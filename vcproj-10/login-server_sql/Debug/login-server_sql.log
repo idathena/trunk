@@ -1,0 +1,111 @@
+﻿Build started 01/09/2013 20:37:15.
+     1>Project "G:\idathena test\vcproj-10\login-server_sql.vcxproj" on node 3 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "login-server_sql\Debug\login-server_sql.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\3rdparty\libconfig /I..\3rdparty\mysql\include /I..\3rdparty\msinttypes\include /I..\3rdparty\mt19937ar /ZI /nologo /W3 /WX- /MP /Od /Oy- /D WIN32 /D _WIN32 /D __WIN32 /D _DEBUG /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D FD_SETSIZE=4096 /D WITH_SQL /D LIBCONFIG_STATIC /D YY_USE_CONST /D _VC80_UPGRADE=0x0710 /D _MBCS /Gm- /RTC1 /MTd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"login-server_sql\Debug\\" /Fd"login-server_sql\Debug\vc100.pdb" /Gd /TC /wd4100 /wd4800 /analyze- /errorReport:prompt ..\3rdparty\libconfig\grammar.c ..\3rdparty\libconfig\libconfig.c ..\3rdparty\libconfig\scanctx.c ..\3rdparty\libconfig\scanner.c ..\3rdparty\libconfig\strbuf.c ..\src\common\mempool.c ..\src\common\mutex.c ..\src\common\raconf.c ..\src\common\thread.c ..\src\login\account_sql.c ..\src\login\ipban_sql.c ..\src\login\login.c ..\src\login\loginlog_sql.c ..\src\common\core.c ..\src\common\db.c ..\src\common\ers.c ..\src\common\malloc.c ..\src\common\md5calc.c ..\src\common\nullpo.c ..\src\common\random.c ..\src\common\showmsg.c ..\src\common\socket.c ..\src\common\sql.c ..\src\common\strlib.c ..\src\common\timer.c ..\src\common\utils.c ..\src\common\msg_conf.c ..\src\common\cli.c ..\3rdparty\mt19937ar\mt19937ar.c
+         grammar.c
+         libconfig.c
+         scanctx.c
+         scanner.c
+         strbuf.c
+         mempool.c
+         mutex.c
+         raconf.c
+         thread.c
+         account_sql.c
+         ipban_sql.c
+         login.c
+         loginlog_sql.c
+         core.c
+         db.c
+         ers.c
+         malloc.c
+         md5calc.c
+         nullpo.c
+         random.c
+         showmsg.c
+         socket.c
+         sql.c
+         strlib.c
+         timer.c
+         utils.c
+         msg_conf.c
+         cli.c
+         mt19937ar.c
+       ManifestResourceCompile:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"login-server_sql\Debug\login-server_sql.exe.embed.manifest.res" login-server_sql\Debug\login-server_sql_manifest.rc 
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\login-server_sql.exe" /INCREMENTAL /NOLOGO /LIBPATH:..\3rdparty\mysql\lib libcmtd.lib oldnames.lib ws2_32.lib libmysql.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB /MANIFEST /ManifestFile:"login-server_sql\Debug\login-server_sql.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"..\login-server_sql.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"..\login-server_sql.lib" /MACHINE:X86 "login-server_sql\Debug\login-server_sql.exe.embed.manifest.res"
+         "login-server_sql\Debug\grammar.obj"
+         "login-server_sql\Debug\libconfig.obj"
+         "login-server_sql\Debug\scanctx.obj"
+         "login-server_sql\Debug\scanner.obj"
+         "login-server_sql\Debug\strbuf.obj"
+         "login-server_sql\Debug\mempool.obj"
+         "login-server_sql\Debug\mutex.obj"
+         "login-server_sql\Debug\raconf.obj"
+         "login-server_sql\Debug\thread.obj"
+         "login-server_sql\Debug\account_sql.obj"
+         "login-server_sql\Debug\ipban_sql.obj"
+         "login-server_sql\Debug\login.obj"
+         "login-server_sql\Debug\loginlog_sql.obj"
+         "login-server_sql\Debug\core.obj"
+         "login-server_sql\Debug\db.obj"
+         "login-server_sql\Debug\ers.obj"
+         "login-server_sql\Debug\malloc.obj"
+         "login-server_sql\Debug\md5calc.obj"
+         "login-server_sql\Debug\nullpo.obj"
+         "login-server_sql\Debug\random.obj"
+         "login-server_sql\Debug\showmsg.obj"
+         "login-server_sql\Debug\socket.obj"
+         "login-server_sql\Debug\sql.obj"
+         "login-server_sql\Debug\strlib.obj"
+         "login-server_sql\Debug\timer.obj"
+         "login-server_sql\Debug\utils.obj"
+         "login-server_sql\Debug\msg_conf.obj"
+         "login-server_sql\Debug\cli.obj"
+         "login-server_sql\Debug\mt19937ar.obj"
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /out:"login-server_sql\Debug\login-server_sql.exe.embed.manifest" /manifest "login-server_sql\Debug\login-server_sql.exe.intermediate.manifest"
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\rc.exe /nologo /fo"login-server_sql\Debug\login-server_sql.exe.embed.manifest.res" login-server_sql\Debug\login-server_sql_manifest.rc 
+       LinkEmbedManifest:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\login-server_sql.exe" /INCREMENTAL /NOLOGO /LIBPATH:..\3rdparty\mysql\lib libcmtd.lib oldnames.lib ws2_32.lib libmysql.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB /MANIFEST /ManifestFile:"login-server_sql\Debug\login-server_sql.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"..\login-server_sql.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"..\login-server_sql.lib" /MACHINE:X86 "login-server_sql\Debug\login-server_sql.exe.embed.manifest.res"
+         "login-server_sql\Debug\grammar.obj"
+         "login-server_sql\Debug\libconfig.obj"
+         "login-server_sql\Debug\scanctx.obj"
+         "login-server_sql\Debug\scanner.obj"
+         "login-server_sql\Debug\strbuf.obj"
+         "login-server_sql\Debug\mempool.obj"
+         "login-server_sql\Debug\mutex.obj"
+         "login-server_sql\Debug\raconf.obj"
+         "login-server_sql\Debug\thread.obj"
+         "login-server_sql\Debug\account_sql.obj"
+         "login-server_sql\Debug\ipban_sql.obj"
+         "login-server_sql\Debug\login.obj"
+         "login-server_sql\Debug\loginlog_sql.obj"
+         "login-server_sql\Debug\core.obj"
+         "login-server_sql\Debug\db.obj"
+         "login-server_sql\Debug\ers.obj"
+         "login-server_sql\Debug\malloc.obj"
+         "login-server_sql\Debug\md5calc.obj"
+         "login-server_sql\Debug\nullpo.obj"
+         "login-server_sql\Debug\random.obj"
+         "login-server_sql\Debug\showmsg.obj"
+         "login-server_sql\Debug\socket.obj"
+         "login-server_sql\Debug\sql.obj"
+         "login-server_sql\Debug\strlib.obj"
+         "login-server_sql\Debug\timer.obj"
+         "login-server_sql\Debug\utils.obj"
+         "login-server_sql\Debug\msg_conf.obj"
+         "login-server_sql\Debug\cli.obj"
+         "login-server_sql\Debug\mt19937ar.obj"
+         login-server_sql.vcxproj -> G:\idathena test\vcproj-10\..\login-server_sql.exe
+       FinalizeBuildStatus:
+         Deleting file "login-server_sql\Debug\login-server_sql.unsuccessfulbuild".
+         Touching "login-server_sql\Debug\login-server_sql.lastbuildstate".
+     1>Done Building Project "G:\idathena test\vcproj-10\login-server_sql.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:14.95
