@@ -1,171 +1,177 @@
-//===== rAthena Documentation ================================
-//= Permissions List
-//===== By: ==================================================
+//===== idAthena Documentation =======================
+//= Daftar Izin (Permissions)
+//===== Oleh: ================================================
 //= rAthena Dev Team
-//===== Current Version: =====================================
+//= idAthena Dev Team
+//===== Penerjemah ===========================================
+//= Cydh
+//===== Versi Saat Ini: ======================================
 //= 20130613
-//===== Description: =========================================
-//= List of available permissions and their functions.
+//===== Deskripsi: ===========================================
+//= Daftar izin yang tersedia dan kegunaannya.
 //============================================================
 
-This file describes the functions of player group permissions,
-configured in '/conf/groups.conf' under the "permissions" bracket.
+File ini mendeskripsikan kegunaan dari izin dari group pemain,
+diatur di file '/conf/groups.conf' dalam bagian "permission".
 
-To search for a permission, write "*" before its name.
-The format of this file is as follows:
-	1. Basic Permissions
-	2. Extended Permissions
-	3. Command-related
+Untuk mencari izin, gunakan awalan "*" sebelum nama izin.
+Format dari fine ini terdiri dari:
+	1. Izin Dasar
+	2. Izin Tambahan
+	3. Izin yang Berkaitan dengan Perintah
 
-========================
-| 1. Basic Permissions |
-========================
+======================
+| 1. Izin-izin Dasar |
+======================
 ---------------------------------------
 
 *can_trade
 
-Allows player to distribute items, such as through trades, dropping,
-vending, storage, mail, etc.
+Mengizinkan pemain untuk mendistribusikan item, seperti melalui
+transaksi antar pemain, menjatuhkan item, vending, storage, email,
+buyingstore, dan lain sebagainya.
 
 ---------------------------------------
 
 *can_party
 
-Allows player to create and join parties.
+Mengizinkan pemain untuk membuat dan bergabung dalam party.
 
 ---------------------------------------
 
-===========================
-| 2. Extended Permissions |
-===========================
+=========================
+| 2. Izin-izin Tambahan |
+=========================
 ---------------------------------------
 
 *all_skill
 
-Grants player all available skills in the player's skill tree.
+Memberikan pemain semua skill yang tersedia ke dalam pohon skill pemain.
 
 ---------------------------------------
 
 *all_equipment
 
-Allows player to equip any item, regardless of requirements (class, level,
-etc.). Note that this can cause client errors if a sprite does not exist.
+Mengizinkan pemain untuk menggunakan segala item, menghiraukan persyaratan
+(class, level, gender, dan lain sebagainya). Catatan bahwa ini bisa
+mengakibatkan client error jika file sprite tidak ada.
 
 ---------------------------------------
 
 *skill_unconditional
 
-Allows player to use any skill, regardless of required conditions (SP,
-items, etc.).
+Mengizinkan pemain untuk menggunakan segala skill, menghiraukan kondisi yang
+diperlukan (SP, item, dan sebagainya).
 
 ---------------------------------------
 
 *join_chat
 
-Allows player to join password-protected chatrooms.
+Mengizinkan pemain untuk masuk ke dalam chatroom yang dilindungi password.
 
 ---------------------------------------
 
 *kick_chat
 
-Prevents player from being kicked from a chatroom.
+Mencegah pemain untuk dikeluarkan dari chatroom.
 
 ---------------------------------------
 
 *view_hpmeter
 
-Allows player to see the HP bar of every player.
+Mengizinkan pemain untuk melihat HP bar dari semua pemain.
 
 ---------------------------------------
 
 *view_equipment
 
-Allows player to view the equipment of every player, regardless of that
-player's setting.
+Mengizinkan pemain untuk melihat equip dari pemain lain, menghiraukan
+pengaturan dari pemain yang akan dilihat equipment-nya.
 
 ---------------------------------------
 
 *hack_info
 
-Allows player to receive all information about players who try to hack,
-spoof a name, etc.
+Memperbolehkan pemain untuk menerima semua informasi tentang pemain yang
+mencoba untuk meng-hack, spoof sebuah nama, dan sebagainya.
 
 ---------------------------------------
 
 *disable_pvm
 
-Prevents player from attacking monsters.
+Mencegah pemain dari menyerang monster.
 
 ---------------------------------------
 
 *disable_pvp
 
-Prevents player from attacking other players.
+Mencegah pemain dari menyerang pemain lain.
 
 ---------------------------------------
 
 *can_trade_bounded
 
-Allows player to do normal item actions with bounded items (drop, sell,
-trade, etc.).
+Memperbolehkan pemain untuk melakukan transaksi item seperti biasa pada
+item bound(menjatuhkan, menjual, transaksi, dan sebagainya).
 
 ---------------------------------------
  
 *item_unconditional
 
-Allows player to consume any consumable item regardless the requirements
-(bypass noitemconsumption mapflag, item's class, gender, status changes,
-item delay, etc).
+Memperbolehkan pemain untuk mengkonsumsi semua item menghiraukan persyaratan
+(seperti dapat menggunakan item pada noitemconsumption mapflag, menghiraukan
+class dari suatu item, gender, gender, status changes, item delay, dan
+sebagainya).
 
 ---------------------------------------
 
-======================
-| 3. Command-related |
-======================
+==========================================
+| 3. Izin yang Berkaitan dengan Perintah |
+==========================================
 ---------------------------------------
 
 *all_commands
 
-Allows usage of all atcommands and charcommands.
+Memperbolehkan penggunaan semua atcommand dan charcommand.
 
 ---------------------------------------
 
 *disable_commands_when_dead
 
-Disables usage of atcommands when player is dead.
+Melarang penggunaan atcommand saat pemain sedang mati.
 
 ---------------------------------------
 
 *hide_session
 
-Hides player session from being displayed by atcommands (@who, @whomap,
-etc.).
+Menyembunyikan keberadaan pemain yang ditampilkan oleh atcommand (@who,
+@whomap, dan sebagainya).
 
 ---------------------------------------
 
 *who_display_aid
 
-Displays all GMs and character/account IDs in the @who command.
+Menampilkan semua GM dan ID karakter/akun pada perintah @who.
 
 ---------------------------------------
 
 *any_warp
 
-Allows player to bypass 'nowarp', 'nowarpto', 'noteleport', and 'nomemo'
-mapflags in commands which modify a character's map or coordinates (@memo,
-@mapmove, @go, @jump, etc.).
+Memperbolehkan pemain untuk melewati cek oleh mapflag 'nowarp', 'nowarpto',
+'noteleport', dan 'nomemo' pada command yang mana memodifikasi posisi atau
+map suatu pemain (@memo, @mapmove, @go, @jump, dan sebagainya).
 
 ---------------------------------------
 
 *receive_requests
 
-Allows player to receive requests through the @requests command.
+Memperbolehkan pemain untuk menerima permintaan melalui perintah @requests.
 
 ---------------------------------------
 
 *show_bossmobs
 
-Displays boss mobs in the @showmobs command.
+Menampilkan boss monster pada perintah @showmobs.
 
 ---------------------------------------
 
@@ -178,12 +184,13 @@ join password-protected channels without a password.
 
 *use_check
 
-Allows player to use the client command /check (displays character status).
+Memperbolehkan pemain untuk menggunakan perintah client '/check' (untuk
+menampilkan status karakter).
 
 ---------------------------------------
 
 *use_changemaptype
 
-Allows player to use the client command /changemaptype.
+Memperbolehkan pemain untuk menggunakan perintah client '/changemaptype'.
 
 ---------------------------------------
