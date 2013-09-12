@@ -1469,7 +1469,7 @@ int64 battle_addmastery(struct map_session_data *sd,struct block_list *target,in
 					damage += (skill * 4);
 				else
 					damage += (skill * 5);
-				// Increase damage by level of KN_SPEARMASTERY * 10
+				//Increase damage by level of KN_SPEARMASTERY * 10
 				if(pc_checkskill(sd,RK_DRAGONTRAINING) > 0)
 					damage += (skill * 10);
 			}
@@ -1491,7 +1491,7 @@ int64 battle_addmastery(struct map_session_data *sd,struct block_list *target,in
 		case W_FIST:
 			if((skill = pc_checkskill(sd,TK_RUN)) > 0)
 				damage += (skill * 10);
-			// No break, fallthrough to Knuckles
+			//No break, fallthrough to Knuckles
 		case W_KNUCKLE:
 			if((skill = pc_checkskill(sd,MO_IRONHAND)) > 0)
 				damage += (skill * 3);
@@ -1514,7 +1514,7 @@ int64 battle_addmastery(struct map_session_data *sd,struct block_list *target,in
 			break;
 	}
 #ifdef RENEWAL
-	if(sd && (skill = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0) // Weapon Research bonus applies to all weapons
+	if(sd && (skill = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0) //Weapon Research bonus applies to all weapons
 		damage += (skill * 2);
 #endif
 
@@ -2217,7 +2217,7 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 #ifdef RENEWAL
 		// Weaponry Research hidden bonus
 		if((skill = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0)
-			hitrate += hitrate * ( 2 * skill ) / 100;
+			hitrate += hitrate * (2 * skill) / 100;
 #endif
 
 		if((sd->status.weapon == W_1HSWORD || sd->status.weapon == W_DAGGER) &&
@@ -6744,7 +6744,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 	if( (s_bl = battle_get_master(src)) == NULL )
 		s_bl = src;
 		
-	if ( s_bl->type == BL_PC ) {
+	if( s_bl->type == BL_PC ) {
 		switch( t_bl->type ) {
 			case BL_MOB: //Source => PC, Target => MOB
 				if ( pc_has_permission((TBL_PC*)s_bl, PC_PERM_DISABLE_PVM) )
@@ -6780,13 +6780,13 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 					state |= BCT_ENEMY;
 					strip_enemy = 0;
 				}
-				break;
 			}
+			break;
 		case BL_SKILL: {
 				TBL_SKILL *su = (TBL_SKILL*)target;
 				if( !su->group )
 					return 0;
-				if( skill_get_inf2(su->group->skill_id)&INF2_TRAP ) { //Only a few skills can target traps...
+				if( skill_get_inf2(su->group->skill_id)&INF2_TRAP ) { //Only a few skills can target traps
 					switch( battle_getcurrentskill(src) ) {
 						case RK_DRAGONBREATH: //It can only hit traps in pvp/gvg maps
 						case RK_DRAGONBREATH_WATER:
@@ -6908,46 +6908,46 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 
 	switch( s_bl->type ) { //Checks on source master
 		case BL_PC: {
-			struct map_session_data *sd = BL_CAST(BL_PC, s_bl);
-			if( s_bl != t_bl ) {
-				if( sd->state.killer ) {
-					state |= BCT_ENEMY; //Can kill anything
-					strip_enemy = 0;
-				} else if( sd->duel_group && !((!battle_config.duel_allow_pvp && map[m].flag.pvp) || (!battle_config.duel_allow_gvg && map_flag_gvg(m))) )
-		  		{
-					if( t_bl->type == BL_PC && (sd->duel_group == ((TBL_PC*)t_bl)->duel_group) )
-						return (BCT_ENEMY&flag)?1:-1; //Duel targets can ONLY be your enemy, nothing else.
+				struct map_session_data *sd = BL_CAST(BL_PC, s_bl);
+				if( s_bl != t_bl ) {
+					if( sd->state.killer ) {
+						state |= BCT_ENEMY; //Can kill anything
+						strip_enemy = 0;
+					} else if( sd->duel_group && !((!battle_config.duel_allow_pvp && map[m].flag.pvp) || (!battle_config.duel_allow_gvg && map_flag_gvg(m))) )
+					{
+						if( t_bl->type == BL_PC && (sd->duel_group == ((TBL_PC*)t_bl)->duel_group) )
+							return (BCT_ENEMY&flag)?1:-1; //Duel targets can ONLY be your enemy, nothing else.
+						else
+							return 0; //You can't target anything out of your duel
+					}
+				}
+				if( map_flag_gvg(m) && !sd->status.guild_id && t_bl->type == BL_MOB && ((TBL_MOB*)t_bl)->class_ == MOBID_EMPERIUM )
+					return 0; //If you don't belong to a guild, can't target emperium.
+				if( t_bl->type != BL_PC )
+					state |= BCT_ENEMY; //Natural enemy.
+			}
+			break;
+		case BL_MOB: {
+				struct mob_data *md = BL_CAST(BL_MOB, s_bl);
+				if( !((agit_flag || agit2_flag) && map[m].flag.gvg_castle) && md->guardian_data && md->guardian_data->guild_id )
+					return 0; //Disable guardians/emperium owned by Guilds on non-woe times.
+
+				if( !md->special_state.ai ) { //Normal mobs
+					if(
+						( target->type == BL_MOB && t_bl->type == BL_PC && ( ((TBL_MOB*)target)->special_state.ai != AI_ZANZOU && ((TBL_MOB*)target)->special_state.ai != AI_ATTACK ) ) ||
+						( t_bl->type == BL_MOB && !((TBL_MOB*)t_bl)->special_state.ai )
+					  )
+						state |= BCT_PARTY; //Normal mobs with no ai are friends.
 					else
-						return 0; //You can't target anything out of your duel
+						state |= BCT_ENEMY; //However, all else are enemies.
+				} else {
+					if( t_bl->type == BL_MOB && !((TBL_MOB*)t_bl)->special_state.ai )
+						state |= BCT_ENEMY; //Natural enemy for AI mobs are normal mobs.
 				}
 			}
-			if( map_flag_gvg(m) && !sd->status.guild_id && t_bl->type == BL_MOB && ((TBL_MOB*)t_bl)->class_ == MOBID_EMPERIUM )
-				return 0; //If you don't belong to a guild, can't target emperium.
-			if( t_bl->type != BL_PC )
-				state |= BCT_ENEMY; //Natural enemy.
 			break;
-		}
-		case BL_MOB: {
-			struct mob_data *md = BL_CAST(BL_MOB, s_bl);
-			if( !((agit_flag || agit2_flag) && map[m].flag.gvg_castle) && md->guardian_data && md->guardian_data->guild_id )
-				return 0; //Disable guardians/emperium owned by Guilds on non-woe times.
-
-			if( !md->special_state.ai ) { //Normal mobs
-				if(
-					( target->type == BL_MOB && t_bl->type == BL_PC && ( ((TBL_MOB*)target)->special_state.ai != AI_ZANZOU && ((TBL_MOB*)target)->special_state.ai != AI_ATTACK ) ) ||
-					( t_bl->type == BL_MOB && !((TBL_MOB*)t_bl)->special_state.ai )
-				  )
-					state |= BCT_PARTY; //Normal mobs with no ai are friends.
-				else
-					state |= BCT_ENEMY; //However, all else are enemies.
-			} else {
-				if( t_bl->type == BL_MOB && !((TBL_MOB*)t_bl)->special_state.ai )
-					state |= BCT_ENEMY; //Natural enemy for AI mobs are normal mobs.
-			}
-			break;
-		}
 		default:
-		//Need some sort of default behaviour for unhandled types.
+			//Need some sort of default behaviour for unhandled types.
 			if (t_bl->type != s_bl->type)
 				state |= BCT_ENEMY;
 			break;
@@ -6966,7 +6966,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 		state |= BCT_SELF|BCT_PARTY|BCT_GUILD;
 		if( state&BCT_ENEMY && strip_enemy )
 			state&=~BCT_ENEMY;
-		return (flag&state)?1:-1;
+		return (flag&state) ? 1 : -1;
 	}
 
 	if( map_flag_vs(m) ) { //Check rivalry settings.
@@ -6994,7 +6994,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 			state &= ~BCT_ENEMY;
 
 		if( state&BCT_ENEMY && battle_config.pk_mode && !map_flag_gvg(m) && s_bl->type == BL_PC && t_bl->type == BL_PC ) {
-			// Prevent novice engagement on pk_mode (feature by Valaris)
+			//Prevent novice engagement on pk_mode (feature by Valaris)
 			TBL_PC *sd = (TBL_PC*)s_bl, *sd2 = (TBL_PC*)t_bl;
 			if (
 				(sd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||

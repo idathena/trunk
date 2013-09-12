@@ -6926,7 +6926,7 @@ BUILDIN_FUNC(getpartymember)
 
 	if( script_hasdata(st,3) )
  		type = script_getnum(st,3);
-	
+
 	if( p != NULL ) {
 		for( i = 0; i < MAX_PARTY; i++ ) {
 			if( p->party.member[i].account_id ) {

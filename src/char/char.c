@@ -336,7 +336,7 @@ void set_char_offline(int char_id, int account_id)
 			Sql_ShowDebug(sql_handle);
 	} else {
 		struct mmo_charstatus* cp = (struct mmo_charstatus*)idb_get(char_db_,char_id);
-		inter_guild_CharOffline(char_id, cp?cp->guild_id:-1);
+		inter_guild_CharOffline(char_id, cp ? cp->guild_id : -1);
 		if (cp)
 			idb_remove(char_db_,char_id);
 
@@ -2067,7 +2067,7 @@ void disconnect_player(int account_id)
 	int i;
 	struct char_session_data* sd;
 
-	// disconnect player if online on char-server
+	//Disconnect player if online on char-server
 	ARR_FIND( 0, fd_max, i, session[i] && (sd = (struct char_session_data*)session[i]->session_data) && sd->account_id == account_id );
 	if( i < fd_max )
 		set_eof(i);
@@ -2082,7 +2082,9 @@ static void char_auth_ok(int fd, struct char_session_data *sd)
 		if (character->server > -1) { //Character already online. KICK KICK KICK
 			mapif_disconnectplayer(server[character->server].fd, character->account_id, character->char_id, 2);
 			if (character->waiting_disconnect == INVALID_TIMER)
-				character->waiting_disconnect = add_timer(gettick()+20000, chardb_waiting_disconnect, character->account_id, 0);
+				character->waiting_disconnect = add_timer(gettick() + 20000, chardb_waiting_disconnect, character->account_id, 0);
+			if (character)
+				character->pincode_success = false;
 			WFIFOHEAD(fd,3);
 			WFIFOW(fd,0) = 0x81;
 			WFIFOB(fd,2) = 8;
@@ -3615,7 +3617,11 @@ static void char_delete2_req(int fd, struct char_session_data* sd)
 */
 
 	// Success
-	delete_date = time(NULL) + char_del_delay;
+	delete_date =
+#if PACKETVER < 20130320
+		time(NULL) +
+#endif
+		char_del_delay;
 
 	if( SQL_SUCCESS != Sql_Query(sql_handle, "UPDATE `%s` SET `delete_date`='%lu' WHERE `char_id`='%d'", char_db, (unsigned long)delete_date, char_id) )
 	{

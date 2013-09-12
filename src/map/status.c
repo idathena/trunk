@@ -3611,22 +3611,22 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 
 	regen->flag = RGN_HP|RGN_SP;
 
-	if(regen->sregen) {
+	if (regen->sregen) {
 		if (regen->sregen->hp)
-			regen->flag|=RGN_SHP;
+			regen->flag |= RGN_SHP;
 
 		if (regen->sregen->sp)
-			regen->flag|=RGN_SSP;
+			regen->flag |= RGN_SSP;
 
 		regen->sregen->rate.hp = regen->sregen->rate.sp = 1;
 	}
 
 	if (regen->ssregen) {
 		if (regen->ssregen->hp)
-			regen->flag|=RGN_SHP;
+			regen->flag |= RGN_SHP;
 
 		if (regen->ssregen->sp)
-			regen->flag|=RGN_SSP;
+			regen->flag |= RGN_SSP;
 
 		regen->ssregen->rate.hp = regen->ssregen->rate.sp = 1;
 	}
@@ -3656,7 +3656,7 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 		((bl->type == BL_PC && ((TBL_PC*)bl)->class_&MAPID_UPPERMASK) == MAPID_MONK && (sc->data[SC_EXTREMITYFIST] ||
 			(sc->data[SC_EXPLOSIONSPIRITS] && (!sc->data[SC_SPIRIT] || sc->data[SC_SPIRIT]->val2 != SL_MONK))))
 		) //No natural SP regen
-		regen->flag &=~RGN_SP;
+		regen->flag &= ~RGN_SP;
 
 	if (sc->data[SC_TENSIONRELAX]) {
 		regen->rate.hp += 2;
@@ -3675,33 +3675,33 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 			regen->rate.hp += sce->val2;
 			regen->rate.sp += sce->val3;
 		} else
-			regen->flag&=~sce->val4; //Remove regen as specified by val4
+			regen->flag &= ~sce->val4; //Remove regen as specified by val4
 	}
 
 	if (sc->data[SC_GT_REVITALIZE]) {
-		regen->hp = cap_value(regen->hp*sc->data[SC_GT_REVITALIZE]->val3/100, 1, SHRT_MAX);
+		regen->hp = cap_value(regen->hp*sc->data[SC_GT_REVITALIZE]->val3 / 100, 1, SHRT_MAX);
 		regen->state.walk = 1;
 	}
 
-	if ((sc->data[SC_FIRE_INSIGNIA] && sc->data[SC_FIRE_INSIGNIA]->val1 == 1) //if insignia lvl 1
+	if ((sc->data[SC_FIRE_INSIGNIA] && sc->data[SC_FIRE_INSIGNIA]->val1 == 1) //If insignia lvl 1
 			|| (sc->data[SC_WATER_INSIGNIA] && sc->data[SC_WATER_INSIGNIA]->val1 == 1)
 			|| (sc->data[SC_EARTH_INSIGNIA] && sc->data[SC_EARTH_INSIGNIA]->val1 == 1)
 			|| (sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 1))
 		regen->rate.hp *= 2;
 
 	if (sc->data[SC_VITALITYACTIVATION])
-		regen->flag &=~RGN_SP;
+		regen->flag &= ~RGN_SP;
 }
 
 void status_calc_state( struct block_list *bl, struct status_change *sc, enum scs_flag flag, bool start ) {
 
-	/* no sc at all, we can zero without any extra weight over our conciousness */
+	/* No sc at all, we can zero without any extra weight over our conciousness */
 	if( !sc->count ) {
 		memset(&sc->cant, 0, sizeof (sc->cant));
 		return;
 	}
 
-	/* can move? */
+	/* Can move? */
 	if( flag&SCS_NOMOVE ) {
 		if( !(flag&SCS_NOMOVECOND) ) {
 			sc->cant.move += ( start ? 1 : -1 );
@@ -3716,7 +3716,7 @@ void status_calc_state( struct block_list *bl, struct status_change *sc, enum sc
 		}
 	}
 
-	/* can't use skills */
+	/* Can't use skills */
 	if( flag&SCS_NOCAST ) {
 		if( !(flag&SCS_NOCASTCOND) ) {
 			sc->cant.cast += ( start ? 1 : -1 );
@@ -3725,7 +3725,7 @@ void status_calc_state( struct block_list *bl, struct status_change *sc, enum sc
 		}
 	}
 
-	/* can't chat */
+	/* Can't chat */
 	if( flag&SCS_NOCHAT ) {
 		if( !(flag&SCS_NOCHATCOND) ) {
 			sc->cant.chat += ( start ? 1 : -1 );
@@ -3733,9 +3733,9 @@ void status_calc_state( struct block_list *bl, struct status_change *sc, enum sc
 			sc->cant.chat += ( start ? 1 : -1 );
 	}
 
-	/* player-only states */
+	/* Player-only states */
 	if( bl->type == BL_PC ) {
-		/* can pick items? */
+		/* Can pick items? */
 		if( flag&SCS_NOPICKITEM ) {
 			if( !(flag&SCS_NOPICKITEMCOND) ) {
 				sc->cant.pickup += ( start ? 1 : -1 );
@@ -3744,7 +3744,7 @@ void status_calc_state( struct block_list *bl, struct status_change *sc, enum sc
 			}
 		}
 
-		/* can drop items? */
+		/* Can drop items? */
 		if( flag&SCS_NODROPITEM ) {
 			if( !(flag&SCS_NODROPITEMCOND) ) {
 				sc->cant.drop += ( start ? 1 : -1 );

@@ -3492,7 +3492,7 @@
 5785,Green_Bunny_Hairband,Green Bunny Hairband,5,20,,200,,0,,1,0xFFFFFFFF,63,2,256,,1,1,664,{ bonus bStr,2; bonus bInt,1; bonus bDex,1; },{},{}
 5786,Ancient_Elven_Ear,Ancient Elven Ear,5,10,,200,,1,,0,0xFFFFFFFF,63,2,512,,1,0,665,{ bonus bLuk,1; bonus bMaxHP,100; bonus bMaxSP,30; },{},{}
 5787,Tha_Maero_Mask,Tha Maero Mask,5,20,,100,,0,,0,0xFFFFFFFF,63,2,513,,30,0,666,{ bonus bMdef,2; },{},{}
-5788,3D_Glasses,3D Glasses,5,20,,100,,1,,0,0xFFFFFFFF,63,2,512,,1,0,661,{ bonus2 bSubEle,Ele_Neutral,5; bonus2 bMagicAddRace,RC_Formless,4; },{},{}
+5788,3D_Glasses,3D Glasses,5,20,,100,,1,,0,0xFFFFFFFF,63,2,512,,1,0,661,{ bonus2 bSubRace,RC_Formless,5; bonus2 bMagicAddRace,RC_Formless,4; },{},{}
 5789,Thanatos_Mal_Mask,Thanatos Mal Mask,5,20,,100,,3,,0,0xFFFFFFFF,63,2,513,,30,0,667,{ bonus bVit,1; },{},{}
 5790,Holy_Mom_Love,TM,5,20,,500,,0,,1,0xFFFFFFFF,63,2,768,,45,1,610,{ bonus2 bSubRace,RC_Demon,-5; bonus2 bSubRace,RC_Undead,-5; bonus3 bAutoSpell,"MG_COLDBOLT",1,20; },{},{}
 5791,Tenkaippin_Ramen,Tenkaippin Ramen,5,20,,500,,1,,0,0xFFFFFFFF,63,2,256,,30,0,668,{ bonus bInt,-1; bonus bDex,4; },{},{}
@@ -8044,7 +8044,7 @@
 18506,Hattah_Black,Hattah Black,5,12000,,4000,,2,,1,0xFFFFFFFF,63,2,769,,1,1,676,{},{},{}
 18507,Elven_Ears_,Elven Ears,5,20,,100,,0,,1,0xFFFFFFFE,63,2,512,,70,0,73,{},{},{}
 18508,Garuda_Hat,Garuda Hat,5,20,,100,,4,,1,0xFFFFFFFE,63,2,256,,30,1,677,{ bonus bLuk,5; bonus bMdef,3; bonus2 bSubEle,Ele_Neutral,5; bonus2 bSubEle,Ele_Fire,5; bonus2 bSubEle,Ele_Water,5; bonus2 bSubEle,Ele_Wind,5; bonus2 bSubEle,Ele_Earth,5; bonus2 bSubEle,Ele_Dark,5; bonus2 bSubEle,Ele_Holy,5; bonus2 bSubEle,Ele_Ghost,5; bonus bHit,10; bonus bDelayRate,-5; if(getrefine()>=7) bonus2 bAddMonsterDropItem,522,100*(getrefine()-6); },{},{}
-18509,RWC2010_Indonesia,RWC2010 Indonesia,5,20,,100,,6,,1,0xFFFFFFFE,63,2,256,,15,1,678,{ bonus2 bSubRace,RC_DemiHuman,10; bonus bCritical,10; bonus2 bAddItemHealRate,501,100; bonus2 bAddItemHealRate,504,100; bonus bLuk,5; bonus bAspd,1; bonus2 bAddRace,RC_NonBoss,3; bonus2 bAddRace,RC_Boss,3; bonus bMatkRate,3; },{},{}
+18509,RWC2010_Indonesia,RWC2010 Indonesia,5,20,,100,,6,,1,0xFFFFFFFE,63,2,256,,15,1,678,{ bonus2 bSubRace,RC_DemiHuman,10; bonus bCritical,10; bonus2 bAddItemHealRate,501,100; bonus2 bAddItemHealRate,504,100; bonus2 bAddItemHealRate,11501,100; bonus bLuk,5; bonus bAspd,1; bonus2 bAddRace,RC_NonBoss,3; bonus2 bAddRace,RC_Boss,3; bonus bMatkRate,3; },{},{}
 18510,Blood_Angel_Hair_Band,Blood Angel Hair Band,5,0,,0,,1,,0,0xFFFFFFFF,63,2,256,,60,0,679,{},{},{}
 18511,Blood_Angel_Wing_Ear,Blood Angel Wing Ear,5,0,,0,,1,,0,0xFFFFFFFF,63,2,512,,60,0,680,{},{},{}
 18512,Juho_Necktie,Juho Necktie,5,0,,0,,1,,1,0xFFFFFFFF,63,2,256,,20,1,443,{},{},{}
