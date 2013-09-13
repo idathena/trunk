@@ -2507,6 +2507,7 @@ int status_calc_pc_(struct map_session_data* sd, bool first)
 		+ sizeof(sd->ignore_mdef)
 		+ sizeof(sd->ignore_def)
 		+ sizeof(sd->itemgrouphealrate)
+		+ sizeof(sd->magic_subrace)
 		+ sizeof(sd->sp_gain_race)
 		+ sizeof(sd->sp_gain_race_attack)
 		+ sizeof(sd->hp_gain_race_attack)
@@ -2518,8 +2519,8 @@ int status_calc_pc_(struct map_session_data* sd, bool first)
 	if (sd->special_state.intravision && !sd->sc.data[SC_INTRAVISION]) //Clear intravision as long as nothing else is using it
 		clif_status_load(&sd->bl, SI_INTRAVISION, 0);
 
-	memset(&sd->special_state,0,sizeof(sd->special_state));
-	memset(&status->max_hp, 0, sizeof(struct status_data)-(sizeof(status->hp)+sizeof(status->sp)));
+	memset(&sd->special_state, 0, sizeof(sd->special_state));
+	memset(&status->max_hp, 0, sizeof(struct status_data) - (sizeof(status->hp) + sizeof(status->sp)));
 
 	//FIXME: Most of these stuff should be calculated once, but how do I fix the memset above to do that? [Skotlex]
 	if (!sd->state.permanent_speed)

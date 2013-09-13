@@ -140,27 +140,27 @@ struct map_session_data {
 	//status_calc_pc, while special_state is recalculated in each call. [Skotlex]
 	struct {
 		unsigned int active : 1; //Marks active player (not active is logging in/out, or changing map servers)
-		unsigned int menu_or_input : 1;// if a script is waiting for feedback from the player
+		unsigned int menu_or_input : 1; //If a script is waiting for feedback from the player
 		unsigned int dead_sit : 2;
-		unsigned int lr_flag : 3;//1: left h. weapon; 2: arrow; 3: shield
+		unsigned int lr_flag : 3; //1: left h. weapon; 2: arrow; 3: shield
 		unsigned int connect_new : 1;
 		unsigned int arrow_atk : 1;
 		unsigned int gangsterparadise : 1;
 		unsigned int rest : 1;
 		unsigned int storage_flag : 2; //0: closed, 1: Normal Storage open, 2: guild storage open [Skotlex]
 		unsigned int snovice_dead_flag : 1; //Explosion spirits on death: 0 off, 1 used.
-		unsigned int abra_flag : 2; // Abracadabra bugfix by Aru
-		unsigned int autocast : 1; // Autospell flag [Inkfish]
+		unsigned int abra_flag : 2; //Abracadabra bugfix by Aru
+		unsigned int autocast : 1; //Autospell flag [Inkfish]
 		unsigned int autotrade : 1;	//By Fantik
 		unsigned int reg_dirty : 4; //By Skotlex (marks whether registry variables have been saved or not yet)
 		unsigned int showdelay :1;
 		unsigned int showexp :1;
 		unsigned int showzeny :1;
-		unsigned int noask :1; // [LuzZza]
+		unsigned int noask :1; //[LuzZza]
 		unsigned int trading :1; //[Skotlex] is 1 only after a trade has started.
 		unsigned int deal_locked :2; //1: Clicked on OK. 2: Clicked on TRADE
-		unsigned int monster_ignore :1; // for monsters to ignore a character [Valaris] [zzo]
-		unsigned int size :2; // for tiny/large types
+		unsigned int monster_ignore :1; //For monsters to ignore a character [Valaris] [zzo]
+		unsigned int size :2; //For tiny/large types
 		unsigned int night :1; //Holds whether or not the player currently has the SI_NIGHT effect on. [Skotlex]
 		unsigned int blockedmove :1;
 		unsigned int using_fake_npc :1;
@@ -169,22 +169,22 @@ struct map_session_data {
 		unsigned int killable : 1;
 		unsigned int doridori : 1;
 		unsigned int ignoreAll : 1;
-		unsigned int debug_remove_map : 1; // temporary state to track double remove_map's [FlavioJS]
+		unsigned int debug_remove_map : 1; //Temporary state to track double remove_map's [FlavioJS]
 		unsigned int buyingstore : 1;
 		unsigned int lesseffect : 1;
 		unsigned int vending : 1;
-		unsigned int noks : 3; // [Zeph Kill Steal Protection]
+		unsigned int noks : 3; //[Zeph Kill Steal Protection]
 		unsigned int changemap : 1;
-		unsigned int callshop : 1; // flag to indicate that a script used callshop; on a shop
-		short pmap; // Previous map on Map Change
+		unsigned int callshop : 1; //Flag to indicate that a script used callshop; on a shop
+		short pmap; //Previous map on Map Change
 		unsigned short autoloot;
-		unsigned short autolootid[AUTOLOOTITEM_SIZE]; // [Zephyrus]
-		unsigned int autolooting : 1; //performance-saver, autolooting state for @alootid
-		unsigned short autobonus; //flag to indicate if an autobonus is activated. [Inkfish]
+		unsigned short autolootid[AUTOLOOTITEM_SIZE]; //[Zephyrus]
+		unsigned int autolooting : 1; //Performance-saver, autolooting state for @alootid
+		unsigned short autobonus; //Flag to indicate if an autobonus is activated. [Inkfish]
 		struct guild *gmaster_flag;
-		unsigned int prevend : 1; //used to flag wheather you've spent 40sp to open the vending or not.
-		unsigned int warping : 1; //states whether you're in the middle of a warp processing
-		unsigned int permanent_speed : 1; // When 1, speed cannot be changed through status_calc_pc().
+		unsigned int prevend : 1; //Used to flag wheather you've spent 40sp to open the vending or not.
+		unsigned int warping : 1; //States whether you're in the middle of a warp processing
+		unsigned int permanent_speed : 1; //When 1, speed cannot be changed through status_calc_pc().
 		unsigned int hold_recalc : 1;
 		unsigned int snovice_call_flag : 3; //Summon Angel (stage 1~3)
 	} state;
@@ -195,21 +195,21 @@ struct map_session_data {
 		unsigned int no_castcancel2 : 1;
 		unsigned int no_sizefix : 1;
 		unsigned int no_gemstone : 1;
-		unsigned int intravision : 1; // Maya Purple Card effect [DracoRPG]
-		unsigned int perfect_hiding : 1; // [Valaris]
+		unsigned int intravision : 1; //Maya Purple Card effect [DracoRPG]
+		unsigned int perfect_hiding : 1; //[Valaris]
 		unsigned int no_knockback : 1;
 		unsigned int bonus_coma : 1;
 	} special_state;
 	int login_id1, login_id2;
 	unsigned short class_;	//This is the internal job ID used by the map server to simplify comparisons/queries/etc. [Skotlex]
 	int group_id, group_pos, group_level;
-	unsigned int permissions;/* group permissions */
+	unsigned int permissions;/* Group permissions */
 
-	int packet_ver;  // 5: old, 6: 7july04, 7: 13july04, 8: 26july04, 9: 9aug04/16aug04/17aug04, 10: 6sept04, 11: 21sept04, 12: 18oct04, 13: 25oct04 ... 18
+	int packet_ver;  //5: old, 6: 7july04, 7: 13july04, 8: 26july04, 9: 9aug04/16aug04/17aug04, 10: 6sept04, 11: 21sept04, 12: 18oct04, 13: 25oct04 ... 18
 	struct mmo_charstatus status;
 	struct registry save_reg;
 	
-	struct item_data* inventory_data[MAX_INVENTORY]; // direct pointers to itemdb entries (faster than doing item_id lookups)
+	struct item_data* inventory_data[MAX_INVENTORY]; //Direct pointers to itemdb entries (faster than doing item_id lookups)
 	short equip_index[EQI_MAX];
 	unsigned int weight,max_weight;
 	int cart_weight,cart_num,cart_weight_max;
@@ -217,12 +217,12 @@ struct map_session_data {
 	unsigned short mapindex;
 	unsigned char head_dir; //0: Look forward. 1: Look right, 2: Look left.
 	unsigned int client_tick;
-	int npc_id,areanpc_id,npc_shopid,touching_id; //for script follow scriptoid ,npcid
+	int npc_id,areanpc_id,npc_shopid,touching_id; //For script follow scriptoid ,npcid
 	int npc_item_flag; //Marks the npc_id with which you can use items during interactions with said npc (see script command enable_itemuse)
-	int npc_menu; // internal variable, used in npc menu handling
+	int npc_menu; //Internal variable, used in npc menu handling
 	int npc_amount;
 	struct script_state *st;
-	char npc_str[CHATBOX_SIZE]; // for passing npc input box text to script engine
+	char npc_str[CHATBOX_SIZE]; //For passing npc input box text to script engine
 	int npc_timer_id; //For player attached npc timers. [Skotlex]
 	unsigned int chatID;
 	time_t idletime;
@@ -236,40 +236,40 @@ struct map_session_data {
 		char name[NAME_LENGTH];
 	} ignore[MAX_IGNORE_LIST];
 
-	int followtimer; // [MouseJstr]
+	int followtimer; //[MouseJstr]
 	int followtarget;
 
-	time_t emotionlasttime; // to limit flood with emotion packets
+	time_t emotionlasttime; //To limit flood with emotion packets
 
 	short skillitem,skillitemlv;
 	uint16 skill_id_old,skill_lv_old;
 	uint16 skill_id_dance,skill_lv_dance;
-	short cook_mastery; // range: [0,1999] [Inkfish]
+	short cook_mastery; //Range: [0,1999] [Inkfish]
 	unsigned char blockskill[MAX_SKILL];
 	int cloneskill_id, reproduceskill_id;
 	int menuskill_id, menuskill_val, menuskill_val2;
 
 	int invincible_timer;
 	unsigned int canlog_tick;
-	unsigned int canuseitem_tick;	// [Skotlex]
+	unsigned int canuseitem_tick; //[Skotlex]
 	unsigned int canusecashfood_tick;
-	unsigned int canequip_tick;	// [Inkfish]
+	unsigned int canequip_tick;	//[Inkfish]
 	unsigned int cantalk_tick;
-	unsigned int canskill_tick; // used to prevent abuse from no-delay ACT files
-	unsigned int cansendmail_tick; // [Mail System Flood Protection]
-	unsigned int ks_floodprotect_tick; // [Kill Steal Protection]
+	unsigned int canskill_tick; //Used to prevent abuse from no-delay ACT files
+	unsigned int cansendmail_tick; //[Mail System Flood Protection]
+	unsigned int ks_floodprotect_tick; //[Kill Steal Protection]
 
 	struct {
 		short nameid;
 		unsigned int tick;
-	} item_delay[MAX_ITEMDELAYS]; // [Paradox924X]
+	} item_delay[MAX_ITEMDELAYS]; //[Paradox924X]
 
 	short weapontype1,weapontype2;
-	short disguise; // [Valaris]
+	short disguise; //[Valaris]
 
 	struct weapon_data right_weapon, left_weapon;
-	
-	// here start arrays to be globally zeroed at the beginning of status_calc_pc()
+
+	//Here start arrays to be globally zeroed at the beginning of status_calc_pc()
 	int param_bonus[6],param_equip[6]; //Stores card/equipment bonuses.
 	int subele[ELE_MAX];
 	int subrace[RC_MAX];
@@ -292,16 +292,17 @@ struct map_session_data {
 	int ignore_mdef[RC_MAX];
 	int ignore_def[RC_MAX];
 	int itemgrouphealrate[MAX_ITEMGROUP];
+	int magic_subrace[RC_MAX];
 	short sp_gain_race[RC_MAX];
 	short sp_gain_race_attack[RC_MAX];
 	short hp_gain_race_attack[RC_MAX];
-	// zeroed arrays end here.
-	// zeroed structures start here
+	//Zeroed arrays end here.
+	//Zeroed structures start here
 	struct s_autospell autospell[15], autospell2[15], autospell3[15];
 	struct s_addeffect addeff[MAX_PC_BONUS], addeff2[MAX_PC_BONUS];
 	struct s_addeffectonskill addeff3[MAX_PC_BONUS];
 
-	struct { //skillatk raises bonus dmg% of skills, skillheal increases heal%, skillblown increases bonus blewcount for some skills.
+	struct { //Skillatk raises bonus dmg% of skills, skillheal increases heal%, skillblown increases bonus blewcount for some skills.
 		unsigned short id;
 		short val;
 	} skillatk[MAX_PC_BONUS], skillusesprate[MAX_PC_BONUS], skillusesp[MAX_PC_BONUS], skillheal[5], skillheal2[5], skillblown[MAX_PC_BONUS], skillcast[MAX_PC_BONUS], skillfixcast[MAX_PC_BONUS], skillvarcast[MAX_PC_BONUS], skillfixcastrate[MAX_PC_BONUS];
@@ -350,13 +351,13 @@ struct map_session_data {
 		int get_zeny_num; //Added Get Zeny Rate [Skotlex]
 		int double_add_rate;
 		int short_weapon_damage_return,long_weapon_damage_return;
-		int magic_damage_return; // AppleGirl Was Here
+		int magic_damage_return; //AppleGirl Was Here
 		int break_weapon_rate,break_armor_rate;
 		int crit_atk_rate;
-		int classchange; // [Valaris]
+		int classchange; //[Valaris]
 		int speed_rate, speed_add_rate, aspd_add;
-		int itemhealrate2; // [Epoque] Increase heal rate of all healing items.
-		int shieldmdef;//royal guard's
+		int itemhealrate2; //[Epoque] Increase heal rate of all healing items.
+		int shieldmdef; //Royal guard's
 		unsigned int setitem_hash, setitem_hash2; //Split in 2 because shift operations only work on int ranges. [Skotlex]
 
 		short splash_range, splash_add_range;
@@ -365,16 +366,16 @@ struct map_session_data {
 		short sp_gain_value, hp_gain_value, magic_sp_gain_value, magic_hp_gain_value;
 		short sp_vanish_rate;
 		short sp_vanish_per;
-		unsigned short unbreakable;	// chance to prevent ANY equipment breaking [celest]
+		unsigned short unbreakable;	//Chance to prevent ANY equipment breaking [celest]
 		unsigned short unbreakable_equip; //100% break resistance on certain equipment
 		unsigned short unstripable_equip;
 		int fixcastrate, varcastrate;
 		int add_fixcast, add_varcast;
-		int ematk; // matk bonus from equipment
-		int eatk; // atk bonus from equipment
+		int ematk; //Matk bonus from equipment
+		int eatk; //Atk bonus from equipment
 	} bonus;
 
-	// zeroed vars end here.
+	//Zeroed vars end here.
 
 	int castrate,delayrate,hprate,sprate,dsprate;
 	int hprecov_rate,sprecov_rate;

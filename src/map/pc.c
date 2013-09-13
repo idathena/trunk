@@ -3200,6 +3200,10 @@ int pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 				sd->skillusesp[i].val  = val;
 			}
 			break;
+		case SP_MAGIC_SUBRACE:
+			if(sd->state.lr_flag != 2)
+				sd->magic_subrace[type2] += val;
+			break;
 		default:
 			ShowWarning("pc_bonus2: unknown type %d %d %d!\n",type,type2,val);
 			break;

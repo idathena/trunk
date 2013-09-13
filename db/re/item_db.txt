@@ -1634,7 +1634,7 @@
 2586,Siege_Manteau,Siege Manteau,5,10,,600,,32,,1,0xFFFFFFFE,63,2,4,,95,1,0,{ bonus bMdef,1; bonus2 bSubRace,RC_DemiHuman,2; },{},{}
 2587,Siege_Muffler,Siege Muffler,5,10,,400,,15,,1,0xFFFFFFFF,63,2,4,,95,1,0,{ bonus bMdef,10; bonus2 bSubRace,RC_DemiHuman,2; },{},{}
 2588,Ragamuffin_Cape_,Ragamuffin Cape,5,56000,,500,,4,,1,0xFFFFFFFE,63,2,4,,40,1,0,{ bonus bMdef,10; },{},{}
-2589,Fallen_Angel_Wing,Fallen Angel Wing,5,0,,200,,18,,0,0xFFFFFFFF,63,2,4,,0,1,3,{ bonus bLuk,2; bonus bMdef,18; bonus2 bSubRace,RC_DemiHuman,10; bonus2 bSubEle,Ele_Dark,30; bonus2 bSubEle,Ele_Holy,-30; },{},{}
+2589,Fallen_Angel_Wing,Fallen Angel Wing,5,0,,200,,18,,0,0xFFFFFFFF,63,2,4,,0,1,3,{ bonus bLuk,2; bonus bMdef,18; bonus2 bMagicSubRace,RC_DemiHuman,10; },{},{}
 2590,Buwaya_Cloth,Buwaya Sack Cloth,5,20,,200,,8,,0,0xFFFFFFFF,63,2,4,,1,1,0,{ bonus bHealPower2,getrefine()/3; bonus bAddItemHealRate,getrefine()/3; bonus2 bSubEle,Ele_Water,10; bonus2 bSubEle,Ele_Wind,10; bonus2 bSubEle,Ele_Earth,10; bonus2 bSubEle,Ele_Fire,10; },{},{}
 2591,Bayani_Buwaya_Cloth,Bayani Buwaya Sack Cloth,5,20,,200,,8,,1,0xFFFFFFFF,63,2,4,,1,1,0,{ bonus bHealPower2,getrefine(); bonus bAddItemHealRate,getrefine(); bonus2 bSubEle,Ele_Water,10; bonus2 bSubEle,Ele_Wind,10; bonus2 bSubEle,Ele_Earth,10; bonus2 bSubEle,Ele_Fire,10; },{},{}
 2592,Boss_Brownie_Manteau,Boss Brownie Manteau,5,20,,100,,3,,0,0xFFFFFFFF,63,2,4,,50,1,0,{},{},{}
@@ -3492,7 +3492,7 @@
 5785,Green_Bunny_Hairband,Green Bunny Hairband,5,20,,200,,0,,1,0xFFFFFFFF,63,2,256,,1,1,664,{ bonus bStr,2; bonus bInt,1; bonus bDex,1; },{},{}
 5786,Ancient_Elven_Ear,Ancient Elven Ear,5,10,,200,,1,,0,0xFFFFFFFF,63,2,512,,1,0,665,{ bonus bLuk,1; bonus bMaxHP,100; bonus bMaxSP,30; },{},{}
 5787,Tha_Maero_Mask,Tha Maero Mask,5,20,,100,,0,,0,0xFFFFFFFF,63,2,513,,30,0,666,{ bonus bMdef,2; },{},{}
-5788,3D_Glasses,3D Glasses,5,20,,100,,1,,0,0xFFFFFFFF,63,2,512,,1,0,661,{ bonus2 bSubRace,RC_Formless,5; bonus2 bMagicAddRace,RC_Formless,4; },{},{}
+5788,3D_Glasses,3D Glasses,5,20,,100,,1,,0,0xFFFFFFFF,63,2,512,,1,0,661,{ bonus2 bSubEle,Ele_Neutral,5; bonus2 bMagicAddRace,RC_Formless,4; },{},{}
 5789,Thanatos_Mal_Mask,Thanatos Mal Mask,5,20,,100,,3,,0,0xFFFFFFFF,63,2,513,,30,0,667,{ bonus bVit,1; },{},{}
 5790,Holy_Mom_Love,TM,5,20,,500,,0,,1,0xFFFFFFFF,63,2,768,,45,1,610,{ bonus2 bSubRace,RC_Demon,-5; bonus2 bSubRace,RC_Undead,-5; bonus3 bAutoSpell,"MG_COLDBOLT",1,20; },{},{}
 5791,Tenkaippin_Ramen,Tenkaippin Ramen,5,20,,500,,1,,0,0xFFFFFFFF,63,2,256,,30,0,668,{ bonus bInt,-1; bonus bDex,4; },{},{}
@@ -5751,7 +5751,7 @@
 12425,SP_Increase_Potion_(Small),SP Increase Potion (Small),0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INCMSPRATE,500000,2; sc_start SC_INCMSP,500000,((BaseLevel/10)-5); percentheal 0,2; },{},{}
 12426,SP_Increase_Potion_(Medium),SP Increase Potion (Medium),0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INCMSPRATE,500000,4; sc_start SC_INCMSP,500000,(BaseLevel/10); percentheal 0,4; },{},{}
 12427,SP_Increase_Potion_(Large),SP Increase Potion (Large),0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INCMSPRATE,500000,8; sc_start SC_INCMSP,500000,((BaseLevel/10)+5); percentheal 0,8; },{},{}
-12428,Concentrated_White_Potion_Z,Concentrated White Potion Z,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_EXTRACT_WHITE_POTION_Z,500000,0; heal 1000,0; },{},{}
+12428,Concentrated_White_Potion_Z,Concentrated White Potion Z,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_EXTRACT_WHITE_POTION_Z,500000,20; heal 1000,0; },{},{}
 12429,Savage_Full_Roast,Savage Full Roast,2,,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_SAVAGE_STEAK,300000,20; },{},{}
 12430,Cocktail_Warg_Blood,Cocktail Warg Blood,2,,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_COCKTAIL_WARG_BLOOD,300000,20; },{},{}
 12431,Minor_Stew,Minor Stew,2,,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_MINOR_BBQ,300000,20; },{},{}

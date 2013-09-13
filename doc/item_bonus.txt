@@ -425,3 +425,8 @@ bonus2 bFixedCastrate,s,x;		Increases fixed cast time of skill s by x%. (support
 
 bonus4 bSetDefRace,n,x,r,y;		Set DEF to y of an enemy of race n at x% for r milliseconds with normal attack.
 bonus4 bSetMDefRace,n,x,r,y;		Set MDEF to y of an enemy of race n at x% for r milliseconds with normal attack.
+
+bonus2 bMagicSubRace,n,x;		Adds x% magical damage reduction against race n
+					n: 	0=Formless, 1=Undead, 2=Brute, 3=Plant, 4=Insect,
+						5=Fish, 6=Demon, 7=Demi-Human, 8=Angel, 9=Dragon, 
+						10=Boss monster, 11=Other than (normal monster) boss monster
