@@ -14,20 +14,20 @@
 
 y_airport,143,43,5	script	Airport Staff#y_air1a::y_airport1	90,{
 	mes "[Airport Staff]";
-	mes "Welcome to Juno Airport where we offer domestic flights to Einbroch, Lighthalzen and Hugel,";
-	mes "and international flights to Izlude and Rachel.";
-	mes "How may I be of service?";
+	mes "Selamat datang di bandara Juno di mana kami menawarkan penerbangan domestik ke Einbroch, Lighthalzen dan Hugel";
+	mes "dan penerbangan internasional ke Izlude dan Rachel.";
+	mes "Ada yang bisa aku bantu?";
 	next;
 	if (select("Board the Airship.:Cancel.") == 1) {
 		mes "[Airport Staff]";
-		mes "The boarding fee for all";
-		mes "flights is 1,200 zeny. If you";
-		mes "use a Free Ticket for Airship,";
-		mes "the boarding fee will be waived.So would you like to depart?";
+		mes "Biaya untuk semua penerbangan";
+		mes "adalah 1,200 zeny. Jika kamu";
+		mes "menggunakan tiket gratis untuk penerbangan,";
+		mes "biaya penerbangan akan dibebaskan. Jadi apakah kamu ingin berangkat?";
 		next;
 		if (select("Yes:No") == 1) {
 			if (countitem(7311) > 0) {
-				delitem 7311,1; //Free_Flying_Ship_Ticket
+				delitem 7311,1; //Tiket_Gratis_Kapal_Udara
 				warp "y_airport",148,51;
 				end;
 			}
@@ -37,15 +37,15 @@ y_airport,143,43,5	script	Airport Staff#y_air1a::y_airport1	90,{
 				end;
 			}
 			mes "[Airport Staff]";
-			mes "I'm sorry, but you don't";
-			mes "have 1,200 zeny to pay";
-			mes "for the boarding fee.";
+			mes "Maaf, tetapi kamu tidak mempunyai";
+			mes "1,200 zeny";
+			mes "untuk biaya penerbangannya.";
 			close;
 		}
 	}
 	mes "[Airport Staff]";
-	mes "Thank you and";
-	mes "have a nice day.";
+	mes "Terimakasih dan, ";
+	mes "semoga harimu menyenangkan.";
 	close;
 }
 
@@ -54,16 +54,16 @@ y_airport,126,43,5	duplicate(y_airport1)	Airport Staff#y_air1c	90
 
 y_airport,143,49,3	script	Arrival Staff#y_air2a::y_airport2	90,{
 	mes "[Airport Staff]";
-	mes "Welcome to Juno Airport. If you've just arrived from your";
-	mes "flight, let me guide you to the main terminal. Otherwise, please";
-	mes "board the departing Airship to reach your intended destination.";
+	mes "Selamat datang di bandara Juno. Jika Kamu baru saja tiba dari";
+	mes "penerbangan, biarkan saya memandu kamu ke terminal utama.. Jika tidak, silahkan";
+	mes "naik ke pesawat yang hendak berangkat untuk mencapai tujuan yang kamu inginkan..";
 	next;
 	if (select("Exit to main terminal:Cancel") == 1) {
 		mes "[Airport Staff]";
-		mes "Once you're in the main terminal, you must pay the fee once again";
-		mes "to board a departing Airship. You should only exit if your intended";
-		mes "destination is Juno. Proceed to";
-		mes "exit to the main terminal?";
+		mes "Ketika kamu berada di terminal utama, kamu akan dikenakan tambahan biaya lagi";
+		mes "untuk naik pesawat. Kamu sebaiknya keluar jika";
+		mes "tujuanya adalah Juno. Lanjutkan";
+		mes "untuk keluar ke terminal utama?";
 		next;
 		if (select("Yes:No") == 1) {
 			warp "y_airport",142,40;
@@ -71,10 +71,10 @@ y_airport,143,49,3	script	Arrival Staff#y_air2a::y_airport2	90,{
 		}
 	}
 	mes "[Airport Staff]";
-	mes "Alright, thank you";
-	mes "for your patronage";
-	mes "and I hope you have";
-	mes "a pleasant flight~";
+	mes "Baiklah, terima kasih";
+	mes "atas dukungannya";
+	mes "dan saya harap kamu memiliki";
+	mes "penerbangan yang menyenangkan~";
 	close;
 }
 
@@ -83,79 +83,79 @@ y_airport,158,50,3	duplicate(y_airport2)	Arrival Staff#y_air2c	90
 
 y_airport,145,63,5	script	Domestic Boarding	91,{
 	mes "[Boarding Staff]";
-	mes "Would you like to board the";
-	mes "Airship that flies to Einbroch,";
-	mes "Lighthalzen and Hugel? If so,";
-	mes "please let me guide you to that";
-	mes "Airship's boarding area.";
+	mes "Apakah kamu ingin naik";
+	mes "pesawat dengan tujuan penerbangan ke Einbroch,";
+	mes "Lighthalzen dan Hugel? Jika iya,";
+	mes "izinkan saya membimbing kamu ke";
+	mes "Area penerbangan.";
 	next;
 	if (select("Yes:No") == 1) {
 		warp "yuno",59,244;
 		end;
 	}
 	mes "[Boarding Staff]";
-	mes "Very well, then.";
-	mes "Thank you for your";
-	mes "patronage, and I hope";
-	mes "you enjoy your travels~";
+	mes "Baiklah kalau begitu.";
+	mes "Terimakasih atas";
+	mes "dukungannya, dan saya berharap";
+	mes "kamu bisa menikmati perjalanannya~";
 	close;
 }
 
 y_airport,140,63,5	script	International Boarding	91,{
 	mes "[Boarding Staff]";
-	mes "Would you like to board";
-	mes "the Airship which flies to";
-	mes "Juno, Izlude and Rachel?";
-	mes "If so, let me guide";
-	mes "you to the boarding area.";
+	mes "Apakah kamu ingin naik;
+	mes "pesawat dengan tujuan penerbangan ke";
+	mes "Juno, Izlude dan Rachel?";
+	mes "izinkan saya membimbing kamu ke";
+	mes "Area penerbangan.";
 	next;
 	if (select("Yes:No") == 1) {
 		warp "yuno",47,244;
 		end;
 	}
 	mes "[Boarding Staff]";
-	mes "Alright, then.";
-	mes "Thank you for flying";
-	mes "with us, and I hope you";
-	mes "enjoy your travels on our";
-	mes "state of the art Airships.";
+	mes "Baiklah kalau begitu.";
+	mes "Terimakasih telah terbang";
+	mes "bersama kami,dan saya harap";
+	mes "kamu dapat menikmati perjalanan dengan";
+	mes "menggunakan layanan kami.";
 	close;
 }
 
 yuno,14,262,5	script	Airship Staff#yuno01	91,{
 	mes "[Airship Staff]";
-	mes "Welcome to Juno Airport.";
-	mes "Please use this door to";
-	mes "board the Airship that will";
-	mes "be flying all the way to Izlude";
-	mes "in the Rune-Midgarts Kingdom,";
-	mes "and to Rachel in the Arunafeltz";
-	mes "Republic.";
+	mes "Selamat datang di bandara Juno.";
+	mes "Silahkan gunakan pintu ini untuk";
+	mes "naik pesawat yang akan";
+	mes "terbang ke Izlude";
+	mes "di Kerajaan Rune Midgard,";
+	mes "dan Rachel di";
+	mes "Republik Arunafeltz.";
 	next;
 	mes "[Airship Staff]";
-	mes "Otherwise, if Juno is";
-	mes "your intended destination,";
-	mes "please head down the stairs";
-	mes "and ask the Arrival Staff to lead";
-	mes "you to the main terminal. Thank";
-	mes "you, and enjoy your travels.";
+	mes "Sebaliknya, Jika Juno";
+	mes "adalah tujuan yang kamu maksud,";
+	mes "silahkan turuni tangga";
+	mes "dan tanya staff kami untuk membimbing kamu";
+	mes "ke terminal utama. terima kasih,";
+	mes "dan selamat menikmati perjalanannya.";
 	close;
 }
 
 yuno,88,263,3	script	Airship Staff#yuno02	91,{
 	mes "[Airship Staff]";
-	mes "Welcome to Juno Airport.";
-	mes "Please use this door to";
-	mes "board the Airship which stops";
-	mes "over Einbroch, Lighthalzen and";
-	mes "Hugel in the Schwaltzvalt Republic.";
+	mes "Selamat datang di bandara Juno.";
+	mes "Silahkan gunakan pintu ini untuk";
+	mes "naik ke pesawat yang berhenti di";
+	mes "sekitar Einbroch, Lighthalzen dan";
+	mes "Hugel di Republik Schwaltzvalt.";
 	next;
 	mes "[Airship Staff]";
-	mes "Otherwise, if Juno is";
-	mes "your intended destination,";
-	mes "please head down the stairs";
-	mes "and ask the Arrival Staff to lead";
-	mes "you to the main terminal. Thank";
-	mes "you, and enjoy your travels.";
+	mes "Sebaliknya, jika Juno adalah";
+	mes "tujuan yang kamu maksud,";
+	mes "silahkan turuni tangga";
+	mes "dan tanya staff kami untuk membimbing kamu";
+	mes "ke terminal utama. terima kasih,";
+	mes "dan selamat menikmati perjalanannya.";
 	close;
 }
