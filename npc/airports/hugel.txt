@@ -1,18 +1,21 @@
-//===== rAthena Script ======================================= 
-//= Hugel Airport NPCs
-//===== By: ================================================== 
+//===== idAthena Script ======================================
+//= NPC Bandara Hugel
+//===== Script Asli dari =====================================
+//= rAthena
+//===== Diterjemahkan Oleh ===================================
+//= jetkappu
+//===== Oleh: ================================================
 //= rAthena Dev Team
-//===== Current Version: =====================================
+//===== Versi Saat Ini: ======================================
 //= 1.0
-//===== Compatible With: ===================================== 
+//===== Dapat Digunakan Dengan: ==============================
 //= rAthena SVN
-//===== Description: ========================================= 
-//= Hugel Airport NPCs
-//===== Additional Comments: ================================= 
-//= 1.0 First version.
-//============================================================ 
-//=================== Translated by ==========================
-//===================== jetkappu =============================
+//= idAthena SVN
+//===== Deskripsi: ===========================================
+//= NPC Bandara Hugel
+//===== Komentar Tambahan: ===================================
+//= 1.0 Versi pertama.
+//============================================================
 
 hugel,178,142,0	script	toairplane#hugel	45,1,1,{
 	end;
@@ -20,9 +23,9 @@ OnTouch:
 	mes "Untuk menggunakan pesawat, kamu diharuskan membayar 1.200 zeny atau menukarkan tiket gratis.";
 	mes "Apakah kamu ingin menggunakan layanan ini?";
 	next;
-	if (select("Yes:No") == 1) {
+	if (select("Iya:Tidak") == 1) {
 		if (countitem(7311) > 0) {
-			delitem 7311,1; //Tiket_Gratis_Kapal_Udara
+			delitem 7311,1; //Free_Flying_Ship_Ticket
 			warp "airplane",244,58;
 			end;
 		}

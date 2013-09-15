@@ -1,36 +1,40 @@
-//===== rAthena Script ======================================= 
-//= Izlude Airport NPCs
-//===== By: ================================================== 
+//===== idAthena Script ======================================
+//= NPC Bandara Izlude
+//===== Script Asli dari =====================================
+//= rAthena
+//===== Diterjemahkan Oleh ===================================
+//= jetkappu
+//===== Oleh: ================================================
 //= rAthena Dev Team
-//===== Current Version: =====================================
+//===== Versi Saat Ini: ======================================
 //= 1.0
-//===== Compatible With: ===================================== 
+//===== Dapat Digunakan Dengan: ==============================
 //= rAthena SVN
-//===== Description: ========================================= 
-//= Izlude Airport NPCs
-//===== Additional Comments: ================================= 
-//= 1.0 First version.
-//============================================================ 
-//=================== Translated by ==========================
-//===================== jetkappu =============================
+//= idAthena SVN
+//===== Deskripsi: ===========================================
+//= NPC Bandara Izlude
+//===== Komentar Tambahan: ===================================
+//= 1.0 Versi pertama.
+//============================================================
+
 -	script	::Airship_Staff_izlude	-1,{
-	mes "[Airship Staff]";
+	mes "[Staff Bandara]";
 	mes "Selamat Datang! Apakah kamu ingin";
 	mes "untuk naik pesawat yang";
 	mes "berangkat pada penerbangan yang berhenti";
-	mes "di Juno dan Rachel?";
+	mes "di JuTidak dan Rachel?";
 	next;
-	if (select("Board the Airship to Juno/Rachel.:Cancel.") == 1) {
-		mes "[Airship Staff]";
+	if (select("Menaiki Kapal Udara ke JuTidak/Rachel.:Batal.") == 1) {
+		mes "[Staff Bandara]";
 		mes "Biaya untuk menaiki pesawat ini adalah";
 		mes "1,200 zeny. Namun,";
 		mes "biaya ini dibebaskan jika kamu menggunakan";
 		mes "Tiket gratis untuk pesawat. Sekarang,";
 		mes "apakah kamu masih ingin berangkat?";
 		next;
-		if (select("Yes:No") == 1) {
+		if (select("Iya:Tidak") == 1) {
 			if (countitem(7311) > 0) {
-				delitem 7311,1; //Tiket_Gratis_Kapal_Udara
+				delitem 7311,1; //Free_Flying_Ship_Ticket
 				warp "airplane_01",244,58;
 				end;
 			}
@@ -39,14 +43,14 @@
 				warp "airplane_01",244,58;
 				end;
 			}
-			mes "[Airship Staff]";
+			mes "[Staff Bandara]";
 			mes "Maaf, tetapi kamu tidak mempunyai";
 			mes "1,200 zeny";
 			mes "untuk biaya penerbangannya.";
 			close;
 		}
 	}
-	mes "[Airship Staff]";
+	mes "[Staff Bandara]";
 	mes "Terimakasih dan";
 	mes "silahkan datang kembali.";
 	mes "Semoga hari mu menyenangkan~";

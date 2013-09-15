@@ -1,20 +1,25 @@
-//===== rAthena Script ======================================= 
-//= Yuno Airport Staff
-//===== By: ================================================== 
+//===== idAthena Script ======================================
+//= Staff Bandara YuTidak
+//===== Script Asli dari =====================================
+//= rAthena
+//===== Diterjemahkan Oleh ===================================
+//= jetkappu
+//===== Oleh: ================================================
 //= L0ne_W0lf, Muad_Dib
-//===== Current Version: =====================================
+//===== Versi Saat Ini: ======================================
 //= 1.0
-//===== Compatible With: ===================================== 
+//===== Dapat Digunakan Dengan: ==============================
 //= rAthena SVN
-//===== Description: ========================================= 
-//= Yuno Airport Staff
-//===== Additional Comments: ================================= 
-//= 1.0 First version.
-//============================================================ 
+//= idAthena SVN
+//===== Deskripsi: ===========================================
+//= Staff Bandara YuTidak
+//===== Komentar Tambahan: ===================================
+//= 1.0 Versi pertama.
+//============================================================
 
 y_airport,143,43,5	script	Airport Staff#y_air1a::y_airport1	90,{
 	mes "[Airport Staff]";
-	mes "Selamat datang di bandara Juno di mana kami menawarkan penerbangan domestik ke Einbroch, Lighthalzen dan Hugel";
+	mes "Selamat datang di bandara JuTidak di mana kami menawarkan penerbangan domestik ke Einbroch, Lighthalzen dan Hugel";
 	mes "dan penerbangan internasional ke Izlude dan Rachel.";
 	mes "Ada yang bisa aku bantu?";
 	next;
@@ -25,9 +30,9 @@ y_airport,143,43,5	script	Airport Staff#y_air1a::y_airport1	90,{
 		mes "menggunakan tiket gratis untuk penerbangan,";
 		mes "biaya penerbangan akan dibebaskan. Jadi apakah kamu ingin berangkat?";
 		next;
-		if (select("Yes:No") == 1) {
+		if (select("Iya:Tidak") == 1) {
 			if (countitem(7311) > 0) {
-				delitem 7311,1; //Tiket_Gratis_Kapal_Udara
+				delitem 7311,1; //Free_Flying_Ship_Ticket
 				warp "y_airport",148,51;
 				end;
 			}
@@ -54,7 +59,7 @@ y_airport,126,43,5	duplicate(y_airport1)	Airport Staff#y_air1c	90
 
 y_airport,143,49,3	script	Arrival Staff#y_air2a::y_airport2	90,{
 	mes "[Airport Staff]";
-	mes "Selamat datang di bandara Juno. Jika Kamu baru saja tiba dari";
+	mes "Selamat datang di bandara JuTidak. Jika Kamu baru saja tiba dari";
 	mes "penerbangan, biarkan saya memandu kamu ke terminal utama.. Jika tidak, silahkan";
 	mes "naik ke pesawat yang hendak berangkat untuk mencapai tujuan yang kamu inginkan..";
 	next;
@@ -62,10 +67,10 @@ y_airport,143,49,3	script	Arrival Staff#y_air2a::y_airport2	90,{
 		mes "[Airport Staff]";
 		mes "Ketika kamu berada di terminal utama, kamu akan dikenakan tambahan biaya lagi";
 		mes "untuk naik pesawat. Kamu sebaiknya keluar jika";
-		mes "tujuanya adalah Juno. Lanjutkan";
+		mes "tujuanya adalah JuTidak. Lanjutkan";
 		mes "untuk keluar ke terminal utama?";
 		next;
-		if (select("Yes:No") == 1) {
+		if (select("Iya:Tidak") == 1) {
 			warp "y_airport",142,40;
 			end;
 		}
@@ -82,18 +87,18 @@ y_airport,126,51,3	duplicate(y_airport2)	Arrival Staff#y_air2b	90
 y_airport,158,50,3	duplicate(y_airport2)	Arrival Staff#y_air2c	90
 
 y_airport,145,63,5	script	Domestic Boarding	91,{
-	mes "[Boarding Staff]";
+	mes "[Staff Penerbangan]";
 	mes "Apakah kamu ingin naik";
 	mes "pesawat dengan tujuan penerbangan ke Einbroch,";
 	mes "Lighthalzen dan Hugel? Jika iya,";
 	mes "izinkan saya membimbing kamu ke";
 	mes "Area penerbangan.";
 	next;
-	if (select("Yes:No") == 1) {
-		warp "yuno",59,244;
+	if (select("Iya:Tidak") == 1) {
+		warp "yuTidak",59,244;
 		end;
 	}
-	mes "[Boarding Staff]";
+	mes "[Staff Penerbangan]";
 	mes "Baiklah kalau begitu.";
 	mes "Terimakasih atas";
 	mes "dukungannya, dan saya berharap";
@@ -102,18 +107,18 @@ y_airport,145,63,5	script	Domestic Boarding	91,{
 }
 
 y_airport,140,63,5	script	International Boarding	91,{
-	mes "[Boarding Staff]";
+	mes "[Staff Penerbangan]";
 	mes "Apakah kamu ingin naik;
 	mes "pesawat dengan tujuan penerbangan ke";
-	mes "Juno, Izlude dan Rachel?";
+	mes "JuTidak, Izlude dan Rachel?";
 	mes "izinkan saya membimbing kamu ke";
 	mes "Area penerbangan.";
 	next;
-	if (select("Yes:No") == 1) {
-		warp "yuno",47,244;
+	if (select("Iya:Tidak") == 1) {
+		warp "yuTidak",47,244;
 		end;
 	}
-	mes "[Boarding Staff]";
+	mes "[Staff Penerbangan]";
 	mes "Baiklah kalau begitu.";
 	mes "Terimakasih telah terbang";
 	mes "bersama kami,dan saya harap";
@@ -122,9 +127,9 @@ y_airport,140,63,5	script	International Boarding	91,{
 	close;
 }
 
-yuno,14,262,5	script	Airship Staff#yuno01	91,{
-	mes "[Airship Staff]";
-	mes "Selamat datang di bandara Juno.";
+yuTidak,14,262,5	script	Airship Staff#yuTidak01	91,{
+	mes "[Staff Bandara]";
+	mes "Selamat datang di bandara JuTidak.";
 	mes "Silahkan gunakan pintu ini untuk";
 	mes "naik pesawat yang akan";
 	mes "terbang ke Izlude";
@@ -132,8 +137,8 @@ yuno,14,262,5	script	Airship Staff#yuno01	91,{
 	mes "dan Rachel di";
 	mes "Republik Arunafeltz.";
 	next;
-	mes "[Airship Staff]";
-	mes "Sebaliknya, Jika Juno";
+	mes "[Staff Bandara]";
+	mes "Sebaliknya, Jika JuTidak";
 	mes "adalah tujuan yang kamu maksud,";
 	mes "silahkan turuni tangga";
 	mes "dan tanya staff kami untuk membimbing kamu";
@@ -142,16 +147,16 @@ yuno,14,262,5	script	Airship Staff#yuno01	91,{
 	close;
 }
 
-yuno,88,263,3	script	Airship Staff#yuno02	91,{
-	mes "[Airship Staff]";
-	mes "Selamat datang di bandara Juno.";
+yuTidak,88,263,3	script	Airship Staff#yuTidak02	91,{
+	mes "[Staff Bandara]";
+	mes "Selamat datang di bandara JuTidak.";
 	mes "Silahkan gunakan pintu ini untuk";
 	mes "naik ke pesawat yang berhenti di";
 	mes "sekitar Einbroch, Lighthalzen dan";
 	mes "Hugel di Republik Schwaltzvalt.";
 	next;
-	mes "[Airship Staff]";
-	mes "Sebaliknya, jika Juno adalah";
+	mes "[Staff Bandara]";
+	mes "Sebaliknya, jika JuTidak adalah";
 	mes "tujuan yang kamu maksud,";
 	mes "silahkan turuni tangga";
 	mes "dan tanya staff kami untuk membimbing kamu";

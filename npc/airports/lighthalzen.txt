@@ -1,34 +1,39 @@
-//===== rAthena Script ======================================= 
-//= Lighthalzen Airport Staff
-//===== By: ================================================== 
+//===== idAthena Script ======================================
+//= Staff Bandara Lighthalzen
+//===== Script Asli dari =====================================
+//= rAthena
+//===== Diterjemahkan Oleh ===================================
+//= jetkappu
+//===== Oleh: ================================================
 //= L0ne_W0lf, Muad_Dib
-//===== Current Version: =====================================
+//===== Versi Saat Ini: ======================================
 //= 1.0
-//===== Compatible With: ===================================== 
+//===== Dapat Digunakan Dengan: ==============================
 //= rAthena SVN
-//===== Description: ========================================= 
-//= Lighthalzen Airport Staff
-//===== Additional Comments: ================================= 
-//= 1.0 First version.
-//============================================================ 
+//= idAthena SVN
+//===== Deskripsi: ===========================================
+//= Staff Bandara Lighthalzen
+//===== Komentar Tambahan: ===================================
+//= 1.0 Versi pertama.
+//============================================================
 
 lhz_airport,143,43,5	script	Airport Staff#lhz_air1a::lhz_airport1	90,{
-	mes "[Airport Staff]";
+	mes "[Staff Bandara]";
 	mes "Selamat datang di";
 	mes "Bandara Lighthalzen,";
 	mes "dimana kami menawarkan";
-	mes "penerbangan nonstop ke Einbroch, Juno dan Hugel.";
+	mes "penerbangan Tidaknstop ke Einbroch, JuTidak dan Hugel.";
 	next;
-	if (select("Board the Airship.:Cancel.") == 1) {
-		mes "[Airport Staff]";
+	if (select("Menaiki kapal udara.:Batal.") == 1) {
+		mes "[Staff Bandara]";
 		mes "Biaya penerbangannya adalah";
 		mes "1,200 zeny, tetapi kamu dapat";
 		mes "dibebaskan biaya jika menukarkan";
 		mes "sebuah tiket gratis untuk penerbangan ini.";
 		next;
-		if (select("Yes:No") == 1) {
+		if (select("Iya:Tidak") == 1) {
 			if (countitem(7311) > 0) {
-				delitem 7311,1; //Tiket_Gratis_Kapal_Udara
+				delitem 7311,1; //Free_Flying_Ship_Ticket
 				warp "lhz_airport",148,51;
 				end;
 			}
@@ -44,7 +49,7 @@ lhz_airport,143,43,5	script	Airport Staff#lhz_air1a::lhz_airport1	90,{
 			close;
 		}
 	}
-	mes "[Airport Staff]";
+	mes "[Staff Bandara]";
 	mes "Terima kasih dan";
 	mes "silakan datang kembali.";
 	mes "Semoga harimu menyenangkan~";
@@ -55,25 +60,25 @@ lhz_airport,158,43,5	duplicate(lhz_airport1)	Airship Staff#lhz_air1b	90
 lhz_airport,126,43,5	duplicate(lhz_airport1)	Airship Staff#lhz_air1c	90
 
 lhz_airport,143,49,3	script	Arrival Staff#lhz_air2a::lhz_airport2	90,{
-	mes "[Arrival Staff]";
+	mes "[Staff Kedatangan]";
 	mes "Selamat datang di bandara Lighthalzen.";
 	mes "Izinkan saya untuk memandu kamu ke";
 	mes "terminal utama jika kamu tiba dari penerbangan. Jika tidak";
 	mes "silahkan naik ke pesawat yang hendak berangkat untuk mencapai tujuan yang kamu inginkan..";
 	next;
-	if (select("Exit to main terminal.:Cancel.") == 1) {
-		mes "[Arrival Staff]";
+	if (select("Keluar ke terminal utama.:Batal.") == 1) {
+		mes "[Staff Kedatangan]";
 		mes "Setelah kamu berada di terminal utama, kamu akan dikenakan tambahan biaya lagi";
 		mes "untuk naik pesawat. kamu sebaiknya";
 		mes "keluar jika Lighthalzen adalah tujuan yang kamu maksudkan. Bagaimana kalau kita";
 		mes "lanjutkan untuk terminal utama?";
 		next;
-		if (select("Yes:No") == 1) {
+		if (select("Iya:Tidak") == 1) {
 			warp "lhz_airport",142,40;
 			end;
 		}
 	}
-	mes "[Arrival Staff]";
+	mes "[Staff Kedatangan]";
 	mes "Baiklah, terima kasih";
 	mes "atas dukungannya";
 	mes "dan saya harap kamu memiliki";
