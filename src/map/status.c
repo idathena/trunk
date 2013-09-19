@@ -65,16 +65,8 @@ static struct status_data dummy_status;
 
 int current_equip_item_index; //Contains inventory index of an equipped item. To pass it into the EQUP_SCRIPT [Lupus]
 int current_equip_card_id; //To prevent card-stacking (from jA) [Skotlex]
-//we need it for new cards 15 Feb 2005, to check if the combo cards are insrerted into the CURRENT weapon only
+//We need it for new cards 15 Feb 2005, to check if the combo cards are insrerted into the CURRENT weapon only
 //to avoid cards exploits
-
-static sc_type SkillStatusChangeTable[MAX_SKILL];  //skill  -> status
-static int StatusIconChangeTable[SC_MAX];          //status -> "icon" (icon is a bit of a misnomer, since there exist values with no icon associated)
-static unsigned int StatusChangeFlagTable[SC_MAX]; //status -> flags
-static int StatusSkillChangeTable[SC_MAX];         //status -> skill
-static int StatusRelevantBLTypes[SI_MAX];          //"icon" -> enum bl_type (for clif_status_change to identify for which bl types to send packets)
-static unsigned int StatusChangeStateTable[SC_MAX]; //status -> flags
-
 
 /**
  * Returns the status change associated with a skill.
@@ -178,7 +170,7 @@ void initChangeTables(void) {
 	memset(StatusSkillChangeTable, 0, sizeof(StatusSkillChangeTable));
 	memset(StatusChangeFlagTable, 0, sizeof(StatusChangeFlagTable));
 	memset(StatusChangeStateTable, 0, sizeof(StatusChangeStateTable));
-
+	memset(StatusDisplayType, 0, sizeof(StatusDisplayType));
 
 	//First we define the skill for common ailments. These are used in skill_additional_effect through sc cards. [Skotlex]
 	set_sc( NPC_PETRIFYATTACK , SC_STONE     , SI_BLANK    , SCB_DEF_ELE|SCB_DEF|SCB_MDEF );
@@ -943,6 +935,7 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_PUSH_CART] = SI_ON_PUSH_CART;
 	StatusIconChangeTable[SC_REBOUND] = SI_REBOUND;
 	StatusIconChangeTable[SC_MONSTER_TRANSFORM] = SI_MONSTER_TRANSFORM;
+	StatusIconChangeTable[SC_ALL_RIDING] = SI_ALL_RIDING;
 
 	//Other SC which are not necessarily associated to skills.
 	StatusChangeFlagTable[SC_ASPDPOTION0] = SCB_ASPD;
@@ -1035,12 +1028,43 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_DEFSET] |= SCB_DEF;
 	StatusChangeFlagTable[SC_MDEFSET] |= SCB_MDEF;
 	StatusChangeFlagTable[SC_WEDDING] = SCB_SPEED;
+	StatusChangeFlagTable[SC_ALL_RIDING] = SCB_SPEED;
+
+	/* StatusDisplayType Table [Ind] */
+	StatusDisplayType[SC_ALL_RIDING]	  = true;
+	StatusDisplayType[SC_PUSH_CART]		  = true;
+	StatusDisplayType[SC_SPHERE_1]		  = true;
+	StatusDisplayType[SC_SPHERE_2]		  = true;
+	StatusDisplayType[SC_SPHERE_3]		  = true;
+	StatusDisplayType[SC_SPHERE_4]		  = true;
+	StatusDisplayType[SC_SPHERE_5]		  = true;
+	StatusDisplayType[SC_CAMOUFLAGE]	  = true;
+	StatusDisplayType[SC_DUPLELIGHT]	  = true;
+	StatusDisplayType[SC_ORATIO]		  = true;
+	StatusDisplayType[SC_FREEZING]		  = true;
+	StatusDisplayType[SC_VENOMIMPRESS]	  = true;
+	StatusDisplayType[SC_HALLUCINATIONWALK]	  = true;
+	StatusDisplayType[SC_ROLLINGCUTTER]	  = true;
+	StatusDisplayType[SC_BANDING]		  = true;
+	StatusDisplayType[SC_CRYSTALIZE]	  = true;
+	StatusDisplayType[SC_DEEPSLEEP]		  = true;
+	StatusDisplayType[SC_CURSEDCIRCLE_ATKER]  = true;
+	StatusDisplayType[SC_CURSEDCIRCLE_TARGET] = true;
+	StatusDisplayType[SC_BLOODSUCKER]	  = true;
+	StatusDisplayType[SC__SHADOWFORM]	  = true;
+	StatusDisplayType[SC__MANHOLE]		  = true;
+	StatusDisplayType[SC_MONSTER_TRANSFORM]	  = true;
+	StatusDisplayType[SC_DARKCROW]		  = true;
+	StatusDisplayType[SC_OFFERTORIUM]	  = true;
+	StatusDisplayType[SC_TELEKINESIS_INTENSE] = true;
+	StatusDisplayType[SC_UNLIMIT]		  = true;
 
 	if( !battle_config.display_hallucination ) //Disable Hallucination.
 		StatusIconChangeTable[SC_HALLUCINATION] = SI_BLANK;
 
 	/* StatusChangeState (SCS_) NOMOVE */
 	StatusChangeStateTable[SC_ANKLE]               |= SCS_NOMOVE;
+	StatusChangeStateTable[SC_SPIDERWEB]           |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_AUTOCOUNTER]         |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_TRICKDEAD]           |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_BLADESTOP]           |= SCS_NOMOVE;
@@ -1065,7 +1089,6 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_CRYSTALIZE]          |= SCS_NOMOVE|SCS_NOMOVECOND;
 	StatusChangeStateTable[SC_NETHERWORLD]         |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CAMOUFLAGE]          |= SCS_NOMOVE|SCS_NOMOVECOND;
-
 	StatusChangeStateTable[SC_MEIKYOUSISUI]        |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_KAGEHUMI]            |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_KYOUGAKU]            |= SCS_NOMOVE;
@@ -1813,7 +1836,7 @@ int status_check_skilluse(struct block_list *src, struct block_list *target, uin
 		}
 		if (sc->option&OPTION_CHASEWALK && skill_id != ST_CHASEWALK)
 			return 0;
-		if (sc->option&OPTION_MOUNTING)
+		if (sc->data[SC_ALL_RIDING])
 			return 0; //New mounts can't attack nor use skills in the client. This check makes it cheat-safe [Ind]
 	}
 	
@@ -3493,7 +3516,7 @@ static unsigned short status_calc_speed(struct block_list *,struct status_change
 static short status_calc_aspd_rate(struct block_list *,struct status_change *,int);
 static unsigned short status_calc_dmotion(struct block_list *bl, struct status_change *sc, int dmotion);
 #ifdef RENEWAL_ASPD
-static short status_calc_aspd(struct block_list *bl, struct status_change *sc, short flag);
+	static short status_calc_aspd(struct block_list *bl, struct status_change *sc, short flag);
 #endif
 static short status_calc_fix_aspd(struct block_list *bl, struct status_change *sc, int);
 static unsigned int status_calc_maxhp(struct block_list *,struct status_change *, uint64);
@@ -3502,7 +3525,7 @@ static unsigned char status_calc_element(struct block_list *bl, struct status_ch
 static unsigned char status_calc_element_lv(struct block_list *bl, struct status_change *sc, int lv);
 static unsigned short status_calc_mode(struct block_list *bl, struct status_change *sc, int mode);
 #ifdef RENEWAL
-static unsigned short status_calc_ematk(struct block_list *,struct status_change *,int);
+	static unsigned short status_calc_ematk(struct block_list *,struct status_change *,int);
 #endif
 
 //Calculates base regen values.
@@ -5357,7 +5380,7 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 			if( sc->data[SC_FUSION] )
 				val = 25;
 			else if( sd ) {
-				if( pc_isriding(sd) || sd->sc.option&(OPTION_DRAGON|OPTION_MOUNTING) )
+				if( pc_isriding(sd) || sd->sc.option&(OPTION_DRAGON) || sd->sc.data[SC_ALL_RIDING] )
 					val = 25; //Same bonus
 				else if( pc_isridingwug(sd) )
 					val = 15 + 5 * pc_checkskill(sd, RA_WUGRIDER);
@@ -6295,15 +6318,7 @@ void status_set_viewdata(struct block_list *bl, int class_)
 		case BL_PC: {
 				TBL_PC* sd = (TBL_PC*)bl;
 				if (pcdb_checkid(class_)) {
-					if (sd->sc.option&OPTION_WEDDING)
-						class_ = JOB_WEDDING;
-					else if (sd->sc.option&OPTION_SUMMER)
-						class_ = JOB_SUMMER;
-					else if (sd->sc.option&OPTION_HANBOK)
-						class_ = JOB_HANBOK;
-					else if (sd->sc.option&OPTION_XMAS)
-						class_ = JOB_XMAS;
-					else if (sd->sc.option&OPTION_RIDING) {
+					if (sd->sc.option&OPTION_RIDING) {
 						switch (class_) { //Adapt class to a Mounted one.
 							case JOB_KNIGHT:
 								class_ = JOB_KNIGHT2;
@@ -6335,6 +6350,17 @@ void status_set_viewdata(struct block_list *bl, int class_)
 					sd->vd.cloth_color = cap_value(sd->status.clothes_color,0,battle_config.max_cloth_color);
 					sd->vd.robe = sd->status.robe;
 					sd->vd.sex = sd->status.sex;
+
+					if (sd->vd.cloth_color) {
+						if(sd->sc.option&OPTION_WEDDING && battle_config.wedding_ignorepalette)
+							sd->vd.cloth_color = 0;
+						if(sd->sc.option&OPTION_XMAS && battle_config.xmas_ignorepalette)
+							sd->vd.cloth_color = 0;
+						if(sd->sc.option&OPTION_SUMMER && battle_config.summer_ignorepalette)
+							sd->vd.cloth_color = 0;
+						if(sd->sc.option&OPTION_HANBOK && battle_config.hanbok_ignorepalette)
+							sd->vd.cloth_color = 0;
+					}
 				} else if (vd)
 					memcpy(&sd->vd, vd, sizeof(struct view_data));
 				else
@@ -6398,14 +6424,6 @@ void status_set_viewdata(struct block_list *bl, int class_)
 			}
 			break;
 	}
-	vd = status_get_viewdata(bl);
-	if (vd && vd->cloth_color && (
-		(vd->class_==JOB_WEDDING && battle_config.wedding_ignorepalette)
-		|| (vd->class_==JOB_XMAS && battle_config.xmas_ignorepalette)
-		|| (vd->class_==JOB_SUMMER && battle_config.summer_ignorepalette)
-		|| (vd->class_==JOB_HANBOK && battle_config.hanbok_ignorepalette)
-	))
-		vd->cloth_color = 0;
 }
 
 /// Returns the status_change data of bl or NULL if it doesn't exist.
@@ -6750,6 +6768,67 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 	}
 
 	return tick;
+}
+
+/* [Ind] Fast-Checking sc-display array */
+void status_display_add(struct map_session_data *sd, enum sc_type type, int dval1, int dval2, int dval3) {
+	struct sc_display_entry *entry;
+	int i;
+
+	for( i = 0; i < sd->sc_display_count; i++ ) {
+		if( sd->sc_display[i]->type == type )
+			break;
+	}
+
+	if( i != sd->sc_display_count ) {
+		sd->sc_display[i]->val1 = dval1;
+		sd->sc_display[i]->val2 = dval2;
+		sd->sc_display[i]->val3 = dval3;
+		return;
+	}
+
+	entry = ers_alloc(pc_sc_display_ers, struct sc_display_entry);
+
+	entry->type = type;
+	entry->val1 = dval1;
+	entry->val2 = dval2;
+	entry->val3 = dval3;
+
+	RECREATE(sd->sc_display, struct sc_display_entry *, ++sd->sc_display_count);
+	sd->sc_display[sd->sc_display_count - 1] = entry;
+}
+
+void status_display_remove(struct map_session_data *sd, enum sc_type type) {
+	int i;
+
+	for( i = 0; i < sd->sc_display_count; i++ ) {
+		if( sd->sc_display[i]->type == type )
+			break;
+	}
+
+	if( i != sd->sc_display_count ) {
+		int cursor;
+
+		ers_free(pc_sc_display_ers, sd->sc_display[i]);
+		sd->sc_display[i] = NULL;
+
+		/* The all-mighty compact-o-matic */
+		for( i = 0, cursor = 0; i < sd->sc_display_count; i++ ) {
+			if( sd->sc_display[i] == NULL )
+				continue;
+
+			if( i != cursor ) {
+				sd->sc_display[cursor] = sd->sc_display[i];
+			}
+
+			cursor++;
+		}
+
+		if( !(sd->sc_display_count = cursor) ) {
+			aFree(sd->sc_display);
+			sd->sc_display = NULL;
+		}
+	}
 }
 
 /*==========================================
@@ -7157,7 +7236,6 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 		 if(type >= SC_COMMON_MIN && type <= SC_COMMON_MAX)
 			 return 0;
 		 switch(type) {
-			case SC_SILENCE:
 			case SC_BLESSING:
 			case SC_DECREASEAGI:
 			case SC_PROVOKE:
@@ -7172,7 +7250,6 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 			case SC_MARSHOFABYSS:
 			case SC_ADORAMUS:
 			case SC_PARALYSIS:
-			case SC_VACUUM_EXTREME:
 			case SC_DEEPSLEEP:
 			case SC_CRYSTALIZE:
 			case SC_PAIN_KILLER:
@@ -7794,15 +7871,7 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 			case SC_HANBOK:
 				if (!vd) return 0;
 				//Store previous values as they could be removed
-				val1 = vd->class_;
-				val2 = vd->weapon;
-				val3 = vd->shield;
-				val4 = vd->cloth_color;
 				unit_stop_attack(bl);
-				clif_changelook(bl,LOOK_WEAPON,0);
-				clif_changelook(bl,LOOK_SHIELD,0);
-				clif_changelook(bl,LOOK_BASE,type==SC_WEDDING?JOB_WEDDING:type==SC_XMAS?JOB_XMAS:type==SC_SUMMER?JOB_SUMMER:JOB_HANBOK);
-				clif_changelook(bl,LOOK_CLOTHES_COLOR,vd->cloth_color);
 				break;
 			case SC_NOCHAT:
 				//[GodLesZ] FIXME: is this correct? a hardcoded interval of 60sec? what about configuration ?_?
@@ -7929,6 +7998,7 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 			case SC_READYTURN:
 			case SC_DODGE:
 			case SC_PUSH_CART:
+			case SC_ALL_RIDING:
 				tick = -1;
 				break;
 
@@ -8289,7 +8359,7 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 						int pos =  (bl->x&0xFFFF)|(bl->y<<16), //Current Coordinates
 						map =  sd->mapindex; //Current Map
 						//1. Place in Jail (val2 -> Jail Map, val3 -> x, val4 -> y
-						pc_setpos(sd,(unsigned short)val2,val3,val4, CLR_TELEPORT);
+						pc_setpos(sd,(unsigned short)val2,val3,val4,CLR_TELEPORT);
 						//2. Set restore point (val3 -> return map, val4 return coords
 						val3 = map;
 						val4 = pos;
@@ -9113,11 +9183,12 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 				case SC_WEDDING:
 				case SC_XMAS:
 				case SC_SUMMER:
+				case SC_HANBOK:
+					if( !vd ) break;
+					clif_changelook(bl,LOOK_BASE,vd->class_);
 					clif_changelook(bl,LOOK_WEAPON,0);
 					clif_changelook(bl,LOOK_SHIELD,0);
-					clif_changelook(bl,LOOK_BASE,type == SC_WEDDING ? JOB_WEDDING : type == SC_XMAS ? JOB_XMAS :
-						type == SC_SUMMER ? JOB_SUMMER : SC_HANBOK);
-					clif_changelook(bl,LOOK_CLOTHES_COLOR,val4);
+					clif_changelook(bl,LOOK_CLOTHES_COLOR,vd->cloth_color);
 					break;
 				case SC_KAAHI:
 					val4 = INVALID_TIMER;
@@ -9136,7 +9207,21 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 					break;
 			}
 
-	//Those that make you stop attacking/walking....
+	/* [Ind] */
+	if (sd && StatusDisplayType[type]) {
+		int dval1 = 0, dval2 = 0, dval3 = 0;
+		switch (type) {
+			case SC_ALL_RIDING:
+				dval1 = 1;
+				break;
+			default: /* All others: just copy val1 */
+				dval1 = val1;
+				break;
+		}
+		status_display_add(sd,type,dval1,dval2,dval3);
+	}
+
+	//Those that make you stop attacking/walking.
 	switch (type) {
 		case SC_FREEZE:
 		case SC_STUN:
@@ -9158,7 +9243,6 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 		case SC_CLOSECONFINE2:
 		case SC_TINDER_BREAKER:
 		case SC_TINDER_BREAKER2:
-		case SC_SPIDERWEB:
 		case SC_ELECTRICSHOCKER:
 		case SC_BITE:
 		case SC_CAMOUFLAGE:
@@ -9176,8 +9260,16 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 			unit_stop_walking(bl, 1);
 			break;
 		case SC_ANKLE:
-			if( battle_config.skill_trap_type || !map_flag_gvg(bl->m) )
-				unit_stop_walking(bl, 1);
+		case SC_SPIDERWEB:
+			{
+				int knockback_immune = sd ? !sd->special_state.no_knockback : !(status->mode&(MD_KNOCKBACK_IMMUNE|MD_BOSS));
+				if( knockback_immune ) {
+					if( !battle_config.skill_trap_type && map_flag_gvg2(bl->m) )
+						break;
+					else
+						unit_stop_walking(bl, 1);
+				}
+			}
 			break;
 		case SC_HIDING:
 		case SC_CLOAKING:
@@ -9207,7 +9299,8 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 				opt_flag = 0;
 			sc->opt1 = OPT1_SLEEP;
 			break;
-		case SC_BURNING:		sc->opt1 = OPT1_BURNING;	break; //Burning need this to be showed correctly. [pakpil]
+		//Burning need this to be showed correctly. [pakpil]
+		case SC_BURNING:		sc->opt1 = OPT1_BURNING;	break;
 		case SC_WHITEIMPRISON:  sc->opt1 = OPT1_IMPRISON;	break;
 		case SC_CRYSTALIZE:		sc->opt1 = OPT1_CRYSTALIZE;	break;
 		//OPT2
@@ -9219,7 +9312,7 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 		case SC_CHAOS:
 			sc->opt2 |= OPT2_SIGNUMCRUCIS;
 			break;
-		
+
 		case SC_BLIND:        sc->opt2 |= OPT2_BLIND;        break;
 		case SC_ANGELUS:      sc->opt2 |= OPT2_ANGELUS;      break;
 		case SC_BLEEDING:     sc->opt2 |= OPT2_BLEEDING;     break;
@@ -9236,7 +9329,7 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 			break;
 		case SC_MAXOVERTHRUST:
 		case SC_OVERTHRUST:
-		case SC_SWOO:	//Why does it shares the same opt as Overthrust? Perhaps we'll never know...
+		case SC_SWOO: //Why does it shares the same opt as Overthrust? Perhaps we'll never know
 			sc->opt3 |= OPT3_OVERTHRUST;
 			opt_flag = 0;
 			break;
@@ -9338,15 +9431,19 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 			break;
 		case SC_WEDDING:
 			sc->option |= OPTION_WEDDING;
+			opt_flag |= 0x4;
 			break;
 		case SC_XMAS:
 			sc->option |= OPTION_XMAS;
+			opt_flag |= 0x4;
 			break;
 		case SC_SUMMER:
 			sc->option |= OPTION_SUMMER;
+			opt_flag |= 0x4;
 			break;
 		case SC_HANBOK:
 			sc->option |= OPTION_HANBOK;
+			opt_flag |= 0x4;
 			break;
 		case SC_ORCISH:
 			sc->option |= OPTION_ORCISH;
@@ -9359,18 +9456,25 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 	}
 
 	//On Aegis, when turning on a status change, first goes the option packet, then the sc packet.
-	if(opt_flag)
+	if(opt_flag) {
 		clif_changeoption(bl);
-
+		if(sd && opt_flag&0x4) {
+			clif_changelook(bl,LOOK_BASE,vd->class_);
+			clif_changelook(bl,LOOK_WEAPON,0);
+			clif_changelook(bl,LOOK_SHIELD,0);
+			clif_changelook(bl,LOOK_CLOTHES_COLOR,vd->cloth_color);
+		}
+	}
 	if(calc_flag&SCB_DYE) { //Reset DYE color
-		if (vd && vd->cloth_color) {
+		if(vd && vd->cloth_color) {
 			val4 = vd->cloth_color;
 			clif_changelook(bl,LOOK_CLOTHES_COLOR,0);
 		}
-		calc_flag&=~SCB_DYE;
+		calc_flag &= ~SCB_DYE;
 	}
 
-	clif_status_change(bl,StatusIconChangeTable[type],1,tick,(val_flag&1)?val1:1,(val_flag&2)?val2:0,(val_flag&4)?val3:0);
+	if(!(flag&4 && StatusDisplayType[type]))
+		clif_status_change(bl,StatusIconChangeTable[type],1,tick,(val_flag&1) ? val1 : 1,(val_flag&2) ? val2 : 0,(val_flag&4) ? val3 : 0);
 
 	/**
 	 * Used as temporary storage for scs with interval ticks, so that the actual duration is sent to the client first.
@@ -9545,6 +9649,7 @@ int status_change_clear(struct block_list* bl, int type)
 				case SC_S_LIFEPOTION:
 				case SC_L_LIFEPOTION:
 				case SC_PUSH_CART:
+				case SC_ALL_RIDING:
 					continue;
 			}
 
@@ -9554,6 +9659,7 @@ int status_change_clear(struct block_list* bl, int type)
 				case SC_WEIGHT90:
 				case SC_NOCHAT:
 				case SC_PUSH_CART:
+				case SC_ALL_RIDING:
 					continue;
 			}
 		}
@@ -9598,10 +9704,10 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 	struct status_change_entry *sce;
 	struct status_data *status;
 	struct view_data *vd;
-	int opt_flag=0, calc_flag;
+	int opt_flag = 0, calc_flag;
 
 	nullpo_ret(bl);
-	
+
 	sc = status_get_sc(bl);
 	status = status_get_status_data(bl);
 
@@ -9634,7 +9740,7 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 					//since these SC are not affected by it, and it lets us know
 					//if we have already delayed this attack or not.
 					sce->val1 = 0;
-					sce->timer = add_timer(gettick()+10, status_change_timer, bl->id, type);
+					sce->timer = add_timer(gettick()+10,status_change_timer,bl->id,type);
 					return 1;
 				}
 		}
@@ -9647,12 +9753,16 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 
 	sc->data[type] = NULL;
 
+	if (sd && StatusDisplayType[type]) {
+		status_display_remove(sd,type);
+	}
+
 	vd = status_get_viewdata(bl);
 	calc_flag = StatusChangeFlagTable[type];
 	switch (type) {
 		case SC_GRANITIC_ARMOR: {
 				int damage = status->max_hp * sce->val3 / 100;
-				if (status->hp < damage) //don't kill
+				if (status->hp < damage) //Don't kill
 					damage = status->hp - 1;
 				status_damage(NULL,bl,damage,0,0,1);
 			}
@@ -9660,29 +9770,6 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 		case SC_PYROCLASTIC:
 			if (bl->type == BL_PC)
 				skill_break_equip(bl,bl,EQP_WEAPON,10000,BCT_SELF);
-			break;
-		case SC_WEDDING:
-		case SC_XMAS:
-		case SC_SUMMER:
-		case SC_HANBOK:
-			if (!vd) break;
-			if (sd) {
-				//Load data from sd->status.* as the stored values could have changed.
-				//Must remove OPTION to prevent class being rechanged.
-				sc->option &= type==SC_WEDDING?~OPTION_WEDDING:type==SC_XMAS?~OPTION_XMAS:type==SC_SUMMER?~OPTION_SUMMER:~OPTION_HANBOK;
-				clif_changeoption(&sd->bl);
-				status_set_viewdata(bl, sd->status.class_);
-			} else {
-				vd->class_ = sce->val1;
-				vd->weapon = sce->val2;
-				vd->shield = sce->val3;
-				vd->cloth_color = sce->val4;
-			}
-			clif_changelook(bl,LOOK_BASE,vd->class_);
-			clif_changelook(bl,LOOK_CLOTHES_COLOR,vd->cloth_color);
-			clif_changelook(bl,LOOK_WEAPON,vd->weapon);
-			clif_changelook(bl,LOOK_SHIELD,vd->shield);
-			if(sd) clif_skillinfoblock(sd);
 			break;
 		case SC_RUN: {
 				struct unit_data *ud = unit_bl2ud(bl);
@@ -9914,7 +10001,7 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 				break;
 		  	//Natural expiration.
 			if(sd && sd->mapindex == sce->val2)
-				pc_setpos(sd,(unsigned short)sce->val3,sce->val4&0xFFFF, sce->val4>>16, CLR_TELEPORT);
+				pc_setpos(sd,(unsigned short)sce->val3,sce->val4&0xFFFF,sce->val4>>16,CLR_TELEPORT);
 			break; //Guess hes not in jail :P
 
 		case SC_CHANGE:
@@ -10064,7 +10151,7 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 		case SC_FULL_THROTTLE:
 			sc_start(bl, bl, SC_REBOUND, 100, sce->val1, skill_get_time2(ALL_FULL_THROTTLE, sce->val1));
 			break;
-		}
+	}
 
 	opt_flag = 1;
 	switch(type) {
@@ -10114,15 +10201,19 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 			break;
 		case SC_WEDDING:
 			sc->option &= ~OPTION_WEDDING;
+			opt_flag |= 0x4;
 			break;
 		case SC_XMAS:
 			sc->option &= ~OPTION_XMAS;
+			opt_flag |= 0x4;
 			break;
 		case SC_SUMMER:
 			sc->option &= ~OPTION_SUMMER;
+			opt_flag |= 0x4;
 			break;
 		case SC_HANBOK:
 			sc->option &= ~OPTION_HANBOK;
+			opt_flag |= 0x4;
 			break;
 		case SC_ORCISH:
 			sc->option &= ~OPTION_ORCISH;
@@ -10239,8 +10330,16 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 
 	if( opt_flag&8 ) //bugreport:681
 		clif_changeoption2(bl);
-	else if(opt_flag)
+	else if(opt_flag) {
 		clif_changeoption(bl);
+		if( sd && opt_flag&0x4 ) {
+			clif_changelook(bl,LOOK_BASE,vd->class_);
+			clif_get_weapon_view(sd, &sd->vd.weapon, &sd->vd.shield);
+			clif_changelook(bl,LOOK_WEAPON,sd->vd.weapon);
+			clif_changelook(bl,LOOK_SHIELD,sd->vd.shield);
+			clif_changelook(bl,LOOK_CLOTHES_COLOR,cap_value(sd->status.clothes_color,0,battle_config.max_cloth_color));
+		}
+	}
 
 	if (calc_flag)
 		status_calc_bl(bl,calc_flag);

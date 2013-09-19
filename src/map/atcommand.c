@@ -668,7 +668,7 @@ ACMD_FUNC(whogm)
 	level = pc_get_group_level(sd);
 
 	iter = mapit_getallusers();
-	for( pl_sd = (TBL_PC*)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC*)mapit_next(iter) ) {
+	for (pl_sd = (TBL_PC*)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC*)mapit_next(iter)) {
 		pl_level = pc_get_group_level(pl_sd);
 		if (!pl_level)
 			continue;
@@ -682,7 +682,7 @@ ACMD_FUNC(whogm)
 				continue;
 		}
 		if (pl_level > level) {
-			if (pl_sd->sc.option & OPTION_INVISIBLE)
+			if (pl_sd->sc.option&OPTION_INVISIBLE)
 				continue;
 			sprintf(atcmd_output, msg_txt(913), pl_sd->status.name); // Name: %s (GM)
 			clif_displaymessage(fd, atcmd_output);
@@ -699,10 +699,10 @@ ACMD_FUNC(whogm)
 			pl_sd->status.base_level,
 			job_name(pl_sd->status.class_), pl_sd->status.job_level);
 		clif_displaymessage(fd, atcmd_output);
-		
+
 		p = party_search(pl_sd->status.party_id);
 		g = pl_sd->guild;
-	
+
 		sprintf(atcmd_output,msg_txt(916),	// Party: '%s' | Guild: '%s'
 			p?p->party.name:msg_txt(917), g?g->name:msg_txt(917));	// None.
 
@@ -8517,16 +8517,16 @@ ACMD_FUNC(charcommands)
 	atcommand_commands_sub(sd, fd, COMMAND_CHARCOMMAND);
 	return 0;
 }
-/* for new mounts */
+/* For new mounts */
 ACMD_FUNC(mount2) {
 
 	clif_displaymessage(sd->fd,msg_txt(1362)); // NOTICE: If you crash with mount your LUA is outdated.
-	if( !(sd->sc.option&OPTION_MOUNTING) ) {
-		clif_displaymessage(sd->fd,msg_txt(1363)); // You have mounted.
-		pc_setoption(sd, sd->sc.option|OPTION_MOUNTING);
+	if( !(sd->sc.data[SC_ALL_RIDING]) ) {
+		clif_displaymessage(sd->fd, msg_txt(1363)); // You have mounted.
+		sc_start(&sd->bl, &sd->bl, SC_ALL_RIDING, 100, 0, -1);
 	} else {
-		clif_displaymessage(sd->fd,msg_txt(1364)); // You have released your mount.
-		pc_setoption(sd, sd->sc.option&~OPTION_MOUNTING);
+		clif_displaymessage(sd->fd, msg_txt(1364)); // You have released your mount.
+		status_change_end(&sd->bl, SC_ALL_RIDING, INVALID_TIMER);
 	}
 	return 0;
 }
@@ -8931,14 +8931,14 @@ ACMD_FUNC(fontcolor)
 	unsigned char k;
 
 	if( !message || !*message ) {
-		channel_display_list(sd,"colors");
+		channel_display_list(sd, "colors");
 		return -1;
 	}
 
-	if( strcmpi(message,"Normal") == 0 ) {
+	if( strcmpi(message, "Normal") == 0 ) {
 		sd->fontcolor = 0;
 	} else {
-		ARR_FIND(0,Channel_Config.colors_count,k,( strcmpi(message,Channel_Config.colors_name[k]) == 0 ));
+		ARR_FIND(0, Channel_Config.colors_count,k, (strcmpi(message, Channel_Config.colors_name[k]) == 0));
 		if( k == Channel_Config.colors_count ) {
 			sprintf(atcmd_output, msg_txt(1411), message); // Unknown color '%s'.
 			clif_displaymessage(fd, atcmd_output);
@@ -8948,6 +8948,57 @@ ACMD_FUNC(fontcolor)
 	}
 	sprintf(atcmd_output, msg_txt(1454), message); // Color set to '%s'.
 	clif_displaymessage(fd, atcmd_output);
+
+	return 0;
+}
+
+ACMD_FUNC(costume) {
+	const char* names[4] = {
+		"Wedding",
+		"Xmas",
+		"Summer",
+		"Hanbok",
+	};
+	const int name2id[4] = { SC_WEDDING, SC_XMAS, SC_SUMMER, SC_HANBOK };
+	unsigned short k = 0;
+
+	if( !message || !*message ) {
+		for( k = 0; k < 4; k++ ) {
+			if( sd->sc.data[name2id[k]] ) {
+				sprintf(atcmd_output, msg_txt(1488), names[k]); // Costume '%s' removed.
+				clif_displaymessage(sd->fd, atcmd_output);
+				status_change_end(&sd->bl, name2id[k], INVALID_TIMER);
+				return 0;
+			}
+		}
+
+		clif_displaymessage(sd->fd, msg_txt(1487)); // Available Costumes
+		for( k = 0; k < 4; k++ ) {
+			sprintf(atcmd_output, msg_txt(1486), names[k]); // -- %s
+			clif_displaymessage(sd->fd, atcmd_output);
+		}
+		return -1;
+	}
+
+	for( k = 0; k < 4; k++ ) {
+		if( sd->sc.data[name2id[k]] ) {
+			sprintf(atcmd_output, msg_txt(1485), names[k]); // You're already with a '%s' costume, type '@costume' to remove it.
+			clif_displaymessage(sd->fd, atcmd_output);
+			return -1;
+		}
+	}
+
+	for( k = 0; k < 4; k++ ) {
+		if( strcmpi(message, names[k]) == 0 )
+			break;
+	}
+	if( k == 4 ) {
+		sprintf(atcmd_output, msg_txt(1484), message); // '%s' is not a known costume
+		clif_displaymessage(sd->fd, atcmd_output);
+		return -1;
+	}
+
+	sc_start(&sd->bl, &sd->bl, name2id[k], 100, 0, -1);
 
 	return 0;
 }
@@ -9229,6 +9280,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(join),
 		ACMD_DEF(channel),
 		ACMD_DEF(fontcolor),
+		ACMD_DEF(costume),
 	};
 	AtCommandInfo* atcommand;
 	int i;

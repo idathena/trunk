@@ -8892,28 +8892,28 @@ BUILDIN_FUNC(killmonsterall)
  *------------------------------------------*/
 BUILDIN_FUNC(clone)
 {
-	TBL_PC *sd, *msd=NULL;
-	int char_id,master_id=0,x,y, mode = 0, flag = 0, m;
+	TBL_PC *sd, *msd = NULL;
+	int char_id,master_id = 0,x,y,mode = 0,flag = 0,m;
 	unsigned int duration = 0;
-	const char *map,*event="";
+	const char *map,*event = "";
 
-	map=script_getstr(st,2);
-	x=script_getnum(st,3);
-	y=script_getnum(st,4);
-	event=script_getstr(st,5);
-	char_id=script_getnum(st,6);
+	map = script_getstr(st,2);
+	x = script_getnum(st,3);
+	y = script_getnum(st,4);
+	event = script_getstr(st,5);
+	char_id = script_getnum(st,6);
 
 	if( script_hasdata(st,7) )
-		master_id=script_getnum(st,7);
+		master_id = script_getnum(st,7);
 
 	if( script_hasdata(st,8) )
-		mode=script_getnum(st,8);
+		mode = script_getnum(st,8);
 
 	if( script_hasdata(st,9) )
-		flag=script_getnum(st,9);
+		flag = script_getnum(st,9);
 	
 	if( script_hasdata(st,10) )
-		duration=script_getnum(st,10);
+		duration = script_getnum(st,10);
 
 	check_event(st, event);
 
@@ -8930,7 +8930,7 @@ BUILDIN_FUNC(clone)
 			master_id = 0;
 	}
 	if (sd) //Return ID of newly crafted clone.
-		script_pushint(st,mob_clone_spawn(sd, m, x, y, event, master_id, mode, flag, 1000*duration));
+		script_pushint(st,mob_clone_spawn(sd,m,x,y,event,master_id,mode,flag,1000 * duration));
 	else //Failed to create clone.
 		script_pushint(st,0);
 
@@ -9339,7 +9339,7 @@ BUILDIN_FUNC(announce)
 		if (fontColor)
 			intif_broadcast2(mes, (int)strlen(mes) + 1, strtol(fontColor, (char **)NULL, 0), fontType, fontSize, fontAlign, fontY);
 		else
-			intif_broadcast(mes, (int)strlen(mes) + 1, flag&(BC_SOURCE_MASK|BC_TARGET_MASK));
+			intif_broadcast(mes, (int)strlen(mes) + 1, flag&BC_COLOR_MASK);
 	}
 	return 0;
 }
@@ -9378,7 +9378,7 @@ BUILDIN_FUNC(mapannounce)
 		return 0;
 
 	map_foreachinmap(buildin_announce_sub, m, BL_PC,
-			mes, strlen(mes) + 1, flag&(BC_SOURCE_MASK|BC_TARGET_MASK), fontColor, fontType, fontSize, fontAlign, fontY);
+			mes, strlen(mes) + 1, flag&BC_COLOR_MASK, fontColor, fontType, fontSize, fontAlign, fontY);
 	return 0;
 }
 /*==========================================
@@ -9403,7 +9403,7 @@ BUILDIN_FUNC(areaannounce)
 		return 0;
 
 	map_foreachinarea(buildin_announce_sub, m, x0, y0, x1, y1, BL_PC,
-		mes, strlen(mes) + 1, flag&(BC_SOURCE_MASK|BC_TARGET_MASK), fontColor, fontType, fontSize, fontAlign, fontY);
+		mes, strlen(mes) + 1, flag&BC_COLOR_MASK, fontColor, fontType, fontSize, fontAlign, fontY);
 	return 0;
 }
 
@@ -16584,7 +16584,7 @@ BUILDIN_FUNC(instance_announce) {
 
 	for( i = 0; i < instance_data[instance_id].cnt_map; i++ )
 		map_foreachinmap(buildin_announce_sub, instance_data[instance_id].map[i].m, BL_PC,
-						 mes, strlen(mes) + 1, flag&(BC_SOURCE_MASK|BC_TARGET_MASK), fontColor, fontType, fontSize, fontAlign, fontY);
+						 mes, strlen(mes) + 1, flag&BC_COLOR_MASK, fontColor, fontType, fontSize, fontAlign, fontY);
 
 	return true;
 }
@@ -16942,7 +16942,7 @@ BUILDIN_FUNC(ismounting) {
 	TBL_PC* sd;
 	if( (sd = script_rid2sd(st)) == NULL )
 		return 0;
-	if( sd->sc.option&OPTION_MOUNTING )
+	if( sd->sc.data[SC_ALL_RIDING] )
 		script_pushint(st,1);
 	else
 		script_pushint(st,0);
@@ -16960,13 +16960,13 @@ BUILDIN_FUNC(setmounting) {
 	if( (sd = script_rid2sd(st)) == NULL )
 		return 0;
 	if( sd->sc.option&(OPTION_WUGRIDER|OPTION_RIDING|OPTION_DRAGON|OPTION_MADOGEAR) )
-		script_pushint(st,0);//can't mount with one of these
+		script_pushint(st,0); //Can't mount with one of these
 	else {
-		if( sd->sc.option&OPTION_MOUNTING )
-			pc_setoption(sd, sd->sc.option&~OPTION_MOUNTING);//release mount
+		if( sd->sc.data[SC_ALL_RIDING] )
+			status_change_end(&sd->bl,SC_ALL_RIDING,INVALID_TIMER);
 		else
-			pc_setoption(sd, sd->sc.option|OPTION_MOUNTING);//mount
-		script_pushint(st,1);//in both cases, return 1.
+			sc_start(&sd->bl,&sd->bl,SC_ALL_RIDING,100,0,-1);
+		script_pushint(st,1); //In both cases, return 1.
 	}
 	return 0;
 }

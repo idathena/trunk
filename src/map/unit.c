@@ -2367,7 +2367,6 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 				sd->reg_num = 0;
 			}
 			if( sd->regstr ) {
-				int i;
 				for( i = 0; i < sd->regstr_num; ++i )
 					if( sd->regstr[i].data )
 						aFree(sd->regstr[i].data);
@@ -2384,6 +2383,15 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 				aFree(sd->combos.bonus);
 				aFree(sd->combos.id);
 				sd->combos.count = 0;
+			}
+			/* [Ind] */
+			if( sd->sc_display_count ) {
+				for( i = 0; i < sd->sc_display_count; i++ ) {
+					ers_free(pc_sc_display_ers, sd->sc_display[i]);
+				}
+				sd->sc_display_count = 0;
+				aFree(sd->sc_display);
+				sd->sc_display = NULL;
 			}
 			break;
 		}

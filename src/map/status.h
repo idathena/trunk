@@ -16,9 +16,9 @@ struct status_change;
  * Changing this limit requires edits to refine_db.txt
  **/
 #ifdef RENEWAL
-#	define MAX_REFINE 20
+	#define MAX_REFINE 20
 #else
-#	define MAX_REFINE 10
+	#define MAX_REFINE 10
 #endif
 
 enum refine_type {
@@ -674,6 +674,8 @@ typedef enum sc_type {
 	//Vellum Weapon reductions
 	SC_DEFSET,
 	SC_MDEFSET,
+
+	SC_ALL_RIDING,
 
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds.
 } sc_type;
@@ -1533,7 +1535,6 @@ enum {
 	OPTION_DRAGON4		= 0x02000000,
 	OPTION_DRAGON5		= 0x04000000,
 	OPTION_HANBOK		= 0x08000000,
-	OPTION_MOUNTING		= 0x10000000,
 
 #ifndef NEW_CARTS
 	OPTION_CART1	= 0x00000008,
@@ -1634,6 +1635,14 @@ struct weapon_atk {
 #endif
 };
 
+sc_type SkillStatusChangeTable[MAX_SKILL];  //skill  -> status
+int StatusIconChangeTable[SC_MAX];          //status -> "icon" (icon is a bit of a misnomer, since there exist values with no icon associated)
+unsigned int StatusChangeFlagTable[SC_MAX]; //status -> flags
+int StatusSkillChangeTable[SC_MAX];         //status -> skill
+int StatusRelevantBLTypes[SI_MAX];          //"icon" -> enum bl_type (for clif->status_change to identify for which bl types to send packets)
+static unsigned int StatusChangeStateTable[SC_MAX]; //status -> flags
+bool StatusDisplayType[SC_MAX];
+
 //For holding basic status (which can be modified by status changes)
 struct status_data {
 	unsigned int
@@ -1705,12 +1714,17 @@ struct regen_data {
 	struct {
 		unsigned walk:1; //Can you regen even when walking?
 		unsigned gc:1;	//Tags when you should have double regen due to GVG castle
-		unsigned overweight :2; //overweight state (1: 50%, 2: 90%)
-		unsigned block :2; //Block regen flag (1: Hp, 2: Sp)
+		unsigned overweight:2; //overweight state (1: 50%, 2: 90%)
+		unsigned block:2; //Block regen flag (1: Hp, 2: Sp)
 	} state;
 
 	//skill-regen, sitting-skill-regen (since not all chars with regen need it)
 	struct regen_data_sub *sregen, *ssregen;
+};
+
+struct sc_display_entry {
+	enum sc_type type;
+	int val1,val2,val3;
 };
 
 struct status_change_entry {

@@ -1295,18 +1295,13 @@ int clif_spawn(struct block_list *bl)
 					clif_specialeffect(bl,421,AREA);
 				if (sd->bg_id && map[sd->bl.m].flag.battleground)
 					clif_sendbgemblem_area(sd);
-				if (sd->sc.option&OPTION_MOUNTING) {
-					//New Mounts are not complaint to the original method, so we gotta tell this guy that he is mounting.
-					clif_status_load_notick(&sd->bl,SI_ALL_RIDING,2,1,0,0);
+				for (i = 0; i < sd->sc_display_count; i++) {
+					clif_status_change2(&sd->bl,sd->bl.id,AREA,StatusIconChangeTable[sd->sc_display[i]->type],sd->sc_display[i]->val1,sd->sc_display[i]->val2,sd->sc_display[i]->val3);
 				}
 				for (i = 1; i < 5; i++) {
 					if (sd->talisman[i] > 0)
 						clif_talisman(sd, i);
 				}
-#ifdef NEW_CARTS
-				if (sd->sc.data[SC_PUSH_CART])
-					clif_status_load_notick(&sd->bl,SI_ON_PUSH_CART,2,sd->sc.data[SC_PUSH_CART]->val1,0,0);
-#endif
 				if (sd->status.robe)
 					clif_refreshlook(bl,bl->id,LOOK_ROBE,sd->status.robe,AREA);
 			}
@@ -2971,16 +2966,24 @@ void clif_changelook(struct block_list *bl,int type,int val)
 				vd->shield = val;
 			break;
 		case LOOK_BASE:
-			vd->class_ = val;
-			if (vd->class_ == JOB_WEDDING || vd->class_ == JOB_XMAS || vd->class_ == JOB_SUMMER || vd->class_ == JOB_HANBOK)
+			if (!sd) break;
+
+			if (sd->sc.option&(OPTION_WEDDING|OPTION_XMAS|OPTION_SUMMER|OPTION_HANBOK))
 				vd->weapon = vd->shield = 0;
-			if (vd->cloth_color && (
-				(vd->class_ == JOB_WEDDING && battle_config.wedding_ignorepalette) ||
-				(vd->class_ == JOB_XMAS && battle_config.xmas_ignorepalette) ||
-				(vd->class_ == JOB_SUMMER && battle_config.summer_ignorepalette) ||
-				(vd->class_ == JOB_HANBOK && battle_config.hanbok_ignorepalette)
-			))
-				clif_changelook(bl,LOOK_CLOTHES_COLOR,0);
+
+			if (!vd->cloth_color)
+				break;
+
+			if (sd) {
+				if (sd->sc.option&OPTION_WEDDING && battle_config.wedding_ignorepalette)
+					vd->cloth_color = 0;
+				if (sd->sc.option&OPTION_XMAS && battle_config.xmas_ignorepalette)
+					vd->cloth_color = 0;
+				if (sd->sc.option&OPTION_SUMMER && battle_config.summer_ignorepalette)
+					vd->cloth_color = 0;
+				if (sd->sc.option&OPTION_HANBOK && battle_config.hanbok_ignorepalette)
+					vd->cloth_color = 0;
+			}
 			break;
 		case LOOK_HAIR:
 			vd->hair_style = val;
@@ -2998,13 +3001,16 @@ void clif_changelook(struct block_list *bl,int type,int val)
 			vd->hair_color = val;
 			break;
 		case LOOK_CLOTHES_COLOR:
-			if (val && (
-				(vd->class_ == JOB_WEDDING && battle_config.wedding_ignorepalette) ||
-				(vd->class_ == JOB_XMAS && battle_config.xmas_ignorepalette) ||
-				(vd->class_ == JOB_SUMMER && battle_config.summer_ignorepalette) ||
-				(vd->class_ == JOB_HANBOK && battle_config.hanbok_ignorepalette)
-			))
-				val = 0;
+			if (val && sd) {
+				if (sd->sc.option&OPTION_WEDDING && battle_config.wedding_ignorepalette)
+					val = 0;
+				if (sd->sc.option&OPTION_XMAS && battle_config.xmas_ignorepalette)
+					val = 0;
+				if (sd->sc.option&OPTION_SUMMER && battle_config.summer_ignorepalette)
+					val = 0;
+				if (sd->sc.option&OPTION_HANBOK && battle_config.hanbok_ignorepalette)
+					val = 0;
+			}
 			vd->cloth_color = val;
 			break;
 		case LOOK_SHOES:
@@ -4034,27 +4040,22 @@ static void clif_getareachar_pc(struct map_session_data* sd,struct map_session_d
 
 	if( dstsd->chatID ) {
 		struct chat_data *cd = NULL;
-		if( (cd = (struct chat_data*)map_id2bl(dstsd->chatID)) && cd->usersd[0]==dstsd)
+		if( (cd = (struct chat_data*)map_id2bl(dstsd->chatID)) && cd->usersd[0] == dstsd)
 			clif_dispchat(cd,sd->fd);
 	} else if( dstsd->state.vending )
 		clif_showvendingboard(&dstsd->bl,dstsd->message,sd->fd);
 	else if( dstsd->state.buyingstore )
 		clif_buyingstore_entry_single(sd, dstsd);
 
-	if(dstsd->spiritball > 0)
+	if( dstsd->spiritball > 0 )
 		clif_spiritball_single(sd->fd, dstsd);
-	for(i = 1; i < 5; i++){
+	for( i = 1; i < 5; i++ ) {
 		if( dstsd->talisman[i] > 0 )
 			clif_talisman_single(sd->fd, dstsd, i);
 	}
-	if( dstsd->sc.option&OPTION_MOUNTING ) {
-		//New Mounts are not complaint to the original method, so we gotta tell this guy that I'm mounting.
-		clif_status_load_single(sd->fd,dstsd->bl.id,SI_ALL_RIDING,2,1,0,0);
+	for( i = 0; i < dstsd->sc_display_count; i++ ) {
+		clif_status_change2(&sd->bl,dstsd->bl.id,SELF,StatusIconChangeTable[dstsd->sc_display[i]->type],dstsd->sc_display[i]->val1,dstsd->sc_display[i]->val2,dstsd->sc_display[i]->val3);
 	}
-#ifdef NEW_CARTS
-	if( dstsd->sc.data[SC_PUSH_CART] )
-		clif_status_load_single(sd->fd, dstsd->bl.id, SI_ON_PUSH_CART, 2, dstsd->sc.data[SC_PUSH_CART]->val1, 0, 0);
-#endif
 	if( (sd->status.party_id && dstsd->status.party_id == sd->status.party_id) || //Party-mate, or hpdisp setting.
 		(sd->bg_id && sd->bg_id == dstsd->bg_id) || //BattleGround
 		pc_has_permission(sd, PC_PERM_VIEW_HPMETER)
@@ -5424,6 +5425,24 @@ void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val
 }
 
 
+void clif_status_change2(struct block_list *bl, int tid, enum send_target target, int type, int val1, int val2, int val3) {
+	unsigned char buf[32];
+
+	nullpo_retv(bl);
+
+	WBUFW(buf,0) = 0x043f;
+	WBUFW(buf,2) = type;
+	WBUFL(buf,4) = tid;
+	WBUFB(buf,8) = 1;
+	WBUFL(buf,9) = 9999;
+	WBUFL(buf,13) = val1;
+	WBUFL(buf,17) = val2;
+	WBUFL(buf,21) = val3;
+
+	clif_send(buf,packet_len(0x043f),bl,target);
+}
+
+
 /// Send message (modified by [Yor]) (ZC_NOTIFY_PLAYERCHAT).
 /// 008e <packet len>.W <message>.?B
 void clif_displaymessage(const int fd, const char* mes)
@@ -6049,42 +6068,57 @@ void clif_cart_additem(struct map_session_data *sd,int n,int amount,int fail)
 
 	nullpo_retv(sd);
 
-	fd=sd->fd;
-	if(n<0 || n>=MAX_CART || sd->status.cart[n].nameid<=0)
+	fd = sd->fd;
+	if(n < 0 || n >= MAX_CART || sd->status.cart[n].nameid <= 0)
 		return;
 
 #if PACKETVER < 5
 	WFIFOHEAD(fd,packet_len(0x124));
 	buf=WFIFOP(fd,0);
-	WBUFW(buf,0)=0x124;
-	WBUFW(buf,2)=n+2;
-	WBUFL(buf,4)=amount;
+	WBUFW(buf,0) = 0x124;
+	WBUFW(buf,2) = n + 2;
+	WBUFL(buf,4) = amount;
 	if((view = itemdb_viewid(sd->status.cart[n].nameid)) > 0)
-		WBUFW(buf,8)=view;
+		WBUFW(buf,8) = view;
 	else
-		WBUFW(buf,8)=sd->status.cart[n].nameid;
-	WBUFB(buf,10)=sd->status.cart[n].identify;
-	WBUFB(buf,11)=sd->status.cart[n].attribute;
-	WBUFB(buf,12)=sd->status.cart[n].refine;
-	clif_addcards(WBUFP(buf,13), &sd->status.cart[n]);
+		WBUFW(buf,8) = sd->status.cart[n].nameid;
+	WBUFB(buf,10) = sd->status.cart[n].identify;
+	WBUFB(buf,11) = sd->status.cart[n].attribute;
+	WBUFB(buf,12) = sd->status.cart[n].refine;
+	clif_addcards(WBUFP(buf,13),&sd->status.cart[n]);
 	WFIFOSET(fd,packet_len(0x124));
 #else
 	WFIFOHEAD(fd,packet_len(0x1c5));
-	buf=WFIFOP(fd,0);
-	WBUFW(buf,0)=0x1c5;
-	WBUFW(buf,2)=n+2;
-	WBUFL(buf,4)=amount;
+	buf = WFIFOP(fd,0);
+	WBUFW(buf,0) = 0x1c5;
+	WBUFW(buf,2) = n + 2;
+	WBUFL(buf,4) = amount;
 	if((view = itemdb_viewid(sd->status.cart[n].nameid)) > 0)
-		WBUFW(buf,8)=view;
+		WBUFW(buf,8) = view;
 	else
-		WBUFW(buf,8)=sd->status.cart[n].nameid;
-	WBUFB(buf,10)=itemdb_type(sd->status.cart[n].nameid);
-	WBUFB(buf,11)=sd->status.cart[n].identify;
-	WBUFB(buf,12)=sd->status.cart[n].attribute;
-	WBUFB(buf,13)=sd->status.cart[n].refine;
-	clif_addcards(WBUFP(buf,14), &sd->status.cart[n]);
+		WBUFW(buf,8) = sd->status.cart[n].nameid;
+	WBUFB(buf,10) = itemdb_type(sd->status.cart[n].nameid);
+	WBUFB(buf,11) = sd->status.cart[n].identify;
+	WBUFB(buf,12) = sd->status.cart[n].attribute;
+	WBUFB(buf,13) = sd->status.cart[n].refine;
+	clif_addcards(WBUFP(buf,14),&sd->status.cart[n]);
 	WFIFOSET(fd,packet_len(0x1c5));
 #endif
+}
+
+
+// [Ind] - Data Thanks to Yommy
+void clif_cart_additem_ack(struct map_session_data *sd, int flag)
+{
+	int fd;
+	unsigned char *buf;
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	buf = WFIFOP(fd,0);
+	WBUFW(buf,0) = 0x12c;
+	WBUFL(buf,2) = flag;
+	clif_send(buf,packet_len(0x12c),&sd->bl,SELF);
 }
 
 
@@ -6096,12 +6130,12 @@ void clif_cart_delitem(struct map_session_data *sd,int n,int amount)
 
 	nullpo_retv(sd);
 
-	fd=sd->fd;
+	fd = sd->fd;
 
 	WFIFOHEAD(fd,packet_len(0x125));
-	WFIFOW(fd,0)=0x125;
-	WFIFOW(fd,2)=n+2;
-	WFIFOL(fd,4)=amount;
+	WFIFOW(fd,0) = 0x125;
+	WFIFOW(fd,2) = n + 2;
+	WFIFOL(fd,4) = amount;
 	WFIFOSET(fd,packet_len(0x125));
 }
 
@@ -10622,12 +10656,15 @@ void clif_parse_StopAttack(int fd,struct map_session_data *sd)
 void clif_parse_PutItemToCart(int fd,struct map_session_data *sd)
 {
 	struct s_packet_db* info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
+	short flag = 0;
 	if (pc_istrading(sd))
 		return;
 	if (!pc_iscarton(sd))
 		return;
-	pc_putitemtocart(sd,RFIFOW(fd,info->pos[0])-2,
-		RFIFOL(fd,info->pos[1]));
+	if ((flag = pc_putitemtocart(sd,RFIFOW(fd,info->pos[0]) - 2,RFIFOL(fd,info->pos[1])))) {
+		clif_dropitem(sd,RFIFOW(fd,info->pos[0]) - 2,0);
+		clif_cart_additem_ack(sd,(flag == 1) ? ADDITEM_TO_CART_FAIL_WEIGHT : ADDITEM_TO_CART_FAIL_COUNT);
+	}
 }
 
 
@@ -16335,42 +16372,6 @@ int clif_skill_itemlistwindow( struct map_session_data *sd, uint16 skill_id, uin
 	return 1;
 }
 
-
-/**
- * Sends a new status without a tick (currently used by the new mounts)
- **/
-int clif_status_load_notick(struct block_list *bl,int type,int flag,int val1, int val2, int val3) {
-	unsigned char buf[32];
-
-	nullpo_ret(bl);
-
-	WBUFW(buf,0)  = 0x043f;
-	WBUFW(buf,2)  = type;
-	WBUFL(buf,4)  = bl->id;
-	WBUFB(buf,8)  = flag;
-	WBUFL(buf,9)  = 0;
-	WBUFL(buf,13) = val1;
-	WBUFL(buf,17) = val2;
-	WBUFL(buf,21) = val3;
-
-	clif_send(buf,packet_len(0x043f),bl,AREA);
-	return 0;
-}
-
-//Notifies FD of ID's type
-int clif_status_load_single(int fd, int id,int type,int flag,int val1, int val2, int val3) {
-	WFIFOHEAD(fd,packet_len(0x043f));
-	WFIFOW(fd,0)  = 0x043f;
-	WFIFOW(fd,2)  = type;
-	WFIFOL(fd,4)  = id;
-	WFIFOB(fd,8)  = flag;
-	WFIFOL(fd,9)  = 0;
-	WFIFOL(fd,13) = val1;
-	WFIFOL(fd,17) = val2;
-	WFIFOL(fd,21) = val3;
-	WFIFOSET(fd,packet_len(0x043f));
-	return 0;
-}
 
 // msgstringtable.txt
 // 0x291 <line>.W

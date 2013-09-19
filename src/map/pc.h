@@ -5,6 +5,7 @@
 #define _PC_H_
 
 #include "../common/mmo.h" // JOB_*, MAX_FAME_LIST, struct fame_list, struct mmo_charstatus
+#include "../common/ers.h"
 #include "../common/timer.h" // INVALID_TIMER
 #include "atcommand.h" // AtCommandType
 #include "battle.h" // battle_config
@@ -383,13 +384,13 @@ struct map_session_data {
 	int critical_rate,hit_rate,flee_rate,flee2_rate,def_rate,def2_rate,mdef_rate,mdef2_rate;
 
 	int itemid;
-	short itemindex;	//Used item's index in sd->inventory [Skotlex]
+	short itemindex; //Used item's index in sd->inventory [Skotlex]
 
-	short catch_target_class; // pet catching, stores a pet class to catch (short now) [zzo]
+	short catch_target_class; //Pet catching, stores a pet class to catch (short now) [zzo]
 
 	short spiritball, spiritball_old;
 	int spirit_timer[MAX_SPIRITBALL];
-	short talisman[ELE_POISON+1]; // There are actually 5 talisman Fire, Ice, Wind, Earth & Poison maybe because its color violet.
+	short talisman[ELE_POISON+1]; //There are actually 5 talisman Fire, Ice, Wind, Earth & Poison maybe because its color violet.
 	int talisman_timer[ELE_POISON+1][10];
 
 	unsigned char potion_success_counter; //Potion successes in row counter
@@ -411,17 +412,17 @@ struct map_session_data {
 		int zeny, weight;
 	} deal;
 
-	bool party_creating; // whether the char is requesting party creation
-	bool party_joining; // whether the char is accepting party invitation
-	int party_invite, party_invite_account; // for handling party invitation (holds party id and account id)
-	int adopt_invite; // Adoption
+	bool party_creating; //Whether the char is requesting party creation
+	bool party_joining; //Whether the char is accepting party invitation
+	int party_invite, party_invite_account; //For handling party invitation (holds party id and account id)
+	int adopt_invite; //Adoption
 
-	struct guild *guild; // [Ind] speed everything up
+	struct guild *guild; //[Ind] speed everything up
 	int guild_invite,guild_invite_account;
 	int guild_emblem_id,guild_alliance,guild_alliance_account;
-	short guild_x,guild_y; // For guildmate position display. [Skotlex] should be short [zzo]
-	int guildspy; // [Syrus22]
-	int partyspy; // [Syrus22]
+	short guild_x,guild_y; //For guildmate position display. [Skotlex] should be short [zzo]
+	int guildspy; //[Syrus22]
+	int partyspy; //[Syrus22]
 
 	int vended_id;
 	int vender_id;
@@ -429,20 +430,20 @@ struct map_session_data {
 	char message[MESSAGE_SIZE];
 	struct s_vending vending[MAX_VENDING];
 
-	unsigned int buyer_id;  // uid of open buying store
+	unsigned int buyer_id;  //uid of open buying store
 	struct s_buyingstore buyingstore;
 
 	struct s_search_store_info searchstore;
 
 	struct pet_data *pd;
-	struct homun_data *hd;	// [blackhole89]
+	struct homun_data *hd; //[blackhole89]
 	struct mercenary_data *md;
 	struct elemental_data *ed;
 
 	struct {
 		int  m; //-1 - none, other: map index corresponding to map name.
-		unsigned short index; //map index
-	} feel_map[3];// 0 - Sun; 1 - Moon; 2 - Stars
+		unsigned short index; //Map index
+	} feel_map[3]; // 0 - Sun; 1 - Moon; 2 - Stars
 	short hate_mob[3];
 
 	int pvp_timer;
@@ -452,14 +453,14 @@ struct map_session_data {
 
 	char eventqueue[MAX_EVENTQUEUE][EVENT_NAME_LENGTH];
 	int eventtimer[MAX_EVENTTIMER];
-	unsigned short eventcount; // [celest]
+	unsigned short eventcount; //[celest]
 
-	unsigned char change_level_2nd; // job level when changing from 1st to 2nd class [jobchange_level in global_reg_value]
-	unsigned char change_level_3rd; // job level when changing from 2nd to 3rd class [jobchange_level_3rd in global_reg_value]
+	unsigned char change_level_2nd; //Job level when changing from 1st to 2nd class [jobchange_level in global_reg_value]
+	unsigned char change_level_3rd; //Job level when changing from 2nd to 3rd class [jobchange_level_3rd in global_reg_value]
 
-	char fakename[NAME_LENGTH]; // fake names [Valaris]
+	char fakename[NAME_LENGTH]; //Fake names [Valaris]
 
-	int duel_group; // duel vars [LuzZza]
+	int duel_group; //Duel vars [LuzZza]
 	int duel_invite;
 
 	int killerrid, killedrid;
@@ -467,17 +468,17 @@ struct map_session_data {
 	int cashPoints, kafraPoints;
 	int rental_timer;
 
-	// Auction System [Zephyrus]
+	//Auction System [Zephyrus]
 	struct {
 		int index, amount;
 	} auction;
 
-	// Mail System [Zephyrus]
+	//Mail System [Zephyrus]
 	struct {
 		short nameid;
 		int index, amount, zeny;
 		struct mail_data inbox;
-		bool changed; // if true, should sync with charserver on next mailbox request
+		bool changed; //If true, should sync with charserver on next mailbox request
 	} mail;
 
 	//Quest log system [Kevin] [Inkfish]
@@ -487,7 +488,7 @@ struct map_session_data {
 	struct quest quest_log[MAX_QUEST_DB];
 	bool save_quest;
 
-	// temporary debug [flaviojs]
+	//Temporary debug [flaviojs]
 	const char* debug_file;
 	int debug_line;
 	const char* debug_func;
@@ -535,9 +536,13 @@ struct map_session_data {
 	unsigned char fontcolor;
 	unsigned int channel_tick;
 
+	/* [Ind] */
+	struct sc_display_entry **sc_display;
+	unsigned char sc_display_count;
+
 	unsigned char delayed_damage; //[Ind]
 
-	// Temporary debugging of bug #3504
+	//Temporary debugging of bug #3504
 	const char* delunit_prevfile;
 	int delunit_prevline;
 
@@ -545,6 +550,8 @@ struct map_session_data {
 		int id;
 	} dmglog[DAMAGELOG_SIZE_PC];
 };
+
+struct eri *pc_sc_display_ers;
 
 enum weapon_type {
 	W_FIST,	//Bare hands

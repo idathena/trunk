@@ -443,8 +443,8 @@ void pc_inventory_rentals(struct map_session_data *sd)
 
 		if( sd->status.inventory[i].expire_time <= time(NULL) ) {
 			if( sd->status.inventory[i].nameid == ITEMID_REINS_OF_MOUNT
-					&& sd->sc.option&OPTION_MOUNTING ) {
-				pc_setoption(sd, sd->sc.option&~OPTION_MOUNTING);
+					&& sd->sc.data[SC_ALL_RIDING] ) {
+				status_change_end(&sd->bl, SC_ALL_RIDING, INVALID_TIMER);
 			}
 			clif_rental_expired(sd->fd, i, sd->status.inventory[i].nameid);
 			pc_delitem(sd, i, sd->status.inventory[i].amount, 0, 0, LOG_TYPE_OTHER);
@@ -512,9 +512,9 @@ int pc_makesavestatus(struct map_session_data *sd)
 	//Only copy the Cart/Peco/Falcon options, the rest are handled via
 	//status change load/saving. [Skotlex]
 #ifdef NEW_CARTS
-	sd->status.option = sd->sc.option&(OPTION_INVISIBLE|OPTION_FALCON|OPTION_RIDING|OPTION_DRAGON|OPTION_WUG|OPTION_WUGRIDER|OPTION_MADOGEAR|OPTION_MOUNTING);
+	sd->status.option = sd->sc.option&(OPTION_INVISIBLE|OPTION_FALCON|OPTION_RIDING|OPTION_DRAGON|OPTION_WUG|OPTION_WUGRIDER|OPTION_MADOGEAR);
 #else
-	sd->status.option = sd->sc.option&(OPTION_INVISIBLE|OPTION_CART|OPTION_FALCON|OPTION_RIDING|OPTION_DRAGON|OPTION_WUG|OPTION_WUGRIDER|OPTION_MADOGEAR|OPTION_MOUNTING);
+	sd->status.option = sd->sc.option&(OPTION_INVISIBLE|OPTION_CART|OPTION_FALCON|OPTION_RIDING|OPTION_DRAGON|OPTION_WUG|OPTION_WUGRIDER|OPTION_MADOGEAR);
 #endif
 	if (sd->sc.data[SC_JAILED]) { //When Jailed, do not move last point.
 		if(pc_isdead(sd)){
@@ -1138,6 +1138,10 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 			pc_delitem(sd,idxlist[i],sd->status.inventory[idxlist[i]].amount,0,1,LOG_TYPE_OTHER);
 	}
 #endif
+
+	/* [Ind] */
+	sd->sc_display = NULL;
+	sd->sc_display_count = 0;
 
 	//Request all registries (auth is considered completed whence they arrive)
 	intif_request_registry(sd,7);
@@ -4267,7 +4271,7 @@ int pc_useitem(struct map_session_data *sd,int n)
 
 	/* Items with delayed consume are not meant to work while in mounts except reins of mount(12622) */
 	if( id->flag.delay_consume ) {
-		if( nameid != ITEMID_REINS_OF_MOUNT && sd->sc.option&OPTION_MOUNTING ) 
+		if( nameid != ITEMID_REINS_OF_MOUNT && sd->sc.data[SC_ALL_RIDING] )
 			return 0;
 		else if( pc_issit(sd) )
 			return 0;
@@ -4375,15 +4379,15 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 	nullpo_retr(1, sd);
 	nullpo_retr(1, item_data);
 
-	if(item_data->nameid <= 0 || amount <= 0)
+	if( item_data->nameid <= 0 || amount <= 0 )
 		return 1;
 	data = itemdb_search(item_data->nameid);
 
-	if( data->stack.cart && amount > data->stack.amount ) { // item stack limitation
+	if( data->stack.cart && amount > data->stack.amount ) { //Item stack limitation
 		return 1;
 	}
 
-	if( !itemdb_cancartstore(item_data, pc_get_group_level(sd)) || (item_data->bound > 1 && !pc_can_give_bounded_items(sd)) ) { // Check item trade restrictions [Skotlex]
+	if( !itemdb_cancartstore(item_data, pc_get_group_level(sd)) || (item_data->bound > 1 && !pc_can_give_bounded_items(sd)) ) { //Check item trade restrictions [Skotlex]
 		clif_displaymessage(sd->fd, msg_txt(264));
 		return 1;
 	}
@@ -4399,16 +4403,16 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 			sd->status.cart[i].card[2] == item_data->card[2] && sd->status.cart[i].card[3] == item_data->card[3] );
 	};
 
-	if( i < MAX_CART ) { // item already in cart, stack it
+	if( i < MAX_CART ) { //Item already in cart, stack it
 		if( amount > MAX_AMOUNT - sd->status.cart[i].amount || ( data->stack.cart && amount > data->stack.amount - sd->status.cart[i].amount ) )
-			return 1; // no room
+			return 2; //No slot
 
 		sd->status.cart[i].amount+=amount;
 		clif_cart_additem(sd,i,amount,0);
-	} else { // item not stackable or not present, add it
+	} else { //Item not stackable or not present, add it
 		ARR_FIND( 0, MAX_CART, i, sd->status.cart[i].nameid == 0 );
 		if( i == MAX_CART )
-			return 1; // no room
+			return 2; //No slot
 
 		memcpy(&sd->status.cart[i],item_data,sizeof(sd->status.cart[0]));
 		sd->status.cart[i].amount=amount;
@@ -4417,7 +4421,7 @@ int pc_cart_additem(struct map_session_data *sd,struct item *item_data,int amoun
 	}
 	sd->status.cart[i].favorite = 0;/* clear */
 	log_pick_pc(sd, log_type, amount, &sd->status.cart[i]);
-	
+
 	sd->cart_weight += w;
 	clif_updatestatus(sd,SP_CARTINFO);
 
@@ -4463,21 +4467,22 @@ int pc_cart_delitem(struct map_session_data *sd,int n,int amount,int type,e_log_
 int pc_putitemtocart(struct map_session_data *sd,int idx,int amount)
 {
 	struct item *item_data;
+	short flag;
 
 	nullpo_ret(sd);
 
-	if (idx < 0 || idx >= MAX_INVENTORY) //Invalid index check [Skotlex]
+	if( idx < 0 || idx >= MAX_INVENTORY ) //Invalid index check [Skotlex]
 		return 1;
-	
+
 	item_data = &sd->status.inventory[idx];
 
 	if( item_data->nameid == 0 || amount < 1 || item_data->amount < amount || sd->state.vending )
 		return 1;
-		
-	if( pc_cart_additem(sd,item_data,amount,LOG_TYPE_NONE) == 0 )
+
+	if( (flag = pc_cart_additem(sd,item_data,amount,LOG_TYPE_NONE)) == 0 )
 		return pc_delitem(sd,idx,amount,0,5,LOG_TYPE_NONE);
 
-	return 1;
+	return flag;
 }
 
 /*==========================================
@@ -6319,8 +6324,6 @@ int pc_resetskill(struct map_session_data* sd, int flag)
 			i &= ~OPTION_WUGRIDER;
 		if( i&OPTION_MADOGEAR && ( sd->class_&MAPID_THIRDMASK ) == MAPID_MECHANIC )
 			i &= ~OPTION_MADOGEAR;
-		if( i&OPTION_MOUNTING )
-			i &= ~OPTION_MOUNTING;
 #ifndef NEW_CARTS
 		if( i&OPTION_CART && pc_checkskill(sd, MC_PUSHCART) )
 			i &= ~OPTION_CART;
@@ -7331,7 +7334,7 @@ static int jobchange_killclone(struct block_list *bl, va_list ap)
  *------------------------------------------*/
 int pc_jobchange(struct map_session_data *sd,int job, int upper)
 {
-	int i, fame_flag=0;
+	int i, fame_flag = 0;
 	int b_class;
 
 	nullpo_ret(sd);
@@ -7356,83 +7359,83 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 	job = pc_mapid2jobid(b_class, sd->status.sex);
 	if (job == -1)
 		return 1;
-	
+
 	if ((unsigned short)b_class == sd->class_)
 		return 1; //Nothing to change.
 
-	// changing from 1st to 2nd job
+	//Changing from 1st to 2nd job
 	if ((b_class&JOBL_2) && !(sd->class_&JOBL_2) && (b_class&MAPID_UPPERMASK) != MAPID_SUPER_NOVICE) {
 		sd->change_level_2nd = sd->status.job_level;
-		pc_setglobalreg (sd, "jobchange_level", sd->change_level_2nd);
+		pc_setglobalreg (sd,"jobchange_level",sd->change_level_2nd);
 	}
-	// changing from 2nd to 3rd job
-	else if((b_class&JOBL_THIRD) && !(sd->class_&JOBL_THIRD)) {
+	//Changing from 2nd to 3rd job
+	else if ((b_class&JOBL_THIRD) && !(sd->class_&JOBL_THIRD)) {
 		sd->change_level_3rd = sd->status.job_level;
-		pc_setglobalreg (sd, "jobchange_level_3rd", sd->change_level_3rd);
+		pc_setglobalreg (sd,"jobchange_level_3rd",sd->change_level_3rd);
 	}
 
-	if(sd->cloneskill_id) {
-		if( sd->status.skill[sd->cloneskill_id].flag == SKILL_FLAG_PLAGIARIZED ) {
+	if (sd->cloneskill_id) {
+		if (sd->status.skill[sd->cloneskill_id].flag == SKILL_FLAG_PLAGIARIZED) {
 			sd->status.skill[sd->cloneskill_id].id = 0;
 			sd->status.skill[sd->cloneskill_id].lv = 0;
 			sd->status.skill[sd->cloneskill_id].flag = SKILL_FLAG_PERMANENT;
 			clif_deleteskill(sd,sd->cloneskill_id);
 		}
 		sd->cloneskill_id = 0;
-		pc_setglobalreg(sd, "CLONE_SKILL", 0);
-		pc_setglobalreg(sd, "CLONE_SKILL_LV", 0);
+		pc_setglobalreg(sd,"CLONE_SKILL",0);
+		pc_setglobalreg(sd,"CLONE_SKILL_LV",0);
 	}
-	
-	if(sd->reproduceskill_id) {
-		if( sd->status.skill[sd->reproduceskill_id].flag == SKILL_FLAG_PLAGIARIZED ) {
+
+	if (sd->reproduceskill_id) {
+		if (sd->status.skill[sd->reproduceskill_id].flag == SKILL_FLAG_PLAGIARIZED) {
 			sd->status.skill[sd->reproduceskill_id].id = 0;
 			sd->status.skill[sd->reproduceskill_id].lv = 0;
 			sd->status.skill[sd->reproduceskill_id].flag = SKILL_FLAG_PERMANENT;
 			clif_deleteskill(sd,sd->reproduceskill_id);
 		}
 		sd->reproduceskill_id = 0;
-		pc_setglobalreg(sd, "REPRODUCE_SKILL",0);
-		pc_setglobalreg(sd, "REPRODUCE_SKILL_LV",0);
+		pc_setglobalreg(sd,"REPRODUCE_SKILL",0);
+		pc_setglobalreg(sd,"REPRODUCE_SKILL_LV",0);
 	}
 
-	// Give or reduce transcendent status points
-	if( (b_class&JOBL_UPPER) && !(sd->class_&JOBL_UPPER) ) { // Change from a non t class to a t class -> give points
+	//Give or reduce transcendent status points
+	if ((b_class&JOBL_UPPER) && !(sd->class_&JOBL_UPPER)) { //Change from a non t class to a t class -> give points
 		sd->status.status_point += 52;
 		clif_updatestatus(sd,SP_STATUSPOINT);
-	} else if( !(b_class&JOBL_UPPER) && (sd->class_&JOBL_UPPER) ) { // Change from a t class to a non t class -> remove points
-		if( sd->status.status_point < 52 ) {
-			// The player already used his bonus points, so we have to reset his status points
+	} else if (!(b_class&JOBL_UPPER) && (sd->class_&JOBL_UPPER)) { //Change from a t class to a non t class -> remove points
+		if (sd->status.status_point < 52) {
+			//The player already used his bonus points, so we have to reset his status points
 			pc_resetstate(sd);
 		}
 		sd->status.status_point -= 52;
 		clif_updatestatus(sd,SP_STATUSPOINT);
 	}
 
-	if ( (b_class&MAPID_UPPERMASK) != (sd->class_&MAPID_UPPERMASK) ) { //Things to remove when changing class tree.
+	if ((b_class&MAPID_UPPERMASK) != (sd->class_&MAPID_UPPERMASK)) { //Things to remove when changing class tree.
 		const int class_ = pc_class2idx(sd->status.class_);
 		short id;
-		for(i = 0; i < MAX_SKILL_TREE && (id = skill_tree[class_][i].id) > 0; i++) {
+		for (i = 0; i < MAX_SKILL_TREE && (id = skill_tree[class_][i].id) > 0; i++) {
 			//Remove status specific to your current tree skills.
 			enum sc_type sc = status_skill2sc(id);
 			if (sc > SC_COMMON_MAX && sd->sc.data[sc])
-				status_change_end(&sd->bl, sc, INVALID_TIMER);
+				status_change_end(&sd->bl,sc,INVALID_TIMER);
 		}
 	}
 
-	if( (sd->class_&MAPID_UPPERMASK) == MAPID_STAR_GLADIATOR && (b_class&MAPID_UPPERMASK) != MAPID_STAR_GLADIATOR) {
-		/* going off star glad lineage, reset feel to not store no-longer-used vars in the database */
+	if ((sd->class_&MAPID_UPPERMASK) == MAPID_STAR_GLADIATOR && (b_class&MAPID_UPPERMASK) != MAPID_STAR_GLADIATOR) {
+		/* Going off star glad lineage, reset feel to not store no-longer-used vars in the database */
 		pc_resetfeel(sd);
 	}
 
 	sd->status.class_ = job;
 	fame_flag = pc_famerank(sd->status.char_id,sd->class_&MAPID_UPPERMASK);
 	sd->class_ = (unsigned short)b_class;
-	sd->status.job_level=1;
-	sd->status.job_exp=0;
-	
+	sd->status.job_level = 1;
+	sd->status.job_exp = 0;
+
 	if (sd->status.base_level > pc_maxbaselv(sd)) {
 		sd->status.base_level = pc_maxbaselv(sd);
-		sd->status.base_exp=0;
+		sd->status.base_exp = 0;
 		pc_resetstate(sd);
 		clif_updatestatus(sd,SP_STATUSPOINT);
 		clif_updatestatus(sd,SP_BASELEVEL);
@@ -7444,19 +7447,19 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 	clif_updatestatus(sd,SP_JOBEXP);
 	clif_updatestatus(sd,SP_NEXTJOBEXP);
 
-	for(i=0;i<EQI_MAX;i++) {
-		if(sd->equip_index[i] >= 0)
-			if(!pc_isequip(sd,sd->equip_index[i]))
-				pc_unequipitem(sd,sd->equip_index[i],2); // unequip invalid item for class
+	for (i = 0; i < EQI_MAX; i++) {
+		if (sd->equip_index[i] >= 0)
+			if (!pc_isequip(sd,sd->equip_index[i]))
+				pc_unequipitem(sd,sd->equip_index[i],2); //Unequip invalid item for class
 	}
 
 	//Change look, if disguised, you need to undisguise
 	//to correctly calculate new job sprite without
 	if (sd->disguise)
-		pc_disguise(sd, 0);
+		pc_disguise(sd,0);
 
 	status_set_viewdata(&sd->bl, job);
-	clif_changelook(&sd->bl,LOOK_BASE,sd->vd.class_); // move sprite update to prevent client crashes with incompatible equipment [Valaris]
+	clif_changelook(&sd->bl,LOOK_BASE,sd->vd.class_); //Move sprite update to prevent client crashes with incompatible equipment [Valaris]
 	if(sd->vd.cloth_color)
 		clif_changelook(&sd->bl,LOOK_CLOTHES_COLOR,sd->vd.cloth_color);
 
@@ -7473,31 +7476,31 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 
 	//Remove peco/cart/falcon
 	i = sd->sc.option;
-	if( i&OPTION_RIDING && !pc_checkskill(sd, KN_RIDING) )
-		i&=~OPTION_RIDING;
-	if( i&OPTION_FALCON && !pc_checkskill(sd, HT_FALCON) )
-		i&=~OPTION_FALCON;
-	if( i&OPTION_DRAGON && !pc_checkskill(sd,RK_DRAGONTRAINING) )
-		i&=~OPTION_DRAGON;
-	if( i&OPTION_WUGRIDER && !pc_checkskill(sd,RA_WUGMASTERY) )
-		i&=~OPTION_WUGRIDER;
-	if( i&OPTION_WUG && !pc_checkskill(sd,RA_WUGMASTERY) )
-		i&=~OPTION_WUG;
-	if( i&OPTION_MADOGEAR ) //You do not need a skill for this.
-		i&=~OPTION_MADOGEAR;
+	if (i&OPTION_RIDING && !pc_checkskill(sd,KN_RIDING))
+		i &= ~OPTION_RIDING;
+	if (i&OPTION_FALCON && !pc_checkskill(sd,HT_FALCON))
+		i &= ~OPTION_FALCON;
+	if (i&OPTION_DRAGON && !pc_checkskill(sd,RK_DRAGONTRAINING))
+		i &= ~OPTION_DRAGON;
+	if (i&OPTION_WUGRIDER && !pc_checkskill(sd,RA_WUGMASTERY))
+		i &= ~OPTION_WUGRIDER;
+	if (i&OPTION_WUG && !pc_checkskill(sd,RA_WUGMASTERY))
+		i &= ~OPTION_WUG;
+	if (i&OPTION_MADOGEAR) //You do not need a skill for this.
+		i &= ~OPTION_MADOGEAR;
 #ifndef NEW_CARTS
-	if( i&OPTION_CART && !pc_checkskill(sd, MC_PUSHCART) )
-		i&=~OPTION_CART;
+	if (i&OPTION_CART && !pc_checkskill(sd,MC_PUSHCART))
+		i &= ~OPTION_CART;
 #else
-	if( sd->sc.data[SC_PUSH_CART] && !pc_checkskill(sd, MC_PUSHCART) )
+	if (sd->sc.data[SC_PUSH_CART] && !pc_checkskill(sd,MC_PUSHCART))
 		pc_setcart(sd, 0);
 #endif
-	if(i != sd->sc.option)
-		pc_setoption(sd, i);
+	if (i != sd->sc.option)
+		pc_setoption(sd,i);
 
-	if(merc_is_hom_active(sd->hd) && !pc_checkskill(sd, AM_CALLHOMUN))
-		merc_hom_vaporize(sd, HOM_ST_ACTIVE);
-	
+	if (merc_is_hom_active(sd->hd) && !pc_checkskill(sd,AM_CALLHOMUN))
+		merc_hom_vaporize(sd,HOM_ST_ACTIVE);
+
 	if(sd->status.manner < 0)
 		clif_changestatus(sd,SP_MANNER,sd->status.manner);
 
@@ -7505,7 +7508,7 @@ int pc_jobchange(struct map_session_data *sd,int job, int upper)
 	pc_checkallowskill(sd);
 	pc_equiplookall(sd);
 
-	//if you were previously famous, not anymore.
+	//If you were previously famous, not anymore.
 	if (fame_flag) {
 		chrif_save(sd,0);
 		chrif_buildfamelist();
@@ -7613,62 +7616,53 @@ int pc_changelook(struct map_session_data *sd,int type,int val)
  *------------------------------------------*/
 int pc_setoption(struct map_session_data *sd,int type)
 {
-	int p_type, new_look=0;
+	int p_type, new_look = 0;
 	nullpo_ret(sd);
 	p_type = sd->sc.option;
 
 	//Option has to be changed client-side before the class sprite or it won't always work (eg: Wedding sprite) [Skotlex]
-	sd->sc.option=type;
+	sd->sc.option = type;
 	clif_changeoption(&sd->bl);
 
-	if( (type&OPTION_RIDING && !(p_type&OPTION_RIDING)) || (type&OPTION_DRAGON && !(p_type&OPTION_DRAGON) && pc_checkskill(sd,RK_DRAGONTRAINING) > 0) )
-	{ // Mounting
+	if ((type&OPTION_RIDING && !(p_type&OPTION_RIDING)) || (type&OPTION_DRAGON && !(p_type&OPTION_DRAGON) && pc_checkskill(sd,RK_DRAGONTRAINING) > 0))
+	{ //Mounting
 		clif_status_load(&sd->bl,SI_RIDING,1);
 		status_calc_pc(sd,0);
-	} else if( (!(type&OPTION_RIDING) && p_type&OPTION_RIDING) || (!(type&OPTION_DRAGON) && p_type&OPTION_DRAGON) ) { // Dismount
+	} else if ((!(type&OPTION_RIDING) && p_type&OPTION_RIDING) || (!(type&OPTION_DRAGON) && p_type&OPTION_DRAGON)) { //Dismount
 		clif_status_load(&sd->bl,SI_RIDING,0);
 		status_calc_pc(sd,0);
 	}
-	
+
 #ifndef NEW_CARTS
-	if( type&OPTION_CART && !( p_type&OPTION_CART ) ) { //Cart On
+	if (type&OPTION_CART && !( p_type&OPTION_CART )) { //Cart On
 		clif_cartlist(sd);
-		clif_updatestatus(sd, SP_CARTINFO);
-		if(pc_checkskill(sd, MC_PUSHCART) < 10)
+		clif_updatestatus(sd,SP_CARTINFO);
+		if (pc_checkskill(sd,MC_PUSHCART) < 10)
 			status_calc_pc(sd,0); //Apply speed penalty.
-	} else if( !( type&OPTION_CART ) && p_type&OPTION_CART ){ //Cart Off
+	} else if (!(type&OPTION_CART) && p_type&OPTION_CART) { //Cart Off
 		clif_clearcart(sd->fd);
-		if(pc_checkskill(sd, MC_PUSHCART) < 10)
+		if (pc_checkskill(sd,MC_PUSHCART) < 10)
 			status_calc_pc(sd,0); //Remove speed penalty.
 	}
 #endif
-
-	if (type&OPTION_MOUNTING && !(p_type&OPTION_MOUNTING) ) {
-		clif_status_load_notick(&sd->bl,SI_ALL_RIDING,2,1,0,0);
-		status_calc_pc(sd,0);
-	} else if (!(type&OPTION_MOUNTING) && p_type&OPTION_MOUNTING) {
-		clif_status_load_notick(&sd->bl,SI_ALL_RIDING,0,0,0,0);
-		status_calc_pc(sd,0);
-	}
-
 
 	if (type&OPTION_FALCON && !(p_type&OPTION_FALCON)) //Falcon ON
 		clif_status_load(&sd->bl,SI_FALCON,1);
 	else if (!(type&OPTION_FALCON) && p_type&OPTION_FALCON) //Falcon OFF
 		clif_status_load(&sd->bl,SI_FALCON,0);
 
-	if( (sd->class_&MAPID_THIRDMASK) == MAPID_RANGER ) {
-		if( type&OPTION_WUGRIDER && !(p_type&OPTION_WUGRIDER) ) { // Mounting
+	if ((sd->class_&MAPID_THIRDMASK) == MAPID_RANGER) {
+		if (type&OPTION_WUGRIDER && !(p_type&OPTION_WUGRIDER)) { //Mounting
 			clif_status_load(&sd->bl,SI_WUGRIDER,1);
 			status_calc_pc(sd,0);
-		} else if( !(type&OPTION_WUGRIDER) && p_type&OPTION_WUGRIDER ) { // Dismount
+		} else if (!(type&OPTION_WUGRIDER) && p_type&OPTION_WUGRIDER) { //Dismount
 			clif_status_load(&sd->bl,SI_WUGRIDER,0);
 			status_calc_pc(sd,0);
 		}
 	}
-	if( (sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC ) {
-		if( type&OPTION_MADOGEAR && !(p_type&OPTION_MADOGEAR) ) {
-			status_calc_pc(sd, 0);
+	if ((sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC) {
+		if (type&OPTION_MADOGEAR && !(p_type&OPTION_MADOGEAR)) {
+			status_calc_pc(sd,0);
 			status_change_end(&sd->bl,SC_MAXIMIZEPOWER,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_OVERTHRUST,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_WEAPONPERFECTION,INVALID_TIMER);
@@ -7676,8 +7670,8 @@ int pc_setoption(struct map_session_data *sd,int type)
 			status_change_end(&sd->bl,SC_CARTBOOST,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_MELTDOWN,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_MAXOVERTHRUST,INVALID_TIMER);
-		} else if( !(type&OPTION_MADOGEAR) && p_type&OPTION_MADOGEAR ) {
-			status_calc_pc(sd, 0);
+		} else if (!(type&OPTION_MADOGEAR) && p_type&OPTION_MADOGEAR) {
+			status_calc_pc(sd,0);
 			status_change_end(&sd->bl,SC_SHAPESHIFT,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_HOVERING,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_ACCELERATION,INVALID_TIMER);
@@ -7689,26 +7683,6 @@ int pc_setoption(struct map_session_data *sd,int type)
 	if (type&OPTION_FLYING && !(p_type&OPTION_FLYING))
 		new_look = JOB_STAR_GLADIATOR2;
 	else if (!(type&OPTION_FLYING) && p_type&OPTION_FLYING)
-		new_look = -1;
-	
-	if (type&OPTION_WEDDING && !(p_type&OPTION_WEDDING))
-		new_look = JOB_WEDDING;
-	else if (!(type&OPTION_WEDDING) && p_type&OPTION_WEDDING)
-		new_look = -1;
-
-	if (type&OPTION_XMAS && !(p_type&OPTION_XMAS))
-		new_look = JOB_XMAS;
-	else if (!(type&OPTION_XMAS) && p_type&OPTION_XMAS)
-		new_look = -1;
-
-	if (type&OPTION_SUMMER && !(p_type&OPTION_SUMMER))
-		new_look = JOB_SUMMER;
-	else if (!(type&OPTION_SUMMER) && p_type&OPTION_SUMMER)
-		new_look = -1;
-
-	if (type&OPTION_HANBOK && !(p_type&OPTION_HANBOK))
-		new_look = JOB_HANBOK;
-	else if (!(type&OPTION_HANBOK) && p_type&OPTION_HANBOK)
 		new_look = -1;
 
 	if (sd->disguise || !new_look)
@@ -7723,7 +7697,7 @@ int pc_setoption(struct map_session_data *sd,int type)
 	clif_changelook(&sd->bl,LOOK_BASE,new_look);
 	if (sd->vd.cloth_color)
 		clif_changelook(&sd->bl,LOOK_CLOTHES_COLOR,sd->vd.cloth_color);
-	clif_skillinfoblock(sd); // Skill list needs to be updated after base change.
+	clif_skillinfoblock(sd); //Skill list needs to be updated after base change.
 
 	return 0;
 }
@@ -7739,11 +7713,11 @@ int pc_setcart(struct map_session_data *sd,int type) {
 	nullpo_ret(sd);
 
 	if( type < 0 || type > MAX_CARTS )
-		return 1;// Never trust the values sent by the client! [Skotlex]
+		return 1; //Never trust the values sent by the client! [Skotlex]
 
 	if( pc_checkskill(sd,MC_PUSHCART) <= 0 && type != 0 )
-		return 1;// Push cart is required
-		
+		return 1; //Push cart is required
+
 	if( type == 0 && pc_iscarton(sd) )
 		status_change_end(&sd->bl,SC_GN_CARTBOOST,INVALID_TIMER);
 
@@ -7758,24 +7732,24 @@ int pc_setcart(struct map_session_data *sd,int type) {
 		default: /* Everything else is an allowed ID so we can move on */
 			if( !sd->sc.data[SC_PUSH_CART] ) /* First time, so fill cart data */
 				clif_cartlist(sd);
-			clif_updatestatus(sd, SP_CARTINFO);
-			sc_start(&sd->bl, &sd->bl, SC_PUSH_CART, 100, type, 0);
-			clif_status_load_notick(&sd->bl, SI_ON_PUSH_CART, 2, type, 0, 0);
+			clif_updatestatus(sd,SP_CARTINFO);
+			sc_start(&sd->bl,&sd->bl,SC_PUSH_CART,100,type,0);
+			clif_status_change2(&sd->bl,sd->bl.id,AREA,SI_ON_PUSH_CART,type,0,0);
 			if( sd->sc.data[SC_PUSH_CART] ) /* Forcefully update */
 				sd->sc.data[SC_PUSH_CART]->val1 = type;
 			break;
 	}
-	
-	if(pc_checkskill(sd, MC_PUSHCART) < 10)
+
+	if( pc_checkskill(sd,MC_PUSHCART) < 10 )
 		status_calc_pc(sd,0); //Recalc speed penalty.
 #else
-	// Update option
+	//Update option
 	option = sd->sc.option;
-	option &= ~OPTION_CART;// clear cart bits
-	option |= cart[type]; // set cart
-	pc_setoption(sd, option);
+	option &= ~OPTION_CART; //Clear cart bits
+	option |= cart[type]; //Set cart
+	pc_setoption(sd,option);
 #endif
-	
+
 	return 0;
 }
 
@@ -7784,11 +7758,11 @@ int pc_setcart(struct map_session_data *sd,int type) {
  *------------------------------------------*/
 int pc_setfalcon(TBL_PC* sd, int flag)
 {
-	if( flag ){
-		if( pc_checkskill(sd,HT_FALCON)>0 )	// add falcon if he have the skill
+	if( flag ) {
+		if( pc_checkskill(sd,HT_FALCON) > 0 ) //Add falcon if he have the skill
 			pc_setoption(sd,sd->sc.option|OPTION_FALCON);
-	} else if( pc_isfalcon(sd) ){
-		pc_setoption(sd,sd->sc.option&~OPTION_FALCON); // remove falcon
+	} else if( pc_isfalcon(sd) ) {
+		pc_setoption(sd,sd->sc.option&~OPTION_FALCON); //Remove falcon
 	}
 
 	return 0;
@@ -7799,11 +7773,11 @@ int pc_setfalcon(TBL_PC* sd, int flag)
  *------------------------------------------*/
 int pc_setriding(TBL_PC* sd, int flag)
 {
-	if( flag ){
-		if( pc_checkskill(sd,KN_RIDING) > 0 ) // add peco
-			pc_setoption(sd, sd->sc.option|OPTION_RIDING);
-	} else if( pc_isriding(sd) ){
-			pc_setoption(sd, sd->sc.option&~OPTION_RIDING);
+	if( flag ) {
+		if( pc_checkskill(sd,KN_RIDING) > 0 ) //Add peco
+			pc_setoption(sd,sd->sc.option|OPTION_RIDING);
+	} else if( pc_isriding(sd) ) {
+			pc_setoption(sd,sd->sc.option&~OPTION_RIDING);
 	}
 
 	return 0;
@@ -7814,11 +7788,11 @@ int pc_setriding(TBL_PC* sd, int flag)
  *------------------------------------------*/
 int pc_setmadogear(TBL_PC* sd, int flag)
 {
-	if( flag ){
+	if( flag ) {
 		if( pc_checkskill(sd,NC_MADOLICENCE) > 0 )
-			pc_setoption(sd, sd->sc.option|OPTION_MADOGEAR);
-	} else if( pc_ismadogear(sd) ){
-			pc_setoption(sd, sd->sc.option&~OPTION_MADOGEAR);
+			pc_setoption(sd,sd->sc.option|OPTION_MADOGEAR);
+	} else if( pc_ismadogear(sd) ) {
+			pc_setoption(sd,sd->sc.option&~OPTION_MADOGEAR);
 	}
 
 	return 0;
@@ -7831,7 +7805,7 @@ int pc_candrop(struct map_session_data *sd, struct item *item)
 {
 	if( item && (item->expire_time || (item->bound && !pc_can_give_bounded_items(sd))) )
 		return 0;
-	if( !pc_can_give_items(sd) || sd->sc.cant.drop ) //check if this GM level can drop items
+	if( !pc_can_give_items(sd) || sd->sc.cant.drop ) //Check if this GM level can drop items
 		return 0;
 	return (itemdb_isdropable(item, pc_get_group_level(sd)));
 }
@@ -7861,15 +7835,13 @@ int pc_setreg(struct map_session_data* sd, int reg, int val)
 	nullpo_ret(sd);
 
 	ARR_FIND( 0, sd->reg_num, i, sd->reg[i].index == reg );
-	if( i < sd->reg_num )
-	{// overwrite existing entry
+	if( i < sd->reg_num ) { //Overwrite existing entry
 		sd->reg[i].data = val;
 		return 1;
 	}
 
 	ARR_FIND( 0, sd->reg_num, i, sd->reg[i].data == 0 );
-	if( i == sd->reg_num )
-	{// nothing free, increase size
+	if( i == sd->reg_num ) { //Nothing free, increase size
 		sd->reg_num++;
 		RECREATE(sd->reg, struct script_reg, sd->reg_num);
 	}
@@ -10005,6 +9977,8 @@ void do_final_pc(void) {
 	db_destroy(itemcd_db);
 
 	do_final_pc_groups();
+
+	ers_destroy(pc_sc_display_ers);
 	return;
 }
 
@@ -10013,7 +9987,7 @@ int do_init_pc(void) {
 	itemcd_db = idb_alloc(DB_OPT_RELEASE_DATA);
 
 	pc_readdb();
-	pc_read_motd(); // Read MOTD [Valaris]
+	pc_read_motd(); //Read MOTD [Valaris]
 
 	add_timer_func_list(pc_invincible_timer, "pc_invincible_timer");
 	add_timer_func_list(pc_eventtimer, "pc_eventtimer");
@@ -10027,13 +10001,13 @@ int do_init_pc(void) {
 
 	add_timer(gettick() + autosave_interval, pc_autosave, 0, 0);
 
-	// 0=day, 1=night [Yor]
+	//0 = day, 1 = night [Yor]
 	night_flag = battle_config.night_at_start ? 1 : 0;
 
 	if (battle_config.day_duration > 0 && battle_config.night_duration > 0) {
 		int day_duration = battle_config.day_duration;
 		int night_duration = battle_config.night_duration;
-		// add night/day timer [Yor]
+		//Add night/day timer [Yor]
 		add_timer_func_list(map_day_timer, "map_day_timer");
 		add_timer_func_list(map_night_timer, "map_night_timer");
 
@@ -10042,6 +10016,8 @@ int do_init_pc(void) {
 	}
 
 	do_init_pc_groups();
+
+	pc_sc_display_ers = ers_new(sizeof(struct sc_display_entry), "pc.c:pc_sc_display_ers", ERS_OPT_NONE);
 
 	return 0;
 }
