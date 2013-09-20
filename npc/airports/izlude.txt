@@ -22,9 +22,9 @@
 	mes "Selamat Datang! Apakah kamu ingin";
 	mes "untuk naik pesawat yang";
 	mes "berangkat pada penerbangan yang berhenti";
-	mes "di JuTidak dan Rachel?";
+	mes "di Juno dan Rachel?";
 	next;
-	if (select("Menaiki Kapal Udara ke JuTidak/Rachel.:Batal.") == 1) {
+	if (select("Menaiki Kapal Udara ke Juno/Rachel.:Batal.") == 1) {
 		mes "[Staff Bandara]";
 		mes "Biaya untuk menaiki pesawat ini adalah";
 		mes "1,200 zeny. Namun,";

@@ -22,7 +22,7 @@ lhz_airport,143,43,5	script	Airport Staff#lhz_air1a::lhz_airport1	90,{
 	mes "Selamat datang di";
 	mes "Bandara Lighthalzen,";
 	mes "dimana kami menawarkan";
-	mes "penerbangan Tidaknstop ke Einbroch, JuTidak dan Hugel.";
+	mes "penerbangan tiada henti ke Einbroch, Juno dan Hugel.";
 	next;
 	if (select("Menaiki kapal udara.:Batal.") == 1) {
 		mes "[Staff Bandara]";

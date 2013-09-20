@@ -49,124 +49,124 @@ OnInit:
 	initnpctimer;
 	end;
 OnTimer20000:
-	mapannounce "airplane","We are heading to Einbroch.",bc_map,"0x00ff00";
+	mapannounce "airplane","Kita akan berangkat menuju Einbroch.",bc_map,"0x00ff00";
 	end;
 OnTimer50000:
-	mapannounce "airplane","We will arrive in Einbroch shortly.",bc_map,"0x00ff00";
+	mapannounce "airplane","Kita akan tiba di Einbroch sebentar lagi.",bc_map,"0x00ff00";
 	end;
 OnTimer60000:
 	set $@airplanelocation,1;
 	donpcevent "#AirshipWarp-1::OnUnhide";
 	donpcevent "#AirshipWarp-2::OnUnhide";
-	mapannounce "airplane","Welcome to Einbroch. Have a safe trip.",bc_map,"0x00ff00";
+	mapannounce "airplane","Selamat datang di Einbroch. Selamat bersenang-senang!",bc_map,"0x00ff00";
 	end;
 OnTimer70000:
-	mapannounce "airplane","Currently we are in Einbroch. The Airship will take off shortly.",bc_map,"0x00ff00";
+	mapannounce "airplane","Sekarang kita ada di Einbroch. Pesawatnya akan berangkat sebentar lagi.",bc_map,"0x00ff00";
 	end;
 OnTimer80000:
 	donpcevent "#AirshipWarp-1::OnHide";
 	donpcevent "#AirshipWarp-2::OnHide";
-	mapannounce "airplane","The Airship is now taking off. Our next destination is Lighthalzen.",bc_map,"0x70dbdb";
+	mapannounce "airplane","Pesawatnya sudah berangkat. Tujuan kita berikutnya adalah Lighthalzen.",bc_map,"0x70dbdb";
 	end;
 OnTimer100000:
-	mapannounce "airplane","We are heading to Lighthalzen.",bc_map,"0x70dbdb";
+	mapannounce "airplane","Kita akan berangkat menuju Lighthalzen.",bc_map,"0x70dbdb";
 	end;
 OnTimer130000:
-	mapannounce "airplane","We will arrive in Lighthalzen shortly.",bc_map,"0x70dbdb";
+	mapannounce "airplane","Kita akan tiba di Lighthalzen sebentar lagi.",bc_map,"0x70dbdb";
 	end;
 OnTimer140000:
 	set $@airplanelocation,2;
 	donpcevent "#AirshipWarp-1::OnUnhide";
 	donpcevent "#AirshipWarp-2::OnUnhide";
-	mapannounce "airplane","Welcome to Lighthalzen. Have a safe trip.",bc_map,"0x70dbdb";
+	mapannounce "airplane","Selamat datang di Lighthalzen. Selamat bersenang-senang!",bc_map,"0x70dbdb";
 	end;
 OnTimer150000:
-	mapannounce "airplane","Currently we are in Lighthalzen. The Airship will leave shortly.",bc_map,"0x70dbdb";
+	mapannounce "airplane","Sekarang kita ada di Lighthalzen. Pesawatnya akan berangkat sebentar lagi.",bc_map,"0x70dbdb";
 	end;
 OnTimer160000:
 	donpcevent "#AirshipWarp-1::OnHide";
 	donpcevent "#AirshipWarp-2::OnHide";
-	mapannounce "airplane","The Airship is leaving the ground. Our next destination is Einbroch.",bc_map,"0x00ff00";
+	mapannounce "airplane","Pesawatnya sudah berangkat. Tujuan kita berikutnya adalah Einbroch.",bc_map,"0x00ff00";
 	end;
 OnTimer180000:
-	mapannounce "airplane","We are heading to Einbroch.",bc_map,"0x00ff00";
+	mapannounce "airplane","Kita akan berangkat menuju Einbroch.",bc_map,"0x00ff00";
 	end;
 OnTimer210000:
-	mapannounce "airplane","We will arrive in Einbroch shortly.",bc_map,"0x00FF00";
+	mapannounce "airplane","Kita akan tiba di Einbroch sebentar lagi.",bc_map,"0x00FF00";
 	end;
 OnTimer220000:
 	set $@airplanelocation,1;
 	donpcevent "#AirshipWarp-1::OnUnhide";
 	donpcevent "#AirshipWarp-2::OnUnhide";
-	mapannounce "airplane","Welcome to Einbroch. Have a safe trip.",bc_map,"0x00ff00";
+	mapannounce "airplane","Selamat datang di Einbroch. Selamat bersenang-senang!",bc_map,"0x00ff00";
 	end;
 OnTimer230000:
-	mapannounce "airplane","Currently we are in Einbroch. The Airship will take off shortly.",bc_map,"0x00ff00";
+	mapannounce "airplane","Sekarang kita ada di Einbroch. Pesawatnya akan berangkat sebentar lagi.",bc_map,"0x00ff00";
 	end;
 OnTimer240000:
 	donpcevent "#AirshipWarp-1::OnHide";
 	donpcevent "#AirshipWarp-2::OnHide";
-	mapannounce "airplane","The Airship is now taking off. Our next destination is Juno.",bc_map,"0xff8200";
+	mapannounce "airplane","Pesawatnya sudah berangkat. Tujuan kita berikutnya adalah Juno.",bc_map,"0xff8200";
 	end;
 OnTimer260000:
-	mapannounce "airplane","We are heading to Juno.",bc_map,"0xff8200";
+	mapannounce "airplane","Kita akan berangkat menuju Juno.",bc_map,"0xff8200";
 	end;
 OnTimer290000:
-	mapannounce "airplane","We will arrive in Juno shortly.",bc_map,"0xff8200";
+	mapannounce "airplane","Kita akan tiba di Juno sebentar lagi.",bc_map,"0xff8200";
 	end;
 OnTimer300000:
 	set $@airplanelocation,0;
 	donpcevent "#AirshipWarp-1::OnUnhide";
 	donpcevent "#AirshipWarp-2::OnUnhide";
-	mapannounce "airplane","Welcome to Juno. Have a safe trip.",bc_map,"0xff8200";
+	mapannounce "airplane","Selamat datang di Juno. Selamat bersenang-senang!",bc_map,"0xff8200";
 	end;
 OnTimer310000:
-	mapannounce "airplane","Currently we are in Juno. The Airship will leave shortly.",bc_map,"0xff8200";
+	mapannounce "airplane","Sekarang kita ada di Juno. Pesawatnya akan berangkat sebentar lagi.",bc_map,"0xff8200";
 	end;
 OnTimer320000:
 	donpcevent "#AirshipWarp-1::OnHide";
 	donpcevent "#AirshipWarp-2::OnHide";
-	mapannounce "airplane","The Airship is leaving the ground. Our next destination is Hugel.",bc_map,"0xca4bf3";
+	mapannounce "airplane","Pesawatnya sudah berangkat. Tujuan kita berikutnya adalah Hugel.",bc_map,"0xca4bf3";
 	end;
 OnTimer340000:
-	mapannounce "airplane","We are heading to Hugel.",bc_map,"0xca4bf3";
+	mapannounce "airplane","Kita akan berangkat menuju Hugel.",bc_map,"0xca4bf3";
 	end;
 OnTimer370000:
-	mapannounce "airplane","We will arrive in Hugel shortly.",bc_map,"0xca4bf3";
+	mapannounce "airplane","Kita akan tiba di Hugel sebentar lagi.",bc_map,"0xca4bf3";
 	end;
 OnTimer380000:
 	set $@airplanelocation,3;
 	donpcevent "#AirshipWarp-1::OnUnhide";
 	donpcevent "#AirshipWarp-2::OnUnhide";
-	mapannounce "airplane","Welcome to Hugel. Have a safe trip.",bc_map,"0xca4bf3";
+	mapannounce "airplane","Selamat datang di Hugel. Selamat bersenang-senang!",bc_map,"0xca4bf3";
 	end;
 OnTimer390000:
-	mapannounce "airplane","Currently we are in Hugel. The Airship will leave shortly.",bc_map,"0xca4bf3";
+	mapannounce "airplane","Sekarang kita ada di Hugel. Pesawatnya akan berangkat sebentar lagi.",bc_map,"0xca4bf3";
 	end;
 OnTimer400000:
 	donpcevent "#AirshipWarp-1::OnHide";
 	donpcevent "#AirshipWarp-2::OnHide";
-	mapannounce "airplane","The Airship is leaving the ground. Our next destination is Juno.",bc_map,"0xff8200";
+	mapannounce "airplane","Pesawatnya sudah berangkat. Tujuan kita berikutnya adalah Juno.",bc_map,"0xff8200";
 	end;
 OnTimer420000:
-	mapannounce "airplane","We are heading to Juno.",bc_map,"0xff8200";
+	mapannounce "airplane","Kita akan berangkat menuju Juno.",bc_map,"0xff8200";
 	end;
 OnTimer450000:
-	mapannounce "airplane","We will arrive in Juno shortly.",bc_map,"0xff8200";
+	mapannounce "airplane","Kita akan tiba di Juno sebentar lagi.",bc_map,"0xff8200";
 	end;
 OnTimer460000:
 	set $@airplanelocation,0;
 	donpcevent "#AirshipWarp-1::OnUnhide";
 	donpcevent "#AirshipWarp-2::OnUnhide";
-	mapannounce "airplane","Welcome to Juno. Have a safe trip.",bc_map,"0xff8200";
+	mapannounce "airplane","Selamat datang di Juno. Selamat bersenang-senang!",bc_map,"0xff8200";
 	end;
 OnTimer470000:
-	mapannounce "airplane","Currently we are in Juno. The Airship will leave shortly.",bc_map,"0xff8200";
+	mapannounce "airplane","Sekarang kita ada di Juno. Pesawatnya akan berangkat sebentar lagi.",bc_map,"0xff8200";
 	end;
 OnTimer480000:
 	donpcevent "#AirshipWarp-1::OnHide";
 	donpcevent "#AirshipWarp-2::OnHide";
-	mapannounce "airplane","The Airship is leaving the ground. Our next destination is Einbroch.",bc_map,"0x00ff00";
+	mapannounce "airplane","Pesawatnya sudah berangkat. Tujuan kita berikutnya adalah Einbroch.",bc_map,"0x00ff00";
 	stopnpctimer;
 	initnpctimer;
 }
@@ -178,25 +178,22 @@ airplane,247,64,5	duplicate(ExitAirplane)	Exit#airplane1b	857
 airplane,240,40,1	duplicate(ExitAirplane)	Exit#airplane2a	857
 airplane,247,40,1	duplicate(ExitAirplane)	Exit#airplane2b	857
 
-airplane,100,69,3	script	Airship Crew#ein-1	852,{
-	mes "[Airship Crew]";
-	mes "If we've landed at";
-	mes "your destination and";
-	mes "you'd like to leave the";
-	mes "Airship, please use the";
-	mes "stairs up ahead. Thank";
-	mes "you for your patronage.";
+airplane,100,69,3	script	Kru Pesawat#ein-1	852,{
+	mes "[Kru Pesawat]";
+	mes "Setelah pesawatnya sudah tiba di tempat tujuan, kamu bisa menggunakan tangga ke atas";
+	mes "untuk meninggalkan pesawat ini.";
+	mes "Terima kasih!";
 	close;
 }
 
-airplane,64,94,1	script	Umbala Kid#ein_p	787,{
+airplane,64,94,1	script	Umbala Anak Kecil#ein_p	787,{
 	emotion e_swt2;
-	mes "[Kid]";
+	mes "[Anak Kecil]";
 	if (event_umbala >= 3) {
-		mes "Wow, mom!";
-		mes "L-look at this!";
-		mes "We're flying! W-we're...";
-		mes "We're in the freakin' sky!";
+		mes "Wow, ibu!";
+		mes "Lihatlah!";
+		mes "Kita sedang terbang! K-Kita sedang...";
+		mes "Kita ada di atas awan!";
 	}
 	else {
 		mes "Makumalagu!";
@@ -207,15 +204,13 @@ airplane,64,94,1	script	Umbala Kid#ein_p	787,{
 	close;
 }
 
-airplane,66,93,3	script	Umbala Lady#ein_p	783,{
+airplane,66,93,3	script	Umbala Perempuan#ein_p	783,{
 	emotion e_dots;
-	mes "[Lady]";
+	mes "[Perempuan]";
 	if (event_umbala >= 3) {
-		mes "Shush...";
-		mes "Honey, behave~";
-		mes "Don't act so excited";
-		mes "when we're out in a";
-		mes "public place like this!";
+		mes "Sssttt...";
+		mes "Anakku, diamlah~";
+		mes "Jangan berteriak-teriak seperti itu saat kita ada di tempat umum!";
 	}
 	else {
 		mes "Chooktu!";
@@ -229,26 +224,20 @@ airplane,66,93,3	script	Umbala Lady#ein_p	783,{
 airplane,71,91,7	script	Umbala Man#ein_p	789,{
 	if (event_umbala >= 3) {
 		mes "[Chrmlim]";
-		mes "Hey there~";
-		mes "From that look on";
-		mes "your face, I see that";
-		mes "you can understand";
-		mes "me. ^333333*Whew...!*^000000";
+		mes "Halo~";
+		mes "Kelihatannya kamu bisa mengerti bahasaku.";
+		mes "^333333*Whew...!*^000000";
 		next;
 		emotion e_pif;
 		mes "[Chrmlim]";
-		mes "I've been helping the";
-		mes "Airship enterprise by";
-		mes "having the Airship Crewmen";
-		mes "train in Umbala to overcome";
-		mes "any acrophobia they might have through bungee jumping. Neat, eh?";
+		mes "Kalau kamu tidak tahu, aku sudah membantu perusahaan pesawat terbang ini.";
+		mes "Aku melatih para kru pesawat ini di Umbala untuk mengatasi perasaan takut mereka";
+		mes "dengan cara loncat bungee. Menarik kan?";
 		next;
 		mes "[Chrmlim]";
-		mes "But...";
-		mes "Some of them couldn't";
-		mes "overcome their fear of";
-		mes "heights. And a few even";
-		mes "ended up, um, ^333333in Nifflheim^000000.";
+		mes "Tapi...";
+		mes "Beberapa dari mereka tidak bisa mengatasi rasa takutnya.";
+		mes "Ada beberapa, um, yang berakhir di ^333333in Nifflheim^000000 malah...";
 	}
 	else {
 		mes "[Chrmlim]";
@@ -269,96 +258,70 @@ airplane,71,91,7	script	Umbala Man#ein_p	789,{
 	close;
 }
 
-airplane,250,58,2	script	Airship Staff#airplane	67,{
+airplane,250,58,2	script	Staf Pesawat#airplane	67,{
 	// Hugel quest addition
 	if (hg_ma1 == 3) {
-		mes "[Airship Staff]";
-		mes "Welcome";
-		mes "to the Airship.";
-		mes "How may I help you?";
+		mes "[Staf Pesawat]";
+		mes "Selamat datang di pesawat ini!";
+		mes "Ada yang bisa kubantu?";
 		next;
-		select("Do you have a passenger named Thierry?");
-		mes "[Airship Staff]";
-		mes "I am sorry, but I do not think that we have a passenger by that name.";
+		select("Apakah ada penumpang yang bernama Thierry?");
+		mes "[Staf Pesawat]";
+		mes "Maaf, kurasa tidak ada penumpang yang bernama Thierry.";
 		close;
 	}
 	// Hugel quest end
-	mes "[Airship Staff]";
-	mes "Welcome";
-	mes "to the Airship.";
-	mes "How may I help you?";
+	mes "[Staf Pesawat]";
+	mes "Selamat datang di pesawat ini!";
+	mes "Ada yang bisa kubantu?";
 	next;
-	switch (select("Using the Airship:Captain's Cabin:Facilities:Cancel")) {
+	switch (select("Aku ingin naik pesawat:Kabin Kapten:Fasilitas:Batal")) {
 	case 1:
-		mes "[Airship Staff]";
-		mes "When you see a broadcast";
-		mes "announcing that we have";
-		mes "arrived at your destination,";
-		mes "please use one of the exits";
-		mes "located at the north and";
-		mes "south ends of the Airship.";
+		mes "[Staf Pesawat]";
+		mes "Kamu akan mendengar pemberitahuan bila pesawatnya sudah tiba di tujuan.";
+		mes "Silakan gunakan salah satu pintu keluar, ada di sebelah Utara dan Selatan dari pesawat ini.";
 		next;
-		mes "[Airship Staff]";
-		mes "If you happen to miss";
-		mes "your stop, don't worry.";
-		mes "The Airship is constantly";
-		mes "en route and you'll get";
-		mes "another chance to arrive";
-		mes "to your intended destination.";
+		mes "[Staf Pesawat]";
+		mes "Kalau tujuanmu sudah terlewat, jangan khawatir.";
+		mes "Pesawat ini selalu mengudara di rute yang sudah ditentukan.";
+		mes "Jadi pesawat ini pasti akan tiba di tempat tujuanmu lagi.";
 		close;
 	case 2:
-		mes "[Airship Staff]";
-		mes "The Captain's Cabin";
-		mes "is located at the front";
-		mes "of the Airship. There, you";
-		mes "can meet the captain and";
-		mes "the pilot of the Airship.";
+		mes "[Staf Pesawat]";
+		mes "Kabin Kapten ada di depan pesawat ini.";
+		mes "Di sana kamu bisa bertemu dengan sang kapten dan sang pilot.";
 		close;
 	case 3:
-		mes "[Airship Staff]";
-		mes "The Airship provides";
-		mes "various Mini Games for";
-		mes "the entertainment of all";
-		mes "our passengers. We invite";
-		mes "you to try your luck and skills";
-		mes "in the Airship's Mini Games~";
+		mes "[Staf Pesawat]";
+		mes "Pesawat ini menyediakan beberapa Mini Games untuk menghibur para penumpang.";
+		mes "Silakan coba keberuntungan dan keahlianmu di dalam Mini Games tersebut~";
 		close;
 	case 4:
-		mes "[Airship Staff]";
-		mes "Well, I hope you";
-		mes "your flight aboard";
-		mes "our Airships. Thank";
-		mes "you and have a good day.";
+		mes "[Staf Pesawat]";
+		mes "Terima kasih, dan selamat bersenang-senang!";
 		close;
 	}
 }
 
 airplane,80,71,2	script	Zerta#01airplane	834,{
 	mes "[Zerta]";
-	mes "Oh, hello adventurer.";
-	mes "I am currently on a";
-	mes "sacred journey, offering";
-	mes "prayer for the sake of the";
-	mes "Rune-Midgard continent.";
+	mes "Oh, halo!";
+	mes "Sekarang aku sedang menjalani perjalanan suci,";
+	mes "aku berdoa untuk kemajuan dan kesejahteraan Rune-Midgard.";
 	close;
 }
 
 airplane,65,63,4	script	Maelin#01airplane	714,{
 	mes "[Maelin]";
-	mes "Um, this Airship is";
-	mes "to Lutie, isn't it? I've";
-	mes "waiting so long,";
-	mes "but I haven't heard any";
-	mes "broadcast about Lutie.";
+	mes "Um, pesawat ini sedang menuju ke Lutie, iya kan?";
+	mes "Aku sudah menunggu lama, tapi aku belum mendengar pemberitahuan tentang Lutie.";
 	close;
 }
 
 airplane,72,34,6	script	Aanos#01airplane	702,{
 	mes "[Aanos]";
 	mes "Oh wooow~";
-	mes "The sky looks";
-	mes "so different and";
-	mes "pretty from up there!";
+	mes "Langitnya terlihat begitu berbeda dan sangat indah dari atas sini!";
 	close;
 }
 
@@ -366,152 +329,111 @@ airplane,221,158,2	script	Pilot#airplane	852,{
 	// Hugel quest addition
 	if (hg_ma1 == 3) {
 		mes "[Pilot]";
-		mes "I wish that I could go drink a cold fresh beer.";
-		mes "Drinking is the goal of my life! Drinking gives me energy!";
-		mes "I am nothing without drinks!";
+		mes "Kuharap aku bisa meminum bir dingin yang segar.";
+		mes "Minum bir adalah tujuan hidupku! Minum bir memberiku energi!";
+		mes "Aku tidak bisa hidup tanpa bir!";
 		next;
 		mes "[Pilot]";
-		mes "But! Driving under the influence is not good.";
-		mes "But! That makes me want to drink more and more!";
+		mes "Tapi! Menjalankan pesawat saat mabuk, sangatlah tidak baik.";
+		mes "Tapi! Itu membuatku ingin minum bir lagi dan lagi!";
 		emotion e_sob;
 		next;
-		select("Do you know a passenger named Thierry?");
+		select("Apakah ada penumpang yang bernama Thierry?");
 		mes "[Pilot]";
-		mes "This uniform is";
-		mes "really dapper, but";
-		mes "it's way too thick to";
-		mes "wear around the Airship.";
+		mes "Seragam ini sangat cocok dengan warna pesawat ini.";
 		next;
 		mes "[Pilot]";
 		mes "...";
 		mes "......";
-		mes "No one ever really";
-		mes "comes into this room.";
-		mes "And the captain IS a reindeer.^FFFFFF ^000000 I could just strip to my boxers.";
+		mes "Belum ada yang pernah datang ke ruangan ini sebelumnya.";
+		mes "Si kapten adalah seekor rusa. Aku ingin mengenakan celana dalamku...";
 		next;
 		emotion e_omg;
 		mes "[Pilot]";
-		mes "Wah!? Who is it!";
+		mes "Wah!? Siapa kamu!";
 		next;
-		mes "- ...He is not listening to you, at all. -";
+		mes "- ...Kelihatannya dia tidak mendengarkanmu sama sekali -";
 		close;
 	}
 	// Hugel quest end
 	switch (rand(1,4)) {
 	case 1:
 		mes "[Pilot]";
-		mes "It's been sooo";
-		mes "long since I've";
-		mes "enjoyed a nice, cold";
-		mes "alcoholic brew. But the";
-		mes "job requires me to be as";
-		mes "clear headed as I can!";
+		mes "Sudah lama sekali sejak aku bisa menikmati bir dingin yang nikmat.";
+		mes "Tapi pekerjaanku menuntutku agar aku selalu sadar setiap waktu!";
 		next;
 		mes "[Pilot]";
-		mes "Always drink responsibly!";
-		mes "Still, I can't remember the";
-		mes "last time I had a real vacation";
-		mes "or even a day off. Yeap, some";
-		mes "booze, some chips, some TV";
-		mes "and serius R&R is in order.";
+		mes "Jangan pernah mabuk sembarangan!";
+		mes "Tapi aku masih ingat, saat terakhir kali aku pergi berlibur.";
+		mes "Yeap, sedikit bir, keripik kentang, TV. Rasanya hidup indah sekali!";
 		emotion e_sob;
 		close;
 	case 2:
 		mes "[Pilot]";
-		mes "Man, the weather";
-		mes "is really nice today.";
-		mes "Bright, open skies make";
-		mes "for some good visibility";
-		mes "and safe, carefree flying.";
+		mes "Oooh cuacanya sangat bagus hari ini.";
+		mes "Sangat cerah, cocok untuk menjalankan pesawat dengan santai.";
 		close;
 	case 3:
 		mes "[Pilot]";
-		mes "You know, our captain's a";
-		mes "respectable guy. Him and";
-		mes "his brother are actually well";
-		mes "known in the aircraft industry.";
-		mes "Who knew reindeer made";
-		mes "such good captains?";
+		mes "kamu tahu, kapten kami adalah seorang yang dihormati.";
+		mes "Dia dan adiknya adalah orang yang sudah dikenal di bisnis ini.";
 		next;
 		mes "[Pilot]";
-		mes "Just between you";
-		mes "and me, I gotta tell";
-		mes "you, that Santa was onto";
-		mes "something, getting reindeers";
-		mes "and elves to work for him.";
-		mes "The man must be a genius!";
+		mes "Hanya antara kita berdua, aku akan memberitahumu sesuatu.";
+		mes "Santa itu sepertinya menyembunyikan sesuatu.";
+		mes "Dia memperkerjakan rusa dan para elf.";
+		mes "Dia sangat jenius!";
 		close;
 	default:
 		mes "[Pilot]";
-		mes "You know, this whole";
-		mes "piloting thing in the air,";
-		mes "it's rather new, you know?";
-		mes "Yeah, they got this Airship";
-		mes "operation in a hurry.";
+		mes "Kamu tahu, cara mengemudikan pesawat ini masih terasa aneh.";
+		mes "Mungkin karena mereka membuat pesawat ini dengan terburu-buru.";
 		next;
 		emotion e_omg;
 		mes "[Pilot]";
-		mes "Still, they where real";
-		mes "serius, really thought";
-		mes "ahead. I mean, they had us";
-		mes "training while the Airships";
-		mes "were still being invented.";
-		mes "Isn't that freakin' crazy?!";
+		mes "Tetapi mereka benar-benar serius, mereka sudah berpikir ke depan.";
+		mes "Maksudku, mereka sudah melatih para kru saat pesawatnya masih dalam tahap pengembangan.";
+		mes "Gila kan?!";
 		close;
 	}
 }
 
 airplane,50,66,5	script	Apple Merchant#airplane	86,{
 	mes "[Fruitz]";
-	mes "Welcome to Fruitz's";
-	mes "Shop where you can";
-	mes "purchase Apples or grind";
-	mes "them to make Apple Juice.";
+	mes "Selamat datang di toko Fruitz's.";
+	mes "Kamu bisa membeli Apel atau memprosesnya menjadi Jus Apel.";
 	next;
-	switch (select("Buy Apples.:Make Apple Juice.:Why are you here?:Cancel.")) {
+	switch (select("Beli Apel.:Buat Jus Apel.:Kenapa kamu ada di sini?:Batal.")) {
 	case 1:
 		mes "[Fruitz]";
-		mes "Please enter the amount";
-		mes "of Apples that you wish to";
-		mes "buy. Each Apple is 15 zeny";
-		mes "and you can buy a maximum";
-		mes "of 500 at a time. Please enter";
-		mes " '0' to cancel your order.";
+		mes "Silakan tulis jumlah Apel yang ingin kamu beli.";
+		mes "Harganya 15 zeny per buah, dan kamu bisa membeli sampai 500 buah.";
+		mes "Ketik '0' untuk membatalkan.";
 		next;
 		while (1) {
 			input .@input;
 			set .@pay, .@input * 15;
 			if (.@input == 0) {
 				mes "[Fruitz]";
-				mes "Thanks for stopping";
-				mes "by my shop. Farewell!";
-				mes "Come by anytime when";
-				mes "you feel like having an";
-				mes "Apple to snack on~";
+				mes "Terima kasih telah datang ke tokoku.";
+				mes "Kapan-kapan datang lagi ya~";
 				close;
 			}
 			else if (.@input < 1 || .@input > 500) {
 				mes "[Fruitz]";
-				mes "You've entered a number";
-				mes "higher than the maximum";
-				mes "value of 500. Please enter";
-				mes "the number of Apples you";
-				mes "wish to purchase again.";
+				mes "Kamu hanya bisa membeli 500 buah per transaksi.";
 				next;
 			}
 			else {
 				mes "[Fruitz]";
-				mes "A total of ^FF0000" + .@input + "^000000 Apples";
-				mes "will cost you ^FF0000" + .@pay + " Zeny^000000 zeny.";
-				mes "Would you like to continue?";
+				mes "Harga ^FF0000" + .@input + "^000000 buah Apel adalah ";
+				mes "^FF0000" + .@pay + " ^000000 zeny.";
+				mes "Apakah kamu ingin membelinya?";
 				next;
-				if (select("Yes:No") == 2) {
+				if (select("Ya:Tidak") == 2) {
 					mes "[Fruitz]";
-					mes "Thanks for stopping";
-					mes "by my shop. Farewell!";
-					mes "Come by anytime when";
-					mes "you feel like having an";
-					mes "Apple to snack on~";
+					mes "Terima kasih telah datang ke tokoku.";
+					mes "Kapan-kapan datang lagi ya~";
 					close;
 				}
 				break;
@@ -519,130 +441,92 @@ airplane,50,66,5	script	Apple Merchant#airplane	86,{
 		}
 		if (Zeny < .@pay) {
 			mes "[Fruitz]";
-			mes "I'm sorry, but you don't";
-			mes "have enough money to";
-			mes "purchase that many Apples.";
-			mes "Please check your zeny or";
-			mes "purchase fewer Apples.";
+			mes "Maaf, tapi kamu tidak mempunyai uang yang cukup.";
+			mes "Silakan periksa dulu uangmu, atau belilah dalam jumlah yang lebih kecil.";
 			close;
 		}
 		else if (checkweight(512,.@input) == 0) {
 			mes "[Fruitz]";
-			mes "Hmmm, I don't think";
-			mes "you've got enough room in";
-			mes "your inventory to carry this";
-			mes "many Apples. Why don't you free up some of your inventory space?";
+			mes "Hmmm, sepertinya kamu tidak mempunyai ruang yang cukup di dalam tasmu.";
 			close;
 		}
 		else {
 			set Zeny, Zeny - .@pay;
 			getitem 512,.@input; //Apple
 			mes "[Fruitz]";
-			mes "Thanks for stopping by";
-			mes "my shop. I hope you enjoy";
-			mes "the flavor of these Apples~!";
+			mes "Terima kasih telah datang ke tokoku.";
+			mes "Kuharap kamu suka Apelnya~!";
 			close;
 		}
 	case 2:
 		mes "[Fruitz]";
-		mes "Okay, I'll need";
-		mes "^FF00003 Apples and 1 Empty Bottle^000000";
-		mes "to make 1 Apple Juice for you.";
-		mes "Would you like to proceed?";
+		mes "Oke, aku butuh ";
+		mes "^FF00003 Apel dan 1 Empty Bottle^000000";	//nanakiwurtz: Empty Bottle = Botol Kosong?
+		mes "untuk membuat 1 Jus Apel.";
+		mes "Apakah kamu ingin membuat Jus Apel?";
 		next;
-		switch (select("Yes:No")) {
+		switch (select("Ya:Tidak")) {
 		case 1:
 			if (countitem(512) < 3 || countitem(713) < 1) {
 				mes "[Fruitz]";
-				mes "I'm sorry, but you don't";
-				mes "have enough materials to";
-				mes "create a bottle of Apple Juice.";
-				mes "Remember, I need 3 Apples";
-				mes "and 1 Empty Bottle to do it.";
+				mes "Maaf, kamu tidak mempunyai bahan yang cukup untuk membuat Jus Apel.";
+				mes "Ingat, aku butuh 3 Apel dan 1 Empty Bottle.";
 				close;
 			}
 			else {
 				mes "[Fruitz]";
-				mes "Thank you,";
-				mes "please wait";
-				mes "just a moment.";
+				mes "Terima kasih, silakan tunggu sebentar.";
 				next;
-				mes "^3355FF*Grind grind*";
-				mes "*Grind grind*";
+				mes "^3355FF*Peras peras*";
+				mes "*Peras peras*";
 				mes "*Clang...!*^000000";
 				next;
 				delitem 512,3; //Apple
 				delitem 713,1; //Empty_Bottle
 				getitem 531,1; //Apple_Juice
 				mes "[Fruitz]";
-				mes "There you go~";
-				mes "I hope you enjoy!";
-				mes "Please feel free to";
-				mes "stop by for your Apple";
-				mes "and Apple Juice needs";
-				mes "at anytime, adventurer~";
+				mes "Silakaaaan~";
+				mes "Selamat menikmati!";
+				mes "Silakan datang lagi kalau kamu ingin Jus Apel lagi ya!";
 				close;
 			}
 		case 2:
 			mes "[Fruitz]";
-			mes "Thanks for stopping";
-			mes "by my shop. Farewell!";
-			mes "Come by anytime when";
-			mes "you feel like having an";
-			mes "Apple to snack on~";
+			mes "Terima kasih telah datang ke tokoku.";
+			mes "Kapan-kapan datang lagi ya~";
 			close;
 		}
 	case 3:
 		mes "[Fruitz]";
-		mes "I used to be a wandering";
-		mes "vagabond when, one day,";
-		mes "I took a nap and something";
-		mes "struck my head and awoke";
-		mes "me from my restful slumber.";
+		mes "Dulu aku adalah seorang pengelana.";
+		mes "Suatu hari, saat aku sedang tidur siang, sesuatu mengenai kepalaku dan membangunkanku.";
 		next;
 		mes "[Fruitz]";
-		mes "It turns out that I was";
-		mes "sleeping beneath an apple";
-		mes "tree and that an apple fell";
-		mes "and hit me on the head.";
-		mes "I was dying of hunger and";
-		mes "was about to eat that Apple...";
+		mes "Ternyata aku sedang tidur di bawah pohon apel, dan sebuah apel jatuh di atas kepalaku.";
+		mes "Saat itu aku sedang kelaparan dan hampir saja memakan apel tadi...";
 		next;
 		mes "[Fruitz]";
-		mes "But suddenly, Kain, my old";
-		mes "friend from the mining days,";
-		mes "asked me to help him around";
-		mes "on the Airship. So I did, and";
-		mes "it was there where I found some";
-		mes "people playing the Dice game.";
+		mes "Tapi tiba-tiba Kain, teman lamaku dari pertambangan memintaku untuk membantunya di dalam pesawat.";
+		mes "Jadi aku membantunya di dalam pesawat dan aku melihat beberapa orang yang sedang bermain dadu.";
 		next;
 		mes "[Fruitz]";
-		mes "I was bored and curious";
-		mes "and ended up wagering that";
-		mes "single Apple in a game of";
-		mes "dice. But for some reason,";
-		mes "I had this incredible lucky";
-		mes "streak. One apple became two... ";
+		mes "Aku sedang bosan dan penasaran, dan akhirnya aku malah ikut main.";
+		mes "Aku tidak tahu mengapa aku bisa begitu beruntung!";
+		mes "Hadiahnya bertambah besar, dari satu apel jadi dua...";
 		next;
 		mes "[Fruitz]";
-		mes "Two became four and";
-		mes "before I knew it, I had";
-		mes "cornered the Apple market!";
-		mes "I won so many Apples, I just";
-		mes "started my own business here";
-		mes "on the Airship. Weird, huh?";
+		mes "Dua jadi empat, dan sebelum aku menyadarinya, aku sudah mengumpulkan banyak sekali apel!";
+		mes "Jadi aku mulai menjalankan bisnisku sendiri di dalam pesawat ini dengan menjual apel.";
+		mes "Cukup aneh ya?";
 		next;
 		mes "[Fruitz]";
-		mes "So Apples are good";
-		mes "for you. They were";
-		mes "certainly very good";
-		mes "to me. Hahahahaah~!";
+		mes "Jadi, apel sangat bagus untuk kesehatanmu.";
+		mes "Aku juga sangat menyukainya. Hahahahaah~!";
 		close;
 	case 4:
 		mes "[Fruitz]";
-		mes "Thank you for";
-		mes "using my shop.";
-		mes "Farewell~";
+		mes "Terima kasih telah datang ke tokoku.";
+		mes "Kapan-kapan datang lagi ya~";
 		close;
 	}
 }
@@ -688,64 +572,64 @@ OnEnable:
 	initnpctimer;
 	end;
 OnTimer25000:
-	mapannounce "airplane_01","We are heading to Izlude.",bc_map,"0x00ff00";
+	mapannounce "airplane_01","Kita akan berangkat menuju Izlude.",bc_map,"0x00ff00";
 	end;
 OnTimer50000:
-	mapannounce "airplane_01","We will arrive in Izlude shortly.",bc_map,"0x00ff00";
+	mapannounce "airplane_01","Kita akan tiba di Izlude sebentar lagi.",bc_map,"0x00ff00";
 	end;
 OnTimer60000:
 	set $@airplanelocation2,1;
 	donpcevent "#AirshipWarp-3::OnUnhide";
 	donpcevent "#AirshipWarp-4::OnUnhide";
-	mapannounce "airplane_01","Welcome to Izlude. Have a safe trip.",bc_map,"0x00ff00";
+	mapannounce "airplane_01","Selamat datang di Izlude. Selamat bersenang-senang!",bc_map,"0x00ff00";
 	end;
 OnTimer70000:
-	mapannounce "airplane_01","We are currently in Izlude. The Airship will take off shortly.",bc_map,"0x00ff00";
+	mapannounce "airplane_01","We are currently in Izlude. Pesawatnya akan berangkat sebentar lagi.",bc_map,"0x00ff00";
 	end;
 OnTimer80000:
 	donpcevent "#AirshipWarp-3::OnHide";
 	donpcevent "#AirshipWarp-4::OnHide";
-	mapannounce "airplane_01","The Airship is now taking off. Our next destination is Juno.",bc_map,"0x70dbdb";
+	mapannounce "airplane_01","Pesawatnya sudah berangkat. Tujuan kita berikutnya adalah Juno.",bc_map,"0x70dbdb";
 	end;
 OnTimer105000:
-	mapannounce "airplane_01","We are heading to Juno.",bc_map,"0x70dbdb";
+	mapannounce "airplane_01","Kita akan berangkat menuju Juno.",bc_map,"0x70dbdb";
 	end;
 OnTimer130000:
-	mapannounce "airplane_01","We will arrive in Juno shortly.",bc_map,"0x70dbdb";
+	mapannounce "airplane_01","Kita akan tiba di Juno sebentar lagi.",bc_map,"0x70dbdb";
 	end;
 OnTimer140000:
 	set $@airplanelocation2,2;
 	donpcevent "#AirshipWarp-3::OnUnhide";
 	donpcevent "#AirshipWarp-4::OnUnhide";
-	mapannounce "airplane_01","Welcome to Juno. Have a safe trip.",bc_map,"0x70dbdb";
+	mapannounce "airplane_01","Selamat datang di Juno. Selamat bersenang-senang!",bc_map,"0x70dbdb";
 	end;
 OnTimer150000:
-	mapannounce "airplane_01","We are currently in Juno. The Airship will leave shortly.",bc_map,"0x70dbdb";
+	mapannounce "airplane_01","We are currently in Juno. Pesawatnya akan berangkat sebentar lagi.",bc_map,"0x70dbdb";
 	end;
 OnTimer160000:
 	donpcevent "#AirshipWarp-3::OnHide";
 	donpcevent "#AirshipWarp-4::OnHide";
-	mapannounce "airplane_01","The Airship is leaving the ground. Our next destination is Rachel.",bc_map,"0xFF8200";
+	mapannounce "airplane_01","Pesawatnya sudah berangkat. Tujuan kita berikutnya adalah Rachel.",bc_map,"0xFF8200";
 	end;
 OnTimer185000:
-	mapannounce "airplane_01","We are heading to Rachel.",bc_map,"0xFF8200";
+	mapannounce "airplane_01","Kita akan berangkat menuju Rachel.",bc_map,"0xFF8200";
 	end;
 OnTimer210000:
-	mapannounce "airplane_01","We will arrive in Rachel shortly.",bc_map,"0xFF8200";
+	mapannounce "airplane_01","Kita akan tiba di Rachel sebentar lagi.",bc_map,"0xFF8200";
 	end;
 OnTimer220000:
 	set $@airplanelocation2,0;
 	donpcevent "#AirshipWarp-3::OnUnhide";
 	donpcevent "#AirshipWarp-4::OnUnhide";
-	mapannounce "airplane_01","Welcome to Rachel. Have a safe trip.",bc_map,"0xFF8200";
+	mapannounce "airplane_01","Selamat datang di Rachel. Selamat bersenang-senang!",bc_map,"0xFF8200";
 	end;
 OnTimer230000:
-	mapannounce "airplane_01","We are currently in Rachel. The Airship will take off shortly.",bc_map,"0xFF8200";
+	mapannounce "airplane_01","We are currently in Rachel. Pesawatnya akan berangkat sebentar lagi.",bc_map,"0xFF8200";
 	end;
 OnTimer240000:
 	donpcevent "#AirshipWarp-3::OnHide";
 	donpcevent "#AirshipWarp-4::OnHide";
-	mapannounce "airplane_01","The Airship is now taking off. Our next destination is Izlude.",bc_map,"0x00ff00";
+	mapannounce "airplane_01","Pesawatnya sudah berangkat. Tujuan kita berikutnya adalah Izlude.",bc_map,"0x00ff00";
 	stopnpctimer;
 	set .moninv, .moninv + 1;
 	if (.moninv == 7) {
@@ -766,15 +650,15 @@ airplane_01,247,64,5	duplicate(ExitAirplane01)	Exit#airplane_011b	857
 airplane_01,240,40,1	duplicate(ExitAirplane01)	Exit#airplane_012a	857
 airplane_01,247,40,1	duplicate(ExitAirplane01)	Exit#airplane_012b	857
 
-airplane_01,250,58,2	script	Airship Staff#airplane01	67,{
-	mes "[Airship Staff]";
+airplane_01,250,58,2	script	Staf Pesawat#airplane01	67,{
+	mes "[Staf Pesawat]";
 	mes "Welcome";
 	mes "to the Airship.";
 	mes "How may I help you?";
 	next;
 	switch (select("Using the Airship:Captain's Cabin:Facilities:Cancel")) {
 	case 1:
-		mes "[Airship Staff]";
+		mes "[Staf Pesawat]";
 		mes "When you see a broadcast";
 		mes "announcing that we have";
 		mes "arrived at your destination,";
@@ -782,7 +666,7 @@ airplane_01,250,58,2	script	Airship Staff#airplane01	67,{
 		mes "located at the north and";
 		mes "south ends of the Airship.";
 		next;
-		mes "[Airship Staff]";
+		mes "[Staf Pesawat]";
 		mes "If you happen to miss";
 		mes "your stop, don't worry.";
 		mes "The Airship is constantly";
@@ -791,7 +675,7 @@ airplane_01,250,58,2	script	Airship Staff#airplane01	67,{
 		mes "to your intended destination.";
 		close;
 	case 2:
-		mes "[Airship Staff]";
+		mes "[Staf Pesawat]";
 		mes "The Captain's Cabin";
 		mes "is located at the front";
 		mes "of the Airship. There, you";
@@ -799,7 +683,7 @@ airplane_01,250,58,2	script	Airship Staff#airplane01	67,{
 		mes "the pilot of the Airship.";
 		close;
 	case 3:
-		mes "[Airship Staff]";
+		mes "[Staf Pesawat]";
 		mes "The Airship provides";
 		mes "various Mini Games for";
 		mes "the entertainment of all";
@@ -808,7 +692,7 @@ airplane_01,250,58,2	script	Airship Staff#airplane01	67,{
 		mes "in the Airship's Mini Games~";
 		close;
 	case 4:
-		mes "[Airship Staff]";
+		mes "[Staf Pesawat]";
 		mes "Well, I hope you";
 		mes "your flight aboard";
 		mes "our Airships. Thank";
@@ -827,7 +711,7 @@ airplane_01,50,66,5	script	Apple Merchant#air01	86,{
 		close;
 	}
 	mes "[Meltz]";
-	mes "Welcome to Meltz's";
+	mes "Selamat datang di Meltz's";
 	mes "Shop where you can";
 	mes "purchase Apples or grind";
 	mes "them to make Apple Juice.";
@@ -1063,7 +947,7 @@ airplane_01,71,31,2	script	Swordsman Shimizu#air_01	106,{
 //============================================================ 
 airplane_01,32,61,4	script	Nils#ein	49,1,1,{
 	mes "[Nils]";
-	mes "Welcome to the";
+	mes "Selamat datang di the";
 	mes "^ff0000RO Typing Challenge^000000.";
 	mes "Would you like to play";
 	mes "a quick typing game?";
