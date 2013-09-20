@@ -1084,6 +1084,7 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_THORNSTRAP]          |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_MAGNETICFIELD]       |= SCS_NOMOVE;
 	StatusChangeStateTable[SC__MANHOLE]            |= SCS_NOMOVE;
+	StatusChangeStateTable[SC_VACUUM_EXTREME]      |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CURSEDCIRCLE_ATKER]  |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CURSEDCIRCLE_TARGET] |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CRYSTALIZE]          |= SCS_NOMOVE|SCS_NOMOVECOND;
@@ -9288,14 +9289,14 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 
 	//Set option as needed.
 	opt_flag = 1;
-	switch(type) {
+	switch (type) {
 		//OPT1
 		case SC_STONE:  sc->opt1 = OPT1_STONEWAIT; break;
 		case SC_FREEZE: sc->opt1 = OPT1_FREEZE;    break;
 		case SC_STUN:   sc->opt1 = OPT1_STUN;      break;
 		case SC_SLEEP:
 		case SC_DEEPSLEEP:
-			if(type == SC_DEEPSLEEP)
+			if (type == SC_DEEPSLEEP)
 				opt_flag = 0;
 			sc->opt1 = OPT1_SLEEP;
 			break;
@@ -10137,7 +10138,8 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 			break;
 
 		case SC_VACUUM_EXTREME:
-			if( sc && sc->cant.move > 0 ) sc->cant.move--;
+			if( !map_flag_gvg2(bl->m) && sc && sc->cant.move > 0 )
+				sc->cant.move--;
 			break;
 
 		case SC_KYOUGAKU:
@@ -10362,8 +10364,8 @@ int kaahi_heal_timer(int tid, unsigned int tick, int id, intptr_t data)
 	struct status_data *status;
 	int hp;
 
-	if(!((bl=map_id2bl(id))&&
-		(sc=status_get_sc(bl)) &&
+	if(!((bl = map_id2bl(id))&&
+		(sc = status_get_sc(bl)) &&
 		(sce = sc->data[SC_KAAHI])))
 		return 0;
 
@@ -10380,9 +10382,9 @@ int kaahi_heal_timer(int tid, unsigned int tick, int id, intptr_t data)
 	}
 
 	hp = status->max_hp - status->hp;
-	if (hp > sce->val2)
+	if(hp > sce->val2)
 		hp = sce->val2;
-	if (hp)
+	if(hp)
 		status_heal(bl, hp, 0, 2);
 	sce->val4 = INVALID_TIMER;
 	return 1;
@@ -10958,7 +10960,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_VACUUM_EXTREME:
 			if( --(sce->val4) >= 0 ) {
-				if( !unit_is_walking(bl) && !sce->val2 ) {
+				if( !map_flag_gvg2(bl->m) && !unit_is_walking(bl) && !sce->val2 ) {
 					sc->cant.move++;
 					sce->val2 = 1;
 				}

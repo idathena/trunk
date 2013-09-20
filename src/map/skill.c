@@ -12485,7 +12485,7 @@ int skill_unit_onplace_timer (struct skill_unit *src, struct block_list *bl, uns
 			}
 			break;
 
-		case UNT_VACUUM_EXTREME: { //TODO: Official behavior in gvg area. [malufett]
+		case UNT_VACUUM_EXTREME: {
 				int sec = sg->limit - DIFF_TICK(tick,sg->tick);
 				int range = skill_get_unit_range(sg->skill_id,sg->skill_lv);
 
@@ -12496,22 +12496,24 @@ int skill_unit_onplace_timer (struct skill_unit *src, struct block_list *bl, uns
 					distance_xy(src->bl.x,src->bl.y,bl->x,bl->y) <= range) //Don't consider outer bounderies
 					sc_start(ss,bl,type,100,sg->skill_lv,sec);
 
-				if (unit_is_walking(bl) && //Wait until target stop walking
-					(tsc && tsc->data[type] && tsc->data[type]->val4 >= tsc->data[type]->val3 - range))
+				if (!map_flag_gvg2(bl->m)) {
+					if (unit_is_walking(bl) && //Wait until target stop walking
+						(tsc && tsc->data[type] && tsc->data[type]->val4 >= tsc->data[type]->val3 - range))
+							break;
+
+					if (tsc && (!tsc->data[type] || (tsc->data[type] && tsc->data[type]->val4 < 1)))
 						break;
 
-				if (tsc && (!tsc->data[type] || (tsc->data[type] && tsc->data[type]->val4 < 1)))
-					break;
+					if (unit_is_walking(bl) &&
+						distance_xy(src->bl.x,src->bl.y,bl->x,bl->y) > range) //Going outside of boundaries? then force it to stop
+						unit_stop_walking(bl,1);
 
-				if (unit_is_walking(bl) &&
-					distance_xy(src->bl.x,src->bl.y,bl->x,bl->y) > range) //Going outside of boundaries? then force it to stop
-					unit_stop_walking(bl,1);
-
-				if (!unit_is_walking(bl) &&
-					distance_xy(src->bl.x,src->bl.y,bl->x,bl->y) <= range && //Only snap if the target is inside the range or
-					src->bl.x != bl->x && src->bl.y != bl->y) { //Diagonal position parallel to VE's center
-					unit_movepos(bl,src->bl.x,src->bl.y,0,0);
-					clif_fixpos(bl);
+					if (!unit_is_walking(bl) &&
+						distance_xy(src->bl.x,src->bl.y,bl->x,bl->y) <= range && //Only snap if the target is inside the range or
+						src->bl.x != bl->x && src->bl.y != bl->y) { //Diagonal position parallel to VE's center
+						unit_movepos(bl,src->bl.x,src->bl.y,0,0);
+						clif_fixpos(bl);
+					}
 				}
 			}
 			break;
