@@ -355,7 +355,7 @@ airplane,221,158,2	script	Pilot#airplane	852,{
 		close;
 	}
 	// Hugel quest end
-	switch (rdan(1,4)) {
+	switch (rand(1,4)) {
 	case 1:
 		mes "[Pilot]";
 		mes "Sudah lama sekali sejak aku bisa menikmati bir dingin yang nikmat.";
@@ -632,7 +632,7 @@ OnTimer240000:
 	stopnpctimer;
 	set .moninv, .moninv + 1;
 	if (.moninv == 7) {
-		if (rdan(1,3) == 3) {
+		if (rand(1,3) == 3) {
 			donpcevent "Airship#airplane02::OnEnable";
 			end;
 		}
@@ -798,7 +798,7 @@ airplane_01,50,66,5	script	Apple Merchant#air01	86,{
 }
 
 airplane_01,221,158,2	script	Pilot#airplane_01	852,{
-	switch (rdan(1,4)) {
+	switch (rand(1,4)) {
 	case 1:
 		mes "[Pilot]";
 		mes "Garis lintang, sudut 131 Timur.";
@@ -928,7 +928,7 @@ airplane_01,32,61,4	script	Nils#ein	49,1,1,{
 					"Coboman no chikara-yumei na chikara-daiookii na chikara da ze! COBO ON",
 					"I'm the king of All Weirdos! Now you know of my true power. Obey~!",
 					"You give me no choice. I guess it's time for me to reveal my secret...";
-		setarray .@line2_1$[0],	"^3cbcbcuNflAPPaBLe LoVaBLe SeCreTs dan^000000",
+		setarray .@line2_1$[0],	"^3cbcbcuNflAPPaBLe LoVaBLe SeCreTs and^000000",
 					"^ff1493LiGhTsPeEd RiGhT SPEed LeFT TURn^000000",
 					"^ff1493hfjdkeldjsieldjshfjdjeiskdlefvbd^000000",
 					"^ff1493burapaphuraldaneramduanbatuhiwooi^000000",
@@ -942,7 +942,7 @@ airplane_01,32,61,4	script	Nils#ein	49,1,1,{
 					"^ff1493folktale rodimus optimus bumblebee^000000",
 					"^800080`open'0Pen open? open!111OPENSESAME^000000",
 					"^3cbcbcDisCoverY hEaDaChE MoonbeAmS jUsTiCE^000000";
-		setarray .@word2$[0],	"uNflAPPaBLe LoVaBLe SeCreTs dan boWLIiNg aGaINST tHe KarMA of YoUtH",
+		setarray .@word2$[0],	"uNflAPPaBLe LoVaBLe SeCreTs and boWLIiNg aGaINST tHe KarMA of YoUtH",
 					"LiGhTsPeEd RiGhT SPEed LeFT TURn RiGhT BuRn OrIGInAL GaNgSteR SmACk",
 					"hfjdkeldjsieldjshfjdjeiskdlefvbd",
 					"burapaphuraldaneramduanbatuhiwooikabamturubamdingding",
@@ -956,7 +956,7 @@ airplane_01,32,61,4	script	Nils#ein	49,1,1,{
 					1740,
 					1440,
 					1450;
-		set .@wordtest, rdan(7);
+		set .@wordtest, rand(7);
 		next;
 		mes "[Nils]";
 		mes .@line1_1$[.@wordtest];
@@ -1157,8 +1157,8 @@ function	script	applegamble	{
 	mes "^3355FF*Kocok.. kocok... Lempar!*^000000";
 	next;
 	set .@giveapple, .@amount*2;
-	set .@table1, rdan(1,6);
-	set .@table2, rdan(1,6);
+	set .@table1, rand(1,6);
+	set .@table2, rand(1,6);
 	set .@tablesub, .@table1 + .@table2;
 	set .@tabletotal, .@tablesub;
 	mes "["+getarg(0)+"]";
@@ -1168,12 +1168,12 @@ function	script	applegamble	{
 	next;
 	select("Lempar dadu.");
 	mes "^3355FF*kocok.. kocok... Lempar!*^000000";
-	set .@player1, rdan(1,6);
-	set .@player2, rdan(1,6);
+	set .@player1, rand(1,6);
+	set .@player2, rand(1,6);
 	set .@playersub, .@player1 + .@player2;
 	if (.@playersub > 9 && .@amount > 39) {
-		set .@player1, rdan(1,6);
-		set .@player2, rdan(1,6);
+		set .@player1, rand(1,6);
+		set .@player2, rand(1,6);
 		set .@playersub, .@player1 + .@player2;
 	}
 	set .@playertotal, .@playersub;
@@ -1193,7 +1193,7 @@ function	script	applegamble	{
 	switch (select("Lempar dadu.:batal.")) {
 	case 1:
 		mes "^3355FF*Kocok.. kocok... Lempar!*^000000";
-		set .@player3, rdan(1,6);
+		set .@player3, rand(1,6);
 		set .@playertotal, .@playertotal + .@player3;
 		next;
 		mes "["+getarg(0)+"]";
@@ -1242,7 +1242,7 @@ function	script	applegamble	{
 	}
 	next;
 	mes "^3355FF*Kocok.. kocok... Lempar!*^000000";
-	set .@table3, rdan(1,6);
+	set .@table3, rand(1,6);
 	set .@tabletotal, .@tabletotal + .@table3;
 	next;
 	mes "["+getarg(0)+"]";
