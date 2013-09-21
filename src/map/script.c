@@ -9886,8 +9886,8 @@ BUILDIN_FUNC(homunculus_mutate)
 	if( sd == NULL || sd->hd == NULL )
 		return 0;
 
-	if( script_hasdata(st,2) )
-		homun_id = script_getnum(st,2);
+	if( script_hasdata(st, 2) )
+		homun_id = script_getnum(st, 2);
 	else
 		homun_id = 6048 + (rnd() % 4);
 
@@ -9897,7 +9897,7 @@ BUILDIN_FUNC(homunculus_mutate)
 		
 		i = pc_search_inventory(sd, ITEMID_STRANGE_EMBRYO);
 
-		if ( m_class != -1 && m_id != -1 && m_class&HOM_EVO && m_id&HOM_S && sd->hd->homunculus.level >= 99 && i >= 0 ) {
+		if( m_class != HT_INVALID && m_id != HT_INVALID && m_class&HOM_EVO && m_id&HOM_S && sd->hd->homunculus.level >= 99 && i >= 0 ) {
 			sd->hd->homunculus.vaporize = HOM_ST_REST; // Remove morph st
 			merc_call_homunculus(sd); // Respawn homunculus.
 			hom_mutate(sd->hd, homun_id);
@@ -9922,7 +9922,7 @@ BUILDIN_FUNC(homunculus_mutate)
 BUILDIN_FUNC(morphembryo)
 {
 	struct item item_tmp;
-	int m_class, i=0;
+	int m_class, i = 0;
 	TBL_PC *sd;
 
 	sd = script_rid2sd(st);
@@ -9932,7 +9932,7 @@ BUILDIN_FUNC(morphembryo)
 	if( merc_is_hom_active(sd->hd) ) {
 		m_class = hom_class2mapid(sd->hd->homunculus.class_);
 
-		if ( m_class != -1 && m_class&HOM_EVO && sd->hd->homunculus.level >= 99 ) {
+		if( m_class != HT_INVALID && m_class&HOM_EVO && sd->hd->homunculus.level >= 99 ) {
 			memset(&item_tmp, 0, sizeof(item_tmp));
 			item_tmp.nameid = ITEMID_STRANGE_EMBRYO;
 			item_tmp.identify = 1;

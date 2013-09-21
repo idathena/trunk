@@ -507,7 +507,7 @@ int intif_party_message(int party_id,int account_id,const char *mes,int len)
 
 	WFIFOHEAD(inter_fd,len + 12);
 	WFIFOW(inter_fd,0) = 0x3027;
-	WFIFOW(inter_fd,2) = len+12;
+	WFIFOW(inter_fd,2) = len + 12;
 	WFIFOL(inter_fd,4) = party_id;
 	WFIFOL(inter_fd,8) = account_id;
 	memcpy(WFIFOP(inter_fd,12),mes,len);

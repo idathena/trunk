@@ -23,9 +23,16 @@ struct s_homunculus_db {
 };
 
 extern struct s_homunculus_db homunculus_db[MAX_HOMUNCULUS_CLASS];
-enum { HOMUNCULUS_CLASS, HOMUNCULUS_FOOD };
 
-enum { MH_MD_FIGHTING=1, MH_MD_GRAPPLING };
+enum {
+	HOMUNCULUS_CLASS,
+	HOMUNCULUS_FOOD
+};
+
+enum {
+	MH_MD_FIGHTING = 1,
+	MH_MD_GRAPPLING
+};
 
 enum {
 	HOM_ST_ACTIVE = 0,
@@ -50,7 +57,7 @@ struct homun_data {
 	struct s_homunculus homunculus; //[orn]
 
 	int masterteleport_timer;
-	struct map_session_data *master; //pointer back to its master
+	struct map_session_data *master; //Pointer back to its master
 	int hungry_timer; //[orn]
 	unsigned int exp_next;
 	char blockskill[MAX_SKILL]; // [orn]
@@ -73,17 +80,17 @@ struct homun_skill_tree_entry {
 #define HOM_REG 0x1000 //4096
 
 enum {
-// Normal Homunculus
+	// Normal Homunculus
 	MAPID_LIF = HOM_REG|0x0,
 	MAPID_AMISTR,
 	MAPID_FILIR,
 	MAPID_VANILMIRTH,
-// Evolved Homunulus
+	// Evolved Homunulus
 	MAPID_LIF_E = HOM_REG|HOM_EVO|0x0,
 	MAPID_AMISTR_E,
 	MAPID_FILIR_E,
 	MAPID_VANILMIRTH_E,
-// Homunculus S
+	// Homunculus S
 	MAPID_EIRA = HOM_S|0x0,
 	MAPID_BAYERI,
 	MAPID_SERA,
@@ -92,9 +99,10 @@ enum {
 };
 
 enum homun_type {
-	HT_REG	= 0x1,
-	HT_EVO	= 0x2,
-	HT_S	= 0x4,
+	HT_REG, // Regular Homunculus
+	HT_EVO, // Evolved Homunculus
+	HT_S, // Homunculus S
+	HT_INVALID = -1, // Invalid Homunculus
 };
 
 #define homdb_checkid(id) (id >=  HM_CLASS_BASE && id <= HM_CLASS_MAX)

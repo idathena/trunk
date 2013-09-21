@@ -561,7 +561,7 @@ int mob_once_spawn_area(struct map_session_data* sd, int16 m, int16 x0, int16 y0
  * Set a Guardian's guild data [Skotlex]
  *------------------------------------------*/
 static int mob_spawn_guardian_sub(int tid, unsigned int tick, int id, intptr_t data)
-{	//Needed because the guild_data may not be available at guardian spawn time.
+{ //Needed because the guild_data may not be available at guardian spawn time.
 	struct block_list* bl = map_id2bl(id);
 	struct mob_data* md;
 	struct guild* g;
@@ -570,8 +570,7 @@ static int mob_spawn_guardian_sub(int tid, unsigned int tick, int id, intptr_t d
 	if (bl == NULL) //It is possible mob was already removed from map when the castle has no owner. [Skotlex]
 		return 0;
 	
-	if (bl->type != BL_MOB)
-	{
+	if (bl->type != BL_MOB) {
 		ShowError("mob_spawn_guardian_sub: Block error!\n");
 		return 0;
 	}
@@ -620,34 +619,29 @@ int mob_spawn_guardian(const char* mapname, short x, short y, const char* mobnam
 	memset(&data, 0, sizeof(struct spawn_data));
 	data.num = 1;
 
-	m=map_mapname2mapid(mapname);
+	m = map_mapname2mapid(mapname);
 
-	if(m<0)
-	{
+	if (m < 0) {
 		ShowWarning("mob_spawn_guardian: Map [%s] not found.\n", mapname);
 		return 0;
 	}
 	data.m = m;
 	data.num = 1;
-	if(class_<=0) {
+	if (class_ <= 0) {
 		class_ = mob_get_random_id(-class_-1, 1, 99);
 		if (!class_) return 0;
 	}
 
 	data.class_ = class_;
 
-	if( !has_index )
-	{
+	if (!has_index) {
 		guardian = -1;
-	}
-	else if( guardian < 0 || guardian >= MAX_GUARDIANS )
-	{
+	} else if (guardian < 0 || guardian >= MAX_GUARDIANS) {
 		ShowError("mob_spawn_guardian: Invalid guardian index %d for guardian %d (castle map %s)\n", guardian, class_, map[m].name);
 		return 0;
 	}
-	
-	if((x<=0 || y<=0) && !map_search_freecell(NULL, m, &x, &y, -1,-1, 1))
-	{
+
+	if ((x <= 0 || y <= 0) && !map_search_freecell(NULL, m, &x, &y, -1, -1, 1)) {
 		ShowWarning("mob_spawn_guardian: Couldn't locate a spawn cell for guardian class %d (index %d) at castle map %s\n",class_, guardian, map[m].name);
 		return 0;
 	}
@@ -658,9 +652,8 @@ int mob_spawn_guardian(const char* mapname, short x, short y, const char* mobnam
 	if (!mob_parse_dataset(&data))
 		return 0;
 	
-	gc=guild_mapname2gc(map[m].name);
-	if (gc == NULL)
-	{
+	gc = guild_mapname2gc(map[m].name);
+	if (gc == NULL) {
 		ShowError("mob_spawn_guardian: No castle set at map %s\n", map[m].name);
 		return 0;
 	}
@@ -669,8 +662,7 @@ int mob_spawn_guardian(const char* mapname, short x, short y, const char* mobnam
 	else
 		g = guild_search(gc->guild_id);
 
-	if( has_index && gc->guardian[guardian].id )
-  	{	//Check if guardian already exists, refuse to spawn if so.
+	if (has_index && gc->guardian[guardian].id) { //Check if guardian already exists, refuse to spawn if so.
 		struct mob_data *md2 = (TBL_MOB*)map_id2bl(gc->guardian[guardian].id);
 		if (md2 && md2->bl.type == BL_MOB &&
 			md2->guardian_data && md2->guardian_data->number == guardian)
@@ -685,28 +677,23 @@ int mob_spawn_guardian(const char* mapname, short x, short y, const char* mobnam
 	md->guardian_data->number = guardian;
 	md->guardian_data->guild_id = gc->guild_id;
 	md->guardian_data->castle = gc;
-	if( has_index )
-	{// permanent guardian
+	if (has_index) { //Permanent guardian
 		gc->guardian[guardian].id = md->bl.id;
-	}
-	else
-	{// temporary guardian
+	} else { //Temporary guardian
 		int i;
 		ARR_FIND(0, gc->temp_guardians_max, i, gc->temp_guardians[i] == 0);
-		if( i == gc->temp_guardians_max )
-		{
+		if (i == gc->temp_guardians_max) {
 			++(gc->temp_guardians_max);
 			RECREATE(gc->temp_guardians, int, gc->temp_guardians_max);
 		}
 		gc->temp_guardians[i] = md->bl.id;
 	}
-	if (g)
-	{
+	if (g) {
 		md->guardian_data->emblem_id = g->emblem_id;
 		memcpy (md->guardian_data->guild_name, g->name, NAME_LENGTH);
-		md->guardian_data->guardup_lv = guild_checkskill(g,GD_GUARDUP);
+		md->guardian_data->guardup_lv = guild_checkskill(g, GD_GUARDUP);
 	} else if (md->guardian_data->guild_id)
-		add_timer(gettick()+5000,mob_spawn_guardian_sub,md->bl.id,md->guardian_data->guild_id);
+		add_timer(gettick() + 5000, mob_spawn_guardian_sub, md->bl.id, md->guardian_data->guild_id);
 	mob_spawn(md);
 
 	return md->bl.id;
@@ -821,10 +808,8 @@ int mob_delayspawn(int tid, unsigned int tick, int id, intptr_t data)
 	struct block_list* bl = map_id2bl(id);
 	struct mob_data* md = BL_CAST(BL_MOB, bl);
 
-	if( md )
-	{
-		if( md->spawn_timer != tid )
-		{
+	if( md ) {
+		if( md->spawn_timer != tid ) {
 			ShowError("mob_delayspawn: Timer mismatch: %d != %d\n", tid, md->spawn_timer);
 			return 0;
 		}
@@ -1432,11 +1417,11 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 		)) { //Unlock current target.
 			if(mob_warpchase(md, tbl))
 				return true; //Chasing this target.
-			mob_unlocktarget(md, tick-(battle_config.mob_ai&0x8?3000:0)); //Imediately do random walk.
+			mob_unlocktarget(md, tick - (battle_config.mob_ai&0x8 ? 3000 : 0)); //Imediately do random walk.
 			tbl = NULL;
 		}
 	}
-			
+
 	//Check for target change.
 	if(md->attacked_id && mode&MD_CANATTACK) {
 		if(md->attacked_id == md->target_id) { //Rude attacked check.
@@ -1449,7 +1434,7 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 					)
 			&&  md->state.attacked_count++ >= RUDE_ATTACKED_COUNT
 			&&  !mobskill_use(md, tick, MSC_RUDEATTACKED) //If can't rude Attack
-			&&  can_move && unit_escape(&md->bl, tbl, rnd()%10 +1)) //Attempt escape
+			&&  can_move && unit_escape(&md->bl, tbl, rnd()%10 + 1)) //Attempt escape
 			{ //Escaped
 				md->attacked_id = 0;
 				return true;
@@ -1472,7 +1457,7 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 			{ //Rude attacked
 				if(md->state.attacked_count++ >= RUDE_ATTACKED_COUNT
 				&& !mobskill_use(md, tick, MSC_RUDEATTACKED) && can_move
-				&& !tbl && unit_escape(&md->bl, abl, rnd()%10 +1))
+				&& !tbl && unit_escape(&md->bl, abl, rnd()%10 + 1))
 				{ //Escaped.
 					//TODO: Maybe it shouldn't attempt to run if it has another, valid target?
 					md->attacked_id = 0;

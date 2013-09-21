@@ -65,7 +65,7 @@ enum homun_type hom_class2type(int class_) {
 	else if (mid&(HOM_S))
 		return HT_S;
 	else //Invalid type
-		return -1;
+		return HT_INVALID;
 }
 
 int hom_class2mapid(int hom_class)
@@ -316,7 +316,7 @@ int merc_hom_levelup(struct homun_data *hd)
 	int growth_max_hp, growth_max_sp;
 	int m_class;
 
-	if((m_class = hom_class2mapid(hd->homunculus.class_)) == -1) {
+	if((m_class = hom_class2mapid(hd->homunculus.class_)) == HT_INVALID) {
 		ShowError("merc_hom_levelup: Invalid class %d. \n", hd->homunculus.class_);
 		return 0;
 	}
@@ -328,8 +328,8 @@ int merc_hom_levelup(struct homun_data *hd)
 
 	hom = &hd->homunculus;
 	hom->level++;
-	if (!(hom->level % 3))
-		hom->skillpts++;	//1 skillpoint each 3 base level
+	if(!(hom->level % 3))
+		hom->skillpts++; //1 skillpoint each 3 base level
 
 	hom->exp -= hd->exp_next;
 	hd->exp_next = hexptbl[hom->level - 1];
@@ -347,12 +347,12 @@ int merc_hom_levelup(struct homun_data *hd)
 	growth_luk = rnd_value(min->luk, max->luk);
 
 	//Aegis discards the decimals in the stat growth values!
-	growth_str-=growth_str%10;
-	growth_agi-=growth_agi%10;
-	growth_vit-=growth_vit%10;
-	growth_dex-=growth_dex%10;
-	growth_int-=growth_int%10;
-	growth_luk-=growth_luk%10;
+	growth_str -= growth_str%10;
+	growth_agi -= growth_agi%10;
+	growth_vit -= growth_vit%10;
+	growth_dex -= growth_dex%10;
+	growth_int -= growth_int%10;
+	growth_luk -= growth_luk%10;
 
 	hom->max_hp += growth_max_hp;
 	hom->max_sp += growth_max_sp;
@@ -363,13 +363,13 @@ int merc_hom_levelup(struct homun_data *hd)
 	hom->int_+= growth_int;
 	hom->luk += growth_luk;
 
-	if ( battle_config.homunculus_show_growth ) {
+	if(battle_config.homunculus_show_growth) {
 		char output[256] ;
 		sprintf(output,
 			"Growth: hp:%d sp:%d str(%.2f) agi(%.2f) vit(%.2f) int(%.2f) dex(%.2f) luk(%.2f) ",
 			growth_max_hp, growth_max_sp,
-			growth_str/10.0, growth_agi/10.0, growth_vit/10.0,
-			growth_int/10.0, growth_dex/10.0, growth_luk/10.0);
+			growth_str / 10.0, growth_agi / 10.0, growth_vit / 10.0,
+			growth_int / 10.0, growth_dex / 10.0, growth_luk / 10.0);
 		clif_disp_onlyself(hd->master,output,strlen(output));
 	}
 	return 1 ;
@@ -450,7 +450,7 @@ int hom_mutate(struct homun_data *hd, int homun_id)
 	m_class = hom_class2mapid(hd->homunculus.class_);
 	m_id    = hom_class2mapid(homun_id);
 
-	if( m_class == -1 || m_id == -1 || !(m_class&HOM_EVO) || !(m_id&HOM_S) ) {
+	if( m_class == HT_INVALID || m_id == HT_INVALID || !(m_class&HOM_EVO) || !(m_id&HOM_S) ) {
 		clif_emotion(&hd->bl, E_SWT);
 		return 0;
 	}
@@ -497,7 +497,7 @@ int merc_hom_gainexp(struct homun_data *hd,int exp)
 	if(hd->homunculus.vaporize)
 		return 1;
 
-	if((m_class = hom_class2mapid(hd->homunculus.class_)) == -1) {
+	if((m_class = hom_class2mapid(hd->homunculus.class_)) == HT_INVALID) {
 		ShowError("merc_hom_gainexp: Invalid class %d. \n", hd->homunculus.class_);
 		return 0;
 	}
@@ -512,18 +512,18 @@ int merc_hom_gainexp(struct homun_data *hd,int exp)
 	hd->homunculus.exp += exp;
 
 	if(hd->homunculus.exp < hd->exp_next) {
-		clif_hominfo(hd->master,hd,0);
+		clif_hominfo(hd->master, hd, 0);
 		return 0;
 	}
 
 	//Level up
- 	while( hd->homunculus.exp > hd->exp_next && merc_hom_levelup(hd) );
+ 	while(hd->homunculus.exp > hd->exp_next && merc_hom_levelup(hd));
 
 	if(hd->exp_next == 0)
 		hd->homunculus.exp = 0 ;
 
-	clif_specialeffect(&hd->bl,568,AREA);
-	status_calc_homunculus(hd,0);
+	clif_specialeffect(&hd->bl, 568, AREA);
+	status_calc_homunculus(hd, 0);
 	status_percent_heal(&hd->bl, 100, 100);
 	return 0;
 }

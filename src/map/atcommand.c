@@ -111,47 +111,44 @@ static const char* atcommand_help_string(const char* command)
 	const char* str = NULL;
 	config_setting_t* info;
 
-	if( *command == atcommand_symbol || *command == charcommand_symbol )
-	{// remove the prefix symbol for the raw name of the command
+	if( *command == atcommand_symbol || *command == charcommand_symbol ) {
+		// Remove the prefix symbol for the raw name of the command
 		command ++;
 	}
 
-	// convert alias to the real command name
+	// Convert alias to the real command name
 	command = atcommand_checkalias(command);
 
-	// attept to find the first default help command
+	// Attept to find the first default help command
 	info = config_lookup(&atcommand_config, "help");
 
-	if( info == NULL )
-	{// failed to find the help property in the configuration file
+	if( info == NULL ) { // Failed to find the help property in the configuration file
 		return NULL;
 	}
 	
-	if( !config_setting_lookup_string( info, command, &str ) )
-	{// failed to find the matching help string
+	if( !config_setting_lookup_string( info, command, &str ) ) { // Failed to find the matching help string
 		return NULL;
 	}
 
-	// push the result from the method
+	// Push the result from the method
 	return str;
 }
-
 
 /*==========================================
  * @send (used for testing packet sends from the client)
  *------------------------------------------*/
 ACMD_FUNC(send)
 {
-	int len=0,off,end,type;
+	int len = 0,off,end,type;
 	long num;
 
-	// read message type as hex number (without the 0x)
+	// Read message type as hex number (without the 0x)
 	if(!message || !*message ||
-			!((sscanf(message, "len %x", &type)==1 && (len=1))
-			|| sscanf(message, "%x", &type)==1) )
+		!((sscanf(message, "len %x", &type) == 1 && (len = 1))
+		|| sscanf(message, "%x", &type) == 1) )
 	{
 		int i;
-		for (i = 900; i <= 903; ++i)
+		for(i = 900; i <= 903; ++i)
 			clif_displaymessage(fd, msg_txt(i));
 		return -1;
 	}
@@ -173,8 +170,8 @@ ACMD_FUNC(send)
 
 #define SKIP_VALUE(p) \
 	{\
-		while(*(p) && !ISSPACE(*(p))) ++(p); /* non-space */\
-		while(*(p) && ISSPACE(*(p)))  ++(p); /* space */\
+		while(*(p) && !ISSPACE(*(p))) ++(p); /* Non-space */\
+		while(*(p) && ISSPACE(*(p)))  ++(p); /* Space */\
 	}
 //define SKIP_VALUE
 
@@ -187,67 +184,58 @@ ACMD_FUNC(send)
 	}
 //define GET_VALUE
 
-	if (type > 0 && type < MAX_PACKET_DB) {
+	if(type > 0 && type < MAX_PACKET_DB) {
 
-		if(len)
-		{// show packet length
+		if(len) { // Show packet length
 			sprintf(atcmd_output, msg_txt(904), type, packet_db[sd->packet_ver][type].len); // Packet 0x%x length: %d
 			clif_displaymessage(fd, atcmd_output);
 			return 0;
 		}
 
-		len=packet_db[sd->packet_ver][type].len;
-		off=2;
-		if(len == 0)
-		{// unknown packet - ERROR
+		len = packet_db[sd->packet_ver][type].len;
+		off = 2;
+		if(len == 0) { // Unknown packet - ERROR
 			sprintf(atcmd_output, msg_txt(905), type); // Unknown packet: 0x%x
 			clif_displaymessage(fd, atcmd_output);
 			return -1;
-		} else if(len == -1)
-		{// dynamic packet
-			len=SHRT_MAX-4; // maximum length
-			off=4;
+		} else if(len == -1) { // Dynamic packet
+			len = SHRT_MAX - 4; // Maximum length
+			off = 4;
 		}
 		WFIFOHEAD(fd, len);
-		WFIFOW(fd,0)=TOW(type);
+		WFIFOW(fd,0) = TOW(type);
 
-		// parse packet contents
+		// Parse packet contents
 		SKIP_VALUE(message);
-		while(*message != 0 && off < len){
-			if(ISDIGIT(*message) || *message == '-' || *message == '+')
-			{// default (byte)
+		while(*message != 0 && off < len) {
+			if(ISDIGIT(*message) || *message == '-' || *message == '+') { // Default (byte)
 				GET_VALUE(message,num);
-				WFIFOB(fd,off)=TOB(num);
+				WFIFOB(fd,off) = TOB(num);
 				++off;
-			} else if(TOUPPER(*message) == 'B')
-			{// byte
+			} else if(TOUPPER(*message) == 'B') { // Byte
 				++message;
 				GET_VALUE(message,num);
-				WFIFOB(fd,off)=TOB(num);
+				WFIFOB(fd,off) = TOB(num);
 				++off;
-			} else if(TOUPPER(*message) == 'W')
-			{// word (2 bytes)
+			} else if(TOUPPER(*message) == 'W') { // Word (2 bytes)
 				++message;
 				GET_VALUE(message,num);
-				WFIFOW(fd,off)=TOW(num);
-				off+=2;
-			} else if(TOUPPER(*message) == 'L')
-			{// long word (4 bytes)
+				WFIFOW(fd,off) = TOW(num);
+				off += 2;
+			} else if(TOUPPER(*message) == 'L') { // Long word (4 bytes)
 				++message;
 				GET_VALUE(message,num);
-				WFIFOL(fd,off)=TOL(num);
-				off+=4;
-			} else if(TOUPPER(*message) == 'S')
-			{// string - escapes are valid
-				// get string length - num <= 0 means not fixed length (default)
+				WFIFOL(fd,off) = TOL(num);
+				off += 4;
+			} else if(TOUPPER(*message) == 'S') { // String - escapes are valid
+				// Get string length - num <= 0 means not fixed length (default)
 				++message;
-				if(*message == '"'){
-					num=0;
+				if(*message == '"') {
+					num = 0;
 				} else {
 					GET_VALUE(message,num);
-					while(*message != '"')
-					{// find start of string
-						if(*message == 0 || ISSPACE(*message)){
+					while(*message != '"') { // Find start of string
+						if(*message == 0 || ISSPACE(*message)) {
 							PARSE_ERROR(msg_txt(906),message); // Not a string:
 							return -1;
 						}
@@ -255,44 +243,44 @@ ACMD_FUNC(send)
 					}
 				}
 
-				// parse string
+				// Parse string
 				++message;
 				CHECK_EOS(message);
-				end=(num<=0? 0: min(off+((int)num),len));
+				end = (num <= 0 ? 0: min(off + ((int)num),len));
 				for(; *message != '"' && (off < end || end == 0); ++off){
-					if(*message == '\\'){
+					if(*message == '\\') {
 						++message;
 						CHECK_EOS(message);
-						switch(*message){
-							case 'a': num=0x07; break; // Bell
-							case 'b': num=0x08; break; // Backspace
-							case 't': num=0x09; break; // Horizontal tab
-							case 'n': num=0x0A; break; // Line feed
-							case 'v': num=0x0B; break; // Vertical tab
-							case 'f': num=0x0C; break; // Form feed
-							case 'r': num=0x0D; break; // Carriage return
-							case 'e': num=0x1B; break; // Escape
-							default:  num=*message; break;
+						switch(*message) {
+							case 'a': num = 0x07; break; // Bell
+							case 'b': num = 0x08; break; // Backspace
+							case 't': num = 0x09; break; // Horizontal tab
+							case 'n': num = 0x0A; break; // Line feed
+							case 'v': num = 0x0B; break; // Vertical tab
+							case 'f': num = 0x0C; break; // Form feed
+							case 'r': num = 0x0D; break; // Carriage return
+							case 'e': num = 0x1B; break; // Escape
+							default:  num =* message; break;
 							case 'x': // Hexadecimal
-							{
-								++message;
-								CHECK_EOS(message);
-								if(!ISXDIGIT(*message)){
-									PARSE_ERROR(msg_txt(907),message); // Not a hexadecimal digit:
-									return -1;
-								}
-								num=(ISDIGIT(*message)?*message-'0':TOLOWER(*message)-'a'+10);
-								if(ISXDIGIT(*message)){
+								{
 									++message;
 									CHECK_EOS(message);
-									num<<=8;
-									num+=(ISDIGIT(*message)?*message-'0':TOLOWER(*message)-'a'+10);
+									if(!ISXDIGIT(*message)) {
+										PARSE_ERROR(msg_txt(907),message); // Not a hexadecimal digit:
+										return -1;
+									}
+									num = (ISDIGIT(*message) ? *message - '0' : TOLOWER(*message) - 'a' + 10);
+									if(ISXDIGIT(*message)) {
+										++message;
+										CHECK_EOS(message);
+										num <<= 8;
+										num += (ISDIGIT(*message) ? *message - '0' : TOLOWER(*message) - 'a' + 10);
+									}
+									WFIFOB(fd,off) = TOB(num);
+									++message;
+									CHECK_EOS(message);
+									continue;
 								}
-								WFIFOB(fd,off)=TOB(num);
-								++message;
-								CHECK_EOS(message);
-								continue;
-							}
 							case '0':
 							case '1':
 							case '2':
@@ -301,60 +289,55 @@ ACMD_FUNC(send)
 							case '5':
 							case '6':
 							case '7': // Octal
-							{
-								num=*message-'0'; // 1st octal digit
-								++message;
-								CHECK_EOS(message);
-								if(ISDIGIT(*message) && *message < '8'){
-									num<<=3;
-									num+=*message-'0'; // 2nd octal digit
+								{
+									num = *message - '0'; // 1st octal digit
 									++message;
 									CHECK_EOS(message);
-									if(ISDIGIT(*message) && *message < '8'){
-										num<<=3;
-										num+=*message-'0'; // 3rd octal digit
+									if(ISDIGIT(*message) && *message < '8') {
+										num <<= 3;
+										num += *message - '0'; // 2nd octal digit
 										++message;
 										CHECK_EOS(message);
+										if(ISDIGIT(*message) && *message < '8') {
+											num <<= 3;
+											num += *message - '0'; // 3rd octal digit
+											++message;
+											CHECK_EOS(message);
+										}
 									}
+									WFIFOB(fd,off) = TOB(num);
+									continue;
 								}
-								WFIFOB(fd,off)=TOB(num);
-								continue;
-							}
 						}
 					} else
-						num=*message;
-					WFIFOB(fd,off)=TOB(num);
+						num = *message;
+					WFIFOB(fd,off) = TOB(num);
 					++message;
 					CHECK_EOS(message);
-				}//for
-				while(*message != '"')
-				{// ignore extra characters
+				} // For
+				while(*message != '"') { // Ignore extra characters
 					++message;
 					CHECK_EOS(message);
 				}
 
-				// terminate the string
-				if(off < end)
-				{// fill the rest with 0's
-					memset(WFIFOP(fd,off),0,end-off);
-					off=end;
+				// Terminate the string
+				if(off < end) { // Fill the rest with 0's
+					memset(WFIFOP(fd,off),0,end - off);
+					off = end;
 				}
-			} else
-			{// unknown
+			} else { // Unknown
 				PARSE_ERROR(msg_txt(908),message); // Unknown type of value in:
 				return -1;
 			}
 			SKIP_VALUE(message);
 		}
 
-		if(packet_db[sd->packet_ver][type].len == -1)
-		{// send dynamic packet
-			WFIFOW(fd,2)=TOW(off);
+		if(packet_db[sd->packet_ver][type].len == -1) { // Send dynamic packet
+			WFIFOW(fd,2) = TOW(off);
 			WFIFOSET(fd,off);
-		} else
-		{// send static packet
+		} else { // Send static packet
 			if(off < len)
-				memset(WFIFOP(fd,off),0,len-off);
+				memset(WFIFOP(fd,off),0,len - off);
 			WFIFOSET(fd,len);
 		}
 	} else {
@@ -6976,7 +6959,7 @@ ACMD_FUNC(hommutate)
 	m_class = hom_class2mapid(sd->hd->homunculus.class_);
 	m_id	= hom_class2mapid(homun_id);
 
-	if (m_class != -1 && m_id != -1 && m_class&HOM_EVO && m_id&HOM_S && sd->hd->homunculus.level >= 99) {
+	if (m_class != HT_INVALID && m_id != HT_INVALID && m_class&HOM_EVO && m_id&HOM_S && sd->hd->homunculus.level >= 99) {
 		hom_mutate(sd->hd, homun_id);
 	} else {
 		clif_emotion(&sd->hd->bl, E_SWT);
