@@ -611,12 +611,12 @@ int skillnotok (uint16 skill_id, struct map_session_data *sd)
 		case MC_VENDING:
 		case ALL_BUYING_STORE:
 			if (map[sd->bl.m].flag.novending) {
-				clif_displaymessage(sd->fd, msg_txt(276)); // "You can't open a shop on this map"
+				clif_displaymessage(sd->fd, msg_txt(276)); //"You can't open a shop on this map"
 				clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0);
 				return 1;
 			}
 			if (map_getcell(sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKNOVENDING)) {
-				clif_displaymessage(sd->fd, msg_txt(204)); // "You can't open a shop on this cell."
+				clif_displaymessage(sd->fd, msg_txt(204)); //"You can't open a shop on this cell."
 				clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0);
 				return 1;
 			}
@@ -629,9 +629,9 @@ int skillnotok (uint16 skill_id, struct map_session_data *sd)
 				return 1;
 			}
 		case MC_IDENTIFY:
-			return 0; // Always allowed
+			return 0; //Always allowed
 		case WZ_ICEWALL:
-			// Noicewall flag [Valaris]
+			//Noicewall flag [Valaris]
 			if (map[m].flag.noicewall) {
 				clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0);
 				return 1;
@@ -3300,7 +3300,7 @@ int skill_area_sub_count (struct block_list *src, struct block_list *target, uin
  *------------------------------------------*/
 static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 {
-	struct block_list *src = map_id2bl(id),*target;
+	struct block_list *src = map_id2bl(id), *target;
 	struct unit_data *ud = unit_bl2ud(src);
 	struct skill_timerskill *skl;
 	int range;
@@ -5285,12 +5285,12 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 		case AL_DECAGI:
 		case MER_DECAGI:
 			clif_skill_nodamage (src, bl, skill_id, skill_lv,
-				sc_start(src, bl, type, (50 + skill_lv * 3 + (status_get_lv(src) + sstatus->int_)/5), skill_lv, skill_get_time(skill_id,skill_lv)));
+				sc_start(src, bl, type, (50 + skill_lv * 3 + (status_get_lv(src) + sstatus->int_) / 5), skill_lv, skill_get_time(skill_id, skill_lv)));
 			break;
 
 		case AL_CRUCIS:
 			if (flag&1)
-				sc_start(src, bl, type, 23+skill_lv*4+status_get_lv(src)-status_get_lv(bl), skill_lv, skill_get_time(skill_id,skill_lv));
+				sc_start(src, bl, type, 23 + skill_lv * 4 + status_get_lv(src) - status_get_lv(bl), skill_lv, skill_get_time(skill_id, skill_lv));
 			else {
 				map_foreachinrange(skill_area_sub, src, skill_get_splash(skill_id, skill_lv), BL_CHAR,
 					src, skill_id, skill_lv, tick, flag|BCT_ENEMY|1, skill_castend_nodamage_id);
@@ -5300,10 +5300,10 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 
 		case PR_LEXDIVINA:
 		case MER_LEXDIVINA:
-			if( tsce )
-				status_change_end(bl,type, INVALID_TIMER);
+			if (tsce)
+				status_change_end(bl, type, INVALID_TIMER);
 			else
-				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
+				sc_start(src, bl, type, 100, skill_lv, skill_get_time(skill_id, skill_lv));
 			clif_skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			break;
 
@@ -5319,12 +5319,12 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 
 				clif_skill_nodamage (src, bl, skill_id, skill_lv, 1);
 
-				if (sd) { // player-casted
+				if (sd) { //Player-casted
 					sd->state.abra_flag = 1;
 					sd->skillitem = abra_skill_id;
 					sd->skillitemlv = abra_skill_lv;
 					clif_item_skill(sd, abra_skill_id, abra_skill_lv);
-				} else { // mob-casted
+				} else { //Mob-casted
 					struct unit_data *ud = unit_bl2ud(src);
 					int inf = skill_get_inf(abra_skill_id);
 					if (!ud) break;
@@ -7042,7 +7042,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 			break;
 
 		case NPC_SPEEDUP: {
-				// or does it increase casting rate? just a guess xD
+				//Or does it increase casting rate? just a guess xD
 				int i = SC_ASPDPOTION0 + skill_lv - 1;
 				if (i > SC_ASPDPOTION3)
 					i = SC_ASPDPOTION3;
@@ -7052,7 +7052,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 			break;
 
 		case NPC_REVENGE:
-			// not really needed... but adding here anyway ^^
+			//Not really needed, but adding here anyway ^^
 			if (md && md->master_id > 0) {
 				struct block_list *mbl, *tbl;
 				if ((mbl = map_id2bl(md->master_id)) == NULL ||
@@ -7716,21 +7716,21 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
 			break;
 		case HVAN_CHAOTIC: { //[orn]
-				static const int per[5][2]={{20,50},{50,60},{25,75},{60,64},{34,67}};
+				static const int per[5][2] = {{20,50},{50,60},{25,75},{60,64},{34,67}};
 				int r = rnd()%100;
-				i = (skill_lv-1)%5;
-				if(r<per[i][0]) //Self
+				i = (skill_lv - 1)%5;
+				if (r < per[i][0]) //Self
 					bl = src;
-				else if(r<per[i][1]) //Master
+				else if( r < per[i][1]) //Master
 					bl = battle_get_master(src);
 				else //Enemy
 					bl = map_id2bl(battle_gettarget(src));
 
 				if (!bl) bl = src;
-				i = skill_calc_heal(src, bl, skill_id, 1+rnd()%skill_lv, true);
+				i = skill_calc_heal(src, bl, skill_id, 1 + rnd()%skill_lv, true);
 				//Eh? why double skill packet?
-				clif_skill_nodamage(src,bl,AL_HEAL,i,1);
-				clif_skill_nodamage(src,bl,skill_id,i,1);
+				clif_skill_nodamage(src, bl, AL_HEAL, i, 1);
+				clif_skill_nodamage(src, bl, skill_id, i, 1);
 				status_heal(bl, i, 0, 0);
 			}
 			break;
@@ -9678,7 +9678,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 	struct mob_data *md;
 	struct unit_data *ud;
 	struct status_change *sc = NULL;
-	int inf,inf2,flag = 0;
+	int inf, inf2, flag = 0;
 
 	src = map_id2bl(id);
 	if( src == NULL ) {
@@ -11085,7 +11085,7 @@ static int skill_icewall_block(struct block_list *bl,va_list ap) {
 	nullpo_ret(md);
 	if( !md->target_id || ( target = map_id2bl(md->target_id) ) == NULL )
 		return 0;
-	
+
 	if( path_search_long(NULL,bl->m,bl->x,bl->y,target->x,target->y,CELL_CHKICEWALL) )
 		return 0;
 
@@ -15332,7 +15332,7 @@ int skill_greed (struct block_list *bl, va_list ap)
 	struct flooritem_data *fitem = NULL;
 
 	nullpo_ret(bl);
-	nullpo_ret(src = va_arg(ap, struct block_list *));
+	nullpo_ret(src = va_arg(ap,struct block_list *));
 
 	if(src->type == BL_PC && (sd = (struct map_session_data *)src) && bl->type == BL_ITEM && (fitem = (struct flooritem_data *)bl))
 		pc_takeitem(sd, fitem);
@@ -15497,7 +15497,7 @@ static int skill_cell_overlap(struct block_list *bl, va_list ap)
 /*==========================================
  *
  *------------------------------------------*/
-int skill_chastle_mob_changetarget(struct block_list *bl,va_list ap)
+int skill_chastle_mob_changetarget(struct block_list *bl, va_list ap)
 {
 	struct mob_data* md;
 	struct unit_data*ud = unit_bl2ud(bl);
@@ -15707,7 +15707,7 @@ bool skill_check_camouflage(struct block_list *bl, struct status_change_entry *s
 
 	if( bl->type == BL_PC ) { //Check for walls.
 		int i;
-		ARR_FIND( 0, 8, i, map_getcell(bl->m, bl->x+dx[i], bl->y+dy[i], CELL_CHKNOPASS) != 0 );
+		ARR_FIND(0, 8, i, map_getcell(bl->m, bl->x+dx[i], bl->y+dy[i], CELL_CHKNOPASS) != 0);
 		if( i == 8 )
 			wall = false;
 	}
@@ -15957,6 +15957,7 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char* file, int li
 
 	src = map_id2bl(group->src_id);
 	ud = unit_bl2ud(src);
+
 	if( !src || !ud ) {
 		ShowError("skill_delunitgroup: Group's source not found! (src_id: %d skill_id: %d)\n", group->src_id, group->skill_id);
 		return 0;
@@ -15979,9 +15980,9 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char* file, int li
 		}
 	}
 
-	if (skill_get_unit_flag(group->skill_id)&(UF_DANCE|UF_SONG|UF_ENSEMBLE)) {
+	if( skill_get_unit_flag(group->skill_id)&(UF_DANCE|UF_SONG|UF_ENSEMBLE) ) {
 		struct status_change* sc = status_get_sc(src);
-		if (sc && sc->data[SC_DANCING]) {
+		if( sc && sc->data[SC_DANCING] ) {
 			sc->data[SC_DANCING]->val2 = 0 ; //This prevents status_change_end attempting to redelete the group. [Skotlex]
 			status_change_end(src, SC_DANCING, INVALID_TIMER);
 		}
@@ -15989,9 +15990,9 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char* file, int li
 
 	//End Gospel's status change on 'src'
 	//(needs to be done when the group is deleted by other means than skill deactivation)
-	if (group->unit_id == UNT_GOSPEL) {
+	if( group->unit_id == UNT_GOSPEL ) {
 		struct status_change *sc = status_get_sc(src);
-		if(sc && sc->data[SC_GOSPEL]) {
+		if( sc && sc->data[SC_GOSPEL] ) {
 			sc->data[SC_GOSPEL]->val3 = 0; //Remove reference to this group. [Skotlex]
 			status_change_end(src, SC_GOSPEL, INVALID_TIMER);
 		}
@@ -16013,7 +16014,7 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char* file, int li
 				struct status_change *sc = NULL;
 				if( (sc = status_get_sc(src)) != NULL && sc->data[SC_NEUTRALBARRIER_MASTER] ) {
 					sc->data[SC_NEUTRALBARRIER_MASTER]->val2 = 0;
-					status_change_end(src,SC_NEUTRALBARRIER_MASTER,INVALID_TIMER);
+					status_change_end(src, SC_NEUTRALBARRIER_MASTER, INVALID_TIMER);
 				}
 			}
 			break;
@@ -16021,7 +16022,7 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char* file, int li
 				struct status_change *sc = NULL;
 				if( (sc = status_get_sc(src)) != NULL && sc->data[SC_STEALTHFIELD_MASTER] ) {
 					sc->data[SC_STEALTHFIELD_MASTER]->val2 = 0;
-					status_change_end(src,SC_STEALTHFIELD_MASTER,INVALID_TIMER);
+					status_change_end(src, SC_STEALTHFIELD_MASTER, INVALID_TIMER);
 				}
 			}
 			break;
@@ -16029,19 +16030,19 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char* file, int li
 				struct status_change *sc = NULL;
 				if( (sc = status_get_sc(src)) && sc->data[SC_BANDING] ) {
 					sc->data[SC_BANDING]->val4 = 0;
-					status_change_end(src,SC_BANDING,INVALID_TIMER);
+					status_change_end(src, SC_BANDING, INVALID_TIMER);
 				}
 			}
 			break;
 	}
 
-	if (src->type == BL_PC && group->state.ammo_consume)
+	if( src->type == BL_PC && group->state.ammo_consume )
 		battle_consume_ammo((TBL_PC*)src, group->skill_id, group->skill_lv);
 
 	group->alive_count = 0;
 
 	//Remove all unit cells
-	if(group->unit != NULL)
+	if( group->unit != NULL )
 		for( i = 0; i < group->unit_count; i++ )
 			skill_delunit(&group->unit[i]);
 
@@ -16053,13 +16054,13 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char* file, int li
 
 	idb_remove(group_db, group->group_id);
 	map_freeblock(&group->unit->bl); //Schedules deallocation of whole array (HACK)
-	group->unit=NULL;
-	group->group_id=0;
-	group->unit_count=0;
+	group->unit = NULL;
+	group->group_id = 0;
+	group->unit_count = 0;
 
 	//Locate this group, swap with the last entry and delete it
-	ARR_FIND( 0, MAX_SKILLUNITGROUP, i, ud->skillunit[i] == group );
-	ARR_FIND( i, MAX_SKILLUNITGROUP, j, ud->skillunit[j] == NULL ); j--;
+	ARR_FIND(0, MAX_SKILLUNITGROUP, i, ud->skillunit[i] == group);
+	ARR_FIND(i, MAX_SKILLUNITGROUP, j, ud->skillunit[j] == NULL); j--;
 	if( i < MAX_SKILLUNITGROUP ) {
 		ud->skillunit[i] = ud->skillunit[j];
 		ud->skillunit[j] = NULL;

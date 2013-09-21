@@ -4261,9 +4261,8 @@ struct Damage battle_calc_defense_reduction(struct Damage wd, struct block_list 
 	* Damage = Attack * (4000+eDEF)/(4000+eDEF*10) - sDEF
 	* Pierce defence gains 1 atk per def/2
 	**/
-	/* Being hit by a gazillion units, -400 creates a division by 0 and subsequently crashes */
 	if(def1 == -400)
-		def1 = -399;
+		def1 = -399; //Avoid divide by 0
 	ATK_ADD2(wd.damage, wd.damage2,
 		is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_R) ? (def1 / 2) : 0,
 		is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_L) ? (def1 / 2) : 0
@@ -5528,7 +5527,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 			}
 		}
 #ifdef RENEWAL
-	switch(skill_id) { // These skills will do a card fix later
+	switch(skill_id) { //These skills will do a card fix later
 		case CR_ACIDDEMONSTRATION:
 		case ASC_BREAKER:
 			break;
@@ -5558,7 +5557,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 			int mdef2 = tstatus->mdef2;
 #ifdef RENEWAL
 			if(tsc && tsc->data[SC_ASSUMPTIO])
-				mdef <<= 1; // only eMDEF is doubled
+				mdef <<= 1; //Only eMDEF is doubled
 #endif
 			if(sd) {
 				i = sd->ignore_mdef[is_boss(target) ? RC_BOSS : RC_NONBOSS];
@@ -5574,6 +5573,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src,struct block_list 
 			 * RE MDEF Reduction
 			 * Damage = Magic Attack * (1000+eMDEF)/(1000+eMDEF) - sMDEF
 			 **/
+			if (mdef == -100)
+				mdef = -99; //Avoid divide by 0
 			ad.damage = ad.damage * (1000 + mdef) / (1000 + mdef * 10) - mdef2;
 #else
 			if(battle_config.magic_defense_type)
@@ -7466,6 +7467,7 @@ static const struct _battle_data {
 	{ "gm_ignore_warpable_area",            &battle_config.gm_ignore_warpable_area,         0,      2,      100,            },
 	{ "snovice_call_type",                  &battle_config.snovice_call_type,               0,      0,      1,              },
 	{ "guild_notice_changemap",             &battle_config.guild_notice_changemap,          2,      0,      2,              },
+	{ "drop_rateincrease",                  &battle_config.drop_rateincrease,               0,      0,      1,              },
 };
 #ifndef STATS_OPT_OUT
 /**

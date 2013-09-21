@@ -215,26 +215,26 @@ bool chrif_auth_finished(TBL_PC* sd) {
 
 	return false;
 }
-// sets char-server's user id
+//Sets char-server's user id
 void chrif_setuserid(char *id) {
 	memcpy(userid, id, NAME_LENGTH);
 }
 
-// sets char-server's password
+//Sets char-server's password
 void chrif_setpasswd(char *pwd) {
 	memcpy(passwd, pwd, NAME_LENGTH);
 }
 
-// security check, prints warning if using default password
+//Security check, prints warning if using default password
 void chrif_checkdefaultlogin(void) {
-	if (strcmp(userid, "s1")==0 && strcmp(passwd, "p1")==0) {
+	if (strcmp(userid, "s1") == 0 && strcmp(passwd, "p1") == 0) {
 		ShowWarning("Using the default user/password s1/p1 is NOT RECOMMENDED.\n");
 		ShowNotice("Please edit your 'login' table to create a proper inter-server user/password (gender 'S')\n");
 		ShowNotice("and then edit your user/password in conf/map_athena.conf (or conf/import/map_conf.txt)\n");
 	}
 }
 
-// sets char-server's ip address
+//Sets char-server's ip address
 int chrif_setip(const char* ip) {
 	char ip_str[16];
 
@@ -251,12 +251,12 @@ int chrif_setip(const char* ip) {
 	return 1;
 }
 
-// sets char-server's port number
+//Sets char-server's port number
 void chrif_setport(uint16 port) {
 	char_port = port;
 }
 
-// says whether the char-server is connected or not
+//Says whether the char-server is connected or not
 int chrif_isconnected(void) {
 	return (char_fd > 0 && session[char_fd] != NULL && chrif_state == 2);
 }
@@ -273,9 +273,9 @@ int chrif_save(struct map_session_data *sd, int flag) {
 
 	if (flag && sd->state.active) { //Store player data which is quitting
 		//FIXME: SC are lost if there's no connection at save-time because of the way its related data is cleared immediately after this function. [Skotlex]
-		if ( chrif_isconnected() )
+		if (chrif_isconnected())
 			chrif_save_scdata(sd);
-		if ( !chrif_auth_logout(sd,flag == 1 ? ST_LOGOUT : ST_MAPCHANGE) )
+		if (!chrif_auth_logout(sd, flag == 1 ? ST_LOGOUT : ST_MAPCHANGE))
 			ShowError("chrif_save: Failed to set up player %d:%d for proper quitting!\n", sd->status.account_id, sd->status.char_id);
 	}
 
@@ -301,21 +301,21 @@ int chrif_save(struct map_session_data *sd, int flag) {
 	WFIFOW(char_fd,2) = sizeof(sd->status) + 13;
 	WFIFOL(char_fd,4) = sd->status.account_id;
 	WFIFOL(char_fd,8) = sd->status.char_id;
-	WFIFOB(char_fd,12) = (flag==1)?1:0; //Flag to tell char-server this character is quitting.
+	WFIFOB(char_fd,12) = (flag == 1) ? 1 : 0; //Flag to tell char-server this character is quitting.
 
 	//If the user is on a instance map, we have to fake his current position
 	if( map[sd->bl.m].instance_id ) {
 		struct mmo_charstatus status;
 
 		//Copy the whole status
-		memcpy( &status, &sd->status, sizeof( struct mmo_charstatus ) );
+		memcpy(&status, &sd->status, sizeof(struct mmo_charstatus));
 		//Change his current position to his savepoint
-		memcpy( &status.last_point, &status.save_point, sizeof( struct point ) );
+		memcpy(&status.last_point, &status.save_point, sizeof(struct point));
 		//Copy the copied status into the packet
-		memcpy( WFIFOP( char_fd, 13 ), &status, sizeof( struct mmo_charstatus ) );
+		memcpy(WFIFOP(char_fd, 13), &status, sizeof(struct mmo_charstatus));
 	} else {
 		//Copy the whole status into the packet
-		memcpy( WFIFOP( char_fd, 13 ), &sd->status, sizeof( struct mmo_charstatus ) );
+		memcpy(WFIFOP(char_fd, 13), &sd->status, sizeof(struct mmo_charstatus));
 	}
 
 	WFIFOSET(char_fd, WFIFOW(char_fd,2));
@@ -334,7 +334,7 @@ int chrif_save(struct map_session_data *sd, int flag) {
 	return 0;
 }
 
-// connects to char-server (plaintext)
+//Connects to char-server (plaintext)
 int chrif_connect(int fd) {
 	ShowStatus("Logging in to char server...\n", char_fd);
 	WFIFOHEAD(fd,60);
@@ -349,24 +349,24 @@ int chrif_connect(int fd) {
 	return 0;
 }
 
-// sends maps to char-server
+//Sends maps to char-server
 int chrif_sendmap(int fd) {
 	int i;
 
 	ShowStatus("Sending maps to char server...\n");
 
-	// Sending normal maps, not instances
+	//Sending normal maps, not instances
 	WFIFOHEAD(fd, 4 + instance_start * 4);
 	WFIFOW(fd,0) = 0x2afa;
 	for(i = 0; i < instance_start; i++)
-		WFIFOW(fd,4+i*4) = map[i].index;
+		WFIFOW(fd,4 + i * 4) = map_id2index(i);
 	WFIFOW(fd,2) = 4 + i * 4;
 	WFIFOSET(fd,WFIFOW(fd,2));
 
 	return 0;
 }
 
-// receive maps from some other map-server (relayed via char-server)
+//Receive maps from some other map-server (relayed via char-server)
 int chrif_recvmap(int fd) {
 	int i, j;
 	uint32 ip = ntohl(RFIFOL(fd,4));
@@ -384,7 +384,7 @@ int chrif_recvmap(int fd) {
 	return 0;
 }
 
-// remove specified maps (used when some other map-server disconnects)
+//Remove specified maps (used when some other map-server disconnects)
 int chrif_removemap(int fd) {
 	int i, j;
 	uint32 ip =  RFIFOL(fd,4);
@@ -401,13 +401,13 @@ int chrif_removemap(int fd) {
 	return 0;
 }
 
-// received after a character has been "final saved" on the char-server
+//Received after a character has been "final saved" on the char-server
 static void chrif_save_ack(int fd) {
 	chrif_auth_delete(RFIFOL(fd,2), RFIFOL(fd,6), ST_LOGOUT);
 	chrif_check_shutdown();
 }
 
-// request to move a character between mapservers
+//Request to move a character between mapservers
 int chrif_changemapserver(struct map_session_data* sd, uint32 ip, uint16 port) {
 	nullpo_retr(-1, sd);
 

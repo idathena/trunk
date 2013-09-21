@@ -497,6 +497,7 @@ extern struct Battle_Config
 	int gm_ignore_warpable_area;
 	int snovice_call_type;
 	int guild_notice_changemap;
+	int drop_rateincrease;
 } battle_config;
 
 void do_init_battle(void);

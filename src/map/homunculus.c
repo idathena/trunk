@@ -243,7 +243,7 @@ int merc_hom_calc_skilltree(struct homun_data *hd, int flag_evolve)
 	for( i = 0; i < MAX_SKILL_TREE && ( id = hskill_tree[c][i].id ) > 0; i++ ) {
 		if( hd->homunculus.hskill[ id - HM_SKILLBASE ].id )
 			continue; //Skill already known.
-		if(!battle_config.skillfree) {
+		if( !battle_config.skillfree ) {
 			for( j = 0; j < MAX_PC_SKILL_REQUIRE; j++ ) {
 				if( hskill_tree[c][i].need[j].id &&
 					merc_hom_checkskill(hd,hskill_tree[c][i].need[j].id) < hskill_tree[c][i].need[j].lv ) {
@@ -264,7 +264,7 @@ int merc_hom_calc_skilltree(struct homun_data *hd, int flag_evolve)
 int merc_hom_checkskill(struct homun_data *hd,uint16 skill_id)
 {
 	int i = skill_id - HM_SKILLBASE;
-	if(!hd)
+	if(!hd || !&hd->homunculus)
 		return 0;
 
 	if(hd->homunculus.hskill[i].id == skill_id)
@@ -273,11 +273,11 @@ int merc_hom_checkskill(struct homun_data *hd,uint16 skill_id)
 	return 0;
 }
 
-int merc_skill_tree_get_max(int id, int b_class){
+int merc_skill_tree_get_max(int id, int b_class) {
 	int i, skill_id;
 	b_class -= HM_CLASS_BASE;
-	for(i=0;(skill_id=hskill_tree[b_class][i].id)>0;i++)
-		if (id == skill_id)
+	for(i = 0;(skill_id = hskill_tree[b_class][i].id) > 0; i++)
+		if(id == skill_id)
 			return hskill_tree[b_class][i].max;
 	return skill_get_max(id);
 }

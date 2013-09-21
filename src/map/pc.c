@@ -541,7 +541,7 @@ int pc_makesavestatus(struct map_session_data *sd)
 	}
 
 	if(map[sd->bl.m].flag.nosave){
-		struct map_data *m=&map[sd->bl.m];
+		struct map_data *m = &map[sd->bl.m];
 		if(m->save.map)
 			memcpy(&sd->status.last_point,&m->save,sizeof(sd->status.last_point));
 		else
@@ -1193,22 +1193,22 @@ int pc_reg_received(struct map_session_data *sd)
 	sd->change_level_3rd = pc_readglobalreg(sd,"jobchange_level_3rd");
 	sd->die_counter = pc_readglobalreg(sd,"PC_DIE_COUNTER");
 
-	// Cash shop
+	//Cash shop
 	sd->cashPoints = pc_readaccountreg(sd,"#CASHPOINTS");
 	sd->kafraPoints = pc_readaccountreg(sd,"#KAFRAPOINTS");
 
-	// Cooking Exp
+	//Cooking Exp
 	sd->cook_mastery = pc_readglobalreg(sd,"COOK_MASTERY");
 
 	if ((sd->class_&MAPID_BASEMASK) == MAPID_TAEKWON) {
-		// Better check for class rather than skill to prevent "skill resets" from unsetting this
+		//Better check for class rather than skill to prevent "skill resets" from unsetting this
 		sd->mission_mobid = pc_readglobalreg(sd,"TK_MISSION_ID");
 		sd->mission_count = pc_readglobalreg(sd,"TK_MISSION_COUNT");
 	}
 
 	//SG map and mob read [Komurka]
-	for (i=0;i<MAX_PC_FEELHATE;i++) { //for now - someone need to make reading from txt/sql
-		if ((j = pc_readglobalreg(sd,sg_info[i].feel_var))!=0) {
+	for (i = 0; i < MAX_PC_FEELHATE; i++) { //for now - someone need to make reading from txt/sql
+		if ((j = pc_readglobalreg(sd,sg_info[i].feel_var)) != 0) {
 			sd->feel_map[i].index = j;
 			sd->feel_map[i].m = map_mapindex2mapid(j);
 		} else {
@@ -4782,8 +4782,8 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
 		// Remove from map, THEN change x/y coordinates
 		unit_remove_map_pc(sd,clrtype);
 		sd->mapindex = mapindex;
-		sd->bl.x=x;
-		sd->bl.y=y;
+		sd->bl.x = x;
+		sd->bl.y = y;
 		pc_clean_skilltree(sd);
 		chrif_save(sd,2);
 		chrif_changemapserver(sd, ip, (short)port);
@@ -4801,8 +4801,8 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
 
 	if( x == 0 && y == 0 ) { // Pick a random walkable cell
 		do {
-			x=rnd()%(map[m].xs-2)+1;
-			y=rnd()%(map[m].ys-2)+1;
+			x = rnd()%(map[m].xs - 2) + 1;
+			y = rnd()%(map[m].ys - 2) + 1;
 		} while( map_getcell(m,x,y,CELL_CHKNOPASS) );
 	}
 	
@@ -4848,7 +4848,7 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
 		sd->md->bl.y = sd->md->ud.to_y = y;
 		sd->md->ud.dir = sd->ud.dir;
 	}
-	
+
 	return 0;
 }
 
@@ -4861,23 +4861,23 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
  *------------------------------------------*/
 int pc_randomwarp(struct map_session_data *sd, clr_type type)
 {
-	int x,y,i=0;
+	int x,y,i = 0;
 	int16 m;
 
 	nullpo_ret(sd);
 
-	m=sd->bl.m;
+	m = sd->bl.m;
 
 	if (map[sd->bl.m].flag.noteleport) //Teleport forbiden
 		return 0;
 
-	do{
-		x=rnd()%(map[m].xs-2)+1;
-		y=rnd()%(map[m].ys-2)+1;
-	}while(map_getcell(m,x,y,CELL_CHKNOPASS) && (i++)<1000 );
+	do {
+		x = rnd()%(map[m].xs - 2) + 1;
+		y = rnd()%(map[m].ys - 2) + 1;
+	} while (map_getcell(m,x,y,CELL_CHKNOPASS) && (i++) < 1000);
 
 	if (i < 1000)
-		return pc_setpos(sd,map[sd->bl.m].index,x,y,type);
+		return pc_setpos(sd,map_id2index(sd->bl.m),x,y,type);
 
 	return 0;
 }
@@ -4892,17 +4892,17 @@ int pc_memo(struct map_session_data* sd, int pos)
 
 	nullpo_ret(sd);
 
-	// check mapflags
+	// Check mapflags
 	if( sd->bl.m >= 0 && (map[sd->bl.m].flag.nomemo || map[sd->bl.m].flag.nowarpto) && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE) ) {
 		clif_skill_teleportmessage(sd, 1); // "Saved point cannot be memorized."
 		return 0;
 	}
 
-	// check inputs
+	// Check inputs
 	if( pos < -1 || pos >= MAX_MEMOPOINTS )
 		return 0; // invalid input
 
-	// check required skill level
+	// Check required skill level
 	skill = pc_checkskill(sd, AL_WARP);
 	if( skill < 1 ) {
 		clif_skill_memomessage(sd,2); // "You haven't learned Warp."
@@ -4915,9 +4915,9 @@ int pc_memo(struct map_session_data* sd, int pos)
 
 	if( pos == -1 ) {
 		int i;
-		// prevent memo-ing the same map multiple times
-		ARR_FIND( 0, MAX_MEMOPOINTS, i, sd->status.memo_point[i].map == map_id2index(sd->bl.m) );
-		memmove(&sd->status.memo_point[1], &sd->status.memo_point[0], (min(i,MAX_MEMOPOINTS-1))*sizeof(struct point));
+		// Prevent memo-ing the same map multiple times
+		ARR_FIND(0, MAX_MEMOPOINTS, i, sd->status.memo_point[i].map == map_id2index(sd->bl.m));
+		memmove(&sd->status.memo_point[1], &sd->status.memo_point[0], (min(i,MAX_MEMOPOINTS - 1))*sizeof(struct point));
 		pos = 0;
 	}
 

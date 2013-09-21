@@ -420,9 +420,9 @@ int intif_party_addmember(int party_id,struct party_member *member)
 	if (CheckForCharServer())
 		return 0;
 	WFIFOHEAD(inter_fd,42);
-	WFIFOW(inter_fd,0)=0x3022;
-	WFIFOW(inter_fd,2)=8+sizeof(struct party_member);
-	WFIFOL(inter_fd,4)=party_id;
+	WFIFOW(inter_fd,0) = 0x3022;
+	WFIFOW(inter_fd,2) = 8 + sizeof(struct party_member);
+	WFIFOL(inter_fd,4) = party_id;
 	memcpy(WFIFOP(inter_fd,8),member,sizeof(struct party_member));
 	WFIFOSET(inter_fd,WFIFOW(inter_fd, 2));
 	return 1;
@@ -434,11 +434,11 @@ int intif_party_changeoption(int party_id,int account_id,int exp,int item)
 	if (CheckForCharServer())
 		return 0;
 	WFIFOHEAD(inter_fd,14);
-	WFIFOW(inter_fd,0)=0x3023;
-	WFIFOL(inter_fd,2)=party_id;
-	WFIFOL(inter_fd,6)=account_id;
-	WFIFOW(inter_fd,10)=exp;
-	WFIFOW(inter_fd,12)=item;
+	WFIFOW(inter_fd,0) = 0x3023;
+	WFIFOL(inter_fd,2) = party_id;
+	WFIFOL(inter_fd,6) = account_id;
+	WFIFOW(inter_fd,10) = exp;
+	WFIFOW(inter_fd,12) = item;
 	WFIFOSET(inter_fd,14);
 	return 0;
 }
@@ -449,10 +449,10 @@ int intif_party_leave(int party_id,int account_id, int char_id)
 	if (CheckForCharServer())
 		return 0;
 	WFIFOHEAD(inter_fd,14);
-	WFIFOW(inter_fd,0)=0x3024;
-	WFIFOL(inter_fd,2)=party_id;
-	WFIFOL(inter_fd,6)=account_id;
-	WFIFOL(inter_fd,10)=char_id;
+	WFIFOW(inter_fd,0) = 0x3024;
+	WFIFOL(inter_fd,2) = party_id;
+	WFIFOL(inter_fd,6) = account_id;
+	WFIFOL(inter_fd,10) = char_id;
 	WFIFOSET(inter_fd,14);
 	return 0;
 }
@@ -461,25 +461,25 @@ int intif_party_leave(int party_id,int account_id, int char_id)
 int intif_party_changemap(struct map_session_data *sd,int online)
 {
 	int16 m, mapindex;
-	
+
 	if (CheckForCharServer())
 		return 0;
-	if(!sd)
+	if (!sd)
 		return 0;
 
-	if( (m=map_mapindex2mapid(sd->mapindex)) >= 0 && map[m].instance_id )
-		mapindex = map[map[m].instance_src_map].index;
+	if ((m = map_mapindex2mapid(sd->mapindex)) >= 0 && map[m].instance_id)
+		mapindex = map_id2index(map[m].instance_src_map);
 	else
 		mapindex = sd->mapindex;
 
 	WFIFOHEAD(inter_fd,19);
-	WFIFOW(inter_fd,0)=0x3025;
-	WFIFOL(inter_fd,2)=sd->status.party_id;
-	WFIFOL(inter_fd,6)=sd->status.account_id;
-	WFIFOL(inter_fd,10)=sd->status.char_id;
-	WFIFOW(inter_fd,14)=mapindex;
-	WFIFOB(inter_fd,16)=online;
-	WFIFOW(inter_fd,17)=sd->status.base_level;
+	WFIFOW(inter_fd,0) = 0x3025;
+	WFIFOL(inter_fd,2) = sd->status.party_id;
+	WFIFOL(inter_fd,6) = sd->status.account_id;
+	WFIFOL(inter_fd,10) = sd->status.char_id;
+	WFIFOW(inter_fd,14) = mapindex;
+	WFIFOB(inter_fd,16) = online;
+	WFIFOW(inter_fd,17) = sd->status.base_level;
 	WFIFOSET(inter_fd,19);
 	return 1;
 }
@@ -490,8 +490,8 @@ int intif_break_party(int party_id)
 	if (CheckForCharServer())
 		return 0;
 	WFIFOHEAD(inter_fd,6);
-	WFIFOW(inter_fd,0)=0x3026;
-	WFIFOL(inter_fd,2)=party_id;
+	WFIFOW(inter_fd,0) = 0x3026;
+	WFIFOL(inter_fd,2) = party_id;
 	WFIFOSET(inter_fd,6);
 	return 0;
 }
@@ -503,15 +503,15 @@ int intif_party_message(int party_id,int account_id,const char *mes,int len)
 		return 0;
 
 	if (other_mapserver_count < 1)
-		return 0; //No need to send.
+		return 0; // No need to send.
 
 	WFIFOHEAD(inter_fd,len + 12);
-	WFIFOW(inter_fd,0)=0x3027;
-	WFIFOW(inter_fd,2)=len+12;
-	WFIFOL(inter_fd,4)=party_id;
-	WFIFOL(inter_fd,8)=account_id;
+	WFIFOW(inter_fd,0) = 0x3027;
+	WFIFOW(inter_fd,2) = len+12;
+	WFIFOL(inter_fd,4) = party_id;
+	WFIFOL(inter_fd,8) = account_id;
 	memcpy(WFIFOP(inter_fd,12),mes,len);
-	WFIFOSET(inter_fd,len+12);
+	WFIFOSET(inter_fd,len + 12);
 	return 0;
 }
 
@@ -521,10 +521,10 @@ int intif_party_leaderchange(int party_id,int account_id,int char_id)
 	if (CheckForCharServer())
 		return 0;
 	WFIFOHEAD(inter_fd,14);
-	WFIFOW(inter_fd,0)=0x3029;
-	WFIFOL(inter_fd,2)=party_id;
-	WFIFOL(inter_fd,6)=account_id;
-	WFIFOL(inter_fd,10)=char_id;
+	WFIFOW(inter_fd,0) = 0x3029;
+	WFIFOL(inter_fd,2) = party_id;
+	WFIFOL(inter_fd,6) = account_id;
+	WFIFOL(inter_fd,10) = char_id;
 	WFIFOSET(inter_fd,14);
 	return 0;
 }
@@ -535,8 +535,8 @@ int intif_party_sharelvlupdate(unsigned int share_lvl)
 	if (CheckForCharServer())
 		return 0;
 	WFIFOHEAD(inter_fd,6);
-	WFIFOW(inter_fd,0)=0x302A;
-	WFIFOL(inter_fd,2)=share_lvl;
+	WFIFOW(inter_fd,0) = 0x302A;
+	WFIFOL(inter_fd,2) = share_lvl;
 	WFIFOSET(inter_fd,6);
 	return 1;
 }
@@ -548,12 +548,12 @@ int intif_guild_create(const char *name,const struct guild_member *master)
 		return 0;
 	nullpo_ret(master);
 
-	WFIFOHEAD(inter_fd,sizeof(struct guild_member)+(8+NAME_LENGTH));
-	WFIFOW(inter_fd,0)=0x3030;
-	WFIFOW(inter_fd,2)=sizeof(struct guild_member)+(8+NAME_LENGTH);
-	WFIFOL(inter_fd,4)=master->account_id;
+	WFIFOHEAD(inter_fd,sizeof(struct guild_member) + (8 + NAME_LENGTH));
+	WFIFOW(inter_fd,0) = 0x3030;
+	WFIFOW(inter_fd,2) = sizeof(struct guild_member) + (8 + NAME_LENGTH);
+	WFIFOL(inter_fd,4) = master->account_id;
 	memcpy(WFIFOP(inter_fd,8),name,NAME_LENGTH);
-	memcpy(WFIFOP(inter_fd,8+NAME_LENGTH),master,sizeof(struct guild_member));
+	memcpy(WFIFOP(inter_fd,8 + NAME_LENGTH),master,sizeof(struct guild_member));
 	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
 	return 0;
 }
@@ -575,9 +575,9 @@ int intif_guild_addmember(int guild_id,struct guild_member *m)
 {
 	if (CheckForCharServer())
 		return 0;
-	WFIFOHEAD(inter_fd,sizeof(struct guild_member)+8);
+	WFIFOHEAD(inter_fd,sizeof(struct guild_member) + 8);
 	WFIFOW(inter_fd,0) = 0x3032;
-	WFIFOW(inter_fd,2) = sizeof(struct guild_member)+8;
+	WFIFOW(inter_fd,2) = sizeof(struct guild_member) + 8;
 	WFIFOL(inter_fd,4) = guild_id;
 	memcpy(WFIFOP(inter_fd,8),m,sizeof(struct guild_member));
 	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
@@ -590,11 +590,11 @@ int intif_guild_change_gm(int guild_id, const char* name, int len)
 	if (CheckForCharServer())
 		return 0;
 	WFIFOHEAD(inter_fd, len + 8);
-	WFIFOW(inter_fd, 0)=0x3033;
-	WFIFOW(inter_fd, 2)=len+8;
-	WFIFOL(inter_fd, 4)=guild_id;
-	memcpy(WFIFOP(inter_fd,8),name,len);
-	WFIFOSET(inter_fd,len+8);
+	WFIFOW(inter_fd, 0) = 0x3033;
+	WFIFOW(inter_fd, 2) = len + 8;
+	WFIFOL(inter_fd, 4) = guild_id;
+	memcpy(WFIFOP(inter_fd, 8),name,len);
+	WFIFOSET(inter_fd,len + 8);
 	return 0;
 }
 

@@ -3214,9 +3214,9 @@ void map_removemapdb(struct map_data *m)
 int map_readallmaps (void)
 {
 	int i;
-	FILE* fp=NULL;
+	FILE* fp = NULL;
 	int maps_removed = 0;
-	char *map_cache_buffer = NULL; // Has the uncompressed gat data of all maps, so just one allocation has to be made
+	char *map_cache_buffer = NULL; //Has the uncompressed gat data of all maps, so just one allocation has to be made
 	char map_cache_decode_buffer[MAX_MAP_SIZE];
 
 	if( enable_grf )
@@ -3230,22 +3230,22 @@ int map_readallmaps (void)
 			exit(EXIT_FAILURE); //No use launching server if maps can't be read.
 		}
 
-		// Init mapcache data.. [Shinryo]
+		//Init mapcache data. [Shinryo]
 		map_cache_buffer = map_init_mapcache(fp);
-		if(!map_cache_buffer) {
+		if( !map_cache_buffer ) {
 			ShowFatalError("Failed to initialize mapcache data (%s)..\n", mapcachefilepath);
 			exit(EXIT_FAILURE);
 		}
 	}
 
-	for(i = 0; i < map_num; i++) {
+	for( i = 0; i < map_num; i++ ) {
 		size_t size;
 
-		// show progress
-		if(enable_grf)
+		//Show progress
+		if( enable_grf )
 			ShowStatus("Loading maps [%i/%i]: %s"CL_CLL"\r", i, map_num, map[i].name);
 
-		// try to load the map
+		//Try to load the map
 		if( !
 			(enable_grf?
 				 map_readgat(&map[i])
@@ -3259,10 +3259,9 @@ int map_readallmaps (void)
 
 		map[i].index = mapindex_name2id(map[i].name);
 
-		if (uidb_get(map_db,(unsigned int)map[i].index) != NULL)
-		{
+		if( uidb_get(map_db,(unsigned int)map_id2index(i)) != NULL ) {
 			ShowWarning("Map %s already loaded!"CL_CLL"\n", map[i].name);
-			if (map[i].cell) {
+			if( map[i].cell ) {
 				aFree(map[i].cell);
 				map[i].cell = NULL;
 			}
@@ -3275,8 +3274,8 @@ int map_readallmaps (void)
 		map_addmap2db(&map[i]);
 
 		map[i].m = i;
-		memset(map[i].moblist, 0, sizeof(map[i].moblist));	//Initialize moblist [Skotlex]
-		map[i].mob_delete_timer = INVALID_TIMER;	//Initialize timer [Skotlex]
+		memset(map[i].moblist, 0, sizeof(map[i].moblist)); //Initialize moblist [Skotlex]
+		map[i].mob_delete_timer = INVALID_TIMER; //Initialize timer [Skotlex]
 
 		map[i].bxs = (map[i].xs + BLOCK_SIZE - 1) / BLOCK_SIZE;
 		map[i].bys = (map[i].ys + BLOCK_SIZE - 1) / BLOCK_SIZE;
@@ -3286,21 +3285,21 @@ int map_readallmaps (void)
 		map[i].block_mob = (struct block_list**)aCalloc(size, 1);
 	}
 
-	// intialization and configuration-dependent adjustments of mapflags
+	//Intialization and configuration-dependent adjustments of mapflags
 	map_flags_init();
 
 	if( !enable_grf ) {
 		fclose(fp);
 
-		// The cache isn't needed anymore, so free it.. [Shinryo]
+		//The cache isn't needed anymore, so free it.. [Shinryo]
 		aFree(map_cache_buffer);
 	}
 
-	// finished map loading
+	//Finished map loading
 	ShowInfo("Successfully loaded '"CL_WHITE"%d"CL_RESET"' maps."CL_CLL"\n",map_num);
-	instance_start = map_num + 1; // Next Map Index will be instances
+	instance_start = map_num + 1; //Next Map Index will be instances
 
-	if (maps_removed)
+	if( maps_removed )
 		ShowNotice("Maps removed: '"CL_WHITE"%d"CL_RESET"'\n",maps_removed);
 
 	return 0;

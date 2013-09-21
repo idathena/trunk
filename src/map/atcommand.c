@@ -416,11 +416,11 @@ ACMD_FUNC(mapmove)
 		return -1;
 	}
 	if (pc_setpos(sd, mapindex, x, y, CLR_TELEPORT) != 0) {
-		clif_displaymessage(fd, msg_txt(1)); // Map not found.
+		clif_displaymessage(fd, msg_txt(1)); //Map not found.
 		return -1;
 	}
 
-	clif_displaymessage(fd, msg_txt(0)); // Warped.
+	clif_displaymessage(fd, msg_txt(0)); //Warped.
 	return 0;
 }
 
@@ -1779,7 +1779,7 @@ ACMD_FUNC(go)
  
 	nullpo_retr(-1, sd);
  
-	if( map[sd->bl.m].flag.nogo && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE) ) {
+	if (map[sd->bl.m].flag.nogo && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(sd->fd,msg_txt(995)); // You cannot use @go on this map.
 		return 0;
 	}
@@ -1799,15 +1799,15 @@ ACMD_FUNC(go)
 
 		clif_displaymessage(fd, msg_txt(38)); // Invalid location number, or name.
 
-		if( text ) { // Send the text to the client
-			clif_displaymessage( fd, text );
+		if (text) { // Send the text to the client
+			clif_displaymessage(fd, text);
 		}
-		
+
 		return -1;
 	}
 
 	// Get possible name of the city
-	map_name[MAP_NAME_LENGTH-1] = '\0';
+	map_name[MAP_NAME_LENGTH - 1] = '\0';
 	for (i = 0; map_name[i]; i++)
 		map_name[i] = TOLOWER(map_name[i]);
 	// Try to identify the map name
@@ -1915,7 +1915,7 @@ ACMD_FUNC(go)
 		clif_displaymessage(fd, msg_txt(38)); // Invalid location number or name.
 		return -1;
 	}
- 
+
 	return 0;
 }
 
@@ -4277,7 +4277,7 @@ ACMD_FUNC(tonpc)
 	}
 
 	if ((nd = npc_name2id(npcname)) != NULL) {
-		if (pc_setpos(sd, map_id2index(nd->bl.m), nd->bl.x, nd->bl.y, CLR_TELEPORT) == 0)
+		if (nd->bl.m != -1 && pc_setpos(sd, map_id2index(nd->bl.m), nd->bl.x, nd->bl.y, CLR_TELEPORT) == 0)
 			clif_displaymessage(fd, msg_txt(0)); // Warped.
 		else
 			return -1;
@@ -7255,7 +7255,7 @@ ACMD_FUNC(iteminfo)
 		);
 		clif_displaymessage(fd, atcmd_output);
 
-		sprintf(atcmd_output, msg_txt(1280), item_data->value_buy, item_data->value_sell, item_data->weight/10. ); // NPC Buy:%dz, Sell:%dz | Weight: %.1f
+		sprintf(atcmd_output, msg_txt(1280), item_data->value_buy, item_data->value_sell, item_data->weight / 10. ); // NPC Buy:%dz, Sell:%dz | Weight: %.1f
 		clif_displaymessage(fd, atcmd_output);
 
 		if (item_data->maxchance == -1)
@@ -7309,7 +7309,7 @@ ACMD_FUNC(whodrops)
 			sprintf(atcmd_output, msg_txt(1287), MAX_SEARCH); // - Common mobs with highest drop chance (only max %d are listed):
 			clif_displaymessage(fd, atcmd_output);
 
-			for (j=0; j < MAX_SEARCH && item_data->mob[j].chance > 0; j++) {
+			for (j = 0; j < MAX_SEARCH && item_data->mob[j].chance > 0; j++) {
 				float dropchance = (float)item_data->mob[j].chance;
 
 #ifdef RENEWAL_DROP
@@ -8168,15 +8168,15 @@ ACMD_FUNC(itemlist)
 
 	nullpo_retr(-1, sd);
 
-	if( strcmp(command+1, "storagelist") == 0 ) {
+	if( strcmp(command + 1, "storagelist") == 0 ) {
 		location = "storage";
 		items = sd->status.storage.items;
 		size = MAX_STORAGE;
-	} else if( strcmp(command+1, "cartlist") == 0 ) {
+	} else if( strcmp(command + 1, "cartlist") == 0 ) {
 		location = "cart";
 		items = sd->status.cart;
 		size = MAX_CART;
-	} else if( strcmp(command+1, "itemlist") == 0 ) {
+	} else if( strcmp(command + 1, "itemlist") == 0 ) {
 		location = "inventory";
 		items = sd->status.inventory;
 		size = MAX_INVENTORY;
@@ -8185,8 +8185,8 @@ ACMD_FUNC(itemlist)
 
 	StringBuf_Init(&buf);
 
-	count = 0; // total slots occupied
-	counter = 0; // total items found
+	count = 0; // Total slots occupied
+	counter = 0; // Total items found
 	for( i = 0; i < size; ++i ) {
 		const struct item* it = &items[i];
 		struct item_data* itd;
@@ -8239,7 +8239,7 @@ ACMD_FUNC(itemlist)
 				strcat(equipstr, msg_txt(1346)); // lower/mid head,
 			if( (it->equip & EQP_HELM) == EQP_HELM )
 				strcat(equipstr, msg_txt(1347)); // lower/mid/top head,
-			// remove final ', '
+			// Remove final ', '
 			equipstr[strlen(equipstr) - 2] = '\0';
 			StringBuf_AppendStr(&buf, equipstr);
 		}
@@ -8247,16 +8247,16 @@ ACMD_FUNC(itemlist)
 		clif_displaymessage(fd, StringBuf_Value(&buf));
 		StringBuf_Clear(&buf);
 
-		if( it->card[0] == CARD0_PET ) { // pet egg
+		if( it->card[0] == CARD0_PET ) { // Pet egg
 			if (it->card[3])
 				StringBuf_Printf(&buf, msg_txt(1348), (unsigned int)MakeDWord(it->card[1], it->card[2])); //  -> (pet egg, pet id: %u, named)
 			else
 				StringBuf_Printf(&buf, msg_txt(1349), (unsigned int)MakeDWord(it->card[1], it->card[2])); //  -> (pet egg, pet id: %u, unnamed)
-		} else if(it->card[0] == CARD0_FORGE) { // forged item
+		} else if(it->card[0] == CARD0_FORGE) { // Forged item
 			StringBuf_Printf(&buf, msg_txt(1350), (unsigned int)MakeDWord(it->card[2], it->card[3]), it->card[1]>>8, it->card[1]&0x0f); //  -> (crafted item, creator id: %u, star crumbs %d, element %d)
-		} else if(it->card[0] == CARD0_CREATE) { // created item
+		} else if(it->card[0] == CARD0_CREATE) { // Created item
 			StringBuf_Printf(&buf, msg_txt(1351), (unsigned int)MakeDWord(it->card[2], it->card[3])); //  -> (produced item, creator id: %u)
-		} else { // normal item
+		} else { // Normal item
 			int counter2 = 0;
 
 			for( j = 0; j < itd->slot; ++j ) {
