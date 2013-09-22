@@ -1656,21 +1656,21 @@ int pc_updateweightstatus(struct map_session_data *sd)
 	new_overweight = (pc_is90overweight(sd)) ? 2 : (pc_is50overweight(sd)) ? 1 : 0;
 
 	if( old_overweight == new_overweight )
-		return 0; // no change
+		return 0; //No change
 
-	// stop old status change
+	//Stop old status change
 	if( old_overweight == 1 )
 		status_change_end(&sd->bl, SC_WEIGHT50, INVALID_TIMER);
 	else if( old_overweight == 2 )
 		status_change_end(&sd->bl, SC_WEIGHT90, INVALID_TIMER);
 
-	// start new status change
+	//Start new status change
 	if( new_overweight == 1 )
 		sc_start(&sd->bl, &sd->bl, SC_WEIGHT50, 100, 0, 0);
 	else if( new_overweight == 2 )
 		sc_start(&sd->bl, &sd->bl, SC_WEIGHT90, 100, 0, 0);
 
-	// update overweight status
+	//Update overweight status
 	sd->regen.state.overweight = new_overweight;
 
 	return 0;
@@ -4766,7 +4766,7 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
 			clif_displaymessage (sd->fd, msg_txt(276)); // "You can't open a shop on this map."
 			vending_closevending(sd);
 		}
-		channel_pcquit(sd,4); // Quit map channel
+		channel_pcquit(sd, 4); // Quit map channel
 	}
 
 	if( m < 0 ) {
@@ -4780,12 +4780,12 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
 			npc_event_dequeue(sd);
 		npc_script_event(sd, NPCE_LOGOUT);
 		// Remove from map, THEN change x/y coordinates
-		unit_remove_map_pc(sd,clrtype);
+		unit_remove_map_pc(sd, clrtype);
 		sd->mapindex = mapindex;
 		sd->bl.x = x;
 		sd->bl.y = y;
 		pc_clean_skilltree(sd);
-		chrif_save(sd,2);
+		chrif_save(sd, 2);
 		chrif_changemapserver(sd, ip, (short)port);
 
 		// Free session data from this map server [Kevin]
@@ -4803,11 +4803,11 @@ int pc_setpos(struct map_session_data* sd, unsigned short mapindex, int x, int y
 		do {
 			x = rnd()%(map[m].xs - 2) + 1;
 			y = rnd()%(map[m].ys - 2) + 1;
-		} while( map_getcell(m,x,y,CELL_CHKNOPASS) );
+		} while( map_getcell(m, x, y, CELL_CHKNOPASS) );
 	}
 	
-	if ( sd->state.vending && map_getcell(m,x,y,CELL_CHKNOVENDING) ) {
-		clif_displaymessage (sd->fd, msg_txt(204)); // "You can't open a shop on this cell."
+	if ( sd->state.vending && map_getcell(m, x, y, CELL_CHKNOVENDING) ) {
+		clif_displaymessage(sd->fd, msg_txt(204)); // "You can't open a shop on this cell."
 		vending_closevending(sd);
 	}
 

@@ -15,6 +15,7 @@
 //      0x200(UF_ENSEMBLE)	Ensemble skill
 //      0x400(UF_SONG)		Song skill
 //      0x800(UF_DUALMODE)	Spell has effects both at an interval and when you step in/out
+//      0x1000(UF_NONEARNPC)	Spell cannot be placed near the NPC
 //      0x2000(UF_RANGEDSINGLEUNIT)     Layout hack, use layout range propriety but only display center
 // 	Example: 0x006 = 0x002+0x004 -> Cannot be stacked nor cast near targets
 //
@@ -122,8 +123,8 @@
 
 2299,0xcc,    ,  0, 1,1000,enemy, 0x006  //SC_MANHOLE
 2300,0xcd,    ,  0, 0,1000,all,   0x006  //SC_DIMENSIONDOOR
-2301,0xce,    ,  2, 0,  -1,all,   0x200E //SC_CHAOSPANIC
-2302,0xcf,    ,  2, 0,  -1,all,   0x2002 //SC_MAELSTROM
+2301,0xce,    ,  2, 0,  -1,all,   0x300E //SC_CHAOSPANIC
+2302,0xcf,    ,  2, 0,  -1,all,   0x3002 //SC_MAELSTROM
 2303,0xd0,    ,  3, 0,  -1,all,   0x201E //SC_BLOODYLUST
 2304,0xd1,    ,  0, 2,1000,enemy, 0x018  //SC_FEINTBOMB
 

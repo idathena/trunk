@@ -118,7 +118,7 @@ struct view_data* npc_get_viewdata(int class_) { //Returns the viewdata for norm
 	return NULL;
 }
 
-static int npc_isnear_sub(struct block_list* bl, va_list args) {
+int npc_isnear_sub(struct block_list* bl, va_list args) {
 	struct npc_data *nd = (struct npc_data*)bl;
 
 	if( nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE) )
@@ -167,21 +167,19 @@ int npc_enable_sub(struct block_list *bl, va_list ap)
 	struct npc_data *nd;
 
 	nullpo_ret(bl);
-	nullpo_ret(nd=va_arg(ap,struct npc_data *));
-	if(bl->type == BL_PC)
-	{
+	nullpo_ret(nd = va_arg(ap, struct npc_data *));
+	if( bl->type == BL_PC ) {
 		TBL_PC *sd = (TBL_PC*)bl;
 
-		if (nd->sc.option&OPTION_INVISIBLE)
+		if( nd->sc.option&OPTION_INVISIBLE )
 			return 1;
 
-		if( npc_ontouch_event(sd,nd) > 0 && npc_ontouch2_event(sd,nd) > 0 )
-		{ // failed to run OnTouch event, so just click the npc
-			if (sd->npc_id != 0)
+		if( npc_ontouch_event(sd, nd) > 0 && npc_ontouch2_event(sd, nd) > 0 ) { //Failed to run OnTouch event, so just click the npc
+			if( sd->npc_id != 0 )
 				return 0;
 
-			pc_stop_walking(sd,1);
-			npc_click(sd,nd);
+			pc_stop_walking(sd, 1);
+			npc_click(sd, nd);
 		}
 	}
 	return 0;
@@ -194,35 +192,33 @@ int npc_enable(const char* name, int flag)
 {
 	struct npc_data* nd = npc_name2id(name);
 
-	if (nd==NULL)
-	{
+	if( nd == NULL ) {
 		ShowError("npc_enable: Attempted to %s a non-existing NPC '%s' (flag=%d).\n", (flag&3) ? "show" : "hide", name, flag);
 		return 0;
 	}
 
-	if (flag&1) {
-		nd->sc.option&=~OPTION_INVISIBLE;
+	if( flag&1 ) {
+		nd->sc.option &= ~OPTION_INVISIBLE;
 		clif_spawn(&nd->bl);
-	} else if (flag&2)
-		nd->sc.option&=~OPTION_HIDE;
-	else if (flag&4)
-		nd->sc.option|= OPTION_HIDE;
-	else {	//Can't change the view_data to invisible class because the view_data for all npcs is shared! [Skotlex]
-		nd->sc.option|= OPTION_INVISIBLE;
-		clif_clearunit_area(&nd->bl,CLR_OUTSIGHT);  // Hack to trick maya purple card [Xazax]
+	} else if( flag&2 )
+		nd->sc.option &= ~OPTION_HIDE;
+	else if( flag&4 )
+		nd->sc.option |= OPTION_HIDE;
+	else { //Can't change the view_data to invisible class because the view_data for all npcs is shared! [Skotlex]
+		nd->sc.option |= OPTION_INVISIBLE;
+		clif_clearunit_area(&nd->bl, CLR_OUTSIGHT); //Hack to trick maya purple card [Xazax]
 	}
 
-	if (nd->class_ == WARP_CLASS || nd->class_ == FLAG_CLASS)
-	{	//Client won't display option changes for these classes [Toms]
-		if (nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE))
+	if( nd->class_ == WARP_CLASS || nd->class_ == FLAG_CLASS ) { //Client won't display option changes for these classes [Toms]
+		if( nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE) )
 			clif_clearunit_area(&nd->bl, CLR_OUTSIGHT);
 		else
 			clif_spawn(&nd->bl);
 	} else
 		clif_changeoption(&nd->bl);
-		
-	if( flag&3 && (nd->u.scr.xs >= 0 || nd->u.scr.ys >= 0) ) //check if player standing on a OnTouchArea
-		map_foreachinarea( npc_enable_sub, nd->bl.m, nd->bl.x-nd->u.scr.xs, nd->bl.y-nd->u.scr.ys, nd->bl.x+nd->u.scr.xs, nd->bl.y+nd->u.scr.ys, BL_PC, nd );
+
+	if( flag&3 && (nd->u.scr.xs >= 0 || nd->u.scr.ys >= 0) ) //Check if player standing on a OnTouchArea
+		map_foreachinarea(npc_enable_sub, nd->bl.m, nd->bl.x - nd->u.scr.xs, nd->bl.y - nd->u.scr.ys, nd->bl.x + nd->u.scr.xs, nd->bl.y + nd->u.scr.ys, BL_PC, nd);
 
 	return 0;
 }

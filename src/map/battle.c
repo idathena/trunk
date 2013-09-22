@@ -5945,7 +5945,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src,struct block_list *
 		if(mflag > 0)
 			md.damage /= mflag;
 		else
-			ShowError("0 enemies targeted by %d:%s, divide per 0 avoided!\n", skill_id, skill_get_name(skill_id));
+			ShowError("0 enemies targeted by %d:%s, divide per 0 avoided!\n",skill_id,skill_get_name(skill_id));
 	}
 
 	damage_div_fix(md.damage, md.div_);
@@ -5981,7 +5981,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src,struct block_list *
 			if(sd) //In Renewal hit bonus from Vultures Eye is not anymore shown in status window
 				hitrate += pc_checkskill(sd,AC_VULTURE);
 #endif
-			hitrate = cap_value(hitrate, battle_config.min_hitrate, battle_config.max_hitrate);
+			hitrate = cap_value(hitrate,battle_config.min_hitrate,battle_config.max_hitrate);
 
 			if(rnd()%100 < hitrate)
 				i = 1;
@@ -5993,12 +5993,12 @@ struct Damage battle_calc_misc_attack(struct block_list *src,struct block_list *
 		}
 	}
 
-	md.damage +=  battle_calc_cardfix(BF_MISC, src, target, nk, s_ele, 0, md.damage, 0, md.flag);
+	md.damage +=  battle_calc_cardfix(BF_MISC,src,target,nk,s_ele,0,md.damage,0,md.flag);
 
-	if(sd && (i = pc_skillatk_bonus(sd, skill_id)))
+	if(sd && (i = pc_skillatk_bonus(sd,skill_id)))
 		md.damage += md.damage * i / 100;
 
-	if((i = battle_adjust_skill_damage(src->m, skill_id)))
+	if((i = battle_adjust_skill_damage(src->m,skill_id)))
 		md.damage = md.damage * i / 100;
 
 	if(md.damage < 0)
@@ -6027,7 +6027,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src,struct block_list *
 	}
 
 	if(!(nk&NK_NO_ELEFIX))
-		md.damage = battle_attr_fix(src, target, md.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
+		md.damage = battle_attr_fix(src,target,md.damage,s_ele,tstatus->def_ele,tstatus->ele_lv);
 
 	md.damage = battle_calc_damage(src,target,&md,md.damage,skill_id,skill_lv);
 
