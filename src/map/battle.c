@@ -97,7 +97,6 @@ struct block_list* battle_gettargeted(struct block_list *target) {
 	return bl_list[rnd()%c];
 }
 
-
 //Returns the id of the current targetted character of the passed bl. [Skotlex]
 int battle_gettarget(struct block_list* bl) {
 
@@ -2709,7 +2708,7 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 				}
 #else
 			case NJ_ISSEN:
-				wd.damage = 40 * sstatus->str + skill_lv * (sstatus->hp / 10 + 35);
+				wd.damage = (40 * sstatus->str) + (8 * skill_lv / 100 * sstatus->hp);
 				wd.damage2 = 0;
 				break;
 			case LK_SPIRALPIERCE:
@@ -3954,7 +3953,7 @@ static int battle_calc_skill_constant_addition(struct Damage wd, struct block_li
 					atk += ((sstatus->max_sp * (1 + skill_lv * 2 / 10)) + 40 * status_get_lv(src));
 				else
 					atk += ((sstatus->sp * (1 + skill_lv * 2 / 10)) + 10 * status_get_lv(src));
-				nk |= NK_IGNORE_FLEE;
+				nk &= NK_IGNORE_FLEE;
 			}
 			break;
 		case SR_TIGERCANNON:
@@ -4683,7 +4682,7 @@ static struct Damage initialize_weapon_data(struct block_list *src, struct block
 
 			case KN_PIERCE:
 			case ML_PIERCE:
-				wd.div_= (wd.div_ > 0 ? tstatus->size + 1 : -(tstatus->size + 1));
+				wd.div_ = (wd.div_ > 0 ? tstatus->size + 1 : -(tstatus->size + 1));
 				break;
 
 			case TF_DOUBLE: //For NPC used skill.
@@ -4749,7 +4748,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	struct status_data *tstatus = status_get_status_data(target);
 	int skill, right_element, left_element;
 
-	memset(&wd,0,sizeof(wd));
+	memset(&wd, 0, sizeof(wd));
 
 	if(src == NULL || target == NULL) {
 		nullpo_info(NLP_MARK);
@@ -6006,16 +6005,16 @@ struct Damage battle_calc_misc_attack(struct block_list *src,struct block_list *
 		md.damage = 0;
 	else if(md.damage && tstatus->mode&MD_PLANT) {
 		switch(skill_id) {
+			case NJ_ISSEN: //Final Strike will MISS on "plant"-type mobs [helvetica]
+				md.damage = 0;
+				md.dmg_lv = ATK_FLEE;
+				break;
 			case HT_LANDMINE:
 			case MA_LANDMINE:
 			case HT_BLASTMINE:
 			case HT_CLAYMORETRAP:
 			case RA_CLUSTERBOMB:
 #ifdef RENEWAL
-				break;
-			case NJ_ISSEN: //Final Strike will MISS on "plant"-type mobs [helvetica]
-				md.damage = 0;
-				md.dmg_lv = ATK_FLEE;
 				break;
 #endif
 			default:
@@ -6125,6 +6124,18 @@ int64 battle_calc_return_damage(struct block_list* bl, struct block_list *src, i
 			if( rdamage < 1 ) rdamage = 1;
 		} else if( status_reflect && sc && sc->count ) {
 			if( sc->data[SC_REFLECTSHIELD] && skill_id != WS_CARTTERMINATION ) {
+#ifndef RENEWAL
+				switch( skill_id ) {
+					case KN_PIERCE:
+					case ML_PIERCE:
+						{
+							struct status_data *sstatus = status_get_status_data(bl);
+							short count = sstatus->size + 1;
+							damage = damage / count;
+						}
+						break;
+				}
+#endif
 				rdamage += damage * sc->data[SC_REFLECTSHIELD]->val2 / 100;
 #ifdef RENEWAL
 				rdamage = cap_value(rdamage, 1, max_damage);

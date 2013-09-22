@@ -371,7 +371,7 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 {
 	int x0 = bl->x, y0 = bl->y;
 	struct status_change *sc = NULL;
-	int moveblock = ( x0/BLOCK_SIZE != x1/BLOCK_SIZE || y0/BLOCK_SIZE != y1/BLOCK_SIZE);
+	int moveblock = ( x0 / BLOCK_SIZE != x1 / BLOCK_SIZE || y0 / BLOCK_SIZE != y1 / BLOCK_SIZE);
 
 	if (!bl->prev) {
 		//Block not in map, just update coordinates, but do naught else.
@@ -384,17 +384,17 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 	if (bl->type&BL_CHAR) {
 		sc = status_get_sc(bl);
 
-		skill_unit_move(bl,tick,2);
+		skill_unit_move(bl, tick, 2);
 		status_change_end(bl, SC_CLOSECONFINE, INVALID_TIMER);
 		status_change_end(bl, SC_CLOSECONFINE2, INVALID_TIMER);
 		status_change_end(bl, SC_TINDER_BREAKER, INVALID_TIMER);
 		status_change_end(bl, SC_TINDER_BREAKER2, INVALID_TIMER);
-//		status_change_end(bl, SC_BLADESTOP, INVALID_TIMER); //Won't stop when you are knocked away, go figure...
+		//status_change_end(bl, SC_BLADESTOP, INVALID_TIMER); //Won't stop when you are knocked away, go figure.
 		status_change_end(bl, SC_TATAMIGAESHI, INVALID_TIMER);
 		status_change_end(bl, SC_MAGICROD, INVALID_TIMER);
 		if (sc && sc->data[SC_PROPERTYWALK] &&
-			sc->data[SC_PROPERTYWALK]->val3 >= skill_get_maxcount(sc->data[SC_PROPERTYWALK]->val1,sc->data[SC_PROPERTYWALK]->val2) )
-			status_change_end(bl,SC_PROPERTYWALK,INVALID_TIMER);
+			sc->data[SC_PROPERTYWALK]->val3 >= skill_get_maxcount(sc->data[SC_PROPERTYWALK]->val1, sc->data[SC_PROPERTYWALK]->val2) )
+			status_change_end(bl, SC_PROPERTYWALK, INVALID_TIMER);
 	} else if (bl->type == BL_NPC)
 		npc_unsetcells((TBL_NPC*)bl);
 
@@ -411,13 +411,13 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 
 	if (bl->type&BL_CHAR) {
 
-		skill_unit_move(bl,tick,3);
+		skill_unit_move(bl, tick, 3);
 
-		if( bl->type == BL_PC && ((TBL_PC*)bl)->shadowform_id ) {//Shadow Form Target Moving
+		if (bl->type == BL_PC && ((TBL_PC*)bl)->shadowform_id) { //Shadow Form Target Moving
 			struct block_list *d_bl;
-			if( (d_bl = map_id2bl(((TBL_PC*)bl)->shadowform_id)) == NULL || !check_distance_bl(bl,d_bl,10) ) {
-				if( d_bl )
-					status_change_end(d_bl,SC__SHADOWFORM,INVALID_TIMER);
+			if ((d_bl = map_id2bl(((TBL_PC*)bl)->shadowform_id)) == NULL || !check_distance_bl(bl, d_bl, 10)) {
+				if (d_bl)
+					status_change_end(d_bl, SC__SHADOWFORM, INVALID_TIMER);
 				((TBL_PC*)bl)->shadowform_id = 0;
 			}
 		}
@@ -438,23 +438,23 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 				else if (sc->data[SC_STEALTHFIELD_MASTER])
 					skill_unit_move_unit_group(skill_id2group(sc->data[SC_STEALTHFIELD_MASTER]->val2), bl->m, x1-x0, y1-y0);
 
-				if( sc->data[SC__SHADOWFORM] ) {//Shadow Form Caster Moving
+				if (sc->data[SC__SHADOWFORM]) { //Shadow Form Caster Moving
 					struct block_list *d_bl;
-					if( (d_bl = map_id2bl(sc->data[SC__SHADOWFORM]->val2)) == NULL || !check_distance_bl(bl,d_bl,10) )
-						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
+					if( (d_bl = map_id2bl(sc->data[SC__SHADOWFORM]->val2)) == NULL || !check_distance_bl(bl, d_bl, 10) )
+						status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 				}
 
 				if (sc->data[SC_PROPERTYWALK]
-					&& sc->data[SC_PROPERTYWALK]->val3 < skill_get_maxcount(sc->data[SC_PROPERTYWALK]->val1,sc->data[SC_PROPERTYWALK]->val2)
-					&& map_find_skill_unit_oncell(bl,bl->x,bl->y,SO_ELECTRICWALK,NULL,0) == NULL
-					&& map_find_skill_unit_oncell(bl,bl->x,bl->y,SO_FIREWALK,NULL,0) == NULL
-					&& skill_unitsetting(bl,sc->data[SC_PROPERTYWALK]->val1,sc->data[SC_PROPERTYWALK]->val2,x0, y0,0)) {
+					&& sc->data[SC_PROPERTYWALK]->val3 < skill_get_maxcount(sc->data[SC_PROPERTYWALK]->val1, sc->data[SC_PROPERTYWALK]->val2)
+					&& map_find_skill_unit_oncell(bl, bl->x, bl->y, SO_ELECTRICWALK, NULL, 0) == NULL
+					&& map_find_skill_unit_oncell(bl, bl->x, bl->y, SO_FIREWALK, NULL, 0) == NULL
+					&& skill_unitsetting(bl, sc->data[SC_PROPERTYWALK]->val1, sc->data[SC_PROPERTYWALK]->val2, x0,  y0, 0)) {
 						sc->data[SC_PROPERTYWALK]->val3++;
 				}
 
 			}
 			/* Guild Aura Moving */
-			if( bl->type == BL_PC && ((TBL_PC*)bl)->state.gmaster_flag ) {
+			if (bl->type == BL_PC && ((TBL_PC*)bl)->state.gmaster_flag) {
 				if (sc->data[SC_LEADERSHIP])
 					skill_unit_move_unit_group(skill_id2group(sc->data[SC_LEADERSHIP]->val4), bl->m, x1-x0, y1-y0);
 				if (sc->data[SC_GLORYWOUNDS])
@@ -483,17 +483,17 @@ int map_count_oncell(int16 m, int16 x, int16 y, int type)
 	if (x < 0 || y < 0 || (x >= map[m].xs) || (y >= map[m].ys))
 		return 0;
 
-	bx = x/BLOCK_SIZE;
-	by = y/BLOCK_SIZE;
+	bx = x / BLOCK_SIZE;
+	by = y / BLOCK_SIZE;
 
 	if (type&~BL_MOB)
-		for( bl = map[m].block[bx+by*map[m].bxs] ; bl != NULL ; bl = bl->next )
-			if(bl->x == x && bl->y == y && bl->type&type)
+		for (bl = map[m].block[bx+by*map[m].bxs] ; bl != NULL ; bl = bl->next)
+			if (bl->x == x && bl->y == y && bl->type&type)
 				count++;
 	
 	if (type&BL_MOB)
-		for( bl = map[m].block_mob[bx+by*map[m].bxs] ; bl != NULL ; bl = bl->next )
-			if(bl->x == x && bl->y == y)
+		for (bl = map[m].block_mob[bx+by*map[m].bxs] ; bl != NULL ; bl = bl->next)
+			if (bl->x == x && bl->y == y)
 				count++;
 
 	return count;
