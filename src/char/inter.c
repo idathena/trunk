@@ -25,11 +25,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <sys/stat.h> // for stat/lstat/fstat - [Dekamaster/Ultimate GM Tool]
+#include <sys/stat.h> // For stat/lstat/fstat - [Dekamaster/Ultimate GM Tool]
 
 
-#define WISDATA_TTL (60*1000)	//Wis data Time To Live (60 seconds)
-#define WISDELLIST_MAX 256		// Number of elements in the list Delete data Wis
+#define WISDATA_TTL (60 * 1000) // Wis data Time To Live (60 seconds)
+#define WISDELLIST_MAX 256 // Number of elements in the list Delete data Wis
 
 
 Sql* sql_handle = NULL;
@@ -39,23 +39,23 @@ char char_server_ip[32] = "127.0.0.1";
 char char_server_id[32] = "ragnarok";
 char char_server_pw[32] = "ragnarok";
 char char_server_db[32] = "ragnarok";
-char default_codepage[32] = ""; //Feature by irmin.
+char default_codepage[32] = ""; // Feature by irmin.
 
 static struct accreg *accreg_pt;
 unsigned int party_share_level = 10;
 
-// recv. packet list
+// Recv. packet list
 int inter_recv_packet_length[] = {
-	-1,-1, 7,-1, -1,13,36, (2 + 4 + 4 + 4 + NAME_LENGTH),  0, 0, 0, 0,  0, 0,  0, 0,	// 3000-
-	 6,-1, 0, 0,  0, 0, 0, 0, 10,-1, 0, 0,  0, 0,  0, 0,	// 3010-
-	-1,10,-1,14, 14,19, 6,-1, 14,14, 6, 0,  0, 0,  0, 0,	// 3020- Party
-	-1, 6,-1,-1, 55,19, 6,-1, 14,-1,-1,-1, 18,19,186,-1,	// 3030-
-	-1, 9, 0, 0,  0, 0, 0, 0,  7, 6,10,10, 10,-1,  0, 0,	// 3040-
-	-1,-1,10,10,  0,-1,12, 0,  0, 0, 0, 0,  0, 0,  0, 0,	// 3050-  Auction System [Zephyrus]
-	 6,-1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,	// 3060-  Quest system [Kevin] [Inkfish]
-	-1,10, 6,-1,  0, 0, 0, 0,  0, 0, 0, 0, -1,10,  6,-1,	// 3070-  Mercenary packets [Zephyrus], Elemental packets [pakpil]
-	48,14,-1, 6,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,	// 3080-
-	-1,10,-1, 6,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0,	// 3090-  Homunculus packets [albator]
+	-1,-1, 7,-1, -1,13,36, (2 + 4 + 4 + 4 + NAME_LENGTH),  0, 0, 0, 0,  0, 0,  0, 0, // 3000-
+	 6,-1, 0, 0,  0, 0, 0, 0, 10,-1, 0, 0,  0, 0,  0, 0, // 3010-
+	-1,10,-1,14, 14,19, 6,-1, 14,14, 6, 0,  0, 0,  0, 0, // 3020- Party
+	-1, 6,-1,-1, 55,19, 6,-1, 14,-1,-1,-1, 18,19,186,-1, // 3030-
+	-1, 9, 0, 0,  0, 0, 0, 0,  7, 6,10,10, 10,-1,  0, 0, // 3040-
+	-1,-1,10,10,  0,-1,12, 0,  0, 0, 0, 0,  0, 0,  0, 0, // 3050-  Auction System [Zephyrus]
+	 6,-1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, // 3060-  Quest system [Kevin] [Inkfish]
+	-1,10, 6,-1,  0, 0, 0, 0,  0, 0, 0, 0, -1,10,  6,-1, // 3070-  Mercenary packets [Zephyrus], Elemental packets [pakpil]
+	48,14,-1, 6,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, // 3080-
+	-1,10,-1, 6,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, // 3090-  Homunculus packets [albator]
 };
 
 struct WisData {
@@ -66,9 +66,9 @@ struct WisData {
 static DBMap* wis_db = NULL; // int wis_id -> struct WisData*
 static int wis_dellist[WISDELLIST_MAX], wis_delnum;
 
-/* from pc.c due to @accinfo. any ideas to replace this crap are more than welcome. */
+/* From pc.c due to @accinfo. any ideas to replace this crap are more than welcome. */
 const char* job_name(int class_) {
-	switch (class_) {
+	switch( class_ ) {
 		case JOB_NOVICE:
 		case JOB_SWORDMAN:
 		case JOB_MAGE:
@@ -76,7 +76,7 @@ const char* job_name(int class_) {
 		case JOB_ACOLYTE:
 		case JOB_MERCHANT:
 		case JOB_THIEF:
-			return msg_txt(JOB_NOVICE+class_);
+			return msg_txt(JOB_NOVICE + class_);
 
 		case JOB_KNIGHT:
 		case JOB_PRIEST:
@@ -84,7 +84,7 @@ const char* job_name(int class_) {
 		case JOB_BLACKSMITH:
 		case JOB_HUNTER:
 		case JOB_ASSASSIN:
-			return msg_txt(7 - JOB_KNIGHT+class_);
+			return msg_txt(7 - JOB_KNIGHT + class_);
 
 		case JOB_KNIGHT2:
 			return msg_txt(7);
@@ -96,7 +96,7 @@ const char* job_name(int class_) {
 		case JOB_ALCHEMIST:
 		case JOB_BARD:
 		case JOB_DANCER:
-			return msg_txt(13 - JOB_CRUSADER+class_);
+			return msg_txt(13 - JOB_CRUSADER + class_);
 
 		case JOB_CRUSADER2:
 			return msg_txt(13);
@@ -106,7 +106,7 @@ const char* job_name(int class_) {
 		case JOB_GUNSLINGER:
 		case JOB_NINJA:
 		case JOB_XMAS:
-			return msg_txt(20 - JOB_WEDDING+class_);
+			return msg_txt(20 - JOB_WEDDING + class_);
 
 		case JOB_SUMMER:
 			return msg_txt(71);
@@ -121,7 +121,7 @@ const char* job_name(int class_) {
 		case JOB_ACOLYTE_HIGH:
 		case JOB_MERCHANT_HIGH:
 		case JOB_THIEF_HIGH:
-			return msg_txt(25 - JOB_NOVICE_HIGH+class_);
+			return msg_txt(25 - JOB_NOVICE_HIGH + class_);
 
 		case JOB_LORD_KNIGHT:
 		case JOB_HIGH_PRIEST:
@@ -129,7 +129,7 @@ const char* job_name(int class_) {
 		case JOB_WHITESMITH:
 		case JOB_SNIPER:
 		case JOB_ASSASSIN_CROSS:
-			return msg_txt(32 - JOB_LORD_KNIGHT+class_);
+			return msg_txt(32 - JOB_LORD_KNIGHT + class_);
 
 		case JOB_LORD_KNIGHT2:
 			return msg_txt(32);
@@ -192,7 +192,7 @@ const char* job_name(int class_) {
 		case JOB_GANGSI:
 		case JOB_DEATH_KNIGHT:
 		case JOB_DARK_COLLECTOR:
-			return msg_txt(72 - JOB_GANGSI+class_);
+			return msg_txt(72 - JOB_GANGSI + class_);
 
 		case JOB_RUNE_KNIGHT:
 		case JOB_WARLOCK:
@@ -200,7 +200,7 @@ const char* job_name(int class_) {
 		case JOB_ARCH_BISHOP:
 		case JOB_MECHANIC:
 		case JOB_GUILLOTINE_CROSS:
-			return msg_txt(75 - JOB_RUNE_KNIGHT+class_);
+			return msg_txt(75 - JOB_RUNE_KNIGHT + class_);
 
 		case JOB_RUNE_KNIGHT_T:
 		case JOB_WARLOCK_T:
@@ -208,7 +208,7 @@ const char* job_name(int class_) {
 		case JOB_ARCH_BISHOP_T:
 		case JOB_MECHANIC_T:
 		case JOB_GUILLOTINE_CROSS_T:
-			return msg_txt(75 - JOB_RUNE_KNIGHT_T+class_);
+			return msg_txt(75 - JOB_RUNE_KNIGHT_T + class_);
 
 		case JOB_ROYAL_GUARD:
 		case JOB_SORCERER:
@@ -217,7 +217,7 @@ const char* job_name(int class_) {
 		case JOB_SURA:
 		case JOB_GENETIC:
 		case JOB_SHADOW_CHASER:
-			return msg_txt(81 - JOB_ROYAL_GUARD+class_);
+			return msg_txt(81 - JOB_ROYAL_GUARD + class_);
 
 		case JOB_ROYAL_GUARD_T:
 		case JOB_SORCERER_T:
@@ -226,7 +226,7 @@ const char* job_name(int class_) {
 		case JOB_SURA_T:
 		case JOB_GENETIC_T:
 		case JOB_SHADOW_CHASER_T:
-			return msg_txt(81 - JOB_ROYAL_GUARD_T+class_);
+			return msg_txt(81 - JOB_ROYAL_GUARD_T + class_);
 
 		case JOB_RUNE_KNIGHT2:
 		case JOB_RUNE_KNIGHT_T2:
@@ -257,7 +257,7 @@ const char* job_name(int class_) {
 		case JOB_BABY_SURA:
 		case JOB_BABY_GENETIC:
 		case JOB_BABY_CHASER:
-			return msg_txt(88 - JOB_BABY_RUNE+class_);
+			return msg_txt(88 - JOB_BABY_RUNE + class_);
 
 		case JOB_BABY_RUNE2:
 			return msg_txt(88);
@@ -273,11 +273,11 @@ const char* job_name(int class_) {
 
 		case JOB_SUPER_NOVICE_E:
 		case JOB_SUPER_BABY_E:
-			return msg_txt(101 - JOB_SUPER_NOVICE_E+class_);
+			return msg_txt(101 - JOB_SUPER_NOVICE_E + class_);
 
 		case JOB_KAGEROU:
 		case JOB_OBORO:
-			return msg_txt(103 - JOB_KAGEROU+class_);
+			return msg_txt(103 - JOB_KAGEROU + class_);
 
 		default:
 			return msg_txt(106);
@@ -287,79 +287,80 @@ const char* job_name(int class_) {
 /**
   * [Dekamaster/Nightroad]
   **/
-const char * geoip_countryname[253] = {"Unknown","Asia/Pacific Region","Europe","Andorra","United Arab Emirates","Afghanistan","Antigua and Barbuda","Anguilla","Albania","Armenia","Netherlands Antilles",
-		"Angola","Antarctica","Argentina","American Samoa","Austria","Australia","Aruba","Azerbaijan","Bosnia and Herzegovina","Barbados",
-		"Bangladesh","Belgium","Burkina Faso","Bulgaria","Bahrain","Burundi","Benin","Bermuda","Brunei Darussalam","Bolivia",
-		"Brazil","Bahamas","Bhutan","Bouvet Island","Botswana","Belarus","Belize","Canada","Cocos (Keeling) Islands","Congo, The Democratic Republic of the",
-		"Central African Republic","Congo","Switzerland","Cote D'Ivoire","Cook Islands","Chile","Cameroon","China","Colombia","Costa Rica",
-		"Cuba","Cape Verde","Christmas Island","Cyprus","Czech Republic","Germany","Djibouti","Denmark","Dominica","Dominican Republic",
-		"Algeria","Ecuador","Estonia","Egypt","Western Sahara","Eritrea","Spain","Ethiopia","Finland","Fiji",
-		"Falkland Islands (Malvinas)","Micronesia, Federated States of","Faroe Islands","France","France, Metropolitan","Gabon","United Kingdom","Grenada","Georgia","French Guiana",
-		"Ghana","Gibraltar","Greenland","Gambia","Guinea","Guadeloupe","Equatorial Guinea","Greece","South Georgia and the South Sandwich Islands","Guatemala",
-		"Guam","Guinea-Bissau","Guyana","Hong Kong","Heard Island and McDonald Islands","Honduras","Croatia","Haiti","Hungary","Indonesia",
-		"Ireland","Israel","India","British Indian Ocean Territory","Iraq","Iran, Islamic Republic of","Iceland","Italy","Jamaica","Jordan",
-		"Japan","Kenya","Kyrgyzstan","Cambodia","Kiribati","Comoros","Saint Kitts and Nevis","Korea, Democratic People's Republic of","Korea, Republic of","Kuwait",
-		"Cayman Islands","Kazakhstan","Lao People's Democratic Republic","Lebanon","Saint Lucia","Liechtenstein","Sri Lanka","Liberia","Lesotho","Lithuania",
-		"Luxembourg","Latvia","Libyan Arab Jamahiriya","Morocco","Monaco","Moldova, Republic of","Madagascar","Marshall Islands","Macedonia","Mali",
-		"Myanmar","Mongolia","Macau","Northern Mariana Islands","Martinique","Mauritania","Montserrat","Malta","Mauritius","Maldives",
-		"Malawi","Mexico","Malaysia","Mozambique","Namibia","New Caledonia","Niger","Norfolk Island","Nigeria","Nicaragua",
-		"Netherlands","Norway","Nepal","Nauru","Niue","New Zealand","Oman","Panama","Peru","French Polynesia",
-		"Papua New Guinea","Philippines","Pakistan","Poland","Saint Pierre and Miquelon","Pitcairn Islands","Puerto Rico","Palestinian Territory","Portugal","Palau",
-		"Paraguay","Qatar","Reunion","Romania","Russian Federation","Rwanda","Saudi Arabia","Solomon Islands","Seychelles","Sudan",
-		"Sweden","Singapore","Saint Helena","Slovenia","Svalbard and Jan Mayen","Slovakia","Sierra Leone","San Marino","Senegal","Somalia","Suriname",
-		"Sao Tome and Principe","El Salvador","Syrian Arab Republic","Swaziland","Turks and Caicos Islands","Chad","French Southern Territories","Togo","Thailand",
-		"Tajikistan","Tokelau","Turkmenistan","Tunisia","Tonga","Timor-Leste","Turkey","Trinidad and Tobago","Tuvalu","Taiwan",
-		"Tanzania, United Republic of","Ukraine","Uganda","United States Minor Outlying Islands","United States","Uruguay","Uzbekistan","Holy See (Vatican City State)","Saint Vincent and the Grenadines","Venezuela",
-		"Virgin Islands, British","Virgin Islands, U.S.","Vietnam","Vanuatu","Wallis and Futuna","Samoa","Yemen","Mayotte","Serbia","South Africa",
-		"Zambia","Montenegro","Zimbabwe","Anonymous Proxy","Satellite Provider","Other","Aland Islands","Guernsey","Isle of Man","Jersey",
-		"Saint Barthelemy","Saint Martin"};
+const char * geoip_countryname[253] = {"Unknown", "Asia/Pacific Region", "Europe", "Andorra", "United Arab Emirates", "Afghanistan", "Antigua and Barbuda", "Anguilla", "Albania", "Armenia", "Netherlands Antilles", 
+		"Angola", "Antarctica", "Argentina", "American Samoa", "Austria", "Australia", "Aruba", "Azerbaijan", "Bosnia and Herzegovina", "Barbados", 
+		"Bangladesh", "Belgium", "Burkina Faso", "Bulgaria", "Bahrain", "Burundi", "Benin", "Bermuda", "Brunei Darussalam", "Bolivia", 
+		"Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana", "Belarus", "Belize", "Canada", "Cocos (Keeling) Islands", "Congo, The Democratic Republic of the", 
+		"Central African Republic", "Congo", "Switzerland", "Cote D'Ivoire", "Cook Islands", "Chile", "Cameroon", "China", "Colombia", "Costa Rica", 
+		"Cuba", "Cape Verde", "Christmas Island", "Cyprus", "Czech Republic", "Germany", "Djibouti", "Denmark", "Dominica", "Dominican Republic", 
+		"Algeria", "Ecuador", "Estonia", "Egypt", "Western Sahara", "Eritrea", "Spain", "Ethiopia", "Finland", "Fiji", 
+		"Falkland Islands (Malvinas)", "Micronesia, Federated States of", "Faroe Islands", "France", "France, Metropolitan", "Gabon", "United Kingdom", "Grenada", "Georgia", "French Guiana", 
+		"Ghana", "Gibraltar", "Greenland", "Gambia", "Guinea", "Guadeloupe", "Equatorial Guinea", "Greece", "South Georgia and the South Sandwich Islands", "Guatemala", 
+		"Guam", "Guinea-Bissau", "Guyana", "Hong Kong", "Heard Island and McDonald Islands", "Honduras", "Croatia", "Haiti", "Hungary", "Indonesia", 
+		"Ireland", "Israel", "India", "British Indian Ocean Territory", "Iraq", "Iran, Islamic Republic of", "Iceland", "Italy", "Jamaica", "Jordan", 
+		"Japan", "Kenya", "Kyrgyzstan", "Cambodia", "Kiribati", "Comoros", "Saint Kitts and Nevis", "Korea, Democratic People's Republic of", "Korea, Republic of", "Kuwait", 
+		"Cayman Islands", "Kazakhstan", "Lao People's Democratic Republic", "Lebanon", "Saint Lucia", "Liechtenstein", "Sri Lanka", "Liberia", "Lesotho", "Lithuania", 
+		"Luxembourg", "Latvia", "Libyan Arab Jamahiriya", "Morocco", "Monaco", "Moldova, Republic of", "Madagascar", "Marshall Islands", "Macedonia", "Mali", 
+		"Myanmar", "Mongolia", "Macau", "Northern Mariana Islands", "Martinique", "Mauritania", "Montserrat", "Malta", "Mauritius", "Maldives", 
+		"Malawi", "Mexico", "Malaysia", "Mozambique", "Namibia", "New Caledonia", "Niger", "Norfolk Island", "Nigeria", "Nicaragua", 
+		"Netherlands", "Norway", "Nepal", "Nauru", "Niue", "New Zealand", "Oman", "Panama", "Peru", "French Polynesia", 
+		"Papua New Guinea", "Philippines", "Pakistan", "Poland", "Saint Pierre and Miquelon", "Pitcairn Islands", "Puerto Rico", "Palestinian Territory", "Portugal", "Palau", 
+		"Paraguay", "Qatar", "Reunion", "Romania", "Russian Federation", "Rwanda", "Saudi Arabia", "Solomon Islands", "Seychelles", "Sudan", 
+		"Sweden", "Singapore", "Saint Helena", "Slovenia", "Svalbard and Jan Mayen", "Slovakia", "Sierra Leone", "San Marino", "Senegal", "Somalia", "Suriname", 
+		"Sao Tome and Principe", "El Salvador", "Syrian Arab Republic", "Swaziland", "Turks and Caicos Islands", "Chad", "French Southern Territories", "Togo", "Thailand", 
+		"Tajikistan", "Tokelau", "Turkmenistan", "Tunisia", "Tonga", "Timor-Leste", "Turkey", "Trinidad and Tobago", "Tuvalu", "Taiwan", 
+		"Tanzania, United Republic of", "Ukraine", "Uganda", "United States Minor Outlying Islands", "United States", "Uruguay", "Uzbekistan", "Holy See (Vatican City State)", "Saint Vincent and the Grenadines", "Venezuela", 
+		"Virgin Islands, British", "Virgin Islands, U.S.", "Vietnam", "Vanuatu", "Wallis and Futuna", "Samoa", "Yemen", "Mayotte", "Serbia", "South Africa", 
+		"Zambia", "Montenegro", "Zimbabwe", "Anonymous Proxy", "Satellite Provider", "Other", "Aland Islands", "Guernsey", "Isle of Man", "Jersey", 
+		"Saint Barthelemy", "Saint Martin"};
 unsigned char *geoip_cache;
-void geoip_readdb(void){
+void geoip_readdb(void) {
 	struct stat bufa;
-	FILE *db=fopen("./db/GeoIP.dat","rb");
+	FILE *db = fopen("./db/GeoIP.dat", "rb");
 	fstat(fileno(db), &bufa);
 	geoip_cache = (unsigned char *) malloc(sizeof(unsigned char) * bufa.st_size);
-	if(fread(geoip_cache, sizeof(unsigned char), bufa.st_size, db) != bufa.st_size) { ShowError("geoip_cache reading didn't read all elements \n"); }
+	if( fread(geoip_cache, sizeof(unsigned char), bufa.st_size, db) != bufa.st_size )
+		ShowError("geoip_cache reading didn't read all elements \n");
 	fclose(db);
 	ShowStatus("Finished Reading "CL_GREEN"GeoIP"CL_RESET" Database.\n");
 }
 /* [Dekamaster/Nightroad] */
 /* WHY NOT A DBMAP: There are millions of entries in GeoIP and it has its own algorithm to go quickly through them, a DBMap wouldn't be efficient */
-const char* geoip_getcountry(uint32 ipnum){
+const char* geoip_getcountry(uint32 ipnum) {
 	int depth;
 	unsigned int x;
 	const unsigned char *buf;
 	unsigned int offset = 0;
 
-	for (depth = 31; depth >= 0; depth--) {
-		buf = geoip_cache + (long)6 *offset;
-		if (ipnum & (1 << depth)) {
+	for( depth = 31; depth >= 0; depth-- ) {
+		buf = geoip_cache + (long)6 * offset;
+		if( ipnum & (1 << depth) ) {
 			/* Take the right-hand branch */
-			x =   (buf[3*1 + 0] << (0*8))
-				+ (buf[3*1 + 1] << (1*8))
-				+ (buf[3*1 + 2] << (2*8));
+			x =   (buf[3 * 1 + 0] << (0 * 8))
+				+ (buf[3 * 1 + 1] << (1 * 8))
+				+ (buf[3 * 1 + 2] << (2 * 8));
 		} else {
 			/* Take the left-hand branch */
-			x =   (buf[3*0 + 0] << (0*8))
-				+ (buf[3*0 + 1] << (1*8))
-				+ (buf[3*0 + 2] << (2*8));
+			x =   (buf[3 * 0 + 0] << (0 * 8))
+				+ (buf[3 * 0 + 1] << (1 * 8))
+				+ (buf[3 * 0 + 2] << (2 * 8));
 		}
-		if (x >= 16776960) {
-			x=x-16776960;
+		if( x >= 16776960 ) {
+			x = x - 16776960;
 			return geoip_countryname[x];
 		}
 		offset = x;
 	}
 	return geoip_countryname[0];
 }
-/* sends a mesasge to map server (fd) to a user (u_fd) although we use fd we keep aid for safe-check */
-/* extremely handy I believe it will serve other uses in the near future */
+/* Sends a mesasge to map server (fd) to a user (u_fd) although we use fd we keep aid for safe-check */
+/* Extremely handy I believe it will serve other uses in the near future */
 void inter_to_fd(int fd, int u_fd, int aid, char* msg, ...) {
 	char msg_out[512];
 	va_list ap;
-	int len = 1;/* yes we start at 1 */
+	int len = 1; /* Yes we start at 1 */
 
-	va_start(ap,msg);
+	va_start(ap, msg);
 		len += vsnprintf(msg_out, 512, msg, ap);
 	va_end(ap);
 
@@ -378,7 +379,7 @@ void inter_to_fd(int fd, int u_fd, int aid, char* msg, ...) {
 /* [Dekamaster/Nightroad] */
 void mapif_parse_accinfo(int fd) {
 	int u_fd = RFIFOL(fd,2), aid = RFIFOL(fd,6), castergroup = RFIFOL(fd,10);
-	char query[NAME_LENGTH], query_esq[NAME_LENGTH*2+1];
+	char query[NAME_LENGTH], query_esq[NAME_LENGTH * 2 + 1];
 	int account_id;
 	char *data;
 
@@ -388,25 +389,25 @@ void mapif_parse_accinfo(int fd) {
 
 	account_id = atoi(query);
 
-	if (account_id < START_ACCOUNT_NUM) {	// is string
-		if ( SQL_ERROR == Sql_Query(sql_handle, "SELECT `account_id`,`name`,`class`,`base_level`,`job_level`,`online` FROM `%s` WHERE `name` LIKE '%s' LIMIT 10", char_db, query_esq)
-				|| Sql_NumRows(sql_handle) == 0 ) {
-			if( Sql_NumRows(sql_handle) == 0 ) {
-				inter_to_fd(fd, u_fd, aid, "No matches were found for your criteria, '%s'",query);
-			} else {
+	if( account_id < START_ACCOUNT_NUM ) {	// Is string
+		if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `account_id`,`name`,`class`,`base_level`,`job_level`,`online` FROM `%s` WHERE `name` LIKE '%s' LIMIT 10", char_db, query_esq)
+			|| Sql_NumRows(sql_handle) == 0 ) {
+			if( Sql_NumRows(sql_handle) == 0 )
+				inter_to_fd(fd, u_fd, aid, "No matches were found for your criteria, '%s'", query);
+			else {
 				Sql_ShowDebug(sql_handle);
 				inter_to_fd(fd, u_fd, aid, "An error occured, bother your admin about it.");
 			}
 			Sql_FreeResult(sql_handle);
 			return;
 		} else {
-			if( Sql_NumRows(sql_handle) == 1 ) {//we found a perfect match
+			if( Sql_NumRows(sql_handle) == 1 ) { // We found a perfect match
 				Sql_NextRow(sql_handle);
 				Sql_GetData(sql_handle, 0, &data, NULL); account_id = atoi(data);
 				Sql_FreeResult(sql_handle);
-			} else {// more than one, listing... [Dekamaster/Nightroad]
+			} else { // More than one, listing. [Dekamaster/Nightroad]
 				inter_to_fd(fd, u_fd, aid, "Your query returned the following %d results, please be more specific...",(int)Sql_NumRows(sql_handle));
-				while ( SQL_SUCCESS == Sql_NextRow(sql_handle) ) {
+				while( SQL_SUCCESS == Sql_NextRow(sql_handle) ) {
 					int class_;
 					short base_level, job_level, online;
 					char name[NAME_LENGTH];
@@ -426,16 +427,17 @@ void mapif_parse_accinfo(int fd) {
 		}
 	}
 
-	/* it will only get here if we have a single match */
+	/* It will only get here if we have a single match */
 	if( account_id ) {
 		char userid[NAME_LENGTH], user_pass[NAME_LENGTH], email[40], last_ip[20], lastlogin[30], pincode[5], birthdate[11];
 		short level = -1;
-		int logincount = 0,state = 0;
-		if ( SQL_ERROR == Sql_Query(sql_handle, "SELECT `userid`, `user_pass`, `email`, `last_ip`, `group_id`, `lastlogin`, `logincount`, `state`,`pincode`,`birthdate` FROM `login` WHERE `account_id` = '%d' LIMIT 1", account_id)
+		int logincount = 0, state = 0;
+		// FIXME: No, this doesn't really look right. We can't, and shouldn't, access the login table from the char server.
+		if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `userid`, `user_pass`, `email`, `last_ip`, `group_id`, `lastlogin`, `logincount`, `state`,`pincode`,`birthdate` FROM `login` WHERE `account_id` = '%d' LIMIT 1", account_id)
 			|| Sql_NumRows(sql_handle) == 0 ) {
-			if( Sql_NumRows(sql_handle) == 0 ) {
-				inter_to_fd(fd, u_fd, aid,  "No account with ID '%d' was found.", account_id );
-			} else {
+			if( Sql_NumRows(sql_handle) == 0 )
+				inter_to_fd(fd, u_fd, aid, "No account with ID '%d' was found.", account_id );
+			else {
 				inter_to_fd(fd, u_fd, aid, "An error occured, bother your admin about it.");
 				Sql_ShowDebug(sql_handle);
 			}
@@ -455,13 +457,13 @@ void mapif_parse_accinfo(int fd) {
 
 		Sql_FreeResult(sql_handle);
 
-		if (level == -1)
+		if( level == -1 )
 			return;
 
 		inter_to_fd(fd, u_fd, aid, "-- Account %d --", account_id );
 		inter_to_fd(fd, u_fd, aid, "User: %s | GM Group: %d | State: %d", userid, level, state );
 
-		if (level < castergroup) { /* only show pass if your gm level is greater than the one you're searching for */
+		if( level < castergroup ) { /* Only show pass if your gm level is greater than the one you're searching for */
 			if( strlen(pincode) )
 				inter_to_fd(fd, u_fd, aid, "Password: %s (PIN:%s)", user_pass, pincode );
 			else
@@ -473,19 +475,18 @@ void mapif_parse_accinfo(int fd) {
 		inter_to_fd(fd, u_fd, aid, "This user has logged in %d times, the last time was at %s", logincount, lastlogin );
 		inter_to_fd(fd, u_fd, aid, "-- Character Details --" );
 
+		if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `char_id`, `name`, `char_num`, `class`, `base_level`, `job_level`, `online` FROM `%s` WHERE `account_id` = '%d' ORDER BY `char_num` LIMIT %d", char_db, account_id, MAX_CHARS)
+			|| Sql_NumRows(sql_handle) == 0 ) {
 
-		if ( SQL_ERROR == Sql_Query(sql_handle, "SELECT `char_id`, `name`, `char_num`, `class`, `base_level`, `job_level`, `online` FROM `char` WHERE `account_id` = '%d' ORDER BY `char_num` LIMIT %d", account_id, MAX_CHARS)
-				|| Sql_NumRows(sql_handle) == 0 ) {
-
-				if( Sql_NumRows(sql_handle) == 0 )
-					inter_to_fd(fd, u_fd, aid,"This account doesn't have characters.");
-				else {
-					inter_to_fd(fd, u_fd, aid,"An error occured, bother your admin about it.");
-					Sql_ShowDebug(sql_handle);
-				}
+			if( Sql_NumRows(sql_handle) == 0 )
+				inter_to_fd(fd, u_fd, aid, "This account doesn't have characters.");
+			else {
+				inter_to_fd(fd, u_fd, aid, "An error occured, bother your admin about it.");
+				Sql_ShowDebug(sql_handle);
+			}
 
 		} else {
-			while ( SQL_SUCCESS == Sql_NextRow(sql_handle) ) {
+			while( SQL_SUCCESS == Sql_NextRow(sql_handle) ) {
 				int char_id, class_;
 				short char_num, base_level, job_level, online;
 				char name[NAME_LENGTH];
@@ -498,7 +499,7 @@ void mapif_parse_accinfo(int fd) {
 				Sql_GetData(sql_handle, 5, &data, NULL); job_level = atoi(data);
 				Sql_GetData(sql_handle, 6, &data, NULL); online = atoi(data);
 
-				inter_to_fd(fd, u_fd, aid, "[Slot/CID: %d/%d] %s | %s | Level: %d/%d | %s", char_num, char_id, name, job_name(class_), base_level, job_level, online?"On":"Off");
+				inter_to_fd(fd, u_fd, aid, "[Slot/CID: %d/%d] %s | %s | Level: %d/%d | %s", char_num, char_id, name, job_name(class_), base_level, job_level, online ? "On" : "Off");
 			}
 		}
 		Sql_FreeResult(sql_handle);
@@ -520,24 +521,23 @@ int inter_accreg_tosql(int account_id, int char_id, struct accreg* reg, int type
 	reg->char_id = char_id;
 
 	//`global_reg_value` (`type`, `account_id`, `char_id`, `str`, `value`)
-	switch( type )
-	{
-	case 3: //Char Reg
-		if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `type`=3 AND `char_id`='%d'", reg_db, char_id) )
-			Sql_ShowDebug(sql_handle);
-		account_id = 0;
-		break;
-	case 2: //Account Reg
-		if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `type`=2 AND `account_id`='%d'", reg_db, account_id) )
-			Sql_ShowDebug(sql_handle);
-		char_id = 0;
-		break;
-	case 1: //Account2 Reg
-		ShowError("inter_accreg_tosql: Char server shouldn't handle type 1 registry values (##). That is the login server's work!\n");
-		return 0;
-	default:
-		ShowError("inter_accreg_tosql: Invalid type %d\n", type);
-		return 0;
+	switch( type ) {
+		case 3: //Char Reg
+			if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `type`=3 AND `char_id`='%d'", reg_db, char_id) )
+				Sql_ShowDebug(sql_handle);
+			account_id = 0;
+			break;
+		case 2: //Account Reg
+			if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `type`=2 AND `account_id`='%d'", reg_db, account_id) )
+				Sql_ShowDebug(sql_handle);
+			char_id = 0;
+			break;
+		case 1: //Account2 Reg
+			ShowError("inter_accreg_tosql: Char server shouldn't handle type 1 registry values (##). That is the login server's work!\n");
+			return 0;
+		default:
+			ShowError("inter_accreg_tosql: Invalid type %d\n", type);
+			return 0;
 	}
 
 	if( reg->reg_num <= 0 )
@@ -690,7 +690,7 @@ int inter_log(char* fmt, ...)
 	va_end(ap);
 
 	Sql_EscapeStringLen(sql_handle, esc_str, str, strnlen(str, sizeof(str)));
-	if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` (`time`, `log`) VALUES (NOW(),  '%s')", interlog_db, esc_str) )
+	if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` (`time`, `log`) VALUES (NOW(), '%s')", interlog_db, esc_str) )
 		Sql_ShowDebug(sql_handle);
 
 	return 0;

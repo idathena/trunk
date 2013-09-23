@@ -6305,14 +6305,14 @@ enum damage_lv battle_weapon_attack(struct block_list* src, struct block_list* t
 	int skillv;
 	struct Damage wd;
 
-	nullpo_retr(ATK_NONE, src);
-	nullpo_retr(ATK_NONE, target);
+	nullpo_retr(ATK_NONE,src);
+	nullpo_retr(ATK_NONE,target);
 
 	if (src->prev == NULL || target->prev == NULL)
 		return ATK_NONE;
 
-	sd = BL_CAST(BL_PC, src);
-	tsd = BL_CAST(BL_PC, target);
+	sd = BL_CAST(BL_PC,src);
+	tsd = BL_CAST(BL_PC,target);
 
 	sstatus = status_get_status_data(src);
 	tstatus = status_get_status_data(target);
@@ -6336,65 +6336,65 @@ enum damage_lv battle_weapon_attack(struct block_list* src, struct block_list* t
 			}
 			//Ammo check by Ishizu-chan
 			if (sd->inventory_data[index])
-			switch (sd->status.weapon) {
-				case W_BOW:
-					if (sd->inventory_data[index]->look != A_ARROW) {
-						clif_arrow_fail(sd,0);
-						return ATK_NONE;
-					}
-					break;
-				case W_REVOLVER:
-				case W_RIFLE:
-				case W_GATLING:
-				case W_SHOTGUN:
-					if (sd->inventory_data[index]->look != A_BULLET) {
-						clif_arrow_fail(sd,0);
-						return ATK_NONE;
-					}
-					break;
-				case W_GRENADE:
-					if (sd->inventory_data[index]->look != A_GRENADE) {
-						clif_arrow_fail(sd,0);
-						return ATK_NONE;
-					}
-					break;
-			}
+				switch (sd->status.weapon) {
+					case W_BOW:
+						if (sd->inventory_data[index]->look != A_ARROW) {
+							clif_arrow_fail(sd,0);
+							return ATK_NONE;
+						}
+						break;
+					case W_REVOLVER:
+					case W_RIFLE:
+					case W_GATLING:
+					case W_SHOTGUN:
+						if (sd->inventory_data[index]->look != A_BULLET) {
+							clif_arrow_fail(sd,0);
+							return ATK_NONE;
+						}
+						break;
+					case W_GRENADE:
+						if (sd->inventory_data[index]->look != A_GRENADE) {
+							clif_arrow_fail(sd,0);
+							return ATK_NONE;
+						}
+						break;
+				}
 		}
 	}
 
 	if (sc && sc->count) {
 		if (sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&2))
-			status_change_end(src, SC_CLOAKING, INVALID_TIMER);
+			status_change_end(src,SC_CLOAKING,INVALID_TIMER);
 		else if (sc->data[SC_CLOAKINGEXCEED] && !(sc->data[SC_CLOAKINGEXCEED]->val4&2))
-			status_change_end(src, SC_CLOAKINGEXCEED, INVALID_TIMER);
+			status_change_end(src,SC_CLOAKINGEXCEED,INVALID_TIMER);
 	}
 
-	if (tsc && tsc->data[SC_AUTOCOUNTER] && status_check_skilluse(target, src, KN_AUTOCOUNTER, 1)) {
+	if (tsc && tsc->data[SC_AUTOCOUNTER] && status_check_skilluse(target,src,KN_AUTOCOUNTER,1)) {
 		uint8 dir = map_calc_dir(target,src->x,src->y);
 		int t_dir = unit_getdir(target);
-		int dist = distance_bl(src, target);
-		if (dist <= 0 || (!map_check_dir(dir,t_dir) && dist <= tstatus->rhw.range+1)) {
+		int dist = distance_bl(src,target);
+		if (dist <= 0 || (!map_check_dir(dir,t_dir) && dist <= tstatus->rhw.range + 1)) {
 			uint16 skill_lv = tsc->data[SC_AUTOCOUNTER]->val1;
 			clif_skillcastcancel(target); //Remove the casting bar. [Skotlex]
-			clif_damage(src, target, tick, sstatus->amotion, 1, 0, 1, 0, 0); //Display MISS.
-			status_change_end(target, SC_AUTOCOUNTER, INVALID_TIMER);
-			skill_attack(BF_WEAPON, target, target, src, KN_AUTOCOUNTER, skill_lv, tick, 0);
+			clif_damage(src,target,tick,sstatus->amotion,1,0,1,0,0); //Display MISS.
+			status_change_end(target,SC_AUTOCOUNTER,INVALID_TIMER);
+			skill_attack(BF_WEAPON,target,target,src,KN_AUTOCOUNTER,skill_lv,tick,0);
 			if (tsc->data[SC_CRUSHSTRIKE])
-				status_change_end(target, SC_CRUSHSTRIKE, INVALID_TIMER);
+				status_change_end(target,SC_CRUSHSTRIKE,INVALID_TIMER);
 			return ATK_BLOCK;
 		}
 	}
 
 	if (tsc && tsc->data[SC_BLADESTOP_WAIT] && !is_boss(src) && (src->type == BL_PC || tsd == NULL ||
-		distance_bl(src, target) <= (tsd->status.weapon == W_FIST ? 1 : 2))) {
+		distance_bl(src,target) <= (tsd->status.weapon == W_FIST ? 1 : 2))) {
 		uint16 skill_lv = tsc->data[SC_BLADESTOP_WAIT]->val1;
 		int duration = skill_get_time2(MO_BLADESTOP,skill_lv);
-		status_change_end(target, SC_BLADESTOP_WAIT, INVALID_TIMER);
-		if (sc_start4(src, src, SC_BLADESTOP, 100, sd ? pc_checkskill(sd, MO_BLADESTOP) : 0, 0, 0, target->id, duration)) {
+		status_change_end(target,SC_BLADESTOP_WAIT,INVALID_TIMER);
+		if (sc_start4(src,src,SC_BLADESTOP,100,sd ? pc_checkskill(sd,MO_BLADESTOP) : 0,0,0,target->id,duration)) {
 			//Target locked.
-			clif_damage(src, target, tick, sstatus->amotion, 1, 0, 1, 0, 0); //Display MISS.
-			clif_bladestop(target, src->id, 1);
-			sc_start4(src, target, SC_BLADESTOP, 100, skill_lv, 0, 0, src->id, duration);
+			clif_damage(src,target,tick,sstatus->amotion,1,0,1,0,0); //Display MISS.
+			clif_bladestop(target,src->id,1);
+			sc_start4(src,target,SC_BLADESTOP,100,skill_lv,0,0,src->id,duration);
 			return ATK_BLOCK;
 		}
 	}
@@ -6403,7 +6403,7 @@ enum damage_lv battle_weapon_attack(struct block_list* src, struct block_list* t
 		int triple_rate = 30 - skillv; //Base Rate
 		if (sc && sc->data[SC_SKILLRATE_UP] && sc->data[SC_SKILLRATE_UP]->val1 == MO_TRIPLEATTACK) {
 			triple_rate += triple_rate * (sc->data[SC_SKILLRATE_UP]->val2) / 100;
-			status_change_end(src, SC_SKILLRATE_UP, INVALID_TIMER);
+			status_change_end(src,SC_SKILLRATE_UP,INVALID_TIMER);
 		}
 		if (rnd()%100 < triple_rate) {
 			if( skill_attack(BF_WEAPON,src,src,target,MO_TRIPLEATTACK,skillv,tick,0) )
@@ -6421,12 +6421,12 @@ enum damage_lv battle_weapon_attack(struct block_list* src, struct block_list* t
 				status_change_end(src,SC_SACRIFICE,INVALID_TIMER);
 
 			/**
-			 * We need to calculate the DMG before the hp reduction, because it can kill the source.
+			 * We need to calculate the DMG before the hp reduction,because it can kill the source.
 			 * For futher information: bugreport:4950
 			 **/
 			ret_val = (damage_lv)skill_attack(BF_WEAPON,src,src,target,PA_SACRIFICE,skill_lv,tick,0);
 
-			status_zap(src, sstatus->max_hp * 9 / 100, 0); //Damage to self is always 9%
+			status_zap(src,sstatus->max_hp * 9 / 100,0); //Damage to self is always 9%
 			if (ret_val == ATK_NONE)
 				return ATK_MISS;
 			return ret_val;
@@ -6454,49 +6454,49 @@ enum damage_lv battle_weapon_attack(struct block_list* src, struct block_list* t
 		}
 	}
 
-	if( tsc && tsc->data[SC_GT_ENERGYGAIN] && tsc->data[SC_GT_ENERGYGAIN]->val2 ) {
+	if (tsc && tsc->data[SC_GT_ENERGYGAIN] && tsc->data[SC_GT_ENERGYGAIN]->val2) {
 		int spheremax = 0;
-		if( tsc->data[SC_RAISINGDRAGON] )
+		if (tsc->data[SC_RAISINGDRAGON])
 			spheremax = 5 + tsc->data[SC_RAISINGDRAGON]->val1;
 		else
 			spheremax = 5;
-		if( tsd && rnd()%100 < tsc->data[SC_GT_ENERGYGAIN]->val3 )
+		if (tsd && rnd()%100 < tsc->data[SC_GT_ENERGYGAIN]->val3)
 			pc_addspiritball(tsd,skill_get_time2(SR_GENTLETOUCH_ENERGYGAIN,tsc->data[SC_GT_ENERGYGAIN]->val1),spheremax);
 	}
 
-	if( tsc && tsc->data[SC_KAAHI] && tsc->data[SC_KAAHI]->val4 == INVALID_TIMER && tstatus->hp < tstatus->max_hp )
+	if (tsc && tsc->data[SC_KAAHI] && tsc->data[SC_KAAHI]->val4 == INVALID_TIMER && tstatus->hp < tstatus->max_hp)
 		tsc->data[SC_KAAHI]->val4 = add_timer(tick + skill_get_time2(SL_KAAHI,tsc->data[SC_KAAHI]->val1),kaahi_heal_timer,target->id,SC_KAAHI); //Activate heal.
 
 	wd = battle_calc_attack(BF_WEAPON,src,target,0,0,flag);
 
-	if( sc && sc->count ) {
+	if (sc && sc->count) {
 		if (sc->data[SC_EXEEDBREAK]) {
 			ATK_RATER(wd.damage,sc->data[SC_EXEEDBREAK]->val1)
 			status_change_end(src,SC_EXEEDBREAK,INVALID_TIMER);
 		}
-		if( sc->data[SC_SPELLFIST] ) {
-			if( --(sc->data[SC_SPELLFIST]->val1) >= 0 ) {
+		if (sc->data[SC_SPELLFIST]) {
+			if (--(sc->data[SC_SPELLFIST]->val1) >= 0) {
 				struct Damage ad = battle_calc_attack(BF_MAGIC,src,target,sc->data[SC_SPELLFIST]->val3,sc->data[SC_SPELLFIST]->val4,flag|BF_SHORT);
 				wd.damage = ad.damage;
 			} else
 				status_change_end(src,SC_SPELLFIST,INVALID_TIMER);
 		}
-		if( sd && sc->data[SC_FEARBREEZE] && sc->data[SC_FEARBREEZE]->val4 > 0 && sd->status.inventory[sd->equip_index[EQI_AMMO]].amount >= sc->data[SC_FEARBREEZE]->val4 && battle_config.arrow_decrement) {
+		if (sd && sc->data[SC_FEARBREEZE] && sc->data[SC_FEARBREEZE]->val4 > 0 && sd->status.inventory[sd->equip_index[EQI_AMMO]].amount >= sc->data[SC_FEARBREEZE]->val4 && battle_config.arrow_decrement) {
 			pc_delitem(sd,sd->equip_index[EQI_AMMO],sc->data[SC_FEARBREEZE]->val4,0,1,LOG_TYPE_CONSUME);
 			sc->data[SC_FEARBREEZE]->val4 = 0;
 		}
 	}
-	if( sd && sd->state.arrow_atk ) //Consume arrow.
+	if (sd && sd->state.arrow_atk) //Consume arrow.
 		battle_consume_ammo(sd,0,0);
 
 	damage = wd.damage + wd.damage2;
 
-	if( damage > 0 && src != target ) {
-		if( sc && sc->data[SC_DUPLELIGHT] && (wd.flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT &&
-			rnd()%100 <= 10 + 2 * sc->data[SC_DUPLELIGHT]->val1 ) {
+	if (damage > 0 && src != target) {
+		if (sc && sc->data[SC_DUPLELIGHT] && (wd.flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT &&
+			rnd()%100 <= 10 + 2 * sc->data[SC_DUPLELIGHT]->val1) {
 			//Activates it only from melee damage
 			uint16 skill_id;
-			if( rnd()%2 == 1 )
+			if (rnd()%2 == 1)
 				skill_id = AB_DUPLELIGHT_MELEE;
 			else
 				skill_id = AB_DUPLELIGHT_MAGIC;
@@ -6504,47 +6504,47 @@ enum damage_lv battle_weapon_attack(struct block_list* src, struct block_list* t
 		}
 	}
 
-	wd.dmotion = clif_damage(src, target, tick, wd.amotion, wd.dmotion, wd.damage, wd.div_ , wd.type, wd.damage2);
+	wd.dmotion = clif_damage(src,target,tick,wd.amotion,wd.dmotion,wd.damage,wd.div_ ,wd.type,wd.damage2);
 
 	if (sd && sd->bonus.splash_range > 0 && damage > 0)
-		skill_castend_damage_id(src, target, 0, 1, tick, 0);
-	if ( target->type == BL_SKILL && damage > 0 ){
+		skill_castend_damage_id(src,target,0,1,tick,0);
+	if (target->type == BL_SKILL && damage > 0) {
 		TBL_SKILL *su = (TBL_SKILL*)target;
-		if( su->group && su->group->skill_id == HT_BLASTMINE)
-			skill_blown(src, target, 3, -1, 0);
+		if (su->group && su->group->skill_id == HT_BLASTMINE)
+			skill_blown(src,target,3,-1,0);
 	}
 
 	map_freeblock_lock();
 
-	battle_delay_damage(tick, wd.amotion, src, target, wd.flag, 0, 0, damage, wd.dmg_lv, wd.dmotion, true);
+	battle_delay_damage(tick,wd.amotion,src,target,wd.flag,0,0,damage,wd.dmg_lv,wd.dmotion,true);
 
-	if( tsc ) {
-		if( tsc->data[SC_DEVOTION] ) {
+	if (tsc) {
+		if (tsc->data[SC_DEVOTION]) {
 			struct status_change_entry *sce = tsc->data[SC_DEVOTION];
 			struct block_list *d_bl = map_id2bl(sce->val1);
 
-			if( d_bl && (
+			if (d_bl && (
 				(d_bl->type == BL_MER && ((TBL_MER*)d_bl)->master && ((TBL_MER*)d_bl)->master->bl.id == target->id) ||
 				(d_bl->type == BL_PC && ((TBL_PC*)d_bl)->devotion[sce->val2] == target->id)
-				) && check_distance_bl(target, d_bl, sce->val3) )
+				) && check_distance_bl(target,d_bl,sce->val3))
 			{
-				clif_damage(d_bl, d_bl, gettick(), 0, 0, damage, 0, 0, 0);
-				status_fix_damage(NULL, d_bl, damage, 0);
+				clif_damage(d_bl,d_bl,gettick(),0,0,damage,0,0,0);
+				status_fix_damage(NULL,d_bl,damage,0);
 			} else
-				status_change_end(target, SC_DEVOTION, INVALID_TIMER);
-		} else if( tsc->data[SC_CIRCLE_OF_FIRE_OPTION] && (wd.flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT && target->type == BL_PC ) {
+				status_change_end(target,SC_DEVOTION,INVALID_TIMER);
+		} else if (tsc->data[SC_CIRCLE_OF_FIRE_OPTION] && (wd.flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT && target->type == BL_PC) {
 			struct elemental_data *ed = ((TBL_PC*)target)->ed;
-			if( ed ) {
-				clif_skill_damage(&ed->bl, target, tick, status_get_amotion(src), 0, -30000, 1, EL_CIRCLE_OF_FIRE, tsc->data[SC_CIRCLE_OF_FIRE_OPTION]->val1, 6);
-				skill_attack(BF_WEAPON, &ed->bl, &ed->bl, src, EL_CIRCLE_OF_FIRE, tsc->data[SC_CIRCLE_OF_FIRE_OPTION]->val1, tick, wd.flag);
+			if (ed) {
+				clif_skill_damage(&ed->bl,target,tick,status_get_amotion(src),0,-30000,1,EL_CIRCLE_OF_FIRE,tsc->data[SC_CIRCLE_OF_FIRE_OPTION]->val1,6);
+				skill_attack(BF_WEAPON,&ed->bl,&ed->bl,src,EL_CIRCLE_OF_FIRE,tsc->data[SC_CIRCLE_OF_FIRE_OPTION]->val1,tick,wd.flag);
 			}
-		} else if( tsc->data[SC_WATER_SCREEN_OPTION] && tsc->data[SC_WATER_SCREEN_OPTION]->val1 ) {
+		} else if (tsc->data[SC_WATER_SCREEN_OPTION] && tsc->data[SC_WATER_SCREEN_OPTION]->val1) {
 			struct block_list *e_bl = map_id2bl(tsc->data[SC_WATER_SCREEN_OPTION]->val1);
-			if( e_bl && !status_isdead(e_bl) ) {
-				clif_damage(e_bl, e_bl, tick, wd.amotion, wd.dmotion, damage, wd.div_, wd.type, wd.damage2);
-				status_damage(target, e_bl, damage, 0, 0, 0);
+			if (e_bl && !status_isdead(e_bl)) {
+				clif_damage(e_bl,e_bl,tick,wd.amotion,wd.dmotion,damage,wd.div_,wd.type,wd.damage2);
+				status_damage(target,e_bl,damage,0,0,0);
 				//Just show damage in target.
-				clif_damage(src, target, tick, wd.amotion, wd.dmotion, damage, wd.div_, wd.type, wd.damage2);
+				clif_damage(src,target,tick,wd.amotion,wd.dmotion,damage,wd.div_,wd.type,wd.damage2);
 				map_freeblock_unlock();
 				return ATK_BLOCK;
 			}
@@ -6557,87 +6557,90 @@ enum damage_lv battle_weapon_attack(struct block_list* src, struct block_list* t
 		uint16 skill_lv = sc->data[SC_AUTOSPELL]->val3;
 		int i = rnd()%100;
 		if (sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_SAGE)
-			i = 0; //Max chance, no skilllv reduction. [Skotlex]
+			i = 0; //Max chance, no skill_lv reduction. [Skotlex]
 		if (i >= 50) skill_lv -= 2;
 		else if (i >= 15) skill_lv--;
 		if (skill_lv < 1) skill_lv = 1;
-		sp = skill_get_sp(skill_id, skill_lv) * 2 / 3;
+		sp = skill_get_sp(skill_id,skill_lv) * 2 / 3;
 
-		if (status_charge(src, 0, sp)) {
+		if (status_charge(src,0,sp)) {
 			switch (skill_get_casttype(skill_id)) {
 				case CAST_GROUND:
-					skill_castend_pos2(src, target->x, target->y, skill_id, skill_lv, tick, flag);
+					skill_castend_pos2(src,target->x,target->y,skill_id,skill_lv,tick,flag);
 					break;
 				case CAST_NODAMAGE:
-					skill_castend_nodamage_id(src, target, skill_id, skill_lv, tick, flag);
+					skill_castend_nodamage_id(src,target,skill_id,skill_lv,tick,flag);
 					break;
 				case CAST_DAMAGE:
-					skill_castend_damage_id(src, target, skill_id, skill_lv, tick, flag);
+					skill_castend_damage_id(src,target,skill_id,skill_lv,tick,flag);
 					break;
 			}
 		}
 	}
 	if (sd) {
-		if( (wd.flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT && sc && sc->data[SC__AUTOSHADOWSPELL] && rnd()%100 < sc->data[SC__AUTOSHADOWSPELL]->val3 &&
-			sd->status.skill[sc->data[SC__AUTOSHADOWSPELL]->val1].id != 0 && sd->status.skill[sc->data[SC__AUTOSHADOWSPELL]->val1].flag == SKILL_FLAG_PLAGIARIZED )
+		if ((wd.flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT && sc && sc->data[SC__AUTOSHADOWSPELL] && rnd()%100 < sc->data[SC__AUTOSHADOWSPELL]->val3 &&
+			sd->status.skill[sc->data[SC__AUTOSHADOWSPELL]->val1].id != 0 && sd->status.skill[sc->data[SC__AUTOSHADOWSPELL]->val1].flag == SKILL_FLAG_PLAGIARIZED)
 		{
 			int r_skill = sd->status.skill[sc->data[SC__AUTOSHADOWSPELL]->val1].id,
 				r_lv = sc->data[SC__AUTOSHADOWSPELL]->val2, type;
 
-				if( (type = skill_get_casttype(r_skill)) == CAST_GROUND ) {
+				if ((type = skill_get_casttype(r_skill)) == CAST_GROUND) {
 					int maxcount = 0;
 
-					if( !(BL_PC&battle_config.skill_reiteration) &&
-						skill_get_unit_flag(r_skill)&UF_NOREITERATION )
+					if (!(BL_PC&battle_config.skill_reiteration) &&
+						skill_get_unit_flag(r_skill)&UF_NOREITERATION)
 							type = -1;
 
-					if( BL_PC&battle_config.skill_nofootset &&
-						skill_get_unit_flag(r_skill)&UF_NOFOOTSET )
+					if (BL_PC&battle_config.skill_nofootset &&
+						skill_get_unit_flag(r_skill)&UF_NOFOOTSET)
 							type = -1;
 
-					if( BL_PC&battle_config.land_skill_limit &&
-						(maxcount = skill_get_maxcount(r_skill, r_lv)) > 0
-					  ) {
+					if (BL_PC&battle_config.land_skill_limit &&
+						(maxcount = skill_get_maxcount(r_skill,r_lv)) > 0)
+					{
 						int v;
-						for(v = 0; v < MAX_SKILLUNITGROUP && sd->ud.skillunit[v] && maxcount; v++) {
-							if(sd->ud.skillunit[v]->skill_id == r_skill)
+						for (v = 0; v < MAX_SKILLUNITGROUP && sd->ud.skillunit[v] && maxcount; v++) {
+							if (sd->ud.skillunit[v]->skill_id == r_skill)
 								maxcount--;
 						}
-						if( maxcount == 0 )
+						if (maxcount == 0)
 							type = -1;
 					}
 
-					if( type != CAST_GROUND ) {
-							clif_skill_fail(sd,r_skill,USESKILL_FAIL_LEVEL,0);
-							map_freeblock_unlock();
-							return wd.dmg_lv;
+					if (skill_get_unit_flag(r_skill)&UF_NONEARNPC)
+						type = -1;
+
+					if (type != CAST_GROUND) {
+						clif_skill_fail(sd,r_skill,USESKILL_FAIL_LEVEL,0);
+						map_freeblock_unlock();
+						return wd.dmg_lv;
 					}
 				}
 
 				sd->state.autocast = 1;
 				skill_consume_requirement(sd,r_skill,r_lv,3);
-				switch( type ) {
+				switch (type) {
 					case CAST_GROUND:
-						skill_castend_pos2(src, target->x, target->y, r_skill, r_lv, tick, flag);
+						skill_castend_pos2(src,target->x,target->y,r_skill,r_lv,tick,flag);
 						break;
 					case CAST_DAMAGE:
-						skill_castend_damage_id(src, target, r_skill, r_lv, tick, flag);
+						skill_castend_damage_id(src,target,r_skill,r_lv,tick,flag);
 						break;
 					case CAST_NODAMAGE:
-						skill_castend_nodamage_id(src, target, r_skill, r_lv, tick, flag);
+						skill_castend_nodamage_id(src,target,r_skill,r_lv,tick,flag);
 						break;
 				}
 				sd->state.autocast = 0;
 
-				sd->ud.canact_tick = tick + skill_delayfix(src, r_skill, r_lv);
-				clif_status_change(src, SI_ACTIONDELAY, 1, skill_delayfix(src, r_skill, r_lv), 0, 0, 1);
+				sd->ud.canact_tick = tick + skill_delayfix(src,r_skill,r_lv);
+				clif_status_change(src,SI_ACTIONDELAY,1,skill_delayfix(src,r_skill,r_lv),0,0,1);
 		}
 
 		if (wd.flag&BF_WEAPON && src != target && damage > 0) {
 			if (battle_config.left_cardfix_to_right)
-				battle_drain(sd, target, wd.damage, wd.damage, tstatus->race, is_boss(target));
+				battle_drain(sd,target,wd.damage,wd.damage,tstatus->race,is_boss(target));
 			else
-				battle_drain(sd, target, wd.damage, wd.damage2, tstatus->race, is_boss(target));
+				battle_drain(sd,target,wd.damage,wd.damage2,tstatus->race,is_boss(target));
 		}
 	}
 
@@ -6645,21 +6648,22 @@ enum damage_lv battle_weapon_attack(struct block_list* src, struct block_list* t
 		if (damage > 0 && tsc->data[SC_POISONREACT] &&
 			(rnd()%100 < tsc->data[SC_POISONREACT]->val3
 			|| sstatus->def_ele == ELE_POISON) &&
-//			check_distance_bl(src, target, tstatus->rhw.range+1) && Doesn't checks range! o.O;
-			status_check_skilluse(target, src, TF_POISON, 0)
+			//check_distance_bl(src,target,tstatus->rhw.range + 1) && //Doesn't checks range! o.O;
+			status_check_skilluse(target,src,TF_POISON,0)
 		) {	//Poison React
 			struct status_change_entry *sce = tsc->data[SC_POISONREACT];
 			if (sstatus->def_ele == ELE_POISON) {
 				sce->val2 = 0;
-				skill_attack(BF_WEAPON, target, target, src, AS_POISONREACT, sce->val1, tick, 0);
+				skill_attack(BF_WEAPON,target,target,src,AS_POISONREACT,sce->val1,tick,0);
 			} else {
-				skill_attack(BF_WEAPON, target, target, src, TF_POISON, 5, tick, 0);
+				skill_attack(BF_WEAPON,target,target,src,TF_POISON,5,tick,0);
 				--sce->val2;
 			}
 			if (sce->val2 <= 0)
-				status_change_end(target, SC_POISONREACT, INVALID_TIMER);
+				status_change_end(target,SC_POISONREACT,INVALID_TIMER);
 		}
 	}
+
 	map_freeblock_unlock();
 	return wd.dmg_lv;
 }

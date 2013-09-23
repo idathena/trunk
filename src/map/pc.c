@@ -981,9 +981,9 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	} else
 		sd->class_ = i;
 
-	// Checks and fixes to character status data, that are required
-	// in case of configuration change or stuff, which cannot be
-	// checked on char-server.
+	//Checks and fixes to character status data, that are required
+	//in case of configuration change or stuff, which cannot be
+	//checked on char-server.
 	if (sd->status.hair < MIN_HAIR_STYLE || sd->status.hair > MAX_HAIR_STYLE) {
 		sd->status.hair = MIN_HAIR_STYLE;
 	}
@@ -1132,7 +1132,7 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	pc_itemcd_do(sd,true);
 
 #ifdef BOUND_ITEMS
-	// Party bound item check
+	//Party bound item check
 	if (sd->status.party_id == 0 && (j = pc_bound_chk(sd,3,idxlist))) { //Party was deleted while character offline
 		for (i = 0; i < j; i++)
 			pc_delitem(sd,idxlist[i],sd->status.inventory[idxlist[i]].amount,0,1,LOG_TYPE_OTHER);

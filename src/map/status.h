@@ -1640,7 +1640,7 @@ int StatusIconChangeTable[SC_MAX];          //status -> "icon" (icon is a bit of
 unsigned int StatusChangeFlagTable[SC_MAX]; //status -> flags
 int StatusSkillChangeTable[SC_MAX];         //status -> skill
 int StatusRelevantBLTypes[SI_MAX];          //"icon" -> enum bl_type (for clif->status_change to identify for which bl types to send packets)
-static unsigned int StatusChangeStateTable[SC_MAX]; //status -> flags
+unsigned int StatusChangeStateTable[SC_MAX]; //status -> flags
 bool StatusDisplayType[SC_MAX];
 
 //For holding basic status (which can be modified by status changes)

@@ -5658,7 +5658,7 @@ static short status_calc_aspd(struct block_list *bl, struct status_change *sc, s
 	if( sc->data[SC_GOLDENE_FERSE] )
 		skills2 += sc->data[SC_GOLDENE_FERSE]->val3;
 
-	return ( flag&1? (skills1 + pots) : skills2 );
+	return ( flag&1 ? (skills1 + pots) : skills2 );
 }
 #endif
 
@@ -5926,7 +5926,7 @@ static unsigned int status_calc_maxsp(struct block_list *bl, struct status_chang
 static unsigned char status_calc_element(struct block_list *bl, struct status_change *sc, int element)
 {
 	if(!sc || !sc->count)
-		return element;
+		return cap_value(element,0,UCHAR_MAX);
 
 	if(sc->data[SC_FREEZE])
 		return ELE_WATER;
@@ -5947,7 +5947,7 @@ static unsigned char status_calc_element(struct block_list *bl, struct status_ch
 static unsigned char status_calc_element_lv(struct block_list *bl, struct status_change *sc, int lv)
 {
 	if(!sc || !sc->count)
-		return lv;
+		return cap_value(lv,1,4);
 
 	if(sc->data[SC_FREEZE])
 		return 1;
@@ -5969,7 +5969,7 @@ static unsigned char status_calc_element_lv(struct block_list *bl, struct status
 unsigned char status_calc_attack_element(struct block_list *bl, struct status_change *sc, int element)
 {
 	if(!sc || !sc->count)
-		return element;
+		return cap_value(element,0,UCHAR_MAX);
 	if(sc->data[SC_ENCHANTARMS])
 		return sc->data[SC_ENCHANTARMS]->val2;
 	if(sc->data[SC_WATERWEAPON]
@@ -6002,14 +6002,14 @@ unsigned char status_calc_attack_element(struct block_list *bl, struct status_ch
 static unsigned short status_calc_mode(struct block_list *bl, struct status_change *sc, int mode)
 {
 	if(!sc || !sc->count)
-		return mode;
+		return cap_value(mode,0,USHRT_MAX);
 	if(sc->data[SC_MODECHANGE]) {
 		if (sc->data[SC_MODECHANGE]->val2)
 			mode = sc->data[SC_MODECHANGE]->val2; //Set mode
 		if (sc->data[SC_MODECHANGE]->val3)
-			mode|= sc->data[SC_MODECHANGE]->val3; //Add mode
+			mode |= sc->data[SC_MODECHANGE]->val3; //Add mode
 		if (sc->data[SC_MODECHANGE]->val4)
-			mode&=~sc->data[SC_MODECHANGE]->val4; //Del mode
+			mode &= ~sc->data[SC_MODECHANGE]->val4; //Del mode
 	}
 	return cap_value(mode,0,USHRT_MAX);
 }
@@ -6017,11 +6017,11 @@ static unsigned short status_calc_mode(struct block_list *bl, struct status_chan
 const char* status_get_name(struct block_list *bl) {
 	nullpo_ret(bl);
 	switch (bl->type) {
-	case BL_PC:  return ((TBL_PC *)bl)->fakename[0] != '\0' ? ((TBL_PC*)bl)->fakename : ((TBL_PC*)bl)->status.name;
-	case BL_MOB: return ((TBL_MOB*)bl)->name;
-	case BL_PET: return ((TBL_PET*)bl)->pet.name;
-	case BL_HOM: return ((TBL_HOM*)bl)->homunculus.name;
-	case BL_NPC: return ((TBL_NPC*)bl)->name;
+		case BL_PC:  return ((TBL_PC *)bl)->fakename[0] != '\0' ? ((TBL_PC*)bl)->fakename : ((TBL_PC*)bl)->status.name;
+		case BL_MOB: return ((TBL_MOB*)bl)->name;
+		case BL_PET: return ((TBL_PET*)bl)->pet.name;
+		case BL_HOM: return ((TBL_HOM*)bl)->homunculus.name;
+		case BL_NPC: return ((TBL_NPC*)bl)->name;
 	}
 	return "Unknown";
 }
@@ -10979,7 +10979,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				damage =  200 + 100 * sce->val1 + status_get_int(src);
 				status_damage(src, bl, damage, 0, clif_damage(bl, bl, tick, status->amotion, status->dmotion + 200, damage, 1, 0, 0), 0);
 				unit_skillcastcancel(bl, 1);
-				if ( sc->data[type] ) {
+				if( sc->data[type] ) {
 					sc_timer_next(1000 + tick, status_change_timer, bl->id, data);
 				}
 				map_freeblock_unlock();

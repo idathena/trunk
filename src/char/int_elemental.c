@@ -17,24 +17,23 @@
 
 bool mapif_elemental_save(struct s_elemental* ele) {
 	bool flag = true;
-	
+
 	if( ele->elemental_id == 0 ) { // Create new DB entry
 		if( SQL_ERROR == Sql_Query(sql_handle,
-								   "INSERT INTO `elemental` (`char_id`,`class`,`mode`,`hp`,`sp`,`max_hp`,`max_sp`,`atk1`,`atk2`,`matk`,`aspd`,`def`,`mdef`,`flee`,`hit`,`life_time`)"
-								   "VALUES ('%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%u')",
-								   ele->char_id, ele->class_, ele->mode, ele->hp, ele->sp, ele->max_hp, ele->max_sp, ele->atk, ele->atk2, ele->matk, ele->amotion, ele->def, ele->mdef, ele->flee, ele->hit, ele->life_time) )
+			"INSERT INTO `%s` (`char_id`,`class`,`mode`,`hp`,`sp`,`max_hp`,`max_sp`,`atk1`,`atk2`,`matk`,`aspd`,`def`,`mdef`,`flee`,`hit`,`life_time`)"
+			"VALUES ('%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d','%u')",
+			elemental_db, ele->char_id, ele->class_, ele->mode, ele->hp, ele->sp, ele->max_hp, ele->max_sp, ele->atk, ele->atk2, ele->matk, ele->amotion, ele->def, ele->mdef, ele->flee, ele->hit, ele->life_time) )
 		{
 			Sql_ShowDebug(sql_handle);
 			flag = false;
-		}
-		else
+		} else
 			ele->elemental_id = (int)Sql_LastInsertId(sql_handle);
 	} else if( SQL_ERROR == Sql_Query(sql_handle,
-									"UPDATE `elemental` SET `char_id` = '%d', `class` = '%d', `mode` = '%d', `hp` = '%d', `sp` = '%d',"
-									"`max_hp` = '%d', `max_sp` = '%d', `atk1` = '%d', `atk2` = '%d', `matk` = '%d', `aspd` = '%d', `def` = '%d',"
-									"`mdef` = '%d', `flee` = '%d', `hit` = '%d', `life_time` = '%u' WHERE `ele_id` = '%d'",
-									ele->char_id, ele->class_, ele->mode, ele->hp, ele->sp, ele->max_hp, ele->max_sp, ele->atk, ele->atk2,
-									ele->matk, ele->amotion, ele->def, ele->mdef, ele->flee, ele->hit, ele->life_time, ele->elemental_id) )
+		"UPDATE `%s` SET `char_id` = '%d', `class` = '%d', `mode` = '%d', `hp` = '%d', `sp` = '%d',"
+		"`max_hp` = '%d', `max_sp` = '%d', `atk1` = '%d', `atk2` = '%d', `matk` = '%d', `aspd` = '%d', `def` = '%d',"
+		"`mdef` = '%d', `flee` = '%d', `hit` = '%d', `life_time` = '%u' WHERE `ele_id` = '%d'",
+		elemental_db, ele->char_id, ele->class_, ele->mode, ele->hp, ele->sp, ele->max_hp, ele->max_sp, ele->atk, ele->atk2,
+		ele->matk, ele->amotion, ele->def, ele->mdef, ele->flee, ele->hit, ele->life_time, ele->elemental_id) )
 	{ // Update DB entry
 		Sql_ShowDebug(sql_handle);
 		flag = false;
@@ -44,23 +43,25 @@ bool mapif_elemental_save(struct s_elemental* ele) {
 
 bool mapif_elemental_load(int ele_id, int char_id, struct s_elemental *ele) {
 	char* data;
-	
+
 	memset(ele, 0, sizeof(struct s_elemental));
 	ele->elemental_id = ele_id;
 	ele->char_id = char_id;
-	
-	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `class`, `mode`, `hp`, `sp`, `max_hp`, `max_sp`, `atk1`, `atk2`, `matk`, `aspd`,"
-							   "`def`, `mdef`, `flee`, `hit`, `life_time` FROM `elemental` WHERE `ele_id` = '%d' AND `char_id` = '%d'",
-							   ele_id, char_id) ) {
+
+	if( SQL_ERROR == Sql_Query(sql_handle,
+		"SELECT `class`, `mode`, `hp`, `sp`, `max_hp`, `max_sp`, `atk1`, `atk2`, `matk`, `aspd`,"
+		"`def`, `mdef`, `flee`, `hit`, `life_time` FROM `%s` WHERE `ele_id` = '%d' AND `char_id` = '%d'",
+		elemental_db, ele_id, char_id) )
+	{
 		Sql_ShowDebug(sql_handle);
 		return false;
 	}
-	
+
 	if( SQL_SUCCESS != Sql_NextRow(sql_handle) ) {
 		Sql_FreeResult(sql_handle);
 		return false;
 	}
-	
+
 	Sql_GetData(sql_handle,  0, &data, NULL); ele->class_ = atoi(data);
 	Sql_GetData(sql_handle,  1, &data, NULL); ele->mode = atoi(data);
 	Sql_GetData(sql_handle,  2, &data, NULL); ele->hp = atoi(data);
@@ -79,22 +80,22 @@ bool mapif_elemental_load(int ele_id, int char_id, struct s_elemental *ele) {
 	Sql_FreeResult(sql_handle);
 	if( save_log )
 		ShowInfo("Elemental loaded (%d - %d).\n", ele->elemental_id, ele->char_id);
-	
+
 	return true;
 }
 
 bool mapif_elemental_delete(int ele_id) {
-	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `elemental` WHERE `ele_id` = '%d'", ele_id) ) {
+	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `ele_id` = '%d'", elemental_db, ele_id) ) {
 		Sql_ShowDebug(sql_handle);
 		return false;
 	}
-	
+
 	return true;
 }
 
 static void mapif_elemental_send(int fd, struct s_elemental *ele, unsigned char flag) {
 	int size = sizeof(struct s_elemental) + 5;
-	
+
 	WFIFOHEAD(fd,size);
 	WFIFOW(fd,0) = 0x387c;
 	WFIFOW(fd,2) = size;
@@ -150,7 +151,7 @@ void inter_elemental_sql_final(void) {
  *------------------------------------------*/
 int inter_elemental_parse_frommap(int fd) {
 	unsigned short cmd = RFIFOW(fd,0);
-	
+
 	switch( cmd ) {
 		case 0x307c: mapif_parse_elemental_create(fd, (struct s_elemental*)RFIFOP(fd,4)); break;
 		case 0x307d: mapif_parse_elemental_load(fd, (int)RFIFOL(fd,2), (int)RFIFOL(fd,6)); break;
