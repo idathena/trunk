@@ -9719,29 +9719,27 @@ BUILDIN_FUNC(sc_end)
 		bl = map_id2bl(script_getnum(st, 3));
 	else
 		bl = map_id2bl(st->rid);
-	
+
 	if( potion_flag == 1 && potion_target ) //##TODO how does this work [FlavioJS]
 		bl = map_id2bl(potion_target);
 
 	if( !bl )
 		return 0;
 
-	if( type >= 0 && type < SC_MAX )
-	{
+	if( type >= 0 && type < SC_MAX ) {
 		struct status_change *sc = status_get_sc(bl);
 		struct status_change_entry *sce = sc ? sc->data[type] : NULL;
-		
+
 		if( !sce )
 			return 0;
-			
-		switch( type )
-		{
+
+		switch( type ) {
 			case SC_WEIGHT50:
 			case SC_WEIGHT90:
 			case SC_NOCHAT:
 			case SC_PUSH_CART:
 				return 0;
-			
+
 			default:
 				break;
 		}
@@ -9749,7 +9747,7 @@ BUILDIN_FUNC(sc_end)
 		sce->val1 = sce->val2 = sce->val3 = sce->val4 = 0;
 		status_change_end(bl, (sc_type)type, INVALID_TIMER);
 	} else
-		status_change_clear(bl, 2); // remove all effects
+		status_change_clear(bl, 2); //Remove all effects
 	return 0;
 }
 

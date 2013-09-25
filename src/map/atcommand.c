@@ -8950,7 +8950,7 @@ ACMD_FUNC(costume) {
 			if( sd->sc.data[name2id[k]] ) {
 				sprintf(atcmd_output, msg_txt(1488), names[k]); // Costume '%s' removed.
 				clif_displaymessage(sd->fd, atcmd_output);
-				status_change_end(&sd->bl, name2id[k], INVALID_TIMER);
+				status_change_end(&sd->bl, (sc_type)name2id[k], INVALID_TIMER);
 				return 0;
 			}
 		}
@@ -8981,7 +8981,7 @@ ACMD_FUNC(costume) {
 		return -1;
 	}
 
-	sc_start(&sd->bl, &sd->bl, name2id[k], 100, 0, -1);
+	sc_start(&sd->bl, &sd->bl, (sc_type)name2id[k], 100, 0, -1);
 
 	return 0;
 }

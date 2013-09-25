@@ -2972,7 +2972,7 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 			case GC_VENOMPRESSURE: {
 					struct status_change *ssc = status_get_sc(src);
 					if (ssc && ssc->data[SC_POISONINGWEAPON] && rnd()%100 < 70 + 5 * skill_lv) {
-						sc_start(src, bl, (enum sc_type)ssc->data[SC_POISONINGWEAPON]->val2, 100, ssc->data[SC_POISONINGWEAPON]->val1,
+						sc_start(src, bl, (sc_type)ssc->data[SC_POISONINGWEAPON]->val2, 100, ssc->data[SC_POISONINGWEAPON]->val1,
 							skill_get_time2(GC_POISONINGWEAPON, 1));
 						status_change_end(src, SC_POISONINGWEAPON, INVALID_TIMER);
 						clif_skill_nodamage(src, bl, skill_id, skill_lv, 1);
@@ -3139,7 +3139,7 @@ static int skill_check_unit_range2_sub (struct block_list *bl, va_list ap)
 
 static int skill_check_unit_range2 (struct block_list *bl, int x, int y, uint16 skill_id, uint16 skill_lv, int type)
 {
-	int range1, range2;
+	int range1 = 0, range2 = 0;
 
 	switch (skill_id) {
 		case WZ_ICEWALL:
@@ -5927,11 +5927,11 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 		case MO_ABSORBSPIRITS:
 			i = 0;
 			if (dstsd && dstsd->spiritball && (sd == dstsd || map_flag_vs(src->m)) && (dstsd->class_&MAPID_BASEMASK)!=MAPID_GUNSLINGER) {
-				//split the if for readability, and included gunslingers in the check so that their coins cannot be removed [Reddozen]
+				//Split the if for readability, and included gunslingers in the check so that their coins cannot be removed [Reddozen]
 				i = dstsd->spiritball * 7;
 				pc_delspiritball(dstsd,dstsd->spiritball,0);
 			} else if (dstmd && !(tstatus->mode&MD_BOSS) && rnd() % 100 < 20) {
-				//check if target is a monster and not a Boss, for the 20% chance to absorb 2 SP per monster's level [Reddozen]
+				//Check if target is a monster and not a Boss, for the 20% chance to absorb 2 SP per monster's level [Reddozen]
 				i = 2 * dstmd->level;
 				mob_target(dstmd,src,0);
 			}
@@ -6882,10 +6882,10 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 					sp = sp * tsc->data[SC_MAGICROD]->val2 / 100;
 					if(sp < 1) sp = 1;
 					status_heal(bl,0,sp,2);
-					status_percent_damage(bl, src, 0, -20, false); //20% max SP damage.
+					status_percent_damage(bl,src,0,-20,false); //20% max SP damage.
 				} else {
 					struct unit_data *ud = unit_bl2ud(bl);
-					int bl_skill_id=0,bl_skill_lv=0,hp = 0;
+					int bl_skill_id = 0,bl_skill_lv = 0,hp = 0;
 					if (!ud || ud->skilltimer == INVALID_TIMER)
 						break; //Nothing to cancel.
 					bl_skill_id = ud->skill_id;
@@ -6901,10 +6901,10 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 					unit_skillcastcancel(bl,0);
 					sp = skill_get_sp(bl_skill_id,bl_skill_lv);
-					status_zap(bl, hp, sp);
+					status_zap(bl,hp,sp);
 
 					if (hp && skill_lv >= 5)
-						hp>>=1;	//Recover half damaged HP at level 5 [Skotlex]
+						hp >>= 1;	//Recover half damaged HP at level 5 [Skotlex]
 					else
 						hp = 0;
 
@@ -7084,7 +7084,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 
 		case NPC_TRANSFORMATION:
 		case NPC_METAMORPHOSIS:
-			if(md && md->skill_idx >= 0) {
+			if (md && md->skill_idx >= 0) {
 				int class_ = mob_random_class (md->db->skill[md->skill_idx].val,0);
 				if (skill_lv > 1) //Multiply the rest of mobs. [Skotlex]
 					mob_summonslave(md,md->db->skill[md->skill_idx].val,skill_lv-1,skill_id);
@@ -7100,16 +7100,16 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 			//val[2] adds to the current mode
 			//val[3] removes from the current mode
 			//val[4] if set, asks to delete the previous mode change.
-			if(md && md->skill_idx >= 0 && tsc) {
+			if (md && md->skill_idx >= 0 && tsc) {
 				clif_emotion(bl, md->db->skill[md->skill_idx].val[0]);
-				if(md->db->skill[md->skill_idx].val[4] && tsce)
+				if (md->db->skill[md->skill_idx].val[4] && tsce)
 					status_change_end(bl, type, INVALID_TIMER);
 
 				//If mode gets set by NPC_EMOTION then the target should be reset [Playtester]
-				if(skill_id == NPC_EMOTION && md->db->skill[md->skill_idx].val[1])
+				if (skill_id == NPC_EMOTION && md->db->skill[md->skill_idx].val[1])
 					mob_unlocktarget(md, tick);
 
-				if(md->db->skill[md->skill_idx].val[1] || md->db->skill[md->skill_idx].val[2])
+				if (md->db->skill[md->skill_idx].val[1] || md->db->skill[md->skill_idx].val[2])
 					sc_start4(src, src, type, 100, skill_lv,
 						md->db->skill[md->skill_idx].val[1],
 						md->db->skill[md->skill_idx].val[2],
@@ -8365,7 +8365,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 					case WL_SUMMONSTONE: element = WLS_STONE; break;
 				}
 
-				sc_start4(src,src,(enum sc_type)sctype,100,element,pos,skill_lv,0,skill_get_time(skill_id,skill_lv));
+				sc_start4(src,src,(sc_type)sctype,100,element,pos,skill_lv,0,skill_get_time(skill_id,skill_lv));
 				clif_skill_nodamage(src,bl,skill_id,0,0);
 			}
 			break;
@@ -11547,7 +11547,7 @@ struct skill_unit_group* skill_unitsetting (struct block_list *src, uint16 skill
 		if( !alive )
 			continue;
 
-		nullpo_retr(NULL,unit=skill_initunit(group,i,ux,uy,val1,val2));
+		nullpo_retr(NULL,unit = skill_initunit(group,i,ux,uy,val1,val2));
 		unit->limit = limit;
 		unit->range = range;
 
@@ -11734,7 +11734,7 @@ static int skill_unit_onplace (struct skill_unit *src, struct block_list *bl, un
 		case UNT_SUITON:
 			if( !sce )
 				sc_start4(ss,bl,type,100,sg->skill_lv,
-				map_flag_vs(bl->m) || battle_check_target(&src->bl,bl,BCT_ENEMY) > 0 ? 1 : 0, //Send val3 =1 to reduce agi.
+				map_flag_vs(bl->m) || battle_check_target(&src->bl,bl,BCT_ENEMY) > 0 ? 1 : 0, //Send val3 = 1 to reduce agi.
 				0,0,sg->limit);
 			break;
 
@@ -13251,8 +13251,8 @@ int skill_check_condition_castbegin(struct map_session_data* sd, uint16 skill_id
 				return 0;
 			break;
 		case MO_EXTREMITYFIST:
-//			if( sc && sc->data[SC_EXTREMITYFIST ]) //To disable Asura during the 5 min skill block uncomment this...
-//				return 0;
+			//if( sc && sc->data[SC_EXTREMITYFIST] ) //To disable Asura during the 5 min skill block uncomment this...
+				//return 0;
 			if( sc && (sc->data[SC_BLADESTOP] || sc->data[SC_CURSEDCIRCLE_ATKER]) )
 				break;
 			if( sc && sc->data[SC_COMBO] ) {

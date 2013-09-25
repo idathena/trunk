@@ -4,7 +4,7 @@
 #ifndef	_MMO_H_
 #define	_MMO_H_
 
-#include "cbasetypes.h"
+#include "../common/cbasetypes.h"
 #include "../common/db.h"
 #include <time.h>
 

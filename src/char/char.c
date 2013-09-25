@@ -271,12 +271,12 @@ void set_char_charselect(int account_id)
 	character->char_id = -1;
 	character->server = -1;
 
-	if(character->waiting_disconnect != INVALID_TIMER) {
+	if( character->waiting_disconnect != INVALID_TIMER ) {
 		delete_timer(character->waiting_disconnect, chardb_waiting_disconnect);
 		character->waiting_disconnect = INVALID_TIMER;
 	}
 
-	if (login_fd > 0 && !session[login_fd]->flag.eof) {
+	if( login_fd > 0 && !session[login_fd]->flag.eof ) {
 		WFIFOHEAD(login_fd,6);
 		WFIFOW(login_fd,0) = 0x272b;
 		WFIFOL(login_fd,2) = account_id;
@@ -310,17 +310,17 @@ void set_char_online(int map_id, int char_id, int account_id)
 		server[character->server].users++;
 
 	//Get rid of disconnect timer
-	if(character->waiting_disconnect != INVALID_TIMER) {
+	if( character->waiting_disconnect != INVALID_TIMER ) {
 		delete_timer(character->waiting_disconnect, chardb_waiting_disconnect);
 		character->waiting_disconnect = INVALID_TIMER;
 	}
 
 	//Set char online in guild cache. If char is in memory, use the guild id on it, otherwise seek it.
-	cp = (struct mmo_charstatus*)idb_get(char_db_,char_id);
-	inter_guild_CharOnline(char_id, cp?cp->guild_id:-1);
+	cp = (struct mmo_charstatus*)idb_get(char_db_, char_id);
+	inter_guild_CharOnline(char_id, cp ? cp->guild_id : -1);
 
 	//Notify login server
-	if (login_fd > 0 && !session[login_fd]->flag.eof) {
+	if( login_fd > 0 && !session[login_fd]->flag.eof ) {
 		WFIFOHEAD(login_fd,6);
 		WFIFOW(login_fd,0) = 0x272b;
 		WFIFOL(login_fd,2) = account_id;
@@ -332,31 +332,31 @@ void set_char_offline(int char_id, int account_id)
 {
 	struct online_char_data* character;
 
-	if ( char_id == -1 ) {
+	if( char_id == -1 ) {
 		if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `online`='0' WHERE `account_id`='%d'", char_db, account_id) )
 			Sql_ShowDebug(sql_handle);
 	} else {
 		struct mmo_charstatus* cp = (struct mmo_charstatus*)idb_get(char_db_,char_id);
 		inter_guild_CharOffline(char_id, cp ? cp->guild_id : -1);
-		if (cp)
-			idb_remove(char_db_,char_id);
+		if( cp )
+			idb_remove(char_db_, char_id);
 
 		if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `online`='0' WHERE `char_id`='%d' LIMIT 1", char_db, char_id) )
 			Sql_ShowDebug(sql_handle);
 	}
 
-	if ((character = (struct online_char_data*)idb_get(online_char_db, account_id)) != NULL) {
+	if( (character = (struct online_char_data*)idb_get(online_char_db, account_id)) != NULL ) {
 		//We don't free yet to avoid aCalloc/aFree spamming during char change. [Skotlex]
 		if( character->server > -1 )
 			if( server[character->server].users > 0 ) // Prevent this value from going negative.
 				server[character->server].users--;
 
-		if(character->waiting_disconnect != INVALID_TIMER) {
+		if( character->waiting_disconnect != INVALID_TIMER ) {
 			delete_timer(character->waiting_disconnect, chardb_waiting_disconnect);
 			character->waiting_disconnect = INVALID_TIMER;
 		}
 
-		if(character->char_id == char_id) {
+		if( character->char_id == char_id ) {
 			character->char_id = -1;
 			character->server = -1;
 			//Needed if player disconnects completely since Skotlex did not want to free the session
@@ -367,7 +367,7 @@ void set_char_offline(int char_id, int account_id)
 	}
 
 	//Remove char if 1- Set all offline, or 2- character is no longer connected to char-server.
-	if (login_fd > 0 && !session[login_fd]->flag.eof && (char_id == -1 || character == NULL || character->fd == -1)) {
+	if( login_fd > 0 && !session[login_fd]->flag.eof && (char_id == -1 || character == NULL || character->fd == -1) ) {
 		WFIFOHEAD(login_fd,6);
 		WFIFOW(login_fd,0) = 0x272c;
 		WFIFOL(login_fd,2) = account_id;
@@ -382,14 +382,14 @@ static int char_db_setoffline(DBKey key, DBData *data, va_list ap)
 {
 	struct online_char_data* character = (struct online_char_data*)db_data2ptr(data);
 	int server = va_arg(ap, int);
-	if (server == -1) {
+	if( server == -1 ) {
 		character->char_id = -1;
 		character->server = -1;
-		if(character->waiting_disconnect != INVALID_TIMER){
+		if( character->waiting_disconnect != INVALID_TIMER ) {
 			delete_timer(character->waiting_disconnect, chardb_waiting_disconnect);
 			character->waiting_disconnect = INVALID_TIMER;
 		}
-	} else if (character->server == server)
+	} else if( character->server == server )
 		character->server = -2; //In some map server that we aren't connected to.
 	return 0;
 }
@@ -402,13 +402,13 @@ static int char_db_kickoffline(DBKey key, DBData *data, va_list ap)
 	struct online_char_data* character = (struct online_char_data*)db_data2ptr(data);
 	int server_id = va_arg(ap, int);
 
-	if (server_id > -1 && character->server != server_id)
+	if( server_id > -1 && character->server != server_id )
 		return 0;
 
 	//Kick out any connected characters, and set them offline as appropriate.
-	if (character->server > -1)
+	if( character->server > -1 )
 		mapif_disconnectplayer(server[character->server].fd, character->account_id, character->char_id, 1);
-	else if (character->waiting_disconnect == INVALID_TIMER)
+	else if( character->waiting_disconnect == INVALID_TIMER )
 		set_char_offline(character->char_id, character->account_id);
 	else
 		return 0; // fail
@@ -418,13 +418,13 @@ static int char_db_kickoffline(DBKey key, DBData *data, va_list ap)
 
 void set_all_offline(int id)
 {
-	if (id < 0)
+	if( id < 0 )
 		ShowNotice("Sending all users offline.\n");
 	else
 		ShowNotice("Sending users of map-server %d offline.\n",id);
 	online_char_db->foreach(online_char_db,char_db_kickoffline,id);
 
-	if (id >= 0 || login_fd <= 0 || session[login_fd]->flag.eof)
+	if( id >= 0 || login_fd <= 0 || session[login_fd]->flag.eof )
 		return;
 	//Tell login-server to also mark all our characters as offline.
 	WFIFOHEAD(login_fd,2);
@@ -2711,8 +2711,7 @@ void mapif_server_init(int id)
 /// Destroys a server structure.
 void mapif_server_destroy(int id)
 {
-	if( server[id].fd == -1 )
-	{
+	if( server[id].fd == -1 ) {
 		do_close(server[id].fd);
 		server[id].fd = -1;
 	}
@@ -2730,16 +2729,16 @@ void mapif_server_reset(int id)
 	WBUFL(buf,4) = htonl(server[id].ip);
 	WBUFW(buf,8) = htons(server[id].port);
 	j = 0;
-	for(i = 0; i < MAX_MAP_PER_SERVER; i++)
-		if (server[id].map[i])
-			WBUFW(buf,10+(j++)*4) = server[id].map[i];
-	if (j > 0) {
+	for( i = 0; i < MAX_MAP_PER_SERVER; i++ )
+		if( server[id].map[i] )
+			WBUFW(buf,10 + (j++) * 4) = server[id].map[i];
+	if( j > 0 ) {
 		WBUFW(buf,2) = j * 4 + 10;
 		mapif_sendallwos(fd, buf, WBUFW(buf,2));
 	}
 	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `index`='%d'", ragsrvinfo_db, server[id].fd) )
 		Sql_ShowDebug(sql_handle);
-	online_char_db->foreach(online_char_db,char_db_setoffline,id); //Tag relevant chars as 'in disconnected' server.
+	online_char_db->foreach(online_char_db, char_db_setoffline, id); //Tag relevant chars as 'in disconnected' server.
 	mapif_server_destroy(id);
 	mapif_server_init(id);
 }
@@ -4905,7 +4904,7 @@ int char_config_read(const char* cfgName)
 		return 1;
 	}
 
-	while(fgets(line, sizeof(line), fp)) {
+	while (fgets(line, sizeof(line), fp)) {
 		if (line[0] == '/' && line[1] == '/')
 			continue;
 
@@ -4914,13 +4913,13 @@ int char_config_read(const char* cfgName)
 
 		remove_control_chars(w1);
 		remove_control_chars(w2);
-		if(strcmpi(w1,"timestamp_format") == 0) {
+		if (strcmpi(w1,"timestamp_format") == 0) {
 			safestrncpy(timestamp_format, w2, sizeof(timestamp_format));
-		} else if(strcmpi(w1,"console_silent")==0){
+		} else if (strcmpi(w1,"console_silent") == 0) {
 			msg_silent = atoi(w2);
-			if( msg_silent ) /* only bother if its actually enabled */
+			if (msg_silent) /* Only bother if its actually enabled */
 				ShowInfo("Console Silent Setting: %d\n", atoi(w2));
-		} else if(strcmpi(w1,"stdout_with_ansisequence")==0){
+		} else if (strcmpi(w1, "stdout_with_ansisequence") == 0) {
 			stdout_with_ansisequence = config_switch(w2);
 		} else if (strcmpi(w1, "userid") == 0) {
 			safestrncpy(userid, w2, sizeof(userid));
@@ -4943,7 +4942,7 @@ int char_config_read(const char* cfgName)
 			login_port = atoi(w2);
 		} else if (strcmpi(w1, "char_ip") == 0) {
 			char_ip = host2ip(w2);
-			if (char_ip){
+			if (char_ip) {
 				char ip_str[16];
 				safestrncpy(char_ip_str, w2, sizeof(char_ip_str));
 				ShowStatus("Character server IP address : %s -> %s\n", w2, ip2str(char_ip, ip_str));
@@ -4970,7 +4969,7 @@ int char_config_read(const char* cfgName)
 		} else if(strcmpi(w1, "gm_allow_group") == 0) {
 			gm_allow_group = atoi(w2);
 		} else if (strcmpi(w1, "autosave_time") == 0) {
-			autosave_interval = atoi(w2)*1000;
+			autosave_interval = atoi(w2) * 1000;
 			if (autosave_interval <= 0)
 				autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
 		} else if (strcmpi(w1, "save_log") == 0) {
@@ -4992,13 +4991,13 @@ int char_config_read(const char* cfgName)
 		} else if (strcmpi(w1, "start_items") == 0) {
 			int i = 0, n = 0;
 			char *lineitem, **fields;
-			int fields_length = 3+1;
+			int fields_length = 3 + 1;
 			fields = (char**)aMalloc(fields_length*sizeof(char*));
 
 			lineitem = strtok(w2, ":");
 			while (lineitem != NULL) {
 				n = sv_split(lineitem, strlen(lineitem), 0, ',', fields, fields_length, SV_NOESCAPE_NOTERMINATE);
-				if (n+1 < fields_length) {
+				if (n + 1 < fields_length) {
 					ShowDebug("start_items: not enough arguments for %s! Skipping...\n", lineitem);
 					lineitem = strtok(NULL, ":"); //Next itemline
 					continue;
@@ -5014,7 +5013,7 @@ int char_config_read(const char* cfgName)
 				i++;
 			}
 			aFree(fields);
-		} else if(strcmpi(w1,"log_char") == 0) { //Log char or not [devil]
+		} else if (strcmpi(w1,"log_char") == 0) { //Log char or not [devil]
 			log_char = atoi(w2);
 		} else if (strcmpi(w1, "unknown_char_name") == 0) {
 			safestrncpy(unknown_char_name, w2, sizeof(unknown_char_name));
@@ -5029,7 +5028,7 @@ int char_config_read(const char* cfgName)
 			char_del_level = atoi(w2);
 		} else if (strcmpi(w1, "char_del_delay") == 0) {
 			char_del_delay = atoi(w2);
-		} else if(strcmpi(w1,"db_path")==0) {
+		} else if (strcmpi(w1,"db_path")==0) {
 			safestrncpy(db_path, w2, sizeof(db_path));
 		} else if (strcmpi(w1, "console") == 0) {
 			console = config_switch(w2);
@@ -5056,13 +5055,13 @@ int char_config_read(const char* cfgName)
 		} else if (strcmpi(w1, "pincode_enabled") == 0) {
 			pincode_enabled = config_switch(w2);
 #if PACKETVER < 20110309
-			if( pincode_enabled ) {
+			if (pincode_enabled) {
 				ShowWarning("pincode_enabled requires PACKETVER 20110309 or higher. Disabling...\n");
 				pincode_enabled = false;
 			}
 #endif
 		} else if (strcmpi(w1, "pincode_changetime") == 0) {
-			pincode_changetime = atoi(w2)*60*60*24;
+			pincode_changetime = atoi(w2) * 60 * 60 * 24;
 		} else if (strcmpi(w1, "pincode_maxtry") == 0) {
 			pincode_maxtry = atoi(w2);
 		} else if (strcmpi(w1, "pincode_force") == 0) {

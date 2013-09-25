@@ -4511,24 +4511,24 @@ struct Damage battle_calc_attack_gvg_bg(struct Damage wd, struct block_list *src
 				}
 		}
 		if( !wd.damage2 ) {
-			wd.damage = battle_calc_damage(src,target,&wd,wd.damage,skill_id,skill_lv);
+			wd.damage = battle_calc_damage(src, target, &wd, wd.damage, skill_id, skill_lv);
 			if( map_flag_gvg2(target->m) )
-				wd.damage = battle_calc_gvg_damage(src,target,wd.damage,wd.div_,skill_id,skill_lv,wd.flag);
+				wd.damage = battle_calc_gvg_damage(src, target, wd.damage, wd.div_, skill_id, skill_lv, wd.flag);
 			else if( map[target->m].flag.battleground )
-				wd.damage = battle_calc_bg_damage(src,target,wd.damage,wd.div_,skill_id,skill_lv,wd.flag);
+				wd.damage = battle_calc_bg_damage(src, target, wd.damage, wd.div_, skill_id, skill_lv, wd.flag);
 		} else if( !wd.damage ) {
-			wd.damage2 = battle_calc_damage(src,target,&wd,wd.damage2,skill_id,skill_lv);
+			wd.damage2 = battle_calc_damage(src, target, &wd, wd.damage2, skill_id, skill_lv);
 			if( map_flag_gvg2(target->m) )
-				wd.damage2 = battle_calc_gvg_damage(src,target,wd.damage2,wd.div_,skill_id,skill_lv,wd.flag);
-			else if(map[target->m].flag.battleground)
-				wd.damage2 = battle_calc_bg_damage(src,target,wd.damage2,wd.div_,skill_id,skill_lv,wd.flag);
+				wd.damage2 = battle_calc_gvg_damage(src, target, wd.damage2, wd.div_, skill_id, skill_lv, wd.flag);
+			else if( map[target->m].flag.battleground )
+				wd.damage2 = battle_calc_bg_damage(src, target, wd.damage2, wd.div_, skill_id, skill_lv, wd.flag);
 		} else {
 			int64 d1 = wd.damage + wd.damage2, d2 = wd.damage2;
-			wd.damage = battle_calc_damage(src,target,&wd,d1,skill_id,skill_lv);
+			wd.damage = battle_calc_damage(src, target, &wd, d1, skill_id, skill_lv);
 			if( map_flag_gvg2(target->m) )
-				wd.damage = battle_calc_gvg_damage(src,target,wd.damage,wd.div_,skill_id,skill_lv,wd.flag);
+				wd.damage = battle_calc_gvg_damage(src, target, wd.damage, wd.div_, skill_id, skill_lv, wd.flag);
 			else if( map[target->m].flag.battleground )
-				wd.damage = battle_calc_bg_damage(src,target,wd.damage,wd.div_,skill_id,skill_lv,wd.flag);
+				wd.damage = battle_calc_bg_damage(src, target, wd.damage, wd.div_, skill_id, skill_lv, wd.flag);
 			wd.damage2 = d2 * 100 / d1 * wd.damage / 100;
 			if( wd.damage > 1 && wd.damage2 < 1 ) wd.damage2 = 1;
 			wd.damage -= wd.damage2;
@@ -4907,8 +4907,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	if(tsd) { //Card Fix for target (tsd), 2 is not added to the "left" flag meaning "target cards only"
 		switch(skill_id) { //These skills will do a card fix later
 			case CR_ACIDDEMONSTRATION:
+#ifdef RENEWAL
 			case NJ_ISSEN:
 			case ASC_BREAKER:
+#endif
 			case KO_HAPPOKUNAI:
 				break;
 			default:
