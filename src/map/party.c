@@ -1151,19 +1151,19 @@ int party_foreachsamemap(int (*func)(struct block_list*,va_list),struct map_sess
 	if((p = party_search(sd->status.party_id)) == NULL)
 		return 0;
 
-	x0 = sd->bl.x-range;
-	y0 = sd->bl.y-range;
-	x1 = sd->bl.x+range;
-	y1 = sd->bl.y+range;
+	x0 = sd->bl.x - range;
+	y0 = sd->bl.y - range;
+	x1 = sd->bl.x + range;
+	y1 = sd->bl.y + range;
 
 	for(i = 0; i < MAX_PARTY; i++) {
 		struct map_session_data *psd = p->data[i].sd;
-		if(!psd) continue;
+		if(!psd)
+			continue;
 		if(psd->bl.m != sd->bl.m || !psd->bl.prev)
 			continue;
-		if(range &&
-			(psd->bl.x<x0 || psd->bl.y<y0 ||
-			 psd->bl.x>x1 || psd->bl.y>y1 ) )
+		if(range && (psd->bl.x < x0 || psd->bl.y < y0 ||
+			psd->bl.x > x1 || psd->bl.y > y1))
 			continue;
 		list[blockcount++] =& psd->bl;
 	}

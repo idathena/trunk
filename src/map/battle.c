@@ -45,12 +45,12 @@ int battle_getcurrentskill(struct block_list *bl) {	//Returns the current/last s
 
 	if( bl->type == BL_SKILL ) {
 		struct skill_unit * su = (struct skill_unit*)bl;
-		return su->group?su->group->skill_id:0;
+		return su->group ? su->group->skill_id : 0;
 	}
 
 	ud = unit_bl2ud(bl);
 
-	return ud?ud->skill_id:0;
+	return ud ? ud->skill_id : 0;
 }
 
 /*==========================================
@@ -72,14 +72,14 @@ static int battle_gettargeted_sub(struct block_list *bl, va_list ap) {
 	if (*c >= 24)
 		return 0;
 
-	if ( !(ud = unit_bl2ud(bl)) )
+	if (!(ud = unit_bl2ud(bl)))
 		return 0;
 
 	if (ud->target == target_id || ud->skilltarget == target_id) {
 		bl_list[(*c)++] = bl;
 		return 1;
 	}
-	
+
 	return 0;
 }
 
@@ -108,7 +108,7 @@ int battle_gettarget(struct block_list* bl) {
 		case BL_MER: return ((struct mercenary_data*)bl)->ud.target;
 		case BL_ELEM: return ((struct elemental_data*)bl)->ud.target;
 	}
-	
+
 	return 0;
 }
 
@@ -825,6 +825,11 @@ int64 battle_calc_damage(struct block_list *src,struct block_list *bl,struct Dam
 		}
 
 		if( (sc->data[SC_PNEUMA] && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG) || sc->data[SC__MANHOLE] ) {
+			d->dmg_lv = ATK_BLOCK;
+			return 0;
+		}
+
+		if( sc->data[SC_ELEMENTAL_SHIELD] && flag&BF_MAGIC ) {
 			d->dmg_lv = ATK_BLOCK;
 			return 0;
 		}
@@ -4563,7 +4568,7 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 		)) &&
 		rnd()%100 < tsc->data[SC_REJECTSWORD]->val2
 	) {
-		ATK_RATER(wd.damage, 50)
+		ATK_RATER(wd.damage,50)
 		status_fix_damage(target,src,wd.damage,clif_damage(target,src,gettick(),0,0,wd.damage,0,0,0));
 		clif_skill_nodamage(target,target,ST_REJECTSWORD,tsc->data[SC_REJECTSWORD]->val1,1);
 		if(--(tsc->data[SC_REJECTSWORD]->val3) <= 0)
@@ -4601,7 +4606,7 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 		status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
 	}
 
-	switch( skill_id ) {
+	switch(skill_id) {
 #ifndef RENEWAL
 		case ASC_BREAKER: { //Breaker int-based damage
 				struct Damage md = battle_calc_misc_attack(src, target, skill_id, skill_lv, wd.miscflag);

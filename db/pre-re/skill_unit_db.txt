@@ -29,7 +29,7 @@
  12,0x7e,    ,  0, 0,  -1,all,   0x003	//MG_SAFETYWALL
  18,0x7f,    , -1, 0,  20,enemy, 0x010	//MG_FIREWALL
  21,0x86,    ,  0, 2,1000,enemy, 0x018	//MG_THUNDERSTORM
- 25,0x85,    ,  1, 0,  -1,all,   0x003	//AL_PNEUMA
+ 25,0x85,    ,  1, 0,  -1,all,   0x2003 //AL_PNEUMA
  27,0x81,0x80,  0, 0,  -1,all,   0x00E	//AL_WARP
  47,0x86,    ,  0, 2,1000,enemy, 0x080	//AC_SHOWER
  70,0x83,    , -1, 1,1000,all,   0x018	//PR_SANCTUARY
@@ -120,7 +120,7 @@
 2274,0xe3,    ,  2, 0, 500,friend,   0x000	//NC_STEALTHFIELD
 
 2299,0xcc,    ,  0, 1,1000,enemy, 0x006  //SC_MANHOLE
-2300,0xcd,    ,  0, 0,1000,all,   0x006	 //SC_DIMENSIONDOOR
+2300,0xcd,    ,  0, 0,1000,all,   0x006  //SC_DIMENSIONDOOR
 2301,0xce,    ,  2, 0,  -1,all,   0x300E //SC_CHAOSPANIC
 2302,0xcf,    ,  2, 0,  -1,all,   0x3002 //SC_MAELSTROM
 2303,0xd0,    ,  3, 0,  -1,all,   0x201E //SC_BLOODYLUST
@@ -161,6 +161,7 @@
 3020,0xf8,    ,  0, 2, 100,all, 0x018   //KO_ZENKAI
 
 5006,0x101,   ,  0, 3,2000,enemy, 0x018	//NC_MAGMA_ERUPTION
+5008,0x85,    ,  0, 0,  -1,all,   0x003	//SO_ELEMENTAL_SHIELD
 5010,0xfe,    ,  0, 2,  -1,enemy, 0x000	//SC_ESCAPE
 
 8020,0xf5,    ,  0, 3,2300:2100:1900:1700:1500,enemy, 0x018 //MH_POISON_MIST

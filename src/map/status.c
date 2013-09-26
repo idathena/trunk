@@ -225,7 +225,7 @@ void initChangeTables(void) {
 	add_sc( WZ_VERMILION         , SC_BLIND           );
 	add_sc( WZ_FROSTNOVA         , SC_FREEZE          );
 	add_sc( WZ_STORMGUST         , SC_FREEZE          );
-	set_sc( WZ_QUAGMIRE          , SC_QUAGMIRE        , SI_QUAGMIRE        , SCB_AGI|SCB_DEX|SCB_ASPD|SCB_SPEED );
+	set_sc( WZ_QUAGMIRE          , SC_QUAGMIRE        , SI_QUAGMIRE        , SCB_AGI|SCB_DEX|SCB_SPEED|SCB_ASPD );
 	set_sc( BS_ADRENALINE        , SC_ADRENALINE      , SI_ADRENALINE      , SCB_ASPD );
 	set_sc( BS_WEAPONPERFECT     , SC_WEAPONPERFECTION, SI_WEAPONPERFECTION, SCB_NONE );
 	set_sc( BS_OVERTHRUST        , SC_OVERTHRUST      , SI_OVERTHRUST      , SCB_NONE );
@@ -296,7 +296,7 @@ void initChangeTables(void) {
 	set_sc( CR_PROVIDENCE        , SC_PROVIDENCE      , SI_PROVIDENCE      , SCB_ALL );
 	set_sc( CR_DEFENDER          , SC_DEFENDER        , SI_DEFENDER        , SCB_SPEED|SCB_ASPD );
 	set_sc( CR_SPEARQUICKEN      , SC_SPEARQUICKEN    , SI_SPEARQUICKEN    , SCB_ASPD|SCB_CRI|SCB_FLEE );
-	set_sc( MO_STEELBODY         , SC_STEELBODY       , SI_STEELBODY       , SCB_DEF|SCB_MDEF|SCB_ASPD|SCB_SPEED );
+	set_sc( MO_STEELBODY         , SC_STEELBODY       , SI_STEELBODY       , SCB_DEF|SCB_MDEF|SCB_SPEED|SCB_ASPD );
 	add_sc( MO_BLADESTOP         , SC_BLADESTOP_WAIT  );
 	add_sc( MO_BLADESTOP         , SC_BLADESTOP       );
 	set_sc( MO_EXPLOSIONSPIRITS  , SC_EXPLOSIONSPIRITS, SI_EXPLOSIONSPIRITS, SCB_CRI|SCB_REGEN );
@@ -574,7 +574,7 @@ void initChangeTables(void) {
 	set_sc( RK_FIGHTINGSPIRIT    , SC_FIGHTINGSPIRIT    , SI_FIGHTINGSPIRIT        , SCB_WATK|SCB_ASPD );
 	set_sc( RK_ABUNDANCE         , SC_ABUNDANCE         , SI_ABUNDANCE             , SCB_NONE );
 	set_sc( RK_CRUSHSTRIKE       , SC_CRUSHSTRIKE       , SI_CRUSHSTRIKE           , SCB_NONE );
-	set_sc_with_vfx( RK_DRAGONBREATH_WATER , SC_FREEZING      , SI_FROSTMISTY      , SCB_ASPD|SCB_SPEED|SCB_DEF|SCB_DEF2 );
+	set_sc_with_vfx( RK_DRAGONBREATH_WATER , SC_FREEZING      , SI_FROSTMISTY      , SCB_SPEED|SCB_ASPD|SCB_DEF|SCB_DEF2 );
 
 	set_sc_with_vfx( GC_VENOMIMPRESS , SC_VENOMIMPRESS , SI_VENOMIMPRESS     , SCB_NONE );
 	set_sc( GC_POISONINGWEAPON   , SC_POISONINGWEAPON  , SI_POISONINGWEAPON  , SCB_NONE );
@@ -599,7 +599,7 @@ void initChangeTables(void) {
 	set_sc( AB_OFFERTORIUM       , SC_OFFERTORIUM     , SI_OFFERTORIUM     , SCB_NONE );
 
 	add_sc( WL_WHITEIMPRISON     , SC_WHITEIMPRISON	  );
-	set_sc_with_vfx( WL_FROSTMISTY , SC_FREEZING      , SI_FROSTMISTY      , SCB_ASPD|SCB_SPEED|SCB_DEF|SCB_DEF2 );
+	set_sc_with_vfx( WL_FROSTMISTY , SC_FREEZING      , SI_FROSTMISTY      , SCB_SPEED|SCB_ASPD|SCB_DEF|SCB_DEF2 );
 	add_sc( WL_JACKFROST         , SC_FREEZE		  );
 	set_sc( WL_MARSHOFABYSS      , SC_MARSHOFABYSS    , SI_MARSHOFABYSS    , SCB_AGI|SCB_DEX|SCB_SPEED );
 	set_sc( WL_RECOGNIZEDSPELL   , SC_RECOGNIZEDSPELL , SI_RECOGNIZEDSPELL , SCB_MATK );
@@ -619,7 +619,7 @@ void initChangeTables(void) {
 	add_sc( RA_MAIZETRAP         , SC_ELEMENTALCHANGE );
 	add_sc( RA_VERDURETRAP       , SC_ELEMENTALCHANGE );
 	set_sc( RA_FIRINGTRAP        , SC_BURNING         , SI_BLANK           , SCB_MDEF );
-	set_sc_with_vfx( RA_ICEBOUNDTRAP , SC_FREEZING    , SI_FROSTMISTY      , SCB_ASPD|SCB_SPEED|SCB_DEF|SCB_DEF2 );
+	set_sc_with_vfx( RA_ICEBOUNDTRAP , SC_FREEZING    , SI_FROSTMISTY      , SCB_SPEED|SCB_ASPD|SCB_DEF|SCB_DEF2 );
 	set_sc( RA_UNLIMIT           , SC_UNLIMIT         , SI_UNLIMIT         , SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2 );
 
 	set_sc( NC_ACCELERATION      , SC_ACCELERATION    , SI_ACCELERATION    , SCB_SPEED );
@@ -712,6 +712,7 @@ void initChangeTables(void) {
 	set_sc( SO_WATER_INSIGNIA    , SC_WATER_INSIGNIA  , SI_WATER_INSIGNIA  , SCB_WATK|SCB_ATK_ELE|SCB_REGEN );
 	set_sc( SO_WIND_INSIGNIA     , SC_WIND_INSIGNIA   , SI_WIND_INSIGNIA   , SCB_WATK|SCB_ATK_ELE|SCB_REGEN );
 	set_sc( SO_EARTH_INSIGNIA    , SC_EARTH_INSIGNIA  , SI_EARTH_INSIGNIA  , SCB_MDEF|SCB_DEF|SCB_MAXHP|SCB_MAXSP|SCB_WATK|SCB_ATK_ELE|SCB_REGEN );
+	add_sc( SO_ELEMENTAL_SHIELD  , SC_ELEMENTAL_SHIELD );
 
 	set_sc( GN_CARTBOOST                  , SC_GN_CARTBOOST, SI_CARTSBOOST                 , SCB_SPEED );
 	set_sc( GN_THORNS_TRAP                , SC_THORNSTRAP  , SI_THORNTRAP                  , SCB_NONE );
@@ -1001,7 +1002,7 @@ void initChangeTables(void) {
 
 	StatusChangeFlagTable[SC_STEALTHFIELD_MASTER] |= SCB_SPEED;
 
-	StatusChangeFlagTable[SC_HALLUCINATIONWALK_POSTDELAY] |= SCB_ASPD|SCB_SPEED;
+	StatusChangeFlagTable[SC_HALLUCINATIONWALK_POSTDELAY] |= SCB_SPEED|SCB_ASPD;
 
 	//Guillotine Cross Poison Effects
 	StatusChangeFlagTable[SC_PARALYSE] |= SCB_FLEE|SCB_SPEED|SCB_ASPD;
@@ -8787,15 +8788,15 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 			case SC_GLOOMYDAY:
 				val2 = 20 + 5 * val1; //Flee reduction.
 				val3 = 15 + 5 * val1; //ASPD reduction.
-				if ( sd && rnd()%100 < val1 ) { //(Skill Lv) %
+				if( sd && rnd()%100 < val1 ) { //(Skill Lv) %
 					val4 = 1; //Reduce walk speed by half.
-					if (pc_isriding(sd)) pc_setriding(sd, 0);
-					if (pc_isridingdragon(sd)) pc_setoption(sd, sd->sc.option&~OPTION_DRAGON);
+					if( pc_isriding(sd) ) pc_setriding(sd, 0);
+					if( pc_isridingdragon(sd) ) pc_setoption(sd, sd->sc.option&~OPTION_DRAGON);
 				} 
 				break;
 			case SC_GLOOMYDAY_SK: 
 				//Random number between [15 ~ (Voice Lesson Skill Level x 5) + (Skill Level x 10)] %. 
-				val2 = 15 + rnd()%( (sd ? pc_checkskill(sd, WM_LESSON) * 5 : 0) + val1 * 10 );
+				val2 = 15 + rnd()%((sd ? pc_checkskill(sd, WM_LESSON) * 5 : 0) + val1 * 10);
 				break;
 			case SC_SONGOFMANA:
 				val3 = 10 + 5 * val2;
@@ -10329,10 +10330,10 @@ int status_change_end_(struct block_list* bl, enum sc_type type, int tid, const 
 			opt_flag = 0;
 	}
 
-	if (calc_flag&SCB_DYE) { //Restore DYE color
-		if (vd && !vd->cloth_color && sce->val4)
+	if( calc_flag&SCB_DYE ) { //Restore DYE color
+		if( vd && !vd->cloth_color && sce->val4 )
 			clif_changelook(bl,LOOK_CLOTHES_COLOR,sce->val4);
-		calc_flag&=~SCB_DYE;
+		calc_flag &= ~SCB_DYE;
 	}
 
 	//On Aegis, when turning off a status change, first goes the sc packet, then the option packet.

@@ -1212,7 +1212,7 @@ static void clif_weather_check(struct map_session_data *sd)
 {
 	int16 m = sd->bl.m;
 	int fd = sd->fd;
-	
+
 	if (map[m].flag.snow
 		|| map[m].flag.clouds
 		|| map[m].flag.fog
