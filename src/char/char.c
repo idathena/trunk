@@ -466,14 +466,14 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 	int errors = 0; //If there are any errors while saving, "cp" will not be updated at the end.
 	StringBuf buf;
 
-	if (char_id!=p->char_id) return 0;
+	if (char_id != p->char_id) return 0;
 
-	cp = idb_ensure(char_db_, char_id, create_charstatus);
+	cp = (struct mmo_charstatus *) idb_ensure(char_db_, char_id, create_charstatus);
 
 	StringBuf_Init(&buf);
 	memset(save_status, 0, sizeof(save_status));
 
-	//map inventory data
+	//Map inventory data
 	if( memcmp(p->inventory, cp->inventory, sizeof(p->inventory)) ) {
 		if (!inventory_to_sql(p->inventory, MAX_INVENTORY, p->char_id))
 			strcat(save_status, " inventory");
@@ -481,7 +481,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 			errors++;
 	}
 
-	//map cart data
+	//Map cart data
 	if( memcmp(p->cart, cp->cart, sizeof(p->cart)) ) {
 		if (!memitemdata_to_sql(p->cart, MAX_CART, p->char_id, TABLE_CART))
 			strcat(save_status, " cart");
@@ -489,7 +489,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 			errors++;
 	}
 
-	//map storage data
+	//Map storage data
 	if( memcmp(p->storage.items, cp->storage.items, sizeof(p->storage.items)) ) {
 		if (!memitemdata_to_sql(p->storage.items, MAX_STORAGE, p->account_id, TABLE_STORAGE))
 			strcat(save_status, " storage");
@@ -497,7 +497,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 			errors++;
 	}
 
-	if (
+	if(
 		(p->base_exp != cp->base_exp) || (p->base_level != cp->base_level) ||
 		(p->job_level != cp->job_level) || (p->job_exp != cp->job_exp) ||
 		(p->zeny != cp->zeny) ||
@@ -551,7 +551,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 	}
 
 	//Values that will seldom change (to speed up saving)
-	if (
+	if(
 		(p->hair != cp->hair) || (p->hair_color != cp->hair_color) || (p->clothes_color != cp->clothes_color) ||
 		(p->class_ != cp->class_) ||
 		(p->partner_id != cp->partner_id) || (p->father != cp->father) ||
@@ -589,25 +589,21 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 			errors++;
 	}
 
-	//memo points
-	if( memcmp(p->memo_point, cp->memo_point, sizeof(p->memo_point)) )
-	{
+	//Memo points
+	if( memcmp(p->memo_point, cp->memo_point, sizeof(p->memo_point)) ) {
 		char esc_mapname[NAME_LENGTH*2+1];
 
 		//`memo` (`memo_id`,`char_id`,`map`,`x`,`y`)
-		if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id`='%d'", memo_db, p->char_id) )
-		{
+		if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id`='%d'", memo_db, p->char_id) ) {
 			Sql_ShowDebug(sql_handle);
 			errors++;
 		}
 
-		//insert here.
+		//Insert here.
 		StringBuf_Clear(&buf);
 		StringBuf_Printf(&buf, "INSERT INTO `%s`(`char_id`,`map`,`x`,`y`) VALUES ", memo_db);
-		for( i = 0, count = 0; i < MAX_MEMOPOINTS; ++i )
-		{
-			if( p->memo_point[i].map )
-			{
+		for( i = 0, count = 0; i < MAX_MEMOPOINTS; ++i ) {
+			if( p->memo_point[i].map ) {
 				if( count )
 					StringBuf_AppendStr(&buf, ",");
 				Sql_EscapeString(sql_handle, esc_mapname, mapindex_id2name(p->memo_point[i].map));
@@ -615,10 +611,8 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 				++count;
 			}
 		}
-		if( count )
-		{
-			if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) )
-			{
+		if( count ) {
+			if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) ) {
 				Sql_ShowDebug(sql_handle);
 				errors++;
 			}
@@ -627,24 +621,22 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 	}
 
 	//FIXME: is this neccessary? [ultramage]
-	for(i=0;i<MAX_SKILL;i++)
-		if ((p->skill[i].lv != 0) && (p->skill[i].id == 0))
-			p->skill[i].id = i; // Fix skill tree
+	for( i = 0; i < MAX_SKILL; i++ )
+		if( (p->skill[i].lv != 0) && (p->skill[i].id == 0) )
+			p->skill[i].id = i; //Fix skill tree
 
 
-	//skills
-	if( memcmp(p->skill, cp->skill, sizeof(p->skill)) )
-	{
+	//Skills
+	if( memcmp(p->skill, cp->skill, sizeof(p->skill)) ) {
 		//`skill` (`char_id`, `id`, `lv`)
-		if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id`='%d'", skill_db, p->char_id) )
-		{
+		if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id`='%d'", skill_db, p->char_id) ) {
 			Sql_ShowDebug(sql_handle);
 			errors++;
 		}
 
 		StringBuf_Clear(&buf);
 		StringBuf_Printf(&buf, "INSERT INTO `%s`(`char_id`,`id`,`lv`,`flag`) VALUES ", skill_db);
-		//insert here.
+		//Insert here.
 		for( i = 0, count = 0; i < MAX_SKILL; ++i ) {
 			if( p->skill[i].id != 0 && p->skill[i].flag != SKILL_FLAG_TEMPORARY ) {
 
@@ -660,10 +652,8 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 				++count;
 			}
 		}
-		if( count )
-		{
-			if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) )
-			{
+		if( count ) {
+			if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) ) {
 				Sql_ShowDebug(sql_handle);
 				errors++;
 			}
@@ -673,38 +663,32 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 	}
 
 	diff = 0;
-	for(i = 0; i < MAX_FRIENDS; i++){
-		if(p->friends[i].char_id != cp->friends[i].char_id ||
-			p->friends[i].account_id != cp->friends[i].account_id){
+	for( i = 0; i < MAX_FRIENDS; i++ ) {
+		if( p->friends[i].char_id != cp->friends[i].char_id ||
+			p->friends[i].account_id != cp->friends[i].account_id ) {
 			diff = 1;
 			break;
 		}
 	}
 
-	if(diff == 1)
-	{	//Save friends
-		if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id`='%d'", friend_db, char_id) )
-		{
+	if( diff == 1 ) { //Save friends
+		if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id`='%d'", friend_db, char_id) ) {
 			Sql_ShowDebug(sql_handle);
 			errors++;
 		}
 
 		StringBuf_Clear(&buf);
 		StringBuf_Printf(&buf, "INSERT INTO `%s` (`char_id`, `friend_account`, `friend_id`) VALUES ", friend_db);
-		for( i = 0, count = 0; i < MAX_FRIENDS; ++i )
-		{
-			if( p->friends[i].char_id > 0 )
-			{
+		for( i = 0, count = 0; i < MAX_FRIENDS; ++i ) {
+			if( p->friends[i].char_id > 0 ) {
 				if( count )
 					StringBuf_AppendStr(&buf, ",");
 				StringBuf_Printf(&buf, "('%d','%d','%d')", char_id, p->friends[i].account_id, p->friends[i].char_id);
 				count++;
 			}
 		}
-		if( count )
-		{
-			if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) )
-			{
+		if( count ) {
+			if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) ) {
 				Sql_ShowDebug(sql_handle);
 				errors++;
 			}
@@ -717,18 +701,16 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 	StringBuf_Clear(&buf);
 	StringBuf_Printf(&buf, "REPLACE INTO `%s` (`char_id`, `hotkey`, `type`, `itemskill_id`, `skill_lvl`) VALUES ", hotkey_db);
 	diff = 0;
-	for(i = 0; i < ARRAYLENGTH(p->hotkeys); i++){
-		if(memcmp(&p->hotkeys[i], &cp->hotkeys[i], sizeof(struct hotkey)))
-		{
+	for( i = 0; i < ARRAYLENGTH(p->hotkeys); i++ ) {
+		if( memcmp(&p->hotkeys[i], &cp->hotkeys[i], sizeof(struct hotkey)) ) {
 			if( diff )
 				StringBuf_AppendStr(&buf, ",");// not the first hotkey
 			StringBuf_Printf(&buf, "('%d','%u','%u','%u','%u')", char_id, (unsigned int)i, (unsigned int)p->hotkeys[i].type, p->hotkeys[i].id , (unsigned int)p->hotkeys[i].lv);
 			diff = 1;
 		}
 	}
-	if(diff) {
-		if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) )
-		{
+	if( diff ) {
+		if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) ) {
 			Sql_ShowDebug(sql_handle);
 			errors++;
 		} else
@@ -736,9 +718,9 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 	}
 #endif
 	StringBuf_Destroy(&buf);
-	if (save_status[0]!='\0' && save_log)
+	if( save_status[0]!='\0' && save_log )
 		ShowInfo("Saved char %d - %s:%s.\n", char_id, p->name, save_status);
-	if (!errors)
+	if( !errors )
 		memcpy(cp, p, sizeof(struct mmo_charstatus));
 	return 0;
 }
@@ -2363,7 +2345,7 @@ int parse_fromlogin(int fd) {
 					if( node != NULL )
 						node->sex = sex;
 
-					// get characters
+					// Get characters
 					if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `char_id`,`class`,`guild_id` FROM `%s` WHERE `account_id` = '%d'", char_db, acc) )
 						Sql_ShowDebug(sql_handle);
 					for( i = 0; i < MAX_CHARS && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i ) {
@@ -2381,7 +2363,7 @@ int parse_fromlogin(int fd) {
 							class_[i] == JOB_BABY_MINSTREL || class_[i] == JOB_BABY_WANDERER ||
 							class_[i] == JOB_KAGEROU || class_[i] == JOB_OBORO )
 						{
-							// job modification
+							// Job modification
 							if( class_[i] == JOB_BARD || class_[i] == JOB_DANCER )
 								class_[i] = (sex ? JOB_BARD : JOB_DANCER);
 							else if( class_[i] == JOB_CLOWN || class_[i] == JOB_GYPSY )
@@ -2401,16 +2383,16 @@ int parse_fromlogin(int fd) {
 						if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `class`='%d', `weapon`='0', `shield`='0', `head_top`='0', `head_mid`='0', `head_bottom`='0' WHERE `char_id`='%d'", char_db, class_[i], char_id[i]) )
 							Sql_ShowDebug(sql_handle);
 
-						if( guild_id[i] )// If there is a guild, update the guild_member data [Skotlex]
+						if( guild_id[i] ) // If there is a guild, update the guild_member data [Skotlex]
 							inter_guild_sex_changed(guild_id[i], acc, char_id[i], sex);
 					}
 					Sql_FreeResult(sql_handle);
 
-					// disconnect player if online on char-server
+					// Disconnect player if online on char-server
 					disconnect_player(acc);
 				}
 
-				// notify all mapservers about this change
+				// Notify all mapservers about this change
 				WBUFW(buf,0) = 0x2b0d;
 				WBUFL(buf,2) = acc;
 				WBUFB(buf,6) = sex;
@@ -2418,15 +2400,15 @@ int parse_fromlogin(int fd) {
 			}
 			break;
 
-			// reply to an account_reg2 registry request
+			// Reply to an account_reg2 registry request
 			case 0x2729:
 				if (RFIFOREST(fd) < 4 || RFIFOREST(fd) < RFIFOW(fd,2))
 					return 0;
 
-			{	//Receive account_reg2 registry, forward to map servers.
+			{ // Receive account_reg2 registry, forward to map servers.
 				unsigned char buf[13+ACCOUNT_REG2_NUM*sizeof(struct global_reg)];
 				memcpy(buf,RFIFOP(fd,0), RFIFOW(fd,2));
-				WBUFW(buf,0) = 0x3804; //Map server can now receive all kinds of reg values with the same packet. [Skotlex]
+				WBUFW(buf,0) = 0x3804; // Map server can now receive all kinds of reg values with the same packet. [Skotlex]
 				mapif_sendall(buf, WBUFW(buf,2));
 				RFIFOSKIP(fd, RFIFOW(fd,2));
 			}
@@ -2437,15 +2419,15 @@ int parse_fromlogin(int fd) {
 				if (RFIFOREST(fd) < 11)
 					return 0;
 
-			{	// send to all map-servers to disconnect the player
+			{ // Send to all map-servers to disconnect the player
 				unsigned char buf[11];
 				WBUFW(buf,0) = 0x2b14;
 				WBUFL(buf,2) = RFIFOL(fd,2);
 				WBUFB(buf,6) = RFIFOB(fd,6); // 0: change of statut, 1: ban
-				WBUFL(buf,7) = RFIFOL(fd,7); // status or final date of a banishment
+				WBUFL(buf,7) = RFIFOL(fd,7); // Status or final date of a banishment
 				mapif_sendall(buf, 11);
 			}
-				// disconnect player if online on char-server
+				// Disconnect player if online on char-server
 				disconnect_player(RFIFOL(fd,2));
 
 				RFIFOSKIP(fd,11);

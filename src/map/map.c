@@ -1617,7 +1617,7 @@ int map_quit(struct map_session_data *sd) {
 		if (node && node->char_id == sd->status.char_id &&
 			node->state != ST_LOGOUT)
 			//Except when logging out, clear the auth-connect data immediately.
-			chrif_auth_delete(node->account_id, node->char_id, node->state);
+			chrif_auth_delete(node->account_id,node->char_id,node->state);
 		//Non-active players should not have loaded any data yet (or it was cleared already) so no additional cleanups are needed.
 		return 0;
 	}
@@ -1633,63 +1633,63 @@ int map_quit(struct map_session_data *sd) {
 
 	pc_itemcd_do(sd,false);
 
-	npc_script_event(sd, NPCE_LOGOUT);
+	npc_script_event(sd,NPCE_LOGOUT);
 
 	//Unit_free handles clearing the player related data,
 	//map_quit handles extra specific data which is related to quitting normally
 	//(changing map-servers invokes unit_free but bypasses map_quit)
 	if (sd->sc.count) {
 		//Status that are not saved
-		status_change_end(&sd->bl, SC_BOSSMAPINFO, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_AUTOTRADE, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_SPURT, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_BERSERK, INVALID_TIMER);
-		status_change_end(&sd->bl, SC__BLOODYLUST, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_TRICKDEAD, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_LEADERSHIP, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_GLORYWOUNDS, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_SOULCOLD, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_HAWKEYES, INVALID_TIMER);
+		status_change_end(&sd->bl,SC_BOSSMAPINFO,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_AUTOTRADE,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_SPURT,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_BERSERK,INVALID_TIMER);
+		status_change_end(&sd->bl,SC__BLOODYLUST,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_TRICKDEAD,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_LEADERSHIP,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_GLORYWOUNDS,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_SOULCOLD,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_HAWKEYES,INVALID_TIMER);
 		if (sd->sc.data[SC_ENDURE] && sd->sc.data[SC_ENDURE]->val4)
-			status_change_end(&sd->bl, SC_ENDURE, INVALID_TIMER); //No need to save infinite endure
-		status_change_end(&sd->bl, SC_WEIGHT50, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_WEIGHT90, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_SATURDAYNIGHTFEVER, INVALID_TIMER);
-		status_change_end(&sd->bl, SC_KYOUGAKU, INVALID_TIMER);
+			status_change_end(&sd->bl,SC_ENDURE,INVALID_TIMER); //No need to save infinite endure
+		status_change_end(&sd->bl,SC_WEIGHT50,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_WEIGHT90,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_SATURDAYNIGHTFEVER,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_KYOUGAKU,INVALID_TIMER);
 		if (battle_config.debuff_on_logout&1) {
-			status_change_end(&sd->bl, SC_ORCISH, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_STRIPWEAPON, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_STRIPARMOR, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_STRIPSHIELD, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_STRIPHELM, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_EXTREMITYFIST, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_EXPLOSIONSPIRITS, INVALID_TIMER);
+			status_change_end(&sd->bl,SC_ORCISH,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_STRIPWEAPON,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_STRIPARMOR,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_STRIPSHIELD,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_STRIPHELM,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_EXTREMITYFIST,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_EXPLOSIONSPIRITS,INVALID_TIMER);
 			if (sd->sc.data[SC_REGENERATION] && sd->sc.data[SC_REGENERATION]->val4)
-				status_change_end(&sd->bl, SC_REGENERATION, INVALID_TIMER);
+				status_change_end(&sd->bl,SC_REGENERATION,INVALID_TIMER);
 			//TO-DO Probably there are way more NPC_type negative status that are removed
-			status_change_end(&sd->bl, SC_CHANGEUNDEAD, INVALID_TIMER);
+			status_change_end(&sd->bl,SC_CHANGEUNDEAD,INVALID_TIMER);
 			//Both these statuses are removed on logout. [L0ne_W0lf]
-			status_change_end(&sd->bl, SC_SLOWCAST, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_CRITICALWOUND, INVALID_TIMER);
+			status_change_end(&sd->bl,SC_SLOWCAST,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_CRITICALWOUND,INVALID_TIMER);
 		}
 		if (battle_config.debuff_on_logout&2) {
-			status_change_end(&sd->bl, SC_MAXIMIZEPOWER, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_MAXOVERTHRUST, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_STEELBODY, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_PRESERVE, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_KAAHI, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_SPIRIT, INVALID_TIMER);
+			status_change_end(&sd->bl,SC_MAXIMIZEPOWER,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_MAXOVERTHRUST,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_STEELBODY,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_PRESERVE,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_KAAHI,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_SPIRIT,INVALID_TIMER);
 		}
 	}
 
 	for (i = 0; i < EQI_MAX; i++) {
 		if (sd->equip_index[i] >= 0)
-			if (!pc_isequip(sd , sd->equip_index[i]))
-				pc_unequipitem(sd , sd->equip_index[i] , 2);
+			if (!pc_isequip(sd ,sd->equip_index[i]))
+				pc_unequipitem(sd ,sd->equip_index[i] ,2);
 	}
 
 	//Return loot to owner
-	if (sd->pd) pet_lootitem_drop(sd->pd, sd);
+	if (sd->pd) pet_lootitem_drop(sd->pd,sd);
 
 	if (sd->state.storage_flag == 1) sd->state.storage_flag = 0; //No need to Double Save Storage on Quit.
 
@@ -1700,10 +1700,10 @@ int map_quit(struct map_session_data *sd) {
 
 	if (sd->ed) {
 		elemental_clean_effect(sd->ed);
-		unit_remove_map(&sd->ed->bl,CLR_TELEPORT);
+		unit_remove_map(&sd->ed->bl,CLR_RESPAWN);
 	}
 
-	unit_remove_map_pc(sd,CLR_TELEPORT);
+	unit_remove_map_pc(sd,CLR_RESPAWN);
 
 	if (map[sd->bl.m].instance_id) { //Avoid map conflicts and warnings on next login
 		int16 m;
@@ -1722,7 +1722,7 @@ int map_quit(struct map_session_data *sd) {
 	}
 
 	if (sd->state.vending) {
-		idb_remove(vending_db, sd->status.char_id);
+		idb_remove(vending_db,sd->status.char_id);
 	}
 
 	pc_damage_log_clear(sd,0);

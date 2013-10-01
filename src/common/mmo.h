@@ -58,17 +58,17 @@
 #define HOTKEY_SAVING
 
 #if PACKETVER < 20090603
-        // (27 = 9 skills x 3 bars)               (0x02b9,191)
+        //(27 = 9 skills x 3 bars) (0x02b9,191)
         #define MAX_HOTKEYS 27
 #elif PACKETVER < 20090617
-        // (36 = 9 skills x 4 bars)               (0x07d9,254)
+        //(36 = 9 skills x 4 bars) (0x07d9,254)
         #define MAX_HOTKEYS 36
 #else
-        // (38 = 9 skills x 4 bars & 2 Quickslots)(0x07d9,268)
+        //(38 = 9 skills x 4 bars & 2 Quickslots) (0x07d9,268)
         #define MAX_HOTKEYS 38
 #endif
 
-#define MAX_MAP_PER_SERVER 1500 // Increased to allow creation of Instance Maps
+#define MAX_MAP_PER_SERVER 1500 //Increased to allow creation of Instance Maps
 #define MAX_INVENTORY 100
 //Max number of characters per account. Note that changing this setting alone is not enough if the client is not hexed to support more characters as well.
 #define MAX_CHARS 9
@@ -81,10 +81,10 @@
 #define MAX_FAME 1000000000
 #define MAX_CART 100
 #define MAX_SKILL 5020
-#define GLOBAL_REG_NUM 256   // max permanent character variables per char
-#define ACCOUNT_REG_NUM 64   // max permanent local account variables per account
-#define ACCOUNT_REG2_NUM 16  // max permanent global account variables per account
-//Should hold the max of GLOBAL/ACCOUNT/ACCOUNT2 (needed for some arrays that hold all three)
+#define GLOBAL_REG_NUM 256 //Max permanent character variables per char
+#define ACCOUNT_REG_NUM 64 //Max permanent local account variables per account
+#define ACCOUNT_REG2_NUM 16 //Max permanent global account variables per account
+//Should hold the max of GLOBAL/ACCOUNT/ACCOUNT2 (Needed for some arrays that hold all three)
 #define MAX_REG_NUM 256
 #define DEFAULT_WALK_SPEED 150
 #define MIN_WALK_SPEED 0
@@ -92,17 +92,17 @@
 #define MAX_STORAGE 600
 #define MAX_GUILD_STORAGE 600
 #define MAX_PARTY 12
-#define MAX_GUILD 16+10*6	// increased max guild members +6 per 1 extension levels [Lupus]
-#define MAX_GUILDPOSITION 20	// increased max guild positions to accomodate for all members [Valaris] (removed) [PoW]
+#define MAX_GUILD 16 + 10 * 6 //Increased max guild members +6 per 1 extension levels [Lupus]
+#define MAX_GUILDPOSITION 20 //Increased max guild positions to accomodate for all members [Valaris] (removed) [PoW]
 #define MAX_GUILDEXPULSION 32
 #define MAX_GUILDALLIANCE 16
-#define MAX_GUILDSKILL	15 // increased max guild skills because of new skills [Sara-chan]
+#define MAX_GUILDSKILL 17 //Increased max guild skills because of new skills [Sara-chan]
 #define MAX_GUILDLEVEL 50
-#define MAX_GUARDIANS 8	//Local max per castle. [Skotlex]
+#define MAX_GUARDIANS 8 //Local max per castle. [Skotlex]
 #define MAX_QUEST_DB 2700 //Max quests that the server will load
 #define MAX_QUEST_OBJECTIVES 3 //Max quest objectives for a quest
 
-// for produce
+//For produce
 #define MIN_ATTRIBUTE 0
 #define MAX_ATTRIBUTE 4
 #define ATTRIBUTE_NORMAL 0
@@ -143,9 +143,9 @@
 //Base Homun skill.
 #define HM_SKILLBASE 8001
 #define MAX_HOMUNSKILL 43
-#define MAX_HOMUNCULUS_CLASS	52	//[orn], Increased to 60 from 16 to allow new Homun-S.
+#define MAX_HOMUNCULUS_CLASS 52	//[orn], Increased to 60 from 16 to allow new Homun-S.
 #define HM_CLASS_BASE 6001
-#define HM_CLASS_MAX (HM_CLASS_BASE+MAX_HOMUNCULUS_CLASS-1)
+#define HM_CLASS_MAX (HM_CLASS_BASE + MAX_HOMUNCULUS_CLASS - 1)
 
 //Mail System
 #define MAIL_MAX_INBOX 30
@@ -154,16 +154,16 @@
 
 //Mercenary System
 #define MC_SKILLBASE 8201
-#define MAX_MERCSKILL 40
+#define MAX_MERCSKILL 41
 #define MAX_MERCENARY_CLASS 61
 
 //Elemental System
-#define MAX_ELEMENTALSKILL 42
 #define EL_SKILLBASE 8401
-#define MAX_ELESKILLTREE 3
+#define MAX_ELEMENTALSKILL 42
 #define MAX_ELEMENTAL_CLASS 12
+#define MAX_ELESKILLTREE 3
 #define EL_CLASS_BASE 2114
-#define EL_CLASS_MAX (EL_CLASS_BASE+MAX_ELEMENTAL_CLASS-1)
+#define EL_CLASS_MAX (EL_CLASS_BASE + MAX_ELEMENTAL_CLASS - 1)
 
 enum item_types {
 	IT_HEALING = 0,
@@ -197,7 +197,7 @@ struct item {
 	int id;
 	short nameid;
 	short amount;
-	unsigned short equip; // location(s) where item is equipped (using enum equip_pos for bitmasking)
+	unsigned short equip; //Location(s) where item is equipped (using enum equip_pos for bitmasking)
 	char identify;
 	char refine;
 	char attribute;
@@ -216,9 +216,9 @@ enum e_skill_flag {
 	SKILL_FLAG_PERMANENT,
 	SKILL_FLAG_TEMPORARY,
 	SKILL_FLAG_PLAGIARIZED,
-	SKILL_FLAG_REPLACED_LV_0, // temporary skill overshadowing permanent skill of level 'N - SKILL_FLAG_REPLACED_LV_0',
-	SKILL_FLAG_PERM_GRANTED, // permanent, granted through someway e.g. script
-	SKILL_FLAG_TMP_COMBO, // @FIXME for homon combo atm
+	SKILL_FLAG_REPLACED_LV_0, //Temporary skill overshadowing permanent skill of level 'N - SKILL_FLAG_REPLACED_LV_0',
+	SKILL_FLAG_PERM_GRANTED, //Permanent, granted through someway e.g. script
+	SKILL_FLAG_TMP_COMBO, //@FIXME for homon combo atm
 	//...
 };
 
@@ -591,6 +591,7 @@ enum e_guild_skill {
 	GD_EMERGENCYCALL = 10013,
 	GD_DEVELOPMENT = 10014,
 	GD_ITEMEMERGENCYCALL = 10015,
+	GD_GUILD_STORAGE = 10016,
 	GD_MAX,
 };
 
@@ -747,6 +748,8 @@ enum {
 	JOB_KAGEROU = 4211,
 	JOB_OBORO,
 
+	JOB_REBELLION = 4215,
+
 	JOB_MAX,
 };
 
@@ -756,9 +759,9 @@ enum {
 	SEX_SERVER
 };
 
-// sanity checks...
+// Sanity checks
 #if MAX_ZENY > INT_MAX
-#error MAX_ZENY is too big
+	#error MAX_ZENY is too big
 #endif
 
 #endif /* _MMO_H_ */

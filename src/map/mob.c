@@ -882,10 +882,10 @@ int mob_spawn (struct mob_data *md)
 
 	md->last_thinktime = tick;
 	if( md->bl.prev != NULL )
-		unit_remove_map(&md->bl,CLR_RESPAWN);
+		unit_remove_map(&md->bl,CLR_TELEPORT);
 	else if ( md->spawn && md->class_ != md->spawn->class_ ) {
 		md->class_ = md->spawn->class_;
-		status_set_viewdata(&md->bl, md->class_);
+		status_set_viewdata(&md->bl,md->class_);
 		md->db = mob_db(md->class_);
 		memcpy(md->name,md->spawn->name,NAME_LENGTH);
 	}
@@ -896,52 +896,52 @@ int mob_spawn (struct mob_data *md)
 		md->bl.y = md->spawn->y;
 
 		if( (md->bl.x == 0 && md->bl.y == 0) || md->spawn->xs || md->spawn->ys ) { //Monster can be spawned on an area.
-			if( !map_search_freecell(&md->bl, -1, &md->bl.x, &md->bl.y, md->spawn->xs, md->spawn->ys, battle_config.no_spawn_on_player?4:0) )
+			if( !map_search_freecell(&md->bl,-1,&md->bl.x,&md->bl.y,md->spawn->xs,md->spawn->ys,battle_config.no_spawn_on_player ? 4 : 0) )
 			{ // Retry again later
 				if( md->spawn_timer != INVALID_TIMER )
-					delete_timer(md->spawn_timer, mob_delayspawn);
-				md->spawn_timer = add_timer(tick+5000,mob_delayspawn,md->bl.id,0);
+					delete_timer(md->spawn_timer,mob_delayspawn);
+				md->spawn_timer = add_timer(tick + 5000,mob_delayspawn,md->bl.id,0);
 				return 1;
 			}
-		} else if( battle_config.no_spawn_on_player > 99 && map_foreachinrange(mob_count_sub, &md->bl, AREA_SIZE, BL_PC) )
+		} else if( battle_config.no_spawn_on_player > 99 && map_foreachinrange(mob_count_sub,&md->bl,AREA_SIZE,BL_PC) )
 		{ // Retry again later (players on sight)
 			if( md->spawn_timer != INVALID_TIMER )
-				delete_timer(md->spawn_timer, mob_delayspawn);
-			md->spawn_timer = add_timer(tick+5000,mob_delayspawn,md->bl.id,0);
+				delete_timer(md->spawn_timer,mob_delayspawn);
+			md->spawn_timer = add_timer(tick + 5000,mob_delayspawn,md->bl.id,0);
 			return 1;
 		}
 	}
 
-	memset(&md->state, 0, sizeof(md->state));
-	status_calc_mob(md, 1);
+	memset(&md->state,0,sizeof(md->state));
+	status_calc_mob(md,1);
 	md->attacked_id = 0;
 	md->target_id = 0;
 	md->move_fail_count = 0;
 	md->ud.state.attack_continue = 0;
 	md->ud.target_to = 0;
 	if( md->spawn_timer != INVALID_TIMER ) {
-		delete_timer(md->spawn_timer, mob_delayspawn);
+		delete_timer(md->spawn_timer,mob_delayspawn);
 		md->spawn_timer = INVALID_TIMER;
 	}
 
 //	md->master_id = 0;
 	md->master_dist = 0;
 
-	md->state.aggressive = md->status.mode&MD_ANGRY?1:0;
+	md->state.aggressive = md->status.mode&MD_ANGRY ? 1 : 0;
 	md->state.skillstate = MSS_IDLE;
-	md->next_walktime = tick+rnd()%5000+1000;
+	md->next_walktime = tick+rnd()%5000 + 1000;
 	md->last_linktime = tick;
 	md->dmgtick = tick - 5000;
 	md->last_pcneartime = 0;
 
-	for( i = 0, c = tick-MOB_MAX_DELAY; i < MAX_MOBSKILL; i++ )
+	for( i = 0, c = tick - MOB_MAX_DELAY; i < MAX_MOBSKILL; i++ )
 		md->skilldelay[i] = c;
 
-	memset(md->dmglog, 0, sizeof(md->dmglog));
+	memset(md->dmglog,0,sizeof(md->dmglog));
 	md->tdmg = 0;
 	
 	if( md->lootitem )
-		memset(md->lootitem, 0, sizeof(*md->lootitem));
+		memset(md->lootitem,0,sizeof(*md->lootitem));
 	
 	md->lootitem_count = 0;
 
@@ -957,7 +957,7 @@ int mob_spawn (struct mob_data *md)
 	if( map[md->bl.m].users )
 		clif_spawn(&md->bl);
 	skill_unit_move(&md->bl,tick,1);
-	mobskill_use(md, tick, MSC_SPAWN);
+	mobskill_use(md,tick,MSC_SPAWN);
 	return 0;
 }
 
@@ -1818,10 +1818,8 @@ int mob_timer_delete(int tid, unsigned int tick, int id, intptr_t data)
 	struct block_list* bl = map_id2bl(id);
 	struct mob_data* md = BL_CAST(BL_MOB, bl);
 
-	if( md )
-	{
-		if( md->deletetimer != tid )
-		{
+	if( md ) {
+		if( md->deletetimer != tid ) {
 			ShowError("mob_timer_delete: Timer mismatch: %d != %d\n", tid, md->deletetimer);
 			return 0;
 		}
@@ -2740,17 +2738,17 @@ void mob_heal(struct mob_data *md,unsigned int heal)
  *------------------------------------------*/
 int mob_warpslave_sub(struct block_list *bl,va_list ap)
 {
-	struct mob_data *md=(struct mob_data *)bl;
+	struct mob_data *md = (struct mob_data *)bl;
 	struct block_list *master;
-	short x,y,range=0;
+	short x,y,range = 0;
 	master = va_arg(ap, struct block_list*);
 	range = va_arg(ap, int);
 	
-	if(md->master_id!=master->id)
+	if (md->master_id != master->id)
 		return 0;
 
 	map_search_freecell(master, 0, &x, &y, range, range, 0);
-	unit_warp(&md->bl, master->m, x, y,CLR_RESPAWN);
+	unit_warp(&md->bl, master->m, x, y, CLR_TELEPORT);
 	return 1;
 }
 

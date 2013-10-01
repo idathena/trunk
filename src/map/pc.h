@@ -683,9 +683,14 @@ struct {
 #define pc_isfalcon(sd)       ( (sd)->sc.option&OPTION_FALCON )
 #define pc_isriding(sd)       ( (sd)->sc.option&OPTION_RIDING )
 #define pc_isinvisible(sd)    ( (sd)->sc.option&OPTION_INVISIBLE )
-#define pc_is50overweight(sd) ( (sd)->weight*100 >= (sd)->max_weight*battle_config.natural_heal_weight_rate )
-#define pc_is90overweight(sd) ( (sd)->weight*10 >= (sd)->max_weight*9 )
-#define pc_maxparameter(sd)   ( ((((sd)->class_&MAPID_UPPERMASK) == MAPID_KAGEROUOBORO) ?  battle_config.max_expanded_parameter : (sd)->class_&JOBL_THIRD ? ((sd)->class_&JOBL_BABY ? battle_config.max_baby_third_parameter : (((sd)->class_&MAPID_THIRDMASK) == MAPID_SUPER_NOVICE_E) ? battle_config.max_expanded_parameter : battle_config.max_third_parameter) : ((sd)->class_&JOBL_BABY ? battle_config.max_baby_parameter : battle_config.max_parameter)) )
+#define pc_is50overweight(sd) ( (sd)->weight * 100 >= (sd)->max_weight * battle_config.natural_heal_weight_rate )
+#define pc_is90overweight(sd) ( (sd)->weight * 10 >= (sd)->max_weight * 9 )
+#define pc_maxparameter(sd)   ( \
+	(((sd)->class_&MAPID_UPPERMASK) == MAPID_KAGEROUOBORO) || \
+	(((sd)->class_&MAPID_UPPERMASK) == MAPID_REBELLION) ? battle_config.max_expanded_parameter : \
+	((sd)->class_&JOBL_THIRD) ? (((sd)->class_&JOBL_BABY) ? battle_config.max_baby_third_parameter : (((sd)->class_&MAPID_THIRDMASK) == MAPID_SUPER_NOVICE_E) ? battle_config.max_expanded_parameter : battle_config.max_third_parameter) : \
+	((sd)->class_&JOBL_BABY) ? battle_config.max_baby_parameter : battle_config.max_parameter \
+	)
 /**
  * Ranger
  **/
@@ -700,8 +705,8 @@ struct {
 #define pc_stop_attack(sd) unit_stop_attack(&(sd)->bl)
 
 // Weapon check considering dual wielding.
-#define pc_check_weapontype(sd, type) ((type)&((sd)->status.weapon < MAX_WEAPON_TYPE? \
-	1<<(sd)->status.weapon:(1<<(sd)->weapontype1)|(1<<(sd)->weapontype2)|(1<<(sd)->status.weapon)))
+#define pc_check_weapontype(sd, type) ((type)&((sd)->status.weapon < MAX_WEAPON_TYPE ? \
+	1<<(sd)->status.weapon : (1<<(sd)->weapontype1)|(1<<(sd)->weapontype2)|(1<<(sd)->status.weapon)))
 // Checks if the given class value corresponds to a player class. [Skotlex]
 // JOB_NOVICE isn't checked for class_ is supposed to be unsigned
 #define pcdb_checkid_sub(class_) \
@@ -711,7 +716,8 @@ struct {
 ||	( (class_) >= JOB_RUNE_KNIGHT    && (class_) <= JOB_MECHANIC_T2    ) \
 ||	( (class_) >= JOB_BABY_RUNE      && (class_) <= JOB_BABY_MECHANIC2 ) \
 ||	( (class_) >= JOB_SUPER_NOVICE_E && (class_) <= JOB_SUPER_BABY_E   ) \
-||	( (class_) >= JOB_KAGEROU        && (class_) <  JOB_MAX            ) \
+||	( (class_) >= JOB_KAGEROU        && (class_) <= JOB_OBORO          ) \
+||	( (class_) >= JOB_REBELLION      && (class_) <  JOB_MAX            ) \
 )
 #define pcdb_checkid(class_) pcdb_checkid_sub((unsigned int)class_)
 
@@ -724,7 +730,7 @@ struct {
 	#define pc_leftside_mdef(sd) ((sd)->battle_status.mdef2)
 	#define pc_rightside_mdef(sd) ((sd)->battle_status.mdef)
 	#define pc_leftside_matk(sd) (status_base_matk(status_get_status_data(&(sd)->bl), (sd)->status.base_level))
-	#define pc_rightside_matk(sd) ((sd)->battle_status.rhw.matk+(sd)->battle_status.lhw.matk+(sd)->bonus.ematk)	
+	#define pc_rightside_matk(sd) ((sd)->battle_status.rhw.matk + (sd)->battle_status.lhw.matk + (sd)->bonus.ematk)	
 #else
 	#define pc_leftside_atk(sd) ((sd)->battle_status.batk + (sd)->battle_status.rhw.atk + (sd)->battle_status.lhw.atk)
 	#define pc_rightside_atk(sd) ((sd)->battle_status.rhw.atk2 + (sd)->battle_status.lhw.atk2)

@@ -3109,19 +3109,18 @@ ACMD_FUNC(questskill)
 	uint16 skill_id;
 	nullpo_retr(-1, sd);
 
-	if (!message || !*message || (skill_id = atoi(message)) <= 0)
-	{// also send a list of skills applicable to this command
+	if (!message || !*message || (skill_id = atoi(message)) <= 0) {
+		// Also send a list of skills applicable to this command
 		const char* text;
 
-		// attempt to find the text corresponding to this command
-		text = atcommand_help_string( command );
+		// Attempt to find the text corresponding to this command
+		text = atcommand_help_string(command);
 
-		// send the error message as always
+		// Send the error message as always
 		clif_displaymessage(fd, msg_txt(1027)); // Please enter a quest skill number.
 
-		if( text )
-		{// send the skill ID list associated with this command
-			clif_displaymessage( fd, text );
+		if (text) { // Send the skill ID list associated with this command
+			clif_displaymessage(fd, text);
 		}
 
 		return -1;
@@ -3130,7 +3129,7 @@ ACMD_FUNC(questskill)
 		clif_displaymessage(fd, msg_txt(198)); // This skill number doesn't exist.
 		return -1;
 	}
-	if (!(skill_get_inf2(skill_id) & INF2_QUEST_SKILL)) {
+	if (!(skill_get_inf2(skill_id)&INF2_QUEST_SKILL)) {
 		clif_displaymessage(fd, msg_txt(197)); // This skill number doesn't exist or isn't a quest skill.
 		return -1;
 	}
@@ -5416,28 +5415,28 @@ ACMD_FUNC(useskill)
 	char target[100];
 	nullpo_retr(-1, sd);
 
-	if(!message || !*message || sscanf(message, "%hu %hu %23[^\n]", &skill_id, &skill_lv, target) != 3) {
+	if (!message || !*message || sscanf(message, "%hu %hu %23[^\n]", &skill_id, &skill_lv, target) != 3) {
 		clif_displaymessage(fd, msg_txt(1165)); // Usage: @useskill <skill ID> <skill level> <target>
 		return -1;
 	}
 
-	if(!strcmp(target,"self")) pl_sd = sd; //quick keyword
-	else if ( (pl_sd = map_nick2sd(target)) == NULL ) {
+	if (!strcmp(target,"self")) pl_sd = sd; //quick keyword
+	else if ((pl_sd = map_nick2sd(target)) == NULL) {
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
 	}
 
-	if ( pc_get_group_level(sd) < pc_get_group_level(pl_sd) ) {
+	if (pc_get_group_level(sd) < pc_get_group_level(pl_sd)) {
 		clif_displaymessage(fd, msg_txt(81)); // Your GM level don't authorise you to do this action on this player.
 		return -1;
 	}
 
-	if (skill_id >= HM_SKILLBASE && skill_id < HM_SKILLBASE+MAX_HOMUNSKILL
+	if (skill_id >= HM_SKILLBASE && skill_id < HM_SKILLBASE + MAX_HOMUNSKILL
 		&& sd->hd && merc_is_hom_active(sd->hd)) // (If used with @useskill, put the homunc as dest)
 		bl = &sd->hd->bl;
 	else
 		bl = &sd->bl;
-	
+
 	if (skill_get_inf(skill_id)&INF_GROUND_SKILL)
 		unit_skilluse_pos(bl, pl_sd->bl.x, pl_sd->bl.y, skill_id, skill_lv);
 	else
