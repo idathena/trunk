@@ -67,7 +67,7 @@ int unit_walktoxy_sub(struct block_list *bl)
 	struct walkpath_data wpd;
 	struct unit_data *ud = NULL;
 
-	nullpo_retr(1, bl);
+	nullpo_retr(1,bl);
 	ud = unit_bl2ud(bl);
 	if( ud == NULL ) return 0;
 
@@ -82,7 +82,7 @@ int unit_walktoxy_sub(struct block_list *bl)
 		uint8 dir;
 		//Trim the last part of the path to account for range,
 		//but always move at least one cell when requested to move.
-		for( i = ud->chaserange*10; i > 0 && ud->walkpath.path_len>1; ) {
+		for( i = ud->chaserange*10; i > 0 && ud->walkpath.path_len > 1; ) {
 		   ud->walkpath.path_len--;
 			dir = ud->walkpath.path[ud->walkpath.path_len];
 			if( dir&1 )
@@ -94,7 +94,7 @@ int unit_walktoxy_sub(struct block_list *bl)
 		}
 	}
 
-	ud->state.change_walk_target=0;
+	ud->state.change_walk_target = 0;
 
 	if( bl->type == BL_PC ) {
 		((TBL_PC *)bl)->head_dir = 0;
@@ -105,11 +105,11 @@ int unit_walktoxy_sub(struct block_list *bl)
 	if( ud->walkpath.path_pos>=ud->walkpath.path_len )
 		i = -1;
 	else if( ud->walkpath.path[ud->walkpath.path_pos]&1 )
-		i = status_get_speed(bl)*14/10;
+		i = status_get_speed(bl) * 14 / 10;
 	else
 		i = status_get_speed(bl);
 	if( i > 0 )
-		ud->walktimer = add_timer(gettick()+i,unit_walktoxy_timer,bl->id,i);
+		ud->walktimer = add_timer(gettick() + i,unit_walktoxy_timer,bl->id,i);
 	return 1;
 }
 

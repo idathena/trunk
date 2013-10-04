@@ -956,7 +956,7 @@ int party_send_xy_clear(struct party_data *p)
 	return 0;
 }
 
-// exp share and added zeny share [Valaris]
+// Exp share and added zeny share [Valaris]
 int party_exp_share(struct party_data* p, struct block_list* src, unsigned int base_exp, unsigned int job_exp, int zeny)
 {
 	struct map_session_data* sd[MAX_PARTY];
@@ -966,7 +966,7 @@ int party_exp_share(struct party_data* p, struct block_list* src, unsigned int b
 #endif
 	nullpo_ret(p);
 
-	// count the number of players eligible for exp sharing
+	// Count the number of players eligible for exp sharing
 	for (i = c = 0; i < MAX_PARTY; i++) {
 		if( (sd[c] = p->data[i].sd) == NULL || sd[c]->bl.m != src->m || pc_isdead(sd[c]) || (battle_config.idle_no_share && pc_isidle(sd[c])) )
 			continue;

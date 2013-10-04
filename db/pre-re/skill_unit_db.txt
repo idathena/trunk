@@ -123,7 +123,7 @@
 2300,0xcd,    ,  0, 0,1000,all,   0x006  //SC_DIMENSIONDOOR
 2301,0xce,    ,  2, 0,  -1,all,   0x300E //SC_CHAOSPANIC
 2302,0xcf,    ,  2, 0,  -1,all,   0x3002 //SC_MAELSTROM
-2303,0xd0,    ,  3, 0,  -1,all,   0x201E //SC_BLOODYLUST
+2303,0xd0,    ,  3, 0,  -1,all,   0x201A //SC_BLOODYLUST
 2304,0xd1,    ,  0, 2,1000,enemy, 0x018  //SC_FEINTBOMB
 
 2317,0x86,    , -1, 0,  -1,enemy, 0x010 //LG_OVERBRAND

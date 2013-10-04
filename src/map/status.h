@@ -1583,11 +1583,11 @@ enum {
 	OPTION_CART4	= 0x00000200,
 	OPTION_CART5	= 0x00000400,
 
-	/*  compound constant for older carts */
+	/*  Compound constant for older carts */
 	OPTION_CART	= OPTION_CART1|OPTION_CART2|OPTION_CART3|OPTION_CART4|OPTION_CART5,
 #endif
 
-	// compound constants
+	//Compound constants
 	OPTION_DRAGON	= OPTION_DRAGON1|OPTION_DRAGON2|OPTION_DRAGON3|OPTION_DRAGON4|OPTION_DRAGON5,
 };
 
@@ -1603,16 +1603,16 @@ enum manner_flags
 
 /* Status Change State Flags */
 enum scs_flag {
-	SCS_NOMOVECOND		= 0x00000001, /* cond flag for nomove */
-	SCS_NOMOVE		= 0x00000002, /* unit unable to move */
-	SCS_NOPICKITEMCOND	= 0x00000004, /* cond flag for nopickitem */
-	SCS_NOPICKITEM		= 0x00000008, /* player unable to pick up items */
-	SCS_NODROPITEMCOND	= 0x00000010, /* cond flag for nodropitem */
-	SCS_NODROPITEM		= 0x00000020, /* player unable to drop items */
-	SCS_NOCASTCOND		= 0x00000040, /* cond flag for nocast */
-	SCS_NOCAST		= 0x00000080, /* unit unable to cast skills */
-	SCS_NOCHAT		= 0x00000100, /* unit can't talk */
-	SCS_NOCHATCOND		= 0x00000200, /* cond flag for notalk */
+	SCS_NOMOVECOND		= 0x00000001, /* Cond flag for nomove */
+	SCS_NOMOVE		= 0x00000002, /* Unit unable to move */
+	SCS_NOPICKITEMCOND	= 0x00000004, /* Cond flag for nopickitem */
+	SCS_NOPICKITEM		= 0x00000008, /* Player unable to pick up items */
+	SCS_NODROPITEMCOND	= 0x00000010, /* Cond flag for nodropitem */
+	SCS_NODROPITEM		= 0x00000020, /* Player unable to drop items */
+	SCS_NOCASTCOND		= 0x00000040, /* Cond flag for nocast */
+	SCS_NOCAST		= 0x00000080, /* Unit unable to cast skills */
+	SCS_NOCHAT		= 0x00000100, /* Unit can't talk */
+	SCS_NOCHATCOND		= 0x00000200, /* Cond flag for notalk */
 };
 
 //Define flags for the status_calc_bl function. [Skotlex]

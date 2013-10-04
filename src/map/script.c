@@ -3142,58 +3142,53 @@ void op_2num(struct script_state* st, int op, int i1, int i2)
 	int ret;
 	double ret_double;
 
-	switch( op )
-	{
-	case C_AND:  ret = i1 & i2;		break;
-	case C_OR:   ret = i1 | i2;		break;
-	case C_XOR:  ret = i1 ^ i2;		break;
-	case C_LAND: ret = (i1 && i2);	break;
-	case C_LOR:  ret = (i1 || i2);	break;
-	case C_EQ:   ret = (i1 == i2);	break;
-	case C_NE:   ret = (i1 != i2);	break;
-	case C_GT:   ret = (i1 >  i2);	break;
-	case C_GE:   ret = (i1 >= i2);	break;
-	case C_LT:   ret = (i1 <  i2);	break;
-	case C_LE:   ret = (i1 <= i2);	break;
-	case C_R_SHIFT: ret = i1>>i2;	break;
-	case C_L_SHIFT: ret = i1<<i2;	break;
-	case C_DIV:
-	case C_MOD:
-		if( i2 == 0 ) {
-			ShowError("script:op_2num: division by zero detected op=%s i1=%d i2=%d\n", script_op2name(op), i1, i2);
-			script_reportsrc(st);
-			script_pushnil(st);
-			st->state = END;
-			return;
-		} else if( op == C_DIV )
-			ret = i1 / i2;
-		else //if( op == C_MOD )
-			ret = i1 % i2;
-		break;
-	default:
-		switch( op )
-		{// operators that can overflow/underflow
-		case C_ADD: ret = i1 + i2; ret_double = (double)i1 + (double)i2; break;
-		case C_SUB: ret = i1 - i2; ret_double = (double)i1 - (double)i2; break;
-		case C_MUL: ret = i1 * i2; ret_double = (double)i1 * (double)i2; break;
+	switch( op ) {
+		case C_AND:  ret = i1 & i2;		break;
+		case C_OR:   ret = i1 | i2;		break;
+		case C_XOR:  ret = i1 ^ i2;		break;
+		case C_LAND: ret = (i1 && i2);	break;
+		case C_LOR:  ret = (i1 || i2);	break;
+		case C_EQ:   ret = (i1 == i2);	break;
+		case C_NE:   ret = (i1 != i2);	break;
+		case C_GT:   ret = (i1 >  i2);	break;
+		case C_GE:   ret = (i1 >= i2);	break;
+		case C_LT:   ret = (i1 <  i2);	break;
+		case C_LE:   ret = (i1 <= i2);	break;
+		case C_R_SHIFT: ret = i1>>i2;	break;
+		case C_L_SHIFT: ret = i1<<i2;	break;
+		case C_DIV:
+		case C_MOD:
+			if( i2 == 0 ) {
+				ShowError("script:op_2num: division by zero detected op=%s i1=%d i2=%d\n", script_op2name(op), i1, i2);
+				script_reportsrc(st);
+				script_pushnil(st);
+				st->state = END;
+				return;
+			} else if( op == C_DIV )
+				ret = i1 / i2;
+			else //if( op == C_MOD )
+				ret = i1 % i2;
+			break;
 		default:
-			ShowError("script:op_2num: unexpected number operator %s i1=%d i2=%d\n", script_op2name(op), i1, i2);
-			script_reportsrc(st);
-			script_pushnil(st);
-			return;
-		}
-		if( ret_double < (double)INT_MIN )
-		{
-			ShowWarning("script:op_2num: underflow detected op=%s i1=%d i2=%d\n", script_op2name(op), i1, i2);
-			script_reportsrc(st);
-			ret = INT_MIN;
-		}
-		else if( ret_double > (double)INT_MAX )
-		{
-			ShowWarning("script:op_2num: overflow detected op=%s i1=%d i2=%d\n", script_op2name(op), i1, i2);
-			script_reportsrc(st);
-			ret = INT_MAX;
-		}
+			switch( op ) { // Operators that can overflow/underflow
+				case C_ADD: ret = i1 + i2; ret_double = (double)i1 + (double)i2; break;
+				case C_SUB: ret = i1 - i2; ret_double = (double)i1 - (double)i2; break;
+				case C_MUL: ret = i1 * i2; ret_double = (double)i1 * (double)i2; break;
+				default:
+					ShowError("script:op_2num: unexpected number operator %s i1=%d i2=%d\n", script_op2name(op), i1, i2);
+					script_reportsrc(st);
+					script_pushnil(st);
+					return;
+			}
+			if( ret_double < (double)INT_MIN ) {
+				ShowWarning("script:op_2num: underflow detected op=%s i1=%d i2=%d\n", script_op2name(op), i1, i2);
+				script_reportsrc(st);
+				ret = INT_MIN;
+			} else if( ret_double > (double)INT_MAX ) {
+				ShowWarning("script:op_2num: overflow detected op=%s i1=%d i2=%d\n", script_op2name(op), i1, i2);
+				script_reportsrc(st);
+				ret = INT_MAX;
+			}
 	}
 	script_pushint(st, ret);
 }
@@ -4767,7 +4762,7 @@ BUILDIN_FUNC(callsub)
 			const char* name = reference_getname(data);
 			if( name[0] == '.' && name[1] == '@' ) {
 				if ( !ref ) {
-					ref = (struct DBMap**)aCalloc(sizeof(struct DBMap*), 1);
+					ref = (struct DBMap**)aCalloc(sizeof(struct DBMap*),1);
 					ref[0] = st->stack->var_function;
 				}
 				data->ref = ref;
@@ -4776,12 +4771,12 @@ BUILDIN_FUNC(callsub)
 	}
 
 	CREATE(ri, struct script_retinfo, 1);
-	ri->script       = st->script;// script code
-	ri->var_function = st->stack->var_function;// scope variables
-	ri->pos          = st->pos;// script location
-	ri->nargs        = j;// argument count
-	ri->defsp        = st->stack->defsp;// default stack pointer
-	push_retinfo(st->stack, ri, ref);
+	ri->script       = st->script; // Script code
+	ri->var_function = st->stack->var_function; // Scope variables
+	ri->pos          = st->pos; // Script location
+	ri->nargs        = j; // Argument count
+	ri->defsp        = st->stack->defsp; // Default stack pointer
+	push_retinfo(st->stack,ri,ref);
 
 	st->pos = pos;
 	st->stack->defsp = st->stack->sp;
@@ -4800,8 +4795,7 @@ BUILDIN_FUNC(getarg)
 	struct script_retinfo* ri;
 	int idx;
 
-	if( st->stack->defsp < 1 || st->stack->stack_data[st->stack->defsp - 1].type != C_RETINFO )
-	{
+	if( st->stack->defsp < 1 || st->stack->stack_data[st->stack->defsp - 1].type != C_RETINFO ) {
 		ShowError("script:getarg: no callfunc or callsub!\n");
 		st->state = END;
 		return 1;
@@ -4813,10 +4807,9 @@ BUILDIN_FUNC(getarg)
 	if( idx >= 0 && idx < ri->nargs )
 		push_copy(st->stack, st->stack->defsp - 1 - ri->nargs + idx);
 	else if( script_hasdata(st,3) )
-		script_pushcopy(st, 3);
-	else
-	{
-		ShowError("script:getarg: index (idx=%d) out of range (nargs=%d) and no default value found\n", idx, ri->nargs);
+		script_pushcopy(st,3);
+	else {
+		ShowError("script:getarg: index (idx=%d) out of range (nargs=%d) and no default value found\n",idx,ri->nargs);
 		st->state = END;
 		return 1;
 	}
@@ -4831,29 +4824,22 @@ BUILDIN_FUNC(getarg)
 /// return <value>;
 BUILDIN_FUNC(return)
 {
-	if( script_hasdata(st,2) )
-	{// return value
+	if( script_hasdata(st,2) ) { // Return value
 		struct script_data* data;
-		script_pushcopy(st, 2);
-		data = script_getdatatop(st, -1);
-		if( data_isreference(data) )
-		{
+		script_pushcopy(st,2);
+		data = script_getdatatop(st,-1);
+		if( data_isreference(data) ) {
 			const char* name = reference_getname(data);
-			if( name[0] == '.' && name[1] == '@' )
-			{// scope variable
+			if( name[0] == '.' && name[1] == '@' ) { // Scope variable
 				if( !data->ref || data->ref == (DBMap**)&st->stack->var_function )
-					get_val(st, data);// current scope, convert to value
-			}
-			else if( name[0] == '.' && !data->ref )
-			{// script variable, link to current script
+					get_val(st,data); // Current scope, convert to value
+			} else if( name[0] == '.' && !data->ref ) { // Script variable, link to current script
 				data->ref = &st->script->script_vars;
 			}
 		}
-	}
-	else
-	{// no return value
+	} else // No return value
 		script_pushnil(st);
-	}
+
 	st->state = RETFUNC;
 	return 0;
 }
@@ -4869,16 +4855,13 @@ BUILDIN_FUNC(rand)
 	int min;
 	int max;
 
-	if( script_hasdata(st,3) )
-	{// min,max
+	if( script_hasdata(st,3) ) { // Min,max
 		min = script_getnum(st,2);
 		max = script_getnum(st,3);
 		if( max < min )
 			swap(min, max);
 		range = max - min + 1;
-	}
-	else
-	{// range
+	} else { // Range
 		min = 0;
 		range = script_getnum(st,2);
 	}
@@ -4908,9 +4891,9 @@ BUILDIN_FUNC(warp)
 	x = script_getnum(st,3);
 	y = script_getnum(st,4);
 
-	if(strcmp(str,"Random")==0)
+	if( strcmp(str,"Random") == 0 )
 		ret = pc_randomwarp(sd,CLR_TELEPORT);
-	else if(strcmp(str,"SavePoint")==0 || strcmp(str,"Save")==0)
+	else if( strcmp(str,"SavePoint") == 0 || strcmp(str,"Save") == 0 )
 		ret = pc_setpos(sd,sd->status.save_point.map,sd->status.save_point.x,sd->status.save_point.y,CLR_TELEPORT);
 	else
 		ret = pc_setpos(sd,mapindex_name2id(str),x,y,CLR_OUTSIGHT);
@@ -11232,7 +11215,7 @@ BUILDIN_FUNC(setcastledata)
 		return 1;
 	}
 
-	if (index <= 0 || index > 9+MAX_GUARDIANS) {
+	if (index <= 0 || index > 9 + MAX_GUARDIANS) {
 		ShowWarning("buildin_setcastledata: index = '%d' is out of allowed range\n", index);
 		return 1;
 	}
@@ -11245,15 +11228,15 @@ BUILDIN_FUNC(setcastledata)
  * ---------------------------------------------------------------------*/
 BUILDIN_FUNC(requestguildinfo)
 {
-	int guild_id=script_getnum(st,2);
-	const char *event=NULL;
+	int guild_id = script_getnum(st,2);
+	const char *event = NULL;
 
-	if( script_hasdata(st,3) ){
-		event=script_getstr(st,3);
-		check_event(st, event);
+	if (script_hasdata(st,3)) {
+		event = script_getstr(st,3);
+		check_event(st,event);
 	}
 
-	if(guild_id>0)
+	if (guild_id > 0)
 		guild_npc_request_info(guild_id,event);
 	return 0;
 }
@@ -11262,29 +11245,28 @@ BUILDIN_FUNC(requestguildinfo)
 /// getequipcardcnt(<equipment slot>);
 BUILDIN_FUNC(getequipcardcnt)
 {
-	int i=-1,j,num;
+	int i = -1,j,num;
 	TBL_PC *sd;
 	int count;
 
-	num=script_getnum(st,2);
-	sd=script_rid2sd(st);
+	num = script_getnum(st,2);
+	sd = script_rid2sd(st);
 	if (num > 0 && num <= ARRAYLENGTH(equip))
-		i=pc_checkequip(sd,equip[num-1]);
+		i = pc_checkequip(sd,equip[num - 1]);
 
 	if (i < 0 || !sd->inventory_data[i]) {
 		script_pushint(st,0);
 		return 0;
 	}
 
-	if(itemdb_isspecial(sd->status.inventory[i].card[0]))
-	{
+	if(itemdb_isspecial(sd->status.inventory[i].card[0])) {
 		script_pushint(st,0);
 		return 0;
 	}
 
 	count = 0;
-	for( j = 0; j < sd->inventory_data[i]->slot; j++ )
-		if( sd->status.inventory[i].card[j] && itemdb_type(sd->status.inventory[i].card[j]) == IT_CARD )
+	for (j = 0; j < sd->inventory_data[i]->slot; j++)
+		if (sd->status.inventory[i].card[j] && itemdb_type(sd->status.inventory[i].card[j]) == IT_CARD)
 			count++;
 
 	script_pushint(st,count);
@@ -11295,23 +11277,23 @@ BUILDIN_FUNC(getequipcardcnt)
 /// and give them to the character. If any cards were removed in this manner, it will also show a success effect.
 /// successremovecards <slot>;
 BUILDIN_FUNC(successremovecards) {
-	int i=-1,j,c,cardflag=0;
+	int i = -1,j,c,cardflag = 0;
 
 	TBL_PC* sd = script_rid2sd(st);
 	int num = script_getnum(st,2);
 
 	if (num > 0 && num <= ARRAYLENGTH(equip))
-		i=pc_checkequip(sd,equip[num-1]);
+		i = pc_checkequip(sd,equip[num - 1]);
 
 	if (i < 0 || !sd->inventory_data[i]) {
 		return 0;
 	}
 
-	if(itemdb_isspecial(sd->status.inventory[i].card[0]))
+	if (itemdb_isspecial(sd->status.inventory[i].card[0]))
 		return 0;
 
-	for( c = sd->inventory_data[i]->slot - 1; c >= 0; --c ) {
-		if( sd->status.inventory[i].card[c] && itemdb_type(sd->status.inventory[i].card[c]) == IT_CARD ) {// extract this card from the item
+	for (c = sd->inventory_data[i]->slot - 1; c >= 0; --c) {
+		if (sd->status.inventory[i].card[c] && itemdb_type(sd->status.inventory[i].card[c]) == IT_CARD ) { // Extract this card from the item
 			int flag;
 			struct item item_tmp;
 			memset(&item_tmp,0,sizeof(item_tmp));
@@ -11319,18 +11301,18 @@ BUILDIN_FUNC(successremovecards) {
 			item_tmp.nameid   = sd->status.inventory[i].card[c];
 			item_tmp.identify = 1;
 
-			if((flag=pc_additem(sd,&item_tmp,1,LOG_TYPE_SCRIPT))){	// get back the cart in inventory
+			if ((flag = pc_additem(sd,&item_tmp,1,LOG_TYPE_SCRIPT))) { // Get back the cart in inventory
 				clif_additem(sd,0,0,flag);
 				map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0);
 			}
 		}
 	}
 
-	if(cardflag == 1) {// if card was remove remplace item with no card
+	if (cardflag == 1) { // If card was remove remplace item with no card
 		int flag;
 		struct item item_tmp;
 		memset(&item_tmp,0,sizeof(item_tmp));
-		
+
 		item_tmp.nameid      = sd->status.inventory[i].nameid;
 		item_tmp.identify    = 1;
 		item_tmp.refine      = sd->status.inventory[i].refine;
@@ -11342,7 +11324,7 @@ BUILDIN_FUNC(successremovecards) {
 			item_tmp.card[j]=sd->status.inventory[i].card[j];
 
 		pc_delitem(sd,i,1,0,3,LOG_TYPE_SCRIPT);
-		if((flag=pc_additem(sd,&item_tmp,1,LOG_TYPE_SCRIPT))){	// chk if can be spawn in inventory otherwise put on floor
+		if ((flag = pc_additem(sd,&item_tmp,1,LOG_TYPE_SCRIPT))) { // Check if can be spawn in inventory otherwise put on floor
 			clif_additem(sd,0,0,flag);
 			map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0);
 		}

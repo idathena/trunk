@@ -307,7 +307,6 @@ Option_Summer	0x40000
 Option_Wug	0x100000
 Option_Wugrider	0x200000
 Option_Hanbok	0x8000000
-Option_Mounting	0x10000000
 
 bc_all	0
 bc_map	1
