@@ -4271,7 +4271,7 @@ int clif_damage(struct block_list* src, struct block_list* dst, unsigned int tic
 		unit_setdir(src,unit_getdir(src));
 	}
 	//Return adjusted can't walk delay for further processing.
-	return clif_calc_walkdelay(dst,ddelay,type,damage+damage2,div);
+	return clif_calc_walkdelay(dst,ddelay,type,damage + damage2,div);
 }
 
 /*==========================================

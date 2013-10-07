@@ -1276,11 +1276,11 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 //		return 0; //Cannot damage a bl not on a map, except when "charging" hp/sp
 
 	sc = status_get_sc(target);
-	if( hp && battle_config.invincible_nodamage && src && sc && sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF] )
+	if (hp && battle_config.invincible_nodamage && src && sc && sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF])
 		hp = 1;
 
-	if( hp && !(flag&1) ) {
-		if( sc ) {
+	if (hp && !(flag&1)) {
+		if (sc) {
 			struct status_change_entry *sce;
 			if (sc->data[SC_STONE] && sc->opt1 == OPT1_STONE)
 				status_change_end(target, SC_STONE, INVALID_TIMER);
@@ -1310,11 +1310,11 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 					status_change_end(target, SC_GRAVITATION, INVALID_TIMER);
 				}
 			}
-			if(sc->data[SC_DANCING] && (unsigned int)hp > status->max_hp>>2)
+			if (sc->data[SC_DANCING] && (unsigned int)hp > status->max_hp>>2)
 				status_change_end(target, SC_DANCING, INVALID_TIMER);
-			if(sc->data[SC_CLOAKINGEXCEED] && --(sc->data[SC_CLOAKINGEXCEED]->val2) <= 0)
+			if (sc->data[SC_CLOAKINGEXCEED] && --(sc->data[SC_CLOAKINGEXCEED]->val2) <= 0)
 				status_change_end(target, SC_CLOAKINGEXCEED, INVALID_TIMER);
-			if(sc->data[SC_KAGEMUSYA] && --(sc->data[SC_KAGEMUSYA]->val3) <= 0)
+			if (sc->data[SC_KAGEMUSYA] && --(sc->data[SC_KAGEMUSYA]->val3) <= 0)
 				status_change_end(target, SC_KAGEMUSYA, INVALID_TIMER);
 		}
 		unit_skillcastcancel(target, 2);
@@ -1327,7 +1327,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 		if (sc->data[SC_AUTOBERSERK] &&
 			(!sc->data[SC_PROVOKE] || !sc->data[SC_PROVOKE]->val2) &&
 			status->hp < status->max_hp>>2)
-			sc_start4(src,target,SC_PROVOKE,100,10,1,0,0,0);
+			sc_start4(src, target, SC_PROVOKE, 100, 10, 1, 0, 0, 0);
 		if (sc->data[SC_BERSERK] && status->hp <= 100)
 			status_change_end(target, SC_BERSERK, INVALID_TIMER);
 		if (sc->data[SC_RAISINGDRAGON] && status->hp <= 1000)
@@ -1337,11 +1337,11 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 	}
 
 	switch (target->type) {
-		case BL_PC:  pc_damage((TBL_PC*)target,src,hp,sp); break;
+		case BL_PC:  pc_damage((TBL_PC*)target, src, hp, sp); break;
 		case BL_MOB: mob_damage((TBL_MOB*)target, src, hp); break;
 		case BL_HOM: merc_damage((TBL_HOM*)target); break;
-		case BL_MER: mercenary_heal((TBL_MER*)target,hp,sp); break;
-		case BL_ELEM: elemental_heal((TBL_ELEM*)target,hp,sp); break;
+		case BL_MER: mercenary_heal((TBL_MER*)target, hp, sp); break;
+		case BL_ELEM: elemental_heal((TBL_ELEM*)target, hp, sp); break;
 	}
 
 	if (src && target->type == BL_PC && ((TBL_PC*)target)->disguise) {
@@ -1363,7 +1363,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 	//&4: Also delete object from memory.
 	switch (target->type) {
 		case BL_PC:  flag = pc_dead((TBL_PC*)target,src); break;
-		case BL_MOB: flag = mob_dead((TBL_MOB*)target, src, flag&4?3:0); break;
+		case BL_MOB: flag = mob_dead((TBL_MOB*)target, src, flag&4 ? 3 : 0); break;
 		case BL_HOM: flag = merc_hom_dead((TBL_HOM*)target); break;
 		case BL_MER: flag = mercenary_dead((TBL_MER*)target); break;
 		case BL_ELEM: flag = elemental_dead((TBL_ELEM*)target); break;
@@ -8648,7 +8648,7 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 				tick = -1;
 				break;
 			case SC__SHADOWFORM: {
-					struct map_session_data * s_sd = map_id2sd(val2);
+					struct map_session_data *s_sd = map_id2sd(val2);
 					if( s_sd )
 						s_sd->shadowform_id = bl->id;
 					val4 = tick / 1000;

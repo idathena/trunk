@@ -848,7 +848,7 @@ int skill_additional_effect (struct block_list* src, struct block_list *bl, uint
 	}
 
 	if( dmg_lv < ATK_DEF && //No damage, do nothing
-		!(tsc->data[SC_PNEUMA] || tsc->data[SC__SHADOWFORM]) ) ////Keep retaining its status ability
+		!(tsc->data[SC_PNEUMA] || tsc->data[SC__SHADOWFORM]) ) //Keep retaining its status ability
 		return 0;
 
 	switch( skill_id ) {
@@ -2332,23 +2332,23 @@ void skill_combo(struct block_list* src, struct block_list *dsrc, struct block_l
 		switch (skill_id) {
 			case MO_TRIPLEATTACK:
 				if (pc_checkskill(sd, MO_CHAINCOMBO) > 0 || pc_checkskill(sd, SR_DRAGONCOMBO) > 0)
-					duration=1;
+					duration = 1;
 				break;
 			case MO_CHAINCOMBO:
 				if (pc_checkskill(sd, MO_COMBOFINISH) > 0 && sd->spiritball > 0)
-					duration=1;
+					duration = 1;
 				break;
 			case MO_COMBOFINISH:
-				if (sd->status.party_id>0) //bonus from SG_FRIEND [Komurka]
+				if (sd->status.party_id > 0) //bonus from SG_FRIEND [Komurka]
 					party_skill_check(sd, sd->status.party_id, MO_COMBOFINISH, skill_lv);
 				if (pc_checkskill(sd, CH_TIGERFIST) > 0 && sd->spiritball > 0)
-					duration=1;
+					duration = 1;
 			case CH_TIGERFIST:
 				if (!duration && pc_checkskill(sd, CH_CHAINCRUSH) > 0 && sd->spiritball > 1)
-					duration=1;
+					duration = 1;
 			case CH_CHAINCRUSH:
 				if (!duration && pc_checkskill(sd, MO_EXTREMITYFIST) > 0 && sd->spiritball > 0 && sd->sc.data[SC_EXPLOSIONSPIRITS])
-					duration=1;
+					duration = 1;
 				break;
 			case AC_DOUBLE: {
 					unsigned char race = status_get_race(bl);
@@ -2372,12 +2372,12 @@ void skill_combo(struct block_list* src, struct block_list *dsrc, struct block_l
 			case MH_SONIC_CRAW:
 			case MH_SILVERVEIN_RUSH:
 				if (hd->homunculus.spiritball > 0) duration = 2000;
-					delay=1;
+					delay = 1;
 				break;
 			case MH_EQC:
 			case MH_MIDNIGHT_FRENZY:
 				if (hd->homunculus.spiritball >= 2) duration = 2000;
-					delay=1;
+					delay = 1;
 				break;
 		}
 	}
@@ -2559,7 +2559,10 @@ int skill_attack (int attack_type, struct block_list* src, struct block_list *ds
 
 	switch (skill_id) {
 		case WL_HELLINFERNO: //Hell Inferno burning status only starts if Fire part hits
-			if (dmg.damage > 0 && !(flag&ELE_DARK))
+			if (dmg.dmg_lv < ATK_DEF && tsc &&
+				!(tsc->data[SC_PNEUMA] || tsc->data[SC__SHADOWFORM]))
+				break;
+			if (!(flag&ELE_DARK))
 				sc_start4(src, bl, SC_BURNING, 55 + 5 * skill_lv, skill_lv, 1000, src->id, 0, skill_get_time(skill_id, skill_lv));
 			break;
 		case SC_TRIANGLESHOT:
@@ -9295,9 +9298,8 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 
 		case GN_BLOOD_SUCKER: {
 				struct status_change *sc = status_get_sc(src);
-						
-				if( sc && sc->bs_counter < skill_get_maxcount( skill_id ,skill_lv) ) {
-					if( tsc && tsc->data[type] ){
+				if( sc && sc->bs_counter < skill_get_maxcount(skill_id,skill_lv) ) {
+					if( tsc && tsc->data[type] ) {
 						(sc->bs_counter)--;
 						status_change_end(src,type,INVALID_TIMER); //The first one cancels and the last one will take effect resetting the timer
 					}
@@ -10971,7 +10973,7 @@ int skill_castend_map (struct map_session_data *sd, uint16 skill_id, const char 
 				p[3] = &sd->status.memo_point[2];
 
 				if((maxcount = skill_get_maxcount(skill_id, sd->menuskill_val)) > 0) {
-					for(i=0;i<MAX_SKILLUNITGROUP && sd->ud.skillunit[i] && maxcount;i++) {
+					for(i = 0; i < MAX_SKILLUNITGROUP && sd->ud.skillunit[i] && maxcount; i++) {
 						if(sd->ud.skillunit[i]->skill_id == skill_id)
 							maxcount--;
 					}
@@ -18288,7 +18290,7 @@ static bool skill_parse_row_skilldb(char* split[], int columns, int current)
 	}
 
 	idx = skill_get_index(skill_id);
-	if( !idx ) //invalid skill id
+	if( !idx ) //Invalid skill id
 		return false;
 
 	skill_split_atoi(split[1],skill_db[idx].range);
