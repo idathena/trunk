@@ -84,7 +84,7 @@ enum e_skill_inf3 {
 	INF3_EFF_SHADOWJUMP   = 0x0200, //Spell range affected by NJ_SHADOWJUMP
 	INF3_EFF_RADIUS       = 0x0400, //Spell range affected by WL_RADIUS
 	INF3_EFF_RESEARCHTRAP = 0x0800, //Spell range affected by RA_RESEARCHTRAP
-	INF3_DIS_PLAGIA       = 0x1000, //Spell that can't be copied
+	INF3_USABLE_MANHOLE   = 0x1000, //Spell that can be used even under Man Hole effect
 	INF3_USABLE_WARG      = 0x2000, //Spell that can be use while riding warg
 	INF3_DIS_MADO         = 0x4000, //Spell that can't be used while in mado
 };
@@ -1916,6 +1916,10 @@ enum {
 	UNT_FLAMECROSS,
 	UNT_HELLBURNING,
 	UNT_MAGMA_ERUPTION,
+	UNT_KINGS_GRACE,
+	UNT_GLITTERING_GREED,
+	UNT_B_TRAP,
+	UNT_FIRE_RAIN,
 
 	/**
 	 * Guild Auras

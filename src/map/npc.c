@@ -899,72 +899,68 @@ int npc_touch_areanpc(struct map_session_data* sd, int16 m, int16 x, int16 y)
 	int i;
 	int j, found_warp = 0;
 
-	nullpo_retr(1, sd);
+	nullpo_retr(1,sd);
 
-	// Why not enqueue it? [Inkfish]
+	//Why not enqueue it? [Inkfish]
 	//if(sd->npc_id)
-	//	return 1;
+		//return 1;
 
-	for(i=0;i<map[m].npc_num;i++)
-	{
-		if (map[m].npc[i]->sc.option&OPTION_INVISIBLE) {
-			f=0; // a npc was found, but it is disabled; don't print warning
+	for( i = 0; i < map[m].npc_num; i++ ) {
+		if( map[m].npc[i]->sc.option&OPTION_INVISIBLE ) {
+			f = 0; //A npc was found, but it is disabled; don't print warning
 			continue;
 		}
 
-		switch(map[m].npc[i]->subtype) {
-		case WARP:
-			xs=map[m].npc[i]->u.warp.xs;
-			ys=map[m].npc[i]->u.warp.ys;
-			break;
-		case SCRIPT:
-			xs=map[m].npc[i]->u.scr.xs;
-			ys=map[m].npc[i]->u.scr.ys;
-			break;
-		default:
-			continue;
+		switch( map[m].npc[i]->subtype ) {
+			case WARP:
+				xs = map[m].npc[i]->u.warp.xs;
+				ys = map[m].npc[i]->u.warp.ys;
+				break;
+			case SCRIPT:
+				xs = map[m].npc[i]->u.scr.xs;
+				ys = map[m].npc[i]->u.scr.ys;
+				break;
+			default:
+				continue;
 		}
-		if( x >= map[m].npc[i]->bl.x-xs && x <= map[m].npc[i]->bl.x+xs
-		&&  y >= map[m].npc[i]->bl.y-ys && y <= map[m].npc[i]->bl.y+ys )
+		if( x >= map[m].npc[i]->bl.x - xs && x <= map[m].npc[i]->bl.x + xs &&
+			y >= map[m].npc[i]->bl.y - ys && y <= map[m].npc[i]->bl.y + ys )
 			break;
 	}
-	if( i == map[m].npc_num )
-	{
-		if( f == 1 ) // no npc found
-			ShowError("npc_touch_areanpc : stray NPC cell/NPC not found in the block on coordinates '%s',%d,%d\n", map[m].name, x, y);
+	if( i == map[m].npc_num ) {
+		if( f == 1 ) //No npc found
+			ShowError("npc_touch_areanpc : stray NPC cell/NPC not found in the block on coordinates '%s',%d,%d\n",map[m].name,x,y);
 		return 1;
 	}
-	switch(map[m].npc[i]->subtype) {
+	switch( map[m].npc[i]->subtype ) {
 		case WARP:
-			if( pc_ishiding(sd) || (sd->sc.count && sd->sc.data[SC_CAMOUFLAGE]) )
-				break; // hidden chars cannot use warps
+			if( pc_ishiding(sd) || (sd->sc.count && sd->sc.data[SC_CAMOUFLAGE]) || pc_isdead(sd) )
+				break; //Hidden or dead chars cannot use warps
 			pc_setpos(sd,map[m].npc[i]->u.warp.mapindex,map[m].npc[i]->u.warp.x,map[m].npc[i]->u.warp.y,CLR_OUTSIGHT);
 			break;
 		case SCRIPT:
-			for (j = i; j < map[m].npc_num; j++) {
-				if (map[m].npc[j]->subtype != WARP) {
+			for( j = i; j < map[m].npc_num; j++ ) {
+				if( map[m].npc[j]->subtype != WARP )
 					continue;
-				}
-				
-				if ((sd->bl.x >= (map[m].npc[j]->bl.x - map[m].npc[j]->u.warp.xs) && sd->bl.x <= (map[m].npc[j]->bl.x + map[m].npc[j]->u.warp.xs)) &&
-					(sd->bl.y >= (map[m].npc[j]->bl.y - map[m].npc[j]->u.warp.ys) && sd->bl.y <= (map[m].npc[j]->bl.y + map[m].npc[j]->u.warp.ys))) {
-						if( pc_ishiding(sd) || (sd->sc.count && sd->sc.data[SC_CAMOUFLAGE]) )
-							break; // hidden chars cannot use warps
+
+				if( (sd->bl.x >= (map[m].npc[j]->bl.x - map[m].npc[j]->u.warp.xs) && sd->bl.x <= (map[m].npc[j]->bl.x + map[m].npc[j]->u.warp.xs)) &&
+					(sd->bl.y >= (map[m].npc[j]->bl.y - map[m].npc[j]->u.warp.ys) && sd->bl.y <= (map[m].npc[j]->bl.y + map[m].npc[j]->u.warp.ys)) ) {
+						if( pc_ishiding(sd) || (sd->sc.count && sd->sc.data[SC_CAMOUFLAGE]) || pc_isdead(sd) )
+							break; //Hidden or dead chars cannot use warps
 					pc_setpos(sd,map[m].npc[j]->u.warp.mapindex,map[m].npc[j]->u.warp.x,map[m].npc[j]->u.warp.y,CLR_OUTSIGHT);
 					found_warp = 1;
 					break;
 				}
 			}
-			
-			if (found_warp > 0) {
+
+			if( found_warp > 0 )
 				break;
-			}
-			
-			if( npc_ontouch_event(sd,map[m].npc[i]) > 0 && npc_ontouch2_event(sd,map[m].npc[i]) > 0 )
-			{ // failed to run OnTouch event, so just click the npc
+
+			if( npc_ontouch_event(sd,map[m].npc[i]) > 0 && npc_ontouch2_event(sd,map[m].npc[i]) > 0 ) {
+				//Failed to run OnTouch event, so just click the npc
 				struct unit_data *ud = unit_bl2ud(&sd->bl);
-				if( ud && ud->walkpath.path_pos < ud->walkpath.path_len )
-				{ // Since walktimer always == INVALID_TIMER at this time, we stop walking manually. [Inkfish]
+				if( ud && ud->walkpath.path_pos < ud->walkpath.path_len ) {
+					//Since walktimer always == INVALID_TIMER at this time, we stop walking manually. [Inkfish]
 					clif_fixpos(&sd->bl);
 					ud->walkpath.path_pos = ud->walkpath.path_len;
 				}
@@ -985,13 +981,11 @@ int npc_touch_areanpc2(struct mob_data *md)
 	struct event_data* ev;
 	int xs, ys;
 
-	for( i = 0; i < map[m].npc_num; i++ )
-	{
+	for( i = 0; i < map[m].npc_num; i++ ) {
 		if( map[m].npc[i]->sc.option&OPTION_INVISIBLE )
 			continue;
 
-		switch( map[m].npc[i]->subtype )
-		{
+		switch( map[m].npc[i]->subtype ) {
 			case WARP:
 				if( !( battle_config.mob_warp&1 ) )
 					continue;
@@ -1003,30 +997,29 @@ int npc_touch_areanpc2(struct mob_data *md)
 				ys = map[m].npc[i]->u.scr.ys;
 				break;
 			default:
-				continue; // Keep Searching
+				continue; //Keep Searching
 		}
 
 		if( x >= map[m].npc[i]->bl.x-xs && x <= map[m].npc[i]->bl.x+xs && y >= map[m].npc[i]->bl.y-ys && y <= map[m].npc[i]->bl.y+ys )
-		{ // In the npc touch area
-			switch( map[m].npc[i]->subtype )
-			{
+		{ //In the npc touch area
+			switch( map[m].npc[i]->subtype ) {
 				case WARP:
 					xs = map_mapindex2mapid(map[m].npc[i]->u.warp.mapindex);
 					if( m < 0 )
-						break; // Cannot Warp between map servers
+						break; //Cannot Warp between map servers
 					if( unit_warp(&md->bl, xs, map[m].npc[i]->u.warp.x, map[m].npc[i]->u.warp.y, CLR_OUTSIGHT) == 0 )
-						return 1; // Warped
+						return 1; //Warped
 					break;
 				case SCRIPT:
 					if( map[m].npc[i]->bl.id == md->areanpc_id )
-						break; // Already touch this NPC
+						break; //Already touch this NPC
 					snprintf(eventname, ARRAYLENGTH(eventname), "%s::OnTouchNPC", map[m].npc[i]->exname);
 					if( (ev = (struct event_data*)strdb_get(ev_db, eventname)) == NULL || ev->nd == NULL )
-						break; // No OnTouchNPC Event
+						break; //No OnTouchNPC Event
 					md->areanpc_id = map[m].npc[i]->bl.id;
-					id = md->bl.id; // Stores Unique ID
+					id = md->bl.id; //Stores Unique ID
 					run_script(ev->nd->u.scr.script, ev->pos, md->bl.id, ev->nd->bl.id);
-					if( map_id2md(id) == NULL ) return 1; // Not Warped, but killed
+					if( map_id2md(id) == NULL ) return 1; //Not Warped, but killed
 					break;
 			}
 
@@ -1047,51 +1040,49 @@ int npc_check_areanpc(int flag, int16 m, int16 x, int16 y, int16 range)
 	int x0,y0,x1,y1;
 	int xs,ys;
 
-	if (range < 0) return 0;
-	x0 = max(x-range, 0);
-	y0 = max(y-range, 0);
-	x1 = min(x+range, map[m].xs-1);
-	y1 = min(y+range, map[m].ys-1);
+	if( range < 0 ) return 0;
+	x0 = max(x - range, 0);
+	y0 = max(y - range, 0);
+	x1 = min(x + range, map[m].xs - 1);
+	y1 = min(y + range, map[m].ys - 1);
 	
 	//First check for npc_cells on the range given
 	i = 0;
-	for (ys = y0; ys <= y1 && !i; ys++) {
-		for(xs = x0; xs <= x1 && !i; xs++){
-			if (map_getcell(m,xs,ys,CELL_CHKNPC))
+	for( ys = y0; ys <= y1 && !i; ys++ ) {
+		for( xs = x0; xs <= x1 && !i; xs++ ) {
+			if( map_getcell(m,xs,ys,CELL_CHKNPC) )
 				i = 1;
 		}
 	}
-	if (!i) return 0; //No NPC_CELLs.
+	if( !i ) return 0; //No NPC_CELLs.
 
 	//Now check for the actual NPC on said range.
-	for(i=0;i<map[m].npc_num;i++)
-	{
-		if (map[m].npc[i]->sc.option&OPTION_INVISIBLE)
+	for( i = 0; i < map[m].npc_num; i++ ) {
+		if( map[m].npc[i]->sc.option&OPTION_INVISIBLE )
 			continue;
 
-		switch(map[m].npc[i]->subtype)
-		{
-		case WARP:
-			if (!(flag&1))
+		switch( map[m].npc[i]->subtype ) {
+			case WARP:
+				if( !(flag&1) )
+					continue;
+				xs = map[m].npc[i]->u.warp.xs;
+				ys = map[m].npc[i]->u.warp.ys;
+				break;
+			case SCRIPT:
+				if( !(flag&2) )
+					continue;
+				xs = map[m].npc[i]->u.scr.xs;
+				ys = map[m].npc[i]->u.scr.ys;
+				break;
+			default:
 				continue;
-			xs=map[m].npc[i]->u.warp.xs;
-			ys=map[m].npc[i]->u.warp.ys;
-			break;
-		case SCRIPT:
-			if (!(flag&2))
-				continue;
-			xs=map[m].npc[i]->u.scr.xs;
-			ys=map[m].npc[i]->u.scr.ys;
-			break;
-		default:
-			continue;
 		}
 
-		if( x1 >= map[m].npc[i]->bl.x-xs && x0 <= map[m].npc[i]->bl.x+xs
-		&&  y1 >= map[m].npc[i]->bl.y-ys && y0 <= map[m].npc[i]->bl.y+ys )
-			break; // found a npc
+		if( x1 >= map[m].npc[i]->bl.x - xs && x0 <= map[m].npc[i]->bl.x + xs &&
+			y1 >= map[m].npc[i]->bl.y - ys && y0 <= map[m].npc[i]->bl.y + ys )
+			break; //Found a npc
 	}
-	if (i==map[m].npc_num)
+	if( i == map[m].npc_num )
 		return 0;
 
 	return (map[m].npc[i]->bl.id);
@@ -1106,19 +1097,23 @@ struct npc_data* npc_checknear(struct map_session_data* sd, struct block_list* b
 	struct npc_data *nd;
 
 	nullpo_retr(NULL, sd);
-	if(bl == NULL) return NULL;
-	if(bl->type != BL_NPC) return NULL;
+
+	if( bl == NULL )
+		return NULL;
+	if( bl->type != BL_NPC )
+		return NULL;
+
 	nd = (TBL_NPC*)bl;
 
-	if(sd->state.using_fake_npc && sd->npc_id == bl->id)
+	if( sd->state.using_fake_npc && sd->npc_id == bl->id )
 		return nd;
 
-	if (nd->class_<0) //Class-less npc, enable click from anywhere.
+	if( nd->class_ < 0 ) //Class-less npc, enable click from anywhere.
 		return nd;
 
-	if (bl->m!=sd->bl.m ||
-	   bl->x<sd->bl.x-AREA_SIZE-1 || bl->x>sd->bl.x+AREA_SIZE+1 ||
-	   bl->y<sd->bl.y-AREA_SIZE-1 || bl->y>sd->bl.y+AREA_SIZE+1)
+	if( bl->m != sd->bl.m ||
+		bl->x<sd->bl.x - AREA_SIZE - 1 || bl->x>sd->bl.x + AREA_SIZE + 1 ||
+		bl->y<sd->bl.y - AREA_SIZE - 1 || bl->y>sd->bl.y + AREA_SIZE + 1 )
 		return NULL;
 
 	return nd;

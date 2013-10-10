@@ -246,4 +246,4 @@ GN_CRAZYWEED,2       // Crazy Weed
 GN_HELLS_PLANT,2     // Hell's Plant
 
 // Kagerou/Oboro
-KO_MUCHANAGE,1 // Overthrow
+KO_MUCHANAGE,3 // Overthrow

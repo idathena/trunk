@@ -1342,9 +1342,8 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	casttime = skill_vfcastfix(src, casttime, skill_id, skill_lv);
 #endif
 
-	if( src->type == BL_NPC ) { //NPC-objects do not have cast time
+	if( src->type == BL_NPC ) //NPC-objects do not have cast time
 		casttime = 0;
-	}
 
 	if( !ud->state.running ) //Need TK_RUN or WUGDASH handler to be done before that, see bugreport:6026
 		unit_stop_walking(src, 1); //Eventhough this is not how official works but this will do the trick. bugreport:6829
@@ -1515,19 +1514,18 @@ int unit_skilluse_pos2( struct block_list *src, short skill_x, short skill_y, ui
 	casttime = skill_vfcastfix(src, casttime, skill_id, skill_lv );
 #endif
 
-	if(src->type == BL_NPC) { //NPC-objects do not have cast time
+	if(src->type == BL_NPC) //NPC-objects do not have cast time
 		casttime = 0;
-	}
 
-	ud->state.skillcastcancel = castcancel&&casttime>0?1:0;
+	ud->state.skillcastcancel = castcancel&&casttime > 0 ? 1 : 0;
 	if(!sd || sd->skillitem != skill_id || skill_get_cast(skill_id,skill_lv))
 		ud->canact_tick  = tick + casttime + 100;
-//	if(sd) {
-//		switch(skill_id) {
-//			case ????:
-//				sd->canequip_tick = tick + casttime;
-//		}
-//	}
+	//if(sd) {
+		//switch(skill_id) {
+			//case ????:
+				//sd->canequip_tick = tick + casttime;
+		//}
+	//}
 	ud->skill_id     = skill_id;
 	ud->skill_lv     = skill_lv;
 	ud->skillx       = skill_x;

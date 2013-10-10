@@ -229,6 +229,10 @@ int storage_storageadd(struct map_session_data* sd, int index, int amount)
 
 	if( storage_additem(sd,&sd->status.inventory[index],amount) == 0 )
 		pc_delitem(sd,index,amount,0,4,LOG_TYPE_STORAGE);
+	else {
+		clif_dropitem(sd,index,0);
+		return 0;
+	}
 
 	return 1;
 }
@@ -521,7 +525,7 @@ int storage_guild_storageadd(struct map_session_data* sd, int index, int amount)
 	struct guild_storage *stor;
 
 	nullpo_ret(sd);
-	nullpo_ret(stor=guild2storage2(sd->status.guild_id));
+	nullpo_ret(stor = guild2storage2(sd->status.guild_id));
 		
 	if( !stor->storage_status || stor->storage_amount > MAX_GUILD_STORAGE )
 		return 0;
@@ -540,8 +544,12 @@ int storage_guild_storageadd(struct map_session_data* sd, int index, int amount)
 		return 0;
 	}
 
-	if(guild_storage_additem(sd,stor,&sd->status.inventory[index],amount)==0)
+	if( guild_storage_additem(sd,stor,&sd->status.inventory[index],amount) == 0 )
 		pc_delitem(sd,index,amount,0,4,LOG_TYPE_GSTORAGE);
+	else {
+		clif_dropitem(sd,index,0);
+		return 0;
+	}
 
 	return 1;
 }

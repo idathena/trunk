@@ -206,7 +206,7 @@ void initChangeTables(void) {
 	add_sc( TF_POISON            , SC_POISON          );
 	set_sc( KN_TWOHANDQUICKEN    , SC_TWOHANDQUICKEN  , SI_TWOHANDQUICKEN  , SCB_ASPD );
 	add_sc( KN_AUTOCOUNTER       , SC_AUTOCOUNTER     );
-	set_sc( PR_IMPOSITIO         , SC_IMPOSITIO       , SI_IMPOSITIO       , 
+	set_sc( PR_IMPOSITIO         , SC_IMPOSITIO       , SI_IMPOSITIO       ,
 #ifdef RENEWAL
 			SCB_NONE );
 #else
@@ -676,7 +676,7 @@ void initChangeTables(void) {
 	set_sc( SR_GENTLETOUCH_ENERGYGAIN, SC_GT_ENERGYGAIN      , SI_GENTLETOUCH_ENERGYGAIN, SCB_NONE );
 	set_sc( SR_GENTLETOUCH_CHANGE    , SC_GT_CHANGE          , SI_GENTLETOUCH_CHANGE    , SCB_ASPD|SCB_MDEF|SCB_MAXHP );
 	set_sc( SR_GENTLETOUCH_REVITALIZE, SC_GT_REVITALIZE      , SI_GENTLETOUCH_REVITALIZE, SCB_MAXHP|SCB_REGEN );
-	add_sc( SR_FLASHCOMBO            , SC_FLASHCOMBO );
+	set_sc( SR_FLASHCOMBO            , SC_FLASHCOMBO         , SI_FLASHCOMBO            , SCB_NONE );
 
 	set_sc( WA_SWING_DANCE            , SC_SWINGDANCE           , SI_SWINGDANCE           , SCB_SPEED|SCB_ASPD );
 	set_sc( WA_SYMPHONY_OF_LOVER      , SC_SYMPHONYOFLOVER      , SI_SYMPHONYOFLOVERS     , SCB_MDEF );
@@ -1731,7 +1731,6 @@ int status_check_skilluse(struct block_list *src, struct block_list *target, uin
 	if (src) sc = status_get_sc(src);
 
 	if (sc && sc->count) {
-		
 		if (skill_id != RK_REFRESH && sc->opt1 >0 && !(sc->opt1 == OPT1_CRYSTALIZE && src->type == BL_MOB) && sc->opt1 != OPT1_BURNING && skill_id != SR_GENTLETOUCH_CURE) {   //Stuned/Frozen/etc
 			if (flag != 1) //Can't cast, casted stuff can't damage.
 				return 0;
@@ -1782,7 +1781,7 @@ int status_check_skilluse(struct block_list *src, struct block_list *target, uin
 
 		if (skill_id && //Do not block item-casted skills.
 			(src->type != BL_PC || ((TBL_PC*)src)->skillitem != skill_id)
-		) {	//Skills blocked through status changes...
+		) {	//Skills blocked through status changes.
 			if (!flag && ( //Blocked only from using the skill (stuff like autospell may still go through
 				sc->cant.cast ||
 				(sc->data[SC_MARIONETTE] && skill_id != CG_MARIONETTE) || //Only skill you can use is marionette again to cancel it
@@ -1812,16 +1811,10 @@ int status_check_skilluse(struct block_list *src, struct block_list *target, uin
 				return 0;
 
 			if (sc->data[SC__MANHOLE] || ((tsc = status_get_sc(target)) && tsc->data[SC__MANHOLE])) {
-				switch (skill_id) { //TODO: make this a flag in skill_db?
-					//Skills that can be used even under Man Hole effects.
-					case SC_SHADOWFORM:
-					case SC_STRIPACCESSARY:
-						break;
-					default:
-						return 0;
-				}
+				//Skills that can be used even under Man Hole effect.
+				if (!(skill_get_inf3(skill_id)&INF3_USABLE_MANHOLE))
+					return 0;
 			}
-
 		}
 	}
 
@@ -6982,7 +6975,7 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 
 		case SC_SIGNUMCRUCIS:
 			//Only affects demons and undead element (but not players)
-			if((!undead_flag && status->race!=RC_DEMON) || bl->type == BL_PC)
+			if((!undead_flag && status->race != RC_DEMON) || bl->type == BL_PC)
 				return 0;
 			break;
 		case SC_AETERNA:
@@ -7286,9 +7279,9 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 	//Before overlapping fail, one must check for status cured.
 	switch (type) {
 		case SC_BLESSING:
-			//TO-DO Blessing and Agi up should do 1 damage against players on Undead Status, even on PvM
+			//@TODO: Blessing and Agi up should do 1 damage against players on Undead Status, even on PvM
 			//but cannot be plagiarized (this requires aegis investigation on packets and official behavior) [Brainstorm]
-			if ((!undead_flag && status->race!=RC_DEMON) || bl->type == BL_PC) {
+			if ((!undead_flag && status->race != RC_DEMON) || bl->type == BL_PC) {
 				status_change_end(bl, SC_CURSE, INVALID_TIMER);
 				if (sc->data[SC_STONE] && sc->opt1 == OPT1_STONE)
 					status_change_end(bl, SC_STONE, INVALID_TIMER);
@@ -7888,7 +7881,7 @@ int status_change_start(struct block_list* src,struct block_list* bl,enum sc_typ
 			case SC_DPOISON:
 				//Lose 10/15% of your life as long as it doesn't brings life below 25%
 				if (status->hp > status->max_hp>>2) {
-					int diff = status->max_hp*(bl->type==BL_PC?10:15)/100;
+					int diff = status->max_hp*(bl->type == BL_PC ? 10 : 15)/100;
 					if (status->hp - diff < status->max_hp>>2)
 						diff = status->hp - (status->max_hp>>2);
 					if (val2 && bl->type == BL_MOB) {
@@ -10470,7 +10463,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				map_foreachinrange( status_change_timer_sub,bl,sce->val3,BL_CHAR|BL_SKILL,bl,sce,type,tick);
 			else
 				map_foreachinrange( status_change_timer_sub,bl,sce->val3,BL_CHAR,bl,sce,type,tick);
-			if( --(sce->val2)>0 ) {
+			if( --(sce->val2) > 0 ) {
 				sc_timer_next(250 + tick,status_change_timer,bl->id,data);
 				sce->val4 += 250; //Use for Shadow Form 2 seconds checking.
 				return 0;
@@ -10479,7 +10472,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			
 		case SC_PROVOKE:
 			if( sce->val2 ) { //Auto-provoke (it is ended in status_heal)
-				sc_timer_next(1000 * 60 + tick,status_change_timer,bl->id,data );
+				sc_timer_next(1000 * 60 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
 			break;
@@ -10491,14 +10484,14 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				unit_stop_attack(bl);
 				sc->opt1 = OPT1_STONE;
 				clif_changeoption(bl);
-				sc_timer_next(1000 + tick,status_change_timer,bl->id,data );
+				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				status_calc_bl(bl,StatusChangeFlagTable[type]);
 				return 0;
 			}
 			if( --(sce->val3) > 0 ) {
-				if(++(sce->val4)%5 == 0 && status->hp > status->max_hp / 4)
+				if( ++(sce->val4)%5 == 0 && status->hp > status->max_hp / 4 )
 					status_percent_damage(NULL,bl,1,0,false);
-				sc_timer_next(1000 + tick,status_change_timer,bl->id,data );
+				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
 			break;
@@ -10509,7 +10502,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				if( !sc->data[SC_SLOWPOISON] ) {
 					if( sce->val2 && bl->type == BL_MOB ) {
 						struct block_list* src = map_id2bl(sce->val2);
-						if(src)
+						if( src )
 							mob_log_damage((TBL_MOB*)bl,src,sce->val4);
 					}
 					map_freeblock_lock();

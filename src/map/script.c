@@ -6144,42 +6144,42 @@ BUILDIN_FUNC(getitem)
 	TBL_PC *sd;
 	struct script_data *data;
 
-	data=script_getdata(st,2);
+	data = script_getdata(st,2);
 	get_val(st,data);
-	if( data_isstring(data) ) { // "<item name>"
-		const char *name=conv_str(st,data);
+	if( data_isstring(data) ) { // "<Item name>"
+		const char *name = conv_str(st,data);
 		struct item_data *item_data = itemdb_searchname(name);
 		if( item_data == NULL ) {
-			ShowError("buildin_getitem: Nonexistant item %s requested.\n", name);
+			ShowError("buildin_getitem: Nonexistant item %s requested.\n",name);
 			return 1; //No item created.
 		}
-		nameid=item_data->nameid;
-	} else if( data_isint(data) ) { // <item id>
-		nameid=conv_num(st,data);
+		nameid = item_data->nameid;
+	} else if( data_isint(data) ) { //<Item id>
+		nameid = conv_num(st,data);
 		//Violet Box, Blue Box, etc - random item pick
 		if( nameid < 0 ) {
 			nameid = -nameid;
 			flag = 1;
 		}
 		if( nameid <= 0 || !itemdb_exists(nameid) ) {
-			ShowError("buildin_getitem: Nonexistant item %d requested.\n", nameid);
+			ShowError("buildin_getitem: Nonexistant item %d requested.\n",nameid);
 			return 1; //No item created.
 		}
 	} else {
-		ShowError("buildin_getitem: invalid data type for argument #1 (%d).", data->type);
+		ShowError("buildin_getitem: invalid data type for argument #1 (%d).",data->type);
 		return 1;
 	}
 
-	// <amount>
-	if( (amount=script_getnum(st,3)) <= 0)
-		return 0; //return if amount <=0, skip the useles iteration
+	//<Amount>
+	if( (amount = script_getnum(st,3)) <= 0)
+		return 0; //return if amount <= 0, skip the useles iteration
 
 	memset(&it,0,sizeof(it));
-	it.nameid=nameid;
-	if(!flag)
-		it.identify=1;
+	it.nameid = nameid;
+	if( !flag )
+		it.identify = 1;
 	else
-		it.identify=itemdb_isidentified(nameid);
+		it.identify = itemdb_isidentified(nameid);
 
 	if( !strcmp(script_getfuncname(st),"getitembound") ) {
 		char bound = script_getnum(st,4);
@@ -6189,28 +6189,28 @@ BUILDIN_FUNC(getitem)
 		}
 		it.bound = bound;
 		if( script_hasdata(st,5) )
-			sd=map_id2sd(script_getnum(st,5));
+			sd = map_id2sd(script_getnum(st,5));
 		else
-			sd=script_rid2sd(st); // Attached player
+			sd = script_rid2sd(st); //Attached player
 	} else if( script_hasdata(st,4) )
-		sd=map_id2sd(script_getnum(st,4)); // <Account ID>
+		sd = map_id2sd(script_getnum(st,4)); //<Account ID>
 	else
-		sd=script_rid2sd(st); // Attached player
+		sd = script_rid2sd(st); //Attached player
 
-	if( sd == NULL ) // no target
+	if( sd == NULL ) //No target
 		return 0;
 
 	//Check if it's stackable.
-	if (!itemdb_isstackable(nameid))
+	if( !itemdb_isstackable(nameid) )
 		get_count = 1;
 	else
 		get_count = amount;
 
-	for (i = 0; i < amount; i += get_count) {
-		// if not pet egg
-		if (!pet_create_egg(sd, nameid)) {
-			if ((flag = pc_additem(sd, &it, get_count, LOG_TYPE_SCRIPT))) {
-				clif_additem(sd, 0, 0, flag);
+	for( i = 0; i < amount; i += get_count ) {
+		//If not pet egg
+		if( !pet_create_egg(sd,nameid) ) {
+			if( (flag = pc_additem(sd,&it,get_count,LOG_TYPE_SCRIPT)) ) {
+				clif_additem(sd,0,0,flag);
 				if( pc_candrop(sd,&it) )
 					map_addflooritem(&it,get_count,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0);
 			}
@@ -6227,7 +6227,7 @@ BUILDIN_FUNC(getitem2)
 {
 	int nameid,amount,get_count,i,flag = 0;
 	int iden,ref,attr,c1,c2,c3,c4;
-	char bound=0;
+	char bound = 0;
 	struct item_data *item_data;
 	struct item item_tmp;
 	TBL_PC *sd;
@@ -6240,51 +6240,51 @@ BUILDIN_FUNC(getitem2)
 			return 1;
 		}
 		if( script_hasdata(st,12) )
-			sd=map_id2sd(script_getnum(st,12));
+			sd = map_id2sd(script_getnum(st,12));
 		else
-			sd=script_rid2sd(st); // Attached player
+			sd = script_rid2sd(st); //Attached player
 	} else if( script_hasdata(st,11) )
-		sd=map_id2sd(script_getnum(st,11)); // <Account ID>
+		sd = map_id2sd(script_getnum(st,11)); // <Account ID>
 	else
-		sd=script_rid2sd(st); // Attached player
+		sd = script_rid2sd(st); //Attached player
 
-	if( sd == NULL ) // no target
+	if( sd == NULL ) //No target
 		return 0;
 
-	data=script_getdata(st,2);
+	data = script_getdata(st,2);
 	get_val(st,data);
 	if( data_isstring(data) ) {
-		const char *name=conv_str(st,data);
+		const char *name = conv_str(st,data);
 		struct item_data *item_data = itemdb_searchname(name);
 		if( item_data )
-			nameid=item_data->nameid;
+			nameid = item_data->nameid;
 		else
-			nameid=UNKNOWN_ITEM_ID;
+			nameid = UNKNOWN_ITEM_ID;
 	} else
-		nameid=conv_num(st,data);
+		nameid = conv_num(st,data);
 
-	amount=script_getnum(st,3);
-	iden=script_getnum(st,4);
-	ref=script_getnum(st,5);
-	attr=script_getnum(st,6);
-	c1=(short)script_getnum(st,7);
-	c2=(short)script_getnum(st,8);
-	c3=(short)script_getnum(st,9);
-	c4=(short)script_getnum(st,10);
+	amount = script_getnum(st,3);
+	iden = script_getnum(st,4);
+	ref = script_getnum(st,5);
+	attr = script_getnum(st,6);
+	c1 = (short)script_getnum(st,7);
+	c2 = (short)script_getnum(st,8);
+	c3 = (short)script_getnum(st,9);
+	c4 = (short)script_getnum(st,10);
 
-	if(nameid<0) { // Invalide nameid
+	if( nameid < 0 ) { //Invalide nameid
 		nameid = -nameid;
 		flag = 1;
 	}
 
-	if(nameid > 0) {
+	if( nameid > 0 ) {
 		memset(&item_tmp,0,sizeof(item_tmp));
-		item_data=itemdb_exists(nameid);
-		if (item_data == NULL)
+		item_data = itemdb_exists(nameid);
+		if( item_data == NULL )
 			return -1;
-		if(item_data->type==IT_WEAPON || item_data->type==IT_ARMOR) {
-			if(ref > MAX_REFINE) ref = MAX_REFINE;
-		} else if(item_data->type==IT_PETEGG) {
+		if( item_data->type == IT_WEAPON || item_data->type == IT_ARMOR ) {
+			if( ref > MAX_REFINE ) ref = MAX_REFINE;
+		} else if( item_data->type == IT_PETEGG ) {
 			iden = 1;
 			ref = 0;
 		} else {
@@ -6292,30 +6292,30 @@ BUILDIN_FUNC(getitem2)
 			ref = attr = 0;
 		}
 
-		item_tmp.nameid=nameid;
-		if(!flag)
-			item_tmp.identify=iden;
-		else if(item_data->type==IT_WEAPON || item_data->type==IT_ARMOR)
-			item_tmp.identify=0;
-		item_tmp.refine=ref;
-		item_tmp.attribute=attr;
-		item_tmp.card[0]=(short)c1;
-		item_tmp.card[1]=(short)c2;
-		item_tmp.card[2]=(short)c3;
-		item_tmp.card[3]=(short)c4;
+		item_tmp.nameid = nameid;
+		if( !flag )
+			item_tmp.identify = iden;
+		else if( item_data->type == IT_WEAPON || item_data->type == IT_ARMOR )
+			item_tmp.identify = 0;
+		item_tmp.refine = ref;
+		item_tmp.attribute = attr;
+		item_tmp.card[0] = (short)c1;
+		item_tmp.card[1] = (short)c2;
+		item_tmp.card[2] = (short)c3;
+		item_tmp.card[3] = (short)c4;
 		item_tmp.bound=bound;
 
 		//Check if it's stackable.
-		if (!itemdb_isstackable(nameid))
+		if( !itemdb_isstackable(nameid) )
 			get_count = 1;
 		else
 			get_count = amount;
 
-		for (i = 0; i < amount; i += get_count) {
-			// if not pet egg
-			if (!pet_create_egg(sd, nameid)) {
-				if ((flag = pc_additem(sd, &item_tmp, get_count, LOG_TYPE_SCRIPT))) {
-					clif_additem(sd, 0, 0, flag);
+		for( i = 0; i < amount; i += get_count ) {
+			//If not pet egg
+			if( !pet_create_egg(sd,nameid) ) {
+				if( (flag = pc_additem(sd,&item_tmp,get_count,LOG_TYPE_SCRIPT)) ) {
+					clif_additem(sd,0,0,flag);
 					if( pc_candrop(sd,&item_tmp) )
 						map_addflooritem(&item_tmp,get_count,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0);
 				}

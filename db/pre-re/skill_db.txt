@@ -48,7 +48,7 @@
 //    0x0001 - Skill ignores land protector (e.g. arrow shower)
 //    0x0002 - Spell that doesn't end camouflage
 //    0x0004 - Usable skills while hiding
-//    0x0008 - Spell that can be use while in dancing state
+//    0x0008 - Spell that can be used while in dancing state
 //    0x0010 - Spell that could hit emperium
 //    0x0020 - Spell blocked by statis
 //    0x0040 - Spell blocked by kagehumi
@@ -57,8 +57,8 @@
 //    0x0200 - Spell range affected by NJ_SHADOWJUMP
 //    0x0400 - Spell range affected by WL_RADIUS
 //    0x0800 - Spell range affected by RA_RESEARCHTRAP
-//    0x1000 - Spell that can't be copied
-//    0x2000 - Spell that can be using while riding warg
+//    0x1000 - Spell that can be used even under Man Hole effect
+//    0x2000 - Spell that can be used while riding warg
 //    0x4000 - Spell that can't be used while in mado
 // 17 Name
 // 18 Description
@@ -90,12 +90,12 @@
 26,0,6,4,0,0x1,0,2,1,yes,0,0,0,magic,0,0x40,	AL_TELEPORT,Teleport
 27,9,6,2,0,0x1,0,4,1,yes,0,0,3,magic,0,0,	AL_WARP,Warp Portal
 28,9,6,16,6,0x21,0,10,1,yes,0,0,0,magic,0,0,	AL_HEAL,Heal
-29,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0x1000,	AL_INCAGI,Increase AGI
+29,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	AL_INCAGI,Increase AGI
 30,9,6,1,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	AL_DECAGI,Decrease AGI
 31,0,6,4,0,0x1,0,1,1,yes,0,0,0,magic,0,0,	AL_HOLYWATER,Aqua Benedicta
 32,0,6,4,0,0x3,15,10,1,yes,0,0,0,magic,0,0,	AL_CRUCIS,Signum Crucis
 33,0,6,4,0,0x3,-1,10,1,yes,0,0,0,magic,0,0,	AL_ANGELUS,Angelus
-34,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0x1000,	AL_BLESSING,Blessing
+34,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	AL_BLESSING,Blessing
 35,9,6,16,0,0x1,0,1,1,yes,0,0,0,magic,0,0,	AL_CURE,Cure
 36,0,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	MC_INCCARRY,Enlarge Weight Limit
 37,0,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	MC_DISCOUNT,Discount
@@ -649,8 +649,8 @@
 
 // Additional Skill (??)
 688,9,6,16,0,0x1,0,10,0,no,0,0x200,0,none,0,0,	GM_SANDMAN,GM Sandman
-689,0,6,4,0,0x3,-1,10,1,yes,0,0x2,0,magic,0,0x1000,	CASH_BLESSING,Party Blessing
-690,0,6,4,0,0x3,-1,10,1,yes,0,0x2,0,magic,0,0x1000,	CASH_INCAGI,Party Increase AGI
+689,0,6,4,0,0x3,-1,10,1,yes,0,0x2,0,magic,0,0,	CASH_BLESSING,Party Blessing
+690,0,6,4,0,0x3,-1,10,1,yes,0,0x2,0,magic,0,0,	CASH_INCAGI,Party Increase AGI
 691,0,6,4,0,0x3,-1,5,1,yes,0,0x2,0,magic,0,0,	CASH_ASSUMPTIO,Party Assumptio
 692,0,6,4,0,0x01,0,1,1,no,0,0x2,0,none,0,0,	ALL_CATCRY,Cat Cry
 693,0,6,4,0,0x3,-1,1,1,yes,0,0x2,0,magic,0,0,	ALL_PARTYFLEE,Party Flee
@@ -875,7 +875,7 @@
 2284,1,6,1,-1,0x2,1,5,1,no,0,0,0,weapon,0,0,	SC_FATALMENACE,Fatal Menace
 2285,0,6,4,0,0x1,0,10,1,no,0,0,0,none,0,0,	SC_REPRODUCE,Reproduce
 2286,0,6,4,0,0x1,0,10,1,yes,0,0,0,none,0,0,	SC_AUTOSHADOWSPELL,Auto Shadow Spell
-2287,5,6,1,0,0x1,0,5,1,no,0,0,0,none,0,0x40,	SC_SHADOWFORM,Shadow Form
+2287,5,6,1,0,0x1,0,5,1,no,0,0,0,none,0,0x1040,	SC_SHADOWFORM,Shadow Form
 2288,7:7:7:9:9:9:9:11:11:11,8,1,-1,0,0,10,-3,yes,0,0,0,weapon,3,0,	SC_TRIANGLESHOT,Triangle Shot
 2289,0,6,4,0,0x3,2,5,1,no,0,0,0,none,0,0,	SC_BODYPAINT,Body Painting
 2290,0,6,4,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SC_INVISIBILITY,Invisibility
@@ -886,7 +886,7 @@
 2295,3,6,1,0,0x1,0,3,1,yes,0,0,0,none,0,0,	SC_LAZINESS,Masquerade - Laziness
 2296,3,6,1,0,0x1,0,3,1,yes,0,0,0,none,0,0,	SC_UNLUCKY,Masquerade - Unlucky
 2297,3,6,1,0,0x1,0,3,1,yes,0,0,0,none,0,0,	SC_WEAKNESS,Masquerade - Weakness
-2298,3,6,1,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SC_STRIPACCESSARY,Strip Accessory
+2298,3,6,1,0,0x1,0,5,1,yes,0,0,0,none,0,0x1000,	SC_STRIPACCESSARY,Strip Accessory
 2299,7,6,2,0,0x1,0,3,1,yes,0,0x80,3,magic,0,0,	SC_MANHOLE,Man Hole
 2300,7,6,2,0,0x1,0,3,1,yes,0,0,1,magic,0,0,	SC_DIMENSIONDOOR,Dimension Door
 2301,7,6,2,0,0x1,0,3,1,yes,0,0,0,magic,0,0,	SC_CHAOSPANIC,Chaos Panic
@@ -1065,29 +1065,29 @@
 //****
 // Rebellion
 2551,0,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	RL_GLITTERING_GREED,Flip The Coin Greed
-2552,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,	RL_RICHS_COIN,Rich's Coin
-2553,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_MASS_SPIRAL,Mass Spiral
-2554,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_BANISHING_BUSTER,Banishing Buster
-2555,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_B_TRAP,Bind Trap
-2556,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,	RL_FLICKER,Flicker
-2557,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_S_STORM,Shatter Storm
-2558,0,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	RL_E_CHAIN,Eternal Chain
-2559,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,	RL_QD_SHOT,Quick Draw Shot
-2560,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,	RL_C_MARKER,Crimson Marker
-2561,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_FIREDANCE,Fire Dance
-2562,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_H_MINE,Howling Mine
-2563,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_P_ALTER,Platinum Alter
-2564,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_FALLEN_ANGEL,Fallen Angel
-2565,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_R_TRIP,Round Trip
-2566,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_D_TAIL,Dragon Tail
-2567,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_FIRE_RAIN,Fire Rain
-2568,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_HEAT_BARREL,Heat Barrel
-2569,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_AM_BLAST,Anti-Material Blast
-2570,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_SLUGSHOT,Slug Shot
-2571,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_HAMMER_OF_GOD,Hammer of God
-2572,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_R_TRIP_PLUSATK,Round Trip Plus Attack
-2573,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RL_B_FLICKER_ATK,Bind Flicker Attack
-2574,0,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	RL_GLITTERING_GREED_ATK,Flip The Coin Greed Attack
+2552,0,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	RL_RICHS_COIN,Rich's Coin
+2553,15,6,1,-1,0,0,5,1,no,0,0,0,weapon,0,0,	RL_MASS_SPIRAL,Mass Spiral
+2554,9,6,1,-1,0x2,2,5,1,no,0,0,0,weapon,0,0,	RL_BANISHING_BUSTER,Banishing Buster
+2555,0,6,4,0,0x1,0,5,1,no,0,0,3,none,0,0,	RL_B_TRAP,Bind Trap
+2556,0,6,4,0,0x3,-1,1,1,no,0,0,0,none,0,0,	RL_FLICKER,Flicker
+2557,9,6,1,-1,0x2,2,5,1,no,0,0,0,weapon,0,0,	RL_S_STORM,Shatter Storm
+2558,0,6,4,0,0x1,0,10,1,no,0,0,0,none,0,0,	RL_E_CHAIN,Eternal Chain
+2559,0,6,4,-1,0,0,1,1,no,0,0x200,0,weapon,0,0,	RL_QD_SHOT,Quick Draw Shot
+2560,11,6,1,0,0x1,0,1,1,no,0,0,3,none,0,0,	RL_C_MARKER,Crimson Marker
+2561,0,6,4,-1,0x2,2,5,1,no,0,0,0,weapon,0,0,	RL_FIREDANCE,Fire Dance
+2562,7:8:9:10:11,6,1,-1,0,0,5,1,no,0,0,0,weapon,0,0,	RL_H_MINE,Howling Mine
+2563,0,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0,	RL_P_ALTER,Platinum Alter
+2564,9,6,2,0,0x1,0,5,1,no,0,0,0,none,0,0,	RL_FALLEN_ANGEL,Fallen Angel
+2565,0,6,4,-1,0x2,2:3:4:5:6,5,1,no,0,0,0,weapon,3,0,	RL_R_TRIP,Round Trip
+2566,0,6,4,-1,0x2,-1,5,1,no,0,0,0,weapon,0,0,	RL_D_TAIL,Dragon Tail
+2567,3,6,1,-1,0,0,5,1,no,0,0,0,weapon,0,0,	RL_FIRE_RAIN,Fire Rain
+2568,0,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0,	RL_HEAT_BARREL,Heat Barrel
+2569,9,6,1,-1,0,0,5,1,no,0,0,0,weapon,0,0,	RL_AM_BLAST,Anti-Material Blast
+2570,9,6,1,-1,0,0,5,1,no,0,0,0,weapon,6,0,	RL_SLUGSHOT,Slug Shot
+2571,7:8:9:10:11,6,1,-1,0x2,2,5,1,no,0,0,0,weapon,0,0,	RL_HAMMER_OF_GOD,Hammer of God
+2572,0,6,1,-1,0x40,0,5,1,no,0,0,0,weapon,0,0,	RL_R_TRIP_PLUSATK,Round Trip Plus Attack
+2573,0,6,1,-1,0,0,5,1,no,0,0,0,weapon,0,0,	RL_B_FLICKER_ATK,Bind Flicker Attack
+2574,0,6,1,-1,0,0,10,1,no,0,0,0,weapon,0,0,	RL_GLITTERING_GREED_ATK,Flip The Coin Greed Attack
 
 //****
 // Kagerou & Oboro
@@ -1096,7 +1096,7 @@
 3003,0,0,0,0,0,0,5,0,no,0,0,0,weapon,0,0,	KO_LEFT,Left Hand Mastery
 3004,3:4:5:6:7,8,1,-1,0,0,5,-2,no,0,0,0,weapon,0,0,	KO_JYUMONJIKIRI,Cross Strike
 3005,2,6,1,-1,0,0,5,1,no,0,0,0,weapon,0,0,	KO_SETSUDAN,Soul Sever
-3006,7:8:9:10:11,6,2,0,0x42,2,5,1,no,0,0,0,weapon,0,0,	KO_BAKURETSU,Bakuretsu Kunai
+3006,7:8:9:10:11,6,2,-1,0x42,2,5,1,no,0,0,0,weapon,0,0,	KO_BAKURETSU,Bakuretsu Kunai
 3007,5,6,4,-1,0x42,4:4:4:4:5,5,1,no,0,0,0,weapon,0,0,	KO_HAPPOKUNAI,Happo Kunai
 3008,11,8,2,0,0x56,1:1:1:1:1:1:1:1:1:2,10,-10,no,0,0,0,misc,0,0,	KO_MUCHANAGE,Mucha Nage
 3009,9:10:11:12:13,8,2,-1,0x2,3,5,2,no,0,0,0,weapon,0,0,	KO_HUUMARANKA,Huuma Shuriken Ranka 
@@ -1235,8 +1235,8 @@
 8236,5,6,1,0,0x1,0,10,0,yes,0,0,0,magic,0,0,	MER_LEXDIVINA,Lex_Divina
 8237,9,6,1,0,0x1,0,1,1,yes,0,0,0,magic,0,0,	MER_ESTIMATION,Sense
 8238,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	MER_KYRIE,Kyrie Eleison
-8239,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0x1000,	MER_BLESSING,Blessing
-8240,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0x1000,	MER_INCAGI,Increase Agility
+8239,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	MER_BLESSING,Blessing
+8240,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	MER_INCAGI,Increase Agility
 //8241,2,6,2,0,0,0,1,1,no,0,0,0,none,0,0,	MER_INVINCIBLEOFF2,Mind Blaster
 
 // Elemental Spirits Skills

@@ -264,15 +264,15 @@ enum npc_subtype { WARP, SHOP, SCRIPT, CASHSHOP, TOMB };
 
 enum {
 	RC_FORMLESS = 0, //Nothing
-	RC_UNDEAD,
+	RC_UNDEAD,       //Undead
 	RC_BRUTE,        //Animal
-	RC_PLANT,
-	RC_INSECT,
-	RC_FISH,
+	RC_PLANT,        //Plant
+	RC_INSECT,       //Insect
+	RC_FISH,         //Fish
 	RC_DEMON,        //Devil
 	RC_DEMIHUMAN,    //Human
-	RC_ANGEL,
-	RC_DRAGON,
+	RC_ANGEL,        //Angel
+	RC_DRAGON,       //Dragon
 	RC_BOSS,         //Player - Not sure why, but thats what it shows officially.
 	RC_NONBOSS,      //Last - It marks the end of the race enum table in official,
 	RC_NONDEMIHUMAN, //but NONBOSS and NONDEMIHUMAN exists here for custom needs.
@@ -291,16 +291,16 @@ enum {
 };
 
 enum {
-	ELE_NEUTRAL = 0,
-	ELE_WATER,
-	ELE_EARTH,
-	ELE_FIRE,
-	ELE_WIND,
-	ELE_POISON,
-	ELE_HOLY,
-	ELE_DARK,
-	ELE_GHOST,
-	ELE_UNDEAD,
+	ELE_NEUTRAL = 0, //Nothing
+	ELE_WATER,       //Water
+	ELE_EARTH,       //Ground
+	ELE_FIRE,        //Fire
+	ELE_WIND,        //Wind
+	ELE_POISON,      //Poison
+	ELE_HOLY,        //Saint
+	ELE_DARK,        //Darkness
+	ELE_GHOST,       //Telekinesis
+	ELE_UNDEAD,      //Undead
 	ELE_MAX,
 	ELE_NONE
 };
@@ -431,19 +431,19 @@ enum _sp {
 };
 
 enum _look {
-	LOOK_BASE,
-	LOOK_HAIR,
-	LOOK_WEAPON,
-	LOOK_HEAD_BOTTOM,
-	LOOK_HEAD_TOP,
-	LOOK_HEAD_MID,
-	LOOK_HAIR_COLOR,
-	LOOK_CLOTHES_COLOR,
-	LOOK_SHIELD,
-	LOOK_SHOES,
-	LOOK_BODY, //Purpose Unknown. Doesen't appear to do anything.
-	LOOK_RESET_COSTUMES, //Makes all headgear sprites on player vanish when activated.
-	LOOK_ROBE,
+	LOOK_BASE,           //Job
+	LOOK_HAIR,           //Head
+	LOOK_WEAPON,         //Weapon
+	LOOK_HEAD_BOTTOM,    //Accessory
+	LOOK_HEAD_TOP,       //Accessory2
+	LOOK_HEAD_MID,       //Accessory3
+	LOOK_HAIR_COLOR,     //Headpalette
+	LOOK_CLOTHES_COLOR,  //Bodypalette
+	LOOK_SHIELD,         //Shield
+	LOOK_SHOES,          //Shoes
+	LOOK_BODY,           //Body - Purpose Unknown. Doesen't appear to do anything.
+	LOOK_RESET_COSTUMES, //Reset Costumes - Makes all headgear sprites on player vanish when activated.
+	LOOK_ROBE,           //Robe
 	LOOK_FLOOR
 };
 
