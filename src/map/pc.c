@@ -1122,11 +1122,6 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	}
 
 	/**
-	 * Check if player have any cool downs on
-	 **/
-	skill_cooldown_load(sd);
-
-	/**
 	 * Check if player have any item cooldowns on
 	 **/
 	pc_itemcd_do(sd,true);
@@ -1269,7 +1264,7 @@ int pc_reg_received(struct map_session_data *sd)
 
 	status_calc_pc(sd,1);
 	chrif_scdata_request(sd->status.account_id, sd->status.char_id);
-
+	chrif_skillcooldown_request(sd->status.account_id, sd->status.char_id);
 	intif_Mail_requestinbox(sd->status.char_id, 0); // MAIL SYSTEM - Request Mail Inbox
 	intif_request_questlog(sd);
 
@@ -4993,7 +4988,7 @@ int pc_checkallowskill(struct map_session_data *sd)
 	if(!sd->sc.count)
 		return 0;
 
-	for(i = 0; i < ARRAYLENGTH(scw_list); i++) { // Skills requiring specific weapon types
+	for(i = 0; i < ARRAYLENGTH(scw_list); i++) { //Skills requiring specific weapon types
 		if(scw_list[i] == SC_DANCING && !battle_config.dancing_weaponswitch_fix)
 			continue;
 		if(sd->sc.data[scw_list[i]] &&
@@ -5002,10 +4997,10 @@ int pc_checkallowskill(struct map_session_data *sd)
 	}
 
 	if(sd->sc.data[SC_SPURT] && sd->status.weapon)
-		// Spurt requires bare hands (feet, in fact xD)
+		//Spurt requires bare hands (feet, in fact xD)
 		status_change_end(&sd->bl, SC_SPURT, INVALID_TIMER);
 
-	if(sd->status.shield <= 0) { // Skills requiring a shield
+	if(sd->status.shield <= 0) { //Skills requiring a shield
 		for(i = 0; i < ARRAYLENGTH(scs_list); i++)
 			if(sd->sc.data[scs_list[i]])
 				status_change_end(&sd->bl, scs_list[i], INVALID_TIMER);
@@ -5031,6 +5026,26 @@ int pc_checkequip(struct map_session_data *sd,int pos)
 	}
 
 	return -1;
+}
+
+/*==========================================
+ * Check if sd as nameid equiped somewhere
+ * Return
+ *	0 : No nameid equiped
+ *------------------------------------------*/
+int pc_checkequip2(struct map_session_data *sd,int nameid)
+{
+	int i;
+
+	for(i = 0; i < EQI_MAX; i++) {
+		if(equip_pos[i]) {
+			int idx = sd->equip_index[i];
+			if(sd->status.inventory[idx].nameid == nameid)
+				return 1;
+		}
+	}
+
+	return 0;
 }
 
 /*==========================================

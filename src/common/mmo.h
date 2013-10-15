@@ -127,6 +127,7 @@
 
 #define MAX_FRIENDS 40
 #define MAX_MEMOPOINTS 3
+#define MAX_SKILLCOOLDOWN 20
 
 //Size of the fame list arrays.
 #define MAX_FAME_LIST 10
@@ -244,6 +245,11 @@ struct accreg {
 	int account_id, char_id;
 	int reg_num;
 	struct global_reg reg[MAX_REG_NUM];
+};
+
+struct skill_cooldown_data {
+  unsigned short skill_id;
+  long tick;
 };
 
 //For saving status changes across sessions. [Skotlex]

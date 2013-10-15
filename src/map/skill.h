@@ -102,6 +102,7 @@ enum e_skill_display {
 
 #define MAX_SKILL_ITEM_REQUIRE 10
 #define MAX_SKILL_STATUS_REQUIRE 3
+
 struct skill_condition {
 	int hp,
 	    mhp,
@@ -115,7 +116,8 @@ struct skill_condition {
 	    state,
 	    spiritball,
 	    itemid[MAX_SKILL_ITEM_REQUIRE],
-	    amount[MAX_SKILL_ITEM_REQUIRE];
+	    amount[MAX_SKILL_ITEM_REQUIRE],
+		eqItem[10]; //Max eq_item
 	uint8 status_count;
 	enum sc_type status[MAX_SKILL_STATUS_REQUIRE];
 };
@@ -133,7 +135,8 @@ struct s_skill_require {
 	    state,
 	    spiritball[MAX_SKILL_LEVEL],
 	    itemid[MAX_SKILL_ITEM_REQUIRE],
-	    amount[MAX_SKILL_ITEM_REQUIRE];
+	    amount[MAX_SKILL_ITEM_REQUIRE],
+		eqItem[10]; //Max eq_item
 	uint8 status_count;
 	enum sc_type status[MAX_SKILL_STATUS_REQUIRE];
 };
@@ -415,20 +418,21 @@ int skill_chastle_mob_changetarget(struct block_list *bl,va_list ap);
 
 ///Item creation
 int skill_can_produce_mix( struct map_session_data *sd, int nameid, int trigger, int qty);
-int skill_produce_mix( struct map_session_data *sd, uint16 skill_id, int nameid, int slot1, int slot2, int slot3, int qty );
+int skill_produce_mix(struct map_session_data *sd, uint16 skill_id, int nameid, int slot1, int slot2, int slot3, int qty);
 
-int skill_arrow_create( struct map_session_data *sd,int nameid);
+int skill_arrow_create(struct map_session_data *sd,int nameid);
 
 ///Skills for the mob
-int skill_castend_nodamage_id( struct block_list *src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,unsigned int tick,int flag );
-int skill_castend_damage_id( struct block_list* src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,unsigned int tick,int flag );
-int skill_castend_pos2( struct block_list *src, int x,int y,uint16 skill_id,uint16 skill_lv,unsigned int tick,int flag);
+int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
+int skill_castend_damage_id(struct block_list* src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
+int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
 
-int skill_blockpc_start_(struct map_session_data*, uint16 skill_id, int, bool);
-int skill_blockhomun_start (struct homun_data*,uint16 skill_id,int);
-int skill_blockmerc_start (struct mercenary_data*,uint16 skill_id,int);
-
-#define skill_blockpc_start(sd, skill_id, tick) skill_blockpc_start_( sd, skill_id, tick, false )
+int skill_blockpc_start(struct map_session_data*, uint16 skill_id, int tick);
+int skill_blockpc_get(struct map_session_data *sd, uint16 skill_id);
+int skill_blockpc_clear(struct map_session_data *sd);
+int skill_blockpc_end(int tid, unsigned int tick, int id, intptr_t data);
+int skill_blockhomun_start(struct homun_data*, uint16 skill_id, int tick);
+int skill_blockmerc_start(struct mercenary_data*, uint16 skill_id, int tick);
 
 ///(Epoque:) To-do: replace this macro with some sort of skill tree check (rather than hard-coded skill names)
 #define skill_ischangesex(id) ( \
@@ -1936,10 +1940,6 @@ enum {
  **/
 void skill_usave_add(struct map_session_data * sd, uint16 skill_id, uint16 skill_lv);
 void skill_usave_trigger(struct map_session_data *sd);
-/**
- * Skill Cool Downs - load from pc.c when the character logs in
- **/
-void skill_cooldown_load(struct map_session_data * sd);
 /**
  * Warlock
  **/

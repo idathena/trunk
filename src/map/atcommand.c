@@ -2555,10 +2555,9 @@ ACMD_FUNC(makeegg) {
 		return -1;
 	}
 
-	if ((item_data = itemdb_searchname(message)) != NULL) // for egg name
+	if ((item_data = itemdb_searchname(message)) != NULL) // For egg name
 		id = item_data->nameid;
-	else
-	if ((id = mobdb_searchname(message)) != 0) // for monster name
+	else if ((id = mobdb_searchname(message)) != 0) // For monster name
 		;
 	else
 		id = atoi(message);
@@ -7217,12 +7216,10 @@ ACMD_FUNC(iteminfo)
 	}
 	if ((item_array[0] = itemdb_exists(atoi(message))) == NULL)
 		count = itemdb_searchname_array(item_array, MAX_SEARCH, message);
-
 	if (!count) {
 		clif_displaymessage(fd, msg_txt(19)); // Invalid item ID or name.
 		return -1;
 	}
-
 	if (count > MAX_SEARCH) {
 		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH, count); // Displaying first %d out of %d matches
 		clif_displaymessage(fd, atcmd_output);
@@ -7237,7 +7234,7 @@ ACMD_FUNC(iteminfo)
 		);
 		clif_displaymessage(fd, atcmd_output);
 
-		sprintf(atcmd_output, msg_txt(1280), item_data->value_buy, item_data->value_sell, item_data->weight / 10. ); // NPC Buy:%dz, Sell:%dz | Weight: %.1f
+		sprintf(atcmd_output, msg_txt(1280), item_data->value_buy, item_data->value_sell, item_data->weight / 10.); // NPC Buy:%dz, Sell:%dz | Weight: %.1f
 		clif_displaymessage(fd, atcmd_output);
 
 		if (item_data->maxchance == -1)
@@ -8060,6 +8057,11 @@ ACMD_FUNC(auction)
 {
 	nullpo_ret(sd);
 
+	if (!battle_config.feature_auction) {
+		clif_colormes(sd, color_table[COLOR_RED], msg_txt(1489));
+		return 0;
+	}
+
 	clif_Auction_openwindow(sd);
 
 	return 0;
@@ -8075,25 +8077,17 @@ ACMD_FUNC(ksprotection)
 	if( sd->state.noks ) {
 		sd->state.noks = 0;
 		clif_displaymessage(fd, msg_txt(1325)); // [ K.S Protection Inactive ]
-	}
-	else
-	{
-		if( !message || !*message || !strcmpi(message, "party") )
-		{ // Default is Party
+	} else {
+		if( !message || !*message || !strcmpi(message, "party") ) { // Default is Party
 			sd->state.noks = 2;
 			clif_displaymessage(fd, msg_txt(1326)); // [ K.S Protection Active - Option: Party ]
-		}
-		else if( !strcmpi(message, "self") )
-		{
+		} else if( !strcmpi(message, "self") ) {
 			sd->state.noks = 1;
 			clif_displaymessage(fd, msg_txt(1327)); // [ K.S Protection Active - Option: Self ]
-		}
-		else if( !strcmpi(message, "guild") )
-		{
+		} else if( !strcmpi(message, "guild") ) {
 			sd->state.noks = 3;
 			clif_displaymessage(fd, msg_txt(1328)); // [ K.S Protection Active - Option: Guild ]
-		}
-		else
+		} else
 			clif_displaymessage(fd, msg_txt(1329)); // Usage: @noks <self|party|guild>
 	}
 	return 0;

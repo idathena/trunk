@@ -965,6 +965,8 @@ void merc_hom_revive(struct homun_data *hd, unsigned int hp, unsigned int sp)
 	clif_hominfo(sd,hd,1);
 	clif_hominfo(sd,hd,0);
 	clif_homskillinfoblock(sd);
+	if (hd->homunculus.class_ == 6052) //Eleanor
+		sc_start(&hd->bl, &hd->bl, SC_STYLE_CHANGE, 100, MH_MD_FIGHTING, INVALID_TIMER);
 }
 
 void merc_reset_stats(struct homun_data *hd)

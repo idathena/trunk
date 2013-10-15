@@ -68,6 +68,7 @@ char mercenary_db[256] = "mercenary";
 char mercenary_owner_db[256] = "mercenary_owner";
 char ragsrvinfo_db[256] = "ragsrvinfo";
 char elemental_db[256] = "elemental";
+char skillcooldown_db[256] = "skillcooldown";
 
 // Show loading/saving messages
 int save_log = 1;
@@ -1541,26 +1542,26 @@ int make_new_char_sql(struct char_session_data* sd, char* name_, int str, int ag
 	if(flag < 0)
 		return flag;
 
-	//check other inputs
+	//Check other inputs
 #if PACKETVER >= 20120307
 	if(slot < 0 || slot >= sd->char_slots)
 #else
-	if((slot < 0 || slot >= sd->char_slots) // slots
-	|| (str + agi + vit + int_ + dex + luk != 6*5 ) // stats
+	if((slot < 0 || slot >= sd->char_slots) //Slots
+	|| (str + agi + vit + int_ + dex + luk != 6*5 ) //Stats
 	|| (str < 1 || str > 9 || agi < 1 || agi > 9 || vit < 1 || vit > 9 || int_ < 1 || int_ > 9 || dex < 1 || dex > 9 || luk < 1 || luk > 9) // individual stat values
-	|| (str + int_ != 10 || agi + luk != 10 || vit + dex != 10) ) // pairs
+	|| (str + int_ != 10 || agi + luk != 10 || vit + dex != 10) ) //Pairs
 #endif
 #if PACKETVER >= 20100413
-		return -4; // invalid slot
+		return -4; //Invalid slot
 #else
-		return -2; // invalid input
+		return -2; //Invalid input
 #endif
 
-	// check char slot
+	//Check char slot
 	if(sd->found_char[slot] != -1)
-		return -2; /* character account limit exceeded */
+		return -2; /* Character account limit exceeded */
 
-	// validation success, log result
+	//Validation success, log result
 	if(log_char) {
 		if(SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` (`time`, `char_msg`,`account_id`,`char_num`,`name`,`str`,`agi`,`vit`,`int`,`dex`,`luk`,`hair`,`hair_color`)"
 			"VALUES (NOW(), '%s', '%d', '%d', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d')",
@@ -1863,12 +1864,7 @@ int mmo_char_tobuf(uint8* buffer, struct mmo_charstatus* p)
 	offset += MAP_NAME_LENGTH_EXT;
 #endif
 #if PACKETVER >= 20100803
-	WBUFL(buf,124) =
-	#if PACKETVER >= 20130320
-		(p->delete_date > 0) ? TOL(p->delete_date - time(NULL)) : 0;
-	#else
-		TOL(p->delete_date);
-	#endif
+	WBUFL(buf,124) = (p->delete_date ? TOL(p->delete_date - time(NULL)) : 0);
 	offset += 4;
 #endif
 #if PACKETVER >= 20110111
@@ -3083,13 +3079,47 @@ int parse_frommap(int fd)
 				RFIFOSKIP(fd,6);
 				break;
 
-			case 0x2b0a:
-				if( RFIFOREST(fd) < RFIFOW(fd, 2) )
+			case 0x2b0a: //Request skillcooldown data
+				if( RFIFOREST(fd) < 10 )
 					return 0;
+				{
+					int aid, cid;
+					aid = RFIFOL(fd,2);
+					cid = RFIFOL(fd,6);
+					if( SQL_ERROR == Sql_Query(sql_handle, "SELECT skill, tick FROM `%s` WHERE `account_id` = '%d' AND `char_id`='%d'",
+						skillcooldown_db, aid, cid) )
+					{
+						Sql_ShowDebug(sql_handle);
+						break;
+					}
+					if( Sql_NumRows(sql_handle) > 0 ) {
+						int count;
+						char* data;
+						struct skill_cooldown_data scd;
 
-				socket_datasync(fd, false);
-
-				RFIFOSKIP(fd,RFIFOW(fd,2));
+						WFIFOHEAD(fd,14 + MAX_SKILLCOOLDOWN * sizeof(struct skill_cooldown_data));
+						WFIFOW(fd,0) = 0x2b0b;
+						WFIFOL(fd,4) = aid;
+						WFIFOL(fd,8) = cid;
+						for( count = 0; count < MAX_SKILLCOOLDOWN && SQL_SUCCESS == Sql_NextRow(sql_handle); ++count ) {
+							Sql_GetData(sql_handle, 0, &data, NULL); scd.skill_id = atoi(data);
+							Sql_GetData(sql_handle, 1, &data, NULL); scd.tick = atoi(data);
+							memcpy(WFIFOP(fd, 14 + count * sizeof(struct skill_cooldown_data)), &scd, sizeof(struct skill_cooldown_data));
+						}
+						if( count >= MAX_SKILLCOOLDOWN )
+							ShowWarning("Too many skillcooldowns for %d:%d, some of them were not loaded.\n", aid, cid);
+						if( count > 0 ) {
+							WFIFOW(fd,2) = 14 + count * sizeof(struct skill_cooldown_data);
+							WFIFOW(fd,12) = count;
+							WFIFOSET(fd,WFIFOW(fd,2));
+							//Clear the data once loaded.
+							if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `account_id` = '%d' AND `char_id`='%d'", skillcooldown_db, aid, cid) )
+								Sql_ShowDebug(sql_handle);
+						}
+					}
+					Sql_FreeResult(sql_handle);
+					RFIFOSKIP(fd,10);
+				}
 				break;
 
 			case 0x2b0c: //Map server send information to change an email of an account -> login-server
@@ -3253,6 +3283,42 @@ int parse_frommap(int fd)
 					return 0;
 				divorce_char_sql(RFIFOL(fd,2), RFIFOL(fd,6));
 				RFIFOSKIP(fd,10);
+				break;
+
+			case 0x2b13:
+				if( RFIFOREST(fd) < RFIFOW(fd, 2) )
+					return 0;
+				socket_datasync(fd, false);
+				RFIFOSKIP(fd,RFIFOW(fd,2));
+				break;
+
+			case 0x2b15: //Request to save skill cooldown data
+				if( RFIFOREST(fd) < 4 || RFIFOREST(fd) < RFIFOW(fd,2) )
+					return 0;
+				{
+					int count, aid, cid;
+					aid = RFIFOL(fd,4);
+					cid = RFIFOL(fd,8);
+					count = RFIFOW(fd,12);
+					if( count > 0 ) {
+						struct skill_cooldown_data data;
+						StringBuf buf;
+						int i;
+
+						StringBuf_Init(&buf);
+						StringBuf_Printf(&buf, "INSERT INTO `%s` (`account_id`, `char_id`, `skill`, `tick`) VALUES ", skillcooldown_db);
+						for( i = 0; i < count; ++i ) {
+							memcpy(&data,RFIFOP(fd, 14 + i * sizeof(struct skill_cooldown_data)), sizeof(struct skill_cooldown_data));
+							if( i > 0 )
+								StringBuf_AppendStr(&buf, ", ");
+							StringBuf_Printf(&buf, "('%d','%d','%d','%d')", aid, cid, data.skill_id, data.tick);
+						}
+						if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) )
+							Sql_ShowDebug(sql_handle);
+						StringBuf_Destroy(&buf);
+					}
+					RFIFOSKIP(fd,RFIFOW(fd,2));
+				}
 				break;
 
 			case 0x2b16: //Receive rates [Wizputer]
@@ -3523,7 +3589,7 @@ void char_delete2_ack(int fd, int char_id, uint32 result, time_t delete_date)
 	WFIFOL(fd,6) = result;
 	WFIFOL(fd,10) =
 #if PACKETVER >= 20130320
-		delete_date > 0 ? TOL(delete_date - time(NULL)) : 0;
+		TOL(delete_date - time(NULL));
 #else
 		TOL(delete_date);
 #endif

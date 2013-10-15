@@ -11756,24 +11756,22 @@ BUILDIN_FUNC(guardianinfo)
 	struct guild_castle* gc = guild_mapname2gc(mapname);
 	struct mob_data* gd;
 
-	if( gc == NULL || id < 0 || id >= MAX_GUARDIANS )
-	{
+	if( gc == NULL || id < 0 || id >= MAX_GUARDIANS ) {
 		script_pushint(st,-1);
 		return 0;
 	}
 
 	if( type == 0 )
 		script_pushint(st, gc->guardian[id].visible);
-	else
-	if( !gc->guardian[id].visible )
+	else if( !gc->guardian[id].visible )
 		script_pushint(st,-1);
-	else
-	if( (gd = map_id2md(gc->guardian[id].id)) == NULL )
+	else if( (gd = map_id2md(gc->guardian[id].id)) == NULL )
 		script_pushint(st,-1);
-	else
-	{
-		if     ( type == 1 ) script_pushint(st,gd->status.max_hp);
-		else if( type == 2 ) script_pushint(st,gd->status.hp);
+	else {
+		if ( type == 1 )
+			script_pushint(st,gd->status.max_hp);
+		else if( type == 2 )
+			script_pushint(st,gd->status.hp);
 		else
 			script_pushint(st,-1);
 	}
@@ -11786,31 +11784,30 @@ BUILDIN_FUNC(guardianinfo)
  *------------------------------------------*/
 BUILDIN_FUNC(getitemname)
 {
-	int item_id=0;
+	int item_id = 0;
 	struct item_data *i_data;
 	char *item_name;
 	struct script_data *data;
 
-	data=script_getdata(st,2);
+	data = script_getdata(st,2);
 	get_val(st,data);
 
-	if( data_isstring(data) ){
-		const char *name=conv_str(st,data);
+	if( data_isstring(data) ) {
+		const char *name = conv_str(st,data);
 		struct item_data *item_data = itemdb_searchname(name);
 		if( item_data )
-			item_id=item_data->nameid;
-	}else
-		item_id=conv_num(st,data);
+			item_id = item_data->nameid;
+	} else
+		item_id = conv_num(st,data);
 
 	i_data = itemdb_exists(item_id);
-	if (i_data == NULL)
-	{
+	if( i_data == NULL ) {
 		script_pushconststr(st,"null");
 		return 0;
 	}
-	item_name=(char *)aMalloc(ITEM_NAME_LENGTH*sizeof(char));
+	item_name = (char *)aMalloc(ITEM_NAME_LENGTH * sizeof(char));
 
-	memcpy(item_name, i_data->jname, ITEM_NAME_LENGTH);
+	memcpy(item_name,i_data->jname,ITEM_NAME_LENGTH);
 	script_pushstr(st,item_name);
 	return 0;
 }
@@ -11822,7 +11819,7 @@ BUILDIN_FUNC(getitemslots)
 	int item_id;
 	struct item_data *i_data;
 
-	item_id=script_getnum(st,2);
+	item_id = script_getnum(st,2);
 
 	i_data = itemdb_exists(item_id);
 

@@ -40,24 +40,24 @@ struct Channel* channel_create(char *name, char *pass, unsigned char color, enum
 
 	if(!name) return NULL;
 
-	CREATE( channel, struct Channel, 1 ); //will exit on fail allocation
+	CREATE(channel,struct Channel,1); //will exit on fail allocation
 	channel->users = idb_alloc(DB_OPT_BASE);
 	channel->banned = idb_alloc(DB_OPT_BASE|DB_OPT_RELEASE_DATA);
 	channel->opt = CHAN_OPT_BASE;
 	channel->type = chantype;
 	channel->color = color;
 	safestrncpy(channel->name, name, CHAN_NAME_LENGTH);
-	if( !pass )
+	if(!pass)
 		channel->pass[0] = '\0';
 	else
 		safestrncpy(channel->pass, pass, CHAN_NAME_LENGTH);
 
 	//ShowInfo("Create channel %s\n",channel->name);
-	switch(channel->type){
-	case CHAN_TYPE_MAP: channel->m = val; break;
-	case CHAN_TYPE_ALLY: channel->gid = val; break;
-	case CHAN_TYPE_PRIVATE: channel->owner = val; //dont break here private need to put in db
-	default: strdb_put(channel_db, channel->name, channel);
+	switch(channel->type) {
+		case CHAN_TYPE_MAP: channel->m = val; break;
+		case CHAN_TYPE_ALLY: channel->gid = val; break;
+		case CHAN_TYPE_PRIVATE: channel->owner = val; //Dont break here private need to put in db
+		default: strdb_put(channel_db,channel->name,channel);
 	}
 
 	return channel;
@@ -69,35 +69,38 @@ struct Channel* channel_create(char *name, char *pass, unsigned char color, enum
  * return
  *  0 : success
  *  -1 : invalid channel
+ *  -2 : can't delete now
  */
 int channel_delete(struct Channel *channel) {
 	if(!channel)
 		return -1;
-	else if( db_size(channel->users)) {
+	if(channel->type == CHAN_TYPE_PUBLIC && runflag != MAPSERVER_ST_RUNNING) //Only delete, if server stop
+		return -2;
+	if(db_size(channel->users)) {
 		struct map_session_data *sd;
 		DBIterator *iter = db_iterator(channel->users);
-		for( sd = dbi_first(iter); dbi_exists(iter); sd = dbi_next(iter) ) { //for all users
-			channel_clean(channel,sd,1); //make all quit
+		for(sd = dbi_first(iter); dbi_exists(iter); sd = dbi_next(iter)) { //For all users
+			channel_clean(channel,sd,1); //Make all quit
 		}
 		dbi_destroy(iter);
 	}
 	//ShowInfo("Deleting channel %s\n",channel->name);
 	db_destroy(channel->users);
 	db_destroy(channel->banned);
-	switch(channel->type){
-	case CHAN_TYPE_MAP:
-		map[channel->m].channel = NULL;
-		aFree(channel);
-		break;
-	case CHAN_TYPE_ALLY: {
-		struct guild *g = guild_search(channel->gid);
-		if(g) g->channel = NULL;
-		aFree(channel);
-		break;
-	}
-	default:
-		strdb_remove(channel_db, channel->name);
-		break;
+	switch(channel->type) {
+		case CHAN_TYPE_MAP:
+			map[channel->m].channel = NULL;
+			aFree(channel);
+			break;
+		case CHAN_TYPE_ALLY: {
+			struct guild *g = guild_search(channel->gid);
+			if(g) g->channel = NULL;
+			aFree(channel);
+			break;
+		}
+		default:
+			strdb_remove(channel_db,channel->name);
+			break;
 	}
 	return 0;
 }
@@ -215,19 +218,18 @@ int channel_gjoin(struct map_session_data *sd, int flag){
 	if(!g) return -2;
 
 	channel = g->channel;
-	if(!channel){
+	if(!channel) {
 		channel = channel_create(Channel_Config.ally_chname,NULL,Channel_Config.ally_chcolor,CHAN_TYPE_ALLY,g->guild_id);
 		g->channel = channel;
 		channel_ajoin(g);
 	}
-	if(flag&1) {
-		channel_join(channel,sd);	//join our guild chat
-	}
-	if(flag&2){
-		for (i = 0; i < MAX_GUILDALLIANCE; i++){
-			struct guild *ag; //allied guld
-			struct guild_alliance *ga = &g->alliance[i]; //guild alliance
-			if(ga->guild_id && (ga->opposition==0) && (ag=guild_search(ga->guild_id)) ) //only join allies
+	if(flag&1) //Join our guild chat
+		channel_join(channel,sd);
+	if(flag&2) {
+		for(i = 0; i < MAX_GUILDALLIANCE; i++) {
+			struct guild *ag; //Allied guld
+			struct guild_alliance *ga = &g->alliance[i]; //Guild alliance
+			if(ga->guild_id && (ga->opposition == 0) && (ag = guild_search(ga->guild_id))) //Only join allies
 				channel_join(ag->channel,sd);
 		}
 	}
@@ -248,28 +250,29 @@ int channel_clean(struct Channel *channel, struct map_session_data *sd, int flag
 	if(!channel || !sd)
 		return -1;
 
-	if( channel == sd->gcbind )
+	if(channel == sd->gcbind)
 		sd->gcbind = NULL;
 
 	ARR_FIND(0, sd->channel_count, i, sd->channels[i] == channel);
-	if( i < sd->channel_count ) {
+	if(i < sd->channel_count) {
 		unsigned char cursor = i;
 		sd->channels[i] = NULL;
-		for(; i < sd->channel_count; i++ ) { //slice move list down
-			if( sd->channels[i] == NULL )
+		for(; i < sd->channel_count; i++) { //Slice move list down
+			if(sd->channels[i] == NULL)
 				continue;
 			if(i != cursor)
 				sd->channels[cursor] = sd->channels[i];
 			cursor++;
 		}
-		if ( !(sd->channel_count = cursor) ) { //if in no more chan delete db
+		if(!(sd->channel_count = cursor)) { //If in no more chan delete db
 			aFree(sd->channels);
 			sd->channels = NULL;
 		}
 	}
 
-	idb_remove(channel->users,sd->status.char_id); //remove user for channel user list
-	if( !db_size(channel->users) && !(flag&1) && channel->type != CHAN_TYPE_PUBLIC )
+	idb_remove(channel->users,sd->status.char_id); //Remove user for channel user list
+	//Auto delete when no more user in
+	if(!db_size(channel->users) && !(flag&1))
 		channel_delete(channel);
 
 	return 0;

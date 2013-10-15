@@ -1444,6 +1444,7 @@ void socket_datasync(int fd, bool send) {
 		{ sizeof(struct s_skill) },
 		{ sizeof(struct global_reg) },
 		{ sizeof(struct accreg) },
+		{ sizeof(struct skill_cooldown_data) },
 		{ sizeof(struct status_change_data) },
 		{ sizeof(struct storage_data) },
 		{ sizeof(struct guild_storage) },
@@ -1472,25 +1473,25 @@ void socket_datasync(int fd, bool send) {
 		unsigned short p_len = ( alen * 4 ) + 4;
 		WFIFOHEAD(fd, p_len);
 
-		WFIFOW(fd, 0) = 0x2b0a;
-		WFIFOW(fd, 2) = p_len;
+		WFIFOW(fd,0) = 0x2b13;
+		WFIFOW(fd,2) = p_len;
 
 		for( i = 0; i < alen; i++ ) {
-			WFIFOL(fd, 4 + ( i * 4 ) ) = data_list[i].length;
+			WFIFOL(fd,4 + (i * 4)) = data_list[i].length;
 		}
 
-		WFIFOSET(fd, p_len);
+		WFIFOSET(fd,p_len);
 	} else {
 		for( i = 0; i < alen; i++ ) {
-			if( RFIFOL(fd, 4 + (i * 4) ) != data_list[i].length ) {
-				/* force the other to go wrong too so both are taken down */
-				WFIFOHEAD(fd, 8);
-				WFIFOW(fd, 0) = 0x2b0a;
-				WFIFOW(fd, 2) = 8;
-				WFIFOL(fd, 4) = 0;
+			if( RFIFOL(fd,4 + (i * 4)) != data_list[i].length ) {
+				/* Force the other to go wrong too so both are taken down */
+				WFIFOHEAD(fd,8);
+				WFIFOW(fd,0) = 0x2b13;
+				WFIFOW(fd,2) = 8;
+				WFIFOL(fd,4) = 0;
 				WFIFOSET(fd, 8);
 				flush_fifo(fd);
-				/* shut down */
+				/* Shut down */
 				ShowFatalError("Servers are out of sync! recompile from scratch (%d)\n",i);
 				exit(EXIT_FAILURE);
 			}

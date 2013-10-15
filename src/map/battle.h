@@ -497,6 +497,7 @@ extern struct Battle_Config
 	int snovice_call_type;
 	int guild_notice_changemap;
 	int drop_rateincrease;
+	int feature_auction;
 } battle_config;
 
 void do_init_battle(void);

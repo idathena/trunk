@@ -2642,7 +2642,7 @@ int npc_duplicate4instance(struct npc_data *snd, int16 m) {
 
 		if( !imap )
 			imap = map_mapname2mapid(map[dm].name);
-	
+
 		if( imap == -1 ) {
 			ShowError("npc_duplicate4instance: warp (%s) leading to instanced map (%s), but instance map is not attached to current instance.\n", map[dm].name, snd->exname);
 			return 1;

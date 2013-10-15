@@ -631,6 +631,19 @@ CREATE TABLE IF NOT EXISTS `skill` (
 ) ENGINE=MyISAM;
 
 --
+-- Table structure for table `skillcooldown`
+--
+
+CREATE TABLE IF NOT EXISTS `skillcooldown` (
+  `account_id` int(11) unsigned NOT NULL,
+  `char_id` int(11) unsigned NOT NULL,
+  `skill` smallint(11) unsigned NOT NULL DEFAULT '0',
+  `tick` int(11) NOT NULL,
+  KEY `account_id` (`account_id`),
+  KEY `char_id` (`char_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
 -- Table structure for table `skill_homunculus`
 --
 
@@ -659,6 +672,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1362528000);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1362794218);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1366078541);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1366378765);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1366378888);
 
 --
 -- Table structure for table `sstatus`

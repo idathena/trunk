@@ -255,8 +255,8 @@ int mapif_parse_itembound_retrieve(int fd)
 	StringBuf buf;
 	SqlStmt* stmt;
 	struct item item;
-	int j, i=0, s;
-	bool found=false;
+	int j, i = 0, s;
+	bool found = false;
 	struct item items[MAX_INVENTORY];
 	int char_id = RFIFOL(fd,2);
 	int aid = RFIFOL(fd,6);
@@ -269,12 +269,13 @@ int mapif_parse_itembound_retrieve(int fd)
 	StringBuf_Printf(&buf, " FROM `%s` WHERE `char_id`='%d'",inventory_db,char_id);
 
 	stmt = SqlStmt_Malloc(sql_handle);
-	if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf))
-	||  SQL_ERROR == SqlStmt_Execute(stmt) )
+	if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) ||
+		SQL_ERROR == SqlStmt_Execute(stmt) )
 	{
 		SqlStmt_ShowDebug(stmt);
 		SqlStmt_Free(stmt);
 		StringBuf_Destroy(&buf);
+		mapif_itembound_ack(fd,aid,guild_id);
 		return 1;
 	}
 
@@ -291,23 +292,24 @@ int mapif_parse_itembound_retrieve(int fd)
 		SqlStmt_BindColumn(stmt, 9+j, SQLDT_SHORT, &item.card[j], 0, NULL, NULL);
 
 	while( SQL_SUCCESS == SqlStmt_NextRow(stmt) ) {
-		if(item.bound == 2) {
+		if( item.bound == 2 ) {
 			memcpy(&items[i],&item,sizeof(struct item));
 			i++;
 		}
 	}
 	Sql_FreeResult(sql_handle);
 	
-	if(!i) { //No items found - No need to continue
+	if( !i ) { //No items found - No need to continue
 		StringBuf_Destroy(&buf);
 		SqlStmt_Free(stmt);
+		mapif_itembound_ack(fd,aid,guild_id);
 		return 0;
 	}
 
 	//First we delete the character's items
 	StringBuf_Clear(&buf);
 	StringBuf_Printf(&buf, "DELETE FROM `%s` WHERE",inventory_db);
-	for(j=0; j<i; j++) {
+	for( j = 0; j < i; j++ ) {
 		if( found )
 			StringBuf_AppendStr(&buf, " OR");
 		else
@@ -315,12 +317,13 @@ int mapif_parse_itembound_retrieve(int fd)
 		StringBuf_Printf(&buf, " `id`=%d",items[j].id);
 	}
 
-	if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf))
-	||  SQL_ERROR == SqlStmt_Execute(stmt) )
+	if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) ||
+		SQL_ERROR == SqlStmt_Execute(stmt) )
 	{
 		SqlStmt_ShowDebug(stmt);
 		SqlStmt_Free(stmt);
 		StringBuf_Destroy(&buf);
+		mapif_itembound_ack(fd,aid,guild_id);
 		return 1;
 	}
 
@@ -345,12 +348,13 @@ int mapif_parse_itembound_retrieve(int fd)
 		StringBuf_AppendStr(&buf, ")");
 	}
 
-	if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf))
-	||  SQL_ERROR == SqlStmt_Execute(stmt) )
+	if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) ||
+		SQL_ERROR == SqlStmt_Execute(stmt) )
 	{
 		SqlStmt_ShowDebug(stmt);
 		SqlStmt_Free(stmt);
 		StringBuf_Destroy(&buf);
+		mapif_itembound_ack(fd,aid,guild_id);
 		return 1;
 	}
 
@@ -367,14 +371,14 @@ int mapif_parse_itembound_retrieve(int fd)
 int inter_storage_parse_frommap(int fd)
 {
 	RFIFOHEAD(fd);
-	switch(RFIFOW(fd,0)){
-	case 0x3018: mapif_parse_LoadGuildStorage(fd); break;
-	case 0x3019: mapif_parse_SaveGuildStorage(fd); break;
+	switch( RFIFOW(fd,0) ) {
+		case 0x3018: mapif_parse_LoadGuildStorage(fd); break;
+		case 0x3019: mapif_parse_SaveGuildStorage(fd); break;
 #ifdef BOUND_ITEMS
-	case 0x3056: mapif_parse_itembound_retrieve(fd); break;
+		case 0x3056: mapif_parse_itembound_retrieve(fd); break;
 #endif
-	default:
-		return 0;
+		default:
+			return 0;
 	}
 	return 1;
 }

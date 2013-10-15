@@ -52,7 +52,7 @@
 #include <stdarg.h>
 #include <time.h>
 
-/* for clif_clearunit_delayed */
+/* For clif_clearunit_delayed */
 static struct eri *delay_clearunit_ers;
 
 //#define DUMP_UNKNOWN_PACKET
@@ -67,7 +67,15 @@ struct s_packet_db packet_db[MAX_PACKET_VER + 1][MAX_PACKET_DB + 1];
 
 //Converts item type in case of pet eggs.
 static inline int itemtype(int type) {
-	return ( type == IT_PETEGG ) ? IT_WEAPON : type;
+	switch( type ) {
+#if PACKETVER >= 20080827
+		case IT_WEAPON:	return IT_ARMOR;
+		case IT_ARMOR:
+		case IT_PETARMOR:
+#endif
+		case IT_PETEGG:	return IT_WEAPON;
+		default:	return type;
+	}
 }
 
 
@@ -5323,51 +5331,42 @@ void clif_cooking_list(struct map_session_data *sd, int trigger, uint16 skill_id
 	int fd;
 	int i, c;
 	int view;
-	
+
 	nullpo_retv(sd);
 	fd = sd->fd;
-	
+
+	if( sd->menuskill_id == skill_id )
+		return; //Avoid resending the menu twice or more times
+
 	WFIFOHEAD(fd, 6 + 2 * MAX_SKILL_PRODUCE_DB);
 	WFIFOW(fd,0) = 0x25a;
-	WFIFOW(fd,4) = list_type; // list type
-	
+	WFIFOW(fd,4) = list_type; //List type
+
 	c = 0;
 	for( i = 0; i < MAX_SKILL_PRODUCE_DB; i++ ) {
 		if( !skill_can_produce_mix(sd,skill_produce_db[i].nameid,trigger, qty) )
 			continue;
-		
 		if( (view = itemdb_viewid(skill_produce_db[i].nameid)) > 0 )
 			WFIFOW(fd, 6 + 2 * c) = view;
 		else
 			WFIFOW(fd, 6 + 2 * c) = skill_produce_db[i].nameid;
-		
 		c++;
 	}
-	
-	if( skill_id == AM_PHARMACY ) {	// Only send it while Cooking else check for c.
-		WFIFOW(fd,2) = 6 + 2 * c;
-		WFIFOSET(fd,WFIFOW(fd,2));
-	}
-	
-	if( c > 0 ) {
+
+	if( c > 0 || skill_id == AM_PHARMACY ) {
 		sd->menuskill_id = skill_id;
 		sd->menuskill_val = trigger;
-		if( skill_id != AM_PHARMACY ) {
-			sd->menuskill_val2 = qty; // amount.
-			WFIFOW(fd,2) = 6 + 2 * c;
-			WFIFOSET(fd,WFIFOW(fd,2));
-		}
+		sd->menuskill_val2 = qty; //Amount
+		WFIFOW(fd,2) = 6 + 2 * c;
+		WFIFOSET(fd,WFIFOW(fd,2));
 	} else {
 		clif_menuskill_clear(sd);
-		if( skill_id != AM_PHARMACY ) { // AM_PHARMACY is used to Cooking.
-			// It fails.
 #if PACKETVER >= 20090922
 			clif_msg_skill(sd,skill_id,0x625);
 #else
 			WFIFOW(fd,2) = 6 + 2 * c;
 			WFIFOSET(fd,WFIFOW(fd,2));
 #endif
-		}
 	}
 }
 
@@ -5428,7 +5427,7 @@ void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val
 		WBUFL(buf,21) = val3;
 	}
 #endif
-	clif_send(buf,packet_len(WBUFW(buf,0)),bl, (sd && sd->status.option&OPTION_INVISIBLE) ? SELF : AREA);
+	clif_send(buf,packet_len(WBUFW(buf,0)),bl,(sd && sd->status.option&OPTION_INVISIBLE) ? SELF : AREA);
 }
 
 
@@ -5515,15 +5514,15 @@ void clif_GlobalMessage(struct block_list* bl, const char* message, enum send_ta
 	if (!message)
 		return;
 
-	len = strlen(message)+1;
+	len = strlen(message) + 1;
 
-	if (len > sizeof(buf)-8) {
+	if (len > sizeof(buf) - 8) {
 		ShowWarning("clif_GlobalMessage: Truncating too long message '%s' (len=%d).\n", message, len);
-		len = sizeof(buf)-8;
+		len = sizeof(buf) - 8;
 	}
 
 	WBUFW(buf,0) = 0x8d;
-	WBUFW(buf,2) = len+8;
+	WBUFW(buf,2) = len + 8;
 	WBUFL(buf,4) = bl->id;
 	safestrncpy((char *) WBUFP(buf,8),message,len);
 	clif_send((unsigned char *) buf,WBUFW(buf,2),bl,target);
@@ -6114,7 +6113,10 @@ void clif_cart_additem(struct map_session_data *sd,int n,int amount,int fail)
 }
 
 
-// [Ind] - Data Thanks to Yommy
+/* [Ind] - Data Thanks to Yommy
+ * - ADDITEM_TO_CART_FAIL_WEIGHT = 0x0
+ * - ADDITEM_TO_CART_FAIL_COUNT  = 0x1
+ */
 void clif_cart_additem_ack(struct map_session_data *sd, int flag)
 {
 	int fd;
@@ -9362,7 +9364,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 		status_calc_pc(sd, false); /* Some conditions are map-dependent so we must recalculate */
 		sd->state.changemap = false;
 
-		// Instances do not need their own channels
+		//Instances do not need their own channels
 		if(Channel_Config.map_enable && Channel_Config.map_autojoin && !map[sd->bl.m].flag.chmautojoin &&
 			!map[sd->bl.m].instance_id) {
 			channel_mjoin(sd); //Join new map
@@ -9404,16 +9406,14 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 		sd->areanpc_id = 0;
 
 	/* It broke at some point (e.g. during a crash), so we make it visibly dead again. */
-	if( !sd->status.hp && !pc_isdead(sd) && status_isdead(&sd->bl) )
-			pc_setdead(sd);
+	if(!sd->status.hp && !pc_isdead(sd) && status_isdead(&sd->bl))
+		pc_setdead(sd);
 
 	//If player is dead, and is spawned (such as @refresh) send death packet. [Valaris]
 	if(pc_isdead(sd))
 		clif_clearunit_area(&sd->bl, CLR_DEAD);
-	else {
+	else
 		skill_usave_trigger(sd);
-		clif_changed_dir(&sd->bl, SELF);
-	}
 
 	// Trigger skill effects if you appear standing on them
 	if(!battle_config.pc_invincible_time)
@@ -14156,6 +14156,9 @@ void clif_Auction_openwindow(struct map_session_data *sd)
 	if( sd->state.storage_flag || sd->state.vending || sd->state.buyingstore || sd->state.trading )
 		return;
 
+	if( !battle_config.feature_auction )
+		return;
+
 	WFIFOHEAD(fd,packet_len(0x25f));
 	WFIFOW(fd,0) = 0x25f;
 	WFIFOL(fd,2) = 0;
@@ -14248,6 +14251,9 @@ void clif_parse_Auction_setitem(int fd, struct map_session_data *sd)
 	int amount = RFIFOL(fd,info->pos[1]); // Always 1
 	struct item_data *item;
 
+	if( !battle_config.feature_auction )
+		return;
+
 	if( sd->auction.amount > 0 )
 		sd->auction.amount = 0;
 
@@ -14325,11 +14331,14 @@ void clif_parse_Auction_register(int fd, struct map_session_data *sd)
 	struct item_data *item;
 	struct s_packet_db* info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
 
+	if( !battle_config.feature_auction )
+		return;
+
 	auction.price = RFIFOL(fd,info->pos[0]);
 	auction.buynow = RFIFOL(fd,info->pos[1]);
 	auction.hours = RFIFOW(fd,info->pos[2]);
 
-	// Invalid Situations...
+	// Invalid Situations
 	if( sd->auction.amount < 1 ) {
 		ShowWarning("Character %s trying to register auction without item.\n", sd->status.name);
 		return;
@@ -14345,7 +14354,7 @@ void clif_parse_Auction_register(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	// Auction checks...
+	// Auction checks
 	if( sd->status.inventory[sd->auction.index].bound && !pc_can_give_bounded_items(sd) ) {
 		clif_displaymessage(sd->fd, msg_txt(293));
 		clif_Auction_message(fd, 2); // The auction has been canceled
@@ -14458,6 +14467,9 @@ void clif_parse_Auction_search(int fd, struct map_session_data* sd)
 	int price = RFIFOL(fd,info->pos[1]);  // FIXME: bug #5071
 	int page = RFIFOW(fd,info->pos[3]);
 
+	if( !battle_config.feature_auction )
+		return; 
+
 	clif_parse_Auction_cancelreg(fd, sd);
 	
 	safestrncpy(search_text, (char*)RFIFOP(fd,info->pos[2]), sizeof(search_text));
@@ -14473,6 +14485,10 @@ void clif_parse_Auction_search(int fd, struct map_session_data* sd)
 void clif_parse_Auction_buysell(int fd, struct map_session_data* sd)
 {
 	short type = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]) + 6;
+
+	if( !battle_config.feature_auction )
+		return;
+
 	clif_parse_Auction_cancelreg(fd, sd);
 
 	intif_Auction_requestlist(sd->status.char_id, type, 0, "", 1);
@@ -14661,11 +14677,10 @@ void clif_parse_cashshop_buy(int fd, struct map_session_data *sd)
 			ShowWarning("Player %u sent incorrect cash shop buy packet (len %u:%u)!\n", sd->status.char_id, len, 10 + count * s_itl);
 			return;
 		}
-		if(cmd == 0x848) {
+		if( cmd == 0x848 )
 			cashshop_buylist(sd, points, count, item_list);
-		} else {
+		else
 			fail = npc_cashshop_buylist(sd, points, count, item_list);
-		}
 #endif
 	}
 	clif_cashshop_ack(sd, fail);
@@ -16736,7 +16751,7 @@ static int clif_parse(int fd)
 		} else {
 			// Check authentification packet to know packet version
 			packet_ver = clif_guess_PacketVer(fd, 0, &err);
-			if( err ) {// failed to identify packet version
+			if( err ) { // Failed to identify packet version
 				ShowInfo("clif_parse: Disconnecting session #%d with unknown packet version%s (p:0x%04x|l:%d).\n", fd, (
 					err == 1 ? "" :
 					err == 2 ? ", possibly for having an invalid account_id" :

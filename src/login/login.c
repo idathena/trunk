@@ -1357,7 +1357,7 @@ int parse_login(int fd)
 			return 0;
 		}
 
-		// create a session for this new connection
+		// Create a session for this new connection
 		CREATE(session[fd]->session_data, struct login_session_data, 1);
 		sd = (struct login_session_data*)session[fd]->session_data;
 		sd->fd = fd;
@@ -1368,13 +1368,13 @@ int parse_login(int fd)
 
 		switch( command ) {
 
-			case 0x0200:		// New alive packet: structure: 0x200 <account.userid>.24B. used to verify if client is always alive.
+			case 0x0200: // New alive packet: structure: 0x200 <account.userid>.24B. used to verify if client is always alive.
 				if (RFIFOREST(fd) < 26)
 					return 0;
 				RFIFOSKIP(fd,26);
 				break;
 
-			// client md5 hash (binary)
+			// Client md5 hash (binary)
 			case 0x0204: // S 0204 <md5 hash>.16B (kRO 2004-05-31aSakexe langtype 0 and 6)
 				if (RFIFOREST(fd) < 18)
 					return 0;
@@ -1385,11 +1385,11 @@ int parse_login(int fd)
 				RFIFOSKIP(fd,18);
 				break;
 
-			// request client login (raw password)
+			// Request client login (raw password)
 			case 0x0064: // S 0064 <version>.L <username>.24B <password>.24B <clienttype>.B
 			case 0x0277: // S 0277 <version>.L <username>.24B <password>.24B <clienttype>.B <ip address>.16B <adapter address>.13B
 			case 0x02b0: // S 02b0 <version>.L <username>.24B <password>.24B <clienttype>.B <ip address>.16B <adapter address>.13B <g_isGravityID>.B
-			// request client login (md5-hashed password)
+			// Request client login (md5-hashed password)
 			case 0x01dd: // S 01dd <version>.L <username>.24B <password hash>.16B <clienttype>.B
 			case 0x01fa: // S 01fa <version>.L <username>.24B <password hash>.16B <clienttype>.B <?>.B(index of the connection in the clientinfo file (+10 if the command-line contains "pc"))
 			case 0x027c: // S 027c <version>.L <username>.24B <password hash>.16B <clienttype>.B <?>.13B(junk)
@@ -1442,7 +1442,7 @@ int parse_login(int fd)
 							clienttype = RFIFOB(fd,46);
 						}
 					}
-					RFIFOSKIP(fd,RFIFOREST(fd)); // assume no other packet was sent
+					RFIFOSKIP(fd,RFIFOREST(fd)); // Assume no other packet was sent
 
 					sd->clienttype = clienttype;
 					sd->version = version;
@@ -1460,7 +1460,7 @@ int parse_login(int fd)
 					}
 
 					if( sd->passwdenc != 0 && login_config.use_md5_passwds ) {
-						login_auth_failed(sd, 3); // send "rejected from server"
+						login_auth_failed(sd, 3); // Send "rejected from server"
 						return 0;
 					}
 
@@ -1473,7 +1473,7 @@ int parse_login(int fd)
 				}
 				break;
 
-			case 0x01db:	// Sending request of the coding key
+			case 0x01db: // Sending request of the coding key
 				RFIFOSKIP(fd,2);
 				{
 					memset(sd->md5key, '\0', sizeof(sd->md5key));
@@ -1488,7 +1488,7 @@ int parse_login(int fd)
 				}
 				break;
 
-			case 0x2710:	// Connection request of a char-server
+			case 0x2710: // Connection request of a char-server
 				if (RFIFOREST(fd) < 86)
 					return 0;
 				{
@@ -1536,7 +1536,7 @@ int parse_login(int fd)
 						session[fd]->flag.server = 1;
 						realloc_fifo(fd, FIFOSIZE_SERVERLINK, FIFOSIZE_SERVERLINK);
 
-						// send connection success
+						// Send connection success
 						WFIFOHEAD(fd,3);
 						WFIFOW(fd,0) = 0x2711;
 						WFIFOB(fd,2) = 0;
@@ -1549,7 +1549,7 @@ int parse_login(int fd)
 						WFIFOSET(fd,3);
 					}
 				}
-				return 0; // processing will continue elsewhere
+				return 0; // Processing will continue elsewhere
 
 			default:
 				ShowNotice("Abnormal end of connection (ip: %s): Unknown packet 0x%x\n", ip, command);

@@ -776,15 +776,15 @@ int guild_leave(struct map_session_data* sd, int guild_id, int account_id, int c
 
 	g = sd->guild;
 
-	if(g==NULL)
+	if( g == NULL )
 		return 0;
 
-	if(sd->status.account_id!=account_id ||
-		sd->status.char_id!=char_id || sd->status.guild_id!=guild_id ||
-		((agit_flag || agit2_flag) && map[sd->bl.m].flag.gvg_castle))
+	if( sd->status.account_id != account_id ||
+		sd->status.char_id != char_id || sd->status.guild_id != guild_id ||
+		((agit_flag || agit2_flag) && map[sd->bl.m].flag.gvg_castle) )
 		return 0;
 
-	intif_guild_leave(sd->status.guild_id, sd->status.account_id, sd->status.char_id,0,mes);
+	intif_guild_leave(sd->status.guild_id,sd->status.account_id,sd->status.char_id,0,mes);
 	return 0;
 }
 
@@ -801,23 +801,23 @@ int guild_expulsion(struct map_session_data* sd, int guild_id, int account_id, i
 
 	g = sd->guild;
 
-	if(g==NULL)
+	if( g == NULL )
 		return 0;
 
-	if(sd->status.guild_id!=guild_id)
+	if( sd->status.guild_id != guild_id )
 		return 0;
 
-	if( (ps=guild_getposition(g,sd))<0 || !(g->position[ps].mode&0x0010) )
+	if( (ps = guild_getposition(g,sd)) < 0 || !(g->position[ps].mode&0x0010) )
 		return 0; //Expulsion permission
 
 	//Can't leave inside guild castles.
-	if ((tsd = map_id2sd(account_id)) &&
+	if( (tsd = map_id2sd(account_id)) &&
 		tsd->status.char_id == char_id &&
-		((agit_flag || agit2_flag) && map[tsd->bl.m].flag.gvg_castle))
+		((agit_flag || agit2_flag) && map[tsd->bl.m].flag.gvg_castle) )
 		return 0;
 
 	//Find the member and perform expulsion
-	i = guild_getindex(g, account_id, char_id);
+	i = guild_getindex(g,account_id,char_id);
 	if( i != -1 && strcmp(g->member[i].name,g->master) != 0 ) //Can't expel the GL!
 		intif_guild_leave(g->guild_id,account_id,char_id,1,mes);
 
@@ -832,33 +832,33 @@ int guild_member_withdraw(int guild_id, int account_id, int char_id, int flag, c
 	struct map_session_data* online_member_sd;
 
 	if( g == NULL )
-		return 0; // no such guild (error!)
+		return 0; //No such guild (error!)
 
 	i = guild_getindex(g, account_id, char_id);
 	if( i == -1 )
-		return 0; // not a member (inconsistency!)
-
-	online_member_sd = guild_getavailablesd(g);
-	if( online_member_sd == NULL )
-		return 0; // noone online to inform
+		return 0; //Not a member (inconsistency!)
 
 #ifdef BOUND_ITEMS
 	//Guild bound item check
 	guild_retrieveitembound(char_id,account_id,guild_id);
 #endif
 
-	if( !flag )
-		clif_guild_leave(online_member_sd, name, mes);
-	else
-		clif_guild_expulsion(online_member_sd, name, mes, account_id);
+	online_member_sd = guild_getavailablesd(g);
+	if( online_member_sd == NULL )
+		return 0; //No one online to inform
 
-	// remove member from guild
+	if( !flag )
+		clif_guild_leave(online_member_sd,name,mes);
+	else
+		clif_guild_expulsion(online_member_sd,name,mes,account_id);
+
+	//Remove member from guild
 	memset(&g->member[i],0,sizeof(struct guild_member));
 	clif_guild_memberlist(online_member_sd);
 
-	// update char, if online
+	//Update char, if online
 	if( sd != NULL && sd->status.guild_id == guild_id ) {
-		// do stuff that needs the guild_id first, BEFORE we wipe it
+		//Do stuff that needs the guild_id first, BEFORE we wipe it
 		if( sd->state.storage_flag == 2 ) //Close the guild storage.
 			storage_guild_storageclose(sd);
 		guild_send_dot_remove(sd);
@@ -877,14 +877,14 @@ int guild_member_withdraw(int guild_id, int account_id, int char_id, int flag, c
 void guild_retrieveitembound(int char_id,int aid,int guild_id)
 {
 	TBL_PC *sd = map_id2sd(aid);
-	if(sd){ //Character is online
+	if( sd ) { //Character is online
 		int idxlist[MAX_INVENTORY];
 		int j,i;
 		j = pc_bound_chk(sd,2,idxlist);
-		if(j) {
+		if( j ) {
 			struct guild_storage* stor = guild2storage(sd->status.guild_id);
-			for(i=0;i<j;i++) { //Loop the matching items, guild_storage_additem takes care of opening storage
-				if(stor)
+			for( i = 0; i < j; i++ ) { //Loop the matching items, guild_storage_additem takes care of opening storage
+				if( stor )
 					guild_storage_additem(sd,stor,&sd->status.inventory[idxlist[i]],sd->status.inventory[idxlist[i]].amount);
 				pc_delitem(sd,idxlist[i],sd->status.inventory[idxlist[i]].amount,0,4,LOG_TYPE_GSTORAGE);
 			}
@@ -892,15 +892,15 @@ void guild_retrieveitembound(int char_id,int aid,int guild_id)
 		}
 	} else { //Character is offline, ask char server to do the job
 		struct guild_storage* stor = guild2storage2(guild_id);
-		if(stor && stor->storage_status == 1) { //Someone is in guild storage, close them
-			struct s_mapiterator* iter = mapit_getallusers();
-			for( sd = (TBL_PC*)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC*)mapit_next(iter) ) {
-				if(sd->status.guild_id == guild_id && sd->state.storage_flag == 2) {
+		struct guild *g = guild_search(guild_id);
+		int i;
+		nullpo_retv(g);
+		if( stor && stor->storage_status == 1 ) { //Someone is in guild storage, close them
+			for( i = 0; i < g->max_member; i++ ) {
+				TBL_PC *pl_sd = g->member[i].sd;
+				if( pl_sd && pl_sd->state.storage_flag == 2 )
 					storage_guild_storageclose(sd);
-					break;
-				}
 			}
-			mapit_free(iter);
 		}
 		intif_itembound_req(char_id,aid,guild_id);
 	}
@@ -908,7 +908,7 @@ void guild_retrieveitembound(int char_id,int aid,int guild_id)
 #endif
 
 int guild_send_memberinfoshort(struct map_session_data *sd,int online)
-{ // cleaned up [LuzZza]
+{ //Cleaned up [LuzZza]
 	struct guild *g;
 	nullpo_ret(sd);
 
@@ -922,8 +922,8 @@ int guild_send_memberinfoshort(struct map_session_data *sd,int online)
 		sd->status.account_id,sd->status.char_id,online,sd->status.base_level,sd->status.class_);
 
 	if(!online) {
-		int i=guild_getindex(g,sd->status.account_id,sd->status.char_id);
-		if(i>=0)
+		int i = guild_getindex(g,sd->status.account_id,sd->status.char_id);
+		if(i >= 0)
 			g->member[i].sd=NULL;
 		else
 			ShowError("guild_send_memberinfoshort: Failed to locate member %d:%d in guild %d!\n", sd->status.account_id, sd->status.char_id, g->guild_id);
@@ -970,7 +970,7 @@ int guild_recv_memberinfoshort(int guild_id,int account_id,int char_id,int onlin
 			sd->status.guild_id=0;
 			sd->guild_emblem_id=0;
 		}
-		ShowWarning("guild: not found member %d,%d on %d[%s]\n",	account_id,char_id,guild_id,g->name);
+		ShowWarning("guild: not found member %d,%d on %d[%s]\n",account_id,char_id,guild_id,g->name);
 		return 0;
 	}
 
@@ -1085,7 +1085,7 @@ int guild_position_changed(int guild_id,int idx,struct guild_position *p)
 		return 0;
 	memcpy(&g->position[idx],p,sizeof(struct guild_position));
 	clif_guild_positionchanged(g,idx);
-	
+
 	// Update char name in client [LuzZza]
 	for(i=0;i<g->max_member;i++)
 		if(g->member[i].position == idx && g->member[i].sd != NULL)
@@ -1347,7 +1347,7 @@ void guild_guildaura_refresh(struct map_session_data *sd, uint16 skill_id, uint1
 	}
 	group = skill_unitsetting(&sd->bl,skill_id,skill_lv,sd->bl.x,sd->bl.y,0);
 	if( group ) {
-		sc_start4(NULL,&sd->bl,type,100,(battle_config.guild_aura&16)?0:skill_lv,0,0,group->group_id,600000);//duration doesn't matter these status never end with val4
+		sc_start4(NULL,&sd->bl,type,100,(battle_config.guild_aura&16)?0:skill_lv,0,0,group->group_id,600000); //Duration doesn't matter these status never end with val4
 	}
 	return;
 }
@@ -1363,9 +1363,9 @@ int guild_get_alliance_count(struct guild *g,int flag)
 	int i,c;
 	nullpo_ret(g);
 
-	for(i=c=0;i<MAX_GUILDALLIANCE;i++) {
-		if(	g->alliance[i].guild_id>0 &&
-			g->alliance[i].opposition==flag )
+	for( i = c = 0; i < MAX_GUILDALLIANCE; i++ ) {
+		if(	g->alliance[i].guild_id > 0 &&
+			g->alliance[i].opposition == flag )
 			c++;
 	}
 	return c;
@@ -1376,8 +1376,8 @@ void guild_block_skill(struct map_session_data *sd, int time)
 {
 	int skill_id[] = { GD_BATTLEORDER, GD_REGENERATION, GD_RESTORE, GD_EMERGENCYCALL };
 	int i;
-	for (i = 0; i < 4; i++)
-		skill_blockpc_start_(sd, skill_id[i], time , true);
+	for( i = 0; i < 4; i++ )
+		skill_blockpc_start(sd, skill_id[i], time);
 }
 
 /*====================================================
