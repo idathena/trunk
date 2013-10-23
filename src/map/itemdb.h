@@ -13,20 +13,22 @@
 
 #define MAX_RANDITEM	11000
 
-// The maximum number of item delays
-#define MAX_ITEMDELAYS	10
+// Maximum number of item delays
+#define MAX_ITEMDELAYS	30
 
 #define MAX_SEARCH	5  //Designed for search functions, species max number of matches to display.
 
-/* maximum amount of items a combo may require */
+/* Maximum amount of items a combo may require */
 #define MAX_ITEMS_PER_COMBO 6
 
 enum item_itemid {
+	ITEMID_HOLY_WATER = 523,
 	ITEMID_EMPERIUM = 714,
 	ITEMID_YELLOW_GEMSTONE = 715,
 	ITEMID_RED_GEMSTONE = 716,
 	ITEMID_BLUE_GEMSTONE = 717,
 	ITEMID_TRAP = 1065,
+	ITEMID_PAINT_BRUSH = 6122,
 	ITEMID_STRANGE_EMBRYO = 6415,
 	ITEMID_STONE = 7049,
 	ITEMID_SKULL_ = 7420,
@@ -35,10 +37,6 @@ enum item_itemid {
 	ITEMID_ANCILLA = 12333,
 	ITEMID_REINS_OF_MOUNT = 12622,
 };
-
-/**
- * Rune Knight
- **/
 
 enum rune_list {
 	ITEMID_NAUTHIZ = 12725,
@@ -53,9 +51,6 @@ enum rune_list {
 	ITEMID_LUX_ANIMA = 22540,
 };
 
-/**
- * Mechanic
- **/
 enum mecha_item_list {
 	ITEMID_ACCELERATOR = 2800,
 	ITEMID_HOVERING_BOOSTER,

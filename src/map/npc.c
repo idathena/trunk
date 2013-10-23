@@ -82,7 +82,7 @@ struct event_data {
 
 static struct eri *timer_event_ers; //For the npc timer data. [Skotlex]
 
-/* hello */
+/* Hello */
 static char *npc_last_path;
 static char *npc_last_ref;
 

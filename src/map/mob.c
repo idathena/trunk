@@ -3951,11 +3951,11 @@ static int mob_read_randommonster(void)
 	memset(&summon, 0, sizeof(summon));
 
 	for(i = 0; i < ARRAYLENGTH(mobfile) && i < MAX_RANDOMMONSTER; i++) { // MobID,DummyName,Rate
-		entries=0;
+		entries = 0;
 		mob_db_data[0]->summonper[i] = MOBID_PORING; // Default fallback value, in case the database does not provide one
 		sprintf(line, "%s/%s", db_path, mobfile[i]);
-		fp=fopen(line,"r");
-		if(fp==NULL) {
+		fp = fopen(line,"r");
+		if(fp == NULL) {
 			ShowError("can't read %s\n",line);
 			return -1;
 		}
@@ -3963,22 +3963,22 @@ static int mob_read_randommonster(void)
 			int class_;
 			if(line[0] == '/' && line[1] == '/')
 				continue;
-			memset(str,0,sizeof(str));
-			for(j=0,p=line;j<3 && p;j++){
-				str[j]=p;
-				p=strchr(p,',');
-				if(p) *p++=0;
+			memset(str, 0, sizeof(str));
+			for(j = 0, p = line; j < 3 && p; j++) {
+				str[j] = p;
+				p = strchr(p,',');
+				if(p) *p++ = 0;
 			}
 
-			if(str[0]==NULL || str[2]==NULL)
+			if(str[0] == NULL || str[2] == NULL)
 				continue;
 
 			class_ = atoi(str[0]);
 			if(mob_db(class_) == mob_dummy)
 				continue;
-			mob_db_data[class_]->summonper[i]=atoi(str[2]);
+			mob_db_data[class_]->summonper[i] = atoi(str[2]);
 			if(i) {
-				if( summon[i].qty < ARRAYLENGTH(summon[i].class_) ) //MvPs
+				if(summon[i].qty < ARRAYLENGTH(summon[i].class_)) //MvPs
 					summon[i].class_[summon[i].qty++] = class_;
 				else {
 					ShowDebug("Can't store more random mobs from %s, increase size of mob.c:summon variable!\n", mobfile[i]);

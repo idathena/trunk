@@ -498,6 +498,7 @@ extern struct Battle_Config
 	int guild_notice_changemap;
 	int drop_rateincrease;
 	int feature_auction;
+	int mon_trans_disable_in_gvg;
 } battle_config;
 
 void do_init_battle(void);

@@ -585,7 +585,7 @@ int channel_pcdelete(struct map_session_data *sd, char *chname){
 	if(channel_pc_haschan(sd,channel)<0){
 		sprintf(output, msg_txt(1425),chname);// You're not part of the '%s' channel.
 		clif_displaymessage(sd->fd, output);
-		return -2; //channel doesn't exist or player don't have it
+		return -2; // Channel doesn't exist or player don't have it
 	}
 	channel_delete(channel);
 

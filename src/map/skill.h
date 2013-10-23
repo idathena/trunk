@@ -1988,6 +1988,7 @@ enum gx_poison {
  **/
 int skill_maelstrom_suction(struct block_list *bl, va_list ap);
 int skill_select_menu(struct map_session_data *sd,uint16 skill_id);
+bool skill_check_shadowform(struct block_list *bl, int64 damage, int hit);
 
 // Sorcerer Four Elemental Analisys.
 int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv, unsigned short *item_list);

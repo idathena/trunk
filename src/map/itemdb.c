@@ -538,7 +538,7 @@ static void itemdb_read_itemgroup_sub(const char* filename)
 		for( j = 0, p = line; j < 3 && p; j++ ) {
 			str[j] = p;
 			p = strchr(p, ',');
-			if( p ) *p++=0;
+			if( p ) *p++ = 0;
 		}
 		if( str[0] == NULL)
 			continue;
@@ -761,7 +761,7 @@ int itemdb_combo_split_atoi (char *str, int *val) {
 		str = strchr(str,':');
 
 		if (str)
-			*str ++= 0;
+			*str++ = 0;
 	}
 
 	if (i == 0) //No data found.
@@ -939,7 +939,7 @@ void itemdb_re_split_atoi(char *str, int *atk, int *matk) {
 		val[i] = atoi(str);
 		str = strchr(str,':');
 		if (str)
-			*str ++= 0;
+			*str++ = 0;
 	}
 	if (i == 0) {
 		*atk = *matk = 0;
@@ -1335,7 +1335,7 @@ static void itemdb_read(void) {
 	sv_readdb(db_path, "item_avail.txt",         ',', 2, 2, -1, &itemdb_read_itemavail);
 	sv_readdb(db_path, DBPATH"item_noequip.txt", ',', 2, 2, -1, &itemdb_read_noequip);
 	sv_readdb(db_path, DBPATH"item_trade.txt",   ',', 3, 3, -1, &itemdb_read_itemtrade);
-	sv_readdb(db_path, "item_delay.txt",         ',', 2, 2, -1, &itemdb_read_itemdelay);
+	sv_readdb(db_path, DBPATH"item_delay.txt",   ',', 2, 2, -1, &itemdb_read_itemdelay);
 	sv_readdb(db_path, "item_stack.txt",         ',', 3, 3, -1, &itemdb_read_stack);
 	sv_readdb(db_path, DBPATH"item_buyingstore.txt",   ',', 1, 1, -1, &itemdb_read_buyingstore);
 	sv_readdb(db_path, "item_nouse.txt",         ',', 3, 3, -1, &itemdb_read_nouse);

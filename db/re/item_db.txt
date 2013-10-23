@@ -5974,13 +5974,13 @@
 12655,Brain_Powder,Brain Powder,2,2000,,100,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 12656,Magical_Powder,Magical Powder,2,3000,,200,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 12657,Madness_Powder,Madness Powder,2,4000,,300,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
-12658,Trans_Scroll_Devi,Transformation Scroll(Deviruchi),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start4 SC_MONSTER_TRANSFORM,1200000,1109,0,0,0; },{},{}
-12659,Trans_Scroll_Ray_Arch,Transformation Scroll(Raydric),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start4 SC_MONSTER_TRANSFORM,1200000,1276,0,0,0; },{},{}
-12660,Trans_Scroll_Mavka,Transformation Scroll(Mavka),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start4 SC_MONSTER_TRANSFORM,1200000,1884,0,0,0; },{},{}
-12661,Trans_Scroll_Marduk,Transformation Scroll(Marduk),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start4 SC_MONSTER_TRANSFORM,1200000,1140,0,0,0; },{},{}
-12662,Trans_Scroll_Banshee,Transformation Scroll(Banshee),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start4 SC_MONSTER_TRANSFORM,1200000,1867,0,0,0; },{},{}
-12663,Trans_Scroll_Poring,Transformation Scroll(Poring),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start4 SC_MONSTER_TRANSFORM,1200000,1002,0,0,0; },{},{}
-12664,Trans_Scroll_Golem,Transformation Scroll(Golem),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start4 SC_MONSTER_TRANSFORM,1200000,1040,0,0,0; },{},{}
+12658,Trans_Scroll_Devi,Transformation Scroll(Deviruchi),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ montransform 1109,1200000,SC_MTF_ASPD; },{},{}
+12659,Trans_Scroll_Ray_Arch,Transformation Scroll(Raydric),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ montransform 1276,1200000,SC_MTF_RANGEATK; },{},{}
+12660,Trans_Scroll_Mavka,Transformation Scroll(Mavka),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ montransform 1884,1200000,SC_MTF_RANGEATK; },{},{}
+12661,Trans_Scroll_Marduk,Transformation Scroll(Marduk),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ montransform 1140,1200000,SC_MTF_MATK; },{},{}
+12662,Trans_Scroll_Banshee,Transformation Scroll(Banshee),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ montransform 1867,1200000,SC_MTF_MATK; },{},{}
+12663,Trans_Scroll_Poring,Transformation Scroll(Poring),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ montransform 1002,1200000,SC_MTF_CRIDAMAGE; },{},{}
+12664,Trans_Scroll_Golem,Transformation Scroll(Golem),2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ montransform 1040,1200000,SC_MTF_MLEATKED; },{},{}
 12665,Grovel_Buff,Grovel Buff,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 12666,Thai_Perfume_MATK,Thai Perfume MATK,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 12667,Thai_Perfume_ATK,Thai Perfume ATK,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
@@ -8257,9 +8257,9 @@
 18737,Fortier_Mask,Fortier Masque,5,20,,200,,0,,0,0xFFFFFFFF,63,2,512,,10,0,876,{ bonus bUnbreakableHelm,0; },{},{}
 18739,Carnation_Hairband,Carnation Hairband,5,20,,100,,0,,0,0xFFFFFFFF,63,2,256,,0,1,878,{ bonus bLuk,1; },{},{}
 18740,Hair_Of_The_Strong,Hair Of The Strong,5,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,0,0,879,{},{},{}
-18742,C_MoonStar_Accessory,Moon and Stars,5,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,0,0,0,{},{},{}
+18742,C_MoonStar_Accessory,Moon and Stars,5,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,0,0,881,{},{ sc_start SC_MOONSTAR,-1,0; },{ sc_end SC_MOONSTAR; }
 18743,Spirit_Of_Chung_E,Spirit Of Chung E,5,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,0,0,882,{},{},{}
-18744,C_World_Star,Twilight,5,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,0,0,0,{},{},{}
+18744,C_World_Star,Twilight,5,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,0,0,883,{},{ /*sc_start SC_SUPERSTAR,-1,0;*/ },{ /*sc_end SC_SUPERSTAR;*/ }
 18745,Choco_Stick_In_Mouth,Choco Stick In Mouth,5,20,,100,,0,,0,0xFFFFFFFF,63,2,1,,10,0,884,{},{},{}
 18746,Chilly_Breath,Chilly Breath,5,20,,100,,0,,0,0xFFFFFFFF,63,2,1,,10,0,885,{ bonus bInt,1; },{},{}
 18747,Eyes_Of_Ifrit,Eyes Of Ifrit,5,20,,100,,1,,1,0xFFFFFFFF,63,2,512,,0,0,886,{ bonus bDex,1; },{},{}
@@ -8389,6 +8389,7 @@
 21005,Metal_Two_Hand_Sword,Metal Two Hand Sword,4,20,,0,95,,1,1,0x00004082,63,2,34,3,1,1,3,{ bonus bBaseAtk,(getrefine()*6); bonus bMatk,(getrefine()*2); set .@i,((BaseLevel/10)>12)?12:(BaseLevel/10); if(.@i>2) bonus bBaseAtk,((.@i-2)*5); },{},{}
 // New Items
 22514,Candy_Holder,Candy Holder,11,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
+22538,Hanbok_Pocket,Hanbok Pocket,2,0,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_HANBOK,600000,0; },{},{}
 22558,Lucky_Bag,Lucky Bag,11,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22559,Mock_Strawberry,Mock Strawberry,11,20,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 50,50; itemskill "SM_ENDURE",3; },{},{}
 22571,Easter_Egg,Easter Egg,11,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}

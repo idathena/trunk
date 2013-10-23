@@ -678,7 +678,15 @@ typedef enum sc_type {
 	SC_ALL_RIDING,
 	SC_ELEMENTAL_SHIELD,
 
-	SC_MAX, //Automatically updated max, used in for's to check we are within bounds.
+	SC_MTF_ASPD,
+	SC_MTF_RANGEATK,
+	SC_MTF_MATK,
+	SC_MTF_MLEATKED,
+	SC_MTF_CRIDAMAGE,
+
+	SC_MOONSTAR, //Headgears with special animations through status
+
+	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 
 // Official status change ids, used to display status icons on the client.

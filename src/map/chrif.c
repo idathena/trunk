@@ -1018,25 +1018,25 @@ int chrif_accountban(int fd) {
 
 	acc = RFIFOL(fd,2);
 
-	if ( battle_config.etc_log )
+	if( battle_config.etc_log )
 		ShowNotice("chrif_accountban %d.\n", acc);
 	sd = map_id2sd(acc);
 
-	if ( acc < 0 || sd == NULL ) {
+	if( acc < 0 || sd == NULL ) {
 		ShowError("chrif_accountban failed - player not online.\n");
 		return 0;
 	}
 
 	sd->login_id1++; // change identify, because if player come back in char within the 5 seconds, he can change its characters
-	if (RFIFOB(fd,6) == 0) { // 0: change of statut, 1: ban
+	if( RFIFOB(fd,6) == 0 ) { // 0: change of statut, 1: ban
 		int ret_status = RFIFOL(fd,7); // status or final date of a banishment
-		if(0<ret_status && ret_status<=9)
-			clif_displaymessage(sd->fd, msg_txt(411+ret_status));
-		else if(ret_status==100)
+		if( 0 < ret_status && ret_status <= 9 )
+			clif_displaymessage(sd->fd, msg_txt(411 + ret_status));
+		else if( ret_status == 100 )
 			clif_displaymessage(sd->fd, msg_txt(421));
 		else
 			clif_displaymessage(sd->fd, msg_txt(420)); //"Your account has not more authorised."
-	} else if (RFIFOB(fd,6) == 1) { // 0: change of statut, 1: ban
+	} else if( RFIFOB(fd,6) == 1 ) { // 0: change of statut, 1: ban
 		time_t timestamp;
 		char tmpstr[2048];
 		timestamp = (time_t)RFIFOL(fd,7); // status or final date of a banishment

@@ -93,7 +93,7 @@
 488,0xb9,    ,  3, 0,  -1,all,   0x200	//CG_HERMODE
 516,0x86,    ,  3, 0, 100,enemy, 0x000	//GS_DESPERADO
 521,0xbe,    ,  0, 1,1000,enemy, 0x000	//GS_GROUNDDRIFT
-525,0x86,    ,  0, 2, 100,enemy, 0x018  //NJ_HUUMA
+525,0x86,    ,  0, 2,1000,enemy, 0x018  //NJ_HUUMA
 527,0xbc,    , -1, 0,2000,enemy, 0x018	//NJ_TATAMIGAESHI
 535,0xbd,    , -1, 0,  20,enemy, 0x010	//NJ_KAENSIN
 538,0xbb,    ,  1:1:1:2:2:2:3:3:3:4,0,-1,all, 0x010 //NJ_SUITON
@@ -106,8 +106,8 @@
 
 2032,0xe1,    ,  2, 0,1000,enemy, 0x018	//GC_POISONSMOKE
 
-2213,0x86,    ,  0, 9, 100,enemy, 0x018	//WL_COMET
-2216,0xcb,    , -1, 0, 100,enemy, 0x018	//WL_EARTHSTRAIN
+2213,0x86,    ,  0, 9,1000,enemy, 0x018	//WL_COMET
+2216,0xcb,    , -1, 0,1000,enemy, 0x018	//WL_EARTHSTRAIN
 
 2238,0xd8,    ,  0, 1,1000,enemy, 0x006	//RA_ELECTRICSHOCKER
 2239,0xd9,    ,  0, 1,1000,enemy, 0x006	//RA_CLUSTERBOMB
@@ -118,8 +118,8 @@
 2253,0xd6,    ,  0, 1,1000,enemy, 0x002	//RA_FIRINGTRAP
 2254,0xd7,    ,  0, 1,1000,enemy, 0x002	//RA_ICEBOUNDTRAP
 
-2273,0xe2,    ,  2, 0, 500,all,0x000	//NC_NEUTRALBARRIER
-2274,0xe3,    ,  2, 0, 500,friend,   0x000	//NC_STEALTHFIELD
+2273,0xe2,    ,  2, 0, 500,all,   0x000	//NC_NEUTRALBARRIER
+2274,0xe3,    ,  2, 0, 500,friend,0x000	//NC_STEALTHFIELD
 
 2299,0xcc,    ,  0, 1,1000,enemy, 0x006  //SC_MANHOLE
 2300,0xcd,    ,  0, 0,1000,all,   0x006  //SC_DIMENSIONDOOR
@@ -133,7 +133,7 @@
 
 2414,0xda,    ,  0, 0,1000,enemy, 0x008	//WM_REVERBERATION
 2418,0xdb,    ,  0, 5, 300,enemy, 0x800	//WM_SEVERE_RAINSTORM
-2419,0xde,    ,  0, 1,1000,all,   0x014  //WM_POEMOFNETHERWORLD
+2419,0xde,    ,  0, 1,1000,all,   0x014	//WM_POEMOFNETHERWORLD
 
 2443,0xdc,    ,  0, 0,1000,enemy, 0x00A	//SO_FIREWALK
 2444,0xdd,    ,  0, 0,1000,enemy, 0x00A	//SO_ELECTRICWALK
@@ -158,21 +158,21 @@
 
 2555,0x104,   ,  0, 1:2:2:3:3,500,enemy,0x006	//RL_B_TRAP
 
-3006,0x86,    ,  0, 1, 100,enemy, 0x018	//KO_BAKURETSU
-3008,0x86,    ,  0, 1:1:1:1:1:1:1:1:1:2, 100,enemy, 0x018 //KO_MUCHANAGE
-3009,0x86,    ,  0, 3, 500,enemy, 0x018 //KO_HUUMARANKA
+3006,0x86,    ,  0, 1,1000,enemy, 0x018	//KO_BAKURETSU
+3008,0x86,    ,  0, 1:1:1:1:1:1:1:1:1:2,1000,enemy, 0x018 //KO_MUCHANAGE
+3009,0x86,    ,  0, 3,1000,enemy, 0x018 //KO_HUUMARANKA
 3010,0xfc,    ,  0, 1,5000,enemy, 0x018 //KO_MAKIBISHI
-3020,0xf8,    ,  0, 2, 100,all, 0x018   //KO_ZENKAI
+3020,0xf8,    ,  0, 2, 500,all, 0x018   //KO_ZENKAI
 
 5006,0x101,   ,  0, 3,2000,enemy, 0x018	//NC_MAGMA_ERUPTION
 5008,0x85,    ,  0, 0,  -1,all,   0x003	//SO_ELEMENTAL_SHIELD
 5010,0xfe,    ,  0, 2,  -1,enemy, 0x000	//SC_ESCAPE
 
-8020,0xf5,    ,  3, 0,2300:2100:1900:1700:1500,enemy, 0x018 //MH_POISON_MIST
-8033,0x7e,    ,  0, 0,  -1,all, 0x003 //MH_STEINWAND
+8020,0xf5,    ,  3, 0,2300:2100:1900:1700:1500,enemy, 0x018	//MH_POISON_MIST
+8033,0x7e,    ,  0, 0,  -1,all, 0x003	//MH_STEINWAND
 8025,0x86,    ,  0, 2:2:3:3:4,1000,enemy, 0x018	//MH_XENO_SLASHER
-8041,0xf6,    ,  1:1:2:2:3, 0,2000,enemy, 0x01A //MH_LAVA_SLIDE
-8043,0xf7,    ,  1, 0,  -1,all, 0x2018  //MH_VOLCANIC_ASH
+8041,0xf6,    ,  1:1:2:2:3, 0,2000,enemy, 0x01A	//MH_LAVA_SLIDE
+8043,0xf7,    ,  1, 0,  -1,all, 0x2018 	//MH_VOLCANIC_ASH
 
 8208,0x86,    ,  0, 2,1000,enemy, 0x080	//MA_SHOWER
 8209,0x90,    ,  0, 1,1000,enemy, 0x006	//MA_SKIDTRAP

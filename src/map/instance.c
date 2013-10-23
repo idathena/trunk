@@ -268,16 +268,16 @@ int instance_create(int party_id, const char *name)
 	if(db == NULL)
 		return -1;
 
-	if( p == NULL )
+	if(p == NULL)
 		return -2;
 
-	if( p->instance_id )
+	if(p->instance_id)
 		return -3; // Party already instancing
 
 	// Searching a Free Instance
 	// 0 is ignored as this mean "no instance" on maps
-	ARR_FIND(1, MAX_INSTANCE_DB, i, instance_data[i].state == INSTANCE_FREE);
-	if( i >= MAX_INSTANCE_DB )
+	ARR_FIND(1, MAX_INSTANCE_DATA, i, instance_data[i].state == INSTANCE_FREE);
+	if(i >= MAX_INSTANCE_DATA)
 		return -4;
 
 	instance_data[i].type = db->type;
@@ -294,9 +294,9 @@ int instance_create(int party_id, const char *name)
 
 	instance_wait.id[instance_wait.count++] = p->instance_id;
 
-	clif_instance_create( party_getavailablesd( p ), name, instance_wait.count, 1);
+	clif_instance_create(party_getavailablesd(p), name, instance_wait.count, 1);
 
-	instance_subscription_timer(0,0,0,0);
+	instance_subscription_timer(0, 0, 0, 0);
 
 	ShowInfo("[Instance] Created: %s.\n", name);
 
