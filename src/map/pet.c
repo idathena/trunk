@@ -496,8 +496,7 @@ int pet_catch_process2(struct map_session_data* sd, int target_id)
 	nullpo_retr(1, sd);
 
 	md = (struct mob_data*)map_id2bl(target_id);
-	if(!md || md->bl.type != BL_MOB || md->bl.prev == NULL)
-	{	// Invalid inputs/state, abort capture.
+	if(!md || md->bl.type != BL_MOB || md->bl.prev == NULL) { //Invalid inputs/state, abort capture.
 		clif_pet_roulette(sd,0);
 		sd->catch_target_class = -1;
 		sd->itemid = sd->itemindex = -1;
@@ -507,11 +506,11 @@ int pet_catch_process2(struct map_session_data* sd, int target_id)
 	//FIXME: delete taming item here, if this was an item-invoked capture and the item was flagged as delay-consume [ultramage]
 
 	i = search_petDB_index(md->class_,PET_CLASS);
-	//catch_target_class == 0 is used for universal lures (except bosses for now). [Skotlex]
-	if (sd->catch_target_class == 0 && !(md->status.mode&MD_BOSS))
+	//Catch_target_class == 0 is used for universal lures (except bosses for now). [Skotlex]
+	if(sd->catch_target_class == 0 && !(md->status.mode&MD_BOSS))
 		sd->catch_target_class = md->class_;
 	if(i < 0 || sd->catch_target_class != md->class_) {
-		clif_emotion(&md->bl, E_AG);	//mob will do /ag if wrong lure is used on them.
+		clif_emotion(&md->bl,E_AG); //Mob will do /ag if wrong lure is used on them.
 		clif_pet_roulette(sd,0);
 		sd->catch_target_class = -1;
 		return 1;
@@ -523,16 +522,13 @@ int pet_catch_process2(struct map_session_data* sd, int target_id)
 	if(battle_config.pet_catch_rate != 100)
 		pet_catch_rate = (pet_catch_rate*battle_config.pet_catch_rate)/100;
 
-	if(rnd()%10000 < pet_catch_rate)
-	{
+	if(rnd()%10000 < pet_catch_rate) {
 		unit_remove_map(&md->bl,CLR_OUTSIGHT);
 		status_kill(&md->bl);
 		clif_pet_roulette(sd,1);
 		intif_create_pet(sd->status.account_id,sd->status.char_id,pet_db[i].class_,mob_db(pet_db[i].class_)->lv,
 			pet_db[i].EggID,0,pet_db[i].intimate,100,0,1,pet_db[i].jname);
-	}
-	else
-	{
+	} else {
 		clif_pet_roulette(sd,0);
 		sd->catch_target_class = -1;
 	}

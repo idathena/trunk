@@ -9029,56 +9029,56 @@ void clif_parse_WantToConnection(int fd, struct map_session_data* sd)
 	struct auth_node* node;
 	int cmd, account_id, char_id, login_id1, sex;
 	unsigned int client_tick; //The client tick is a tick, therefore it needs be unsigned. [Skotlex]
-	int packet_ver;	// 5: old, 6: 7july04, 7: 13july04, 8: 26july04, 9: 9aug04/16aug04/17aug04, 10: 6sept04, 11: 21sept04, 12: 18oct04, 13: 25oct04 (by [Yor])
+	int packet_ver;	//5: old, 6: 7july04, 7: 13july04, 8: 26july04, 9: 9aug04/16aug04/17aug04, 10: 6sept04, 11: 21sept04, 12: 18oct04, 13: 25oct04 (by [Yor])
 
 	if (sd) {
 		ShowError("clif_parse_WantToConnection : invalid request (character already logged in)\n");
 		return;
 	}
 
-	// Only valid packet version get here
+	//Only valid packet version get here
 	packet_ver = clif_guess_PacketVer(fd, 1, NULL);
 
 	cmd = RFIFOW(fd,0);
-	account_id  = RFIFOL(fd, packet_db[packet_ver][cmd].pos[0]);
-	char_id     = RFIFOL(fd, packet_db[packet_ver][cmd].pos[1]);
-	login_id1   = RFIFOL(fd, packet_db[packet_ver][cmd].pos[2]);
-	client_tick = RFIFOL(fd, packet_db[packet_ver][cmd].pos[3]);
-	sex         = RFIFOB(fd, packet_db[packet_ver][cmd].pos[4]);
+	account_id  = RFIFOL(fd,packet_db[packet_ver][cmd].pos[0]);
+	char_id     = RFIFOL(fd,packet_db[packet_ver][cmd].pos[1]);
+	login_id1   = RFIFOL(fd,packet_db[packet_ver][cmd].pos[2]);
+	client_tick = RFIFOL(fd,packet_db[packet_ver][cmd].pos[3]);
+	sex         = RFIFOB(fd,packet_db[packet_ver][cmd].pos[4]);
 
-	if( packet_ver < 5 || // reject really old client versions
-		(packet_ver <= 9 && (battle_config.packet_ver_flag & 1) == 0) || // older than 6sept04
-	    (packet_ver > 9 && packet_ver <40 && (battle_config.packet_ver_flag & 1<<(packet_ver-9)) == 0) || // version not allowed
-	    (packet_ver >= 40 && packet_ver <=72 && (battle_config.packet_ver_flag2 & 1<<(packet_ver-40)) == 0) )
-	{ // packet version rejected
+	if (packet_ver < 5 || //Reject really old client versions
+		(packet_ver <= 9 && (battle_config.packet_ver_flag & 1) == 0) || //Older than 6sept04
+	    (packet_ver > 9 && packet_ver <40 && (battle_config.packet_ver_flag & 1<<(packet_ver-9)) == 0) || //Version not allowed
+	    (packet_ver >= 40 && packet_ver <=72 && (battle_config.packet_ver_flag2 & 1<<(packet_ver-40)) == 0))
+	{ //Packet version rejected
 		ShowInfo("Rejected connection attempt, forbidden packet version (AID/CID: '"CL_WHITE"%d/%d"CL_RESET"', Packet Ver: '"CL_WHITE"%d"CL_RESET"', IP: '"CL_WHITE"%s"CL_RESET"').\n", account_id, char_id, packet_ver, ip2str(session[fd]->client_addr, NULL));
 		WFIFOHEAD(fd,packet_len(0x6a));
 		WFIFOW(fd,0) = 0x6a;
-		WFIFOB(fd,2) = 5; // Your Game's EXE file is not the latest version
+		WFIFOB(fd,2) = 5; //Your Game's EXE file is not the latest version
 		WFIFOSET(fd,packet_len(0x6a));
 		set_eof(fd);
 		return;
 	}
 
-	if( runflag != MAPSERVER_ST_RUNNING ) { // not allowed
-		clif_authfail_fd(fd,1);// server closed
+	if (runflag != MAPSERVER_ST_RUNNING) { //Not allowed
+		clif_authfail_fd(fd, 1); //Server closed
 		return;
 	}
 
 	//Check for double login.
 	bl = map_id2bl(account_id);
-	if(bl && bl->type != BL_PC) {
+	if (bl && bl->type != BL_PC) {
 		ShowError("clif_parse_WantToConnection: a non-player object already has id %d, please increase the starting account number\n", account_id);
 		WFIFOHEAD(fd,packet_len(0x6a));
 		WFIFOW(fd,0) = 0x6a;
-		WFIFOB(fd,2) = 3; // Rejected by server
+		WFIFOB(fd,2) = 3; //Rejected by server
 		WFIFOSET(fd,packet_len(0x6a));
 		set_eof(fd);
 		return;
 	}
 
 	if (bl ||
-		((node=chrif_search(account_id)) && //An already existing node is valid only if it is for this login.
+		((node = chrif_search(account_id)) && //An already existing node is valid only if it is for this login.
 			!(node->account_id == account_id && node->char_id == char_id && node->state == ST_LOGIN)))
 	{
 		clif_authfail_fd(fd, 8); //Still recognizes last connection
@@ -9416,13 +9416,13 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd)
 	if(!sd->status.hp && !pc_isdead(sd) && status_isdead(&sd->bl))
 		pc_setdead(sd);
 
-	//If player is dead,and is spawned (such as @refresh) send death packet. [Valaris]
+	//If player is dead, and is spawned (such as @refresh) send death packet. [Valaris]
 	if(pc_isdead(sd))
 		clif_clearunit_area(&sd->bl,CLR_DEAD);
 	else
 		skill_usave_trigger(sd);
 
-	// Trigger skill effects if you appear standing on them
+	//Trigger skill effects if you appear standing on them
 	if(!battle_config.pc_invincible_time)
 		skill_unit_move(&sd->bl,gettick(),1);
 }
@@ -14061,11 +14061,11 @@ void clif_parse_Mail_setattach(int fd, struct map_session_data *sd)
 
 	if( !chrif_isconnected() )
 		return;
-	if (idx < 0 || amount < 0)
+	if( idx < 0 || amount < 0 )
 		return;
 
 	flag = mail_setitem(sd, idx, amount);
-	clif_Mail_setattachment(fd,idx,flag);
+	clif_Mail_setattachment(fd, idx, flag);
 }
 
 
@@ -14079,9 +14079,9 @@ void clif_parse_Mail_winopen(int fd, struct map_session_data *sd)
 {
 	int type = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
 
-	if (type == 0 || type == 1)
+	if( type == 0 || type == 1 )
 		mail_removeitem(sd, 0);
-	if (type == 0 || type == 2)
+	if( type == 0 || type == 2 )
 		mail_removezeny(sd, 0);
 }
 
@@ -14098,51 +14098,46 @@ void clif_parse_Mail_send(int fd, struct map_session_data *sd)
 		return;
 	if( sd->state.trading )
 		return;
-
 	if( RFIFOW(fd,info->pos[0]) < 69 ) {
 		ShowWarning("Invalid Msg Len from account %d.\n", sd->status.account_id);
 		return;
 	}
-
 	if( DIFF_TICK(sd->cansendmail_tick, gettick()) > 0 ) {
-		clif_displaymessage(sd->fd,msg_txt(675)); //"Cannot send mails too fast!!."
-		clif_Mail_send(fd, true); // fail
+		clif_displaymessage(sd->fd, msg_txt(675)); //"Cannot send mails too fast!!."
+		clif_Mail_send(fd, true); //Fail
 		return;
 	}
 
 	body_len = RFIFOB(fd,info->pos[3]);
 
-	if (body_len > MAIL_BODY_LENGTH)
+	if( body_len > MAIL_BODY_LENGTH )
 		body_len = MAIL_BODY_LENGTH;
-
-	if( !mail_setattachment(sd, &msg) ) { // Invalid Append condition
-		clif_Mail_send(sd->fd, true); // fail
-		mail_removeitem(sd,0);
-		mail_removezeny(sd,0);
+	if( !mail_setattachment(sd, &msg) ) { //Invalid Append condition
+		clif_Mail_send(sd->fd, true); //Fail
+		mail_removeitem(sd, 0);
+		mail_removezeny(sd, 0);
 		return;
 	}
 
-	msg.id = 0; // id will be assigned by charserver
+	msg.id = 0; //ID will be assigned by charserver
 	msg.send_id = sd->status.char_id;
-	msg.dest_id = 0; // will attempt to resolve name
+	msg.dest_id = 0; //Will attempt to resolve name
 	safestrncpy(msg.send_name, sd->status.name, NAME_LENGTH);
 	safestrncpy(msg.dest_name, (char*)RFIFOP(fd,info->pos[1]), NAME_LENGTH);
 	safestrncpy(msg.title, (char*)RFIFOP(fd,info->pos[2]), MAIL_TITLE_LENGTH);
 
-	if (msg.title[0] == '\0') {
-		return; // Message has no length and somehow client verification was skipped.
-	}
-	
-	if (body_len)
-		safestrncpy(msg.body, (char*)RFIFOP(fd,RFIFOW(fd,info->pos[4])), body_len + 1);
+	if( msg.title[0] == '\0' )
+		return; //Message has no length and somehow client verification was skipped.
+	if( body_len )
+		safestrncpy(msg.body, (char*)RFIFOP(fd,info->pos[4]), body_len + 1);
 	else
 		memset(msg.body, 0x00, MAIL_BODY_LENGTH);
-	
+
 	msg.timestamp = time(NULL);
 	if( !intif_Mail_send(sd->status.account_id, &msg) )
 		mail_deliveryfail(sd, &msg);
 
-	sd->cansendmail_tick = gettick() + 1000; // 1 Second flood Protection
+	sd->cansendmail_tick = gettick() + 1000; //1 Second flood Protection
 }
 
 
@@ -16684,23 +16679,20 @@ void DumpUnknow(int fd,TBL_PC *sd,int cmd,int packet_len) {
 	strftime(datestr, sizeof(datestr)-1, "%A, %B %d %Y %X.", datetime); //Server time (normal time): %A, %B %d %Y %X.
 
 	if( ( fp = fopen( packet_txt , "a" ) ) != NULL ) {
-		if( sd ) {
+		if( sd )
 			fprintf(fp, "Unknown packet 0x%04X (length %d), %s session #%d, %d/%d (AID/CID) at %s \n", cmd, packet_len, sd->state.active ? "authed" : "unauthed", fd, sd->status.account_id, sd->status.char_id,datestr);
-		} else {
+		else
 			fprintf(fp, "Unknown packet 0x%04X (length %d), session #%d at %s\n", cmd, packet_len, fd,datestr);
-		}
 		WriteDump(fp, RFIFOP(fd,0), packet_len);
 		fprintf(fp, "\n");
 		fclose(fp);
 	} else {
 		ShowError("Failed to write '%s'.\n", packet_txt);
-		// Dump on console instead
-		if( sd ) {
+		//Dump on console instead
+		if( sd )
 			ShowDebug("Unknown packet 0x%04X (length %d), %s session #%d, %d/%d (AID/CID) at %s\n", cmd, packet_len, sd->state.active ? "authed" : "unauthed", fd, sd->status.account_id, sd->status.char_id,datestr);
-		} else {
+		else
 			ShowDebug("Unknown packet 0x%04X (length %d), session #%d at %s\n", cmd, packet_len, fd,datestr);
-		}
-
 		ShowDump(RFIFOP(fd,0), packet_len);
 	}
 }
@@ -16715,46 +16707,45 @@ static int clif_parse(int fd)
 	TBL_PC* sd;
 	int pnum;
 
-	// TODO apply delays or disconnect based on packet throughput [FlavioJS]
-	// Note: "click masters" can do 80+ clicks in 10 seconds
+	//TODO apply delays or disconnect based on packet throughput [FlavioJS]
+	//Note: "click masters" can do 80+ clicks in 10 seconds
 
-	// Limit max packets per cycle to 3 (delay packet spammers) [FlavioJS]  -- This actually aids packet spammers, but stuff like /str+ gets slow without it [Ai4rei]
-	for( pnum = 0; pnum < 3; ++pnum ) { // begin main client packet processing loop
+	//Limit max packets per cycle to 3 (delay packet spammers) [FlavioJS] -- This actually aids packet spammers, but stuff like /str+ gets slow without it [Ai4rei]
+	for( pnum = 0; pnum < 3; ++pnum ) { //Begin main client packet processing loop
 
 		sd = (TBL_PC *)session[fd]->session_data;
-		if (session[fd]->flag.eof) {
-			if (sd) {
-				if (sd->state.autotrade) {
-					// Disassociate character from the socket connection.
+		if( session[fd]->flag.eof ) {
+			if( sd ) {
+				if( sd->state.autotrade ) {
+					//Disassociate character from the socket connection.
 					session[fd]->session_data = NULL;
 					sd->fd = 0;
 					ShowInfo("Character '"CL_WHITE"%s"CL_RESET"' logged off (using @autotrade).\n", sd->status.name);
-				} else if (sd->state.active) {
-					// Player logout display [Valaris]
+				} else if( sd->state.active ) {
+					//Player logout display [Valaris]
 					ShowInfo("Character '"CL_WHITE"%s"CL_RESET"' logged off.\n", sd->status.name);
 					clif_quitsave(fd, sd);
 				} else {
-					// Unusual logout (during log on/off/map-changer procedure)
+					//Unusual logout (during log on/off/map-changer procedure)
 					ShowInfo("Player AID:%d/CID:%d logged off.\n", sd->status.account_id, sd->status.char_id);
 					map_quit(sd);
 				}
-			} else {
+			} else
 				ShowInfo("Closed connection from '"CL_WHITE"%s"CL_RESET"'.\n", ip2str(session[fd]->client_addr, NULL));
-			}
 			do_close(fd);
 			return 0;
 		}
 
-		if (RFIFOREST(fd) < 2)
+		if( RFIFOREST(fd) < 2 )
 			return 0;
 
 		cmd = RFIFOW(fd,0);
 
-		// Identify client's packet version
-		if (sd) {
+		//Identify client's packet version
+		if( sd )
 			packet_ver = sd->packet_ver;
-		} else {
-			// Check authentification packet to know packet version
+		else {
+			//Check authentification packet to know packet version
 			packet_ver = clif_guess_PacketVer(fd, 0, &err);
 			if( err ) { // Failed to identify packet version
 				ShowInfo("clif_parse: Disconnecting session #%d with unknown packet version%s (p:0x%04x|l:%d).\n", fd, (
@@ -16769,21 +16760,19 @@ static int clif_parse(int fd)
 					". ERROR invalid error code"), cmd, RFIFOREST(fd));
 				WFIFOHEAD(fd,packet_len(0x6a));
 				WFIFOW(fd,0) = 0x6a;
-				WFIFOB(fd,2) = 3; // Rejected from Server
+				WFIFOB(fd,2) = 3; //Rejected from Server
 				WFIFOSET(fd,packet_len(0x6a));
-				
 #ifdef DUMP_INVALID_PACKET
 				ShowDump(RFIFOP(fd,0), RFIFOREST(fd));
 #endif
-
 				RFIFOSKIP(fd, RFIFOREST(fd));
 				set_eof(fd);
 				return 0;
 			}
 		}
 
-		// Filter out invalid / unsupported packets
-		if (cmd > MAX_PACKET_DB || packet_db[packet_ver][cmd].len == 0) {
+		//Filter out invalid / unsupported packets
+		if( cmd > MAX_PACKET_DB || packet_db[packet_ver][cmd].len == 0 ) {
 			ShowWarning("clif_parse: Received unsupported packet (packet 0x%04x, %d bytes received), disconnecting session #%d.\n", cmd, RFIFOREST(fd), fd);
 #ifdef DUMP_INVALID_PACKET
 			ShowDump(RFIFOP(fd,0), RFIFOREST(fd));
@@ -16792,14 +16781,14 @@ static int clif_parse(int fd)
 			return 0;
 		}
 
-		// Determine real packet length
+		//Determine real packet length
 		packet_len = packet_db[packet_ver][cmd].len;
-		if (packet_len == -1) { // variable-length packet
-			if (RFIFOREST(fd) < 4)
+		if( packet_len == -1 ) { //Variable-length packet
+			if( RFIFOREST(fd) < 4 )
 				return 0;
 
 			packet_len = RFIFOW(fd,2);
-			if (packet_len < 4 || packet_len > 32768) {
+			if( packet_len < 4 || packet_len > 32768 ) {
 				ShowWarning("clif_parse: Received packet 0x%04x specifies invalid packet_len (%d), disconnecting session #%d.\n", cmd, packet_len, fd);
 #ifdef DUMP_INVALID_PACKET
 				ShowDump(RFIFOP(fd,0), RFIFOREST(fd));
@@ -16808,16 +16797,16 @@ static int clif_parse(int fd)
 				return 0;
 			}
 		}
-		if ((int)RFIFOREST(fd) < packet_len)
-			return 0; // Not enough data received to form the packet
+		if( (int)RFIFOREST(fd) < packet_len )
+			return 0; //Not enough data received to form the packet
 
 		if( packet_db[packet_ver][cmd].func == clif_parse_debug )
 			packet_db[packet_ver][cmd].func(fd, sd);
 		else if( packet_db[packet_ver][cmd].func != NULL ) {
 			if( !sd && packet_db[packet_ver][cmd].func != clif_parse_WantToConnection )
-				; // Only valid packet when there is no session
+				; //Only valid packet when there is no session
 			else if( sd && sd->bl.prev == NULL && packet_db[packet_ver][cmd].func != clif_parse_LoadEndAck )
-				; // Only valid packet when player is not on a map
+				; //Only valid packet when player is not on a map
 			else
 				packet_db[packet_ver][cmd].func(fd, sd); 
 		}
@@ -16825,7 +16814,7 @@ static int clif_parse(int fd)
 		else DumpUnknow(fd, sd, cmd, packet_len);
 #endif
 		RFIFOSKIP(fd, packet_len);
-	}; // Main loop end
+	}; //Main loop end
 
 	return 0;
 }

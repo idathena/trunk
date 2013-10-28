@@ -1139,6 +1139,7 @@ function	script	unknown_d	{
 	}
 	close;
 }
+prt_fild03,144,95,0	script	Tree Roots	844,{ unknown_d(12166,902); }
 prt_fild09,371,255,0	script	Reptile Tongues	844,{ unknown_d(12167,903); }
 prt_fild09,352,241,0	script	Scorpion Tails	844,{ unknown_d(12168,904); }
 pay_fild02,177,108,0	script	Stems	844,{ unknown_d(12169,905); }
@@ -6029,7 +6030,7 @@ dic_in01,349,129,5	script	Bouy#13_3	449,{
 				mes "I've been waiting for the Galtens to return because I'm not accustomed to battle since I'm Venknick. Thank you very much.";
 				next;
 				mes "[Bouy]";
-				mes "Handwork is much faster to refine pieces of Bradium instead of using a machine. I will only need an hour to finish.";
+				mes "Handwork is much faster to refine pieces of Bradium instead of using a machine. I will only need two hours to finish."; //Official: "an hour", but gives 2-hour quest.
 				next;
 				mes "[Bouy]";
 				mes "Please go rest while I get to work.";

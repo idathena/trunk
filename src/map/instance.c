@@ -56,7 +56,7 @@ static struct instance_db *instance_searchtype_db(short instance_type)
 {
 	int i;
 
-	for(i=0; i < MAX_INSTANCE_DB; i++) {
+	for(i = 0; i < MAX_INSTANCE_DB; i++) {
 		if(instance_db[i].type == instance_type)
 			return &instance_db[i];
 	}
@@ -71,7 +71,7 @@ static struct instance_db *instance_searchname_db(const char *instance_name)
 {
 	int i;
 
-	for(i=0; i < MAX_INSTANCE_DB; i++) {
+	for(i = 0; i < MAX_INSTANCE_DB; i++) {
 		if(strcmp(instance_db[i].name, instance_name) == 0)
 			return &instance_db[i];
 	}
@@ -115,7 +115,7 @@ static int instance_subscription_timer(int tid, unsigned int tick, int id, intpt
 	for(i = 0; i < instance_wait.count; i++) {
 		if(	instance_data[instance_wait.id[i]].state == INSTANCE_IDLE &&
 			( p = party_search( instance_data[instance_wait.id[i]].party_id ) ) != NULL
-		){
+		) {
 			clif_instance_changewait( party_getavailablesd( p ), i + 1, 1 );
 		}
 	}

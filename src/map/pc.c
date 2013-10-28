@@ -9257,13 +9257,12 @@ bool pc_isautolooting(struct map_session_data *sd, int nameid)
 
 	if( !sd->state.autolooting && !sd->state.autolootingtype )
 		return false;
-
 	if( sd->state.autolooting )
 		ARR_FIND(0, AUTOLOOTITEM_SIZE, i, sd->state.autolootid[i] == nameid);
 	if( sd->state.autolootingtype && sd->state.autoloottype&(1<<itemdb_type(nameid)) )
 		j = true;
 
-	return (i != AUTOLOOTITEM_SIZE || j );
+	return (sd->state.autolooting ? i != AUTOLOOTITEM_SIZE : sd->state.autolootingtype ? j : false);
 }
 
 /**

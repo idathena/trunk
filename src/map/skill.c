@@ -508,7 +508,7 @@ static short skill_isCopyable (struct map_session_data *sd, uint16 skill_id, str
 int skillnotok (uint16 skill_id, struct map_session_data *sd)
 {
 	int16 idx, m;
-	nullpo_retr (1, sd);
+	nullpo_retr(1, sd);
 	m = sd->bl.m;
 	idx = skill_get_index(skill_id);
 
@@ -6878,7 +6878,8 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 						case SC_LAUDAAGNUS:			case SC_LAUDARAMUS:		case SC_GATLINGFEVER:
 						case SC_INCREASING:			case SC_ADJUSTMENT:		case SC_MADNESSCANCEL:
 						case SC_ANGEL_PROTECT:			case SC_MONSTER_TRANSFORM:	case SC_FULL_THROTTLE:
-						case SC_REBOUND:			case SC_TELEKINESIS_INTENSE:
+						case SC_REBOUND:			case SC_TELEKINESIS_INTENSE:	case SC_MOONSTAR:
+						case SC_SUPER_STAR:			case SC_ALL_RIDING:
 #ifdef RENEWAL
 						case SC_EXTREMITYFIST2:
 #endif
@@ -8313,6 +8314,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 						case SC_RAISINGDRAGON:		case SC_GT_REVITALIZE:		case SC_GT_ENERGYGAIN:
 						case SC_GT_CHANGE:		case SC_ANGEL_PROTECT:		case SC_MONSTER_TRANSFORM:
 						case SC_FULL_THROTTLE:		case SC_REBOUND:		case SC_TELEKINESIS_INTENSE:
+						case SC_MOONSTAR:		case SC_SUPER_STAR:		case SC_ALL_RIDING:
 #ifdef RENEWAL
 						case SC_EXTREMITYFIST2:
 #endif
@@ -8364,9 +8366,12 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 			if( (src == bl || battle_check_target(src,bl,BCT_ENEMY) > 0) && !is_boss(bl) ) { //Should not work with bosses.
 				int rate = ( sd ? sd->status.job_level / 4 : 0 );
 
-				if( src == bl ) rate = 100; //Success Chance: On self, 100%
-				else if( bl->type == BL_PC ) rate += 20 + 10 * skill_lv; //On Players, (20 + 10 * Skill Level) %
-				else rate += 40 + 10 * skill_lv; //On Monsters, (40 + 10 * Skill Level) %
+				if( src == bl )
+					rate = 100; //Success Chance: On self, 100%
+				else if( bl->type == BL_PC )
+					rate += 20 + 10 * skill_lv; //On Players, (20 + 10 * Skill Level) %
+				else
+					rate += 40 + 10 * skill_lv; //On Monsters, (40 + 10 * Skill Level) %
 
 				if( sd )
 					skill_blockpc_start(sd,skill_id,4000);
@@ -14250,10 +14255,8 @@ struct skill_condition skill_get_requirement(struct map_session_data* sd, uint16
 	req.zeny = skill_db[idx].require.zeny[skill_lv - 1];
 
 	if( sc && sc->data[SC__UNLUCKY] ) {
-		if ( sc->data[SC__UNLUCKY]->val1 == 1 )
-			req.zeny += 250;
-		else if ( sc->data[SC__UNLUCKY]->val1 == 2 )
-			req.zeny += 500;
+		if( sc->data[SC__UNLUCKY]->val1 < 3 )
+			req.zeny += sc->data[SC__UNLUCKY]->val1 * 250;
 		else
 			req.zeny += 1000;
 	}
@@ -15814,7 +15817,7 @@ bool skill_check_shadowform(struct block_list *bl, int64 damage, int hit)
 	struct status_change *sc;
 	struct block_list *src;
 
-	nullpo_retr(-1, bl);
+	nullpo_retr(1, bl);
 	sc = status_get_sc(bl);
 
 	if( sc && sc->data[SC__SHADOWFORM] && damage ) {
@@ -17804,7 +17807,7 @@ int skill_blockpc_clear(struct map_session_data *sd) {
 	return 1;
 }
 
-int skill_blockhomun_end(int tid, unsigned int tick, int id, intptr_t data)	//[orn]
+int skill_blockhomun_end(int tid, unsigned int tick, int id, intptr_t data) //[orn]
 {
 	struct homun_data *hd = (TBL_HOM*) map_id2bl(id);
 	if (data <= 0 || data >= MAX_SKILL)
@@ -17814,10 +17817,10 @@ int skill_blockhomun_end(int tid, unsigned int tick, int id, intptr_t data)	//[o
 	return 1;
 }
 
-int skill_blockhomun_start(struct homun_data *hd, uint16 skill_id, int tick)	//[orn]
+int skill_blockhomun_start(struct homun_data *hd, uint16 skill_id, int tick) //[orn]
 {
 	uint16 idx = skill_get_index(skill_id);
-	nullpo_retr (-1, hd);
+	nullpo_retr(-1, hd);
 
 	if (idx == 0)
 		return -1;
@@ -17843,12 +17846,11 @@ int skill_blockmerc_end(int tid, unsigned int tick, int id, intptr_t data) //[or
 int skill_blockmerc_start(struct mercenary_data *md, uint16 skill_id, int tick)
 {
 	uint16 idx = skill_get_index(skill_id);
-	nullpo_retr (-1, md);
+	nullpo_retr(-1, md);
 
-	if (idx == 0)
+	if( idx == 0 )
 		return -1;
-	if( tick < 1 )
-	{
+	if( tick < 1 ) {
 		md->blockskill[idx] = 0;
 		return -1;
 	}
@@ -17865,8 +17867,8 @@ void skill_usave_add(struct map_session_data * sd, uint16 skill_id, uint16 skill
 		idb_remove(skillusave_db,sd->status.char_id);
 	}
 	
-	CREATE( sus, struct skill_usave, 1 );
-	idb_put( skillusave_db, sd->status.char_id, sus );
+	CREATE(sus, struct skill_usave, 1);
+	idb_put(skillusave_db, sd->status.char_id, sus);
 
 	sus->skill_id = skill_id;
 	sus->skill_lv = skill_lv;
@@ -17879,7 +17881,7 @@ void skill_usave_trigger(struct map_session_data *sd) {
 	if( ! (sus = idb_get(skillusave_db,sd->status.char_id)) ) {
 		return;
 	}
-	
+
 	skill_unitsetting(&sd->bl,sus->skill_id,sus->skill_lv,sd->bl.x,sd->bl.y,0);
 
 	idb_remove(skillusave_db,sd->status.char_id);

@@ -553,10 +553,10 @@ int channel_pccreate(struct map_session_data *sd, char *chname, char *chpass){
 		}
 	} else { //failure display cause
 		switch(res){
-		case -1: sprintf(output, msg_txt(1405), CHAN_NAME_LENGTH); break;// Channel name must start with '#'.
-		case -2: sprintf(output, msg_txt(1406), CHAN_NAME_LENGTH); break;// Channel length must be between 3 and %d.
-		case -3: sprintf(output, msg_txt(1436), CHAN_NAME_LENGTH); break;// Channel password can't be over %d characters.
-		case -4: sprintf(output, msg_txt(1407), chname);// Channel '%s' is not available.
+		case -1: sprintf(output, msg_txt(1405), CHAN_NAME_LENGTH); break; // Channel name must start with '#'.
+		case -2: sprintf(output, msg_txt(1406), CHAN_NAME_LENGTH); break; // Channel length must be between 3 and %d.
+		case -3: sprintf(output, msg_txt(1436), CHAN_NAME_LENGTH); break; // Channel password can't be over %d characters.
+		case -4: sprintf(output, msg_txt(1407), chname); // Channel '%s' is not available.
 		}
 		clif_displaymessage(sd->fd, output);
 		return -1;
@@ -577,13 +577,13 @@ int channel_pcdelete(struct map_session_data *sd, char *chname){
 	if(!sd || !chname) return 0;
 
 	if( channel_chk(chname,NULL,1) ) {
-		clif_displaymessage(sd->fd, msg_txt(1405));// Channel name must start with '#'.
+		clif_displaymessage(sd->fd, msg_txt(1405)); // Channel name must start with '#'.
 		return -1;
 	}
 
 	channel = channel_name2channel(chname,sd,0);
 	if(channel_pc_haschan(sd,channel)<0){
-		sprintf(output, msg_txt(1425),chname);// You're not part of the '%s' channel.
+		sprintf(output, msg_txt(1425),chname); // You're not part of the '%s' channel.
 		clif_displaymessage(sd->fd, output);
 		return -2; // Channel doesn't exist or player don't have it
 	}

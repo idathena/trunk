@@ -5137,7 +5137,7 @@ ACMD_FUNC(npcmove)
 		return -1;
 	}
 
-	if ((m=nd->bl.m) < 0 || nd->bl.prev == NULL) {
+	if ((m = nd->bl.m) < 0 || nd->bl.prev == NULL) {
 		clif_displaymessage(fd, msg_txt(1154)); // NPC is not on this map.
 		return -1;	//Not on a map.
 	}
@@ -5172,14 +5172,14 @@ ACMD_FUNC(addwarp)
 	}
 
 	m = mapindex_name2id(mapname);
-	if( m == 0 ) {
+	if (m == 0) {
 		sprintf(atcmd_output, msg_txt(1157), mapname); // Unknown map '%s'.
 		clif_displaymessage(fd, atcmd_output);
 		return -1;
 	}
 
 	nd = npc_add_warp(warpname, sd->bl.m, sd->bl.x, sd->bl.y, 2, 2, m, x, y);
-	if( nd == NULL )
+	if (nd == NULL)
 		return -1;
 
 	sprintf(atcmd_output, msg_txt(1158), nd->exname); // New warp NPC '%s' created.
@@ -5205,7 +5205,7 @@ ACMD_FUNC(follow)
 		return 0;
 	}
 	
-	if ( (pl_sd = map_nick2sd((char *)message)) == NULL ) {
+	if ((pl_sd = map_nick2sd((char *)message)) == NULL) {
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
 	}
@@ -5223,22 +5223,47 @@ ACMD_FUNC(follow)
 
 
 /*==========================================
- * @dropall by [MouseJstr]
- * Drop all your possession on the ground
+ * @dropall by [MouseJstr] and [Xantara]
+ * Drops all your possession on the ground based on item type
  *------------------------------------------*/
 ACMD_FUNC(dropall)
 {
-	int i;
+	int8 type = -1;
+	uint16 i, count = 0;
+	struct item_data *item_data = NULL;
+
 	nullpo_retr(-1, sd);
+	
+	if (message[0]) {
+		type = atoi(message);
+		if (type != -1 && type != IT_HEALING && type != IT_USABLE && type != IT_ETC && type != IT_WEAPON &&
+			type != IT_ARMOR && type != IT_CARD && type != IT_PETEGG && type != IT_PETARMOR && type != IT_AMMO)
+		{
+			clif_displaymessage(fd, msg_txt(1506));
+			clif_displaymessage(fd, msg_txt(1507));
+			return -1;
+		}
+	}
 
 	for (i = 0; i < MAX_INVENTORY; i++) {
 		if (sd->status.inventory[i].amount) {
-			if(sd->status.inventory[i].equip != 0)
-				pc_unequipitem(sd, i, 3);
-				pc_dropitem(sd,  i, sd->status.inventory[i].amount);
+			if ((item_data = itemdb_exists(sd->status.inventory[i].nameid)) == NULL) {
+				ShowDebug("Non-existant item %d on dropall list (account_id: %d, char_id: %d)\n", sd->status.inventory[i].nameid, sd->status.account_id, sd->status.char_id);
+				continue;
 			}
-	}
+			if (!pc_candrop(sd,&sd->status.inventory[i]))
+				continue;
 
+			if (type == -1 || type == (uint8)item_data->type) {
+				if (sd->status.inventory[i].equip != 0)
+					pc_unequipitem(sd, i, 3);
+				count += sd->status.inventory[i].amount;
+				pc_dropitem(sd, i, sd->status.inventory[i].amount);
+			}
+		}
+	}
+	sprintf(atcmd_output, msg_txt(1508), count); // %d items are dropped!
+	clif_displaymessage(fd, atcmd_output); 
 	return 0;
 }
 
@@ -5857,8 +5882,7 @@ ACMD_FUNC(autolootitem)
 				clif_displaymessage(fd, msg_txt(1198)); // Your autolootitem list is empty.
 			} else {
 				clif_displaymessage(fd, msg_txt(1199)); // Items on your autolootitem list:
-				for(i = 0; i < AUTOLOOTITEM_SIZE; i++)
-				{
+				for (i = 0; i < AUTOLOOTITEM_SIZE; i++) {
 					if (sd->state.autolootid[i] == 0)
 						continue;
 					if (!(item_data = itemdb_exists(sd->state.autolootid[i]))) {
@@ -8476,11 +8500,11 @@ ACMD_FUNC(delitem)
 
 	total = amount;
 
-	// delete items
+	// Delete items
 	while( amount && ( idx = pc_search_inventory(sd, nameid) ) != -1 ) {
 		int delamount = ( amount < sd->status.inventory[idx].amount ) ? amount : sd->status.inventory[idx].amount;
 
-		if( sd->inventory_data[idx]->type == IT_PETEGG && sd->status.inventory[idx].card[0] == CARD0_PET ) { // delete pet
+		if( sd->inventory_data[idx]->type == IT_PETEGG && sd->status.inventory[idx].card[0] == CARD0_PET ) { // Delete pet
 			intif_delete_petdata(MakeDWord(sd->status.inventory[idx].card[1], sd->status.inventory[idx].card[2]));
 		}
 		pc_delitem(sd, idx, delamount, 0, 0, LOG_TYPE_COMMAND);
@@ -8488,7 +8512,7 @@ ACMD_FUNC(delitem)
 		amount-= delamount;
 	}
 
-	// notify target
+	// Notify target
 	sprintf(atcmd_output, msg_txt(113), total-amount); // %d item(s) removed by a GM.
 	clif_displaymessage(sd->fd, atcmd_output);
 
@@ -8512,7 +8536,7 @@ ACMD_FUNC(delitem)
 ACMD_FUNC(font)
 {
 	int font_id;
-	nullpo_retr(-1,sd);
+	nullpo_retr(-1, sd);
 
 	font_id = atoi(message);
 	if( font_id == 0 ) {
@@ -8547,8 +8571,8 @@ static void atcommand_commands_sub(struct map_session_data* sd, const int fd, At
 	DBIterator *iter = db_iterator(atcommand_db);
 	int count = 0;
 
-	memset(line_buff,' ',CHATBOX_SIZE);
-	line_buff[CHATBOX_SIZE-1] = 0;
+	memset(line_buff, ' ', CHATBOX_SIZE);
+	line_buff[CHATBOX_SIZE - 1] = 0;
 
 	clif_displaymessage(fd, msg_txt(273)); // "Commands available:"
 
@@ -8570,21 +8594,50 @@ static void atcommand_commands_sub(struct map_session_data* sd, const int fd, At
 
 		slen = strlen(cmd->command);
 
-		// flush the text buffer if this command won't fit into it
-		if ( slen + cur - line_buff >= CHATBOX_SIZE ) {
-			clif_displaymessage(fd,line_buff);
+		// Flush the text buffer if this command won't fit into it
+		if( slen + cur - line_buff >= CHATBOX_SIZE ) {
+			clif_displaymessage(fd, line_buff);
 			cur = line_buff;
-			memset(line_buff,' ',CHATBOX_SIZE);
-			line_buff[CHATBOX_SIZE-1] = 0;
+			memset(line_buff, ' ', CHATBOX_SIZE);
+			line_buff[CHATBOX_SIZE - 1] = 0;
 		}
 
-		memcpy(cur,cmd->command,slen);
-		cur += slen+(10-slen%10);
+		memcpy(cur, cmd->command, slen);
+		cur += slen + (10 - slen%10);
 
 		count++;
 	}
 	dbi_destroy(iter);
 	clif_displaymessage(fd,line_buff);
+
+	if( atcmd_binding_count ) {
+		int i, count_bind, gm_lvl = pc_get_group_level(sd);
+		for( i = count_bind = 0; i < atcmd_binding_count; i++ ) {
+			if( gm_lvl >= (type - 1 ? atcmd_binding[i]->level2 : atcmd_binding[i]->level) ) {
+				unsigned int slen = strlen(atcmd_binding[i]->command);
+				if( count_bind == 0 ) {
+					cur = line_buff;
+					memset(line_buff, ' ', CHATBOX_SIZE);
+					line_buff[CHATBOX_SIZE - 1] = 0;
+					clif_displaymessage(fd, "-----------------");
+					clif_displaymessage(fd, msg_txt(509)); // Script-bound commands:
+				}
+				if( slen + cur - line_buff >= CHATBOX_SIZE ) {
+					clif_displaymessage(fd, line_buff);
+					cur = line_buff;
+					memset(line_buff, ' ', CHATBOX_SIZE);
+					line_buff[CHATBOX_SIZE - 1] = 0;
+				}
+				memcpy(cur, atcmd_binding[i]->command, slen);
+				cur += slen + (10 - slen%10);
+				count_bind++;
+			}
+		}
+		if( count_bind )
+			clif_displaymessage(fd, line_buff); // Last one
+		count += count_bind;
+		
+	}
 
 	sprintf(atcmd_output, msg_txt(274), count); // "%d commands found."
 	clif_displaymessage(fd, atcmd_output);

@@ -89,16 +89,16 @@ char log_db_db[32] = "log";
 Sql* logmysql_handle;
 
 // DBMap declaartion
-static DBMap* id_db=NULL; // int id -> struct block_list*
-static DBMap* pc_db=NULL; // int id -> struct map_session_data*
-static DBMap* mobid_db=NULL; // int id -> struct mob_data*
-static DBMap* bossid_db=NULL; // int id -> struct mob_data* (MVP db)
-static DBMap* map_db=NULL; // unsigned int mapindex -> struct map_data*
-static DBMap* nick_db=NULL; // int char_id -> struct charid2nick* (requested names of offline characters)
-static DBMap* charid_db=NULL; // int char_id -> struct map_session_data*
-static DBMap* regen_db=NULL; // int id -> struct block_list* (status_natural_heal processing)
+static DBMap* id_db = NULL; // int id -> struct block_list*
+static DBMap* pc_db = NULL; // int id -> struct map_session_data*
+static DBMap* mobid_db = NULL; // int id -> struct mob_data*
+static DBMap* bossid_db = NULL; // int id -> struct mob_data* (MVP db)
+static DBMap* map_db = NULL; // unsigned int mapindex -> struct map_data*
+static DBMap* nick_db = NULL; // int char_id -> struct charid2nick* (requested names of offline characters)
+static DBMap* charid_db = NULL; // int char_id -> struct map_session_data*
+static DBMap* regen_db = NULL; // int id -> struct block_list* (status_natural_heal processing)
 
-static int map_users=0;
+static int map_users = 0;
 
 #define BLOCK_SIZE 8
 #define block_free_max 1048576
@@ -109,19 +109,19 @@ static int block_free_count = 0, block_free_lock = 0;
 static struct block_list *bl_list[BL_LIST_MAX];
 static int bl_list_count = 0;
 
-#define MAP_MAX_MSG 1500
+#define MAP_MAX_MSG 1550
 static char* msg_table[MAP_MAX_MSG]; // map Server messages
 
 struct map_data map[MAX_MAP_PER_SERVER];
 int map_num = 0;
-int map_port=0;
+int map_port = 0;
 
 int autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
 int minsave_interval = 100;
 int save_settings = 0xFFFF;
 int agit_flag = 0;
 int agit2_flag = 0;
-int night_flag = 0; // 0=day, 1=night [Yor]
+int night_flag = 0; // 0 = day, 1 = night [Yor]
 
 struct charid_request {
 	struct charid_request* next;

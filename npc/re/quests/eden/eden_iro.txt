@@ -318,7 +318,8 @@ moc_para01,50,39,4	script	Eve Natalia	882,{
 			mes "You don't even have 1... stop wasting my time.";
 			close;
 		}
-		//FIXME: missing dialogue
+		mes "[Eve Natalia]";
+		mes "Oh perfect, you get ^CC0000" + .@amount + "^000000 Safe to 7 Certificates!";
 		delitem .@item,1;
 		for(set .@i,0; .@i<.@amount; set .@i,.@i+1) {
 			// Note: iRO lists item 6235 as "Safe to 7 Headgear Certificate", but it's Guarantee_Armor_6Up in our database.
@@ -339,8 +340,12 @@ moc_para01,50,39,4	script	Eve Natalia	882,{
 // Bubble Gum & Battle Manual Exchanger
 //============================================================
 moc_para01,48,184,2	script	Gum & Manual Exchanger	562,{
+	if (Weight < MaxWeight / 2) {
+		mes "You're carrying too many items right now.";
+		close;	
+	}
 	mes "[Trader Machine]";
-	mes "Insert Bubble Gums and/or Battle Mnauals to trade for higher efficiency Gums and Manuals.";
+	mes "Insert Bubble Gums and/or Battle Manuals to trade for higher efficiency Gums and Manuals.";
 	next;
 	mes "[Trader Machine]";
 	mes "Exchange rate:";
@@ -366,25 +371,29 @@ moc_para01,48,184,2	script	Gum & Manual Exchanger	562,{
 	case 5:
 		mes "[Trader Machine]";
 		mes "I can give you 1 Battle Manual X3 for 1 Costume Corsair.";
-		close; // Missing item database entry, disabled for now.
-		/*
 		next;
 		if (countitem(19619) == 0) {
 			mes "[Trader Machine]";
-			mes "You don't have enough Costume Corsair hats to make that trade.";
+			mes "You don't have a Costume Corsair hat to make that trade.";
 			close;
 		}
 		next;
 		if(select("Yes, give it to me!:No, wait not yet.") == 2)
 			close;
-		delitem 19619,1;
+		// Unofficial dialogue.
+		mes "[Trader Machine]";
+		mes "You place the required items into the machine...";
+		next;
+		mes "[Trader Machine]";
+		mes "The Machine has given you an item in return!";
+		delitem 19619,1; //C_Corsair
 		getitem 14545,1; //Battle_Manual_X3
 		close;
-		*/
 	case 6:
 		close;
 	}
 
+//callsub L_Exchange,<Insert Item>,<Amount>,<Return Item>,<Amount>
 L_Exchange:
 	mes "[Trader Machine]";
 	mes "How many "+getitemname(getarg(2))+" do you want?";

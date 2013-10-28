@@ -9689,15 +9689,15 @@ BUILDIN_FUNC(getscrate)
 	struct block_list *bl;
 	int type,rate;
 
-	type=script_getnum(st,2);
-	rate=script_getnum(st,3);
-	if( script_hasdata(st,4) ) //get for the bl assigned
+	type = script_getnum(st,2);
+	rate = script_getnum(st,3);
+	if( script_hasdata(st,4) ) //Get for the bl assigned
 		bl = map_id2bl(script_getnum(st,4));
 	else
 		bl = map_id2bl(st->rid);
 
-	if (bl)
-		rate = status_get_sc_def(NULL, bl, (sc_type)type, 10000, 10000, 0);
+	if( bl )
+		rate = status_get_sc_def(NULL,bl,(sc_type)type,10000,10000,0);
 
 	script_pushint(st,rate);
 	return 0;
@@ -9711,28 +9711,24 @@ BUILDIN_FUNC(getstatus)
 	int id, type;
 	struct map_session_data* sd = script_rid2sd(st);
 
-	if( sd == NULL )
-	{// no player attached
+	if( sd == NULL ) { //No player attached
 		return 0;
 	}
 
-	id = script_getnum(st, 2);
-	type = script_hasdata(st, 3) ? script_getnum(st, 3) : 0;
+	id = script_getnum(st,2);
+	type = script_hasdata(st,3) ? script_getnum(st,3) : 0;
 
-	if( id <= SC_NONE || id >= SC_MAX )
-	{// invalid status type given
-		ShowWarning("script.c:getstatus: Invalid status type given (%d).\n", id);
+	if( id <= SC_NONE || id >= SC_MAX ) { //Invalid status type given
+		ShowWarning("script.c:getstatus: Invalid status type given (%d).\n",id);
 		return 0;
 	}
 
-	if( sd->sc.count == 0 || !sd->sc.data[id] )
-	{// no status is active
+	if( sd->sc.count == 0 || !sd->sc.data[id] ) { //No status is active
 		script_pushint(st, 0);
 		return 0;
 	}
 	
-	switch( type )
-	{
+	switch( type ) {
 		case 1:	 script_pushint(st, sd->sc.data[id]->val1);	break;
 		case 2:  script_pushint(st, sd->sc.data[id]->val2);	break;
 		case 3:  script_pushint(st, sd->sc.data[id]->val3);	break;
@@ -9741,13 +9737,12 @@ BUILDIN_FUNC(getstatus)
 			{
 				struct TimerData* timer = (struct TimerData*)get_timer(sd->sc.data[id]->timer);
 
-				if( timer )
-				{// return the amount of time remaining
+				if( timer ) { //Return the amount of time remaining
 					script_pushint(st, timer->tick - gettick());
 				}
 			}
 			break;
-		default: script_pushint(st, 1); break;
+		default: script_pushint(st,1); break;
 	}
 
 	return 0;
@@ -9759,7 +9754,7 @@ BUILDIN_FUNC(getstatus)
 BUILDIN_FUNC(debugmes)
 {
 	const char *str;
-	str=script_getstr(st,2);
+	str = script_getstr(st,2);
 	ShowDebug("script debug : %d %d : %s\n",st->rid,st->oid,str);
 	return 0;
 }
@@ -9771,8 +9766,8 @@ BUILDIN_FUNC(catchpet)
 	int pet_id;
 	TBL_PC *sd;
 
-	pet_id= script_getnum(st,2);
-	sd=script_rid2sd(st);
+	pet_id = script_getnum(st,2);
+	sd = script_rid2sd(st);
 	if( sd == NULL )
 		return 0;
 
@@ -9787,16 +9782,15 @@ BUILDIN_FUNC(homunculus_evolution)
 {
 	TBL_PC *sd;
 
-	sd=script_rid2sd(st);
+	sd = script_rid2sd(st);
 	if( sd == NULL )
 		return 0;
 
-	if(merc_is_hom_active(sd->hd))
-	{
-		if (sd->hd->homunculus.intimacy > 91000)
+	if( merc_is_hom_active(sd->hd) ) {
+		if( sd->hd->homunculus.intimacy > 91000 )
 			merc_hom_evolution(sd->hd);
 		else
-			clif_emotion(&sd->hd->bl, E_SWT);
+			clif_emotion(&sd->hd->bl,E_SWT);
 	}
 	return 0;
 }
