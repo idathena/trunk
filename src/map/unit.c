@@ -1955,6 +1955,7 @@ int unit_skillcastcancel(struct block_list *bl,int type)
 	int ret = 0, skill_id;
 
 	nullpo_ret(bl);
+
 	if (!ud || ud->skilltimer == INVALID_TIMER)
 		return 0; //Nothing to cancel.
 
@@ -1978,11 +1979,12 @@ int unit_skillcastcancel(struct block_list *bl,int type)
 		skill_id = ud->skill_id;
 
 	if (skill_get_inf(skill_id) & INF_GROUND_SKILL)
-		ret = delete_timer( ud->skilltimer, skill_castend_pos );
+		ret = delete_timer(ud->skilltimer, skill_castend_pos);
 	else
-		ret = delete_timer( ud->skilltimer, skill_castend_id );
+		ret = delete_timer(ud->skilltimer, skill_castend_id);
+
 	if (ret < 0)
-		ShowError("delete timer error : skill_id : %d\n",ret);
+		ShowError("delete timer error %d : skill %d (%s)\n", ret, skill_id, skill_get_name(skill_id));
 
 	ud->skilltimer = INVALID_TIMER;
 
@@ -1997,7 +1999,8 @@ int unit_skillcastcancel(struct block_list *bl,int type)
 		}
 	}
 
-	if (bl->type == BL_MOB) ((TBL_MOB*)bl)->skill_idx = -1;
+	if (bl->type == BL_MOB)
+		((TBL_MOB*)bl)->skill_idx = -1;
 
 	clif_skillcastcancel(bl);
 	return 1;
@@ -2009,7 +2012,7 @@ void unit_dataset(struct block_list *bl)
 	struct unit_data *ud;
 	nullpo_retv(ud = unit_bl2ud(bl));
 
-	memset( ud, 0, sizeof( struct unit_data) );
+	memset(ud, 0, sizeof( struct unit_data));
 	ud->bl             = bl;
 	ud->walktimer      = INVALID_TIMER;
 	ud->skilltimer     = INVALID_TIMER;
@@ -2025,7 +2028,7 @@ void unit_dataset(struct block_list *bl)
 int unit_counttargeted(struct block_list* bl)
 {
 	struct unit_data* ud;
-	if( bl && (ud = unit_bl2ud(bl)) )
+	if (bl && (ud = unit_bl2ud(bl)))
 		return ud->target_count;
 	return 0;
 }
@@ -2037,7 +2040,7 @@ int unit_fixdamage(struct block_list *src,struct block_list *target,unsigned int
 {
 	nullpo_ret(target);
 
-	if(damage+damage2 <= 0)
+	if (damage + damage2 <= 0)
 		return 0;
 	
 	return status_fix_damage(src,target,damage+damage2,clif_damage(target,target,tick,sdelay,ddelay,damage,div,type,damage2));
@@ -2050,16 +2053,16 @@ int unit_changeviewsize(struct block_list *bl,short size)
 {
 	nullpo_ret(bl);
 
-	size=(size<0)?-1:(size>0)?1:0;
+	size = (size < 0) ? -1 : (size > 0) ? 1 : 0;
 
-	if(bl->type == BL_PC) {
-		((TBL_PC*)bl)->state.size=size;
-	} else if(bl->type == BL_MOB) {
-		((TBL_MOB*)bl)->special_state.size=size;
-	} else
+	if (bl->type == BL_PC)
+		((TBL_PC*)bl)->state.size = size;
+	else if (bl->type == BL_MOB)
+		((TBL_MOB*)bl)->special_state.size = size;
+	else
 		return 0;
-	if(size!=0)
-		clif_specialeffect(bl,421+size, AREA);
+	if (size != 0)
+		clif_specialeffect(bl,421 + size, AREA);
 	return 0;
 }
 
@@ -2076,12 +2079,12 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char* file, 
 	struct status_change *sc = status_get_sc(bl);
 	nullpo_ret(ud);
 
-	if(bl->prev == NULL)
+	if (bl->prev == NULL)
 		return 0; //Already removed?
 
 	map_freeblock_lock();
 
-	unit_set_target(ud, 0);
+	unit_set_target(ud,0);
 
 	if (ud->walktimer != INVALID_TIMER)
 		unit_stop_walking(bl,0);
@@ -2092,39 +2095,39 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char* file, 
 
 	//Do not reset can-act delay. [Skotlex]
 	ud->attackabletime = ud->canmove_tick /*= ud->canact_tick*/ = gettick();
-	if(sc && sc->count ) { //Map-change/warp dispells.
-		status_change_end(bl, SC_BLADESTOP, INVALID_TIMER);
-		status_change_end(bl, SC_BASILICA, INVALID_TIMER);
-		status_change_end(bl, SC_ANKLE, INVALID_TIMER);
-		status_change_end(bl, SC_TRICKDEAD, INVALID_TIMER);
-		status_change_end(bl, SC_BLADESTOP_WAIT, INVALID_TIMER);
-		status_change_end(bl, SC_RUN, INVALID_TIMER);
-		status_change_end(bl, SC_DANCING, INVALID_TIMER);
-		status_change_end(bl, SC_WARM, INVALID_TIMER);
-		status_change_end(bl, SC_DEVOTION, INVALID_TIMER);
-		status_change_end(bl, SC_MARIONETTE, INVALID_TIMER);
-		status_change_end(bl, SC_MARIONETTE2, INVALID_TIMER);
-		status_change_end(bl, SC_CLOSECONFINE, INVALID_TIMER);
-		status_change_end(bl, SC_CLOSECONFINE2, INVALID_TIMER);
-		status_change_end(bl, SC_TINDER_BREAKER, INVALID_TIMER);
-		status_change_end(bl, SC_TINDER_BREAKER2, INVALID_TIMER);
-		status_change_end(bl, SC_HIDING, INVALID_TIMER);
-		//Ensure the bl is a PC; if so, we'll handle the removal of cloaking and cloaking exceed later
-		if ( bl->type != BL_PC ) {
-			status_change_end(bl, SC_CLOAKING, INVALID_TIMER);
-			status_change_end(bl, SC_CLOAKINGEXCEED, INVALID_TIMER);
+	if (sc && sc->count) { //Map-change/warp dispells.
+		status_change_end(bl,SC_BLADESTOP,INVALID_TIMER);
+		status_change_end(bl,SC_BASILICA,INVALID_TIMER);
+		status_change_end(bl,SC_ANKLE,INVALID_TIMER);
+		status_change_end(bl,SC_TRICKDEAD,INVALID_TIMER);
+		status_change_end(bl,SC_BLADESTOP_WAIT,INVALID_TIMER);
+		status_change_end(bl,SC_RUN,INVALID_TIMER);
+		status_change_end(bl,SC_DANCING,INVALID_TIMER);
+		status_change_end(bl,SC_WARM,INVALID_TIMER);
+		status_change_end(bl,SC_DEVOTION,INVALID_TIMER);
+		status_change_end(bl,SC_MARIONETTE,INVALID_TIMER);
+		status_change_end(bl,SC_MARIONETTE2,INVALID_TIMER);
+		status_change_end(bl,SC_CLOSECONFINE,INVALID_TIMER);
+		status_change_end(bl,SC_CLOSECONFINE2,INVALID_TIMER);
+		status_change_end(bl,SC_TINDER_BREAKER,INVALID_TIMER);
+		status_change_end(bl,SC_TINDER_BREAKER2,INVALID_TIMER);
+		status_change_end(bl,SC_HIDING,INVALID_TIMER);
+		//Ensure the bl is a PC. If so, we'll handle the removal of cloaking and cloaking exceed later
+		if (bl->type != BL_PC) {
+			status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
+			status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
 		}
-		status_change_end(bl, SC_CHASEWALK, INVALID_TIMER);
+		status_change_end(bl,SC_CHASEWALK,INVALID_TIMER);
 		if (sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_SELF)
-			status_change_end(bl, SC_GOSPEL, INVALID_TIMER);
-		status_change_end(bl, SC_CHANGE, INVALID_TIMER);
-		status_change_end(bl, SC_STOP, INVALID_TIMER);
-		status_change_end(bl, SC_WUGDASH, INVALID_TIMER);
-		status_change_end(bl, SC_CAMOUFLAGE, INVALID_TIMER);
-		status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
-		status_change_end(bl, SC__MANHOLE, INVALID_TIMER);
-		status_change_end(bl, SC_VACUUM_EXTREME, INVALID_TIMER);
-		status_change_end(bl, SC_CURSEDCIRCLE_ATKER, INVALID_TIMER); //Callme before warp
+			status_change_end(bl,SC_GOSPEL,INVALID_TIMER);
+		status_change_end(bl,SC_CHANGE,INVALID_TIMER);
+		status_change_end(bl,SC_STOP,INVALID_TIMER);
+		status_change_end(bl,SC_WUGDASH,INVALID_TIMER);
+		status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
+		status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
+		status_change_end(bl,SC__MANHOLE,INVALID_TIMER);
+		status_change_end(bl,SC_VACUUM_EXTREME,INVALID_TIMER);
+		status_change_end(bl,SC_CURSEDCIRCLE_ATKER,INVALID_TIMER); //Callme before warp
 	}
 
 	if (bl->type&(BL_CHAR|BL_PET)) {
@@ -2132,159 +2135,169 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char* file, 
 		skill_cleartimerskill(bl);
 	}
 
-	switch(bl->type) {
+	switch (bl->type) {
 		case BL_PC: {
-			struct map_session_data *sd = (struct map_session_data*)bl;
+				struct map_session_data *sd = (struct map_session_data*)bl;
 
-			if(sd->shadowform_id) { //If shadow target has leave the map
-				struct block_list *d_bl = map_id2bl(sd->shadowform_id);
-				if(d_bl)
-					status_change_end(d_bl,SC__SHADOWFORM,INVALID_TIMER);
-			}
-			//Leave/reject all invitations.
-			if(sd->chatID)
-				chat_leavechat(sd,0);
-			if(sd->trade_partner)
-				trade_tradecancel(sd);
-			buyingstore_close(sd);
-			searchstore_close(sd);
-			if(sd->state.storage_flag == 1)
-				storage_storage_quit(sd,0);
-			else if (sd->state.storage_flag == 2)
-				storage_guild_storage_quit(sd,0);
-			sd->state.storage_flag = 0; //Force close it when being warped.
-			if(sd->party_invite>0)
-				party_reply_invite(sd,sd->party_invite,0);
-			if(sd->guild_invite>0)
-				guild_reply_invite(sd,sd->guild_invite,0);
-			if(sd->guild_alliance>0)
-				guild_reply_reqalliance(sd,sd->guild_alliance_account,0);
-			if(sd->menuskill_id)
-				sd->menuskill_id = sd->menuskill_val = 0;
-			if( sd->touching_id )
-				npc_touchnext_areanpc(sd,true);
-				
-			// Check if warping and not changing the map.
-			if ( sd->state.warping && !sd->state.changemap ) {
-				status_change_end(bl, SC_CLOAKING, INVALID_TIMER);
-				status_change_end(bl, SC_CLOAKINGEXCEED, INVALID_TIMER);
-			}
-
-			sd->npc_shopid = 0;
-			sd->adopt_invite = 0;
-
-			if(sd->pvp_timer != INVALID_TIMER) {
-				delete_timer(sd->pvp_timer,pc_calc_pvprank_timer);
-				sd->pvp_timer = INVALID_TIMER;
-				sd->pvp_rank = 0;
-			}
-			if(sd->duel_group > 0)
-				duel_leave(sd->duel_group, sd);
-
-			if(pc_issit(sd)) {
-				pc_setstand(sd);
-				skill_sit(sd,0);
-			}
-			party_send_dot_remove(sd);//minimap dot fix [Kevin]
-			guild_send_dot_remove(sd);
-			bg_send_dot_remove(sd);
-
-			if( map[bl->m].users <= 0 || sd->state.debug_remove_map ) {
-				// This is only place where map users is decreased, if the mobs were removed too soon then this function was executed too many times [FlavioJS]
-				if( sd->debug_file == NULL || !(sd->state.debug_remove_map) ) {
-					sd->debug_file = "";
-					sd->debug_line = 0;
-					sd->debug_func = "";
+				if (sd->shadowform_id) { //If shadow target has leave the map
+					struct block_list *d_bl = map_id2bl(sd->shadowform_id);
+					if(d_bl)
+						status_change_end(d_bl,SC__SHADOWFORM,INVALID_TIMER);
 				}
-				ShowDebug("unit_remove_map: unexpected state when removing player AID/CID:%d/%d"
-					" (active=%d connect_new=%d rewarp=%d changemap=%d debug_remove_map=%d)"
-					" from map=%s (users=%d)."
-					" Previous call from %s:%d(%s), current call from %s:%d(%s)."
-					" Please report this!!!\n",
-					sd->status.account_id, sd->status.char_id,
-					sd->state.active, sd->state.connect_new, sd->state.rewarp, sd->state.changemap, sd->state.debug_remove_map,
-					map[bl->m].name, map[bl->m].users,
-					sd->debug_file, sd->debug_line, sd->debug_func, file, line, func);
-			} else if (--map[bl->m].users == 0 && battle_config.dynamic_mobs)	//[Skotlex]
-				map_removemobs(bl->m);
-			if( !(sd->sc.option&OPTION_INVISIBLE) ) { // decrement the number of active pvp players on the map
-				--map[bl->m].users_pvp;
+				//Leave/reject all invitations.
+				if (sd->chatID)
+					chat_leavechat(sd,0);
+				if (sd->trade_partner)
+					trade_tradecancel(sd);
+
+				buyingstore_close(sd);
+				searchstore_close(sd);
+
+				if (sd->state.storage_flag == 1)
+					storage_storage_quit(sd,0);
+				else if (sd->state.storage_flag == 2)
+					storage_guild_storage_quit(sd,0);
+
+				sd->state.storage_flag = 0; //Force close it when being warped.
+
+				if (sd->party_invite > 0)
+					party_reply_invite(sd,sd->party_invite,0);
+				if (sd->guild_invite > 0)
+					guild_reply_invite(sd,sd->guild_invite,0);
+				if (sd->guild_alliance > 0)
+					guild_reply_reqalliance(sd,sd->guild_alliance_account,0);
+				if (sd->menuskill_id)
+					sd->menuskill_id = sd->menuskill_val = 0;
+				if ( sd->touching_id )
+					npc_touchnext_areanpc(sd,true);
+				//Check if warping and not changing the map.
+				if (sd->state.warping && !sd->state.changemap) {
+					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
+					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+				}
+
+				sd->npc_shopid = 0;
+				sd->adopt_invite = 0;
+
+				if (sd->pvp_timer != INVALID_TIMER) {
+					delete_timer(sd->pvp_timer,pc_calc_pvprank_timer);
+					sd->pvp_timer = INVALID_TIMER;
+					sd->pvp_rank = 0;
+				}
+				if (sd->duel_group > 0)
+					duel_leave(sd->duel_group,sd);
+				if (pc_issit(sd)) {
+					pc_setstand(sd);
+					skill_sit(sd,0);
+				}
+
+				party_send_dot_remove(sd); //Minimap dot fix [Kevin]
+				guild_send_dot_remove(sd);
+				bg_send_dot_remove(sd);
+
+				if (map[bl->m].users <= 0 || sd->state.debug_remove_map) {
+					//This is only place where map users is decreased.
+					//If the mobs were removed too soon then this function was executed too many times [FlavioJS]
+					if (sd->debug_file == NULL || !(sd->state.debug_remove_map)) {
+						sd->debug_file = "";
+						sd->debug_line = 0;
+						sd->debug_func = "";
+					}
+					ShowDebug("unit_remove_map: unexpected state when removing player AID/CID:%d/%d"
+						" (active=%d connect_new=%d rewarp=%d changemap=%d debug_remove_map=%d)"
+						" from map=%s (users=%d)."
+						" Previous call from %s:%d(%s), current call from %s:%d(%s)."
+						" Please report this!!!\n",
+						sd->status.account_id,sd->status.char_id,
+						sd->state.active,sd->state.connect_new,sd->state.rewarp,sd->state.changemap,sd->state.debug_remove_map,
+						map[bl->m].name,map[bl->m].users,
+						sd->debug_file,sd->debug_line,sd->debug_func,file,line,func);
+				} else if (--map[bl->m].users == 0 && battle_config.dynamic_mobs) //[Skotlex]
+					map_removemobs(bl->m);
+				if (!(sd->sc.option&OPTION_INVISIBLE)) //Decrement the number of active pvp players on the map
+					--map[bl->m].users_pvp;
+				if (sd->state.hpmeter_visible) {
+					map[bl->m].hpmeter_visible--;
+					sd->state.hpmeter_visible = 0;
+				}
+
+				sd->state.debug_remove_map = 1; //Temporary state to track double remove_map's [FlavioJS]
+				sd->debug_file = file;
+				sd->debug_line = line;
+				sd->debug_func = func;
+
 			}
-
-			sd->state.debug_remove_map = 1; // temporary state to track double remove_map's [FlavioJS]
-			sd->debug_file = file;
-			sd->debug_line = line;
-			sd->debug_func = func;
-
 			break;
-		}
 		case BL_MOB: {
-			struct mob_data *md = (struct mob_data*)bl;
-			// Drop previous target mob_slave_keep_target: no.
-			if (!battle_config.mob_slave_keep_target)
-				md->target_id=0;
+				struct mob_data *md = (struct mob_data*)bl;
+				//Drop previous target mob_slave_keep_target: no.
+				if (!battle_config.mob_slave_keep_target)
+					md->target_id = 0;
 
-			md->attacked_id=0;
-			md->state.skillstate= MSS_IDLE;
+				md->attacked_id = 0;
+				md->state.skillstate = MSS_IDLE;
 
+			}
 			break;
-		}
 		case BL_PET: {
-			struct pet_data *pd = (struct pet_data*)bl;
-			if( pd->pet.intimate <= 0 && !(pd->master && !pd->master->state.active) ) { //If logging out, this is deleted on unit_free
-				clif_clearunit_area(bl,clrtype);
-				map_delblock(bl);
-				unit_free(bl,CLR_OUTSIGHT);
-				map_freeblock_unlock();
-				return 0;
+				struct pet_data *pd = (struct pet_data*)bl;
+				//If logging out, this is deleted on unit_free
+				if (pd->pet.intimate <= 0 && !(pd->master && !pd->master->state.active)) {
+					clif_clearunit_area(bl,clrtype);
+					map_delblock(bl);
+					unit_free(bl,CLR_OUTSIGHT);
+					map_freeblock_unlock();
+					return 0;
+				}
 			}
-
 			break;
-		}
 		case BL_HOM: {
-			struct homun_data *hd = (struct homun_data *)bl;
-			ud->canact_tick = ud->canmove_tick; //It appears HOM do reset the can-act tick.
-			if( !hd->homunculus.intimacy && !(hd->master && !hd->master->state.active) ) { //If logging out, this is deleted on unit_free
-				clif_emotion(bl, E_SOB);
-				clif_clearunit_area(bl,clrtype);
-				map_delblock(bl);
-				unit_free(bl,CLR_OUTSIGHT);
-				map_freeblock_unlock();
-				return 0;
+				struct homun_data *hd = (struct homun_data *)bl;
+				ud->canact_tick = ud->canmove_tick; //It appears HOM do reset the can-act tick.
+				//If logging out, this is deleted on unit_free
+				if (!hd->homunculus.intimacy && !(hd->master && !hd->master->state.active)) {
+					clif_emotion(bl,E_SOB);
+					clif_clearunit_area(bl,clrtype);
+					map_delblock(bl);
+					unit_free(bl,CLR_OUTSIGHT);
+					map_freeblock_unlock();
+					return 0;
+				}
 			}
 			break;
-		}
 		case BL_MER: {
-			struct mercenary_data *md = (struct mercenary_data *)bl;
-			ud->canact_tick = ud->canmove_tick;
-			if( mercenary_get_lifetime(md) <= 0 && !(md->master && !md->master->state.active) ) {
-				clif_clearunit_area(bl,clrtype);
-				map_delblock(bl);
-				unit_free(bl,CLR_OUTSIGHT);
-				map_freeblock_unlock();
-				return 0;
+				struct mercenary_data *md = (struct mercenary_data *)bl;
+				ud->canact_tick = ud->canmove_tick;
+				if (mercenary_get_lifetime(md) <= 0 && !(md->master && !md->master->state.active)) {
+					clif_clearunit_area(bl,clrtype);
+					map_delblock(bl);
+					unit_free(bl,CLR_OUTSIGHT);
+					map_freeblock_unlock();
+					return 0;
+				}
 			}
 			break;
-		}
 		case BL_ELEM: {
-			struct elemental_data *ed = (struct elemental_data *)bl;
-			ud->canact_tick = ud->canmove_tick;
-			if( elemental_get_lifetime(ed) <= 0 && !(ed->master && !ed->master->state.active) ) {
-				clif_clearunit_area(bl,clrtype);
-				map_delblock(bl);
-				unit_free(bl,0);
-				map_freeblock_unlock();
-				return 0;
+				struct elemental_data *ed = (struct elemental_data *)bl;
+				ud->canact_tick = ud->canmove_tick;
+				if (elemental_get_lifetime(ed) <= 0 && !(ed->master && !ed->master->state.active)) {
+					clif_clearunit_area(bl,clrtype);
+					map_delblock(bl);
+					unit_free(bl,0);
+					map_freeblock_unlock();
+					return 0;
+				}
 			}
 			break;
-		}
-		default: break;// do nothing
+		default:
+			break; //Do nothing
 	}
 	/**
 	 * BL_MOB is handled by mob_dead unless the monster is not dead.
 	 **/
-	if( bl->type != BL_MOB || !status_isdead(bl) )
+	if (bl->type != BL_MOB || !status_isdead(bl))
 		clif_clearunit_area(bl,clrtype);
+
 	map_delblock(bl);
 	map_freeblock_unlock();
 	return 1;

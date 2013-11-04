@@ -344,6 +344,19 @@ enum clif_messages {
 	ADDITEM_TO_CART_FAIL_COUNT = 0x1,
 };
 
+enum e_BANKING_DEPOSIT_ACK {
+	BDA_SUCCESS = 0x0,
+	BDA_ERROR = 0x1,
+	BDA_NO_MONEY = 0x2,
+	BDA_OVERFLOW = 0x3,
+};
+
+enum e_BANKING_WITHDRAW_ACK {
+	BWA_SUCCESS = 0x0,
+	BWA_NO_MONEY = 0x1,
+	BWA_UNKNOWN_ERROR = 0x2,
+};
+
 int clif_setip(const char* ip);
 void clif_setbindip(const char* ip);
 void clif_setport(uint16 port);
@@ -806,5 +819,9 @@ void clif_channel_msg(struct Channel *channel, struct map_session_data *sd, char
 
 void clif_ranklist(struct map_session_data *sd, int16 rankingType);
 void clif_update_rankingpoint(struct map_session_data *sd, int rankingtype, int point);
+
+/* Bank System [Yommy] */
+void clif_bank_deposit(struct map_session_data *sd, enum e_BANKING_DEPOSIT_ACK reason);
+void clif_bank_withdraw(struct map_session_data *sd, enum e_BANKING_WITHDRAW_ACK reason);
 
 #endif /* _CLIF_H_ */

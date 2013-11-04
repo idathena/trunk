@@ -256,17 +256,17 @@ static struct block_list bl_head;
  *------------------------------------------*/
 static void map_addblcell(struct block_list *bl)
 {
-	if( bl->m<0 || bl->x<0 || bl->x>=map[bl->m].xs || bl->y<0 || bl->y>=map[bl->m].ys || !(bl->type&BL_CHAR) )
+	if( bl->m < 0 || bl->x < 0 || bl->x >= map[bl->m].xs || bl->y < 0 || bl->y >= map[bl->m].ys || !(bl->type&BL_CHAR) )
 		return;
-	map[bl->m].cell[bl->x+bl->y*map[bl->m].xs].cell_bl++;
+	map[bl->m].cell[bl->x + bl->y * map[bl->m].xs].cell_bl++;
 	return;
 }
 
 static void map_delblcell(struct block_list *bl)
 {
-	if( bl->m <0 || bl->x<0 || bl->x>=map[bl->m].xs || bl->y<0 || bl->y>=map[bl->m].ys || !(bl->type&BL_CHAR) )
+	if( bl->m < 0 || bl->x < 0 || bl->x >= map[bl->m].xs || bl->y < 0 || bl->y >= map[bl->m].ys || !(bl->type&BL_CHAR) )
 		return;
-	map[bl->m].cell[bl->x+bl->y*map[bl->m].xs].cell_bl--;
+	map[bl->m].cell[bl->x + bl->y * map[bl->m].xs].cell_bl--;
 }
 #endif
 
@@ -1691,9 +1691,7 @@ int map_quit(struct map_session_data *sd) {
 	//Return loot to owner
 	if (sd->pd) pet_lootitem_drop(sd->pd,sd);
 
-	if (sd->state.storage_flag == 1) sd->state.storage_flag = 0; //No need to Double Save Storage on Quit.
-
-	if (sd->state.permanent_speed == 1) sd->state.permanent_speed = 0; //Remove lock so speed is set back to normal at login.
+	if (sd->state.storage_flag == 1) sd->state.storage_flag = 0; //No need to double save storage on quit.
 
 	if (map[sd->bl.m].instance_id)
 		instance_delusers(map[sd->bl.m].instance_id);

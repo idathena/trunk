@@ -201,6 +201,7 @@ struct map_session_data {
 		unsigned int permanent_speed : 1; //When 1, speed cannot be changed through status_calc_pc().
 		unsigned int hold_recalc : 1;
 		unsigned int snovice_call_flag : 3; //Summon Angel (stage 1~3)
+		unsigned int hpmeter_visible : 1;
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -507,7 +508,6 @@ struct map_session_data {
 	const char* debug_func;
 
 	unsigned int bg_id;
-	unsigned short user_font;
 
 #ifdef SECURE_NPCTIMEOUT
 	/**
@@ -1008,11 +1008,11 @@ enum {
 	ADDITEM_STACKLIMIT = 7
 };
 
-// timer for night.day
+// Timer for night/day
 extern int day_timer_tid;
 extern int night_timer_tid;
-int map_day_timer(int tid, unsigned int tick, int id, intptr_t data); // by [yor]
-int map_night_timer(int tid, unsigned int tick, int id, intptr_t data); // by [yor]
+int map_day_timer(int tid, unsigned int tick, int id, intptr_t data); // By [yor]
+int map_night_timer(int tid, unsigned int tick, int id, intptr_t data); // By [yor]
 
 // Rental System
 void pc_inventory_rentals(struct map_session_data *sd);
@@ -1042,4 +1042,11 @@ void pc_damage_log_clear(struct map_session_data *sd, int id);
 #if defined(RENEWAL_DROP) || defined(RENEWAL_EXP)
 	int pc_level_penalty_mod(struct map_session_data *sd, int mob_level, uint32 mob_race, uint32 mob_mode, int type);
 #endif
+
+void pc_rental_expire(struct map_session_data *sd, int i);
+void pc_scdata_received(struct map_session_data *sd);
+
+void pc_bank_deposit(struct map_session_data *sd, int money);
+void pc_bank_withdraw(struct map_session_data *sd, int money);
+
 #endif /* _PC_H_ */

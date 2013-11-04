@@ -585,7 +585,7 @@ struct map_data {
 		unsigned nojobexp : 1; // [Lorky]
 		unsigned nomobloot : 1; // [Lorky]
 		unsigned nomvploot : 1; // [Lorky]
-		unsigned nightenabled :1; //For night display. [Skotlex]
+		unsigned nightenabled :1; // For night display. [Skotlex]
 		unsigned restricted : 1; // [Komurka]
 		unsigned nodrop : 1;
 		unsigned novending : 1;
@@ -641,19 +641,22 @@ struct map_data {
 	/* rAthena Local Chat */
 	struct Channel *channel;
 
-	/* adjust_unit_duration mapflag */
+	/* Adjust_unit_duration mapflag */
 	struct mapflag_skill_adjust **units;
 	unsigned short unit_count;
-	/* adjust_skill_damage mapflag */
+	/* Adjust_skill_damage mapflag */
 	struct mapflag_skill_adjust **skills;
 	unsigned short skill_count;
+
+	/* Speeds up clif_updatestatus processing by causing hpmeter to run only when someone with the permission can view it */
+	unsigned short hpmeter_visible;
 };
 
 /// Stores information about a remote map (for multi-mapserver setups).
 /// Beginning of data structure matches 'map_data', to allow typecasting.
 struct map_data_other_server {
 	char name[MAP_NAME_LENGTH];
-	unsigned short index; //Index is the map index used by the mapindex* functions.
+	unsigned short index; // Index is the map index used by the mapindex* functions.
 	struct mapcell* cell; // If this is NULL, the map is not on this map-server
 	uint32 ip;
 	uint16 port;
@@ -672,8 +675,8 @@ extern int minsave_interval;
 extern int save_settings;
 extern int agit_flag;
 extern int agit2_flag;
-extern int night_flag; // 0=day, 1=night [Yor]
-extern int enable_spy; //Determines if @spy commands are active.
+extern int night_flag; // 0 = day, 1 = night [Yor]
+extern int enable_spy; // Determines if @spy commands are active.
 extern char db_path[256];
 
 extern char motd_txt[];

@@ -328,14 +328,14 @@ int instance_addmap(short instance_id)
 
 	// Set to busy, update timers
 	im->state = INSTANCE_BUSY;
-	im->idle_limit = (unsigned int)time(NULL) + INSTANCE_LIMIT/1000;
-	im->idle_timer = add_timer(gettick()+INSTANCE_LIMIT, instance_delete_timer, instance_id, 0);
+	im->idle_limit = (unsigned int)time(NULL) + INSTANCE_LIMIT / 1000;
+	im->idle_timer = add_timer(gettick() + INSTANCE_LIMIT, instance_delete_timer, instance_id, 0);
 
 	// Add the maps
 	for(i = 0; i < MAX_MAP_PER_INSTANCE; i++) {
 		if(strlen(db->mapname[i]) < 1)
 			continue;
-		else if( (m = map_addinstancemap(db->mapname[i], instance_id)) < 0) {
+		else if((m = map_addinstancemap(db->mapname[i], instance_id)) < 0) {
 			// An error occured adding a map
 			ShowError("instance_addmap: No maps added to instance %d.\n",instance_id);
 			return 0;
@@ -353,7 +353,7 @@ int instance_addmap(short instance_id)
 
 	// Inform party members of the created instance
 	if( (p = party_search( im->party_id ) ) != NULL )
-		clif_instance_status( party_getavailablesd( p ), db->name, im->keep_limit, im->idle_limit, 1);
+		clif_instance_status(party_getavailablesd(p), db->name, im->keep_limit, im->idle_limit, 1);
 
 	return cnt_map;
 }

@@ -48,7 +48,8 @@
 
 #ifndef PACKETVER
 	//#define PACKETVER 20120410
-	#define PACKETVER 20130320
+	//#define PACKETVER 20130320
+	#define PACKETVER 20130807
 #endif
 
 //Remove/Comment this line to disable sc_data saving. [Skotlex]
@@ -78,6 +79,7 @@
 //Max amount of a single stacked item
 #define MAX_AMOUNT 30000
 #define MAX_ZENY 1000000000
+#define MAX_BANK_ZENY 2147483647
 #define MAX_FAME 1000000000
 #define MAX_CART 100
 #define MAX_SKILL 5020
@@ -87,7 +89,7 @@
 //Should hold the max of GLOBAL/ACCOUNT/ACCOUNT2 (Needed for some arrays that hold all three)
 #define MAX_REG_NUM 256
 #define DEFAULT_WALK_SPEED 150
-#define MIN_WALK_SPEED 0
+#define MIN_WALK_SPEED 20 /* Below 20 clips animation */
 #define MAX_WALK_SPEED 1000
 #define MAX_STORAGE 600
 #define MAX_GUILD_STORAGE 600
@@ -355,6 +357,7 @@ struct mmo_charstatus {
 
 	unsigned int base_exp,job_exp;
 	int zeny;
+	int bank_vault;
 
 	short class_;
 	unsigned int status_point,skill_point;
@@ -398,8 +401,10 @@ struct mmo_charstatus {
 
 	time_t delete_date;
 
-	// Char server addon system
+	//Char server addon system
 	unsigned int character_moves;
+
+	unsigned char font;
 };
 
 typedef enum mail_status {

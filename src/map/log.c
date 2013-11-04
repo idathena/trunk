@@ -18,7 +18,7 @@
 #include <string.h>
 
 
-/// filters for item logging
+/// Filters for item logging
 typedef enum e_log_filter
 {
 	LOG_FILTER_NONE     = 0x000,
@@ -43,15 +43,15 @@ struct Log_Config log_config;
 
 
 #ifdef SQL_INNODB
-// database is using an InnoDB engine so do not use DELAYED
+// Database is using an InnoDB engine so do not use DELAYED
 #define LOG_QUERY "INSERT"
 #else
-// database is using a MyISAM engine so use DELAYED
+// Database is using a MyISAM engine so use DELAYED
 #define LOG_QUERY "INSERT DELAYED"
 #endif
 
 
-/// obtain log type character for item/zeny logs
+/// Obtain log type character for item/zeny logs
 static char log_picktype2char(e_log_pick_type type)
 {
 	switch( type ) {
@@ -72,17 +72,18 @@ static char log_picktype2char(e_log_pick_type type)
 		case LOG_TYPE_AUCTION:          return 'I';  // Auct(I)on
 		case LOG_TYPE_BUYING_STORE:     return 'B';  // (B)uying Store
 		case LOG_TYPE_LOOT:             return 'L';  // (L)oot (consumed monster pick/drop)
-		case LOG_TYPE_OTHER:            return 'X';  // Other
 		case LOG_TYPE_CASH:             return '$';  // Cash
+		case LOG_TYPE_BANK:             return 'K';  // Ban(K) Transactions
+		case LOG_TYPE_OTHER:            return 'X';  // Other
 	}
 
-	// should not get here, fallback
+	// Should not get here, fallback
 	ShowDebug("log_picktype2char: Unknown pick type %d.\n", type);
 	return 'X';
 }
 
 
-/// obtain log type character for chat logs
+/// Obtain log type character for chat logs
 static char log_chattype2char(e_log_chat_type type)
 {
 	switch( type ) {
@@ -93,7 +94,7 @@ static char log_chattype2char(e_log_chat_type type)
 		case LOG_CHAT_MAINCHAT: return 'M';  // (M)ain chat
 	}
 
-	// should not get here, fallback
+	// Should not get here, fallback
 	ShowDebug("log_chattype2char: Unknown chat type %d.\n", type);
 	return 'O';
 }

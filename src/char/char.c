@@ -68,7 +68,9 @@ char mercenary_db[256] = "mercenary";
 char mercenary_owner_db[256] = "mercenary_owner";
 char ragsrvinfo_db[256] = "ragsrvinfo";
 char elemental_db[256] = "elemental";
+char interreg_db[32] = "interreg";
 char skillcooldown_db[256] = "skillcooldown";
+char account_data_db[256] = "account_data";
 
 // Show loading/saving messages
 int save_log = 1;
@@ -515,7 +517,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 		(p->ele_id != cp->ele_id) || (p->shield != cp->shield) || (p->head_top != cp->head_top) ||
 		(p->head_mid != cp->head_mid) || (p->head_bottom != cp->head_bottom) || (p->delete_date != cp->delete_date) ||
 		(p->rename != cp->rename) || (p->robe != cp->robe) || (p->character_moves != cp->character_moves) ||
-		(p->show_equip != cp->show_equip) || (p->allow_party != cp->allow_party)
+		(p->show_equip != cp->show_equip) || (p->allow_party != cp->allow_party) || (p->font != cp->font)
 	) {	//Save status
 		unsigned int opt = 0;
 
@@ -531,7 +533,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 			"`option`='%d',`party_id`='%d',`guild_id`='%d',`pet_id`='%d',`homun_id`='%d',`elemental_id`='%d',"
 			"`weapon`='%d',`shield`='%d',`head_top`='%d',`head_mid`='%d',`head_bottom`='%d',"
 			"`last_map`='%s',`last_x`='%d',`last_y`='%d',`save_map`='%s',`save_x`='%d',`save_y`='%d',`rename`='%d',"
-			"`delete_date`='%lu',`robe`='%d',`moves`='%d',`char_opt`='%u'"
+			"`delete_date`='%lu',`robe`='%d',`moves`='%d',`char_opt`='%u',`font`='%u'"
 			" WHERE `account_id`='%d' AND `char_id` = '%d'",
 			char_db, p->base_level, p->job_level,
 			p->base_exp, p->job_exp, p->zeny,
@@ -542,13 +544,23 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 			mapindex_id2name(p->last_point.map), p->last_point.x, p->last_point.y,
 			mapindex_id2name(p->save_point.map), p->save_point.x, p->save_point.y, p->rename,
 			(unsigned long)p->delete_date, // FIXME: platform-dependent size
-			p->robe,p->character_moves,opt,
+			p->robe,p->character_moves,opt,p->font,
 			p->account_id, p->char_id) )
 		{
 			Sql_ShowDebug(sql_handle);
 			errors++;
 		} else
 			strcat(save_status, " status");
+	}
+
+	if( p->bank_vault != cp->bank_vault ) {
+		if( SQL_ERROR == Sql_Query(sql_handle, "REPLACE INTO `%s` (`account_id`,`bank_vault`) VALUES ('%d','%d')",
+			account_data_db, p->account_id, p->bank_vault) )
+		{
+			Sql_ShowDebug(sql_handle);
+			errors++;
+		} else
+			strcat(save_status, " bank");
 	}
 
 	//Values that will seldom change (to speed up saving)
@@ -563,9 +575,9 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus* p)
 	{
 		if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `class`='%d',"
 			"`hair`='%d',`hair_color`='%d',`clothes_color`='%d',"
-			"`partner_id`='%d', `father`='%d', `mother`='%d', `child`='%d',"
-			"`karma`='%d',`manner`='%d', `fame`='%d'"
-			" WHERE  `account_id`='%d' AND `char_id` = '%d'",
+			"`partner_id`='%d',`father`='%d',`mother`='%d',`child`='%d',"
+			"`karma`='%d',`manner`='%d',`fame`='%d'"
+			" WHERE `account_id`='%d' AND `char_id` = '%d'",
 			char_db, p->class_,
 			p->hair, p->hair_color, p->clothes_color,
 			p->partner_id, p->father, p->mother, p->child,
@@ -1139,10 +1151,12 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 	int hotkey_num;
 #endif
 	unsigned int opt;
+	int account_id;
 
 	memset(p, 0, sizeof(struct mmo_charstatus));
 
-	if (save_log) ShowInfo("Char load request (%d)\n", char_id);
+	if( save_log )
+		ShowInfo("Char load request (%d)\n", char_id);
 
 	stmt = SqlStmt_Malloc(sql_handle);
 	if( stmt == NULL ) {
@@ -1150,14 +1164,14 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 		return 0;
 	}
 
-	// read char data
+	//Read char data
 	if( SQL_ERROR == SqlStmt_Prepare(stmt, "SELECT "
 		"`char_id`,`account_id`,`char_num`,`name`,`class`,`base_level`,`job_level`,`base_exp`,`job_exp`,`zeny`,"
 		"`str`,`agi`,`vit`,`int`,`dex`,`luk`,`max_hp`,`hp`,`max_sp`,`sp`,"
 		"`status_point`,`skill_point`,`option`,`karma`,`manner`,`party_id`,`guild_id`,`pet_id`,`homun_id`,`elemental_id`,`hair`,"
 		"`hair_color`,`clothes_color`,`weapon`,`shield`,`head_top`,`head_mid`,`head_bottom`,`last_map`,`last_x`,`last_y`,"
 		"`save_map`,`save_x`,`save_y`,`partner_id`,`father`,`mother`,`child`,`fame`,`rename`,`delete_date`,`robe`,`moves`,"
-		"`char_opt`"
+		"`char_opt`,`font`"
 		" FROM `%s` WHERE `char_id`=? LIMIT 1", char_db)
 	||	SQL_ERROR == SqlStmt_BindParam(stmt, 0, SQLDT_INT, &char_id, 0)
 	||	SQL_ERROR == SqlStmt_Execute(stmt)
@@ -1215,6 +1229,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 51, SQLDT_SHORT,  &p->robe, 0, NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 52, SQLDT_UINT32, &p->character_moves, 0, NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 53, SQLDT_UINT,   &opt, 0, NULL, NULL)
+	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 54, SQLDT_UCHAR,  &p->font, 0, NULL, NULL)
 	)
 	{
 		SqlStmt_ShowDebug(stmt);
@@ -1226,6 +1241,9 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 		SqlStmt_Free(stmt);
 		return 0;
 	}
+
+	account_id = p->account_id;
+
 	p->last_point.map = mapindex_name2id(last_map);
 	p->save_point.map = mapindex_name2id(save_map);
 
@@ -1243,12 +1261,12 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 
 	strcat(t_msg, " status");
 
-	if (!load_everything) { // For quick selection of data when displaying the char menu
+	if (!load_everything) { //For quick selection of data when displaying the char menu
 		SqlStmt_Free(stmt);
 		return 1;
 	}
 
-	//read memo data
+	//Read memo data
 	//`memo` (`memo_id`,`char_id`,`map`,`x`,`y`)
 	if( SQL_ERROR == SqlStmt_Prepare(stmt, "SELECT `map`,`x`,`y` FROM `%s` WHERE `char_id`=? ORDER by `memo_id` LIMIT %d", memo_db, MAX_MEMOPOINTS)
 	||	SQL_ERROR == SqlStmt_BindParam(stmt, 0, SQLDT_INT, &char_id, 0)
@@ -1264,7 +1282,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 	}
 	strcat(t_msg, " memo");
 
-	//read inventory
+	//Read inventory
 	//`inventory` (`id`,`char_id`, `nameid`, `amount`, `equip`, `identify`, `refine`, `attribute`, `card0`, `card1`, `card2`, `card3`, `expire_time`, `favorite`, `unique_id`)
 	StringBuf_Init(&buf);
 	StringBuf_AppendStr(&buf, "SELECT `id`, `nameid`, `amount`, `equip`, `identify`, `refine`, `attribute`, `expire_time`, `favorite`, `bound`, `unique_id`");
@@ -1296,7 +1314,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 
 	strcat(t_msg, " inventory");
 
-	//read cart
+	//Read cart
 	//`cart_inventory` (`id`,`char_id`, `nameid`, `amount`, `equip`, `identify`, `refine`, `attribute`, `card0`, `card1`, `card2`, `card3`, expire_time`, `unique_id`)
 	StringBuf_Clear(&buf);
 	StringBuf_AppendStr(&buf, "SELECT `id`, `nameid`, `amount`, `equip`, `identify`, `refine`, `attribute`, `expire_time`, `bound`, `unique_id`");
@@ -1326,11 +1344,11 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 		memcpy(&p->cart[i], &tmp_item, sizeof(tmp_item));
 	strcat(t_msg, " cart");
 
-	//read storage
+	//Read storage
 	storage_fromsql(p->account_id, &p->storage);
 	strcat(t_msg, " storage");
 
-	//read skill
+	//Read skill
 	//`skill` (`char_id`, `id`, `lv`)
 	if( SQL_ERROR == SqlStmt_Prepare(stmt, "SELECT `id`, `lv`,`flag` FROM `%s` WHERE `char_id`=? LIMIT %d", skill_db, MAX_SKILL)
 	||	SQL_ERROR == SqlStmt_BindParam(stmt, 0, SQLDT_INT, &char_id, 0)
@@ -1351,7 +1369,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 	}
 	strcat(t_msg, " skills");
 
-	//read friends
+	//Read friends
 	//`friends` (`char_id`, `friend_account`, `friend_id`)
 	if( SQL_ERROR == SqlStmt_Prepare(stmt, "SELECT c.`account_id`, c.`char_id`, c.`name` FROM `%s` c LEFT JOIN `%s` f ON f.`friend_account` = c.`account_id` AND f.`friend_id` = c.`char_id` WHERE f.`char_id`=? LIMIT %d", char_db, friend_db, MAX_FRIENDS)
 	||	SQL_ERROR == SqlStmt_BindParam(stmt, 0, SQLDT_INT, &char_id, 0)
@@ -1366,7 +1384,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 	strcat(t_msg, " friends");
 
 #ifdef HOTKEY_SAVING
-	//read hotkeys
+	//Read hotkeys
 	//`hotkey` (`char_id`, `hotkey`, `type`, `itemskill_id`, `skill_lvl`
 	if( SQL_ERROR == SqlStmt_Prepare(stmt, "SELECT `hotkey`, `type`, `itemskill_id`, `skill_lvl` FROM `%s` WHERE `char_id`=?", hotkey_db)
 	||	SQL_ERROR == SqlStmt_BindParam(stmt, 0, SQLDT_INT, &char_id, 0)
@@ -1390,15 +1408,26 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus* p, bool load_everything
 	mercenary_owner_fromsql(char_id, p);
 	strcat(t_msg, " mercenary");
 
+	//Read account data
+	//`account_data` (`account_id`,`bank_vault`)
+	if( SQL_ERROR == SqlStmt_Prepare(stmt, "SELECT `bank_vault` FROM `%s` WHERE `account_id`=? LIMIT 1", account_data_db)
+	||	SQL_ERROR == SqlStmt_BindParam(stmt, 0, SQLDT_INT, &account_id, 0)
+	||	SQL_ERROR == SqlStmt_Execute(stmt)
+	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 0, SQLDT_INT, &p->bank_vault, 0, NULL, NULL) )
+		SqlStmt_ShowDebug(stmt);
 
-	if (save_log) ShowInfo("Loaded char (%d - %s): %s\n", char_id, p->name, t_msg);	//ok. all data load successfuly!
+	if( SQL_SUCCESS == SqlStmt_NextRow(stmt) )
+		strcat(t_msg, " bank");
+
+	if( save_log )
+		ShowInfo("Loaded char (%d - %s): %s\n", char_id, p->name, t_msg); //OK. all data load successfuly!
 	SqlStmt_Free(stmt);
 	StringBuf_Destroy(&buf);
 
 	/* Load options into proper vars */
-	if (opt & OPT_ALLOW_PARTY)
+	if( opt&OPT_ALLOW_PARTY )
 		p->allow_party = true;
-	if (opt & OPT_SHOW_EQUIP)
+	if( opt&OPT_SHOW_EQUIP )
 		p->show_equip = true;
 
 	cp = idb_ensure(char_db_, char_id, create_charstatus);
@@ -2854,6 +2883,14 @@ int parse_frommap(int fd)
 							if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `account_id`='%d' AND `char_id`='%d'", scdata_db, aid, cid) )
 								Sql_ShowDebug(sql_handle);
 						}
+					} else { //No sc (needs a response)
+						WFIFOHEAD(fd,14);
+						WFIFOW(fd,0) = 0x2b1d;
+						WFIFOW(fd,2) = 14;
+						WFIFOL(fd,4) = aid;
+						WFIFOL(fd,8) = cid;
+						WFIFOW(fd,12) = 0;
+						WFIFOSET(fd,WFIFOW(fd,2));
 					}
 					Sql_FreeResult(sql_handle);
 #endif
@@ -4934,6 +4971,10 @@ void sql_config_read(const char* cfgName)
 			safestrncpy(ragsrvinfo_db, w2,sizeof(ragsrvinfo_db));
 		else if(!strcmpi(w1, "elemental_db"))
 			safestrncpy(elemental_db, w2,sizeof(elemental_db));
+		else if(!strcmpi(w1,"interreg_db"))
+			safestrncpy(interreg_db, w2, sizeof(interreg_db));
+		else if(!strcmpi(w1, "account_data_db"))
+			safestrncpy(account_data_db, w2,sizeof(account_data_db));
 		//Support the import command, just like any other config
 		else if(!strcmpi(w1, "import"))
 			sql_config_read(w2);

@@ -2325,7 +2325,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			//A Rare Drop Global Announce by Lupus
 			if(mvp_sd && drop_rate <= battle_config.rare_drop_announce) {
 				char message[128];
-				sprintf (message, msg_txt(541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate / 100);
+				sprintf(message, msg_txt(541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate / 100);
 				//MSG: "'%s' won %s's %s (chance: %0.02f%%)"
 				intif_broadcast(message, strlen(message) + 1, BC_DEFAULT);
 			}

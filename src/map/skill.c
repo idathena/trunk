@@ -9900,7 +9900,8 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 
 			if( inf&BCT_ENEMY && (sc = status_get_sc(target)) && (sc->data[SC_FOGWALL] && rnd() % 100 < 75) ) {
 				//Fogwall makes all offensive-type targetted skills fail at 75%, and
-				if( sd ) clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0);
+				if( sd )
+					clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0);
 				break;
 			}
 		}
@@ -9916,7 +9917,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 		}
 
 		if( src != target && battle_config.skill_add_range &&
-			!check_distance_bl(src,target,skill_get_range2(src,ud->skill_id,ud->skill_lv)+battle_config.skill_add_range) )
+			!check_distance_bl(src,target,skill_get_range2(src,ud->skill_id,ud->skill_lv) + battle_config.skill_add_range) )
 		{
 			if( sd ) {
 				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0);
@@ -10021,20 +10022,20 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 	} while( 0 );
 
 	//Skill failed.
-	if (ud->skill_id == MO_EXTREMITYFIST && sd && !(sc && sc->data[SC_FOGWALL])) {
+	if( ud->skill_id == MO_EXTREMITYFIST && sd && !(sc && sc->data[SC_FOGWALL]) ) {
 		//When Asura fails... (except when it fails from Wall of Fog)
 		//Consume SP/spheres
 		skill_consume_requirement(sd,ud->skill_id,ud->skill_lv,1);
 		status_set_sp(src,0,0);
 		sc = &sd->sc;
-		if (sc->count) { //End states
+		if( sc->count ) { //End states
 			status_change_end(src,SC_EXPLOSIONSPIRITS,INVALID_TIMER);
 			status_change_end(src,SC_BLADESTOP,INVALID_TIMER);
 #ifdef RENEWAL
 			sc_start(src,src,SC_EXTREMITYFIST2,100,ud->skill_lv,skill_get_time(ud->skill_id,ud->skill_lv));
 #endif
 		}
-		if (target && target->m == src->m) { //Move character to target anyway.
+		if( target && target->m == src->m ) { //Move character to target anyway.
 			int dir, x, y;
 			dir = map_calc_dir(src,target->x,target->y);
 			if( dir > 0 && dir < 4) x = -2;
@@ -10043,7 +10044,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			if( dir > 2 && dir < 6 ) y = -2;
 			else if( dir == 7 || dir < 2 ) y = 2;
 			else y = 0;
-			if (unit_movepos(src,src->x+x,src->y+y,1,1)) { //Display movement + animation.
+			if( unit_movepos(src,src->x + x,src->y + y,1,1) ) { //Display movement + animation.
 				clif_slide(src,src->x,src->y);
 				clif_skill_damage(src,target,tick,sd->battle_status.amotion,0,0,1,ud->skill_id,ud->skill_lv,5);
 			}

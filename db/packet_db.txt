@@ -33,7 +33,7 @@
 // Main packet version of the DB to use (default = max available version)
 // Client detection is faster when all clients use this version.
 // Version 23 is the latest Sakexe (above versions are for Renewal clients)
-packet_db_ver: 34
+packet_db_ver: 45
 
 packet_ver: 5
 0x0064,55
@@ -1841,14 +1841,14 @@ packet_ver: 34
 0x0849,16 //clif_cashshop_result
 0x084A,2,cashshopclose,0
 0x08C9,2,cashshopitemlist,0
-// Shuffle End
+//Shuffle End
 
 //New Packets
 0x0447,2,booking_playcancel,0
 0x084b,19 //fallitem4
-0x090f,-1 // notify_newentry7
-0x0914,-1 // notify_moveentry
-0x0915,-1 // notify_standentry
+0x090f,-1 //notify_newentry7
+0x0914,-1 //notify_moveentry
+0x0915,-1 //notify_standentry
 0x0978,6,reqworldinfo,2
 0x0979,50 //ackworldinfo
 0x0990,31 //additem
@@ -1860,13 +1860,13 @@ packet_ver: 34
 0x0996,-1 //store itemlist equip
 0x0997,-1 //ZC_EQUIPWIN_MICROSCOPE_V5
 0x0998,8,equipitem,2:4
-0x0999,11 // cz_wear_equipv5
-0x099a,9 // take_off_equipv5
+0x0999,11 //cz_wear_equipv5
+0x099a,9 //take_off_equipv5
 0x099b,8  //maptypeproperty2
 0x099f,24
 //New Packets End
 
-//2013-05-15a Ragexe (Yommy)
+//2013-05-15aRagexe (Yommy)
 packet_ver: 35
 0x0369,7,actionrequest,2:6
 0x083C,10,useskilltoid,2:4:6
@@ -1898,7 +1898,7 @@ packet_ver: 35
 0x0931,5,hommenu,2:4
 0x093E,36,storagepassword,2:4:20
 
-//2013-05-22 Ragexe (Yommy)
+//2013-05-22Ragexe (Yommy)
 packet_ver: 36
 0x08a2,7,actionrequest,2:6
 0x095c,10,useskilltoid,2:4:6
@@ -1930,7 +1930,7 @@ packet_ver: 36
 0x0926,5,hommenu,2:4
 0x088e,36,storagepassword,2:4:20
 
-//2013-05-29 Ragexe (Shakto)
+//2013-05-29Ragexe (Shakto)
 packet_ver: 37
 0x0890,7,actionrequest,2:6
 0x0438,10,useskilltoid,2:4:6
@@ -1953,16 +1953,16 @@ packet_ver: 37
 0x0964,2,reqclosebuyingstore,0
 0x0869,-1,reqopenbuyingstore,2:4:8:9:89
 0x0874,18,bookingregreq,2,4:6
-// 0x088E,8); // CZ_JOIN_BATTLE_FIELD
+//0x088E,8 //CZ_JOIN_BATTLE_FIELD
 0x0958,-1,itemlistwindowselected,2:4:8:12
 0x0919,19,wanttoconnection,2:6:10:14:18
 0x08A8,26,partyinvite2,2
-// 0x0888,4); // CZ_GANGSI_RANK
+//0x0888,4); //CZ_GANGSI_RANK
 0x0877,26,friendslistadd,2
 0x023B,5,hommenu,2:4
 0x0956,36,storagepassword,2:4:20
 
-//2013-06-05 Ragexe (Shakto)
+//2013-06-05Ragexe (Shakto)
 packet_ver: 38
 0x0369,7,actionrequest,2:6
 0x083C,10,useskilltoid,2:4:6
@@ -1985,17 +1985,17 @@ packet_ver: 38
 0x0817,2,reqclosebuyingstore,0
 0x0815,-1,reqopenbuyingstore,2:4:8:9:89
 0x0365,18,bookingregreq,2:4:6
-// 0x0363,8 // CZ_JOIN_BATTLE_FIELD
+//0x0363,8 //CZ_JOIN_BATTLE_FIELD
 0x0281,-1,itemlistwindowselected,2:4:8:12
 0x022D,19,wanttoconnection,2:6:10:14:18
 0x0802,26,partyinvite2,2
-// 0x0436,4 // CZ_GANGSI_RANK
+//0x0436,4 //CZ_GANGSI_RANK
 0x023B,26,friendslistadd,2
 0x0361,5,hommenu,2,4
 0x0883,36,storagepassword,2:4:20
 0x097C,4,ranklist,2
 
-//2013-06-12 Ragexe (Shakto)
+//2013-06-12Ragexe (Shakto)
 packet_ver: 39
 0x0369,7,actionrequest,2:6
 0x083C,10,useskilltoid,2:4:6
@@ -2018,16 +2018,16 @@ packet_ver: 39
 0x0817,2,reqclosebuyingstore,0
 0x0815,-1,reqopenbuyingstore,2:4:8:9:89
 0x0365,18,bookingregreq,2:4:6
-// 0x0363,8 CZ_JOIN_BATTLE_FIELD
+//0x0363,8 //CZ_JOIN_BATTLE_FIELD
 0x0281,-1,itemlistwindowselected,2:4:8:12
 0x0919,19,wanttoconnection,2:6:10:14:18
 0x0802,26,partyinvite2,2
-// 0x0436,4 CZ_GANGSI_RANK
+//0x0436,4 //CZ_GANGSI_RANK
 0x0940,26,friendslistadd,2
 0x093A,5,hommenu,2:4
 0x0964,36,storagepassword,2:4:20
 
-//2013-06-18 Ragexe (Shakto)
+//2013-06-18Ragexe (Shakto)
 packet_ver: 40
 0x0889,7,actionrequest,2:6
 0x0951,10,useskilltoid,2:4:6
@@ -2050,16 +2050,16 @@ packet_ver: 40
 0x085A,2,reqclosebuyingstore,0
 0x0932,-1,reqopenbuyingstore,2:4:8:9:89
 0x08A7,18,bookingregreq,2:4:6
-// 0x087A,8 CZ_JOIN_BATTLE_FIELD
+//0x087A,8 //CZ_JOIN_BATTLE_FIELD
 0x0942,-1,itemlistwindowselected,2:4:8:12
 0x095B,19,wanttoconnection,2:6:10:14:18
 0x0887,26,partyinvite2,2
-// 0x0878,4 CZ_GANGSI_RANK
+//0x0878,4 //CZ_GANGSI_RANK
 0x0953,26,friendslistadd,2
 0x02C4,5,hommenu,2:4
 0x0864,36,storagepassword,2:4:20
 
-//2013-06-26 Ragexe
+//2013-06-26Ragexe
 packet_ver: 41
 0x0369,7,actionrequest,2:6
 0x083C,10,useskilltoid,2:4:6
@@ -2082,16 +2082,16 @@ packet_ver: 41
 0x0365,2,reqclosebuyingstore,0
 0x0815,-1,reqopenbuyingstore,2:4:8:9:89
 0x0894,18,bookingregreq,2:4:6
-// 0x0860,8 CZ_JOIN_BATTLE_FIELD
+//0x0860,8 //CZ_JOIN_BATTLE_FIELD
 0x08A5,-1,itemlistwindowselected,2:4:8:12
 0x088C,19,wanttoconnection,2:6:10:14:18
 0x0895,26,partyinvite2,2
-// 0x088F,4 CZ_GANGSI_RANK
+//0x088F,4 //CZ_GANGSI_RANK
 0x08AB,26,friendslistadd,2
 0x0960,5,hommenu,2:4
 0x0930,36,storagepassword,2:4:20
 
-//2013-07-03 Ragexe
+//2013-07-03Ragexe
 packet_ver: 42
 0x0369,7,actionrequest,2:6
 0x083C,10,useskilltoid,2:4:6
@@ -2114,16 +2114,16 @@ packet_ver: 42
 0x0817,2,reqclosebuyingstore,0
 0x0815,-1,reqopenbuyingstore,2:4:8:9:89
 0x0365,18,bookingregreq,2:4:6
-// 0x0363,8 CZ_JOIN_BATTLE_FIELD
+//0x0363,8 //CZ_JOIN_BATTLE_FIELD
 0x0281,-1,itemlistwindowselected,2:4:8:12
 0x022D,19,wanttoconnection,2:6:10:14:18
 0x0802,26,partyinvite2,2
-// 0x0436,4 CZ_GANGSI_RANK
+//0x0436,4 //CZ_GANGSI_RANK
 0x0360,26,friendslistadd,2
 0x094A,5,hommenu,2:4
 0x0873,36,storagepassword,2:4:20
 
-//2013-07-10 Ragexe
+//2013-07-10Ragexe
 packet_ver: 43
 0x0369,7,actionrequest,2:6
 0x083C,10,useskilltoid,2:4:6
@@ -2146,18 +2146,18 @@ packet_ver: 43
 0x0817,2,reqclosebuyingstore,0
 0x0815,-1,reqopenbuyingstore,2:4:8:9:89
 0x0365,18,bookingregreq,2:4:6
-// 0x0363,8 CZ_JOIN_BATTLE_FIELD
+//0x0363,8 //CZ_JOIN_BATTLE_FIELD
 0x0281,-1,itemlistwindowselected,2:4:8:12
 0x022D,19,wanttoconnection,2:6:10:14:18
 0x0802,26,partyinvite2,2
-// 0x0436,4 CZ_GANGSI_RANK
+//0x0436,4 //CZ_GANGSI_RANK
 0x023B,26,friendslistadd,2
 0x0361,5,hommenu,2:4
 0x0880,36,storagepassword,2:4:20
 0x0848,-1,cashshopbuy,2:6:4:10
 0x097D,288 //ZC_ACK_RANKING
 
-//2013-07-17 Ragexe
+//2013-07-17Ragexe
 packet_ver: 44
 0x0918,7,actionrequest,2:6
 0x091E,10,useskilltoid,2:4:6
@@ -2180,16 +2180,26 @@ packet_ver: 44
 0x096A,2,reqclosebuyingstore,0
 0x08AA,-1,reqopenbuyingstore,2:4:8:9:89
 0x0862,18,bookingregreq,2:4:6
-// 0x08A6,8 CZ_JOIN_BATTLE_FIELD
+//0x08A6,8 CZ_JOIN_BATTLE_FIELD
 0x0897,-1,itemlistwindowselected,2:4:8:12
 0x091D,19,wanttoconnection,2:6:10:14:18
 0x092F,26,partyinvite2,2
-// 0x086C,4 CZ_GANGSI_RANK
+//0x086C,4 CZ_GANGSI_RANK
 0x0863,26,friendslistadd,2
 0x088A,5,hommenu,2:4
 0x095B,36,storagepassword,2:4:20
+0x09A6,12 //ZC_BANKING_CHECK
+0x09A7,10,bankdeposit,2:4:6
+0x09A8,16 //ZC_ACK_BANKING_DEPOSIT
+0x09A9,10,bankwithdrawal,2:4:6
+0x09AA,16 //ZC_ACK_BANKING_WITHDRAW
+0x09AB,6,bankcheck,2:4
+0x09B6,6,bankopen,2:4
+0x09B7,4 //ZC_ACK_OPEN_BANKING
+0x09B8,6,bankclose,2:4
+0x09B9,4 //ZC_ACK_CLOSE_BANKING
 
-//2013-08-07 Ragexe
+//2013-08-07Ragexe
 packet_ver: 45
 0x0369,7,actionrequest,2:6
 0x083C,10,useskilltoid,2:4:6
@@ -2212,11 +2222,11 @@ packet_ver: 45
 0x0817,2,reqclosebuyingstore,0
 0x0815,-1,reqopenbuyingstore,2:4:8:9:89
 0x0365,18,bookingregreq,2:4:6
-// 0x0363,8 CZ_JOIN_BATTLE_FIELD
+//0x0363,8 CZ_JOIN_BATTLE_FIELD
 0x0281,-1,itemlistwindowselected,2:4:8:12
 0x022D,19,wanttoconnection,2:6:10:14:18
 0x0802,26,partyinvite2,2
-// 0x0436,4 CZ_GANGSI_RANK
+//0x0436,4 CZ_GANGSI_RANK
 0x023B,26,friendslistadd,2
 0x0361,5,hommenu,2:4
 0x0887,36,storagepassword,2:4:20

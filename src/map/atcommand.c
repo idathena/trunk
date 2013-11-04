@@ -771,16 +771,21 @@ ACMD_FUNC(speed)
 		return -1;
 	}
 
-	if (speed < 0) {
+	sd->state.permanent_speed = 0;
+
+	if (speed < 0)
 		sd->base_status.speed = DEFAULT_WALK_SPEED;
-		sd->state.permanent_speed = 0; // Remove lock when set back to default speed.
-	} else {
+	else
 		sd->base_status.speed = cap_value(speed, MIN_WALK_SPEED, MAX_WALK_SPEED);
-		sd->state.permanent_speed = 1; // Set lock when set to non-default speed.
-	}
 
 	status_calc_bl(&sd->bl, SCB_SPEED);
-	clif_displaymessage(fd, msg_txt(8)); // Speed changed.
+
+	if (sd->base_status.speed != DEFAULT_WALK_SPEED) {
+		sd->state.permanent_speed = 1; // Set lock when set to non-default speed.
+		clif_displaymessage(fd, msg_txt(8)); // Speed changed.
+	} else
+		clif_displaymessage(fd, msg_txt(172)); //Speed returned to normal.
+
 	return 0;
 }
 
@@ -8540,8 +8545,8 @@ ACMD_FUNC(font)
 
 	font_id = atoi(message);
 	if( font_id == 0 ) {
-		if( sd->user_font ) {
-			sd->user_font = 0;
+		if( sd->status.font ) {
+			sd->status.font = 0;
 			clif_displaymessage(fd, msg_txt(1356)); // Returning to normal font.
 			clif_font(sd);
 		} else {
@@ -8550,8 +8555,8 @@ ACMD_FUNC(font)
 		}
 	} else if( font_id < 0 || font_id > 9 )
 		clif_displaymessage(fd, msg_txt(1359)); // Invalid font. Use a value from 0 to 9.
-	else if( font_id != sd->user_font ) {
-		sd->user_font = font_id;
+	else if( font_id != sd->status.font ) {
+		sd->status.font = font_id;
 		clif_font(sd);
 		clif_displaymessage(fd, msg_txt(1360)); // Font changed.
 	} else

@@ -2248,7 +2248,7 @@ void script_errorwarning_sub(StringBuf *buf, const char* src, const char* file, 
 		p = lineend + 1;
 	}
 
-	StringBuf_Printf(buf, "script error on %s line %d\n", file, line);
+	StringBuf_Printf(buf, "script error in file '%s' line %d\n", file, line);
 	StringBuf_Printf(buf, "    %s\n", error_msg);
 	for(j = 0; j < 5; j++ ) {
 		script_print_line(buf, linestart[j], NULL, line + j - 5);
@@ -7416,7 +7416,7 @@ BUILDIN_FUNC(getequippercentrefinery)
  *------------------------------------------*/
 BUILDIN_FUNC(successrefitem)
 {
-	int i = -1, num, ep;
+	int i = -1,num,ep;
 	TBL_PC *sd;
 
 	num = script_getnum(st,2);
@@ -7427,13 +7427,16 @@ BUILDIN_FUNC(successrefitem)
 	if(num > 0 && num <= ARRAYLENGTH(equip))
 		i = pc_checkequip(sd,equip[num - 1]);
 	if(i >= 0) {
-		ep=sd->status.inventory[i].equip;
+		ep = sd->status.inventory[i].equip;
 
 		//Logs items, got from (N)PC scripts [Lupus]
 		log_pick_pc(sd,LOG_TYPE_SCRIPT,-1,&sd->status.inventory[i]);
 
+		if(sd->status.inventory[i].refine >= MAX_REFINE)
+			return 0;
+
 		sd->status.inventory[i].refine++;
-		pc_unequipitem(sd,i,2); // status calc will happen in pc_equipitem() below
+		pc_unequipitem(sd,i,2); //Status calc will happen in pc_equipitem() below
 
 		clif_refine(sd->fd,0,i,sd->status.inventory[i].refine);
 		clif_delitem(sd,i,1,3);
@@ -7444,7 +7447,7 @@ BUILDIN_FUNC(successrefitem)
 		clif_additem(sd,i,1,0);
 		pc_equipitem(sd,i,ep);
 		clif_misceffect(&sd->bl,3);
-		if(sd->status.inventory[i].refine == MAX_REFINE &&
+		if(sd->status.inventory[i].refine == 10 &&
 			sd->status.inventory[i].card[0] == CARD0_FORGE &&
 		  	sd->status.char_id == (int)MakeDWord(sd->status.inventory[i].card[2],sd->status.inventory[i].card[3])
 		) { // Fame point system [DracoRPG]
@@ -7493,17 +7496,21 @@ BUILDIN_FUNC(failedrefitem)
 }
 
 /*==========================================
- * Downgrades an Equipment Part by -1 . [Masao]
+ * Downgrades an Equipment Part by -1,
+ * unless optional <downgrade_count> is provided
+ * in the specified equipment slot of the invoking character. [Masao]
  *------------------------------------------*/
 BUILDIN_FUNC(downrefitem)
 {
-	int i = -1,num,ep;
+	int i = -1,num,ep,down = 1;
 	TBL_PC *sd;
 
-	num = script_getnum(st,2);
 	sd = script_rid2sd(st);
 	if(sd == NULL)
 		return 0;
+	num = script_getnum(st,2);
+	if(script_hasdata(st,3))
+		down = script_getnum(st,3);
 
 	if(num > 0 && num <= ARRAYLENGTH(equip))
 		i = pc_checkequip(sd,equip[num - 1]);
@@ -7513,10 +7520,11 @@ BUILDIN_FUNC(downrefitem)
 		//Logs items, got from (N)PC scripts [Lupus]
 		log_pick_pc(sd,LOG_TYPE_SCRIPT,-1,&sd->status.inventory[i]);
 
-		sd->status.inventory[i].refine++;
-		pc_unequipitem(sd,i,2); // status calc will happen in pc_equipitem() below
+		pc_unequipitem(sd,i,2); //Status calc will happen in pc_equipitem() below
+		sd->status.inventory[i].refine -= down;
+		sd->status.inventory[i].refine = cap_value(sd->status.inventory[i].refine,0,MAX_REFINE);
 
-		clif_refine(sd->fd,2,i,sd->status.inventory[i].refine = sd->status.inventory[i].refine - 2);
+		clif_refine(sd->fd,2,i,sd->status.inventory[i].refine);
 		clif_delitem(sd,i,1,3);
 
 		//Logs items, got from (N)PC scripts [Lupus]
@@ -16565,14 +16573,14 @@ BUILDIN_FUNC(setfont)
 {
 	struct map_session_data *sd = script_rid2sd(st);
 	int font = script_getnum(st,2);
+
 	if( sd == NULL )
 		return 0;
-
-	if( sd->user_font != font )
-		sd->user_font = font;
+	if( sd->status.font != font )
+		sd->status.font = font;
 	else
-		sd->user_font = 0;
-	
+		sd->status.font = 0;
+
 	clif_font(sd);
 	return 0;
 }
@@ -17829,7 +17837,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getequippercentrefinery,"i"),
 	BUILDIN_DEF(successrefitem,"i"),
 	BUILDIN_DEF(failedrefitem,"i"),
-	BUILDIN_DEF(downrefitem,"i"),
+	BUILDIN_DEF(downrefitem,"i?"),
 	BUILDIN_DEF(statusup,"i"),
 	BUILDIN_DEF(statusup2,"ii"),
 	BUILDIN_DEF(bonus,"iv"),

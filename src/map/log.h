@@ -17,7 +17,7 @@ typedef enum e_log_chat_type {
 	LOG_CHAT_PARTY       = 0x04,
 	LOG_CHAT_GUILD       = 0x08,
 	LOG_CHAT_MAINCHAT    = 0x10,
-	// all
+	// All
 	LOG_CHAT_ALL         = 0xFF,
 } e_log_chat_type;
 
@@ -42,9 +42,10 @@ typedef enum e_log_pick_type {
 	LOG_TYPE_BUYING_STORE     = 0x08000,
 	LOG_TYPE_OTHER            = 0x10000,
 	LOG_TYPE_CASH             = 0x20000,
-	// combinations
+	LOG_TYPE_BANK             = 0x40000,
+	// Combinations
 	LOG_TYPE_LOOT             = LOG_TYPE_PICKDROP_MONSTER|LOG_TYPE_CONSUME,
-	// all
+	// All
 	LOG_TYPE_ALL              = 0xFFFFF,
 } e_log_pick_type;
 
