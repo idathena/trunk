@@ -503,7 +503,7 @@ int map_count_oncell(int16 m, int16 x, int16 y, int type)
  * flag&1: runs battle_check_target check based on unit->group->target_flag
  */
 struct skill_unit* map_find_skill_unit_oncell(struct block_list* target,int16 x,int16 y,uint16 skill_id,struct skill_unit* out_unit, int flag) {
-	int16 m,bx,by;
+	int16 m, bx, by;
 	struct block_list *bl;
 	struct skill_unit *unit;
 	m = target->m;
@@ -511,12 +511,11 @@ struct skill_unit* map_find_skill_unit_oncell(struct block_list* target,int16 x,
 	if (x < 0 || y < 0 || (x >= map[m].xs) || (y >= map[m].ys))
 		return NULL;
 
-	bx = x/BLOCK_SIZE;
-	by = y/BLOCK_SIZE;
+	bx = x / BLOCK_SIZE;
+	by = y / BLOCK_SIZE;
 
-	for( bl = map[m].block[bx+by*map[m].bxs] ; bl != NULL ; bl = bl->next )
-	{
-		if (bl->x != x || bl->y != y || bl->type != BL_SKILL)
+	for( bl = map[m].block[bx+by*map[m].bxs] ; bl != NULL ; bl = bl->next ) {
+		if( bl->x != x || bl->y != y || bl->type != BL_SKILL )
 			continue;
 
 		unit = (struct skill_unit *) bl;
@@ -531,10 +530,10 @@ struct skill_unit* map_find_skill_unit_oncell(struct block_list* target,int16 x,
 /*==========================================
  * Adapted from foreachinarea for an easier invocation. [Skotlex]
  *------------------------------------------*/
-int map_foreachinrange(int (*func)(struct block_list*,va_list), struct block_list* center, int16 range, int type, ...)
+int map_foreachinrange(int (*func)(struct block_list*, va_list), struct block_list* center, int16 range, int type, ...)
 {
 	int bx, by, m;
-	int returnCount = 0;	//total sum of returned values of func() [Skotlex]
+	int returnCount = 0; //Total sum of returned values of func() [Skotlex]
 	struct block_list *bl;
 	int blockcount = bl_list_count, i;
 	int x0, x1, y0, y1;
@@ -3609,7 +3608,7 @@ int map_sql_init(void)
 	ShowInfo("Connecting to the Map DB Server....\n");
 	if( SQL_ERROR == Sql_Connect(mmysql_handle, map_server_id, map_server_pw, map_server_ip, map_server_port, map_server_db) )
 		exit(EXIT_FAILURE);
-	ShowStatus("connect success! (Map Server Connection)\n");
+	ShowStatus("Connect success! (Map Server Connection)\n");
 
 	if( strlen(default_codepage) > 0 )
 		if ( SQL_ERROR == Sql_SetEncoding(mmysql_handle, default_codepage) )

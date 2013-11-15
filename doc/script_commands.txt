@@ -4538,10 +4538,6 @@ Whatever the type is, it will also show a failure effect on screen.
 This command repairs a broken piece of equipment, using the same list of broken 
 items as available through 'getbrokenid'.
 
-The official scripts seem to use the repair command as a function instead: 
-'repair(<number>)' but it returns nothing on the stack. Probably only Valaris, 
-who made it, can answer why is it so.
-
 ---------------------------------------
 
 *repairall;
@@ -4561,10 +4557,6 @@ character and put appropriate messages into their chat window. It will also give
 the character fame points if a weapon reached +10 this way, even though these 
 will only take effect for blacksmith who will later forge a weapon.
 
-The official scripts seems to use the 'successrefitem' command as a function 
-instead: 'successrefitem(<number>)' but it returns nothing on the stack. 
-This is since jAthena, so probably nobody knows for sure why is it so.
-
 ---------------------------------------
 
 *failedrefitem <equipment slot>;
@@ -4574,20 +4566,14 @@ invoking character. The item will be destroyed. This will also display a 'refine
 failure' effect on the character and put appropriate messages into their chat 
 window.
 
-The official scripts seems to use the 'failedrefitem' command as a function 
-instead: 'failedrefitem(<number>)' but it returns nothing on the stack. This is 
-since jAthena, so probably nobody knows for sure why is it so.
-
 ---------------------------------------
 
 *downrefitem <equipment slot>{,<downgrade_count>};
 
-This command will downgrade an item by - 1 (unless optional <downgrade_count> is provided)
-in the specified equipment slot  of the invoking character.
-So the item will not be destroyed unlike in the 
-failedrefitem script command. This will also display a 'refine failure' 
-effect on the character and put appropriate messages into their chat 
-window.
+This command will downgrade an item in the specified equipment slot of the invoking
+character by -1, or a count if given. For a list of equipment slots see 'getequipid'.
+This command will also display a 'refine failure' effect on the character and put
+appropriate messages into their chat window.
 
 ---------------------------------------
 
@@ -5173,6 +5159,14 @@ current SVN, which prevents the cases of multi-spouse problems). It will return
 
 This function will also destroy both wedding rings and send a message to both 
 players, telling them they are now divorced.
+
+---------------------------------------
+
+*montransform <monster name/ID>,<duration>,<sc type>{,<val1>,<val2>,<val3>,<val4>};
+
+This command will turn a player into a monster for a given duration and grants an
+SC attribute effect while transformed. Note that players cannot be transformed
+during War of Emperium or if already disguised.
 
 ---------------------------------------
 //

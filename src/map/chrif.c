@@ -40,7 +40,7 @@ static DBMap* auth_db; // int id -> struct auth_node*
 
 static const int packet_len_table[0x3d] = { // U - used, F - free
 	60, 3,-1,27,10,-1, 6,-1,	// 2af8-2aff: U->2af8, U->2af9, U->2afa, U->2afb, U->2afc, U->2afd, U->2afe, U->2aff
-	 6,-1,18, 7,-1,39,30, 10,	// 2b00-2b07: U->2b00, U->2b01, U->2b02, U->2b03, U->2b04, U->2b05, U->2b06, U->2b07
+	 6,-1,19, 7,-1,39,30, 10,	// 2b00-2b07: U->2b00, U->2b01, U->2b02, U->2b03, U->2b04, U->2b05, U->2b06, U->2b07
 	 6,30,10,-1,86, 7,44,34,	// 2b08-2b0f: U->2b08, U->2b09, U->2b0a, F->2b0b, U->2b0c, U->2b0d, U->2b0e, U->2b0f
 	11,10,10,-1,11,-1,266,10,	// 2b10-2b17: U->2b10, U->2b11, U->2b12, F->2b13, U->2b14, F->2b15, U->2b16, U->2b17
 	 2,10, 2,-1,-1,-1, 2, 7,	// 2b18-2b1f: U->2b18, U->2b19, U->2b1a, U->2b1b, U->2b1c, U->2b1d, U->2b1e, U->2b1f
@@ -66,8 +66,8 @@ static const int packet_len_table[0x3d] = { // U - used, F - free
 //2b07: Outgoing, chrif_removefriend -> 'Tell charserver to remove friend_id from char_id friend list'
 //2b08: Outgoing, chrif_searchcharid -> '...'
 //2b09: Incoming, map_addchariddb -> 'Adds a name to the nick db'
-//2b0a: Incoming, chrif_skillcooldown_request
-//2b0b: Incoming, chrif_skillcooldown_load
+//2b0a: Outgoing, chrif_skillcooldown_request -> requesting the list of skillcooldown for char
+//2b0b: Incoming, chrif_skillcooldown_load -> received the list of cooldown for char
 //2b0c: Outgoing, chrif_changeemail -> 'change mail address ...'
 //2b0d: Incoming, chrif_changedsex -> 'Change sex of acc XY'
 //2b0e: Outgoing, chrif_char_ask_name -> 'Do some operations (change sex, ban / unban etc)'
@@ -77,7 +77,7 @@ static const int packet_len_table[0x3d] = { // U - used, F - free
 //2b12: Incoming, chrif_divorceack -> 'divorce chars
 //2b13: Incoming/Outgoing, socket_datasync()
 //2b14: Incoming, chrif_accountban -> 'not sure: kick the player with message XY'
-//2b15: Incoming, chrif_skillcooldown_save
+//2b15: Outgoing, chrif_skillcooldown_save -> request to save skillcooldown
 //2b16: Outgoing, chrif_ragsrvinfo -> 'sends base / job / drop rates ....'
 //2b17: Outgoing, chrif_char_offline -> 'tell the charserver that the char is now offline'
 //2b18: Outgoing, chrif_char_reset_offline -> 'set all players OFF!'
@@ -751,13 +751,14 @@ int chrif_charselectreq(struct map_session_data* sd, uint32 s_ip) {
 
 	chrif_check(-1);
 
-	WFIFOHEAD(char_fd,18);
+	WFIFOHEAD(char_fd,19);
 	WFIFOW(char_fd, 0) = 0x2b02;
 	WFIFOL(char_fd, 2) = sd->bl.id;
 	WFIFOL(char_fd, 6) = sd->login_id1;
 	WFIFOL(char_fd,10) = sd->login_id2;
 	WFIFOL(char_fd,14) = htonl(s_ip);
-	WFIFOSET(char_fd,18);
+	WFIFOB(char_fd,18) = sd->packet_ver;
+	WFIFOSET(char_fd,19);
 
 	return 0;
 }

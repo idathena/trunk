@@ -9676,11 +9676,19 @@ BUILDIN_FUNC(sc_end)
 			case SC_WEIGHT90:
 			case SC_NOCHAT:
 			case SC_PUSH_CART:
+			case SC_ALL_RIDING:
+			case SC_STYLE_CHANGE:
+			case SC_MONSTER_TRANSFORM:
+			case SC_MTF_ASPD:
+			case SC_MTF_RANGEATK:
+			case SC_MTF_MATK:
+			case SC_MTF_MLEATKED:
+			case SC_MTF_CRIDAMAGE:
 				return 0;
-
 			default:
 				break;
 		}
+
 		//This should help status_change_end force disabling the SC in case it has no limit.
 		sce->val1 = sce->val2 = sce->val3 = sce->val4 = 0;
 		status_change_end(bl, (sc_type)type, INVALID_TIMER);
@@ -12496,7 +12504,7 @@ BUILDIN_FUNC(nude)
 	}
 
 	if( calcflag )
-		status_calc_pc(sd,0);
+		status_calc_pc(sd,SCO_NONE);
 
 	return 0;
 }
@@ -12944,18 +12952,17 @@ BUILDIN_FUNC(npcspeed)
 // make an npc walk to a position [Valaris]
 BUILDIN_FUNC(npcwalkto)
 {
-	struct npc_data *nd=(struct npc_data *)map_id2bl(st->oid);
-	int x=0,y=0;
+	struct npc_data *nd = (struct npc_data *)map_id2bl(st->oid);
+	int x = 0, y = 0;
 
-	x=script_getnum(st,2);
-	y=script_getnum(st,3);
+	x = script_getnum(st,2);
+	y = script_getnum(st,3);
 
 	if(nd) {
-		if (!nd->status.hp) {
-			status_calc_npc(nd, true);
-		} else {
-			status_calc_npc(nd, false);
-		}
+		if(!nd->status.hp)
+			status_calc_npc(nd,SCO_FIRST);
+		else
+			status_calc_npc(nd,SCO_NONE);
 		unit_walktoxy(&nd->bl,x,y,0);
 	}
 
@@ -12966,9 +12973,8 @@ BUILDIN_FUNC(npcstop)
 {
 	struct npc_data *nd=(struct npc_data *)map_id2bl(st->oid);
 
-	if(nd) {
+	if(nd)
 		unit_stop_walking(&nd->bl,1|4);
-	}
 
 	return 0;
 }
@@ -17270,9 +17276,9 @@ BUILDIN_FUNC(npcskill)
 	nd->stat_point = stat_point;
 
 	if (!nd->status.hp)
-		status_calc_npc(nd, true);
+		status_calc_npc(nd,SCO_FIRST);
 	else
-		status_calc_npc(nd, false);
+		status_calc_npc(nd,SCO_NONE);
 
 	if (skill_get_inf(skill_id)&INF_GROUND_SKILL)
 		unit_skilluse_pos(&nd->bl, sd->bl.x, sd->bl.y, skill_id, skill_level);

@@ -299,10 +299,10 @@ void merc_hom_skillup(struct homun_data *hd,uint16 skill_id)
 	{
 		hd->homunculus.hskill[i].lv++;
 		hd->homunculus.skillpts-- ;
-		status_calc_homunculus(hd,0);
+		status_calc_homunculus(hd, SCO_NONE);
 		if (hd->master) {
 			clif_homskillup(hd->master, skill_id);
-			clif_hominfo(hd->master,hd,0);
+			clif_hominfo(hd->master, hd, 0);
 			clif_homskillinfoblock(hd->master);
 		}
 	}
@@ -311,7 +311,7 @@ void merc_hom_skillup(struct homun_data *hd,uint16 skill_id)
 int merc_hom_levelup(struct homun_data *hd)
 {
 	struct s_homunculus *hom;
-	struct h_stats *min, *max;
+	struct h_stats *min = NULL, *max = NULL;
 	int growth_str, growth_agi, growth_vit, growth_int, growth_dex, growth_luk;
 	int growth_max_hp, growth_max_sp;
 	int m_class;
@@ -321,21 +321,38 @@ int merc_hom_levelup(struct homun_data *hd)
 		return 0;
 	}
 
-	if(((m_class&HOM_REG) && hd->homunculus.level >= battle_config.hom_max_level)
-		|| ((m_class&HOM_S) && hd->homunculus.level >= battle_config.hom_S_max_level)
-		|| !hd->exp_next || hd->homunculus.exp < hd->exp_next)
+	//When homunculus is homunculus S, we check to see if we need to apply previous class stats
+	if(m_class&HOM_S && hd->homunculus.level < battle_config.hom_S_growth_level) {
+		int i;
+		//We also need to be sure that the previous class exists, otherwise give it something to work with
+		if(!hd->homunculus.prev_class)
+			hd->homunculus.prev_class = 6001;
+		//Give the homunculus the level up stats database it needs
+		i = search_homunculusDB_index(hd->homunculus.prev_class, HOMUNCULUS_CLASS);
+		if(i < 0) //Nothing should go wrong here, but check anyways
+			return 0;
+		max = &homunculus_db[i].gmax;
+		min = &homunculus_db[i].gmin;
+	}
+
+	if(((m_class&HOM_REG) && hd->homunculus.level >= battle_config.hom_max_level) ||
+		((m_class&HOM_S) && hd->homunculus.level >= battle_config.hom_S_max_level) ||
+		!hd->exp_next || hd->homunculus.exp < hd->exp_next)
 		return 0;
 
 	hom = &hd->homunculus;
 	hom->level++;
-	if(!(hom->level % 3))
+
+	if(!(hom->level%3))
 		hom->skillpts++; //1 skillpoint each 3 base level
 
 	hom->exp -= hd->exp_next;
 	hd->exp_next = hexptbl[hom->level - 1];
 
-	max  = &hd->homunculusDB->gmax;
-	min  = &hd->homunculusDB->gmin;
+	if(!max) {
+		max  = &hd->homunculusDB->gmax;
+		min  = &hd->homunculusDB->gmin;
+	}
 
 	growth_max_hp = rnd_value(min->HP, max->HP);
 	growth_max_sp = rnd_value(min->SP, max->SP);
@@ -417,7 +434,7 @@ int merc_hom_evolution(struct homun_data *hd)
 	hom->str += 10*rnd_value(min->str, max->str);
 	hom->agi += 10*rnd_value(min->agi, max->agi);
 	hom->vit += 10*rnd_value(min->vit, max->vit);
-	hom->int_+= 10*rnd_value(min->int_,max->int_);
+	hom->int_+= 10*rnd_value(min->int_, max->int_);
 	hom->dex += 10*rnd_value(min->dex, max->dex);
 	hom->luk += 10*rnd_value(min->luk, max->luk);
 	hom->intimacy = 500;
@@ -427,15 +444,15 @@ int merc_hom_evolution(struct homun_data *hd)
 
 	clif_spawn(&hd->bl);
 	clif_emotion(&sd->bl, E_NO1);
-	clif_specialeffect(&hd->bl,568,AREA);
+	clif_specialeffect(&hd->bl, 568, AREA);
 
 	//status_Calc flag&1 will make current HP/SP be reloaded from hom structure
 	hom->hp = hd->battle_status.hp;
 	hom->sp = hd->battle_status.sp;
-	status_calc_homunculus(hd,1);
+	status_calc_homunculus(hd, SCO_FIRST);
 
 	if (!(battle_config.hom_setting&0x2))
-		skill_unit_move(&sd->hd->bl,gettick(),1); // apply land skills immediately
+		skill_unit_move(&sd->hd->bl, gettick(), 1); //Apply land skills immediately
 	
 	return 1 ;
 }
@@ -466,8 +483,8 @@ int hom_mutate(struct homun_data *hd, int homun_id)
 		return 0;
 	}
 
-	// Its said the player can rename the homunculus again after mutation.
-	// This might be true since the homunculus's form completely changes.
+	//Its said the player can rename the homunculus again after mutation.
+	//This might be true since the homunculus's form completely changes.
 	hd->homunculus.rename_flag = 0;
 
 	unit_remove_map(&hd->bl, CLR_OUTSIGHT);
@@ -475,17 +492,17 @@ int hom_mutate(struct homun_data *hd, int homun_id)
 
 	clif_spawn(&hd->bl);
 	clif_emotion(&sd->bl, E_NO1);
-	clif_specialeffect(&hd->bl,568,AREA);
+	clif_specialeffect(&hd->bl, 568, AREA);
 
 	//status_Calc flag&1 will make current HP/SP be reloaded from hom structure
 	hom = &hd->homunculus;
 	hom->hp = hd->battle_status.hp;
 	hom->sp = hd->battle_status.sp;
 	hom->prev_class = prev_class;
-	status_calc_homunculus(hd,1);
+	status_calc_homunculus(hd, SCO_FIRST);
 
 	if (!(battle_config.hom_setting&0x2))
-		skill_unit_move(&sd->hd->bl,gettick(),1); // apply land skills immediately
+		skill_unit_move(&sd->hd->bl, gettick(), 1); //Apply land skills immediately
 
 	return 1;
 }
@@ -523,7 +540,7 @@ int merc_hom_gainexp(struct homun_data *hd,int exp)
 		hd->homunculus.exp = 0 ;
 
 	clif_specialeffect(&hd->bl, 568, AREA);
-	status_calc_homunculus(hd, 0);
+	status_calc_homunculus(hd, SCO_NONE);
 	status_percent_heal(&hd->bl, 100, 100);
 	return 0;
 }
@@ -622,7 +639,7 @@ int merc_hom_food(struct map_session_data *sd, struct homun_data *hd)
 		emotion = E_HO;
 	}
 
-	hd->homunculus.hunger += 10;	//dunno increase value for each food
+	hd->homunculus.hunger += 10; //Dunno increase value for each food
 	if(hd->homunculus.hunger > 100)
 		hd->homunculus.hunger = 100;
 
@@ -714,7 +731,7 @@ int merc_hom_change_name_ack(struct map_session_data *sd, char* name, int flag)
 	struct homun_data *hd = sd->hd;
 	if (!merc_is_hom_active(hd)) return 0;
 
-	normalize_name(name," ");//bugreport:3032
+	normalize_name(name," "); //bugreport:3032
 	
 	if ( !flag || !strlen(name) ) {
 		clif_displaymessage(sd->fd, msg_txt(280)); // You cannot use this name
@@ -731,7 +748,7 @@ int search_homunculusDB_index(int key,int type)
 {
 	int i;
 
-	for(i=0;i<MAX_HOMUNCULUS_CLASS;i++) {
+	for(i = 0; i < MAX_HOMUNCULUS_CLASS; i++) {
 		if(homunculus_db[i].base_class <= 0)
 			continue;
 		switch(type) {
@@ -782,7 +799,7 @@ int merc_hom_alloc(struct map_session_data *sd, struct s_homunculus *hom)
 	unit_dataset(&hd->bl);
 	hd->ud.dir = sd->ud.dir;
 
-	// Find a random valid pos around the player
+	//Find a random valid pos around the player
 	hd->bl.m = sd->bl.m;
 	hd->bl.x = sd->bl.x;
 	hd->bl.y = sd->bl.y;
@@ -791,7 +808,8 @@ int merc_hom_alloc(struct map_session_data *sd, struct s_homunculus *hom)
 	hd->bl.y = hd->ud.to_y;
 
 	map_addiddb(&hd->bl);
-	status_calc_homunculus(hd,1);
+	status_calc_homunculus(hd, SCO_FIRST);
+	status_percent_heal(&hd->bl, 100, 100);
 
 	hd->hungry_timer = INVALID_TIMER;
 	hd->masterteleport_timer = INVALID_TIMER;
@@ -801,7 +819,7 @@ int merc_hom_alloc(struct map_session_data *sd, struct s_homunculus *hom)
 void merc_hom_init_timers(struct homun_data * hd)
 {
 	if (hd->hungry_timer == INVALID_TIMER)
-		hd->hungry_timer = add_timer(gettick()+hd->homunculusDB->hungryDelay,merc_hom_hungry,hd->master->bl.id,0);
+		hd->hungry_timer = add_timer(gettick() + hd->homunculusDB->hungryDelay,merc_hom_hungry,hd->master->bl.id,0);
 	hd->regen.state.block = 0; //Restore HP/SP block.
 	hd->masterteleport_timer = INVALID_TIMER;
 }
@@ -813,7 +831,7 @@ int merc_call_homunculus(struct map_session_data *sd)
 	if (!sd->status.hom_id) //Create a new homun.
 		return merc_create_homunculus_request(sd, HM_CLASS_BASE + rnd_value(0, 7)) ;
 
-	// If homunc not yet loaded, load it
+	//If homunc not yet loaded, load it
 	if (!sd->hd)
 		return intif_homunculus_requestload(sd->status.account_id, sd->status.hom_id);
 
@@ -823,7 +841,7 @@ int merc_call_homunculus(struct map_session_data *sd)
 		return 0; //Can't use this if homun wasn't vaporized.
 
 	if (hd->homunculus.vaporize == HOM_ST_MORPH)
-		return 0; // Can't call homunculus (morph state).
+		return 0; //Can't call homunculus (morph state).
 
 	merc_hom_init_timers(hd);
 	hd->homunculus.vaporize = HOM_ST_ACTIVE;
@@ -835,7 +853,7 @@ int merc_call_homunculus(struct map_session_data *sd)
 		clif_spawn(&hd->bl);
 		clif_send_homdata(sd,SP_ACK,0);
 		clif_hominfo(sd,hd,1);
-		clif_hominfo(sd,hd,0); // send this x2. dunno why, but kRO does that [blackhole89]
+		clif_hominfo(sd,hd,0); //Send this x2. dunno why, but kRO does that [blackhole89]
 		clif_homskillinfoblock(sd);
 		if (battle_config.slaves_inherit_speed&1)
 			status_calc_bl(&hd->bl, SCB_SPEED);
@@ -1008,35 +1026,32 @@ int merc_hom_shuffle(struct homun_data *hd)
 	exp = hd->homunculus.exp;
 	memcpy(&b_skill, &hd->homunculus.hskill, sizeof(b_skill));
 	skillpts = hd->homunculus.skillpts;
-	//Reset values to level 1.
-	merc_reset_stats(hd);
+	merc_reset_stats(hd); //Reset values to level 1.
 
-	//Level it back up
-	do {
+	do { //Level it back up
 		hd->homunculus.exp += hd->exp_next;
 	} while( hd->homunculus.level < lv && merc_hom_levelup(hd) );
 
-	if( hd->homunculus.class_ == hd->homunculusDB->evo_class ) {
-		//Evolved bonuses
+	if( hd->homunculus.class_ == hd->homunculusDB->evo_class ) { //Evolved bonuses
 		struct s_homunculus *hom = &hd->homunculus;
 		struct h_stats *max = &hd->homunculusDB->emax, *min = &hd->homunculusDB->emin;
 		hom->max_hp += rnd_value(min->HP, max->HP);
 		hom->max_sp += rnd_value(min->SP, max->SP);
-		hom->str += 10*rnd_value(min->str, max->str);
-		hom->agi += 10*rnd_value(min->agi, max->agi);
-		hom->vit += 10*rnd_value(min->vit, max->vit);
-		hom->int_+= 10*rnd_value(min->int_,max->int_);
-		hom->dex += 10*rnd_value(min->dex, max->dex);
-		hom->luk += 10*rnd_value(min->luk, max->luk);
+		hom->str += 10 * rnd_value(min->str, max->str);
+		hom->agi += 10 * rnd_value(min->agi, max->agi);
+		hom->vit += 10 * rnd_value(min->vit, max->vit);
+		hom->int_+= 10 * rnd_value(min->int_, max->int_);
+		hom->dex += 10 * rnd_value(min->dex, max->dex);
+		hom->luk += 10 * rnd_value(min->luk, max->luk);
 	}
 
 	hd->homunculus.exp = exp;
 	memcpy(&hd->homunculus.hskill, &b_skill, sizeof(b_skill));
 	hd->homunculus.skillpts = skillpts;
 	clif_homskillinfoblock(sd);
-	status_calc_homunculus(hd,0);
+	status_calc_homunculus(hd, SCO_NONE);
 	status_percent_heal(&hd->bl, 100, 100);
-	clif_specialeffect(&hd->bl,568,AREA);
+	clif_specialeffect(&hd->bl, 568, AREA);
 
 	return 1;
 }

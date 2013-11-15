@@ -74,14 +74,15 @@ struct Channel* channel_create(char *name, char *pass, unsigned char color, enum
 int channel_delete(struct Channel *channel) {
 	if(!channel)
 		return -1;
-	if(channel->type == CHAN_TYPE_PUBLIC && runflag != MAPSERVER_ST_RUNNING) //Only delete, if server stop
+	if(channel->type == CHAN_TYPE_PUBLIC && runflag == MAPSERVER_ST_RUNNING) //Only delete, if server stop
 		return -2;
 	if(db_size(channel->users)) {
 		struct map_session_data *sd;
 		DBIterator *iter = db_iterator(channel->users);
-		for(sd = dbi_first(iter); dbi_exists(iter); sd = dbi_next(iter)) { //For all users
+		//For all users
+		for(sd = (struct map_session_data *)dbi_first(iter); dbi_exists(iter); sd = (struct map_session_data *)dbi_next(iter))
 			channel_clean(channel,sd,1); //Make all quit
-		}
+
 		dbi_destroy(iter);
 	}
 	//ShowInfo("Deleting channel %s\n",channel->name);
@@ -1155,18 +1156,18 @@ int do_init_channel(void) {
 void do_final_channel(void) {
 	DBIterator *iter;
 	struct Channel *channel;
-	int i=0;
+	int i = 0;
 
-	//delete all in remaining chan db
+	//Delete all in remaining chan db
 	iter = db_iterator(channel_db);
-	for( channel = dbi_first(iter); dbi_exists(iter); channel = dbi_next(iter) ) {
+	for( channel = (struct Channel *)dbi_first(iter); dbi_exists(iter); channel = (struct Channel *)dbi_next(iter) )
 		channel_delete(channel);
-	}
+
 	dbi_destroy(iter);
-	//at this point all user should have left their channel (private and public should be gone)
+	//At this point all user should have left their channel (private and public should be gone)
 	db_destroy(channel_db);
 
-	//delete all color thing
+	//Delete all color thing
 	if( Channel_Config.colors_count ) {
 		for(i = 0; i < Channel_Config.colors_count; i++) {
 			aFree(Channel_Config.colors_name[i]);

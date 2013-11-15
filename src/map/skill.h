@@ -66,8 +66,7 @@ enum e_skill_inf2 {
 	INF2_GUILD_ONLY     = 0x0800,
 	INF2_NO_ENEMY       = 0x1000,
 	INF2_CHORUS_SKILL   = 0x2000, //Chorus skill
-	INF2_NO_BG_DMG      = 0x4000, //Spell that ignore bg reduction
-	INF2_NO_GVG_DMG     = 0x8000, //Spell that ignore gvg reduction
+	INF2_NO_BG_GVG_DMG  = 0x4000, //Spell that ignore bg and gvg reduction
 };
 
 ///Skill info type 3

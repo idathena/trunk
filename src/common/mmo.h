@@ -405,6 +405,9 @@ struct mmo_charstatus {
 	unsigned int character_moves;
 
 	unsigned char font;
+
+	/* `account_data` modifiers */
+	unsigned short mod_exp,mod_drop,mod_death;
 };
 
 typedef enum mail_status {
@@ -533,10 +536,10 @@ struct guild {
 	struct guild_alliance alliance[MAX_GUILDALLIANCE];
 	struct guild_expulsion expulsion[MAX_GUILDEXPULSION];
 	struct guild_skill skill[MAX_GUILDSKILL];
+	struct Channel *channel;
 
 	/* TODO: still used for something? */
-	unsigned short save_flag; // for TXT saving
-	void *channel;
+	unsigned short save_flag; // For TXT saving
 };
 
 struct guild_castle {

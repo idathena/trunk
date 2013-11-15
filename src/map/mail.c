@@ -45,32 +45,31 @@ int mail_removeitem(struct map_session_data *sd, short flag)
 int mail_removezeny(struct map_session_data *sd, short flag)
 {
 	nullpo_ret(sd);
-	
-	if (flag && sd->mail.zeny > 0)
-	{  //Zeny send
+
+	if (flag && sd->mail.zeny > 0) //Zeny send
 		pc_payzeny(sd,sd->mail.zeny,LOG_TYPE_MAIL, NULL);
-	}
+
 	sd->mail.zeny = 0;
-	
+
 	return 1;
 }
 
-unsigned char mail_setitem(struct map_session_data *sd, int idx, int amount) {
+unsigned char mail_setitem(struct map_session_data *sd, int idx, int amount)
+{
+	if( pc_istrading(sd) )
+		return 1;
 
-		if( pc_istrading(sd) )
-				return 1;
-			
-		if( idx == 0 ) { // Zeny Transfer
-				if( amount < 0 || !pc_can_give_items(sd) )
-						return 1;
+	if( idx == 0 ) { //Zeny Transfer
+		if( amount < 0 || !pc_can_give_items(sd) )
+			return 1;
 
 		if( amount > sd->status.zeny )
 			amount = sd->status.zeny;
 
 		sd->mail.zeny = amount;
-		// clif_updatestatus(sd, SP_ZENY);
+		//clif_updatestatus(sd,SP_ZENY);
 		return 0;
-	} else { // Item Transfer
+	} else { //Item Transfer
 		idx -= 2;
 		mail_removeitem(sd, 0);
 
@@ -78,9 +77,10 @@ unsigned char mail_setitem(struct map_session_data *sd, int idx, int amount) {
 			return 1;
 		if( amount < 0 || amount > sd->status.inventory[idx].amount )
 			return 1;
-		if( !pc_can_give_items(sd) || sd->status.inventory[idx].expire_time 
-			|| !itemdb_canmail(&sd->status.inventory[idx],pc_get_group_level(sd)) 
-			|| (sd->status.inventory[idx].bound && !pc_can_give_bounded_items(sd)) )
+		if( !pc_can_give_items(sd) || sd->status.inventory[idx].expire_time ||
+			!itemdb_available(sd->status.inventory[idx].nameid) ||
+			!itemdb_canmail(&sd->status.inventory[idx],pc_get_group_level(sd)) ||
+			(sd->status.inventory[idx].bound && !pc_can_give_bounded_items(sd)) )
 			return 1;
 
 		sd->mail.index = idx;

@@ -109,28 +109,28 @@ static __inline uint64 _rdtsc(){
 	} t;
 
 	asm volatile("rdtsc":"=a"(t.dw[0]), "=d"(t.dw[1]) );
-	
+
 	return t.qw;
 }
 
 static void rdtsc_calibrate(){
 	uint64 t1, t2;
 	int32 i;
-	
+
 	ShowStatus("Calibrating Timer Source, please wait... ");
-	
+
 	RDTSC_CLOCK = 0;
-	
+
 	for(i = 0; i < 5; i++){
 		t1 = _rdtsc();
 		usleep(1000000); //1000 MS
 		t2 = _rdtsc();
-		RDTSC_CLOCK += (t2 - t1) / 1000; 
+		RDTSC_CLOCK += (t2 - t1) / 1000;
 	}
 	RDTSC_CLOCK /= 5;
-	
+
 	RDTSC_BEGINTICK = _rdtsc();
-	
+
 	ShowMessage(" done. (Frequency: %u Mhz)\n", (uint32)(RDTSC_CLOCK/1000) );
 }
 
@@ -243,7 +243,7 @@ static int acquire_timer(void)
 int add_timer(unsigned int tick, TimerFunc func, int id, intptr_t data)
 {
 	int tid;
-	
+
 	tid = acquire_timer();
 	timer_data[tid].tick     = tick;
 	timer_data[tid].func     = func;
@@ -320,7 +320,7 @@ int addtick_timer(int tid, unsigned int tick)
 int settick_timer(int tid, unsigned int tick)
 {
 	size_t i;
-	
+
 	// search timer position
 	ARR_FIND(0, BHEAP_LENGTH(timer_heap), i, BHEAP_DATA(timer_heap)[i] == tid);
 	if( i == BHEAP_LENGTH(timer_heap) )
@@ -404,6 +404,96 @@ int do_timer(unsigned int tick)
 unsigned long get_uptime(void)
 {
 	return (unsigned long)difftime(time(NULL), start_time);
+}
+
+void time2str(char *timestr, char *format, int timein)
+{
+	time_t timeout = time(NULL) + timein;
+	strftime(timestr, 24, format, localtime(&timeout));
+}
+
+/*
+ * Split given timein into year, month, day, hour, minute, second
+ */
+void split_time(int timein, int* year, int* month, int* day, int* hour, int* minute, int* second)
+{
+	const int factor_min = 60;
+	const int factor_hour = factor_min * 60;
+	const int factor_day = factor_hour * 24;
+	const int factor_month = factor_day * 30; // Approx
+	const int factor_year = factor_month * 12; // Even worse approx
+
+	*year = timein / factor_year;
+	timein -= *year * factor_year;
+	*month = timein / factor_month;
+	timein -= *month * factor_month;
+	*day = timein / factor_day;
+	timein -= *day * factor_day;
+	*hour = timein / factor_hour;
+	timein -= *hour * factor_hour;
+	*minute = timein / factor_min;
+	timein -= *minute * factor_min;
+	*second = timein;
+
+	*year = max(0,*year);
+	*month = max(0,*month);
+	*day = max(0,*day);
+	*hour = max(0,*hour);
+	*minute = max(0,*minute);
+	*second = max(0,*second);
+}
+
+/*
+ * Create a "timestamp" with the given argument
+ */
+double solve_time(char* modif_p)
+{
+	double totaltime = 0;
+	int value = 0;
+	struct tm then_tm;
+	time_t now = time(NULL);
+	time_t then = now;
+	then_tm = *localtime(&then);
+
+	while (modif_p[0] != '\0') {
+		value = atoi(modif_p);
+		if (value == 0)
+			modif_p++;
+		else {
+			if (modif_p[0] == '-' || modif_p[0] == '+')
+				modif_p++;
+			while (modif_p[0] >= '0' && modif_p[0] <= '9')
+				modif_p++;
+			if (modif_p[0] == 's') {
+				then_tm.tm_sec += value;
+				modif_p++;
+			} else if (modif_p[0] == 'n') {
+				then_tm.tm_min += value;
+				modif_p++;
+			} else if (modif_p[0] == 'm' && modif_p[1] == 'n') {
+				then_tm.tm_min += value;
+				modif_p = modif_p + 2;
+			} else if (modif_p[0] == 'h') {
+				then_tm.tm_hour += value;
+				modif_p++;
+			} else if (modif_p[0] == 'd' || modif_p[0] == 'j') {
+				then_tm.tm_mday += value;
+				modif_p++;
+			} else if (modif_p[0] == 'm') {
+				then_tm.tm_mon += value;
+				modif_p++;
+			} else if (modif_p[0] == 'y' || modif_p[0] == 'a') {
+				then_tm.tm_year += value;
+				modif_p++;
+			} else if (modif_p[0] != '\0') {
+				modif_p++;
+			}
+		}
+	}
+	then = mktime(&then_tm);
+	totaltime = difftime(then,now);
+
+	return totaltime;
 }
 
 void timer_init(void)

@@ -220,31 +220,29 @@ bool exists(const char* filename)
 
 uint8 GetByte(uint32 val, int idx)
 {
-	switch( idx )
-	{
-	case 0: return (uint8)( (val & 0x000000FF)         );
-	case 1: return (uint8)( (val & 0x0000FF00) >> 0x08 );
-	case 2: return (uint8)( (val & 0x00FF0000) >> 0x10 );
-	case 3: return (uint8)( (val & 0xFF000000) >> 0x18 );
-	default:
+	switch( idx ) {
+		case 0: return (uint8)( (val & 0x000000FF)         );
+		case 1: return (uint8)( (val & 0x0000FF00) >> 0x08 );
+		case 2: return (uint8)( (val & 0x00FF0000) >> 0x10 );
+		case 3: return (uint8)( (val & 0xFF000000) >> 0x18 );
+		default:
 #if defined(DEBUG)
-		ShowDebug("GetByte: invalid index (idx=%d)\n", idx);
+			ShowDebug("GetByte: invalid index (idx=%d)\n", idx);
 #endif
-		return 0;
+			return 0;
 	}
 }
 
 uint16 GetWord(uint32 val, int idx)
 {
-	switch( idx )
-	{
-	case 0: return (uint16)( (val & 0x0000FFFF)         );
-	case 1: return (uint16)( (val & 0xFFFF0000) >> 0x10 );
-	default:
+	switch( idx ) {
+		case 0: return (uint16)( (val & 0x0000FFFF)         );
+		case 1: return (uint16)( (val & 0xFFFF0000) >> 0x10 );
+		default:
 #if defined(DEBUG)
-		ShowDebug("GetWord: invalid index (idx=%d)\n", idx);
+			ShowDebug("GetWord: invalid index (idx=%d)\n", idx);
 #endif
-		return 0;
+			return 0;
 	}
 }
 uint16 MakeWord(uint8 byte0, uint8 byte1)
@@ -259,44 +257,46 @@ uint32 MakeDWord(uint16 word0, uint16 word1)
 		( (uint32)(word1 << 0x10) );
 }
 
-int date2version(int date){
-	if(date < 20040906) return 5;
-	else if(date < 20040920) return 10;
-	else if(date < 20041005) return 11;
-	else if(date < 20041025) return 12;
-	else if(date < 20041129) return 13;
-	else if(date < 20050110) return 14;
-	else if(date < 20050509) return 15;
-	else if(date < 20050628) return 16;
-	else if(date < 20050718) return 17;
-	else if(date < 20050719) return 18;
-	else if(date < 20060327) return 19;
-	else if(date < 20070108) return 20;
-	else if(date < 20070212) return 21;
-	//wtf @FIXME
-	else if(date < 20080910) return 22;
-	else if(date < 20080827) return 23;
-	else if(date < 20080910) return 24;
-	//unable to solve from date
-	else if(date < 20101124) return 25;
-	else if(date < 20111005) return 26;
-	else if(date < 20111102) return 27;
-	else if(date < 20120307) return 28;
-	else if(date < 20120410) return 29;
-	else if(date < 20120418) return 30;
-	else if(date < 20120618) return 31;
-	else if(date < 20120702) return 32;
-	else if(date < 20130320) return 33;
-	else if(date < 20130515) return 34;
-	else if(date < 20130522) return 35;
-	else if(date < 20130529) return 36;
-	else if(date < 20130605) return 37;
-	else if(date < 20130612) return 38;
-	else if(date >= 20130612) return 39;
-//	else if(date < 20040920) return 40;
-//	else if(date < 20040920) return 41;
-//	else if(date < 20040920) return 42;
-//	else if(date < 20040920) return 43;
+int date2version(int date) {
+	if( date < 20040906 ) return 5;
+	else if( date < 20040920 ) return 10;
+	else if( date < 20041005 ) return 11;
+	else if( date < 20041025 ) return 12;
+	else if( date < 20041129 ) return 13;
+	else if( date < 20050110 ) return 14;
+	else if( date < 20050509 ) return 15;
+	else if( date < 20050628 ) return 16;
+	else if( date < 20050718 ) return 17;
+	else if( date < 20050719 ) return 18;
+	else if( date < 20060327 ) return 19;
+	else if( date < 20070108 ) return 20;
+	else if( date < 20070212 ) return 21;
+	//WTF @FIXME
+	else if( date < 20080910 ) return 22;
+	else if( date < 20080827 ) return 23;
+	else if( date < 20080910 ) return 24;
+	//Unable to solve from date
+	else if( date < 20101124 ) return 25;
+	else if( date < 20111005 ) return 26;
+	else if( date < 20111102 ) return 27;
+	else if( date < 20120307 ) return 28;
+	else if( date < 20120410 ) return 29;
+	else if( date < 20120418 ) return 30;
+	else if( date < 20120618 ) return 31;
+	else if( date < 20120702 ) return 32;
+	else if( date < 20130320 ) return 33;
+	else if( date < 20130515 ) return 34;
+	else if( date < 20130522 ) return 35;
+	else if( date < 20130529 ) return 36;
+	else if( date < 20130605 ) return 37;
+	else if( date < 20130612 ) return 38;
+	else if( date < 20130618 ) return 39;
+	else if( date < 20130626 ) return 40;
+	else if( date < 20130703 ) return 41;
+	else if( date < 20130710 ) return 42;
+	else if( date < 20130717 ) return 43;
+	else if( date < 20130807 ) return 44;
+	else if( date >= 20130807 ) return 45;
 	else return 30; //default
 }
 
@@ -305,16 +305,14 @@ unsigned int get_percentage(const unsigned int A, const unsigned int B)
 {
 	double result;
 
-	if( B == 0 )
-	{
+	if( B == 0 ) {
 		ShowError("get_percentage(): divison by zero! (A=%u,B=%u)\n", A, B);
 		return ~0U;
 	}
 
 	result = 100 * ((double)A / (double)B);
 
-	if( result > UINT_MAX )
-	{
+	if( result > UINT_MAX ) {
 		ShowError("get_percentage(): result percentage too high! (A=%u,B=%u,result=%g)\n", A, B, result);
 		return UINT_MAX;
 	}

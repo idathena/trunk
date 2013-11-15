@@ -521,7 +521,7 @@ void clif_inventorylist(struct map_session_data *sd);
 void clif_equiplist(struct map_session_data *sd);
 
 void clif_cart_additem(struct map_session_data *sd,int n,int amount,int fail);
-void clif_cart_additem_ack(struct map_session_data *sd, int flag);
+void clif_cart_additem_ack(struct map_session_data *sd, uint8 flag);
 void clif_cart_delitem(struct map_session_data *sd,int n,int amount);
 void clif_cartlist(struct map_session_data *sd);
 void clif_clearcart(int fd);
@@ -808,6 +808,7 @@ void clif_monster_hp_bar(struct mob_data* md, int fd);
 enum clif_colors {
 	COLOR_RED,
 	COLOR_WHITE,
+	COLOR_CUSTOM,
 	COLOR_MAX
 };
 unsigned long color_table[COLOR_MAX];
@@ -823,5 +824,7 @@ void clif_update_rankingpoint(struct map_session_data *sd, int rankingtype, int 
 /* Bank System [Yommy] */
 void clif_bank_deposit(struct map_session_data *sd, enum e_BANKING_DEPOSIT_ACK reason);
 void clif_bank_withdraw(struct map_session_data *sd, enum e_BANKING_WITHDRAW_ACK reason);
+
+void clif_show_modifiers(struct map_session_data *sd);
 
 #endif /* _CLIF_H_ */

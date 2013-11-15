@@ -379,8 +379,8 @@ struct map_session_data {
 		short add_steal_rate;
 		short add_heal_rate, add_heal2_rate;
 		short sp_gain_value, hp_gain_value, magic_sp_gain_value, magic_hp_gain_value;
-		short sp_vanish_rate;
-		short sp_vanish_per;
+		short sp_vanish_rate, hp_vanish_rate;
+		short sp_vanish_per, hp_vanish_per;
 		unsigned short unbreakable;	//Chance to prevent ANY equipment breaking [celest]
 		unsigned short unbreakable_equip; //100% break resistance on certain equipment
 		unsigned short unstripable_equip;
@@ -884,6 +884,7 @@ int pc_resethate(struct map_session_data*);
 int pc_equipitem(struct map_session_data*,int,int);
 int pc_unequipitem(struct map_session_data*,int,int);
 int pc_checkitem(struct map_session_data*);
+int pc_check_available_item(struct map_session_data *sd);
 int pc_useitem(struct map_session_data*,int);
 
 int pc_skillatk_bonus(struct map_session_data *sd, uint16 skill_id);
@@ -1038,6 +1039,8 @@ void pc_baselevelchanged(struct map_session_data *sd);
 
 void pc_damage_log_add(struct map_session_data *sd, int id);
 void pc_damage_log_clear(struct map_session_data *sd, int id);
+
+void pc_show_version(struct map_session_data *sd);
 
 #if defined(RENEWAL_DROP) || defined(RENEWAL_EXP)
 	int pc_level_penalty_mod(struct map_session_data *sd, int mob_level, uint32 mob_race, uint32 mob_mode, int type);

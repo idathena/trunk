@@ -1515,7 +1515,7 @@ enum e_mode
 //who were not on your field of sight when it happened)
 
 //opt1: Non stackable status changes.
-enum {
+enum sc_opt1 {
 	OPT1_STONE = 1, //Petrified
 	OPT1_FREEZE,
 	OPT1_STUN,
@@ -1528,7 +1528,7 @@ enum {
 };
 
 //opt2: Stackable status changes.
-enum {
+enum sc_opt2 {
 	OPT2_POISON		= 0x0001,
 	OPT2_CURSE		= 0x0002,
 	OPT2_SILENCE		= 0x0004,
@@ -1541,7 +1541,7 @@ enum {
 };
 
 //opt3: (SHOW_EFST_*)
-enum {
+enum sc_opt3 {
 	OPT3_NORMAL		= 0x00000000,
 	OPT3_QUICKEN		= 0x00000001,
 	OPT3_OVERTHRUST		= 0x00000002,
@@ -1563,7 +1563,7 @@ enum {
 	OPT3_CONTRACT		= 0x00020000,
 };
 
-enum {
+enum e_option {
 	OPTION_NOTHING		= 0x00000000,
 	OPTION_SIGHT		= 0x00000001,
 	OPTION_HIDE		= 0x00000002,
@@ -1666,6 +1666,12 @@ enum scb_flag
 
 	SCB_BATTLE	= 0x3FFFFFFE,
 	SCB_ALL		= 0x3FFFFFFF
+};
+
+enum e_status_calc_opt {
+	SCO_NONE  = 0x0,
+	SCO_FIRST = 0x1, /* Trigger the calculations that should take place only onspawn/once */
+	SCO_FORCE = 0x2, /* Only relevant to BL_PC types, ensures call bypasses the queue caused by delayed damage */
 };
 
 //Define to determine who gets HP/SP consumed on doing skills/etc. [Skotlex]
@@ -1913,28 +1919,29 @@ int status_change_timer_sub(struct block_list* bl, va_list ap);
 int status_change_clear(struct block_list* bl, int type);
 int status_change_clear_buffs(struct block_list* bl, int type);
 
-#define status_calc_bl(bl, flag) status_calc_bl_(bl, (enum scb_flag)(flag), false)
-#define status_calc_mob(md, first) status_calc_bl_(&(md)->bl, SCB_ALL, first)
-#define status_calc_pet(pd, first) status_calc_bl_(&(pd)->bl, SCB_ALL, first)
-#define status_calc_pc(sd, first) status_calc_bl_(&(sd)->bl, SCB_ALL, first)
-#define status_calc_homunculus(hd, first) status_calc_bl_(&(hd)->bl, SCB_ALL, first)
-#define status_calc_mercenary(md, first) status_calc_bl_(&(md)->bl, SCB_ALL, first)
-#define status_calc_elemental(ed, first) status_calc_bl_(&(ed)->bl, SCB_ALL, first)
-#define status_calc_npc(nd, first) status_calc_bl_(&(nd)->bl, SCB_ALL, first)
+#define status_calc_bl(bl, flag) status_calc_bl_(bl, (enum scb_flag)(flag), SCO_NONE)
+#define status_calc_mob(md, opt) status_calc_bl_(&(md)->bl, SCB_ALL, opt)
+#define status_calc_pet(pd, opt) status_calc_bl_(&(pd)->bl, SCB_ALL, opt)
+#define status_calc_pc(sd, opt) status_calc_bl_(&(sd)->bl, SCB_ALL, opt)
+#define status_calc_homunculus(hd, opt) status_calc_bl_(&(hd)->bl, SCB_ALL, opt)
+#define status_calc_mercenary(md, opt) status_calc_bl_(&(md)->bl, SCB_ALL, opt)
+#define status_calc_elemental(ed, opt) status_calc_bl_(&(ed)->bl, SCB_ALL, opt)
+#define status_calc_npc(nd, opt) status_calc_bl_(&(nd)->bl, SCB_ALL, opt)
 
-void status_calc_bl_(struct block_list *bl, enum scb_flag flag, bool first);
-int status_calc_mob_(struct mob_data* md, bool first);
-int status_calc_pet_(struct pet_data* pd, bool first);
-int status_calc_pc_(struct map_session_data* sd, bool first);
-int status_calc_homunculus_(struct homun_data *hd, bool first);
-int status_calc_mercenary_(struct mercenary_data *md, bool first);
-int status_calc_elemental_(struct elemental_data *ed, bool first);
+void status_calc_bl_(struct block_list *bl, enum scb_flag flag, enum e_status_calc_opt opt);
+int status_calc_mob_(struct mob_data* md, enum e_status_calc_opt opt);
+int status_calc_pet_(struct pet_data* pd, enum e_status_calc_opt opt);
+int status_calc_pc_(struct map_session_data* sd, enum e_status_calc_opt opt);
+int status_calc_homunculus_(struct homun_data *hd, enum e_status_calc_opt opt);
+int status_calc_mercenary_(struct mercenary_data *md, enum e_status_calc_opt opt);
+int status_calc_elemental_(struct elemental_data *ed, enum e_status_calc_opt opt);
+int status_calc_npc_(struct npc_data *nd, enum e_status_calc_opt opt);
 
 void status_calc_misc(struct block_list *bl, struct status_data *status, int level);
 void status_calc_regen(struct block_list *bl, struct status_data *status, struct regen_data *regen);
 void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, struct status_change *sc);
 
-int status_check_skilluse(struct block_list *src, struct block_list *target, uint16 skill_id, int flag); // [Skotlex]
+int status_check_skilluse(struct block_list *src, struct block_list *target, uint16 skill_id, int flag); //[Skotlex]
 int status_check_visibility(struct block_list *src, struct block_list *target); //[Skotlex]
 
 int status_change_spread( struct block_list *src, struct block_list *bl );

@@ -1437,18 +1437,19 @@ void itemdb_reload(void)
 				continue;
 
 			if (id->mob[k].id != i)
-				memmove(&id->mob[k+1], &id->mob[k], (MAX_SEARCH-k-1)*sizeof(id->mob[0]));
+				memmove(&id->mob[k + 1], &id->mob[k], (MAX_SEARCH - k - 1) * sizeof(id->mob[0]));
 			id->mob[k].chance = entry->dropitem[d].p;
 			id->mob[k].id = i;
 		}
 	}
 
-	// readjust itemdb pointer cache for each player
+	//Read just itemdb pointer cache for each player
 	iter = mapit_geteachpc();
 	for( sd = (struct map_session_data*)mapit_first(iter); mapit_exists(iter); sd = (struct map_session_data*)mapit_next(iter) ) {
-		memset(sd->item_delay, 0, sizeof(sd->item_delay));  // reset item delays
+		memset(sd->item_delay, 0, sizeof(sd->item_delay)); //Reset item delays
 		pc_setinventorydata(sd);
-		/* clear combo bonuses */
+		pc_check_available_item(sd); //Check for invalid(ated) items.
+		/* Clear combo bonuses */
 		if( sd->combos.count ) {
 			aFree(sd->combos.bonus);
 			aFree(sd->combos.id);
@@ -1456,7 +1457,7 @@ void itemdb_reload(void)
 			sd->combos.id = NULL;
 			sd->combos.count = 0;
 			if( pc_load_combo(sd) > 0 )
-				status_calc_pc(sd,0);
+				status_calc_pc(sd, SCO_FORCE);
 		}
 
 	}
