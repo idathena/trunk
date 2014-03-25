@@ -28,15 +28,12 @@ int storage_tosql(int account_id, struct storage_data* p)
 int storage_fromsql(int account_id, struct storage_data* p)
 {
 	StringBuf buf;
-	struct item* item;
-	char* data;
-	int i;
-	int j;
+	int i, j;
 
-	memset(p, 0, sizeof(struct storage_data)); //clean up memory
+	memset(p, 0, sizeof(struct storage_data)); //Clean up memory
 	p->storage_amount = 0;
 
-	// storage {`account_id`/`id`/`nameid`/`amount`/`equip`/`identify`/`refine`/`attribute`/`card0`/`card1`/`card2`/`card3`}
+	// Storage {`account_id`/`id`/`nameid`/`amount`/`equip`/`identify`/`refine`/`attribute`/`card0`/`card1`/`card2`/`card3`}
 	StringBuf_Init(&buf);
 	StringBuf_AppendStr(&buf, "SELECT `id`,`nameid`,`amount`,`equip`,`identify`,`refine`,`attribute`,`expire_time`,`bound`,`unique_id`");
 	for( j = 0; j < MAX_SLOTS; ++j )
@@ -48,8 +45,10 @@ int storage_fromsql(int account_id, struct storage_data* p)
 
 	StringBuf_Destroy(&buf);
 
-	for( i = 0; i < MAX_STORAGE && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i )
-	{
+	for( i = 0; i < MAX_STORAGE && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i ) {
+		struct item* item;
+		char* data;
+
 		item = &p->items[i];
 		Sql_GetData(sql_handle, 0, &data, NULL); item->id = atoi(data);
 		Sql_GetData(sql_handle, 1, &data, NULL); item->nameid = atoi(data);
@@ -61,9 +60,9 @@ int storage_fromsql(int account_id, struct storage_data* p)
 		Sql_GetData(sql_handle, 7, &data, NULL); item->expire_time = (unsigned int)atoi(data);
 		Sql_GetData(sql_handle, 8, &data, NULL); item->bound = atoi(data);
 		Sql_GetData(sql_handle, 9, &data, NULL); item->unique_id = strtoull(data, NULL, 10);
-		for( j = 0; j < MAX_SLOTS; ++j )
-		{
-			Sql_GetData(sql_handle, 10+j, &data, NULL); item->card[j] = atoi(data);
+		for( j = 0; j < MAX_SLOTS; ++j ) {
+			Sql_GetData(sql_handle, 10 + j, &data, NULL);
+			item->card[j] = atoi(data);
 		}
 	}
 	p->storage_amount = i;
@@ -85,16 +84,13 @@ int guild_storage_tosql(int guild_id, struct guild_storage* p)
 int guild_storage_fromsql(int guild_id, struct guild_storage* p)
 {
 	StringBuf buf;
-	struct item* item;
-	char* data;
-	int i;
-	int j;
+	int i, j;
 
-	memset(p, 0, sizeof(struct guild_storage)); //clean up memory
+	memset(p, 0, sizeof(struct guild_storage)); //Clean up memory
 	p->storage_amount = 0;
 	p->guild_id = guild_id;
 
-	// storage {`guild_id`/`id`/`nameid`/`amount`/`equip`/`identify`/`refine`/`attribute`/`card0`/`card1`/`card2`/`card3`}
+	//Storage {`guild_id`/`id`/`nameid`/`amount`/`equip`/`identify`/`refine`/`attribute`/`card0`/`card1`/`card2`/`card3`}
 	StringBuf_Init(&buf);
 	StringBuf_AppendStr(&buf, "SELECT `id`,`nameid`,`amount`,`equip`,`identify`,`refine`,`attribute`,`bound`,`unique_id`");
 	for( j = 0; j < MAX_SLOTS; ++j )
@@ -106,8 +102,10 @@ int guild_storage_fromsql(int guild_id, struct guild_storage* p)
 
 	StringBuf_Destroy(&buf);
 
-	for( i = 0; i < MAX_GUILD_STORAGE && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i )
-	{
+	for( i = 0; i < MAX_GUILD_STORAGE && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i ) {
+		struct item* item;
+		char* data;
+
 		item = &p->items[i];
 		Sql_GetData(sql_handle, 0, &data, NULL); item->id = atoi(data);
 		Sql_GetData(sql_handle, 1, &data, NULL); item->nameid = atoi(data);
@@ -119,9 +117,9 @@ int guild_storage_fromsql(int guild_id, struct guild_storage* p)
 		Sql_GetData(sql_handle, 7, &data, NULL); item->bound = atoi(data);
 		Sql_GetData(sql_handle, 8, &data, NULL); item->unique_id = strtoull(data, NULL, 10);
 		item->expire_time = 0;
-		for( j = 0; j < MAX_SLOTS; ++j )
-		{
-			Sql_GetData(sql_handle, 9+j, &data, NULL); item->card[j] = atoi(data);
+		for( j = 0; j < MAX_SLOTS; ++j ) {
+			Sql_GetData(sql_handle, 9 + j, &data, NULL);
+			item->card[j] = atoi(data);
 		}
 	}
 	p->storage_amount = i;

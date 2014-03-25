@@ -285,7 +285,7 @@
     <Copy SourceFiles="..\conf\import-tmpl\login_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\login_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\map_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\map_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\msg_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\msg_conf.txt')" />
-    <Copy SourceFiles="..\conf\import-tmpl\packet_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\packet_conf.txt')" />
+	<Copy SourceFiles="..\conf\import-tmpl\packet_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\packet_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\script_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\script_conf.txt')" />
   </Target>
 </Project>

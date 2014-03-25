@@ -1,23 +1,33 @@
 #!/usr/bin/perl
 
 # Item Database:
-#     --i=../db/pre-re/item_db.txt --o=../sql-files/item_db.sql --t=pre --m=item
-#     --i=../db/re/item_db.txt --o=../sql-files/item_db_re.sql --t=re --m=item
+#     --i=../db/pre-re/item_db.txt --o=../sql-files/item_db.sql --t=pre --m=item --table=item_db
+#     --i=../db/re/item_db.txt --o=../sql-files/item_db_re.sql --t=re --m=item --table=item_db_re
+#
+#     --i=../db/item_db2.txt --o=../sql-files/item_db2.sql --t=pre --m=item --table=item_db2
+#     --i=../db/item_db2.txt --o=../sql-files/item_db2_re.sql --t=re --m=item --table=item_db2_re
 #
 # Mob Database:
-#     --i=../db/pre-re/mob_db.txt --o=../sql-files/mob_db.sql --t=pre --m=mob
-#     --i=../db/re/mob_db.txt --o=../sql-files/mob_db_re.sql --t=re --m=mob
+#     --i=../db/pre-re/mob_db.txt --o=../sql-files/mob_db.sql --t=pre --m=mob --table=mob_db
+#     --i=../db/re/mob_db.txt --o=../sql-files/mob_db_re.sql --t=re --m=mob --table=mob_db_re
+#
+#     --i=../db/mob_db2.txt --o=../sql-files/mob_db2.sql --t=pre --m=mob --table=mob_db2
+#     --i=../db/mob_db2.txt --o=../sql-files/mob_db2_re.sql --t=re --m=mob --table=mob_db2_re
 #
 # Mob Skill Database:
-#     --i=../db/pre-re/mob_skill_db.txt --o=../sql-files/mob_skill_db.sql --t=pre --m=mob_skill
-#     --i=../db/re/mob_skill_db.txt --o=../sql-files/mob_skill_db_re.sql --t=re --m=mob_skill
+#     --i=../db/pre-re/mob_skill_db.txt --o=../sql-files/mob_skill_db.sql --t=pre --m=mob_skill --table=mob_skill_db
+#     --i=../db/re/mob_skill_db.txt --o=../sql-files/mob_skill_db_re.sql --t=re --m=mob_skill --table=mob_skill_db_re
+#
+#     --i=../db/mob_skill_db2.txt --o=../sql-files/mob_skill_db2.sql --t=pre --m=mob_skill --table=mob_skill_db2
+#     --i=../db/mob_skill_db2.txt --o=../sql-files/mob_skill_db2_re.sql --t=re --m=mob_skill --table=mob_skill_db2_re
 #
 # List of options:
-#   item_db.pl --help
+#   convert_sql.pl --help
 
 use strict;
 use warnings;
 use Getopt::Long;
+use File::Basename;
 
 my $sFilein = "";
 my $sFileout = "";
@@ -75,6 +85,8 @@ sub GetArgs {
 
 sub Main {
 	GetArgs();
+	my($filename, $dir, $suffix) = fileparse($0);
+	chdir $dir; #put ourself like was called in tool folder
 	BuildDataForType($sTarget,$sType);
 	ConvertFile($sFilein,$sFileout,$sType);
 	print "Conversion ended.\n";
@@ -207,7 +219,7 @@ CREATE TABLE `$db` (
   `equip_jobs` int(12) unsigned default NULL,
   `equip_upper` tinyint(8) unsigned default NULL,
   `equip_genders` tinyint(2) unsigned default NULL,
-  `equip_locations` smallint(4) unsigned default NULL,
+  `equip_locations` mediumint(7) unsigned default NULL,
   `weapon_level` tinyint(2) unsigned default NULL,
   `equip_level` tinyint(3) unsigned default NULL,
   `refineable` tinyint(1) unsigned default NULL,
@@ -215,7 +227,7 @@ CREATE TABLE `$db` (
   `script` text,
   `equip_script` text,
   `unequip_script` text,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM;
 ";
 		#NOTE: These do not match the table struct defaults.
@@ -249,7 +261,7 @@ CREATE TABLE `$db` (
  `equip_jobs` int(12) unsigned default NULL,
  `equip_upper` tinyint(8) unsigned default NULL,
  `equip_genders` tinyint(2) unsigned default NULL,
- `equip_locations` smallint(4) unsigned default NULL,
+ `equip_locations` mediumint(7) unsigned default NULL,
  `weapon_level` tinyint(2) unsigned default NULL,
  `equip_level` varchar(10) default '',
  `refineable` tinyint(1) unsigned default NULL,
@@ -265,6 +277,7 @@ CREATE TABLE `$db` (
 		}
 	}
 	elsif($sType =~ /mob_skill/i) { #Same format for Pre-Renewal and Renewal.
+		$db = $sTable;
 		$db = "mob_skill_db" unless($db);
 		$nb_columns = 19;
 		@str_col = (1,2,8,9,10,11,17,18);
@@ -299,6 +312,7 @@ CREATE TABLE IF NOT EXISTS `$db` (
 ";
 	}
 	elsif($sType =~ /mob/i) { #Same format for Pre-Renewal and Renewal.
+		$db = $sTable;
 		$db = "mob_db" unless($db);
 		$nb_columns = 57;
 		@str_col = (1,2,3);
@@ -367,7 +381,7 @@ CREATE TABLE `$db` (
   `Drop9per` smallint(9) unsigned NOT NULL default '0',
   `DropCardid` smallint(9) unsigned NOT NULL default '0',
   `DropCardper` smallint(9) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`ID`)
+  PRIMARY KEY (`ID`)
 ) ENGINE=MyISAM;
 ";
 	}

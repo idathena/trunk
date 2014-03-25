@@ -32,10 +32,22 @@ struct quest;
 struct party_booking_ad_info;
 #include <stdarg.h>
 
-enum { // packet DB
+enum { //packet_db
 	MAX_PACKET_DB  = 0xF00,
-	MAX_PACKET_VER = 45,
+	MAX_PACKET_VER = 46,
 	MAX_PACKET_POS = 20,
+};
+
+enum e_packet_ack {
+	ZC_ACK_OPEN_BANKING = 0,
+	ZC_ACK_BANKING_DEPOSIT,
+	ZC_ACK_BANKING_WITHDRAW,
+	ZC_BANKING_CHECK,
+	ZC_PERSONAL_INFOMATION,
+	ZC_PERSONAL_INFOMATION_CHN,
+	ZC_CLEAR_DIALOG,
+	//Add other here
+	MAX_ACK_FUNC //Auto upd len
 };
 
 struct s_packet_db {
@@ -47,19 +59,20 @@ struct s_packet_db {
 // packet_db[SERVER] is reserved for server use
 #define SERVER 0
 #define packet_len(cmd) packet_db[SERVER][cmd].len
-extern struct s_packet_db packet_db[MAX_PACKET_VER+1][MAX_PACKET_DB+1];
+extern struct s_packet_db packet_db[MAX_PACKET_VER + 1][MAX_PACKET_DB + 1];
+extern int packet_db_ack[MAX_PACKET_VER + 1][MAX_ACK_FUNC + 1];
 
-// local define
+// Local define
 typedef enum send_target {
 	ALL_CLIENT,
 	ALL_SAMEMAP,
-	AREA,               // area
-	AREA_WOS,           // area, without self
-	AREA_WOC,           // area, without chatrooms
-	AREA_WOSC,          // area, without own chatroom
-	AREA_CHAT_WOC,      // hearable area, without chatrooms
-	CHAT,               // current chatroom
-	CHAT_WOS,           // current chatroom, without self
+	AREA,               // Area
+	AREA_WOS,           // Area, without self
+	AREA_WOC,           // Area, without chatrooms
+	AREA_WOSC,          // Area, without own chatroom
+	AREA_CHAT_WOC,      // Hearable area, without chatrooms
+	CHAT,               // Current chatroom
+	CHAT_WOS,           // Current chatroom, without self
 	PARTY,
 	PARTY_WOS,
 	PARTY_SAMEMAP,
@@ -207,7 +220,7 @@ typedef enum clr_type
 } clr_type;
 
 enum map_property
-{// clif_map_property
+{ // clif_map_property
 	MAPPROPERTY_NOTHING       = 0,
 	MAPPROPERTY_FREEPVPZONE   = 1,
 	MAPPROPERTY_EVENTPVPZONE  = 2,
@@ -218,7 +231,7 @@ enum map_property
 };
 
 enum map_type
-{// clif_map_type
+{ // clif_map_type
 	MAPTYPE_VILLAGE              = 0,
 	MAPTYPE_VILLAGE_IN           = 1,
 	MAPTYPE_FIELD                = 2,
@@ -247,7 +260,7 @@ enum map_type
 };
 
 enum useskill_fail_cause
-{// clif_skill_fail
+{ // clif_skill_fail
 	USESKILL_FAIL_LEVEL = 0,
 	USESKILL_FAIL_SP_INSUFFICIENT = 1,
 	USESKILL_FAIL_HP_INSUFFICIENT = 2,
@@ -336,12 +349,22 @@ enum useskill_fail_cause
 };
 
 enum clif_messages {
-	MERC_MSG_BASE = 1266, //0x4f2
-	SKILL_CANT_USE_AREA = 0x536,
-	VIEW_EQUIP_FAIL = 0x54d,
-	USAGE_FAIL = 0x783,
 	ADDITEM_TO_CART_FAIL_WEIGHT = 0x0,
 	ADDITEM_TO_CART_FAIL_COUNT = 0x1,
+	ITEM_CANT_OBTAIN_WEIGHT = 0x34, /* You cannot carry more items because you are overweight. */
+	ITEM_NOUSE_SITTING = 0x297,
+	MERC_MSG_BASE = 0x4f2,
+	SKILL_CANT_USE_AREA = 0x536,
+	ITEM_CANT_USE_AREA =  0x537,
+	VIEW_EQUIP_FAIL = 0x54d,
+	RUNE_CANT_CREATE = 0x61b,
+	ITEM_CANT_COMBINE = 0x623,
+	INVENTORY_SPACE_FULL = 0x625,
+	ITEM_PRODUCE_SUCCESS = 0x627,
+	ITEM_PRODUCE_FAIL = 0x628,
+	ITEM_UNIDENTIFIED = 0x62d,
+	USAGE_FAIL = 0x783,
+	NEED_REINS_OF_MOUNT = 0x78c,
 };
 
 enum e_BANKING_DEPOSIT_ACK {
@@ -355,6 +378,14 @@ enum e_BANKING_WITHDRAW_ACK {
 	BWA_SUCCESS = 0x0,
 	BWA_NO_MONEY = 0x1,
 	BWA_UNKNOWN_ERROR = 0x2,
+};
+
+enum e_personalinfo {
+	PINFO_BASIC = 0,
+	PINFO_PREMIUM,
+	PINFO_SERVER,
+	PINFO_CAFE,
+	PINFO_MAX,
 };
 
 int clif_setip(const char* ip);
@@ -390,6 +421,7 @@ void clif_selllist(struct map_session_data *sd); //Self
 void clif_scriptmes(struct map_session_data *sd, int npcid, const char *mes); //Self
 void clif_scriptnext(struct map_session_data *sd,int npcid); //Self
 void clif_scriptclose(struct map_session_data *sd, int npcid); //Self
+void clif_scriptclear(struct map_session_data *sd, int npcid); //Self
 void clif_scriptmenu(struct map_session_data* sd, int npcid, const char* mes); //Self
 void clif_scriptinput(struct map_session_data *sd, int npcid); //Self
 void clif_scriptinputstr(struct map_session_data *sd, int npcid); //Self
@@ -508,7 +540,7 @@ void clif_status_change(struct block_list *bl, int type, int flag, int tick, int
 void clif_status_change2(struct block_list *bl, int tid, enum send_target target, int type, int val1, int val2, int val3);
 
 void clif_wis_message(int fd, const char* nick, const char* mes, int mes_len);
-void clif_wis_end(int fd, int flag);
+void clif_wis_end(int fd, int result);
 
 void clif_solved_charname(int fd, int charid, const char* name);
 void clif_charnameack(int fd, struct block_list *bl);
@@ -647,7 +679,7 @@ void clif_friendslist_send(struct map_session_data *sd);
 void clif_friendslist_reqack(struct map_session_data *sd, struct map_session_data *f_sd, int type);
 
 void clif_weather(int16 m); // [Valaris]
-void clif_specialeffect(struct block_list* bl, int type, enum send_target target); // special effects [Valaris]
+void clif_specialeffect(struct block_list* bl, int type, enum send_target target); // Special effects [Valaris]
 void clif_specialeffect_single(struct block_list* bl, int type, int fd);
 void clif_messagecolor(struct block_list* bl, unsigned long color, const char* msg); // Mob/Npc color talk [SnakeDrak]
 void clif_specialeffect_value(struct block_list* bl, int effect_id, int num, send_target target);
@@ -687,17 +719,17 @@ void clif_msg_value(struct map_session_data* sd, unsigned short id, int value);
 void clif_msg_skill(struct map_session_data* sd, uint16 skill_id, int msg_id);
 
 // Quest system [Kevin] [Inkfish]
-void clif_quest_send_list(struct map_session_data * sd);
-void clif_quest_send_mission(struct map_session_data * sd);
-void clif_quest_add(struct map_session_data * sd, struct quest * qd, int index);
-void clif_quest_delete(struct map_session_data * sd, int quest_id);
-void clif_quest_update_status(struct map_session_data * sd, int quest_id, bool active);
-void clif_quest_update_objective(struct map_session_data * sd, struct quest * qd, int index);
+void clif_quest_send_list(struct map_session_data *sd);
+void clif_quest_send_mission(struct map_session_data *sd);
+void clif_quest_add(struct map_session_data *sd, struct quest *qd);
+void clif_quest_delete(struct map_session_data *sd, int quest_id);
+void clif_quest_update_status(struct map_session_data *sd, int quest_id, bool active);
+void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd);
 void clif_quest_show_event(struct map_session_data *sd, struct block_list *bl, short state, short color);
 void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, bool quest);
 
 int clif_send(const uint8* buf, int len, struct block_list* bl, enum send_target type);
-int do_init_clif(void);
+void do_init_clif(void);
 void do_final_clif(void);
 
 // MAIL SYSTEM
@@ -775,6 +807,8 @@ void clif_search_store_info_click_ack(struct map_session_data* sd, short x, shor
 void clif_cashshop_result( struct map_session_data* sd, uint16 item_id, uint16 result );
 void clif_cashshop_open( struct map_session_data* sd );
 
+void clif_display_pinfo(struct map_session_data *sd, int type);
+
 /**
  * 3CeAM
  **/
@@ -783,7 +817,7 @@ void clif_msgtable_num(int fd, int line, int num);
 
 int clif_elementalconverter_list(struct map_session_data *sd);
 
-void clif_millenniumshield(struct map_session_data *sd, short shields );
+void clif_millenniumshield(struct block_list *bl, short shields);
 
 int clif_spellbook_list(struct map_session_data *sd);
 
@@ -802,9 +836,7 @@ void clif_talisman(struct map_session_data *sd, short type);
 void clif_snap(struct block_list *bl, short x, short y);
 void clif_monster_hp_bar(struct mob_data* md, int fd);
 
-/**
- * Color Table
- **/
+// Color Table
 enum clif_colors {
 	COLOR_RED,
 	COLOR_WHITE,
@@ -823,8 +855,16 @@ void clif_update_rankingpoint(struct map_session_data *sd, int rankingtype, int 
 
 /* Bank System [Yommy] */
 void clif_bank_deposit(struct map_session_data *sd, enum e_BANKING_DEPOSIT_ACK reason);
-void clif_bank_withdraw(struct map_session_data *sd, enum e_BANKING_WITHDRAW_ACK reason);
+void clif_bank_withdraw(struct map_session_data *sd,enum e_BANKING_WITHDRAW_ACK reason);
+void clif_parse_BankDeposit(int fd, struct map_session_data *sd);
+void clif_parse_BankWithdraw(int fd, struct map_session_data *sd);
+void clif_parse_BankCheck(int fd, struct map_session_data *sd);
+void clif_parse_BankOpen(int fd, struct map_session_data *sd);
+void clif_parse_BankClose(int fd, struct map_session_data *sd);
 
-void clif_show_modifiers(struct map_session_data *sd);
+void clif_crimson_marker(struct map_session_data *sd, struct block_list *bl, uint8 flag);
+void clif_crimson_marker_single(int fd, struct block_list *bl, uint8 flag);
+void clif_crimson_marker2(struct map_session_data *sd, int target_id, int type, int x, int y, int id, int color);
+void clif_crimson_marker2_single(int fd, int target_id, int type, int x, int y, int id, int color);
 
 #endif /* _CLIF_H_ */

@@ -390,7 +390,7 @@ int instance_mapname2mapid(const char *name, short instance_id)
 		if(im->map[i].src_m == m) {
 			char alt_name[MAP_NAME_LENGTH];
 			if((strchr(iname,'@') == NULL) && strlen(iname) > 8) {
-				memmove(iname, iname+(strlen(iname)-9), strlen(iname));
+				memmove(iname, iname + (strlen(iname) - 9), strlen(iname));
 				snprintf(alt_name, sizeof(alt_name),"%d#%s", instance_id, iname);
 			} else
 				snprintf(alt_name, sizeof(alt_name),"%.3d%s", instance_id, iname);
@@ -485,6 +485,19 @@ int instance_destroy(short instance_id)
  *------------------------------------------*/
 int instance_enter(struct map_session_data *sd, const char *name)
 {
+	struct instance_db *db = instance_searchname_db(name);
+
+	if(db == NULL)
+		return 3;
+
+	return instance_enter_position(sd, name, db->enter.x, db->enter.y);
+}
+
+/*==========================================
+ * Warp a user into instance
+ *------------------------------------------*/
+int instance_enter_position(struct map_session_data *sd, const char *name, short x, short y)
+{
 	struct instance_data *im;
 	struct instance_db *db = instance_searchname_db(name);
 	struct party_data *p;
@@ -495,6 +508,7 @@ int instance_enter(struct map_session_data *sd, const char *name)
 	// Character must be in instance party
 	if(sd->status.party_id == 0)
 		return 1;
+
 	if((p = party_search(sd->status.party_id)) == NULL)
 		return 1;
 
@@ -508,8 +522,10 @@ int instance_enter(struct map_session_data *sd, const char *name)
 	im = &instance_data[p->instance_id];
 	if(im->party_id != p->party.party_id)
 		return 3;
+
 	if(im->state != INSTANCE_BUSY)
 		return 3;
+
 	if(im->type != db->type)
 		return 3;
 
@@ -517,7 +533,7 @@ int instance_enter(struct map_session_data *sd, const char *name)
 	if((m = instance_mapname2mapid(db->enter.mapname, p->instance_id)) < 0)
 		return 3;
 
-	if(pc_setpos(sd, map_id2index(m), db->enter.x, db->enter.y, 0))
+	if(pc_setpos(sd, map_id2index(m), x, y, 0))
 		return 3;
 
 	// If there was an idle timer, let's stop it
@@ -616,19 +632,19 @@ int instance_delusers(short instance_id)
  *------------------------------------------*/
 static bool instance_readdb_sub(char* str[], int columns, int current)
 {
-	int i, type, k=0;
+	int i, type, k = 0;
 
-	type=atoi(str[0]);
+	type = atoi(str[0]);
 
-	instance_db[type].type=type;
+	instance_db[type].type = type;
 	safestrncpy(instance_db[type].name, str[1], 24);
-	instance_db[type].limit=atoi(str[2]);
+	instance_db[type].limit = atoi(str[2]);
 	safestrncpy(instance_db[type].enter.mapname, str[3], MAP_NAME_LENGTH);
-	instance_db[type].enter.x=atoi(str[4]);
-	instance_db[type].enter.y=atoi(str[5]);
+	instance_db[type].enter.x = atoi(str[4]);
+	instance_db[type].enter.y = atoi(str[5]);
 
 	//Instance maps
-	for(i=6; i<columns; i++)
+	for(i = 6; i < columns; i++)
 		if(strlen(str[i])) {
 			safestrncpy(instance_db[type].mapname[k], str[i], MAP_NAME_LENGTH);
 			k++;
@@ -641,7 +657,7 @@ void instance_readdb(void)
 {
 
 	memset(&instance_db, 0, sizeof(instance_db));
-	sv_readdb(db_path, DBPATH"instance_db.txt", ',', 7, 7+MAX_MAP_PER_INSTANCE, MAX_INSTANCE_DB, &instance_readdb_sub);
+	sv_readdb(db_path, DBPATH"instance_db.txt", ',', 7, 7 + MAX_MAP_PER_INSTANCE, MAX_INSTANCE_DB, &instance_readdb_sub);
 
 }
 
@@ -656,7 +672,7 @@ void do_reload_instance(void)
 	struct map_session_data *sd;
 	int i;
 
-	for( i = 1; i < MAX_INSTANCE_DATA; i++ ) {
+	for(i = 1; i < MAX_INSTANCE_DATA; i++) {
 		im = &instance_data[i];
 		if(!im->cnt_map)
 			continue;
@@ -672,9 +688,10 @@ void do_reload_instance(void)
 
 	// Reset player to instance beginning
 	iter = mapit_getallusers();
-	for( sd = (TBL_PC*)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC*)mapit_next(iter) )
+	for(sd = (TBL_PC*)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC*)mapit_next(iter))
 		if(sd && map[sd->bl.m].instance_id) {
 			struct party_data *p;
+
 			if(!(p = party_search(sd->status.party_id)) || p->instance_id != map[sd->bl.m].instance_id) // Someone not in party is on instance map
 				continue;
 			im = &instance_data[p->instance_id];

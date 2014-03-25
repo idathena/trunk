@@ -7,10 +7,10 @@
 #include "../common/showmsg.h"
 #include "../common/strlib.h"
 #include "../common/mmo.h"
+#include "map.h"
 #include "atcommand.h" // msg_txt()
 #include "battle.h" // struct battle_config
 #include "clif.h"
-#include "map.h"
 #include "npc.h" // npc_event_do()
 #include "pc.h"
 #include "skill.h" // ext_skill_unit_onplace()
@@ -51,17 +51,16 @@ static struct chat_data* chat_createchat(struct block_list* bl, const char* titl
 	cd->bl.type = BL_CHAT;
 	cd->bl.next = cd->bl.prev = NULL;
 
-	if( cd->bl.id == 0 )
-	{
+	if( cd->bl.id == 0 ) {
 		aFree(cd);
-		cd = NULL;
+		return NULL;
 	}
 
 	map_addiddb(&cd->bl);
 
 	if( bl->type != BL_NPC )
 		cd->kick_list = idb_alloc(DB_OPT_BASE);
-	
+
 	return cd;
 }
 
@@ -164,7 +163,10 @@ int chat_joinchat(struct map_session_data* sd, int chatid, const char* pass)
 
 
 /*==========================================
- * leave a chatroom
+ * Make player *sd leave a chatroom
+ * @param *sd : player pointer
+ * @param kicked : for clif notification, kicked=1 or regular leave
+ * @return 0:sucess, 1:failed
  *------------------------------------------*/
 int chat_leavechat(struct map_session_data* sd, bool kicked)
 {
@@ -175,15 +177,13 @@ int chat_leavechat(struct map_session_data* sd, bool kicked)
 	nullpo_retr(1, sd);
 
 	cd = (struct chat_data*)map_id2bl(sd->chatID);
-	if( cd == NULL )
-	{
+	if( cd == NULL ) {
 		pc_setchatid(sd, 0);
 		return 1;
 	}
 
-	ARR_FIND( 0, cd->users, i, cd->usersd[i] == sd );
-	if ( i == cd->users )
-	{	// Not found in the chatroom?
+	ARR_FIND(0, cd->users, i, cd->usersd[i] == sd);
+	if ( i == cd->users ) { //Not found in the chatroom?
 		pc_setchatid(sd, 0);
 		return -1;
 	}
@@ -195,49 +195,51 @@ int chat_leavechat(struct map_session_data* sd, bool kicked)
 	leavechar = i;
 
 	for( i = leavechar; i < cd->users; i++ )
-		cd->usersd[i] = cd->usersd[i+1];
+		cd->usersd[i] = cd->usersd[i + 1];
 
 
-	if( cd->users == 0 && cd->owner->type == BL_PC ) { // Delete empty chatroom
+	if( cd->users == 0 && cd->owner->type == BL_PC ) { //Delete empty chatroom
 		struct skill_unit* unit;
 		struct skill_unit_group* group;
-		
+
 		clif_clearchat(cd, 0);
 		db_destroy(cd->kick_list);
 		map_deliddb(&cd->bl);
 		map_delblock(&cd->bl);
 		map_freeblock(&cd->bl);
-		
+
 		unit = map_find_skill_unit_oncell(&sd->bl, sd->bl.x, sd->bl.y, AL_WARP, NULL, 0);
 		group = (unit != NULL) ? unit->group : NULL;
 		if( group != NULL )
 			ext_skill_unit_onplace(unit, &sd->bl, group->tick);
-		
+
 		return 1;
 	}
 
-	if( leavechar == 0 && cd->owner->type == BL_PC )
-	{	// Set and announce new owner
+	if( leavechar == 0 && cd->owner->type == BL_PC ) { //Set and announce new owner
 		cd->owner = (struct block_list*) cd->usersd[0];
 		clif_changechatowner(cd, cd->usersd[0]);
 		clif_clearchat(cd, 0);
 
 		//Adjust Chat location after owner has been changed.
-		map_delblock( &cd->bl );
-		cd->bl.x=cd->usersd[0]->bl.x;
-		cd->bl.y=cd->usersd[0]->bl.y;
-		map_addblock( &cd->bl );
+		map_delblock(&cd->bl);
+		cd->bl.x = cd->usersd[0]->bl.x;
+		cd->bl.y = cd->usersd[0]->bl.y;
+		if( map_addblock(&cd->bl) )
+			return 1;
 
-		clif_dispchat(cd,0);
-	}
-	else
-		clif_dispchat(cd,0); // refresh chatroom
+		clif_dispchat(cd, 0);
+	} else
+		clif_dispchat(cd, 0); //Refresh chatroom
 
 	return 0;
 }
 
 /*==========================================
- * change a chatroom's owner
+ * Change a chatroom's owner
+ * @param *sd : player pointer
+ * @param *nextownername : string of new owner (name should be in chatroom)
+ * @return 0:sucess, 1:failure
  *------------------------------------------*/
 int chat_changechatowner(struct map_session_data* sd, const char* nextownername)
 {
@@ -248,33 +250,34 @@ int chat_changechatowner(struct map_session_data* sd, const char* nextownername)
 	nullpo_retr(1, sd);
 
 	cd = (struct chat_data*)map_id2bl(sd->chatID);
-	if( cd == NULL || (struct block_list*) sd != cd->owner )
+	if( cd == NULL || (struct block_list*)sd != cd->owner )
 		return 1;
 
-	ARR_FIND( 1, cd->users, i, strncmp(cd->usersd[i]->status.name, nextownername, NAME_LENGTH) == 0 );
+	ARR_FIND(1, cd->users, i, strncmp(cd->usersd[i]->status.name, nextownername, NAME_LENGTH) == 0);
 	if( i == cd->users )
-		return -1;  // name not found
+		return -1;  // Name not found
 
-	// erase temporarily
+	// Erase temporarily
 	clif_clearchat(cd,0);
 
-	// set new owner
-	cd->owner = (struct block_list*) cd->usersd[i];
-	clif_changechatowner(cd,cd->usersd[i]);
+	// Set new owner
+	cd->owner = (struct block_list*)cd->usersd[i];
+	clif_changechatowner(cd, cd->usersd[i]);
 
-	// swap the old and new owners' positions
+	// Swap the old and new owners' positions
 	tmpsd = cd->usersd[i];
 	cd->usersd[i] = cd->usersd[0];
 	cd->usersd[0] = tmpsd;
 
-	// set the new chatroom position
-	map_delblock( &cd->bl );
+	// Set the new chatroom position
+	map_delblock(&cd->bl);
 	cd->bl.x = cd->owner->x;
 	cd->bl.y = cd->owner->y;
-	map_addblock( &cd->bl );
+	if( map_addblock(&cd->bl) )
+		return 1;
 
-	// and display again
-	clif_dispchat(cd,0);
+	// And display again
+	clif_dispchat(cd, 0);
 
 	return 0;
 }
@@ -289,7 +292,7 @@ int chat_changechatstatus(struct map_session_data* sd, const char* title, const 
 	nullpo_retr(1, sd);
 
 	cd = (struct chat_data*)map_id2bl(sd->chatID);
-	if( cd==NULL || (struct block_list *)sd != cd->owner )
+	if( cd == NULL || (struct block_list *)sd != cd->owner )
 		return 1;
 
 	safestrncpy(cd->title, title, CHATROOM_TITLE_SIZE);
@@ -315,16 +318,16 @@ int chat_kickchat(struct map_session_data* sd, const char* kickusername)
 
 	cd = (struct chat_data *)map_id2bl(sd->chatID);
 	
-	if( cd==NULL || (struct block_list *)sd != cd->owner )
+	if( cd == NULL || (struct block_list *)sd != cd->owner )
 		return -1;
 
-	ARR_FIND( 0, cd->users, i, strncmp(cd->usersd[i]->status.name, kickusername, NAME_LENGTH) == 0 );
+	ARR_FIND(0, cd->users, i, strncmp(cd->usersd[i]->status.name, kickusername, NAME_LENGTH) == 0);
 	if( i == cd->users )
 		return -1;
 
-	if (pc_has_permission(cd->usersd[i], PC_PERM_NO_CHAT_KICK))
-		return 0; //gm kick protection [Valaris]
-	
+	if( pc_has_permission(cd->usersd[i], PC_PERM_NO_CHAT_KICK) )
+		return 0; //GM kick protection [Valaris]
+
 	idb_put(cd->kick_list,cd->usersd[i]->status.char_id,(void*)1);
 
 	chat_leavechat(cd->usersd[i],1);

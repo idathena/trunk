@@ -28,6 +28,7 @@ extern struct Script_Config {
 	const char *loadmap_event_name;
 	const char *baselvup_event_name;
 	const char *joblvup_event_name;
+	const char *stat_calc_event_name;
 
 	const char* ontouch_name;
 	const char* ontouch2_name;
@@ -124,7 +125,7 @@ struct script_state {
 	int rid,oid;
 	struct script_code *script, *scriptroot;
 	struct sleep_data {
-		int tick,timer,charid;
+		int tick, timer, charid;
 	} sleep;
 	//For backing up purposes
 	struct script_state *bk_st;
@@ -134,6 +135,7 @@ struct script_state {
 	unsigned npc_item_flag : 1;
 	unsigned mes_active : 1;  // Store if invoking character has a NPC dialog box open.
 	unsigned char* funcname; // Stores the current running function name
+	uint8 atcommand_enable_npc;
 };
 
 struct script_reg {
@@ -179,16 +181,17 @@ void script_run_autobonus(const char *autobonus,int id, int pos);
 
 bool script_get_constant(const char* name, int* value);
 void script_set_constant(const char* name, int value, bool isparameter);
+void script_hardcoded_constants(void);
 
 void script_cleararray_pc(struct map_session_data* sd, const char* varname, void* value);
 void script_setarray_pc(struct map_session_data* sd, const char* varname, uint8 idx, void* value, int* refcache);
 
 int script_config_read(char *cfgName);
-int do_init_script(void);
-int do_final_script(void);
+void do_init_script(void);
+void do_final_script(void);
 int add_str(const char* p);
 const char* get_str(int id);
-int script_reload(void);
+void script_reload(void);
 
 // @commands (script based)
 void setd_sub(struct script_state *st, TBL_PC *sd, const char *varname, int elem, void *value, struct DBMap **ref);

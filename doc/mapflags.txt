@@ -396,3 +396,16 @@ in '/conf/channels.conf'.
 Disables MVP tombs from appearing on a map.
 
 ---------------------------------------
+
+*nocashshop
+
+Disables users from opening cash shop on a map.
+
+---------------------------------------
+
+
+*nobanking
+
+Disables users from opening bank on a map.
+
+---------------------------------------

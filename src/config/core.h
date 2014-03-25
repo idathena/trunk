@@ -11,7 +11,7 @@
 /// Max number of items on @autolootid list
 #define AUTOLOOTITEM_SIZE 10
 
-/// The maximum number of atcommand suggestions
+/// The maximum number of atcommand and @warp suggestions
 #define MAX_SUGGESTIONS 10
 
 /// Comment to disable the official walk path
@@ -69,10 +69,41 @@
 	#define MAX_SKILL_DAMAGE_RATE 100000
 #endif
 
-/// Uncomment if MAX_LEVEL is l50 or lower
-/// Comment to disable the job HP/SP tables and use formulas instead,
-/// or MAX_LEVEL is higher than 150
+/// Uncomment to enable the job base HP/SP table (job_basehpsp_db.txt)
 //#define HP_SP_TABLES
+
+/// Uncomment to enable VIP system.
+//#define VIP_ENABLE
+
+/// Enable VIP script changes? (requires VIP_ENABLE)
+/// The primary effects of this are restrictions on non-VIP players, such as requiring
+/// a Reset Stone to change into third classes, paying more for equipment upgrades, and
+/// so forth. Note that the changes are based on euRO, not iRO.
+#define VIP_SCRIPT 0
+
+#ifdef VIP_ENABLE
+	#define MIN_STORAGE 300 //Default number of storage slots.
+	#define MIN_CHARS 3 //Default number of characters per account.
+	#define MAX_CHAR_VIP 6 //This must be less than MAX_CHARS
+	#define MAX_CHAR_BILLING 0 //This must be less than MAX_CHARS
+#else
+	#define MIN_STORAGE MAX_STORAGE //If the VIP system is disabled the min = max.
+	#define MIN_CHARS MAX_CHARS //Default number of characters per account.
+	#define MAX_CHAR_VIP 0
+	#define MAX_CHAR_BILLING 0
+#endif
+#if (MIN_CHARS + MAX_CHAR_VIP + MAX_CHAR_BILLING) > MAX_CHARS
+	#error "Config of MAX_CHARS is invalid"
+#endif
+#if MIN_STORAGE > MAX_STORAGE
+	#error "Config of MIN_STORAGE is invalid"
+#endif
+
+/// Uncomment to enable Visible Monsters' HP
+/// All type Monsters' HP will visible to all players, instead of only those who hit it.
+/// Monsters spawned with 'boss' flag have a greater bar (2-3x normal size)
+/// Requires PACKETVER >= 20120404
+//#define VISIBLE_MONSTER_HP
 
 /**
  * No settings past this point

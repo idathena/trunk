@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Current Version: =====================================
-//= 20130827
+//= 20140211
 //===== Description: =========================================
 //= List of available atcommands and their functions.
 //============================================================
@@ -298,6 +298,13 @@ prontera (x= 165, y= 198) 01 00 00 00 00
 
 ---------------------------------------
 
+@showrate
+
+When VIP is enabled, the rate information always be shown when every player load map.
+Use this command to disable or enable that rate information.
+
+---------------------------------------
+
 ========================
 | 2. Database Commands |
 ========================
@@ -307,7 +314,7 @@ prontera (x= 165, y= 198) 01 00 00 00 00
 Displays monster information (rates, stats, drops, MVP data).
 
 Example:
-@monsterinfo Poring
+@mobinfo Poring
 
 Output:
 Monster: 'Poring'/'Poring'/'PORING' (1002)
@@ -779,9 +786,10 @@ Warps to your save point.
 
 ---------------------------------------
 
-@jump
+@jump {<x> <y>}
 
-Warps to a random coordinate on the current map.
+Warps to the given coordinates on the current map.
+If no coordinates are entered, a random location will be chosen.
 
 ---------------------------------------
 
@@ -856,9 +864,10 @@ Changes the specified stat of your character.
 
 ---------------------------------------
 
-@allstats
+@allstats <+/- amount>
 
-Sets all stats to the maximum (default is 99).
+Changes all stats of your character.
+If no amount is given, sets all stats to the maximum (default is 99).
 
 ---------------------------------------
 
@@ -875,9 +884,9 @@ Changes unused status or skill points by the specified amount.
 
 ---------------------------------------
 
-@streset
+@resetstat
 /resetstate
-@skreset
+@resetskill
 /resetskill
 @reset
 
@@ -914,10 +923,10 @@ Summons the specified amount of spirit spheres around you.
 
 ---------------------------------------
 
-@mount
+@mount {<dragon color 1-5>}
 @mount2
 
-Toggles mounting/unmounting a peco (@mount) or cash mount (@mount2).
+Toggles mounting/unmounting a job mount (@mount) or cash mount (@mount2).
 
 ---------------------------------------
 
@@ -1034,6 +1043,33 @@ Toggles GM Hide (total invisibility to characters and monsters).
 
 Command what other npcs say.
 Displays the message above the NPC's head (like the 'npctalk' script command).
+
+---------------------------------------
+
+@vip <+/- time> <player name>
+
+Set a player in VIP mode for a limited time.
+Time could be reduced and if below now VIP mode is removed
+Time elements: y/a, m, d/j, h, mn, s
+
+Example:
+@vip +2h mychar
+-> set mychar's account as VIP for 2 hours.
+
+---------------------------------------
+
+@fullstrip <player name>
+
+Unequip all items from a player.
+
+---------------------------------------
+
+@cart <cart ID>
+
+Give or remove a cart to a player and also change the cart skin based on ID:
+  0: remove cart
+1-5: normal carts
+6-9: new carts (available for PACKETVER >= 20120201)
 
 ---------------------------------------
 
@@ -1160,7 +1196,7 @@ Disconnects a user or all users from the server.
 @ban <+/- time> <player name>
 @unban <player name>
 
-Bans or unbans a player for a limited time.
+Bans or unbans a player account for a limited time.
 Time elements: y/a, m, d/j, h, mn, s
 
 Example:
@@ -1173,6 +1209,19 @@ Example:
 @unblock <player name>
 
 Blocks or unblocks a player from logging in indefinitely.
+
+---------------------------------------
+
+@charban <+/- time> <player name>
+@charunban <player name>
+
+Bans or unbans a player for a limited time. 
+(Very similar to @ban and but for 1 character only)
+Time elements: y/a, m, d/j, h, mn, s
+
+Example:
+@ban +2d Char2
+-> bans Char2's for 2 days.
 
 ---------------------------------------
 

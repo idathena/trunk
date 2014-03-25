@@ -4,6 +4,10 @@
 #ifndef _BATTLE_H_
 #define _BATTLE_H_
 
+#include "../common/mmo.h"
+#include "../config/core.h"
+#include "map.h" //ELE_MAX
+
 // State of a single attack attempt; used in flee/def penalty calculations when mobbed
 typedef enum damage_lv {
 	ATK_NONE,    // Not an attack
@@ -29,16 +33,21 @@ enum { // Flag of the final calculation
 
 enum e_battle_check_target
 { //New definitions [Skotlex]
-	BCT_ENEMY   = 0x020000,
-	BCT_NOENEMY = 0x1d0000, //This should be (~BCT_ENEMY&BCT_ALL)
-	BCT_PARTY   = 0x040000,
-	BCT_NOPARTY = 0x1b0000, //This should be (~BCT_PARTY&BCT_ALL)
-	BCT_GUILD   = 0x080000,
-	BCT_NOGUILD = 0x170000, //This should be (~BCT_GUILD&BCT_ALL)
-	BCT_ALL     = 0x1f0000,
-	BCT_NOONE   = 0x000000,
-	BCT_SELF    = 0x010000,
-	BCT_NEUTRAL = 0x100000,
+	BCT_NOONE     = 0x000000,
+	BCT_SELF      = 0x010000,
+	BCT_ENEMY     = 0x020000,
+	BCT_PARTY     = 0x040000,
+	BCT_GUILDALLY = 0x080000, //Only allies, NOT guildmates
+	BCT_NEUTRAL   = 0x100000,
+	BCT_SAMEGUILD = 0x200000, //No Guild Allies
+
+	BCT_GUILD     = 0x280000, //Guild AND allies (BCT_SAMEGUILD|BCT_GUILDALLY)
+
+	BCT_NOGUILD   = 0x170000, //This should be (~BCT_GUILD&BCT_ALL)
+	BCT_NOPARTY   = 0x3b0000, //This should be (~BCT_PARTY&BCT_ALL)
+	BCT_NOENEMY   = 0x3d0000, //This should be (~BCT_ENEMY&BCT_ALL)
+
+	BCT_ALL       = 0x3f0000, //Sum of BCT_NOONE to BCT_SAMEGUILD
 };
 
 // Damage structure
@@ -47,7 +56,7 @@ struct Damage {
 	int64 statusAtk, statusAtk2, weaponAtk, weaponAtk2, equipAtk, equipAtk2, masteryAtk, masteryAtk2;
 #endif
 	int64 damage, damage2; // Right, left dmg
-	int type, div_; // Chk clif_damage for type @TODO add an enum ? ; nb of hit
+	int type, div_; // Chk clif_damage for type @TODO: Add an enum ? ; nb of hit
 	int amotion, dmotion;
 	int blewcount; // Nb of knockback
 	int flag; // Chk BF_* flag, (enum below)
@@ -56,7 +65,7 @@ struct Damage {
 };
 
 //(Used in read pc.c,) attribute table (battle_attr_fix)
-extern int attr_fix_table[4][10][10];
+extern int attr_fix_table[4][ELE_MAX][ELE_MAX];
 
 struct map_session_data;
 struct mob_data;
@@ -91,7 +100,7 @@ struct block_list* battle_getenemy(struct block_list *target, int type, int rang
 int battle_gettarget(struct block_list *bl);
 int battle_getcurrentskill(struct block_list *bl);
 
-#define	is_boss(bl)	(status_get_mode(bl)&MD_BOSS) // Can refine later [Aru]
+#define	is_boss(bl)	(status_get_class_(bl) == CLASS_BOSS) // Can refine later [Aru]
 
 int battle_check_undead(int race,int element);
 int battle_check_target(struct block_list *src, struct block_list *target,int flag);
@@ -474,8 +483,10 @@ extern struct Battle_Config
 	int bg_flee_penalty;
 
 	int max_third_parameter;
-	int max_expanded_parameter;
 	int max_baby_third_parameter;
+	int max_trans_parameter;
+	int max_third_trans_parameter;
+	int max_extended_parameter;
 	int atcommand_max_stat_bypass;
 	int max_third_aspd;
 	int vcast_stat_scale;
@@ -502,6 +513,39 @@ extern struct Battle_Config
 	int mon_trans_disable_in_gvg;
 	int transform_end_on_death;
 	int feature_banking;
+	int emblem_woe_change;
+	int emblem_transparency_limit;
+	int vip_storage_increase;
+	int vip_base_exp_increase;
+	int vip_job_exp_increase;
+	int vip_exp_penalty_base_normal;
+	int vip_exp_penalty_base;
+	int vip_exp_penalty_job_normal;
+	int vip_exp_penalty_job;
+	int vip_bm_increase;
+	int vip_drop_increase;
+	int vip_gemstone;
+	int vip_disp_rate;
+	int discount_item_point_shop;
+	int oktoberfest_ignorepalette;
+	int update_enemy_position;
+	int devotion_rdamage;
+
+	// Autotrade persistency
+	int feature_autotrade;
+	int feature_autotrade_direction;
+	int feature_autotrade_sit;
+
+	int disp_serverbank_msg;
+	int warg_can_falcon;
+	int path_blown_halt;
+	int rental_mount_speed_boost;
+	int atcommand_enable_npc;
+	int crimson_marker_type;
+	int warp_suggestions_enabled;
+	int taekwon_mission_mobname;
+	int teleport_on_portal;
+	int cart_revo_knockback;
 } battle_config;
 
 void do_init_battle(void);

@@ -190,23 +190,26 @@ static void cashshop_read_db( void ){
 	}
 }
 
-/*
- * Attempts to purchase a cashshop item from the list.
- * Checks if the transaction is valid and if the user has enough inventory space to receive the item.
- * If yes, take cashpoints and give items;
- * else return clif_error.
+/** Attempts to purchase a cashshop item from the list.
+ * If yes, take cashpoints and give items; else return clif_error.
+ * @param sd Player that request to buy item(s)
+ * @param kafrapoints
+ * @param n Count of item list
+ * @param item_list Array of item ID
+ * @return true: success, false: fail
  */
-void cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, uint16* item_list ){
+bool cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, uint16* item_list ){
 	uint32 totalcash = 0;
 	uint32 totalweight = 0;
 	int i,new_;
 	uint8 stackflag[256];
 
 	if( sd == NULL || item_list == NULL ){
-		return;
+		clif_cashshop_result( sd, 0, CASHSHOP_RESULT_ERROR_UNKNOWN );
+		return false;
 	}else if( sd->state.trading ){
 		clif_cashshop_result( sd, 0, CASHSHOP_RESULT_ERROR_PC_STATE );
-		return;
+		return false;
 	}
 
 	new_ = 0;
@@ -220,14 +223,14 @@ void cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 
 		if( tab > CASHSHOP_TAB_SEARCH ){
 			clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_UNKNOWN );
-			return;
+			return false;
 		}
 
 		ARR_FIND( 0, cash_shop_items[tab].count, j, nameid == cash_shop_items[tab].item[j]->nameid );
 
 		if( j == cash_shop_items[tab].count || !itemdb_exists( nameid ) ){
-			clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_UNKNOWN );
-			return;
+			clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_UNKNOWN_ITEM );
+			return false;
 		}else if( !itemdb_isstackable( nameid ) && quantity > 1 ){
 			stackflag[i] = 1;
 			/*uint32* quantity_ptr = (uint32*)(item_list + i * 5 + 2);
@@ -245,7 +248,7 @@ void cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 
 					case CHKADDITEM_OVERAMOUNT:
 						clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_OVER_PRODUCT_TOTAL_CNT );
-						return;
+						return false;
 				}
 			}
 		}else{
@@ -259,7 +262,7 @@ void cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 
 				case CHKADDITEM_OVERAMOUNT:
 					clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_OVER_PRODUCT_TOTAL_CNT );
-					return;
+					return false;
 			}
 		}
 		totalcash += cash_shop_items[tab].item[j]->price * quantity;
@@ -268,15 +271,15 @@ void cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 
 	if( ( totalweight + sd->weight ) > sd->max_weight ){
 		clif_cashshop_result( sd, 0, CASHSHOP_RESULT_ERROR_INVENTORY_WEIGHT );
-		return;
+		return false;
 	}else if( pc_inventoryblank( sd ) < new_ ){
 		clif_cashshop_result( sd, 0, CASHSHOP_RESULT_ERROR_INVENTORY_ITEMCNT );
-		return;
+		return false;
 	}
 
-	if(pc_paycash( sd, totalcash, kafrapoints, LOG_TYPE_CASH ) < 0){
+	if( pc_paycash( sd, totalcash, kafrapoints, LOG_TYPE_CASH ) < 0 ){
 		clif_cashshop_result( sd, 0, CASHSHOP_RESULT_ERROR_SHORTTAGE_CASH );
-		return;
+		return false;
 	}
 
 	for( i = 0; i < n; ++i ){
@@ -298,19 +301,19 @@ void cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 					switch( pc_additem( sd, &item_tmp, 1, LOG_TYPE_CASH ) ){
 						case ADDITEM_OVERWEIGHT:
 							clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_INVENTORY_WEIGHT );
-							return;
+							return false;
 
 						case ADDITEM_OVERITEM:
 							clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_INVENTORY_ITEMCNT );
-							return;
+							return false;
 
 						case ADDITEM_OVERAMOUNT:
 							clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_OVER_PRODUCT_TOTAL_CNT );
-							return;
+							return false;
 
 						case ADDITEM_STACKLIMIT:
 							clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_RUNE_OVERCOUNT );
-							return;
+							return false;
 					}
 				}		
 			}
@@ -327,25 +330,26 @@ void cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 				switch( pc_additem( sd, &item_tmp, quantity, LOG_TYPE_CASH ) ){
 					case ADDITEM_OVERWEIGHT:
 						clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_INVENTORY_WEIGHT );
-						return;
+						return false;
 
 					case ADDITEM_OVERITEM:
 						clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_INVENTORY_ITEMCNT );
-						return;
+						return false;
 
 					case ADDITEM_OVERAMOUNT:
 						clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_OVER_PRODUCT_TOTAL_CNT );
-						return;
+						return false;
 
 					case ADDITEM_STACKLIMIT:
 						clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_RUNE_OVERCOUNT );
-						return;
+						return false;
 				}
 			}
 		}
 	}
 
-	clif_cashshop_result( sd, 0, CASHSHOP_RESULT_SUCCESS );
+	clif_cashshop_result( sd, 0, CASHSHOP_RESULT_SUCCESS ); //Doesn't show any message?
+	return true;
 }
 
 /*
@@ -360,7 +364,7 @@ void cashshop_reloaddb( void ){
  * Destroys cashshop class.
  * Closes all and cleanup.
  */
-int do_final_cashshop( void ){
+void do_final_cashshop( void ){
 	int tab, i;
 
 	for( tab = CASHSHOP_TAB_NEW; tab < CASHSHOP_TAB_SEARCH; tab++ ){
@@ -370,17 +374,11 @@ int do_final_cashshop( void ){
 		aFree( cash_shop_items[tab].item );
 	}
 	memset( cash_shop_items, 0, sizeof( cash_shop_items ) );
-
-	return 0;
 }
 
 /*
  * Initializes cashshop class.
- * return
- *  0 : success
  */
-int do_init_cashshop( void ){
+void do_init_cashshop( void ){
 	cashshop_read_db();
-
-	return 0;
 }

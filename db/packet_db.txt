@@ -33,7 +33,7 @@
 // Main packet version of the DB to use (default = max available version)
 // Client detection is faster when all clients use this version.
 // Version 23 is the latest Sakexe (above versions are for Renewal clients)
-packet_db_ver: 45
+packet_db_ver: 46
 
 packet_ver: 5
 0x0064,55
@@ -462,6 +462,7 @@ packet_ver: 5
 //0x020b,-1
 //0x020c,-1
 0x020d,-1
+0x8d6,6,ZC_CLEAR_DIALOG,2
 
 //2004-07-05aSakexe
 packet_ver: 6
@@ -1450,7 +1451,7 @@ packet_ver: 25
 //0x07f4,3
 
 //2009-10-27aRagexeRE
-0x07f5,6,gmreqaccname,2
+0x07f5,6,gmfullstrip,2
 0x07f6,14
 
 //2009-11-03aRagexeRE
@@ -1760,6 +1761,7 @@ packet_ver: 30
 0x0977,14 //Monster HP Bar
 0x0916,26,guildinvite2,2
 0x091d,41,bookingregreq,2:4:6
+0x08cb,10,ZC_PERSONAL_INFOMATION,2:4:6:8:10:11:13:15
 
 //2012-04-18aRagexeRE
 packet_ver: 31
@@ -1851,6 +1853,8 @@ packet_ver: 34
 0x0915,-1 //notify_standentry
 0x0978,6,reqworldinfo,2
 0x0979,50 //ackworldinfo
+0x097b,16,ZC_PERSONAL_INFOMATION,2:4:8:12:16:17:21:25
+//0x0981,12,ZC_PERSONAL_INFOMATION_CHN,2:4:6:8:12:13:15:17:10
 0x0990,31 //additem
 0x0991,-1 //inv itemlist normal
 0x0992,-1 //inv itemlist equip
@@ -2188,16 +2192,16 @@ packet_ver: 44
 0x0863,26,friendslistadd,2
 0x088A,5,hommenu,2:4
 0x095B,36,storagepassword,2:4:20
-0x09A6,12 //ZC_BANKING_CHECK
-0x09A7,10,bankdeposit,2:4:6
-0x09A8,16 //ZC_ACK_BANKING_DEPOSIT
-0x09A9,10,bankwithdrawal,2:4:6
-0x09AA,16 //ZC_ACK_BANKING_WITHDRAW
-0x09AB,6,bankcheck,2:4
-0x09B6,6,bankopen,2:4
-0x09B7,4 //ZC_ACK_OPEN_BANKING
-0x09B8,6,bankclose,2:4
-0x09B9,4 //ZC_ACK_CLOSE_BANKING
+0x09A6,12,ZC_BANKING_CHECK,2:10
+0x09A7,10,bankdeposit,2:6
+0x09A8,16,ZC_ACK_BANKING_DEPOSIT,2:4:12
+0x09A9,10,bankwithdrawal,2:6
+0x09AA,16,ZC_ACK_BANKING_WITHDRAW,2:4:12
+0x09AB,6,bankcheck,2
+0x09B6,6,bankopen,2
+0x09B7,4,ZC_ACK_OPEN_BANKING,2
+0x09B8,6,bankclose,2
+0x09B9,4,ZC_ACK_CLOSE_BANKING,2
 
 //2013-08-07Ragexe
 packet_ver: 45
@@ -2231,5 +2235,44 @@ packet_ver: 45
 0x0361,5,hommenu,2:4
 0x0887,36,storagepassword,2:4:20
 
+//2013-12-23Ragexe
+packet_ver: 46
+0x0369,7,actionrequest,2:6
+0x083C,10,useskilltoid,2:4:6
+0x0437,5,walktoxy,2
+0x035F,6,ticksend,2
+0x0202,5,changedir,2:4
+0x07E4,6,takeitem,2
+0x0362,6,dropitem,2:4
+0x07EC,8,movetokafra,2:4
+0x0364,8,movefromkafra,2:4
+0x0438,10,useskilltopos,2:4:6:8
+0x0366,90,useskilltoposinfo,2:4:6:8:10
+0x096A,6,getcharnamerequest,2
+0x0368,6,solvecharname,2
+0x0838,12,searchstoreinfolistitemclick,2:6:10
+0x0835,2,searchstoreinfonextpage,0
+0x0819,-1,searchstoreinfo,2:4:5:9:13:14:15
+0x0811,-1,reqtradebuyingstore,2:4:8:12
+0x0360,6,reqclickbuyingstore,2
+0x0817,2,reqclosebuyingstore,0
+0x0815,-1,reqopenbuyingstore,2:4:8:9:89
+0x0365,18,bookingregreq,2:4:6
+//0x363,8 CZ_JOIN_BATTLE_FIELD
+0x0281,-1,itemlistwindowselected,2:4:8:12
+0x022D,19,wanttoconnection,2:6:10:14:18
+0x0802,26,partyinvite2,2
+//0x436,4 CZ_GANGSI_RANK
+0x023B,26,friendslistadd,2
+0x0361,5,hommenu,2:4
+0x08A4,36,storagepassword,2:4:20
+//New Packets
+0x09D4,2,dull,0 //npcshopclosed
+0x09CE,102,itemmonster,2
+//NPC Market
+0x09D8,2,dull,0 //npcmarketclosed
+0x09D6,-1,dull,0 //npcmarketpurchase
+0x09DF,7
+
 //Add new packets here
-//packet_ver: 46
+//packet_ver: 47

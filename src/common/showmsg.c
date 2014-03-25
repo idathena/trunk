@@ -662,16 +662,7 @@ int	FPRINTF(FILE *file, const char *fmt, ...)
 #define STDOUT stdout
 #define STDERR stderr
 
-#endif// not _WIN32
-
-
-
-
-
-
-
-
-
+#endif //Not _WIN32
 
 char timestamp_format[20] = ""; //For displaying Timestamps
 

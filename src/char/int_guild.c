@@ -113,15 +113,15 @@ int inter_guild_tosql(struct guild *g,int flag)
 	// temporary storage for str convertion. They must be twice the size of the
 	// original string to ensure no overflows will occur. [Skotlex]
 	char t_info[256];
-	char esc_name[NAME_LENGTH*2+1];
-	char esc_master[NAME_LENGTH*2+1];
+	char esc_name[NAME_LENGTH * 2 + 1];
+	char esc_master[NAME_LENGTH * 2 + 1];
 	char new_guild = 0;
-	int i=0;
+	int i = 0;
 
-	if (g->guild_id<=0 && g->guild_id != -1) return 0;
+	if( g->guild_id <= 0 && g->guild_id != -1 ) return 0;
 
 #ifdef NOISY
-	ShowInfo("Save guild request ("CL_BOLD"%d"CL_RESET" - flag 0x%x).",g->guild_id, flag);
+	ShowInfo("Save guild request ("CL_BOLD"%d"CL_RESET" - flag 0x%x).", g->guild_id, flag);
 #endif
 
 	Sql_EscapeStringLen(sql_handle, esc_name, g->name, strnlen(g->name, NAME_LENGTH));
@@ -129,8 +129,7 @@ int inter_guild_tosql(struct guild *g,int flag)
 	*t_info = '\0';
 
 	// Insert a new guild the guild
-	if (flag&GS_BASIC && g->guild_id == -1)
-	{
+	if( flag&GS_BASIC && g->guild_id == -1 ) {
 		strcat(t_info, " guild_create");
 
 		// Create a new guild
@@ -140,18 +139,16 @@ int inter_guild_tosql(struct guild *g,int flag)
 			guild_db, esc_name, esc_master, g->guild_lv, g->max_member, g->average_lv, g->member[0].char_id) )
 		{
 			Sql_ShowDebug(sql_handle);
-			if (g->guild_id == -1)
+			if( g->guild_id == -1 )
 				return 0; //Failed to create guild!
-		}
-		else
-		{
+		} else {
 			g->guild_id = (int)Sql_LastInsertId(sql_handle);
 			new_guild = 1;
 		}
 	}
 
 	// If we need an update on an existing guild or more update on the new guild
-	if (((flag & GS_BASIC_MASK) && !new_guild) || ((flag & (GS_BASIC_MASK & ~GS_BASIC)) && new_guild))
+	if( ((flag&GS_BASIC_MASK) && !new_guild) || ((flag&(GS_BASIC_MASK&~GS_BASIC)) && new_guild) )
 	{
 		StringBuf buf;
 		bool add_comma = false;
@@ -159,24 +156,22 @@ int inter_guild_tosql(struct guild *g,int flag)
 		StringBuf_Init(&buf);
 		StringBuf_Printf(&buf, "UPDATE `%s` SET ", guild_db);
 
-		if (flag & GS_EMBLEM)
-		{
-			char emblem_data[sizeof(g->emblem_data)*2+1];
+		if( flag&GS_EMBLEM ) {
+			char emblem_data[sizeof(g->emblem_data) * 2 + 1];
 			char* pData = emblem_data;
 
 			strcat(t_info, " emblem");
 			// Convert emblem_data to hex
-			//TODO: why not use binary directly? [ultramage]
-			for(i=0; i<g->emblem_len; i++){
-				*pData++ = dataToHex[(g->emblem_data[i] >> 4) & 0x0F];
-				*pData++ = dataToHex[g->emblem_data[i] & 0x0F];
+			// @TODO: why not use binary directly? [ultramage]
+			for( i = 0; i < g->emblem_len; i++ ) {
+				*pData++ = dataToHex[(g->emblem_data[i]>>4)&0x0F];
+				*pData++ = dataToHex[g->emblem_data[i]&0x0F];
 			}
 			*pData = 0;
 			StringBuf_Printf(&buf, "`emblem_len`=%d, `emblem_id`=%d, `emblem_data`='%s'", g->emblem_len, g->emblem_id, emblem_data);
 			add_comma = true;
 		}
-		if (flag & GS_BASIC)
-		{
+		if( flag&GS_BASIC ) {
 			strcat(t_info, " basic");
 			if( add_comma )
 				StringBuf_AppendStr(&buf, ", ");
@@ -184,8 +179,7 @@ int inter_guild_tosql(struct guild *g,int flag)
 				add_comma = true;
 			StringBuf_Printf(&buf, "`name`='%s', `master`='%s', `char_id`=%d", esc_name, esc_master, g->member[0].char_id);
 		}
-		if (flag & GS_CONNECT)
-		{
+		if( flag&GS_CONNECT ) {
 			strcat(t_info, " connect");
 			if( add_comma )
 				StringBuf_AppendStr(&buf, ", ");
@@ -193,10 +187,9 @@ int inter_guild_tosql(struct guild *g,int flag)
 				add_comma = true;
 			StringBuf_Printf(&buf, "`connect_member`=%d, `average_lv`=%d", g->connect_member, g->average_lv);
 		}
-		if (flag & GS_MES)
-		{
-			char esc_mes1[sizeof(g->mes1)*2+1];
-			char esc_mes2[sizeof(g->mes2)*2+1];
+		if( flag&GS_MES ) {
+			char esc_mes1[sizeof(g->mes1) * 2 + 1];
+			char esc_mes2[sizeof(g->mes2) * 2 + 1];
 
 			strcat(t_info, " mes");
 			if( add_comma )
@@ -207,12 +200,11 @@ int inter_guild_tosql(struct guild *g,int flag)
 			Sql_EscapeStringLen(sql_handle, esc_mes2, g->mes2, strnlen(g->mes2, sizeof(g->mes2)));
 			StringBuf_Printf(&buf, "`mes1`='%s', `mes2`='%s'", esc_mes1, esc_mes2);
 		}
-		if (flag & GS_LEVEL)
-		{
+		if( flag&GS_LEVEL ) {
 			strcat(t_info, " level");
 			if( add_comma )
 				StringBuf_AppendStr(&buf, ", ");
-			//else  //last condition using add_coma setting
+			//else  // Last condition using add_coma setting
 			//	add_comma = true;
 			StringBuf_Printf(&buf, "`guild_lv`=%d, `skill_point`=%d, `exp`=%"PRIu64", `next_exp`=%u, `max_member`=%d", g->guild_lv, g->skill_point, g->exp, g->next_exp, g->max_member);
 		}
@@ -222,18 +214,16 @@ int inter_guild_tosql(struct guild *g,int flag)
 		StringBuf_Destroy(&buf);
 	}
 
-	if (flag&GS_MEMBER)
-	{
-		struct guild_member *m;
-
+	if( flag&GS_MEMBER ) {
 		strcat(t_info, " members");
 		// Update only needed players
-		for(i=0;i<g->max_member;i++){
-			m = &g->member[i];
-			if (!m->modified)
+		for( i = 0; i < g->max_member; i++ ) {
+			struct guild_member *m = &g->member[i];
+
+			if( !m->modified )
 				continue;
-			if(m->account_id) {
-				//Since nothing references guild member table as foreign keys, it's safe to use REPLACE INTO
+			if( m->account_id ) {
+				// Since nothing references guild member table as foreign keys, it's safe to use REPLACE INTO
 				Sql_EscapeStringLen(sql_handle, esc_name, m->name, strnlen(m->name, NAME_LENGTH));
 				if( SQL_ERROR == Sql_Query(sql_handle, "REPLACE INTO `%s` (`guild_id`,`account_id`,`char_id`,`hair`,`hair_color`,`gender`,`class`,`lv`,`exp`,`exp_payper`,`online`,`position`,`name`) "
 					"VALUES ('%d','%d','%d','%d','%d','%d','%d','%d','%"PRIu64"','%d','%d','%d','%s')",
@@ -241,8 +231,7 @@ int inter_guild_tosql(struct guild *g,int flag)
 					m->hair, m->hair_color, m->gender,
 					m->class_, m->lv, m->exp, m->exp_payper, m->online, m->position, esc_name) )
 					Sql_ShowDebug(sql_handle);
-				if (m->modified&GS_MEMBER_NEW || new_guild == 1)
-				{
+				if( m->modified&GS_MEMBER_NEW || new_guild == 1 ) {
 					if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `guild_id` = '%d' WHERE `char_id` = '%d'",
 						char_db, g->guild_id, m->char_id) )
 						Sql_ShowDebug(sql_handle);
@@ -252,12 +241,13 @@ int inter_guild_tosql(struct guild *g,int flag)
 		}
 	}
 
-	if (flag&GS_POSITION){
+	if( flag&GS_POSITION ) {
 		strcat(t_info, " positions");
-		//printf("- Insert guild %d to guild_position\n",g->guild_id);
-		for(i=0;i<MAX_GUILDPOSITION;i++){
+		//printf("- Insert guild %d to guild_position\n", g->guild_id);
+		for( i = 0; i < MAX_GUILDPOSITION; i++ ) {
 			struct guild_position *p = &g->position[i];
-			if (!p->modified)
+
+			if( !p->modified )
 				continue;
 			Sql_EscapeStringLen(sql_handle, esc_name, p->name, strnlen(p->name, NAME_LENGTH));
 			if( SQL_ERROR == Sql_Query(sql_handle, "REPLACE INTO `%s` (`guild_id`,`position`,`name`,`mode`,`exp_mode`) VALUES ('%d','%d','%s','%d','%d')",
@@ -267,25 +257,20 @@ int inter_guild_tosql(struct guild *g,int flag)
 		}
 	}
 
-	if (flag&GS_ALLIANCE)
-	{
+	if( flag&GS_ALLIANCE ) {
 		// Delete current alliances
 		// NOTE: no need to do it on both sides since both guilds in memory had
 		// their info changed, not to mention this would also mess up oppositions!
 		// [Skotlex]
 		//if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `guild_id`='%d' OR `alliance_id`='%d'", guild_alliance_db, g->guild_id, g->guild_id) )
 		if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `guild_id`='%d'", guild_alliance_db, g->guild_id) )
-		{
 			Sql_ShowDebug(sql_handle);
-		}
-		else
-		{
+		else {
 			//printf("- Insert guild %d to guild_alliance\n",g->guild_id);
-			for(i=0;i<MAX_GUILDALLIANCE;i++)
-			{
-				struct guild_alliance *a=&g->alliance[i];
-				if(a->guild_id>0)
-				{
+			for( i = 0; i < MAX_GUILDALLIANCE; i++ ) {
+				struct guild_alliance *a = &g->alliance[i];
+
+				if( a->guild_id > 0 ) {
 					Sql_EscapeStringLen(sql_handle, esc_name, a->name, strnlen(a->name, NAME_LENGTH));
 					if( SQL_ERROR == Sql_Query(sql_handle, "REPLACE INTO `%s` (`guild_id`,`opposition`,`alliance_id`,`name`) "
 						"VALUES ('%d','%d','%d','%s')",
@@ -296,13 +281,14 @@ int inter_guild_tosql(struct guild *g,int flag)
 		}
 	}
 
-	if (flag&GS_EXPULSION){
+	if( flag&GS_EXPULSION ) {
 		strcat(t_info, " expulsions");
-		//printf("- Insert guild %d to guild_expulsion\n",g->guild_id);
-		for(i=0;i<MAX_GUILDEXPULSION;i++){
-			struct guild_expulsion *e=&g->expulsion[i];
-			if(e->account_id>0){
-				char esc_mes[sizeof(e->mes)*2+1];
+		//printf("- Insert guild %d to guild_expulsion\n", g->guild_id);
+		for( i = 0; i < MAX_GUILDEXPULSION; i++ ) {
+			struct guild_expulsion *e = &g->expulsion[i];
+
+			if( e->account_id > 0 ) {
+				char esc_mes[sizeof(e->mes) * 2 + 1];
 
 				Sql_EscapeStringLen(sql_handle, esc_name, e->name, strnlen(e->name, NAME_LENGTH));
 				Sql_EscapeStringLen(sql_handle, esc_mes, e->mes, strnlen(e->mes, sizeof(e->mes)));
@@ -313,11 +299,11 @@ int inter_guild_tosql(struct guild *g,int flag)
 		}
 	}
 
-	if (flag&GS_SKILL){
+	if( flag&GS_SKILL ) {
 		strcat(t_info, " skills");
-		//printf("- Insert guild %d to guild_skill\n",g->guild_id);
-		for(i=0;i<MAX_GUILDSKILL;i++){
-			if (g->skill[i].id>0 && g->skill[i].lv>0){
+		//printf("- Insert guild %d to guild_skill\n", g->guild_id);
+		for( i = 0; i < MAX_GUILDSKILL; i++) {
+			if( g->skill[i].id > 0 && g->skill[i].lv > 0) {
 				if( SQL_ERROR == Sql_Query(sql_handle, "REPLACE INTO `%s` (`guild_id`,`id`,`lv`) VALUES ('%d','%d','%d')",
 					guild_skill_db, g->guild_id, g->skill[i].id, g->skill[i].lv) )
 					Sql_ShowDebug(sql_handle);
@@ -325,8 +311,8 @@ int inter_guild_tosql(struct guild *g,int flag)
 		}
 	}
 
-	if (save_log)
-		ShowInfo("Saved guild (%d - %s):%s\n",g->guild_id,g->name,t_info);
+	if( save_log )
+		ShowInfo("Saved guild (%d - %s):%s\n", g->guild_id, g->name, t_info);
 	return 1;
 }
 
@@ -1170,6 +1156,7 @@ int mapif_parse_CreateGuild(int fd,int account_id,char *name,struct guild_member
 	g->max_member=16;
 	g->average_lv=master->lv;
 	g->connect_member=1;
+	g->guild_lv=1;
 
 	for(i=0;i<MAX_GUILDSKILL;i++)
 		g->skill[i].id=i + GD_SKILLBASE;

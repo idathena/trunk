@@ -112,7 +112,7 @@ void inter_pet_sql_final(void){
 }
 //----------------------------------
 int inter_pet_delete(int pet_id){
-	ShowInfo("delete pet request: %d...\n",pet_id);
+	ShowInfo("Delete pet request: %d...\n",pet_id);
 
 	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `pet_id`='%d'", pet_db, pet_id) )
 		Sql_ShowDebug(sql_handle);

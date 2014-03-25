@@ -7,7 +7,7 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-    
+
 int date_get_year(void);
 int date_get_month(void);
 int date_get_day(void);

@@ -52,7 +52,7 @@ struct Channel* channel_create(char *name, char *pass, unsigned char color, enum
 	else
 		safestrncpy(channel->pass, pass, CHAN_NAME_LENGTH);
 
-	//ShowInfo("Create channel %s\n",channel->name);
+	//ShowInfo("Create channel %s type=%d, val=%d\n",channel->name,chantype,val);
 	switch(channel->type) {
 		case CHAN_TYPE_MAP: channel->m = val; break;
 		case CHAN_TYPE_ALLY: channel->gid = val; break;
@@ -78,6 +78,7 @@ int channel_delete(struct Channel *channel) {
 		return -2;
 	if(db_size(channel->users)) {
 		struct map_session_data *sd;
+
 		DBIterator *iter = db_iterator(channel->users);
 		//For all users
 		for(sd = (struct map_session_data *)dbi_first(iter); dbi_exists(iter); sd = (struct map_session_data *)dbi_next(iter))
@@ -95,6 +96,7 @@ int channel_delete(struct Channel *channel) {
 			break;
 		case CHAN_TYPE_ALLY: {
 			struct guild *g = guild_search(channel->gid);
+
 			if(g) g->channel = NULL;
 			aFree(channel);
 			break;
@@ -117,14 +119,15 @@ int channel_delete(struct Channel *channel) {
  * -3 : sd banned
  */
 int channel_join(struct Channel *channel, struct map_session_data *sd) {
-	char output[128];
-
 	if(!channel || !sd)
 		return -1;
-	if(channel_haspc(channel,sd)==1)
+	if(sd->state.autotrade)
+		return 0; //Fake success
+	if(channel_haspc(channel,sd) == 1)
 		return -2;
+	if(channel_haspcbanned(channel,sd) == 1) {
+		char output[128];
 
-	if(channel_haspcbanned(channel,sd)==1){
 		sprintf(output, msg_txt(1438),channel->name); //You're currently banned from the '%s' channel.
 		clif_displaymessage(sd->fd, output);
 		return -3;
@@ -134,18 +137,18 @@ int channel_join(struct Channel *channel, struct map_session_data *sd) {
 	sd->channels[ sd->channel_count - 1 ] = channel;
 	idb_put(channel->users, sd->status.char_id, sd);
 
-	if( sd->stealth ) {
+	if(sd->stealth)
 		sd->stealth = false;
-	} else if( channel->opt & CHAN_OPT_ANNOUNCE_JOIN ) {
+	else if(channel->opt & CHAN_OPT_ANNOUNCE_JOIN) {
 		char message[60];
+
 		sprintf(message, "[ #%s ] '%s' has joined.",channel->name,sd->status.name);
 		clif_channel_msg(channel,sd,message,channel->color);
 	}
 
-	/* someone is cheating, we kindly disconnect the bastard */
-	if( sd->channel_count > 200 ) {
+	/* Someone is cheating, we kindly disconnect the bastard */
+	if(sd->channel_count > 200)
 		set_eof(sd->fd);
-	}
 
 	return 0;
 }
@@ -211,13 +214,12 @@ int channel_ajoin(struct guild *g){
 int channel_gjoin(struct map_session_data *sd, int flag){
 	struct Channel *channel;
 	struct guild *g;
-	int i;
 
-	if(!sd) return -1;
-
+	if(!sd)
+		return -1;
 	g = sd->guild;
-	if(!g) return -2;
-
+	if(!g)
+		return -2;
 	channel = g->channel;
 	if(!channel) {
 		channel = channel_create(Channel_Config.ally_chname,NULL,Channel_Config.ally_chcolor,CHAN_TYPE_ALLY,g->guild_id);
@@ -227,9 +229,12 @@ int channel_gjoin(struct map_session_data *sd, int flag){
 	if(flag&1) //Join our guild chat
 		channel_join(channel,sd);
 	if(flag&2) {
+		int i;
+
 		for(i = 0; i < MAX_GUILDALLIANCE; i++) {
 			struct guild *ag; //Allied guld
 			struct guild_alliance *ga = &g->alliance[i]; //Guild alliance
+
 			if(ga->guild_id && (ga->opposition == 0) && (ag = guild_search(ga->guild_id))) //Only join allies
 				channel_join(ag->channel,sd);
 		}
@@ -295,18 +300,20 @@ int channel_pcquit(struct map_session_data *sd, int type){
 
 	//On closing state we could have clean all chan by sd but pcquit is more used to free unit when
 	//he quit a map_server, not call in map_quit cause we need to cleanup when we switch map-server as well
-	if(!sd) return -1;
+	if(!sd)
+		return -1;
 
 	// Leave all chat channels.
-	if(type&(1|2) && Channel_Config.ally_enable && sd->guild){ //quit guild and ally chan
+	if(type&(1|2) && Channel_Config.ally_enable && sd->guild) { //Quit guild and ally chan
 		struct guild *g = sd->guild;
-		if(type&1 && channel_haspc(g->channel,sd)==1){
-			channel_clean(g->channel,sd,0); //leave guild chan
-		}
-		if(type&2){
-			struct guild *ag; //allied guild
-			for (i = 0; i < MAX_GUILDALLIANCE; i++) { //leave all alliance chan
-				if( g->alliance[i].guild_id && (ag = guild_search(g->alliance[i].guild_id) ) ) {
+
+		if(type&1 && channel_haspc(g->channel,sd) == 1)
+			channel_clean(g->channel,sd,0); //Leave guild chan
+		if(type&2) {
+			for (i = 0; i < MAX_GUILDALLIANCE; i++) { //Leave all alliance chan
+				struct guild *ag = guild_search(g->alliance[i].guild_id); //Allied guild
+
+				if(g->alliance[i].guild_id && ag) {
 					if(channel_haspc(ag->channel,sd) == 1)
 						channel_clean(ag->channel,sd,0);
 					break;
@@ -314,14 +321,12 @@ int channel_pcquit(struct map_session_data *sd, int type){
 			}
 		}
 	}
-	if(type&4 && Channel_Config.map_enable && channel_haspc(map[sd->bl.m].channel,sd)==1){ //quit map chan
+	if(type&4 && Channel_Config.map_enable && channel_haspc(map[sd->bl.m].channel,sd) == 1) //Quit map chan
 		channel_clean(map[sd->bl.m].channel,sd,0);
-	}
-	if(type&8 && sd->channel_count ) { //quit all chan
+	if(type&8 && sd->channel_count) { //Quit all chan
 		uint8 count = sd->channel_count;
-		for( i = count-1; i >= 0; i--) { //going backward to avoid shifting
+		for(i = count-1; i >= 0; i--) //Going backward to avoid shifting
 			channel_clean(sd->channels[i],sd,0);
-		}
 	}
 	return 0;
 }
@@ -412,7 +417,7 @@ struct Channel* channel_name2channel(char *chname, struct map_session_data *sd, 
 	else if(sd && (strcmpi(chname + 1,Channel_Config.ally_chname) == 0) && sd->guild){
 		channel = sd->guild->channel;
 		if(flag&1 && !channel) {
-			channel = channel_create(Channel_Config.map_chname,NULL,Channel_Config.map_chcolor,CHAN_TYPE_ALLY,sd->guild->guild_id);
+			channel = channel_create(Channel_Config.ally_chname,NULL,Channel_Config.ally_chcolor,CHAN_TYPE_ALLY,sd->guild->guild_id);
 			if(flag&2) channel_gjoin(sd,3);
 			sd->guild->channel = channel;
 		}
@@ -481,46 +486,46 @@ int channel_display_list(struct map_session_data *sd, char *options){
 	if(!sd || !options)
 		return -1;
 
-	//display availaible colors
-	if( options[0] != '\0' && strcmpi(options,"colors") == 0 ) {
+	// Display availaible colors
+	if(options[0] != '\0' && strcmpi(options,"colors") == 0) {
 		char msg[40];
+
 		clif_displaymessage(sd->fd, msg_txt(1444)); // ---- Available Colors ----
-		for( k = 0; k < Channel_Config.colors_count; k++ ) {
-			sprintf(msg, msg_txt(1445),Channel_Config.colors_name[k]);// - '%s'
+		for(k = 0; k < Channel_Config.colors_count; k++) {
+			sprintf(msg, msg_txt(1445),Channel_Config.colors_name[k]); // - '%s'
 			clif_colormes(sd,Channel_Config.colors[k],msg);
 		}
-	}
-	else if( options[0] != '\0' && strcmpi(options,"mine") == 0 ) { //display chan I'm into
+	} else if(options[0] != '\0' && strcmpi(options,"mine") == 0) { //Display chan I'm into
 		clif_displaymessage(sd->fd, msg_txt(1475)); // ---- My Channels ----
 		if(!sd->channel_count)
 			clif_displaymessage(sd->fd, msg_txt(1476)); // You have not joined any channels.
 		else {
-			for(k=0; k<sd->channel_count; k++){
+			for(k = 0; k < sd->channel_count; k++) {
 				channel = sd->channels[k];
-				sprintf(output, msg_txt(1409), channel->name, db_size(channel->users));// - #%s (%d users)
+				sprintf(output, msg_txt(1409), channel->name, db_size(channel->users)); // - #%s (%d users)
 				clif_displaymessage(sd->fd, output);
 			}
 		}
-	}
-	else { //display public chanels
+	} else { // Display public chanels
 		DBIterator *iter;
 		bool has_perm = pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN) ? true : false;
 
 		clif_displaymessage(sd->fd, msg_txt(1410)); // ---- Public Channels ----
-		if( Channel_Config.map_enable ) {
+		if(Channel_Config.map_enable) {
 			sprintf(output, msg_txt(1409), Channel_Config.map_chname, map[sd->bl.m].channel ? db_size(map[sd->bl.m].channel->users) : 0);// - #%s (%d users)
 			clif_displaymessage(sd->fd, output);
 		}
-		if( Channel_Config.ally_enable && sd->status.guild_id ) {
+		if(Channel_Config.ally_enable && sd->status.guild_id) {
 			struct guild *g = sd->guild;
-			if( !g ) return -1; //how can this happen if status.guild_id true ?
-			sprintf(output, msg_txt(1409), Channel_Config.ally_chname, db_size(((struct Channel *)g->channel)->users));// - #%s (%d users)
+
+			if(!g) return -1; // How can this happen if status.guild_id true ?
+			sprintf(output, msg_txt(1409), Channel_Config.ally_chname, db_size(((struct Channel *)g->channel)->users)); // - #%s (%d users)
 			clif_displaymessage(sd->fd, output);
 		}
 		iter = db_iterator(channel_db);
 		for(channel = dbi_first(iter); dbi_exists(iter); channel = dbi_next(iter)) {
-			if( has_perm || channel->type == CHAN_TYPE_PUBLIC ) {
-				sprintf(output, msg_txt(1409), channel->name, db_size(channel->users));// - #%s (%d users)
+			if(has_perm || channel->type == CHAN_TYPE_PUBLIC) {
+				sprintf(output, msg_txt(1409), channel->name, db_size(channel->users)); // - #%s (%d users)
 				clif_displaymessage(sd->fd, output);
 			}
 		}
@@ -537,7 +542,6 @@ int channel_display_list(struct map_session_data *sd, char *options){
  *  -1 : fail
  */
 int channel_pccreate(struct map_session_data *sd, char *chname, char *chpass){
-	struct Channel *channel;
 	char output[128];
 	int8 res;
 
@@ -545,19 +549,20 @@ int channel_pccreate(struct map_session_data *sd, char *chname, char *chpass){
 		return 0;
 
 	res = channel_chk(chname,chpass,7);
-	if(res==0){ //success
-		channel = channel_create(chname + 1,chpass,0,CHAN_TYPE_PRIVATE,sd->status.char_id);
+	if(res == 0) { // Success
+		struct Channel *channel = channel_create(chname + 1,chpass,0,CHAN_TYPE_PRIVATE,sd->status.char_id);
+
 		channel_join(channel,sd);
-		if( !( channel->opt & CHAN_OPT_ANNOUNCE_JOIN ) ) {
+		if(!(channel->opt & CHAN_OPT_ANNOUNCE_JOIN)) {
 			sprintf(output, msg_txt(1403),chname); // You're now in the '%s' channel.
 			clif_displaymessage(sd->fd, output);
 		}
-	} else { //failure display cause
-		switch(res){
-		case -1: sprintf(output, msg_txt(1405), CHAN_NAME_LENGTH); break; // Channel name must start with '#'.
-		case -2: sprintf(output, msg_txt(1406), CHAN_NAME_LENGTH); break; // Channel length must be between 3 and %d.
-		case -3: sprintf(output, msg_txt(1436), CHAN_NAME_LENGTH); break; // Channel password can't be over %d characters.
-		case -4: sprintf(output, msg_txt(1407), chname); // Channel '%s' is not available.
+	} else { // Failure display cause
+		switch(res) {
+			case -1: sprintf(output, msg_txt(1405), CHAN_NAME_LENGTH); break; // Channel name must start with '#'.
+			case -2: sprintf(output, msg_txt(1406), CHAN_NAME_LENGTH); break; // Channel length must be between 3 and %d.
+			case -3: sprintf(output, msg_txt(1436), CHAN_NAME_LENGTH); break; // Channel password can't be over %d characters.
+			case -4: sprintf(output, msg_txt(1407), chname); // Channel '%s' is not available.
 		}
 		clif_displaymessage(sd->fd, output);
 		return -1;
@@ -904,7 +909,7 @@ int channel_pcban(struct map_session_data *sd, char *chname, struct map_session_
 int channel_pcsetopt(struct map_session_data *sd, char *chname, const char *option, const char *val){
 	struct Channel *channel;
 	char output[128];
-	int k, s=0;
+	int k, s = 0;
 	const char* opt_str[] = {
 		"None",
 		"JoinAnnounce",
@@ -930,7 +935,7 @@ int channel_pcsetopt(struct map_session_data *sd, char *chname, const char *opti
 		return -1;
 	}
 
-	if(!option || option == '\0' ) {
+	if( !option || option[0] == '\0' ) {
 		clif_displaymessage(sd->fd, msg_txt(1446));// You need to input an option.
 		return -1;
 	}
@@ -1139,14 +1144,11 @@ void channel_read_config(void) {
 
 /*
  * Initialise db and read config
- * return
- *  0 : success
  */
-int do_init_channel(void) {
+void do_init_channel(void) {
 	channel_db = stridb_alloc(DB_OPT_DUP_KEY|DB_OPT_RELEASE_DATA, CHAN_NAME_LENGTH);
 	Channel_Config.ally_enable = Channel_Config.map_enable = Channel_Config.ally_autojoin = Channel_Config.map_autojoin = false;
 	channel_read_config();
-	return 0;
 }
 
 /*
@@ -1156,7 +1158,6 @@ int do_init_channel(void) {
 void do_final_channel(void) {
 	DBIterator *iter;
 	struct Channel *channel;
-	int i = 0;
 
 	//Delete all in remaining chan db
 	iter = db_iterator(channel_db);
@@ -1169,9 +1170,10 @@ void do_final_channel(void) {
 
 	//Delete all color thing
 	if( Channel_Config.colors_count ) {
-		for(i = 0; i < Channel_Config.colors_count; i++) {
+		int i = 0;
+
+		for(i = 0; i < Channel_Config.colors_count; i++)
 			aFree(Channel_Config.colors_name[i]);
-		}
 		aFree(Channel_Config.colors_name);
 		aFree(Channel_Config.colors);
 	}

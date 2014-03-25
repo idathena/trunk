@@ -14,7 +14,7 @@
 //= Currently does not allow for "insurance", or "splitting"
 //= of pairs.
 //===== Additional Comments: =================================
-//= 
+//= 1.0 First version.
 //============================================================
 
 cmd_in02,188,89,1	script	Black Jack Dealer	57,{

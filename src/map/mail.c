@@ -59,7 +59,7 @@ unsigned char mail_setitem(struct map_session_data *sd, int idx, int amount)
 	if( pc_istrading(sd) )
 		return 1;
 
-	if( idx == 0 ) { //Zeny Transfer
+	if( !idx ) { //Zeny Transfer
 		if( amount < 0 || !pc_can_give_items(sd) )
 			return 1;
 

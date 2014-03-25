@@ -6,6 +6,7 @@
 #include "../common/malloc.h"
 #include "../common/showmsg.h"
 #include "../common/utils.h"
+#include "../common/nullpo.h"
 #include "timer.h"
 
 #include <stdio.h>
@@ -88,8 +89,8 @@ char* search_timer_func_list(TimerFunc func)
 {
 	struct timer_func_list* tfl;
 
-	for( tfl=tfl_root; tfl != NULL; tfl=tfl->next )
-		if (func == tfl->func)
+	for( tfl = tfl_root; tfl != NULL; tfl = tfl->next )
+		if( func == tfl->func )
 			return tfl->name;
 
 	return "unknown timer function";
@@ -262,8 +263,7 @@ int add_timer_interval(unsigned int tick, TimerFunc func, int id, intptr_t data,
 {
 	int tid;
 
-	if( interval < 1 )
-	{
+	if( interval < 1 ) {
 		ShowError("add_timer_interval: invalid interval (tick=%u %p[%s] id=%d data=%d diff_tick=%d)\n", tick, func, search_timer_func_list(func), id, data, DIFF_TICK(tick, gettick()));
 		return INVALID_TIMER;
 	}
@@ -283,7 +283,7 @@ int add_timer_interval(unsigned int tick, TimerFunc func, int id, intptr_t data,
 /// Retrieves internal timer data
 const struct TimerData* get_timer(int tid)
 {
-	return ( tid >= 0 && tid < timer_data_num ) ? &timer_data[tid] : NULL;
+	return (tid >= 0 && tid < timer_data_num) ? &timer_data[tid] : NULL;
 }
 
 /// Marks a timer specified by 'id' for immediate deletion once it expires.
@@ -291,13 +291,11 @@ const struct TimerData* get_timer(int tid)
 /// Returns 0 on success, < 0 on failure.
 int delete_timer(int tid, TimerFunc func)
 {
-	if( tid < 0 || tid >= timer_data_num )
-	{
+	if( tid < 0 || tid >= timer_data_num ) {
 		ShowError("delete_timer error : no such timer %d (%p(%s))\n", tid, func, search_timer_func_list(func));
 		return -1;
 	}
-	if( timer_data[tid].func != func )
-	{
+	if( timer_data[tid].func != func ) {
 		ShowError("delete_timer error : function mismatch %p(%s) != %p(%s)\n", timer_data[tid].func, search_timer_func_list(timer_data[tid].func), func, search_timer_func_list(func));
 		return -2;
 	}
@@ -406,10 +404,20 @@ unsigned long get_uptime(void)
 	return (unsigned long)difftime(time(NULL), start_time);
 }
 
-void time2str(char *timestr, char *format, int timein)
+/**
+ * Converting a timestamp is a srintf according to format
+ * safefr then strftime as it ensure \0 at end of string
+ * @param str, pointer to the destination string
+ * @param size, max length of the string
+ * @param timestamp, see unix epoch
+ * @param format, format to convert timestamp on, see strftime format
+ * @return the string of timestamp
+ */
+const char* timestamp2string(char* str, size_t size, time_t timestamp, const char* format)
 {
-	time_t timeout = time(NULL) + timein;
-	strftime(timestr, 24, format, localtime(&timeout));
+	size_t len = strftime(str, size, format, localtime(&timestamp));
+	memset(str + len, '\0', size - len);
+	return str;
 }
 
 /*
@@ -420,8 +428,8 @@ void split_time(int timein, int* year, int* month, int* day, int* hour, int* min
 	const int factor_min = 60;
 	const int factor_hour = factor_min * 60;
 	const int factor_day = factor_hour * 24;
-	const int factor_month = factor_day * 30; // Approx
-	const int factor_year = factor_month * 12; // Even worse approx
+	const int factor_month = 2629743; // Approx  (30.44 days)
+	const int factor_year = 31556926; // Approx (365.24 days)
 
 	*year = timein / factor_year;
 	timein -= *year * factor_year;
@@ -449,14 +457,16 @@ void split_time(int timein, int* year, int* month, int* day, int* hour, int* min
 double solve_time(char* modif_p)
 {
 	double totaltime = 0;
-	int value = 0;
 	struct tm then_tm;
 	time_t now = time(NULL);
 	time_t then = now;
 	then_tm = *localtime(&then);
 
+	nullpo_retr(0,modif_p);
+
 	while (modif_p[0] != '\0') {
-		value = atoi(modif_p);
+		int value = atoi(modif_p);
+
 		if (value == 0)
 			modif_p++;
 		else {

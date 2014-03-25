@@ -38,7 +38,7 @@ struct mmo_account
 {
 	int account_id;
 	char userid[NAME_LENGTH];
-	char pass[32+1];        // 23+1 for plaintext, 32+1 for md5-ed passwords
+	char pass[32 + 1];        // 23+1 for plaintext, 32+1 for md5-ed passwords
 	char sex;               // gender (M/F/S)
 	char email[40];         // e-mail (by default: a@a.com)
 	int group_id;           // player group id
@@ -49,10 +49,15 @@ struct mmo_account
 	unsigned int logincount;// number of successful auth attempts
 	char lastlogin[24];     // date+time of last successful login
 	char last_ip[16];       // save of last IP of connection
-	char birthdate[10+1];   // assigned birth date (format: YYYY-MM-DD, default: 0000-00-00)
-	char pincode[PINCODE_LENGTH+1]; // pincode system
+	char birthdate[10 + 1];   // assigned birth date (format: YYYY-MM-DD, default: 0000-00-00)
+	char pincode[PINCODE_LENGTH + 1]; // pincode system
 	time_t pincode_change;  // (timestamp): last time of pincode change
 	int account_reg2_num;
+	int bank_vault;
+#ifdef VIP_ENABLE
+	int old_group;
+	time_t vip_time;
+#endif
 	struct global_reg account_reg2[ACCOUNT_REG2_NUM]; // account script variables (stored on login server)
 };
 

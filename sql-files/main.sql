@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `cart_inventory` (
   `char_id` int(11) NOT NULL default '0',
   `nameid` int(11) NOT NULL default '0',
   `amount` int(11) NOT NULL default '0',
-  `equip` mediumint(8) unsigned NOT NULL default '0',
+  `equip` int(11) unsigned NOT NULL default '0',
   `identify` smallint(6) NOT NULL default '0',
   `refine` tinyint(3) unsigned NOT NULL default '0',
   `attribute` tinyint(4) NOT NULL default '0',
@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS `char` (
   `moves` int(11) unsigned NOT NULL default '0',
   `char_opt` int(11) unsigned NOT NULL default '0',
   `font` tinyint(3) unsigned NOT NULL default '0',
+  `unban_time` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY (`char_id`),
   UNIQUE KEY `name_key` (`name`),
   KEY `account_id` (`account_id`),
@@ -334,7 +335,7 @@ CREATE TABLE IF NOT EXISTS `guild_storage` (
   `guild_id` int(11) unsigned NOT NULL default '0',
   `nameid` int(11) unsigned NOT NULL default '0',
   `amount` int(11) unsigned NOT NULL default '0',
-  `equip` mediumint(8) unsigned NOT NULL default '0',
+  `equip` int(11) unsigned NOT NULL default '0',
   `identify` smallint(6) unsigned NOT NULL default '0',
   `refine` tinyint(3) unsigned NOT NULL default '0',
   `attribute` tinyint(4) unsigned NOT NULL default '0',
@@ -398,7 +399,7 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `char_id` int(11) unsigned NOT NULL default '0',
   `nameid` int(11) unsigned NOT NULL default '0',
   `amount` int(11) unsigned NOT NULL default '0',
-  `equip` mediumint(8) unsigned NOT NULL default '0',
+  `equip` int(11) unsigned NOT NULL default '0',
   `identify` smallint(6) NOT NULL default '0',
   `refine` tinyint(3) unsigned NOT NULL default '0',
   `attribute` tinyint(4) unsigned NOT NULL default '0',
@@ -447,6 +448,9 @@ CREATE TABLE IF NOT EXISTS `login` (
   `character_slots` tinyint(3) unsigned NOT NULL default '0',
   `pincode` varchar(4) NOT NULL default '',
   `pincode_change` int(11) unsigned NOT NULL default '0',
+  `bank_vault` int(11) NOT NULL default '0',
+  `vip_time` int(11) unsigned NOT NULL default '0',
+  `old_group` tinyint(3) NOT NULL default '0',
   PRIMARY KEY  (`account_id`),
   KEY `name` (`userid`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2000000; 
@@ -678,6 +682,10 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1381354728);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1381423003);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1382892428);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1383162785);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1383167577);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1383205740);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1383955424);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1384473995);
 
 --
 -- Table structure for table `sstatus`
@@ -698,7 +706,7 @@ CREATE TABLE IF NOT EXISTS `storage` (
   `account_id` int(11) unsigned NOT NULL default '0',
   `nameid` int(11) unsigned NOT NULL default '0',
   `amount` smallint(11) unsigned NOT NULL default '0',
-  `equip` mediumint(8) unsigned NOT NULL default '0',
+  `equip` int(11) unsigned NOT NULL default '0',
   `identify` smallint(6) unsigned NOT NULL default '0',
   `refine` tinyint(3) unsigned NOT NULL default '0',
   `attribute` tinyint(4) unsigned NOT NULL default '0',
@@ -722,18 +730,76 @@ CREATE TABLE IF NOT EXISTS `interreg` (
   `value` varchar(20) NOT NULL,
    PRIMARY KEY (`varname`)
 ) ENGINE=InnoDB;
-INSERT INTO `interreg` (`varname`, `value`) VALUES
-('unique_id', '0');
+INSERT INTO `interreg` (`varname`, `value`) VALUES ('unique_id', '0');
 
 --
--- Table structure for table `account_data`
+-- Table structure for table `bonus_script`
 --
 
-CREATE TABLE IF NOT EXISTS `account_data` (
-  `account_id` int(11) unsigned NOT NULL default '0',
-  `bank_vault` int(11) unsigned NOT NULL default '0',
-  `base_exp` tinyint(4) unsigned NOT NULL default '100',
-  `base_drop` tinyint(4) unsigned NOT NULL default '100',
-  `base_death` tinyint(4) unsigned NOT NULL default '100',
-  PRIMARY KEY  (`account_id`)
-) ENGINE=MyISAM;
+CREATE TABLE IF NOT EXISTS `bonus_script` (
+	`char_id` int(11) NOT NULL,
+	`script` varchar(1024) NOT NULL,
+	`tick` int(11) NOT NULL default '0',
+	`flag` tinyint(3) unsigned NOT NULL default '0',
+	`type` tinyint(1) unsigned NOT NULL default '0',
+	`icon` smallint(4) NOT NULL default '-1'
+) ENGINE=InnoDB default CHARSET=latin1;
+
+--
+-- Table structure for table `vending_items`
+--
+
+CREATE TABLE IF NOT EXISTS `vending_items` (
+  `vending_id` int(10) unsigned NOT NULL,
+  `index` smallint(5) unsigned NOT NULL,
+  `cartinventory_id` int(10) unsigned NOT NULL,
+  `amount` smallint(5) unsigned NOT NULL,
+  `price` int(10) unsigned NOT NULL
+) ENGINE=MyISAM default CHARSET=latin1;
+
+--
+-- Table structure for table `vendings`
+--
+
+CREATE TABLE IF NOT EXISTS `vendings` (
+  `id` int(10) unsigned NOT NULL,
+  `account_id` int(11) unsigned NOT NULL,
+  `char_id` int(10) unsigned NOT NULL,
+  `sex` enum('F','M') NOT NULL default 'M',
+  `map` varchar(20) NOT NULL,
+  `x` smallint(5) unsigned NOT NULL,
+  `y` smallint(5) unsigned NOT NULL,
+  `title` varchar(80) NOT NULL,
+  `autotrade` tinyint(4) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM default CHARSET=latin1;
+
+--
+-- Table structure for table `buyingstore_items`
+--
+
+CREATE TABLE IF NOT EXISTS `buyingstore_items` (
+  `buyingstore_id` int(10) unsigned NOT NULL,
+  `index` smallint(5) unsigned NOT NULL,
+  `item_id` int(10) unsigned NOT NULL,
+  `amount` smallint(5) unsigned NOT NULL,
+  `price` int(10) unsigned NOT NULL
+) ENGINE=MyISAM default CHARSET=latin1;
+
+--
+-- Table structure for table `buyingstores`
+--
+
+CREATE TABLE IF NOT EXISTS `buyingstores` (
+  `id` int(10) unsigned NOT NULL,
+  `account_id` int(11) unsigned NOT NULL,
+  `char_id` int(10) unsigned NOT NULL,
+  `sex` enum('F','M') NOT NULL default 'M',
+  `map` varchar(20) NOT NULL,
+  `x` smallint(5) unsigned NOT NULL,
+  `y` smallint(5) unsigned NOT NULL,
+  `title` varchar(80) NOT NULL,
+  `limit` int(10) unsigned NOT NULL,
+  `autotrade` tinyint(4) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM default CHARSET=latin1;

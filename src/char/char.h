@@ -11,6 +11,7 @@
 enum E_CHARSERVER_ST
 {
 	CHARSERVER_ST_RUNNING = CORE_ST_LAST,
+	CHARSERVER_ST_STARTING,
 	CHARSERVER_ST_SHUTDOWN,
 	CHARSERVER_ST_LAST
 };
@@ -40,6 +41,7 @@ int memitemdata_to_sql(const struct item items[], int max, int id, int tableswit
 int mapif_sendall(unsigned char *buf,unsigned int len);
 int mapif_sendallwos(int fd,unsigned char *buf,unsigned int len);
 int mapif_send(int fd,unsigned char *buf,unsigned int len);
+void mapif_on_parse_accinfo(int account_id,int u_fd, int aid, int castergroup, int map_fd);
 
 int char_married(int pl1,int pl2);
 int char_child(int parent_id, int child_id);
@@ -83,6 +85,9 @@ extern char mercenary_db[256];
 extern char mercenary_owner_db[256];
 extern char ragsrvinfo_db[256];
 extern char elemental_db[256];
+extern char interreg_db[32];
+extern char skillcooldown_db[256];
+extern char bonus_script_db[256];
 
 extern int db_use_sqldbs; //Added for sql item_db read for char server [Valaris]
 

@@ -1,3 +1,6 @@
+// Items Misc Database
+//
+// Structure of Database:
 // GroupID,ItemID,Rate
 // 
 // Cookie Bag
@@ -1214,3 +1217,37 @@
 69,4429,32	// Salamander Card
 69,4431,32	// Kasa Card
 69,4432,33	// Magmaring Card
+// Flamel Card
+70,545,1	// Condensed Red Potion
+70,546,1	// Condensed Yellow Potion
+70,547,1	// Condensed White Potion
+// Candy Holder
+389,518,10	// Honey
+389,529,20	// Candy
+389,538,15	// Well-baked Cookie
+389,539,10	// Piece of Cake
+389,580,20	// Bread
+389,603,1	// Old Blue Box
+389,607,1	// Yggdrasil Berry
+389,616,1	// Old Card Album
+389,617,1	// Old Violet Box
+389,641,1	// Contract in Shadow
+389,7460,10	// Niflheim Express Ticket
+389,11550,5	// Pumpkin Cake
+389,12192,5	// Pumpkin Pie
+// Lucky Bag
+390,12018,8	// Firecracker
+390,663,6	// Korean Rice Cake
+390,668,2	// Red Envelope
+390,7647,3	// Taiwan Luk Coin
+390,7649,1	// Big Luk Bookmark
+// Holy Egg 2
+391,984,4	// Oridecon
+391,985,10	// Elunium
+391,547,30	// Condensed White Potion
+391,505,30	// Blue Potion
+391,607,3	// Yggdrasil Berry
+391,608,2	// Yggdrasil Seed
+391,610,15	// Yggdrasil Leaf
+391,616,5	// Old Card Album
+391,5198,1	// Drooping Bunny

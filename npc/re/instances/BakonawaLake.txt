@@ -3,7 +3,7 @@
 //===== By: ================================================== 
 //= Euphy
 //===== Current Version: ===================================== 
-//= 1.1
+//= 1.2
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -13,8 +13,11 @@
 //===== Additional Comments: ================================= 
 //= 1.0 First version. [Euphy]
 //= 1.1 Added GM management NPC. [Euphy]
+//= 1.2 Added VIP features. [Euphy]
 //============================================================ 
 
+// Instance Creation :: ma_baku
+//============================================================
 ma_scene01,174,179,4	script	Taho	541,{
 	disable_items;
 	if (checkweight(1201,1) == 0) {
@@ -118,6 +121,8 @@ sec_in02,26,26,4	script	Bakonawa's Rage	541,{
 	close;
 }
 
+// Instance Scripts :: in_baku01
+//============================================================
 1@ma_b,62,52,4	script	Taho#nf	541,{
 	mes "[Taho]";
 	mes "Heehee, I could join the Bakonawa hunt, but I'd rather hide behind that rock and cheer you guys on.";
@@ -474,10 +479,10 @@ OnMobSpawn:
 		erasequest 12279;
 		mes "[Taho]";
 		mes "This was found from Bakonawa's corpse. It would be better if you take this.";
-//		if (IsPremiumPcCafe == 10)
+		if (!VIP_SCRIPT || vip_status(1))
 			getitem 6499,7; //Ancient_Grudge
-//		else
-//			getitem 6499,5; //Ancient_Grudge
+		else
+			getitem 6499,5; //Ancient_Grudge
 		getexp 0,100000;
 		next;
 	}

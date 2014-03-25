@@ -39,8 +39,6 @@ typedef struct SPIN_LOCK{
 } __attribute__((aligned(64))) SPIN_LOCK, *PSPIN_LOCK;
 #endif
 
-
-
 static forceinline void InitializeSpinLock(PSPIN_LOCK lck){
 		lck->lock = 0;
 		lck->nest = 0;
@@ -50,7 +48,6 @@ static forceinline void InitializeSpinLock(PSPIN_LOCK lck){
 static forceinline void FinalizeSpinLock(PSPIN_LOCK lck){
 		return;
 }
-
 
 #define getsynclock(l) { while(1){ if(InterlockedCompareExchange(l, 1, 0) == 0) break; rathread_yield(); } }
 #define dropsynclock(l) { InterlockedExchange(l, 0); }
@@ -84,7 +81,6 @@ static forceinline void EnterSpinLock(PSPIN_LOCK lck){
 
 }
 
-
 static forceinline void LeaveSpinLock(PSPIN_LOCK lck){
 		int tid = rathread_get_tid();
 
@@ -97,8 +93,5 @@ static forceinline void LeaveSpinLock(PSPIN_LOCK lck){
 		
 		dropsynclock(&lck->sync_lock);
 }
-
-
-
 
 #endif

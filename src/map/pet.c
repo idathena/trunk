@@ -274,7 +274,7 @@ static int pet_performance(struct map_session_data *sd, struct pet_data *pd)
 
 	if (pd->pet.intimate > 900)
 		val = (pd->petDB->s_perfor > 0)? 4:3;
-	else if(pd->pet.intimate > 750) //TODO: this is way too high
+	else if(pd->pet.intimate > 750) //@TODO: This is way too high
 		val = 2;
 	else
 		val = 1;
@@ -365,15 +365,20 @@ int pet_data_init(struct map_session_data *sd, struct s_pet *pet)
 
 	pd->last_thinktime = gettick();
 	pd->state.skillbonus = 0;
+
 	if( battle_config.pet_status_support )
 		run_script(pet_db[i].pet_script,0,sd->bl.id,0);
-	if( pd->petDB && pd->petDB->equip_script )
-		status_calc_pc(sd,SCO_NONE);
 
-	if( battle_config.pet_hungry_delay_rate != 100 )
-		interval = (pd->petDB->hungry_delay * battle_config.pet_hungry_delay_rate) / 100;
-	else
-		interval = pd->petDB->hungry_delay;
+	if( pd->petDB ) {
+		if( pd->petDB->equip_script )
+			status_calc_pc(sd,SCO_NONE);
+
+		if( battle_config.pet_hungry_delay_rate != 100 )
+			interval = pd->petDB->hungry_delay * battle_config.pet_hungry_delay_rate / 100;
+		else
+			interval = pd->petDB->hungry_delay;
+	}
+
 	if( interval <= 0 )
 		interval = 1;
 	pd->pet_hungry_timer = add_timer(gettick() + interval, pet_hungry, sd->bl.id, 0);
@@ -402,11 +407,12 @@ int pet_birth_process(struct map_session_data *sd, struct s_pet *pet)
 	}
 
 	intif_save_petdata(sd->status.account_id,pet);
-	if (save_settings&8)
-		chrif_save(sd,0); //is it REALLY Needed to save the char for hatching a pet? [Skotlex]
+	if(save_settings&8)
+		chrif_save(sd,0); //Is it REALLY Needed to save the char for hatching a pet? [Skotlex]
 
 	if(sd->bl.prev != NULL) {
-		map_addblock(&sd->pd->bl);
+		if(map_addblock(&sd->pd->bl))
+			return 1;
 		clif_spawn(&sd->pd->bl);
 		clif_send_petdata(sd,sd->pd, 0,0);
 		clif_send_petdata(sd,sd->pd, 5,battle_config.pet_hair_style);
@@ -431,8 +437,9 @@ int pet_recv_petdata(int account_id,struct s_pet *p,int flag)
 	}
 	if(p->incuvate == 1) {
 		int i;
+
 		//Delete egg from inventory. [Skotlex]
-		for (i = 0; i < MAX_INVENTORY; i++) {
+		for(i = 0; i < MAX_INVENTORY; i++) {
 			if(sd->status.inventory[i].card[0] == CARD0_PET &&
 				p->pet_id == MakeDWord(sd->status.inventory[i].card[1], sd->status.inventory[i].card[2]))
 				break;
@@ -442,12 +449,13 @@ int pet_recv_petdata(int account_id,struct s_pet *p,int flag)
 			sd->status.pet_id = 0;
 			return 1;
 		}
-		if (!pet_birth_process(sd,p)) //Pet hatched. Delete egg.
+		if(!pet_birth_process(sd,p)) //Pet hatched. Delete egg.
 			pc_delitem(sd,i,1,0,0,LOG_TYPE_OTHER);
 	} else {
 		pet_data_init(sd,p);
 		if(sd->pd && sd->bl.prev != NULL) {
-			map_addblock(&sd->pd->bl);
+			if(map_addblock(&sd->pd->bl))
+				return 1;
 			clif_spawn(&sd->pd->bl);
 			clif_send_petdata(sd,sd->pd,0,0);
 			clif_send_petdata(sd,sd->pd,5,battle_config.pet_hair_style);
@@ -467,9 +475,9 @@ int pet_select_egg(struct map_session_data *sd,short egg_index)
 		return 0; //Forged packet!
 
 	if(sd->status.inventory[egg_index].card[0] == CARD0_PET)
-		intif_request_petdata(sd->status.account_id, sd->status.char_id, MakeDWord(sd->status.inventory[egg_index].card[1], sd->status.inventory[egg_index].card[2]) );
+		intif_request_petdata(sd->status.account_id,sd->status.char_id,MakeDWord(sd->status.inventory[egg_index].card[1],sd->status.inventory[egg_index].card[2]));
 	else
-		ShowError("wrong egg item inventory %d\n",egg_index);
+		ShowError("Wrong egg item inventory %d\n",egg_index);
 
 	return 0;
 }
@@ -501,11 +509,11 @@ int pet_catch_process2(struct map_session_data* sd, int target_id)
 
 	//FIXME: delete taming item here, if this was an item-invoked capture and the item was flagged as delay-consume [ultramage]
 
-	i = search_petDB_index(md->class_,PET_CLASS);
+	i = search_petDB_index(md->mob_id,PET_CLASS);
 	//Catch_target_class == 0 is used for universal lures (except bosses for now). [Skotlex]
 	if(sd->catch_target_class == 0 && !(md->status.mode&MD_BOSS))
-		sd->catch_target_class = md->class_;
-	if(i < 0 || sd->catch_target_class != md->class_) {
+		sd->catch_target_class = md->mob_id;
+	if(i < 0 || sd->catch_target_class != md->mob_id) {
 		clif_emotion(&md->bl,E_AG); //Mob will do /ag if wrong lure is used on them.
 		clif_pet_roulette(sd,0);
 		sd->catch_target_class = -1;
@@ -1192,86 +1200,76 @@ int pet_skill_support_timer(int tid, unsigned int tick, int id, intptr_t data)
  * pet_db.txt
  * pet_db2.txt
  *------------------------------------------*/
-int read_petdb()
+void read_petdb()
 {
 	char* filename[] = {"pet_db.txt","pet_db2.txt"};
 	FILE *fp;
 	int nameid,i,j,k;
 
 	// Remove any previous scripts in case reloaddb was invoked.
-	for( j = 0; j < MAX_PET_DB; j++ )
-	{
-		if( pet_db[j].pet_script )
-		{
+	for( j = 0; j < MAX_PET_DB; j++ ) {
+		if( pet_db[j].pet_script ) {
 			script_free_code(pet_db[j].pet_script);
 			pet_db[j].pet_script = NULL;
 		}
-		if( pet_db[j].equip_script )
-		{
+		if( pet_db[j].equip_script ) {
 			script_free_code(pet_db[j].equip_script);
 			pet_db[j].pet_script = NULL;
 		}
 	}
 
-	// clear database
+	// Clear database
 	memset(pet_db,0,sizeof(pet_db));
 
-	j = 0; // entry counter
-	for( i = 0; i < ARRAYLENGTH(filename); i++ )
-	{
+	j = 0; // Entry counter
+	for( i = 0; i < ARRAYLENGTH(filename); i++ ) {
 		char line[1024];
 		int lines, entries;
 
 		sprintf(line, "%s/%s", db_path, filename[i]);
-		fp=fopen(line,"r");
-		if( fp == NULL )
-		{
+		fp = fopen(line,"r");
+		if( fp == NULL ) {
 			if( i == 0 )
 				ShowError("can't read %s\n",line);
 			continue;
 		}
 
 		lines = entries = 0;
-		while( fgets(line, sizeof(line), fp) && j < MAX_PET_DB )
-		{
+		while( fgets(line, sizeof(line), fp) && j < MAX_PET_DB ) {
 			char *str[22], *p;
 			lines++;
 
-			if(line[0] == '/' && line[1] == '/')
+			if( line[0] == '/' && line[1] == '/' )
 				continue;
 			memset(str, 0, sizeof(str));
 			p = line;
 			while( ISSPACE(*p) )
 				++p;
 			if( *p == '\0' )
-				continue; // empty line
-			for( k = 0; k < 20; ++k )
-			{
+				continue; // Empty line
+			for( k = 0; k < 20; ++k ) {
 				str[k] = p;
 				p = strchr(p,',');
 				if( p == NULL )
-					break; // comma not found
+					break; // Comma not found
 				*p = '\0';
 				++p;
 			}
 
-			if( p == NULL )
-			{
+			if( p == NULL ) {
 				ShowError("read_petdb: Insufficient columns in line %d, skipping.\n", lines);
 				continue;
 			}
 
 			// Pet Script
-			if( *p != '{' )
-			{
+			if( *p != '{' ) {
 				ShowError("read_petdb: Invalid format (Pet Script column) in line %d, skipping.\n", lines);
 				continue;
 			}
 
 			str[20] = p;
-			p = strstr(p+1,"},");
-			if( p == NULL )
-			{
+			p = strstr(p + 1,"},");
+			if( p == NULL ) {
 				ShowError("read_petdb: Invalid format (Pet Script column) in line %d, skipping.\n", lines);
 				continue;
 			}
@@ -1279,8 +1277,7 @@ int read_petdb()
 			p += 2;
 
 			// Equip Script
-			if( *p != '{' )
-			{
+			if( *p != '{' ) {
 				ShowError("read_petdb: Invalid format (Equip Script column) in line %d, skipping.\n", lines);
 				continue;
 			}
@@ -1289,8 +1286,7 @@ int read_petdb()
 			if( (nameid = atoi(str[0])) <= 0 )
 				continue;
 
-			if( !mobdb_checkid(nameid) )
-			{
+			if( !mobdb_checkid(nameid) ) {
 				ShowWarning("pet_db reading: Invalid mob-class %d, pet not read.\n", nameid);
 				continue;
 			}
@@ -1298,25 +1294,25 @@ int read_petdb()
 			pet_db[j].class_ = nameid;
 			safestrncpy(pet_db[j].name,str[1],NAME_LENGTH);
 			safestrncpy(pet_db[j].jname,str[2],NAME_LENGTH);
-			pet_db[j].itemID=atoi(str[3]);
-			pet_db[j].EggID=atoi(str[4]);
-			pet_db[j].AcceID=atoi(str[5]);
-			pet_db[j].FoodID=atoi(str[6]);
-			pet_db[j].fullness=atoi(str[7]);
-			pet_db[j].hungry_delay=atoi(str[8])*1000;
-			pet_db[j].r_hungry=atoi(str[9]);
+			pet_db[j].itemID = atoi(str[3]);
+			pet_db[j].EggID = atoi(str[4]);
+			pet_db[j].AcceID = atoi(str[5]);
+			pet_db[j].FoodID = atoi(str[6]);
+			pet_db[j].fullness = atoi(str[7]);
+			pet_db[j].hungry_delay = atoi(str[8]) * 1000;
+			pet_db[j].r_hungry = atoi(str[9]);
 			if( pet_db[j].r_hungry <= 0 )
-				pet_db[j].r_hungry=1;
-			pet_db[j].r_full=atoi(str[10]);
-			pet_db[j].intimate=atoi(str[11]);
-			pet_db[j].die=atoi(str[12]);
-			pet_db[j].capture=atoi(str[13]);
-			pet_db[j].speed=atoi(str[14]);
-			pet_db[j].s_perfor=(char)atoi(str[15]);
-			pet_db[j].talk_convert_class=atoi(str[16]);
-			pet_db[j].attack_rate=atoi(str[17]);
-			pet_db[j].defence_attack_rate=atoi(str[18]);
-			pet_db[j].change_target_rate=atoi(str[19]);
+				pet_db[j].r_hungry = 1;
+			pet_db[j].r_full = atoi(str[10]);
+			pet_db[j].intimate = atoi(str[11]);
+			pet_db[j].die = atoi(str[12]);
+			pet_db[j].capture = atoi(str[13]);
+			pet_db[j].speed = atoi(str[14]);
+			pet_db[j].s_perfor = (char)atoi(str[15]);
+			pet_db[j].talk_convert_class = atoi(str[16]);
+			pet_db[j].attack_rate = atoi(str[17]);
+			pet_db[j].defence_attack_rate = atoi(str[18]);
+			pet_db[j].change_target_rate = atoi(str[19]);
 			pet_db[j].pet_script = NULL;
 			pet_db[j].equip_script = NULL;
 
@@ -1334,13 +1330,12 @@ int read_petdb()
 		fclose(fp);
 		ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' pets in '"CL_WHITE"%s"CL_RESET"'.\n", entries, filename[i]);
 	}
-	return 0;
 }
 
 /*==========================================
  * Initialization process relationship skills
  *------------------------------------------*/
-int do_init_pet(void)
+void do_init_pet(void)
 {
 	read_petdb();
 
@@ -1355,27 +1350,22 @@ int do_init_pet(void)
 	add_timer_func_list(pet_recovery_timer,"pet_recovery_timer"); // [Valaris]
 	add_timer_func_list(pet_heal_timer,"pet_heal_timer"); // [Valaris]
 	add_timer_interval(gettick()+MIN_PETTHINKTIME,pet_ai_hard,0,0,MIN_PETTHINKTIME);
-
-	return 0;
 }
 
-int do_final_pet(void)
+void do_final_pet(void)
 {
 	int i;
-	for( i = 0; i < MAX_PET_DB; i++ )
-	{
-		if( pet_db[i].pet_script )
-		{
+
+	for( i = 0; i < MAX_PET_DB; i++ ) {
+		if( pet_db[i].pet_script ) {
 			script_free_code(pet_db[i].pet_script);
 			pet_db[i].pet_script = NULL;
 		}
-		if( pet_db[i].equip_script )
-		{
+		if( pet_db[i].equip_script ) {
 			script_free_code(pet_db[i].equip_script);
 			pet_db[i].equip_script = NULL;
 		}
 	}
 	ers_destroy(item_drop_ers);
 	ers_destroy(item_drop_list_ers);
-	return 0;
 }

@@ -6,10 +6,10 @@
 #include "../common/strlib.h"
 #include "../common/nullpo.h"
 #include "../common/showmsg.h"
+#include "map.h"
 #include "battle.h"
 #include "itemdb.h"
 #include "log.h"
-#include "map.h"
 #include "mob.h"
 #include "pc.h"
 
@@ -114,7 +114,7 @@ static char log_cashtype2char( e_log_cash_type type )
 }
 
 
-/// check if this item should be logged according the settings
+/// Check if this item should be logged according the settings
 static bool should_log_item(int nameid, int amount, int refine)
 {
 	int filter = log_config.filter;
@@ -235,7 +235,7 @@ void log_pick_pc(struct map_session_data* sd, e_log_pick_type type, int amount, 
 void log_pick_mob(struct mob_data* md, e_log_pick_type type, int amount, struct item* itm)
 {
 	nullpo_retv(md);
-	log_pick(md->class_, md->bl.m, type, amount, itm);
+	log_pick(md->mob_id, md->bl.m, type, amount, itm);
 }
 
 /// logs zeny transactions
@@ -516,7 +516,7 @@ int log_config_read(const char* cfgName)
 		if( line[0] == '/' && line[1] == '/' )
 			continue;
 
-		if( sscanf(line, "%[^:]: %[^\r\n]", w1, w2) == 2 ) {
+		if( sscanf(line, "%1023[^:]: %1023[^\r\n]", w1, w2) == 2 ) {
 			if( strcmpi(w1, "enable_logs") == 0 )
 				log_config.enable_logs = (e_log_pick_type)config_switch(w2);
 			else if( strcmpi(w1, "sql_logs") == 0 )

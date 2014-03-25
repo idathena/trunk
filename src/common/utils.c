@@ -257,7 +257,7 @@ uint32 MakeDWord(uint16 word0, uint16 word1)
 		( (uint32)(word1 << 0x10) );
 }
 
-int date2version(int date) {
+uint32 date2version(int date) {
 	if( date < 20040906 ) return 5;
 	else if( date < 20040920 ) return 10;
 	else if( date < 20041005 ) return 11;
@@ -272,7 +272,7 @@ int date2version(int date) {
 	else if( date < 20070108 ) return 20;
 	else if( date < 20070212 ) return 21;
 	//WTF @FIXME
-	else if( date < 20080910 ) return 22;
+	//else if( date < 20080910 ) return 22;
 	else if( date < 20080827 ) return 23;
 	else if( date < 20080910 ) return 24;
 	//Unable to solve from date
@@ -296,11 +296,12 @@ int date2version(int date) {
 	else if( date < 20130710 ) return 42;
 	else if( date < 20130717 ) return 43;
 	else if( date < 20130807 ) return 44;
-	else if( date >= 20130807 ) return 45;
-	else return 30; //default
+	else if( date < 20131223 ) return 45;
+	else if( date >= 20131223 ) return 46;
+	else return 30; //Default
 }
 
-/// calculates the value of A / B, in percent (rounded down)
+/// Calculates the value of A / B, in percent (rounded down)
 unsigned int get_percentage(const unsigned int A, const unsigned int B)
 {
 	double result;
@@ -318,4 +319,30 @@ unsigned int get_percentage(const unsigned int A, const unsigned int B)
 	}
 
 	return (unsigned int)floor(result);
+}
+
+/**
+ * Calculates the Levenshtein distance of two strings.
+ * @author http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C
+ */
+int levenshtein(const char *s1, const char *s2) {
+	unsigned int s1len, s2len, x, y, lastdiag, olddiag, i;
+	unsigned int *column;
+
+	s1len = strlen(s1);
+	s2len = strlen(s2);
+	column = malloc((s1len + 1) * sizeof(unsigned int));
+	for (y = 1; y <= s1len; y++)
+		column[y] = y;
+	for (x = 1; x <= s2len; x++) {
+		column[0] = x;
+		for (y = 1, lastdiag = x - 1; y <= s1len; y++) {
+			olddiag = column[y];
+			column[y] = min(min(column[y] + 1, column[y - 1] + 1), lastdiag + (s1[y - 1] == s2[x - 1] ? 0 : 1));
+			lastdiag = olddiag;
+		}
+	}
+	i = column[s1len];
+	free(column);
+	return i;
 }

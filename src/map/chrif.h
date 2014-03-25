@@ -11,7 +11,7 @@ enum sd_state { ST_LOGIN, ST_LOGOUT, ST_MAPCHANGE };
 struct auth_node {
 	int account_id, char_id;
 	int login_id1, login_id2, sex, fd;
-	time_t expiration_time; // # of seconds 1/1/1970 (timestamp): Validity limit of the account (0 = unlimited)
+	time_t expiration_time; //# of seconds 1/1/1970 (timestamp): Validity limit of the account (0 = unlimited)
 	struct map_session_data *sd;	//Data from logged on char.
 	struct mmo_charstatus *char_dat;	//Data from char server.
 	unsigned int node_created; //timestamp for node timeouts
@@ -35,19 +35,20 @@ struct auth_node* chrif_auth_check(int account_id, int char_id, enum sd_state st
 bool chrif_auth_delete(int account_id, int char_id, enum sd_state state);
 bool chrif_auth_finished(struct map_session_data* sd);
 
-void chrif_authreq(struct map_session_data* sd);
+void chrif_authreq(struct map_session_data* sd, bool autotrade);
 void chrif_authok(int fd);
 int chrif_scdata_request(int account_id, int char_id);
 int chrif_skillcooldown_request(int account_id, int char_id);
 int chrif_skillcooldown_save(struct map_session_data *sd);
 int chrif_skillcooldown_load(int fd);
+
 int chrif_save(struct map_session_data* sd, int flag);
 int chrif_charselectreq(struct map_session_data* sd, uint32 s_ip);
 int chrif_changemapserver(struct map_session_data* sd, uint32 ip, uint16 port);
 
 int chrif_searchcharid(int char_id);
 int chrif_changeemail(int id, const char *actual_email, const char *new_email);
-int chrif_char_ask_name(int acc, const char* character_name, unsigned short operation_type, int year, int month, int day, int hour, int minute, int second);
+int chrif_req_login_operation(int aid, const char* character_name, unsigned short operation_type, int timediff, int val1, int val2);
 int chrif_updatefamelist(struct map_session_data *sd);
 int chrif_buildfamelist(void);
 int chrif_save_scdata(struct map_session_data *sd);
@@ -63,8 +64,19 @@ int chrif_divorce(int partner_id1, int partner_id2);
 int chrif_removefriend(int char_id, int friend_id);
 int chrif_send_report(char* buf, int len);
 
-int do_final_chrif(void);
-int do_init_chrif(void);
+void chrif_parse_ack_vipActive(int fd);
+
+int chrif_req_charban(int aid, const char* character_name, int timediff);
+int chrif_req_charunban(int cid);
+
+int chrif_load_bankdata(int fd);
+
+int chrif_bsdata_request(int char_id);
+int chrif_save_bsdata(struct map_session_data *sd);
+int chrif_load_bsdata(int fd);
+
+void do_final_chrif(void);
+void do_init_chrif(void);
 
 int chrif_flush_fifo(void);
 

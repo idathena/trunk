@@ -10,8 +10,7 @@
 
 /**
  * Default Magical Reflection Behavior
- * - When reflecting, reflected damage depends on gears caster is wearing, not target
- * - When disabled damage depends on gears target is wearing, not caster.
+ * - When reflecting, reflected damage also affected by caster's gears
  * @values 1 (enabled) or 0 (disabled)
  **/
 #define MAGIC_REFLECTION_TYPE 1

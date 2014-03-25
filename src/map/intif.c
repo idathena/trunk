@@ -350,9 +350,9 @@ int intif_request_registry(struct map_session_data *sd, int flag)
 	WFIFOW(inter_fd,0) = 0x3005;
 	WFIFOL(inter_fd,2) = sd->status.account_id;
 	WFIFOL(inter_fd,6) = sd->status.char_id;
-	WFIFOB(inter_fd,10) = (flag&1?1:0); //Request Acc Reg 2
-	WFIFOB(inter_fd,11) = (flag&2?1:0); //Request Acc Reg
-	WFIFOB(inter_fd,12) = (flag&4?1:0); //Request Char Reg
+	WFIFOB(inter_fd,10) = (flag&1 ? 1 : 0); //Request Acc Reg 2
+	WFIFOB(inter_fd,11) = (flag&2 ? 1 : 0); //Request Acc Reg
+	WFIFOB(inter_fd,12) = (flag&4 ? 1 : 0); //Request Char Reg
 	WFIFOSET(inter_fd,13);
 
 	return 0;
@@ -937,20 +937,18 @@ int mapif_parse_WisToGM(int fd)
 {
 	int permission, mes_len;
 	char Wisp_name[NAME_LENGTH];
-	char mbuf[255];
 	char *message;
 
 	mes_len =  RFIFOW(fd,2) - 32;
-	message = (char *) (mes_len >= 255 ? (char *) aMalloc(mes_len) : mbuf);
+	message = (char *)aMalloc(mes_len);
 
 	permission = RFIFOL(fd,28);
 	safestrncpy(Wisp_name, (char*)RFIFOP(fd,4), NAME_LENGTH);
 	safestrncpy(message, (char*)RFIFOP(fd,32), mes_len);
-	// information is sent to all online GM
+	// Information is sent to all online GM
 	map_foreachpc(mapif_parse_WisToGM_sub, permission, Wisp_name, message, mes_len);
 
-	if (message != mbuf)
-		aFree(message);
+	aFree(message);
 	return 0;
 }
 
@@ -1306,12 +1304,12 @@ int intif_parse_RecvPetData(int fd)
 {
 	struct s_pet p;
 	int len;
-	len=RFIFOW(fd,2);
-	if(sizeof(struct s_pet)!=len-9) {
+
+	len = RFIFOW(fd,2);
+	if(sizeof(struct s_pet) != len - 9) {
 		if(battle_config.etc_log)
-			ShowError("intif: pet data: data size error %d %d\n",sizeof(struct s_pet),len-9);
-	}
-	else{
+			ShowError("intif: pet data: data size error %d %d\n",sizeof(struct s_pet),len - 9);
+	} else {
 		memcpy(&p,RFIFOP(fd,9),sizeof(struct s_pet));
 		pet_recv_petdata(RFIFOL(fd,4),&p,RFIFOB(fd,8));
 	}
@@ -1341,19 +1339,20 @@ int intif_parse_DeletePetOk(int fd)
 int intif_parse_ChangeNameOk(int fd)
 {
 	struct map_session_data *sd = NULL;
-	if((sd=map_id2sd(RFIFOL(fd,2)))==NULL ||
+
+	if((sd = map_id2sd(RFIFOL(fd,2))) == NULL ||
 		sd->status.char_id != RFIFOL(fd,6))
 		return 0;
 
-	switch (RFIFOB(fd,10)) {
-	case 0: //Players [NOT SUPPORTED YET]
-		break;
-	case 1: //Pets
-		pet_change_name_ack(sd, (char*)RFIFOP(fd,12), RFIFOB(fd,11));
-		break;
-	case 2: //Hom
-		merc_hom_change_name_ack(sd, (char*)RFIFOP(fd,12), RFIFOB(fd,11));
-		break;
+	switch(RFIFOB(fd,10)) {
+		case 0: //Players [NOT SUPPORTED YET]
+			break;
+		case 1: //Pets
+			pet_change_name_ack(sd, (char*)RFIFOP(fd,12), RFIFOB(fd,11));
+			break;
+		case 2: //Hom
+			hom_change_name_ack(sd, (char*)RFIFOP(fd,12), RFIFOB(fd,11));
+			break;
 	}
 	return 0;
 }
@@ -1364,13 +1363,14 @@ int intif_parse_ChangeNameOk(int fd)
 int intif_parse_CreateHomunculus(int fd)
 {
 	int len;
-	len=RFIFOW(fd,2)-9;
-	if(sizeof(struct s_homunculus)!=len) {
+
+	len = RFIFOW(fd,2) - 9;
+	if(sizeof(struct s_homunculus) != len) {
 		if(battle_config.etc_log)
-			ShowError("intif: create homun data: data size error %d != %d\n",sizeof(struct s_homunculus),len);
+			ShowError("intif: create homun data: data size error %d != %d\n", sizeof(struct s_homunculus), len);
 		return 0;
 	}
-	merc_hom_recv_data(RFIFOL(fd,4), (struct s_homunculus*)RFIFOP(fd,9), RFIFOB(fd,8)) ;
+	hom_recv_data(RFIFOL(fd,4), (struct s_homunculus*)RFIFOP(fd,9), RFIFOB(fd,8)) ;
 	return 0;
 }
 
@@ -1378,14 +1378,14 @@ int intif_parse_RecvHomunculusData(int fd)
 {
 	int len;
 
-	len=RFIFOW(fd,2)-9;
+	len = RFIFOW(fd,2) - 9;
 
 	if(sizeof(struct s_homunculus)!=len) {
 		if(battle_config.etc_log)
-			ShowError("intif: homun data: data size error %d %d\n",sizeof(struct s_homunculus),len);
+			ShowError("intif: homun data: data size error %d %d\n", sizeof(struct s_homunculus), len);
 		return 0;
 	}
-	merc_hom_recv_data(RFIFOL(fd,4), (struct s_homunculus*)RFIFOP(fd,9), RFIFOB(fd,8));
+	hom_recv_data(RFIFOL(fd,4), (struct s_homunculus*)RFIFOP(fd,9), RFIFOB(fd,8));
 	return 0;
 }
 
@@ -1393,7 +1393,6 @@ int intif_parse_SaveHomunculusOk(int fd)
 {
 	if(RFIFOB(fd,6) != 1)
 		ShowError("homunculus data save failure for account %d\n", RFIFOL(fd,2));
-
 	return 0;
 }
 
@@ -1401,7 +1400,6 @@ int intif_parse_DeleteHomunculusOk(int fd)
 {
 	if(RFIFOB(fd,2) != 1)
 		ShowError("Homunculus data delete failure\n");
-
 	return 0;
 }
 
@@ -1411,82 +1409,104 @@ QUESTLOG SYSTEM FUNCTIONS
 
 ***************************************/
 
-int intif_request_questlog(TBL_PC *sd)
+/**
+ * Requests a character's quest log entries to the inter server.
+ *
+ * @param sd Character's data
+ */
+void intif_request_questlog(TBL_PC *sd)
 {
 	WFIFOHEAD(inter_fd,6);
 	WFIFOW(inter_fd,0) = 0x3060;
 	WFIFOL(inter_fd,2) = sd->status.char_id;
 	WFIFOSET(inter_fd,6);
-	return 0;
 }
 
-int intif_parse_questlog(int fd)
+void intif_parse_questlog(int fd)
 {
-	int char_id = RFIFOL(fd, 4);
-	int i;
-	TBL_PC * sd = map_charid2sd(char_id);
+	int char_id = RFIFOL(fd,4), num_received = (RFIFOW(fd,2) - 8) / sizeof(struct quest);
+	TBL_PC *sd = map_charid2sd(char_id);
 
 	//User not online anymore
 	if(!sd)
-		return -1;
+		return;
 
-	sd->avail_quests = sd->num_quests = (RFIFOW(fd, 2)-8)/sizeof(struct quest);
+	sd->num_quests = sd->avail_quests = 0;
 
-	memset(&sd->quest_log, 0, sizeof(sd->quest_log));
-
-	for( i = 0; i < sd->num_quests; i++ )
-	{
-		memcpy(&sd->quest_log[i], RFIFOP(fd, i*sizeof(struct quest)+8), sizeof(struct quest));
-
-		sd->quest_index[i] = quest_search_db(sd->quest_log[i].quest_id);
-
-		if( sd->quest_index[i] < 0 )
-		{
-			ShowError("intif_parse_questlog: quest %d not found in DB.\n",sd->quest_log[i].quest_id);
-			sd->avail_quests--;
-			sd->num_quests--;
-			i--;
-			continue;
+	if(num_received == 0) {
+		if(sd->quest_log) {
+			aFree(sd->quest_log);
+			sd->quest_log = NULL;
 		}
+	} else {
+		struct quest *received = (struct quest *)RFIFOP(fd,8);
+		int i, k = num_received;
 
-		if( sd->quest_log[i].state == Q_COMPLETE )
-			sd->avail_quests--;
+		if(sd->quest_log)
+			RECREATE(sd->quest_log, struct quest, num_received);
+		else
+			CREATE(sd->quest_log, struct quest, num_received);
+
+		for(i = 0; i < num_received; i++) {
+			if(quest_db(received[i].quest_id) == &quest_dummy) {
+				ShowError("intif_parse_QuestLog: quest %d not found in DB.\n", received[i].quest_id);
+				continue;
+			}
+			if(received[i].state != Q_COMPLETE) //Insert at the beginning
+				memcpy(&sd->quest_log[sd->avail_quests++], &received[i], sizeof(struct quest));
+			else //Insert at the end
+				memcpy(&sd->quest_log[--k], &received[i], sizeof(struct quest));
+			sd->num_quests++;
+		}
+		if(sd->avail_quests < k) {
+			//sd->avail_quests and k didn't meet in the middle: some entries were skipped
+			if(k < num_received) //Move the entries at the end to fill the gap
+				memmove(&sd->quest_log[k], &sd->quest_log[sd->avail_quests], sizeof(struct quest) * (num_received - k));
+			sd->quest_log = aRealloc(sd->quest_log, sizeof(struct quest) * sd->num_quests);
+		}
 	}
 
 	quest_pc_login(sd);
-
-	return 0;
 }
 
-int intif_parse_questsave(int fd)
+/**
+ * Parses the quest log save ack for a character from the inter server.
+ *
+ * Received in reply to the requests made by intif_quest_save.
+ *
+ * @see intif_parse
+ */
+void intif_parse_questsave(int fd)
 {
 	int cid = RFIFOL(fd, 2);
 	TBL_PC *sd = map_id2sd(cid);
 
-	if( !RFIFOB(fd, 6) )
+	if(!RFIFOB(fd,6))
 		ShowError("intif_parse_questsave: Failed to save quest(s) for character %d!\n", cid);
-	else if( sd )
+	else if(sd)
 		sd->save_quest = false;
-
-	return 0;
 }
 
+/**
+ * Requests to the inter server to save a character's quest log entries.
+ *
+ * @param sd Character's data
+ * @return 0 in case of success, nonzero otherwise
+ */
 int intif_quest_save(TBL_PC *sd)
 {
-	int len;
+	int len = sizeof(struct quest) * sd->num_quests + 8;
 
 	if(CheckForCharServer())
-		return 0;
-
-	len = sizeof(struct quest)*sd->num_quests + 8;
+		return 1;
 
 	WFIFOHEAD(inter_fd, len);
 	WFIFOW(inter_fd,0) = 0x3061;
 	WFIFOW(inter_fd,2) = len;
 	WFIFOL(inter_fd,4) = sd->status.char_id;
-	if( sd->num_quests )
-		memcpy(WFIFOP(inter_fd,8), &sd->quest_log, sizeof(struct quest)*sd->num_quests);
-	WFIFOSET(inter_fd,  len);
+	if(sd->num_quests)
+		memcpy(WFIFOP(inter_fd,8), sd->quest_log, sizeof(struct quest) * sd->num_quests);
+	WFIFOSET(inter_fd,len);
 
 	return 0;
 }
@@ -1723,8 +1743,7 @@ static void intif_parse_Mail_send(int fd)
 	struct map_session_data *sd;
 	bool fail;
 
-	if( RFIFOW(fd,2) - 4 != sizeof(struct mail_message) )
-	{
+	if( RFIFOW(fd,2) - 4 != sizeof(struct mail_message) ) {
 		ShowError("intif_parse_Mail_send: data size error %d %d\n", RFIFOW(fd,2) - 4, sizeof(struct mail_message));
 		return;
 	}
@@ -1734,12 +1753,10 @@ static void intif_parse_Mail_send(int fd)
 
 	// notify sender
 	sd = map_charid2sd(msg.send_id);
-	if( sd != NULL )
-	{
+	if( sd != NULL ) {
 		if( fail )
 			mail_deliveryfail(sd, &msg);
-		else
-		{
+		else {
 			clif_Mail_send(sd->fd, false);
 			if( save_settings&16 )
 				chrif_save(sd, 0);
@@ -1819,8 +1836,7 @@ static void intif_parse_Auction_register(int fd)
 	struct map_session_data *sd;
 	struct auction_data auction;
 
-	if( RFIFOW(fd,2) - 4 != sizeof(struct auction_data) )
-	{
+	if( RFIFOW(fd,2) - 4 != sizeof(struct auction_data) ) {
 		ShowError("intif_parse_Auction_register: data size error %d %d\n", RFIFOW(fd,2) - 4, sizeof(struct auction_data));
 		return;
 	}
@@ -1829,15 +1845,12 @@ static void intif_parse_Auction_register(int fd)
 	if( (sd = map_charid2sd(auction.seller_id)) == NULL )
 		return;
 
-	if( auction.auction_id > 0 )
-	{
+	if( auction.auction_id > 0 ) {
 		clif_Auction_message(sd->fd, 1); // Confirmation Packet ??
 		if( save_settings&32 )
 			chrif_save(sd,0);
-	}
-	else
-	{
-		int zeny = auction.hours*battle_config.auction_feeperhour;
+	} else {
+		int zeny = auction.hours * battle_config.auction_feeperhour;
 
 		clif_Auction_message(sd->fd, 4);
 		pc_additem(sd, &auction.item, auction.item.amount, LOG_TYPE_AUCTION);
@@ -1868,12 +1881,11 @@ static void intif_parse_Auction_cancel(int fd)
 	if( sd == NULL )
 		return;
 
-	switch( result )
-	{
-	case 0: clif_Auction_message(sd->fd, 2); break;
-	case 1: clif_Auction_close(sd->fd, 2); break;
-	case 2: clif_Auction_close(sd->fd, 1); break;
-	case 3: clif_Auction_message(sd->fd, 3); break;
+	switch( result ) {
+		case 0: clif_Auction_message(sd->fd, 2); break;
+		case 1: clif_Auction_close(sd->fd, 2); break;
+		case 2: clif_Auction_close(sd->fd, 1); break;
+		case 3: clif_Auction_message(sd->fd, 3); break;
 	}
 }
 
@@ -1900,8 +1912,7 @@ static void intif_parse_Auction_close(int fd)
 		return;
 
 	clif_Auction_close(sd->fd, result);
-	if( result == 0 )
-	{
+	if( result == 0 ) {
 		// FIXME: Leeching off a parse function
 		clif_parse_Auction_cancelreg(fd, sd);
 		intif_Auction_requestlist(sd->status.char_id, 6, 0, "", 1);
@@ -1938,11 +1949,8 @@ static void intif_parse_Auction_bid(int fd)
 
 	clif_Auction_message(sd->fd, result);
 	if( bid > 0 )
-	{
 		pc_getzeny(sd, bid, LOG_TYPE_AUCTION,NULL);
-	}
-	if( result == 1 )
-	{ // To update the list, display your buy list
+	if( result == 1 ) { // To update the list, display your buy list
 		clif_parse_Auction_cancelreg(fd, sd);
 		intif_Auction_requestlist(sd->status.char_id, 7, 0, "", 1);
 	}
@@ -1988,7 +1996,7 @@ int intif_parse_mercenary_received(int fd)
 		return 0;
 	}
 
-	merc_data_received((struct s_mercenary*)RFIFOP(fd,5), RFIFOB(fd,4));
+	mercenary_recv_data((struct s_mercenary*)RFIFOP(fd,5), RFIFOB(fd,4));
 	return 0;
 }
 
@@ -2136,7 +2144,7 @@ int intif_parse_elemental_saved(int fd)
 	return 0;
 }
 
-void intif_request_accinfo( int u_fd, int aid, int group_lv, char* query ) {
+void intif_request_accinfo(int u_fd, int aid, int group_lv, char* query) {
 
 	WFIFOHEAD(inter_fd,2 + 4 + 4 + 4 + NAME_LENGTH);
 
@@ -2199,12 +2207,11 @@ void intif_parse_itembound_ack(int fd) {
 int intif_parse(int fd)
 {
 	int packet_len, cmd;
+
 	cmd = RFIFOW(fd,0);
 	// Verify ID of the packet
-	if(cmd < 0x3800 || cmd >= 0x3800 + (sizeof(packet_len_table) / sizeof(packet_len_table[0])) ||
-	   packet_len_table[cmd - 0x3800] == 0) {
-	   	return 0;
-	}
+	if(cmd < 0x3800 || cmd >= 0x3800 + ARRAYLENGTH(packet_len_table) || packet_len_table[cmd - 0x3800] == 0)
+	   return 0;
 	// Check the length of the packet
 	packet_len = packet_len_table[cmd - 0x3800];
 	if(packet_len == -1) {
@@ -2212,9 +2219,8 @@ int intif_parse(int fd)
 			return 2;
 		packet_len = RFIFOW(fd,2);
 	}
-	if((int)RFIFOREST(fd) < packet_len) {
+	if((int)RFIFOREST(fd) < packet_len)
 		return 2;
-	}
 	// Processing branch
 	switch(cmd) {
 		case 0x3800:

@@ -21,6 +21,7 @@ struct status_change;
 	#define MAX_REFINE 10
 #endif
 
+// Refine type
 enum refine_type {
 	REFINE_TYPE_ARMOR	= 0,
 	REFINE_TYPE_WEAPON1	= 1,
@@ -30,6 +31,7 @@ enum refine_type {
 	REFINE_TYPE_MAX		= 5
 };
 
+// Get refine chance
 int status_get_refine_chance(enum refine_type wlv, int refine);
 
 // Status changes listing. These code are for use by the server.
@@ -600,7 +602,7 @@ typedef enum sc_type {
 	SC_WATER_INSIGNIA,
 	SC_WIND_INSIGNIA, //517
 	SC_EARTH_INSIGNIA,
-	/* new pushcart */
+	/* New pushcart */
 	SC_PUSH_CART,
 	/* Warlock Spell books */
 	SC_SPELLBOOK1,
@@ -649,10 +651,7 @@ typedef enum sc_type {
 	SC_PYROCLASTIC,
 	SC_PARALYSIS,
 	SC_PAIN_KILLER,
-
-#ifdef RENEWAL
 	SC_EXTREMITYFIST2,
-#endif
 
 	SC_DARKCROW,
 	SC_FULL_THROTTLE,
@@ -668,8 +667,8 @@ typedef enum sc_type {
 	SC_ANGEL_PROTECT,
 	SC_ILLUSIONDOPING,
 	SC_FLASHCOMBO,
-	SC_CHAOS,
-	SC_FEINT,
+	SC__CHAOS,
+	SC__FEINT,
 
 	//Vellum Weapon reductions
 	SC_DEFSET,
@@ -688,6 +687,23 @@ typedef enum sc_type {
 	SC_MOONSTAR,
 	SC_SUPER_STAR,
 
+	SC_HEAT_BARREL,
+	SC_HEAT_BARREL_AFTER,
+	SC_P_ALTER,
+	SC_E_CHAIN,
+	SC_C_MARKER,
+	SC_ANTI_M_BLAST,
+	SC_B_TRAP,
+	SC_H_MINE,
+	SC_QD_SHOT_READY,
+
+	SC_OKTOBERFEST,
+	SC_STRANGELIGHTS,
+	SC_DECORATION_OF_MUSIC,
+	SC_QUEST_BUFF1,
+	SC_QUEST_BUFF2,
+	SC_QUEST_BUFF3,
+	SC_TEARGAS_SOB,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 
@@ -736,14 +752,14 @@ enum si_type {
 	SI_ASPDPOTION2 = 39,
 	SI_ASPDPOTIONINFINITY = 40,
 	SI_SPEEDPOTION1		= 41,
-//	SI_MOVHASTE_INFINITY		= 42,
-//	SI_AUTOCOUNTER = 43,
-//	SI_SPLASHER = 44,
-//	SI_ANKLESNARE = 45,
+	//SI_MOVHASTE_INFINITY		= 42,
+	SI_AUTOCOUNTER = 43,
+	SI_SPLASHER = 44,
+	SI_ANKLESNARE = 45,
 	SI_ACTIONDELAY		= 46,
-//	SI_NOACTION = 47,
-//	SI_IMPOSSIBLEPICKUP = 48,
-//	SI_BARRIER = 49,
+	//SI_NOACTION = 47,
+	//SI_IMPOSSIBLEPICKUP = 48,
+	SI_BARRIER = 49,
 	SI_STRIPWEAPON		= 50,
 	SI_STRIPSHIELD		= 51,
 	SI_STRIPARMOR		= 52,
@@ -754,58 +770,58 @@ enum si_type {
 	SI_CP_HELM		= 57,
 	SI_AUTOGUARD		= 58,
 	SI_REFLECTSHIELD	= 59,
-//	SI_DEVOTION = 60,
+	SI_DEVOTION = 60,
 	SI_PROVIDENCE		= 61,
 	SI_DEFENDER		= 62,
-//	SI_MAGICROD = 63,
-//	SI_WEAPONPROPERTY = 64,
+	SI_MAGICROD = 63,
+	//SI_WEAPONPROPERTY = 64,
 	SI_AUTOSPELL		= 65,
-//	SI_SPECIALZONE = 66,
-//	SI_MASK = 67,
+	//SI_SPECIALZONE = 66,
+	//SI_MASK = 67,
 	SI_SPEARQUICKEN		= 68,
-//	SI_BDPLAYING = 69,
-//	SI_WHISTLE = 70,
-//	SI_ASSASSINCROSS = 71,
-//	SI_POEMBRAGI = 72,
-//	SI_APPLEIDUN = 73,
-//	SI_HUMMING = 74,
-//	SI_DONTFORGETME = 75,
-//	SI_FORTUNEKISS = 76,
-//	SI_SERVICEFORYOU = 77,
-//	SI_RICHMANKIM = 78,
-//	SI_ETERNALCHAOS = 79,
-//	SI_DRUMBATTLEFIELD = 80,
-//	SI_RINGNIBELUNGEN = 81,
-//	SI_ROKISWEIL = 82,
-//	SI_INTOABYSS = 83,
-//	SI_SIEGFRIED = 84,
-//	SI_BLADESTOP = 85,
+	SI_BDPLAYING = 69,
+	SI_WHISTLE = 70,
+	SI_ASSASSINCROSS = 71,
+	SI_POEMBRAGI = 72,
+	SI_APPLEIDUN = 73,
+	SI_HUMMING = 74,
+	SI_DONTFORGETME = 75,
+	SI_FORTUNEKISS = 76,
+	SI_SERVICEFORYOU = 77,
+	SI_RICHMANKIM = 78,
+	SI_ETERNALCHAOS = 79,
+	SI_DRUMBATTLEFIELD = 80,
+	SI_RINGNIBELUNGEN = 81,
+	SI_ROKISWEIL = 82,
+	SI_INTOABYSS = 83,
+	SI_SIEGFRIED = 84,
+	SI_BLADESTOP = 85,
 	SI_EXPLOSIONSPIRITS	= 86,
 	SI_STEELBODY		= 87,
 	SI_EXTREMITYFIST = 88,
-//	SI_COMBOATTACK = 89,
+	//SI_COMBOATTACK = 89,
 	SI_FIREWEAPON		= 90,
 	SI_WATERWEAPON		= 91,
 	SI_WINDWEAPON		= 92,
 	SI_EARTHWEAPON		= 93,
-//	SI_MAGICATTACK = 94,
+	//SI_MAGICATTACK = 94,
 	SI_STOP			= 95,
-//	SI_WEAPONBRAKER = 96,
+	//SI_WEAPONBRAKER = 96,
 	SI_UNDEAD		= 97,
-//	SI_POWERUP = 98,
-//	SI_AGIUP = 99,
-//	SI_SIEGEMODE = 100,
-//	SI_INVISIBLE = 101,
-//	SI_STATUSONE = 102,
+	//SI_POWERUP = 98,
+	//SI_AGIUP = 99,
+	//SI_SIEGEMODE = 100,
+	//SI_INVISIBLE = 101,
+	//SI_STATUSONE = 102,
 	SI_AURABLADE		= 103,
 	SI_PARRYING		= 104,
 	SI_CONCENTRATION	= 105,
 	SI_TENSIONRELAX		= 106,
 	SI_BERSERK		= 107,
-//	SI_SACRIFICE = 108,
-//	SI_GOSPEL = 109,
+	//SI_SACRIFICE = 108,
+	SI_GOSPEL = 109,
 	SI_ASSUMPTIO		= 110,
-//	SI_BASILICA = 111,
+	SI_BASILICA = 111,
 	SI_LANDENDOW		= 112,
 	SI_MAGICPOWER		= 113,
 	SI_EDP			= 114,
@@ -813,32 +829,32 @@ enum si_type {
 	SI_WINDWALK		= 116,
 	SI_MELTDOWN		= 117,
 	SI_CARTBOOST		= 118,
-//	SI_CHASEWALK = 119,
+	SI_CHASEWALK = 119,
 	SI_REJECTSWORD		= 120,
 	SI_MARIONETTE		= 121,
 	SI_MARIONETTE2		= 122,
 	SI_MOONLIT		= 123,
 	SI_BLEEDING		= 124,
 	SI_JOINTBEAT		= 125,
-//	SI_MINDBREAKER = 126,
-//	SI_MEMORIZE = 127,
-//	SI_FOGWALL = 128,
-//	SI_SPIDERWEB = 129,
+	SI_MINDBREAKER = 126,
+	SI_MEMORIZE = 127,
+	SI_FOGWALL = 128,
+	SI_SPIDERWEB = 129,
 	SI_BABY			= 130,
-//	SI_SUB_WEAPONPROPERTY = 131,
+	//SI_SUB_WEAPONPROPERTY = 131,
 	SI_AUTOBERSERK		= 132,
 	SI_RUN			= 133,
 	SI_BUMP			= 134,
 	SI_READYSTORM		= 135,
-//	SI_STORMKICK_READY = 136,
+	//SI_STORMKICK_READY = 136,
 	SI_READYDOWN		= 137,
-//	SI_DOWNKICK_READY = 138,
+	//SI_DOWNKICK_READY = 138,
 	SI_READYTURN		= 139,
-//	SI_TURNKICK_READY = 140,
+	//SI_TURNKICK_READY = 140,
 	SI_READYCOUNTER		= 141,
-//	SI_COUNTER_READY = 142,
+	//SI_COUNTER_READY = 142,
 	SI_DODGE		= 143,
-//	SI_DODGE_READY = 144,
+	//SI_DODGE_READY = 144,
 	SI_SPURT		= 145,
 	SI_SHADOWWEAPON		= 146,
 	SI_ADRENALINE2		= 147,
@@ -848,55 +864,55 @@ enum si_type {
 	SI_PLUSMAGICPOWER = 151,
 	SI_DEVIL		= 152,
 	SI_KAITE		= 153,
-//	SI_SWOO = 154,
-//	SI_STAR2 = 155,
+	SI_SWOO = 154,
+	//SI_STAR2 = 155,
 	SI_KAIZEL		= 156,
 	SI_KAAHI		= 157,
 	SI_KAUPE		= 158,
 	SI_SMA			= 159,
 	SI_NIGHT		= 160,
 	SI_ONEHAND		= 161,
-//	SI_FRIEND = 162,
-//	SI_FRIENDUP = 163,
-//	SI_SG_WARM = 164,
+	//SI_FRIEND = 162,
+	//SI_FRIENDUP = 163,
+	//SI_SG_WARM = 164,
 	SI_WARM			= 165,
-//	166 | The three show the exact same display: ultra red character (165, 166, 167)
-//	167 | Their names would be SI_SG_SUN_WARM, SI_SG_MOON_WARM, SI_SG_STAR_WARM
-//	SI_EMOTION = 168,
+	//166 | The three show the exact same display: ultra red character (165, 166, 167)
+	//167 | Their names would be SI_SG_SUN_WARM, SI_SG_MOON_WARM, SI_SG_STAR_WARM
+	//SI_EMOTION = 168,
 	SI_SUN_COMFORT		= 169,
 	SI_MOON_COMFORT		= 170,
 	SI_STAR_COMFORT		= 171,
-//	SI_EXPUP = 172,
-//	SI_GDSKILL_BATTLEORDER = 173,
-//	SI_GDSKILL_REGENERATION = 174,
-//	SI_GDSKILL_POSTDELAY = 175,
-//	SI_RESISTHANDICAP = 176,
-//	SI_MAXHPPERCENT = 177,
-//	SI_MAXSPPERCENT = 178,
-//	SI_DEFENCE = 179,
-//	SI_SLOWDOWN = 180,
+	//SI_EXPUP = 172,
+	SI_GDSKILL_BATTLEORDER = 173,
+	SI_GDSKILL_REGENERATION = 174,
+	//SI_GDSKILL_POSTDELAY = 175,
+	//SI_RESISTHANDICAP = 176,
+	//SI_MAXHPPERCENT = 177,
+	//SI_MAXSPPERCENT = 178,
+	//SI_DEFENCE = 179,
+	//SI_SLOWDOWN = 180,
 	SI_PRESERVE		= 181,
 	SI_INCSTR		= 182,
-//	SI_NOT_EXTREMITYFIST = 183,
+	//SI_NOT_EXTREMITYFIST = 183,
 	SI_INTRAVISION		= 184,
-//	SI_MOVESLOW_POTION = 185,
+	//SI_MOVESLOW_POTION = 185,
 	SI_DOUBLECAST		= 186,
-//	SI_GRAVITATION = 187,
+	SI_GRAVITATION = 187,
 	SI_MAXOVERTHRUST	= 188,
-//	SI_LONGING = 189,
-//	SI_HERMODE = 190,
+	SI_LONGING = 189,
+	SI_HERMODE = 190,
 	SI_TAROT		= 191, // the icon allows no doubt... but what is it really used for ?? [DracoRPG]
-//	SI_HLIF_AVOID = 192,
-//	SI_HFLI_FLEET = 193,
-//	SI_HFLI_SPEED = 194,
-//	SI_HLIF_CHANGE = 195,
-//	SI_HAMI_BLOODLUST = 196,
+	//SI_HLIF_AVOID = 192,
+	//SI_HFLI_FLEET = 193,
+	//SI_HFLI_SPEED = 194,
+	//SI_HLIF_CHANGE = 195,
+	//SI_HAMI_BLOODLUST = 196,
 	SI_SHRINK		= 197,
 	SI_SIGHTBLASTER		= 198,
 	SI_WINKCHARM		= 199,
 	SI_CLOSECONFINE		= 200,
 	SI_CLOSECONFINE2	= 201,
-//	SI_DISABLEMOVE = 202,
+	//SI_DISABLEMOVE = 202,
 	SI_MADNESSCANCEL	= 203,	//[blackhole89]
 	SI_GATLINGFEVER		= 204,
 	SI_EARTHSCROLL = 205,
@@ -905,36 +921,36 @@ enum si_type {
 	SI_NEN			= 208,
 	SI_ADJUSTMENT		= 209,
 	SI_ACCURACY		= 210,
-//	SI_NJ_SUITON = 211,
-//	SI_PET = 212,
-//	SI_MENTAL = 213,
-//	SI_EXPMEMORY = 214,
-//	SI_PERFORMANCE = 215,
-//	SI_GAIN = 216,
-//	SI_GRIFFON = 217,
-//	SI_DRIFT = 218,
-//	SI_WALLSHIFT = 219,
-//	SI_REINCARNATION = 220,
-//	SI_PATTACK = 221,
-//	SI_PSPEED = 222,
-//	SI_PDEFENSE = 223,
-//	SI_PCRITICAL = 224,
-//	SI_RANKING = 225,
-//	SI_PTRIPLE = 226,
-//	SI_DENERGY = 227,
-//	SI_WAVE1 = 228,
-//	SI_WAVE2 = 229,
-//	SI_WAVE3 = 230,
-//	SI_WAVE4 = 231,
-//	SI_DAURA = 232,
-//	SI_DFREEZER = 233,
-//	SI_DPUNISH = 234,
-//	SI_DBARRIER = 235,
-//	SI_DWARNING = 236,
-//	SI_MOUSEWHEEL = 237,
-//	SI_DGAUGE = 238,
-//	SI_DACCEL = 239,
-//	SI_DBLOCK = 240,
+	//SI_NJ_SUITON = 211,
+	//SI_PET = 212,
+	//SI_MENTAL = 213,
+	//SI_EXPMEMORY = 214,
+	//SI_PERFORMANCE = 215,
+	//SI_GAIN = 216,
+	//SI_GRIFFON = 217,
+	//SI_DRIFT = 218,
+	//SI_WALLSHIFT = 219,
+	//SI_REINCARNATION = 220,
+	//SI_PATTACK = 221,
+	//SI_PSPEED = 222,
+	//SI_PDEFENSE = 223,
+	//SI_PCRITICAL = 224,
+	//SI_RANKING = 225,
+	//SI_PTRIPLE = 226,
+	//SI_DENERGY = 227,
+	//SI_WAVE1 = 228,
+	//SI_WAVE2 = 229,
+	//SI_WAVE3 = 230,
+	//SI_WAVE4 = 231,
+	//SI_DAURA = 232,
+	//SI_DFREEZER = 233,
+	//SI_DPUNISH = 234,
+	//SI_DBARRIER = 235,
+	//SI_DWARNING = 236,
+	//SI_MOUSEWHEEL = 237,
+	//SI_DGAUGE = 238,
+	//SI_DACCEL = 239,
+	//SI_DBLOCK = 240,
 	SI_FOODSTR		= 241,
 	SI_FOODAGI		= 242,
 	SI_FOODVIT		= 243,
@@ -948,23 +964,23 @@ enum si_type {
 	SI_LIFEINSURANCE	= 251,
 	SI_ITEMBOOST		= 252,
 	SI_BOSSMAPINFO		= 253,
-//	SI_DA_ENERGY = 254,
-//	SI_DA_FIRSTSLOT = 255,
-//	SI_DA_HEADDEF = 256,
-//	SI_DA_SPACE = 257,
-//	SI_DA_TRANSFORM = 258,
-//	SI_DA_ITEMREBUILD = 259,
-//	SI_DA_ILLUSION = 260, //All mobs display as Turtle General
-//	SI_DA_DARKPOWER = 261,
-//	SI_DA_EARPLUG = 262,
-//	SI_DA_CONTRACT = 263, //Bio Mob effect on you and SI_TRICKDEAD icon
-//	SI_DA_BLACK = 264, //For short time blurry screen
-//	SI_DA_MAGICCART = 265,
-//	SI_CRYSTAL = 266,
-//	SI_DA_REBUILD = 267,
-//	SI_DA_EDARKNESS = 268,
-//	SI_DA_EGUARDIAN = 269,
-//	SI_DA_TIMEOUT = 270,
+	//SI_DA_ENERGY = 254,
+	//SI_DA_FIRSTSLOT = 255,
+	//SI_DA_HEADDEF = 256,
+	//SI_DA_SPACE = 257,
+	//SI_DA_TRANSFORM = 258,
+	//SI_DA_ITEMREBUILD = 259,
+	//SI_DA_ILLUSION = 260, //All mobs display as Turtle General
+	//SI_DA_DARKPOWER = 261,
+	//SI_DA_EARPLUG = 262,
+	//SI_DA_CONTRACT = 263, //Bio Mob effect on you and SI_TRICKDEAD icon
+	//SI_DA_BLACK = 264, //For short time blurry screen
+	//SI_DA_MAGICCART = 265,
+	//SI_CRYSTAL = 266,
+	//SI_DA_REBUILD = 267,
+	//SI_DA_EDARKNESS = 268,
+	//SI_DA_EGUARDIAN = 269,
+	//SI_DA_TIMEOUT = 270,
 	SI_FOOD_STR_CASH = 271,
 	SI_FOOD_AGI_CASH = 272,
 	SI_FOOD_VIT_CASH = 273,
@@ -977,12 +993,12 @@ enum si_type {
 	SI_MERC_SPUP	= 280,
 	SI_MERC_HITUP	= 281,
 	SI_SLOWCAST		= 282,
-//	SI_MAGICMIRROR = 283,
-//	SI_STONESKIN = 284,
-//	SI_ANTIMAGIC = 285,
+	//SI_MAGICMIRROR = 283,
+	//SI_STONESKIN = 284,
+	//SI_ANTIMAGIC = 285,
 	SI_CRITICALWOUND	= 286,
-//	SI_NPC_DEFENDER = 287,
-//	SI_NOACTION_WAIT = 288,
+	//SI_NPC_DEFENDER = 287,
+	//SI_NOACTION_WAIT = 288,
 	SI_MOVHASTE_HORSE = 289,
 	SI_DEF_RATE		= 290,
 	SI_MDEF_RATE	= 291,
@@ -991,20 +1007,20 @@ enum si_type {
 	SI_L_LIFEPOTION = 294,
 	SI_INCCRI		= 295,
 	SI_PLUSAVOIDVALUE = 296,
-//	SI_ATKER_ASPD = 297,
-//	SI_TARGET_ASPD = 298,
-//	SI_ATKER_MOVESPEED = 299,
+	//SI_ATKER_ASPD = 297,
+	//SI_TARGET_ASPD = 298,
+	//SI_ATKER_MOVESPEED = 299,
 	SI_ATKER_BLOOD = 300,
 	SI_TARGET_BLOOD = 301,
 	SI_ARMOR_PROPERTY = 302,
-//	SI_REUSE_LIMIT_A = 303,
+	//SI_REUSE_LIMIT_A = 303,
 	SI_HELLPOWER = 304,
-//	SI_STEAMPACK = 305,
-//	SI_REUSE_LIMIT_B = 306,
-//	SI_REUSE_LIMIT_C = 307,
-//	SI_REUSE_LIMIT_D = 308,
-//	SI_REUSE_LIMIT_E = 309,
-//	SI_REUSE_LIMIT_F = 310,
+	SI_STEAMPACK = 305,
+	//SI_REUSE_LIMIT_B = 306,
+	//SI_REUSE_LIMIT_C = 307,
+	//SI_REUSE_LIMIT_D = 308,
+	//SI_REUSE_LIMIT_E = 309,
+	//SI_REUSE_LIMIT_F = 310,
 	SI_INVINCIBLE = 311,
 	SI_CASH_PLUSONLYJOBEXP = 312,
 	SI_PARTYFLEE = 313,
@@ -1155,7 +1171,7 @@ enum si_type {
 	SI_FREEZE_SP = 458,
 	SI_GN_TRAINING_SWORD = 459,
 	SI_GN_REMODELING_CART = 460,
-	SI_CARTSBOOST = 461,
+	SI_GN_CARTBOOST = 461,
 	SI_FIXEDCASTINGTM_REDUCE = 462,
 	SI_THORNTRAP = 463,
 	SI_BLOODSUCKER = 464,
@@ -1228,11 +1244,11 @@ enum si_type {
 	SI_STONE_SHIELD = 531,
 	SI_STONE_SHIELD_OPTION = 532,
 	SI_POWER_OF_GAIA = 533,
-	//	SI_EL_WAIT = 534,
-	//	SI_EL_PASSIVE = 535,
-	//	SI_EL_DEFENSIVE = 536,
-	//	SI_EL_OFFENSIVE = 537,
-	//	SI_EL_COST = 538,
+	//SI_EL_WAIT = 534,
+	//SI_EL_PASSIVE = 535,
+	//SI_EL_DEFENSIVE = 536,
+	//SI_EL_OFFENSIVE = 537,
+	//SI_EL_COST = 538,
 	SI_PYROTECHNIC = 539,
 	SI_PYROTECHNIC_OPTION = 540,
 	SI_HEATER = 541,
@@ -1280,7 +1296,7 @@ enum si_type {
 	SI_ODINS_POWER = 583,
 	SI_STYLE_CHANGE = 584,
 	SI_SONIC_CLAW_POSTDELAY = 585,
-	// ID's 586 - 595 Currently Unused
+	//ID's 586 - 595 Currently Unused
 	SI_SILVERVEIN_RUSH_POSTDELAY = 596,
 	SI_MIDNIGHT_FRENZY_POSTDELAY = 597,
 	SI_GOLDENE_FERSE = 598,
@@ -1465,6 +1481,43 @@ enum si_type {
 	SI_ZONGZI_POUCH_TRANS = 777,
 	SI_HEAT_BARREL_AFTER = 778,
 	SI_DECORATION_OF_MUSIC = 779,
+	SI_OVERSEAEXPUP = 780,
+	SI_CLOWN_N_GYPSY_CARD = 781,
+	SI_OPEN_NPC_MARKET = 782,
+	SI_BEEF_RIB_STEW = 783,
+	SI_PORK_RIB_STEW = 784,
+	SI_CHUSEOK_MONDAY = 785,
+	SI_CHUSEOK_TUESDAY = 786,
+	SI_CHUSEOK_WEDNESDAY = 787,
+	SI_CHUSEOK_THURSDAY = 788,
+	SI_CHUSEOK_FRIDAY = 789,
+	SI_CHUSEOK_WEEKEND = 790,
+	SI_ALL_LIGHTGUARD = 791,
+	SI_ALL_LIGHTGUARD_COOL_TIME = 792,
+	SI_MTF_MHP = 793,
+	SI_MTF_MSP = 794,
+	SI_MTF_PUMPKIN = 795,
+	SI_MTF_HITFLEE = 796,
+	SI_MTF_CRIDAMAGE2 = 797,
+	SI_MTF_SPDRAIN = 798,
+	SI_ACUO_MINT_GUM = 799,
+	SI_S_HEALPOTION = 800,
+	SI_REUSE_LIMIT_S_HEAL_POTION = 801,
+	SI_PLAYTIME_STATISTICS = 802,
+	SI_GN_CHANGEMATERIAL_OPERATOR = 803,
+	SI_GN_MIX_COOKING_OPERATOR = 804,
+	SI_GN_MAKEBOMB_OPERATOR = 805,
+	SI_GN_S_PHARMACY_OPERATOR = 806,
+	SI_SO_EL_ANALYSIS_DISASSEMBLY_OPERATOR = 807,
+	SI_SO_EL_ANALYSIS_COMBINATION_OPERATOR = 808,
+	SI_NC_MAGICDECOY_OPERATOR = 809,
+	SI_GUILD_STORAGE = 810,
+	SI_GC_POISONINGWEAPON_OPERATOR = 811,
+	SI_WS_WEAPONREFINE_OPERATOR = 812,
+	SI_BS_REPAIRWEAPON_OPERATOR = 813,
+	SI_GET_MAILBOX = 814,
+	SI_JUMPINGCLAN = 815,
+	SI_JP_OTP = 816,
 	SI_MAX,
 };
 
@@ -1514,25 +1567,25 @@ enum e_mode
 //Status change option definitions (options are what makes status changes visible to chars
 //who were not on your field of sight when it happened)
 
-//opt1: Non stackable status changes.
+//OPT1: (BODYSTATE_) Non stackable status changes.
 enum sc_opt1 {
 	OPT1_STONE = 1, //Petrified
 	OPT1_FREEZE,
 	OPT1_STUN,
 	OPT1_SLEEP,
-	//Aegis uses OPT1 = 5 to identify undead enemies (which also grants them immunity to the other opt1 changes)
+	//Aegis uses OPT1 = 5 to identify undead enemies (which also grants them immunity to the other OPT1 changes)
 	OPT1_STONEWAIT = 6, //Petrifying
 	OPT1_BURNING,
 	OPT1_IMPRISON,
 	OPT1_CRYSTALIZE,
 };
 
-//opt2: Stackable status changes.
+//OPT2: (HEALTHSTATE_) Stackable status changes.
 enum sc_opt2 {
 	OPT2_POISON		= 0x0001,
 	OPT2_CURSE		= 0x0002,
 	OPT2_SILENCE		= 0x0004,
-	OPT2_SIGNUMCRUCIS	= 0x0008,
+	OPT2_SIGNUMCRUCIS	= 0x0008, //Confusion
 	OPT2_BLIND		= 0x0010,
 	OPT2_ANGELUS		= 0x0020,
 	OPT2_BLEEDING		= 0x0040,
@@ -1540,7 +1593,7 @@ enum sc_opt2 {
 	OPT2_FEAR		= 0x0100,
 };
 
-//opt3: (SHOW_EFST_*)
+//OPT3: (SHOW_EFST_)
 enum sc_opt3 {
 	OPT3_NORMAL		= 0x00000000,
 	OPT3_QUICKEN		= 0x00000001,
@@ -1563,6 +1616,7 @@ enum sc_opt3 {
 	OPT3_CONTRACT		= 0x00020000,
 };
 
+//OPTION: (EFFECTSTATE_)
 enum e_option {
 	OPTION_NOTHING		= 0x00000000,
 	OPTION_SIGHT		= 0x00000001,
@@ -1575,7 +1629,7 @@ enum e_option {
 	OPTION_WEDDING		= 0x00001000,
 	OPTION_RUWACH		= 0x00002000,
 	OPTION_CHASEWALK	= 0x00004000,
-	OPTION_FLYING		= 0x00008000, //Note that clientside Flying and Xmas are 0x8000 for clients prior to 2007.
+	OPTION_FLYING		= 0x00008000, //NOTE: That clientside Flying and Xmas are 0x8000 for clients prior to 2007.
 	OPTION_XMAS		= 0x00010000,
 	OPTION_TRANSFORM	= 0x00020000,
 	OPTION_SUMMER		= 0x00040000,
@@ -1588,6 +1642,7 @@ enum e_option {
 	OPTION_DRAGON4		= 0x02000000,
 	OPTION_DRAGON5		= 0x04000000,
 	OPTION_HANBOK		= 0x08000000,
+	OPTION_OKTOBERFEST	= 0x10000000,
 
 #ifndef NEW_CARTS
 	OPTION_CART1	= 0x00000008,
@@ -1596,12 +1651,13 @@ enum e_option {
 	OPTION_CART4	= 0x00000200,
 	OPTION_CART5	= 0x00000400,
 
-	/*  Compound constant for older carts */
+	//Compound constant for older carts
 	OPTION_CART	= OPTION_CART1|OPTION_CART2|OPTION_CART3|OPTION_CART4|OPTION_CART5,
 #endif
 
 	//Compound constants
 	OPTION_DRAGON	= OPTION_DRAGON1|OPTION_DRAGON2|OPTION_DRAGON3|OPTION_DRAGON4|OPTION_DRAGON5,
+	OPTION_COSTUME	= OPTION_WEDDING|OPTION_XMAS|OPTION_SUMMER|OPTION_HANBOK|OPTION_OKTOBERFEST,
 };
 
 //Defines for the manner system [Skotlex]
@@ -1674,6 +1730,22 @@ enum e_status_calc_opt {
 	SCO_FORCE = 0x2, /* Only relevant to BL_PC types, ensures call bypasses the queue caused by delayed damage */
 };
 
+//Enum for bonus_script's flag
+enum e_bonus_script_flags {
+	BONUS_FLAG_REM_ON_DEAD = 0x01, //Remove bonus when dead
+	BONUS_FLAG_REM_ON_DISPELL = 0x02, //Removable by Dispell
+	BONUS_FLAG_REM_ON_CLEARANCE = 0x04, //Removable by Clearance
+	BONUS_FLAG_REM_ON_LOGOUT = 0x08, //Remove bonus when player logged out
+	BONUS_FLAG_REM_BUFF = 0x10, //Remove bonus when player logged out
+	BONUS_FLAG_REM_DEBUFF = 0x20, //Remove bonus when player logged out
+};
+
+//Enum for status_get_hpbonus and status_get_spbonus
+enum e_status_bonus {
+	STATUS_BONUS_FIX = 0,
+	STATUS_BONUS_RATE = 1,
+};
+
 //Define to determine who gets HP/SP consumed on doing skills/etc. [Skotlex]
 #define BL_CONSUME (BL_PC|BL_HOM|BL_MER|BL_ELEM)
 //Define to determine who has regen
@@ -1681,9 +1753,10 @@ enum e_status_calc_opt {
 //Define to determine who will receive a clif_status_change packet for effects that require one to display correctly
 #define BL_SCEFFECT (BL_PC|BL_HOM|BL_MER|BL_MOB|BL_ELEM)
 
-//Basic damage info of a weapon
-//Required because players have two of these, one in status_data
-//and another for their left hand weapon.
+/** Basic damage info of a weapon
+ * Required because players have two of these, one in status_data
+ * and another for their left hand weapon.
+ */
 struct weapon_atk {
 	unsigned short atk, atk2;
 	unsigned short range;
@@ -1694,21 +1767,21 @@ struct weapon_atk {
 #endif
 };
 
-sc_type SkillStatusChangeTable[MAX_SKILL];  //skill  -> status
-int StatusIconChangeTable[SC_MAX];          //status -> "icon" (icon is a bit of a misnomer, since there exist values with no icon associated)
-unsigned int StatusChangeFlagTable[SC_MAX]; //status -> flags
-int StatusSkillChangeTable[SC_MAX];         //status -> skill
-int StatusRelevantBLTypes[SI_MAX];          //"icon" -> enum bl_type (for clif->status_change to identify for which bl types to send packets)
-unsigned int StatusChangeStateTable[SC_MAX]; //status -> flags
+sc_type SkillStatusChangeTable[MAX_SKILL];   // skill  -> status
+int StatusIconChangeTable[SC_MAX];           // status -> "icon" (icon is a bit of a misnomer, since there exist values with no icon associated)
+unsigned int StatusChangeFlagTable[SC_MAX];  // status -> flags
+int StatusSkillChangeTable[SC_MAX];          // status -> skill
+int StatusRelevantBLTypes[SI_MAX];           // "icon" -> enum bl_type (for clif->status_change to identify for which bl types to send packets)
+unsigned int StatusChangeStateTable[SC_MAX]; // status -> flags
 bool StatusDisplayType[SC_MAX];
 
 //For holding basic status (which can be modified by status changes)
 struct status_data {
 	unsigned int
-		hp, sp,  // see status_cpy before adding members before hp and sp
+		hp, sp, // See status_cpy before adding members before hp and sp
 		max_hp, max_sp;
+	short str, agi, vit, int_, dex, luk;
 	unsigned short
-		str, agi, vit, int_, dex, luk,
 		batk,
 #ifdef RENEWAL
 		watk, watk2,
@@ -1725,14 +1798,15 @@ struct status_data {
 		aspd_rate2,
 #endif
 		aspd_rate;
-	/**
-	 * defType is RENEWAL dependent and defined in src/map/config/data/const.h
-	 **/
-		defType def,mdef;
+
+	//defType is RENEWAL dependent and defined in src/map/config/data/const.h
+	defType def, mdef;
 
 	unsigned char
 		def_ele, ele_lv,
-		size, race;
+		size,
+		race, //See enum e_race
+		class_; //See enum e_classAE
 
 	struct weapon_atk rhw, lhw; //Right Hand/Left Hand Weapon.
 };
@@ -1740,64 +1814,68 @@ struct status_data {
 //Additional regen data that only players have.
 struct regen_data_sub {
 	unsigned short
-		hp,sp;
+		hp, sp;
 
 	//tick accumulation before healing.
 	struct {
-		unsigned int hp,sp;
+		unsigned int hp, sp;
 	} tick;
 
 	//Regen rates (where every 1 means +100% regen)
 	struct {
-		unsigned char hp,sp;
+		unsigned char hp, sp;
 	} rate;
 };
 
+//Regen data
 struct regen_data {
 
 	unsigned short flag; //Marks what stuff you may heal or not.
 	unsigned short
-		hp,sp,shp,ssp;
+		hp, sp, shp, ssp;
 
 	//tick accumulation before healing.
 	struct {
-		unsigned int hp,sp,shp,ssp;
+		unsigned int hp, sp, shp, ssp;
 	} tick;
 
 	//Regen rates (where every 1 means +100% regen)
 	struct {
 		unsigned char
-		hp,sp,shp,ssp;
+		hp, sp, shp, ssp;
 	} rate;
 
 	struct {
-		unsigned walk:1; //Can you regen even when walking?
-		unsigned gc:1;	//Tags when you should have double regen due to GVG castle
-		unsigned overweight:2; //overweight state (1: 50%, 2: 90%)
-		unsigned block:2; //Block regen flag (1: Hp, 2: Sp)
+		unsigned walk: 1; //Can you regen even when walking?
+		unsigned gc: 1;	//Tags when you should have double regen due to GVG castle
+		unsigned overweight: 2; //overweight state (1: 50%, 2: 90%)
+		unsigned block: 2; //Block regen flag (1: Hp, 2: Sp)
 	} state;
 
 	//skill-regen, sitting-skill-regen (since not all chars with regen need it)
 	struct regen_data_sub *sregen, *ssregen;
 };
 
+//Status display entry
 struct sc_display_entry {
 	enum sc_type type;
-	int val1,val2,val3;
+	int val1, val2, val3;
 };
 
+//Status change entry
 struct status_change_entry {
 	int timer;
-	int val1,val2,val3,val4;
+	int val1, val2, val3, val4;
 };
 
+//Status change
 struct status_change {
 	unsigned int option;// effect state (bitfield)
 	unsigned int opt3;// skill state (bitfield)
 	unsigned short opt1;// body state
 	unsigned short opt2;// health state (bitfield)
 	unsigned char count;
-	//TODO: See if it is possible to implement the following SC's without requiring extra parameters while the SC is inactive.
+	//@TODO: See if it is possible to implement the following SC's without requiring extra parameters while the SC is inactive.
 	unsigned char jb_flag; //Joint Beat type flag
 	struct {
 		unsigned char move;
@@ -1834,7 +1912,7 @@ int status_charge(struct block_list* bl, int64 hp, int64 sp);
 int status_percent_change(struct block_list *src,struct block_list *target,signed char hp_rate, signed char sp_rate, int flag);
 //Easier handling of status_percent_change
 #define status_percent_heal(bl, hp_rate, sp_rate) status_percent_change(NULL, bl, -(hp_rate), -(sp_rate), 0)
-#define status_percent_damage(src, target, hp_rate, sp_rate, kill) status_percent_change(src, target, hp_rate, sp_rate, (kill)?1:2)
+#define status_percent_damage(src, target, hp_rate, sp_rate, kill) status_percent_change(src, target, hp_rate, sp_rate, (kill) ? 1 : 2)
 //Instant kill with no drops/exp/etc
 #define status_kill(bl) status_percent_damage(NULL, bl, 100, 0, true)
 //Used to set the hp/sp of an object to an absolute value (can't kill)
@@ -1842,7 +1920,6 @@ int status_set_hp(struct block_list *bl, unsigned int hp, int flag);
 int status_set_sp(struct block_list *bl, unsigned int sp, int flag);
 int status_heal(struct block_list *bl,int64 hp,int64 sp, int flag);
 int status_revive(struct block_list *bl, unsigned char per_hp, unsigned char per_sp);
-//Fixed HP/SP recovery resurrection function needed for the WM_DEADHILLHERE skill. [Rytech]
 int status_fixed_revive(struct block_list *bl, unsigned int per_hp, unsigned int per_sp);
 
 struct regen_data *status_get_regen_data(struct block_list *bl);
@@ -1888,12 +1965,12 @@ unsigned char status_calc_attack_element(struct block_list *bl, struct status_ch
 #define status_get_attack_element(bl) status_get_status_data(bl)->rhw.ele
 #define status_get_attack_lelement(bl) status_get_status_data(bl)->lhw.ele
 #define status_get_race(bl) status_get_status_data(bl)->race
+#define status_get_class_(bl) status_get_status_data(bl)->class_
 #define status_get_size(bl) status_get_status_data(bl)->size
 #define status_get_mode(bl) status_get_status_data(bl)->mode
 int status_get_party_id(struct block_list *bl);
 int status_get_guild_id(struct block_list *bl);
 int status_get_emblem_id(struct block_list *bl);
-int status_get_mexp(struct block_list *bl);
 int status_get_race2(struct block_list *bl);
 
 struct view_data *status_get_viewdata(struct block_list *bl);
@@ -1917,7 +1994,7 @@ int kaahi_heal_timer(int tid, unsigned int tick, int id, intptr_t data);
 int status_change_timer(int tid, unsigned int tick, int id, intptr_t data);
 int status_change_timer_sub(struct block_list* bl, va_list ap);
 int status_change_clear(struct block_list* bl, int type);
-int status_change_clear_buffs(struct block_list* bl, int type);
+void status_change_clear_buffs(struct block_list* bl, int type);
 
 #define status_calc_bl(bl, flag) status_calc_bl_(bl, (enum scb_flag)(flag), SCO_NONE)
 #define status_calc_mob(md, opt) status_calc_bl_(&(md)->bl, SCB_ALL, opt)

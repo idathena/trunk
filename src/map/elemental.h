@@ -19,6 +19,21 @@
 #define EL_SKILLMODE_ASSIST 0x2
 #define EL_SKILLMODE_AGGRESSIVE 0x4
 
+enum elemental_elemantalid {
+	ELEMENTALID_AGNI_S = 2114,
+	ELEMENTALID_AGNI_M,
+	ELEMENTALID_AGNI_L,
+	ELEMENTALID_AQUA_S,
+	ELEMENTALID_AQUA_M,
+	ELEMENTALID_AQUA_L,
+	ELEMENTALID_VENTUS_S,
+	ELEMENTALID_VENTUS_M,
+	ELEMENTALID_VENTUS_L,
+	ELEMENTALID_TERA_S,
+	ELEMENTALID_TERA_M,
+	ELEMENTALID_TERA_L,
+};
+
 struct elemental_skill {
 	unsigned short id, lv;
 	short mode;
@@ -86,10 +101,10 @@ struct skill_condition elemental_skill_get_requirements(uint16 skill_id, uint16 
 #define elemental_stop_walking(ed, type) unit_stop_walking(&(ed)->bl, type)
 #define elemental_stop_attack(ed) unit_stop_attack(&(ed)->bl)
 
-int read_elemental_skilldb(void);
+void read_elemental_skilldb(void);
 void reload_elementaldb(void);
 void reload_elemental_skilldb(void);
-int do_init_elemental(void);
+void do_init_elemental(void);
 void do_final_elemental(void);
 
 #endif /* _ELEMENTAL_H_ */

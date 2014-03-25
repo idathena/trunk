@@ -56,8 +56,11 @@ struct npc_data {
 			struct npc_label_list *label_list;
 		} scr;
 		struct {
-			struct npc_item_list* shop_item;
-			int count;
+			struct npc_item_list *shop_item;
+			uint16 count;
+			int itemshop_nameid; // Item Shop cost item ID
+			char pointshop_str[32]; // Point Shop cost variable name
+			bool discount;
 		} shop;
 		struct {
 			short xs,ys; // OnTouch area radius
@@ -89,7 +92,7 @@ enum actor_classes
 #define MAX_NPC_CLASS 1000
 // New NPC range
 #define MAX_NPC_CLASS2_START 10000
-#define MAX_NPC_CLASS2_END 10049
+#define MAX_NPC_CLASS2_END 10095
 
 //Checks if a given id is a valid npc id. [Skotlex]
 //Since new npcs are added all the time, the max valid value is the one before the first mob (Scorpion = 1001)
@@ -109,6 +112,7 @@ enum npce_event {
 	NPCE_DIE,
 	NPCE_KILLPC,
 	NPCE_KILLNPC,
+	NPCE_STATCALC,
 	NPCE_MAX
 };
 struct view_data* npc_get_viewdata(int class_);
@@ -126,6 +130,7 @@ int npc_buysellsel(struct map_session_data* sd, int id, int type);
 int npc_buylist(struct map_session_data* sd,int n, unsigned short* item_list);
 int npc_selllist(struct map_session_data* sd, int n, unsigned short* item_list);
 void npc_parse_mob2(struct spawn_data* mob);
+bool npc_viewisid(const char * viewid);
 struct npc_data* npc_add_warp(char* name, short from_mapid, short from_x, short from_y, short xs, short ys, unsigned short to_mapindex, short to_x, short to_y);
 int npc_globalmessage(const char* name,const char* mes);
 
@@ -145,8 +150,8 @@ void npc_addsrcfile(const char* name);
 void npc_delsrcfile(const char* name);
 void npc_parsesrcfile(const char* filepath, bool runOnInit);
 void do_clear_npc(void);
-int do_final_npc(void);
-int do_init_npc(void);
+void do_final_npc(void);
+void do_init_npc(void);
 void npc_event_do_oninit(void);
 int npc_do_ontimer(int npc_id, int option);
 
@@ -173,9 +178,10 @@ int npc_cashshop_buy(struct map_session_data *sd, int nameid, int amount, int po
 extern struct npc_data* fake_nd;
 
 int npc_cashshop_buylist(struct map_session_data *sd, int points, int count, unsigned short* item_list);
+bool npc_shop_discount(enum npc_subtype type, bool discount);
 
 #ifdef SECURE_NPCTIMEOUT
-	int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t data);
+int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t data);
 #endif
 
 // @commands (script-based)

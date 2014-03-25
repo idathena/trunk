@@ -80,8 +80,8 @@ int intif_homunculus_requestsave(int account_id, struct s_homunculus* sh);
 int intif_homunculus_requestdelete(int homun_id);
 
 /******QUEST SYTEM*******/
-int intif_request_questlog(struct map_session_data * sd);
-int intif_quest_save(struct map_session_data * sd);
+void intif_request_questlog(struct map_session_data *sd);
+int intif_quest_save(struct map_session_data *sd);
 
 // MERCENARY SYSTEM
 int intif_mercenary_create(struct s_mercenary *merc);
@@ -109,7 +109,7 @@ int intif_elemental_delete(int ele_id);
 int intif_elemental_save(struct s_elemental *ele);
 
 /* @accinfo */
-void intif_request_accinfo( int u_fd, int aid, int group_lv, char* query );
+void intif_request_accinfo(int u_fd, int aid, int group_lv, char* query);
 
 int CheckForCharServer(void);
 

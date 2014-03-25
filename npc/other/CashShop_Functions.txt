@@ -3,27 +3,29 @@
 //===== By: ================================================== 
 //= L0ne_W0lf
 //===== Current Version: ===================================== 
-//= 1.7
+//= 1.8
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
-//= Used explicitly in the Item Database for Cash shop items
+//= Used for Cash shop items:
 //= - Kafra Card
 //= - Giant Fly Wing
 //= - Neuralizer
 //= - Dungeon Teleport Scroll
+//= Also included are functions related to the VIP system.
 //===== Additional Comments: ================================= 
 //= 1.0 First version. [L0ne_W0lf]
 //=     F_CashPartyCall Optimized by Trancid.
 //= 1.1 Updated Dungeon Teleport Scroll. [L0ne_W0lf]
 //=     Added Town Teleport Scroll Function
-//=     Added Seige Teleport Scroll Function
+//=     Added Siege Teleport Scroll Function
 //= 1.2 Updated the dungeon teleport scroll menu. [L0ne_w0lf]
 //= 1.3 Implemented Aozi Giant Flywing Fix. (bugreport:4242) [L0ne_w0lf]
 //= 1.4 Simplified Giant Flywing function using warpparty. [L0ne_w0lf]
 //= 1.5 Neuralizer is no longer consumed upon failure. [Euphy]
 //= 1.6 Updated Teleport functions and added Curious_Snowball. [Euphy]
 //= 1.7 Added Dungeon Teleport Scroll II maps. [Euphy]
+//= 1.8 Added VIP function. [Euphy]
 //============================================================ 
 
 // Kafra Card
@@ -40,7 +42,6 @@ function	script	F_CashStore	{
 	cutin "",255;
 	return;
 }
-
 
 // Giant Fly Wing
 //============================================================ 
@@ -235,7 +236,7 @@ function	script	F_CashTele	{
 //============================================================ 
 // - Warp player to selected guild castle.
 // - No arguments.
-function	script	F_CashSeigeTele	{
+function	script	F_CashSiegeTele	{
 	switch(select("Neuschwanstein (aldeg_cas01):Hohenschwangau (aldeg_cas02):Nuernberg (aldeg_cas03):Wuerzburg (aldeg_cas04):Rothenburg (aldeg_cas05):Repherion (gefg_cas01):Eeyorbriggar (gefg_cas02):Yesnelph (gefg_cas03):Bergel (gefg_cas04):Mersetzdeitz (gefg_cas05):Bright Arbor (payg_cas01):Sacred Altar (payg_cas02):Holy Shadow (payg_cas03):Scarlet Palace (payg_cas04):Bamboo Grove Hill (payg_cas05):Kriemhild (prtg_cas01):Swanhild (prtg_cas02):Fadhgridh (prtg_cas03):Skoegul (prtg_cas04):Gondul (prtg_cas05)")) {
 	case 1: warp "alde_gld",48,91; end;
 	case 2: warp "alde_gld",103,245; end;
@@ -300,4 +301,36 @@ function	script	F_Snowball	{
 		break;
 	}
 	end;
+}
+
+// VIP Functions
+//============================================================ 
+function	script	VIP_Third_Class	{
+	if (!vip_status(1)) {
+		mes "[Voice from nowhere]";
+		mes "Access to Premium content is only available to those who possess a certain amount of Reset Stones.";
+		next;
+		if (countitem(6320) < 1) {
+			mes "[Voice from nowhere]";
+			mes "In order to change to third class, you must bring 1 ^0000CCReset Stone^000000 or have a Premium account.";
+			//mes "Please visit our iShop to purchase the ^0000CCReset Stone^000000.";
+			close;
+		} else {
+			mes "[Voice from nowhere]";
+			mes "Would you like to participate in this quest for 1 ^0000CCReset Stone^000000?";
+			next;
+			switch(select("Yes:No")) {
+			case 1:
+				mes "[Voice from nowhere]";
+				mes "Good luck, adventurer.";
+				delitem 6320,1; //Premium_Reset_Stone
+				break;
+			case 2:
+				mes "[Voice from nowhere]";
+				mes "Very well.";
+				close;
+			}
+		}
+	}
+	return;
 }

@@ -21,6 +21,7 @@ struct Channel;
 
 enum E_MAPSERVER_ST {
 	MAPSERVER_ST_RUNNING = CORE_ST_LAST,
+	MAPSERVER_ST_STARTING,
 	MAPSERVER_ST_SHUTDOWN,
 	MAPSERVER_ST_LAST
 };
@@ -48,25 +49,6 @@ void map_do_final_msg(void);
 #define MAX_IGNORE_LIST 20 // official is 14
 #define MAX_VENDING 12
 #define MAX_MAP_SIZE 512*512 // Wasn't there something like this already? Can't find it.. [Shinryo]
-
-// Added definitions for WoESE objects. [L0ne_W0lf]
-enum MOBID {
-	MOBID_PORING = 1002,
-	MOBID_EMPERIUM = 1288,
-	MOBID_TREAS01 = 1324,
-	MOBID_TREAS40 = 1363,
-	MOBID_BARRICADE1 = 1905,
-	MOBID_BARRICADE2,
-	MOBID_GUARIDAN_STONE1,
-	MOBID_GUARIDAN_STONE2,
-	MOBID_FOOD_STOR,
-	MOBID_BLUE_CRYST = 1914,
-	MOBID_PINK_CRYST,
-	MOBID_TREAS41 = 1938,
-	MOBID_TREAS49 = 1946,
-	MOBID_SILVERSNIPER = 2042,
-	MOBID_MAGICDECOY_WIND = 2046,
-};
 
 //The following system marks a different job ID system used by the map server,
 //which makes a lot more sense than the normal one. [Skotlex]
@@ -104,6 +86,7 @@ enum {
 	MAPID_SUMMER,
 	MAPID_HANBOK,
 	MAPID_GANGSI,
+	MAPID_OKTOBERFEST,
 //2-1 Jobs
 	MAPID_SUPER_NOVICE = JOBL_2_1|0x0,
 	MAPID_KNIGHT,
@@ -260,9 +243,10 @@ enum bl_type {
 //For common mapforeach calls. Since pets cannot be affected, they aren't included here yet.
 #define BL_CHAR (BL_PC|BL_MOB|BL_HOM|BL_MER|BL_ELEM)
 
-enum npc_subtype { WARP, SHOP, SCRIPT, CASHSHOP, TOMB };
+enum npc_subtype { WARP, SHOP, SCRIPT, CASHSHOP, ITEMSHOP, POINTSHOP, TOMB };
 
-enum {
+enum e_race {
+	RC_NONE_ = -1,   //Don't give us bonus
 	RC_FORMLESS = 0, //Nothing
 	RC_UNDEAD,       //Undead
 	RC_BRUTE,        //Animal
@@ -273,13 +257,20 @@ enum {
 	RC_DEMIHUMAN,    //Human
 	RC_ANGEL,        //Angel
 	RC_DRAGON,       //Dragon
-	RC_BOSS,         //Player - Not sure why, but thats what it shows officially.
-	RC_NONBOSS,      //Last - It marks the end of the race enum table in official,
-	RC_NONDEMIHUMAN, //but NONBOSS and NONDEMIHUMAN exists here for custom needs.
-	RC_MAX
+	RC_ALL,          //All
+	RC_MAX           //Auto upd enum for array size
 };
 
-enum {
+enum e_classAE {
+	CLASS_NONE = -1, //Don't give us bonus
+	CLASS_NORMAL = 0,
+	CLASS_BOSS,
+	CLASS_GUARDIAN,
+	CLASS_ALL,
+	CLASS_MAX //Auto upd enum for array len
+};
+
+enum e_race2 {
 	RC2_NONE = 0,
 	RC2_GOBLIN,
 	RC2_KOBOLD,
@@ -290,7 +281,7 @@ enum {
 	RC2_MAX
 };
 
-enum {
+enum e_elemen {
 	ELE_NEUTRAL = 0, //Nothing
 	ELE_WATER,       //Water
 	ELE_EARTH,       //Ground
@@ -301,8 +292,8 @@ enum {
 	ELE_DARK,        //Darkness
 	ELE_GHOST,       //Telekinesis
 	ELE_UNDEAD,      //Undead
-	ELE_MAX,
-	ELE_NONE
+	ELE_ALL,
+	ELE_MAX          //Auto upd enum for array len
 };
 
 enum mob_ai {
@@ -337,7 +328,7 @@ struct block_list {
 // Mob List Held in memory for Dynamic Mobs [Wizputer]
 // Expanded to specify all mob-related spawn data by [Skotlex]
 struct spawn_data {
-	short class_; //Class, used because a mob can change it's class
+	short id; //ID, used because a mob can change it's class
 	unsigned short m, x, y;	//Spawn information (map, point, spawn-area around point)
 	signed short xs, ys;
 	unsigned short num; //Number of mobs using this structure
@@ -380,28 +371,25 @@ enum _sp {
 	SP_SITTING = 123,
 	SP_CHARMOVE = 124,
 	SP_CHARRENAME = 125,
-	SP_MOD_EXP = 126,
-	SP_MOD_DROP = 127,
-	SP_MOD_DEATH = 128,
 
 	// Mercenaries
-	SP_MERCFLEE = 165, SP_MERCKILLS = 189, SP_MERCFAITH = 190,
+	SP_MERCFLEE = 165,SP_MERCKILLS = 189,SP_MERCFAITH = 190,
 
 	// Original 1000-
 	SP_ATTACKRANGE = 1000,	SP_ATKELE,SP_DEFELE, // 1000-1002
-	SP_CASTRATE, SP_MAXHPRATE, SP_MAXSPRATE, SP_SPRATE, // 1003-1006
-	SP_ADDELE, SP_ADDRACE, SP_ADDSIZE, SP_SUBELE, SP_SUBRACE, // 1007-1011
-	SP_ADDEFF, SP_RESEFF, // 1012-1013
+	SP_CASTRATE,SP_MAXHPRATE,SP_MAXSPRATE,SP_SPRATE, // 1003-1006
+	SP_ADDELE,SP_ADDRACE,SP_ADDSIZE,SP_SUBELE,SP_SUBRACE, // 1007-1011
+	SP_ADDEFF,SP_RESEFF, // 1012-1013
 	SP_BASE_ATK,SP_ASPD_RATE,SP_HP_RECOV_RATE,SP_SP_RECOV_RATE,SP_SPEED_RATE, // 1014-1018
 	SP_CRITICAL_DEF,SP_NEAR_ATK_DEF,SP_LONG_ATK_DEF, // 1019-1021
-	SP_DOUBLE_RATE, SP_DOUBLE_ADD_RATE, SP_SKILL_HEAL, SP_MATK_RATE, // 1022-1025
+	SP_DOUBLE_RATE,SP_DOUBLE_ADD_RATE,SP_SKILL_HEAL,SP_MATK_RATE, // 1022-1025
 	SP_IGNORE_DEF_ELE,SP_IGNORE_DEF_RACE, // 1026-1027
 	SP_ATK_RATE,SP_SPEED_ADDRATE,SP_SP_REGEN_RATE, // 1028-1030
 	SP_MAGIC_ATK_DEF,SP_MISC_ATK_DEF, // 1031-1032
 	SP_IGNORE_MDEF_ELE,SP_IGNORE_MDEF_RACE, // 1033-1034
 	SP_MAGIC_ADDELE,SP_MAGIC_ADDRACE,SP_MAGIC_ADDSIZE, // 1035-1037
 	SP_PERFECT_HIT_RATE,SP_PERFECT_HIT_ADD_RATE,SP_CRITICAL_RATE,SP_GET_ZENY_NUM,SP_ADD_GET_ZENY_NUM, // 1038-1042
-	SP_ADD_DAMAGE_CLASS,SP_ADD_MAGIC_DAMAGE_CLASS,SP_ADD_DEF_CLASS,SP_ADD_MDEF_CLASS, // 1043-1046
+	SP_ADD_DAMAGE_CLASS,SP_ADD_MAGIC_DAMAGE_CLASS,SP_ADD_DEF_MONSTER,SP_ADD_MDEF_MONSTER, // 1043-1046
 	SP_ADD_MONSTER_DROP_ITEM,SP_DEF_RATIO_ATK_ELE,SP_DEF_RATIO_ATK_RACE,SP_UNBREAKABLE_GARMENT, // 1047-1050
 	SP_HIT_RATE,SP_FLEE_RATE,SP_FLEE2_RATE,SP_DEF_RATE,SP_DEF2_RATE,SP_MDEF_RATE,SP_MDEF2_RATE, // 1051-1057
 	SP_SPLASH_RANGE,SP_SPLASH_ADD_RANGE,SP_AUTOSPELL,SP_HP_DRAIN_RATE,SP_SP_DRAIN_RATE, // 1058-1062
@@ -411,26 +399,31 @@ enum _sp {
 	SP_NO_KNOCKBACK,SP_CLASSCHANGE, // 1077-1078
 	SP_HP_DRAIN_VALUE,SP_SP_DRAIN_VALUE, // 1079-1080
 	SP_WEAPON_ATK,SP_WEAPON_ATK_RATE, // 1081-1082
-	SP_DELAYRATE,SP_HP_DRAIN_RATE_RACE,SP_SP_DRAIN_RATE_RACE, // 1083-1085
-	SP_IGNORE_MDEF_RATE,SP_IGNORE_DEF_RATE,SP_SKILL_HEAL2,SP_ADDEFF_ONSKILL, //1086-1089
+	SP_DELAYRATE,SP_HP_DRAIN_VALUE_RACE,SP_SP_DRAIN_VALUE_RACE, // 1083-1085
+	SP_IGNORE_MDEF_RACE_RATE,SP_IGNORE_DEF_RACE_RATE,SP_SKILL_HEAL2,SP_ADDEFF_ONSKILL, //1086-1089
 	SP_ADD_HEAL_RATE,SP_ADD_HEAL2_RATE,SP_EQUIP_ATK, //1090-1092
 
 	SP_RESTART_FULL_RECOVER = 2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
 	SP_NO_CASTCANCEL2,SP_NO_MISC_DAMAGE,SP_UNBREAKABLE_WEAPON,SP_UNBREAKABLE_ARMOR,SP_UNBREAKABLE_HELM, // 2006-2010
 	SP_UNBREAKABLE_SHIELD,SP_LONG_ATK_RATE, // 2011-2012
 
-	SP_CRIT_ATK_RATE, SP_CRITICAL_ADDRACE, SP_NO_REGEN, SP_ADDEFF_WHENHIT, SP_AUTOSPELL_WHENHIT, // 2013-2017
-	SP_SKILL_ATK, SP_UNSTRIPABLE, SP_AUTOSPELL_ONSKILL, // 2018-2020
-	SP_SP_GAIN_VALUE, SP_HP_REGEN_RATE, SP_HP_LOSS_RATE, SP_ADDRACE2, SP_HP_GAIN_VALUE, // 2021-2025
-	SP_SUBSIZE, SP_HP_DRAIN_VALUE_RACE, SP_ADD_ITEM_HEAL_RATE, SP_SP_DRAIN_VALUE_RACE, SP_EXP_ADDRACE,	// 2026-2030
-	SP_SP_GAIN_RACE, SP_SUBRACE2, SP_UNBREAKABLE_SHOES,	// 2031-2033
-	SP_UNSTRIPABLE_WEAPON,SP_UNSTRIPABLE_ARMOR,SP_UNSTRIPABLE_HELM,SP_UNSTRIPABLE_SHIELD,  // 2034-2037
-	SP_INTRAVISION, SP_ADD_MONSTER_DROP_ITEMGROUP, SP_SP_LOSS_RATE, // 2038-2040
-	SP_ADD_SKILL_BLOW, SP_SP_VANISH_RATE, SP_MAGIC_SP_GAIN_VALUE, SP_MAGIC_HP_GAIN_VALUE, SP_ADD_CLASS_DROP_ITEM, // 2041-2045
-	SP_EMATK, SP_SP_GAIN_RACE_ATTACK, SP_HP_GAIN_RACE_ATTACK, SP_SKILL_USE_SP_RATE, // 2046-2049
-	SP_SKILL_COOLDOWN, SP_SKILL_FIXEDCAST, SP_SKILL_VARIABLECAST, SP_FIXCASTRATE, SP_VARCASTRATE, // 2050-2054
-	SP_SKILL_USE_SP, SP_MAGIC_ATK_ELE, SP_ADD_FIXEDCAST, SP_ADD_VARIABLECAST, // 2055-2058
-	SP_DEF_SET, SP_MDEF_SET, SP_MAGIC_SUBRACE, SP_HP_VANISH_RATE // 2059-2062
+	SP_CRIT_ATK_RATE,SP_CRITICAL_ADDRACE,SP_NO_REGEN,SP_ADDEFF_WHENHIT,SP_AUTOSPELL_WHENHIT, // 2013-2017
+	SP_SKILL_ATK,SP_UNSTRIPABLE,SP_AUTOSPELL_ONSKILL, // 2018-2020
+	SP_SP_GAIN_VALUE,SP_HP_REGEN_RATE,SP_HP_LOSS_RATE,SP_ADDRACE2,SP_HP_GAIN_VALUE, // 2021-2025
+	SP_SUBSIZE,SP_HP_DRAIN_VALUE_CLASS,SP_ADD_ITEM_HEAL_RATE,SP_SP_DRAIN_VALUE_CLASS,SP_EXP_ADDRACE, // 2026-2030
+	SP_SP_GAIN_RACE,SP_SUBRACE2,SP_UNBREAKABLE_SHOES, // 2031-2033
+	SP_UNSTRIPABLE_WEAPON,SP_UNSTRIPABLE_ARMOR,SP_UNSTRIPABLE_HELM,SP_UNSTRIPABLE_SHIELD, // 2034-2037
+	SP_INTRAVISION,SP_ADD_MONSTER_DROP_ITEMGROUP,SP_SP_LOSS_RATE, // 2038-2040
+	SP_ADD_SKILL_BLOW,SP_SP_VANISH_RATE,SP_MAGIC_SP_GAIN_VALUE,SP_MAGIC_HP_GAIN_VALUE,SP_ADD_MONSTER_ID_DROP_ITEM, // 2041-2045
+	SP_EMATK,SP_SP_GAIN_RACE_ATTACK,SP_HP_GAIN_RACE_ATTACK,SP_SKILL_USE_SP_RATE, // 2046-2049
+	SP_SKILL_COOLDOWN,SP_SKILL_FIXEDCAST,SP_SKILL_VARIABLECAST,SP_FIXCASTRATE,SP_VARCASTRATE, // 2050-2054
+	SP_SKILL_USE_SP,SP_MAGIC_ATK_ELE,SP_ADD_FIXEDCAST,SP_ADD_VARIABLECAST, // 2055-2058
+	SP_DEF_SET,SP_MDEF_SET,SP_MAGIC_SUBRACE,SP_HP_VANISH_RATE, // 2059-2062
+
+	SP_IGNORE_DEF_CLASS,SP_IGNORE_DEF_CLASS_RATE,SP_IGNORE_MDEF_CLASS,SP_IGNORE_MDEF_CLASS_RATE, //2063-2066
+	SP_DEF_RATIO_ATK_CLASS,SP_ADDCLASS,SP_SUBCLASS,SP_MAGIC_ADDCLASS,SP_WEAPON_COMA_CLASS, //2067-2071
+	SP_MAGIC_SUBCLASS,SP_EXP_ADDCLASS,SP_ADD_CLASS_DROP_ITEM,SP_ADD_CLASS_DROP_ITEMGROUP, //2072-2075
+	SP_ADDMAXWEIGHT //2076
 };
 
 enum _look {
@@ -467,25 +460,24 @@ typedef enum {
 
 // used by map_getcell()
 typedef enum {
-	CELL_GETTYPE,		// retrieves a cell's 'gat' type
+	CELL_GETTYPE,          // Retrieves a cell's 'gat' type
 
-	CELL_CHKWALL,		// wall (gat type 1)
-	CELL_CHKWATER,		// water (gat type 3)
-	CELL_CHKCLIFF,		// cliff/gap (gat type 5)
+	CELL_CHKWALL,          // Whether the cell is a wall (gat type 1)
+	CELL_CHKWATER,         // Whether the cell is water (gat type 3)
+	CELL_CHKCLIFF,         // Whether the cell is a cliff/gap (gat type 5)
 
-	CELL_CHKPASS,		// passable cell (gat type non-1/5)
-	CELL_CHKREACH,		// Same as PASS, but ignores the cell-stacking mod.
-	CELL_CHKNOPASS,		// non-passable cell (gat types 1 and 5)
-	CELL_CHKNOREACH,	// Same as NOPASS, but ignores the cell-stacking mod.
-	CELL_CHKSTACK,		// whether cell is full (reached cell stacking limit)
+	CELL_CHKPASS,          // Whether the cell is passable (gat type not 1 and 5)
+	CELL_CHKREACH,         // Whether the cell is passable, but ignores the cell stacking limit
+	CELL_CHKNOPASS,        // Whether the cell is non-passable (gat types 1 and 5)
+	CELL_CHKNOREACH,       // Whether the cell is non-passable, but ignores the cell stacking limit
+	CELL_CHKSTACK,         // Whether the cell is full (reached cell stacking limit)
 
-	CELL_CHKNPC,
-	CELL_CHKBASILICA,
-	CELL_CHKLANDPROTECTOR,
-	CELL_CHKNOVENDING,
-	CELL_CHKNOCHAT,
-	CELL_CHKICEWALL
-
+	CELL_CHKNPC,           // Whether the cell has an OnTouch NPC
+	CELL_CHKBASILICA,      // Whether the cell has Basilica
+	CELL_CHKLANDPROTECTOR, // Whether the cell has Land Protector
+	CELL_CHKNOVENDING,     // Whether the cell denies MC_VENDING skill
+	CELL_CHKNOCHAT,        // Whether the cell denies Player Chat Window
+	CELL_CHKICEWALL        // Whether the cell has Ice Wall
 } cell_chk;
 
 struct mapcell
@@ -533,6 +525,15 @@ struct s_skill_damage {
 struct mapflag_skill_adjust {
 	unsigned short skill_id;
 	unsigned short modifier;
+};
+
+struct questinfo {
+	struct npc_data *nd;
+	unsigned short icon;
+	unsigned char color;
+	int quest_id;
+	bool hasJob;
+	unsigned short job; /* Perhaps a mapid mask would be most flexible? */
 };
 
 struct map_data {
@@ -604,6 +605,8 @@ struct map_data {
 		unsigned nomineeffect : 1; // Allow /mineeffect
 		unsigned nolockon : 1;
 		unsigned notomb : 1;
+		unsigned nocashshop : 1;
+		unsigned nobanking : 1;
 #ifdef ADJUST_SKILL_DAMAGE
 		unsigned skill_damage : 1;
 #endif
@@ -653,6 +656,10 @@ struct map_data {
 
 	/* Speeds up clif_updatestatus processing by causing hpmeter to run only when someone with the permission can view it */
 	unsigned short hpmeter_visible;
+
+	/* ShowEvent Data Cache */
+	struct questinfo *qi_data;
+	unsigned short qi_count;
 };
 
 /// Stores information about a remote map (for multi-mapserver setups).
@@ -809,6 +816,9 @@ void do_reconnect_map(void); //Invoked on map-char reconnection [Skotlex]
 void map_addmap2db(struct map_data *m);
 void map_removemapdb(struct map_data *m);
 
+void map_add_questinfo(int m, struct questinfo *qi);
+bool map_remove_questinfo(int m, struct npc_data *nd);
+
 extern char *INTER_CONF_NAME;
 extern char *LOG_CONF_NAME;
 extern char *MAP_CONF_NAME;
@@ -857,13 +867,19 @@ extern int db_use_sqldbs;
 extern Sql* mmysql_handle;
 extern Sql* logmysql_handle;
 
+extern char buyingstore_db[32];
+extern char buyingstore_items_db[32];
 extern char item_db_db[32];
 extern char item_db2_db[32];
 extern char item_db_re_db[32];
 extern char mob_db_db[32];
+extern char mob_db_re_db[32];
 extern char mob_db2_db[32];
 extern char mob_skill_db_db[32];
+extern char mob_skill_db_re_db[32];
 extern char mob_skill_db2_db[32];
+extern char vendings_db[32];
+extern char vending_items_db[32];
 
 void do_shutdown(void);
 

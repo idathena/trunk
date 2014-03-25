@@ -1,26 +1,28 @@
+// Skill Unit Database
+//
+// Structure of Database:
 // ID,unit ID,unit ID 2,layout,range,interval,target,flag
 //
 // layout = -1:special, 0:1*1, 1:3*3, 2:5*5, up to 5:11*11
 // target = friend (party +guildmates +neutral players) / party / guild
-//          ally (party +guildmates) / all / enemy
-// flag 0x001(UF_DEFNOTENEMY)		If 'defunit_not_enemy' is set, the target is changed to 'friend'
-//      0x002(UF_NOREITERRATION)	Spell cannot be stacked
-//      0x004(UF_NOFOOTSET)		Spell cannot be cast near/on targets
-//      0x008(UF_NOOVERLAP)		Spell effects do not overlap
-//      0x010(UF_PATHCHECK)	Only cells with a shootable path will be placed
-//      0x020(UF_NOPC)		Spell cannot affect players.
-//      0x040(UF_NOMOB)		Spell cannot affect mobs.
-//      0x080(UF_SKILL)		Spell can affect skills.
-//      0x100(UF_DANCE)		Dance skill
-//      0x200(UF_ENSEMBLE)	Ensemble skill
-//      0x400(UF_SONG)		Song skill
-//      0x800(UF_DUALMODE)	Spell has effects both at an interval and when you step in/out
-//      0x1000(UF_NONEARNPC)	Spell cannot be placed near the NPC
+//          ally (party +guildmates) / all / sameguild (guild but no allies) / enemy
+// flag 0x0001(UF_DEFNOTENEMY)		If 'defunit_not_enemy' is set, the target is changed to 'friend'
+//      0x0002(UF_NOREITERRATION)	Spell cannot be stacked
+//      0x0004(UF_NOFOOTSET)		Spell cannot be cast near/on targets
+//      0x0008(UF_NOOVERLAP)		Spell effects do not overlap
+//      0x0010(UF_PATHCHECK)		Only cells with a shootable path will be placed
+//      0x0020(UF_NOPC)			Spell cannot affect players.
+//      0x0040(UF_NOMOB)		Spell cannot affect mobs.
+//      0x0080(UF_SKILL)		Spell can affect skills.
+//      0x0100(UF_DANCE)		Dance skill
+//      0x0200(UF_ENSEMBLE)		Ensemble skill
+//      0x0400(UF_SONG)			Song skill
+//      0x0800(UF_DUALMODE)		Spell has effects both at an interval and when you step in/out
+//      0x1000(UF_????)			Unused flag
 //      0x2000(UF_RANGEDSINGLEUNIT)     Layout hack, use layout range propriety but only display center
 // 	Example: 0x006 = 0x002+0x004 -> Cannot be stacked nor cast near targets
 //
 // Notes:
-// ------
 //    0x89,0x8a,0x8b without indication
 //
 //    u1   u2 lay  r intr target  flag
@@ -97,7 +99,7 @@
 527,0xbc,    , -1, 0,2000,enemy, 0x018	//NJ_TATAMIGAESHI
 535,0xbd,    , -1, 0,  20,enemy, 0x010	//NJ_KAENSIN
 538,0xbb,    ,  1:1:1:2:2:2:3:3:3:4,0,-1,all, 0x010 //NJ_SUITON
-541,0x86,    ,  0, 3:3:4:4:5, 100,enemy, 0x018 //NJ_RAIGEKISAI
+541,0x86,    ,  0, 3:3:4:4:5, 200,enemy, 0x018 //NJ_RAIGEKISAI
 670,0xc7,    ,  1, 4:7:10:13:16:19:22:25:28:31,1000,all, 0x008 //NPC_EVILLAND
 
 //706,0xfd,   ,  0, 0,1000,all,   0x000 //NPC_VENOMFOG
@@ -107,7 +109,7 @@
 2032,0xe1,    ,  2, 0,1000,enemy, 0x018	//GC_POISONSMOKE
 
 2213,0x86,    ,  0, 9,1000,enemy, 0x018	//WL_COMET
-2216,0xcb,    , -1, 0,1000,enemy, 0x018	//WL_EARTHSTRAIN
+2216,0xcb,    , -1, 2,2000,enemy, 0x018	//WL_EARTHSTRAIN
 
 2238,0xd8,    ,  0, 1,1000,enemy, 0x006	//RA_ELECTRICSHOCKER
 2239,0xd9,    ,  0, 1,1000,enemy, 0x006	//RA_CLUSTERBOMB
@@ -123,17 +125,16 @@
 
 2299,0xcc,    ,  0, 1,1000,enemy, 0x006  //SC_MANHOLE
 2300,0xcd,    ,  0, 0,1000,all,   0x006  //SC_DIMENSIONDOOR
-2301,0xce,    ,  2, 0,  -1,all,   0x300E //SC_CHAOSPANIC
-2302,0xcf,    ,  2, 0,  -1,all,   0x3002 //SC_MAELSTROM
+2301,0xce,    ,  2, 0,  -1,all,   0x200E //SC_CHAOSPANIC
+2302,0xcf,    ,  2, 0,  -1,all,   0x2002 //SC_MAELSTROM
 2303,0xd0,    ,  3, 0,  -1,all,   0x201A //SC_BLOODYLUST
-2304,0xd1,    ,  0, 2,1000,enemy, 0x018  //SC_FEINTBOMB
+2304,0xd1,    ,  0, 2, 500,enemy, 0x018  //SC_FEINTBOMB
 
-2317,0x86,    , -1, 0,  -1,enemy, 0x010 //LG_OVERBRAND
 2319,0xec,    ,  0, 3,5000,all,   0x000	//LG_BANDING
 
 2414,0xda,    ,  0, 0,1000,enemy, 0x008	//WM_REVERBERATION
 2418,0xdb,    ,  0, 5, 300,enemy, 0x800	//WM_SEVERE_RAINSTORM
-2419,0xde,    ,  0, 1,1000,all,   0x014	//WM_POEMOFNETHERWORLD
+2419,0xde,    ,  0, 1,1000,enemy, 0x014	//WM_POEMOFNETHERWORLD
 
 2443,0xdc,    ,  0, 0,1000,enemy, 0x00A	//SO_FIREWALK
 2444,0xdd,    ,  0, 0,1000,enemy, 0x00A	//SO_ELECTRICWALK
@@ -149,14 +150,15 @@
 2468,0xf4,    ,  0, 1,1000,all,   0x010	//SO_EARTH_INSIGNIA
 
 2479,0xe5,    ,  0, 1,1000,enemy, 0x006	//GN_THORNS_TRAP
-2482,0xe6,0x7f, -1, 1,  -1,all,   0x000	//GN_WALLOFTHORN
+2482,0xe6,0x7f,  0, 1, 100,all,   0x000	//GN_WALLOFTHORN
 2484,0x86,    ,  0, 1, 100,enemy, 0x080	//GN_CRAZYWEED_ATK
 2485,0xe7,    ,  0, 2,2000,enemy, 0x098	//GN_DEMONIC_FIRE
-2487,0xe8,    ,  0, 2, 500,all,   0x000	//GN_FIRE_EXPANSION_SMOKE_POWDER
-2488,0xe9,    ,  0, 2, 500,all,   0x000	//GN_FIRE_EXPANSION_TEAR_GAS
+2487,0xe8,    ,  2, 0,  -1,all,   0x2000	//GN_FIRE_EXPANSION_SMOKE_POWDER
+2488,0xe9,    ,  2, 0,  -1,all,   0x2000	//GN_FIRE_EXPANSION_TEAR_GAS
 2490,0xea,    ,  0, 1,1000,all,   0x006	//GN_HELLS_PLANT
 
 2555,0x104,   ,  0, 1:2:2:3:3,500,enemy,0x006	//RL_B_TRAP
+2567,0xe7,    , -1, 0,2000,enemy, 0x098	//RL_FIRE_RAIN
 
 3006,0x86,    ,  0, 1,1000,enemy, 0x018	//KO_BAKURETSU
 3008,0x86,    ,  0, 1:1:1:1:1:1:1:1:1:2,1000,enemy, 0x018 //KO_MUCHANAGE
@@ -180,12 +182,12 @@
 8211,0x95,    ,  0, 1,1000,enemy, 0x006	//MA_SANDMAN
 8212,0x97,    ,  0, 1,1000,enemy, 0x006	//MA_FREEZINGTRAP
 
-8403,0xed,    , -1, 1,1000,enemy, 0x018 //EL_FIRE_MANTLE
-8406,0xee,    ,  0, 1,  -1,friend,0x018	//EL_WATER_BARRIER
+8403,0xed,    , -1, 0,  20,enemy, 0x018 //EL_FIRE_MANTLE
+8406,0xee,    ,  0, 1,1000,friend,0x018	//EL_WATER_BARRIER
 8409,0xef,    ,  0, 1,1000,friend,0x018	//EL_ZEPHYR
-8412,0xf0,    ,  0, 1,  -1,friend,0x018	//EL_POWER_OF_GAIA
+8412,0xf0,    ,  0, 1,1000,friend,0x018	//EL_POWER_OF_GAIA
 
-10006,0xc1,   ,  2, 0,  -1,guild, 0x040	//GD_LEADERSHIP
-10007,0xc2,   ,  2, 0,  -1,guild, 0x040	//GD_GLORYWOUNDS
-10008,0xc3,   ,  2, 0,  -1,guild, 0x040	//GD_SOULCOLD
-10009,0xc4,   ,  2, 0,  -1,guild, 0x040	//GD_HAWKEYES
+10006,0xc1,   ,  2, 0,  -1,sameguild, 0x040	//GD_LEADERSHIP
+10007,0xc2,   ,  2, 0,  -1,sameguild, 0x040	//GD_GLORYWOUNDS
+10008,0xc3,   ,  2, 0,  -1,sameguild, 0x040	//GD_SOULCOLD
+10009,0xc4,   ,  2, 0,  -1,sameguild, 0x040	//GD_HAWKEYES

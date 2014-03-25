@@ -5,7 +5,7 @@
 //===== Current Version: =====================================
 //= $Revision: 614 $
 //===== Last Updated: ========================================
-//= $LastChangedDate: 2013-03-21 20:57:26 +0700 (Kam, 21 Mar 2013) $
+//= $LastChangedDate: 2013-03-21 20:57:26 +0700 (Kamis, 21 Mar 2013) $
 //===== Description: =========================================
 //= Basic information and installation guide with links to
 //= various forum posts and Wiki articles.

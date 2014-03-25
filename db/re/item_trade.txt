@@ -1,19 +1,24 @@
-//Item Trading Restrictions File
-//Specify here special rules for item trading.
-//Item ID, TradeMask, Group-Level Override
-//Trading mask values:
-//1:Item can't be droped
-//2:Item can't be traded (nor vended)
-//4:Wedded partner can override restriction 2.
-//8:Item can't be sold to npcs
-//16:Item can't be placed in the cart
-//32:Item can't be placed in the storage
-//64:Item can't be placed in the guild storage
-//128:Item can't be attached to mail
-//256:Item can't be auctioned
-//Example:
-//1161,67,50 //Balmung: No drop, No trade, No Guild Store (1+2+64 =67),
-//only groups of group-level 50 and up can override the setting.
+// Item Trade Restrictions Database
+// Defines special trade rules for individual items.
+//
+// Structure of Database:
+// Item ID, TradeMask,Group Level Override
+//
+// Legend for 'TradeMask' field (bitmask):
+// 1   - item can't be dropped
+// 2   - item can't be traded (nor vended)
+// 4   - wedded partner can override restriction 2
+// 8   - item can't be sold to npcs
+// 16  - item can't be placed in the cart
+// 32  - item can't be placed in the storage
+// 64  - item can't be placed in the guild storage
+// 128 - item can't be attached to mail
+// 256 - item can't be auctioned
+//
+// Example:
+// 1161,67,50
+//	Balmung cannot be dropped, traded, or placed in Guild Storage (1+2+64).
+//	Only groups of group-level 50 and up can override this setting.
 
 // Wedding Related items
 2634,507,100	// Wedding Ring
@@ -1416,6 +1421,7 @@
 14605,475,100	// Orc Lord Scroll
 14606,475,100	// JOB Battle Manual
 14608,73,100	// Manchu-Han Imperial Feast
+14696,475,100	// Sealed Gloom Under Night Gachapon
 16002,507,100	// Stunner
 16134,475,100	// Frog King Hat Box
 16135,457,100	// Satanic Bone Helm Box
@@ -1997,6 +2003,7 @@
 2826,65,100	// Dark Knight Belt
 2827,65,100	// Dark Knight Glove
 2843,507,100	// Gold Trickle
+6821,475,100	// Single Union Badge
 12786,459,100	// Character Position Change Coupon
 13049,65,100	// Lacma
 13052,499,100	// Tourist Dagger
@@ -2011,8 +2018,13 @@
 12630,475,100	// Teddy Bear Scroll
 12778,473,100	// Bapho Jr Scroll
 12779,473,100	// Galapago Scroll
+17338,457,100	// Ore Box V
+17339,457,100	// Ore Box V(10)
+22685,475,100	// Single Union Christmas Gift
 
 // Sealed Cards
+4485,457,100	// Sealed Gloom Under Night Card
+4488,457,100	// Sealed Dark Lord Card
 4489,457,100	// Sealed Pharaoh Card
 4490,457,100	// Sealed Moonlight Flower Card
 4491,457,100	// Sealed Sniper Card
@@ -2039,3 +2051,52 @@
 4542,457,100	// Sealed Detale Card
 4543,457,100	// Sealed Hatii Card
 4544,457,100	// Sealed Evil Snake Lord Card
+
+// kRO 2013-03-06 Items
+6713,457,100	// Heart of Soul
+6714,457,100	// Sheena's Soul
+6715,457,100	// God's Soul Piece
+16378,457,100	// Siege Teleport Scroll 30 Box
+16382,457,100	// WoE Teleport Scroll 30 Box
+16821,457,100	// Dungeon Teleport Scroll Box(5)
+16822,457,100	// Dungeon Teleport Scroll Box(10)
+16837,457,100	// Dungeon Teleport Scroll II Box(5)
+16838,457,100	// Dungeon Teleport Scroll II Box(10)
+16864,457,100	// Siege Map Teleport Scroll Box(10)
+16865,457,100	// Siege Map Teleport Scroll Box(30)
+16866,457,100	// Siege Map Teleport Scroll II Box(10)
+16867,457,100	// Siege Map Teleport Scroll II Box(30)
+17159,457,100	// Name Change Box
+17160,457,100	// Character Name Change Card Box
+18122,457,100	// Giant Bow
+18123,457,100	// Bow of Storms
+22540,457,100	// Lux Anima Rune
+
+// kRO 2013-07-17 Items
+6746,475,100	// Iron Artifacts
+6747,475,100	// Steel Workpiece
+13118,475,100	// Spark Light
+
+// kRO 2013-10-02 Items
+2997,475,100	// RWC Gold Brooch
+2999,475,100	// RWC Brooch
+18828,475,100	// 2013 RWC Winners Helmet
+18829,475,100	// 2013 RWC Runners-Up Helmet
+18830,475,100	// 2013 RWC 3rd Helmet
+22652,475,100	// Brilliant Hat Box
+
+// kRO 2013-10-08 Items
+22675,475,100	// Mysterious Scroll
+
+// kRO 2013-11-06 Items
+14616,475,100	// Bar Cookie Of Strength
+14617,475,100	// Bar Cookie Of Vitality
+14618,475,100	// Bar Cookie Of Agility
+14619,475,100	// Bar Cookie Of Intelligence
+14620,475,100	// Bar Cookie Of Dexterity
+14621,475,100	// Bar Cookie Of Lucky
+17442,475,100	// Emperium G Box
+17449,475,100	// Set Bar Cookies
+
+// kRO 2013-11-13 Items
+16628,475,100	// Brynhild Box

@@ -5,6 +5,7 @@
 #include "showmsg.h"
 #include "malloc.h"
 #include "core.h"
+#include "strlib.h"
 #ifndef MINICORE
 #include "db.h"
 #include "socket.h"
@@ -24,6 +25,7 @@
 #include <unistd.h>
 #else
 #include "../common/winapi.h" // Console close event handling
+#include <direct.h>
 #endif
 
 
@@ -165,9 +167,9 @@ const char* get_svn_revision(void) {
 
 	// subversion 1.7 uses a sqlite3 database
 	// FIXME this is hackish at best...
-	// - ignores database file structure
-	// - assumes the data in NODES.dav_cache column ends with "!svn/ver/<revision>/<path>)"
-	// - since it's a cache column, the data might not even exist
+	// - Ignores database file structure
+	// - Assumes the data in NODES.dav_cache column ends with "!svn/ver/<revision>/<path>)"
+	// - Since it's a cache column, the data might not even exist
 	if( (fp = fopen(".svn"PATHSEP_STR"wc.db", "rb")) != NULL || (fp = fopen(".."PATHSEP_STR".svn"PATHSEP_STR"wc.db", "rb")) != NULL ) {
 #ifndef SVNNODEPATH
 		//not sure how to handle branches, so i'll leave this overridable define until a better solution comes up
@@ -180,7 +182,7 @@ const char* get_svn_revision(void) {
 		size_t i,j,len;
 		char* buffer;
 
-		// read file to buffer
+		// Read file to buffer
 		fseek(fp, 0, SEEK_END);
 		len = ftell(fp);
 		buffer = (char*)aMalloc(len + 1);
@@ -189,17 +191,17 @@ const char* get_svn_revision(void) {
 		buffer[len] = '\0';
 		fclose(fp);
 
-		// parse buffer
+		// Parse buffer
 		for( i = prefix_len + 1; i + postfix_len <= len; ++i ) {
 			if( buffer[i] != postfix[0] || memcmp(buffer + i, postfix, postfix_len) != 0 )
-				continue; // postfix missmatch
-			for( j = i; j > 0; --j ) { // skip digits
+				continue; // Postfix missmatch
+			for( j = i; j > 0; --j ) { // Skip digits
 				if( !ISDIGIT(buffer[j - 1]) )
 					break;
 			}
 			if( memcmp(buffer + j - prefix_len, prefix, prefix_len) != 0 )
-				continue; // prefix missmatch
-			// done
+				continue; // Prefix missmatch
+			// Done
 			snprintf(svn_version_buffer, sizeof(svn_version_buffer), "%d", atoi(buffer + j));
 			break;
 		}
@@ -210,23 +212,23 @@ const char* get_svn_revision(void) {
 	}
 
 	// subversion 1.6 and older?
-	if ((fp = fopen(".svn/entries", "r")) != NULL) {
+	if( (fp = fopen(".svn/entries", "r")) != NULL ) {
 		char line[1024];
 		int rev;
+
 		// Check the version
-		if (fgets(line, sizeof(line), fp)) {
-			if(!ISDIGIT(line[0])) {
+		if( fgets(line, sizeof(line), fp) ) {
+			if( !ISDIGIT(line[0]) ) {
 				// XML File format
-				while (fgets(line,sizeof(line),fp))
-					if (strstr(line,"revision=")) break;
-				if (sscanf(line," %*[^\"]\"%d%*[^\n]", &rev) == 1) {
+				while( fgets(line, sizeof(line), fp) )
+					if( strstr(line, "revision=") ) break;
+				if( sscanf(line," %*[^\"]\"%d%*[^\n]", &rev) == 1 )
 					snprintf(svn_version_buffer, sizeof(svn_version_buffer), "%d", rev);
-				}
 			} else {
 				// Bin File format
-				if ( fgets(line, sizeof(line), fp) == NULL ) { printf("Can't get bin name\n"); } // Get the name
-				if ( fgets(line, sizeof(line), fp) == NULL ) { printf("Can't get entries kind\n"); } // Get the entries kind
-				if(fgets(line, sizeof(line), fp)) { // Get the rev numver
+				if( fgets(line, sizeof(line), fp) == NULL ) { printf("Can't get bin name\n"); } // Get the name
+				if( fgets(line, sizeof(line), fp) == NULL ) { printf("Can't get entries kind\n"); } // Get the entries kind
+				if( fgets(line, sizeof(line), fp) ) { // Get the rev numver
 					snprintf(svn_version_buffer, sizeof(svn_version_buffer), "%d", atoi(line));
 				}
 			}
@@ -237,7 +239,7 @@ const char* get_svn_revision(void) {
 			return svn_version_buffer;
 	}
 
-	// fallback
+	// Fallback
 	snprintf(svn_version_buffer, sizeof(svn_version_buffer), "Unknown");
 	return svn_version_buffer;
 }
@@ -269,9 +271,8 @@ static void display_title(void) {
 void usercheck(void)
 {
 #ifndef _WIN32
-    if (geteuid() == 0) {
-		ShowWarning ("You are running rAthena with root privileges, it is not necessary.\n");
-    }
+    if( geteuid() == 0 )
+		ShowWarning ("You are running idAthena with root privileges, it is not necessary.\n");
 #endif
 }
 
@@ -280,20 +281,29 @@ void usercheck(void)
  *--------------------------------------*/
 int main (int argc, char **argv)
 {
-	{ // initialize program arguments
+	{ // Initialize program arguments
 		char *p1 = SERVER_NAME = argv[0];
-		char *p2 = p1;
-		while ((p1 = strchr(p2, '/')) != NULL || (p1 = strchr(p2, '\\')) != NULL) {
+
+		if( (p1 = strrchr(argv[0], '/')) != NULL || (p1 = strrchr(argv[0], '\\')) != NULL ) {
+			char *pwd = NULL; // Path working directory
+			int n = 0;
+
 			SERVER_NAME = ++p1;
-			p2 = p1;
+			n = p1 - argv[0]; // Calc dir name len
+			pwd = safestrncpy(malloc(n + 1), argv[0], n);
+			if( chdir(pwd) != 0 )
+				ShowError("Couldn't change working directory to %s for %s, runtime will probably fail", pwd, SERVER_NAME);
+			free(pwd);
 		}
+
 		arg_c = argc;
 		arg_v = argv;
+
 	}
 
-	malloc_init();// needed for Show* in display_title() [FlavioJS]
+	malloc_init(); // Needed for Show* in display_title() [FlavioJS]
 
-#ifdef MINICORE // minimalist Core
+#ifdef MINICORE // Minimalist Core
 	display_title();
 	usercheck();
 	do_init(argc,argv);
@@ -318,12 +328,10 @@ int main (int argc, char **argv)
 
 	do_init(argc,argv);
 
-	{// Main runtime cycle
-		int next;
-		while (runflag != CORE_ST_STOP) {
-			next = do_timer(gettick_nocache());
-			do_sockets(next);
-		}
+	// Main runtime cycle
+	while (runflag != CORE_ST_STOP) {
+		int next = do_timer(gettick_nocache());
+		do_sockets(next);
 	}
 
 	do_final();

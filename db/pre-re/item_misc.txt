@@ -1,5 +1,8 @@
+// Items Misc Database
+//
+// Structure of Database:
 // GroupID,ItemID,Rate
-// 
+//
 // First Aid Kit
 8,501,5		// Red Potion
 8,502,5		// Orange Potion

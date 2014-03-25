@@ -9,11 +9,10 @@
  */
 int date_get_year(void)
 {
-	time_t t;
-	struct tm * lt;
-	t = time(NULL);
-	lt = localtime(&t);
-	return lt->tm_year+1900;
+	time_t t = time(NULL);
+	struct tm *lt = localtime(&t);
+
+	return lt->tm_year + 1900;
 }
 
 /*
@@ -21,11 +20,10 @@ int date_get_year(void)
  */
 int date_get_month(void)
 {
-	time_t t;
-	struct tm * lt;
-	t = time(NULL);
-	lt = localtime(&t);
-	return lt->tm_mon+1;
+	time_t t = time(NULL);
+	struct tm *lt = localtime(&t);
+
+	return lt->tm_mon + 1;
 }
 
 /*
@@ -33,10 +31,9 @@ int date_get_month(void)
  */
 int date_get_day(void)
 {
-	time_t t;
-	struct tm * lt;
-	t = time(NULL);
-	lt = localtime(&t);
+	time_t t = time(NULL);
+	struct tm *lt = localtime(&t);
+
 	return lt->tm_mday;
 }
 
@@ -45,10 +42,9 @@ int date_get_day(void)
  */
 int date_get_hour(void)
 {
-	time_t t;
-	struct tm * lt;
-	t = time(NULL);
-	lt = localtime(&t);
+	time_t t = time(NULL);
+	struct tm *lt = localtime(&t);
+
 	return lt->tm_hour;
 }
 
@@ -57,10 +53,9 @@ int date_get_hour(void)
  */
 int date_get_min(void)
 {
-	time_t t;
-	struct tm * lt;
-	t = time(NULL);
-	lt = localtime(&t);
+	time_t t = time(NULL);
+	struct tm *lt = localtime(&t);
+
 	return lt->tm_min;
 }
 
@@ -69,10 +64,9 @@ int date_get_min(void)
  */
 int date_get_sec(void)
 {
-	time_t t;
-	struct tm * lt;
-	t = time(NULL);
-	lt = localtime(&t);
+	time_t t = time(NULL);
+	struct tm *lt = localtime(&t);
+
 	return lt->tm_sec;
 }
 
