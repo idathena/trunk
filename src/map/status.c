@@ -4616,6 +4616,8 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->aspd_rate = status_calc_aspd_rate(bl, sc, b_status->aspd_rate);
 			if( status->aspd_rate != 1000 )
 				amotion = amotion * status->aspd_rate / 1000;
+			if( sd->ud.skilltimer != INVALID_TIMER && (lv = pc_checkskill(sd, SA_FREECAST)) > 0 )
+				amotion = amotion * (lv + 10) * 5 / 100;
 #else //[malufett]
 			switch( sd->status.weapon ) {
 				case W_BOW:	case W_MUSICAL:
@@ -4634,13 +4636,13 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			if( (lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && (sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE) )
 				val += ((lv + 1) / 2);
 			amotion -= (int)(temp + (float)((status_calc_aspd(bl, sc, 1) + val) * status->agi) / 200) * 10;
-			if( status->aspd_rate != 1000 ) //Absolute ASPD % modifier
+			//Absolute ASPD % modifier
+			if( status->aspd_rate != 1000 )
 				amotion = (200 - (200 - amotion / 10) * status->aspd_rate / 1000) * 10;
-#endif
 			if( sd->ud.skilltimer != INVALID_TIMER && (lv = pc_checkskill(sd, SA_FREECAST)) > 0 )
-				amotion *= (lv + 10) * 5 / 100;
-#ifdef RENEWAL_ASPD
-			if( (status_calc_aspd(bl, sc, 2) + status->aspd_rate2) != 0 ) //RE ASPD % modifier
+				amotion = (200 - (200 - amotion / 10) * (lv + 10) * 5 / 100) * 10;
+			//RE ASPD % modifier
+			if( (status_calc_aspd(bl, sc, 2) + status->aspd_rate2) != 0 )
 				amotion -= (amotion - pc_maxaspd(sd)) * (status_calc_aspd(bl, sc, 2) + status->aspd_rate2) / 100 + 5; //Don't have round()
 			amotion += sd->bonus.aspd_add;
 #endif

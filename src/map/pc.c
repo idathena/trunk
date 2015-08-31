@@ -7287,7 +7287,6 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		clif_status_load(&sd->bl,SI_SIT,0);
 
 	pc_setdead(sd);
-
 	pc_setglobalreg(sd,"PC_DIE_COUNTER",sd->die_counter + 1);
 	pc_setparam(sd,SP_KILLERRID,src ? src->id : 0);
 
