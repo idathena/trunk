@@ -20,7 +20,8 @@ prt_castle,80,170,4	script	King of Prontera	108,{
 	if(select("Sure, what can I do?:Sorry, I'm busy.")==2) {
 		mes "[King of Prontera]";
 		mes "Ok, that's fine, I'm sure someone else will help.";
-		close; }
+		close;
+	}
 	mes "[King of Prontera]";
 	mes "Thank you. Well, my daughter next to me is a little rowdy...";
 	mes "If you get her these items I'm sure she'll calm down.";
@@ -35,9 +36,10 @@ prt_castle,80,170,4	script	King of Prontera	108,{
 				mes "If you could get me:";
 				for(set .@j,1; .@j<getarraysize(getd(".@Items"+.@i)); set .@j,.@j+2)
 					mes " ~ ^0055FF"+getd(".@Items"+.@i+"["+(.@j+1)+"]")+"^000000x "+getitemname(getd(".@Items"+.@i+"["+.@j+"]"));
-				mes "I'll give my "+((.@i)?"sword.":"crown.");
-				if (.@i==2) close;
-				next; }
+				mes "I'll give my "+((.@i==1)?"crown.":"sword.");
+				if(.@i==2) close;
+				next;
+			}
 		case 2:
 			mes "[King of Prontera]";
 			mes "What item do you want?";
@@ -46,10 +48,11 @@ prt_castle,80,170,4	script	King of Prontera	108,{
 			for(set .@j,1; .@j<getarraysize(getd(".@Items"+.@i)); set .@j,.@j+2)
 				if (countitem(getd(".@Items"+.@i+"["+.@j+"]")) < getd(".@Items"+.@i+"["+(.@j+1)+"]")) set .@nr,1;
 			mes "[King of Prontera]";
-			if (.@nr) { 
+			if(.@nr) { 
 				mes "You're missing something.";
 				mes "Come back after you get ALL the items.";
-				close; }
+				close;
+			}
 			for(set .@j,1; .@j<getarraysize(getd(".@Items"+.@i)); set .@j,.@j+2)
 				delitem getd(".@Items"+.@i+"["+.@j+"]"), getd(".@Items"+.@i+"["+(.@j+1)+"]");
 			getitem getd(".@Items"+.@i+"[0]"),1;
@@ -71,7 +74,8 @@ prt_castle,84,170,4	script	King's Daughter	62,{
 	if(select("Why?:Whatever...")==2) {
 		mes "[King's Daughter]";
 		mes "FINE THEN! Hmph!!";
-		close; }
+		close;
+	}
 	mes "[King's Daughter]";
 	mes "Well, he won't give me what I want!!";
 	mes "He's the King of Prontera. He should be able to get me ANYTHING!!!";

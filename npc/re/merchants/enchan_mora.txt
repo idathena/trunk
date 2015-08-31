@@ -20,6 +20,7 @@
 // Arch Bishop Enchants :: coin_arc
 //============================================================
 mora,88,89,5	script	Keeper of Secrets#pa082	495,{
+	disable_items;
 	if (checkweight(1201,1) == 0) {
 		mes "You have too many kinds of things with you to do that. Throw out some of them and try again.";
 		close;
@@ -28,7 +29,6 @@ mora,88,89,5	script	Keeper of Secrets#pa082	495,{
 		mes "You are carrying too much weight to do that. Reduce the weight and try again.";
 		close;
 	}
-	disable_items;
 	if (countitem(6380) < 10) {
 		mes "[Artifice]";
 		mes "Relics for Archbishops are meant for defense and support!";
@@ -141,6 +141,7 @@ mora,88,89,5	script	Keeper of Secrets#pa082	495,{
 }
 
 mora,96,74,5	script	Master of Relics#pa0829	495,{
+	disable_items;
 	if (checkweight(1201,1) == 0) {
 		mes "You have too many kinds of things with you to do that. Throw out some of them and try again.";
 		close;
@@ -149,7 +150,6 @@ mora,96,74,5	script	Master of Relics#pa0829	495,{
 		mes "You are carrying too much weight to do that. Reduce the weight and try again.";
 		close;
 	}
-	disable_items;
 	mes "[Relice]";
 	mes "I enhance Relics that holy Arch-Bishops use, it will take 2 Mora Coins and the relic to allow me to attempt to enhance it.";
 	next;
@@ -393,6 +393,7 @@ mora,104,76,4	script	Guardian of Artifacts#p	495,{
 }
 
 mora,99,93,5	script	Artifact Crafter#pa0829	495,{
+	disable_items;
 	if (checkweight(1201,1) == 0) {
 		mes "You have too many kinds of things with you to do that. Throw out some of them and try again.";
 		close;
@@ -401,7 +402,6 @@ mora,99,93,5	script	Artifact Crafter#pa0829	495,{
 		mes "You are carrying too much weight to do that. Reduce the weight and try again.";
 		close;
 	}
-	disable_items;
 	mes "[Artifact Crafter]";
 	mes "My job is to imbue artifacts with new power. If you have enough Coins, you can have one of the following items reinforced.";
 	next;
@@ -596,6 +596,7 @@ mora,152,97,5	script	Guardian of Power#pa082	515,{
 }
 
 mora,148,98,3	script	Artifact Researcher#new	521,{
+	disable_items;
 	if (checkweight(1201,1) == 0) {
 		mes "Reduce the amount of items that you have in your inventory before continuing.";
 		close;
@@ -604,7 +605,6 @@ mora,148,98,3	script	Artifact Researcher#new	521,{
 		mes "You are carrying too much in your inventory.";
 		close;
 	}
-	disable_items;
 	mes "[Artifact Researcher]";
 	mes "Nice to meet you.";
 	mes "I'm here in Mora studying ancient relics and artifacts. The new discoveries of Adventurers has made this village very exciting for me.";
@@ -1078,6 +1078,13 @@ L_Socket:
 			mes "Well I guess I was wrong...";
 			close;
 		}
+
+		// anti-hack
+		if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) ||
+		    callfunc("F_IsEquipRefineHack", .@part, .@equip_refine) ||
+		    callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]))
+			close;
+
 		if (.@equip_card[3] == 0 && getarg(2) < 4) {
 			set .@equip_card[3],.@enchant;
 		} else if (.@equip_card[2] == 0 && getarg(2) < 3) {
@@ -1154,6 +1161,7 @@ L_Socket:
 // Arch Bishop & Warlock Empowering :: relic_change
 //============================================================
 mora,124,82,4	script	Artifact Collector#blan	522,{
+	disable_items;
 	if (checkweight(1201,1) == 0) {
 		mes "Reduce the amount of items that you have in your inventory before continuing.";
 		close;
@@ -1162,7 +1170,6 @@ mora,124,82,4	script	Artifact Collector#blan	522,{
 		mes "You are carrying too much in your inventory.";
 		close;
 	}
-	disable_items;
 	emotion e_ho;
 	mes "Those Mora Artifacts look so perfect!";
 	mes "But I know you want them to be even better!";

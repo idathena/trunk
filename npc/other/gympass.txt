@@ -148,3 +148,5 @@ payon,173,141,4	script	Ripped Cabus#GymPass	899,{
 		}
 	}
 }
+
+prt_in,95,54,4	duplicate(Ripped Cabus#GymPass)	Ripped Camus#prt	899

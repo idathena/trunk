@@ -175,6 +175,7 @@ RK_IGNITIONBREAK,2	// Ignition Break
 GC_CROSSIMPACT,2	// Cross Impact
 GC_DARKILLUSION,2	// Dark Illusion
 GC_PHANTOMMENACE,2	// Phantom Menace
+GC_DARKCROW,2	// Dark Claw
 
 // Arch Bishop
 AB_JUDEX,2	// Judex
@@ -210,11 +211,14 @@ WL_SUMMON_ATK_WATER,2	// Dummy skill for Summon Water Ball
 WL_SUMMON_ATK_GROUND,2	// Dummy skill for Summon Stone
 
 // Ranger
-RA_ARROWSTORM,2,44,64	// Arrow Storm
-RA_AIMEDBOLT,2,44,64	// Aimed Bolt
+RA_ARROWSTORM,2	// Arrow Storm
+RA_AIMEDBOLT,2	// Aimed Bolt
 RA_CLUSTERBOMB,2	// Cluster Bomb
 RA_FIRINGTRAP,2	// Firing Trap
 RA_ICEBOUNDTRAP,2	// Icebound Trap
+
+// Mechanic
+NC_MAGMA_ERUPTION,2	// Magma Eruption
 
 // Shadow Chaser
 SC_FATALMENACE,2	// Fatal Menace
@@ -270,6 +274,7 @@ GN_CRAZYWEED,2	// Crazy Weed
 GN_HELLS_PLANT,2	// Hell's Plant
 GN_CRAZYWEED_ATK,2	// Dummy skill for Crazy Weed
 GN_HELLS_PLANT_ATK,2	// Dummy skil for Hell's Plant
+GN_ILLUSIONDOPING,2	// Illusion Doping
 
 // Kagerou/Oboro
 KO_MUCHANAGE,3	// Overthrow

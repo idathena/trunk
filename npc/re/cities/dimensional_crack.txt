@@ -1,0 +1,1038 @@
+//===== rAthena Script ======================================= 
+//= Dimensional Crack
+//===== By: ================================================== 
+//= Ziu
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= [Official Conversion]
+//= Dimensional Crack Script
+//===== Additional Comments: ================================= 
+//= 1.0 First version, edited. [exneval]
+//============================================================ 
+
+mid_camp,207,290,5	script	Time Travel Guide#camp	852,{
+	mes "[Expedition Guard Phil]";
+	mes "Are you going to enter the";
+	mes "dimensional gap of time and space?";
+	mes "Please use this device you see here";
+	mes "to do so.";
+	next;
+	switch(select("What's the dimensional gap?","End Conversation"))
+	{
+		case 1:
+			mes "[Expedition Guard Phil]";
+			mes "Haven't we already traveled here";
+			mes "from Rune Midgard?";
+			mes "I guess this is a lost area that we";
+			mes "haven't been to yet.";
+			next;
+			mes "[Expedition Guard Phil]";
+			mes "All these researchers seem to have";
+			mes "found a way to travel through time";
+			mes "and space with these devices.";
+			next;
+			mes "[Expedition Guard Phil]";
+			mes "I guess it's making our exploration";
+			mes "duties easier for us.";
+			mes "Travel to all the new areas is way";
+			mes "faster than walking or even riding";
+			mes "a Peco.";
+			next;
+			mes "[Expedition Guard Phil]";
+			mes "Time distorted here because of";
+			mes "all these special rifts.";
+			mes "Make sure you only use the devices";
+			mes "of the researchers or you might get";
+			mes "lost forever.";
+			next;
+			mes "[Expedition Guard Phil]";
+			mes "Hundreds of others have fallen into";
+			mes "unexplored gaps and have never been";
+			mes "seen again.";
+			close;
+		case 2:
+			close;
+	}
+}
+
+mid_camp,212,290,3	script	Time Travel Guide#camp2	852,{
+	mes "[Expedition Guard Jackson]";
+	mes "Please use the Dimensional Devices";
+	mes "to travel through the time gaps.";
+	mes "Many places are unexplored so be";
+	mes "careful of where you go.";
+	close;
+}
+
+mid_camp,210,291,0	script	Dimensional Device#camp	10007,{
+	mes "Enter the Dimensional Gap of time";
+	mes "and space?";
+	next;
+	switch(select("Yes","No"))
+	{
+		case 1:
+			close2;
+			warp "dali",141,82;
+			end;
+		case 2:
+			close;
+	}
+OnPCLoadMapEvent:
+	if(strcharinfo(3)=="mid_camp") showevent 0,1;
+	end;
+}
+
+bif_fild01,314,154,5	script	Expedition Guide#bi	852,{
+	mes "[Expedition Guard Paul]";
+	mes "Are you going to enter the";
+	mes "dimensional gap of time and space?";
+	mes "Please use this device you see here";
+	mes "to do so.";
+	next;
+	switch(select("What's the dimensional gap?","There is a stranger nearby","End Conversation"))
+	{
+		case 1:
+			mes "[Expedition Guard Paul]";
+			mes "Haven't we already traveled here";
+			mes "from Rune Midgard?";
+			mes "I guess this is a lost area that we";
+			mes "haven't been to yet.";
+			next;
+			mes "[Expedition Guard Paul]";
+			mes "All these researchers seem to have";
+			mes "found a way to travel through time";
+			mes "and space with these devices.";
+			next;
+			mes "[Expedition Guard Paul]";
+			mes "I guess it's making our exploration";
+			mes "duties easier for us.";
+			mes "Travel to all the new areas is way";
+			mes "faster than walking or even riding";
+			mes "a Peco.";
+			next;
+			mes "[Expedition Guard Paul]";
+			mes "Time distorted here because of";
+			mes "all these special rifts.";
+			mes "Make sure you only use the devices";
+			mes "of the researchers or you might get";
+			mes "lost forever.";
+			next;
+			mes "[Expedition Guard Paul]";
+			mes "Hundreds of others have fallen into";
+			mes "unexplored gaps and have never been";
+			mes "seen again.";
+			close;
+		case 2:
+			mes "[Expedition Guard Paul]";
+			mes "A stranger?";
+			mes "That person was sent to research";
+			mes "this area by a person of influence";
+			mes "from El Dicastes.";
+			next;
+			mes "[Expedition Guard Paul]";
+			mes "It has to do with avoiding a";
+			mes "conflict with the Laphine people.";
+			mes "I don't really know about the";
+			mes "details.";
+			close;
+		case 3:
+			close;
+	}
+}
+
+bif_fild01,320,154,3	script	Expedition Guide#bi2	852,{
+	mes "[Expedition Guard Pierce]";
+	mes "Please use the Dimensional Devices";
+	mes "to travel through the time gaps.";
+	mes "Many places are unexplored so be";
+	mes "careful of where you go.";
+	close;
+}
+
+bif_fild01,318,159,0	script	Dimensional Device#bi	10007,{
+	mes "Enter the Dimensional Gap of time";
+	mes "and space?";
+	next;
+	switch(select("Yes","No"))
+	{
+		case 1:
+			close2;
+			warp "dali",43,92;
+			end;
+		case 2:
+			close;
+	}
+OnPCLoadMapEvent:
+	if(strcharinfo(3)=="bif_fild01") showevent 0,1;
+	end;
+}
+
+dic_fild02,236,33,3	script	Expedition Guide#dic	852,{
+	mes "[Expedition Guard Chris]";
+	mes "Are you going to enter the";
+	mes "dimensional gap of time and space?";
+	mes "Please use this device you see here";
+	mes "to do so.";
+	next;
+	switch(select("What's the dimensional gap?","End Conversation"))
+	{
+		case 1:
+			mes "[Expedition Guard Chris]";
+			mes "Haven't we already traveled here";
+			mes "from Rune Midgard?";
+			mes "I guess this is a lost area that we";
+			mes "haven't been to yet.";
+			next;
+			mes "[Expedition Guard Chris]";
+			mes "All these researchers seem to have";
+			mes "found a way to travel through time";
+			mes "and space with these devices.";
+			next;
+			mes "[Expedition Guard Chris]";
+			mes "I guess it's making our exploration";
+			mes "duties easier for us.";
+			mes "Travel to all the new areas is way";
+			mes "faster than walking or even riding";
+			mes "a Peco.";
+			next;
+			mes "[Expedition Guard Chris]";
+			mes "Time distorted here because of";
+			mes "all these special rifts.";
+			mes "Make sure you only use the devices";
+			mes "of the researchers or you might get";
+			mes "lost forever.";
+			next;
+			mes "[Expedition Guard Chris]";
+			mes "Hundreds of others have fallen into";
+			mes "unexplored gaps and have never been";
+			mes "seen again.";
+			close;
+		case 2:
+			close;
+	}
+}
+
+dic_fild02,239,36,5	script	Expedition Guide#dic2	852,{
+	mes "[Expedition Guard Paul]";
+	mes "Please use the Dimensional Devices";
+	mes "to travel through the time gaps.";
+	mes "Many places are unexplored so be";
+	mes "careful of where you go.";
+	close;
+}
+
+dic_fild02,241,31,0	script	Dimensional Device#dic	10007,{
+	mes "Enter the Dimensional Gap of time";
+	mes "and space?";
+	next;
+	switch(select("Yes","No"))
+	{
+		case 1:
+			close2;
+			warp "dali",41,134;
+			end;
+		case 2:
+			close;
+	}
+OnPCLoadMapEvent:
+	if(strcharinfo(3)=="dic_fild02") showevent 0,1;
+	end;
+}
+
+moc_fild22b,225,198,5	script	Expedition Guide#moc	852,{
+	mes "[Expedition Guard Derek]";
+	mes "Are you going to enter the";
+	mes "dimensional gap of time and space?";
+	mes "Please use this device you see here";
+	mes "to do so.";
+	next;
+	switch(select("What's the dimensional gap?","End Conversation"))
+	{
+		case 1:
+			mes "[Expedition Guard Derek]";
+			mes "Haven't we already traveled here";
+			mes "from Rune Midgard?";
+			mes "I guess this is a lost area that we";
+			mes "haven't been to yet.";
+			next;
+			mes "[Expedition Guard Derek]";
+			mes "All these researchers seem to have";
+			mes "found a way to travel through time";
+			mes "and space with these devices.";
+			next;
+			mes "[Expedition Guard Derek]";
+			mes "I guess it's making our exploration";
+			mes "duties easier for us.";
+			mes "Travel to all the new areas is way";
+			mes "faster than walking or even riding";
+			mes "a Peco.";
+			next;
+			mes "[Expedition Guard Derek]";
+			mes "Time distorted here because of";
+			mes "all these special rifts.";
+			mes "Make sure you only use the devices";
+			mes "of the researchers or you might get";
+			mes "lost forever.";
+			next;
+			mes "[Expedition Guard Derek]";
+			mes "Hundreds of others have fallen into";
+			mes "unexplored gaps and have never been";
+			mes "seen again.";
+			close;
+		case 2:
+			close;
+	}
+}
+
+moc_fild22b,223,203,3	script	Expedition Guide#moc2	852,{
+	mes "[Expedition Guard Fisher]";
+	mes "Please use the Dimensional Devices";
+	mes "to travel through the time gaps.";
+	mes "Many places are unexplored so be";
+	mes "careful of where you go.";
+	close;
+}
+
+moc_fild22b,221,201,0	script	Dimensional Device#moc	10007,{
+	mes "Enter the Dimensional Gap of time";
+	mes "and space?";
+	next;
+	switch(select("Yes","No"))
+	{
+		case 1:
+			close2;
+			warp "dali",119,56;
+			end;
+		case 2:
+			close;
+	}
+OnPCLoadMapEvent:
+	if(strcharinfo(3)=="moc_fild22b") showevent 0,1;
+	end;
+}
+
+//Dimensional Crack NPCS
+dali,137,87,3	script	Allied Forces Staff	997,{
+	mes "[Allied Forces Staff]";
+	mes "The dimensional gap is connected to";
+	mes "the Midgard Alliance camp in Jotenheim.";
+	mes "Do not worry, hundreds of tests";
+	mes "were done to ensure safe";
+	mes "transport.";
+	close;
+}
+
+dali,115,85,3	script	Party Leader#SWDMASTER2	119,{
+	end;
+OnInit:
+	hideonnpc "Party Leader#SWDMASTER2";
+	end;
+OnChat1:
+	npctalk "Attention!!!";
+	end;
+OnChat2:
+	npctalk "Wait. Be quiet and stand in line!";
+	end;
+OnChat3:
+	npctalk "We are inside of the dimensional crack now, where shall we go first?";
+	end;
+OnChat4:
+	npctalk "Anyone have an opinion?";
+	end;
+OnChat29:
+	npctalk "Excuse me..... everyone.............?";
+	end;
+OnChat31:
+	emotion e_sob;
+	npctalk "Please listen....";
+	end;
+OnChat32:
+	hideonnpc "Party Leader#SWDMASTER2";
+	hideoffnpc "Party Leader#SWDMASTER";
+	end;
+}
+
+dali,119,76,7	script	Party Member#SHADOW	482,{
+	end;
+OnChat12:
+	npctalk "Woke up?";
+	end;
+OnChat16:
+	npctalk "I have no idea. There might be an accident up front.";
+	end;
+OnChat23:
+	npctalk "Right.. I should have entered with another group!";
+	end;
+OnChat31:
+	npctalk "Take a nap. I am sleepy too then let's shift later.";
+	end;
+}
+
+dali,120,77,4	script	Party Member#SURA	484,{
+	end;
+OnChat10:
+	emotion e_yawn;
+	npctalk "Oh? What? You didn't get in yet?";
+	end;
+OnChat13:
+	emotion e_an;
+	npctalk "Why are you still here?";
+	end;
+OnChat19:
+	emotion e_an;
+	end;
+OnChat20:
+	npctalk "Damn! I am pissed off! I came here because I heard only a party is allowed to get in!";
+	end;
+OnChat22:
+	emotion e_an;
+	end;
+OnChat27:
+	emotion e_yawn;
+	npctalk "Bah, I do not care. I'm gonna take a nap so wake me up when we're ready.";
+	end;
+}
+
+dali,119,78,2	script	Party Member#GUILLOTINE	466,{
+	end;
+OnChat5:
+	npctalk "You want to eat again?";
+	end;
+OnChat9:
+	npctalk "I just saw a street trader passing by... Where is he?";
+	end;
+OnChat13:
+	npctalk "Wait for a moment. A street trader will pass by.";
+	end;
+OnChat18:
+	npctalk "Give me a sip of juice.";
+	end;
+OnChat23:
+	npctalk "So mean.. I won't eat then.";
+	end;
+OnChat25:
+	npctalk "Not at all.";
+	end;
+OnChat30:
+	emotion e_ag;
+	npctalk "No!!!!!!!!!";
+	end;
+}
+
+dali,117,79,5	script	Party Member#CRU	745,{
+	end;
+OnChat4:
+	npctalk "Well, I am kind of hungry... Can we get something warm to eat?";
+	end;
+OnChat7:
+	npctalk "I need to eat something before doing anything.";
+	end;
+OnChat11:
+	npctalk "Can I come back after having a meal?";
+	end;
+OnChat15:
+	npctalk "I want to buy cold grape juice~";
+	end;
+OnChat21:
+	npctalk "You pay for your food.";
+	end;
+OnChat24:
+	emotion e_gg;
+	npctalk "Hey. Are you pissed off?";
+	end;
+OnChat28:
+	emotion e_gg;
+	npctalk "You are upset!!";
+	end;
+OnChat31:
+	npctalk "I'm so pissed off right now...";
+	end;
+}
+
+dali,120,81,3	script	Party Member#EINOLD	847,{
+	end;
+OnChat18:
+	npctalk "Cough~ Cough~";
+	end;
+OnChat28:
+	npctalk "What? You, we gotta talk! I've been too nice to you!";
+	end;
+}
+
+dali,117,81,7	script	Party Member#WANDERER	485,{
+	end;
+OnChat2:
+	npctalk "We heard about a magic competition being held here!";
+	end;
+OnChat6:
+	npctalk "I am just wondering about the tournament..";
+	end;
+OnChat13:
+	npctalk "Can you catch that?";
+	end;
+OnChat17:
+	npctalk "What? Is that what you think?";
+	end;
+OnChat23:
+	npctalk "I will let it go.";
+	end;
+OnChat28:
+	npctalk "Can I get back before I die...";
+	end;
+}
+
+dali,118,83,3	script	Party Member#MONK	746,{
+	end;
+OnChat1:
+	npctalk "I heard about some magic swordman. Let's go find him.";
+	end;
+OnChat3:
+	npctalk "Where is it?!";
+	end;
+OnChat8:
+	npctalk "By the way, I also heard about something called the Devil's Tower.";
+	end;
+OnChat10:
+	npctalk "I am curious about the faceworms I heard from a Laphine.";
+	end;
+OnChat14:
+	npctalk "That is your wish....";
+	end;
+OnChat21:
+	npctalk "Are you going to hit me? Do it!";
+	emotion e_ag;
+	end;
+OnChat26:
+	emotion e_gg;
+	npctalk "You are scared huh... chuckling~";
+	end;
+OnChat30:
+	npctalk "Whatever~";
+	end;
+}
+
+dali,115,85,3	script	Party Leader#SWDMASTER	119,{
+	donpcevent "Party Leader#SWDMASTER2::OnChat1";
+	donpcevent "#dalichat::OnEnable";
+	end;
+}
+
+dali,115,85,0	script	#dalichat	-1,{
+	end;
+OnInit:
+	disablenpc "#dalichat";
+	end;
+OnEnable:
+	enablenpc "#dalichat";
+	initnpctimer;
+	end;
+OnTimer1000:
+	hideonnpc "Party Leader#SWDMASTER";
+	hideoffnpc "Party Leader#SWDMASTER2";
+	end;
+OnTimer2000:
+	donpcevent "Party Leader#SWDMASTER2::OnChat2";
+	end;
+OnTimer3000:
+	donpcevent "Party Leader#SWDMASTER2::OnChat3";
+	end;
+OnTimer4000:
+	donpcevent "Party Leader#SWDMASTER2::OnChat4";
+	end;
+OnTimer6000:
+	donpcevent "Party Member#MONK::OnChat1";
+	end;
+OnTimer7500:
+	donpcevent "Party Member#WANDERER::OnChat2";
+	end;
+OnTimer9000:
+	donpcevent "Party Member#MONK::OnChat3";
+	end;
+OnTimer10500:
+	donpcevent "Party Member#CRU::OnChat4";
+	end;
+OnTimer12000:
+	donpcevent "Party Member#GUILLOTINE::OnChat5";
+	end;
+OnTimer13500:
+	donpcevent "Party Member#WANDERER::OnChat6";
+	end;
+OnTimer15000:
+	donpcevent "Party Member#CRU::OnChat7";
+	end;
+OnTimer16500:
+	donpcevent "Party Member#MONK::OnChat8";
+	end;
+OnTimer18000:
+	donpcevent "Party Member#GUILLOTINE::OnChat9";
+	end;
+OnTimer19500:
+	donpcevent "Party Member#SURA::OnChat10";
+	end;
+OnTimer20000:
+	donpcevent "Party Member#MONK::OnChat10";
+	end;
+OnTimer21000:
+	donpcevent "Party Member#CRU::OnChat11";
+	end;
+OnTimer22500:
+	donpcevent "Party Member#SHADOW::OnChat12";
+	end;
+OnTimer24000:
+	donpcevent "Party Member#WANDERER::OnChat13";
+	donpcevent "Party Member#SURA::OnChat13";
+	end;
+OnTimer24500:
+	donpcevent "Party Member#GUILLOTINE::OnChat13";
+	end;
+OnTimer25500:
+	donpcevent "Party Member#MONK::OnChat14";
+	end;
+OnTimer27000:
+	donpcevent "Party Member#CRU::OnChat15";
+	end;
+OnTimer28500:
+	donpcevent "Party Member#SHADOW::OnChat16";
+	end;
+OnTimer30000:
+	donpcevent "Party Member#WANDERER::OnChat17";
+	end;
+OnTimer31500:
+	donpcevent "Party Member#GUILLOTINE::OnChat18";
+	end;
+OnTimer32000:
+	donpcevent "Party Member#EINOLD::OnChat18";
+	end;
+OnTimer33000:
+	donpcevent "Party Member#SURA::OnChat19";
+	end;
+OnTimer34000:
+	donpcevent "Party Member#SURA::OnChat20";
+	end;
+OnTimer34500:
+	donpcevent "Party Member#MONK::OnChat21";
+	end;
+OnTimer36000:
+	donpcevent "Party Member#CRU::OnChat21";
+	end;
+OnTimer37500:
+	donpcevent "Party Member#SURA::OnChat22";
+	end;
+OnTimer39000:
+	donpcevent "Party Member#GUILLOTINE::OnChat23";
+	donpcevent "Party Member#SHADOW::OnChat23";
+	donpcevent "Party Member#WANDERER::OnChat23";
+	end;
+OnTimer40500:
+	donpcevent "Party Member#CRU::OnChat24";
+	end;
+OnTimer42000:
+	donpcevent "Party Member#GUILLOTINE::OnChat25";
+	end;
+OnTimer43500:
+	donpcevent "Party Member#MONK::OnChat26";
+	end;
+OnTimer45000:
+	donpcevent "Party Member#SURA::OnChat27";
+	end;
+OnTimer46500:
+	donpcevent "Party Member#CRU::OnChat28";
+	donpcevent "Party Member#WANDERER::OnChat28";
+	donpcevent "Party Member#EINOLD::OnChat28";
+	end;
+OnTimer48000:
+	donpcevent "Party Leader#SWDMASTER2::OnChat29";
+	end;
+OnTimer49500:
+	donpcevent "Party Member#GUILLOTINE::OnChat30";
+	donpcevent "Party Member#MONK::OnChat30";
+	end;
+OnTimer51000:
+	donpcevent "Party Member#SHADOW::OnChat31";
+	donpcevent "Party Member#CRU::OnChat31";
+	donpcevent "Party Leader#SWDMASTER2::OnChat31";
+	end;
+OnTimer52500:
+	donpcevent "Party Leader#SWDMASTER2::OnChat32";
+	stopnpctimer;
+	disablenpc "#dalichat";
+	end;
+}
+
+dali,102,83,5	script	Merchant Prince#HUMERC	900,2,2,{
+	mes "[Prince Canet]";
+	mes "Who're you?";
+	next;
+	mes "[Prince Canet]";
+	mes "What do you want?";
+	mes "You looking something in";
+	mes "particular?";
+	next;
+	mes "[Prince Canet]";
+	mes "So some enforcers have been";
+	mes "cracking down on merchants lately.";
+	mes "I can not sell anything.";
+	next;
+	mes "[Prince Canet]";
+	mes "Come here...";
+	next;
+	mes "[Jumpy Knight]";
+	mes "I knew you would be here!!";
+	mes "No illegal trading is allowed";
+	mes "here!";
+	mes "Don't you know?";
+	hideoffnpc "Jumpy Knight#JP_RUN";
+	next;
+	mes "[Prince Canet]";
+	mes "Says who?";
+	next;
+	mes "[Jumpy Knight]";
+	mes "Ok, then show me your permit.";
+	next;
+	mes "[Prince Canet]";
+	mes "Permit?";
+	mes "No one's in charge here!";
+	next;
+	mes "[Prince Canet]";
+	mes "You! If you need anything come to";
+	mes "me ok?";
+	next;
+	mes "[Jumpy Knight]";
+	mes "I will catch you!";
+	hideonnpc "Merchant Prince#HUMERC";
+	close2;
+	hideonnpc "Jumpy Knight#JP_RUN";
+	enablenpc "Merchant Prince#HUMERC2";
+	hideoffnpc "Merchant Prince#HUMERC2";
+	disablenpc "Merchant Prince#HUMERC";
+	end;
+OnTouch:
+	mes "[Prince Canet]";
+	mes "Cold juice!";
+	mes "Apple, grape, orange~";
+	mes "Anything you want!";
+	next;
+	mes "[Prince Canet]";
+	mes "Sweet potato, dumpling~";
+	mes "Here we have delicious desserts~";
+	close;
+}
+
+dali,105,82,1	script	Jumpy Knight#JP_RUN	430,{
+	end;
+OnInit:
+	hideonnpc "Jumpy Knight#JP_RUN";
+	end;
+}
+
+dali,63,112,7	script	Merchant Prince#HUMERC2	900,2,2,{
+	mes "[Prince Canet]";
+	mes "You need to pay a tool to get past.";
+	next;
+	switch(select("What tool?"))
+	{
+		case 1:
+			mes "[Prince Canet]";
+			mes "You did not know?";
+			mes "500 zeny";
+			next;
+			mes "[Jumpy Knight]";
+			mes "You there!";
+			mes "Stop right there!";
+			hideoffnpc "Jumpy Knight#JP_RUN2";
+			next;
+			mes "[Prince Canet]";
+			mes "Ugh! How are you always following";
+			mes "me?";
+			mes "Got some kind of crush on me or";
+			mes "something?";
+			mes "I don't think you and I make a good";
+			mes "match...";
+			next;
+			mes "[Jumpy Knight]";
+			mes "Why don't we find out then?";
+			next;
+			mes "[Prince Canet]";
+			mes "That's it no more talking.";
+			mes "I'm outta here~";
+			next;
+			mes "[Jumpy Knight]";
+			mes "Keep running you sneaky coward!";
+			hideonnpc "Merchant Prince#HUMERC2";
+			close2;
+			hideonnpc "Jumpy Knight#JP_RUN2";
+			hideoffnpc "Merchant Prince#HUMERC3";
+			disablenpc "Merchant Prince#HUMERC2";
+			end;
+	}
+OnInit:
+	disablenpc "Merchant Prince#HUMERC2";
+	end;
+OnTouch:
+	mes "[Prince Canet]";
+	mes "500 zeny";
+	close;
+}
+
+dali,67,113,3	script	Jumpy Knight#JP_RUN2	430,{
+	end;
+OnInit:
+	hideonnpc "Jumpy Knight#JP_RUN2";
+	end;
+}
+
+dali,89,97,3	script	Merchant Prince#HUMERC3	900,{
+	mes "[Prince Canet]";
+	mes "You are lucky that you have met up";
+	mes "with me.";
+	mes "Who am I?";
+	mes "I'm here to become a merchant";
+	mes "King.";
+	next;
+	mes "[Prince Canet]";
+	mes "I might be working a street stall";
+	mes "now but I'll have an actual shop";
+	mes "some day.";
+	next;
+	mes "[Prince Canet]";
+	mes "It's my first day so I'm having a";
+	mes "major sale.";
+	next;
+	mes "[Prince Canet]";
+	mes "Let's see I've got a...";
+	mes "Ring of something!";
+	mes "Sword of stuff!";
+	mes "A backpack of some sort!";
+	next;
+	mes "[Prince Canet]";
+	mes "Tell me if you need anything,";
+	hideoffnpc "Jumpy Knight#JP_RUN3";
+	next;
+	mes "[Prince Canet]";
+	mes "What are you doing here?";
+	mes "This is my spot for a shop";
+	mes "Get outta my turf!";
+	next;
+	mes "[Jumpy Knight]";
+	mes "Bah!!";
+	mes "You're gonna regret those words!";
+	next;
+	mes "[Prince Canet]";
+	mes "I'm shaking...";
+	hideonnpc "Merchant Prince#HUMERC3";
+	close2;
+	hideonnpc "Jumpy Knight#JP_RUN3";
+	enablenpc "Merchant Prince#HUMERC";
+	hideoffnpc "Merchant Prince#HUMERC";
+	end;
+OnInit:
+	hideonnpc "Merchant Prince#HUMERC3";	
+	end;
+}
+
+dali,89,94,7	script	Jumpy Knight#JP_RUN3	430,{
+	end;
+OnInit:
+	hideonnpc "Jumpy Knight#JP_RUN3";
+	end;
+}
+
+//Usefull NPC & Warps
+dali,112,96,3	script	Cat Hand Storage	496,{
+	mes "[Logistics Manager]";
+	mes "Welcome.";
+	mes "I am in charge of taking care of";
+	mes "storage in this weird place.";
+	mes "Do you need to access your";
+	mes "storage?";
+	next;
+	switch(select("Use Storage -> 200z","Cancel."))
+	{
+		case 1:
+			if (Zeny < 200) {
+				mes "[Logistics Manager]";
+				mes "The charge for using storage is";
+				mes "200z";
+				close;
+			}
+			set Zeny, Zeny - 200;
+			mes "[Logistics Manager]";
+			mes "Have a good time~ Mew~";
+			callfunc("F_CheckKafCode");
+			close2;
+			openstorage;
+			end;
+		case 2:
+			mes "[Logistics Manager]";
+			mes "Or you may use our service next";
+			mes "time.";
+			close;
+	}
+}
+
+dali,56,126,3	script	Dispatched Sapha#BENKUNI	449,{
+	mes "[Benkuni Miyo]";
+	mes "This part of the dimensional gap is";
+	mes "connected to the south of the";
+	mes "Kamidal mountain range in El";
+	mes "Dicastes.";
+	mes "I just dropped by here to do some";
+	mes "research. Isn't it incredible?";
+	next;
+	mes "[Benkuni Miyo]";
+	mes "And it's so close to the";
+	mes "Laphine...";
+	mes ".......Hmm";
+	mes "Do not worry. I do not want to";
+	mes "fight in such a place.";
+	close;
+}
+
+dali,51,104,5	script	Splendide Soldier#FAIRY	447,{
+	mes "[Splendide Soldier]";
+	mes "This area is connected to the south";
+	mes "of the Bifrost bridge.";
+	mes "It enable swift movement to the";
+	mes "Splendide frontline.";
+	next;
+	mes "[Splendide Soldier]";
+	mes "If we use it properly, we can";
+	mes "advance quickly to the capital of";
+	mes "the Sapha.";
+	next;
+	mes "[Splendide Soldier]";
+	mes "The Mayor is asking us to cooperate";
+	mes "instead of fighting...";
+	mes "We have a common enemy so the Sapha";
+	mes "are safe for now...";
+	close;
+}
+
+dali,122,60,3	script	Morocc Soldier#MOC_SLDR	707,{
+	mes "[Morocc Soldier]";
+	mes "This place is connected to Morocc";
+	mes "in Rune Midgard.";
+	mes "This is the fastest gateway back";
+	mes "home.";
+	close;
+}
+
+dali02,58,123,3	script	Curious Knight#KY_KNT	418,{
+	mes "[Curious Knight]";
+	mes "The royal guard was desperate for";
+	mes "help.";
+	mes "We entered through a secret place";
+	mes "in the palace.";
+	next;
+	mes "[Curious Knight]";
+	mes "We were whisked away here...";
+	mes "No idea where I am but I have to";
+	mes "establish a base here for the";
+	mes "Knighthood.";
+	close;
+}
+
+dali02,51,112,5	script	Confused Thief#DST_SOL	939,{
+	mes "[Confused Thief]";
+	mes "One minute I'm in a bar...";
+	mes "The next minute I'm here...";
+	mes "What is this place?";
+	next;
+	mes "[Confused Thief]";
+	mes "There's no night or day in here.";
+	mes "Hmm, something has to be valuable";
+	mes "in this place...";
+	close;
+}
+
+dali02,65,115,5	script	Adventurous Rafflesia#ra	516,{
+	mes "[Adventurous Rafflesia]";
+	mes "No no this has to be Thanatos";
+	mes "Tower...";
+	mes "I sense dark magic here.";
+	next;
+	mes "[Guide]";
+	mes "Oh, we're back here again.";
+	mes "I cannot find a way out!";
+	mes "We are trapped in this maze!";
+	next;
+	mes "[Tourist]";
+	mes "Is this place the famous Prontera?";
+	mes "It is dark just like a big city!";
+	next;
+	mes "[Traveller]";
+	mes "I hear a ticking clock.";
+	mes "This place must be Geffen!";
+	close;
+}
+
+dali02,68,117,5	script	Guide#ra	516,{
+	mes "[Guide]";
+	mes "Oh, we're back here again.";
+	mes "I cannot find a way out!";
+	mes "We are trapped in this maze!";
+	next;
+	mes "[Tourist]";
+	mes "Is this place the famous Prontera?";
+	mes "It is dark just like a big city!";
+	next;
+	mes "[Traveller]";
+	mes "I hear a ticking clock.";
+	mes "This place must be Geffen!";
+	next;
+	mes "[Adventurous Rafflesia]";
+	mes "No no this has to be Thanatos";
+	mes "Tower...";
+	mes "I sense dark magic here.";
+	close;
+}
+
+dali02,65,119,5	script	Tourist#ra	516,{
+	mes "[Tourist]";
+	mes "Is this place the famous Prontera?";
+	mes "It is dark just like a big city!";
+	next;
+	mes "[Adventurous Rafflesia]";
+	mes "No no this has to be Thanatos";
+	mes "Tower...";
+	mes "I sense dark magic here.";
+	next;
+	mes "[Guide]";
+	mes "Oh, we're back here again.";
+	mes "I cannot find a way out!";
+	mes "We are trapped in this maze!";
+	next;
+	mes "[Traveller]";
+	mes "I hear a ticking clock.";
+	mes "This place must be Geffen!";
+	close;
+}
+
+dali02,69,122,5	script	Traveller#ra	516,{
+	mes "[Traveller]";
+	mes "I hear a ticking clock.";
+	mes "This place must be Geffen!";
+	next;
+	mes "[Guide]";
+	mes "Oh, we're back here again.";
+	mes "I cannot find a way out!";
+	mes "We are trapped in this maze!";
+	next;
+	mes "[Tourist]";
+	mes "Is this place the famous Prontera?";
+	mes "It is dark just like a big city!";
+	next;
+	mes "[Adventurous Rafflesia]";
+	mes "No no this has to be Thanatos";
+	mes "Tower...";
+	mes "I sense dark magic here.";
+	close;
+}
+
+mid_camp	mapflag	loadevent
+bif_fild01	mapflag	loadevent
+dic_fild02	mapflag	loadevent
+moc_fild22b	mapflag	loadevent

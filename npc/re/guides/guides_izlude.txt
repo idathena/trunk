@@ -205,5 +205,3 @@ izlude_a,133,113,4	duplicate(GuideIzlude)	Guide#02izlude_a	105
 izlude_b,133,113,4	duplicate(GuideIzlude)	Guide#02izlude_b	105
 izlude_c,133,113,4	duplicate(GuideIzlude)	Guide#02izlude_c	105
 izlude_d,133,113,4	duplicate(GuideIzlude)	Guide#02izlude_d	105
-
-//izlude,120,206,4	duplicate(GuideIzlude)	Guide#03izlude	105

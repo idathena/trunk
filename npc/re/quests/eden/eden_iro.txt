@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= -SkittleNugget-
 //===== Current Version: =====================================
-//= 1.4
+//= 1.5
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: =========================================
@@ -15,6 +15,7 @@
 //= 1.2 Added VIP NPCs and features. [Euphy]
 //= 1.3 Added Mail Annex Station scripts, commented out. [Euphy]
 //= 1.4 Added Merry Badger. [Euphy/-SkittleNugget-]
+//= 1.5 Added Shadow Blacksmith. [exneval]
 //============================================================
 
 // Acolyte Warper (part of other/acolyte_warp.txt)
@@ -836,6 +837,9 @@ moc_para01,26,185,4	duplicate(Suhnbi#cash)	Suhnmi#eden	85
 // HD Refiner "Blacksmith Mighty Hammer" (re/merchants/hd_refiner.txt)
 // A combination of the +7~9 and +10 and up refiner, currently a placeholder.
 moc_para01,38,185,4	duplicate(MightyHammer)	Mighty Hammer#ed	826
+
+// Shadow Refiner "Shadow Blacksmith" (re/merchants/shadow_refiner.txt)
+moc_para01,44,185,6	duplicate(ShadowBlacksmith)	Shadow Blacksmith#ed	726
 
 // Refiner Effect
 -	script	#eden_refine_effect	-1,{

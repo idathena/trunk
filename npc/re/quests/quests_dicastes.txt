@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Gennosuke Kouga, Muad_Dib
 //===== Current Version: =====================================
-//= 2.3
+//= 2.4
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: =========================================
@@ -11,7 +11,7 @@
 //= Quest NPCs related to Dewata:
 //== Sapha's Visit, Doha's Secrect Order, Frede's Request,
 //== Department Quests, Document Quests,
-//== Chesire's Call, Cat Hands Enchantment
+//== Cheshire's Call, Cat Hands Enchantment
 //== Cat Hand Agent
 //===== Additional Comments: =================================
 //= 1.0 First version. 14107 lines, oh, the pain...
@@ -33,6 +33,7 @@
 //= 2.1 Added reset option to "Kareka". [Euphy]
 //= 2.2 Added Izlude duplicates. [Euphy]
 //= 2.3 Added GM management NPCs. [Euphy]
+//= 2.4 Corrected NPC Location. [Dastgir]
 //============================================================
 
 // Entrance
@@ -692,7 +693,7 @@ dic_in01,51,270,7	script	Supply Dept. 1 Manager	449,{
 	close;
 }
 
-dic_in01,48,273,8	script	Supply Dept. 2 Manager	449,{
+dic_in01,48,273,0	script	Supply Dept. 2 Manager	449,{
 	if (!checkweight(1201,1)) {
 		mes "You have too many kinds of items. Let's try again after you reduce the number of items.";
 		close;
@@ -1139,7 +1140,7 @@ function	script	unknown_d	{
 	}
 	close;
 }
-prt_fild03,144,95,0	script	Tree Roots	844,{ unknown_d(12166,902); }
+pay_fild03,144,95,0	script	Tree Roots	844,{ unknown_d(12166,902); }
 prt_fild09,371,255,0	script	Reptile Tongues	844,{ unknown_d(12167,903); }
 prt_fild09,352,241,0	script	Scorpion Tails	844,{ unknown_d(12168,904); }
 pay_fild02,177,108,0	script	Stems	844,{ unknown_d(12169,905); }
@@ -7627,6 +7628,13 @@ moc_fild22b,182,179,3	script	Cat Hand Agent#Tat	495,{
 	mes "Are you ready?";
 	next;
 	if (select ("To the other world!:I need some time.") == 1) {
+		mes "[Tat]";
+		mes "If you want to talk to the Manuk giants in the new world, you're going to need an interpreter ring.";
+		next;
+		mes "[Tat]";
+		mes "Talk to Schwartzvalt Mechanic hanging out in font of the Expedition's main tent and he'll direct you to what you need to do.";
+		mes "The humans there might make you jump through some hoops to get one though...";
+		next;
 		mes "[Tat]";
 		mes "Don't forget you are in debt to the Cat Hand Merchant, human!";
 		close2;

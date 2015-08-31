@@ -165,12 +165,11 @@ void trade_tradeack(struct map_session_data *sd, int type)
 }
 
 /**
- * Check here hacker for duplicate item in trade
- * normal client refuse to have 2 same types of item (except equipment) in same trade window
- * normal client authorize only no equiped item and only from inventory
- * This function could end player connection if too much hack is detected
- * @param sd : player to check
- * @return -1:zeny hack, 0:all fine, 1:item hack
+ * Checks if an impossible trade will occur
+ *  Normal clients refuse to have 2 items of the same type (except equipment) in the same trade window
+ *  Normal clients authorize only no equipped items and only items from inventory
+ * @return 0 The trade can continue
+ * @return 1 Hack attempt
  */
 int impossible_trade_check(struct map_session_data *sd)
 {
@@ -180,10 +179,8 @@ int impossible_trade_check(struct map_session_data *sd)
 
 	nullpo_retr(1, sd);
 
-	if (sd->deal.zeny > sd->status.zeny) {
-		pc_setglobalreg(sd,"ZENY_HACKER",1);
-		return -1;
-	}
+	if (sd->deal.zeny > sd->status.zeny)
+		return 1;
 
 	//Get inventory of player
 	memcpy(&inventory, &sd->status.inventory, sizeof(struct item) * MAX_INVENTORY);
@@ -201,26 +198,26 @@ int impossible_trade_check(struct map_session_data *sd)
 			continue;
 		index = sd->deal.item[i].index;
 		if (inventory[index].amount < sd->deal.item[i].amount) { //If more than the player have -> hack
-			sprintf(message_to_gm, msg_txt(538), sd->status.name, sd->status.account_id); //Hack on trade: character '%s' (account: %d) try to trade more items that he has.
+			sprintf(message_to_gm, msg_txt(538), sd->status.name, sd->status.account_id); // Hack on trade: character '%s' (account: %d) try to trade more items that he has.
 			intif_wis_message_to_gm(wisp_server_name, PC_PERM_RECEIVE_HACK_INFO, message_to_gm);
-			sprintf(message_to_gm, msg_txt(539), inventory[index].amount, inventory[index].nameid, sd->deal.item[i].amount); //This player has %d of a kind of item (ID: %d), and try to trade %d of them.
+			sprintf(message_to_gm, msg_txt(539), inventory[index].amount, inventory[index].nameid, sd->deal.item[i].amount); // This player has %d of a kind of item (ID: %d), and try to trade %d of them.
 			intif_wis_message_to_gm(wisp_server_name, PC_PERM_RECEIVE_HACK_INFO, message_to_gm);
 			//If we block people
 			if (battle_config.ban_hack_trade < 0) {
-				chrif_req_login_operation(-1, sd->status.name, 1, 0, 0, 0); //Type: 1 - block
+				chrif_req_login_operation(-1, sd->status.name, CHRIF_OP_LOGIN_BLOCK, 0, 0); //Type: 1 - block
 				set_eof(sd->fd); //Forced to disconnect because of the hack
 				//Message about the ban
-				strcpy(message_to_gm, msg_txt(540)); //This player has been definitively blocked.
+				strcpy(message_to_gm, msg_txt(540)); // This player has been definitively blocked.
 			//If we ban people
 			} else if (battle_config.ban_hack_trade > 0) {
-				chrif_req_login_operation(-1, sd->status.name, 2, battle_config.ban_hack_trade * 60, 0, 0); //Type: 2 - ban (year, month, day, hour, minute, second)
+				chrif_req_login_operation(-1, sd->status.name, CHRIF_OP_LOGIN_BAN, battle_config.ban_hack_trade * 60, 0); //Type: 2 - ban (year, month, day, hour, minute, second)
 				set_eof(sd->fd); //Forced to disconnect because of the hack
 				//Nessage about the ban
-				sprintf(message_to_gm, msg_txt(507), battle_config.ban_hack_trade); //This player has been banned for %d minute(s).
+				sprintf(message_to_gm, msg_txt(507), battle_config.ban_hack_trade); // This player has been banned for %d minute(s).
 			} else
 				//Message about the ban
-				strcpy(message_to_gm, msg_txt(508)); //This player hasn't been banned (Ban option is disabled).
-			
+				strcpy(message_to_gm, msg_txt(508)); // This player hasn't been banned (Ban option is disabled).
+
 			intif_wis_message_to_gm(wisp_server_name, PC_PERM_RECEIVE_HACK_INFO, message_to_gm);
 			return 1;
 		}
@@ -241,7 +238,6 @@ int trade_check(struct map_session_data *sd, struct map_session_data *tsd)
 	struct item inventory2[MAX_INVENTORY];
 	struct item_data *data;
 	int trade_i, i, n;
-	short amount;
 
 	//Check zenys value against hackers (Zeny was already checked on time of adding, but you never know when you lost some zeny since then.
 	if (sd->deal.zeny > sd->status.zeny || (tsd->status.zeny > MAX_ZENY - sd->deal.zeny))
@@ -255,7 +251,8 @@ int trade_check(struct map_session_data *sd, struct map_session_data *tsd)
 
 	//Check free slot in both inventory
 	for (trade_i = 0; trade_i < 10; trade_i++) {
-		amount = sd->deal.item[trade_i].amount;
+		short amount = sd->deal.item[trade_i].amount;
+
 		if (amount) {
 			n = sd->deal.item[trade_i].index;
 			if (amount > inventory[n].amount)
@@ -263,7 +260,7 @@ int trade_check(struct map_session_data *sd, struct map_session_data *tsd)
 			
 			data = itemdb_search(inventory[n].nameid);
 			i = MAX_INVENTORY;
-			if (itemdb_isstackable2(data)) { //Stackable item.
+			if (itemdb_isstackable2(data)) { //Stackable item
 				for (i = 0; i < MAX_INVENTORY; i++)
 					if (inventory2[i].nameid == inventory[n].nameid &&
 						inventory2[i].card[0] == inventory[n].card[0] && inventory2[i].card[1] == inventory[n].card[1] &&
@@ -373,11 +370,14 @@ void trade_tradeadditem(struct map_session_data *sd, short index, short amount)
 		return;
 	}
 
-	if( ((item->bound == 1 || item->bound > 2) || (item->bound == 2 && sd->status.guild_id != target_sd->status.guild_id)) && !pc_can_give_bounded_items(sd) ) { // Item Bound
+	if( ((item->bound == BOUND_ACCOUNT || item->bound > BOUND_GUILD) || (item->bound == BOUND_GUILD && sd->status.guild_id != target_sd->status.guild_id)) && !pc_can_give_bounded_items(sd) ) { // Item Bound
 		clif_displaymessage(sd->fd, msg_txt(293));
 		clif_tradeitemok(sd, index + 2, 1);
 		return;
 	}
+
+	if( item->bound )
+		sd->state.isBoundTrading |= (1<<item->bound);
 
 	//Locate a trade position
 	ARR_FIND(0, 10, trade_i, sd->deal.item[trade_i].index == index || sd->deal.item[trade_i].amount == 0);
@@ -416,9 +416,9 @@ void trade_tradeadditem(struct map_session_data *sd, short index, short amount)
  * @param sd : Player who's adding zeny
  * @param amount : zeny amount
  */
-void trade_tradeaddzeny(struct map_session_data* sd, int amount)
+void trade_tradeaddzeny(struct map_session_data *sd, int amount)
 {
-	struct map_session_data* target_sd;
+	struct map_session_data *target_sd;
 
 	nullpo_retv(sd);
 
@@ -470,7 +470,10 @@ void trade_tradecancel(struct map_session_data *sd)
 	struct map_session_data *target_sd;
 	int trade_i;
 
+	nullpo_retv(sd);
+
 	target_sd = map_id2sd(sd->trade_partner);
+	sd->state.isBoundTrading = 0;
 
 	if(!sd->state.trading) { //Not trade acepted
 		if(target_sd) {
@@ -529,7 +532,8 @@ void trade_tradecommit(struct map_session_data *sd)
 {
 	struct map_session_data *tsd;
 	int trade_i;
-	int flag;
+
+	nullpo_retv(sd);
 
 	if (!sd->state.trading || !sd->state.deal_locked) //Locked should be 1 (pressed ok) before you can press trade.
 		return;
@@ -564,6 +568,7 @@ void trade_tradecommit(struct map_session_data *sd)
 	//Trade is accepted and correct.
 	for (trade_i = 0; trade_i < 10; trade_i++) {
 		int n;
+		unsigned char flag = 0;
 
 		if (sd->deal.item[trade_i].amount) {
 			n = sd->deal.item[trade_i].index;
@@ -603,10 +608,12 @@ void trade_tradecommit(struct map_session_data *sd)
 	sd->state.deal_locked = 0;
 	sd->trade_partner = 0;
 	sd->state.trading = 0;
+	sd->state.isBoundTrading = 0;
 
 	tsd->state.deal_locked = 0;
 	tsd->trade_partner = 0;
 	tsd->state.trading = 0;
+	tsd->state.isBoundTrading = 0;
 
 	clif_tradecompleted(sd, 0);
 	clif_tradecompleted(tsd, 0);

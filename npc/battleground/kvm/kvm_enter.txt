@@ -149,7 +149,7 @@ bat_room,164,121,1	script	KVM Mercenary Officer#2	414,{
 		if (BaseLevel > 79) warp "bat_room",169,207;
 		else if (BaseLevel < 60) warp "bat_room",197,207;
 		else warp "bat_room",225,207;
-		close;
+		end;
 	case 2:
 		mes "[Croix Mercenary Officer]";
 		mes "We will win!";

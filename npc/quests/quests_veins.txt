@@ -4775,7 +4775,7 @@ veins,78,226,5	script	Camel#camelcc1::VeinsCamel	938,{
 veins,72,227,3	duplicate(VeinsCamel)	Camel#camelcc3	938
 veins,81,222,1	duplicate(VeinsCamel)	Camel#camelcc4	938
 veins,77,219,5	duplicate(VeinsCamel)	Camel#camelcc5	938
-veins,73,215,8	duplicate(VeinsCamel)	Camel#camelcc6	938
+veins,73,215,0	duplicate(VeinsCamel)	Camel#camelcc6	938
 veins,68,215,5	duplicate(VeinsCamel)	Camel#camelcc7	938
 
 ve_fild07,235,42,3	script	Silk Sand Camel	938,{

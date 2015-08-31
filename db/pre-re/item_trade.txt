@@ -521,7 +521,7 @@
 1639,499,100	// Novice Rod
 1742,499,100	// Novice Composite Bow
 2393,499,100	// Novice Adventurer's Suit
-2819,499,100	// Swordsman Manual
+2819,499,100	// Swordman Manual
 2820,499,100	// Thief Manual
 2821,499,100	// Acolyte Manual
 2822,499,100	// Archer Manual
@@ -1049,7 +1049,7 @@
 13942,475,100	// Love Angel Magic Powder Box 30 Days
 13943,475,100	// Squirrel Magic Powder Box 30 Days
 13944,475,100	// Gogo Magic Powder Box 30 Days
-13945,475,100	// Brazil Swordsman Package
+13945,475,100	// Brazil Swordman Package
 13946,475,100	// Brazil Magician Package
 13947,475,100	// Brazil Acolyte Package
 13948,475,100	// Brazil Archer package

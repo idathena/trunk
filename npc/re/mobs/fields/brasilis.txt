@@ -20,3 +20,4 @@ bra_fild01,0,0,0,0	monster	Headless Mule	2071,40,5000,0,0
 bra_fild01,0,0,0,0	monster	Red Mushroom	1085,5,5000,0,0
 bra_fild01,0,0,0,0	monster	Jaguar	2072,55,5000,0,0
 bra_fild01,0,0,0,0	monster	Toucan	2073,60,5000,0,0
+bra_fild01,0,0,0,0	monster	Furious Toucan	2630,2,300000,0,0

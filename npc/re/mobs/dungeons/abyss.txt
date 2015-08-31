@@ -24,6 +24,7 @@ abyss_01,0,0,0,0	monster	Ancient Mimic	1699,10,5000,0,0
 abyss_01,0,0,0,0	monster	Novus	1715,9,5000,0,0
 abyss_01,0,0,0,0	monster	Novus	1718,9,5000,0,0
 abyss_01,0,0,0,0	monster	Dragon Egg	1721,8,5000,0,0
+abyss_01,0,0,0,0	monster	Furious Ferus	2832,2,300000,0,0
 
 //==================================================
 // abyss_02 - Abyss Lake Underground Cave
@@ -36,6 +37,7 @@ abyss_02,0,0,0,0	monster	Acidus	1713,10,5000,0,0
 abyss_02,0,0,0,0	monster	Ancient Mimic	1699,10,5000,0,0
 abyss_02,0,0,0,0	monster	Novus	1715,5,5000,0,0
 abyss_02,0,0,0,0	monster	Novus	1718,5,5000,0,0
+abyss_02,0,0,0,0	monster	Acidus Ringleader	2913,2,300000,0,0
 
 //==================================================
 // abyss_03 - Abyss Lake Underground Cave
@@ -49,3 +51,4 @@ abyss_03,0,0,0,0	monster	Ferus	1714,10,5000,0,0
 abyss_03,0,0,0,0	monster	Ferus	1717,10,5000,0,0
 abyss_03,0,0,0,0	monster	Hydrolancer	1720,3,5000,0,0
 abyss_03,0,0,0,0	boss_monster	Detardeurus	1719,1,10800000,600000,0
+abyss_03,0,0,0,0	monster	Solid Acidus	2912,2,300000,0,0

@@ -27,6 +27,7 @@ gefenia01,0,0,0,0	monster	Bloody Knight	1268,1,3600000,3000000,0
 gefenia01,0,0,0,0	monster	Mysteltainn	1203,1,10800000,7200000,0
 gefenia01,0,0,0,0	monster	Executioner	1205,1,18000000,14400000,0
 gefenia01,0,0,0,0	monster	Ogretooth	1204,1,18000000,14400000,0
+gefenia01,0,0,0,0	monster	Swift False Angel	2834,2,300000,0,0
 
 //==================================================
 // gefenia02 - Geffenia
@@ -41,6 +42,7 @@ gefenia02,0,0,0,0	monster	Bloody Knight	1268,1,3600000,3000000,0
 gefenia02,0,0,0,0	monster	Ogretooth	1204,1,10800000,7200000,0
 gefenia02,0,0,0,0	monster	Mysteltainn	1203,1,18000000,14400000,0
 gefenia02,0,0,0,0	monster	Executioner	1205,1,18000000,14400000,0
+gefenia02,0,0,0,0	monster	Solid Violy	2623,2,300000,0,0
 
 //==================================================
 // gefenia03 - Geffenia
@@ -55,6 +57,7 @@ gefenia03,0,0,0,0	monster	Bloody Knight	1268,1,3600000,3000000,0
 gefenia03,0,0,0,0	monster	Executioner	1205,1,10800000,7200000,0
 gefenia03,0,0,0,0	monster	Mysteltainn	1203,1,18000000,14400000,0
 gefenia03,0,0,0,0	monster	Ogretooth	1204,1,18000000,14400000,0
+gefenia03,0,0,0,0	monster	Swift Violy	2622,2,300000,0,0
 
 //==================================================
 // gefenia04 - Geffenia
@@ -69,3 +72,4 @@ gefenia04,0,0,0,0	monster	Bloody Knight	1268,1,3600000,3000000,0
 gefenia04,0,0,0,0	monster	Mysteltainn	1203,1,18000000,14400000,0
 gefenia04,0,0,0,0	monster	Executioner	1205,1,18000000,14400000,0
 gefenia04,0,0,0,0	monster	Ogretooth	1204,1,18000000,14400000,0
+gefenia04,0,0,0,0	monster	Elusive Violy	2621,2,300000,0,0

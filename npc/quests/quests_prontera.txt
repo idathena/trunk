@@ -565,6 +565,7 @@ S_GetBooks:
 		mes "thanks for doing this for me.";
 		mes "I was really at my wit's end...";
 		set prt_curse,3;
+		setquest 18030; //Custom addition to make the script consistent
 		getitem 7431,1; //Books
 		close;
 	}
@@ -864,6 +865,7 @@ yuno,311,195,3	script	Historian#prt01	754,{
 		mes "somewhere in that desert town.";
 		set prt_curse,6;
 		getitem 7342,1; //File01
+		changequest 18030,18031; //Custom addition to make the script consistent
 		close;
 	}
 	else if (prt_curse == 6) {
@@ -3392,7 +3394,7 @@ moc_fild16,201,295,5	script	Assassin Guildsman#poiso	884,{
 			mes "......";
 			mes ".........";
 			next;
-			mes "[Assassin Guildsman";
+			mes "[Assassin Guildsman]";
 			mes "Listen carefully.";
 			mes "I will only tell this";
 			mes "to you one time.";

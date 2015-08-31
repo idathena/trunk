@@ -36,22 +36,49 @@
 // Entrance
 //============================================================
 gef_fild10,242,202,0	script	Dimensional Gorge Piece	406,{
-
-	set .@party_id,getcharid(1);
-	set .@p_name$,getpartyname(.@party_id);
-	set .@md_name$,"Orc's Memory";
-
-	if (!instance_check_party(.@party_id,2,30,80)) {
+	if (BaseLevel < 30 || BaseLevel > 80) {
 		mes "Only users between Levels ^ff000030 ~ 80^000000 can enter this Dungeon.";
 		close;
 	}
-
+	set .@party_id,getcharid(1);
+	set .@ins_mas,getpartyleader(.@party_id,2);
+	set .@p_name$,getpartyname(.@party_id);
+	set .@md_name$,"Orc's Memory";
 	set .@orctime,checkquest(12059,PLAYTIME);
-	if (.@orctime == -1) {
-		if (getcharid(0) == getpartyleader(.@party_id,2)) {
-			mes "Party status confirmed. Would you like to book entrance to the "+.@md_name$+"?";
+	if(instance_check_party(.@party_id,2)) {
+		if (.@orctime == 0 || .@orctime == 1) {
+			mes "You can enter the Dungeon if it has been generated.";
 			next;
-			switch(select("Reserve the "+.@md_name$+":Enter the Dungeon:Cancel")) {
+			if (select("Enter the Dungeon "+.@md_name$+":Cancel") == 2)
+				close;
+			switch (instance_enter(.@md_name$)) {
+			case 3:
+				mes "An unknown error has occurred.";
+				close;
+			case 2:
+				mes "Memorial Dungeon "+.@md_name$+" does not exist.";
+				mes "Memorial Dungeon has been destroyed by the Party Leader, or because of the time limit. Please try again after 2 hours.";
+				close;
+			case 1:
+				mes "Only a member of the party can enter the Memorial Dungeon.";
+				close;
+			case 0:
+				mapannounce "gef_fild10",.@p_name$+" party's member "+strcharinfo(0)+" has entered the "+.@md_name$+".",bc_map,"0x00ff99";
+				//warp "1@orcs",179,15;
+				close;
+			}
+		} else if (.@orctime == 2) {
+			mes "^0000ffAll records and after-effects related to the Orc's Memory Dungeon are deleted. You can now regenerate or re-enter the dungeon.^000000";
+			erasequest 12059;
+			close;
+		} else if (.@orctime == -1) {
+			if (getcharid(0) == .@ins_mas) {
+				mes "Party status confirmed. Would you like to book entrance to the "+.@md_name$+"?";
+				next;
+				set .@menu$,"Reserve the "+.@md_name$+":Enter the Dungeon:Cancel";
+			} else
+				set .@menu$,":Enter the Dungeon "+.@md_name$+":Cancel";
+			switch(select(.@menu$)) {
 			case 1:
 				if (instance_create(.@md_name$) < 0) {
 					mes "Party Name: "+.@p_name$;
@@ -59,51 +86,38 @@ gef_fild10,242,202,0	script	Dimensional Gorge Piece	406,{
 					mes "^0000ff"+.@md_name$+" ^000000 - Reservation Failed.";
 					close;
 				}
-				mes "^0000ff"+.@md_name$+"^000000- Attempting to book an entrance";
+				mes "^0000ff"+.@md_name$+"^000000- Attempting to book an entrance.";
 				mes "After making a reservation, you have to select 'Enter the Dungeon' from the menu if you wish to enter the "+.@md_name$+".";
 				close;
 			case 2:
-				callsub L_Enter,0;
+				switch (instance_enter(.@md_name$)) {
+				case 3:
+					mes "An unknown error has occurred.";
+					close;
+				case 2:
+					mes "Memorial Dungeon "+.@md_name$+" does not exist.";
+					mes "The party leader has not reserved entrance to the dungeon yet.";
+					next;
+					mes "Once reservation is complete, the dungeon will be generated.";
+					mes "If your dungeon has been destroyed you must wait 2 hours before re-entering.";
+					close;
+				case 1:
+					mes "Only a member of the party can enter the Memorial Dungeon.";
+					close;
+				case 0:
+					mapannounce "gef_fild10",.@p_name$+" party's member "+strcharinfo(0)+" has entered the "+.@md_name$+".",bc_map,"0x00ff99";
+					setquest 12059;
+					//warp "1@orcs",179,15;
+					end;
+				}
 			case 3:
-				close;
+				end;
 			}
 		}
-		if(select(.@md_name$ + " Enter the Memorial Dungeon:Cancel") == 2)
-			end;
-		callsub L_Enter,1;
-	} else if (.@orctime == 0 || .@orctime == 1) {
-		mes "You can enter the Dungeon if it has been generated.";
-		next;
-		if(select("Enter the Dungeon "+.@md_name$+":Cancel") == 2)
-			close;
-		callsub L_Enter,0;
-	} else if (.@orctime == 2) {
-		mes "^0000ffAll records and after-effects related to the Orc's Memory Dungeon are deleted. You can now regenerate or re-enter the dungeon.^000000";
-		erasequest 12059;
+	} else {
+		mes "In order to generate a dungeon you must be the Party Leader and have at least 2 members in the party.";
 		close;
 	}
-	mes "In order to generate a dungeon you must be the Party Leader and have at least 2 members in the party.";
-	close;
-L_Enter:
-	switch(instance_enter("Orc's Memory")) {
-	case 3:
-		mes "An unknown error has occurred.";
-		close;
-	case 2:
-		mes "Memorial Dungeon Orc's Memory does not exist.";
-		mes "Memorial Dungeon has been destroyed by the Party Leader, or because of the time limit. Please try again after 2 hours.";
-		close;
-	case 1:
-		mes "Only a member of the party can enter the Memorial Dungeon.";
-		close;
-	case 0:
-		mapannounce "gef_fild10",.@p_name$+" party's member "+strcharinfo(0)+" has entered the Orc's Memory.",bc_map,"0x00ff99";
-		if (checkquest(12059) == -1) setquest 12059;
-		//warp "1@orcs",179,15;
-		if (getarg(0) == 0) close;
-		else end;
-	}
-
 }
 
 gef_fild10,238,202,6	script	Mad Scientist#orc	865,{

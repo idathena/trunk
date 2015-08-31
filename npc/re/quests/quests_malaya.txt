@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Euphy
 //===== Current Version: =====================================
-//= 1.2
+//= 1.3
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: =========================================
@@ -23,6 +23,7 @@
 //= 1.0 Added "Nurse in Port Malaya" and "Pintados Festival" quests. [Euphy]
 //= 1.1 Added GM management function and NPC. [Euphy]
 //= 1.2 Added VIP features. [Euphy]
+//= 1.3 Fixed Pintados Festival timer. [exneval]
 //============================================================
 
 // Cautious Village & Daily Quests :: hi_malaya
@@ -73,7 +74,7 @@ malaya,266,76,3	script	Rodel the Guard#malaya	570,4,4,{
 			close;
 		}
 		.@playtime = checkquest(7405, PLAYTIME);
-		if (.@playtime == 0) {
+		if (.@playtime == 1) {
 			mes "[Rodel the Guard]";
 			mes "Whew, thanks to you, I have one less thing to worry about.";
 			mes "I will lose less of my things.";
@@ -135,16 +136,10 @@ malaya,266,76,3	script	Rodel the Guard#malaya	570,4,4,{
 				mes "It would be a simple task for you.";
 				setquest 7404;
 				close;
-			} else if (.@hunting == 0) {
+			} else if (.@hunting == 1) {
 				mes "[Rodel the Guard]";
 				mes "You have to get rid of 20 Jejelings.";
 				mes "20 should be enough to give those Jejelings a good scare.";
-				close;
-			} else if (.@hunting == 1) {
-				mes "[Rodel the Guard]";
-				mes "Oh, the hunt is over, but you haven't killed all the Jejelings.";
-				mes "Come again if you want another try.";
-				erasequest 7404;
 				close;
 			} else {
 				mes "[Rodel the Guard]";
@@ -160,7 +155,7 @@ malaya,266,76,3	script	Rodel the Guard#malaya	570,4,4,{
 				getexp 200000,200000;
 				erasequest 7404;
 				setquest 7405;
-				if (rand(1))
+				if (rand(2))
 					$malayaNames$[1] = strcharinfo(0);
 //				SavePPL Jejellopy
 				close;
@@ -711,7 +706,7 @@ malaya,169,350,5	script	Imelda#malaya	475,{
 		else
 			getitem 6497, 1; // Lesser_Agimat
 		getexp 200000,200000;
-		if (rand(1))
+		if (rand(2))
 			$malayaNames$[0] = strcharinfo(0);
 		close;
 	} else {
@@ -817,7 +812,7 @@ malaya,169,350,5	script	Imelda#malaya	475,{
 				else
 					getitem 6497, 1; // Lesser_Agimat
 				getexp 200000,200000;
-				if (rand(1))
+				if (rand(2))
 					$malayaNames$[0] = strcharinfo(0);
 				close;
 			} else {
@@ -3362,6 +3357,7 @@ ma_fild01,166,214,6	script	Old Man in Dilemma#GA	575,{
 				if (countitem(6497) >= 3 && Zeny >= 1000) {
 					specialeffect2 EF_CONE;
 					specialeffect EF_FORESTLIGHT2;
+					delitem 6497,3; //Lesser_Agimat
 					set Zeny, Zeny-1000;
 					getitem 12775,1; //Ancient_Spirit_Agimat
 				} else {
@@ -3534,6 +3530,7 @@ ma_fild01,238,198,4	script	Tikbalang Expert#malaya	582,{
 			switch(select("Yes, Im interested.:No, I can capture one myself.")) {
 			case 1:
 				delitem 6496,3; //Tikbalang_Thick_Spine
+				delitem 6497,5; //Lesser_Agimat
 				getitem 12699,1; //Tikbalang_Belt
 				mes "[Tikbalang Expert]";
 				mes "Yiiiiiiiiiiii! Yap!";
@@ -3773,7 +3770,7 @@ ma_fild01,158,243,6	script	Tribe Blacksmith#malaya	582,{
 		break;
 	}
 	
-	if (!(.@item)) {
+	if (!getequipisequiped(.@part)) {
 		mes "[Bayani]";
 		mes "You should wear the equipment to upgrade and not come without it on you.";
 		close;
@@ -3819,11 +3816,14 @@ ma_fild01,158,243,6	script	Tribe Blacksmith#malaya	582,{
 	mes "[Bayani]";
 	mes "BAM!!";
 	next;
-	
 	delitem 6499,20; //Ancient_Grudge
+
+	// anti-hack
+	if (callfunc("F_IsEquipIDHack", .@part, .@item))
+		close;
+
 	delequip .@part;
 	getitem .@newItem, 1; 
-	
 	mes "[Bayani]";
 	mes "Ha ha. Perfect.";
 	mes "Congratulations. Your armor is better than ever.";
@@ -3892,6 +3892,7 @@ OnTouch:
 	}
 	end;
 }
+
 malaya,276,288,5	script	Port Malaya Villager::buwaya_A	582,{
 	if (malaya_hi < 20) {
 		mes "- Look at you warily while whispering to each other. -";
@@ -5679,7 +5680,7 @@ malaya,283,265,4	script	Village Chief#bako2	580,{
 		mes "[Village Chief]";
 		mes "^0000FFLost Belongings^000000";
 		mes "are said to be carried by";
-		mes "^FF0000Tiucknuc^000000 that roams Baryo Mahiwaga.";
+		mes "^FF0000Tiyanak^000000 that roams Baryo Mahiwaga.";
 		next;
 		switch(select("Do it yourself.:I'm on my way.")) {
 		case 1:
@@ -5690,7 +5691,7 @@ malaya,283,265,4	script	Village Chief#bako2	580,{
 		case 2:
 			mes "[Village Chief]";
 			mes "Let's start then. First,";
-			mes "retrieve two ^FF0000Lost Belongings^000000 from Tiucknuc";
+			mes "retrieve two ^FF0000Lost Belongings^000000 from Tiyanak";
 			mes "and take them to ^0000FFMissing Person's Father^000000";
 			mes "for me.";
 			set malaya_bakona2,1;
@@ -5699,26 +5700,26 @@ malaya,283,265,4	script	Village Chief#bako2	580,{
 		}
 	} else if (malaya_bakona2 == 1) {
 		mes "[Village Chief]";
-		mes "From Tiucknuc that roams Baryo Mahiwaga Field,";
+		mes "From Tiyanak that roams Baryo Mahiwaga Field,";
 		mes "retrieve two ^FF0000Lost Belongings^000000";
 		mes "and deliver them to ^0000FFMissing Person's Father^000000";
 		mes "for me.";
 		close;
 	} else if (malaya_bakona2 == 2) {
 		mes "[Village Chief]";
-		mes "Retrieve Seven ^FF0000Lost Belongings^000000 from Tiucknuc";
+		mes "Retrieve seven ^FF0000Lost Belongings^000000 from Tiyanak";
 		mes "and deliver them to ^0000FFMissing Person's Friend^000000";
 		mes "for me.";
 		close;
 	} else if (malaya_bakona2 == 3) {
 		mes "[Village Chief]";
-		mes "Retrieve three ^FF0000Lost Belongings^000000 from Tiucknuc";
+		mes "Retrieve three ^FF0000Lost Belongings^000000 from Tiyanak";
 		mes "and deliver them to ^0000FFMissing Person's Son^000000";
 		mes "for me.";
 		close;
 	} else if (malaya_bakona2 == 4) {
 		mes "[Village Chief]";
-		mes "Retrieve five ^FF0000Lost Belongings^000000 from Tiucknuc";
+		mes "Retrieve five ^FF0000Lost Belongings^000000 from Tiyanak";
 		mes "and deliver them to ^0000FFMissing Person's Mother^000000";
 		mes "for me.";
 		close;
@@ -5896,7 +5897,7 @@ malaya,269,267,5	script	Missing Person's Father	582,{
 		next;
 		mes "The man is unable to continue as he tries to hold back his tears.";
 		mes "Let's continue to find the lost belongings of the missing people.";
-		mes "Let's retrieve them from Tiucknuc that roams Baryo Mahiwaga Field,";
+		mes "Let's retrieve them from Tiyanak that roams Baryo Mahiwaga Field,";
 		mes "seven ^FF0000Lost Belongings^000000";
 		mes "and deliver them to ^0000FFMissing Person's Friend^000000.";
 		delitem 6520,2; //Lost_Belongings
@@ -5910,7 +5911,7 @@ malaya,269,267,5	script	Missing Person's Father	582,{
 		next;
 		mes "The man is unable to continue as he tries to hold back his tears.";
 		mes "Let's continue to find the lost belongings of the missing people.";
-		mes "Retrieve seven ^FF0000Lost Belongings^000000 from Tiucknuc";
+		mes "Retrieve seven ^FF0000Lost Belongings^000000 from Tiyanak";
 		mes "and deliver them to ^0000FFMissing Person's Friend^000000.";
 		close;
 	} else {
@@ -5970,7 +5971,7 @@ L_Quest:
 	next;
 	mes "Leaving behind the crying boy,";
 	mes "let's continue to find the lost belongings of the missing people.";
-	mes "Retrieve three ^FF0000Lost Belongings^000000 from Tiucknuc";
+	mes "Retrieve three ^FF0000Lost Belongings^000000 from Tiyanak";
 	mes "and deliver them to ^0000FFMissing Person's Son^000000.";
 	return;
 }
@@ -6016,7 +6017,7 @@ L_Quest:
 	next;
 	mes "Man crying in agony.";
 	mes "Let's continue to find the lost belongings of the missing people.";
-	mes "Retrieve five ^FF0000Lost Belongings^000000 from Tiucknuc";
+	mes "Retrieve five ^FF0000Lost Belongings^000000 from Tiyanak";
 	mes "and deliver them to ^0000FFMissing Person's Mother^000000.";
 	return;
 }
@@ -7598,8 +7599,6 @@ malaya,64,78,4	script	Village Woman#mab	583,{
 		mes "I don't know.";
 		mes "I haven't given it a thought.";
 		mes "It is strange to have a new nurse coming to a closed hospital.";
-		set malaya_bang,6;
-		changequest 11287,11288;
 		close;
 	} else {
 		mes "[Village Woman]";
@@ -8238,7 +8237,6 @@ ma_fild01,1,1,4	script	Pintados Manager#pin	894,{
 		next;
 		switch(select("Start Pintados Festival:End Pintados Festival:NPC_ON:NPC_OFF")) {
 		case 1:
-			set $malaya_pintados_00,1;
 			donpcevent "Pintados Manager#pin::OnEnable";
 			mes "Start the Pintados Festival.";
 			close;
@@ -8324,27 +8322,19 @@ ma_fild01,1,1,4	script	Pintados Manager#pin	894,{
 	}
 	end;
 
-// Moved to individual NPCs for smoother processing.
-//OnInit:
-//	if ($malaya_pintados_00 > 0)
-//		donpcevent "Pintados Manager#pin::OnEnableNPC";
-//	end;
-
 OnTimer1800000:
-	set $malaya_pintados_00, $malaya_pintados_00;
 	if ($malaya_pintados_00 > 0 && $malaya_pintados_00 < 344) {
-		set $malaya_pintados_00,$malaya_pintados_00+1;
 		stopnpctimer;
+		set $malaya_pintados_00,$malaya_pintados_00+1;
 		initnpctimer;
-	} else {
-		set $malaya_pintados_00,0;
+	} else
 		donpcevent "Pintados Manager#pin::OnDisable";
-	}
 	end;
 OnEnable:
-	initnpctimer;
+	set $malaya_pintados_00,1;
 	donpcevent "Pintados Manager#pin::OnEnableNPC";
 	announce "The 'Pintados Festival' will be held for a week in Baryo Mahiwaga.",bc_all,"0xFB9D04",FW_NORMAL,12;
+	initnpctimer;
 	end;
 OnDisable:
 	stopnpctimer;
@@ -8372,6 +8362,10 @@ OnDisableNPC:
 	donpcevent "Beat Catching Boy#pin10"+.@str$;
 	donpcevent "Beat Catching Boy#pin11"+.@str$;
 	end;
+OnInit:
+	if ($malaya_pintados_00)
+		initnpctimer;
+	end;
 }
 
 ma_fild01,179,260,2	script	Festival Helper Boy#pin	577,{
@@ -8379,9 +8373,8 @@ ma_fild01,179,260,2	script	Festival Helper Boy#pin	577,{
 		mes "Cannot proceed because you have too many items in your possession.";
 		close;
 	}
-	if ($malaya_pintados_00 == 0) {
+	if (!$malaya_pintados_00) {
 		if ($malaya_pintados_01 > 999 && $malaya_pintados_02 > 999 && $malaya_pintados_03 > 299) {
-			set $malaya_pintados_00,1;
 			donpcevent "Pintados Manager#pin::OnEnable";
 			emotion e_lv;
 			mes "[Isco]";
@@ -8694,7 +8687,7 @@ ma_fild01,172,223,6	script	Tattooist#pin	574,{
 	case 3:
 		break;
 	}
-	if ($malaya_pintados_00 == 0) {
+	if (!$malaya_pintados_00) {
 		mes "[Tattooist]";
 		mes "The holy task of drawing Tattoos is only done during the '^7A96E0Pintados Festival^000000'. Sorry but looks like the festival is not on.";
 		close;
@@ -8903,7 +8896,7 @@ ma_fild01,173,223,0	duplicate(Ancient Grudge#01)	Ancient Grudge#03	139
 ma_fild01,172,222,0	duplicate(Ancient Grudge#01)	Ancient Grudge#04	139
 ma_fild01,171,223,0	duplicate(Ancient Grudge#01)	Ancient Grudge#05	139
 
-ma_fild01,192,200,8	script	Tourist#pin01	58,{
+ma_fild01,192,200,0	script	Tourist#pin01	58,{
 	mes "[Tourist]";
 	mes "I came from afar and dropped everything to come and enjoy the 'Pintados Festival'.";
 	next;
@@ -9121,3 +9114,94 @@ OnDisable:
 	end;
 }
 ma_fild01,170,228,4	duplicate(Beat Catching Boy#pin10)	Beat Catching Boy#pin11	577
+
+ma_fild01,1,1,0	script	malaya_quest	-1,{
+OnInit:
+	enablenpc "malaya_quest";
+	donpcevent "malaya_quest::OnEnable";
+	end;
+
+OnEnable:
+	monster "ma_fild01",0,0,"Tikbalang",2313,30,"malaya_quest::OnMyMobDead";
+	initnpctimer;
+	end;
+
+OnDisable:
+	stopnpctimer;
+	killmonster "ma_fild01","malaya_quest::OnMyMobDead";
+	disablenpc "malaya_quest";
+	end;
+
+OnTimer600000:
+	stopnpctimer;
+	killmonster "ma_fild01","malaya_quest::OnMyMobDead";
+	donpcevent "malaya_quest::OnEnable";
+	end;
+
+OnMyMobDead:
+	if (mobcount("ma_fild01","malaya_quest::OnMyMobDead") < 30 && checkquest(7406) == 1)
+		getitem 6507,1; //Evil_Bone
+	end;
+}
+
+ma_fild01,1,1,0	script	malaya_quest2	-1,{
+OnInit:
+	enablenpc "malaya_quest2";
+	donpcevent "malaya_quest2::OnEnable";
+	end;
+
+OnEnable:
+	monster "ma_fild01",0,0,"Tiyanak",2314,30,"malaya_quest2::OnMyMobDead";
+	initnpctimer;
+	end;
+
+OnDisable:
+	stopnpctimer;
+	killmonster "ma_fild01","malaya_quest2::OnMyMobDead";
+	disablenpc "malaya_quest2";
+	end;
+
+OnTimer600000:
+	stopnpctimer;
+	killmonster "ma_fild01","malaya_quest2::OnMyMobDead";
+	donpcevent "malaya_quest2::OnEnable";
+	end;
+
+OnMyMobDead:
+	if (mobcount("ma_fild01","malaya_quest2::OnMyMobDead") < 30) {
+		if (malaya_bakona2 > 0 && malaya_bakona2 < 5)
+			getitem 6520,1; //Lost_Belongings
+		else if (checkquest(7406) == 1)
+			getitem 6507,1; //Evil_Bone
+	}
+	end;
+}
+
+ma_fild02,1,1,0	script	malaya_quest3	-1,{
+OnInit:
+	enablenpc "malaya_quest3";
+	donpcevent "malaya_quest3::OnEnable";
+	end;
+
+OnEnable:
+	monster "ma_fild02",0,0,"Bungisngis",2309,30,"malaya_quest3::OnMyMobDead";
+	initnpctimer;
+	end;
+
+OnDisable:
+	stopnpctimer;
+	killmonster "ma_fild02","malaya_quest3::OnMyMobDead";
+	disablenpc "malaya_quest3";
+	end;
+
+OnTimer600000:
+	stopnpctimer;
+	killmonster "ma_fild02","malaya_quest3::OnMyMobDead";
+	donpcevent "malaya_quest3::OnEnable";
+	end;
+
+OnMyMobDead:
+	if (mobcount("ma_fild02","malaya_quest3::OnMyMobDead") < 30 && checkquest(7406) == 1)
+		getitem 6507,1; //Evil_Bone
+	end;
+}

@@ -24,13 +24,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <sys/stat.h> //For stat/lstat/fstat - [Dekamaster/Ultimate GM Tool]
 
 #define WISDATA_TTL (60 * 1000) //Wis data Time To Live (60 seconds)
 #define WISDELLIST_MAX 256 //Number of elements in the list Delete data Wis
 
-Sql* sql_handle = NULL; //Link to mysql db, connection FD
+Sql *sql_handle = NULL; //Link to mysql db, connection FD
 
 int char_server_port = 3306;
 char char_server_ip[32] = "127.0.0.1";
@@ -44,7 +45,7 @@ unsigned int party_share_level = 10;
 
 // Recv. packet list
 int inter_recv_packet_length[] = {
-	-1,-1, 7,-1, -1,13,36, (2 + 4 + 4 + 4 + NAME_LENGTH),  0, 0, 0, 0,  0, 0,  0, 0, // 3000-
+	-1,-1, 7,-1, -1,13,36, (2 + 4 + 4 + 4 + NAME_LENGTH), 0, -1, 0, 0, 0, 0, 0, 0, // 3000-
 	 6,-1, 0, 0,  0, 0, 0, 0, 10,-1, 0, 0,  0, 0,  0, 0, // 3010-
 	-1,10,-1,14, 14,19, 6,-1, 14,14, 6, 0,  0, 0,  0, 0, // 3020- Party
 	-1, 6,-1,-1, 55,19, 6,-1, 14,-1,-1,-1, 18,19,186,-1, // 3030-
@@ -61,11 +62,11 @@ struct WisData {
 	unsigned long tick;
 	unsigned char src[24], dst[24], msg[512];
 };
-static DBMap* wis_db = NULL; // int wis_id -> struct WisData*
+static DBMap *wis_db = NULL; // int wis_id -> struct WisData*
 static int wis_dellist[WISDELLIST_MAX], wis_delnum;
 
 /* From pc.c due to @accinfo. any ideas to replace this crap are more than welcome. */
-const char* job_name(int class_) {
+const char *job_name(int class_) {
 	switch( class_ ) {
 		case JOB_NOVICE:
 		case JOB_SWORDMAN:
@@ -286,9 +287,13 @@ const char* job_name(int class_) {
 }
 
 /**
-  * [Dekamaster/Nightroad]
-  **/
-const char * geoip_countryname[253] = {"Unknown", "Asia/Pacific Region", "Europe", "Andorra", "United Arab Emirates", "Afghanistan", "Antigua and Barbuda", "Anguilla", "Albania", "Armenia", "Netherlands Antilles", 
+ * [Dekamaster/Nightroad]
+ */
+#define GEOIP_MAX_COUNTRIES 255
+#define GEOIP_STRUCTURE_INFO_MAX_SIZE 20
+#define GEOIP_COUNTRY_BEGIN 16776960
+
+const char * geoip_countryname[GEOIP_MAX_COUNTRIES] = {"Unknown", "Asia/Pacific Region", "Europe", "Andorra", "United Arab Emirates", "Afghanistan", "Antigua and Barbuda", "Anguilla", "Albania", "Armenia", "Netherlands Antilles", 
 		"Angola", "Antarctica", "Argentina", "American Samoa", "Austria", "Australia", "Aruba", "Azerbaijan", "Bosnia and Herzegovina", "Barbados", 
 		"Bangladesh", "Belgium", "Burkina Faso", "Bulgaria", "Bahrain", "Burundi", "Benin", "Bermuda", "Brunei Darussalam", "Bolivia", 
 		"Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana", "Belarus", "Belize", "Canada", "Cocos (Keeling) Islands", "Congo, The Democratic Republic of the", 
@@ -313,28 +318,29 @@ const char * geoip_countryname[253] = {"Unknown", "Asia/Pacific Region", "Europe
 		"Tanzania, United Republic of", "Ukraine", "Uganda", "United States Minor Outlying Islands", "United States", "Uruguay", "Uzbekistan", "Holy See (Vatican City State)", "Saint Vincent and the Grenadines", "Venezuela", 
 		"Virgin Islands, British", "Virgin Islands, U.S.", "Vietnam", "Vanuatu", "Wallis and Futuna", "Samoa", "Yemen", "Mayotte", "Serbia", "South Africa", 
 		"Zambia", "Montenegro", "Zimbabwe", "Anonymous Proxy", "Satellite Provider", "Other", "Aland Islands", "Guernsey", "Isle of Man", "Jersey", 
-		"Saint Barthelemy", "Saint Martin"};
-unsigned char *geoip_cache;
-void geoip_readdb(void) {
-	struct stat bufa;
-	FILE *db = fopen("./db/GeoIP.dat", "rb");
-	fstat(fileno(db), &bufa);
-	geoip_cache = (unsigned char *)aMalloc(sizeof(unsigned char) * bufa.st_size);
-	if( fread(geoip_cache, sizeof(unsigned char), bufa.st_size, db) != bufa.st_size )
-		ShowError("geoip_cache reading didn't read all elements \n");
-	fclose(db);
-	ShowStatus("Finished Reading "CL_GREEN"GeoIP"CL_RESET" Database.\n");
-}
+		"Saint Barthelemy", "Saint Martin", "Bonaire, Saint Eustatius and Saba", "South Sudan"};
+
+/**
+ * GeoIP information
+ */
+struct s_geoip {
+	unsigned char *cache; // GeoIP.dat information see geoip_init()
+	bool active;
+} geoip;
+
 /* [Dekamaster/Nightroad] */
 /* WHY NOT A DBMAP: There are millions of entries in GeoIP and it has its own algorithm to go quickly through them, a DBMap wouldn't be efficient */
-const char* geoip_getcountry(uint32 ipnum) {
+const char *geoip_getcountry(uint32 ipnum) {
 	int depth;
 	unsigned int x;
-	const unsigned char *buf;
 	unsigned int offset = 0;
 
+	if( geoip.active == false )
+		return geoip_countryname[0];
+
 	for( depth = 31; depth >= 0; depth-- ) {
-		buf = geoip_cache + (long)6 * offset;
+		const unsigned char *buf = geoip.cache + (long)6 * offset;
+
 		if( ipnum & (1 << depth) ) {
 			/* Take the right-hand branch */
 			x =   (buf[3 * 1 + 0] << (0 * 8))
@@ -346,17 +352,103 @@ const char* geoip_getcountry(uint32 ipnum) {
 				+ (buf[3 * 0 + 1] << (1 * 8))
 				+ (buf[3 * 0 + 2] << (2 * 8));
 		}
-		if( x >= 16776960 ) {
-			x = x - 16776960;
+		if( x >= GEOIP_COUNTRY_BEGIN ) {
+			x = x - GEOIP_COUNTRY_BEGIN;
+			if( x > GEOIP_MAX_COUNTRIES )
+				return geoip_countryname[0];
 			return geoip_countryname[x];
 		}
 		offset = x;
 	}
+
+	ShowError("geoip_getcountry(): Error traversing database for ipnum %d\n", ipnum);
+	ShowWarning("geoip_getcountry(): Possible database corruption!\n");
+
 	return geoip_countryname[0];
 }
+
+/**
+ * Disables GeoIP
+ * frees geoip.cache
+ */
+void geoip_final(bool shutdown) {
+	if( geoip.cache ) {
+		aFree(geoip.cache);
+		geoip.cache = NULL;
+	}
+
+	if( geoip.active ) {
+		if( !shutdown )
+			ShowStatus("GeoIP "CL_RED"disabled"CL_RESET".\n");
+		geoip.active = false;
+	}
+}
+
+/**
+ * Reads GeoIP database and stores it into memory
+ * geoip.cache should be freed after use!
+ * http://dev.maxmind.com/geoip/legacy/geolite/
+ */
+void geoip_init(void) {
+	int i, fno;
+	char db_type = 1;
+	unsigned char delim[3];
+	struct stat bufa;
+	FILE *db;
+
+	geoip.active = true;
+
+	db = fopen("./db/GeoIP.dat","rb");
+	if( db == NULL ) {
+		ShowError("geoip_readdb: Error reading GeoIP.dat!\n");
+		geoip_final(false);
+		return;
+	}
+
+	fno = fileno(db);
+	if( fstat(fno, &bufa) < 0 ) {
+		ShowError("geoip_readdb: Error stating GeoIP.dat! Error %d\n", errno);
+		geoip_final(false);
+		return;
+	}
+
+	geoip.cache = aMalloc((sizeof(geoip.cache) * bufa.st_size));
+	if( fread(geoip.cache, sizeof(unsigned char), bufa.st_size, db) != bufa.st_size ) {
+		ShowError("geoip_cache: Couldn't read all elements!\n");
+		fclose(db);
+		geoip_final(false);
+		return;
+	}
+
+	// Search database type
+	fseek(db, -3l, SEEK_END);
+	for( i = 0; i < GEOIP_STRUCTURE_INFO_MAX_SIZE; i++ ) {
+		fread(delim, sizeof(delim[0]), 3, db);
+		if( delim[0] == 255 && delim[1] == 255 && delim[2] == 255 ) {
+			fread(&db_type, sizeof(db_type), 1, db);
+			break;
+		} else
+			fseek(db, -4l, SEEK_CUR);
+	}
+
+	fclose(db);
+
+	if( db_type != 1 ) {
+		if( db_type )
+			ShowError("geoip_init(): Database type is not supported %d!\n", db_type);
+		else
+			ShowError("geoip_init(): GeoIP is corrupted!\n");
+
+		geoip_final(false);
+		return;
+	}
+
+	ShowStatus("Finished Reading "CL_GREEN"GeoIP"CL_RESET" Database.\n");
+}
+
 /* Sends a mesasge to map server (fd) to a user (u_fd) although we use fd we keep aid for safe-check */
 /* Extremely handy I believe it will serve other uses in the near future */
-void inter_to_fd(int fd, int u_fd, int aid, char* msg, ...) {
+void inter_to_fd(int fd, int u_fd, int aid, char *msg, ...) {
 	char msg_out[512];
 	va_list ap;
 	int len = 1; /* Yes we start at 1 */
@@ -371,7 +463,7 @@ void inter_to_fd(int fd, int u_fd, int aid, char* msg, ...) {
 	WFIFOW(fd,2) = 12 + (unsigned short)len;
 	WFIFOL(fd,4) = u_fd;
 	WFIFOL(fd,8) = aid;
-	safestrncpy((char*)WFIFOP(fd,12), msg_out, len);
+	safestrncpy((char *)WFIFOP(fd,12), msg_out, len);
 
 	WFIFOSET(fd,12 + len);
 
@@ -384,7 +476,7 @@ void mapif_parse_accinfo(int fd) {
 	int account_id;
 	char *data;
 
-	safestrncpy(query, (char*) RFIFOP(fd,14), NAME_LENGTH);
+	safestrncpy(query, (char *) RFIFOP(fd,14), NAME_LENGTH);
 
 	Sql_EscapeString(sql_handle, query_esq, query);
 
@@ -495,7 +587,6 @@ void mapif_parse_accinfo2(bool success, int map_fd, int u_fd, int u_aid, int acc
 // Save registry to sql
 int inter_accreg_tosql(int account_id, int char_id, struct accreg* reg, int type)
 {
-	struct global_reg* r;
 	StringBuf buf;
 	int i;
 
@@ -531,7 +622,8 @@ int inter_accreg_tosql(int account_id, int char_id, struct accreg* reg, int type
 	StringBuf_Printf(&buf, "INSERT INTO `%s` (`type`,`account_id`,`char_id`,`str`,`value`) VALUES ", reg_db);
 
 	for( i = 0; i < reg->reg_num; ++i ) {
-		r = &reg->reg[i];
+		struct global_reg* r = &reg->reg[i];
+
 		if( r->str[0] != '\0' && r->value[0] != '\0' ) {
 			char str[32];
 			char val[256];
@@ -558,8 +650,7 @@ int inter_accreg_tosql(int account_id, int char_id, struct accreg* reg, int type
 // Load account_reg from sql (type=2)
 int inter_accreg_fromsql(int account_id,int char_id, struct accreg *reg, int type)
 {
-	struct global_reg* r;
-	char* data;
+	char *data;
 	size_t len;
 	int i;
 
@@ -571,26 +662,25 @@ int inter_accreg_fromsql(int account_id,int char_id, struct accreg *reg, int typ
 	reg->char_id = char_id;
 
 	//`global_reg_value` (`type`, `account_id`, `char_id`, `str`, `value`)
-	switch( type )
-	{
-	case 3: //char reg
-		if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `str`, `value` FROM `%s` WHERE `type`=3 AND `char_id`='%d'", reg_db, char_id) )
-			Sql_ShowDebug(sql_handle);
-		break;
-	case 2: //account reg
-		if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `str`, `value` FROM `%s` WHERE `type`=2 AND `account_id`='%d'", reg_db, account_id) )
-			Sql_ShowDebug(sql_handle);
-		break;
-	case 1: //account2 reg
-		ShowError("inter_accreg_fromsql: Char server shouldn't handle type 1 registry values (##). That is the login server's work!\n");
-		return 0;
-	default:
-		ShowError("inter_accreg_fromsql: Invalid type %d\n", type);
-		return 0;
+	switch( type ) {
+		case 3: //char reg
+			if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `str`, `value` FROM `%s` WHERE `type`=3 AND `char_id`='%d'", reg_db, char_id) )
+				Sql_ShowDebug(sql_handle);
+			break;
+		case 2: //account reg
+			if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `str`, `value` FROM `%s` WHERE `type`=2 AND `account_id`='%d'", reg_db, account_id) )
+				Sql_ShowDebug(sql_handle);
+			break;
+		case 1: //account2 reg
+			ShowError("inter_accreg_fromsql: Char server shouldn't handle type 1 registry values (##). That is the login server's work!\n");
+			return 0;
+		default:
+			ShowError("inter_accreg_fromsql: Invalid type %d\n", type);
+			return 0;
 	}
-	for( i = 0; i < MAX_REG_NUM && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i )
-	{
-		r = &reg->reg[i];
+	for( i = 0; i < MAX_REG_NUM && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i ) {
+		struct global_reg* r = &reg->reg[i];
+
 		// str
 		Sql_GetData(sql_handle, 0, &data, &len);
 		memcpy(r->str, data, min(len, sizeof(r->str)));
@@ -614,11 +704,10 @@ int inter_accreg_sql_init(void)
 /*==========================================
  * read config file
  *------------------------------------------*/
-static int inter_config_read(const char* cfgName)
+static int inter_config_read(const char *cfgName)
 {
-	int i;
-	char line[1024], w1[1024], w2[1024];
-	FILE* fp;
+	char line[1024];
+	FILE *fp;
 
 	fp = fopen(cfgName, "r");
 	if(fp == NULL) {
@@ -627,32 +716,31 @@ static int inter_config_read(const char* cfgName)
 	}
 
 	while(fgets(line, sizeof(line), fp)) {
-		i = sscanf(line, "%[^:]: %[^\r\n]", w1, w2);
-		if(i != 2)
+		char w1[24], w2[1024];
+
+		if(line[0] == '/' && line[1] == '/')
 			continue;
 
-		if(!strcmpi(w1,"char_server_ip")) {
+		if(sscanf(line, "%23[^:]: %1023[^\r\n]", w1, w2) != 2)
+			continue;
+
+		if(!strcmpi(w1, "char_server_ip"))
 			strcpy(char_server_ip,w2);
-		} else
-		if(!strcmpi(w1,"char_server_port")) {
+		else if(!strcmpi(w1, "char_server_port"))
 			char_server_port = atoi(w2);
-		} else
-		if(!strcmpi(w1,"char_server_id")) {
+		else if(!strcmpi(w1, "char_server_id"))
 			strcpy(char_server_id,w2);
-		} else
-		if(!strcmpi(w1,"char_server_pw")) {
+		else if(!strcmpi(w1, "char_server_pw"))
 			strcpy(char_server_pw,w2);
-		} else
-		if(!strcmpi(w1,"char_server_db")) {
+		else if(!strcmpi(w1, "char_server_db"))
 			strcpy(char_server_db,w2);
-		} else
-		if(!strcmpi(w1,"default_codepage")) {
+		else if(!strcmpi(w1, "default_codepage"))
 			strcpy(default_codepage,w2);
-		} else if(!strcmpi(w1,"party_share_level"))
+		else if(!strcmpi(w1, "party_share_level"))
 			party_share_level = (unsigned int)atof(w2);
-		else if(!strcmpi(w1,"log_inter"))
+		else if(!strcmpi(w1, "log_inter"))
 			log_inter = atoi(w2);
-		else if(!strcmpi(w1,"import"))
+		else if(!strcmpi(w1, "import"))
 			inter_config_read(w2);
 	}
 	fclose(fp);
@@ -663,7 +751,7 @@ static int inter_config_read(const char* cfgName)
 }
 
 // Save interlog into sql
-int inter_log(char* fmt, ...)
+int inter_log(char *fmt, ...)
 {
 	char str[255];
 	char esc_str[sizeof(str)*2+1];// escaped str
@@ -714,7 +802,7 @@ int inter_init_sql(const char *file)
 	inter_mail_sql_init();
 	inter_auction_sql_init();
 
-	geoip_readdb();
+	geoip_init();
 	return 0;
 }
 
@@ -733,9 +821,10 @@ void inter_final(void)
 	inter_mail_sql_final();
 	inter_auction_sql_final();
 
-	if (accreg_pt) aFree(accreg_pt);
+	if( accreg_pt )
+		aFree(accreg_pt);
 
-	if (geoip_cache) aFree(geoip_cache);
+	geoip_final(true);
 
 	return;
 }
@@ -751,7 +840,7 @@ int inter_mapif_init(int fd)
 // Broadcast sending
 int mapif_broadcast(unsigned char *mes, int len, unsigned long fontColor, short fontType, short fontSize, short fontAlign, short fontY, int sfd)
 {
-	unsigned char *buf = (unsigned char*)aMalloc((len) * sizeof(unsigned char));
+	unsigned char *buf = (unsigned char *)aMalloc((len) * sizeof(unsigned char));
 
 	if (buf == NULL) return 1;
 
@@ -773,11 +862,13 @@ int mapif_broadcast(unsigned char *mes, int len, unsigned long fontColor, short 
 int mapif_wis_message(struct WisData *wd)
 {
 	unsigned char buf[2048];
-	if (wd->len > 2047-56) wd->len = 2047-56; //Force it to fit to avoid crashes. [Skotlex]
 
-	WBUFW(buf, 0) = 0x3801;
-	WBUFW(buf, 2) = 56 +wd->len;
-	WBUFL(buf, 4) = wd->id;
+	if (wd->len >= sizeof(wd->msg) - 1) //Force it to fit to avoid crashes [Skotlex]
+		wd->len = sizeof(wd->msg) - 1;
+
+	WBUFW(buf,0) = 0x3801;
+	WBUFW(buf,2) = 56 + wd->len;
+	WBUFL(buf,4) = wd->id;
 	memcpy(WBUFP(buf, 8), wd->src, NAME_LENGTH);
 	memcpy(WBUFP(buf,32), wd->dst, NAME_LENGTH);
 	memcpy(WBUFP(buf,56), wd->msg, wd->len);
@@ -821,8 +912,8 @@ int mapif_account_reg_reply(int fd,int account_id,int char_id, int type)
 	}else{
 		int i,p;
 		for (p=13,i = 0; i < reg->reg_num && p < 5000; i++) {
-			p+= sprintf((char*)WFIFOP(fd,p), "%s", reg->reg[i].str)+1; //We add 1 to consider the '\0' in place.
-			p+= sprintf((char*)WFIFOP(fd,p), "%s", reg->reg[i].value)+1;
+			p+= sprintf((char *)WFIFOP(fd,p), "%s", reg->reg[i].str)+1; //We add 1 to consider the '\0' in place.
+			p+= sprintf((char *)WFIFOP(fd,p), "%s", reg->reg[i].value)+1;
 		}
 		WFIFOW(fd,2)=p;
 		if (p>= 5000)
@@ -835,8 +926,7 @@ int mapif_account_reg_reply(int fd,int account_id,int char_id, int type)
 //Request to kick char from a certain map server. [Skotlex]
 int mapif_disconnectplayer(int fd, int account_id, int char_id, int reason)
 {
-	if (fd >= 0)
-	{
+	if (fd >= 0) {
 		WFIFOHEAD(fd,7);
 		WFIFOW(fd,0) = 0x2b1f;
 		WFIFOL(fd,2) = account_id;
@@ -887,67 +977,78 @@ int check_ttl_wisdata(void)
 
 //--------------------------------------------------------
 
-// broadcast sending
+// Broadcast sending
 int mapif_parse_broadcast(int fd)
 {
 	mapif_broadcast(RFIFOP(fd,16), RFIFOW(fd,2), RFIFOL(fd,4), RFIFOW(fd,8), RFIFOW(fd,10), RFIFOW(fd,12), RFIFOW(fd,14), fd);
 	return 0;
 }
 
+/**
+ * Parse received item broadcast and sends it to all connected map-serves
+ * ZI 3009 <cmd>.W <len>.W <nameid>.W <source>.W <type>.B <name>.24B <srcname>.24B
+ * IZ 3809 <cmd>.W <len>.W <nameid>.W <source>.W <type>.B <name>.24B <srcname>.24B
+ * @param fd
+ * @return
+ */
+int mapif_parse_broadcast_item(int fd)
+{
+	unsigned char buf[9 + NAME_LENGTH * 2];
+
+	memcpy(WBUFP(buf,0), RFIFOP(fd,0), RFIFOW(fd,2));
+	WBUFW(buf,0) = 0x3809;
+	mapif_sendallwos(fd, buf, RFIFOW(fd,2));
+	return 0;
+}
 
 // Wisp/page request to send
 int mapif_parse_WisRequest(int fd)
 {
 	struct WisData* wd;
-	static int wisid = 0;
 	char name[NAME_LENGTH];
-	char esc_name[NAME_LENGTH*2+1];// escaped name
-	char* data;
+	char esc_name[NAME_LENGTH * 2 + 1]; // Escaped name
+	char *data;
 	size_t len;
 
+	if (fd <= 0)
+		return 0; // Check if we have a valid fd
 
-	if ( fd <= 0 ) {return 0;} // check if we have a valid fd
-
-	if (RFIFOW(fd,2)-52 >= sizeof(wd->msg)) {
+	if (RFIFOW(fd,2) - 52 >= sizeof(wd->msg)) {
 		ShowWarning("inter: Wis message size too long.\n");
 		return 0;
-	} else if (RFIFOW(fd,2)-52 <= 0) { // normaly, impossible, but who knows...
+	} else if (RFIFOW(fd,2) - 52 <= 0) { // Normaly, impossible, but who knows
 		ShowError("inter: Wis message doesn't exist.\n");
 		return 0;
 	}
 
-	safestrncpy(name, (char*)RFIFOP(fd,28), NAME_LENGTH); //Received name may be too large and not contain \0! [Skotlex]
+	safestrncpy(name, (char *)RFIFOP(fd,28), NAME_LENGTH); // Received name may be too large and not contain \0! [Skotlex]
 
 	Sql_EscapeStringLen(sql_handle, esc_name, name, strnlen(name, NAME_LENGTH));
-	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `name` FROM `%s` WHERE `name`='%s'", char_db, esc_name) )
+	if (SQL_ERROR == Sql_Query(sql_handle, "SELECT `name` FROM `%s` WHERE `name`='%s'", char_db, esc_name))
 		Sql_ShowDebug(sql_handle);
 
-	// search if character exists before to ask all map-servers
-	if( SQL_SUCCESS != Sql_NextRow(sql_handle) )
-	{
+	// Search if character exists before to ask all map-servers
+	if (SQL_SUCCESS != Sql_NextRow(sql_handle)) {
 		unsigned char buf[27];
-		WBUFW(buf, 0) = 0x3802;
-		memcpy(WBUFP(buf, 2), RFIFOP(fd, 4), NAME_LENGTH);
-		WBUFB(buf,26) = 1; // flag: 0: success to send wisper, 1: target character is not loged in?, 2: ignored by target
+
+		WBUFW(buf,0) = 0x3802;
+		memcpy(WBUFP(buf,2), RFIFOP(fd,4), NAME_LENGTH);
+		WBUFB(buf,26) = 1; // Flag: 0: success to send wisper, 1: target character is not loged in?, 2: ignored by target
 		mapif_send(fd, buf, 27);
-	}
-	else
-	{// Character exists. So, ask all map-servers
-		// to be sure of the correct name, rewrite it
+	} else { // Character exists. So, ask all map-servers to be sure of the correct name, rewrite it
 		Sql_GetData(sql_handle, 0, &data, &len);
 		memset(name, 0, NAME_LENGTH);
 		memcpy(name, data, min(len, NAME_LENGTH));
-		// if source is destination, don't ask other servers.
-		if( strncmp((const char*)RFIFOP(fd,4), name, NAME_LENGTH) == 0 )
-		{
+		// If source is destination, don't ask other servers.
+		if (strncmp((const char *)RFIFOP(fd,4), name, NAME_LENGTH) == 0) {
 			uint8 buf[27];
-			WBUFW(buf, 0) = 0x3802;
-			memcpy(WBUFP(buf, 2), RFIFOP(fd, 4), NAME_LENGTH);
-			WBUFB(buf,26) = 1; // flag: 0: success to send wisper, 1: target character is not loged in?, 2: ignored by target
+
+			WBUFW(buf,0) = 0x3802;
+			memcpy(WBUFP(buf,2), RFIFOP(fd,4), NAME_LENGTH);
+			WBUFB(buf,26) = 1; // Flag: 0: success to send wisper, 1: target character is not loged in?, 2: ignored by target
 			mapif_send(fd, buf, 27);
-		}
-		else
-		{
+		} else {
+			static int wisid = 0;
 
 			CREATE(wd, struct WisData, 1);
 
@@ -956,8 +1057,8 @@ int mapif_parse_WisRequest(int fd)
 
 			wd->id = ++wisid;
 			wd->fd = fd;
-			wd->len= RFIFOW(fd,2)-52;
-			memcpy(wd->src, RFIFOP(fd, 4), NAME_LENGTH);
+			wd->len = RFIFOW(fd,2) - 52;
+			memcpy(wd->src, RFIFOP(fd,4), NAME_LENGTH);
 			memcpy(wd->dst, RFIFOP(fd,28), NAME_LENGTH);
 			memcpy(wd->msg, RFIFOP(fd,52), wd->len);
 			wd->tick = gettick();
@@ -984,7 +1085,7 @@ int mapif_parse_WisReply(int fd)
 		return 0;	// This wisp was probably suppress before, because it was timeout of because of target was found on another map-server
 
 	if ((--wd->count) <= 0 || flag != 1) {
-		mapif_wis_end(wd, flag); // flag: 0: success to send wisper, 1: target character is not loged in?, 2: ignored by target
+		mapif_wis_end(wd, flag); // Flag: 0: success to send wisper, 1: target character is not loged in?, 2: ignored by target
 		idb_remove(wis_db, id);
 	}
 
@@ -994,10 +1095,10 @@ int mapif_parse_WisReply(int fd)
 // Received wisp message from map-server for ALL gm (just copy the message and resends it to ALL map-servers)
 int mapif_parse_WisToGM(int fd)
 {
-	unsigned char buf[2048]; // 0x3003/0x3803 <packet_len>.w <wispname>.24B <min_gm_level>.w <message>.?B
+	unsigned char buf[2048]; // 0x3003/0x3803 <packet_len>.w <wispname>.24B <permission>.L <message>.?B
 
 	memcpy(WBUFP(buf,0), RFIFOP(fd,0), RFIFOW(fd,2));
-	WBUFW(buf, 0) = 0x3803;
+	WBUFW(buf,0) = 0x3803;
 	mapif_sendall(buf, RFIFOW(fd,2));
 
 	return 0;
@@ -1006,34 +1107,34 @@ int mapif_parse_WisToGM(int fd)
 // Save account_reg into sql (type=2)
 int mapif_parse_Registry(int fd)
 {
-	int j,p,len, max;
-	struct accreg *reg=accreg_pt;
+	int j, p, len, max;
+	struct accreg *reg = accreg_pt;
 
 	memset(accreg_pt,0,sizeof(struct accreg));
-	switch (RFIFOB(fd, 12)) {
-	case 3: //Character registry
-		max = GLOBAL_REG_NUM;
-	break;
-	case 2: //Account Registry
-		max = ACCOUNT_REG_NUM;
-	break;
-	case 1: //Account2 registry, must be sent over to login server.
-		return save_accreg2(RFIFOP(fd,4), RFIFOW(fd,2)-4);
-	default:
-		return 1;
+	switch (RFIFOB(fd,12)) {
+		case 3: //Character registry
+			max = GLOBAL_REG_NUM;
+			break;
+		case 2: //Account Registry
+			max = ACCOUNT_REG_NUM;
+			break;
+		case 1: //Account2 registry, must be sent over to login server.
+			return save_accreg2(RFIFOP(fd,4),RFIFOW(fd,2) - 4);
+		default:
+			return 1;
 	}
-	for(j=0,p=13;j<max && p<RFIFOW(fd,2);j++){
-		sscanf((char*)RFIFOP(fd,p), "%31c%n",reg->reg[j].str,&len);
-		reg->reg[j].str[len]='\0';
-		p +=len+1; //+1 to skip the '\0' between strings.
-		sscanf((char*)RFIFOP(fd,p), "%255c%n",reg->reg[j].value,&len);
-		reg->reg[j].value[len]='\0';
-		p +=len+1;
+	for (j = 0, p = 13; j < max && p < RFIFOW(fd,2); j++) {
+		sscanf((char *)RFIFOP(fd,p),"%31c%n",reg->reg[j].str,&len);
+		reg->reg[j].str[len] = '\0';
+		p += len + 1; //+1 to skip the '\0' between strings.
+		sscanf((char *)RFIFOP(fd,p),"%255c%n",reg->reg[j].value,&len);
+		reg->reg[j].value[len] = '\0';
+		p += len + 1;
 	}
-	reg->reg_num=j;
+	reg->reg_num = j;
 
-	inter_accreg_tosql(RFIFOL(fd,4),RFIFOL(fd,8),reg, RFIFOB(fd,12));
-	mapif_account_reg(fd,RFIFOP(fd,0));	// Send updated accounts to other map servers.
+	inter_accreg_tosql(RFIFOL(fd,4),RFIFOL(fd,8),reg,RFIFOB(fd,12));
+	mapif_account_reg(fd,RFIFOP(fd,0));	//Send updated accounts to other map servers.
 	return 0;
 }
 
@@ -1041,11 +1142,14 @@ int mapif_parse_Registry(int fd)
 int mapif_parse_RegistryRequest(int fd)
 {
 	//Load Char Registry
-	if (RFIFOB(fd,12)) mapif_account_reg_reply(fd,RFIFOL(fd,2),RFIFOL(fd,6),3);
+	if (RFIFOB(fd,12))
+		mapif_account_reg_reply(fd,RFIFOL(fd,2),RFIFOL(fd,6),3);
 	//Load Account Registry
-	if (RFIFOB(fd,11)) mapif_account_reg_reply(fd,RFIFOL(fd,2),RFIFOL(fd,6),2);
+	if (RFIFOB(fd,11))
+		mapif_account_reg_reply(fd,RFIFOL(fd,2),RFIFOL(fd,6),2);
 	//Ask Login Server for Account2 values.
-	if (RFIFOB(fd,10)) request_accreg2(RFIFOL(fd,2),RFIFOL(fd,6));
+	if (RFIFOB(fd,10))
+		request_accreg2(RFIFOL(fd,2),RFIFOL(fd,6));
 	return 1;
 }
 
@@ -1064,13 +1168,13 @@ static void mapif_namechange_ack(int fd, int account_id, int char_id, int type, 
 int mapif_parse_NameChangeRequest(int fd)
 {
 	int account_id, char_id, type;
-	char* name;
+	char *name;
 	int i;
 
 	account_id = RFIFOL(fd,2);
 	char_id = RFIFOL(fd,6);
 	type = RFIFOB(fd,10);
-	name = (char*)RFIFOP(fd,11);
+	name = (char *)RFIFOP(fd,11);
 
 	// Check Authorised letters/symbols in the name
 	if (char_name_option == 1) { // only letters/symbols in char_name_letters are authorised
@@ -1086,7 +1190,7 @@ int mapif_parse_NameChangeRequest(int fd)
 			return 0;
 		}
 	}
-	//TODO: type holds the type of object to rename.
+	//@TODO: type holds the type of object to rename.
 	//If it were a player, it needs to have the guild information and db information
 	//updated here, because changing it on the map won't make it be saved [Skotlex]
 
@@ -1130,52 +1234,32 @@ int inter_parse_frommap(int fd)
 		return 2;
 
 	switch(cmd) {
-	case 0x3000: mapif_parse_broadcast(fd); break;
-	case 0x3001: mapif_parse_WisRequest(fd); break;
-	case 0x3002: mapif_parse_WisReply(fd); break;
-	case 0x3003: mapif_parse_WisToGM(fd); break;
-	case 0x3004: mapif_parse_Registry(fd); break;
-	case 0x3005: mapif_parse_RegistryRequest(fd); break;
-	case 0x3006: mapif_parse_NameChangeRequest(fd); break;
-	case 0x3007: mapif_parse_accinfo(fd); break;
-	/* 0x3008 is used by the report stuff */
-	default:
-		if(  inter_party_parse_frommap(fd)
-		  || inter_guild_parse_frommap(fd)
-		  || inter_storage_parse_frommap(fd)
-		  || inter_pet_parse_frommap(fd)
-		  || inter_homunculus_parse_frommap(fd)
-		  || inter_mercenary_parse_frommap(fd)
-		  || inter_elemental_parse_frommap(fd)
-		  || inter_mail_parse_frommap(fd)
-		  || inter_auction_parse_frommap(fd)
-		  || inter_quest_parse_frommap(fd) )
-			break;
-		else
-			return 0;
+		case 0x3000: mapif_parse_broadcast(fd); break;
+		case 0x3001: mapif_parse_WisRequest(fd); break;
+		case 0x3002: mapif_parse_WisReply(fd); break;
+		case 0x3003: mapif_parse_WisToGM(fd); break;
+		case 0x3004: mapif_parse_Registry(fd); break;
+		case 0x3005: mapif_parse_RegistryRequest(fd); break;
+		case 0x3006: mapif_parse_NameChangeRequest(fd); break;
+		case 0x3007: mapif_parse_accinfo(fd); break;
+		// 0x3008 is used by the report stuff
+		case 0x3009: mapif_parse_broadcast_item(fd); break;
+		default:
+			if(inter_party_parse_frommap(fd) ||
+				inter_guild_parse_frommap(fd) ||
+				inter_storage_parse_frommap(fd) ||
+				inter_pet_parse_frommap(fd) ||
+				inter_homunculus_parse_frommap(fd) ||
+				inter_mercenary_parse_frommap(fd) ||
+				inter_elemental_parse_frommap(fd) ||
+				inter_mail_parse_frommap(fd) ||
+				inter_auction_parse_frommap(fd) ||
+				inter_quest_parse_frommap(fd))
+				break;
+			else
+				return 0;
 	}
 
-	RFIFOSKIP(fd, len);
+	RFIFOSKIP(fd,len);
 	return 1;
 }
-
-uint64 inter_chk_lastuid(int8 flag, uint64 value){
-	static uint64 last_updt_uid = 0;
-	static int8 update = 0;
-	if(flag)
-	{
-		if(last_updt_uid < value){
-			last_updt_uid = value;
-			update = 1;
-		}
-
-		return 0;
-	}else if(update)
-	{
-		update = 0;
-		return last_updt_uid;
-	}
-	return 0;
-}
-
-

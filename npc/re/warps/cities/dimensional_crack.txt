@@ -1,0 +1,20 @@
+//===== rAthena Script =======================================
+//= Dimensional Crack Warp Script
+//===== By: ==================================================
+//= Ziu
+//===== Current Version: =====================================
+//= 1.0
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: =========================================
+//= Warp Points for Dimensional Crack
+//===== Additional Comments: =================================
+//= 1.0 First Version.
+//============================================================
+
+dali,149,82,0	warp	dalimidcamp	1,1,mid_camp,210,289
+dali,40,87,0	warp	dalibifrost	1,1,bif_fild01,318,155
+dali,35,139,0	warp	dalidicast	1,1,dic_fild02,237,32
+dali,122,49,0	warp	dalimoc	1,1,moc_fild22b,227,200
+dali,64,129,0	warp	dalidali02	1,1,dali02,66,101
+dali02,66,98,0	warp	dali02dali	1,1,dali,64,125

@@ -1,0 +1,244 @@
+//===== rAthena Script ======================================= 
+//= Aldebaran Quest NPCs
+//===== By: ================================================== 
+//= Ziu, Vesper (translation)
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= NPC that give access to Clock Tower Nightmare Mode.
+//===== Additional Comments: ================================= 
+//= 1.0 First version. [exneval]
+//============================================================ 
+
+// Clock Tower Nightmare Mode :: nightmare_ct
+//============================================================
+c_tower1,232,222,5	script	Bellzamine Button#ct	968,{
+	mes "[Bellzamine Button]";
+	mes "Do you know about";
+	mes "^FF0000The Time-Twisted Clock Tower^000000?";
+	next;
+	mes "[Bellzamine Button]";
+	mes "I'm from there.";
+	mes "Because of that";
+	mes "my time is twisted too.";
+	next;
+	mes "[Bellzamine Button]";
+	mes "There are monsters";
+	mes "who can manipulate time.";
+	mes "All your memories and ages";
+	mes "will be twisted.";
+	next;
+	mes "[Bellzamine Button]";
+	mes "Because your time can be in danger.";
+	mes "Please don't ask where the place is to me.";
+	next;
+	switch(select("Don't ask","Enter 2nd floor of Twisted Clock Tower","Enter 3rd floor of Twisted Clock Tower"))
+	{
+		case 1:	
+			mes "[Bellzamine Button]";
+			mes "Phew...That's a good choice.";
+			mes "Because brand-new monsters will";
+			mes "give you huge exp and items, and that's dangerous.";
+			mes "Please go back to the safe place.";
+			close;
+		case 2:
+			mes "[Bellzamine Button]";
+			mes "That's a dangerous choice.";
+			next;
+			mes "[Bellzamine Button]";
+			mes "Because of it's dangerous";
+			mes "You need to pay ^0000FF10000z^000000 to me.";
+			next;
+			switch(select("Forget it","Pay 10000z","Why should I pay?"))
+			{
+				case 1:
+					mes "[Bellzamine Button]";
+					mes "Phew...That's a good choice.";
+					mes "Because brand-new monsters will";
+					mes "give you huge exp and items, and that's dangerous.";
+					mes "Please go back to the safe place.";
+					close;
+				case 2:
+					if (Zeny > 9999) {
+						Zeny -= 10000;
+						mes "[Bellzamine Button]";
+						mes "I hope you're safe";
+						mes "not like me just ended my time twisted...";
+						close2;
+						warp "c_tower2_",268,26;
+						end;
+					} else {
+						mes "[Bellzamine Button]";
+						mes "Really? You don't have money and asked me to?";
+						close;
+					}
+					break;
+				case 3:
+					mes "[Bellzamine Button]";
+					mes "For the safety of people";
+					mes "I always alert people about the danger!";
+					mes "That's why I need some pay.";
+					emotion e_swt;
+					close;
+			}
+			break;
+		case 3:
+			mes "[Bellzamine Button]";
+			mes "It's a dangerous choice.";
+			next;
+			mes "[Bellzamine Button]";
+			mes "It's a too dangerous";
+			mes "You need to pay ^0000FF10000z^000000.";
+			next;
+			switch(select("Forget it","Pay 10000z","Why should I pay?"))
+			{
+				case 1:
+					mes "[Bellzamine Button]";
+					mes "Phew...That's a good choice.";
+					mes "Because brand-new monsters will";
+					mes "give you huge exp and items, and that's dangerous.";
+					mes "Please go back to the safe place.";
+					close;
+				case 2:
+					if (Zeny > 9999) {
+						Zeny -= 10000;
+						mes "[Bellzamine Button]";
+						mes "I hope you're safe";
+						mes "not like me just ended my time twisted...";
+						close2;
+						warp "c_tower3_",65,147;
+						end;
+					} else {
+						mes "[Bellzamine Button]";
+						mes "Really? You don't have money and asked me to?";
+						close;
+					}
+					break;
+				case 3:
+					mes "[Bellzamine Button]";
+					mes "For the safety of people";
+					mes "I always alert people about the danger!";
+					mes "That's why I need some pay.";
+					emotion e_swt;
+					close;
+			}
+			break;
+	}
+}
+
+c_tower2_,274,26,3	script	Bellzamine Button#ct1	962,{
+	mes "[Bellzamine Button]";
+	mes "Maybe you've seen me";
+	mes "before sometime?";
+	next;
+	mes "[Bellzamine Button]";
+	mes "You saw me in the different place.";
+	mes "Different shape.";
+	next;
+	switch(select("I want to know about this place","Get me out of here"))
+	{
+		case 1:
+			mes "[Bellzamine Button]";
+			mes "Can you explain me";
+			mes "about what you've seen,";
+			mes "you've done?";
+			next;
+			mes "[Bellzamine Button]";
+			mes "Me too.";
+			mes "You can be missing one";
+			mes "without no purpose, no idea.";
+			next;
+			mes "[Bellzamine Button]";
+			mes "It's time to go back.";
+			mes "Please cherish";
+			mes "your time.";
+			next;
+			switch(select("Stay more","Go back"))
+			{
+				case 1:
+					mes "[Bellzamine Button]";
+					mes "You really like";
+					mes "this place.";
+					mes "Well, do whatever you want.";
+					close;
+				case 2:
+					mes "[Bellzamine Button]";
+					mes "Think about the juice in a cup.";
+					mes "You're stirring the juice with spoon and you're watching";
+					mes "the juice color is changing.";
+					close2;
+					warp "c_tower1",235,223;
+					end;
+			}
+			break;
+		case 2:
+			mes "[Bellzamine Button]";
+			mes "It's time to break up.";
+			mes "Do you have any favorite juice?";
+			next;
+			mes "[Bellzamine Button]";
+			mes "Think about the juice in a cup.";
+			mes "You're stirring the juice with spoon and you're watching";
+			mes "the juice color is changing.";
+			close2;
+			warp "c_tower1",235,223;
+			end;
+	}
+}
+
+c_tower3_,59,148,5	script	Bellzamine Button#ct2	574,{
+	mes "[Bellzamine Button]";
+	mes "Maybe you've seen me";
+	mes "before sometime?";
+	next;
+	mes "[Bellzamine Button]";
+	mes "You saw me in the different place.";
+	mes "Different shape.";
+	next;
+	switch(select("Who are you?","Get me out of here"))
+	{
+		case 1:
+			mes "[Bellzamine Button]";
+			mes "That's frequently asked question.";
+			mes "You'll be asked these questions a lot.";
+			next;
+			mes "[Bellzamine Button]";
+			mes "As you turn the page of books.";
+			mes "You'll see the end of book,";
+			mes "that's how it does.";
+			next;
+			mes "[Bellzamine Button]";
+			mes "It's time to go back.";
+			mes "Please cherish";
+			mes "your time.";
+			next;
+			switch(select("Stay more","Go back"))
+			{
+				case 1:
+					mes "[Bellzamine Button]";
+					mes "You really like";
+					mes "this place.";
+					mes "Well, do whatever you want.";
+					close;
+				case 2:
+					mes "[Bellzamine Button]";
+					mes "Think about the juice in a cup.";
+					mes "You're stirring the juice with spoon and you're watching";
+					mes "the juice color is changing.";
+					close2;
+					warp "c_tower1",235,223;
+					end;
+			}
+			break;
+		case 2:
+			mes "[Bellzamine Button]";
+			mes "Think about the juice in a cup.";
+			mes "You're stirring the juice with spoon and you're watching";
+			mes "the juice color is changing.";
+			close2;
+			warp "c_tower1",235,223;
+			end;
+	}
+}

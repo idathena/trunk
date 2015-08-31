@@ -3,6 +3,8 @@
 0,1,9,0,0,0,0,0,0,0,0,0,0 //NV_BASIC#Basic Skill#
 0,142,1,0,0,0,0,0,0,0,0,0,0 //NV_FIRSTAID#First Aid#
 0,143,1,0,0,0,0,0,0,0,0,0,0 //NV_TRICKDEAD#Act Dead#
+0,408,1,0,0,0,0,0,0,0,0,0,0 //WE_BABY#Baby#
+0,409,1,0,0,0,0,0,0,0,0,0,0 //WE_CALLPARENT#Call Parent#
 0,410,1,0,0,0,0,0,0,0,0,0,0 //WE_CALLBABY#Call Baby#
 //Swordman
 1,1,9,0,0,0,0,0,0,0,0,0,0 //NV_BASIC#Basic Skill#

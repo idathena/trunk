@@ -17,6 +17,8 @@
 //= 1.0 First version. [Euphy]
 //============================================================
 
+// Main NPC :: new_smelting612
+//============================================================
 -	script	::BlacksmithDister	-1,{
 	disable_items;
 	mes "[Blacksmith Dister]";
@@ -32,12 +34,12 @@
 	next;
 	setarray .@position$[1],"Head","Body","Left Hand","Right Hand","Robe","Shoes","Accessory 1","Accessory 2","Head 2","Head 3";
 	set .@menu$,"";
-	for(set .@i,1; .@i<=10; set .@i,.@i+1)
+	for (set .@i,1; .@i<=10; set .@i,.@i+1)
 		set .@menu$, .@menu$+((getequipisequiped(.@i))?getequipname(.@i):.@position$[.@i]+"-[Unequipped]")+":";
 	set .@part, select(.@menu$);
 	if (!getequipisequiped(.@part)) {
 		mes "[Blacksmith Dister]";
-		switch(.@part) {
+		switch (.@part) {
 		case 1:
 			mes "I'm a blacksmith, not a hairstylist.";
 			break;
@@ -79,7 +81,7 @@
 		close;
 	}
 	set .@equip_lv, getequipweaponlv(.@part);
-	switch(.@equip_lv) {
+	switch (.@equip_lv) {
 	default:
 	case 0:
 		set .@price,20000;
@@ -112,7 +114,7 @@
 	mes "This "+.@type$+" has been refined to "+.@equip_refine+". To refine it, I need "+.@ore$+" and a "+callfunc("F_InsertComma",.@price)+" zeny refining fee.";
 	mes "Do you want to proceed?";
 	next;
-	if(select("Yes:No") == 2) {
+	if (select("Yes:No") == 2) {
 		mes "[Blacksmith Dister]";
 		mes "I am busy, don't joke with me!";
 		close;
@@ -124,7 +126,7 @@
 		mes "[Blacksmith Dister]";
 		mes "Of course, the refining fee will not be returned! Do you want to continue?";
 		next;
-		if(select("Yes:No") == 2) {
+		if (select("Yes:No") == 2) {
 			mes "[Blacksmith Dister]";
 			mes "Good. I'd be sad if it failed, too.";
 			close;

@@ -3,27 +3,28 @@
 //===== By: ================================================== 
 //= Fix up by Jukka
 //===== Current Version: ===================================== 
-//= 1.6
+//= 2.0
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
 //= [Official Conversion]
 //= Swordman training quest.
 //===== Additional Comments: ================================= 
-//= 1.0 Fully working
-//= 1.1 optimized [Lupus]
+//= 1.0 Fully working.
+//= 1.1 Optimized. [Lupus]
 //= 1.2 Fixed a typo on NPC name. [SinSloth]
 //= 1.3 Fixed experience gains to match upcoming rate adjustments. [SinSloth]
 //= 1.4 Misc. updates. [L0ne_W0lf]
 //= 1.5 Added Renewal Izlude coordinates.
 //= 1.6 Added Pre-Renewal support. [Euphy]
+//= 2.0 Removed quest commands. [exneval]
 //============================================================ 
 
 // Shurank
 //============================================================
 izlude_in,82,163,3	script	Shurank	733,{
 	mes "[Shurank]";
-	if(Class == Job_Novice || Class == Job_Baby){
+	if(Class == Job_Novice || Class == Job_Baby) {
 		mes "Still wondering";
 		mes "what to do with";
 		mes "your future, eh?";
@@ -43,7 +44,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "come back to me...";
 		close;
 	}
-	if(BaseClass == Job_Swordman && eaclass()&(EAJL_2|EAJL_UPPER|EAJL_THIRD)){
+	if(BaseClass == Job_Swordman && eaclass()&(EAJL_2|EAJL_UPPER|EAJL_THIRD)) {
 		mes "From your raiment,";
 		mes "I see that you are";
 		if(Sex)
@@ -57,7 +58,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "There's nothing that I can actually offer to teach you. But if you know any new Swordmen that show potential, please direct them to me.";
 		close;
 	}
-	if(BaseClass != Job_Swordman){
+	if(BaseClass != Job_Swordman) {
 		mes "Greetings adventurer.";
 		mes "If you happen to know";
 		mes "any new Swordmen,";
@@ -72,7 +73,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "Foreign to me.";
 		close;
 	}
-	switch(tu_swordman){
+	switch(tu_swordman) {
 	case 23:
 		mes "Greetings, my friend.";
 		mes "There is nothing more";
@@ -101,7 +102,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "when surrounded by foes, but also keep in mind that it also inflicts a little damage on its caster.";
 		next;
 		set .@chk_magnum, getskilllv("SM_MAGNUM");
-		if(.@chk_magnum > 5){
+		if(.@chk_magnum > 5) {
 			mes "[Shurank]";
 			mes "I see that you've been training in the use of Magnum Break. Although it is an awesome skill, it's not for every Swordman. Still, there's no harm in learning it.";
 			next;
@@ -109,8 +110,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Here is a humble reward for";
 			mes "your great efforts. But do not let your talents allow you to grow arrogant!";
 			set tu_swordman, 23;
-			completequest 8228;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 186,0;
 			else
 				getexp 1860,0;
@@ -168,7 +168,6 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "Before you go, please take this.";
 		mes "I hope that you make good use of it as you train to become stronger and stronger. Good luck out there.";
 		set tu_swordman, 23;
-		completequest 8228;
 		getitem 1113,1; //Scimiter
 		close;
 	case 21:
@@ -190,7 +189,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		next;
 		set .@chk_hanson, getskilllv("SM_SWORD");
 		set .@chk_yangson, getskilllv("SM_TWOHAND");
-		if((.@chk_hanson > 9) || (.@chk_yangson > 9)){
+		if((.@chk_hanson > 9) || (.@chk_yangson > 9)) {
 			mes "[Shurank]";
 			mes "Ah, from the way you handle your Sword, I see that you have mastered a Sword Mastery. I'm thoroughly impressed.";
 			next;
@@ -200,8 +199,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "in recognition of";
 			mes "your accomplishment.";
 			set tu_swordman, 22;
-			changequest 8227,8228;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 186,0;
 			else
 				getexp 1860,0;
@@ -225,13 +223,11 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "skill coming along?";
 		next;
 		set .@chk_endure, getskilllv("SM_ENDURE");
-		if(.@chk_endure > 1){
+		if(.@chk_endure > 1) {
 			mes "[Shurank]";
 			mes "From that gleen of toughness upon your skin, I see now that I was foolish to ask. Well done~";
 			set tu_swordman, 13;
-			erasequest 8221;
-			setquest 8222;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 126,0;
 			else
 				getexp 1260,0;
@@ -259,7 +255,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "the Endure skill yet?";
 		next;
 		set .@chk_endure, getskilllv("SM_ENDURE");
-		if((.@chk_endure > 0) && (.@chk_endure < 2)){
+		if((.@chk_endure > 0) && (.@chk_endure < 2)) {
 			mes "[Shurank]";
 			mes "I see that you";
 			mes "know how to use the";
@@ -277,8 +273,6 @@ izlude_in,82,163,3	script	Shurank	733,{
 			next;
 			mes "[Shurank]";
 			mes "Since you've learned the Endure skill already, I don't think I need to explain it any further. You've done well.";
-			erasequest 8221;
-			setquest 8222;
 			set tu_swordman, 13;
 			next;
 			mes "[Shurank]";
@@ -290,13 +284,11 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Hurry and meet with Dequ'ee and return to me when you complete whatever it is that he wishes for you to do.";
 			close2;
 			end;
-		} else if(.@chk_endure > 1){
+		} else if(.@chk_endure > 1) {
 			mes "[Shurank]";
 			mes "From that gleen of toughness upon your skin, I see now that I was foolish to ask. Well done~";
 			set tu_swordman, 13;
-			erasequest 8221;
-			setquest 8222;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 126,0;
 			else
 				getexp 1260,0;
@@ -322,7 +314,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "the Endure skill.";
 		next;
 		set .@chk_endure, getskilllv("SM_ENDURE");
-		if(.@chk_endure == 0){
+		if(.@chk_endure == 0) {
 			mes "[Shurank]";
 			mes "As you've noticed, receiving any damage causes you to reel in pain, stunning you for an instant. Thus, rapidly attacking enemies are dangerous since it's difficult to counter or escape them.";
 			next;
@@ -338,9 +330,8 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "if you can endure attacks";
 			mes "from your enemies!";
 			set tu_swordman, 11;
-			changequest 8220,8221;
 			close;
-		} else if((.@chk_endure > 0) && (.@chk_endure < 2)){
+		} else if((.@chk_endure > 0) && (.@chk_endure < 2)) {
 			mes "[Shurank]";
 			mes "I see that you";
 			mes "know how to use the";
@@ -359,8 +350,6 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "[Shurank]";
 			mes "Since you've learned the Endure skill already, I don't think I need to explain it any further. You've done well.";
 			set tu_swordman, 13;
-			erasequest 8221;
-			setquest 8222;
 			next;
 			mes "[Shurank]";
 			mes "Ah, once again, I have";
@@ -370,13 +359,11 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "[Shurank]";
 			mes "Hurry and meet with Dequ'ee and return to me when you complete whatever it is that he wishes for you to do.";
 			close;
-		} else if(.@chk_endure > 1){
+		} else if(.@chk_endure > 1) {
 			mes "[Shurank]";
 			mes "Hm. But judging from the gleen of toughness on your skin, I suppose teaching you about Endure would be a waste of your time. Well done!";
 			set tu_swordman, 13;
-			erasequest 8221;
-			setquest 8222;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 126,0;
 			else
 				getexp 1260,0;
@@ -396,11 +383,11 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "the use of the Provoke skill?";
 		next;
 		set .@chk_provoke, getskilllv("SM_PROVOKE");
-		if((.@chk_provoke > 4) && (.@chk_provoke < 10)){
+		if((.@chk_provoke > 4) && (.@chk_provoke < 10)) {
 			mes "[Shurank]";
 			mes "Ah, I see that you have a fairly good understanding of the Provoke skill. Let me reward you in this small way for your efforts.";
 			set tu_swordman, 10;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 112,0;
 			else
 				getexp 1120,0;
@@ -408,7 +395,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "[Shurank]";
 			mes "Next time we speak, I will tell you what I know about the ^5D478BEndure^000000 skill. When you're ready to learn, come back to me.";
 			close;
-		} else if(.@chk_provoke == 10){
+		} else if(.@chk_provoke == 10) {
 			mes "[Shurank]";
 			mes "Y-you've mastered";
 			mes "Provoke? Impressive!";
@@ -417,7 +404,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "an outstanding Swordman.";
 			mes "Here is a small reward...";
 			set tu_swordman, 10;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 126,0;
 			else
 				getexp 1260,0;
@@ -439,7 +426,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "skill been progressing?";
 		next;
 		set .@chk_provoke, getskilllv("SM_PROVOKE");
-		if((.@chk_provoke > 0) && (.@chk_provoke < 5)){
+		if((.@chk_provoke > 0) && (.@chk_provoke < 5)) {
 			mes "[Shurank]";
 			mes "Ah, now I can see that you";
 			mes "know how to use it. That's a vast improvement over not being able to use it at all. Let me refesh you on Provoke's details.";
@@ -465,11 +452,11 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Alright, come back to me when you become sufficiently skilled in the use of Provoke. In the meantime, keep training.";
 			set tu_swordman, 9;
 			close;
-		} else if((.@chk_provoke > 4) && (.@chk_provoke < 10)){
+		} else if((.@chk_provoke > 4) && (.@chk_provoke < 10)) {
 			mes "[Shurank]";
 			mes "Ah, I see that you have a fairly good understanding of the Provoke skill. Let me reward you in this small way for your efforts.";
 			set tu_swordman, 10;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 112,0;
 			else
 				getexp 1120,0;
@@ -477,7 +464,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "[Shurank]";
 			mes "Next time we speak, I will tell you what I know about the ^5D478BEndure^000000 skill. When you're ready to learn, come back to me.";
 			close;
-		} else if(.@chk_provoke == 10){
+		} else if(.@chk_provoke == 10) {
 			mes "[Shurank]";
 			mes "Y-you've mastered";
 			mes "Provoke? Impressive!";
@@ -486,7 +473,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "an outstanding Swordman.";
 			mes "Here is a small reward...";
 			set tu_swordman, 10;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 126,0;
 			else
 				getexp 1260,0;
@@ -509,7 +496,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "of that, let me continue your instruction on Swordman skills. This time, we'll cover Provoke.";
 		next;
 		set .@chk_provoke, getskilllv("SM_PROVOKE");
-		if(.@chk_provoke == 0){
+		if(.@chk_provoke == 0) {
 			mes "[Shurank]";
 			mes "You haven't";
 			mes "learned Provoke yet?";
@@ -537,9 +524,8 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Now I ask that you train yourself in the use of Provoke. Come back";
 			mes "to me when you have a sufficient understanding of the use of the Provoke skill.";
 			set tu_swordman, 8;
-			changequest 8217,8218;
 			close;
-		} else if((.@chk_provoke > 0) && (.@chk_provoke < 5)){
+		} else if((.@chk_provoke > 0) && (.@chk_provoke < 5)) {
 			mes "[Shurank]";
 			mes "Hm. You seem to have a basic understanding of Provoke, but let me give you a few details so that you can better understand the use of that skill.";
 			next;
@@ -564,14 +550,12 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Now I ask that you train yourself in the use of Provoke. Come back";
 			mes "to me when you have a sufficient understanding of the use of the Provoke skill.";
 			set tu_swordman, 9;
-			changequest 8218,8219;
 			close;
-		} else if((.@chk_provoke > 4) && (.@chk_provoke < 10)){
+		} else if((.@chk_provoke > 4) && (.@chk_provoke < 10)) {
 			mes "[Shurank]";
 			mes "Ah, I see that you have a fairly good understanding of the Provoke skill. Let me reward you in this small way for your efforts.";
 			set tu_swordman, 10;
-			changequest 8219,8220;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 112,0;
 			else
 				getexp 1120,0;
@@ -579,7 +563,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "[Shurank]";
 			mes "Next time we speak, I will tell you what I know about the ^5D478BEndure^000000 skill. When you're ready to learn, come back to me.";
 			close;
-		} else if(.@chk_provoke == 10){
+		} else if(.@chk_provoke == 10) {
 			mes "[Shurank]";
 			mes "Y-you've mastered";
 			mes "Provoke? Impressive!";
@@ -588,11 +572,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "an outstanding Swordman.";
 			mes "Here is a small reward...";
 			set tu_swordman, 10;
-			completequest 8218;
-			completequest 8219;
-			completequest 8220;
-			setquest 8221;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 126,0;
 			else
 				getexp 1260,0;
@@ -648,7 +628,6 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "Although there's a Warp service,";
 		mes "I recommend traveling by foot. You cannot grow strong without testing your strength and practicing your skills!";
 		set tu_swordman, 6;
-		changequest 8215,8216;
 		close;
 	case 4:
 		mes "Since you've mastered Bash,";
@@ -660,7 +639,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "able to both take it and dish it out.";
 		next;
 		set .@chk_hp, getskilllv("SM_RECOVERY");
-		if(.@chk_hp == 0){
+		if(.@chk_hp == 0) {
 			mes "[Shurank]";
 			mes "But judging from that";
 			mes "scrawny frame of yours,";
@@ -679,12 +658,12 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "learn this skill! Of course, there are other Swordman skills that are just as important, though...";
 			set tu_swordman, 5;
 			next;
-		} else if(.@chk_hp == 10){
+		} else if(.@chk_hp == 10) {
 			mes "[Shurank]";
 			mes "Ah! That healthy glow!";
 			mes "I see that you've mastered this skill already. Let me give you a little reward for your hard training!";
 			set tu_swordman, 5;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 112,0;
 			else
 				getexp 1120,0;
@@ -718,7 +697,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "you as a fellow Swordman.";
 		next;
 		set .@chk_bash, getskilllv("SM_BASH");
-		if(.@chk_bash == 10){
+		if(.@chk_bash == 10) {
 			mes "[Shurank]";
 			mes "Those calluses...!";
 			mes "Only a master of the Bash skill has those kinds of hands. Great work, Swordman. I'm very impressed.";
@@ -727,7 +706,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Here's a small prize in recognition of your efforts thus far. But don't relax yet! You still have a long way to go before grasping";
 			mes "all of the basics.";
 			set tu_swordman, 4;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 97,0;
 			else
 				getexp 970,0;
@@ -746,7 +725,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "need to master this skill.";
 		next;
 		set .@chk_bash, getskilllv("SM_BASH");
-		if((.@chk_bash > 4) && (.@chk_bash < 10)){
+		if((.@chk_bash > 4) && (.@chk_bash < 10)) {
 			mes "[Shurank]";
 			mes "Hm. It doesn't look like you've gained mastery of Bash, but it seems like you're trying hard.";
 			next;
@@ -765,12 +744,12 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Here's a little reward for all of your hard work. I hope you realize the importance of using Bash as";
 			mes "you grow stronger.";
 			set tu_swordman, 3;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 83,0;
 			else
 				getexp 830,0;
 			close;
-		} else if(.@chk_bash == 10){
+		} else if(.@chk_bash == 10) {
 			mes "[Shurank]";
 			mes "Those calluses...!";
 			mes "Only a master of the Bash skill has those kinds of hands. Great work, Swordman. I'm very impressed.";
@@ -779,7 +758,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Here's a small prize in recognition of your efforts thus far. But don't relax yet! You still have a long way to go before grasping";
 			mes "all of the basics.";
 			set tu_swordman, 4;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 97,0;
 			else
 				getexp 970,0;
@@ -796,7 +775,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "the art of using Bash? I fervently believe that the Bash skill is the essense of Swordmanship!";
 		next;
 		set .@chk_bash, getskilllv("SM_BASH");
-		if((.@chk_bash > 0) && (.@chk_bash < 5)){
+		if((.@chk_bash > 0) && (.@chk_bash < 5)) {
 			mes "[Shurank]";
 			mes "I see that you understand";
 			mes "a little bit about the Bash skill. But still, it's not enough. Let me explain in detail...";
@@ -817,12 +796,12 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Still, for your training efforts, let me give you a humble reward. But remember, we still have more";
 			mes "of the fundamentals to cover!";
 			set tu_swordman, 2;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 58,0;
 			else
 				getexp 580,0;
 			close;
-		} else if((.@chk_bash > 4) && (.@chk_bash < 10)){
+		} else if((.@chk_bash > 4) && (.@chk_bash < 10)) {
 			mes "[Shurank]";
 			mes "Hmm...";
 			mes "Still haven't mastered Bash, eh? Well, in any case, I think you've made some progress.";
@@ -849,8 +828,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "[Shurank]";
 			mes "For your efforts and patience, I offer you this small reward. Please take it and grow even stronger...";
 			set tu_swordman, 3;
-			setquest 8211;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 83,0;
 			else
 				getexp 830,0;
@@ -858,7 +836,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "[Shurank]";
 			mes "I believe that every true Swordman should master the Bash skill. If you ever do master the skill as a Swordman, come back to me.";
 			close;
-		} else if(.@chk_bash == 10){
+		} else if(.@chk_bash == 10) {
 			mes "[Shurank]";
 			mes "Those calluses...!";
 			mes "Only a master of the Bash skill has those kinds of hands. Great work, Swordman. I'm very impressed.";
@@ -867,7 +845,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Here's a small prize in recognition of your efforts thus far. But don't relax yet! You still have a long way to go before grasping";
 			mes "all of the basics.";
 			set tu_swordman, 4;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 97,0;
 			else
 				getexp 970,0;
@@ -895,7 +873,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 		mes "which is the ^5D478BBash^000000 skill.";
 		next;
 		set .@chk_bash, getskilllv("SM_BASH");
-		if(.@chk_bash == 0){
+		if(.@chk_bash == 0) {
 			mes "[Shurank]";
 			mes "^333333*Gasp*^000000";
 			mes "Those soft, delicate hands! You've never learned how to use Bash, haven't you?! How do you expect to lead battles without knowing Bash?";
@@ -903,13 +881,12 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "[Shurank]";
 			mes "Now, if you wish to become a true Swordman, you must learn the Bash skill. There's no question about it: You've got to know these basics! Take this, and learn to Bash!";
 			set tu_swordman, 1;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 49,0;
 			else
 				getexp 490,0;
-			setquest 8211;
 			close;
-		} else if((.@chk_bash > 0) && (.@chk_bash < 5)){
+		} else if((.@chk_bash > 0) && (.@chk_bash < 5)) {
 			mes "[Shurank]";
 			mes "I see that you understand";
 			mes "a little bit about the Bash skill. But still, it's not enough. Let me explain in detail...";
@@ -930,13 +907,12 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Still, for your training efforts, let me give you a humble reward. But remember, we still have more";
 			mes "of the fundamentals to cover!";
 			set tu_swordman, 2;
-			changequest 8211,8212;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 58,0;
 			else
 				getexp 580,0;
 			close;
-		} else if((.@chk_bash > 4) && (.@chk_bash < 10)){
+		} else if((.@chk_bash > 4) && (.@chk_bash < 10)) {
 			mes "[Shurank]";
 			mes "I see that you've gained some proficiency with the Bash skill. But still, it's not enough. Let me explain...";
 			next;
@@ -956,8 +932,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Still, for your training efforts, let me give you a humble reward. But remember, we still have more";
 			mes "of the fundamentals to cover!";
 			set tu_swordman, 3;
-			changequest 8212,8213;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 83,0;
 			else
 				getexp 830,0;
@@ -965,7 +940,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "[Shurank]";
 			mes "But if you wish to become an expert Swordman in my eyes, you must master Bash!";
 			close;
-		} else if(.@chk_bash == 10){
+		} else if(.@chk_bash == 10) {
 			mes "[Shurank]";
 			mes "Those calluses...!";
 			mes "Only a master of the Bash skill has those kinds of hands. Great work, Swordman. I'm very impressed.";
@@ -974,11 +949,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 			mes "Here's a small prize in recognition of your efforts thus far. But don't relax yet! You still have a long way to go before grasping";
 			mes "all of the basics.";
 			set tu_swordman, 4;
-			completequest 8211;
-			completequest 8212;
-			completequest 8213;
-			setquest 8214;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 97,0;
 			else
 				getexp 970,0;
@@ -994,7 +965,7 @@ izlude_in,82,163,3	script	Shurank	733,{
 // Daqu'ee
 //============================================================
 geffen,154,143,3	script	Dequ'ee	734,{
-	if(BaseJob == Job_Novice){
+	if(BaseJob == Job_Novice) {
 		mes "[Dequ'ee]";
 		mes "Hey there.";
 		mes "Frustrated with";
@@ -1012,7 +983,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "I don't know how you want to live your life, but you should give the Swordman job some serious thought...";
 		close;
 	}
-	if(BaseClass == Job_Swordman && eaclass()&(EAJL_2|EAJL_UPPER)){
+	if(BaseClass == Job_Swordman && eaclass()&(EAJL_2|EAJL_UPPER)) {
 		mes "[Dequ'ee]";
 		mes "Ah...";
 		mes "A fellow sword wielder!";
@@ -1023,7 +994,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "depend on the strength of your blade. It's an awesome responsibility, but we can never let our allies down in battle...";
 		close;
 	}
-	if(BaseClass != Job_Swordman){
+	if(BaseClass != Job_Swordman) {
 		mes "[Dequ'ee]";
 		mes "Hello there.";
 		mes "Not a fan of swords, are you?";
@@ -1038,7 +1009,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "Pretty boring...";
 		close;
 	}
-	if(tu_swordman > 20){
+	if(tu_swordman > 20) {
 		mes "[Dequ'ee]";
 		mes "I hope you continue";
 		mes "to train yourself in";
@@ -1047,7 +1018,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "wielding a blade...";
 		close;
 	}
-	if(tu_swordman == 20){
+	if(tu_swordman == 20) {
 		mes "[Dequ'ee]";
 		mes "Huh...?";
 		mes "Aren't you supposed";
@@ -1072,15 +1043,14 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "Why don't you report back to Shurank now? I guess he still";
 		mes "wants to show you the ropes of Swordmanship.";
 		set tu_swordman, 21;
-		changequest 8226,8227;
 		close2;
-		if (checkre(0))
+		if(checkre(0))
 			warp "izlude",127,100;
 		else
 			warp "izlude",35,78;
 		end;
 	}
-	if(tu_swordman == 19){
+	if(tu_swordman == 19) {
 		mes "[Dequ'ee]";
 		mes "What are still doing here?";
 		mes "Hurry and check on Bankley!";
@@ -1088,15 +1058,15 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "he might be up to!";
 		close;
 	}
-	if((tu_swordman == 17) || (tu_swordman == 18)){
+	if((tu_swordman == 17) || (tu_swordman == 18)) {
 		mes "[Dequ'ee]";
-		if(tu_swordman == 17){
+		if(tu_swordman == 17) {
 			mes "TheisWesomeof";
 			mes "ConBanfoevidehi";
 			mes "victkleyundncem";
 			mes "hekdlfiDrindkelsd";
 			next;
-		} else if(tu_swordman == 18){
+		} else if(tu_swordman == 18) {
 			mes "hekdlfiDrindkelsd";
 			mes "TheisWesomeof";
 			mes "ConBanfoevidehi";
@@ -1133,8 +1103,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 			mes "[Dequ'ee]";
 			mes "Hurry over to Morroc and monitor Bankley in case he does anything desperate. If something happens, report to me right away!";
 			set tu_swordman, 19;
-			changequest 8224,8225;
-			if (checkre(3))
+			if(checkre(3))
 				getexp 162,0;
 			else
 				getexp 1620,0;
@@ -1161,7 +1130,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 			close;
 		}
 	}
-	if(tu_swordman == 16){
+	if(tu_swordman == 16) {
 		mes "[Dequ'ee]";
 		mes "I guess these codes need to be arranged in a certain order before we can figure out its secrets.";
 		next;
@@ -1851,7 +1820,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 			break;
 		}
 	}
-	if(tu_swordman == 15){
+	if(tu_swordman == 15) {
 		set .@hans$, "victkleyundncem";
 		set .@bang$, "hekdlfiDrindkelsd";
 		set .@mutr$, "ConBanfoevidehi";
@@ -1872,7 +1841,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "tell me the code that Hans had.";
 		next;
 		input .@inputstr$;
-		if(.@inputstr$ == .@hans$){
+		if(.@inputstr$ == .@hans$) {
 			mes "[Dequ'ee]";
 			mes "victkleyundncem?";
 			mes "That's certainly";
@@ -1880,7 +1849,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 			mes "Now, tell me Bankley's.";
 			next;
 			input .@inputstr$;
-			if(.@inputstr$ == .@bang$){
+			if(.@inputstr$ == .@bang$) {
 				mes "[Dequ'ee]";
 				mes "hekdlfiDrindkelsd..";
 				mes "What the hell is that...?";
@@ -1888,7 +1857,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 				mes "What about Muetro's?";
 				next;
 				input .@inputstr$;
-				if(.@inputstr$ == .@mutr$){
+				if(.@inputstr$ == .@mutr$) {
 					mes "[Dequ'ee]";
 					mes "ConBanfoevidehi.";
 					mes "This is going to";
@@ -1897,7 +1866,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 					mes "tell me Geil's.";
 					next;
 					input .@inputstr$;
-					if(.@inputstr$ == .@geil$){
+					if(.@inputstr$ == .@geil$) {
 						mes "[Dequ'ee]";
 						mes "TheisWesomeof...";
 						mes "Alright, great.";
@@ -1913,7 +1882,6 @@ geffen,154,143,3	script	Dequ'ee	734,{
 						mes "out, it's the only clue";
 						mes "that we have...";
 						set tu_swordman, 16;
-						changequest 8223,8224;
 						close;
 					} else {
 						mes "[Dequ'ee]";
@@ -1946,7 +1914,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 	
 		}
 	}
-	if(tu_swordman == 14){
+	if(tu_swordman == 14) {
 		mes "[Dequ'ee]";
 		mes "Didn't I ask you";
 		mes "to interrogate the";
@@ -1956,7 +1924,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "as possible!";
 		close;
 	}
-	if(tu_swordman == 13){
+	if(tu_swordman == 13) {
 		mes "[Dequ'ee]";
 		mes "Ah, you're here!";
 		mes "Shurank must have";
@@ -1989,11 +1957,10 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "near that city.";
 		next;
 		set tu_swordman, 14;
-		changequest 8222,8223;
 		warp "moc_fild07",359,201;
 		close;
 	}
-	if((tu_swordman > 7) && (tu_swordman < 13)){
+	if((tu_swordman > 7) && (tu_swordman < 13)) {
 		mes "[Dequ'ee]";
 		mes "Hmm...";
 		mes "Still receiving";
@@ -2005,7 +1972,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "Swordmen nowadays are getting sloppier and sloppier. Someone has to keep the new guys in line and on their toes!";
 		close;
 	}
-	if(tu_swordman == 7){
+	if(tu_swordman == 7) {
 		mes "[Dequ'ee]";
 		mes "What are you";
 		mes "still doing here?";
@@ -2020,7 +1987,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 		mes "out who he is.";
 		close;
 	}
-	if(tu_swordman == 6){
+	if(tu_swordman == 6) {
 		mes "[Dequ'ee]";
 		mes "Ah...!";
 		mes "Are you the Swordman";
@@ -2182,8 +2149,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 					mes "[Dequ'ee]";
 					mes "Thank you for taking the trouble to come this far. Let me reward you with some experience points.";
 					set tu_swordman, 7;
-					changequest 8216,8217;
-					if (checkre(3))
+					if(checkre(3))
 						getexp 112,0;
 					else
 						getexp 1120,0;
@@ -2193,7 +2159,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 					mes "of yourself,";
 					mes "brave Swordman.";
 					next;
-					if (checkre(0))
+					if(checkre(0))
 						warp "izlude",127,100;
 					else
 						warp "izlude",35,78;
@@ -2259,7 +2225,7 @@ geffen,154,143,3	script	Dequ'ee	734,{
 //============================================================
 morocc_in,51,101,3	script	Geil	89,{
 	mes "[Geil]";
-	if(tu_swordman == 15){
+	if(tu_swordman == 15) {
 		mes "Were you sent by the authorities? Quit giving me such a hard time! I'm not the murderer! I don't even know who was killed. I'm not the one you're looking for!";
 		next;
 		mes "[Geil]";
@@ -2277,7 +2243,7 @@ morocc_in,51,101,3	script	Geil	89,{
 		mes "What's so important about this code, and why do you guys keep hounding me about the murder?!";
 		close;
 	}
-	if(tu_swordman == 14){
+	if(tu_swordman == 14) {
 		mes "Were you sent by the authorities? Quit giving me such a hard time! I'm not the murderer! I don't even know who was killed. I'm not the one you're looking for!";
 		next;
 		mes "[Geil]";
@@ -2310,7 +2276,7 @@ morocc_in,51,101,3	script	Geil	89,{
 //============================================================
 morocc,82,292,5	script	Muetro	84,{
 	mes "[Muetro]";
-	if(tu_swordman == 15){
+	if(tu_swordman == 15) {
 		mes "You're just";
 		mes "like all the others.";
 		mes "You want the code";
@@ -2323,7 +2289,7 @@ morocc,82,292,5	script	Muetro	84,{
 		mes "catch the murderer.";
 		close;
 	}
-	if(tu_swordman == 14){
+	if(tu_swordman == 14) {
 		mes "You're just";
 		mes "like all the others.";
 		mes "You want the code";
@@ -2351,7 +2317,7 @@ morocc,82,292,5	script	Muetro	84,{
 //============================================================
 morocc,240,72,3	script	Hans	86,{
 	mes "[Hans]";
-	if(tu_swordman == 15){
+	if(tu_swordman == 15) {
 		mes "Help me!";
 		mes "Please help me!";
 		mes "I'm no murderer!";
@@ -2375,7 +2341,7 @@ morocc,240,72,3	script	Hans	86,{
 		mes "It's like he used magic or something to make it stick out in my brain. Please leave me alone, this is all I know!";
 		close;
 	}
-	if(tu_swordman == 14){
+	if(tu_swordman == 14) {
 		mes "Help me!";
 		mes "Please help me!";
 		mes "I'm no murderer!";
@@ -2408,13 +2374,13 @@ morocc,240,72,3	script	Hans	86,{
 // Bankley
 //============================================================
 morocc_in,12,156,3	script	Bankley	97,{
-	if(tu_swordman > 19){
+	if(tu_swordman > 19) {
 		mes "^3355FFBankley had a pitiable";
 		mes "expression on his face.^000000";
 		mes "^3355FFHis body is completely lifeless. There's a long, deep wound in his chest, and a blood drenched knife is clenched in his right hand.^000000";
 		close;
 	}
-	if(tu_swordman == 19){
+	if(tu_swordman == 19) {
 		mes "...";
 		mes "......";
 		next;
@@ -2423,11 +2389,10 @@ morocc_in,12,156,3	script	Bankley	97,{
 		mes "^3355FFBankley had a sad, pitiable expression on his face. Since the color is still fresh in his cheeks, he died only a little while ago.";
 		mes "^3355FFThere is a long, deep wound in his chest, and a blood drenched knife is clenched in his right hand.^000000";
 		set tu_swordman, 20;
-		changequest 8225,8226;
 		close;
 	}
 	mes "[Bankley]";
-	if(tu_swordman == 15){
+	if(tu_swordman == 15) {
 		mes "I didn't kill anybody...!";
 		mes "I'm innocent and don't";
 		mes "have anything to hide!";
@@ -2454,7 +2419,7 @@ morocc_in,12,156,3	script	Bankley	97,{
 		mes "for the real culprit!";
 		close;
 	}
-	if(tu_swordman == 14){
+	if(tu_swordman == 14) {
 		mes "I didn't kill anybody...!";
 		mes "I'm innocent and don't";
 		mes "have anything to hide!";

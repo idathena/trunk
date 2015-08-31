@@ -108,6 +108,24 @@ moc_prydn2	mapflag	nomemo
 1@nyd	mapflag	nomemo
 2@nyd	mapflag	nomemo
 
+// Criatura Academy ==============
+iz_ac01	mapflag	nomemo
+iz_ac02	mapflag	nomemo
+iz_int	mapflag	nomemo
+iz_ng01	mapflag	nomemo
+iz_int01	mapflag	nomemo
+iz_int02	mapflag	nomemo
+iz_int03	mapflag	nomemo
+iz_int04	mapflag	nomemo
+iz_ac01_a	mapflag	nomemo
+iz_ac02_a	mapflag	nomemo
+iz_ac01_b	mapflag	nomemo
+iz_ac02_b	mapflag	nomemo
+iz_ac01_c	mapflag	nomemo
+iz_ac02_c	mapflag	nomemo
+iz_ac01_d	mapflag	nomemo
+iz_ac02_d	mapflag	nomemo
+
 // Glast Heim Memorial Dungeon ===
 1@gl_k	mapflag	nomemo
 2@gl_k	mapflag	nomemo
@@ -119,9 +137,10 @@ gl_cas02_	mapflag	nomemo
 1@def02	mapflag	nomemo
 1@def03	mapflag	nomemo
 
-// Heroes' Trails - Part 1 =======
+// Heroes' Trails =======
 1@gef	mapflag	nomemo
 1@face	mapflag	nomemo
 1@sara	mapflag	nomemo
 1@gef_in	mapflag	nomemo
 dali	mapflag	nomemo
+dali02	mapflag	nomemo

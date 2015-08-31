@@ -3095,7 +3095,7 @@ OnTouch:
 /* Currently broken.
 prt_maze02,25,161,0	script	#music	-1,7,7,{
 OnTouch:
-	soundeffect "effect\\Â¼Â®Â¾Ã§Ã€Ã‡ Â¾Ã®Â½Ã˜Â½Ã….wav",1;
+	soundeffect "effect\\¼®¾çÀÇ ¾î½Ø½Å.wav",1;
 	end;
 }
 */
@@ -8811,7 +8811,7 @@ que_sign01,197,195,4	script	Serin#witch	90,{
 				getexp (checkre(3))?20000:200000,0;
 				set $@sign_w1,0;
 				close2;
-				warp "umbala,",132,203;
+				warp "umbala",132,203;
 				end;
 			}
 		}
@@ -12611,7 +12611,7 @@ function	script	F_UpdateSignVars	{
 		set sign_fail,0;
 		set gaananpoint,0;
 		set gaanantest,0;
-		set arianstest,0;
+		set ariantest,0;
 		set SignJore,0;
 		set ScareAlchSign,0;
 		set dearles_test,0;

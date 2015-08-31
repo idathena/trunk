@@ -46,8 +46,8 @@ int storage_fromsql(int account_id, struct storage_data* p)
 	StringBuf_Destroy(&buf);
 
 	for( i = 0; i < MAX_STORAGE && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i ) {
-		struct item* item;
-		char* data;
+		struct item *item;
+		char *data;
 
 		item = &p->items[i];
 		Sql_GetData(sql_handle, 0, &data, NULL); item->id = atoi(data);
@@ -73,7 +73,7 @@ int storage_fromsql(int account_id, struct storage_data* p)
 }
 
 /// Save guild_storage data to sql
-int guild_storage_tosql(int guild_id, struct guild_storage* p)
+int guild_storage_tosql(int guild_id, struct guild_storage *p)
 {
 	memitemdata_to_sql(p->items, MAX_GUILD_STORAGE, guild_id, TABLE_GUILD_STORAGE);
 	ShowInfo ("guild storage save to DB - guild: %d\n", guild_id);
@@ -81,7 +81,7 @@ int guild_storage_tosql(int guild_id, struct guild_storage* p)
 }
 
 /// Load guild_storage data to mem
-int guild_storage_fromsql(int guild_id, struct guild_storage* p)
+int guild_storage_fromsql(int guild_id, struct guild_storage *p)
 {
 	StringBuf buf;
 	int i, j;
@@ -103,8 +103,8 @@ int guild_storage_fromsql(int guild_id, struct guild_storage* p)
 	StringBuf_Destroy(&buf);
 
 	for( i = 0; i < MAX_GUILD_STORAGE && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i ) {
-		struct item* item;
-		char* data;
+		struct item *item;
+		char *data;
 
 		item = &p->items[i];
 		Sql_GetData(sql_handle, 0, &data, NULL); item->id = atoi(data);
@@ -162,11 +162,10 @@ int mapif_load_guild_storage(int fd,int account_id,int guild_id, char flag)
 {
 	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `guild_id` FROM `%s` WHERE `guild_id`='%d'", guild_db, guild_id) )
 		Sql_ShowDebug(sql_handle);
-	else if( Sql_NumRows(sql_handle) > 0 )
-	{// guild exists
-		WFIFOHEAD(fd, sizeof(struct guild_storage)+13);
+	else if( Sql_NumRows(sql_handle) > 0 ) { //Guild exists
+		WFIFOHEAD(fd, sizeof(struct guild_storage) + 13);
 		WFIFOW(fd,0) = 0x3818;
-		WFIFOW(fd,2) = sizeof(struct guild_storage)+13;
+		WFIFOW(fd,2) = sizeof(struct guild_storage) + 13;
 		WFIFOL(fd,4) = account_id;
 		WFIFOL(fd,8) = guild_id;
 		WFIFOB(fd,12) = flag; //1 open storage, 0 don't open
@@ -187,10 +186,10 @@ int mapif_load_guild_storage(int fd,int account_id,int guild_id, char flag)
 int mapif_save_guild_storage_ack(int fd,int account_id,int guild_id,int fail)
 {
 	WFIFOHEAD(fd,11);
-	WFIFOW(fd,0)=0x3819;
-	WFIFOL(fd,2)=account_id;
-	WFIFOL(fd,6)=guild_id;
-	WFIFOB(fd,10)=fail;
+	WFIFOW(fd,0) = 0x3819;
+	WFIFOL(fd,2) = account_id;
+	WFIFOL(fd,6) = guild_id;
+	WFIFOB(fd,10) = fail;
 	WFIFOSET(fd,11);
 	return 0;
 }
@@ -215,15 +214,11 @@ int mapif_parse_SaveGuildStorage(int fd)
 	len = RFIFOW(fd,2);
 
 	if( sizeof(struct guild_storage) != len - 12 )
-	{
 		ShowError("inter storage: data size error %d != %d\n", sizeof(struct guild_storage), len - 12);
-	}
-	else
-	{
+	else {
 		if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `guild_id` FROM `%s` WHERE `guild_id`='%d'", guild_db, guild_id) )
 			Sql_ShowDebug(sql_handle);
-		else if( Sql_NumRows(sql_handle) > 0 )
-		{// guild exists
+		else if( Sql_NumRows(sql_handle) > 0 ) { //Guild exists
 			Sql_FreeResult(sql_handle);
 			guild_storage_tosql(guild_id, (struct guild_storage*)RFIFOP(fd,12));
 			mapif_save_guild_storage_ack(fd, RFIFOL(fd,4), guild_id, 0);
@@ -234,37 +229,72 @@ int mapif_parse_SaveGuildStorage(int fd)
 	mapif_save_guild_storage_ack(fd, RFIFOL(fd,4), guild_id, 1);
 	return 0;
 }
+
 #ifdef BOUND_ITEMS
-int mapif_itembound_ack(int fd, int aid, int guild_id)
+/**
+ * IZ 0x3856 <account_id>.L <guild_id>.W
+ * Tells map-server if the process if complete, unlock the guild storage
+ */
+static void mapif_itembound_ack(int fd, int account_id, int guild_id)
 {
 	WFIFOHEAD(fd,8);
 	WFIFOW(fd,0) = 0x3856;
-	WFIFOL(fd,2) = aid;
+	WFIFOL(fd,2) = account_id;
 	WFIFOW(fd,6) = guild_id;
 	WFIFOSET(fd,8);
-	return 0;
+	unset_session_flag(account_id, 1);
 }
 
-//------------------------------------------------
-//Guild bound items pull for offline characters [Akinari]
-//------------------------------------------------
+/**
+ * IZ 0x3857 <size>.W <count>.W <guild_id>.W { <item>.?B }.*MAX_INVENTORY
+ * Send the retrieved guild bound items to map-server, store them to guild storage.
+ * By using this method, stackable items will looks how it should be, and overflowed
+ * item's stack won't disturbs the guild storage table and the leftover items (when
+ * storage is full) will be discarded.
+ * @param fd
+ * @param guild_id
+ * @param items[]
+ * @param count
+ * @author [Cydh]
+ */
+static void mapif_itembound_store2gstorage(int fd, int guild_id, struct item items[], unsigned short count)
+{
+	int size = 8 + sizeof(struct item) * MAX_INVENTORY, i;
+
+	WFIFOHEAD(fd,size);
+	WFIFOW(fd,0) = 0x3857;
+	WFIFOW(fd,2) = size;
+	WFIFOW(fd,6) = guild_id;
+	for( i = 0; i < count && i < MAX_INVENTORY; i++ ) {
+		if( !&items[i] )
+			continue;
+		memcpy(WFIFOP(fd,8 + (i * sizeof(struct item))), &items[i], sizeof(struct item));
+	}
+	WFIFOW(fd,4) = i;
+	WFIFOSET(fd,size);
+}
+
+/**
+ * ZI 0x3056 <char_id>.L <account_id>.L <guild_id>.W
+ * Pulls guild bound items for offline characters
+ * @author [Akinari]
+ */
 int mapif_parse_itembound_retrieve(int fd)
 {
 	StringBuf buf;
-	SqlStmt* stmt;
-	struct item item;
-	int j, i = 0, s;
-	bool found = false;
-	struct item items[MAX_INVENTORY];
-	int char_id = RFIFOL(fd,2);
-	int aid = RFIFOL(fd,6);
-	int guild_id = RFIFOW(fd,10);
+	SqlStmt *stmt;
+	unsigned short i = 0, count = 0;
+	struct item item, items[MAX_INVENTORY];
+	int j, guild_id = RFIFOW(fd,10);
+	uint32 char_id = RFIFOL(fd,2), account_id = RFIFOL(fd,6);
 
 	StringBuf_Init(&buf);
+
+	//Get bound items from player's inventory
 	StringBuf_AppendStr(&buf, "SELECT `id`, `nameid`, `amount`, `equip`, `identify`, `refine`, `attribute`, `expire_time`, `bound`");
 	for( j = 0; j < MAX_SLOTS; ++j )
 		StringBuf_Printf(&buf, ", `card%d`", j);
-	StringBuf_Printf(&buf, " FROM `%s` WHERE `char_id`='%d'",inventory_db,char_id);
+	StringBuf_Printf(&buf, " FROM `%s` WHERE `char_id`='%d' AND `bound` = %d", inventory_db, char_id, BOUND_GUILD);
 
 	stmt = SqlStmt_Malloc(sql_handle);
 	if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) ||
@@ -273,12 +303,12 @@ int mapif_parse_itembound_retrieve(int fd)
 		SqlStmt_ShowDebug(stmt);
 		SqlStmt_Free(stmt);
 		StringBuf_Destroy(&buf);
-		mapif_itembound_ack(fd,aid,guild_id);
+		mapif_itembound_ack(fd, account_id, guild_id);
 		return 1;
 	}
 
 	SqlStmt_BindColumn(stmt, 0, SQLDT_INT,       &item.id,          0, NULL, NULL);
-	SqlStmt_BindColumn(stmt, 1, SQLDT_SHORT,     &item.nameid,      0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 1, SQLDT_USHORT,    &item.nameid,      0, NULL, NULL);
 	SqlStmt_BindColumn(stmt, 2, SQLDT_SHORT,     &item.amount,      0, NULL, NULL);
 	SqlStmt_BindColumn(stmt, 3, SQLDT_USHORT,    &item.equip,       0, NULL, NULL);
 	SqlStmt_BindColumn(stmt, 4, SQLDT_CHAR,      &item.identify,    0, NULL, NULL);
@@ -287,81 +317,89 @@ int mapif_parse_itembound_retrieve(int fd)
 	SqlStmt_BindColumn(stmt, 7, SQLDT_UINT,      &item.expire_time, 0, NULL, NULL);
 	SqlStmt_BindColumn(stmt, 8, SQLDT_UINT,      &item.bound,       0, NULL, NULL);
 	for( j = 0; j < MAX_SLOTS; ++j )
-		SqlStmt_BindColumn(stmt, 9+j, SQLDT_SHORT, &item.card[j], 0, NULL, NULL);
+		SqlStmt_BindColumn(stmt, 9 + j, SQLDT_SHORT, &item.card[j], 0, NULL, NULL);
 
-	while( SQL_SUCCESS == SqlStmt_NextRow(stmt) ) {
-		if( item.bound == 2 ) {
-			memcpy(&items[i],&item,sizeof(struct item));
-			i++;
-		}
-	}
+	memset(&items, 0, sizeof(items));
+	while( SQL_SUCCESS == SqlStmt_NextRow(stmt) )
+		memcpy(&items[count++], &item, sizeof(struct item));
 	Sql_FreeResult(sql_handle);
-	
-	if( !i ) { //No items found - No need to continue
+
+	ShowInfo("Found '"CL_WHITE"%d"CL_RESET"' guild bound item(s) from CID = "CL_WHITE"%d"CL_RESET", AID = %d, Guild ID = "CL_WHITE"%d"CL_RESET".\n", count, char_id, account_id, guild_id);
+	if( !count ) { //No items found - No need to continue
 		StringBuf_Destroy(&buf);
 		SqlStmt_Free(stmt);
-		mapif_itembound_ack(fd,aid,guild_id);
-		return 0;
+		mapif_itembound_ack(fd, account_id, guild_id);
+		return 1;
 	}
 
-	//First we delete the character's items
+	set_session_flag(account_id, 1);
+
+	//Delete bound items from player's inventory
 	StringBuf_Clear(&buf);
-	StringBuf_Printf(&buf, "DELETE FROM `%s` WHERE",inventory_db);
-	for( j = 0; j < i; j++ ) {
-		if( found )
-			StringBuf_AppendStr(&buf, " OR");
-		else
-			found = true;
-		StringBuf_Printf(&buf, " `id`=%d",items[j].id);
-	}
-
+	StringBuf_Printf(&buf, "DELETE FROM `%s` WHERE `bound` = %d", inventory_db, BOUND_GUILD);
 	if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) ||
 		SQL_ERROR == SqlStmt_Execute(stmt) )
 	{
 		SqlStmt_ShowDebug(stmt);
 		SqlStmt_Free(stmt);
 		StringBuf_Destroy(&buf);
-		mapif_itembound_ack(fd,aid,guild_id);
+		mapif_itembound_ack(fd, account_id, guild_id);
 		return 1;
 	}
 
-	//Now let's update the guild storage with those deleted items
-	found = false;
+	//Send the deleted items to map-server to store them in guild storage [Cydh]
+	mapif_itembound_store2gstorage(fd, guild_id, items, count);
+
+	//Verifies equip bitmasks (see item.equip) and handles the sql statement
+#define CHECK_REMOVE(var, mask, token, num) {\
+	if( (var)&(mask) && !(j&(num)) ) {\
+		if( j )\
+			StringBuf_AppendStr(&buf, ",");\
+		StringBuf_AppendStr(&buf, "`"#token"`='0'");\
+		j |= (1<<num);\
+	}\
+}
+
 	StringBuf_Clear(&buf);
-	StringBuf_Printf(&buf, "INSERT INTO `%s` (`guild_id`, `nameid`, `amount`, `identify`, `refine`, `attribute`, `expire_time`, `bound`", guild_storage_db);
-	for( j = 0; j < MAX_SLOTS; ++j )
-		StringBuf_Printf(&buf, ", `card%d`", j);
-	StringBuf_AppendStr(&buf, ") VALUES ");
-	
-	for( j = 0; j < i; ++j ) {
-		if( found )
-			StringBuf_AppendStr(&buf, ",");
-		else
-			found = true;
-
-		StringBuf_Printf(&buf, "('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d'",
-			guild_id, items[j].nameid, items[j].amount, items[j].identify, items[j].refine, items[j].attribute, items[j].expire_time, items[j].bound);
-		for( s = 0; s < MAX_SLOTS; ++s )
-			StringBuf_Printf(&buf, ", '%d'", items[j].card[s]);
-		StringBuf_AppendStr(&buf, ")");
+	j = 0;
+	for( i = 0; i < count && i < MAX_INVENTORY; i++ ) {
+		if( !&items[i] || !items[i].equip )
+			continue;
+		//Equips can be at more than one slot at the same time
+		CHECK_REMOVE(items[i].equip, EQP_HAND_R, weapon, 0);
+		CHECK_REMOVE(items[i].equip, EQP_HAND_L, shield, 1);
+		CHECK_REMOVE(items[i].equip, EQP_HEAD_TOP|EQP_COSTUME_HEAD_TOP, head_top, 2);
+		CHECK_REMOVE(items[i].equip, EQP_HEAD_MID|EQP_COSTUME_HEAD_MID, head_mid, 3);
+		CHECK_REMOVE(items[i].equip, EQP_HEAD_LOW|EQP_COSTUME_HEAD_LOW, head_bottom, 4);
+		CHECK_REMOVE(items[i].equip, EQP_GARMENT|EQP_COSTUME_GARMENT, robe, 5);
 	}
 
-	if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) ||
-		SQL_ERROR == SqlStmt_Execute(stmt) )
-	{
-		SqlStmt_ShowDebug(stmt);
-		SqlStmt_Free(stmt);
-		StringBuf_Destroy(&buf);
-		mapif_itembound_ack(fd,aid,guild_id);
-		return 1;
+#undef CHECK_REMOVE
+
+	//Update player's view
+	if( j ) {
+		StringBuf buf2;
+		StringBuf_Init(&buf2);
+		StringBuf_Printf(&buf2, "UPDATE `%s` SET %s WHERE `char_id`='%d'", char_db, StringBuf_Value(&buf), char_id);
+
+		if( SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) ||
+			SQL_ERROR == SqlStmt_Execute(stmt) )
+		{
+			SqlStmt_ShowDebug(stmt);
+			SqlStmt_Free(stmt);
+			StringBuf_Destroy(&buf);
+			StringBuf_Destroy(&buf2);
+			mapif_itembound_ack(fd, account_id, guild_id);
+			return 1;
+		}
+
+		StringBuf_Destroy(&buf2);
 	}
 
 	StringBuf_Destroy(&buf);
 	SqlStmt_Free(stmt);
 
-	//Finally reload storage and tell map we're done
-	mapif_load_guild_storage(fd,aid,guild_id,0);
-	mapif_itembound_ack(fd,aid,guild_id);
+	unset_session_flag(account_id, 1);
 	return 0;
 }
 #endif

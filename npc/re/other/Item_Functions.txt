@@ -1,0 +1,143 @@
+//===== rAthena Script ======================================= 
+//= RE Item Functions
+//===== By: ================================================== 
+//= exneval
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= Used for renewal items.
+//===== Additional Comments: ================================= 
+//= 1.0 First version. [exneval]
+//============================================================ 
+
+function	script	F_5497	{ //King_Tiger_Doll_Hat
+	showscript "fee-faw-fum-!!! I totally feel like a tiger!!!";
+	return;
+}
+
+function	script	F_11592	{ //Trans_Candy_Red
+	showscript "Traaaansformation-!! Bloody Murderer form!!";
+	return;
+}
+
+function	script	F_11593	{ //Trans_Candy_Blue
+	showscript "Traaaansformation-!! Bathory form!!";
+	return;
+}
+
+function	script	F_11594	{ //Trans_Candy_Yellow
+	showscript "Traaaansformation-!! Jakk form!!";
+	return;
+}
+
+function	script	F_11595	{ //Trans_Candy_Green
+	showscript "Traaaansformation-!! Quve form!!";
+	return;
+}
+
+function	script	F_12658	{ //Trans_Scroll_Devi
+	showscript "Traaaansformation-!! Deviruchi form!!";
+	return;
+}
+
+function	script	F_12659	{ //Trans_Scroll_Ray_Arch
+	showscript "Traaaansformation-!! Raydric Archer form!!";
+	return;
+}
+
+function	script	F_12660	{ //Trans_Scroll_Mavka
+	showscript "Traaaansformation-!! Mavka form!!";
+	return;
+}
+
+function	script	F_12661	{ //Trans_Scroll_Marduk
+	showscript "Traaaansformation-!! Marduk form!!";
+	return;
+}
+
+function	script	F_12662	{ //Trans_Scroll_Banshee
+	showscript "Traaaansformation-!! Banshee form!!";
+	return;
+}
+
+function	script	F_12663	{ //Trans_Scroll_Poring
+	showscript "Traaaansformation-!! Poring form!!";
+	return;
+}
+
+function	script	F_12664	{ //Trans_Scroll_Golem
+	showscript "Traaaansformation-!! Golem form!!";
+	return;
+}
+
+function	script	F_12796	{ //Red_Booster
+	showscript "Oh My GOODNESS!!! I FEEL AWESOMELY STRONG!!! WOWOW";
+	return;
+}
+
+function	script	F_18650	{ //RWC_Shouting_Mouth
+	showscript "RWC 2011 Fighting!!";
+	return;
+}
+
+function	script	F_18691	{ //Rising_Black_Dragon
+	showscript "Oy my goooodness!! How could my profile be so cute!!!";
+	return;
+}
+
+function	script	F_18810_D	{ //Hell_Pumpkin_Hat
+	showscript "Human can show up, or get out of here Goast!!";
+	return;
+}
+
+function	script	F_18810_L	{ //Hell_Pumpkin_Hat
+	showscript "Trick or Treat!!";
+	return;
+}
+
+function	script	F_18856	{ //W_King_Tiger_Doll_Hat
+	showscript "fee-faw-fum-!!! I totally feel like a tiger!!!";
+	return;
+}
+
+function	script	F_18934	{ //Fox_Ears_Drop_Ribbon
+	showscript "Traaaansformation-!! Moonlight Flower form!!";
+	return;
+}
+
+function	script	F_22750	{ //Trans_Scroll_Horn_Scaraba
+	showscript "Traaaansformation-!! Horn Scaraba form!!";
+	return;
+}
+
+function	script	F_22751	{ //Trans_Scroll_Wanderer
+	showscript "Traaaansformation-!! Wanderer form!!";
+	return;
+}
+
+function	script	F_22752	{ //Trans_Scroll_Gazeti
+	showscript "Traaaansformation-!! Gazeti form!!";
+	return;
+}
+
+function	script	F_22753	{ //Trans_Scroll_Kobold_Archer
+	showscript "Traaaansformation-!! Kobold Archer form!!";
+	return;
+}
+
+function	script	F_22754	{ //Trans_Scroll_Necromancer
+	showscript "Traaaansformation-!! Necromancer form!!";
+	return;
+}
+
+function	script	F_22755	{ //Trans_Scroll_Wind_Ghost
+	showscript "Traaaansformation-!! Wind Ghost form!!";
+	return;
+}
+
+function	script	F_28319	{ //Cauda_Daemonica
+	showscript "Traaaansformation-!! Succubus form!!";
+	return;
+}

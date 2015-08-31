@@ -94,26 +94,32 @@ auction_02,43,17,0	warp	auction_enterance_lhz	1,1,lighthalzen,209,169
 // Auction House NPCs
 //============================================================
 -	script	Auction Broker#dum::AuctionBroker	-1,{
-	mes "[Auction Broker]";
-	mes "Welcome to the Auction Hall.";
-	mes "Would you like to view the goods?";
-	next;
-	if (select("Yes:No") == 1) {
+	if (getbattleflag("feature.auction")) {
 		mes "[Auction Broker]";
-		mes "Very well.";
-		mes "Please take";
-		mes "a look, and see";
-		mes "What's being offered~";
-		OpenAuction;
+		mes "Welcome to the Auction Hall.";
+		mes "Would you like to view the goods?";
+		next;
+		if (select("Yes:No") == 1) {
+			mes "[Auction Broker]";
+			mes "Very well.";
+			mes "Please take";
+			mes "a look, and see";
+			mes "What's being offered~";
+			OpenAuction;
+			close;
+		}
+		mes "[Auction Broker]";
+		mes "Very well, then.";
+		mes "If you change your";
+		mes "mind, then please";
+		mes "come and check";
+		mes "out the auctions~";
+		close;
+	} else {
+		mes "[Auction Broker]";
+		mes "Sorry, we are closed.";
 		close;
 	}
-	mes "[Auction Broker]";
-	mes "Very well, then.";
-	mes "If you change your";
-	mes "mind, then please";
-	mes "come and check";
-	mes "out the auctions~";
-	close;
 }
 
 auction_01,182,68,6	duplicate(AuctionBroker)	Auction Broker#moc1	98

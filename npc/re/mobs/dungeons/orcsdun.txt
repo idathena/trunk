@@ -22,6 +22,7 @@ orcsdun01,167,133,5,5	monster	Black Mushroom	1084,5,900000,450000,1
 orcsdun01,67,34,5,5	monster	Black Mushroom	1084,5,900000,450000,1
 orcsdun01,83,50,5,5	monster	White Plant	1082,2,180000,90000,1
 orcsdun01,58,67,10,10	monster	White Plant	1082,3,180000,90000,1
+orcsdun01,0,0,0,0	monster	Elusive Orc Zombie	2723,2,300000,0,0
 
 //==================================================
 // orcsdun02 - Orc Dungeon
@@ -34,3 +35,4 @@ orcsdun02,0,0,0,0	monster	Orc Archer	1189,5,5000,0,0
 orcsdun02,0,0,0,0	monster	Black Mushroom	1084,5,180000,90000,1
 orcsdun02,105,37,10,10	monster	White Plant	1082,2,180000,90000,1
 orcsdun02,37,44,10,10	monster	White Plant	1082,3,180000,90000,1
+orcsdun02,0,0,0,0	monster	Swift Orc Skeleton	2724,2,300000,0,0

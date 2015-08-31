@@ -7065,7 +7065,7 @@ OnTimer120000:
 
 ra_temin,293,144,0	script	out1#rachel	-1,3,3,{
 OnTouch:
-	if (ra_tem_q == 18) {
+	if (isbegin_quest(8102) == 1) {
 		mes "^3355FFIt sounds like they're";
 		mes "still talking. It'd be";
 		mes "best to patient and wait";
@@ -7077,6 +7077,7 @@ OnTouch:
 		mes "you can hear them a little";
 		mes "better if you listen from";
 		mes "the left side of the wall.^000000";
+		set ra_tem_q_18,1;
 		close2;
 		warp "ra_temin",300,153;
 		end;
@@ -7086,7 +7087,7 @@ OnTouch:
 
 ra_temin,288,151,0	script	hidden1#rachel	-1,1,6,{
 OnTouch:
-	if (ra_tem_q == 18) {
+	if (ra_tem_q_18 == 1) {
 		mes "^3355FFAt this distance you";
 		mes "can cleartly hear the";
 		mes "voices from the other";
@@ -7239,6 +7240,7 @@ OnTouch:
 		mes "What could she possibly mean?";
 		mes "For now, you may as well";
 		mes "talk to High Priest Zhed.^000000";
+		set ra_tem_q_18,2;
 		set ra_tem_q,19;
 		changequest 8102,8103;
 		close;

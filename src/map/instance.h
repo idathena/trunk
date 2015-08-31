@@ -4,15 +4,20 @@
 #ifndef _INSTANCE_H_
 #define _INSTANCE_H_
 
-#define MAX_INSTANCE_DATA	300	// Essentially how many instances we can create, but instance creation is primarily decided by MAX_MAP_PER_SERVER	
-#define MAX_MAP_PER_INSTANCE 	10	// Max number of maps per instance
+#define MAX_INSTANCE_DATA 300 // Essentially how many instances we can create, but instance creation is primarily decided by MAX_MAP_PER_SERVER	
+#define MAX_MAP_PER_INSTANCE 10 // Max number of maps per instance
 
-#define INSTANCE_NAME_LENGTH (60+1)
+#define INSTANCE_NAME_LENGTH (60 + 1)
 
-typedef enum instance_state { INSTANCE_FREE, INSTANCE_IDLE, INSTANCE_BUSY } instance_state;
+typedef enum instance_state {
+	INSTANCE_FREE,
+	INSTANCE_IDLE,
+	INSTANCE_BUSY
+} instance_state;
 
 struct instance_data {
-	short type, cnt_map;
+	unsigned short type, // Instance DB ID
+		cnt_map;
 	int state;
 	int party_id;
 	unsigned int keep_limit;
@@ -20,7 +25,7 @@ struct instance_data {
 	unsigned int idle_limit;
 	int idle_timer;
 
-	struct DBMap* vars; // Instance Variable for scripts
+	struct DBMap *vars; // Instance Variable for scripts
 	struct {
 		int m;
 		int src_m;
@@ -42,6 +47,7 @@ int instance_addmap(short instance_id);
 
 void instance_addnpc(struct instance_data *im);
 void instance_readdb(void);
+void instance_reload(void);
 void do_reload_instance(void);
 void do_init_instance(void);
 void do_final_instance(void);

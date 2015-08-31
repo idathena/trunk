@@ -1,29 +1,24 @@
-//===== idAthena Script ======================================
-//= NPC Bandara Rachel
-//===== Script Asli dari =====================================
-//= rAthena
-//===== Diterjemahkan Oleh ===================================
-//= jetkappu
-//===== Oleh: ================================================
+//===== rAthena Script ======================================= 
+//= Rachel Airport NPCs
+//===== By: ================================================== 
 //= rAthena Dev Team
-//===== Versi Saat Ini: ======================================
+//===== Current Version: =====================================
 //= 1.0
-//===== Dapat Digunakan Dengan: ==============================
+//===== Compatible With: ===================================== 
 //= rAthena SVN
-//= idAthena SVN
-//===== Deskripsi: ===========================================
-//= NPC Bandara Rachel
-//===== Komentar Tambahan: ===================================
-//= 1.0 Versi pertama.
-//============================================================
+//===== Description: ========================================= 
+//= Rachel Airport NPCs
+//===== Additional Comments: ================================= 
+//= 1.0 First version.
+//============================================================ 
 
 ra_fild12,295,208,0	script	toairplane#rachel	45,1,1,{
 	end;
 OnTouch:
-	mes "Untuk menggunakan pesawat, kamu diharuskan membayar 1.200 zeny atau tiket gratis pesawat.";
-	mes "Apakah kamu ingin menggunakan layanan ini?";
+	mes "To use the airship, you are required to pay 1,200 zeny or a Free Airship Ticket.";
+	mes "Would you like to use the service?";
 	next;
-	if (select("Iya:Tidak") == 1) {
+	if (select("Yes:No") == 1) {
 		if (countitem(7311) > 0) {
 			delitem 7311,1; //Free_Flying_Ship_Ticket
 			warp "airplane_01",245,60;
@@ -34,10 +29,10 @@ OnTouch:
 			warp "airplane_01",245,60;
 			end;
 		}
-		mes "Saya minta maaf, tetapi kamu tidak punya cukup uang.";
-		mes "Harap diingat, kamu diharuskan membayar 1.200 zeny untuk menggunakan layanan ini.";
+		mes "I am sorry, but you do not have enough money.";
+		mes "Please remember, you are required to pay 1,200 zeny to use the service.";
 		close;
 	}
-	mes "Terima kasih, silhakan datang lagi.";
+	mes "Thank you, please come again.";
 	close;
 }

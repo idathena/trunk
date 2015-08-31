@@ -167,7 +167,7 @@ typedef enum DBDataType {
  * @param u Union of available data types
  * @param u.i Data of int type
  * @param u.ui Data of unsigned int type
- * @param u.ptr Data of void* type
+ * @param u.ptr Data of void *type
  * @public
  */
 typedef struct DBData {
@@ -289,7 +289,7 @@ struct DBIterator
 	 * @return Data of the entry
 	 * @protected
 	 */
-	DBData* (*first)(DBIterator* self, DBKey* out_key);
+	DBData* (*first)(DBIterator *self, DBKey* out_key);
 
 	/**
 	 * Fetches the last entry in the database.
@@ -300,7 +300,7 @@ struct DBIterator
 	 * @return Data of the entry
 	 * @protected
 	 */
-	DBData* (*last)(DBIterator* self, DBKey* out_key);
+	DBData* (*last)(DBIterator *self, DBKey* out_key);
 
 	/**
 	 * Fetches the next entry in the database.
@@ -311,7 +311,7 @@ struct DBIterator
 	 * @return Data of the entry
 	 * @protected
 	 */
-	DBData* (*next)(DBIterator* self, DBKey* out_key);
+	DBData* (*next)(DBIterator *self, DBKey* out_key);
 
 	/**
 	 * Fetches the previous entry in the database.
@@ -322,7 +322,7 @@ struct DBIterator
 	 * @return Data of the entry
 	 * @protected
 	 */
-	DBData* (*prev)(DBIterator* self, DBKey* out_key);
+	DBData* (*prev)(DBIterator *self, DBKey* out_key);
 
 	/**
 	 * Returns true if the fetched entry exists.
@@ -332,7 +332,7 @@ struct DBIterator
 	 * @return true is the entry exists
 	 * @protected
 	 */
-	bool (*exists)(DBIterator* self);
+	bool (*exists)(DBIterator *self);
 
 	/**
 	 * Removes the current entry from the database.
@@ -345,14 +345,14 @@ struct DBIterator
 	 * @protected
 	 * @see DBMap#remove
 	 */
-	int (*remove)(DBIterator* self, DBData *out_data);
+	int (*remove)(DBIterator *self, DBData *out_data);
 
 	/**
 	 * Destroys this iterator and unlocks the database.
 	 * @param self Iterator
 	 * @protected
 	 */
-	void (*destroy)(DBIterator* self);
+	void (*destroy)(DBIterator *self);
 
 };
 
@@ -373,7 +373,7 @@ struct DBMap {
 	 * @return New iterator
 	 * @protected
 	 */
-	DBIterator* (*iterator)(DBMap* self);
+	DBIterator *(*iterator)(DBMap *self);
 
 	/**
 	 * Returns true if the entry exists.
@@ -382,7 +382,7 @@ struct DBMap {
 	 * @return true is the entry exists
 	 * @protected
 	 */
-	bool (*exists)(DBMap* self, DBKey key);
+	bool (*exists)(DBMap *self, DBKey key);
 
 	/**
 	 * Get the data of the entry identified by the key.
@@ -391,7 +391,7 @@ struct DBMap {
 	 * @return Data of the entry or NULL if not found
 	 * @protected
 	 */
-	DBData* (*get)(DBMap* self, DBKey key);
+	DBData* (*get)(DBMap *self, DBKey key);
 
 	/**
 	 * Just calls {@link DBMap#vgetall}.
@@ -410,7 +410,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#vgetall(DBMap*,void **,unsigned int,DBMatcher,va_list)
 	 */
-	unsigned int (*getall)(DBMap* self, DBData** buf, unsigned int max, DBMatcher match, ...);
+	unsigned int (*getall)(DBMap *self, DBData** buf, unsigned int max, DBMatcher match, ...);
 
 	/**
 	 * Get the data of the entries matched by <code>match</code>.
@@ -428,7 +428,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#getall(DBMap*,void **,unsigned int,DBMatcher,...)
 	 */
-	unsigned int (*vgetall)(DBMap* self, DBData** buf, unsigned int max, DBMatcher match, va_list args);
+	unsigned int (*vgetall)(DBMap *self, DBData** buf, unsigned int max, DBMatcher match, va_list args);
 
 	/**
 	 * Just calls {@link DBMap#vensure}.
@@ -443,7 +443,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#vensure(DBMap*,DBKey,DBCreateData,va_list)
 	 */
-	DBData* (*ensure)(DBMap* self, DBKey key, DBCreateData create, ...);
+	DBData* (*ensure)(DBMap *self, DBKey key, DBCreateData create, ...);
 
 	/**
 	 * Get the data of the entry identified by the key.
@@ -457,7 +457,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#ensure(DBMap*,DBKey,DBCreateData,...)
 	 */
-	DBData* (*vensure)(DBMap* self, DBKey key, DBCreateData create, va_list args);
+	DBData* (*vensure)(DBMap *self, DBKey key, DBCreateData create, va_list args);
 
 	/**
 	 * Put the data identified by the key in the database.
@@ -470,7 +470,7 @@ struct DBMap {
 	 * @return 1 if if the entry already exists, 0 otherwise
 	 * @protected
 	 */
-	int (*put)(DBMap* self, DBKey key, DBData data, DBData *out_data);
+	int (*put)(DBMap *self, DBKey key, DBData data, DBData *out_data);
 
 	/**
 	 * Remove an entry from the database.
@@ -482,7 +482,7 @@ struct DBMap {
 	 * @return 1 if if the entry already exists, 0 otherwise
 	 * @protected
 	 */
-	int (*remove)(DBMap* self, DBKey key, DBData *out_data);
+	int (*remove)(DBMap *self, DBKey key, DBData *out_data);
 
 	/**
 	 * Just calls {@link DBMap#vforeach}.
@@ -495,7 +495,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#vforeach(DBMap*,DBApply,va_list)
 	 */
-	int (*foreach)(DBMap* self, DBApply func, ...);
+	int (*foreach)(DBMap *self, DBApply func, ...);
 
 	/**
 	 * Apply <code>func</code> to every entry in the database.
@@ -507,7 +507,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#foreach(DBMap*,DBApply,...)
 	 */
-	int (*vforeach)(DBMap* self, DBApply func, va_list args);
+	int (*vforeach)(DBMap *self, DBApply func, va_list args);
 
 	/**
 	 * Just calls {@link DBMap#vclear}.
@@ -522,7 +522,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#vclear(DBMap*,DBApply,va_list)
 	 */
-	int (*clear)(DBMap* self, DBApply func, ...);
+	int (*clear)(DBMap *self, DBApply func, ...);
 
 	/**
 	 * Removes all entries from the database.
@@ -536,7 +536,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#clear(DBMap*,DBApply,...)
 	 */
-	int (*vclear)(DBMap* self, DBApply func, va_list args);
+	int (*vclear)(DBMap *self, DBApply func, va_list args);
 
 	/**
 	 * Just calls {@link DBMap#vdestroy}.
@@ -553,7 +553,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#vdestroy(DBMap*,DBApply,va_list)
 	 */
-	int (*destroy)(DBMap* self, DBApply func, ...);
+	int (*destroy)(DBMap *self, DBApply func, ...);
 
 	/**
 	 * Finalize the database, feeing all the memory it uses.
@@ -568,7 +568,7 @@ struct DBMap {
 	 * @protected
 	 * @see DBMap#destroy(DBMap*,DBApply,...)
 	 */
-	int (*vdestroy)(DBMap* self, DBApply func, va_list args);
+	int (*vdestroy)(DBMap *self, DBApply func, va_list args);
 
 	/**
 	 * Return the size of the database (number of items in the database).
@@ -576,7 +576,7 @@ struct DBMap {
 	 * @return Size of the database
 	 * @protected
 	 */
-	unsigned int (*size)(DBMap* self);
+	unsigned int (*size)(DBMap *self);
 
 	/**
 	 * Return the type of the database.
@@ -584,7 +584,7 @@ struct DBMap {
 	 * @return Type of the database
 	 * @protected
 	 */
-	DBType (*type)(DBMap* self);
+	DBType (*type)(DBMap *self);
 
 	/**
 	 * Return the options of the database.
@@ -592,7 +592,7 @@ struct DBMap {
 	 * @return Options of the database
 	 * @protected
 	 */
-	DBOptions (*options)(DBMap* self);
+	DBOptions (*options)(DBMap *self);
 
 };
 
@@ -775,7 +775,7 @@ DBReleaser db_custom_release(DBRelease which);
  * @see #db_default_release(DBType,DBOptions)
  * @see #db_fix_options(DBType,DBOptions)
  */
-DBMap* db_alloc(const char *file, int line, DBType type, DBOptions options, unsigned short maxlen);
+DBMap *db_alloc(const char *file, int line, DBType type, DBOptions options, unsigned short maxlen);
 
 /**
  * Manual cast from 'int' to the union DBKey.
@@ -844,13 +844,13 @@ int db_data2i(DBData *data);
 unsigned int db_data2ui(DBData *data);
 
 /**
- * Gets void* type data from struct DBData.
- * If data is not void* type, returns NULL.
+ * Gets void *type data from struct DBData.
+ * If data is not void *type, returns NULL.
  * @param data Data
- * @return Void* value of the data.
+ * @return void *value of the data.
  * @public
  */
-void* db_data2ptr(DBData *data);
+void *db_data2ptr(DBData *data);
 
 /**
  * Initialize the database system.
@@ -875,14 +875,15 @@ struct linkdb_node {
 	void               *data;
 };
 
-typedef void (*LinkDBFunc)(void* key, void* data, va_list args);
+typedef int (*LinkDBFunc)(void *key, void *data, va_list args);
 
-void  linkdb_insert ( struct linkdb_node** head, void *key, void* data); // 重複を考慮しない
-void  linkdb_replace( struct linkdb_node** head, void *key, void* data); // 重複を考慮する
-void* linkdb_search ( struct linkdb_node** head, void *key);
-void* linkdb_erase  ( struct linkdb_node** head, void *key);
+void  linkdb_insert ( struct linkdb_node** head, void *key, void *data); // 重複を考慮しない
+void  linkdb_replace( struct linkdb_node** head, void *key, void *data); // 重複を考慮する
+void *linkdb_search ( struct linkdb_node** head, void *key);
+void *linkdb_erase  ( struct linkdb_node** head, void *key);
 void  linkdb_final  ( struct linkdb_node** head );
-void  linkdb_foreach( struct linkdb_node** head, LinkDBFunc func, ...  );
+int   linkdb_vforeach( struct linkdb_node** head, LinkDBFunc func, va_list ap);
+int   linkdb_foreach( struct linkdb_node** head, LinkDBFunc func, ...  );
 
 
 
@@ -1292,6 +1293,7 @@ void  linkdb_foreach( struct linkdb_node** head, LinkDBFunc func, ...  );
 /////////////////////////////////////////////////////////////////////
 // Binary heap library based on defines. (uses the vector defines above)
 // uses aMalloc, aRealloc, aFree
+// WARNING: BHEAP implementation details affect behaviour of A* pathfinding
 
 
 
@@ -1404,6 +1406,21 @@ void  linkdb_foreach( struct linkdb_node** head, LinkDBFunc func, ...  );
 
 
 
+/// See BHEAP_PUSH. Version used by A* implementation, matching client bheap.
+///
+/// @param __heap Binary heap
+/// @param __val Value
+/// @param __topcmp Comparator
+/// @param __swp Swapper
+#define BHEAP_PUSH2(__heap,__val,__topcmp,__swp) \
+	do{ \
+		size_t _i_ = VECTOR_LENGTH(__heap); \
+		VECTOR_PUSH(__heap,__val); /* insert at end */ \
+		BHEAP_SIFTDOWN(__heap,0,_i_,__topcmp,__swp); \
+	}while(0)
+
+
+
 /// Removes the top value of the heap. (using the '=' operator)
 /// Assumes the heap is not empty.
 ///
@@ -1416,6 +1433,22 @@ void  linkdb_foreach( struct linkdb_node** head, LinkDBFunc func, ...  );
 /// @param __topcmp Comparator
 /// @param __swp Swapper
 #define BHEAP_POP(__heap,__topcmp,__swp) BHEAP_POPINDEX(__heap,0,__topcmp,__swp)
+
+
+
+/// See BHEAP_POP. Version used by A* implementation, matching client bheap.
+///
+/// @param __heap Binary heap
+/// @param __topcmp Comparator
+/// @param __swp Swapper
+#define BHEAP_POP2(__heap,__topcmp,__swp) \
+	do{ \
+		VECTOR_INDEX(__heap,0) = VECTOR_POP(__heap); /* put last at index */ \
+		if( !VECTOR_LENGTH(__heap) ) /* removed last, nothing to do */ \
+			break; \
+		BHEAP_SIFTUP(__heap,0,__topcmp,__swp);	\
+	}while(0)
+
 
 
 /// Removes the target value of the heap. (using the '=' operator)
@@ -1462,6 +1495,74 @@ void  linkdb_foreach( struct linkdb_node** head, LinkDBFunc func, ...  );
 				_i_ = _rchild_; \
 			} \
 		} \
+	}while(0)
+
+
+
+/// Follow path up towards (but not all the way to) the root, swapping nodes until finding
+/// a place where the new item that was placed at __idx fits.
+/// Only goes as high as __startidx (usually 0).
+///
+/// @param __heap Binary heap
+/// @param __startidx Index of an ancestor of __idx
+/// @param __idx Index of an inserted element
+/// @param __topcmp Comparator
+/// @param __swp Swapper
+#define BHEAP_SIFTDOWN(__heap,__startidx,__idx,__topcmp,__swp)	\
+	do{ \
+		size_t _i2_ = __idx; \
+		while( _i2_ > __startidx ) \
+		{ /* restore heap property in parents */ \
+			size_t _parent_ = (_i2_-1)/2; \
+			if( __topcmp(VECTOR_INDEX(__heap,_parent_),VECTOR_INDEX(__heap,_i2_)) <= 0 ) \
+				break; /* done */ \
+			__swp(VECTOR_INDEX(__heap,_parent_),VECTOR_INDEX(__heap,_i2_)); \
+			_i2_ = _parent_; \
+		} \
+	}while(0)
+
+
+
+/// Repeatedly swap the smaller child with parent, after placing a new item at __idx.
+///
+/// @param __heap Binary heap
+/// @param __idx Index of an inserted element
+/// @param __topcmp Comparator
+/// @param __swp Swapper
+#define BHEAP_SIFTUP(__heap,__idx,__topcmp,__swp) \
+	do{ \
+		size_t _i_ = __idx; \
+		size_t _lchild_ = _i_*2 + 1; \
+		while( _lchild_ < VECTOR_LENGTH(__heap) ) \
+		{ /* restore heap property in childs */ \
+			size_t _rchild_ = _i_*2 + 2; \
+			if( _rchild_ >= VECTOR_LENGTH(__heap) || __topcmp(VECTOR_INDEX(__heap,_lchild_),VECTOR_INDEX(__heap,_rchild_)) < 0 ) \
+			{ /* left child */ \
+				__swp(VECTOR_INDEX(__heap,_i_),VECTOR_INDEX(__heap,_lchild_)); \
+				_i_ = _lchild_; \
+			} \
+			else \
+			{ /* right child */ \
+				__swp(VECTOR_INDEX(__heap,_i_),VECTOR_INDEX(__heap,_rchild_)); \
+				_i_ = _rchild_; \
+			} \
+			_lchild_ = _i_*2 + 1; \
+		} \
+		BHEAP_SIFTDOWN(__heap,__idx,_i_,__topcmp,__swp); \
+	}while(0)
+
+
+
+/// Call this after modifying the item at __idx__ to restore the heap
+///
+/// @param __heap Binary heap
+/// @param __idx Index
+/// @param __topcmp Comparator
+/// @param __swp Swapper
+#define BHEAP_UPDATE(__heap,__idx,__topcmp,__swp) \
+	do{ \
+		BHEAP_SIFTDOWN(__heap,0,__idx,__topcmp,__swp); \
+		BHEAP_SIFTUP(__heap,__idx,__topcmp,__swp); \
 	}while(0)
 
 

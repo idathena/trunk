@@ -3,8 +3,15 @@
 #TODO list :
 #- don't always override import/file, sed grep ?
 
-use CPAN;
+use File::Basename;
+use DBI;
+use DBD::mysql;
+use YAML::XS;
+use Cwd;
+use Getopt::Long;
+use Net::Ping;
 use strict;
+
 use constant {
     SERV_UID => "Serv_userid",
     SERV_PW => "Serv_userpass",
@@ -28,13 +35,14 @@ use constant {
     MIN_PORT => 2000, #below are usually reserved for system
     MAX_PORT => 65535,
 };
-BEGIN { #check and install module
-    my @aCheckModule = ("File::Basename","DBI","DBD::mysql","YAML","YAML::XS","Cwd","Getopt::Long","Net::Ping");
-    my @aMarkInst = ();
-    foreach(@aCheckModule) { eval "require $_" or push(@aMarkInst,$_); }
-    CPAN::install("@aMarkInst") if(@aMarkInst > 0);
-    foreach(@aCheckModule) { $_->import(); }
-}
+#BEGIN { #check and install module
+#    my @aCheckModule = ("File::Basename","DBI","DBD::mysql","YAML","YAML::XS","Cwd","Getopt::Long","Net::Ping");
+#    my @aMarkInst = ();
+#    foreach(@aCheckModule) { eval "require $_" or push(@aMarkInst,$_); }
+#    CPAN::install("@aMarkInst") if(@aMarkInst > 0);
+#    foreach(@aCheckModule) { $_->import(); }
+#}
+
 # setup my defaults option
 my $sDsdFile    = DESD_CONF_FILE;
 my $sAutoyes    = 0;
@@ -53,10 +61,12 @@ sub GetArgs {
     'C=i'	=> \$sClean,	 #Clean (like force but remove before adding)
     'target=s'	=> \$sTarget,	 #Target (wich setup to run)
     'Force=i'	=> \$sForce,	 #Force (bypass verification)
+    'OS=s'	=> \$sOS, #OS (specify the os you wish to use)
     'help!' => \$sHelp,
     ) or $sHelp=1; #display help if invalid option
     my $sValidTarget = "All|Conf|DB|Inst|Dump";
-
+    
+	
     if( $sHelp ) {
 	print "Incorect option specified, available option are:\n"
 	    ."\t --f filename => file (specify desiredconf to use)\n"
@@ -64,6 +74,7 @@ sub GetArgs {
 	    ."\t --C => Clean (remove file, db, user before adding new)\n"
 	    ."\t --target => target (specify wich setup to run [$sValidTarget])\n"
 	    ."\t --Force => Force (bypass verification)\n";
+	    ."\t --OS => (specify the os you wish to use and avoid check)";
 	exit;
     }
     unless($sTarget =~ /$sValidTarget/i){
@@ -171,28 +182,39 @@ sub EnableCoredump {
 
 sub GetOS {
 	#yes we could $^0 or uname -r but $^0 only give perl binary build OS and uname hmm...
-	my @aSupportedOS = ("Debian","Ubuntu","Fedora","CentOs","FreeBSD");
-    my $sOSregex = join("|",@aSupportedOS); 
-    until($sOS =~ /$sOSregex/i){
-		print "Please enter your OS:[$sOSregex] or enter 'quit' to exit\n";
-		$sOS = <>; chomp($sOS);
-		last if($sOS eq "quit");
-    }
+	open PIPE,"lsb_release -i  |" or die $!;
+	my $sDistri = <PIPE>;
+	if($sDistri){
+		my @aDist =  split(":",$sDistri);
+		$sDistri = $aDist[1];
+		$sDistri =~ s/^\s+|\s+$//g;
+		$sOS = $sDistri;
+	}
+	else {
+		my @aSupportedOS = ("Debian","Ubuntu","Fedora","CentOs","FreeBSD");
+		my $sOSregex = join("|",@aSupportedOS); 
+		until($sOS =~ /$sOSregex/i){
+			print "Please enter your OS:[$sOSregex] or enter 'quit' to exit\n";
+			$sOS = <>; chomp($sOS);
+			last if($sOS eq "quit");
+		}
+	}
 	return $sOS;
 }
 
 sub InstallSoft {
     print "\n Starting InstallSoft \n";
     print "This autoinstall feature is experimental, package name varies from distri and version, couldn't support them all\n";
-    $sOS = GetOS();
+    $sOS = GetOS() unless $sOS;
     if($sOS eq "quit"){ print "Skipping Software installation\n"; return; }
-    elsif($sOS =~ /Ubuntu|Debian/i) { #tested on ubuntu 12.10
+    elsif($sOS =~ /Ubuntu|Debian/i) { #tested on ubuntu 12.10,13.10
 	my @aListSoft = ("gcc","gdb","zlibc","zlib1g-dev","make","git","mysql-client","mysql-server","mysql-common","libmysqlclient-dev","phpmyadmin","libpcre3-dev");
 	print "Going to install: @aListSoft\n";
 	system("sudo apt-get install @aListSoft");
-    }
-    elsif($sOS =~ /Fedora|CentOs/i){ #tested on fedora 18 /centos 6
-	my @aListSoft = ("gcc","gdb","zlib","zlib-devel","make","git","mysql-server","mysql-devel","phpmyadmin","pcre-devel");
+	}
+	elsif($sOS =~ /Fedora|CentOs/i){ #tested on fedora 18,19,20 /centos 5,6,7
+	my @aListSoft = ("gcc","gdb","zlib","zlib-devel","make","git","mariadb-server","maria","mariadb-devel","phpmyadmin","pcre-devel");
+#	my @aListSoft = ("gcc","gdb","zlib","zlib-devel","make","git","mysql-server","mysql-devel","phpmyadmin","pcre-devel");
 	system("sudo yum install @aListSoft");
     }
     elsif($sOS =~ /FreeBSD/i){ #tested on FreeBSD 9.01

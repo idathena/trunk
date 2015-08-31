@@ -28,8 +28,10 @@
 //==================================================
 
 //==================================================
-// ein_fild02 - Disabled on Renewal
+// ein_fild02 - Einbroch Field
 //==================================================
+ein_fild02,0,0,0,0	monster	Ungoliant	1618,1,75600000,75200000,0
+ein_fild02,0,0,0,0	monster	Ungoliant Ringleader	2629,2,300000,0,0
 
 //==================================================
 // ein_fild03 - Einbroch Field
@@ -40,6 +42,7 @@ ein_fild03,0,0,0,0	monster	Noxious	1620,20,5000,0,0
 ein_fild03,0,0,0,0	monster	Pitman	1616,20,5000,0,0
 ein_fild03,0,0,0,0	monster	Yellow Plant	1081,15,60000,30000,0
 ein_fild03,0,0,0,0	monster	Green Plant	1080,15,60000,30000,0
+ein_fild03,0,0,0,0	monster	Swift Teddy Bear	2636,2,300000,0,0
 
 //==================================================
 // ein_fild04 - Einbroch Field
@@ -52,6 +55,7 @@ ein_fild04,0,0,0,0	monster	Pitman	1616,10,5000,0,0
 ein_fild04,0,0,0,0	monster	Red Plant	1078,10,60000,30000,0
 ein_fild04,0,0,0,0	monster	Yellow Plant	1081,10,60000,30000,0
 ein_fild04,0,0,0,0	monster	Green Plant	1080,10,60000,30000,0
+ein_fild04,0,0,0,0	monster	Venomous Ringleader	2624,2,300000,0,0
 
 //==================================================
 // ein_fild05 - Einbroch Field
@@ -61,6 +65,7 @@ ein_fild05,0,0,0,0	monster	Venomous	1621,30,5000,0,0
 ein_fild05,0,0,0,0	monster	Teddy Bear	1622,20,5000,0,0
 ein_fild05,0,0,0,0	monster	Demon Pungus	1378,15,5000,0,0
 ein_fild05,0,0,0,0	monster	Pitman	1616,10,5000,0,0
+ein_fild05,0,0,0,0	monster	Furious Noxious	2727,2,300000,0,0
 
 //==================================================
 // ein_fild06 - Einbroch Field
@@ -70,6 +75,7 @@ ein_fild06,0,0,0,0	monster	Metaling	1613,30,5000,0,0
 ein_fild06,0,0,0,0	monster	Red Plant	1078,10,120000,60000,0
 ein_fild06,0,0,0,0	monster	Yellow Plant	1081,10,120000,60000,0
 ein_fild06,0,0,0,0	monster	Black Mushroom	1084,5,120000,60000,0
+ein_fild06,0,0,0,0	monster	Solid Holden	2745,2,300000,0,0
 
 //==================================================
 // ein_fild07 - Einbroch Field
@@ -81,6 +87,7 @@ ein_fild07,0,0,0,0	monster	Ungoliant	1618,1,86400000,86000000,0
 ein_fild07,0,0,0,0	monster	Red Plant	1078,10,120000,60000,0
 ein_fild07,0,0,0,0	monster	Yellow Plant	1081,10,120000,60000,0
 ein_fild07,0,0,0,0	monster	Red Mushroom	1085,10,120000,60000,0
+ein_fild07,0,0,0,0	monster	Metaling Ringleader	2756,2,300000,0,0
 
 //==================================================
 // ein_fild08 - Einbroch Field
@@ -90,6 +97,7 @@ ein_fild08,0,0,0,0	monster	Porcellio	1619,30,5000,0,0
 ein_fild08,0,0,0,0	monster	Red Plant	1078,10,120000,60000,0
 ein_fild08,0,0,0,0	monster	Yellow Plant	1081,10,120000,60000,0
 ein_fild08,0,0,0,0	monster	Red Mushroom	1085,10,120000,60000,0
+ein_fild08,0,0,0,0	monster	Solid Metaling	2755,2,300000,0,0
 
 //==================================================
 // ein_fild09 - Einbroch Field
@@ -99,6 +107,7 @@ ein_fild09,0,0,0,0	monster	Metaling	1613,30,5000,0,0
 ein_fild09,0,0,0,0	monster	Red Plant	1078,10,120000,60000,0
 ein_fild09,0,0,0,0	monster	Yellow Plant	1081,10,120000,60000,0
 ein_fild09,0,0,0,0	monster	Red Mushroom	1085,10,120000,60000,0
+ein_fild09,0,0,0,0	monster	Solid Porcellio	2700,2,300000,0,0
 
 //==================================================
 // ein_fild10 - Disabled on Renewal

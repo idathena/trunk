@@ -665,7 +665,7 @@ moc_para01,32,179,4	script	Tutorial Goal	895,{
 	close;
 }
 
-moc_para01,24,175,4	script	Siege Master	734,{
+moc_para01,26,174,4	script	Siege Master	734,{
 	set .@checkquest, checkquest(4161);
 	if (.@checkquest == 2) {
 		mes "[Siege Expert]";
@@ -1200,7 +1200,7 @@ L_Info:
 	return;
 }
 
-moc_para01,28,167,3	script	Memorial Dungeon Expert	868,{
+moc_para01,28,167,3	script	Memorial Dungeon Expert	916,{
 	set .@checkquest, checkquest(4164);
 	if (.@checkquest == 2) {
 		mes "[Memorial Dungeon Expert]";

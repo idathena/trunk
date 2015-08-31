@@ -1,0 +1,182 @@
+//===== rAthena Script ======================================= 
+//= Shadow Refiner
+//===== By: ================================================== 
+//= Dastgir
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= [Official Conversion]
+//= Refining Shadow Gears NPC.
+//===== Additional Comments: ================================= 
+//= 1.0 First version. [exneval]
+//============================================================ 
+
+-	script	::ShadowBlacksmith	-1,{
+	disable_items;
+	mes "[Shadow Blacksmith]";
+	mes "Do you want to refine a shadow";
+	mes "item? Pick yer poison!";
+	next;
+	setarray .@position$[0],"Armor","Weapon","Shield","Shoes","Earring","Pendant";
+	for (.@i = EQI_SHADOW_ARMOR; .@i <= EQI_SHADOW_ACC_L; .@i++)
+		.@menu$ = .@menu$+((getequipisequiped(.@i))?getequipname(.@i):"^8C8C8C"+.@position$[.@i-EQI_SHADOW_ARMOR]+" [Not Equipped]^000000")+":";
+	.@menu$ = .@menu$+"Refine Info";
+	.@SelectedPart = select(.@menu$)+EQI_SHADOW_ARMOR-1;
+	if (.@SelectedPart == EQI_SHADOW_ACC_L+1) { //Refine Info
+		mes "[Shadow Blacksmith]";
+		mes "When a shadow item is refined, it";
+		mes "gains extra bonuses very much like";
+		mes "normal items.";
+		next;
+		mes "[Shadow Blacksmith]";
+		mes "Weapon: ATK, MATK + 1 increase for";
+		mes "each +1 refine success.";
+		mes "Etc: HP + 10 increase for each +1";
+		mes "refine success.";
+		next;
+		mes "[Shadow Blacksmith]";
+		mes "All types of Oridecon and Elunium";
+		mes "can be used to refine shadow items.";
+		mes "Each attempt will also cost 20,000";
+		mes "zeny";
+		next;
+		mes "[Shadow Blacksmith]";
+		mes "When attempting to refine an item";
+		mes "to +5 or higher there is a chance";
+		mes "the item will break.";
+		mes "Please use Enriched or HD Ore for";
+		mes "the refinement.";
+		close;
+	}
+	while (1) {
+		mes "[Shadow Blacksmith]";
+		mes "I require 20,000 zeny as a fee for";
+		mes "EACH refine attempt.";
+		mes "Choose your Ore and start";
+		mes "refining.";
+		next;
+		.@index = 0;
+		if (.@SelectedPart != EQI_SHADOW_WEAPON)
+			.@index = 1;
+		setarray .@s_ore1[0],984,985; //Oridecon,Elunium
+		setarray .@s_ore2[0],7620,7619; //Enriched_Oridecon,Enriched_Elunium
+		setarray .@s_ore3[0],6240,6241; //HD_Oridecon,HD_Elunium
+		if (countitem(.@s_ore1[.@index])) {
+			.@mate$[0] = getitemname(.@s_ore1[.@index]);
+			.@miss[0] = 0;
+		} else {
+			.@mate$[0] = "^8C8C8C"+ getitemname(.@s_ore1[.@index]) +"^000000";
+			.@miss[0] = 1;
+		}
+		if (countitem(.@s_ore2[.@index])) {
+			.@mate$[1] = getitemname(.@s_ore2[.@index]);
+			.@miss[1] = 0;
+		} else {
+			.@mate$[1] = "^8C8C8C"+ getitemname(.@s_ore2[.@index]) +"^000000";
+			.@miss[1] = 1;
+		}
+		if (getequiprefinerycnt(.@SelectedPart) > 6 && countitem(.@s_ore3[.@index])) {
+			.@mate$[2] = getitemname(.@s_ore3[.@index]);
+			.@miss[2] = 0;
+		} else {
+			.@mate$[2] = "^8C8C8C"+ getitemname(.@s_ore3[.@index]) +"^000000";
+			.@miss[2] = 1;
+		}
+		//-----------------------------------------------------------------------------
+		.@option = select(.@mate$[0],.@mate$[1],.@mate$[2],"Cancel");
+		.@option -= 1;
+		.@enrch_ore = .@hd_ore = 0;
+		if (.@option == 1) //Enriched
+			.@enrch_ore = 1;
+		if (.@option == 2) { //HD
+			if (getequiprefinerycnt(.@SelectedPart) < 7) {
+				mes "[Shadow Blacksmith]";
+				mes "HD Ore can only used for +7 or higher refine level items.";
+				close;
+			}
+			.@hd_ore = 1;
+		}
+		if (.@option == 3) {
+			mes "[Shadow Blacksmith]";
+			mes "You've cancelled refining.";
+			close;
+		}
+		if (.@miss[.@option]) {
+			mes "[Shadow Blacksmith]";
+			if (!.@option)
+				mes "You do not have any Elunium / Oridecon.";
+			else if (.@option == 1)
+				mes "You do not have any Enriched Elunium / Oridecon.";
+			else if	(.@option == 2)
+				mes "You do not have any HD Elunium / Oridecon.";
+			close;
+		}
+		if (Zeny < 20000) {
+			mes "[Shadow Blacksmith]";
+			mes "You do not have enough refine fee.";
+			close;
+		}
+		if (getequiprefinerycnt(.@SelectedPart) > 9) {
+			mes "[Shadow Blacksmith]";
+			mes "Shadow item refining is only possible until +10 level.";
+			close;
+		}
+		if (!getequipisenableref(.@SelectedPart)) {
+			mes "[Shadow Blacksmith]";
+			mes "This item cannot be refined.";
+			close;
+		}
+		if (getequippercentrefinery(.@SelectedPart) < 100) {
+			mes "[Shadow Blacksmith]";
+			mes "Safety guaranteed refine limit for shadow item is until +4.";
+			if (!.@hoihoi)
+				mes "If you try more refining, item might get broken when failed. Still want to refine?";
+			else
+				mes "If you try more refining, item refine level might go down when failed. Still want to refine?";
+			next;
+			if (select("Proceed","Cancel") == 2) {
+				mes "[Shadow Blacksmith]";
+				mes "You've cancelled refining.";
+				close;
+			}
+		}
+		//-----------------------------------------------------------------------------
+		mes "[Shadow Blacksmith]";
+		mes "Here we go--!!!";
+		next;
+		.@choose = getd(".@s_ore"+(.@option+1)+"["+ .@index +"]");
+		delitem .@choose,1;
+		Zeny -= 20000;
+		if (.@enrch_ore || .@hd_ore) {
+			if (getequippercentrefinery(.@SelectedPart) > rand(100) || getequippercentrefinery(.@SelectedPart) > rand(100)) {
+				successrefitem .@SelectedPart;
+				mes "[Shadow Blacksmith]";
+				mes "Refine was successful.";
+				next;
+			} else {
+				if (.@hd_ore)
+					downrefitem .@SelectedPart;
+				else
+					failedrefitem .@SelectedPart;
+				mes "[Shadow Blacksmith]";
+				mes "Oh no.. Refine was failed.";
+				close;
+			}
+		} else {
+			if (getequippercentrefinery(.@SelectedPart) <= rand(100)) {
+				failedrefitem .@SelectedPart;
+				mes "[Shadow Blacksmith]";
+				mes "Oh no.. Refine was failed.";
+				close;
+			}
+			successrefitem .@SelectedPart;
+			mes "[Shadow Blacksmith]";
+			mes "Refine was successful.";
+			next;
+		}
+	}
+}
+//itemmall,31,73,4	duplicate(ShadowBlacksmith)	Shadow Blacksmith#nomal	4_F_JOB_BLACKSMITH
+prt_in,94,70,4	duplicate(ShadowBlacksmith)	Shadow Blacksmith#prt	4_F_JOB_BLACKSMITH

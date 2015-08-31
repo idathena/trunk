@@ -50,20 +50,21 @@ extern char mapindex_cfgfile[80];
 #define MAP_ECLAGE "eclage"
 #define MAP_ECLAGE_IN "ecl_in01"
 
-//When a map index search fails, return results from what map?
-#define MAP_DEFAULT "prontera"
-#define MAP_DEFAULT_X 150
-#define MAP_DEFAULT_Y 150
+const char *mapindex_getmapname(const char *string, char *output);
+const char *mapindex_getmapname_ext(const char *string, char *output);
 
-const char* mapindex_getmapname(const char* string, char* output);
-const char* mapindex_getmapname_ext(const char* string, char* output);
-unsigned short mapindex_name2id(const char*);
-#define mapindex_id2name(n) mapindex_id2name_sub(n,__FILE__, __LINE__, __func__)
-const char* mapindex_id2name_sub(unsigned short,const char *file, int line, const char *func);
+unsigned short mapindex_name2id_sub(const char *name, const char *func);
+#define mapindex_name2id(mapname) mapindex_name2id_sub((mapname), __FUNCTION__)
+
+const char *mapindex_id2name_sub(unsigned short id, const char *file, int line, const char *func);
+#define mapindex_id2name(mapname) mapindex_id2name_sub((mapname), __FILE__, __LINE__, __FUNCTION__)
+
+int mapindex_addmap(int index, const char *name);
+int mapindex_removemap(int index);
+
+void mapindex_check_mapdefault(const char *mapname);
+
 void mapindex_init(void);
 void mapindex_final(void);
-
-int mapindex_addmap(int index, const char* name);
-int mapindex_removemap(int index);
 
 #endif /* _MAPINDEX_H_ */

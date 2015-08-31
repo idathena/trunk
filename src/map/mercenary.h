@@ -74,7 +74,7 @@ int mercenary_checkskill(struct mercenary_data *md, uint16 skill_id);
 
 /**
  * atcommand.c required
- **/
+ */
 void mercenary_readdb(void);
 void mercenary_read_skilldb(void);
 

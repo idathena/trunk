@@ -10,14 +10,14 @@
 #include <stdlib.h> // exit
 
 // global sql settings (in ipban_sql.c)
-static char   global_db_hostname[32] = "127.0.0.1";
+static char   global_db_hostname[64] = "127.0.0.1";
 static uint16 global_db_port = 3306;
 static char   global_db_username[32] = "ragnarok";
-static char   global_db_password[32] = "ragnarok";
+static char   global_db_password[32] = "";
 static char   global_db_database[32] = "ragnarok";
 static char   global_codepage[32] = "";
 // local sql settings
-static char   log_db_hostname[32] = "";
+static char   log_db_hostname[64] = "";
 static uint16 log_db_port = 0;
 static char   log_db_username[32] = "";
 static char   log_db_password[32] = "";
@@ -25,7 +25,7 @@ static char   log_db_database[32] = "";
 static char   log_codepage[32] = "";
 static char   log_login_db[256] = "loginlog";
 
-static Sql* sql_handle = NULL;
+static Sql *sql_handle = NULL;
 static bool enabled = false;
 
 
@@ -43,7 +43,7 @@ unsigned long loginlog_failedattempts(uint32 ip, unsigned int minutes)
 
 	if( SQL_SUCCESS == Sql_NextRow(sql_handle) )
 	{
-		char* data;
+		char *data;
 		Sql_GetData(sql_handle, 0, &data, NULL);
 		failures = strtoul(data, NULL, 10);
 		Sql_FreeResult(sql_handle);
@@ -55,7 +55,7 @@ unsigned long loginlog_failedattempts(uint32 ip, unsigned int minutes)
 /*=============================================
  * Records an event in the login log
  *---------------------------------------------*/
-void login_log(uint32 ip, const char* username, int rcode, const char* message)
+void login_log(uint32 ip, const char *username, int rcode, const char *message)
 {
 	char esc_username[NAME_LENGTH*2+1];
 	char esc_message[255*2+1];
@@ -77,12 +77,12 @@ void login_log(uint32 ip, const char* username, int rcode, const char* message)
 
 bool loginlog_init(void)
 {
-	const char* username;
-	const char* password;
-	const char* hostname;
+	const char *username;
+	const char *password;
+	const char *hostname;
 	uint16      port;
-	const char* database;
-	const char* codepage;
+	const char *database;
+	const char *codepage;
 
 	if( log_db_hostname[0] != '\0' )
 	{// local settings
@@ -127,58 +127,45 @@ bool loginlog_final(void)
 	return true;
 }
 
-bool loginlog_config_read(const char* key, const char* value)
+bool loginlog_config_read(const char *key, const char *value)
 {
-	const char* signature;
+	const char *signature;
 
 	signature = "sql.";
-	if( strncmpi(key, signature, strlen(signature)) == 0 )
-	{
+	if( strncmpi(key, signature, strlen(signature)) == 0 ) {
 		key += strlen(signature);
 		if( strcmpi(key, "db_hostname") == 0 )
 			safestrncpy(global_db_hostname, value, sizeof(global_db_hostname));
-		else
-		if( strcmpi(key, "db_port") == 0 )
+		else if( strcmpi(key, "db_port") == 0 )
 			global_db_port = (uint16)strtoul(value, NULL, 10);
-		else
-		if( strcmpi(key, "db_username") == 0 )
+		else if( strcmpi(key, "db_username") == 0 )
 			safestrncpy(global_db_username, value, sizeof(global_db_username));
-		else
-		if( strcmpi(key, "db_password") == 0 )
+		else if( strcmpi(key, "db_password") == 0 )
 			safestrncpy(global_db_password, value, sizeof(global_db_password));
-		else
-		if( strcmpi(key, "db_database") == 0 )
+		else if( strcmpi(key, "db_database") == 0 )
 			safestrncpy(global_db_database, value, sizeof(global_db_database));
-		else
-		if( strcmpi(key, "codepage") == 0 )
+		else if( strcmpi(key, "codepage") == 0 )
 			safestrncpy(global_codepage, value, sizeof(global_codepage));
 		else
-			return false;// not found
+			return false; // Not found
 		return true;
 	}
 
 	if( strcmpi(key, "log_db_ip") == 0 )
 		safestrncpy(log_db_hostname, value, sizeof(log_db_hostname));
-	else
-	if( strcmpi(key, "log_db_port") == 0 )
+	else if( strcmpi(key, "log_db_port") == 0 )
 		log_db_port = (uint16)strtoul(value, NULL, 10);
-	else
-	if( strcmpi(key, "log_db_id") == 0 )
+	else if( strcmpi(key, "log_db_id") == 0 )
 		safestrncpy(log_db_username, value, sizeof(log_db_username));
-	else
-	if( strcmpi(key, "log_db_pw") == 0 )
+	else if( strcmpi(key, "log_db_pw") == 0 )
 		safestrncpy(log_db_password, value, sizeof(log_db_password));
-	else
-	if( strcmpi(key, "log_db_db") == 0 )
+	else if( strcmpi(key, "log_db_db") == 0 )
 		safestrncpy(log_db_database, value, sizeof(log_db_database));
-	else
-	if( strcmpi(key, "log_codepage") == 0 )
+	else if( strcmpi(key, "log_codepage") == 0 )
 		safestrncpy(log_codepage, value, sizeof(log_codepage));
-	else
-	if( strcmpi(key, "log_login_db") == 0 )
+	else if( strcmpi(key, "log_login_db") == 0 )
 		safestrncpy(log_login_db, value, sizeof(log_login_db));
 	else
 		return false;
-
 	return true;
 }

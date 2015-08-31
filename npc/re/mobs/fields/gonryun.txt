@@ -19,3 +19,4 @@ gon_fild01,0,0,0,0	monster	Baby Leopard	1415,40,5000,0,0
 gon_fild01,0,0,0,0	monster	Side Winder	1037,10,5000,0,0
 gon_fild01,0,0,0,0	monster	Green Plant	1080,5,5000,0,0
 gon_fild01,0,0,0,0	monster	Shining Plant	1083,1,5000,0,0
+gon_fild01,0,0,0,0	monster	Dumpling Child Ringleader	2683,2,300000,0,0

@@ -7,6 +7,7 @@
 #include "../common/cbasetypes.h"
 #include "../common/db.h"
 #include <time.h>
+#include "../common/strlib.h" // StringBuf
 
 // server->client protocol version
 //        0 - pre-?
@@ -74,6 +75,7 @@
 #define MAX_GUILDLEVEL 50 //Max Guild level
 #define MAX_GUARDIANS 8 //Local max per castle. [Skotlex]
 #define MAX_QUEST_OBJECTIVES 3 //Max quest objectives for a quest
+#define MAX_PC_BONUS_SCRIPT 50 //Max bonus script can be fetched from `bonus_script` table on player load [Cydh]
 
 //For produce
 #define MIN_ATTRIBUTE 0
@@ -157,6 +159,8 @@ enum item_types {
 	IT_MAX
 };
 
+#define INDEX_NOT_FOUND (-1) //Used as invalid/failure value in various functions that return an index
+
 //Questlog states
 enum quest_state {
 	Q_INACTIVE, //Inactive quest (the user can toggle between active and inactive quests)
@@ -174,16 +178,42 @@ struct quest {
 
 struct item {
 	int id;
-	short nameid;
+	unsigned short nameid;
 	short amount;
 	unsigned int equip; //Location(s) where item is equipped (using enum equip_pos for bitmasking)
 	char identify;
 	char refine;
 	char attribute;
-	short card[MAX_SLOTS];
+	unsigned short card[MAX_SLOTS];
 	unsigned int expire_time;
 	char favorite, bound;
 	uint64 unique_id;
+};
+
+//Equip position constants
+enum equip_pos {
+	EQP_HEAD_LOW         = 0x000001,
+	EQP_HEAD_MID         = 0x000200, //512
+	EQP_HEAD_TOP         = 0x000100, //256
+	EQP_HAND_R           = 0x000002, //2
+	EQP_HAND_L           = 0x000020, //32
+	EQP_ARMOR            = 0x000010, //16
+	EQP_SHOES            = 0x000040, //64
+	EQP_GARMENT          = 0x000004, //4
+	EQP_ACC_L            = 0x000008, //8
+	EQP_ACC_R            = 0x000080, //128
+	EQP_COSTUME_HEAD_TOP = 0x000400, //1024
+	EQP_COSTUME_HEAD_MID = 0x000800, //2048
+	EQP_COSTUME_HEAD_LOW = 0x001000, //4096
+	EQP_COSTUME_GARMENT  = 0x002000, //8192
+	//EQP_COSTUME_FLOOR  = 0x004000, //16384
+	EQP_AMMO             = 0x008000, //32768
+	EQP_SHADOW_ARMOR     = 0x010000, //65536
+	EQP_SHADOW_WEAPON    = 0x020000, //131072
+	EQP_SHADOW_SHIELD    = 0x040000, //262144
+	EQP_SHADOW_SHOES     = 0x080000, //524288
+	EQP_SHADOW_ACC_R     = 0x100000, //1048576
+	EQP_SHADOW_ACC_L     = 0x200000, //2097152
 };
 
 struct point {
@@ -210,7 +240,7 @@ enum e_mmo_charstatus_opt {
 struct s_skill {
 	unsigned short id;
 	unsigned char lv;
-	unsigned char flag; // see enum e_skill_flag
+	unsigned char flag; //See enum e_skill_flag
 };
 
 struct global_reg {
@@ -225,11 +255,13 @@ struct accreg {
 	struct global_reg reg[MAX_REG_NUM];
 };
 
-#define MAX_BONUS_SCRIPT_LENGTH 1024
+#define MAX_BONUS_SCRIPT_LENGTH 512
 struct bonus_script_data {
-	char script[MAX_BONUS_SCRIPT_LENGTH];
-	long tick;
-	short type, flag, icon;
+	char script_str[MAX_BONUS_SCRIPT_LENGTH]; //Script string
+	uint32 tick; //Tick
+	uint16 flag; //Flags @see enum e_bonus_script_flags
+	int16 icon; //Icon SI
+	uint8 type; //0 - None, 1 - Buff, 2 - Debuff
 };
 
 struct skill_cooldown_data {
@@ -237,7 +269,7 @@ struct skill_cooldown_data {
   long tick;
 };
 
-//For saving status changes across sessions. [Skotlex]
+//For saving status changes across sessions [Skotlex]
 struct status_change_data {
 	unsigned short type; //SC_type
 	long val1, val2, val3, val4, tick; //Remaining duration.
@@ -248,13 +280,14 @@ struct storage_data {
 	struct item items[MAX_STORAGE];
 };
 
+//Guild storgae struct
 struct guild_storage {
-	int dirty;
-	int guild_id;
-	short storage_status;
-	short storage_amount;
-	struct item items[MAX_GUILD_STORAGE];
-	unsigned short lock;
+	bool dirty; //Dirty status, need to be saved
+	int guild_id; //Guild ID
+	short storage_amount; //Amount of item on storage
+	struct item items[MAX_GUILD_STORAGE]; //Item entries
+	bool locked; //If locked, can't use storage when item bound retrieval
+	uint32 opened; //Holds the char_id that open the storage
 };
 
 struct s_pet {
@@ -269,7 +302,7 @@ struct s_pet {
 	short hungry;//pet hungry
 	char name[NAME_LENGTH];
 	char rename_flag;
-	char incuvate;
+	char incubate;
 };
 
 struct s_homunculus {	//[orn]
@@ -287,12 +320,18 @@ struct s_homunculus {	//[orn]
 	unsigned int exp;
 	short rename_flag;
 	short vaporize; //albator
-	int str ;
-	int agi ;
-	int vit ;
-	int int_ ;
-	int dex ;
-	int luk ;
+	int str;
+	int agi;
+	int vit;
+	int int_;
+	int dex;
+	int luk;
+	int str_value;
+	int agi_value;
+	int vit_value;
+	int int_value;
+	int dex_value;
+	int luk_value;
 
 	char spiritball; //for homun S [lighta]
 };
@@ -340,22 +379,21 @@ struct mmo_charstatus {
 
 	unsigned int base_exp,job_exp;
 	int zeny;
-	int bank_vault;
 
 	short class_;
 	unsigned int status_point,skill_point;
 	int hp,max_hp,sp,max_sp;
 	unsigned int option;
-	short manner;
+	short manner; // Defines how many minutes a char will be muted, each negative point is equivalent to a minute
 	unsigned char karma;
 	short hair,hair_color,clothes_color;
 	int party_id,guild_id,pet_id,hom_id,mer_id,ele_id;
 	int fame;
 
 	// Mercenary Guilds Rank
-	int arch_faith, arch_calls;
-	int spear_faith, spear_calls;
-	int sword_faith, sword_calls;
+	int arch_faith,arch_calls;
+	int spear_faith,spear_calls;
+	int sword_faith,sword_calls;
 
 	short weapon; // enum weapon_type
 	short shield; // view-id
@@ -379,7 +417,7 @@ struct mmo_charstatus {
 #ifdef HOTKEY_SAVING
 	struct hotkey hotkeys[MAX_HOTKEYS];
 #endif
-	bool show_equip, allow_party;
+	bool show_equip,allow_party;
 	short rename;
 
 	time_t delete_date;
@@ -389,7 +427,10 @@ struct mmo_charstatus {
 	unsigned int character_moves;
 
 	unsigned char font;
+
 	bool cashshop_sent; //Whether the player has received the CashShop list
+
+	uint32 uniqueitem_counter;
 };
 
 typedef enum mail_status {
@@ -543,7 +584,7 @@ struct guild_castle {
 		unsigned visible : 1;
 		int id; // object id
 	} guardian[MAX_GUARDIANS];
-	int* temp_guardians; // ids of temporary guardians (mobs)
+	int *temp_guardians; // ids of temporary guardians (mobs)
 	int temp_guardians_max;
 };
 
@@ -553,14 +594,21 @@ struct fame_list {
 	char name[NAME_LENGTH];
 };
 
-enum { //Change Guild Infos
+/**
+ * Guild Basic Information
+ * It is used to request changes via intif_guild_change_basicinfo in map-server and to
+ * signalize changes made in char-server via mapif_parse_GuildMemberInfoChange
+ */
+enum e_guild_info {
 	GBI_EXP = 1,		// Guild Experience (EXP)
 	GBI_GUILDLV,		// Guild level
 	GBI_SKILLPOINT,		// Guild skillpoints
-	GBI_SKILLLV,		// Guild skill_lv ?? seem unused
+	//Changes a skill level, struct guild_skill should be sent.
+	//All checks regarding max skill level should be done in _map-server_
+	GBI_SKILLLV,		// Guild skill_lv
 };
 
-enum { //Change Member Infos
+enum e_guild_member_info { //Change Member Infos
 	GMI_POSITION	= 0,
 	GMI_EXP,
 	GMI_HAIR,
@@ -593,7 +641,7 @@ enum e_guild_skill {
 };
 
 //These mark the ID of the jobs, as expected by the client. [Skotlex]
-enum {
+enum e_job {
 	JOB_NOVICE,
 	JOB_SWORDMAN,
 	JOB_MAGE,
@@ -765,9 +813,36 @@ enum e_char_server_type {
 	CST_P2P         = 4,
 };
 
+// Item Bound Type
+enum bound_type {
+	BOUND_NONE = 0, //No bound
+	BOUND_ACCOUNT, //1 - Account Bound
+	BOUND_GUILD, //2 - Guild Bound
+	BOUND_PARTY, //3 - Party Bound
+	BOUND_CHAR, //4 - Character Bound
+	BOUND_MAX,
+
+	BOUND_ONEQUIP = 1, //Shows notification when item will be bound on equip
+	BOUND_DISPYELLOW = 2, //Shows the item name in yellow color
+};
+
 // Sanity checks
 #if MAX_ZENY > INT_MAX
 	#error MAX_ZENY is too big
+#endif
+
+#if (MIN_CHARS + MAX_CHAR_VIP + MAX_CHAR_BILLING) > MAX_CHARS
+	#error "Config of MAX_CHARS is invalid"
+#endif
+
+#if MIN_STORAGE > MAX_STORAGE
+	#error "Config of MIN_STORAGE is invalid"
+#endif
+
+#ifdef PACKET_OBFUSCATION
+	#if PACKETVER < 20110817
+		#undef PACKET_OBFUSCATION
+	#endif
 #endif
 
 #endif /* _MMO_H_ */

@@ -12,7 +12,7 @@ bool pc_group_exists(int group_id);
 bool pc_group_can_use_command(int group_id, const char *command, AtCommandType type);
 bool pc_group_has_permission(int group_id, int permission);
 bool pc_group_should_log_commands(int group_id);
-const char* pc_group_id2name(int group_id);
+const char *pc_group_id2name(int group_id);
 int pc_group_id2level(int group_id);
 void pc_group_pc_load(struct map_session_data *sd);
 
@@ -46,7 +46,10 @@ enum e_pc_permission {
 	PC_PERM_CHANNEL_ADMIN       = 0x00200000,
 	PC_PERM_TRADE_BOUNDED       = 0x00400000,
 	PC_PERM_ITEM_UNCONDITIONAL  = 0x00800000,
-	//Add other here..
+	PC_PERM_ENABLE_COMMAND      = 0x01000000,
+	PC_PERM_BYPASS_STAT_ONCLONE = 0x02000000,
+	PC_PERM_BYPASS_MAX_STAT     = 0x04000000,
+	//Add other here
 	PC_PERM_ALLPERMISSION       = 0xFFFFFFFF,
 };
 
@@ -78,6 +81,9 @@ static const struct {
 	{ "channel_admin", PC_PERM_CHANNEL_ADMIN },
 	{ "can_trade_bounded", PC_PERM_TRADE_BOUNDED },
 	{ "item_unconditional", PC_PERM_ITEM_UNCONDITIONAL },
+	{ "command_enable", PC_PERM_ENABLE_COMMAND },
+	{ "bypass_stat_onclone", PC_PERM_BYPASS_STAT_ONCLONE },
+	{ "bypass_max_stat", PC_PERM_BYPASS_MAX_STAT },
 	{ "all_permission", PC_PERM_ALLPERMISSION },
 };
 

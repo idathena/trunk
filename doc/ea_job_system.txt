@@ -35,7 +35,7 @@ The eA Job System:
 	EAJ_TAEKWON	0x7
 	EAJ_GUNSLINGER	0x9
 	EAJ_NINJA	0x0A
-	EAJ_GANGSI	0x0D
+	EAJ_GANGSI	0x0E
 
 - Branch: All classes can be classified as "1st Class", "2-1 Class" or "2-2 Class":
 	

@@ -415,7 +415,7 @@ cmd_fild07,136,134,4	script	Kafra Employee::kaf_cmd_fild07	721,{
 	mes "How may I assist you?";
 	callfunc "F_Kafra",5,0,1,40,820;
 	if (checkre(0))
-		savepoint strnpcinfo(4),129,97;
+		areasavepoint strnpcinfo(4),127,140,129,142;
 	else
 		savepoint "izlude",94,103;
 	callfunc "F_KafEnd",0,1,"in the city of Izlude";
@@ -598,7 +598,7 @@ niflheim,202,180,3	script	Kafra Employee::kaf_niflheim	791,{
 // Dungeons and Fields
 //============================================================
 // - Byalan Island
-izlu2dun,106,58,8	script	Kafra Employee::kaf_izlu2dun	115,{
+izlu2dun,106,58,0	script	Kafra Employee::kaf_izlu2dun	115,{
 	cutin "kafra_03",2;
 	if (!checkre(0) && BaseJob == Job_Novice && job_merchant_q2 > 0) {
 		// Merchant Job Change Quest

@@ -16,6 +16,7 @@
 #include <stdlib.h> // atoi
 
 struct cash_item_db cash_shop_items[CASHSHOP_TAB_SEARCH];
+bool cash_shop_defined = false;
 
 extern char item_cash_db_db[32];
 extern char item_cash_db2_db[32];
@@ -26,13 +27,13 @@ extern char item_cash_db2_db[32];
  *  0 = failure
  *  1 = success
  */
-static int cashshop_parse_dbrow( char** str, const char* source, int line ){
-	uint32 nameid = atoi( str[1] );
+static int cashshop_parse_dbrow( char **str, const char *source, int line ){
+	unsigned short nameid = atoi( str[1] );
 
 	if( itemdb_exists( nameid ) ){
 		uint16 tab = atoi( str[0] );
 		uint32 price = atoi( str[2] );
-		struct cash_item_data* cid;
+		struct cash_item_data *cid;
 		int j;
 
 		if( tab > CASHSHOP_TAB_SEARCH ){
@@ -55,10 +56,10 @@ static int cashshop_parse_dbrow( char** str, const char* source, int line ){
 
 		cid->nameid = nameid;
 		cid->price = price;
-
+		cash_shop_defined = true;
 		return 1;
 	}else{
-		ShowWarning( "cashshop_parse_dbrow: Invalid ID %d in line %d of \"%s\", skipping...\n", nameid, line, source );
+		ShowWarning( "cashshop_parse_dbrow: Invalid ID %hu in line %d of \"%s\", skipping...\n", nameid, line, source );
 	}
 
 	return 0;
@@ -67,9 +68,13 @@ static int cashshop_parse_dbrow( char** str, const char* source, int line ){
 /*
  * Reads database from TXT format,
  * parses lines and sends them to parse_dbrow.
+ * TODO: Change to sv_readdb
  */
 static void cashshop_read_db_txt( void ){
-	const char* filename[] = { DBPATH"item_cash_db.txt", "item_cash_db2.txt" };
+	const char *filename[] = {
+		DBPATH"item_cash_db.txt",
+		"item_cash_db2.txt"
+	};
 	int fi;
 
 	for( fi = 0; fi < ARRAYLENGTH( filename ); ++fi ){
@@ -77,7 +82,7 @@ static void cashshop_read_db_txt( void ){
 		char line[1024];
 
 		char path[256];
-		FILE* fp;
+		FILE *fp;
 
 		sprintf( path, "%s/%s", db_path, filename[fi] );
 		fp = fopen( path, "r" );
@@ -130,7 +135,7 @@ static void cashshop_read_db_txt( void ){
 
 		fclose(fp);
 
-		ShowStatus( "Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename[fi] );
+		ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, path);
 	}
 }
 
@@ -139,7 +144,7 @@ static void cashshop_read_db_txt( void ){
  * parses line and sends them to parse_dbrow.
  */
 static int cashshop_read_db_sql( void ){
-	const char* cash_db_name[] = { item_cash_db_db, item_cash_db2_db };
+	const char *cash_db_name[] = { item_cash_db_db, item_cash_db2_db };
 	int fi;
 
 	for( fi = 0; fi < ARRAYLENGTH( cash_db_name ); ++fi ){
@@ -151,7 +156,7 @@ static int cashshop_read_db_sql( void ){
 		}
 
 		while( SQL_SUCCESS == Sql_NextRow( mmysql_handle ) ){
-			char* str[3];
+			char *str[3];
 			int i;
 
 			++lines;
@@ -198,13 +203,13 @@ static void cashshop_read_db( void ){
  * @param item_list Array of item ID
  * @return true: success, false: fail
  */
-bool cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, uint16* item_list ){
+bool cashshop_buylist( struct map_session_data *sd, uint32 kafrapoints, int n, uint16* item_list ){
 	uint32 totalcash = 0;
 	uint32 totalweight = 0;
-	int i,new_;
+	int i, new_;
 	uint8 stackflag[256];
 
-	if( sd == NULL || item_list == NULL ){
+	if( sd == NULL || item_list == NULL || !cash_shop_defined ){
 		clif_cashshop_result( sd, 0, CASHSHOP_RESULT_ERROR_UNKNOWN );
 		return false;
 	}else if( sd->state.trading ){
@@ -215,10 +220,11 @@ bool cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 	new_ = 0;
 
 	for( i = 0; i < n; ++i ){
-		uint32 nameid = *( item_list + i * 5 );
+		unsigned short nameid = *( item_list + i * 5 );
 		uint32 quantity = *( item_list + i * 5 + 2 );
 		uint16 tab = *( item_list + i * 5 + 4 );
 		int j;
+
 		stackflag[i] = 0;
 
 		if( tab > CASHSHOP_TAB_SEARCH ){
@@ -226,21 +232,24 @@ bool cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 			return false;
 		}
 
-		ARR_FIND( 0, cash_shop_items[tab].count, j, nameid == cash_shop_items[tab].item[j]->nameid );
+		ARR_FIND( 0, cash_shop_items[tab].count, j, nameid == cash_shop_items[tab].item[j]->nameid || nameid == itemdb_viewid(cash_shop_items[tab].item[j]->nameid) );
+
+		nameid = *( item_list + i * 5 ) = cash_shop_items[tab].item[j]->nameid; //item_avail replacement
 
 		if( j == cash_shop_items[tab].count || !itemdb_exists( nameid ) ){
 			clif_cashshop_result( sd, nameid, CASHSHOP_RESULT_ERROR_UNKNOWN_ITEM );
 			return false;
-		}else if( !itemdb_isstackable( nameid ) && quantity > 1 ){
+		}else if( ( !itemdb_isstackable( nameid ) || ( itemdb_search( nameid ) )->flag.guid ) && quantity > 1 ){
 			stackflag[i] = 1;
-			/*uint32* quantity_ptr = (uint32*)(item_list + i * 5 + 2);
-			ShowWarning( "Player %s (%d:%d) sent a hexed packet trying to buy %d of nonstackable cash item %d!\n", sd->status.name, sd->status.account_id, sd->status.char_id, quantity, nameid );
+			/*uint32 *quantity_ptr = (uint32 *)(item_list + i * 5 + 2);
+			ShowWarning( "Player %s (%d:%d) sent a hexed packet trying to buy %d of nonstackable cash item %hu!\n", sd->status.name, sd->status.account_id, sd->status.char_id, quantity, nameid );
 			*quantity_ptr = 1;*/
 		}
 
 		if( stackflag[i] ){
 			int jj;
-			for( jj = 0; jj < quantity; ++jj){
+
+			for( jj = 0; jj < quantity; ++jj ){
 				switch( pc_checkadditem( sd, nameid, 1 ) ){
 					case CHKADDITEM_NEW:
 						new_++;
@@ -283,18 +292,19 @@ bool cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 	}
 
 	for( i = 0; i < n; ++i ){
-		uint32 nameid = *( item_list + i * 5 );
+		unsigned short nameid = *( item_list + i * 5 );
 		uint32 quantity = *( item_list + i * 5 + 2 );
 
 		if( stackflag[i] ){
 			int jj;
+
 			for( jj = 0; jj < quantity; ++jj ){
 				if( itemdb_type( nameid ) == IT_PETEGG ){
 					pet_create_egg( sd, nameid );
 				}else{
 					struct item item_tmp;
-					memset( &item_tmp, 0, sizeof( item_tmp ) );
 
+					memset( &item_tmp, 0, sizeof( item_tmp ) );
 					item_tmp.nameid = nameid;
 					item_tmp.identify = 1;
 
@@ -322,8 +332,8 @@ bool cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 				pet_create_egg( sd, nameid );
 			}else{
 				struct item item_tmp;
-				memset( &item_tmp, 0, sizeof( item_tmp ) );
 
+				memset( &item_tmp, 0, sizeof( item_tmp ) );
 				item_tmp.nameid = nameid;
 				item_tmp.identify = 1;
 
@@ -352,7 +362,7 @@ bool cashshop_buylist( struct map_session_data* sd, uint32 kafrapoints, int n, u
 	return true;
 }
 
-/*
+/**
  * Reloads cashshop database by destroying it and reading it again.
  */
 void cashshop_reloaddb( void ){
@@ -380,5 +390,6 @@ void do_final_cashshop( void ){
  * Initializes cashshop class.
  */
 void do_init_cashshop( void ){
+	cash_shop_defined = false;
 	cashshop_read_db();
 }

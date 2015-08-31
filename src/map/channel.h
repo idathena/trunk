@@ -27,7 +27,7 @@ enum Channel_Type {
 	CHAN_TYPE_ALLY		= 3,	//guild
 };
 
-struct {
+struct Channel_Config {
 	unsigned long *colors;		//color avail int list
 	char **colors_name;		//colors avail name list
 	unsigned char colors_count;	//color avail count
@@ -36,7 +36,8 @@ struct {
 	bool map_autojoin, ally_autojoin;	//do user auto join in mapchange, guildjoin ?
 	char map_chname[CHAN_NAME_LENGTH], ally_chname[CHAN_NAME_LENGTH]; //channel name for map and ally
 	bool closing;			//server is closing
-} Channel_Config;
+};
+extern struct Channel_Config channel_config;
 
 struct Channel {
 	char name[CHAN_NAME_LENGTH];	//channel name
@@ -52,7 +53,7 @@ struct Channel {
 	unsigned char msg_delay;	//delay in second if opt_msg_delay
 };
 
-DBMap* channel_get_db(void);
+DBMap *channel_get_db(void);
 
 struct Channel* channel_create(char *name, char *pass, unsigned char color, enum Channel_Type chantype, int val);
 int channel_delete(struct Channel *channel);
@@ -81,7 +82,7 @@ int channel_pcleave(struct map_session_data *sd, char *chname);
 int channel_pccolor(struct map_session_data *sd, char *chname, char *color);
 int channel_pcbind(struct map_session_data *sd, char *chname);
 int channel_pcunbind(struct map_session_data *sd);
-int channel_pcban(struct map_session_data *sd, char *chname, struct map_session_data *tsd, int flag);
+int channel_pcban(struct map_session_data *sd, char *chname, char *pname, int flag);
 int channel_pcsetopt(struct map_session_data *sd, char *chname, const char *option, const char *val);
 
 void do_init_channel(void);

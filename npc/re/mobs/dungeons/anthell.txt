@@ -107,6 +107,7 @@ anthell01,30,198,0,0	monster	Ant Egg	1097,1,60000,30000,0
 anthell01,31,198,0,0	monster	Ant Egg	1097,1,60000,30000,0
 anthell01,32,197,0,0	monster	Ant Egg	1097,1,60000,30000,0
 anthell01,31,186,0,0	monster	Ant Egg	1097,1,60000,30000,0
+anthell01,0,0,0,0	monster	Elusive Deniro	2857,2,300000,0,0
 
 //==================================================
 // anthell02 - Ant Hell
@@ -119,3 +120,4 @@ anthell02,0,0,0,0	monster	Deniro	1105,15,5000,0,0
 anthell02,0,0,0,0	monster	Piere	1160,15,5000,0,0
 anthell02,0,0,0,0	monster	Giearth	1121,3,5000,0,0
 anthell02,0,0,0,0	boss_monster	Maya	1147,1,7200000,600000,1
+anthell02,0,0,0,0	monster	Solid Andre	2902,2,300000,0,0

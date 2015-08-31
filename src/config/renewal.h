@@ -9,12 +9,12 @@
 /**
  * rAthena configuration file (http://rathena.org)
  * For detailed guidance on these check http://rathena.org/wiki/SRC/config/
- **/
+ */
 
 
 /**
  * @INFO: This file holds general-purpose renewal settings, for class-specific ones check /src/config/classes folder
- **/
+ */
 
 /// game renewal server mode
 /// (disable by commenting the line)
@@ -69,6 +69,12 @@
 /// - there is a change in how skills/items give ASPD
 /// - some skill/item ASPD bonuses won't stack
 #define RENEWAL_ASPD
+
+/// renewal stat calculations
+/// (disable by commenting the line)
+///
+/// leave this line to enable renewal calculation for increasing status/parameter points
+#define RENEWAL_STAT
 
 #endif
 

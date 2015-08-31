@@ -8,7 +8,7 @@
 //= rAthena SVN
 //===== Description: =========================================
 //= [Official Conversion]
-//= Jawaii town NPCs.
+//= Jawaii Town NPCs.
 //===== Additional Comments: =================================
 //= 1.0 First Version. Renewal coordinates by Masao.
 //= 1.1 Moved "Honeymoon Helper" NPC.

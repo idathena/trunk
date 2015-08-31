@@ -21,6 +21,7 @@ nameless_n,0,0,0,0	monster	Banshee	1867,16,5000,0,0
 nameless_n,0,0,0,0	monster	Ragged Zombie	1865,12,5000,0,0
 nameless_n,0,0,0,0	monster	Zombie Slaughter	1864,12,5000,0,0
 nameless_n,0,0,0,0	monster	Flame Skull	1869,3,5000,0,0
+nameless_n,0,0,0,0	monster	Furious Ghoul	2822,2,300000,0,0
 
 //==================================================
 // abbey01 - Cursed Monastery
@@ -31,6 +32,7 @@ abbey01,0,0,0,0	monster	Ragged Zombie	1865,33,5000,0,0
 abbey01,0,0,0,0	monster	Zombie Slaughter	1864,30,5000,0,0
 abbey01,0,0,0,0	monster	Hellhound	1866,25,5000,0,0
 abbey01,0,0,0,0	monster	Flame Skull	1869,21,5000,0,0
+abbey01,0,0,0,0	monster	Swift Banshee	2887,2,300000,0,0
 
 //==================================================
 // abbey02 - Cursed Monastery
@@ -40,6 +42,7 @@ abbey02,0,0,0,0	monster	Ragged Zombie	1865,70,5000,0,0
 abbey02,0,0,0,0	monster	Flame Skull	1869,21,5000,0,0
 abbey02,0,0,0,0	monster	Necromancer	1870,7,5000,0,0
 abbey02,236,78,21,18	boss_monster	Fallen Bishop	1871,1,7200000,600000,1
+abbey02,0,0,0,0	monster	Swift Zombie Slaughter	2603,2,300000,0,0
 
 //==================================================
 // abbey03 - Cursed Monastery
@@ -48,3 +51,4 @@ abbey03,0,0,0,0	monster	Necromancer	1870,60,5000,0,0
 abbey03,0,0,0,0	monster	Banshee	1867,30,5000,0,0
 abbey03,0,0,0,0	monster	Flame Skull	1869,25,5000,0,0
 abbey03,0,0,0,0	boss_monster	Beelzebub	1873,1,43200000,600000,1
+abbey03,0,0,0,0	monster	Necromancer Ringleader	2736,2,300000,0,0

@@ -3,7 +3,7 @@
 //===== By: ================================================== 
 //= L0ne_W0lf
 //===== Current Version: ===================================== 
-//= 3.4
+//= 3.5
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -27,6 +27,7 @@
 //= 3.3 Updated to match the latest official script. [Euphy]
 //= 3.3a Added Izlude RE coordinates. [Euphy]
 //= 3.4 Added GM management function and NPC. [Euphy]
+//= 3.5 Updated turn-in requirements for Tripatriate Union's Feud. [Euphy]
 //============================================================ 
 
 // Onward to the New World :: ep13_gogo
@@ -81,8 +82,12 @@ function	script	Promotional_Staff	{
 	}
 }
 
-prontera,163,53,3	script	Promotional Staff#prt	100,{
+prontera,163,53,3	script	Promotional Staff#prt	100,3,3,{
 	callfunc "Promotional_Staff";
+	end;
+
+OnTouch:
+	emotion e_what,1;
 	end;
 }
 
@@ -352,7 +357,7 @@ prt_castle,83,67,5	script	Recruiter for the Brave	109,{
 	}
 }
 
-aldebaran,127,138,3	script	Promotional Staff#alde	100,{
+aldebaran,127,138,3	script	Promotional Staff#alde	100,3,3,{
 	if (ep13_ryu > 3) {
 		mes "[Promotional Staff]";
 		mes "Did you try out for the test, or are you already enjoying your adventures?";
@@ -450,9 +455,13 @@ aldebaran,127,138,3	script	Promotional Staff#alde	100,{
 	}
 	callfunc "Promotional_Staff";
 	end;
+
+OnTouch:
+	emotion e_what,1;
+	end;
 }
 
-geffen,90,67,3	script	Promotional Staff#gef	100,{
+geffen,90,67,3	script	Promotional Staff#gef	100,3,3,{
 	if (ep13_ryu > 6) {
 		mes "[Promotional Staff]";
 		mes "Did you take the test?";
@@ -565,6 +574,10 @@ geffen,90,67,3	script	Promotional Staff#gef	100,{
 		close;
 	}
 	callfunc "Promotional_Staff";
+	end;
+
+OnTouch:
+	emotion e_what,1;
 	end;
 }
 
@@ -698,6 +711,10 @@ geffen,90,67,3	script	Promotional Staff#gef	100,{
 		}
 	}
 	callfunc "Promotional_Staff";
+	end;
+
+OnTouch:
+	emotion e_what,1;
 	end;
 }
 
@@ -5948,7 +5965,7 @@ mid_camp,165,245,0	script	Ryosen#ep131_rhea01	748,{
 			mes "I heard you can get this thing from a monster named, 'Cornus' found in the fields.";
 			next;
 			mes "[Ryosen]";
-			mes "Or... do you have any ^0000ffMystic Horns^000000 with you? Of course, I'm not saying that I want it for free. If you'd give me 5 ^0000ff5 Mystic Horns^000000, I'd give you my Rune-Midgart's Strawberry Cake.";
+			mes "Or... do you have any ^0000ffMystic Horns^000000 with you? Of course, I'm not saying that I want it for free. If you'd give me ^0000ff2 Mystic Horns^000000, I'd give you my Rune-Midgart's Strawberry Cake.";
 			next;
 			switch(select("I haven't seen such a thing.:Oh, ok, I'll give you!")) {
 			case 1:
@@ -5979,7 +5996,7 @@ mid_camp,165,245,0	script	Ryosen#ep131_rhea01	748,{
 			mes "[Ryosen]";
 			mes "... Haha, I'm joking...";
 			next;
-			if (countitem(6023) > 4) {
+			if (countitem(6023) > 1) {
 				mes "[Ryosen]";
 				mes "Are you really, honestly, positively sure you want to exchange them for my cake?";
 				next;
@@ -5997,7 +6014,7 @@ mid_camp,165,245,0	script	Ryosen#ep131_rhea01	748,{
 				next;
 				mes "[Ryosen]";
 				mes "I heard you could extract some magical energy form Mystic Horns and use it. Anyway, thank you!";
-				delitem 6023,5; //Mystic_Horn
+				delitem 6023,2; //Mystic_Horn
 				getitem 12319,1; //Strawberry_Cake
 				close;
 			}
@@ -6345,7 +6362,7 @@ mid_camp,247,255,1	script	Hue#ep131_rhea02	868,{
 			next;
 			mes "[Hue]";
 			mes "Could you bring ^0000ffFur^000000 if you get some? I'm not asking it for free.";
-			mes "I'll give you my Pineapple Jubilee from Schwartzvalt, if you bring me ^0000ff5 Furs^000000.";
+			mes "I'll give you my Pineapple Jubilee from Schwartzvalt, if you bring me ^0000ff2 Furs^000000.";
 			next;
 			switch(select("I don't have any, right now.:Oh, I'll give you Fur.")) {
 			case 1:
@@ -6372,7 +6389,7 @@ mid_camp,247,255,1	script	Hue#ep131_rhea02	868,{
 			mes "[Hue]";
 			mes "Ah, are you sure you want to exchange?";
 			next;
-			if (countitem(6020) > 4) {
+			if (countitem(6020) > 1) {
 				mes "[Hue]";
 				mes "Oh, so it's the thing called, Fur??";
 				next;
@@ -6392,7 +6409,7 @@ mid_camp,247,255,1	script	Hue#ep131_rhea02	868,{
 				next;
 				mes "[Hue]";
 				mes "I always needed this because the weather here is colder then I expected. I'm sure this will keep me warm.";
-				delitem 6020,5; //Fur
+				delitem 6020,2; //Fur
 				getitem 12320,1; //Pineapple_Juice
 				close;
 			}
@@ -6808,7 +6825,7 @@ mid_camp,222,218,3	script	Hansenne#ep131_rhea03	931,{
 			next;
 			mes "[Hansenne]";
 			mes "Can you give me a ^0000ffPeaked Hat^000000 if you have any? I'm not asking for free.";
-			mes "For ^0000ff5 Peaked Hats^000000, I'll give you my special dessert!";
+			mes "For ^0000ff2 Peaked Hats^000000, I'll give you my special dessert!";
 			next;
 			switch(select("No way.:Sure.")) {
 			case 1:
@@ -6837,7 +6854,7 @@ mid_camp,222,218,3	script	Hansenne#ep131_rhea03	931,{
 			mes "[Hansenne]";
 			mes "Ah!!! You have it?";
 			next;
-			if (countitem(6021) > 4) {
+			if (countitem(6021) > 1) {
 				mes "[Hansenne]";
 				mes "Oh, you really have those!";
 				next;
@@ -6858,7 +6875,7 @@ mid_camp,222,218,3	script	Hansenne#ep131_rhea03	931,{
 				mes "Ehhmmm, thank you!";
 				mes "Geeeee, thank you!";
 				mes "Haha, hahaha, hahahahahahahahaha.";
-				delitem 6021,5; //Peaked_Hat
+				delitem 6021,2; //Peaked_Hat
 				getitem 12321,1; //Spicy_Sandwich
 				close;
 			}
@@ -8319,7 +8336,7 @@ spl_fild02,321,169,0	duplicate(Fishinghole)	School of Fish#2	844
 spl_fild02,326,171,0	duplicate(Fishinghole)	School of Fish#3	844
 mid_camp,75,135,0	duplicate(Fishinghole)	School of Fish#4	844
 
-mid_camp,66,122,55	script	Henry Clifford	712,{
+mid_camp,66,122,7	script	Henry Clifford	712,{
 	if (countitem(6049) > 0) {
 		mes "[Henry Clifford]";
 		mes "Congratulations, you've caught a precious Marlin.";
@@ -8369,7 +8386,7 @@ mid_camp,66,122,55	script	Henry Clifford	712,{
 	}
 }
 
-mid_camp,88,100,55	script	Cat Hand Mining Agent	876,{
+mid_camp,88,100,7	script	Cat Hand Mining Agent	876,{
 	if (checkquest(12062,PLAYTIME) == -1) {
 		if ((countitem(6048) > 2) && (ep13_yong1 > 9)) {
 			mes "[Cat Hand Mining Agent]";
@@ -8554,7 +8571,7 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 	}
 	else if (ep13_1_edq == 2) {
 		mes "[Hibba Agip]";
-		mes "Oh yes, right... You're" + strcharinfo(0) + ", right? Abidal has told me good things about you.";
+		mes "Oh yes, right... You're " + strcharinfo(0) + ", right? Abidal has told me good things about you.";
 		next;
 		mes "[Hibba Agip]";
 		mes "We're lucky to have you, my friend... I hope you're as good as the stories play you up to be.";
@@ -8836,27 +8853,11 @@ mid_campin,90,121,5	script	Hibba Agip	459,{
 		cutin "ep13_captin_edq",255;
 		close;
 	}
-	else if ((ep13_1_edq == 9) && (countitem(11012) < 3)) {
+	else if ((ep13_1_edq == 9) && (countitem(11012) != 3)) {
 		mes "[Hibba Agip]";
 		mes "Is something wrong? Alright, we'll write another report for you.";
 		next;
-		delitem 11012,1; //Expedition_Report
-		delitem 11012,1; //Expedition_Report
-		delitem 11012,1; //Expedition_Report
-		getitem 11012,3; //Expedition_Report
-		mes "[Hibba Agip]";
-		mes "Let me remind you again. The officials are these three people: ^0000FFMinister Laur^000000 of the Rune Midgarts Kingdom, ^0000FFPriest Nuria^000000 of Arunafeltz and ^0000FFGerhart^000000 of the Schwaltzvalt Republic.";
-		next;
-		mes "[Hibba Agip]";
-		mes "Make sure to deliver the report to them without fail. Come back in one piece, alright?";
-		cutin "ep13_captin_edq",255;
-		close;
-	}
-	else if ((ep13_1_edq == 9) && (countitem(11012) > 3)) {
-		mes "[Hibba Agip]";
-		mes "Is something wrong? Alright, we'll write another report for you.";
-		next;
-		delitem 11012,20; //Expedition_Report
+		delitem 11012,countitem(11012); //Expedition_Report
 		getitem 11012,3; //Expedition_Report
 		mes "[Hibba Agip]";
 		mes "Let me remind you again. The officials are these three people: ^0000FFMinister Laur^000000 of the Rune Midgarts Kingdom, ^0000FFPriest Nuria^000000 of Arunafeltz and ^0000FFGerhart^000000 of the Schwaltzvalt Republic.";

@@ -2,7 +2,7 @@
 // For more information, see LICENCE in the main folder
 
 #ifndef _INTIF_H_
-#define _INFIF_H_
+#define _INTIF_H_
 
 //#include "../common/mmo.h"
 struct party_member;
@@ -17,9 +17,11 @@ struct auction_data;
 
 int intif_parse(int fd);
 
-int intif_broadcast(const char* mes, int len, int type);
-int intif_broadcast2(const char* mes, int len, unsigned long fontColor, short fontType, short fontSize, short fontAlign, short fontY);
-int intif_main_message(struct map_session_data* sd, const char* message);
+int intif_broadcast(const char *mes, int len, int type);
+int intif_broadcast2(const char *mes, int len, unsigned long fontColor, short fontType, short fontSize, short fontAlign, short fontY);
+int intif_broadcast_obtain_special_item(struct map_session_data *sd, unsigned short nameid, unsigned int sourceid, unsigned char type);
+int intif_broadcast_obtain_special_item_npc(struct map_session_data *sd, unsigned short nameid, const char *srcname);
+int intif_main_message(struct map_session_data *sd, const char *message);
 
 int intif_wis_message(struct map_session_data *sd,char *nick,char *mes,int mes_len);
 int intif_wis_message_to_gm(char *Wisp_name, int permission, char *mes);
@@ -29,7 +31,6 @@ int intif_request_registry(struct map_session_data *sd, int flag);
 
 int intif_request_guild_storage(int account_id, int guild_id);
 int intif_send_guild_storage(int account_id, struct guild_storage *gstor);
-
 
 int intif_create_party(struct party_member *member,char *name,int item,int item2);
 int intif_request_partyinfo(int party_id, int char_id);
@@ -43,7 +44,6 @@ int intif_party_message(int party_id, int account_id, const char *mes,int len);
 int intif_party_leaderchange(int party_id,int account_id,int char_id);
 int intif_party_sharelvlupdate(unsigned int share_lvl);
 
-
 int intif_guild_create(const char *name, const struct guild_member *master);
 int intif_guild_request_info(int guild_id);
 int intif_guild_addmember(int guild_id, struct guild_member *m);
@@ -51,7 +51,7 @@ int intif_guild_leave(int guild_id, int account_id, int char_id, int flag, const
 int intif_guild_memberinfoshort(int guild_id, int account_id, int char_id, int online, int lv, int class_);
 int intif_guild_break(int guild_id);
 int intif_guild_message(int guild_id, int account_id, const char *mes, int len);
-int intif_guild_change_gm(int guild_id, const char* name, int len);
+int intif_guild_change_gm(int guild_id, const char *name, int len);
 int intif_guild_change_basicinfo(int guild_id, int type, const void *data, int len);
 int intif_guild_change_memberinfo(int guild_id, int account_id, int char_id, int type, const void *data, int len);
 int intif_guild_position(int guild_id, int idx, struct guild_position *p);
@@ -62,11 +62,11 @@ int intif_guild_emblem(int guild_id, int len, const char *data);
 int intif_guild_castle_dataload(int num, int *castle_ids);
 int intif_guild_castle_datasave(int castle_id, int index, int value);
 #ifdef BOUND_ITEMS
-void intif_itembound_req(int char_id, int aid, int guild_id);
+void intif_itembound_guild_retrieve(uint32 char_id, uint32 account_id, int guild_id);
 #endif
 
 int intif_create_pet(int account_id, int char_id, short pet_type, short pet_lv, short pet_egg_id,
-                     short pet_equip, short intimate, short hungry, char rename_flag, char incuvate, char *pet_name);
+	short pet_equip, short intimate, short hungry, char rename_flag, char incubate, char *pet_name);
 int intif_request_petdata(int account_id, int char_id, int pet_id);
 int intif_save_petdata(int account_id, struct s_pet *p);
 int intif_delete_petdata(int pet_id);
@@ -79,7 +79,7 @@ int intif_homunculus_requestload(int account_id, int homun_id);
 int intif_homunculus_requestsave(int account_id, struct s_homunculus* sh);
 int intif_homunculus_requestdelete(int homun_id);
 
-/******QUEST SYTEM*******/
+// QUEST SYSTEM
 void intif_request_questlog(struct map_session_data *sd);
 int intif_quest_save(struct map_session_data *sd);
 
@@ -97,11 +97,11 @@ int intif_Mail_delete(int char_id, int mail_id);
 int intif_Mail_return(int char_id, int mail_id);
 int intif_Mail_send(int account_id, struct mail_message *msg);
 // AUCTION SYSTEM
-int intif_Auction_requestlist(int char_id, short type, int price, const char* searchtext, short page);
+int intif_Auction_requestlist(int char_id, short type, int price, const char *searchtext, short page);
 int intif_Auction_register(struct auction_data *auction);
 int intif_Auction_cancel(int char_id, unsigned int auction_id);
 int intif_Auction_close(int char_id, unsigned int auction_id);
-int intif_Auction_bid(int char_id, const char* name, unsigned int auction_id, int bid);
+int intif_Auction_bid(int char_id, const char *name, unsigned int auction_id, int bid);
 // ELEMENTAL SYSTEM
 int intif_elemental_create(struct s_elemental *ele);
 int intif_elemental_request(int ele_id, int char_id);
@@ -109,7 +109,7 @@ int intif_elemental_delete(int ele_id);
 int intif_elemental_save(struct s_elemental *ele);
 
 /* @accinfo */
-void intif_request_accinfo(int u_fd, int aid, int group_lv, char* query);
+int intif_request_accinfo(int u_fd, int aid, int group_lv, char *query);
 
 int CheckForCharServer(void);
 

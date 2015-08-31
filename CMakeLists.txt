@@ -461,6 +461,8 @@ set( DEVELOPMENT_FILES
 	"${CMAKE_CURRENT_SOURCE_DIR}/configure.in"
 	"${CMAKE_CURRENT_SOURCE_DIR}/idAthena-9.sln"
 	"${CMAKE_CURRENT_SOURCE_DIR}/idAthena-10.sln"
+	"${CMAKE_CURRENT_SOURCE_DIR}/idAthena-12.sln"
+	"${CMAKE_CURRENT_SOURCE_DIR}/idAthena-13.sln"
 	)
 set( DEVELOPMENT_DIRECTORIES
 	"3rdparty"
@@ -468,6 +470,8 @@ set( DEVELOPMENT_DIRECTORIES
 	"src"
 	"vcproj-9"
 	"vcproj-10"
+	"vcproj-12"
+	"vcproj-13"
 	)
 set( RUNTIME_FILES
 	"${CMAKE_CURRENT_SOURCE_DIR}/athena-start"

@@ -46,7 +46,7 @@ bonus bFlee,n;				Flee + n
 bonus bFleeRate,n;			Flee + n%
 bonus bFlee2,n;				Perfect Dodge + n
 bonus bFlee2Rate,n;			Perfect Dodge + n%
-bonus bSpeedRate,n;			Moving speed + n% (only the highest among all is applied)
+bonus bSpeedRate,n;			Moving speed + n% (only the highest among all is applied, won't be stacked with SC_SPEEDUP0, SC_SPEEDUP1)
 bonus bSpeedAddRate,n;			Moving speed + n%
 bonus bAspd,n;				Attack speed + n
 bonus bAspdRate,n;			Attack speed + n%
@@ -96,11 +96,11 @@ bonus bHealPower2,n;			Increase heal amount if you are healed by any skills by n
 bonus2 bAddEff,e,x;			Adds a x/100 chance to cause effect e to the target when attacking (e.g. x=100 makes 1% chance, x=10000 makes 100% chance, etc)
 					e:	Eff_Blind, Eff_Sleep, Eff_Poison, Eff_Freeze, Eff_Silence,
 						Eff_Stun, Eff_Curse, Eff_Confusion, Eff_Stone, Eff_Bleeding,
-						Eff_DPoison, Eff_Fear, Eff_Burning
+						Eff_DPoison, Eff_Fear, Eff_Burning, Eff_Crystalize, Eff_Deepsleep
 bonus2 bResEff,e,x;			Adds a x/100 tolerance to effect e (e.g. x=100 makes 1% tolerance, x=10000 makes 100% tolerance, etc)
 					e:	Eff_Blind, Eff_Sleep, Eff_Poison, Eff_Freeze, Eff_Silence,
 						Eff_Stun, Eff_Curse, Eff_Confusion, Eff_Stone, Eff_Bleeding,
-						Eff_DPoison, Eff_Fear, Eff_Burning
+						Eff_DPoison, Eff_Fear, Eff_Burning, Eff_Crystalize, Eff_Deepsleep
 bonus2 bCastrate,n,x;			Adjust casting time of skill n by x% (supports skill names)
 bonus2 bAddSize,n,x;			+x% physical damage against size n.
 					n:	Size_Small, Size_Medium, Size_Large, Size_All
@@ -114,11 +114,11 @@ bonus2 bMagicAddRace,n,x;		+x% magical damage against race n
 					n: 	RC_Formless, RC_Undead, RC_Brute, RC_Plant, RC_Insect, RC_Fish, RC_Demon, RC_DemiHuman, RC_Angel, RC_Dragon, RC_All
 bonus2 bSubRace,n,x;			+x% damage reduction against race n
 					n: 	RC_Formless, RC_Undead, RC_Brute, RC_Plant, RC_Insect, RC_Fish, RC_Demon, RC_DemiHuman, RC_Angel, RC_Dragon, RC_All
-bonus2 bAddEle,n,x;			+x% physical damage against element n
+bonus2 bAddDefEle,n,x;			+x% physical damage against defense element n
 					n: 	Ele_Neutral, Ele_Water, Ele_Earth, Ele_Fire, Ele_Wind, Ele_Poison, Ele_Holy, Ele_Dark, Ele_Ghost, Ele_Undead, Ele_All
-bonus2 bMagicAddEle,n,x; 		+x% magical damage against element n
+bonus2 bMagicAddDefEle,n,x; 		+x% magical damage against defense element n
 					n: 	Ele_Neutral, Ele_Water, Ele_Earth, Ele_Fire, Ele_Wind, Ele_Poison, Ele_Holy, Ele_Dark, Ele_Ghost, Ele_Undead, Ele_All
-bonus2 bSubEle,n,x;			x% Damage reduction against element n.
+bonus2 bSubEle,n,x;			x% Damage reduction against attack element n.
 					n: 	Ele_Neutral, Ele_Water, Ele_Earth, Ele_Fire, Ele_Wind, Ele_Poison, Ele_Holy, Ele_Dark, Ele_Ghost, Ele_Undead, Ele_All
 bonus2 bMagicAtkEle,n,x; 		Increases damage of n element magic by x%.
 					n: 	Ele_Neutral, Ele_Water, Ele_Earth, Ele_Fire, Ele_Wind, Ele_Poison, Ele_Holy, Ele_Dark, Ele_Ghost, Ele_Undead, Ele_All
@@ -134,10 +134,10 @@ bonus2 bIgnoreDefRaceRate,n,x;		Disregard x% of the target's DEF if the target b
 					n: 	RC_Formless, RC_Undead, RC_Brute, RC_Plant, RC_Insect, RC_Fish, RC_Demon, RC_DemiHuman, RC_Angel, RC_Dragon, RC_All
 bonus2 bIgnoreMdefRaceRate,n,x;		Disregard x% of the target's MDEF if the target belongs to race n
 					n: 	RC_Formless, RC_Undead, RC_Brute, RC_Plant, RC_Insect, RC_Fish, RC_Demon, RC_DemiHuman, RC_Angel, RC_Dragon, RC_All
-bonus2 bHPDrainRate,n,x;		n/10 % probability to drain x% HP when attacking
-bonus2 bSPDrainRate,n,x;		n/10 % probability to drain x% SP when attacking
-bonus2 bSPVanishRate,n,x;		Add the (n/10)% chance of decreasing enemy's SP (player) amount by x% when attacking
+bonus2 bHPDrainRate,n,x;		n/10 % probability to drain x% damage as HP when attacking
+bonus2 bSPDrainRate,n,x;		n/10 % probability to drain x% damage as SP when attacking
 bonus2 bHPVanishRate,n,x;		Add the (n/10)% chance of decreasing enemy's HP (player) amount by x% when attacking
+bonus2 bSPVanishRate,n,x;		Add the (n/10)% chance of decreasing enemy's SP (player) amount by x% when attacking
 bonus2 bAddMonsterDropItem,n,x;		Adds a x/100% chance for item n to be dropped, when killing any monster.
 					If 'x' is negative value, then it's a part of formula
 						chance = -x*(killed_mob_level/10)+1
@@ -182,9 +182,6 @@ bonus2 bAddRace2,n,x;			Increase damage by x% vs. enemies of race n (Check db/mo
 bonus3 bAutoSpellWhenHit,x,y,n;		n/10% chance to cast skill x of level y on attacker (unless it is a self or support skill) when being hit by a
 					direct attack. (supports skill names)
 					Target must be within spell's range to go off.
-bonus3 bSPDrainRate,n,x,y;		When attacking there is a n/10% chance to either gain SP equivalent to x% of damage dealt,
-					OR drain the amount of sp from the enemy.
-					y:	0=gain sp  1:drain enemy sp
 bonus4 bAutoSpell,x,y,n,i;		n/10% chance to cast skill x of level y when attacking (supports skill names)
 					i:
 						0=cast on self
@@ -243,8 +240,8 @@ bonus5 bAutoSpellWhenHit,x,y,n,t,i;	n/10% chance to cast skill x of level y when
 
 //---- 2/22 new card effects ----
 
-bonus2 bAddItemHealRate,n,x;		Increases HP recovered by n type items by x%, you can also use direct item IDs instead of group values.
-					(Check db/item_group_db.txt)
+bonus2 bAddItemHealRate,n,x;		Increases HP recovered by x% for item n
+bonus2 bAddItemGroupHealRate,ig,x;	Increases HP recovered by x% for items of item group ig
 
 //---- 3/15 new card effects ----
 
@@ -284,23 +281,19 @@ bonus bAddStealRate,n;			n/100% increase to Steal skill success chance
 
 bonus2 bAddSkillBlow,x,y;		Pushback the target by y cells when using skill x (supports skill names)
 
-bonus bSPDrainValue,n;			When hitting a monster by physical attack, you gain n SP
-					(use negative numbers so the user loses SP)
-bonus2 bSPDrainValue,n,x;		When hitting a monster by physical attack, ...
-					x:
-						0=you gain n SP, 1=you drain n SP from target
+bonus bSPDrainValue,n;			When hitting a monster by physical attack, you gain n SP (use negative numbers so the user loses SP)
 
 bonus2 bIgnoreDefRate,n,x;		Disregard x% of the target's DEF if the target belongs to race n
 
-bonus3 bAddEle,n,x,t;			+x% physical damage against element n
+bonus3 bAddDefEle,n,x,t;		+x% physical damage against defense element n.
 					n: 	Ele_Neutral, Ele_Water, Ele_Earth, Ele_Fire, Ele_Wind, Ele_Poison, Ele_Holy, Ele_Dark, Ele_Ghost, Ele_Undead, Ele_All
 					t: Trigger criteria:
 					   BF_SHORT: Trigger on melee attack
 					   BF_LONG: Trigger on ranged attack
 					   ( Default: BF_SHORT+BF_LONG )
 					   
-					   BF_WEAPON: Trigger on weapon skills 
-					   BF_MAGIC: Trigger on magic skills 
+					   BF_WEAPON: Trigger on weapon skills
+					   BF_MAGIC: Trigger on magic skills
 					   BF_MISC: Trigger on misc skills
 					   ( Default: BF_WEAPON )
 					   
@@ -312,7 +305,7 @@ bonus3 bAddEle,n,x,t;			+x% physical damage against element n
 					   i: 1=cast on enemy, not on self
 					   2=use random skill lv in [1..y]
 					   3=1+2 (random lv on enemy)
-bonus3 bSubEle,n,x,t;			x% Damage reduction against element n.
+bonus3 bSubEle,n,x,t;			x% Damage reduction against attack element n.
 					n: 	Ele_Neutral, Ele_Water, Ele_Earth, Ele_Fire, Ele_Wind, Ele_Poison, Ele_Holy, Ele_Dark, Ele_Ghost, Ele_Undead, Ele_All
 					t: Trigger criteria:
 					   BF_SHORT: Trigger on melee attack
@@ -355,13 +348,12 @@ bonus2 bWeaponComaEle,x,n;		Adds a n/100% chance to cause Coma when attacking a 
 bonus2 bAddEff2,e,n;			Adds a n/100% chance to cause status change e on self when attacking.
 					e:	Eff_Blind, Eff_Sleep, Eff_Poison, Eff_Freeze, Eff_Silence,
 						Eff_Stun, Eff_Curse, Eff_Confusion, Eff_Stone, Eff_Bleeding,
-						Eff_DPoison, Eff_Fear, Eff_Burning
+						Eff_DPoison, Eff_Fear, Eff_Burning, Eff_Crystalize, Eff_Deepsleep
 bonus bMagicDamageReturn,n;		Adds a n% chance to reflect targetted magic spells back to the enemy that caused it.
 bonus bPerfectHide,n;			Hidden/cloaked character is no longer detected by monsters with 'detector' mode (n is meaningless).
 bonus bNoKnockback,n;			Character is no longer knocked back by enemy skills with such effect (n is meaningless).
 bonus bClassChange,n;			Gives a n/100% chance to change the attacked monster's class with normal attack.
 bonus bHPDrainValue,n;			Heals +n HP with normal attack.
-bonus2 bHPDrainValue,n,x;		Heals +n HP with normal attack. When x is non-zero, the HP is drained instead.
 bonus2 bWeaponAtk,x,n;			Adds n ATK when weapon of type x is equipped.
 					x:	see doc/item_db.txt -> view -> weapons for possible values
 bonus2 bWeaponAtkRate,x,n;		Adds n% damage to normal attacks when weapon of type x is equipped.
@@ -397,10 +389,7 @@ bonus2 bSkillVariableCast,s,x;		Increases variable cast time of skill s by x mil
 bonus2 bVariableCastrate,s,x;		Increases variable cast time of skill s by x%. (supports skill names.)
 bonus2 bFixedCastrate,s,x;		Increases fixed cast time of skill s by x%. (supports skill names.)
 bonus4 bSetDefRace,n,x,r,y;		Set DEF to y of an enemy of race n at x% for r milliseconds with normal attack.
-bonus4 bSetMDefRace,n,x,r,y;		Set MDEF to y of an enemy of race n at x% for r milliseconds with normal attack.
-
-bonus2 bMagicSubRace,n,x;		Adds x% magical damage reduction against race n
-					n: RC_Formless, RC_Undead, RC_Brute, RC_Plant, RC_Insect, RC_Fish, RC_Demon, RC_DemiHuman, RC_Angel, RC_Dragon, RC_All
+bonus4 bSetMdefRace,n,x,r,y;		Set MDEF to y of an enemy of race n at x% for r milliseconds with normal attack.
 
 bonus bIgnoreDefClass,n;		Disregard DEF against enemies of class n
 					n: 	Class_Normal, Class_Boss, Class_Guardian, Class_All
@@ -416,13 +405,11 @@ bonus2 bExpAddClass,n,x;		Increase exp gained by x% vs. enemies of class n
 					n: 	Class_Normal, Class_Boss, Class_Guardian, Class_All
 bonus2 bMagicAddClass,n,x;		+x% magical damage against class n
 					n: 	Class_Normal, Class_Boss, Class_Guardian, Class_All
-bonus2 bMagicSubClass,n,x;		+x% magical damage reduction against class n
-					n: 	Class_Normal, Class_Boss, Class_Guardian, Class_All
 bonus2 bWeaponComaClass,n,y;		y/100% chance to cause Coma when attacking a monster of class x with a normal attack
 					n: 	Class_Normal, Class_Boss, Class_Guardian, Class_All
-bonus2 bHpDrainValueClass,n,x;		Heals +x HP when attacking a monster of class n with normal attack.
+bonus2 bHPDrainValueClass,n,x;		Heals +x HP when attacking a monster of class n with normal attack.
 					n: 	Class_Normal, Class_Boss, Class_Guardian, Class_All
-bonus2 bSpDrainValueClass,n,x;		Heals +x SP when attacking a monster of class n with normal attack.
+bonus2 bSPDrainValueClass,n,x;		Heals +x SP when attacking a monster of class n with normal attack.
 					n: 	Class_Normal, Class_Boss, Class_Guardian, Class_All
 bonus2 bIgnoreDefClassRate,n,x;		Disregard x% of the target's DEF if the target belongs to class n
 					n: 	Class_Normal, Class_Boss, Class_Guardian, Class_All
@@ -438,3 +425,28 @@ bonus3 bAddClassDropItemGroup,n,x,y;	Adds a y/100% chance to get an item of grou
 						chance = -y*(killed_mob_level/10)+1
 
 bonus bAddMaxWeight,n;			MaxWeight + n (in units of 0.1)
+
+bonus3 bHPVanishRate,n,x,t;		Same as bonus2 but works only if trigger t activates (see BF_* flags) when attacking.
+bonus3 bSPVanishRate,n,x,t;		Same as bonus2 but works only if trigger t activates (see BF_* flags) when attacking.
+bonus3 bStateNoRecoverRace,n,x,r;	Set no recovery state of an enemy of race n at x% for r milliseconds with normal attack.
+
+bonus4 bAddEff,n,x,y,t;			Adds a x/100 chance to cause effect n to the target when attacking (e.g. x=100 makes 1% chance, x=10000 makes 100% chance, etc).
+					y is the trigger criteria:
+						ATF_SELF: Trigger effect on self.
+						ATF_TARGET: Trigger effect on target (default)
+						ATF_SHORT: Trigger on melee attacks
+						ATF_LONG: Trigger in ranged attacks (default: trigger on all attacks)
+					t is the effect duration in milliseconds. Valid range is 0 ~ 65535. If set and greater than 0, the effect can't be avoided nor its duration reduced.
+
+bonus3 bSPVanishRaceRate,r,n,x;		Add a n/10% chance of decreasing enemy's SP amount by x% when attacking, depends on enemy race r.
+					r: RC_Formless, RC_Undead, RC_Brute, RC_Plant, RC_Insect, RC_Fish, RC_Demon, RC_DemiHuman, RC_Angel, RC_Dragon, RC_All
+bonus3 bHPVanishRaceRate,r,n,x;		Add a n/10% chance of decreasing enemy's HP amount by x% when attacking, depends on enemy race r.
+					r: RC_Formless, RC_Undead, RC_Brute, RC_Plant, RC_Insect, RC_Fish, RC_Demon, RC_DemiHuman, RC_Angel, RC_Dragon, RC_All
+bonus4 bSPVanishRaceRate,r,n,x,t;	Same as bonus2 but works only if trigger t activates (see BF_* flags) when attacking.
+bonus4 bHPVanishRaceRate,r,n,x,t;	Same as bonus2 but works only if trigger t activates (see BF_* flags) when attacking.
+
+bonus bAbsorbDmgMaxHP,n;		If the damage received is more than n% of Max HP, the damage received is [TotalDamage] - [n% of MaxHP]
+
+bonus2 bSubSkill,n,x;  			Reduces x% damage received from skill n. (supports skill names.)
+bonus2 bSubDefEle,n,x;    		+x% damage reduction from enemy with defense element n.
+					n: 	Ele_Neutral, Ele_Water, Ele_Earth, Ele_Fire, Ele_Wind, Ele_Poison, Ele_Holy, Ele_Dark, Ele_Ghost, Ele_Undead, Ele_All

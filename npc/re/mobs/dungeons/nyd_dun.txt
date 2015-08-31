@@ -28,3 +28,4 @@ nyd_dun01,58,216,0,0	monster	Draco Egg	2014,1,60000,30000,0
 nyd_dun01,60,226,0,0	monster	Draco Egg	2014,1,60000,30000,0
 nyd_dun01,53,228,0,0	monster	Draco Egg	2014,1,60000,30000,0
 nyd_dun01,47,218,0,0	monster	Draco Egg	2014,1,60000,30000,0
+nyd_dun01,0,0,0,0	monster	Solid Draco	2849,2,300000,0,0

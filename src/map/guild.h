@@ -13,14 +13,14 @@ struct guild_castle;
 struct map_session_data;
 struct mob_data;
 
-//For quick linking to a guardian's info. [Skotlex]
+/**
+ * Guardian data
+ * For quick linking to a guardian's info. [Skotlex]
+ */
 struct guardian_data {
-	int number; //0-MAX_GUARDIANS-1 = Guardians. MAX_GUARDIANS = Emperium.
-	int guild_id;
-	int emblem_id;
-	int guardup_lv; //Level of GD_GUARDUP skill.
-	char guild_name[NAME_LENGTH];
-	struct guild_castle* castle;
+	int number; // 0-MAX_GUARDIANS-1 = Guardians. MAX_GUARDIANS = Emperium
+	struct guild *g;
+	struct guild_castle *castle;
 };
 
 int guild_skill_get_max(int id);
@@ -28,15 +28,15 @@ int guild_skill_get_max(int id);
 int guild_checkskill(struct guild *g,int id);
 int guild_check_skill_require(struct guild *g,int id); // [Komurka]
 int guild_checkcastles(struct guild *g); // [MouseJstr]
-bool guild_isallied(int guild_id, int guild_id2); //Checks alliance based on guild Ids. [Skotlex]
+bool guild_isallied(int guild_id, int guild_id2); // Checks alliance based on guild Ids [Skotlex]
 
 void do_init_guild(void);
 struct guild *guild_search(int guild_id);
 struct guild *guild_searchname(char *str);
 struct guild_castle *guild_castle_search(int gcid);
 
-struct guild_castle* guild_mapname2gc(const char* mapname);
-struct guild_castle* guild_mapindex2gc(short mapindex);
+struct guild_castle *guild_mapname2gc(const char *mapname);
+struct guild_castle *guild_mapindex2gc(short mapindex);
 
 struct map_session_data *guild_getavailablesd(struct guild *g);
 int guild_getindex(struct guild *g,int account_id,int char_id);
@@ -60,7 +60,7 @@ int guild_member_withdraw(int guild_id,int account_id,int char_id,int flag,
 	const char *name,const char *mes);
 int guild_expulsion(struct map_session_data *sd,int guild_id,
 	int account_id,int char_id,const char *mes);
-int guild_skillup(struct map_session_data* sd, uint16 skill_id);
+int guild_skillup(struct map_session_data *sd, uint16 skill_id);
 void guild_block_skill(struct map_session_data *sd, int time);
 int guild_reqalliance(struct map_session_data *sd,struct map_session_data *tsd);
 int guild_reply_reqalliance(struct map_session_data *sd,int account_id,int flag);
@@ -100,14 +100,14 @@ void guild_agit_end(void);
 
 void guild_agit2_start(void);
 void guild_agit2_end(void);
-/* guild flag cachin */
+// Guild flag cachin
 void guild_flag_add(struct npc_data *nd);
 void guild_flag_remove(struct npc_data *nd);
 void guild_flags_clear(void);
 
 void guild_guildaura_refresh(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 #ifdef BOUND_ITEMS
-void guild_retrieveitembound(int char_id,int aid,int guild_id);
+void guild_retrieveitembound(uint32 char_id, uint32 account_id, int guild_id);
 #endif
 
 void do_final_guild(void);

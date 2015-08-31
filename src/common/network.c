@@ -23,7 +23,6 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
-
 #include "../common/cbasetypes.h"
 #include "../common/showmsg.h"
 #include "../common/timer.h"
@@ -63,18 +62,16 @@ static int _network_async_free_netbuf_proc(int tid, unsigned int tick, int id, i
 void network_init(){
 	SESSION *s;
 	int32 i;
-	
-	memset(g_Session, 0x00, (sizeof(SESSION) * MAXCONN) );
-	
+
+	memset(g_Session, 0x00, (sizeof(SESSION) * MAXCONN));
+
 	for(i = 0; i < MAXCONN; i++){
 		s = &g_Session[i];
-		
 		s->type = NST_FREE;
 		s->disconnect_in_progress = false;
-				
 	}
-	
-	// Initialize the correspondig event dispatcher
+
+	// Initialize the corresponding event dispatcher
 	evdp_init();
 
 	//
@@ -317,15 +314,17 @@ void network_disconnect(int32 fd){
 
 int32 network_addlistener(bool v6,  const char *addr,  uint16 port){
 	SESSION *s;
-	int optval, fd;
+	int fd;
+#ifdef SO_REUSEADDR
+	int optval;
+#endif
 
 #if !defined(ENABLE_IPV6)
 	if(v6 == true){
-		 ShowError("network_addlistener(%c, '%s', %u):  this release has no IPV6 support.\n",  (v6==true?'t':'f'),  addr, port);
+		 ShowError("network_addlistener(%c, '%s', %u):  this release has no IPV6 support.\n", (v6==true?'t':'f'), addr, port);
 		 return -1;
 	}
 #endif
-
 
 #ifdef ENABLE_IPV6
 	if(v6 == true)
@@ -336,26 +335,24 @@ int32 network_addlistener(bool v6,  const char *addr,  uint16 port){
 
 	// Error?
 	if(fd == -1){
-		ShowError("network_addlistener(%c, '%s', %u):  socket() failed (errno: %u / %s)\n",  (v6==true?'t':'f'),  addr, port,    errno, strerror(errno));
+		ShowError("network_addlistener(%c, '%s', %u):  socket() failed (errno: %u / %s)\n", (v6==true?'t':'f'),  addr, port, errno, strerror(errno));
 		return -1;
 	}
 	
 	// Too many connections?
 	if(fd >= MAXCONN){
-		ShowError("network_addlistener(%c, '%s', %u):  cannot create listener, exceeds more than supported connections (%u).\n", (v6==true?'t':'f'),  addr, port, MAXCONN);
+		ShowError("network_addlistener(%c, '%s', %u):  cannot create listener, exceeds more than supported connections (%u).\n", (v6==true?'t':'f'), addr, port, MAXCONN);
 		close(fd);
 		return -1;
 	}
-	
-	
+
 	s = &g_Session[fd];
 	if(s->type != NST_FREE){ // additional checks.. :)
-			ShowError("network_addlistener(%c, '%s', %u): failed, got fd #%u which is already in use in local session table?!\n", (v6==true?'t':'f'),  addr, port, fd);
+			ShowError("network_addlistener(%c, '%s', %u): failed, got fd #%u which is already in use in local session table?!\n", (v6==true?'t':'f'), addr, port, fd);
 			close(fd);
 			return -1;
 	}
-	
-	
+
 	// Fill ip addr structs
 #ifdef ENABLE_IPV6
 	if(v6 == true){
@@ -367,7 +364,6 @@ int32 network_addlistener(bool v6,  const char *addr,  uint16 port){
 			close(fd);
 			return -1;
 		}
-		
 	}else{
 #endif
 		memset(&s->addr.v4, 0x00, sizeof(s->addr.v4));
@@ -377,12 +373,11 @@ int32 network_addlistener(bool v6,  const char *addr,  uint16 port){
 #ifdef ENABLE_IPV6
 	}
 #endif
-		 
 
 	// if OS has support for SO_REUSEADDR, apply the flag
 	// so the address could be used when there're still time_wait sockets outstanding from previous application run.
 #ifdef SO_REUSEADDR
-	optval=1;
+	optval = 1;
 	setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 #endif
 
@@ -390,14 +385,14 @@ int32 network_addlistener(bool v6,  const char *addr,  uint16 port){
 #ifdef ENABLE_IPV6
 	if(v6 == true){
 		if( bind(fd, (struct sockaddr*)&s->addr.v6,  sizeof(s->addr.v6)) == -1) {
-			ShowError("network_addlistener(%c, '%s', %u): bind failed (errno: %u / %s)\n",  (v6==true?'t':'f'),  addr, port, errno, strerror(errno));
+			ShowError("network_addlistener(%c, '%s', %u): bind failed (errno: %u / %s)\n", (v6==true?'t':'f'), addr, port, errno, strerror(errno));
 			close(fd);
 			return -1;
 		}
 	}else{
 #endif
 		if( bind(fd, (struct sockaddr*)&s->addr.v4,  sizeof(s->addr.v4)) == -1) {
-            ShowError("network_addlistener(%c, '%s', %u): bind failed (errno: %u / %s)\n",  (v6==true?'t':'f'),  addr, port, errno, strerror(errno));
+            ShowError("network_addlistener(%c, '%s', %u): bind failed (errno: %u / %s)\n", (v6==true?'t':'f'), addr, port, errno, strerror(errno));
 			close(fd);
 			return -1;
 		}		
@@ -406,7 +401,7 @@ int32 network_addlistener(bool v6,  const char *addr,  uint16 port){
 #endif
 
 	if( listen(fd, l_ListenBacklog) == -1){
-		ShowError("network_addlistener(%c, '%s', %u): listen failed (errno: %u / %s)\n",  (v6==true?'t':'f'),  addr, port, errno, strerror(errno));
+		ShowError("network_addlistener(%c, '%s', %u): listen failed (errno: %u / %s)\n", (v6==true?'t':'f'), addr, port, errno, strerror(errno));
 		close(fd);
 		return -1;
 	}
@@ -414,7 +409,7 @@ int32 network_addlistener(bool v6,  const char *addr,  uint16 port){
 
 	// Set to nonblock!
 	if(_setnonblock(fd) == false){
-		ShowError("network_addlistener(%c, '%s', %u): cannot set to nonblock (errno: %u / %s)\n",  (v6==true?'t':'f'),  addr, port, errno, strerror(errno));
+		ShowError("network_addlistener(%c, '%s', %u): cannot set to nonblock (errno: %u / %s)\n", (v6==true?'t':'f'), addr, port, errno, strerror(errno));
 		close(fd);
 		return -1;
 	}	
@@ -422,12 +417,11 @@ int32 network_addlistener(bool v6,  const char *addr,  uint16 port){
 
 	// Rgister @ evdp.
 	if( evdp_addlistener(fd, &s->evdp_data) != true){
-		ShowError("network_addlistener(%c, '%s', %u): eventdispatcher subsystem returned an error.\n",  (v6==true?'t':'f'),  addr, port);
+		ShowError("network_addlistener(%c, '%s', %u): eventdispatcher subsystem returned an error.\n", (v6==true?'t':'f'), addr, port);
 		close(fd);
 		return -1;
 	}
-	
-	
+
 	// Apply flags on Session array for this conneciton.
 	if(v6 == true)	s->v6 = true;
 	else			s->v6 = false;
@@ -507,8 +501,11 @@ int32 network_connect(bool v6,
                         void (*onConnectionLooseHandler)(int32 fd)
 ){
 	register SESSION *s;
-	int32 fd, optval, ret;
+	int32 fd, ret;
 	struct sockaddr_in ip4;
+#ifdef SO_REUSEADDR
+	int32 optval;
+#endif
 #ifdef ENABLE_IPV6
 	struct sockaddr_in6 ip6;
 #endif
@@ -523,62 +520,59 @@ int32 network_connect(bool v6,
 #ifndef ENABLE_IPV6
 	// check..
 	if(v6 == true){
-		ShowError("network_connect(%c, '%s', %u...): tried to create an ipv6 connection, IPV6 is not supported in this release.\n", (v6==true?'t':'f'),  addr, port);
+		ShowError("network_connect(%c, '%s', %u...): tried to create an ipv6 connection, IPV6 is not supported in this release.\n", (v6==true?'t':'f'), addr, port);
 		return -1;
 	}
 #endif
 
 	// check connection limits.
 	if(fd >= MAXCONN){
-		ShowError("network_connect(%c, '%s', %u...): cannot create new connection, exceeeds more than supported connections (%u)\n", (v6==true?'t':'f'),  addr, port );
+		ShowError("network_connect(%c, '%s', %u...): cannot create new connection, exceeeds more than supported connections (%u)\n", (v6==true?'t':'f'), addr, port);
 		close(fd);
 		return -1;
 	}
 
-	
 	// Originating IP/Port pair given ?
 	if(from_addr != NULL && *from_addr != 0){
 		//.. 
-		#ifdef SO_REUSEADDR
-	    optval=1;
+#ifdef SO_REUSEADDR
+	    optval = 1;
 	    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-		#endif
-		
-		#ifdef ENABLE_IPV6
+#endif
+
+#ifdef ENABLE_IPV6
 		if(v6 == true){
 			memset(&ip6, 0x00, sizeof(ip6));
 			ip6.sin6_family = AF_INET6;
 			ip6.sin6_port = htons(from_port);
-			
+
 			if(inet_pton(AF_INET6, from_addr, &ip6.sin6_addr) != 1){
-				ShowError("network_connect(%c, '%s', %u...): cannot parse originating (from) IPV6 address (errno: %u / %s)\n", (v6==true?'t':'f'),  addr, port, errno, strerror(errno));
+				ShowError("network_connect(%c, '%s', %u...): cannot parse originating (from) IPV6 address (errno: %u / %s)\n", (v6==true?'t':'f'), addr, port, errno, strerror(errno));
 				close(fd);
 				return -1;
  			}
-		
+
  			ret = bind(fd, (struct sockaddr*)&ip6, sizeof(ip6));
 		}else{
-		#endif
+#endif
 			memset(&ip4, 0x00, sizeof(ip4));
-			
+
 			ip4.sin_family = AF_INET;
 			ip4.sin_port = htons(from_port);
 			ip4.sin_addr.s_addr = inet_addr(from_addr);
 			ret = bind(fd, (struct sockaddr*)&ip4, sizeof(ip4));
-		#ifdef ENABLE_IPV6
+#ifdef ENABLE_IPV6
 		}
-		#endif
+#endif
 		
 	}
-	
 
 	// Set non block
 	if(_setnonblock(fd) == false){
-		ShowError("network_connect(%c, '%s', %u...): cannot set socket to nonblocking (errno: %u / %s)\n", (v6==true?'t':'f'),  addr, port, errno, strerror(errno));
+		ShowError("network_connect(%c, '%s', %u...): cannot set socket to nonblocking (errno: %u / %s)\n", (v6==true?'t':'f'), addr, port, errno, strerror(errno));
 		close(fd);
 		return -1;
 	}
-
 
 	// Create ip addr block to connect to .. 
 #ifdef ENABLE_IPV6
@@ -586,24 +580,22 @@ int32 network_connect(bool v6,
 		memset(&ip6, 0x00, sizeof(ip6));
 		ip6.sin6_family = AF_INET6;
 		ip6.sin6_port = htons(port);
-		
+
 		if(inet_pton(AF_INET6, addr, &ip6.sin6_addr) != 1){
-			 ShowError("network_connect(%c, '%s', %u...): cannot parse destination IPV6 address (errno: %u / %s)\n", (v6==true?'t':'f'),  addr, port, errno, strerror(errno));
+			 ShowError("network_connect(%c, '%s', %u...): cannot parse destination IPV6 address (errno: %u / %s)\n", (v6==true?'t':'f'), addr, port, errno, strerror(errno));
 			 close(fd);
 			 return -1;
 		}
-	
 	}else{
 #endif
 	memset(&ip4, 0x00, sizeof(ip4));
-	
+
 	ip4.sin_family = AF_INET;
 	ip4.sin_port = htons(port);
 	ip4.sin_addr.s_addr = inet_addr(addr);	
 #ifdef ENABLE_IPV6
 	}
 #endif
-
 
 	// Assign Session..
 	s = &g_Session[fd];
@@ -619,22 +611,21 @@ int32 network_connect(bool v6,
 	else
 #endif
 		memcpy(&s->addr.v4, &ip4, sizeof(ip4));
-	
+
 	// Register @ EVDP. as outgoing (see doc of the function)
 	if(evdp_addconnecting(fd, &s->evdp_data) == false){
-		ShowError("network_connect(%c, '%s', %u...): eventdispatcher subsystem returned an error.\n", (v6==true?'t':'f'),  addr, port);
-		
+		ShowError("network_connect(%c, '%s', %u...): eventdispatcher subsystem returned an error.\n", (v6==true?'t':'f'), addr, port);
+
 		// cleanup session x.x.. 
 		s->type = NST_FREE;
 		s->onConnect = NULL;
 		s->onDisconnect = NULL;
 		s->onSend = NULL;
-		
+
 		// close, return error code.
 		close(fd);
 		return -1;
 	}
-
 
 #ifdef ENABLE_IPV6
 	if(v6 == true)
@@ -643,28 +634,26 @@ int32 network_connect(bool v6,
 #endif
 		ret = connect(fd, (struct sockaddr*)&ip4, sizeof(ip4));
 
-
 	// 
 	if(ret != 0 && errno != EINPROGRESS){
-		ShowWarning("network_connect(%c, '%s', %u...): connection failed (errno: %u / %s)\n", (v6==true?'t':'f'),  addr, port, errno, strerror(errno));
-		
+		ShowWarning("network_connect(%c, '%s', %u...): connection failed (errno: %u / %s)\n", (v6==true?'t':'f'), addr, port, errno, strerror(errno));
+
 		// Cleanup session ..
 		s->type = NST_FREE;
 		s->onConnect = NULL;
 		s->onDisconnect = NULL;
 		s->onSend = NULL;
-		
+
 		// .. remove from evdp and close fd.	
 		evdp_remove(fd, &s->evdp_data);
 		close(fd);
 		return -1;
 	}
 
-
 	// ! The Info Message :~D
 	ShowStatus("network_connect fd#%u (%s:%u) in progress.. \n", fd, addr, port);
 
-return fd;	
+	return fd;
 }//end: network_connect()
 
 

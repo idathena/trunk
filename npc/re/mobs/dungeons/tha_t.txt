@@ -21,6 +21,7 @@ tha_t01,0,0,0,0	monster	Mimic	1191,20,5000,0,0
 tha_t01,0,0,0,0	monster	Plasma	1695,20,5000,0,0
 tha_t01,0,0,0,0	monster	Alice	1275,5,5000,0,0
 tha_t01,0,0,0,0	monster	Lady Solace	1703,4,5000,0,0
+tha_t01,0,0,0,0	monster	Swift Rideword	2681,2,300000,0,0
 
 //==================================================
 // tha_t02 - Thanatos Tower - Lower Level
@@ -33,6 +34,7 @@ tha_t02,0,0,0,0	monster	Rideword	1195,10,5000,0,0
 tha_t02,0,0,0,0	monster	Elder	1377,10,5000,0,0
 tha_t02,0,0,0,0	monster	Alice	1275,10,5000,0,0
 tha_t02,0,0,0,0	monster	Baroness of Retribution	1702,4,5000,0,0
+tha_t02,0,0,0,0	monster	Ancient Mimic Ringleader	2903,2,300000,0,0
 
 //==================================================
 // tha_t03 - Thanatos Tower - Lower Level
@@ -44,6 +46,7 @@ tha_t03,0,0,0,0	monster	Mimic	1191,10,5000,0,0
 tha_t03,0,0,0,0	monster	Ancient Mimic	1699,10,5000,0,0
 tha_t03,0,0,0,0	monster	Elder	1377,10,5000,0,0
 tha_t03,0,0,0,0	monster	Mistress of Shelter	1701,4,5000,0,0
+tha_t03,0,0,0,0	monster	Death Word Ringleader	2860,2,300000,0,0
 
 //==================================================
 // tha_t04 - Thanatos Tower - Lower Level
@@ -57,6 +60,7 @@ tha_t04,0,0,0,0	monster	Plasma	1694,20,5000,0,0
 tha_t04,0,0,0,0	monster	Owl Duke	1320,10,5000,0,0
 tha_t04,0,0,0,0	monster	Owl Baron	1295,10,5000,0,0
 tha_t04,0,0,0,0	monster	Dame of Sentinel	1700,4,5000,0,0
+tha_t04,0,0,0,0	monster	Solid Death Word	2859,2,300000,0,0
 
 //==================================================
 // tha_t05 - Thanatos Tower - Upper Level
@@ -71,6 +75,7 @@ tha_t05,0,0,0,0	monster	Plasma	1695,10,5000,0,0
 tha_t05,0,0,0,0	monster	Plasma	1697,10,5000,0,0
 tha_t05,0,0,0,0	monster	Plasma	1694,10,5000,0,0
 tha_t05,0,0,0,0	monster	Dolor of Thanatos	1707,2,5000,0,0
+tha_t05,0,0,0,0	monster	Owl Duke Ringleader	2721,2,300000,0,0
 
 //==================================================
 // tha_t06 - Thanatos Tower - Upper Level
@@ -85,6 +90,7 @@ tha_t06,0,0,0,0	monster	Plasma	1695,10,5000,0,0
 tha_t06,0,0,0,0	monster	Plasma	1697,10,5000,0,0
 tha_t06,0,0,0,0	monster	Plasma	1694,10,5000,0,0
 tha_t06,0,0,0,0	monster	Maero of Thanatos	1706,2,5000,0,0
+tha_t06,0,0,0,0	monster	Swift Death Word	2858,2,300000,0,0
 
 //==================================================
 // tha_t07 - Thanatos Tower - Upper Level 
@@ -96,6 +102,7 @@ tha_t07,0,0,0,0	monster	Dame of Sentinel	1700,7,5000,0,0
 tha_t07,0,0,0,0	monster	Mistress of Shelter	1701,7,5000,0,0
 tha_t07,0,0,0,0	monster	Lady Solace	1703,7,5000,0,0
 tha_t07,0,0,0,0	monster	Despero of Thanatos	1705,2,5000,0,0
+tha_t07,0,0,0,0	monster	Swift Baroness of Retribution	2686,2,300000,0,0
 
 //==================================================
 // tha_t08 - Thanatos Tower - Upper Level
@@ -107,6 +114,7 @@ tha_t08,0,0,0,0	monster	Dame of Sentinel	1700,5,5000,0,0
 tha_t08,0,0,0,0	monster	Mistress of Shelter	1701,5,5000,0,0
 tha_t08,0,0,0,0	monster	Lady Solace	1703,5,5000,0,0
 tha_t08,0,0,0,0	monster	Odium of Thanatos	1704,2,5000,0,0
+tha_t08,0,0,0,0	monster	Elusive Baroness of Retribution	2685,2,300000,0,0
 
 //==================================================
 // tha_t09 - Thanatos Tower - Upper Level
@@ -118,6 +126,7 @@ tha_t09,0,0,0,0	monster	Mistress of Shelter	1701,5,5000,0,0
 tha_t09,0,0,0,0	monster	Plasma	1694,5,5000,0,0
 tha_t09,0,0,0,0	monster	Dolor of Thanatos	1712,3,5000,0,0
 tha_t09,0,0,0,0	monster	Dolor of Thanatos	1707,1,5000,0,0
+tha_t09,0,0,0,0	monster	Elusive Lady Solace	2650,2,300000,0,0
 
 //==================================================
 // tha_t10 - Thanatos Tower - Upper Level
@@ -129,6 +138,7 @@ tha_t10,0,0,0,0	monster	Lady Solace	1703,5,5000,0,0
 tha_t10,0,0,0,0	monster	Plasma	1697,5,5000,0,0
 tha_t10,0,0,0,0	monster	Maero of Thanatos	1711,3,5000,0,0
 tha_t10,0,0,0,0	monster	Maero of Thanatos	1706,1,5000,0,0
+tha_t10,0,0,0,0	monster	Furious Baroness of Retribution	2684,2,300000,0,0
 
 //==================================================
 // tha_t11 - Thanatos Tower - Upper Level
@@ -140,6 +150,7 @@ tha_t11,0,0,0,0	monster	Lady Solace	1703,5,5000,0,0
 tha_t11,0,0,0,0	monster	Plasma	1695,5,5000,0,0
 tha_t11,0,0,0,0	monster	Despero of Thanatos	1710,3,5000,0,0
 tha_t11,0,0,0,0	monster	Despero of Thanatos	1705,1,5000,0,0
+tha_t11,0,0,0,0	monster	Elusive Mistress of Shelter	2665,2,300000,0,0
 
 //==================================================
 // tha_t12 - Thanatos Tower - Upper Level
@@ -150,3 +161,4 @@ tha_t12,0,0,0,0	monster	Mistress of Shelter	1701,5,5000,0,0
 tha_t12,0,0,0,0	monster	Lady Solace	1703,5,5000,0,0
 tha_t12,0,0,0,0	monster	Plasma	1693,5,5000,0,0
 tha_t12,0,0,0,0	monster	Odium of Thanatos	1709,4,5000,0,0
+tha_t12,0,0,0,0	monster	Dame of Sentinel Ringleader	2726,2,300000,0,0

@@ -1,34 +1,34 @@
-//===== idAthena Script ======================================
-//= Staff Bandara Einbroch
-//===== Script Asli dari =====================================
-//= rAthena
-//===== Diterjemahkan Oleh ===================================
-//= Tim Penerjemah idAthena
-//===== Oleh: ================================================
+//===== rAthena Script ======================================= 
+//= Einbroch Airport Staff
+//===== By: ================================================== 
 //= L0ne_W0lf, Muad_Dib
-//===== Versi Saat Ini: ======================================
+//===== Current Version: =====================================
 //= 1.0
-//===== Dapat Digunakan Dengan: ==============================
+//===== Compatible With: ===================================== 
 //= rAthena SVN
-//= idAthena SVN
-//===== Deskripsi: ===========================================
-//= Staff Bandara Einbroch
-//===== Komentar Tambahan: ===================================
-//= 1.0 Versi pertama.
-//============================================================
+//===== Description: ========================================= 
+//= Einbroch Airport Staff
+//===== Additional Comments: ================================= 
+//= 1.0 First version.
+//============================================================ 
 
 airport,143,43,5	script	Airport Staff#airport1a::airport1	90,{
-	mes "[Staff Bandara]";
-	mes "Selamat datang di Bandara Einbroch,";
-	mes "dimana kita menawarkan penerbangan tiada henti ke Juno, Lighthalzen, dan Hugel.";
+	mes "[Airport Staff]";
+	mes "Welcome to the";
+	mes "Einbroch Airport,";
+	mes "where we offer nonstop";
+	mes "flights to the cities of";
+	mes "Juno, Lighthalzen and Hugel.";
 	next;
-	if (select("Menaiki Kapal Udara:Batal") == 1) {
-		mes "[Staff Bandara]";
-		mes "Tarif penerbangan Kapal Udara adalah 1,200 zeny,";
-		mes "tetapi jika kamu memiliki Free Ticket for Airship, biaya akan gratis.";
-		mes "Akankah kamu menaiki Kapal Udara?";
+	if (select("Board the Airship:Cancel") == 1) {
+		mes "[Airport Staff]";
+		mes "The Airship boarding fee";
+		mes "is 1,200 zeny, but if you've";
+		mes "got a Free Ticket for Airship,";
+		mes "the fee will be waived. Will";
+		mes "you board the Airship?";
 		next;
-		if (select("Iya:Tidak") == 1) {
+		if (select("Yes:No") == 1) {
 			if (countitem(7311) > 0) {
 				delitem 7311,1; //Free_Flying_Ship_Ticket
 				warp "airport",148,51;
@@ -39,15 +39,19 @@ airport,143,43,5	script	Airport Staff#airport1a::airport1	90,{
 				warp "airport",148,51;
 				end;
 			}
-			mes "[Staff Bandara]";
-			mes "Mohon maaf, tetapi kamu tidak memiliki tiket untuk Kapal Udara";
-			mes "dan kamu tidak memiliki cukup zeny untuk biaya penerbangan.";
-			mes "Perlu diingat, biaya penerbangan adalah 1,200 Zeny";
+			mes "[Airport Staff]";
+			mes "I'm sorry, but you don't";
+			mes "have a Free Ticket for";
+			mes "Airship and you don't have";
+			mes "enough zeny for boarding";
+			mes "the Airship. Remember, the";
+			mes "boarding fee is 1,200 zeny.";
 			close;
 		}
 	}
-	mes "[Staff Bandara]";
-	mes "Terimakasih dan semoga menjadi hari yang indah.";
+	mes "[Airport Staff]";
+	mes "Thank you and";
+	mes "have a nice day.";
 	close;
 }
 
@@ -55,24 +59,31 @@ airport,158,43,5	duplicate(airport1)	Airport Staff#airport1b	90
 airport,126,43,5	duplicate(airport1)	Airport Staff#airport1c	90
 
 airport,143,49,3	script	Arrival Staff#airport2a::airport2	90,{
-	mes "[Staff Kedatangan]";
-	mes "Selamat datang di Bandara Einbroch.";
-	mes "Jika kamu tiba dari penerbanganmu, izinkan saya menunjukkan terminal utama.";
-	mes "Atau, mohon menaiki Kapal Udara ke Juno, Lighthalzen, dan Hugel.";
+	mes "[Arrival Staff]";
+	mes "Welcome to Einbroch Airport.";
+	mes "If you are arriving from your";
+	mes "flight, let me guide you to the";
+	mes "main terminal. Otherwise, please board the Airship to depart to";
+	mes "Juno, Lighthalzen and Hugel.";
 	next;
-	if (select("Keluar ke terminal utama:Batal") == 1) {
-		mes "[Staff Kedatangan]";
-		mes "Setibanya kamu di terminal utama, kamu akan dikenakan biaya lagi untuk menaiki kapal udara.";
-		mes "Kamu lebih baik keluar jika Einbroch adalah kota tujuanmu.";
-		mes "Lanjutkan ke terminal utama?";
+	if (select("Exit to main terminal.:Cancel.") == 1) {
+		mes "[Arrival Staff]";
+		mes "Once you're in the main terminal, you will need to pay the fee again";
+		mes "to board an Airship. You should";
+		mes "only exit if the city of Einbroch";
+		mes "is your intended destination.";
+		mes "Proceed to the main terminal?";
 		next;
-		if (select("Iya:Tidak") == 1) {
+		if (select("Yes:No") == 1) {
 			warp "airport",142,40;
 			end;
 		}
 	}
-	mes "[Staff Kedatangan]";
-	mes "Baiklah, terimakasih telah terbang bersama kami dan semoga selamat menikmati penerbangan~";
+	mes "[Arrival Staff]";
+	mes "Alright, thank you";
+	mes "for your patronage";
+	mes "and I hope you have";
+	mes "a pleasant flight~";
 	close;
 }
 
@@ -80,21 +91,20 @@ airport,126,51,3	duplicate(airport2)	Arrival Staff#airport2b	90
 airport,158,50,3	duplicate(airport2)	Arrival Staff#airport2c	90
 
 einbroch,94,267,3	script	Airship Staff#ein01	91,{
-	mes "[Staff Kapal Udara]";
-	mes "Selamat datang di bandara Juno.";
-	mes "Silahkan gunakan pintu ini untuk";
-	mes "naik pesawat yang akan";
-	mes "terbang ke Izlude";
-	mes "di Kerajaan Rune Midgard,";
-	mes "dan Rachel di";
-	mes "Republik Arunafeltz.";
+	mes "[Airship Staff]";
+	mes "Welcome to the";
+	mes "Einbroch Airport.";
+	mes "Please use this door to";
+	mes "board the Airship which stops";
+	mes "over Juno, Lighthalzen and";
+	mes "Hugel in the Schwaltzvalt Republic.";
 	next;
-	mes "[Staff Kapal Udara]";
-	mes "Sebaliknya, Jika Juno";
-	mes "adalah tujuan yang kamu maksud,";
-	mes "silahkan turuni tangga";
-	mes "dan tanya staff kami untuk membimbing kamu";
-	mes "ke terminal utama. terima kasih,";
-	mes "dan selamat menikmati perjalanannya.";
+	mes "[Airship Staff]";
+	mes "Otherwise, if Einbroch is";
+	mes "your intended destination,";
+	mes "please head down the stairs";
+	mes "and ask the Arrival Staff to lead";
+	mes "you to the main terminal. Thank";
+	mes "you, and enjoy your travels.";
 	close;
 }

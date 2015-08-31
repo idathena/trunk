@@ -1306,7 +1306,6 @@ ayothaya,83,132,0	script	Dusit#thai	843,{
 			mes "[Dusit]";
 			mes "Ah well, you'll see what I'm talking about. I hope he'll help you learn more about that evil creature.";
 			set ayodunquest,1;
-			setquest 12035;
 			close;
 		}
 		mes "[Dusit]";
@@ -1335,9 +1334,9 @@ ayo_in01,181,193,4	script	Shaman#thai	840,{
 	// - Pre-Renewal requires Needle Packet and Spool.
 	// - Renewal requires Fabric and Nine Tails.
 	if (checkre(0))
-		setarray .@items[0],7213,7217; //Needle_Pouch, Spool
-	else
 		setarray .@items[0],1059,1022; //Transparent_Cloth, Fox_Tail
+	else
+		setarray .@items[0],7213,7217; //Needle_Pouch, Spool
 
 	if (ayodunquest == 1) {
 		mes "[Boonthom]";
@@ -1464,7 +1463,7 @@ ayo_in01,181,193,4	script	Shaman#thai	840,{
 			mes "when you prepare all";
 			mes "the materials.";
 			set ayodunquest,2;
-			changequest 12035,12036;
+			setquest 12035;
 			close;
 		}
 		mes "[Boonthom]";
@@ -1503,7 +1502,7 @@ ayo_in01,181,193,4	script	Shaman#thai	840,{
 			delitem 7190,1; //Solid_Peeling
 			delitem 523,1; //Holy_Water
 			set ayodunquest,3;
-			changequest 12036,12037;
+			completequest 12035;
 			getitem 7285,1; //Thread_Skein
 			next;
 			mes "[Boonthom]";
@@ -1513,6 +1512,7 @@ ayo_in01,181,193,4	script	Shaman#thai	840,{
 			mes "[Boonthom]";
 			mes "The ancient building consists";
 			mes "of 2 levels. Before you enter the 2nd underground level, please return to me so that I can tell you how to enter that place.";
+			close;
 		}
 		mes "[Boonthom]";
 		mes "Did you forget what materials";
@@ -1614,7 +1614,7 @@ ayo_in01,181,193,4	script	Shaman#thai	840,{
 		mes "^3366992 "+getitemname(.@items[0])+"^000000 and";
 		mes "^3366992 "+getitemname(.@items[0])+"^000000.";
 		set ayodunquest,10;
-		changequest 12037,12038;
+		changequest 12036,12037;
 		next;
 		mes "[Boonthom]";
 		mes "Return to me";
@@ -1650,7 +1650,7 @@ ayo_in01,181,193,4	script	Shaman#thai	840,{
 			delitem 523,2; //Holy_Water
 			set ayodunquest,11;
 			getitem 7287,1; //Thread_Skein_
-			changequest 12038,12039;
+			changequest 12037,12038;
 			next;
 			mes "[Boonthom]";
 			mes "Even if you lose this, don't worry. Just bring me the materials, and";
@@ -2093,7 +2093,7 @@ ayo_dun02,268,108,0	script	 #reward_tiger	111,{
 		mes "^3355FFYou pick";
 		mes "up the box.^000000";
 		set ayodunquest,12;
-		completequest 12039;
+		changequest 12038,12039;
 		getitem 603,1; //Old_Blue_Box
 		close;
 	}

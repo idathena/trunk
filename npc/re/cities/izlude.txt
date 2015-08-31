@@ -8,7 +8,7 @@
 //= rAthena SVN
 //===== Description: ========================================= 
 //= [Official Conversion]
-//= Izlude town NPCs.
+//= Izlude Town NPCs.
 //===== Additional Comments: ================================= 
 //= 1.0 First Version. Still missing many new NPCs and their dialogues. [Masao]
 //= 1.1 Updated to match the official script. [Euphy]
@@ -72,36 +72,44 @@ izlude_c,165,156,2	duplicate(Soldier_izlude)	Soldier#izlude_c	105
 izlude_d,165,156,2	duplicate(Soldier_izlude)	Soldier#izlude_d	105
 
 -	script	::Guard_izlude	-1,{
-	mes "[Izlude Guard]";
-	mes "Welcome to Izlude.";
+	mes "[Guard]";
+	mes "Beyond this point is the town of Izlude.";
 	close;
 }
-prt_fild08,350,219,4	duplicate(Guard_izlude)	Guard#izlude	105
-prt_fild08a,350,219,4	duplicate(Guard_izlude)	Guard#izlude_a	105
-prt_fild08b,350,219,4	duplicate(Guard_izlude)	Guard#izlude_b	105
-prt_fild08c,350,219,4	duplicate(Guard_izlude)	Guard#izlude_c	105
-prt_fild08d,350,219,4	duplicate(Guard_izlude)	Guard#izlude_d	105
+prt_fild08,347,216,3	duplicate(Guard_izlude)	Guard#izlude	105
+prt_fild08a,347,216,3	duplicate(Guard_izlude)	Guard#izlude_a	105
+prt_fild08b,347,216,3	duplicate(Guard_izlude)	Guard#izlude_b	105
+prt_fild08c,347,216,3	duplicate(Guard_izlude)	Guard#izlude_c	105
+prt_fild08d,347,216,3	duplicate(Guard_izlude)	Guard#izlude_d	105
+
+-	script	::Guard_izlude2	-1,{
+	end;
+}
+prt_fild08,347,209,3	duplicate(Guard_izlude2)	Guard#izlude2	105
+prt_fild08a,347,209,3	duplicate(Guard_izlude2)	Guard#izlude2_a	105
+prt_fild08b,347,209,3	duplicate(Guard_izlude2)	Guard#izlude2_b	105
+prt_fild08c,347,209,3	duplicate(Guard_izlude2)	Guard#izlude2_c	105
+prt_fild08d,347,209,3	duplicate(Guard_izlude2)	Guard#izlude2_d	105
 
 // Channel Warper :: channel
 //============================================================
 function	script	F_IzludeChannel	{
-	mes "[Izlude Copy Warper]";
-	mes "Izlude is a verly lively place is it not?";
-	mes "I am here to help make Izlude feel more smooth!";
-	mes "I can send you to another copy of Izlude.";
-	mes "Do you want to go to another copy?";
+	mes "[Channel Teleporter]";
+	mes "Is the Izlude area too crowded?";
+	mes "I came to help you to pass by more smoothly~!";
+	mes "Here we are at channel "+strnpcinfo(2)+".";
+	mes "Will you teleport to other channel?";
 	next;
-	set .@i, select(getarg(0)+":Never mind");
-	if (.@i < 6) {
+	set .@i,select(getarg(0)+":Don't teleport.");
+	if(.@i < 6) {
 		setarray .@maps$[1],"izlude","izlude_a","izlude_b","izlude_c","izlude_d";
-		savepoint .@maps$[.@i],128,98;
+		areasavepoint .@maps$[.@i],127,97,129,99;
 		warp .@maps$[.@i],128,98;
-		end;
 	}
 	close;
 }
-izlude,122,105,5	script	Izlude Copy Warper	64,{ callfunc "F_IzludeChannel",":Go to copy 2:Go to copy 3:Go to copy 4:Go to copy 5"; }
-izlude_a,122,105,5	script	Izlude Copy Warper#_a	64,{ callfunc "F_IzludeChannel","Go to copy 1::Go to copy 3:Go to copy 4:Go to copy 5"; }
-izlude_b,122,105,5	script	Izlude Copy Warper#_b	64,{ callfunc "F_IzludeChannel","Go to copy 1:Go to copy 2::Go to copy 4:Go to copy 5"; }
-izlude_c,122,105,5	script	Izlude Copy Warper#_c	64,{ callfunc "F_IzludeChannel","Go to copy 1:Go to copy 2:Go to copy 3::Go to copy 5"; }
-izlude_d,122,105,5	script	Izlude Copy Warper#_d	64,{ callfunc "F_IzludeChannel","Go to copy 1:Go to copy 2:Go to copy 3:Go to copy 4:"; }
+izlude,122,105,5	script	Channel Teleporter#1	64,{ callfunc "F_IzludeChannel",":Teleport to channel 2:Teleport to channel 3:Teleport to channel 4:Teleport to channel 5"; }
+izlude_a,122,105,5	script	Channel Teleporter#2	64,{ callfunc "F_IzludeChannel","Teleport to channel 1::Teleport to channel 3:Teleport to channel 4:Teleport to channel 5"; }
+izlude_b,122,105,5	script	Channel Teleporter#3	64,{ callfunc "F_IzludeChannel","Teleport to channel 1:Teleport to channel 2::Teleport to channel 4:Teleport to channel 5"; }
+izlude_c,122,105,5	script	Channel Teleporter#4	64,{ callfunc "F_IzludeChannel","Teleport to channel 1:Teleport to channel 2:Teleport to channel 3::Teleport to channel 5"; }
+izlude_d,122,105,5	script	Channel Teleporter#5	64,{ callfunc "F_IzludeChannel","Teleport to channel 1:Teleport to channel 2:Teleport to channel 3:Teleport to channel 4:"; }

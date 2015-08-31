@@ -6,7 +6,7 @@
 /**
  * rAthena configuration file (http://rathena.org)
  * For detailed guidance on these check http://rathena.org/wiki/SRC/config/
- **/
+ */
 
 /**
  * @INFO: This file holds constants that aims at making code smoother and more efficient
@@ -14,7 +14,7 @@
 
 /**
  * "Sane Checks" to save you from compiling with cool bugs 
- **/
+ */
 /*#if SECURE_NPCTIMEOUT_INTERVAL <= 0
 	#error SECURE_NPCTIMEOUT_INTERVAL should be at least 1 (1s)
 #endif
@@ -30,7 +30,7 @@
 
 /**
  * Path within the /db folder to (non-)renewal specific db files
- **/
+ */
 #ifdef RENEWAL
 	#define DBPATH "re/"
 #else
@@ -39,7 +39,7 @@
 
 /**
  * DefType
- **/
+ */
 #ifdef RENEWAL
 	typedef short defType;
 	#define DEFTYPE_MIN SHRT_MIN
@@ -50,41 +50,44 @@
 	#define DEFTYPE_MAX CHAR_MAX
 #endif
 
-/* pointer size fix which fixes several gcc warnings */
+// Pointer size fix which fixes several gcc warnings
 #ifdef __64BIT__
 	#define __64BPRTSIZE(y) (intptr)y
 #else
 	#define __64BPRTSIZE(y) y
 #endif
 
-/* ATCMD_FUNC(mobinfo) HIT and FLEE calculations */
+// ATCMD_FUNC(mobinfo)
 #ifdef RENEWAL
-	#define MOB_FLEE(mob) ( mob->lv + mob->status.agi + 100 )
-	#define MOB_HIT(mob)  ( mob->lv + mob->status.dex + 150 )
+	#define MOB_FLEE(mob) ( (mob)->lv + (mob)->status.agi + 100 )
+	#define MOB_HIT(mob)  ( (mob)->lv + (mob)->status.dex + 150 )
+	#define MOB_ATK1(mob) ( (mob)->lv + (mob)->status.str + (mob)->status.rhw.atk * 8 / 10 )
+	#define MOB_ATK2(mob) ( (mob)->lv + (mob)->status.str + (mob)->status.rhw.atk * 12 / 10 )
+	#define MOB_MATK1(mob)( (mob)->lv + (mob)->status.int_ + (mob)->status.rhw.atk2 * 7 / 10 )
+	#define MOB_MATK2(mob)( (mob)->lv + (mob)->status.int_ + (mob)->status.rhw.atk2 * 13 / 10 )
 #else
-	#define MOB_FLEE(mob) ( mob->lv + mob->status.agi )
-	#define MOB_HIT(mob)  ( mob->lv + mob->status.dex )
+	#define MOB_FLEE(mob) ( (mob)->lv + (mob)->status.agi )
+	#define MOB_HIT(mob)  ( (mob)->lv + (mob)->status.dex )
 #endif
 
-/* Renewal's dmg level modifier, used as a macro for a easy way to turn off. */
+// Renewal's dmg level modifier, used as a macro for a easy way to turn off
 #ifdef RENEWAL_LVDMG
 	#define RE_LVL_DMOD(val) \
-		if( status_get_lv(src) > 100 && val > 0 ) \
+		if( (val) > 0 ) \
 			skillratio = skillratio * status_get_lv(src) / val;
 	#define RE_LVL_MDMOD(val) \
-		if( status_get_lv(src) > 100 && val > 0) \
+		if( (val) > 0 ) \
 			md.damage = md.damage * status_get_lv(src) / val;
-	/* Ranger traps special */
+	// Ranger traps special
 	#define RE_LVL_TMDMOD() \
-		if( status_get_lv(src) > 100 ) \
-			md.damage = md.damage * 150 / 100 + md.damage * status_get_lv(src) / 100;
+		md.damage = md.damage * 150 / 100 + md.damage * status_get_lv(src) / 100;
 #else
 	#define RE_LVL_DMOD(val) 
 	#define RE_LVL_MDMOD(val)
 	#define RE_LVL_TMDMOD()
 #endif
 
-/* Feb 1st 2012 */
+// Feb 1st 2012
 #if PACKETVER >= 20120201
 	#define NEW_CARTS
 	#define MAX_CARTS 9
@@ -101,5 +104,5 @@
 #endif
 /**
  * End of File
- **/
+ */
 #endif

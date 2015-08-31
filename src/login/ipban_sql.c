@@ -31,7 +31,7 @@ static char   ipban_codepage[32] = "";
 static char   ipban_table[32] = "ipbanlist";
 
 // Globals
-static Sql* sql_handle = NULL;
+static Sql *sql_handle = NULL;
 static int cleanup_timer_id = INVALID_TIMER;
 static bool ipban_inited = false;
 
@@ -41,12 +41,12 @@ int ipban_cleanup(int tid, unsigned int tick, int id, intptr_t data);
 // Initialize
 void ipban_init(void)
 {
-	const char* username;
-	const char* password;
-	const char* hostname;
+	const char *username;
+	const char *password;
+	const char *hostname;
 	uint16      port;
-	const char* database;
-	const char* codepage;
+	const char *database;
+	const char *codepage;
 
 	ipban_inited = true;
 
@@ -104,9 +104,9 @@ void ipban_final(void)
 }
 
 // Load configuration options
-bool ipban_config_read(const char* key, const char* value)
+bool ipban_config_read(const char *key, const char *value)
 {
-	const char* signature;
+	const char *signature;
 
 	if( ipban_inited )
 		return false; // Settings can only be changed before init
@@ -177,8 +177,8 @@ bool ipban_config_read(const char* key, const char* value)
 // Check ip against active bans list
 bool ipban_check(uint32 ip)
 {
-	uint8* p = (uint8*)&ip;
-	char* data = NULL;
+	uint8 *p = (uint8 *)&ip;
+	char *data = NULL;
 	int matches;
 
 	if( !login_config.ipban )
@@ -214,7 +214,7 @@ void ipban_log(uint32 ip)
 
 	// If over the limit, add a temporary ban entry
 	if( failures >= login_config.dynamic_pass_failure_ban_limit ) {
-		uint8* p = (uint8*)&ip;
+		uint8 *p = (uint8 *)&ip;
 		if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s`(`list`,`btime`,`rtime`,`reason`) VALUES ('%u.%u.%u.*', NOW() , NOW() +  INTERVAL %d MINUTE ,'Password error ban')",
 			ipban_table, p[3], p[2], p[1], login_config.dynamic_pass_failure_ban_duration) )
 			Sql_ShowDebug(sql_handle);

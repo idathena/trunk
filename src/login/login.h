@@ -103,7 +103,7 @@ struct Login_Config {
 #define do_final_msg() login_do_final_msg()
 
 int login_msg_config_read(char *cfgName);
-const char* login_msg_txt(int msg_number);
+const char *login_msg_txt(int msg_number);
 void login_do_final_msg(void);
 
 #define MAX_SERVERS 30 // Number of charserv loginserv can handle

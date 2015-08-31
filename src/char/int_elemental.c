@@ -42,7 +42,7 @@ bool mapif_elemental_save(struct s_elemental* ele) {
 }
 
 bool mapif_elemental_load(int ele_id, int char_id, struct s_elemental *ele) {
-	char* data;
+	char *data;
 
 	memset(ele, 0, sizeof(struct s_elemental));
 	ele->elemental_id = ele_id;
@@ -79,7 +79,7 @@ bool mapif_elemental_load(int ele_id, int char_id, struct s_elemental *ele) {
 	Sql_GetData(sql_handle, 14, &data, NULL); ele->life_time = atoi(data);
 	Sql_FreeResult(sql_handle);
 	if( save_log )
-		ShowInfo("Elemental loaded (%d - %d).\n", ele->elemental_id, ele->char_id);
+		ShowInfo("Elemental loaded (ID: %d / Class: %d / CID: %d).\n", ele->elemental_id, ele->class_, ele->char_id);
 
 	return true;
 }
@@ -111,6 +111,7 @@ static void mapif_parse_elemental_create(int fd, struct s_elemental* ele) {
 
 static void mapif_parse_elemental_load(int fd, int ele_id, int char_id) {
 	struct s_elemental ele;
+
 	bool result = mapif_elemental_load(ele_id, char_id, &ele);
 	mapif_elemental_send(fd, &ele, result);
 }
@@ -153,10 +154,10 @@ int inter_elemental_parse_frommap(int fd) {
 	unsigned short cmd = RFIFOW(fd,0);
 
 	switch( cmd ) {
-		case 0x307c: mapif_parse_elemental_create(fd, (struct s_elemental*)RFIFOP(fd,4)); break;
+		case 0x307c: mapif_parse_elemental_create(fd, (struct s_elemental *)RFIFOP(fd,4)); break;
 		case 0x307d: mapif_parse_elemental_load(fd, (int)RFIFOL(fd,2), (int)RFIFOL(fd,6)); break;
 		case 0x307e: mapif_parse_elemental_delete(fd, (int)RFIFOL(fd,2)); break;
-		case 0x307f: mapif_parse_elemental_save(fd, (struct s_elemental*)RFIFOP(fd,4)); break;
+		case 0x307f: mapif_parse_elemental_save(fd, (struct s_elemental *)RFIFOP(fd,4)); break;
 		default:
 			return 0;
 	}

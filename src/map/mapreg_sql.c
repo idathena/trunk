@@ -15,9 +15,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static DBMap* mapreg_db = NULL; // int var_id -> int value
-static DBMap* mapregstr_db = NULL; // int var_id -> char* value
-static struct eri *mapreg_ers; //[Ind/Hercules]
+static DBMap *mapreg_db = NULL; // int var_id -> int value
+static DBMap *mapregstr_db = NULL; // int var_id -> char *value
+static struct eri *mapreg_ers; //[Ind]
 
 static char mapreg_table[32] = "mapreg";
 static bool mapreg_i_dirty = false;
@@ -33,7 +33,7 @@ int mapreg_readreg(int uid) {
 }
 
 /// Looks up the value of a string variable using its uid.
-char* mapreg_readregstr(int uid) {
+char *mapreg_readregstr(int uid) {
 	struct mapreg_save *m = idb_get(mapregstr_db, uid);
 	return m?m->u.str:NULL;
 }
@@ -43,7 +43,7 @@ bool mapreg_setreg(int uid, int val) {
 	struct mapreg_save *m;
 	int num = (uid & 0x00ffffff);
 	int i   = (uid & 0xff000000) >> 24;
-	const char* name = get_str(num);
+	const char *name = get_str(num);
 
 	if( val != 0 ) {
 		if( (m = idb_get(mapreg_db,uid)) ) {
@@ -83,11 +83,11 @@ bool mapreg_setreg(int uid, int val) {
 }
 
 /// Modifies the value of a string variable.
-bool mapreg_setregstr(int uid, const char* str) {
+bool mapreg_setregstr(int uid, const char *str) {
 	struct mapreg_save *m;
 	int num = (uid & 0x00ffffff);
 	int i   = (uid & 0xff000000) >> 24;
-	const char* name = get_str(num);
+	const char *name = get_str(num);
 	
 	if( str == NULL || *str == 0 ) {
 		if(name[1] != '@') {
@@ -139,7 +139,7 @@ static void script_load_mapreg(void) {
 	   | varname | index | value |
 	   +-------------------------+
 	                                */
-	SqlStmt* stmt = SqlStmt_Malloc(mmysql_handle);
+	SqlStmt *stmt = SqlStmt_Malloc(mmysql_handle);
 	char varname[32+1];
 	int index;
 	char value[255+1];
@@ -194,7 +194,7 @@ static void script_load_mapreg(void) {
 
 /// Saves permanent variables to database
 static void script_save_mapreg(void) {
-	DBIterator* iter;
+	DBIterator *iter;
 	struct mapreg_save *m = NULL;
 
 	if( mapreg_i_dirty ) {
@@ -203,7 +203,7 @@ static void script_save_mapreg(void) {
 			if( m->save ) {
 				int num = (m->uid & 0x00ffffff);
 				int i   = (m->uid & 0xff000000) >> 24;
-				const char* name = get_str(num);
+				const char *name = get_str(num);
 
 				if( SQL_ERROR == Sql_Query(mmysql_handle, "UPDATE `%s` SET `value`='%d' WHERE `varname`='%s' AND `index`='%d' LIMIT 1", mapreg_table, m->u.i, name, i) )
 					Sql_ShowDebug(mmysql_handle);
@@ -220,7 +220,7 @@ static void script_save_mapreg(void) {
 			if( m->save ) {
 				int num = (m->uid & 0x00ffffff);
 				int i   = (m->uid & 0xff000000) >> 24;
-				const char* name = get_str(num);
+				const char *name = get_str(num);
 				char tmp_str2[2*255+1];
 
 				Sql_EscapeStringLen(mmysql_handle, tmp_str2, m->u.str, safestrnlen(m->u.str, 255));
@@ -241,7 +241,7 @@ static int script_autosave_mapreg(int tid, unsigned int tick, int id, intptr_t d
 
 
 void mapreg_reload(void) {
-	DBIterator* iter;
+	DBIterator *iter;
 	struct mapreg_save *m = NULL;
 
 	script_save_mapreg();
@@ -268,7 +268,7 @@ void mapreg_reload(void) {
 }
 
 void mapreg_final(void) {
-	DBIterator* iter;
+	DBIterator *iter;
 	struct mapreg_save *m = NULL;
 	
 	script_save_mapreg();
@@ -305,7 +305,7 @@ void mapreg_init(void) {
 	add_timer_interval(gettick() + MAPREG_AUTOSAVE_INTERVAL, script_autosave_mapreg, 0, 0, MAPREG_AUTOSAVE_INTERVAL);
 }
 
-bool mapreg_config_read(const char* w1, const char* w2) {
+bool mapreg_config_read(const char *w1, const char *w2) {
 	if(!strcmpi(w1, "mapreg_db"))
 		safestrncpy(mapreg_table, w2, sizeof(mapreg_table));
 	else

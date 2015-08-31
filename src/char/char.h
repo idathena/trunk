@@ -20,13 +20,13 @@ struct mmo_charstatus;
 
 #define MAX_MAP_SERVERS 30
 
-#define DEFAULT_AUTOSAVE_INTERVAL 300*1000
+#define DEFAULT_AUTOSAVE_INTERVAL 300 * 1000
 
 #define msg_config_read(cfgName) char_msg_config_read(cfgName)
 #define msg_txt(msg_number) char_msg_txt(msg_number)
 #define do_final_msg() char_do_final_msg()
 int char_msg_config_read(char *cfgName);
-const char* char_msg_txt(int msg_number);
+const char *char_msg_txt(int msg_number);
 void char_do_final_msg(void);
 
 enum {
@@ -38,17 +38,28 @@ enum {
 
 int memitemdata_to_sql(const struct item items[], int max, int id, int tableswitch);
 
-int mapif_sendall(unsigned char *buf,unsigned int len);
-int mapif_sendallwos(int fd,unsigned char *buf,unsigned int len);
-int mapif_send(int fd,unsigned char *buf,unsigned int len);
-void mapif_on_parse_accinfo(int account_id,int u_fd, int aid, int castergroup, int map_fd);
+int mapif_sendall(unsigned char *buf, unsigned int len);
+int mapif_sendallwos(int fd, unsigned char *buf, unsigned int len);
+int mapif_send(int fd, unsigned char *buf, unsigned int len);
+void mapif_on_parse_accinfo(int account_id, int u_fd, int aid, int castergroup, int map_fd);
 
-int char_married(int pl1,int pl2);
+void disconnect_player(int account_id);
+void set_session_flag_(int account_id, int val, bool set);
+#define set_session_flag(account_id, val) ( set_session_flag_((account_id), (val), true)  )
+#define unset_session_flag(account_id, val) ( set_session_flag_((account_id), (val), false) )
+
+int char_married(int pl1, int pl2);
 int char_child(int parent_id, int child_id);
-int char_family(int pl1,int pl2,int pl3);
+int char_family(int pl1, int pl2, int pl3);
+
+void char_reject(int fd, uint8 errCode);
+void char_refuse_delchar(int fd, uint8 errCode);
+void char_connectack(int fd, uint8 errCode);
+void char_charselres(int fd, uint32 aid, uint8 res);
+void char_changemapserv_ack(int fd, bool nok);
 
 int request_accreg2(int account_id, int char_id);
-int save_accreg2(unsigned char* buf, int len);
+int save_accreg2(unsigned char *buf, int len);
 
 extern int char_name_option;
 extern char char_name_letters[];

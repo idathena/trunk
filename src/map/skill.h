@@ -13,31 +13,23 @@ struct skill_unit;
 struct skill_unit_group;
 struct status_change_entry;
 
-#define MAX_SKILL_DB MAX_SKILL
-#define MAX_SKILL_PRODUCE_DB 270
-#define MAX_PRODUCE_RESOURCE 12
-#define MAX_SKILL_ARROW_DB 150
-#define MAX_ARROW_RESOURCE 5
-#define MAX_SKILL_ABRA_DB 350
-#define MAX_SKILL_IMPROVISE_DB 50
-#define MAX_SKILL_LEVEL 100
-#define MAX_SKILL_CRIMSON_MARKER 3
+#define MAX_SKILL_DB MAX_SKILL //Max Skill DB
+#define MAX_SKILL_PRODUCE_DB 280 //Max Produce DB
+#define MAX_PRODUCE_RESOURCE 12 //Max Produce requirements
+#define MAX_SKILL_ARROW_DB 150 //Max Arrow Creation DB
+#define MAX_ARROW_RESULT 5 //Max Arrow results/created
+#define MAX_SKILL_ABRA_DB 160 //Max Skill list of Abracadabra DB
+#define MAX_SKILL_IMPROVISE_DB 20 //Max Skill for Improvise
+#define MAX_SKILL_LEVEL 100 //Max Skill Level
+#define MAX_SKILL_CRIMSON_MARKER 3 //Max Crimson Marker targets (RL_C_MARKER)
+#define SKILL_NAME_LENGTH 31 //Max Skill Name length
+#define SKILL_DESC_LENGTH 31 //Max Skill Desc length
 
-DBMap* skilldb_name2id;
+DBMap *skilldb_name2id;
 
-///Constants to identify the skill's inf value:
-enum e_skill_inf {
-	INF_ATTACK_SKILL  = 0x01,
-	INF_GROUND_SKILL  = 0x02,
-	INF_SELF_SKILL    = 0x04, //Skills casted on self where target is automatically chosen
-	//0x08 not assigned
-	INF_SUPPORT_SKILL = 0x10,
-	INF_TARGET_TRAP   = 0x20,
-};
-
-///Constants to identify a skill's nk value (damage properties)
-///The NK value applies only to non INF_GROUND_SKILL skills
-///when determining skill castend function to invoke.
+//Constants to identify a skill's nk value (damage properties)
+//The NK value applies only to non INF_GROUND_SKILL skills
+//when determining skill castend function to invoke.
 enum e_skill_nk {
 	NK_NO_DAMAGE      = 0x01,
 	NK_SPLASH         = 0x02|0x04, //0x4 = splash & split
@@ -49,8 +41,18 @@ enum e_skill_nk {
 	NK_NO_CARDFIX_DEF = 0x80,
 };
 
-///A skill with 3 would be no damage + splash: area of effect.
-///Constants to identify a skill's inf2 value.
+//Constants to identify the skill's inf value:
+enum e_skill_inf {
+	INF_ATTACK_SKILL  = 0x01,
+	INF_GROUND_SKILL  = 0x02,
+	INF_SELF_SKILL    = 0x04, //Skills casted on self where target is automatically chosen
+	//0x08 not assigned
+	INF_SUPPORT_SKILL = 0x10,
+	INF_TARGET_TRAP   = 0x20,
+};
+
+//A skill with 3 would be no damage + splash: area of effect.
+//Constants to identify a skill's inf2 value.
 enum e_skill_inf2 {
 	INF2_QUEST_SKILL    = 0x0001,
 	INF2_NPC_SKILL      = 0x0002, //NPC skills are those that players can't have in their skill tree.
@@ -70,82 +72,86 @@ enum e_skill_inf2 {
 	INF2_NO_NEARNPC     = 0x8000, //Disable cast skill if near with NPC [Cydh]
 };
 
-///Skill info type 3
+//Skill info type 3
 enum e_skill_inf3 {
-	INF3_NOLP               = 0x0001, //Skill that can ignores Land Protector
-	INF3_NOENDCAMOUFLAGE    = 0x0002, //Skill that doesn't end camouflage
-	INF3_USABLE_HIDING      = 0x0004, //Skill that can be use in hiding
-	INF3_USABLE_DANCE       = 0x0008, //Skill that can be use while in dancing state
-	INF3_HIT_EMP            = 0x0010, //Skill that could hit emperium
-	INF3_AUTOSHADOWSPELL    = 0x0020, //Skill that can be auto casted by Auto Shadow Spell
-	INF3_KAGEHUMI_BL        = 0x0040, //Skill blocked by kagehumi
-	INF3_EFF_VULTURE        = 0x0080, //Skill range affected by AC_VULTURE
-	INF3_EFF_SNAKEEYE       = 0x0100, //Skill range affected by GS_SNAKEEYE
-	INF3_EFF_SHADOWJUMP     = 0x0200, //Skill range affected by NJ_SHADOWJUMP
-	INF3_EFF_RADIUS         = 0x0400, //Skill range affected by WL_RADIUS
-	INF3_EFF_RESEARCHTRAP   = 0x0800, //Skill range affected by RA_RESEARCHTRAP
-	INF3_USABLE_MANHOLE     = 0x1000, //Skill that can be used even under Man Hole effect
-	INF3_USABLE_WARG        = 0x2000, //Skill that can be use while riding warg
-	INF3_DIS_MADO           = 0x4000, //Skill that can't be used while in mado
+	INF3_NOLP               = 0x00001, //Skill that can ignores Land Protector
+	INF3_HIT_HIDING         = 0x00002, //Skill that having an affect to hiding target
+	INF3_USABLE_HIDING      = 0x00004, //Skill that can be use in hiding
+	INF3_USABLE_DANCE       = 0x00008, //Skill that can be use while in dancing state
+	INF3_HIT_EMP            = 0x00010, //Skill that could hit emperium
+	INF3_AUTOSHADOWSPELL    = 0x00020, //Skill that can be auto casted by Auto Shadow Spell
+	INF3_KAGEHUMI_BL        = 0x00040, //Skill blocked by kagehumi
+	INF3_EFF_VULTURE        = 0x00080, //Skill range affected by AC_VULTURE
+	INF3_EFF_SNAKEEYE       = 0x00100, //Skill range affected by GS_SNAKEEYE
+	INF3_EFF_SHADOWJUMP     = 0x00200, //Skill range affected by NJ_SHADOWJUMP
+	INF3_EFF_RADIUS         = 0x00400, //Skill range affected by WL_RADIUS
+	INF3_EFF_RESEARCHTRAP   = 0x00800, //Skill range affected by RA_RESEARCHTRAP
+	INF3_USABLE_MANHOLE     = 0x01000, //Skill that can be used even under Man Hole effect
+	INF3_USABLE_WARG        = 0x02000, //Skill that can be use while riding warg
+	INF3_SC_GLOOMYDAY_SK    = 0x04000, //Skill that affected by SC_GLOOMYDAY_SK
+	INF3_SC_DANCEWITHWUG    = 0x08000, //Skill that affected by SC_DANCEWITHWUG
 };
 
-///Walk intervals at which chase-skills are attempted to be triggered.
+//Walk intervals at which chase-skills are attempted to be triggered
+//If you change this, make sure it's an odd value (for icewall block behavior)
 #define WALK_SKILL_INTERVAL 5
 
-///Flags passed to skill_attack/skill_area_sub
+//Flags passed to skill_attack/skill_area_sub
 enum e_skill_display {
 	SD_LEVEL     = 0x1000, //skill_attack will send -1 instead of skill level (affects display of some skills)
-	SD_ANIMATION = 0x2000, //skill_attack will use '5' instead of the skill's 'type' (this makes skills show an animation)
+	SD_ANIMATION = 0x2000, //skill_attack will use '5' instead of the skill's 'type' (this makes skills show an animation), also being used in skill_attack for splash skill (NK_SPLASH) to check status_check_skilluse
 	SD_SPLASH    = 0x4000, //skill_area_sub will count targets in skill_area_temp[2]
 	SD_PREAMBLE  = 0x8000, //skill_area_sub will transmit a 'magic' damage packet (-30000 dmg) for the first target selected
 };
 
-#define MAX_SKILL_ITEM_REQUIRE 10
-#define MAX_SKILL_STATUS_REQUIRE 3
-#define MAX_SKILL_EQUIP_REQUIRE 10
+#define MAX_SKILL_ITEM_REQUIRE 10 //Maximum required items
+#define MAX_SKILL_STATUS_REQUIRE 3 //Maximum required statuses
+#define MAX_SKILL_EQUIP_REQUIRE 10 //Maximum required equipped item
 
 struct skill_condition {
-	int hp,
-	    mhp,
-	    sp,
-	    hp_rate,
-	    sp_rate,
-	    ammo,
-	    ammo_qty,
-	    weapon,
-	    zeny,
-	    state,
-	    spiritball,
-	    itemid[MAX_SKILL_ITEM_REQUIRE],
-	    amount[MAX_SKILL_ITEM_REQUIRE];
-	short *eqItem;
-	enum sc_type *status;
-	uint8 status_count, eqItem_count;
+	int hp, //HP cost
+	    mhp, //MaxHP to trigger
+	    sp, //SP cost
+	    hp_rate, //HP cost (%)
+	    sp_rate, //SP cost (%)
+	    ammo, //Ammo type
+	    ammo_qty, //Amount of ammo
+	    weapon, //Weapon type
+	    zeny, //Zeny cost
+	    state, //State/condition
+	    spiritball, //Spiritball cost
+	    itemid[MAX_SKILL_ITEM_REQUIRE], //Required item
+	    amount[MAX_SKILL_ITEM_REQUIRE]; //Amount of item
+	uint16 *eqItem; //List of equipped item
+	enum sc_type *status; //List of Status required (SC)
+	uint8 status_count, //Count of SC
+		eqItem_count; //Count of equipped item
 };
 
 struct s_skill_require {
-	int hp[MAX_SKILL_LEVEL],
-	    mhp[MAX_SKILL_LEVEL],
-	    sp[MAX_SKILL_LEVEL],
-	    hp_rate[MAX_SKILL_LEVEL],
-	    sp_rate[MAX_SKILL_LEVEL],
-	    zeny[MAX_SKILL_LEVEL],
-	    weapon,
-	    ammo,
-	    ammo_qty[MAX_SKILL_LEVEL],
-	    state,
-	    spiritball[MAX_SKILL_LEVEL],
-	    itemid[MAX_SKILL_ITEM_REQUIRE],
-	    amount[MAX_SKILL_ITEM_REQUIRE];
-	short *eqItem;
-	enum sc_type *status;
-	uint8 status_count, eqItem_count;
+	int hp[MAX_SKILL_LEVEL], //HP cost
+	    mhp[MAX_SKILL_LEVEL], //MaxHP to trigger
+	    sp[MAX_SKILL_LEVEL], //SP cost
+	    hp_rate[MAX_SKILL_LEVEL], //HP cost (%)
+	    sp_rate[MAX_SKILL_LEVEL], //SP cost (%)
+	    zeny[MAX_SKILL_LEVEL], //Zeny cost
+	    weapon, //Weapon type
+	    ammo, //Ammo type
+	    ammo_qty[MAX_SKILL_LEVEL], //Amount of ammo
+	    state, //State/condition
+	    spiritball[MAX_SKILL_LEVEL], //Spiritball cost
+	    itemid[MAX_SKILL_ITEM_REQUIRE], //Required item
+	    amount[MAX_SKILL_ITEM_REQUIRE]; //Amount of item
+	uint16 *eqItem; //List of equipped item
+	enum sc_type *status; //List of Status required (SC)
+	uint8 status_count, //Count of SC
+		eqItem_count; //Count of equipped item
 };
 
-/// Database skills
+//Database skills
 struct s_skill_db {
-	char name[NAME_LENGTH];
-	char desc[40];
+	char name[SKILL_NAME_LENGTH];
+	char desc[SKILL_DESC_LENGTH];
 	int range[MAX_SKILL_LEVEL],hit,inf,element[MAX_SKILL_LEVEL],nk,splash[MAX_SKILL_LEVEL],max;
 	int num[MAX_SKILL_LEVEL];
 	int cast[MAX_SKILL_LEVEL],walkdelay[MAX_SKILL_LEVEL],delay[MAX_SKILL_LEVEL];
@@ -177,7 +183,7 @@ struct s_skill_db {
 };
 extern struct s_skill_db skill_db[MAX_SKILL_DB];
 
-#define MAX_SKILL_UNIT_LAYOUT 50
+#define MAX_SKILL_UNIT_LAYOUT 55
 #define MAX_SQUARE_LAYOUT 5 //11 * 11 Placement of a maximum unit
 #define MAX_SKILL_UNIT_COUNT ((MAX_SQUARE_LAYOUT * 2 + 1) * (MAX_SQUARE_LAYOUT * 2 + 1))
 struct s_skill_unit_layout {
@@ -204,38 +210,44 @@ struct skill_timerskill {
 	int flag;
 };
 
-#define MAX_SKILLUNITGROUP 25
+#define MAX_SKILLUNITGROUP 25 //Maximum skill unit group (for same skill each source)
 struct skill_unit_group {
-	int src_id;
-	int party_id;
-	int guild_id;
-	int bg_id;
-	int map;
+	int src_id; //Caster ID/RID, if player is account_id
+	int party_id; //Party ID
+	int guild_id; //Guild ID
+	int bg_id; //Battleground ID
+	int map; //Map
 	int target_flag; //Holds BCT_* flag for battle_check_target
 	int bl_flag; //Holds BL_* flag for map_foreachin* functions
-	unsigned int tick;
-	int limit,interval;
-	uint16 skill_id,skill_lv;
-	int val1,val2,val3;
-	char *valstr;
-	int unit_id;
-	int group_id;
-	int unit_count,alive_count;
+	unsigned int tick; //Tick when skill unit initialized
+	int limit, //Life time
+		interval; //Timer interval
+	uint16 skill_id, //Skill ID
+		skill_lv; //Skill level
+	int val1, val2, val3; //Values
+	char *valstr; //String value, used for HT_TALKIEBOX & RG_GRAFFITI
+	int unit_id; //Unit ID (for client effect)
+	int group_id; //Skill Group ID
+	int link_group_id; //Linked group that should be deleted if this one is deleted
+	int unit_count, //Number of unit at this group
+		alive_count; //Number of alive unit
 	int item_id; //Store item used.
-	struct skill_unit *unit;
+	struct skill_unit *unit; //Skill Unit
 	struct {
-		unsigned ammo_consume : 1;
+		unsigned ammo_consume : 1; //Need to consume ammo
 		unsigned song_dance : 2; //0x1 Song/Dance, 0x2 Ensemble
-		unsigned guildaura : 1;
+		unsigned guildaura : 1; //Guild Aura
 	} state;
 };
 
+//Skill unit
 struct skill_unit {
 	struct block_list bl;
-	struct skill_unit_group *group;
+	struct skill_unit_group *group; //Skill group reference
 	int limit;
-	int val1,val2;
-	short alive,range;
+	int val1, val2, val3, val4;
+	short alive, range;
+	int prev;
 };
 
 #define MAX_SKILLUNITGROUPTICKSET 25
@@ -245,60 +257,66 @@ struct skill_unit_group_tickset {
 };
 
 enum {
-	UF_DEFNOTENEMY   = 0x0001, // If 'defunit_not_enemy' is set, the target is changed to 'friend'
-	UF_NOREITERATION = 0x0002, // Spell cannot be stacked
-	UF_NOFOOTSET     = 0x0004, // Spell cannot be cast near/on targets
-	UF_NOOVERLAP     = 0x0008, // Spell effects do not overlap
-	UF_PATHCHECK     = 0x0010, // Only cells with a shootable path will be placed
-	UF_NOPC          = 0x0020, // May not target players
-	UF_NOMOB         = 0x0040, // May not target mobs
-	UF_SKILL         = 0x0080, // May target skills
-	UF_DANCE         = 0x0100, // Dance
-	UF_ENSEMBLE      = 0x0200, // Duet
-	UF_SONG          = 0x0400, // Song
-	UF_DUALMODE      = 0x0800, // Spells should trigger both ontimer and onplace/onout/onleft effects
-	//UF_????        = 0x1000, // Unused flag
-	UF_RANGEDSINGLEUNIT = 0x2000 // Hack for ranged layout, only display center
+	UF_DEFNOTENEMY   = 0x0001, //If 'defunit_not_enemy' is set, the target is changed to 'friend'
+	UF_NOREITERATION = 0x0002, //Unit cannot be stacked
+	UF_NOFOOTSET     = 0x0004, //Unit cannot be cast near/on targets
+	UF_NOOVERLAP     = 0x0008, //Unit effects do not overlap
+	UF_PATHCHECK     = 0x0010, //Only cells with a shootable path will be placed
+	UF_NOPC          = 0x0020, //May not target players
+	UF_NOMOB         = 0x0040, //May not target mobs
+	UF_SKILL         = 0x0080, //May target skills
+	UF_DANCE         = 0x0100, //Dance
+	UF_ENSEMBLE      = 0x0200, //Duet
+	UF_SONG          = 0x0400, //Song
+	UF_DUALMODE      = 0x0800, //Unit should trigger both ontimer and onplace/onout/onleft effects
+	//UF_????        = 0x1000, //Unused flag
+	UF_RANGEDSINGLEUNIT = 0x2000 //Hack for ranged layout, only display center
 };
 
-///Create Database item
+//Create Database item
 struct s_skill_produce_db {
-	int nameid, trigger;
-	int req_skill,req_skill_lv,itemlv;
-	int mat_id[MAX_PRODUCE_RESOURCE],mat_amount[MAX_PRODUCE_RESOURCE];
+	unsigned short nameid, //Product ID
+		unique_id, //Unique ID
+		req_skill, //Required Skill
+		req_skill_lv, //Required Skill Level
+		itemlv, //Item Level
+		mat_id[MAX_PRODUCE_RESOURCE], //Materials needed
+		mat_amount[MAX_PRODUCE_RESOURCE]; //Amount of each materials
 };
 extern struct s_skill_produce_db skill_produce_db[MAX_SKILL_PRODUCE_DB];
 
-///Creating database arrow
+//Creating database arrow
 struct s_skill_arrow_db {
-	int nameid, trigger;
-	int cre_id[MAX_ARROW_RESOURCE],cre_amount[MAX_ARROW_RESOURCE];
+	unsigned short nameid, //Material ID
+		cre_id[MAX_ARROW_RESULT], //Arrow created
+		cre_amount[MAX_ARROW_RESULT]; //Amount of each arrow created
 };
 extern struct s_skill_arrow_db skill_arrow_db[MAX_SKILL_ARROW_DB];
 
-///Abracadabra database
+//Abracadabra database
 struct s_skill_abra_db {
-	uint16 skill_id;
-	char name[NAME_LENGTH];
-	int per[MAX_SKILL_LEVEL];
+	uint16 skill_id; //Skill ID
+	char name[SKILL_NAME_LENGTH]; //Shouted skill name
+	int per[MAX_SKILL_LEVEL]; //Probability summoned
 };
 extern struct s_skill_abra_db skill_abra_db[MAX_SKILL_ABRA_DB];
-
-extern int enchant_eff[5];
-extern int deluge_eff[5];
 
 void do_init_skill(void);
 void do_final_skill(void);
 
-///Cast type
-enum { CAST_GROUND, CAST_DAMAGE, CAST_NODAMAGE };
-///Returns the cast type of the skill: ground cast, castend damage, castend no damage
+//Cast type
+enum {
+	CAST_GROUND,
+	CAST_DAMAGE,
+	CAST_NODAMAGE
+};
+//Returns the cast type of the skill: ground cast, castend damage, castend no damage
 int skill_get_casttype(uint16 skill_id); //[Skotlex]
-const char* skill_get_name(uint16 skill_id); // [Skotlex]
-const char* skill_get_desc(uint16 skill_id); // [Skotlex]
-int skill_tree_get_max(uint16 skill_id, int b_class); // Celest
+const char *skill_get_name(uint16 skill_id); //[Skotlex]
+const char *skill_get_desc(uint16 skill_id); //[Skotlex]
+int skill_tree_get_max(uint16 skill_id, int b_class); //Celest
 
-///Accessor to the skills database
+//Accessor to the skills database
 int skill_get_index(uint16 skill_id);
 int skill_get_type(uint16 skill_id);
 int skill_get_hit(uint16 skill_id);
@@ -327,7 +345,7 @@ int skill_get_unit_flag(uint16 skill_id);
 int skill_get_unit_target(uint16 skill_id);
 int skill_get_inf3(uint16 skill_id);
 
-///Accessor for skill requirements
+//Accessor for skill requirements
 int skill_get_hp(uint16 skill_id, uint16 skill_lv);
 int skill_get_mhp(uint16 skill_id, uint16 skill_lv);
 int skill_get_sp(uint16 skill_id, uint16 skill_lv);
@@ -344,34 +362,34 @@ int skill_get_spiritball(uint16 skill_id, uint16 skill_lv);
 int skill_get_itemid(uint16 skill_id, int idx);
 int skill_get_itemqty(uint16 skill_id, int idx);
 
-int skill_name2id(const char* name);
+int skill_name2id(const char *name);
 
-int skill_isammotype(struct map_session_data *sd, int skill);
+int skill_isammotype(struct map_session_data *sd, uint16 skill_id);
 int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data);
 int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data);
-int skill_castend_map( struct map_session_data *sd,uint16 skill_id, const char *map);
+int skill_castend_map(struct map_session_data *sd,uint16 skill_id, const char *map);
 
 int skill_cleartimerskill(struct block_list *src);
 int skill_addtimerskill(struct block_list *src,unsigned int tick,int target,int x,int y,uint16 skill_id,uint16 skill_lv,int type,int flag);
 
-///Results Added
-int skill_additional_effect( struct block_list* src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,int attack_type,int dmg_lv,unsigned int tick);
-int skill_counter_additional_effect( struct block_list* src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,int attack_type,unsigned int tick);
-int skill_blown(struct block_list* src, struct block_list* target, int count, int8 dir, int flag);
-int skill_break_equip(struct block_list *src, struct block_list *bl, unsigned short where, int rate, int flag);
-int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned short where, int rate, int lv, int time);
-///Skills unit
-struct skill_unit_group* skill_id2group(int group_id);
-struct skill_unit_group *skill_unitsetting(struct block_list* src, uint16 skill_id, uint16 skill_lv, short x, short y, int flag);
-struct skill_unit *skill_initunit (struct skill_unit_group *group, int idx, int x, int y, int val1, int val2);
+//Results Added
+int skill_additional_effect(struct block_list *src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,int attack_type,int dmg_lv,unsigned int tick);
+int skill_counter_additional_effect(struct block_list *src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,int attack_type,unsigned int tick);
+short skill_blown(struct block_list *src, struct block_list *target, char count, int8 dir, unsigned char flag);
+int skill_break_equip(struct block_list *src, struct block_list *bl, unsigned short pos, int rate, int flag);
+int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned short pos, int rate, uint16 skill_lv, int time);
+//Skills unit
+struct skill_unit_group *skill_id2group(int group_id);
+struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_id, uint16 skill_lv, short x, short y, int flag);
+struct skill_unit *skill_initunit(struct skill_unit_group *group, int idx, int x, int y, int val1, int val2, int val3, int val4);
 int skill_delunit(struct skill_unit *unit);
-struct skill_unit_group *skill_initunitgroup(struct block_list* src, int count, uint16 skill_id, uint16 skill_lv, int unit_id, int limit, int interval);
-int skill_delunitgroup_(struct skill_unit_group *group, const char* file, int line, const char* func);
-#define skill_delunitgroup(group) skill_delunitgroup_(group,__FILE__,__LINE__,__func__)
-int skill_clear_unitgroup(struct block_list *src);
+struct skill_unit_group *skill_initunitgroup(struct block_list *src, int count, uint16 skill_id, uint16 skill_lv, int unit_id, int limit, int interval);
+int skill_delunitgroup_(struct skill_unit_group *group, const char *file, int line, const char *func);
+#define skill_delunitgroup(group) skill_delunitgroup_(group,__FILE__,__LINE__,__FUNCTION__)
+void skill_clear_unitgroup(struct block_list *src);
 int skill_clear_group(struct block_list *bl, int flag);
-void ext_skill_unit_onplace(struct skill_unit *src, struct block_list *bl, unsigned int tick);
-int skill_unit_ondamaged(struct skill_unit *src,struct block_list *bl,int64 damage,unsigned int tick);
+void ext_skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, unsigned int tick);
+int skill_unit_ondamaged(struct skill_unit *unit, int64 damage);
 
 int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
 int skill_castfix_sc(struct block_list *bl, double time);
@@ -380,7 +398,7 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 #endif
 int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
 
-///Skill conditions check and remove [Inkfish]
+//Skill conditions check and remove [Inkfish]
 bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 int skill_check_condition_char_sub(struct block_list *bl, va_list ap);
@@ -389,67 +407,67 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 int skill_disable_check(struct status_change *sc, uint16 skill_id);
 
 int skill_check_pc_partner(struct map_session_data *sd, uint16 skill_id, uint16 *skill_lv, int range, int cast_flag);
-///Added skill_check_unit_cell
-int skill_check_unit_cell(uint16 skill_id,int16 m,int16 x,int16 y,int unit_id);
-int skill_unit_out_all( struct block_list *bl,unsigned int tick,int range);
-int skill_unit_move(struct block_list *bl,unsigned int tick,int flag);
-int skill_unit_move_unit_group( struct skill_unit_group *group, int16 m,int16 dx,int16 dy);
+//Added skill_check_unit_cell
+int skill_check_unit_cell(uint16 skill_id, int16 m, int16 x, int16 y, int unit_id);
+int skill_unit_out_all(struct block_list *bl, unsigned int tick, int range);
+int skill_unit_move(struct block_list *bl, unsigned int tick, int flag);
+void skill_unit_move_unit_group(struct skill_unit_group *group, int16 m, int16 dx, int16 dy);
 
 struct skill_unit_group *skill_check_dancing(struct block_list *src);
 
-///Cast canceled
+//Cast canceled
 int skill_castcancel(struct block_list *bl,int type);
 
-int skill_sit (struct map_session_data *sd, int type);
-void skill_brandishspear(struct block_list* src, struct block_list* bl, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
+int skill_sit(struct map_session_data *sd, int type);
+void skill_brandishspear(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
 void skill_repairweapon(struct map_session_data *sd, int idx);
 void skill_identify(struct map_session_data *sd,int idx);
-void skill_weaponrefine(struct map_session_data *sd,int idx); // [Celest]
+void skill_weaponrefine(struct map_session_data *sd,int idx); //[Celest]
 int skill_autospell(struct map_session_data *md,uint16 skill_id);
 
 int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool heal);
 
 bool skill_check_cloaking(struct block_list *bl, struct status_change_entry *sce);
+bool skill_can_cloak(struct map_session_data *sd);
+int skill_check_cloaking_end(struct block_list *bl, va_list ap);
 
-///Abnormal status
-int skill_enchant_elemental_end(struct block_list *bl, int type);
+//Abnormal status
+void skill_enchant_elemental_end(struct block_list *bl, int type);
 bool skill_isNotOk(uint16 skill_id, struct map_session_data *sd);
 bool skill_isNotOk_hom(uint16 skill_id, struct homun_data *hd);
 bool skill_isNotOk_mercenary(uint16 skill_id, struct mercenary_data *md);
 
 bool skill_isNotOk_npcRange(struct block_list *src, uint16 skill_id, uint16 skill_lv, int pos_x, int pos_y);
 
-int skill_chastle_mob_changetarget(struct block_list *bl,va_list ap);
+//Item creation
+short skill_can_produce_mix(struct map_session_data *sd, unsigned short nameid, unsigned short unique_id, int trigger, int qty);
+bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned short nameid, unsigned short unique_id, int slot1, int slot2, int slot3, int qty);
 
-///Item creation
-int skill_can_produce_mix( struct map_session_data *sd, int nameid, int trigger, int qty);
-int skill_produce_mix(struct map_session_data *sd, uint16 skill_id, int nameid, int slot1, int slot2, int slot3, int qty);
+bool skill_arrow_create(struct map_session_data *sd, unsigned short nameid);
 
-int skill_arrow_create(struct map_session_data *sd,int nameid);
-
-///Skills for the mob
+//Skills for the mob
 int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
-int skill_castend_damage_id(struct block_list* src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
+int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
 int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
 
-int skill_blockpc_start(struct map_session_data*, uint16 skill_id, int tick);
+int skill_blockpc_start(struct map_session_data *sd, uint16 skill_id, int tick);
 int skill_blockpc_get(struct map_session_data *sd, uint16 skill_id);
 int skill_blockpc_clear(struct map_session_data *sd);
 int skill_blockpc_end(int tid, unsigned int tick, int id, intptr_t data);
 int skill_blockhomun_start(struct homun_data*, uint16 skill_id, int tick);
 int skill_blockmerc_start(struct mercenary_data*, uint16 skill_id, int tick);
 
-///(Epoque:) To-do: replace this macro with some sort of skill tree check (rather than hard-coded skill names)
+//(Epoque:) To-do: replace this macro with some sort of skill tree check (rather than hard-coded skill names)
 #define skill_ischangesex(id) ( \
 	((id) >= BD_ADAPTATION     && (id) <= DC_SERVICEFORYOU) || ((id) >= CG_ARROWVULCAN && (id) <= CG_MARIONETTE) || \
 	((id) >= CG_LONGINGFREEDOM && (id) <= CG_TAROTCARD)     || ((id) >= WA_SWING_DANCE && (id) <= WM_UNLIMITED_HUMMING_VOICE))
 
-///Skill action, (return dmg,heal)
-int skill_attack( int attack_type, struct block_list* src, struct block_list *dsrc,struct block_list *bl,uint16 skill_id,uint16 skill_lv,unsigned int tick,int flag );
+//Skill action, (return dmg,heal)
+int skill_attack(int attack_type, struct block_list *src, struct block_list *dsrc, struct block_list *bl, uint16 skill_id, uint16 skill_lv, unsigned int tick, int flag);
 
 void skill_reload(void);
 
-///List of State Requirements
+//List of State Requirements
 enum e_require_state {
 	ST_NONE,
 	ST_HIDDEN,
@@ -468,7 +486,7 @@ enum e_require_state {
 	ST_PECO,
 };
 
-///List of Skills
+//List of Skills
 enum e_skill {
 	NV_BASIC = 1,
 
@@ -1218,6 +1236,10 @@ enum e_skill {
 	NPC_VENOMFOG,
 	NPC_MILLENNIUMSHIELD,
 	NPC_COMET,
+//@TODO: What PACKETVER are these skills added? [Panikon]
+//After this addition all skills from NPC_WIDEWEB to NPC_LEX_AETERNA
+//will have their IDs changed
+#if PACKETVER >= 20140205
 	NPC_ICEMINE,
 	NPC_ICEEXPLO,
 	NPC_FLAMECROSS,
@@ -1230,6 +1252,7 @@ enum e_skill {
 	NPC_DEATHSUMMON,
 	NPC_HELLBURNING,
 	NPC_JACKFROST,
+#endif
 	NPC_WIDEWEB,
 	NPC_WIDESUCK,
 	NPC_STORMGUST2,
@@ -1237,6 +1260,17 @@ enum e_skill {
 	NPC_REVERBERATION,
 	NPC_REVERBERATION_ATK,
 	NPC_LEX_AETERNA,
+	NPC_ARROWSTORM,
+	NPC_CHEAL,
+	NPC_SR_CURSEDCIRCLE,
+	NPC_DRAGONBREATH,
+	NPC_FATALMENACE,
+	NPC_MAGMA_ERUPTION,
+	NPC_MAGMA_ERUPTION_DOTDAMAGE,
+	NPC_MANDRAGORA,
+	NPC_PSYCHIC_WAVE,
+	NPC_RAYOFGENESIS,
+	NPC_VENOMIMPRESS,
 
 	KN_CHARGEATK = 1001,
 	CR_SHRINK,
@@ -1644,6 +1678,8 @@ enum e_skill {
 	DC_FORTUNEKISS2,
 	ITEM_OPTION_SPLASH_ATTACK,
 	GM_FORCE_TRANSFER,
+	GM_WIDE_RESURRECTION,
+	ALL_NIFLHEIM_RECALL,
 
 	GC_DARKCROW = 5001,
 	RA_UNLIMIT,
@@ -1659,10 +1695,7 @@ enum e_skill {
 	WL_TELEKINESIS_INTENSE,
 	LG_KINGS_GRACE,
 	ALL_FULL_THROTTLE,
-	SR_FLASHCOMBO_ATK_STEP1,
-	SR_FLASHCOMBO_ATK_STEP2,
-	SR_FLASHCOMBO_ATK_STEP3,
-	SR_FLASHCOMBO_ATK_STEP4,
+	NC_MAGMA_ERUPTION_DOTDAMAGE,
 
 	HLIF_HEAL = 8001,
 	HLIF_AVOID,
@@ -1794,7 +1827,7 @@ enum e_skill {
 	EL_STONE_RAIN,
 };
 
-/// The client view ids for land skills.
+//The client view ids for land skills.
 enum {
 	UNT_SAFETYWALL = 0x7e,
 	UNT_FIREWALL,
@@ -1868,7 +1901,7 @@ enum {
 	UNT_DEATHWAVE, //TODO
 	UNT_WATERATTACK, //TODO
 	UNT_WINDATTACK, //TODO
-	UNT_EARTHQUAKE, //TODO
+	UNT_EARTHQUAKE,
 	UNT_EVILLAND,
 	UNT_DARK_RUNNER, //TODO
 	UNT_DARK_TRANSFER, //TODO
@@ -1892,7 +1925,7 @@ enum {
 	UNT_SEVERE_RAINSTORM,
 	UNT_FIREWALK,
 	UNT_ELECTRICWALK,
-	UNT_NETHERWORLD,
+	UNT_POEMOFNETHERWORLD,
 	UNT_PSYCHIC_WAVE,
 	UNT_CLOUD_KILL,
 	UNT_POISONSMOKE,
@@ -1933,20 +1966,18 @@ enum {
 	UNT_B_TRAP,
 	UNT_FIRE_RAIN,
 
-	/**
-	 * Guild Auras
-	 **/
+	//Guild Auras
 	UNT_GD_LEADERSHIP = 0xc1,
 	UNT_GD_GLORYWOUNDS = 0xc2,
 	UNT_GD_SOULCOLD = 0xc3,
 	UNT_GD_HAWKEYES = 0xc4,
 
-	UNT_MAX = 0x190
+	UNT_MAX
 };
 /**
  * Skill Unit Save
- **/
-void skill_usave_add(struct map_session_data * sd, uint16 skill_id, uint16 skill_lv);
+ */
+void skill_usave_add(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 void skill_usave_trigger(struct map_session_data *sd);
 
 #define MAX_SKILL_SPELLBOOK_DB	17
@@ -1956,10 +1987,16 @@ enum wl_spheres {
 	WLS_WATER,
 	WLS_STONE,
 };
-int skill_spellbook (struct map_session_data *sd, int nameid);
+struct s_skill_spellbook_db {
+	unsigned short nameid,
+		skill_id,
+		point;
+};
+extern struct s_skill_spellbook_db skill_spellbook_db[MAX_SKILL_SPELLBOOK_DB];
+void skill_spellbook(struct map_session_data *sd, unsigned short nameid);
 int skill_block_check(struct block_list *bl, enum sc_type type, uint16 skill_id);
 
-#define MAX_SKILL_MAGICMUSHROOM_DB 23
+#define MAX_SKILL_MAGICMUSHROOM_DB 25
 struct s_skill_magicmushroom_db {
 	uint16 skill_id;
 };
@@ -1968,9 +2005,9 @@ extern struct s_skill_magicmushroom_db skill_magicmushroom_db[MAX_SKILL_MAGICMUS
 int skill_detonator(struct block_list *bl, va_list ap);
 bool skill_check_camouflage(struct block_list *bl, struct status_change_entry *sce);
 
-int skill_magicdecoy(struct map_session_data *sd, int nameid);
+int skill_magicdecoy(struct map_session_data *sd, unsigned short nameid);
 
-int skill_poisoningweapon(struct map_session_data *sd, int nameid);
+int skill_poisoningweapon(struct map_session_data *sd, unsigned short nameid);
 
 int skill_maelstrom_suction(struct block_list *bl, va_list ap);
 int skill_select_menu(struct map_session_data *sd,uint16 skill_id);
@@ -1981,10 +2018,12 @@ int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv,
 int skill_changematerial(struct map_session_data *sd, int n, unsigned short *item_list);
 int skill_get_elemental_type(uint16 skill_id, uint16 skill_lv);
 
-void skill_combo_toogle_inf(struct block_list* bl, uint16 skill_id, int inf);
-void skill_combo(struct block_list* src, struct block_list *dsrc, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int tick);
+void skill_combo_toogle_inf(struct block_list *bl, uint16 skill_id, int inf);
+void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int tick);
 
-/// Skill Damage target
+void skill_toggle_magicpower(struct block_list *bl, uint16 skill_id);
+
+//Skill Damage target
 #ifdef ADJUST_SKILL_DAMAGE
 enum e_skill_damage_caster {
 	SDC_PC   = 0x01,
@@ -1997,14 +2036,14 @@ enum e_skill_damage_caster {
 };
 #endif
 
-/// Variable name of copied skill by Plagiarism
+//Variable name of copied skill by Plagiarism
 #define SKILL_VAR_PLAGIARISM "CLONE_SKILL"
-/// Variable name of copied skill level by Plagiarism
+//Variable name of copied skill level by Plagiarism
 #define SKILL_VAR_PLAGIARISM_LV "CLONE_SKILL_LV"
 
-/// Variable name of copied skill by Reproduce
+//Variable name of copied skill by Reproduce
 #define SKILL_VAR_REPRODUCE "REPRODUCE_SKILL"
-/// Variable name of copied skill level by Reproduce
+//Variable name of copied skill level by Reproduce
 #define SKILL_VAR_REPRODUCE_LV "REPRODUCE_SKILL_LV"
 
 #endif /* _SKILL_H_ */

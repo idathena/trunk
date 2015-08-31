@@ -70,6 +70,24 @@ ecl_in04	mapflag	noteleport
 1@ecl	mapflag	monster_noteleport
 ecl_hub01	mapflag	noteleport
 
+// Criatura Academy ==============
+iz_ac01	mapflag	noteleport
+iz_ac02	mapflag	noteleport
+iz_int	mapflag	noteleport
+iz_ng01	mapflag	noteleport
+iz_int01	mapflag	noteleport
+iz_int02	mapflag	noteleport
+iz_int03	mapflag	noteleport
+iz_int04	mapflag	noteleport
+iz_ac01_a	mapflag	noteleport
+iz_ac02_a	mapflag	noteleport
+iz_ac01_b	mapflag	noteleport
+iz_ac02_b	mapflag	noteleport
+iz_ac01_c	mapflag	noteleport
+iz_ac02_c	mapflag	noteleport
+iz_ac01_d	mapflag	noteleport
+iz_ac02_d	mapflag	noteleport
+
 // Glast Heim Memorial Dungeon ===
 1@gl_k	mapflag	noteleport
 1@gl_k	mapflag	monster_noteleport
@@ -86,7 +104,7 @@ gl_cas02_	mapflag	noteleport
 1@def03	mapflag	noteleport
 1@def03	mapflag	monster_noteleport
 
-// Heroes' Trails - Part 1 =======
+// Heroes' Trails ================
 1@gef	mapflag	noteleport
 1@gef	mapflag	monster_noteleport
 1@face	mapflag	noteleport
@@ -96,3 +114,4 @@ gl_cas02_	mapflag	noteleport
 1@gef_in	mapflag	noteleport
 1@gef_in	mapflag	monster_noteleport
 dali	mapflag	noteleport
+dali02	mapflag	noteleport

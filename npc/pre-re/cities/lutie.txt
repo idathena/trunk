@@ -1,0 +1,16 @@
+//===== rAthena Script =======================================
+//= Lutie Town Pre-Renewal
+//===== By: ================================================== 
+//= rAthena Dev Team
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= [Official Conversion]
+//= Lutie town NPCs.
+//===== Additional Comments: ================================= 
+//= 1.0 First Version.
+//============================================================
+
+aldebaran,223,222,4	duplicate(Mr_Claus_alde)	Mr. Claus#alde	718

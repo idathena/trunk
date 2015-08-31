@@ -311,6 +311,25 @@ Notes:
 
 ---------------------------------------
 
+*adjust_unit_duration
+
+Allows to control the duration of unit skills in any map.
+
+The example of mapflag configuration can be found in 'npc/mapflag/skill_duration.txt'.
+
+---------------------------------------
+
+*adjust_skill_damage
+
+Allows to modify the damage of any skill in any map.
+
+Note that this is the simple version of 'skill_damage' mapflag, and there's no need to do
+any source modification (enable / disable a config) in 'src/config/core.h' directory.
+
+The example of mapflag configuration can be found in 'npc/mapflag/skill_modifier.txt'.
+
+---------------------------------------
+
 ==================
 | 3. Map Effects |
 ==================
