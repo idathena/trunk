@@ -224,7 +224,7 @@
 2434:2530,{ bonus bFlee,10; }
 2434:2551,{ bonus bFlee,10; }
 2434:15058,{ bonus bAgi,2; bonus bFlee,5; }
-2441:2546,{ bonus bFlee,5; }
+2441:2546,{ bonus2 bSubEle,Ele_Fire,10; bonus bFlee,5; }
 2472:2570:15030:16013,{ bonus2 bAddRace,RC_Undead,15; bonus2 bMagicAddRace,RC_Undead,15; bonus2 bSkillAtk,"AB_ADORAMUS",200; bonus2 bSkillUseSP,"AB_ADORAMUS",30; }
 2472:2570:15030:16018,{ bonus2 bAddRace,RC_Undead,30; bonus2 bMagicAddRace,RC_Undead,30; bonus2 bSkillAtk,"AB_ADORAMUS",200; bonus2 bSkillUseSP,"AB_ADORAMUS",30; bonus2 bVariableCastrate,"AL_HOLYLIGHT",-50; bonus2 bVariableCastrate,"PR_TURNUNDEAD",-50; bonus2 bVariableCastrate,"PR_MAGNUS",-50; bonus2 bVariableCastrate,"AB_JUDEX",-50; bonus2 bVariableCastrate,"AB_ADORAMUS",-50; }
 2475:2574:2883:15036,{ bonus bMaxHPrate,14; bonus2 bSubEle,Ele_Neutral,10; bonus2 bSkillAtk,"RK_HUNDREDSPEAR",50; skill "CR_AUTOGUARD",1; bonus bUseSPrate,10; }

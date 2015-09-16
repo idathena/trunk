@@ -91,7 +91,7 @@
 2434:2529,{ bonus bFlee,10; }
 2434:2530,{ bonus bFlee,10; }
 2434:2551,{ bonus bFlee,10; }
-2441:2546,{ bonus bFlee,5; }
+2441:2546,{ bonus2 bSubEle,Ele_Fire,10; bonus bFlee,5; }
 2518:2648:2649:5126,{ bonus bInt,5; bonus bMdef,11; bonus bMaxSPrate,20; bonus bNoCastCancel,0; bonus bCastrate,25; }
 2519:2650:2651:5127,{ bonus bStr,2; bonus bLuk,9; bonus bCritical,13; bonus bBaseAtk,18; bonus bFlee2,13; }
 2527:13001,{ bonus2 bAddRace,RC_Dragon,5; }

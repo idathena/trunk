@@ -1404,7 +1404,7 @@ REPLACE INTO `item_db` VALUES (2437,'Battle_Boots','Battle Boots',4,10,NULL,0,NU
 REPLACE INTO `item_db` VALUES (2438,'Paw_Of_Cat','Paw of Cat',4,10,NULL,300,NULL,0,NULL,0,0xFFFFFFFF,7,2,64,NULL,80,1,0,'bonus bFlee,5; bonus bAgi,1;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2439,'Refresh_Shoes','Refresh Shoes',4,20,NULL,0,NULL,9,NULL,0,0xFFFFFFFF,7,2,64,NULL,0,0,0,'bonus bMaxHPrate,17; bonus bMaxSPrate,8; bonus2 bHPRegenRate,20,10000; bonus2 bSPRegenRate,3,10000;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2440,'Sprint_Shoes','Sprint Shoes',4,20,NULL,300,NULL,2,NULL,1,0x00CFFF80,2,2,64,NULL,70,1,0,'bonus bAgi,1; bonus bSPrecovRate,5;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (2441,'Beach_Sandal','Beach Sandals',4,20,NULL,200,NULL,0,NULL,0,0xFFFFFFFF,7,2,64,NULL,0,1,0,'bonus bStr,1; bonus bInt,1; bonus bAgi,1; bonus2 bSubEle,Ele_Fire,10;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (2441,'Beach_Sandal','Beach Sandals',4,20,NULL,200,NULL,0,NULL,0,0xFFFFFFFF,7,2,64,NULL,0,1,0,'bonus bStr,1; bonus bInt,1; bonus bAgi,1;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2442,'Boots_Perforated','Red Stocking Boots',4,0,NULL,0,NULL,7,NULL,0,0xFFFFFFFF,7,2,64,NULL,0,0,0,'bonus bLuk,2; bonus bHPrecovRate,10; bonus bSPrecovRate,10; bonus3 bAutoSpellWhenHit,"WZ_QUAGMIRE",3,20; bonus bMdef,1;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2443,'Fish_Shoes','Fisher\'s Boots',4,10,NULL,250,NULL,0,NULL,0,0xFFFFFFFF,7,2,64,NULL,0,0,0,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (2444,'Krieger_Shoes1','Glorious Shoes',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFE,7,2,64,NULL,81,1,0,'bonus bMaxHPrate,10; bonus2 bSubRace,RC_DemiHuman,4; bonus3 bAutoSpellWhenHit,"AL_INCAGI",1,10;',NULL,NULL);
@@ -1461,7 +1461,7 @@ REPLACE INTO `item_db` VALUES (2542,'Flame_Manteau','Flame Manteau of Naght Sieg
 REPLACE INTO `item_db` VALUES (2543,'Sylphid_Manteau','Sylphid Manteau',4,20,NULL,0,NULL,9,NULL,0,0xFFFFFFFF,7,2,4,NULL,0,0,0,'bonus bFlee,13; bonus2 bSubEle,Ele_Neutral,13; bonus bFlee2,1;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2544,'Leather_Of_Tendrilion','Leather of Tendrilion',4,20,NULL,300,NULL,3,NULL,1,0x00CFDF80,2,2,4,NULL,0,1,0,'bonus2 bSubEle,Ele_Water,5; bonus2 bSubEle,Ele_Earth,5; bonus2 bSubRace,RC_Plant,5; bonus2 bSubRace,RC_Brute,5;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2545,'Musika','Musika',4,20,NULL,500,NULL,2,NULL,1,0x00008100,2,2,4,NULL,70,1,0,'bonus bMdef,3; bonus3 bAutoSpellwhenhit,"AL_HEAL",(getskilllv("AL_HEAL")>0?getskilllv("AL_HEAL"):1),20;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (2546,'Beach_Manteau','Beach Manteau',4,20,NULL,600,NULL,0,NULL,1,0xFFFFFFFF,7,2,4,NULL,0,1,0,'bonus bStr,1; bonus bInt,1; bonus2 bSubEle,Ele_Fire,10;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (2546,'Beach_Manteau','Beach Manteau',4,20,NULL,600,NULL,0,NULL,1,0xFFFFFFFF,7,2,4,NULL,0,1,0,'bonus bStr,1; bonus bInt,1;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2547,'Cheap_Running_Shirts','Cheap Undershirt',4,0,NULL,0,NULL,8,NULL,0,0xFFFFFFFF,7,2,4,NULL,0,1,0,'bonus bDex,2; bonus bFlee,10; bonus2 bSubEle,Ele_Neutral,10; bonus bMdef,1;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2548,'Muffler_C','Neo Muffler',4,0,NULL,0,NULL,5,NULL,0,0xFFFFFFFE,2,2,4,NULL,95,0,0,'bonus2 bSubRace,RC_DemiHuman,10; bonus bMaxHPrate,10; bonus2 bSubEle,Ele_Water,5; bonus2 bSubEle,Ele_Fire,5; bonus2 bSubEle,Ele_Holy,5; bonus2 bSubEle,Ele_Dark,5;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2549,'Krieger_Muffler1','Glorious Muffler',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFE,7,2,4,NULL,81,1,0,'bonus bMaxHPrate,5; bonus2 bSubRace,RC_DemiHuman,5;',NULL,NULL);
@@ -5833,7 +5833,7 @@ REPLACE INTO `item_db` VALUES (13772,'Hardback_Box','Refined Hardcover Book Box'
 REPLACE INTO `item_db` VALUES (13773,'Fire_Brand_Box','Refined Fireblend Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'rentitem 13408,604800;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (13774,'Immaterial_Sword_Box','Refined Immaterial Sword Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'rentitem 13409,604800;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (13775,'Unholy_Touch_Box','Refined Unholy Touch Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'rentitem 1274,604800;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (13776,'Cloak_Of_Survival_Box','Refined Survivor\'s Manteau Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'rentitem 2535,604800;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (13776,'Cloak_Of_Survival_Box','Refined Survivor\'s Manteau Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'rentitem 2535,1209600;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (13777,'Masquerade_Box','Refined Masquerade Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'rentitem 5326,1209600;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (13778,'Orc_Hero_Helm_Box','Refined Helmet of Orc Hero Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'rentitem 5327,1209600;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (13779,'Evil_Wing_Ears_Box','Refined Wing of Diablo Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'rentitem 5328,1209600;',NULL,NULL);

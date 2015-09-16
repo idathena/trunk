@@ -237,9 +237,9 @@ IG_Diary_Of_Great_Sage_Box,Diary_Of_Great_Sage_C,0,1,0,0,10080,1
 
 IG_Asura_Box,Asura_C,0,1,0,0,10080,1
 
-IG_Apple_Of_Archer_Box,Apple_Of_Archer_C,0,1,0,0,10080,1
+IG_Apple_Of_Archer_Box,Apple_Of_Archer_C,0,1,0,0,20160,1
 
-IG_Bunny_Band_Box,Bunny_Band_C,0,1,0,0,10080,1
+IG_Bunny_Band_Box,Bunny_Band_C,0,1,0,0,20160,1
 
 IG_Sahkkat_Box,Sahkkat_C,0,1,0,0,10080,1
 
