@@ -9556,12 +9556,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				tick = -1;
 				break;
 			case SC_EXEEDBREAK:
-				val2 = 100 * val1;
+				val2 = 150 * val1;
 				if( sd ) { //Players
 					short index = sd->equip_index[EQI_HAND_R];
 
 					if( index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON )
-						val2 += 10 * sd->status.job_level + sd->inventory_data[index]->weight / 10 * sd->inventory_data[index]->wlv * status_get_lv(bl) / 100;
+						val2 += 15 * sd->status.job_level + sd->inventory_data[index]->weight / 10 * sd->inventory_data[index]->wlv * status_get_lv(bl) / 100;
 				} else //Monster use
 					val2 += 500;
 				break;

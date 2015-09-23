@@ -7294,7 +7294,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 		}
 		if (sc->data[SC_EXEEDBREAK]) {
 			if (!target_has_infinite_defense(target,skill_id,wd.flag)) {
-				ATK_RATE(wd.damage,wd.damage2,sc->data[SC_EXEEDBREAK]->val2);
+				ATK_ADDRATE(wd.damage,wd.damage2,sc->data[SC_EXEEDBREAK]->val2);
 				battle_do_reflect(BF_WEAPON,&wd,src,target,skill_id,0);
 			}
 			status_change_end(src,SC_EXEEDBREAK,INVALID_TIMER);
