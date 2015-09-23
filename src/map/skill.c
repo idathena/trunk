@@ -5283,8 +5283,10 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				TBL_HOM *hd = BL_CAST(BL_HOM,src);
 				int duration = 0;
 
-				if (sd && skill_id == MH_EQC && is_boss(bl))
+				if (sd && skill_id == MH_EQC && is_boss(bl)) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
+					break;
+				}
 				duration = max(skill_lv,(status_get_str(src) / 7 - status_get_str(bl) / 10)) * 1000; //Yommy formula
 				if (skill_id == MH_TINDER_BREAKER && unit_movepos(src,bl->x,bl->y,1,true))
 					clif_blown(src,bl);

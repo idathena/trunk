@@ -7279,29 +7279,38 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 		if (sc->data[SC_CRUSHSTRIKE]) {
 			struct map_session_data *sd = BL_CAST(BL_PC,src);
 
-			if (sd) {
-				short index = sd->equip_index[EQI_HAND_R];
+			if (!target_has_infinite_defense(target,skill_id,wd.flag)) {
+				if (sd) {
+					short index = sd->equip_index[EQI_HAND_R];
 
-				if (index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON)
-					ATK_RATE(wd.damage,wd.damage2,sd->inventory_data[index]->weight / 10 + sstatus->rhw.atk +
-						100 * sd->inventory_data[index]->wlv * (sd->status.inventory[index].refine + 6));
+					if (index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON)
+						ATK_RATE(wd.damage,wd.damage2,sd->inventory_data[index]->weight / 10 + sstatus->rhw.atk +
+							100 * sd->inventory_data[index]->wlv * (sd->status.inventory[index].refine + 6));
+				}
+				battle_do_reflect(BF_WEAPON,&wd,src,target,skill_id,0);
 			}
-			battle_do_reflect(BF_WEAPON,&wd,src,target,skill_id,0);
 			skill_break_equip(src,src,EQP_WEAPON,2000,BCT_SELF);
 			status_change_end(src,SC_CRUSHSTRIKE,INVALID_TIMER);
 		}
 		if (sc->data[SC_EXEEDBREAK]) {
-			ATK_RATE(wd.damage,wd.damage2,sc->data[SC_EXEEDBREAK]->val2);
-			battle_do_reflect(BF_WEAPON,&wd,src,target,skill_id,0);
+			if (!target_has_infinite_defense(target,skill_id,wd.flag)) {
+				ATK_RATE(wd.damage,wd.damage2,sc->data[SC_EXEEDBREAK]->val2);
+				battle_do_reflect(BF_WEAPON,&wd,src,target,skill_id,0);
+			}
 			status_change_end(src,SC_EXEEDBREAK,INVALID_TIMER);
 		}
 		if (sc->data[SC_SPELLFIST]) {
 			if (--(sc->data[SC_SPELLFIST]->val2) >= 0) {
 				struct Damage ad = battle_calc_attack(BF_MAGIC,src,target,sc->data[SC_SPELLFIST]->val3,sc->data[SC_SPELLFIST]->val4,flag|BF_SHORT);
 
-				wd.damage = ad.damage;
-				DAMAGE_DIV_FIX(wd.damage, wd.div_); //Double the damage for multiple hits
-				battle_do_reflect(BF_WEAPON,&wd,src,target,skill_id,0);
+				if (!target_has_infinite_defense(target,skill_id,ad.flag)) {
+					wd.damage = ad.damage;
+					DAMAGE_DIV_FIX(wd.damage,wd.div_); //Double the damage for multiple hits
+					battle_do_reflect(BF_WEAPON,&wd,src,target,skill_id,0);
+				} else {
+					wd.damage = 1;
+					DAMAGE_DIV_FIX(wd.damage,wd.div_);
+				}
 			} else
 				status_change_end(src,SC_SPELLFIST,INVALID_TIMER);
 		}

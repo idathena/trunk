@@ -7268,8 +7268,9 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		sc_def = min(sc_def,battle_config.pc_max_sc_def * 100);
 		sc_def2 = min(sc_def2,battle_config.pc_max_sc_def * 100);
 
-		if (tick_def > 0 && battle_config.pc_sc_def_rate != 100) {
-			tick_def = tick_def * battle_config.pc_sc_def_rate / 100;
+		if (battle_config.pc_sc_def_rate != 100) {
+			if (tick_def > 0)
+				tick_def = tick_def * battle_config.pc_sc_def_rate / 100;
 			tick_def2 = tick_def2 * battle_config.pc_sc_def_rate / 100;
 		}
 	} else {
@@ -7281,8 +7282,9 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		sc_def = min(sc_def,battle_config.mob_max_sc_def * 100);
 		sc_def2 = min(sc_def2,battle_config.mob_max_sc_def * 100);
 
-		if (tick_def > 0 && battle_config.mob_sc_def_rate != 100) {
-			tick_def = tick_def * battle_config.mob_sc_def_rate / 100;
+		if (battle_config.mob_sc_def_rate != 100) {
+			if (tick_def > 0)
+				tick_def = tick_def * battle_config.mob_sc_def_rate / 100;
 			tick_def2 = tick_def2 * battle_config.mob_sc_def_rate / 100;
 		}
 	}
