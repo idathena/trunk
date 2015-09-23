@@ -9929,9 +9929,9 @@ REPLACE INTO `item_db_re` VALUES (19779,'C_Persica','Costume Persica',4,20,NULL,
 REPLACE INTO `item_db_re` VALUES (19780,'C_Knit_Rabbit_Ears','Costume Knit Rabbit Ears',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,867,'bonus bMaxHPrate,3; bonus bMaxSPrate,3;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (19781,'C_Angel_Wing_Ears','Costume Angel Wing Ears',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,158,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (19782,'C_Refined_Drooping_Cat','Costume Refined Drooping Cat',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,142,NULL,NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (19783,'C_Grampa_Beard','Costume Grampa Beard',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,25,NULL,NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (19783,'C_Grampa_Beard','Costume Grampa Beard',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,4096,NULL,'1',0,25,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (19784,'C_Morrigane\'s_Helm','Costume Morrigane\'s Helm',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,257,NULL,NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (19785,'C_Crunch_Toast','Costume Crunch Toast',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,188,NULL,NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (19785,'C_Crunch_Toast','Costume Crunch Toast',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,4096,NULL,'1',0,188,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (19786,'C_Crown_Of_Mistress','Costume Crown of Mistress',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,165,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (19787,'C_Devoted_Eyes','Costume Devoted Eyes',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,2048,NULL,'1',0,1021,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (19788,'C_Heart_Eyepatch','Costume Heart Eyepatch',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,2048,NULL,'1',0,779,NULL,NULL,NULL);
