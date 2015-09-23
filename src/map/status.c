@@ -9563,7 +9563,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					if( index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON )
 						val2 += 15 * sd->status.job_level + sd->inventory_data[index]->weight / 10 * sd->inventory_data[index]->wlv * status_get_lv(bl) / 100;
 				} else //Monster use
-					val2 += 500;
+					val2 += 750;
 				break;
 			case SC_PRESTIGE:
 				val2 = (status->int_ + status->luk) * val1 / 20 * status_get_lv(bl) / 200 + val1; //Chance to evade magic damage
