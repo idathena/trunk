@@ -17382,11 +17382,11 @@ void skill_enchant_elemental_end(struct block_list *bl, int type)
 	nullpo_retv(bl);
 	nullpo_retv(sc = status_get_sc(bl));
 
-	if (!sc || !sc->count)
+	if( !sc || !sc->count )
 		return;
 
-	for (i = 0; i < ARRAYLENGTH(scs); i++)
-		if (type != scs[i] && sc->data[scs[i]])
+	for( i = 0; i < ARRAYLENGTH(scs); i++ )
+		if( type != scs[i] && sc->data[scs[i]] )
 			status_change_end(bl, scs[i], INVALID_TIMER);
 }
 

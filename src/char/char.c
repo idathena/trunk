@@ -819,7 +819,7 @@ int memitemdata_to_sql(const struct item items[], int max, int id, int tableswit
 		SqlStmt_BindColumn(stmt, 10+j, SQLDT_USHORT, &item.card[j],     0, NULL, NULL);
 
 	// Bit array indicating which inventory items have already been matched
-	flag = (bool*) aCalloc(max, sizeof(bool));
+	flag = (bool *)aCalloc(max, sizeof(bool));
 
 	while( SQL_SUCCESS == SqlStmt_NextRow(stmt) ) {
 		found = false;
@@ -957,7 +957,7 @@ int inventory_to_sql(const struct item items[], int max, int id) {
 		SqlStmt_BindColumn(stmt, 11+j, SQLDT_USHORT, &item.card[j],     0, NULL, NULL);
 
 	// Bit array indicating which inventory items have already been matched
-	flag = (bool*)aCalloc(max, sizeof(bool));
+	flag = (bool *)aCalloc(max, sizeof(bool));
 
 	while( SQL_SUCCESS == SqlStmt_NextRow(stmt) ) {
 		found = false;

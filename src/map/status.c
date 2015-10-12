@@ -5692,7 +5692,7 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 		def -= def * sc->data[SC_SIGNUMCRUCIS]->val2 / 100;
 	if(sc->data[SC_CONCENTRATION])
 		def -= def * sc->data[SC_CONCENTRATION]->val4 / 100;
-	if(sc->data[SC_PROVOKE] && bl->type != BL_PC) //Provoke doesn't alter player defense
+	if(sc->data[SC_PROVOKE] && bl->type != BL_PC) //Provoke doesn't alter player eDEF
 		def -= def * sc->data[SC_PROVOKE]->val4 / 100;
 	if(sc->data[SC_STRIPSHIELD] && bl->type != BL_PC)
 		def -= def * sc->data[SC_STRIPSHIELD]->val2 / 100;
@@ -7939,6 +7939,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_ADORAMUS,INVALID_TIMER);
 			if( sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_HIGH )
 				status_change_end(bl,SC_SPIRIT,INVALID_TIMER);
+			break;
+		case SC_IMPOSITIO: //Replace higher level effect for lower
+			if( sc->data[type] && sc->data[type]->val1 > val1 )
+				status_change_end(bl,type,INVALID_TIMER);
 			break;
 		case SC_QUAGMIRE:
 			status_change_end(bl,SC_CONCENTRATE,INVALID_TIMER);

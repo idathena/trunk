@@ -2391,8 +2391,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 #ifdef RENEWAL_DROP
 			if(drop_modifier != 100) {
 				drop_rate = apply_rate(drop_rate, drop_modifier);
-				if(drop_rate < 1)
-					drop_rate = 1;
+				drop_rate = max(drop_rate, 1);
 			}
 #endif
 
