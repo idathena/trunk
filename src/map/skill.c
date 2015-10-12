@@ -5010,12 +5010,12 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 
 		case NC_INFRAREDSCAN:
 			if (flag&1) {
-				sc_start(src,bl,SC_INFRAREDSCAN,100,skill_lv,skill_get_time(skill_id,skill_lv));
 				status_change_end(bl,SC_HIDING,INVALID_TIMER);
 				status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 				status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
 				status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 				status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
+				sc_start(src,bl,SC_INFRAREDSCAN,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			}
 			break;
 

@@ -3806,14 +3806,14 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 		case LG_OVERBRAND:
 			skillratio += -100 + 400 * skill_lv + (sd ? pc_checkskill(sd,CR_SPEARQUICKEN) * 50 : 0);
-			RE_LVL_DMOD(100);
+			RE_LVL_DMOD(150);
 			break;
 		case LG_OVERBRAND_BRANDISH:
 			skillratio += -100 + 300 * skill_lv + sstatus->str + sstatus->dex;
-			RE_LVL_DMOD(100);
+			RE_LVL_DMOD(150);
 			break;
 		case LG_OVERBRAND_PLUSATK:
-			skillratio += -100 + 200 * skill_lv + rnd_value(10,100);
+			skillratio += -100 + 200 * skill_lv;
 			break;
 		case LG_RAYOFGENESIS:
 			skillratio += 200 + 300 * skill_lv;
