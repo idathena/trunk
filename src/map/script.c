@@ -4165,7 +4165,7 @@ void queryThread_add(struct script_state *st, bool type) {
 	racond_signal(queryThreadCond);
 }
 /* adds a new log to the queue */
-void queryThread_log(char * entry, int length) {
+void queryThread_log(char *entry, int length) {
 	int idx = logThreadData.count;
 	
 	EnterSpinLock(&queryThreadLock);
@@ -18644,7 +18644,7 @@ BUILDIN_FUNC(areamobuseskill)
 BUILDIN_FUNC(progressbar)
 {
 	struct map_session_data *sd = script_rid2sd(st);
-	const char * color;
+	const char *color;
 	unsigned int second;
 
 	if( !st || !sd )
@@ -18961,7 +18961,7 @@ BUILDIN_FUNC(is_function) {
  * get_revision() -> retrieves the current svn revision (if available)
  */
 BUILDIN_FUNC(get_revision) {
-	const char * revision;
+	const char *revision;
 
 	if ( (revision = get_svn_revision()) != 0 )
 		script_pushint(st,atoi(revision));

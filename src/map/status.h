@@ -2091,7 +2091,7 @@ int status_fixed_revive(struct block_list *bl, unsigned int per_hp, unsigned int
 struct regen_data *status_get_regen_data(struct block_list *bl);
 struct status_data *status_get_status_data(struct block_list *bl);
 struct status_data *status_get_base_status(struct block_list *bl);
-const char * status_get_name(struct block_list *bl);
+const char *status_get_name(struct block_list *bl);
 int status_get_class(struct block_list *bl);
 int status_get_lv(struct block_list *bl);
 #define status_get_range(bl) status_get_status_data(bl)->rhw.range

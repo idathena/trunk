@@ -2256,7 +2256,7 @@ int npc_parseview(const char *w4, const char *start, const char *buffer, const c
 /**
  * Checks if given view is an ID or constant.
  */
-bool npc_viewisid(const char * viewid)
+bool npc_viewisid(const char *viewid)
 {
 	if( atoi(viewid) != -1 )
 		while( *viewid ) //Loop through view, looking for non-numeric character

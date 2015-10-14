@@ -9897,7 +9897,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			//[(15 + 5 * Skill Level) + (Caster's INT / 5) + (Caster's Job Level / 5) - (Target's INT / 6) - (Target's LUK / 10)]%
 			rate = (15 + 5 * skill_lv) + status_get_int(src) / 5 + (sd ? sd->status.job_level / 5 : 0);
 			rate -= status_get_int(bl) / 6 - status_get_luk(bl) / 10;
-			tick = status_get_lv(bl) / 20 + status_get_base_status(bl)->int_ / 40;
+			tick = status_get_lv(bl) / 20 + (sd ? sd->status.int_ : status_get_base_status(bl)->int_) / 40;
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			status_change_start(src,bl,type,rate * 100,skill_lv,0,0,0,max(skill_get_time(skill_id,skill_lv) - (1000 * tick),5000),SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
 			break;

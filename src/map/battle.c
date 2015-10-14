@@ -3965,7 +3965,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 				//ATK [( Skill Level x 50 ) + ( Cart Weight / ( 150 - Caster's Base STR ))] + ( Cart Remodeling Skill Level x 50 )] %
 				skillratio += -100 + 50 * skill_lv;
 				if(sd && sd->cart_weight) {
-					short strbonus = status_get_base_status(src)->str; //Only using base STR
+					short strbonus = sd->status.str; //Only using base STR
 
 					skillratio += sd->cart_weight / 10 / (150 - min(strbonus,120)) + pc_checkskill(sd,GN_REMODELING_CART) * 50;
 				}

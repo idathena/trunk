@@ -199,7 +199,7 @@ void script_reload(void);
 void setd_sub(struct script_state *st, TBL_PC *sd, const char *varname, int elem, void *value, struct DBMap **ref);
 
 #ifdef BETA_THREAD_TEST
-void queryThread_log(char * entry, int length);
+void queryThread_log(char *entry, int length);
 #endif
 
 #endif /* _SCRIPT_H_ */

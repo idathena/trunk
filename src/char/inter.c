@@ -293,7 +293,7 @@ const char *job_name(int class_) {
 #define GEOIP_STRUCTURE_INFO_MAX_SIZE 20
 #define GEOIP_COUNTRY_BEGIN 16776960
 
-const char * geoip_countryname[GEOIP_MAX_COUNTRIES] = {"Unknown", "Asia/Pacific Region", "Europe", "Andorra", "United Arab Emirates", "Afghanistan", "Antigua and Barbuda", "Anguilla", "Albania", "Armenia", "Netherlands Antilles", 
+const char *geoip_countryname[GEOIP_MAX_COUNTRIES] = {"Unknown", "Asia/Pacific Region", "Europe", "Andorra", "United Arab Emirates", "Afghanistan", "Antigua and Barbuda", "Anguilla", "Albania", "Armenia", "Netherlands Antilles", 
 		"Angola", "Antarctica", "Argentina", "American Samoa", "Austria", "Australia", "Aruba", "Azerbaijan", "Bosnia and Herzegovina", "Barbados", 
 		"Bangladesh", "Belgium", "Burkina Faso", "Bulgaria", "Bahrain", "Burundi", "Benin", "Bermuda", "Brunei Darussalam", "Bolivia", 
 		"Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana", "Belarus", "Belize", "Canada", "Cocos (Keeling) Islands", "Congo, The Democratic Republic of the", 

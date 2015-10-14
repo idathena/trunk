@@ -1504,7 +1504,7 @@ int rename_char_sql(struct char_session_data *sd, int char_id)
 	return 0;
 }
 
-int check_char_name(char * name, char * esc_name)
+int check_char_name(char *name, char *esc_name)
 {
 	int i;
 

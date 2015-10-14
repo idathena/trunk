@@ -7197,7 +7197,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			tick_def2 = (status->int_ + status->luk) * 50;
 			break;
 		case SC_WHITEIMPRISON:
-			if (bl->type != BL_PC)
+			if (!sd)
 				tick_def2 = (status->vit + status->luk) * 50;
 			break;
 		case SC_STASIS: //10 secs (fixed) + {(Stasis Skill level * 10 - (Target's VIT + DEX) / 20)}
@@ -7228,18 +7228,18 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		case SC_ELECTRICSHOCKER:
 			tick_def2 = (status->vit + status->agi) * 70;
 			break;
-		case SC_DEEPSLEEP:
-			tick_def2 = b_status->int_ * 50 + SCDEF_LVL_CAP(bl,150) * 50; //kRO balance update lists this formula
+		case SC_DEEPSLEEP: //kRO balance update lists this formula
+			tick_def2 = (sd ? sd->status.int_ : b_status->int_) * 50 + SCDEF_LVL_CAP(bl,150) * 50;
 			break;
 		case SC_NETHERWORLD:
 			tick_def2 = SCDEF_LVL_CAP(bl,150) * 20 + SCDEF_JOBLVL_CAP(sd,50) * 100;
 			break;
 		case SC_CRYSTALIZE:
-			if (bl->type == BL_PC)
-				tick_def2 = b_status->vit * 100;
+			if (sd)
+				tick_def2 = sd->status.vit * 100;
 			break;
 		case SC_VACUUM_EXTREME:
-			tick_def2 = b_status->str * 50;
+			tick_def2 = (sd ? sd->status.str : b_status->str) * 50;
 			break;
 		case SC_KYOUGAKU:
 			tick_def2 = status->int_ * 50;
@@ -7248,7 +7248,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			tick_def2 = (status->vit + status->luk) * 50;
 			break;
 		case SC_B_TRAP:
-			tick_def2 = b_status->str * 50; //Custom values
+			tick_def2 = (sd ? sd->status.str : b_status->str) * 50; //Custom values
 			break;
 		case SC_NORECOVER_STATE:
 			tick_def2 = status->luk * 100;
@@ -7354,7 +7354,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			tick = max(tick,6000); //6 secs
 			break;
 		case SC_WHITEIMPRISON:
-			if (bl->type != BL_PC)
+			if (!sd)
 		//Fall through
 		case SC_STASIS:
 			tick = max(tick,10000); //10 secs
@@ -7649,7 +7649,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					mode &= ~val4; //Del mode
 				if( val3 )
 					mode |= val3; //Add mode
-				if( mode == bstatus->mode ) { //No change.
+				if( mode == bstatus->mode ) { //No change
 					if( sc->data[type] ) //Abort previous status
 						return status_change_end(bl,type,INVALID_TIMER);
 					return 0;
@@ -10521,7 +10521,7 @@ int status_change_clear(struct block_list *bl,int type)
 	for(i = 0; i < SC_MAX; i++) {
 		if(!sc->data[i])
 			continue;
-		if(type == 0) {
+		if(!type) {
 			switch(i) { //Type 0: PC killed -> Place here statuses that do not dispel on death
 				case SC_ELEMENTALCHANGE: //Only when its Holy or Dark that it doesn't dispell on death
 					if(sc->data[i]->val2 != ELE_HOLY && sc->data[i]->val2 != ELE_DARK)
@@ -10609,7 +10609,7 @@ int status_change_clear(struct block_list *bl,int type)
 		}
 
 		//Config if the monster transform status should end on death [Rytech]
-		if(type == 0 && battle_config.transform_end_on_death == 0) {
+		if(!type && !battle_config.transform_end_on_death) {
 			switch(i) {
 				case SC_MONSTER_TRANSFORM:
 				case SC_MTF_ASPD:
@@ -10668,7 +10668,7 @@ int status_change_clear(struct block_list *bl,int type)
 #endif
 	sc->bs_counter = 0;
 
-	if(type == 0 || type == 2)
+	if(!type || type == 2)
 		clif_changeoption(bl);
 
 	return 1;

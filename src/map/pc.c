@@ -485,10 +485,10 @@ void pc_setrestartvalue(struct map_session_data *sd, char type) {
 	b_status = &sd->base_status;
 	status = &sd->battle_status;
 
-	if (type&1) {	//Normal resurrection
+	if(type&1) { //Normal resurrection
 		status->hp = 1; //Otherwise, status_heal may fail if dead
 		status_heal(&sd->bl, b_status->hp, 0, 1);
-		if( status->sp < b_status->sp )
+		if(status->sp < b_status->sp)
 			status_set_sp(&sd->bl, b_status->sp, 1);
 	} else { //Just for saving on the char-server (with values as if respawned)
 		sd->status.hp = b_status->hp;
@@ -3727,7 +3727,7 @@ void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int 
 {
 	nullpo_retv(sd);
 
-	switch( type ) {
+	switch(type) {
 		case SP_AUTOSPELL:
 			if(sd->state.lr_flag != 2)
 				pc_bonus_autospell(sd->autospell, ARRAYLENGTH(sd->autospell), (val&1 ? type2 : -type2), (val&2 ? -type3 : type3), type4, 0, current_equip_card_id);
