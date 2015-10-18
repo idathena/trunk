@@ -9974,10 +9974,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				clif_changelook(bl,LOOK_CLOTHES_COLOR,vd->cloth_color);
 				break;
 			case SC_BANDING: {
-					struct skill_unit_group *sg;
+					struct skill_unit_group *group;
 
-					if( (sg = skill_unitsetting(bl,LG_BANDING,val1,bl->x,bl->y,0)) != NULL )
-						val4 = sg->group_id;
+					if( (group = skill_unitsetting(bl,LG_BANDING,val1,bl->x,bl->y,0)) )
+						val4 = group->group_id;
 				}
 				break;
 			case SC_KYOUGAKU:
@@ -10949,8 +10949,17 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			}
 			sc_start4(bl,bl,SC_REGENERATION,100,10,0,0,(RGN_HP|RGN_SP),skill_get_time(status_sc2skill(type),sce->val1));
 			break;
+		case SC_BASILICA: //Clear the skill area [Skotlex]
+			if (sce->val3 && sce->val4 == bl->id) {
+				struct skill_unit_group *group = skill_id2group(sce->val3);
+
+				sce->val3 = 0;
+				if (group) //Might have been cleared before status ended, e.g. land protector
+					skill_delunitgroup(group);
+			}
+			break;
 		case SC_GOSPEL:
-			if (sce->val3) { //Clear the group
+			if (sce->val3) {
 				struct skill_unit_group *group = skill_id2group(sce->val3);
 
 				sce->val3 = 0;
@@ -10962,26 +10971,17 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			if (sce->val3 == BCT_SELF)
 				skill_clear_unitgroup(bl);
 			break;
-		case SC_BASILICA: //Clear the skill area [Skotlex]
-			if (sce->val3 && sce->val4 == bl->id) {
-				struct skill_unit_group *group = skill_id2group(sce->val3);
-
-				sce->val3 = 0;
-				if (group)
-					skill_delunitgroup(group);
-			}
-			break;
 		case SC_TRICKDEAD:
 			if (vd)
 				vd->dead_sit = 0;
 			break;
 		case SC_WARM:
 		case SC__MANHOLE:
-			if (sce->val4) { //Clear the group
+			if (sce->val4) {
 				struct skill_unit_group *group = skill_id2group(sce->val4);
 
 				sce->val4 = 0;
-				if (group) //Might have been cleared before status ended, e.g. land protector
+				if (group)
 					skill_delunitgroup(group);
 			}
 			break;
@@ -11055,7 +11055,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 				struct skill_unit_group *group = skill_id2group(sce->val2);
 
 				sce->val2 = 0;
-				if (group) //Might have been cleared before status ended, e.g. land protector
+				if (group)
 					skill_delunitgroup(group);
 			}
 			break;
@@ -11075,13 +11075,13 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			}
 			break;
 		case SC_BANDING:
-				if (sce->val4) {
-					struct skill_unit_group *group = skill_id2group(sce->val4);
+			if (sce->val4) {
+				struct skill_unit_group *group = skill_id2group(sce->val4);
 
-					sce->val4 = 0;
-					if (group) //Might have been cleared before status ended, e.g. land protector
-						skill_delunitgroup(group);
-				}
+				sce->val4 = 0;
+				if (group)
+					skill_delunitgroup(group);
+			}
 			break;
 		case SC_CURSEDCIRCLE_ATKER:
 			if (sce->val2) //Used area size because there is a chance the caster could knock back and can't clear the target

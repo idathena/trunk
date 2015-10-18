@@ -3303,8 +3303,7 @@ static int skill_check_unit_range_sub(struct block_list *bl, va_list ap)
 		case RL_B_TRAP:
 		case SC_ESCAPE:
 			//Non stackable on themselves and traps (including venom dust and poison mist which does not has the trap inf2 set)
-			if (skill_id != g_skill_id && !(skill_get_inf2(g_skill_id)&INF2_TRAP) &&
-				g_skill_id != AS_VENOMDUST && g_skill_id != MH_POISON_MIST)
+			if (skill_id != g_skill_id && !(skill_get_inf2(g_skill_id)&INF2_TRAP) && g_skill_id != AS_VENOMDUST && g_skill_id != MH_POISON_MIST)
 				return 0;
 			break;
 		default: //Avoid stacking with same kind of trap [Skotlex]
@@ -11847,21 +11846,18 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 
 		case NC_NEUTRALBARRIER:
 		case NC_STEALTHFIELD:
-			if( sd )
-				skill_consume_requirement(sd,skill_id,skill_lv,2);
 			if( sc ) {
 				if( (sc->data[SC_NEUTRALBARRIER_MASTER] && skill_id == NC_NEUTRALBARRIER) ||
 					(sc->data[SC_STEALTHFIELD_MASTER] && skill_id == NC_STEALTHFIELD) ) {
-					skill_clear_unitgroup(src);
+					skill_clear_unitgroup(src); //To remove previous skills, can't use both
 					return 0;
 				}
 			}
-			skill_clear_unitgroup(src); //To remove previous skills, can't use both
-			if( (group = skill_unitsetting(src,skill_id,skill_lv,src->x,src->y,0)) != NULL ) {
+			if( (group = skill_unitsetting(src,skill_id,skill_lv,src->x,src->y,0)) ) {
+				if( sd )
+					skill_consume_requirement(sd,skill_id,skill_lv,2);
 				sc_start2(src,src,(skill_id == NC_NEUTRALBARRIER ? SC_NEUTRALBARRIER_MASTER : SC_STEALTHFIELD_MASTER),100,
 					skill_lv,group->group_id,skill_get_time(skill_id,skill_lv));
-				if( sd )
-					pc_overheat(sd,1);
 			}
 			break;
 
@@ -11919,7 +11915,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			if( sce )
 				status_change_end(src,type,INVALID_TIMER);
 			else {
-				if( (group = skill_unitsetting(src,skill_id,skill_lv,src->x,src->y,0)) != NULL ) {
+				if( (group = skill_unitsetting(src,skill_id,skill_lv,src->x,src->y,0)) ) {
 					sc_start4(src,src,type,100,skill_lv,0,0,group->group_id,skill_get_time(skill_id,skill_lv));
 					if( sd )
 						pc_banding(sd,skill_lv);
@@ -17195,10 +17191,8 @@ static int skill_cell_overlap(struct block_list *bl, va_list ap)
 			break;
 	}
 
-	//It deletes everything except non-essamble dance skills, traps and barriers
-	if (unit->group->skill_id == SA_LANDPROTECTOR && !(skill_get_inf2(skill_id)&(INF2_TRAP)) &&
-		!(skill_get_inf3(skill_id)&(INF3_NOLP))) {
-		(*alive) = 0;
+	if (unit->group->skill_id == SA_LANDPROTECTOR && !(skill_get_inf2(skill_id)&(INF2_TRAP)) && !(skill_get_inf3(skill_id)&(INF3_NOLP))) {
+		(*alive) = 0; //It deletes everything except non-essamble dance skills, traps and barriers
 		return 1;
 	}
 
