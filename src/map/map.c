@@ -436,7 +436,7 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 
 	if (bl->type&BL_CHAR) {
 		skill_unit_move(bl, tick, 3);
-		if (bl->type == BL_PC && ((TBL_PC *)bl)->shadowform_id) { //Shadow Form Target Moving
+		if (bl->type == BL_PC && ((TBL_PC *)bl)->shadowform_id) { //Moving Target Shadow Form
 			struct block_list *d_bl;
 
 			if ((d_bl = map_id2bl(((TBL_PC *)bl)->shadowform_id)) == NULL || !check_distance_bl(bl, d_bl, 10)) {
@@ -463,7 +463,7 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 					skill_unit_move_unit_group(skill_id2group(sc->data[SC_NEUTRALBARRIER_MASTER]->val2), bl->m, x1 - x0, y1 - y0);
 				else if (sc->data[SC_STEALTHFIELD_MASTER])
 					skill_unit_move_unit_group(skill_id2group(sc->data[SC_STEALTHFIELD_MASTER]->val2), bl->m, x1 - x0, y1 - y0);
-				if (sc->data[SC__SHADOWFORM]) { //Shadow Form Caster Moving
+				if (sc->data[SC__SHADOWFORM]) { //Moving Caster Shadow Form
 					struct block_list *d_bl;
 
 					if ((d_bl = map_id2bl(sc->data[SC__SHADOWFORM]->val2)) == NULL || !check_distance_bl(bl, d_bl, 10))
@@ -476,7 +476,7 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 					skill_unitsetting(bl, sc->data[SC_PROPERTYWALK]->val1, sc->data[SC_PROPERTYWALK]->val2, x0,  y0, 0))
 					sc->data[SC_PROPERTYWALK]->val3++;
 			}
-			//Guild Aura Moving
+			//Moving Guild Aura
 			if (bl->type == BL_PC && ((TBL_PC *)bl)->state.gmaster_flag) {
 				if (sc->data[SC_LEADERSHIP])
 					skill_unit_move_unit_group(skill_id2group(sc->data[SC_LEADERSHIP]->val4), bl->m, x1 - x0, y1 - y0);

@@ -2718,8 +2718,6 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 		switch(skill_id) {
 			case MC_CARTREVOLUTION:
 			case RA_CLUSTERBOMB:
-			case RA_FIRINGTRAP:
-			case RA_ICEBOUNDTRAP:
 			case NC_ARMSCANNON:
 			case SR_TIGERCANNON:
 			case SR_CRESCENTELBOW_AUTOSPELL:
@@ -2728,6 +2726,16 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 				wd.damage = battle_attr_fix(src, target, wd.damage, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 				if(is_attack_left_handed(src, skill_id))
 					wd.damage2 = battle_attr_fix(src, target, wd.damage2, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
+				break;
+			case RA_FIRINGTRAP:
+				wd.damage = battle_attr_fix(src, target, wd.damage, ELE_FIRE, tstatus->def_ele, tstatus->ele_lv);
+				if(is_attack_left_handed(src, skill_id))
+					wd.damage2 = battle_attr_fix(src, target, wd.damage2, ELE_FIRE, tstatus->def_ele, tstatus->ele_lv);
+				break;
+			case RA_ICEBOUNDTRAP:
+				wd.damage = battle_attr_fix(src, target, wd.damage, ELE_WATER, tstatus->def_ele, tstatus->ele_lv);
+				if(is_attack_left_handed(src, skill_id))
+					wd.damage2 = battle_attr_fix(src, target, wd.damage2, ELE_WATER, tstatus->def_ele, tstatus->ele_lv);
 				break;
 			case GN_CARTCANNON:
 			case KO_HAPPOKUNAI:
@@ -5383,8 +5391,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			case PA_SHIELDCHAIN:
 			case CR_ACIDDEMONSTRATION:
 			case RA_CLUSTERBOMB:
-			case RA_FIRINGTRAP:
-			case RA_ICEBOUNDTRAP:
 			case NC_ARMSCANNON:
 			case SR_TIGERCANNON:
 			case SR_CRESCENTELBOW_AUTOSPELL:
@@ -5396,9 +5402,15 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 					wd.damage2 = battle_attr_fix(src, target, wd.damage2, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 				break;
 			case AM_DEMONSTRATION:
+			case RA_FIRINGTRAP:
 				wd.damage = battle_attr_fix(src, target, wd.damage, ELE_FIRE, tstatus->def_ele, tstatus->ele_lv);
 				if(is_attack_left_handed(src, skill_id))
 					wd.damage2 = battle_attr_fix(src, target, wd.damage2, ELE_FIRE, tstatus->def_ele, tstatus->ele_lv);
+				break;
+			case RA_ICEBOUNDTRAP:
+				wd.damage = battle_attr_fix(src, target, wd.damage, ELE_WATER, tstatus->def_ele, tstatus->ele_lv);
+				if(is_attack_left_handed(src, skill_id))
+					wd.damage2 = battle_attr_fix(src, target, wd.damage2, ELE_WATER, tstatus->def_ele, tstatus->ele_lv);
 				break;
 			case GN_CARTCANNON:
 			case KO_HAPPOKUNAI:
@@ -7146,7 +7158,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 			short index = sd->equip_index[EQI_AMMO];
 
 			if (index < 0) {
-				if (sd->weapontype1 > W_KATAR || sd->weapontype1 < W_HUUMA)
+				if (sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE)
 					clif_skill_fail(sd,0,USESKILL_FAIL_NEED_MORE_BULLET,0,0);
 				else
 					clif_arrow_fail(sd,0);
@@ -7197,21 +7209,21 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 			uint16 skill_lv = tsc->data[SC_AUTOCOUNTER]->val1;
 
 			clif_skillcastcancel(target); //Remove the casting bar [Skotlex]
-			clif_damage(src,target,tick,sstatus->amotion,1,0,1,DMG_NORMAL,0); //Display MISS
+			clif_damage(src,target,tick,sstatus->amotion,1,0,1,DMG_NORMAL,0); //Display miss
 			status_change_end(target,SC_AUTOCOUNTER,INVALID_TIMER);
 			skill_attack(BF_WEAPON,target,target,src,KN_AUTOCOUNTER,skill_lv,tick,0);
 			return ATK_BLOCK;
 		}
 	}
 
-	if (tsc && tsc->data[SC_BLADESTOP_WAIT] && !is_boss(src) && (src->type == BL_PC || tsd == NULL ||
+	if (tsc && tsc->data[SC_BLADESTOP_WAIT] && !is_boss(src) && (src->type == BL_PC || !tsd ||
 		distance_bl(src,target) <= (tsd->status.weapon == W_FIST ? 1 : 2))) {
 		uint16 skill_lv = tsc->data[SC_BLADESTOP_WAIT]->val1;
 		int duration = skill_get_time2(MO_BLADESTOP,skill_lv);
 
 		status_change_end(target,SC_BLADESTOP_WAIT,INVALID_TIMER);
 		//Target locked
-		if (sc_start4(src,src,SC_BLADESTOP,100,sd ? pc_checkskill(sd,MO_BLADESTOP) : 0,0,0,target->id,duration)) {
+		if (sc_start4(src,src,SC_BLADESTOP,100,(sd ? pc_checkskill(sd,MO_BLADESTOP) : 0),0,0,target->id,duration)) {
 			clif_damage(src,target,tick,sstatus->amotion,1,0,1,DMG_NORMAL,0);
 			clif_bladestop(target,src->id,1);
 			sc_start4(src,target,SC_BLADESTOP,100,skill_lv,0,0,src->id,duration);
