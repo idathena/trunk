@@ -107,7 +107,7 @@
 						case 10: callfunc "Func_Socket",13122,13124,40,61,500,984,2,999,10;
 						case 11: callfunc "Func_Socket",13195,13190,40,61,500,984,2,999,10;
 						case 12: callfunc "Func_Socket",13194,13196,40,61,500,984,2,999,10;
-						case 13: callfunc "Func_Socket",13198,13199,40,61,500,984,2,999,10;
+						case 13: callfunc "Func_Socket",13198,13199,40,61,700,984,5,999,10;
 						case 14: callfunc "Func_Socket",28201,28202,40,61,500,984,2,999,10;
 					}
 				case 4:

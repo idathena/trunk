@@ -7154,8 +7154,8 @@ REPLACE INTO `item_db_re` VALUES (13194,'Peace_Breaker','Peace Breaker',5,195000
 REPLACE INTO `item_db_re` VALUES (13195,'RAG203','RAG203',5,1800000,NULL,1300,'260',NULL,9,0,0x40000000,63,2,34,3,'140',1,18,'bonus bHit,10; bonus bCriticalRate,15; bonus4 bAutoSpell,"AL_DECAGI",1,10,0;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (13196,'Peace_Breaker_','Peace Breaker',5,10,NULL,1400,'250',NULL,9,1,0x40000000,63,2,34,3,'140',1,20,'bonus bHit,-25; bonus bAspdRate,25;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (13197,'Mini_Mei','Mini Mei',5,1600000,NULL,2500,'220',NULL,9,2,0x40000000,63,2,34,2,'106',1,19,NULL,NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (13198,'Tempest','Tempest',5,2200000,NULL,2500,'250',NULL,9,0,0x40000000,63,2,34,2,'140',1,19,'bonus bHit,-25; bonus bCritical,10; bonus bLongAtkRate,20;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (13199,'Tempest_','Tempest',5,10,NULL,2500,'250',NULL,9,1,0x40000000,63,2,34,2,'140',1,19,'bonus bHit,-25; bonus bCritical,10; bonus bLongAtkRate,20;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (13198,'Tempest','Tempest',5,2200000,NULL,2500,'250',NULL,9,0,0x40000000,63,2,34,4,'140',1,19,'bonus bHit,-25; bonus bCritical,10; bonus bLongAtkRate,20;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (13199,'Tempest_','Tempest',5,10,NULL,2500,'250',NULL,9,1,0x40000000,63,2,34,4,'140',1,19,'bonus bHit,-25; bonus bCritical,10; bonus bLongAtkRate,20;',NULL,NULL);
 # Bullets
 #===================================================================
 REPLACE INTO `item_db_re` VALUES (13200,'Bullet','Bullet',10,1,NULL,2,'10',NULL,NULL,NULL,0x41000000,63,2,32768,NULL,'1',NULL,3,NULL,NULL,NULL);
@@ -11026,9 +11026,9 @@ REPLACE INTO `item_db_re` VALUES (28104,'Ru_Gold_Axe_M','Ru Gold Axe M',5,20,NUL
 REPLACE INTO `item_db_re` VALUES (28105,'Infinity_Axe','Infinity Axe',5,10,NULL,500,'265',NULL,1,1,0x00000022,63,2,34,4,'100',1,7,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28106,'Crimson_Two_handed_Axe','Crimson Two-handed Axe',5,20,NULL,2000,'200',NULL,1,2,0x000444A2,63,2,34,3,'70',1,7,'set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); if(BaseLevel>70) bonus bBaseAtk,((BaseLevel-70)/10)*5; bonus bUnbreakableWeapon,0;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28107,'Two_Handed_Axe_Of_Vicious_Mind','Two-Handed Axe of Vicious Mind',5,20,NULL,2500,'250',NULL,1,1,0x000444A2,63,2,34,4,'160',1,7,'set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); bonus bUnbreakableWeapon,0;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (28200,'End_Of_The_Horizon','End of The Horizon',5,2700000,NULL,2400,'410',NULL,9,1,0x40000000,63,2,34,4,'110',1,21,NULL,NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (28201,'Southern_Cross','Southern Cross',5,2800000,NULL,2000,'480',NULL,9,0,0x40000000,63,2,34,4,'141',1,21,'bonus3 bAutoSpell,"GC_CROSSIMPACT",1,50;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (28202,'Southern_Cross_','Southern Cross',5,10,NULL,2000,'480',NULL,9,1,0x40000000,63,2,34,4,'141',1,21,'bonus3 bAutoSpell,"GC_CROSSIMPACT",1,50;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (28200,'End_Of_The_Horizon','End of The Horizon',5,2700000,NULL,2400,'410',NULL,9,1,0x40000000,63,2,34,3,'110',1,21,NULL,NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (28201,'Southern_Cross','Southern Cross',5,2800000,NULL,2000,'480',NULL,9,0,0x40000000,63,2,34,3,'141',1,21,'bonus3 bAutoSpell,"GC_CROSSIMPACT",1,50;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (28202,'Southern_Cross_','Southern Cross',5,10,NULL,2000,'480',NULL,9,1,0x40000000,63,2,34,3,'141',1,21,'bonus3 bAutoSpell,"GC_CROSSIMPACT",1,50;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28203,'Half_BF_Rifle1','Half BF Rifle1',5,0,NULL,0,'50',NULL,9,0,0x01000000,63,2,34,3,'80',1,18,'bonus bDex,2; bonus bHit,8; bonus bCritical,8; bonus2 bAddRace,RC_DemiHuman,30; bonus2 bVariableCastrate,"GS_TRACKING",-20; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,10; bonus bUnbreakableWeapon,0;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28204,'Half_BF_Shotgun1','Half BF Shotgun1',5,0,NULL,0,'100',NULL,9,0,0x01000000,63,2,34,3,'80',1,20,'bonus bDex,2; bonus bSplashRange,1; bonus2 bAddRace,RC_DemiHuman,30; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,10; autobonus "{ bonus bBaseAtk,80; bonus2 bHPLossRate,100,1000; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_BASH3D; }"; bonus bUnbreakableWeapon,0;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28306,'Luna\'s_Blessing','Luna\'s Blessing',4,20,NULL,100,NULL,5,NULL,1,0xFFFFFFFF,63,2,136,NULL,'1',0,0,'bonus bMdef,2; bonus bAllStats,1; bonus5 bAutoSpell,"CG_TAROTCARD",5,100,BF_WEAPON|BF_MAGIC,1;',NULL,NULL);
