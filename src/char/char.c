@@ -816,7 +816,7 @@ int memitemdata_to_sql(const struct item items[], int max, int id, int tableswit
 	SqlStmt_BindColumn(stmt, 8, SQLDT_UINT,         &item.bound,       0, NULL, NULL);
 	SqlStmt_BindColumn(stmt, 9, SQLDT_UINT64,       &item.unique_id,   0, NULL, NULL);
 	for( j = 0; j < MAX_SLOTS; ++j )
-		SqlStmt_BindColumn(stmt, 10+j, SQLDT_USHORT, &item.card[j],     0, NULL, NULL);
+		SqlStmt_BindColumn(stmt, 10+j, SQLDT_USHORT, &item.card[j],    0, NULL, NULL);
 
 	// Bit array indicating which inventory items have already been matched
 	flag = (bool *)aCalloc(max, sizeof(bool));
@@ -954,7 +954,7 @@ int inventory_to_sql(const struct item items[], int max, int id) {
 	SqlStmt_BindColumn(stmt, 9,  SQLDT_CHAR,          &item.bound,       0, NULL, NULL);
 	SqlStmt_BindColumn(stmt, 10, SQLDT_UINT64,        &item.unique_id,   0, NULL, NULL);
 	for( j = 0; j < MAX_SLOTS; ++j )
-		SqlStmt_BindColumn(stmt, 11+j, SQLDT_USHORT, &item.card[j],     0, NULL, NULL);
+		SqlStmt_BindColumn(stmt, 11+j, SQLDT_USHORT,  &item.card[j],     0, NULL, NULL);
 
 	// Bit array indicating which inventory items have already been matched
 	flag = (bool *)aCalloc(max, sizeof(bool));

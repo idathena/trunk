@@ -5252,8 +5252,6 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 				sce->timer = add_timer(gettick() + skill_get_time(SG_KNOWLEDGE, sce->val1), status_change_timer, sd->bl.id, SC_KNOWLEDGE);
 			}
 			status_change_end(&sd->bl, SC_CLOAKINGEXCEED, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_NEUTRALBARRIER_MASTER, INVALID_TIMER);
-			status_change_end(&sd->bl, SC_STEALTHFIELD_MASTER, INVALID_TIMER);
 			status_change_end(&sd->bl, SC_PROPERTYWALK, INVALID_TIMER);
 		}
 		for( i = 0; i < EQI_MAX; i++ )
@@ -5329,7 +5327,7 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 	if( sd->bl.prev != NULL ) {
 		unit_remove_map_pc(sd, clrtype);
 		clif_changemap(sd, m, x, y); // [MouseJstr]
-	} else if( sd->state.active ) // Tag player for rewarping after map-loading is done. [Skotlex]
+	} else if( sd->state.active ) // Tag player for rewarping after map-loading is done [Skotlex]
 		sd->state.rewarp = 1;
 
 	sd->mapindex = mapindex;

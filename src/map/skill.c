@@ -11853,6 +11853,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 					return 0;
 				}
 			}
+			skill_clear_unitgroup(src);
 			if( (group = skill_unitsetting(src,skill_id,skill_lv,src->x,src->y,0)) ) {
 				if( sd )
 					skill_consume_requirement(sd,skill_id,skill_lv,2);
@@ -17818,6 +17819,8 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char *file, int li
 			case DC_DONTFORGETME:
 			case DC_FORTUNEKISS:
 			case DC_SERVICEFORYOU:
+			case NC_NEUTRALBARRIER:
+			case NC_STEALTHFIELD:
 				skill_usave_add(((TBL_PC *)src), group->skill_id, group->skill_lv);
 				break;
 		}
@@ -19726,36 +19729,41 @@ int skill_blockmerc_start(struct mercenary_data *md, uint16 skill_id, int tick)
 
 	return add_timer(gettick() + tick, skill_blockmerc_end, md->bl.id, idx);
 }
+
 /**
  * Adds a new skill unit entry for this player to recast after map load
  */
-void skill_usave_add(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv) {
-	struct skill_usave * sus = NULL;
+void skill_usave_add(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv)
+{
+	struct skill_usave *sus = NULL;
 
 	if( idb_exists(skillusave_db,sd->status.char_id) ) {
 		idb_remove(skillusave_db,sd->status.char_id);
 	}
-	
+
 	CREATE(sus, struct skill_usave, 1);
 	idb_put(skillusave_db, sd->status.char_id, sus);
 
 	sus->skill_id = skill_id;
 	sus->skill_lv = skill_lv;
-	
-	return;
 }
-void skill_usave_trigger(struct map_session_data *sd) {
-	struct skill_usave * sus = NULL;
 
-	if( ! (sus = idb_get(skillusave_db,sd->status.char_id)) )
+void skill_usave_trigger(struct map_session_data *sd)
+{
+	struct skill_usave *sus = NULL;
+	struct skill_unit_group *group = NULL;
+
+	if( !(sus = idb_get(skillusave_db,sd->status.char_id)) )
 		return;
 
-	skill_unitsetting(&sd->bl,sus->skill_id,sus->skill_lv,sd->bl.x,sd->bl.y,0);
+	if( (group = skill_unitsetting(&sd->bl,sus->skill_id,sus->skill_lv,sd->bl.x,sd->bl.y,0)) )
+		if( sus->skill_id == NC_NEUTRALBARRIER || sus->skill_id == NC_STEALTHFIELD  )
+			sc_start2(&sd->bl,&sd->bl,(sus->skill_id == NC_NEUTRALBARRIER ? SC_NEUTRALBARRIER_MASTER : SC_STEALTHFIELD_MASTER),100,
+				sus->skill_lv,group->group_id,skill_get_time(sus->skill_id,sus->skill_lv));
 	idb_remove(skillusave_db,sd->status.char_id);
-
-	return;
 }
-/*
+
+/**
  *
  */
 int skill_split_str (char *str, char **val, int num)

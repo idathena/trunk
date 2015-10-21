@@ -307,17 +307,17 @@ int mapif_parse_itembound_retrieve(int fd)
 		return 1;
 	}
 
-	SqlStmt_BindColumn(stmt, 0, SQLDT_INT,       &item.id,          0, NULL, NULL);
-	SqlStmt_BindColumn(stmt, 1, SQLDT_USHORT,    &item.nameid,      0, NULL, NULL);
-	SqlStmt_BindColumn(stmt, 2, SQLDT_SHORT,     &item.amount,      0, NULL, NULL);
-	SqlStmt_BindColumn(stmt, 3, SQLDT_USHORT,    &item.equip,       0, NULL, NULL);
-	SqlStmt_BindColumn(stmt, 4, SQLDT_CHAR,      &item.identify,    0, NULL, NULL);
-	SqlStmt_BindColumn(stmt, 5, SQLDT_CHAR,      &item.refine,      0, NULL, NULL);
-	SqlStmt_BindColumn(stmt, 6, SQLDT_CHAR,      &item.attribute,   0, NULL, NULL);
-	SqlStmt_BindColumn(stmt, 7, SQLDT_UINT,      &item.expire_time, 0, NULL, NULL);
-	SqlStmt_BindColumn(stmt, 8, SQLDT_UINT,      &item.bound,       0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 0, SQLDT_INT,       &item.id,           0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 1, SQLDT_USHORT,    &item.nameid,       0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 2, SQLDT_SHORT,     &item.amount,       0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 3, SQLDT_USHORT,    &item.equip,        0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 4, SQLDT_CHAR,      &item.identify,     0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 5, SQLDT_CHAR,      &item.refine,       0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 6, SQLDT_CHAR,      &item.attribute,    0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 7, SQLDT_UINT,      &item.expire_time,  0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 8, SQLDT_UINT,      &item.bound,        0, NULL, NULL);
 	for( j = 0; j < MAX_SLOTS; ++j )
-		SqlStmt_BindColumn(stmt, 9 + j, SQLDT_SHORT, &item.card[j], 0, NULL, NULL);
+		SqlStmt_BindColumn(stmt, 9 + j, SQLDT_USHORT, &item.card[j], 0, NULL, NULL);
 
 	memset(&items, 0, sizeof(items));
 	while( SQL_SUCCESS == SqlStmt_NextRow(stmt) )

@@ -9332,7 +9332,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 10 + 5 * val1; //DEF/MDEF increase
 				break;
 			case SC_STEALTHFIELD_MASTER:
-				tick_time = val2 = 2000 + 1000 * val1;
+				tick_time = val3 = 2000 + 1000 * val1;
 				val4 = tick / tick_time;
 				break;
 			case SC_OVERHEAT:
@@ -12292,7 +12292,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			if( --(sce->val4) >= 0 ) {
 				if( !status_charge(bl,0,status->max_sp * 3 / 100) )
 					break;
-				sc_timer_next(sce->val2 + tick,status_change_timer,bl->id,data);
+				sc_timer_next(sce->val3 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
 			break;

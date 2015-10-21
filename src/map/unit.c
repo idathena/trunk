@@ -1189,8 +1189,7 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
 	if (!unit_remove_map(bl, type))
 		return 3;
 
-	if (bl->m != m && battle_config.clear_unit_onwarp &&
-		battle_config.clear_unit_onwarp&bl->type)
+	if (bl->m != m && battle_config.clear_unit_onwarp && battle_config.clear_unit_onwarp&bl->type)
 		skill_clear_unitgroup(bl);
 
 	bl->x = ud->to_x = x;
@@ -2769,14 +2768,19 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 			status_change_end(bl,SC_GOSPEL,INVALID_TIMER);
 		status_change_end(bl,SC_CHANGE,INVALID_TIMER);
 		status_change_end(bl,SC_STOP,INVALID_TIMER);
+		status_change_end(bl,SC_ELECTRICSHOCKER,INVALID_TIMER);
 		status_change_end(bl,SC_WUGDASH,INVALID_TIMER);
+		status_change_end(bl,SC_BITE,INVALID_TIMER);
 		status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 		status_change_end(bl,SC_MAGNETICFIELD,INVALID_TIMER);
+		status_change_end(bl,SC_NEUTRALBARRIER_MASTER,INVALID_TIMER);
+		status_change_end(bl,SC_STEALTHFIELD_MASTER,INVALID_TIMER);
 		status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 		status_change_end(bl,SC__MANHOLE,INVALID_TIMER);
-		status_change_end(bl,SC_VACUUM_EXTREME,INVALID_TIMER);
 		status_change_end(bl,SC_CURSEDCIRCLE_ATKER,INVALID_TIMER);
 		status_change_end(bl,SC_NETHERWORLD,INVALID_TIMER);
+		status_change_end(bl,SC_CRYSTALIZE,INVALID_TIMER);
+		status_change_end(bl,SC_VACUUM_EXTREME,INVALID_TIMER);
 	}
 
 	if (bl->type&(BL_CHAR|BL_PET)) {
@@ -2788,12 +2792,6 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 		case BL_PC: {
 				struct map_session_data *sd = (struct map_session_data *)bl;
 
-				if (sd->shadowform_id) { //If shadow target has leave the map
-					struct block_list *d_bl = map_id2bl(sd->shadowform_id);
-
-					if(d_bl)
-						status_change_end(d_bl,SC__SHADOWFORM,INVALID_TIMER);
-				}
 				//Leave/reject all invitations
 				if (sd->chatID)
 					chat_leavechat(sd,0);
@@ -2817,8 +2815,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 					sd->menuskill_id = sd->menuskill_val = 0;
 				if (sd->touching_id)
 					npc_touchnext_areanpc(sd,true);
-				//Check if warping and not changing the map
-				if (sd->state.warping && !sd->state.changemap) {
+				if (sd->state.warping && !sd->state.changemap) { //Check if warping and not changing the map
 					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
 				}
