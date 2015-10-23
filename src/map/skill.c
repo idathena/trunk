@@ -12936,8 +12936,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 	type = status_skill2sc(skill_id);
 	sce = (sc && type != SC_NONE) ? sc->data[type] : NULL;
 
-	if( skill_get_type(skill_id) == BF_MAGIC &&
-		map_getcell(unit->bl.m,unit->bl.x,unit->bl.y,CELL_CHKLANDPROTECTOR) && skill_id != SA_LANDPROTECTOR )
+	if( skill_get_type(skill_id) == BF_MAGIC && skill_id != SA_LANDPROTECTOR && map_getcell(unit->bl.m,unit->bl.x,unit->bl.y,CELL_CHKLANDPROTECTOR) )
 		return 0; //AoE skills are ineffective [Skotlex]
 
 	if( skill_get_inf2(skill_id)&(INF2_SONG_DANCE|INF2_ENSEMBLE_SKILL) && map_getcell(bl->m,bl->x,bl->y,CELL_CHKBASILICA) )
@@ -17112,7 +17111,7 @@ static int skill_cell_overlap(struct block_list *bl, va_list ap)
 				skill_delunit(unit);
 				return 1;
 			}
-			//It deletes everything except non-essamble dance skills, traps (exclude Fire Pillar and Hells Plant) and barriers
+			//It deletes everything except non-essamble dance skills, traps (exclude Fire Pillar and Hells Plant)
 			if ((!(skill_get_inf2(unit->group->skill_id)&(INF2_TRAP)) && !(skill_get_inf3(unit->group->skill_id)&(INF3_NOLP))) ||
 				unit->group->skill_id == WZ_FIREPILLAR || unit->group->skill_id == GN_HELLS_PLANT) {
 				skill_delunit(unit);
@@ -17193,7 +17192,7 @@ static int skill_cell_overlap(struct block_list *bl, va_list ap)
 	}
 
 	if (unit->group->skill_id == SA_LANDPROTECTOR && !(skill_get_inf2(skill_id)&(INF2_TRAP)) && !(skill_get_inf3(skill_id)&(INF3_NOLP))) {
-		(*alive) = 0; //It deletes everything except non-essamble dance skills, traps and barriers
+		(*alive) = 0; //It deletes everything except non-essamble dance skills, traps
 		return 1;
 	}
 
@@ -18004,7 +18003,7 @@ int skill_unit_timer_sub_onplace(struct block_list *bl, va_list ap)
 
 	if( !(skill_get_inf2(group->skill_id)&(INF2_TRAP)) && !(skill_get_inf3(group->skill_id)&(INF3_NOLP)) &&
 		map_getcell(unit->bl.m,unit->bl.x,unit->bl.y,CELL_CHKLANDPROTECTOR) )
-		return 0; //AoE skills are ineffective except non-essamble dance skills, traps and barriers
+		return 0; //AoE skills are ineffective except non-essamble dance skills, traps
 
 	if( group->skill_id != GN_WALLOFTHORN && battle_check_target(&unit->bl,bl,group->target_flag) <= 0 )
 		return 0;

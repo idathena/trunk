@@ -10832,11 +10832,7 @@ void clif_parse_ActionRequest(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
 
-	clif_parse_ActionRequest_sub(sd,
-		RFIFOB(fd,info->pos[1]),
-		RFIFOL(fd,info->pos[0]),
-		gettick()
-	);
+	clif_parse_ActionRequest_sub(sd,RFIFOB(fd,info->pos[1]),RFIFOL(fd,info->pos[0]),gettick());
 }
 
 
@@ -11299,7 +11295,7 @@ void clif_npc_sell_result(struct map_session_data *sd, unsigned char result)
 /// 00c9 <packet len>.W { <index>.W <amount>.W }*
 void clif_parse_NpcSellListSend(int fd,struct map_session_data *sd)
 {
-	int fail=0,n;
+	int fail = 0, n;
 	unsigned short *item_list;
 	struct s_packet_db *info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
 
@@ -12132,7 +12128,7 @@ void clif_parse_NpcSelectMenu(int fd,struct map_session_data *sd)
 /// 00b9 <npc id>.L
 void clif_parse_NpcNextClicked(int fd,struct map_session_data *sd)
 {
-	npc_scriptcont(sd,RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]), false);
+	npc_scriptcont(sd, RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]), false);
 }
 
 
@@ -12154,14 +12150,14 @@ void clif_parse_NpcAmountInput(int fd,struct map_session_data *sd)
 void clif_parse_NpcStringInput(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
-	int message_len = RFIFOW(fd,info->pos[0])-8;
+	int message_len = RFIFOW(fd,info->pos[0]) - 8;
 	int npcid = RFIFOL(fd,info->pos[1]);
 	const char *message = (char *)RFIFOP(fd,info->pos[2]);
 
 	if( message_len <= 0 )
-		return; // invalid input
+		return; //Invalid input
 
-	safestrncpy(sd->npc_str, message, min(message_len,CHATBOX_SIZE));
+	safestrncpy(sd->npc_str, message, min(message_len, CHATBOX_SIZE));
 	npc_scriptcont(sd, npcid, false);
 }
 
