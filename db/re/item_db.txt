@@ -8460,12 +8460,12 @@
 16030,Pile_Bunker_S,Pile Bunker S,5,250000,,3000,400,,1,1,0x00000400,56,2,2,4,130,1,8,{ bonus bAspdRate,getrefine()/2; },{},{}
 16031,Pile_Bunker_P,Pile Bunker P,5,250000,,4000,450,,1,0,0x00000400,56,2,2,4,130,1,8,{ bonus bBaseAtk,getrefine()*5; },{},{}
 16032,Pile_Bunker_T,Pile Bunker T,5,250000,,3500,400,,1,1,0x00000400,56,2,2,4,130,1,8,{ bonus bUseSPrate,-getrefine(); },{},{}
-16033,Robots_Mechanical_Arm,Robot's Mechanical Arm,5,20,,3000,195,,1,2,0x00000400,56,2,2,4,130,1,8,{ bonus bCritical,20; bonus bUnbreakableWeapon,0; },{},{}
+16033,Robots_Mechanical_Arm,Robot's Mechanical Arm,5,20,,3000,195,,1,2,0x00000032,56,2,2,4,130,1,8,{ bonus bCritical,20; bonus bUnbreakableWeapon,0; },{},{}
 16034,Half_Mjolnir,Half Mjolnir,5,20,,6000,350,,1,0,0x000444A2,63,2,2,4,95,0,8,{ bonus bAtkEle,Ele_Wind; bonus bDex,50; bonus bStr,20; bonus bAspdRate,10; bonus3 bAutoSpell,"MG_THUNDERSTORM",10,100; autobonus "{ bonus bSplashRange,1; }",50,10000,BF_WEAPON,"{ specialeffect2 EF_ENHANCE; }"; },{},{}
 16035,Half_BF_Morning_Star1,Half BF Morning Star1,5,20,,0,105,,1,0,0x0004C5B3,63,2,2,3,80,1,8,{ bonus bStr,1; bonus bDex,1; bonus2 bAddRace,RC_DemiHuman,35; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,10; bonus bUnbreakableWeapon,0; },{},{}
 16036,Ru_Blue_Mace,Ru_Blue Mace,5,20,,1500,170,,1,1,0x00008000,56,2,2,3,100,1,8,{ bonus bVit,5; bonus bInt,5; /* Gold PC Room: bonus2 bAddClass,Class_All,20; bonus bVariableCastrate,-10; */ },{},{}
 16037,Ru_Gold_Mace,Ru Gold Mace,5,20,,1500,170,,1,2,0x00008000,56,2,2,3,120,1,8,{ bonus bVit,8; bonus bInt,8; },{},{}
-16038,Infinity_Mace,Infinity Mace,5,20,,500,155,,1,1,0x00000032,63,2,2,4,100,1,8,{},{},{}
+16038,Infinity_Mace,Infinity Mace,5,20,,500,155,,1,1,0x00000032,56,2,2,4,100,1,8,{},{},{}
 16039,Spoon,Spoon,5,20,,1000,80,,1,1,0x0004C5B3,63,2,2,3,40,1,8,{ bonus bAspd,10; bonus2 bAddEff,Eff_Curse,1000; },{},{}
 16040,Crimson_Mace,Crimson Mace,5,20,,800,80,,1,2,0x0004C5B3,63,2,2,3,70,1,8,{ set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); if(BaseLevel>70) bonus bBaseAtk,((BaseLevel-70)/10)*5; bonus bUnbreakableWeapon,0; },{},{}
 16041,Mace_Of_Vicious_Mind,Mace of Vicious Mind,5,20,,1300,130,,1,1,0x0004C5B3,63,2,2,4,160,1,8,{ set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); bonus bUnbreakableWeapon,0; },{},{}
@@ -9475,10 +9475,10 @@
 18825,Bankruptcy_Of_Heart_,Bankruptcy of Heart,4,20,,1200,,8,,1,0xFFFFFFFF,63,2,256,,38,1,107,{ bonus bInt,1; bonus bDex,1; },{},{}
 18826,Chun_Tree_Hat,Chun Tree Hat,4,20,,300,,0,,1,0xFFFFFFFF,63,2,256,,1,1,939,{ bonus bVit,2; bonus bInt,2; },{},{}
 18827,Valkyrie_Circlet,Valkyrie Circlet,4,20,,300,,10,,1,0xFFFFFFFF,63,2,256,,50,1,940,{ bonus bStr,1; bonus2 bAddDefEle,Ele_Dark,10; bonus2 bAddRace,RC_Demon,10; },{},{}
-18828,2012RMSCNO1,2013 RWC Winners Helmet,4,1000,,1000,,20,,1,0xFFFFFFFF,63,2,256,,60,1,942,{ bonus bAllStats,5; bonus bMdef,5; bonus bSpeedAddRate,10; skill "AL_TELEPORT",1; bonus bUnbreakableHelm,0; },{},{}
-18829,2012RMSCNO2,2013 RWC Runners-Up Helmet,4,1000,,1000,,20,,1,0xFFFFFFFF,63,2,256,,60,1,943,{ bonus bAllStats,4; bonus bMdef,5; bonus bSpeedAddRate,10; skill "AL_TELEPORT",1; bonus bUnbreakableHelm,0; },{},{}
-18830,2012RMSCNO3,2013 RWC 3rd Helmet,4,1000,,1000,,20,,1,0xFFFFFFFF,63,2,256,,60,1,944,{ bonus bAllStats,3; bonus bMdef,5; bonus bSpeedAddRate,10; skill "AL_TELEPORT",1; bonus bUnbreakableHelm,0; },{},{}
-18831,2012RMSCNO4,2012RMSCNO4,4,1000,,1000,,20,,1,0xFFFFFFFF,63,2,256,,95,0,945,{ bonus bAllStats,2; bonus bMdef,5; bonus bSpeedAddRate,10; },{},{}
+18828,2012RMSCNO1,RMSC2012 Champion Headgear,4,1000,,1000,,20,,1,0xFFFFFFFF,63,2,256,,60,1,942,{ bonus bAllStats,5; bonus bMdef,5; bonus bSpeedAddRate,10; skill "AL_TELEPORT",1; bonus bUnbreakableHelm,0; },{},{}
+18829,2012RMSCNO2,RMSC2012 1st Runner Headgear,4,1000,,1000,,20,,1,0xFFFFFFFF,63,2,256,,60,1,943,{ bonus bAllStats,4; bonus bMdef,5; bonus bSpeedAddRate,10; skill "AL_TELEPORT",1; bonus bUnbreakableHelm,0; },{},{}
+18830,2012RMSCNO3,RMSC2012 2nd Runner Headgear,4,1000,,1000,,20,,1,0xFFFFFFFF,63,2,256,,60,1,944,{ bonus bAllStats,3; bonus bMdef,5; bonus bSpeedAddRate,10; skill "AL_TELEPORT",1; bonus bUnbreakableHelm,0; },{},{}
+18831,2012RMSCNO4,RMSC2012 Special Headgear,4,1000,,1000,,20,,1,0xFFFFFFFF,63,2,256,,95,0,945,{ bonus bAllStats,2; bonus bMdef,5; bonus bSpeedAddRate,10; },{},{}
 18832,Rolf_Von_Gigue_666th,Rolf Von Gigue 666th,4,20,,300,,0,,0,0xFFFFFFFF,63,2,256,,0,1,946,{ bonus3 bAutoSpell,"BS_ADRENALINE",2,5+(getpetinfo(0)==1101?(getpetinfo(3)>=910?15:10):0); },{},{}
 18833,Marin_Crown,Marin Crown,4,20,,10,,3,,1,0xFFFFFFFF,63,2,256,,1,1,948,{ bonus bAllStats,1; bonus bMdef,2; bonus3 bAutoSpellWhenHit,"MG_FROSTDIVER",3,10; bonus3 bAutoSpell,"MG_COLDBOLT",5,10; },{},{}
 18834,Sakura_Hairband,Sakura Hairband,4,20,,0,,3,,0,0xFFFFFFFF,63,2,256,,1,1,949,{ bonus bLuk,3; bonus3 bAutoSpellWhenHit,"HP_ASSUMPTIO",3,10; },{},{}

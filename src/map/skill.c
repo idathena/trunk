@@ -2276,29 +2276,26 @@ static int skill_magic_reflect(struct block_list *src, struct block_list *bl, in
 	struct status_change *sc = status_get_sc(bl);
 	struct map_session_data *sd = BL_CAST(BL_PC, bl);
 
-	if( sc && sc->data[SC_KYOMU] )
-		return 0; //Nullify reflecting ability
+	if( !sc || !sc->count )
+		return 0; //Status-based reflection
 
-	//Item-based reflection
-	if( sd && sd->bonus.magic_damage_return && type && rnd()%100 < sd->bonus.magic_damage_return )
-		return 1;
+	if( sc->data[SC_KYOMU] )
+		return 0; //Nullify reflecting ability
 
 	if( is_boss(src) )
 		return 0;
 
-	//Status-based reflection
-	if( !sc || sc->count == 0 )
-		return 0;
+	if( sd && sd->bonus.magic_damage_return && type && rnd()%100 < sd->bonus.magic_damage_return )
+		return 1; //Item-based reflection
 
 	if( sc->data[SC_MAGICMIRROR] && rnd()%100 < sc->data[SC_MAGICMIRROR]->val2 )
 		return 1;
 
-	//Kaite only works against non-players if they are low-level
 	if( sc->data[SC_KAITE] && (src->type == BL_PC || status_get_lv(src) <= 80) ) {
 		clif_specialeffect(bl, 438, AREA);
 		if( --sc->data[SC_KAITE]->val2 <= 0 )
 			status_change_end(bl, SC_KAITE, INVALID_TIMER);
-		return 2;
+		return 2; //Kaite only works against non-players if they are low-level
 	}
 
 	return 0;
@@ -2751,7 +2748,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 
 	if ((dmg.flag&BF_MAGIC) && (skill_id != NPC_EARTHQUAKE || //Earthquake on multiple targets is not counted as a target skill [Inkfish]
 		(battle_config.eq_single_target_reflectable && (flag&0xFFF) == 1))) {
-		if ((dmg.damage || dmg.damage2) && (type = skill_magic_reflect(src, bl, src == dsrc))) { //Magic reflection, switch caster/target
+		if ((dmg.damage || dmg.damage2) && (type = skill_magic_reflect(src, bl, (src == dsrc)))) { //Magic reflection, switch caster/target
 			struct block_list *tbl = bl;
 
 			rmdamage = true;
@@ -6123,15 +6120,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			status_change_end(bl,SC_NEN,INVALID_TIMER);
 			break;
 
-		/* Was modified to only affect targetted char.	[Skotlex]
+		/* Was modified to only affect targetted char [Skotlex]
 		case HP_ASSUMPTIO:
 			if (flag&1)
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			else {
-				map_foreachinrange(skill_area_sub,bl,
-					skill_get_splash(skill_id,skill_lv),BL_PC,
-					src,skill_id,skill_lv,tick,flag|BCT_ALL|1,
-					skill_castend_nodamage_id);
+				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_PC,src,
+					skill_id,skill_lv,tick,flag|BCT_ALL|1,skill_castend_nodamage_id);
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			}
 			break;

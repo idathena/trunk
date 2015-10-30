@@ -8874,7 +8874,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					struct block_list *d_bl;
 					struct status_change *d_sc;
 
-					if( (d_bl = map_id2bl(val1)) && (d_sc = status_get_sc(d_bl)) && d_sc->count ) { //Inherits Status From Source
+					if( (d_bl = map_id2bl(val1)) && (d_sc = status_get_sc(d_bl)) && d_sc->count ) { //Inherits status from source
 						const enum sc_type types[] = { SC_AUTOGUARD,SC_REFLECTSHIELD,SC_ENDURE };
 						int i = (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) ? 1 : 2;
 
@@ -9147,8 +9147,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 20 * val1; //Heal effectiveness decrease
 				break;
 			case SC_MAGICMIRROR:
-				//Level 6 ~ 10 use effect of level 1 ~ 5
-				val1 = 1 + ((val1 - 1)%5);
+				val1 = 1 + ((val1 - 1)%5); //Level 6 ~ 10 use effect of level 1 ~ 5
+			//Fall through
 			case SC_SLOWCAST:
 				val2 = 20 * val1; //Magic reflection/cast rate
 				break;

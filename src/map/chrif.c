@@ -1272,7 +1272,7 @@ int chrif_save_scdata(struct map_session_data *sd) {
 			continue;
 		if (sc->data[i]->timer != INVALID_TIMER) {
 			timer = get_timer(sc->data[i]->timer);
-			if (timer == NULL || timer->func != status_change_timer)
+			if (!timer || timer->func != status_change_timer)
 				continue;
 			if (DIFF_TICK(timer->tick,tick) > 0)
 				data.tick = DIFF_TICK(timer->tick,tick); //Duration that is left before ending
@@ -1289,7 +1289,7 @@ int chrif_save_scdata(struct map_session_data *sd) {
 		count++;
 	}
 
-	if (count == 0)
+	if (!count)
 		return 0; //Nothing to save or everything was as successful as if there was something to save
 
 	WFIFOW(char_fd,12) = count;
@@ -1320,7 +1320,7 @@ int chrif_skillcooldown_save(struct map_session_data *sd) {
 		if (!battle_config.guild_skill_relog_delay && (sd->scd[i]->skill_id >= GD_BATTLEORDER && sd->scd[i]->skill_id <= GD_EMERGENCYCALL))
 			continue;
 		timer = get_timer(sd->scd[i]->timer);
-		if (timer == NULL || timer->func != skill_blockpc_end || DIFF_TICK(timer->tick, tick) < 0)
+		if (!timer || timer->func != skill_blockpc_end || DIFF_TICK(timer->tick, tick) < 0)
 			continue;
 		data.tick = DIFF_TICK(timer->tick, tick);
 		data.skill_id = sd->scd[i]->skill_id;
@@ -1328,7 +1328,7 @@ int chrif_skillcooldown_save(struct map_session_data *sd) {
 		count++;
 	}
 
-	if (count == 0)
+	if (!count)
 		return 0;
 
 	WFIFOW(char_fd,12) = count;
@@ -1488,14 +1488,14 @@ int chrif_char_online(struct map_session_data *sd) {
 
 ///Called when the connection to Char Server is disconnected.
 void chrif_on_disconnect(void) {
-	if( chrif_connected != 1 )
+	if (chrif_connected != 1)
 		ShowWarning("Connection to Char Server lost.\n\n");
 	chrif_connected = 0;
 
-	other_mapserver_count = 0; //Reset counter. We receive ALL maps from all map-servers on reconnect.
+	other_mapserver_count = 0; //Reset counter, we receive ALL maps from all map-servers on reconnect
 	map_eraseallipport();
 
-	//Attempt to reconnect in a second. [Skotlex]
+	//Attempt to reconnect in a second [Skotlex]
 	add_timer(gettick() + 1000, check_connect_char_server, 0, 0);
 }
 
