@@ -440,6 +440,7 @@
 5391:5766,{ set .@r,getequiprefinerycnt(EQI_HEAD_TOP); if(.@r>=7) bonus bMaxHP,100; if(.@r>=9) bonus bMaxHP,200; }
 5401:5653,{ bonus bInt,1; bonus bMatkRate,2; }
 5403:18529,{ bonus3 bAutoSpell,"BS_GREED",1,50; }
+5421:18651,{ bonus bAspdRate,getequiprefinerycnt(EQI_HEAD_TOP)/2; }
 5470:5653,{ bonus bDex,1; bonus bLongAtkRate,3; }
 5475:18656,{ bonus bBaseAtk,30; bonus bMatk,30; autobonus "{ bonus2 bAddMonsterDropItem,529,5000; bonus2 bAddMonsterDropItem,530,5000; bonus2 bAddMonsterDropItem,538,5000; bonus2 bAddMonsterDropItem,12192,5000; }",10,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; autobonus "{ bonus2 bAddMonsterDropItem,529,5000; bonus2 bAddMonsterDropItem,530,5000; bonus2 bAddMonsterDropItem,538,5000; bonus2 bAddMonsterDropItem,12192,5000; }",5,5000,BF_MAGIC,"{ specialeffect2 EF_ENERGYCOAT; }"; }
 5498:5521,{ set .@r,getequiprefinerycnt(EQI_HEAD_TOP); if(.@r>=7) bonus bCritAtkRate,10; if(.@r>=9) bonus bAspd,1; }
