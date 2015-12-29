@@ -17278,7 +17278,7 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 			break;
 		case UNT_FIRINGTRAP:
 		case UNT_ICEBOUNDTRAP:
-			if( src->id == bl->id )
+			if( bl->id == src->id )
 				break;
 			if( bl->type == BL_SKILL ) {
 				struct skill_unit *su = (struct skill_unit *)bl;
@@ -17290,15 +17290,14 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 			}
 		//Fall through
 		case UNT_CLUSTERBOMB:
-			if( ss != bl )
+			if( bl->id != ss->id )
 				skill_attack(BF_MISC,ss,src,bl,group->skill_id,group->skill_lv,tick,group->val1|SD_LEVEL);
 			break;
 		case UNT_B_TRAP:
-			if( battle_check_target(ss,bl,(group->target_flag&~BCT_SELF)) > 0 )
-				skill_castend_damage_id(ss,bl,group->skill_id,group->skill_lv,tick,SD_LEVEL|SD_ANIMATION|SD_SPLASH|1);
+			skill_castend_damage_id(ss,bl,group->skill_id,group->skill_lv,tick,SD_LEVEL|SD_ANIMATION|SD_SPLASH|1);
 			break;
 		case UNT_CLAYMORETRAP:
-			if( src->id == bl->id )
+			if( bl->id == src->id )
 				break;
 			if( bl->type == BL_SKILL ) {
 				struct skill_unit *su = (struct skill_unit *)bl;
@@ -17520,12 +17519,12 @@ bool skill_check_shadowform(struct block_list *bl, int64 damage, int hit)
 
 			status_damage(src, bl, (damage / hit) * (hit - temp), 0, 0, 0);
 			status_damage(bl, src, (damage / hit) * (hit - (hit - temp)), 0,
-				clif_damage(src, src, gettick(), status_get_amotion(src), status_get_dmotion(src), damage, hit, (hit > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0), 0);
+				clif_damage(src, src, gettick(), 500, 500, damage, hit, (hit > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0), 0);
 			status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 			if( src->type == BL_PC )
 				((TBL_PC *)src)->shadowform_id = 0;
 		} else
-			status_damage(bl, src, damage, 0, clif_damage(src, src, gettick(), status_get_amotion(src), status_get_dmotion(src), damage, hit, (hit > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0), 0);
+			status_damage(bl, src, damage, 0, clif_damage(src, src, gettick(), 500, 500, damage, hit, (hit > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0), 0);
 		return true;
 	}
 	return false;

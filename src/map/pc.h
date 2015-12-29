@@ -354,6 +354,8 @@ struct map_session_data {
 	int ignore_def_by_race[RC_MAX];
 	int ignore_def_by_class[CLASS_MAX];
 	short sp_gain_race[RC_MAX];
+	int dropaddrace[RC_MAX];
+	int dropaddclass[CLASS_MAX];
 	//Zeroed arrays end here
 
 	//Zeroed structures start here

@@ -3949,7 +3949,7 @@ moc_para01,111,83,3	script	Blacksmith Thorn#2nd10	2_M_OLDBLSMITH,{
 					1986,"Eden Group Whip I","Whip, Attack 125", //P_Tail1
 					18106,"Eden Group Bow III","Bow, Attack 140"; //P_Bow3
 			}
-			else if (Class == Job_Ninja) {
+			else if (BaseJob == Job_Ninja) {
 				callsub L_Select,"",
 					13066,"Eden Group Dagger III","Dagger, MATK +80, ATK 165", //P_Dagger3
 					13310,"Eden Group Huuma Shuriken I","Huuma Suriken, MATK +50, ATK 170"; //P_Huuma_Suriken1
@@ -3961,7 +3961,7 @@ moc_para01,111,83,3	script	Blacksmith Thorn#2nd10	2_M_OLDBLSMITH,{
 					1658,"Eden Group Staff III","Staff, MATK +170, INT +4, ATK 60", //P_Staff3
 					13066,"Eden Group Dagger III","Dagger, MATK +80, ATK 165"; //P_Dagger3
 			}
-			else if (Class == Job_Gunslinger)
+			else if (BaseJob == Job_Gunslinger)
 				getitem 13114,1; //P_Revolver3
 			else {
 				mes "Hmm, you are eligible to receive equipment.";

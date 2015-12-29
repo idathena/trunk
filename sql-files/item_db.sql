@@ -1008,7 +1008,7 @@ REPLACE INTO `item_db` VALUES (1767,'Arrow_Of_Shadow','Arrow of Shadow',10,3,NUL
 REPLACE INTO `item_db` VALUES (1768,'Sleep_Arrow','Sleep Arrow',10,10,NULL,3,1,NULL,NULL,NULL,0x000A1848,7,2,32768,NULL,1,NULL,1,'bonus2 bAddEff,Eff_Sleep,2000;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (1769,'Silence_Arrow','Mute Arrow',10,10,NULL,3,1,NULL,NULL,NULL,0x000A1848,7,2,32768,NULL,1,NULL,1,'bonus2 bAddEff,Eff_Silence,1000;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (1770,'Iron_Arrow','Iron Arrow',10,2,NULL,1,30,NULL,NULL,NULL,0x000A1848,7,2,32768,NULL,1,NULL,1,NULL,NULL,NULL);
-REPLACE INTO `item_db` VALUES (1771,'Venom_Knife','Venom Knife',10,50,NULL,5,30,NULL,NULL,NULL,0x00001000,7,2,32768,NULL,1,NULL,2,NULL,NULL,NULL);
+REPLACE INTO `item_db` VALUES (1771,'Venom_Knife','Venom Knife',10,50,NULL,5,30,NULL,NULL,NULL,0x000A1848,7,2,32768,NULL,1,NULL,2,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (1772,'Holy_Arrow','Holy Arrow',10,3,NULL,2,50,NULL,NULL,NULL,0x000A1848,7,2,32768,NULL,1,NULL,1,'bonus bAtkEle,Ele_Holy; bonus2 bAddRace,RC_Demon,5;',NULL,NULL);
 # Knuckles
 #===================================================================
@@ -4713,8 +4713,8 @@ REPLACE INTO `item_db` VALUES (12108,'Bundle_Of_Magic_Scroll','Scroll Package',2
 REPLACE INTO `item_db` VALUES (12109,'Poring_Box','Poring Box',2,10000,NULL,200,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'monster "this",-1,-1,"--ja--",-2,1,"";',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12110,'First_Aid_Kit','First Aid Kit',2,10000,NULL,200,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getrandgroupitem(IG_FirstAid,1); getrandgroupitem(IG_FirstAid,1); getrandgroupitem(IG_FirstAid,1); getrandgroupitem(IG_FirstAid,1); getrandgroupitem(IG_FirstAid,1);',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12111,'Food_Package','Bundle of Food',2,10000,NULL,200,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getrandgroupitem(IG_FoodBag,1); getrandgroupitem(IG_FoodBag,1); getrandgroupitem(IG_FoodBag,1);',NULL,NULL);
-REPLACE INTO `item_db` VALUES (12112,'Tropical_Sograt','Tropical Sograt',2,1000,NULL,100,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'sc_start SC_CURSE,10000,1;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (12113,'Vermilion_The_Beach','Vermilion on the Beach',2,1000,NULL,100,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'sc_start SC_STUN,10000,1;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (12112,'Tropical_Sograt','Tropical Sograt',2,1000,NULL,100,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'sc_start SC_CONFUSION,10000,0; sc_start SC_CURSE,10000,0;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (12113,'Vermilion_The_Beach','Vermilion on the Beach',2,1000,NULL,100,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'sc_start SC_BLIND,10000,0; sc_start SC_STUN,10000,0;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12114,'Elemental_Fire','Elemental Converter',11,2,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'itemskill "ITEM_ENCHANTARMS",4;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12115,'Elemental_Water','Elemental Converter',11,2,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'itemskill "ITEM_ENCHANTARMS",2;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12116,'Elemental_Earth','Elemental Converter',11,2,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'itemskill "ITEM_ENCHANTARMS",3;',NULL,NULL);
@@ -5260,7 +5260,7 @@ REPLACE INTO `item_db` VALUES (12770,'Glory_FB_Hat_Box','Glory FB Hat Box',2,0,N
 REPLACE INTO `item_db` VALUES (12771,'Passion_Hat_Box2','Passion Hat Box2',2,0,NULL,0,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (12772,'Cool_Hat_Box2','Cool Hat Box2',2,0,NULL,0,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (12773,'Victory_Hat_Box2','Victory Hat Box2',2,0,NULL,0,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `item_db` VALUES (12846,'Unripe_Apple2','Unripe Apple2',2,10,NULL,50,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `item_db` VALUES (12846,'Little_Unripe_Apple','Little Unripe Apple',2,10,NULL,50,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (12848,'Falcon_Flute','Falcon Flute',11,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'if(getskilllv("HT_FALCON")) { if(checkoption(Option_Wug)||checkoption(Option_Wugrider)) end; if(checkfalcon()==1) { setfalcon 0; } else { setfalcon 1; } }',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12900,'Battle_Manual_Box','Battle Manual Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12208,10;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12901,'Insurance_Package','Insurance Package',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12209,10;',NULL,NULL);

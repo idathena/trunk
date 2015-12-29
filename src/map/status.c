@@ -1241,7 +1241,6 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_STEELBODY]           |= SCS_NOCAST;
 	StatusChangeStateTable[SC_BERSERK]             |= SCS_NOCAST;
 	StatusChangeStateTable[SC_OBLIVIONCURSE]       |= SCS_NOCAST;
-	StatusChangeStateTable[SC__SHADOWFORM]         |= SCS_NOCAST;
 	StatusChangeStateTable[SC__INVISIBILITY]       |= SCS_NOCAST;
 	StatusChangeStateTable[SC__IGNORANCE]          |= SCS_NOCAST;
 	StatusChangeStateTable[SC__MANHOLE]            |= SCS_NOCAST;
@@ -1952,6 +1951,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 				(sc->data[SC_MARIONETTE] && skill_id != CG_MARIONETTE) || //Only skill you can use is marionette again to cancel it
 				(sc->data[SC_MARIONETTE2] && skill_id == CG_MARIONETTE) || //Cannot use marionette if you are being buffed by another
 				(sc->data[SC_STASIS] && skill_block_check(src, SC_STASIS, skill_id)) ||
+				(sc->data[SC__SHADOWFORM] && !flag) ||
 				(sc->data[SC_KAGEHUMI] && skill_block_check(src, SC_KAGEHUMI, skill_id)))
 				return false;
 		}
@@ -3112,6 +3112,8 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->ignore_def_by_race)
 		+ sizeof(sd->ignore_def_by_class)
 		+ sizeof(sd->sp_gain_race)
+		+ sizeof(sd->dropaddrace)
+		+ sizeof(sd->dropaddclass)
 		);
 
 	memset(&sd->right_weapon.overrefine, 0, sizeof(sd->right_weapon) - sizeof(sd->right_weapon.atkmods));

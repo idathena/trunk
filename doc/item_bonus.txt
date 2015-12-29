@@ -450,3 +450,6 @@ bonus bAbsorbDmgMaxHP,n;		If the damage received is more than n% of Max HP, the 
 bonus2 bSubSkill,n,x;  			Reduces x% damage received from skill n. (supports skill names.)
 bonus2 bSubDefEle,n,x;    		+x% damage reduction from enemy with defense element n.
 					n: 	Ele_Neutral, Ele_Water, Ele_Earth, Ele_Fire, Ele_Wind, Ele_Poison, Ele_Holy, Ele_Dark, Ele_Ghost, Ele_Undead, Ele_All
+bonus2 bDropAddRace,n,x;		Increase drop gained by x% vs. enemies of race n
+bonus2 bDropAddClass,n,x;		Increase drop gained by x% vs. enemies of class n
+					n: 	Class_Normal, Class_Boss, Class_Guardian, Class_All

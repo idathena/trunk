@@ -1044,7 +1044,7 @@ lhz_cube,233,24,4	script	Sorcerer#Bio4Reward	4_M_UMDANCEKID,{
 				mes "Not enough '^88C6F7Chill of the Dead^000000', You need to bring 10 '^88C6F7Chill of the Dead^000000'";
 				close;
 			}
-			if ( (.@menu==3 && .@3thzptsodyd == 1) || (.@menu==2 && .@4thzptsodyd == 1) ) {
+			if ( (.@menu == 3 && .@3thzptsodyd == 1) || (.@menu == 2 && .@4thzptsodyd == 1) ) {
 				mes "[Pudding]";
 				mes "This equipment didn't get any special power.";
 				close;

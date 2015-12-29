@@ -338,6 +338,9 @@
 2968:18821,{ bonus bMatkRate,getequiprefinerycnt(EQI_HEAD_TOP)/2; }
 2969:13092,{ bonus bMatk,10*getequiprefinerycnt((getequipid(EQI_HAND_R) == 13092)?EQI_HAND_R:EQI_HAND_L); }
 2969:18821,{ bonus bMatkRate,getequiprefinerycnt(EQI_HEAD_TOP)/2; }
+2977:2978,{ bonus5 bAutoSpell,"WZ_FROSTNOVA",10,10,BF_WEAPON,0; bonus5 bAutoSpell,"SO_PSYCHIC_WAVE",1,10,BF_WEAPON,1; bonus5 bAutoSpell,"HW_MAGICPOWER",1,10,BF_MAGIC,0; bonus5 bAutoSpellWhenHit,"DC_SCREAM",1,10,BF_WEAPON|BF_MAGIC,0; }
+2979:18852,{ bonus bMaxHPRate,15; bonus2 bSubEle,Ele_Fire,10; bonus bLongAtkRate,30; }
+2979:18853,{ bonus bMaxHPRate,15; bonus2 bSubEle,Ele_Fire,10; bonus bLongAtkRate,30; }
 2983:4218,{ bonus bVit,-3; bonus bHPrecovRate,-20; bonus bMaxHP,1000; }
 2983:4218:4269,{ bonus bVit,-3; bonus bHPrecovRate,-20; bonus bMaxHP,1000; bonus bInt,-3; bonus bSPrecovRate,-20; bonus bMaxSP,150; }
 2983:4269,{ bonus bInt,-3; bonus bSPrecovRate,-20; bonus bMaxSP,150; }

@@ -3584,6 +3584,16 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 			PC_BONUS_CHK_ELEMENT(type2,SP_SUBDEF_ELE);
 			sd->subdefele[type2] += val;
 			break;
+		case SP_DROP_ADDRACE:
+			PC_BONUS_CHK_RACE(type2, SP_DROP_ADDRACE);
+			if(sd->state.lr_flag != 2)
+				sd->dropaddrace[type2] += val;
+			break;
+		case SP_DROP_ADDCLASS:
+			PC_BONUS_CHK_CLASS(type2, SP_DROP_ADDCLASS);
+			if(sd->state.lr_flag != 2)
+				sd->dropaddclass[type2] += val;
+			break;
 		default:
 			ShowWarning("pc_bonus2: Unknown type %d %d %d!\n", type, type2, val);
 			break;
@@ -6286,8 +6296,7 @@ static void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsi
 		if (battle_config.pk_mode && (int)(status_get_lv(src) - sd->status.base_level) >= 20)
 			bonus += 15; //pk_mode additional exp if monster > 20 levels [Valaris]
 #ifdef VIP_ENABLE
-		//EXP bonus for VIP player
-		if (src->type == BL_MOB && pc_isvip(sd)) {
+		if (src->type == BL_MOB && pc_isvip(sd)) { //EXP bonus for VIP player
 			vip_bonus_base = battle_config.vip_base_exp_increase;
 			vip_bonus_job = battle_config.vip_job_exp_increase;
 		}
