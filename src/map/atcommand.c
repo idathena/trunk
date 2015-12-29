@@ -5650,10 +5650,10 @@ ACMD_FUNC(changelook)
 	int type = 0, value = 0; //p = Position, v = Value
 	int pos[6] = { LOOK_HEAD_TOP,LOOK_HEAD_MID,LOOK_HEAD_BOTTOM,LOOK_WEAPON,LOOK_SHIELD,LOOK_ROBE };
 
-	if( sscanf(message, "%d %d", &type, &value) != 2 || type < 1 || type > 6 || value < 0) {
+	if( sscanf(message, "%d %d", &type, &value) != 2 || type < 1 || type > 6 || value < 0 ) {
 		clif_displaymessage(fd, msg_txt(1177)); // Usage: @changelook {<position>} <view id>
 		clif_displaymessage(fd, msg_txt(533));  // Position must be a number between 1 - 6 and view id must be 0 or higher.
-		clif_displaymessage(fd, msg_txt(1178)); // Position: 1-Top 2-Middle 3-Bottom 4-Weapon 5-Shield 6-Shoes 7-Robe
+		clif_displaymessage(fd, msg_txt(1178)); // Position: 1-Top 2-Middle 3-Bottom 4-Weapon 5-Shield 6-Robe
 		return -1;
 	}
 	//If the check passes, display the requested result on the character.

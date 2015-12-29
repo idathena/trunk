@@ -788,7 +788,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
  * Absorb damage based on criteria
  * @param bl
  * @param d Damage
- **/
+ */
 static void battle_absorb_damage(struct block_list *bl, struct Damage *d)
 {
 	int64 dmg_ori = 0, dmg_new = 0;
@@ -1496,9 +1496,10 @@ int64 battle_calc_gvg_damage(struct block_list *src, struct block_list *bl, int6
 	if( skill_get_inf2(skill_id)&INF2_NO_BG_GVG_DMG )
 		return damage;
 
-	//Uncomment if you want god-mode Emperiums at 100 defense [Kisuka]
-	//if( md && md->guardian_data )
+#ifndef RENEWAL
+	//if( md && md->guardian_data ) //Uncomment if you want god-mode Emperiums at 100 defense [Kisuka]
 		//damage -= damage * md->guardian_data->castle->defense / 100 * battle_config.castle_defense_rate / 100;
+#endif
 
 	if( flag&BF_SKILL ) { //Skills get a different reduction than non-skills [Skotlex]
 		if( flag&BF_WEAPON )
@@ -1678,14 +1679,14 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 {
 	struct status_data *status = status_get_status_data(src);
 	struct status_change *sc = status_get_sc(src);
-	uint8 type = (watk == &status->lhw ? EQI_HAND_L : EQI_HAND_R);
+	uint8 type = (watk == &status->lhw ? EQI_HAND_L : EQI_HAND_R), refine;
 	uint16 atkmin = (type == EQI_HAND_L ? status->watk2 : status->watk);
 	uint16 atkmax = atkmin;
 	int64 damage;
 	bool weapon_perfection = false;
-	short index, refine;
+	short index = sd->equip_index[type];
 
-	if((index = sd->equip_index[type]) >= 0 && sd->inventory_data[index]) {
+	if(index >= 0 && sd->inventory_data[index]) {
 		float strdex_bonus, variance;
 		short flag = 0, dstr;
 
@@ -1714,9 +1715,8 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 			atkmax = atkmin;
 	}
 
-	if(type == EQI_HAND_R && (index = sd->equip_index[type]) >= 0 && sd->inventory_data[index] &&
-		sd->inventory_data[index]->type == IT_WEAPON && sd->inventory_data[index]->range <= 3 &&
-		(refine = sd->status.inventory[index].refine) < 16 && refine) {
+	if(type == EQI_HAND_R && index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON &&
+		watk->range <= 3 && (refine = sd->status.inventory[index].refine) < 16 && refine) {
 		int r = refine_info[watk->wlv].randombonus_max[refine + (4 - watk->wlv)] / 100;
 
 		if(r)
@@ -1909,7 +1909,7 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		skill_id == NJ_KIRIKAGE)
 		return BF_SHORT;
 
-	//Skill Range Criteria
+	//Skill range criteria
 	if(battle_config.skillrange_by_distance && (src->type&battle_config.skillrange_by_distance)) {
 		if(check_distance_bl(src, target, 5)) //Based on distance between src/target [Skotlex]
 			return BF_SHORT;
@@ -2470,8 +2470,7 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 	if(sd) {
 		uint16 lv;
 
-#ifdef RENEWAL
-		//Weaponry Research hidden bonus
+#ifdef RENEWAL //Weaponry Research hidden bonus
 		if((lv = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0)
 			hitrate += hitrate * 2 * lv / 100;
 #endif
@@ -3442,8 +3441,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 				i *= 2; //Although not clear, it's being assumed that the 2x damage is only for the break neck ailment
 			skillratio += i;
 			break;
-#ifdef RENEWAL
-		//Renewal: skill ratio applies to entire damage [helvetica]
+#ifdef RENEWAL //Renewal: Skill ratio applies to entire damage [helvetica]
 		case LK_SPIRALPIERCE:
 		case ML_SPIRALPIERCE:
 			skillratio += 50 * skill_lv;
@@ -4486,8 +4484,7 @@ static short battle_get_defense(struct block_list *src, struct block_list *targe
 		if(skill_id == AM_ACIDTERROR)
 			def1 = 0; //Ignores eDEF [Skotlex]
 #endif
-		if(def2 < 1)
-			def2 = 1;
+		def2 = max(def2,1);
 	}
 	//Vitality reduction
 	//[rodatazone: http://rodatazone.simgaming.net/mechanics/substats.php#def]

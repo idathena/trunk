@@ -2488,6 +2488,8 @@ static int map_instancemap_clean(struct block_list *bl, va_list ap)
 	return 1;
 }
 
+static void map_free_questinfo(int m);
+
 /*==========================================
  * Deleting an instance map
  *------------------------------------------*/
@@ -2511,6 +2513,7 @@ int map_delinstancemap(int m)
 	aFree(map[m].cell);
 	aFree(map[m].block);
 	aFree(map[m].block_mob);
+	map_free_questinfo(m);
 
 	map_removemapdb(&map[m]);
 	memset(&map[m], 0x00, sizeof(map[0]));
@@ -3342,8 +3345,7 @@ void do_final_maps(void) {
 			map[i].skill_count = 0;
 		}
 
-		if( map[i].qi_data )
-			aFree(map[i].qi_data);
+		map_free_questinfo(i);
 	}
 }
 
@@ -3389,11 +3391,7 @@ void map_flags_init(void) {
 		if( battle_config.pk_mode )
 			map[i].flag.pvp = 1; // Make all maps pvp for pk_mode [Valaris]
 
-		if( map[i].qi_data )
-			aFree(map[i].qi_data);
-
-		map[i].qi_data = NULL;
-		map[i].qi_count = 0;
+		map_free_questinfo(i);
 	}
 }
 
@@ -3958,35 +3956,97 @@ int log_sql_init(void)
 	return 0;
 }
 
-void map_add_questinfo(int m, struct questinfo *qi) {
+struct questinfo *map_add_questinfo(int m, struct questinfo *qi) {
 	unsigned short i;
 
-	//Duplicate, override
 	for( i = 0; i < map[m].qi_count; i++ )
-		if( map[m].qi_data[i].nd == qi->nd )
-			break;
+		if( &map[m].qi_data[i] && map[m].qi_data[i].nd == qi->nd && map[m].qi_data[i].quest_id == qi->quest_id )
+			break; //Duplicate, override
 
 	if( i == map[m].qi_count )
 		RECREATE(map[m].qi_data, struct questinfo, ++map[m].qi_count);
+	else { //Clear previous criteria on override
+		if( map[m].qi_data[i].jobid )
+			aFree(map[m].qi_data[i].jobid);
+		map[m].qi_data[i].jobid = NULL;
+		map[m].qi_data[i].jobid_count = 0;
+		if( map[m].qi_data[i].req )
+			aFree(map[m].qi_data[i].req);
+		map[m].qi_data[i].req = NULL;
+		map[m].qi_data[i].req_count = 0;
+	}
 
 	memcpy(&map[m].qi_data[i], qi, sizeof(struct questinfo));
+	return &map[m].qi_data[i];
 }
 
 bool map_remove_questinfo(int m, struct npc_data *nd) {
-	unsigned short i;
+	unsigned short i, c;
 
 	for( i = 0; i < map[m].qi_count; i++ ) {
 		struct questinfo *qi = &map[m].qi_data[i];
 
 		if( qi->nd == nd ) {
-			memset(&map[m].qi_data[i], 0, sizeof(struct questinfo));
-			if( i != --map[m].qi_count )
-				memmove(&map[m].qi_data[i],&map[m].qi_data[i + 1],sizeof(struct questinfo) * (map[m].qi_count - i));
-			return true;
+			if( qi->jobid )
+				aFree(qi->jobid);
+			qi->jobid = NULL;
+			qi->jobid_count = 0;
+			if( qi->req )
+				aFree(qi->req);
+			qi->req = NULL;
+			qi->req_count = 0;
+			memset(&map[m].qi_data[i], 0, sizeof(map[m].qi_data[i]));
 		}
 	}
 
-	return false;
+	for( i = 0, c = 0; i < map[m].qi_count; i++ ) { //Move next data to empty slot
+		struct questinfo *qi = &map[m].qi_data[i];
+
+		if( !qi || !qi->nd )
+			continue;
+		if( i != c ) {
+			map[m].qi_data[c] = map[m].qi_data[i];
+			memset(&map[m].qi_data[i], 0, sizeof(map[m].qi_data[i]));
+		}
+		c++;
+	}
+
+	if( !(map[m].qi_count = c) ) {
+		aFree(map[m].qi_data);
+		map[m].qi_data = NULL;
+	} else
+		RECREATE(map[m].qi_data, struct questinfo, map[m].qi_count);
+	return true;
+}
+
+static void map_free_questinfo(int m) {
+	unsigned short i;
+
+	for( i = 0; i < map[m].qi_count; i++ ) {
+		if( map[m].qi_data[i].jobid )
+			aFree(map[m].qi_data[i].jobid);
+		map[m].qi_data[i].jobid = NULL;
+		map[m].qi_data[i].jobid_count = 0;
+		if( map[m].qi_data[i].req )
+			aFree(map[m].qi_data[i].req);
+		map[m].qi_data[i].req = NULL;
+		map[m].qi_data[i].req_count = 0;
+	}
+	aFree(map[m].qi_data);
+	map[m].qi_data = NULL;
+	map[m].qi_count = 0;
+}
+
+struct questinfo *map_has_questinfo(int m, struct npc_data *nd, int quest_id) {
+	unsigned short i;
+
+	for( i = 0; i < map[m].qi_count; i++ ) {
+		struct questinfo *qi = &map[m].qi_data[i];
+
+		if( qi->nd == nd && qi->quest_id == quest_id )
+			return qi;
+	}
+	return NULL;
 }
 
 /**
@@ -3995,7 +4055,8 @@ bool map_remove_questinfo(int m, struct npc_data *nd) {
 int map_db_final(DBKey key, DBData *data, va_list ap)
 {
 	struct map_data_other_server *mdos = db_data2ptr(data);
-	if(mdos && mdos->cell == NULL)
+
+	if( mdos && mdos->cell == NULL )
 		aFree(mdos);
 	return 0;
 }

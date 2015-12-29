@@ -553,6 +553,10 @@ struct map_session_data {
 	struct quest *quest_log; //Quest log entries (note: Q_COMPLETE quests follow the first <avail_quests>th enties
 	bool save_quest;         //Whether the quest_log entries were modified and are waitin to be saved
 
+	//Showevent data cache flags from map
+	bool *qi_display;
+	unsigned short qi_count;
+
 	//Temporary debug [flaviojs]
 	const char *debug_file;
 	int debug_line;
@@ -1145,6 +1149,9 @@ short pc_get_itemgroup_bonus_group(struct map_session_data *sd, uint16 group_id)
 bool pc_is_same_equip_index(enum equip_index eqi, short *equip_index, short index);
 // Check if player is Taekwon Ranker and the level is >= 90 (battle_config.taekwon_ranker_min_lv)
 #define pc_is_taekwon_ranker(sd) (((sd)->class_&MAPID_UPPERMASK) == MAPID_TAEKWON && (sd)->status.base_level >= battle_config.taekwon_ranker_min_lv && pc_famerank((sd)->status.char_id,MAPID_TAEKWON))
+
+void pc_show_questinfo(struct map_session_data *sd);
+void pc_show_questinfo_reinit(struct map_session_data *sd);
 
 #if defined(RENEWAL_DROP) || defined(RENEWAL_EXP)
 int pc_level_penalty_mod(struct map_session_data *sd, int mob_level, uint32 mob_class, int type);

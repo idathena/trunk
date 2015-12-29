@@ -3792,7 +3792,7 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 				int i;
 
 				for (i = 0; i < MAX_DROP_PER_MAP; i++) {
-					if (map[m].drop_list[i].drop_id == 0){
+					if (map[m].drop_list[i].drop_id == 0) {
 						map[m].drop_list[i].drop_id = drop_id;
 						map[m].drop_list[i].drop_type = drop_type;
 						map[m].drop_list[i].drop_per = drop_per;

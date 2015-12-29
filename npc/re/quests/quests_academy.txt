@@ -192,7 +192,7 @@ iz_int04,96,73,0	duplicate(toIzlude)	#izlude_d	WARPNPC,2,2
 //============================================================
 -	script	::CaptainCaroccIzlude	-1,{
 	cutin "fly_trock",2;
-	if(Class == Job_Novice) {
+	if(Class == Job_Novice && BaseLevel < 15) {
 		if(isbegin_quest(4269) == 2) {
 			if(!isbegin_quest(7472)) {
 				mes "[Carocc]";
@@ -372,7 +372,7 @@ iz_int04,96,73,0	duplicate(toIzlude)	#izlude_d	WARPNPC,2,2
 						mes "[Carocc]";
 						mes "He usually talks to new adventurers near the entrance of the academy at the north bridge of Izlude.";
 						next;
-						if(isbegin_quest(7473) == 1) {
+						if(isbegin_quest(7473)) {
 							select("I know who you're talking about.");
 							mes "[Carocc]";
 							mes "Then there's no worry.";
@@ -569,16 +569,15 @@ iz_int04,96,73,0	duplicate(toIzlude)	#izlude_d	WARPNPC,2,2
 	}
 
 OnTouch:
-	if((eaclass()&BASEMASK) == EAJ_NOVICE) {
-		if(isbegin_quest(4269) == 2)
-			emotion e_heh;
-		else
-			emotion e_gasp;
-	} else
-		emotion e_heh;
+	if(Class == Job_Novice && BaseLevel < 15 && !isbegin_quest(4269))
+		emotion e_gasp;
+	else
+		emotion e_heh;	
 	end;
 OnInit:
-	questinfo QTYPE_QUEST,7472,0,0,0,1,0,EAJ_NOVICE;
+	questinfo 7472,QTYPE_QUEST,1,Job_Novice;
+	setquestinfo_level 7472,1,14;
+	setquestinfo_req 7472,7473,0;
 	end;
 }
 
@@ -632,7 +631,7 @@ izlude_d,127,229,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#2iz_d	4_F_ACOLYTE
 		mes "- Continue the quest after re-organizing your inventory.";
 		close;
 	}
-	if(Class == Job_Novice) {
+	if(Class == Job_Novice && BaseLevel < 15) {
 		viewpoint 2,1,1,14,0xFF0000;
 		if(!isbegin_quest(7473)) {
 			if(!isbegin_quest(7472)) {
@@ -911,13 +910,14 @@ izlude_d,127,229,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#2iz_d	4_F_ACOLYTE
 	}
 
 OnTouch:
-	if(isbegin_quest(4269) == 2)
-		emotion e_heh;
-	else
+	if(!isbegin_quest(4269))
 		emotion e_gasp;
+	else
+		emotion e_heh;
 	end;
 OnInit:
-	questinfo QTYPE_QUEST,7473,0,0,0,1,0,EAJ_NOVICE;
+	questinfo 7473,QTYPE_QUEST,1,Job_Novice;
+	setquestinfo_level 7473,1,14;
 	end;
 }
 
@@ -933,7 +933,7 @@ izlude_d,122,207,3	duplicate(CriaturaAcademyStaff)	Criatura Academy Staff#d	4_M_
 		mes "- Please try it again after re-organizing your items.";
 		close;
 	}
-	if(!(eaclass()&EAJL_2)) {
+	if(!(eaclass()&EAJL_2) && BaseLevel < 15) {
 		if(!isbegin_quest(7474)) {
 			mes "[Information Staff]";
 			mes "Hi, how are you?";
@@ -1213,9 +1213,7 @@ izlude_d,122,207,3	duplicate(CriaturaAcademyStaff)	Criatura Academy Staff#d	4_M_
 			mes "[Information Staff]";
 			mes "Enjoy your stay.";
 			mes "Bye~!";
-			close2;
-			cutin "prt_soldier",255;
-			end;
+			close;
 		}
 	}
 	end;
@@ -1231,7 +1229,8 @@ L_Mark:
 	mes "Would you like to check any other locations?";
 	return;
 OnInit:
-	questinfo QTYPE_QUEST,7474,0,0,0,1,EAJL_2,EAJ_NOVICE;
+	questinfo 7474,QTYPE_QUEST,1;
+	setquestinfo_level 7474,1,14;
 	end;
 }
 
@@ -1240,139 +1239,6 @@ izlude_a,120,207,4	duplicate(InformationStaff)	Information Staff#a	8W_SOLDIER
 izlude_b,120,207,4	duplicate(InformationStaff)	Information Staff#b	8W_SOLDIER
 izlude_c,120,207,4	duplicate(InformationStaff)	Information Staff#c	8W_SOLDIER
 izlude_d,120,207,4	duplicate(InformationStaff)	Information Staff#d	8W_SOLDIER
-
--	script	::BulletinBoardBridge	-1,{
-	mes "=== Information ===";
-	if(isbegin_quest(7474) == 1) {
-		if(!isbegin_quest(7477))
-			mes "Tx_01236";
-		else if(isbegin_quest(7477) == 1)
-			mes "Tx_01321";
-	} else
-		mes "Tx_01326";
-	mes "Prontera Field.";
-	mes "The city of Prontera is located to the north.";
-	if(isbegin_quest(7474) == 1 && !isbegin_quest(7477)) {
-		next;
-		set .@val,isbegin_quest(7475)+isbegin_quest(7476);
-		if(!.@val) {
-			mes "- Except for the simple signboard, nothing can be found.";
-			next;
-			select("Why is there nothing?");
-			cutin "nov_lumin01",2;
-			mes "[Lumin]";
-			mes "Of course.";
-			mes "Fly Wings were here so I already packed them in my bag.";
-			next;
-			select("So can I have some?");
-			cutin "nov_lumin03",2;
-			mes "[Lumin]";
-			mes "That's not fair, I was here first so they're mine";
-			mes "You better get to the next stop faster if you want the prize.";
-			next;
-			mes "[Lumin]";
-			mes "Well, then.....";
-			next;
-			mes "- Lumin disappreared with with his long hair in the air.";
-			mes "- This guy....";
-			setquest 7477;
-			viewpoint 2,1,1,15,0xFF0000;
-			cutin "",255;
-		} else if(.@val == 1) {
-			mes "- Except for the simple signboard, nothing can be found here.";
-			next;
-			select("Where's the treasure?");
-			cutin "nov_lumin01",2;
-			mes "[Lumin]";
-			mes "Yeo.";
-			mes "Sorry but I am quicker than you.";
-			mes "There were Fly WIngs here..";
-			next;
-			cutin "nov_lumin02",2;
-			mes "[Lumin]";
-			mes "In fact, I don't like Fly Wings.";
-			mes "Flies are so dirty.";
-			next;
-			mes "[Lumin]";
-			mes "By the way, why is one of the convenient transportations fly wing shaped?";
-			mes "Perhaps you know?";
-			next;
-			cutin "nov_lumin01",2;
-			mes "[Lumin]";
-			mes "...You don't know.";
-			next;
-			mes "- Defeated by Lumin again.";
-			mes "- Keep calm and find the next location.";
-			setquest 7477;
-			viewpoint 2,1,1,15,0xFF0000;
-			cutin "",255;
-		} else {
-			cutin "nov_lumin01",2;
-			mes "[Lumin]";
-			mes ".......";
-			next;
-			cutin "nov_lumin03",2;
-			mes "[Lumin]";
-			mes ".. Phoohut.";
-			next;
-			if(select("Are you kidding me?!:Where's the treasure?") == 1) {
-				cutin "nov_lumin05",2;
-				mes "[Lumin]";
-				mes "No.";
-				mes "Meeting three times in one day must be destiny.";
-				mes "You and I can be friends.";
-				next;
-				select("Or Frenemies!");
-				cutin "nov_lumin02",2;
-				mes "[Lumin]";
-				mes "Frene-what? Oh well I'm done with the mission.";
-				mes "Take care.";
-				next;
-				mes "["+strcharinfo(0)+"]";
-				mes "Are you even listening to me?!";
-				setquest 7477;
-				viewpoint 2,1,1,15,0xFF0000;
-				cutin "",255;
-				next;
-				mes "^4d4fff- I have to report the result to the Information Staff.^000000";
-			} else {
-				cutin "nov_lumin01",2;
-				mes "[Lumin]";
-				mes "Fly Wings.";
-				mes "If I hand them over to you, you'll just waste 'em so I think I'll keep them.";
-				next;
-				cutin "nov_lumin05",2;
-				mes "[Lumin]";
-				mes "Come on this is just friendly competition.";
-				next;
-				cutin "nov_lumin03",2;
-				mes "[Lumin]";
-				mes "I am doing this for you to make you stronger.";
-				mes "Now, so long.";
-				next;
-				mes "^4d4fff- I have to report the result to the Information Staff.^000000";
-				setquest 7477;
-				viewpoint 2,1,1,15,0xFF0000;
-				cutin "",255;
-			}
-		}
-	}
-	close;
-
-OnTouch:
-	if(isbegin_quest(7474) == 1 && !isbegin_quest(7477))
-		emotion e_gasp;
-	end;
-OnInit:
-	questinfo QTYPE_QUEST,7474,1,7477,0;
-	end;
-}
-
-izlude,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz	4_BULLETIN_BOARD2,3,3
-izlude_a,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_a	4_BULLETIN_BOARD2,3,3
-izlude_b,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_b	4_BULLETIN_BOARD2,3,3
-izlude_c,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_c	4_BULLETIN_BOARD2,3,3
-izlude_d,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_d	4_BULLETIN_BOARD2,3,3
 
 -	script	::BulletinBoardAirship	-1,{
 	mes "=== Information Airship Route ===";
@@ -1500,7 +1366,8 @@ OnTouch:
 		emotion e_gasp;
 	end;
 OnInit:
-	questinfo QTYPE_QUEST,7474,1,7475,0;
+	questinfo 7475,QTYPE_QUEST,0;
+	setquestinfo_req 7475,7474,1;
 	end;
 }
 
@@ -1629,7 +1496,8 @@ OnTouch:
 		emotion e_gasp;
 	end;
 OnInit:
-	questinfo QTYPE_QUEST,7474,1,7476,0;
+	questinfo 7476,QTYPE_QUEST,0;
+	setquestinfo_req 7476,7474,1;
 	end;
 }
 
@@ -1639,8 +1507,142 @@ izlude_b,207,167,3	duplicate(BulletinBoardArena)	Arena#iz_b	4_BULLETIN_BOARD2,3,
 izlude_c,207,167,3	duplicate(BulletinBoardArena)	Arena#iz_c	4_BULLETIN_BOARD2,3,3
 izlude_d,207,167,3	duplicate(BulletinBoardArena)	Arena#iz_d	4_BULLETIN_BOARD2,3,3
 
+-	script	::BulletinBoardBridge	-1,{
+	mes "=== Information ===";
+	if(isbegin_quest(7474) == 1) {
+		if(!isbegin_quest(7477))
+			mes "Tx_01236";
+		else if(isbegin_quest(7477) == 1)
+			mes "Tx_01321";
+	} else
+		mes "Tx_01326";
+	mes "Prontera Field.";
+	mes "The city of Prontera is located to the north.";
+	if(isbegin_quest(7474) == 1 && !isbegin_quest(7477)) {
+		next;
+		set .@val,isbegin_quest(7475)+isbegin_quest(7476);
+		if(!.@val) {
+			mes "- Except for the simple signboard, nothing can be found.";
+			next;
+			select("Why is there nothing?");
+			cutin "nov_lumin01",2;
+			mes "[Lumin]";
+			mes "Of course.";
+			mes "Fly Wings were here so I already packed them in my bag.";
+			next;
+			select("So can I have some?");
+			cutin "nov_lumin03",2;
+			mes "[Lumin]";
+			mes "That's not fair, I was here first so they're mine";
+			mes "You better get to the next stop faster if you want the prize.";
+			next;
+			mes "[Lumin]";
+			mes "Well, then.....";
+			next;
+			mes "- Lumin disappreared with with his long hair in the air.";
+			mes "- This guy....";
+			setquest 7477;
+			viewpoint 2,1,1,15,0xFF0000;
+			cutin "",255;
+		} else if(.@val == 1) {
+			mes "- Except for the simple signboard, nothing can be found here.";
+			next;
+			select("Where's the treasure?");
+			cutin "nov_lumin01",2;
+			mes "[Lumin]";
+			mes "Yeo.";
+			mes "Sorry but I am quicker than you.";
+			mes "There were Fly WIngs here..";
+			next;
+			cutin "nov_lumin02",2;
+			mes "[Lumin]";
+			mes "In fact, I don't like Fly Wings.";
+			mes "Flies are so dirty.";
+			next;
+			mes "[Lumin]";
+			mes "By the way, why is one of the convenient transportations fly wing shaped?";
+			mes "Perhaps you know?";
+			next;
+			cutin "nov_lumin01",2;
+			mes "[Lumin]";
+			mes "...You don't know.";
+			next;
+			mes "- Defeated by Lumin again.";
+			mes "- Keep calm and find the next location.";
+			setquest 7477;
+			viewpoint 2,1,1,15,0xFF0000;
+			cutin "",255;
+		} else {
+			cutin "nov_lumin01",2;
+			mes "[Lumin]";
+			mes ".......";
+			next;
+			cutin "nov_lumin03",2;
+			mes "[Lumin]";
+			mes ".. Phoohut.";
+			next;
+			if(select("Are you kidding me?!:Where's the treasure?") == 1) {
+				cutin "nov_lumin05",2;
+				mes "[Lumin]";
+				mes "No.";
+				mes "Meeting three times in one day must be destiny.";
+				mes "You and I can be friends.";
+				next;
+				select("Or Frenemies!");
+				cutin "nov_lumin02",2;
+				mes "[Lumin]";
+				mes "Frene-what? Oh well I'm done with the mission.";
+				mes "Take care.";
+				next;
+				mes "["+strcharinfo(0)+"]";
+				mes "Are you even listening to me?!";
+				setquest 7477;
+				viewpoint 2,1,1,15,0xFF0000;
+				cutin "",255;
+				next;
+				mes "^4d4fff- I have to report the result to the Information Staff.^000000";
+			} else {
+				cutin "nov_lumin01",2;
+				mes "[Lumin]";
+				mes "Fly Wings.";
+				mes "If I hand them over to you, you'll just waste 'em so I think I'll keep them.";
+				next;
+				cutin "nov_lumin05",2;
+				mes "[Lumin]";
+				mes "Come on this is just friendly competition.";
+				next;
+				cutin "nov_lumin03",2;
+				mes "[Lumin]";
+				mes "I am doing this for you to make you stronger.";
+				mes "Now, so long.";
+				next;
+				mes "^4d4fff- I have to report the result to the Information Staff.^000000";
+				setquest 7477;
+				viewpoint 2,1,1,15,0xFF0000;
+				cutin "",255;
+			}
+		}
+	}
+	close;
+
+OnTouch:
+	if(isbegin_quest(7474) == 1 && !isbegin_quest(7477))
+		emotion e_gasp;
+	end;
+OnInit:
+	questinfo 7477,QTYPE_QUEST,0;
+	setquestinfo_req 7477,7474,1;
+	end;
+}
+
+izlude,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz	4_BULLETIN_BOARD2,3,3
+izlude_a,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_a	4_BULLETIN_BOARD2,3,3
+izlude_b,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_b	4_BULLETIN_BOARD2,3,3
+izlude_c,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_c	4_BULLETIN_BOARD2,3,3
+izlude_d,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_d	4_BULLETIN_BOARD2,3,3
+
 -	script	::InstructorArgos	-1,{
-	if(Class == Job_Novice) {
+	if(Class == Job_Novice && !getskilllv("NV_TRICKDEAD")) {
 		if(isbegin_quest(15001) == 2) {
 			mes "[Instructor Argos]";
 			mes "Snoring... Snoring...";
@@ -1799,7 +1801,7 @@ izlude_d,207,167,3	duplicate(BulletinBoardArena)	Arena#iz_d	4_BULLETIN_BOARD2,3,
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,15001,0,0,0,1,0,EAJ_NOVICE;
+	questinfo 15001,QTYPE_QUEST,1,Job_Novice;
 	end;
 }
 
@@ -2012,7 +2014,7 @@ izlude_d,140,260,3	duplicate(InstructorArgos)	Instructor Argos#iz_d	4_M_LIEMAN
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,1237,0,0,0,0,EAJL_2,EAJ_NOVICE;
+	questinfo 1237,QTYPE_QUEST,0;
 	end;
 }
 
@@ -2068,13 +2070,13 @@ izlude_d,115,181,5	duplicate(ShopHelper)	Shop Helper#iz_d	4_F_KHELLISIA
 					mes "People started to question, 'Can we make a device to insert cards to these?'";
 					next;
 					mes "[Mounds]";
-					mes "At least, one day a man called ^0000ffSeyablem^000000 showed up with the technology of socket enchant.";
+					mes "At least, one day a man called ^0000ffSeiyablem^000000 showed up with the technology of socket enchant.";
 					next;
 					mes "[Mounds]";
 					mes "Nobody knew how he got the technology....";
 					next;
 					mes "[Mounds]";
-					mes "Someday later, a younger brother of Seyablem called ^0000ffLeyablem^000000 introduced a different device from his brother to socket enchant other equipments.";
+					mes "Someday later, a younger brother of Seiyablem called ^0000ffLeablem^000000 introduced a different device from his brother to socket enchant other equipments.";
 					next;
 					mes "[Mounds]";
 					mes "May people using the brothers' socket enchanting services, they stole the technology.";
@@ -2210,7 +2212,7 @@ izlude_d,115,181,5	duplicate(ShopHelper)	Shop Helper#iz_d	4_F_KHELLISIA
 				mes "Please keep in mind that there always risks of failure and if failed, the equipment will be broken.";
 				next;
 				mes "[Mounds]";
-				mes "If you want to know more about the socket enchant, go and consult with Leyablem or Seyablem who are working at Prontera or Payon.";
+				mes "If you want to know more about the socket enchant, go and consult with Leablem or Seiyablem who are working at Prontera or Payon.";
 				next;
 				select("I see.");
 				mes "[Mounds]";
@@ -2323,7 +2325,7 @@ izlude_d,115,181,5	duplicate(ShopHelper)	Shop Helper#iz_d	4_F_KHELLISIA
 					mes "Socket enchant is the skill to make card slots appear in Weapon or Armor.";
 					next;
 					mes "[Mounds]";
-					mes "When you meet the Seyablem and Leyablem brothers around the towns of Rune Midgard they can help you with this service.";
+					mes "When you meet the Seiyablem and Leablem brothers around the towns of Rune Midgard they can help you with this service.";
 					next;
 					mes "[Mounds]";
 					mes "If they fail to put a new slot in yur item say farewell to it...";
@@ -2375,7 +2377,8 @@ izlude_d,115,181,5	duplicate(ShopHelper)	Shop Helper#iz_d	4_F_KHELLISIA
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,5157,0,0,0,1,EAJL_2,EAJ_NOVICE;
+	questinfo 5157,QTYPE_QUEST,1;
+	setquestinfo_level 5157,1,20;
 	end;
 }
 
@@ -2779,7 +2782,8 @@ izlude_d,108,139,7	duplicate(EnchanterAlmondJ)	Enchanter Almond J#iz_d	4_CAT_SAI
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,5153,0,0,0,1,EAJL_2,EAJ_NOVICE;
+	questinfo 5153,QTYPE_QUEST,1;
+	setquestinfo_level 5153,1,20;
 	end;
 }
 
@@ -2817,10 +2821,10 @@ izlude_d,153,126,1	duplicate(RefineryOwnerHan)	Refinery Owner Han#iz_d	4_M_02
 		mes "This equipment is impossible to refine.";
 		close;
 	}
-	if(getequiprefinerycnt(.@part) >= 10) { //Custom text
+	if(getequiprefinerycnt(.@part) >= 10) {
 		mes "[Refining Machine Wagjak]";
-		mes "^ff0000- Error number 000"+.@part+"2 -^000000";
-		mes "Item can't be refined anymore.";
+		mes "^FF0000- Error number 1010 -^000000";
+		mes "At the current version, you can do refining up to level 10.";
 		close;
 	}
 	set .@refineitemid, getequipid(.@part);
@@ -3470,23 +3474,23 @@ izlude_d,148,122,5	duplicate(RefiningManiac)	Refining Maniac#iz_d	4_M_SITDOWN
 				mes "You may treat the equipments carefully... As you don't have nothing to be repaired.";
 				close;
 			}
-			//Custom text
 			mes "[Repair Man]";
-			mes "Hmm...";
-			mes "Let's see...";
-			mes "Out of all your items, "+.@checkitem+" are damaged.";
-			mes "Would you like to repair?";
+			mes "Hmmm... let's see... oh.. hmm...";
 			next;
 			set .@totalcost,.@repairprice*.@checkitem;
 			mes "[Repair Man]";
-			mes "Each repair costs "+.@repairprice+" zeny. So to repair all your damaged items would cost "+.@totalcost+" zeny! Would you like to repair the items?";
+			mes "------------------------";
+			mes "Damaged Equipment Estimate";
+			mes "Damaged Equipment: ^FF0000"+.@checkitem+"?000000";
+			mes "Fee: ^0000FF"+.@totalcost+" Zeny^000000";
+			mes "------------------------";
+			mes "Would you like to proceed with the repair?";
 			next;
 			switch(select("Yes:No")) {
 				case 1:
 					if(Zeny < .@totalcost) {
 						mes "[Repair Man]";
-						mes "Whoa whoa...";
-						mes "Check your wallet before you receive the repair bill! I can't repair anything because you don't have enough zeny.";
+						mes "The repair cost is "+.@repairprice+" Zeny per damaged equipment. You do not have enough money.";
 						close;
 					}
 					set .@checkitem2,1;
@@ -3503,7 +3507,7 @@ izlude_d,148,122,5	duplicate(RefiningManiac)	Refining Maniac#iz_d	4_M_SITDOWN
 							set .@checkitem,.@checkitem-1;
 						}
 						mes "[Repair Man]";
-						mes "Okay! All done. Now, try to be a little more careful. Items have lives too you know.";
+						mes "The repair has been completed. Be sure to take good care of your equipment.";
 						close;
 					} else {
 						mes "[Repair Man]";
@@ -3512,7 +3516,7 @@ izlude_d,148,122,5	duplicate(RefiningManiac)	Refining Maniac#iz_d	4_M_SITDOWN
 					}
 				case 2:
 					mes "[Repair Man]";
-					mes "Well, it's no skin off my nose, but it's not good to leave items damaged. You should get them repaired as soon as possible!";
+					mes "Well, I don't care. After all, it's not my equipment. However, leaving equipment unchecked is not a wise choice.";
 					close;
 			}
 		case 2:
@@ -3755,8 +3759,19 @@ izlude_c,97,144,1	duplicate(Etinifni)	Etinifni#iz_c	4_M_DEWBOY
 izlude_d,97,144,1	duplicate(Etinifni)	Etinifni#iz_d	4_M_DEWBOY
 
 -	script	::WeddingSecretary	-1,{
-	mes "[Wedding Secretary]";
-	mes "Are you in love?";
+	if(Class == Job_Novice) {
+		mes "[Wedding Secretary]";
+		mes "You are the just a beginner.";
+		next;
+		mes "[Wedding Secretary]";
+		mes "Everything looks new and unfamiliar, doesn't it? Isn't it all exiciting?";
+		next;
+		mes "[Wedding Secretary]";
+		mes "What can be a more exciting start than a marriage in your life?";
+	} else {
+		mes "[Wedding Secretary]";
+		mes "Are you in love?";
+	}
 	next;
 	mes "[Wedding Secretary]";
 	mes "I am the Wedding Secretary sent here for those poeple wanting to join their lives to another.";
@@ -3853,336 +3868,56 @@ izlude_b,102,150,5	duplicate(WeddingSecretary)	Wedding Secretary#iz_b	1_F_LIBRAR
 izlude_c,102,150,5	duplicate(WeddingSecretary)	Wedding Secretary#iz_c	1_F_LIBRARYGIRL
 izlude_d,102,150,5	duplicate(WeddingSecretary)	Wedding Secretary#iz_d	1_F_LIBRARYGIRL
 
--	script	#iz_talkative_chat	-1,{
+-	script	::TalkativeKid	-1,{
 	end;
-OnTimer1000:
-	donpcevent "Talkative Adventurer#0::OnTalk1";
-	donpcevent "Talkative Adventurer#a::OnTalk1";
-	donpcevent "Talkative Adventurer#b::OnTalk1";
-	donpcevent "Talkative Adventurer#c::OnTalk1";
-	donpcevent "Talkative Adventurer#d::OnTalk1";
-	end;
-OnTimer4000:
-	donpcevent "Talkative Kid#0::OnTalk2";
-	donpcevent "Talkative Kid#a::OnTalk2";
-	donpcevent "Talkative Kid#b::OnTalk2";
-	donpcevent "Talkative Kid#c::OnTalk2";
-	donpcevent "Talkative Kid#d::OnTalk2";
-	end;
+
 OnTimer64000:
-	donpcevent "Talkative Kid#0::OnTalk3";
-	donpcevent "Talkative Kid#a::OnTalk3";
-	donpcevent "Talkative Kid#b::OnTalk3";
-	donpcevent "Talkative Kid#c::OnTalk3";
-	donpcevent "Talkative Kid#d::OnTalk3";
+	npctalk "I used all my Novice Red Potions. What should I do?";
 	end;
-OnTimer67000:
-	donpcevent "Talkative Adventurer#0::OnTalk4";
-	donpcevent "Talkative Adventurer#a::OnTalk4";
-	donpcevent "Talkative Adventurer#b::OnTalk4";
-	donpcevent "Talkative Adventurer#c::OnTalk4";
-	donpcevent "Talkative Adventurer#d::OnTalk4";
-	end;
-OnTimer70000:
-	donpcevent "Talkative Kid#0::OnTalk5";
-	donpcevent "Talkative Kid#a::OnTalk5";
-	donpcevent "Talkative Kid#b::OnTalk5";
-	donpcevent "Talkative Kid#c::OnTalk5";
-	donpcevent "Talkative Kid#d::OnTalk5";
-	end;
-OnTimer73000:
-	donpcevent "Talkative Adventurer#0::OnTalk6";
-	donpcevent "Talkative Adventurer#a::OnTalk6";
-	donpcevent "Talkative Adventurer#b::OnTalk6";
-	donpcevent "Talkative Adventurer#c::OnTalk6";
-	donpcevent "Talkative Adventurer#d::OnTalk6";
-	end;
-OnTimer133000:
-	donpcevent "Talkative Adventurer#0::OnTalk7";
-	donpcevent "Talkative Adventurer#a::OnTalk7";
-	donpcevent "Talkative Adventurer#b::OnTalk7";
-	donpcevent "Talkative Adventurer#c::OnTalk7";
-	donpcevent "Talkative Adventurer#d::OnTalk7";
+OnTimer72000:
+	npctalk "Where is the shop?";
 	end;
 OnTimer136000:
-	donpcevent "Talkative Kid#0::OnTalk8";
-	donpcevent "Talkative Kid#a::OnTalk8";
-	donpcevent "Talkative Kid#b::OnTalk8";
-	donpcevent "Talkative Kid#c::OnTalk8";
-	donpcevent "Talkative Kid#d::OnTalk8";
+	npctalk "Idiot! You do not know about the 'shortcut window'?";
 	end;
-OnTimer139000:
-	donpcevent "Talkative Adventurer#0::OnTalk9";
-	donpcevent "Talkative Adventurer#a::OnTalk9";
-	donpcevent "Talkative Adventurer#b::OnTalk9";
-	donpcevent "Talkative Adventurer#c::OnTalk9";
-	donpcevent "Talkative Adventurer#d::OnTalk9";
+OnTimer144000:
+	npctalk "The items in your inventory can be dragged and put in the shortcut window.";
 	end;
-OnTimer142000:
-	donpcevent "Talkative Kid#0::OnTalk10";
-	donpcevent "Talkative Kid#a::OnTalk10";
-	donpcevent "Talkative Kid#b::OnTalk10";
-	donpcevent "Talkative Kid#c::OnTalk10";
-	donpcevent "Talkative Kid#d::OnTalk10";
+OnTimer212000:
+	npctalk "I got so many beginner's item in the Academy!";
 	end;
-OnTimer145000:
-	donpcevent "Talkative Adventurer#0::OnTalk11";
-	donpcevent "Talkative Adventurer#a::OnTalk11";
-	donpcevent "Talkative Adventurer#b::OnTalk11";
-	donpcevent "Talkative Adventurer#c::OnTalk11";
-	donpcevent "Talkative Adventurer#d::OnTalk11";
+OnTimer276000:
+	npctalk "They even game me weapons and a shield!";
 	end;
-OnTimer205000:
-	donpcevent "Talkative Kid#0::OnTalk12";
-	donpcevent "Talkative Kid#a::OnTalk12";
-	donpcevent "Talkative Kid#b::OnTalk12";
-	donpcevent "Talkative Kid#c::OnTalk12";
-	donpcevent "Talkative Kid#d::OnTalk12";
+OnTimer284000:
+	npctalk "Just press <Ctrl+~key> to open the map you have.";
 	end;
-OnTimer208000:
-	donpcevent "Talkative Adventurer#0::OnTalk13";
-	donpcevent "Talkative Adventurer#a::OnTalk13";
-	donpcevent "Talkative Adventurer#b::OnTalk13";
-	donpcevent "Talkative Adventurer#c::OnTalk13";
-	donpcevent "Talkative Adventurer#d::OnTalk13";
+OnTimer344000:
+	npctalk "Then do you want to go to Criatura Academy with me? I'm learning how to battle from Instructor Subino!";
 	end;
-OnTimer211000:
-	donpcevent "Talkative Kid#0::OnTalk14";
-	donpcevent "Talkative Kid#a::OnTalk14";
-	donpcevent "Talkative Kid#b::OnTalk14";
-	donpcevent "Talkative Kid#c::OnTalk14";
-	donpcevent "Talkative Kid#d::OnTalk14";
+OnTimer348000:
+	npctalk "The Academy is in North side of Izldude. Let's go~!";
 	end;
-OnTimer213000:
-	emotion e_omg,0,"Talkative Adventurer#0";
-	emotion e_omg,0,"Talkative Adventurer#a";
-	emotion e_omg,0,"Talkative Adventurer#b";
-	emotion e_omg,0,"Talkative Adventurer#c";
-	emotion e_omg,0,"Talkative Adventurer#d";
+OnTimer416000:
+	npctalk "It's a system to guide you to a destination.";
 	end;
-OnTimer214000:
-	donpcevent "Talkative Adventurer#0::OnTalk15";
-	donpcevent "Talkative Adventurer#a::OnTalk15";
-	donpcevent "Talkative Adventurer#b::OnTalk15";
-	donpcevent "Talkative Adventurer#c::OnTalk15";
-	donpcevent "Talkative Adventurer#d::OnTalk15";
+OnTimer424000:
+	npctalk "In the basic menu, please click the [Navigation] button.";
 	end;
-OnTimer274000:
-	donpcevent "Talkative Adventurer#0::OnTalk16";
-	donpcevent "Talkative Adventurer#a::OnTalk16";
-	donpcevent "Talkative Adventurer#b::OnTalk16";
-	donpcevent "Talkative Adventurer#c::OnTalk16";
-	donpcevent "Talkative Adventurer#d::OnTalk16";
+OnTimer492000:
+	npctalk "Whee. Ain't gonna use your brain? Please type /where in the chat window now!";
 	end;
-OnTimer277000:
-	donpcevent "Talkative Kid#0::OnTalk17";
-	donpcevent "Talkative Kid#a::OnTalk17";
-	donpcevent "Talkative Kid#b::OnTalk17";
-	donpcevent "Talkative Kid#c::OnTalk17";
-	donpcevent "Talkative Kid#d::OnTalk17";
+OnTimer552000:
+	npctalk "In this case, you can push the <Enter> key.";
 	end;
-OnTimer337000:
-	donpcevent "Talkative Adventurer#0::OnTalk18";
-	donpcevent "Talkative Adventurer#a::OnTalk18";
-	donpcevent "Talkative Adventurer#b::OnTalk18";
-	donpcevent "Talkative Adventurer#c::OnTalk18";
-	donpcevent "Talkative Adventurer#d::OnTalk18";
+OnTimer560000:
+	npctalk "We are just repeating the same dialog. HaHaha.";
 	end;
-OnTimer340000:
-	donpcevent "Talkative Kid#0::OnTalk19";
-	donpcevent "Talkative Kid#a::OnTalk19";
-	donpcevent "Talkative Kid#b::OnTalk19";
-	donpcevent "Talkative Kid#c::OnTalk19";
-	donpcevent "Talkative Kid#d::OnTalk19";
-	end;
-OnTimer343000:
-	donpcevent "Talkative Adventurer#0::OnTalk20";
-	donpcevent "Talkative Adventurer#a::OnTalk20";
-	donpcevent "Talkative Adventurer#b::OnTalk20";
-	donpcevent "Talkative Adventurer#c::OnTalk20";
-	donpcevent "Talkative Adventurer#d::OnTalk20";
-	end;
-OnTimer346000:
-	donpcevent "Talkative Kid#0::OnTalk21";
-	donpcevent "Talkative Kid#a::OnTalk21";
-	donpcevent "Talkative Kid#b::OnTalk21";
-	donpcevent "Talkative Kid#c::OnTalk21";
-	donpcevent "Talkative Kid#d::OnTalk21";
-	end;
-OnTimer406000:
-	donpcevent "Talkative Adventurer#0::OnTalk22";
-	donpcevent "Talkative Adventurer#a::OnTalk22";
-	donpcevent "Talkative Adventurer#b::OnTalk22";
-	donpcevent "Talkative Adventurer#c::OnTalk22";
-	donpcevent "Talkative Adventurer#d::OnTalk22";
-	end;
-OnTimer409000:
-	donpcevent "Talkative Kid#0::OnTalk23";
-	donpcevent "Talkative Kid#a::OnTalk23";
-	donpcevent "Talkative Kid#b::OnTalk23";
-	donpcevent "Talkative Kid#c::OnTalk23";
-	donpcevent "Talkative Kid#d::OnTalk23";
-	end;
-OnTimer412000:
-	donpcevent "Talkative Kid#0::OnTalk24";
-	donpcevent "Talkative Kid#a::OnTalk24";
-	donpcevent "Talkative Kid#b::OnTalk24";
-	donpcevent "Talkative Kid#c::OnTalk24";
-	donpcevent "Talkative Kid#d::OnTalk24";
-	end;
-OnTimer415000:
-	donpcevent "Talkative Adventurer#0::OnTalk25";
-	donpcevent "Talkative Adventurer#a::OnTalk25";
-	donpcevent "Talkative Adventurer#b::OnTalk25";
-	donpcevent "Talkative Adventurer#c::OnTalk25";
-	donpcevent "Talkative Adventurer#d::OnTalk25";
-	end;
-OnTimer475000:
-	donpcevent "Talkative Adventurer#0::OnTalk26";
-	donpcevent "Talkative Adventurer#a::OnTalk26";
-	donpcevent "Talkative Adventurer#b::OnTalk26";
-	donpcevent "Talkative Adventurer#c::OnTalk26";
-	donpcevent "Talkative Adventurer#d::OnTalk26";
-	end;
-OnTimer478000:
-	donpcevent "Talkative Kid#0::OnTalk27";
-	donpcevent "Talkative Kid#a::OnTalk27";
-	donpcevent "Talkative Kid#b::OnTalk27";
-	donpcevent "Talkative Kid#c::OnTalk27";
-	donpcevent "Talkative Kid#d::OnTalk27";
-	end;
-OnTimer538000:
-	donpcevent "Talkative Adventurer#0::OnTalk28";
-	donpcevent "Talkative Adventurer#a::OnTalk28";
-	donpcevent "Talkative Adventurer#b::OnTalk28";
-	donpcevent "Talkative Adventurer#c::OnTalk28";
-	donpcevent "Talkative Adventurer#d::OnTalk28";
-	end;
-OnTimer541000:
-	donpcevent "Talkative Kid#0::OnTalk29";
-	donpcevent "Talkative Kid#a::OnTalk29";
-	donpcevent "Talkative Kid#b::OnTalk29";
-	donpcevent "Talkative Kid#c::OnTalk29";
-	donpcevent "Talkative Kid#d::OnTalk29";
-	end;
-OnTimer544000:
-	donpcevent "Talkative Adventurer#0::OnTalk30";
-	donpcevent "Talkative Adventurer#a::OnTalk30";
-	donpcevent "Talkative Adventurer#b::OnTalk30";
-	donpcevent "Talkative Adventurer#c::OnTalk30";
-	donpcevent "Talkative Adventurer#d::OnTalk30";
-	end;
-OnTimer603000:
+OnTimer565000:
 	stopnpctimer;
 	//Fall through
 OnInit:
 	initnpctimer;
-	end;
-}
-
--	script	::TalkativeAdventurer	-1,{
-	end;
-
-OnTalk1:
-	npctalk "A while ago, one Novice talked to me like hey 'Talkative Adventurer'?";
-	end;
-OnTalk4:
-	npctalk "You can buy potion from Merchants.";
-	end;
-OnTalk6:
-	npctalk "It's the Potion image in the mini map.";
-	end;
-OnTalk7:
-	npctalk "Is there any way to use items easily?";
-	end;
-OnTalk9:
-	npctalk "Shortcut window? The slots at the top of the screen? How can I use it?";
-	end;
-OnTalk11:
-	npctalk "From inventory, do you mean 'item' menu? Oh, it is!";
-	end;
-OnTalk13:
-	npctalk "You have a bunch of potions?";
-	end;
-OnTalk15:
-	npctalk "What?! I should go to the Academy now!";
-	end;
-OnTalk16:
-	npctalk "Where is Izlude? In the center?";
-	end;
-OnTalk18:
-	npctalk "I do not know what to do.";
-	end;
-OnTalk20:
-	npctalk "Oh yea? I want to know so many things~ I will go with you!";
-	end;
-OnTalk22:
-	npctalk "Navigation. What is that?";
-	end;
-OnTalk25:
-	npctalk "Oh-! Should I search for a Kafra Employee?";
-	end;
-OnTalk26:
-	npctalk "What is the town name?";
-	end;
-OnTalk28:
-	npctalk "I cannot see the part where I can write something in the chat window?";
-	end;
-OnTalk30:
-	npctalk "Oh you smarty...";
-	end;
-}
-
-izlude,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#0	4_M_KID1
-izlude_a,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#a	4_M_KID1
-izlude_b,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#b	4_M_KID1
-izlude_c,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#c	4_M_KID1
-izlude_d,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#d	4_M_KID1
-
--	script	::TalkativeKid	-1,{
-	end;
-
-OnTalk2:
-	npctalk "We are just repeating the same dialog. HaHaha.";
-	end;
-OnTalk3:
-	npctalk "I used all my Novice Red Potions. What should I do?";
-	end;
-OnTalk5:
-	npctalk "Where is the shop?";
-	end;
-OnTalk8:
-	npctalk "Idiot! You do not know about the 'shortcut window'?";
-	end;
-OnTalk10:
-	npctalk "The items in your inventory can be dragged and put in the shortcut window.";
-	end;
-OnTalk12:
-	npctalk "I got so many beginner's item in the Academy!";
-	end;
-OnTalk14:
-	npctalk "They even game me weapons and a shield!";
-	end;
-OnTalk17:
-	npctalk "Just press <Ctrl+~key> to open the map you have.";
-	end;
-OnTalk19:
-	npctalk "Then do you want to go to Criatura Academy with me? I'm learning how to battle from Instructor Subino!";
-	end;
-OnTalk21:
-	npctalk "The Academy is in North side of Izldude. Let's go~!";
-	end;
-OnTalk23:
-	npctalk "It's a system to guide you to a destination.";
-	end;
-OnTalk24:
-	npctalk "In the basic menu, please click the [Navigation] button.";
-	end;
-OnTalk27:
-	npctalk "Whee. Ain't gonna use your brain? Please type /where in the chat window now!";
-	end;
-OnTalk29:
-	npctalk "In this case, you can push the <Enter> key.";
 	end;
 }
 
@@ -4192,16 +3927,80 @@ izlude_b,143,205,7	duplicate(TalkativeKid)	Talkative Kid#b	4_F_KID2
 izlude_c,143,205,7	duplicate(TalkativeKid)	Talkative Kid#c	4_F_KID2
 izlude_d,143,205,7	duplicate(TalkativeKid)	Talkative Kid#d	4_F_KID2
 
+-	script	::TalkativeAdventurer	-1,{
+	end;
+
+OnTimer69000:
+	npctalk "You can buy potion from Merchants.";
+	end;
+OnTimer77000:
+	npctalk "It's the Potion image in the mini map.";
+	end;
+OnTimer131000:
+	npctalk "Is there any way to use items easily?";
+	end;
+OnTimer141000:
+	npctalk "Shortcut window? The slots at the top of the screen? How can I use it?";
+	end;
+OnTimer149000:
+	npctalk "From inventory, do you mean 'item' menu? Oh, it is!";
+	end;
+OnTimer217000:
+	npctalk "You have a bunch of potions?";
+	end;
+OnTimer281000:
+	npctalk "What?! I should go to the Academy now!";
+	end;
+OnTimer279000:
+	npctalk "Where is Izlude? In the center?";
+	end;
+OnTimer339000:
+	npctalk "I do not know what to do.";
+	end;
+OnTimer349000:
+	npctalk "Oh yea? I want to know so many things~ I will go with you!";
+	end;
+OnTimer411000:
+	npctalk "Navigation. What is that?";
+	end;
+OnTimer421000:
+	npctalk "Oh-! Should I search for a Kafra Employee?";
+	end;
+OnTimer487000:
+	npctalk "What is the town name?";
+	end;
+OnTimer497000:
+	npctalk "I cannot see the part where I can write something in the chat window?";
+	end;
+OnTimer557000:
+	npctalk "Oh you smarty...";
+	end;
+OnTimer555000:
+	npctalk "A while ago, one Novice talked to me like hey 'Talkative Adventurer'?. HaHaha.";
+	end;
+OnTimer565000:
+	stopnpctimer;
+	//Fall through
+OnInit:
+	initnpctimer;
+	end;
+}
+
+izlude,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#0	4_M_KID1
+izlude_a,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#a	4_M_KID1
+izlude_b,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#b	4_M_KID1
+izlude_c,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#c	4_M_KID1
+izlude_d,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#d	4_M_KID1
+
 -	script	::RestingAdventurer	-1,{
 	end;
-OnTimer1000:
+
+OnTimer60000:
 	npctalk "You know what? If you are sitting, HP and SP recovery is faster.";
 	end;
-OnTimer4000:
-	npctalk "Sitting is possible if your basic job skill level is more than 3. Shortcut is pressing the <INSERT> key.";
-	end;
-OnTimer59000:
+OnTimer65000:
 	stopnpctimer;
+	npctalk "Sitting is possible if your basic job skill level is more than 3. Shortcut is pressing the <INSERT> key.";
 	//Fall through
 OnInit:
 	initnpctimer;
@@ -4241,6 +4040,16 @@ iz_ac01_c,105,36,5	duplicate(EdenTeleportOfficer)	Eden Teleport Officer#37	4_F_N
 iz_ac01_d,105,36,5	duplicate(EdenTeleportOfficer)	Eden Teleport Officer#38	4_F_NOVICE
 
 -	script	::AcademyReceptionist	-1,{
+	if(isbegin_quest(7117) == 1) { erasequest 7117; }
+	if(isbegin_quest(7118) == 1) { erasequest 7118; }
+	if(isbegin_quest(7119) == 1) { erasequest 7119; }
+	if(isbegin_quest(7120) == 1) { erasequest 7120; }
+	if(isbegin_quest(7121) == 1) { erasequest 7121; }
+	if(isbegin_quest(7122) == 1) { erasequest 7122; }
+	if(isbegin_quest(7123) == 1) { erasequest 7123; }
+	if(isbegin_quest(7124) == 1) { erasequest 7124; }
+	if(isbegin_quest(7126) == 1) { erasequest 7126; }
+	if(isbegin_quest(7127) == 1) { erasequest 7127; }
 	if(isbegin_quest(4269) == 2) {
 		mes "[Receptionist]";
 		mes "Hello, "+strcharinfo(0)+".";
@@ -4280,6 +4089,7 @@ iz_ac01_d,105,36,5	duplicate(EdenTeleportOfficer)	Eden Teleport Officer#38	4_F_N
 					mes "Be careful with it as it won't be provided again.";
 					setquest 4269;
 					completequest 4269;
+					setquest 11255;
 					getitem 2352,1; //Novice_Plate
 					getitem 2510,1; //Novice_Hood
 					getitem 2414,1; //Novice_Boots
@@ -4411,7 +4221,7 @@ iz_ac01_d,105,36,5	duplicate(EdenTeleportOfficer)	Eden Teleport Officer#38	4_F_N
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,4269,0,0,0,0,0,EAJ_NOVICE;
+	questinfo 4269,QTYPE_QUEST,0,Job_Novice;
 	end;
 }
 
@@ -4991,8 +4801,8 @@ iz_ac01_d,93,44,5	duplicate(ac_board)	[Dispensary]#ac_d	2_BULLETIN_BOARD
 				mes "- Snap, snap, snap.. Crack -";
 				next;
 				delitem 6593,1;	//Criatura_Hair_Coupon
-				setlook 1,.@style;
-				setlook 6,.@pallete;
+				if(isbegin_quest(11255) == 1)
+					completequest 11255;
 				cutin "",255;
 				mes "[Otter Samssoon]";
 				mes "Oh my! Oh my! Oh my!";
@@ -5107,7 +4917,7 @@ iz_ac01_d,69,36,3	duplicate(OtterSamssoon)	Otter Samssoon#ac_d	4W_SAILOR
 			getitem 11058,1; //Novice_Combi_Book
 			close;
 		case 2:
-			if(BaseLevel < 20) {
+			if(BaseLevel <= 20) {
 				mes "[Querrie]";
 				mes "Breaking news! Special sale for you only!";
 				mes "One combination kit only for 30z!";
@@ -5132,7 +4942,7 @@ iz_ac01_d,69,36,3	duplicate(OtterSamssoon)	Otter Samssoon#ac_d	4W_SAILOR
 				mes "You can buy up to 99 at once.";
 				close;
 			}
-			set .@cost,.@input*(BaseLevel<20?30:500);
+			set .@cost,.@input*(BaseLevel<=20?30:500);
 			mes "[Querrie]";
 			mes .@input+" combination kits will cost you "+.@cost+".... zeny.";
 			if(Zeny < .@cost) {
@@ -5163,16 +4973,20 @@ iz_ac01_d,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_d	4_F_03
 		close;
 	}
 	mes "[Therapist]";
-	mes "This is the dispensary of the Royal Criatura Academy.";
-	mes "How can I help you?";
-	next;
-	if(!(eaclass()&EAJL_2) && isbegin_quest(4269) == 2)
+	if(!(eaclass()&EAJL_2) && isbegin_quest(4269) == 2) {
+		mes "Are you a student?";
+		mes "Do you have any problem in your body?";
+		next;
 		set .@menu$,"Help me!:Teach me the First Aid Skill:^ff0000Red Herb Quest^000000:Save Location";
-	else
+	} else {
+		mes "This is the dispensary of the Royal Criatura Academy.";
+		mes "How can I help you?";
+		next;
 		set .@menu$,"Help me!:First Aid Skill::I want to rest.";
+	}
 	switch(select(.@menu$)) {
 		case 1:
-			if(BaseLevel < 20) {
+			if(BaseLevel <= 20) {
 				mes "[Therapist]";
 				mes "Are you injured?";
 				mes "Even the emergency treatment didn't work for you?";
@@ -5202,6 +5016,7 @@ iz_ac01_d,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_d	4_F_03
 				mes "[Therapist]";
 				mes "Recovery ratio is very minimal...";
 				mes "It can help you avaoid dying but won't give you much HP.";
+				specialeffect2 EF_BEGINSPELL6;
 				specialeffect2 EF_SPELLBREAKER;
 				next;
 				mes "[Therapist]";
@@ -5292,7 +5107,7 @@ iz_ac01_d,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_d	4_F_03
 					getitem 11058,1; //Novice_Combi_Book
 					getitem 12849,10; //Combination_Kit
 					getitem 507,1; //Red_Herb
-					delitem 512,1; //Apple
+					getitem 512,1; //Apple
 					next;
 					mes "[Therapist]";
 					mes "Not only potions but also other easily attainable things can be turned to various tools. Please make use of them.";
@@ -5347,7 +5162,8 @@ iz_ac01_d,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_d	4_F_03
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,4269,2,7478,0,0,EAJL_2,EAJ_NOVICE;
+	questinfo 7478,QTYPE_QUEST,0;
+	setquestinfo_req 7478,4269,2;
 	end;
 }
 
@@ -5363,82 +5179,100 @@ iz_ac01_d,59,43,3	duplicate(Therapist)	Therapist#ac_d	4_M_6THPRIN1
 		mes "- Please try it again after organizing the items.";
 		close;
 	}
-	if(!(eaclass()&EAJL_2)) {
-		if(isbegin_quest(7479) == 2) {
-			mes "[Criatura Student]";
-			mes ".......";
-			next;
-			mes "- This student looks familiar...";
-			close;
-		}
-		if(isbegin_quest(7478) == 1) {
-			cutin "nov_lumin01",2;
+	if(isbegin_quest(7478) == 1 && !isbegin_quest(7479)) {
+		cutin "nov_lumin01",2;
+		mes "[Lumin]";
+		mes "Hey there Turtle.";
+		mes "You are really slow.";
+		mes "This Red Plant is no longer useful for you.";
+		emotion e_gasp,1;
+		specialeffect EF_STEAL,AREA,"Red Plant Effect#"+strnpcinfo(2);
+		donpcevent "Cultivated Red Plant#"+strnpcinfo(2)+"::OnDisable";
+		next;
+		if(select("What are you talking about?:Who're you?") == 1) {
 			mes "[Lumin]";
-			mes "Hey there Turtle.";
-			mes "You are really slow.";
-			mes "This Red Plant is no longer useful for you.";
-			emotion e_gasp,1;
-			specialeffect EF_STEAL,AREA,"Red Plant Effect#"+strnpcinfo(2);
-			donpcevent "Cultivated Red Plant#"+strnpcinfo(2)+"::OnDisable";
+			mes "You heard me.";
+			mes "Aren't you here to collect the Red Plant for the Academy Therapist.";
 			next;
-			if(select("What are you talking about?:Who're you?") == 1) {
-				mes "[Lumin]";
-				mes "You heard me.";
-				mes "Aren't you here to collect the Red Plant for the Academy Therapist.";
-				next;
-				mes "[Lumin]";
-				mes "But, But something weird just happened.";
-				mes "It happened right before my eyes.";
-				next;
+			mes "[Lumin]";
+			mes "But, But something weird just happened.";
+			mes "It happened right before my eyes.";
+			next;
+			cutin "nov_lumin02",2;
+		} else {
+			mes "[Lumin]";
+			if(isbegin_quest(7472) || isbegin_quest(7474) == 2) {
 				cutin "nov_lumin02",2;
-			} else {
-				cutin "nov_lumin02",2;
-				mes "[Lumin]";
 				mes "Did you lose your memory.";
 				mes "If the captain hears about it, he'll cry.";
 				mes "It is still ok as long as I remember you.";
-				next;
+			} else {
+				cutin "nov_lumin04",2;
+				mes "Lumin.";
+				mes ".......";
+				mes "How about being happy?";
 			}
-			mes "[Lumin]";
-			mes "Anyway, let me explain it to you, I have just cut all the leaves of this Red Plant.";
-			mes "You can't collect the Red Plant anymore.";
 			next;
-			select("Ok so give me a ^ff0000Red Herb^000000");
-			cutin "nov_lumin03",2;
-			mes "[Lumin]";
-			mes "OK... Then...";
-			mes "I don't even need it anyways. I already know all about basic medical botany.";
-			next;
-			select("Then, why did you do it?");
-			cutin "nov_lumin05",2;
-			mes "[Lumin]";
-			mes "I didn't do it!";
-			mes "I was just standing here.";
-			next;
-			cutin "nov_lumin01",2;
-			mes "[Lumin]";
-			mes "Here take this Red Herb.";
-			setquest 7479;
-			completequest 7479;
-			getitem 507,1; //Red_Herb
-			next;
-			mes "[Lumin]";
-			mes "Ah... See it's growing back.";
-			donpcevent "Cultivated Red Plant#"+strnpcinfo(2)+"::OnEnable";
-			close2;
-			cutin "",255;
-			end;
 		}
-		mes "- He seems to be thinking of something deeply.";
-		close;
+		mes "[Lumin]";
+		mes "Anyway, let me explain it to you, I have just cut all the leaves of this Red Plant.";
+		mes "You can't collect the Red Plant anymore.";
+		next;
+		select("Ok so give me a ^ff0000Red Herb^000000");
+		cutin "nov_lumin03",2;
+		mes "[Lumin]";
+		mes "OK... Then...";
+		mes "I don't even need it anyways. I already know all about basic medical botany.";
+		next;
+		select("Then, why did you do it?");
+		cutin "nov_lumin05",2;
+		mes "[Lumin]";
+		mes "I didn't do it!";
+		mes "I was just standing here.";
+		next;
+		cutin "nov_lumin01",2;
+		mes "[Lumin]";
+		mes "Here take this Red Herb.";
+		setquest 7479;
+		completequest 7479;
+		getitem 507,1; //Red_Herb
+		next;
+		mes "[Lumin]";
+		mes "Ah... See it's growing back.";
+		donpcevent "Cultivated Red Plant#"+strnpcinfo(2)+"::OnEnable";
+		close2;
+		cutin "",255;
+		end;
 	} else {
-		mes "[Criatura Student]";
-		mes ".......";
-		close;
+		if(Class == Job_Novice) {
+			if(isbegin_quest(7478) == 1) {
+				cutin "nov_lumin01",2;
+				mes "[Lumin]";
+				mes "I guess you should go back to the Therapist.";
+				mes "He's probably waiting for you..";
+				close2;
+				cutin "",255;
+				end;
+			}
+			mes "- He seems to be thinking of something deeply.";
+			close;
+		} else {
+			if(isbegin_quest(7479) == 2) {
+				mes "[Criatura Student]";
+				mes ".......";
+				next;
+				mes "- This student looks familiar...";
+				close;
+			}
+			mes "[Criatura Student]";
+			mes ".......";
+			close;
+		}
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,7478,1,7479,0,0,EAJL_2,EAJ_NOVICE;
+	questinfo 7479,QTYPE_QUEST,1;
+	setquestinfo_req 7479,7478,1;
 	end;
 }
 
@@ -5507,7 +5341,6 @@ izlude_d,141,251,0	duplicate(RedPlantEffect)	Red Plant Effect#d	1078,3,3
 			mes "Hmmm... You look like have some talent.";
 			mes "Being in a good mood, shall I show you something newfangled?";
 			next;
-			set ac_novice,2;
 			set .@menu$,"Newfangled?:Who are you..?:Why are you here?:Conversation finished";
 		} else
 			set .@menu$,":Who are you..?:Why are you here?:Conversation finished";
@@ -5584,10 +5417,21 @@ izlude_d,141,251,0	duplicate(RedPlantEffect)	Red Plant Effect#d	1078,3,3
 					mes "[Odd Novice]";
 					mes "What? You, disturbing me.";
 					mes "Get away from me kid you're botherin' me.";
-					close;
 				}
 				close;
 			case 3:
+				if(getskilllv(NV_BASIC) > 8) {
+					mes "[Odd Novice]";
+					mes "You, talking like this, why don't you go and change your job already instead of hanging around here?";
+					mes "Hmm, did you want to be like me maybe?";
+					next;
+					mes "[Odd Novice]";
+					mes "Aha~ If you want all the different skills...";
+					next;
+					mes "[Odd Novice]";
+					mes "If you do like I do, then you will be a great Super Novice.";
+					close;
+				}
 				set .@rnd,rand(1,3);
 				if(.@rnd == 1) {
 					mes "[Odd Novice]";
@@ -5791,6 +5635,14 @@ iz_ac01_d,133,34,5	duplicate(BrokeTrainee)	Broke Trainee#ac_d	4_M_SITDOWN
 			emotion e_sry;
 			end;
 		} else if(isbegin_quest(15000) == 1) {
+			if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
+				mes "- Here, just moment!! -";
+				mes "- As you are overloaded with too many items in your inventory -";
+				mes "- You can't receive the items anymore -";
+				mes "- Let yourself enlightened -";
+				mes "- and please try again -";
+				close;
+			}
 			mes "[Mainz]";
 			mes "Are you ready to learn about abnormal statuses? I promise that I won't trick you anymore. I am a 'trainer' after all right?";
 			next;
@@ -6694,7 +6546,10 @@ iz_ac01_d,134,47,5	duplicate(TrainerMainz)	Trainer Mainz#ac_d	4_M_KY_KNT,4,4
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,0,0,0,0,1,0,EAJ_NOVICE;
+	questinfo 14154,QTYPE_QUEST,1,Job_Novice;
+	questinfo 14155,QTYPE_QUEST,1,Job_Novice;
+	questinfo 14156,QTYPE_QUEST,1,Job_Novice;
+	questinfo 14157,QTYPE_QUEST,1,Job_Novice;
 	end;
 }
 
@@ -6806,9 +6661,9 @@ iz_ac01_d,93,76,5	duplicate(ac_board)	[Armory]#ac_d	2_BULLETIN_BOARD
 
 					if(.@quest_id == 11343)
 						continue;
-					if(checkquest(.@quest_id,HUNTING) == 0 || checkquest(.@quest_id,HUNTING) == 1)
+					if(isbegin_quest(.@quest_id,HUNTING) == 1)
 						erasequest .@quest_id;
-					else if(checkquest(.@quest_id,HUNTING) == 2) {
+					else if(isbegin_quest(.@quest_id,HUNTING) == 2) {
 						erasequest .@quest_id;
 						if(countitem(.@material[.@i]) >= .@count[i]) {
 							delitem .@material[.@i],.@count[.@i];
@@ -6832,7 +6687,7 @@ iz_ac01_d,93,76,5	duplicate(ac_board)	[Armory]#ac_d	2_BULLETIN_BOARD
 								setquest 11338;
 								completequest 11338;
 							}
-							if(checkquest(11339,HUNTING) < 2) {
+							if(isbegin_quest(11339,HUNTING) < 2) {
 								mes "[Battle Instructor Subino]";
 								mes "^ff0000Poring^000000s are very cute monsters when you see them.";
 								next;
@@ -6846,7 +6701,7 @@ iz_ac01_d,93,76,5	duplicate(ac_board)	[Armory]#ac_d	2_BULLETIN_BOARD
 								setquest 11338;
 								completequest 11338;
 							}
-							if(checkquest(11340,HUNTING) < 2) {
+							if(isbegin_quest(11340,HUNTING) < 2) {
 								mes "[Battle Instructor Subino]";
 								mes "^ff0000Lunatic^000000s are very cute animal that live near Prontera.";
 								mes "Tender...Soft...Very cute... It is very cute........";
@@ -6864,7 +6719,7 @@ iz_ac01_d,93,76,5	duplicate(ac_board)	[Armory]#ac_d	2_BULLETIN_BOARD
 								setquest 11338;
 								completequest 11338;
 							}
-							if(checkquest(11341,HUNTING) < 2) {
+							if(isbegin_quest(11341,HUNTING) < 2) {
 								mes "[Battle Instructor Subino]";
 								mes "^ff0000Fabre^000000 is the most common bug which is usually seen in Rune Midgard Kingdom..";
 								mes "It is a worm but it is very popular because it looks cute.";
@@ -6879,7 +6734,7 @@ iz_ac01_d,93,76,5	duplicate(ac_board)	[Armory]#ac_d	2_BULLETIN_BOARD
 								setquest 11338;
 								completequest 11338;
 							}
-							if(checkquest(11344,HUNTING) < 2) {
+							if(isbegin_quest(11344,HUNTING) < 2) {
 								mes "[Battle Instructor Subino]";
 								mes "^ff0000Pupa^000000 is the intermediate stage of a Fabre before transforming into a Creamy.";
 								mes "The process of a larva turning into a buttefly is mysterious.";
@@ -6894,7 +6749,7 @@ iz_ac01_d,93,76,5	duplicate(ac_board)	[Armory]#ac_d	2_BULLETIN_BOARD
 								setquest 11338;
 								completequest 11338;
 							}
-							if(checkquest(11342,HUNTING) < 2) {
+							if(isbegin_quest(11342,HUNTING) < 2) {
 								mes "[Battle Instructor Subino]";
 								mes "^ff0000Hornet^000000s are a group of bees that live near Prontera under control of the Queen bee Mistress.";
 								mes "Not aggressive... They only attack with their stingers when they are in danger.";
@@ -6947,7 +6802,7 @@ iz_ac01_d,93,76,5	duplicate(ac_board)	[Armory]#ac_d	2_BULLETIN_BOARD
 	}
 
 L_Quest:
-	if(checkquest(getarg(0),HUNTING) == -1) {
+	if(!isbegin_quest(getarg(0),HUNTING)) {
 		if(select("Take quest.:Stop.") == 2) {
 			mes "[Battle Instructor Subino]";
 			mes "You don't seem to be interested.";
@@ -6966,7 +6821,7 @@ L_Quest:
 		mes "You can check received quests by pressing ^ff0000Alt + U^000000.";
 		setquest getarg(0);
 		close;
-	} else if(checkquest(getarg(0),HUNTING) == 0 || checkquest(getarg(0),HUNTING) == 1) {
+	} else if(isbegin_quest(getarg(0),HUNTING) == 1) {
 		if(select("End Conversation:Give up on the quest.") == 2) {
 			mes "[Battle Instructor Subino]";
 			mes "Will you really give up on the quest?";
@@ -7006,7 +6861,16 @@ L_Quest:
 		close;
 	}
 OnInit:
-	questinfo QTYPE_QUEST,4269,2,0,0,1,0,EAJ_NOVICE;
+	questinfo 11339,QTYPE_QUEST,1,Job_Novice;
+	questinfo 11340,QTYPE_QUEST,1,Job_Novice;
+	questinfo 11341,QTYPE_QUEST,1,Job_Novice;
+	questinfo 11342,QTYPE_QUEST,1,Job_Novice;
+	questinfo 11344,QTYPE_QUEST,1,Job_Novice;
+	setquestinfo_req 11339,4269,2;
+	setquestinfo_req 11340,4269,2;
+	setquestinfo_req 11341,4269,2;
+	setquestinfo_req 11342,4269,2;
+	setquestinfo_req 11344,4269,2;
 	end;
 }
 
@@ -7166,14 +7030,18 @@ prt_fild08d,343,216,3	duplicate(BattleInstructorField)	Battle Instructor#01_d	4_
 							mes "[Attribute Expert]";
 							mes "How much damage did you give?";
 							next;
-							input .@input;
+							input .@input,1,100000;
 							if(.@input < 10) {
 								mes "[Attribute Expert]";
 								mes "Oh man, "+.@input+"! Are you even trying?";
 								mes "You're barely hitting it.";
-							} else {
+							} else if(.@input > 9 && .@input < 100001) {
 								mes "[Attribute Expert]";
 								mes "You are good I guess...";
+							} else {
+								mes "[Attribute Expert]";
+								mes "But wait that's impossible.";
+								close;
 							}
 							next;
 							mes "[Attribute Expert]";
@@ -7219,7 +7087,7 @@ prt_fild08d,343,216,3	duplicate(BattleInstructorField)	Battle Instructor#01_d	4_
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,2299,0;
+	questinfo 2299,QTYPE_QUEST,0;
 	end;
 }
 
@@ -7391,7 +7259,7 @@ function	script	F_PetInformation	{
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,2298,0;
+	questinfo 2298,QTYPE_QUEST,0;
 	end;
 }
 
@@ -7503,6 +7371,9 @@ new_1-3,99,169,3	script	Friendly Poring#new	4_PORING,{
 		next;
 		mes "[Unskilled Poring]";
 		mes "Ghostring's the strongest in the world!";
+		emotion e_paper,0,"Cowardly Poring#pet_1";
+		emotion e_paper,0,"Unskilled Poring#pet_2";
+		emotion e_paper,0,"Foolish Poring#pet_3";
 		next;
 		mes "[Ghostring]";
 		mes "What kind of monster I am?";
@@ -7510,6 +7381,9 @@ new_1-3,99,169,3	script	Friendly Poring#new	4_PORING,{
 		next;
 		mes "[Unskilled Poring]";
 		mes "Ghostring's da Boss!";
+		emotion e_paper,0,"Cowardly Poring#pet_1";
+		emotion e_paper,0,"Unskilled Poring#pet_2";
+		emotion e_paper,0,"Foolish Poring#pet_3";
 		next;
 		mes "[Ghostring]";
 		mes "Bwa ha ha ha~";
@@ -7537,6 +7411,9 @@ new_1-3,99,169,3	script	Friendly Poring#new	4_PORING,{
 		mes "[Unskilled Poring]";
 		mes "Wot's Dat? Onna them Poring's talkin' to a huumie.";
 		mes "Shall we beat "+(Sex?"him":"her")+" up?";
+		emotion e_paper,0,"Cowardly Poring#pet_1";
+		emotion e_paper,0,"Unskilled Poring#pet_2";
+		emotion e_paper,0,"Foolish Poring#pet_3";
 		next;
 		mes "[Poring]";
 		mes "Blimey!";
@@ -7568,7 +7445,7 @@ new_1-3,99,169,3	script	Friendly Poring#new	4_PORING,{
 		mes "[Poring]";
 		mes "That'll lure them from out of Ghostring's influence.";
 		changequest 2295,2296;
-		getitem 12846,5; //Unripe_Apple2
+		getitem 12846,5; //Little_Unripe_Apple
 		cutin "",255;
 		close;
 	} else if(isbegin_quest(2296) == 1) {
@@ -7649,6 +7526,8 @@ new_1-3,99,169,3	script	Friendly Poring#new	4_PORING,{
 		mes "I look forward to seeing you once you've explored Rune Midgard!";
 		mes "Cheers mate.";
 		completequest 2298;
+		if(Class == Job_Novice)
+			getexp 500,50;
 		getitem 531,3; //Apple_Juice
 		getitem 643,1; //Pet_Incubator
 		close;
@@ -7663,6 +7542,10 @@ new_1-3,108,165,3	script	Ghostring#new	4_GHOSTRING,{
 	mes "I am da biggest and da meanest Ghostring!";
 	close;
 }
+
+new_1-3,105,165,5	script	Cowardly Poring#pet_1	2398,{ end; }
+new_1-3,105,164,5	script	Unskillful Poring#pet_2	2398,{ end; }
+new_1-3,105,163,5	script	Foolish Poring#pet_3	2398,{ end; }
 
 new_1-3,96,176,0	warp	to_ac_armory#new	2,2,iz_ac01,49,73
 
@@ -7872,7 +7755,7 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 	if(Class == Job_Novice && isbegin_quest(4269) == 2) {
 		if(!isbegin_quest(1229)) {
 			mes "[Trainer Adric]";
-			mes "You want to become a swordman?";
+			mes "You want to become a Swordman?";
 			mes "Great decision.";
 			next;
 			mes "[Trainer Adric]";
@@ -7941,7 +7824,7 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 		} else if(isbegin_quest(1229) == 1) {
 			mes "[Trainer Adric]";
 			mes "If you are equipped with a ^ff0000Swordman Manual^000000.";
-			mes "You'll be able to experience the basic skills of the swordman.";
+			mes "You'll be able to experience the basic skills of the Swordman.";
 			mes "Now let's study the basics of Swordman skills.";
 			next;
 			while(1) {
@@ -7956,7 +7839,7 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 						mes "Swordman prefer to use spears, two-handed swords or combination sword and shield.";
 						next;
 						mes "[Trainer Adric]";
-						mes "Also the swordman's strength is normal high making them able to carry massive amounts of weight.";
+						mes "Also the Swordman's strength is normal high making them able to carry massive amounts of weight.";
 						next;
 						break;
 					case 3:
@@ -7988,6 +7871,7 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 						mes "The study material can be retaught by Neals the assistant trainer.";
 						mes "Remember this.";
 						completequest 1229;
+						set ac_swordman,1;
 						setquest 1230;
 						close2;
 						cutin "",255;
@@ -7995,18 +7879,89 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 				}
 			}
 		} else {
-			if(isbegin_quest(1230) == 1) {
+			if(ac_swordman == 1) {
+				if(JobLevel < 10) {
+					mes "[Trainer Adric]";
+					mes "Using the Swordman Manual I gave you train by hunting monsters.";
+					mes "Go to the Battle Instructor Subino on the first floor Armory room.";
+					next;
+					mes "[Trainer Adric]";
+					mes "Raise your level to ^007a02job level 10^000000 and get to ^007a02basic skill level 9^000000, come back here again.";
+					set ac_swordman,2;
+					if(isbegin_quest(1230) == 1)
+						erasequest 1230;
+					close2;
+					cutin "",255;
+					end;
+				}
 				mes "[Trainer Adric]";
-				mes "Using the Swordman Manual I gave you train by hunting monsters.";
-				mes "Go to the Battle Instructor Subino on the first floor Armory room.";
+				mes "Since you have enough job levels, you don't need any more lecturing.";
 				next;
+				switch(select("Then I will stop.:But I want to listen more.:I want to be a Swordman right away!")) {
+					case 1:
+						mes "[Trainer Adric]";
+						mes "You surpassed the study material to raise your level.";
+						next;
+						mes "[Trainer Adric]";
+						mes "Impressive.";
+						close2;
+						cutin "",255;
+						end;
+					case 2:
+						mes "[Trainer Adric]";
+						mes "There's nothing else special to teach you.";
+						mes "Everything I taught you if you remember them well, that's all you need.";
+						next;
+						mes "[Trainer Adric]";
+						mes "If you need additional training, go to the Battle Instructor Subino on the first floor Armory room.";
+						next;
+						switch(select("This is very tedious.:I need more training.:I want to be a Swordman right away!")) {
+							case 1:
+								mes "[Trainer Adric]";
+								mes "A simple No would've sufficed.";
+								close2;
+								cutin "",255;
+								end;
+							case 2:
+								mes "[Trainer Adric]";
+								mes "Go to the Battle Instructor Subino on the first floor Armory room.";
+								mes "If you think you're ready, come back here.";
+								mes "You need to change to a Swordman job soon!";
+								set ac_swordman,2;
+								if(isbegin_quest(1230) == 1)
+									erasequest 1230;
+								close2;
+								cutin "",255;
+								end;
+							case 3:
+								break;
+						}
+					case 3:
+						break;
+				}
+				if(getskilllv("NV_BASIC") < 9) {
+					mes "[Trainer Adric]";
+					mes "I'm sorry to tell you this but to be a Swordman, you must reach at least ^4d4fffJob level 10^000000.";
+					mes "And ^4d4fffBasic Skill Level 9^000000.";
+					next;
+					mes "[Trainer Adric]";
+					mes "Want to be a Swordman without having the minimun requirement?";
+					mes "Do you think being a Swordman is that easy?";
+					close2;
+					cutin "",255;
+					end;
+				}
 				mes "[Trainer Adric]";
-				mes "Raise your level to ^007a02job level 10^000000 and get to ^007a02basic skill level 9^000000, come back here again.";
-				completequest 1230;
+				mes "Congratulations! From now on, you are going to live a Swordman's life!";
+				mes "Let's do it right now!";
+				if(isbegin_quest(1230) == 1)
+					erasequest 1230;
+				callfunc "Job_Change",Job_Swordman;
+				getitem 13415,1; //N_Falchion
 				close2;
 				cutin "",255;
 				end;
-			} else {
+			} else if(ac_swordman == 2) {
 				if(JobLevel < 10) {
 					mes "[Trainer Adric]";
 					mes "You still don't have enough to become a Swordman.";
@@ -8032,6 +7987,8 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 				mes "[Trainer Adric]";
 				mes "Congratulations! From now on, you are going to live a Swordman's life!";
 				mes "Let's do it right now!";
+				if(isbegin_quest(1230) == 1)
+					erasequest 1230;
 				callfunc "Job_Change",Job_Swordman;
 				getitem 13415,1; //N_Falchion
 				close2;
@@ -8070,6 +8027,23 @@ iz_ac02_d,60,51,5	duplicate(SwordmanTrainer)	Swordman Trainer#2ac_d	4_M_SWORDMAN
 
 -	script	::SwordmanAssistant	-1,{
 	if(Class == Job_Novice && isbegin_quest(4269) == 2) {
+		if(JobLevel >= 10) {
+			mes "[Assitant Trainer Neals]";
+			mes "As you are at the enough job level, you don't need any more lecturing.";
+			next;
+			if(select("Then I will stop.:Become a Swordman right away!") == 1) {
+				mes "[Assitant Trainer Neals]";
+				mes "Before the training starts, you already raised your level.";
+				mes "Impressive.";
+				close;
+			}
+			mes "[Assitant Trainer Neals]";
+			mes "It seems that you have fully grown.";
+			mes "Talk to the Trainer Adric to become a Swordman!"; //Custom text
+			if(isbegin_quest(1230) == 1)
+				erasequest 1230;
+			close;
+		}
 		if(isbegin_quest(1229) == 2) {
 			mes "[Assistant Trainer Neals]";
 			mes "Let's repeat the prerequisite of Swordmanhood, this is a review study!";
@@ -8086,7 +8060,7 @@ iz_ac02_d,60,51,5	duplicate(SwordmanTrainer)	Swordman Trainer#2ac_d	4_M_SWORDMAN
 						mes "Swordman prefer to use spears, two-handed swords or combination sword and shield.";
 						next;
 						mes "[Assistant Trainer Neals]";
-						mes "Also the swordman's strength is normal high making them able to carry massive amounts of weight.";
+						mes "Also the Swordman's strength is normal high making them able to carry massive amounts of weight.";
 						next;
 						break;
 					case 3:
@@ -8128,8 +8102,13 @@ iz_ac02_d,60,51,5	duplicate(SwordmanTrainer)	Swordman Trainer#2ac_d	4_M_SWORDMAN
 	} else {
 		if(Class == Job_Swordman) {
 			mes "[Assistant Trainer Neals]";
-			mes "You are now a swordman!";
+			mes "You are now a Swordman!";
 			mes "There's nothing else special to teach you.";
+			close;
+		} else if(Class != Job_Novice) {
+			mes "[Assitant Trainer Neals]";
+			mes "You already have another job!";
+			mes "Go away!";
 			close;
 		}
 		mes "[Assistant Trainer Neals]";
@@ -8836,47 +8815,57 @@ iz_ac02_d,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_d	4_M_KID1
 	while(1) {
 		switch(select("What is transcending?:What is the 3rd job change?:Who is Igoo?:End Conversation")) {
 			case 1:
-				mes "[Ragie]";
-				mes "Transcending is great. Very great.";
-				next;
-				mes "[Ragie]";
-				mes "Basically the 2nd job adventurer gains the base level 99 and job level 50, then that person can transcend.";
-				next;
-				mes "[Ragie]";
-				mes "Once you transcend, you can go back to the base level Novice.";
-				next;
-				mes "[Ragie]";
-				mes "It is very hard to start your adventure again. However, there is a merit to the hardship.";
-				next;
-				mes "[Ragie]";
-				mes "The most important merit is to learn new skills at a new upgraded level. In my case, I could transfer to not an ordinary Bard but a Minstrel.";
-				next;
-				mes "[Ragie]";
-				mes "Indeed, be careful as you can only follow the way of the job you choose before transcending.";
-				next;
-				mes "[Ragie]";
-				mes "If you are interested in transcending, recommend you visit the Sage castle in ^ff0000Juno.^000000 I maybe far behind for it.";
+				if(ADVJOB != 0) {
+					mes "[Ragie]";
+					mes "You seem to already know what it is!";
+				} else {
+					mes "[Ragie]";
+					mes "Transcending is great. Very great.";
+					next;
+					mes "[Ragie]";
+					mes "Basically the 2nd job adventurer gains the base level 99 and job level 50, then that person can transcend.";
+					next;
+					mes "[Ragie]";
+					mes "Once you transcend, you can go back to the base level Novice.";
+					next;
+					mes "[Ragie]";
+					mes "It is very hard to start your adventure again. However, there is a merit to the hardship.";
+					next;
+					mes "[Ragie]";
+					mes "The most important merit is to learn new skills at a new upgraded level. In my case, I could transfer to not an ordinary Bard but a Minstrel.";
+					next;
+					mes "[Ragie]";
+					mes "Indeed, be careful as you can only follow the way of the job you choose before transcending.";
+					next;
+					mes "[Ragie]";
+					mes "If you are interested in transcending, recommend you visit the Sage castle in ^ff0000Juno.^000000 I maybe far behind for it.";
+				}
 				next;
 				break;
 			case 2:
-				mes "[Ragie]";
-				mes "The 3rd job change is obviously a new job.";
-				next;
-				mes "[Ragie]";
-				mes "Adventurers with the 2nd job or can be transferred to the 3rd job class once gaining the base level 99 and the job level more than 50.";
-				next;
-				mes "[Ragie]";
-				mes "For example, a Bard like me was an Archer in the beginning. Now I became a Bard. As I am diligently adventuring, I may be able to change jobs to a third job.";
-				next;
-				mes "[Ragie]";
-				mes "Ah, of course, though I don't make transfer, I could be Minstrel as my final target. However, I won't compromise with the reality.";
-				mes "Someday I will be the best Minstrel.";
-				next;
-				mes "[Ragie]";
-				mes "So, if you transfer, you could first be Novice and be a Bard. But someday I could be Minstrel, couldn't I?";
-				next;
-				mes "[Ragie]";
-				mes "Choice is always on you. Be ambitious, adventurer. Someday I will sing an encouraging song for you.";
+				if(BaseLevel > 99) {
+					mes "[Ragie]";
+					mes "Oh, you know very well, don't you?";
+				} else {
+					mes "[Ragie]";
+					mes "The 3rd job change is obviously a new job.";
+					next;
+					mes "[Ragie]";
+					mes "Adventurers with the 2nd job or can be transferred to the 3rd job class once gaining the base level 99 and the job level more than 50.";
+					next;
+					mes "[Ragie]";
+					mes "For example, a Bard like me was an Archer in the beginning. Now I became a Bard. As I am diligently adventuring, I may be able to change jobs to a third job.";
+					next;
+					mes "[Ragie]";
+					mes "Ah, of course, though I don't make transfer, I could be Minstrel as my final target. However, I won't compromise with the reality.";
+					mes "Someday I will be the best Minstrel.";
+					next;
+					mes "[Ragie]";
+					mes "So, if you transfer, you could first be Novice and be a Bard. But someday I could be Minstrel, couldn't I?";
+					next;
+					mes "[Ragie]";
+					mes "Choice is always on you. Be ambitious, adventurer. Someday I will sing an encouraging song for you.";
+				}
 				next;
 				break;
 			case 3:
@@ -8925,11 +8914,11 @@ iz_ac02_d,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_d	2_BULLETIN_BOARD
 
 -	script	::Arang	-1,{
 	cutin "arang03",0;
+	mes "[Arang]";
+	mes "Hi, Good morning!";
+	emotion e_ho;
+	next;
 	if(Class == Job_Novice) {
-		mes "[Arang]";
-		mes "Hi, Good morning!";
-		emotion e_ho;
-		next;
 		if(isbegin_quest(4269) == 2) {
 			if(JobLevel == 10) {
 				cutin "arang01",0;
@@ -9077,10 +9066,33 @@ iz_ac02_d,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_d	2_BULLETIN_BOARD
 			end;
 		}
 	} else {
-		mes "[Arang]";
-		mes "Hi, Good morning!";
-		emotion e_ho;
-		next;
+		if(ac_taekwon) {
+			if(Class == Job_Taekwon) {
+				mes "[Arang]";
+				mes "Are you diligently training? Once you are trained well, you could become a Taekwon Master or a Soul Linker.";
+				close2;
+				cutin "",255;
+				end;
+			} else if(Class == Job_Star_Gladiator) {
+				mes "[Arang]";
+				mes "You became a nice Taekwon Master!? Please keep in mind power is followed by responsibility.";
+				close2;
+				cutin "",255;
+				end;
+			} else if(Class == Job_Soul_Linker) {
+				mes "[Arang]";
+				mes "Handling spirits is a very delicate job to do, I heard. Excellent! The adventurer led by me has grown up like this.";
+				close2;
+				cutin "",255;
+				end;
+			} else {
+				mes "[Arang]";
+				mes "Ehra! I thought you followed the Taekwon way~~ it is regretful but everyone has their own life, hehe.";
+				close2;
+				cutin "",255;
+				end;
+			}
+		}
 		mes "[Arang]";
 		mes "I am propagating the way of Taekwons!";
 		close2;
@@ -9094,6 +9106,16 @@ iz_ac02_a,70,85,5	duplicate(Arang)	Arang#01_a	4_F_TAEKWON
 iz_ac02_b,70,85,5	duplicate(Arang)	Arang#01_b	4_F_TAEKWON
 iz_ac02_c,70,85,5	duplicate(Arang)	Arang#01_c	4_F_TAEKWON
 iz_ac02_d,70,85,5	duplicate(Arang)	Arang#01_d	4_F_TAEKWON
+
+pay_fild08,153,83,1	script	Lady Harvesting Herbs#2	1_F_ORIENT_02,{
+	mes "[Lady]";
+	mes "There is a town called Payon to the east. Taking a long way to the south, you can even reach Alberta.";
+	next;
+	mes "[Lady]";
+	mes "Payon is the wonderful city. There you can be transferred to an Archer or to a Taekwon. And a nice Dungeon there. If you have time, please make a visit.";
+	emotion e_heh;
+	close;
+}
 
 iz_ac02,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#0	2_BULLETIN_BOARD
 iz_ac02_a,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#a	2_BULLETIN_BOARD
@@ -9109,18 +9131,33 @@ iz_ac02_d,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#d	2_BULLETIN_BOARD
 	cutin "aca_gung_01",2;
 	if(Class == Job_Novice) {
 		if(isbegin_quest(4269) == 2) {
+			.@has_manual = 0;
+			setarray .@manuals[0],2819,2820,2821,2822,2823,2824,2942,2941,2940;
+			for(.@i = 0; .@i < 9; .@i++) {
+				if(isequippedcnt(.@manuals[.@i]))
+					.@has_manual = 1;
+			}
+			for(.@i = 0; .@i < 9; .@i++) {
+				if(countitem(.@manuals[.@i]))
+					.@has_manual = 1;
+			}
 			mes "[Lusa]";
 			mes "Gosh Darnit! You are cuter then a piglet! Are ya trying ta learn to be a ^ff0000gunslinger^000000?";
 			emotion e_awsm;
 			next;
-			switch(select("What is a Gunslinger?:Can I try out the skills?:Becoming a Gunslinger?:How can I try out the skills?:Cancel")) {
+			if(.@has_manual == 1) {
+				.@menu$ = "What is a Gunslinger?:Can I try out the skills?:Becoming a Gunslinger?:How can I try out the skills?:Cancel";
+			} else {
+				.@menu$ = "What is a Gunslinger?:Can I try out the skills?:Becoming a Gunslinger?::Cancel";
+			}
+			switch(select(.@menu$)) {
 				case 1:
 					mes "[Lusa]";
 					mes "You're so cute! A ^ff0000Gunslinger^000000 who has true grit wield his weapons bringing justice in these wild times.";
 					emotion e_lv;
 					next;
 					mes "[Lusa]";
-					mes "Ya, know you remind me of my little sister, that scamp couldn't shoot the broadside of barn.. At least not until I taught her.";
+					mes "Ya, know you remind me of my little "+(Sex?"brother":"sister")+", that scamp couldn't shoot the broadside of barn.. At least not until I taught "+(Sex?"him":"her")+".";
 					next;
 					mes "[Lusa]";
 					mes "Now y'all need to understand, guns aren't some little thing that you just swing at an animal, you don't wiggle those there fingers and shock them to death.";
@@ -9204,6 +9241,17 @@ iz_ac02_d,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#d	2_BULLETIN_BOARD
 					cutin "",255;
 					end;
 				case 3:
+					if(Upper == 2) {
+						mes "[Lusa]";
+						mes "Oh, sorry! Children cannot become Gunslingers!";
+						emotion e_slur;
+						next;
+						mes "[Lusa]";
+						mes "Perhaps you should talk to your parents about other professions.";
+						close2;
+						cutin "",255;
+						end;
+					}
 					mes "[Lusa]";
 					mes "Are you going to learn to shoot as a gunslinger?";
 					next;
@@ -9304,6 +9352,35 @@ iz_ac02_d,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#d	2_BULLETIN_BOARD
 			cutin "",255;
 			end;
 		}
+	} else if(Class == Job_Gunslinger) {
+		if(BaseLevel < 21) {
+			mes "[Lusa]";
+			mes "Oh! Are you just darling, a newly minted gunslinger!";
+			next;
+			mes "[Lusa]";
+			mes "Why your shootin iron looks shinier then a silver zeny! Do ya need anything?";
+			next;
+			if(select("Can you help me get to Einbroch?:No, thanks.") == 1) {
+				mes "[Lusa]";
+				mes "Sure, why not? Make sure to spend some time trainin!";
+				next;
+				mes "[Lusa]";
+				mes "Get over there ya scamp!";
+				close2;
+				warp "que_ng",150,167;
+				end;
+			}
+			mes "[Lusa]";
+			mes "Oh, I am glad to hear that you are so strong!";
+			close2;
+			cutin "",255;
+			end;
+		}
+		mes "[Lusa]";
+		mes "Howdy! It's nice to see you again.";
+		close2;
+		cutin "",255;
+		end;
 	} else {
 		mes "[Lusa]";
 		mes "Hey! Y'all aren't gunslingers!";
@@ -9319,6 +9396,17 @@ iz_ac02_a,142,85,5	duplicate(Lusa)	Lusa#2ac_a	4_F_GUNSLINGER
 iz_ac02_b,142,85,5	duplicate(Lusa)	Lusa#2ac_b	4_F_GUNSLINGER
 iz_ac02_c,142,85,5	duplicate(Lusa)	Lusa#2ac_c	4_F_GUNSLINGER
 iz_ac02_d,142,85,5	duplicate(Lusa)	Lusa#2ac_d	4_F_GUNSLINGER
+
+-	script	::Lusa'sDesk	-1,{
+	mes "There is a stack of papers on the desk.";
+	close;
+}
+
+iz_ac02,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac	CLEAR_NPC
+iz_ac02_a,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac_a	CLEAR_NPC
+iz_ac02_b,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac_b	CLEAR_NPC
+iz_ac02_c,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac_c	CLEAR_NPC
+iz_ac02_d,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac_d	CLEAR_NPC
 
 -	script	::QuiteTrainee	-1,{
 	if(Class == Job_Novice) {
@@ -9339,6 +9427,10 @@ iz_ac02_d,142,85,5	duplicate(Lusa)	Lusa#2ac_d	4_F_GUNSLINGER
 			mes "[Quite Trainee]";
 			mes "Are you coming to take the lesson for gunslinger?";
 		}
+		close;
+	} else if(Class == Job_Gunslinger) {
+		mes "[Quiet Trainee]";
+		mes "You are a gunslinger? You look great! I want to become a gunslinger......";
 		close;
 	} else {
 		mes "[Quite Trainee]";
@@ -9380,6 +9472,10 @@ iz_ac02_d,143,77,3	duplicate(QuiteTrainee)	Quite Trainee#2ac_d	4_F_KID2
 		mes "[Noisy Trainee]";
 		mes "I heard that as it was a dangerous weapon they don't let us use them yet!";
 		close;
+	} else if(Class == Job_Gunslinger) {
+		mes "[Noisy Trainee]";
+		mes "Oh Mr. gunslinger!! Nice.";
+		close;
 	} else {
 		mes "[Noisy Trainee]";
 		mes "What? Why did you take the other job rather than being a nice gunslinger?";
@@ -9406,6 +9502,10 @@ iz_ac02_c,159,79,7	duplicate(FrightenedTrainee)	Frightened Trainee#2ac_c	4_F_HUG
 iz_ac02_d,159,79,7	duplicate(FrightenedTrainee)	Frightened Trainee#2ac_d	4_F_HUGIRL
 
 -	script	::StaffSentByGuild	-1,{
+	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
+		mes "- You are carrying too many items. -";
+		close;
+	}
 	mes "[Sharp Snake's Fang]";
 	mes "Yesssssss? I wass sssent by the academy.";
 	close;
@@ -9537,7 +9637,7 @@ iz_ac02_d,98,110,5	duplicate(ac_board)	[Archer Classroom]#2ac_d	2_BULLETIN_BOARD
 						mes "But he may train you with a lot of useful hunting skills for you.";
 						mes F_Navi("Battle Trainer Subino","iz_ac01,59,83","^4d4fff");
 						mes "You may visit him.";
-						if(!isbegin_quest(14158)) {
+						if(isbegin_quest(14158) != 2) {
 							setquest 14158;
 							completequest 14158;
 							getitem 2822,1; //Archer_Manual
@@ -9739,7 +9839,7 @@ iz_ac02_d,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac_d	2_BULLETIN_BOARD
 						mes "I will show you my poewr by offering a demonstration.";
 						mes "You should be honored to be witnessing this!";
 						next;
-						set .@rnd,rand(1,6);
+						set .@rnd,rand(1,7);
 						if(.@rnd == 1) {
 							mes "[Mage Chuck]";
 							mes "Fire damage premier~!!!";
@@ -9763,11 +9863,17 @@ iz_ac02_d,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac_d	2_BULLETIN_BOARD
 							mes "Wall of Fire~!!";
 							mes "^007a02Fire Wall^000000!!!!";
 							specialeffect2 EF_FIREWALL;
-						} else {
+						} else if(.@rnd == 6) {
 							mes "[Mage Chuck]";
 							mes "Get lost in the storm!";
 							mes "^007a02Thunder Storm^000000!!!!";
 							specialeffect2 EF_THUNDERSTORM;
+						} else {
+							mes "[Mage Chuck]";
+							mes "What killed the dinosaurs?";
+							mes "The Ice Age!";
+							mes "^007a02Frost Diver^000000!!!!";
+							specialeffect2 EF_FROSTDIVER2;
 						}
 						next;
 						mes "[Mage Chuck]";
@@ -9779,9 +9885,27 @@ iz_ac02_d,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac_d	2_BULLETIN_BOARD
 						next;
 						break;
 					case 4:
+						if(countitem(2824) > 0) {
+							mes "[Mage Chuck]";
+							mes "I think you already received a ^FF0000Mage Manual^000000~!";
+							mes "I can't offer you two of them.";
+							mes "One is good enough~!";
+							next;
+							mes "[Mage Chuck]";
+							mes "Try out the skills after equipping the^006400 Mage Manual^000000.";
+							mes "Then hunt with the skills given to you in your skill window.";
+							next;
+							mes "[Mage Chuck]";
+							mes "Anything else you want to know about Mages?";
+							next;
+							break;
+						}
 						if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 							mes "[Mage Chuck]";
 							mes "If you want to become a Mage, lighten up your inventory load.";
+							next;
+							mes "[Mage Chuck]";
+							mes "Anything else you want to know about Mages?";
 							next;
 							break;
 						} else {
@@ -9903,6 +10027,7 @@ iz_ac02_d,98,140,5	duplicate(ac_board)	[Thief Classroom]#2ac_d	2_BULLETIN_BOARD
 			cutin "",255;
 			setnpcdisplay("Lumin#"+strnpcinfo(2),4_M_THIEF_RUMIN);
 			specialeffect EF_SPHERE;
+			specialeffect EF_SPHERE;
 			next;
 			cutin "thf_lumin01",2;
 			mes "[Lumin]";
@@ -9916,6 +10041,7 @@ iz_ac02_d,98,140,5	duplicate(ac_board)	[Thief Classroom]#2ac_d	2_BULLETIN_BOARD
 			close2;
 			cutin "",255;
 			setnpcdisplay("Lumin#"+strnpcinfo(2),4_M_NOV_RUMIN);
+			specialeffect EF_SPHERE;
 			specialeffect EF_SPHERE;
 			end;
 		}
@@ -9931,7 +10057,7 @@ iz_ac02_d,98,140,5	duplicate(ac_board)	[Thief Classroom]#2ac_d	2_BULLETIN_BOARD
 			cutin "",255;
 			end;
 		}
-		if(checkquest(7487,HUNTING) == -1) {
+		if(!isbegin_quest(7487,HUNTING)) {
 			mes "[Lumin]";
 			mes "Your eagerness and efforts to complete mission moved me to offer something.";
 			next;
@@ -10023,7 +10149,8 @@ iz_ac02_d,98,140,5	duplicate(ac_board)	[Thief Classroom]#2ac_d	2_BULLETIN_BOARD
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,7485,1,7487,0,0,0,EAJ_NOVICE;
+	questinfo 7487,QTYPE_QUEST,0;
+	setquestinfo_req 7487,7485,1;
 	end;
 }
 
@@ -10498,363 +10625,6 @@ OnInit:
 	donpcevent "3tf_mobct#2ac_d::OnRespawn";
 	end;
 }
-
--	script	::Verkhasel	-1,{
-cutin "gc_verkhasel01",0;
-	if(isbegin_quest(4269) == 2) {
-		if(Class == Job_Novice) {
-			if(!isbegin_quest(7480)) {
-				mes "[Verkhasel]";
-				mes "What? it interrupts me.";
-				close2;
-				cutin "",255;
-				end;
-			} else if(isbegin_quest(7480) == 1) {
-				if(!isbegin_quest(7482)) {
-					mes "[Verkhasel]";
-					mes "Eheee. Eheee. It can't be a joke.";
-					mes "Mayssel's class...";
-					mes "Did you call upon me for this kind of nasthy thing?";
-					next;
-					select("...Let's keep working?");
-					cutin "nov_lumin02",2;
-					mes "[Lumin]";
-					mes "It's a pity. That man is scary.";
-					mes "But as long as I am with you, don't be afraid of him.";
-					next;
-					cutin "gc_verkhasel01",0;
-					mes "[Verkhasel]";
-					mes "What are you talking about this time?";
-					mes "In the beginning, Lu.. You should not be here...";
-					next;
-					cutin "nov_lumin01",2;
-					mes "[Lumin]";
-					mes "........Who am I?";
-					mes "Assistant.... Treainer?";
-					next;
-					cutin "gc_verkhasel02",0;
-					mes "[Verkhasel]";
-					mes "Zt...";
-					mes "Well, which one are you curious about?";
-					next;
-					cutin "gc_verkhasel01",0;
-					while(1) {
-						switch(select("Double Attack:Envenom:Improve Dodge and Hide:About you:That's enough.")) {
-							case 1:
-								mes "[Verkhasel]";
-								mes "You may already know the primary weapon of a Thief is a dagger.";
-								mes "A thief's speciality is the ^4d4fffDouble Attack^000000 by a dagger.";
-								next;
-								mes "[Verkhasel]";
-								mes "If you are short of attacking power, it can be covered at a certain degree.";
-								mes "Any other questions?";
-								set .@opt,1;
-								next;
-								break;
-							case 2:
-								mes "[Verkhasel]";
-								mes "There is a skill called ^4d4fffEnvenom^000000 to intoxicate your enemey with poison and the other skill called ^4d4fffDetoxify^000000 to remove the poisoned status.";
-								next;
-								mes "[Verkhasel]";
-								mes "You can tell poisoned status by its very pretty purple color.";
-								next;
-								mes "[Verkhasel]";
-								mes "In case, you are poisoned, venom will dcrease your vitality rapidly, you either detoxify right away or take the antidote potion.";
-								next;
-								mes "[Verkhasel]";
-								mes "If you have more interest in poison, you may be an assassin.";
-								mes "They officially use poison.";
-								mes "Then next!";
-								set .@opt,2;
-								next;
-								break;
-							case 3:
-								mes "[Verkhasel]";
-								mes "Thief's train the skill called ^4d4fffImprove Dodge^000000.";
-								mes "This makes the enemy powerless by evading its attack.";
-								next;
-								mes "[Verkhasel]";
-								mes "Rather than being patient after being hit, it is more suitable for a less defensive thief to avoid from it fast.";
-								mes "Being this reason, agility [AGI] can't be neglected.";
-								next;
-								mes "[Verkhasel]";
-								mes "^4d4fffHiding^000000 is the skill for refuge.";
-								mes "If successful, others can't see you.";
-								next;
-								mes "[Verkhasel]";
-								mes "Ah, as it is said you can't cheat a ghost.... You would be found by evil.";
-								mes "Also sensitive insects recognize it...";
-								next;
-								mes "[Verkhasel]";
-								mes "Other than these, it will be useful for avoiding emergency situations.";
-								mes "When you become higher jobs like Rogue or Assassin, you can learn more useful skills like Refuge.";
-								set .@opt,3;
-								next;
-								break;
-							case 4:
-								mes "[Verkhasel]";
-								mes "Me? I am chief of the Guillotine Cross.";
-								mes "......";
-								next;
-								cutin "nov_lumin01",2;
-								mes "[Lumin]";
-								mes "As one of the assassins, I am in charge of punishing the law violators, as the member of the execution group.";
-								mes "For your reference, the primary weapon of Verkhasel is Katar.";
-								next;
-								select("How do you know thatt?");
-								cutin "nov_lumin03",2;
-								mes "[Lumin]";
-								mes "That's my hope.";
-								next;
-								cutin "gc_verkhasel01",0;
-								mes "[Verkhasel]";
-								mes "Oh.. Smart funk~~";
-								mes "That's enough, Lu.";
-								mes "Any more questions?";
-								next;
-								break;
-							case 5:
-								if(.@opt) {
-									mes "[Verkhasel]";
-									mes "OK.";
-									mes "Considering your favor not to ignore me, let's finish it now.";
-									next;
-									mes "[Verkhasel]";
-									mes "Honestly, I don't think you need to know the details about the thief's skills.";
-									mes "Then, just be aware there is something like that.";
-									next;
-									mes "[Verkhasel]";
-									mes "I mean it is good enough now.";
-									setquest 7482;
-									close2;
-									cutin "",255;
-									end;
-								}
-								mes "[Verkhasel]";
-								mes "You can steal one item from one enemy.";
-								mes "I feel mortified at stopping here, but it's worse to be neglected...";
-								next;
-								break;
-						}
-					}
-				} else {
-					mes "[Verkhasel]";
-					mes "Anything else you're curious. about?";
-					mes "I will give you an answer after you finish Mayssel's class.";
-					next;
-					mes "[Verkhasel]";
-					mes "I mean that she knows it.";
-					mes "Mayssel will do it for you.";
-					next;
-					cutin "nov_lumin01",2;
-					mes "[Lumin]";
-					mes "Lazy boy.";
-					mes "Tell me the truth... You are annoying.";
-					next;
-					cutin "gc_verkhasel02",0;
-					mes "[Verkhasel]";
-					mes "......You........";
-					mes "Zt.. I don't know the enemy..";
-					close2;
-					cutin "",255;
-					end;
-				}
-			} else {
-				if(!isbegin_quest(7483)) {
-					mes "[Verkhasel]";
-					mes "To learn more about the way of a thief, keep going on with Mayssel's class";
-					mes "Because nagging at me here, you can't get anything.";
-					close2;
-					cutin "",255;
-					end;
-				} else if(isbegin_quest(7483) == 1) {
-					if(isbegin_quest(7485) == 2) {
-						mes "[Verkhasel]";
-						mes "Now you fully understand what skill venom is..";
-						mes "As you completed my assignment, go and check it with Mayssel.";
-						close2;
-						cutin "",255;
-						end;
-					}
-					if(checkquest(7485,HUNTING) == -1) {
-						mes "[Verkhasel]";
-						mes "This is about the use of skill.";
-						mes "Now if you were an assassin, shall I let you test the skills related to venom which you may continue to use?";
-						next;
-						mes "[Verkhasel]";
-						mes "Load the thief guide recieved by Mayssel and open the skill window by pressing Alt + S key.";
-						mes "Register Envenom registered on the MISC compartment, by pressing shortcut key.";
-						next;
-						mes "[Verkhasel]";
-						mes "Then, approach the Poring's cage in the center of this room and aim at Poring, and ^4d4fffhunt one poring by using envenom^000000.";
-						next;
-						mes "[Verkhasel]";
-						mes "That's my assignment to you.";
-						mes "You definitely use envenom to Poring in this room.";
-						mes "Don't go out far away to find Porings.";
-						setquest 7485;
-						next;
-						cutin "nov_lumin02",2;
-						mes "[Lumin]";
-						mes "Eummm.";
-						mes "It's sad..";
-						mes "Please accept my condolence in advance, as you can't experience envenom... hehehe...";
-						next;
-						select("What are you talking about?");
-						cutin "nov_lumin03",2;
-						mes "[Lumin]";
-						mes "From now, I am going to hunt Poring..";
-						mes "..Don't misunderstand me for challenging you, as such I want to make a bet with you.";
-						next;
-						mes "- Lumin is betting win or lose.";
-						cutin "",255;
-						close;
-					} else if(checkquest(7485,HUNTING) == 0 || checkquest(7485,HUNTING) == 1) {
-						mes "[Verkhasel]";
-						mes "Come close to a poring cage and use envenom to poring.";
-						mes "You must do it only to porings in this room.";
-						next;
-						if(select("I see..:I won't do it.") == 2) {
-							mes "[Verkhasel]";
-							mes "These are not your aptitude.";
-							mes "I will cancel my assignment, and the other assignments from Mayssel to be cancelled by her.";
-							next;
-							if(select("Cancel.:I will continue..") == 2) {
-								mes "[Verkhasel]";
-								mes "Have you changed your mind?";
-								mes "Then, until you kill all the porings in the cage, keep attacking them with envenom.";
-								close2;
-								cutin "",255;
-								end;
-							}
-							mes "[Verkhasel]";
-							mes "Cancel the mission to hunt poring with envenom.";
-							erasequest 7485;
-							close2;
-							cutin "",255;
-							end;
-						}
-						mes "[Verkhasel]";
-						mes "OK. Until you kill all the porings in the cage, attack them with venom.";
-						percentheal 0,100;
-						close2;
-						cutin "",255;
-						end;
-					} else {
-						mes "[Verkhasel]";
-						mes "You are doing well.";
-						mes "Envenom has the poison effect and can damage from venom itself.";
-						next;
-						mes "[Verkhasel]";
-						mes "The skill experience is now enough.";
-						mes "Check it with Mayssel.";
-						completequest 7485;
-						getexp 800,0;
-						close2;
-						cutin "",255;
-						end;
-					}
-				} else {
-					mes "[Verkhasel]";
-					mes "You are the bung finished Mayssel's class complete.";
-					mes "Any more questions, ask Mayssel.";
-					mes "It is the end of my class.";
-					next;
-					mes "[Verkhasel]";
-					mes "If you become a thief, we may meet together in far future..";
-					mes "If you become an assassin.";
-					close2;
-					cutin "",255;
-					end;
-				}
-			}
-		} else {
-			if(Class == Job_Thief) {
-				mes "[Verkhasel]";
-				mes "Ehee, you...";
-				mes "What do you want to be?";
-				next;
-				if(select("An Assassin.:A Rogue.") == 2) {
-					mes "[Verkhasel]";
-					mes "Go there.";
-					next;
-					cutin "sc_vicente04",2;
-					mes "[Vicente]";
-					mes "Oh... Mr. Verkhasel...";
-					mes "Don't play like this among a family.";
-					mes "Why are you dividing us into teams?";
-					next;
-					cutin "gc_verkhasel01",0;
-					mes "[Verkhasel]";
-					mes "I've never been in your family.";
-					mes "Originally, you are not a Rogue.";
-					mes "You were only a merchant.";
-					next;
-					cutin "sc_vicente02",2;
-					mes "[Vicente]";
-					mes "Oh.. No.. What a dirty word.";
-					mes "Have I asked you for buying something from me?";
-					next;
-					cutin "gc_mayssel03",1;
-					mes "[Mayssel]";
-					mes ".......... You look friendly.. Two of you...";
-					next;
-					mes "- The mood frozen.";
-					cutin "",255;
-					close;
-				}
-				cutin "nov_lumin03",2;
-				mes "[Lumin]";
-				mes "Welcome to your joining in the way of bloody darness.";
-				mes "My comrad.";
-				next;
-				cutin "gc_verkhasel02",0;
-				mes "[Verkhasel]";
-				mes ".... ........";
-				mes "(Verkhasel glancing at sky)";
-				mes "...";
-				mes ".. Ha...!";
-				next;
-				mes "- The mood is becoming delicate.";
-				cutin "",255;
-				close;
-			}
-			mes "[Verkhasel]";
-			mes "You are the guy knows everything you need.";
-			mes "Are you coming to watch only?";
-			mes "Emmm?";
-			mes "Why don't you help the juniors without watch only?";
-			close2;
-			cutin "",255;
-			end;
-		}
-	} else {
-		mes "[Verkhasel]";
-		mes "There is no words to tell you guy not belonging to our academy.";
-		mes "In fact, I pulled out here unwillingly, I don't have mind to be kind of you...";
-		next;
-		cutin "gc_mayssel03",1;
-		mes "[Mayssel]";
-		mes "Wait, Verkhasel.....";
-		mes "Don't get even with other innocent....";
-		mes "How about helping my class for me?";
-		next;
-		mes "- ... Everybody frozen..";
-		close2;
-		cutin "",255;
-		end;
-	}
-
-OnInit:
-	questinfo QTYPE_QUEST,7480,1,7482,0,0,0,EAJ_NOVICE;
-	end;
-}
-
-iz_ac02,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac	4_M_GUILLOTINE
-iz_ac02_a,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_a	4_M_GUILLOTINE
-iz_ac02_b,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_b	4_M_GUILLOTINE
-iz_ac02_c,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_c	4_M_GUILLOTINE
-iz_ac02_d,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_d	4_M_GUILLOTINE
 
 -	script	::GuestLecturerMayssel	-1,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
@@ -11346,7 +11116,10 @@ iz_ac02_d,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_d	4_M_GUILLOTINE
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,4269,2,7480,0,0,0,EAJ_NOVICE;
+	questinfo 7480,QTYPE_QUEST,0,Job_Novice;
+	setquestinfo_req 7480,4269,2;
+	questinfo 7483,QTYPE_QUEST,0;
+	setquestinfo_req 7483,7481,1,7482,1;
 	end;
 }
 
@@ -11732,7 +11505,10 @@ iz_ac02_d,52,136,3	duplicate(GuestLecturerMayssel)	Guest Lecturer Mayssel#d	4_F_
 	}
 
 OnInit:
-	questinfo QTYPE_QUEST,7480,1,7481,0,0,0,EAJ_NOVICE;
+	questinfo 7481,QTYPE_QUEST,0;
+	setquestinfo_req 7481,7480,1;
+	questinfo 7484,QTYPE_QUEST,0;
+	setquestinfo_req 7484,7483,1;
 	end;
 }
 
@@ -11742,59 +11518,365 @@ iz_ac02_b,49,134,5	duplicate(Vicente)	Vicente#2ac_b	4_M_HUMAN_02
 iz_ac02_c,49,134,5	duplicate(Vicente)	Vicente#2ac_c	4_M_HUMAN_02
 iz_ac02_d,49,134,5	duplicate(Vicente)	Vicente#2ac_d	4_M_HUMAN_02
 
--	script	::VerkhaselQuestIcon	-1,{
-	end;
+-	script	::Verkhasel	-1,{
+cutin "gc_verkhasel01",0;
+	if(isbegin_quest(4269) == 2) {
+		if(Class == Job_Novice) {
+			if(!isbegin_quest(7480)) {
+				mes "[Verkhasel]";
+				mes "What? it interrupts me.";
+				close2;
+				cutin "",255;
+				end;
+			} else if(isbegin_quest(7480) == 1) {
+				if(!isbegin_quest(7482)) {
+					mes "[Verkhasel]";
+					mes "Eheee. Eheee. It can't be a joke.";
+					mes "Mayssel's class...";
+					mes "Did you call upon me for this kind of nasthy thing?";
+					next;
+					select("...Let's keep working?");
+					cutin "nov_lumin02",2;
+					mes "[Lumin]";
+					mes "It's a pity. That man is scary.";
+					mes "But as long as I am with you, don't be afraid of him.";
+					next;
+					cutin "gc_verkhasel01",0;
+					mes "[Verkhasel]";
+					mes "What are you talking about this time?";
+					mes "In the beginning, Lu.. You should not be here...";
+					next;
+					cutin "nov_lumin01",2;
+					mes "[Lumin]";
+					mes "........Who am I?";
+					mes "Assistant.... Treainer?";
+					next;
+					cutin "gc_verkhasel02",0;
+					mes "[Verkhasel]";
+					mes "Zt...";
+					mes "Well, which one are you curious about?";
+					next;
+					cutin "gc_verkhasel01",0;
+					while(1) {
+						switch(select("Double Attack:Envenom:Improve Dodge and Hide:About you:That's enough.")) {
+							case 1:
+								mes "[Verkhasel]";
+								mes "You may already know the primary weapon of a Thief is a dagger.";
+								mes "A thief's speciality is the ^4d4fffDouble Attack^000000 by a dagger.";
+								next;
+								mes "[Verkhasel]";
+								mes "If you are short of attacking power, it can be covered at a certain degree.";
+								mes "Any other questions?";
+								set .@opt,1;
+								next;
+								break;
+							case 2:
+								mes "[Verkhasel]";
+								mes "There is a skill called ^4d4fffEnvenom^000000 to intoxicate your enemey with poison and the other skill called ^4d4fffDetoxify^000000 to remove the poisoned status.";
+								next;
+								mes "[Verkhasel]";
+								mes "You can tell poisoned status by its very pretty purple color.";
+								next;
+								mes "[Verkhasel]";
+								mes "In case, you are poisoned, venom will dcrease your vitality rapidly, you either detoxify right away or take the antidote potion.";
+								next;
+								mes "[Verkhasel]";
+								mes "If you have more interest in poison, you may be an assassin.";
+								mes "They officially use poison.";
+								mes "Then next!";
+								set .@opt,2;
+								next;
+								break;
+							case 3:
+								mes "[Verkhasel]";
+								mes "Thief's train the skill called ^4d4fffImprove Dodge^000000.";
+								mes "This makes the enemy powerless by evading its attack.";
+								next;
+								mes "[Verkhasel]";
+								mes "Rather than being patient after being hit, it is more suitable for a less defensive thief to avoid from it fast.";
+								mes "Being this reason, agility [AGI] can't be neglected.";
+								next;
+								mes "[Verkhasel]";
+								mes "^4d4fffHiding^000000 is the skill for refuge.";
+								mes "If successful, others can't see you.";
+								next;
+								mes "[Verkhasel]";
+								mes "Ah, as it is said you can't cheat a ghost.... You would be found by evil.";
+								mes "Also sensitive insects recognize it...";
+								next;
+								mes "[Verkhasel]";
+								mes "Other than these, it will be useful for avoiding emergency situations.";
+								mes "When you become higher jobs like Rogue or Assassin, you can learn more useful skills like Refuge.";
+								set .@opt,3;
+								next;
+								break;
+							case 4:
+								mes "[Verkhasel]";
+								mes "Me? I am chief of the Guillotine Cross.";
+								mes "......";
+								next;
+								cutin "nov_lumin01",2;
+								mes "[Lumin]";
+								mes "As one of the assassins, I am in charge of punishing the law violators, as the member of the execution group.";
+								mes "For your reference, the primary weapon of Verkhasel is Katar.";
+								next;
+								select("How do you know thatt?");
+								cutin "nov_lumin03",2;
+								mes "[Lumin]";
+								mes "That's my hope.";
+								next;
+								cutin "gc_verkhasel01",0;
+								mes "[Verkhasel]";
+								mes "Oh.. Smart funk~~";
+								mes "That's enough, Lu.";
+								mes "Any more questions?";
+								next;
+								break;
+							case 5:
+								if(.@opt) {
+									mes "[Verkhasel]";
+									mes "OK.";
+									mes "Considering your favor not to ignore me, let's finish it now.";
+									next;
+									mes "[Verkhasel]";
+									mes "Honestly, I don't think you need to know the details about the thief's skills.";
+									mes "Then, just be aware there is something like that.";
+									next;
+									mes "[Verkhasel]";
+									mes "I mean it is good enough now.";
+									setquest 7482;
+									close2;
+									cutin "",255;
+									end;
+								}
+								mes "[Verkhasel]";
+								mes "You can steal one item from one enemy.";
+								mes "I feel mortified at stopping here, but it's worse to be neglected...";
+								next;
+								break;
+						}
+					}
+				} else {
+					mes "[Verkhasel]";
+					mes "Anything else you're curious. about?";
+					mes "I will give you an answer after you finish Mayssel's class.";
+					next;
+					mes "[Verkhasel]";
+					mes "I mean that she knows it.";
+					mes "Mayssel will do it for you.";
+					next;
+					cutin "nov_lumin01",2;
+					mes "[Lumin]";
+					mes "Lazy boy.";
+					mes "Tell me the truth... You are annoying.";
+					next;
+					cutin "gc_verkhasel02",0;
+					mes "[Verkhasel]";
+					mes "......You........";
+					mes "Zt.. I don't know the enemy..";
+					close2;
+					cutin "",255;
+					end;
+				}
+			} else {
+				if(!isbegin_quest(7483)) {
+					mes "[Verkhasel]";
+					mes "To learn more about the way of a thief, keep going on with Mayssel's class";
+					mes "Because nagging at me here, you can't get anything.";
+					close2;
+					cutin "",255;
+					end;
+				} else if(isbegin_quest(7483) == 1) {
+					if(isbegin_quest(7485) == 2) {
+						mes "[Verkhasel]";
+						mes "Now you fully understand what skill venom is..";
+						mes "As you completed my assignment, go and check it with Mayssel.";
+						close2;
+						cutin "",255;
+						end;
+					}
+					if(!isbegin_quest(7485,HUNTING)) {
+						mes "[Verkhasel]";
+						mes "This is about the use of skill.";
+						mes "Now if you were an assassin, shall I let you test the skills related to venom which you may continue to use?";
+						next;
+						mes "[Verkhasel]";
+						mes "Load the thief guide recieved by Mayssel and open the skill window by pressing Alt + S key.";
+						mes "Register Envenom registered on the MISC compartment, by pressing shortcut key.";
+						next;
+						mes "[Verkhasel]";
+						mes "Then, approach the Poring's cage in the center of this room and aim at Poring, and ^4d4fffhunt one poring by using envenom^000000.";
+						next;
+						mes "[Verkhasel]";
+						mes "That's my assignment to you.";
+						mes "You definitely use envenom to Poring in this room.";
+						mes "Don't go out far away to find Porings.";
+						setquest 7485;
+						next;
+						cutin "nov_lumin02",2;
+						mes "[Lumin]";
+						mes "Eummm.";
+						mes "It's sad..";
+						mes "Please accept my condolence in advance, as you can't experience envenom... hehehe...";
+						next;
+						select("What are you talking about?");
+						cutin "nov_lumin03",2;
+						mes "[Lumin]";
+						mes "From now, I am going to hunt Poring..";
+						mes "..Don't misunderstand me for challenging you, as such I want to make a bet with you.";
+						next;
+						mes "- Lumin is betting win or lose.";
+						cutin "",255;
+						close;
+					} else if(isbegin_quest(7485,HUNTING) == 1) {
+						mes "[Verkhasel]";
+						mes "Come close to a poring cage and use envenom to poring.";
+						mes "You must do it only to porings in this room.";
+						next;
+						if(select("I see..:I won't do it.") == 2) {
+							mes "[Verkhasel]";
+							mes "These are not your aptitude.";
+							mes "I will cancel my assignment, and the other assignments from Mayssel to be cancelled by her.";
+							next;
+							if(select("Cancel.:I will continue..") == 2) {
+								mes "[Verkhasel]";
+								mes "Have you changed your mind?";
+								mes "Then, until you kill all the porings in the cage, keep attacking them with envenom.";
+								close2;
+								cutin "",255;
+								end;
+							}
+							mes "[Verkhasel]";
+							mes "Cancel the mission to hunt poring with envenom.";
+							erasequest 7485;
+							close2;
+							cutin "",255;
+							end;
+						}
+						mes "[Verkhasel]";
+						mes "OK. Until you kill all the porings in the cage, attack them with venom.";
+						percentheal 0,100;
+						close2;
+						cutin "",255;
+						end;
+					} else {
+						mes "[Verkhasel]";
+						mes "You are doing well.";
+						mes "Envenom has the poison effect and can damage from venom itself.";
+						next;
+						mes "[Verkhasel]";
+						mes "The skill experience is now enough.";
+						mes "Check it with Mayssel.";
+						completequest 7485;
+						getexp 800,0;
+						close2;
+						cutin "",255;
+						end;
+					}
+				} else {
+					mes "[Verkhasel]";
+					mes "You are the bung finished Mayssel's class complete.";
+					mes "Any more questions, ask Mayssel.";
+					mes "It is the end of my class.";
+					next;
+					mes "[Verkhasel]";
+					mes "If you become a thief, we may meet together in far future..";
+					mes "If you become an assassin.";
+					close2;
+					cutin "",255;
+					end;
+				}
+			}
+		} else {
+			if(Class == Job_Thief) {
+				mes "[Verkhasel]";
+				mes "Ehee, you...";
+				mes "What do you want to be?";
+				next;
+				if(select("An Assassin.:A Rogue.") == 2) {
+					mes "[Verkhasel]";
+					mes "Go there.";
+					next;
+					cutin "sc_vicente04",2;
+					mes "[Vicente]";
+					mes "Oh... Mr. Verkhasel...";
+					mes "Don't play like this among a family.";
+					mes "Why are you dividing us into teams?";
+					next;
+					cutin "gc_verkhasel01",0;
+					mes "[Verkhasel]";
+					mes "I've never been in your family.";
+					mes "Originally, you are not a Rogue.";
+					mes "You were only a merchant.";
+					next;
+					cutin "sc_vicente02",2;
+					mes "[Vicente]";
+					mes "Oh.. No.. What a dirty word.";
+					mes "Have I asked you for buying something from me?";
+					next;
+					cutin "gc_mayssel03",1;
+					mes "[Mayssel]";
+					mes ".......... You look friendly.. Two of you...";
+					next;
+					mes "- The mood frozen.";
+					cutin "",255;
+					close;
+				}
+				cutin "nov_lumin03",2;
+				mes "[Lumin]";
+				mes "Welcome to your joining in the way of bloody darness.";
+				mes "My comrad.";
+				next;
+				cutin "gc_verkhasel02",0;
+				mes "[Verkhasel]";
+				mes ".... ........";
+				mes "(Verkhasel glancing at sky)";
+				mes "...";
+				mes ".. Ha...!";
+				next;
+				mes "- The mood is becoming delicate.";
+				cutin "",255;
+				close;
+			}
+			mes "[Verkhasel]";
+			mes "You are the guy knows everything you need.";
+			mes "Are you coming to watch only?";
+			mes "Emmm?";
+			mes "Why don't you help the juniors without watch only?";
+			close2;
+			cutin "",255;
+			end;
+		}
+	} else {
+		mes "[Verkhasel]";
+		mes "There is no words to tell you guy not belonging to our academy.";
+		mes "In fact, I pulled out here unwillingly, I don't have mind to be kind of you...";
+		next;
+		cutin "gc_mayssel03",1;
+		mes "[Mayssel]";
+		mes "Wait, Verkhasel.....";
+		mes "Don't get even with other innocent....";
+		mes "How about helping my class for me?";
+		next;
+		mes "- ... Everybody frozen..";
+		close2;
+		cutin "",255;
+		end;
+	}
+
 OnInit:
-	hideonnpc "Verkhasel#a2ac";
-	hideonnpc "Verkhasel#a2ac_a";
-	hideonnpc "Verkhasel#a2ac_b";
-	hideonnpc "Verkhasel#a2ac_c";
-	hideonnpc "Verkhasel#a2ac_d";
-	questinfo QTYPE_QUEST,7483,1,7485,0,0,0,EAJ_NOVICE;
+	questinfo 7482,QTYPE_QUEST,0;
+	setquestinfo_req 7482,7480,1;
+	questinfo 7485,QTYPE_QUEST,0;
+	setquestinfo_req 7485,7483,1;
 	end;
 }
 
-iz_ac02,55,134,3	duplicate(VerkhaselQuestIcon)	Verkhasel#a2ac	4_M_GUILLOTINE
-iz_ac02_a,55,134,3	duplicate(VerkhaselQuestIcon)	Verkhasel#a2ac_a	4_M_GUILLOTINE
-iz_ac02_b,55,134,3	duplicate(VerkhaselQuestIcon)	Verkhasel#a2ac_b	4_M_GUILLOTINE
-iz_ac02_c,55,134,3	duplicate(VerkhaselQuestIcon)	Verkhasel#a2ac_c	4_M_GUILLOTINE
-iz_ac02_d,55,134,3	duplicate(VerkhaselQuestIcon)	Verkhasel#a2ac_d	4_M_GUILLOTINE
-
--	script	::MaysselQuestIcon	-1,{
-	end;
-OnInit:
-	hideonnpc "Mayssel#2ac";
-	hideonnpc "Mayssel#2ac_a";
-	hideonnpc "Mayssel#2ac_b";
-	hideonnpc "Mayssel#2ac_c";
-	hideonnpc "Mayssel#2ac_d";
-	questinfo QTYPE_QUEST,7481,1,7482,1,0,0,EAJ_NOVICE;
-	end;
-}
-
-iz_ac02,52,136,3	duplicate(MaysselQuestIcon)	Mayssel#2ac	4_F_MAYSEL
-iz_ac02_a,52,136,3	duplicate(MaysselQuestIcon)	Mayssel#2ac_a	4_F_MAYSEL
-iz_ac02_b,52,136,3	duplicate(MaysselQuestIcon)	Mayssel#2ac_b	4_F_MAYSEL
-iz_ac02_c,52,136,3	duplicate(MaysselQuestIcon)	Mayssel#2ac_c	4_F_MAYSEL
-iz_ac02_d,52,136,3	duplicate(MaysselQuestIcon)	Mayssel#2ac_d	4_F_MAYSEL
-
--	script	::VicenteQuestIcon	-1,{
-	end;
-OnInit:
-	hideonnpc "Vicente#a2ac";
-	hideonnpc "Vicente#a2ac_a";
-	hideonnpc "Vicente#a2ac_b";
-	hideonnpc "Vicente#a2ac_c";
-	hideonnpc "Vicente#a2ac_d";
-	questinfo QTYPE_QUEST,7483,1,7484,0,0,0,EAJ_NOVICE;
-	end;
-}
-
-iz_ac02,49,134,5	duplicate(VicenteQuestIcon)	Vicente#a2ac	4_M_HUMAN_02
-iz_ac02_a,49,134,5	duplicate(VicenteQuestIcon)	Vicente#a2ac_a	4_M_HUMAN_02
-iz_ac02_b,49,134,5	duplicate(VicenteQuestIcon)	Vicente#a2ac_b	4_M_HUMAN_02
-iz_ac02_c,49,134,5	duplicate(VicenteQuestIcon)	Vicente#a2ac_c	4_M_HUMAN_02
-iz_ac02_d,49,134,5	duplicate(VicenteQuestIcon)	Vicente#a2ac_d	4_M_HUMAN_02
+iz_ac02,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac	4_M_GUILLOTINE
+iz_ac02_a,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_a	4_M_GUILLOTINE
+iz_ac02_b,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_b	4_M_GUILLOTINE
+iz_ac02_c,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_c	4_M_GUILLOTINE
+iz_ac02_d,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_d	4_M_GUILLOTINE
 
 iz_ac02,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac	2_BULLETIN_BOARD
 iz_ac02_a,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac_a	2_BULLETIN_BOARD
@@ -11805,6 +11887,14 @@ iz_ac02_d,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac_d	2_BULLETIN_BOARD
 -	script	::NinjaGuide	-1,{
 	cutin "aca_ninja_k",2;
 	if(Class == Job_Novice) {
+		if(Upper == 2) {
+			mes "[Ninja Guide]";
+			mes "A child cannot accept the life of the Ninja.";
+			mes "It is not easy to qualify for such a life, so do not feel sorry...";
+			close2;
+			cutin "",255;
+			end;
+		}
 		if(isbegin_quest(4269) == 2) {
 			mes "[Ninja Guide]";
 			mes "Hmmm. So a new beginner has come eh?";
@@ -11960,15 +12050,31 @@ iz_ac02_d,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac_d	2_BULLETIN_BOARD
 			end;
 		}
 	} else {
-		mes "[Ninja Guide]";
-		mes "I am the guide to the way of the Ninja for new comers.";
-		next;
-		mes "[Ninja Guide]";
-		mes "I'm not interested in the people who are already on their path.";
-		mes "Take your leave now...";
-		close2;
-		cutin "",255;
-		end;
+		if(Upper != 0) {
+			mes "[Ninja Guide]";
+			mes "I do not wish to speak to you. Leave now...";
+			close2;
+			cutin "",255;
+			end;
+		} else {
+			if(Class == Job_Ninja) {
+				mes "[Ko Ori]";
+				mes "How was it?";
+				mes "Although he is very blunt, he does care very deeply about newcomers.";
+				close2;
+				cutin "",255;
+				end;
+			}
+			mes "[Ninja Guide]";
+			mes "I am the guide to the way of the Ninja for new comers.";
+			next;
+			mes "[Ninja Guide]";
+			mes "I'm not interested in the people who are already on their path.";
+			mes "Take your leave now...";
+			close2;
+			cutin "",255;
+			end;
+		}
 	}
 }
 
@@ -12848,3 +12954,64 @@ iz_ac02_a,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_a	4_F_MADA
 iz_ac02_b,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_b	4_F_MADAME
 iz_ac02_c,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_c	4_F_MADAME
 iz_ac02_d,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_d	4_F_MADAME
+
+// =============================================================================
+// = Old Novice Training Grounds
+// = These NPCs will teleport any stuck player to the new starting area.
+// =============================================================================
+-	script	::TrainingInstructor	4_F_03,{
+	mes "[Training Instructor]";
+	mes "The training grounds have been revised.";
+	mes "I will send you to Izlude.";
+	close2;
+	erasequest 7117,7127;
+	if(strnpcinfo(4) == "new_1-1" || strnpcinfo(4) == "new_1-2" || strnpcinfo(4) == "new_1-3" || strnpcinfo(4) == "new_1-4") {
+		.@warp$ = "iz_int";
+	} else if(strnpcinfo(4) == "new_2-1" || strnpcinfo(4) == "new_2-2" || strnpcinfo(4) == "new_2-3" || strnpcinfo(4) == "new_2-4") {
+		.@warp$ = "iz_int01";
+	} else if(strnpcinfo(4) == "new_3-1" || strnpcinfo(4) == "new_3-2" || strnpcinfo(4) == "new_3-3" || strnpcinfo(4) == "new_3-4") {
+		.@warp$ = "iz_int02";
+	} else if(strnpcinfo(4) == "new_4-1" || strnpcinfo(4) == "new_4-2" || strnpcinfo(4) == "new_4-3" || strnpcinfo(4) == "new_4-4") {
+		.@warp$ = "iz_int03";
+	} else if(strnpcinfo(4) == "new_5-1" || strnpcinfo(4) == "new_5-2" || strnpcinfo(4) == "new_5-3" || strnpcinfo(4) == "new_5-4") {
+		.@warp$ = "iz_int04";
+	}
+	savepoint .@warp$,98,88;
+	warp .@warp$,98,88;
+	end;
+}
+
+new_1-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#1a	4_F_03
+new_1-2,100,29,4	duplicate(TrainingInstructor)	Training Instructor#1b	4_F_03
+new_1-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#1c	4_F_03
+new_1-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#1d	4_F_03
+new_1-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#1e	4_F_03
+new_1-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#1f	4_F_03
+new_2-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#2a	4_F_03
+new_2-2,100,29,4	duplicate(TrainingInstructor)	Training Instructor#2b	4_F_03
+new_2-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#2c	4_F_03
+new_2-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#2d	4_F_03
+new_2-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#2e	4_F_03
+new_2-3,96,30,4	duplicate(TrainingInstructor)	Training Instructor#2f	4_F_03
+new_2-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#2g	4_F_03
+new_3-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#3a	4_F_03
+new_3-2,100,29,4	duplicate(TrainingInstructor)	Training Instructor#3b	4_F_03
+new_3-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#3c	4_F_03
+new_3-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#3d	4_F_03
+new_3-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#3e	4_F_03
+new_3-3,96,30,4	duplicate(TrainingInstructor)	Training Instructor#3f	4_F_03
+new_3-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#3g	4_F_03
+new_4-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#4a	4_F_03
+new_4-2,53,114,3	duplicate(TrainingInstructor)	Training Instructor#4b	4_F_03
+new_4-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#4c	4_F_03
+new_4-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#4d	4_F_03
+new_4-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#4e	4_F_03
+new_4-3,96,30,4	duplicate(TrainingInstructor)	Training Instructor#4f	4_F_03
+new_4-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#4g	4_F_03
+new_5-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#5a	4_F_03
+new_5-2,100,29,4	duplicate(TrainingInstructor)	Training Instructor#5b	4_F_03
+new_5-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#5c	4_F_03
+new_5-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#5d	4_F_03
+new_5-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#5e	4_F_03
+new_5-3,96,30,4	duplicate(TrainingInstructor)	Training Instructor#5f	4_F_03
+new_5-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#5g	4_F_03

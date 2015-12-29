@@ -1275,6 +1275,8 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	sd->avail_quests = 0;
 	sd->save_quest = false;
 	sd->count_rewarp = 0;
+	sd->qi_display = NULL;
+	sd->qi_count = 0;
 
 	//Warp player
 	if ((i = pc_setpos(sd,sd->status.last_point.map, sd->status.last_point.x, sd->status.last_point.y, CLR_OUTSIGHT)) != 0) {
@@ -5276,7 +5278,7 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 		uint32 ip;
 		uint16 port;
 
-		// If can't find any map-servers, just abort setting position.
+		// If can't find any map-servers, just abort setting position
 		if( !sd->mapindex || map_mapname2ipport(mapindex, &ip, &port) )
 			return 2;
 
@@ -6220,10 +6222,12 @@ int pc_checkbaselevelup(struct map_session_data *sd) {
 void pc_baselevelchanged(struct map_session_data *sd) {
 	uint8 i;
 
-	for (i = 0; i < EQI_MAX; i++)
+	for (i = 0; i < EQI_MAX; i++) {
 		if (sd->equip_index[i] >= 0 &&
 			sd->inventory_data[sd->equip_index[i]]->elvmax && sd->status.base_level > (unsigned int)sd->inventory_data[sd->equip_index[i]]->elvmax)
 			pc_unequipitem(sd, sd->equip_index[i], 3);
+	}
+	pc_show_questinfo(sd);
 }
 
 int pc_checkjoblevelup(struct map_session_data *sd)
@@ -7449,7 +7453,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			if( id == 0 )
 				continue;
 			if( id == -1 ) {
-				int eq_num = 0,eq_n[MAX_INVENTORY];
+				int eq_num = 0, eq_n[MAX_INVENTORY];
 
 				memset(eq_n,0,sizeof(eq_n));
 				for( i = 0; i < MAX_INVENTORY; i++ ) {
@@ -7477,11 +7481,11 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 				}
 			} else if( id > 0 ) {
 				for( i = 0; i < MAX_INVENTORY; i++ ) {
-					if( sd->status.inventory[i].nameid == id
-						&& rnd()%10000 < per
-						&& ((type == 1 && !sd->status.inventory[i].equip) ||
-							(type == 2 && sd->status.inventory[i].equip) ||
-							type == 3) )
+					if( sd->status.inventory[i].nameid == id &&
+						rnd()%10000 < per &&
+						((type == 1 && !sd->status.inventory[i].equip) ||
+						(type == 2 && sd->status.inventory[i].equip) ||
+						type == 3) )
 					{
 						if( sd->status.inventory[i].equip )
 							pc_unequipitem(sd,i,3);
@@ -8208,6 +8212,7 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	status_calc_pc(sd,SCO_FORCE);
 	pc_checkallowskill(sd);
 	pc_equiplookall(sd);
+	pc_show_questinfo(sd);
 
 	//If you were previously famous, not anymore.
 	if (fame_flag) {
@@ -11580,6 +11585,121 @@ uint64 pc_generate_unique_id(struct map_session_data *sd) {
 	nullpo_ret(sd);
 
 	return ((uint64)sd->status.char_id<<32)|sd->status.uniqueitem_counter++;
+}
+
+/**
+ * Toggle to remember if the questinfo is displayed yet or not.
+ * @param qi_display Display flag
+ * @param show If show is true and qi_display is 0, set qi_display to 1 and show the event bubble.
+ *             If show is false and qi_display is 1, set qi_display to 0 and hide the event bubble.
+ */
+static void pc_show_questinfo_sub(struct map_session_data *sd, bool *qi_display, struct questinfo *qi, bool show) {
+	if (show) { //Check if need to be displayed
+		if ((*qi_display) != 1) {
+			(*qi_display) = 1;
+			clif_quest_show_event(sd, &qi->nd->bl, qi->icon, qi->color);
+		}
+	} else { //Check if need to be hide
+		if ((*qi_display) != 0) {
+			(*qi_display) = 0;
+#if PACKETVER >= 20120410
+			clif_quest_show_event(sd, &qi->nd->bl, 9999, 0);
+#else
+			clif_quest_show_event(sd, &qi->nd->bl, 0, 0);
+#endif
+		}
+	}
+}
+
+/**
+ * Show available NPC Quest / Event Icon Check [Kisuka]
+ * @param sd Player
+ */
+void pc_show_questinfo(struct map_session_data *sd) {
+#if PACKETVER >= 20090218
+	struct questinfo *qi = NULL;
+	unsigned short i;
+	uint8 j;
+	int8 mystate = 0;
+	bool failed = false;
+
+	nullpo_retv(sd);
+
+	if (sd->bl.m < 0 || sd->bl.m >= MAX_MAPINDEX)
+		return;
+
+	if (!map[sd->bl.m].qi_count || !map[sd->bl.m].qi_data)
+		return;
+
+	for(i = 0; i < map[sd->bl.m].qi_count; i++) {
+		qi = &map[sd->bl.m].qi_data[i];
+
+		if (!qi)
+			continue;
+		if (quest_check(sd, qi->quest_id, HAVEQUEST) != -1) { //Check if quest is not started
+			pc_show_questinfo_sub(sd, &sd->qi_display[i], qi, false);
+			continue;
+		}
+		if (sd->status.base_level < qi->min_level || sd->status.base_level > qi->max_level) { //Level range checks
+			pc_show_questinfo_sub(sd, &sd->qi_display[i], qi, false);
+			continue;
+		}
+		if (qi->req_count) { //Quest requirements
+			failed = false;
+			for (j = 0; j < qi->req_count; j++) {
+				mystate = quest_check(sd, qi->req[j].quest_id, HAVEQUEST);
+				mystate = mystate + (mystate < 1);
+				if (mystate != qi->req[j].state) {
+					failed = true;
+					break;
+				}
+			}
+			if (failed) {
+				pc_show_questinfo_sub(sd, &sd->qi_display[i], qi, false);
+				continue;
+			}
+		}
+		if (qi->jobid_count) { //Job requirements
+			failed = true;
+			for (j = 0; j < qi->jobid_count; j++) {
+				if (pc_mapid2jobid(sd->class_,sd->status.sex) == qi->jobid[j]) {
+					pc_show_questinfo_sub(sd, &sd->qi_display[i], qi, true);
+					failed = false;
+					break;
+				}
+			}
+			if (!failed)
+				continue;
+			pc_show_questinfo_sub(sd, &sd->qi_display[i], qi, false);
+		} else
+			pc_show_questinfo_sub(sd, &sd->qi_display[i], qi, true);
+	}
+#endif
+}
+
+/**
+ * Reinit the questinfo for player when changing map
+ * @param sd Player
+ */
+void pc_show_questinfo_reinit(struct map_session_data *sd) {
+#if PACKETVER >= 20090218
+	nullpo_retv(sd);
+
+	if (sd->qi_display) {
+		aFree(sd->qi_display);
+		sd->qi_display = NULL;
+	}
+
+	sd->qi_count = 0;
+
+	if (sd->bl.m < 0 || sd->bl.m >= MAX_MAPINDEX)
+		return;
+
+	if (!map[sd->bl.m].qi_count || !map[sd->bl.m].qi_data)
+		return;
+
+	CREATE(sd->qi_display, bool, (sd->qi_count = map[sd->bl.m].qi_count));
+#endif
 }
 
 /*==========================================

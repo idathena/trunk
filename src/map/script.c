@@ -11132,17 +11132,18 @@ BUILDIN_FUNC(addrid)
 	struct s_mapiterator *iter;
 	struct block_list *bl;
 	TBL_PC *sd;
+
 	if(st->rid < 1) {
 		st->state = END;
 		bl = map_id2bl(st->oid);
 	} else
-		bl = map_id2bl(st->rid); //If run without rid it'd error,also oid if npc, else rid for map
+		bl = map_id2bl(st->rid); //If run without rid it'd error, also oid if npc, else rid for map
 	iter = mapit_getallusers();
 	switch(script_getnum(st,2)) {
 		case 0:
 			for(sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter)) {
 				if(!script_getnum(st,3) || !sd->st)
-					if(sd->status.account_id != st->rid) //Attached player already runs.
+					if(sd->status.account_id != st->rid) //Attached player already runs
 						run_script(st->script,st->pos,sd->status.account_id,st->oid);
 			}
 			break;
@@ -11154,36 +11155,34 @@ BUILDIN_FUNC(addrid)
 			}
 			break;
 		case 2:
-			if(script_getnum(st,4) == 0) {
+			if(!script_getnum(st,4)) {
 				script_pushint(st,0);
 				return 0;
 			}
 			for(sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter)) {
 				if(!script_getnum(st,3) || !sd->st)
-					//Attached player already runs.
 					if((sd->status.account_id != st->rid) && (sd->status.party_id == script_getnum(st,4)))
 						run_script(st->script,st->pos,sd->status.account_id,st->oid);
 			}
 			break;
 		case 3:
-			if(script_getnum(st,4) == 0) {
+			if(!script_getnum(st,4)) {
 				script_pushint(st,0);
 				return 0;
 			}
 			for(sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter)) {
 				if(!script_getnum(st,3) || !sd->st)
-					//Attached player already runs.
 					if((sd->status.account_id != st->rid) && (sd->status.guild_id == script_getnum(st,4)))
 						run_script(st->script,st->pos,sd->status.account_id,st->oid);
 			}
 			break;
 		case 4:
 			map_foreachinarea(buildin_addrid_sub,
-			bl->m,script_getnum(st,4),script_getnum(st,5),script_getnum(st,6),script_getnum(st,7),BL_PC,
-			st,script_getnum(st,3)); //4-x0 , 5-y0 , 6-x1, 7-y1
+				bl->m,script_getnum(st,4),script_getnum(st,5),script_getnum(st,6),script_getnum(st,7),BL_PC,
+					st,script_getnum(st,3)); //4-x0 , 5-y0 , 6-x1, 7-y1
 			break;
 		default:
-			if((map_id2sd(script_getnum(st,2))) == NULL) { //Player not online.
+			if(!map_id2sd(script_getnum(st,2))) { //Player not online
 				script_pushint(st,0);
 				return 0;
 			}
@@ -17752,25 +17751,36 @@ BUILDIN_FUNC(readbook)
 
 /// Questlog script commands
 /**
- * questinfo <Icon>,<Quest ID>,<State ID>{,<Quest ID2>{,<State ID2>{,<Map Mark Color>{,<Job Mask>{,<Job Number>}}}}};
+ * Add job criteria to questinfo
+ * @param qi Quest Info
+ * @param job
+ * @author [Cydh]
+ */
+static void buildin_questinfo_setjob(struct questinfo *qi, int job) {
+	RECREATE(qi->jobid, unsigned short, qi->jobid_count + 1);
+	qi->jobid[qi->jobid_count++] = job;
+}
+
+/**
+ * questinfo <Quest ID>,<Icon>{,<Map Mark Color>{,<Job Class>}};
  */
 BUILDIN_FUNC(questinfo)
 {
 	struct npc_data *nd = map_id2nd(st->oid);
-	int icon, color;
-	struct questinfo qi;
+	int quest_id, icon;
+	struct questinfo qi, *q2;
 
 	if( nd == NULL ) {
 		ShowError("buildin_questinfo: No NPC attached.\n");
 		return 1;
 	}
 
-	qi.nd = nd;
-	icon = script_getnum(st,2);
+	quest_id = script_getnum(st,2);
+	icon = script_getnum(st,3);
 
 #if PACKETVER >= 20120410
 	if( icon < 0 || (icon > 8 && icon != 9999) || icon == 7 )
-		icon = 9999; // Default to nothing if icon id is invalid
+		icon = 9999; //Default to nothing if icon id is invalid
 #else
 	if( icon < 0 || icon > 7 )
 		icon = 0;
@@ -17778,39 +17788,126 @@ BUILDIN_FUNC(questinfo)
 		icon = icon + 1;
 #endif
 
+	qi.quest_id = quest_id;
 	qi.icon = (unsigned short)icon;
-	qi.id1 = script_getnum(st,3);
-	qi.state1 = script_getnum(st,4);
-	qi.id2 = (script_hasdata(st,5) ? script_getnum(st,5) : 0);
-	qi.state2 = (script_hasdata(st,6) ? script_getnum(st,6) : 0);
-	color = (script_hasdata(st,7) ? script_getnum(st,7) : 0);
+	qi.nd = nd;
 
-	if( color < 0 || color > 3 ) {
-		ShowWarning("buildin_questinfo: invalid color '%d', changing to 0\n", color);
-		script_reportfunc(st);
-		color = 0;
-	}
+	if( script_hasdata(st,4) ) {
+		int color = script_getnum(st,4);
 
-	qi.color = color;
-	qi.hasJob = false;
-	qi.class_ = -1;
-
-	if( script_hasdata(st,8) ) {
-		int mask = script_getnum(st,8);
-
-		qi.hasJob = true;
-		qi.mask = mask;
-	}
-
-	if( qi.hasJob ) {
-		if( script_hasdata(st,9) ) {
-			int class_ = script_getnum(st,9);
-
-			qi.class_ = class_;
+		if( color < 0 || color > 3 ) {
+			ShowWarning("buildin_questinfo: invalid color '%d', changing to 0\n", color);
+			script_reportfunc(st);
+			color = 0;
 		}
+		qi.color = (unsigned char)color;
 	}
 
-	map_add_questinfo(nd->bl.m, &qi);
+	qi.min_level = 1;
+	qi.max_level = MAX_LEVEL;
+
+	q2 = map_add_questinfo(nd->bl.m, &qi);
+	q2->req = NULL;
+	q2->req_count = 0;
+	q2->jobid = NULL;
+	q2->jobid_count = 0;
+
+	if( script_hasdata(st,5) ) {
+		int job = script_getnum(st,5);
+
+		if( !pcdb_checkid(job) )
+			ShowError("buildin_questinfo: Nonexistant Job Class.\n");
+		else
+			buildin_questinfo_setjob(q2, job);
+	}
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Set the quest info of quest_id only showed on player in level range.
+ * setquestinfo_level <quest_id>,<min_level>,<max_level>
+ * @author [Cydh]
+ */
+BUILDIN_FUNC(setquestinfo_level)
+{
+	struct npc_data *nd = map_id2nd(st->oid);
+	int quest_id = script_getnum(st,2);
+	struct questinfo *qi = map_has_questinfo(nd->bl.m, nd, quest_id);
+
+	if( !qi ) {
+		ShowError("buildin_setquestinfo_level: Quest with ID '%d' is not defined yet.\n", quest_id);
+		return 1;
+	}
+
+	qi->min_level = script_getnum(st,3);
+	qi->max_level = script_getnum(st,4);
+	if( !qi->max_level )
+		qi->max_level = MAX_LEVEL;
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Set the quest info of quest_id only showed for player that has quest criteria
+ * setquestinfo_req <quest_id>,<quest_req_id>,<state>{,<quest_req_id>,<state>,...};
+ * @author [Cydh]
+ */
+BUILDIN_FUNC(setquestinfo_req) {
+	struct npc_data *nd = map_id2nd(st->oid);
+	int quest_id = script_getnum(st,2);
+	struct questinfo *qi = map_has_questinfo(nd->bl.m, nd, quest_id);
+	uint8 i = 0;
+	uint8 num = script_lastdata(st);
+
+	if( !qi ) {
+		ShowError("buildin_setquestinfo_req: Quest with ID '%d' is not defined yet.\n", quest_id);
+		return 1;
+	}
+
+	if( quest_search(quest_id) == &quest_dummy ) {
+		ShowError("buildin_setquestinfo_req: Quest with ID '%d' is not found in Quest DB.\n", quest_id);
+		return 1;
+	}
+
+	if( num%2 ) {
+		ShowError("buildin_setquestinfo_req: Odd number of parameters(%d) - pairs of requirements are expected.\n", num - 2);
+		return 1;
+	}
+
+	for( i = 3; i <= num; i += 2 ) {
+		RECREATE(qi->req, struct questinfo_req, qi->req_count + 1);
+		qi->req[qi->req_count].quest_id = script_getnum(st,i);
+		qi->req[qi->req_count].state = (script_getnum(st,i + 1) >= 2) ? 2 : (script_getnum(st,i + 1) <= 0) ? 0 : 1;
+		qi->req_count++;
+	}
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Set the quest info of quest_id only showed for player that has specified Job
+ * setquestinfo_job <quest_id>,<job>{,<job>...};
+ * @author [Cydh]
+ */
+BUILDIN_FUNC(setquestinfo_job) {
+	struct npc_data *nd = map_id2nd(st->oid);
+	int quest_id = script_getnum(st,2);
+	struct questinfo *qi = map_has_questinfo(nd->bl.m, nd, quest_id);
+	int job_id = 0;
+	uint8 i = 0;
+	uint8 num = script_lastdata(st) + 1;
+
+	if( !qi ) {
+		ShowError("buildin_setquestinfo_job: Quest with ID '%d' is not defined yet.\n", quest_id);
+		return 1;
+	}
+
+	for( i = 3; i < num; i++ ) {
+		job_id = script_getnum(st,i);
+		if( !pcdb_checkid(job_id) ) {
+			ShowError("buildin_setquestinfo_job: Invalid job id '%d' in Quest with ID %d.\n", job_id, quest_id);
+			continue;
+		}
+		buildin_questinfo_setjob(qi, job_id);
+	}
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -17825,7 +17922,7 @@ BUILDIN_FUNC(setquest)
 		return 1;
 
 	quest_add(sd, script_getnum(st,2));
-	questinfo_update_status(sd);
+	pc_show_questinfo(sd);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -17840,7 +17937,7 @@ BUILDIN_FUNC(erasequest)
 		return 1;
 
 	quest_delete(sd, script_getnum(st,2));
-	questinfo_update_status(sd);
+	pc_show_questinfo(sd);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -17855,7 +17952,7 @@ BUILDIN_FUNC(completequest)
 		return 1;
 
 	quest_update_status(sd, script_getnum(st,2), Q_COMPLETE);
-	questinfo_update_status(sd);
+	pc_show_questinfo(sd);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -17870,7 +17967,7 @@ BUILDIN_FUNC(changequest)
 		return 1;
 
 	quest_change(sd, script_getnum(st,2), script_getnum(st,3));
-	questinfo_update_status(sd);
+	pc_show_questinfo(sd);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -17894,17 +17991,21 @@ BUILDIN_FUNC(checkquest)
 }
 
 /**
- * isbegin_quest(<ID>{,<char_id>})
+ * isbegin_quest(<ID>{,PLAYTIME|HUNTING{,<char_id>}})
  */
 BUILDIN_FUNC(isbegin_quest)
 {
 	struct map_session_data *sd;
+	enum quest_check_type type = HAVEQUEST;
 	int i;
 
-	if( !script_charid2sd(3,sd) )
+	if( !script_charid2sd(4,sd) )
 		return 1;
 
-	i = quest_check(sd, script_getnum(st,2), (enum quest_check_type)HAVEQUEST);
+	if( script_hasdata(st,3) )
+		type = (enum quest_check_type)script_getnum(st,3);
+
+	i = quest_check(sd, script_getnum(st,2), type);
 	script_pushint(st, i + (i < 1));
 
 	return SCRIPT_CMD_SUCCESS;
@@ -17915,7 +18016,7 @@ BUILDIN_FUNC(isbegin_quest)
  */
 BUILDIN_FUNC(showevent)
 {
-	TBL_PC *sd;
+	struct map_session_data *sd;
 	struct npc_data *nd = map_id2nd(st->oid);
 	int icon, color = 0;
 
@@ -20291,7 +20392,7 @@ BUILDIN_FUNC(getvar) {
 /**
  * Display script message
  * showscript "<message>"{,<GID>};
- **/
+ */
 BUILDIN_FUNC(showscript) {
 	struct block_list *bl = NULL;
 	const char *msg = script_getstr(st,2);
@@ -20864,12 +20965,15 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(unbindatcmd,"s"),
 	BUILDIN_DEF(useatcmd,"s"),
 	//Quest Log System [Inkfish]
-	BUILDIN_DEF(questinfo,"iii?????"),
+	BUILDIN_DEF(questinfo,"ii??"),
+	BUILDIN_DEF(setquestinfo_level,"iii"),
+	BUILDIN_DEF(setquestinfo_req,"iii*"),
+	BUILDIN_DEF(setquestinfo_job,"ii*"),
 	BUILDIN_DEF(setquest,"i?"),
 	BUILDIN_DEF(erasequest,"i?"),
 	BUILDIN_DEF(completequest,"i?"),
 	BUILDIN_DEF(checkquest,"i??"),
-	BUILDIN_DEF(isbegin_quest,"i?"),
+	BUILDIN_DEF(isbegin_quest,"i??"),
 	BUILDIN_DEF(changequest,"ii?"),
 	BUILDIN_DEF(showevent,"i??"),
 	//Party related

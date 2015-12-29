@@ -233,7 +233,11 @@ void bonus_script_save(int fd); // Save bonus_script data
 unsigned int save_flag = 0;
 
 // Initial position (it's possible to set it in conf file)
-struct point start_point = { 0, 53, 111 };
+#ifdef RENEWAL
+	struct point start_point = { 0, 97, 90 };
+#else
+	struct point start_point = { 0, 53, 111 };
+#endif
 
 int console = 0;
 
@@ -5603,6 +5607,7 @@ int char_config_read(const char *cfgName)
 				autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
 		} else if(strcmpi(w1, "save_log") == 0)
 			save_log = config_switch(w2);
+#ifdef RENEWAL
 		else if(strcmpi(w1, "start_point") == 0) {
 			char map[MAP_NAME_LENGTH_EXT];
 			int x, y;
@@ -5614,7 +5619,22 @@ int char_config_read(const char *cfgName)
 				ShowError("Specified start_point %s not found in map-index cache.\n", map);
 			start_point.x = x;
 			start_point.y = y;
-		} else if(strcmpi(w1, "start_zeny") == 0) {
+		}
+#else
+		else if(strcmpi(w1, "start_point_pre") == 0) {
+			char map[MAP_NAME_LENGTH_EXT];
+			int x, y;
+
+			if(sscanf(w2, "%15[^,],%d,%d", map, &x, &y) < 3)
+				continue;
+			start_point.map = mapindex_name2id(map);
+			if(!start_point.map)
+				ShowError("Specified start_point %s not found in map-index cache.\n", map);
+			start_point.x = x;
+			start_point.y = y;
+		}
+#endif
+		else if(strcmpi(w1, "start_zeny") == 0) {
 			start_zeny = atoi(w2);
 			if(start_zeny < 0)
 				start_zeny = 0;
@@ -5792,7 +5812,11 @@ int do_init(int argc, char **argv)
 	//Read map indexes
 	runflag = CHARSERVER_ST_STARTING;
 	mapindex_init();
-	start_point.map = mapindex_name2id("new_zone01");
+#ifdef RENEWAL
+	start_point.map = mapindex_name2id("iz_int");
+#else
+	start_point.map = mapindex_name2id("new_1-1");
+#endif
 	safestrncpy(default_map, "prontera", MAP_NAME_LENGTH);
 
 	CHAR_CONF_NAME = "conf/char_athena.conf";

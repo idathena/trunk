@@ -2262,7 +2262,7 @@ glast_01,210,273,5	script	Hugin's Buttler	69,{
 						mes "The boots have been upgraded as you want.";
 						delequip .@part;
 						delitem 6607,5; //Temporal_Crystal
-						getitem .@equip_type[.@select-2],1; //Temporal_Str_Boots,Temporal_Int_Boots,Temporal_Agi_Boots,Temporal_Vit_Boots,Temporal_Dex_Boots,Temporal_Luk_Boots
+						getitem .@equip_type[.@select-2],1; //Temporal_STR_Boots,Temporal_INT_Boots,Temporal_AGI_Boots,Temporal_VIT_Boots,Temporal_DEX_Boots,Temporal_LUK_Boots
 						close;
 					}
 					mes "[Hugin's Buttler]";
@@ -2336,12 +2336,12 @@ glast_01,212,273,4	script	Hugin's Magic Master	66,{
 	setarray .@enchant4th[0],4822,4835,4826,4862,4881,4755; //Fighting_Spirit7,Expert_Archer4,Spell5,MHP2,DelayafterAttack4Lv,Luck6
 	setarray .@enchant_cost[0],1,4,15,30,10;
 	switch (.@equip_id) {
-	case 22000: //Temporal_Str_Boots
-	case 22001: //Temporal_Int_Boots
-	case 22002: //Temporal_Agi_Boots
-	case 22003: //Temporal_Vit_Boots
-	case 22004: //Temporal_Dex_Boots
-	case 22005: //Temporal_Luk_Boots
+	case 22000: //Temporal_STR_Boots
+	case 22001: //Temporal_INT_Boots
+	case 22002: //Temporal_AGI_Boots
+	case 22003: //Temporal_VIT_Boots
+	case 22004: //Temporal_DEX_Boots
+	case 22005: //Temporal_LUK_Boots
 		if (!.@card3) { //4th slot 1st try enchanting
 			set .@cost,.@enchant_cost[0];
 			set .@number,1;
@@ -2533,12 +2533,12 @@ glast_01,210,270,0	script	Hugin's Craftsman	726,{
 	}
 	set .@equip_id,getequipid(.@part);
 	switch (.@equip_id) {
-	case 22000: //Temporal_Str_Boots
-	case 22001: //Temporal_Int_Boots
-	case 22002: //Temporal_Agi_Boots
-	case 22003: //Temporal_Vit_Boots
-	case 22004: //Temporal_Dex_Boots
-	case 22005: //Temporal_Luk_Boots
+	case 22000: //Temporal_STR_Boots
+	case 22001: //Temporal_INT_Boots
+	case 22002: //Temporal_AGI_Boots
+	case 22003: //Temporal_VIT_Boots
+	case 22004: //Temporal_DEX_Boots
+	case 22005: //Temporal_LUK_Boots
 		mes "[Hugin's Craftsman]";
 		mes "And ^FF0000all enchant or refine rates will be lost if you fail this.^000000";
 		mes "Still want to risk it?";
@@ -2579,17 +2579,17 @@ glast_01,210,270,0	script	Hugin's Craftsman	726,{
 		delitem 6607,5; //Temporal_Crystal
 		delequip .@part;
 		if (.@equip_id == 22000) {
-			getitem 22006,1; //Temporal_Str_Boots_
+			getitem 22006,1; //Temporal_STR_Boots_
 		} else if (.@equip_id == 22001) {
-			getitem 22009,1; //Temporal_Int_Boots_
+			getitem 22009,1; //Temporal_INT_Boots_
 		} else if (.@equip_id == 22002) {
-			getitem 22010,1; //Temporal_Agi_Boots_
+			getitem 22010,1; //Temporal_AGI_Boots_
 		} else if (.@equip_id == 22003) {
-			getitem 22007,1; //Temporal_Vit_Boots_
+			getitem 22007,1; //Temporal_VIT_Boots_
 		} else if (.@equip_id == 22004) {
-			getitem 22008,1; //Temporal_Dex_Boots_
+			getitem 22008,1; //Temporal_DEX_Boots_
 		} else if (.@equip_id == 22005) {
-			getitem 22011,1; //Temporal_Luk_Boots_
+			getitem 22011,1; //Temporal_LUK_Boots_
 		}
 		close;
 	default:

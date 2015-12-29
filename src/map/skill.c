@@ -866,7 +866,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 				if( (sd->addeff[i].flag&(ATF_LONG|ATF_SHORT)) != (ATF_LONG|ATF_SHORT) ) { //Trigger has range consideration
 					if( (sd->addeff[i].flag&ATF_LONG && !(attack_type&BF_LONG)) ||
 						(sd->addeff[i].flag&ATF_SHORT && !(attack_type&BF_SHORT)) )
-						continue; //Range Failed
+						continue; //Range failed
 				}
 				type =  sd->addeff[i].id;
 				if( sd->addeff[i].duration > 0 ) { //Fixed duration
@@ -1882,10 +1882,16 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 				rate += dstsd->addeff2[i].arrow_rate;
 			if(!rate)
 				continue;
+			if((dstsd->addeff2[i].flag&(ATF_WEAPON|ATF_MAGIC|ATF_MISC)) != (ATF_WEAPON|ATF_MAGIC|ATF_MISC)) { //Trigger has attack type consideration
+				if((dstsd->addeff2[i].flag&ATF_WEAPON && !(attack_type&BF_WEAPON)) ||
+					(dstsd->addeff2[i].flag&ATF_MAGIC && !(attack_type&BF_MAGIC)) ||
+					(dstsd->addeff2[i].flag&ATF_MISC && !(attack_type&BF_MISC)))
+					continue;
+			}
 			if((dstsd->addeff2[i].flag&(ATF_LONG|ATF_SHORT)) != (ATF_LONG|ATF_SHORT)) { //Trigger has range consideration
 				if((dstsd->addeff2[i].flag&ATF_LONG && !(attack_type&BF_LONG)) ||
 					(dstsd->addeff2[i].flag&ATF_SHORT && !(attack_type&BF_SHORT)))
-					continue; //Range Failed
+					continue; //Range failed
 			}
 			type = dstsd->addeff2[i].id;
 			time = skill_get_time2(status_sc2skill(type),7);
@@ -5840,27 +5846,24 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case CG_MARIONETTE: {
 				struct status_change *sc = status_get_sc(src);
 
+				//Cannot cast on another bard/dancer-type class of the same gender as caster
 				if (sd && dstsd && (dstsd->class_&MAPID_UPPERMASK) == MAPID_BARDDANCER && dstsd->status.sex == sd->status.sex) {
-					//Cannot cast on another bard/dancer-type class of the same gender as caster
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					map_freeblock_unlock();
 					return 1;
 				}
-
 				if (sc && tsc) {
 					if (!sc->data[SC_MARIONETTE] && !tsc->data[SC_MARIONETTE2]) {
 						sc_start(src,src,SC_MARIONETTE,100,bl->id,skill_get_time(skill_id,skill_lv));
 						sc_start(src,bl,SC_MARIONETTE2,100,src->id,skill_get_time(skill_id,skill_lv));
 						clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 					} else if (sc->data[SC_MARIONETTE ] &&  sc->data[SC_MARIONETTE ]->val1 == bl->id &&
-						tsc->data[SC_MARIONETTE2] && tsc->data[SC_MARIONETTE2]->val1 == src->id)
-					{
+						tsc->data[SC_MARIONETTE2] && tsc->data[SC_MARIONETTE2]->val1 == src->id) {
 						status_change_end(src,SC_MARIONETTE,INVALID_TIMER);
 						status_change_end(bl,SC_MARIONETTE2,INVALID_TIMER);
 					} else {
 						if (sd)
 							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-
 						map_freeblock_unlock();
 						return 1;
 					}
@@ -8105,13 +8108,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			sc_start(src,src,SC_SMA,100,skill_lv,skill_get_time(SL_SMA,skill_lv));
 			break;
 		case SL_HIGH:
-			if (sd && dstsd && !(dstsd->class_&JOBL_UPPER) && !(dstsd->class_&JOBL_2) && dstsd->status.base_level < 70) {
+			if (dstsd && !(dstsd->class_&JOBL_2) && (dstsd->class_&JOBL_UPPER) && dstsd->status.base_level < 70) {
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,
+					sc_start4(src,bl,type,100,skill_lv,skill_id,0,0,skill_get_time(skill_id,skill_lv)));
+				sc_start(src,src,SC_SMA,100,skill_lv,skill_get_time(SL_SMA,skill_lv));
+			} else if (sd)
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-				break;
-			}
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,
-				sc_start4(src,bl,type,100,skill_lv,skill_id,0,0,skill_get_time(skill_id,skill_lv)));
-			sc_start(src,src,SC_SMA,100,skill_lv,skill_get_time(SL_SMA,skill_lv));
 			break;
 
 		case SL_SWOO:
@@ -10431,6 +10433,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if( hd ) {
 				int heal;
 
+#ifdef RENEWAL
+				if( dstmd && dstmd->mob_id == MOBID_EMPERIUM )
+					break;
+#endif
 				if( tsc ) {
 					const enum sc_type scs[] = {
 						SC_MANDRAGORA,SC_HARMONIZE,SC_DEEPSLEEP,SC_VOICEOFSIREN,SC_SLEEP,SC_CONFUSION,SC_HALLUCINATION
@@ -12904,7 +12910,6 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 	struct skill_unit_group *group;
 	struct block_list *src; //Actual source that cast the skill unit
 	TBL_PC *sd;
-	struct status_data *status;
 	struct status_change *sc;
 	struct status_change_entry *sce;
 	enum sc_type type;
@@ -12927,7 +12932,6 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 
 	sd = BL_CAST(BL_PC,bl);
 	sc = status_get_sc(bl);
-	status = status_get_status_data(bl);
 	type = status_skill2sc(skill_id);
 	sce = (sc && type != SC_NONE) ? sc->data[type] : NULL;
 

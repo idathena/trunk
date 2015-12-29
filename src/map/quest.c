@@ -354,58 +354,6 @@ int quest_check(TBL_PC *sd, int quest_id, enum quest_check_type type) {
 }
 
 /**
- * NPC quest/event icon check
- * @author [Kisuka]
- */
-void questinfo_update_status(TBL_PC *sd) {
-	unsigned short i = 0;
-
-#if PACKETVER >= 20090218
-	for( i = 0; i < map[sd->bl.m].qi_count; i++ ) {
-		struct questinfo *qi = &map[sd->bl.m].qi_data[i];
-		int j = quest_check(sd, qi->id1, HAVEQUEST);
-		int k = quest_check(sd, qi->id2, HAVEQUEST);
-
-		j = j + (j < 1);
-		k = k + (k < 1);
-		if( qi->state1 == j ) {
-			if( !qi->id2 ) {
-				if( qi->hasJob ) {
-					if( (qi->mask && ((qi->class_ == -1 && (sd->class_&qi->mask)) ||
-						(qi->class_ != -1 && (sd->class_&qi->mask) == qi->class_))) ||
-						(!qi->mask && qi->class_ != -1 && sd->status.class_ == qi->class_) )
-						clif_quest_show_event(sd, &qi->nd->bl, qi->icon, qi->color);
-				} else
-					clif_quest_show_event(sd, &qi->nd->bl, qi->icon, qi->color);
-			} else {
-				if( qi->state2 == k ) {
-					if( qi->hasJob ) {
-						if( (qi->mask && ((qi->class_ == -1 && (sd->class_&qi->mask)) ||
-							(qi->class_ != -1 && (sd->class_&qi->mask) == qi->class_))) ||
-							(!qi->mask && qi->class_ != -1 && sd->status.class_ == qi->class_) )
-							clif_quest_show_event(sd, &qi->nd->bl, qi->icon, qi->color);
-					} else
-						clif_quest_show_event(sd, &qi->nd->bl, qi->icon, qi->color);
-				} else {
-	#if PACKETVER >= 20120410
-					clif_quest_show_event(sd, &qi->nd->bl, 9999, 0);
-	#else
-					clif_quest_show_event(sd, &qi->nd->bl, 0, 0);
-	#endif
-				}
-			}
-		} else {
-	#if PACKETVER >= 20120410
-					clif_quest_show_event(sd, &qi->nd->bl, 9999, 0);
-	#else
-					clif_quest_show_event(sd, &qi->nd->bl, 0, 0);
-	#endif
-		}
-	}
-#endif
-}
-
-/**
  * Loads quests from the quest db.
  *
  * @return Number of loaded quests, or -1 if the file couldn't be read.

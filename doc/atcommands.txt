@@ -986,8 +986,7 @@ If no position is given, the command defaults to headgear.
 3: Bottom
 4: Weapon
 5: Shield
-6: Shoes
-7: Robe
+6: Robe
 
 ---------------------------------------
 

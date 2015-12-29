@@ -125,6 +125,7 @@
 12731,1,100	// Runstone_Turisus
 12732,1,100	// Runstone_Pertz
 12733,1,100	// Runstone_Hagalas
+12846,1,100	// Little_Unripe_Apple
 14521,1,100	// Repair_Scroll
 14529,1,100	// Greed_Scroll
 14532,1,100	// Battle_Manual25

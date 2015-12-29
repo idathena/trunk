@@ -33,10 +33,10 @@
 	mes "what I do, and take pride in it.";
 	next;
 	mes "[Leablem]";
-	mes "I've learned most of the things from my brother, Seyablem,";
+	mes "I've learned most of the things from my brother, Seiyablem,";
 	mes "but I think I still have a lot to learn.";
 	mes "So please understand my slotting services are limited,";
-	mes "unlike my brother Seyablem.";
+	mes "unlike my brother Seiyablem.";
 	next;
 	mes "[Leablem]";
 	mes "My brother wasn't so happy to teach me";

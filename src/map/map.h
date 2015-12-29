@@ -46,9 +46,9 @@ void map_do_final_msg(void);
 #define MAX_FLOORITEM START_ACCOUNT_NUM
 #define MAX_LEVEL 175
 #define MAX_DROP_PER_MAP 48
-#define MAX_IGNORE_LIST 20 // official is 14
+#define MAX_IGNORE_LIST 20 //Official is 14
 #define MAX_VENDING 12
-#define MAX_MAP_SIZE 512*512 // Wasn't there something like this already? Can't find it.. [Shinryo]
+#define MAX_MAP_SIZE 512*512 //Wasn't there something like this already? Can't find it. [Shinryo]
 
 //The following system marks a different job ID system used by the map server,
 //which makes a lot more sense than the normal one. [Skotlex]
@@ -567,25 +567,33 @@ struct mapflag_skill_adjust {
 	unsigned short modifier;
 };
 
+struct questinfo_req {
+	unsigned int quest_id;
+	unsigned state : 1; // 0: Doesn't have, 1: Active/Inactive, 2: Complete
+};
+
 struct questinfo {
 	struct npc_data *nd;
 	unsigned short icon;
 	unsigned char color;
-	int id1, id2;
-	uint8 state1, state2;
-	bool hasJob;
-	int mask, class_;
+	int quest_id;
+	unsigned short min_level,
+		max_level;
+	uint8 req_count;
+	uint8 jobid_count;
+	struct questinfo_req *req;
+	unsigned short *jobid;
 };
 
 struct map_data {
 	char name[MAP_NAME_LENGTH];
 	uint16 index; // The map index used by the mapindex* functions.
-	struct mapcell* cell; // Holds the information of each map cell (NULL if the map is not on this map-server).
+	struct mapcell *cell; // Holds the information of each map cell (NULL if the map is not on this map-server).
 	struct block_list **block;
 	struct block_list **block_mob;
 	int16 m;
-	int16 xs,ys; // Map dimensions (in cells)
-	int16 bxs,bys; // Map dimensions (in blocks)
+	int16 xs, ys; // Map dimensions (in cells)
+	int16 bxs, bys; // Map dimensions (in blocks)
 	int16 bgscore_lion, bgscore_eagle; // Battleground ScoreBoard
 	int npc_num;
 	int users;
@@ -705,7 +713,7 @@ struct map_data {
 struct map_data_other_server {
 	char name[MAP_NAME_LENGTH];
 	unsigned short index; // Index is the map index used by the mapindex* functions.
-	struct mapcell* cell; // If this is NULL, the map is not on this map-server
+	struct mapcell *cell; // If this is NULL, the map is not on this map-server
 	uint32 ip;
 	uint16 port;
 };
@@ -878,8 +886,9 @@ void map_skill_damage_add(struct map_data *m, uint16 skill_id, int pc, int mob, 
 #define CHK_RACE2(race2) ((race2) >= RC2_NONE && (race2) < RC2_MAX) // Check valid Race2
 #define CHK_CLASS(class_) ((class_) > CLASS_NONE && (class_) < CLASS_MAX) // Check valid Class
 
-void map_add_questinfo(int m, struct questinfo *qi);
+struct questinfo *map_add_questinfo(int m, struct questinfo *qi);
 bool map_remove_questinfo(int m, struct npc_data *nd);
+struct questinfo *map_has_questinfo(int m, struct npc_data *nd, int quest_id);
 
 extern char *INTER_CONF_NAME;
 extern char *LOG_CONF_NAME;

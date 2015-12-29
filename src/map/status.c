@@ -830,7 +830,7 @@ void initChangeTables(void) {
 	set_sc_with_vfx( RL_AM_BLAST, SC_ANTI_M_BLAST       , SI_ANTI_M_BLAST         , SCB_NONE          );
 	set_sc( RL_HEAT_BARREL      , SC_HEAT_BARREL        , SI_HEAT_BARREL          , SCB_ASPD|SCB_FLEE );
 
-	//Storing the target job rather than simply SC_SPIRIT simplifies code later on.
+	//Storing the target job rather than simply SC_SPIRIT simplifies code later on
 	SkillStatusChangeTable[SL_ALCHEMIST]   = (sc_type)MAPID_ALCHEMIST,
 	SkillStatusChangeTable[SL_MONK]        = (sc_type)MAPID_MONK,
 	SkillStatusChangeTable[SL_STAR]        = (sc_type)MAPID_STAR_GLADIATOR,
@@ -8875,7 +8875,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					struct status_change *d_sc;
 
 					if( (d_bl = map_id2bl(val1)) && (d_sc = status_get_sc(d_bl)) && d_sc->count ) { //Inherits status from source
-						const enum sc_type types[] = { SC_AUTOGUARD,SC_REFLECTSHIELD,SC_ENDURE };
+						const enum sc_type types[] = { SC_ENDURE,SC_AUTOGUARD,SC_REFLECTSHIELD };
 						int i = (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) ? 1 : 2;
 
 						while( i >= 0 ) {
@@ -10790,9 +10790,9 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 				status_change_end(bl,SC_PROVOKE,INVALID_TIMER);
 			break;
 		case SC_ENDURE:
-		case SC_DEFENDER:
-		case SC_REFLECTSHIELD:
 		case SC_AUTOGUARD:
+		case SC_REFLECTSHIELD:
+		case SC_DEFENDER:
 			{
 				struct map_session_data *tsd;
 
@@ -10803,9 +10803,8 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 						if (sd->devotion[i] && (tsd = map_id2sd(sd->devotion[i])) && tsd->sc.data[type])
 							status_change_end(&tsd->bl,type,INVALID_TIMER);
 					}
-				} else if (bl->type == BL_MER && ((TBL_MER *)bl)->devotion_flag) { //Clear Status from Master
-					tsd = ((TBL_MER *)bl)->master;
-					if (tsd && tsd->sc.data[type])
+				} else if (bl->type == BL_MER && ((TBL_MER *)bl)->devotion_flag) { //Clear status from master
+					if ((tsd = ((TBL_MER *)bl)->master) && tsd->sc.data[type])
 						status_change_end(&tsd->bl,type,INVALID_TIMER);
 				}
 			}
@@ -10820,10 +10819,10 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 						((TBL_MER *)d_bl)->devotion_flag = 0;
 					clif_devotion(d_bl,NULL);
 				}
-				status_change_end(bl,SC_AUTOGUARD,INVALID_TIMER);
-				status_change_end(bl,SC_DEFENDER,INVALID_TIMER);
-				status_change_end(bl,SC_REFLECTSHIELD,INVALID_TIMER);
 				status_change_end(bl,SC_ENDURE,INVALID_TIMER);
+				status_change_end(bl,SC_AUTOGUARD,INVALID_TIMER);
+				status_change_end(bl,SC_REFLECTSHIELD,INVALID_TIMER);
+				status_change_end(bl,SC_DEFENDER,INVALID_TIMER);
 			}
 			break;
 		case SC_BLADESTOP:
