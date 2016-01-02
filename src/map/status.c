@@ -7250,7 +7250,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			tick_def2 = (status->vit + status->luk) * 50;
 			break;
 		case SC_B_TRAP:
-			tick_def2 = (sd ? sd->status.str : b_status->str) * 50; //Custom values
+			tick_def2 = (sd ? sd->status.str : b_status->str) * 50;
 			break;
 		case SC_NORECOVER_STATE:
 			tick_def2 = status->luk * 100;
