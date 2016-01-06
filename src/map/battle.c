@@ -959,7 +959,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 #ifdef RENEWAL
 			skill_id != WS_CARTTERMINATION &&
 #endif
-			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK) && rnd()%100 < sce->val2 )
+			(skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
+			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK)) && rnd()%100 < sce->val2 )
 		{
 			int delay;
 			struct status_change_entry *sce_d = sc->data[SC_DEVOTION];
@@ -1014,7 +1015,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 #ifdef RENEWAL
 			skill_id != WS_CARTTERMINATION &&
 #endif
-			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK) && rnd()%100 < sce->val2 )
+			(skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
+			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK)) && rnd()%100 < sce->val2 )
 		{
 			clif_skill_nodamage(bl,bl,LK_PARRYING,sce->val1,1);
 			return 0; //Attack blocked by Parrying
@@ -1067,7 +1069,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 #ifdef RENEWAL
 			skill_id != WS_CARTTERMINATION &&
 #endif
-			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK) )
+			(skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
+			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK)) )
 		{
 			skill_additional_effect(src,bl,skill_id,skill_lv,flag,ATK_BLOCK,gettick());
 			if( !status_isdead(src) )
@@ -1202,7 +1205,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 		if( sc->data[SC_ENERGYCOAT]
 #ifndef RENEWAL
-			&& flag&BF_WEAPON && !(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK)
+			&& flag&BF_WEAPON && (skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
+			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK))
 #endif
 		) {
 			int per = 100 * status->sp / status->max_sp - 1; //100% should be counted as the 80~99% interval
