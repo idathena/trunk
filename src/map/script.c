@@ -2353,7 +2353,7 @@ void script_hardcoded_constants(void)
 	script_set_constant("MAX_LEVEL", MAX_LEVEL, false);
 	script_set_constant("MAX_STORAGE", MAX_STORAGE, false);
 	script_set_constant("MAX_INVENTORY", MAX_INVENTORY, false);
-	script_set_constant("MAX_CART", MAX_INVENTORY, false);
+	script_set_constant("MAX_CART", MAX_CART, false);
 	script_set_constant("MAX_ZENY", MAX_ZENY, false);
 	script_set_constant("MAX_PARTY", MAX_PARTY, false);
 	script_set_constant("MAX_GUILD", MAX_GUILD, false);
@@ -10417,7 +10417,7 @@ BUILDIN_FUNC(getscrate)
 BUILDIN_FUNC(getstatus)
 {
 	int id, type;
-	struct map_session_data* sd;
+	struct map_session_data *sd;
 
 	if( !script_charid2sd(4,sd) )
 		return 1;
@@ -10784,14 +10784,23 @@ BUILDIN_FUNC(changebase)
 		return 0;
 	}
 
-	if( !sd->disguise && vclass != sd->vd.class_ )
-		pc_changelook(sd,LOOK_BASE,vclass); //Updated client view. Base, Weapon and Cloth Colors
+	if( !sd->disguise && vclass != sd->vd.class_ ) {
+		status_set_viewdata(&sd->bl,vclass);
+		//Updated client view. Base, Weapon, Cloth Colors and Body.
+		clif_changelook(&sd->bl,LOOK_BASE,sd->vd.class_);
+		clif_changelook(&sd->bl,LOOK_WEAPON,sd->status.weapon);
+		if( sd->vd.cloth_color )
+			clif_changelook(&sd->bl,LOOK_CLOTHES_COLOR,sd->vd.cloth_color);
+		if( sd->vd.body_style )
+			clif_changelook(&sd->bl,LOOK_BODY2,sd->vd.body_style);
+		clif_skillinfoblock(sd);
+	}
 
 	return SCRIPT_CMD_SUCCESS;
 }
 
 /**
- * Change sec and unequip all item and request for a changesex to char-serv
+ * Change account sex and unequip all item and request for a changesex to char-serv
  * changesex({<char_id>});
  */
 BUILDIN_FUNC(changesex)
@@ -10803,12 +10812,36 @@ BUILDIN_FUNC(changesex)
 		return 1;
 
 	pc_resetskill(sd,4);
-	//To avoid any problem with equipment and invalid sex, equipment is unequiped.
+	//To avoid any problem with equipment and invalid sex, equipment is unequiped
 	for( i = 0; i < EQI_MAX; i++ )
 		if( sd->equip_index[i] >= 0 )
-			pc_unequipitem(sd, sd->equip_index[i], 3);
-	chrif_changesex(sd);
+			pc_unequipitem(sd,sd->equip_index[i],3);
+	chrif_changesex(sd,true);
 	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Change character's sex and unequip all item and request for a changesex to char-serv
+ * changecharsex({<char_id>});
+ */
+BUILDIN_FUNC(changecharsex)
+{
+#if PACKETVER >= 20141016
+	int i;
+	TBL_PC *sd = NULL;
+
+	if( !script_charid2sd(2,sd) )
+		return 1;
+
+	pc_resetskill(sd,4);
+	for( i = 0; i < EQI_MAX; i++ )
+		if( sd->equip_index[i] >= 0 )
+			pc_unequipitem(sd,sd->equip_index[i],3);
+	chrif_changesex(sd,false);
+	return SCRIPT_CMD_SUCCESS;
+#else
+	return SCRIPT_CMD_FAILURE;
+#endif
 }
 
 /*==========================================
@@ -13984,6 +14017,7 @@ BUILDIN_FUNC(getlook)
 		case LOOK_SHIELD:   	val = sd->status.shield; break; //8
 		case LOOK_SHOES:    	break; //9
 		case LOOK_ROBE:     	val = sd->status.robe; break; //12
+		case LOOK_BODY2:		val = sd->status.body; break; //13
 	}
 	script_pushint(st,val);
 	return SCRIPT_CMD_SUCCESS;
@@ -15816,7 +15850,7 @@ BUILDIN_FUNC(callshop)
 			if( nd->u.shop.shop_item[i].qty )
 				break;
 		if( i == nd->u.shop.count ) {
-			clif_colormes(sd,color_table[COLOR_RED],msg_txt(500));
+			clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(500));
 			return 0;
 		}
 		sd->npc_shopid = nd->bl.id;
@@ -17511,7 +17545,7 @@ BUILDIN_FUNC(openauction)
 		return 1;
 
 	if( !battle_config.feature_auction ) {
-		clif_colormes(sd, color_table[COLOR_RED], msg_txt(1489));
+		clif_colormes(sd->fd, color_table[COLOR_RED], msg_txt(1489));
 		return 0;
 	}
 
@@ -20440,6 +20474,28 @@ BUILDIN_FUNC(ignoretimeout)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * opendressroom(<flag>{,<char_id>});
+ */
+BUILDIN_FUNC(opendressroom)
+{
+#if PACKETVER >= 20150513
+    TBL_PC *sd;
+	int flag = 1;
+
+    if (script_hasdata(st,2))
+		flag = script_getnum(st,2);
+
+    if (!script_charid2sd(3,sd))
+        return 1;
+
+    clif_dressing_room(sd,flag);
+    return SCRIPT_CMD_SUCCESS;
+#else
+    return SCRIPT_CMD_FAILURE;
+#endif
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -20668,6 +20724,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(skillpointcount,"?"),
 	BUILDIN_DEF(changebase,"i?"),
 	BUILDIN_DEF(changesex,"?"),
+	BUILDIN_DEF(changecharsex,"?"),
 	BUILDIN_DEF(waitingroom,"si?????"),
 	BUILDIN_DEF(delwaitingroom,"?"),
 	BUILDIN_DEF(waitingroomkick,"ss"),
@@ -21009,6 +21066,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getvar,"vi"),
 	BUILDIN_DEF(showscript,"s?"),
 	BUILDIN_DEF(ignoretimeout,"i?"),
+	BUILDIN_DEF(opendressroom,"i?"),
 
 #include "../custom/script_def.inc"
 

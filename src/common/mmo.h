@@ -21,7 +21,7 @@
 // See conf/battle/client.conf for other version
 
 #ifndef PACKETVER
-	#define PACKETVER 20131223
+	#define PACKETVER 20150916
 #endif
 
 //Remove/Comment this line to disable sc_data saving. [Skotlex]
@@ -386,7 +386,7 @@ struct mmo_charstatus {
 	unsigned int option;
 	short manner; // Defines how many minutes a char will be muted, each negative point is equivalent to a minute
 	unsigned char karma;
-	short hair,hair_color,clothes_color;
+	short hair,hair_color,clothes_color,body;
 	int party_id,guild_id,pet_id,hom_id,mer_id,ele_id;
 	int fame;
 
@@ -431,6 +431,8 @@ struct mmo_charstatus {
 	bool cashshop_sent; //Whether the player has received the CashShop list
 
 	uint32 uniqueitem_counter;
+
+	unsigned char hotkey_rowshift;
 };
 
 typedef enum mail_status {
@@ -843,6 +845,21 @@ enum bound_type {
 	#if PACKETVER < 20110817
 		#undef PACKET_OBFUSCATION
 	#endif
+#endif
+
+// Feb 1st 2012
+#if PACKETVER >= 20120201
+	#define NEW_CARTS
+	#ifndef ENABLE_SC_SAVING
+		#warning "Cart won't be able to be saved for relog"
+	#endif
+#if PACKETVER >= 20150826
+	#define MAX_CARTS 12 //Used for 3 new cart design
+#else
+	#define MAX_CARTS 9
+#endif
+#else
+	#define MAX_CARTS 5
 #endif
 
 #endif /* _MMO_H_ */

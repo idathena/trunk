@@ -987,6 +987,7 @@ If no position is given, the command defaults to headgear.
 4: Weapon
 5: Shield
 6: Robe
+7: Body
 
 ---------------------------------------
 
@@ -1142,6 +1143,12 @@ Success message: Information sent to login-server via char-server.
 @changesex
 
 Changes the gender attached to the player's account.
+
+---------------------------------------
+
+@changecharsex
+
+Changes the gender attached to the player's character.
 
 ---------------------------------------
 

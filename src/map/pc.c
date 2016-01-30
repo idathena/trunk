@@ -589,6 +589,16 @@ void pc_rental_expire(struct map_session_data *sd, int i)
 			}
 			break;
 	}
+	if( &sd->sc ) {
+		if( sd->sc.data[SC_MOONSTAR] )
+			status_change_end(&sd->bl, SC_MOONSTAR, INVALID_TIMER);
+		if( sd->sc.data[SC_SUPER_STAR] )
+			status_change_end(&sd->bl, SC_SUPER_STAR, INVALID_TIMER);
+		if( sd->sc.data[SC_STRANGELIGHTS] )
+			status_change_end(&sd->bl, SC_STRANGELIGHTS, INVALID_TIMER);
+		if( sd->sc.data[SC_DECORATION_OF_MUSIC] )
+			status_change_end(&sd->bl, SC_DECORATION_OF_MUSIC, INVALID_TIMER);
+	}
 	clif_rental_expired(sd->fd, i, sd->status.inventory[i].nameid);
 	pc_delitem(sd, i, sd->status.inventory[i].amount, 0, 0, LOG_TYPE_OTHER);
 }
@@ -665,6 +675,10 @@ void pc_makesavestatus(struct map_session_data *sd)
 	if(!battle_config.save_clothcolor)
 		sd->status.clothes_color = 0;
 
+	//Since this is currently not officially released, its best to have a forced option to not save body styles
+	if(!battle_config.save_body_style)
+		sd->status.body = 0;
+
 #ifdef NEW_CARTS //Only copy the Cart/Peco/Falcon options, the rest are handled via status change load/saving [Skotlex]
 	sd->status.option = sd->sc.option&(OPTION_INVISIBLE|OPTION_FALCON|OPTION_RIDING|OPTION_DRAGON|OPTION_WUG|OPTION_WUGRIDER|OPTION_MADOGEAR);
 #else
@@ -712,16 +726,16 @@ void pc_setnewpc(struct map_session_data *sd, int account_id, int char_id, int l
 {
 	nullpo_retv(sd);
 
-	sd->bl.id        = account_id;
-	sd->status.account_id   = account_id;
-	sd->status.char_id      = char_id;
-	sd->status.sex   = sex;
-	sd->login_id1    = login_id1;
-	sd->login_id2    = 0; //At this point, we can not know the value
-	sd->client_tick  = client_tick;
+	sd->bl.id = account_id;
+	sd->status.account_id = account_id;
+	sd->status.char_id = char_id;
+	sd->status.sex = sex;
+	sd->login_id1 = login_id1;
+	sd->login_id2 = 0; //At this point, we can not know the value
+	sd->client_tick = client_tick;
 	sd->state.active = 0; //To be set to 1 after player is fully authed and loaded
-	sd->bl.type      = BL_PC;
-	sd->canlog_tick  = gettick();
+	sd->bl.type = BL_PC;
+	sd->canlog_tick = gettick();
 	//Required to prevent homunculus copuing a base speed of 0
 	sd->battle_status.speed = sd->base_status.speed = DEFAULT_WALK_SPEED;
 	sd->state.warp_clean = 1;
@@ -1189,6 +1203,7 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	sd->status.hair = cap_value(sd->status.hair,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
 	sd->status.hair_color = cap_value(sd->status.hair_color,MIN_HAIR_COLOR,MAX_HAIR_COLOR);
 	sd->status.clothes_color = cap_value(sd->status.clothes_color,MIN_CLOTH_COLOR,MAX_CLOTH_COLOR);
+	sd->status.body = cap_value(sd->status.body,MIN_BODY_STYLE,MAX_BODY_STYLE);
 
 	//Initializations to null/0 unneeded since map_session_data was filled with 0 upon allocation.
 	if (!sd->status.hp)
@@ -1356,7 +1371,6 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 void pc_authfail(struct map_session_data *sd)
 {
 	clif_authfail_fd(sd->fd, 0);
-	return;
 }
 
 /**
@@ -1418,6 +1432,14 @@ void pc_reg_received(struct map_session_data *sd)
 
 	if (battle_config.feature_banking)
 		sd->bank_vault = pc_readreg2(sd,BANK_VAULT_VAR);
+
+	if (battle_config.feature_roulette) {
+		sd->roulette_point.bronze = pc_readreg2(sd,ROULETTE_BRONZE_VAR);
+		sd->roulette_point.silver = pc_readreg2(sd,ROULETTE_SILVER_VAR);
+		sd->roulette_point.gold = pc_readreg2(sd,ROULETTE_GOLD_VAR);
+	}
+
+	sd->roulette.prizeIdx = -1;
 
 	//SG map and mob read [Komurka]
 	for (i = 0; i < MAX_PC_FEELHATE; i++) { //For now - someone need to make reading from txt/sql
@@ -3935,7 +3957,7 @@ int pc_skill(TBL_PC *sd, int id, int level, int flag)
  * @param idx_equip The target equipment's inventory index.
  * @retval true if the card can be inserted.
  */
-bool pc_can_insert_card_into(struct map_session_data* sd, int idx_card, int idx_equip)
+bool pc_can_insert_card_into(struct map_session_data *sd, int idx_card, int idx_equip)
 {
 	int i;
 
@@ -3978,7 +4000,7 @@ bool pc_can_insert_card_into(struct map_session_data* sd, int idx_card, int idx_
  * @param idx_card  The card's inventory index.
  * @retval true if the card can be inserted.
  */
-bool pc_can_insert_card(struct map_session_data* sd, int idx_card)
+bool pc_can_insert_card(struct map_session_data *sd, int idx_card)
 {
 	nullpo_ret(sd);
 
@@ -4618,7 +4640,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 	}
 
 	if( sd->state.storage_flag && item->type != IT_CASH ) {
-		clif_colormes(sd,color_table[COLOR_RED],msg_txt(388)); // You cannot use this item while storage is open.
+		clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(388)); // You cannot use this item while storage is open.
 		return false;
 	}
 
@@ -4714,7 +4736,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 			return false;
 		}
 		if( !pc_inventoryblank(sd) ) {
-			clif_colormes(sd,color_table[COLOR_RED],msg_txt(1477)); // Item cannot be open when inventory is full.
+			clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(1477)); // Item cannot be open when inventory is full.
 			return false;
 		}
 	}
@@ -7621,6 +7643,9 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_CHARRENAME:	val = sd->status.rename; break;
 		case SP_CHARFONT:	val = sd->status.font; break;
 		case SP_BANK_VAULT:	val = sd->bank_vault; break;
+		case SP_ROULETTE_BRONZE:	val = sd->roulette_point.bronze; break;
+		case SP_ROULETTE_SILVER:	val = sd->roulette_point.silver; break;
+		case SP_ROULETTE_GOLD:		val = sd->roulette_point.gold; break;
 		case SP_CRITICAL:	val = sd->battle_status.cri / 10; break;
 		case SP_ASPD:		val = (2000 - sd->battle_status.amotion) / 10; break;
 		case SP_BASE_ATK:	val = sd->battle_status.batk; break;
@@ -7878,6 +7903,18 @@ bool pc_setparam(struct map_session_data *sd,int type,int val) {
 			log_zeny(sd, LOG_TYPE_BANK, sd, -(sd->bank_vault - cap_value(val, 0, MAX_BANK_ZENY)));
 			sd->bank_vault = cap_value(val, 0, MAX_BANK_ZENY);
 			pc_setreg2(sd, BANK_VAULT_VAR, sd->bank_vault);
+			return true;
+		case SP_ROULETTE_BRONZE:
+			sd->roulette_point.bronze = val;
+			pc_setreg2(sd, ROULETTE_BRONZE_VAR, sd->roulette_point.bronze);
+			return true;
+		case SP_ROULETTE_SILVER:
+			sd->roulette_point.silver = val;
+			pc_setreg2(sd, ROULETTE_SILVER_VAR, sd->roulette_point.silver);
+			return true;
+		case SP_ROULETTE_GOLD:
+			sd->roulette_point.gold = val;
+			pc_setreg2(sd, ROULETTE_GOLD_VAR, sd->roulette_point.gold);
 			return true;
 		default:
 			ShowError("pc_setparam: Attempted to set unknown parameter '%d'.\n", type);
@@ -8141,6 +8178,10 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	if ((sd->class_&MAPID_UPPERMASK) == MAPID_STAR_GLADIATOR && (b_class&MAPID_UPPERMASK) != MAPID_STAR_GLADIATOR)
 		pc_resetfeel(sd);
 
+	//Reset body style to 0 before changing job to avoid errors since not every job has a alternate outfit
+	sd->status.body = 0;
+	clif_changelook(&sd->bl,LOOK_BODY2,0);
+
 	sd->status.class_ = job;
 	fame_flag = pc_famerank(sd->status.char_id,sd->class_&MAPID_UPPERMASK);
 	sd->class_ = (unsigned short)b_class;
@@ -8174,6 +8215,8 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	clif_changelook(&sd->bl,LOOK_BASE,sd->vd.class_); //Move sprite update to prevent client crashes with incompatible equipment [Valaris]
 	if(sd->vd.cloth_color)
 		clif_changelook(&sd->bl,LOOK_CLOTHES_COLOR,sd->vd.cloth_color);
+	//if(sd->vd.body_style)
+	//	clif_changelook(&sd->bl,LOOK_BODY2,sd->vd.body_style);
 
 	//Update skill tree
 	pc_calc_skilltree(sd);
@@ -8277,7 +8320,7 @@ void pc_changelook(struct map_session_data *sd, int type, int val)
 			val = cap_value(val,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
 			if (sd->status.hair != val) {
 				sd->status.hair = val;
-				if (sd->status.guild_id) //Update Guild Window. [Skotlex]
+				if (sd->status.guild_id) //Update Guild Window [Skotlex]
 					intif_guild_change_memberinfo(sd->status.guild_id,sd->status.account_id,sd->status.char_id,
 					GMI_HAIR,&sd->status.hair,sizeof(sd->status.hair));
 			}
@@ -8314,6 +8357,10 @@ void pc_changelook(struct map_session_data *sd, int type, int val)
 			break;
 		case LOOK_ROBE:
 			sd->status.robe = val;
+			break;
+		case LOOK_BODY2:
+			val = cap_value(val,MIN_BODY_STYLE,MAX_BODY_STYLE);
+			sd->status.body = val;
 			break;
 	}
 	clif_changelook(&sd->bl,type,val);
@@ -8418,6 +8465,8 @@ void pc_setoption(struct map_session_data *sd,int type)
 
 	if (sd->vd.cloth_color)
 		clif_changelook(&sd->bl,LOOK_CLOTHES_COLOR,sd->vd.cloth_color);
+	if (sd->vd.body_style)
+		clif_changelook(&sd->bl,LOOK_BODY2,sd->vd.body_style);
 	clif_skillinfoblock(sd); //Skill list needs to be updated after base change
 }
 
@@ -10980,7 +11029,7 @@ uint8 pc_itemcd_add(struct map_session_data *sd, struct item_data *id, unsigned 
 					sprintf(e_msg,msg_txt(379), (double)e_tick / 60); // Able to use %.1f min later.
 				else
 					sprintf(e_msg,msg_txt(380), e_tick + 1); // Able to use %d sec later.
-				clif_colormes(sd,color_table[COLOR_YELLOW],e_msg);
+				clif_colormes(sd->fd,color_table[COLOR_YELLOW],e_msg);
 				return 1; //Delay has not expired yet
 			}
 		} else //Not yet used item (all slots are initially empty)
@@ -11223,7 +11272,7 @@ enum e_BANKING_WITHDRAW_ACK pc_bank_withdraw(struct map_session_data *sd, int mo
 		return BWA_NO_MONEY;
 	else if ( limit_check > MAX_ZENY ) {
 		//No official response for this scenario exists
-		clif_colormes(sd,color_table[COLOR_RED],msg_txt(1509)); // You can't withdraw that much money.
+		clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(1509)); // You can't withdraw that much money.
 		return BWA_UNKNOWN_ERROR;
 	}
 	if( pc_getzeny(sd,money,LOG_TYPE_BANK,NULL) )

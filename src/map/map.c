@@ -85,6 +85,7 @@ char mob_db2_db[32] = "mob_db2";
 char mob_skill_db_db[32] = "mob_skill_db";
 char mob_skill_db_re_db[32] = "mob_skill_db_re";
 char mob_skill_db2_db[32] = "mob_skill_db2";
+char roulette_db[32] = "roulette";
 char vendings_db[32] = "vendings";
 char vending_items_db[32] = "vending_items";
 
@@ -1836,6 +1837,10 @@ int map_quit(struct map_session_data *sd) {
 		status_change_end(&sd->bl,SC_WEIGHT90,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_SATURDAYNIGHTFEVER,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_ALL_RIDING,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_MOONSTAR,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_SUPER_STAR,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_STRANGELIGHTS,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_DECORATION_OF_MUSIC,INVALID_TIMER);
 		if (battle_config.debuff_on_logout&1) { //Remove negative buffs
 			status_change_end(&sd->bl,SC_ORCISH,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_STRIPWEAPON,INVALID_TIMER);
@@ -3824,6 +3829,10 @@ int inter_config_read(char *cfgName)
 			strcpy(buyingstores_db, w2);
 		else if( strcmpi(w1, "buyingstore_items_db") == 0 )
 			strcpy(buyingstore_items_db, w2);
+		else if( strcmpi(w1, "item_cash_db_db") == 0 )
+			strcpy(item_cash_db_db, w2);
+		else if( strcmpi(w1, "item_cash_db2_db") == 0 )
+			strcpy(item_cash_db2_db, w2);
 		else if( strcmpi(w1, "item_db_db") == 0 )
 			strcpy(item_db_db, w2);
 		else if( strcmpi(w1, "item_db2_db") == 0 )
@@ -3844,10 +3853,8 @@ int inter_config_read(char *cfgName)
 			strcpy(mob_skill_db_re_db, w2);
 		else if( strcmpi(w1, "mob_skill_db2_db") == 0 )
 			strcpy(mob_skill_db2_db, w2);
-		else if( strcmpi(w1, "item_cash_db_db") == 0 )
-			strcpy(item_cash_db_db, w2);
-		else if( strcmpi(w1, "item_cash_db2_db") == 0 )
-			strcpy(item_cash_db2_db, w2);
+		else if( strcmpi(w1, "db_roulette_table") == 0 )
+			strcpy(roulette_db, w2);
 		else if( strcmpi(w1, "vendings_db") == 0 )
 			strcpy(vendings_db, w2);
 		else if( strcmpi(w1, "vending_items_db") == 0 )

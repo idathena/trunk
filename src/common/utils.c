@@ -88,8 +88,8 @@ void ShowDump(const void* buffer, size_t length)
 
 #ifdef WIN32
 
-static char* checkpath(char *path, const char *srcpath)
-{	// just make sure the char*path is not const
+static char *checkpath(char *path, const char *srcpath)
+{	// just make sure the char *path is not const
 	char *p=path;
 	if(NULL!=path && NULL!=srcpath)
 	while(*srcpath) {
@@ -104,7 +104,7 @@ static char* checkpath(char *path, const char *srcpath)
 	return path;
 }
 
-void findfile(const char *p, const char *pat, void (func)(const char*))
+void findfile(const char *p, const char *pat, void (func)(const char *))
 {
 	WIN32_FIND_DATAA FindFileData;
 	HANDLE hFind;
@@ -146,7 +146,7 @@ void findfile(const char *p, const char *pat, void (func)(const char*))
 	return;
 }
 
-int check_filepath(const char* filepath){
+int check_filepath(const char *filepath){
 	DWORD Attribute;
 	if( Attribute = GetFileAttributes(filepath) ){
 		if( (Attribute & INVALID_FILE_ATTRIBUTES) && GetLastError() == ERROR_FILE_NOT_FOUND ) return 3;
@@ -166,7 +166,7 @@ int check_filepath(const char* filepath){
  * @param filepath
  * @return 1=dir, 2=file, 3=else, 0=error
  */
-int check_filepath(const char* filepath){
+int check_filepath(const char *filepath){
     struct stat s;
 
     if( stat(filepath,&s) == 0 ){
@@ -179,8 +179,8 @@ int check_filepath(const char* filepath){
     }
 }
 
-static char* checkpath(char *path, const char*srcpath)
-{	// just make sure the char*path is not const
+static char *checkpath(char *path, const char *srcpath)
+{	// just make sure the char *path is not const
 	char *p=path;
 	if(NULL!=path && NULL!=srcpath)
 	while(*srcpath) {
@@ -195,7 +195,7 @@ static char* checkpath(char *path, const char*srcpath)
 	return path;
 }
 
-void findfile(const char *p, const char *pat, void (func)(const char*))
+void findfile(const char *p, const char *pat, void (func)(const char *))
 {
 	DIR* dir;					// pointer to the scanned directory.
 	struct dirent* entry;		// pointer to one directory entry.
@@ -243,7 +243,7 @@ void findfile(const char *p, const char *pat, void (func)(const char*))
 }
 #endif
 
-bool exists(const char* filename)
+bool exists(const char *filename)
 {
 	return !access(filename, F_OK);
 }
@@ -314,14 +314,14 @@ int32 MakeLongLE(int32 val)
 }
 
 // Reads an uint16 in little-endian from the buffer
-uint16 GetUShort(const unsigned char* buf)
+uint16 GetUShort(const unsigned char *buf)
 {
 	return	 ( ((uint16)(buf[0]))         )
 			|( ((uint16)(buf[1])) << 0x08 );
 }
 
 // Reads an uint32 in little-endian from the buffer
-uint32 GetULong(const unsigned char* buf)
+uint32 GetULong(const unsigned char *buf)
 {
 	return	 ( ((uint32)(buf[0]))         )
 			|( ((uint32)(buf[1])) << 0x08 )
@@ -330,13 +330,13 @@ uint32 GetULong(const unsigned char* buf)
 }
 
 // Reads an int32 in little-endian from the buffer
-int32 GetLong(const unsigned char* buf)
+int32 GetLong(const unsigned char *buf)
 {
 	return (int32)GetULong(buf);
 }
 
 // Reads a float (32 bits) from the buffer
-float GetFloat(const unsigned char* buf)
+float GetFloat(const unsigned char *buf)
 {
 	uint32 val = GetULong(buf);
 	return *((float*)(void*)&val);
@@ -382,9 +382,12 @@ uint32 date2version(int date) {
 	else if(date < 20130717) return 43;
 	else if(date < 20130807) return 44;
 	else if(date < 20131223) return 45;
-	else if(date >= 20131223) return 46;
-
-	else return 30; //default
+	else if(date < 20141016) return 46;
+	else if(date < 20141022) return 47;
+	else if(date < 20150513) return 48;
+	else if(date < 20150916) return 49;
+	else if(date >= 20150916) return 50;
+	else return 30; //Default
 }
 
 /// calculates the value of A / B, in percent (rounded down)

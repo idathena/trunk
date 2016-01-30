@@ -3661,7 +3661,6 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 						//Hit a Lightning on the current Target
 						skill_attack(BF_MAGIC,src,src,target,skl->skill_id,skl->skill_lv,tick,(9 - skl->type));
 						skill_toggle_magicpower(src,skl->skill_id);
-
 						if (skl->type < (4 + skl->skill_lv - 1) && skl->x < 3) { //Remaining Chains Hit
 							struct block_list *nbl = NULL; //Next Target of Chain
 
@@ -4835,7 +4834,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 						j++;
 					}
 				}
-
 				//Sphere Sort, this time from new to old
 				for (i = 0; i <= j - 2; i++) {
 					for (k = i + 1; k <= j - 1; k++) {
@@ -4845,12 +4843,10 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 						}
 					}
 				}
-
 				if (j == 5) { //If 5 spheres, remove last one and only do 4 actions (Official behavior)
 					status_change_end(src,(sc_type)spheres[4],INVALID_TIMER);
 					j = 4;
 				}
-
 				k = 0;
 				for (i = 0; i < j; i++) { //Loop should always be 4 for regular players, but unconditional_skill could be less
 					switch (sc->data[spheres[i]]->val1) {
@@ -4877,10 +4873,8 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					for (i = SC_MAXSPELLBOOK; i >= SC_SPELLBOOK1; i--) //List all available spell to be released
 						if (sc->data[i])
 							spell[s++] = i;
-
 					if (s == 0)
 						break;
-
 					i = spell[(s == 1 ? 0 : rnd()%s)]; //Random select of spell to be released
 					if (sc->data[i]) { //Now extract the data from the preserved spell
 						r_skill_id = sc->data[i]->val1;
@@ -4894,13 +4888,10 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 						sc->data[SC_FREEZE_SP]->val2 -= point;
 					else //Last spell to be released
 						status_change_end(src,SC_FREEZE_SP,INVALID_TIMER);
-
 					if (!skill_check_condition_castbegin(sd,r_skill_id,r_skill_lv))
 						break;
-
 					skill_consume_requirement(sd,r_skill_id,r_skill_lv,1);
 					skill_toggle_magicpower(src,r_skill_id);
-
 					switch (skill_get_casttype(r_skill_id)) {
 						case CAST_GROUND:
 							skill_castend_pos2(src,bl->x,bl->y,r_skill_id,r_skill_lv,tick,0);
@@ -4927,12 +4918,10 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 							j++;
 						}
 					}
-
 					if (j == 0) { //No Spheres
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON_NONE,0,0);
 						break;
 					}
-
 					//Sphere Sort
 					for (i = 0; i <= j - 2; i++) {
 						for (k = i + 1; k <= j - 1; k++) {
@@ -4942,7 +4931,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 							}
 						}
 					}
-
 					if (skill_lv == 1)
 						j = 1; //Limit only to one ball
 					for (i = 0; i < j; i++) {
@@ -5062,7 +5050,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case SR_KNUCKLEARROW:
 			//Holds current direction of bl/target to src/attacker before the src is moved to bl location
 			dir_ka = map_calc_dir(bl,src->x,src->y);
-
 			if (unit_movepos(src,bl->x,bl->y,1,true))
 				clif_blown(src,bl); //Has slide effect even in GVG
 			skill_addtimerskill(src,tick,bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag|SD_LEVEL|2);
@@ -6175,6 +6162,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case MC_CHANGECART:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			break;
+
+		case MC_CARTDECORATE:
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			if (sd)
+				clif_SelectCart(sd);
 			break;
 
 		case TK_MISSION:
@@ -10490,7 +10483,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					//	char output[128];
 					//
 					//	safesnprintf(output,sizeof(output),msg_txt(378),(sce->val1 == MH_MD_FIGHTING ? "fighthing" : "grappling"));
-					//	clif_colormes(hd->master,color_table[COLOR_RED],output);
+					//	clif_colormes(hd->master->fd,color_table[COLOR_RED],output);
 					//}
 				}
 			}
@@ -15109,7 +15102,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 					char output[128];
 
 					sprintf(output,"%s",msg_txt(382)); // You're too close to a stone or emperium to do this skill
-					clif_colormes(sd,color_table[COLOR_RED],output);
+					clif_colormes(sd->fd,color_table[COLOR_RED],output);
 					return false;
 				}
 			}
@@ -15517,7 +15510,7 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 				skill_get_desc(skill_id),
 				require.ammo_qty,
 				itemdb_jname(sd->status.inventory[idx].nameid));
-			clif_colormes(sd,color_table[COLOR_RED],e_msg);
+			clif_colormes(sd->fd,color_table[COLOR_RED],e_msg);
 			return false;
 		}
 		if( !(require.ammo&(1<<sd->inventory_data[idx]->look)) ) { //Ammo type check. Send the "wrong weapon type" message
@@ -19265,7 +19258,7 @@ int skill_poisoningweapon(struct map_session_data *sd, unsigned short nameid) {
 	if( sc_start4(&sd->bl,&sd->bl,SC_POISONINGWEAPON,100,
 		pc_checkskill(sd,GC_RESEARCHNEWPOISON),type,chance,0,skill_get_time(GC_POISONINGWEAPON,sd->menuskill_val)) ) {
 		sprintf(output,"[%s] Poison effect was applied to the weapon.",msg);
-		clif_colormes(sd,color_table[COLOR_WHITE],output);
+		clif_colormes(sd->fd,color_table[COLOR_WHITE],output);
 	}
 	return 0;
 }

@@ -128,6 +128,8 @@ bool target_has_infinite_defense(struct block_list *target, uint16 skill_id, int
 #define MAX_HAIR_COLOR battle_config.max_hair_color
 #define MIN_CLOTH_COLOR battle_config.min_cloth_color
 #define MAX_CLOTH_COLOR battle_config.max_cloth_color
+#define MIN_BODY_STYLE battle_config.min_body_style
+#define MAX_BODY_STYLE battle_config.max_body_style
 
 extern struct Battle_Config
 {
@@ -602,6 +604,11 @@ extern struct Battle_Config
 	int max_homunculus_hp;
 	int max_homunculus_sp;
 	int max_homunculus_parameter;
+	int feature_roulette;
+	int monster_hp_bars_info;
+	int min_body_style;
+	int max_body_style;
+	int save_body_style;
 } battle_config;
 
 void do_init_battle(void);

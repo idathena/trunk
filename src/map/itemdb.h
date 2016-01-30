@@ -29,6 +29,10 @@
 
 #define MAX_ITEMGROUP_RANDGROUP 4 //Max group for random item (increase this when needed). @TODO: Remove this limit and use dynamic size if needed
 
+//Client-defined value
+#define MAX_ROULETTE_LEVEL 7
+#define MAX_ROULETTE_COLUMNS 9 
+
 #define CARD0_FORGE 0x00FF
 #define CARD0_CREATE 0x00FE
 #define CARD0_PET 0x0100
@@ -42,6 +46,7 @@ enum item_itemid {
 	ITEMID_YELLOW_POTION = 503,
 	ITEMID_WHITE_POTION,
 	ITEMID_BLUE_POTION,
+	ITEMID_APPLE = 512,
 	ITEMID_HOLY_WATER = 523,
 	ITEMID_PUMPKIN = 535,
 	ITEMID_RED_SLIM_POTION = 545,
@@ -51,6 +56,7 @@ enum item_itemid {
 	ITEMID_WING_OF_BUTTERFLY,
 	ITEMID_ANODYNE = 605,
 	ITEMID_ALOEBERA,
+	ITEMID_MAGNIFIER = 611,
 	ITEMID_POISON_BOTTLE = 678,
 	ITEMID_EMPTY_BOTTLE = 713,
 	ITEMID_EMPERIUM,
@@ -380,6 +386,14 @@ enum ItemNouseRestrictions {
 	INR_ALL     = 0x1 //Sum of all the above values
 };
 
+//Struct of Roulette db
+struct s_roulette_db {
+	unsigned short *nameid[MAX_ROULETTE_LEVEL], //Item ID
+		           *qty[MAX_ROULETTE_LEVEL]; //Amount of Item ID
+	int *flag[MAX_ROULETTE_LEVEL]; //Whether the item is for loss or win
+	int items[MAX_ROULETTE_LEVEL]; //Number of items in the list for each
+} rd;
+
 //Main item data struct
 struct item_data {
 	unsigned short nameid;
@@ -523,6 +537,8 @@ struct item_combo *itemdb_combo_exists(unsigned short combo_id);
 struct s_item_group_db *itemdb_group_exists(unsigned short group_id);
 char itemdb_pc_get_itemgroup(uint16 group_id, struct map_session_data *sd);
 uint16 itemdb_get_randgroupitem_count(uint16 group_id, uint8 sub_group, unsigned short nameid);
+
+bool itemdb_parse_roulette_db(void);
 
 void itemdb_reload(void);
 

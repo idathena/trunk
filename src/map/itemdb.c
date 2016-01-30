@@ -1053,7 +1053,7 @@ static void itemdb_read_combos() {
 
 			// Populate the children to refer to this combo
 			for (v = 1; v < retcount; v++) {
-				struct item_data * it;
+				struct item_data *it;
 				int index;
 
 				it = itemdb_exists(items[v]);
@@ -1078,6 +1078,111 @@ static void itemdb_read_combos() {
 
 	fclose(fp);
 	ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"item_combo_db"CL_RESET"'.\n", count);
+}
+
+/**
+ * Process Roulette items
+ */
+bool itemdb_parse_roulette_db(void)
+{
+	int i, j;
+	uint32 count = 0;
+
+	// Retrieve all rows from the item database
+	if (SQL_ERROR == Sql_Query(mmysql_handle, "SELECT * FROM `%s`", roulette_db)) {
+		Sql_ShowDebug(mmysql_handle);
+		return false;
+	}
+
+	for (i = 0; i < MAX_ROULETTE_LEVEL; i++)
+		rd.items[i] = 0;
+
+	for (i = 0; i < MAX_ROULETTE_LEVEL; i++) {
+		int k, limit = MAX_ROULETTE_COLUMNS - i;
+
+		for (k = 0; k < limit && SQL_SUCCESS == Sql_NextRow(mmysql_handle); k++) {
+			char *data;
+			unsigned short item_id, amount;
+			int level, flag;
+
+			Sql_GetData(mmysql_handle, 1, &data, NULL); level = atoi(data);
+			Sql_GetData(mmysql_handle, 2, &data, NULL); item_id = atoi(data);
+			Sql_GetData(mmysql_handle, 3, &data, NULL); amount = atoi(data);
+			Sql_GetData(mmysql_handle, 4, &data, NULL); flag = atoi(data);
+			if (!itemdb_exists(item_id)) {
+				ShowWarning("itemdb_parse_roulette_db: Unknown item ID '%hu' in level '%d'\n", item_id, level);
+				continue;
+			}
+			if (amount < 1) {
+				ShowWarning("itemdb_parse_roulette_db: Unsupported amount '%hu' for item ID '%hu' in level '%d'\n", amount, item_id, level);
+				continue;
+			}
+			if (flag < 0 || flag > 1) {
+				ShowWarning("itemdb_parse_roulette_db: Unsupported flag '%d' for item ID '%hu' in level '%d'\n", flag, item_id, level);
+				continue;
+			}
+			j = rd.items[i];
+			RECREATE(rd.nameid[i], unsigned short, ++rd.items[i]);
+			RECREATE(rd.qty[i], unsigned short, rd.items[i]);
+			RECREATE(rd.flag[i], int, rd.items[i]);
+			rd.nameid[i][j] = item_id;
+			rd.qty[i][j] = amount;
+			rd.flag[i][j] = flag;
+			++count;
+		}
+	}
+
+	// Free the query result
+	Sql_FreeResult(mmysql_handle);
+
+	for (i = 0; i < MAX_ROULETTE_LEVEL; i++) {
+		int limit = MAX_ROULETTE_COLUMNS - i;
+
+		if (rd.items[i] == limit)
+			continue;
+		if (rd.items[i] > limit) {
+			ShowWarning("itemdb_parse_roulette_db: Level %d has %d items, only %d supported, capping...\n", i + 1, rd.items[i], limit);
+			rd.items[i] = limit;
+			continue;
+		}
+		// This scenario = rd.items[i] < limit
+		ShowWarning("itemdb_parse_roulette_db: Level %d has %d items, %d are required. Filling with Apples...\n", i + 1, rd.items[i], limit);
+		rd.items[i] = limit;
+		RECREATE(rd.nameid[i], unsigned short, rd.items[i]);
+		RECREATE(rd.qty[i], unsigned short, rd.items[i]);
+		RECREATE(rd.flag[i], int, rd.items[i]);
+		for (j = 0; j < MAX_ROULETTE_COLUMNS - i; j++) {
+			if (rd.qty[i][j])
+				continue;
+			rd.nameid[i][j] = ITEMID_APPLE;
+			rd.qty[i][j] = 1;
+			rd.flag[i][j] = 0;
+		}
+	}
+
+	ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, roulette_db);
+
+	return true;
+}
+
+/**
+ * Free Roulette items
+ */
+static void itemdb_roulette_free(void) {
+	int i;
+
+	for (i = 0; i < MAX_ROULETTE_LEVEL; i++) {
+		if (rd.nameid[i])
+			aFree(rd.nameid[i]);
+		if (rd.qty[i])
+			aFree(rd.qty[i]);
+		if (rd.flag[i])
+			aFree(rd.flag[i]);
+		rd.nameid[i] = NULL;
+		rd.qty[i] = NULL;
+		rd.flag[i] = NULL;
+		rd.items[i] = 0;
+	}
 }
 
 /*======================================
@@ -1590,9 +1695,15 @@ void itemdb_reload(void)
 	itemdb->clear(itemdb, itemdb_final_sub);
 	db_clear(itemdb_combo);
 
+	if( battle_config.feature_roulette )
+		itemdb_roulette_free();
+
 	//Read new data
 	itemdb_read();
 	cashshop_reloaddb();
+
+	if( battle_config.feature_roulette )
+		itemdb_parse_roulette_db();
 
 	//Epoque's awesome @reloaditemdb fix - thanks! [Ind]
 	//- Fixes the need of a @reloadmobdb after a @reloaditemdb to re-link monster drop data
@@ -1654,6 +1765,8 @@ void do_final_itemdb(void) {
 	itemdb_group->destroy(itemdb_group, itemdb_group_free);
 	itemdb->destroy(itemdb, itemdb_final_sub);
 	destroy_item_data(dummy_item);
+	if( battle_config.feature_roulette )
+		itemdb_roulette_free();
 }
 
 /**
@@ -1665,4 +1778,6 @@ void do_init_itemdb(void) {
 	itemdb_group = uidb_alloc(DB_OPT_BASE);
 	itemdb_create_dummy();
 	itemdb_read();
+	if( battle_config.feature_roulette )
+		itemdb_parse_roulette_db();
 }
