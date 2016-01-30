@@ -434,6 +434,9 @@ CharMoves	124	1
 CharRename	125	1
 Font		126	1
 BankVault	127	1
+RouletteBronze	128	1
+RouletteSilver	129	1
+RouletteGold	130	1
 
 bMaxHP	6
 bMaxSP	8
@@ -672,8 +675,7 @@ LOOK_SHOES	9
 LOOK_COSTUMEBODY	10
 LOOK_RESET_COSTUMES	11
 LOOK_ROBE	12
-LOOK_FLOOR	13
-LOOK_BODY2	14
+LOOK_BODY2	13
 
 Eff_Stone	0
 Eff_Freeze	1

@@ -405,6 +405,9 @@ enum _sp {
 	SP_CHARRENAME = 125,
 	SP_CHARFONT = 126,
 	SP_BANK_VAULT = 127,
+	SP_ROULETTE_BRONZE = 128,
+	SP_ROULETTE_SILVER = 129,
+	SP_ROULETTE_GOLD = 130,
 
 	// Mercenaries
 	SP_MERCFLEE = 165,SP_MERCKILLS = 189,SP_MERCFAITH = 190,
@@ -471,14 +474,13 @@ enum _look {
 	LOOK_CLOTHES_COLOR,  //Bodypalette
 	LOOK_SHIELD,         //Shield
 	LOOK_SHOES,          //Shoes
-	LOOK_COSTUMEBODY,	 //Costume Body - Used to be Body and didn't do anything at the time of testing
+	LOOK_COSTUMEBODY,    //Costume Body - Used to be Body and didn't do anything at the time of testing
 	LOOK_RESET_COSTUMES, //Reset Costumes - Makes all headgear sprites on player vanish when activated
 	LOOK_ROBE,           //Robe
-	LOOK_FLOOR,          //Floor
-	LOOK_BODY2,          //2nd Body - Purpose unknown
+	LOOK_BODY2,          //Body2 - Changes body appearance
 };
 
-// used by map_setcell()
+// Used by map_setcell()
 typedef enum {
 	CELL_WALKABLE,
 	CELL_SHOOTABLE,
@@ -494,7 +496,7 @@ typedef enum {
 
 } cell_t;
 
-// used by map_getcell()
+// Used by map_getcell()
 typedef enum {
 	CELL_GETTYPE,          // Retrieves a cell's 'gat' type
 
@@ -790,7 +792,7 @@ void map_clearflooritem(struct block_list *bl);
 int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, int first_charid, int second_charid, int third_charid, int flags, unsigned short mob_id);
 
 // Instances
-int map_addinstancemap(const char*,int);
+int map_addinstancemap(const char *,int);
 int map_delinstancemap(int);
 
 // player to map session
@@ -951,6 +953,7 @@ extern char mob_db2_db[32];
 extern char mob_skill_db_db[32];
 extern char mob_skill_db_re_db[32];
 extern char mob_skill_db2_db[32];
+extern char roulette_db[32];
 extern char vendings_db[32];
 extern char vending_items_db[32];
 

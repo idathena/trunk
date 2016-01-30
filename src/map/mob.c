@@ -2067,10 +2067,7 @@ void mob_damage(struct mob_data *md, struct block_list *src, int damage)
 		return;
 
 #if PACKETVER >= 20120404
-#ifndef VISIBLE_MONSTER_HP
-	if( !(md->status.mode&MD_BOSS) )
-#endif
-	{
+	if( battle_config.monster_hp_bars_info ) {
 		int i;
 
 		for( i = 0; i < DAMAGELOG_SIZE; i++ ) { //Must show hp bar to all char who already hit the mob
@@ -2779,10 +2776,7 @@ void mob_heal(struct mob_data *md, unsigned int heal)
 		clif_charnameack(0,&md->bl);
 
 #if PACKETVER >= 20120404
-#ifndef VISIBLE_MONSTER_HP
-	if( !(md->status.mode&MD_BOSS) )
-#endif
-	{
+	if( battle_config.monster_hp_bars_info ) {
 		int i;
 
 		for( i = 0; i < DAMAGELOG_SIZE; i++ ) { //Must show hp bar to all char who already hit the mob
@@ -3955,6 +3949,12 @@ static bool mob_readdb_mobavail(char *str[], int columns, int current)
 		mob_db_data[mob_id]->vd.head_bottom = atoi(str[9]);
 		mob_db_data[mob_id]->option = atoi(str[10])&~(OPTION_HIDE|OPTION_CLOAK|OPTION_INVISIBLE);
 		mob_db_data[mob_id]->vd.cloth_color = atoi(str[11]); //Monster player dye option - Valaris
+#ifdef NEW_CARTS
+		if(mob_db_data[mob_id]->option & OPTION_CART) {
+			ShowWarning("mob_readdb_mobavail: You tried to use a cart for mob id %d. This does not work with setting an option anymore.\n", mob_id);
+			mob_db_data[mob_id]->option &= ~OPTION_CART;
+		}
+#endif
 	} else if(columns == 3)
 		mob_db_data[mob_id]->vd.head_bottom = atoi(str[2]); //Mob equipment [Valaris]
 	else if(columns != 2)

@@ -6901,6 +6901,7 @@ void status_set_viewdata(struct block_list *bl, int class_)
 					sd->vd.hair_style = cap_value(sd->status.hair,0,battle_config.max_hair_style);
 					sd->vd.hair_color = cap_value(sd->status.hair_color,0,battle_config.max_hair_color);
 					sd->vd.cloth_color = cap_value(sd->status.clothes_color,0,battle_config.max_cloth_color);
+					sd->vd.body_style = cap_value(sd->status.body,0,battle_config.max_body_style);
 					sd->vd.robe = sd->status.robe;
 					sd->vd.sex = sd->status.sex;
 
@@ -6915,6 +6916,11 @@ void status_set_viewdata(struct block_list *bl, int class_)
 							sd->vd.cloth_color = 0;
 						if (sd->sc.option&OPTION_OKTOBERFEST && battle_config.oktoberfest_ignorepalette)
 							sd->vd.cloth_color = 0;
+						if (sd->vd.body_style && (
+							sd->sc.option&OPTION_WEDDING || sd->sc.option&OPTION_XMAS ||
+							sd->sc.option&OPTION_SUMMER || sd->sc.option&OPTION_HANBOK ||
+							sd->sc.option&OPTION_OKTOBERFEST))
+							sd->vd.body_style = 0;
 					}
 				} else if (vd)
 					memcpy(&sd->vd,vd,sizeof(struct view_data));
@@ -9974,6 +9980,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				clif_changelook(bl,LOOK_WEAPON,0);
 				clif_changelook(bl,LOOK_SHIELD,0);
 				clif_changelook(bl,LOOK_CLOTHES_COLOR,vd->cloth_color);
+				clif_changelook(bl,LOOK_BODY2,0);
 				break;
 			case SC_BANDING: {
 					struct skill_unit_group *group;
@@ -10391,6 +10398,15 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		}
 		calc_flag &= ~SCB_DYE;
 	}
+
+	//Might be needed in the future [Rytech]
+	/*if(calc_flag&SCB_BODY) { //Reset body style
+		if(vd && vd->body_style) {
+			val4 = vd->body_style;
+			clif_changelook(bl,LOOK_BODY2,0);
+		}
+		calc_flag &= ~SCB_BODY;
+	}*/
 
 	if(!(flag&SCFLAG_NOICON) && !(flag&SCFLAG_LOADED && StatusDisplayType[type]))
 		clif_status_change(bl,StatusIconChangeTable[type],1,tick,(val_flag&1) ? val1 : 1,(val_flag&2) ? val2 : 0,(val_flag&4) ? val3 : 0);
@@ -11438,6 +11454,13 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		calc_flag &= ~SCB_DYE;
 	}
 
+	//Might be needed in the future [Rytech]
+	/*if (calc_flag&SCB_BODY) { //Restore body style
+		if (vd && !vd->body_style && sce->val4)
+			clif_changelook(bl,LOOK_BODY2,sce->val4);
+		calc_flag &= ~SCB_BODY;
+	}*/
+
 	//On Aegis, when turning off a status change, first goes the sc packet, then the option packet
 	clif_status_load(bl,StatusIconChangeTable[type],0);
 
@@ -11451,6 +11474,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			clif_changelook(bl,LOOK_WEAPON,sd->vd.weapon);
 			clif_changelook(bl,LOOK_SHIELD,sd->vd.shield);
 			clif_changelook(bl,LOOK_CLOTHES_COLOR,cap_value(sd->status.clothes_color,0,battle_config.max_cloth_color));
+			clif_changelook(bl,LOOK_BODY2,cap_value(sd->status.body,0,battle_config.max_body_style));
 		}
 	}
 

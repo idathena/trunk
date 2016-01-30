@@ -684,7 +684,7 @@ ACMD_FUNC(who)
 					break;
 				}
 			}
-			clif_colormes(sd, color_table[COLOR_DEFAULT], StringBuf_Value(&buf));
+			clif_colormes(sd->fd, color_table[COLOR_DEFAULT], StringBuf_Value(&buf));
 			StringBuf_Clear(&buf);
 			count++;
 		}
@@ -1728,6 +1728,40 @@ ACMD_FUNC(model)
 			pc_changelook(sd, LOOK_HAIR_COLOR, hair_color);
 			pc_changelook(sd, LOOK_CLOTHES_COLOR, cloth_color);
 			clif_displaymessage(fd, msg_txt(36)); // Appearance changed.
+	} else {
+		clif_displaymessage(fd, msg_txt(37)); // An invalid number was specified.
+		return -1;
+	}
+
+	return 0;
+}
+
+/*==========================================
+ * @bodystyle [Rytech]
+ *------------------------------------------*/
+ACMD_FUNC(bodystyle)
+{
+	int body_style = 0;
+	nullpo_retr(-1, sd);
+
+	memset(atcmd_output, '\0', sizeof(atcmd_output));
+
+	//Limit body styles to certain jobs since not all of them are released yet.
+	if (!((sd->class_&MAPID_THIRDMASK) == MAPID_GUILLOTINE_CROSS || (sd->class_&MAPID_THIRDMASK) == MAPID_GENETIC ||
+		(sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC)) {
+		clif_displaymessage(fd, msg_txt(727));	// This job has no alternate body styles.
+		return -1;
+	}
+
+	if (!message || !*message || sscanf(message, "%d", &body_style) < 1) {
+		sprintf(atcmd_output, msg_txt(726), MIN_BODY_STYLE, MAX_BODY_STYLE); // Please enter a body style (usage: @bodystyle <body ID: %d-%d>).
+		clif_displaymessage(fd, atcmd_output);
+		return -1;
+	}
+
+	if (body_style >= MIN_BODY_STYLE && body_style <= MAX_BODY_STYLE) {
+		pc_changelook(sd, LOOK_BODY2, body_style);
+		clif_displaymessage(fd, msg_txt(36)); // Appearence changed.
 	} else {
 		clif_displaymessage(fd, msg_txt(37)); // An invalid number was specified.
 		return -1;
@@ -5648,12 +5682,12 @@ ACMD_FUNC(divorce)
 ACMD_FUNC(changelook)
 {
 	int type = 0, value = 0; //p = Position, v = Value
-	int pos[6] = { LOOK_HEAD_TOP,LOOK_HEAD_MID,LOOK_HEAD_BOTTOM,LOOK_WEAPON,LOOK_SHIELD,LOOK_ROBE };
+	int pos[7] = { LOOK_HEAD_TOP,LOOK_HEAD_MID,LOOK_HEAD_BOTTOM,LOOK_WEAPON,LOOK_SHIELD,LOOK_ROBE,LOOK_BODY2 };
 
-	if( sscanf(message, "%d %d", &type, &value) != 2 || type < 1 || type > 6 || value < 0 ) {
+	if( sscanf(message, "%d %d", &type, &value) != 2 || type < 1 || type > 7 || value < 0 ) {
 		clif_displaymessage(fd, msg_txt(1177)); // Usage: @changelook {<position>} <view id>
 		clif_displaymessage(fd, msg_txt(533));  // Position must be a number between 1 - 6 and view id must be 0 or higher.
-		clif_displaymessage(fd, msg_txt(1178)); // Position: 1-Top 2-Middle 3-Bottom 4-Weapon 5-Shield 6-Robe
+		clif_displaymessage(fd, msg_txt(1178)); // Position: 1-Top 2-Middle 3-Bottom 4-Weapon 5-Shield 6-Robe 7-Body
 		return -1;
 	}
 	//If the check passes, display the requested result on the character.
@@ -6668,8 +6702,8 @@ ACMD_FUNC(uptime)
 }
 
 /*==========================================
- * @changesex <sex>
- * => Changes one's sex. Argument sex can be 0 or 1, m or f, male or female.
+ * @changesex
+ * => Changes one's account sex. Switch from male to female or visversa
  *------------------------------------------*/
 ACMD_FUNC(changesex)
 {
@@ -6681,7 +6715,26 @@ ACMD_FUNC(changesex)
 	for( i = 0; i < EQI_MAX; i++ )
 		if( sd->equip_index[i] >= 0 )
 			pc_unequipitem(sd, sd->equip_index[i], 3);
-	chrif_changesex(sd);
+	chrif_changesex(sd, true);
+
+	return 0;
+}
+
+/*==========================================
+ * @changecharsex
+ * => Changes one's character sex. Switch from male to female or visversa.
+ *------------------------------------------*/
+ACMD_FUNC(changecharsex)
+{
+	int i;
+	nullpo_retr(-1, sd);
+
+	pc_resetskill(sd,4);
+	// To avoid any problem with equipment and invalid sex, equipment is unequiped.
+	for( i = 0; i < EQI_MAX; i++ )
+		if( sd->equip_index[i] >= 0 )
+			pc_unequipitem(sd, sd->equip_index[i], 3);
+	chrif_changesex(sd, false);
 
 	return 0;
 }
@@ -8325,7 +8378,7 @@ ACMD_FUNC(auction)
 	nullpo_ret(sd);
 
 	if (!battle_config.feature_auction) {
-		clif_colormes(sd, color_table[COLOR_RED], msg_txt(1489)); // Auction system isn't available.
+		clif_colormes(sd->fd, color_table[COLOR_RED], msg_txt(1489)); // Auction system isn't available.
 		return 0;
 	}
 
@@ -9785,6 +9838,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(clearweather),
 		ACMD_DEF(uptime),
 		ACMD_DEF(changesex),
+		ACMD_DEF(changecharsex),
 		ACMD_DEF(mute),
 		ACMD_DEF(refresh),
 		ACMD_DEF(refreshall),
@@ -9893,6 +9947,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(fullstrip),
 		ACMD_DEF(cloneequip),
 		ACMD_DEF(clonestat),
+		ACMD_DEF(bodystyle),
 	};
 	AtCommandInfo* atcommand;
 	int i;

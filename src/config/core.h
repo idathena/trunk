@@ -84,12 +84,6 @@
 	#define MAX_CHAR_BILLING 0
 #endif
 
-/// Uncomment to enable Visible Monsters' HP.
-/// All type Monsters' HP will visible to all players, instead of only those who hit it.
-/// Monsters spawned with 'boss' flag have a greater bar (2-3x normal size)
-/// Requires PACKETVER >= 20120404
-//#define VISIBLE_MONSTER_HP
-
 /// Uncomment to enable official Packet Obfuscation support.
 /// When enabled, make sure there is value for 'packet_keys' of used packet version or
 /// defined 'packet_keys_use' in db/packet_db.txt.

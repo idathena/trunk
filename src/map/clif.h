@@ -33,9 +33,9 @@ struct party_booking_ad_info;
 #include <stdarg.h>
 
 enum { // packet_db
-	MIN_PACKET_DB = 0x0064,
-	MAX_PACKET_DB = 0xF00,
-	MAX_PACKET_VER = 46,
+	MIN_PACKET_DB = 0x064,
+	MAX_PACKET_DB = 0xAFF,
+	MAX_PACKET_VER = 50,
 	MAX_PACKET_POS = 20,
 };
 
@@ -415,6 +415,35 @@ enum e_BANKING_DEPOSIT_ACK {
 	BDA_OVERFLOW = 0x3,
 };
 
+enum RECV_ROULETTE_ITEM_REQ {
+	RECV_ITEM_SUCCESS = 0x0,
+	RECV_ITEM_FAILED = 0x1,
+	RECV_ITEM_OVERCOUNT = 0x2,
+	RECV_ITEM_OVERWEIGHT = 0x3,
+};
+
+enum RECV_ROULETTE_ITEM_ACK {
+	RECV_ITEM_NORMAL = 0x0,
+	RECV_ITEM_LOSING = 0x1,
+};
+
+enum GENERATE_ROULETTE_ACK {
+	GENERATE_ROULETTE_SUCCESS = 0x0,
+	GENERATE_ROULETTE_FAILED = 0x1,
+	GENERATE_ROULETTE_NO_ENOUGH_POINT = 0x2,
+	GENERATE_ROULETTE_LOSING = 0x3,
+};
+
+enum OPEN_ROULETTE_ACK {
+	OPEN_ROULETTE_SUCCESS = 0x0,
+	OPEN_ROULETTE_FAILED = 0x1,
+};
+
+enum CLOSE_ROULETTE_ACK {
+	CLOSE_ROULETTE_SUCCESS = 0x0,
+	CLOSE_ROULETTE_FAILED = 0x1,
+};
+
 enum e_BANKING_WITHDRAW_ACK {
 	BWA_SUCCESS = 0x0,
 	BWA_NO_MONEY = 0x1,
@@ -498,7 +527,7 @@ void clif_sitting(struct block_list *bl);
 void clif_standing(struct block_list *bl);
 void clif_changelook(struct block_list *bl,int type,int val); //Area
 void clif_changetraplook(struct block_list *bl,int val); //Area
-void clif_sendlook(struct block_list *bl,int id,int type,int val,int val2,enum send_target target);
+void clif_sprite_change(struct block_list *bl,int id,int type,int val,int val2,enum send_target target);
 void clif_refreshlook(struct block_list *bl,int id,int type,int val,enum send_target target); //Area specified in 'target'
 void clif_arrowequip(struct map_session_data *sd,int val); //Self
 void clif_arrow_fail(struct map_session_data *sd,int type); //Self
@@ -640,10 +669,10 @@ void clif_changed_dir(struct block_list *bl, enum send_target target);
 void clif_openvendingreq(struct map_session_data *sd, int num);
 void clif_showvendingboard(struct block_list *bl, const char *message, int fd);
 void clif_closevendingboard(struct block_list *bl, int fd);
-void clif_vendinglist(struct map_session_data *sd, int id, struct s_vending* vending);
+void clif_vendinglist(struct map_session_data *sd, int id, struct s_vending *vending);
 void clif_buyvending(struct map_session_data *sd, int index, int amount, int fail);
-void clif_openvending(struct map_session_data *sd, int id, struct s_vending* vending);
-void clif_vendingreport(struct map_session_data *sd, int index, int amount);
+void clif_openvending(struct map_session_data *sd, int id, struct s_vending *vending);
+void clif_vendingreport(struct map_session_data *sd, int index, int amount, uint32 char_id, int zeny);
 
 void clif_movetoattack(struct map_session_data *sd,struct block_list *bl);
 
@@ -788,7 +817,7 @@ void clif_quest_send_mission(struct map_session_data *sd);
 void clif_quest_add(struct map_session_data *sd, struct quest *qd);
 void clif_quest_delete(struct map_session_data *sd, int quest_id);
 void clif_quest_update_status(struct map_session_data *sd, int quest_id, bool active);
-void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd);
+void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd, int mobid);
 void clif_quest_show_event(struct map_session_data *sd, struct block_list *bl, short effect, short color);
 void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, bool is_quest);
 
@@ -858,7 +887,7 @@ void clif_buyingstore_disappear_entry(struct map_session_data *sd);
 void clif_buyingstore_disappear_entry_single(struct map_session_data *sd, struct map_session_data *pl_sd);
 void clif_buyingstore_itemlist(struct map_session_data *sd, struct map_session_data *pl_sd);
 void clif_buyingstore_trade_failed_buyer(struct map_session_data *sd, short result);
-void clif_buyingstore_update_item(struct map_session_data *sd, unsigned short nameid, unsigned short amount);
+void clif_buyingstore_update_item(struct map_session_data *sd, unsigned short nameid, unsigned short amount, uint32 char_id, int zeny);
 void clif_buyingstore_delete_item(struct map_session_data *sd, short index, unsigned short amount, int price);
 void clif_buyingstore_trade_failed_seller(struct map_session_data *sd, short result, unsigned short nameid);
 
@@ -904,7 +933,7 @@ enum clif_colors {
 	COLOR_MAX
 };
 unsigned long color_table[COLOR_MAX];
-int clif_colormes(struct map_session_data *sd, unsigned long color, const char *msg);
+int clif_colormes(int fd, unsigned long color, const char *msg);
 
 void clif_channel_msg(struct Channel *channel, struct map_session_data *sd, char *msg, short color);
 
@@ -931,5 +960,16 @@ void clif_notify_bindOnEquip(struct map_session_data *sd, int n);
 void clif_merge_item_open(struct map_session_data *sd);
 
 void clif_broadcast_obtain_special_item(const char *char_name, unsigned short nameid, unsigned short container, enum BROADCASTING_SPECIAL_ITEM_OBTAIN type, const char *srcname);
+
+//Roulette [Yommy]
+void clif_roulette_generate_ack(struct map_session_data *sd, unsigned char result, short stage, short prizeIdx, short bonusItemID);
+void clif_parse_RouletteOpen(int fd, struct map_session_data *sd);
+void clif_parse_RouletteInfo(int fd, struct map_session_data *sd);
+void clif_parse_RouletteClose(int fd, struct map_session_data *sd);
+void clif_parse_RouletteGenerate(int fd, struct map_session_data *sd);
+void clif_parse_RouletteRecvItem(int fd, struct map_session_data *sd);
+
+void clif_dressing_room(struct map_session_data *sd, int flag);
+void clif_SelectCart(struct map_session_data *sd);
 
 #endif /* _CLIF_H_ */

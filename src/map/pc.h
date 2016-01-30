@@ -28,6 +28,9 @@
 #define DAMAGELOG_SIZE_PC 100 //Damage log
 #define MAX_DEVOTION 5 //Max Devotion slots
 #define BANK_VAULT_VAR "#BANKVAULT"
+#define ROULETTE_BRONZE_VAR "RouletteBronze"
+#define ROULETTE_SILVER_VAR "RouletteSilver"
+#define ROULETTE_GOLD_VAR "RouletteGold"
 
 //Update this max as necessary. 85 is the value needed for Expanded Super Novice
 #define MAX_SKILL_TREE 85
@@ -368,8 +371,11 @@ struct map_session_data {
 		short val;
 	} skillatk[MAX_PC_BONUS], skillusesprate[MAX_PC_BONUS], skillusesp[MAX_PC_BONUS],
 		skillheal[MAX_PC_BONUS], skillheal2[MAX_PC_BONUS], skillblown[MAX_PC_BONUS],
-		skillcast[MAX_PC_BONUS], skillvarcast[MAX_PC_BONUS], cooldown[MAX_PC_BONUS],
-		skillfixcast[MAX_PC_BONUS], skillfixcastrate[MAX_PC_BONUS], subskill[MAX_PC_BONUS];
+		skillcast[MAX_PC_BONUS], skillfixcastrate[MAX_PC_BONUS], subskill[MAX_PC_BONUS];
+	struct s_skill_bonus_i32 {
+		uint16 id;
+		int32 val;
+	} skillvarcast[MAX_PC_BONUS], cooldown[MAX_PC_BONUS], skillfixcast[MAX_PC_BONUS];
 	struct s_regen {
 		short value;
 		int rate;
@@ -646,13 +652,21 @@ struct map_session_data {
 #ifdef PACKET_OBFUSCATION
 	unsigned int cryptKey; //Packet obfuscation key to be used for the next received packet
 #endif
+	struct {
+		int bronze, silver, gold; //Roulette Coin
+	} roulette_point;
+	struct {
+		short stage;
+		int8 prizeIdx;
+		short prizeStage;
+		bool claimPrize;
+	} roulette;
 };
 
 struct eri *pc_sc_display_ers; //Player's SC display table
 struct eri *pc_itemgrouphealrate_ers; //Player's Item Group Heal Rate table
 
-/* Global expiration timer id */
-extern int pc_expiration_tid;
+extern int pc_expiration_tid; //Global expiration timer id
 
 enum weapon_type {
 	W_FIST,	//Bare hands
@@ -931,8 +945,8 @@ void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int 
 void pc_bonus5(struct map_session_data *sd, int type, int type2, int type3, int type4, int type5, int val);
 int pc_skill(TBL_PC *sd, int id, int level, int flag);
 
-bool pc_can_insert_card_into(struct map_session_data* sd, int idx_card, int idx_equip);
-bool pc_can_insert_card(struct map_session_data* sd, int idx_card);
+bool pc_can_insert_card_into(struct map_session_data *sd, int idx_card, int idx_equip);
+bool pc_can_insert_card(struct map_session_data *sd, int idx_card);
 int pc_insert_card(struct map_session_data *sd, int idx_card, int idx_equip);
 
 int pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 skill_lv);

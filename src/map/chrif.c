@@ -70,7 +70,7 @@ static const int packet_len_table[0x3d] = { // U - used, F - free
 //2b0a: Outgoing, chrif_skillcooldown_request -> requesting the list of skillcooldown for char
 //2b0b: Incoming, chrif_skillcooldown_load -> received the list of cooldown for char
 //2b0c: Outgoing, chrif_changeemail -> 'change mail address ...'
-//2b0d: Incoming, chrif_changedsex -> 'Change sex of acc XY'
+//2b0d: Incoming, chrif_changedsex -> 'Change sex of acc XY' (or char)
 //2b0e: Outgoing, chrif_req_login_operation -> 'Do some operations (change sex, ban / unban etc)'
 //2b0f: Incoming, chrif_ack_login_req -> 'answer of the 2b0e'
 //2b10: Outgoing, chrif_updatefamelist -> 'Update the fame ranking lists and send them'
@@ -192,7 +192,7 @@ static bool chrif_sd_to_auth(TBL_PC *sd, enum sd_state state) {
 	node->login_id2 = sd->login_id2;
 	node->sex = sd->status.sex;
 	node->fd = sd->fd;
-	node->sd = sd;	//Data from logged on char
+	node->sd = sd; //Data from logged on char
 	node->node_created = gettick(); //timestamp for node timeouts
 	node->state = state;
 
@@ -718,7 +718,7 @@ void chrif_authok(int fd) {
 }
 
 // Client authentication failed
-void chrif_authfail(int fd) {/* HELLO WORLD. ip in RFIFOL 15 is not being used (but is available) */
+void chrif_authfail(int fd) { /* HELLO WORLD. ip in RFIFOL 15 is not being used (but is available) */
 	int account_id, char_id;
 	uint32 login_id1;
 	char sex;
@@ -737,7 +737,7 @@ void chrif_authfail(int fd) {/* HELLO WORLD. ip in RFIFOL 15 is not being used (
 		node->login_id1 == login_id1 &&
 		node->sex == sex &&
 		node->state == ST_LOGIN )
-	{ // found a match
+	{ // Found a match
 		clif_authfail_fd(node->fd, 0);
 		chrif_auth_delete(account_id, char_id, ST_LOGIN);
 	}
@@ -849,42 +849,44 @@ int chrif_changeemail(int id, const char *actual_email, const char *new_email) {
  * @timediff : tick to add or remove to unixtimestamp
  * @val1 : extra data value to transfer for operation
  */
-int chrif_req_login_operation(int aid, const char *character_name, unsigned short operation_type, int32 timediff, int val1) {
-		chrif_check(-1);
+int chrif_req_login_operation(int aid, const char *character_name, enum chrif_req_op operation_type, int32 timediff, int val1) {
+	chrif_check(-1);
 
-		WFIFOHEAD(char_fd,40);
-		WFIFOW(char_fd,0) = 0x2b0e;
-		WFIFOL(char_fd,2) = aid;
-		safestrncpy((char *)WFIFOP(char_fd,6), character_name, NAME_LENGTH);
-		WFIFOW(char_fd,30) = operation_type;
-		if (operation_type == CHRIF_OP_LOGIN_BAN || operation_type == CHRIF_OP_LOGIN_VIP)
-			WFIFOL(char_fd,32) = timediff;
-		WFIFOL(char_fd,36) = val1;
-		WFIFOSET(char_fd,40);
-        return 0;
+	WFIFOHEAD(char_fd,40);
+	WFIFOW(char_fd,0) = 0x2b0e;
+	WFIFOL(char_fd,2) = aid;
+	safestrncpy((char *)WFIFOP(char_fd,6), character_name, NAME_LENGTH);
+	WFIFOW(char_fd,30) = operation_type;
+	if (operation_type == CHRIF_OP_LOGIN_BAN || operation_type == CHRIF_OP_LOGIN_VIP)
+		WFIFOL(char_fd,32) = timediff;
+	WFIFOL(char_fd,36) = val1;
+	WFIFOSET(char_fd,40);
+
+	return 0;
 }
 
 /**
  * S 2b0e <accid>.l <name>.24B <operation_type>.w <timediff>L <val1>L <val2>L
- * Send an account modification (changesex) request to the login server (via char server).
+ * Send a sex change (for account or character) request to the login server (via char server).
  * @sd : Player requesting operation
  */
-int chrif_changesex(struct map_session_data *sd) {
+int chrif_changesex(struct map_session_data *sd, bool change_account) {
 	chrif_check(-1);
 
 	WFIFOHEAD(char_fd,40);
 	WFIFOW(char_fd,0) = 0x2b0e;
 	WFIFOL(char_fd,2) = sd->status.account_id;
 	safestrncpy((char *)WFIFOP(char_fd,6), sd->status.name, NAME_LENGTH);
-	WFIFOW(char_fd,30) = CHRIF_OP_LOGIN_CHANGESEX;
+	WFIFOW(char_fd,30) = (change_account ? CHRIF_OP_LOGIN_CHANGESEX : CHRIF_OP_CHANGECHARSEX);
+	if (!change_account)
+		WFIFOB(char_fd,32) = (sd->status.sex == SEX_MALE ? SEX_FEMALE : SEX_MALE);
 	WFIFOSET(char_fd,40);
-
 	clif_displaymessage(sd->fd, msg_txt(408)); // "Need disconnection to perform change-sex request..."
-
 	if (sd->fd)
 		clif_authfail_fd(sd->fd, 15);
 	else
 		map_quit(sd);
+
 	return 0;
 }
 
@@ -913,11 +915,14 @@ static void chrif_ack_login_req(int aid, const char *player_name, uint16 type, u
 	}
 
 	switch (type) {
+		case CHRIF_OP_LOGIN_CHANGESEX:
+		case CHRIF_OP_CHANGECHARSEX:
+			type = CHRIF_OP_LOGIN_CHANGESEX; //So we don't have to create a new msgstring
+		//Fall through
 		case CHRIF_OP_LOGIN_BLOCK:
 		case CHRIF_OP_LOGIN_BAN:
 		case CHRIF_OP_LOGIN_UNBLOCK:
 		case CHRIF_OP_LOGIN_UNBAN:
-		case CHRIF_OP_LOGIN_CHANGESEX:
 			snprintf(action, 25, "%s", msg_txt(427 + type)); // Block|Ban|Unblock|Unban|Change the sex of
 			break;
 		case CHRIF_OP_LOGIN_VIP:
@@ -945,34 +950,19 @@ static void chrif_ack_login_req(int aid, const char *player_name, uint16 type, u
 /*==========================================
  * Request char server to change sex of char (modified by Yor)
  *------------------------------------------*/
-int chrif_changedsex(int fd) {
-	struct map_session_data *sd;
+void chrif_changedsex(int fd) {
 	int acc = RFIFOL(fd,2);
-	//int sex = RFIFOL(fd,6); //Dead store. Uncomment if needed again.
+	//int sex = RFIFOL(fd,6); //Dead store, uncomment if needed again
 
 	if (battle_config.etc_log)
 		ShowNotice("chrif_changedsex %d.\n", acc);
-
 	//Path to activate this response:
 	//Map(start) (0x2b0e) -> Char(0x2727) -> Login
 	//Login(0x2723) [ALL] -> Char (0x2b0d)[ALL] -> Map (HERE)
-	//Char will usually be "logged in" despite being forced to log-out in the begining
-	//of this process [Panikon]
-	if ((sd = map_id2sd(acc)) != NULL) {
-		int i;
-
-		for (i = 0; i < SC_MAX; i++) {
-			if (!sd->sc.data[i])
-				continue;
-			switch (i) {
-				case SC_MOONSTAR:	case SC_SUPER_STAR:
-				case SC_STRANGELIGHTS:	case SC_DECORATION_OF_MUSIC:
-					status_change_end(&sd->bl,(sc_type)i,INVALID_TIMER);
-					break;
-			}
-		}
-	}
-	return 0;
+	//OR
+	//Map(start) (0x2b03) -> Char
+	//Char(0x2b0d)[ALL] -> Map (HERE)
+	//Char will usually be "logged in" despite being forced to log-out in the begining of this process [Panikon]
 }
 
 /*==========================================
