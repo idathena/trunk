@@ -4398,6 +4398,7 @@ void clif_storageitemadded(struct map_session_data *sd, struct item *i, int inde
 	WFIFOL(fd,4) = amount; //Amount
 	WFIFOW(fd,8) = (view > 0 ? view : i->nameid); //ID
 #if PACKETVER >= 5
+	WFIFOB(fd,10) = itemdb_type(i->nameid); //Type
 	offset += 1;
 #endif
 	WFIFOB(fd,10 + offset) = i->identify; //Identify flag
