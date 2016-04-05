@@ -1884,7 +1884,11 @@ ACMD_FUNC(go)
 		{ MAP_UMBALA,       89, 157, 3 }, // 12 = Umbala
 		{ MAP_NIFLHEIM,     21, 153, 3 }, // 13 = Niflheim
 		{ MAP_LOUYANG,     217,  40, 3 }, // 14 = Luoyang
+#ifdef RENEWAL
+		{ MAP_NOVICE,       97,  90, 3 }, // 15 = Training Grounds (Renewal)
+#else
 		{ MAP_NOVICE,       53, 111, 3 }, // 15 = Training Grounds
+#endif
 		{ MAP_JAIL,         23,  61, 3 }, // 16 = Prison
 		{ MAP_JAWAII,      249, 127, 3 }, // 17 = Jawaii
 		{ MAP_AYOTHAYA,    151, 117, 3 }, // 18 = Ayothaya

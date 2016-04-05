@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define MAX_STARTPOINT 5 //Max number of start point defined in conf
 #define MAX_STARTITEM 32 //Max number of items a new players can start with
 #define CHAR_MAX_MSG 300 //Max number of msg_conf
 static char *msg_table[CHAR_MAX_MSG]; // Login Server messages_conf
@@ -162,11 +163,12 @@ struct char_session_data {
 	uint8 flag; // &1 - Retrieving guild bound items
 };
 
+//Initial items the player with spawn with on the server
 struct startitem {
-	int nameid; //Item ID
-	int amount; //Number of items
-	int pos; //Position (for auto-equip)
-} start_items[MAX_STARTITEM + 1];
+	unsigned short nameid, //Item ID
+		amount; //Number of items
+	short pos; //Position (Auto-equip)
+} start_items[MAX_STARTITEM];
 
 int max_connect_user = -1;
 int gm_allow_group = -1;
@@ -234,12 +236,8 @@ void bonus_script_save(int fd); // Save bonus_script data
 // other is char_id
 unsigned int save_flag = 0;
 
-// Initial position (it's possible to set it in conf file)
-#ifdef RENEWAL
-	struct point start_point = { 0, 97, 90 };
-#else
-	struct point start_point = { 0, 53, 111 };
-#endif
+struct point start_point[MAX_STARTPOINT]; //Initial position the player will spawn on the server
+short start_point_count = 1; //Number of positions read
 
 int console = 0;
 
@@ -1628,7 +1626,7 @@ int make_new_char_sql(struct char_session_data *sd, char *name_, int str, int ag
 
 	char name[NAME_LENGTH];
 	char esc_name[NAME_LENGTH * 2 + 1];
-	int char_id, flag, k;
+	int char_id, flag, k, start_point_idx = rnd()%start_point_count;
 
 	safestrncpy(name, name_, NAME_LENGTH);
 	normalize_name(name,TRIM_CHARS);
@@ -1664,7 +1662,7 @@ int make_new_char_sql(struct char_session_data *sd, char *name_, int str, int ag
 		"'%d', '%d', '%s', '%d',  '%d','%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d','%d', '%d','%d', '%d', '%s', '%d', '%d', '%s', '%d', '%d')",
 		char_db, sd->account_id , slot, esc_name, start_zeny, 48, str, agi, vit, int_, dex, luk,
 		(40 * (100 + vit) / 100) , (40 * (100 + vit) / 100 ),  (11 * (100 + int_) / 100), (11 * (100 + int_) / 100), hair_style, hair_color,
-		mapindex_id2name(start_point.map), start_point.x, start_point.y, mapindex_id2name(start_point.map), start_point.x, start_point.y))
+		mapindex_id2name(start_point[start_point_idx].map), start_point[start_point_idx].x, start_point[start_point_idx].y, mapindex_id2name(start_point[start_point_idx].map), start_point[start_point_idx].x, start_point[start_point_idx].y))
 	{
 		Sql_ShowDebug(sql_handle);
 		return -2; //No, stop the procedure!
@@ -1676,7 +1674,7 @@ int make_new_char_sql(struct char_session_data *sd, char *name_, int str, int ag
 		"'%d', '%d', '%s', '%d',  '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d','%d', '%d','%d', '%d', '%s', '%d', '%d', '%s', '%d', '%d')",
 		char_db, sd->account_id , slot, esc_name, start_zeny, str, agi, vit, int_, dex, luk,
 		(40 * (100 + vit) / 100) , (40 * (100 + vit) / 100 ),  (11 * (100 + int_) / 100), (11 * (100 + int_) / 100), hair_style, hair_color,
-		mapindex_id2name(start_point.map), start_point.x, start_point.y, mapindex_id2name(start_point.map), start_point.x, start_point.y))
+		mapindex_id2name(start_point[start_point_idx].map), start_point[start_point_idx].x, start_point[start_point_idx].y, mapindex_id2name(start_point[start_point_idx].map), start_point[start_point_idx].x, start_point[start_point_idx].y))
 	{
 		Sql_ShowDebug(sql_handle);
 		return -2; //No, stop the procedure!
@@ -5653,6 +5651,91 @@ void sql_config_read(const char *cfgName)
 	ShowInfo("Done reading %s.\n", cfgName);
 }
 
+/**
+ * Split start_point configuration values.
+ * @param w2_value: Value from w2
+ */
+static void char_config_split_startpoint(char *w2_value)
+{
+	char *lineitem, **fields, config_name[20];
+	int i = 0, fields_length = 3 + 1;
+
+	memset(config_name, 0, sizeof(config_name));
+
+#ifdef RENEWAL
+	strcat(config_name, "start_point");
+#else
+	strcat(config_name, "start_point_pre");
+#endif
+
+	start_point_count = 0; //Reset to begin reading
+
+	fields = (char **)aMalloc(fields_length * sizeof(char *));
+	if(fields == NULL)
+		return; //Failed to allocate memory
+	lineitem = strtok(w2_value, ":");
+
+	while(lineitem != NULL && start_point_count < MAX_STARTPOINT) {
+		int n = sv_split(lineitem, strlen(lineitem), 0, ',', fields, fields_length, SV_NOESCAPE_NOTERMINATE);
+
+		if(n + 1 < fields_length) {
+			ShowDebug("%s: not enough arguments for %s! Skipping...\n", config_name, lineitem);
+			lineitem = strtok(NULL, ":"); //Next lineitem
+			continue;
+		}
+		start_point[i].map = mapindex_name2id(fields[1]);
+		if(!start_point[i].map) {
+			ShowError("Start point %s not found in map-index cache. Setting to default location.\n", start_point[i].map);
+			start_point[i].map = mapindex_name2id(MAP_DEFAULT_NAME);
+			start_point[i].x = MAP_DEFAULT_X;
+			start_point[i].y = MAP_DEFAULT_Y;
+		} else {
+			start_point[i].x = max(0, atoi(fields[2]));
+			start_point[i].y = max(0, atoi(fields[3]));
+		}
+		start_point_count++;
+		lineitem = strtok(NULL, ":"); //Next lineitem
+		i++;
+	}
+	aFree(fields);
+}
+
+/**
+ * Split start_items configuration values.
+ * @param w2_value: Value from w2
+ */
+static void char_config_split_startitem(char *w2_value)
+{
+	char *lineitem, **fields, config_name[20];
+	int i = 0, fields_length = 3 + 1;
+
+	memset(config_name, 0, sizeof(config_name));
+
+	strcat(config_name, "start_items");
+
+	fields = (char **)aMalloc(fields_length * sizeof(char *));
+	if(fields == NULL)
+		return; //Failed to allocate memory
+	lineitem = strtok(w2_value, ":");
+
+	while(lineitem != NULL && i < MAX_STARTITEM) {
+		int n = sv_split(lineitem, strlen(lineitem), 0, ',', fields, fields_length, SV_NOESCAPE_NOTERMINATE);
+
+		if(n + 1 < fields_length) {
+			ShowDebug("%s: not enough arguments for %s! Skipping...\n", config_name, lineitem);
+			lineitem = strtok(NULL, ":"); //Next lineitem
+			continue;
+		}
+		//TODO: Item ID verification
+		start_items[i].nameid = max(0, atoi(fields[1]));
+		start_items[i].amount = max(0, atoi(fields[2]));
+		start_items[i].pos = max(0, atoi(fields[3]));
+		lineitem = strtok(NULL, ":"); //Next lineitem
+		i++;
+	}
+	aFree(fields);
+}
+
 int char_config_read(const char *cfgName)
 {
 	char line[1024], w1[1024], w2[1024];
@@ -5735,63 +5818,18 @@ int char_config_read(const char *cfgName)
 		} else if(strcmpi(w1, "save_log") == 0)
 			save_log = config_switch(w2);
 #ifdef RENEWAL
-		else if(strcmpi(w1, "start_point") == 0) {
-			char map[MAP_NAME_LENGTH_EXT];
-			int x, y;
-
-			if(sscanf(w2, "%15[^,],%d,%d", map, &x, &y) < 3)
-				continue;
-			start_point.map = mapindex_name2id(map);
-			if(!start_point.map)
-				ShowError("Specified start_point %s not found in map-index cache.\n", map);
-			start_point.x = x;
-			start_point.y = y;
-		}
+		else if(strcmpi(w1, "start_point") == 0)
 #else
-		else if(strcmpi(w1, "start_point_pre") == 0) {
-			char map[MAP_NAME_LENGTH_EXT];
-			int x, y;
-
-			if(sscanf(w2, "%15[^,],%d,%d", map, &x, &y) < 3)
-				continue;
-			start_point.map = mapindex_name2id(map);
-			if(!start_point.map)
-				ShowError("Specified start_point %s not found in map-index cache.\n", map);
-			start_point.x = x;
-			start_point.y = y;
-		}
+		else if(strcmpi(w1, "start_point_pre") == 0)
 #endif
+			char_config_split_startpoint(w2);
 		else if(strcmpi(w1, "start_zeny") == 0) {
 			start_zeny = atoi(w2);
 			if(start_zeny < 0)
 				start_zeny = 0;
-		} else if(strcmpi(w1, "start_items") == 0) {
-			int i = 0;
-			char *lineitem, **fields;
-			int fields_length = 3 + 1;
-
-			fields = (char **)aMalloc(fields_length * sizeof(char *));
-			lineitem = strtok(w2, ":");
-			while(lineitem != NULL) {
-				int n = sv_split(lineitem, strlen(lineitem), 0, ',', fields, fields_length, SV_NOESCAPE_NOTERMINATE);
-
-				if(n + 1 < fields_length) {
-					ShowDebug("start_items: not enough arguments for %s! Skipping...\n", lineitem);
-					lineitem = strtok(NULL, ":"); //Next itemline
-					continue;
-				}
-				if(i > MAX_STARTITEM)
-					ShowDebug("start_items: too many items, only %d are allowed! Ignoring parameter %s...\n", MAX_STARTITEM, lineitem);
-				else {
-					start_items[i].nameid = max(0,atoi(fields[1]));
-					start_items[i].amount = max(0,atoi(fields[2]));
-					start_items[i].pos = max(0,atoi(fields[3]));
-				}
-				lineitem = strtok(NULL, ":"); //Next itemline
-				i++;
-			}
-			aFree(fields);
-		} else if(strcmpi(w1,"log_char") == 0) //Log char or not [devil]
+		} else if(strcmpi(w1, "start_items") == 0)
+			char_config_split_startitem(w2);
+		else if(strcmpi(w1,"log_char") == 0) //Log char or not [devil]
 			log_char = atoi(w2);
 		else if(strcmpi(w1, "unknown_char_name") == 0) {
 			safestrncpy(unknown_char_name, w2, sizeof(unknown_char_name));
@@ -5939,11 +5977,18 @@ int do_init(int argc, char **argv)
 	//Read map indexes
 	runflag = CHARSERVER_ST_STARTING;
 	mapindex_init();
-#ifdef RENEWAL
-	start_point.map = mapindex_name2id("iz_int");
-#else
-	start_point.map = mapindex_name2id("new_1-1");
-#endif
+
+	start_point[0].map = mapindex_name2id(MAP_DEFAULT_NAME);
+	start_point[0].x = MAP_DEFAULT_X;
+	start_point[0].y = MAP_DEFAULT_Y;
+
+	start_items[0].nameid = 1201;
+	start_items[0].amount = 1;
+	start_items[0].pos = 2;
+	start_items[1].nameid = 2301;
+	start_items[1].amount = 1;
+	start_items[1].pos = 16;
+
 	safestrncpy(default_map, "prontera", MAP_NAME_LENGTH);
 
 	CHAR_CONF_NAME = "conf/char_athena.conf";

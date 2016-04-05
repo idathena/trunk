@@ -5,6 +5,7 @@
 #define _MAPINDEX_H_
 
 #include "../common/db.h"
+#include "../config/renewal.h"
 
 //File in charge of assigning a numberic ID to each map in existance for space saving when passing map info between servers.
 extern char mapindex_cfgfile[80];
@@ -36,7 +37,11 @@ extern char mapindex_cfgfile[80];
 #define MAP_RACHEL "rachel"
 #define MAP_VEINS "veins"
 #define MAP_JAIL "sec_pri"
-#define MAP_NOVICE "new_1-1"
+#ifdef RENEWAL
+	#define MAP_NOVICE "iz_int"
+#else
+	#define MAP_NOVICE "new_1-1"
+#endif
 #define MAP_MOSCOVIA "moscovia"
 #define MAP_MIDCAMP "mid_camp"
 #define MAP_MANUK "manuk"
