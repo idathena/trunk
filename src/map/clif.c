@@ -7968,10 +7968,19 @@ void clif_mvp_exp(struct map_session_data *sd, unsigned int exp)
 	nullpo_retv(sd);
 
 	fd = sd->fd;
+#if PACKETVER >= 20131223 //kRO remove this packet [Napster]
+	if(battle_config.mvp_exp_reward_message) {
+		char e_msg[CHAT_SIZE_MAX];
+
+		sprintf(e_msg, msg_txt(389), exp);
+		clif_colormes(fd, color_table[COLOR_CYAN], e_msg); // Congratulations! You are the MVP! Your reward EXP Points are %u !!
+	}
+#else
 	WFIFOHEAD(fd,packet_len(0x10b));
 	WFIFOW(fd,0) = 0x10b;
 	WFIFOL(fd,2) = min(exp,(unsigned int)INT32_MAX);
 	WFIFOSET(fd,packet_len(0x10b));
+#endif
 }
 
 
@@ -19735,7 +19744,7 @@ void packetdb_readdb(bool reload)
  *
  *------------------------------------------*/
 void do_init_clif(void) {
-	const char *colors[COLOR_MAX] = { "0x00FF00", "0xFF0000", "0xFFFFFF", "0xFFFF00" };
+	const char *colors[COLOR_MAX] = { "0x00FF00", "0xFF0000", "0xFFFFFF", "0xFFFF00", "0x00FFFF" };
 	int i;
 
 	for( i = 0; i < COLOR_MAX; i++ ) { //Setup Color Table (saves unnecessary load of strtoul on every call)
