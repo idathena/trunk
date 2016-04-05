@@ -9279,7 +9279,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case LG_SHIELDSPELL:
 			if( sd ) {
-				int opt = 0;
+				short effect_number = rnd()%3 + 1; //Effect number, each level has 3 unique effects thats randomly picked from
+				short splash_range = 0; //Splash AoE, used for splash AoE ATK/MATK and Lex Divina
 				short index = sd->equip_index[EQI_HAND_L], shield_def = 0, shield_mdef = 0, shield_refine = 0;
 				struct item_data *shield_data = NULL;
 
@@ -9292,100 +9293,95 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					shield_mdef = sd->bonus.shieldmdef;
 					shield_refine = sd->status.inventory[sd->equip_index[EQI_HAND_L]].refine;
 				}
-				if( flag&1 ) {
-					sc_start(src,bl,SC_SILENCE,100,skill_lv,shield_mdef * 30000);
-					break;
-				}
-				opt = rnd()%3 + 1; //Generates a number between 1 - 3. The number generated will determine which effect will be triggered
 				switch( skill_lv ) {
 					case 1: { //DEF Based
-							int splashrange = 0;
-
+							if( effect_number == 1 ) {
 #ifdef RENEWAL
-							if( shield_def >= 0 && shield_def <= 40 )
+								if( shield_def >= 0 && shield_def <= 40 )
 #else
-							if( shield_def >= 0 && shield_def <= 4 )
+								if( shield_def >= 0 && shield_def <= 4 )
 #endif
-								splashrange = 1;
+									splash_range = 1;
 #ifdef RENEWAL
-							else if( shield_def >= 41 && shield_def <= 80 )
+								else if( shield_def >= 41 && shield_def <= 80 )
 #else
-							else if( shield_def >= 5 && shield_def <= 9 )
+								else if( shield_def >= 5 && shield_def <= 8 )
 #endif
-								splashrange = 2;
-							else
-								splashrange = 3;
-							switch( opt ) {
+									splash_range = 2;
+								else
+									splash_range = 3;
+							}
+							switch( effect_number ) {
 								case 1: //Splash AoE ATK
-									sc_start(src,bl,SC_SHIELDSPELL_DEF,100,opt,INVALID_TIMER);
+									sc_start(src,bl,SC_SHIELDSPELL_DEF,100,effect_number,INVALID_TIMER);
 									clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
-									map_foreachinrange(skill_area_sub,src,splashrange,BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
+									map_foreachinrange(skill_area_sub,src,splash_range,BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
 									status_change_end(bl,SC_SHIELDSPELL_DEF,INVALID_TIMER);
 									break;
 								case 2: //% Damage Reflecting Increase
 #ifdef RENEWAL
-									sc_start2(src,bl,SC_SHIELDSPELL_DEF,100,opt,shield_def / 10,shield_def * 1000);
+									sc_start2(src,bl,SC_SHIELDSPELL_DEF,100,effect_number,shield_def / 10,shield_def * 1000);
 #else
-									sc_start2(src,bl,SC_SHIELDSPELL_DEF,100,opt,shield_def,shield_def * 1000 * 10);
+									sc_start2(src,bl,SC_SHIELDSPELL_DEF,100,effect_number,shield_def,shield_def * 1000 * 10);
 #endif
 									break;
 								case 3: //Equipment Attack Increase
 #ifdef RENEWAL
-									sc_start2(src,bl,SC_SHIELDSPELL_DEF,100,opt,shield_def,shield_def * 3000);
+									sc_start2(src,bl,SC_SHIELDSPELL_DEF,100,effect_number,shield_def,shield_def * 3000);
 #else
-									sc_start2(src,bl,SC_SHIELDSPELL_DEF,100,opt,shield_def * 10,shield_def * 3000 * 10);
+									sc_start2(src,bl,SC_SHIELDSPELL_DEF,100,effect_number,shield_def * 10,shield_def * 3000 * 10);
 #endif
 									break;
 							}
 						}
 						break;
 					case 2: { //MDEF Based
-							int splashrange = 0;
-
 							if( !shield_mdef )
 								break; //Nothing should happen if the shield has no MDEF, not even displaying a message
-							if( shield_mdef >= 1 && shield_mdef <= 3 )
-								splashrange = 1;
-							else if( shield_mdef >= 4 && shield_mdef <= 5 )
-								splashrange = 2;
-							else
-								splashrange = 3;
-							switch( opt ) {
+							if( effect_number != 3 ) {
+								if( shield_mdef >= 1 && shield_mdef <= 3 )
+									splash_range = 1;
+								else if( shield_mdef >= 4 && shield_mdef <= 5 )
+									splash_range = 2;
+								else
+									splash_range = 3;
+							}
+							switch( effect_number ) {
 								case 1: //Splash AoE MATK
-									sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,opt,INVALID_TIMER);
+									sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,effect_number,INVALID_TIMER);
 									clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
-									map_foreachinrange(skill_area_sub,src,splashrange,BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
+									map_foreachinrange(skill_area_sub,src,splash_range,BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
 									status_change_end(bl,SC_SHIELDSPELL_MDEF,INVALID_TIMER);
 									break;
 								case 2: //Splash AoE Lex Divina
-									sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,opt,shield_mdef * 2000);
-									clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
-									map_foreachinrange(skill_area_sub,src,splashrange,BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
+									shield_mdef = min(shield_mdef,10); //Level of Lex Divina to cast
+									sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,effect_number,INVALID_TIMER);
+									map_foreachinrange(skill_area_sub,src,splash_range,BL_CHAR,src,PR_LEXDIVINA,shield_mdef,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
+									status_change_end(bl,SC_SHIELDSPELL_MDEF,INVALID_TIMER);
 									break;
 								case 3: //Casts Magnificat
-									if( sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,opt,shield_mdef * 30000) )
-										clif_skill_nodamage(src,bl,PR_MAGNIFICAT,skill_lv,
-											sc_start(src,bl,SC_MAGNIFICAT,100,1,shield_mdef * 30000));
+									if( sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,effect_number,shield_mdef * 30000) )
+										clif_skill_nodamage(src,bl,PR_MAGNIFICAT,skill_lv,sc_start(src,bl,SC_MAGNIFICAT,100,1,shield_mdef * 30000));
 									break;
 							}
 						}
 						break;
 					case 3: //Refine Based
 						if( !shield_refine )
-							break; //Nothing should happen if the shield has no refine, not even displaying a message
-						switch( opt ) {
+							break;
+						switch( effect_number ) {
 							case 1: //Allows you to break armor at a 100% rate when you do damage
-								sc_start(src,bl,SC_SHIELDSPELL_REF,100,opt,shield_refine * 30000);
+								sc_start(src,bl,SC_SHIELDSPELL_REF,100,effect_number,shield_refine * 30000);
 								break;
 							case 2: //Increases DEF and Status Effect resistance depending on Shield refine rate
 #ifdef RENEWAL
-								sc_start4(src,bl,SC_SHIELDSPELL_REF,100,opt,shield_refine * 10 * status_get_lv(src) / 100,(shield_refine * 2) + (sstatus->luk / 10),0,shield_refine * 20000);
+								sc_start4(src,bl,SC_SHIELDSPELL_REF,100,effect_number,shield_refine * 10 * status_get_lv(src) / 100,(shield_refine * 2) + (sstatus->luk / 10),0,shield_refine * 20000);
 #else
-								sc_start4(src,bl,SC_SHIELDSPELL_REF,100,opt,shield_refine,(shield_refine * 2) + (sstatus->luk / 10),0,shield_refine * 20000);
+								sc_start4(src,bl,SC_SHIELDSPELL_REF,100,effect_number,shield_refine,(shield_refine * 2) + (sstatus->luk / 10),0,shield_refine * 20000);
 #endif
 								break;
 							case 3: //Recovers HP depending on Shield refine rate
-								sc_start(src,bl,SC_SHIELDSPELL_REF,100,opt,INVALID_TIMER); //HP Recovery
+								sc_start(src,bl,SC_SHIELDSPELL_REF,100,effect_number,INVALID_TIMER); //HP Recovery
 								status_heal(bl,sstatus->max_hp * ((status_get_lv(src) / 10) + (shield_refine + 1)) / 100,0,2);
 								status_change_end(bl,SC_SHIELDSPELL_REF,INVALID_TIMER);
 								break;
