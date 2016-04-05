@@ -9793,8 +9793,8 @@ static bool clif_process_message(struct map_session_data *sd, int format, char *
 	*messagelen_ = 0;
 
 	packetlen = RFIFOW(fd,info->pos[0]);
-	// basic structure checks
-	if( packetlen < 4 + 1 ) { // 4-byte header and at least an empty string is expected
+	//Basic structure checks
+	if( packetlen < 4 + 1 ) { //4-byte header and at least an empty string is expected
 		ShowWarning("clif_process_message: Received malformed packet from player '%s' (no message data)!\n", sd->status.name);
 		return false;
 	}
@@ -9802,62 +9802,61 @@ static bool clif_process_message(struct map_session_data *sd, int format, char *
 	text = (char *)RFIFOP(fd,info->pos[1]);
 	textlen = packetlen - 4;
 
-	// process <name> part of the packet
-	if( format == 0 ) { // name and message are separated by ' : '
-		// validate name
+	//Process <name> part of the packet
+	if( format == 0 ) { //Name and message are separated by ' : '
+		//Validate name
 		name = text;
-		namelen = strnlen(sd->status.name, NAME_LENGTH-1); // name length (w/o zero byte)
+		namelen = strnlen(sd->status.name, NAME_LENGTH - 1); //Name length (w/o zero byte)
 
-		if( strncmp(name, sd->status.name, namelen) || // the text must start with the speaker's name
-			name[namelen] != ' ' || name[namelen+1] != ':' || name[namelen+2] != ' ' ) // followed by ' : '
+		if( strncmp(name, sd->status.name, namelen) || //The text must start with the speaker's name
+			name[namelen] != ' ' || name[namelen + 1] != ':' || name[namelen + 2] != ' ' ) //Followed by ' : '
 		{
 			//Hacked message, or infamous "client desynch" issue where they pick one char while loading another.
 			ShowWarning("clif_process_message: Player '%s' sent a message using an incorrect name! Forcing a relog...\n", sd->status.name);
-			set_eof(fd); // Just kick them out to correct it.
+			set_eof(fd); //Just kick them out to correct it.
 			return false;
 		}
 
 		message = name + namelen + 3;
-		messagelen = textlen - namelen - 3; // this should be the message length (w/ zero byte included)
-	} else { // name has fixed width
+		messagelen = textlen - namelen - 3; //This should be the message length (w/ zero byte included)
+	} else { //Name has fixed width
 		if( textlen < NAME_LENGTH + 1 ) {
 			ShowWarning("clif_process_message: Received malformed packet from player '%s' (packet length is incorrect)!\n", sd->status.name);
 			return false;
 		}
 
-		// validate name
+		//Validate name
 		name = text;
-		namelen = strnlen(name, NAME_LENGTH-1); // name length (w/o zero byte)
+		namelen = strnlen(name, NAME_LENGTH - 1); //Name length (w/o zero byte)
 
-		if( name[namelen] != '\0' ) { // only restriction is that the name must be zero-terminated
+		if( name[namelen] != '\0' ) { //Only restriction is that the name must be zero-terminated
 			ShowWarning("clif_process_message: Player '%s' sent an unterminated name!\n", sd->status.name);
 			return false;
 		}
 
 		message = name + NAME_LENGTH;
-		messagelen = textlen - NAME_LENGTH; // this should be the message length (w/ zero byte included)
+		messagelen = textlen - NAME_LENGTH; //This should be the message length (w/ zero byte included)
 	}
-
-#if PACKETVER >= 20151001
+#if PACKETVER >= 20151029
+	if( message[messagelen - 1] != '\0' )
 		message[messagelen++] = '\0';
 #endif
-
-	if( messagelen != strnlen(message, messagelen)+1 ) { // the declared length must match real length
+	if( messagelen != strnlen(message, messagelen) + 1 ) { //The declared length must match real length
 		ShowWarning("clif_process_message: Received malformed packet from player '%s' (length is incorrect)!\n", sd->status.name);
 		return false;
 	}
-	// verify <message> part of the packet
-	if( message[messagelen-1] != '\0' ) { // message must be zero-terminated
+	//Verify <message> part of the packet
+	if( message[messagelen - 1] != '\0' ) { //Message must be zero-terminated
 		ShowWarning("clif_process_message: Player '%s' sent an unterminated message string!\n", sd->status.name);
 		return false;
 	}
-	if( messagelen > CHAT_SIZE_MAX-1 ) {
-		// messages mustn't be too long
-		// Normally you can only enter CHATBOX_SIZE-1 letters into the chat box, but Frost Joke / Dazzler's text can be longer.
-		// Also, the physical size of strings that use multibyte encoding can go multiple times over the chatbox capacity.
-		// Neither the official client nor server place any restriction on the length of the data in the packet,
-		// but we'll only allow reasonably long strings here. This also makes sure that they fit into the `chatlog` table.
-		ShowWarning("clif_process_message: Player '%s' sent a message too long ('%.*s')!\n", sd->status.name, CHAT_SIZE_MAX-1, message);
+	if( messagelen > CHAT_SIZE_MAX - 1 ) {
+		//Messages mustn't be too long
+		//Normally you can only enter CHATBOX_SIZE-1 letters into the chat box, but Frost Joke / Dazzler's text can be longer.
+		//Also, the physical size of strings that use multibyte encoding can go multiple times over the chatbox capacity.
+		//Neither the official client nor server place any restriction on the length of the data in the packet,
+		//but we'll only allow reasonably long strings here. This also makes sure that they fit into the `chatlog` table.
+		ShowWarning("clif_process_message: Player '%s' sent a message too long ('%.*s')!\n", sd->status.name, CHAT_SIZE_MAX - 1, message);
 		return false;
 	}
 
@@ -12345,6 +12344,10 @@ void clif_parse_NpcStringInput(int fd, struct map_session_data *sd)
 	if( message_len <= 0 )
 		return; //Invalid input
 
+#if PACKETVER >= 20151029
+	message_len++;
+#endif
+
 	safestrncpy(sd->npc_str, message, min(message_len, CHATBOX_SIZE));
 	npc_scriptcont(sd, npcid, false);
 }
@@ -12826,7 +12829,11 @@ void clif_parse_PartyMessage(int fd, struct map_session_data *sd)
 	char *name, *message;
 	int namelen, messagelen;
 
-	// validate packet and retrieve name and message
+#if PACKETVER >= 20151029
+	textlen++;
+#endif
+
+	//Validate packet and retrieve name and message
 	if( !clif_process_message(sd, 0, &name, &namelen, &message, &messagelen) )
 		return;
 
@@ -12834,7 +12841,7 @@ void clif_parse_PartyMessage(int fd, struct map_session_data *sd)
 		return;
 
 	if( sd->sc.cant.chat )
-		return; //no "chatting" while muted.
+		return; //No "chatting" while muted
 
 	if( battle_config.min_chat_delay ) { //[Skotlex]
 		if( DIFF_TICK(sd->cantalk_tick, gettick()) > 0 )
@@ -12842,7 +12849,7 @@ void clif_parse_PartyMessage(int fd, struct map_session_data *sd)
 		sd->cantalk_tick = gettick() + battle_config.min_chat_delay;
 	}
 
-	// Reset idle time when using party chat.
+	//Reset idle time when using party chat
 	sd->idletime = last_tick;
 
 	party_send_message(sd, text, textlen);
