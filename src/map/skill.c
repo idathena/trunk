@@ -1725,17 +1725,9 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	//Polymorph
 	if( sd && sd->bonus.classchange && attack_type&BF_WEAPON && dstmd &&
 		!(tstatus->mode&MD_BOSS) && (rnd()%10000 < sd->bonus.classchange) ) {
-		struct mob_db *mob;
-		int class_, i = 0;
+		int class_ = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,0x01,0);
 
-		do {
-			do {
-				class_ = rnd()%MAX_MOB_DB;
-			} while( !mobdb_checkid(class_) );
-			rate = rnd()%1000000;
-			mob = mob_db(class_);
-		} while( (mob->status.mode&(MD_BOSS|MD_PLANT) || mob->summonper[0] <= rate) && (i++) < 2000 );
-		if( i < 2000 )
+		if( class_ && mobdb_checkid(class_) )
 			mob_class_change(dstmd,class_);
 	}
 
@@ -5766,7 +5758,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SA_CLASSCHANGE:
 		case SA_MONOCELL:
 			if (dstmd) {
-				int mob_id = (skill_id == SA_MONOCELL ? MOBID_PORING : mob_get_random_id(4,0x01,0));
+				int mob_id = (skill_id == SA_MONOCELL ? MOBID_PORING : mob_get_random_id(MOBG_ClassChange,0x01,0));
 
 				if (sd && dstmd->status.mode&MD_BOSS) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -6179,7 +6171,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
-				id = mob_get_random_id(0,0x0F,sd->status.base_level);
+				id = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,0x0F,sd->status.base_level);
 				if (!id) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;

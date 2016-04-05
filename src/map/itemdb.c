@@ -704,7 +704,6 @@ static void itemdb_read_itemgroup_sub(const char *filename)
 	}
 	fclose(fp);
 	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", entries, filename);
-	return;
 }
 
 static void itemdb_read_itemgroup(void)
@@ -713,7 +712,6 @@ static void itemdb_read_itemgroup(void)
 
 	snprintf(path, 255, "%s/"DBPATH"item_group_db.txt", db_path);
 	itemdb_read_itemgroup_sub(path);
-	return;
 }
 
 /** Read item forbidden by mapflag (can't equip item)
