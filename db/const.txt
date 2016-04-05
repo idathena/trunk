@@ -4905,6 +4905,12 @@ IT_DELAYCONSUME	11
 IT_SHADOWGEAR	12
 IT_CASH	18
 
+MOBG_Branch_Of_Dead_Tree	0
+MOBG_Poring_Box	1
+MOBG_Bloody_Dead_Branch	2
+MOBG_Red_Pouch_Of_Surprise	3
+MOBG_ClassChange	4
+
 false	0
 true	1
 

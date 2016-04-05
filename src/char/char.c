@@ -202,7 +202,7 @@ void pincode_decrypt(uint32 userSeed, char *pin);
 int pincode_compare(int fd, struct char_session_data *sd, char *pin);
 
 void mapif_vipack(int mapfd, uint32 aid, uint32 vip_time, uint8 isvip, int group_id);
-void loginif_reqvipdata(uint32 aid, uint8 type, int32 timediff, int mapfd);
+int loginif_reqvipdata(uint32 aid, uint8 type, int32 timediff, int mapfd);
 void loginif_parse_vipack(int fd);
 void loginif_parse_changesex(int sex, int acc, int char_id, int class_, int guild_id);
 void loginif_parse_ackchangecharsex(int char_id, int sex);
@@ -2329,7 +2329,7 @@ void mapif_vipack(int mapfd, uint32 aid, uint32 vip_time, uint8 isvip, int group
  * @param mapfd: link to mapserv for ack
  * @return 0 if success
  */
-void loginif_reqvipdata(uint32 aid, uint8 type, int32 timediff, int mapfd) {
+int loginif_reqvipdata(uint32 aid, uint8 type, int32 timediff, int mapfd) {
 	loginif_check(-1);
 #ifdef VIP_ENABLE
 	WFIFOHEAD(login_fd,15);
@@ -2340,6 +2340,7 @@ void loginif_reqvipdata(uint32 aid, uint8 type, int32 timediff, int mapfd) {
 	WFIFOL(login_fd,11) = mapfd; //req_inc_duration
 	WFIFOSET(login_fd,15);
 #endif
+	return 1;
 }
 
 /**
