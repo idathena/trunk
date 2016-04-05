@@ -8449,6 +8449,7 @@ static const struct _battle_data {
 	{ "min_body_style",                     &battle_config.min_body_style,                  0,      0,      SHRT_MAX,       },
 	{ "max_body_style",                     &battle_config.max_body_style,                  1,      0,      SHRT_MAX,       },
 	{ "save_body_style",                    &battle_config.save_body_style,                 0,      0,      1,              },
+	{ "mvp_exp_reward_message",             &battle_config.mvp_exp_reward_message,          0,      0,      1,              },
 };
 #ifndef STATS_OPT_OUT
 /**
@@ -8688,6 +8689,13 @@ void battle_adjust_conf()
 	if (battle_config.feature_banking) {
 		ShowWarning("conf/battle/feature.conf banking is enabled but it requires PACKETVER 2013-07-24 or newer, disabling...\n");
 		battle_config.feature_banking = 0;
+	}
+#endif
+
+#if PACKETVER < 20131223
+	if (battle_config.mvp_exp_reward_message) {
+		ShowWarning("conf/battle/client.conf MVP EXP reward message is enabled but it requires PACKETVER 2013-12-23 or newer, disabling...\n");
+		battle_config.mvp_exp_reward_message = 0;
 	}
 #endif
 
