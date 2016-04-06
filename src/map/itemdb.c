@@ -292,21 +292,32 @@ const char *itemdb_typename_ammo(enum e_item_ammo ammo) {
  *------------------------------------------*/
 static void itemdb_jobid2mapid(unsigned int *bclass, unsigned int jobmask)
 {
-	int i;
-
 	bclass[0] = bclass[1] = bclass[2] = 0;
-	//Base classes
-	if (jobmask & 1<<JOB_NOVICE) { //Both Novice/Super-Novice are counted with the same ID
+
+	//Novice And 1st Jobs
+	if (jobmask & 1<<JOB_NOVICE) { //Novice and Super Novice share the same job equip mask
 		bclass[0] |= 1<<MAPID_NOVICE;
 		bclass[1] |= 1<<MAPID_NOVICE;
 	}
-	for (i = JOB_NOVICE+1; i <= JOB_THIEF; i++) {
-		if (jobmask & 1<<i)
-			bclass[0] |= 1<<(MAPID_NOVICE+i);
+	if (jobmask & 1<<JOB_SWORDMAN)
+		bclass[0] |= 1<<MAPID_SWORDMAN;
+	if (jobmask & 1<<JOB_MAGE)
+		bclass[0] |= 1<<MAPID_MAGE;
+	if (jobmask & 1<<JOB_ARCHER)
+		bclass[0] |= 1<<MAPID_ARCHER;
+	if (jobmask & 1<<JOB_ACOLYTE) { //Acolyte and Gangsi share the same job equip mask
+		bclass[0] |= 1<<MAPID_ACOLYTE;
+		bclass[0] |= 1<<MAPID_GANGSI;
 	}
+	if (jobmask & 1<<JOB_MERCHANT)
+		bclass[0] |= 1<<MAPID_MERCHANT;
+	if (jobmask & 1<<JOB_THIEF)
+		bclass[0] |= 1<<MAPID_THIEF;
 	//2-1 classes
-	if (jobmask & 1<<JOB_KNIGHT)
+	if (jobmask & 1<<JOB_KNIGHT) { //Knight and Death Knight share the same job equip mask
 		bclass[1] |= 1<<MAPID_SWORDMAN;
+		bclass[1] |= 1<<MAPID_GANGSI;
+	}
 	if (jobmask & 1<<JOB_PRIEST)
 		bclass[1] |= 1<<MAPID_ACOLYTE;
 	if (jobmask & 1<<JOB_WIZARD)
@@ -322,8 +333,12 @@ static void itemdb_jobid2mapid(unsigned int *bclass, unsigned int jobmask)
 		bclass[2] |= 1<<MAPID_SWORDMAN;
 	if (jobmask & 1<<JOB_MONK)
 		bclass[2] |= 1<<MAPID_ACOLYTE;
-	if (jobmask & 1<<JOB_SAGE)
+	if (jobmask & 1<<JOB_SAGE) { //Sage and Dark Collector share the same job equip mask
 		bclass[2] |= 1<<MAPID_MAGE;
+		bclass[2] |= 1<<MAPID_GANGSI;
+	}
+	if (jobmask & 1<<JOB_ROGUE)
+		bclass[2] |= 1<<MAPID_THIEF;
 	if (jobmask & 1<<JOB_ALCHEMIST)
 		bclass[2] |= 1<<MAPID_MERCHANT;
 	if (jobmask & 1<<JOB_BARD)
@@ -331,33 +346,23 @@ static void itemdb_jobid2mapid(unsigned int *bclass, unsigned int jobmask)
 	//Bard/Dancer share the same slot now
 	//if (jobmask & 1<<JOB_DANCER)
 		//bclass[2] |= 1<<MAPID_ARCHER;
-	if (jobmask & 1<<JOB_ROGUE)
-		bclass[2] |= 1<<MAPID_THIEF;
-	//Special classes that don't fit above
+	//Expanded Jobs
 	if (jobmask & 1<<21) //Taekwon boy
 		bclass[0] |= 1<<MAPID_TAEKWON;
 	if (jobmask & 1<<22) //Star Gladiator
 		bclass[1] |= 1<<MAPID_TAEKWON;
 	if (jobmask & 1<<23) //Soul Linker
 		bclass[2] |= 1<<MAPID_TAEKWON;
-	if (jobmask & 1<<JOB_GUNSLINGER) { //Rebellion job can equip Gunslinger equips [Rytech]
+	if (jobmask & 1<<JOB_GUNSLINGER) { //Gunslinger and Rebellion share the same job equip mask
 		bclass[0] |= 1<<MAPID_GUNSLINGER;
 		bclass[1] |= 1<<MAPID_GUNSLINGER;
 	}
-	if (jobmask & 1<<JOB_NINJA) { //Kagerou/Oboro jobs can equip Ninja equips [Rytech]
+	if (jobmask & 1<<JOB_NINJA) { //Ninja and Kagerou/Oboro share the same job equip mask
 		bclass[0] |= 1<<MAPID_NINJA;
 		bclass[1] |= 1<<MAPID_NINJA;
 	}
-	if (jobmask & 1<<26) //Bongun/Munak
-		bclass[0] |= 1<<MAPID_GANGSI;
-	if (jobmask & 1<<27) //Death Knight
-		bclass[1] |= 1<<MAPID_GANGSI;
-	if (jobmask & 1<<28) //Dark Collector
-		bclass[2] |= 1<<MAPID_GANGSI;
-	if (jobmask & 1<<29) //Kagerou / Oboro
-		bclass[1] |= 1<<MAPID_NINJA;
-	if (jobmask & 1<<30) //Rebellion
-		bclass[1] |= 1<<MAPID_GUNSLINGER;
+	if (jobmask & 1<<26) //Summoner
+		bclass[0] |= 1<<MAPID_SUMMONER;
 }
 
 /**

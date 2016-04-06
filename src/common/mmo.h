@@ -55,7 +55,7 @@
 #define MAX_BANK_ZENY SINT32_MAX //Max zeny in Bank
 #define MAX_FAME 1000000000 //Max fame points
 #define MAX_CART 100 //Maximum item in cart
-#define MAX_SKILL 5020 //Maximum skill data
+#define MAX_SKILL 5044 //Maximum skill data
 #define GLOBAL_REG_NUM 256 //Max permanent character variables per char
 #define ACCOUNT_REG_NUM 64 //Max permanent local account variables per account
 #define ACCOUNT_REG2_NUM 16 //Max permanent global account variables per account
@@ -642,7 +642,7 @@ enum e_guild_skill {
 	GD_MAX,
 };
 
-//These mark the ID of the jobs, as expected by the client. [Skotlex]
+// These mark the ID of the jobs, as expected by the client [Skotlex]
 enum e_job {
 	JOB_NOVICE,
 	JOB_SWORDMAN,
@@ -797,6 +797,8 @@ enum e_job {
 	JOB_OBORO,
 
 	JOB_REBELLION = 4215,
+
+	JOB_SUMMONER = 4218,
 
 	JOB_MAX,
 };

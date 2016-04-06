@@ -5478,6 +5478,9 @@ BUILDIN_FUNC(percentheal)
 		sp = 0;
 	}
 
+	if( sd->sc.data[SC_BITESCAR] )
+		hp = 0;
+
 	pc_percentheal(sd,hp,sp);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -10442,11 +10445,10 @@ BUILDIN_FUNC(getstatus)
 		case 4:  script_pushint(st, sd->sc.data[id]->val4);	break;
 		case 5:
 			{
-				struct TimerData* timer = (struct TimerData*)get_timer(sd->sc.data[id]->timer);
+				struct TimerData *timer = (struct TimerData *)get_timer(sd->sc.data[id]->timer);
 
-				if( timer ) { //Return the amount of time remaining
+				if( timer ) //Return the amount of time remaining
 					script_pushint(st, timer->tick - gettick());
-				}
 			}
 			break;
 		default: script_pushint(st,1); break;

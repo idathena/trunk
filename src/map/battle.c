@@ -1178,6 +1178,9 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( sc->data[SC_WATER_BARRIER] )
 			damage = damage * 80 / 100; //20% reduction to all type attacks
 
+		if( sc->data[SC_SU_STOOP] )
+			damage -= damage * 90 / 100;
+
 		if( src->type == BL_MOB ) { //Compressed code, fixed by map.h [Epoque]
 			int i;
 
@@ -1274,6 +1277,16 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 				}
 				if( --sce->val3 <= 0 || sce->val2 <= 0 || skill_id == AL_HOLYLIGHT )
 					status_change_end(bl,SC_KYRIE,INVALID_TIMER);
+			}
+			if( (sce = sc->data[SC_TUNAPARTY]) ) {
+				clif_specialeffect(bl,336,AREA);
+				sce->val2 -= (int)cap_value(damage,INT_MIN,INT_MAX);
+				if( sce->val2 >= 0 )
+					damage = 0;
+				else
+					damage = -sce->val2;
+				if( /*--sce->val3 <= 0 ||*/ sce->val2 <= 0 )
+					status_change_end(bl,SC_TUNAPARTY,INVALID_TIMER);
 			}
 			if( sc->data[SC_MEIKYOUSISUI] && rnd()%100 < 40 ) //Custom value
 				status_change_end(bl,SC_MEIKYOUSISUI,INVALID_TIMER);
@@ -4133,6 +4146,24 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case RL_AM_BLAST:
 			skillratio += -100 + 300 * skill_lv + status_get_dex(src) / 5; //Custom values
 			break;
+		case SU_BITE:
+			skillratio += 100;
+			break;
+		case SU_SCRATCH:
+			skillratio += -50 + 50 * skill_lv;
+			break;
+		case SU_SCAROFTAROU:
+			skillratio += -100 + 100 * skill_lv;
+			break;
+		case SU_PICKYPECK:
+		case SU_PICKYPECK_DOUBLE_ATK:
+			skillratio += 100 + 100 * skill_lv;
+			if(status_get_max_hp(target) / 100 <= 50)
+				skillratio *= 2;
+			break;
+		case SU_LUNATICCARROTBEAT:
+			skillratio += 100 + 100 * skill_lv;
+			break;
 	}
 	return skillratio;
 }
@@ -4395,17 +4426,33 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, -sc->data[SC_EQC]->val3);
 #endif
 		}
-		if(sc->data[SC_UNLIMIT] && (wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
-			switch(skill_id) {
-				case RA_WUGDASH:
-				case RA_WUGSTRIKE:
-				case RA_WUGBITE:
-					break;
-				default:
-					ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_UNLIMIT]->val2);
-					RE_ALLATK_ADDRATE(wd, sc->data[SC_UNLIMIT]->val2);
-					break;
+		if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
+			if(sc->data[SC_UNLIMIT]) {
+				switch(skill_id) {
+					case RA_WUGDASH:
+					case RA_WUGSTRIKE:
+					case RA_WUGBITE:
+						break;
+					default:
+						ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_UNLIMIT]->val2);
+						RE_ALLATK_ADDRATE(wd, sc->data[SC_UNLIMIT]->val2);
+						break;
+				}
 			}
+			if(sc->data[SC_ARCLOUSEDASH] && sc->data[SC_ARCLOUSEDASH]->val4) {
+				ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_ARCLOUSEDASH]->val4);
+				RE_ALLATK_ADDRATE(wd, sc->data[SC_ARCLOUSEDASH]->val4);
+			}
+		}
+	}
+
+	if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
+		if(sd && pc_checkskill(sd, SU_POWEROFLIFE) > 0 && pc_checkskill(sd, SU_SCAROFTAROU) == 5 &&
+			pc_checkskill(sd, SU_PICKYPECK) == 5 && pc_checkskill(sd, SU_ARCLOUSEDASH) == 5 &&
+			pc_checkskill(sd, SU_LUNATICCARROTBEAT) == 5)
+		{
+			ATK_ADDRATE(wd.damage, wd.damage2, 20);
+			RE_ALLATK_ADDRATE(wd, 20);
 		}
 	}
 
@@ -5710,6 +5757,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case AB_RENOVATIO:
 				ad.damage = status_get_lv(src) * 10 + sstatus->int_;
 				break;
+			case SU_SV_ROOTTWIST_ATK:
+				ad.damage = 100;
+				break;
 			default:
 				MATK_ADD(status_get_matk(src, 2));
 
@@ -6101,6 +6151,12 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						break;
 					case MH_POISON_MIST:
 						skillratio += -100 + 40 * skill_lv * status_get_lv(src) / 100;
+						break;
+					case SU_SV_STEMSPEAR:
+						skillratio += 600;
+						break;
+					case SU_CN_METEOR:
+						skillratio += 100 + 100 * skill_lv;
 						break;
 				}
 
@@ -8450,6 +8506,7 @@ static const struct _battle_data {
 	{ "max_body_style",                     &battle_config.max_body_style,                  1,      0,      SHRT_MAX,       },
 	{ "save_body_style",                    &battle_config.save_body_style,                 0,      0,      1,              },
 	{ "mvp_exp_reward_message",             &battle_config.mvp_exp_reward_message,          0,      0,      1,              },
+	{ "max_summoner_parameter",             &battle_config.max_summoner_parameter,          120,    10,     SHRT_MAX,       },
 };
 #ifndef STATS_OPT_OUT
 /**

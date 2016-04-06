@@ -99,11 +99,15 @@ spl_fild02,25,211,4	script	Cat Hand Agent#spl	421,{
 			mes "You can now directly return to this camp.";
 			close;
 		case 2:
-			if(basicskillcheck() && getskilllv("NV_BASIC") < 6){
+			if(!callfunc("F_CanOpenStorage")){
 				mes "[Cat Hand Agent]";
 				mes "I'm sorry, but you";
-				mes "need the Novice's";
-				mes "Basic Skill Level 6 to";
+				if(Class == Job_Summoner)
+					mes "need the New Basic Skill to";
+				else {
+					mes "need the Novice's";
+					mes "Basic Skill Level 6 to";
+				}
 				mes "use the Storage Service.";
 				close;
 			}
@@ -146,11 +150,15 @@ spl_fild02,25,211,4	script	Cat Hand Agent#spl	421,{
 			mes "You can now directly return to this camp.";
 			close;
 		case 2:
-			if(basicskillcheck() && getskilllv("NV_BASIC") < 6){
+			if(!callfunc("F_CanOpenStorage")){
 				mes "[Cat Hand Agent]";
 				mes "I'm sorry, but you";
-				mes "need the Novice's";
-				mes "Basic Skill Level 6 to";
+				if(Class == Job_Summoner)
+					mes "need the New Basic Skill to";
+				else {
+					mes "need the Novice's";
+					mes "Basic Skill Level 6 to";
+				}
 				mes "use the Storage Service.";
 				close;
 			}
@@ -267,11 +275,15 @@ spl_fild02,25,211,4	script	Cat Hand Agent#spl	421,{
 			mes "You can now directly return to this camp.";
 			close;
 		case 2:
-			if(basicskillcheck() && getskilllv("NV_BASIC") < 6){
+			if(!callfunc("F_CanOpenStorage")){
 				mes "[Cat Hand Agent]";
 				mes "I'm sorry, but you";
-				mes "need the Novice's";
-				mes "Basic Skill Level 6 to";
+				if(Class == Job_Summoner)
+					mes "need the New Basic Skill to";
+				else {
+					mes "need the Novice's";
+					mes "Basic Skill Level 6 to";
+				}
 				mes "use the Storage Service.";
 				close;
 			}
