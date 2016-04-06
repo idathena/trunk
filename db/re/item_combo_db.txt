@@ -466,9 +466,12 @@
 15110:22043,{ bonus bBaseAtk,30; }
 15116:20743:22046,{ bonus bMaxHPrate,25; bonus bMaxSPrate,25; bonus bSpeedAddRate,10; }
 15117:20744:22047,{ set .@r,getequiprefinerycnt(EQI_ARMOR)+getequiprefinerycnt(EQI_GARMENT)+getequiprefinerycnt(EQI_SHOES); bonus bMaxHPrate,25+(.@r>=30?5:0); bonus bMaxSPrate,25+(.@r>=30?5:0); bonus bSpeedAddRate,10; }
+15126:20788:22083,{ bonus bMaxHP,2000; bonus bNoCastCancel,0; bonus bFixedCastrate,-15-(getequiprefinerycnt(EQI_ARMOR)+getequiprefinerycnt(EQI_GARMENT)+getequiprefinerycnt(EQI_SHOES)); }
 15128:20773,{ bonus bDelayrate,-10-(BaseLevel>130?10:0); if(BaseLevel>130) bonus bFlee2,8; }
+15129:20789:22084,{ bonus bMaxHP,3000; bonus bNoCastCancel,0; bonus bFixedCastrate,-20-(getequiprefinerycnt(EQI_ARMOR)+getequiprefinerycnt(EQI_GARMENT)+getequiprefinerycnt(EQI_SHOES)); }
 15138:19026,{ bonus2 bSubRace,RC_Fish,10+getequiprefinerycnt(EQI_ARMOR); bonus bUnbreakableArmor,0; }
 15138:19026:20756:22059,{ bonus bMaxHP,1000; bonus bMaxSP,100; bonus2 bExpAddRace,RC_Fish,20; bonus2 bMagicAddRace,RC_Fish,50; bonus2 bSubEle,Ele_Water,50; }
+15156:20790:22085,{ bonus bMaxHP,4000; bonus bNoCastCancel,0; bonus bFixedCastrate,-25-(getequiprefinerycnt(EQI_ARMOR)+getequiprefinerycnt(EQI_GARMENT)+getequiprefinerycnt(EQI_SHOES)); }
 18507:18539,{ bonus bUseSPrate,-3; }
 18607:18672,{ bonus bSPrecovRate,3; }
 18607:18673,{ bonus bHealPower2,10; }

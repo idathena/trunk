@@ -4293,9 +4293,12 @@ iz_ac01_d,100,39,5	duplicate(AcademyReceptionist)	Academy Receptionist#1_d	4_F_0
 						mes "[Kafra Guide Trainer]";
 						mes "Storage is necessary for you to survive so use it regularly.";
 					} else {
-						if(basicskillcheck() && getskilllv("NV_BASIC") < 6) {
+						if(!callfunc("F_CanOpenStorage")) {
 							mes "[Kafra Guide Trainer]";
-							mes "To use the storage, you need to raise the Basic Skill to level 6 or higher.";
+							if(Class == Job_Summoner)
+								mes "To use the storage, you need to raise the New Basic Skill.";
+							else
+								mes "To use the storage, you need to raise the Basic Skill to level 6 or higher.";
 						} else {
 							if(countitem(7059) > 0 || Zeny >= 500) {
 								mes "[Kafra Guide Trainer]";
@@ -7800,7 +7803,7 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 						cutin "",255;
 						end;
 					}
-					if(getskilllv("NV_BASIC") < 9) {
+					if(!callfunc("F_CanChangeJob")) {
 						mes "[Trainer Adric]";
 						mes "I'm sorry to tell you this but to be a Swordman, you must reach at least ^4d4fffJob level 10^000000.";
 						mes "And ^4d4fffBasic Skill Level 9^000000.";
@@ -7939,7 +7942,7 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 					case 3:
 						break;
 				}
-				if(getskilllv("NV_BASIC") < 9) {
+				if(!callfunc("F_CanChangeJob")) {
 					mes "[Trainer Adric]";
 					mes "I'm sorry to tell you this but to be a Swordman, you must reach at least ^4d4fffJob level 10^000000.";
 					mes "And ^4d4fffBasic Skill Level 9^000000.";
@@ -7972,7 +7975,7 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 					cutin "",255;
 					end;
 				}
-				if(getskilllv("NV_BASIC") < 9) {
+				if(!callfunc("F_CanChangeJob")) {
 					mes "[Trainer Adric]";
 					mes "I'm sorry to tell you this but to be a Swordman, you must reach at least ^4d4fffJob level 10^000000.";
 					mes "And ^4d4fffBasic Skill Level 9^000000.";
@@ -9652,7 +9655,7 @@ iz_ac02_d,98,110,5	duplicate(ac_board)	[Archer Classroom]#2ac_d	2_BULLETIN_BOARD
 						mes "[Marlbron]";
 						mes "Let me check a little while, before you change your job you have to be at job level 10.";
 						next;
-						if(getskilllv("NV_BASIC") < 9) {
+						if(!callfunc("F_CanChangeJob")) {
 							mes "[Marlbron]";
 							mes "Hmmm. You are a little bit short of JOB level.";
 							mes "Are you coming back after more training?";
@@ -9930,7 +9933,7 @@ iz_ac02_d,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac_d	2_BULLETIN_BOARD
 							end;
 						}
 					case 5:
-						if(getskilllv("NV_BASIC") < 9) {
+						if(!callfunc("F_CanChangeJob")) {
 							mes "[Mage Chuck]";
 							mes "Oh, man your Basic Skill Level doesn't reach enough to be a Mge.";
 							mes "Go back and level up your Basic Skill.";
@@ -10876,7 +10879,7 @@ OnInit:
 					next;
 					switch(select("Change job to Thief.:Thief Stat Explanation:Thief Skill Explanation:Not curious about it.")) {
 						case 1:
-							if(getskilllv("NV_BASIC") < 9) {
+							if(!callfunc("F_CanChangeJob")) {
 								mes "[Mayssel]";
 								mes "I'm sorry but you are short of job levels to change your job.";
 								next;
@@ -11979,7 +11982,7 @@ iz_ac02_d,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac_d	2_BULLETIN_BOARD
 						}
 					}
 				case 2:
-					if(getskilllv("NV_BASIC") < 9) {
+					if(!callfunc("F_CanChangeJob")) {
 						mes "[Ninja Guide]";
 						mes "I appreciate your braveness but, first of all, you have to be familiar with the current profession.";
 						next;
@@ -12537,7 +12540,7 @@ iz_ac02_d,53,171,3	duplicate(StewardAydin)	Steward Aydin#2ac_d	4_M_MANAGER
 									cutin "",255;
 									end;
 								}
-								if(getskilllv("NV_BASIC") < 9) {
+								if(!callfunc("F_CanChangeJob")) {
 									mes "[Salim Hamid]";
 									mes "But if you want to be a merchant, your basic skill level must reach Level 9 or you must spend all of your skill points.";
 									next;
@@ -12861,7 +12864,7 @@ iz_ac02_d,152,165,5	duplicate(aNun)	A Nun#2ac_d	4_F_SISTER
 				mes "Do you truly wish to become a servant of God?";
 				mes "Let's see whether you are ready for it or not... Hmm...";
 				next;
-				if(getskilllv("NV_BASIC") < 9) {
+				if(!callfunc("F_CanChangeJob")) {
 					mes "[Alcie Yisha]";
 					mes "Oh my?! You haven't accomplished the basic practice yet?! You have long way to go! Come again after increasing your job level!";
 					close2;

@@ -1855,7 +1855,7 @@ int pc_calc_skilltree_normalize_job(struct map_session_data *sd)
 	novice_skills = job_info[pc_class2idx(JOB_NOVICE)].max_level[1] - 1;
 
 	// Limit 1st class and above to novice job levels
-	if (skill_point < novice_skills)
+	if (skill_point < novice_skills && (sd->class_&MAPID_BASEMASK) != MAPID_SUMMONER)
 		c = MAPID_NOVICE;
 	// Limit 2nd class and above to first class job levels (super novices are exempt)
 	else if ((sd->class_&JOBL_2) && (sd->class_&MAPID_UPPERMASK) != MAPID_SUPER_NOVICE) {
@@ -4766,7 +4766,8 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 		sd->sc.data[SC_KAGEHUMI] ||
 		(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOITEM) ||
 		sd->sc.data[SC_HEAT_BARREL_AFTER] ||
-		sd->sc.data[SC_KINGS_GRACE]) )
+		sd->sc.data[SC_KINGS_GRACE] ||
+		sd->sc.data[SC_SUHIDE]) )
 		return false;
 
 	if( !pc_isItemClass(sd,item) )
@@ -5760,6 +5761,8 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_BABY_SURA:             return MAPID_BABY_SURA;
 		case JOB_BABY_GENETIC:          return MAPID_BABY_GENETIC;
 		case JOB_BABY_CHASER:           return MAPID_BABY_CHASER;
+		//Summoner Job
+		case JOB_SUMMONER:              return MAPID_SUMMONER;
 		default:
 			return -1;
 	}
@@ -5896,6 +5899,8 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_BABY_SURA:             return JOB_BABY_SURA;
 		case MAPID_BABY_GENETIC:          return JOB_BABY_GENETIC;
 		case MAPID_BABY_CHASER:           return JOB_BABY_CHASER;
+		//Summoner Job
+		case MAPID_SUMMONER:              return JOB_SUMMONER;
 		default:
 			return -1;
 	}
@@ -6122,6 +6127,9 @@ const char *job_name(int class_)
 
 		case JOB_REBELLION:
 			return msg_txt(695);
+
+		case JOB_SUMMONER:
+			return msg_txt(697);
 
 		default:
 			return msg_txt(655);
@@ -6986,6 +6994,8 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 			pc_setoption(sd, i);
 		if( hom_is_active(sd->hd) && pc_checkskill(sd, AM_CALLHOMUN) )
 			hom_vaporize(sd, HOM_ST_REST);
+		if( sd->sc.data[SC_SPRITEMABLE] && pc_checkskill(sd, SU_SPRITEMABLE) )
+			status_change_end(&sd->bl, SC_SPRITEMABLE, INVALID_TIMER);
 	}
 
 	for( i = 1; i < MAX_SKILL; i++ ) {
@@ -8015,6 +8025,8 @@ int pc_itemheal(struct map_session_data *sd,int itemid, int hp,int sp)
 	}
 	if(sd->sc.data[SC_EXTREMITYFIST2])
 		sp = 0;
+	if(sd->sc.data[SC_BITESCAR])
+		hp = 0;
 	return status_heal(&sd->bl,hp,sp,1);
 }
 
@@ -8213,6 +8225,9 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 
 	status_set_viewdata(&sd->bl, job);
 	clif_changelook(&sd->bl,LOOK_BASE,sd->vd.class_); //Move sprite update to prevent client crashes with incompatible equipment [Valaris]
+#if PACKETVER >= 20151029
+	clif_changelook(&sd->bl,LOOK_HAIR,sd->vd.hair_style); //Update player's head (only matters when switching to or from Doram)
+#endif
 	if(sd->vd.cloth_color)
 		clif_changelook(&sd->bl,LOOK_CLOTHES_COLOR,sd->vd.cloth_color);
 	//if(sd->vd.body_style)
@@ -8250,13 +8265,16 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 		i &= ~OPTION_CART;
 #else
 	if (sd->sc.data[SC_PUSH_CART] && !pc_checkskill(sd,MC_PUSHCART))
-		pc_setcart(sd, 0);
+		pc_setcart(sd,0);
 #endif
 	if (i != sd->sc.option)
 		pc_setoption(sd,i);
 
 	if (hom_is_active(sd->hd) && !pc_checkskill(sd,AM_CALLHOMUN))
 		hom_vaporize(sd,HOM_ST_REST);
+
+	if (sd->sc.data[SC_SPRITEMABLE] && !pc_checkskill(sd,SU_SPRITEMABLE))
+		status_change_end(&sd->bl,SC_SPRITEMABLE,INVALID_TIMER);
 
 	if(sd->status.manner < 0)
 		clif_changestatus(sd,SP_MANNER,sd->status.manner);
@@ -11540,7 +11558,8 @@ short pc_maxparameter(struct map_session_data *sd, enum e_params param) {
 			return max_param;
 	}
 
-	return ((class_&MAPID_UPPERMASK) == MAPID_KAGEROUOBORO || (class_&MAPID_UPPERMASK) == MAPID_REBELLION) ? battle_config.max_extended_parameter :
+	return (class_&MAPID_BASEMASK) == MAPID_SUMMONER ? battle_config.max_summoner_parameter :
+		((class_&MAPID_UPPERMASK) == MAPID_KAGEROUOBORO || (class_&MAPID_UPPERMASK) == MAPID_REBELLION) ? battle_config.max_extended_parameter :
 		((class_&JOBL_THIRD) ? ((class_&JOBL_UPPER) ? battle_config.max_third_trans_parameter : ((class_&JOBL_BABY) ? battle_config.max_baby_third_parameter : battle_config.max_third_parameter)) : 
 		((class_&JOBL_BABY) ? battle_config.max_baby_parameter :
 		((class_&JOBL_UPPER) ? battle_config.max_trans_parameter : battle_config.max_parameter)));

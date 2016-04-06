@@ -610,6 +610,7 @@ extern struct Battle_Config
 	int max_body_style;
 	int save_body_style;
 	int mvp_exp_reward_message;
+	int max_summoner_parameter;
 } battle_config;
 
 void do_init_battle(void);

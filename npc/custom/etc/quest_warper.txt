@@ -454,7 +454,7 @@ Zeny_short_SP:
 
 L_Storage:
 	next;
-	if(basicskillcheck() > 0 && getskilllv("NV_BASIC") < 6) goto L_StorageJBlow;
+	if(!callfunc("F_CanOpenStorage")) goto L_StorageJBlow;
 	set @fee, $QW_S_PRICE;
 	if ($QW_S_PRICE == 60)&&(BaseJob == Job_Novice) set @fee, 30;
 	if ($QW_S_PRICE == 60)&&(BaseJob != Job_Novice) set @fee, 60;
@@ -481,7 +481,10 @@ L_Storage:
 
 L_StorageJBlow:
 	mes "[Warpra]";
-	mes "I am sorry but you have to be at least Novice level 6 if you want to use the storage.";
+	if (Class == Job_Summoner)
+		mes "I am sorry but you must have the New Basic Skill if you want to use the storage.";
+	else
+		mes "I am sorry but you must have the Basic Skill at least level 6 if you want to use the storage.";
 	return;
 
 L_GStorage:
