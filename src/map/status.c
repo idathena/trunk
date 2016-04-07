@@ -193,7 +193,7 @@ void initChangeTables(void) {
 	memset(StatusChangeStateTable, 0, sizeof(StatusChangeStateTable));
 	memset(StatusDisplayType, 0, sizeof(StatusDisplayType));
 
-	//First we define the skill for common ailments. These are used in skill_additional_effect through sc cards [Skotlex]
+	//First we define the skill for common ailments, these are used in skill_additional_effect through sc cards [Skotlex]
 	set_sc( NPC_PETRIFYATTACK , SC_STONE     , SI_BLANK    , SCB_DEF_ELE|SCB_DEF|SCB_MDEF );
 	set_sc( NPC_WIDEFREEZE    , SC_FREEZE    , SI_BLANK    , SCB_DEF_ELE|SCB_DEF|SCB_MDEF );
 	set_sc( NPC_STUNATTACK    , SC_STUN      , SI_BLANK    , SCB_NONE );
@@ -742,23 +742,6 @@ void initChangeTables(void) {
 	set_sc( GN_MANDRAGORA                 , SC_MANDRAGORA  , SI_MANDRAGORA                 , SCB_INT );
 	set_sc_with_vfx( GN_ILLUSIONDOPING    , SC_ILLUSIONDOPING, SI_ILLUSIONDOPING           , SCB_HIT );
 
-	//Summoner
-	set_sc( SU_HIDE                 , SC_SUHIDE       , SI_SUHIDE          , SCB_NONE );
-	add_sc( SU_SCRATCH              , SC_BLEEDING );
-	set_sc( SU_STOOP                , SC_SU_STOOP     , SI_SU_STOOP        , SCB_NONE );
-	add_sc( SU_SV_STEMSPEAR         , SC_BLEEDING );
-	set_sc( SU_CN_POWDERING         , SC_CATNIPPOWDER , SI_CATNIPPOWDER    , SCB_WATK|SCB_MATK|SCB_SPEED|SCB_REGEN );
-	add_sc( SU_CN_METEOR            , SC_CURSE );
-	set_sc_with_vfx( SU_SV_ROOTTWIST, SC_SV_ROOTTWIST , SI_SV_ROOTTWIST    , SCB_NONE );
-	//add_sc( SU_SCAROFTAROU        , SC_STUN );
-	set_sc( SU_SCAROFTAROU          , SC_BITESCAR     , SI_BITESCAR        , SCB_NONE );
-	set_sc( SU_ARCLOUSEDASH         , SC_ARCLOUSEDASH , SI_ARCLOUSEDASH    , SCB_AGI|SCB_SPEED );
-	add_sc( SU_LUNATICCARROTBEAT    , SC_STUN );
-	set_sc( SU_TUNAPARTY            , SC_TUNAPARTY    , SI_TUNAPARTY       , SCB_NONE );
-	set_sc( SU_BUNCHOFSHRIMP        , SC_SHRIMP       , SI_SHRIMP          , SCB_BATK|SCB_MATK );
-	set_sc( SU_FRESHSHRIMP          , SC_FRESHSHRIMP  , SI_FRESHSHRIMP     , SCB_NONE );
-
-	//Homunculus S
 	add_sc( MH_STAHL_HORN         , SC_STUN );
 	set_sc( MH_ANGRIFFS_MODUS     , SC_ANGRIFFS_MODUS  , SI_ANGRIFFS_MODUS     , SCB_BATK|SCB_WATK|SCB_DEF|SCB_FLEE|SCB_MAXHP );
 	set_sc( MH_GOLDENE_FERSE      , SC_GOLDENE_FERSE   , SI_GOLDENE_FERSE      , SCB_ASPD|SCB_FLEE );
@@ -780,7 +763,6 @@ void initChangeTables(void) {
 	set_sc( MH_CBC                , SC_CBC             , SI_CBC             , SCB_NONE );
 	set_sc( MH_EQC                , SC_EQC             , SI_EQC             , SCB_DEF2|SCB_MAXHP );
 
-	//Elemental Spirit summoner's 'side' status changes
 	set_sc( EL_CIRCLE_OF_FIRE  , SC_CIRCLE_OF_FIRE_OPTION, SI_CIRCLE_OF_FIRE_OPTION, SCB_NONE );
 	set_sc( EL_FIRE_CLOAK      , SC_FIRE_CLOAK_OPTION    , SI_FIRE_CLOAK_OPTION    , SCB_ALL );
 	set_sc( EL_WATER_SCREEN    , SC_WATER_SCREEN_OPTION  , SI_WATER_SCREEN_OPTION  , SCB_NONE );
@@ -845,6 +827,21 @@ void initChangeTables(void) {
 	set_sc( RL_SLUGSHOT         , SC_STUN               , SI_SLUGSHOT             , SCB_NONE          );
 	set_sc_with_vfx( RL_AM_BLAST, SC_ANTI_M_BLAST       , SI_ANTI_M_BLAST         , SCB_NONE          );
 	set_sc( RL_HEAT_BARREL      , SC_HEAT_BARREL        , SI_HEAT_BARREL          , SCB_ASPD|SCB_FLEE );
+
+	set_sc( SU_HIDE                 , SC_SUHIDE       , SI_SUHIDE          , SCB_NONE );
+	add_sc( SU_SCRATCH              , SC_BLEEDING );
+	set_sc( SU_STOOP                , SC_SU_STOOP     , SI_SU_STOOP        , SCB_NONE );
+	add_sc( SU_SV_STEMSPEAR         , SC_BLEEDING );
+	set_sc( SU_CN_POWDERING         , SC_CATNIPPOWDER , SI_CATNIPPOWDER    , SCB_WATK|SCB_MATK|SCB_SPEED|SCB_REGEN );
+	add_sc( SU_CN_METEOR            , SC_CURSE );
+	set_sc_with_vfx( SU_SV_ROOTTWIST, SC_SV_ROOTTWIST , SI_SV_ROOTTWIST    , SCB_NONE );
+	//add_sc( SU_SCAROFTAROU        , SC_STUN );
+	set_sc( SU_SCAROFTAROU          , SC_BITESCAR     , SI_BITESCAR        , SCB_NONE );
+	set_sc( SU_ARCLOUSEDASH         , SC_ARCLOUSEDASH , SI_ARCLOUSEDASH    , SCB_AGI|SCB_SPEED );
+	add_sc( SU_LUNATICCARROTBEAT    , SC_STUN );
+	set_sc( SU_TUNAPARTY            , SC_TUNAPARTY    , SI_TUNAPARTY       , SCB_NONE );
+	set_sc( SU_BUNCHOFSHRIMP        , SC_SHRIMP       , SI_SHRIMP          , SCB_BATK|SCB_MATK );
+	set_sc( SU_FRESHSHRIMP          , SC_FRESHSHRIMP  , SI_FRESHSHRIMP     , SCB_NONE );
 
 	//Storing the target job rather than simply SC_SPIRIT simplifies code later on
 	SkillStatusChangeTable[SL_ALCHEMIST]   = (sc_type)MAPID_ALCHEMIST,
@@ -1207,7 +1204,10 @@ void initChangeTables(void) {
 	StatusDisplayType[SC_SUPER_STAR]	  = true;
 	StatusDisplayType[SC_STRANGELIGHTS]	  = true;
 	StatusDisplayType[SC_DECORATION_OF_MUSIC] = true;
-	StatusDisplayType[SC_SPRITEMABLE]     = true;
+	StatusDisplayType[SC_SUHIDE]		  = true;
+	StatusDisplayType[SC_SU_STOOP]		  = true;
+	StatusDisplayType[SC_SPRITEMABLE]	  = true;
+	StatusDisplayType[SC_TUNAPARTY]		  = true;
 
 	//StatusChangeState (SCS_) NOMOVE
 	StatusChangeStateTable[SC_ANKLE]                |= SCS_NOMOVE;
@@ -2868,7 +2868,7 @@ static int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type) {
 #ifndef HP_SP_TABLES
 			if ((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && sd->status.base_level >= 99)
 				bonus += 2000; //Super novice lvl 99 hp bonus
-			//Summoner starts with 60 HP and gains additional HP by base level calculations.
+			//Summoner starts with 60 HP and gains additional HP by base level calculations
 			if ((sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER) {
 					bonus += 18;
 					if (sd->status.base_level > 2)
@@ -2986,11 +2986,13 @@ static int status_get_spbonus(struct block_list *bl, enum e_status_bonus type) {
 				bonus += 30 * i;
 			if ((i = pc_checkskill(sd,SU_SPRITEMABLE)) > 0)
 				bonus += 100;
+#ifndef HP_SP_TABLES
 			//Summoner starts at 8 SP and gain 2 SP per even base lv and 3 SP per odd base lv
 			if ((sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER) {
 				bonus -= 4;
 				bonus += (sd->status.base_level - 1) / 2;
 			}
+#endif
 		}
 		if (sc) { //Bonus by SC
 			if(sc->data[SC_INCMSP])
@@ -10057,8 +10059,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val4 = 0;
 				break;
 			case SC_TUNAPARTY:
-				val2 = (status->max_hp * (val1 * 10) / 100); // %MaxHP to absorb
-				//val3 = 6 + val1; // Hits !TODO: Does it have hits too?
+				val2 = (status->max_hp * val1 * 10 / 100); // %MaxHP to absorb
 				break;
 			default:
 				if( calc_flag == SCB_NONE && StatusIconChangeTable[type] == SI_BLANK &&
