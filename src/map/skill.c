@@ -1535,21 +1535,21 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sc_start(src,bl,SC_STUN,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case SU_SCRATCH:
-			sc_start2(src,bl,SC_BLEEDING,skill_lv * 3,skill_lv,src->id,skill_get_time(skill_id,skill_lv)); //TODO: What's the chance/time?
+			sc_start2(src,bl,SC_BLEEDING,skill_lv * 3,skill_lv,src->id,skill_get_time(skill_id,skill_lv)); //Custom
 			break;
 		case SU_SV_STEMSPEAR:
 			sc_start2(src,bl,SC_BLEEDING,10,skill_lv,src->id,skill_get_time(skill_id,skill_lv));
 			break;
 		case SU_CN_METEOR:
 			if( skill_area_temp[3] == 1 )
-				sc_start(src,bl,SC_CURSE,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //TODO: What's the chance/time?
+				sc_start(src,bl,SC_CURSE,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
 			break;
 		//case SU_SCAROFTAROU:
-		//	sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //TODO: What's the chance/time?
+		//	sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
 		//	break;
 		case SU_LUNATICCARROTBEAT:
 			if( skill_area_temp[3] == 1 )
-				sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time(skill_id,skill_lv)); //TODO: What's the chance/time?
+				sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
 			break;
 	} //End of switch skill_id
 
@@ -2997,7 +2997,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, NV_BASIC, -1, DMG_SPLASH);
 			break;
 		case EL_STONE_RAIN:
-			dmg.dmotion = clif_damage(bl, bl, tick, 0, 0, damage, dmg.div_, (flag&1 ? DMG_MULTI_HIT : DMG_NORMAL), 0);
+			dmg.amotion = dmg.dmotion = 0;
+		//Fall through
+		case SU_LUNATICCARROTBEAT:
+			dmg.dmotion = clif_damage(bl, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (flag&1 ? DMG_MULTI_HIT : DMG_NORMAL), 0);
 			break;
 		case WL_HELLINFERNO:
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, 1, skill_id, -2, DMG_SKILL);
@@ -3783,6 +3786,11 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					if (target->type == BL_PC)
 						sc_start(src,target,SC_SITDOWN_FORCE,100,skl->skill_lv,skill_get_time2(skl->skill_id,skl->skill_lv));
 					break;
+				case SU_SCRATCH:
+				case SU_SV_STEMSPEAR:
+				case SU_SCAROFTAROU:
+					skill_castend_damage_id(src,target,skl->skill_id,skl->skill_lv,tick,skl->flag);
+					break;
 				case CH_PALMSTRIKE: {
 						struct status_change *tsc = status_get_sc(target);
 						struct status_change *sc = status_get_sc(src);
@@ -4308,12 +4316,10 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 			break;
 
-		case SU_PICKYPECK:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-		//Fall through
 		case SU_BITE:
+		case SU_PICKYPECK_DOUBLE_ATK:
 			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
-			if (status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //TODO: Need activation chance
+			if (status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
 				skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag);
 			break;
 
@@ -4381,8 +4387,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case EL_FIRE_WAVE_ATK:
 		case EL_WATER_SCREW_ATK:
 		case EL_HURRICANE_ATK:
-		case SU_SCRATCH:
-		case SU_LUNATICCARROTBEAT:
 			if (flag&1) { //Recursive invocation
 				int sflag = skill_area_temp[0]&0xFFF;
 				int heal = 0;
@@ -4417,27 +4421,21 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					clif_skill_nodamage(NULL,src,AL_HEAL,heal,1);
 					status_heal(src,heal,0,0);
 				}
-				if (skill_id == SU_SCRATCH && status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //TODO: Need activation chance
-					skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag);
 			} else {
-				skill_area_temp[0] = 0;
-				skill_area_temp[1] = bl->id;
-				skill_area_temp[2] = 0;
 				switch (skill_id) {
-					case SU_LUNATICCARROTBEAT:
-						skill_area_temp[3] = 0;
-					//Fall through
 					case NJ_BAKUENRYU:
 					case GN_CARTCANNON:
 					case GN_ILLUSIONDOPING:
 					case MH_HEILIGE_STANGE:
-					case SU_SCRATCH:
 						clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 						break;
 					case MH_XENO_SLASHER:
 						clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 						break;
 				}
+				skill_area_temp[0] = 0;
+				skill_area_temp[1] = bl->id;
+				skill_area_temp[2] = 0;
 				switch (skill_id) {
 #ifdef RENEWAL
 					case MG_FIREBALL:
@@ -4463,14 +4461,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				//Recursive invocation of skill_castend_damage_id() with flag|1
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),(skill_id == WM_REVERBERATION_MELEE || skill_id == WM_REVERBERATION_MAGIC) ? BL_CHAR : splash_target(src),src,
 					skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
-				if (sd && skill_id == SU_LUNATICCARROTBEAT) {
-					short item_idx = pc_search_inventory(sd, ITEMID_CARROT);
-
-					if (item_idx >= 0) {
-						pc_delitem(sd,item_idx,1,0,1,LOG_TYPE_CONSUME);
-						skill_area_temp[3] = 1;
-					}
-				}
 				if (skill_id == AS_SPLASHER) {
 					map_freeblock_unlock();
 					return 0; //Already consume the requirement item, so end it
@@ -5318,13 +5308,47 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			}
 			break;
 
+		case SU_SCRATCH:
+			if (flag&1)
+				skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
+			else {
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);				
+				if (status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
+					skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag);
+			}
+			break;
+
 		case SU_SCAROFTAROU:
-			sc_start(src,bl,status_skill2sc(skill_id),10,skill_lv,skill_get_time(skill_id,skill_lv)); //TODO: What's the activation chance for the Bite effect?
+			sc_start(src,bl,status_skill2sc(skill_id),10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
 		//Fall through
 		case SU_SV_STEMSPEAR:
-			skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
-			if (status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //TODO: Need activation chance
-				skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,(skill_id == SU_SV_STEMSPEAR) ? BF_MAGIC : BF_WEAPON,flag);
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION);
+			if (!flag && status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) { //Custom
+				int time = skill_get_delay(skill_id,skill_lv) + (skill_id == SU_SCAROFTAROU ? 400 : 0);
+
+				skill_addtimerskill(src,tick + time,bl->id,0,0,skill_id,skill_lv,skill_get_type(skill_id),flag|1);
+			}
+			break;
+
+		case SU_LUNATICCARROTBEAT:
+			if (flag&1)
+				skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
+			else {
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
+				skill_area_temp[3] = 0;
+				if (sd) {
+					short item_idx = pc_search_inventory(sd,ITEMID_CARROT);
+
+					if (item_idx) {
+						pc_delitem(sd,item_idx,1,0,1,LOG_TYPE_CONSUME);
+						skill_area_temp[3] = 1;
+					}
+				}
+				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
+			}
 			break;
 
 		case 0: //No skill - basic/normal attack
@@ -10875,6 +10899,11 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			}
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
+			break;
+
+		case SU_PICKYPECK:
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			skill_castend_damage_id(src,bl,skill_id + 1,skill_lv,tick,SD_LEVEL);
 			break;
 
 		case SU_TUNABELLY: {
@@ -16460,7 +16489,7 @@ struct square {
 	int val2[5];
 };
 
-static void skill_brandishspear_first (struct square *tc, uint8 dir, int16 x, int16 y)
+static void skill_brandishspear_first(struct square *tc, uint8 dir, int16 x, int16 y)
 {
 	nullpo_retv(tc);
 
@@ -16555,7 +16584,7 @@ static void skill_brandishspear_first (struct square *tc, uint8 dir, int16 x, in
 	}
 }
 
-static void skill_brandishspear_dir (struct square* tc, uint8 dir, int are)
+static void skill_brandishspear_dir(struct square* tc, uint8 dir, int are)
 {
 	int c;
 	nullpo_retv(tc);

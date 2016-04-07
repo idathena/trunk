@@ -239,9 +239,9 @@ int battle_delay_damage_sub(int tid, unsigned int tick, int id, intptr_t data) {
 			map_freeblock_lock();
 			status_fix_damage(src, target, dat->damage, dat->delay);
 			if( dat->attack_type && !status_isdead(target) && dat->additional_effects )
-				skill_additional_effect(src,target,dat->skill_id,dat->skill_lv,dat->attack_type,dat->dmg_lv,tick);
+				skill_additional_effect(src, target, dat->skill_id, dat->skill_lv, dat->attack_type, dat->dmg_lv, tick);
 			if( dat->dmg_lv > ATK_BLOCK && dat->attack_type )
-				skill_counter_additional_effect(src,target,dat->skill_id,dat->skill_lv,dat->attack_type,tick);
+				skill_counter_additional_effect(src, target, dat->skill_id, dat->skill_lv, dat->attack_type, tick);
 			map_freeblock_unlock();
 		} else if( !src && dat->skill_id == CR_REFLECTSHIELD ) {
 			//It was monster reflected damage, and the monster died, we pass the damage to the character as expected
@@ -1279,13 +1279,12 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 					status_change_end(bl,SC_KYRIE,INVALID_TIMER);
 			}
 			if( (sce = sc->data[SC_TUNAPARTY]) ) {
-				clif_specialeffect(bl,336,AREA);
 				sce->val2 -= (int)cap_value(damage,INT_MIN,INT_MAX);
 				if( sce->val2 >= 0 )
 					damage = 0;
 				else
 					damage = -sce->val2;
-				if( /*--sce->val3 <= 0 ||*/ sce->val2 <= 0 )
+				if( sce->val2 <= 0 )
 					status_change_end(bl,SC_TUNAPARTY,INVALID_TIMER);
 			}
 			if( sc->data[SC_MEIKYOUSISUI] && rnd()%100 < 40 ) //Custom value
@@ -4155,7 +4154,6 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case SU_SCAROFTAROU:
 			skillratio += -100 + 100 * skill_lv;
 			break;
-		case SU_PICKYPECK:
 		case SU_PICKYPECK_DOUBLE_ATK:
 			skillratio += 100 + 100 * skill_lv;
 			if(status_get_max_hp(target) / 100 <= 50)
