@@ -1279,9 +1279,6 @@ int chrif_save_scdata(struct map_session_data *sd) {
 		count++;
 	}
 
-	if (!count)
-		return 0; //Nothing to save or everything was as successful as if there was something to save
-
 	WFIFOW(char_fd,12) = count;
 	WFIFOW(char_fd,2) = 14 + count * sizeof(struct status_change_data); //Total packet size
 	WFIFOSET(char_fd,WFIFOW(char_fd,2));
@@ -1318,9 +1315,6 @@ int chrif_skillcooldown_save(struct map_session_data *sd) {
 		count++;
 	}
 
-	if (!count)
-		return 0;
-
 	WFIFOW(char_fd,12) = count;
 	WFIFOW(char_fd,2) = 14 + count * sizeof (struct skill_cooldown_data);
 	WFIFOSET(char_fd,WFIFOW(char_fd,2));
@@ -1349,7 +1343,7 @@ int chrif_load_scdata(int fd) {
 		return -1;
 	}
 
-	count = RFIFOW(fd,12); //sc_count
+	count = RFIFOW(fd,12); //sc count
 
 	for (i = 0; i < count; i++) {
 		struct status_change_data *data = (struct status_change_data *)RFIFOP(fd,14 + i * sizeof(struct status_change_data));
@@ -1360,6 +1354,7 @@ int chrif_load_scdata(int fd) {
 
 	pc_scdata_received(sd);
 #endif
+
 	return 0;
 }
 
@@ -1372,21 +1367,26 @@ int chrif_skillcooldown_load(int fd) {
 	cid = RFIFOL(fd,8);
 
 	sd = map_id2sd(aid);
+
 	if (!sd) {
 		ShowError("chrif_skillcooldown_load: Player of AID %d not found!\n", aid);
 		return -1;
 	}
+
 	if (sd->status.char_id != cid) {
 		ShowError("chrif_skillcooldown_load: Receiving data for account %d, char id does not matches (%d != %d)!\n", aid, sd->status.char_id, cid);
 		return -1;
 	}
-	count = RFIFOW(fd,12); //sc_count
+
+	count = RFIFOW(fd,12); //skill count
+
 	for (i = 0; i < count; i++) {
 		struct skill_cooldown_data *data = (struct skill_cooldown_data *)RFIFOP(fd,14 + i * sizeof(struct skill_cooldown_data));
 
 		if (skill_blockpc_start(sd, data->skill_id, data->tick))
 			clif_skill_cooldown_list(sd, data->skill_id, data->tick);
 	}
+
 	return 0;
 }
 

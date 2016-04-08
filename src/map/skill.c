@@ -3047,7 +3047,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case LG_OVERBRAND_PLUSATK:
 		case RL_BANISHING_BUSTER:
 		case RL_S_STORM:
-		case RL_SLUGSHOT:
 		case RL_R_TRIP_PLUSATK:
 		case NC_MAGMA_ERUPTION:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, status_get_amotion(src), dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
@@ -4130,6 +4129,9 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case NC_MAGMA_ERUPTION_DOTDAMAGE:
 		case RL_AM_BLAST:
 		case RL_SLUGSHOT:
+		case MH_STAHL_HORN:
+		case MH_NEEDLE_OF_PARALYZE:
+		case MH_SONIC_CRAW:
 		case EL_WIND_SLASH:
 			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 			break;
@@ -5278,12 +5280,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					}
 				}
 			}
-			break;
-
-		case MH_STAHL_HORN:
-		case MH_NEEDLE_OF_PARALYZE:
-		case MH_SONIC_CRAW:
-			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 			break;
 
 		case MH_SILVERVEIN_RUSH:
@@ -11527,12 +11523,13 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 						flag |= 1;
 					}
 				}
+				//Creates a random cell in the splash area
 				for( i = 1; i <= skill_get_time(skill_id,skill_lv) / skill_get_unit_interval(skill_id); i++ ) {
-					//Creates a random Cell in the Splash Area
 					tmp_x = x - area + rnd()%(area * 2 + 1);
 					tmp_y = y - area + rnd()%(area * 2 + 1);
 					skill_unitsetting(src,skill_id,skill_lv,tmp_x,tmp_y,flag + i * skill_get_unit_interval(skill_id));
 				}
+				clif_skill_nodamage(src,src,skill_id,skill_lv,1);
 			}
 			break;
 
