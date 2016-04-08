@@ -5652,7 +5652,7 @@ static short status_calc_flee(struct block_list *bl, struct status_change *sc, i
 	if(sc->data[SC_C_MARKER])
 		flee -= 10;
 	if(sc->data[SC_HEAT_BARREL])
-		flee -= sc->data[SC_HEAT_BARREL]->val3;
+		flee -= sc->data[SC_HEAT_BARREL]->val4;
 	if(sc->data[SC_SPIDERWEB])
 		flee -= flee * 50 / 100;
 	if(sc->data[SC_BERSERK])
@@ -10008,8 +10008,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_HEAT_BARREL: {
 					uint8 n = (uint8)(sd ? sd->spiritball_old : 10);
 
-					val2 = 5 * n; //-%Fixed cast
-					val3 = 75 - 5 * val1; //-Flee
+					val2 = (6 + 2 * val1) * n; //+Atk
+					val3 = 5 * n; //-%Fixed cast
+					val4 = 75 - 5 * val1; //-Flee
 				}
 				break;
 			case SC_P_ALTER: {

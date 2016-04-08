@@ -3258,7 +3258,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		if(sc->data[SC_P_ALTER])
 			skillratio += sc->data[SC_P_ALTER]->val2;
 		if(sc->data[SC_HEAT_BARREL])
-			skillratio += 200;
+			skillratio += sc->data[SC_HEAT_BARREL]->val2;
 	}
 
 	switch(skill_id) {
