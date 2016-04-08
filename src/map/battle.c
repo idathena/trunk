@@ -421,7 +421,7 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 				break;
 			case ELE_HOLY:
 				if( tsc->data[SC_ORATIO] )
-					ratio += tsc->data[SC_ORATIO]->val1 * 2;
+					ratio += tsc->data[SC_ORATIO]->val2;
 				break;
 			case ELE_POISON:
 				if( tsc->data[SC_VENOMIMPRESS] )
@@ -3191,8 +3191,8 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 		if(hitnumber > 1) { //Needed to allow critical attacks to hit when not hitting more then once
 			wd.div_ = hitnumber;
 			wd.type = DMG_MULTI_HIT;
-			if(sc && sc->data[SC_E_CHAIN])
-				sc_start(src,src,SC_QD_SHOT_READY,100,target->id,skill_get_time(RL_QD_SHOT,1));
+			if(sc && sc->data[SC_E_CHAIN] && !sc->data[SC_QD_SHOT_READY])
+				sc_start(src,src,SC_QD_SHOT_READY,100,target->id,skill_get_time(RL_QD_SHOT,1) + status_get_dex(src) * 4);
 		}
 	}
 
@@ -4105,10 +4105,15 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 		case RL_FIREDANCE:
 			skillratio += -100 + 100 * skill_lv;
-			skillratio += (skillratio * status_get_lv(src)) / 300; //Custom values
+			RE_LVL_DMOD(100);
+			break;
+		case RL_BANISHING_BUSTER:
+			skillratio += 900 + 200 * skill_lv;
+			RE_LVL_DMOD(100);
 			break;
 		case RL_S_STORM:
-			skillratio += -100 + 200 * skill_lv; //Custom values
+			skillratio += 900 + 100 * skill_lv;
+			RE_LVL_DMOD(100);
 			break;
 		case RL_SLUGSHOT: {
 				uint16 w = 50;
@@ -4116,34 +4121,32 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 
 				if(sd && (idx = sd->equip_index[EQI_AMMO]) >= 0 && sd->inventory_data[idx])
 					w = sd->inventory_data[idx]->weight / 10;
-				skillratio += -100 + (max(w,1) * skill_lv * 30); //Custom values
+				skillratio += -100 + max(w,1) * 32 * skill_lv;
 			}
 			break;
 		case RL_D_TAIL:
-			skillratio += -100 + (2500 + 500 * skill_lv);
+			skillratio += 2400 + 500 * skill_lv;
 			break;
 		case RL_R_TRIP:
-			skillratio += -100 + 150 * skill_lv; //Custom values
-			break;
 		case RL_R_TRIP_PLUSATK:
-			skillratio += -100 + 100 * skill_lv + rnd_value(10,100); //Custom values
+			skillratio += -100 + (status_get_dex(src) / 2) * (10 + 3 * skill_lv);
+			if(skill_id == RL_R_TRIP_PLUSATK)
+				skillratio >>= 1; //Half damage
 			break;
 		case RL_H_MINE:
 			skillratio += 100 + 200 * skill_lv;
 			if(sd && sd->flicker) //Explode bonus damage
-				skillratio += 800 + (skill_lv - 1) * 300;
+				skillratio += 500 + 300 * skill_lv;
 			break;
 		case RL_HAMMER_OF_GOD:
-			skillratio += 2300 + 800 * (skill_lv - 1) + 10 * (sd ? sd->spiritball_old : 1); //Custom values
-			break;
-		case RL_QD_SHOT:
-			skillratio += -100 + max(pc_checkskill(sd,GS_CHAINACTION),1) * status_get_dex(src) / 5; //Custom values
+			skillratio += 1500 + 800 * skill_lv + (((sd ? sd->spiritball_old : 1) + 1) / 2) * 200;
 			break;
 		case RL_FIRE_RAIN:
-			skillratio += 1900 + 200 * (skill_lv - 1) + status_get_dex(src); //Custom values
+			skillratio += 1900 + status_get_dex(src) * skill_lv;
+			RE_LVL_DMOD(100);
 			break;
 		case RL_AM_BLAST:
-			skillratio += -100 + 300 * skill_lv + status_get_dex(src) / 5; //Custom values
+			skillratio += 1900 + 200 * skill_lv;
 			break;
 		case SU_BITE:
 			skillratio += 100;
@@ -6696,7 +6699,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			md.flag |= BF_WEAPON;
 			break;
 		case RL_B_TRAP:
-			md.damage = ((200 + status_get_dex(src)) * skill_lv * 10) + sstatus->hp; //Custom values
+			md.damage = (3 * skill_lv / 100) * tstatus->hp + sstatus->dex * 10;
 			break;
 		case MH_EQC: {
 				int max_damage = tstatus->hp;

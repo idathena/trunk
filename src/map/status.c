@@ -5652,7 +5652,7 @@ static short status_calc_flee(struct block_list *bl, struct status_change *sc, i
 	if(sc->data[SC_C_MARKER])
 		flee -= 10;
 	if(sc->data[SC_HEAT_BARREL])
-		flee -= sc->data[SC_HEAT_BARREL]->val4;
+		flee -= sc->data[SC_HEAT_BARREL]->val3;
 	if(sc->data[SC_SPIDERWEB])
 		flee -= flee * 50 / 100;
 	if(sc->data[SC_BERSERK])
@@ -6077,7 +6077,7 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 				if( sc->data[SC_REBOUND] )
 					val = max( val, 25 );
 				if( sc->data[SC_B_TRAP] )
-					val = max( val, sc->data[SC_B_TRAP]->val2 );
+					val = max( val, 90 );
 				if( sc->data[SC_CATNIPPOWDER] )
 					val = max( val, sc->data[SC_CATNIPPOWDER]->val3 );
 
@@ -6235,8 +6235,6 @@ static short status_calc_aspd(struct block_list *bl, struct status_change *sc, s
 		skills2 += sc->data[SC_EXTRACT_SALAMINE_JUICE]->val1;
 	if(sc->data[SC_GOLDENE_FERSE])
 		skills2 += sc->data[SC_GOLDENE_FERSE]->val3;
-	if(sc->data[SC_HEAT_BARREL])
-		skills2 += sc->data[SC_HEAT_BARREL]->val3;
 	if(sc->data[SC_INCASPDRATE])
 		skills2 += sc->data[SC_INCASPDRATE]->val1;
 	if(sc->data[SC_GATLINGFEVER])
@@ -6308,6 +6306,8 @@ static short status_calc_fix_aspd(struct block_list *bl, struct status_change *s
 		aspd -= 50; //+5 ASPD
 	if (sc->data[SC_FIGHTINGSPIRIT])
 		aspd -= sc->data[SC_FIGHTINGSPIRIT]->val2;
+	if (sc->data[SC_HEAT_BARREL])
+		aspd -= sc->data[SC_HEAT_BARREL]->val1;
 	if (sc->data[SC_MTF_ASPD])
 		aspd -= sc->data[SC_MTF_ASPD]->val1;
 	if (sc->data[SC_MTF_ASPD2])
@@ -6407,8 +6407,6 @@ static short status_calc_aspd_rate(struct block_list *bl, struct status_change *
 		aspd_rate -= 10 * sc->data[SC_INCASPDRATE]->val1;
 	if(sc->data[SC_GOLDENE_FERSE])
 		aspd_rate -= 10 * sc->data[SC_GOLDENE_FERSE]->val3;
-	if(sc->data[SC_HEAT_BARREL])
-		aspd_rate -= 10 * sc->data[SC_HEAT_BARREL]->val3;
 	if(sc->data[SC_DONTFORGETME])
 		aspd_rate += sc->data[SC_DONTFORGETME]->val2;
 	if(sc->data[SC_LONGING])
@@ -8889,7 +8887,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( val4 == BCT_SELF ) { //Self effect
 					tick_time = 10000;
 					val2 = tick / tick_time;
-					status_change_clear_buffs(bl,7); //Remove buffs/debuffs
+					status_change_clear_buffs(bl,SCCB_BUFFS|SCCB_DEBUFFS|SCCB_CHEM_PROTECT|SCCB_REFRESH,0); //Remove buffs/debuffs
 				}
 				break;
 			case SC_MARIONETTE: {
@@ -9344,6 +9342,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_LAUDARAMUS:
 				clif_specialeffect(bl,748,AREA);
+				break;
+			case SC_ORATIO:
+				val2 = 2 * val1;
 				break;
 			case SC_SECRAMENT:
 				val2 = 10 * val1;
@@ -10004,29 +10005,22 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				tick_time = 1000;
 				val4 = tick / tick_time;
 				break;
-			case SC_B_TRAP:
-				val2 = val1 * 25; //-Speed (Custom)
-				break;
 			case SC_HEAT_BARREL: {
 					uint8 n = (uint8)(sd ? sd->spiritball_old : 10);
 
-					val2 = val1 * 5; //-%Fixed cast (Custom)
-					val3 = val1 * n / 5; //+ASPD (Custom)
-					val4 = 75 - 5 * val1; //-Flee
+					val2 = 5 * n; //-%Fixed cast
+					val3 = 75 - 5 * val1; //-Flee
 				}
 				break;
 			case SC_P_ALTER: {
 					uint8 n = (uint8)(sd ? sd->spiritball_old : 10);
 
-					val2 = val1 * n * 2; //+ATK (Custom)
-					val3 = val1 * 15; //+DEF (Custom)
+					val2 = 10 * (val1 + n); //+Atk
+					val3 = val1 * 15; //+Def (Custom)
 				}
 				break;
 			case SC_ANTI_M_BLAST:
-				if( bl->type == BL_PC )
-					val2 = val1 * 10;
-				else
-					val2 = val1 * 5; //Custom
+				val2 = val1 * 10;
 				break;
 			case SC_DEFSET:
 			case SC_MDEFSET:
@@ -12717,22 +12711,27 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
  * Clears buffs/debuffs or bonus_script on an object
  * @param bl: Object to clear [PC|MOB|HOM|MER|ELEM]
  * @param type: Type to remove
- *  &1: Clear Buff
- *  $2: Clear Debuffs
- *  &4: Clear specific debuffs with a RK_REFRESH
- *  &8: Clear bonus_script with a RK_LUXANIMA
+ *  SCCB_BUFFS: Clear Buffs
+ *  SCCB_DEBUFFS: Clear Debuffs
+ *  SCCB_CHEM_PROTECT: Clear AM_CP_ARMOR/HELM/SHIELD/WEAPON
+ *  SCCB_BANISHING_BUSTER: Clear specific buffs through RL_BANISHING_BUSTER
+ *  SCCB_REFRESH: Clear specific debuffs through RK_REFRESH
+ *  SCCB_LUXANIMA: Bonus Script removed through RK_LUXANIMA
+ * @param val1: Additional value
  */
-void status_change_clear_buffs(struct block_list *bl, int type)
+void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 {
 	int i;
+	uint8 j = 0;
 	struct status_change *sc = status_get_sc(bl);
+	enum sc_type types[SC_MAX];
 
 	if( !sc || !sc->count )
 		return;
 
 	map_freeblock_lock();
 
-	if( type&6 ) //Debuffs and spesific debuffs with a RK_REFRESH
+	if( type&(SCCB_DEBUFFS|SCCB_REFRESH) ) //Debuffs and spesific debuffs with a RK_REFRESH
 		for( i = SC_COMMON_MIN; i <= SC_COMMON_MAX; i++ )
 			status_change_end(bl, (sc_type)i, INVALID_TIMER);
 
@@ -12757,10 +12756,6 @@ void status_change_clear_buffs(struct block_list *bl, int type)
 			case SC_JAILED:
 			case SC_ANKLE:
 			case SC_BLADESTOP:
-			case SC_CP_WEAPON:
-			case SC_CP_SHIELD:
-			case SC_CP_ARMOR:
-			case SC_CP_HELM:
 			case SC_STRFOOD:
 			case SC_AGIFOOD:
 			case SC_VITFOOD:
@@ -12847,6 +12842,14 @@ void status_change_clear_buffs(struct block_list *bl, int type)
 			case SC_SPRITEMABLE:
 			case SC_BITESCAR:
 				continue;
+			//Chemical Protection is only removed by some skills
+			case SC_CP_WEAPON:
+			case SC_CP_SHIELD:
+			case SC_CP_ARMOR:
+			case SC_CP_HELM:
+				if( !(type&SCCB_CHEM_PROTECT) )
+					continue;
+				break;
 			//Debuffs that can be removed
 			case SC_FEAR:
 			case SC_BURNING:
@@ -12864,7 +12867,7 @@ void status_change_clear_buffs(struct block_list *bl, int type)
 			case SC_DEEPSLEEP:
 			case SC_CRYSTALIZE:
 			case SC_MANDRAGORA:
-				if( !(type&4) )
+				if( !(type&SCCB_REFRESH) )
 					continue;
 				break;
 			case SC_QUAGMIRE:
@@ -12885,30 +12888,47 @@ void status_change_clear_buffs(struct block_list *bl, int type)
 			case SC_MAGNETICFIELD:
 			case SC_VACUUM_EXTREME:
 			case SC_NETHERWORLD:
-				if( !(type&2) )
+				if( !(type&SCCB_DEBUFFS) )
 					continue;
 				break;
 			//The rest are buffs that can be removed
 			case SC_BERSERK:
 			case SC_SATURDAYNIGHTFEVER:
-				if( !(type&1) )
+				if( !(type&(SCCB_BUFFS|SCCB_BANISHING_BUSTER)) )
 					continue;
 				sc->data[i]->val2 = 0;
 				break;
 			default:
-				if( !(type&1) )
+				if( !(type&(SCCB_BUFFS|SCCB_BANISHING_BUSTER)) )
 					continue;
 				break;
 		}
-		status_change_end(bl, (sc_type)i, INVALID_TIMER);
+		if( !(type&SCCB_BANISHING_BUSTER) )
+			status_change_end(bl, (sc_type)i, INVALID_TIMER);
+		types[j] = (sc_type)i;
+		j++;
+	}
+
+	if( type&SCCB_BANISHING_BUSTER ) { //Remove 'skill level' random buffs [exneval]
+		uint8 k, x;
+
+		for( x = j - 1; x > 0; x-- ) {
+			uint8 y = rnd()%(x + 1);
+			enum sc_type tmp_type = types[x];
+
+			types[x] = types[y];
+			types[y] = tmp_type;
+		}
+		for( k = 0; k < val1; k++ )
+			status_change_end(bl, types[k], INVALID_TIMER);
 	}
 
 	if( bl->type == BL_PC ) { //Removes bonus_script
 		i = 0;
-		if( type&1 ) i |= BSF_REM_BUFF;
-		if( type&2 ) i |= BSF_REM_DEBUFF;
-		if( type&4 ) i |= BSF_REM_ON_REFRESH;
-		if( type&8 ) i |= BSF_REM_ON_LUXANIMA;
+		if( type&SCCB_BUFFS )    i |= BSF_REM_BUFF;
+		if( type&SCCB_DEBUFFS )  i |= BSF_REM_DEBUFF;
+		if( type&SCCB_REFRESH )  i |= BSF_REM_ON_REFRESH;
+		if( type&SCCB_LUXANIMA ) i |= BSF_REM_ON_LUXANIMA;
 		pc_bonus_script_clear(BL_CAST(BL_PC, bl), i);
 	}
 
@@ -12922,7 +12942,6 @@ void status_change_clear_buffs(struct block_list *bl, int type)
 
 	map_freeblock_unlock();
 }
-
 /**
  * Infect a user with status effects (SC_DEADLYINFECT)
  * @param src: Object initiating change on bl [PC|MOB|HOM|MER|ELEM]
