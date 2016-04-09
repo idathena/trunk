@@ -1506,7 +1506,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		if( target )
 			target_id = target->id;
 	} else if( src->type == BL_HOM ) {
-		switch( skill_id ) { //Homun-auto-target skills
+		switch( skill_id ) { //Homun auto-target skills
 			case HLIF_HEAL:
 			case HLIF_AVOID:
 			case HAMI_DEFENCE:
@@ -1517,15 +1517,10 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 				target_id = target->id;
 				break;
 			case MH_SONIC_CRAW:
-			case MH_TINDER_BREAKER:
-				{
-					int skill_id2 = (skill_id == MH_SONIC_CRAW ? MH_MIDNIGHT_FRENZY : MH_EQC);
-
-					if( sc && sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == skill_id2 ) { //It's a combo
-						target_id = sc->data[SC_COMBO]->val2;
-						combo = 1;
-						casttime = -1;
-					}
+				if( sc && sc->data[SC_MIDNIGHT_FRENZY_POSTDELAY] ) {
+					target_id = sc->data[SC_MIDNIGHT_FRENZY_POSTDELAY]->val2;
+					combo = 1;
+					casttime = -1;
 				}
 				break;
 		}
@@ -2758,8 +2753,6 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 		status_change_end(bl,SC_MARIONETTE2,INVALID_TIMER);
 		status_change_end(bl,SC_CLOSECONFINE,INVALID_TIMER);
 		status_change_end(bl,SC_CLOSECONFINE2,INVALID_TIMER);
-		status_change_end(bl,SC_TINDER_BREAKER,INVALID_TIMER);
-		status_change_end(bl,SC_TINDER_BREAKER2,INVALID_TIMER);
 		status_change_end(bl,SC_HIDING,INVALID_TIMER);
 		//Ensure the bl is a PC. If so, we'll handle the removal of cloaking and cloaking exceed later
 		if (bl->type != BL_PC) {
@@ -2784,6 +2777,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 		status_change_end(bl,SC_NETHERWORLD,INVALID_TIMER);
 		status_change_end(bl,SC_CRYSTALIZE,INVALID_TIMER);
 		status_change_end(bl,SC_VACUUM_EXTREME,INVALID_TIMER);
+		status_change_end(bl,SC_TINDER_BREAKER,INVALID_TIMER);
 		status_change_end(bl,SC_SUHIDE,INVALID_TIMER);
 	}
 

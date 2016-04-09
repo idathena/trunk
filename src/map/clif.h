@@ -593,7 +593,7 @@ void clif_class_change(struct block_list *bl,int class_,int type);
 
 void clif_skillinfoblock(struct map_session_data *sd);
 void clif_skillup(struct map_session_data *sd, uint16 skill_id, int lv, int range, int upgradable);
-void clif_skillinfo(struct map_session_data *sd,int skill, int inf);
+void clif_skillinfo(struct map_session_data *sd, uint16 skill_id, int inf);
 void clif_addskill(struct map_session_data *sd, int id);
 void clif_deleteskill(struct map_session_data *sd, int id);
 
@@ -797,6 +797,7 @@ void clif_feel_hate_reset(struct map_session_data *sd);
 
 // [blackhole89]
 void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag);
+void clif_homskillinfo(struct map_session_data *sd, uint16 skill_id, int inf);
 int clif_homskillinfoblock(struct map_session_data *sd);
 void clif_homskillup(struct map_session_data *sd, uint16 skill_id); //[orn]
 int clif_hom_food(struct map_session_data *sd, int foodid, int fail); //[orn]

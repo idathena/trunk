@@ -55,7 +55,7 @@
 #define MAX_BANK_ZENY SINT32_MAX //Max zeny in Bank
 #define MAX_FAME 1000000000 //Max fame points
 #define MAX_CART 100 //Maximum item in cart
-#define MAX_SKILL 5044 //Maximum skill data
+#define MAX_SKILL 5057 //Maximum skill data
 #define GLOBAL_REG_NUM 256 //Max permanent character variables per char
 #define ACCOUNT_REG_NUM 64 //Max permanent local account variables per account
 #define ACCOUNT_REG2_NUM 16 //Max permanent global account variables per account
@@ -227,8 +227,6 @@ enum e_skill_flag {
 	SKILL_FLAG_PLAGIARIZED,
 	SKILL_FLAG_REPLACED_LV_0, //Temporary skill overshadowing permanent skill of level 'N - SKILL_FLAG_REPLACED_LV_0',
 	SKILL_FLAG_PERM_GRANTED, //Permanent, granted through someway e.g. script
-	SKILL_FLAG_TMP_COMBO, //@FIXME for homon combo atm
-	//...
 };
 
 enum e_mmo_charstatus_opt {

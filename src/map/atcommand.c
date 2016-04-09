@@ -1481,12 +1481,12 @@ ACMD_FUNC(joblevelup)
 			clif_displaymessage(fd, msg_txt(159)); // Job level can't go any lower.
 			return -1;
 		}
-		level *=-1;
+		level *= -1;
 		if ((unsigned int)level >= sd->status.job_level) // Fix negative overflow
 			level = sd->status.job_level - 1;
 		sd->status.job_level -= (unsigned int)level;
 		if (sd->status.skill_point < level)
-			pc_resetskill(sd,0); //Reset skills since we need to subtract more points.
+			pc_resetskill(sd,0); //Reset skills since we need to subtract more points
 		if (sd->status.skill_point < level)
 			sd->status.skill_point = 0;
 		else

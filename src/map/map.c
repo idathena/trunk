@@ -401,10 +401,9 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 		skill_unit_move(bl, tick, 2);
 		status_change_end(bl, SC_CLOSECONFINE, INVALID_TIMER);
 		status_change_end(bl, SC_CLOSECONFINE2, INVALID_TIMER);
-		status_change_end(bl, SC_TINDER_BREAKER, INVALID_TIMER);
-		status_change_end(bl, SC_TINDER_BREAKER2, INVALID_TIMER);
 		//status_change_end(bl, SC_BLADESTOP, INVALID_TIMER); //Won't stop when you are knocked away, go figure
 		status_change_end(bl, SC_MAGICROD, INVALID_TIMER);
+		status_change_end(bl, SC_TINDER_BREAKER, INVALID_TIMER);
 		status_change_end(bl, SC_SU_STOOP, INVALID_TIMER);
 		if (sc) {
 #ifdef RENEWAL //3x3 AoE ranged damage protection
