@@ -1875,6 +1875,10 @@ moc_para01,112,96,5	script	Administrator Michael	4_M_RUSMAN1,{
 				callsub S_Select,"",
 					13112,"Eden Revolver I","Revolver","HIT-5, Attack 44",""; //P_Revolver1
 			}
+			if (Class == Job_Summoner) {
+				callsub S_Select,"",
+					1699,"Eden Foxtail Staff I","Staff","DEX+3, INT+3, Ranged Attack+5%, MATK+135, Attack 120",""; //P_Foxtail_Staff1
+			}
 			mes "Let me see... you will receive..";
 			mes "the Eden Group Boots II and Uniform II.";
 			next;
@@ -1951,6 +1955,10 @@ moc_para01,112,96,5	script	Administrator Michael	4_M_RUSMAN1,{
 			if (Class == Job_Gunslinger) {
 				callsub S_Select,"",
 					13113,"Eden Revolver II","Revolver","HIT-5, Attack 60",""; //P_Revolver2
+			}
+			if (Class == Job_Summoner) {
+				callsub S_Select,"",
+					26100,"Eden Foxtail Staff II","Staff","DEX+4, INT+4, Ranged Attack+6%, MATK+165, Attack 135",""; //P_Foxtail_Staff2
 			}
 			mes "Let me see... you will receive..";
 			mes "the Eden Group Boots III and Uniform III.";
@@ -3949,7 +3957,7 @@ moc_para01,111,83,3	script	Blacksmith Thorn#2nd10	2_M_OLDBLSMITH,{
 					1986,"Eden Group Whip I","Whip, Attack 125", //P_Tail1
 					18106,"Eden Group Bow III","Bow, Attack 140"; //P_Bow3
 			}
-			else if (BaseJob == Job_Ninja) {
+			else if (Class == Job_Ninja) {
 				callsub L_Select,"",
 					13066,"Eden Group Dagger III","Dagger, MATK +80, ATK 165", //P_Dagger3
 					13310,"Eden Group Huuma Shuriken I","Huuma Suriken, MATK +50, ATK 170"; //P_Huuma_Suriken1
@@ -3961,8 +3969,10 @@ moc_para01,111,83,3	script	Blacksmith Thorn#2nd10	2_M_OLDBLSMITH,{
 					1658,"Eden Group Staff III","Staff, MATK +170, INT +4, ATK 60", //P_Staff3
 					13066,"Eden Group Dagger III","Dagger, MATK +80, ATK 165"; //P_Dagger3
 			}
-			else if (BaseJob == Job_Gunslinger)
+			else if (Class == Job_Gunslinger)
 				getitem 13114,1; //P_Revolver3
+			else if (Class == Job_Summoner)
+				getitem 26101,1; //P_Foxtail_Staff3
 			else {
 				mes "Hmm, you are eligible to receive equipment.";
 				mes "Yeah I understand that.";
@@ -4105,7 +4115,8 @@ moc_para01,112,79,3	script	Weapons Expert BK#2nd11	4_M_REPAIR,{
 		1986,  //P_Tail1
 		13114, //P_Revolver3
 		1831,  //P_Knuckle1
-		13310; //P_Huuma_Shuriken1
+		13310, //P_Huuma_Shuriken1
+		26101; //P_Foxtail_Staff3
 	.@menu$ = "Eden Group Slayer III:" +
 		"Eden Group Saber III:" +
 		"Eden Group Dagger III:" +
@@ -4120,7 +4131,8 @@ moc_para01,112,79,3	script	Weapons Expert BK#2nd11	4_M_REPAIR,{
 		"Eden Group Whip I:" +
 		"Eden Group Revolver III:" +
 		"Eden Group Knuckles I:" +
-		"Eden Group Huuma Shuriken I";
+		"Eden Group Huuma Shuriken I:" +
+		"Eden Group Foxtail Staff III";
 	mes "[BK]";
 	mes "What's happening?";
 	mes "No way?!";

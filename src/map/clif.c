@@ -1594,6 +1594,34 @@ void clif_send_homdata(struct map_session_data *sd, int state, int param)
 }
 
 
+void clif_homskillinfo(struct map_session_data *sd, uint16 skill_id, int inf)
+{
+	struct homun_data *hd;
+	int fd, id, idx = skill_id - HM_SKILLBASE;
+
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	hd = sd->hd;
+
+	if( (id = hd->homunculus.hskill[idx].id) <= 0 )
+		return;
+
+	WFIFOHEAD(fd,packet_len(0x7e1));
+	WFIFOW(fd,0) = 0x7e1;
+	WFIFOW(fd,2) = id;
+	WFIFOL(fd,4) = (inf ? inf : skill_get_inf(id));
+	WFIFOW(fd,8) = hd->homunculus.hskill[idx].lv;
+	WFIFOW(fd,10) = skill_get_sp(id,hd->homunculus.hskill[idx].lv);
+	WFIFOW(fd,12) = skill_get_range2(&hd->bl,id,hd->homunculus.hskill[idx].lv);
+	if( hd->homunculus.hskill[id - HM_SKILLBASE].flag == SKILL_FLAG_PERMANENT )
+		WFIFOB(fd,14) = (hd->homunculus.hskill[idx].lv < hom_skill_tree_get_max(id,hd->homunculus.class_)) ? 1 : 0;
+	else
+		WFIFOB(fd,14) = 0;
+	WFIFOSET(fd,packet_len(0x7e1));
+}
+
+
 int clif_homskillinfoblock(struct map_session_data *sd)
 { //[orn]
 	struct homun_data *hd;
@@ -1613,11 +1641,9 @@ int clif_homskillinfoblock(struct map_session_data *sd)
 		int id = hd->homunculus.hskill[i].id;
 
 		if (id != 0) {
-			int combo = (hd->homunculus.hskill[i].flag)&SKILL_FLAG_TMP_COMBO;
-
 			j = id - HM_SKILLBASE;
 			WFIFOW(fd,len) = id;
-			WFIFOW(fd,len + 2) = (combo ? INF_SELF_SKILL : skill_get_inf(id));
+			WFIFOW(fd,len + 2) = skill_get_inf(id);
 			WFIFOW(fd,len + 4) = 0;
 			WFIFOW(fd,len + 6) = hd->homunculus.hskill[j].lv;
 			WFIFOW(fd,len + 8) = skill_get_sp(id,hd->homunculus.hskill[j].lv);
@@ -5257,19 +5283,19 @@ void clif_skillup(struct map_session_data *sd, uint16 skill_id, int lv, int rang
 
 /// Updates a skill in the skill tree (ZC_SKILLINFO_UPDATE2).
 /// 07e1 <skill id>.W <type>.L <level>.W <sp cost>.W <attack range>.W <upgradable>.B
-void clif_skillinfo(struct map_session_data *sd, int skill, int inf)
+void clif_skillinfo(struct map_session_data *sd, uint16 skill_id, int inf)
 {
 	const int fd = sd->fd;
 
 	WFIFOHEAD(fd,packet_len(0x7e1));
 	WFIFOW(fd,0) = 0x7e1;
-	WFIFOW(fd,2) = skill;
-	WFIFOL(fd,4) = inf?inf:skill_get_inf(skill);
-	WFIFOW(fd,8) = sd->status.skill[skill].lv;
-	WFIFOW(fd,10) = skill_get_sp(skill,sd->status.skill[skill].lv);
-	WFIFOW(fd,12) = skill_get_range2(&sd->bl,skill,sd->status.skill[skill].lv);
-	if( sd->status.skill[skill].flag == SKILL_FLAG_PERMANENT )
-		WFIFOB(fd,14) = (sd->status.skill[skill].lv < skill_tree_get_max(skill, sd->status.class_))? 1:0;
+	WFIFOW(fd,2) = skill_id;
+	WFIFOL(fd,4) = (inf ? inf : skill_get_inf(skill_id));
+	WFIFOW(fd,8) = sd->status.skill[skill_id].lv;
+	WFIFOW(fd,10) = skill_get_sp(skill_id,sd->status.skill[skill_id].lv);
+	WFIFOW(fd,12) = skill_get_range2(&sd->bl,skill_id,sd->status.skill[skill_id].lv);
+	if( sd->status.skill[skill_id].flag == SKILL_FLAG_PERMANENT )
+		WFIFOB(fd,14) = (sd->status.skill[skill_id].lv < skill_tree_get_max(skill_id,sd->status.class_)) ? 1 : 0;
 	else
 		WFIFOB(fd,14) = 0;
 	WFIFOSET(fd,packet_len(0x7e1));
@@ -18676,8 +18702,9 @@ static uint8 clif_roulette_getitem(struct map_session_data *sd) {
 	it.nameid = rd.nameid[sd->roulette.prizeStage][sd->roulette.prizeIdx];
 	it.identify = 1;
 
-	if( (res = pc_additem(sd, &it, rd.qty[sd->roulette.prizeStage][sd->roulette.prizeIdx], LOG_TYPE_ROULETTE)) == 0 )
+	if( (res = pc_additem(sd, &it, rd.qty[sd->roulette.prizeStage][sd->roulette.prizeIdx], LOG_TYPE_ROULETTE)) == 0 ) {
 		; //onSuccess
+	}
 
 	sd->roulette.claimPrize = false;
 	sd->roulette.prizeStage = 0;

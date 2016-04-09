@@ -647,11 +647,11 @@ typedef enum sc_type {
 	SC_ZANGETSU,
 	SC_GENSOU,
 	SC_AKAITSUKI, // 540
-	
-	//Homon S
+
+	//Homunculus S
 	SC_STYLE_CHANGE,
 	SC_TINDER_BREAKER,
-	SC_TINDER_BREAKER2,
+	SC_TINDER_BREAKER_POSTDELAY,
 	SC_CBC,
 	SC_EQC,
 	SC_GOLDENE_FERSE,
@@ -770,6 +770,11 @@ typedef enum sc_type {
 	SC_TUNAPARTY,
 	SC_SHRIMP,
 	SC_FRESHSHRIMP,
+
+	SC_SONIC_CLAW_POSTDELAY,
+	SC_SILVERVEIN_RUSH_POSTDELAY,
+	SC_MIDNIGHT_FRENZY_POSTDELAY,
+	SC_CBC_POSTDELAY,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 
@@ -2131,6 +2136,7 @@ struct status_data *status_get_base_status(struct block_list *bl);
 const char *status_get_name(struct block_list *bl);
 int status_get_class(struct block_list *bl);
 int status_get_lv(struct block_list *bl);
+int status_get_job_lv(struct block_list *bl);
 #define status_get_range(bl) status_get_status_data(bl)->rhw.range
 #define status_get_hp(bl) status_get_status_data(bl)->hp
 #define status_get_max_hp(bl) status_get_status_data(bl)->max_hp

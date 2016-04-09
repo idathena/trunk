@@ -1051,7 +1051,7 @@ REPLACE INTO `item_db_re` VALUES (1686,'Large_Foxtail_Staff','Large Foxtail Staf
 REPLACE INTO `item_db_re` VALUES (1687,'Beginner_Foxtail_Staff','Beginner Foxtail Staff',5,20,NULL,100,'40:15',NULL,1,1,0x04000000,7,2,2,1,'3',1,10,'bonus bMaxHP,100;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (1690,'Mysterious_Foxtail_Staff','Mysterious Foxtail Staff',5,20,NULL,400,'80:180',NULL,1,3,0x04000000,7,2,2,2,'60',1,10,'set .@r,getrefine(); bonus bMaxSP,10*(.@r/3)+50; bonus bMatk,10*(.@r/3);',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (1694,'Foxtail_Model','Foxtail Model',5,20,NULL,300,'150',NULL,1,3,0x04000000,7,2,2,2,'60',1,10,'set .@r,getrefine(); bonus bLongAtkRate,8; bonus bMaxHP,100; bonus bDex,(.@r/3)*2; bonus bMaxSP,(.@r/3)*10;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (1699,'Paradise_Foxtail_Staff_I','Eden Group Foxtail I',5,20,NULL,0,'120:90',NULL,1,0,0x04000000,7,2,2,2,'26',0,10,'bonus bDex,3; bonus bInt,3; bonus bLongAtkRate,5;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (1699,'P_Foxtail_Staff1','Eden Foxtail Staff I',5,20,NULL,0,'120:135',NULL,1,0,0x04000000,7,2,2,2,'26',0,10,'bonus bDex,3; bonus bInt,3; bonus bLongAtkRate,5;',NULL,NULL);
 # Bows
 #===================================================================
 REPLACE INTO `item_db_re` VALUES (1701,'Bow','Bow',5,1000,NULL,500,'15',NULL,5,3,0x000A0848,63,2,34,1,'4',1,11,NULL,NULL,NULL);
@@ -11055,8 +11055,8 @@ REPLACE INTO `item_db_re` VALUES (24244,'S_Reload_Shield','Reload Shadow Shield'
 REPLACE INTO `item_db_re` VALUES (24245,'S_Reload_Armor','Reload Shadow Armor',12,10,NULL,0,NULL,NULL,NULL,0,0xFFFFFFFF,63,2,65536,NULL,'1',1,0,'set .@r,getrefine(); bonus bDelayrate,-1-(.@r>=9?2:(.@r>=7?1:0));',NULL,NULL);
 # New Items
 #===================================================================
-REPLACE INTO `item_db_re` VALUES (26100,'Paradise_Foxtail_Staff_II','Eden Group Foxtail Staff II',5,20,NULL,0,'135:165',NULL,1,0,0x04000000,7,2,2,2,'40',0,10,'bonus bDex,4; bonus bInt,4; bonus bLongAtkRate,6;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (26101,'Paradise_Foxtail_Staff_III','Eden Group Foxtail Staff III',5,20,NULL,0,'150:195',NULL,1,0,0x04000000,7,2,2,3,'60',0,10,'bonus bDex,5; bonus bInt,5; bonus bLongAtkRate,7;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (26100,'P_Foxtail_Staff2','Eden Foxtail Staff II',5,20,NULL,0,'135:165',NULL,1,0,0x04000000,7,2,2,2,'40',0,10,'bonus bDex,4; bonus bInt,4; bonus bLongAtkRate,6;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (26101,'P_Foxtail_Staff3','Eden Foxtail Staff III',5,20,NULL,0,'150:195',NULL,1,0,0x04000000,7,2,2,3,'60',0,10,'bonus bDex,5; bonus bInt,5; bonus bLongAtkRate,7;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28000,'Thanatos_Katar','Thanatos Katar',5,20,NULL,1800,'220:80',NULL,1,1,0x00001000,63,2,34,4,'120',1,16,'bonus bInt,6; bonus bVit,6; bonus bLuk,-6; bonus2 bHPDrainRate,50,5; bonus2 bSPDrainRate,10,5; bonus2 bHPLossRate,100,10000;',NULL,'heal -1000,0;');
 REPLACE INTO `item_db_re` VALUES (28001,'Evil_Slayer_Ripper_Katar','Evil Slayer Ripper Katar',5,20,NULL,1200,'120',NULL,1,1,0x00001000,63,2,34,3,'100',1,16,'set .@r,getrefine(); bonus2 bAddRace,RC_Demon,10; bonus2 bAddRace,RC_Undead,10; bonus2 bAddClass,Class_All,(.@r>=12?12:(.@r>=9?5:0));',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28002,'Half_BF_Katar2','Half BF Katar2',5,20,NULL,0,'130',NULL,1,0,0x00001000,63,2,34,3,'80',1,16,'bonus bStr,1; bonus bDex,1; bonus bLuk,1; bonus2 bAddRace,RC_DemiHuman,35; bonus bCritAtkRate,10; bonus bAspdRate,3; bonus bUnbreakableWeapon,0;',NULL,NULL);

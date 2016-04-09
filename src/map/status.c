@@ -758,8 +758,9 @@ void initChangeTables(void) {
 	set_sc( MH_PAIN_KILLER        , SC_PAIN_KILLER     , SI_PAIN_KILLER     , SCB_ASPD );
 	set_sc( MH_SILENT_BREEZE      , SC_SILENCE         , SI_SILENT_BREEZE   , SCB_NONE );
 	add_sc( MH_STYLE_CHANGE       , SC_STYLE_CHANGE );
-	set_sc( MH_TINDER_BREAKER     , SC_TINDER_BREAKER2 , SI_TINDER_BREAKER  , SCB_FLEE );
-	set_sc( MH_TINDER_BREAKER     , SC_TINDER_BREAKER  , SI_TINDER_BREAKER_POSTDELAY, SCB_FLEE );
+	add_sc( MH_SILVERVEIN_RUSH    , SC_STUN );
+	add_sc( MH_MIDNIGHT_FRENZY    , SC_FEAR );
+	set_sc( MH_TINDER_BREAKER     , SC_TINDER_BREAKER  , SI_TINDER_BREAKER  , SCB_FLEE );
 	set_sc( MH_CBC                , SC_CBC             , SI_CBC             , SCB_NONE );
 	set_sc( MH_EQC                , SC_EQC             , SI_EQC             , SCB_DEF2|SCB_MAXHP );
 
@@ -1041,6 +1042,11 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_REUSE_LIMIT_RECALL] = SI_REUSE_LIMIT_RECALL;
 	StatusIconChangeTable[SC_REUSE_LIMIT_ASPD_POTION] = SI_REUSE_LIMIT_ASPD_POTION;
 	StatusIconChangeTable[SC_SPRITEMABLE] = SI_SPRITEMABLE;
+	StatusIconChangeTable[SC_SONIC_CLAW_POSTDELAY] = SI_SONIC_CLAW_POSTDELAY;
+	StatusIconChangeTable[SC_SILVERVEIN_RUSH_POSTDELAY] = SI_SILVERVEIN_RUSH_POSTDELAY;
+	StatusIconChangeTable[SC_MIDNIGHT_FRENZY_POSTDELAY] = SI_MIDNIGHT_FRENZY_POSTDELAY;
+	StatusIconChangeTable[SC_TINDER_BREAKER_POSTDELAY] = SI_TINDER_BREAKER_POSTDELAY;
+	StatusIconChangeTable[SC_CBC_POSTDELAY] = SI_CBC_POSTDELAY;
 
 	if( !battle_config.display_hallucination ) //Disable Hallucination
 		StatusIconChangeTable[SC_HALLUCINATION] = SI_BLANK;
@@ -1220,8 +1226,6 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_STOP]                 |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CLOSECONFINE]         |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CLOSECONFINE2]        |= SCS_NOMOVE;
-	StatusChangeStateTable[SC_TINDER_BREAKER]       |= SCS_NOMOVE;
-	StatusChangeStateTable[SC_TINDER_BREAKER2]      |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_MADNESSCANCEL]        |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_GRAVITATION]          |= SCS_NOMOVE|SCS_NOMOVECOND;
 	StatusChangeStateTable[SC_DEATHBOUND_POSTDELAY] |= SCS_NOMOVE;
@@ -1239,6 +1243,7 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_MEIKYOUSISUI]         |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_KAGEHUMI]             |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_PARALYSIS]            |= SCS_NOMOVE;
+	StatusChangeStateTable[SC_TINDER_BREAKER]       |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_KINGS_GRACE]          |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_SUHIDE]               |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_SV_ROOTTWIST]         |= SCS_NOMOVE;
@@ -2954,7 +2959,7 @@ static int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type) {
 			if(sc->data[SC_BEYONDOFWARCRY])
 				bonus -= sc->data[SC_BEYONDOFWARCRY]->val4;
 			if(sc->data[SC_EQC])
-				bonus -= sc->data[SC_EQC]->val4;
+				bonus -= sc->data[SC_EQC]->val3;
 		}
 	}
 
@@ -3628,7 +3633,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	if(sd->critical_rate != 100)
 		status->cri = cap_value(status->cri * sd->critical_rate / 100, SHRT_MIN, SHRT_MAX);
 	if(pc_checkskill(sd,SU_POWEROFLIFE) > 0)
-		status->cri += 20;
+		status->cri += 200;
 
 	if(sd->flee2_rate < 0)
 		sd->flee2_rate = 0;
@@ -5432,7 +5437,7 @@ static unsigned short status_calc_ematk(struct block_list *bl, struct status_cha
 	if(sc->data[SC_ODINS_POWER])
 		matk += 40 + 30 * sc->data[SC_ODINS_POWER]->val1;
 	if(sc->data[SC_MOONLITSERENADE])
-		matk += sc->data[SC_MOONLITSERENADE]->val3;
+		matk += sc->data[SC_MOONLITSERENADE]->val4;
 	if(sc->data[SC_IZAYOI])
 		matk += 25 * sc->data[SC_IZAYOI]->val1;
 	if(sc->data[SC_ZANGETSU])
@@ -5481,7 +5486,7 @@ static unsigned short status_calc_matk(struct block_list *bl, struct status_chan
 	if(sc->data[SC_ODINS_POWER])
 		matk += 40 + 30 * sc->data[SC_ODINS_POWER]->val1;
 	if(sc->data[SC_MOONLITSERENADE])
-		matk += sc->data[SC_MOONLITSERENADE]->val3;
+		matk += sc->data[SC_MOONLITSERENADE]->val4;
 	if(sc->data[SC_IZAYOI])
 		matk += 25 * sc->data[SC_IZAYOI]->val1;
 	if(sc->data[SC_ZANGETSU])
@@ -5600,7 +5605,7 @@ static short status_calc_flee(struct block_list *bl, struct status_change *sc, i
 		return (short)cap_value(flee,1,SHRT_MAX);
 	if(sc->data[SC_OVERED_BOOST]) //Should be final and unmodifiable by any means
 		return sc->data[SC_OVERED_BOOST]->val2;
-	if(sc->data[SC_TINDER_BREAKER] || sc->data[SC_TINDER_BREAKER2])
+	if(sc->data[SC_TINDER_BREAKER])
 		return 0;
 
 	if(sc->data[SC_INCFLEE])
@@ -5757,7 +5762,7 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 	if(sc->data[SC_INCDEFRATE])
 		def += def * sc->data[SC_INCDEFRATE]->val1 / 100;
 	if(sc->data[SC_ECHOSONG])
-		def += def * sc->data[SC_ECHOSONG]->val3 / 100;
+		def += def * sc->data[SC_ECHOSONG]->val4 / 100;
 	if(sc->data[SC_ODINS_POWER])
 		def -= 20 * sc->data[SC_ODINS_POWER]->val1;
 	if(sc->data[SC_ANGRIFFS_MODUS])
@@ -5913,7 +5918,7 @@ defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int md
 	if(sc->data[SC_FREEZE])
 		mdef += mdef * 25 / 100;
 	if(sc->data[SC_SYMPHONYOFLOVER])
-		mdef += mdef * sc->data[SC_SYMPHONYOFLOVER]->val3 / 100;
+		mdef += mdef * sc->data[SC_SYMPHONYOFLOVER]->val4 / 100;
 	if(sc->data[SC_GT_CHANGE]) {
 		mdef -= sc->data[SC_GT_CHANGE]->val4;
 		if(mdef < 0)
@@ -6683,6 +6688,29 @@ int status_get_lv(struct block_list *bl) {
 	return 1;
 }
 
+/*==========================================
+ * Get the job level of the current bl
+ * Return:
+ *	1 = fail
+ *	level = success
+ *------------------------------------------*/
+int status_get_job_lv(struct block_list *bl) {
+	nullpo_ret(bl);
+
+	switch (bl->type) {
+		case BL_PC: 
+			return ((TBL_PC*)bl)->status.job_level;
+		case BL_MOB:
+		case BL_PET:
+		case BL_HOM:
+		case BL_MER:
+		case BL_ELEM:
+		case BL_NPC:
+			return 50;
+	}
+	return 1;
+}
+
 struct regen_data *status_get_regen_data(struct block_list *bl)
 {
 	nullpo_retr(NULL, bl);
@@ -7127,8 +7155,8 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 #define SCDEF_LVL_CAP(bl,cap) ((bl) ? (status_get_lv(bl) > (cap) ? (cap) : status_get_lv(bl)) : 0)
 //Returns the difference between the levels of 'bl' and 'src', both capped to 'maxlv', multiplied by 'factor'
 #define SCDEF_LVL_DIFF(bl,src,maxlv,factor) ((SCDEF_LVL_CAP((bl),(maxlv)) - SCDEF_LVL_CAP((src),(maxlv))) * (factor))
-//Returns the 'sd's job level, capped to 'cap'
-#define SCDEF_JOBLVL_CAP(sd,cap) ((sd) ? ((sd)->status.job_level > (cap) ? (cap) : (sd)->status.job_level) : 0)
+//Returns the 'bl's job level, capped to 'cap'
+#define SCDEF_JOBLVL_CAP(bl,cap) ((bl) ? (status_get_job_lv(bl) > (cap) ? (cap) : status_get_job_lv(bl)) : 0)
 
 	if (status_isimmune(bl)) {
 		switch (type) { //Status effects that are blocked by Golden Thief Bug card or Wand of Hermod
@@ -7320,7 +7348,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			tick_def2 = (sd ? sd->status.int_ : b_status->int_) * 50 + SCDEF_LVL_CAP(bl,150) * 50;
 			break;
 		case SC_NETHERWORLD:
-			tick_def2 = SCDEF_LVL_CAP(bl,150) * 20 + SCDEF_JOBLVL_CAP(sd,50) * 100;
+			tick_def2 = SCDEF_LVL_CAP(bl,150) * 20 + SCDEF_JOBLVL_CAP(bl,50) * 100;
 			break;
 		case SC_CRYSTALIZE:
 			if (sd)
@@ -8311,8 +8339,18 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_FOOD_DEX_CASH,INVALID_TIMER);
 			status_change_end(bl,SC_FOOD_LUK_CASH,INVALID_TIMER);
 			break;
-		case SC_EQC:
-			status_change_end(bl,SC_CBC,INVALID_TIMER);
+		case SC_SONIC_CLAW_POSTDELAY:
+		case SC_SILVERVEIN_RUSH_POSTDELAY:
+		case SC_MIDNIGHT_FRENZY_POSTDELAY:
+		case SC_TINDER_BREAKER_POSTDELAY:
+		case SC_CBC_POSTDELAY:
+			if( sc->data[type] ) //Don't remove status that was just activated
+				break;
+			status_change_end(bl,SC_SONIC_CLAW_POSTDELAY,INVALID_TIMER);
+			status_change_end(bl,SC_SILVERVEIN_RUSH_POSTDELAY,INVALID_TIMER);
+			status_change_end(bl,SC_MIDNIGHT_FRENZY_POSTDELAY,INVALID_TIMER);
+			status_change_end(bl,SC_TINDER_BREAKER_POSTDELAY,INVALID_TIMER);
+			status_change_end(bl,SC_CBC_POSTDELAY,INVALID_TIMER);
 			break;
 	}
 
@@ -8347,7 +8385,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_DPOISON:
 			case SC_BERSERK:
 			case SC_CLOSECONFINE2: //Can't be re-closed in
-			case SC_TINDER_BREAKER2:
 			case SC_MARIONETTE:
 			case SC_MARIONETTE2:
 			case SC_NOCHAT:
@@ -8480,7 +8517,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_ADORAMUS:
 				val2 = 2 + val1; //Agi change
 				if( type == SC_ADORAMUS )
-					sc_start(src,bl,SC_BLIND,val1 * 4 + (sd ? sd->status.job_level / 2 : 0),val1,skill_get_time(status_sc2skill(type),val1));
+					sc_start(src,bl,SC_BLIND,val1 * 4 + status_get_job_lv(bl) / 2,val1,skill_get_time(status_sc2skill(type),val1));
 				break;
 			case SC_ENDURE:
 				val2 = 7; //Hit-count [Celest]
@@ -8992,21 +9029,18 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				}
 				status_zap(bl,status->hp - 1,(val2 ? 0 : status->sp));
 				return 1;
-			case SC_TINDER_BREAKER2:
-			case SC_CLOSECONFINE2:
-				{
+			case SC_CLOSECONFINE2: {
 					struct block_list *src = (val2 ? map_id2bl(val2) : NULL);
 					struct status_change *sc2 = (src ? status_get_sc(src) : NULL);
-					enum sc_type type2 = (type == SC_TINDER_BREAKER2 ? SC_TINDER_BREAKER : SC_CLOSECONFINE);
-					struct status_change_entry *sce2 = (sc2 ? sc2->data[type2] : NULL);
+					struct status_change_entry *sce2 = (sc2 ? sc2->data[SC_CLOSECONFINE] : NULL);
 
 					if( src && sc2 ) {
 						if( !sce2 ) //Start lock on caster
-							sc_start4(src,src,type2,100,val1,1,0,0,tick + 1000);
+							sc_start4(src,src,SC_CLOSECONFINE,100,val1,1,0,0,tick + 1000);
 						else { //Increase count of locked enemies and refresh time
 							(sce2->val2)++;
 							delete_timer(sce2->timer,status_change_timer);
-							sce2->timer = add_timer(gettick() + tick + 1000,status_change_timer,src->id,type2);
+							sce2->timer = add_timer(gettick() + tick + 1000,status_change_timer,src->id,SC_CLOSECONFINE);
 						}
 					} else //Status failed
 						return 0;
@@ -9317,14 +9351,13 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_STONEHARDSKIN:
 				val2 = status->hp * 20 / 100;
-				if( val2 > 0 )
+				if( val2 )
 					status_heal(bl,-val2,0,0); //Reduce health by 20%
-				if( sd ) //DEF/MDEF Increase
-					val1 = sd->status.job_level * pc_checkskill(sd,RK_RUNEMASTERY) / 4
+				val1 = status_get_job_lv(bl) * (sd ? pc_checkskill(sd,RK_RUNEMASTERY) : 10) / 4
 #ifndef RENEWAL
 					/ 10
 #endif
-					;
+					; //DEF/MDEF Increase
 				break;
 			case SC_ABUNDANCE:
 				tick_time = 10000;
@@ -9561,14 +9594,14 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val3 = 5 * val1 + val2; //ASPD Increase
 				break;
 			case SC_SYMPHONYOFLOVER:
-				val3 = 12 * val1 + val2 + (sd ? sd->status.job_level / 4 : 0); //MDEF Increase In %
+				val4 = 12 * val1 + val2 + val3 / 4; //MDEF Increase In %
 				break;
 			case SC_MOONLITSERENADE:
 			case SC_RUSHWINDMILL:
-				val3 = 6 * val1 + val2 + (sd ? sd->status.job_level / 5 : 0); //MATK/ATK Increase
+				val4 = 6 * val1 + val2 + val3 / 5; //MATK/ATK Increase
 				break;
 			case SC_ECHOSONG:
-				val3 = 6 * val1 + val2 + (sd ? sd->status.job_level / 4 : 0); //DEF Increase In %
+				val4 = 6 * val1 + val2 + val3 / 4; //DEF Increase In %
 				break;
 			case SC_HARMONIZE:
 				val2 = 5 + 5 * val1;
@@ -9603,7 +9636,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_GLOOMYDAY_SK: 
 				//Random number between [15 ~ (Voice Lesson Skill Level x 5) + (Skill Level x 10)] %
-				val2 = rnd_value(15,(sd ? pc_checkskill(sd,WM_LESSON) * 5 : 0) + val1 * 10);
+				val2 = rnd_value(15,(sd ? pc_checkskill(sd,WM_LESSON) : 10) * 5 + val1 * 10);
 				break;
 			case SC_SONGOFMANA:
 				val3 = 10 + min(5 * val2,35); //SP regen
@@ -9661,7 +9694,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					short index = sd->equip_index[EQI_HAND_R];
 
 					if( index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON )
-						val2 += 15 * sd->status.job_level + sd->inventory_data[index]->weight / 10 * sd->inventory_data[index]->wlv * status_get_lv(bl) / 100;
+						val2 += 15 * status_get_job_lv(bl) + sd->inventory_data[index]->weight / 10 * sd->inventory_data[index]->wlv * status_get_lv(bl) / 100;
 				} else //Monster use
 					val2 += 750;
 				break;
@@ -9681,16 +9714,16 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val3 = tick / tick_time;
 				break;
 			case SC_INSPIRATION:
-				val2 = (sd ? sd->status.job_level : 0);
+				val2 = status_get_job_lv(bl);
 				val3 = status_get_lv(bl) / 10 + val2 / 5; //All stat bonus
 				tick_time = 5000;
 				val4 = tick / tick_time;
 				break;
 			case SC_CRESCENTELBOW:
-				val2 = (sd ? sd->status.job_level / 2 : 0) + (50 + 5 * val1);
+				val2 = status_get_job_lv(bl) / 2 + 50 + 5 * val1;
 				break;
 			case SC_LIGHTNINGWALK:
-				val2 = (sd ? sd->status.job_level / 2 : 0) + 40 + 5 * val1; //Chance: [(Job Level / 2) + (40 + 5 * Skill Level)] %
+				val2 = status_get_job_lv(bl) / 2 + 40 + 5 * val1; //Chance: [(Job Level / 2) + (40 + 5 * Skill Level)] %
 				val3 = ((val1 > 0 && val1 < 3) ? 3 : (val1 > 2 && val1 < 5) ? 2 : 1); //SP drain
 				tick_time = 1000;
 				val4 = tick / tick_time;
@@ -9721,7 +9754,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_HEATER_OPTION:
 				val2 = 120; //Bonus Eatk
-				val3 = (sd ? sd->status.job_level : 0); //% Increase damage
+				val3 = status_get_job_lv(bl); //% Increase damage
 				val4 = ELE_FIRE; //Change into fire element
 				break;
 			case SC_TROPIC_OPTION:
@@ -9733,7 +9766,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_COOLER_OPTION:
 				val2 = 80; //Bonus Matk
-				val3 = (sd ? sd->status.job_level : 0); //% Freezing chance
+				val3 = status_get_job_lv(bl); //% Freezing chance
 				val4 = ELE_WATER; //Change into water elemet
 				break;
 			case SC_CHILLY_AIR_OPTION:
@@ -9744,7 +9777,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 50; //% Increase speed and flee
 				break;
 			case SC_BLAST_OPTION:
-				val2 = (sd ? sd->status.job_level : 0); //% Increase damage
+				val2 = status_get_job_lv(bl); //% Increase damage
 				val3 = ELE_WIND; //Change into wind elemet
 				break;
 			case SC_WILD_STORM_OPTION:
@@ -9756,7 +9789,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_CURSED_SOIL_OPTION:
 				val2 = 10; //Bonus % MaxHP
-				val3 = (sd ? sd->status.job_level : 0); //% Increase Damage
+				val3 = status_get_job_lv(bl); //% Increase Damage
 				val4 = ELE_EARTH; //Change into earth elemet
 				break;
 			case SC_UPHEAVAL_OPTION:
@@ -9942,19 +9975,21 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val3 = 200 * val1 * status_get_lv(src) / 150; //Flat dmg reduction
 				sc_start(src,bl,SC_ENDURE,100,1,tick); //Start endure for same duration
 				break;
+			case SC_MIDNIGHT_FRENZY_POSTDELAY: {
+					TBL_HOM *hd = BL_CAST(BL_HOM,bl);
+
+					if( hd->master )
+						clif_homskillinfo(hd->master,MH_SONIC_CRAW,INF_SELF_SKILL);
+				}
+				break;
 			case SC_CBC:
-				val3 = 10; //SP drain %
-				if( bl->type == BL_MOB )
-					tick_time = 2000; //HP dmg each 2 secs
-				else
-					tick_time = 3000; //SP drain each 3 secs
+				val1 = 0; //Prepares for tracking seconds in timer script
+				tick_time = 1000;
 				val4 = tick / tick_time;
 				break;
 			case SC_EQC:
-				val2 = 5 * val1; //Def reduc %
-				val3 = 5 * val1; //Atk reduc %
-				val4 = 2 * val1; //MaxHP reduc %
-				sc_start2(src,bl,SC_STUN,100,val1,bl->id,1000 * status_get_lv(src) / 50 + 500 * val1);
+				val2 = 5 * val1; //Atk/Def reduc %
+				val3 = 2 * val1; //MaxHP reduc %
 				break;
 			case SC_FULL_THROTTLE:
 				val2 = (val1 == 1 ? 6 : 6 - val1);
@@ -10205,8 +10240,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_CONFUSION:
 		case SC_CLOSECONFINE:
 		case SC_CLOSECONFINE2:
-		case SC_TINDER_BREAKER:
-		case SC_TINDER_BREAKER2:
 		case SC_FEAR:
 		case SC__MANHOLE:
 		case SC_PARALYSIS:
@@ -10225,6 +10258,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_ELECTRICSHOCKER:
 		case SC_MAGNETICFIELD:
 		case SC_NETHERWORLD:
+		case SC_TINDER_BREAKER:
 			if (!unit_blown_immune(bl,0x3))
 				unit_stop_walking(bl,1);
 			break;
@@ -11027,19 +11061,15 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 					skill_castend_damage_id(src,bl,sce->val2,sce->val1,gettick(),SD_LEVEL);
 			}
 			break;
-		case SC_TINDER_BREAKER2:
-		case SC_CLOSECONFINE2:
-			{
+		case SC_CLOSECONFINE2: {
 				struct block_list *src = (sce->val2 ? map_id2bl(sce->val2) : NULL);
 				struct status_change *sc2 = (src ? status_get_sc(src) : NULL);
-				enum sc_type type2 = (type == SC_CLOSECONFINE2 ? SC_CLOSECONFINE : SC_TINDER_BREAKER);
 
-				if (src && sc2 && sc2->data[type2]) //If status was already ended, do nothing
-					if (type == SC_TINDER_BREAKER2 || (--(sc2->data[type2]->val2) <= 0)) //Decrease count
-						status_change_end(src,type2,INVALID_TIMER); //No more holds, free him up
+				if (src && sc2 && sc2->data[SC_CLOSECONFINE]) //If status was already ended, do nothing
+					if (--(sc2->data[SC_CLOSECONFINE]->val2) <= 0) //Decrease count
+						status_change_end(src,SC_CLOSECONFINE,INVALID_TIMER); //No more holds, free him up
 			}
 			break;
-		case SC_TINDER_BREAKER:
 		case SC_CLOSECONFINE:
 			if (sce->val2 > 0) { //Caster has been unlocked, nearby chars need to be unlocked
 				int range = 1 +
@@ -11368,6 +11398,13 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		case SC_ALL_RIDING:
 			if (sd && sd->state.autocast)
 				sd->state.autocast = 0;
+			break;
+		case SC_MIDNIGHT_FRENZY_POSTDELAY: {
+				TBL_HOM *hd = BL_CAST(BL_HOM,bl);
+
+				if (hd->master)
+					clif_homskillinfo(hd->master,MH_SONIC_CRAW,INF_ATTACK_SKILL);
+			}
 			break;
 	}
 
@@ -12546,16 +12583,18 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			break;
 
 		case SC_CBC:
-			if( --(sce->val4) >= 0 ) {
-				int sp = status->max_sp * sce->val3 / 100;
-				int hp = (bl->type == BL_MOB ? sp * 10 : 0);
-
-				if( !status_charge(bl,hp,sp) )
-					break;
-				if( bl->type == BL_MOB )
-					sc_timer_next(2000 + tick,status_change_timer,bl->id,data);
-				else
-					sc_timer_next(3000 + tick,status_change_timer,bl->id,data);
+			if( --(sce->val4) >= 0 ) { //val1 is used to count the number of seconds that passed
+				sce->val1++;
+				if( sce->val1%2 == 0 ) { //Lose HP every 2 seconds
+					if( sce->val3 ) { //SPdamage value higher then 0 signals target is not a monster
+						if( !status_charge(bl,sce->val2,0) )
+							break;
+					} else if( !status_damage(NULL,bl,sce->val2,0,0,3) )
+						break; //If it's a monster then use this to remove HP since status_charge won't work
+				}
+				if( sce->val1%3 == 0 ) //Lose SP every 3 seconds
+					status_charge(bl,0,sce->val3);
+				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
 			break;
@@ -12686,22 +12725,17 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
 				}
 			}
 			break;
+		case SC_CLOSECONFINE:
+			//Locked char has released the hold on everyone
+			if( tsc && tsc->data[SC_CLOSECONFINE2] && tsc->data[SC_CLOSECONFINE2]->val2 == src->id ) {
+				tsc->data[SC_CLOSECONFINE2]->val2 = 0;
+				status_change_end(bl, SC_CLOSECONFINE2, INVALID_TIMER);
+			}
+			break;
 		case SC_CURSEDCIRCLE_TARGET:
 			if( tsc && tsc->data[SC_CURSEDCIRCLE_TARGET] && tsc->data[SC_CURSEDCIRCLE_TARGET]->val2 == src->id ) {
 				clif_bladestop(bl, tsc->data[SC_CURSEDCIRCLE_TARGET]->val2, 0);
 				status_change_end(bl, type, INVALID_TIMER);
-			}
-			break;
-		case SC_TINDER_BREAKER:
-		case SC_CLOSECONFINE:
-			{
-				enum sc_type type2 = (type == SC_CLOSECONFINE ? SC_CLOSECONFINE2 : SC_TINDER_BREAKER2);
-
-				//Locked char has released the hold on everyone
-				if( tsc && tsc->data[type2] && tsc->data[type2]->val2 == src->id ) {
-					tsc->data[type2]->val2 = 0;
-					status_change_end(bl, type2, INVALID_TIMER);
-				}
 			}
 			break;
 	}

@@ -701,6 +701,17 @@
 //736,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_PSYCHIC_WAVE,NPC Psychic Wave
 //737,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_RAYOFGENESIS,NPC Ray of Genesis
 //738,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_VENOMIMPRESS,NPC Venom Impress
+//739,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_CLOUD_KILL,NPC Cloud Kill
+//740,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_IGNITIONBREAK,NPC Ignition Break
+//741,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_PHANTOMTHRUST,NPC Phantom Thrust
+//742,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_POISON_BUSTER,NPC Poison Blaster
+//743,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_HALLUCINATIONWALK,NPC Hallucination Walk
+//744,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_ELECTRICWALK,NPC Electric Walk
+//745,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_FIREWALK,NPC Fire Walk
+//746,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_WIDEDISPEL,Wide Dispell
+//747,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_LEASH,Leash
+//748,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_WIDELEASH,Wide Leash
+//749,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_WIDECRITICALWOUND,Wide Critical Wound
 
 // 2nd Job Quest Skills
 1001,14,6,1,-1,0,0,1,1,no,0,0x1,0,weapon,0,0,	KN_CHARGEATK,Charge Attack
@@ -1179,26 +1190,37 @@
 5023,6:10:14,6,2,0,0x1,0,3,1,yes,0,0,0,none,0,0,	SU_LOPE,Lope
 5024,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_SPRITEMABLE,Spirit Marble
 5025,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_POWEROFLAND,Power of Land
-5026,9,6,1,2:3:1:4:8,0,0,5,1,yes,0,0,0,magic,0,0,		SU_SV_STEMSPEAR,Silvervine Stem Spear
-5027,9,6,1,0,0x3,0,5,1,yes,0,0,1,none,0,0,		SU_CN_POWDERING,Catnip Powdering
-5028,9,8,2,0,0,1:1:2:2:3,5,1:2:3:4:5,yes,0,0,0,magic,0,0,		SU_CN_METEOR,Catnip Meteor
-5029,9,6,1,0,0x1,0,5,1,yes,0,0,1,none,0,0,		SU_SV_ROOTTWIST,Silvervine Root Twist
+5026,9,6,1,2:3:1:4:8,0,0,5,1,yes,0,0,0,magic,0,0,	SU_SV_STEMSPEAR,Silvervine Stem Spear
+5027,9,6,1,0,0x3,0,5,1,yes,0,0,1,none,0,0,	SU_CN_POWDERING,Catnip Powdering
+5028,9,8,2,0,0,1:1:2:2:3,5,1:2:3:4:5,yes,0,0,0,magic,0,0,	SU_CN_METEOR,Catnip Meteor
+5029,9,6,1,0,0x1,0,5,1,yes,0,0,1,none,0,0,	SU_SV_ROOTTWIST,Silvervine Root Twist
 5030,0,6,1,5,0x30,0,5,1,no,0,0,1,magic,0,0,	SU_SV_ROOTTWIST_ATK,Silver Vine Root Twist Attack
 5031,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_POWEROFLIFE,Power of Life
 5032,9,6,1,-1,0,0,5,1,yes,0,0,0,weapon,0,0,	SU_SCAROFTAROU,Scar of Tarou
 5033,9,6,1,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_PICKYPECK,Picky Peck
 5034,0,8,1,-1,0,0,5,-5,no,0,0,0,weapon,0,0,	SU_PICKYPECK_DOUBLE_ATK,Picky Peck Double Attack
-5035,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,		SU_ARCLOUSEDASH,Arclouse Dash
+5035,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_ARCLOUSEDASH,Arclouse Dash
 5036,9,8,1,-1,0x2,1:1:2:2:3,5,1:2:3:4:5,yes,0,0,0,weapon,0,0,	SU_LUNATICCARROTBEAT,Lunatic Carrot Beat
 5037,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_POWEROFSEA,Power of Sea
-5038,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,		SU_TUNABELLY,Tuna Belly
-5039,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,		SU_TUNAPARTY,Tuna Party
-5040,0,6,4,0,0x3,-1,5,1,yes,0,0,0,none,0,0,		SU_BUNCHOFSHRIMP,Bunch of Shrimp
-5041,9,6,16,0,0x3,0,5,1,yes,0,0,0,none,0,0,		SU_FRESHSHRIMP,Fresh Shrimp
-
-// Unknown Unconfirmed Summoner Skills - Animations Show On These
-//5042,0,0,0,0,0,0,5,0,yes,0,0,0,none,0,0x0,		SU_CN_METEOR_SEC,
-//5043,0,0,0,0,0,0,5,0,yes,0,0,0,none,0,0x0,		SU_LUNATICCARROTBEAT_SEC,
+5038,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_TUNABELLY,Tuna Belly
+5039,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_TUNAPARTY,Tuna Party
+5040,0,6,4,0,0x3,-1,5,1,yes,0,0,0,none,0,0,	SU_BUNCHOFSHRIMP,Bunch of Shrimp
+5041,9,6,16,0,0x3,0,5,1,yes,0,0,0,none,0,0,	SU_FRESHSHRIMP,Fresh Shrimp
+5042,0,8,2,0,0,0,5,1,yes,0,0,0,magic,0,0,	SU_CN_METEOR2,Catnip Meteor 2
+5043,0,8,1,0,0,0,5,1,yes,0,0,0,weapon,0,0,	SU_LUNATICCARROTBEAT2,Lunatic Carrot Beat 2
+//5044,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SOULATTACK,
+//5045,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_POWEROFFLOCK,
+//5046,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SVG_SPIRIT,
+//5047,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_HISS,
+//5048,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_NYANGGRASS,
+//5049,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_GROOMING,
+//5050,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_PURRING,
+//5051,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SHRIMPARTY,
+//5052,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SPIRITOFLIFE,
+//5053,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_MEOWMEOW,
+//5054,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SPIRITOFLAND,
+//5055,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_CHATTERING,
+//5056,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SPIRITOFSEA,
 
 8001,9,6,4,0,0x1,0,5,1,no,0,0,0,magic,0,0,	HLIF_HEAL,Healing Touch
 8002,0,6,4,0,0x3,-1,5,1,no,0,0,0,none,0,0,	HLIF_AVOID,Avoid
@@ -1227,15 +1249,15 @@
 8025,7,8,2,4:0:4:0:4,0x2,2:2:3:3:4,5,-6,no,0,0,0,magic,0,0,	MH_XENO_SLASHER,Xeno Slasher
 8026,5:5:7:7:9,6,16,0,0x1,0,5,1,no,0,0,0,magic,0,0,	MH_SILENT_BREEZE,Silent Breeze
 8027,0,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	MH_STYLE_CHANGE,Style Change
-8028,1,8,1,0,0,0,5,1,no,0,0x200,0,weapon,0,0,	MH_SONIC_CRAW,Sonic Claw
+8028,1,8,1,0,0,0,5,10,no,0,0x200,0,weapon,0,0,	MH_SONIC_CRAW,Sonic Claw
 8029,1,6,4,0,0,0,5,1,no,0,0x200,0,weapon,0,0,	MH_SILVERVEIN_RUSH,Silver Bain Rush
-8030,1,6,4,0,0,0,5,1,no,0,0x200,0,weapon,0,0,	MH_MIDNIGHT_FRENZY,Midnight Frenzy
+8030,1,8,4,0,0,0,5,-8,no,0,0x200,0,weapon,0,0,	MH_MIDNIGHT_FRENZY,Midnight Frenzy
 8031,5:6:7:8:9,6,1,0,0,0,5,1,no,0,0,0,weapon,3,0,	MH_STAHL_HORN,Steel Horn
 8032,0,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0,	MH_GOLDENE_FERSE,Golden Heel
 8033,0,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0,	MH_STEINWAND,Stone Wall
 8034,9,6,1,6,0x2,1:1:1:1:2,5,1,no,0,0,0,magic,0,0,	MH_HEILIGE_STANGE,Holy Pole
 8035,0,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0,	MH_ANGRIFFS_MODUS,Attack Mode
-8036,3:4:5:6:7,6,1,0,0,0,5,1,no,0,0x200,0,weapon,0,0,	MH_TINDER_BREAKER,Tinder Breaker
+8036,3:4:5:6:7,6,1,0,0,0,5,1,yes,0,0,0,weapon,0,0,	MH_TINDER_BREAKER,Tinder Breaker
 8037,1,6,4,0,0,0,5,1,no,0,0x200,0,weapon,0,0,	MH_CBC,Continual Break Combo
 8038,1,6,4,0,0,0,5,1,no,0,0x200,0,misc,0,0,	MH_EQC,Eternal Quick Combo
 8039,0,6,4,3,0x2,1:1:1:2:2,5,1,no,0,0,0,weapon,0,0,	MH_MAGMA_FLOW,Magma Flow

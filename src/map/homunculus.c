@@ -201,7 +201,7 @@ void hom_delspiritball(TBL_HOM *hd, int count, int type)
 
 	hd->homunculus.spiritball -= count;
 
-	if (!type)
+	if (type)
 		clif_spiritball(&hd->bl);
 }
 
