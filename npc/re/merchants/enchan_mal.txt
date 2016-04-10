@@ -152,8 +152,8 @@ malangdo,213,167,4	script	Mayomayo#mal	555,{
 			case 1137: callsub L_Socket,2,2; //Excalibur
 			case 1130: callsub L_Socket,2,2; //Nagan
 			case 1132: callsub L_Socket,4,2; //Edge
-			case 13412: callsub L_Scoket,5,2; //Twin_Edge_B
-			case 13413: callsub L_Scoket,5,2; //Twin_Edge_R
+			case 13412: callsub L_Socket,5,2; //Twin_Edge_B
+			case 13413: callsub L_Socket,5,2; //Twin_Edge_R
 		}
 		break;
 	case 3: // 2-H Swords
