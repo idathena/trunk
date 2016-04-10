@@ -4403,8 +4403,8 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 		}
 		//Sonic Blow +25% dmg on GVG, +100% dmg on non GVG
 		if(skill_id == AS_SONICBLOW && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_ASSASIN) {
-			ATK_ADDRATE(wd.damage, wd.damage2, map_flag_gvg2(src->m) ? 25 : 100);
-			RE_ALLATK_ADDRATE(wd, map_flag_gvg2(src->m) ? 25 : 100);
+			ATK_ADDRATE(wd.damage, wd.damage2, (map_flag_gvg2(src->m) ? 25 : 100));
+			RE_ALLATK_ADDRATE(wd, (map_flag_gvg2(src->m) ? 25 : 100));
 		}
 		if(skill_id == CR_SHIELDBOOMERANG && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_CRUSADER) {
 			ATK_ADDRATE(wd.damage, wd.damage2, 100);
@@ -6704,12 +6704,14 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			md.damage = 200 + 100 * skill_lv + sstatus->int_;
 			break;
 		case GN_HELLS_PLANT_ATK:
-			md.damage = skill_lv * status_get_lv(target) * 10 + sstatus->int_ * 7 / 2 *
+			md.damage = 10 * skill_lv * status_get_lv(src) + 7 * sstatus->int_ / 2 *
 				(18 + status_get_job_lv(src) / 4) * 5 / (10 - (sd ? pc_checkskill(sd, AM_CANNIBALIZE) : 5));
+			if(map_flag_gvg2(src->m))
+				md.damage >>= 1;
 			md.flag |= BF_WEAPON;
 			break;
 		case RL_B_TRAP:
-			md.damage = (3 * skill_lv / 100) * tstatus->hp + sstatus->dex * 10;
+			md.damage = 3 * skill_lv * tstatus->hp / 100 + 10 * sstatus->dex;
 			break;
 		case MH_EQC: {
 				int targetHP = tstatus->hp,
