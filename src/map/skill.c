@@ -10903,6 +10903,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 				ud->skilltimer = tid;
 				return skill_castend_pos(tid,tick,id,data);
 			case GN_WALLOFTHORN:
+			case RL_B_TRAP:
 			case SC_ESCAPE:
 			case SU_CN_POWDERING:
 			case SU_SV_ROOTTWIST:
@@ -11192,7 +11193,7 @@ int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data)
 			int i;
 
 			for( i = 0; i < MAX_SKILLUNITGROUP && ud->skillunit[i] && maxcount; i++ )
-				if(ud->skillunit[i]->skill_id == ud->skill_id)
+				if( ud->skillunit[i]->skill_id == ud->skill_id )
 					maxcount--;
 			if( maxcount == 0 ) {
 				if( sd )
@@ -15448,10 +15449,9 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 
 				if( battle_config.land_skill_limit && maxcount > 0 && (battle_config.land_skill_limit&BL_PC) ) {
 					i = map_foreachinmap(skill_check_condition_mob_master_sub,sd->bl.m,BL_MOB,sd->bl.id,mob_id,skill_id,&c);
-					if( c >= maxcount || (skill_id == AM_CANNIBALIZE && c != i && (battle_config.summon_flora&2)) )
-					{ //Fails when exceed max limit. There are other plant types already out
+					if( c >= maxcount || (skill_id == AM_CANNIBALIZE && c != i && (battle_config.summon_flora&2)) ) {
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-						return false;
+						return false; //Fails when exceed max limit, there are other plant types already out
 					}
 				}
 			}
