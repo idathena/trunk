@@ -7544,8 +7544,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if (tsc && tsc->data[SC_MAGICROD]) {
 					sp = skill_get_sp(skill_id,skill_lv);
 					sp = sp * tsc->data[SC_MAGICROD]->val2 / 100;
-					if (sp < 1)
-						sp = 1;
+					sp = max(sp,1);
 					status_heal(bl,0,sp,2);
 					status_percent_damage(bl,src,0,-20,false); //20% MaxSP damage
 				} else {
@@ -7562,16 +7561,16 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 								clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 							break;
 						}
-					} else if (!dstsd || map_flag_vs(bl->m)) //HP damage only on vs-maps when against players
+					}
+					//HP damage only on vs-maps when against players and skill need to be at level 5
+					if ((!dstsd || map_flag_vs(bl->m)) && skill_lv >= 5)
 						hp = tstatus->max_hp / 50; //Recover 2% HP [Skotlex]
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 					unit_skillcastcancel(bl,0);
 					sp = skill_get_sp(bl_skill_id,bl_skill_lv);
 					status_zap(bl,hp,sp);
-					if (hp && skill_lv >= 5)
-						hp >>= 1;	//Recover half damaged HP at level 5 [Skotlex]
-					else
-						hp = 0;
+					if (hp) //Recover half damaged HP [Skotlex]
+						hp >>= 1;
 					if (sp) //Recover some of the SP used
 						sp = sp * (25 * (skill_lv - 1)) / 100;
 					if (hp || sp)
