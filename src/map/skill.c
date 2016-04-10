@@ -2293,23 +2293,27 @@ static int skill_magic_reflect(struct block_list *src, struct block_list *bl, in
 	if( !sc || !sc->count )
 		return 0; //Status-based reflection
 
-	if( sc->data[SC_KYOMU] )
-		return 0; //Nullify reflecting ability
+	if( !sc->data[SC_KYOMU] ) { //Kyomu doesn't reflect
+		//Item-based reflection (Bypasses Boss check)
+		if( sd && sd->bonus.magic_damage_return && type && rnd()%100 < sd->bonus.magic_damage_return )
+			return 1; //Item-based reflection
+	}
+
+	//Magic Mirror reflection (Bypasses Boss check)
+	if( sc->data[SC_MAGICMIRROR] && rnd()%100 < sc->data[SC_MAGICMIRROR]->val2 )
+		return 1;
 
 	if( is_boss(src) )
 		return 0;
 
-	if( sd && sd->bonus.magic_damage_return && type && rnd()%100 < sd->bonus.magic_damage_return )
-		return 1; //Item-based reflection
-
-	if( sc->data[SC_MAGICMIRROR] && rnd()%100 < sc->data[SC_MAGICMIRROR]->val2 )
-		return 1;
-
+	//Kaite reflection (Doessn't bypass Boss check)
 	if( sc->data[SC_KAITE] && (src->type == BL_PC || status_get_lv(src) <= 80) ) {
+		//Kaite only works against non-players if they are low-level
+		//Kyomu doesn't disable Kaite, but the "skill fail chance" part of Kyomu applies to it
 		clif_specialeffect(bl, 438, AREA);
 		if( --sc->data[SC_KAITE]->val2 <= 0 )
 			status_change_end(bl, SC_KAITE, INVALID_TIMER);
-		return 2; //Kaite only works against non-players if they are low-level
+		return 2;
 	}
 
 	return 0;
@@ -12698,6 +12702,10 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 			val2 = skill_lv + 4;
 			val3 = 300 * skill_lv + 65 * (status->int_ + status_get_lv(src)) + status->max_sp;
 			break;
+		case MH_VOLCANIC_ASH:
+			if( !map_flag_vs(src->m) )
+				target = BCT_ENEMY;
+			break;
 		case EL_FIRE_MANTLE:
 			val2 = skill_lv;
 			break;
@@ -15169,13 +15177,6 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 			break;
 		case SO_EL_CONTROL:
 			if( !sd->status.ele_id || !sd->ed ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-				return false;
-			}
-			break;
-		case LG_REFLECTDAMAGE:
-		case CR_REFLECTSHIELD:
-			if( sc && sc->data[SC_KYOMU] && rnd()%100 < 5 * sc->data[SC_KYOMU]->val1 ) {
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				return false;
 			}

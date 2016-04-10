@@ -1095,7 +1095,7 @@ int unit_blown_immune(struct block_list *bl, int flag)
 
 				if (md->mob_id == MOBID_EMPERIUM)
 					return 2; //Emperium can't be knocked back
-				if ((flag&0x1) && status_get_mode(bl)&(MD_KNOCKBACK_IMMUNE|MD_BOSS) && !(battle_config.skill_trap_type&0x2))
+				if ((flag&0x1) && (status_get_mode(bl)&(MD_KNOCKBACK_IMMUNE|MD_BOSS)) && !(battle_config.skill_trap_type&0x2))
 					return 3; //Bosses or immune can't be knocked back
 			}
 			break;

@@ -7052,8 +7052,8 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 #endif
 	}
 
-	if( sc && sc->data[SC_KYOMU] )
-		return 0; //Nullify reflecting ability
+	if( sc && sc->data[SC_KYOMU] && !sc->data[SC_SHIELDSPELL_DEF] )
+		return 0; //Nullify reflecting ability except for Shield Spell DEF
 
 	return rdamage;
 }
