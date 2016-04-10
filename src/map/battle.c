@@ -2300,6 +2300,8 @@ static int is_attack_piercing(struct Damage wd, struct block_list *src, struct b
 #endif
 		case PA_SACRIFICE:
 		case PA_SHIELDCHAIN:
+		case RK_DRAGONBREATH:
+		case RK_DRAGONBREATH_WATER:
 		case NC_SELFDESTRUCTION:
 		case KO_HAPPOKUNAI:
 			return 0;
@@ -2585,6 +2587,7 @@ static bool battle_skill_stacks_masteries_vvs(uint16 skill_id)
 		case RK_DRAGONBREATH_WATER:
 		case NC_SELFDESTRUCTION:
 		case KO_HAPPOKUNAI:
+		case RL_MASS_SPIRAL:
 			return false;
 	}
 	return true;
@@ -5079,6 +5082,10 @@ static struct Damage initialize_weapon_data(struct block_list *src, struct block
 					if(sc && sc->data[SC_BANDING] && sc->data[SC_BANDING]->val2 > 3)
 						wd.div_ = sc->data[SC_BANDING]->val2;
 				}
+				break;
+
+			case RL_R_TRIP: //Knock's back target out of skill range
+				wd.blewcount -= distance_bl(src, target);
 				break;
 
 			case EL_STONE_RAIN:
