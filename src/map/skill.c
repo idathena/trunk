@@ -409,7 +409,7 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 				hp += hp * lv * 2 / 100;
 			if( sd && tsd && sd->status.partner_id == tsd->status.char_id && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex )
 				hp *= 2;
-			if( sd && ((lv = pc_checkskill(sd, SU_POWEROFSEA)) > 0)) {
+			if( sd && ((lv = pc_checkskill(sd, SU_POWEROFSEA)) > 0) ) {
 				hp += hp * 10 / 100;
 				if( pc_checkskill(sd, SU_TUNABELLY) == 5 && pc_checkskill(sd, SU_TUNAPARTY) == 5 &&
 					pc_checkskill(sd, SU_BUNCHOFSHRIMP) == 5 && pc_checkskill(sd, SU_FRESHSHRIMP) == 5 )
@@ -1488,7 +1488,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 				sc_start(src,bl,SC_HALLUCINATION,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case RL_MASS_SPIRAL:
-			sc_start(src,bl,SC_BLEEDING,rnd()%50 + skill_lv * 10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
+			sc_start(src,bl,SC_BLEEDING,50,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case RL_SLUGSHOT:
 			if( dstmd )
@@ -2952,6 +2952,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case LG_MOONSLASHER:
 		case SR_TIGERCANNON:
 		case GN_SPORE_EXPLOSION:
+		case RL_BANISHING_BUSTER:
 		case RL_HAMMER_OF_GOD:
 		case EL_CIRCLE_OF_FIRE:
 		case EL_FIRE_MANTLE:
@@ -3010,7 +3011,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.amotion = status_get_amotion(src) * 2;
 		//Fall through
 		case LG_OVERBRAND_PLUSATK:
-		case RL_BANISHING_BUSTER:
 		case RL_S_STORM:
 		case RL_R_TRIP_PLUSATK:
 		case NC_MAGMA_ERUPTION:
@@ -3180,9 +3180,8 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				status_zap(bl, 0, damage / 10); //10% of damage dealt
 				break;
 			case RL_BANISHING_BUSTER:
-				if (tsd)
-					pc_bonus_script_clear(tsd, BSF_REM_ON_BANISHING_BUSTER);
-				status_change_clear_buffs(bl, SCCB_BANISHING_BUSTER, skill_lv);
+				if( skill_area_temp[1] == bl->id )
+					status_change_clear_buffs(bl, SCCB_BANISHING_BUSTER, skill_lv);
 				break;
 		}
 		if (sd)
@@ -4489,10 +4488,12 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				}
 			} else {
 				switch (skill_id) {
+					case RL_BANISHING_BUSTER:
+						clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SPLASH);
+					//Fall through
 					case NJ_BAKUENRYU:
 					case GN_CARTCANNON:
 					case GN_ILLUSIONDOPING:
-					case RL_BANISHING_BUSTER:
 					case MH_HEILIGE_STANGE:
 						clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 						break;
@@ -5508,6 +5509,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			case BS_ADRENALINE:
 			case AB_RENOVATIO:
 			case AB_HIGHNESSHEAL:
+			case SU_TUNABELLY:
+			case SU_FRESHSHRIMP:
 				if(!sd->state.autocast && sd->skillitem != skill_id) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 					return 1;

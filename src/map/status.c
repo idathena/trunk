@@ -2870,6 +2870,12 @@ static int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type) {
 				bonus += i * 200;
 			if ((i = pc_checkskill(sd,SU_SPRITEMABLE)) > 0)
 				bonus += 1000;
+			if ((i = pc_checkskill(sd,SU_POWEROFSEA)) > 0) {
+				bonus += 1000;
+				if (pc_checkskill(sd,SU_TUNABELLY) == 5 && pc_checkskill(sd,SU_TUNAPARTY) == 5 &&
+					pc_checkskill(sd,SU_BUNCHOFSHRIMP) == 5 && pc_checkskill(sd,SU_FRESHSHRIMP) == 5)
+					bonus += 3000;
+			}
 #ifndef HP_SP_TABLES
 			if ((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && sd->status.base_level >= 99)
 				bonus += 2000; //Super novice lvl 99 hp bonus
@@ -2991,6 +2997,12 @@ static int status_get_spbonus(struct block_list *bl, enum e_status_bonus type) {
 				bonus += 30 * i;
 			if ((i = pc_checkskill(sd,SU_SPRITEMABLE)) > 0)
 				bonus += 100;
+			if ((i = pc_checkskill(sd,SU_POWEROFSEA)) > 0) {
+				bonus += 100;
+				if (pc_checkskill(sd,SU_TUNABELLY) == 5 && pc_checkskill(sd,SU_TUNAPARTY) == 5 &&
+					pc_checkskill(sd,SU_BUNCHOFSHRIMP) == 5 && pc_checkskill(sd,SU_FRESHSHRIMP) == 5)
+					bonus += 300;
+			}
 #ifndef HP_SP_TABLES
 			//Summoner starts at 8 SP and gain 2 SP per even base lv and 3 SP per odd base lv
 			if ((sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER) {
@@ -6312,7 +6324,7 @@ static short status_calc_fix_aspd(struct block_list *bl, struct status_change *s
 	if (sc->data[SC_FIGHTINGSPIRIT])
 		aspd -= sc->data[SC_FIGHTINGSPIRIT]->val2;
 	if (sc->data[SC_HEAT_BARREL])
-		aspd -= sc->data[SC_HEAT_BARREL]->val1;
+		aspd -= 10 * sc->data[SC_HEAT_BARREL]->val1;
 	if (sc->data[SC_MTF_ASPD])
 		aspd -= sc->data[SC_MTF_ASPD]->val1;
 	if (sc->data[SC_MTF_ASPD2])
@@ -7952,18 +7964,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				return 0;
 			}
 			break;
-		case SC_MADNESSCANCEL:
-			if( sc->data[SC_HEAT_BARREL] || sc->data[SC_P_ALTER] )
-				return 0;
-			break;
-		case SC_HEAT_BARREL:
-			if( sc->data[SC_MADNESSCANCEL] || sc->data[SC_P_ALTER] )
-				return 0;
-			break;
-		case SC_P_ALTER:
-			if( sc->data[SC_MADNESSCANCEL] || sc->data[SC_HEAT_BARREL] )
-				return 0;
-			break;
 		case SC_KINGS_GRACE:
 			if( sc->data[SC_WHITEIMPRISON] )
 				return 0;
@@ -8150,6 +8150,14 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 		case SC_MADNESSCANCEL:
 			status_change_end(bl,SC_ADJUSTMENT,INVALID_TIMER);
+		//Fall through
+		case SC_P_ALTER:
+		case SC_HEAT_BARREL:
+			if( sc->data[type] )
+				break;
+			status_change_end(bl,SC_MADNESSCANCEL,INVALID_TIMER);
+			status_change_end(bl,SC_P_ALTER,INVALID_TIMER);
+			status_change_end(bl,SC_HEAT_BARREL,INVALID_TIMER);
 			break;
 		//NPC_CHANGEUNDEAD will debuff Blessing and Agi Up
 		case SC_CHANGEUNDEAD:
@@ -10083,10 +10091,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 10; //Batk%, Matk%
 				break;
 			case SC_FRESHSHRIMP:
-				tick_time = 10000 - ((val1 - 1) * 1000);
-				val4 = tick / tick_time;
-				if( val4 <= 0 ) //Prevents a negeative value from happening
-					val4 = 0;
+				val2 = 11000 - 1000 * val1; //Heal interval
+				val2 = max(val2,1000);
+				tick_time = val2;
+				val3 = tick / tick_time;
 				break;
 			case SC_TUNAPARTY:
 				val2 = (status->max_hp * val1 * 10 / 100); // %MaxHP to absorb
@@ -12652,9 +12660,9 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			break;
 
 		case SC_FRESHSHRIMP:
-			if( --(sce->val4) >= 0 ) {
+			if( --(sce->val3) >= 0 ) {
 				status_heal(bl,status->max_hp / 100,0,2);
-				sc_timer_next((10000 - ((sce->val1 - 1) * 1000)) + tick,status_change_timer,bl->id,data);
+				sc_timer_next(sce->val2 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
 			break;
@@ -12960,10 +12968,16 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 
 	if( bl->type == BL_PC ) { //Removes bonus_script
 		i = 0;
-		if( type&SCCB_BUFFS )    i |= BSF_REM_BUFF;
-		if( type&SCCB_DEBUFFS )  i |= BSF_REM_DEBUFF;
-		if( type&SCCB_REFRESH )  i |= BSF_REM_ON_REFRESH;
-		if( type&SCCB_LUXANIMA ) i |= BSF_REM_ON_LUXANIMA;
+		if( type&SCCB_BUFFS )
+			i |= BSF_REM_BUFF;
+		if( type&SCCB_DEBUFFS )
+			i |= BSF_REM_DEBUFF;
+		if( type&SCCB_BANISHING_BUSTER )
+			i |= BSF_REM_ON_BANISHING_BUSTER;
+		if( type&SCCB_REFRESH )
+			i |= BSF_REM_ON_REFRESH;
+		if( type&SCCB_LUXANIMA )
+			i |= BSF_REM_ON_LUXANIMA;
 		pc_bonus_script_clear(BL_CAST(BL_PC, bl), i);
 	}
 
