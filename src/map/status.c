@@ -1872,7 +1872,7 @@ int status_fixed_revive(struct block_list *bl, unsigned int per_hp, unsigned int
  * 	1 - Cast bar is done.
  * 	2 - Skill already pulled off, check is due to ground-based skills or splash-damage ones.
  * src MAY be null to indicate we shouldn't check it, this is a ground-based skill attack.
- * target MAY Be null, in which case the checks are only to see
+ * target MAY be null, in which case the checks are only to see
  * whether the source can cast or not the skill on the ground.
  *------------------------------------------*/
 bool status_check_skilluse(struct block_list *src, struct block_list *target, uint16 skill_id, int flag)
@@ -1914,8 +1914,13 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 	if (sc && sc->count) {
 		if (sc->data[SC_ALL_RIDING])
 			return false; //New mounts can't attack nor use skills in the client, this check makes it cheat-safe [Ind]
-		if (sc->data[SC_ASH] && rnd()%100 < 50 && src->type == BL_PC) { //Gain 50% of failing rate when casting skills
-			clif_skill_fail((TBL_PC *)src, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+		if (flag == 1 && //Only applies when cast bar is done
+			!(status->mode&MD_BOSS) && //Don't affect boss monsters
+			((sc->data[SC_ASH] && rnd()%100 < 50) || //Gain 50% of failing rate when casting skills
+			(sc->data[SC_KYOMU] && rnd()%100 < 5 * sc->data[SC_KYOMU]->val1))) //Gain 25% of failing rate at level 5
+		{
+			if (src->type == BL_PC)
+				clif_skill_fail((TBL_PC *)src, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 			return false;
 		}
 		if (sc->opt1 && sc->opt1 != OPT1_BURNING && sc->opt1 != OPT1_FREEZING &&
@@ -1933,7 +1938,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 		if (sc->data[SC_WINKCHARM] && target && flag != 2) {
 			struct block_list *winkcharm_target = map_id2bl(sc->data[SC_WINKCHARM]->val2);
 
-			if (winkcharm_target != NULL) {
+			if (winkcharm_target) {
 				if (unit_bl2ud(src) && (unit_bl2ud(src))->walktimer == INVALID_TIMER)
 					unit_walktobl(src, map_id2bl(sc->data[SC_WINKCHARM]->val2), 3, 1);
 				return false;
@@ -1991,7 +1996,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 		}
 	}
 
-	if (target == NULL || target == src)
+	if (!target || target == src)
 		return true; //No further checking needed
 
 	if (tsc && tsc->count) {
@@ -5352,8 +5357,8 @@ static unsigned short status_calc_batk(struct block_list *bl, struct status_chan
 		batk -= batk * 25 / 100;
 	if(sc->data[SC__ENERVATION])
 		batk -= batk * sc->data[SC__ENERVATION]->val2 / 100;
-	if(sc->data[SC_ASH] && status_get_element(bl) == ELE_WATER)
-		batk -= batk * 50 / 100;
+	if(sc->data[SC_ASH])
+		batk -= batk * sc->data[SC_ASH]->val4 / 100;
 
 	return (unsigned short)cap_value(batk,0,USHRT_MAX);
 }
@@ -5599,7 +5604,7 @@ static short status_calc_hit(struct block_list *bl, struct status_change *sc, in
 	if(sc->data[SC_TEARGAS])
 		hit -= hit * 50 / 100;
 	if(sc->data[SC_ASH])
-		hit -= hit * 50 / 100;
+		hit -= hit * sc->data[SC_ASH]->val2 / 100;
 
 	return (short)cap_value(hit,1,SHRT_MAX);
 }
@@ -5690,8 +5695,8 @@ static short status_calc_flee(struct block_list *bl, struct status_change *sc, i
 		flee -= flee * (40 + 10 * sc->data[SC_SATURDAYNIGHTFEVER]->val1) / 100;
 	if(sc->data[SC_TEARGAS])
 		flee -= flee * 50 / 100;
-	if(sc->data[SC_ASH] && status_get_element(bl) == ELE_WATER)
-		flee -= flee * 50 / 100;
+	if(sc->data[SC_ASH])
+		flee -= flee * sc->data[SC_ASH]->val4 / 100;
 
 	return (short)cap_value(flee,1,SHRT_MAX);
 }
@@ -5805,8 +5810,8 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 		def -= def * 25 / 100;
 	if(sc->data[SC_ROCK_CRUSHER])
 		def -= def * sc->data[SC_ROCK_CRUSHER]->val2 / 100;
-	if(sc->data[SC_ASH] && status_get_race(bl) == RC_PLANT)
-		def -= def * 50 / 100;
+	if(sc->data[SC_ASH])
+		def -= def * sc->data[SC_ASH]->val3 / 100;
 	if(sc->data[SC_OVERED_BOOST] && bl->type == BL_HOM)
 		def -= def * sc->data[SC_OVERED_BOOST]->val4 / 100;
 
@@ -5875,8 +5880,8 @@ short status_calc_def2(struct block_list *bl, struct status_change *sc, int def2
 		def2 -= def2 * 14 * sc->data[SC_ANALYZE]->val1 / 100;
 	if(sc->data[SC_SATURDAYNIGHTFEVER])
 		def2 -= def2 * (10 + 10 * sc->data[SC_SATURDAYNIGHTFEVER]->val1) / 100;
-	if(sc->data[SC_ASH] && status_get_race(bl) == RC_PLANT)
-		def2 -= def2 * 50 / 100;
+	if(sc->data[SC_ASH])
+		def2 -= def2 * sc->data[SC_ASH]->val3 / 100;
 	if(sc->data[SC_PARALYSIS])
 		def2 -= def2 * sc->data[SC_PARALYSIS]->val2 / 100;
 	if(sc->data[SC_EQC])
@@ -9958,7 +9963,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_OVERED_BOOST:
 				val2 = 300 + 40 * val1; //Flee bonus
 				val3 = 179 + 2 * val1; //Aspd bonus
-				val4 = 50; //Def reduc %
+				val4 = 50; //Def reduction %
 				break;
 			case SC_GRANITIC_ARMOR:
 				val2 = 2 * val1; //Dmg hp reduction
@@ -9966,6 +9971,18 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_MAGMA_FLOW:
 				val2 = 3 * val1; //Activation chance
+				break;
+			case SC_ASH:
+				val2 = 0; //Hit reduction %
+				val3 = 0; //Def reduction %
+				val4 = 0; //Atk/Flee reduction
+				if( !(status_get_mode(bl)&MD_BOSS) ) {
+					val2 = 50;
+					if( status_get_race(bl) == RC_PLANT )
+						val3 = 50;
+					if( status_get_element(bl) == ELE_WATER )
+						val4 = 50;
+				}
 				break;
 			case SC_PYROCLASTIC:
 				val2 = 10 * val1 + status_get_lv(src); //Watk bonus
