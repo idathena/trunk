@@ -628,7 +628,7 @@ void initChangeTables(void) {
 	add_sc( WL_CRIMSONROCK        , SC_STUN           );
 	add_sc( WL_HELLINFERNO        , SC_BURNING        );
 	add_sc( WL_COMET              , SC_BURNING        );
-	set_sc( WL_TELEKINESIS_INTENSE, SC_TELEKINESIS_INTENSE , SI_TELEKINESIS_INTENSE , SCB_NONE );
+	set_sc( WL_TELEKINESIS_INTENSE, SC_TELEKINESIS_INTENSE, SI_TELEKINESIS_INTENSE, SCB_NONE );
 
 	set_sc( RA_FEARBREEZE        , SC_FEARBREEZE      , SI_FEARBREEZE      , SCB_NONE );
 	set_sc( RA_ELECTRICSHOCKER   , SC_ELECTRICSHOCKER , SI_ELECTRICSHOCKER , SCB_NONE );
@@ -1213,6 +1213,7 @@ void initChangeTables(void) {
 	StatusDisplayType[SC_SUHIDE]		  = true;
 	StatusDisplayType[SC_SU_STOOP]		  = true;
 	StatusDisplayType[SC_SPRITEMABLE]	  = true;
+	StatusDisplayType[SC_SV_ROOTTWIST]	  = true;
 	StatusDisplayType[SC_TUNAPARTY]		  = true;
 
 	//StatusChangeState (SCS_) NOMOVE
@@ -1231,15 +1232,17 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_DEATHBOUND_POSTDELAY] |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_ELECTRICSHOCKER]      |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_BITE]                 |= SCS_NOMOVE;
-	StatusChangeStateTable[SC_THORNSTRAP]           |= SCS_NOMOVE;
+	StatusChangeStateTable[SC_CAMOUFLAGE]           |= SCS_NOMOVE|SCS_NOMOVECOND;
 	StatusChangeStateTable[SC_MAGNETICFIELD]        |= SCS_NOMOVE;
 	StatusChangeStateTable[SC__MANHOLE]             |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_FALLENEMPIRE]         |= SCS_NOMOVE;
-	StatusChangeStateTable[SC_VACUUM_EXTREME]       |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CURSEDCIRCLE_ATKER]   |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CURSEDCIRCLE_TARGET]  |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_NETHERWORLD]          |= SCS_NOMOVE;
-	StatusChangeStateTable[SC_CAMOUFLAGE]           |= SCS_NOMOVE|SCS_NOMOVECOND;
+	StatusChangeStateTable[SC_DEEPSLEEP]            |= SCS_NOMOVE;
+	StatusChangeStateTable[SC_CRYSTALIZE]           |= SCS_NOMOVE;
+	StatusChangeStateTable[SC_VACUUM_EXTREME]       |= SCS_NOMOVE;
+	StatusChangeStateTable[SC_THORNSTRAP]           |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_MEIKYOUSISUI]         |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_KAGEHUMI]             |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_PARALYSIS]            |= SCS_NOMOVE;
@@ -1270,8 +1273,10 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC__INVISIBILITY]       |= SCS_NOCAST;
 	StatusChangeStateTable[SC__IGNORANCE]          |= SCS_NOCAST;
 	StatusChangeStateTable[SC__MANHOLE]            |= SCS_NOCAST;
-	StatusChangeStateTable[SC_SATURDAYNIGHTFEVER]  |= SCS_NOCAST;
 	StatusChangeStateTable[SC_CURSEDCIRCLE_TARGET] |= SCS_NOCAST;
+	StatusChangeStateTable[SC_SATURDAYNIGHTFEVER]  |= SCS_NOCAST;
+	StatusChangeStateTable[SC_DEEPSLEEP]           |= SCS_NOCAST;
+	StatusChangeStateTable[SC_CRYSTALIZE]          |= SCS_NOCAST;
 	StatusChangeStateTable[SC_KINGS_GRACE]         |= SCS_NOCAST;
 	StatusChangeStateTable[SC_HEAT_BARREL_AFTER]   |= SCS_NOCAST;
 
@@ -1923,8 +1928,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 				clif_skill_fail((TBL_PC *)src, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 			return false;
 		}
-		if (sc->opt1 && sc->opt1 != OPT1_BURNING && sc->opt1 != OPT1_FREEZING &&
-			skill_id != RK_REFRESH && skill_id != SR_GENTLETOUCH_CURE) { //Stuned/Frozen/etc
+		if (sc->opt1 && sc->opt1 != OPT1_BURNING && skill_id != RK_REFRESH && skill_id != SR_GENTLETOUCH_CURE) { //Stuned/Frozen/etc
 			if (flag != 1)
 				return false; //Can't cast, casted spells can't damage
 			if (!(skill_get_inf(skill_id)&INF_GROUND_SKILL))
@@ -7685,21 +7689,27 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_STONE:
 			if( sc->data[SC_POWER_OF_GAIA] )
 				return 0;
+		//Fall through
 		case SC_FREEZE:
 			if( undead_flag && !(flag&SCFLAG_NOAVOID) )
-				return 0; //Undead are immune to Freeze/Stone
+				return 0; //Undead are immune to Stone/Freeze
+			if( type == SC_FREEZE && sc->data[SC_WARMER] )
+				return 0; //Warmer makes you immune to freezing
 		//Fall through
-		case SC_SLEEP:
 		case SC_STUN:
+		case SC_SLEEP:
 		case SC_BURNING:
-		case SC_FREEZING:
+			if( type == SC_BURNING && sc->data[SC_FREEZING] )
+				return 0; //Burning can't be given to someone in freezing status
+		//Fall through
 		case SC_WHITEIMPRISON:
-		case SC_DEEPSLEEP:
-		case SC_CRYSTALIZE:
-			if( (type == SC_FREEZE || type == SC_FREEZING || type == SC_CRYSTALIZE) && sc->data[SC_WARMER] )
-				return 0; //Immune to Freeze, Freezing and Crystalize status if under Warmer status [Jobbie]
 			if( sc->opt1 )
 				return 0; //Cannot override other OPT1 status changes [Skotlex]
+			break;
+		case SC_FREEZING:
+		case SC_CRYSTALIZE:
+			if( (type == SC_FREEZING && sc->data[SC_BURNING]) || sc->data[SC_WARMER] )
+				return 0; //Burning makes you immune to freezing
 			break;
 		case SC_BERSERK: //There all like berserk, do not everlap each other
 			if( sc->data[SC_SATURDAYNIGHTFEVER] )
@@ -8031,7 +8041,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_PAIN_KILLER:
 			case SC_KYOMU:
 			case SC_AKAITSUKI:
-			case SC_SV_ROOTTWIST:
 			case SC_BITESCAR:
 			case SC_FRESHSHRIMP:
 				return 0;
@@ -8311,9 +8320,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				status_change_end(bl,SC_GT_CHANGE,INVALID_TIMER);
 			break;
 		case SC_WARMER:
-			status_change_end(bl,SC_CRYSTALIZE,INVALID_TIMER);
-			status_change_end(bl,SC_FREEZING,INVALID_TIMER);
 			status_change_end(bl,SC_FREEZE,INVALID_TIMER);
+			status_change_end(bl,SC_FREEZING,INVALID_TIMER);
+			status_change_end(bl,SC_CRYSTALIZE,INVALID_TIMER);
 			break;
 		case SC_INVINCIBLE:
 			status_change_end(bl,SC_INVINCIBLEOFF,INVALID_TIMER);
@@ -9581,9 +9590,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val4 = tick / tick_time;
 				break;
 			case SC_THORNSTRAP:
-				tick_time = 1000;
-				val4 = tick / tick_time;
-				break;
 			case SC_BLOODSUCKER:
 				tick_time = 1000;
 				val4 = tick / tick_time;
@@ -10093,6 +10099,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 50; //Watk%, Matk%
 				val3 = 25 * val1; //Move speed reduction
 				break;
+			case SC_SV_ROOTTWIST:
+				tick_time = 1000;
+				val4 = tick / tick_time;
+				break;
 			case SC_BITESCAR:
 				val2 = 2 * val1; //MaxHP% damage
 				tick_time = 1000;
@@ -10109,7 +10119,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_FRESHSHRIMP:
 				val2 = 11000 - 1000 * val1; //Heal interval
-				val2 = max(val2,1000);
 				tick_time = val2;
 				val3 = tick / tick_time;
 				break;
@@ -10241,9 +10250,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 
 	switch (type) {
 		//Those that make you stop attacking/walking
+		case SC_STONE:
 		case SC_FREEZE:
 		case SC_STUN:
-		case SC_STONE:
 			flag |= SCFLAG_KNOCKBACK_IMMUNE;
 		case SC_SLEEP:
 		case SC_WHITEIMPRISON:
@@ -10270,7 +10279,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_PARALYSIS:
 		case SC_MEIKYOUSISUI:
 		case SC_KAGEHUMI:
-		case SC_SV_ROOTTWIST:
 			if (!(flag&SCFLAG_KNOCKBACK_IMMUNE))
 				unit_stop_walking(bl,1);
 			break;
@@ -10283,7 +10291,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_ELECTRICSHOCKER:
 		case SC_MAGNETICFIELD:
 		case SC_NETHERWORLD:
+		case SC_THORNSTRAP:
 		case SC_TINDER_BREAKER:
+		case SC_SV_ROOTTWIST:
 			if (!unit_blown_immune(bl,0x3))
 				unit_stop_walking(bl,1);
 			break;
@@ -10350,22 +10360,13 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			sc->opt1 = OPT1_STUN;
 			break;
 		case SC_SLEEP:
-		case SC_DEEPSLEEP:
 			sc->opt1 = OPT1_SLEEP;
-			if (type == SC_DEEPSLEEP)
-				opt_flag = 0;
 			break;
 		case SC_BURNING: //Burning need this to be showed correctly [pakpil]
 			sc->opt1 = OPT1_BURNING;
 			break;
-		case SC_FREEZING:
-			sc->opt1 = OPT1_FREEZING;
-			break;
 		case SC_WHITEIMPRISON:
 			sc->opt1 = OPT1_IMPRISON;
-			break;
-		case SC_CRYSTALIZE:
-			sc->opt1 = OPT1_CRYSTALIZE;
 			break;
 		//OPT2
 		case SC_POISON:
@@ -11235,7 +11236,6 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			break;
 		case SC_NEUTRALBARRIER_MASTER:
 		case SC_STEALTHFIELD_MASTER:
-		case SC_SV_ROOTTWIST:
 			if (sce->val2) {
 				struct skill_unit_group *group = skill_id2group(sce->val2);
 
@@ -11441,10 +11441,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		case SC_STUN:
 		case SC_SLEEP:
 		case SC_BURNING:
-		case SC_FREEZING:
 		case SC_WHITEIMPRISON:
-		case SC_DEEPSLEEP:
-		case SC_CRYSTALIZE:
 			sc->opt1 = 0;
 			break;
 		//OPT2
@@ -12668,6 +12665,24 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			}
 			break;
 
+		case SC_SV_ROOTTWIST:
+			if( --(sce->val4) >= 0 ) {
+				struct block_list *src = map_id2bl(sce->val2);
+				struct skill_unit_group *group = skill_id2group(sce->val3);
+
+				if( !src || (src && (status_isdead(src) || src->m != bl->m)) )
+					break;
+				map_freeblock_lock();
+				if( group )
+					skill_attack(BF_MAGIC,src,src,bl,SU_SV_ROOTTWIST_ATK,group->skill_lv,tick,SD_LEVEL|SD_ANIMATION);
+				if( sc->data[type] ) {
+					sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
+				}
+				map_freeblock_unlock();
+				return 0;
+			}
+			break;
+
 		case SC_BITESCAR:
 			if( --(sce->val4) >= 0 ) {
 				status_percent_damage(bl,bl,-sce->val2,0,0);
@@ -12678,7 +12693,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_FRESHSHRIMP:
 			if( --(sce->val3) >= 0 ) {
-				status_heal(bl,status->max_hp / 100,0,2);
+				status_heal(bl,4 * status->max_hp / 100,0,2);
 				sc_timer_next(sce->val2 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}

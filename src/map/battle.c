@@ -398,9 +398,9 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 					struct unit_data *ud = unit_bl2ud(map_id2bl(tsc->data[SC_SPIDERWEB]->val3));
 					uint8 i;
 
-					if( tsc->data[SC_SPIDERWEB]->val2-- > 0 )
+					if( (tsc->data[SC_SPIDERWEB]->val2)-- > 0 )
 						ratio += 100; //Double damage
-					if( tsc->data[SC_SPIDERWEB]->val2 == 0 )
+					if( !tsc->data[SC_SPIDERWEB]->val2 )
 						status_change_end(target, SC_SPIDERWEB, INVALID_TIMER);
 					if( ud ) {
 						ARR_FIND(0, MAX_SKILLUNITGROUP, i, ud->skillunit[i] && ud->skillunit[i]->skill_id == PF_SPIDERWEB);
@@ -1022,7 +1022,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			return 0; //Attack blocked by Parrying
 		}
 
-		if( (sce = sc->data[SC_DODGE]) && (!sc->opt1 || sc->opt1 == OPT1_BURNING || sc->opt1 == OPT1_FREEZING) &&
+		if( (sce = sc->data[SC_DODGE]) && (!sc->opt1 || sc->opt1 == OPT1_BURNING) &&
 			((flag&BF_LONG) || sc->data[SC_SPURT]) && rnd()%100 < 20 ) {
 			if( sd && pc_issit(sd) )
 				pc_setstand(sd); //Stand it to dodge
@@ -2376,7 +2376,7 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 		return true;
 	else if(skill_id == CR_SHIELDBOOMERANG && sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_CRUSADER)
 		return true;
-	else if(tsc && tsc->opt1 && tsc->opt1 != OPT1_STONEWAIT && tsc->opt1 != OPT1_BURNING && tsc->opt1 != OPT1_FREEZING)
+	else if(tsc && tsc->opt1 && tsc->opt1 != OPT1_STONEWAIT && tsc->opt1 != OPT1_BURNING)
 		return true;
 	else if(nk&NK_IGNORE_FLEE)
 		return true;
@@ -4159,6 +4159,8 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 		case SU_SCAROFTAROU:
 			skillratio += -100 + 100 * skill_lv;
+			if(is_boss(target))
+				skillratio <<= 1;
 			break;
 		case SU_PICKYPECK_DOUBLE_ATK:
 			skillratio += 100 + 100 * skill_lv;
@@ -6736,7 +6738,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		struct status_change *sc = status_get_sc(target);
 
 		i = 0; //Temp for "hit or no hit"
-		if(sc && sc->opt1 && sc->opt1 != OPT1_STONEWAIT && sc->opt1 != OPT1_BURNING && sc->opt1 != OPT1_FREEZING)
+		if(sc && sc->opt1 && sc->opt1 != OPT1_STONEWAIT && sc->opt1 != OPT1_BURNING)
 			i = 1;
 		else {
 			short flee = tstatus->flee,
