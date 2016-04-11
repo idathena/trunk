@@ -4490,13 +4490,6 @@ static void clif_getareachar_pc(struct map_session_data *sd,struct map_session_d
 		clif_spiritball_single(sd->fd, dstsd);
 	if( dstsd->spiritcharm_type != CHARM_TYPE_NONE && dstsd->spiritcharm > 0 )
 		clif_spiritcharm_single(sd->fd, dstsd);
-	for( i = 0; i < dstsd->sc_display_count; i++ ) {
-		if( (dstsd->sc.option&OPTION_INVISIBLE) ||
-			(pc_ishiding(dstsd) && !sd->special_state.intravision && !sd->sc.data[SC_INTRAVISION]) )
-			clif_efst_status_change(&sd->bl, dstsd->bl.id, SELF, SI_BLANK, 0, 0, 0);
-		else
-			clif_efst_status_change(&sd->bl, dstsd->bl.id, SELF, StatusIconChangeTable[dstsd->sc_display[i]->type], dstsd->sc_display[i]->val1, dstsd->sc_display[i]->val2, dstsd->sc_display[i]->val3);
-	}
 	if( (sd->status.party_id && dstsd->status.party_id == sd->status.party_id) || //Party-mate, or hp disp setting
 		(sd->bg_id && sd->bg_id == dstsd->bg_id) || //BattleGround
 		pc_has_permission(sd, PC_PERM_VIEW_HPMETER) )
@@ -4539,6 +4532,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 	switch (bl->type) {
 		case BL_PC: {
 				TBL_PC *tsd = (TBL_PC *)bl;
+				int i;
 
 				clif_getareachar_pc(sd,tsd);
 				if (tsd->state.size == SZ_BIG) //Tiny/big players [Valaris]
@@ -4547,6 +4541,12 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_specialeffect_single(bl,421,sd->fd);
 				if (tsd->bg_id && map[tsd->bl.m].flag.battleground)
 					clif_sendbgemblem_single(sd->fd,tsd);
+				for (i = 0; i < tsd->sc_display_count; i++) {
+					if ((tsd->sc.option&OPTION_INVISIBLE) || (pc_ishiding(tsd) && !sd->special_state.intravision && !sd->sc.data[SC_INTRAVISION]))
+						clif_efst_status_change(&sd->bl,tsd->bl.id,SELF,SI_BLANK,0,0,0);
+					else
+						clif_efst_status_change(&sd->bl,tsd->bl.id,SELF,StatusIconChangeTable[tsd->sc_display[i]->type],tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
+				}
 				if (tsd->status.robe)
 					clif_refreshlook(&sd->bl,bl->id,LOOK_ROBE,tsd->status.robe,SELF);
 			}
@@ -10576,7 +10576,7 @@ void clif_parse_WalkToXY(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	if( sd->sc.opt1 && (sd->sc.opt1 == OPT1_STONEWAIT || sd->sc.opt1 == OPT1_BURNING || sd->sc.opt1 == OPT1_FREEZING) )
+	if( sd->sc.opt1 && (sd->sc.opt1 == OPT1_STONEWAIT || sd->sc.opt1 == OPT1_BURNING) )
 		; //You CAN walk on this OPT1 value
 	else if( sd->progressbar.npc_id )
 		clif_progressbar_abort(sd);
@@ -10923,7 +10923,13 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 		(sd->sc.data[SC_TRICKDEAD] ||
 		(sd->sc.data[SC_AUTOCOUNTER] && action_type != 0x07) ||
 		sd->sc.data[SC_BLADESTOP] ||
-		sd->sc.data[SC_DEEPSLEEP]) )
+		sd->sc.data[SC_DEATHBOUND] ||
+		sd->sc.data[SC__MANHOLE] ||
+		sd->sc.data[SC_CURSEDCIRCLE_ATKER] ||
+		sd->sc.data[SC_CURSEDCIRCLE_TARGET] ||
+		sd->sc.data[SC_DEEPSLEEP] ||
+		sd->sc.data[SC_CRYSTALIZE] ||
+		sd->sc.data[SC_SUHIDE]) )
 		return;
 
 	if( action_type != 0x00 && action_type != 0x07 )
@@ -10964,7 +10970,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 				clif_sitting(&sd->bl);
 				return;
 			}
-			if( sd->ud.skilltimer != INVALID_TIMER || (sd->sc.opt1 && sd->sc.opt1 != OPT1_BURNING && sd->sc.opt1 != OPT1_FREEZING) )
+			if( sd->ud.skilltimer != INVALID_TIMER || (sd->sc.opt1 && sd->sc.opt1 != OPT1_BURNING) )
 				break;
 			if( sd->sc.count && sd->sc.data[SC_DANCING] )
 				break;
@@ -11239,7 +11245,12 @@ void clif_parse_DropItem(int fd, struct map_session_data *sd)
 		if (sd->sc.count && (
 			sd->sc.data[SC_AUTOCOUNTER] ||
 			sd->sc.data[SC_BLADESTOP] ||
-			(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOITEM)
+			(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOITEM) ||
+			sd->sc.data[SC_DEATHBOUND] ||
+			sd->sc.data[SC_CURSEDCIRCLE_ATKER] ||
+			sd->sc.data[SC_CURSEDCIRCLE_TARGET] ||
+			sd->sc.data[SC_DEEPSLEEP] ||
+			sd->sc.data[SC_CRYSTALIZE]
 		))
 			break;
 
@@ -11249,7 +11260,7 @@ void clif_parse_DropItem(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	//Because the client does not like being ignored.
+	//Because the client does not like being ignored
 	clif_dropitem(sd, item_index,0);
 }
 

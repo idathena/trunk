@@ -1763,9 +1763,7 @@ enum sc_opt1 {
 	//Aegis uses OPT1 = 5 to identify undead enemies (which also grants them immunity to the other OPT1 changes)
 	OPT1_STONEWAIT = 6, //Petrifying
 	OPT1_BURNING,
-	OPT1_FREEZING,
 	OPT1_IMPRISON,
-	OPT1_CRYSTALIZE,
 };
 
 //OPT2: (HEALTHSTATE_) Stackable status changes
@@ -1979,7 +1977,7 @@ sc_type SkillStatusChangeTable[MAX_SKILL];   // skill  -> status
 int StatusIconChangeTable[SC_MAX];           // status -> "icon" (icon is a bit of a misnomer, since there exist values with no icon associated)
 unsigned int StatusChangeFlagTable[SC_MAX];  // status -> flags
 int StatusSkillChangeTable[SC_MAX];          // status -> skill
-int StatusRelevantBLTypes[SI_MAX];           // "icon" -> enum bl_type (for clif->status_change to identify for which bl types to send packets)
+int StatusRelevantBLTypes[SI_MAX];           // "icon" -> enum bl_type (for clif_status_change to identify for which bl types to send packets)
 unsigned int StatusChangeStateTable[SC_MAX]; // status -> flags
 bool StatusDisplayType[SC_MAX];
 

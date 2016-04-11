@@ -1332,7 +1332,7 @@ int unit_can_move(struct block_list *bl) {
 			(sc->data[SC_DANCING]->val1&0xFFFF) == CG_MOONLIT ||
 			(sc->data[SC_DANCING]->val1&0xFFFF) == CG_HERMODE)))
 			return 0;
-		if (sc->opt1 && sc->opt1 != OPT1_STONEWAIT && sc->opt1 != OPT1_BURNING && sc->opt1 != OPT1_FREEZING)
+		if (sc->opt1 && sc->opt1 != OPT1_STONEWAIT && sc->opt1 != OPT1_BURNING)
 			return 0;
 		if ((sc->option&OPTION_HIDE) && (!sd || pc_checkskill(sd, RG_TUNNELDRIVE) <= 0))
 			return 0;

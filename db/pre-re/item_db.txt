@@ -1639,7 +1639,7 @@
 2796,Magical_Stone,Rocks,4,0,,200,,0,,0,0x00810204,7,2,136,,99,0,0,{ bonus2 bAddDamageClass,2047,10; bonus2 bAddDefMonster,2048,-10; bonus3 bAddMonsterIdDropItem,6152,2047,70; },{},{}
 2797,Magical_Stone_,Rocks,4,0,,200,,0,,0,0x00810204,7,2,136,,99,0,0,{ bonus2 bAddDamageClass,2049,10; bonus2 bAddDefMonster,2050,-10; bonus3 bAddMonsterIdDropItem,6151,2049,70; },{},{}
 2798,Will_Of_Exhausted_Angel,Will of Exhausted Angel,4,0,,200,,0,,0,0x00008100,7,2,136,,99,0,0,{ if(strcharinfo(3)=="job3_arch02") { bonus2 bAddDefMonster,1761,50; bonus2 bAddDefMonster,1762,50; } },{},{}
-2799,Kuirpenring,Kuirpenring,4,0,,100,,0,,1,0xFFFFFFFF,7,2,136,,0,0,0,{ bonus bMdef,1; },{},{}
+2799,Ring_Of_Protection,Ring of Protection,4,0,,100,,0,,1,0xFFFFFFFF,7,2,136,,1,0,0,{ bonus bMaxHP,150; bonus bMaxSP,30; if(getskilllv("MO_CALLSPIRITS")==5) { bonus5 bAutoSpellOnSkill,"MO_CALLSPIRITS","AL_BLESSING",10,100,1; } bonus4 bAutoSpellWhenHit,"SM_ENDURE",10,100,0; bonus4 bAutoSpellWhenHit,"AL_ANGELUS",10,100,0; },{},{}
 2819,Swordman_Manual,Swordman Manual,4,0,,100,,0,,0,0x00000001,7,2,136,,1,0,0,{ bonus bMaxSP,100; skill "SM_BASH",1; skill "SM_PROVOKE",1; skill "SM_MAGNUM",1; },{},{}
 2820,Thief_Manual,Thief Manual,4,0,,100,,0,,0,0x00000001,7,2,136,,1,0,0,{ bonus bMaxSP,100; skill "TF_DOUBLE",3; bonus bDoubleRate,15; skill "TF_STEAL",1; skill "TF_HIDING",1; skill "TF_POISON",1; },{},{}
 2821,Acolyte_Manual,Acolyte Manual,4,0,,100,,0,,0,0x00000001,7,2,136,,1,0,0,{ bonus bMaxSP,100; skill "AL_HEAL",1; skill "AL_INCAGI",1; skill "AL_BLESSING",1; },{},{}
