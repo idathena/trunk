@@ -1535,8 +1535,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sc_start2(src,bl,SC_BLEEDING,10,skill_lv,src->id,skill_get_time(skill_id,skill_lv));
 			break;
 		case SU_CN_METEOR:
-			if( skill_area_temp[3] == 1 )
-				sc_start(src,bl,SC_CURSE,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
+			sc_start(src,bl,SC_CURSE,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
 			break;
 		//case SU_SCAROFTAROU:
 		//	sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
@@ -11572,19 +11571,11 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 				int area = skill_get_splash(skill_id,skill_lv);
 				short tmp_x = 0, tmp_y = 0;
 
-				if( sd && skill_id == SU_CN_METEOR ) {
-					short item_idx = pc_search_inventory(sd,ITEMID_CATNIP_FRUIT);
-
-					if( item_idx >= 0 ) {
-						pc_delitem(sd,item_idx,1,0,1,LOG_TYPE_CONSUME);
-						flag |= 1;
-					}
-				}
 				//Creates a random cell in the splash area
 				for( i = 1; i <= skill_get_time(skill_id,skill_lv) / skill_get_unit_interval(skill_id); i++ ) {
 					tmp_x = x - area + rnd()%(area * 2 + 1);
 					tmp_y = y - area + rnd()%(area * 2 + 1);
-					skill_unitsetting(src,skill_id,skill_lv,tmp_x,tmp_y,flag + i * skill_get_unit_interval(skill_id));
+					skill_unitsetting(src,skill_id,skill_lv,tmp_x,tmp_y,i * skill_get_unit_interval(skill_id));
 				}
 				clif_skill_nodamage(src,src,skill_id,skill_lv,1);
 			}
@@ -12358,7 +12349,6 @@ static bool skill_dance_switch(struct skill_unit *unit, int flag)
  * @param x Position x
  * @param y Position y
  * @param flag &1: Used to determine when the skill 'morphs' (Warp portal becomes active, or Fire Pillar becomes active)
- *		xx_METEOR: flag &1 contains if the unit can cause curse, flag is also the duration of the unit in milliseconds
  * @return skill_unit_group
  */
 struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_id, uint16 skill_lv, int16 x, int16 y, int flag)
@@ -12405,6 +12395,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 #endif
 			if( flag ) //Hit bonus from each elemental class [exneval]
 				val2 += flag;
+			flag = 0;
 			break;
 		case MG_FIREWALL:
 			if( sc && sc->data[SC_VIOLENTGALE] )
@@ -12436,8 +12427,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 			break;
 		case WZ_METEOR:
 		case SU_CN_METEOR:
-			limit = flag - (flag&1);
-			val1 = (flag&1);
+			limit = flag;
 			flag = 0; //Flag should not influence anything else for these skills
 			break;
 		case WZ_FIREPILLAR:
@@ -13358,12 +13348,6 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 					if (rnd()%100 < unit->val1)
 						skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,skill_id,skill_lv,tick,0);
 					break;
-				case SU_CN_METEOR:
-					if (group->val1)
-						skill_area_temp[3] = 1;
-					else
-						skill_area_temp[3] = 0;
-				//Fall through
 				default:
 					skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,skill_id,skill_lv,tick,0);
 					break;
@@ -18236,9 +18220,8 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 					skill_delunit(unit);
 				break;
 			default:
-				if( group->skill_id == WZ_METEOR || group->skill_id == SU_CN_METEOR ) {
+				if( group->skill_id == WZ_METEOR || group->skill_id == SU_CN_METEOR ) { //Unit will expire the next interval, start dropping Meteor
 					if( !group->val2 && (DIFF_TICK(tick,group->tick) >= group->limit - group->interval || DIFF_TICK(tick,group->tick) >= unit->limit - group->interval) ) {
-						//Unit will expire the next interval, start dropping Meteor
 						struct block_list *src;
 
 						if( (src = map_id2bl(group->src_id)) != NULL ) {
@@ -18246,8 +18229,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 							group->val2 = 1;
 						}
 					}
-					//No damage until expiration
-					return 0;
+					return 0; //No damage until expiration
 				}
 				break;
 		}
