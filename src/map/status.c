@@ -8770,8 +8770,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_STONE:
 				val3 = tick / 1000; //Petrified HP-damage iterations
-				if( val3 < 1 )
-					val3 = 1;
+				val3 = max(val3,1);
 				tick = val4; //Petrifying time
 				tick = max(tick,1000); //Min time
 				calc_flag = 0; //Actual status changes take effect on petrified state
@@ -10123,7 +10122,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val3 = tick / tick_time;
 				break;
 			case SC_TUNAPARTY:
-				val2 = (status->max_hp * val1 * 10 / 100); // %MaxHP to absorb
+				val2 = status_get_max_hp(src) * val1 / 10; //%MaxHP to absorb
 				break;
 			default:
 				if( calc_flag == SCB_NONE && StatusIconChangeTable[type] == SI_BLANK &&

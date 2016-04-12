@@ -6054,7 +6054,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case PR_KYRIE:
 		case MER_KYRIE:
-		case SU_TUNAPARTY:
 			clif_skill_nodamage(bl,bl,skill_id,-1,
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 			break;
@@ -6173,8 +6172,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case RL_E_CHAIN:
 		case RL_P_ALTER:
 		case RL_HEAT_BARREL:
-		case SU_FRESHSHRIMP:
 		case SU_ARCLOUSEDASH:
+		case SU_TUNAPARTY:
+		case SU_FRESHSHRIMP:
 		case MH_PAIN_KILLER:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
