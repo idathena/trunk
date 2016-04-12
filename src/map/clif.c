@@ -1445,19 +1445,21 @@ int clif_spawn(struct block_list *bl)
 			break;
 		case BL_MOB: {
 				TBL_MOB *md = ((TBL_MOB *)bl);
-				int effect_id;
+				int effect_id = 0;
 
 				if (md->special_state.size == SZ_BIG) //Tiny/Big mobs [Valaris]
 					clif_specialeffect(&md->bl,423,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect(&md->bl,421,AREA);
+#if PACKETVER < 20151029
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
-#if PACKETVER >= 20130000
+	#if PACKETVER >= 20130000
 					if (effect_id == 979)
 						effect_id = 880;
-#endif
+	#endif
 					clif_specialeffect(&md->bl,effect_id,AREA);
 				}
+#endif
 			}
 			break;
 		case BL_NPC: {
@@ -4568,19 +4570,21 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 			break;
 		case BL_MOB: {
 				TBL_MOB *md = (TBL_MOB *)bl;
-				int effect_id;
+				int effect_id = 0;
 
 				if (md->special_state.size == SZ_BIG) //Tiny/big mobs [Valaris]
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
+#if PACKETVER < 20151029
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
-#if PACKETVER >= 20130000
+	#if PACKETVER >= 20130000
 					if (effect_id == 979)
 						effect_id = 880;
-#endif
+	#endif
 					clif_specialeffect_single(bl,effect_id,sd->fd);
 				}
+#endif
 #if PACKETVER >= 20120404
 				if (battle_config.monster_hp_bars_info) {
 					int i;
