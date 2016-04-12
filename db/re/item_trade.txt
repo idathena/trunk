@@ -3845,4 +3845,17 @@
 28310,467,100	// Sarah's_Left_Earring
 28311,467,100	// Sarah's_Right_Earring
 28333,475,100	// Gold_PC_Room_Ring
+28374,467,100	// Foxtail_Ring
+28413,435,100	// Lesser_Tuna_Talisman
+28414,435,100	// Intermediate_Tuna_Talisman
+28415,435,100	// Superior_Tuna_Talisman
+28416,435,100	// Lesser_Leaf_Talisman
+28417,435,100	// Intermediate_Leaf_Talisman
+28418,435,100	// Superior_Leaf_Talisman
+28419,435,100	// Lesser_Bunny_Talisman
+28420,435,100	// Intermediate_Bunny_Talisman
+28421,435,100	// Superior_Bunny_Talisman
+28422,435,100	// Shining_Eggplant_Talisman
+28423,435,100	// Fresh_Tuna_Talisman
+28424,435,100	// Chubby_Earthworm_Talisman
 28703,467,100	// Infinity_Dagger

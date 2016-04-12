@@ -5011,6 +5011,13 @@ iz_ac01_d,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_d	4_F_03
 			mes "There are lots of vacant beds!";
 			close;
 		case 2:
+			if(Class == Job_Summoner) { //Custom text
+				mes "[Therapist]";
+				mes "I'm sorry...";
+				mes "It seems you'll never able to learn this skill.";
+				mes "I can't do anything about it.";
+				close;
+			}
 			if(!getskilllv("NV_FIRSTAID")) {
 				mes "[Therapist]";
 				mes "You are commendable!";
