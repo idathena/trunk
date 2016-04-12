@@ -4295,8 +4295,8 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 	}
 
 	if( sc->data[SC_CATNIPPOWDER] ) {
-		regen->rate.hp *= 2;
-		regen->rate.sp *= 2;
+		regen->rate.hp <<= 1;
+		regen->rate.sp <<= 1;
 	}
 
 	if( bl->type == BL_ELEM ) {
