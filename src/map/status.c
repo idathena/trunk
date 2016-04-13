@@ -836,7 +836,6 @@ void initChangeTables(void) {
 	set_sc( SU_CN_POWDERING         , SC_CATNIPPOWDER , SI_CATNIPPOWDER    , SCB_WATK|SCB_MATK|SCB_SPEED|SCB_REGEN );
 	add_sc( SU_CN_METEOR            , SC_CURSE );
 	set_sc_with_vfx( SU_SV_ROOTTWIST, SC_SV_ROOTTWIST , SI_SV_ROOTTWIST    , SCB_NONE );
-	//add_sc( SU_SCAROFTAROU        , SC_STUN );
 	set_sc( SU_SCAROFTAROU          , SC_BITESCAR     , SI_BITESCAR        , SCB_NONE );
 	set_sc( SU_ARCLOUSEDASH         , SC_ARCLOUSEDASH , SI_ARCLOUSEDASH    , SCB_AGI|SCB_SPEED );
 	add_sc( SU_LUNATICCARROTBEAT    , SC_STUN );

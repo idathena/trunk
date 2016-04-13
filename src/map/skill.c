@@ -1537,9 +1537,10 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case SU_CN_METEOR:
 			sc_start(src,bl,SC_CURSE,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
 			break;
-		//case SU_SCAROFTAROU:
-		//	sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
-		//	break;
+		case SU_SCAROFTAROU:
+			sc_start(src,bl,SC_BITESCAR,10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
+			sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
+			break;
 		case SU_LUNATICCARROTBEAT:
 			sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
 			break;
@@ -5361,9 +5362,12 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case SU_BITE:
-			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+		case SU_SCAROFTAROU:
+		case SU_SV_STEMSPEAR:
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION);
 			if (!flag && status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
-				skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag|1);
+				skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,skill_get_type(skill_id),flag|1);
 			break;
 
 		case SU_SCRATCH:
@@ -5375,16 +5379,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				if (status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
 					skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag);
 			}
-			break;
-
-		case SU_SCAROFTAROU:
-			sc_start(src,bl,status_skill2sc(skill_id),10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
-		//Fall through
-		case SU_SV_STEMSPEAR:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION);
-			if (!flag && status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
-				skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,skill_get_type(skill_id),flag|1);
 			break;
 
 		case SU_PICKYPECK: {
