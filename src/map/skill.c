@@ -1529,10 +1529,10 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sc_start(src,bl,SC_STUN,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case SU_SCRATCH:
-			sc_start2(src,bl,SC_BLEEDING,skill_lv * 3,skill_lv,src->id,skill_get_time(skill_id,skill_lv)); //Custom
+			sc_start2(src,bl,SC_BLEEDING,skill_lv * 3,skill_lv,src->id,skill_get_time2(skill_id,skill_lv)); //Custom
 			break;
 		case SU_SV_STEMSPEAR:
-			sc_start2(src,bl,SC_BLEEDING,10,skill_lv,src->id,skill_get_time(skill_id,skill_lv));
+			sc_start2(src,bl,SC_BLEEDING,10,skill_lv,src->id,skill_get_time2(skill_id,skill_lv));
 			break;
 		case SU_CN_METEOR:
 			sc_start(src,bl,SC_CURSE,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
@@ -1542,7 +1542,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
 			break;
 		case SU_LUNATICCARROTBEAT:
-			sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
+			sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
 			break;
 	} //End of switch skill_id
 
