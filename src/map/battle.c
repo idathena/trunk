@@ -3799,7 +3799,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			if(sd && skill_lv == 1) { //[(Caster's Base Level x 4) + (Shield DEF x 10) + (Caster's VIT x 2)] %
 				short index = sd->equip_index[EQI_HAND_L];
 
-				skillratio += -100 + status_get_lv(src) * 4 + status_get_vit(src) * 2;
+				skillratio += -100 + 4 * status_get_lv(src) + 2 * sstatus->vit;
 				if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_ARMOR)
 					skillratio += sd->inventory_data[index]->def * 10;
 			} else
@@ -3914,7 +3914,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 		case SR_CRESCENTELBOW_AUTOSPELL:
 			//ATK [{(Target's HP / 100) x Skill Level} x Caster's Base Level / 125] %
-			skillratio += -100 + status_get_hp(target) / 100 * skill_lv;
+			skillratio += -100 + tstatus->hp / 100 * skill_lv;
 			RE_LVL_DMOD(125);
 			skillratio = min(5000,skillratio); //Maximum of 5000% ATK
 			break;
@@ -4095,7 +4095,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			skillratio += -100 + 300 * skill_lv * status_get_lv(src) / 150;
 			break;
 		case MH_TINDER_BREAKER:
-			skillratio += -100 + (100 * skill_lv + 3 * status_get_str(src)) * status_get_lv(src) / 120;
+			skillratio += -100 + (100 * skill_lv + 3 * sstatus->str) * status_get_lv(src) / 120;
 			break;
 		case MH_CBC:
 			skillratio += 300 * skill_lv + 4 * status_get_lv(src);
@@ -4132,7 +4132,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 		case RL_R_TRIP:
 		case RL_R_TRIP_PLUSATK:
-			skillratio += -100 + (status_get_dex(src) / 2) * (10 + 3 * skill_lv);
+			skillratio += -100 + (sstatus->dex / 2) * (10 + 3 * skill_lv);
 			if(skill_id == RL_R_TRIP_PLUSATK)
 				skillratio >>= 1; //Half damage
 			break;
@@ -4145,7 +4145,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			skillratio += 1500 + 800 * skill_lv + (((sd ? sd->spiritball_old : 1) + 1) / 2) * 200;
 			break;
 		case RL_FIRE_RAIN:
-			skillratio += 1900 + status_get_dex(src) * skill_lv;
+			skillratio += 1900 + sstatus->dex * skill_lv;
 			RE_LVL_DMOD(100);
 			break;
 		case RL_AM_BLAST:
@@ -4162,10 +4162,11 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			if(is_boss(target))
 				skillratio <<= 1;
 			break;
-		case SU_PICKYPECK_DOUBLE_ATK:
+		case SU_PICKYPECK:
 			skillratio += 100 + 100 * skill_lv;
-			if(status_get_max_hp(target) / 100 <= 50)
-				skillratio *= 2;
+			break;
+		case SU_PICKYPECK_DOUBLE_ATK:
+			skillratio += 300 + 200 * skill_lv;
 			break;
 		case SU_LUNATICCARROTBEAT:
 			skillratio += 100 + 100 * skill_lv;

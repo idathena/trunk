@@ -1541,8 +1541,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		//	sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
 		//	break;
 		case SU_LUNATICCARROTBEAT:
-			if( skill_area_temp[3] == 1 )
-				sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
+			sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
 			break;
 	} //End of switch skill_id
 
@@ -3851,9 +3850,11 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					if (target->type == BL_PC)
 						sc_start(src,target,SC_SITDOWN_FORCE,100,skl->skill_lv,skill_get_time2(skl->skill_id,skl->skill_lv));
 					break;
+				case SU_BITE:
 				case SU_SCRATCH:
 				case SU_SV_STEMSPEAR:
 				case SU_SCAROFTAROU:
+				case SU_PICKYPECK:
 					skill_castend_damage_id(src,target,skl->skill_id,skl->skill_lv,tick,skl->flag);
 					break;
 				case CH_PALMSTRIKE: {
@@ -4385,13 +4386,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case HT_POWER:
 			if (tstatus->race == RC_BRUTE || tstatus->race == RC_INSECT)
 				skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
-			break;
-
-		case SU_BITE:
-		case SU_PICKYPECK_DOUBLE_ATK:
-			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
-			if (status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
-				skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag);
 			break;
 
 		//Splash attack skills
@@ -5366,6 +5360,12 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			}
 			break;
 
+		case SU_BITE:
+			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+			if (!flag && status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
+				skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag|1);
+			break;
+
 		case SU_SCRATCH:
 			if (flag&1)
 				skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
@@ -5383,10 +5383,17 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case SU_SV_STEMSPEAR:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION);
-			if (!flag && status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) { //Custom
-				int time = skill_get_delay(skill_id,skill_lv) + (skill_id == SU_SCAROFTAROU ? 400 : 0);
+			if (!flag && status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
+				skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,skill_get_type(skill_id),flag|1);
+			break;
 
-				skill_addtimerskill(src,tick + time,bl->id,0,0,skill_id,skill_lv,skill_get_type(skill_id),flag|1);
+		case SU_PICKYPECK: {
+				uint16 skid = ((status_get_hp(bl) <= status_get_max_hp(bl) / 2) ? SU_PICKYPECK_DOUBLE_ATK : skill_id);
+
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				skill_attack(BF_WEAPON,src,src,bl,skid,skill_lv,tick,flag|SD_LEVEL);
+				if (!flag && status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
+					skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag|1);
 			}
 			break;
 
@@ -5396,15 +5403,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			else {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
-				skill_area_temp[3] = 0;
-				if (sd) {
-					short item_idx = pc_search_inventory(sd,ITEMID_CARROT);
-
-					if (item_idx) {
-						pc_delitem(sd,item_idx,1,0,1,LOG_TYPE_CONSUME);
-						skill_area_temp[3] = 1;
-					}
-				}
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
 			}
 			break;
@@ -10754,11 +10752,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			}
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
-			break;
-
-		case SU_PICKYPECK:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			skill_castend_damage_id(src,bl,skill_id + 1,skill_lv,tick,SD_LEVEL);
 			break;
 
 		case SU_TUNABELLY: {
