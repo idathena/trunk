@@ -8227,7 +8227,7 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 
 	status_set_viewdata(&sd->bl, job);
 	clif_changelook(&sd->bl,LOOK_BASE,sd->vd.class_); //Move sprite update to prevent client crashes with incompatible equipment [Valaris]
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 	clif_changelook(&sd->bl,LOOK_HAIR,sd->vd.hair_style); //Update player's head (only matters when switching to or from Doram)
 #endif
 	if(sd->vd.cloth_color)
@@ -10521,6 +10521,8 @@ static unsigned int pc_calc_basehp(uint16 level, uint16 class_) {
 #endif
 	for(i = 2; i <= level; i++)
 		base_hp += floor(i * (job_info[idx].hp_factor / 100.) + 0.5); //Don't have round()
+	if(class_ == JOB_SUMMONER)
+		base_hp += floor((base_hp / 2) + 0.5);
 	return (unsigned int)base_hp;
 }
 
@@ -10547,6 +10549,9 @@ static unsigned int pc_calc_basesp(uint16 level, uint16 class_) {
 				base_sp -= 18;
 			else
 				base_sp = 9 + 3 * level;
+			break;
+		case JOB_SUMMONER:
+			base_sp -= floor(base_sp / 2);
 			break;
 	}
 	return (unsigned int)base_sp;
