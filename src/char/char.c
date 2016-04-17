@@ -1623,7 +1623,7 @@ int check_char_name(char *name, char *esc_name)
  *  char_id: Success
  */
 #if PACKETVER >= 20120307
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 int make_new_char_sql(struct char_session_data *sd, char *name_, int slot, int hair_color, int hair_style, short start_job, short unknown, int sex) { //TODO: Unknown byte
 #else
 int make_new_char_sql(struct char_session_data *sd, char *name_, int slot, int hair_color, int hair_style) {
@@ -1655,7 +1655,7 @@ int make_new_char_sql(struct char_session_data *sd, char *name_, int str, int ag
 
 	//Check other inputs
 #if PACKETVER >= 20120307
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 	switch(sex) {
 			case SEX_FEMALE:
 				sex = 'F';
@@ -1685,7 +1685,7 @@ int make_new_char_sql(struct char_session_data *sd, char *name_, int str, int ag
 	if(sd->found_char[slot] != -1)
 		return -2; //Character account limit exceeded
 
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 	if(start_job == JOB_NOVICE) { //Human race
 		start_hp = 40 * (100 + vit) / 100;
 		start_sp = 11 * (100 + int_) / 100;
@@ -1704,7 +1704,7 @@ int make_new_char_sql(struct char_session_data *sd, char *name_, int str, int ag
 #endif
 
 	//Insert the new char entry to the database
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 	if(SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` (`account_id`, `char_num`, `name`, `class`, `zeny`, `status_point`, `str`, `agi`, `vit`, `int`, `dex`, `luk`, `max_hp`, `hp`,"
 		"`max_sp`, `sp`, `hair`, `hair_color`, `last_map`, `last_x`, `last_y`, `save_map`, `save_x`, `save_y`, `sex`) VALUES ("
 		"'%d', '%d', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%d', '%d', '%s', '%d', '%d', '%c')",
@@ -4627,7 +4627,7 @@ int parse_char(int fd)
 				break;
 
 			//Create new char
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 			//S 0a39 <name>.24B <slot>.B <hair color>.W <hair style>.W <class>.W <unknown>.unknown <sex>.B
 			case 0xa39:
 				FIFOSD_CHECK(36)
@@ -4644,7 +4644,7 @@ int parse_char(int fd)
 				if( !char_new ) //Turn character creation on/off [Kevin]
 					i = -2;
 				else
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 					i = make_new_char_sql(sd,(char *)RFIFOP(fd,2),RFIFOB(fd,26),RFIFOW(fd,27),RFIFOW(fd,29),RFIFOW(fd,31),RFIFOW(fd,32),RFIFOB(fd,35));
 #elif PACKETVER >= 20120307
 					i = make_new_char_sql(sd,(char *)RFIFOP(fd,2),RFIFOB(fd,26),RFIFOW(fd,27),RFIFOW(fd,29));
@@ -4686,7 +4686,7 @@ int parse_char(int fd)
 					//Add new entry to the chars list
 					sd->found_char[char_dat.slot] = i; //The char_id of the new char
 				}
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 				RFIFOSKIP(fd,36);
 #elif PACKETVER >= 20120307
 				RFIFOSKIP(fd,31);
@@ -5871,7 +5871,7 @@ int char_config_read(const char *cfgName)
 		else if(strcmpi(w1, "start_point_pre") == 0)
 #endif
 			char_config_split_startpoint(w1, w2, start_point, &start_point_count);
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 		else if(strcmpi(w1, "start_point_doram") == 0)
 			char_config_split_startpoint(w1, w2, start_point_doram, &start_point_count_doram);
 #endif
@@ -5881,7 +5881,7 @@ int char_config_read(const char *cfgName)
 				start_zeny = 0;
 		} else if(strcmpi(w1, "start_items") == 0)
 			char_config_split_startitem(w1, w2, start_items);
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 		else if (strcmpi(w1, "start_items_doram") == 0)
 			char_config_split_startitem(w1, w2, start_items_doram);
 #endif
@@ -6038,7 +6038,7 @@ int do_init(int argc, char **argv)
 	start_point[0].x = MAP_DEFAULT_X;
 	start_point[0].y = MAP_DEFAULT_Y;
 
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 	start_point_doram[0].map = mapindex_name2id(MAP_DEFAULT_NAME);
 	start_point_doram[0].x = MAP_DEFAULT_X;
 	start_point_doram[0].y = MAP_DEFAULT_Y;
@@ -6051,7 +6051,7 @@ int do_init(int argc, char **argv)
 	start_items[1].amount = 1;
 	start_items[1].pos = 16;
 
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 	start_items_doram[0].nameid = 1681;
 	start_items_doram[0].amount = 1;
 	start_items_doram[0].pos = 2;

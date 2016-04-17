@@ -1452,7 +1452,7 @@ int clif_spawn(struct block_list *bl)
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect(&md->bl,421,AREA);
 				effect_id = 0;
-#if PACKETVER < 20151029
+#if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
 	#if PACKETVER >= 20130000
 					if (effect_id == 979)
@@ -4578,7 +4578,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
 				effect_id = 0;
-#if PACKETVER < 20151029
+#if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
 	#if PACKETVER >= 20130000
 					if (effect_id == 979)
@@ -9869,7 +9869,7 @@ static bool clif_process_message(struct map_session_data *sd, int format, char *
 		message = name + NAME_LENGTH;
 		messagelen = textlen - NAME_LENGTH; //This should be the message length (w/ zero byte included)
 	}
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 	if( message[messagelen - 1] != '\0' )
 		message[messagelen++] = '\0';
 #endif
@@ -12387,7 +12387,7 @@ void clif_parse_NpcStringInput(int fd, struct map_session_data *sd)
 	if( message_len <= 0 )
 		return; //Invalid input
 
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 	message_len++;
 #endif
 
@@ -12872,7 +12872,7 @@ void clif_parse_PartyMessage(int fd, struct map_session_data *sd)
 	char *name, *message;
 	int namelen, messagelen;
 
-#if PACKETVER >= 20151029
+#if PACKETVER >= 20151104
 	textlen++;
 #endif
 
