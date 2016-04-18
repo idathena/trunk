@@ -36,6 +36,7 @@
 #include <math.h>
 
 int attr_fix_table[4][ELE_MAX][ELE_MAX];
+int64 battle_damage_temp[2];
 
 struct Battle_Config battle_config;
 static struct eri *delay_damage_ers; //For battle delay damage structures
@@ -2714,10 +2715,13 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 			(skill_id && (element == -1 || !right_element))) && (wd.flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON))
 			return wd;
 		switch(skill_id) {
+			case SR_TIGERCANNON:
+				if(wd.miscflag&16)
+					wd.damage = battle_damage_temp[0];
+			//Fall through
 			case MC_CARTREVOLUTION:
 			case RA_CLUSTERBOMB:
 			case NC_ARMSCANNON:
-			case SR_TIGERCANNON:
 			case SR_CRESCENTELBOW_AUTOSPELL:
 			case SR_GATEOFHELL:
 			case KO_BAKURETSU:
@@ -3851,7 +3855,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 		case SR_SKYNETBLOW:
 			//ATK [{(Skill Level x 100) + (Caster's AGI) + 150} x Caster's Base Level / 100] %
-			if(wd.miscflag&4)
+			if(wd.miscflag&8)
 				skillratio += 100 * skill_lv + sstatus->agi + 50;
 			else //ATK [{(Skill Level x 80) + (Caster's AGI)} x Caster's Base Level / 100] %
 				skillratio += -100 + 80 * skill_lv + sstatus->agi;
@@ -3878,8 +3882,10 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 				int hp = sstatus->max_hp * (10 + 2 * skill_lv) / 100,
 					sp = sstatus->max_sp * (5 + skill_lv) / 100;
 
+				if(wd.miscflag&16)
+					break;
 				//ATK [((Caster's consumed HP + SP) / 2) x Caster's Base Level / 100] %
-				if(wd.miscflag&4)
+				if(wd.miscflag&8)
 					skillratio += -100 + (hp + sp) / 2;
 				else //ATK [((Caster's consumed HP + SP) / 4) x Caster's Base Level / 100] %
 					skillratio += -100 + (hp + sp) / 4;
@@ -4954,10 +4960,10 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 				}
 			}
 			if((sce = tsc->data[SC_CRESCENTELBOW]) && rnd()%100 < sce->val2) {
-				target->damage = wd.damage; //Will be used for bonus part formula [exneval]
+				battle_damage_temp[0] = wd.damage; //Will be used for bonus part formula [exneval]
 				clif_skill_nodamage(target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, 1);
 				skill_attack(BF_WEAPON, target, target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, gettick(), 0);
-				ATK_ADD(wd.damage, wd.damage2, src->damage / 10);
+				ATK_ADD(wd.damage, wd.damage2, battle_damage_temp[1] / 10);
 				status_change_end(target, SC_CRESCENTELBOW, INVALID_TIMER);
 			}
 		}
@@ -5426,6 +5432,10 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	//But final damage is considered to "the forced" and resistances are applied again
 	if(sd && !(nk&NK_NO_ELEFIX) && (wd.damage || wd.damage2)) {
 		switch(skill_id) {
+			case SR_TIGERCANNON:
+				if(wd.miscflag&16)
+					wd.damage = battle_damage_temp[0];
+			//Fall through
 			case MC_CARTREVOLUTION:
 			case MO_INVESTIGATE:
 			case AM_ACIDTERROR:
@@ -5434,7 +5444,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			case CR_ACIDDEMONSTRATION:
 			case RA_CLUSTERBOMB:
 			case NC_ARMSCANNON:
-			case SR_TIGERCANNON:
 			case SR_CRESCENTELBOW_AUTOSPELL:
 			case SR_GATEOFHELL:
 			case GN_FIRE_EXPANSION_ACID:
@@ -5504,14 +5513,16 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			break;
 #endif
 		case SR_TIGERCANNON:
-			if(wd.miscflag&4) {
+			if(wd.miscflag&16 && wd.damage)
+				break;
+			if(wd.miscflag&8) {
 				ATK_ADD(wd.damage, wd.damage2, skill_lv * 500 + status_get_lv(target) * 40);
 			} else
 				ATK_ADD(wd.damage, wd.damage2, skill_lv * 240 + status_get_lv(target) * 40);
 			break;
 		case SR_CRESCENTELBOW_AUTOSPELL:
 			//[Received damage x {1 + (Skill Level x 0.2)}]
-			ATK_ADD(wd.damage, wd.damage2, src->damage * (1 + skill_lv * 2 / 10));
+			ATK_ADD(wd.damage, wd.damage2, battle_damage_temp[0] * (1 + skill_lv * 2 / 10));
 			break;
 		case SR_GATEOFHELL: {
 				struct status_data *sstatus = status_get_status_data(src);
@@ -5528,16 +5539,9 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	//Perform multihit calculations
 	DAMAGE_DIV_FIX(wd.damage, wd.div_);
 
-	switch(skill_id) {
-		case SR_TIGERCANNON:
-			if(wd.miscflag&8)
-				break; //Splash Tiger Cannon attack plant will be calculated later [exneval]
-		//Fall through
-		default: //Only do 1 dmg to plant, no need to calculate rest
-			if(target_has_infinite_defense(target, skill_id, wd.flag))
-				return battle_calc_attack_plant(wd, src, target, skill_id, skill_lv);
-			break;
-	}
+	//Only do 1 dmg to plant, no need to calculate rest
+	if(target_has_infinite_defense(target, skill_id, wd.flag))
+		return battle_calc_attack_plant(wd, src, target, skill_id, skill_lv);
 
 	wd = battle_calc_attack_left_right_hands(wd, src, target, skill_id, skill_lv);
 
@@ -5558,17 +5562,13 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
  		case RA_ICEBOUNDTRAP:
 		case SO_VARETYR_SPEAR:
 			return wd; //Do GVG fix later
-		case SR_TIGERCANNON:
-			if(wd.miscflag&8)
-				break; //Splash Tiger Cannon GVG fix will be calculated later [exneval]
-		//Fall through
 		default:
 			wd = battle_calc_attack_gvg_bg(wd, src, target, skill_id, skill_lv);
 			break;
 	}
 
 	if(skill_id == SR_CRESCENTELBOW_AUTOSPELL)
-		target->damage = wd.damage; //Will be used for additional damage to the caster [exneval]
+		battle_damage_temp[1] = wd.damage; //Will be used for additional damage to the caster [exneval]
 
 	wd = battle_calc_weapon_final_atk_modifiers(wd, src, target, skill_id, skill_lv);
 
@@ -5577,15 +5577,9 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	if(!skill_id && sc && (sc->data[SC_CRUSHSTRIKE] || sc->data[SC_EXEEDBREAK] || sc->data[SC_SPELLFIST]))
 		return wd; //Reflected later
 
-	switch(skill_id) { //Skill reflect gets calculated after all attack modifier
-		case SR_TIGERCANNON:
-			if(wd.miscflag&8)
-				break; //Splash Tiger Cannon will be reflected later [exneval]
-		//Fall through
-		default:
-			battle_do_reflect(BF_WEAPON, &wd, src, target, skill_id, skill_lv); //WIP [lighta]
-			break;
-	}
+	//Skill reflect gets calculated after all attack modifier
+	battle_do_reflect(BF_WEAPON, &wd, src, target, skill_id, skill_lv); //WIP [lighta]
+
 	return wd;
 }
 

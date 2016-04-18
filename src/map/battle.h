@@ -624,4 +624,6 @@ int battle_get_value(const char *w1);
 struct block_list *battle_getenemyarea(struct block_list *src, int x, int y, int range, int type, int ignore_id);
 int battle_damage_area(struct block_list *bl, va_list ap);
 
+extern int64 battle_damage_temp[2];
+
 #endif /* _BATTLE_H_ */

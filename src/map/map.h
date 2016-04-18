@@ -353,7 +353,6 @@ struct block_list {
 	int id;
 	int16 m, x, y;
 	enum bl_type type;
-	int64 damage; //Damage holding [exneval]
 	int val1;
 };
 

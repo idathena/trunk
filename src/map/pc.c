@@ -8493,7 +8493,7 @@ void pc_setoption(struct map_session_data *sd,int type)
 /*==========================================
  * Give player a cart
  *------------------------------------------*/
-bool pc_setcart(struct map_session_data *sd,int type) {
+bool pc_setcart(struct map_session_data *sd, int type) {
 #ifndef NEW_CARTS
 	int cart[6] = { 0x0000,OPTION_CART1,OPTION_CART2,OPTION_CART3,OPTION_CART4,OPTION_CART5 };
 	int option;
@@ -8511,6 +8511,8 @@ bool pc_setcart(struct map_session_data *sd,int type) {
 		case 0:
 			if( !sd->sc.data[SC_PUSH_CART] )
 				return true;
+			status_change_end(&sd->bl,SC_CARTBOOST,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_GN_CARTBOOST,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_PUSH_CART,INVALID_TIMER);
 			clif_clearcart(sd->fd);
 			clif_updatestatus(sd,SP_CARTINFO);
