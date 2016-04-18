@@ -1878,6 +1878,7 @@ int map_quit(struct map_session_data *sd) {
 			status_change_end(&sd->bl,SC_MELTDOWN,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_MAXOVERTHRUST,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_PRESERVE,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_GN_CARTBOOST,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_HEAT_BARREL,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_P_ALTER,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_E_CHAIN,INVALID_TIMER);

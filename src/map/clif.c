@@ -6098,8 +6098,8 @@ void clif_GlobalMessage(struct block_list *bl, const char *message, enum send_ta
 	WBUFW(buf,0) = 0x8d;
 	WBUFW(buf,2) = len + 8;
 	WBUFL(buf,4) = bl->id;
-	safestrncpy((char *) WBUFP(buf,8),message,len);
-	clif_send((unsigned char *) buf,WBUFW(buf,2),bl,target);
+	safestrncpy((char *)WBUFP(buf,8),message,len);
+	clif_send((unsigned char *)buf,WBUFW(buf,2),bl,target);
 
 }
 
@@ -10720,12 +10720,12 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data *sd)
 	if( (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE ) {
 		unsigned int next = pc_nextbaseexp(sd);
 
-		if( next == 0 )
+		if( !next )
 			next = pc_thisbaseexp(sd);
 		if( next ) { //0%, 10%, 20%, ...
 			int percent = (int)(((float)sd->status.base_exp / (float)next) * 1000.);
 
-			if( (battle_config.snovice_call_type || percent) && (percent%100) == 0 ) { //10.0%, 20.0%, ..., 90.0%
+			if( (battle_config.snovice_call_type || percent) && !(percent%100) ) { //10.0%, 20.0%, ..., 90.0%
 				switch( sd->state.snovice_call_flag ) {
 					case 0:
 						if( strstr(message, msg_txt(1481)) ) // "Dear angel, can you hear my voice?"
@@ -10762,14 +10762,15 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data *sd)
 	 * Fake Name Design by FatalEror (bug report #9)
 	 */
 	if( (is_fake = (sd->fakename[0])) ) {
-		fakename = (char *) aMalloc(strlen(sd->fakename) + messagelen + 3);
+		fakename = (char *)aMalloc(strlen(sd->fakename) + messagelen + 3);
 		strcpy(fakename, sd->fakename);
 		strcat(fakename, " : ");
 		strcat(fakename, message);
 		textlen = strlen(fakename) + 1;
 	}
+
 	//Send message to others (using the send buffer for temp. storage)
-	clif_GlobalMessage(&sd->bl,is_fake ? fakename : text,sd->chatID ? CHAT_WOS : AREA_CHAT_WOC);
+	clif_GlobalMessage(&sd->bl, (is_fake ? fakename : text), (sd->chatID ? CHAT_WOS : AREA_CHAT_WOC));
 
 	//Send back message to the speaker
 	if( is_fake ) {
@@ -10782,6 +10783,7 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data *sd)
 		WFIFOW(fd,0) = 0x8e;
 	}
 	WFIFOSET(fd, WFIFOW(fd,2));
+
 #ifdef PCRE_SUPPORT
 	//Trigger listening npcs
 	map_foreachinrange(npc_chat_sub, &sd->bl, AREA_SIZE, BL_NPC, text, textlen, &sd->bl);
@@ -13494,7 +13496,7 @@ void clif_parse_GuildMessage(int fd, struct map_session_data *sd)
 	char *name, *message;
 	int namelen, messagelen;
 
-	// Validate packet and retrieve name and message
+	//Validate packet and retrieve name and message
 	if( !clif_process_message(sd, 0, &name, &namelen, &message, &messagelen) )
 		return;
 
@@ -13502,7 +13504,7 @@ void clif_parse_GuildMessage(int fd, struct map_session_data *sd)
 		return;
 
 	if( sd->sc.cant.chat )
-		return; //No "chatting" while muted.
+		return; //No "chatting" while muted
 
 	if( battle_config.min_chat_delay ) { //[Skotlex]
 		if( DIFF_TICK(sd->cantalk_tick, gettick()) > 0 )

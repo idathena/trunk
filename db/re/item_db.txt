@@ -9802,7 +9802,7 @@
 19648,C_Autumn_Leaves,Costume Autumn Leaves,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,241,{},{},{}
 19649,C_White_Baby_Cat_Ears,Costume White Baby Cat Ears,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,926,{},{},{}
 19650,C_Rainbow_Feather_Deco,Costume Rainbow Feather Deco,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,934,{},{},{}
-19651,C_RWC_Shouting_Mouth,Costume RWC Shouting Mouth,4,1000,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,194,{},{},{}
+19651,C_RWC_Shouting_Mouth,Costume RWC Shouting Mouth,4,1000,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,194,{},{},{}
 19652,C_Rabbit_Magic_Hat,Costume Rabbit Magic Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,497,{},{},{}
 19653,C_Marcher_Hat,Costume Marcher Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,269,{},{},{}
 19654,C_Ship_Captain_Hat,Costume Ship Captain Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,367,{},{},{}
