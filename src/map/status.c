@@ -8918,7 +8918,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_BERSERK:
 				if( val3 == SC__BLOODYLUST )
 					sc_start(src,bl,(sc_type)val3,100,val1,tick + 100);
-				if( !val3 && !(sc->data[SC_ENDURE] && sc->data[SC_ENDURE]->val4) )
+				else if( !(sc->data[SC_ENDURE] && sc->data[SC_ENDURE]->val4) )
 					sc_start4(src,bl,SC_ENDURE,100,10,0,0,2,tick);
 				//HP healing is performing after the calc_status call
 				//val2 holds HP penalty
@@ -10599,7 +10599,16 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 	if(sd) {
 		if(sd->pd)
 			pet_sc_check(sd,type); //Skotlex: Pet Status Effect Healing
-		status_calc_pc(sd,SCO_NONE);
+		switch(type) {
+			case SC_BERSERK:
+			case SC_MERC_HPUP:
+			case SC_MERC_SPUP:
+				status_calc_pc(sd,SCO_FORCE);
+				break;
+			default:
+				status_calc_pc(sd,SCO_NONE);
+				break;
+		}
 	}
 
 	//1st thing to execute when loading status

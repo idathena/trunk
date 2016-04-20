@@ -6171,13 +6171,11 @@ It is an approximation of official server script language's 'cmdothernpc'.
 
 ---------------------------------------
 
-*npctalk "<message>"{,<flag>};
+*npctalk "<message>";
 
 This command will display a message to the surrounding area as if the NPC object 
 running it was a player talking - that is, above their head and in the chat 
-window. If 'flag' is 1, means there's no display name of the NPC will be displayed.
-By default, 'flag' is 0 so the display name of the NPC will get appended in front
-of the message to complete the effect.
+window. The display name of the NPC won't get appended in front of the message.
 
     // This will make everyone in the area see the NPC greet the character
     // who just invoked it.
@@ -7332,11 +7330,10 @@ Suggest to use 'unitblockmove' to forcefully stop the unit with OnTouch.
 
 ---------------------------------------
 
-*unittalk <GID>,"<text>"{,<flag>};
+*unittalk <GID>,"<text>";
 
 This command will make a <GID> say a message.
-If 'flag' is 1, that means the <GID> name will not be displayed.
-By default, 'flag' is 0 so the display name get appended in front of the message.
+The display name of the <GID> won't get appended in front of the message.
 
 ---------------------------------------
 

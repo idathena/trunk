@@ -13847,21 +13847,12 @@ BUILDIN_FUNC(message)
 BUILDIN_FUNC(npctalk)
 {
 	const char *str = script_getstr(st,2);
-	uint8 flag = 0;
 	struct npc_data *nd = (struct npc_data *)map_id2bl(st->oid);
 
-	if( script_hasdata(st,3) )
-		flag = script_getnum(st,3);
-
 	if( nd ) {
-		char name[NAME_LENGTH], message[256];
+		char message[256];
 
-		safestrncpy(name,nd->name,sizeof(name));
-		strtok(name,"#"); //Discard extra name identifier if present
-		if( !flag )
-			safesnprintf(message,sizeof(message),"%s : %s",name,str);
-		else
-			safesnprintf(message,sizeof(message),"%s",str);
+		safesnprintf(message,sizeof(message),"%s",str);
 		clif_disp_overhead(&nd->bl,message);
 	}
 	return SCRIPT_CMD_SUCCESS;
@@ -17230,19 +17221,15 @@ BUILDIN_FUNC(unitstopwalk)
 
 /// Makes the unit say the given message
 ///
-/// unittalk <unit_id>,"<message>"{,<flag>};
+/// unittalk <unit_id>,"<message>";
 BUILDIN_FUNC(unittalk)
 {
 	int unit_id;
-	uint8 flag = 0;
 	const char *message;
 	struct block_list *bl;
 
 	unit_id = script_getnum(st,2);
 	message = script_getstr(st,3);
-
-	if( script_hasdata(st,4) )
-		flag = script_getnum(st,4);
 
 	bl = map_id2bl(unit_id);
 
@@ -17250,10 +17237,7 @@ BUILDIN_FUNC(unittalk)
 		struct StringBuf sbuf;
 
 		StringBuf_Init(&sbuf);
-		if( flag )
-			StringBuf_Printf(&sbuf, "%s", message);
-		else
-			StringBuf_Printf(&sbuf, "%s : %s", status_get_name(bl), message);
+		StringBuf_Printf(&sbuf, "%s", message);
 		clif_disp_overhead(bl, StringBuf_Value(&sbuf));
 		StringBuf_Destroy(&sbuf);
 	}
@@ -20807,7 +20791,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(atcommand,"charcommand","s"), // [MouseJstr]
 	BUILDIN_DEF(movenpc,"sii?"), // [MouseJstr]
 	BUILDIN_DEF(message,"ss"), // [MouseJstr]
-	BUILDIN_DEF(npctalk,"s?"), // [Valaris]
+	BUILDIN_DEF(npctalk,"s"), // [Valaris]
 	BUILDIN_DEF(mobcount,"ss"),
 	BUILDIN_DEF(getlook,"i?"),
 	BUILDIN_DEF(getsavepoint,"i?"),
@@ -20926,7 +20910,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(unitstopattack,"i"),
 	BUILDIN_DEF(unitstopwalk,"i"),
 	BUILDIN_DEF2(pcblockmove,"unitblockmove","ii"),
-	BUILDIN_DEF(unittalk,"is?"),
+	BUILDIN_DEF(unittalk,"is"),
 	BUILDIN_DEF(unitemote,"ii"),
 	BUILDIN_DEF(unitskilluseid,"ivi??"), //Originally by Qamera [Celest]
 	BUILDIN_DEF(unitskillusepos,"iviii?"), //[Celest]
