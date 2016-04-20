@@ -79,7 +79,7 @@
 1644:18720,{ set .@r,getequiprefinerycnt(EQI_HAND_R); bonus bMatk,.@r*15+(.@r>=10?50:0); if(.@r>=10) bonus bVariableCastrate,-10; }
 1646:2161,{ set .@r,getequiprefinerycnt(EQI_HAND_L)*4; bonus2 bVariableCastrate,"WZ_STORMGUST",-.@r; bonus2 bVariableCastrate,"WL_FROSTMISTY",-.@r; bonus2 bVariableCastrate,"WL_JACKFROST",-.@r; }
 1649:2198,{ set .@r,getequiprefinerycnt(EQI_HAND_R); if(getequiprefinerycnt(EQI_HAND_L)>=9) bonus bMatk,.@r*15; if(.@r>=10) { bonus bMatk,50; bonus bVariableCastrate,-10; } }
-1657:2471:2569:15029,{ bonus bHealPower,25; bonus2 bSkillUseSP,"AL_HEAL",20; bonus2 bSkillCooldown,"AB_SECRAMENT",-2000; bonus2 bSkillCooldown,"AB_LAUDAAGNUS",-2000; bonus2 bSkillCooldown,"AB_LAUDARAMUS",-2000; }
+1657:2471:2569:15029,{ bonus bHealPower,25; bonus2 bSkillUseSP,"AL_HEAL",20; bonus2 bSkillCooldown,"AB_CLEARANCE",-2000; bonus2 bSkillCooldown,"AB_LAUDAAGNUS",-2000; bonus2 bSkillCooldown,"AB_LAUDARAMUS",-2000; }
 1659:5920,{ set .@r,getequiprefinerycnt(EQI_HAND_R); bonus2 bSkillUseSP,"AL_HEAL",-.@r*6; bonus2 bSkillUseSP,"AB_CHEAL",-.@r*10; bonus2 bSkillUseSP,"AB_HIGHNESSHEAL",-.@r*14; }
 1660:2471:2569:15029,{ bonus bHealPower,45; bonus2 bSkillUseSP,"AL_HEAL",50; bonus3 bAutoSpellWhenHit,"AB_SILENTIUM",1,100; bonus2 bSkillCooldown,"AB_CLEARANCE",-3000; bonus2 bSkillCooldown,"AB_LAUDAAGNUS",-3000; bonus2 bSkillCooldown,"AB_LAUDARAMUS",-3000; }
 1662:18539,{ set .@r,getequiprefinerycnt(EQI_HAND_R); bonus bMatk,.@r*10; if(.@r>=10) bonus bVariableCastrate,-10; }

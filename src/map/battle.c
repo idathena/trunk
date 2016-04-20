@@ -4419,6 +4419,21 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADDRATE(wd.damage, wd.damage2, 100);
 			RE_ALLATK_ADDRATE(wd, 100);
 		}
+		if(!skill_id) {
+			if(sc->data[SC_ENCHANTBLADE]) { //[((Skill Level x 20) + 100) x (Caster's Base Level / 150)] + Caster's INT
+				int64 dmg = (sc->data[SC_ENCHANTBLADE]->val1 * 20 + 100) * status_get_lv(src) / 150 + status_get_int(src);
+				short totalmdef = tstatus->mdef + tstatus->mdef2;
+
+				if((dmg = dmg - totalmdef + status_get_matk(src, 2))) {
+					ATK_ADD(wd.damage, wd.damage2, dmg);
+					RE_ALLATK_ADD(wd, dmg);
+				}
+			}
+			if(sc->data[SC_GIANTGROWTH] && rnd()%100 < sc->data[SC_GIANTGROWTH]->val2) { //+200% damage
+				ATK_ADDRATE(wd.damage, wd.damage2, 200);
+				RE_ALLATK_ADDRATE(wd, 200);
+			}
+		}
 		if(sc->data[SC_GLOOMYDAY_SK] && (inf3&INF3_SC_GLOOMYDAY_SK)) {
 			ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_GLOOMYDAY_SK]->val2);
 			RE_ALLATK_ADDRATE(wd, sc->data[SC_GLOOMYDAY_SK]->val2);
@@ -4666,34 +4681,18 @@ struct Damage battle_calc_attack_post_defense(struct Damage wd, struct block_lis
 	struct status_data *tstatus = status_get_status_data(target);
 
 	//Post skill/vit reduction damage increases
-	if(sc) { //Status change skill damages
-		if(sc->data[SC_NIBELUNGEN]) {
-			if(sd) {
-				short index = sd->equip_index[(sd->state.lr_flag ? EQI_HAND_L : EQI_HAND_R)];
+	if(sc && sc->data[SC_NIBELUNGEN]) {
+		if(sd) {
+			short index = sd->equip_index[(sd->state.lr_flag ? EQI_HAND_L : EQI_HAND_R)];
 
-				//In renewal, the level 4 weapon limitation has been removed
-				//But still need to check whether have equipped a weapon or not (bare hand means no bonus damage)
-				if(index >= 0 && sd->inventory_data[index]
+			//In renewal, the level 4 weapon limitation has been removed
+			//But still need to check whether have equipped a weapon or not (bare hand means no bonus damage)
+			if(index >= 0 && sd->inventory_data[index]
 #ifndef RENEWAL
-					&& sd->inventory_data[index]->wlv == 4
+				&& sd->inventory_data[index]->wlv == 4
 #endif
-					)
-					ATK_ADD(wd.damage, wd.damage2, sc->data[SC_NIBELUNGEN]->val2);
-			} else
+				)
 				ATK_ADD(wd.damage, wd.damage2, sc->data[SC_NIBELUNGEN]->val2);
-		}
-		if(!skill_id) {
-			if(sc->data[SC_ENCHANTBLADE]) {
-				//[((Skill Level x 20) + 100) x (Caster's Base Level / 150)] + Caster's INT
-				int64 i = (sc->data[SC_ENCHANTBLADE]->val1 * 20 + 100) * status_get_lv(src) / 150 + status_get_int(src);
-				short totalmdef = tstatus->mdef + tstatus->mdef2;
-
-				i = i - totalmdef + status_get_matk(src, 2);
-				if(i)
-					ATK_ADD(wd.damage, wd.damage2, i);
-			}
-			if(sc->data[SC_GIANTGROWTH] && rnd()%100 < sc->data[SC_GIANTGROWTH]->val2)
-				ATK_ADDRATE(wd.damage, wd.damage2, 200); //Triple damage
 		}
 	}
 #ifndef RENEWAL
