@@ -2604,6 +2604,10 @@
 13167,0,2086,30,0,0,0,0,"Rake horn Scaraba Story"
 13168,3600,0,0,0,0,0,0,"Rake horn Scaraba Story - Wait"
 
+13181,0,0,0,0,0,0,0,"Nightmarish Jitterbug"
+13182,82800,0,0,0,0,0,0,"Nightmarish Jitterbug: Waiting"
+13183,0,0,0,0,0,0,0,"Nightmarish Jitterbug: Completed"
+
 14118,0,0,0,0,0,0,0,"Wuhari's concern"
 14119,0,0,0,0,0,0,0,"Test of patience"
 14120,0,0,0,0,0,0,0,"Test of patience 2"

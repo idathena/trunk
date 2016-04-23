@@ -17,3 +17,4 @@
 12,Old Glast Heim,3600,1@gl_k,150,20,1@gl_k,2@gl_k
 13,Eclage Interior,1200,1@ecl,60,50,1@ecl
 14,Sara's Memory,3600,1@sara,250,155,1@sara
+15,Nightmarish Jitterbug,3300,1@jtb,16,18,1@jtb

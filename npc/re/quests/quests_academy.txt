@@ -8800,109 +8800,109 @@ iz_ac02_b,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_b	4_M_KID1
 iz_ac02_c,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_c	4_M_KID1
 iz_ac02_d,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_d	4_M_KID1
 
--	script	::Ragie	-1,{
-	mes "[Ragie]";
+-	script	::Ragi	-1,{
+	mes "[Ragi]";
 	mes "A sudden poetic inspiration hit me!";
 	next;
-	mes "[Ragie]";
+	mes "[Ragi]";
 	mes "^4d4fffIn the night of Byalan Island under the moonlight, sitting alone in Izlude.^000000";
 	next;
-	mes "[Ragie]";
+	mes "[Ragi]";
 	mes "^4d4fffWearing Tzurugie on my belly, in the deep anxiety.^000000";
 	next;
-	mes "[Ragie]";
+	mes "[Ragi]";
 	mes "^4d4fffHearing I made a fortune from somewhere, killing me softly.^000000";
 	next;
-	mes "[Ragie]";
+	mes "[Ragi]";
 	mes ".......";
 	next;
-	mes "[Ragie]";
+	mes "[Ragi]";
 	mes "How about it? It is excellent, isn't it?";
 	next;
-	mes "[Ragie]";
-	mes "I will ^ff0000transcend^000000 and ^ff00003rd job change.^000000 Become a nice Minstrel, I can play with a famous Wanderer like Mrs. Igoo.";
+	mes "[Ragi]";
+	mes "I will ^ff0000transcend^000000 and ^ff00003rd job change.^000000 Become a nice Minstrel, I can play with a famous Wanderer like Mrs. Aigu.";
 	next;
 	while(1) {
-		switch(select("What is transcending?:What is the 3rd job change?:Who is Igoo?:End Conversation")) {
+		switch(select("What is transcending?:What is the 3rd job change?:Who is Aigu?:End Conversation")) {
 			case 1:
 				if(ADVJOB != 0) {
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "You seem to already know what it is!";
 				} else {
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "Transcending is great. Very great.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "Basically the 2nd job adventurer gains the base level 99 and job level 50, then that person can transcend.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "Once you transcend, you can go back to the base level Novice.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "It is very hard to start your adventure again. However, there is a merit to the hardship.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "The most important merit is to learn new skills at a new upgraded level. In my case, I could transfer to not an ordinary Bard but a Minstrel.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "Indeed, be careful as you can only follow the way of the job you choose before transcending.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "If you are interested in transcending, recommend you visit the Sage castle in ^ff0000Juno.^000000 I maybe far behind for it.";
 				}
 				next;
 				break;
 			case 2:
 				if(BaseLevel > 99) {
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "Oh, you know very well, don't you?";
 				} else {
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "The 3rd job change is obviously a new job.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "Adventurers with the 2nd job or can be transferred to the 3rd job class once gaining the base level 99 and the job level more than 50.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "For example, a Bard like me was an Archer in the beginning. Now I became a Bard. As I am diligently adventuring, I may be able to change jobs to a third job.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "Ah, of course, though I don't make transfer, I could be Minstrel as my final target. However, I won't compromise with the reality.";
 					mes "Someday I will be the best Minstrel.";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "So, if you transfer, you could first be Novice and be a Bard. But someday I could be Minstrel, couldn't I?";
 					next;
-					mes "[Ragie]";
+					mes "[Ragi]";
 					mes "Choice is always on you. Be ambitious, adventurer. Someday I will sing an encouraging song for you.";
 				}
 				next;
 				break;
 			case 3:
-				mes "[Ragie]";
-				mes "No! You don't know the most beautiful girl Wanderer Igoo in this era?";
+				mes "[Ragi]";
+				mes "No! You don't know the most beautiful girl Wanderer Aigu in this era?";
 				next;
-				mes "[Ragie]";
+				mes "[Ragi]";
 				mes "Haven't you heard about [Volume 1 : Lost Poring] or [Volume 2 : Poring my love]?";
 				next;
-				mes "[Ragie]";
+				mes "[Ragi]";
 				mes "Then, have you never heard the songs like [It's a Good day for an OCA] or [Baphomet I hardly knew you]";
 				next;
-				mes "[Ragie]";
+				mes "[Ragi]";
 				mes "A beautiful Wanderer from Comodo at the age of 20. Not only Midgard but also wherever her wandering troupe goes, a fan club follows.";
 				next;
-				mes "[Ragie]";
-				mes "I am ^ff0000Ragie^000000 in charge with the Rune Midgard branch head of Igoo's informal fan club! As Igoo has gone to the 2nd world, I am taking a rest for a while. But she will be back soon.";
+				mes "[Ragi]";
+				mes "I am ^ff0000Ragi^000000 in charge with the Rune Midgard branch head of Aigu's informal fan club! As Aigu has gone to the 2nd world, I am taking a rest for a while. But she will be back soon.";
 				next;
-				mes "[Ragie]";
+				mes "[Ragi]";
 				mes "As I am still a low level of adventurer, I haven't followed her to the 2nd world... See! I will make great efforts and follow her everywhere.";
 				next;
-				mes "[Ragie]";
+				mes "[Ragi]";
 				mes "Ahaa. No sweat no sweat. It is useless to tell such a story to those ignorant.";
 				next;
 				break;
 			case 4:
-				mes "[Ragie]";
+				mes "[Ragi]";
 				mes "Ah! I happened to come up with another great poetic inspiration..";
 				mes "Take a memo.. Memo..";
 				close;
@@ -8910,11 +8910,11 @@ iz_ac02_d,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_d	4_M_KID1
 	}
 }
 
-iz_ac02,149,43,3	duplicate(Ragie)	Ragie#2ac	1_M_BARD
-iz_ac02_a,149,43,3	duplicate(Ragie)	Ragie#2ac_a	1_M_BARD
-iz_ac02_b,149,43,3	duplicate(Ragie)	Ragie#2ac_b	1_M_BARD
-iz_ac02_c,149,43,3	duplicate(Ragie)	Ragie#2ac_c	1_M_BARD
-iz_ac02_d,149,43,3	duplicate(Ragie)	Ragie#2ac_d	1_M_BARD
+iz_ac02,149,43,3	duplicate(Ragi)	Ragi#2ac	1_M_BARD
+iz_ac02_a,149,43,3	duplicate(Ragi)	Ragi#2ac_a	1_M_BARD
+iz_ac02_b,149,43,3	duplicate(Ragi)	Ragi#2ac_b	1_M_BARD
+iz_ac02_c,149,43,3	duplicate(Ragi)	Ragi#2ac_c	1_M_BARD
+iz_ac02_d,149,43,3	duplicate(Ragi)	Ragi#2ac_d	1_M_BARD
 
 iz_ac02,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2	2_BULLETIN_BOARD
 iz_ac02_a,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_a	2_BULLETIN_BOARD
@@ -9054,7 +9054,7 @@ iz_ac02_d,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_d	2_BULLETIN_BOARD
 				sc_start SC_STUN,10000,0;
 				percentheal -99,0;
 				close2;
-				warp "iz_ac"+strnpcinfo(2),53,49,0;
+				warp "iz_ac0"+strnpcinfo(2),53,49,0;
 				sleep2 500;
 				mes "As I can't recall, I feel the shock that something hit me on my head.";
 				mes "^ff0000I should look for somebody to heal me nearby.^000000";
@@ -9111,11 +9111,11 @@ iz_ac02_d,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,70,85,5	duplicate(Arang)	Arang#01	4_F_TAEKWON
-iz_ac02_a,70,85,5	duplicate(Arang)	Arang#01_a	4_F_TAEKWON
-iz_ac02_b,70,85,5	duplicate(Arang)	Arang#01_b	4_F_TAEKWON
-iz_ac02_c,70,85,5	duplicate(Arang)	Arang#01_c	4_F_TAEKWON
-iz_ac02_d,70,85,5	duplicate(Arang)	Arang#01_d	4_F_TAEKWON
+iz_ac02,70,85,5	duplicate(Arang)	Arang#1	4_F_TAEKWON
+iz_ac02_a,70,85,5	duplicate(Arang)	Arang#1_a	4_F_TAEKWON
+iz_ac02_b,70,85,5	duplicate(Arang)	Arang#1_b	4_F_TAEKWON
+iz_ac02_c,70,85,5	duplicate(Arang)	Arang#1_c	4_F_TAEKWON
+iz_ac02_d,70,85,5	duplicate(Arang)	Arang#1_d	4_F_TAEKWON
 
 pay_fild08,153,83,1	script	Lady Harvesting Herbs#2	1_F_ORIENT_02,{
 	mes "[Lady]";

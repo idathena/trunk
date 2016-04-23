@@ -144,3 +144,6 @@ gl_cas02_	mapflag	nomemo
 1@gef_in	mapflag	nomemo
 dali	mapflag	nomemo
 dali02	mapflag	nomemo
+
+// Nightmarish Jitterbug =========
+1@jtb	mapflag	nomemo

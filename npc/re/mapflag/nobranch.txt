@@ -91,3 +91,6 @@ izlude_a	mapflag	nobranch
 izlude_b	mapflag	nobranch
 izlude_c	mapflag	nobranch
 izlude_d	mapflag	nobranch
+
+// Nightmarish Jitterbug =======
+1@jtb	mapflag	nobranch

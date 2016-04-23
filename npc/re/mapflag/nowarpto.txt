@@ -57,3 +57,6 @@ gl_cas02_	mapflag	nowarpto
 1@face	mapflag	nowarpto
 1@sara	mapflag	nowarpto
 1@gef_in	mapflag	nowarpto
+
+// Nightmarish Jitterbug =========
+1@jtb	mapflag	nowarpto
