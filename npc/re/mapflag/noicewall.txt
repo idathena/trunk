@@ -36,3 +36,6 @@
 
 // Inside Eclage ===========
 1@ecl	mapflag	noicewall
+
+// Nightmarish Jitterbug =========
+1@jtb	mapflag	noicewall

@@ -17217,7 +17217,8 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 				sc_start2(ss,bl,SC_ELEMENTALCHANGE,100,group->skill_lv,skill_get_ele(group->skill_id,group->skill_lv),skill_get_time2(group->skill_id,group->skill_lv));
 			break;
 		case UNT_REVERBERATION: //For proper skill delay animation when use with Dominion Impulse
-			skill_addtimerskill(ss,tick + status_get_amotion(ss),bl->id,0,0,WM_REVERBERATION_MELEE,group->skill_lv,BF_WEAPON,0);
+			if( ss->type == BL_PC ) //Monster skill only deal magic type attack [exneval]
+				skill_addtimerskill(ss,tick + status_get_amotion(ss),bl->id,0,0,WM_REVERBERATION_MELEE,group->skill_lv,BF_WEAPON,0);
 			skill_addtimerskill(ss,tick + status_get_amotion(ss) * 2,bl->id,0,0,WM_REVERBERATION_MAGIC,group->skill_lv,BF_MAGIC,0);
 			break;
 		case UNT_FIRINGTRAP:

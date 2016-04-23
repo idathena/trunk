@@ -2137,8 +2137,8 @@ S_Select:
 	if (para_suv02 == 0) {
 		mes "You don't have a record of receiving any supplies";
 		mes "so, you'll receive the Eden Group Hat and Manteau as well.";
-		getitem 18514,1; //Para_Team_Hat2
-		getitem 2571,1; //Para_Team_Manteau2
+		getitem 5583,1; //Para_Team_Hat
+		getitem 2560,1; //Para_Team_Manteau
 		if (para_suv01 == 22)
 			para_suv02 = 2;
 		else
@@ -3982,10 +3982,10 @@ moc_para01,111,83,3	script	Blacksmith Thorn#2nd10	2_M_OLDBLSMITH,{
 				close;
 			}
 			para_2nd02 = 2;
-			getitem 18514,1; //Paradise Hat II
-			getitem 15031,1; //Paradise Uniform IV
-			getitem 2473,1; //Paradise Boots IV
-			getitem 2571,1; //Paradise Mantle II
+			getitem 18514,1; //Para_Team_Hat2
+			getitem 15031,1; //Para_Team_Armor
+			getitem 2473,1; //Para_Team_Boots4
+			getitem 2571,1; //Para_Team_Manteau2
 			mes "Here's your equipment.";
 			mes "I'll also give you the other gear that comes along with this set.";
 		}

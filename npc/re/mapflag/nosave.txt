@@ -96,3 +96,6 @@ que_avan01	mapflag	nosave	SavePoint
 1@face	mapflag	nosave	SavePoint
 1@sara	mapflag	nosave	SavePoint
 1@gef_in	mapflag	nosave	SavePoint
+
+// Nightmarish Jitterbug =========
+1@jtb	mapflag	nosave	SavePoint

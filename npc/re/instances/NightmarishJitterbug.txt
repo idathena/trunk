@@ -1,0 +1,5888 @@
+//===== rAthena Script ======================================= 
+//= Nightmarish Jitterbug
+//===== By: ================================================== 
+//= Tokeiburu, Nova
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= [Official Conversion]
+//= Nightmarish Jitterbug Instance
+//===== Additional Comments: ================================= 
+//= 1.0 First version, edited. [exneval]
+//============================================================ 
+
+// Instance start
+//============================================================
+moc_para01,26,95,5	script	Roel#sara	10040,{
+	cutin "roel01",0;
+	if (BaseLevel < 120) {
+		mes "[Roel]";
+		mes "We're looking for adventurers that can join us for a brand new adventure. If you're at the Level to accept Aigu's quests, then you're qualified.";
+		close2;
+		cutin "roel01",255;
+		end;
+	}
+	if (!isbegin_quest(13181) && !isbegin_quest(13183)) {
+		mes "[Roel]";
+		mes "I'm Roel, new member of the White Wings Guild. Rotert had me search everywhere for New Oz, and I've found some clues as to his whereabouts.";
+		next;
+		mes "[Roel]";
+		mes "Recruiting guild prospects! Join us in our search for our former master New Oz! Are you interested?";
+		next;
+		if (select("Yes.:No.:") == 1) {
+			cutin "roel02",0;
+			mes "[Roel]";
+			mes "What a difficult task. I searched from this end to that end of the world, and could find neither hide nor hair of him.";
+			next;
+			cutin "roel01",0;
+			mes "[Roel]";
+			mes "I tried to some trace of him, but to no avail.";
+			next;
+			mes "[Roel]";
+			mes "New Oz is an avid adventurer who never stays in one place long enough; a lot of people claimed they saw him, yet none of them remembered where he went.";
+			next;
+			mes "[Roel]";
+			mes "After a while, I had to give up on tracing him. I was just wasting time.";
+			next;
+			mes "[Roel]";
+			mes "I turned my eyes to the Other World, and there I met some eyewitnesses. They led me to the last place New Oz had been seen.";
+			next;
+			mes "[Roel]";
+			mes "The whole process was painful. If it weren't for Runane, we couldn't have Memorized his last location or gotten out of it.";
+			next;
+			mes "[Roel]";
+			mes "If you're interested in joining us, please talk to Runane. We have an exciting adventure ahead of us.";
+			setquest 13181;
+		}
+		close2;
+		cutin "roel01",255;
+		end;
+	}
+	if (isbegin_quest(13181) == 1) {
+		mes "[Roel]";
+		mes "Are you ready yet? You can give up if you're not confident.";
+		next;
+		if (select("No.:Give up.:") == 1) {
+			mes "[Roel]";
+			mes "That's the spirit!";
+			close2;
+			cutin "roel01",255;
+			end;
+		}
+		if (isbegin_quest(13183) == 2)
+			completequest 13181;
+		else
+			erasequest 13181;
+		close2;
+		cutin "roel01",255;
+		end;
+	}
+	if (isbegin_quest(13181) == 2 || isbegin_quest(13183) == 2) {
+		if (!isbegin_quest(13183)) {
+			mes "[Roel]";
+			mes "It was my first adventure as a member of White Wings. I can't wait for the next one!";
+			erasequest 13181;
+			setquest 13183;
+			completequest 13183;
+			next;
+		}
+		mes "[Roel]";
+		mes "Where do you think Shalosh is by now? The space where we met Shalosh is caught in a time loop, repeating the same events again and again.";
+		next;
+		mes "[Roel]";
+		mes "Mingmin thinks the phenomenon has something to do with the Dimensional Crack and Shalosh's ability.";
+		next;
+		mes "[Roel]";
+		mes "I didn't quite understand her, but Runane said the portal to the place she Memorized is based on time instead of space.";
+		next;
+		mes "[Roel]";
+		mes "If you want, you can go back in time and experience the same events. Do you want to embark on an adventure again?";
+		next;
+		if (select("Yes.:No.:") == 1) {
+			mes "[Roel]";
+			mes "You might have a different experience this time in this place full of unfathomable mysteries. Please ask Runane to open the portal for you.";
+			next;
+			mes "[Roel]";
+			mes "This time, maybe you don't have to leave Shalosh.";
+			if (isbegin_quest(13181) == 2)
+				erasequest 13181;
+			setquest 13181;
+		}
+		close2;
+		cutin "roel01",255;
+		end;
+	}
+}
+
+moc_para01,29,95,5	script	Runane#sara	10039,{
+	cutin "lunain01",0;
+	if (BaseLevel < 120) {
+		mes "[Runane]";
+		mes "^ff0000You must be Level 120.^000000";
+		close2;
+		cutin "lunain01",255;
+		end;
+	}
+	if (isbegin_quest(13181) == 1) {
+		.@jittDailyCooldown = isbegin_quest(13182,PLAYTIME);
+		 if (.@jittDailyCooldown == 2) {
+			mes "[Runane]";
+			mes "The dimensional portal is now available to be opened.";
+			erasequest 13182;
+			close2;
+			cutin "lunain01",255;
+			end;
+		} else if (.@jittDailyCooldown == 1) {
+			mes "[Runane]";
+			mes "^ff0000This dimensional portal cannot be accessed for 23 hours after your last access.^000000";
+			close2;
+			cutin "lunain01",255;
+			end;
+		} else {
+			.@party_id = getcharid(1);
+			.@ins_mas = getpartyleader(.@party_id,2);
+			.@p_name$ = getpartyname(.@party_id);
+			.@p_reader$ = strcharinfo(0);
+			.@md_name$ = "Nightmarish Jitterbug";
+			if (!.@party_id) {
+				mes "[Runane]";
+				mes "^ff0000You first must form/join a party of at least 1 person to enter this dungeon.^000000";
+				close2;
+				cutin "lunain01",255;
+				end;
+			}
+			if (getcharid(0) == .@ins_mas)
+				.@menu$ = "Open the dimensional portal.:Enter Nightmarish Jitterbug.:Cancel.";
+			else
+				.@menu$ = ":Enter Nightmarish Jitterbug.:Cancel.";
+			switch (select(.@menu$)) {
+				case 1:
+					switch (instance_create(.@md_name$)) {
+						case -3: //Custom text
+							mes "[Runane]";
+							mes "^ff0000Failed to open the dimensional portal. You already open it!^000000";
+							close2;
+							cutin "lunain01",255;
+							end;
+						case -4:
+						case -2:
+						case -1:
+							mes "[Runane]";
+							mes "Party Name: "+.@p_name$;
+							mes "Party Leader: "+.@p_reader$;
+							mes "^0000ff"+.@md_name$+"^000000 - Reservation Failed!.";
+							close2;
+							cutin "lunain01",255;
+							end;
+					}
+					mes "[Runane]";
+					mes "^ff0000Preparing the dimensional portal...^000000";
+					mes "^ff0000Please wait.^000000";
+					break;
+				case 2:
+					switch (instance_enter(.@md_name$)) {
+						case 3:
+							mes "[Runane]";
+							mes "^ff0000An unknown error has occurred.^000000";
+							break;
+						case 2:
+						case 1:
+							mes "[Runane]";
+							mes "^ff0000Your party leader has not yet created a Time Crack.^000000";
+							break;
+						case 0:
+							mapannounce "moc_para01",.@p_name$+"'s "+.@p_reader$+", is entering "+.@md_name$+".",bc_map,"0x00ff99";
+							setquest 13182;
+							end;
+					}
+					break;
+				case 3:
+					cutin "lunain01",255;
+					end;
+			}
+			close2;
+			cutin "lunain01",255;
+			end;
+		}
+	} else {
+		mes "[Runane]";
+		mes "^ff0000If you want to use my dimensional portal, then you first have to talk to Roel. The portal is not open for everyone.^000000";
+		close2;
+		cutin "lunain01",255;
+		end;
+	}
+}
+
+// Room 1
+//============================================================
+1@jtb,25,28,5	script	Rohtert#01	630,{
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "...We finally meet, New Oz!";
+	close2;
+	cutin "rote01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Rohtert#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Rohtert#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Rohtert#01");
+	end;
+}
+
+1@jtb,31,28,4	script	Aigu#01		646,{
+	cutin "igu01",2;
+	mes "[Aigu]";
+	mes "You look new around here. Nice to meet ya!";
+	close2;
+	cutin "igu01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#01");
+	end;
+}
+
+1@jtb,23,26,5	script	Gelkah#01	629,{
+	cutin "gelca01",0;
+	mes "[Gelkah]";
+	mes "This place gives me the heebie-jeebies.";
+	close2;
+	cutin "gelca01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Gelkah#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Gelkah#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Gelkah#01");
+	end;
+}
+
+1@jtb,33,26,4	script	Ragi#01		647,{
+	cutin "ragi01",2;
+	mes "[Ragi]";
+	mes "I've followed Aigu all the way here.";
+	close2;
+	cutin "ragi01",255;
+	end;
+	
+OnInstanceInit:
+	donpcevent instance_npcname("Ragi#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ragi#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ragi#01");
+	end;
+}
+
+1@jtb,25,24,5	script	Mingmin#01	643,{
+	cutin "min02",0;
+	mes "[Mingmin]";
+	mes "He's bad news. Trouble follows him wherever he goes.";
+	close2;
+	cutin "min02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#01");
+	end;
+}
+
+1@jtb,31,24,4	script	Arang#01	644,{
+	cutin "arang01",2;
+	mes "[Arang]";
+	mes "Heya!";
+	close2;
+	cutin "arang01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Arang#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Arang#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Arang#01");
+	end;
+}
+
+1@jtb,23,22,5	script	Runane#01	10039,{
+	cutin "lunain01",0;
+	mes "[Runane]";
+	mes "Oh, is he the famous New Oz?";
+	close2;
+	cutin "lunain01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#01");
+	end;
+}
+
+1@jtb,34,22,4	script	Roel#01		10040,{
+	cutin "roel01",0;
+	mes "[Roel]";
+	mes "I'm Roel, new guildsman. Nice to meet you.";
+	close2;
+	cutin "roel01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#01");
+	end;
+}
+
+1@jtb,28,21,5	script	Melody-Jack#01	844,{
+	mes "[Melody-Jack]";
+	mes "Stop bothering me. Can't you see I'm hiding?!";
+	close;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Melody-Jack#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Melody-Jack#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Melody-Jack#01");
+	end;
+}
+
+1@jtb,28,30,5	script	New Oz#01	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "Our adventure hasn't started yet, and I'm already hungry.";
+		close2;
+		cutin "nines02",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "It seems everyone's here.";
+		unittalk getnpcid(0),"New Oz : It seems everyone's here.";
+		emotion e_ho;
+		next;
+		cutin "rote03",0;
+		mes "[Rohtert]";
+		mes "I told you, New Oz. We can't just let this go.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : I told you, New Oz. We can't just let this go.";
+		emotion e_an,0,instance_npcname("Rohtert#01");
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "Considering the time and money we wasted on you, you deserve to be fed a basket full of poisonous mushrooms.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#01")),"Mingmin : Considering the time and money we wasted on you, you deserve to be fed a basket full of poisonous mushrooms.";
+		next;
+		cutin "nines04",0;
+		mes "[New Oz]";
+		mes "I'll explain everything, and enough with the poisonous mushrooms. I can't eat mushrooms at all.";
+		unittalk getnpcid(0),"New Oz : I'll explain everything, and enough with the poisonous mushrooms. I can't eat mushrooms at all.";
+		emotion e_ho;
+		next;
+		cutin "igu05",2;
+		mes "[Aigu]";
+		mes "New Oz, you can't eat anything but meat. Sigh, I'm glad you're safe.";
+		unittalk getnpcid(0,instance_npcname("Aigu#01")),"Aigu : New Oz, you can't eat anything but meat. Sigh, I'm glad you're safe.";
+		next;
+		cutin "gelca03",0;
+		mes "[Gelkah]";
+		mes "You're famous New Oz! Nice to meet you. My master told me many great things...";
+		unittalk getnpcid(0,instance_npcname("Gelkah#01")),"Gelkah : You're famous New Oz! Nice to meet you. My master told me many great things...";
+		next;
+		cutin "rote03",0;
+		mes "[Rohtert]";
+		mes "Enough. He's just an idiot with no sense of direction.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : Enough. He's just an idiot with no sense of direction.";
+		next;
+		cutin "arang02",2;
+		mes "[Arang]";
+		mes "Wow, New Oz! Your eyes look puffier than ever.";
+		unittalk getnpcid(0,instance_npcname("Arang#01")),"Arang : Wow, New Oz! Your eyes look puffier than ever.";
+		next;
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "Hello, Arang. How's Arirang? Heh. What brings you here?";
+		unittalk getnpcid(0),"New Oz : Hello, Arang. How's Arirang? Heh. What brings you here?";
+		next;
+		cutin "rote03",0;
+		mes "[Rohtert]";
+		mes "New Oz, do you know how long you've been missing? We even recruited new guildsmen to find you, and...";
+		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : New Oz, do you know how long you've been missing? We even recruited new guildsmen to find you, and...";
+		next;
+		cutin "lunain01",0;
+		mes "[Runane]";
+		mes "Hi, nice to meet you. I'm honored to meet the famous New Oz in person.";
+		unittalk getnpcid(0,instance_npcname("Runane#01")),"Runane : Hi, nice to meet you. I'm honored to meet the famous New Oz in person.";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "H-hello, my name is Roel. Runane and I've joined the guild together. Nice to meet you.";
+		unittalk getnpcid(0,instance_npcname("Roel#01")),"Roel : H-hello, my name is Roel. Runane and I've joined the guild together. Nice to meet you.";
+		next;
+		cutin "rote02",0;
+		mes "[Rohtert]";
+		mes "In accordance with the Guild Policy, Article 8, I'm now the master of the guild, and you're just a member.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : In accordance with the Guild Policy, Article 8, I'm now the master of the guild, and you're just a member.";
+		next;
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "Oh, congratulations, Master.";
+		unittalk getnpcid(0),"New Oz : Oh, congratulations, Master.";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "...That wasn't what I expected. Aren't you upset at all?";
+		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : ...That wasn't what I expected. Aren't you upset at all?";
+		emotion e_dots,0,instance_npcname("Rohtert#01");
+		next;
+		mes "[Melody-Jack]";
+		mes "What did you expect? All he thinks about is adventure, monsters, and treasure.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : What did you expect? All he thinks about is adventure, monsters, and treasure.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		cutin "rote01",255;
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Argh, is there a ghost? Or am I hearing things?";
+		unittalk getnpcid(0),"New Oz : Argh, is there a ghost? Or am I hearing things?";
+		next;
+		mes "[Melody-Jack]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : ...";
+		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		cutin "nines01",255;
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Whew, it's you Jack. Long time, no see, everyone.";
+		unittalk getnpcid(0),"New Oz : Whew, it's you Jack. Long time, no see, everyone.";
+		next;
+		mes "[Melody-Jack]";
+		mes "This isn't a good time for chit-chat. I'm sensing something from the very floor where you're standing and where I'm hiding.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : This isn't a good time for chit-chat. I'm sensing something from the very floor where you're standing and where I'm hiding.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		cutin "nines01",255;
+		next;
+		cutin "arang03",2;
+		mes "[Arang]";
+		mes "Jack, is that why you're hiding like a coward?";
+		unittalk getnpcid(0,instance_npcname("Arang#01")),"Arang : Jack, is that why you're hiding like a coward?";
+		next;
+		mes "[Melody-Jack]";
+		mes "It comes natural for veteran thieves like me to hide themselves in potential enemy territories.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : It comes natural for veteran thieves like me to hide themselves in potential enemy territories.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		cutin "arang03",255;
+		next;
+		mes "[Melody-Jack]";
+		mes "I'm not hiding because my sprite is not yet ready!";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : I'm not hiding because my sprite is not yet ready!";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "I agree with Jack. Everything about this place--from the air to the soil--screams unatural.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#01")),"Mingmin : I agree with Jack. Everything about this place--from the air to the soil--screams unatural.";
+		next;
+		cutin "ragi01",2;
+		mes "[Ragi]";
+		mes "Could it be supernatural?";
+		unittalk getnpcid(0,instance_npcname("Ragi#01")),"Ragi : Could it be supernatural?";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Or otherwordly.";
+		unittalk getnpcid(0),"New Oz : Or otherwordly.";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Mingmin#01")),"Mingmin : ...";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "You're Ragi, right? I like the way you think. I'd love to work with you sometimes.";
+		unittalk getnpcid(0),"New Oz : You're Ragi, right? I like the way you think. I'd love to work with you sometimes.";
+		next;
+		cutin "lunain02",0;
+		mes "[Runane]";
+		mes "I've joined this guild to meet you, New Oz. Do you have a girlfriend?";
+		unittalk getnpcid(0,instance_npcname("Runane#01")),"Runane : I've joined this guild to meet you, New Oz. Do you have a girlfriend?";
+		next;
+		cutin "igu05",2;
+		mes "[Aigu]";
+		mes "Don't you dare--I called dibs on him first!";
+		unittalk getnpcid(0,instance_npcname("Aigu#01")),"Aigu : Don't you dare--I called dibs on him first!";
+		next;
+		cutin "lunain03",0;
+		mes "[Runane]";
+		mes "I don't think he knows that. Do you, New Oz?";
+		unittalk getnpcid(0,instance_npcname("Runane#01")),"Runane : I don't think he knows that. Do you, New Oz?";
+		next;
+		cutin "igu04",2;
+		mes "[Aigu]";
+		mes "Well, I didn't...";
+		unittalk getnpcid(0,instance_npcname("Aigu#01")),"Aigu : Well, I didn't...";
+		next;
+		cutin "lunain01",0;
+		mes "[Runane]";
+		mes "*Snort* Then he's fair game!";
+		unittalk getnpcid(0,instance_npcname("Runane#01")),"Runane : *Snort* Then he's fair game!";
+		next;
+		cutin "gelca02",0;
+		mes "[Gelkah]";
+		mes "Um, the conversation seems to have gone...";
+		unittalk getnpcid(0,instance_npcname("Gelkah#01")),"Gelkah : Um, the conversation seems to have gone...";
+		next;
+		cutin "ragi03",2;
+		mes "[Ragi]";
+		mes "She can change subjects more quickly than an Arclouse can cast Increase AGI.";
+		unittalk getnpcid(0,instance_npcname("Ragi#01")),"Ragi : She can change subjects more quickly than an Arclouse can cast Increase AGI.";
+		next;
+		cutin "arang02",0;
+		mes "[Arang]";
+		mes "Are they competing over New Oz? I want in, too!";
+		unittalk getnpcid(0,instance_npcname("Arang#01")),"Arang : Are they competing over New Oz? I want in, too!";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "...Sorry to bother you guys, but I think something's over there.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#01")),"Mingmin : ...Sorry to bother you guys, but I think something's over there.";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "Perhaps it's monsters. Do you want me to go check?";
+		unittalk getnpcid(0,instance_npcname("Roel#01")),"Roel : Perhaps it's monsters. Do you want me to go check?";
+		next;
+		cutin "lunain04",0;
+		mes "[Runane]";
+		mes "You stay here, kiddo. I'll go.";
+		unittalk getnpcid(0,instance_npcname("Runane#01")),"Runane : You stay here, kiddo. I'll go.";
+		next;
+		cutin "igu05",2;
+		mes "[Aigu]";
+		mes "Wait, we're not finished here!";
+		unittalk getnpcid(0,instance_npcname("Aigu#01")),"Aigu : Wait, we're not finished here!";
+		next;
+		cutin "ragi01",0;
+		mes "[Ragi]";
+		mes "Oh, both of them left.";
+		unittalk getnpcid(0,instance_npcname("Ragi#01")),"Ragi : Oh, both of them left.";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "New Oz, you're like a magnet for crazy.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : New Oz, you're like a magnet for crazy.";
+		donpcevent instance_npcname("Aigu#01")+"::OnDisable";
+		donpcevent instance_npcname("Runane#01")+"::OnDisable";
+		next;
+		cutin "gelca02",0;
+		mes "[Gelkah]";
+		mes "I can see what has made you become so irritable, Master.";
+		unittalk getnpcid(0,instance_npcname("Gelkah#01")),"Gelkah : I can see what has made you become so irritable, Master.";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "He's born irritable.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#01")),"Mingmin : He's born irritable.";
+		next;
+		cutin "arang01",0;
+		mes "[Arang]";
+		mes "Agreed. He's violent, dirty...";
+		unittalk getnpcid(0,instance_npcname("Arang#01")),"Arang : Agreed. He's violent, dirty...";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Oh, shut it, both of you!";
+		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : Oh, shut it, both of you!";
+		next;
+		cutin "nines03",0;
+		mes "[New Oz]";
+		mes "That reminds me, when Rot was younger...";
+		unittalk getnpcid(0),"New Oz : That reminds me, when Rot was younger...";
+		next;
+		cutin "gelca04",0;
+		mes "[Gelkah]";
+		mes "Rot? Is that your pet name, Master? Are you two friends?";
+		unittalk getnpcid(0,instance_npcname("Gelkah#01")),"Gelkah : Rot? Is that your pet name, Master? Are you two friends?";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "That does it, I'm leaving!";
+		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : That does it, I'm leaving!";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "That Crack thing, or the entrance as you might call it, has vanished. If you really want to leave, then follow Aigu.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#01")),"Mingmin : That Crack thing, or the entrance as you might call it, has vanished. If you really want to leave, then follow Aigu.";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Stop pretending you care about me! I can take care of myself!";
+		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : Stop pretending you care about me! I can take care of myself!";
+		next;
+		cutin "gelca04",0;
+		mes "[Gelkah]";
+		mes "Master, come with me!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#01")),"Gelkah : Master, come with me!";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "Oh, we've got new members, huh? Great, I have a few mushrooms that I've wanted to sample...";
+		unittalk getnpcid(0,instance_npcname("Mingmin#01")),"Mingmin : Oh, we've got new members, huh? Great, I have a few mushrooms that I've wanted to sample...";
+		next;
+		cutin "ragi02",2;
+		mes "[Ragi]";
+		mes "Roel, I think we should move too.";
+		unittalk getnpcid(0,instance_npcname("Ragi#01")),"Ragi : Roel, I think we should move too.";
+		donpcevent instance_npcname("Gelkah#01")+"::OnDisable";
+		donpcevent instance_npcname("Rohtert#01")+"::OnDisable";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "Let's go.";
+		unittalk getnpcid(0,instance_npcname("Roel#01")),"Roel : Let's go.";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Arang, let's go. It's time for an adventure!";
+		unittalk getnpcid(0),"New Oz : Arang, let's go. It's time for an adventure!";
+		next;
+		cutin "arang02",0;
+		mes "[Arang]";
+		mes "All righty!";
+		unittalk getnpcid(0,instance_npcname("Arang#01")),"Arang : All righty!";
+		donpcevent instance_npcname("Roel#01")+"::OnDisable";
+		donpcevent instance_npcname("Ragi#01")+"::OnDisable";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "I hope there are lots of things to study.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#01")),"Mingmin : I hope there are lots of things to study.";
+		next;
+		mes "["+strcharinfo(0)+"]";
+		mes "...";
+		donpcevent instance_npcname("New Oz#01")+"::OnDisable";
+		donpcevent instance_npcname("Arang#01")+"::OnDisable";
+		donpcevent instance_npcname("Mingmin#01")+"::OnDisable";
+		cutin "min02",255;
+		next;
+		mes "[Melody-Jack]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : ...";
+		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		next;
+		mes "["+strcharinfo(0)+"]";
+		mes "...";
+		next;
+		mes "[Melody-Jack]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : ...";
+		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		next;
+		mes "[Melody-Jack]";
+		mes "Let's move before they forget about us.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : Let's move before they forget about us.";
+		close2;
+		donpcevent instance_npcname("Melody-Jack#01")+"::OnDisable";
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,100,46,133,13,"Ferre",3069,10,instance_npcname("New Oz#01")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp1")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#01")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#01");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#01")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Aigu#02")+"::OnEnable";
+		donpcevent instance_npcname("Runane#02")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 2
+//============================================================
+1@jtb,118,45,5	script	Aigu#02	646,{
+	cutin "igu03",0;
+	mes "[Aigu]";
+	mes "A place full of mysteries.";
+	close2;
+	cutin "igu03",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#02")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#02");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#02");
+	end;
+}
+
+1@jtb,121,47,4	script	???#2	10041,{
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("???#2")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("???#2");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("???#2");
+	end;
+}
+
+1@jtb,123,45,4	script	Runane#02	10039,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "lunain01",2;
+		mes "[Runane]";
+		mes "Please, let there be no more surprises.";
+		close2;
+		cutin "lunain01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "lunain01",2;
+		mes "[Runane]";
+		mes "Um, I have a feeling something might spring out of nowhere to attack us.";
+		unittalk getnpcid(0),"Runane : Um, I have a feeling something might spring out of nowhere to attack us.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[???]";
+		mes "What is it?";
+		unittalk getnpcid(0,instance_npcname("???#2")),"??? : What is it?";
+		donpcevent instance_npcname("???#2")+"::OnEnable";
+		next;
+		cutin "lunain04",2;
+		mes "[Runane]";
+		mes "*Shriek*";
+		unittalk getnpcid(0),"Runane : *Shriek*";
+		emotion e_omg;
+		next;
+		cutin "igu03",0;
+		mes "[Aigu]";
+		mes "MONSTER-!...Um, it's just a woman.";
+		unittalk getnpcid(0,instance_npcname("Aigu#02")),"Aigu : MONSTER-!...Um, it's just a woman.";
+		emotion e_omg,0,instance_npcname("Aigu#02");
+		next;
+		cutin "lunain04",0;
+		mes "[Runane]";
+		mes "There's something! SOMETHING!";
+		unittalk getnpcid(0),"Runane : There's something! SOMETHING!";
+		next;
+		cutin "igu01",0;
+		mes "[Aigu]";
+		mes "Calm down. It's just a woman.";
+		unittalk getnpcid(0,instance_npcname("Aigu#02")),"Aigu : Calm down. It's just a woman.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[???]";
+		mes "Voice of a woman...";
+		unittalk getnpcid(0,instance_npcname("???#2")),"??? : Voice of a woman...";
+		emotion e_what,0,instance_npcname("???#2");
+		next;
+		cutin "igu01",0;
+		mes "[Aigu]";
+		mes "How did we get in, you ask?";
+		unittalk getnpcid(0,instance_npcname("Aigu#02")),"Aigu : How did we get in, you ask?";
+		next;
+		cutin "shaloshi01",0;
+		mes "[???]";
+		mes "No idea. How did you get in?";
+		unittalk getnpcid(0,instance_npcname("???#2")),"??? : No idea. How did you get in?";
+		next;
+		cutin "lunain03",2;
+		mes "[Runane]";
+		mes "We got lost and now we're in a spacetime. How did this happen?";
+		unittalk getnpcid(0),"Runane : We got lost and now we're in a spacetime. How did this happen?";
+		next;
+		cutin "igu04",0;
+		mes "[Aigu]";
+		mes "We didn't have to be here if it weren't for someone.";
+		unittalk getnpcid(0,instance_npcname("Aigu#02")),"Aigu : We didn't have to be here if it weren't for someone.";
+		emotion e_swt2,0,instance_npcname("Aigu#02");
+		next;
+		cutin "shaloshi01",0;
+		mes "[???]";
+		mes "The one who sings.";
+		unittalk getnpcid(0,instance_npcname("???#2")),"??? : The one who sings.";
+		next;
+		cutin "lunain01",2;
+		mes "[Runane]";
+		mes "Do you know New Oz? Let's take him out of here.";
+		unittalk getnpcid(0),"Runane : Do you know New Oz? Let's take him out of here.";
+		next;
+		cutin "igu03",0;
+		mes "[Aigu]";
+		mes "Okay. Take my hand.";
+		unittalk getnpcid(0,instance_npcname("Aigu#02")),"Aigu : Okay. Take my hand.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[???]";
+		mes "Your hand... warm.";
+		unittalk getnpcid(0,instance_npcname("???#2")),"??? : Your hand... warm.";
+		next;
+		cutin "igu02",0;
+		mes "[Aigu]";
+		mes "It's calloused because I dance. Heh heh.";
+		unittalk getnpcid(0,instance_npcname("Aigu#02")),"Aigu : It's calloused because I dance. Heh heh.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[???]";
+		mes "Dance...";
+		unittalk getnpcid(0,instance_npcname("???#2")),"??? : Dance...";
+		next;
+		cutin "lunain02",2;
+		mes "[Runane]";
+		mes "Where's everyone? Have they gone somewhere else? Let's go in that direction.";
+		unittalk getnpcid(0),"Runane : Where's everyone? Have they gone somewhere else? Let's go in that direction.";
+		close2;
+		donpcevent instance_npcname("Runane#02")+"::OnDisable";
+		donpcevent instance_npcname("???#2")+"::OnDisable";
+		donpcevent instance_npcname("Aigu#02")+"::OnDisable";
+		cutin "lunain02",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,180,49,221,12,"Ferre",3069,10,instance_npcname("Runane#02")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp2")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#02")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#02");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#02");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("Runane#02")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Gelkah#03")+"::OnEnable";
+		donpcevent instance_npcname("Rohtert#03")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 3
+//============================================================
+1@jtb,205,31,3	script	Gelkah#03	629,{
+	cutin "gelca04",2;
+	mes "[Gelkah]";
+	mes "Something might jump us!";
+	close2;
+	cutin "gelca04",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Gelkah#03")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Gelkah#03");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Gelkah#03");
+	end;
+}
+
+1@jtb,198,31,5	script	Rohtert#03	630,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "These monsters are boring.";
+		close2;
+		cutin "rote01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "gelca01",2;
+		mes "[Gelkah]";
+		mes "I'm detecting electromagnetic waves up ahead. At least Grade E monsters.";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : I'm detecting electromagnetic waves up ahead. At least Grade E monsters.";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Hey, what have you been reading these days?";
+		unittalk getnpcid(0),"Rohtert : Hey, what have you been reading these days?";
+		emotion e_swt;
+		next;
+		cutin "gelca03",2;
+		mes "[Gelkah]";
+		mes "Heh, Sci-Fi. There's a mechanical tool that works...";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : Heh, Sci-Fi. There's a mechanical tool that works...";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Stop talking and get ready to practice your special skills.";
+		unittalk getnpcid(0),"Rohtert : Stop talking and get ready to practice your special skills.";
+		emotion e_sigh;
+		next;
+		cutin "gelca03",2;
+		mes "[Gelkah]";
+		mes "Ooh, this will be like reenacting a scene from the book, where monsters are rampaging.";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : Ooh, this will be like reenacting a scene from the book, where monsters are rampaging.";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Gelkah, Ultra Special Skill No. 8: Wild Dance.";
+		unittalk getnpcid(0),"Rohtert : Gelkah, Ultra Special Skill No. 8: Wild Dance.";
+		next;
+		cutin "gelca01",2;
+		mes "[Gelkah]";
+		mes "!!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : !!";
+		emotion e_gasp,0,instance_npcname("Gelkah#03");
+		next;
+		mes "[Gelkah]";
+		mes "Here we go!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : Here we go!";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Delicate Flashlight, Lumiere Dupleix!";
+		unittalk getnpcid(0),"Rohtert : Delicate Flashlight, Lumiere Dupleix!";
+		specialeffect EF_LEXAETERNA;
+		specialeffect EF_POTION_BERSERK;
+		specialeffect EF_SIGNUM;
+		next;
+		cutin "gelca01",2;
+		mes "[Gelkah]";
+		mes "Ruinous Twelve Heaven's Nets!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : Ruinous Twelve Heaven's Nets!";
+		specialeffect EF_HITLINE,AREA,instance_npcname("Gelkah#03");
+		specialeffect EF_BASH3D2,AREA,instance_npcname("Gelkah#03");
+		specialeffect EF_GUMGANG,AREA,instance_npcname("Gelkah#03");
+		next;
+		mes "[Gelkah/Rohtert]";
+		mes "CROSS!!!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : CROSS!!!";
+		unittalk getnpcid(0),"Rohtert : CROSS!!!";
+		emotion e_flash,0,instance_npcname("Gelkah#03");
+		emotion e_flash;
+		specialeffect EF_GRANDCROSS,AREA,instance_npcname("Gelkah#03");
+		specialeffect EF_GRANDCROSS;
+		next;
+		cutin "rote01",0;
+		mes "[Gelkah/Rohtert]", "Scatter--Thousand Flashlights!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : Scatter--Thousand Flashlights!";
+		unittalk getnpcid(0),"Rohtert : Scatter--Thousand Flashlights!";
+		specialeffect EF_LEXAETERNA,AREA,instance_npcname("Gelkah#03");
+		specialeffect EF_LEXAETERNA;
+		sleep2 300;
+		specialeffect EF_LORD,AREA,instance_npcname("Gelkah#03");
+		specialeffect EF_LORD;
+		specialeffect EF_LORD,AREA,instance_npcname("Gelkah#03");
+		specialeffect EF_LORD;
+		sleep2 300;
+		specialeffect EF_SUI_EXPLOSION,AREA,instance_npcname("Gelkah#03");
+		specialeffect EF_SUI_EXPLOSION;
+		specialeffect EF_BEGINASURA,AREA,instance_npcname("Gelkah#03");
+		specialeffect EF_BEGINASURA;
+		next;
+		cutin "gelca01",2;
+		mes "[Gelkah]";
+		mes "...Whew.";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : ...Whew.";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Hm, not good enough, Gelkah. Don't let the guild business distract you from practice.";
+		unittalk getnpcid(0),"Rohtert : Hm, not good enough, Gelkah. Don't let the guild business distract you from practice.";
+		next;
+		cutin "gelca03",2;
+		mes "[Gelkah]";
+		mes "Yes, Master!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : Yes, Master!";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Where are the others? This is definitely not a run-of-the-mill cave.";
+		unittalk getnpcid(0),"Rohtert : Where are the others? This is definitely not a run-of-the-mill cave.";
+		close2;
+		cutin "rote01",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,268,46,305,14,"Ferre",3069,20,instance_npcname("Rohtert#03")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp3")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Rohtert#03")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Rohtert#03");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Rohtert#03");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("Rohtert#03")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("???#4")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 4
+//============================================================
+1@jtb,292,22,4	script	???#4	10041,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "shaloshi01",2;
+		mes "[???]";
+		mes "...";
+		close2;
+		cutin "shaloshi01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "shaloshi01",2;
+		mes "[???]";
+		mes "...";
+		unittalk getnpcid(0),"??? : ...";
+		next;
+		select("Did you get lost by yourself again?");
+		mes "[???]";
+		mes "I'm not alone.";
+		unittalk getnpcid(0),"??? : I'm not alone.";
+		next;
+		mes "[???]";
+		mes "Aigu and Runane are good.";
+		unittalk getnpcid(0),"??? : Aigu and Runane are good.";
+		next;
+		mes "[???]";
+		mes "Ask many questions.";
+		unittalk getnpcid(0),"??? : Ask many questions.";
+		next;
+		mes "[???]";
+		mes "Can't answer.";
+		unittalk getnpcid(0),"??? : Can't answer.";
+		next;
+		mes "[???]";
+		mes "Can't remember a thing.";
+		unittalk getnpcid(0),"??? : Can't remember a thing.";
+		next;
+		mes "[???]";
+		mes "But I'm not alone.";
+		unittalk getnpcid(0),"??? : But I'm not alone.";
+		next;
+		.@menu = select("Leave her:It's too dangerous, so take her with you");
+		mes "[???]";
+		if (.@menu == 1) {
+			mes "I'm okay. Not the first time.";
+			unittalk getnpcid(0),"??? : I'm okay. Not the first time.";
+		} else {
+			mes "Kind.";
+			unittalk getnpcid(0),"??? : Kind.";
+		}
+		next;
+		mes "[???]";
+		mes "...";
+		unittalk getnpcid(0),"??? : ...";
+		close2;
+		cutin "shaloshi01",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,10,130,47,95,"Ferre",3069,20,instance_npcname("???#4")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp4")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("???#4")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("???#4");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("???#4");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("???#4")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Aigu#05")+"::OnEnable";
+		donpcevent instance_npcname("Arang#05")+"::OnEnable";
+		donpcevent instance_npcname("Shalosh#5")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#05")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 5
+//============================================================
+1@jtb,25,110,4	script	Aigu#05	646,{
+	cutin "igu01",0;
+	mes "[Aigu]";
+	mes "Monsters started appearing, and their number is growing quickly.";
+	close2;
+	cutin "igu01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#05")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#05");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#05");
+	end;
+}
+
+1@jtb,25,105,4	script	Arang#05	644,{
+	cutin "arang03",0;
+	mes "[Arang]";
+	mes "I'm not scared!";
+	close2;
+	cutin "arang03",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Arang#05")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Arang#05");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Arang#05");
+	end;
+}
+
+1@jtb,27,108,4	script	Shalosh#5	10041,{
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "...";
+	close2;
+	cutin "shaloshi01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#5")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#5");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#5");
+	end;
+}
+
+1@jtb,20,108,5	script	New Oz#05	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "I'll sing again later.";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "igu05",2;
+		mes "[Aigu]";
+		mes "New Oz! Where did you go this time?";
+		unittalk getnpcid(0,instance_npcname("Aigu#05")),"Aigu : New Oz! Where did you go this time?";
+		next;
+		cutin "nines04",0;
+		mes "[New Oz]";
+		mes "Sorry. This place is like a maze. There are so many offshoots and clearings that I've lost count.";
+		unittalk getnpcid(0),"New Oz : Sorry. This place is like a maze. There are so many offshoots and clearings that I've lost count.";
+		next;
+		cutin "arang01",2;
+		mes "[Arang]";
+		mes "*Snort* You said the same thing about the Prontera Culvert.";
+		unittalk getnpcid(0,instance_npcname("Arang#05")),"Arang : *Snort* You said the same thing about the Prontera Culvert.";
+		next;
+		cutin "igu04",2;
+		mes "[Aigu]";
+		mes "What are you talking about? Why can't you just follow us? Runane? I saw her next to me a moment ago.";
+		unittalk getnpcid(0,instance_npcname("Aigu#05")),"Aigu : What are you talking about? Why can't you just follow us? Runane? I saw her next to me a moment ago.";
+		next;
+		cutin "shaloshi01",2;
+		mes "[???]";
+		mes "Man with the singing voice.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#5")),"??? : Man with the singing voice.";
+		next;
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "Oh, hello. May I ask who you are, little lady?";
+		unittalk getnpcid(0),"New Oz : Oh, hello. May I ask who you are, little lady?";
+		next;
+		cutin "shaloshi01",2;
+		mes "[Shalosh]";
+		mes "I'm Shalosh. Sing for me.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#5")),"Shalosh : I'm Shalosh. Sing for me.";
+		next;
+		cutin "nines03",0;
+		mes "[New Oz]";
+		mes "Hah hah, you're cute. I'll sing for you later.";
+		unittalk getnpcid(0),"New Oz : Hah hah, you're cute. I'll sing for you later.";
+		next;
+		cutin "shaloshi01",2;
+		mes "[Shalosh]";
+		mes "You promised. You're kind.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#5")),"Shalosh : You promised. You're kind.";
+		next;
+		cutin "igu03",2;
+		mes "[Aigu]";
+		mes "Monsters started appearing, and their numbers is growing quickly.";
+		unittalk getnpcid(0,instance_npcname("Aigu#05")),"Aigu : Monsters started appearing, and their numbers is growing quickly.";
+		next;
+		cutin "arang02",2;
+		mes "[Arang]";
+		mes "You'll be ok, Aigu, so long as you stick with us... Um, where's everyone?";
+		unittalk getnpcid(0,instance_npcname("Arang#05")),"Arang : You'll be ok, Aigu, so long as you stick with us... Um, where's everyone?";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Hah hah, don't worry, little ladies. I'll protect you.";
+		unittalk getnpcid(0),"New Oz : Hah hah, don't worry, little ladies. I'll protect you.";
+		next;
+		cutin "arang03",2;
+		mes "[Arang]";
+		mes "New Oz, I love you!";
+		unittalk getnpcid(0,instance_npcname("Arang#05")),"Arang : New Oz, I love you!";
+		next;
+		cutin "shaloshi01",2;
+		mes "[Shalosh]";
+		mes "You protect me. You're kind.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#5")),"Shalosh : You protect me. You're kind.";
+		next;
+		cutin "igu05",2;
+		mes "[Aigu]";
+		mes "You'd run before everyone else in here. Well, we can't stay here. Let's move on.";
+		unittalk getnpcid(0,instance_npcname("Aigu#05")),"Aigu : You'd run before everyone else in here. Well, we can't stay here. Let's move on.";
+		close2;
+		cutin "igu05",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,94,131,131,96,"Ferre",3069,10,instance_npcname("New Oz#05")+"::OnMyMobDead";
+	areamonster .@map$,94,131,131,96,"Ferre",3070,5,instance_npcname("New Oz#05")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp5")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#05")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#05");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#05");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#05")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Aigu#06")+"::OnEnable";
+		donpcevent instance_npcname("Runane#06")+"::OnEnable";
+		donpcevent instance_npcname("Roel#06")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 6
+//============================================================
+1@jtb,115,113,4	script	Aigu#06	646,{
+	cutin "igu01",0;
+	mes "[Aigu]";
+	mes "I feel great--this is my first adventure in a long time since I was charged with caring for other adventurers. Plus I've met my hero New Oz!";
+	close2;
+	cutin "igu01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#06")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#06");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#06");
+	end;
+}
+
+1@jtb,116,117,4	script	Runane#06	10039,{
+	cutin "lunain01",2;
+	mes "[Runane]";
+	mes "Where do you think New Oz is this time?";
+	close2;
+	cutin "lunain01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#06")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#06");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#06");
+	end;
+}
+
+1@jtb,111,115,5	script	Roel#06	10040,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "What's wrong with me? My heart won't stop pounding.";
+		close2;
+		cutin "roel01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "lunain01",2;
+		mes "[Runane]";
+		mes "The fog cleared up.";
+		unittalk getnpcid(0,instance_npcname("Runane#06")),"Runane : The fog cleared up.";
+		next;
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "But it stayed long enough for us to lose each other.";
+		unittalk getnpcid(0),"Roel : But it stayed long enough for us to lose each other.";
+		next;
+		cutin "igu05",2;
+		mes "[Aigu]";
+		mes "One moment, I had Shalosh's hand in my hand, and the next, she's gone.";
+		unittalk getnpcid(0,instance_npcname("Aigu#06")),"Aigu : One moment, I had Shalosh's hand in my hand, and the next, she's gone.";
+		next;
+		cutin "lunain01",2;
+		mes "[Runane]";
+		mes "Her name is Shalosh? I asked her several times, and she didn't tell me.";
+		unittalk getnpcid(0,instance_npcname("Runane#06")),"Runane : Her name is Shalosh? I asked her several times, and she didn't tell me.";
+		next;
+		cutin "igu01",2;
+		mes "[Aigu]";
+		mes "That's strange. She told New Oz straight from the start.";
+		unittalk getnpcid(0,instance_npcname("Aigu#06")),"Aigu : That's strange. She told New Oz straight from the start.";
+		next;
+		cutin "lunain04",2;
+		mes "[Runane]";
+		mes "Hmpf, I hate girls. I get the feeling we'll be seeing even more monsters.";
+		unittalk getnpcid(0,instance_npcname("Runane#06")),"Runane : Hmpf, I hate girls. I get the feeling we'll be seeing even more monsters.";
+		next;
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "Worry not--I'll protect you!";
+		unittalk getnpcid(0),"Roel : Worry not--I'll protect you!";
+		next;
+		cutin "igu04",2;
+		mes "[Aigu]";
+		mes "You'd better be more reliable than someone I know.";
+		unittalk getnpcid(0,instance_npcname("Aigu#06")),"Aigu : You'd better be more reliable than someone I know.";
+		next;
+		cutin "lunain03",2;
+		mes "[Runane]";
+		mes "Don't put too much faith in this kid. I'd better go look for New Oz.";
+		unittalk getnpcid(0,instance_npcname("Runane#06")),"Runane : Don't put too much faith in this kid. I'd better go look for New Oz.";
+		next;
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "...";
+		unittalk getnpcid(0),"Roel : ...";
+		next;
+		cutin "roel03",0;
+		mes "[Roel]";
+		mes "(She's just my type!)";
+		unittalk getnpcid(0),"Roel : (She's just my type!)";
+		close2;
+		cutin "roel03",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,182,131,219,95,"Ferre",3069,15,instance_npcname("Roel#06")+"::OnMyMobDead";
+	areamonster .@map$,182,131,219,95,"Ferre",3070,5,instance_npcname("Roel#06")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp6")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#06")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#06");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#06");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("Roel#06")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Shalosh#7")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#07")+"::OnEnable";
+		donpcevent instance_npcname("Mingmin#07")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 7
+//============================================================
+1@jtb,206,114,5	script	Shalosh#7	10041,{
+	cutin "shaloshi01",0;
+	mes "[Shalosh]";
+	mes "New Oz's hand... hot.";
+	close2;
+	cutin "shaloshi01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#7")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#7");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#7");
+	end;
+}
+
+1@jtb,203,112,5	script	New Oz#07	625,{
+	cutin "nines03",0;
+	mes "[New Oz]";
+	mes "I wonder what might wait for us at the end of this passage. The anticipation is killing me!";
+	close2;
+	cutin "nines03",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#07")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#07");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#07");
+	end;
+}
+
+1@jtb,206,107,5	script	Mingmin#07	643,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "...";
+		close2;
+		cutin "min02",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "min02",2;
+		mes "[Mingmin]";
+		mes "New Oz!";
+		unittalk getnpcid(0),"Mingmin : New Oz!";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Yeah, what's up?";
+		unittalk getnpcid(0,instance_npcname("New Oz#07")),"New Oz : Yeah, what's up?";
+		next;
+		cutin "min02",2;
+		mes "[Mingmin]";
+		mes "Do you really have to ask? Who's that girl? Is she yours?";
+		unittalk getnpcid(0),"Mingmin : Do you really have to ask? Who's that girl? Is she yours?";
+		emotion e_omg;
+		next;
+		cutin "nines04",0;
+		mes "[New Oz]";
+		mes "W-whazza...?! Don't be ridiculous. I just found her now.";
+		unittalk getnpcid(0,instance_npcname("New Oz#07")),"New Oz : W-whazza...?! Don't be ridiculous. I just found her now.";
+		emotion e_omg,0,instance_npcname("New Oz#07");
+		next;
+		cutin "min02",2;
+		mes "[Mingmin]";
+		mes "A little girl in this strange place, by herself? Hm, doesn't it sound strange to you?";
+		unittalk getnpcid(0),"Mingmin : A little girl in this strange place, by herself? Hm, doesn't it sound strange to you?";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "You're strange.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#7")),"Shalosh : You're strange.";
+		next;
+		cutin "min01",2;
+		mes "[Mingmin]";
+		mes "No, I'm not! You don't want me to get angry at you, girl.";
+		unittalk getnpcid(0),"Mingmin : No, I'm not! You don't want me to get angry at you, girl.";
+		emotion e_bzz;
+		sleep2 300;
+		emotion e_an;
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Here they come...";
+		unittalk getnpcid(0,instance_npcname("Shalosh#7")),"Shalosh : Here they come...";
+		emotion e_dots,0,instance_npcname("Shalosh#7");
+		next;
+		cutin "nines04",0;
+		mes "[New Oz]";
+		mes "These monsters don't stop coming. But where are all the big, rare, beautiful ones?";
+		unittalk getnpcid(0,instance_npcname("New Oz#07")),"New Oz : These monsters don't stop coming. But where are all the big, rare, beautiful ones?";
+		next;
+		cutin "min02",2;
+		mes "[Mingmin]";
+		mes "I'll have to study you later, girl.";
+		unittalk getnpcid(0),"Mingmin : I'll have to study you later, girl.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Shalosh#7")),"Shalosh : ...";
+		close2;
+		cutin "shaloshi01",255;
+		donpcevent instance_npcname("Shalosh#7")+"::OnDisable";
+		donpcevent instance_npcname("New Oz#07")+"::OnDisable";
+		donpcevent instance_npcname("Mingmin#07")+"::OnDisable";
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,268,131,306,95,"Ferre",3069,22,instance_npcname("Mingmin#07")+"::OnMyMobDead";
+	areamonster .@map$,268,131,306,95,"Ferre",3070,5,instance_npcname("Mingmin#07")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp7")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#07")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#07");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#07");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("Mingmin#07")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Shalosh#8")+"::OnEnable";
+		donpcevent instance_npcname("Ragi#08")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#08")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 8
+//============================================================
+1@jtb,286,117,5	script	Shalosh#8	10041,{
+	cutin "shaloshi01",0;
+	mes "[Shalosh]";
+	mes "(Trying to whistle) I can't.";
+	close2;
+	cutin "shaloshi01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#8")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#8");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#8");
+	end;
+}
+
+1@jtb,290,114,4	script	Ragi#08	647,{
+	cutin "ragi01",0;
+	mes "[Ragi]";
+	mes "I'm not experienced in adventuring, but it's quite fun.";
+	close2;
+	cutin "ragi01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Ragi#08")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ragi#08");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ragi#08");
+	end;
+}
+
+1@jtb,285,114,5	script	New Oz#08	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "...";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "I keep loing the others. They were right in front of me.";
+		unittalk getnpcid(0),"New Oz : I keep loing the others. They were right in front of me.";
+		next;
+		cutin "ragi01",0;
+		mes "[Ragi]";
+		mes "We've met again.";
+		unittalk getnpcid(0,instance_npcname("Ragi#08")),"Ragi : We've met again.";
+		next;
+		cutin "nines03",0;
+		mes "[New Oz]";
+		mes "You have good taste. This just came to my mind. Listen.";
+		unittalk getnpcid(0),"New Oz : You have good taste. This just came to my mind. Listen.";
+		next;
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "The seasons are changing once again~ yet I haven't had a chance to dye my nails with garden balsam~";
+		unittalk getnpcid(0),"New Oz : The seasons are changing once again~ yet I haven't had a chance to dye my nails with garden balsam~";
+		emotion e_ho;
+		next;
+		cutin "ragi01",0;
+		mes "[Ragi]";
+		mes "Waiting for snow~";
+		unittalk getnpcid(0,instance_npcname("Ragi#08")),"Ragi : Waiting for snow~";
+		emotion e_ho,0,instance_npcname("Ragi#08");
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "You're good. You'll make great Gypsy and Minstrel.";
+		unittalk getnpcid(0),"New Oz : You're good. You'll make great Gypsy and Minstrel.";
+		emotion e_no1;
+		next;
+		cutin "ragi01",0;
+		mes "[Ragi]";
+		mes "I want to stay as a Bard for a while.";
+		unittalk getnpcid(0,instance_npcname("Ragi#08")),"Ragi : I want to stay as a Bard for a while.";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "I guess jobs don't matter so long as you can sing and play, huh?";
+		unittalk getnpcid(0),"New Oz : I guess jobs don't matter so long as you can sing and play, huh?";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Love your song.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#8")),"Shalosh : Love your song.";
+		next;
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "Shalosh, do you have a favorite song?";
+		unittalk getnpcid(0),"New Oz : Shalosh, do you have a favorite song?";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Runane sings. Whistles good, too.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#8")),"Shalosh : Runane sings. Whistles good, too.";
+		emotion e_ho,0,instance_npcname("Shalosh#8");
+		next;
+		mes "- Shalosh puckers her lips to whistle, but fails. -";
+		cutin "shaloshi01",255;
+		next;
+		cutin "ragi01",0;
+		mes "[Ragi]";
+		mes "Um, are you trying to whistle?";
+		unittalk getnpcid(0,instance_npcname("Ragi#08")),"Ragi : Um, are you trying to whistle?";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Hah hah, I'll teach you how to do it later, Shalosh.";
+		unittalk getnpcid(0),"New Oz : Hah hah, I'll teach you how to do it later, Shalosh.";
+		next;
+		mes "[New Oz]";
+		mes strcharinfo(0)+", do you have a favorite song?";
+		unittalk getnpcid(0),"New Oz : "+strcharinfo(0)+", do you have a favorite song?";
+		next;
+		'jitOption = select("Aigu's debut song- Lost Poring:Aigu's single- Only I Didn't Know about the Card Album:New Oz's Red Potion (feat. Muka):Ragi's Self-composed song- Accidental Moon");
+		setarray .@choices$,"","Aigu's debut song, Lost Poring","Aigu's Only I Didn't Know about the Card Album","your Red Potion (feat. Muka)","Ragi's Accidental Moon";
+		unittalk getcharid(3),strcharinfo(0)+" : I like "+.@choices$['jitOption]+".";
+		mes "[New Oz]";
+		switch ('jitOption) {
+			case 1:
+				mes "You know her debut song. You're a fan of her, huh?";
+				unittalk getnpcid(0),"New Oz : You know her debut song. You're a fan of her, huh?";
+				break;
+			case 2: //Custom text
+				mes "You know her single. You're a fan of her, huh?";
+				unittalk getnpcid(0),"New Oz : You know her single. You're a fan of her, huh?";
+				break;
+			case 3:
+				mes "Hah hah, this is embarassing, but thank you.";
+				unittalk getnpcid(0),"New Oz : Hah hah, this is embarassing, but thank you.";
+				break;
+			case 4: //Custom text
+				mes "Hah hah, I like it too.";
+				unittalk getnpcid(0),"New Oz : Hah hah, I like it too.";
+				break;
+		}
+		next;
+		mes "[New Oz]";
+		mes "Hm, to each his own.";
+		unittalk getnpcid(0),"New Oz : Hm, to each his own.";
+		next;
+		cutin "ragi01",0;
+		mes "[Ragi]";
+		mes "Something else is showing up.";
+		unittalk getnpcid(0,instance_npcname("Ragi#08")),"Ragi : Something else is showing up.";
+		emotion e_gasp,0,instance_npcname("Ragi#08");
+		next;
+		cutin "nines04",0;
+		mes "[New Oz]";
+		mes "Ah, I'm getting hungry. The monsters can screw themselves. Shalosh, let's go!";
+		unittalk getnpcid(0),"New Oz : Ah, I'm getting hungry. The monsters can screw themselves. Shalosh, let's go!";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Okay.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#8")),"Shalosh : Okay.";
+		donpcevent instance_npcname("New Oz#08")+"::OnDisable";
+		next;
+		cutin "ragi03",0;
+		mes "[Ragi]";
+		mes "Hey, come with me!";
+		unittalk getnpcid(0,instance_npcname("Ragi#08")),"Ragi : Hey, come with me!";
+		donpcevent instance_npcname("Shalosh#8")+"::OnDisable";
+		close2;
+		donpcevent instance_npcname("Ragi#08")+"::OnDisable";
+		cutin "ragi03",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,351,131,389,96,"Ferre",3069,22,instance_npcname("New Oz#08")+"::OnMyMobDead";
+	areamonster .@map$,351,131,389,96,"Ferre",3070,5,instance_npcname("New Oz#08")+"::OnMyMobDead";
+	areamonster .@map$,351,131,389,96,"Jitterbug",3108+rand(1),('jitOption==3?2:1),instance_npcname("New Oz#08")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp8")+"::OnEnable";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#08")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#08");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#08");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#08")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Roel#09")+"::OnEnable";
+		donpcevent instance_npcname("Shalosh#9")+"::OnEnable";
+		donpcevent instance_npcname("Runane#09")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#09")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 9
+//============================================================
+1@jtb,369,117,5	script	Roel#09	10040,{
+	cutin "roel01",0;
+	mes "[Roel]";
+	mes "I've trained enough. I can be useful.";
+	close2;
+	cutin "roel01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#09")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#09");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#09");
+	end;
+}
+
+1@jtb,374,110,4	script	Shalosh#9	10041,{
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "It's not dangerous. Don't worry.";
+	close2;
+	cutin "shaloshi01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#9")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#9");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#9");
+	end;
+}
+
+1@jtb,368,111,5	script	Runane#09	10039,{
+	cutin "lunain01",0;
+	mes "[Runane]";
+	mes "Never let your guard down while exploring, or you can get hurt.";
+	close2;
+	cutin "lunain01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#09")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#09");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#09");
+	end;
+}
+
+1@jtb,375,117,4	script	New Oz#09	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "These guys are different. They seem to understand music... or maybe not.";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "Did you take care of them already? I wanted to take part in it.";
+		unittalk getnpcid(0),"New Oz : Did you take care of them already? I wanted to take part in it.";
+		emotion e_ho,0;
+		next;
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "They look cute, but they're ferocious.";
+		unittalk getnpcid(0,instance_npcname("Roel#09")),"Roel : They look cute, but they're ferocious.";
+		next;
+		cutin "shaloshi01",2;
+		mes "[Shalosh]";
+		mes "Small friends follow us. Not cute.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#9")),"Shalosh : Small friends follow us. Not cute.";
+		next;
+		cutin "lunain01",0;
+		mes "[Runane]";
+		mes "They're monsters, not your friends. Be careful.";
+		unittalk getnpcid(0,instance_npcname("Runane#09")),"Runane : They're monsters, not your friends. Be careful.";
+		next;
+		cutin "shaloshi01",2;
+		mes "[Shalosh]";
+		mes "Monsters...";
+		unittalk getnpcid(0,instance_npcname("Shalosh#9")),"Shalosh : Monsters...";
+		next;
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "Could she have lost her memory? It seems she doesn't understand danger, it seems.";
+		unittalk getnpcid(0,instance_npcname("Roel#09")),"Roel : Could she have lost her memory? It seems she doesn't understand danger, it seems.";
+		next;
+		cutin "shaloshi01",2;
+		mes "[Shalosh]";
+		mes "Danger, no.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#9")),"Shalosh : Danger, no.";
+		next;
+		cutin "lunain02",0;
+		mes "[Runane]";
+		mes "I think she has.";
+		unittalk getnpcid(0,instance_npcname("Runane#09")),"Runane : I think she has.";
+		next;
+		cutin "shaloshi01",2;
+		mes "[Shalosh]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Shalosh#9")),"Shalosh : ...";
+		close2;
+		cutin "shaloshi01",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,11,218,48,182,"Ferre",3069,10,instance_npcname("New Oz#09")+"::OnMyMobDead";
+	areamonster .@map$,11,218,48,182,"Ferre",3070,5,instance_npcname("New Oz#09")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp9")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#09")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#09");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#09");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#09")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Roel#10")+"::OnEnable";
+		donpcevent instance_npcname("Mingmin#10")+"::OnEnable";
+		donpcevent instance_npcname("Aigu#10")+"::OnEnable";
+		donpcevent instance_npcname("Arang#10")+"::OnEnable";
+		donpcevent instance_npcname("Runane#10")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 10
+//============================================================
+1@jtb,32,198,4	script	Roel#10	10040,{
+	cutin "roel01",2;
+	mes "[Roel]";
+	mes "A stream of water has started flowing.";
+	close2;
+	cutin "roel01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#10")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#10");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#10");
+	end;
+}
+
+1@jtb,23,200,5	script	Mingmin#10	643,{
+	cutin "min02",0;
+	mes "[Mingmin]";
+	mes "Hm, getting pretty awkward here.";
+	close2;
+	cutin "min02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#10")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#10");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#10");
+	end;
+}
+
+1@jtb,25,196,5	script	Aigu#10	646,{
+	cutin "igu01",0;
+	mes "[Aigu]";
+	mes "How long do I have to shimmy my shoulders~";
+	close2;
+	cutin "igu01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#10")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#10");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#10");
+	end;
+}
+
+1@jtb,28,197,4	script	Arang#10	644,{
+	cutin "arang01",2;
+	mes "[Arang]";
+	mes "Hate Green Potions~";
+	close2;
+	cutin "arang01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Arang#10")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Arang#10");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Arang#10");
+	end;
+}
+
+1@jtb,26,201,5	script	Runane#10	10039,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "lunain04",0;
+		mes "[Runane]";
+		mes "Arang, why aren't you drinking it?";
+		close2;
+		cutin "lunain04",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "lunain01",0;
+		mes "[Runane]";
+		mes "Push, push~";
+		unittalk getnpcid(0),"Runane : Push, push~";
+		emotion e_ho;
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "Push, push~";
+		unittalk getnpcid(0,instance_npcname("Mingmin#10")),"Mingmin : Push, push~";
+		emotion e_ho,0,instance_npcname("Mingmin#10");
+		next;
+		cutin "igu01",0;
+		mes "[Aigu]";
+		mes "How long do I have to shimmy my shoulders~";
+		unittalk getnpcid(0,instance_npcname("Aigu#10")),"Aigu : How long do I have to shimmy my shoulders~";
+		emotion e_ho,0,instance_npcname("Aigu#10");
+		next;
+		cutin "lunain01",0;
+		mes "[Runane]";
+		mes "Pam, pam, pam~";
+		unittalk getnpcid(0),"Runane : Pam, pam, pam~";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "Chica, chica~";
+		unittalk getnpcid(0,instance_npcname("Mingmin#10")),"Mingmin : Chica, chica~";
+		next;
+		cutin "igu02",0;
+		mes "[Aigu]";
+		mes "Pam, pam, pam, pam~";
+		unittalk getnpcid(0,instance_npcname("Aigu#10")),"Aigu : Pam, pam, pam, pam~";
+		next;
+		cutin "lunain01",0;
+		mes "[Runane]";
+		mes "*Blow*";
+		unittalk getnpcid(0),"Runane : *Blow*";
+		next;
+		cutin "arang01",2;
+		mes "[Arang]";
+		mes "Ugh, I don't want to drink this!";
+		unittalk getnpcid(0,instance_npcname("Arang#10")),"Arang : Ugh, I don't want to drink this!";
+		next;
+		cutin "min03",0;
+		mes "[Mingmin]";
+		mes "Just trust me and drink it!";
+		unittalk getnpcid(0,instance_npcname("Mingmin#10")),"Mingmin : Just trust me and drink it!";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "What are you trying to feed this child? What's in this green bottle?  ...No...";
+		unittalk getnpcid(0,instance_npcname("Roel#10")),"Roel : What are you trying to feed this child? What's in this green bottle?  ...No...";
+		emotion e_gasp,0,instance_npcname("Roel#10");
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "Green Potion.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#10")),"Mingmin : Green Potion.";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "Green Potion is such a bitter... Um, Green Potion you said?";
+		unittalk getnpcid(0,instance_npcname("Roel#10")),"Roel : Green Potion is such a bitter... Um, Green Potion you said?";
+		next;
+		cutin "igu03",0;
+		mes "[Aigu]";
+		mes "Green Potion!";
+		unittalk getnpcid(0,instance_npcname("Aigu#10")),"Aigu : Green Potion!";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "Green Potion?";
+		unittalk getnpcid(0,instance_npcname("Roel#10")),"Roel : Green Potion?";
+		next;
+		cutin "lunain04",0;
+		mes "[Runane]";
+		mes "I said Green Potion!";
+		unittalk getnpcid(0),"Runane : I said Green Potion!";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "But you're singing a strange song, and... Green Potion?";
+		unittalk getnpcid(0,instance_npcname("Roel#10")),"Roel : But you're singing a strange song, and... Green Potion?";
+		next;
+		cutin "igu03",0;
+		mes "[Aigu]";
+		mes "I had an almost expired Green Potion, so we decided to play Rock-paper-scissors and feed it to the loser.";
+		unittalk getnpcid(0,instance_npcname("Aigu#10")),"Aigu : I had an almost expired Green Potion, so we decided to play Rock-paper-scissors and feed it to the loser.";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "It doesn't do anything when you're not poisoned. We just didn't want to waste a good potion.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#10")),"Mingmin : It doesn't do anything when you're not poisoned. We just didn't want to waste a good potion.";
+		next;
+		cutin "arang01",0;
+		mes "[Arang]";
+		mes "But it's awfully bitter.";
+		unittalk getnpcid(0,instance_npcname("Arang#10")),"Arang : But it's awfully bitter.";
+		next;
+		cutin "lunain04",0;
+		mes "[Runane]";
+		mes "Are you drinking it yet?";
+		unittalk getnpcid(0),"Runane : Are you drinking it yet?";
+		next;
+		cutin "igu02",0;
+		mes "[Aigu]";
+		mes "DRINK! DRINK!";
+		unittalk getnpcid(0,instance_npcname("Aigu#10")),"Aigu : DRINK! DRINK!";
+		next;
+		cutin "min01",0;
+		mes "[Mingmin]";
+		mes "DRINK! DRINK!";
+		unittalk getnpcid(0,instance_npcname("Mingmin#10")),"Mingmin : DRINK! DRINK!";
+		next;
+		cutin "arang02",2;
+		mes "[Arang]";
+		mes "Roel, can't you drink it for your sister?";
+		unittalk getnpcid(0,instance_npcname("Arang#10")),"Arang : Roel, can't you drink it for your sister?";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "Let me go look for possible threats.";
+		unittalk getnpcid(0,instance_npcname("Roel#10")),"Roel : Let me go look for possible threats.";
+		close2;
+		donpcevent instance_npcname("Roel#10")+"::OnDisable";
+		cutin "roel01",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,94,218,132,182,"Ferre",3069,10,instance_npcname("Runane#10")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp10")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#10")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#10");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#10");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("Runane#10")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Mingmin#11")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 11
+//============================================================
+1@jtb,106,198,5	script	Mingmin#11	643,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "I'm glad the mushroom is not poisonous.";
+		close2;
+		cutin "min02",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "Its interior looked like that of a forest, then changed to that of a cave. How strange.";
+		unittalk getnpcid(0),"Mingmin : Its interior looked like that of a forest, then changed to that of a cave. How strange.";
+		next;
+		mes "[Mingmin]";
+		mes "Strange plants growing on stranger terrains. Everything looks out of place.";
+		unittalk getnpcid(0),"Mingmin : Strange plants growing on stranger terrains. Everything looks out of place.";
+		next;
+		mes "[Mingmin]";
+		mes "I've harvested a few mushrooms to taste.";
+		unittalk getnpcid(0),"Mingmin : I've harvested a few mushrooms to taste.";
+		next;
+		cutin "min01",0;
+		mes "[Mingmin]";
+		mes "This mushroom is poisonous, but not life threatening. Do you want to have a bite?";
+		unittalk getnpcid(0),"Mingmin : This mushroom is poisonous, but not life threatening. Do you want to have a bite?";
+		next;
+		.@menu = select("Decline:Have a bite");
+		if (.@menu == 2) {
+			mes "[Mingmin]";
+			mes "You're braver than I thought.";
+			unittalk getnpcid(0),"Mingmin : You're braver than I thought.";
+			next;
+			mes "- You feel good, possibly a side effect of eating the mushroom. -";
+			cutin "min01",255;
+			next;
+			cutin "min01",0;
+			mes "[Mingmin]";
+			mes "I should try one.";
+			unittalk getnpcid(0),"Mingmin : I should try one.";
+		} else {
+			mes "[Mingmin]";
+			mes "I won't take no for an answer!";
+			unittalk getnpcid(0),"Mingmin : I won't take no for an answer!";
+			next;
+			mes "- Mingmin shoves a mushroom into your mouth. -";
+			cutin "min01",255;
+			next;
+			cutin "min01",0;
+			mes "[Mingmin]";
+			mes "Hm?";
+			unittalk getnpcid(0),"Mingmin : Hm?";
+			next;
+			mes "[Mingmin]";
+			mes "You're not reacting. Maybe the mushroom is not poisonous after all. Maybe I should try one...";
+			unittalk getnpcid(0),"Mingmin : You're not reacting. Maybe the mushroom is not poisonous after all. Maybe I should try one...";
+		}
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "Hm...";
+		unittalk getnpcid(0),"Mingmin : Hm...";
+		next;
+		mes "[Mingmin]";
+		mes "It has almost no taste.";
+		unittalk getnpcid(0),"Mingmin : It has almost no taste.";
+		next;
+		mes "[Mingmin]";
+		mes "Sheesh, this was a waste of time. You should go first. There's one more thing I want to look at.";
+		unittalk getnpcid(0),"Mingmin : Sheesh, this was a waste of time. You should go first. There's one more thing I want to look at.";
+		close2;
+		cutin "min02",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,180,217,218,182,"Ferre",3069,15,instance_npcname("Mingmin#11")+"::OnMyMobDead";
+	areamonster .@map$,180,217,218,182,"Ferre",3070,5,instance_npcname("Mingmin#11")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp11")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#11")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#11");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#11");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("Mingmin#11")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Melody-Jack#12")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#12")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 12
+//============================================================
+1@jtb,191,206,5	script	Melody-Jack#12	844,{
+	mes "[Melody-Jack]";
+	mes "Please don't talk to me--I'm hiding for a reason.";
+	close;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Melody-Jack#12")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Melody-Jack#12");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Melody-Jack#12");
+	end;
+}
+
+1@jtb,195,206,4	script	New Oz#12	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "You made it sound so difficult, when you could just say, 'give and take.'";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "nines04",2;
+		mes "[New Oz]";
+		mes "Um, how did I manage to lose the others again?";
+		unittalk getnpcid(0),"New Oz : Um, how did I manage to lose the others again?";
+		next;
+		mes "[Melody-Jack]";
+		mes "New Oz.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : New Oz.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		cutin "nines04",255;
+		next;
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "Wah! Jeez!";
+		unittalk getnpcid(0),"New Oz : Wah! Jeez!";
+		next;
+		mes "[Melody-Jack]";
+		mes "And I thought you'd have gotten used to having me around invisible.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : And I thought you'd have gotten used to having me around invisible.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		cutin "nines01",255;
+		next;
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "Are we still in danger?";
+		unittalk getnpcid(0),"New Oz : Are we still in danger?";
+		next;
+		mes "[Melody-Jack]";
+		mes "Guess so. We've been circling around the same place, by the way.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : Guess so. We've been circling around the same place, by the way.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		cutin "nines01",255;
+		next;
+		cutin "nines04",2;
+		mes "[New Oz]";
+		mes "So I was right about this place being maze-like. Ugh, I'm getting hungry again.";
+		unittalk getnpcid(0),"New Oz : So I was right about this place being maze-like. Ugh, I'm getting hungry again.";
+		next;
+		mes "[Melody-Jack]";
+		mes "I've waited for you because I wanted to talk.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : I've waited for you because I wanted to talk.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		cutin "nines04",255;
+		next;
+		mes "[Melody-Jack]";
+		mes "New Oz, your contact has expired at the time you returned to the guild.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : New Oz, your contact has expired at the time you returned to the guild.";
+		next;
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "Oh, that's right. Since I'm no longer the master, my contract has expired naturally.";
+		unittalk getnpcid(0),"New Oz : Oh, that's right. Since I'm no longer the master, my contract has expired naturally.";
+		next;
+		mes "[Melody-Jack]";
+		mes "But given the situation, my promise to you still stands.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : But given the situation, my promise to you still stands.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		cutin "nines01",255;
+		next;
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "Thanks. I'm glad my contingency plan is still in place.";
+		unittalk getnpcid(0),"New Oz : Thanks. I'm glad my contingency plan is still in place.";
+		next;
+		mes "[Melody-Jack]";
+		mes "Hmpf, just know I'm keeping my promise to you only because you've got what I want.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : Hmpf, just know I'm keeping my promise to you only because you've got what I want.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		cutin "nines01",255;
+		next;
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "Oh, do you mean this ukulele?";
+		unittalk getnpcid(0),"New Oz : Oh, do you mean this ukulele?";
+		next;
+		mes "[Melody-Jack]";
+		mes "You moron, that's worth nothing. Your contract has expired, but a promise is a promise and I intend to keep it.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : You moron, that's worth nothing. Your contract has expired, but a promise is a promise and I intend to keep it.";
+		emotion e_meh,0,instance_npcname("Melody-Jack#12");
+		cutin "nines01",255;
+		next;
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "Thanks";
+		unittalk getnpcid(0),"New Oz : Thanks";
+		close2;
+		donpcevent instance_npcname("Melody-Jack#12")+"::OnDisable";
+		cutin "nines01",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,268,216,305,181,"Ferre",3069,15,instance_npcname("New Oz#12")+"::OnMyMobDead";
+	areamonster .@map$,268,216,305,181,"Ferre",3070,5,instance_npcname("New Oz#12")+"::OnMyMobDead";
+	areamonster .@map$,268,216,305,181,"Ferre",3071,5,instance_npcname("New Oz#12")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp12")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#12")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#12");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#12");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#12")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Aigu#13")+"::OnEnable";
+		donpcevent instance_npcname("Ragi#13")+"::OnEnable";
+		donpcevent instance_npcname("Shalosh#13")+"::OnEnable";
+		donpcevent instance_npcname("Roel#13")+"::OnEnable";
+		donpcevent instance_npcname("Mingmin#13")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#13")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 13
+//============================================================
+1@jtb,287,195,4	script	Aigu#13	646,{
+	cutin "igu04",0;
+	mes "[Aigu]";
+	mes "Don't listen to him. He doesn't need encouragement for his bad jokes.";
+	close2;
+	cutin "igu04",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#13")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#13");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#13");
+	end;
+}
+
+1@jtb,285,195,4	script	Ragi#13	647,{
+	cutin "ragi02",0;
+	mes "[Ragi]";
+	mes "If you find my joke funny, don't try to hide it. Just laugh.";
+	close2;
+	cutin "ragi02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Ragi#13")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ragi#13");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ragi#13");
+	end;
+}
+
+1@jtb,285,192,1	script	Shalosh#13	10041,{
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "I think someone made my wish come true.";
+	close2;
+	cutin "shaloshi01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#13")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#13");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#13");
+	end;
+}
+
+1@jtb,289,191,4	script	Roel#13	10040,{
+	cutin "roel01",2;
+	mes "[Roel]";
+	mes "I hope Shalosh will recover her memory soon.";
+	close2;
+	cutin "roel01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#13")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#13");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#13");
+	end;
+}
+
+1@jtb,280,191,7	script	Mingmin#13	643,{
+	cutin "min02",0;
+	mes "[Mingmin]";
+	mes "Ugh, I'm tired. Looking out for these new members all day is work in itself.";
+	close2;
+	cutin "min02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#13")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#13");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#13");
+	end;
+}
+
+1@jtb,282,194,5	script	New Oz#13	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "It's possible someone else might be in here.";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "I remembered a few things.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#13")),"Shalosh : I remembered a few things.";
+		next;
+		cutin "igu04",2;
+		mes "[Aigu]";
+		mes "Did you?";
+		unittalk getnpcid(0,instance_npcname("Aigu#13")),"Aigu : Did you?";
+		next;
+		cutin "ragi01",0;
+		mes "[Ragi]";
+		mes "She said she did.";
+		unittalk getnpcid(0,instance_npcname("Ragi#13")),"Ragi : She said she did.";
+		emotion e_ho,0,instance_npcname("Ragi#13");
+		next;
+		cutin "nines03",0;
+		mes "[New Oz]";
+		mes "Right, that's what she said.";
+		unittalk getnpcid(0),"New Oz : Right, that's what she said.";
+		emotion e_ho;
+		next;
+		mes "[Ragi & New Oz]";
+		mes "!!!";
+		unittalk getnpcid(0,instance_npcname("Ragi#13")),"Ragi : !!!";
+		unittalk getnpcid(0),"New Oz : !!!";
+		emotion e_gasp,0,instance_npcname("Ragi#13");
+		emotion e_gasp;
+		next;
+		mes "[Ragi & New Oz]";
+		mes "Gimmie five!";
+		unittalk getnpcid(0,instance_npcname("Ragi#13")),"Ragi : Gimmie five!";
+		unittalk getnpcid(0),"New Oz : Gimmie five!";
+		next;
+		mes "- *Slap* -";
+		cutin "nines03",255;
+		next;
+		mes "- Before the two give each other a high five, Aigu and Mingmin slap them on their backs. -";
+		emotion e_wah,0,instance_npcname("Ragi#13");
+		emotion e_wah;
+		emotion e_pif,0,instance_npcname("Aigu#13");
+		emotion e_pif,0,instance_npcname("Mingmin#13");
+		specialeffect EF_HIT5,AREA,instance_npcname("Ragi#13");
+		specialeffect EF_HIT5;
+		next;
+		cutin "igu03",2;
+		mes "[Aigu]";
+		mes "Stop goofing around. Shalosh, talk to us.";
+		unittalk getnpcid(0,instance_npcname("Aigu#13")),"Aigu : Stop goofing around. Shalosh, talk to us.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "In the pitch darkness, I heard a voice. It was low, but it was ringing for a while.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#13")),"Shalosh : In the pitch darkness, I heard a voice. It was low, but it was ringing for a while.";
+		next;
+		mes "[Shalosh]";
+		mes "Later I heard New Oz singing while waiting for his friends. His voice warmed me.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#13")),"Shalosh : Later I heard New Oz singing while waiting for his friends. His voice warmed me.";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "You speak like a grow-up now, all smooth and clear.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#13")),"Mingmin : You speak like a grow-up now, all smooth and clear.";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "She could have been terrified.";
+		unittalk getnpcid(0,instance_npcname("Roel#13")),"Roel : She could have been terrified.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "I didn't know what friends meant, but it sounded good. I wanted it.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#13")),"Shalosh : I didn't know what friends meant, but it sounded good. I wanted it.";
+		next;
+		mes "[Shalosh]";
+		mes "Aigu and Runane showed up.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#13")),"Shalosh : Aigu and Runane showed up.";
+		next;
+		mes "[Shalosh]";
+		mes "I thought someone made my wish come true.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#13")),"Shalosh : I thought someone made my wish come true.";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "The pitch darkness... Don't you remember anything else?";
+		unittalk getnpcid(0),"New Oz : The pitch darkness... Don't you remember anything else?";
+		emotion e_what;
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "No.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#13")),"Shalosh : No.";
+		next;
+		cutin "roel01",2;
+		mes "[Roel]";
+		mes "She could have had her eyes closed. Perhaps she's sleeping.";
+		unittalk getnpcid(0,instance_npcname("Roel#13")),"Roel : She could have had her eyes closed. Perhaps she's sleeping.";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "The pitch darkness... The cave is bright throughout, aside from the fog.";
+		unittalk getnpcid(0),"New Oz : The pitch darkness... The cave is bright throughout, aside from the fog.";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "A dream. A low voice in a dream. What kind of dream?";
+		unittalk getnpcid(0,instance_npcname("Mingmin#13")),"Mingmin : A dream. A low voice in a dream. What kind of dream?";
+		next;
+		'jitOption = select("She heard her own thoughts:She was talking with someone");
+		setarray .@choices$,"","Maybe she heard her own thoughts","Maybe she was talking with someone";
+		unittalk getcharid(3),strcharinfo(0)+" : "+.@choices$['jitOption]+".";
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Shalosh#13")),"Shalosh : ...";
+		next;
+		cutin "igu04",0;
+		mes "[Aigu]";
+		mes "She may not have remembered everything, but this is an improvement. Let's wait until she's ready to talk more.";
+		unittalk getnpcid(0,instance_npcname("Aigu#13")),"Aigu : She may not have remembered everything, but this is an improvement. Let's wait until she's ready to talk more.";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "A voice before singing. It's possible someone else might be in here.";
+		unittalk getnpcid(0),"New Oz : A voice before singing. It's possible someone else might be in here.";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "We'll know soon enough.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#13")),"Mingmin : We'll know soon enough.";
+		close2;
+		cutin "min02",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,358,212,388,182,"Ferre",3069,20,instance_npcname("New Oz#13")+"::OnMyMobDead";
+	areamonster .@map$,358,212,388,182,"Ferre",3070,10,instance_npcname("New Oz#13")+"::OnMyMobDead";
+	areamonster .@map$,358,212,388,182,"Jitterbug",3108+rand(1),('jitOption==2?2:1),instance_npcname("New Oz#13")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp13")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#13")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#13");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#13");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#13")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Shalosh#14")+"::OnEnable";
+		donpcevent instance_npcname("Roel#14")+"::OnEnable";
+		donpcevent instance_npcname("Mingmin#14")+"::OnEnable";
+		donpcevent instance_npcname("Runane#14")+"::OnEnable";
+		donpcevent instance_npcname("Arang#14")+"::OnEnable";
+		donpcevent instance_npcname("Rohtert#14")+"::OnEnable";
+		donpcevent instance_npcname("Gelkah#14")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#14")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 14
+//============================================================
+1@jtb,385,214,4	script	Shalosh#14	10041,{
+	cutin "shaloshi02",2;
+	mes "[Shalosh]";
+	mes "Can't you hear what others think?";
+	close2;
+	cutin "shaloshi02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#14")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#14");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#14");
+	end;
+}
+
+1@jtb,376,218,5	script	Roel#14	10040,{
+	cutin "roel01",0;
+	mes "[Roel]";
+	mes "Comrades should be best friends!";
+	close2;
+	cutin "roel01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#14")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#14");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#14");
+	end;
+}
+
+1@jtb,382,211,4	script	Mingmin#14	643,{
+	cutin "min02",0;
+	mes "[Mingmin]";
+	mes "Don't care.";
+	close2;
+	cutin "min02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#14")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#14");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#14");
+	end;
+}
+
+1@jtb,384,218,4	script	Runane#14	10039,{
+	cutin "lunain02",2;
+	mes "[Runane]";
+	mes "I bake and knit in my spare time. I'm very domestic. Ho ho ho!";
+	close2;
+	cutin "lunain02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#14")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#14");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#14");
+	end;
+}
+
+1@jtb,383,216,5	script	Arang#14	644,{
+	cutin "arang01",0;
+	mes "[Arang]";
+	mes "Yap! Yap!";
+	close2;
+	cutin "arang01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Arang#14")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Arang#14");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Arang#14");
+	end;
+}
+
+1@jtb,375,214,5	script	Rohtert#14	630,{
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "It's true that I'm the strongest.";
+	close2;
+	cutin "rote01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Rohtert#14")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Rohtert#14");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Rohtert#14");
+	end;
+}
+
+1@jtb,378,211,5	script	Gelkah#14	629,{
+	cutin "gelca01",0;
+	mes "[Gelkah]";
+	mes "I never slack on my training.";
+	close2;
+	cutin "gelca01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Gelkah#14")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Gelkah#14");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Gelkah#14");
+	end;
+}
+
+1@jtb,380,219,5	script	New Oz#14	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "Don't worry. Children grow by fighting.";
+		close2;
+		cutin "nines02",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Arang! Shalosh!";
+		unittalk getnpcid(0),"New Oz : Arang! Shalosh!";
+		next;
+		cutin "arang01",2;
+		mes "[Arang]";
+		mes "What?";
+		unittalk getnpcid(0,instance_npcname("Arang#14")),"Arang : What?";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Where's you in danger?";
+		unittalk getnpcid(0,instance_npcname("Shalosh#14")),"Shalosh : Where's you in danger?";
+		next;
+		cutin "arang02",2;
+		mes "[Arang]";
+		mes "Where have you been? We just had an awesome monster here!";
+		unittalk getnpcid(0,instance_npcname("Arang#14")),"Arang : Where have you been? We just had an awesome monster here!";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Heh, my instincts told me to slow down because danger was ahead.";
+		unittalk getnpcid(0),"New Oz : Heh, my instincts told me to slow down because danger was ahead.";
+		next;
+		cutin "gelca01",0;
+		mes "[Gelkah]";
+		mes "Oh, the instincts of a great adventurer!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#14")),"Gelkah : Oh, the instincts of a great adventurer!";
+		next;
+		cutin "arang01",2;
+		mes "[Arang]";
+		mes "No, his instincts have gotten rusty.";
+		unittalk getnpcid(0,instance_npcname("Arang#14")),"Arang : No, his instincts have gotten rusty.";
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "He's just being lazy. He's not so weak.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#14")),"Rohtert : He's just being lazy. He's not so weak.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "My instincts just told me New Oz is not strong.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#14")),"Shalosh : My instincts just told me New Oz is not strong.";
+		next;
+		mes "[Shalosh]";
+		mes "New Oz, did you just think everyone except Rot is mediocre?";
+		unittalk getnpcid(0,instance_npcname("Shalosh#14")),"Shalosh : New Oz, did you just think everyone except Rot is mediocre?";
+		next;
+		cutin "min02",2;
+		mes "[Mingmin]";
+		mes "You can talk and you can hear other people's thoughts. Brillant.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#14")),"Mingmin : You can talk and you can hear other people's thoughts. Brillant.";
+		next;
+		cutin "lunain04",2;
+		mes "[Runane]";
+		mes "Enough! Stop being disrespectful to New Oz!";
+		unittalk getnpcid(0,instance_npcname("Runane#14")),"Runane : Enough! Stop being disrespectful to New Oz!";
+		next;
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "Comrades should not fight with each other.";
+		unittalk getnpcid(0,instance_npcname("Roel#14")),"Roel : Comrades should not fight with each other.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Comrades should not fight with each other. Got it.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#14")),"Shalosh : Comrades should not fight with each other. Got it.";
+		next;
+		cutin "lunain03",2;
+		mes "[Runane]";
+		mes "Comrades, who? We're just a bunch of strangers hell-bent on saving a lost girl!";
+		unittalk getnpcid(0,instance_npcname("Runane#14")),"Runane : Comrades, who? We're just a bunch of strangers hell-bent on saving a lost girl!";
+		next;
+		cutin "roel03",0;
+		mes "[Roel]";
+		mes "(She's hawt when she's angry!)";
+		unittalk getnpcid(0,instance_npcname("Roel#14")),"Roel : (She's hawt when she's angry!)";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "We'll talk again the moment we're out of here.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#14")),"Mingmin : We'll talk again the moment we're out of here.";
+		emotion e_an,0,instance_npcname("Mingmin#14");
+		close2;
+		cutin "min02",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,13,300,47,267,"Ferre",3069,10,instance_npcname("New Oz#14")+"::OnMyMobDead";
+	areamonster .@map$,13,300,47,267,"Ferre",3070,10,instance_npcname("New Oz#14")+"::OnMyMobDead";
+	areamonster .@map$,13,300,47,267,"Ferre",3071,10,instance_npcname("New Oz#14")+"::OnMyMobDead";
+	areamonster .@map$,13,300,47,267,"Ferre",3072,5,instance_npcname("New Oz#14")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp14")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#14")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#14");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#14");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#14")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Mingmin#15")+"::OnEnable";
+		donpcevent instance_npcname("Rohtert#15")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#15")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 15
+//============================================================
+1@jtb,30,279,4	script	Mingmin#15	643,{
+	cutin "min02",0;
+	mes "[Mingmin]";
+	mes "Tsk, tsk. I practically raised everyone here, and now they're at each other's throughts over the guild master position.";
+	close2;
+	cutin "min02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#15")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#15");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#15");
+	end;
+}
+
+1@jtb,30,284,4	script	Rohtert#15	630,{
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "Don't let yourself be deluded by rumors! I'm the Stag of the Southern Gate, the most powerful Bishop in exorcist history!";
+	close2;
+	cutin "rote01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Rohtert#15")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Rohtert#15");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Rohtert#15");
+	end;
+}
+
+1@jtb,26,280,5	script	New Oz#15	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Wait, I've collected some Autumn Leaves and Blue Cards to give to other friends as souvenirs. Where are they?";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "Having you two with me brings back a lot of memories.";
+		unittalk getnpcid(0),"New Oz : Having you two with me brings back a lot of memories.";
+		emotion e_ho;
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "I was as stubborn as a mule and busy pretending like I knew what I was doing.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#15")),"Rohtert : I was as stubborn as a mule and busy pretending like I knew what I was doing.";
+		next;
+		cutin "min01",0;
+		mes "[Mingmin]";
+		mes "Do you remember when you two fought over that florist girl at the southern gate of Prontera? Or when the doll merchant at the eastern gate whupped you for bickering and driving his customers away?";
+		unittalk getnpcid(0,instance_npcname("Mingmin#15")),"Mingmin : Do you remember when you two fought over that florist girl at the southern gate of Prontera? Or when the doll merchant at the eastern gate whupped you for bickering and driving his customers away?";
+		emotion e_what,0,instance_npcname("Mingmin#15");
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "Do you not have any good memories of us?";
+		unittalk getnpcid(0,instance_npcname("Rohtert#15")),"Rohtert : Do you not have any good memories of us?";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Oh, I remember! Ah, good times!";
+		unittalk getnpcid(0),"New Oz : Oh, I remember! Ah, good times!";
+		emotion e_ho;
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Am I the only one not happy about this conversation?";
+		unittalk getnpcid(0,instance_npcname("Rohtert#15")),"Rohtert : Am I the only one not happy about this conversation?";
+		emotion e_dots,0,instance_npcname("Rohtert#15");
+		next;
+		cutin "min01",0;
+		mes "[Mingmin]";
+		mes "How about when you played with Dead Branch to death? Or when you and your Sorcerer buddies killed yourselves playing Hocus Pocus?";
+		unittalk getnpcid(0,instance_npcname("Mingmin#15")),"Mingmin : How about when you played with Dead Branch to death? Or when you and your Sorcerer buddies killed yourselves playing Hocus Pocus?";
+		emotion e_meh,0,instance_npcname("Mingmin#15");
+		next;
+		cutin "rote01",0;
+		mes "[Rohtert]";
+		mes "Can't you think of a nice memory?";
+		unittalk getnpcid(0,instance_npcname("Rohtert#15")),"Rohtert : Can't you think of a nice memory?";
+		emotion e_sigh,0,instance_npcname("Rohtert#15");
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "I can! Mingmin drank the Poison Bottle I found on the street and died; I told you it was expensive, and I didn't say anything about it being good for your health.";
+		unittalk getnpcid(0),"New Oz : I can! Mingmin drank the Poison Bottle I found on the street and died; I told you it was expensive, and I didn't say anything about it being good for your health.";
+		emotion e_ok;
+		next;
+		cutin "min01",0;
+		mes "[Mingmin]";
+		mes "Oh, I remember! That was funny!";
+		unittalk getnpcid(0,instance_npcname("Mingmin#15")),"Mingmin : Oh, I remember! That was funny!";
+		emotion e_heh,0,instance_npcname("Mingmin#15");
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "Arg!";
+		unittalk getnpcid(0,instance_npcname("Rohtert#15")),"Rohtert : Arg!";
+		emotion e_wah,0,instance_npcname("Rohtert#15");
+		close2;
+		cutin "rote01",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,104,297,132,268,"Ferre",3069,8,instance_npcname("New Oz#15")+"::OnMyMobDead";
+	areamonster .@map$,104,297,132,268,"Ferre",3070,10,instance_npcname("New Oz#15")+"::OnMyMobDead";
+	areamonster .@map$,104,297,132,268,"Ferre",3071,5,instance_npcname("New Oz#15")+"::OnMyMobDead";
+	areamonster .@map$,104,297,132,268,"Ferre",3072,7,instance_npcname("New Oz#15")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp15")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#15")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#15");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#15");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#15")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Aigu#16")+"::OnEnable";
+		donpcevent instance_npcname("Runane#16")+"::OnEnable";
+		donpcevent instance_npcname("Shalosh#16")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 16
+//============================================================
+1@jtb,108,285,5	script	Aigu#16	646,{
+	cutin "igu03",0;
+	mes "[Aigu]";
+	mes "I don't mind healthy rivalry, but I prefer friendship, however long it lasts.";
+	close2;
+	cutin "igu03",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#16")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#16");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#16");
+	end;
+}
+
+1@jtb,113,285,4	script	Runane#16	10039,{
+	cutin "lunain01",2;
+	mes "[Runane]";
+	mes "Let's make a truce for now. But make no mistake--New Oz is mine the moment I find him vulnerable.";
+	close2;
+	cutin "lunain01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#16")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#16");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#16");
+	end;
+}
+
+1@jtb,110,281,5	script	Shalosh#16	10041,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "shaloshi01",2;
+		mes "[Shalosh]";
+		mes "Friends... Rivalry... Comrades...";
+		close2;
+		cutin "shaloshi01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "lunain02",2;
+		mes "[Runane]";
+		mes "Maybe New Oz is not interested in dating.";
+		unittalk getnpcid(0,instance_npcname("Runane#16")),"Runane : Maybe New Oz is not interested in dating.";
+		next;
+		cutin "igu05",0;
+		mes "[Aigu]";
+		mes "Tell me something I don't know.";
+		unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : Tell me something I don't know.";
+		next;
+		cutin "lunain01",2;
+		mes "[Runane]";
+		mes "But you haven't tried to talk to him. I mean seriously, have you?";
+		unittalk getnpcid(0,instance_npcname("Runane#16")),"Runane : But you haven't tried to talk to him. I mean seriously, have you?";
+		next;
+		cutin "igu04",0;
+		mes "[Aigu]";
+		mes "You've met him today, but you should know unless you're stupid.";
+		unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : You've met him today, but you should know unless you're stupid.";
+		next;
+		cutin "lunain02",2;
+		mes "[Runane]";
+		mes "I know--he'll say no if I ask him out.";
+		unittalk getnpcid(0,instance_npcname("Runane#16")),"Runane : I know--he'll say no if I ask him out.";
+		next;
+		cutin "igu05",0;
+		mes "[Aigu]";
+		mes "That dimwit is only interested in adventuring.";
+		unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : That dimwit is only interested in adventuring.";
+		next;
+		cutin "lunain04",2;
+		mes "[Runane]";
+		mes "Don't call my hero that! ...But I agree with you.";
+		unittalk getnpcid(0,instance_npcname("Runane#16")),"Runane : Don't call my hero that! ...But I agree with you.";
+		next;
+		cutin "igu03",0;
+		mes "[Aigu]";
+		mes "You seem to be found of Roel.";
+		unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : You seem to be found of Roel.";
+		next;
+		cutin "lunain03",2;
+		mes "[Runane]";
+		mes "I'm not interested in that kid.";
+		unittalk getnpcid(0,instance_npcname("Runane#16")),"Runane : I'm not interested in that kid.";
+		next;
+		cutin "igu03",0;
+		mes "[Aigu]";
+		mes "How about you, Adventurer? How are things with your significant other?";
+		unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : How about you, Adventurer? How are things with your significant other?";
+		next;
+		'jitOption = select("You don't even know if I have one:My love is unrequited:We're happy");
+		cutin "igu01",0;
+		switch ('jitOption) {
+			case 1:
+				unittalk getcharid(3),strcharinfo(0)+" : You don't even know if I have one.";
+				mes "[Aigu]";
+				mes "Oh, I'm sorry, but I'm on the verge of bursting into tears.";
+				unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : Oh, I'm sorry, but I'm on the verge of bursting into tears.";
+				break;
+			case 2:
+				unittalk getcharid(3),strcharinfo(0)+" : My love is unrequited.";
+				mes "[Aigu]";
+				mes "Unrequited love is painful. You'd better let it go before it breaks you.";
+				unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : Unrequited love is painful. You'd better let it go before it breaks you.";
+				break;
+			case 3: //Custom text
+				unittalk getcharid(3),strcharinfo(0)+" : We're happy.";
+				mes "[Aigu]";
+				mes "I'm glad to hear it.";
+				unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : I'm glad to hear it.";
+				break;
+		}
+		next;
+		cutin "igu03",0;
+		mes "[Aigu]";
+		mes "I don't mind healthy rivalry, but I prefer friendship, however long it lasts.";
+		unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : I don't mind healthy rivalry, but I prefer friendship, however long it lasts.";
+		next;
+		cutin "lunain01",2;
+		mes "[Runane]";
+		mes "Let's make a truce for now. But make no mistake--New Oz is mine the moment I find him vulnerable.";
+		unittalk getnpcid(0,instance_npcname("Runane#16")),"Runane : Let's make a truce for now. But make no mistake--New Oz is mine the moment I find him vulnerable.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "(Friends... Rivalry...)";
+		unittalk getnpcid(0),"Shalosh : (Friends... Rivalry...)";
+		next;
+		cutin "igu01",0;
+		mes "[Aigu]";
+		mes "Over my dead body!";
+		unittalk getnpcid(0,instance_npcname("Aigu#16")),"Aigu : Over my dead body!";
+		close2;
+		cutin "igu01",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	monster .@map$,209,273,"Ferre",3072,1,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	monster .@map$,210,272,"Ferre",3069,1,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	monster .@map$,211,273,"Ferre",3071,1,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	monster .@map$,212,272,"Ferre",3072,1,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	monster .@map$,213,273,"Ferre",3070,1,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	monster .@map$,211,274,"Ferre",3070,1,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	monster .@map$,212,275,"Ferre",3070,1,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	monster .@map$,213,275,"Ferre",3070,1,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	monster .@map$,213,276,"Ferre",3070,1,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	areamonster .@map$,183,301,220,272,"Ferre",3069,5,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	areamonster .@map$,183,301,220,272,"Ferre",3070,8,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	areamonster .@map$,183,301,220,272,"Ferre",3071,5,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	areamonster .@map$,183,301,220,272,"Ferre",3072,5,instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	areamonster .@map$,183,301,220,272,"Jitterbug",3108+rand(1),('jitOption==3?2:1),instance_npcname("Shalosh#16")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp16")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#16")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#16");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#16");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("Shalosh#16")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Roel#17")+"::OnEnable";
+		donpcevent instance_npcname("Runane#17")+"::OnEnable";
+		donpcevent instance_npcname("Shalosh#17")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 17
+//============================================================
+1@jtb,199,278,7	script	Roel#17	10040,{
+	cutin "roel03",0;
+	mes "[Roel]";
+	mes "I'm okay. At least I can protect Shalosh. Feeling protective of someone is nice.";
+	close2;
+	cutin "roel03",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#17")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#17");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#17");
+	end;
+}
+
+1@jtb,203,281,4	script	Runane#17	10039,{
+	cutin "lunain02",2;
+	mes "[Runane]";
+	mes "True friends don't need to declare their friendship; they just become friends without knowing.";
+	close2;
+	cutin "lunain02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#17")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#17");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#17");
+	end;
+}
+
+1@jtb,198,282,5	script	Shalosh#17	10041,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Ferres don't bite me.";
+		close2;
+		cutin "shaloshi01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Roel and Runane are hurt.";
+		unittalk getnpcid(0),"Shalosh : Roel and Runane are hurt.";
+		emotion e_dots;
+		next;
+		cutin "lunain04",2;
+		mes "[Runane]";
+		mes "I'm fine. I told you to be careful, kiddo!";
+		unittalk getnpcid(0,instance_npcname("Runane#17")),"Runane : I'm fine. I told you to be careful, kiddo!";
+		next;
+		cutin "roel04",0;
+		mes "[Roel]";
+		mes "Sorry. I won't disappoint you again.";
+		unittalk getnpcid(0,instance_npcname("Roel#17")),"Roel : Sorry. I won't disappoint you again.";
+		emotion e_sry,0,instance_npcname("Roel#17");
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "She's not happy with him, but she still treats him really well.";
+		unittalk getnpcid(0),"Shalosh : She's not happy with him, but she still treats him really well.";
+		next;
+		cutin "roel03",0;
+		mes "[Roel]";
+		mes "(She's kind.)";
+		unittalk getnpcid(0,instance_npcname("Roel#17")),"Roel : (She's kind.)";
+		emotion e_lv,0,instance_npcname("Roel#17");
+		next;
+		cutin "lunain02",2;
+		mes "[Runane]";
+		mes "Don't mistake this for anything more than what it is--babysitting!";
+		unittalk getnpcid(0,instance_npcname("Runane#17")),"Runane : Don't mistake this for anything more than what it is--babysitting!";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "She's blushing.";
+		unittalk getnpcid(0),"Shalosh : She's blushing.";
+		emotion e_dots;
+		next;
+		cutin "lunain01",2;
+		mes "[Runane]";
+		mes "There's nothing about you I like.";
+		unittalk getnpcid(0,instance_npcname("Runane#17")),"Runane : There's nothing about you I like.";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Before Aigu and Runane,";
+		unittalk getnpcid(0),"Shalosh : Before Aigu and Runane,";
+		next;
+		mes "[Shalosh]";
+		mes "the Ferres showed up first.";
+		unittalk getnpcid(0),"Shalosh : the Ferres showed up first.";
+		next;
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "Ferre?";
+		unittalk getnpcid(0,instance_npcname("Roel#17")),"Roel : Ferre?";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "They emit 'ferre, ferre,' so I call them Ferres.";
+		unittalk getnpcid(0),"Shalosh : They emit 'ferre, ferre,' so I call them Ferres.";
+		next;
+		mes "[Shalosh]";
+		mes "They did nothing but croacked.";
+		unittalk getnpcid(0),"Shalosh : They did nothing but croacked.";
+		next;
+		mes "[Shalosh]";
+		mes "They're my friends. They don't bite or hurt.";
+		unittalk getnpcid(0),"Shalosh : They're my friends. They don't bite or hurt.";
+		next;
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "But now...";
+		unittalk getnpcid(0,instance_npcname("Roel#17")),"Roel : But now...";
+		next;
+		cutin "lunain04",2;
+		mes "[Runane]";
+		mes "Listen, humans and monsters can't be friends. At least that's what I think.";
+		unittalk getnpcid(0,instance_npcname("Runane#17")),"Runane : Listen, humans and monsters can't be friends. At least that's what I think.";
+		emotion e_pif,0,instance_npcname("Runane#17");
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Can't be friends.";
+		unittalk getnpcid(0),"Shalosh : Can't be friends.";
+		next;
+		cutin "lunain03",2;
+		mes "[Runane]";
+		mes "That's right. I like you better when you listen to me.";
+		unittalk getnpcid(0,instance_npcname("Runane#17")),"Runane : That's right. I like you better when you listen to me.";
+		next;
+		cutin "roel03",0;
+		mes "[Roel]";
+		mes "How about I be your friend?";
+		unittalk getnpcid(0,instance_npcname("Roel#17")),"Roel : How about I be your friend?";
+		next;
+		cutin "lunain02",2;
+		mes "[Runane]";
+		mes "Stop making things awkward! We're about the same age, so we're friends already.";
+		unittalk getnpcid(0,instance_npcname("Runane#17")),"Runane : Stop making things awkward! We're about the same age, so we're friends already.";
+		emotion e_hmm,0,instance_npcname("Runane#17");
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "(Can't be friends.)";
+		unittalk getnpcid(0),"Shalosh : (Can't be friends.)";
+		close2;
+		cutin "shaloshi01",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,13,389,45,355,"Ferre",3069,5,instance_npcname("Shalosh#17")+"::OnMyMobDead";
+	areamonster .@map$,13,389,45,355,"Ferre",3070,9,instance_npcname("Shalosh#17")+"::OnMyMobDead";
+	areamonster .@map$,13,389,45,355,"Ferre",3071,9,instance_npcname("Shalosh#17")+"::OnMyMobDead";
+	areamonster .@map$,13,389,45,355,"Ferre",3072,9,instance_npcname("Shalosh#17")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp17")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#17")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#17");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#17");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("Shalosh#17")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Arang#18")+"::OnEnable";
+		donpcevent instance_npcname("Ragi#18")+"::OnEnable";
+		donpcevent instance_npcname("Gelkah#18")+"::OnEnable";
+		donpcevent instance_npcname("Rohtert#18")+"::OnEnable";
+		donpcevent instance_npcname("Aigu#18")+"::OnEnable";
+		donpcevent instance_npcname("Mingmin#18")+"::OnEnable";
+		donpcevent instance_npcname("Melody-Jack#18")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#18")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 18
+//============================================================
+1@jtb,26,380,5	script	Arang#18	644,{
+	cutin "arang02",0;
+	mes "[Arang]";
+	mes "I wish these monsters were as cute and helpless as those Porings for the Taekwon mission.";
+	close2;
+	cutin "arang02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Arang#18")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Arang#18");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Arang#18");
+	end;
+}
+
+1@jtb,31,380,4	script	Ragi#18	647,{
+	cutin "ragi01",0;
+	mes "[Ragi]";
+	mes "They're bickering all the time, but look like good friends. Don't they?";
+	close2;
+	cutin "ragi01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Ragi#18")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ragi#18");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ragi#18");
+	end;
+}
+
+1@jtb,33,376,4	script	Gelkah#18	629,{
+	cutin "gelca01",0;
+	mes "[Gelkah]";
+	mes "I practice hard, so I can shine in times of danger.";
+	close2;
+	cutin "gelca01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Gelkah#18")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Gelkah#18");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Gelkah#18");
+	end;
+}
+
+1@jtb,30,373,4	script	Rohtert#18	630,{
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "I have a feeling New Oz is up to no good.";
+	close2;
+	cutin "rote01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Rohtert#18")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Rohtert#18");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Rohtert#18");
+	end;
+}
+
+1@jtb,24,376,5	script	Aigu#18	646,{
+	cutin "igu05",0;
+	mes "[Aigu]";
+	mes "New Oz's enthusiasm for adventure went overboard. Again. I can't say I hate that about him, though.";
+	close2;
+	cutin "igu05",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#18")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#18");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#18");
+	end;
+}
+
+1@jtb,25,373,5	script	Mingmin#18	643,{
+	cutin "min02",0;
+	mes "[Mingmin]";
+	mes "We'd better look for an exit before things get too crazy.";
+	close2;
+	cutin "min02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#18")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#18");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#18");
+	end;
+}
+
+1@jtb,30,377,5	script	Melody-Jack#18	844,{
+	mes "[Melody-Jack]";
+	mes "New Oz is never tactful.";
+	close;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Melody-Jack#18")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Melody-Jack#18");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Melody-Jack#18");
+	end;
+}
+
+1@jtb,28,377,5	script	New Oz#18	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "We should find her.";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Strange... The atmosphere has changed.";
+		unittalk getnpcid(0),"New Oz : Strange... The atmosphere has changed.";
+		emotion e_dots;
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "The air smells different, and things look less... perceptible.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#18")),"Mingmin : The air smells different, and things look less... perceptible.";
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "It seems as though we're underwater, yet I don't feel it.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#18")),"Rohtert : It seems as though we're underwater, yet I don't feel it.";
+		next;
+		mes "[Melody-Jack]";
+		mes "I'm telling you, we've been circling around the same place.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#18")),"Melody-Jack : I'm telling you, we've been circling around the same place.";
+		emotion e_dum,0,instance_npcname("Melody-Jack#18");
+		cutin "rote01",255;
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "I agree. And this clearing is neither compact nor spacious.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#18")),"Mingmin : I agree. And this clearing is neither compact nor spacious.";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "Do you think it's meaningless for us to go deeper?";
+		unittalk getnpcid(0),"New Oz : Do you think it's meaningless for us to go deeper?";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "No. I'm just saying the environmental changes are too drastic, almost like the mood swings of a bipolar person.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#18")),"Mingmin : No. I'm just saying the environmental changes are too drastic, almost like the mood swings of a bipolar person.";
+		next;
+		mes "[Mingmin]";
+		mes "I don't know why, but things are losing their shape as if they're fading away.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#18")),"Mingmin : I don't know why, but things are losing their shape as if they're fading away.";
+		next;
+		mes "[Melody-Jack]";
+		mes "All the while, the foreign energy I've been sensing is growing stronger. This is bad.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#18")),"Melody-Jack : All the while, the foreign energy I've been sensing is growing stronger. This is bad.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#18");
+		cutin "min02",255;
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "I feel like something's going to appear in front of our eyes with a loud pop.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#18")),"Mingmin : I feel like something's going to appear in front of our eyes with a loud pop.";
+		next;
+		cutin "arang02",2;
+		mes "[Arang]";
+		mes "I hope it's a formidable monster!";
+		unittalk getnpcid(0,instance_npcname("Arang#18")),"Arang : I hope it's a formidable monster!";
+		next;
+		cutin "igu01",0;
+		mes "[Aigu]";
+		mes "I hope you're wrong.";
+		unittalk getnpcid(0,instance_npcname("Aigu#18")),"Aigu : I hope you're wrong.";
+		emotion e_X,0,instance_npcname("Aigu#18");
+		next;
+		cutin "ragi02",2;
+		mes "[Ragi]";
+		mes "I'm just going to leave you guys to...";
+		unittalk getnpcid(0,instance_npcname("Ragi#18")),"Ragi : I'm just going to leave you guys to...";
+		next;
+		cutin "nines02",0;
+		mes "[New Oz]";
+		mes "The monster?";
+		unittalk getnpcid(0),"New Oz : The monster?";
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "I'll kill you both before the monster.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#18")),"Rohtert : I'll kill you both before the monster.";
+		next;
+		cutin "gelca04",2;
+		mes "[Gelkah]";
+		mes "Master, please!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#18")),"Gelkah : Master, please!";
+		next;
+		cutin "arang02",0;
+		mes "[Arang]";
+		mes "Have you seen Shalosh? Where is she?";
+		unittalk getnpcid(0,instance_npcname("Arang#18")),"Arang : Have you seen Shalosh? Where is she?";
+		next;
+		cutin "igu04",0;
+		mes "[Aigu]";
+		mes "Oh, you're right!";
+		unittalk getnpcid(0,instance_npcname("Aigu#18")),"Aigu : Oh, you're right!";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Mingmin#18")),"Mingmin : ...";
+		next;
+		mes "[Melody-Jack]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#18")),"Melody-Jack : ...";
+		emotion e_dots,0,instance_npcname("Melody-Jack#18");
+		cutin "min02",255;
+		next;
+		cutin "nines03",0;
+		mes "[New Oz]";
+		mes "We should find her.";
+		unittalk getnpcid(0),"New Oz : We should find her.";
+		close2;
+		cutin "nines03",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,95,387,133,352,"Ferre",3069,3,instance_npcname("New Oz#18")+"::OnMyMobDead";
+	areamonster .@map$,95,387,133,352,"Ferre",3070,10,instance_npcname("New Oz#18")+"::OnMyMobDead";
+	areamonster .@map$,95,387,133,352,"Ferre",3072,6,instance_npcname("New Oz#18")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp18")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#18")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#18");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#18");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#18")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Gelkah#19")+"::OnEnable";
+		donpcevent instance_npcname("Roel#19")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 19
+//============================================================
+1@jtb,110,377,2	script	Gelkah#19	629,{
+	cutin "gelca01",0;
+	mes "[Gelkah]";
+	mes "Fighting is essential to adventurer training. Divide and conquer!";
+	close2;
+	cutin "gelca01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Gelkah#19")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Gelkah#19");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Gelkah#19");
+	end;
+}
+
+1@jtb,105,377,5	script	Roel#19	10040,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "One of my friends once set me up on a blind date in Izlude.";
+		next;
+		mes "[Roel]";
+		mes "She and I exchanged a couple of letters, first to introduce each other, and then the second to set up a date.";
+		next;
+		cutin "roel04",0;
+		mes "[Roel]";
+		mes "She didn't reply to my second letter. I can't fAigure out why.";
+		close2;
+		cutin "roel04",255;
+		end;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "gelca01",2;
+		mes "[Gelkah]";
+		mes "Scene 8: Heroes are surrounded by a horde of enemies. Roel, let's choreograph what we've practiced today, shall we?";
+		unittalk getnpcid(0,instance_npcname("Gelkah#19")),"Gelkah : Scene 8: Heroes are surrounded by a horde of enemies. Roel, let's choreograph what we've practiced today, shall we?";
+		next;
+		cutin "roel01",0;
+		mes "[Roel]";
+		mes "Gelkah, get ready!";
+		unittalk getnpcid(0),"Roel : Gelkah, get ready!";
+		emotion e_gasp;
+		next;
+		cutin "gelca01",2;
+		mes "[Gelkah]";
+		mes "Gelkah-style Mental Strength! Iron Physique!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#19")),"Gelkah : Gelkah-style Mental Strength! Iron Physique!";
+		emotion e_com,0,instance_npcname("Gelkah#19");
+		specialeffect EF_GUMGANG,AREA,instance_npcname("Gelkah#19");
+		next;
+		cutin "roel02",0;
+		mes "[Roel]";
+		mes "Impenetrable defense! Roel-style Guard!";
+		unittalk getnpcid(0),"Roel : Impenetrable defense! Roel-style Guard!";
+		emotion e_com;
+		specialeffect EF_KEEPING;
+		next;
+		cutin "gelca01",2;
+		mes "[Roel & Gelkah]";
+		mes "CROSS!!!";
+		unittalk getnpcid(0),"Roel : CROSS!!!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#19")),"Gelkah : CROSS!!!";
+		specialeffect EF_POTION_BERSERK;
+		specialeffect EF_POTION_BERSERK,AREA,instance_npcname("Gelkah#19");
+		next;
+		cutin "roel03",0;
+		mes "[Roel & Gelkah]";
+		mes "Last bastion!";
+		unittalk getnpcid(0),"Roel : Last bastion!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#19")),"Gelkah : Last bastion!";
+		specialeffect EF_SHIELDBOOMERANG;
+		specialeffect EF_BOTTOM_BASILICA,AREA,instance_npcname("Gelkah#19");
+		specialeffect EF_SHIELDCHARGE;
+		sleep2 300;
+		specialeffect EF_GLASSWALL,AREA,instance_npcname("Gelkah#19");
+		specialeffect EF_GLASSWALL;
+		specialeffect EF_GUARD;
+		sleep2 300;
+		specialeffect EF_ANGELUS,AREA,instance_npcname("Gelkah#19");
+		specialeffect EF_ANGELUS;
+		next;
+		cutin "roel02",0;
+		mes "[Roel]";
+		mes "By the gods, Gelkah, you're awesome!";
+		unittalk getnpcid(0),"Roel : By the gods, Gelkah, you're awesome!";
+		next;
+		'jitOption = select("Awesome, indeed!:You just made up those words to look cool!");
+		if ('jitOption == 2) { //Custom text
+			unittalk getcharid(3),strcharinfo(0)+" : You just made up those words to look cool!";
+			cutin "roel01",0;
+			mes "[Roel]";
+			mes "I'm not! The traning that she'd been through is what makes her more stronger now.";
+			unittalk getnpcid(0),"Roel : I'm not! The traning that she'd been through is what makes her more stronger now.";
+		} else {
+			unittalk getcharid(3),strcharinfo(0)+" : Awesome, indeed!";
+			cutin "gelca03",2;
+			mes "[Gelkah]";
+			mes "I've learned from the best.";
+			unittalk getnpcid(0,instance_npcname("Gelkah#19")),"Gelkah : I've learned from the best.";
+		}
+		next;
+		cutin "roel02",0;
+		mes "[Roel]";
+		mes "I hope you'll teach me too, Rohtert.";
+		unittalk getnpcid(0),"Roel : I hope you'll teach me too, Rohtert.";
+		next;
+		cutin "gelca03",2;
+		mes "[Gelkah]";
+		mes "Special skills are all about their names. Shouting impressive names is enough to intimidate your enemies.";
+		unittalk getnpcid(0,instance_npcname("Gelkah#19")),"Gelkah : Special skills are all about their names. Shouting impressive names is enough to intimidate your enemies.";
+		next;
+		mes "- They're absorbed in talking about their new special skills. -";
+		cutin "gelca03",255;
+		close2;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	areamonster .@map$,182,387,219,354,"Ferre",3069,10,instance_npcname("Roel#19")+"::OnMyMobDead";
+	areamonster .@map$,182,387,219,354,"Ferre",3070,10,instance_npcname("Roel#19")+"::OnMyMobDead";
+	areamonster .@map$,182,387,219,354,"Ferre",3071,10,instance_npcname("Roel#19")+"::OnMyMobDead";
+	areamonster .@map$,182,387,219,354,"Ferre",3072,10,instance_npcname("Roel#19")+"::OnMyMobDead";
+	areamonster .@map$,182,387,219,354,"Jitterbug",3108+rand(1),('jitOption==2?2:1),instance_npcname("Roel#19")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp19")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#19")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#19");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#19");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("Roel#19")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("Rohtert#20")+"::OnEnable";
+		donpcevent instance_npcname("Arang#20")+"::OnEnable";
+		donpcevent instance_npcname("Aigu#20")+"::OnEnable";
+		donpcevent instance_npcname("Ragi#20")+"::OnEnable";
+		donpcevent instance_npcname("Runane#20")+"::OnEnable";
+		donpcevent instance_npcname("Roel#20")+"::OnEnable";
+		donpcevent instance_npcname("Shalosh#20")+"::OnEnable";
+		donpcevent instance_npcname("Gelkah#20")+"::OnEnable";
+		donpcevent instance_npcname("Mingmin#20")+"::OnEnable";
+		donpcevent instance_npcname("Melody-Jack#20")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#20")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 20
+//============================================================
+1@jtb,201,369,4	script	Rohtert#20	630,{
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "I'll show you my charismatic leadership as the guild master!";
+	close2;
+	cutin "rote01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Rohtert#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Rohtert#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Rohtert#20");
+	end;
+}
+
+1@jtb,204,366,4	script	Arang#20	644,{
+	cutin "arang01",0;
+	mes "[Arang]";
+	mes "Haap!";
+	close2;
+	cutin "arang01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Arang#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Arang#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Arang#20");
+	end;
+}
+
+1@jtb,195,368,5	script	Aigu#20	646,{
+	cutin "igu05",0;
+	mes "[Aigu]";
+	mes "I'm following New Oz.";
+	close2;
+	cutin "igu05",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#20");
+	end;
+}
+
+1@jtb,194,367,5	script	Ragi#20	647,{
+	cutin "ragi02",0;
+	mes "[Ragi]";
+	mes "I hope today won't be the last day I play my instrument...";
+	close2;
+	cutin "ragi02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Ragi#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ragi#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ragi#20");
+	end;
+}
+
+1@jtb,195,365,5	script	Runane#20	10039,{
+	cutin "lunain01",0;
+	mes "[Runane]";
+	mes "We should find New Oz and Shalosh first.";
+	close2;
+	cutin "lunain01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#20");
+	end;
+}
+
+1@jtb,194,363,5	script	Roel#20	10040,{
+	cutin "roel01",0;
+	mes "[Roel]";
+	mes "I'll follow you guys to the ends of the world.";
+	close2;
+	cutin "roel01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#20");
+	end;
+}
+
+1@jtb,201,365,4	script	Gelkah#20	629,{
+	cutin "gelca04",2;
+	mes "[Gelkah]";
+	mes "I believe in you, Master!";
+	close2;
+	cutin "gelca04",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Gelkah#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Gelkah#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Gelkah#20");
+	end;
+}
+
+1@jtb,202,363,4	script	Mingmin#20	643,{
+	cutin "min02",0;
+	mes "[Mingmin]";
+	mes "*Grunt* Why did I get myself into this mess?";
+	close2;
+	cutin "min02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#20");
+	end;
+}
+
+1@jtb,202,367,5	script	Melody-Jack#20	844,{
+	mes "[Melody-Jack]";
+	mes "I knew this would happen, and Aigu didn't listen to me!";
+	close;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Melody-Jack#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Melody-Jack#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Melody-Jack#20");
+	end;
+}
+
+1@jtb,198,363,5	script	Shalosh#20	10041,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#20");
+	end;
+}
+
+1@jtb,197,363,5	script	Ferre#20	10047,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Ferre#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ferre#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ferre#20");
+	end;
+}
+
+1@jtb,199,363,5	script	Ferre#20s	10047,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Ferre#20s")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ferre#20s");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ferre#20s");
+	end;
+}
+
+1@jtb,198,369,5	script	New Oz#20	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		mes "[New Oz]";
+		mes "...";
+		close;
+	}
+	.@menu = select("Talk:Hurry");
+	if (.@menu == 2 && isbegin_quest(13183)) {
+		mes "Try to jog your memory while hurrying.";
+		close2;
+		donpcevent instance_npcname("Shalosh#20")+"::OnDisable";
+		donpcevent instance_npcname("New Oz#20")+"::OnDisable";
+		donpcevent instance_npcname("Aigu#20")+"::OnDisable";
+	}
+	if (.@menu == 1 || !isbegin_quest(13183)) {
+		cutin "shaloshi03",0;
+		mes "[Shalosh]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Shalosh#20")),"Shalosh : ...";
+		next;
+		mes "[Melody-Jack]";
+		mes "I'm afraid this place is falling down around us.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#20")),"Melody-Jack : I'm afraid this place is falling down around us.";
+		cutin "shaloshi03",255;
+		next;
+		cutin "shaloshi03",0;
+		mes "[Shalosh]";
+		mes "The Ferres are angry.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#20")),"Shalosh : The Ferres are angry.";
+		next;
+		cutin "min02",2;
+		mes "[Mingmin]";
+		mes "Wow, you can even hear what monsters think?";
+		unittalk getnpcid(0,instance_npcname("Mingmin#20")),"Mingmin : Wow, you can even hear what monsters think?";
+		next;
+		cutin "shaloshi03",0;
+		mes "[Shalosh]";
+		mes "They're my friends.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#20")),"Shalosh : They're my friends.";
+		next;
+		cutin "lunain04",0;
+		mes "[Runane]";
+		mes "No, they're not. Friends don't attack each other!";
+		unittalk getnpcid(0,instance_npcname("Runane#20")),"Runane : No, they're not. Friends don't attack each other!";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "They're just trying to protect me.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#20")),"Shalosh : They're just trying to protect me.";
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "Protect you from what?";
+		unittalk getnpcid(0,instance_npcname("Rohtert#20")),"Rohtert : Protect you from what?";
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "From what Rot is thinking.";
+		unittalk getnpcid(0,instance_npcname("Shalosh#20")),"Shalosh : From what Rot is thinking.";
+		next;
+		mes "[Melody-Jack]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#20")),"Melody-Jack : ...";
+		emotion e_dots,0,instance_npcname("Melody-Jack#20");
+		cutin "shaloshi01",255;
+		next;
+		cutin "shaloshi01",0;
+		mes "[Shalosh]";
+		mes "Ferre?";
+		unittalk getnpcid(0,instance_npcname("Shalosh#20")),"Shalosh : Ferre?";
+		donpcevent instance_npcname("Ferre#20")+"::OnEnable";
+		donpcevent instance_npcname("Ferre#20s")+"::OnEnable";
+		next;
+		mes "[Ferre]";
+		mes "Ferre, ferre!";
+		unittalk getnpcid(0,instance_npcname("Ferre#20")),"Ferre : Ferre, ferre!";
+		emotion e_an,0,instance_npcname("Ferre#20");
+		cutin "shaloshi01",255;
+		next;
+		mes "[Ferre]";
+		mes "Ferre, ferre, ferre!";
+		unittalk getnpcid(0,instance_npcname("Ferre#20s")),"Ferre : Ferre, ferre, ferre!";
+		emotion e_an,0,instance_npcname("Ferre#20s");
+		specialeffect EF_READYPORTAL2,AREA,instance_npcname("Shalosh#20");
+		specialeffect EF_PORTAL2,AREA,instance_npcname("Shalosh#20");
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "!!!";
+		unittalk getnpcid(0),"New Oz : !!!";
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "We're going to be burried in there. Let's find an exit.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#20")),"Rohtert : We're going to be burried in there. Let's find an exit.";
+		donpcevent instance_npcname("Shalosh#20")+"::OnDisable";
+		donpcevent instance_npcname("Ferre#20")+"::OnDisable";
+		donpcevent instance_npcname("Ferre#20s")+"::OnDisable";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "We have to find Shalosh!";
+		unittalk getnpcid(0),"New Oz : We have to find Shalosh!";
+		next;
+		mes "[Melody-Jack]";
+		mes "New Oz, I've known you're weird in the head, but she's...";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#20")),"Melody-Jack : New Oz, I've known you're weird in the head, but she's...";
+		emotion e_dots,0,instance_npcname("Melody-Jack#20");
+		cutin "nines01",255;
+		next;
+		cutin "nines04",0;
+		mes "[New Oz]";
+		mes "I know. You don't have to remind me.";
+		unittalk getnpcid(0),"New Oz : I know. You don't have to remind me.";
+		next;
+		cutin "min02",2;
+		mes "[Mingmin]";
+		mes "Then let's get out of here. We're in serious danger right now.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#20")),"Mingmin : Then let's get out of here. We're in serious danger right now.";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "I have to find her. I have to talk to her.";
+		unittalk getnpcid(0),"New Oz : I have to find her. I have to talk to her.";
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "NEW OZ!";
+		unittalk getnpcid(0,instance_npcname("Rohtert#20")),"Rohtert : NEW OZ!";
+		next;
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "I'm not your master anymore. You don't have to follow me.";
+		unittalk getnpcid(0),"New Oz : I'm not your master anymore. You don't have to follow me.";
+		next;
+		cutin "lunain01",0;
+		mes "[Runane]";
+		mes "!!!";
+		unittalk getnpcid(0,instance_npcname("Runane#20")),"Runane : !!!";
+		next;
+		cutin "igu05",0;
+		mes "[Aigu]";
+		mes "New Oz, I'm coming with you!";
+		unittalk getnpcid(0,instance_npcname("Aigu#20")),"Aigu : New Oz, I'm coming with you!";
+		donpcevent instance_npcname("New Oz#20")+"::OnDisable";
+		next;
+		cutin "min02",0;
+		mes "[Mingmin]";
+		mes "It's your call, new master.";
+		unittalk getnpcid(0,instance_npcname("Mingmin#20")),"Mingmin : It's your call, new master.";
+		next;
+		cutin "gelca04",2;
+		mes "[Gelkah]";
+		mes "Master!";
+		unittalk getnpcid(0,instance_npcname("Gelkah#20")),"Gelkah : Master!";
+		donpcevent instance_npcname("Aigu#20")+"::OnDisable";
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "...";
+		unittalk getnpcid(0,instance_npcname("Rohtert#20")),"Rohtert : ...";
+		next;
+		mes "[Rohtert]";
+		mes "We'll find New Oz and Shalosh. An when we do, I'm going to kill both of them.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#20")),"Rohtert : We'll find New Oz and Shalosh. An when we do, I'm going to kill both of them.";
+		next;
+		cutin "roel04",0;
+		mes "[Roel]";
+		mes "New Oz, did you know this would happen? You're lucky to have such good friends.";
+		unittalk getnpcid(0,instance_npcname("Roel#20")),"Roel : New Oz, did you know this would happen? You're lucky to have such good friends.";
+		next;
+		mes "[Melody-Jack]";
+		mes "He didn't know because he doesn't think; ever.";
+		unittalk getnpcid(0,instance_npcname("Melody-Jack#20")),"Melody-Jack : He didn't know because he doesn't think; ever.";
+		emotion e_dots,0,instance_npcname("Melody-Jack#20");
+		cutin "roel04",255;
+		next;
+		cutin "arang01",2;
+		mes "[Arang]";
+		mes "Yippee! Let's go!";
+		unittalk getnpcid(0,instance_npcname("Arang#20")),"Arang : Yippee! Let's go!";
+		next;
+		cutin "rote01",2;
+		mes "[Rohtert]";
+		mes "We'll split into two teams. Be careful not to lose your way in the maze-like offshoots.";
+		unittalk getnpcid(0,instance_npcname("Rohtert#20")),"Rohtert : We'll split into two teams. Be careful not to lose your way in the maze-like offshoots.";
+		next;
+		'jitOption = select("Follow Rohtert and Gelkah:Search alone");
+		cutin "min01",0;
+		mes "[Mingmin]";
+		mes "Are we ready? Let's go!";
+		unittalk getnpcid(0,instance_npcname("Mingmin#20")),"Mingmin : Are we ready? Let's go!";
+		close2;
+		cutin "min01",255;
+	}
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	monster .@map$,288,339,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,288,319,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,288,309,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,287,296,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,299,295,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,310,294,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,323,295,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,334,295,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,344,295,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,353,294,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,357,300,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,357,307,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,358,317,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,358,325,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	monster .@map$,358,338,"Ferre",3069,1,instance_npcname("New Oz#20")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtwarp20")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#20")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#20");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#20");
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#20")+"::OnMyMobDead");
+	if (!.@mob_num) {
+		sleep2 1500;
+		donpcevent instance_npcname("#jtwarp21")+"::OnEnable";
+		donpcevent instance_npcname("Shalosh#22")+"::OnEnable";
+		donpcevent instance_npcname("Ferre#22")+"::OnEnable";
+		donpcevent instance_npcname("New Oz#22")+"::OnEnable";
+	}
+	end;
+}
+
+// Room 22
+//============================================================
+1@jtb,328,326,4	script	Rohtert#22	630,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Rohtert#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Rohtert#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Rohtert#22");
+	end;
+}
+
+1@jtb,330,328,4	script	Gelkah#22	629,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Gelkah#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Gelkah#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Gelkah#22");
+	end;
+}
+
+1@jtb,317,325,5	script	Aigu#22	646,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#22");
+	end;
+}
+
+1@jtb,316,322,5	script	Ragi#22	647,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Ragi#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ragi#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ragi#22");
+	end;
+}
+
+1@jtb,325,322,4	script	Melody-Jack#22	844,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Melody-Jack#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Melody-Jack#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Melody-Jack#22");
+	end;
+}
+
+1@jtb,319,320,5	script	Arang#22	644,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Arang#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Arang#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Arang#22");
+	end;
+}
+
+1@jtb,321,318,4	script	Runane#22	10039,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#22");
+	end;
+}
+
+1@jtb,326,319,4	script	Roel#22	10040,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#22");
+	end;
+}
+
+1@jtb,328,324,4	script	Mingmin#22	643,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#22");
+	end;
+}
+
+1@jtb,326,329,4	script	Shalosh#22	10041,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Shalosh#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Shalosh#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Shalosh#22");
+	end;
+}
+
+1@jtb,324,327,4	script	Ferre#22	10047,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Ferre#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ferre#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ferre#22");
+	end;
+}
+
+1@jtb,324,327,4	script	Ferre#22s	10048,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Ferre#22s")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ferre#22s");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ferre#22s");
+	end;
+}
+
+1@jtb,320,323,5	script	New Oz#22	625,{
+	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "...";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	cutin "nines04",0;
+	mes "[New Oz]";
+	mes "*Pant Pant* I've found you, Shalosh.";
+	unittalk getnpcid(0),"New Oz : *Pant Pant* I've found you, Shalosh.";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "New Oz...";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : New Oz...";
+	next;
+	cutin "nines04",0;
+	mes "[New Oz]";
+	mes "*Pant Pant* I'm glad you didn't make it too far.";
+	unittalk getnpcid(0),"New Oz : *Pant Pant* I'm glad you didn't make it too far.";
+	next;
+	mes "[Ferre]";
+	mes "Ferre, ferre, fe-!";
+	unittalk getnpcid(0,instance_npcname("Ferre#22")),"Ferre : Ferre, ferre, fe-!";
+	cutin "nines04",255;
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "Ferre is angry.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : Ferre is angry.";
+	next;
+	cutin "nines01",0;
+	mes "[New Oz]";
+	mes "You don't have to get upset. I'm not here to take your friend away. I just want...";
+	unittalk getnpcid(0),"New Oz : You don't have to get upset. I'm not here to take your friend away. I just want...";
+	next;
+	mes "[Ferre]";
+	mes "Ferre, ferre, ferre!";
+	unittalk getnpcid(0,instance_npcname("Ferre#22")),"Ferre : Ferre, ferre, ferre!";
+	cutin "nines01",255;
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "Ferre is really angry.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : Ferre is really angry.";
+	next;
+	cutin "nines01",0;
+	mes "[New Oz]";
+	mes "Yeah, you don't have to tell me that.";
+	unittalk getnpcid(0),"New Oz : Yeah, you don't have to tell me that.";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "That is not good. Ferre...";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : That is not good. Ferre...";
+	next;
+	mes "[Shalosh]";
+	mes "No, no!";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : No, no!";
+	next;
+	mes "[Ferre]";
+	mes "Ferre, ferre, ferre, ferre-!";
+	unittalk getnpcid(0,instance_npcname("Ferre#22")),"Ferre : Ferre, ferre, ferre, ferre-!";
+	cutin "shaloshi01",255;
+	sleep2 1000;
+	donpcevent instance_npcname("Ferre#22")+"::OnDisable";
+	sleep2 1000;
+	donpcevent instance_npcname("Ferre#22s")+"::OnEnable";
+	sleep2 1000;
+	specialeffect EF_LORD,AREA,instance_npcname("Ferre#22s");
+	specialeffect EF_SUI_EXPLOSION,AREA,instance_npcname("Ferre#22s");
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "Ferre has transformed into its true form!";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : Ferre has transformed into its true form!";
+	next;
+	mes "^FF0000A formidable enemy has appeared!^000000";
+	cutin "shaloshi01",255;
+	next;
+	mes "[Ferre]";
+	mes "FERRE- FERRE- FERRE- FERRE-!!";
+	unittalk getnpcid(0,instance_npcname("Ferre#22s")),"Ferre : FERRE- FERRE- FERRE- FERRE-!!";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "Ferre, you don't have to do this!";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : Ferre, you don't have to do this!";
+	next;
+	cutin "nines03",0;
+	mes "[New Oz]";
+	mes "Well, if I can't talk him out of this, then we'll have to duke it out.";
+	unittalk getnpcid(0),"New Oz : Well, if I can't talk him out of this, then we'll have to duke it out.";
+	next;
+	mes "[New Oz]";
+	mes "Where are the others? Hey new guys, help me out here. That Ferre looks like he can pack a punch.";
+	unittalk getnpcid(0),"New Oz : Where are the others? Hey new guys, help me out here. That Ferre looks like he can pack a punch.";
+	next;
+	mes "[Ferre]";
+	mes "FERRE, FERRE, FERRE-!";
+	unittalk getnpcid(0,instance_npcname("Ferre#22s")),"Ferre : FERRE, FERRE, FERRE-!";
+	cutin "nines03",0;
+	next;
+	cutin "nines02",0;
+	mes "[New Oz]";
+	mes "Let's begin!";
+	unittalk getnpcid(0),"New Oz : Let's begin!";
+	close2;
+	donpcevent instance_npcname("Ferre#22s")+"::OnDisable";
+	donpcevent instance_npcname("Shalosh#22")+"::OnDisable";
+	donpcevent instance_npcname("New Oz#22")+"::OnDisable";
+	donpcevent instance_npcname("New Oz#22s")+"::OnEnable";
+	unittalk getnpcid(0,instance_npcname("New Oz#22s")),"New Oz : Don't worry. I'll help you!";
+	cutin "nines02",255;
+	'jitRoom = atoi(strnpcinfo(2));
+	.@map$ = instance_mapname("1@jtb");
+	monster .@map$,321,313,"Ferre",3069,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,321,313,"Ferre",3070,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,321,313,"Ferre",3071,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,321,313,"Ferre",3072,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,331,324,"Ferre",3069,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,331,324,"Ferre",3070,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,331,324,"Ferre",3071,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,331,324,"Ferre",3072,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,313,326,"Ferre",3069,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,313,326,"Ferre",3070,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,313,326,"Ferre",3071,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	monster .@map$,313,326,"Ferre",3072,1,instance_npcname("New Oz#22")+"::OnMyMobDead";
+	donpcevent instance_npcname("#jtboss")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#22");
+	end;
+OnMyMobDead:
+	end;
+}
+
+1@jtb,320,323,5	script	New Oz#22s	625,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#22s")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#22s");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#22s");
+	end;
+}
+
+1@jtb,45,48,0	script	#jtboss	139,{
+	end;
+OnTimer30000:
+	unittalk getnpcid(0,instance_npcname("New Oz#22s")),F_Rand(
+		"New Oz : What do you call a fish musician? A piano tuna.",
+		"New Oz : What did the farmer say to the green pumpkin? Why orange you orange?",
+		"New Oz : What does a nosy pepper do? Gets jalapeno business!",
+		"New Oz : Why do bananas wear suntan lotion? Because they peel!",
+		"New Oz : Um, hold on. One of the ukulele strings snapped. How about I sing instead?");
+	emotion e_ho,0,instance_npcname("New Oz#22s");
+	unittalk 'jitBossGID,"FERRE! FERRE!";
+	unitskilluseid 'jitBossGID,"NPC_WIDEFREEZE",5;
+	stopnpctimer;
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtboss")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtboss");
+	donpcevent instance_npcname("#jtboss")+"::OnRespawn";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtboss");
+	end;
+OnRespawn:
+	.@map$ = instance_mapname("1@jtb");
+	if ('jitOption == 2) {
+		monster .@map$,324,327,"Jitterbug",3108,1,instance_npcname("#jtboss")+"::OnMyMobDead";
+		monster .@map$,324,327,"Jitterbug",3109,1,instance_npcname("#jtboss")+"::OnMyMobDead";
+	} else
+		monster .@map$,324,327,"Awakened Ferre",3073,1,instance_npcname("#jtboss")+"::OnMyMobDead";
+	'jitBossGID = $@mobid[0];
+	initnpctimer;
+	end;
+OnMyMobDead:
+	.@map$ = instance_mapname("1@jtb");
+	.@mob_num = mobcount(.@map$,instance_npcname("#jtboss")+"::OnMyMobDead");
+	if ('jitBossGID)
+		stopnpctimer;
+	if (!.@mob_num) {
+		'jitRoom = 99;
+		donpcevent instance_npcname("New Oz#22s")+"::OnDisable";
+		donpcevent instance_npcname("New Oz#22t")+"::OnEnable";
+		donpcevent instance_npcname("Ferre#22")+"::OnEnable";
+		donpcevent instance_npcname("Shalosh#22")+"::OnEnable";
+	}
+	end;
+}
+
+1@jtb,320,323,5	script	New Oz#22t	625,{
+	if ('jitRoom >= 100 || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",0;
+		mes "[New Oz]";
+		mes "...";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	cutin "nines01",0;
+	mes "[New Oz]";
+	mes "I like his spirit, though I can see he's getting exhausted.";
+	unittalk getnpcid(0),"New Oz : I like his spirit, though I can see he's getting exhausted.";
+	next;
+	mes "[Ferre]";
+	mes "Ferre...";
+	unittalk getnpcid(0,instance_npcname("Ferre#22")),"Ferre : Ferre...";
+	cutin "nines01",255;
+	next;
+	cutin "rote01",2;
+	mes "[Rohtert]";
+	mes "New Oz, you're alive! Good, because I'm going to kill...";
+	unittalk getnpcid(0,instance_npcname("Rohtert#22")),"Rohtert : New Oz, you're alive! Good, because I'm going to kill...";
+	emotion e_an,0,instance_npcname("Rohtert#22");
+	donpcevent instance_npcname("Gelkah#22")+"::OnEnable";
+	donpcevent instance_npcname("Rohtert#22")+"::OnEnable";
+	next;
+	cutin "igu05",0;
+	mes "[Aigu]";
+	mes "New Oz, are you all right?";
+	unittalk getnpcid(0,instance_npcname("Aigu#22")),"Aigu : New Oz, are you all right?";
+	donpcevent instance_npcname("Aigu#22")+"::OnEnable";
+	donpcevent instance_npcname("Ragi#22")+"::OnEnable";
+	next;
+	cutin "nines01",0;
+	mes "[New Oz]";
+	mes "I'm all right. Rot, were you worried about me?";
+	unittalk getnpcid(0),"New Oz : I'm all right. Rot, were you worried about me?";
+	next;
+	mes "[Melody-Jack]";
+	mes "Wow, this place is not going to last long--look how violently the ground is shaking! We really need to get out like yesterday, New Oz.";
+	unittalk getnpcid(0,instance_npcname("Melody-Jack#22")),"Melody-Jack : Wow, this place is not going to last long--look how violently the ground is shaking! We really need to get out like yesterday, New Oz.";
+	emotion e_dots,0,instance_npcname("Melody-Jack#22");
+	donpcevent instance_npcname("Melody-Jack#22")+"::OnEnable";
+	donpcevent instance_npcname("Arang#22")+"::OnEnable";
+	donpcevent instance_npcname("Runane#22")+"::OnEnable";
+	donpcevent instance_npcname("Roel#22")+"::OnEnable";
+	donpcevent instance_npcname("Mingmin#22")+"::OnEnable";
+	cutin "nines01",255;
+	next;
+	mes "[Ferre]";
+	mes "Ferre...";
+	unittalk getnpcid(0,instance_npcname("Ferre#22")),"Ferre : Ferre...";
+	next;
+	cutin "rote01",2;
+	mes "[Rohtert]";
+	mes "He's not dead. Guys, I understand you're new, but you can't make mistakes like this.";
+	unittalk getnpcid(0,instance_npcname("Rohtert#22")),"Rohtert : He's not dead. Guys, I understand you're new, but you can't make mistakes like this.";
+	next;
+	mes "[Melody-Jack]";
+	mes "Better get rid of him quickly.";
+	unittalk getnpcid(0,instance_npcname("Melody-Jack#22")),"Melody-Jack : Better get rid of him quickly.";
+	emotion e_dots,0,instance_npcname("Melody-Jack#22");
+	cutin "rote01",255;
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "NO! He's my friend!";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : NO! He's my friend!";
+	next;
+	mes "[Shalosh]";
+	mes "Ferre created this space in the Crack for me. If he loses his mind or perishes, his space will disappear with everything in it.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : Ferre created this space in the Crack for me. If he loses his mind or perishes, his space will disappear with everything in it.";
+	next;
+	cutin "min01",2;
+	mes "[Mingmin]";
+	mes "Except you, you mean.";
+	unittalk getnpcid(0,instance_npcname("Mingmin#22")),"Mingmin : Except you, you mean.";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "...";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : ...";
+	next;
+	cutin "rote01",2;
+	mes "[Rohtert]";
+	mes "I should have plenty of time before that to get rid of you. I'll show you why I'm called the Bad Boy of the Exorcist World.";
+	unittalk getnpcid(0,instance_npcname("Rohtert#22")),"Rohtert : I should have plenty of time before that to get rid of you. I'll show you why I'm called the Bad Boy of the Exorcist World.";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "If I take Ferre with me to a different space, then a number of exists will appear in the loosened rift in spacetime.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : If I take Ferre with me to a different space, then a number of exists will appear in the loosened rift in spacetime.";
+	next;
+	mes "[Melody-Jack]";
+	mes "You're smart and capable of teleportation. Rohtert, we can't let her go.";
+	unittalk getnpcid(0,instance_npcname("Melody-Jack#22")),"Melody-Jack : You're smart and capable of teleportation. Rohtert, we can't let her go.";
+	emotion e_dots,0,instance_npcname("Melody-Jack#22");
+	cutin "shaloshi01",255;
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "I shouldn't have led you here, but I really wanted some friends.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : I shouldn't have led you here, but I really wanted some friends.";
+	next;
+	cutin "nines04",0;
+	mes "[New Oz]";
+	mes "And you have them. Us.";
+	unittalk getnpcid(0),"New Oz : And you have them. Us.";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "...Thank you.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : ...Thank you.";
+	next;
+	mes "[Shalosh]";
+	mes "Now I should be honest with you. I remember everything now. Let me introduce myself again.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : Now I should be honest with you. I remember everything now. Let me introduce myself again.";
+	next;
+	mes "[Shalosh]";
+	mes "I'm Shalosh, a demon mind reader and the third agent of Morroc's.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : I'm Shalosh, a demon mind reader and the third agent of Morroc's.";
+	next;
+	cutin "rote01",2;
+	mes "[Rohtert]";
+	mes "MORROC?!";
+	unittalk getnpcid(0,instance_npcname("Rohtert#22")),"Rohtert : MORROC?!";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "...I'm free now, but that doesn't change who I am: a demon.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : ...I'm free now, but that doesn't change who I am: a demon.";
+	next;
+	mes "[Shalosh]";
+	mes "I enjoyed your company. If we meet again... Will we be enemies?";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : I enjoyed your company. If we meet again... Will we be enemies?";
+	next;
+	cutin "nines04",0;
+	mes "[New Oz]";
+	mes "No, Shalosh. As of today, you're a new member of New Oz's White Wings Guild.";
+	unittalk getnpcid(0),"New Oz : No, Shalosh. As of today, you're a new member of New Oz's White Wings Guild.";
+	next;
+	cutin "rote01",2;
+	mes "[Rohtert]";
+	mes "Who says you can invite her? I'm not taking in a demon!";
+	unittalk getnpcid(0,instance_npcname("Rohtert#22")),"Rohtert : Who says you can invite her? I'm not taking in a demon!";
+	next;
+	cutin "arang02",2;
+	mes "[Arang]";
+	mes "Guildsmen can bicker with each other, but they're still family.";
+	unittalk getnpcid(0,instance_npcname("Arang#22")),"Arang : Guildsmen can bicker with each other, but they're still family.";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "...Thank you, Adventurer New Oz. If I find some interesting place, can I invite you over?";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : ...Thank you, Adventurer New Oz. If I find some interesting place, can I invite you over?";
+	next;
+	mes "[Shalosh]";
+	mes "I think I have the ability to take people with me, wherever I go. Or you wouldn't have followed me this far.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : I think I have the ability to take people with me, wherever I go. Or you wouldn't have followed me this far.";
+	next;
+	cutin "lunain04",0;
+	mes "[Runane]";
+	mes "Don't you dare take away my New Oz!";
+	unittalk getnpcid(0,instance_npcname("Runane#20")),"Runane : Don't you dare take away my New Oz!";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "You just thought, 'take me, too!'";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : You just thought, 'take me, too!'";
+	next;
+	cutin "igu03",0;
+	mes "[Aigu]";
+	mes "Aww, Runane. You're cute!";
+	unittalk getnpcid(0,instance_npcname("Aigu#22")),"Aigu : Aww, Runane. You're cute!";
+	next;
+	cutin "roel04",2;
+	mes "[Roel]";
+	mes "Shalosh, I don't care who you are. You're my friend, and I'm yours.";
+	unittalk getnpcid(0,instance_npcname("Roel#22")),"Roel : Shalosh, I don't care who you are. You're my friend, and I'm yours.";
+	next;
+	cutin "shaloshi01",2;
+	mes "[Shalosh]";
+	mes "Thank you. If only I knew how to express my feelings...";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : Thank you. If only I knew how to express my feelings...";
+	next;
+	cutin "igu05",0;
+	mes "[Aigu]";
+	mes "It's easy. Just smile.";
+	unittalk getnpcid(0,instance_npcname("Aigu#22")),"Aigu : It's easy. Just smile.";
+	next;
+	cutin "shaloshi04",2;
+	mes "[Shalosh]";
+	mes "Bye, friends. I hope we'll meet again soon.";
+	unittalk getnpcid(0,instance_npcname("Shalosh#22")),"Shalosh : Bye, friends. I hope we'll meet again soon.";
+	next;
+	cutin "nines01",0;
+	mes "[New Oz]";
+	mes "Bye.";
+	unittalk getnpcid(0),"New Oz : Bye.";
+	specialeffect EF_PORTAL2,AREA,instance_npcname("Shalosh#22");
+	specialeffect EF_PORTAL2,AREA,instance_npcname("Ferre#22");
+	donpcevent instance_npcname("Shalosh#22")+"::OnDisable";
+	donpcevent instance_npcname("Ferre#22")+"::OnDisable";
+	next;
+	cutin "rote01",2;
+	mes "[Rohtert]";
+	mes "Don't look at me. Is that an exit?";
+	unittalk getnpcid(0,instance_npcname("Rohtert#22")),"Rohtert : Don't look at me. Is that an exit?";
+	close2;
+	areawarp instance_mapname("1@jtb"),305,339,338,312,instance_mapname("1@jtb"),359,23;
+	cutin "rote01",255;
+	'jitRoom = 100;
+	sleep2 500;
+	donpcevent instance_npcname("Gelkah#23")+"::OnEnable";
+	donpcevent instance_npcname("Roel#23")+"::OnEnable";
+	donpcevent instance_npcname("Arang#23")+"::OnEnable";
+	donpcevent instance_npcname("Melody-Jack#23")+"::OnEnable";
+	donpcevent instance_npcname("Aigu#23")+"::OnEnable";
+	donpcevent instance_npcname("Runane#23")+"::OnEnable";
+	donpcevent instance_npcname("Rohtert#23")+"::OnEnable";
+	donpcevent instance_npcname("Ragi#23")+"::OnEnable";
+	donpcevent instance_npcname("Mingmin#23")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#23")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#22t")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#22t");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#22t");
+	end;
+}
+
+// Room 23
+//============================================================
+1@jtb,358,24,5	script	Gelkah#23	629,{
+	cutin "gelca01",0;
+	mes "[Gelkah]";
+	mes "I will! I'll practice harder, too!";
+	close2;
+	cutin "gelca01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Gelkah#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Gelkah#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Gelkah#23");
+	end;
+}
+
+1@jtb,381,47,4	script	Roel#23	10040,{
+	cutin "roel03",2;
+	mes "[Roel]";
+	mes "I want to dance as well as Aigu.";
+	close2;
+	cutin "roel03",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Roel#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Roel#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Roel#23");
+	end;
+}
+
+1@jtb,378,47,5	script	Arang#23	644,{
+	cutin "arang03",0;
+	mes "[Arang]";
+	mes "Roel and I are friends now. Heh.";
+	close2;
+	cutin "arang03",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Arang#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Arang#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Arang#23");
+	end;
+}
+
+1@jtb,363,11,5	script	Melody-Jack#23	844,{
+	mes "[Melody-Jack]";
+	mes "Our deal is done. Let me think about what I want in return...";
+	close;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Melody-Jack#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Melody-Jack#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Melody-Jack#23");
+	end;
+}
+
+1@jtb,380,28,4	script	Aigu#23	646,{
+	cutin "igu03",2;
+	mes "[Aigu]";
+	mes "I'll never again let you go, New Oz!";
+	close2;
+	cutin "igu03",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Aigu#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Aigu#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Aigu#23");
+	end;
+}
+
+1@jtb,385,20,5	script	Runane#23	10039,{
+	cutin "lunain03",0;
+	mes "[Runane]";
+	mes "I want to go home. I really want to take a shower and eat some bread.";
+	close2;
+	cutin "lunain03",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Runane#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Runane#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Runane#23");
+	end;
+}
+
+1@jtb,375,31,5	script	Rohtert#23	630,{
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "You're a prospect for now. Work hard for the guild, and I might promote you one day.";
+	close2;
+	cutin "rote01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Rohtert#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Rohtert#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Rohtert#23");
+	end;
+}
+
+1@jtb,359,43,5	script	Ragi#23	647,{
+	cutin "ragi01",0;
+	mes "[Ragi]";
+	mes "I've found so much inspiration through this adventure. I'm hopeful I can write some good songs.";
+	close2;
+	cutin "ragi01",255;
+	end;
+	
+OnInstanceInit:
+	donpcevent instance_npcname("Ragi#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Ragi#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Ragi#23");
+	end;
+}
+
+1@jtb,375,28,5	script	Mingmin#23	643,{
+	disable_items;
+	cutin "min02",0;
+	mes "[Mingmin]";
+	mes "I've stolen a few strands of hair from Shalosh, thinking it'd come in handy someday. I want to analyze them, though I already know the results.";
+	next;
+	switch (select("Strange Pendant:Jitterbug Tooth:Quit.")) {
+		case 1:
+			mes "[Mingmin]";
+			mes "Have you seen this pendant?";
+			next;
+			mes "[Mingmin]";
+			mes "I think I can fit Pendant of Harmony and Pendant of Chaos together.";
+			next;
+			mes "[Mingmin]";
+			mes "And if I do, the results will be incredible!";
+			next;
+			mes "[Mingmin]";
+			mes "ATK +6%. MATK +6%. All stats +1. Magic attacks from enemies cast Level 1 Auto Spell Maelstorm. Def: 0 Weight: 10";
+			mes "Requried Level: 130 Slot: 1";
+			next;
+			if (countitem(2990) && countitem(2991)) {
+				switch (select("Quit.:Combine pendants.")) {
+					case 1:
+						mes "[Mingmin]";
+						mes "This place is still full of things to study.";
+						break;
+					case 2: //Custom text
+						mes "[Mingmin]";
+						if (MaxWeight - Weight < 1000)
+							mes "You don't have enough space in your inventory to carry your reward.";
+						else {
+							mes "I hope you like it! I can combine more pendants for you if you need.";
+							delitem 2990,1; //Pendant_Of_Harmony
+							delitem 2991,1; //Pendant_Of_Chaos
+							getitem 2992,1; //Pendant_Of_Maelstrom
+						}
+						break;
+				}
+			} else {
+				mes "[Mingmin]";
+				mes "If my description of the combination results is strangely familiar to you, I wouldn't know. But that's how I picture the results. If you find both the pendants, bring them to me, yeah?";
+				next;
+				mes "[Mingmin]";
+				mes "This place is still full of things to study.";
+			}
+			break;
+		case 2:
+			mes "[Mingmin]";
+			mes "Do you have Jitterbug Teeth?";
+			next;
+			mes "[Mingmin]";
+			mes "I can't tell you just yet, but they're useful to me. Bring them to me, and I'll give you some booty New Oz has hoarded in return.";
+			next;
+			mes "[Mingmin]";
+			mes "What exactly am I offering? Gigantic Bow, Storm Bow, and ^ff0000other valuable things found in this space.^000000 If you want them, bring me at least 50 Jitterbug Teeth.";
+			next;
+			mes "[Mingmin]";
+			mes "I'll exchange 50 Jitterbug Teeth with ^ff0000a random item.^000000";
+			next;
+			if (select("Quit.:Exchange 50.") == 2) {
+				mes "[Mingmin]";
+				if (countitem(6719) < 50)
+					mes "I won't accept anything less than 50 Jitterbug Teeth.";
+				else { //Custom text
+					//Bow_Of_Storms
+					//Giant_Bow
+					//Pendant_Of_Harmony
+					//Pendant_Of_Chaos
+					//Aigu's_Floral_Bracelet
+					//Aigu's_Floral_Mic
+					//New_Oz's_Wing_Ring
+					//New_Oz's_Ukulele
+					//Frozen_Breastplate
+					//Hardened_Breastplate
+					//Old_Card_Album
+					.@jitItem = F_Rand(18123,18122,2990,2991,2989,1990,2988,1935,15100,15101,616);
+					if (MaxWeight - Weight < 1000)
+						mes "You don't have enough space in your inventory to carry your reward.";
+					else {
+						mes "I hope you like it! You can bring me more Jitterbug Teeth for other items.";
+						delitem 6719,50; //Jitterbug's_Tooth
+						getitem .@jitItem,1;
+					}
+				}
+			}
+			break;
+	}
+	close2;
+	cutin "min02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Mingmin#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Mingmin#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Mingmin#23");
+	end;
+}
+
+1@jtb,379,31,4	script	New Oz#23	625,{
+	if ('jitRoom >= 101 || getcharid(0) != getpartyleader(getcharid(1),2)) {
+		cutin "nines01",2;
+		mes "[New Oz]";
+		mes "It's been a while since I had so much fun.";
+		close2;
+		cutin "nines01",255;
+		end;
+	}
+	cutin "nines02",2;
+	mes "[New Oz]";
+	mes "This was my first adventure with my old friends in a long time. I hope we can do this again soon.";
+	unittalk getnpcid(0),"New Oz : This was my first adventure with my old friends in a long time. I hope we can do this again soon.";
+	emotion e_ho;
+	next;
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "New Oz. Need I remind you this guild is no longer called New Oz's White Wings?";
+	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : New Oz. Need I remind you this guild is no longer called New Oz's White Wings?";
+	emotion e_bzz,0,instance_npcname("Rohtert#23");
+	next;
+	cutin "nines04",2;
+	mes "[New Oz]";
+	mes "What? Did you change the guild name?";
+	unittalk getnpcid(0),"New Oz : What? Did you change the guild name?";
+	next;
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "Of course! Now it's called... Um...";
+	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : Of course! Now it's called... Um...";
+	emotion e_pif,0,instance_npcname("Rohtert#23");
+	next;
+	cutin "min02",0;
+	mes "[Mingmin]";
+	mes "Stop thinking and just keep the old name.";
+	unittalk getnpcid(0,instance_npcname("Mingmin#23")),"Mingmin : Stop thinking and just keep the old name.";
+	emotion e_sigh,0,instance_npcname("Mingmin#23");
+	emotion e_hmm,0,instance_npcname("Mingmin#23");
+	next;
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "Nope, I'm going to caall it Rohtert's Super Critical Guild!";
+	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : Nope, I'm going to caall it Rohtert's Super Critical Guild!";
+	emotion e_flash,0,instance_npcname("Rohtert#23");
+	emotion e_shy,0,instance_npcname("Rohtert#23");
+	next;
+	cutin "igu04",2;
+	mes "[Aigu]";
+	mes "...";
+	unittalk getnpcid(0,instance_npcname("Aigu#23")),"Aigu : ...";
+	emotion e_otl,0,instance_npcname("Aigu#23");
+	next;
+	mes "[Aigu]";
+	mes "That sounds lame.";
+	unittalk getnpcid(0,instance_npcname("Aigu#23")),"Aigu : That sounds lame.";
+	next;
+	cutin "roel04",2;
+	mes "[Roel]";
+	mes "I'm not a fan of it.";
+	unittalk getnpcid(0,instance_npcname("Roel#23")),"Roel : I'm not a fan of it.";
+	next;
+	cutin "lunain04",0;
+	mes "[Runane]";
+	mes "Dorky.";
+	unittalk getnpcid(0,instance_npcname("Runane#23")),"Runane : Dorky.";
+	next;
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "I'm the guild master! I name it whatever I want!";
+	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : I'm the guild master! I name it whatever I want!";
+	emotion e_bzz,0,instance_npcname("Rohtert#23");
+	next;
+	cutin "arang01",2;
+	mes "[Arang]";
+	mes "Not cool.";
+	unittalk getnpcid(0,instance_npcname("Arang#23")),"Arang : Not cool.";
+	next;
+	cutin "min03",0;
+	mes "[Mingmin]";
+	mes "Keep the name. I'm out.";
+	unittalk getnpcid(0,instance_npcname("Mingmin#23")),"Mingmin : Keep the name. I'm out.";
+	emotion e_gg,0,instance_npcname("Mingmin#23");
+	next;
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "You can't do that!";
+	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : You can't do that!";
+	emotion e_omg,0,instance_npcname("Rohtert#23");
+	next;
+	mes "[Melody-Jack]";
+	mes "I'm not a member, but if you ask me, that name...";
+	unittalk getnpcid(0,instance_npcname("Melody-Jack#23")),"Melody-Jack : I'm not a member, but if you ask me, that name...";
+	emotion e_dots,0,instance_npcname("Melody-Jack#23");
+	cutin "rote01",255;
+	next;
+	cutin "ragi03",0;
+	mes "[Ragi]";
+	mes "I'll never be able to speak that name. Aigu, are you sure you want to stick with these guys?";
+	unittalk getnpcid(0,instance_npcname("Ragi#23")),"Ragi : I'll never be able to speak that name. Aigu, are you sure you want to stick with these guys?";
+	next;
+	cutin "igu03",2;
+	mes "[Aigu]";
+	mes "I don't care. I'm staying with New Oz.";
+	unittalk getnpcid(0,instance_npcname("Aigu#23")),"Aigu : .I don't care. I'm staying with New Oz.";
+	emotion e_lv2,0,instance_npcname("Aigu#23");
+	next;
+	cutin "lunain04",0;
+	mes "[Runane]";
+	mes "I just don't like the name.";
+	unittalk getnpcid(0,instance_npcname("Runane#23")),"Runane : I just don't like the name.";
+	next;
+	cutin "rote01",0;
+	mes "[Rohtert]";
+	mes "Shush! We've had enough for a day. You all are dismissed! This concludes the adventure of Rohtert's Super Critical Guild!";
+	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : Shush! We've had enough for a day. You all are dismissed! This concludes the adventure of Rohtert's Super Critical Guild!";	
+	if (isbegin_quest(13181) == 1) {
+		completequest 13181;
+		getexp 1500000,500000;
+	}
+	close2;
+	cutin "rote01",255;
+	'jitRoom = 101;
+	donpcevent instance_npcname("#jtwarp23")+"::OnEnable";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("New Oz#23")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("New Oz#23");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("New Oz#23");
+	end;
+}
+
+// Warps
+//============================================================
+1@jtb,45,47,0	script	#jtwarp1	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp1")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp1");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp1");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,99,17;
+	end;
+}
+
+1@jtb,135,17,0	script	#jtwarp2	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp2")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp2");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp2");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,184,16;
+	end;
+}
+
+1@jtb,220,23,0	script	#jtwarp3	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp3")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp3");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp3");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,270,16;
+	end;
+}
+
+1@jtb,306,47,0	script	#jtwarp4	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp4")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp4");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp4");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,11,98;
+	end;
+}
+
+1@jtb,39,133,0	script	#jtwarp5	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp5")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp5");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp5");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,95,99;
+	end;
+}
+
+1@jtb,133,106,0	script	#jtwarp6	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp6")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp6");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp6");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,183,129;
+	end;
+}
+
+1@jtb,209,133,0	script	#jtwarp7	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp7")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp7");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp7");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,276,95;
+	end;
+}
+
+1@jtb,307,122,0	script	#jtwarp8	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp8")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp8");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp8");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,359,96;
+	end;
+}
+
+1@jtb,386,133,0	script	#jtwarp9	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp9")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp9");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp9");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,13,215;
+	end;
+}
+
+1@jtb,49,196,0	script	#jtwarp10	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp10")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp10");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp10");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,94,201;
+	end;
+}
+
+1@jtb,133,197,0	script	#jtwarp11	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp11")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp11");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp11");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,181,198;
+	end;
+}
+
+1@jtb,218,203,0	script	#jtwarp12	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp12")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp12");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp12");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,269,207;
+	end;
+}
+
+1@jtb,307,195,0	script	#jtwarp13	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp13")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp13");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp13");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,355,216;
+	end;
+}
+
+1@jtb,388,182,0	script	#jtwarp14	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp14")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp14");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp14");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,13,275;
+	end;
+}
+
+1@jtb,47,303,0	script	#jtwarp15	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp15")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp15");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp15");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,99,299;
+	end;
+}
+
+1@jtb,134,275,0	script	#jtwarp16	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp16")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp16");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp16");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,200,271;
+	end;
+}
+
+1@jtb,199,305,0	script	#jtwarp17	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp17")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp17");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp17");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,13,385;
+	end;
+}
+
+1@jtb,49,365,0	script	#jtwarp18	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp18")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp18");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp18");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,107,389;
+	end;
+}
+
+1@jtb,111,352,0	script	#jtwarp19	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp19")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp19");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp19");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,186,386;
+	end;
+}
+
+1@jtb,220,359,0	script	#jtwarp20	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp20")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp20");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp20");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,287,356;
+	end;
+}
+
+1@jtb,311,358,0	script	#jtwarp21	45,2,2,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp21")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp21");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp21");
+	end;
+OnTouch:
+	.@map$ = instance_mapname("1@jtb");
+	warp .@map$,335,320;
+	end;
+}
+
+1@jtb,391,30,0	script	#jtwarp23	45,2,2,{ 
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#jtwarp23")+"::OnDisable";
+	end;
+OnDisable:
+	disablenpc instance_npcname("#jtwarp23");
+	end;
+OnEnable:
+	enablenpc instance_npcname("#jtwarp23");
+	end;
+OnTouch: 
+	if (isbegin_quest(13181) == 1) {
+		completequest 13181;
+		getexp 1500000,500000;
+	}
+	warp "moc_para01",28,87;
+	end;
+}

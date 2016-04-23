@@ -2735,6 +2735,7 @@ function	script	WeightBigQuest	{
 		mes "- try again. -";
 		close;
 	}
+	return;
 }
 
 eclage,282,255,4	script	Wuhari#eclbig	4_M_FAIRYKID6,{
@@ -4603,25 +4604,26 @@ function	script	CheckBurglary	{
 				continue;
 		case 9252:
 			mes "- Let's examine Poppy first -";
-			return;
+			break;
 		case 9253:
 			mes "- Let's examine the messy";
 			mes "bookshelves first -";
-			return;
+			break;
 		case 9254:
 			mes "- Let's examine the damaged";
 			mes "book first -";
-			return;
+			break;
 		case 9255:
 			mes "- Let's examine the";
 			mes "container first -";
-			return;
+			break;
 		case 9256:
 			mes "- Let's examine the";
 			mes "messed up table first -";
-			return;
+			break;
 		}
 	}
+	return;
 }
 
 ecl_in04,78,108,5	script	Daughter Luen#eclage	4_F_FAIRYKID2,{
@@ -7864,6 +7866,7 @@ function	script	PranksterDiag	{
 		mes "Stay away from my bookshelves!";
 		close;
 	}
+	return;
 }
 
 ecl_in01,80,86,4	script	Midgard Exploration#bok1	HIDDEN_NPC,{
@@ -12466,14 +12469,14 @@ function	script	Wallnotes	{
 		mes "I succeeded in putting Bifrost to sleep.";
 		mes "I am just so amazing!";
 		mes "But why do I have to remain in a place like this, too?";
-		return;
+		break;
 	case 2:
 		mes "It hasn't been too long since I was imprisoned in the tower, but my memories are leaving me so rapidly.";
 		mes "It may be Bifrost's strong will to stay awake that is affecting me this way.";
 		next;
 		mes "[Wall Note 2]";
 		mes "I wonder if I'll forget even my name... How it worries me...";
-		return;
+		break;
 	case 3:
 		mes "My appearance is changing!";
 		mes "My hands, my skin...";
@@ -12486,11 +12489,11 @@ function	script	Wallnotes	{
 		mes "Is it Bifrost's curse against me for putting her to sleep?";
 		mes "Is it doing this to me while it's asleep?";
 		mes "I can't believe it... My goodness!";
-		return;
+		break;
 	case 4:
 		mes "Bifrost's head is still growing continuously. I can't believe this... She's keep stretching beyond the tower!";
 		mes "Could it be her strong will, is still awake and is trying to send a message?";
-		return;
+		break;
 	case 5:
 		mes "The person who will be under attack after Bifrost is none other than me!";
 		mes "I feel an eerie gaze directed at me!";
@@ -12498,8 +12501,9 @@ function	script	Wallnotes	{
 		next;
 		mes "[Wall Note 5]";
 		mes "Monsters, I have to create more monsters to protect me. As many as I could possibly create!";
-		return;
+		break;
 	}
+	return;
 }
 
 ecl_tdun04,39,27,0	script	#prf1	HIDDEN_WARP_NPC,2,2,{
@@ -12958,6 +12962,7 @@ function	script	EclageinEntrance	{
 		hideonnpc "Eclage Guard#tl01";
 		end;
 	}
+	return;
 }
 
 ecl_in01,32,52,5	script	Traveler Fome#tl01	4_F_DOGTRAVELER,3,3,{
