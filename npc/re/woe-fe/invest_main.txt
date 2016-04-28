@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Euphy
 //===== Current Version: =====================================
-//= 1.1
+//= 1.2
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: =========================================
@@ -15,6 +15,7 @@
 //===== Additional Comments: =================================
 //= 1.0 First version. Missing official times. [Euphy]
 //= 1.1 Added GM management function. [Euphy]
+//= 1.2 Fixed variables not resetting in 'OnResult' label [exneval]
 //============================================================
 
 // Global Variables
@@ -263,7 +264,7 @@ OnCalculate:
 			setd "$"+.@cas$[.@i]+"_invest_result",1;
 	}
 	// No further actions if 20,000,000z isn't reached.
-	if (!.@total_2000)
+	if (!.@total_2000 && !.@total_7000)
 		end;
 	// No further actions if any realm hits 70,000,000z.
 	if (.@total_7000) {

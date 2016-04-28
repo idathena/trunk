@@ -17793,14 +17793,15 @@ void clif_snap(struct block_list *bl, short x, short y) {
 
 /// 0977 <id>.L <HP>.L <maxHP>.L (ZC_HP_INFO).
 void clif_monster_hp_bar(struct mob_data *md, int fd) {
-#if PACKETVER >= 20120404
+	if( mob_is_battleground(md) || mob_is_gvg(md) || mob_is_treasure(md) || mob_is_guardian(md->mob_id) )
+		return;
+
 	WFIFOHEAD(fd,packet_len(0x977));
 	WFIFOW(fd,0) = 0x977;
 	WFIFOL(fd,2) = md->bl.id;
 	WFIFOL(fd,6) = md->status.hp;
 	WFIFOL(fd,10) = md->status.max_hp;
 	WFIFOSET(fd,packet_len(0x977));
-#endif
 }
 
 
