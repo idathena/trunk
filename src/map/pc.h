@@ -1184,4 +1184,7 @@ int pc_autotrade_timer(int tid, unsigned int tick, int id, intptr_t data);
 enum e_BANKING_DEPOSIT_ACK pc_bank_deposit(struct map_session_data *sd, int money);
 enum e_BANKING_WITHDRAW_ACK pc_bank_withdraw(struct map_session_data *sd, int money);
 
+bool pc_process_chat_message(struct map_session_data *sd, const char *message);
+void pc_check_supernovice_call(struct map_session_data *sd, const char *message);
+
 #endif /* _PC_H_ */
