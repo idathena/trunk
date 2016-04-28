@@ -6860,7 +6860,7 @@ These four commands will start and end War of Emperium or War of Emperium SE.
 This is a bit more complex than it sounds, since the commands themselves won't 
 actually do anything interesting, except causing all 'OnAgitStart:' and 
 'OnAgitEnd:', or 'OnAgitStart2:' and 'OnAgitEnd2:' in the case of latter two
-commands, events to run everywhere, respectively. They are used as  simple 
+commands, events to run everywhere, respectively. They are used as simple 
 triggers to run a lot of complex scripts all across the server, and they, 
 in turn, are triggered by clock with an 'OnClock<time>:' time-triggering label.
 

@@ -374,9 +374,9 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 	switch( skill_id ) {
 		case BA_APPLEIDUN: //HP recovery
 #ifdef RENEWAL
-			hp = 100 + 5 * skill_lv + 5 * (status_get_vit(src) / 10);
+			hp = 100 + skill_lv * 5 + 5 * (status_get_vit(src) / 10);
 #else
-			hp = 30 + 5 * skill_lv + 5 * (status_get_vit(src) / 10);
+			hp = 30 + skill_lv * 5 + 5 * (status_get_vit(src) / 10);
 #endif
 			if( sd )
 				hp += 5 * pc_checkskill(sd,BA_MUSICALLESSON);
@@ -387,36 +387,45 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 		case NPC_EVILLAND:
 			hp = (skill_lv > 6) ? 666 : skill_lv * 100;
 			break;
-		case AB_HIGHNESSHEAL:
-			hp = ((status_get_lv(src) + status_get_int(src)) / 8) * (4 + ((sd ? pc_checkskill(sd,AL_HEAL) : 10) * 8));
-			hp = (hp * (17 + 3 * skill_lv)) / 10;
+		case SU_TUNABELLY:
+			hp = (skill_lv * 20 - 10) * status_get_max_hp(target) / 100;
 			break;
 		default:
 			if( skill_lv >= battle_config.max_heal_lv )
 				return battle_config.max_heal;
+			if( skill_id == AB_HIGHNESSHEAL )
+				hp = (status_get_lv(src) + status_get_int(src)) / 8 * ((sd ? pc_checkskill(sd, AL_HEAL) : 10) * 8 + 4);
+			else {
 #ifdef RENEWAL
-			/**
-			 * Renewal Heal Formula
-			 * Formula: ( [(Base Level + INT) / 5] x 30 ) x (Heal Level / 10) x (Modifiers) + MATK
-			 */
-			hp = (status_get_lv(src) + status_get_int(src)) / 5 * 30 * skill_lv / 10;
+				/**
+				 * Renewal Heal Formula
+				 * Formula: ( [(Base Level + INT) / 5] x 30 ) x (Heal Level / 10) x (Modifiers) + MATK
+				 */
+				hp = ((status_get_lv(src) + status_get_int(src)) / 5 * 30) * skill_lv / 10;
 #else
-			hp = (status_get_lv(src) + status_get_int(src)) / 8 * (4 + (skill_lv * 8));
+				hp = (status_get_lv(src) + status_get_int(src)) / 8 * (skill_lv * 8 + 4);
 #endif
+			}
 			if( sd && ((lv = pc_checkskill(sd, HP_MEDITATIO)) > 0) )
 				hp += hp * lv * 2 / 100;
+			else if( sd && pc_checkskill(sd, SU_POWEROFSEA) > 0 ) {
+				short sea_heal = 10;
+
+				if( (pc_checkskill(sd, SU_TUNABELLY) + pc_checkskill(sd, SU_TUNAPARTY) +
+					pc_checkskill(sd, SU_BUNCHOFSHRIMP) + pc_checkskill(sd, SU_FRESHSHRIMP)) == 20 )
+					sea_heal += 20;
+				hp += hp * sea_heal / 100;
+			}
 			else if( src->type == BL_HOM && (lv = hom_checkskill(((TBL_HOM *)src), HLIF_BRAIN)) > 0 )
 				hp += hp * lv * 2 / 100;
-			if( sd && tsd && sd->status.partner_id == tsd->status.char_id && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex )
-				hp *= 2;
-			if( sd && ((lv = pc_checkskill(sd, SU_POWEROFSEA)) > 0) ) {
-				hp += hp * 10 / 100;
-				if( pc_checkskill(sd, SU_TUNABELLY) == 5 && pc_checkskill(sd, SU_TUNAPARTY) == 5 &&
-					pc_checkskill(sd, SU_BUNCHOFSHRIMP) == 5 && pc_checkskill(sd, SU_FRESHSHRIMP) == 5 )
-					hp += hp * 20 / 100;
-			}
+			if( sd && tsd && sd->status.partner_id == tsd->status.char_id &&
+				(sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex )
+				hp <<= 1;
 			break;
 	}
+
+	if( skill_id == AB_HIGHNESSHEAL ) //Highness Heal increases healing by a percentage
+		hp += hp * (70 + 30 * skill_lv) / 100;
 
 	if( (!heal || (target && target->type == BL_MER)) && skill_id != NPC_EVILLAND )
 		hp >>= 1;
@@ -427,9 +436,10 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 	if( tsd && (i = pc_skillheal2_bonus(tsd, skill_id)) )
 		hp += hp * i / 100;
 
-	if( sc && sc->data[SC_OFFERTORIUM] && (skill_id == AB_HIGHNESSHEAL || skill_id == AB_CHEAL ||
-		skill_id == PR_SANCTUARY || skill_id == AL_HEAL) )
-		hp += hp * sc->data[SC_OFFERTORIUM]->val2 / 100;
+	if( sc && sc->count ) {
+		if( sc->data[SC_OFFERTORIUM] )
+			hp += hp * sc->data[SC_OFFERTORIUM]->val2 / 100;
+	}
 
 	if( tsc && tsc->count ) {
 		if( skill_id != NPC_EVILLAND && skill_id != BA_APPLEIDUN ) {
@@ -5605,6 +5615,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case HLIF_HEAL:	//[orn]
 		case AL_HEAL:
 		case AB_HIGHNESSHEAL:
+		case SU_TUNABELLY:
 			{
 				int heal = skill_calc_heal(src,bl,skill_id,skill_lv,true);
 				int heal_get_jobexp;
@@ -10697,18 +10708,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 
-		case SU_TUNABELLY: {
-				int heal = ((2 * skill_lv - 1) * 10) * status_get_max_hp(bl) / 100;
-
-#ifdef RENEWAL
-				if( dstmd && dstmd->mob_id == MOBID_EMPERIUM )
-					break;
-#endif
-				status_heal(bl,heal,0,0);
-				clif_skill_nodamage(src,bl,skill_id,heal,1);
-			}
-			break;
-
 		case SU_BUNCHOFSHRIMP:
 			if( !sd || !sd->status.party_id || flag&1 ) {
 				int heal = skill_lv * status_get_max_hp(bl) / 100; //Custom
@@ -12453,7 +12452,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 		case DC_HUMMING:
 			val1 = 2 * skill_lv + status->dex / 10; //Hit increase
 #ifdef RENEWAL
-				val1 *= 2;
+			val1 <<= 1;
 #endif
 			if( sd )
 				val1 += pc_checkskill(sd,DC_DANCINGLESSON);
@@ -12798,7 +12797,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 		unit->range = range;
 
 		if( skill_id == PF_FOGWALL && alive == 2 ) { //Double duration of cells on top of Deluge/Suiton
-			unit->limit *= 2;
+			unit->limit <<= 1;
 			group->limit = unit->limit;
 		}
 
@@ -15231,7 +15230,9 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		}
 	}
 
-	if( require.eqItem_count ) { //Check if equiped item
+	if( require.eqItem_count ) {
+		int j = require.eqItem_count;
+
 		for( i = 0; i < require.eqItem_count; i++ ) {
 			uint16 reqeqit = require.eqItem[i];
 
@@ -15239,16 +15240,26 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				break; //No more required item get out of here
 			switch( skill_id ) {
 				case NC_PILEBUNKER:
-					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) &&
-						!pc_checkequip2(sd,ITEMID_PILE_BUNKER_S,EQI_ACC_L,EQI_MAX) &&
-						!pc_checkequip2(sd,ITEMID_PILE_BUNKER_P,EQI_ACC_L,EQI_MAX) &&
-						!pc_checkequip2(sd,ITEMID_PILE_BUNKER_T,EQI_ACC_L,EQI_MAX) )
-					{
-						clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT,0,reqeqit);
-						return false;
+					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) ) {
+						j--;
+						if( !j ) {
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT,0,require.eqItem[0]);
+							return false;
+						} else
+							continue;
 					}
 					break;
-				default:
+				case NC_EMERGENCYCOOL:
+					if( !pc_search_inventory(sd,reqeqit) ) {
+						j--;
+						if( !j ) {
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ITEM,0,require.eqItem[0]);
+							return false;
+						} else
+							continue;
+					}
+					break;
+				default: //Check if equiped item
 					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) ) {
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT,0,reqeqit);
 						return false;
@@ -15744,9 +15755,8 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 
 	switch( skill_id ) {
 		//Skill level-dependent checks
-		case NC_SHAPESHIFT:
-		case NC_REPAIR:
-			//NOTE: Please make sure Magic_Gear_Fuel in the last position in skill_require_db.txt
+		case NC_SHAPESHIFT: //NOTE: Please make sure Magic_Gear_Fuel in the last position in skill_require_db.txt
+		case NC_REPAIR: //NOTE: Please make sure Repair_Kit in the last position in skill_require_db.txt
 			req.itemid[1] = skill_db[idx].require.itemid[MAX_SKILL_ITEM_REQUIRE - 1];
 			req.amount[1] = skill_db[idx].require.amount[MAX_SKILL_ITEM_REQUIRE - 1];
 		//Fall through
@@ -20480,7 +20490,7 @@ static void skill_destroy_requirement(void) {
 
 /**
  * Read skill requirement from skill_require_db.txt
- * Structure: skill_id,HPCost,MaxHPTrigger,SPCost,HPRateCost,SPRateCost,ZenyCost,RequiredWeapons,RequiredAmmoTypes,RequiredAmmoAmount,RequiredState,RequiredStatuss,SpiritSphereCost,RequiredItemID1,RequiredItemAmount1,RequiredItemID2,RequiredItemAmount2,RequiredItemID3,RequiredItemAmount3,RequiredItemID4,RequiredItemAmount4,RequiredItemID5,RequiredItemAmount5,RequiredItemID6,RequiredItemAmount6,RequiredItemID7,RequiredItemAmount7,RequiredItemID8,RequiredItemAmount8,RequiredItemID9,RequiredItemAmount9,RequiredItemID10,RequiredItemAmount10
+ * Structure: skill_id,HPCost,MaxHPTrigger,SPCost,HPRateCost,SPRateCost,ZenyCost,RequiredWeapons,RequiredAmmoTypes,RequiredAmmoAmount,RequiredState,RequiredStatuss,SpiritSphereCost,RequiredItemID1,RequiredItemAmount1,RequiredItemID2,RequiredItemAmount2,RequiredItemID3,RequiredItemAmount3,RequiredItemID4,RequiredItemAmount4,RequiredItemID5,RequiredItemAmount5,RequiredItemID6,RequiredItemAmount6,RequiredItemID7,RequiredItemAmount7,RequiredItemID8,RequiredItemAmount8,RequiredItemID9,RequiredItemAmount9,RequiredItemID10,RequiredItemAmount10,RequiredEquipment
  */
 static bool skill_parse_row_requiredb(char *split[], int columns, int current)
 {
@@ -20555,28 +20565,42 @@ static bool skill_parse_row_requiredb(char *split[], int columns, int current)
 
 		if( (skill_db[idx].require.status_count = skill_split_atoi2(split[11],require,":",SC_STONE,ARRAYLENGTH(require))) ) {
 			CREATE(skill_db[idx].require.status,enum sc_type,skill_db[idx].require.status_count);
-			for( i = 0; i < skill_db[idx].require.status_count; i++ )
+			for( i = 0; i < skill_db[idx].require.status_count; i++ ) {
+				//@TODO: Add a check if possible here
 				skill_db[idx].require.status[i] = (sc_type)require[i];
+			}
 		}
 	}
 
 	skill_split_atoi(split[12],skill_db[idx].require.spiritball);
 
 	for( i = 0; i < MAX_SKILL_ITEM_REQUIRE; i++ ) {
-		skill_db[idx].require.itemid[i] = atoi(split[13 + 2 * i]);
+		int itemid = atoi(split[13 + 2 * i]);
+
+		if( itemid && !itemdb_exists(itemid) ) {
+			ShowError("skill_parse_row_requiredb: Invalid item (in ITEM_REQUIRE list) %d for skill %d.\n",itemid,atoi(split[0]));
+			return false;
+		}
+		skill_db[idx].require.itemid[i] = itemid;
 		skill_db[idx].require.amount[i] = atoi(split[14 + 2 * i]);
 	}
 
 	//Equipped Item requirements
-	//NOTE: We don't check the item is exist or not here
 	trim(split[33]);
 	if( split[33][0] != '\0' || atoi(split[33]) ) {
 		int require[MAX_SKILL_EQUIP_REQUIRE];
 
 		if( (skill_db[idx].require.eqItem_count = skill_split_atoi2(split[33],require,":",500,ARRAYLENGTH(require))) ) {
 			CREATE(skill_db[idx].require.eqItem,uint16,skill_db[idx].require.eqItem_count);
-			for( i = 0; i < skill_db[idx].require.eqItem_count; i++ )
+			for( i = 0; i < skill_db[idx].require.eqItem_count; i++ ) {
+				if( require[i] && !itemdb_exists(require[i]) ) {
+					ShowError("skill_parse_row_requiredb: Invalid item (in EQUIP_REQUIRE list)  %d for skill %d.\n",require[i],atoi(split[0]));
+					aFree(skill_db[idx].require.eqItem); //Don't need to retain this
+					skill_db[idx].require.eqItem_count = 0;
+					return false;
+				}
 				skill_db[idx].require.eqItem[i] = require[i];
+			}
 		}
 	}
 	return true;

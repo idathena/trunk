@@ -2880,8 +2880,8 @@ static int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type) {
 				bonus += 1000;
 			if ((i = pc_checkskill(sd,SU_POWEROFSEA)) > 0) {
 				bonus += 1000;
-				if (pc_checkskill(sd,SU_TUNABELLY) == 5 && pc_checkskill(sd,SU_TUNAPARTY) == 5 &&
-					pc_checkskill(sd,SU_BUNCHOFSHRIMP) == 5 && pc_checkskill(sd,SU_FRESHSHRIMP) == 5)
+				if ((pc_checkskill(sd,SU_TUNABELLY) + pc_checkskill(sd,SU_TUNAPARTY) +
+					pc_checkskill(sd,SU_BUNCHOFSHRIMP) + pc_checkskill(sd,SU_FRESHSHRIMP)) == 20)
 					bonus += 2000;
 			}
 #ifndef HP_SP_TABLES
@@ -3001,8 +3001,8 @@ static int status_get_spbonus(struct block_list *bl, enum e_status_bonus type) {
 				bonus += 100;
 			if ((i = pc_checkskill(sd,SU_POWEROFSEA)) > 0) {
 				bonus += 100;
-				if (pc_checkskill(sd,SU_TUNABELLY) == 5 && pc_checkskill(sd,SU_TUNAPARTY) == 5 &&
-					pc_checkskill(sd,SU_BUNCHOFSHRIMP) == 5 && pc_checkskill(sd,SU_FRESHSHRIMP) == 5)
+				if ((pc_checkskill(sd,SU_TUNABELLY) + pc_checkskill(sd,SU_TUNAPARTY) +
+					pc_checkskill(sd,SU_BUNCHOFSHRIMP) + pc_checkskill(sd,SU_FRESHSHRIMP)) == 20)
 					bonus += 200;
 			}
 		}
@@ -3803,7 +3803,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	}
 	if((lv = pc_checkskill(sd,SA_DRAGONOLOGY)) > 0) {
 #ifdef RENEWAL
-		lv *= 2;
+		lv <<= 1;
 #else
 		lv *= 4;
 #endif
@@ -8095,7 +8095,11 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_OVERTHRUST,INVALID_TIMER);
 			break;
 		case SC_MAGNIFICAT:
+		case SC_OFFERTORIUM:
+			if( sc->data[type] )
+				break;
 			status_change_end(bl,SC_OFFERTORIUM,INVALID_TIMER);
+			status_change_end(bl,SC_MAGNIFICAT,INVALID_TIMER);
 			break;
 		case SC_KYRIE: //Cancels Assumptio
 			status_change_end(bl,SC_ASSUMPTIO,INVALID_TIMER);
@@ -8211,9 +8215,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_ASPDPOTION1,INVALID_TIMER);
 			status_change_end(bl,SC_ASPDPOTION2,INVALID_TIMER);
 			status_change_end(bl,SC_ASPDPOTION3,INVALID_TIMER);
-			break;
-		case SC_OFFERTORIUM:
-			status_change_end(bl,SC_MAGNIFICAT,INVALID_TIMER);
 			break;
 		case SC_SWINGDANCE:
 		case SC_SYMPHONYOFLOVER:
@@ -10028,11 +10029,11 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val3 = 40 * val1;
 				break;
 			case SC_OFFERTORIUM:
-				val2 = 30 * val1;
-				val3 = 100 + 20 * val1;
+				val2 = 30 * val1; //Heal Power Increase
+				val3 = 100 + 20 * val1; //SP Requirement Increase
 				break;
 			case SC_FRIGG_SONG:
-				val2 = 5 * val1;
+				val2 = 5 * val1; //MaxHP Increase
 				val3 = 80 + 20 * val1;
 				tick_time = 1000;
 				val4 = tick / tick_time;
@@ -12641,7 +12642,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_FRIGG_SONG:
 			if( --(sce->val4) >= 0 ) {
-				status_heal(bl,sce->val3,0,0);
+				status_heal(bl,sce->val3,0,2);
 				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
@@ -13218,7 +13219,7 @@ static int status_natural_heal(struct block_list *bl, va_list args)
 			rate /= 2;
 		//Homun HP regen fix (they should regen as if they were sitting (twice as fast)
 		if (bl->type == BL_HOM)
-			rate *= 2;
+			rate <<= 1;
 		regen->tick.hp += rate;
 		if (regen->tick.hp >= (unsigned int)battle_config.natural_healhp_interval) {
 			int val = 0;
@@ -13236,7 +13237,7 @@ static int status_natural_heal(struct block_list *bl, va_list args)
 		rate = (int)(natural_heal_diff_tick * (regen->rate.sp / 100. * multi));
 		//Homun SP regen fix (they should regen as if they were sitting (twice as fast)
 		if (bl->type == BL_HOM)
-			rate *= 2;
+			rate <<= 1;
 #ifdef RENEWAL
 		if (bl->type == BL_PC && (((TBL_PC *)bl)->class_&MAPID_UPPERMASK) == MAPID_MONK &&
 			sc && sc->data[SC_EXPLOSIONSPIRITS] && (!sc->data[SC_SPIRIT] || sc->data[SC_SPIRIT]->val2 != SL_MONK))
@@ -13272,7 +13273,7 @@ static int status_natural_heal(struct block_list *bl, va_list args)
 			int val = sregen->sp;
 
 			if (sd && sd->state.doridori) {
-				val *= 2;
+				val <<= 1;
 				sd->state.doridori = 0;
 				if ((rate = pc_checkskill(sd,TK_SPTIME)))
 					sc_start(bl, bl, status_skill2sc(TK_SPTIME), 100, rate, skill_get_time(TK_SPTIME, rate));

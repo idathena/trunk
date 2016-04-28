@@ -2364,7 +2364,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				if(md->special_state.size == SZ_MEDIUM && drop_rate >= 2)
 					drop_rate /= 2;
 				else if(md->special_state.size == SZ_BIG)
-					drop_rate *= 2;
+					drop_rate <<= 1;
 			}
 			if(src) {
 				if(battle_config.drops_by_luk) //Drops affected by luk as a fixed increase [Valaris]

@@ -4859,10 +4859,10 @@ OnDisable:
 OnRespawn:
 	.@map$ = instance_mapname("1@jtb");
 	if ('jitOption == 2) {
-		monster .@map$,324,327,"Jitterbug",3108,1,instance_npcname("#jtboss")+"::OnMyMobDead";
-		monster .@map$,324,327,"Jitterbug",3109,1,instance_npcname("#jtboss")+"::OnMyMobDead";
-	} else
-		monster .@map$,324,327,"Awakened Ferre",3073,1,instance_npcname("#jtboss")+"::OnMyMobDead";
+		monster .@map$,322,337,"Jitterbug",3108,1,instance_npcname("#jtboss")+"::OnMyMobDead";
+		monster .@map$,322,337,"Jitterbug",3109,1,instance_npcname("#jtboss")+"::OnMyMobDead";
+	}
+	monster .@map$,324,327,"Awakened Ferre",3073,1,instance_npcname("#jtboss")+"::OnMyMobDead";
 	'jitBossGID = $@mobid[0];
 	initnpctimer;
 	end;
