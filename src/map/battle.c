@@ -3461,7 +3461,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case LK_JOINTBEAT:
 			i = -50 + 10 * skill_lv;
 			if(wd.miscflag&BREAK_NECK)
-				i *= 2; //Although not clear, it's being assumed that the 2x damage is only for the break neck ailment
+				i <<= 1; //Although not clear, it's being assumed that the 2x damage is only for the break neck ailment
 			skillratio += i;
 			break;
 #ifdef RENEWAL //Renewal: Skill ratio applies to entire damage [helvetica]
@@ -3518,7 +3518,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			if(wd.miscflag) { //Running bonus
 				skillratio += 10 * status_get_lv(src) / 3; //@TODO: Check the real value?
 				if(sc && sc->data[SC_SPURT]) //Spurt bonus
-					skillratio *= 2;
+					skillratio <<= 1;
 			}
 			break;
 		case GS_TRIPLEACTION:
@@ -3564,7 +3564,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case NJ_TATAMIGAESHI:
 			skillratio += 10 * skill_lv;
 #ifdef RENEWAL
-			skillratio *= 2;
+			skillratio <<= 1;
 #endif
 			break;
 		case NJ_KASUMIKIRI:
@@ -5782,7 +5782,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case MG_NAPALMBEAT:
 						skillratio += -30 + 10 * skill_lv;
 						if(tsc && tsc->data[SC_WHITEIMPRISON])
-							skillratio *= 2;
+							skillratio <<= 1;
 						break;
 					case MG_FIREBALL:
 #ifdef RENEWAL
@@ -5797,7 +5797,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						if(battle_check_undead(tstatus->race,tstatus->def_ele))
 							skillratio += 5 * skill_lv;
 						if(tsc && tsc->data[SC_WHITEIMPRISON])
-							skillratio *= 2;
+							skillratio <<= 1;
 						break;
 					case MG_FIREWALL:
 						skillratio -= 50;
@@ -5851,7 +5851,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case HW_NAPALMVULCAN:
 						skillratio += 25;
 						if(tsc && tsc->data[SC_WHITEIMPRISON])
-							skillratio *= 2;
+							skillratio <<= 1;
 						break;
 					case SL_STIN: //Target size must be small (0) for full damage
 						skillratio += (tstatus->size != SZ_SMALL ? -99 : 10 * skill_lv);
@@ -5950,7 +5950,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						skillratio += -100 + (skill_lv + 4) * 100 + sstatus->int_;
 						RE_LVL_DMOD(100);
 						if(tsc && tsc->data[SC_WHITEIMPRISON])
-							skillratio *= 2;
+							skillratio <<= 1;
 						break;
 					case WL_FROSTMISTY:
 						skillratio += 100 + 100 * skill_lv;
@@ -8382,7 +8382,7 @@ static const struct _battle_data {
 	{ "auction_maximumprice",               &battle_config.auction_maximumprice,            500000000, 0,   MAX_ZENY,       },
 	{ "homunculus_auto_vapor",              &battle_config.homunculus_auto_vapor,           1,      0,      1,              },
 	{ "display_status_timers",              &battle_config.display_status_timers,           1,      0,      1,              },
-	{ "skill_add_heal_rate",                &battle_config.skill_add_heal_rate,             7,      0,      INT_MAX,        },
+	{ "skill_add_heal_rate",                &battle_config.skill_add_heal_rate,             39,      0,      INT_MAX,        },
 	{ "eq_single_target_reflectable",       &battle_config.eq_single_target_reflectable,    1,      0,      1,              },
 	{ "invincible.nodamage",                &battle_config.invincible_nodamage,             0,      0,      1,              },
 	{ "mob_slave_keep_target",              &battle_config.mob_slave_keep_target,           0,      0,      1,              },

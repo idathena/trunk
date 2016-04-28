@@ -7128,7 +7128,8 @@ int pc_skillheal_bonus(struct map_session_data *sd, uint16 skill_id) {
 			case PR_SANCTUARY:      if( !(battle_config.skill_add_heal_rate&2) ) bonus = 0; break;
 			case AM_POTIONPITCHER:  if( !(battle_config.skill_add_heal_rate&4) ) bonus = 0; break;
 			case CR_SLIMPITCHER:    if( !(battle_config.skill_add_heal_rate&8) ) bonus = 0; break;
-			case BA_APPLEIDUN:      if( !(battle_config.skill_add_heal_rate&16)) bonus = 0; break;
+			case BA_APPLEIDUN:      if( !(battle_config.skill_add_heal_rate&16) ) bonus = 0; break;
+			case AB_HIGHNESSHEAL:   if( !(battle_config.skill_add_heal_rate&32) ) bonus = 0; break;
 		}
 	}
 
@@ -7456,7 +7457,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 			if( base_penalty > 0 ) { //Recheck after altering to speedup
 				if( battle_config.pk_mode && src && src->type == BL_PC )
-					base_penalty *= 2;
+					base_penalty <<= 1;
 				sd->status.base_exp -= min(sd->status.base_exp,base_penalty);
 				clif_updatestatus(sd,SP_BASEEXP);
 			}
@@ -7470,7 +7471,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 			if( job_penalty > 0 ) {
 				if( battle_config.pk_mode && src && src->type == BL_PC )
-					job_penalty *= 2;
+					job_penalty <<= 1;
 				sd->status.job_exp -= min(sd->status.job_exp,job_penalty);
 				clif_updatestatus(sd,SP_JOBEXP);
 			}
