@@ -11783,6 +11783,83 @@ void pc_show_questinfo_reinit(struct map_session_data *sd) {
 #endif
 }
 
+/**
+ * Verifies a chat message, searching for atcommands, checking if the sender
+ * character can chat, and updating the idle timer.
+ *
+ * @param sd      The sender character.
+ * @param message The message text.
+ * @return Whether the message is a valid chat message.
+ */
+bool pc_process_chat_message(struct map_session_data *sd, const char *message) {
+	if (is_atcommand(sd->fd, sd, message, 1))
+		return false;
+
+	if (sd->sc.cant.chat)
+		return false; //No "chatting" while muted
+
+	if (battle_config.min_chat_delay) { //[Skotlex]
+		if (DIFF_TICK(sd->cantalk_tick, gettick()) > 0)
+			return false;
+		sd->cantalk_tick = gettick() + battle_config.min_chat_delay;
+	}
+
+	sd->idletime = last_tick; //Reset idle time when using chat
+
+	return true;
+}
+
+/**
+ * Checks a chat message, scanning for the Super Novice prayer sequence.
+ *
+ * If a match is found, the angel is invoked or the counter is incremented as
+ * appropriate.
+ *
+ * @param sd      The sender character.
+ * @param message The message text.
+ */
+void pc_check_supernovice_call(struct map_session_data *sd, const char *message) {
+	unsigned int next = pc_nextbaseexp(sd);
+	int percent = 0;
+
+	if ((sd->class_&MAPID_UPPERMASK) != MAPID_SUPER_NOVICE)
+		return;
+
+	if (!next)
+		next = pc_thisbaseexp(sd);
+
+	if (!next)
+		return;
+
+	//0%, 10%, 20%, ...
+	percent = (int)(((float)sd->status.base_exp / (float)next) * 1000.);
+	if ((battle_config.snovice_call_type || percent) && !(percent%100)) { //10.0%, 20.0%, ..., 90.0%
+		switch (sd->state.snovice_call_flag) {
+			case 0:
+				if (strstr(message, msg_txt(1481))) // "Dear angel, can you hear my voice?"
+					sd->state.snovice_call_flag = 1;
+				break;
+			case 1: {
+					char buf[256];
+
+					snprintf(buf, 256, msg_txt(1482), sd->status.name);
+					if (strstr(message, buf)) // "I am %s Super Novice~"
+						sd->state.snovice_call_flag = 2;
+				}
+				break;
+			case 2:
+				if (strstr(message, msg_txt(1483))) // "Help me out~ Please~ T_T"
+					sd->state.snovice_call_flag = 3;
+				break;
+			case 3:
+				sc_start(&sd->bl, &sd->bl, status_skill2sc(MO_EXPLOSIONSPIRITS), 100, 17, skill_get_time(MO_EXPLOSIONSPIRITS, 5)); //Lv17-> +50 critical (noted by Poki) [Skotlex]
+				clif_skill_nodamage(&sd->bl, &sd->bl, MO_EXPLOSIONSPIRITS, 5, 1); //Prayer always shows successful Lv5 cast and disregards noskill restrictions
+				sd->state.snovice_call_flag = 0;
+				break;
+		}
+	}
+}
+
 /*==========================================
  * pc Init/Terminate
  *------------------------------------------*/
