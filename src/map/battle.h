@@ -611,6 +611,7 @@ extern struct Battle_Config
 	int save_body_style;
 	int mvp_exp_reward_message;
 	int max_summoner_parameter;
+	int mob_eye_range_bonus; //Vulture's Eye and Snake's Eye range bonus
 } battle_config;
 
 void do_init_battle(void);

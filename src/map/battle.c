@@ -1928,13 +1928,12 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 
 	//Skill range criteria
 	if(battle_config.skillrange_by_distance && (src->type&battle_config.skillrange_by_distance)) {
-		if(check_distance_bl(src, target, 5)) //Based on distance between src/target [Skotlex]
+		if(check_distance_bl(src, target, 3)) //Based on distance between src/target [Skotlex]
 			return BF_SHORT;
 		return BF_LONG;
 	}
 
-	//Based on used skill's range
-	if(skill_get_range2(src, skill_id, skill_lv) < 5)
+	if(skill_get_range2(src, skill_id, skill_lv) <= 3) //Based on used skill's range
 		return BF_SHORT;
 	return BF_LONG;
 }
@@ -5764,6 +5763,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case AB_RENOVATIO:
 				ad.damage = status_get_lv(src) * 10 + sstatus->int_;
 				break;
+			case OB_OBOROGENSOU_TRANSITION_ATK:
+				ad.damage = battle_damage_temp[0]; //Recieved magic damage * skill_lv / 10
+				break;
 			case SU_SV_ROOTTWIST_ATK:
 				ad.damage = 100;
 				break;
@@ -8515,6 +8517,7 @@ static const struct _battle_data {
 	{ "save_body_style",                    &battle_config.save_body_style,                 0,      0,      1,              },
 	{ "mvp_exp_reward_message",             &battle_config.mvp_exp_reward_message,          0,      0,      1,              },
 	{ "max_summoner_parameter",             &battle_config.max_summoner_parameter,          120,    10,     SHRT_MAX,       },
+	{ "monster_eye_range_bonus",            &battle_config.mob_eye_range_bonus,             0,      0,      10,             },
 };
 #ifndef STATS_OPT_OUT
 /**
