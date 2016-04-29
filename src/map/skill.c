@@ -334,7 +334,7 @@ int skill_get_range2(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 			if( inf3&INF3_EFF_SNAKEEYE ) //Allow GS skills to be effected by the range of Snake Eyes [Reddozen]
 				range += pc_checkskill((TBL_PC *)bl, GS_SNAKEEYE);
 		} else
-			range += 10; //Assume level 10?
+			range += battle_config.mob_eye_range_bonus;
 	}
 
 	if( inf3&(INF3_EFF_SHADOWJUMP|INF3_EFF_RADIUS|INF3_EFF_RESEARCHTRAP) ) {
@@ -2869,12 +2869,12 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	}
 
 	if (damage && tsc && tsc->data[SC_GENSOU] && dmg.flag&BF_MAGIC) {
-		struct block_list *nbl = battle_getenemyarea(bl, bl->x, bl->y, 2, BL_CHAR, bl->id);
+		uint16 lv = tsc->data[SC_GENSOU]->val1;
 
-		if (nbl) { //Only one target is chosen
-			damage = damage / 2; //Deflect half of the damage to a target nearby
-			clif_skill_damage(bl, nbl, tick, status_get_amotion(src), 0, status_fix_damage(bl, nbl, damage,0), dmg.div_, OB_OBOROGENSOU_TRANSITION_ATK, -1, DMG_SKILL);
-		}
+		battle_damage_temp[0] = damage * lv / 10;
+		skill_area_temp[1] = 0;
+		map_foreachinrange(skill_attack_area, bl, skill_get_splash(OB_OBOROGENSOU_TRANSITION_ATK, lv), splash_target(bl),
+			BF_MAGIC, bl, bl, OB_OBOROGENSOU_TRANSITION_ATK, lv, tick, flag|SD_LEVEL, BCT_ENEMY);
 	}
 
 	//Skill hit type
@@ -7492,7 +7492,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					x = src->x + dirx[dir] * skill_lv * 2;
 					y = src->y + diry[dir] * skill_lv * 2;
 				}
-
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				if (!map_count_oncell(src->m,x,y,BL_PC|BL_NPC|BL_MOB,0) && map_getcell(src->m,x,y,CELL_CHKREACH) && unit_movepos(src,x,y,1,false))
 					clif_blown(src,src);
@@ -9828,16 +9827,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					i = rnd()%MAX_SKILL_IMPROVISE_DB;
 					improv_skill_id = skill_improvise_db[i].skill_id;
 				} while( checked++ < checked_max && (improv_skill_id == 0 || rnd()%10000 >= skill_improvise_db[i].per) );
-
 				if( !skill_get_index(improv_skill_id) ) {
 					if( sd )
 						clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 					break;
 				}
-
 				improv_skill_lv = 4 + skill_lv;
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-
 				if( sd ) {
 					sd->state.abra_flag = 2;
 					sd->skillitem = improv_skill_id;
@@ -15770,6 +15766,7 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 		case SO_WATER_INSIGNIA:
 		case SO_WIND_INSIGNIA:
 		case SO_EARTH_INSIGNIA:
+		case KO_MAKIBISHI:
 			req.itemid[0] = skill_db[idx].require.itemid[min(skill_lv - 1,MAX_SKILL_ITEM_REQUIRE - 1)];
 			req.amount[0] = skill_db[idx].require.amount[min(skill_lv - 1,MAX_SKILL_ITEM_REQUIRE - 1)];
 			level_dependent = true;
