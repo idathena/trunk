@@ -612,6 +612,7 @@ extern struct Battle_Config
 	int mvp_exp_reward_message;
 	int max_summoner_parameter;
 	int mob_eye_range_bonus; //Vulture's Eye and Snake's Eye range bonus
+	int crimsonrock_knockback;
 } battle_config;
 
 void do_init_battle(void);
