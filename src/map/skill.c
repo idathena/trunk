@@ -2625,13 +2625,12 @@ void skill_attack_blow(struct block_list *src, struct block_list *dsrc, struct b
 		case EL_FIRE_MANTLE:
 			dir = unit_getdir(target); //Backwards
 			break;
-		//This ensures the storm randomly pushes instead of exactly a cell backwards per official mechanics
 		case WZ_STORMGUST:
 			if (!battle_config.stormgust_knockback)
-				dir = rnd()%8;
+				dir = rnd()%8; //This ensures SG randomly pushes instead of exactly a cell backwards per official mechanics
 			break;
 		case WL_CRIMSONROCK:
-			dir = map_calc_dir(target, skill_area_temp[4], skill_area_temp[5]);
+			dir = (!battle_config.crimsonrock_knockback ? map_calc_dir(target, skill_area_temp[4], skill_area_temp[5]) : 6);
 			break;
 	}
 
@@ -2995,7 +2994,9 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, skill_lv, DMG_MULTI_HIT);
 			break;
 		case WL_CHAINLIGHTNING_ATK:
-			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, 1, WL_CHAINLIGHTNING, -2, DMG_SKILL);
+		case WM_REVERBERATION_MELEE:
+		case WM_REVERBERATION_MAGIC:
+			dmg.dmotion = clif_skill_damage(bl, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SKILL);
 			break;
 		case WL_TETRAVORTEX_FIRE:
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, WL_TETRAVORTEX_WIND, -1, DMG_SPLASH);
@@ -3018,9 +3019,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case GN_FIRE_EXPANSION_ACID:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, CR_ACIDDEMONSTRATION, skill_lv, DMG_MULTI_HIT);
 			break;
-		case GN_SLINGITEM_RANGEMELEEATK:
-			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, GN_SLINGITEM, -2, DMG_SKILL);
-			break;
 		case LG_OVERBRAND:
 		case LG_OVERBRAND_BRANDISH:
 		case NC_MAGMA_ERUPTION_DOTDAMAGE:
@@ -3033,12 +3031,8 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case NC_MAGMA_ERUPTION:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, status_get_amotion(src), dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
 			break;
-		case WM_REVERBERATION_MELEE:
-		case WM_REVERBERATION_MAGIC:
-			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, WM_REVERBERATION, -2, DMG_SKILL);
-			break;
 		case WM_SEVERE_RAINSTORM_MELEE:
-			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, WM_SEVERE_RAINSTORM, -2, DMG_SKILL);
+			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SKILL);
 			break;
 		case WZ_SIGHTBLASTER:
 		case HT_CLAYMORETRAP:
@@ -4494,8 +4488,10 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					case MG_FIREBALL:
 #endif
 					case WL_CRIMSONROCK:
-						skill_area_temp[4] = bl->x;
-						skill_area_temp[5] = bl->y;
+						if (!battle_config.crimsonrock_knockback) {
+							skill_area_temp[4] = bl->x;
+							skill_area_temp[5] = bl->y;
+						}
 						break;
 					case NC_VULCANARM:
 						if (sd)
@@ -10155,9 +10151,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if( itemdb_is_slingatk(ammo_id) ) { //If thrown item is a bomb or a lump, then its a attack type ammo
 					if( battle_check_target(src,bl,BCT_ENEMY ) > 0) { //Only allow throwing attacks at enemies
 						if( ammo_id == ITEMID_PINEAPPLE_BOMB ) //Pineapple Bombs deal 5x5 splash damage on targeted enemy
-							map_foreachinrange(skill_area_sub,bl,2,BL_CHAR,src,GN_SLINGITEM_RANGEMELEEATK,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
+							map_foreachinrange(skill_area_sub,bl,2,BL_CHAR,src,GN_SLINGITEM_RANGEMELEEATK,skill_lv,tick,flag|BCT_ENEMY|SD_LEVEL|SD_ANIMATION|SD_SPLASH|1,skill_castend_damage_id);
 						else //All other bombs and lumps hits one enemy
-							skill_castend_damage_id(src,bl,GN_SLINGITEM_RANGEMELEEATK,skill_lv,tick,flag);
+							skill_castend_damage_id(src,bl,GN_SLINGITEM_RANGEMELEEATK,skill_lv,tick,flag|SD_LEVEL|SD_ANIMATION);
 					} else //Otherwise, it fails, shows animation and removes items
 						clif_skill_fail(sd,GN_SLINGITEM_RANGEMELEEATK,USESKILL_FAIL,0,0);
 				} else if( itemdb_is_slingbuff(ammo_id) ) { //If thrown item is a potion, food, powder, or overcooked food, then its a buff type ammo
@@ -17253,10 +17249,12 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 				break;
 			if( bl->type == BL_SKILL ) {
 				struct skill_unit *su = (struct skill_unit *)bl;
+				int unit_id;
 
 				if( !su || !su->group )
 					return 0;
-				switch( su->group->unit_id ) {
+				unit_id = su->group->unit_id;
+				switch( unit_id ) {
 					case UNT_CLAYMORETRAP:
 					case UNT_LANDMINE:
 					case UNT_BLASTMINE:
@@ -17266,9 +17264,14 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 					case UNT_FREEZINGTRAP:
 					case UNT_FIRINGTRAP:
 					case UNT_ICEBOUNDTRAP:
-						clif_changetraplook(bl, UNT_USED_TRAPS);
-						su->group->limit = DIFF_TICK(gettick(),su->group->tick) + 1500;
 						su->group->unit_id = UNT_USED_TRAPS;
+						clif_changetraplook(bl, UNT_USED_TRAPS);
+						if( unit_id == UNT_FIRINGTRAP )
+							su->group->limit = DIFF_TICK(gettick(),su->group->tick);
+						else if( unit_id == UNT_ICEBOUNDTRAP )
+							su->group->limit = DIFF_TICK(gettick(),su->group->tick) + 1000;
+						else
+							su->group->limit = DIFF_TICK(gettick(),su->group->tick) + 1500;
 						break;
 				}
 			}
