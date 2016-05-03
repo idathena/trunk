@@ -2116,6 +2116,8 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
  */
 bool target_has_infinite_defense(struct block_list *target, uint16 skill_id, int flag)
 {
+	struct status_data *tstatus = status_get_status_data(target);
+
 	if(target->type == BL_SKILL) {
 		TBL_SKILL *su = ((TBL_SKILL *)target);
 
@@ -4675,7 +4677,6 @@ struct Damage battle_calc_attack_post_defense(struct Damage wd, struct block_lis
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct status_change *sc = status_get_sc(src);
 	struct status_data *sstatus = status_get_status_data(src);
-	struct status_data *tstatus = status_get_status_data(target);
 
 	//Post skill/vit reduction damage increases
 	if(sc && sc->data[SC_NIBELUNGEN]) {
