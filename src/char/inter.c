@@ -476,7 +476,7 @@ void mapif_parse_accinfo(int fd) {
 	int account_id;
 	char *data;
 
-	safestrncpy(query, (char *) RFIFOP(fd,14), NAME_LENGTH);
+	safestrncpy(query, (char *)RFIFOP(fd,14), NAME_LENGTH);
 
 	Sql_EscapeString(sql_handle, query_esq, query);
 
@@ -1097,7 +1097,7 @@ int mapif_parse_WisToGM(int fd)
 {
 	unsigned char buf[2048]; // 0x3003/0x3803 <packet_len>.w <wispname>.24B <permission>.L <message>.?B
 
-	memcpy(WBUFP(buf,0), RFIFOP(fd,0), RFIFOW(fd,2));
+	memcpy(WBUFP(buf,0), RFIFOP(fd,0), RFIFOW(fd,2)); // Message contains the NUL terminator (see intif_wis_message_to_gm())
 	WBUFW(buf,0) = 0x3803;
 	mapif_sendall(buf, RFIFOW(fd,2));
 

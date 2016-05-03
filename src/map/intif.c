@@ -1263,7 +1263,7 @@ int intif_parse_WisMessage(int fd)
 		return 0;
 	}
 
-	wisp_source = (char *) RFIFOP(fd,8); //Speed up [Yor]
+	wisp_source = (char *)RFIFOP(fd,8); //Speed up [Yor]
 	for (i = 0; i < MAX_IGNORE_LIST &&
 		sd->ignore[i].name[0] != '\0' &&
 		strcmp(sd->ignore[i].name, wisp_source) != 0
@@ -1274,8 +1274,8 @@ int intif_parse_WisMessage(int fd)
 		return 0;
 	}
 
-	//Success to send whisper.
-	clif_wis_message(sd->fd, wisp_source, (char *)RFIFOP(fd,56), RFIFOW(fd,2) - 56);
+	//Success to send whisper
+	clif_wis_message(sd->fd, wisp_source, (char *)RFIFOP(fd,56), RFIFOW(fd,2) - 57);
 	intif_wis_replay(id, 0); //Success
 
 	return 1;
@@ -1292,7 +1292,7 @@ int intif_parse_WisEnd(int fd)
 
 	if (battle_config.etc_log) //flag: 0: Success to send wisper, 1: Target character is not loged in?, 2: Ignored by target
 		ShowInfo("intif_parse_wisend: player: %s, flag: %d\n", RFIFOP(fd,2), RFIFOB(fd,26));
-	sd = (struct map_session_data *)map_nick2sd((char *) RFIFOP(fd,2));
+	sd = (struct map_session_data *)map_nick2sd((char *)RFIFOP(fd,2));
 	if (sd != NULL)
 		clif_wis_end(sd->fd, RFIFOB(fd,26));
 
@@ -1305,7 +1305,7 @@ int intif_parse_WisEnd(int fd)
  * @param va : list of arguments ( wisp_name, message, len)
  * @return 0 = Error, 1 = Msg sent
  */
-static int mapif_parse_WisToGM_sub(struct map_session_data *sd,va_list va)
+static int intif_parse_WisToGM_sub(struct map_session_data *sd,va_list va)
 {
 	int permission = va_arg(va, int);
 	char *wisp_name;
@@ -1326,24 +1326,24 @@ static int mapif_parse_WisToGM_sub(struct map_session_data *sd,va_list va)
 /**
  * Received wisp message from map-server via char-server for ALL gm
  * 0x3003/0x3803 <packet_len>.w <wispname>.24B <permission>.l <message>.?B
- * @see mapif_parse_WisToGM_sub, for 1 transmission
+ * @see intif_parse_WisToGM_sub, for 1 transmission
  * @param fd : char-serv link
  * @return 1
  */
-int mapif_parse_WisToGM(int fd)
+int intif_parse_WisToGM(int fd)
 {
 	int permission, mes_len;
 	char Wisp_name[NAME_LENGTH];
 	char *message;
 
-	mes_len =  RFIFOW(fd,2) - 8 + NAME_LENGTH;
-	message = (char *)aMalloc(mes_len);
+	mes_len = RFIFOW(fd,2) - 9 + NAME_LENGTH; //Length not including the NUL terminator
+	message = (char *)aMalloc(mes_len + 1);
 
 	permission = RFIFOL(fd,4 + NAME_LENGTH);
 	safestrncpy(Wisp_name, (char *)RFIFOP(fd,4), NAME_LENGTH);
-	safestrncpy(message, (char *)RFIFOP(fd,8 + NAME_LENGTH), mes_len);
+	safestrncpy(message, (char *)RFIFOP(fd,8 + NAME_LENGTH), mes_len + 1);
 	//Information is sent to all online GM
-	map_foreachpc(mapif_parse_WisToGM_sub, permission, Wisp_name, message, mes_len);
+	map_foreachpc(intif_parse_WisToGM_sub, permission, Wisp_name, message, mes_len);
 
 	aFree(message);
 	return 1;
@@ -3142,13 +3142,13 @@ int intif_parse(int fd)
 	switch (cmd) {
 		case 0x3800:
 			if (RFIFOL(fd,4) == 0xFF000000) //Normal announce.
-				clif_broadcast(NULL, (char *) RFIFOP(fd,16), packet_len - 16, BC_DEFAULT, ALL_CLIENT);
+				clif_broadcast(NULL, (char *)RFIFOP(fd,16), packet_len - 16, BC_DEFAULT, ALL_CLIENT);
 			else //Color announce.
-				clif_broadcast2(NULL, (char *) RFIFOP(fd,16), packet_len - 16, RFIFOL(fd,4), RFIFOW(fd,8), RFIFOW(fd,10), RFIFOW(fd,12), RFIFOW(fd,14), ALL_CLIENT);
+				clif_broadcast2(NULL, (char *)RFIFOP(fd,16), packet_len - 16, RFIFOL(fd,4), RFIFOW(fd,8), RFIFOW(fd,10), RFIFOW(fd,12), RFIFOW(fd,14), ALL_CLIENT);
 			break;
 		case 0x3801:	intif_parse_WisMessage(fd); break;
 		case 0x3802:	intif_parse_WisEnd(fd); break;
-		case 0x3803:	mapif_parse_WisToGM(fd); break;
+		case 0x3803:	intif_parse_WisToGM(fd); break;
 		case 0x3804:	intif_parse_Registers(fd); break;
 		case 0x3806:	intif_parse_ChangeNameOk(fd); break;
 		case 0x3807:	intif_parse_MessageToFD(fd); break;

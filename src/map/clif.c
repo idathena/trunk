@@ -4611,7 +4611,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 //Aegis data specifies that: 4 endure against single hit sources, 9 against multi-hit.
 static inline int clif_calc_delay(int type, int div, int damage, int delay)
 {
-	return (delay == 0 && damage > 0) ? (div > 1 ? DMG_MULTI_HIT_ENDURE : DMG_ENDURE) : (enum e_damage_type)type;
+	return (!delay && damage) ? (div > 1 ? DMG_MULTI_HIT_ENDURE : DMG_ENDURE) : (enum e_damage_type)type;
 }
 
 /*==========================================
@@ -5502,7 +5502,7 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int
 	WBUFL(buf,16) = sdelay;
 	WBUFL(buf,20) = ddelay;
 	if(battle_config.hide_woe_damage && map_flag_gvg2(src->m))
-		WBUFW(buf,24) = damage ? div : 0;
+		WBUFW(buf,24) = (damage ? div : 0);
 	else
 		WBUFW(buf,24) = damage;
 	WBUFW(buf,26) = skill_lv;
@@ -5514,7 +5514,6 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int
 		clif_send(buf,packet_len(0x114),dst,SELF);
 	} else
 		clif_send(buf,packet_len(0x114),dst,AREA);
-
 	if(disguised(src)) {
 		WBUFL(buf,4) = -src->id;
 		if(disguised(dst))
@@ -5532,7 +5531,7 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int
 	WBUFL(buf,16) = sdelay;
 	WBUFL(buf,20) = ddelay;
 	if(battle_config.hide_woe_damage && map_flag_gvg2(src->m))
-		WBUFL(buf,24) = damage ? div : 0;
+		WBUFL(buf,24) = (damage ? div : 0);
 	else
 		WBUFL(buf,24) = damage;
 	WBUFW(buf,28) = skill_lv;
@@ -5552,7 +5551,6 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int
 		clif_send(buf,packet_len(0x1de),dst,SELF);
 	} else
 		clif_send(buf,packet_len(0x1de),dst,AREA);
-
 	if(disguised(src)) {
 		WBUFL(buf,4) = -src->id;
 		if(disguised(dst))
@@ -6349,21 +6347,21 @@ void clif_upgrademessage(int fd, int result, unsigned short item_id)
 void clif_wis_message(int fd, const char *nick, const char *mes, int mes_len)
 {
 #if PACKETVER < 20091104
-	WFIFOHEAD(fd,mes_len + NAME_LENGTH + 4);
+	WFIFOHEAD(fd,mes_len + NAME_LENGTH + 5);
 	WFIFOW(fd,0) = 0x97;
-	WFIFOW(fd,2) = mes_len + NAME_LENGTH + 4;
+	WFIFOW(fd,2) = mes_len + NAME_LENGTH + 5;
 	safestrncpy((char *)WFIFOP(fd,4),nick,NAME_LENGTH);
-	safestrncpy((char *)WFIFOP(fd,28),mes,mes_len);
+	safestrncpy((char *)WFIFOP(fd,28),mes,mes_len + 1);
 	WFIFOSET(fd,WFIFOW(fd,2));
 #else
 	struct map_session_data *ssd = map_nick2sd(nick);
 
-	WFIFOHEAD(fd,mes_len + NAME_LENGTH + 8);
+	WFIFOHEAD(fd,mes_len + NAME_LENGTH + 9);
 	WFIFOW(fd,0) = 0x97;
-	WFIFOW(fd,2) = mes_len + NAME_LENGTH + 8;
+	WFIFOW(fd,2) = mes_len + NAME_LENGTH + 9;
 	safestrncpy((char *)WFIFOP(fd,4),nick,NAME_LENGTH);
 	WFIFOL(fd,28) = (ssd && pc_get_group_level(ssd) == 99) ? 1 : 0; //isAdmin; if nonzero, also displays text above char
-	safestrncpy((char *)WFIFOP(fd,32),mes,mes_len);
+	safestrncpy((char *)WFIFOP(fd,32),mes,mes_len + 1);
 	WFIFOSET(fd,WFIFOW(fd,2));
 #endif
 }
@@ -10770,9 +10768,9 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data *sd)
 		WBUFW(buf,2) = 8 + outlen;
 		WBUFL(buf,4) = sd->bl.id;
 		if( is_fakename )
-			safesnprintf(WBUFP(buf,8), outlen, "%s : %s", sd->fakename, message);
+			safesnprintf((char *)WBUFP(buf,8), outlen, "%s : %s", sd->fakename, message);
 		else
-			safestrncpy(WBUFP(buf,8), full_message, outlen);
+			safestrncpy((char *)WBUFP(buf,8), full_message, outlen);
 		//FIXME: chat has range of 9 only
 		clif_send(buf, WBUFW(buf,2), &sd->bl, (sd->chatID ? CHAT_WOS : AREA_CHAT_WOC));
 		aFree(buf);
@@ -10783,9 +10781,9 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data *sd)
 	WFIFOW(fd,0) = 0x8e;
 	WFIFOW(fd,2) = 4 + outlen;
 	if( is_fakename )
-		safesnprintf(WFIFOP(fd,4), outlen, "%s : %s", sd->fakename, message);
+		safesnprintf((char *)WFIFOP(fd,4), outlen, "%s : %s", sd->fakename, message);
 	else
-		safestrncpy(WFIFOP(fd,4), full_message, outlen);
+		safestrncpy((char *)WFIFOP(fd,4), full_message, outlen);
 	WFIFOSET(fd,WFIFOW(fd,2));
 
 #ifdef PCRE_SUPPORT
@@ -11098,7 +11096,7 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 			}
 			for( i = 0; i < NUM_WHISPER_VAR; ++i ) {
 				safesnprintf(output, sizeof(output), "@whispervar%d$", i);
-				set_var(sd, output, (char *) split_data[i]);
+				set_var(sd, output, (char *)split_data[i]);
 			}
 			safesnprintf(output, sizeof(output), "%s::OnWhisperGlobal", npc->exname);
 			npc_event(sd, output, 0); //Calls the NPC label
@@ -11130,7 +11128,7 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 	//And if we ask for 'Test', we must not contact 'test' player
 	//So, we send information to inter-server, which is the only one which decide (and copy correct name)
 	if( !dstsd || strcmp(dstsd->status.name, target) != 0 ) {
-		intif_wis_message(sd, target, message, strlen(message) + 1);
+		intif_wis_message(sd, target, message, strlen(message));
 		return;
 	}
 
@@ -11148,7 +11146,7 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 		char output[256];
 
 		safesnprintf(output, sizeof(output), "%s is in autotrade mode and cannot receive whispered messages.", dstsd->status.name);
-		clif_wis_message(fd, wisp_server_name, output, strlen(output) + 1);
+		clif_wis_message(fd, wisp_server_name, output, strlen(output));
 		return;
 	}
 
@@ -11165,7 +11163,7 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 	clif_wis_end(fd, 0); //0: Success to send wisper
 
 	//Normal message
-	clif_wis_message(dstsd->fd, sd->status.name, message, strlen(message) + 1);
+	clif_wis_message(dstsd->fd, sd->status.name, message, strlen(message));
 }
 
 

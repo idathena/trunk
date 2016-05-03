@@ -3422,7 +3422,7 @@ int map_waterheight(char *mapname)
 	if (found) strcpy(fn, found); // Replace with real name
 
 	// Read & convert fn
-	rsw = (char *) grfio_read (fn);
+	rsw = (char *)grfio_read (fn);
 	if (rsw) { // Load water height from file
 		//FIXME Casting between integer* and float* which have an incompatible binary data representation.
 		int wh = (int)*(float *)(rsw + 166);

@@ -14987,7 +14987,7 @@ BUILDIN_FUNC(implode)
 		int i, k = 0;
 
 		for( i = 0; i <= array_size; ++i ) {
-			temp = (char *) get_val2(st, reference_uid(id, i), reference_getref(data));
+			temp = (char *)get_val2(st, reference_uid(id, i), reference_getref(data));
 			len += strlen(temp);
 			script_removetop(st,-1,0);
 		}
@@ -15002,7 +15002,7 @@ BUILDIN_FUNC(implode)
 
 		//Build output
 		for(i = 0; i < array_size; ++i) {
-			temp = (char *) get_val2(st, reference_uid(id, i), reference_getref(data));
+			temp = (char *)get_val2(st, reference_uid(id, i), reference_getref(data));
 			len = strlen(temp);
 			memcpy(&output[k], temp, len);
 			k += len;
@@ -15012,7 +15012,7 @@ BUILDIN_FUNC(implode)
 			}
 			script_removetop(st,-1,0);
 		}
-		temp = (char *) get_val2(st, reference_uid(id, array_size), reference_getref(data));
+		temp = (char *)get_val2(st, reference_uid(id, array_size), reference_getref(data));
 		len = strlen(temp);
 		memcpy(&output[k], temp, len);
 		k += len;
