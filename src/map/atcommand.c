@@ -5800,7 +5800,7 @@ ACMD_FUNC(changeleader)
 		return -1;
 	}
 
-	if( party_changeleader(sd, map_nick2sd((char *) message), NULL) )
+	if( party_changeleader(sd, map_nick2sd((char *)message), NULL) )
 		return 0;
 	return -1;
 }
@@ -10050,7 +10050,7 @@ static void atcommand_get_suggestions(struct map_session_data *sd, const char *n
 
 		// Merge full match and prefix match results
 		if (prefix_count < MAX_SUGGESTIONS) {
-			memmove(&suggestions[prefix_count], full_match, sizeof(char *) * (MAX_SUGGESTIONS-prefix_count));
+			memmove(&suggestions[prefix_count], full_match, sizeof(char *)* (MAX_SUGGESTIONS-prefix_count));
 			prefix_count = min(prefix_count + full_count, MAX_SUGGESTIONS);
 		}
 

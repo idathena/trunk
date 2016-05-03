@@ -2215,7 +2215,7 @@ static void npc_parsename(struct npc_data *nd, const char *name, const char *sta
 
 		npc_last_npd = npd;
 		npc_last_ref = npd->path;
-		npc_last_path = (char *) filepath;
+		npc_last_path = (char *)filepath;
 	} else {
 		nd->path = npc_last_ref;
 		if( npc_last_npd )
