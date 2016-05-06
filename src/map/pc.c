@@ -5316,7 +5316,6 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 		// If can't find any map-servers, just abort setting position
 		if( !sd->mapindex || map_mapname2ipport(mapindex, &ip, &port) )
 			return 2;
-
 		if( sd->npc_id )
 			npc_event_dequeue(sd);
 		npc_script_event(sd, NPCE_LOGOUT);
@@ -5328,10 +5327,8 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 		pc_clean_skilltree(sd);
 		chrif_save(sd, 2);
 		chrif_changemapserver(sd, ip, (short)port);
-
 		// Free session data from this map server [Kevin]
 		unit_free_pc(sd);
-
 		return 0;
 	}
 
@@ -5347,7 +5344,6 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 			x = rnd()%(map[m].xs - 2) + 1;
 			y = rnd()%(map[m].ys - 2) + 1;
 			c++;
-
 			if( c > (map[m].xs * map[m].ys) * 3 ) { //Force out
 				ShowError("pc_setpos: couldn't found a valid coordinates for player '%s' (%d:%d) on (%s), preventing warp\n", sd->status.name, sd->status.account_id, sd->status.char_id, mapindex_id2name(mapindex));
 				return 0; //Preventing warp

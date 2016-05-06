@@ -100,7 +100,7 @@ bool searchstore_open(struct map_session_data *sd, unsigned int uses, unsigned s
 }
 
 
-void searchstore_query(struct map_session_data *sd, unsigned char type, unsigned int min_price, unsigned int max_price, const unsigned short* itemlist, unsigned int item_count, const unsigned short* cardlist, unsigned int card_count)
+void searchstore_query(struct map_session_data *sd, unsigned char type, unsigned int min_price, unsigned int max_price, const unsigned short *itemlist, unsigned int item_count, const unsigned short *cardlist, unsigned int card_count)
 {
 	unsigned int i;
 	struct map_session_data *pl_sd;
@@ -321,7 +321,7 @@ void searchstore_clearremote(struct map_session_data *sd) {
 
 
 /// receives results from a store-specific callback
-bool searchstore_result(struct map_session_data *sd, int store_id, int account_id, const char *store_name, unsigned short nameid, unsigned short amount, unsigned int price, const unsigned short* card, unsigned char refine)
+bool searchstore_result(struct map_session_data *sd, int store_id, int account_id, const char *store_name, unsigned short nameid, unsigned short amount, unsigned int price, const unsigned short *card, unsigned char refine)
 {
 	struct s_search_store_info_item *ssitem;
 

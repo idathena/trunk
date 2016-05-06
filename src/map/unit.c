@@ -1158,7 +1158,7 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
 
 	switch (bl->type) {
 		case BL_MOB:
-			if (map[bl->m].flag.monster_noteleport && ((TBL_MOB *)bl)->master_id == 0)
+			if (map[bl->m].flag.monster_noteleport && !((TBL_MOB *)bl)->master_id)
 				return 1;
 			if (m != bl->m && map[m].flag.nobranch && battle_config.mob_warp&4 && !(((TBL_MOB *)bl)->master_id))
 				return 1;
@@ -1176,7 +1176,6 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
 		}
 	} else if (map_getcell(m,x,y,CELL_CHKNOREACH)) { //Invalid target cell
 		ShowWarning("unit_warp: Specified non-walkable target cell: %d (%s) at [%d,%d]\n", m, map[m].name, x,y);
-
 		if (!map_search_freecell(NULL, m, &x, &y, 4, 4, 1)) { //Can't find a nearby cell
 			ShowWarning("unit_warp failed. Unit Id:%d/Type:%d, target position map %d (%s) at [%d,%d]\n", bl->id, bl->type, m, map[m].name, x, y);
 			return 2;
@@ -1198,6 +1197,7 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
 
 	if (map_addblock(bl))
 		return 4; //Error on adding bl to map
+
 	clif_spawn(bl);
 	skill_unit_move(bl,gettick(),1);
 

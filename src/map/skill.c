@@ -2994,27 +2994,19 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, skill_lv, DMG_MULTI_HIT);
 			break;
 		case WL_CHAINLIGHTNING_ATK:
-		case WM_REVERBERATION_MELEE:
-		case WM_REVERBERATION_MAGIC:
-			dmg.dmotion = clif_skill_damage(bl, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SKILL);
+		case GN_CRAZYWEED_ATK:
+			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
 			break;
 		case WL_TETRAVORTEX_FIRE:
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, WL_TETRAVORTEX_WIND, -1, DMG_SPLASH);
 			break;
 		case MG_FIREBALL:
-		case WL_TETRAVORTEX_WATER:
-		case WL_TETRAVORTEX_WIND:
-		case WL_TETRAVORTEX_GROUND:
 		case NC_ARMSCANNON:
 		case GN_CARTCANNON:
-		case GN_CRAZYWEED_ATK:
 		case GN_ILLUSIONDOPING:
 		case KO_BAKURETSU:
 		case MH_HEILIGE_STANGE:
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
-			break;
-		case SC_FEINTBOMB:
-			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
 			break;
 		case GN_FIRE_EXPANSION_ACID:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, CR_ACIDDEMONSTRATION, skill_lv, DMG_MULTI_HIT);
@@ -3030,9 +3022,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case RL_R_TRIP_PLUSATK:
 		case NC_MAGMA_ERUPTION:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, status_get_amotion(src), dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
-			break;
-		case WM_SEVERE_RAINSTORM_MELEE:
-			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SKILL);
 			break;
 		case WZ_SIGHTBLASTER:
 		case HT_CLAYMORETRAP:
@@ -3743,13 +3732,13 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 							struct block_list *nbl = NULL; //Next Target of Chain
 
 							//After 2 bounces, it will bounce to other targets in 7x7 range
-							nbl = battle_getenemyarea(src,target->x,target->y,(skl->type > 2) ? 2 : 3,
+							nbl = battle_getenemyarea(src,target->x,target->y,(skl->type > 2 ? 2 : 3),
 								BL_CHAR|BL_SKILL,target->id); //Search for a new Target around current one
-							if (nbl == NULL)
+							if (!nbl)
 								skl->x++;
 							else 
 								skl->x = 0;
-							skill_addtimerskill(src,tick + 651,(nbl ? nbl : target)->id,skl->x,0,WL_CHAINLIGHTNING_ATK,skl->skill_lv,skl->type + 1,skl->flag);
+							skill_addtimerskill(src,tick + 651,(nbl ? nbl : target)->id,skl->x,0,WL_CHAINLIGHTNING_ATK,skl->skill_lv,skl->type + 1,0);
 						}
 					}
 					break;
@@ -3757,36 +3746,74 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 				case WL_TETRAVORTEX_WATER:
 				case WL_TETRAVORTEX_WIND:
 				case WL_TETRAVORTEX_GROUND:
-					clif_skill_nodamage(src,target,skl->skill_id,skl->skill_lv,1);
-					skill_attack(BF_MAGIC,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag);
+					clif_skill_nodamage(target,target,skl->skill_id,-1,1);
+					skill_attack(BF_MAGIC,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag|SD_LEVEL|SD_ANIMATION);
 					skill_toggle_magicpower(src,skl->skill_id);
-					if (skl->type >= 3) { //Final Hit
-						if (!status_isdead(target)) { //Final Status Effect
-							int effects[4] = { SC_BURNING,SC_FREEZING,SC_BLEEDING,SC_STUN },
-								applyeffects[4] = { 0,0,0,0 },
-								i, j = 0, k = 0;
+					if( skl->type == 4 ) { //Status inflicts are depend on what summoned element is used
+						const enum sc_type scs[] = { SC_BURNING,SC_BLEEDING,SC_FREEZING,SC_STUN };
 
-							for (i = 1; i <= 8; i = i + i) {
-								if (skl->x&i) {
-									applyeffects[j] = effects[k];
-									j++;
+						int rate = skl->y, index = skl->x - 1;
+						sc_start2(src,target,scs[index],rate,skl->skill_lv,src->id,skill_get_time(WL_TETRAVORTEX,index + 1));
+					}
+					break;
+				case WL_SUMMON_ATK_FIRE:
+				case WL_SUMMON_ATK_WIND:
+				case WL_SUMMON_ATK_WATER:
+				case WL_SUMMON_ATK_GROUND:
+					clif_skill_nodamage(src,target,skl->skill_id,-1,1);
+					skill_attack(skl->type,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag|SD_LEVEL|SD_ANIMATION);
+					break;
+				case WL_RELEASE: {
+						struct map_session_data *sd = map_id2sd(src->id);
+						struct status_change *sc = status_get_sc(src);
+						int i;
+
+						if (sd) {
+							if (sc && sc->data[SC_FREEZE_SP]) {
+								uint16 r_skill_id, r_skill_lv, point, s = 0;
+								int spell[SC_MAXSPELLBOOK - SC_SPELLBOOK1 + 1];
+
+								for (i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++) //List all available spell to be released
+									if (sc->data[i])
+										spell[s++] = i;
+								if (s == 0)
+									break;
+								i = spell[(s == 1 ? 0 : rnd()%s)]; //Random select of spell to be released
+								if (sc->data[i]) { //Now extract the data from the preserved spell
+									r_skill_id = sc->data[i]->val1;
+									r_skill_lv = sc->data[i]->val2;
+									point = sc->data[i]->val3;
+									status_change_end(src,(sc_type)i,INVALID_TIMER);
+								} else //Something went wrong
+									break;
+								if (sc->data[SC_FREEZE_SP]->val2 > point)
+									sc->data[SC_FREEZE_SP]->val2 -= point;
+								else //Last spell to be released
+									status_change_end(src,SC_FREEZE_SP,INVALID_TIMER);
+								if (!skill_check_condition_castbegin(sd,r_skill_id,r_skill_lv))
+									break;
+								skill_consume_requirement(sd,r_skill_id,r_skill_lv,1);
+								skill_toggle_magicpower(src,r_skill_id);
+								switch (skill_get_casttype(r_skill_id)) {
+									case CAST_GROUND:
+										skill_castend_pos2(src,target->x,target->y,r_skill_id,r_skill_lv,tick,0);
+										break;
+									case CAST_NODAMAGE:
+										skill_castend_nodamage_id(src,target,r_skill_id,r_skill_lv,tick,0);
+										break;
+									case CAST_DAMAGE:
+										skill_castend_damage_id(src,target,r_skill_id,r_skill_lv,tick,0);
+										break;
 								}
-								k++;
-							}
-							if (j) {
-								i = applyeffects[rnd()%j];
-								status_change_start(src,target,i,10000,skl->skill_lv,
-									(i == SC_BURNING ? 1000 : (i == SC_BLEEDING ? src->id : 0)),
-									(i == SC_BURNING ? src->id : 0),0,
-									(i == SC_BURNING ? 15000 : (i == SC_FREEZING ? 40000 :
-									(i == SC_BLEEDING ? 120000 : 5000))),SCFLAG_NONE);
+								sd->ud.canact_tick = tick + skill_delayfix(src,r_skill_id,r_skill_lv);
+								clif_status_change(src,SI_ACTIONDELAY,1,skill_delayfix(src,r_skill_id,r_skill_lv),0,0,0);
 							}
 						}
 					}
 					break;
 				case WM_REVERBERATION_MELEE:
 				case WM_REVERBERATION_MAGIC:
-					skill_castend_damage_id(src,target,skl->skill_id,skl->skill_lv,tick,skl->flag);
+					skill_castend_damage_id(src,target,skl->skill_id,skl->skill_lv,tick,skl->flag|SD_LEVEL|SD_ANIMATION);
 					break;
 				case SC_FATALMENACE:
 					if (src == target) //Casters Part
@@ -4239,7 +4266,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 
 				if (!map_flag_gvg2(src->m) && !map[src->m].flag.battleground && unit_movepos(src,bl->x,bl->y,0,true))
 					clif_blown(src,bl); //Teleport to target (If not in GVG)
-
 				if (path) { //Cause damage and knockback if the path to target was a straight one
 					skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,dist);
 					skill_blown(src,bl,dist,dir,0);
@@ -4448,14 +4474,19 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					sflag |= SD_LEVEL; //-1 will be used in packets instead of the skill level
 				if (skill_area_temp[1] != bl->id && !(skill_get_inf2(skill_id)&INF2_NPC_SKILL))
 					sflag |= SD_ANIMATION; //Original target gets no animation (as well as all NPC skills)
-				if (tsc && tsc->data[SC_HOVERING] && (skill_id == LG_MOONSLASHER || skill_id == SR_WINDMILL))
-					break;
 				switch (skill_id) {
 #ifdef RENEWAL
 					case MG_FIREBALL:
 						sflag |= distance_xy(bl->x,bl->y,skill_area_temp[4],skill_area_temp[5]);
 						break;
 #endif
+					case LG_MOONSLASHER:
+					case SR_WINDMILL:
+						if (tsc && tsc->data[SC_HOVERING]) {
+							map_freeblock_unlock();
+							return 0;
+						}
+						break;
 					case SR_SKYNETBLOW:
 						if (flag&8)
 							sflag |= 8;
@@ -4874,8 +4905,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case WL_CHAINLIGHTNING:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			skill_addtimerskill(src,tick + 150,bl->id,0,0,WL_CHAINLIGHTNING_ATK,skill_lv,0,flag);
+			skill_addtimerskill(src,tick + 150,bl->id,0,0,WL_CHAINLIGHTNING_ATK,skill_lv,0,0);
 			break;
 
 		case WL_DRAINLIFE: {
@@ -4893,125 +4923,53 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case WL_TETRAVORTEX:
-			if (sd && sc) { //No SC? No spheres
-				int spheres[5] = { 0,0,0,0,0 },
-					positions[5] = { -1,-1,-1,-1,-1 },
-					i, j = 0, k, subskill = 0;
+			if (sc) {
+				int i, j = 0;
+				int types[][2] = {{0,0},{0,0},{0,0},{0,0}};
 
 				for (i = SC_SPHERE_1; i <= SC_SPHERE_5; i++) {
 					if (sc->data[i]) {
-						spheres[j] = i;
-						positions[j] = sc->data[i]->val2;
+						int id = WL_TETRAVORTEX_FIRE + (sc->data[i]->val1 - WLS_FIRE);
+
+						if (j < 4) {
+							int sc_index = 0, rate = 0;
+
+							types[j][0] = (sc->data[i]->val1 - WLS_FIRE) + 1;
+							types[j][1] = 25; //25% each for equal sharing
+							if (j == 3) {
+								sc_index = types[rnd()%4][0];
+								for (j = 0; j < 4; j++)
+									if (types[j][0] == sc_index)
+										rate += types[j][1];
+							}
+							skill_addtimerskill(src,tick + (i - SC_SPHERE_1) * 206,bl->id,sc_index,rate,id,skill_lv,j,flag);
+						}
+						status_change_end(src,(sc_type)i,INVALID_TIMER);
 						j++;
 					}
-				}
-				//Sphere Sort, this time from new to old
-				for (i = 0; i <= j - 2; i++) {
-					for (k = i + 1; k <= j - 1; k++) {
-						if (positions[i] < positions[k]) {
-							swap(positions[i],positions[k]);
-							swap(spheres[i],spheres[k]);
-						}
-					}
-				}
-				if (j == 5) { //If 5 spheres, remove last one and only do 4 actions (Official behavior)
-					status_change_end(src,(sc_type)spheres[4],INVALID_TIMER);
-					j = 4;
-				}
-				k = 0;
-				for (i = 0; i < j; i++) { //Loop should always be 4 for regular players, but unconditional_skill could be less
-					switch (sc->data[spheres[i]]->val1) {
-						case WLS_FIRE:  subskill = WL_TETRAVORTEX_FIRE; k |= 1; break;
-						case WLS_WATER: subskill = WL_TETRAVORTEX_WATER; k |= 2; break;
-						case WLS_WIND:  subskill = WL_TETRAVORTEX_WIND; k |= 4; break;
-						case WLS_STONE: subskill = WL_TETRAVORTEX_GROUND; k |= 8; break;
-					}
-					skill_addtimerskill(src,tick + i * 250,bl->id,k,0,subskill,skill_lv,i,flag);
-					status_change_end(src,(sc_type)spheres[i],INVALID_TIMER);
 				}
 			}
 			break;
 
 		case WL_RELEASE:
-			if (sd) {
+			if (sc) {
 				int i;
 
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				//Priority is to release Spell Book
-				if (sc && sc->data[SC_FREEZE_SP]) { //Check sealed spells
-					uint16 r_skill_id, r_skill_lv, point, s = 0;
-					int spell[SC_MAXSPELLBOOK - SC_SPELLBOOK1 + 1];
-
-					for (i = SC_MAXSPELLBOOK; i >= SC_SPELLBOOK1; i--) //List all available spell to be released
-						if (sc->data[i])
-							spell[s++] = i;
-					if (s == 0)
-						break;
-					i = spell[(s == 1 ? 0 : rnd()%s)]; //Random select of spell to be released
-					if (sc->data[i]) { //Now extract the data from the preserved spell
-						r_skill_id = sc->data[i]->val1;
-						r_skill_lv = sc->data[i]->val2;
-						point = sc->data[i]->val3;
-						status_change_end(src,(sc_type)i,INVALID_TIMER);
-					} else //Something went wrong
-						break;
-
-					if (sc->data[SC_FREEZE_SP]->val2 > point)
-						sc->data[SC_FREEZE_SP]->val2 -= point;
-					else //Last spell to be released
-						status_change_end(src,SC_FREEZE_SP,INVALID_TIMER);
-					if (!skill_check_condition_castbegin(sd,r_skill_id,r_skill_lv))
-						break;
-					skill_consume_requirement(sd,r_skill_id,r_skill_lv,1);
-					skill_toggle_magicpower(src,r_skill_id);
-					switch (skill_get_casttype(r_skill_id)) {
-						case CAST_GROUND:
-							skill_castend_pos2(src,bl->x,bl->y,r_skill_id,r_skill_lv,tick,0);
-							break;
-						case CAST_NODAMAGE:
-							skill_castend_nodamage_id(src,bl,r_skill_id,r_skill_lv,tick,0);
-							break;
-						case CAST_DAMAGE:
-							skill_castend_damage_id(src,bl,r_skill_id,r_skill_lv,tick,0);
-							break;
-					}
-					sd->ud.canact_tick = tick + skill_delayfix(src,r_skill_id,r_skill_lv);
-					clif_status_change(src,SI_ACTIONDELAY,1,skill_delayfix(src,r_skill_id,r_skill_lv),0,0,0);
-				} else { //Summon Balls
-					int j = 0, k;
-					int spheres[5] = { 0,0,0,0,0 },
-						positions[5] = { -1,-1,-1,-1,-1 };
-
+				if (sc->data[SC_FREEZE_SP]) //Check sealed spells
+					skill_addtimerskill(src,tick + status_get_adelay(src),bl->id,0,0,skill_id,skill_lv,BF_MAGIC,flag);
+				else { //Summon Balls
 					for (i = SC_SPHERE_1; i <= SC_SPHERE_5; i++) {
-						if (sc && sc->data[i]) {
-							spheres[j] = i;
-							positions[j] = sc->data[i]->val2;
-							sc->data[i]->val2--; //Prepares for next position
-							j++;
-						}
-					}
-					if (j == 0) { //No Spheres
-						clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON_NONE,0,0);
-						break;
-					}
-					//Sphere Sort
-					for (i = 0; i <= j - 2; i++) {
-						for (k = i + 1; k <= j - 1; k++) {
-							if (positions[i] > positions[k]) {
-								swap(positions[i],positions[k]);
-								swap(spheres[i],spheres[k]);
-							}
-						}
-					}
-					if (skill_lv == 1)
-						j = 1; //Limit only to one ball
-					for (i = 0; i < j; i++) {
-						int skele = WL_RELEASE - 5 + sc->data[spheres[i]]->val1 - WLS_FIRE; //Convert Ball Element into Skill ATK for balls
+						if (sc->data[i]) {
+							int id = WL_SUMMON_ATK_FIRE + (sc->data[i]->val1 - WLS_FIRE);
 
-						//WL_SUMMON_ATK_FIRE, WL_SUMMON_ATK_WIND, WL_SUMMON_ATK_WATER, WL_SUMMON_ATK_GROUND
-						skill_addtimerskill(src,tick + status_get_adelay(src) * i,bl->id,0,0,skele,sc->data[spheres[i]]->val3,BF_MAGIC,flag|SD_LEVEL);
-						status_change_end(src,(sc_type)spheres[i],INVALID_TIMER); //Eliminate ball
+							skill_addtimerskill(src,tick + (i - SC_SPHERE_1) * status_get_adelay(src),bl->id,0,0,id,sc->data[i]->val3,BF_MAGIC,flag);
+							status_change_end(src,(sc_type)i,INVALID_TIMER);
+							if (skill_lv == 1)
+								break;
+						}
 					}
-					clif_skill_nodamage(src,bl,skill_id,0,1);
 				}
 			}
 			break;
@@ -9099,28 +9057,24 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 				if( !sc )
 					break;
-
 				for( i = SC_SPHERE_1; i <= SC_SPHERE_5; i++ ) {
 					if( !sctype && !sc->data[i] )
 						sctype = i; //Take the free SC
 					if( sc->data[i] )
 						pos = max(sc->data[i]->val2,pos);
 				}
-
 				if( !sctype ) {
 					if( sd ) //No free slots to put SC
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON,0,0);
 					break;
 				}
-
-				pos++; //Used in val2 for SC. Indicates the order of this ball
-				switch( skill_id ) { //Set val1. The SC element for this ball
+				pos++; //Used in val2 for SC, indicates the order of this ball
+				switch( skill_id ) { //Set val1, the SC element for this ball
 					case WL_SUMMONFB:    element = WLS_FIRE;  break;
 					case WL_SUMMONBL:    element = WLS_WIND;  break;
 					case WL_SUMMONWB:    element = WLS_WATER; break;
 					case WL_SUMMONSTONE: element = WLS_STONE; break;
 				}
-
 				sc_start4(src,src,(sc_type)sctype,100,element,pos,skill_lv,0,skill_get_time(skill_id,skill_lv));
 				clif_skill_nodamage(src,bl,skill_id,0,0);
 			}
@@ -11265,6 +11219,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case CR_CULTIVATION:
 		case HW_GANBANTEIN:
 		case NJ_SHADOWJUMP:
+		case WL_EARTHSTRAIN:
 		case LG_EARTHDRIVE:
 		case RL_FIRE_RAIN:
 		case SC_ESCAPE:
@@ -11736,7 +11691,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 						case 2: sx = x - i; break;
 						case 6: sx = x + i; break;
 					}
-					skill_addtimerskill(src,tick + 140 * i,0,sx,sy,skill_id,skill_lv,dir,flag&2);
+					skill_addtimerskill(src,tick + i * 140,0,sx,sy,skill_id,skill_lv,dir,flag&2);
 				}
 			}
 			break;
@@ -11871,7 +11826,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 					int tmp_x = x - area + rnd()%(area * 2 + 1);
 					int tmp_y = y - area + rnd()%(area * 2 + 1);
 
-					skill_addtimerskill(src,tick + 250 * i,0,tmp_x,tmp_y,GN_CRAZYWEED_ATK,skill_lv,-1,0);
+					skill_addtimerskill(src,tick + i * 250,0,tmp_x,tmp_y,GN_CRAZYWEED_ATK,skill_lv,-1,0);
 				}
 			}
 			break;
@@ -11994,7 +11949,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 						case 6: sx = x + i; break;
 						case 7: sy = y + i; sx = x + i; break;
 					}
-					skill_addtimerskill(src,tick + 80 * i,0,sx,sy,skill_id,skill_lv,dir,flag);
+					skill_addtimerskill(src,tick + i * 80,0,sx,sy,skill_id,skill_lv,dir,flag);
 				}
 				clif_skill_damage(src,src,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 			}
@@ -13726,7 +13681,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 
 		case UNT_SEVERE_RAINSTORM:
 			if (battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0)
-				skill_attack(BF_WEAPON,src,&unit->bl,bl,WM_SEVERE_RAINSTORM_MELEE,skill_lv,tick,0);
+				skill_attack(BF_WEAPON,src,&unit->bl,bl,WM_SEVERE_RAINSTORM_MELEE,skill_lv,tick,SD_LEVEL|SD_ANIMATION|SD_SPLASH);
 			break;
 
 		case UNT_POEMOFNETHERWORLD:
@@ -14928,29 +14883,37 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		case WL_SUMMONBL:
 		case WL_SUMMONWB:
 		case WL_SUMMONSTONE:
-			if( sc ) {
-				ARR_FIND(SC_SPHERE_1,SC_SPHERE_5 + 1,i,!sc->data[i]);
-				if( i == SC_SPHERE_5 + 1 ) { //No more free slots
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON,0,0);
-					return false;
-				}
-			}
-			break;
-		//bugreport:7598 moved sphere check to precast to avoid triggering cooldown per official behavior -helvetica
 		case WL_TETRAVORTEX:
-			if( sc ) {
-				int j = 0;
+		case WL_RELEASE:
+			{
+				int i, j = 0;
 
 				for( i = SC_SPHERE_1; i <= SC_SPHERE_5; i++ )
-					if( sc->data[i] )
+					if( sc && sc->data[i] )
 						j++;
-				if( j < 4 ) { //Need 4 spheres minimum
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					return false;
+				switch( skill_id ) {
+					case WL_TETRAVORTEX:
+						if( j < 4 ) {
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_CONDITION,0,0);
+							return false;
+						}
+						break;
+					case WL_RELEASE:
+						for( i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++ )
+							if( sc && sc->data[i] )
+								j++;
+						if( j == 0 ) {
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON_NONE,0,0);
+							return false;
+						}
+						break;
+					default:
+						if( j == 5 ) {
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON,0,0);
+							return false;
+						}
+						break;
 				}
-			} else { //No status at all? No spheres present
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-				return false;
 			}
 			break;
 		case GC_HALLUCINATIONWALK:
@@ -18086,7 +18049,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 					struct block_list *src =  map_id2bl(group->src_id);
 
 					if( src )
-						map_foreachinrange(skill_area_sub,&unit->bl,unit->range,splash_target(src),src,SC_FEINTBOMB,group->skill_lv,tick,BCT_ENEMY|SD_ANIMATION|1,skill_castend_damage_id);
+						map_foreachinrange(skill_area_sub,&unit->bl,unit->range,splash_target(src),src,SC_FEINTBOMB,group->skill_lv,tick,BCT_ENEMY|SD_LEVEL|SD_ANIMATION|1,skill_castend_damage_id);
 					skill_delunit(unit);
 				}
 				break;
@@ -18767,7 +18730,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 			case GC_CREATENEWPOISON:
 				make_per = 3000 + 500 * pc_checkskill(sd,GC_RESEARCHNEWPOISON)
 					+ status->dex / 3 * 10 + status->luk * 10 + sd->status.job_level * 10; //Success increase from DEX, LUK, and job level
-				qty = rnd_value( (3 + pc_checkskill(sd,GC_RESEARCHNEWPOISON)) / 2, (8 + pc_checkskill(sd,GC_RESEARCHNEWPOISON)) / 2 );
+				qty = rnd_value((3 + pc_checkskill(sd,GC_RESEARCHNEWPOISON)) / 2, (8 + pc_checkskill(sd,GC_RESEARCHNEWPOISON)) / 2);
 				break;
 			case GN_CHANGEMATERIAL:
 				for( i = 0; i < MAX_SKILL_CHANGEMATERIAL_DB; i++ ) {
@@ -19322,7 +19285,7 @@ int skill_magicdecoy(struct map_session_data *sd, unsigned short nameid) {
 	return 0;
 }
 
-//Warlock spell books. [LimitLine]
+//Warlock spell books [LimitLine]
 void skill_spellbook(struct map_session_data *sd, unsigned short nameid) {
 	int i, max_preserve, skill_id, point;
 	struct status_change *sc;
@@ -19354,12 +19317,13 @@ void skill_spellbook(struct map_session_data *sd, unsigned short nameid) {
 	max_preserve = 4 * pc_checkskill(sd, WL_FREEZE_SP) + status_get_int(&sd->bl) / 10 + sd->status.base_level / 10;
 	point = skill_spellbook_db[i].point;
 
+	//This is how official seals the spells [malufett]
 	if( sc && sc->data[SC_FREEZE_SP] ) {
 		if( (sc->data[SC_FREEZE_SP]->val2 + point) > max_preserve ) {
 			clif_skill_fail(sd, WL_READING_SB, USESKILL_FAIL_SPELLBOOK_PRESERVATION_POINT, 0, 0);
 			return;
 		}
-		for( i = SC_MAXSPELLBOOK; i >= SC_SPELLBOOK1; i-- ) { //This is how official seals the spells [malufett]
+		for( i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++ ) {
 			if( !sc->data[i] ) {
 				sc->data[SC_FREEZE_SP]->val2 += point; //Increase points
 				sc_start4(&sd->bl, &sd->bl, (sc_type)i, 100, skill_id, pc_checkskill(sd, skill_id), point, 0, INVALID_TIMER);
@@ -19398,7 +19362,7 @@ int skill_select_menu(struct map_session_data *sd,uint16 skill_id) {
 	return 0;
 }
 
-int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv, unsigned short* item_list) {
+int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv, unsigned short *item_list) {
 	int i;
 
 	nullpo_ret(sd);

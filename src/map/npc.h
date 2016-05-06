@@ -197,7 +197,7 @@ int npc_cashshop_buy(struct map_session_data *sd, unsigned short nameid, int amo
 
 extern struct npc_data *fake_nd;
 
-int npc_cashshop_buylist(struct map_session_data *sd, int points, int count, unsigned short* item_list);
+int npc_cashshop_buylist(struct map_session_data *sd, int points, int count, unsigned short *item_list);
 bool npc_shop_discount(enum npc_subtype type, bool discount);
 
 #if PACKETVER >= 20131223
