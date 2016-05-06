@@ -1091,13 +1091,20 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 
 #if PACKETVER >= 20120221
 	if( battle_config.monster_hp_bars_info && bl->type == BL_MOB && (status_get_hp(bl) < status_get_max_hp(bl)) ) {
-		WBUFL(buf,55) = status_get_max_hp(bl); //maxHP
-		WBUFL(buf,59) = status_get_hp(bl); //HP
+		TBL_MOB *md = ((TBL_MOB *)bl);
+
+		if( mob_is_battleground(md) || mob_is_gvg(md) || mob_is_treasure(md) || mob_is_guardian(md->mob_id) ) {
+			WBUFL(buf,55) = -1;
+			WBUFL(buf,59) = -1;
+		} else {
+			WBUFL(buf,55) = status_get_max_hp(bl); //maxHP
+			WBUFL(buf,59) = status_get_hp(bl); //HP
+		}
 	} else {
-		WBUFL(buf,55) = -1; //maxHP
-		WBUFL(buf,59) = -1; //HP
+		WBUFL(buf,55) = -1;
+		WBUFL(buf,59) = -1;
 	}
-	WBUFB(buf,63) = (bl->type == BL_MOB && (((TBL_MOB *)bl)->db->mexp > 0) ? 1 : 0); //isBoss
+	WBUFB(buf,63) = (bl->type == BL_MOB && (((TBL_MOB *)bl)->db->mexp ? 1 : 0)); //isBoss
 #endif
 
 #if PACKETVER >= 20150513
@@ -1235,7 +1242,7 @@ static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, un
 	buf = WBUFP(buffer,offset);
 #endif
 
-	WBUFB(buf,48) = (sd && sd->status.karma) ? 1 : 0;
+	WBUFB(buf,48) = (sd && sd->status.karma ? 1 : 0);
 	WBUFB(buf,49) = vd->sex;
 	WBUFPOS2(buf,50,bl->x,bl->y,ud->to_x,ud->to_y,8,8);
 	WBUFB(buf,56) = (sd ? 5 : 0);
@@ -1248,13 +1255,20 @@ static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, un
 
 #if PACKETVER >= 20120221
 	if( battle_config.monster_hp_bars_info && bl->type == BL_MOB && (status_get_hp(bl) < status_get_max_hp(bl)) ) {
-		WBUFL(buf,62) = status_get_max_hp(bl); //maxHP
-		WBUFL(buf,66) = status_get_hp(bl); //HP
+		TBL_MOB *md = ((TBL_MOB *)bl);
+
+		if( mob_is_battleground(md) || mob_is_gvg(md) || mob_is_treasure(md) || mob_is_guardian(md->mob_id) ) {
+			WBUFL(buf,62) = -1;
+			WBUFL(buf,66) = -1;
+		} else {
+			WBUFL(buf,62) = status_get_max_hp(bl); //maxHP
+			WBUFL(buf,66) = status_get_hp(bl); //HP
+		}
 	} else {
-		WBUFL(buf,62) = -1; //maxHP
-		WBUFL(buf,66) = -1; //HP
+		WBUFL(buf,62) = -1;
+		WBUFL(buf,66) = -1;
 	}
-	WBUFB(buf,70) = (bl->type == BL_MOB && (((TBL_MOB *)bl)->db->mexp > 0) ? 1 : 0); //isBoss
+	WBUFB(buf,70) = (bl->type == BL_MOB && (((TBL_MOB *)bl)->db->mexp ? 1 : 0)); //isBoss
 #endif
 
 #if PACKETVER >= 20150513
@@ -4534,7 +4548,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 		clif_refreshlook(&sd->bl,bl->id,LOOK_BODY2,vd->body_style,SELF);
 	switch (bl->type) {
 		case BL_PC: {
-				TBL_PC *tsd = (TBL_PC *)bl;
+				TBL_PC *tsd = ((TBL_PC *)bl);
 				int i;
 
 				clif_getareachar_pc(sd,tsd);
@@ -4559,7 +4573,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 				clif_devotion(bl,sd);
 			break;
 		case BL_NPC: {
-				TBL_NPC *nd = (TBL_NPC *)bl;
+				TBL_NPC *nd = ((TBL_NPC *)bl);
 
 				if (nd->chat_id)
 					clif_dispchat((struct chat_data *)map_id2bl(nd->chat_id),sd->fd);
@@ -4570,7 +4584,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 			}
 			break;
 		case BL_MOB: {
-				TBL_MOB *md = (TBL_MOB *)bl;
+				TBL_MOB *md = ((TBL_MOB *)bl);
 				int effect_id;
 
 				if (md->special_state.size == SZ_BIG) //Tiny/big mobs [Valaris]
@@ -5050,7 +5064,7 @@ static int clif_getareachar(struct block_list *bl,va_list ap)
 
 	sd = va_arg(ap,struct map_session_data*);
 
-	if (sd == NULL || !sd->fd)
+	if (!sd || !sd->fd)
 		return 0;
 
 	switch (bl->type) {
@@ -10126,7 +10140,6 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	}
 
 	sd->state.warping = 0;
-
 	//Look
 #if PACKETVER < 4
 	clif_changelook(&sd->bl,LOOK_WEAPON,sd->status.weapon);
@@ -10134,8 +10147,10 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 #else
 	clif_changelook(&sd->bl,LOOK_WEAPON,0);
 #endif
+
 	if(sd->vd.cloth_color)
 		clif_refreshlook(&sd->bl,sd->bl.id,LOOK_CLOTHES_COLOR,sd->vd.cloth_color,SELF);
+
 	if(sd->vd.body_style)
 		clif_refreshlook(&sd->bl,sd->bl.id,LOOK_BODY2,sd->vd.body_style,SELF);
 
@@ -10177,12 +10192,11 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		map[sd->bl.m].users_pvp++;
 
 	sd->state.debug_remove_map = 0; //Temporary state to track double remove_map's [FlavioJS]
-
-	//Reset the callshop flag if the player changes map
-	sd->state.callshop = 0;
+	sd->state.callshop = 0; //Reset the callshop flag if the player changes map
 
 	if(map_addblock(&sd->bl))
 		return;
+
 	clif_spawn(&sd->bl);
 
 	//Party
@@ -10282,22 +10296,16 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		clif_updatestatus(sd,SP_NEXTJOBEXP);
 		clif_updatestatus(sd,SP_SKILLPOINT);
 		clif_initialstatus(sd);
-
 		if(sd->sc.option&OPTION_FALCON)
 			clif_status_load(&sd->bl,SI_FALCON,1);
-
 		if(sd->sc.option&(OPTION_RIDING|OPTION_DRAGON))
 			clif_status_load(&sd->bl,SI_RIDING,1);
-
 		if(sd->sc.option&OPTION_WUGRIDER)
 			clif_status_load(&sd->bl,SI_WUGRIDER,1);
-
 		if(sd->sc.data[SC_ALL_RIDING])
 			clif_status_load(&sd->bl,SI_ALL_RIDING,1);
-
 		if(sd->status.manner < 0)
 			sc_start(&sd->bl,&sd->bl,SC_NOCHAT,100,0,0);
-
 		//Auron reported that This skill only triggers when you logon on the map o.O [Skotlex]
 		if((lv = pc_checkskill(sd,SG_KNOWLEDGE)) > 0) {
 			if(sd->bl.m == sd->feel_map[0].m ||
@@ -10305,27 +10313,19 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 				sd->bl.m == sd->feel_map[2].m)
 				sc_start(&sd->bl,&sd->bl,SC_KNOWLEDGE,100,lv,skill_get_time(SG_KNOWLEDGE,lv));
 		}
-
 		if(sd->pd && sd->pd->pet.intimate > 900)
 			clif_pet_emotion(sd->pd,(sd->pd->pet.class_ - 100) * 100 + 50 + pet_hungry_val(sd->pd));
-
 		if(hom_is_active(sd->hd))
 			hom_init_timers(sd->hd);
-
 		if(night_flag && map[sd->bl.m].flag.nightenabled) {
 			sd->state.night = 1;
 			clif_status_load(&sd->bl,SI_NIGHT,1);
 		}
-
 		//Notify everyone that this char logged in [Skotlex]
 		map_foreachpc(clif_friendslist_toggle_sub,sd->status.account_id,sd->status.char_id,1);
-
-		//Set the initial idle time
-		sd->idletime = last_tick;
-
+		sd->idletime = last_tick; //Set the initial idle time
 		if(!sd->state.autotrade) //Don't trigger NPC event or opening vending/buyingstore will be failed
 			npc_script_event(sd,NPCE_LOGIN); //Login Event
-
 	} else {
 		//For some reason the client "loses" these on warp/map-change
 		clif_updatestatus(sd,SP_STR);
@@ -10334,7 +10334,6 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		clif_updatestatus(sd,SP_INT);
 		clif_updatestatus(sd,SP_DEX);
 		clif_updatestatus(sd,SP_LUK);
-
 		if(sd->state.warp_clean) { //Abort currently running script
 			sd->state.using_fake_npc = 0;
 			sd->state.menu_or_input = 0;
@@ -10343,7 +10342,6 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 				npc_event_dequeue(sd);
 		} else
 			sd->state.warp_clean = 1;
-
 		if(sd->guild && (battle_config.guild_notice_changemap == 2 || (battle_config.guild_notice_changemap == 1 && sd->state.changemap)))
 			clif_guild_notice(sd,sd->guild);
 	}
@@ -10356,7 +10354,6 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		if((battle_config.bg_flee_penalty != 100 || battle_config.gvg_flee_penalty != 100) &&
 			(map_flag_gvg2(sd->state.pmap) || map_flag_gvg2(sd->bl.m) || map[sd->state.pmap].flag.battleground || map[sd->bl.m].flag.battleground))
 			status_calc_bl(&sd->bl,SCB_FLEE); //Refresh flee penalty
-
 		if(night_flag && map[sd->bl.m].flag.nightenabled) { //Display night
 			if(!sd->state.night) {
 				sd->state.night = 1;
@@ -10366,36 +10363,29 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			sd->state.night = 0;
 			clif_status_load(&sd->bl,SI_NIGHT,0);
 		}
-
 		if(map[sd->bl.m].flag.battleground) {
 			clif_map_type(sd,MAPTYPE_BATTLEFIELD); //Battleground Mode
 			if(map[sd->bl.m].flag.battleground == 2)
 				clif_bg_updatescore_single(sd);
 		}
-
 		if(map[sd->bl.m].flag.allowks && !map_flag_ks(sd->bl.m)) {
 			char output[128];
 
 			safesnprintf(output,sizeof(output),"[ Kill Steal Protection Disabled. KS is allowed in this map ]");
 			clif_broadcast(&sd->bl,output,strlen(output) + 1,BC_BLUE,SELF);
 		}
-
 		if(map_flag_gvg2(sd->bl.m)) {
 			if(sd->sc.data[SC_C_MARKER])
 				status_change_end(&sd->bl,SC_C_MARKER,INVALID_TIMER);
 			if(sd->sc.data[SC_ANTI_M_BLAST])
 				status_change_end(&sd->bl,SC_ANTI_M_BLAST,INVALID_TIMER);
 		}
-
 		map_iwall_get(sd); //Updates Walls Info on this Map to Client
-
 		status_calc_pc(sd,SCO_NONE); //Some conditions are map-dependent so we must recalculate
-
 		//Instances do not need their own channels
 		if(channel_config.map_enable && channel_config.map_autojoin &&
 			!map[sd->bl.m].flag.chmautojoin && !map[sd->bl.m].instance_id)
 			channel_mjoin(sd); //Join new map
-
 #ifdef VIP_ENABLE
 		if(!sd->disableshowrate) {
 			clif_display_pinfo(sd,ZC_PERSONAL_INFOMATION);
@@ -10404,12 +10394,10 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		if(battle_config.vip_gemstone && pc_isvip(sd))
 			sd->special_state.no_gemstone = 2;
 #endif
-
 		sd->state.changemap = 0;
 	}
 
 	mail_clear(sd);
-
 	clif_maptypeproperty2(&sd->bl,SELF);
 
 	if(sd->state.gmaster_flag) { //Guild Aura Init
@@ -11475,7 +11463,7 @@ void clif_parse_NpcSellListSend(int fd,struct map_session_data *sd)
 	struct s_packet_db *info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
 
 	n = (RFIFOW(fd,info->pos[0]) - 4) / 4; //(pktlen - (cmd + len)) / listsize
-	item_list = (unsigned short*)RFIFOP(fd,info->pos[1]);
+	item_list = (unsigned short *)RFIFOP(fd,info->pos[1]);
 
 	if (sd->state.trading || !sd->npc_shopid)
 		fail = 1;
@@ -15837,7 +15825,7 @@ void clif_parse_cashshop_buy(int fd, struct map_session_data *sd)
 		int len = RFIFOW(fd,info->pos[0]);
 		int points = RFIFOL(fd,info->pos[1]);
 		int count = RFIFOW(fd,info->pos[2]);
-		unsigned short* item_list = (unsigned short*)RFIFOP(fd,info->pos[3]);
+		unsigned short *item_list = (unsigned short *)RFIFOP(fd,info->pos[3]);
 
 		if( len < 10 || len != 10 + count * s_itl) {
 			ShowWarning("Player %u sent incorrect cash shop buy packet (len %u:%u)!\n",sd->status.char_id,len,10 + count * s_itl);
@@ -16859,7 +16847,7 @@ void clif_parse_ItemListWindowSelected(int fd, struct map_session_data *sd) {
 	int n = (RFIFOW(fd,info->pos[0]) - 12) / 4;
 	int type = RFIFOL(fd,info->pos[1]);
 	int flag = RFIFOL(fd,info->pos[2]); // Button clicked: 0 = Cancel, 1 = OK
-	unsigned short* item_list = (unsigned short*)RFIFOP(fd,info->pos[3]);
+	unsigned short *item_list = (unsigned short *)RFIFOP(fd,info->pos[3]);
 	
 	if( sd->state.trading || sd->npc_shopid )
 		return;
@@ -17303,7 +17291,7 @@ static void clif_parse_SearchStoreInfo(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	searchstore_query(sd, type, min_price, max_price, (const unsigned short*)itemlist, item_count, (const unsigned short*)cardlist, card_count);
+	searchstore_query(sd, type, min_price, max_price, (const unsigned short *)itemlist, item_count, (const unsigned short *)cardlist, card_count);
 }
 
 

@@ -5720,6 +5720,8 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 			def += def * sc->data[SC_NEUTRALBARRIER]->val2 / 100;
 		if(sc->data[SC_FORCEOFVANGUARD])
 			def += def * 2 * sc->data[SC_FORCEOFVANGUARD]->val1 / 100;
+		if(sc->data[SC_ECHOSONG])
+			def += def * sc->data[SC_ECHOSONG]->val4 / 100;
 		if(sc->data[SC_CAMOUFLAGE])
 			def -= def * 5 * sc->data[SC_CAMOUFLAGE]->val3 / 100;
 		if(sc->data[SC_OVERED_BOOST] && bl->type == BL_PC)
@@ -5768,8 +5770,6 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 		def += 100;
 	if(sc->data[SC_INCDEFRATE])
 		def += def * sc->data[SC_INCDEFRATE]->val1 / 100;
-	if(sc->data[SC_ECHOSONG])
-		def += def * sc->data[SC_ECHOSONG]->val4 / 100;
 	if(sc->data[SC_ODINS_POWER])
 		def -= 20 * sc->data[SC_ODINS_POWER]->val1;
 	if(sc->data[SC_ANGRIFFS_MODUS])
@@ -8221,8 +8221,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_MOONLITSERENADE:
 		case SC_RUSHWINDMILL:
 		case SC_ECHOSONG:
-		case SC_HARMONIZE:
-		case SC_FRIGG_SONG: //Group A doesn't overlap
+		case SC_HARMONIZE: //Group A doesn't overlap
 			if( type != SC_SWINGDANCE )
 				status_change_end(bl,SC_SWINGDANCE,INVALID_TIMER);
 			if( type != SC_SYMPHONYOFLOVER )
@@ -8235,8 +8234,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				status_change_end(bl,SC_ECHOSONG,INVALID_TIMER);
 			if( type != SC_HARMONIZE )
 				status_change_end(bl,SC_HARMONIZE,INVALID_TIMER);
-			if( type != SC_FRIGG_SONG )
-				status_change_end(bl,SC_FRIGG_SONG,INVALID_TIMER);
 			break;
 		case SC_VOICEOFSIREN:
 		case SC_DEEPSLEEP:

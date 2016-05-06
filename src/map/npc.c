@@ -1389,7 +1389,7 @@ int npc_buysellsel(struct map_session_data *sd, int id, int type)
 /*==========================================
 * Cash Shop Buy List
 *------------------------------------------*/
-int npc_cashshop_buylist(struct map_session_data *sd, int points, int count, unsigned short* item_list)
+int npc_cashshop_buylist(struct map_session_data *sd, int points, int count, unsigned short *item_list)
 {
 	int i, j, amount, new_, w, vt;
 	unsigned short nameid;
