@@ -21008,7 +21008,7 @@ static void skill_readdb(void)
 #endif
 }
 
-void skill_reload (void) {
+void skill_reload(void) {
 	struct s_mapiterator *iter;
 	struct map_session_data *sd;
 

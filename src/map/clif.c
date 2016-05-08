@@ -1456,7 +1456,7 @@ int clif_spawn(struct block_list *bl)
 
 					if (td)
 						time = DIFF_TICK(td->tick,gettick());
-					clif_efst_status_change(bl,bl,AREA,StatusIconChangeTable[sd->sc_display[i]->type],
+					clif_efst_status_change(bl,bl->id,AREA,StatusIconChangeTable[sd->sc_display[i]->type],
 						time,sd->sc_display[i]->val1,sd->sc_display[i]->val2,sd->sc_display[i]->val3);
 				}
 				if (sd->status.robe)
@@ -4572,9 +4572,9 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					if (td)
 						time = DIFF_TICK(td->tick,gettick());
 					if ((tsd->sc.option&OPTION_INVISIBLE) || (pc_ishiding(tsd) && !sd->special_state.intravision && !sd->sc.data[SC_INTRAVISION]))
-						clif_efst_status_change(&sd->bl,bl,SELF,SI_BLANK,time,0,0,0);
+						clif_efst_status_change(&sd->bl,bl->id,SELF,SI_BLANK,time,0,0,0);
 					else
-						clif_efst_status_change(&sd->bl,bl,SELF,StatusIconChangeTable[tsd->sc_display[i]->type],time,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
+						clif_efst_status_change(&sd->bl,bl->id,SELF,StatusIconChangeTable[tsd->sc_display[i]->type],time,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
 				}
 				if (tsd->status.robe)
 					clif_refreshlook(&sd->bl,bl->id,LOOK_ROBE,tsd->status.robe,SELF);
@@ -5988,7 +5988,7 @@ void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val
 /// Notifies clients while player entering the screen with a active EFST status.
 /// 08ff <id>.L <index>.W <remain msec>.L { <val>.L }*3  (ZC_EFST_SET_ENTER) (PACKETVER >= 20111108)
 /// 0984 <id>.L <index>.W <total msec>.L <remain msec>.L { <val>.L }*3 (ZC_EFST_SET_ENTER2) (PACKETVER >= 20120618)
-void clif_efst_status_change(struct block_list *dst, struct block_list *bl, enum send_target target, int type, int tick, int val1, int val2, int val3) {
+void clif_efst_status_change(struct block_list *bl, int tid, enum send_target target, int type, int tick, int val1, int val2, int val3) {
 	unsigned char buf[32];
 #if PACKETVER >= 20120618
 	const int cmd = 0x984;
@@ -6000,14 +6000,13 @@ void clif_efst_status_change(struct block_list *dst, struct block_list *bl, enum
 	if (type == SI_BLANK)
 		return;
 
-	nullpo_retv(dst);
 	nullpo_retv(bl);
 
 	if (tick <= 0)
 		tick = 9999;
 
 	WBUFW(buf,offset + 0) = cmd;
-	WBUFL(buf,offset + 2) = bl->id;
+	WBUFL(buf,offset + 2) = tid;
 	WBUFW(buf,offset + 6) = type;
 #if PACKETVER >= 20111108
 	WBUFL(buf,offset + 8) = tick; //Set remain status duration [exneval]
@@ -6019,7 +6018,7 @@ void clif_efst_status_change(struct block_list *dst, struct block_list *bl, enum
 	WBUFL(buf,offset + 16) = val2;
 	WBUFL(buf,offset + 20) = val3;
 #endif
-	clif_send(buf,packet_len(cmd),dst,target);
+	clif_send(buf,packet_len(cmd),bl,target);
 }
 
 
