@@ -637,7 +637,7 @@ void pc_inventory_rental_add(struct map_session_data *sd, int seconds)
 		return;
 
 	if( sd->rental_timer != INVALID_TIMER ) {
-		const struct TimerData * td;
+		const struct TimerData *td;
 
 		td = get_timer(sd->rental_timer);
 		if( DIFF_TICK(td->tick, gettick()) > tick ) { // Update Timer as this one ends first than the current one
@@ -6981,13 +6981,15 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 			i &= ~OPTION_WUGRIDER;
 		if( i&OPTION_MADOGEAR && (sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC )
 			i &= ~OPTION_MADOGEAR;
+		if( pc_checkskill(sd, MC_PUSHCART) ) {
 #ifndef NEW_CARTS
-		if( i&OPTION_CART && pc_checkskill(sd, MC_PUSHCART) )
-			i &= ~OPTION_CART;
+			if( i&OPTION_CART )
+				i &= ~OPTION_CART;
 #else
-		if( sd->sc.data[SC_PUSH_CART] )
-			pc_setcart(sd, 0);
+			if( sd->sc.data[SC_PUSH_CART] )
+				pc_setcart(sd, 0);
 #endif
+		}
 		if( i != sd->sc.option )
 			pc_setoption(sd, i);
 		if( hom_is_active(sd->hd) && pc_checkskill(sd, AM_CALLHOMUN) )
@@ -8259,13 +8261,15 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 		i &= ~OPTION_WUG;
 	if (i&OPTION_MADOGEAR) //You do not need a skill for this
 		i &= ~OPTION_MADOGEAR;
+	if (!pc_checkskill(sd,MC_PUSHCART)) {
 #ifndef NEW_CARTS
-	if (i&OPTION_CART && !pc_checkskill(sd,MC_PUSHCART))
-		i &= ~OPTION_CART;
+		if (i&OPTION_CART)
+			i &= ~OPTION_CART;
 #else
-	if (sd->sc.data[SC_PUSH_CART] && !pc_checkskill(sd,MC_PUSHCART))
-		pc_setcart(sd,0);
+		if (sd->sc.data[SC_PUSH_CART])
+			pc_setcart(sd,0);
 #endif
+	}
 	if (i != sd->sc.option)
 		pc_setoption(sd,i);
 
@@ -8521,7 +8525,7 @@ bool pc_setcart(struct map_session_data *sd, int type) {
 				clif_cartlist(sd);
 			clif_updatestatus(sd,SP_CARTINFO);
 			sc_start(&sd->bl,&sd->bl,SC_PUSH_CART,100,type,INVALID_TIMER);
-			clif_efst_status_change(&sd->bl,sd->bl.id,AREA,SI_ON_PUSH_CART,type,0,0);
+			clif_efst_status_change(&sd->bl,&sd->bl,AREA,SI_ON_PUSH_CART,9999,type,0,0);
 			if( sd->sc.data[SC_PUSH_CART] ) //Forcefully update
 				sd->sc.data[SC_PUSH_CART]->val1 = type;
 			break;

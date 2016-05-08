@@ -1443,15 +1443,21 @@ int clif_spawn(struct block_list *bl)
 					clif_specialeffect(bl,423,AREA);
 				else if (sd->state.size == SZ_MEDIUM)
 					clif_specialeffect(bl,421,AREA);
-				if (sd->bg_id && map[sd->bl.m].flag.battleground)
+				if (sd->bg_id && map[bl->m].flag.battleground)
 					clif_sendbgemblem_area(sd);
 				if (sd->spiritball > 0)
-					clif_spiritball(&sd->bl);
+					clif_spiritball(bl);
 				if (sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0)
 					clif_spiritcharm(sd);
 				for (i = 0; i < sd->sc_display_count; i++) {
-					clif_efst_status_change(&sd->bl,sd->bl.id,AREA,StatusIconChangeTable[sd->sc_display[i]->type],
-						sd->sc_display[i]->val1,sd->sc_display[i]->val2,sd->sc_display[i]->val3);
+					int type = sd->sc_display[i]->type, time;
+					struct status_change *sc = status_get_sc(bl);
+					const struct TimerData *td = (sc && sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
+
+					if (td)
+						time = DIFF_TICK(td->tick,gettick());
+					clif_efst_status_change(bl,bl,AREA,StatusIconChangeTable[sd->sc_display[i]->type],
+						time,sd->sc_display[i]->val1,sd->sc_display[i]->val2,sd->sc_display[i]->val3);
 				}
 				if (sd->status.robe)
 					clif_refreshlook(bl,bl->id,LOOK_ROBE,sd->status.robe,AREA);
@@ -1462,9 +1468,9 @@ int clif_spawn(struct block_list *bl)
 				int effect_id;
 
 				if (md->special_state.size == SZ_BIG) //Tiny/Big mobs [Valaris]
-					clif_specialeffect(&md->bl,423,AREA);
+					clif_specialeffect(bl,423,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
-					clif_specialeffect(&md->bl,421,AREA);
+					clif_specialeffect(bl,421,AREA);
 				effect_id = 0;
 #if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
@@ -1472,7 +1478,7 @@ int clif_spawn(struct block_list *bl)
 					if (effect_id == 979)
 						effect_id = 880;
 	#endif
-					clif_specialeffect(&md->bl,effect_id,AREA);
+					clif_specialeffect(bl,effect_id,AREA);
 				}
 #endif
 			}
@@ -1481,9 +1487,9 @@ int clif_spawn(struct block_list *bl)
 				TBL_NPC *nd = ((TBL_NPC *)bl);
 
 				if (nd->size == SZ_BIG)
-					clif_specialeffect(&nd->bl,423,AREA);
+					clif_specialeffect(bl,423,AREA);
 				else if (nd->size == SZ_MEDIUM)
-					clif_specialeffect(&nd->bl,421,AREA);
+					clif_specialeffect(bl,421,AREA);
 			}
 			break;
 		case BL_PET:
@@ -4556,13 +4562,19 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if(tsd->state.size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
-				if (tsd->bg_id && map[tsd->bl.m].flag.battleground)
+				if (tsd->bg_id && map[bl->m].flag.battleground)
 					clif_sendbgemblem_single(sd->fd,tsd);
 				for (i = 0; i < tsd->sc_display_count; i++) {
+					int type = tsd->sc_display[i]->type, time;
+					struct status_change *tsc = status_get_sc(bl);
+					const struct TimerData *td = (tsc && tsc->data[type] ? get_timer(tsc->data[type]->timer) : NULL);
+
+					if (td)
+						time = DIFF_TICK(td->tick,gettick());
 					if ((tsd->sc.option&OPTION_INVISIBLE) || (pc_ishiding(tsd) && !sd->special_state.intravision && !sd->sc.data[SC_INTRAVISION]))
-						clif_efst_status_change(&sd->bl,tsd->bl.id,SELF,SI_BLANK,0,0,0);
+						clif_efst_status_change(&sd->bl,bl,SELF,SI_BLANK,time,0,0,0);
 					else
-						clif_efst_status_change(&sd->bl,tsd->bl.id,SELF,StatusIconChangeTable[tsd->sc_display[i]->type],tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
+						clif_efst_status_change(&sd->bl,bl,SELF,StatusIconChangeTable[tsd->sc_display[i]->type],time,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
 				}
 				if (tsd->status.robe)
 					clif_refreshlook(&sd->bl,bl->id,LOOK_ROBE,tsd->status.robe,SELF);
@@ -5928,8 +5940,14 @@ void clif_cooking_list(struct map_session_data *sd, int trigger, uint16 skill_id
 /// 0983 <index>.W <id>.L <state>.B <total msec>.L <remain msec>.L { <val>.L }*3 (ZC_MSG_STATE_CHANGE3) (PACKETVER >= 20120618)
 void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val1,int val2,int val3)
 {
-	unsigned char buf[32];
 	struct map_session_data *sd;
+	unsigned char buf[32];
+#if PACKETVER >= 20120618
+	const int cmd = 0x983;
+#elif PACKETVER >= 20090121
+	const int cmd = 0x43f;
+#endif
+	int offset = 0;
 
 	if (type == SI_BLANK) //It shows nothing on the client
 		return;
@@ -5942,40 +5960,25 @@ void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val
 	if (!(status_type2relevant_bl_types(type)&bl->type))
 		return;
 
-#if PACKETVER >= 20120618
-	if(flag && battle_config.display_status_timers && sd)
-		WBUFW(buf,0) = 0x983;
+	if (flag && battle_config.display_status_timers && sd)
+		WBUFW(buf,offset + 0) = cmd;
 	else
-#elif PACKETVER >= 20090121
-	if(flag && battle_config.display_status_timers && sd)
-		WBUFW(buf,0) = 0x43f;
-	else
-#endif
-		WBUFW(buf,0) = 0x196; //For non-pc unit
-
-	WBUFW(buf,2) = type;
-	WBUFL(buf,4) = bl->id;
-	WBUFB(buf,8) = flag;
-#if PACKETVER >= 20120618
-	if(flag && battle_config.display_status_timers && sd) {
+		WBUFW(buf,offset + 0) = 0x196; //For non-pc unit
+	WBUFW(buf,offset + 2) = type;
+	WBUFL(buf,offset + 4) = bl->id;
+	WBUFB(buf,offset + 8) = flag;
+#if PACKETVER >= 20090121
+	if (flag && battle_config.display_status_timers && sd) {
 		if (tick <= 0)
 			tick = 9999; //This is indeed what official servers do
-
-		WBUFL(buf,9) = tick; //At this stage remain and total are the same value I believe
-		WBUFL(buf,13) = tick;
-		WBUFL(buf,17) = val1;
-		WBUFL(buf,21) = val2;
-		WBUFL(buf,25) = val3;
-	}
-#elif PACKETVER >= 20090121
-	if(flag && battle_config.display_status_timers && sd) {
-		if (tick <= 0)
-			tick = 9999;
-
-		WBUFL(buf,9) = tick;
-		WBUFL(buf,13) = val1;
-		WBUFL(buf,17) = val2;
-		WBUFL(buf,21) = val3;
+		WBUFL(buf,offset + 9) = tick; //At this stage remain and total are the same value I believe
+#if PACKETVER >= 20120618
+		WBUFL(buf,offset + 13) = tick;
+		offset += 4;
+#endif
+		WBUFL(buf,offset + 13) = val1;
+		WBUFL(buf,offset + 17) = val2;
+		WBUFL(buf,offset + 21) = val3;
 	}
 #endif
 	clif_send(buf,packet_len(WBUFW(buf,0)),bl,(sd && sd->status.option&OPTION_INVISIBLE) ? SELF : AREA);
@@ -5985,34 +5988,38 @@ void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val
 /// Notifies clients while player entering the screen with a active EFST status.
 /// 08ff <id>.L <index>.W <remain msec>.L { <val>.L }*3  (ZC_EFST_SET_ENTER) (PACKETVER >= 20111108)
 /// 0984 <id>.L <index>.W <total msec>.L <remain msec>.L { <val>.L }*3 (ZC_EFST_SET_ENTER2) (PACKETVER >= 20120618)
-void clif_efst_status_change(struct block_list *bl, int tid, enum send_target target, int type, int val1, int val2, int val3) {
+void clif_efst_status_change(struct block_list *dst, struct block_list *bl, enum send_target target, int type, int tick, int val1, int val2, int val3) {
 	unsigned char buf[32];
+#if PACKETVER >= 20120618
+	const int cmd = 0x984;
+#elif PACKETVER >= 20111108
+	const int cmd = 0x8ff;
+#endif
+	int offset = 0;
 
 	if (type == SI_BLANK)
 		return;
 
+	nullpo_retv(dst);
 	nullpo_retv(bl);
 
+	if (tick <= 0)
+		tick = 9999;
+
+	WBUFW(buf,offset + 0) = cmd;
+	WBUFL(buf,offset + 2) = bl->id;
+	WBUFW(buf,offset + 6) = type;
+#if PACKETVER >= 20111108
+	WBUFL(buf,offset + 8) = tick; //Set remain status duration [exneval]
 #if PACKETVER >= 20120618
-	WBUFW(buf,0) = 0x984;
-#elif PACKETVER >= 20111108
-	WBUFW(buf,0) = 0x8ff;
+	WBUFL(buf,offset + 12) = tick;
+	offset += 4;
 #endif
-	WBUFL(buf,2) = tid;
-	WBUFW(buf,6) = type;
-#if PACKETVER >= 20120618
-	WBUFL(buf,8) = 9999;
-	WBUFL(buf,12) = 9999;
-	WBUFL(buf,16) = val1;
-	WBUFL(buf,20) = val2;
-	WBUFL(buf,24) = val3;
-#elif PACKETVER >= 20111108
-	WBUFL(buf,8) = 9999;
-	WBUFL(buf,12) = val1;
-	WBUFL(buf,16) = val2;
-	WBUFL(buf,20) = val3;
+	WBUFL(buf,offset + 12) = val1;
+	WBUFL(buf,offset + 16) = val2;
+	WBUFL(buf,offset + 20) = val3;
 #endif
-	clif_send(buf,packet_len(WBUFW(buf,0)),bl,target);
+	clif_send(buf,packet_len(cmd),dst,target);
 }
 
 
@@ -15944,7 +15951,7 @@ void clif_bossmapinfo(int fd, struct mob_data *md, short flag)
 			} else
 				WFIFOB(fd,2) = 2; // First Time
 		} else if( md->spawn_timer != INVALID_TIMER ) { // Boss is Dead
-			const struct TimerData * timer_data = get_timer(md->spawn_timer);
+			const struct TimerData *timer_data = get_timer(md->spawn_timer);
 			unsigned int seconds;
 			int hours, minutes;
 

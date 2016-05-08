@@ -2403,7 +2403,7 @@ int status_get_matk(struct block_list *bl, int flag)
 		return 0;
 	}
 
-	if( (status = status_get_status_data(bl)) == NULL )
+	if( !(status = status_get_status_data(bl)) )
 		return 0;
 
 	//Just get MATK
@@ -2427,10 +2427,10 @@ static void status_update_matk(struct block_list *bl)
 
 	nullpo_retv(bl);
 
-	if( (status = status_get_status_data(bl)) == NULL )
+	if( !(status = status_get_status_data(bl)) )
 		return;
 
-	if( (sc = status_get_sc(bl)) == NULL )
+	if( !(sc = status_get_sc(bl)) )
 		return;
 
 	status_get_matk_sub(bl, 0, &matk_max, &matk_min);
@@ -7502,21 +7502,17 @@ void status_display_add(struct map_session_data *sd, enum sc_type type, int dval
 		if( sd->sc_display[i]->type == type )
 			break;
 	}
-
 	if( i != sd->sc_display_count ) {
 		sd->sc_display[i]->val1 = dval1;
 		sd->sc_display[i]->val2 = dval2;
 		sd->sc_display[i]->val3 = dval3;
 		return;
 	}
-
 	entry = ers_alloc(pc_sc_display_ers, struct sc_display_entry);
-
 	entry->type = type;
 	entry->val1 = dval1;
 	entry->val2 = dval2;
 	entry->val3 = dval3;
-
 	RECREATE(sd->sc_display, struct sc_display_entry *, ++sd->sc_display_count);
 	sd->sc_display[sd->sc_display_count - 1] = entry;
 }
@@ -7528,24 +7524,18 @@ void status_display_remove(struct map_session_data *sd, enum sc_type type) {
 		if( sd->sc_display[i]->type == type )
 			break;
 	}
-
 	if( i != sd->sc_display_count ) {
 		int cursor;
 
 		ers_free(pc_sc_display_ers, sd->sc_display[i]);
 		sd->sc_display[i] = NULL;
-
-		/* The all-mighty compact-o-matic */
-		for( i = 0, cursor = 0; i < sd->sc_display_count; i++ ) {
-			if( sd->sc_display[i] == NULL )
+		for( i = 0, cursor = 0; i < sd->sc_display_count; i++ ) { //The all-mighty compact-o-matic
+			if( !sd->sc_display[i] )
 				continue;
-
 			if( i != cursor )
 				sd->sc_display[cursor] = sd->sc_display[i];
-
 			cursor++;
 		}
-
 		if( !(sd->sc_display_count = cursor) ) {
 			aFree(sd->sc_display);
 			sd->sc_display = NULL;
@@ -9043,7 +9033,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 						if( !sce2 ) //Start lock on caster
 							sc_start4(src,src,SC_CLOSECONFINE,100,val1,1,0,0,tick + 1000);
 						else { //Increase count of locked enemies and refresh time
-							(sce2->val2)++;
+							sce2->val2++;
 							delete_timer(sce2->timer,status_change_timer);
 							sce2->timer = add_timer(gettick() + tick + 1000,status_change_timer,src->id,SC_CLOSECONFINE);
 						}
@@ -10857,7 +10847,7 @@ int status_change_clear(struct block_list *bl,int type)
 }
 
 /*==========================================
- * Special condition we want to effectuate,check before ending a status.
+ * Special condition we want to effectuate, check before ending a status.
  *------------------------------------------*/
 int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const char *file, int line)
 {
@@ -11050,7 +11040,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 					if (group == NULL) {
 						ShowDebug("status_change_end: SC_DANCING is missing skill unit group (val1=%d, val2=%d, val3=%d, val4=%d, timer=%d, tid=%d, char_id=%d, map=%s, x=%d, y=%d, prev=%s:%d, from=%s:%d). Please report this! (#3504)\n",
 							sce->val1,sce->val2,sce->val3,sce->val4,sce->timer,tid,
-							sd ? sd->status.char_id : 0,
+							(sd ? sd->status.char_id : 0),
 							mapindex_id2name(map_id2index(bl->m)),bl->x,bl->y,
 							prevfile,prevline,
 							file,line);
@@ -11701,7 +11691,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 	else \
 		ShowError("status_change_timer: Unexpected NULL status change id: %d data: %d\n",id,data)
 
-	switch(type) {
+	switch( type ) {
 		case SC_MAXIMIZEPOWER:
 		case SC_CLOAKING:
 			if( !status_charge(bl,0,1) )
@@ -11711,7 +11701,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_CHASEWALK:
 			if( !status_charge(bl,0,sce->val4) )
-				break; //Not enough SP to continue
+				break;
 			if( !sc->data[SC_CHASEWALK2] ) {
 				sc_start(bl,bl,SC_CHASEWALK2,100,1<<(sce->val1 - 1),
 				(sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_ROGUE ? 10 : 1) * //SL bonus -> x10 duration
@@ -11730,7 +11720,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_HIDING:
 			if( --(sce->val2) >= 0 ) {
-				if( sce->val2%sce->val4 == 0 && !status_charge(bl,0,1) )
+				if( !(sce->val2%sce->val4) && !status_charge(bl,0,1) )
 					break; //Fail if it's time to substract SP and there isn't
 				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				return 0;
@@ -11914,7 +11904,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 						s = 10;
 						break;
 				}
-				if( s != 0 && sce->val3%s == 0 ) {
+				if( s != 0 && !(sce->val3%s) ) {
 					if( sc->data[SC_LONGING] )
 						sp *= 3;
 					if( !status_charge(bl,0,sp) )
@@ -11945,7 +11935,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			break;
 
 		case SC_SPLASHER:
-			//if( sce->val4%1000 == 0 ) { Custom Venom Splasher countdown timer
+			//if( !(sce->val4%1000) ) { Custom Venom Splasher countdown timer
 			//	char timer[10];
 			//
 			//	snprintf (timer,10,"%d",sce->val4 / 1000);
