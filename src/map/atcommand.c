@@ -6573,7 +6573,7 @@ ACMD_FUNC(summon)
 
 	md->master_id = sd->bl.id;
 	md->special_state.ai = AI_ATTACK;
-	md->deletetimer = add_timer(tick + (duration * 60000), mob_timer_delete, md->bl.id, 0);
+	md->deletetimer = add_timer(tick + duration * 60000, mob_timer_delete, md->bl.id, 0);
 	clif_specialeffect(&md->bl, 344, AREA);
 	mob_spawn(md);
 	sc_start4(NULL, &md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE, 0, 60000);

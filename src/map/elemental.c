@@ -150,7 +150,7 @@ int elemental_create(struct map_session_data *sd, int class_, unsigned int lifet
 }
 
 int elemental_get_lifetime(struct elemental_data *ed) {
-	const struct TimerData * td;
+	const struct TimerData *td;
 
 	if( ed == NULL || ed->summon_timer == INVALID_TIMER )
 		return 0;

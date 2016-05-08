@@ -1054,10 +1054,10 @@ int pet_lootitem_drop(struct pet_data *pd,struct map_session_data *sd)
 	memset(pd->loot->item,0,pd->loot->max * sizeof(struct item));
 	pd->loot->count = 0;
 	pd->loot->weight = 0;
-	pd->ud.canact_tick = gettick()+10000;	//prevent picked up during 10*1000ms
+	pd->ud.canact_tick = gettick() + 10000; //Prevent picked up during 10 * 1000ms
 
 	if (dlist->item)
-		add_timer(gettick()+540,pet_delay_item_drop,0,(intptr_t)dlist);
+		add_timer(gettick() + 540,pet_delay_item_drop,0,(intptr_t)dlist);
 	else
 		ers_free(item_drop_list_ers, dlist);
 	return 1;

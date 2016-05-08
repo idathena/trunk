@@ -14046,7 +14046,7 @@ int skill_unit_onleft(uint16 skill_id, struct block_list *bl, unsigned int tick)
 						status_change_end(bl, SC_BLIND, INVALID_TIMER);
 					else {
 						delete_timer(sce->timer, status_change_timer);
-						sce->timer = add_timer(30000 + tick, status_change_timer, bl->id, SC_BLIND);
+						sce->timer = add_timer(tick + 30000, status_change_timer, bl->id, SC_BLIND);
 					}
 				}
 			}
@@ -19527,7 +19527,7 @@ int skill_blockpc_get(struct map_session_data *sd, uint16 skill_id) {
 	nullpo_retr(-1, sd);
 
 	ARR_FIND(0, MAX_SKILLCOOLDOWN, i, sd->scd[i] && sd->scd[i]->skill_id == skill_id);
-	return (i >= MAX_SKILLCOOLDOWN) ? -1 : i;
+	return (i >= MAX_SKILLCOOLDOWN ? -1 : i);
 }
 
 int skill_blockpc_end(int tid, unsigned int tick, int id, intptr_t data) {
