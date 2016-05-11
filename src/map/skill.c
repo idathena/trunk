@@ -1545,14 +1545,14 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sc_start2(src,bl,SC_BLEEDING,10,skill_lv,src->id,skill_get_time2(skill_id,skill_lv));
 			break;
 		case SU_CN_METEOR:
-			sc_start(src,bl,SC_CURSE,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
+			sc_start(src,bl,SC_CURSE,20,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case SU_SCAROFTAROU:
 			sc_start(src,bl,SC_BITESCAR,10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
 			sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
 			break;
 		case SU_LUNATICCARROTBEAT:
-			sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
+			sc_start(src,bl,SC_STUN,20,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 	} //End of switch skill_id
 
@@ -2630,7 +2630,8 @@ void skill_attack_blow(struct block_list *src, struct block_list *dsrc, struct b
 				dir = rnd()%8; //This ensures SG randomly pushes instead of exactly a cell backwards per official mechanics
 			break;
 		case WL_CRIMSONROCK:
-			dir = (!battle_config.crimsonrock_knockback ? map_calc_dir(target, skill_area_temp[4], skill_area_temp[5]) : 6);
+			if (!battle_config.crimsonrock_knockback)
+				dir = map_calc_dir(target, skill_area_temp[4], skill_area_temp[5]);
 			break;
 	}
 
@@ -2877,7 +2878,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	}
 
 	//Skill hit type
-	type = (!skill_id) ? DMG_SPLASH : skill_get_hit(skill_id);
+	type = (!skill_id ? DMG_SPLASH : skill_get_hit(skill_id));
 
 	switch (skill_id) {
 		case WL_HELLINFERNO: //Hell Inferno burning status only starts if Fire part hits
@@ -2949,7 +2950,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case NPC_CRITICALSLASH:
 		case TF_DOUBLE:
 		case GS_CHAINACTION:
-			dmg.dmotion = clif_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (enum e_damage_type)dmg.type, dmg.damage2);
+			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (enum e_damage_type)dmg.type, dmg.damage2);
 			break;
 		case HW_GRAVITATION:
 			dmg.dmotion = clif_damage(bl, bl, 0, 0, 0, damage, 1, DMG_ENDURE, 0);
@@ -2982,15 +2983,12 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.amotion = dmg.dmotion = 0;
 		//Fall through
 		case SU_LUNATICCARROTBEAT:
-			dmg.dmotion = clif_damage(bl, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (flag&1 ? DMG_MULTI_HIT : DMG_NORMAL), 0);
+			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (flag&1 ? DMG_MULTI_HIT : DMG_NORMAL), 0);
 			break;
 		case WL_HELLINFERNO:
-			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, 1, skill_id, -2, DMG_SKILL);
+			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SKILL);
 			break;
-		case NJ_HUUMA:
-		case WL_SOULEXPANSION:
 		case WL_COMET:
-		case KO_MUCHANAGE:
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, skill_lv, DMG_MULTI_HIT);
 			break;
 		case WL_CHAINLIGHTNING_ATK:
@@ -2998,15 +2996,17 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
 			break;
 		case WL_TETRAVORTEX_FIRE:
-			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, WL_TETRAVORTEX_WIND, -1, DMG_SPLASH);
+			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, WL_TETRAVORTEX_WIND, -1, DMG_SPLASH);
 			break;
 		case MG_FIREBALL:
 		case NC_ARMSCANNON:
 		case GN_CARTCANNON:
 		case GN_ILLUSIONDOPING:
 		case KO_BAKURETSU:
+		case RL_BANISHING_BUSTER:
+		case RL_S_STORM:
 		case MH_HEILIGE_STANGE:
-			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
+			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
 			break;
 		case GN_FIRE_EXPANSION_ACID:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, CR_ACIDDEMONSTRATION, skill_lv, DMG_MULTI_HIT);
@@ -3017,8 +3017,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.amotion = status_get_amotion(src) * 2;
 		//Fall through
 		case LG_OVERBRAND_PLUSATK:
-		case RL_BANISHING_BUSTER:
-		case RL_S_STORM:
 		case RL_R_TRIP_PLUSATK:
 		case NC_MAGMA_ERUPTION:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, status_get_amotion(src), dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
@@ -4429,7 +4427,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case WL_CRIMSONROCK:
 		case WL_FROSTMISTY:
 		case WL_JACKFROST:
-		case WL_COMET:
 		case RA_ARROWSTORM:
 		case RA_WUGDASH:
 		case NC_VULCANARM:

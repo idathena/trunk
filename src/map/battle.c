@@ -1420,16 +1420,27 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 	if( damage && status->mode&MD_PLANT && battle_config.skill_min_damage ) {
 		if( (flag&BF_WEAPON && battle_config.skill_min_damage&1) ||
 			(flag&BF_MAGIC && battle_config.skill_min_damage&2) ||
-			(flag&BF_MISC && battle_config.skill_min_damage&4) ) {
-			int div_ = (skill_id ? skill_get_num(skill_id,skill_lv) : div);
+			(flag&BF_MISC && battle_config.skill_min_damage&4) )
+		{
+			int div_ = skill_get_num(skill_id,skill_lv);
 
-			damage = (div_ > 0 ? div_ : 0);
-			//Damage that just look like multiple hits but are actually one will show "miss" but still do 1 damage to plants
-			if( !damage )
-				d->dmg_lv = ATK_FLEE;
-			else if( damage > 1 && d->miscflag&1 ) {
-				damage = 1;
-				d->dmg_lv = ATK_FLEE;
+			switch( skill_id ) {
+				case SU_CN_METEOR:
+				case SU_LUNATICCARROTBEAT:
+					damage = div_ * -1;
+					break;
+				default:
+					if( !skill_id )
+						div_ = div;
+					damage = (div_ ? div_ : 0);
+					//Damage that just look like multiple hits but are actually one will show "miss" but still do 1 damage to plants
+					if( !damage )
+						d->dmg_lv = ATK_FLEE;
+					else if( damage > 1 && d->miscflag&1 ) {
+						damage = 1;
+						d->dmg_lv = ATK_FLEE;
+					}
+					break;
 			}
 		}
 	}
@@ -4474,9 +4485,9 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 	}
 
 	if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
-		if(sd && pc_checkskill(sd, SU_POWEROFLIFE) > 0 && pc_checkskill(sd, SU_SCAROFTAROU) == 5 &&
-			pc_checkskill(sd, SU_PICKYPECK) == 5 && pc_checkskill(sd, SU_ARCLOUSEDASH) == 5 &&
-			pc_checkskill(sd, SU_LUNATICCARROTBEAT) == 5)
+		if(sd && pc_checkskill(sd, SU_POWEROFLIFE) > 0 &&
+			(pc_checkskill(sd, SU_SCAROFTAROU) + pc_checkskill(sd, SU_PICKYPECK) +
+			pc_checkskill(sd, SU_ARCLOUSEDASH) + pc_checkskill(sd, SU_LUNATICCARROTBEAT)) == 20)
 		{
 			ATK_ADDRATE(wd.damage, wd.damage2, 20);
 			RE_ALLATK_ADDRATE(wd, 20);
@@ -6164,7 +6175,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						skillratio += 600;
 						break;
 					case SU_CN_METEOR:
-						skillratio += -60 + 20 * skill_lv;
+						skillratio += 100 + 100 * skill_lv;
 						break;
 				}
 
