@@ -1290,6 +1290,17 @@ int   linkdb_foreach( struct linkdb_node** head, LinkDBFunc func, ...  );
 
 
 
+/// Resets the length and clears content, so the vector is empty
+/// 
+/// @param __vec Vector
+#define VECTOR_RESET(__vec) \
+	if( VECTOR_LENGTH(__vec) > 0 ) { \
+		memset(VECTOR_DATA(__vec), 0, (VECTOR_LENGTH(__vec) * sizeof(VECTOR_FIRST(__vec)))); /* clear data */ \
+	} \
+	VECTOR_LENGTH(__vec) = 0; /* clear current length */
+
+
+
 /////////////////////////////////////////////////////////////////////
 // Binary heap library based on defines. (uses the vector defines above)
 // uses aMalloc, aRealloc, aFree
@@ -1571,6 +1582,13 @@ int   linkdb_foreach( struct linkdb_node** head, LinkDBFunc func, ...  );
 ///
 /// @param __heap Binary heap
 #define BHEAP_CLEAR(__heap) VECTOR_CLEAR(__heap)
+
+
+
+/// Resets the binary heap and clears content so it can be treated as empty
+///
+/// @parm __heap Binary heap
+#define BHEAP_RESET(__heap) VECTOR_RESET(__heap)
 
 
 
