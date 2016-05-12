@@ -8581,10 +8581,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					sc_start(src,bl,SC_ABUNDANCE,100,skill_lv,skill_get_time(skill_id,skill_lv));
 				status_change_clear_buffs(bl,SCCB_LUXANIMA,0); //For bonus_script
 			} else if( sd ) {
-				struct status_change_entry *tsce;
-
 				skill_area_temp[5] = 0;
-				if( tsc && (tsce = tsc->data[SC_LUXANIMA]) ) {
+				if( tsce ) {
 					switch( tsce->val2 ) {
 						case SC_MILLENNIUMSHIELD:
 							skill_area_temp[5] = 0x10;
