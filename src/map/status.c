@@ -595,6 +595,7 @@ void initChangeTables(void) {
 	set_sc( RK_ABUNDANCE         , SC_ABUNDANCE         , SI_ABUNDANCE             , SCB_NONE );
 	set_sc( RK_CRUSHSTRIKE       , SC_CRUSHSTRIKE       , SI_CRUSHSTRIKE           , SCB_NONE );
 	set_sc_with_vfx( RK_DRAGONBREATH_WATER, SC_FREEZING , SI_FROSTMISTY            , SCB_SPEED|SCB_ASPD|SCB_DEF|SCB_DEF2 );
+	add_sc( RK_LUXANIMA          , SC_LUXANIMA  );
 
 	set_sc_with_vfx( GC_VENOMIMPRESS , SC_VENOMIMPRESS , SI_VENOMIMPRESS     , SCB_NONE );
 	set_sc( GC_POISONINGWEAPON   , SC_POISONINGWEAPON  , SI_POISONINGWEAPON  , SCB_NONE );
@@ -9338,7 +9339,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 500 + 100 * val1;
 				break;
 			case SC_MILLENNIUMSHIELD:
-				clif_millenniumshield(bl,0);
+				clif_millenniumshield(bl,val2);
 				break;
 			case SC_VITALITYACTIVATION:
 				val2 = 50; //Increase HP recovery effects by 50%
