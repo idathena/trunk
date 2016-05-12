@@ -11355,6 +11355,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 #endif
 		case NPC_EARTHQUAKE:
 		case NPC_EVILLAND:
+		case NPC_VENOMFOG:
 		case WL_COMET:
 		case RA_ELECTRICSHOCKER:
 		case RA_CLUSTERBOMB:
@@ -13288,7 +13289,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_EVILLAND: //Will heal demon and undead element monsters, but not players
-			if ((bl->type == BL_PC) || (!battle_check_undead(tstatus->race,tstatus->def_ele) && tstatus->race != RC_DEMON)) {
+			if (bl->type == BL_PC || (!battle_check_undead(tstatus->race,tstatus->def_ele) && tstatus->race != RC_DEMON)) {
 				if (battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0) //Damage enemies
 					skill_attack(BF_MISC,src,&unit->bl,bl,skill_id,skill_lv,tick,0);
 			} else {
@@ -13775,6 +13776,18 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			}
 			break;
 
+		case UNT_LAVA_SLIDE:
+			skill_attack(BF_WEAPON,src,&unit->bl,bl,skill_id,skill_lv,tick,0);
+			if (++group->val1 > 4) //After 5 separate hits have been dealt, destroy the unit
+				group->limit = DIFF_TICK(tick,group->tick);
+			break;
+
+		case UNT_POISON_MIST:
+			skill_attack(BF_MAGIC,src,&unit->bl,bl,skill_id,skill_lv,tick,0);
+			status_change_start(src,bl,SC_BLIND,(10 + 10 * skill_lv) * 100,
+				skill_lv,skill_id,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
+			break;
+
 		case UNT_ZENKAI_WATER:
 		case UNT_ZENKAI_LAND:
 		case UNT_ZENKAI_FIRE:
@@ -13822,16 +13835,17 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 				sc_start2(src,bl,type,100,group->val1,group->val2,skill_get_time2(skill_id,skill_lv));
 			break;
 
-		case UNT_LAVA_SLIDE:
-			skill_attack(BF_WEAPON,src,&unit->bl,bl,skill_id,skill_lv,tick,0);
-			if (++group->val1 > 4) //After 5 separate hits have been dealt, destroy the unit
-				group->limit = DIFF_TICK(tick,group->tick);
-			break;
+		case UNT_VENOMFOG:
+			if (battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0)
+				skill_attack(BF_MISC,src,&unit->bl,bl,skill_id,skill_lv,tick,0);
+			else {
+				int heal = 2000;
 
-		case UNT_POISON_MIST:
-			skill_attack(BF_MAGIC,src,&unit->bl,bl,skill_id,skill_lv,tick,0);
-			status_change_start(src,bl,SC_BLIND,(10 + 10 * skill_lv) * 100,
-				skill_lv,skill_id,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
+				if (tstatus->hp >= tstatus->max_hp)
+					break;
+				clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
+				status_heal(bl,heal,0,0);
+			}
 			break;
 
 		case UNT_B_TRAP:
