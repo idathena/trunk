@@ -17528,7 +17528,6 @@ int clif_spellbook_list(struct map_session_data *sd)
 			c++;
 		}
 	}
-	
 	if( c > 0 ) {
 		WFIFOW(fd,2) = c * 2 + 4;
 		WFIFOSET(fd, WFIFOW(fd, 2));
@@ -17635,7 +17634,6 @@ int clif_autoshadowspell_list(struct map_session_data *sd) {
 			c++;
 		}
 	}
-
 	if( c > 0 ) {
 		WFIFOW(fd,2) = 8 + c * 2;
 		WFIFOL(fd,4) = c;
