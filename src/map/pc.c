@@ -1619,13 +1619,13 @@ void pc_calc_skilltree(struct map_session_data *sd)
 
 		if( sd->sc.count && sd->sc.data[SC_SPIRIT] &&
 			sd->sc.data[SC_SPIRIT]->val2 == SL_BARDDANCER && i >= DC_HUMMING && i<= DC_SERVICEFORYOU ) { //Enable Bard/Dancer spirit linked skills
-			if( sd->status.sex ) { //Link dancer skills to bard.
+			if( sd->status.sex ) { //Link dancer skills to bard
 				if( sd->status.skill[i - 8].lv < 10 )
 					continue;
 				sd->status.skill[i].id = i;
 				sd->status.skill[i].lv = sd->status.skill[i - 8].lv; //Set the level to the same as the linking skill
 				sd->status.skill[i].flag = SKILL_FLAG_TEMPORARY; //Tag it as a non-savable, non-uppable, bonus skill
-			} else { //Link bard skills to dancer.
+			} else { //Link bard skills to dancer
 				if( sd->status.skill[i].lv < 10 )
 					continue;
 				sd->status.skill[i - 8].id = i - 8;

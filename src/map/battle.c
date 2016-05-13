@@ -1056,8 +1056,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			return 0;
 		}
 
-#ifdef RENEWAL //400% damage receive
-		if( sc->data[SC_KAITE] && (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT )
+#ifdef RENEWAL //Renewal: Increases the physical damage the target takes by 400% [exneval]
+		if( (sce = sc->data[SC_KAITE]) && sce->val3 && (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT )
 			damage <<= 2;
 #endif
 
@@ -2820,6 +2820,12 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 			ATK_ADD(wd.masteryAtk, wd.masteryAtk2, div_ * sd->spiritball_old * 3);
 		} else
 			ATK_ADD(wd.masteryAtk, wd.masteryAtk2, div_ * sd->spiritball * 3);
+		if(!skill_id && sd->status.party_id && (lv = pc_checkskill(sd, TK_POWER)) > 0) { //Doesn't increase skill damage in renewal [exneval]
+			int members = party_foreachsamemap(party_sub_count, sd, 0);
+
+			if(members > 1)
+				ATK_ADDRATE(wd.masteryAtk, wd.masteryAtk2, 2 * lv * (members - 1));
+		}
 #endif
 		if(skill_id == NJ_SYURIKEN && (lv = pc_checkskill(sd, NJ_TOBIDOUGU)) > 0) {
 			ATK_ADD(wd.damage, wd.damage2, 3 * lv);
@@ -3116,7 +3122,7 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 					ShowError("0 enemies targeted by %d:%s, divide per 0 avoided!\n", skill_id, skill_get_name(skill_id));
 			}
 			if(sd) { //Add any bonuses that modify the base damage
-				uint16 lv;
+				uint16 lv = 0;
 
 				if(sd->bonus.atk_rate) {
 					ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.atk_rate);
@@ -3128,13 +3134,10 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 #ifndef RENEWAL //Add +crit damage bonuses here in pre-renewal mode [helvetica]
 				if(sd->bonus.crit_atk_rate && is_attack_critical(wd, src, target, skill_id, skill_lv, false))
 					ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.crit_atk_rate);
+				if(sd->status.party_id && (lv = pc_checkskill(sd, TK_POWER)) > 0 &&
+					(i = party_foreachsamemap(party_sub_count, sd, 0)) > 1) //Exclude the player himself [Inkfish]
+					ATK_ADDRATE(wd.damage, wd.damage2, 2 * lv * (i - 1));
 #endif
-				if(sd->status.party_id && (lv = pc_checkskill(sd, TK_POWER)) > 0) {
-					if((i = party_foreachsamemap(party_sub_count, sd, 0)) > 1) { //Exclude the player himself [Inkfish]
-						ATK_ADDRATE(wd.damage, wd.damage2, 2 * lv * i);
-						RE_ALLATK_ADDRATE(wd, 2 * lv * i);
-					}
-				}
 			}
 			break;
 	} //End switch(skill_id)

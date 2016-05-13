@@ -3739,7 +3739,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		status->aspd_rate += 250 - lv * 50;
 #else //Needs more info
 	if((lv = pc_checkskill(sd,SG_DEVIL)) > 0 && !pc_nextjobexp(sd))
-		status->aspd_rate += lv * 30;
+		status->aspd_rate += 10 + lv * 10;
 	if((lv = pc_checkskill(sd,KN_CAVALIERMASTERY)) > 0 && pc_isriding(sd))
 		status->aspd_rate -= 500 - lv * 100;
 	else if((lv = pc_checkskill(sd,RK_DRAGONTRAINING)) > 0 && pc_isridingdragon(sd))
@@ -4245,6 +4245,7 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 	if( sc->data[SC_DANCING] ||
 #ifdef RENEWAL
 		sc->data[SC_MAXIMIZEPOWER] ||
+		sc->data[SC_FUSION] ||
 #else
 		(bl->type == BL_PC && (((TBL_PC *)bl)->class_&MAPID_UPPERMASK) == MAPID_MONK &&
 		(sc->data[SC_EXPLOSIONSPIRITS] || sc->data[SC_EXTREMITYFIST]) &&

@@ -457,6 +457,10 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 				penalty += tsc->data[SC_CRITICALWOUND]->val2;
 			if( tsc->data[SC_DEATHHURT] )
 				penalty += 20;
+#ifdef RENEWAL
+			if( tsc->data[SC_FUSION] )
+				penalty += 25;
+#endif
 			if( tsc->data[SC_NORECOVER_STATE] )
 				penalty = 100;
 			if( penalty > 0 )
@@ -2329,27 +2333,27 @@ static int skill_magic_reflect(struct block_list *src, struct block_list *bl, in
 	if( !sc || !sc->count )
 		return 0; //Status-based reflection
 
-	if( !sc->data[SC_KYOMU] ) { //Kyomu doesn't reflect
-		//Item-based reflection (Bypasses Boss check)
-		if( sd && sd->bonus.magic_damage_return && type && rnd()%100 < sd->bonus.magic_damage_return )
-			return 1; //Item-based reflection
-	}
+	if( !sc->data[SC_KYOMU] && //Kyomu doesn't reflect
+		sd && sd->bonus.magic_damage_return && type && rnd()%100 < sd->bonus.magic_damage_return )
+		return 1; //Item-based reflection (Bypasses Boss check)
 
-	//Magic Mirror reflection (Bypasses Boss check)
 	if( sc->data[SC_MAGICMIRROR] && rnd()%100 < sc->data[SC_MAGICMIRROR]->val2 )
-		return 1;
+		return 1; //Magic Mirror reflection (Bypasses Boss check)
 
 	if( is_boss(src) )
 		return 0;
 
-	//Kaite reflection (Doessn't bypass Boss check)
-	if( sc->data[SC_KAITE] && (src->type == BL_PC || status_get_lv(src) <= 80) ) {
-		//Kaite only works against non-players if they are low-level
-		//Kyomu doesn't disable Kaite, but the "skill fail chance" part of Kyomu applies to it
+	//Kyomu doesn't disable Kaite, but the "skill fail chance" part of Kyomu applies to it
+	if( sc->data[SC_KAITE] &&
+		(src->type == BL_PC || status_get_lv(src) <= 80) ) { //Kaite only works against non-players if they are low-level
+#ifdef RENEWAL //Renewal: 50% chance to reflect targeted magic, and does not reflect area of effect magic [exneval]
+		if( sc->data[SC_KAITE]->val3 && !(type && rnd()%100 < 50) )
+			return 0;
+#endif
 		clif_specialeffect(bl, 438, AREA);
 		if( --sc->data[SC_KAITE]->val2 <= 0 )
 			status_change_end(bl, SC_KAITE, INVALID_TIMER);
-		return 2;
+		return 2; //Kaite reflection (Doessn't bypass Boss check)
 	}
 
 	return 0;
@@ -2786,12 +2790,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				tsc = NULL; //Don't need it
 			flag |= 2; //bugreport:2564 flag&2 disables double casting trigger
 			dmg.blewcount = 0; //bugreport:7859 magical reflect'd zeroes blewcount
-			//Spirit of Wizard blocks Kaite's reflection
-			if (type == 2 && tsc && tsc->data[SC_SPIRIT] && tsc->data[SC_SPIRIT]->val2 == SL_WIZARD) {
-				//Consume one Fragment per hit of the casted skill? [Skotlex]
+			if (type == 2 && tsc && tsc->data[SC_SPIRIT] && tsc->data[SC_SPIRIT]->val2 == SL_WIZARD) { //Spirit of Wizard blocks Kaite's reflection
 				type = (tsd ? pc_search_inventory(tsd, ITEMID_FRAGMENT_OF_CRYSTAL) : INDEX_NOT_FOUND);
 				if (type != INDEX_NOT_FOUND) {
-					if (tsd)
+					if (tsd) //Consume one Fragment per hit of the casted skill? [Skotlex]
 						pc_delitem(tsd, type, 1, 0, 1, LOG_TYPE_CONSUME);
 					dmg.damage = dmg.damage2 = 0;
 					dmg.dmg_lv = ATK_MISS;
@@ -6577,21 +6579,29 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SL_KAAHI:
 		case SL_KAIZEL:
 		case SL_KAUPE:
-			if (sd) {
-				if (!dstsd ||
-					!((sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_SOULLINKER) ||
-					(dstsd->class_&MAPID_UPPERMASK) == MAPID_SOUL_LINKER ||
-					dstsd->status.char_id == sd->status.char_id ||
-					dstsd->status.char_id == sd->status.partner_id ||
-					dstsd->status.char_id == sd->status.child))
-				{
-					status_change_start(src,src,SC_STUN,10000,skill_lv,0,0,0,500,SCFLAG_FIXEDRATE);
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					break;
+			{
+				uint8 flag = 0;
+
+				if (sd) {
+					if (!dstsd ||
+						!((sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_SOULLINKER) ||
+						(dstsd->class_&MAPID_UPPERMASK) == MAPID_SOUL_LINKER ||
+						dstsd->status.char_id == sd->status.char_id ||
+						dstsd->status.char_id == sd->status.partner_id ||
+						dstsd->status.char_id == sd->status.child))
+					{
+						status_change_start(src,src,SC_STUN,10000,skill_lv,0,0,0,500,SCFLAG_FIXEDRATE);
+						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+						break;
+					}
+#ifdef RENEWAL
+					if (skill_id == SL_KAITE && sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_SOULLINKER)
+						flag = 1;
+#endif
 				}
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,
+					sc_start4(src,bl,type,100,skill_lv,0,flag,0,skill_get_time(skill_id,skill_lv)));
 			}
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,
-				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 			break;
 
 		case SM_AUTOBERSERK:
@@ -9011,7 +9021,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				}
 				i = sc_start2(src,bl,type,rate,skill_lv,src->id,(bl->id == src->id) ? 5000 : (bl->type == BL_PC) ?
 					skill_get_time(skill_id,skill_lv) : skill_get_time2(skill_id,skill_lv));
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,i);
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				if( !i && sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			} else if( sd )
@@ -10973,7 +10983,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 		//They just set the data so leave it as it is [Inkfish]
 		if( sd && ud->skill_id != SA_ABRACADABRA && ud->skill_id != WM_RANDOMIZESPELL )
 			sd->skillitem = sd->skillitemlv = 0;
-		if( !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL) )
+		if( !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL) || target->id != src->id )
 			unit_setdir(src,map_calc_dir(src,target->x,target->y));
 		if( ud->skilltimer == INVALID_TIMER ) {
 			if( md )
@@ -13737,13 +13747,18 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			}
 			break;
 
-		case UNT_HELLS_PLANT:
-			if (tsc && tsc->data[SC__MANHOLE])
-				break;
-			if (battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0)
-				skill_attack(skill_get_type(GN_HELLS_PLANT_ATK),src,&unit->bl,bl,GN_HELLS_PLANT_ATK,skill_lv,tick,0);
-			if (bl->id != src->id) //The caster is the only one who can step on the plants, without destroying them
-				skill_delunit(group->unit); //Deleting it directly to avoid extra hits
+		case UNT_HELLS_PLANT: {
+				struct mob_data *md = BL_CAST(BL_MOB,bl);
+
+				if (md && md->mob_id == MOBID_EMPERIUM)
+					break;
+				if (tsc && tsc->data[SC__MANHOLE])
+					break;
+				if (battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0)
+					skill_attack(skill_get_type(GN_HELLS_PLANT_ATK),src,&unit->bl,bl,GN_HELLS_PLANT_ATK,skill_lv,tick,0);
+				if (bl->id != src->id) //The caster is the only one who can step on the plants, without destroying them
+					skill_delunit(group->unit); //Deleting it directly to avoid extra hits
+			}
 			break;
 
 		case UNT_CLOUD_KILL:
@@ -15024,6 +15039,19 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				sc->data[SC_BANDING]->val2 < (skill_id == LG_RAYOFGENESIS ? 2 : 3) )
 				return false; //Just fails, no msg here
 			break;
+		case SC_MANHOLE:
+		case SC_DIMENSIONDOOR:
+			if( sc && sc->data[SC_MAGNETICFIELD] ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false;
+			}
+			break;
+		case SC_FEINTBOMB:
+			if( map_getcell(sd->bl.m,sd->bl.x,sd->bl.y,CELL_CHKLANDPROTECTOR) ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false;
+			}
+			break;
 		case SR_FALLENEMPIRE:
 			if( !(sc && sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == SR_DRAGONCOMBO) )
 				return false;
@@ -15055,19 +15083,6 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		case SR_GATEOFHELL:
 			if( sd->spiritball > 0 )
 				sd->spiritball_old = require.spiritball;
-			break;
-		case SC_MANHOLE:
-		case SC_DIMENSIONDOOR:
-			if( sc && sc->data[SC_MAGNETICFIELD] ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-				return false;
-			}
-			break;
-		case SC_FEINTBOMB:
-			if( map_getcell(sd->bl.m,sd->bl.x,sd->bl.y,CELL_CHKLANDPROTECTOR) ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-				return false;
-			}
 			break;
 		case SO_FIREWALK:
 		case SO_ELECTRICWALK: //Can't be casted until you've walked all cells
@@ -15875,6 +15890,30 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 					req.spiritball = sd->spiritball; //Must consume all regardless of the amount required
 			}
 			break;
+#ifdef RENEWAL
+		case AS_SONICBLOW:
+			if( sc ) {
+				if( sc->data[SC_EDP] )
+					req.sp += req.sp;
+				if( sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_ASSASIN )
+					req.sp <<= 1;
+			}
+			break;
+		case BA_POEMBRAGI:
+		case BA_WHISTLE:
+		case BA_ASSASSINCROSS:
+		case BA_APPLEIDUN:
+			if( !sd->status.sex && sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_BARDDANCER )
+				req.sp <<= 1;
+			break;
+		case DC_HUMMING:
+		case DC_DONTFORGETME:
+		case DC_FORTUNEKISS:
+		case DC_SERVICEFORYOU:
+			if( sd->status.sex && sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_BARDDANCER )
+				req.sp <<= 1;
+			break;
+#endif
 		case GC_CROSSIMPACT:
 		case GC_COUNTERSLASH:
 			if( sc && sc->data[SC_EDP] )
@@ -16096,6 +16135,21 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 		//All variable cast additive bonuses must come first
 		if( sc->data[SC_SLOWCAST] )
 			VARCAST_REDUCTION(-sc->data[SC_SLOWCAST]->val2);
+#ifdef RENEWAL
+		if( sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_WIZARD ) {
+			switch( skill_id ) {
+				case WZ_FIREPILLAR:
+					if( skill_lv < 5 )
+						break;
+				//Fall through
+				case HW_GRAVITATION:
+				case MG_SAFETYWALL:
+				case MG_STONECURSE:
+					VARCAST_REDUCTION(-50);
+					break;
+			}
+		}
+#endif
 		if( sc->data[SC__LAZINESS] )
 			VARCAST_REDUCTION(-sc->data[SC__LAZINESS]->val3);
 		//Variable cast reduction bonuses
