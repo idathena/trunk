@@ -360,7 +360,7 @@ struct DBIterator
  * Public interface of a database. Only contains funtions.
  * All the functions take the interface as the first argument.
  * @public
- * @see #db_alloc(const char*,int,DBType,DBOptions,unsigned short)
+ * @see #db_alloc(const char *,int,DBType,DBOptions,unsigned short)
  */
 struct DBMap {
 

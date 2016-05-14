@@ -153,118 +153,55 @@ void signals_init (void) {
 }
 #endif
 
-#ifdef SVNVERSION
-const char *get_svn_revision(void) {
-	return EXPAND_AND_QUOTE(SVNVERSION);
-}
-#else // not SVNVERSION
-const char* get_svn_revision(void) {
-	static char svn_version_buffer[16] = "";
+// GIT path
+#define GIT_ORIGIN "refs/remotes/origin/master"
+
+// Grabs the hash from the last time the user updated their working copy (last pull)
+const char *get_git_hash(void) {
+	static char GitHash[41] = ""; //Sha(40) + 1
 	FILE *fp;
 
-	if( svn_version_buffer[0] != '\0' )
-		return svn_version_buffer;
+	if (GitHash[0] != '\0')
+		return GitHash;
 
-	// subversion 1.7 uses a sqlite3 database
-	// FIXME this is hackish at best...
-	// - Ignores database file structure
-	// - Assumes the data in NODES.dav_cache column ends with "!svn/ver/<revision>/<path>)"
-	// - Since it's a cache column, the data might not even exist
-	if( (fp = fopen(".svn"PATHSEP_STR"wc.db", "rb")) != NULL || (fp = fopen(".."PATHSEP_STR".svn"PATHSEP_STR"wc.db", "rb")) != NULL ) {
-#ifndef SVNNODEPATH
-		//not sure how to handle branches, so i'll leave this overridable define until a better solution comes up
-		#define SVNNODEPATH trunk
-#endif
-		const char* prefix = "!svn/ver/";
-		const char* postfix = "/"EXPAND_AND_QUOTE(SVNNODEPATH)")"; // there should exist only 1 entry like this
-		size_t prefix_len = strlen(prefix);
-		size_t postfix_len = strlen(postfix);
-		size_t i,j,len;
-		char* buffer;
+	if ((fp = fopen(".git/"GIT_ORIGIN, "r")) != NULL) {
+		char line[64];
+		char *rev = (char *)malloc(sizeof(char) * 50);
 
-		// Read file to buffer
-		fseek(fp, 0, SEEK_END);
-		len = ftell(fp);
-		buffer = (char*)aMalloc(len + 1);
-		fseek(fp, 0, SEEK_SET);
-		len = fread(buffer, 1, len, fp);
-		buffer[len] = '\0';
+		if (fgets(line, sizeof(line), fp) && sscanf(line, "%40s", rev))
+			snprintf(GitHash, sizeof(GitHash), "%s", rev);
+		free(rev);
 		fclose(fp);
+	} else
+		GitHash[0] = UNKNOWN_VERSION;
 
-		// Parse buffer
-		for( i = prefix_len + 1; i + postfix_len <= len; ++i ) {
-			if( buffer[i] != postfix[0] || memcmp(buffer + i, postfix, postfix_len) != 0 )
-				continue; // Postfix missmatch
-			for( j = i; j > 0; --j ) { // Skip digits
-				if( !ISDIGIT(buffer[j - 1]) )
-					break;
-			}
-			if( memcmp(buffer + j - prefix_len, prefix, prefix_len) != 0 )
-				continue; // Prefix missmatch
-			// Done
-			snprintf(svn_version_buffer, sizeof(svn_version_buffer), "%d", atoi(buffer + j));
-			break;
-		}
-		aFree(buffer);
+	if (!(*GitHash))
+		GitHash[0] = UNKNOWN_VERSION;
 
-		if( svn_version_buffer[0] != '\0' )
-			return svn_version_buffer;
-	}
-
-	// subversion 1.6 and older?
-	if( (fp = fopen(".svn/entries", "r")) != NULL ) {
-		char line[1024];
-		int rev;
-
-		// Check the version
-		if( fgets(line, sizeof(line), fp) ) {
-			if( !ISDIGIT(line[0]) ) {
-				// XML File format
-				while( fgets(line, sizeof(line), fp) )
-					if( strstr(line, "revision=") ) break;
-				if( sscanf(line," %*[^\"]\"%d%*[^\n]", &rev) == 1 )
-					snprintf(svn_version_buffer, sizeof(svn_version_buffer), "%d", rev);
-			} else {
-				// Bin File format
-				if( fgets(line, sizeof(line), fp) == NULL ) { printf("Can't get bin name\n"); } // Get the name
-				if( fgets(line, sizeof(line), fp) == NULL ) { printf("Can't get entries kind\n"); } // Get the entries kind
-				if( fgets(line, sizeof(line), fp) ) { // Get the rev numver
-					snprintf(svn_version_buffer, sizeof(svn_version_buffer), "%d", atoi(line));
-				}
-			}
-		}
-		fclose(fp);
-
-		if( svn_version_buffer[0] != '\0' )
-			return svn_version_buffer;
-	}
-
-	// Fallback
-	snprintf(svn_version_buffer, sizeof(svn_version_buffer), "Unknown");
-	return svn_version_buffer;
+	return GitHash;
 }
-#endif
 
 /*======================================
  *	CORE : Display title
  *  ASCII By CalciumKid 1/12/2011
  *--------------------------------------*/
 static void display_title(void) {
-	//ClearScreen(); // clear screen and go up/left (0, 0 position in text)
+	const char *git = get_git_hash();
 
 	ShowMessage("\n");
 	ShowMessage(""CL_PASS"        "CL_BOLD"                                                             "CL_PASS""CL_CLL""CL_NORMAL"\n");
-	ShowMessage(""CL_PASS"        "CL_BT_WHITE"            Pengembangan idAthena mempersembahkan        "CL_PASS""CL_CLL""CL_NORMAL"\n");
+	ShowMessage(""CL_PASS"        "CL_BT_WHITE"                    Mempersembahkan                      "CL_PASS""CL_CLL""CL_NORMAL"\n");
 	ShowMessage(""CL_PASS"        "CL_BOLD"       _      _     ___   __  __                             "CL_PASS""CL_CLL""CL_NORMAL"\n");
 	ShowMessage(""CL_PASS"        "CL_BOLD"      |_| ___| |   /   | / /_/ /_  ___  ____  ____ _         "CL_PASS""CL_CLL""CL_NORMAL"\n");
 	ShowMessage(""CL_PASS"        "CL_BOLD"      | ||  _  |  / /| |/ __/ __ \\/ _ \\/ __ \\/ __ `/      "CL_PASS""CL_CLL""CL_NORMAL"\n");
 	ShowMessage(""CL_PASS"        "CL_BOLD"      | || |_| | / ___ / /_/ / / /  __/ / / / /_/ /          "CL_PASS""CL_CLL""CL_NORMAL"\n");
 	ShowMessage(""CL_PASS"        "CL_BOLD"      |_||____/ /_/  |_\\__/_/ /_/\\___/_/ /_/\\__,_/        "CL_PASS""CL_CLL""CL_NORMAL"\n");
-	ShowMessage(""CL_PASS"        "CL_BOLD"                                                             "CL_PASS""CL_CLL""CL_NORMAL"\n");  
-	ShowMessage(""CL_PASS"        "CL_GREEN"               http://idAthena.org                          "CL_PASS""CL_CLL""CL_NORMAL"\n");
+	ShowMessage(""CL_PASS"        "CL_BOLD"                                                             "CL_PASS""CL_CLL""CL_NORMAL"\n");
+	ShowMessage(""CL_PASS"        "CL_GREEN"            http://github.com/idathena/trunk/               "CL_PASS""CL_CLL""CL_NORMAL"\n");
 	ShowMessage(""CL_PASS"        "CL_BOLD"                                                             "CL_PASS""CL_CLL""CL_NORMAL"\n");
 
-	ShowInfo("SVN Revision: '"CL_WHITE"%s"CL_RESET"'.\n", get_svn_revision());
+	if (git[0] != UNKNOWN_VERSION)
+		ShowInfo("Git Hash: '"CL_WHITE"%s"CL_RESET"'\n", git);
 }
 
 // Warning if executed as superuser (root)

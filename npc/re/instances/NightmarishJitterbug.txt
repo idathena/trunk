@@ -160,12 +160,9 @@ moc_para01,29,95,5	script	Runane#sara	10039,{
 			switch (select(.@menu$)) {
 				case 1:
 					switch (instance_create(.@md_name$)) {
-						case -3: //Custom text
-							mes "[Runane]";
-							mes "^ff0000Failed to open the dimensional portal. You already open it!^000000";
-							close2;
-							cutin "lunain01",255;
-							end;
+						case -3:
+							dispbottom "Memorial Dungeon, '"+.@md_name$+"' is already in progress.",0xFFFFFF;
+							break;
 						case -4:
 						case -2:
 						case -1:
@@ -195,6 +192,7 @@ moc_para01,29,95,5	script	Runane#sara	10039,{
 						case 0:
 							mapannounce "moc_para01",.@p_name$+"'s "+.@p_reader$+", is entering "+.@md_name$+".",bc_map,"0x00ff99";
 							setquest 13182;
+							//warp "1@jtb",16,18;
 							end;
 					}
 					break;
