@@ -13,21 +13,21 @@
 #include "cli.h"
 
 //map confs
-char* MAP_CONF_NAME;
-char* INTER_CONF_NAME;
-char* LOG_CONF_NAME;
-char* BATTLE_CONF_FILENAME;
-char* ATCOMMAND_CONF_FILENAME;
-char* SCRIPT_CONF_NAME;
-char* GRF_PATH_FILENAME;
+char *MAP_CONF_NAME;
+char *INTER_CONF_NAME;
+char *LOG_CONF_NAME;
+char *BATTLE_CONF_FILENAME;
+char *ATCOMMAND_CONF_FILENAME;
+char *SCRIPT_CONF_NAME;
+char *GRF_PATH_FILENAME;
 //char confs
-char* CHAR_CONF_NAME;
-char* SQL_CONF_NAME;
+char *CHAR_CONF_NAME;
+char *SQL_CONF_NAME;
 //login confs
-char* LOGIN_CONF_NAME;
+char *LOGIN_CONF_NAME;
 //common conf (used by multiple serv)
-char* LAN_CONF_NAME; //char-login
-char* MSG_CONF_NAME; //all
+char *LAN_CONF_NAME; //char-login
+char *MSG_CONF_NAME; //all
 
 /**
  * Function to check if specified option have an argument follow it
@@ -35,7 +35,7 @@ char* MSG_CONF_NAME; //all
  *   false : no other args found, and throw a warning
  *   true : something following us
  */
-bool opt_has_next_value(const char* option, int i, int argc)
+bool opt_has_next_value(const char *option, int i, int argc)
 {
 	if (i >= argc - 1) {
 		ShowWarning("Missing value for option '%s'.\n", option);
@@ -53,11 +53,13 @@ bool opt_has_next_value(const char* option, int i, int argc)
  */
 void display_versionscreen(bool do_exit)
 {
-	ShowInfo("idAthena SVN Revision: '"CL_WHITE"%s"CL_RESET"'\n", get_svn_revision());
-	ShowInfo(CL_GREEN"Website/Forum:"CL_RESET"\thttp://rathena.org/\n");
-	ShowInfo(CL_GREEN"IRC Channel:"CL_RESET"\tirc://irc.rizon.net/#rathena\n");
-	ShowInfo("Open "CL_WHITE"readme.txt"CL_RESET" for more information.\n");
-	if( do_exit )
+	const char *git = get_git_hash();
+
+	if (git[0] != UNKNOWN_VERSION)
+		ShowInfo("idAthena Git Hash: '"CL_WHITE"%s"CL_RESET"'\n", git);
+	ShowInfo(CL_GREEN"Git Site:"CL_RESET"\thttp://github.com/idathena/trunk/\n");
+	ShowInfo("Open "CL_WHITE"README.md"CL_RESET" for more information.\n");
+	if (do_exit)
 		exit(EXIT_SUCCESS);
 }
 
@@ -70,7 +72,7 @@ int cli_get_options(int argc, char ** argv)
 {
     int i = 0;
     for (i = 1; i < argc; i++) {
-	const char* arg = argv[i];
+	const char *arg = argv[i];
 
 	if (arg[0] != '-' && (arg[0] != '/' || arg[1] == '-')) { // -, -- and /
 	    ShowError("Unknown option '%s'.\n", argv[i]);

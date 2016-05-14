@@ -2,7 +2,7 @@
 // For more information, see LICENCE in the main folder
 
 #include "../common/cbasetypes.h"
-#include "../common/core.h" // get_svn_revision()
+#include "../common/core.h" // get_git_hash()
 #include "../common/malloc.h"
 #include "../common/nullpo.h"
 #include "../common/random.h"
@@ -11312,13 +11312,13 @@ enum e_BANKING_WITHDRAW_ACK pc_bank_withdraw(struct map_session_data *sd, int mo
  * @param sd: Player
  */
 void pc_show_version(struct map_session_data *sd) {
-	const char *svn = get_svn_revision();
+	const char *git = get_git_hash();
 	char buf[CHAT_SIZE_MAX];
 
-	if( svn[0] != 0 )
-		sprintf(buf,msg_txt(1295),"SVN: r",svn); // idAthena Version %s%s
+	if( git[0] != UNKNOWN_VERSION )
+		sprintf(buf,msg_txt(1295),"GIT Hash: ",git); // idAthena Git Hash: %s
 	else
-		sprintf(buf,msg_txt(1296)); // Cannot determine current version.
+		sprintf(buf,msg_txt(1296)); // Can't find current Git version.
 	clif_displaymessage(sd->fd,buf);
 }
 

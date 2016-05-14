@@ -8565,11 +8565,11 @@ void rAthena_report(char *date, char *time_c) {
 		C_SQL_DBS               = 0x2000,
 		C_SQL_LOGS              = 0x4000,
 	};
-		
-	if( (rev_str = get_svn_revision()) != 0 )
+
+	if( (rev_str = get_git_hash()) != 0 )
 		rev = atoi(rev_str);
-	
-	/* We get the current time */
+
+	//We get the current time
 	time(&curtime);
 	strftime(timestring, 24, "%Y-%m-%d %H:%M:%S", localtime(&curtime));
 
@@ -8626,19 +8626,18 @@ void rAthena_report(char *date, char *time_c) {
 	config |= C_SECURE_NPCTIMEOUT;
 #endif
 
-	/* non-define part */
+	//Non-define part
 	if( db_use_sqldbs )
 		config |= C_SQL_DBS;
-	
+
 	if( log_config.sql_logs )
 		config |= C_SQL_LOGS;
-	
-#define BFLAG_LENGTH 35
-	
-	CREATE(buf, char, 6 + 12 + 9 + 24 + 4 + 4 + 4 + 4 + ( bd_size * ( BFLAG_LENGTH + 4 ) ) + 1 );
-	
-	/* build packet */
 
+#define BFLAG_LENGTH 35
+
+	CREATE(buf, char, 6 + 12 + 9 + 24 + 4 + 4 + 4 + 4 + ( bd_size * ( BFLAG_LENGTH + 4 ) ) + 1 );
+
+	//Build packet
 	WBUFW(buf,0) = 0x3000;
 	WBUFW(buf,2) = 6 + 12 + 9 + 24 + 4 + 4 + 4 + 4 + ( bd_size * ( BFLAG_LENGTH + 4 ) );
 	WBUFW(buf,4) = 0x9c;
@@ -8646,28 +8645,27 @@ void rAthena_report(char *date, char *time_c) {
 	safestrncpy((char *)WBUFP(buf,6), date, 12);
 	safestrncpy((char *)WBUFP(buf,6 + 12), time_c, 9);
 	safestrncpy((char *)WBUFP(buf,6 + 12 + 9), timestring, 24);
-	
+
 	WBUFL(buf,6 + 12 + 9 + 24)         = rev;
 	WBUFL(buf,6 + 12 + 9 + 24 + 4)     = map_getusers();
-	
+
 	WBUFL(buf,6 + 12 + 9 + 24 + 4 + 4) = config;
 	WBUFL(buf,6 + 12 + 9 + 24 + 4 + 4 + 4) = bd_size;
-	
+
 	for( i = 0; i < bd_size; i++ ) {
 		safestrncpy((char *)WBUFP(buf,6 + 12 + 9 + 24 + 4 + 4 + 4 + 4 + ( i * ( BFLAG_LENGTH + 4 ) ) ), battle_data[i].str, 35);
 		WBUFL(buf,6 + 12 + 9 + 24 + 4 + 4 + 4 + 4 + BFLAG_LENGTH + ( i * ( BFLAG_LENGTH + 4 )  )  ) = *battle_data[i].val;
 	}
-	
+
 	chrif_send_report(buf, 6 + 12 + 9 + 24 + 4 + 4 + 4 + 4 + ( bd_size * ( BFLAG_LENGTH + 4 ) ) );
-	
+
 	aFree(buf);
 	
 #undef BFLAG_LENGTH
 }
 static int rAthena_report_timer(int tid, unsigned int tick, int id, intptr_t data) {
-	if( chrif_isconnected() ) { /* char server relays it, so it must be online. */
+	if( chrif_isconnected() ) //Char server relays it, so it must be online
 		rAthena_report(__DATE__,__TIME__);
-	}
 	return 0;
 }
 #endif

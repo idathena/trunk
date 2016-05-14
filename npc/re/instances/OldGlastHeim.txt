@@ -124,9 +124,9 @@ glast_01,204,273,6	script	Hugin#ghinstance	755,{
 			close;
 		case 2:
 			switch(instance_enter(.@md_name$)) {
-			case 3: //Custom text
+			case 3:
 				mes "[Hugin]";
-				mes "Sorry, I won't let you enter the time gap. There's something wrong with the dimension right now.";
+				mes "An unknown error has occurred.";
 				close;
 			case 2:
 				mes "[Hugin]";

@@ -19077,15 +19077,17 @@ BUILDIN_FUNC(is_function) {
 }
 
 /**
- * get_revision() -> retrieves the current svn revision (if available)
+ * get_githash() -> retrieves the current git hash (if available)
  */
-BUILDIN_FUNC(get_revision) {
-	const char *revision;
+BUILDIN_FUNC(get_githash) {
+	const char *git = get_git_hash();
+	char buf[CHAT_SIZE_MAX];
 
-	if ( (revision = get_svn_revision()) != 0 )
-		script_pushint(st,atoi(revision));
+	safestrncpy(buf, git, strlen(git) + 1);
+	if( git[0] != UNKNOWN_VERSION )
+		script_pushstr(st,buf);
 	else
-		script_pushint(st,-1);//unknown
+		script_pushstr(st,"Unknown"); //Unknown
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -20992,7 +20994,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getargcount,""),
 	BUILDIN_DEF(getcharip,"?"),
 	BUILDIN_DEF(is_function,"s"),
-	BUILDIN_DEF(get_revision,""),
+	BUILDIN_DEF(get_githash,""),
 	BUILDIN_DEF(freeloop,"?"),
 	BUILDIN_DEF(getrandgroupitem,"i??"),
 	BUILDIN_DEF(cleanmap,"s"),
