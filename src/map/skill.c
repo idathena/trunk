@@ -1237,17 +1237,23 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case WL_EARTHSTRAIN: {
 				int dur;
 				uint8 i;
-				const int pos[5] = { EQP_WEAPON,EQP_SHIELD,EQP_ARMOR,EQP_HELM,EQP_ACC };
+				const int pos[5] = { EQP_WEAPON,EQP_HELM,EQP_ARMOR,EQP_SHIELD,EQP_ACC };
 
 				rate = max(5,(sstatus->dex - tstatus->dex) / 5) + skill_lv * (5 + skill_lv);
 				dur = max(0,(sstatus->dex - tstatus->dex) * 500) + skill_get_time2(skill_id,skill_lv);
-				if( !tsc->data[SC_WHITEIMPRISON] )
-					for( i = 0; i < skill_lv; i++ )
+				if( !tsc->data[SC_WHITEIMPRISON] ) {
+					for( i = 0; i < skill_lv; i++ ) {
 						skill_strip_equip(src,bl,pos[i],rate,skill_lv,dur);
+						if( skill_lv == 1 )
+							skill_strip_equip(src,bl,pos[skill_lv],rate,skill_lv,dur);
+					}
+				}
 			}
 			break;
 		case WL_FROSTMISTY:
-			sc_start(src,bl,SC_FREEZING,25 + skill_lv * 5,skill_lv,skill_get_time(skill_id,skill_lv));
+			rate = 2 + (skill_lv - 1) * status_get_job_lv(src) / 7; //Job level bonus [exneval]
+			rate += 25 + skill_lv * 5;
+			sc_start(src,bl,SC_FREEZING,rate,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case WL_JACKFROST:
 			sc_start(src,bl,SC_FREEZE,100,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -4911,13 +4917,16 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				int heal = skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
 				int rate = 70 + 5 * skill_lv;
 
-				heal = heal * (5 + 5 * skill_lv) / 100;
-				if (bl->type == BL_SKILL)
-					heal = 0; //Don't absorb heal from Ice Walls or other skill units
-				if (heal && rnd()%100 < rate) {
-					status_heal(src,heal,0,0);
-					clif_skill_nodamage(NULL,src,AL_HEAL,heal,1);
+				if (bl->type == BL_SKILL || //Don't absorb heal from Ice Walls or other skill units
+					status_get_hp(src) == status_get_max_hp(src)) //Don't absorb when caster was in full HP
+					heal = 0;
+				else {
+					heal = heal * 8 * skill_lv / 100;
+					heal = heal * status_get_lv(src) / 100; //Base Level bonus [exneval]
 				}
+				rate -= skill_lv * status_get_job_lv(src) / 50; //Job Level bonus [exneval]
+				if (heal && rnd()%100 < rate)
+					status_heal(src,heal,0,2);
 			}
 			break;
 
@@ -4975,7 +4984,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 
 		case WL_HELLINFERNO:
 			skill_attack(BF_MAGIC,src,src,bl,skill_id,skill_lv,tick,flag);
-			skill_attack(BF_MAGIC,src,src,bl,skill_id,skill_lv,tick,flag|ELE_DARK);
+			skill_addtimerskill(src,tick + 200,bl->id,0,0,skill_id,skill_lv,BF_MAGIC,flag|ELE_DARK);
 			break;
 
 		case RA_WUGSTRIKE:
@@ -9008,19 +9017,23 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case WL_WHITEIMPRISON:
-			if( bl->id == src->id || battle_check_target(src,bl,BCT_ENEMY) > 0 ) {
-				int rate = status_get_job_lv(src) / 4;
+			if( bl->id == src->id || (battle_check_target(src,bl,BCT_ENEMY) > 0 && !is_boss(bl)) ) {
+				int rate = 23 + (1 - skill_lv) * status_get_job_lv(src) / 7; //Job level bonus [exneval]
+				int dur;
 
-				if( bl->id == src->id )
+				if( bl->id == src->id ) {
 					rate = 100; //On self, 100%
-				else {
-					if( bl->type == BL_PC )
+					dur = 5000;
+				} else {
+					if( bl->type == BL_PC ) {
 						rate += 20 + 10 * skill_lv; //On players, (20 + 10 * Skill Level)%
-					else
+						dur = skill_get_time(skill_id,skill_lv);
+					} else {
 						rate += 40 + 10 * skill_lv; //On monsters, (40 + 10 * Skill Level)%
+						dur = skill_get_time2(skill_id,skill_lv);
+					}
 				}
-				i = sc_start2(src,bl,type,rate,skill_lv,src->id,(bl->id == src->id) ? 5000 : (bl->type == BL_PC) ?
-					skill_get_time(skill_id,skill_lv) : skill_get_time2(skill_id,skill_lv));
+				i = sc_start2(src,bl,type,rate,skill_lv,src->id,dur);
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				if( !i && sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -9039,8 +9052,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				else
 					status_change_start(src,bl,SC_STONE,10000,skill_lv,0,0,1000,skill_get_time(skill_id,skill_lv),SCFLAG_FIXEDTICK);
 			} else {
-				int rate = 45 + 5 * skill_lv + status_get_job_lv(src) / 4;
+				int rate = (skill_lv - 1) * status_get_job_lv(src) / 15 - 2; //Job level bonus [exneval]
 
+				rate += 45 + 5 * skill_lv;
 				if( rnd()%100 < rate ) { //Success on first target
 					if( !tsc->data[SC_STONE] )
 						rate = status_change_start(src,bl,SC_STONE,10000,skill_lv,0,0,1000,skill_get_time(skill_id,skill_lv),SCFLAG_FIXEDTICK);
@@ -20349,7 +20363,6 @@ int skill_block_check(struct block_list *bl, sc_type type , uint16 skill_id) {
 			if( skill_id == AL_TELEPORT )
 				return 1;
 			break;
-
 		case SC_STASIS:
 			inf = skill_get_inf2(skill_id);
 			//Song, Dance, Ensemble, Chorus, and all magic skills will not work in Stasis status [Rytech]
@@ -20357,7 +20370,6 @@ int skill_block_check(struct block_list *bl, sc_type type , uint16 skill_id) {
 				inf == INF2_CHORUS_SKILL || skill_get_type(skill_id) == BF_MAGIC )
 				return 1; //Can't do it
 			break;
-
 		case SC_KAGEHUMI:
 			if( inf3&INF3_KAGEHUMI_BL )
 				return 1;
