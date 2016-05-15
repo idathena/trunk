@@ -161,9 +161,9 @@ void aFree_(void *p, const char *file, int line, const char *func)
 
 /* block */
 struct block {
-	struct block* block_next;		/* Then the allocated area */
-	struct block* unfill_prev;		/* The previous area not filled */
-	struct block* unfill_next;		/* The next area not filled */
+	struct block *block_next;		/* Then the allocated area */
+	struct block *unfill_prev;		/* The previous area not filled */
+	struct block *unfill_next;		/* The next area not filled */
 	unsigned short unit_size;		/* The size of the unit */
 	unsigned short unit_hash;		/* The hash of the unit */
 	unsigned short unit_count;		/* The number of units */
@@ -175,27 +175,27 @@ struct block {
 
 struct unit_head {
 	struct block   *block;
-	const  char *file;
-	unsigned short line;
-	unsigned short size;
-	long           checksum;
+	const char     *file;
+	unsigned short  line;
+	unsigned short  size;
+	long            checksum;
 };
 
-static struct block* hash_unfill[BLOCK_DATA_COUNT1 + BLOCK_DATA_COUNT2 + 1];
-static struct block* block_first, *block_last, block_head;
+static struct block *hash_unfill[BLOCK_DATA_COUNT1 + BLOCK_DATA_COUNT2 + 1];
+static struct block *block_first, *block_last, block_head;
 
 /* Data for areas that do not use the memory be turned */
 struct unit_head_large {
 	size_t                  size;
-	struct unit_head_large* prev;
-	struct unit_head_large* next;
+	struct unit_head_large *prev;
+	struct unit_head_large *next;
 	struct unit_head        unit_head;
 };
 
 static struct unit_head_large *unit_head_large_first = NULL;
 
-static struct block* block_malloc(unsigned short hash);
-static void          block_free(struct block* p);
+static struct block *block_malloc(unsigned short hash);
+static void          block_free(struct block *p);
 static size_t        memmgr_usage_bytes;
 
 #define block2unit(p, n) ((struct unit_head*)(&(p)->data[ p->unit_size * (n) ]))
@@ -241,7 +241,7 @@ void *_mmalloc(size_t size, const char *file, int line, const char *func )
 	/* To ensure the area that exceeds the length of the block, using malloc () to */
 	/* At that time, the distinction by assigning NULL to unit_head.block */
 	if(hash2size(size_hash) > BLOCK_DATA_SIZE - sizeof(struct unit_head)) {
-		struct unit_head_large* p = (struct unit_head_large*)MALLOC(sizeof(struct unit_head_large)+size,file,line,func);
+		struct unit_head_large *p = (struct unit_head_large *)MALLOC(sizeof(struct unit_head_large) + size,file,line,func);
 		if(p != NULL) {
 			p->size            = size;
 			p->unit_head.block = NULL;
@@ -256,7 +256,7 @@ void *_mmalloc(size_t size, const char *file, int line, const char *func )
 				p->next = unit_head_large_first;
 			}
 			unit_head_large_first = p;
-			*(long*)((char *)p + sizeof(struct unit_head_large) - sizeof(long) + size) = 0xdeadbeaf;
+			*(long *)((char *)p + sizeof(struct unit_head_large) - sizeof(long) + size) = 0xdeadbeaf;
 			return (char *)p + sizeof(struct unit_head_large) - sizeof(long);
 		} else {
 			ShowFatalError("Memory manager::memmgr_alloc failed (allocating %d+%d bytes at %s:%d).\n", sizeof(struct unit_head_large), size, file, line);
@@ -318,7 +318,7 @@ void *_mmalloc(size_t size, const char *file, int line, const char *func )
 	head->file  = file;
 	head->line  = line;
 	head->size  = (unsigned short)size;
-	*(long*)((char *)head + sizeof(struct unit_head) - sizeof(long) + size) = 0xdeadbeaf;
+	*(long *)((char *)head + sizeof(struct unit_head) - sizeof(long) + size) = 0xdeadbeaf;
 	return (char *)head + sizeof(struct unit_head) - sizeof(long);
 }
 
@@ -378,7 +378,7 @@ void _mfree(void *ptr, const char *file, int line, const char *func )
 		/* area that is directly secured by malloc () */
 		struct unit_head_large *head_large = (struct unit_head_large *)((char *)ptr - sizeof(struct unit_head_large) + sizeof(long));
 		if(
-			*(long*)((char *)head_large + sizeof(struct unit_head_large) - sizeof(long) + head_large->size)
+			*(long *)((char *)head_large + sizeof(struct unit_head_large) - sizeof(long) + head_large->size)
 			!= 0xdeadbeaf)
 		{
 			ShowError("Memory manager: args of aFree 0x%p is overflowed pointer %s line %d\n", ptr, file, line);
@@ -406,7 +406,7 @@ void _mfree(void *ptr, const char *file, int line, const char *func )
 			//ShowError("Memory manager: args of aFree 0x%p is invalid pointer %s line %d\n", ptr, file, line);
 		} else if(head->block == NULL) {
 			ShowError("Memory manager: args of aFree 0x%p is freed pointer %s:%d@%s\n", ptr, file, line, func);
-		} else if(*(long*)((char *)head + sizeof(struct unit_head) - sizeof(long) + head->size) != 0xdeadbeaf) {
+		} else if(*(long *)((char *)head + sizeof(struct unit_head) - sizeof(long) + head->size) != 0xdeadbeaf) {
 			ShowError("Memory manager: args of aFree 0x%p is overflowed pointer %s line %d\n", ptr, file, line);
 		} else {
 			memmgr_usage_bytes -= head->size;
@@ -438,7 +438,7 @@ void _mfree(void *ptr, const char *file, int line, const char *func )
 }
 
 /* Allocating blocks */
-static struct block* block_malloc(unsigned short hash)
+static struct block *block_malloc(unsigned short hash)
 {
 	struct block *p;
 
@@ -496,7 +496,7 @@ static struct block* block_malloc(unsigned short hash)
 	return p;
 }
 
-static void block_free(struct block* p)
+static void block_free(struct block *p)
 {
 	if( p->unfill_prev ) {
 		if( p->unfill_prev == &block_head) {
@@ -549,8 +549,8 @@ static void memmgr_log (char *buf)
 /// @return true if the memory is active
 bool memmgr_verify(void *ptr)
 {
-	struct block* block = block_first;
-	struct unit_head_large* large = unit_head_large_first;
+	struct block *block = block_first;
+	struct unit_head_large *large = unit_head_large_first;
 
 	if( ptr == NULL )
 		return false; // Never valid

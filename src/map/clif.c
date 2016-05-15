@@ -1450,7 +1450,7 @@ int clif_spawn(struct block_list *bl)
 				if (sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0)
 					clif_spiritcharm(sd);
 				for (i = 0; i < sd->sc_display_count; i++) {
-					int type = sd->sc_display[i]->type, time;
+					int type = sd->sc_display[i]->type, time = 0;
 					struct status_change *sc = status_get_sc(bl);
 					const struct TimerData *td = (sc && sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
 
@@ -4565,7 +4565,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 				if (tsd->bg_id && map[bl->m].flag.battleground)
 					clif_sendbgemblem_single(sd->fd,tsd);
 				for (i = 0; i < tsd->sc_display_count; i++) {
-					int type = tsd->sc_display[i]->type, time;
+					int type = tsd->sc_display[i]->type, time = 0;
 					struct status_change *tsc = status_get_sc(bl);
 					const struct TimerData *td = (tsc && tsc->data[type] ? get_timer(tsc->data[type]->timer) : NULL);
 
