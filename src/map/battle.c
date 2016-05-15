@@ -3122,8 +3122,6 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 					ShowError("0 enemies targeted by %d:%s, divide per 0 avoided!\n", skill_id, skill_get_name(skill_id));
 			}
 			if(sd) { //Add any bonuses that modify the base damage
-				uint16 lv = 0;
-
 				if(sd->bonus.atk_rate) {
 					ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.atk_rate);
 #ifdef RENEWAL //Renewal: Attack bonus only modify weapon and equip ATK [exneval]
@@ -3131,12 +3129,17 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 					ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, sd->bonus.atk_rate);
 #endif
 				}
-#ifndef RENEWAL //Add +crit damage bonuses here in pre-renewal mode [helvetica]
-				if(sd->bonus.crit_atk_rate && is_attack_critical(wd, src, target, skill_id, skill_lv, false))
-					ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.crit_atk_rate);
-				if(sd->status.party_id && (lv = pc_checkskill(sd, TK_POWER)) > 0 &&
-					(i = party_foreachsamemap(party_sub_count, sd, 0)) > 1) //Exclude the player himself [Inkfish]
-					ATK_ADDRATE(wd.damage, wd.damage2, 2 * lv * (i - 1));
+#ifndef RENEWAL
+				{
+					uint16 lv = 0;
+
+					//Add +crit damage bonuses here in pre-renewal mode [helvetica]
+					if(sd->bonus.crit_atk_rate && is_attack_critical(wd, src, target, skill_id, skill_lv, false))
+						ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.crit_atk_rate);
+					if(sd->status.party_id && (lv = pc_checkskill(sd, TK_POWER)) > 0 &&
+						(i = party_foreachsamemap(party_sub_count, sd, 0)) > 1) //Exclude the player himself [Inkfish]
+						ATK_ADDRATE(wd.damage, wd.damage2, 2 * lv * (i - 1));
+				}
 #endif
 			}
 			break;
