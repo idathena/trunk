@@ -5302,6 +5302,9 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			case RL_GLITTERING_GREED_ATK:
 				id = RL_GLITTERING_GREED;
 				break;
+			case SU_PICKYPECK_DOUBLE_ATK:
+				id = SU_PICKYPECK;
+				break;
 			default:
 				id = skill_id;
 				break;

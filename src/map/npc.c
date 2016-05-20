@@ -4242,9 +4242,8 @@ void npc_read_event_script(void)
 		dbi_destroy(iter);
 	}
 
-	if (battle_config.etc_log) {
-		//Print summary.
-		for (i = 0; i < NPCE_MAX; i++)
+	if( battle_config.etc_log ) {
+		for( i = 0; i < NPCE_MAX; i++ ) //Print summary
 			ShowInfo("%s: %d '%s' events.\n", config[i].name, script_event[i].event_count, config[i].event_name);
 	}
 }
@@ -4253,10 +4252,11 @@ void npc_clear_pathlist(void) {
 	struct npc_path_data *npd = NULL;
 	DBIterator *path_list = db_iterator(npc_path_db);
 	
-	/* Free all npc_path_data filepaths */
-	for( npd = dbi_first(path_list); dbi_exists(path_list); npd = dbi_next(path_list) )
+	//Free all npc_path_data filepaths
+	for( npd = dbi_first(path_list); dbi_exists(path_list); npd = dbi_next(path_list) ) {
 		if( npd->path )
 			aFree(npd->path);
+	}
 
 	dbi_destroy(path_list);
 }
@@ -4266,7 +4266,7 @@ void npc_clear_pathlist(void) {
  * @param npc_min Minimum npc id - used to know how many NPCs were loaded
  */
 void npc_process_files(int npc_min) {
-	struct npc_src_list *file; // Current file
+	struct npc_src_list *file; //Current file
 
 	ShowStatus("Loading NPCs...\r");
 	for( file = npc_src_files; file != NULL; file = file->next ) {
