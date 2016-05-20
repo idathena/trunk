@@ -10014,7 +10014,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_TELEKINESIS_INTENSE:
 				val2 = 10 * val1;
-				val3 = 40 * val1;
+				val3 = 100 + 40 * val1;
 				break;
 			case SC_OFFERTORIUM:
 				val2 = 30 * val1; //Heal Power Increase
