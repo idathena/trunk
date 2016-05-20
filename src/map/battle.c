@@ -371,10 +371,6 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 				if( sc->data[SC_DELUGE] )
 					ratio += sc->data[SC_DELUGE]->val3;
 				break;
-			case ELE_GHOST:
-				if( sc->data[SC_TELEKINESIS_INTENSE] )
-					ratio += sc->data[SC_TELEKINESIS_INTENSE]->val3;
-				break;
 		}
 	}
 
@@ -5804,6 +5800,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						skillratio += -30 + 10 * skill_lv;
 						if(tsc && tsc->data[SC_WHITEIMPRISON])
 							skillratio <<= 1;
+						if(sc && sc->data[SC_TELEKINESIS_INTENSE])
+							skillratio = skillratio * sc->data[SC_TELEKINESIS_INTENSE]->val3 / 100;
 						break;
 					case MG_FIREBALL:
 #ifdef RENEWAL
@@ -5819,6 +5817,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 							skillratio += 5 * skill_lv;
 						if(tsc && tsc->data[SC_WHITEIMPRISON])
 							skillratio <<= 1;
+						if(sc && sc->data[SC_TELEKINESIS_INTENSE])
+							skillratio = skillratio * sc->data[SC_TELEKINESIS_INTENSE]->val3 / 100;
 						break;
 					case MG_FIREWALL:
 						skillratio -= 50;
@@ -5873,6 +5873,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						skillratio += 25;
 						if(tsc && tsc->data[SC_WHITEIMPRISON])
 							skillratio <<= 1;
+						if(sc && sc->data[SC_TELEKINESIS_INTENSE])
+							skillratio = skillratio * sc->data[SC_TELEKINESIS_INTENSE]->val3 / 100;
 						break;
 					case SL_STIN: //Target size must be small (0) for full damage
 						skillratio += (tstatus->size != SZ_SMALL ? -99 : 10 * skill_lv);
@@ -5972,6 +5974,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						RE_LVL_DMOD(100);
 						if(tsc && tsc->data[SC_WHITEIMPRISON])
 							skillratio <<= 1;
+						if(sc && sc->data[SC_TELEKINESIS_INTENSE])
+							skillratio = skillratio * sc->data[SC_TELEKINESIS_INTENSE]->val3 / 100;
 						break;
 					case WL_FROSTMISTY:
 						skillratio += 100 + 100 * skill_lv;
