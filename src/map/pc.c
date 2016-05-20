@@ -1558,7 +1558,7 @@ static int pc_calc_skillpoint(struct map_session_data *sd)
 			uint16 inf2 = skill_get_inf2(i);
 
 			if((!(inf2&INF2_QUEST_SKILL) || battle_config.quest_skill_learn) &&
-				!(inf2&(INF2_WEDDING_SKILL|INF2_SPIRIT_SKILL)) //Do not count wedding/link skills. [Skotlex]
+				!(inf2&(INF2_WEDDING_SKILL|INF2_SPIRIT_SKILL)) //Do not count wedding/link skills [Skotlex]
 				) {
 				if(sd->status.skill[i].flag == SKILL_FLAG_PERMANENT)
 					skill_point += skill_lv;
@@ -7005,7 +7005,7 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 		if( lv < 1 )
 			continue;
 		inf2 = skill_get_inf2(i);
-		if( inf2&(INF2_WEDDING_SKILL|INF2_SPIRIT_SKILL) ) //Avoid reseting wedding/linker skills.
+		if( inf2&(INF2_WEDDING_SKILL|INF2_SPIRIT_SKILL) ) //Avoid reseting wedding/linker skills
 			continue;
 		//Don't reset trick dead if not a novice/baby
 		if( i == NV_TRICKDEAD && (sd->class_&MAPID_UPPERMASK) != MAPID_NOVICE ) {

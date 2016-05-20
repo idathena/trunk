@@ -15905,6 +15905,16 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 			}
 			break;
 #ifdef RENEWAL
+		case WZ_FIREPILLAR:
+			if( skill_lv < 5 )
+				break;
+		//Fall through
+		case HW_GRAVITATION:
+		case MG_SAFETYWALL:
+		case MG_STONECURSE:
+			if( sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_WIZARD )
+				req.sp += req.sp * 50 / 100;
+			break;
 		case AS_SONICBLOW:
 			if( sc ) {
 				if( sc->data[SC_EDP] )
