@@ -354,10 +354,8 @@ bonus bPerfectHide,n;			Hidden/cloaked character is no longer detected by monste
 bonus bNoKnockback,n;			Character is no longer knocked back by enemy skills with such effect (n is meaningless).
 bonus bClassChange,n;			Gives a n/100% chance to change the attacked monster's class with normal attack.
 bonus bHPDrainValue,n;			Heals +n HP with normal attack.
-bonus2 bWeaponAtk,x,n;			Adds n ATK when weapon of type x is equipped.
-					x:	see doc/item_db.txt -> view -> weapons for possible values
-bonus2 bWeaponAtkRate,x,n;		Adds n% damage to normal attacks when weapon of type x is equipped.
-					x:	see doc/item_db.txt -> view -> weapons for possible values
+bonus bWeaponAtkRate,n;		Weapon ATK + n%
+bonus bWeaponMatkRate,n;		Weapon Magical ATK + n%
 bonus bDelayrate,n;			Increases skill delay by n%.
 bonus3 bAddEffOnSkill,s,x,n;		Adds a n/100% chance to cause status change x on enemy when using skill s (supports skill names)
 bonus4 bAddEffOnSkill,s,x,n,t;		Adds a n/100% chance to cause status change x when using skill s (supports skill names)

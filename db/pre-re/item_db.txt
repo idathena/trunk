@@ -1430,7 +1430,7 @@
 2542,Flame_Manteau,Flame Manteau of Naght Sieger,4,20,,700,,4,,1,0xFFFFFFFE,2,2,4,,70,1,0,{ bonus bMaxHPrate,5; bonus bMdef,2; bonus bMatkRate,1; bonus2 bAddDefEle,Ele_Fire,2; },{},{}
 2543,Sylphid_Manteau,Sylphid Manteau,4,20,,0,,9,,0,0xFFFFFFFF,7,2,4,,0,0,0,{ bonus bFlee,13; bonus2 bSubEle,Ele_Neutral,13; bonus bFlee2,1; },{},{}
 2544,Leather_Of_Tendrilion,Leather of Tendrilion,4,20,,300,,3,,1,0x00CFDF80,2,2,4,,0,1,0,{ bonus2 bSubEle,Ele_Water,5; bonus2 bSubEle,Ele_Earth,5; bonus2 bSubRace,RC_Plant,5; bonus2 bSubRace,RC_Brute,5; },{},{}
-2545,Musika,Musika,4,20,,500,,2,,1,0x00008100,2,2,4,,70,1,0,{ bonus bMdef,3; bonus3 bAutoSpellwhenhit,"AL_HEAL",(getskilllv("AL_HEAL")>0?getskilllv("AL_HEAL"):1),20; },{},{}
+2545,Musika,Musika,4,20,,500,,2,,1,0x00008100,2,2,4,,70,1,0,{ bonus bMdef,3; bonus3 bAutoSpellwhenhit,"AL_HEAL",(getskilllv("AL_HEAL")>1?getskilllv("AL_HEAL"):1),20; },{},{}
 2546,Beach_Manteau,Beach Manteau,4,20,,600,,0,,1,0xFFFFFFFF,7,2,4,,0,1,0,{ bonus bStr,1; bonus bInt,1; },{},{}
 2547,Cheap_Running_Shirts,Cheap Undershirt,4,0,,0,,8,,0,0xFFFFFFFF,7,2,4,,0,1,0,{ bonus bDex,2; bonus bFlee,10; bonus2 bSubEle,Ele_Neutral,10; bonus bMdef,1; },{},{}
 2548,Muffler_C,Neo Muffler,4,0,,0,,5,,0,0xFFFFFFFE,2,2,4,,95,0,0,{ bonus2 bSubRace,RC_DemiHuman,10; bonus bMaxHPrate,10; bonus2 bSubEle,Ele_Water,5; bonus2 bSubEle,Ele_Fire,5; bonus2 bSubEle,Ele_Holy,5; bonus2 bSubEle,Ele_Dark,5; },{},{}

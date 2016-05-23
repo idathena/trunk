@@ -338,8 +338,6 @@ struct map_session_data {
 	int weapon_coma_ele[ELE_MAX];
 	int weapon_coma_race[RC_MAX];
 	int weapon_coma_class[CLASS_MAX];
-	int weapon_atk[16];
-	int weapon_atk_rate[16];
 	int arrow_adddefele[ELE_MAX];
 	int arrow_addrace[RC_MAX];
 	int arrow_addclass[CLASS_MAX];
@@ -448,6 +446,7 @@ struct map_session_data {
 		short ematk; //Matk bonus from equipment
 		short eatk; //Atk bonus from equipment
 		uint8 absorb_dmg_maxhp; //[Cydh]
+		short weapon_atk_rate, weapon_matk_rate;
 	} bonus;
 	//Zeroed vars end here
 

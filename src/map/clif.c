@@ -16278,6 +16278,7 @@ void clif_mercenary_updatestatus(struct map_session_data *sd, int type)
 	switch( type ) {
 		case SP_ATK1: {
 				int atk = rnd()%(status->rhw.atk2 - status->rhw.atk + 1) + status->rhw.atk;
+
 				WFIFOL(fd,4) = cap_value(atk, 0, INT16_MAX);
 			}
 			break;

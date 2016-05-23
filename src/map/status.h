@@ -2016,7 +2016,7 @@ struct status_data {
 		race, //See enum e_race
 		class_; //See enum e_classAE
 
-	struct weapon_atk rhw, lhw; //Right Hand/Left Hand Weapon.
+	struct weapon_atk rhw, lhw; //Right Hand/Left Hand Weapon
 };
 
 //Additional regen data that only players have.

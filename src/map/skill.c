@@ -1559,7 +1559,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			break;
 		case SU_SCAROFTAROU:
 			sc_start(src,bl,SC_BITESCAR,10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
-			sc_start(src,bl,SC_STUN,10,skill_lv,skill_get_time2(skill_id,skill_lv)); //Custom
+			status_change_start(src,bl,SC_STUN,100,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDTICK); //Custom
 			break;
 		case SU_LUNATICCARROTBEAT:
 			sc_start(src,bl,SC_STUN,20,skill_lv,skill_get_time2(skill_id,skill_lv));

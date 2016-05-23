@@ -543,8 +543,8 @@ bNoKnockback	1077
 bClassChange	1078
 bHPDrainValue	1079
 bSPDrainValue	1080
-bWeaponAtk	1081
-bWeaponAtkRate	1082
+bWeaponAtkRate	1081
+bWeaponMatkRate	1082
 bDelayrate	1083
 bHPDrainValueRace	1084
 bSPDrainValueRace	1085
