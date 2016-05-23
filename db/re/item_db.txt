@@ -2107,7 +2107,10 @@
 2948,Demon_Wing,Demon Wing,4,20,,100,,0,,1,0xFFFFFFFF,63,2,136,,70,0,0,{ bonus bFlee,5; },{},{}
 2949,Silversmith_Bracelet,Silversmith Bracelet,4,20,,100,,3,,1,0xFFFFFFFF,63,2,136,,60,0,0,{ bonus bAllStats,1; bonus bMdef,3; skill "SA_SPELLBREAKER",5; },{},{}
 2950,Rune_Ring,Rune Ring,4,20,,0,,0,,0,0xFFFFFFFF,63,2,136,,1:100,0,0,{ bonus2 bExpAddRace,RC_All,10; },{},{}
-2954,Kvasir_Ring_Brown,Kvasir Ring Brown,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bMaxHP,100; /* skill "Dust of Galaxy",1; */ },{},{}
+2951,Kvasir_Ring_Blue,Kvasir Ring Blue,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bMaxSP,30; skill "ECL_SNOWFLIP",1;},{},{}
+2952,Kvasir_Ring_Red,Kvasir Ring Red,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bMaxSP,30; skill "ECL_PEONYMAMY",1;},{},{}
+2953,Kvasir_Ring_Green,Kvasir Ring Green,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bMaxHP,100; skill "ECL_SADAGUI",1;},{},{}
+2954,Kvasir_Ring_Brown,Kvasir Ring Brown,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bMaxHP,100; skill "ECL_SEQUOIADUST",1;},{},{}
 2956,Safety_Ring_,Advanced Safety Ring,4,75000,,100,,10,,1,0xFFFFFFFE,63,2,136,,50,0,0,{ bonus bMdef,5; bonus bAllStats,1; },{},{}
 2957,Good_Ring_Of_Flame_Lord,Advanced Ring of Flame Lord,4,20,,100,,0,,0,0xFEDFFF80,63,2,136,,85,0,0,{ bonus bStr,3; bonus bVit,2; bonus bBaseAtk,20; bonus2 bSubEle,Ele_Fire,10; bonus3 bAutoSpell,"CH_SOULCOLLECT",1,30; bonus3 bAutoSpell,"MO_EXPLOSIONSPIRITS",1,10; bonus3 bAutoSpell,"PA_PRESSURE",2,30; bonus3 bAutoSpell,"MG_FIREBALL",1,150; bonus3 bAutoSpell,"KN_BOWLINGBASH",5,20; },{},{}
 2958,Good_Ring_Of_Resonance,Advanced Ring of Resonance,4,20,,100,,2,,0,0xFEDFFF80,63,2,136,,85,0,0,{ bonus bAgi,3; bonus bVit,1; bonus bMdef,2; bonus bMatk,10; bonus4 bAutoSpellWhenHit,"WZ_QUAGMIRE",1,50,0; bonus3 bAutoSpellWhenHit,"AS_SPLASHER",10,20; bonus3 bAutoSpellWhenHit,"AL_HEAL",10,30; bonus3 bAutoSpellWhenHit,"HP_ASSUMPTIO",3,20; bonus3 bAutoSpellWhenHit,"CG_TAROTCARD",5,20; },{},{}
