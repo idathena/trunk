@@ -1809,7 +1809,7 @@ static int64 battle_calc_base_damage(struct block_list *src, struct status_data 
 			atkmin = atkmax;
 	} else { //PCs
 		atkmax = watk->atk;
-		type = (watk == &status->lhw) ? EQI_HAND_L : EQI_HAND_R;
+		type = (watk == &status->lhw ? EQI_HAND_L : EQI_HAND_R);
 		if(!(flag&1) || (flag&2)) { //Normal attacks
 			atkmin = status->dex;
 			if(sd->equip_index[type] >= 0 && sd->inventory_data[sd->equip_index[type]])
@@ -1882,19 +1882,17 @@ static int64 battle_calc_base_damage(struct block_list *src, struct status_data 
 	else
 		damage += status->batk;
 
-	//Rodatazone says that Overrefine bonuses are part of base atk
-	//Here we also apply the weapon_atk_rate bonus so it is correctly applied on left/right hands
+	//Rodatazone says that overrefine bonuses are part of base atk
 	if(sd) {
-		if(type == EQI_HAND_L) {
-			if(sd->left_weapon.overrefine)
-				damage += rnd()%sd->left_weapon.overrefine + 1;
-			if(sd->weapon_atk_rate[sd->weapontype2])
-				damage += damage * sd->weapon_atk_rate[sd->weapontype2] / 100;
-		} else { //Right hand
-			if(sd->right_weapon.overrefine)
-				damage += rnd()%sd->right_weapon.overrefine + 1;
-			if(sd->weapon_atk_rate[sd->weapontype1])
-				damage += damage * sd->weapon_atk_rate[sd->weapontype1] / 100;
+		switch(type) {
+			case EQI_HAND_L:
+				if(sd->left_weapon.overrefine)
+					damage += rnd()%sd->left_weapon.overrefine + 1;
+				break;
+			case EQI_HAND_R:
+				if(sd->right_weapon.overrefine)
+					damage += rnd()%sd->right_weapon.overrefine + 1;
+				break;
 		}
 	}
 	return damage;

@@ -3158,8 +3158,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->weapon_coma_ele)
 		+ sizeof(sd->weapon_coma_race)
 		+ sizeof(sd->weapon_coma_class)
-		+ sizeof(sd->weapon_atk)
-		+ sizeof(sd->weapon_atk_rate)
 		+ sizeof(sd->arrow_adddefele)
 		+ sizeof(sd->arrow_addrace)
 		+ sizeof(sd->arrow_addclass)
@@ -3301,18 +3299,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 				wd = &sd->right_weapon;
 				watk = &status->rhw;
 			}
-			watk->atk += sd->inventory_data[index]->atk;
-			if(r)
-				watk->atk2 += refine_info[wlv].bonus[r - 1] / 100;
-#ifdef RENEWAL
-			watk->matk += sd->inventory_data[index]->matk;
-			watk->wlv = wlv;
-			if(r && sd->weapontype1 != W_BOW) //Renewal magic attack refine bonus
-				watk->matk += refine_info[wlv].bonus[r - 1] / 100;
-#endif
-			if(r) //Overrefine bonus
-				wd->overrefine = refine_info[wlv].randombonus_max[r - 1] / 100;
-			watk->range += sd->inventory_data[index]->range;
 			if(sd->inventory_data[index]->script && (pc_has_permission(sd,PC_PERM_USE_ALL_EQUIPMENT) ||
 				!itemdb_isNoEquip(sd->inventory_data[index],sd->bl.m))) {
 				if(wd == &sd->left_weapon) {
@@ -3324,6 +3310,22 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 				if(!calculating) //Abort, run_script retriggered this [Skotlex]
 					return 1;
 			}
+			watk->atk = sd->inventory_data[index]->atk;
+			if(sd->bonus.weapon_atk_rate)
+				watk->atk += watk->atk * sd->bonus.weapon_atk_rate / 100;
+			if(r)
+				watk->atk2 += refine_info[wlv].bonus[r - 1] / 100;
+#ifdef RENEWAL
+			watk->matk = sd->inventory_data[index]->matk;
+			if(sd->bonus.weapon_matk_rate)
+				watk->matk += watk->matk * sd->bonus.weapon_matk_rate / 100;
+			watk->wlv = wlv;
+			if(r && sd->weapontype1 != W_BOW) //Renewal magic attack refine bonus
+				watk->matk += refine_info[wlv].bonus[r - 1] / 100;
+#endif
+			if(r) //Overrefine bonus
+				wd->overrefine = refine_info[wlv].randombonus_max[r - 1] / 100;
+			watk->range += sd->inventory_data[index]->range;
 			if(sd->status.inventory[index].card[0] == CARD0_FORGE) { //Forged weapon
 				wd->star += (sd->status.inventory[index].card[1]>>8);
 				if(wd->star >= 15)
@@ -3562,9 +3564,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	//------ ATTACK CALCULATION ------
 	//Base batk value is set in status_calc_misc
 #ifndef RENEWAL
-	//Weapon-type bonus (FIXME: Why is the weapon_atk bonus applied to base attack?)
-	if(sd->status.weapon < MAX_WEAPON_TYPE && sd->weapon_atk[sd->status.weapon])
-		status->batk += sd->weapon_atk[sd->status.weapon];
 	//Absolute modifiers from passive skills
 	if(pc_checkskill(sd,BS_HILTBINDING) > 0)
 		status->batk += 4;
@@ -3609,42 +3608,35 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	status_calc_misc(&sd->bl, status, sd->status.base_level);
 
 	//Equipment modifiers for misc settings
-	if(sd->matk_rate < 0)
-		sd->matk_rate = 0;
+	sd->matk_rate = max(sd->matk_rate,0);
 	if(sd->matk_rate != 100) {
 		status->matk_max = status->matk_max * sd->matk_rate / 100;
 		status->matk_min = status->matk_min * sd->matk_rate / 100;
 	}
 
-	if(sd->hit_rate < 0)
-		sd->hit_rate = 0;
+	sd->hit_rate = max(sd->hit_rate,0);
 	if(sd->hit_rate != 100)
 		status->hit = status->hit * sd->hit_rate / 100;
 
-	if(sd->flee_rate < 0)
-		sd->flee_rate = 0;
+	sd->flee_rate = max(sd->flee_rate,0);
 	if(sd->flee_rate != 100)
 		status->flee = status->flee * sd->flee_rate / 100;
 
-	if(sd->def2_rate < 0)
-		sd->def2_rate = 0;
+	sd->def2_rate = max(sd->def2_rate,0);
 	if(sd->def2_rate != 100)
 		status->def2 = status->def2 * sd->def2_rate / 100;
 
-	if(sd->mdef2_rate < 0)
-		sd->mdef2_rate = 0;
+	sd->mdef2_rate = max(sd->mdef2_rate,0);
 	if(sd->mdef2_rate != 100)
 		status->mdef2 = status->mdef2 * sd->mdef2_rate / 100;
 
-	if(sd->critical_rate < 0)
-		sd->critical_rate = 0;
+	sd->critical_rate = max(sd->critical_rate,0);
 	if(sd->critical_rate != 100)
 		status->cri = cap_value(status->cri * sd->critical_rate / 100, SHRT_MIN, SHRT_MAX);
 	if(pc_checkskill(sd,SU_POWEROFLIFE) > 0)
 		status->cri += 200;
 
-	if(sd->flee2_rate < 0)
-		sd->flee2_rate = 0;
+	sd->flee2_rate = max(sd->flee2_rate,0);
 	if(sd->flee2_rate != 100)
 		status->flee2 = status->flee2 * sd->flee2_rate / 100;
 
