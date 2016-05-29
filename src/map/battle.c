@@ -4430,13 +4430,15 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			RE_ALLATK_ADDRATE(wd, 100);
 		}
 		if(!skill_id) {
-			if(sc->data[SC_ENCHANTBLADE]) { //[((Skill Level x 20) + 100) x (Caster's Base Level / 150)] + Caster's INT
-				int64 dmg = (sc->data[SC_ENCHANTBLADE]->val1 * 20 + 100) * status_get_lv(src) / 150 + status_get_int(src);
+			if(sc->data[SC_ENCHANTBLADE]) { //[((Skill Level x 20) + 100) x (Caster's Base Level / 150)] + Caster's INT + MATK - MDEF - MDEF2
+				int64 dmg = sc->data[SC_ENCHANTBLADE]->val2 + status_get_matk(src, 2);
 				short totalmdef = tstatus->mdef + tstatus->mdef2;
 
-				if((dmg = dmg - totalmdef + status_get_matk(src, 2))) {
+				if((dmg = dmg - totalmdef)) {
 					ATK_ADD(wd.damage, wd.damage2, dmg);
-					RE_ALLATK_ADD(wd, dmg);
+#ifdef RENEWAL
+					ATK_ADD(wd.weaponAtk, wd.weaponAtk2, dmg);
+#endif
 				}
 			}
 			if(sc->data[SC_GIANTGROWTH] && rnd()%100 < sc->data[SC_GIANTGROWTH]->val2) { //+200% damage
