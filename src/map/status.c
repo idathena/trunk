@@ -11185,6 +11185,10 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			if (sc->data[SC_ENDURE] && !sc->data[SC_ENDURE]->val4)
 				status_change_end(bl,SC_ENDURE,INVALID_TIMER);
 			break;
+		case SC_TENSIONRELAX:
+			if (sc->data[SC_WEIGHT50] || sc->data[SC_WEIGHT90])
+				status_get_regen_data(bl)->state.overweight = 1; //Add the overweight flag back
+			break;
 		case SC_HALLUCINATIONWALK:
 			sc_start(bl,bl,SC_HALLUCINATIONWALK_POSTDELAY,100,sce->val1,skill_get_time2(status_sc2skill(type),sce->val1));
 			break;
