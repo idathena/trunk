@@ -1928,7 +1928,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 				time = 3000;
 				sc_flag = SCFLAG_FIXEDTICK;
 			}
-			if(dstsd->addeff2[i].flag&ATF_TARGET)
+			if(dstsd->addeff2[i].flag&ATF_TARGET && bl->id != src->id)
 				status_change_start(src,src,type,rate,7,(type == SC_BURNING) ? 1000 : 0,(type == SC_BURNING ? src->id : 0),0,time,sc_flag);
 			if(dstsd->addeff2[i].flag&ATF_SELF && !status_isdead(bl))
 				status_change_start(src,bl,type,rate,7,(type == SC_BURNING) ? 1000 : 0,(type == SC_BURNING ? src->id : 0),0,time,sc_flag);
@@ -5565,9 +5565,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 	type = status_skill2sc(skill_id);
 	tsc = status_get_sc(bl);
-	tsce = (tsc && type != -1) ? tsc->data[type] : NULL;
+	tsce = (tsc && type != SC_NONE) ? tsc->data[type] : NULL;
 
-	if(bl->id != src->id && type > -1 && (i = skill_get_ele(skill_id,skill_lv)) > ELE_NEUTRAL &&
+	if(bl->id != src->id && type > SC_NONE && (i = skill_get_ele(skill_id,skill_lv)) > ELE_NEUTRAL &&
 		skill_get_inf(skill_id) != INF_SUPPORT_SKILL && battle_attr_fix(NULL,NULL,100,i,tstatus->def_ele,tstatus->ele_lv) <= 0)
 		return 1; //Skills that cause an status should be blocked if the target element blocks its element
 
@@ -7410,6 +7410,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_REUSE_CRUSHSTRIKE:		case SC_REUSE_REFRESH:		case SC_REUSE_STORMBLAST:
 							case SC_REUSE_LIMIT_MTF:		case SC_REUSE_LIMIT_ECL:	case SC_REUSE_LIMIT_RECALL:
 							case SC_REUSE_LIMIT_ASPD_POTION:	case SC_SPRITEMABLE:		case SC_BITESCAR:
+							case SC_ACTIVE_MONSTER_TRANSFORM:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )
@@ -8955,7 +8956,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_REUSE_LIMIT_G:			case SC_REUSE_LIMIT_H:		case SC_REUSE_MILLENNIUMSHIELD:
 							case SC_REUSE_CRUSHSTRIKE:		case SC_REUSE_REFRESH:		case SC_REUSE_STORMBLAST:
 							case SC_REUSE_LIMIT_MTF:		case SC_REUSE_LIMIT_ECL:	case SC_REUSE_LIMIT_RECALL:
-							case SC_REUSE_LIMIT_ASPD_POTION:	case SC_SPRITEMABLE:
+							case SC_REUSE_LIMIT_ASPD_POTION:	case SC_SPRITEMABLE:		case SC_ACTIVE_MONSTER_TRANSFORM:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )

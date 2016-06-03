@@ -777,6 +777,7 @@ typedef enum sc_type {
 	SC_CBC_POSTDELAY,
 
 	SC_LUXANIMA,
+	SC_ACTIVE_MONSTER_TRANSFORM,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

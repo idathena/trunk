@@ -997,6 +997,7 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_DEFSET] = SI_SET_NUM_DEF;
 	StatusIconChangeTable[SC_MDEFSET] = SI_SET_NUM_MDEF;
 	StatusIconChangeTable[SC_MONSTER_TRANSFORM] = SI_MONSTER_TRANSFORM;
+	StatusIconChangeTable[SC_ACTIVE_MONSTER_TRANSFORM] = SI_ACTIVE_MONSTER_TRANSFORM;
 	StatusIconChangeTable[SC_ALL_RIDING] = SI_ALL_RIDING;
 	StatusIconChangeTable[SC_PUSH_CART] = SI_ON_PUSH_CART;
 	StatusIconChangeTable[SC_MTF_ASPD] = SI_MTF_ASPD;
@@ -1200,6 +1201,7 @@ void initChangeTables(void) {
 	StatusDisplayType[SC_AKAITSUKI]		  = true;
 	StatusDisplayType[SC_GRANITIC_ARMOR]	  = true;
 	StatusDisplayType[SC_MONSTER_TRANSFORM]	  = true;
+	StatusDisplayType[SC_ACTIVE_MONSTER_TRANSFORM]	= true;
 	StatusDisplayType[SC_DARKCROW]		  = true;
 	StatusDisplayType[SC_OFFERTORIUM]	  = true;
 	StatusDisplayType[SC_TELEKINESIS_INTENSE] = true;
@@ -7431,16 +7433,16 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 				rate = max(rate,5000); //50%
 				break;
 		}
-		if (sd && SC_COMMON_MIN <= type && type <= SC_COMMON_MAX) { //Item resistance (only applies to rate%)
+		if (sd && type > SC_NONE && type < SC_MAX) { //Item resistance (only applies to rate%)
 			int bonus = 0;
 
-			if (sd->reseff[type - SC_COMMON_MIN] > 0)
-				bonus += rate * sd->reseff[type - SC_COMMON_MIN] / 10000;
+			if (sd->reseff[type])
+				bonus += rate * sd->reseff[type] / 10000;
 			if (sd->sc.data[SC_COMMONSC_RESIST])
 				bonus += rate * sd->sc.data[SC_COMMONSC_RESIST]->val1 / 100;
 			rate -= bonus;
 		}
-		if (rate > 0 && rate%10 != 0)
+		if (rate && rate%10)
 			rate += (10 - rate%10); //Aegis accuracy
 	}
 
@@ -10030,6 +10032,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 20 + 20 * val1;
 				break;
 			case SC_MONSTER_TRANSFORM:
+			case SC_ACTIVE_MONSTER_TRANSFORM:
 				if( !mobdb_checkid(val1) )
 					val1 = MOBID_PORING;
 				break;
@@ -10153,6 +10156,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_LIGHTNINGWALK:
 		case SC_KYOUGAKU:
 		case SC_MONSTER_TRANSFORM:
+		case SC_ACTIVE_MONSTER_TRANSFORM:
 		case SC_JP_EVENT04:
 			val_flag |= 1;
 			break;
@@ -10777,6 +10781,7 @@ int status_change_clear(struct block_list *bl,int type)
 		if(!type && !battle_config.transform_end_on_death) {
 			switch(i) {
 				case SC_MONSTER_TRANSFORM:
+				case SC_ACTIVE_MONSTER_TRANSFORM:
 				case SC_MTF_ASPD:
 				case SC_MTF_RANGEATK:
 				case SC_MTF_MATK:
@@ -11334,6 +11339,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			clif_status_load(bl,SI_DECREASEAGI,0);
 			break;
 		case SC_MONSTER_TRANSFORM:
+		case SC_ACTIVE_MONSTER_TRANSFORM:
 			if (sce->val2 != SC_NONE)
 				status_change_end(bl,(sc_type)sce->val2,INVALID_TIMER);
 			else {
@@ -12853,6 +12859,7 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 			case SC_ALL_RIDING:
 			case SC_STYLE_CHANGE:
 			case SC_MONSTER_TRANSFORM:
+			case SC_ACTIVE_MONSTER_TRANSFORM:
 			case SC_MOONSTAR:
 			case SC_SUPER_STAR:
 			case SC_MTF_ASPD:

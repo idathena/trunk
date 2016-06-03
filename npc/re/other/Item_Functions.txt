@@ -88,11 +88,13 @@ function	script	F_18691	{ //Rising_Black_Dragon
 }
 
 function	script	F_18810_D	{ //Hell_Pumpkin_Hat
+	specialeffect2 EF_POTION_BERSERK;
 	showscript "Human can show up, or get out of here Goast!!";
 	return;
 }
 
 function	script	F_18810_L	{ //Hell_Pumpkin_Hat
+	specialeffect2 EF_POTION_BERSERK;
 	showscript "Trick or Treat!!";
 	return;
 }

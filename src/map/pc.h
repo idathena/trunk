@@ -334,7 +334,7 @@ struct map_session_data {
 	int subrace2[RC2_MAX];
 	int subclass[CLASS_MAX];
 	int subsize[SZ_MAX];
-	short reseff[SC_COMMON_MAX - SC_COMMON_MIN + 1]; //@TODO: Make this for all SC?
+	short reseff[SC_MAX];
 	int weapon_coma_ele[ELE_MAX];
 	int weapon_coma_race[RC_MAX];
 	int weapon_coma_class[CLASS_MAX];

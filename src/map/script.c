@@ -10378,7 +10378,7 @@ BUILDIN_FUNC(sc_end)
 			case SC_REUSE_LIMIT_G:			case SC_REUSE_LIMIT_H:		case SC_REUSE_MILLENNIUMSHIELD:
 			case SC_REUSE_CRUSHSTRIKE:		case SC_REUSE_REFRESH:		case SC_REUSE_STORMBLAST:
 			case SC_REUSE_LIMIT_MTF:		case SC_REUSE_LIMIT_ECL:	case SC_REUSE_LIMIT_RECALL:
-			case SC_REUSE_LIMIT_ASPD_POTION:
+			case SC_REUSE_LIMIT_ASPD_POTION:	case SC_ACTIVE_MONSTER_TRANSFORM:
 				return 0;
 			default:
 				break;
@@ -19836,8 +19836,10 @@ BUILDIN_FUNC(is_clientver) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/** Turns a player into a monster and grants SC attribute effect. [malufett]
- * montransform <monster name/ID>, <duration>, <sc type>, <val1>, <val2>, <val3>, <val4>;
+/**
+ * Turns a player into a monster and grants SC attribute effect.
+ * transform <monster name/ID>, <duration>, <sc type>, <val1>, <val2>, <val3>, <val4>;
+ * active_transform <monster name/ID>, <duration>, <sc type>, <val1>, <val2>, <val3>, <val4>;
  * @param monster: Monster ID or name
  * @param duration: Transform duration in millisecond (ms)
  * @param sc_type: Type of SC that will be affected during the transformation
@@ -19845,6 +19847,7 @@ BUILDIN_FUNC(is_clientver) {
  * @param val2: Value for SC
  * @param val3: Value for SC
  * @param val4: Value for SC
+ * @author: malufett
  * @return val: 1 - success, 0 - failed
  */
 BUILDIN_FUNC(montransform) {
@@ -19852,6 +19855,7 @@ BUILDIN_FUNC(montransform) {
 	enum sc_type type;
 	int tick, mob_id, val1, val2, val3, val4;
 	struct script_data *data;
+	const char *cmd = script_getfuncname(st);
 
 	if( (sd = script_rid2sd(st)) == NULL )
 		return 0;
@@ -19906,8 +19910,13 @@ BUILDIN_FUNC(montransform) {
 			clif_displaymessage(sd->fd,msg_txt(1491)); // Cannot transform into monster while in disguise.
 			return 0;
 		}
-		status_change_end(&sd->bl,SC_MONSTER_TRANSFORM,INVALID_TIMER); //Clear previous
-		sc_start2(NULL,&sd->bl,SC_MONSTER_TRANSFORM,100,mob_id,type,tick);
+		if( !strcmp(cmd,"active_transform") ) {
+			status_change_end(&sd->bl,SC_ACTIVE_MONSTER_TRANSFORM,INVALID_TIMER); //Clear previous
+			sc_start2(NULL,&sd->bl,SC_ACTIVE_MONSTER_TRANSFORM,100,mob_id,type,tick);
+		} else {
+			status_change_end(&sd->bl,SC_MONSTER_TRANSFORM,INVALID_TIMER);
+			sc_start2(NULL,&sd->bl,SC_MONSTER_TRANSFORM,100,mob_id,type,tick);
+		}
 		if( type != SC_NONE )
 			sc_start4(NULL,&sd->bl,type,100,val1,val2,val3,val4,tick);
 	}
@@ -21036,6 +21045,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(is_clientver,"ii?"),
 	//Monster Transform [malufett]
 	BUILDIN_DEF2(montransform,"transform","vi?????"),
+	BUILDIN_DEF2(montransform,"active_transform","vi?????"),
 	BUILDIN_DEF(bonus_script,"si????"),
 	BUILDIN_DEF(bonus_script_clear,"??"),
 	BUILDIN_DEF(vip_status,"i?"),
