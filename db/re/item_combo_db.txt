@@ -157,7 +157,7 @@
 2183:15068,{ bonus2 bSubEle,Ele_Neutral,5; }
 2183:15068:18776:20710:22015,{ bonus bMaxHP,900; bonus bMaxSP,100; bonus3 bAutoSpellWhenHit,"HP_ASSUMPTIO",1,30; }
 2183:22015,{ bonus bAllStats,2; }
-2189:20725,{ set .@r,getequiprefinerycnt(EQI_HAND_L); if(.@r>6) bonus2 bSubEle,Ele_All,(.@r-6)*2; autobonus "{ bonus2 bHPLossRate,30,1000; bonus bMatk,getequiprefinerycnt(EQI_GARMENT)*5/3; }",3+getequiprefinerycnt(EQI_GARMENT)*3,10000,BF_MAGIC,"{ specialeffect2 EF_POTION_BERSERK; transform 1930,10000; }"; }
+2189:20725,{ set .@r,getequiprefinerycnt(EQI_HAND_L); if(.@r>6) bonus2 bSubEle,Ele_All,(.@r-6)*2; autobonus "{ bonus2 bHPLossRate,30,1000; bonus bMatk,getequiprefinerycnt(EQI_GARMENT)*5/3; }",3+getequiprefinerycnt(EQI_GARMENT)*3,10000,BF_MAGIC,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1930,10000; }"; }
 2198:5966,{ set .@r,getequiprefinerycnt(EQI_HAND_L); bonus2 bSkillCooldown,"WL_COMET",-(.@r>=9?40000:(.@r>=7?20000:0)); }
 2241:5136,{ bonus bMaxHP,700; bonus bMaxSP,50; bonus4 bAutoSpellWhenHit,"AL_INCAGI",10,30,1; }
 2254:18912,{ bonus2 bExpAddRace,RC_All,5; }
@@ -314,7 +314,7 @@
 2913:15040,{ bonus bBaseAtk,getequiprefinerycnt(EQI_ARMOR)*2; }
 2536:2948,{ bonus bFlee2,2; }
 2957:2958,{ bonus4 bAutoSpell,"MO_EXTREMITYFIST",1,3,1; bonus3 bAutoSpell,"PR_LEXAETERNA",1,20; bonus3 bAutoSpell,"AS_SONICBLOW",5,50; bonus3 bAutoSpell,"MO_INVESTIGATE",5,20; bonus3 bAutoSpell,"ASC_METEORASSAULT",2,50; }
-2959:18756,{ set .@r,3+getequiprefinerycnt(EQI_HEAD_TOP)*3; autobonus "{ bonus2 bSPLossRate,5,1000; bonus bBaseAtk,30; }",.@r,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; transform 1785,5000; }"; autobonus2 "{ bonus2 bSPLossRate,5,1000; bonus bBaseAtk,30; }",.@r,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; transform 1785,5000; }"; }
+2959:18756,{ set .@r,3+getequiprefinerycnt(EQI_HEAD_TOP)*3; autobonus "{ bonus2 bSPLossRate,5,1000; bonus bBaseAtk,30; }",.@r,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1785,5000; }"; autobonus2 "{ bonus2 bSPLossRate,5,1000; bonus bBaseAtk,30; }",.@r,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1785,5000; }"; }
 2963:15073,{ bonus bAspdRate,5; }
 2963:15074,{ bonus bDelayrate,-5; bonus2 bSubRace,RC_DemiHuman,5; }
 2964:15073,{ bonus bDelayrate,-5; bonus2 bSubRace,RC_DemiHuman,5; }

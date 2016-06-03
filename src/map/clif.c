@@ -10428,8 +10428,10 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	if(sd->sc.opt2) //Client loses these on warp
 		clif_changeoption(&sd->bl);
 
-	if(sd->sc.data[SC_MONSTER_TRANSFORM] && battle_config.mon_trans_disable_in_gvg && map_flag_gvg2(sd->bl.m)) {
+	if((sd->sc.data[SC_MONSTER_TRANSFORM] || sd->sc.data[SC_ACTIVE_MONSTER_TRANSFORM]) &&
+		battle_config.mon_trans_disable_in_gvg && map_flag_gvg2(sd->bl.m)) {
 		status_change_end(&sd->bl,SC_MONSTER_TRANSFORM,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_ACTIVE_MONSTER_TRANSFORM,INVALID_TIMER);
 		clif_displaymessage(sd->fd,msg_txt(1493)); // Transforming into monster is not allowed in Guild Wars.
 	}
 

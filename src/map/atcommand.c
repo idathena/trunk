@@ -4821,7 +4821,7 @@ ACMD_FUNC(disguise)
 		return -1;
 	}
 
-	if (sd->sc.data[SC_MONSTER_TRANSFORM]) {
+	if (sd->sc.data[SC_MONSTER_TRANSFORM] || sd->sc.data[SC_ACTIVE_MONSTER_TRANSFORM]) {
 		clif_displaymessage(fd, msg_txt(1492)); // Character cannot be disguised while in monster form.
 		return -1;
 	}

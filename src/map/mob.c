@@ -2601,9 +2601,11 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		if(md->npc_event[0] && !md->state.npc_killmonster) {
 			if(sd && battle_config.mob_npc_event_type) {
 				pc_setparam(sd, SP_KILLERRID, sd->bl.id);
+				pc_setparam(sd, SP_KILLEDRID, md->mob_id);
 				npc_event(sd, md->npc_event, 0);
 			} else if(mvp_sd) {
-				pc_setparam(mvp_sd, SP_KILLERRID, sd ? sd->bl.id : 0);
+				pc_setparam(mvp_sd, SP_KILLERRID, (sd ? sd->bl.id : 0));
+				pc_setparam(mvp_sd, SP_KILLEDRID, md->mob_id);
 				npc_event(mvp_sd, md->npc_event, 0);
 			} else
 				npc_event_do(md->npc_event);
@@ -3637,9 +3639,9 @@ static unsigned int mob_drop_adjust(int baserate, int rate_adjust, unsigned shor
 
 	if (battle_config.logarithmic_drops && rate_adjust > 0 && rate_adjust != 100 && baserate > 0) //Logarithmic drops equation by Ishizu-Chan
 		//Equation: Droprate(x,y) = x * (5 - log(x)) ^ (ln(y) / ln(5))
-		//x is the normal Droprate, y is the Modificator.
+		//x is the normal Droprate, y is the Modificator
 		rate = rate * pow((5.0 - log10(rate)), (log(rate_adjust/100.) / log(5.0))) + 0.5;
-	else //Classical linear rate adjustment.
+	else //Classical linear rate adjustment
 		rate = rate * rate_adjust / 100;
 
 	return (unsigned int)cap_value(rate,rate_min,rate_max);
