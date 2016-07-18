@@ -3757,9 +3757,12 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					skill_toggle_magicpower(src,skl->skill_id);
 					if( skl->type == 4 ) { //Status inflicts are depend on what summoned element is used
 						const enum sc_type scs[] = { SC_BURNING,SC_BLEEDING,SC_FREEZING,SC_STUN };
+						int rate = skl->y, index = skl->x - 1, time = skill_get_time(WL_TETRAVORTEX,index + 1);
 
-						int rate = skl->y, index = skl->x - 1;
-						sc_start2(src,target,scs[index],rate,skl->skill_lv,src->id,skill_get_time(WL_TETRAVORTEX,index + 1));
+						if( !index )
+							sc_start4(src,target,scs[index],rate,skl->skill_lv,1000,src->id,0,time);
+						else
+							sc_start2(src,target,scs[index],rate,skl->skill_lv,src->id,time);
 					}
 					break;
 				case WL_SUMMON_ATK_FIRE:
@@ -8071,14 +8074,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case 2:	//All buffs removed
 							status_change_clear_buffs(bl,SCCB_BUFFS|SCCB_CHEM_PROTECT,0);
 							break;
-						case 3:	{ //1000 damage, random armor destroyed
-								status_fix_damage(src,bl,1000,0);
-								clif_damage(src,bl,tick,0,0,1000,0,DMG_NORMAL,0);
-								if (!status_isdead(bl)) {
-									int pos[] = { EQP_HELM,EQP_SHIELD,EQP_ARMOR,EQP_SHOES,EQP_GARMENT };
+						case 3:	//1000 damage, random armor destroyed
+							status_fix_damage(src,bl,1000,0);
+							clif_damage(src,bl,tick,0,0,1000,0,DMG_NORMAL,0);
+							if (!status_isdead(bl)) {
+								int pos[] = { EQP_HELM,EQP_SHIELD,EQP_ARMOR,EQP_SHOES,EQP_GARMENT };
 
-									skill_break_equip(src,bl,pos[rnd()%5],10000,BCT_ENEMY);
-								}
+								skill_break_equip(src,bl,pos[rnd()%5],10000,BCT_ENEMY);
 							}
 							break;
 						case 4:	//ATK -50%
@@ -8101,8 +8103,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 								sc_start(src,bl,sc[rnd()%3],100,skill_lv,skill_get_time2(skill_id,skill_lv));
 							}
 							break;
-						case 8:	//Curse coma and poison
-							status_change_start(src,bl,SC_COMA,100,skill_lv,0,src->id,0,0,SCFLAG_NONE);
+						case 8:	//Curse, coma and poison
+							status_change_start(src,bl,SC_COMA,10000,skill_lv,0,src->id,0,0,SCFLAG_NONE);
 							sc_start(src,bl,SC_CURSE,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 							sc_start(src,bl,SC_POISON,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 							break;
@@ -17612,7 +17614,7 @@ struct skill_unit *skill_initunit(struct skill_unit_group *group, int idx, int x
 			skill_unitsetmapcell(unit,HP_BASILICA,group->skill_lv,CELL_BASILICA,true);
 			break;
 		default:
-			if (group->state.song_dance&0x1) //Check for dissonance.
+			if (group->state.song_dance&0x1) //Check for dissonance
 				skill_dance_overlap(unit,1);
 			break;
 	}
