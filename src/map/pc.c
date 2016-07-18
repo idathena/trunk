@@ -8600,6 +8600,8 @@ bool pc_can_attack(struct map_session_data *sd, int target_id)
 		(sd->sc.data[SC_GRAVITATION] && sd->sc.data[SC_GRAVITATION]->val3 == BCT_SELF) ||
 		sd->sc.data[SC__SHADOWFORM] ||
 		sd->sc.data[SC_FALLENEMPIRE] ||
+		sd->sc.data[SC_CURSEDCIRCLE_ATKER] ||
+		sd->sc.data[SC_CURSEDCIRCLE_TARGET] ||
 		(sd->sc.data[SC_VOICEOFSIREN] && sd->sc.data[SC_VOICEOFSIREN]->val2 == target_id) ||
 		sd->sc.data[SC_ALL_RIDING] || //The client doesn't let you, this is to make cheat-safe
 		sd->sc.data[SC_KINGS_GRACE]) )

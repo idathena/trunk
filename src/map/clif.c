@@ -10922,16 +10922,13 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 		return;
 	}
 
-	//Statuses that don't let the player sit/attack/talk with NPCs(targeted)
-	//(not all are included in pc_can_attack)
+	//Statuses that don't let the player sit/attack/talk with NPCs(targeted) (not all are included in pc_can_attack)
 	if( sd->sc.count &&
 		(sd->sc.data[SC_TRICKDEAD] ||
 		(sd->sc.data[SC_AUTOCOUNTER] && action_type != 0x07) ||
 		sd->sc.data[SC_BLADESTOP] ||
 		sd->sc.data[SC_DEATHBOUND] ||
 		sd->sc.data[SC__MANHOLE] ||
-		sd->sc.data[SC_CURSEDCIRCLE_ATKER] ||
-		sd->sc.data[SC_CURSEDCIRCLE_TARGET] ||
 		sd->sc.data[SC_DEEPSLEEP] ||
 		sd->sc.data[SC_CRYSTALIZE] ||
 		sd->sc.data[SC_SUHIDE]) )
@@ -10977,10 +10974,11 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 			}
 			if( sd->ud.skilltimer != INVALID_TIMER || (sd->sc.opt1 && sd->sc.opt1 != OPT1_BURNING) )
 				break;
-			if( sd->sc.count && sd->sc.data[SC_DANCING] )
-				break;
-			if( sd->sc.cant.move ) //No sitting during these states either
-				break;
+			if( sd->sc.count && (
+				sd->sc.data[SC_DANCING] ||
+				sd->sc.data[SC_ANKLE] ||
+				(sd->sc.data[SC_GRAVITATION] && sd->sc.data[SC_GRAVITATION]->val3 == BCT_SELF)) )
+				break; //No sitting during these states either
 			sd->idletime = last_tick;
 			pc_setsit(sd);
 			skill_sit(sd,1);
@@ -11238,8 +11236,6 @@ void clif_parse_DropItem(int fd, struct map_session_data *sd)
 			sd->sc.data[SC_BLADESTOP] ||
 			(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOITEM) ||
 			sd->sc.data[SC_DEATHBOUND] ||
-			sd->sc.data[SC_CURSEDCIRCLE_ATKER] ||
-			sd->sc.data[SC_CURSEDCIRCLE_TARGET] ||
 			sd->sc.data[SC_DEEPSLEEP] ||
 			sd->sc.data[SC_CRYSTALIZE]
 		))
