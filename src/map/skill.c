@@ -4940,8 +4940,14 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 
 				for (i = SC_SPHERE_1; i <= SC_SPHERE_5; i++) {
 					if (sc->data[i]) {
-						int id = WL_TETRAVORTEX_FIRE + (sc->data[i]->val1 - WLS_FIRE);
+						uint16 id = 0;
 
+						switch (sc->data[i]->val1) {
+							case WLS_FIRE:  id = WL_TETRAVORTEX_FIRE; break;
+							case WLS_WIND:  id = WL_TETRAVORTEX_WIND; break;
+							case WLS_WATER: id = WL_TETRAVORTEX_WATER; break;
+							case WLS_STONE: id = WL_TETRAVORTEX_GROUND; break;
+						}
 						if (j < 4) {
 							int sc_index = 0, rate = 0;
 
@@ -8116,7 +8122,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							clif_damage(src,bl,tick,0,0,6666,0,DMG_NORMAL,0);
 							sc_start(src,bl,SC_INCATKRATE,100,-50,skill_get_time2(skill_id,skill_lv));
 							sc_start(src,bl,SC_INCMATKRATE,100,-50,skill_get_time2(skill_id,skill_lv));
-							sc_start(src,bl,SC_CURSE,skill_lv,100,skill_get_time2(skill_id,skill_lv));
+							sc_start(src,bl,SC_CURSE,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 							break;
 						case 11: //4444 damage
 							status_fix_damage(src,bl,4444,0);
