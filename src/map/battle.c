@@ -4606,6 +4606,8 @@ static short battle_get_defense(struct block_list *src, struct block_list *targe
 #ifndef RENEWAL
 		//VIT + rnd(0, [VIT / 20] ^ 2 - 1)
 		vit_def = (def2 / 20) * (def2 / 20);
+		if(tsc && tsc->data[SC_SKA])
+			vit_def += 100; //Eska increases the random part of the formula by 100
 		vit_def = def2 + (vit_def > 0 ? rnd()%vit_def : 0);
 #else
 		vit_def = def2;
