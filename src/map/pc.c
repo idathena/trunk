@@ -598,6 +598,18 @@ void pc_rental_expire(struct map_session_data *sd, int i)
 			status_change_end(&sd->bl, SC_STRANGELIGHTS, INVALID_TIMER);
 		if( sd->sc.data[SC_DECORATION_OF_MUSIC] )
 			status_change_end(&sd->bl, SC_DECORATION_OF_MUSIC, INVALID_TIMER);
+		if( sd->sc.data[SC_HAT_EFFECT] )
+			status_change_end(&sd->bl, SC_HAT_EFFECT, INVALID_TIMER);
+		if( sd->sc.data[SC_QSCARABA] )
+			status_change_end(&sd->bl, SC_QSCARABA, INVALID_TIMER);
+		if( sd->sc.data[SC_LJOSALFAR] )
+			status_change_end(&sd->bl, SC_LJOSALFAR, INVALID_TIMER);
+		if( sd->sc.data[SC_MAPLE_FALLS] )
+			status_change_end(&sd->bl, SC_MAPLE_FALLS, INVALID_TIMER);
+		if( sd->sc.data[SC_MERMAID_LONGING] )
+			status_change_end(&sd->bl, SC_MERMAID_LONGING, INVALID_TIMER);
+		if( sd->sc.data[SC_TIME_ACCESSORY] )
+			status_change_end(&sd->bl, SC_TIME_ACCESSORY, INVALID_TIMER);
 	}
 	clif_rental_expired(sd->fd, i, sd->status.inventory[i].nameid);
 	pc_delitem(sd, i, sd->status.inventory[i].amount, 0, 0, LOG_TYPE_OTHER);

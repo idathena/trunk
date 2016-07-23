@@ -9631,7 +9631,7 @@
 19019,Elemental_Crown,Elemental Crown,4,20,,500,,10,,1,0xFFFFFFFF,63,2,256,,50,1,1219,{ set .@r,getrefine(); bonus bDex,3+.@r/2; bonus bLongAtkRate,4; if(BaseLevel>130) bonus bDex,.@r; },{},{}
 19020,Survive_Circlet,Survive Circlet,4,20,,500,,10,,0,0xFFFFFFFF,63,2,256,,50,1,1220,{ set .@r,getrefine(); bonus bInt,3+.@r/2; bonus bMatkRate,4; if(BaseLevel>130) bonus bInt,.@r; },{},{}
 19021,Gigant_Helm,Gigant Helm,4,20,,500,,10,,0,0xFFFFFFFF,63,2,256,,50,1,1221,{ set .@r,getrefine(); bonus bStr,3+.@r/2; bonus2 bAddClass,Class_All,4; if(BaseLevel>130) bonus bStr,.@r; },{},{}
-19023,Queen_Scaraba_Crown,Queen Scaraba Crown,4,20,,1500,,0,,1,0xFFFFFFFF,63,2,257,,70,1,1231,{ set .@r,getrefine(); bonus bDefRate,-50; bonus bMdefRate,-50; bonus2 bSubRace,RC_Insect,.@r; bonus5 bAutoSpell,"NPC_WIDECONFUSE",2,100+.@r*10,BF_WEAPON|BF_MAGIC,0; },{},{}
+19023,Queen_Scaraba_Crown,Queen Scaraba Crown,4,20,,1500,,0,,1,0xFFFFFFFF,63,2,257,,70,1,1231,{ set .@r,getrefine(); bonus bDefRate,-50; bonus bMdefRate,-50; bonus2 bSubRace,RC_Insect,.@r; bonus5 bAutoSpell,"NPC_WIDECONFUSE",2,100+.@r*10,BF_WEAPON|BF_MAGIC,0; },{ sc_start SC_QSCARABA,-1,0; },{ sc_end SC_QSCARABA; }
 19024,Protect_Feathers,Protect Feathers,4,20,,500,,0,,0,0xFFFFFFFF,63,2,512,,70,0,1232,{ bonus bMdef,2+(readparam(bVit)>=120?3:0); bonus2 bSubRace,RC_DemiHuman,2+(readparam(bVit)>=108?2:0); bonus bAspdRate,-5-(readparam(bVit)>=108?5:0); if(readparam(bVit)>=120) bonus bMaxHPrate,3; },{},{}
 19025,Puppy_Ears_Hat_,Puppy Ears Hat,4,20,,200,,3,,1,0xFFFFFFFF,63,2,256,,10,1,827,{ bonus bMdef,3; bonus2 bAddRace,RC_Brute,5; bonus2 bMagicAddRace,RC_Brute,5; bonus2 bSubRace,RC_Brute,5; bonus3 bAddMonsterDropItem,7938,RC_Brute,100; },{},{}
 19026,Aegir_Helm,Aegir Helm,4,20,,800,,10,,1,0xFFFFFFFF,63,2,256,,40,1,870,{ bonus bVit,3; },{},{}
@@ -10219,7 +10219,7 @@
 20059,C_Welding_Mask,Costume Welding Mask,4,20,,0,,0,,0,0xFFFFFFFF,63,2,6144,,1,0,79,{},{},{}
 20060,C_Safety_Helmet,Costume Safety Helmet,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,95,{},{},{}
 20061,C_Ganster_Mask,Costume Gangster Mask,4,20,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,52,{},{},{}
-20062,C_Angel_Stair,Costume Angel Stair,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,,{ /* TODO: View ID */ },{},{}
+20062,C_Angel_Stair,Costume Angel Stair,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,0,{},{ sc_start SC_HAT_EFFECT,-1,0; },{ sc_end SC_HAT_EFFECT; }
 20063,C_Yellow_Brain_Hat,Costume Yellow Brain Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1228,{},{},{}
 20064,C_Blue_Brain_Hat,Costume Blue Brain Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1229,{},{},{}
 20065,C_Hairband_Of_Grandpeco,Costume Grand Peco Hairband,4,20,,0,,0,,0,0xFFFFFFFF,63,2,3072,,1,0,473,{},{},{}
@@ -10255,7 +10255,7 @@
 20096,C_Blue_Ribbon,Costume Blue Ribbon,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,441,{},{},{}
 20097,C_White_Ribbon,Costume White Ribbon,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,442,{},{},{}
 20098,C_Vampire_Hairband,Costume Vampire Hairband,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1238,{},{},{}
-20099,C_Ljosalfar,Costume Ljosalfar,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1239,{},{},{}
+20099,C_Ljosalfar,Costume Ljosalfar,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1239,{},{ sc_start SC_LJOSALFAR,-1,0; },{ sc_end SC_LJOSALFAR; }
 20100,C_Volume_Fhat,Costume Volume Fhat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1240,{},{},{}
 20101,C_Bragi_Wing_Ears,Costume Bragi Wing Ears,4,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,1,0,1241,{},{},{}
 20102,C_Horse_King_J,Costume Horse King_J,4,20,,0,,0,,0,0xFFFFFFFF,63,2,7168,,1,0,1189,{},{},{}
@@ -10310,7 +10310,7 @@
 20151,C_Poison_Spore_Hat,Costume Poison Spore Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,899,{},{},{}
 20152,C_Straw_Rice_Bag,Costume Straw Rice Bag,4,20,,0,,0,,0,0xFFFFFFFF,63,2,7168,,1,0,1273,{},{},{}
 20153,C_Monochrome_Cap,Costume Monochrome Cap,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1274,{},{},{}
-20154,C_Falling_Maple_leafs,Costume Falling Maple leafs,4,20,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,1275,{},{},{}
+20154,C_Falling_Maple_leafs,Costume Falling Maple leafs,4,20,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,1275,{},{ sc_start SC_MAPLE_FALLS,-1,0; },{ sc_end SC_MAPLE_FALLS; }
 20155,C_Lady_Feather_Hat,Costume Lady Feather Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1276,{},{},{}
 20156,C_Fan_in_Mouth,Costume Fan in Mouth,4,20,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,857,{},{},{}
 20157,C_Evolved_Blue_Fish,Costume Evolved Blue Fish,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,149,{},{},{}
@@ -10365,7 +10365,7 @@
 20206,C_Chicken_Hat1,Costume Chicken Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,7168,,1,0,1296,{},{},{}
 20207,C_Striped_Hairband,Costume Striped Hairband,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,133,{},{},{}
 20208,C_Necktie,Costume Necktie,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,443,{},{},{}
-20209,C_Mermaid_Bubbles,Costume Mermaid Bubbles,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1299,{},{},{}
+20209,C_Mermaid_Bubbles,Costume Mermaid Bubbles,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1299,{},{ sc_start SC_MERMAID_LONGING,-1,0; },{ sc_end SC_MERMAID_LONGING; }
 20210,C_Chicken_Hat2,Costume Chicken Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,7168,,1,0,1297,{},{},{}
 20211,C_Chicken_Hat3,Costume Chicken Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,7168,,1,0,1298,{},{},{}
 20212,C_Loki_&_Nidhoggur_dolls,Costume Loki & Nidhoggur dolls,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1304,{},{},{}
@@ -10396,13 +10396,13 @@
 20237,C_Pink_Fur_Hat,Costume Pink Beanie,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,281,{},{},{}
 20238,C_Blue_Drooping_Kitty,Costume Blue Drooping Cat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,277,{},{},{}
 20239,C_Large_Ribbon_Muffler,Costume Large Ribbon Muffler,4,20,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,1312,{},{},{}
-20240,C_Gift_Of_Snow,Costume Gift of Snow,4,20,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,,{ /* TODO: View ID */ },{},{}
+20240,C_Gift_Of_Snow,Costume Gift of Snow,4,20,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,0,{},{},{}
 20241,C_Eclipse_Hat,Costume Eclipse Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,922,{},{},{}
 20242,C_Snownow_Hat,Costume Snownow Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1313,{},{},{}
 20243,C_Choco_Mint_Bonnet,Costume Choco Mint Bonnet,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1314,{},{},{}
 20244,C_Zealotus_Mask,Costume Zealotus Mask,4,20,,0,,0,,0,0xFFFFFFFF,63,2,3072,,1,0,200,{},{},{}
 20245,C_Cat_Paw_Hairpin,Costume Cat Paw Hairpin,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,447,{},{},{}
-20246,C_Decoration_Of_Time,Costume Decoration of Time,4,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,1,0,1309,{},{},{}
+20246,C_Decoration_Of_Time,Costume Decoration of Time,4,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,1,0,1309,{},{ sc_start SC_TIME_ACCESSORY,-1,0; },{ sc_end SC_TIME_ACCESSORY; }
 20247,C_Black_Hand_Of_Fate,Costume Black Hand of Fate,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1310,{},{},{}
 20248,C_Black_Strong_Hair,Costume Black Hand of Fate,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1315,{ bonus bStr,2; },{},{}
 20249,C_Red_Strong_Hair,Costume Red Hand of Fate,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1316,{ bonus bInt,2; },{},{}
