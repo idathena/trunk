@@ -3434,7 +3434,7 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 	fd = sd->fd;
 	sd->fd = 0;
 
-	//Go Backwards to give better priority to advanced skills.
+	//Go Backwards to give better priority to advanced skills
 	for (i = 0, j = MAX_SKILL_TREE - 1; j >= 0 && i < MAX_MOBSKILL; j--) {
 		int skill_id = skill_tree[pc_class2idx(sd->status.class_)][j].id;
 

@@ -680,7 +680,7 @@ typedef enum sc_type {
 	SC_ANGEL_PROTECT,
 	SC_ILLUSIONDOPING,
 	SC_FLASHCOMBO,
-	SC_DEATHBOUND_POSTDELAY,
+	SC_TELEPORT_FIXEDCASTINGDELAY,
 	SC__FEINTBOMB,
 
 	//Vellum Weapon reductions
@@ -695,7 +695,6 @@ typedef enum sc_type {
 	SC_MTF_MLEATKED,
 	SC_MTF_CRIDAMAGE,
 
-	//Headgears with special animations through status
 	SC_MOONSTAR,
 	SC_SUPER_STAR,
 
@@ -778,6 +777,18 @@ typedef enum sc_type {
 
 	SC_LUXANIMA,
 	SC_ACTIVE_MONSTER_TRANSFORM,
+
+	SC_HAT_EFFECT,
+	SC_QSCARABA,
+	SC_LJOSALFAR,
+	SC_MAPLE_FALLS,
+	SC_MERMAID_LONGING,
+	SC_TIME_ACCESSORY,
+
+	SC_GEFFEN_MAGIC1,
+	SC_GEFFEN_MAGIC2,
+	SC_GEFFEN_MAGIC3,
+	SC_FENRIR_CARD,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

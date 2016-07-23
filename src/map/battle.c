@@ -4968,7 +4968,7 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 					skill_blown(target, src, skill_get_blewcount(RK_DEATHBOUND, sce->val1), unit_getdir(src), 0);
 					status_fix_damage(target, src, rdamage, clif_damage(target, src, gettick(), 0, 0, rdamage, 0, DMG_NORMAL, 0));
 					status_change_end(target, SC_DEATHBOUND, INVALID_TIMER);
-					status_change_end(target, SC_DEATHBOUND_POSTDELAY, INVALID_TIMER);
+					status_change_end(target, SC_TELEPORT_FIXEDCASTINGDELAY, INVALID_TIMER);
 				}
 			}
 			if((sce = tsc->data[SC_CRESCENTELBOW]) && rnd()%100 < sce->val2) {
@@ -6019,23 +6019,11 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 							skillratio += 1400 + 500 * skill_lv; //15 x 15 cell
 						else
 							skillratio += 900 + 500 * skill_lv; //19 x 19 cell
-
-						if(sd && sd->status.party_id) {
-							struct map_session_data *psd;
-							int p_sd[5] = {0, 0, 0, 0, 0}, c; //Just limit it to 5
-
-							c = 0;
-							memset(p_sd, 0, sizeof(p_sd));
-							party_foreachsamemap(skill_check_condition_char_sub, sd, 3, &sd->bl, &c, &p_sd, skill_id);
-							c = (c > 1 ? rnd()%c : 0);
-
-							//MATK [{( Skill Level x 400 ) x ( Caster's Base Level / 120 )} + 2500 ] %
-							if((psd = map_id2sd(p_sd[c])) && pc_checkskill(psd, WL_COMET) > 0) {
-								skillratio = skill_lv * 400;
-								RE_LVL_DMOD(120);
-								skillratio += 2500;
-								status_zap(&psd->bl, 0, skill_get_sp(skill_id, skill_lv) / 2);
-							}
+						//MATK [{( Skill Level x 400 ) x ( Caster's Base Level / 120 )} + 2500 ] %
+						if(skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),0)) {
+							skillratio = skill_lv * 400;
+							RE_LVL_DMOD(120);
+							skillratio += 2500;
 						}
 						break;
 					case WL_CHAINLIGHTNING_ATK:

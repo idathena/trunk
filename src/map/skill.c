@@ -4933,25 +4933,23 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			}
 			break;
 
-		case WL_TETRAVORTEX:
-			if (sc) {
-				int i, j = 0;
-				int types[][2] = {{0,0},{0,0},{0,0},{0,0}};
+		case WL_TETRAVORTEX: {
+				uint16 i, id;
+				uint8 j = 0;
+				int types[][2] = { {0,0},{0,0},{0,0},{0,0} };
 
-				for (i = SC_SPHERE_1; i <= SC_SPHERE_5; i++) {
-					if (sc->data[i]) {
-						uint16 id = 0;
-
-						switch (sc->data[i]->val1) {
-							case WLS_FIRE:  id = WL_TETRAVORTEX_FIRE; break;
-							case WLS_WIND:  id = WL_TETRAVORTEX_WIND; break;
-							case WLS_WATER: id = WL_TETRAVORTEX_WATER; break;
-							case WLS_STONE: id = WL_TETRAVORTEX_GROUND; break;
+				if (!sd) {
+					for (i = 1; i <= 4; i++) {
+						switch (i) {
+							case 1: id = WL_TETRAVORTEX_FIRE; break;
+							case 2: id = WL_TETRAVORTEX_WATER; break;
+							case 3: id = WL_TETRAVORTEX_WIND; break;
+							case 4: id = WL_TETRAVORTEX_GROUND; break;
 						}
 						if (j < 4) {
 							int sc_index = 0, rate = 0;
 
-							types[j][0] = (sc->data[i]->val1 - WLS_FIRE) + 1;
+							types[j][0] = i;
 							types[j][1] = 25; //25% each for equal sharing
 							if (j == 3) {
 								sc_index = types[rnd()%4][0];
@@ -4959,10 +4957,35 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 									if (types[j][0] == sc_index)
 										rate += types[j][1];
 							}
-							skill_addtimerskill(src,tick + (i - SC_SPHERE_1) * 206,bl->id,sc_index,rate,id,skill_lv,j,flag);
+							skill_addtimerskill(src,tick + (i - 1) * 206,bl->id,sc_index,rate,id,skill_lv,j,flag);
 						}
-						status_change_end(src,(sc_type)i,INVALID_TIMER);
 						j++;
+					}
+				} else if (sc) {
+					for (i = SC_SPHERE_1; i <= SC_SPHERE_5; i++) {
+						if (sc->data[i]) {
+							switch (sc->data[i]->val1) {
+								case WLS_FIRE:  id = WL_TETRAVORTEX_FIRE; break;
+								case WLS_WATER: id = WL_TETRAVORTEX_WATER; break;
+								case WLS_WIND:  id = WL_TETRAVORTEX_WIND; break;
+								case WLS_STONE: id = WL_TETRAVORTEX_GROUND; break;
+							}
+							if (j < 4) {
+								int sc_index = 0, rate = 0;
+
+								types[j][0] = (sc->data[i]->val1 - WLS_FIRE) + 1;
+								types[j][1] = 25;
+								if (j == 3) {
+									sc_index = types[rnd()%4][0];
+									for (j = 0; j < 4; j++)
+										if (types[j][0] == sc_index)
+											rate += types[j][1];
+								}
+								skill_addtimerskill(src,tick + (i - SC_SPHERE_1) * 206,bl->id,sc_index,rate,id,skill_lv,j,flag);
+							}
+							status_change_end(src,(sc_type)i,INVALID_TIMER);
+							j++;
+						}
 					}
 				}
 			}
@@ -7316,7 +7339,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_ADJUSTMENT:			case SC_MADNESSCANCEL:
 							case SC_EXTREMITYFIST2:			case SC_NORECOVER_STATE:
 							//RK
-							case SC_DEATHBOUND:			case SC_DEATHBOUND_POSTDELAY:	case SC_CRUSHSTRIKE:
+							case SC_DEATHBOUND:			case SC_CRUSHSTRIKE:
 							case SC_REFRESH:			case SC_GIANTGROWTH:		case SC_STONEHARDSKIN:
 							case SC_VITALITYACTIVATION:		case SC_FIGHTINGSPIRIT:		case SC_ABUNDANCE:
 							case SC_MILLENNIUMSHIELD:
@@ -7419,7 +7442,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_REUSE_CRUSHSTRIKE:		case SC_REUSE_REFRESH:		case SC_REUSE_STORMBLAST:
 							case SC_REUSE_LIMIT_MTF:		case SC_REUSE_LIMIT_ECL:	case SC_REUSE_LIMIT_RECALL:
 							case SC_REUSE_LIMIT_ASPD_POTION:	case SC_SPRITEMABLE:		case SC_BITESCAR:
-							case SC_ACTIVE_MONSTER_TRANSFORM:
+							case SC_ACTIVE_MONSTER_TRANSFORM:	case SC_TELEPORT_FIXEDCASTINGDELAY:	case SC_HAT_EFFECT:
+							case SC_QSCARABA:			case SC_LJOSALFAR:		case SC_MAPLE_FALLS:
+							case SC_MERMAID_LONGING:		case SC_TIME_ACCESSORY:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )
@@ -8485,7 +8510,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case RK_DEATHBOUND:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-			sc_start(src,bl,SC_DEATHBOUND_POSTDELAY,100,skill_lv,skill_get_time2(skill_id,skill_lv));
+			sc_start(src,bl,SC_TELEPORT_FIXEDCASTINGDELAY,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 
 		case RK_DRAGONHOWLING:
@@ -8869,7 +8894,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_ADJUSTMENT:			case SC_MADNESSCANCEL:
 							case SC_EXTREMITYFIST2:			case SC_NORECOVER_STATE:
 							//RK
-							case SC_DEATHBOUND:			case SC_DEATHBOUND_POSTDELAY:
+							case SC_DEATHBOUND:
 							//AB
 							case SC_EPICLESIS:			case SC_OFFERTORIUM:
 							//GX
@@ -8965,6 +8990,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_REUSE_CRUSHSTRIKE:		case SC_REUSE_REFRESH:		case SC_REUSE_STORMBLAST:
 							case SC_REUSE_LIMIT_MTF:		case SC_REUSE_LIMIT_ECL:	case SC_REUSE_LIMIT_RECALL:
 							case SC_REUSE_LIMIT_ASPD_POTION:	case SC_SPRITEMABLE:		case SC_ACTIVE_MONSTER_TRANSFORM:
+							case SC_TELEPORT_FIXEDCASTINGDELAY:	case SC_HAT_EFFECT:		case SC_QSCARABA:
+							case SC_LJOSALFAR:			case SC_MAPLE_FALLS:		case SC_MERMAID_LONGING:
+							case SC_TIME_ACCESSORY:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )
@@ -9042,9 +9070,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						dur = skill_get_time2(skill_id,skill_lv);
 					}
 				}
-				i = sc_start2(src,bl,type,rate,skill_lv,src->id,dur);
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				if( !i && sd )
+				if( sc_start2(src,bl,type,rate,skill_lv,src->id,dur) )
+					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				else if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			} else if( sd )
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
@@ -14242,7 +14270,7 @@ int skill_check_condition_char_sub(struct block_list *bl, va_list ap)
 	nullpo_ret(sd = (struct map_session_data *)src);
 
 	c = va_arg(ap,int *);
-	p_sd = va_arg(ap, int *);
+	p_sd = va_arg(ap,int *);
 	skill_id = va_arg(ap,int);
 
 	if( ((skill_id != PR_BENEDICTIO && *c >= 1) || *c >= 2) && !(skill_get_inf2(skill_id)&INF2_CHORUS_SKILL) )
@@ -14268,16 +14296,17 @@ int skill_check_condition_char_sub(struct block_list *bl, va_list ap)
 
 					dir = (unit_getdir(&sd->bl) + dir)%8; //This adjusts dir to account for the direction the sd is facing
 					if( (tsd->class_&MAPID_BASEMASK) == MAPID_ACOLYTE && (dir == 2 || dir == 6) && //Must be standing to the left/right of Priest
-						sd->status.sp >= 10 )
+						tsd->status.sp >= 10 ) //Required Acolyte classes need have more than 10 SP
 						p_sd[(*c)++] = tsd->bl.id;
 				}
 				return 1;
-			case AB_ADORAMUS: //Doesn't consume Blue Gemstone when there is at least 1 Priest class next to the caster
+			case AB_ADORAMUS:
 				if( (tsd->class_&MAPID_UPPERMASK) == MAPID_PRIEST )
 					p_sd[(*c)++] = tsd->bl.id;
 				return 1;
-			case WL_COMET: //Doesn't consume Red Gemstones when there is at least 1 Warlock class next to the caster
-				if( (tsd->class_&MAPID_THIRDMASK) == MAPID_WARLOCK )
+			case WL_COMET:
+				if( tsd->status.party_id == sd->status.party_id && (tsd->class_&MAPID_THIRDMASK) == MAPID_WARLOCK &&
+					pc_checkskill(tsd, skill_id) > 0 )
 					p_sd[(*c)++] = tsd->bl.id;
 				return 1;
 			default: { //Warning: Assuming Ensemble Dance/Songs for code speed [Skotlex]
@@ -14306,7 +14335,7 @@ int skill_check_condition_char_sub(struct block_list *bl, va_list ap)
 
 /**
  * Checks and stores partners for ensemble skills [Skotlex]
- * Max partners is 2.
+ * Max partners is limited to 5.
  * @param sd Caster
  * @param skill_id
  * @param skill_lv
@@ -14316,8 +14345,8 @@ int skill_check_condition_char_sub(struct block_list *bl, va_list ap)
 int skill_check_pc_partner(struct map_session_data *sd, uint16 skill_id, uint16 *skill_lv, int range, int cast_flag)
 {
 	static int c = 0;
-	static int p_sd[2] = { 0,0 };
-	int i;
+	static int p_sd[5] = { 0,0,0,0,0 };
+	uint8 i;
 	bool is_chorus = (skill_get_inf2(skill_id)&INF2_CHORUS_SKILL);
 
 	if (!battle_config.player_skill_partner_check || pc_has_permission(sd, PC_PERM_SKILL_UNCONDITIONAL))
@@ -14333,15 +14362,18 @@ int skill_check_pc_partner(struct map_session_data *sd, uint16 skill_id, uint16 
 						status_charge(&tsd->bl, 0, 10);
 				return c;
 			case AB_ADORAMUS:
-				if (c > 0 && (tsd = map_id2sd(p_sd[0])) != NULL) {
+				if (c && (tsd = map_id2sd(p_sd[0])) != NULL) {
 					i = 2 * (*skill_lv);
 					status_charge(&tsd->bl, 0, i);
 				}
 				break;
+			case WL_COMET:
+				i = (c > 1 ? rnd()%c : 0);
+				if (c && (tsd = map_id2sd(p_sd[i])) != NULL)
+					status_charge(&tsd->bl, 0, skill_get_sp(skill_id, *skill_lv) / 2);
+				break;
 			default: //Warning: Assuming Ensemble skills here (for speed)
-				if (is_chorus)
-					break; //Chorus skills are not to be parsed as ensambles
-				if (c > 0 && sd->sc.data[SC_DANCING] && (tsd = map_id2sd(p_sd[0])) != NULL) {
+				if (c && sd->sc.data[SC_DANCING] && (tsd = map_id2sd(p_sd[0])) != NULL) {
 					sd->sc.data[SC_DANCING]->val4 = tsd->bl.id;
 					sc_start4(&sd->bl, &tsd->bl, SC_DANCING, 100, skill_id, sd->sc.data[SC_DANCING]->val2, *skill_lv, sd->bl.id, skill_get_time(skill_id, *skill_lv) + 1000);
 					clif_skill_nodamage(&tsd->bl, &sd->bl, skill_id, *skill_lv, 1);
@@ -14355,10 +14387,14 @@ int skill_check_pc_partner(struct map_session_data *sd, uint16 skill_id, uint16 
 	//Else: New search for partners
 	c = 0;
 	memset(p_sd, 0, sizeof(p_sd));
-	if (is_chorus)
-		i = party_foreachsamemap(skill_check_condition_char_sub, sd, AREA_SIZE, &sd->bl, &c, &p_sd, skill_id, *skill_lv);
-	else
-		i = map_foreachinrange(skill_check_condition_char_sub, &sd->bl, range, BL_PC, &sd->bl, &c, &p_sd, skill_id);
+	if (skill_id == WL_COMET)
+		party_foreachsamemap(skill_check_condition_char_sub, sd, range, &sd->bl, &c, &p_sd, skill_id);
+	else {
+		if (is_chorus)
+			i = party_foreachsamemap(skill_check_condition_char_sub, sd, AREA_SIZE, &sd->bl, &c, &p_sd, skill_id);
+		else
+			i = map_foreachinrange(skill_check_condition_char_sub, &sd->bl, range, BL_PC, &sd->bl, &c, &p_sd, skill_id);
+	}
 
 	//Apply the average lv to encore skills
 	//I know c should be one, but this shows how it could be used for the average of n partners
@@ -14588,12 +14624,12 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	inf2 = skill_get_inf2(skill_id);
 
 	//Perform skill-group checks
-	if( (inf2&INF2_ENSEMBLE_SKILL) && skill_check_pc_partner(sd,skill_id,&skill_lv,1,0) < 1 ) {
+	if( (inf2&INF2_ENSEMBLE_SKILL) && !skill_check_pc_partner(sd,skill_id,&skill_lv,1,0) ) {
 		clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_HELPER,0,0);
 		return false;
 	}
 
-	if( (inf2&INF2_CHORUS_SKILL) && skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),0) < 1 ) {
+	if( (inf2&INF2_CHORUS_SKILL) && !skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),0) ) {
 		clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_HELPER,0,0);
 		return false;
 	}
@@ -14936,8 +14972,10 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		//bugreport:7647 mistress card DOES remove requirements for gemstones from Adoramus and Comet [helvetica]
 		case AB_ADORAMUS:
 		case WL_COMET:
-			if( skill_check_pc_partner(sd,skill_id,&skill_lv,1,0) <= 0 && require.itemid[0] && !sd->special_state.no_gemstone &&
-				((i = pc_search_inventory(sd,require.itemid[0])) == INDEX_NOT_FOUND || sd->status.inventory[i].amount < require.amount[0]) ) {
+			if( !skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),0) &&
+				!sd->special_state.no_gemstone && require.itemid[0] &&
+				((i = pc_search_inventory(sd,require.itemid[0])) == INDEX_NOT_FOUND || sd->status.inventory[i].amount < require.amount[0]) )
+			{
 				//clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ITEM,require.amount[0],require.itemid[0]);
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				return false;
@@ -15407,6 +15445,9 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 				}
 			}
 			break;
+		case WL_COMET:
+			skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),1);
+			break;
 		case NC_SILVERSNIPER:
 		case NC_MAGICDECOY:
 			{
@@ -15810,13 +15851,13 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 								continue;
 							break;
 						case AB_ADORAMUS:
-							if( itemdb_is_gemstone(skill_db[idx].require.itemid[i]) &&
-								(sd->special_state.no_gemstone == 2 || skill_check_pc_partner(sd,skill_id,&skill_lv,1,2)) )
+							if( itemdb_is_gemstone(skill_db[idx].require.itemid[i]) && (sd->special_state.no_gemstone == 2 ||
+								skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),1)) )
 								continue;
 							break;
 						case WL_COMET:
-							if( itemdb_is_gemstone(skill_db[idx].require.itemid[i]) &&
-								(sd->special_state.no_gemstone == 2 || skill_check_pc_partner(sd,skill_id,&skill_lv,1,0)) )
+							if( itemdb_is_gemstone(skill_db[idx].require.itemid[i]) && (sd->special_state.no_gemstone == 2 ||
+								skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),0)) )
 								continue;
 							break;
 					}
@@ -16219,8 +16260,10 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 			fixcast_r = max(fixcast_r, sc->data[SC_DANCEWITHWUG]->val4);
 		if( sc->data[SC_HEAT_BARREL] )
 			fixcast_r = max(fixcast_r, sc->data[SC_HEAT_BARREL]->val3);
+		if( sc->data[SC_FENRIR_CARD] )
+			fixcast_r = max(fixcast_r, sc->data[SC_FENRIR_CARD]->val2);
 		//Fixed cast non percentage bonuses
-		if( sc->data[SC_DEATHBOUND_POSTDELAY] )
+		if( sc->data[SC_TELEPORT_FIXEDCASTINGDELAY] )
 			fixed += 1000;
 		if( sc->data[SC_MANDRAGORA] )
 			fixed += sc->data[SC_MANDRAGORA]->val1 * 500;

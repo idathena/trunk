@@ -1048,6 +1048,17 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_MIDNIGHT_FRENZY_POSTDELAY] = SI_MIDNIGHT_FRENZY_POSTDELAY;
 	StatusIconChangeTable[SC_TINDER_BREAKER_POSTDELAY] = SI_TINDER_BREAKER_POSTDELAY;
 	StatusIconChangeTable[SC_CBC_POSTDELAY] = SI_CBC_POSTDELAY;
+	StatusIconChangeTable[SC_TELEPORT_FIXEDCASTINGDELAY] = SI_TELEPORT_FIXEDCASTINGDELAY;
+	StatusIconChangeTable[SC_HAT_EFFECT] = SI_HAT_EFFECT;
+	StatusIconChangeTable[SC_QSCARABA] = SI_QSCARABA;
+	StatusIconChangeTable[SC_LJOSALFAR] = SI_LJOSALFAR;
+	StatusIconChangeTable[SC_MAPLE_FALLS] = SI_MAPLE_FALLS;
+	StatusIconChangeTable[SC_MERMAID_LONGING] = SI_MERMAID_LONGING;
+	StatusIconChangeTable[SC_TIME_ACCESSORY] = SI_TIME_ACCESSORY;
+	StatusIconChangeTable[SC_GEFFEN_MAGIC1] = SI_GEFFEN_MAGIC1;
+	StatusIconChangeTable[SC_GEFFEN_MAGIC2] = SI_GEFFEN_MAGIC2;
+	StatusIconChangeTable[SC_GEFFEN_MAGIC3] = SI_GEFFEN_MAGIC3;
+	StatusIconChangeTable[SC_FENRIR_CARD] = SI_FENRIR_CARD;
 
 	if( !battle_config.display_hallucination ) //Disable Hallucination
 		StatusIconChangeTable[SC_HALLUCINATION] = SI_BLANK;
@@ -1160,6 +1171,10 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_MTF_MHP] |= SCB_MAXHP;
 	StatusChangeFlagTable[SC_MTF_MSP] |= SCB_MAXSP;
 	StatusChangeFlagTable[SC_ATTHASTE_CASH] |= SCB_ASPD;
+	StatusChangeFlagTable[SC_GEFFEN_MAGIC1] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GEFFEN_MAGIC2] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GEFFEN_MAGIC3] |= SCB_ALL;
+	StatusChangeFlagTable[SC_FENRIR_CARD] |= SCB_MATK|SCB_ALL;
 
 	//StatusDisplayType Table [Ind]
 	StatusDisplayType[SC_ALL_RIDING]	  = true;
@@ -1217,6 +1232,12 @@ void initChangeTables(void) {
 	StatusDisplayType[SC_SPRITEMABLE]	  = true;
 	StatusDisplayType[SC_SV_ROOTTWIST]	  = true;
 	StatusDisplayType[SC_TUNAPARTY]		  = true;
+	StatusDisplayType[SC_HAT_EFFECT]	  = true;
+	StatusDisplayType[SC_QSCARABA]		  = true;
+	StatusDisplayType[SC_LJOSALFAR]		  = true;
+	StatusDisplayType[SC_MAPLE_FALLS]	  = true;
+	StatusDisplayType[SC_MERMAID_LONGING] = true;
+	StatusDisplayType[SC_TIME_ACCESSORY]  = true;
 
 	//StatusChangeState (SCS_) NOMOVE
 	StatusChangeStateTable[SC_ANKLE]                |= SCS_NOMOVE;
@@ -1231,7 +1252,6 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_CLOSECONFINE2]        |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_MADNESSCANCEL]        |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_GRAVITATION]          |= SCS_NOMOVE|SCS_NOMOVECOND;
-	StatusChangeStateTable[SC_DEATHBOUND_POSTDELAY] |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_ELECTRICSHOCKER]      |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_BITE]                 |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CAMOUFLAGE]           |= SCS_NOMOVE|SCS_NOMOVECOND;
@@ -3873,6 +3893,14 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			sd->subele[ELE_NEUTRAL] += sc->data[SC_MTF_MLEATKED]->val1;
 		if(sc->data[SC_MTF_CRIDAMAGE])
 			sd->bonus.crit_atk_rate += sc->data[SC_MTF_CRIDAMAGE]->val1;
+		if(sc->data[SC_GEFFEN_MAGIC1]) {
+			sd->right_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC1]->val1;
+			sd->left_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC1]->val1;
+		}
+		if(sc->data[SC_GEFFEN_MAGIC2])
+			sd->magic_addrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC2]->val1;
+		if(sc->data[SC_GEFFEN_MAGIC3])
+			sd->subrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC3]->val1;
 	}
 	status_cpy(&sd->battle_status,status);
 
@@ -5451,6 +5479,8 @@ static unsigned short status_calc_ematk(struct block_list *bl, struct status_cha
 		matk += sc->data[SC_MTF_MATK2]->val1;
 	if(sc->data[SC_2011RWC_SCROLL])
 		matk += 30;
+	if(sc->data[SC_FENRIR_CARD])
+		matk += sc->data[SC_FENRIR_CARD]->val1;
 
 	return (unsigned short)cap_value(matk,0,USHRT_MAX);
 }
@@ -8504,6 +8534,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_DECORATION_OF_MUSIC:
 			case SC_ALL_RIDING:
 			case SC_SPRITEMABLE:
+			case SC_HAT_EFFECT:
+			case SC_QSCARABA:
+			case SC_LJOSALFAR:
+			case SC_MAPLE_FALLS:
+			case SC_MERMAID_LONGING:
+			case SC_TIME_ACCESSORY:
 				tick = -1; //Permanent effects
 				break;
 			case SC_DECREASEAGI:
@@ -10768,6 +10804,12 @@ int status_change_clear(struct block_list *bl,int type)
 				case SC_REUSE_LIMIT_RECALL:
 				case SC_REUSE_LIMIT_ASPD_POTION:
 				case SC_SPRITEMABLE:
+				case SC_HAT_EFFECT:
+				case SC_QSCARABA:
+				case SC_LJOSALFAR:
+				case SC_MAPLE_FALLS:
+				case SC_MERMAID_LONGING:
+				case SC_TIME_ACCESSORY:
 					continue;
 			}
 		}
@@ -10805,6 +10847,12 @@ int status_change_clear(struct block_list *bl,int type)
 				case SC_SUPER_STAR:
 				case SC_STRANGELIGHTS:
 				case SC_DECORATION_OF_MUSIC:
+				case SC_HAT_EFFECT:
+				case SC_QSCARABA:
+				case SC_LJOSALFAR:
+				case SC_MAPLE_FALLS:
+				case SC_MERMAID_LONGING:
+				case SC_TIME_ACCESSORY:
 					continue;
 			}
 		}
@@ -12892,6 +12940,12 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 			case SC_REUSE_LIMIT_ASPD_POTION:
 			case SC_SPRITEMABLE:
 			case SC_BITESCAR:
+			case SC_HAT_EFFECT:
+			case SC_QSCARABA:
+			case SC_LJOSALFAR:
+			case SC_MAPLE_FALLS:
+			case SC_MERMAID_LONGING:
+			case SC_TIME_ACCESSORY:
 				continue;
 			//Chemical Protection is only removed by some skills
 			case SC_CP_WEAPON:
