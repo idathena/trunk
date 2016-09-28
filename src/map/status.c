@@ -818,6 +818,7 @@ void initChangeTables(void) {
 	add_sc( NPC_WIDECOLD         , SC_CRYSTALIZE         );
 	add_sc( NPC_WIDE_DEEP_SLEEP  , SC_DEEPSLEEP          );
 	add_sc( NPC_WIDESIREN        , SC_VOICEOFSIREN       );
+	add_sc( NPC_COMET            , SC_BURNING            );
 
 	add_sc( RL_MASS_SPIRAL      , SC_BLEEDING           );
 	add_sc( RL_HAMMER_OF_GOD    , SC_STUN               );
@@ -1280,12 +1281,16 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_BLADESTOP]           |= SCS_NOPICKITEM;
 	StatusChangeStateTable[SC_CLOAKINGEXCEED]      |= SCS_NOPICKITEM;
 	StatusChangeStateTable[SC_NOCHAT]              |= SCS_NOPICKITEM|SCS_NOPICKITEMCOND;
+	StatusChangeStateTable[SC_DEEPSLEEP]           |= SCS_NOPICKITEM;
+	StatusChangeStateTable[SC_CRYSTALIZE]          |= SCS_NOPICKITEM;
 	StatusChangeStateTable[SC_SUHIDE]              |= SCS_NOPICKITEM;
 
 	//StatusChangeState (SCS_) NODROPITEMS
 	StatusChangeStateTable[SC_AUTOCOUNTER]         |= SCS_NODROPITEM;
 	StatusChangeStateTable[SC_BLADESTOP]           |= SCS_NODROPITEM;
 	StatusChangeStateTable[SC_NOCHAT]              |= SCS_NODROPITEM|SCS_NODROPITEMCOND;
+	StatusChangeStateTable[SC_DEEPSLEEP]           |= SCS_NODROPITEM;
+	StatusChangeStateTable[SC_CRYSTALIZE]          |= SCS_NODROPITEM;
 
 	//StatusChangeState (SCS_) NOCAST (skills)
 	StatusChangeStateTable[SC_SILENCE]             |= SCS_NOCAST;
@@ -10810,6 +10815,9 @@ int status_change_clear(struct block_list *bl,int type)
 				case SC_MAPLE_FALLS:
 				case SC_MERMAID_LONGING:
 				case SC_TIME_ACCESSORY:
+				case SC_GEFFEN_MAGIC1:
+				case SC_GEFFEN_MAGIC2:
+				case SC_GEFFEN_MAGIC3:
 					continue;
 			}
 		}
@@ -11303,10 +11311,8 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 				struct block_list *src = map_id2bl(sce->val2);
 				struct status_change *sc = status_get_sc(src);
 
-				if (sc && sc->data[SC_CURSEDCIRCLE_ATKER] && --(sc->data[SC_CURSEDCIRCLE_ATKER]->val2) == 0) {
-					clif_bladestop(bl,src->id,0);
+				if (sc && sc->data[SC_CURSEDCIRCLE_ATKER] && --(sc->data[SC_CURSEDCIRCLE_ATKER]->val2) == 0)
 					status_change_end(src,SC_CURSEDCIRCLE_ATKER,INVALID_TIMER);
-				}
 			}
 			break;
 		case SC_RAISINGDRAGON:
@@ -12796,10 +12802,8 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
 			}
 			break;
 		case SC_CURSEDCIRCLE_TARGET:
-			if( tsc && tsc->data[SC_CURSEDCIRCLE_TARGET] && tsc->data[SC_CURSEDCIRCLE_TARGET]->val2 == src->id ) {
-				clif_bladestop(bl, tsc->data[SC_CURSEDCIRCLE_TARGET]->val2, 0);
+			if( tsc && tsc->data[SC_CURSEDCIRCLE_TARGET] && tsc->data[SC_CURSEDCIRCLE_TARGET]->val2 == src->id )
 				status_change_end(bl, type, INVALID_TIMER);
-			}
 			break;
 	}
 	return 0;
@@ -12946,6 +12950,9 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 			case SC_MAPLE_FALLS:
 			case SC_MERMAID_LONGING:
 			case SC_TIME_ACCESSORY:
+			case SC_GEFFEN_MAGIC1:
+			case SC_GEFFEN_MAGIC2:
+			case SC_GEFFEN_MAGIC3:
 				continue;
 			//Chemical Protection is only removed by some skills
 			case SC_CP_WEAPON:
