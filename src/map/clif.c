@@ -11231,16 +11231,6 @@ void clif_parse_DropItem(int fd, struct map_session_data *sd)
 		if (pc_cant_act2(sd) || sd->npc_id)
 			break;
 
-		if (sd->sc.count && (
-			sd->sc.data[SC_AUTOCOUNTER] ||
-			sd->sc.data[SC_BLADESTOP] ||
-			(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOITEM) ||
-			sd->sc.data[SC_DEATHBOUND] ||
-			sd->sc.data[SC_DEEPSLEEP] ||
-			sd->sc.data[SC_CRYSTALIZE]
-		))
-			break;
-
 		if (!pc_dropitem(sd, item_index, item_amount))
 			break;
 

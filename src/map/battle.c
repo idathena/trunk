@@ -5934,6 +5934,17 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case NPC_ENERGYDRAIN:
 						skillratio += 100 * skill_lv;
 						break;
+					case NPC_COMET:
+						i = (sc ? distance_xy(target->x, target->y, sc->pos_x, sc->pos_y) : 8);
+						if(i <= 3)
+							skillratio += 2400 + 500 * skill_lv;
+						else if(i <= 5)
+							skillratio += 1900 + 500 * skill_lv;
+						else if(i <= 7)
+							skillratio += 1400 + 500 * skill_lv;
+						else
+							skillratio += 900 + 500 * skill_lv; 
+						break;
 #ifdef RENEWAL
 					case WZ_HEAVENDRIVE:
 					case WZ_METEOR:

@@ -1231,6 +1231,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case WL_CRIMSONROCK:
 			sc_start(src,bl,SC_STUN,40,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
+		case NPC_COMET:
 		case WL_COMET:
 			sc_start4(src,bl,SC_BURNING,100,skill_lv,1000,src->id,0,skill_get_time2(skill_id,skill_lv));
 			break;
@@ -2996,6 +2997,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case WL_HELLINFERNO:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SKILL);
 			break;
+		case NPC_COMET:
 		case WL_COMET:
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, skill_lv, DMG_MULTI_HIT);
 			break;
@@ -3801,7 +3803,9 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 									status_change_end(src,SC_FREEZE_SP,INVALID_TIMER);
 								if (!skill_check_condition_castbegin(sd,r_skill_id,r_skill_lv))
 									break;
-								skill_consume_requirement(sd,r_skill_id,r_skill_lv,1);
+								if (!skill_check_condition_castend(sd,r_skill_id,r_skill_lv))
+									break;
+								skill_consume_requirement(sd,ud->skill_id,ud->skill_lv,1);
 								skill_toggle_magicpower(src,r_skill_id);
 								switch (skill_get_casttype(r_skill_id)) {
 									case CAST_GROUND:
@@ -4934,7 +4938,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case WL_TETRAVORTEX: {
-				uint16 i, id;
+				uint16 i, id = 0;
 				uint8 j = 0;
 				int types[][2] = { {0,0},{0,0},{0,0},{0,0} };
 
@@ -9358,6 +9362,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SC_WEAKNESS:
 			{
 				int joblvbonus = 0;
+				int inf;
 
 				joblvbonus = status_get_job_lv(src);
 				//First we set the success chance based on the caster's build which increases the chance
@@ -9372,6 +9377,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					if( sd )
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
+				} else if( sd ) {
+					if( skill_get_delay(skill_id,skill_lv) )
+						sd->ud.canact_tick = tick + skill_delayfix(src,skill_id,skill_lv);
+					if( (inf = skill_get_cooldown(sd,skill_id,skill_lv)) > 0 )
+						skill_blockpc_start(sd,skill_id,inf);
+					if( battle_config.display_status_timers )
+						clif_status_change(src,SI_ACTIONDELAY,1,skill_delayfix(src,skill_id,skill_lv),0,0,0);
 				}
 				if( tsc ) {
 					//If the target was successfully inflected with the Ignorance status, drain some of the targets SP
@@ -10983,15 +10995,28 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 		}
 		if( ud->walktimer != INVALID_TIMER && ud->skill_id != TK_RUN && ud->skill_id != RA_WUGDASH )
 			unit_stop_walking(src,1);
-		//Tests show wings don't overwrite the delay but skill scrolls do [Inkfish]
-		if( !sd || sd->skillitem != ud->skill_id || skill_get_delay(ud->skill_id,ud->skill_lv) )
-			ud->canact_tick = tick + skill_delayfix(src,ud->skill_id,ud->skill_lv);
-		if( sd && (inf = skill_get_cooldown(sd,ud->skill_id,ud->skill_lv)) > 0 )
-			skill_blockpc_start(sd,ud->skill_id,inf);
+		switch( ud->skill_id ) {
+			case SC_ENERVATION:
+			case SC_GROOMY:
+			case SC_IGNORANCE:
+			case SC_LAZINESS:
+			case SC_UNLUCKY:
+			case SC_WEAKNESS:
+				break;
+			default:
+				//Tests show wings don't overwrite the delay but skill scrolls do [Inkfish]
+				if( !sd || sd->skillitem != ud->skill_id || skill_get_delay(ud->skill_id,ud->skill_lv) )
+					ud->canact_tick = tick + skill_delayfix(src,ud->skill_id,ud->skill_lv);
+				if( sd ) {
+					if( (inf = skill_get_cooldown(sd,ud->skill_id,ud->skill_lv)) > 0 )
+						skill_blockpc_start(sd,ud->skill_id,inf);
+					if( battle_config.display_status_timers )
+						clif_status_change(src,SI_ACTIONDELAY,1,skill_delayfix(src,ud->skill_id,ud->skill_lv),0,0,0);
+				}
+				break;
+		}
 		if( hd && (inf = skill_get_cooldown(NULL,ud->skill_id,ud->skill_lv)) > 0 )
 			skill_blockhomun_start(hd,ud->skill_id,inf);
-		if( battle_config.display_status_timers && sd )
-			clif_status_change(src,SI_ACTIONDELAY,1,skill_delayfix(src,ud->skill_id,ud->skill_lv),0,0,0);
 		if( sd ) {
 			switch( ud->skill_id ) {
 				case GS_DESPERADO:
@@ -11200,12 +11225,14 @@ int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data)
 			unit_stop_walking(src,1);
 		if( !sd || sd->skillitem != ud->skill_id || skill_get_delay(ud->skill_id,ud->skill_lv) )
 			ud->canact_tick = tick + skill_delayfix(src,ud->skill_id,ud->skill_lv);
-		if( sd && (inf = skill_get_cooldown(sd,ud->skill_id,ud->skill_lv)) > 0 )
-			skill_blockpc_start(sd,ud->skill_id,inf);
+		if( sd ) {
+			if( (inf = skill_get_cooldown(sd,ud->skill_id,ud->skill_lv)) > 0 )
+				skill_blockpc_start(sd,ud->skill_id,inf);
+			if( battle_config.display_status_timers )
+				clif_status_change(src,SI_ACTIONDELAY,1,skill_delayfix(src,ud->skill_id,ud->skill_lv),0,0,0);
+		}
 		if( hd && (inf = skill_get_cooldown(NULL,ud->skill_id,ud->skill_lv)) > 0 )
 			skill_blockhomun_start(hd,ud->skill_id,inf);
-		if( battle_config.display_status_timers && sd )
-			clif_status_change(src,SI_ACTIONDELAY,1,skill_delayfix(src,ud->skill_id,ud->skill_lv),0,0,0);
 //		if( sd ) {
 //			switch( ud->skill_id ) {
 //				case ????:
@@ -11432,6 +11459,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case NPC_EARTHQUAKE:
 		case NPC_EVILLAND:
 		case NPC_VENOMFOG:
+		case NPC_COMET:
 		case WL_COMET:
 		case RA_ELECTRICSHOCKER:
 		case RA_CLUSTERBOMB:
@@ -12606,6 +12634,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 		case GD_HAWKEYES:
 			limit = 1000000; //It doesn't matter
 			break;
+		case NPC_COMET:
 		case WL_COMET:
 			if( sc ) {
 				sc->pos_x = x;
@@ -14346,8 +14375,8 @@ int skill_check_pc_partner(struct map_session_data *sd, uint16 skill_id, uint16 
 {
 	static int c = 0;
 	static int p_sd[5] = { 0,0,0,0,0 };
-	uint8 i;
 	bool is_chorus = (skill_get_inf2(skill_id)&INF2_CHORUS_SKILL);
+	uint8 i = 0;
 
 	if (!battle_config.player_skill_partner_check || pc_has_permission(sd, PC_PERM_SKILL_UNCONDITIONAL))
 		return (is_chorus ? MAX_PARTY : 99); //As if there were infinite partners
@@ -19731,7 +19760,6 @@ int skill_blockpc_start(struct map_session_data *sd, uint16 skill_id, int tick) 
 		CREATE(sd->scd[i], struct skill_cooldown_entry, 1);
 		sd->scd[i]->skill_id = skill_id;
 		sd->scd[i]->timer = add_timer(gettick() + tick, skill_blockpc_end, sd->bl.id, i);
-
 		if (battle_config.display_status_timers && tick)
 			clif_skill_cooldown(sd, skill_id, tick);
 		return 1;
