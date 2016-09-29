@@ -44,22 +44,23 @@
 // 14 Attack type (none, weapon, magic, misc)
 // 15 Amount of tiles skill knockbacks
 // 16 INF3 (skill information 3):
-//    0x00001 - Skill ignores land protector (e.g. arrow shower)
+//    0x00001 - Skill that can ignore SA_LANDPROTECTOR
 //    0x00002 - Skill that having an affect to hiding target
-//    0x00004 - Usable skills while hiding
-//    0x00008 - Skill that can be used while in dancing state
+//    0x00004 - Skill that can be use while in SC_HIDING
+//    0x00008 - Skill that can be use while in SC_DANCING
 //    0x00010 - Skill that could hit emperium
-//    0x00020 - Skill that can be auto casted by Auto Shadow Spell
-//    0x00040 - Skill blocked by kagehumi
+//    0x00020 - Skill that can be auto casted by SC_AUTOSHADOWSPELL
+//    0x00040 - Skill blocked by KG_KAGEHUMI
 //    0x00080 - Skill range affected by AC_VULTURE
 //    0x00100 - Skill range affected by GS_SNAKEEYE
 //    0x00200 - Skill range affected by NJ_SHADOWJUMP
 //    0x00400 - Skill range affected by WL_RADIUS
 //    0x00800 - Skill range affected by RA_RESEARCHTRAP
-//    0x01000 - Skill that can be used to target while under Man Hole effect
+//    0x01000 - Skill that can be used even under SC__MANHOLE
 //    0x02000 - Skill that can be used while riding warg
 //    0x04000 - Skill that affected by SC_GLOOMYDAY_SK
 //    0x08000 - Skill that affected by SC_DANCEWITHWUG
+//    0x10000 - Skill blocked by RA_WUGBITE
 // 17 Name
 // 18 Description
 1,0,0,0,0,0,0,9,0,no,0,0,0,none,0,0,		NV_BASIC,Basic Skill
@@ -112,7 +113,7 @@
 48,0,8,0,-1,0,0,10,2,no,0,0,0,weapon,0,0,	TF_DOUBLE,Double Attack
 49,0,0,0,0,0,0,10,0,no,0,0,0,weapon,0,0,	TF_MISS,Improve Dodge
 50,1,6,1,0,1,0,10,1,no,0,0,0,weapon,0,0,	TF_STEAL,Steal
-51,0,6,4,0,1,0,10,1,no,0,0,0,none,0,0x44,	TF_HIDING,Hiding
+51,0,6,4,0,1,0,10,1,no,0,0,0,none,0,0x10044,	TF_HIDING,Hiding
 52,-2,6,1,5,0,0,10,1,no,0,0,0,weapon,0,0,	TF_POISON,Envenom
 53,9,6,16,5,0x1,0,1,1,no,0,0,0,weapon,0,0,	TF_DETOXIFY,Detoxify
 54,9,6,16,6,0x1,0,4,1,yes,0,0,0,magic,0,0,	ALL_RESURRECTION,Resurrection
@@ -195,7 +196,7 @@
 132,0,0,0,0,0,0,5,0,no,0,0,0,weapon,0,0,	AS_RIGHT,Righthand Mastery
 133,0,0,0,0,0,0,5,0,no,0,0,0,weapon,0,0,	AS_LEFT,Lefthand Mastery
 134,0,0,0,0,0,0,10,0,no,0,0,0,weapon,0,0,	AS_KATAR,Katar Mastery
-135,0,6,4,0,0x1,0,10,1,no,0,0,0,weapon,0,0x40,	AS_CLOAKING,Cloaking
+135,0,6,4,0,0x1,0,10,1,no,0,0,0,weapon,0,0x10040,	AS_CLOAKING,Cloaking
 136,-1,8,1,-1,0,0,10,-8,no,0,0,0,weapon,0,0,	AS_SONICBLOW,Sonic Blow
 137,2:3:4:5:6,6,1,-1,0x2,1,5,1,no,0,0,0,weapon,0,0x4,	AS_GRIMTOOTH,Grimtooth
 138,1,6,16,5,0x1,0,10,1,no,0,0x400,0,weapon,0,0,	AS_ENCHANTPOISON,Enchant Poison
@@ -771,7 +772,7 @@
 2030,0,6,4,-1,0,0,5,1,no,0,0x200,0,weapon,0,0,	GC_WEAPONCRUSH,Weapon Crush
 2031,1,6,1,-1,0,0,5,1,no,0,0,0,weapon,0,0,	GC_VENOMPRESSURE,Venom Pressure
 2032,5,6,2,0,0x1,0,5,1,yes,0,0,1,none,0,0,	GC_POISONSMOKE,Poison Smoke
-2033,0,6,4,0,0x1,0,5,1,no,0,0,0,weapon,0,0x40,	GC_CLOAKINGEXCEED,Cloaking Exceed
+2033,0,6,4,0,0x1,0,5,1,no,0,0,0,weapon,0,0x10040,	GC_CLOAKINGEXCEED,Cloaking Exceed
 2034,0,6,4,-1,0x3,3,1,1,no,0,0,0,weapon,0,0,	GC_PHANTOMMENACE,Phantom Menace
 2035,0,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0,	GC_HALLUCINATIONWALK,Hallucination Walk
 2036,0,6,4,-1,0x3,1:1:1:1:2,5,1,no,0,0,0,weapon,0,0,	GC_ROLLINGCUTTER,Rolling Cutter
@@ -847,11 +848,11 @@
 2240,0,6,4,0,0,0,1,1,no,0,0,0,none,0,0,	RA_WUGMASTERY,Warg Mastery
 2241,0,6,4,0,0,0,3,1,no,0,0,0,none,0,0x2000,	RA_WUGRIDER,Warg Rider
 2242,0,6,4,-1,0x42,1,1,0,no,0,0,0,weapon,0,0xA000,	RA_WUGDASH,Warg Dash
-2243,9,6,1,0,0x40,0,5,1,no,0,0,0,weapon,0,0xA000,	RA_WUGSTRIKE,Warg Strike
-2244,9,6,1,0,0x40,0,5,1,no,0,0,0,weapon,0,0x8080,	RA_WUGBITE,Warg Bite
+2243,9,6,1,0,0x98,0,5,1,no,0,0,0,weapon,0,0xA000,	RA_WUGSTRIKE,Warg Strike
+2244,9,6,1,0,0x98,0,5,1,no,0,0,0,weapon,0,0x8080,	RA_WUGBITE,Warg Bite
 2245,0,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	RA_TOOTHOFWUG,Tooth of Warg
 2246,0,6,4,0,0x2,3:4:5:6:7,5,1,no,0,0,0,weapon,0,0,	RA_SENSITIVEKEEN,Sensitive Keen
-2247,0,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0x40,	RA_CAMOUFLAGE,Camouflage
+2247,0,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0x10040,	RA_CAMOUFLAGE,Camouflage
 2248,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	RA_RESEARCHTRAP,Research Trap
 2249,3,6,2,3,0x43,2,1,1,no,0,0x80,1,misc,0,0x2000,	RA_MAGENTATRAP,Magenta Trap
 2250,3,6,2,1,0x43,2,1,1,no,0,0x80,1,misc,0,0x2000,	RA_COBALTTRAP,Cobalt Trap

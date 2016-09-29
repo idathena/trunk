@@ -74,22 +74,23 @@ enum e_skill_inf2 {
 
 //Skill info type 3
 enum e_skill_inf3 {
-	INF3_NOLP               = 0x00001, //Skill that can ignores Land Protector
+	INF3_NOLP               = 0x00001, //Skill that can ignore SA_LANDPROTECTOR
 	INF3_HIT_HIDING         = 0x00002, //Skill that having an affect to hiding target
-	INF3_USABLE_HIDING      = 0x00004, //Skill that can be use in hiding
-	INF3_USABLE_DANCE       = 0x00008, //Skill that can be use while in dancing state
+	INF3_USABLE_HIDING      = 0x00004, //Skill that can be use while in SC_HIDING
+	INF3_USABLE_DANCE       = 0x00008, //Skill that can be use while in SC_DANCING
 	INF3_HIT_EMP            = 0x00010, //Skill that could hit emperium
-	INF3_AUTOSHADOWSPELL    = 0x00020, //Skill that can be auto casted by Auto Shadow Spell
-	INF3_KAGEHUMI_BL        = 0x00040, //Skill blocked by kagehumi
+	INF3_AUTOSHADOWSPELL    = 0x00020, //Skill that can be auto casted by SC_AUTOSHADOWSPELL
+	INF3_KAGEHUMI_BL        = 0x00040, //Skill blocked by KG_KAGEHUMI
 	INF3_EFF_VULTURE        = 0x00080, //Skill range affected by AC_VULTURE
 	INF3_EFF_SNAKEEYE       = 0x00100, //Skill range affected by GS_SNAKEEYE
 	INF3_EFF_SHADOWJUMP     = 0x00200, //Skill range affected by NJ_SHADOWJUMP
 	INF3_EFF_RADIUS         = 0x00400, //Skill range affected by WL_RADIUS
 	INF3_EFF_RESEARCHTRAP   = 0x00800, //Skill range affected by RA_RESEARCHTRAP
-	INF3_USABLE_MANHOLE     = 0x01000, //Skill that can be used even under Man Hole effect
+	INF3_USABLE_MANHOLE     = 0x01000, //Skill that can be used even under SC__MANHOLE
 	INF3_USABLE_WARG        = 0x02000, //Skill that can be use while riding warg
 	INF3_SC_GLOOMYDAY_SK    = 0x04000, //Skill that affected by SC_GLOOMYDAY_SK
 	INF3_SC_DANCEWITHWUG    = 0x08000, //Skill that affected by SC_DANCEWITHWUG
+	INF3_BITE_BLOCK         = 0x10000, //Skill blocked by RA_WUGBITE
 };
 
 //Walk intervals at which chase-skills are attempted to be triggered

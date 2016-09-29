@@ -413,8 +413,8 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 				BL_PC, buf, len, bl, type);
 			break;
 		case AREA_CHAT_WOC:
-			map_foreachinarea(clif_send_sub, bl->m, bl->x - (AREA_SIZE - 5), bl->y - (AREA_SIZE - 5),
-				bl->x + (AREA_SIZE - 5), bl->y + (AREA_SIZE - 5), BL_PC, buf, len, bl, AREA_WOC);
+			map_foreachinarea(clif_send_sub, bl->m, bl->x - (AREA_SIZE - 1), bl->y - (AREA_SIZE - 1),
+				bl->x + (AREA_SIZE - 1), bl->y + (AREA_SIZE - 1), BL_PC, buf, len, bl, AREA_WOC);
 			break;
 
 		case CHAT:
@@ -1814,11 +1814,9 @@ void clif_move(struct unit_data *ud)
 		return; //Hide NPC from maya purple card
 
 	if (ud->state.speed_changed) {
-		//Since we don't know how to update the speed of other objects,
-		//use the old walk packet to update the data.
 		ud->state.speed_changed = 0;
 		clif_move2(bl,vd,ud);
-		return;
+		return; //Since we don't know how to update the speed of other objects, use the old walk packet to update the data
 	}
 
 	if (sc && (sc->option&(OPTION_HIDE|OPTION_CLOAK)))
