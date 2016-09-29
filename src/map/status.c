@@ -2015,6 +2015,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 				(sc->data[SC_MARIONETTE] && skill_id != CG_MARIONETTE) || //Only skill you can use is marionette again to cancel it
 				(sc->data[SC_MARIONETTE2] && skill_id == CG_MARIONETTE) || //Cannot use marionette if you are being buffed by another
 				(sc->data[SC_STASIS] && skill_block_check(src, SC_STASIS, skill_id)) ||
+				(sc->data[SC_BITE] && skill_block_check(src, SC_BITE, skill_id)) ||
 				(sc->data[SC__SHADOWFORM] && !flag) ||
 				(sc->data[SC_KAGEHUMI] && skill_block_check(src, SC_KAGEHUMI, skill_id)))
 				return false;
@@ -7623,9 +7624,18 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 	if( bl->type == BL_MOB ) {
 		struct mob_data *md = BL_CAST(BL_MOB,bl);
 
-		if( md && (mob_is_gvg(md) || mob_is_battleground(md)) && //GVG/BG Monsters can't be afflicted by status changes
-			type != SC_SAFETYWALL && type != SC_PNEUMA && type != SC_NEUTRALBARRIER && type != SC_STEALTHFIELD )
-			return 0;
+		if( md && (mob_is_gvg(md) || mob_is_battleground(md)) ) {
+			switch( type ) {
+				case SC_SAFETYWALL:
+				case SC_PNEUMA:
+				case SC_RENOVATIO:
+				case SC_NEUTRALBARRIER:
+				case SC_STEALTHFIELD:
+					break;
+				default:
+					return 0; //GVG/BG Monsters can't be afflicted by status changes
+			}
+		}
 	}
 
 	//Immunes against status effects
@@ -7780,10 +7790,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_CLOAKING:
 			if( sd && !skill_can_cloak(sd) )
 				return 0;
-		case SC_CLOAKINGEXCEED:
-		case SC_HIDING:
-			if( sc->data[SC_BITE] )
-				return 0; //Prevent Cloaking, Exceed and Hiding
 			break;
 		case SC_MODECHANGE: {
 				int mode;

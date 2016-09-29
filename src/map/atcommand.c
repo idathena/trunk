@@ -1752,7 +1752,8 @@ ACMD_FUNC(bodystyle)
 		(sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC ||
 		(sd->class_&MAPID_THIRDMASK) == MAPID_ROYAL_GUARD ||
 		(sd->class_&MAPID_THIRDMASK) == MAPID_ARCH_BISHOP ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_RANGER
+		(sd->class_&MAPID_THIRDMASK) == MAPID_RANGER ||
+		(sd->class_&MAPID_THIRDMASK) == MAPID_WARLOCK
 		))
 	{
 		clif_displaymessage(fd, msg_txt(727)); // This job has no alternate body styles.

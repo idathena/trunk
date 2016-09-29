@@ -2827,6 +2827,18 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 			ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 3 * lv);
 #endif
 		}
+		switch(skill_id) {
+			case RA_WUGDASH:
+			case RA_WUGSTRIKE:
+			case RA_WUGBITE:
+				if((lv = pc_checkskill(sd, RA_TOOTHOFWUG)) > 0) {
+					ATK_ADD(wd.damage, wd.damage2, 30 * lv);
+#ifdef RENEWAL
+					ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 30 * lv);
+#endif
+				}
+				break;
+		}
 		if(sc) { //Status change considered as masteries
 			uint8 i;
 
@@ -4225,15 +4237,6 @@ static int64 battle_calc_skill_constant_addition(struct Damage wd,struct block_l
 				atk = 40 * pc_checkskill(sd,RA_RESEARCHTRAP);
 			break;
 #endif
-		case RA_WUGDASH:
-			if(sd && sd->weight)
-				atk = sd->weight / 8 + 30 * pc_checkskill(sd,RA_TOOTHOFWUG);
-			break;
-		case RA_WUGSTRIKE:
-		case RA_WUGBITE:
-			if(sd)
-				atk = 30 * pc_checkskill(sd,RA_TOOTHOFWUG);
-			break;
 		case GC_COUNTERSLASH:
 			atk = 2 * sstatus->agi + 4 * status_get_job_lv(src);
 			break;
@@ -5255,8 +5258,16 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			);
 			wd.damage = wd.statusAtk + wd.weaponAtk + wd.equipAtk + wd.masteryAtk;
 			wd.damage2 = wd.statusAtk2 + wd.weaponAtk2 + wd.equipAtk2 + wd.masteryAtk2;
-			if(wd.flag&BF_LONG) //Affects the entirety of the damage
-				ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.long_attack_atk_rate);
+			if(wd.flag&BF_LONG) { //Affects the entirety of the damage
+				switch(skill_id) {
+					case RA_WUGSTRIKE:
+					case RA_WUGBITE:
+						break; //Ignore % modifiers
+					default:
+						ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.long_attack_atk_rate);
+						break;
+				}
+			}
 		}
 #else
 		wd = battle_attack_sc_bonus(wd, src, target, skill_id, skill_lv);

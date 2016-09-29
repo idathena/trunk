@@ -8789,9 +8789,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if( flag&1 )
 				sc_start(src,bl,type,40 + 5 * skill_lv,skill_lv,skill_get_time(skill_id,skill_lv));
 			else {
-				map_foreachinrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,
-					skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				map_foreachinrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
 			}
 			break;
 
@@ -9733,7 +9732,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				sc_start(src,bl,type,rate,skill_lv,skill_get_time(skill_id,skill_lv));
 			} else {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ALL|1,skill_castend_nodamage_id);
+				map_foreachinrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ALL|1,skill_castend_nodamage_id);
 			}
 			break;
 
@@ -15082,6 +15081,23 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 			if( !pc_isridingwug(sd) ) {
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				return false;
+			} else {
+				int16 sx = sd->bl.x;
+				int16 sy = sd->bl.y;
+				uint8 dir = (unit_getdir(&sd->bl))%8;
+
+				switch( dir ) {
+					case 0: case 8: sy++; break;
+					case 1: sx--; sy++; break;
+					case 2: sx--; break;
+					case 3: sx--; sy--; break;
+					case 4: sy--; break;
+					case 5: sx++; sy--; break;
+					case 6: sx++; break;
+					case 7: sx++; sy++; break;
+				}
+				if( map_count_oncell(sd->bl.m,sx,sy,BL_CHAR,1) > 0 )
+					return false;
 			}
 			break;
 		case LG_BANDING:
@@ -20459,6 +20475,10 @@ int skill_block_check(struct block_list *bl, sc_type type , uint16 skill_id) {
 			if( inf == INF2_SONG_DANCE || inf == INF2_ENSEMBLE_SKILL ||
 				inf == INF2_CHORUS_SKILL || skill_get_type(skill_id) == BF_MAGIC )
 				return 1; //Can't do it
+			break;
+		case SC_BITE:
+			if( inf3&INF3_BITE_BLOCK )
+				return 1;
 			break;
 		case SC_KAGEHUMI:
 			if( inf3&INF3_KAGEHUMI_BL )
