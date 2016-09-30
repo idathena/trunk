@@ -1685,11 +1685,11 @@ int make_new_char_sql(struct char_session_data *sd, char *name_, int str, int ag
 	if(sd->found_char[slot] != -1)
 		return -2; //Character account limit exceeded
 
+	start_hp = 40 * (100 + vit) / 100;
+	start_sp = 11 * (100 + int_) / 100;
+
 #if PACKETVER >= 20151104
-	if(start_job == JOB_NOVICE) { //Human race
-		start_hp = 40 * (100 + vit) / 100;
-		start_sp = 11 * (100 + int_) / 100;
-	} else if(start_job == JOB_SUMMONER) { //Doram race
+	if(start_job == JOB_SUMMONER) { //Doram race
 		start_hp = 60 * (100 + vit) / 100;
 		start_sp = 8 * (100 + int_) / 100;
 		memset(tmp_start_point, 0, MAX_STARTPOINT * sizeof(struct point));
@@ -1697,7 +1697,7 @@ int make_new_char_sql(struct char_session_data *sd, char *name_, int str, int ag
 		memcpy(tmp_start_point, start_point_doram, MAX_STARTPOINT * sizeof(struct point));
 		memcpy(tmp_start_items, start_items_doram, MAX_STARTITEM * sizeof(struct startitem));
 		start_point_idx = rnd()%start_point_count_doram;
-	} else {
+	} else if(start_job != JOB_NOVICE) {
 		ShowWarning("make_new_char_sql: Detected character creation packet with invalid race type on account: %d.\n", sd->account_id);
 		return -2; //Invalid job
 	}

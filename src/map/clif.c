@@ -327,7 +327,7 @@ static int clif_send_sub(struct block_list *bl, va_list ap) {
 			}
 			break;
 #if PACKETVER > 20120418 && PACKETVER < 20130000
-		case AREA: //x120 crashes the client when warping for this packetver range [Ind]
+		case AREA: //0x120 crashes the client when warping for this packetver range [Ind]
 			if (WBUFW(buf,0) == 0x120 && sd->state.warping)
 				return 0;
 			break;
@@ -412,15 +412,20 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 			map_foreachinarea(clif_send_sub, bl->m, bl->x - AREA_SIZE, bl->y - AREA_SIZE, bl->x + AREA_SIZE, bl->y + AREA_SIZE,
 				BL_PC, buf, len, bl, type);
 			break;
-		case AREA_CHAT_WOC:
-			map_foreachinarea(clif_send_sub, bl->m, bl->x - (AREA_SIZE - 1), bl->y - (AREA_SIZE - 1),
-				bl->x + (AREA_SIZE - 1), bl->y + (AREA_SIZE - 1), BL_PC, buf, len, bl, AREA_WOC);
+		case AREA_CHAT_WOC: {
+				uint8 size = AREA_SIZE - 5; //9 Cells
+
+				if (bl->type == BL_NPC)
+					size = AREA_SIZE + 4; //18 Cells
+				map_foreachinarea(clif_send_sub, bl->m, bl->x - size, bl->y - size, bl->x + size, bl->y + size, BL_PC, buf, len, bl, AREA_WOC);
+			}
 			break;
 
 		case CHAT:
 		case CHAT_WOS:
 			{
 				struct chat_data *cd;
+
 				if (sd)
 					cd = (struct chat_data *)map_id2bl(sd->chatID);
 				else if (bl->type == BL_CHAT)
@@ -4569,10 +4574,8 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 
 					if (td)
 						time = DIFF_TICK(td->tick,gettick());
-					if ((tsd->sc.option&OPTION_INVISIBLE) || (pc_ishiding(tsd) && !sd->special_state.intravision && !sd->sc.data[SC_INTRAVISION]))
-						clif_efst_status_change(&sd->bl,bl->id,SELF,SI_BLANK,time,0,0,0);
-					else
-						clif_efst_status_change(&sd->bl,bl->id,SELF,StatusIconChangeTable[tsd->sc_display[i]->type],time,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
+					clif_efst_status_change(&sd->bl,bl->id,SELF,StatusIconChangeTable[tsd->sc_display[i]->type],
+						time,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
 				}
 				if (tsd->status.robe)
 					clif_refreshlook(&sd->bl,bl->id,LOOK_ROBE,tsd->status.robe,SELF);
@@ -5952,11 +5955,11 @@ void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val
 
 	nullpo_retv(bl);
 
-	sd = BL_CAST(BL_PC,bl);
-
 	//Only send status changes that actually matter to the client
 	if (!(status_type2relevant_bl_types(type)&bl->type))
 		return;
+
+	sd = BL_CAST(BL_PC,bl);
 
 	if (flag && battle_config.display_status_timers && sd)
 		WBUFW(buf,offset + 0) = cmd;
@@ -10767,7 +10770,6 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data *sd)
 			safesnprintf((char *)WBUFP(buf,8), outlen, "%s : %s", sd->fakename, message);
 		else
 			safestrncpy((char *)WBUFP(buf,8), full_message, outlen);
-		//FIXME: chat has range of 9 only
 		clif_send(buf, WBUFW(buf,2), &sd->bl, (sd->chatID ? CHAT_WOS : AREA_CHAT_WOC));
 		aFree(buf);
 	}
