@@ -1888,6 +1888,9 @@ int map_quit(struct map_session_data *sd) {
 			status_change_end(&sd->bl,SC_HEAT_BARREL,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_P_ALTER,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_E_CHAIN,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_GEFFEN_MAGIC1,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_GEFFEN_MAGIC2,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_GEFFEN_MAGIC3,INVALID_TIMER);
 		}
 	}
 

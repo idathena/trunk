@@ -178,13 +178,13 @@ static void set_sc(uint16 skill_id, sc_type sc, int icon, unsigned int flag)
 
 void initChangeTables(void) {
 	int i;
-	
+
 	for (i = 0; i < SC_MAX; i++)
 		StatusIconChangeTable[i] = SI_BLANK;
-	
+
 	for (i = 0; i < MAX_SKILL; i++)
 		SkillStatusChangeTable[i] = SC_NONE;
-	
+
 	for (i = 0; i < SI_MAX; i++)
 		StatusRelevantBLTypes[i] = BL_PC;
 
