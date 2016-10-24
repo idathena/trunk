@@ -21,7 +21,7 @@
 //= Sanctuary Quest:
 //= - Actually two quests in one. Donation and dungeon quest.
 //= - Requires 10000 donations before players can start the quest.
-//= - Variable in use: ra_tem_q (max 23) (unset at end)
+//= - Variable in use: ra_tem_q (max 23), ra_tem_q_, ra_tem_q_18 (unset at end)
 //= - Variable in use: Once completed MISC_QUEST bit 8192 is set
 //= - Variable in use: ra_have_donated (0 no/1 yes)
 //= - Variable in use: $rachel_donate (max 10000)
@@ -4023,6 +4023,18 @@ ra_temple,116,174,3	script	Nemma#ra_temple	920,{
 			goto L_End;
 		}
 		else if (ra_tem_q == 10) {
+			if (ra_tem_q_) {
+				emotion e_ho;
+				cutin "ra_nemma03",2;
+				mes "[Priestess Nemma]";
+				mes "Hey, "+strcharinfo(0)+"~!";
+				mes "We reached our target!";
+				mes "Isn't that great? We're no";
+				mes "longer asking for donations,";
+				mes "but you can still redeem your";
+				mes "Lottery Tickets inside, okay?";
+				goto L_End;
+			}
 			cutin "ra_nemma04",2;
 			mes "[Priestess Nemma]";
 			mes "Oh, "+strcharinfo(0)+"!";
@@ -4039,6 +4051,7 @@ ra_temple,116,174,3	script	Nemma#ra_temple	920,{
 			mes "the temple. I thought maybe";
 			mes "something happened and";
 			mes "she got in trouble, you know?";
+			set ra_tem_q_,1;
 			next;
 			cutin "ra_nemma02",2;
 			mes "[Priestess Nemma]";
@@ -4050,14 +4063,13 @@ ra_temple,116,174,3	script	Nemma#ra_temple	920,{
 		}
 		else if (ra_tem_q == 11) {
 			emotion e_ho;
-			cutin "ra_nemma03",2;
+			cutin "ra_nemma01",2;
 			mes "[Priestess Nemma]";
-			mes "Hey, "+strcharinfo(0)+"~!";
-			mes "We reached our target!";
-			mes "Isn't that great? We're no";
-			mes "longer asking for donations,";
-			mes "but you can still redeem your";
-			mes "Lottery Tickets inside, okay?";
+			mes "Well, we're done accepting";
+			mes "donations for the festival.";
+			mes "What should I be doing now?";
+			mes "Mmmm... Maybe I might have";
+			mes "to ask Panno about it.";
 			goto L_End;
 		}
 		else if (ra_tem_q == 12) {
@@ -4232,7 +4244,7 @@ S_Donate:
 	else {
 		mes "[Priestess Nemma]";
 		mes "I'm sorry, but you have";
-		mes "less than "+@Donate$+" zeny...";
+		mes "less than "+(.@num*50000)+" zeny...";
 		mes "I know it's asking a lot,";
 		mes "but those are the rules that";
 		mes "I've been told to follow, so...";
@@ -5103,7 +5115,8 @@ ra_temin,277,159,3	script	High Priest Zhed#rachel	932,{
 		mes "discussion. Why don't you";
 		mes "wait and relax in the next room";
 		mes "over there in the meantime?";
-		changequest 8101,8102;
+		if (isbegin_quest(8101))
+			changequest 8101,8102;
 		close2;
 		cutin "",255;
 		warp "ra_temin",297,156;
@@ -5179,7 +5192,7 @@ ra_temin,277,159,3	script	High Priest Zhed#rachel	932,{
 		mes "you feel compelled to";
 		mes "enter the Holy Ground.^000000";
 	}
-	else if (ra_tem_q == 23) {
+	else if (ra_tem_q == 22 || ra_tem_q == 23) {
 		cutin "ra_gman2",2;
 		mes "[High Priest Zhed]";
 		mes "Oh, it's you.";
@@ -5265,6 +5278,8 @@ ra_temin,277,159,3	script	High Priest Zhed#rachel	932,{
 		close2;
 		set MISC_QUEST,MISC_QUEST | 8192;
 		set ra_tem_q,0;
+		set ra_tem_q_,0;
+		set ra_tem_q_18,0;
 		cutin "",255;
 		completequest 8105;
 		specialeffect2 EF_ABSORBSPIRITS;
@@ -6400,126 +6415,138 @@ ra_temin,170,46,3	script	Panno#rachel	920,{
 			goto L_End;
 		}
 	}
-	else if (ra_tem_q == 10) {
+	else if (ra_tem_q < 10) {
+		cutin "ra_fano02",2;
 		mes "[Priestess Panno]";
-		mes "Good day.";
-		next;
+		mes "I'm busy at the moment.";
+		mes "Come back later. Please.";
+		goto L_End;
+	}
+	else if (ra_tem_q == 10) {
+		if (ra_tem_q_) {
+			mes "[Priestess Panno]";
+			mes "Good day.";
+			next;
+			switch(select("Redeem Lottery Tickets:Temple Information:Hey, did you open the gate?")) {
+			case 1:
+				cutin "ra_fano01",2;
+				mes "[Priestess Panno]";
+				mes "You... still have";
+				mes "Lottery Tickets from";
+				mes "making donations for";
+				mes "the festival? Look up the";
+				mes "word ''punctuality'' in the";
+				mes "dictionary. It might help you.";
+				next;
+				mes "[Priestess Panno]";
+				mes "Fine. You really";
+				mes "want to exchange your";
+				mes "Lottery Tickets? It's my job";
+				mes "to ask and make sure, you";
+				mes "know, in case you were saving";
+				mes "them for some weird reason.";
+				next;
+				if (select("Yes:No") == 1) goto L_Lottery;
+				mes "[Priestess Panno]";
+				mes "You can redeem your";
+				mes "Lottery Tickets at any";
+				mes "time, so please visit";
+				mes "me at your leisure.";
+				mes "Go with Freya.";
+				goto L_End;
 
-		switch(select("Redeem Lottery Tickets:Temple Information:Hey, did you open the gate?")) {
+			case 2:
+				cutin "ra_fano01",2;
+				mes "[Priestess Panno]";
+				mes "The Chapel is located";
+				mes "over the wall behind me";
+				mes "Our pope's office and chambers";
+				mes "are upstairs. You can only go";
+				mes "there if you have special";
+				mes "authorization.";
+				next;
+				mes "["+strcharinfo(0)+"]";
+				mes "......";
+				mes ".........";
+				next;
+				mes "[Priestess Panno]";
+				mes "............";
+				mes ".........";
+				mes "......";
+				next;
+				mes "["+strcharinfo(0)+"]";
+				mes "...?";
+				next;
+				cutin "ra_fano02",2;
+				mes "[Priestess Panno]";
+				mes "You come to a temple";
+				mes "to pray, not to look";
+				mes "around. Or chit-chat";
+				mes "with the priestesses";
+				mes "like me. Don't forget it.";
+				next;
+				cutin "ra_fano02",2;
+				mes "[Priestess Panno]";
+				mes "The offices for the High";
+				mes "Priests are located on each";
+				mes "side of the hallway. However,";
+				mes "you can only enter if you've";
+				mes "been permitted beforehand.";
+				goto L_End;
 
-		case 1:
-			cutin "ra_fano01",2;
-			mes "[Priestess Panno]";
-			mes "You... still have";
-			mes "Lottery Tickets from";
-			mes "making donations for";
-			mes "the festival? Look up the";
-			mes "word ''punctuality'' in the";
-			mes "dictionary. It might help you.";
-			next;
-			mes "[Priestess Panno]";
-			mes "Fine. You really";
-			mes "want to exchange your";
-			mes "Lottery Tickets? It's my job";
-			mes "to ask and make sure, you";
-			mes "know, in case you were saving";
-			mes "them for some weird reason.";
-			next;
-			if (select("Yes:No") == 1) goto L_Lottery;
-			mes "[Priestess Panno]";
-			mes "You can redeem your";
-			mes "Lottery Tickets at any";
-			mes "time, so please visit";
-			mes "me at your leisure.";
-			mes "Go with Freya.";
-			goto L_End;
-
-		case 2:
-			cutin "ra_fano01",2;
-			mes "[Priestess Panno]";
-			mes "The Chapel is located";
-			mes "over the wall behind me";
-			mes "Our pope's office and chambers";
-			mes "are upstairs. You can only go";
-			mes "there if you have special";
-			mes "authorization.";
-			next;
-			mes "["+strcharinfo(0)+"]";
-			mes "......";
-			mes ".........";
-			next;
-			mes "[Priestess Panno]";
-			mes "............";
-			mes ".........";
-			mes "......";
-			next;
-			mes "["+strcharinfo(0)+"]";
-			mes "...?";
-			next;
-			cutin "ra_fano02",2;
-			mes "[Priestess Panno]";
-			mes "You come to a temple";
-			mes "to pray, not to look";
-			mes "around. Or chit-chat";
-			mes "with the priestesses";
-			mes "like me. Don't forget it.";
-			next;
-			cutin "ra_fano02",2;
-			mes "[Priestess Panno]";
-			mes "The offices for the High";
-			mes "Priests are located on each";
-			mes "side of the hallway. However,";
-			mes "you can only enter if you've";
-			mes "been permitted beforehand.";
-			goto L_End;
-
-		case 3:
-			cutin "ra_fano02",2;
-			mes "[Priestess Panno]";
-			mes "Gate...?";
-			next;
-			select("The locked gate to the temple!");
-			mes "[Priestess Panno]";
-			mes "I don't know";
-			mes "what you mean.";
-			next;
-			select("Explain");
-			mes "["+strcharinfo(0)+"]";
-			mes "I think that Priestess Nemma";
-			mes "has been worried about the";
-			mes "gate being broken, though";
-			mes "it hasn't been like that since";
-			mes "you've started your position";
-			mes "here at the temple.";
-			next;
-			mes "[Priestess Panno]";
-			mes "Worried...?";
-			mes "Yes, my twin sister";
-			mes "has been known to";
-			mes "do a lot of that, and cry";
-			mes "for my help. Am I right?";
-			next;
-			mes "["+strcharinfo(0)+"]";
-			mes "It's weird";
-			mes "...She said that the gate";
-			mes "should automatically fix";
-			mes "itself, but it hasn't been";
-			mes "doing it lately. She was";
-			mes "acting really funny..";
-			next;
-			mes "["+strcharinfo(0)+"]";
-			mes "She was talking about";
-			mes "the temple's history and";
-			mes "how the security system was";
-			mes "built. Then she mentioned you,";
-			mes "so I get the feeling you might";
-			mes "know something about this.";
-			next;
-			mes "[Priestess Panno]";
-			mes ".........";
-			set ra_tem_q,11;
-			goto L_End;
+			case 3:
+				cutin "ra_fano02",2;
+				mes "[Priestess Panno]";
+				mes "Gate...?";
+				next;
+				select("The locked gate to the temple!");
+				mes "[Priestess Panno]";
+				mes "I don't know";
+				mes "what you mean.";
+				next;
+				select("Explain");
+				mes "["+strcharinfo(0)+"]";
+				mes "I think that Priestess Nemma";
+				mes "has been worried about the";
+				mes "gate being broken, though";
+				mes "it hasn't been like that since";
+				mes "you've started your position";
+				mes "here at the temple.";
+				next;
+				mes "[Priestess Panno]";
+				mes "Worried...?";
+				mes "Yes, my twin sister";
+				mes "has been known to";
+				mes "do a lot of that, and cry";
+				mes "for my help. Am I right?";
+				next;
+				mes "["+strcharinfo(0)+"]";
+				mes "It's weird";
+				mes "...She said that the gate";
+				mes "should automatically fix";
+				mes "itself, but it hasn't been";
+				mes "doing it lately. She was";
+				mes "acting really funny..";
+				next;
+				mes "["+strcharinfo(0)+"]";
+				mes "She was talking about";
+				mes "the temple's history and";
+				mes "how the security system was";
+				mes "built. Then she mentioned you,";
+				mes "so I get the feeling you might";
+				mes "know something about this.";
+				next;
+				mes "[Priestess Panno]";
+				mes ".........";
+				set ra_tem_q,11;
+				goto L_End;
+			}
 		}
+		cutin "ra_fano02",2;
+		mes "[Priestess Panno]";
+		mes "I'm busy at the moment.";
+		mes "Come back later. Please.";
+		goto L_End;
 	}
 	else if (ra_tem_q == 11) {
 		mes "["+strcharinfo(0)+"]";
@@ -7065,20 +7092,25 @@ OnTimer120000:
 
 ra_temin,293,144,0	script	out1#rachel	-1,3,3,{
 OnTouch:
-	if (isbegin_quest(8102) == 1) {
+	if (ra_tem_q == 18) {
 		mes "^3355FFIt sounds like they're";
 		mes "still talking. It'd be";
 		mes "best to patient and wait";
 		mes "just a little while longer.";
 		mes "Still... It's awfully boring.^000000";
-		next;
-		mes "^3355FFA little eavesdropping";
-		mes "never hurt anyone. Maybe";
-		mes "you can hear them a little";
-		mes "better if you listen from";
-		mes "the left side of the wall.^000000";
-		set ra_tem_q_18,1;
+		if (ra_tem_q_18) {
+			next;
+			mes "^3355FFA little eavesdropping";
+			mes "never hurt anyone. Maybe";
+			mes "you can hear them a little";
+			mes "better if you listen from";
+			mes "the left side of the wall.^000000";
+			close2;
+			warp "ra_temin",300,153;
+			end;
+		}
 		close2;
+		set ra_tem_q_18,1;
 		warp "ra_temin",300,153;
 		end;
 	}
@@ -7087,7 +7119,7 @@ OnTouch:
 
 ra_temin,288,151,0	script	hidden1#rachel	-1,1,6,{
 OnTouch:
-	if (ra_tem_q_18 == 1) {
+	if (ra_tem_q == 18) {
 		mes "^3355FFAt this distance you";
 		mes "can cleartly hear the";
 		mes "voices from the other";
@@ -7240,7 +7272,6 @@ OnTouch:
 		mes "What could she possibly mean?";
 		mes "For now, you may as well";
 		mes "talk to High Priest Zhed.^000000";
-		set ra_tem_q_18,2;
 		set ra_tem_q,19;
 		changequest 8102,8103;
 		close;

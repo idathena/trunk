@@ -17016,7 +17016,7 @@ que_avan01,18,38,0	script	Desk#tl01	CLEAR_NPC,{
 			mes "Take this first.";
 			mes "I'll get Avant.";
 			ep14_2_mylord = 22;
-			delitem 6541,1; //Avant_Research_Data
+			getitem 6541,1; //Avant_Research_Data
 			changequest 7443,7444;
 			next;
 			switch( select("Let Hisie handle it.:I'm taking care of this place!") ) {
