@@ -15714,6 +15714,12 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 				case ITEMID_HOLY_WATER:
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_HOLYWATER,0,0);
 					return false;
+				case ITEMID_ANCILLA:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ANCILLA,0,0);
+					return false;
+				case ITEMID_PAINT_BRUSH:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_PAINTBRUSH,0,0);
+					return false;
 				default:
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ITEM,require.amount[i],require.itemid[i]);
 					return false;
