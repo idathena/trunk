@@ -2978,7 +2978,7 @@ lighthalzen,337,232,3	script	Maku	870,{
 		mes "anyway? Sure, we all";
 		mes "do it, but still...";
 		set friendship,1;
-		if (isbegin_quest(12000) == 0)
+		if (!isbegin_quest(12000))
 			setquest 12000;
 		next;
 		mes "[Maku]";

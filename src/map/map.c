@@ -1867,9 +1867,6 @@ int map_quit(struct map_session_data *sd) {
 			status_change_end(&sd->bl,SC_KYOUGAKU,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_CBC,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_EQC,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_HEAT_BARREL_AFTER,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_C_MARKER,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_ANTI_M_BLAST,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_B_TRAP,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_H_MINE,INVALID_TIMER);
 		}
@@ -1884,10 +1881,7 @@ int map_quit(struct map_session_data *sd) {
 			status_change_end(&sd->bl,SC_MELTDOWN,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_MAXOVERTHRUST,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_PRESERVE,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_GN_CARTBOOST,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_HEAT_BARREL,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_P_ALTER,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_E_CHAIN,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_GEFFEN_MAGIC1,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_GEFFEN_MAGIC2,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_GEFFEN_MAGIC3,INVALID_TIMER);

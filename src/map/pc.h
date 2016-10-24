@@ -702,18 +702,6 @@ enum weapon_type {
 	W_DOUBLE_SA, // sword + axe
 };
 
-enum ammo_type {
-	A_ARROW = 1,
-	A_DAGGER,   //2
-	A_BULLET,   //3
-	A_SHELL,    //4
-	A_GRENADE,  //5
-	A_SHURIKEN, //6
-	A_KUNAI,     //7
-	A_CANNONBALL,	//8
-	A_THROWWEAPON	//9
-};
-
 struct {
 	unsigned int base_hp[MAX_LEVEL], base_sp[MAX_LEVEL]; //Storage for the first calculation with hp/sp factor and multiplicator
 	int hp_factor, hp_multiplicator, sp_factor;
@@ -808,10 +796,10 @@ short pc_maxaspd(struct map_session_data *sd);
 #define pc_stop_walking(sd, type) unit_stop_walking(&(sd)->bl, type)
 #define pc_stop_attack(sd) unit_stop_attack(&(sd)->bl)
 
-// Weapon check considering dual wielding.
+// Weapon check considering dual wielding
 #define pc_check_weapontype(sd, type) ((type)&((sd)->status.weapon < MAX_WEAPON_TYPE ? \
 	1<<(sd)->status.weapon : (1<<(sd)->weapontype1)|(1<<(sd)->weapontype2)|(1<<(sd)->status.weapon)))
-// Checks if the given class value corresponds to a player class. [Skotlex]
+// Checks if the given class value corresponds to a player class [Skotlex]
 // JOB_NOVICE isn't checked for class_ is supposed to be unsigned
 #define pcdb_checkid_sub(class_) \
 ( \
@@ -979,7 +967,7 @@ int pc_resetskill(struct map_session_data *, int);
 int pc_resetfeel(struct map_session_data *);
 int pc_resethate(struct map_session_data *);
 bool pc_equipitem(struct map_session_data *sd, short n, int req_pos);
-bool pc_unequipitem(struct map_session_data *sd, int n, int flag);
+void pc_unequipitem(struct map_session_data *sd, int n, int flag);
 void pc_checkitem(struct map_session_data *);
 void pc_check_available_item(struct map_session_data *sd);
 int pc_useitem(struct map_session_data *,int);

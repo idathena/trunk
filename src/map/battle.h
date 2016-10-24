@@ -253,7 +253,9 @@ extern struct Battle_Config
 	int natural_healsp_interval;
 	int natural_heal_skill_interval;
 	int natural_heal_weight_rate;
-	int arrow_decrement;
+	int ammo_decrement;
+	int ammo_unequip;
+	int ammo_check_weapon;
 	int max_aspd;
 	int max_walk_speed;	//Maximum walking speed after buffs [Skotlex]
 	int max_hp;

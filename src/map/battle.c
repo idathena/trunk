@@ -1603,11 +1603,7 @@ int64 battle_addmastery(struct map_session_data *sd, struct block_list *target, 
 		damage += lv * 10;
 
 	damage += pc_checkskill(sd,NC_MADOLICENCE) * 15; //Attack bonus is granted even without the Madogear
-
-	if(type == 0)
-		weapon = sd->weapontype1;
-	else
-		weapon = sd->weapontype2;
+	weapon = (!type ? sd->weapontype1 : sd->weapontype2);
 
 	switch(weapon) {
 		case W_1HSWORD:
@@ -1910,7 +1906,7 @@ void battle_consume_ammo(TBL_PC *sd, uint16 skill_id, uint16 skill_lv)
 {
 	int qty = 1;
 
-	if(!battle_config.arrow_decrement)
+	if(!battle_config.ammo_decrement)
 		return;
 
 	if(skill_id) {
@@ -2011,9 +2007,9 @@ static int battle_skill_damage_skill(struct block_list *src, struct block_list *
 	if(!battle_skill_damage_iscaster(damage->caster, src->type))
 		return 0;
 
-	if((damage->map&1 && (!mapd->flag.pvp && !map_flag_gvg(m) && !mapd->flag.battleground && !mapd->flag.skill_damage && !mapd->flag.restricted)) ||
+	if((damage->map&1 && (!mapd->flag.pvp && !map_flag_gvg2(m) && !mapd->flag.battleground && !mapd->flag.skill_damage && !mapd->flag.restricted)) ||
 		(damage->map&2 && mapd->flag.pvp) ||
-		(damage->map&4 && map_flag_gvg(m)) ||
+		(damage->map&4 && map_flag_gvg2(m)) ||
 		(damage->map&8 && mapd->flag.battleground) ||
 		(damage->map&16 && mapd->flag.skill_damage) ||
 		(mapd->flag.restricted && damage->map&(8 * mapd->zone)))
@@ -2312,7 +2308,7 @@ static int is_attack_piercing(struct Damage wd, struct block_list *src, struct b
 			return 0;
 		case MO_INVESTIGATE:
 		case RL_MASS_SPIRAL:
-			return 2;
+			return 1;
 		default:
 #ifndef RENEWAL //Renewal critical gains ice pick effect [helvetica]
 			if(is_attack_critical(wd, src, target, skill_id, skill_lv, false))
@@ -2666,8 +2662,7 @@ static int battle_get_weapon_element(struct Damage wd, struct block_list *src, s
 			break;
 	}
 
-	if(sc && ((sc->data[SC_GOLDENE_FERSE] && ((!skill_id && (rnd()%100 < sc->data[SC_GOLDENE_FERSE]->val4)) ||
-		skill_id == MH_STAHL_HORN)) || sc->data[SC_P_ALTER]))
+	if(sc && sc->data[SC_GOLDENE_FERSE] && ((!skill_id && (rnd()%100 < sc->data[SC_GOLDENE_FERSE]->val4)) || skill_id == MH_STAHL_HORN) )
 		element = ELE_HOLY;
 	return element;
 }
@@ -3225,16 +3220,8 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 		}
 	}
 
-	switch(skill_id) {
-		case RA_AIMEDBOLT:
-			if(tsc && (tsc->data[SC_BITE] || tsc->data[SC_ANKLE] || tsc->data[SC_ELECTRICSHOCKER]))
-				wd.div_ = tstatus->size + 2 + (rnd()%100 < 50 - tstatus->size * 10 ? 1 : 0);
-			break;
-		case SC_JYUMONJIKIRI:
-			if(tsc && tsc->data[SC_JYUMONJIKIRI])
-				wd.div_ = wd.div_ * -1; //Needs more info
-			break;
-	}
+	if(skill_id == RA_AIMEDBOLT && tsc && (tsc->data[SC_BITE] || tsc->data[SC_ANKLE] || tsc->data[SC_ELECTRICSHOCKER]))
+		wd.div_ = tstatus->size + 2 + (rnd()%100 < 50 - tstatus->size * 10 ? 1 : 0);
 
 	return wd;
 }
@@ -3284,8 +3271,6 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			status_change_end(src,SC_CRUSHSTRIKE,INVALID_TIMER);
 			skill_break_equip(src,src,EQP_WEAPON,2000,BCT_SELF);
 		}
-		if(sc->data[SC_P_ALTER])
-			skillratio += sc->data[SC_P_ALTER]->val2;
 		if(sc->data[SC_HEAT_BARREL])
 			skillratio += sc->data[SC_HEAT_BARREL]->val2;
 	}
@@ -4361,14 +4346,8 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, sc->data[SC_DRUMBATTLE]->val2);
 		if(sc->data[SC_MADNESSCANCEL])
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, 100);
-		if(sc->data[SC_GATLINGFEVER]) {
-			if(tstatus->size == SZ_SMALL) {
-				ATK_ADD(wd.equipAtk, wd.equipAtk2, 10 * sc->data[SC_GATLINGFEVER]->val1);
-			} else if(tstatus->size == SZ_MEDIUM) {
-				ATK_ADD(wd.equipAtk, wd.equipAtk2, 5 * sc->data[SC_GATLINGFEVER]->val1);
-			} else if(tstatus->size == SZ_BIG)
-				ATK_ADD(wd.equipAtk, wd.equipAtk2, sc->data[SC_GATLINGFEVER]->val1);
-		}
+		if(sc->data[SC_GATLINGFEVER])
+			ATK_ADD(wd.equipAtk, wd.equipAtk2, 20 + 10 * sc->data[SC_GATLINGFEVER]->val1);
 #else
 		if(sc->data[SC_TRUESIGHT])
 			ATK_ADDRATE(wd.damage, wd.damage2, 2 * sc->data[SC_TRUESIGHT]->val1);
@@ -4467,6 +4446,12 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADDRATE(wd.damage, wd.damage2, -sc->data[SC_EQC]->val2);
 #ifdef RENEWAL
 			ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, -sc->data[SC_EQC]->val2);
+#endif
+		}
+		if(sc->data[SC_P_ALTER]) {
+			ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_P_ALTER]->val2);
+#ifdef RENEWAL
+			ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, sc->data[SC_P_ALTER]->val2);
 #endif
 		}
 		if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
@@ -5055,20 +5040,13 @@ static struct Damage initialize_weapon_data(struct block_list *src, struct block
 			case MH_SONIC_CRAW: {
 					TBL_HOM *hd = BL_CAST(BL_HOM, src);
 
-					if(hd)
-						wd.div_ = hd->homunculus.spiritball;
-					else
-						wd.div_ = skill_get_maxcount(skill_id, skill_lv);
+					wd.div_ = (hd ? hd->homunculus.spiritball : skill_get_maxcount(skill_id, skill_lv));
 				}
 				break;
 
 			case MO_FINGEROFFENSIVE:
-				if(sd) {
-					if(battle_config.finger_offensive_type)
-						wd.div_ = 1;
-					else
-						wd.div_ = sd->spiritball_old;
-				}
+				if(sd)
+					wd.div_ = (battle_config.finger_offensive_type ? 1 : max(sd->spiritball_old,1));
 				break;
 
 			case KN_PIERCE:
@@ -7242,39 +7220,8 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 		if (sd->state.arrow_atk) {
 			short index = sd->equip_index[EQI_AMMO];
 
-			if (index < 0) {
-				if (sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE)
-					clif_skill_fail(sd,0,USESKILL_FAIL_NEED_MORE_BULLET,0,0);
-				else
-					clif_arrow_fail(sd,0);
+			if (index < 0 || !sd->inventory_data[index])
 				return ATK_NONE;
-			}
-			//Ammo check by Ishizu-chan
-			if (sd->inventory_data[index]) {
-				switch (sd->status.weapon) {
-					case W_BOW:
-						if (sd->inventory_data[index]->look != A_ARROW) {
-							clif_arrow_fail(sd,0);
-							return ATK_NONE;
-						}
-						break;
-					case W_REVOLVER:
-					case W_RIFLE:
-					case W_GATLING:
-					case W_SHOTGUN:
-						if (sd->inventory_data[index]->look != A_BULLET) {
-							clif_skill_fail(sd,0,USESKILL_FAIL_NEED_MORE_BULLET,0,0);
-							return ATK_NONE;
-						}
-						break;
-					case W_GRENADE:
-						if (sd->inventory_data[index]->look != A_GRENADE) {
-							clif_skill_fail(sd,0,USESKILL_FAIL_NEED_MORE_BULLET,0,0);
-							return ATK_NONE;
-						}
-						break;
-				}
-			}
 		}
 	}
 
@@ -7414,7 +7361,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 	}
 
 	if (sd) {
-		if (battle_config.arrow_decrement && sc && sc->data[SC_FEARBREEZE] && sc->data[SC_FEARBREEZE]->val4 > 0) {
+		if (battle_config.ammo_decrement && sc && sc->data[SC_FEARBREEZE] && sc->data[SC_FEARBREEZE]->val4 > 0) {
 			short idx = sd->equip_index[EQI_AMMO];
 
 			if (idx >= 0 && sd->status.inventory[idx].amount >= sc->data[SC_FEARBREEZE]->val4) {
@@ -8200,7 +8147,9 @@ static const struct _battle_data {
 	{ "natural_healsp_interval",            &battle_config.natural_healsp_interval,         8000,   NATURAL_HEAL_INTERVAL, INT_MAX, },
 	{ "natural_heal_skill_interval",        &battle_config.natural_heal_skill_interval,     10000,  NATURAL_HEAL_INTERVAL, INT_MAX, },
 	{ "natural_heal_weight_rate",           &battle_config.natural_heal_weight_rate,        50,     50,     101             },
-	{ "arrow_decrement",                    &battle_config.arrow_decrement,                 1,      0,      2,              },
+	{ "ammo_decrement",                     &battle_config.ammo_decrement,                  1,      0,      2,              },
+	{ "ammo_unequip",                       &battle_config.ammo_unequip,                    1,      0,      1,              },
+	{ "ammo_check_weapon",                  &battle_config.ammo_check_weapon,               1,      0,      1,              },
 	{ "max_aspd",                           &battle_config.max_aspd,                        190,    100,    199,            },
 	{ "max_third_aspd",                     &battle_config.max_third_aspd,                  193,    100,    199,            },
 	{ "max_walk_speed",                     &battle_config.max_walk_speed,                  300,    100,    100*DEFAULT_WALK_SPEED, },
