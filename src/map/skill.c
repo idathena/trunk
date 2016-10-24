@@ -1574,14 +1574,14 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	}
 
 	if( attack_type&BF_WEAPON ) {
-		if( sd && sd->special_state.bonus_coma ) { //Coma, Breaking Equipment
+		if( sd && sd->special_state.bonus_coma ) { //Coma
 			rate = sd->weapon_coma_ele[tstatus->def_ele] + sd->weapon_coma_ele[ELE_ALL];
 			rate += sd->weapon_coma_race[tstatus->race] + sd->weapon_coma_race[RC_ALL];
 			rate += sd->weapon_coma_class[tstatus->class_] + sd->weapon_coma_class[CLASS_ALL];
 			if( rate )
 				status_change_start(src,bl,SC_COMA,rate,0,0,src->id,0,0,SCFLAG_NONE);
 		}
-		if( sd && battle_config.equip_self_break_rate ) {
+		if( sd && battle_config.equip_self_break_rate ) { //Breaking Equipment
 			rate = battle_config.equip_natural_break_rate;
 			if( sc ) {
 				if( sc->data[SC_GIANTGROWTH] )
@@ -3482,7 +3482,7 @@ static int skill_check_condition_mercenary(struct block_list *bl, uint16 skill_i
 				break;
 			case MH_SONIC_CRAW:
 				if( !hd->homunculus.spiritball ) { //Requires at least 1 spirit sphere
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_SPIRITS,1,0);
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_SPIRIT,1,0);
 					return 0;
 				}
 				if( !(sc && sc->data[SC_STYLE_CHANGE] && sc->data[SC_STYLE_CHANGE]->val1 == MH_MD_FIGHTING) ) {
@@ -3545,9 +3545,9 @@ static int skill_check_condition_mercenary(struct block_list *bl, uint16 skill_i
 				}
 				break;
 		}
-		if( spiritball ) {
+		if( spiritball > 0 ) {
 			if( hd->homunculus.spiritball < spiritball ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_SPIRITS,spiritball,0);
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_SPIRIT,spiritball,0);
 				return 0;
 			}
 			hom_delspiritball(hd,spiritball,1);
@@ -6390,19 +6390,17 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case MO_KITRANSLATION:
-			if (dstsd && dstsd->spiritball < 5 &&
-				(dstsd->class_&MAPID_BASEMASK) != MAPID_GUNSLINGER && (dstsd->class_&MAPID_UPPERMASK) != MAPID_REBELLION) {
-				//Require will define how many spiritballs will be transferred
-				struct skill_condition require = skill_get_requirement(sd,skill_id,skill_lv);
-
-				pc_delspiritball(sd,require.spiritball,0);
-				for (i = 0; i < require.spiritball; i++)
-					pc_addspiritball(dstsd,skill_get_time(skill_id,skill_lv),5);
-			} else {
-				if (sd)
+			if (sd) {
+				if (dstsd && dstsd->spiritball < 5 &&
+					(!sd->status.party_id || sd->status.party_id != dstsd->status.party_id) &&
+					((dstsd->class_&MAPID_BASEMASK) == MAPID_GUNSLINGER || (dstsd->class_&MAPID_UPPERMASK) == MAPID_REBELLION))
+				{
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-				map_freeblock_unlock();
-				return 0;
+					map_freeblock_unlock();
+					return 0;
+				}
+				pc_delspiritball(sd,1,0);
+				pc_addspiritball(dstsd,skill_get_time(skill_id,skill_lv),5);
 			}
 			break;
 
@@ -9643,16 +9641,14 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case SR_POWERVELOCITY:
-			if( !dstsd )
-				break;
-			if( sd && ((dstsd->class_&MAPID_BASEMASK) != MAPID_GUNSLINGER || (dstsd->class_&MAPID_UPPERMASK) != MAPID_REBELLION) ) {
-				int max = pc_getmaxspiritball(dstsd,5);
+			if( sd && dstsd && ((dstsd->class_&MAPID_BASEMASK) != MAPID_GUNSLINGER || (dstsd->class_&MAPID_UPPERMASK) != MAPID_REBELLION) ) {
+				int max = pc_getmaxspiritball(dstsd,0);
 
-				for( i = 0; i < max; i++ )
-					pc_addspiritball(dstsd,skill_get_time(MO_CALLSPIRITS,1),max);
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				pc_delspiritball(sd,sd->spiritball,0);
+				for( i = 0; i < sd->spiritball; i++ )
+					pc_addspiritball(dstsd,skill_get_time(MO_CALLSPIRITS,1),max);
 			}
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
 
 		case SR_GENTLETOUCH_CURE: {
@@ -12459,7 +12455,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 				struct skill_condition req = skill_get_requirement(sd,skill_id,skill_lv);
 
 				ARR_FIND(0,MAX_SKILL_ITEM_REQUIRE,i,req.itemid[i] && (req.itemid[i] == ITEMID_TRAP || req.itemid[i] == ITEMID_SPECIAL_ALLOY_TRAP));
-				if( req.itemid[i] )
+				if( i != MAX_SKILL_ITEM_REQUIRE && req.itemid[i] )
 					req_item = req.itemid[i];
 				if( map_flag_gvg2(src->m) || map[src->m].flag.battleground )
 					limit *= 4; //Longer trap times in WoE [celest]
@@ -14473,7 +14469,7 @@ static int skill_check_condition_mob_master_sub(struct block_list *bl, va_list a
 int skill_isammotype(struct map_session_data *sd, uint16 skill_id)
 {
 	return (
-		battle_config.arrow_decrement == 2 &&
+		battle_config.ammo_decrement == 2 &&
 		(sd->status.weapon == W_BOW || (sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE)) &&
 		skill_id != HT_PHANTASMIC &&
 		skill_get_type(skill_id) == BF_WEAPON &&
@@ -14707,7 +14703,6 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 			break;
 		case MO_FINGEROFFENSIVE:
 		case GS_FLING:
-		case SR_RAMPAGEBLASTER:
 			if( sd->spiritball > 0 && sd->spiritball < require.spiritball )
 				sd->spiritball_old = require.spiritball = sd->spiritball;
 			else
@@ -14934,6 +14929,12 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				return false;
 			}
 			break;
+		case GS_MADNESSCANCEL:
+			if( sc && (sc->data[SC_P_ALTER] || sc->data[SC_HEAT_BARREL]) ) {
+				clif_msg(sd,SKILL_REBEL_GUN_FAIL);
+				return false;
+			}
+			break;
 		case NJ_ISSEN:
 #ifdef RENEWAL
 			if( status->hp < status->hp / 100 )
@@ -14953,7 +14954,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		case NJ_ZENYNAGE:
 		case KO_MUCHANAGE:
 			if( sd->status.zeny < require.zeny ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_MONEY,0,0);
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_MONEY,0,0);
 				return false;
 			}
 			break;
@@ -15112,14 +15113,6 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				return false;
 			}
 			break;
-		case LG_RAGEBURST:
-			if( sd->spiritball > 0 )
-				sd->spiritball_old = require.spiritball = sd->spiritball;
-			else {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_SKILLINTERVAL,0,0);
-				return false;
-			}
-			break;
 		case LG_SHIELDSPELL: {
 				short index = sd->equip_index[EQI_HAND_L];
 				struct item_data *shield_data = NULL;
@@ -15180,15 +15173,11 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				}
 			}
 			if( sd->spiritball > 0 )
-				sd->spiritball_old = require.spiritball = sd->spiritball;
+				sd->spiritball_old = sd->spiritball;
 			else {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_SPIRIT,1,0);
 				return false;
 			}
-			break;
-		case SR_GATEOFHELL:
-			if( sd->spiritball > 0 )
-				sd->spiritball_old = require.spiritball;
 			break;
 		case SO_FIREWALK:
 		case SO_ELECTRICWALK: //Can't be casted until you've walked all cells
@@ -15225,6 +15214,24 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		case KO_ZENKAI:
 			if( sd->spiritcharm_type == CHARM_TYPE_NONE || sd->spiritcharm <= 0 ) {
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON_NONE,0,0);
+				return false;
+			}
+			break;
+		case RL_RICHS_COIN:
+			if( sd->spiritball >= 10 ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON,0,0);
+				return false;
+			}
+			break;
+		case RL_P_ALTER:
+			if( sc && (sc->data[SC_MADNESSCANCEL] || sc->data[SC_HEAT_BARREL]) ) {
+				clif_msg(sd,SKILL_REBEL_GUN_FAIL);
+				return false;
+			}
+			break;
+		case RL_HEAT_BARREL:
+			if( sc && (sc->data[SC_MADNESSCANCEL] || sc->data[SC_P_ALTER]) ) {
+				clif_msg(sd,SKILL_REBEL_GUN_FAIL);
 				return false;
 			}
 			break;
@@ -15332,6 +15339,132 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		}
 	}
 
+	//'mhp' is the max-hp-requirement, so that you must have this % or less of HP to cast it
+	if( require.mhp > 0 && get_percentage(status->hp, status->max_hp) > require.mhp ) {
+		clif_skill_fail(sd,skill_id,USESKILL_FAIL_HP_INSUFFICIENT,0,0);
+		return false;
+	}
+
+	if( require.weapon && !pc_check_weapontype(sd,require.weapon) ) {
+		switch( skill_id ) {
+			case RA_AIMEDBOLT:
+				break;
+			default:
+				if( require.weapon&(1<<W_REVOLVER) )
+					clif_msg(sd,SKILL_NEED_REVOLVER);
+				else if( require.weapon&(1<<W_RIFLE) )
+					clif_msg(sd,SKILL_NEED_RIFLE);
+				else if( require.weapon&(1<<W_GATLING) )
+					clif_msg(sd,SKILL_NEED_GATLING);
+				else if( require.weapon&(1<<W_SHOTGUN) )
+					clif_msg(sd,SKILL_NEED_SHOTGUN);
+				else if( require.weapon&(1<<W_GRENADE) )
+					clif_msg(sd,SKILL_NEED_GRENADE);
+				else
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_WRONG_WEAPON,0,0);
+				return false;
+		}
+	}
+
+	if( require.sp > 0 && status->sp < (unsigned int)require.sp ) {
+		clif_skill_fail(sd,skill_id,USESKILL_FAIL_SP_INSUFFICIENT,0,0);
+		return false;
+	}
+
+	if( require.zeny > 0 && sd->status.zeny < require.zeny ) {
+		clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_MONEY,0,0);
+		return false;
+	}
+
+	for( i = 0; i < MAX_SKILL_ITEM_REQUIRE; ++i ) {
+		short index[MAX_SKILL_ITEM_REQUIRE];
+
+		if( !require.itemid[i] )
+			continue;
+		index[i] = pc_search_inventory(sd,require.itemid[i]);
+		if( index[i] == INDEX_NOT_FOUND || sd->status.inventory[index[i]].amount < require.amount[i] ) {
+			switch( require.itemid[i] ) {
+				case ITEMID_RED_GEMSTONE:
+				case ITEMID_BLUE_GEMSTONE:
+				case ITEMID_HOLY_WATER:
+					break;
+				case ITEMID_ANCILLA:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ANCILLA,0,0);
+					return false;
+				case ITEMID_PAINT_BRUSH:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_PAINTBRUSH,0,0);
+					return false;
+				default:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ITEM,require.amount[i],require.itemid[i]);
+					return false;
+			}
+		}
+	}
+
+	switch( skill_id ) {
+		case GS_FLING:
+		case GS_TRIPLEACTION:
+		case GS_BULLSEYE:
+		case GS_ADJUSTMENT:
+		case GS_MAGICALBULLET:
+			break;
+		case GS_INCREASING:
+		case GS_CRACKER:
+		case GS_MADNESSCANCEL:
+		case RL_MASS_SPIRAL:
+		case RL_BANISHING_BUSTER:
+		case RL_B_TRAP:
+		case RL_S_STORM:
+		case RL_E_CHAIN:
+		case RL_C_MARKER:
+		case RL_FIREDANCE:
+		case RL_H_MINE:
+		case RL_P_ALTER:
+		case RL_FALLEN_ANGEL:
+		case RL_R_TRIP:
+		case RL_FIRE_RAIN:
+		case RL_HEAT_BARREL:
+		case RL_AM_BLAST:
+		case RL_SLUGSHOT:
+		case RL_HAMMER_OF_GOD:
+			if( (require.spiritball > 0 && sd->spiritball < require.spiritball) ||
+				(require.spiritball == -1 && !sd->spiritball) ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_COIN,(require.spiritball > 0 ? require.spiritball : 0),0);
+				return false;
+			}
+			break;
+		default:
+			if( (require.spiritball > 0 && sd->spiritball < require.spiritball) ||
+				(require.spiritball == -1 && !sd->spiritball) ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_SPIRIT,(require.spiritball > 0 ? require.spiritball : 0),0);
+				return false;
+			}
+			break;
+	}
+
+	if( require.ammo ) {
+		short idx = sd->equip_index[EQI_AMMO];
+
+		if( idx < 0 || !sd->inventory_data[idx] || sd->status.inventory[idx].amount < require.ammo_qty ) {
+			switch( skill_id ) {
+				case BA_MUSICALSTRIKE:
+				case DC_THROWARROW:
+				case CG_ARROWVULCAN:
+				case GS_BULLSEYE:
+					break;
+				case RA_ARROWSTORM:
+					clif_arrow_fail(sd,0);
+					return false;
+				default:
+					if( require.ammo&((1<<AMMO_BULLET)|(1<<AMMO_SHELL)|(1<<AMMO_GRENADE)) ) {
+						clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_BULLET,0,0);
+						return false;
+					}
+					break;
+			}
+		}
+	}
+
 	if( require.eqItem_count ) {
 		int j = require.eqItem_count;
 
@@ -15361,6 +15494,16 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 							continue;
 					}
 					break;
+				case RL_P_ALTER:
+					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) ) {
+						j--;
+						if( !j ) {
+							clif_msg(sd,SKILL_NEED_HOLY_BULLET);
+							return false;
+						} else
+							continue;
+					}
+					break;
 				default: //Check if equiped item
 					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) ) {
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT,0,reqeqit);
@@ -15369,44 +15512,6 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 					break;
 			}
 		}
-	}
-
-	//'mhp' is the max-hp-requirement, so that you must have this % or less of HP to cast it
-	if( require.mhp > 0 && get_percentage(status->hp, status->max_hp) > require.mhp ) {
-		clif_skill_fail(sd,skill_id,USESKILL_FAIL_HP_INSUFFICIENT,0,0);
-		return false;
-	}
-
-	if( require.weapon && !pc_check_weapontype(sd,require.weapon) ) {
-		clif_skill_fail(sd,skill_id,USESKILL_FAIL_THIS_WEAPON,0,0);
-		return false;
-	}
-
-	if( require.sp > 0 && status->sp < (unsigned int)require.sp ) {
-		clif_skill_fail(sd,skill_id,USESKILL_FAIL_SP_INSUFFICIENT,0,0);
-		return false;
-	}
-
-	if( require.zeny > 0 && sd->status.zeny < require.zeny ) {
-		clif_skill_fail(sd,skill_id,USESKILL_FAIL_MONEY,0,0);
-		return false;
-	}
-
-	switch( skill_id ) {
-		case LG_RAGEBURST:
-		case MH_SILVERVEIN_RUSH:
-		case MH_MIDNIGHT_FRENZY:
-		case MH_TINDER_BREAKER:
-		case MH_CBC:
-		case MH_EQC:
-			break;
-		default:
-			if( ((require.spiritball > 0 && sd->spiritball < require.spiritball) ||
-				(require.spiritball == -1 && sd->spiritball < 1)) ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_SPIRITS,(require.spiritball == -1) ? 1 : require.spiritball,0);
-				return false;
-			}
-			break;
 	}
 
 	return true;
@@ -15423,6 +15528,7 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 {
 	struct skill_condition require;
 	struct status_data *status;
+	struct status_change *sc;
 	int i;
 
 	nullpo_retr(false,sd);
@@ -15468,6 +15574,11 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 
 	status = &sd->battle_status;
 
+	sc = &sd->sc;
+
+	if( sc && !sc->count )
+		sc = NULL;
+
 	//Perform skill-specific checks (and actions)
 	switch( skill_id ) {
 		case PR_BENEDICTIO:
@@ -15488,6 +15599,18 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 						return false; //Fails when exceed max limit, there are other plant types already out
 					}
 				}
+			}
+			break;
+		case GS_MADNESSCANCEL:
+			if( sc && sc->data[SC_ADJUSTMENT] ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false;
+			}
+			break;
+		case GS_ADJUSTMENT:
+			if( sc && sc->data[SC_MADNESSCANCEL] ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false;
 			}
 			break;
 		case WL_COMET:
@@ -15542,96 +15665,6 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 
 	require = skill_get_requirement(sd,skill_id,skill_lv);
 
-	if( require.hp > 0 && status->hp <= (unsigned int)require.hp ) {
-		if( skill_id == SR_TIGERCANNON )
-			clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-		else
-			clif_skill_fail(sd,skill_id,USESKILL_FAIL_HP_INSUFFICIENT,0,0);
-		return false;
-	}
-
-	if( require.weapon && !pc_check_weapontype(sd,require.weapon) ) {
-		clif_skill_fail(sd,skill_id,USESKILL_FAIL_THIS_WEAPON,0,0);
-		return false;
-	}
-
-	if( require.ammo ) { //Skill requires stuff equipped in the ammo slot
-		short idx = sd->equip_index[EQI_AMMO];
-
-		if( idx < 0 || !sd->inventory_data[idx] ) {
-			if( require.ammo&(1<<AMMO_CANNONBALL) )
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_CANONBALL,0,0);
-			else if( require.ammo&(1<<AMMO_KUNAI) )
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT_KUNAI,0,0);
-			else
-				clif_arrow_fail(sd,0);
-			return false;
-		} else if( sd->status.inventory[idx].amount < require.ammo_qty ) {
-			char e_msg[100];
-
-			if( require.ammo&((1<<AMMO_BULLET)|(1<<AMMO_GRENADE)|(1<<AMMO_SHELL)) ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_MORE_BULLET,0,0);
-				return false;
-			}
-			sprintf(e_msg,msg_txt(381), // Skill Failed. [%s] requires %dx %s.
-				skill_get_desc(skill_id),
-				require.ammo_qty,
-				itemdb_jname(sd->status.inventory[idx].nameid));
-			clif_colormes(sd->fd,color_table[COLOR_RED],e_msg);
-			return false;
-		}
-		if( !(require.ammo&(1<<sd->inventory_data[idx]->look)) ) { //Ammo type check. Send the "wrong weapon type" message
-			//Which is the closest we have to wrong ammo type [Skotlex]
-			clif_arrow_fail(sd,0); //Haplo suggested we just send the equip-arrows message instead [Skotlex]
-			//clif_skill_fail(sd,skill_id,USESKILL_FAIL_THIS_WEAPON,0,0);
-			return false;
-		}
-	}
-
-	for( i = 0; i < MAX_SKILL_ITEM_REQUIRE; ++i ) {
-		short index[MAX_SKILL_ITEM_REQUIRE];
-
-		if( !require.itemid[i] )
-			continue;
-		index[i] = pc_search_inventory(sd,require.itemid[i]);
-		if( index[i] == INDEX_NOT_FOUND || sd->status.inventory[index[i]].amount < require.amount[i] ) {
-			unsigned char type;
-			int btype = 0, val = 0;
-
-			switch( require.itemid[i] ) {
-				case ITEMID_RED_GEMSTONE:
-					type = USESKILL_FAIL_REDJAMSTONE;
-					break;
-				case ITEMID_BLUE_GEMSTONE:
-					type = USESKILL_FAIL_BLUEJAMSTONE;
-					break;
-				case ITEMID_HOLY_WATER:
-					type = USESKILL_FAIL_HOLYWATER;
-					break;
-				case ITEMID_ANCILLA:
-					type = USESKILL_FAIL_ANCILLA;
-					break;
-				case ITEMID_SPECIAL_ALLOY_TRAP:
-					type = USESKILL_FAIL_STUFF_INSUFFICIENT;
-					break;
-				case ITEMID_PAINT_BRUSH:
-					type = USESKILL_FAIL_PAINTBRUSH;
-					break;
-				default:
-					type = USESKILL_FAIL_NEED_ITEM;
-					btype = require.amount[i];
-					val = require.itemid[i];
-					break;
-			}
-			clif_skill_fail(sd,skill_id,type,btype,val);
-			return false;
-		}
-	}
-
-	if( sd->state.abra_flag ) //Hocus-Pocus was used [Inkfish]
-		sd->state.abra_flag = 0;
-
-	//Check the status required
 	if( require.status_count ) {
 		switch( skill_id ) {
 			case WZ_SIGHTRASHER:
@@ -15642,6 +15675,146 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 				break;
 		}
 	}
+
+	if( require.hp > 0 && status->hp <= (unsigned int)require.hp ) {
+		clif_skill_fail(sd,skill_id,USESKILL_FAIL_HP_INSUFFICIENT,0,0);
+		return false;
+	}
+
+	if( require.weapon && !pc_check_weapontype(sd,require.weapon) ) {
+		if( require.weapon&(1<<W_REVOLVER) )
+			clif_msg(sd,SKILL_NEED_REVOLVER);
+		else if( require.weapon&(1<<W_RIFLE) )
+			clif_msg(sd,SKILL_NEED_RIFLE);
+		else if( require.weapon&(1<<W_GATLING) )
+			clif_msg(sd,SKILL_NEED_GATLING);
+		else if( require.weapon&(1<<W_SHOTGUN) )
+			clif_msg(sd,SKILL_NEED_SHOTGUN);
+		else if( require.weapon&(1<<W_GRENADE) )
+			clif_msg(sd,SKILL_NEED_GRENADE);
+		else
+			clif_skill_fail(sd,skill_id,USESKILL_FAIL_WRONG_WEAPON,0,0);
+		return false;
+	}
+
+	for( i = 0; i < MAX_SKILL_ITEM_REQUIRE; ++i ) {
+		short index[MAX_SKILL_ITEM_REQUIRE];
+
+		if( !require.itemid[i] )
+			continue;
+		index[i] = pc_search_inventory(sd,require.itemid[i]);
+		if( index[i] == INDEX_NOT_FOUND || sd->status.inventory[index[i]].amount < require.amount[i] ) {
+			switch( require.itemid[i] ) {
+				case ITEMID_RED_GEMSTONE:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_REDJAMSTONE,0,0);
+					return false;
+				case ITEMID_BLUE_GEMSTONE:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_BLUEJAMSTONE,0,0);
+					return false;
+				case ITEMID_HOLY_WATER:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_HOLYWATER,0,0);
+					return false;
+				default:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ITEM,require.amount[i],require.itemid[i]);
+					return false;
+			}
+		}
+	}
+
+	switch( skill_id ) {
+		case MO_INVESTIGATE:
+		case MO_EXTREMITYFIST:
+			break;
+		case MO_FINGEROFFENSIVE:
+			if( require.spiritball > 0 && sd->spiritball < require.spiritball )
+				sd->spiritball_old = sd->spiritball;
+			break;
+		case GS_FLING:
+		case GS_TRIPLEACTION:
+		case GS_BULLSEYE:
+		case GS_ADJUSTMENT:
+		case GS_MAGICALBULLET:
+			if( require.spiritball > 0 && sd->spiritball < require.spiritball ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_COIN,require.spiritball,0);
+				return false;
+			}
+			break;
+		default:
+			if( (require.spiritball > 0 && sd->spiritball < require.spiritball) ||
+				(require.spiritball == -1 && !sd->spiritball) ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_SPIRIT,(require.spiritball > 0 ? require.spiritball : 0),0);
+				return false;
+			}
+			break;
+	}
+
+	if( require.ammo ) {
+		short idx = sd->equip_index[EQI_AMMO];
+
+		if( idx < 0 || !sd->inventory_data[idx] || sd->status.inventory[idx].amount < require.ammo_qty ) {
+			if( require.ammo&((1<<AMMO_BULLET)|(1<<AMMO_SHELL)|(1<<AMMO_GRENADE)) )
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_BULLET,0,0);
+			else if( require.ammo&(1<<AMMO_CANNONBALL) )
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_CANONBALL,0,0);
+			else if( require.ammo&(1<<AMMO_KUNAI) )
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT_KUNAI,0,0);
+			else
+				clif_arrow_fail(sd,0);
+			return false;
+		}
+	}
+
+	if( require.eqItem_count ) {
+		int j = require.eqItem_count;
+
+		for( i = 0; i < require.eqItem_count; i++ ) {
+			uint16 reqeqit = require.eqItem[i];
+
+			if( !reqeqit )
+				break;
+			switch( skill_id ) {
+				case NC_PILEBUNKER:
+					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) ) {
+						j--;
+						if( !j ) {
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT,0,require.eqItem[0]);
+							return false;
+						} else
+							continue;
+					}
+					break;
+				case NC_EMERGENCYCOOL:
+					if( !pc_search_inventory(sd,reqeqit) ) {
+						j--;
+						if( !j ) {
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ITEM,0,require.eqItem[0]);
+							return false;
+						} else
+							continue;
+					}
+					break;
+				case RL_P_ALTER:
+					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) ) {
+						j--;
+						if( !j ) {
+							clif_msg(sd,SKILL_NEED_HOLY_BULLET);
+							return false;
+						} else
+							continue;
+					}
+					break;
+				default:
+					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) ) {
+						clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT,0,reqeqit);
+						return false;
+					}
+					break;
+			}
+		}
+	}
+
+	if( sd->state.abra_flag ) //Hocus-Pocus was used [Inkfish]
+		sd->state.abra_flag = 0;
 
 	return true;
 }
@@ -15673,9 +15846,6 @@ void skill_consume_requirement(struct map_session_data *sd, uint16 skill_id, uin
 				if( sd->skill_id_old == RL_FALLEN_ANGEL )
 					require.sp = 0; //Don't consume SP if triggered by Fallen Angel
 				break;
-			case MO_KITRANSLATION:
-				require.spiritball = 0; //Spiritual Bestowment only uses spirit sphere when giving it to someone
-			//Fall through
 			default:
 				if( sd->state.autocast )
 					require.sp = 0;
@@ -16037,10 +16207,6 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 		case GC_COUNTERSLASH:
 			if( sc && sc->data[SC_EDP] )
 				req.sp += req.sp;
-			break;
-		case LG_RAGEBURST:
-		case SR_RAMPAGEBLASTER:
-			req.spiritball = (sd->spiritball ? sd->spiritball : (skill_id == LG_RAGEBURST) ? 1 : 15);
 			break;
 		case SR_GATEOFHELL:
 			if( sc && sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == SR_FALLENEMPIRE )

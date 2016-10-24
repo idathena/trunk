@@ -3140,11 +3140,10 @@ void clif_updatestatus(struct map_session_data *sd,int type)
 	WFIFOW(fd,0) = 0xb0;
 	WFIFOW(fd,2) = type;
 	switch( type ) {
-			//00b0
 		case SP_WEIGHT:
 			pc_updateweightstatus(sd);
 			WFIFOHEAD(fd,14);
-			WFIFOW(fd,0) = 0xb0; //Need to re-set as pc_updateweightstatus can alter the buffer. [Skotlex]
+			WFIFOW(fd,0) = 0xb0; //Need to re-set as pc_updateweightstatus can alter the buffer [Skotlex]
 			WFIFOW(fd,2) = type;
 			WFIFOL(fd,4) = sd->weight;
 			break;
@@ -3752,6 +3751,7 @@ void clif_equipitemack(struct map_session_data *sd,int n,int pos,uint8 flag)
 		case 0x8d0:
 			if (flag == ITEM_EQUIP_ACK_FAILLEVEL)
 				flag = 1;
+		//Fall through
 		case 0x999:
 			if (cmd == 0x999)
 				WFIFOL(fd,info->pos[1]) = pos;

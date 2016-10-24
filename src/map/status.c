@@ -651,7 +651,7 @@ void initChangeTables(void) {
 	set_sc( NC_ANALYZE           , SC_ANALYZE         , SI_ANALYZE         , SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2 );
 	set_sc( NC_MAGNETICFIELD     , SC_MAGNETICFIELD   , SI_MAGNETICFIELD   , SCB_NONE );
 	set_sc( NC_NEUTRALBARRIER    , SC_NEUTRALBARRIER  , SI_NEUTRALBARRIER  , SCB_DEF|SCB_MDEF );
-	set_sc( NC_STEALTHFIELD      , SC_STEALTHFIELD    , SI_STEALTHFIELD    , SCB_NONE );
+	set_sc( NC_STEALTHFIELD      , SC_STEALTHFIELD    , SI_STEALTHFIELD    , SCB_SPEED );
 
 	set_sc( LG_REFLECTDAMAGE     , SC_REFLECTDAMAGE   , SI_LG_REFLECTDAMAGE, SCB_NONE );
 	set_sc( LG_FORCEOFVANGUARD   , SC_FORCEOFVANGUARD , SI_FORCEOFVANGUARD , SCB_MAXHP|SCB_DEF );
@@ -1123,7 +1123,6 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_MERC_HPUP] |= SCB_MAXHP;
 	StatusChangeFlagTable[SC_MERC_SPUP] |= SCB_MAXSP;
 	StatusChangeFlagTable[SC_MERC_HITUP] |= SCB_HIT;
-	StatusChangeFlagTable[SC_STEALTHFIELD_MASTER] |= SCB_SPEED;
 	StatusChangeFlagTable[SC_HALLUCINATIONWALK_POSTDELAY] |= SCB_SPEED|SCB_ASPD;
 	StatusChangeFlagTable[SC_PARALYSE] |= SCB_FLEE|SCB_SPEED|SCB_ASPD;
 	StatusChangeFlagTable[SC_DEATHHURT] |= SCB_REGEN;
@@ -3393,7 +3392,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		if(sd->inventory_data[index]) { //Arrows
 			sd->bonus.arrow_atk += sd->inventory_data[index]->atk;
 			sd->state.lr_flag = 2;
-			if(sd->inventory_data[index]->look != A_THROWWEAPON)
+			if(sd->inventory_data[index]->look != AMMO_THROWABLE_ITEM)
 				run_script(sd->inventory_data[index]->script,0,sd->bl.id,0);
 			sd->state.lr_flag = 0;
 			if(!calculating) //Abort, run_script retriggered status_calc_pc [Skotlex]
@@ -6108,7 +6107,7 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 					val = max( val, sc->data[SC_MARSHOFABYSS]->val3 );
 				if( sc->data[SC_CAMOUFLAGE] && sc->data[SC_CAMOUFLAGE]->val1 > 2 )
 					val = max( val, 25 * (5 - sc->data[SC_CAMOUFLAGE]->val1) );
-				if( sc->data[SC_STEALTHFIELD_MASTER] )
+				if( sc->data[SC_STEALTHFIELD] )
 					val = max( val, 20 );
 				if( sc->data[SC__LAZINESS] )
 					val = max( val, 25 );
@@ -8177,20 +8176,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 		case SC_FUSION:
 			status_change_end(bl,SC_SPIRIT,INVALID_TIMER);
-			break;
-		case SC_ADJUSTMENT:
-			status_change_end(bl,SC_MADNESSCANCEL,INVALID_TIMER);
-			break;
-		case SC_MADNESSCANCEL:
-			status_change_end(bl,SC_ADJUSTMENT,INVALID_TIMER);
-		//Fall through
-		case SC_P_ALTER:
-		case SC_HEAT_BARREL:
-			if( sc->data[type] )
-				break;
-			status_change_end(bl,SC_MADNESSCANCEL,INVALID_TIMER);
-			status_change_end(bl,SC_P_ALTER,INVALID_TIMER);
-			status_change_end(bl,SC_HEAT_BARREL,INVALID_TIMER);
 			break;
 		//NPC_CHANGEUNDEAD will debuff Blessing and Agi Up
 		case SC_CHANGEUNDEAD:
