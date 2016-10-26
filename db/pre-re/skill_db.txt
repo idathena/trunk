@@ -88,7 +88,7 @@
 23,0,0,0,0,0,0,10,0,no,0,0,0,weapon,0,0,	AL_DEMONBANE,Demon Bane
 24,0,6,4,6,0x3,2,1,1,yes,0,0,0,magic,0,0,	AL_RUWACH,Ruwach
 25,9,6,2,0,0x1,0,1,1,yes,0,0,0,magic,0,0,	AL_PNEUMA,Pneuma
-26,0,6,4,0,0x1,0,2,1,yes,0,0,0,magic,0,0x8,	AL_TELEPORT,Teleport
+26,0,6,4,0,0x1,0,2,1,yes,0,0,0,magic,0,0x48,	AL_TELEPORT,Teleport
 27,9,6,2,0,0x1,0,4,1,yes,0,0,3,magic,0,0,	AL_WARP,Warp Portal
 28,9,6,16,6,0x21,0,10,1,yes,0,0,0,magic,0,0x20,	AL_HEAL,Heal
 29,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	AL_INCAGI,Increase AGI
@@ -1368,7 +1368,7 @@
 10010,0,0,4,0,0x3,15,1,0,yes,0,0x10,0,none,0,0,	GD_BATTLEORDER,Battle Orders
 10011,0,0,4,0,0x3,15,3,0,yes,0,0x10,0,none,0,0,	GD_REGENERATION,Regeneration
 10012,0,0,4,0,0x3,15,1,0,yes,0,0x10,0,none,0,0,	GD_RESTORE,Restoration
-10013,0,0,4,0,0x3,0,1,0,yes,0,0x10,0,none,0,0,	GD_EMERGENCYCALL,Urgent Call
+10013,0,0,4,0,0x3,0,1,0,yes,0,0x10,0,none,0,0x40,	GD_EMERGENCYCALL,Urgent Call
 10014,0,0,0,0,0,0,1,0,no,0,0x10,0,none,0,0,	GD_DEVELOPMENT,Permanent Development
-10015,0,0,4,0,0x3,0,3,0,yes,0,0x10,0,none,0,0,	GD_ITEMEMERGENCYCALL,Item Emergency Call
+10015,0,0,4,0,0x3,0,3,0,yes,0,0x10,0,none,0,0x40,	GD_ITEMEMERGENCYCALL,Item Emergency Call
 10016,0,0,0,0,0,0,5,0,no,0,0x10,0,none,0,0,	GD_GUILD_STORAGE,Guild Storage

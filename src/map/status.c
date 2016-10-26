@@ -1129,8 +1129,9 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_VENOMBLEED] |= SCB_MAXHP;
 	StatusChangeFlagTable[SC_PYREXIA] |= SCB_HIT|SCB_FLEE;
 	StatusChangeFlagTable[SC_OBLIVIONCURSE] |= SCB_REGEN;
-	StatusChangeFlagTable[SC_BANDING_DEFENCE] |= SCB_SPEED;
+	StatusChangeFlagTable[SC_SHIELDSPELL_DEF] |= SCB_WATK;
 	StatusChangeFlagTable[SC_SHIELDSPELL_REF] |= SCB_DEF;
+	StatusChangeFlagTable[SC_BANDING_DEFENCE] |= SCB_SPEED;
 	StatusChangeFlagTable[SC_STOMACHACHE] |= SCB_STR|SCB_AGI|SCB_VIT|SCB_DEX|SCB_INT|SCB_LUK;
 	StatusChangeFlagTable[SC_MYSTERIOUS_POWDER] |= SCB_MAXHP;
 	StatusChangeFlagTable[SC_MELON_BOMB] |= SCB_SPEED|SCB_ASPD;
@@ -1296,6 +1297,7 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_STEELBODY]           |= SCS_NOCAST;
 	StatusChangeStateTable[SC_BERSERK]             |= SCS_NOCAST;
 	StatusChangeStateTable[SC_OBLIVIONCURSE]       |= SCS_NOCAST;
+	StatusChangeStateTable[SC__SHADOWFORM]         |= SCS_NOCAST;
 	StatusChangeStateTable[SC__INVISIBILITY]       |= SCS_NOCAST;
 	StatusChangeStateTable[SC__IGNORANCE]          |= SCS_NOCAST;
 	StatusChangeStateTable[SC__MANHOLE]            |= SCS_NOCAST;
@@ -2015,7 +2017,6 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 				(sc->data[SC_MARIONETTE2] && skill_id == CG_MARIONETTE) || //Cannot use marionette if you are being buffed by another
 				(sc->data[SC_STASIS] && skill_block_check(src, SC_STASIS, skill_id)) ||
 				(sc->data[SC_BITE] && skill_block_check(src, SC_BITE, skill_id)) ||
-				(sc->data[SC__SHADOWFORM] && !flag) ||
 				(sc->data[SC_KAGEHUMI] && skill_block_check(src, SC_KAGEHUMI, skill_id)))
 				return false;
 		}
@@ -5397,6 +5398,8 @@ static unsigned short status_calc_watk(struct block_list *bl, struct status_chan
 		watk += sc->data[SC_MERC_ATKUP]->val2;
 	if(sc->data[SC_SKE])
 		watk += 3 * watk;
+	if(sc->data[SC_SHIELDSPELL_DEF] && sc->data[SC_SHIELDSPELL_DEF]->val1 == 3)
+		watk += sc->data[SC_SHIELDSPELL_DEF]->val2;
 	if(sc->data[SC_INSPIRATION])
 		watk += 40 * sc->data[SC_INSPIRATION]->val1 + 3 * sc->data[SC_INSPIRATION]->val2;
 	if(sc->data[SC_STRIKING])
@@ -5949,8 +5952,8 @@ defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int md
 #endif
 	if(sc->data[SC_EARTH_INSIGNIA] && sc->data[SC_EARTH_INSIGNIA]->val1 == 3)
 		mdef += 50;	
-	if(sc->data[SC_ENDURE]) //It has been confirmed that eddga card grants 1 MDEF, not 0, not 10, but 1
-		mdef += (sc->data[SC_ENDURE]->val4 == 0 ? sc->data[SC_ENDURE]->val1 : 1);
+	if(sc->data[SC_ENDURE] && !sc->data[SC_ENDURE]->val3) //It has been confirmed that eddga card grants 1 MDEF, not 0, not 10, but 1
+		mdef += (!sc->data[SC_ENDURE]->val4 ? sc->data[SC_ENDURE]->val1 : 1);
 	if(sc->data[SC_STONEHARDSKIN])
 		mdef += sc->data[SC_STONEHARDSKIN]->val1;
 	if(sc->data[SC_STONE] && sc->opt1 == OPT1_STONE)
@@ -8553,9 +8556,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					if( sd ) {
 						int i;
 
-						for( i = 0; i < MAX_DEVOTION; i++ )
+						for( i = 0; i < MAX_DEVOTION; i++ ) {
 							if( sd->devotion[i] && (tsd = map_id2sd(sd->devotion[i])) )
 								status_change_start(src,&tsd->bl,type,10000,val1,val2,val3,val4,tick,SCFLAG_NOAVOID|SCFLAG_NOICON);
+						}
+						if( (tsd = map_id2sd(sd->shadowform_id)) ) //Set 'val3' as flag status inherit from Shadow Form [exneval]
+							status_change_start(src,&tsd->bl,type,10000,val1,val2,1,val4,tick,SCFLAG_NOAVOID|SCFLAG_NOICON);
 					} else if( bl->type == BL_MER && ((TBL_MER *)bl)->devotion_flag && (tsd = ((TBL_MER *)bl)->master) )
 						status_change_start(src,&tsd->bl,type,10000,val1,val2,val3,val4,tick,SCFLAG_NOAVOID);
 				}
@@ -8637,19 +8643,21 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = val1 * 5; //Race/Ele resist
 				break;
 			case SC_REFLECTSHIELD:
-				val2 = 10 + val1 * 3; //% Dmg reflected
-				//val4 used to mark if reflect shield is an inheritance bonus from Devotion
-				if( !(flag&SCFLAG_NOAVOID) && (bl->type&(BL_PC|BL_MER)) ) {
-					struct map_session_data *tsd;
+				if( !(flag&SCFLAG_NOAVOID) ) {
+					val2 = 10 + val1 * 3; //% Dmg reflected
+					//val4 used to mark if reflect shield is an inheritance bonus from Devotion
+					if( bl->type&(BL_PC|BL_MER) ) {
+						struct map_session_data *tsd;
 
-					if( sd ) {
-						int i;
+						if( sd ) {
+							int i;
 
-						for( i = 0; i < MAX_DEVOTION; i++ )
-							if( sd->devotion[i] && (tsd = map_id2sd(sd->devotion[i])) )
-								status_change_start(src,&tsd->bl,type,10000,val1,val2,0,1,tick,SCFLAG_NOAVOID|SCFLAG_NOICON);
-					} else if( bl->type == BL_MER && ((TBL_MER *)bl)->devotion_flag && (tsd = ((TBL_MER *)bl)->master) )
-						status_change_start(src,&tsd->bl,type,10000,val1,val2,0,1,tick,SCFLAG_NOAVOID);
+							for( i = 0; i < MAX_DEVOTION; i++ )
+								if( sd->devotion[i] && (tsd = map_id2sd(sd->devotion[i])) )
+									status_change_start(src,&tsd->bl,type,10000,val1,val2,0,1,tick,SCFLAG_NOAVOID|SCFLAG_NOICON);
+						} else if( bl->type == BL_MER && ((TBL_MER *)bl)->devotion_flag && (tsd = ((TBL_MER *)bl)->master) )
+							status_change_start(src,&tsd->bl,type,10000,val1,val2,0,1,tick,SCFLAG_NOAVOID|SCFLAG_NOICON);
+					}
 				}
 				break;
 			case SC_STRIPWEAPON:
@@ -8879,7 +8887,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_AUTOGUARD:
 				if( !(flag&SCFLAG_NOAVOID) ) {
-					struct map_session_data *tsd;
 					int i;
 
 					for( i = val2 = 0; i < val1; i++ ) {
@@ -8888,12 +8895,14 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 						val2 += (t < 0) ? 1 : t;
 					}
 					if( bl->type&(BL_PC|BL_MER) ) {
+						struct map_session_data *tsd;
+
 						if( sd ) {
 							for( i = 0; i < MAX_DEVOTION; i++ )
 								if( sd->devotion[i] && (tsd = map_id2sd(sd->devotion[i])) )
 									status_change_start(src,&tsd->bl,type,10000,val1,val2,0,0,tick,SCFLAG_NOAVOID|SCFLAG_NOICON);
 						} else if( bl->type == BL_MER && ((TBL_MER *)bl)->devotion_flag && (tsd = ((TBL_MER *)bl)->master) )
-							status_change_start(src,&tsd->bl,type,10000,val1,val2,0,0,tick,SCFLAG_NOAVOID);
+							status_change_start(src,&tsd->bl,type,10000,val1,val2,0,0,tick,SCFLAG_NOAVOID|SCFLAG_NOICON);
 					}
 				}
 				break;
@@ -8908,7 +8917,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 
 						for( i = 0; i < MAX_DEVOTION; i++ ) //See if there are devoted characters, and pass the status to them [Skotlex]
 							if( sd->devotion[i] && (tsd = map_id2sd(sd->devotion[i])) )
-								status_change_start(src,&tsd->bl,type,10000,val1,val2,val3,val4,tick,SCFLAG_NOAVOID);
+								status_change_start(src,&tsd->bl,type,10000,val1,val2,val3,val4,tick,SCFLAG_NOAVOID|SCFLAG_NOICON);
 					}
 				}
 				break;
@@ -9030,18 +9039,16 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					struct status_change *d_sc;
 
 					if( (d_bl = map_id2bl(val1)) && (d_sc = status_get_sc(d_bl)) && d_sc->count ) { //Inherits status from source
-						const enum sc_type types[] = { SC_ENDURE,SC_AUTOGUARD,SC_REFLECTSHIELD };
-						int i = (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) ? 1 : 2;
+						const enum sc_type types[] = { SC_AUTOGUARD,SC_REFLECTSHIELD,SC_DEFENDER,SC_ENDURE };
+						int i = (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) ? 2 : 3;
 
 						while( i >= 0 ) {
 							enum sc_type type2 = types[i];
 
 							if( d_sc->data[type2] )
-								status_change_start(d_bl,bl,type2,10000,d_sc->data[type2]->val1,0,0,(type2 == SC_REFLECTSHIELD ? 1 : 0),skill_get_time(status_sc2skill(type2),d_sc->data[type2]->val1),SCFLAG_NOAVOID|SCFLAG_NOICON);
+								status_change_start(d_bl,bl,type2,10000,d_sc->data[type2]->val1,0,0,(type2 == SC_REFLECTSHIELD ? 1 : 0),skill_get_time(status_sc2skill(type2),d_sc->data[type2]->val1),SCFLAG_NOICON);
 							i--;
 						}
-						if( sc->data[SC_DEFENDER] )
-							status_change_end(bl,SC_DEFENDER,INVALID_TIMER);
 					}
 				}
 				break;
@@ -9503,8 +9510,14 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC__SHADOWFORM: {
 					struct map_session_data *s_sd = map_id2sd(val2);
 
-					if( s_sd )
+					if( s_sd ) {
+						struct status_change *s_sc;
+						struct status_change_entry *s_sce;
+
 						s_sd->shadowform_id = bl->id;
+						if( (s_sc = &s_sd->sc) && (s_sce = s_sc->data[SC_ENDURE]) )
+							status_change_start(&s_sd->bl,bl,SC_ENDURE,10000,s_sce->val1,0,1,0,skill_get_time(SM_ENDURE,s_sce->val1),SCFLAG_NOICON);
+					}
 					tick_time = 1000;
 					val4 = tick / tick_time;
 				}
@@ -10993,7 +11006,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 						unit_stop_walking(bl,1);
 				}
 				if (begin_spurt && sce->val1 >= 7 && DIFF_TICK(gettick(),sce->val4) <= 1000 &&
-					(!sd || (sd->weapontype1 == 0 && sd->weapontype2 == 0)))
+					(!sd || (!sd->weapontype1 && !sd->weapontype2)))
 					sc_start(bl,bl,SC_SPURT,100,sce->val1,skill_get_time2(status_sc2skill(type),sce->val1));
 			}
 			break;
@@ -11008,13 +11021,15 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			{
 				struct map_session_data *tsd;
 
-				if (bl->type == BL_PC) { //Clear Status from others
+				if (bl->type == BL_PC) { //Clear status from others
 					int i;
 
 					for (i = 0; i < MAX_DEVOTION; i++) {
 						if (sd->devotion[i] && (tsd = map_id2sd(sd->devotion[i])) && tsd->sc.data[type])
 							status_change_end(&tsd->bl,type,INVALID_TIMER);
 					}
+					if (type == SC_ENDURE && (tsd = map_id2sd(sd->shadowform_id)))
+						status_change_end(&tsd->bl,type,INVALID_TIMER);
 				} else if (bl->type == BL_MER && ((TBL_MER *)bl)->devotion_flag) { //Clear status from master
 					if ((tsd = ((TBL_MER *)bl)->master) && tsd->sc.data[type])
 						status_change_end(&tsd->bl,type,INVALID_TIMER);
@@ -11275,6 +11290,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 
 				if (s_sd)
 					s_sd->shadowform_id = 0;
+				status_change_end(bl,SC_ENDURE,INVALID_TIMER);
 			}
 			break;
 		case SC__FEINTBOMB:
@@ -12751,7 +12767,7 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
 			status_change_end(bl, SC_CLOAKING, INVALID_TIMER);
 			status_change_end(bl, SC_CLOAKINGEXCEED, INVALID_TIMER);
 			status_change_end(bl, SC_CAMOUFLAGE, INVALID_TIMER);
-			if( type == SC_CONCENTRATE )
+			if( type == SC_CONCENTRATE && tsc && tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
 				status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 			break;
 		case SC_RUWACH: //Un-hides targets on 5*5 range and deals little damages
@@ -12765,11 +12781,8 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
 						skill_attack(BF_MAGIC, src, src, bl, status_sc2skill(type), 1, tick, 0);
 				}
 				if( tsc->data[SC__SHADOWFORM] && (sce && sce->val4 > 0 && sce->val4%2000 == 0) &&
-					rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 ) {
+					rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
 					status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
-					if( battle_check_target(src, bl, BCT_ENEMY) > 0 )
-						skill_attack(BF_MAGIC, src, src, bl, status_sc2skill(type), 1, tick, 0);
-				}
 			}
 			break;
 		case SC_SIGHTBLASTER:

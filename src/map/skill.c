@@ -3077,7 +3077,8 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			ud->attackabletime = tick + type;
 	}
 
-	shadow_flag = skill_check_shadowform(bl, damage, dmg.div_);
+	if (!(tsc && tsc->data[SC_DEVOTION])) //Ignore shadow form status if get devoted [exneval]
+		shadow_flag = skill_check_shadowform(bl, skill_id, damage, dmg.div_);
 
 	if (!dmg.amotion) { //Instant damage
 		if ((!tsc || (!tsc->data[SC_DEVOTION] && !tsc->data[SC_WATER_SCREEN_OPTION] && skill_id != CR_REFLECTSHIELD) || skill_id == HW_GRAVITATION) && !shadow_flag)
@@ -4908,11 +4909,16 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case GC_PHANTOMMENACE: //Only hits invisible targets
-			if (flag&1 && tsc && ((tsc->option&(OPTION_HIDE|OPTION_CLOAK|OPTION_CHASEWALK)) ||
-				tsc->data[SC_CAMOUFLAGE] || tsc->data[SC_STEALTHFIELD] || tsc->data[SC__SHADOWFORM])) {
-				status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
-				status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
-				skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+			if ((flag&1) && tsc) {
+				if ((tsc->option&(OPTION_HIDE|OPTION_CLOAK)) || tsc->data[SC_CAMOUFLAGE]) {
+					status_change_end(bl,SC_HIDING,INVALID_TIMER);
+					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
+					status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
+					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+					skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+				}
+				if (tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
+					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 			}
 			break;
 
@@ -5045,11 +5051,16 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 
 		case RA_SENSITIVEKEEN:
 			if (bl->type != BL_SKILL) { //Only hits invisible targets
-				if (tsc && ((tsc->option&(OPTION_HIDE|OPTION_CLOAK|OPTION_CHASEWALK)) ||
-					tsc->data[SC_CAMOUFLAGE] || tsc->data[SC_STEALTHFIELD] || tsc->data[SC__SHADOWFORM])) {
-					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
-					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
-					skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+				if (tsc) {
+					if ((tsc->option&(OPTION_HIDE|OPTION_CLOAK)) || tsc->data[SC_CAMOUFLAGE]) {
+						status_change_end(bl,SC_HIDING,INVALID_TIMER);
+						status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
+						status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
+						status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+						skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+					}
+					if (tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
+						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 				}
 			} else {
 				struct skill_unit *su = BL_CAST(BL_SKILL,bl);
@@ -5151,9 +5162,14 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case SR_EARTHSHAKER:
-			if (flag&1) { //By default hidden targets will be revealed by aoe skills so no more checking except cloaking exceed and shadow form
+			if (flag&1) {
+				status_change_end(bl,SC_HIDING,INVALID_TIMER);
+				status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
+				status_change_end(bl,SC_CHASEWALK,INVALID_TIMER);
+				status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 				status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
-				status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
+				if (tsc && tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
+					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 				skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 			}
 			break;
@@ -5393,7 +5409,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 
 		default:
 			ShowWarning("skill_castend_damage_id: Unknown skill used:%d\n",skill_id);
-			clif_skill_damage(src,bl,tick,status_get_amotion(src),tstatus->dmotion,0,
+			clif_skill_damage(src,bl,tick,status_get_amotion(src),status_get_dmotion(bl),0,
 				abs(skill_get_num(skill_id,skill_lv)),skill_id,skill_lv,skill_get_hit(skill_id));
 			map_freeblock_unlock();
 			return 1;
@@ -6392,9 +6408,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case MO_KITRANSLATION:
 			if (sd) {
 				if (dstsd && dstsd->spiritball < 5 &&
-					(!sd->status.party_id || sd->status.party_id != dstsd->status.party_id) &&
-					((dstsd->class_&MAPID_BASEMASK) == MAPID_GUNSLINGER || (dstsd->class_&MAPID_UPPERMASK) == MAPID_REBELLION))
-				{
+					((dstsd->class_&MAPID_BASEMASK) == MAPID_GUNSLINGER || (dstsd->class_&MAPID_UPPERMASK) == MAPID_REBELLION)) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					map_freeblock_unlock();
 					return 0;
@@ -7422,7 +7436,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_STOMACHACHE:			case SC_MYSTERIOUS_POWDER:
 							//KO/OB
 							case SC_KAGEHUMI:			case SC_JYUMONJIKIRI:		case SC_MEIKYOUSISUI:
-							case SC_KYOUGAKU:			case SC_IZAYOI:			case SC_ZENKAI:
+							case SC_KYOUGAKU:			case SC_IZAYOI:
 							//RL
 							case SC_HEAT_BARREL:			case SC_HEAT_BARREL_AFTER:	case SC_P_ALTER:
 							case SC_E_CHAIN:			case SC_C_MARKER:		case SC_B_TRAP:
@@ -9244,9 +9258,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if( flag&1 ) {
 				status_change_end(bl,SC_HIDING,INVALID_TIMER);
 				status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
-				status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
 				status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
-				status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
+				status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+				if( tsc && tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
+					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 				sc_start(src,bl,SC_INFRAREDSCAN,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			} else {
 				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
@@ -9325,25 +9340,22 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case SC_SHADOWFORM:
 			if( sd && dstsd && bl->id != src->id && !dstsd->shadowform_id ) {
-				if( clif_skill_nodamage(src,bl,skill_id,skill_lv,
-					sc_start4(src,src,type,100,skill_lv,bl->id,4 + skill_lv,0,skill_get_time(skill_id,skill_lv))) )
-					dstsd->shadowform_id = src->id;
+				sc_start4(src,src,type,100,skill_lv,bl->id,4 + skill_lv,0,skill_get_time(skill_id,skill_lv));
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			} else if( sd )
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			break;
 
 		case SC_BODYPAINT:
 			if( flag&1 ) {
-				if( tsc && ((tsc->option&(OPTION_HIDE|OPTION_CLOAK)) ||
-					tsc->data[SC_CAMOUFLAGE] || tsc->data[SC_STEALTHFIELD] || tsc->data[SC__SHADOWFORM]) ) {
-					sc_start(src,bl,type,20 + 5 * skill_lv,skill_lv,skill_get_time(skill_id,skill_lv));
-					sc_start(src,bl,SC_BLIND,53 + 2 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
-					status_change_end(bl,SC_HIDING,INVALID_TIMER);
-					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
-					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
-					status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
+				status_change_end(bl,SC_HIDING,INVALID_TIMER);
+				status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
+				status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
+				status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+				if( tsc && tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
 					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
-				}
+				sc_start(src,bl,type,20 + 5 * skill_lv,skill_lv,skill_get_time(skill_id,skill_lv));
+				sc_start(src,bl,SC_BLIND,53 + 2 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 			} else {
 				clif_skill_nodamage(src,bl,skill_id,0,1);
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,
@@ -9422,7 +9434,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if( tsc && tsc->data[type] )
 				status_change_end(bl,type,INVALID_TIMER);
 			else
-				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
+				status_change_start(src,bl,type,10000,skill_lv,0,0,0,skill_get_time(skill_id,skill_lv),SCFLAG_NOICON);
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
 
@@ -10495,15 +10507,15 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case KG_KAGEHUMI:
 			if( flag&1 ) {
-				if( tsc && ((tsc->option&(OPTION_HIDE|OPTION_CLOAK)) ||
-					tsc->data[SC_CAMOUFLAGE] || tsc->data[SC_STEALTHFIELD] || tsc->data[SC__SHADOWFORM]) ) {
-						status_change_end(bl,SC_HIDING,INVALID_TIMER);
-						status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
-						status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
-						status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
+				if( tsc && ((tsc->option&(OPTION_HIDE|OPTION_CLOAK)) || tsc->data[SC_CAMOUFLAGE] || tsc->data[SC__SHADOWFORM]) ) {
+					status_change_end(bl,SC_HIDING,INVALID_TIMER);
+					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
+					status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
+					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+					if( tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
 						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
-						sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
-						sc_start(src,src,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
+					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
+					sc_start(src,src,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 				} else if( skill_area_temp[2] == 1 )
 					sc_start(src,src,SC_STOP,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			} else {
@@ -10923,6 +10935,8 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 				//Remove neutral targets (but allow enemy if skill is designed to be so)
 				inf &= ~BCT_NEUTRAL;
 			}
+			if( ud->skill_id == SC_SHADOWFORM )
+				inf = BCT_ALL; //In official Shadow Form target is all [exneval]
 			if( ud->skill_id >= SL_SKE && ud->skill_id <= SL_SKA && target->type == BL_MOB ) {
 				if( ((TBL_MOB *)target)->mob_id == MOBID_EMPERIUM )
 					break;
@@ -13755,9 +13769,10 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 				if (++group->val2%5 == 0) { //Un-hides players every 5 seconds
 					status_change_end(bl,SC_HIDING,INVALID_TIMER);
 					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
-					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
 					status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
-					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
+					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+					if (tsc && tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
+						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 				}
 				sc_start(src,bl,type,100,skill_lv,group->interval + 100);
 			}
@@ -17776,10 +17791,10 @@ bool skill_check_camouflage(struct block_list *bl, struct status_change_entry *s
 /** Check Shadow Form on the target
  * @param bl: Target
  * @param damage: Damage amount
- * @param hit
+ * @param div
  * @return true - in Shadow Form state; false - otherwise
  */
-bool skill_check_shadowform(struct block_list *bl, int64 damage, int hit)
+bool skill_check_shadowform(struct block_list *bl, uint16 skill_id, int64 damage, int div)
 {
 	struct status_change *sc;
 
@@ -17790,32 +17805,17 @@ bool skill_check_shadowform(struct block_list *bl, int64 damage, int hit)
 
 	sc = status_get_sc(bl);
 
-	if( sc && sc->data[SC__SHADOWFORM] ) {
+	if( sc && sc->data[SC__SHADOWFORM] && skill_id != PA_PRESSURE && skill_id != HW_GRAVITATION ) {
 		struct block_list *src = map_id2bl(sc->data[SC__SHADOWFORM]->val2);
 
-		if( !src || src->m != bl->m ) { 
+		if( !src || src->m != bl->m || status_isdead(src) ) {
 			status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 			return false;
 		}
-
-		if( src && (status_isdead(src) || battle_check_target(bl, src, BCT_ENEMY) <= 0) ) {
-			//status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER); //FIXME: An official video didn't show this behavior [exneval]
-			if( src->type == BL_PC )
-				((TBL_PC *)src)->shadowform_id = 0;
-			return false;
-		}
-
-		if( (sc->data[SC__SHADOWFORM]->val3 -= hit) <= 0 ) {
-			int temp = sc->data[SC__SHADOWFORM]->val3 + hit;
-
-			status_damage(src, bl, (damage / hit) * (hit - temp), 0, 0, 0);
-			status_damage(bl, src, (damage / hit) * (hit - (hit - temp)), 0,
-				clif_damage(src, src, gettick(), 500, 500, damage, hit, (hit > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0), 0);
+		clif_damage(src, src, gettick(), 0, 0, damage, div, (div > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0);
+		status_fix_damage(bl, src, damage, 0);
+		if( --(sc->data[SC__SHADOWFORM]->val3) <= 0 )
 			status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
-			if( src->type == BL_PC )
-				((TBL_PC *)src)->shadowform_id = 0;
-		} else
-			status_damage(bl, src, damage, 0, clif_damage(src, src, gettick(), 500, 500, damage, hit, (hit > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0), 0);
 		return true;
 	}
 	return false;
@@ -19709,29 +19709,29 @@ void skill_spellbook(struct map_session_data *sd, unsigned short nameid) {
 	}
 }
 
-int skill_select_menu(struct map_session_data *sd,uint16 skill_id) {
+int skill_select_menu(struct map_session_data *sd, uint16 skill_id) {
 	int id, lv, prob, aslvl = 0;
 
 	nullpo_ret(sd);
 
 	if (sd->sc.data[SC_STOP]) {
 		aslvl = sd->sc.data[SC_STOP]->val1;
-		status_change_end(&sd->bl,SC_STOP,INVALID_TIMER);
+		status_change_end(&sd->bl, SC_STOP, INVALID_TIMER);
 	}
 
 	if( !(skill_get_inf3(sd->status.skill[skill_id].id)&INF3_AUTOSHADOWSPELL) ||
 		(id = sd->status.skill[skill_id].id) == 0 || sd->status.skill[skill_id].flag != SKILL_FLAG_PLAGIARIZED ) {
-		clif_skill_fail(sd,SC_AUTOSHADOWSPELL,USESKILL_FAIL_LEVEL,0,0);
+		clif_skill_fail(sd, SC_AUTOSHADOWSPELL, USESKILL_FAIL_LEVEL, 0, 0);
 		return 0;
 	}
 
 	lv = (aslvl + 1) / 2; //The level the skill will be autocasted
-	lv = min(lv,sd->status.skill[skill_id].lv);
+	lv = min(lv, sd->status.skill[skill_id].lv);
 	if( aslvl >= 10 ) //If level 10 or higher is casted, set to a fixed 15%
 		prob = 15;
 	else
 		prob = 30 - 2 * aslvl; //If below level 10, follow this formula
-	sc_start4(&sd->bl,&sd->bl,SC__AUTOSHADOWSPELL,100,id,lv,prob,0,skill_get_time(SC_AUTOSHADOWSPELL,aslvl));
+	sc_start4(&sd->bl, &sd->bl, SC__AUTOSHADOWSPELL, 100, id, lv, prob, 0, skill_get_time(SC_AUTOSHADOWSPELL, aslvl));
 	return 0;
 }
 

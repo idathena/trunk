@@ -2817,6 +2817,11 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
 				}
+				if (sd->shadowform_id) {
+					struct block_list *s_bl = map_id2bl(sd->shadowform_id);
+
+					status_change_end(s_bl,SC__SHADOWFORM,INVALID_TIMER);
+				}
 				sd->npc_shopid = 0;
 				sd->adopt_invite = 0;
 				if (sd->pvp_timer != INVALID_TIMER) {
@@ -2862,7 +2867,6 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 				sd->debug_file = file;
 				sd->debug_line = line;
 				sd->debug_func = func;
-
 			}
 			break;
 		case BL_MOB: {
