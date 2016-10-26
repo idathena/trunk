@@ -57,11 +57,11 @@ static int itemdb_searchname_sub(DBKey key, DBData *data, va_list ap)
 	dst = va_arg(ap, struct item_data **);
 	dst2 = va_arg(ap, struct item_data **);
 
-	//Absolute priority to Aegis code name.
+	//Absolute priority to Aegis code name
 	if (strcmpi(item->name, str) == 0)
 		*dst = item;
 
-	//Second priority to Client displayed name.
+	//Second priority to Client displayed name
 	if (strcmpi(item->jname, str) == 0)
 		*dst2 = item;
 	return 0;

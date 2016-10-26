@@ -2068,8 +2068,8 @@ int skill_magicdecoy(struct map_session_data *sd, unsigned short nameid);
 int skill_poisoningweapon(struct map_session_data *sd, unsigned short nameid);
 
 int skill_maelstrom_suction(struct block_list *bl, va_list ap);
-int skill_select_menu(struct map_session_data *sd,uint16 skill_id);
-bool skill_check_shadowform(struct block_list *bl, int64 damage, int hit);
+int skill_select_menu(struct map_session_data *sd, uint16 skill_id);
+bool skill_check_shadowform(struct block_list *bl, uint16 skill_id, int64 damage, int div);
 
 int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv, unsigned short *item_list);
 

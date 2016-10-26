@@ -438,13 +438,10 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 	if (bl->type&BL_CHAR) {
 		skill_unit_move(bl, tick, 3);
 		if (bl->type == BL_PC && ((TBL_PC *)bl)->shadowform_id) { //Moving Target Shadow Form
-			struct block_list *d_bl;
+			struct block_list *s_bl = map_id2bl(((TBL_PC *)bl)->shadowform_id);
 
-			if ((d_bl = map_id2bl(((TBL_PC *)bl)->shadowform_id)) == NULL || !check_distance_bl(bl, d_bl, 10)) {
-				if (d_bl)
-					status_change_end(d_bl, SC__SHADOWFORM, INVALID_TIMER);
-				((TBL_PC *)bl)->shadowform_id = 0;
-			}
+			if (!check_distance_bl(bl, s_bl, 10))
+				status_change_end(s_bl, SC__SHADOWFORM, INVALID_TIMER);
 		}
 		if (sc && sc->count) {
 			if (sc->data[SC_DANCING])
@@ -465,9 +462,9 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 				else if (sc->data[SC_STEALTHFIELD_MASTER])
 					skill_unit_move_unit_group(skill_id2group(sc->data[SC_STEALTHFIELD_MASTER]->val2), bl->m, x1 - x0, y1 - y0);
 				if (sc->data[SC__SHADOWFORM]) { //Moving Caster Shadow Form
-					struct block_list *d_bl;
+					struct block_list *s_bl = map_id2bl(sc->data[SC__SHADOWFORM]->val2);
 
-					if ((d_bl = map_id2bl(sc->data[SC__SHADOWFORM]->val2)) == NULL || !check_distance_bl(bl, d_bl, 10))
+					if (!check_distance_bl(bl, s_bl, 10))
 						status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 				}
 				if (sc->data[SC_PROPERTYWALK] &&
@@ -1810,8 +1807,8 @@ int map_quit(struct map_session_data *sd) {
 
 	npc_script_event(sd,NPCE_LOGOUT);
 
-	//Unit_free handles clearing the player related data,
-	//map_quit handles extra specific data which is related to quitting normally
+	//'unit_free' handles clearing the player related data,
+	//'map_quit' handles extra specific data which is related to quitting normally
 	//(changing map-servers invokes unit_free but bypasses map_quit)
 	if (sd->sc.count) { //Statuses that are removed on logout
 		status_change_end(&sd->bl,SC_TRICKDEAD,INVALID_TIMER);
@@ -1860,15 +1857,16 @@ int map_quit(struct map_session_data *sd) {
 			status_change_end(&sd->bl,SC_EXPLOSIONSPIRITS,INVALID_TIMER);
 			if (sd->sc.data[SC_REGENERATION] && sd->sc.data[SC_REGENERATION]->val4)
 				status_change_end(&sd->bl,SC_REGENERATION,INVALID_TIMER);
-			//@TODO: Probably there are way more NPC_type negative status that are removed
-			status_change_end(&sd->bl,SC_CHANGEUNDEAD,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_SLOWCAST,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_CRITICALWOUND,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_RAISINGDRAGON,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_KYOUGAKU,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_CBC,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_EQC,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_B_TRAP,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_H_MINE,INVALID_TIMER);
+			//@TODO: Probably there are way more NPC_type negative status that are removed
+			status_change_end(&sd->bl,SC_CHANGEUNDEAD,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_SLOWCAST,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_CRITICALWOUND,INVALID_TIMER);
 		}
 		if (battle_config.debuff_on_logout&2) { //Remove positive buffs
 			status_change_end(&sd->bl,SC_SIGHTBLASTER,INVALID_TIMER);
@@ -1876,11 +1874,13 @@ int map_quit(struct map_session_data *sd) {
 			status_change_end(&sd->bl,SC_STEELBODY,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_KAAHI,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_SPIRIT,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_PARRYING,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_WINDWALK,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_CARTBOOST,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_MELTDOWN,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_MAXOVERTHRUST,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_PRESERVE,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_REFLECTDAMAGE,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_P_ALTER,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_GEFFEN_MAGIC1,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_GEFFEN_MAGIC2,INVALID_TIMER);

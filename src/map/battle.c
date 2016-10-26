@@ -827,6 +827,26 @@ static void battle_absorb_damage(struct block_list *bl, struct Damage *d)
 	}
 }
 
+/**
+ * Check if bl is shadow forming someone
+ * And shadow target have the specific status type
+ * @param bl
+ * @param type
+ */
+struct status_change_entry *battle_check_shadowform(struct block_list *bl, enum sc_type type) {
+	struct status_change *sc = status_get_sc(bl);
+	struct map_session_data *s_sd = NULL; //Shadow target
+
+	//Check if shadow target have the status type [exneval]
+	if(sc && sc->data[SC__SHADOWFORM] && (s_sd = map_id2sd(sc->data[SC__SHADOWFORM]->val2)) && s_sd->shadowform_id == bl->id) {
+		struct status_change *s_sc;
+
+		if((s_sc = &s_sd->sc) && s_sc->data[type])
+			return s_sc->data[type];
+	}
+	return NULL;
+}
+
 /*==========================================
  * Check damage through status.
  * ATK may be MISS, BLOCKED FAIL, reduc, increase, end status.
@@ -952,7 +972,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			return 0;
 		}
 
-		if( (sce = sc->data[SC_AUTOGUARD]) && flag&BF_WEAPON &&
+		if( ((sce = sc->data[SC_AUTOGUARD]) || (sce = battle_check_shadowform(bl,SC_AUTOGUARD))) && flag&BF_WEAPON &&
 #ifdef RENEWAL
 			skill_id != WS_CARTTERMINATION &&
 #endif
@@ -961,6 +981,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		{
 			int delay;
 			struct status_change_entry *sce_d = sc->data[SC_DEVOTION];
+			struct status_change_entry *sce_s = sc->data[SC__SHADOWFORM];
+			struct map_session_data *s_sd = NULL;
 			struct block_list *d_bl = NULL;
 
 			//Different delay depending on skill level [celest]
@@ -979,6 +1001,11 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			{ //If player is target of devotion, show guard effect on the devotion caster rather than the target
 				clif_skill_nodamage(d_bl,d_bl,CR_AUTOGUARD,sce->val1,1);
 				unit_set_walkdelay(d_bl,gettick(),delay,1);
+				d->dmg_lv = ATK_MISS;
+				return 0;
+			} else if( sce_s && (s_sd = map_id2sd(sce_s->val2)) && s_sd->shadowform_id == bl->id ) {
+				clif_skill_nodamage(&s_sd->bl,&s_sd->bl,CR_AUTOGUARD,sce->val1,1);
+				unit_set_walkdelay(&s_sd->bl,gettick(),delay,1);
 				d->dmg_lv = ATK_MISS;
 				return 0;
 			} else {
@@ -1144,7 +1171,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 				status_change_end(bl,SC_VOICEOFSIREN,INVALID_TIMER);
 		}
 
-		if( (sce = sc->data[SC_DEFENDER]) && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG &&
+		if( ((sce = sc->data[SC_DEFENDER]) || (sce = battle_check_shadowform(bl,SC_DEFENDER))) &&
+			(flag&(BF_LONG|BF_MAGIC)) == BF_LONG &&
 #ifndef RENEWAL
 			skill_id != HT_BLITZBEAT && skill_id != SN_FALCONASSAULT &&
 			skill_id != ASC_BREAKER && skill_id != CR_ACIDDEMONSTRATION &&
@@ -3870,8 +3898,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 		case SR_EARTHSHAKER:
 			//[(Skill Level x 150) x (Caster's Base Level / 100) + (Caster's INT x 3)] %
-			if(tsc && ((tsc->option&(OPTION_HIDE|OPTION_CLOAK|OPTION_CHASEWALK)) ||
-				tsc->data[SC_CAMOUFLAGE] || tsc->data[SC_STEALTHFIELD] || tsc->data[SC__SHADOWFORM])) {
+			if(tsc && ((tsc->option&(OPTION_HIDE|OPTION_CLOAK)) || tsc->data[SC_CAMOUFLAGE])) {
 				skillratio += -100 + 150 * skill_lv;
 				RE_LVL_DMOD(100);
 				skillratio += sstatus->int_ * 3;
@@ -4269,12 +4296,6 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.damage, wd.damage2, sc->data[SC_FIGHTINGSPIRIT]->val1);
 #ifdef RENEWAL
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, sc->data[SC_FIGHTINGSPIRIT]->val1);
-#endif
-		}
-		if(sc->data[SC_SHIELDSPELL_DEF] && sc->data[SC_SHIELDSPELL_DEF]->val1 == 3) {
-			ATK_ADD(wd.damage, wd.damage2, sc->data[SC_SHIELDSPELL_DEF]->val2);
-#ifdef RENEWAL
-			ATK_ADD(wd.equipAtk, wd.equipAtk2, sc->data[SC_SHIELDSPELL_DEF]->val2);
 #endif
 		}
 		if(sc->data[SC_BANDING] && sc->data[SC_BANDING]->val2 > 1) {
@@ -5120,17 +5141,23 @@ void battle_do_reflect(int attack_type, struct Damage *wd, struct block_list *sr
 		struct status_change *tsc = status_get_sc(target);
 		struct status_data *sstatus = status_get_status_data(src);
 		struct status_data *tstatus = status_get_status_data(target);
+		struct block_list *tbl = target;
 		int tick = gettick(), rdelay = 0;
 
 		if(!tsc)
 			return;
+		if(tsc->data[SC__SHADOWFORM] && !battle_check_devotion(target)) {
+			struct map_session_data *s_tsd = map_id2sd(tsc->data[SC__SHADOWFORM]->val2);
 
+			if(battle_check_shadowform(target,SC_REFLECTDAMAGE) && s_tsd && s_tsd->shadowform_id == target->id)
+				target = &s_tsd->bl;
+		}
 		rdamage = battle_calc_return_damage(target, src, &damage, wd->flag, skill_id, true);
 		if(rdamage > 0) {
 			struct block_list *d_bl = battle_check_devotion(src);
 
 			if(attack_type == BF_WEAPON || attack_type == BF_MISC) {
-				if(tsc->data[SC_REFLECTDAMAGE])
+				if(tsc->data[SC_REFLECTDAMAGE] || battle_check_shadowform(tbl,SC_REFLECTDAMAGE))
 					map_foreachinshootrange(battle_damage_area, target, skill_get_splash(LG_REFLECTDAMAGE, 1), BL_CHAR, tick, target, wd->amotion, sstatus->dmotion, rdamage, tstatus->race);
 				else {
 					rdelay = clif_damage(src, (!d_bl) ? src : d_bl, tick, wd->amotion, sstatus->dmotion, rdamage, 1, DMG_ENDURE, 0);
@@ -6981,29 +7008,40 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 	struct status_change *ssc = status_get_sc(src);
 	int64 rdamage = 0, damage = *dmg;
 #ifdef RENEWAL
-	int max_damage = status_get_max_hp(bl);
+	int max_rdamage = status_get_max_hp(bl);
+#endif
+
+#ifdef RENEWAL
+	#define CAP_RDAMAGE(d) ( cap_value((d),1,max_rdamage) )
+#else
+	#define CAP_RDAMAGE(d) ( max((d),1) )
 #endif
 
 	if( (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT ) { //Bounces back part of the damage
 		if( !status_reflect && sd && sd->bonus.short_weapon_damage_return ) {
 			rdamage += damage * sd->bonus.short_weapon_damage_return / 100;
-			rdamage = max(rdamage,1);
-		} else if( status_reflect && sc && sc->count && !(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK) ) {
+			CAP_RDAMAGE(rdamage);
+		} else if( status_reflect && sc && sc->count ) {
 			struct status_change_entry *sce;
 
-			if( (sce = sc->data[SC_REFLECTSHIELD]) ) {
-				struct status_change_entry *sce_d;
+			if( (sce = sc->data[SC_REFLECTSHIELD]) || (sce = battle_check_shadowform(bl,SC_REFLECTSHIELD)) ) {
+				struct status_change_entry *sce_d = sc->data[SC_DEVOTION];
+				struct status_change_entry *sce_s = sc->data[SC__SHADOWFORM];
+				struct map_session_data *s_sd = NULL;
 				struct block_list *d_bl = NULL;
 
-				if( (sce_d = sc->data[SC_DEVOTION]) && (d_bl = map_id2bl(sce_d->val1)) &&
+				if( sce_d && (d_bl = map_id2bl(sce_d->val1)) &&
 					((d_bl->type == BL_MER && ((TBL_MER *)d_bl)->master && ((TBL_MER *)d_bl)->master->bl.id == bl->id) ||
 					(d_bl->type == BL_PC && ((TBL_PC *)d_bl)->devotion[sce_d->val2] == bl->id)) )
 				{ //Don't reflect non-skill attack if has SC_REFLECTSHIELD from Devotion bonus inheritance
 					if( (!skill_id && battle_config.devotion_rdamage_skill_only && sce->val4) ||
 						!check_distance_bl(bl,d_bl,sce_d->val3) )
 						return 0;
-				}
+				} else if( sce_s && (s_sd = map_id2sd(sce_s->val2)) && s_sd->shadowform_id == bl->id && !skill_id )
+					return 0;
 #ifndef RENEWAL
+				if( !(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK) )
+					return 0;
 				switch( skill_id ) {
 					case KN_PIERCE:
 					case ML_PIERCE:
@@ -7017,59 +7055,46 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 				}
 #endif
 				rdamage += damage * sce->val2 / 100;
-#ifdef RENEWAL
-				rdamage = cap_value(rdamage,1,max_damage);
-#else
-				rdamage = max(rdamage,1);
-#endif
+				CAP_RDAMAGE(rdamage);
 			}
-			if( (sce = sc->data[SC_REFLECTDAMAGE]) &&
+			if( (sce = sc->data[SC_REFLECTDAMAGE]) && rnd()%100 < 30 + 10 * sce->val1 &&
 #ifdef RENEWAL
 				skill_id != WS_CARTTERMINATION &&
 #endif
+				!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK) &&
 				!(skill_get_inf2(skill_id)&INF2_TRAP) )
 			{
-				if( rnd()%100 < 30 + 10 * sce->val1 ) {
-					rdamage += damage * sce->val2 / 100;
-#ifdef RENEWAL
-					max_damage = max_damage * status_get_lv(bl) / 100;
-					rdamage = cap_value(rdamage,1,max_damage);
-#else
-					rdamage = max(rdamage,1);
-#endif
-					if( --(sce->val3) <= 0 )
-						status_change_end(bl,SC_REFLECTDAMAGE,INVALID_TIMER);
-				}
-			}
-			if( (sce = sc->data[SC_SHIELDSPELL_DEF]) && sce->val1 == 2 && !is_boss(src) ) {
 				rdamage += damage * sce->val2 / 100;
 #ifdef RENEWAL
-				rdamage = cap_value(rdamage,1,max_damage);
-#else
-				rdamage = max(rdamage,1);
+				max_rdamage = max_rdamage * status_get_lv(bl) / 100;
 #endif
+				CAP_RDAMAGE(rdamage);
+				if( --(sce->val3) <= 0 )
+					status_change_end(bl,SC_REFLECTDAMAGE,INVALID_TIMER);
+			}
+			if( ((sce = sc->data[SC_SHIELDSPELL_DEF]) || (sce = battle_check_shadowform(bl,SC_SHIELDSPELL_DEF))) &&
+				sce->val1 == 2 && !is_boss(src) ) {
+				rdamage += damage * sce->val2 / 100;
+				CAP_RDAMAGE(rdamage);
 			}
 		}
 	} else {
 		if( !status_reflect && sd && sd->bonus.long_weapon_damage_return ) {
 			rdamage += damage * sd->bonus.long_weapon_damage_return / 100;
-			rdamage = max(rdamage,1);
+			CAP_RDAMAGE(rdamage);
 		}
 	}
 
 	if( ssc && ssc->data[SC_INSPIRATION] ) {
 		rdamage += damage / 100;
-#ifdef RENEWAL
-		rdamage = cap_value(rdamage,1,max_damage);
-#else
-		rdamage = max(rdamage,1);
-#endif
+		CAP_RDAMAGE(rdamage);
 	}
 
 	if( sc && sc->data[SC_KYOMU] && !sc->data[SC_SHIELDSPELL_DEF] )
 		return 0; //Nullify reflecting ability except for Shield Spell DEF
 
 	return rdamage;
+#undef CAP_RDAMAGE
 }
 
 /*===========================================
@@ -7406,7 +7431,8 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 
 	map_freeblock_lock();
 
-	if (skill_check_shadowform(target,damage,wd.div_)) {
+	//Ignore shadow form status if get devoted [exneval]
+	if (!(tsc && tsc->data[SC_DEVOTION]) && skill_check_shadowform(target,0,damage,wd.div_)) {
 		if (!status_isdead(target))
 			skill_additional_effect(src,target,0,0,wd.flag,wd.dmg_lv,tick);
 		if (wd.dmg_lv > ATK_BLOCK)
