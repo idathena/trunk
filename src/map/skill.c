@@ -1999,9 +1999,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 		(rate = pc_checkskill(sd,HW_SOULDRAIN)) > 0) { //Soul Drain should only work on targetted spells [Skotlex]
 		if(pc_issit(sd))
 			pc_setstand(sd); //Character stuck in attacking animation while 'sitting' fix [Skotlex]
-		if(skill_get_nk(skill_id)&NK_SPLASH && skill_area_temp[1] != bl->id)
-			;
-		else {
+		if( !((skill_get_nk(skill_id)&NK_SPLASH) && skill_area_temp[1] != bl->id) ) {
 			clif_skill_nodamage(src,bl,HW_SOULDRAIN,rate,1);
 			status_heal(src,0,status_get_lv(bl) * (95 + rate * 15) / 100,2);
 		}
@@ -9600,7 +9598,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if( sc_start2(src,bl,type,100,skill_lv,src->id,skill_get_time(skill_id,skill_lv))) {
 					if( bl->type == BL_MOB )
 						mob_unlocktarget((TBL_MOB *)bl,gettick());
-					clif_bladestop(src,bl->id,1);
 					map_freeblock_unlock();
 					return 1;
 				}

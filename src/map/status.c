@@ -1550,7 +1550,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 		}
 
 		if (target->type == BL_PC)
-			pc_bonus_script_clear(BL_CAST(BL_PC,target),BSF_REM_ON_DAMAGED);
+			pc_bonus_script_clear(BL_CAST(BL_PC, target), BSF_REM_ON_DAMAGED);
 		unit_skillcastcancel(target, 2);
 	}
 
@@ -1999,15 +1999,11 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 			if ((sc->data[SC_DANCING]->val1&0xFFFF) == CG_HERMODE && skill_id == BD_ADAPTATION)
 				return false; //Can't amp out of Wand of Hermode [Skotlex]
 		}
-		if (skill_id && (src->type != BL_PC || ((TBL_PC *)src)->skillitem != skill_id)) { //'itemskill' still can be casted
-			if (sc->cant.cast) { //Through SCS_NOCAST
-				if (flag != 1)
-					return false;
-				if (!(skill_get_inf(skill_id)&INF_GROUND_SKILL))
-					return false;
-			}
-			//Specific skill blocking
-			if ((sc->data[SC_NOCHAT] && (sc->data[SC_NOCHAT]->val1&MANNER_NOSKILL)) ||
+		if (skill_id && //Specific skill blocking
+			(src->type != BL_PC || ((TBL_PC *)src)->skillitem != skill_id)) { //'itemskill' still can be casted
+			if (!flag &&
+				(sc->cant.cast || //Through SCS_NOCAST
+				(sc->data[SC_NOCHAT] && (sc->data[SC_NOCHAT]->val1&MANNER_NOSKILL)) ||
 				(sc->data[SC_VOLCANO] && skill_id == WZ_ICEWALL) ||
 				(sc->data[SC_ROKISWEIL] && skill_id != BD_ADAPTATION) ||
 				(sc->data[SC_HERMODE] && (skill_get_inf(skill_id)&INF_SUPPORT_SKILL)) ||
@@ -2017,7 +2013,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 				(sc->data[SC_MARIONETTE2] && skill_id == CG_MARIONETTE) || //Cannot use marionette if you are being buffed by another
 				(sc->data[SC_STASIS] && skill_block_check(src, SC_STASIS, skill_id)) ||
 				(sc->data[SC_BITE] && skill_block_check(src, SC_BITE, skill_id)) ||
-				(sc->data[SC_KAGEHUMI] && skill_block_check(src, SC_KAGEHUMI, skill_id)))
+				(sc->data[SC_KAGEHUMI] && skill_block_check(src, SC_KAGEHUMI, skill_id))))
 				return false;
 		}
 		if (sc->option) {
