@@ -10596,10 +10596,10 @@ void clif_parse_progressbar(int fd, struct map_session_data *sd)
 	int npc_id = sd->progressbar.npc_id;
 
 	if( gettick() < sd->progressbar.timeout && sd->st )
-		sd->st->state = END;
-
+		pc_close_npc(sd, 1);
+	else //Don't continue the script if fail
+		npc_scriptcont(sd, npc_id, false);
 	sd->progressbar.npc_id = sd->progressbar.timeout = 0;
-	npc_scriptcont(sd, npc_id, false);
 }
 
 
@@ -10616,11 +10616,12 @@ void clif_parse_WalkToXY(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	if( sd->sc.opt1 && (sd->sc.opt1 == OPT1_STONEWAIT || sd->sc.opt1 == OPT1_BURNING) )
-		; //You CAN walk on this OPT1 value
-	else if( sd->progressbar.npc_id )
+	if( sd->progressbar.npc_id ) {
 		clif_progressbar_abort(sd);
-	else if( pc_cant_act(sd) )
+		return;
+	}
+
+	if( pc_cant_act(sd) || (sd->sc.opt1 && sd->sc.opt1 != OPT1_STONEWAIT) )
 		return;
 
 	if( sd->sc.data[SC_RUN] || sd->sc.data[SC_WUGDASH] )
@@ -11363,8 +11364,12 @@ void clif_parse_NpcClicked(int fd,struct map_session_data *sd)
 		return;
 	}
 
-	if (pc_cant_act2(sd) || sd->npc_id)
+	if (pc_cant_act2(sd) || sd->npc_id) {
+#ifdef RENEWAL
+		clif_msg(sd, WORK_IN_PROGRESS);
+#endif
 		return;
+	}
 
 	bl = map_id2bl(RFIFOL(fd,info->pos[0]));
 	//type = RFIFOB(fd,info->pos[1]);
@@ -11604,9 +11609,9 @@ void clif_parse_TradeRequest(int fd,struct map_session_data *sd)
 	t_sd = map_id2sd(RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]));
 
 	if(!sd->chatID && pc_cant_act(sd))
-		return; //You can trade while in a chatroom.
+		return; //You can trade while in a chatroom
 
-	// @noask [LuzZza]
+	//@noask [LuzZza]
 	if(t_sd && t_sd->state.noask) {
 		clif_noask_sub(sd, t_sd, 0);
 		return;
@@ -11616,7 +11621,7 @@ void clif_parse_TradeRequest(int fd,struct map_session_data *sd)
 		clif_skill_fail(sd,1,USESKILL_FAIL_LEVEL,0,0);
 		return;
 	}
-	
+
 	trade_traderequest(sd,t_sd);
 }
 
@@ -11962,7 +11967,7 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 
 	if( sd->npc_id ) {
 #ifdef RENEWAL
-		clif_msg(sd, USAGE_FAIL); //@TODO: Look for the client date that has this message
+		clif_msg(sd, WORK_IN_PROGRESS);
 		return;
 #else
 		if( !sd->npc_item_flag || !(tmp&INF_SELF_SKILL) )
@@ -12371,7 +12376,7 @@ void clif_parse_NpcStringInput(int fd, struct map_session_data *sd)
 /// 0146 <npc id>.L
 void clif_parse_NpcCloseClicked(int fd, struct map_session_data *sd)
 {
-	if (!sd->npc_id) //Avoid parsing anything when the script was done with. [Skotlex]
+	if (!sd->npc_id) //Avoid parsing anything when the script was done with [Skotlex]
 		return;
 	npc_scriptcont(sd, RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]), true);
 }

@@ -3207,6 +3207,7 @@ void script_free_code(struct script_code* code)
 struct script_state *script_alloc_state(struct script_code* script, int pos, int rid, int oid)
 {
 	struct script_state *st;
+
 	CREATE(st, struct script_state, 1);
 	st->stack = (struct script_stack*)aMalloc(sizeof(struct script_stack));
 	st->stack->sp = 0;
@@ -3230,10 +3231,9 @@ struct script_state *script_alloc_state(struct script_code* script, int pos, int
 /// @param st Script state
 void script_free_state(struct script_state *st)
 {
-	if(st->bk_st) { // backup was not restored
+	if(st->bk_st) //Backup was not restored
 		ShowDebug("script_free_state: Previous script state lost (rid=%d, oid=%d, state=%d, bk_npcid=%d).\n", st->bk_st->rid, st->bk_st->oid, st->bk_st->state, st->bk_npcid);
-	}
-	if( st->sleep.timer != INVALID_TIMER )
+	if(st->sleep.timer != INVALID_TIMER)
 		delete_timer(st->sleep.timer, run_script_timer);
 	script_free_vars(st->stack->var_function);
 	pop_stack(st, 0, st->stack->sp);
@@ -3254,14 +3254,13 @@ c_op get_com(unsigned char *script,int *pos)
 {
 	int i = 0, j = 0;
 
-	if(script[*pos]>=0x80) {
+	if(script[*pos] >= 0x80)
 		return C_INT;
+	while(script[*pos] >= 0x40) {
+		i = script[(*pos)++]<<j;
+		j += 6;
 	}
-	while(script[*pos]>=0x40) {
-		i=script[(*pos)++]<<j;
-		j+=6;
-	}
-	return (c_op)(i+(script[(*pos)++]<<j));
+	return (c_op)(i + (script[(*pos)++]<<j));
 }
 
 /*==========================================
@@ -3269,13 +3268,13 @@ c_op get_com(unsigned char *script,int *pos)
  *------------------------------------------*/
 int get_num(unsigned char *script,int *pos)
 {
-	int i,j;
-	i=0; j=0;
-	while(script[*pos]>=0xc0) {
-		i+=(script[(*pos)++]&0x7f)<<j;
-		j+=6;
+	int i = 0, j = 0;
+
+	while(script[*pos] >= 0xc0) {
+		i += (script[(*pos)++]&0x7f)<<j;
+		j += 6;
 	}
-	return i+((script[(*pos)++]&0x7f)<<j);
+	return i + ((script[(*pos)++]&0x7f)<<j);
 }
 
 /*==========================================
@@ -3283,11 +3282,11 @@ int get_num(unsigned char *script,int *pos)
  *------------------------------------------*/
 int pop_val(struct script_state *st)
 {
-	if(st->stack->sp<=0)
+	if(st->stack->sp <= 0)
 		return 0;
 	st->stack->sp--;
-	get_val(st,&(st->stack->stack_data[st->stack->sp]));
-	if(st->stack->stack_data[st->stack->sp].type==C_INT)
+	get_val(st, &(st->stack->stack_data[st->stack->sp]));
+	if(st->stack->stack_data[st->stack->sp].type == C_INT)
 		return st->stack->stack_data[st->stack->sp].u.num;
 	return 0;
 }
@@ -3306,8 +3305,7 @@ void op_3(struct script_state *st, int op)
 		flag = data->u.str[0];// "" -> false
 	else if( data_isint(data) )
 		flag = data->u.num;// 0 -> false
-	else
-	{
+	else {
 		ShowError("script:op_3: invalid data for the ternary operator test\n");
 		script_reportdata(data);
 		script_reportsrc(st);
@@ -3643,12 +3641,12 @@ int run_func(struct script_state *st)
 		return 0;
 
 	pop_stack(st, st->start, st->end);
-	if( st->state == RETFUNC ) { // return from a user-defined function
+	if( st->state == RETFUNC ) { //Return from a user-defined function
 		struct script_retinfo *ri;
 		int olddefsp = st->stack->defsp;
 		int nargs;
 
-		pop_stack(st, st->stack->defsp, st->start);// pop distractions from the stack
+		pop_stack(st, st->stack->defsp, st->start); //Pop distractions from the stack
 		if( st->stack->defsp < 1 || st->stack->stack_data[st->stack->defsp-1].type != C_RETINFO ) {
 			ShowWarning("script:run_func: return without callfunc or callsub!\n");
 			script_reportsrc(st);
@@ -3665,7 +3663,7 @@ int run_func(struct script_state *st)
 		st->stack->defsp = ri->defsp;
 		memset(ri, 0, sizeof(struct script_retinfo));
 
-		pop_stack(st, olddefsp-nargs - 1, olddefsp);// pop arguments and retinfo
+		pop_stack(st, olddefsp-nargs - 1, olddefsp); //Pop arguments and retinfo
 
 		st->state = GOTO;
 	}
@@ -3683,9 +3681,9 @@ void run_script(struct script_code *rootscript, int pos, int rid, int oid)
 	if( rootscript == NULL || pos < 0 )
 		return;
 
-	// @TODO: In jAthena, this function can take over the pending script in the player [FlavioJS]
-	// It is unclear how that can be triggered, so it needs the be traced/checked in more detail
-	// NOTE At the time of this change, this function wasn't capable of taking over the script state because st->scriptroot was never set
+	//@TODO: In jAthena, this function can take over the pending script in the player [FlavioJS]
+	//It is unclear how that can be triggered, so it needs the be traced/checked in more detail
+	//NOTE At the time of this change, this function wasn't capable of taking over the script state because st->scriptroot was never set
 	st = script_alloc_state(rootscript, pos, rid, oid);
 	run_script_main(st);
 }
@@ -3696,7 +3694,7 @@ void script_stop_sleeptimers(int id)
 		struct script_state *st = (struct script_state *)linkdb_erase(&sleep_db,(void *)__64BPRTSIZE(id));
 
 		if( st == NULL )
-			break; // no more sleep timers
+			break; //No more sleep timers
 		script_free_state(st);
 	}
 }
@@ -3717,8 +3715,8 @@ struct linkdb_node* script_erase_sleepdb(struct linkdb_node *n)
 	if( n->next )
 		n->next->prev = n->prev;
 	retnode = n->next;
-	aFree( n );
-	return retnode;		// The following; return retnode
+	aFree(n);
+	return retnode; //The following; return retnode
 }
 
 /*==========================================
@@ -3730,7 +3728,7 @@ int run_script_timer(int tid, unsigned int tick, int id, intptr_t data)
 	struct linkdb_node *node    = (struct linkdb_node *)sleep_db;
 	TBL_PC *sd = map_id2sd(st->rid);
 
-	if((sd && sd->status.char_id != id) || (st->rid && !sd)) { //Character mismatch. Cancel execution.
+	if((sd && sd->status.char_id != id) || (st->rid && !sd)) { //Character mismatch, cancel execution
 		st->rid = 0;
 		st->state = END;
 	}
@@ -3760,15 +3758,12 @@ static void script_detach_state(struct script_state *st, bool dequeue_event)
 		sd->st = st->bk_st;
 		sd->npc_id = st->bk_npcid;
 		sd->state.disable_atcommand_on_npc = 0;
-		if(st->bk_st) {
-			//Remove tag for removal.
+		if(st->bk_st) { //Remove tag for removal
 			st->bk_st = NULL;
 			st->bk_npcid = 0;
 		} else if(dequeue_event) {
 #ifdef SECURE_NPCTIMEOUT
-			/**
-			 * We're done with this NPC session, so we cancel the timer (if existent) and move on
-			 */
+			//We're done with this NPC session, so we cancel the timer (if existent) and move on
 			if(sd->npc_idle_timer != INVALID_TIMER) {
 				delete_timer(sd->npc_idle_timer,npc_rr_secure_timeout_timer);
 				sd->npc_idle_timer = INVALID_TIMER;
@@ -3776,10 +3771,9 @@ static void script_detach_state(struct script_state *st, bool dequeue_event)
 #endif
 			npc_event_dequeue(sd);
 		}
-	} else if(st->bk_st) { // rid was set to 0, before detaching the script state
+	} else if(st->bk_st) { //rid was set to 0, before detaching the script state
 		ShowError("script_detach_state: Found previous script state without attached player (rid=%d, oid=%d, state=%d, bk_npcid=%d)\n", st->bk_st->rid, st->bk_st->oid, st->bk_st->state, st->bk_npcid);
 		script_reportsrc(st->bk_st);
-
 		script_free_state(st->bk_st);
 		st->bk_st = NULL;
 	}
@@ -3793,20 +3787,19 @@ static void script_attach_state(struct script_state *st)
 	struct map_session_data *sd;
 
 	if(st->rid && (sd = map_id2sd(st->rid)) != NULL) {
-		if(st!=sd->st) {
-			if(st->bk_st) { // There is already a backup
+		if(st != sd->st) {
+			if(st->bk_st) //There is already a backup
 				ShowDebug("script_free_state: Previous script state lost (rid=%d, oid=%d, state=%d, bk_npcid=%d).\n", st->bk_st->rid, st->bk_st->oid, st->bk_st->state, st->bk_npcid);
-			}
 			st->bk_st = sd->st;
 			st->bk_npcid = sd->npc_id;
 		}
 		sd->st = st;
 		sd->npc_id = st->oid;
-		sd->npc_item_flag = st->npc_item_flag; // Load default.
+		sd->npc_item_flag = st->npc_item_flag; //Load default
 		sd->state.disable_atcommand_on_npc = (!pc_has_permission(sd, PC_PERM_ENABLE_COMMAND));
 #ifdef SECURE_NPCTIMEOUT
-		if( sd->npc_idle_timer == INVALID_TIMER )
-			sd->npc_idle_timer = add_timer(gettick() + (SECURE_NPCTIMEOUT_INTERVAL*1000),npc_rr_secure_timeout_timer,sd->bl.id,0);
+		if(sd->npc_idle_timer == INVALID_TIMER)
+			sd->npc_idle_timer = add_timer(gettick() + (SECURE_NPCTIMEOUT_INTERVAL * 1000), npc_rr_secure_timeout_timer, sd->bl.id, 0);
 		sd->npc_idle_tick = gettick();
 #endif
 	}
@@ -3914,13 +3907,14 @@ void run_script_main(struct script_state *st)
 	}
 
 	if (st->sleep.tick > 0) {
-		//Restore previous script
-		script_detach_state(st, false);
+		if (!(sd = map_id2sd(st->rid))) { //Get sd since script might have attached someone while running [Inkfish]
+			script_detach_state(st, false); //Restore previous script (only for 'sleep') [exneval]
+			st->sleep.charid = 0;
+		} else
+			st->sleep.charid = sd->status.char_id;
 		//Delay execution
-		sd = map_id2sd(st->rid); //Get sd since script might have attached someone while running [Inkfish]
-		st->sleep.charid = (sd ? sd->status.char_id : 0);
-		st->sleep.timer = add_timer(gettick() + st->sleep.tick, run_script_timer,st->sleep.charid,(intptr_t)st);
-		linkdb_insert(&sleep_db,(void *)__64BPRTSIZE(st->oid),st);
+		st->sleep.timer = add_timer(gettick() + st->sleep.tick, run_script_timer, st->sleep.charid, (intptr_t)st);
+		linkdb_insert(&sleep_db, (void *)__64BPRTSIZE(st->oid), st);
 	} else if (st->state != END && st->rid) {
 		//Resume later (st is already attached to player)
 		if (st->bk_st) {
@@ -4089,7 +4083,7 @@ void script_setarray_pc(struct map_session_data *sd, const char *varname, uint8 
 #ifdef BETA_THREAD_TEST
 int buildin_query_sql_sub(struct script_state *st, Sql *handle);
 
-/* used to receive items the queryThread has already processed */
+//Used to receive items the queryThread has already processed */
 int queryThread_timer(int tid, unsigned int tick, int id, intptr_t data) {
 	int i, cursor = 0;
 	bool allOk = true;
@@ -4106,7 +4100,7 @@ int queryThread_timer(int tid, unsigned int tick, int id, intptr_t data) {
 
 		run_script_main(entry->st);
 		
-		entry->st = NULL;/* empty entries */
+		entry->st = NULL; //Empty entries
 		aFree(entry);
 		queryThreadData.entry[i] = NULL;
 	}
@@ -4465,21 +4459,18 @@ void script_reload(void) {
 BUILDIN_FUNC(mes)
 {
 	TBL_PC *sd = script_rid2sd(st);
+
 	if( sd == NULL )
 		return 0;
-
-	if( !script_hasdata(st, 3) ) { // only a single line detected in the script
+	if( !script_hasdata(st, 3) ) { //Only a single line detected in the script
 		clif_scriptmes(sd, st->oid, script_getstr(st, 2));
-	} else { // parse multiple lines as they exist
+	} else { //Parse multiple lines as they exist
 		int i;
 
-		for( i = 2; script_hasdata(st, i); i++ ) {
-			// send the message to the client
-			clif_scriptmes(sd, st->oid, script_getstr(st, i));
-		}
+		for( i = 2; script_hasdata(st, i); i++ )
+			clif_scriptmes(sd, st->oid, script_getstr(st, i)); //End the message to the client
 	}
-
-	st->mes_active = 1; // Invoking character has a NPC dialog box open.
+	st->mes_active = 1; //Invoking character has a NPC dialog box open
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -4516,7 +4507,8 @@ BUILDIN_FUNC(close)
 
 	if( !st->mes_active ) {
 		TBL_NPC *nd = map_id2nd(st->oid);
-		st->state = END; // Keep backwards compatibility.
+
+		st->state = END; // Keep backwards compatibility
 		ShowWarning("Incorrect use of 'close' command! (source:%s / path:%s)\n",nd?nd->name:"Unknown",nd?nd->path:"Unknown");
 	} else {
 		st->state = CLOSE;
@@ -9425,7 +9417,7 @@ BUILDIN_FUNC(areamonster)
 }
 
 /*==========================================
- * KillMonster subcheck, verify if mob to kill ain't got an even to handle, could be force kill by allflag
+ * KillMonster subcheck, verify if mob to kill ain't got an event to handle, could be force kill by allflag
  *------------------------------------------*/
  static int buildin_killmonster_sub_strip(struct block_list *bl,va_list ap)
 { //Same fix but with killmonster instead - stripping events from mobs
@@ -9434,9 +9426,9 @@ BUILDIN_FUNC(areamonster)
 	int allflag = va_arg(ap, int);
 
 	md->state.npc_killmonster = 1;
-	
+
 	if (!allflag) {
-		if (strcmp(event,md->npc_event) == 0)
+		if (!strcmp(event,md->npc_event))
 			status_kill(bl);
 	} else {
 		if (!md->spawn)
@@ -9454,7 +9446,7 @@ static int buildin_killmonster_sub(struct block_list *bl,va_list ap)
 	int allflag = va_arg(ap, int);
 
 	if (!allflag) {
-		if (strcmp(event,md->npc_event) == 0)
+		if (!strcmp(event,md->npc_event))
 			status_kill(bl);
 	} else {
 		if (!md->spawn)
@@ -9615,7 +9607,7 @@ BUILDIN_FUNC(donpcevent)
 
 /// for Aegis compatibility
 /// basically a specialized 'donpcevent', with the event specified as two arguments instead of one
-BUILDIN_FUNC(cmdothernpc)	// Added by RoVeRT
+BUILDIN_FUNC(cmdothernpc) //Added by RoVeRT
 {
 	const char *npc = script_getstr(st,2);
 	const char *command = script_getstr(st,3);
@@ -12176,7 +12168,7 @@ BUILDIN_FUNC(failedremovecards) {
  * type: 0 = everyone, 1 = guild, 2 = party;	[Reddozen]
  * improved by [Lance]
  * ================================================================*/
-BUILDIN_FUNC(mapwarp) // Added by RoVeRT
+BUILDIN_FUNC(mapwarp) //Added by RoVeRT
 {
 	int x, y, m, check_val = 0, check_ID = 0, i = 0;
 	struct guild *g = NULL;
@@ -12229,17 +12221,17 @@ BUILDIN_FUNC(mapwarp) // Added by RoVeRT
 	return SCRIPT_CMD_SUCCESS;
 }
 
-static int buildin_mobcount_sub(struct block_list *bl,va_list ap) // Added by RoVeRT
+static int buildin_mobcount_sub(struct block_list *bl,va_list ap) //Added by RoVeRT
 {
 	char *event = va_arg(ap,char *);
 	struct mob_data *md = ((struct mob_data *)bl);
 
-	if( md->status.hp > 0 && (!event || strcmp(event,md->npc_event) == 0) )
+	if(md->status.hp && (!event || !strcmp(event,md->npc_event)))
 		return 1;
 	return SCRIPT_CMD_SUCCESS;
 }
 
-BUILDIN_FUNC(mobcount) // Added by RoVeRT
+BUILDIN_FUNC(mobcount) //Added by RoVeRT
 {
 	const char *mapname,*event;
 	int16 m;
@@ -12247,23 +12239,23 @@ BUILDIN_FUNC(mobcount) // Added by RoVeRT
 	mapname = script_getstr(st,2);
 	event = script_getstr(st,3);
 
-	if( strcmp(event, "all") == 0 )
+	if(!strcmp(event,"all"))
 		event = NULL;
 	else
 		check_event(st, event);
 
-	if( strcmp(mapname, "this") == 0 ) {
+	if(!strcmp(mapname,"this")) {
 		struct map_session_data *sd = script_rid2sd(st);
 
-		if( sd == NULL )
+		if(sd == NULL)
 			return 1;
 		m = sd->bl.m;
-	} else if( (m = map_mapname2mapid(mapname)) < 0 ) {
+	} else if((m = map_mapname2mapid(mapname)) < 0) {
 		script_pushint(st,-1);
 		return 0;
 	}
 
-	script_pushint(st,map_foreachinmap(buildin_mobcount_sub, m, BL_MOB, event));
+	script_pushint(st,map_foreachinmap(buildin_mobcount_sub,m,BL_MOB,event));
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -17344,14 +17336,14 @@ BUILDIN_FUNC(sleep)
 	ticks = script_getnum(st,2);
 	//Detach the player
 	script_detach_rid(st);
-	if( ticks <= 0 ) {
-		//Do nothing
-	} else if( st->sleep.tick == 0 ) { //Sleep for the target amount of time
-		st->state = RERUNLINE;
-		st->sleep.tick = ticks;
-	} else { //Sleep time is over
-		st->state = RUN;
-		st->sleep.tick = 0;
+	if( ticks > 0 ) {
+		if( !st->sleep.tick ) { //Sleep for the target amount of time
+			st->state = RERUNLINE;
+			st->sleep.tick = ticks;
+		} else { //Sleep time is over
+			st->state = RUN;
+			st->sleep.tick = 0;
+		}
 	}
 
 	return SCRIPT_CMD_SUCCESS;
@@ -20729,8 +20721,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(waitingroomkickall,"kickwaitingroomall","?"),
 	BUILDIN_DEF(enablewaitingroomevent,"?"),
 	BUILDIN_DEF(disablewaitingroomevent,"?"),
-	BUILDIN_DEF2(enablewaitingroomevent,"enablearena",""),		// Added by RoVeRT
-	BUILDIN_DEF2(disablewaitingroomevent,"disablearena",""),	// Added by RoVeRT
+	BUILDIN_DEF2(enablewaitingroomevent,"enablearena",""), // Added by RoVeRT
+	BUILDIN_DEF2(disablewaitingroomevent,"disablearena",""), // Added by RoVeRT
 	BUILDIN_DEF(getwaitingroomstate,"i?"),
 	BUILDIN_DEF(warpwaitingpc,"sii?"),
 	BUILDIN_DEF(attachrid,"i"),
@@ -20792,12 +20784,12 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(petskillattack,"viii"), // [Skotlex]
 	BUILDIN_DEF(petskillattack2,"viiii"), // [Valaris]
 	BUILDIN_DEF(petskillsupport,"viiii"), // [Skotlex]
-	BUILDIN_DEF(skilleffect,"vi"), // skill effect [Celest]
-	BUILDIN_DEF(npcskilleffect,"viii"), // npc skill effect [Valaris]
-	BUILDIN_DEF(specialeffect,"i??"), // npc skill effect [Valaris]
-	BUILDIN_DEF(specialeffect2,"i??"), // skill effect on players[Valaris]
-	BUILDIN_DEF(nude,"?"), // nude command [Valaris]
-	BUILDIN_DEF(mapwarp,"ssii??"),		// Added by RoVeRT
+	BUILDIN_DEF(skilleffect,"vi"), // Skill effect [Celest]
+	BUILDIN_DEF(npcskilleffect,"viii"), // Npc skill effect [Valaris]
+	BUILDIN_DEF(specialeffect,"i??"), // Npc skill effect [Valaris]
+	BUILDIN_DEF(specialeffect2,"i??"), // Skill effect on players[Valaris]
+	BUILDIN_DEF(nude,"?"), // Nude command [Valaris]
+	BUILDIN_DEF(mapwarp,"ssii??"), // Added by RoVeRT
 	BUILDIN_DEF(atcommand,"s"), // [MouseJstr]
 	BUILDIN_DEF2(atcommand,"charcommand","s"), // [MouseJstr]
 	BUILDIN_DEF(movenpc,"sii?"), // [MouseJstr]

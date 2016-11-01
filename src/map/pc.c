@@ -4840,8 +4840,12 @@ int pc_useitem(struct map_session_data *sd, int n)
 	nullpo_ret(sd);
 
 	if( sd->npc_id ) { //This flag enables you to use items while in an NPC [Skotlex]
+		if( sd->progressbar.npc_id ) {
+			clif_progressbar_abort(sd);
+			return 0;
+		}
 #ifdef RENEWAL
-		clif_msg(sd,USAGE_FAIL); //@TODO look for the client date that has this message
+		clif_msg(sd,WORK_IN_PROGRESS);
 		return 0;
 #else
 		if( !sd->npc_item_flag )
@@ -7250,6 +7254,7 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 int pc_close_npc_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	TBL_PC *sd = map_id2sd(id);
+
 	if( sd )
 		pc_close_npc(sd,data);
 	return 0;
@@ -7268,9 +7273,8 @@ void pc_close_npc(struct map_session_data *sd, int flag) {
 			clif_clearunit_single(sd->npc_id, CLR_OUTSIGHT, sd->fd);
 			sd->state.using_fake_npc = 0;
 		}
-
 		if (sd->st) {
-			if (sd->st->state == RUN) { // Wait ending code execution
+			if (sd->st->state == RUN) { //Wait ending code execution
 				add_timer(gettick() + 500,pc_close_npc_timer,sd->bl.id,flag);
 				return;
 			}
@@ -7280,13 +7284,14 @@ void pc_close_npc(struct map_session_data *sd, int flag) {
 		sd->state.menu_or_input = 0;
 		sd->npc_menu = 0;
 		sd->npc_shopid = 0;
-		clif_scriptmes(sd,sd->npc_id," ");
-		clif_scriptclose(sd,sd->npc_id);
-		clif_scriptclear(sd,sd->npc_id);
+		if (sd->st && sd->st->state == CLOSE) {
+			clif_scriptclose(sd,sd->npc_id);
+			clif_scriptclear(sd,sd->npc_id);
+		}
 #ifdef SECURE_NPCTIMEOUT
 		sd->npc_idle_timer = INVALID_TIMER;
 #endif
-		if (sd->st && sd->st->state == END ) { // Free attached scripts that are waiting
+		if (sd->st && sd->st->state == END) { //Free attached scripts that are waiting
 			script_free_state(sd->st);
 			sd->st = NULL;
 			sd->npc_id = 0;

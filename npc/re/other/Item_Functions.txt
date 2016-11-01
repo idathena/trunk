@@ -100,7 +100,7 @@ function	script	F_18810_L	{ //Hell_Pumpkin_Hat
 }
 
 function	script	F_18856	{ //W_King_Tiger_Doll_Hat
-	showscript "fee-faw-fum-!!! I totally feel like a tiger!!!";
+	showscript "Tiger!";
 	return;
 }
 
@@ -141,5 +141,10 @@ function	script	F_22755	{ //Trans_Scroll_Wind_Ghost
 
 function	script	F_28319	{ //Cauda_Daemonica
 	showscript "Traaaansformation-!! Succubus form!!";
+	return;
+}
+
+function	script	F_19686	{ //C_SantaHairband
+	showscript "Khehehe~ Chaos! Destruction! Petrifaction!";
 	return;
 }
