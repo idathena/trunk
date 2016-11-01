@@ -3139,10 +3139,10 @@ IG_Pumpkin_Candy_Holder,Pumpkin_Cake,1,1,1
 IG_Pumpkin_Candy_Holder,Pumpkin_Pie,1,3,1
 IG_Pumpkin_Candy_Holder,Meat,1,5,1
 IG_Pumpkin_Candy_Holder,HALLOWEEN_G_BOX,1,1,1
-IG_Pumpkin_Candy_Holder,Trans_Candy_Red,1,3,1
-IG_Pumpkin_Candy_Holder,Trans_Candy_Blue,1,3,1
-IG_Pumpkin_Candy_Holder,Trans_Candy_Yellow,1,3,1
-IG_Pumpkin_Candy_Holder,Trans_Candy_Green,1,3,1
+IG_Pumpkin_Candy_Holder,Trance_Candy_R,1,3,1
+IG_Pumpkin_Candy_Holder,Trance_Candy_B,1,3,1
+IG_Pumpkin_Candy_Holder,Trance_Candy_Y,1,3,1
+IG_Pumpkin_Candy_Holder,Trance_Candy_G,1,3,1
 IG_Pumpkin_Candy_Holder,Old_Blue_Box,1,1,1
 IG_Pumpkin_Candy_Holder,Yggdrasilberry,1,1,1
 IG_Pumpkin_Candy_Holder,Old_Card_Album,1,1,1
@@ -3303,8 +3303,8 @@ IG_Three_Master_Package_III10,Sealed_Moonlight_Flower_Scroll,1,11,1
 IG_2013_RWC_Scroll,S_Neutral_Weapon,0,1,0
 IG_2013_RWC_Scroll,S_Neutral_Earring,0,1,0
 IG_2013_RWC_Scroll,S_Neutral_Pendant,0,1,0
-IG_2013_RWC_Scroll,S_Frozen_Curse_Earring,0,1,0
-IG_2013_RWC_Scroll,S_Frozen_Curse_Pendant,0,1,0
+IG_2013_RWC_Scroll,S_Curse_Lift_Earring,0,1,0
+IG_2013_RWC_Scroll,S_Curse_Lift_Pendant,0,1,0
 IG_2013_RWC_Scroll,Guarantee_Weapon_11Up,0,1,0
 IG_2013_RWC_Scroll,Guarantee_Armor_11Up,0,1,0
 IG_2013_RWC_Scroll,Guarantee_Weapon_9Up,0,1,0
@@ -3964,3 +3964,16 @@ IG_Blessing_Midgard_Lucky_Egg,6438,1,3 // 3x Blessed_Weapon_Ore
 IG_Blessing_Midgard_Lucky_Egg,6439,1,3 // 3x Blessed_Armor_Ore
 IG_Blessing_Midgard_Lucky_Egg,12902,1,1 // 1x Bubble Gum Box
 IG_Blessing_Midgard_Lucky_Egg,12901,1,1 // Insurance Package
+
+IG_Closed_Mind_Box,732,1,10 // 10x Crystal_Jewel__
+IG_Closed_Mind_Box,719,1,10 // 10x Violet_Jewel
+IG_Closed_Mind_Box,7642,1,5 // 5x Bloody_Coin
+IG_Closed_Mind_Box,969,1,2 // 2x Gold
+IG_Closed_Mind_Box,1098,1,10 // 10x Manacles
+IG_Closed_Mind_Box,616,1,1 // 1x Old_Card_Album
+IG_Closed_Mind_Box,617,1,3 // 3x Old_Violet_Box
+IG_Closed_Mind_Box,11564,1,5 // 5x Sweet_Canape
+IG_Closed_Mind_Box,11563,1,5 // 5x Hot_Tee
+IG_Closed_Mind_Box,2977,1,1 // 1x Hurt_Mind
+IG_Closed_Mind_Box,2978,1,1 // 1x KindHeart
+IG_Closed_Mind_Box,18848,1,1 // 1x Lush_Rose

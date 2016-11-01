@@ -5932,7 +5932,7 @@ Example:
 *killmonster "<map name>","<event label>"{,<type>};
 
 This command will kill all monsters that were spawned with 'monster' or 
-'addmonster' and have a specified event label attached to them. Commonly used to 
+'areamonster' and have a specified event label attached to them. Commonly used to 
 get rid of remaining quest monsters once the quest is complete.
 
 If the label is given as "All", all monsters which have their respawn times set 
@@ -7403,7 +7403,7 @@ This is used to get and set special data related to the unit.
 With getunitdata, the array given will be filled with the current data. In setunitdata
 the indexes in the array would be used to set that data on the unit. 
 
-Parameters (indexes) for monsters are:
+Parameter (indexes) for monsters are:
 
 	0 - size (big, small, normal)	7  - y				14 - hair style		21 - weapon		28 - LUK
 	1 - level			8  - speed			15 - hair color		22 - looking dir	29 - for slave to copy master's mode

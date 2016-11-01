@@ -3949,7 +3949,7 @@ moc_para01,111,83,3	script	Blacksmith Thorn#2nd10	2_M_OLDBLSMITH,{
 				getitem 18106,1; //P_Bow3
 			else if (BaseJob == Job_Bard) {
 				callsub L_Select,"",
-					1931,"Eden Group Guitar I","Guitar, Attack 125", //P_Guitar1
+					1931,"Eden Group Guitar I","Guitar, Attack 125", //P_String_Inst1
 					18106,"Eden Group Bow III","Bow, Attack 140"; //P_Bow3
 			}
 			else if (BaseJob == Job_Dancer) {
@@ -4111,7 +4111,7 @@ moc_para01,112,79,3	script	Weapons Expert BK#2nd11	4_M_REPAIR,{
 		16014, //P_Mace3
 		18106, //P_Bow3
 		1583,  //P_Book1
-		1931,  //P_Guitar1
+		1931,  //P_String_Inst1
 		1986,  //P_Tail1
 		13114, //P_Revolver3
 		1831,  //P_Knuckle1

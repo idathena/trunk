@@ -166,11 +166,11 @@ bool npc_isnear(struct block_list *bl) {
 int npc_ontouch_event(struct map_session_data *sd, struct npc_data *nd) {
 	char name[EVENT_NAME_LENGTH];
 
-	if( nd->touching_id )
-		return 0; //Attached a player already. Can't trigger on anyone else
+	if( sd->touching_id || nd->touching_id )
+		return 0; //Npc or player already attached, don't trigger the event
 
 	if( pc_ishiding(sd) )
-		return 1; //Can't trigger 'OnTouch_'. try 'OnTouch' later
+		return 1; //Can't trigger 'OnTouch_', use 'OnTouch' instead
 
 	snprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.ontouch_name);
 	return npc_event(sd, name, 1);
@@ -213,9 +213,8 @@ int npc_enable_sub(struct block_list *bl, va_list ap)
 			return 1;
 
 		if( npc_ontouch_event(sd, nd) > 0 && npc_ontouch2_event(sd, nd) > 0 ) { //Failed to run OnTouch event, so just click the npc
-			if( sd->npc_id != 0 )
+			if( sd->npc_id )
 				return 0;
-
 			pc_stop_walking(sd, 1);
 			npc_click(sd, nd);
 		}
@@ -726,7 +725,7 @@ void npc_timerevent_quit(struct map_session_data *sd)
 		struct event_data *ev;
 
 		snprintf(buf, ARRAYLENGTH(buf), "%s::OnTimerQuit", nd->exname);
-		ev = (struct event_data*)strdb_get(ev_db, buf);
+		ev = (struct event_data *)strdb_get(ev_db, buf);
 		if( ev && ev->nd != nd ) {
 			ShowWarning("npc_timerevent_quit: Unable to execute \"OnTimerQuit\", two NPCs have the same event name [%s]!\n",buf);
 			ev = NULL;
@@ -806,7 +805,7 @@ int npc_settimerevent_tick(struct npc_data *nd, int newtimer)
 
 int npc_event_sub(struct map_session_data *sd, struct event_data *ev, const char *eventname)
 {
-	if( sd->npc_id != 0 ) { //Enqueue the event trigger
+	if( sd->npc_id ) { //Enqueue the event trigger
 		int i;
 
 		ARR_FIND(0, MAX_EVENTQUEUE, i, sd->eventqueue[i][0] == '\0');
@@ -830,7 +829,7 @@ int npc_event_sub(struct map_session_data *sd, struct event_data *ev, const char
  *------------------------------------------*/
 int npc_event(struct map_session_data *sd, const char *eventname, int ontouch)
 {
-	struct event_data *ev = (struct event_data*)strdb_get(ev_db, eventname);
+	struct event_data *ev = (struct event_data *)strdb_get(ev_db, eventname);
 	struct npc_data *nd;
 
 	nullpo_ret(sd);
@@ -985,8 +984,9 @@ int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 			if( npc_ontouch_event(sd,map[m].npc[i]) > 0 && npc_ontouch2_event(sd,map[m].npc[i]) > 0 ) {
 				//Failed to run OnTouch event, so just click the npc
 				struct unit_data *ud = unit_bl2ud(&sd->bl);
+
 				if( ud && ud->walkpath.path_pos < ud->walkpath.path_len ) {
-					//Since walktimer always == INVALID_TIMER at this time, we stop walking manually. [Inkfish]
+					//Since walktimer always == INVALID_TIMER at this time, we stop walking manually [Inkfish]
 					clif_fixpos(&sd->bl);
 					ud->walkpath.path_pos = ud->walkpath.path_len;
 				}
@@ -1063,7 +1063,7 @@ int npc_touch_areanpc2(struct mob_data *md)
 					if( map[m].npc[i]->bl.id == md->areanpc_id )
 						break; //Already touch this NPC
 					snprintf(eventname, ARRAYLENGTH(eventname), "%s::OnTouchNPC", map[m].npc[i]->exname);
-					if( (ev = (struct event_data*)strdb_get(ev_db, eventname)) == NULL || ev->nd == NULL )
+					if( (ev = (struct event_data *)strdb_get(ev_db, eventname)) == NULL || ev->nd == NULL )
 						break; //No OnTouchNPC Event
 					md->areanpc_id = map[m].npc[i]->bl.id;
 					id = md->bl.id; //Stores Unique ID
@@ -1237,7 +1237,7 @@ int npc_click(struct map_session_data *sd, struct npc_data *nd)
 	//unit_walktoxy_timer is executed before any other function in this case
 	//so it's best practice to put an 'end;' before OnTouch events in npcs that 
 	//have view ids of mobs to avoid this "issue" [Panikon]
-	if (sd->npc_id != 0) { //The player clicked a npc after entering an OnTouch area
+	if (sd->npc_id) { //The player clicked a npc after entering an OnTouch area
 		if (sd->areanpc_id != sd->npc_id)
 			ShowError("npc_click: npc_id != 0\n");
 		return 1;
@@ -1302,12 +1302,12 @@ int npc_scriptcont(struct map_session_data *sd, int id, bool closing)
 		TBL_NPC *nd = (TBL_NPC *)map_id2bl(id);
 
 		ShowDebug("npc_scriptcont: %s (sd->npc_id=%d) is not %s (id=%d).\n",
-			nd_sd ? (char *)nd_sd->name : "'Unknown NPC'", (int)sd->npc_id,
-		  	nd ? (char *)nd->name : "'Unknown NPC'", (int)id);
+			(nd_sd ? (char *)nd_sd->name : "'Unknown NPC'"), (int)sd->npc_id,
+		  	(nd ? (char *)nd->name : "'Unknown NPC'"), (int)id);
 		return 1;
 	}
-	
-	if (id != fake_nd->bl.id) { // Not item script
+
+	if (id != fake_nd->bl.id) { //Not item script
 		if ((npc_checknear(sd,map_id2bl(id))) == NULL) {
 			ShowWarning("npc_scriptcont: failed npc_checknear test.\n");
 			return 1;
@@ -1317,9 +1317,7 @@ int npc_scriptcont(struct map_session_data *sd, int id, bool closing)
 	sd->npc_idle_tick = gettick(); //Update the last NPC iteration
 #endif
 
-	/**
-	 * WPE can get to this point with a progressbar; we deny it.
-	 */
+	//WPE can get to this point with a progressbar, we deny it
 	if (sd->progressbar.npc_id && DIFF_TICK(sd->progressbar.timeout,gettick()) > 0)
 		return 1;
 
@@ -1344,7 +1342,7 @@ int npc_buysellsel(struct map_session_data *sd, int id, int type)
 		return 1;
 
 	if (nd->subtype != NPCTYPE_SHOP && nd->subtype != NPCTYPE_ITEMSHOP && nd->subtype != NPCTYPE_POINTSHOP) {
-		ShowError("no such shop npc : %d\n",id);
+		ShowError("No such shop npc : %d\n",id);
 		if (sd->npc_id == id)
 			sd->npc_id = 0;
 		return 1;
@@ -2878,7 +2876,7 @@ static const char *npc_parse_script(char *w1, char *w2, char *w3, char *w4, cons
 
 		snprintf(evname, ARRAYLENGTH(evname), "%s::OnInit", nd->exname);
 
-		if( (ev = (struct event_data*)strdb_get(ev_db, evname)) ) //Execute OnInit
+		if( (ev = (struct event_data *)strdb_get(ev_db, evname)) ) //Execute OnInit
 			run_script(nd->u.scr.script,ev->pos,0,nd->bl.id);
 	}
 
@@ -3117,7 +3115,7 @@ int npc_instanceinit(struct npc_data *nd)
 
 	snprintf(evname, ARRAYLENGTH(evname), "%s::OnInstanceInit", nd->exname);
 
-	if( (ev = (struct event_data*)strdb_get(ev_db, evname)) )
+	if( (ev = (struct event_data *)strdb_get(ev_db, evname)) )
 		run_script(nd->u.scr.script,ev->pos,0,nd->bl.id);
 
 	return 0;
@@ -3425,7 +3423,7 @@ int npc_do_atcmd_event(struct map_session_data *sd, const char *command, const c
 		return 0;
 	}
 
-	if( sd->npc_id != 0 ) { // Enqueue the event trigger
+	if( sd->npc_id ) { //Enqueue the event trigger
 		int i;
 
 		ARR_FIND(0, MAX_EVENTQUEUE, i, sd->eventqueue[i][0] == '\0');
