@@ -789,6 +789,8 @@ typedef enum sc_type {
 	SC_GEFFEN_MAGIC2,
 	SC_GEFFEN_MAGIC3,
 	SC_FENRIR_CARD,
+
+	SC_MAXPAIN,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

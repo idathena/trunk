@@ -119,3 +119,7 @@ dali02	mapflag	noteleport
 // Nightmarish Jitterbug =========
 1@jtb	mapflag	noteleport
 1@jtb	mapflag	monster_noteleport
+
+// Horror Toy Factory ============
+1@xm_d	mapflag	noteleport
+1@xm_d	mapflag	monster_noteleport

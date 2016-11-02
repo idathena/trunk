@@ -3144,6 +3144,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				}
 			}
 		}
+		if (tsc->data[SC_MAXPAIN]) {
+			battle_damage_temp[0] = damage;
+			skill_castend_damage_id(bl, src, NPC_MAXPAIN_ATK, tsc->data[SC_MAXPAIN]->val1, tick, flag);
+		}
 	}
 
 	if (damage > 0 && !(tstatus->mode&MD_BOSS)) {
@@ -4433,6 +4437,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case NPC_PULSESTRIKE:
 		case NPC_HELLJUDGEMENT:
 		case NPC_VAMPIRE_GIFT:
+		case NPC_MAXPAIN_ATK:
 		case RK_IGNITIONBREAK:
 		case AB_JUDEX:
 		case WL_SOULEXPANSION:
@@ -6109,6 +6114,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SG_MOON_COMFORT:
 		case SG_STAR_COMFORT:
 		case NPC_HALLUCINATION:
+		case NPC_MAXPAIN:
 		case GS_MADNESSCANCEL:
 		case GS_ADJUSTMENT:
 		case GS_INCREASING:
@@ -11464,6 +11470,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case NPC_EVILLAND:
 		case NPC_VENOMFOG:
 		case NPC_COMET:
+		case NPC_HELLBURNING:
 		case WL_COMET:
 		case RA_ELECTRICSHOCKER:
 		case RA_CLUSTERBOMB:
@@ -13294,6 +13301,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 		case UNT_PSYCHIC_WAVE:
 		case UNT_MAGMA_ERUPTION:
 		case UNT_MAKIBISHI:
+		case UNT_HELLBURNING:
 			skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,skill_id,skill_lv,tick,0);
 			break;
 

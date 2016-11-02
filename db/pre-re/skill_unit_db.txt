@@ -104,6 +104,8 @@
 706,0xfd,     ,  2, 0,1000,all,   0x018	//NPC_VENOMFOG
 708,0x86,     ,  0, 9, 100,enemy, 0x018	//NPC_COMET
 
+719,0x100,    ,  1, 0,  20,enemy, 0x2018	//NPC_HELLBURNING
+
 2044,0xca,    ,  0, 2,1000,all,   0x018	//AB_EPICLESIS
 
 2032,0xe1,    ,  2, 0,2000,enemy, 0x018	//GC_POISONSMOKE

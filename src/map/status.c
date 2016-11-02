@@ -819,6 +819,7 @@ void initChangeTables(void) {
 	add_sc( NPC_WIDE_DEEP_SLEEP  , SC_DEEPSLEEP          );
 	add_sc( NPC_WIDESIREN        , SC_VOICEOFSIREN       );
 	add_sc( NPC_COMET            , SC_BURNING            );
+	set_sc_with_vfx( NPC_MAXPAIN , SC_MAXPAIN            , SI_MAXPAIN               , SCB_NONE );
 
 	add_sc( RL_MASS_SPIRAL      , SC_BLEEDING           );
 	add_sc( RL_HAMMER_OF_GOD    , SC_STUN               );

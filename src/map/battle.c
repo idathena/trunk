@@ -5961,6 +5961,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						else
 							skillratio += 900 + 500 * skill_lv; 
 						break;
+					case NPC_HELLBURNING:
+						skillratio += 900;
+						break;
 #ifdef RENEWAL
 					case WZ_HEAVENDRIVE:
 					case WZ_METEOR:
@@ -6578,6 +6581,9 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			break;
 		case NPC_VENOMFOG:
 			md.damage = 2000;
+			break;
+		case NPC_MAXPAIN_ATK:
+			md.damage = battle_damage_temp[0] * skill_lv * 10 / 100;
 			break;
 #ifdef RENEWAL
 		case HW_MAGICCRASHER: {
@@ -7472,6 +7478,10 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 				clif_damage(e_bl,e_bl,tick,0,0,damage,wd.div_,DMG_NORMAL,0);
 				status_fix_damage(NULL,e_bl,damage,0);
 			}
+		}
+		if (tsc->data[SC_MAXPAIN]) {
+			battle_damage_temp[0] = damage;
+			skill_castend_damage_id(target,src,NPC_MAXPAIN_ATK,tsc->data[SC_MAXPAIN]->val1,tick,flag);
 		}
 	}
 

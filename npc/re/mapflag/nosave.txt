@@ -99,3 +99,6 @@ que_avan01	mapflag	nosave	SavePoint
 
 // Nightmarish Jitterbug =========
 1@jtb	mapflag	nosave	SavePoint
+
+// Horror Toy Factory =========
+1@xm_d	mapflag	nosave	SavePoint

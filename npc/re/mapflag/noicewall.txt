@@ -37,5 +37,26 @@
 // Inside Eclage ===========
 1@ecl	mapflag	noicewall
 
+// Inside Eclage ==================
+1@ecl	mapflag	noicewall
+
+// Glast Heim Memorial Dungeon ====
+1@gl_k	mapflag	noicewall
+2@gl_k	mapflag	noicewall
+
+// Wave Mode Memorial Dungeon =====
+1@def01	mapflag	noicewall
+1@def02	mapflag	noicewall
+1@def03	mapflag	noicewall
+
+// Heroes' Trails - Part 1 ========
+1@gef	mapflag	noicewall
+1@face	mapflag	noicewall
+1@sara	mapflag	noicewall
+1@gef_in	mapflag	noicewall
+
 // Nightmarish Jitterbug =========
 1@jtb	mapflag	noicewall
+
+// Horror Toy Factory =========
+1@xm_d	mapflag	noicewall
