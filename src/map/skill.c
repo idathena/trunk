@@ -3182,10 +3182,8 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	}
 
 	if (!(flag&2) && (skill_id == MG_COLDBOLT || skill_id == MG_FIREBOLT || skill_id == MG_LIGHTNINGBOLT) &&
-		sc && sc->data[SC_DOUBLECAST] && rnd()%100 < sc->data[SC_DOUBLECAST]->val2) {
-		//skill_addtimerskill(src, tick + dmg.div_ * dmg.amotion, bl->id, 0, 0, skill_id, skill_lv, BF_MAGIC, flag|2);
+		sc && sc->data[SC_DOUBLECAST] && rnd()%100 < sc->data[SC_DOUBLECAST]->val2)
 		skill_addtimerskill(src, tick + dmg.amotion, bl->id, 0, 0, skill_id, skill_lv, BF_MAGIC, flag|2);
-	}
 
 	map_freeblock_unlock();
 
@@ -6528,9 +6526,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
 			break;
 
-		case NPC_VAMPIRE_GIFT:
-		case NPC_HELLJUDGEMENT:
 		case NPC_PULSESTRIKE:
+		case NPC_HELLJUDGEMENT:
+		case NPC_VAMPIRE_GIFT:
 			skill_castend_damage_id(src,src,skill_id,skill_lv,tick,flag);
 			break;
 

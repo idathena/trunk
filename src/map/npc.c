@@ -208,11 +208,14 @@ int npc_enable_sub(struct block_list *bl, va_list ap)
 
 	if( bl->type == BL_PC ) {
 		TBL_PC *sd = (TBL_PC *)bl;
+		int ontouch, ontouch2;
 
 		if( nd->sc.option&OPTION_INVISIBLE )
 			return 1;
-
-		if( npc_ontouch_event(sd, nd) > 0 && npc_ontouch2_event(sd, nd) > 0 ) { //Failed to run OnTouch event, so just click the npc
+		//Failed to run OnTouch event, so just click the npc
+		ontouch = npc_ontouch_event(sd, nd);
+		ontouch2 = npc_ontouch2_event(sd, nd);
+		if( ontouch > 0 && ontouch2 > 0 ) {
 			if( sd->npc_id )
 				return 0;
 			pc_stop_walking(sd, 1);
@@ -254,7 +257,7 @@ int npc_enable(const char *name, int flag)
 	} else
 		clif_changeoption(&nd->bl);
 
-	if( flag&3 && (nd->u.scr.xs >= 0 || nd->u.scr.ys >= 0) ) //Check if player standing on a OnTouchArea
+	if( (flag&3) && (nd->u.scr.xs >= 0 || nd->u.scr.ys >= 0) ) //Check if player standing on a OnTouchArea
 		map_foreachinarea(npc_enable_sub, nd->bl.m, nd->bl.x - nd->u.scr.xs, nd->bl.y - nd->u.scr.ys, nd->bl.x + nd->u.scr.xs, nd->bl.y + nd->u.scr.ys, BL_PC, nd);
 
 	return 0;
@@ -856,7 +859,7 @@ int npc_event(struct map_session_data *sd, const char *eventname, int ontouch)
 /*==========================================
  * Sub chk then execute area event type
  *------------------------------------------*/
-int npc_touch_areanpc_sub(struct block_list *bl, va_list ap)
+int npc_touchnext_areanpc_sub(struct block_list *bl, va_list ap)
 {
 	struct map_session_data *sd;
 	int pc_id;
@@ -904,7 +907,7 @@ int npc_touchnext_areanpc(struct map_session_data *sd, bool leavemap)
 
 		nd->touching_id = sd->touching_id = 0;
 		snprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.ontouch_name);
-		map_forcountinarea(npc_touch_areanpc_sub,nd->bl.m,nd->bl.x - xs,nd->bl.y - ys,nd->bl.x + xs,nd->bl.y + ys,1,BL_PC,sd->bl.id,name);
+		map_forcountinarea(npc_touchnext_areanpc_sub,nd->bl.m,nd->bl.x - xs,nd->bl.y - ys,nd->bl.x + xs,nd->bl.y + ys,1,BL_PC,sd->bl.id,name);
 	}
 	return 0;
 }
@@ -914,7 +917,7 @@ int npc_touchnext_areanpc(struct map_session_data *sd, bool leavemap)
  *------------------------------------------*/
 int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 {
-	int xs,ys;
+	int xs, ys;
 	int f = 1;
 	int i;
 	int j, found_warp = 0;
@@ -930,7 +933,6 @@ int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 			f = 0; //A npc was found, but it is disabled; don't print warning
 			continue;
 		}
-
 		switch( map[m].npc[i]->subtype ) {
 			case NPCTYPE_WARP:
 				xs = map[m].npc[i]->u.warp.xs;
@@ -963,35 +965,37 @@ int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 			}
 			pc_setpos(sd,map[m].npc[i]->u.warp.mapindex,map[m].npc[i]->u.warp.x,map[m].npc[i]->u.warp.y,CLR_OUTSIGHT);
 			break;
-		case NPCTYPE_SCRIPT:
-			for( j = i; j < map[m].npc_num; j++ ) {
-				if( map[m].npc[j]->subtype != NPCTYPE_WARP )
-					continue;
+		case NPCTYPE_SCRIPT: {
+				int ontouch, ontouch2;
 
-				if( (sd->bl.x >= (map[m].npc[j]->bl.x - map[m].npc[j]->u.warp.xs) && sd->bl.x <= (map[m].npc[j]->bl.x + map[m].npc[j]->u.warp.xs)) &&
-					(sd->bl.y >= (map[m].npc[j]->bl.y - map[m].npc[j]->u.warp.ys) && sd->bl.y <= (map[m].npc[j]->bl.y + map[m].npc[j]->u.warp.ys)) ) {
-						if( pc_ishiding(sd) || (sd->sc.count && (sd->sc.data[SC_CAMOUFLAGE] || sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__SHADOWFORM])) || pc_isdead(sd) )
-							break; //Hidden or dead chars cannot use warps
-					pc_setpos(sd,map[m].npc[j]->u.warp.mapindex,map[m].npc[j]->u.warp.x,map[m].npc[j]->u.warp.y,CLR_OUTSIGHT);
-					found_warp = 1;
+				for( j = i; j < map[m].npc_num; j++ ) {
+					if( map[m].npc[j]->subtype != NPCTYPE_WARP )
+						continue;
+					if( (sd->bl.x >= (map[m].npc[j]->bl.x - map[m].npc[j]->u.warp.xs) && sd->bl.x <= (map[m].npc[j]->bl.x + map[m].npc[j]->u.warp.xs)) &&
+						(sd->bl.y >= (map[m].npc[j]->bl.y - map[m].npc[j]->u.warp.ys) && sd->bl.y <= (map[m].npc[j]->bl.y + map[m].npc[j]->u.warp.ys)) ) {
+							if( pc_ishiding(sd) || (sd->sc.count && (sd->sc.data[SC_CAMOUFLAGE] || sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__SHADOWFORM])) || pc_isdead(sd) )
+								break; //Hidden or dead chars cannot use warps
+						pc_setpos(sd,map[m].npc[j]->u.warp.mapindex,map[m].npc[j]->u.warp.x,map[m].npc[j]->u.warp.y,CLR_OUTSIGHT);
+						found_warp = 1;
+						break;
+					}
+				}
+				if( found_warp > 0 )
 					break;
-				}
-			}
-
-			if( found_warp > 0 )
-				break;
-
-			if( npc_ontouch_event(sd,map[m].npc[i]) > 0 && npc_ontouch2_event(sd,map[m].npc[i]) > 0 ) {
 				//Failed to run OnTouch event, so just click the npc
-				struct unit_data *ud = unit_bl2ud(&sd->bl);
+				ontouch = npc_ontouch_event(sd,map[m].npc[i]);
+				ontouch2 = npc_ontouch2_event(sd,map[m].npc[i]);
+				if( ontouch > 0 && ontouch2 > 0 ) {
+					struct unit_data *ud = unit_bl2ud(&sd->bl);
 
-				if( ud && ud->walkpath.path_pos < ud->walkpath.path_len ) {
 					//Since walktimer always == INVALID_TIMER at this time, we stop walking manually [Inkfish]
-					clif_fixpos(&sd->bl);
-					ud->walkpath.path_pos = ud->walkpath.path_len;
+					if( ud && ud->walkpath.path_pos < ud->walkpath.path_len ) {
+						clif_fixpos(&sd->bl);
+						ud->walkpath.path_pos = ud->walkpath.path_len;
+					}
+					sd->areanpc_id = map[m].npc[i]->bl.id;
+					npc_click(sd,map[m].npc[i]);
 				}
-				sd->areanpc_id = map[m].npc[i]->bl.id;
-				npc_click(sd,map[m].npc[i]);
 			}
 			break;
 	}
