@@ -12226,7 +12226,7 @@ static int buildin_mobcount_sub(struct block_list *bl,va_list ap) //Added by RoV
 	char *event = va_arg(ap,char *);
 	struct mob_data *md = ((struct mob_data *)bl);
 
-	if(md->status.hp && (!event || !strcmp(event,md->npc_event)))
+	if(md->status.hp > 0 && (!event || !strcmp(event,md->npc_event)))
 		return 1;
 	return SCRIPT_CMD_SUCCESS;
 }

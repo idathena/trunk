@@ -234,7 +234,7 @@
 170,-9,6,1,-1,0x20,0,10,1,no,0,0x2,0,weapon,0,0,	NPC_CRITICALSLASH,Defense disregard attack
 171,-9,8,1,-1,0,0,10,-2:-3:-4:-5:-6:-7:-8:-9:-10:-11,no,0,0x2,0,weapon,0,0,	NPC_COMBOATTACK,Multi-stage Attack
 172,-9,6,1,-1,0x40,0,10,1,no,0,0x2,0,weapon,0,0,	NPC_GUIDEDATTACK,Guided Attack
-173,5,6,4,3,0xE2,5,10,1,no,0,0x2,0,misc,3,0,	NPC_SELFDESTRUCTION,Suicide bombing
+173,5,6,4,3,0xC2,5,10,1,no,0,0x2,0,misc,3,0,	NPC_SELFDESTRUCTION,Suicide bombing
 174,-9,6,1,-1,0x2,3,1,1,no,0,0x2,0,weapon,0,0,	NPC_SPLASHATTACK,Splash attack
 175,0,0,4,0,0x41,0,10,1,no,0,0x2,0,misc,0,0,	NPC_SUICIDE,Suicide
 176,-9,6,1,-1,0,0,5,1,no,0,0x2,0,weapon,0,0,	NPC_POISON,Poison Attack
@@ -616,8 +616,8 @@
 658,9,6,1,7,0,5,10,1,no,0,0x2,14,weapon,0,0,	NPC_DARKNESSBREATH,Darkness Breath
 659,0,6,4,0,0x3,2:5:8:11:14,5,1,no,0,0x2,0,none,0,0,	NPC_DRAGONFEAR,Dragon Fear
 660,-9,6,1,-1,0,0,5,1,no,0,0x2,0,weapon,0,0,	NPC_BLEEDING,Bleeding
-661,0,6,4,0,0x2,7,5,1,no,0,0x2,0,weapon,7,0,	NPC_PULSESTRIKE,Pulse Strike
-662,0,6,4,0,0x2,14,10,1,no,0,0x2,0,weapon,0,0,	NPC_HELLJUDGEMENT,Hell's Judgement
+661,0,6,4,0,0x3,7,5,1,no,0,0x2,0,weapon,7,0,	NPC_PULSESTRIKE,Pulse Strike
+662,0,6,4,0,0x3,14,10,1,no,0,0x2,0,weapon,0,0,	NPC_HELLJUDGEMENT,Hell's Judgement
 663,0,6,4,0,0x3,2:5:8:11:14,5,1,no,0,0x2,0,none,0,0,	NPC_WIDESILENCE,Wide Silence
 664,0,6,4,0,0x3,2:5:8:11:14,5,1,no,0,0x2,0,none,0,0,	NPC_WIDEFREEZE,Wide Freeze
 665,0,6,4,0,0x3,2:5:8:11:14,5,1,no,0,0x2,0,none,0,0,	NPC_WIDEBLEEDING,Wide Bleeding
@@ -634,7 +634,7 @@
 676,0,6,4,0,0x1,0,5,1,no,0,0x2,0,magic,0,0,	NPC_ANTIMAGIC,Anti Magic
 677,0,6,4,0,0x3,2:5:8:11:14,5,1,no,0,0x2,0,none,0,0,	NPC_WIDECURSE,Wide Curse
 678,0,6,4,0,0x3,2:5:8:11:14,5,1,no,0,0x2,0,none,0,0,	NPC_WIDESTUN,Wide Stun
-679,0,6,4,0,0x2,5:7:9:11:13:13:13:13:13:13,10,1,no,0,0x2,0,weapon,0,0,	NPC_VAMPIRE_GIFT,Vampire Gift
+679,0,6,4,0,0x3,5:7:9:11:13:13:13:13:13:13,10,1,no,0,0x2,0,weapon,0,0,	NPC_VAMPIRE_GIFT,Vampire Gift
 680,0,6,4,0,0x3,5:7:9:11:13:13:13:13:13:13,10,1,no,0,0x2,0,none,0,0,	NPC_WIDESOULDRAIN,Wide Soul Drain
 
 // Cash Shop Skill
@@ -671,7 +671,7 @@
 //705,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_WIDESIREN,Wide Siren's Voice
 706,7,6,2,5,0x81,0,1,1,no,0,0x2,0,misc,0,0,	NPC_VENOMFOG,Venom Fog
 //707,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_MILLENNIUMSHIELD,Millenium Shield 2
-708,9,8,2,0,0,0,5,-20,no,0,0,0,magic,2,0x400,	NPC_COMET,Comet 2
+708,9,8,2,0,0,0,5,-20,no,0,0x2,0,magic,2,0x400,	NPC_COMET,Comet 2
 //709,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_ICEMINE,Ice Mine
 //710,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_ICEEXPLO,Ice Explosion
 //711,0,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_FLAMECROSS,Flame Cross

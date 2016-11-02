@@ -12,6 +12,11 @@
 //= 1.0 First version. [exneval]
 //============================================================ 
 
+function	script	F_4875	{ //Bear's_Power
+	showscript "Bigfoot Power!";
+	return;
+}
+
 function	script	F_5497	{ //King_Tiger_Doll_Hat
 	showscript "fee-faw-fum-!!! I totally feel like a tiger!!!";
 	return;
@@ -109,6 +114,11 @@ function	script	F_18934	{ //Fox_Ears_Drop_Ribbon
 	return;
 }
 
+function	script	F_19686	{ //C_SantaHairband
+	showscript "Khehehe~ Chaos! Destruction! Petrifaction!";
+	return;
+}
+
 function	script	F_22750	{ //Trans_Scroll_Horn_Scaraba
 	showscript "Traaaansformation-!! Horn Scaraba form!!";
 	return;
@@ -141,10 +151,5 @@ function	script	F_22755	{ //Trans_Scroll_Wind_Ghost
 
 function	script	F_28319	{ //Cauda_Daemonica
 	showscript "Traaaansformation-!! Succubus form!!";
-	return;
-}
-
-function	script	F_19686	{ //C_SantaHairband
-	showscript "Khehehe~ Chaos! Destruction! Petrifaction!";
 	return;
 }

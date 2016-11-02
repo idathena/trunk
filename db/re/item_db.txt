@@ -2130,17 +2130,17 @@
 2980,Evilspirit_Gloves,Evil Spirit Gloves,4,20,,100,,0,,1,0xFFFFFFFF,63,2,136,,110,0,0,{ bonus bMaxHP,500; bonus bMaxSP,200; skill "PF_SPIDERWEB",1; bonus5 bAutoSpell,"WZ_FROSTNOVA",10,10,BF_WEAPON,0; bonus5 bAutoSpell,"SO_PSYCHIC_WAVE",1,10,BF_WEAPON,1; bonus5 bAutoSpell,"HW_MAGICPOWER",1,10,BF_MAGIC,0; bonus5 bAutoSpellWhenHit,"DC_SCREAM",1,10,BF_WEAPON|BF_MAGIC,0; },{},{}
 2981,RingOfHero,Hero Ring,4,20,,200,,0,,0,0xFFFFFFFF,63,2,136,,160,0,0,{},{},{}
 2983,Greed_Brooch,Greed Brooch,4,20,,100,,0,,1,0xFFFFFFFF,63,2,136,,50,0,0,{ bonus bSPGainValue,2; bonus bMagicSPGainValue,2; bonus2 bHPLossRate,10,5000; },{},{}
-2984,Glove_Save_Rimnil,Glove Save Rimnil,4,20,,100,,0,,1,0xFFFFFFFF,63,2,136,,30,1,0,{ bonus2 bExpAddRace,RC_All,5; },{},{}
+2984,Glove_Of_Saehrimnir,Glove of Saehrimnir,4,20,,100,,0,,1,0xFFFFFFFF,63,2,136,,30,1,0,{ bonus2 bExpAddRace,RC_All,5; },{},{}
 2985,Gyges_Ring,Gyges Ring,4,20,,100,,0,,1,0xFFFFFFFF,63,2,136,,50,0,0,{ bonus bInt,3; bonus bMatk,30; skill "TF_HIDING",1; },{},{ sc_end SC_HIDING; }
 2986,Snake_Ring,Snake Ring,4,20,,100,,2,,1,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bDex,3; bonus bMdef,2; },{},{}
 2987,Snake_Pendant,Snake Pendant,4,20,,100,,3,,1,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bAgi,3; bonus bLuk,2; bonus bMdef,3; },{},{}
-2988,New_Oz's_Wing_Ring,New Oz's Wing Ring,4,62000,,100,,0,,1,0x00080000,56,1,136,,130,0,0,{ bonus bVariableCastrate,-25; },{},{}
-2989,Aigu's_Floral_Bracelet,Aigu's Floral Bracelet,4,62000,,100,,0,,1,0x00080000,56,0,136,,130,0,0,{ bonus bVariableCastrate,-25; },{},{}
+2988,Winged_Ring_Of_Newoz,New Oz's Wing Ring,4,62000,,100,,0,,1,0x00080000,56,1,136,,130,0,0,{ bonus bVariableCastrate,-25; },{},{}
+2989,Floral_Bracelet_Of_Igu,Aigu's Floral Bracelet,4,62000,,100,,0,,1,0x00080000,56,0,136,,130,0,0,{ bonus bVariableCastrate,-25; },{},{}
 2990,Pendant_Of_Harmony,Pendant of Harmony,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,130,0,0,{ bonus bMatkRate,6; bonus bHPrecovRate,50; bonus bSPrecovRate,50; bonus2 bSubEle,Ele_Holy,5; bonus4 bAutoSpell,"AB_RENOVATIO",1,100,0; bonus4 bAutoSpellWhenHit,"PR_SANCTUARY",3,100,0; bonus bStr,-5; },{},{}
 2991,Pendant_Of_Chaos,Pendant of Chaos,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,130,0,0,{ bonus2 bAddClass,Class_All,6; bonus2 bSubEle,Ele_Dark,5; bonus2 bResEff,Eff_Confusion,10000; bonus2 bAddEff,Eff_Confusion,500; bonus3 bAutoSpellWhenHit,"NPC_WIDECONFUSE",2,100; bonus bInt,-5; },{},{}
-2992,Pendant_Of_Maelstrom,Pendant of Maelstrom,4,20,,100,,0,,1,0xFFFFFFFF,63,2,136,,130,0,0,{ bonus2 bAddClass,Class_All,6; bonus bMatkRate,6; bonus bAllStats,1; bonus5 bAutoSpellWhenHit,"SC_MAELSTROM",1,100,BF_MAGIC,0; },{},{}
-2995,DEX_Complement,DEX Complement,4,20,,100,,0,,1,0x00000400,56,2,136,,100,0,0,{ bonus bUseSPrate,-10; bonus bDelayrate,-10; bonus bVariableCastrate,-10; },{},{}
-2996,Reinforced_Parts_Gun_Barrel,Reinforced Parts - Gun Barrel,4,20,,500,,0,,1,0x00000400,56,2,136,,100,0,0,{ bonus2 bAddClass,Class_All,4; bonus bHit,10; bonus2 bSkillAtk,"NC_BOOSTKNUCKLE",25; },{},{}
+2992,Pendant_Of_Maelstorm,Pendant of Maelstorm,4,20,,100,,0,,1,0xFFFFFFFF,63,2,136,,130,0,0,{ bonus2 bAddClass,Class_All,6; bonus bMatkRate,6; bonus bAllStats,1; bonus5 bAutoSpellWhenHit,"SC_MAELSTROM",1,100,BF_MAGIC,0; },{},{}
+2995,Supplement_Part_Dex,Supplement Part DEX,4,20,,100,,0,,1,0x00000400,56,2,136,,100,0,0,{ bonus bUseSPrate,-10; bonus bDelayrate,-10; bonus bVariableCastrate,-10; },{},{}
+2996,Upgrade_Part_Gun_Barrel,Upgrade Part - Gun Barrel,4,20,,500,,0,,1,0x00000400,56,2,136,,100,0,0,{ bonus2 bAddClass,Class_All,4; bonus bHit,10; bonus2 bSkillAtk,"NC_BOOSTKNUCKLE",25; },{},{}
 2997,RWC_Gold_Brooch,RWC Gold Brooch,4,20,,200,,0,,1,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bBaseAtk,25; bonus bMatk,20; },{},{}
 2999,RWC_Brooch,RWC Brooch,4,20,,200,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bMaxHP,300; bonus bMaxSP,30; },{},{}
 // Cards
@@ -2968,7 +2968,7 @@
 4871,SP75,SP+75,6,20,,10,,,,,,,,,,,,,{ bonus bMaxSP,75; },{},{}
 4872,Attack_Delay_2,Delay After Attack Lv2,6,10,,0,,,,,,,,,,,,,{ bonus bAspdRate,6; bonus bDelayrate,-6; },{},{}
 4873,Attack_Delay_3,Delay After Attack Lv3,6,10,,0,,,,,,,,,,,,,{ bonus bAspdRate,8; bonus bDelayrate,-8; },{},{}
-4875,Bear's_Power,Bear's Power,6,10,,0,,,,,,,,,,,,,{ autobonus2 "{ bonus bStr,200; bonus2 bHPLossRate,500,1000; }",50,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1060,5000; }"; },{},{ itemheal 0,-300; }
+4875,Bear's_Power,Bear's Power,6,10,,0,,,,,,,,,,,,,{ autobonus2 "{ bonus bStr,200; bonus2 bHPLossRate,500,1000; }",50,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1060,5000; callfunc \"F_4875\"; }"; },{},{ itemheal 0,-300; }
 4876,Runaway_Magic,Runaway Magic,6,10,,0,,,,,,,,,,,,,{ autobonus "{ bonus bInt,200; bonus2 bSPLossRate,200,1000; }",50,10000,BF_MAGIC; },{},{ itemheal 0,-2000; }
 4877,Speed_Of_Light,Speed of Light,6,10,,0,,,,,,,,,,,,,{ autobonus "{ bonus bAspdRate,100; bonus bFlee2,100; bonus2 bHPLossRate,400,1000; bonus2 bSPLossRate,40,1000; }",50,5000,BF_WEAPON; },{},{ itemheal 0,-300; }
 4878,Muscle_Fool,Muscle Fool,6,10,,0,,,,,,,,,,,,,{ autobonus2 "{ bonus bVit,200; bonus2 bAddClass,Class_All,-50; bonus bMatkRate,-50; }",50,5000,BF_WEAPON; },{},{ itemheal 0,-300; }
@@ -10612,7 +10612,7 @@
 22531,Special_Christmas_Box,Special Christmas Box,18,10,,200,,,,,0xFFFFFFFF,63,2,,,1,,,{ /* TODO */ },{},{}
 22532,Santa_Gift,Santa Gift,18,10,,200,,,,,0xFFFFFFFF,63,2,,,1,,,{ /* TODO */ },{},{}
 22533,New_Year_Gift_Box,New Year Gift Box,18,10,,200,,,,,0xFFFFFFFF,63,2,,,1,,,{ /* TODO */ },{},{}
-22534,Closedmind_Box,Closed Mind Box,18,10,,1000,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_Closed_Mind_Box); },{},{}
+22534,Closedmind_Box,Closed Mind Box,2,10,,1000,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_Closed_Mind_Box); },{},{}
 22535,Scroll_Summoning_Workers(Male),Scroll Summoning Workers(Male),2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22536,Scroll_Summoning_Workers(Female),Scroll Summoning Workers(Female),2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22537,PrizeOfHero,Prize of Hero,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Prize_Of_Hero); },{},{}
