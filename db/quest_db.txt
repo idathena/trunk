@@ -2440,6 +2440,10 @@
 12321,0,0,0,0,0,0,0,"Time Conqueror"
 12322,0,0,0,0,0,0,0,"Space Distortion"
 
+// Horror Toy Factory
+12330,0,0,0,0,0,0,0,"Skull-faced Girl"
+12331,82800,0,0,0,0,0,0,"Trail of Toy Factory"
+
 12363,0,0,0,0,0,0,0,"?????? ?? ??"
 
 13000,0,0,0,0,0,0,0,"RWC2011Card Gathering"

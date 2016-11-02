@@ -147,3 +147,6 @@ dali02	mapflag	nomemo
 
 // Nightmarish Jitterbug =========
 1@jtb	mapflag	nomemo
+
+// Horror Toy Factory =========
+1@xm_d	mapflag	nomemo

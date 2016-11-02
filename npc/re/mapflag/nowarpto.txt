@@ -60,3 +60,6 @@ gl_cas02_	mapflag	nowarpto
 
 // Nightmarish Jitterbug =========
 1@jtb	mapflag	nowarpto
+
+// Horror Toy Factory ============
+1@xm_d	mapflag	nowarpto

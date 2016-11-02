@@ -94,3 +94,6 @@ izlude_d	mapflag	nobranch
 
 // Nightmarish Jitterbug =======
 1@jtb	mapflag	nobranch
+
+// Horror Toy Factory ==========
+1@xm_d	mapflag	nobranch
