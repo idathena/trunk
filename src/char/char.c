@@ -115,18 +115,17 @@ char char_name_letters[1024] = ""; // List of letters/symbols allowed (or not) i
 
 int char_del_level = 0; // From which level u can delete character [Lupus]
 int char_del_delay = 86400;
-// Character deletion type, email = 1, birthdate = 2
 int char_del_option =
 #if PACKETVER >= 20100803
-	2
+	CHAR_DEL_BIRTHDATE
 #else
-	1
+	CHAR_DEL_EMAIL
 #endif
 	;
 int char_del_aegis = 1; // Verify if char is in guild/party or char and reacts as Aegis does (doesn't allow deletion), see char_delete2_req for more information
 
-int log_char = 1;	// loggin char or not [devil]
-int log_inter = 1;	// loggin inter or not [devil]
+int log_char = 1;	// Loggin char or not [devil]
+int log_inter = 1;	// Loggin inter or not [devil]
 
 // Advanced subnet check [LuzZza]
 struct s_subnet {
@@ -2022,7 +2021,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 #endif
 #if PACKETVER >= 20100803
 	WBUFL(buf,124) =
-#if (PACKETVER >= 20130320 && PACKETVER < 20141016) || PACKETVER >= 20150826
+#if PACKETVER_CHAR_DELETEDATE
 		(p->delete_date ? TOL(p->delete_date - time(NULL)) : 0);
 #else
 		TOL(p->delete_date);
@@ -4147,7 +4146,7 @@ void char_delete2_ack(int fd, int char_id, uint32 result, time_t delete_date)
 	WFIFOL(fd,2) = char_id;
 	WFIFOL(fd,6) = result;
 	WFIFOL(fd,10) =
-#if PACKETVER >= 20130320
+#if PACKETVER_CHAR_DELETEDATE
 		TOL(delete_date - time(NULL));
 #else
 		TOL(delete_date);
@@ -4260,6 +4259,36 @@ static void char_delete2_req(int fd, struct char_session_data *sd)
 }
 
 
+/**
+ * Check char deletion code
+ * @param sd
+ * @param delcode E-mail or birthdate
+ * @param flag Delete flag
+ * @return true:Success, false:Failure
+ */
+static bool char_check_delchar(struct char_session_data *sd, char *delcode, uint8 flag) {
+	// Email check
+	if( (flag&CHAR_DEL_EMAIL) &&
+		(!stricmp(delcode, sd->email) || // Email does not match or
+		(!stricmp("a@a.com", sd->email) && // It is default email and
+		!strcmp("", delcode))) ) // User sent an empty email
+	{
+		ShowInfo(""CL_RED"Char Deleted"CL_RESET" "CL_GREEN"(Email)"CL_RESET".\n");
+		return true;
+	}
+	// Birthdate (YYMMDD)
+	if( (flag&CHAR_DEL_BIRTHDATE) &&
+		(!strcmp(sd->birthdate + 2, delcode) || // +2 to cut off the century
+		(!strcmp("0000-00-00", sd->birthdate) && // It is default birthdate and
+		!strcmp("", delcode))) ) // User sent an empty birthdate
+	{
+		ShowInfo(""CL_RED"Char Deleted"CL_RESET" "CL_GREEN"(Birthdate)"CL_RESET".\n");
+		return true;
+	}
+	return false;
+}
+
+
 static void char_delete2_accept(int fd, struct char_session_data *sd)
 { // CH: <0829>.W <char id>.L <birth date:YYMMDD>.6B
 	char birthdate[8 + 1];
@@ -4299,19 +4328,19 @@ static void char_delete2_accept(int fd, struct char_session_data *sd)
 	Sql_GetData(sql_handle, 0, &data, NULL); base_level = (unsigned int)strtoul(data, NULL, 10);
 	Sql_GetData(sql_handle, 1, &data, NULL); delete_date = strtoul(data, NULL, 10);
 
-	if( !delete_date || delete_date>time(NULL) ) { // Not queued or delay not yet passed
+	if( !delete_date || delete_date > time(NULL) ) { // Not queued or delay not yet passed
 		char_delete2_accept_ack(fd, char_id, 4);
 		return;
 	}
 
-	// +2 to cut off the century
-	if( strcmp(sd->birthdate + 2, birthdate) ) { // Birth date is wrong
+	if( !char_check_delchar(sd, birthdate, CHAR_DEL_BIRTHDATE) ) { // Only check for birthdate
 		char_delete2_accept_ack(fd, char_id, 5);
 		return;
 	}
 
 	if( (char_del_level > 0 && base_level >= (unsigned int)char_del_level) ||
-		(char_del_level < 0 && base_level <= (unsigned int)(-char_del_level)) || !(char_del_option&2) )
+		(char_del_level < 0 && base_level <= (unsigned int)(-char_del_level)) ||
+		!(char_del_option&CHAR_DEL_BIRTHDATE) )
 	{ // Character level config restriction
 		char_delete2_accept_ack(fd, char_id, 2);
 		return;
@@ -4708,12 +4737,7 @@ int parse_char(int fd)
 					memcpy(email,RFIFOP(fd,6),40);
 					RFIFOSKIP(fd,(cmd == 0x68 ? 46 : 56));
 
-					//Check if e-mail is correct
-					if( (strcmpi(email,sd->email) && //Email does not matches and
-						(strcmp("a@a.com",sd->email) || //It is not default email, or
-						(strcmp("a@a.com",email) && strcmp("",email)))) || //Email sent does not matches default
-						!(char_del_option&1) )
-					{ //Fail
+					if( !char_check_delchar(sd, email, char_del_option) ) {
 						char_refuse_delchar(fd,0);
 						break;
 					}
@@ -5963,6 +5987,18 @@ int char_config_read(const char *cfgName)
 
 	ShowInfo("Done reading %s.\n", cfgName);
 	return 0;
+}
+
+/**
+ * Checks for values out of range.
+ */
+static void char_config_adjust() {
+#if PACKETVER < 20100803
+	if(char_del_option&CHAR_DEL_BIRTHDATE) {
+		ShowWarning("conf/char_athena.conf:char_del_option birthdate is enabled but it requires PACKETVER 2010-08-03 or newer, defaulting to email...\n");
+		char_del_option &= ~CHAR_DEL_BIRTHDATE;
+	}
+#endif
 }
 
 void do_final(void)
