@@ -20485,6 +20485,48 @@ BUILDIN_FUNC(opendressroom)
 #endif
 }
 
+/**
+ * hateffect(<Hat Effect ID>,<State>);
+ */
+BUILDIN_FUNC(hateffect) {
+#if PACKETVER >= 20150513
+	struct map_session_data *sd = script_rid2sd(st);
+	bool enable;
+	int i, effectID;
+
+	if (!sd)
+		return 1;
+
+	effectID = script_getnum(st,2);
+	enable = (script_getnum(st,3) ? true : false);
+	ARR_FIND(0,sd->hatEffectCount,i,sd->hatEffectIDs[i] == effectID);
+
+	if (enable) {
+		if (i < sd->hatEffectCount)
+			return 0;
+		RECREATE(sd->hatEffectIDs,uint32,sd->hatEffectCount + 1);
+		sd->hatEffectIDs[sd->hatEffectCount] = effectID;
+		sd->hatEffectCount++;
+	} else {
+		if (i == sd->hatEffectCount)
+			return 0;
+		for (; i < sd->hatEffectCount - 1; i++)
+			sd->hatEffectIDs[i] = sd->hatEffectIDs[i + 1];
+
+		sd->hatEffectCount--;
+
+		if (!sd->hatEffectCount) {
+			aFree(sd->hatEffectIDs);
+			sd->hatEffectIDs = NULL;
+		}
+	}
+
+	if (!sd->state.connect_new)
+		clif_hat_effect_single(sd,effectID,enable);
+#endif
+	return SCRIPT_CMD_SUCCESS;
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -21057,6 +21099,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(showscript,"s?"),
 	BUILDIN_DEF(ignoretimeout,"i?"),
 	BUILDIN_DEF(opendressroom,"i?"),
+	BUILDIN_DEF(hateffect,"ii"),
 
 #include "../custom/script_def.inc"
 

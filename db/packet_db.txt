@@ -2507,6 +2507,9 @@ packet_keys: 0x62C86D09,0x75944F17,0x112C133D //[YomRawr]
 //OneClick Itemidentify
 0x0A35,4,oneclick_itemidentify,2 //CZ_REQ_ONECLICK_ITEMIDENTIFY
 
+//New packet
+0x0A3B,-1 //ZC_HAT_EFFECT
+
 //2015-09-16Ragexe
 packet_ver: 50
 packet_keys: 0x17F83A19,0x116944F4,0x1CC541E9 //[Napster]

@@ -6107,6 +6107,7 @@ int do_init(int argc, char **argv)
 
 	msg_config_read(MSG_CONF_NAME);
 	char_config_read(CHAR_CONF_NAME);
+	char_config_adjust();
 	char_lan_config_read(LAN_CONF_NAME);
 	sql_config_read(SQL_CONF_NAME);
 

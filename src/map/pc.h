@@ -660,6 +660,11 @@ struct map_session_data {
 		short prizeStage;
 		bool claimPrize;
 	} roulette;
+
+#if PACKETVER >= 20150513
+	uint32 *hatEffectIDs;
+	uint8 hatEffectCount;
+#endif
 };
 
 struct eri *pc_sc_display_ers; //Player's SC display table
