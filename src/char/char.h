@@ -36,6 +36,11 @@ enum {
 	TABLE_GUILD_STORAGE,
 };
 
+enum e_char_delete {
+	CHAR_DEL_EMAIL = 1,
+	CHAR_DEL_BIRTHDATE
+};
+
 int memitemdata_to_sql(const struct item items[], int max, int id, int tableswitch);
 
 int mapif_sendall(unsigned char *buf, unsigned int len);
