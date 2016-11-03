@@ -1401,6 +1401,9 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	sd->bonus_script.head = NULL;
 	sd->bonus_script.count = 0;
 
+	sd->hatEffectIDs = NULL;
+	sd->hatEffectCount = 0;
+
 	//Request all registries (auth is considered completed whence they arrive)
 	intif_request_registry(sd,7);
 	return true;
