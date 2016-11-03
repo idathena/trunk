@@ -1442,7 +1442,6 @@ int clif_spawn(struct block_list *bl)
 	switch (bl->type) {
 		case BL_PC: {
 				TBL_PC *sd = ((TBL_PC *)bl);
-				int i;
 
 				if (sd->state.size == SZ_BIG) //Tiny/Big players [Valaris]
 					clif_specialeffect(bl,423,AREA);
@@ -1454,18 +1453,9 @@ int clif_spawn(struct block_list *bl)
 					clif_spiritball(bl);
 				if (sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0)
 					clif_spiritcharm(sd);
-				for (i = 0; i < sd->sc_display_count; i++) {
-					int type = sd->sc_display[i]->type, time = 0;
-					struct status_change *sc = status_get_sc(bl);
-					const struct TimerData *td = (sc && sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
-
-					if (td)
-						time = DIFF_TICK(td->tick,gettick());
-					clif_efst_status_change(bl,bl->id,AREA,StatusIconChangeTable[sd->sc_display[i]->type],
-						time,sd->sc_display[i]->val1,sd->sc_display[i]->val2,sd->sc_display[i]->val3);
-				}
 				if (sd->status.robe)
 					clif_refreshlook(bl,bl->id,LOOK_ROBE,sd->status.robe,AREA);
+				clif_efst_status_change_sub(sd,bl,AREA);
 			}
 			break;
 		case BL_MOB: {
@@ -4558,7 +4548,6 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 	switch (bl->type) {
 		case BL_PC: {
 				TBL_PC *tsd = ((TBL_PC *)bl);
-				int i;
 
 				clif_getareachar_pc(sd,tsd);
 				if (tsd->state.size == SZ_BIG) //Tiny/big players [Valaris]
@@ -4567,18 +4556,9 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_specialeffect_single(bl,421,sd->fd);
 				if (tsd->bg_id && map[bl->m].flag.battleground)
 					clif_sendbgemblem_single(sd->fd,tsd);
-				for (i = 0; i < tsd->sc_display_count; i++) {
-					int type = tsd->sc_display[i]->type, time = 0;
-					struct status_change *tsc = status_get_sc(bl);
-					const struct TimerData *td = (tsc && tsc->data[type] ? get_timer(tsc->data[type]->timer) : NULL);
-
-					if (td)
-						time = DIFF_TICK(td->tick,gettick());
-					clif_efst_status_change(&sd->bl,bl->id,SELF,StatusIconChangeTable[tsd->sc_display[i]->type],
-						time,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
-				}
 				if (tsd->status.robe)
 					clif_refreshlook(&sd->bl,bl->id,LOOK_ROBE,tsd->status.robe,SELF);
+				clif_efst_status_change_sub(sd,bl,SELF);
 			}
 			break;
 		case BL_MER: //Devotion Effects
@@ -5939,9 +5919,16 @@ void clif_cooking_list(struct map_session_data *sd, int trigger, uint16 skill_id
 /// 0196 <index>.W <id>.L <state>.B (ZC_MSG_STATE_CHANGE) [used for ending status changes and starting them on non-pc units (when needed)]
 /// 043f <index>.W <id>.L <state>.B <remain msec>.L { <val>.L }*3 (ZC_MSG_STATE_CHANGE2) [used exclusively for starting statuses on pcs]
 /// 0983 <index>.W <id>.L <state>.B <total msec>.L <remain msec>.L { <val>.L }*3 (ZC_MSG_STATE_CHANGE3) (PACKETVER >= 20120618)
-void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val1,int val2,int val3)
+/// @param bl Sends packet to clients around this object
+/// @param id ID of object that has this effect
+/// @param type Status icon see enum si_type
+/// @param flag 1:Active, 0:Deactive
+/// @param tick Duration in ms
+/// @param val1
+/// @param val2
+/// @param val3
+void clif_status_change_sub(struct block_list *bl, int id, int type, int flag, int tick, int val1, int val2, int val3, enum send_target target_type)
 {
-	struct map_session_data *sd;
 	unsigned char buf[32];
 #if PACKETVER >= 20120618
 	const int cmd = 0x983;
@@ -5955,13 +5942,7 @@ void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val
 
 	nullpo_retv(bl);
 
-	//Only send status changes that actually matter to the client
-	if (!(status_type2relevant_bl_types(type)&bl->type))
-		return;
-
-	sd = BL_CAST(BL_PC,bl);
-
-	if (flag && battle_config.display_status_timers && sd)
+	if (flag && battle_config.display_status_timers)
 		WBUFW(buf,offset + 0) = cmd;
 	else
 		WBUFW(buf,offset + 0) = 0x196; //For non-pc unit
@@ -5969,7 +5950,7 @@ void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val
 	WBUFL(buf,offset + 4) = bl->id;
 	WBUFB(buf,offset + 8) = flag;
 #if PACKETVER >= 20090121
-	if (flag && battle_config.display_status_timers && sd) {
+	if (flag && battle_config.display_status_timers) {
 		if (tick <= 0)
 			tick = 9999; //This is indeed what official servers do
 		WBUFL(buf,offset + 9) = tick; //At this stage remain and total are the same value I believe
@@ -5982,11 +5963,75 @@ void clif_status_change(struct block_list *bl,int type,int flag,int tick,int val
 		WBUFL(buf,offset + 21) = val3;
 	}
 #endif
-	clif_send(buf,packet_len(WBUFW(buf,0)),bl,(sd && sd->status.option&OPTION_INVISIBLE) ? SELF : AREA);
+	clif_send(buf,packet_len(WBUFW(buf,0)),bl,target_type);
+}
+
+/**
+ * Sends status effect to clients around the bl
+ * @param bl Object that has the effect
+ * @param type Status icon see enum si_type
+ * @param flag 1:Active, 0:Deactive
+ * @param tick Duration in ms
+ * @param val1
+ * @param val2
+ * @param val3
+ */
+void clif_status_change(struct block_list *bl, int type, int flag, int tick, int val1, int val2, int val3) {
+	struct map_session_data *sd = NULL;
+
+	if (type == SI_BLANK)
+		return;
+
+	if (type == SI_ACTIONDELAY && tick == 0)
+		return;
+
+	nullpo_retv(bl);
+
+	sd = BL_CAST(BL_PC,bl);
+
+	//Only send status changes that actually matter to the client
+	if (!(status_type2relevant_bl_types(type)&bl->type))
+		return;
+
+	clif_status_change_sub(bl,bl->id,type,flag,tick,val1,val2,val3,(sd ? ((sd->status.option&OPTION_INVISIBLE) ? SELF : AREA) : AREA_WOS));
 }
 
 
-/// Notifies clients while player entering the screen with a active EFST status.
+/**
+ * Send any active EFST to those around.
+ * @param sd: Player to send the packet to
+ * @param bl: Objects walking into view
+ * @param target: Client send type
+ */
+void clif_efst_status_change_sub(struct map_session_data *sd, struct block_list *bl, enum send_target target) {
+	struct map_session_data *tsd = NULL;
+	unsigned char i;
+
+	nullpo_retv(sd);
+	nullpo_retv(bl);
+
+	if (target == SELF)
+		tsd = (TBL_PC *)bl;
+	else
+		tsd = sd;
+
+	for (i = 0; i < tsd->sc_display_count; i++) {
+		enum sc_type type = tsd->sc_display[i]->type;
+		struct status_change *sc = status_get_sc(bl);
+		const struct TimerData *td = (sc && sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
+		int tick = 0;
+
+		if (td)
+			tick = DIFF_TICK(td->tick,gettick());
+#if PACKETVER > 20120418
+		clif_efst_status_change((target == SELF) ? &sd->bl : bl,bl->id,target,StatusIconChangeTable[type],tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
+#else
+		clif_status_change_sub(&sd->bl,bl->id,StatusIconChangeTable[type],1,tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
+#endif
+	}
+}
+
+/// Notifies the client when a player enters the screen with an active EFST.
 /// 08ff <id>.L <index>.W <remain msec>.L { <val>.L }*3  (ZC_EFST_SET_ENTER) (PACKETVER >= 20111108)
 /// 0984 <id>.L <index>.W <total msec>.L <remain msec>.L { <val>.L }*3 (ZC_EFST_SET_ENTER2) (PACKETVER >= 20120618)
 void clif_efst_status_change(struct block_list *bl, int tid, enum send_target target, int type, int tick, int val1, int val2, int val3) {
@@ -6011,7 +6056,7 @@ void clif_efst_status_change(struct block_list *bl, int tid, enum send_target ta
 	WBUFL(buf,offset + 2) = tid;
 	WBUFW(buf,offset + 6) = type;
 #if PACKETVER >= 20111108
-	WBUFL(buf,offset + 8) = tick; //Set remain status duration [exneval]
+	WBUFL(buf,offset + 8) = tick; //Set remaining status duration [exneval]
 #if PACKETVER >= 20120618
 	WBUFL(buf,offset + 12) = tick;
 	offset += 4;

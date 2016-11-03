@@ -6162,7 +6162,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 			break;
-
 		case SU_STOOP:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -14992,6 +14991,12 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				return false;
 			}
 			break;
+#ifdef RENEWAL
+		case ASC_EDP:
+			if( sd->weapontype1 == W_FIST )
+				return false;
+			break;
+#endif
 		case AB_ANCILLA: {
 				int count = 0;
 

@@ -37,9 +37,6 @@
 // Inside Eclage ===========
 1@ecl	mapflag	noicewall
 
-// Inside Eclage ==================
-1@ecl	mapflag	noicewall
-
 // Glast Heim Memorial Dungeon ====
 1@gl_k	mapflag	noicewall
 2@gl_k	mapflag	noicewall

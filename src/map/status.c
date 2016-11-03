@@ -8143,6 +8143,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_HIDING:
 			status_change_end(bl,SC_CLOSECONFINE,INVALID_TIMER);
 			status_change_end(bl,SC_CLOSECONFINE2,INVALID_TIMER);
+		//Fall through
+		case SC_CLOAKING:
+		case SC_CLOAKINGEXCEED:
+			status_change_end(bl,SC_HALLUCINATIONWALK,INVALID_TIMER);
 			break;
 		case SC_BERSERK:
 			if( val3 == SC__BLOODYLUST )
@@ -8464,6 +8468,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_ARMOR_ELEMENT:
 			case SC_ARMOR_RESIST:
 			case SC_ATTHASTE_CASH:
+			case SC_PUSH_CART:
 				break;
 			case SC_GOSPEL:
 				if( sce->val4 == BCT_SELF )
@@ -10192,6 +10197,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_BANDING:
 		case SC_LIGHTNINGWALK:
 		case SC_KYOUGAKU:
+		case SC_PUSH_CART:
 		case SC_MONSTER_TRANSFORM:
 		case SC_ACTIVE_MONSTER_TRANSFORM:
 		case SC_JP_EVENT04:
