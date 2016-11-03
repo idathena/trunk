@@ -1237,10 +1237,6 @@ enum e_skill {
 	NPC_VENOMFOG,
 	NPC_MILLENNIUMSHIELD,
 	NPC_COMET,
-//@TODO: What PACKETVER are these skills added? [Panikon]
-//After this addition all skills from NPC_WIDEWEB to NPC_LEX_AETERNA
-//will have their IDs changed
-#if PACKETVER >= 20140205
 	NPC_ICEMINE,
 	NPC_ICEEXPLO,
 	NPC_FLAMECROSS,
@@ -1253,7 +1249,6 @@ enum e_skill {
 	NPC_DEATHSUMMON,
 	NPC_HELLBURNING,
 	NPC_JACKFROST,
-#endif
 	NPC_WIDEWEB,
 	NPC_WIDESUCK,
 	NPC_STORMGUST2,

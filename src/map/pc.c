@@ -5582,9 +5582,6 @@ static void pc_checkallowskill(struct map_session_data *sd)
 		SC_ADRENALINE2,
 		SC_DANCING,
 		SC_GATLINGFEVER,
-#ifdef RENEWAL
-		SC_EDP
-#endif
 	};
 	uint8 i;
 
@@ -8537,9 +8534,11 @@ void pc_setoption(struct map_session_data *sd,int type)
 	clif_skillinfoblock(sd); //Skill list needs to be updated after base change
 }
 
-/*==========================================
+/**
  * Give player a cart
- *------------------------------------------*/
+ * @param sd Player
+ * @param type 0:Remove cart, 1 ~ MAX_CARTS: Cart type
+ */
 bool pc_setcart(struct map_session_data *sd, int type) {
 #ifndef NEW_CARTS
 	int cart[6] = { 0x0000,OPTION_CART1,OPTION_CART2,OPTION_CART3,OPTION_CART4,OPTION_CART5 };
@@ -8570,10 +8569,7 @@ bool pc_setcart(struct map_session_data *sd, int type) {
 			if( !sd->sc.data[SC_PUSH_CART] ) //First time, so fill cart data
 				clif_cartlist(sd);
 			clif_updatestatus(sd,SP_CARTINFO);
-			sc_start(&sd->bl,&sd->bl,SC_PUSH_CART,100,type,INVALID_TIMER);
-			clif_efst_status_change(&sd->bl,sd->bl.id,AREA,SI_ON_PUSH_CART,9999,type,0,0);
-			if( sd->sc.data[SC_PUSH_CART] ) //Forcefully update
-				sd->sc.data[SC_PUSH_CART]->val1 = type;
+			sc_start(&sd->bl,&sd->bl,SC_PUSH_CART,100,type,-1);
 			break;
 	}
 
@@ -9756,6 +9752,10 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 			skill_enchant_elemental_end(&sd->bl,SC_NONE);
 		if( !battle_config.dancing_weaponswitch_fix )
 			status_change_end(&sd->bl,SC_DANCING,INVALID_TIMER); //When unequipping, stop dancing [Skotlex]
+#ifdef RENEWAL
+		if( sd->status.inventory[n].equip&EQP_HAND_R )
+			status_change_end(&sd->bl,SC_EDP,INVALID_TIMER);
+#endif
 		status_change_end(&sd->bl,SC_FEARBREEZE,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_EXEEDBREAK,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_HEAT_BARREL,INVALID_TIMER);
