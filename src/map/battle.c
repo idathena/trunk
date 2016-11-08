@@ -7018,9 +7018,9 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 #endif
 
 #ifdef RENEWAL
-	#define CAP_RDAMAGE(d) ( cap_value((d),1,max_rdamage) )
+	#define CAP_RDAMAGE(d) ( (d) = cap_value((d),1,max_rdamage) )
 #else
-	#define CAP_RDAMAGE(d) ( max((d),1) )
+	#define CAP_RDAMAGE(d) ( (d) = max((d),1) )
 #endif
 
 	if( (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT ) { //Bounces back part of the damage
