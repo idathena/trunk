@@ -5984,7 +5984,7 @@ void clif_status_change(struct block_list *bl, int type, int flag, int tick, int
 	if (type == SI_BLANK)
 		return;
 
-	if (type == SI_ACTIONDELAY && tick == 0)
+	if (type == SI_POSTDELAY && tick == 0)
 		return;
 
 	nullpo_retv(bl);
@@ -10375,7 +10375,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			hom_init_timers(sd->hd);
 		if(night_flag && map[sd->bl.m].flag.nightenabled) {
 			sd->state.night = 1;
-			clif_status_load(&sd->bl,SI_NIGHT,1);
+			clif_status_load(&sd->bl,SI_SKE,1);
 		}
 		//Notify everyone that this char logged in [Skotlex]
 		map_foreachpc(clif_friendslist_toggle_sub,sd->status.account_id,sd->status.char_id,1);
@@ -10413,11 +10413,11 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		if(night_flag && map[sd->bl.m].flag.nightenabled) { //Display night
 			if(!sd->state.night) {
 				sd->state.night = 1;
-				clif_status_load(&sd->bl,SI_NIGHT,1);
+				clif_status_load(&sd->bl,SI_SKE,1);
 			}
 		} else if(sd->state.night) { //Clear night display.
 			sd->state.night = 0;
-			clif_status_load(&sd->bl,SI_NIGHT,0);
+			clif_status_load(&sd->bl,SI_SKE,0);
 		}
 		if(map[sd->bl.m].flag.battleground) {
 			clif_map_type(sd,MAPTYPE_BATTLEFIELD); //Battleground Mode
@@ -10473,7 +10473,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		npc_script_event(sd,NPCE_LOADMAP);
 
 	if(pc_checkskill(sd,SG_DEVIL) && !pc_nextjobexp(sd))
-		clif_status_load(&sd->bl,SI_DEVIL,1); //Blindness [Komurka]
+		clif_status_load(&sd->bl,SI_DEVIL1,1); //Blindness [Komurka]
 
 	if(sd->sc.opt2) //Client loses these on warp
 		clif_changeoption(&sd->bl);
@@ -11001,11 +11001,9 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 				return;
 			if( sd->sc.option&OPTION_COSTUME )
 				return;
-			if( !battle_config.sdelay_attack_enable && !pc_checkskill(sd, SA_FREECAST) ) {
-				if( DIFF_TICK(tick, sd->ud.canact_tick) < 0 ) {
-					clif_skill_fail(sd, 1, USESKILL_FAIL_SKILLINTERVAL, 0, 0);
-					return;
-				}
+			if( !battle_config.sdelay_attack_enable && !pc_checkskill(sd, SA_FREECAST) && DIFF_TICK(tick, sd->ud.canact_tick) < 0 ) {
+				clif_skill_fail(sd, 1, USESKILL_FAIL_SKILLINTERVAL, 0, 0);
+				return;
 			}
 			pc_delinvincibletimer(sd);
 			sd->idletime = last_tick;
@@ -17084,14 +17082,15 @@ void clif_buyingstore_myitemlist(struct map_session_data *sd)
 /// 0814 <account id>.L <store name>.80B
 void clif_buyingstore_entry(struct map_session_data *sd)
 {
-	uint8 buf[86];
+	uint8 buf[MESSAGE_SIZE + 6];
 
 	WBUFW(buf,0) = 0x814;
 	WBUFL(buf,2) = sd->bl.id;
-	memcpy(WBUFP(buf,6), sd->message, MESSAGE_SIZE);
+	safestrncpy((char *)WBUFP(buf,6), sd->message, MESSAGE_SIZE);
 
 	clif_send(buf, packet_len(0x814), &sd->bl, AREA_WOS);
 }
+
 void clif_buyingstore_entry_single(struct map_session_data *sd, struct map_session_data *pl_sd)
 {
 	int fd = sd->fd;
@@ -17099,7 +17098,7 @@ void clif_buyingstore_entry_single(struct map_session_data *sd, struct map_sessi
 	WFIFOHEAD(fd,packet_len(0x814));
 	WFIFOW(fd,0) = 0x814;
 	WFIFOL(fd,2) = pl_sd->bl.id;
-	memcpy(WFIFOP(fd,6), pl_sd->message, MESSAGE_SIZE);
+	safestrncpy((char *)WFIFOP(fd,6), pl_sd->message, MESSAGE_SIZE);
 	WFIFOSET(fd,packet_len(0x814));
 }
 

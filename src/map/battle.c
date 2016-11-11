@@ -1047,7 +1047,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		}
 
 		if( (sce = sc->data[SC_DODGE]) && (!sc->opt1 || sc->opt1 == OPT1_BURNING) &&
-			((flag&BF_LONG) || sc->data[SC_SPURT]) && rnd()%100 < 20 ) {
+			((flag&BF_LONG) || sc->data[SC_STRUP]) && rnd()%100 < 20 ) {
 			if( sd && pc_issit(sd) )
 				pc_setstand(sd); //Stand it to dodge
 			clif_skill_nodamage(bl,bl,TK_DODGE,sce->val1,1);
@@ -3552,7 +3552,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 				skillratio += 10 * status_get_lv(src) / 3; //Tumble bonus
 			if(wd.miscflag) { //Running bonus
 				skillratio += 10 * status_get_lv(src) / 3; //@TODO: Check the real value?
-				if(sc && sc->data[SC_SPURT]) //Spurt bonus
+				if(sc && sc->data[SC_STRUP]) //Strup bonus
 					skillratio <<= 1;
 			}
 			break;
@@ -7564,7 +7564,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 				}
 				sd->state.autocast = 0;
 				sd->ud.canact_tick = tick + skill_delayfix(src,r_skill,r_lv);
-				clif_status_change(src,SI_ACTIONDELAY,1,skill_delayfix(src,r_skill,r_lv),0,0,1);
+				clif_status_change(src,SI_POSTDELAY,1,skill_delayfix(src,r_skill,r_lv),0,0,1);
 		}
 		if (wd.flag&BF_WEAPON && src != target && damage > 0) {
 			if (battle_config.left_cardfix_to_right)

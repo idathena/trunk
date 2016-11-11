@@ -1814,7 +1814,7 @@ int map_quit(struct map_session_data *sd) {
 		status_change_end(&sd->bl,SC_TRICKDEAD,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_BOSSMAPINFO,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_AUTOTRADE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SPURT,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_STRUP,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_READYSTORM,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_READYDOWN,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_READYTURN,INVALID_TIMER);
