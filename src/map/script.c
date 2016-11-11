@@ -2417,6 +2417,17 @@ void script_hardcoded_constants(void)
 	script_set_constant("SCFLAG_LOADED", SCFLAG_LOADED, false);
 	script_set_constant("SCFLAG_FIXEDRATE", SCFLAG_FIXEDRATE, false);
 	script_set_constant("SCFLAG_NOICON", SCFLAG_NOICON, false);
+
+	/* Adoption */
+	script_set_constant("ADOPT_ALLOWED", ADOPT_ALLOWED, false);
+	script_set_constant("ADOPT_ALREADY_ADOPTED", ADOPT_ALREADY_ADOPTED, false);
+	script_set_constant("ADOPT_MARRIED_AND_PARTY", ADOPT_MARRIED_AND_PARTY, false);
+	script_set_constant("ADOPT_EQUIP_RINGS", ADOPT_EQUIP_RINGS, false);
+	script_set_constant("ADOPT_NOT_NOVICE", ADOPT_NOT_NOVICE, false);
+	script_set_constant("ADOPT_CHARACTER_NOT_FOUND", ADOPT_CHARACTER_NOT_FOUND, false);
+	script_set_constant("ADOPT_MORE_CHILDREN", ADOPT_MORE_CHILDREN, false);
+	script_set_constant("ADOPT_LEVEL_70", ADOPT_LEVEL_70, false);
+	script_set_constant("ADOPT_MARRIED", ADOPT_MARRIED, false);
 }
 
 /*==========================================
@@ -20527,6 +20538,80 @@ BUILDIN_FUNC(hateffect) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * adopt("<parent_name>","<baby_name>");
+ * adopt(<parent_id>,<baby_id>);
+ * https://rathena.org/board/topic/104014-suggestion-add-adopt-or-etc/
+ */
+BUILDIN_FUNC(adopt)
+{
+	TBL_PC *sd, *b_sd;
+	struct script_data *data;
+	enum adopt_responses response;
+
+	data = script_getdata(st,2);
+	get_val(st,data);
+
+	if (data_isstring(data)) {
+		const char *name = conv_str(st,data);
+
+		sd = map_nick2sd(name);
+		if (sd == NULL) {
+			ShowError("buildin_adopt: Non-existant parent character %s requested.\n", name);
+			return 1;
+		}
+	} else if (data_isint(data)) {
+		uint32 char_id = conv_num(st,data);
+
+		sd = map_charid2sd(char_id);
+		if (sd == NULL) {
+			ShowError("buildin_adopt: Non-existant parent character %d requested.\n", char_id);
+			return 1;
+		}
+	} else {
+		ShowError("buildin_adopt: Invalid data type for argument #1 (%d).", data->type);
+		return 1;
+	}
+
+	data = script_getdata(st,3);
+	get_val(st,data);
+
+	if (data_isstring(data)) {
+		const char *name = conv_str(st,data);
+
+		b_sd = map_nick2sd(name);
+		if (b_sd == NULL) {
+			ShowError("buildin_adopt: Non-existant baby character %s requested.\n", name);
+			return 1;
+		}
+	} else if (data_isint(data)) {
+		uint32 char_id = conv_num(st,data);
+
+		b_sd = map_charid2sd(char_id);
+		if (b_sd == NULL) {
+			ShowError("buildin_adopt: Non-existant baby character %d requested.\n", char_id);
+			return 1;
+		}
+	} else {
+		ShowError("buildin_adopt: Invalid data type for argument #2 (%d).", data->type);
+		return 1;
+	}
+
+	response = pc_try_adopt(sd,map_charid2sd(sd->status.partner_id),b_sd);
+
+	if (response == ADOPT_ALLOWED) {
+		TBL_PC *p_sd = map_charid2sd(sd->status.partner_id);
+
+		b_sd->adopt_invite = sd->status.account_id;
+		clif_Adopt_request(b_sd,sd,p_sd->status.account_id);
+		script_pushint(st,ADOPT_ALLOWED);
+		return SCRIPT_CMD_SUCCESS;
+	}
+
+	script_pushint(st,response);
+	return SCRIPT_CMD_FAILURE;
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -21100,6 +21185,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(ignoretimeout,"i?"),
 	BUILDIN_DEF(opendressroom,"i?"),
 	BUILDIN_DEF(hateffect,"ii"),
+	BUILDIN_DEF(adopt,"vv"),
 
 #include "../custom/script_def.inc"
 
