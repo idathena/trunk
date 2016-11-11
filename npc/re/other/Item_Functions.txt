@@ -12,6 +12,11 @@
 //= 1.0 First version. [exneval]
 //============================================================ 
 
+function	script	F_4581	{ //Rudo_Card
+	showscript "The Signal!!!";
+	return;
+}
+
 function	script	F_4875	{ //Bear's_Power
 	showscript "Bigfoot Power!";
 	return;

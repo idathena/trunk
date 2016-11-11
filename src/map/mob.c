@@ -179,7 +179,7 @@ void mvptomb_create(struct mob_data *md, char *killer, time_t time)
 
 	nd->u.tomb.md = md;
 	nd->u.tomb.kill_time = time;
-	
+
 	if(killer)
 		safestrncpy(nd->u.tomb.killer_name, killer, NAME_LENGTH);
 	else
@@ -192,7 +192,6 @@ void mvptomb_create(struct mob_data *md, char *killer, time_t time)
 	status_change_init(&nd->bl);
 	unit_dataset(&nd->bl);
 	clif_spawn(&nd->bl);
-
 }
 
 /** Destroys MVP Tomb
@@ -620,7 +619,7 @@ static int mob_spawn_guardian_sub(int tid, unsigned int tick, int id, intptr_t d
 	struct mob_data *md;
 	struct guild *g;
 
-	if (bl == NULL) //It is possible mob was already removed from map when the castle has no owner. [Skotlex]
+	if (bl == NULL) //It is possible mob was already removed from map when the castle has no owner [Skotlex]
 		return 0;
 	
 	if (bl->type != BL_MOB) {

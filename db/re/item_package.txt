@@ -3543,7 +3543,7 @@ IG_Erzulie_Lucky_Egg,6239,1,1 // 1x Guarantee_Armor_11Up
 IG_Erzulie_Lucky_Egg,6238,1,1 // 1x Guarantee_Weapon_11Up
 IG_Erzulie_Lucky_Egg,6232,1,1 // 1x Guarantee_Armor_9Up
 IG_Erzulie_Lucky_Egg,6228,1,1 // 1x Guarantee_Weapon_9Up
-IG_Erzulie_Lucky_Egg,19048,1,1 // 1x Elemental Clothe
+IG_Erzulie_Lucky_Egg,19048,1,1 // 1x Elemental Clothes
 IG_Erzulie_Lucky_Egg,19047,1,1 // 1x Angeling KnitCap
 IG_Erzulie_Lucky_Egg,2198,1,1 // 1x Lapine Shield
 IG_Erzulie_Lucky_Egg,20155,1,1 // 1x C Ladys Feather Hat

@@ -108,20 +108,22 @@ struct s_autospell {
 	bool lock; //bAutoSpellOnSkill: blocks autospell from triggering again, while being executed
 };
 
-//AddEff bonus data
+//AddEff, AddEff2 and AddEffWhenHit bonus struct
 struct s_addeffect {
-	enum sc_type id;  //Effect ID
-	int16 rate;       //Base success rate
-	int16 arrow_rate; //Success rate modifier for ranged attacks (adds to the base rate)
-	uint8 flag;       //Trigger flag (@see enum auto_trigger_flag)
-	uint16 duration;  //Optional, non-reducible duration in ms, if 0, the default, reducible effect's duration is used
-	//TODO: Duration is only used in addeff (set through bonus4 bAddEff), while the other addeffect types should also can use it [Haru]
+	enum sc_type sc; //SC type/effect
+	short rate, //Rate
+		arrow_rate; //Arrow rate
+	unsigned char flag; //Flag
+	unsigned int duration; //Duration the effect applied
 };
 
+//AddEffOnSkill bonus struct
 struct s_addeffectonskill {
-	enum sc_type id;
-	short rate, skill;
-	unsigned char target;
+	enum sc_type sc; //SC type/effect
+	short rate; //Rate
+	uint16 skill_id; //Skill ID
+	unsigned char target; //Target
+	unsigned int duration; //Duration the effect applied
 };
 
 //Struct of add drop item/group rate
@@ -209,7 +211,7 @@ struct map_session_data {
 		unsigned int deal_locked : 2; //1: Clicked on OK. 2: Clicked on TRADE
 		unsigned int monster_ignore : 1; //For monsters to ignore a character [Valaris] [zzo]
 		unsigned int size : 2; //For tiny/large types
-		unsigned int night : 1; //Holds whether or not the player currently has the SI_NIGHT effect on [Skotlex]
+		unsigned int night : 1; //Holds whether or not the player currently has the SI_SKE effect on [Skotlex]
 		unsigned int using_fake_npc : 1;
 		unsigned int rewarp : 1; //Signals that a player should warp as soon as he is done loading a map [Skotlex]
 		unsigned int killer : 1;
@@ -440,6 +442,7 @@ struct map_session_data {
 		short sp_vanish_per, sp_vanish_trigger, hp_vanish_per, hp_vanish_trigger;
 		unsigned short unbreakable;	//Chance to prevent ANY equipment breaking [celest]
 		unsigned short unbreakable_equip; //100% break resistance on certain equipment
+		unsigned short unstripable;
 		unsigned short unstripable_equip;
 		int fixcastrate, varcastrate;
 		int add_fixcast, add_varcast;

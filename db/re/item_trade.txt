@@ -175,7 +175,7 @@
 2003,475,100	// Destruction_Rod_M
 2018,499,100	// Metal_Staff
 2019,499,100	// TE_Woe_Two_Hand_Staff
-2024,467,100	// Infinity_Two_Handed_Stick
+2024,467,100	// Infinity_Staff
 2112,499,100	// Novice_Guard
 2127,475,100	// Secular_Mission
 2132,507,100	// Shelter_Resistance
@@ -1651,7 +1651,7 @@
 13118,499,100	// Tiny_Flame
 13119,467,100	// Freedom_Flame
 13125,499,100	// Metal_Revolver
-13126,467,100	// Infinity_Pistol
+13126,467,100	// Infinity_Revolver
 13171,499,100	// BF_Rifle1
 13172,499,100	// BF_Gatling_Gun1
 13173,499,100	// BF_Shotgun1
@@ -1678,8 +1678,8 @@
 13310,499,100	// P_Huuma_Suriken1
 13312,507,100	// Huuma_Job_Test
 13317,499,100	// TE_Woe_Huuma
-13322,499,100	// Huuma_Metal_Shuriken
-13323,467,100	// Infinity_Shuriken
+13322,499,100	// Huuma_Metal
+13323,467,100	// Infinity_Huuma
 13401,507,100	// Excalibur_C
 13402,507,100	// Cutlas_C
 13403,507,100	// Solar_Sword_C
@@ -3637,8 +3637,8 @@
 18970,475,100	// Magical_Moon_Cat
 18971,475,100	// Old_Rune_Circlet
 18972,475,100	// Old_Mitra
-18973,475,100	// Old_Driver_Band
-18974,475,100	// Old_Driver_Band(Yellow)
+18973,475,100	// Old_Driver_Band_R
+18974,475,100	// Old_Driver_Band_Y
 18975,475,100	// Old_Shadow_Handicraft
 18976,475,100	// Old_Minstrel_Song_Hat
 18977,475,100	// Old_Midas_Whisper
@@ -3646,9 +3646,9 @@
 18979,475,100	// Old_Blazing_Soul
 18980,475,100	// Old_Wind_Whisper
 18981,475,100	// Old_Dying_Swan
-18982,475,100	// Old_Circlet_Of_Bones
+18982,475,100	// Old_Circlet_Of_Bone
 18983,475,100	// Old_Protect_Of_Crown
-18984,475,100	// Old_Camouflage_Rabbit_Hood
+18984,475,100	// Old_Camo_RabbitHood
 19033,467,100	// Ancient_Decoration_Of_The_Goddess
 19051,475,100	// Warrior_Moon_Cat_Hat
 19052,507,100	// Sigrun's_Wings_
@@ -3699,7 +3699,7 @@
 20743,467,100	// Airship_Cape
 21005,499,100	// Metal_Two_Hand_Sword
 21006,499,100	// TE_Woe_Two_Hand_Sword
-21014,467,100	// Infinity_Two_Handed_Sword
+21014,467,100	// Infinity_Twohand_Sword
 //22012,507,100	//
 22046,467,100	// Airship_Boots
 22508,507,100	// Para_Team_Mark_
@@ -3724,8 +3724,8 @@
 22542,475,100	// Concentration_Potion_
 22543,475,100	// Berserk_Potion_
 22544,475,100	// Awakening_Potion_
-22545,475,100	// Speed_Potion
-22546,475,100	// Slow_Potion
+22545,475,100	// Speed_Up_Potion_
+22546,475,100	// Slow_Down_Potion_
 22547,475,100	// Anti_Payne_Moment
 22548,475,100	// Wed_Cursed
 22549,475,100	// Poison_Bottle_
@@ -3840,7 +3840,7 @@
 //22952,475,100	//
 26100,435,100	// P_Foxtail_Staff2
 26101,435,100	// P_Foxtail_Staff3
-28105,467,100	// Infinity_Axe
+28105,467,100	// Infinity_Twohand_Axe
 28310,467,100	// Earring_Of_Sarah_L
 28311,467,100	// Earring_Of_Sarah_R
 28333,475,100	// Gold_PC_Room_Ring

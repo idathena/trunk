@@ -2042,6 +2042,8 @@ int pc_disguise(struct map_session_data *sd, int class_)
 #define PC_BONUS_CHK_CLASS(cl,bonus) { if (!CHK_CLASS((cl))) { PC_BONUS_SHOW_ERROR((bonus),Class,(cl)); }}
 //Check for valid Size, break & show error message if invalid Size
 #define PC_BONUS_CHK_SIZE(sz,bonus) { if (!CHK_MOBSIZE((sz))) { PC_BONUS_SHOW_ERROR((bonus),Size,(sz)); }}
+// Check for valid SC, break & show error message if invalid SC
+#define PC_BONUS_CHK_SC(sc,bonus) { if ((sc) <= SC_NONE || (sc) >= SC_MAX) { PC_BONUS_SHOW_ERROR((bonus),Effect,(sc)); }}
 
 static void pc_bonus_autospell(struct s_autospell *spell, int max, short id, short lv, short rate, short flag, unsigned short card_id)
 {
@@ -2099,17 +2101,16 @@ static void pc_bonus_autospell_onskill(struct s_autospell *spell, int max, short
 }
 
 /**
- * Adds an AddEff/AddEff2/AddEffWhenHit bonus to a character.
- *
- * @param effect     Effects array to append to.
- * @param max        Size of the effect array.
- * @param id         Effect ID (@see enum sc_type).
- * @param rate       Trigger rate.
- * @param arrow_rate Trigger rate modifier for ranged attacks (adds to the base rate).
- * @param flag       Trigger flags (@see enum auto_trigger_flag).
- * @param duration   Fixed (non-reducible) duration in ms. If 0, uses the default (reducible) duration of the given effect.
+ * Add inflict effect bonus for player while attacking/atatcked
+ * @param effect Effect array
+ * @param pmax Max array
+ * @param sc SC/Effect type
+ * @param rate Success chance
+ * @param arrow_rate success chance if bonus comes from arrow-type item
+ * @param flag Target flag
+ * @param duration Duration. If 0 use default duration lookup for associated skill with level 7
  */
-static void pc_bonus_addeff(struct s_addeffect *effect, int max, enum sc_type id, int16 rate, int16 arrow_rate, uint8 flag, uint16 duration)
+static void pc_bonus_addeff(struct s_addeffect* effect, int pmax, enum sc_type sc, short rate, short arrow_rate, unsigned char flag, unsigned int duration)
 {
 	uint16 i;
 
@@ -2119,42 +2120,58 @@ static void pc_bonus_addeff(struct s_addeffect *effect, int max, enum sc_type id
 		flag |= ATF_TARGET; //Default target: enemy
 	if( !(flag&(ATF_WEAPON|ATF_MAGIC|ATF_MISC)) )
 		flag |= ATF_WEAPON; //Default type: weapon
-	for( i = 0; i < max && effect[i].flag; i++ ) {
-		if( effect[i].id == id && effect[i].flag == flag && effect[i].duration == duration ) { //Update existing effect if any
+	if( !duration )
+		duration = (unsigned int)skill_get_time2(status_sc2skill(sc), 7);
+	for( i = 0; i < pmax && effect[i].flag; i++ ) {
+		if( effect[i].sc == sc && effect[i].flag == flag ) {
 			effect[i].rate += rate;
 			effect[i].arrow_rate += arrow_rate;
+			effect[i].duration = max(effect[i].duration, duration);
 			return;
 		}
 	}
-	if( i == max ) {
-		ShowWarning("pc_bonus_addeff: Reached max (%d) number of add effects per character!\n", max);
+	if( i == pmax ) {
+		ShowWarning("pc_bonus_addeff: Reached max (%d) number of add effects per character!\n", pmax);
 		return;
 	}
-	effect[i].id = id;
+	effect[i].sc = sc;
 	effect[i].rate = rate;
 	effect[i].arrow_rate = arrow_rate;
 	effect[i].flag = flag;
 	effect[i].duration = duration;
 }
 
-static void pc_bonus_addeff_onskill(struct s_addeffectonskill* effect, int max, enum sc_type id, short rate, short skill, unsigned char target)
+/**
+ * Add inflict effect bonus for player while attacking using skill
+ * @param effect Effect array
+ * @param pmax Max array
+ * @param sc SC/Effect type
+ * @param rate Success chance
+ * @param flag Target flag
+ * @param duration Duration. If 0 use default duration lookup for associated skill with level 7
+ */
+static void pc_bonus_addeff_onskill(struct s_addeffectonskill* effect, int pmax, enum sc_type sc, short rate, uint16 skill_id, unsigned char target, unsigned int duration)
 {
 	uint8 i;
 
-	for( i = 0; i < max && effect[i].skill; i++ ) {
-		if( effect[i].id == id && effect[i].skill == skill && effect[i].target == target ) {
+	if (!duration)
+		duration = (unsigned int)skill_get_time2(status_sc2skill(sc), 7);
+	for( i = 0; i < pmax && effect[i].skill_id; i++ ) {
+		if( effect[i].sc == sc && effect[i].skill_id == skill_id && effect[i].target == target ) {
 			effect[i].rate += rate;
+			effect[i].duration = max(effect[i].duration, duration);
 			return;
 		}
 	}
-	if( i == max ) {
-		ShowWarning("pc_bonus_addeff_onskill: Reached max (%d) number of add effects on skill per character!\n", max);
+	if( i == pmax ) {
+		ShowWarning("pc_bonus_addeff_onskill: Reached max (%d) number of add effects on skill per character!\n", pmax);
 		return;
 	}
-	effect[i].id = id;
+	effect[i].sc = sc;
 	effect[i].rate = rate;
-	effect[i].skill = skill;
+	effect[i].skill_id = skill_id;
 	effect[i].target = target;
+	effect[i].duration = duration;
 }
 
 /** Adjust/add drop rate modifier for player
@@ -2827,7 +2844,7 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 		case SP_INTRAVISION: //Maya Purple Card effect allowing to see Hiding/Cloaking people [DracoRPG]
 			if(sd->state.lr_flag != 2) {
 				sd->special_state.intravision = 1;
-				clif_status_load(&sd->bl, SI_INTRAVISION, 1);
+				clif_status_load(&sd->bl, SI_CLAIRVOYANCE, 1);
 			}
 			break;
 		case SP_NO_KNOCKBACK:
@@ -2940,11 +2957,14 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			if(sd->state.lr_flag != 2)
 				sd->regen.state.block |= val;
 			break;
+		case SP_UNSTRIPABLE:
+			if(sd->state.lr_flag != 2)
+				sd->bonus.unstripable += val;
+			break;
 		case SP_UNSTRIPABLE_WEAPON:
 			if(sd->state.lr_flag != 2)
 				sd->bonus.unstripable_equip |= EQP_WEAPON;
 			break;
-		case SP_UNSTRIPABLE:
 		case SP_UNSTRIPABLE_ARMOR:
 			if(sd->state.lr_flag != 2)
 				sd->bonus.unstripable_equip |= EQP_ARMOR;
@@ -3113,26 +3133,17 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->subclass[type2] += val;
 			break;
 		case SP_ADDEFF:
-			if(type2 <= SC_NONE || type2 >= SC_MAX) {
-				ShowError("pc_bonus2: SP_ADDEFF: %d invalid effect.\n", type2);
-				break;
-			}
+			PC_BONUS_CHK_SC(type2, SP_ADDEFF);
 			pc_bonus_addeff(sd->addeff, ARRAYLENGTH(sd->addeff), (sc_type)type2,
 				(sd->state.lr_flag != 2 ? val : 0), (sd->state.lr_flag == 2 ? val : 0), 0, 0);
 			break;
 		case SP_ADDEFF2:
-			if(type2 <= SC_NONE || type2 >= SC_MAX) {
-				ShowError("pc_bonus2: SP_ADDEFF2: %d is invalid effect.\n", type2);
-				break;
-			}
+			PC_BONUS_CHK_SC(type2, SP_ADDEFF2);
 			pc_bonus_addeff(sd->addeff, ARRAYLENGTH(sd->addeff), (sc_type)type2,
 				(sd->state.lr_flag != 2 ? val : 0), (sd->state.lr_flag == 2 ? val : 0), ATF_SELF, 0);
 			break;
 		case SP_RESEFF:
-			if(type2 <= SC_NONE || type2 >= SC_MAX) {
-				ShowError("pc_bonus2: SP_RESEFF: %d is invalid effect.\n", type2);
-				break;
-			}
+			PC_BONUS_CHK_SC(type2, SP_RESEFF);
 			if(sd->state.lr_flag == 2)
 				break;
 			i = sd->reseff[type2] + val;
@@ -3299,10 +3310,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->critaddrace[type2] += val * 10;
 			break;
 		case SP_ADDEFF_WHENHIT:
-			if(type2 <= SC_NONE || type2 >= SC_MAX) {
-				ShowError("pc_bonus2: SP_ADDEFF_WHENHIT: %d is invalid effect.\n", type2);
-				break;
-			}
+			PC_BONUS_CHK_SC(type2, SP_ADDEFF_WHENHIT);
 			if(sd->state.lr_flag != 2)
 				pc_bonus_addeff(sd->addeff2, ARRAYLENGTH(sd->addeff2), (sc_type)type2, val, 0, 0, 0);
 			break;
@@ -3717,28 +3725,19 @@ void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int 
 				pc_bonus_item_drop(sd->add_drop, ARRAYLENGTH(sd->add_drop), 0, type2, type3, RC_NONE_, val);
 			break;
 		case SP_ADDEFF:
-			if(type2 <= SC_NONE || type2 >= SC_MAX) {
-				ShowError("pc_bonus3: SP_ADDEFF: %d is not supported.\n", type2);
-				break;
-			}
+			PC_BONUS_CHK_SC(type2, SP_ADDEFF);
 			pc_bonus_addeff(sd->addeff, ARRAYLENGTH(sd->addeff), (sc_type)type2,
 				(sd->state.lr_flag != 2 ? type3 : 0), (sd->state.lr_flag == 2 ? type3 : 0), val, 0);
 			break;
 		case SP_ADDEFF_WHENHIT:
-			if(type2 <= SC_NONE || type2 >= SC_MAX) {
-				ShowError("pc_bonus3: SP_ADDEFF_WHENHIT: %d is not supported.\n", type2);
-				break;
-			}
+			PC_BONUS_CHK_SC(type2, SP_ADDEFF_WHENHIT);
 			if(sd->state.lr_flag != 2)
 				pc_bonus_addeff(sd->addeff2, ARRAYLENGTH(sd->addeff2), (sc_type)type2, type3, 0, val, 0);
 			break;
 		case SP_ADDEFF_ONSKILL:
-			if(type3 <= SC_NONE || type3 >= SC_MAX) {
-				ShowError("pc_bonus3: SP_ADDEFF_ONSKILL: %d is not supported.\n", type3);
-				break;
-			}
+			PC_BONUS_CHK_SC(type3, SP_ADDEFF_ONSKILL);
 			if(sd->state.lr_flag != 2)
-				pc_bonus_addeff_onskill(sd->addeff3, ARRAYLENGTH(sd->addeff3), (sc_type)type3, val, type2, ATF_TARGET);
+				pc_bonus_addeff_onskill(sd->addeff3, ARRAYLENGTH(sd->addeff3), (sc_type)type3, val, type2, ATF_TARGET, 0);
 			break;
 		case SP_ADDDEF_ELE:
 			PC_BONUS_CHK_ELEMENT(type2, SP_ADDDEF_ELE);
@@ -3822,13 +3821,20 @@ void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int 
 				pc_bonus_autospell_onskill(sd->autospell3, ARRAYLENGTH(sd->autospell3), type2, (target ? -type3 : type3), type4, val, current_equip_card_id);
 			}
 			break;
-		case SP_ADDEFF_ONSKILL:
-			if(type2 <= SC_NONE || type2 >= SC_MAX) {
-				ShowError("pc_bonus4: SP_ADDEFF_ONSKILL: %d is not supported.\n", type2);
-				break;
-			}
+		case SP_ADDEFF:
+			PC_BONUS_CHK_SC(type2, SP_ADDEFF);
+			pc_bonus_addeff(sd->addeff, ARRAYLENGTH(sd->addeff), (sc_type)type2,
+				(sd->state.lr_flag != 2 ? type3 : 0), (sd->state.lr_flag == 2 ? type3 : 0), type4, val);
+			break;
+		case SP_ADDEFF_WHENHIT:
+			PC_BONUS_CHK_SC(type2, SP_ADDEFF_WHENHIT);
 			if(sd->state.lr_flag != 2)
-				pc_bonus_addeff_onskill(sd->addeff3, ARRAYLENGTH(sd->addeff3), (sc_type)type3, type4, type2, val);
+				pc_bonus_addeff(sd->addeff2, ARRAYLENGTH(sd->addeff2), (sc_type)type2, type3, 0, type4, val);
+			break;
+		case SP_ADDEFF_ONSKILL:
+			PC_BONUS_CHK_SC(type3, SP_ADDEFF_ONSKILL);
+			if(sd->state.lr_flag != 2)
+				pc_bonus_addeff_onskill(sd->addeff3, ARRAYLENGTH(sd->addeff3), (sc_type)type3, type4, type2, val, 0);
 			break;
 		case SP_SET_DEF_RACE:
 			PC_BONUS_CHK_RACE(type2, SP_SET_DEF_RACE);
@@ -3845,22 +3851,6 @@ void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int 
 			sd->mdef_set_race[type2].rate = type3;
 			sd->mdef_set_race[type2].tick = type4;
 			sd->mdef_set_race[type2].value = val;
-			break;
-		case SP_ADDEFF: {
-				uint16 duration;
-
-				if(type2 <= SC_NONE || type2 >= SC_MAX) {
-					ShowWarning("pc_bonus4: SP_ADDEFF: %d is not supported.\n", type2);
-					break;
-				}
-				if(val < 0 || val > UINT16_MAX) {
-					ShowWarning("pc_bonus4: SP_ADDEFF: invalid duration %d. Valid range: [0:%d].\n", val, UINT16_MAX);
-					duration = (val < 0 ? 0 : UINT16_MAX);
-				} else
-					duration = (uint16)val;
-				pc_bonus_addeff(sd->addeff, ARRAYLENGTH(sd->addeff), (sc_type)type2,
-					(sd->state.lr_flag != 2 ? type3 : 0), (sd->state.lr_flag == 2 ? type3 : 0), type4, duration);
-			}
 			break;
 		case SP_SP_VANISH_RACE_RATE:
 			PC_BONUS_CHK_RACE(type2, SP_SP_VANISH_RACE_RATE);
@@ -3909,6 +3899,11 @@ void pc_bonus5(struct map_session_data *sd, int type, int type2, int type3, int 
 		case SP_AUTOSPELL_ONSKILL:
 			if(sd->state.lr_flag != 2)
 				pc_bonus_autospell_onskill(sd->autospell3, ARRAYLENGTH(sd->autospell3), type2, (val&1 ? -type3 : type3), (val&2 ? -type4 : type4), type5, current_equip_card_id);
+			break;
+		case SP_ADDEFF_ONSKILL:
+			PC_BONUS_CHK_SC(type3, SP_ADDEFF_ONSKILL);
+			if(sd->state.lr_flag != 2)
+				pc_bonus_addeff_onskill(sd->addeff3, ARRAYLENGTH(sd->addeff3), (sc_type)type3, type4, type2, type5, val);
 			break;
 		default:
 			ShowWarning("pc_bonus5: Unknown type %d %d %d %d %d %d!\n", type, type2, type3, type4, type5, val);
@@ -4695,6 +4690,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 		case ITEMID_ANODYNE:
 			if( map_flag_gvg2(sd->bl.m) )
 				return false;
+		//Fall through
 		case ITEMID_ALOEBERA:
 			if( pc_issit(sd) )
 				return false;
@@ -5601,8 +5597,8 @@ static void pc_checkallowskill(struct map_session_data *sd)
 	}
 
 	//Spurt requires bare hands
-	if(sd->sc.data[SC_SPURT] && sd->status.weapon)
-		status_change_end(&sd->bl, SC_SPURT, INVALID_TIMER);
+	if(sd->sc.data[SC_STRUP] && sd->status.weapon)
+		status_change_end(&sd->bl, SC_STRUP, INVALID_TIMER);
 
 	if(sd->status.shield <= 0) { //Skills requiring a shield
 		const enum sc_type scs_list[] = {
@@ -6338,7 +6334,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 	status_calc_pc(sd,SCO_FORCE);
 	clif_misceffect(&sd->bl,1);
 	if (pc_checkskill(sd,SG_DEVIL) && !pc_nextjobexp(sd))
-		clif_status_change(&sd->bl,SI_DEVIL,1,0,0,0,1); //Permanent blind effect from SG_DEVIL
+		clif_status_change(&sd->bl,SI_DEVIL1,1,0,0,0,1); //Permanent blind effect from SG_DEVIL
 
 	npc_script_event(sd,NPCE_JOBLVUP);
 	return 1;
@@ -7012,7 +7008,7 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 		if( pc_is_taekwon_ranker(sd) )
 			return 0;
 		if( pc_checkskill(sd, SG_DEVIL) &&  !pc_nextjobexp(sd) )
-			clif_status_load(&sd->bl, SI_DEVIL, 0); //Remove perma blindness due to skill-reset [Skotlex]
+			clif_status_load(&sd->bl, SI_DEVIL1, 0); //Remove perma blindness due to skill-reset [Skotlex]
 		i = sd->sc.option;
 		if( i&OPTION_RIDING && pc_checkskill(sd, KN_RIDING) )
 			i &= ~OPTION_RIDING;
@@ -7783,11 +7779,9 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_ADD_STEAL_RATE:		val = sd->bonus.add_steal_rate; break;
 		case SP_DELAYRATE:		val = sd->delayrate; break;
 		case SP_CRIT_ATK_RATE:		val = sd->bonus.crit_atk_rate; break;
+		case SP_UNSTRIPABLE:		val = sd->bonus.unstripable; break;
 		case SP_UNSTRIPABLE_WEAPON:	val = (sd->bonus.unstripable_equip&EQP_WEAPON) ? 1 : 0; break;
-		case SP_UNSTRIPABLE:
-		case SP_UNSTRIPABLE_ARMOR:
-			val = (sd->bonus.unstripable_equip&EQP_ARMOR) ? 1 : 0;
-			break;
+		case SP_UNSTRIPABLE_ARMOR:	val = (sd->bonus.unstripable_equip&EQP_ARMOR) ? 1 : 0; break;
 		case SP_UNSTRIPABLE_HELM:	val = (sd->bonus.unstripable_equip&EQP_HELM) ? 1 : 0; break;
 		case SP_UNSTRIPABLE_SHIELD:	val = (sd->bonus.unstripable_equip&EQP_SHIELD) ? 1 : 0; break;
 		case SP_SP_GAIN_VALUE:		val = sd->bonus.sp_gain_value; break;
@@ -10172,7 +10166,7 @@ static int pc_autosave(int tid, unsigned int tick, int id, intptr_t data)
 static int pc_daynight_timer_sub(struct map_session_data *sd,va_list ap)
 {
 	if (sd->state.night != night_flag && map[sd->bl.m].flag.nightenabled) { //Night/day state does not match.
-		clif_status_load(&sd->bl, SI_NIGHT, night_flag); //New night effect by dynamix [Skotlex]
+		clif_status_load(&sd->bl, SI_SKE, night_flag); //New night effect by dynamix [Skotlex]
 		sd->state.night = night_flag;
 		return 1;
 	}
