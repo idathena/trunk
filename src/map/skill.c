@@ -3861,13 +3861,6 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 						skill_castend_damage_id(src,target,skl->skill_id,pc_checkskill(((TBL_PC *)src),skl->skill_id),tick,skl->flag);
 					}
 					break;
-				case SC_ESCAPE:
-					if (skl->type < 4 + skl->skill_lv) {
-						clif_skill_damage(src,src,tick,0,0,-30000,1,skl->skill_id,skl->skill_lv,DMG_SPLASH);
-						skill_blown(src,src,1,unit_getdir(src),0);
-						skill_addtimerskill(src,tick + 80,src->id,0,0,skl->skill_id,skl->skill_lv,skl->type + 1,0);
-					}
-					break;
 				case RL_SLUGSHOT:
 					if (target->type == BL_PC)
 						sc_start(src,target,SC_SITDOWN_FORCE,100,skl->skill_lv,skill_get_time2(skl->skill_id,skl->skill_lv));
@@ -11326,7 +11319,6 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case WL_EARTHSTRAIN:
 		case LG_EARTHDRIVE:
 		case RL_FIRE_RAIN:
-		case SC_ESCAPE:
 		case SU_CN_METEOR:
 			break; //Effect is displayed on respective switch case
 		default:
@@ -11855,14 +11847,13 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 
 		case SC_FEINTBOMB:
 			skill_unitsetting(src,skill_id,skill_lv,x,y,0); //Set bomb on current position
-			skill_blown(src,src,3 * skill_lv,unit_getdir(src),0);
+			skill_blown(src,src,skill_get_blewcount(skill_id,skill_lv),unit_getdir(src),0);
 			sc_start(src,src,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 
 		case SC_ESCAPE:
-			clif_skill_nodamage(src,src,skill_id,skill_lv,1);
 			skill_unitsetting(src,skill_id,skill_lv,x,y,0);
-			skill_addtimerskill(src,tick,src->id,0,0,skill_id,skill_lv,0,0);
+			skill_blown(src,src,skill_get_blewcount(skill_id,skill_lv),unit_getdir(src),0);
 			flag |= 1;
 			break;
 
@@ -13447,7 +13438,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 		case UNT_MANHOLE:
 			if (group->val2)
 				break;
-			if ((group->unit_id == UNT_ANKLESNARE && skill_id != SC_ESCAPE) || bl->id != src->id) {
+			if (group->unit_id == UNT_ANKLESNARE || bl->id != src->id) {
 				int time = skill_get_time2(skill_id,skill_lv);
 
 				if (status_change_start(src,bl,type,10000,skill_lv,group->group_id,0,0,time,SCFLAG_FIXEDRATE)) {
