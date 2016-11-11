@@ -77,9 +77,15 @@ enum MERGE_ITEM_ACK {
 };
 
 enum BROADCASTING_SPECIAL_ITEM_OBTAIN {
-	ITEMOBTAIN_TYPE_BOXITEM =  0x0,
-	ITEMOBTAIN_TYPE_MONSTER_ITEM =  0x1,
-	ITEMOBTAIN_TYPE_NPC =  0x2,
+	ITEMOBTAIN_TYPE_BOXITEM = 0x0,
+	ITEMOBTAIN_TYPE_MONSTER_ITEM = 0x1,
+	ITEMOBTAIN_TYPE_NPC = 0x2,
+};
+
+enum e_adopt_reply {
+	ADOPT_REPLY_MORE_CHILDREN = 0,
+	ADOPT_REPLY_LEVEL_70,
+	ADOPT_REPLY_MARRIED,
 };
 
 // packet_db[SERVER] is reserved for server use
@@ -860,6 +866,7 @@ void clif_cashshop_show(struct map_session_data *sd, struct npc_data *nd);
 
 // ADOPTION
 void clif_Adopt_reply(struct map_session_data *sd, int type);
+void clif_Adopt_request(struct map_session_data *sd, struct map_session_data *src, int p_id);
 
 // MERCENARIES
 void clif_mercenary_info(struct map_session_data *sd);
