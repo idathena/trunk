@@ -3926,8 +3926,7 @@ void run_script_main(struct script_state *st)
 		//Delay execution
 		st->sleep.timer = add_timer(gettick() + st->sleep.tick, run_script_timer, st->sleep.charid, (intptr_t)st);
 		linkdb_insert(&sleep_db, (void *)__64BPRTSIZE(st->oid), st);
-	} else if (st->state != END && st->rid) {
-		//Resume later (st is already attached to player)
+	} else if (st->state != END && st->rid) { //Resume later (st is already attached to player)
 		if (st->bk_st) {
 			ShowWarning("Unable to restore stack! Double continuation!\n");
 			//Report BOTH scripts to see if that can help somehow
@@ -3935,13 +3934,11 @@ void run_script_main(struct script_state *st)
 			script_reportsrc(st->bk_st);
 			ShowDebug("Current script:\n");
 			script_reportsrc(st);
-
 			script_free_state(st->bk_st);
 			st->bk_st = NULL;
 		}
-	} else {
-		//Dispose of script
-		if ((sd = map_id2sd(st->rid)) != NULL) { //Restore previous stack and save char
+	} else { //Dispose of script
+		if ((sd = map_id2sd(st->rid))) { //Restore previous stack and save char
 			if (sd->state.using_fake_npc) {
 				clif_clearunit_single(sd->npc_id, CLR_OUTSIGHT, sd->fd);
 				sd->state.using_fake_npc = 0;
@@ -4406,35 +4403,33 @@ void script_reload(void) {
 	int i;
 
 #ifdef BETA_THREAD_TEST
-	/* We're reloading so any queries undergoing should be...exterminated. */
+	//We're reloading so any queries undergoing should be...exterminated
 	EnterSpinLock(&queryThreadLock);
-	
-	for( i = 0; i < queryThreadData.count; i++ ) {
+
+	for(i = 0; i < queryThreadData.count; i++)
 		aFree(queryThreadData.entry[i]);
-	}
+
 	queryThreadData.count = 0;
-	
-	if( queryThreadData.timer != INVALID_TIMER ) {
+
+	if(queryThreadData.timer != INVALID_TIMER) {
 		delete_timer(queryThreadData.timer, queryThread_timer);
 		queryThreadData.timer = INVALID_TIMER;
 	}
-	
+
 	LeaveSpinLock(&queryThreadLock);
 #endif
-
 	
 	userfunc_db->clear(userfunc_db, db_script_free_code_sub);
 	db_clear(scriptlabel_db);
 
 	// @commands (script based)
 	// Clear bindings
-	for( i = 0; i < atcmd_binding_count; i++ ) {
+	for(i = 0; i < atcmd_binding_count; i++)
 		aFree(atcmd_binding[i]);
-	}
-	
-	if( atcmd_binding_count != 0 )
+
+	if(atcmd_binding_count != 0)
 		aFree(atcmd_binding);
-	
+
 	atcmd_binding_count = 0;
 
 	if(sleep_db) {
@@ -4448,6 +4443,7 @@ void script_reload(void) {
 		}
 		linkdb_final(&sleep_db);
 	}
+
 	mapreg_reload();
 }
 
