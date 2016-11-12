@@ -747,8 +747,7 @@ void pc_setnewpc(struct map_session_data *sd, int account_id, int char_id, int l
 	sd->client_tick = client_tick;
 	sd->state.active = 0; //To be set to 1 after player is fully authed and loaded
 	sd->bl.type = BL_PC;
-	sd->canlog_tick = gettick();
-	//Required to prevent homunculus copuing a base speed of 0
+	//Required to prevent homunculus copying a base speed of 0
 	sd->battle_status.speed = sd->base_status.speed = DEFAULT_WALK_SPEED;
 	sd->state.warp_clean = 1;
 }
@@ -7252,7 +7251,7 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 
 	if( sd->status.ele_id > 0 )
 		elemental_set_target(sd,src);
-	
+
 	sd->canlog_tick = gettick();
 }
 
@@ -7629,7 +7628,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		}
 	}
 
-	//Reset "can log out" tick.
+	//Reset "can log out" tick
 	if( battle_config.prevent_logout )
 		sd->canlog_tick = gettick() - battle_config.prevent_logout;
 

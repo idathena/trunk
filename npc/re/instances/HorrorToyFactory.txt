@@ -719,8 +719,8 @@ L_Socket:
 			close;
 	}
 	// anti-hack
-	if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) ||
-		   callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]))
+	if (callfunc("F_IsEquipIDHack",.@part,.@equip_id) ||
+		   callfunc("F_IsEquipCardHack",.@part,.@equip_card[0],.@equip_card[1],.@equip_card[2],.@equip_card[3]))
 		close;
 	if (.@enchant == 9) {
 		mes "[White Beard Joe]";
@@ -828,45 +828,45 @@ OnStart:
 	donpcevent instance_npcname("#bgm01")+"::OnEnable";
 	donpcevent instance_npcname("Catherine Jet Johnson#01")+"::OnEnable";
 	donpcevent instance_npcname("Catherine Jet Johnson#0")+"::OnDisable";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: This area was Factory No.1. It used to be the place where the toys and dolls were stored before given as presents.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Ah, I remember several things. If someone wasn't in the employees's uniform, the guards used to come and scold them...";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: By the way...";
 	donpcevent instance_npcname("#fac1ct")+"::OnStart";
-	sleep2 3000;
+	sleep 3000;
 	mapannounce .@map$,"Factory announcement: Wake up, toy factory working time has come.",bc_map,"0x00ff44";
-	sleep2 6000;
+	sleep 6000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Wh.. What happened? Toys and dolls are wandering instead of human workers. As if they are employees...";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: I think other spirits have inhabited the empty factory for too long.";
-	sleep2 3000;
+	sleep 3000;
 	mapannounce .@map$,"Factory announcement: Waste and other debries should be kept clear from work areas. This is to keep you safe at all times.",bc_map,"0x00ff44";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: It's just like when humans worked here.";
-	sleep2 3000;
+	sleep 3000;
 	mapannounce .@map$,"Factory announcement: Let's make presents for every child's dream today.",bc_map,"0x00ff44";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: But, it's not the time to be happy. Once we find the last factory area, we will need to halt all production lines.";
-	sleep2 1000;
+	sleep 1000;
 	mapannounce .@map$,"Factory announcement: Please start product line No.1. Don't forget to wear a safety helmet! This means you Bob!",bc_map,"0x00ff44";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Ah, maybe we should restore those toys and moving gift boxes to their original condition.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Eh? I... I mean... To return them as they were.. Yes... We need to fight them? I don't know exactly.";
-	sleep2 2000;
+	sleep 2000;
 	mapannounce .@map$,"Factory announcement: All employees must wear a proper uniform and identification. Please check with security if you do not have yours.",bc_map,"0x00ff44";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Good heavens, I hope the guards are still human. There were boxes of uniforms near here in the past.";
 	donpcevent instance_npcname("Employees' Uniform Box#1")+"::OnEnable";
 	donpcevent instance_npcname("Employees' Uniform Box#2")+"::OnEnable";
 	donpcevent instance_npcname("Employees' Uniform Box#3")+"::OnEnable";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Ah, they are behind me. You'd better change into the uniform. Fortunately, I still have the employee card.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: I will find my way around here. Let's meet near the second production line. Cheer up it's a toy factory. It can't be all that bad!!";
-	sleep2 6000;
+	sleep 6000;
 	donpcevent instance_npcname("Catherine Jet Johnson#01")+"::OnDisable";
 	donpcevent instance_npcname("#bgm01")+"::OnDisable";
 	end;
@@ -875,17 +875,17 @@ OnStart2:
 	donpcevent instance_npcname("#bgm01")+"::OnEnable";
 	donpcevent instance_npcname("Catherine Jet Johnson#01")+"::OnEnable";
 	donpcevent instance_npcname("Catherine Jet Johnson#0")+"::OnDisable";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Ah.. We had been together before? Okay, let's meet at the spot again as we did.";
-	sleep2 6000;
+	sleep 6000;
 	donpcevent instance_npcname("Catherine Jet Johnson#01")+"::OnDisable";
 	donpcevent instance_npcname("Employees' Uniform Box#1")+"::OnEnable";
 	donpcevent instance_npcname("Employees' Uniform Box#2")+"::OnEnable";
 	donpcevent instance_npcname("Employees' Uniform Box#3")+"::OnEnable";
 	mapannounce .@map$,"Factory announcement: Wake up, toy factory working time has come.",bc_map,"0x00ff44";
-	sleep2 6000;
+	sleep 6000;
 	mapannounce .@map$,"Factory announcement: Waste and other debries should be kept clear from work areas. This is to keep you safe at all times.",bc_map,"0x00ff44";
-	sleep2 6000;
+	sleep 6000;
 	mapannounce .@map$,"Factory announcement: Let's make presents for every child's dream today.",bc_map,"0x00ff44";
 	donpcevent instance_npcname("#fac1ct")+"::OnStart";
 	donpcevent instance_npcname("#bgm01")+"::OnDisable";
@@ -986,7 +986,7 @@ OnTimer1000:
 OnAlert:
 	set .@map$,instance_mapname("1@xm_d");
 	unittalk getnpcid(0),"Coordinator: Guard! Where is guard! Here're humans!";
-	sleep2 3000;
+	sleep 3000;
 	donpcevent instance_npcname("Coordinator#fac1bs")+"::OnDisable";
 	areamonster .@map$,61,118,71,128,"Guard",2990,10,instance_npcname("Coordinator#fac1bs")+"::OnMyMobDead";
 	initnpctimer;
@@ -1165,25 +1165,25 @@ OnStart:
 	donpcevent instance_npcname("#bgm06")+"::OnEnable";
 	donpcevent instance_npcname("Catherine Jet Johnson#21")+"::OnEnable";
 	donpcevent instance_npcname("Catherine Jet Johnson#2")+"::OnDisable";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: This place was Factory No.2.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: It used to be filled with people, but now it isn't.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Ah, I realized something while coming here. Some...Children...";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: How can I say.. There were lots of souls looking very scary, but awfully sad.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: How pitiful they are, but please make them rest if they attack you. Fortunately, they won't come at me.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: If you see a worker toy on duty while searching here, would you ask it about the doll maker?";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: He might be sent to Heaven if they recall the memory of doll maker. That the only hope.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: If you find all clues, search other places. I will look for the spot where I met the doll maker last time I was here.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Sorry that I can't be a big help to you, but I am being helped a lot. See you in a minute.";
-	sleep2 6000;
+	sleep 6000;
 	donpcevent instance_npcname("Catherine Jet Johnson#21")+"::OnDisable";
 	donpcevent instance_npcname("Employees' Uniform Box#4")+"::OnEnable";
 	donpcevent instance_npcname("#fac2ct")+"::OnStart";
@@ -1195,9 +1195,9 @@ OnStart2:
 	donpcevent instance_npcname("#bgm06")+"::OnEnable";
 	donpcevent instance_npcname("Catherine Jet Johnson#21")+"::OnEnable";
 	donpcevent instance_npcname("Catherine Jet Johnson#2")+"::OnDisable";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: If you find all clues, search other places. I will look for the spot where I met the doll maker last time I was here.";
-	sleep2 6000;
+	sleep 6000;
 	donpcevent instance_npcname("Catherine Jet Johnson#21")+"::OnDisable";
 	donpcevent instance_npcname("Employees' Uniform Box#4")+"::OnEnable";
 	donpcevent instance_npcname("#fac2ct")+"::OnStart";
@@ -1336,562 +1336,109 @@ OnDisable:
 			close;
 		}
 		close2;
-		unittalk getnpcid(0),"Worker: Ah! Grandpa? He's a real good man. He oiled us everyday and cleaned the dust every often.";
-		sleep2 3000;
-		unittalk getnpcid(0),"Worker: I wish he wouldn't pass away. Ah... Ahah... I feel better.";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#1")+"::OnStart";
-		end;
-	} else {
-		mes "[Worker]";
-		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#1")+"::OnAlert";
-		close;
-	}
-
-OnStart:
-	donpcevent instance_npcname("Worker#1")+"::OnDisable";
-	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
-	end;
-OnAlert:
-	set .@map$,instance_mapname("1@xm_d");
-	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#1")+"::OnDisable";
-	areamonster .@map$,151,94,159,102,"Guard",2990,20,instance_npcname("Worker#1")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#1")+"::OnStart";
-	initnpctimer;
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("Worker#1")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Worker#1");
-	set 'fac2_1,1;
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Worker#1");
-	set 'fac2_1,0;
-	end;
-OnMyMobDead:
-	end;
-OnTimer60000:
-	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#1")+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,130,72,3	script	Worker#2	4_M_COOKIE,{
-	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
-		mes "[Worker]";
-		mes "Huh? What happened?";
-		next;
-		if (select("No, nothing special:Do you know about the doll maker?") == 1) {
-			mes "[Worker]";
-			mes "I'm very busy with working, so could you stop chatting?";
-			close;
+		switch (atoi(strnpcinfo(2))) {
+			case 1: setarray .@talk$[0],"Worker: Ah! Grandpa? He's a real good man. He oiled us everyday and cleaned the dust every often.","Worker: I wish he wouldn't pass away. Ah... Ahah... I feel better."; break;
+			case 2: setarray .@talk$[0],"Worker: Did Kimi kill the craftman grandpa? Who said that? That's not true. Kimi was going to save him!","Worker: Ah... B.. By the way, why my body becomes..."; break;
+			case 3: setarray .@talk$[0],"Worker: He had chronic cardiac disease, but it suddenly started to fit on the day he died. Kimi found him and gave him first aid, but..","Worker: Ah.. Did you do something to me? I feel strange..."; break;
+			case 4: setarray .@talk$[0],"Worker: Kimi didn't move at all for sometime and sat down like ordinary dolls.","Worker: She was about to fly her soul forever... Like me now... Oh, my... What happened to me?"; break;
+			case 5: setarray .@talk$[0],"Worker: Oh, Kimi.. My dear.. She thought the doll maker passed away because she startled him.","Worker: Grandpa was just very pleased that Kimi was moving.."; break;
+			case 6: setarray .@talk$[0],"Worker: He could see a living doll for a while. That's what Kimi first did.","Worker: And what she first saw was his death. What a misery."; break;
+			case 7: setarray .@talk$[0],"Worker: Kimi was able to hear the Grandpa's voice and feel before she was indwelled.","Worker: Perhaps Grandpa's affection made her move and become alive. Ahah.. I'm sleepy.."; break;
+			case 8: setarray .@talk$[0],"Worker: Grandpa good man! Kimi pity! Kimi loves Grandpa! Grandpa died. I'm sad!"; break;
+			case 9: setarray .@talk$[0],"Worker: He was so amazed to see Kimi's opening eyes and his heart... It became like that.","Worker: Anyhow, why my body... It's likely to float in the air.... Something strange."; break;
+			case 10: setarray .@talk$[0],"Worker: Kimi didn't hurt Grandpa! Kimi's wanted to save Grandpa! People are scared of Kimi! Kimi is kind! Kimi is a good girl!","Worker: Grandpa... I miss him. Grandpa, Grandpa..."; break;
 		}
-		close2;
-		unittalk getnpcid(0),"Worker: Did Kimi kill the craftman grandpa? Who said that? That's not true. Kimi was going to save him!";
+		unittalk getnpcid(0),.@talk$[0];
 		sleep2 3000;
-		unittalk getnpcid(0),"Worker: Ah... B.. By the way, why my body becomes...";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#2")+"::OnStart";
-		end;
-	} else {
-		mes "[Worker]";
-		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#2")+"::OnAlert";
-		close;
-	}
-
-OnStart:
-	donpcevent instance_npcname("Worker#2")+"::OnDisable";
-	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
-	end;
-OnAlert:
-	set .@map$,instance_mapname("1@xm_d");
-	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#2")+"::OnDisable";
-	areamonster .@map$,126,68,134,76,"Guard",2990,20,instance_npcname("Worker#2")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#2")+"::OnStart";
-	initnpctimer;
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("Worker#2")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Worker#2");
-	set 'fac2_2,1;
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Worker#2");
-	set 'fac2_2,0;
-	end;
-OnMyMobDead:
-	end;
-OnTimer60000:
-	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#2")+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,134,34,1	script	Worker#3	4_M_COOKIE,{
-	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
-		mes "[Worker]";
-		mes "Huh? What happened?";
-		next;
-		if (select("No, nothing special:Do you know about the doll maker?") == 1) {
-			mes "[Worker]";
-			mes "I'm very busy with working, so could you stop chatting?";
-			close;
+		if (atoi(strnpcinfo(2)) != 8) {
+			unittalk getnpcid(0),.@talk$[1];
+			sleep2 3000;
 		}
-		close2;
-		unittalk getnpcid(0),"Worker: He had chronic cardiac disease, but it suddenly started to fit on the day he died. Kimi found him and gave him first aid, but..";
-		sleep2 3000;
-		unittalk getnpcid(0),"Worker: Ah.. Did you do something to me? I feel strange...";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#3")+"::OnStart";
+		donpcevent instance_npcname(strnpcinfo(0))+"::OnStart";
 		end;
 	} else {
 		mes "[Worker]";
 		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#3")+"::OnAlert";
+		donpcevent instance_npcname(strnpcinfo(0))+"::OnAlert";
 		close;
 	}
 
 OnStart:
-	donpcevent instance_npcname("Worker#3")+"::OnDisable";
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
 	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
 	end;
 OnAlert:
 	set .@map$,instance_mapname("1@xm_d");
 	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#3")+"::OnDisable";
-	areamonster .@map$,130,30,138,38,"Guard",2990,20,instance_npcname("Worker#3")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#3")+"::OnStart";
-	initnpctimer;
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("Worker#3")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Worker#3");
-	set 'fac2_3,1;
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Worker#3");
-	set 'fac2_3,0;
-	end;
-OnMyMobDead:
-	end;
-OnTimer60000:
-	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#3")+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,195,28,3	script	Worker#4	4_M_COOKIE,{
-	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
-		mes "[Worker]";
-		mes "Huh? What happened?";
-		next;
-		if (select("No, nothing special:Do you know about the doll maker?") == 1) {
-			mes "[Worker]";
-			mes "I'm very busy with working, so could you stop chatting?";
-			close;
-		}
-		close2;
-		unittalk getnpcid(0),"Worker: Kimi didn't move at all for sometime and sat down like ordinary dolls.";
-		sleep2 3000;
-		unittalk getnpcid(0),"Worker: She was about to fly her soul forever... Like me now... Oh, my... What happened to me?";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#4")+"::OnStart";
-		end;
-	} else {
-		mes "[Worker]";
-		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#4")+"::OnAlert";
-		close;
+	sleep 3000;
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	switch (atoi(strnpcinfo(2))) {
+		case 1: setarray .@xy[0],151,94,159,102; break;
+		case 2: setarray .@xy[0],126,68,134,76; break;
+		case 3: setarray .@xy[0],130,30,138,38; break;
+		case 4: setarray .@xy[0],191,24,199,32; break;
+		case 5: setarray .@xy[0],224,26,232,34; break;
+		case 6: setarray .@xy[0],199,51,207,59; break;
+		case 7: setarray .@xy[0],128,48,136,56; break;
+		case 8: setarray .@xy[0],158,48,164,54; break;
+		case 9: setarray .@xy[0],229,23,237,31; break;
+		case 10: setarray .@xy[0],205,23,213,31; break;
 	}
-
-OnStart:
-	donpcevent instance_npcname("Worker#4")+"::OnDisable";
-	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
-	end;
-OnAlert:
-	set .@map$,instance_mapname("1@xm_d");
-	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#4")+"::OnDisable";
-	areamonster .@map$,191,24,199,32,"Guard",2990,20,instance_npcname("Worker#4")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#4")+"::OnStart";
+	areamonster .@map$,.@xy[0],.@xy[1],.@xy[2],.@xy[3],"Guard",2990,20,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnStart";
 	initnpctimer;
 	end;
 OnInstanceInit:
-	donpcevent instance_npcname("Worker#4")+"::OnDisable";
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
 	end;
 OnEnable:
-	hideoffnpc instance_npcname("Worker#4");
-	set 'fac2_4,1;
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Worker#4");
-	set 'fac2_4,0;
-	end;
-OnMyMobDead:
-	end;
-OnTimer60000:
-	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#4")+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,228,30,1	script	Worker#5	4_M_COOKIE,{
-	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
-		mes "[Worker]";
-		mes "Huh? What happened?";
-		next;
-		if (select("No, nothing special:Do you know about the doll maker?") == 1) {
-			mes "[Worker]";
-			mes "I'm very busy with working, so could you stop chatting?";
-			close;
-		}
-		close2;
-		unittalk getnpcid(0),"Worker: Oh, Kimi.. My dear.. She thought the doll maker passed away because she startled him.";
-		sleep2 3000;
-		unittalk getnpcid(0),"Worker: Grandpa was just very pleased that Kimi was moving..";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#5")+"::OnStart";
-		end;
-	} else {
-		mes "[Worker]";
-		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#5")+"::OnAlert";
-		close;
+	hideoffnpc instance_npcname(strnpcinfo(0));
+	switch (atoi(strnpcinfo(2))) {
+		case 1: set 'fac2_1,1; break;
+		case 2: set 'fac2_2,1; break;
+		case 3: set 'fac2_3,1; break;
+		case 4: set 'fac2_4,1; break;
+		case 5: set 'fac2_5,1; break;
+		case 6: set 'fac2_6,1; break;
+		case 7: set 'fac2_7,1; break;
+		case 8: set 'fac2_8,1; break;
+		case 9: set 'fac2_9,1; break;
+		case 10: set 'fac2_10,1; break;
 	}
-
-OnStart:
-	donpcevent instance_npcname("Worker#5")+"::OnDisable";
-	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
-	end;
-OnAlert:
-	set .@map$,instance_mapname("1@xm_d");
-	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#5")+"::OnDisable";
-	areamonster .@map$,224,26,232,34,"Guard",2990,20,instance_npcname("Worker#5")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#5")+"::OnStart";
-	initnpctimer;
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("Worker#5")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Worker#5");
-	set 'fac2_5,1;
 	end;
 OnDisable:
-	hideonnpc instance_npcname("Worker#5");
-	set 'fac2_5,0;
-	end;
-OnMyMobDead:
-	end;
-OnTimer60000:
-	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#5")+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,203,55,3	script	Worker#6	4_M_COOKIE,{
-	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
-		mes "[Worker]";
-		mes "Huh? What happened?";
-		next;
-		if (select("No, nothing special:Do you know about the doll maker?") == 1) {
-			mes "[Worker]";
-			mes "I'm very busy with working, so could you stop chatting?";
-			close;
-		}
-		close2;
-		unittalk getnpcid(0),"Worker: He could see a living doll for a while. That's what Kimi first did.";
-		sleep2 3000;
-		unittalk getnpcid(0),"Worker: And what she first saw was his death. What a misery.";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#6")+"::OnStart";
-		end;
-	} else {
-		mes "[Worker]";
-		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#6")+"::OnAlert";
-		close;
+	hideonnpc instance_npcname(strnpcinfo(0));
+	switch (atoi(strnpcinfo(2))) {
+		case 1: set 'fac2_1,0; break;
+		case 2: set 'fac2_2,0; break;
+		case 3: set 'fac2_3,0; break;
+		case 4: set 'fac2_4,0; break;
+		case 5: set 'fac2_5,0; break;
+		case 6: set 'fac2_6,0; break;
+		case 7: set 'fac2_7,0; break;
+		case 8: set 'fac2_8,0; break;
+		case 9: set 'fac2_9,0; break;
+		case 10: set 'fac2_10,0; break;
 	}
-
-OnStart:
-	donpcevent instance_npcname("Worker#6")+"::OnDisable";
-	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
-	end;
-OnAlert:
-	set .@map$,instance_mapname("1@xm_d");
-	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#6")+"::OnDisable";
-	areamonster .@map$,199,51,207,59,"Guard",2990,20,instance_npcname("Worker#6")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#6")+"::OnStart";
-	initnpctimer;
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("Worker#6")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Worker#6");
-	set 'fac2_6,1;
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Worker#6");
-	set 'fac2_6,0;
 	end;
 OnMyMobDead:
 	end;
 OnTimer60000:
 	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#6")+"::OnMyMobDead";
+	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 	stopnpctimer;
 	end;
 }
 
-1@xm_d,132,52,1	script	Worker#7	4_M_COOKIE,{
-	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
-		mes "[Worker]";
-		mes "Huh? What happened?";
-		next;
-		if (select("No, nothing special:Do you know about the doll maker?") == 1) {
-			mes "[Worker]";
-			mes "I'm very busy with working, so could you stop chatting?";
-			close;
-		}
-		close2;
-		unittalk getnpcid(0),"Worker: Kimi was able to hear the Grandpa's voice and feel before she was indwelled.";
-		sleep2 3000;
-		unittalk getnpcid(0),"Worker: Perhaps Grandpa's affection made her move and become alive. Ahah.. I'm sleepy..";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#7")+"::OnStart";
-		end;
-	} else {
-		mes "[Worker]";
-		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#7")+"::OnAlert";
-		close;
-	}
-
-OnStart:
-	donpcevent instance_npcname("Worker#7")+"::OnDisable";
-	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
-	end;
-OnAlert:
-	set .@map$,instance_mapname("1@xm_d");
-	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#7")+"::OnDisable";
-	areamonster .@map$,128,48,136,56,"Guard",2990,20,instance_npcname("Worker#7")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#7")+"::OnStart";
-	initnpctimer;
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("Worker#7")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Worker#7");
-	set 'fac2_7,1;
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Worker#7");
-	set 'fac2_7,0;
-	end;
-OnMyMobDead:
-	end;
-OnTimer60000:
-	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#7")+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,162,52,1	script	Worker#8	4_M_COOKIE,{
-	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
-		mes "[Worker]";
-		mes "Huh? What happened?";
-		next;
-		if (select("No, nothing special:Do you know about the doll maker?") == 1) {
-			mes "[Worker]";
-			mes "I'm very busy with working, so could you stop chatting?";
-			close;
-		}
-		close2;
-		unittalk getnpcid(0),"Worker: Grandpa good man! Kimi pity! Kimi loves Grandpa! Grandpa died. I'm sad!";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#8")+"::OnStart";
-		end;
-	} else {
-		mes "[Worker]";
-		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#8")+"::OnAlert";
-		close;
-	}
-
-OnStart:
-	donpcevent instance_npcname("Worker#8")+"::OnDisable";
-	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
-	end;
-OnAlert:
-	set .@map$,instance_mapname("1@xm_d");
-	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#8")+"::OnDisable";
-	areamonster .@map$,158,48,164,54,"Guard",2990,20,instance_npcname("Worker#8")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#8")+"::OnStart";
-	initnpctimer;
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("Worker#8")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Worker#8");
-	set 'fac2_8,1;
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Worker#8");
-	set 'fac2_8,0;
-	end;
-OnMyMobDead:
-	end;
-OnTimer60000:
-	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#8")+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,242,17,5	script	Worker#9	4_M_COOKIE,{
-	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
-		mes "[Worker]";
-		mes "Huh? What happened?";
-		next;
-		if (select("No, nothing special:Do you know about the doll maker?") == 1) {
-			mes "[Worker]";
-			mes "I'm very busy with working, so could you stop chatting?";
-			close;
-		}
-		close2;
-		unittalk getnpcid(0),"Worker: He was so amazed to see Kimi's opening eyes and his heart... It became like that.";
-		sleep2 3000;
-		unittalk getnpcid(0),"Worker: Anyhow, why my body... It's likely to float in the air.... Something strange.";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#9")+"::OnStart";
-		end;
-	} else {
-		mes "[Worker]";
-		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#9")+"::OnAlert";
-		close;
-	}
-
-OnStart:
-	donpcevent instance_npcname("Worker#9")+"::OnDisable";
-	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
-	end;
-OnAlert:
-	set .@map$,instance_mapname("1@xm_d");
-	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#9")+"::OnDisable";
-	areamonster .@map$,229,23,237,31,"Guard",2990,20,instance_npcname("Worker#9")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#9")+"::OnStart";
-	initnpctimer;
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("Worker#9")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Worker#9");
-	set 'fac2_9,1;
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Worker#9");
-	set 'fac2_9,0;
-	end;
-OnMyMobDead:
-	end;
-OnTimer60000:
-	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#9")+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,209,15,3	script	Worker#10	4_M_COOKIE,{
-	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
-		mes "[Worker]";
-		mes "Huh? What happened?";
-		next;
-		if (select("No, nothing special:Do you know about the doll maker?") == 1) {
-			mes "[Worker]";
-			mes "I'm very busy with working, so could you stop chatting?";
-			close;
-		}
-		close2;
-		unittalk getnpcid(0),"Worker: Kimi didn't hurt Grandpa! Kimi's wanted to save Grandpa! People are scared of Kimi! Kimi is kind! Kimi is a good girl!";
-		sleep2 3000;
-		unittalk getnpcid(0),"Worker: Grandpa... I miss him. Grandpa, Grandpa...";
-		sleep2 3000;
-		donpcevent instance_npcname("Worker#10")+"::OnStart";
-		end;
-	} else {
-		mes "[Worker]";
-		mes "What!? You are not our fellows!!";
-		donpcevent instance_npcname("Worker#10")+"::OnAlert";
-		close;
-	}
-
-OnStart:
-	donpcevent instance_npcname("Worker#10")+"::OnDisable";
-	donpcevent instance_npcname("#fac2wpc")+"::OnStart";
-	end;
-OnAlert:
-	set .@map$,instance_mapname("1@xm_d");
-	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
-	sleep2 3000;
-	donpcevent instance_npcname("Worker#10")+"::OnDisable";
-	areamonster .@map$,205,23,213,31,"Guard",2990,20,instance_npcname("Worker#10")+"::OnMyMobDead";
-	donpcevent instance_npcname("Worker#10")+"::OnStart";
-	initnpctimer;
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("Worker#10")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Worker#10");
-	set 'fac2_10,1;
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Worker#10");
-	set 'fac2_10,0;
-	end;
-OnMyMobDead:
-	end;
-OnTimer60000:
-	set .@map$,instance_mapname("1@xm_d");
-	killmonster .@map$,instance_npcname("Worker#10")+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
+1@xm_d,130,72,3	duplicate(Worker#1)	Worker#2	4_M_COOKIE
+1@xm_d,134,34,1	duplicate(Worker#1)	Worker#3	4_M_COOKIE
+1@xm_d,195,28,3	duplicate(Worker#1)	Worker#4	4_M_COOKIE
+1@xm_d,228,30,1	duplicate(Worker#1)	Worker#5	4_M_COOKIE
+1@xm_d,203,55,3	duplicate(Worker#1)	Worker#6	4_M_COOKIE
+1@xm_d,132,52,1	duplicate(Worker#1)	Worker#7	4_M_COOKIE
+1@xm_d,162,52,1	duplicate(Worker#1)	Worker#8	4_M_COOKIE
+1@xm_d,242,17,5	duplicate(Worker#1)	Worker#9	4_M_COOKIE
+1@xm_d,209,15,3	duplicate(Worker#1)	Worker#10	4_M_COOKIE
 
 1@xm_d,131,208,0	script	#bgm04	-1,9,9,{
 	end;
@@ -1969,39 +1516,39 @@ OnDisable:
 
 OnStart:
 	set .@map$,instance_mapname("1@xm_d");
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Antonio: Listem to me, Santa~ I mean, I like this factory.";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Antonio: No one owns it~ And there are a number of things I can use.";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0,instance_npcname("Santa#3")),"Santa: You silly! Just to be sure, I followed you. Now you steal from everyone's factory!";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0),"Antonio: Hey, is this a big deal if I have surplus presents? I don't know about that~";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0,instance_npcname("Santa#3")),"Santa: Whew... Okay, but think about that how children feel when they got them.";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0,instance_npcname("Santa#3")),"Santa: How they feel if they know you distributed the masterless things to them?";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0),"Antonio: Hmm...";
-	sleep2 2000;
+	sleep 2000;
 	unittalk getnpcid(0),"Antonio: Maybe... I will be happy?! Anyway, that's a present, kekekeke.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0,instance_npcname("Santa#3")),"Santa: Who said the present itself is the problem! You'd better stop this theft, Antonio!";
-	sleep2 5000;
+	sleep 5000;
 	mapannounce .@map$,"Factory announcement: The sending preparations have finished in Factory No.3.",bc_map,"0x00ff44";
-	sleep2 5000;
-	mapannounce .@map$,"Factory announcement:Delivery employees, please stand by.",bc_map,"0x00ff44";
-	sleep2 3000;
+	sleep 5000;
+	mapannounce .@map$,"Factory announcement: Delivery employees, please stand by.",bc_map,"0x00ff44";
+	sleep 3000;
 	unittalk getnpcid(0),"Antonio: Oh! Wohuhu! A bunch of presents are delayed. Let's have a party today?!";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0),"Antonio: Hey, you over there. You can follow me if you'd like to help. I'm okay unless you disturb me!";
-	sleep2 4000;
+	sleep 4000;
 	donpcevent instance_npcname("Antonio#1")+"::OnDisable";
-	sleep2 2000;
+	sleep 2000;
 	unittalk getnpcid(0,instance_npcname("Santa#3")),"Santa: Tha.. That dude has no ethics!";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0,instance_npcname("Santa#3")),"Santa: Hey, would you go kick that Antonio out? He might run away if you hit several times.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0,instance_npcname("Santa#3")),"Santa: It's not right to steal from the community!";
 	donpcevent instance_npcname("#bgm04")+"::OnDisable";
 	donpcevent instance_npcname("#fac4wp")+"::OnEnable";
@@ -2009,7 +1556,7 @@ OnStart:
 	donpcevent instance_npcname("#fac3ct")+"::OnStart";
 	donpcevent instance_npcname("#fac3ct2")+"::OnStart";
 	donpcevent instance_npcname("#fac3ct3")+"::OnStart";
-	sleep2 3000;
+	sleep 3000;
 	donpcevent instance_npcname("#bgm05")+"::OnEnable";
 	end;
 OnInstanceInit:
@@ -2267,53 +1814,53 @@ OnTouch:
 
 OnStart:
 	set .@map$,instance_mapname("1@xm_d");
-	sleep2 2000;
+	sleep 2000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Kimi! Listen to me. I didn't come to blame you here.";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0,instance_npcname("Celine Kimi#0")),"Celine Kimi: Everyone hates me!... You don't like me as well? This ugly and creepy doll like me...";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Kimi, I heard about you from dolls here. The doll maker adored you so much!";
-	sleep2 4000;
+	sleep 4000;
 	mapannounce .@map$,"Phantom's yell: Lie!",bc_map,"0xff8800";
-	sleep2 1000;
+	sleep 1000;
 	unittalk getnpcid(0,instance_npcname("Celine Kimi#0")),"Celine Kimi: Don't lie. If that's true, why didn't he see me with love in his eyes?";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0,instance_npcname("Celine Kimi#0")),"Celine Kimi: Why didn't call my name? [Kimi] [Kimi!] I was anxious to hear Grandpa's voice.";
-	sleep2 4000;
+	sleep 4000;
 	mapannounce .@map$,"Phantom's yell: Yes, Kimi~ Grandpa was frightened! He was scared of you~",bc_map,"0xff8800";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: No, don't listen to it, Kimi! he really cherished you.";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0,instance_npcname("Celine Kimi#0")),"Celine Kimi: Did he... cherish me?";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Yes, when you start to move, he was so plea...";
-	sleep2 1000;
+	sleep 1000;
 	mapannounce .@map$,"Phantom's yell: He was scared of your appearance and his heart stopped, Kimi~ You killed him!",bc_map,"0xff8800";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0,instance_npcname("Celine Kimi#0")),"Celine Kimi: D.. Did I.. kill him?...";
-	sleep2 2000;
+	sleep 2000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: No, Kimi! I've realized that. I misunderstood you. Just he had a disease!";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0,instance_npcname("Celine Kimi#0")),"Celine Kimi: D.. Di.. Did I... kill... him?";
-	sleep2 2000;
+	sleep 2000;
 	mapannounce .@map$,"Phantom's yell: See how you look, Kimi~ See the mirror~ How do you feel?",bc_map,"0xff8800";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0,instance_npcname("Celine Kimi#0")),"Celine Kimi: I... I...";
-	sleep2 1000;
+	sleep 1000;
 	mapannounce .@map$,"Phantom's yell: Don't you agree you are frightening? No one loves you, Kimi~",bc_map,"0xff8800";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0,instance_npcname("Celine Kimi#0")),"Celine Kimi: Because of me, grandpa was dead...";
 	specialeffect EF_MAPPILLAR2,AREA,instance_npcname("Celine Kimi#0");
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: It become serious. Kimi is suffering. It would be dangerous under this condition!";
 	specialeffect EF_MAPPILLAR2,AREA,instance_npcname("Celine Kimi#0");
-	sleep2 1000;
+	sleep 1000;
 	mapannounce .@map$,"Phantom's yell: Rage~ Sorrow~ No one cries for you, Kimi~",bc_map,"0xff8800";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: I will find the emergency exit to escape. Run away, adventurer!";
-	sleep2 3000;
+	sleep 3000;
 	donpcevent instance_npcname("Catherine Jet Johnson#5")+"::OnDisable";
-	sleep2 2000;
+	sleep 2000;
 	donpcevent instance_npcname("Celine Kimi#0")+"::OnDisable";
 	donpcevent instance_npcname("#finalbs2")+"::OnStart";
 	donpcevent instance_npcname("#bgm02")+"::OnDisable";
@@ -2332,15 +1879,8 @@ OnDisable:
 1@xm_d,216,193,3	script	#eff_f01	CLEAR_NPC,{
 	end;
 OnStart:
-	specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f01");
-	specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f02");
-	specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f03");
-	specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f04");
-	specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f05");
-	specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f06");
-	specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f07");
-	specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f08");
-	specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f09");
+	for (set .@i,1; .@i<=9; set .@i,.@i+1)
+		specialeffect EF_HEARTCASTING,AREA,instance_npcname("#eff_f0"+.@i);
 	end;
 OnInstanceInit:
 	donpcevent instance_npcname("#eff_f01")+"::OnDisable";
@@ -2411,9 +1951,9 @@ OnStart:
 		monster .@map$,.@ber_x2,.@ber_y2,"#f_w_1",3038,1,instance_npcname("#bssk03")+"::OnMyMobDead";
 		if (.@mon_num > 20)
 			break;
-		sleep2 200;
+		sleep 200;
 	}
-	sleep2 6000;
+	sleep 6000;
 	killmonster .@map$,instance_npcname("#bssk03")+"::OnMyMobDead";
 	end;
 OnInstanceInit:
@@ -2457,15 +1997,31 @@ OnStart:
 	set .@ber_x,.@ber[6];
 	set .@ber_y,.@ber[7];
 	while (1) {
-		set .@ber_x,.@ber_x+2;
 		set .@ber_r,rand(0,2);
-		set .@ber_y,.@ber_y+.@ber_r-1;
+		switch (atoi(charat(strnpcinfo(2),5))) {
+			case 1:
+				set .@ber_x,.@ber_x+2;
+				set .@ber_y,.@ber_y+.@ber_r-1;
+				break;
+			case 2:
+				set .@ber_x,.@ber_x-2;
+				set .@ber_y,.@ber_y+.@ber_r-1;
+				break;
+			case 3:
+				set .@ber_y,.@ber_y+2;
+				set .@ber_x,.@ber_x+.@ber_r-1;
+				break;
+			case 4:
+				set .@ber_y,.@ber_y-2;
+				set .@ber_x,.@ber_x+.@ber_r-1;
+				break;
+		}
 		monster .@map$,.@ber_x,.@ber_y,"#f_w_1",3038,1,instance_npcname("#crssk1")+"::OnMyMobDead";
 		if (.@ber_x < 211 || .@ber_x > 241 | .@ber_y < 166 || .@ber_y > 201)
 			break;
-		sleep2 200;
+		sleep 200;
 	}
-	sleep2 6000;
+	sleep 6000;
 	killmonster .@map$,instance_npcname("#crssk1")+"::OnMyMobDead";
 	end;
 OnInstanceInit:
@@ -2481,101 +2037,9 @@ OnMyMobDead:
 	end;
 }
 
-1@xm_d,1,5,3	script	#crssk2	CLEAR_NPC,{
-	end;
-OnStart:
-	set .@map$,instance_mapname("1@xm_d");
-	getunitdata 'CelineKimi,.@ber;
-	set .@ber_x,.@ber[6];
-	set .@ber_y,.@ber[7];
-	while (1) {
-		set .@ber_x,.@ber_x-2;
-		set .@ber_r,rand(0,2);
-		set .@ber_y,.@ber_y+.@ber_r-1;
-		monster .@map$,.@ber_x,.@ber_y,"#f_w_2",3038,1,instance_npcname("#crssk2")+"::OnMyMobDead";
-		if (.@ber_x < 211 || .@ber_x > 241 | .@ber_y < 166 || .@ber_y > 201)
-			break;
-		sleep2 200;
-	}
-	sleep2 6000;
-	killmonster .@map$,instance_npcname("#crssk2")+"::OnMyMobDead";
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("#crssk2")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("#crssk2");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("#crssk2");
-	end;
-OnMyMobDead:
-	end;
-}
-
-1@xm_d,1,5,3	script	#crssk3	CLEAR_NPC,{
-	end;
-OnStart:
-	set .@map$,instance_mapname("1@xm_d");
-	getunitdata 'CelineKimi,.@ber;
-	set .@ber_x,.@ber[6];
-	set .@ber_y,.@ber[7];
-	while (1) {
-		set .@ber_y,.@ber_y+2;
-		set .@ber_r,rand(0,2);
-		set .@ber_x,.@ber_x+.@ber_r-1;
-		monster .@map$,.@ber_x,.@ber_y,"#f_w_3",3038,1,instance_npcname("#crssk3")+"::OnMyMobDead";
-		if (.@ber_x < 211 || .@ber_x > 241 | .@ber_y < 166 || .@ber_y > 201)
-			break;
-		sleep2 200;
-	}
-	sleep2 6000;
-	killmonster .@map$,instance_npcname("#crssk3")+"::OnMyMobDead";
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("#crssk3")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("#crssk3");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("#crssk3");
-	end;
-OnMyMobDead:
-	end;
-}
-
-1@xm_d,1,5,3	script	#crssk4	CLEAR_NPC,{
-	end;
-OnStart:
-	set .@map$,instance_mapname("1@xm_d");
-	getunitdata 'CelineKimi,.@ber;
-	set .@ber_x,.@ber[6];
-	set .@ber_y,.@ber[7];
-	while (1) {
-		set .@ber_y,.@ber_y-2;
-		set .@ber_r,rand(0,2);
-		set .@ber_x,.@ber_x+.@ber_r-1;
-		monster .@map$,.@ber_x,.@ber_y,"#f_w_4",3038,1,instance_npcname("#crssk4")+"::OnMyMobDead";
-		if (.@ber_x < 211 || .@ber_x > 241 | .@ber_y < 166 || .@ber_y > 201)
-			break;
-		sleep2 200;
-	}
-	sleep2 6000;
-	killmonster .@map$,instance_npcname("#crssk4")+"::OnMyMobDead";
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname("#crssk4")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("#crssk4");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("#crssk4");
-	end;
-OnMyMobDead:
-	end;
-}
+1@xm_d,1,5,3	duplicate(#crssk1)	#crssk2	CLEAR_NPC
+1@xm_d,1,5,3	duplicate(#crssk1)	#crssk3	CLEAR_NPC
+1@xm_d,1,5,3	duplicate(#crssk1)	#crssk4	CLEAR_NPC
 
 1@xm_d,233,183,0	script	#kimion1	-1,7,7,{
 	end;
@@ -2602,7 +2066,7 @@ OnDisable:
 OnStart:
 	unittalk getnpcid(0),"Celine Kimi: You also... come here to kill me?";
 	specialeffect EF_MAPPILLAR2;
-	sleep2 5000;
+	sleep 5000;
 	donpcevent instance_npcname("Celine Kimi#2")+"::OnDisable";
 	donpcevent instance_npcname("#finalbs2")+"::OnStart";
 	end;
@@ -2728,7 +2192,7 @@ OnTimer10000:
 				setunitdata 'CelineKimi_,2,.@MOB_HP3;
 				donpcevent instance_npcname("#eff_f01")+"::OnStart";
 				unittalk 'CelineKimi,"You and I are the one! I will recover you!";
-				sleep2 1000;
+				sleep 1000;
 				mapannounce .@map$,"Celine Kimi recovers herself and her phantom "+.@set_bs_hp+" HP has been recovered.",bc_map,"0xff6666";
 				donpcevent instance_npcname("#heal_c")+"::OnStart";
 			}
@@ -2743,7 +2207,7 @@ OnTimer10000:
 				setunitdata 'CelineKimi_,2,.@MOB_HP3;
 				donpcevent instance_npcname("#eff_f01")+"::OnStart";
 				unittalk 'CelineKimi_,"I will restore you!!";
-				sleep2 1000;
+				sleep 1000;
 				mapannounce .@map$,"Celine Kimi's phantom recovers herself and her master "+.@set_bs_hp+" HP has been recovered.",bc_map,"0xff6666";
 				donpcevent instance_npcname("#heal_c")+"::OnStart";
 			}
@@ -2786,7 +2250,7 @@ OnStart:
 	donpcevent instance_npcname("Catherine Jet Johnson#6")+"::OnEnable";
 	for (set .@i,1; .@i<=10; set .@i,.@i+1)
 		donpcevent instance_npcname("Packaged Present#"+.@i)+"::OnEnable";
-	sleep2 6000;
+	sleep 6000;
 	mapannounce .@map$,"Catherine Jet Johnson's yell: Are you okay? Flee to the south emergency exit!",bc_map,"0xffff00";
 	end;
 OnInstanceInit:
@@ -2861,21 +2325,21 @@ OnDisable:
 1@xm_d,218,145,5	script	Catherine Jet Johnson#6	4_F_SKULL06GIRL,{
 	end;
 OnStart:
-	sleep2 1000;
+	sleep 1000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Unfortunately, I am failed to persuade Kimi.";
-	sleep2 3000;
+	sleep 3000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: What was the voice of phantom? Why it torments Kimi so harshly...";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: I guess that the curse of my face was form the unidentified voice.";
-	sleep2 4000;
+	sleep 4000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Anyway, even Kimi, saying hates everyone, has collected her recollections here a lot.";
-	sleep2 6000;
+	sleep 6000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: I will put this thing safely even if her soul will return and she won't be disappointed.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: Thanks to you, everything that I have wondered is completely resolved. Please call me again if you are going to send her to Heaven next time.";
-	sleep2 5000;
+	sleep 5000;
 	unittalk getnpcid(0),"Catherine Jet Johnson: I will open the exit way out. I will go outside first, so just follow me.";
-	sleep2 3000;
+	sleep 3000;
 	donpcevent instance_npcname("Catherine Jet Johnson#6")+"::OnDisable";
 	donpcevent instance_npcname("#exwp1")+"::OnEnable";
 	end;
@@ -2894,403 +2358,150 @@ OnDisable:
 //============================================================
 1@xm_d,210,141,3	script	Packaged Present#1	4_TREASURE_BOX,{
 	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#1")+"::OnDisable";
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
 	initnpctimer;
 	end;
 
 OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#1")+"::OnDisable";
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
 	end;
 OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#1");
+	hideoffnpc instance_npcname(strnpcinfo(0));
 	end;
 OnDisable:
-	hideonnpc instance_npcname("Packaged Present#1");
+	hideonnpc instance_npcname(strnpcinfo(0));
 	end;
 OnTimer1000:
 	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(4,8);
+	switch (atoi(strnpcinfo(2))) {
+		case 1:
+			set .@min,4;
+			set .@max,8;
+			setarray .@x[0],208,212;
+			setarray .@y[0],139,143;
+			setarray .@chance[0],150,600,900;
+			setarray .@item[0],644,617,22534; //Gift_Box,Old_Violet_Box,Closedmind_Box
+			setarray .@x_item[0],209,210,211;
+			set .@y_item,141;
+			break;
+		case 2:
+			set .@min,3;
+			set .@max,7;
+			setarray .@x[0],212,216;
+			setarray .@y[0],139,143;
+			setarray .@chance[0],400,700,950;
+			setarray .@item[0],603,616,13442; //Old_Blue_Box,Old_Card_Album,Old_Parasol
+			setarray .@x_item[0],213,214,215;
+			set .@y_item,141;
+			break;
+		case 3:
+			set .@min,2;
+			set .@max,6;
+			setarray .@x[0],216,220;
+			setarray .@y[0],139,143;
+			setarray .@chance[0],850,800,950;
+			setarray .@item[0],7229,12246,2486; //Silver_Bullion,Magic_Card_Album,Shadow_Walk_
+			setarray .@x_item[0],217,218,219;
+			set .@y_item,141;
+			break;
+		case 4:
+			set .@min,4;
+			set .@max,8;
+			setarray .@x[0],220,224;
+			setarray .@y[0],139,143;
+			setarray .@chance[0],700,600,900;
+			setarray .@item[0],7288,617,22534; //Gold_Bullion,Old_Violet_Box,Closedmind_Box
+			setarray .@x_item[0],221,222,223;
+			set .@y_item,141;
+			break;
+		case 5:
+			set .@min,3;
+			set .@max,7;
+			setarray .@x[0],224,228;
+			setarray .@y[0],139,143;
+			setarray .@chance[0],150,700,950;
+			setarray .@item[0],644,616,2976; //Gift_Box,Old_Card_Album,Red_Lantern
+			setarray .@x_item[0],225,226,227;
+			set .@y_item,141;
+			break;
+		case 6:
+			set .@min,2;
+			set .@max,6;
+			setarray .@x[0],208,212;
+			setarray .@y[0],134,138;
+			setarray .@chance[0],400,800,950;
+			setarray .@item[0],603,12246,2977; //Old_Blue_Box,Magic_Card_Album,Hurt_Mind
+			setarray .@x_item[0],209,210,211;
+			set .@y_item,136;
+			break;
+		case 7:
+			set .@min,4;
+			set .@max,8;
+			setarray .@x[0],212,216;
+			setarray .@y[0],134,138;
+			setarray .@chance[0],850,600,900;
+			setarray .@item[0],7229,617,22534; //Silver_Bullion,Old_Violet_Box,Closedmind_Box
+			setarray .@x_item[0],213,214,215;
+			set .@y_item,136;
+			break;
+		case 8:
+			set .@min,3;
+			set .@max,7;
+			setarray .@x[0],216,220;
+			setarray .@y[0],134,138;
+			setarray .@chance[0],700,700,950;
+			setarray .@item[0],7228,616,2978; //Gold_Bullion,Old_Card_Album,KindHeart
+			setarray .@x_item[0],217,218,219;
+			set .@y_item,136;
+			break;
+		case 9:
+			set .@min,2;
+			set .@max,6;
+			setarray .@x[0],220,224;
+			setarray .@y[0],134,138;
+			setarray .@chance[0],150,800,950;
+			setarray .@item[0],644,12246,18848; //Gift_Box,Magic_Card_Album,Lush_Rose
+			setarray .@x_item[0],221,222,223;
+			set .@y_item,136;
+			break;
+		case 10:
+			set .@min,4;
+			set .@max,8;
+			setarray .@x[0],224,228;
+			setarray .@y[0],134,138;
+			setarray .@chance[0],400,600,900;
+			setarray .@item[0],603,617,22534; //Old_Blue_Box,Old_Violet_Box,Closedmind_Box
+			setarray .@x_item[0],225,226,227;
+			set .@y_item,136;
+			break;
+	}
+	set .@idnum,rand(.@min,.@max);
 	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(208,212);
-			set .@idy,rand(139,143);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
+		if (.@id < .@idnum) {
+			set .@idx,rand(.@x[0],.@x[1]);
+			set .@idy,rand(.@y[0],.@y[1]);
+			makeitem 7642,1,.@map$,.@idx,.@idy; //Bloody_Coin
+			set .@id,.@id+1;
 		} else
 			break;
 	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 150)
-		makeitem 644,1,.@map$,209,141; //Gift_Box
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 600)
-		makeitem 617,1,.@map$,210,141; //Old_Violet_Box
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 900)
-		makeitem 22534,1,.@map$,211,141; //Closedmind_Box
+	for (set .@i,0; .@i<=2; .@i++) {
+		if (rand(1,1000) > .@chance[.@i])
+			makeitem2 .@item[.@i],1,.@map$,.@x_item[.@i],.@y_item,0,0,0,0,0,0,0;
+	}
 	stopnpctimer;
 	end;
 }
 
-1@xm_d,214,141,3	script	Packaged Present#2	4_TREASURE_BOX,{
-	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#2")+"::OnDisable";
-	initnpctimer;
-	end;
-
-OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#2")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#2");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Packaged Present#2");
-	end;
-OnTimer1000:
-	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(3,7);
-	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(212,216);
-			set .@idy,rand(139,143);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
-		} else
-			break;
-	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 400)
-		makeitem 603,1,.@map$,213,141; //Old_Blue_Box
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 700)
-		makeitem 616,1,.@map$,214,141; //Old_Card_Album
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 950)
-		makeitem2 13442,1,.@map$,215,141,0,0,0,0,0,0,0; //Old_Parasol
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,218,141,3	script	Packaged Present#3	4_TREASURE_BOX,{
-	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#3")+"::OnDisable";
-	initnpctimer;
-	end;
-
-OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#3")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#3");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Packaged Present#3");
-	end;
-OnTimer1000:
-	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(2,6);
-	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(216,220);
-			set .@idy,rand(139,143);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
-		} else
-			break;
-	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 850)
-		makeitem 7229,1,.@map$,217,141; //Silver_Bullion
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 800)
-		makeitem 12246,1,.@map$,218,141; //Magic_Card_Album
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 950)
-		makeitem2 2486,1,.@map$,219,141,0,0,0,0,0,0,0; //Shadow_Walk_
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,222,141,3	script	Packaged Present#4	4_TREASURE_BOX,{
-	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#4")+"::OnDisable";
-	initnpctimer;
-	end;
-
-OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#4")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#4");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Packaged Present#4");
-	end;
-OnTimer1000:
-	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(4,8);
-	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(220,224);
-			set .@idy,rand(139,143);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
-		} else
-			break;
-	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 700)
-		makeitem 7228,1,.@map$,221,141; //Gold_Bullion
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 600)
-		makeitem 617,1,.@map$,222,141; //Old_Violet_Box
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 900)
-		makeitem 2486,1,.@map$,223,141; //Closedmind_Box
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,226,141,3	script	Packaged Present#5	4_TREASURE_BOX,{
-	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#5")+"::OnDisable";
-	initnpctimer;
-	end;
-
-OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#5")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#5");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Packaged Present#5");
-	end;
-OnTimer1000:
-	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(3,7);
-	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(224,228);
-			set .@idy,rand(139,143);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
-		} else
-			break;
-	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 150)
-		makeitem 644,1,.@map$,225,141; //Gift_Box
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 700)
-		makeitem 616,1,.@map$,226,141; //Old_Card_Album
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 950)
-		makeitem2 2976,1,.@map$,227,141,0,0,0,0,0,0,0; //Red_Lantern
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,210,136,3	script	Packaged Present#6	4_TREASURE_BOX,{
-	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#6")+"::OnDisable";
-	initnpctimer;
-	end;
-
-OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#6")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#6");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Packaged Present#6");
-	end;
-OnTimer1000:
-	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(2,6);
-	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(208,212);
-			set .@idy,rand(134,138);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
-		} else
-			break;
-	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 400)
-		makeitem 603,1,.@map$,209,136; //Old_Blue_Box
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 800)
-		makeitem 12246,1,.@map$,210,136; //Magic_Card_Album
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 950)
-		makeitem2 2977,1,.@map$,211,136,0,0,0,0,0,0,0; //Hurt_Mind
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,214,136,3	script	Packaged Present#7	4_TREASURE_BOX,{
-	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#7")+"::OnDisable";
-	initnpctimer;
-	end;
-
-OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#7")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#7");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Packaged Present#7");
-	end;
-OnTimer1000:
-	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(4,8);
-	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(212,216);
-			set .@idy,rand(134,138);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
-		} else
-			break;
-	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 850)
-		makeitem 7229,1,.@map$,213,136; //Silver_Bullion
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 600)
-		makeitem 617,1,.@map$,214,136; //Old_Violet_Box
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 900)
-		makeitem 22534,1,.@map$,215,136; //Closedmind_Box
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,218,136,3	script	Packaged Present#8	4_TREASURE_BOX,{
-	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#8")+"::OnDisable";
-	initnpctimer;
-	end;
-
-OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#8")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#8");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Packaged Present#8");
-	end;
-OnTimer1000:
-	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(3,7);
-	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(216,220);
-			set .@idy,rand(134,138);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
-		} else
-			break;
-	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 700)
-		makeitem 7228,1,.@map$,217,136; //Gold_Bullion
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 700)
-		makeitem 616,1,.@map$,218,136; //Old_Card_Album
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 950)
-		makeitem2 2978,1,.@map$,219,136,0,0,0,0,0,0,0; //KindHeart
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,222,136,3	script	Packaged Present#9	4_TREASURE_BOX,{
-	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#9")+"::OnDisable";
-	initnpctimer;
-	end;
-
-OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#9")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#9");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Packaged Present#9");
-	end;
-OnTimer1000:
-	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(2,6);
-	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(220,224);
-			set .@idy,rand(134,138);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
-		} else
-			break;
-	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 150)
-		makeitem 644,1,.@map$,221,136; //Gift_Box
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 800)
-		makeitem 12246,1,.@map$,222,136; //Magic_Card_Album
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 950)
-		makeitem2 18848,1,.@map$,223,136,0,0,0,0,0,0,0; //Lush_Rose
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,226,136,3	script	Packaged Present#10	4_TREASURE_BOX,{
-	specialeffect EF_COIN;
-	donpcevent instance_npcname("Packaged Present#10")+"::OnDisable";
-	initnpctimer;
-	end;
-
-OnInstanceInit:
-	donpcevent instance_npcname("Packaged Present#10")+"::OnDisable";
-	end;
-OnEnable:
-	hideoffnpc instance_npcname("Packaged Present#10");
-	end;
-OnDisable:
-	hideonnpc instance_npcname("Packaged Present#10");
-	end;
-OnTimer1000:
-	set .@map$,instance_mapname("1@xm_d");
-	set .@idnum001,rand(4,8);
-	while (1) {
-		if (.@id01 < .@idnum001) {
-			set .@idx,rand(224,228);
-			set .@idy,rand(134,138);
-			makeitem 7642,1,.@map$,.@idx,.@idy;
-			set .@id01,.@id01+1;
-		} else
-			break;
-	}
-	set .@d_item1,rand(1,1000);
-	if (.@d_item1 > 400)
-		makeitem 603,1,.@map$,225,136; //Old_Blue_Box
-	set .@d_item2,rand(1,1000);
-	if (.@d_item2 > 600)
-		makeitem 617,1,.@map$,226,136; //Old_Violet_Box
-	set .@d_item3,rand(1,1000);
-	if (.@d_item3 > 900)
-		makeitem 22534,1,.@map$,227,136; //Closedmind_Box
-	stopnpctimer;
-	end;
-}
+1@xm_d,214,141,3	duplicate(Packaged Present#1)	Packaged Present#2	4_TREASURE_BOX
+1@xm_d,218,141,3	duplicate(Packaged Present#1)	Packaged Present#3	4_TREASURE_BOX
+1@xm_d,222,141,3	duplicate(Packaged Present#1)	Packaged Present#4	4_TREASURE_BOX
+1@xm_d,226,141,3	duplicate(Packaged Present#1)	Packaged Present#5	4_TREASURE_BOX
+1@xm_d,210,136,3	duplicate(Packaged Present#1)	Packaged Present#6	4_TREASURE_BOX
+1@xm_d,214,136,3	duplicate(Packaged Present#1)	Packaged Present#7	4_TREASURE_BOX
+1@xm_d,218,136,3	duplicate(Packaged Present#1)	Packaged Present#8	4_TREASURE_BOX
+1@xm_d,222,136,3	duplicate(Packaged Present#1)	Packaged Present#9	4_TREASURE_BOX
+1@xm_d,226,136,3	duplicate(Packaged Present#1)	Packaged Present#10	4_TREASURE_BOX
 
 // Instance Guards :: md_xm_wp
 //============================================================
@@ -3299,13 +2510,16 @@ OnTimer1000:
 OnTouch_:
 	if (getstatus(SC_MONSTER_TRANSFORM,1) != 1246) {
 		set .@map$,instance_mapname("1@xm_d");
-		setarray .@x[0],10,30,50,70,90;
-		set .@i,atoi(strnpcinfo(2))-61;
+		setarray .@num[0],6,5,4,6,5,4,6,5,4,6,5,4,6,5,6,
+		                  5,6,5,4,6,5,4,6,5,4,6,5,4,6,5,
+		                  5,5,5,5,5,5,5,5,5,5,5,5,5,5;
 		playBGM "125";
 		specialeffect EF_VENOMDUST;
 		donpcevent instance_npcname("#alert1")+"::OnStart";
 		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		areamonster .@map$,.@x[.@i]-10,14,.@x[.@i]+10,34,"Toy Factory Guard",2990,5,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+		getmapxy(.@map$,.@x,.@y,1);
+		set .@mon_num,.@num[atoi(strnpcinfo(2))-61];
+		areamonster .@map$,.@x-5,.@y-5,.@x+5,.@y+5,"Toy Factory Guard",2990,.@mon_num,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 		initnpctimer;
 	}
 	end;
@@ -3332,318 +2546,45 @@ OnTimer45000:
 1@xm_d,50,24,0	duplicate(alert#61)	alert#63	HIDDEN_WARP_NPC,10,10
 1@xm_d,70,24,0	duplicate(alert#61)	alert#64	HIDDEN_WARP_NPC,10,10
 1@xm_d,90,24,0	duplicate(alert#61)	alert#65	HIDDEN_WARP_NPC,10,10
-
-1@xm_d,10,44,0	script	alert#66	HIDDEN_WARP_NPC,10,10,{
-	end;
-OnTouch_:
-	if (getstatus(SC_MONSTER_TRANSFORM,1) != 1246) {
-		set .@map$,instance_mapname("1@xm_d");
-		setarray .@x[0],10,30,50,70,90,110;
-		set .@i,atoi(strnpcinfo(2))-66;
-		playBGM "125";
-		specialeffect EF_VENOMDUST;
-		donpcevent instance_npcname("#alert1")+"::OnStart";
-		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		areamonster .@map$,.@x[.@i]-10,34,.@x[.@i]+10,54,"Toy Factory Guard",2990,5,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-		initnpctimer;
-	}
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	end;
-OnEnable:
-	enablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnDisable:
-	disablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnMyMobDead:
-	end;
-OnTimer45000:
-	set .@map$,instance_mapname("1@xm_d");
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,30,44,0	duplicate(alert#66)	alert#67	HIDDEN_WARP_NPC,10,10
-1@xm_d,50,44,0	duplicate(alert#66)	alert#68	HIDDEN_WARP_NPC,10,10
-1@xm_d,70,44,0	duplicate(alert#66)	alert#69	HIDDEN_WARP_NPC,10,10
-1@xm_d,90,44,0	duplicate(alert#66)	alert#70	HIDDEN_WARP_NPC,10,10
-1@xm_d,110,44,0	duplicate(alert#66)	alert#71	HIDDEN_WARP_NPC,10,10
-
-1@xm_d,10,64,0	script	alert#72	HIDDEN_WARP_NPC,10,10,{
-	end;
-OnTouch_:
-	if (getstatus(SC_MONSTER_TRANSFORM,1) != 1246) {
-		set .@map$,instance_mapname("1@xm_d");
-		setarray .@x[0],10,30,50,70,90,110;
-		set .@i,atoi(strnpcinfo(2))-72;
-		playBGM "125";
-		specialeffect EF_VENOMDUST;
-		donpcevent instance_npcname("#alert1")+"::OnStart";
-		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		areamonster .@map$,.@x[.@i]-10,54,.@x[.@i]+10,74,"Toy Factory Guard",2990,5,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-		initnpctimer;
-	}
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	end;
-OnEnable:
-	enablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnDisable:
-	disablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnMyMobDead:
-	end;
-OnTimer45000:
-	set .@map$,instance_mapname("1@xm_d");
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,30,64,0	duplicate(alert#72)	alert#73	HIDDEN_WARP_NPC,10,10
-1@xm_d,50,64,0	duplicate(alert#72)	alert#74	HIDDEN_WARP_NPC,10,10
-1@xm_d,70,64,0	duplicate(alert#72)	alert#75	HIDDEN_WARP_NPC,10,10
-1@xm_d,90,64,0	duplicate(alert#72)	alert#76	HIDDEN_WARP_NPC,10,10
-1@xm_d,110,64,0	duplicate(alert#72)	alert#77	HIDDEN_WARP_NPC,10,10
-
-1@xm_d,10,84,0	script	alert#78	HIDDEN_WARP_NPC,10,10,{
-	end;
-OnTouch_:
-	if (getstatus(SC_MONSTER_TRANSFORM,1) != 1246) {
-		set .@map$,instance_mapname("1@xm_d");
-		setarray .@x[0],10,30,50,70,90,110;
-		set .@i,atoi(strnpcinfo(2))-78;
-		playBGM "125";
-		specialeffect EF_VENOMDUST;
-		donpcevent instance_npcname("#alert1")+"::OnStart";
-		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		areamonster .@map$,.@x[.@i]-10,74,.@x[.@i]+10,94,"Toy Factory Guard",2990,5,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-		initnpctimer;
-	}
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	end;
-OnEnable:
-	enablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnDisable:
-	disablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnMyMobDead:
-	end;
-OnTimer45000:
-	set .@map$,instance_mapname("1@xm_d");
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,30,84,0	duplicate(alert#78)	alert#79	HIDDEN_WARP_NPC,10,10
-1@xm_d,50,84,0	duplicate(alert#78)	alert#80	HIDDEN_WARP_NPC,10,10
-1@xm_d,70,84,0	duplicate(alert#78)	alert#81	HIDDEN_WARP_NPC,10,10
-1@xm_d,90,84,0	duplicate(alert#78)	alert#82	HIDDEN_WARP_NPC,10,10
-1@xm_d,110,84,0	duplicate(alert#78)	alert#83	HIDDEN_WARP_NPC,10,10
-
-1@xm_d,10,104,0	script	alert#84	HIDDEN_WARP_NPC,10,10,{
-	end;
-OnTouch_:
-	if (getstatus(SC_MONSTER_TRANSFORM,1) != 1246) {
-		set .@map$,instance_mapname("1@xm_d");
-		setarray .@x[0],10,30,50,70,90,110;
-		set .@i,atoi(strnpcinfo(2))-84;
-		playBGM "125";
-		specialeffect EF_VENOMDUST;
-		donpcevent instance_npcname("#alert1")+"::OnStart";
-		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		areamonster .@map$,.@x[.@i]-10,94,.@x[.@i]+10,114,"Toy Factory Guard",2990,5,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-		initnpctimer;
-	}
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	end;
-OnEnable:
-	enablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnDisable:
-	disablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnMyMobDead:
-	end;
-OnTimer45000:
-	set .@map$,instance_mapname("1@xm_d");
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,30,104,0	duplicate(alert#84)	alert#85	HIDDEN_WARP_NPC,10,10
-1@xm_d,50,104,0	duplicate(alert#84)	alert#86	HIDDEN_WARP_NPC,10,10
-1@xm_d,70,104,0	duplicate(alert#84)	alert#87	HIDDEN_WARP_NPC,10,10
-1@xm_d,90,104,0	duplicate(alert#84)	alert#88	HIDDEN_WARP_NPC,10,10
-1@xm_d,110,104,0	duplicate(alert#84)	alert#89	HIDDEN_WARP_NPC,10,10
-
-1@xm_d,155,20,0	script	alert#90	HIDDEN_WARP_NPC,10,10,{
-	end;
-OnTouch_:
-	if (getstatus(SC_MONSTER_TRANSFORM,1) != 1246) {
-		set .@map$,instance_mapname("1@xm_d");
-		setarray .@x[0],155,180,205,230;
-		setarray .@y[0],20,50,80,110;
-		set .@i,atoi(strnpcinfo(2))-90;
-		playBGM "125";
-		specialeffect EF_VENOMDUST;
-		donpcevent instance_npcname("#alert1")+"::OnStart";
-		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		areamonster .@map$,.@x[.@i]-10,.@y[.@i]-10,.@x[.@i]+10,.@y[.@i]+10,"Toy Factory Guard",2990,5,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-		initnpctimer;
-	}
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	end;
-OnEnable:
-	enablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnDisable:
-	disablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnMyMobDead:
-	end;
-OnTimer45000:
-	set .@map$,instance_mapname("1@xm_d");
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,180,50,0	duplicate(alert#90)	alert#91	HIDDEN_WARP_NPC,10,10
-1@xm_d,205,80,0	duplicate(alert#90)	alert#92	HIDDEN_WARP_NPC,10,10
-1@xm_d,230,110,0	duplicate(alert#90)	alert#93	HIDDEN_WARP_NPC,10,10
-
-1@xm_d,180,20,0	script	alert#94	HIDDEN_WARP_NPC,10,10,{
-	end;
-OnTouch_:
-	if (getstatus(SC_MONSTER_TRANSFORM,1) != 1246) {
-		set .@map$,instance_mapname("1@xm_d");
-		setarray .@y[0],20,50,80;
-		set .@i,atoi(strnpcinfo(2))-94;
-		playBGM "125";
-		specialeffect EF_VENOMDUST;
-		donpcevent instance_npcname("#alert1")+"::OnStart";
-		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		areamonster .@map$,170,.@y[.@i]-10,190,.@y[.@i]+10,"Toy Factory Guard",2990,5,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-		initnpctimer;
-	}
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	end;
-OnEnable:
-	enablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnDisable:
-	disablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnMyMobDead:
-	end;
-OnTimer45000:
-	set .@map$,instance_mapname("1@xm_d");
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,180,50,0	duplicate(alert#94)	alert#95	HIDDEN_WARP_NPC,10,10
-1@xm_d,180,80,0	duplicate(alert#94)	alert#96	HIDDEN_WARP_NPC,10,10
-
-1@xm_d,205,20,0	script	alert#97	HIDDEN_WARP_NPC,10,10,{
-	end;
-OnTouch_:
-	if (getstatus(SC_MONSTER_TRANSFORM,1) != 1246) {
-		set .@map$,instance_mapname("1@xm_d");
-		setarray .@y[0],20,50,80,110;
-		set .@i,atoi(strnpcinfo(2))-97;
-		playBGM "125";
-		specialeffect EF_VENOMDUST;
-		donpcevent instance_npcname("#alert1")+"::OnStart";
-		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		areamonster .@map$,195,.@y[.@i]-10,215,.@y[.@i]+10,"Toy Factory Guard",2990,5,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-		initnpctimer;
-	}
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	end;
-OnEnable:
-	enablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnDisable:
-	disablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnMyMobDead:
-	end;
-OnTimer45000:
-	set .@map$,instance_mapname("1@xm_d");
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,205,50,0	duplicate(alert#97)	alert#98	HIDDEN_WARP_NPC,10,10
-1@xm_d,205,80,0	duplicate(alert#97)	alert#99	HIDDEN_WARP_NPC,10,10
-1@xm_d,205,110,0	duplicate(alert#97)	alert#100	HIDDEN_WARP_NPC,10,10
-
-1@xm_d,230,20,0	script	alert#101	HIDDEN_WARP_NPC,10,10,{
-	end;
-OnTouch_:
-	if (getstatus(SC_MONSTER_TRANSFORM,1) != 1246) {
-		set .@map$,instance_mapname("1@xm_d");
-		setarray .@y[0],20,50,80,110;
-		set .@i,atoi(strnpcinfo(2))-101;
-		playBGM "125";
-		specialeffect EF_VENOMDUST;
-		donpcevent instance_npcname("#alert1")+"::OnStart";
-		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		areamonster .@map$,220,.@y[.@i]-10,240,.@y[.@i]+10,"Toy Factory Guard",2990,5,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-		initnpctimer;
-	}
-	end;
-OnInstanceInit:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	end;
-OnEnable:
-	enablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnDisable:
-	disablenpc instance_npcname(strnpcinfo(0));
-	end;
-OnMyMobDead:
-	end;
-OnTimer45000:
-	set .@map$,instance_mapname("1@xm_d");
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
-	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-	stopnpctimer;
-	end;
-}
-
-1@xm_d,230,50,0	duplicate(alert#101)	alert#102	HIDDEN_WARP_NPC,10,10
-1@xm_d,230,80,0	duplicate(alert#101)	alert#103	HIDDEN_WARP_NPC,10,10
-1@xm_d,230,110,0	duplicate(alert#101)	alert#104	HIDDEN_WARP_NPC,10,10
+1@xm_d,10,44,0	duplicate(alert#61)	alert#66	HIDDEN_WARP_NPC,10,10
+1@xm_d,30,44,0	duplicate(alert#61)	alert#67	HIDDEN_WARP_NPC,10,10
+1@xm_d,50,44,0	duplicate(alert#61)	alert#68	HIDDEN_WARP_NPC,10,10
+1@xm_d,70,44,0	duplicate(alert#61)	alert#69	HIDDEN_WARP_NPC,10,10
+1@xm_d,90,44,0	duplicate(alert#61)	alert#70	HIDDEN_WARP_NPC,10,10
+1@xm_d,110,44,0	duplicate(alert#61)	alert#71	HIDDEN_WARP_NPC,10,10
+1@xm_d,10,64,0	duplicate(alert#61)	alert#72	HIDDEN_WARP_NPC,10,10
+1@xm_d,30,64,0	duplicate(alert#61)	alert#73	HIDDEN_WARP_NPC,10,10
+1@xm_d,50,64,0	duplicate(alert#61)	alert#74	HIDDEN_WARP_NPC,10,10
+1@xm_d,70,64,0	duplicate(alert#61)	alert#75	HIDDEN_WARP_NPC,10,10
+1@xm_d,90,64,0	duplicate(alert#61)	alert#76	HIDDEN_WARP_NPC,10,10
+1@xm_d,110,64,0	duplicate(alert#61)	alert#77	HIDDEN_WARP_NPC,10,10
+1@xm_d,10,84,0	duplicate(alert#61)	alert#78	HIDDEN_WARP_NPC,10,10
+1@xm_d,30,84,0	duplicate(alert#61)	alert#79	HIDDEN_WARP_NPC,10,10
+1@xm_d,50,84,0	duplicate(alert#61)	alert#80	HIDDEN_WARP_NPC,10,10
+1@xm_d,70,84,0	duplicate(alert#61)	alert#81	HIDDEN_WARP_NPC,10,10
+1@xm_d,90,84,0	duplicate(alert#61)	alert#82	HIDDEN_WARP_NPC,10,10
+1@xm_d,110,84,0	duplicate(alert#61)	alert#83	HIDDEN_WARP_NPC,10,10
+1@xm_d,10,104,0	duplicate(alert#61)	alert#84	HIDDEN_WARP_NPC,10,10
+1@xm_d,30,104,0	duplicate(alert#61)	alert#85	HIDDEN_WARP_NPC,10,10
+1@xm_d,50,104,0	duplicate(alert#61)	alert#86	HIDDEN_WARP_NPC,10,10
+1@xm_d,70,104,0	duplicate(alert#61)	alert#87	HIDDEN_WARP_NPC,10,10
+1@xm_d,90,104,0	duplicate(alert#61)	alert#88	HIDDEN_WARP_NPC,10,10
+1@xm_d,110,104,0	duplicate(alert#61)	alert#89	HIDDEN_WARP_NPC,10,10
+1@xm_d,155,20,0	duplicate(alert#61)	alert#90	HIDDEN_WARP_NPC,10,10
+1@xm_d,180,50,0	duplicate(alert#61)	alert#91	HIDDEN_WARP_NPC,10,10
+1@xm_d,205,80,0	duplicate(alert#61)	alert#92	HIDDEN_WARP_NPC,10,10
+1@xm_d,230,110,0	duplicate(alert#61)	alert#93	HIDDEN_WARP_NPC,10,10
+1@xm_d,180,20,0	duplicate(alert#61)	alert#94	HIDDEN_WARP_NPC,10,10
+1@xm_d,180,50,0	duplicate(alert#61)	alert#95	HIDDEN_WARP_NPC,10,10
+1@xm_d,180,80,0	duplicate(alert#61)	alert#96	HIDDEN_WARP_NPC,10,10
+1@xm_d,205,20,0	duplicate(alert#61)	alert#97	HIDDEN_WARP_NPC,10,10
+1@xm_d,205,50,0	duplicate(alert#61)	alert#98	HIDDEN_WARP_NPC,10,10
+1@xm_d,205,80,0	duplicate(alert#61)	alert#99	HIDDEN_WARP_NPC,10,10
+1@xm_d,205,110,0	duplicate(alert#61)	alert#100	HIDDEN_WARP_NPC,10,10
+1@xm_d,230,20,0	duplicate(alert#61)	alert#101	HIDDEN_WARP_NPC,10,10
+1@xm_d,230,50,0	duplicate(alert#61)	alert#102	HIDDEN_WARP_NPC,10,10
+1@xm_d,230,80,0	duplicate(alert#61)	alert#103	HIDDEN_WARP_NPC,10,10
+1@xm_d,230,110,0	duplicate(alert#61)	alert#104	HIDDEN_WARP_NPC,10,10
 
 // Instance GM Function :: mx_xm_ad
 //==========================================

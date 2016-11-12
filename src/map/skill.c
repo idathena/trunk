@@ -109,8 +109,6 @@ struct s_skill_nounit_layout skill_nounit_layout[MAX_SKILL_UNIT_LAYOUT];
 int overbrand_nounit_pos;
 int overbrand_brandish_nounit_pos;
 
-static char dir_ka = -1; //Holds temporary direction to the target for SR_KNUCKLEARROW
-
 //Early declaration
 int skill_block_check(struct block_list *bl, enum sc_type type, uint16 skill_id);
 static int skill_check_unit_range(struct block_list *bl, int x, int y, uint16 skill_id, uint16 skill_lv);
@@ -2646,12 +2644,21 @@ void skill_attack_blow(struct block_list *src, struct block_list *dsrc, struct b
 		case SR_KNUCKLEARROW: {
 				short x = target->x, y = target->y;
 
+				dir = map_calc_dir(target, src->x, src->y);
 				//Ignore knockback damage bonus if in WOE or target is boss/knockback immune (bugreport:9096)
-				if (skill_blown(dsrc, target, blewcount, dir_ka, 0x08|0x10|0x20) < blewcount)
+				if (skill_blown(dsrc, target, blewcount, dir, 0x08|0x10|0x20) < blewcount)
 					skill_addtimerskill(src, tick + 300 * ((flag&2) ? 1 : 2), target->id, 0, 0, skill_id, skill_lv, BF_WEAPON, flag|4);
-				dir_ka = -1;
-				if ((target->x != x || target->y != y) && unit_movepos(src,target->x,target->y,1,true))
-					clif_blown(src, target); //Move attacker to the target position after knocked back
+				if (target->x != x || target->y != y)  {
+					if (dir < 4) {
+						x = target->x + 2 * (dir > 0) - 3 * (dir > 0);
+						y = target->y + 1 - (dir / 2) - (dir > 2);
+					} else {
+						x = target->x + 2 * (dir > 4) - 1 * (dir > 4);
+						y = target->y + (dir / 6) - 1 + (dir > 6);
+					}
+					if (unit_movepos(src, x, y, 1, true))
+						clif_blown(src, target); //Move attacker to the target position after knocked back
+				}
 			}
 			break;
 		case RL_R_TRIP:
@@ -4870,6 +4877,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case GC_DARKILLUSION:
+		case SR_KNUCKLEARROW:
 		case KO_JYUMONJIKIRI:
 			{
 				short x, y;
@@ -4884,6 +4892,8 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				}
 				if (unit_movepos(src,x,y,1,true)) {
 					clif_blown(src,bl);
+					if (skill_id == SR_KNUCKLEARROW)
+						flag |= 2;
 					skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 					if (rnd()%100 < 4 * skill_lv && skill_id == GC_DARKILLUSION)
 						skill_castend_damage_id(src,bl,GC_CROSSIMPACT,skill_lv,tick,flag);
@@ -5115,14 +5125,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
 			}
-			break;
-
-		case SR_KNUCKLEARROW:
-			//Holds current direction of bl/target to src/attacker before the src is moved to bl location
-			dir_ka = map_calc_dir(bl,src->x,src->y);
-			if (unit_movepos(src,bl->x,bl->y,1,true))
-				clif_blown(src,bl); //Has slide effect even in GVG
-			skill_addtimerskill(src,tick,bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag|SD_LEVEL|2);
 			break;
 
 		case SR_HOWLINGOFLION:

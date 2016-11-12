@@ -1461,13 +1461,12 @@ int clif_spawn(struct block_list *bl)
 			break;
 		case BL_MOB: {
 				TBL_MOB *md = ((TBL_MOB *)bl);
-				int effect_id;
+				int effect_id = 0;
 
 				if (md->special_state.size == SZ_BIG) //Tiny/Big mobs [Valaris]
 					clif_specialeffect(bl,423,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect(bl,421,AREA);
-				effect_id = 0;
 #if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
 	#if PACKETVER >= 20130000
@@ -1839,9 +1838,8 @@ static int clif_delayquit(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct map_session_data *sd = NULL;
 
-	//Remove player from map server
-	if ((sd = map_id2sd(id)) != NULL && sd->fd == 0) //Should be a disconnected player.
-		map_quit(sd);
+	if ((sd = map_id2sd(id)) && !sd->fd) //Should be a disconnected player
+		map_quit(sd); //Remove player from map server
 	return 0;
 }
 
@@ -1849,12 +1847,11 @@ static int clif_delayquit(int tid, unsigned int tick, int id, intptr_t data)
  *
  *------------------------------------------*/
 void clif_quitsave(int fd,struct map_session_data *sd) {
-	if (!battle_config.prevent_logout ||
-		DIFF_TICK(gettick(), sd->canlog_tick) > battle_config.prevent_logout)
+	if (!battle_config.prevent_logout || DIFF_TICK(gettick(), sd->canlog_tick) > battle_config.prevent_logout)
 		map_quit(sd);
 	else if (sd->fd) {
 		//Disassociate session from player (session is deleted after this function was called)
-		//And set a timer to make him quit later.
+		//And set a timer to make him quit later
 		session[sd->fd]->session_data = NULL;
 		sd->fd = 0;
 		add_timer(gettick() + 10000, clif_delayquit, sd->bl.id, 0);
@@ -4580,13 +4577,12 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 			break;
 		case BL_MOB: {
 				TBL_MOB *md = ((TBL_MOB *)bl);
-				int effect_id;
+				int effect_id = 0;
 
 				if (md->special_state.size == SZ_BIG) //Tiny/big mobs [Valaris]
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
-				effect_id = 0;
 #if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
 	#if PACKETVER >= 20130000
@@ -10718,7 +10714,7 @@ void clif_parse_QuitGame(int fd, struct map_session_data *sd)
 {
 	//Rovert's prevent logout option fixed [Valaris]
 	//int type = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
-	if( !sd->sc.data[SC_CLOAKING] && !sd->sc.data[SC_HIDING] && !sd->sc.data[SC_CHASEWALK] && !sd->sc.data[SC_CLOAKINGEXCEED] && !sd->sc.data[SC_SUHIDE] &&
+	if( !pc_ishiding(sd) && !sd->sc.data[SC_SUHIDE] &&
 		(!battle_config.prevent_logout || DIFF_TICK(gettick(), sd->canlog_tick) > battle_config.prevent_logout) ) {
 		set_eof(fd);
 		pc_damage_log_clear(sd, 0);
@@ -10737,18 +10733,18 @@ void clif_parse_GetCharNameRequest(int fd, struct map_session_data *sd)
 	int id = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
 	struct block_list *bl;
 	//struct status_change *sc;
-	
-	if( id < 0 && -id == sd->bl.id ) // For disguises [Valaris]
+
+	if( id < 0 && -id == sd->bl.id ) //For disguises [Valaris]
 		id = sd->bl.id;
 
 	bl = map_id2bl(id);
 	if( bl == NULL )
-		return;	// Lagged clients could request names of already gone mobs/players. [Skotlex]
+		return;	//Lagged clients could request names of already gone mobs/players [Skotlex]
 
 	if( sd->bl.m != bl->m || !check_distance_bl(&sd->bl, bl, AREA_SIZE) )
-		return; // Block namerequests past view range
+		return; //Block namerequests past view range
 
-	// 'See people in GM hide' cheat detection
+	//'See people in GM hide' cheat detection
 	/* Disabled due to false positives (network lag + request name of char that's about to hide = race condition)
 	sc = status_get_sc(bl);
 	if (sc && (sc->option&OPTION_INVISIBLE) && !disguised(bl) &&
@@ -11075,7 +11071,7 @@ void clif_parse_Restart(int fd, struct map_session_data *sd)
 			break;
 		case 0x01:
 			//Rovert's Prevent logout option - Fixed [Valaris]
-			if( !sd->sc.data[SC_CLOAKING] && !sd->sc.data[SC_HIDING] && !sd->sc.data[SC_CHASEWALK] && !sd->sc.data[SC_CLOAKINGEXCEED] && !sd->sc.data[SC_SUHIDE] &&
+			if( !pc_ishiding(sd) && !sd->sc.data[SC_SUHIDE] &&
 				(!battle_config.prevent_logout || DIFF_TICK(gettick(), sd->canlog_tick) > battle_config.prevent_logout) ) {
 				pc_damage_log_clear(sd, 0);
 				chrif_charselectreq(sd, session[fd]->client_addr); //Send to char-server for character selection
