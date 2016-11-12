@@ -2657,7 +2657,7 @@ void skill_attack_blow(struct block_list *src, struct block_list *dsrc, struct b
 						y = target->y + (dir / 6) - 1 + (dir > 6);
 					}
 					if (unit_movepos(src, x, y, 1, true))
-						clif_blown(src, target); //Move attacker to the target position after knocked back
+						clif_blown(src, target); //Move attacker position after knocked back
 				}
 			}
 			break;
@@ -4877,6 +4877,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case GC_DARKILLUSION:
+		case LG_PINPOINTATTACK:
 		case SR_KNUCKLEARROW:
 		case KO_JYUMONJIKIRI:
 			{
@@ -4890,6 +4891,8 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					x = bl->x + 2 * (dir > 4) - 1 * (dir > 4);
 					y = bl->y + (dir / 6) - 1 + (dir > 6);
 				}
+				if ((map_flag_gvg2(src->m) || map[src->m].flag.battleground) && skill_id == LG_PINPOINTATTACK)
+					break;
 				if (unit_movepos(src,x,y,1,true)) {
 					clif_blown(src,bl);
 					if (skill_id == SR_KNUCKLEARROW)
@@ -5095,12 +5098,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				skill_addtimerskill(src,tick + 800,src->id,x,y,skill_id,skill_lv,0,flag); //To teleport Self
 				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 			}
-			break;
-
-		case LG_PINPOINTATTACK:
-			if (!map_flag_gvg2(src->m) && !map[src->m].flag.battleground && unit_movepos(src,bl->x,bl->y,1,true))
-				clif_blown(src,bl);
-			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 			break;
 
 		case LG_SHIELDSPELL:
