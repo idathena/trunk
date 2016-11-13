@@ -1461,8 +1461,9 @@ int clif_spawn(struct block_list *bl)
 			break;
 		case BL_MOB: {
 				TBL_MOB *md = ((TBL_MOB *)bl);
-				int effect_id = 0;
+				int effect_id;
 
+				effect_id = 0;
 				if (md->special_state.size == SZ_BIG) //Tiny/Big mobs [Valaris]
 					clif_specialeffect(bl,423,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
@@ -4577,8 +4578,9 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 			break;
 		case BL_MOB: {
 				TBL_MOB *md = ((TBL_MOB *)bl);
-				int effect_id = 0;
+				int effect_id;
 
+				effect_id = 0;
 				if (md->special_state.size == SZ_BIG) //Tiny/big mobs [Valaris]
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if (md->special_state.size == SZ_MEDIUM)
@@ -4658,7 +4660,7 @@ static int clif_calc_walkdelay(struct block_list *bl, int delay, char type, int6
 ///     10 = ATTACK_CRITICAL - critical hit
 ///     11 = ATTACK_LUCKY - lucky dodge
 ///     12 = TOUCHSKILL - (touch skill?)
-int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tick, int sdelay, int ddelay, int64 in_damage, int div, enum e_damage_type type, int64 in_damage2)
+int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tick, int sdelay, int ddelay, int64 in_damage, int div, enum e_damage_type type, int64 in_damage2, bool isspdamage)
 {
 	unsigned char buf[34];
 	struct status_change *sc;
@@ -4719,7 +4721,7 @@ int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tic
 #endif
 	}
 #if PACKETVER >= 20131223
-	WBUFB(buf,26) = 0; // IsSPDamage - Displays blue digits, need a way to handle this [Rytech]
+	WBUFB(buf,26) = (isspdamage ? 1 : 0);
 #endif
 	WBUFW(buf,24 + offset) = div;
 	WBUFB(buf,26 + offset) = type;
@@ -4760,7 +4762,7 @@ int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tic
  *------------------------------------------*/
 void clif_takeitem(struct block_list *src, struct block_list *dst)
 {
-	//clif_damage(src,dst,0,0,0,0,0,DMG_PICKUP_ITEM,0);
+	//clif_damage(src,dst,0,0,0,0,0,DMG_PICKUP_ITEM,0,false);
 	unsigned char buf[32];
 
 	nullpo_retv(src);

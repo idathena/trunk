@@ -438,8 +438,7 @@ struct map_session_data {
 		short add_steal_rate;
 		short add_heal_rate, add_heal2_rate;
 		short sp_gain_value, hp_gain_value, magic_sp_gain_value, magic_hp_gain_value;
-		short sp_vanish_rate, hp_vanish_rate;
-		short sp_vanish_per, sp_vanish_trigger, hp_vanish_per, hp_vanish_trigger;
+		short sp_vanish_rate, hp_vanish_rate, sp_vanish_per, hp_vanish_per;
 		unsigned short unbreakable;	//Chance to prevent ANY equipment breaking [celest]
 		unsigned short unbreakable_equip; //100% break resistance on certain equipment
 		unsigned short unstripable;

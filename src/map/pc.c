@@ -3268,15 +3268,13 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 		case SP_SP_VANISH_RATE:
 			if(sd->state.lr_flag != 2) {
 				sd->bonus.sp_vanish_rate += type2;
-				sd->bonus.sp_vanish_per = max(sd->bonus.sp_vanish_per, val);
-				sd->bonus.sp_vanish_trigger = 0;
+				sd->bonus.sp_vanish_per += val;
 			}
 			break;
 		case SP_HP_VANISH_RATE:
 			if(sd->state.lr_flag != 2) {
 				sd->bonus.hp_vanish_rate += type2;
-				sd->bonus.hp_vanish_per = max(sd->bonus.hp_vanish_per, val);
-				sd->bonus.hp_vanish_trigger = 0;
+				sd->bonus.hp_vanish_per += val;
 			}
 			break;
 		case SP_GET_ZENY_NUM:
@@ -3757,20 +3755,6 @@ void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int 
 			if(sd->state.lr_flag != 2)
 				pc_bonus_subele(sd, (unsigned char)type2, type3, val);
 			break;
-		case SP_HP_VANISH_RATE:
-			if(sd->state.lr_flag != 2) {
-				sd->bonus.hp_vanish_rate += type2;
-				sd->bonus.hp_vanish_per = max(sd->bonus.hp_vanish_per, type3);
-				sd->bonus.hp_vanish_trigger = val;
-			}
-			break;
-		case SP_SP_VANISH_RATE:
-			if(sd->state.lr_flag != 2) {
-				sd->bonus.sp_vanish_rate += type2;
-				sd->bonus.sp_vanish_per = max(sd->bonus.sp_vanish_per, type3);
-				sd->bonus.sp_vanish_trigger = val;
-			}
-			break;
 		case SP_STATE_NORECOVER_RACE:
 			PC_BONUS_CHK_RACE(type2, SP_STATE_NORECOVER_RACE);
 			if(sd->state.lr_flag == 2)
@@ -3783,7 +3767,6 @@ void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int 
 			if(sd->state.lr_flag != 2) {
 				sd->sp_vanish_race[type2].rate += type3;
 				sd->sp_vanish_race[type2].per += val;
-				sd->bonus.sp_vanish_trigger = 0;
 			}
 			break;
 		case SP_HP_VANISH_RACE_RATE:
@@ -3791,7 +3774,6 @@ void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int 
 			if(sd->state.lr_flag != 2) {
 				sd->hp_vanish_race[type2].rate += type3;
 				sd->hp_vanish_race[type2].per += val;
-				sd->bonus.hp_vanish_trigger = 0;
 			}
 			break;
 		default:
@@ -3859,22 +3841,6 @@ void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int 
 			sd->mdef_set_race[type2].rate = type3;
 			sd->mdef_set_race[type2].tick = type4;
 			sd->mdef_set_race[type2].value = val;
-			break;
-		case SP_SP_VANISH_RACE_RATE:
-			PC_BONUS_CHK_RACE(type2, SP_SP_VANISH_RACE_RATE);
-			if(sd->state.lr_flag != 2) {
-				sd->sp_vanish_race[type2].rate += type3;
-				sd->sp_vanish_race[type2].per += type4;
-				sd->bonus.sp_vanish_trigger = val;
-			}
-			break;
-		case SP_HP_VANISH_RACE_RATE:
-			PC_BONUS_CHK_RACE(type2, SP_HP_VANISH_RACE_RATE);
-			if(sd->state.lr_flag != 2) {
-				sd->hp_vanish_race[type2].rate += type3;
-				sd->hp_vanish_race[type2].per += type4;
-				sd->bonus.hp_vanish_trigger = val;
-			}
 			break;
 		default:
 			ShowWarning("pc_bonus4: Unknown type %d %d %d %d %d!\n", type, type2, type3, type4, val);
@@ -9655,7 +9621,7 @@ static void pc_unequipitem_sub(struct map_session_data *sd, int n, int flag) {
 void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 	int i = 0;
 
-	nullpo_retr(false,sd);
+	nullpo_retv(sd);
 
 	if( n < 0 || n >= MAX_INVENTORY ) {
 		clif_unequipitemack(sd,0,0,0);
