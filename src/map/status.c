@@ -11222,7 +11222,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 
 				if (tid == INVALID_TIMER || !src)
 					break; //Terminated by damage
-				status_fix_damage(src,bl,400 * sce->val1,clif_damage(bl,bl,gettick(),0,0,400 * sce->val1,0,DMG_NORMAL,0));
+				status_fix_damage(src,bl,400 * sce->val1,clif_damage(bl,bl,gettick(),0,0,400 * sce->val1,0,DMG_NORMAL,0,false));
 			}
 			break;
 		case SC_WUGDASH: {
@@ -11981,7 +11981,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				struct block_list *src = map_id2bl(sce->val2);
 
 				map_freeblock_lock();
-				status_damage(src,bl,100,0,clif_damage(bl,bl,tick,status_get_amotion(bl),status_get_dmotion(bl) + 500,100,0,DMG_NORMAL,0),0);
+				status_damage(src,bl,100,0,clif_damage(bl,bl,tick,status_get_amotion(bl),status_get_dmotion(bl) + 500,100,0,DMG_NORMAL,0,false),0);
 				unit_skillcastcancel(bl,2);
 				if( sc->data[type] ) {
 					sc_timer_next(3000 + tick,status_change_timer,bl->id,data);
@@ -11998,7 +11998,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				struct block_list *src = map_id2bl(sce->val2);
 
 				map_freeblock_lock();
-				status_damage(src,bl,damage,0,clif_damage(bl,bl,tick,status_get_amotion(bl),status_get_dmotion(bl) + 500,damage,0,DMG_NORMAL,0),0);
+				status_damage(src,bl,damage,0,clif_damage(bl,bl,tick,status_get_amotion(bl),status_get_dmotion(bl) + 500,damage,0,DMG_NORMAL,0,false),0);
 				unit_skillcastcancel(bl,2);
 				if( sc->data[type] ) {
 					sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
@@ -12063,7 +12063,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				struct block_list *src = map_id2bl(sce->val2);
 
 				map_freeblock_lock();
-				status_damage(src,bl,1,status->max_sp * 3 / 100,clif_damage(bl,bl,tick,status_get_amotion(bl),1,1,0,DMG_NORMAL,0),0);
+				status_damage(src,bl,1,status->max_sp * 3 / 100,clif_damage(bl,bl,tick,status_get_amotion(bl),1,1,0,DMG_NORMAL,0,false),0);
 				unit_skillcastcancel(bl,2);
 				if( sc->data[type] ) {
 					sc_timer_next(10000 + tick,status_change_timer,bl->id,data);
@@ -12126,7 +12126,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 				damage += battle_attr_fix(NULL,bl,sce->val2,ELE_FIRE,status->def_ele,status->ele_lv);
 				map_freeblock_lock();
-				status_damage(src,bl,damage,0,clif_damage(bl,bl,tick,status_get_amotion(bl),1,damage,0,DMG_NORMAL,0),0);
+				status_damage(src,bl,damage,0,clif_damage(bl,bl,tick,status_get_amotion(bl),1,damage,0,DMG_NORMAL,0,false),0);
 				unit_skillcastcancel(bl,2);
 				if( sc->data[type] ) { //Target still lives [LimitLine]
 					sc_timer_next(3000 + tick,status_change_timer,bl->id,data); //Deals damage every 3 seconds

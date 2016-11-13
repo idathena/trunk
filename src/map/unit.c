@@ -1552,7 +1552,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		return 0;
 	}
 
-	if( src != target && status_isdead(target) ) {
+	if( target->id != src->id && status_isdead(target) ) {
 		switch( skill_id ) { //Skills that may be cast on dead targets
 			case NPC_WIDESOULDRAIN:
 			case PR_REDEMPTIO:
@@ -1853,7 +1853,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	ud->skill_lv     = skill_lv;
 
 	if( casttime > 0 ) {
-		if( src->id != target->id ) //Self-targeted skills shouldn't show different direction
+		if( target->id != src->id ) //Self-targeted skills shouldn't show different direction
 			unit_setdir(src, map_calc_dir(src, target->x, target->y));
 		ud->skilltimer = add_timer(tick + casttime, skill_castend_id, src->id, 0);
 		if( sd && (pc_checkskill(sd, SA_FREECAST) > 0 || skill_id == LG_EXEEDBREAK) )

@@ -68,6 +68,8 @@ struct Damage {
 	int flag; //Check e_battle_flag
 	int miscflag;
 	enum damage_lv dmg_lv; //ATK_LUCKY, ATK_FLEE, ATK_DEF
+	bool isvanishdamage;
+	bool isspdamage; //Display blue damage numbers in clif_damage
 };
 
 //(Used in read pc.c,) attribute table (battle_attr_fix)
@@ -85,6 +87,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, int64 *, int flag, uint16 skill_id, bool status_reflect);
 
 void battle_drain(struct map_session_data *sd, struct block_list *tbl, int64 rdamage, int64 ldamage, int race, int class_);
+void battle_vanish(struct map_session_data *sd, struct block_list *target, struct Damage *wd);
 void battle_do_reflect(int attack_type, struct Damage *wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
 
 int battle_attr_ratio(int atk_elem, int def_type, int def_lv);
@@ -99,7 +102,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 int64 battle_calc_gvg_damage(struct block_list *src, struct block_list *bl, int64 damage, uint16 skill_id, int flag);
 int64 battle_calc_bg_damage(struct block_list *src, struct block_list *bl, int64 damage, uint16 skill_id, int flag);
 
-int battle_delay_damage(unsigned int tick, int amotion, struct block_list *src, struct block_list *target, int attack_type, uint16 skill_id, uint16 skill_lv, int64 damage, enum damage_lv dmg_lv, int ddelay, bool additional_effects);
+int battle_delay_damage(unsigned int tick, int amotion, struct block_list *src, struct block_list *target, int attack_type, uint16 skill_id, uint16 skill_lv, int64 damage, enum damage_lv dmg_lv, int ddelay, bool additional_effects, bool isspdamage);
 
 //Summary normal attack treatment (basic attack)
 enum damage_lv battle_weapon_attack(struct block_list *bl, struct block_list *target, unsigned int tick, int flag);

@@ -2282,7 +2282,7 @@ short skill_blown(struct block_list *src, struct block_list *target, char count,
 		return count; //Actual knockback distance is 0
 
 	//Create flag needed in unit_blown_immune
-	if( src != target )
+	if( target->id != src->id )
 		checkflag |= 0x1; //Offensive
 	if( !(flag&0x02) )
 		checkflag |= 0x2; //Knockback type
@@ -2958,10 +2958,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case NPC_CRITICALSLASH:
 		case TF_DOUBLE:
 		case GS_CHAINACTION:
-			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (enum e_damage_type)dmg.type, dmg.damage2);
+			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (enum e_damage_type)dmg.type, dmg.damage2, false);
 			break;
 		case HW_GRAVITATION:
-			dmg.dmotion = clif_damage(bl, bl, 0, 0, 0, damage, 1, DMG_ENDURE, 0);
+			dmg.dmotion = clif_damage(bl, bl, 0, 0, 0, damage, 1, DMG_ENDURE, 0, false);
 			break;
 		case AS_SPLASHER:
 			if (flag&SD_ANIMATION) //The surrounding targets
@@ -2991,7 +2991,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.amotion = dmg.dmotion = 0;
 		//Fall through
 		case SU_LUNATICCARROTBEAT:
-			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (flag&1 ? DMG_MULTI_HIT : DMG_NORMAL), 0);
+			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (flag&1 ? DMG_MULTI_HIT : DMG_NORMAL), 0, false);
 			break;
 		case WL_HELLINFERNO:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SKILL);
@@ -3098,7 +3098,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			if (dmg.flag > ATK_BLOCK)
 				skill_counter_additional_effect(src, bl, skill_id, skill_lv, dmg.flag, tick);
 		} else
-			battle_delay_damage(tick, dmg.amotion, src, bl, dmg.flag, skill_id, skill_lv, damage, dmg.dmg_lv, dmg.dmotion, additional_effects);
+			battle_delay_damage(tick, dmg.amotion, src, bl, dmg.flag, skill_id, skill_lv, damage, dmg.dmg_lv, dmg.dmotion, additional_effects, false);
 	}
 
 	if (tsc && skill_id != PA_PRESSURE && skill_id != HW_GRAVITATION) {
@@ -3112,7 +3112,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				check_distance_bl(bl, d_bl, sce_d->val3))
 			{
 				if (!rmdamage) {
-					clif_damage(d_bl, d_bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0);
+					clif_damage(d_bl, d_bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0, false);
 					status_fix_damage(NULL, d_bl, damage, 0);
 				} else {
 					bool isDevotRdamage = false;
@@ -3122,7 +3122,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 					//If !isDevotRdamage, reflected magics are done directly on the target not on paladin
 					//This check is only for magical skill
 					//For BF_WEAPON skills types track var rdamage and function battle_calc_return_damage
-					clif_damage(bl, (!isDevotRdamage) ? bl : d_bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0);
+					clif_damage(bl, (!isDevotRdamage) ? bl : d_bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0, false);
 					status_fix_damage(bl, (!isDevotRdamage) ? bl : d_bl, damage, 0);
 				}
 			} else {
@@ -3137,10 +3137,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 
 			if (e_bl) {
 				if (!rmdamage) {
-					clif_skill_damage(e_bl, e_bl, tick, 0, 0, damage, dmg.div_, skill_id, -1, skill_get_hit(skill_id));
+					clif_damage(e_bl, e_bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0, false);
 					status_fix_damage(NULL, e_bl, damage, 0);
 				} else {
-					clif_skill_damage(bl, bl, tick, 0, 0, damage, dmg.div_, skill_id, -1, skill_get_hit(skill_id));
+					clif_damage(bl, bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0, false);
 					status_fix_damage(bl, bl, damage, 0);
 				}
 			}
@@ -3701,7 +3701,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 						short x,y;
 
 						map_search_freecell(src,0,&x,&y,1,1,0);
-						if (target != src && !status_isdead(target))
+						if (target->id != src->id && !status_isdead(target))
 							unit_warp(target,-1,x,y,CLR_TELEPORT);
 					}
 					break;
@@ -4681,7 +4681,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 		case CH_PALMSTRIKE: //Palm Strike takes effect 1 sec after casting [Skotlex]
 			//clif_skill_nodamage(src,bl,skill_id,skill_lv,0); //Can't make this one display the correct attack animation delay
-			clif_damage(src,bl,tick,status_get_amotion(src),0,-1,1,DMG_ENDURE,0); //Display an absorbed damage attack
+			clif_damage(src,bl,tick,status_get_amotion(src),0,-1,1,DMG_ENDURE,0,false); //Display an absorbed damage attack
 			skill_addtimerskill(src,tick + (1000 + status_get_amotion(src)),bl->id,0,0,skill_id,skill_lv,BF_WEAPON,flag);
 			break;
 
@@ -8110,7 +8110,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							break;
 						case 3:	//1000 damage, random armor destroyed
 							status_fix_damage(src,bl,1000,0);
-							clif_damage(src,bl,tick,0,0,1000,0,DMG_NORMAL,0);
+							clif_damage(src,bl,tick,0,0,1000,0,DMG_NORMAL,0,false);
 							if (!status_isdead(bl)) {
 								int pos[] = { EQP_HELM,EQP_SHIELD,EQP_ARMOR,EQP_SHOES,EQP_GARMENT };
 
@@ -8147,14 +8147,14 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							break;
 						case 10: //6666 damage, ATK and MATK -50%, cursed
 							status_fix_damage(src,bl,6666,0);
-							clif_damage(src,bl,tick,0,0,6666,0,DMG_NORMAL,0);
+							clif_damage(src,bl,tick,0,0,6666,0,DMG_NORMAL,0,false);
 							sc_start(src,bl,SC_INCATKRATE,100,-50,skill_get_time2(skill_id,skill_lv));
 							sc_start(src,bl,SC_INCMATKRATE,100,-50,skill_get_time2(skill_id,skill_lv));
 							sc_start(src,bl,SC_CURSE,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 							break;
 						case 11: //4444 damage
 							status_fix_damage(src,bl,4444,0);
-							clif_damage(src,bl,tick,0,0,4444,0,DMG_NORMAL,0);
+							clif_damage(src,bl,tick,0,0,4444,0,DMG_NORMAL,0,false);
 							break;
 						case 12: //Stun
 							sc_start(src,bl,SC_STUN,100,skill_lv,5000);
@@ -9819,7 +9819,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					break;
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 				if( skill_area_temp[5] > 7 )
-					status_fix_damage(src,bl,9999,clif_damage(src,bl,tick,0,0,9999,0,DMG_NORMAL,0));
+					status_fix_damage(src,bl,9999,clif_damage(src,bl,tick,0,0,9999,0,DMG_NORMAL,0,false));
 			} else if( sd ) {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				skill_area_temp[5] = map_foreachinrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_PC,src,skill_id,skill_lv,tick,BCT_ALL,skill_area_sub_count);
@@ -10915,7 +10915,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 				inf = BCT_NOENEMY;
 			else
 				inf = 0;
-			if( inf2&(INF2_PARTY_ONLY|INF2_GUILD_ONLY) && src != target ) {
+			if( inf2&(INF2_PARTY_ONLY|INF2_GUILD_ONLY) && target->id != src->id ) {
 				inf |=
 					(inf2&INF2_PARTY_ONLY ? BCT_PARTY : 0)|
 					(inf2&INF2_GUILD_ONLY ? BCT_GUILD : 0);
@@ -10953,7 +10953,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			if( md->skill_idx >= 0 && md->db->skill[md->skill_idx].emotion >= 0 )
 				clif_emotion(src,md->db->skill[md->skill_idx].emotion);
 		}
-		if( src != target && battle_config.skill_add_range &&
+		if( target->id != src->id && battle_config.skill_add_range &&
 			!check_distance_bl(src,target,skill_get_range2(src,ud->skill_id,ud->skill_lv) + battle_config.skill_add_range) ) {
 			if( sd ) {
 				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -17806,7 +17806,7 @@ bool skill_check_shadowform(struct block_list *bl, uint16 skill_id, int64 damage
 			status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 			return false;
 		}
-		clif_damage(src, src, gettick(), 0, 0, damage, div, (div > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0);
+		clif_damage(src, src, gettick(), 0, 0, damage, div, (div > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0, false);
 		status_fix_damage(bl, src, damage, 0);
 		if( --(sc->data[SC__SHADOWFORM]->val3) <= 0 )
 			status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
