@@ -4208,8 +4208,6 @@ ma_in01,47,101,3	script	Totoy#buwaya	577,7,7,{
 		mes "[Dog]";
 		mes "Bark bark!!";
 		next;
-		/*
-		// Better translation needed.
 		mes "[Totoy]";
 		mes "Um... hey!";
 		next;
@@ -4217,7 +4215,7 @@ ma_in01,47,101,3	script	Totoy#buwaya	577,7,7,{
 		emotion e_omg,1;
 		mes "[Totoy]";
 		mes "Huh?";
-		if (!Sex) {
+		if (Sex) {
 			mes "Totoy is a girl, and you are a boy.";
 			mes "You're not a boy?";
 		} else {
@@ -4228,7 +4226,6 @@ ma_in01,47,101,3	script	Totoy#buwaya	577,7,7,{
 		mes "[Totoy]";
 		mes "Is it because my name, Totoy? But that's the name my parents gave me thinking I would be a boy when I was born. Ha ha!";
 		next;
-		*/
 		mes "[Totoy]";
 		mes "Anyway, thanks for bringing my best friend back.";
 		mes "I don't have much but would like to thank you. Wait, let me see what's inside my drawer. He he-";

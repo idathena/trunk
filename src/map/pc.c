@@ -1308,7 +1308,7 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	pc_setinventorydata(sd);
 	pc_setequipindex(sd);
 
-	if (sd->status.option & OPTION_INVISIBLE && !pc_can_use_command(sd, "hide", COMMAND_ATCOMMAND))
+	if (pc_isinvisible(sd) && !pc_can_use_command(sd, "hide", COMMAND_ATCOMMAND))
 		sd->status.option &=~ OPTION_INVISIBLE;
 
 	status_change_init(&sd->bl);
@@ -1575,7 +1575,7 @@ void pc_reg_received(struct map_session_data *sd)
 		clif_parse_LoadEndAck(sd->fd, sd);
 	}
 
-	if (sd->sc.option&OPTION_INVISIBLE) {
+	if (pc_isinvisible(sd)) {
 		sd->vd.class_ = INVISIBLE_CLASS;
 		clif_displaymessage(sd->fd, msg_txt(11)); // Invisible: On
 		//Decrement the number of pvp players on the map
@@ -1998,7 +1998,7 @@ int pc_disguise(struct map_session_data *sd, int class_)
 		return 0;
 	if (class_ && sd->disguise == class_)
 		return 0;
-	if (sd->sc.option&OPTION_INVISIBLE) { //Character is invisible, stealth class-change [Skotlex]
+	if (pc_isinvisible(sd)) { //Character is invisible, stealth class-change [Skotlex]
 		sd->disguise = class_; //Viewdata is set on uncloaking
 		return 2;
 	}
@@ -6435,10 +6435,10 @@ bool pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned in
 	}
 
 	if (base_exp)
-		clif_displayexp(sd,(nextb ? base_exp : 0),SP_BASEEXP,is_quest);
+		clif_displayexp(sd,(nextb ? base_exp : 0),SP_BASEEXP,is_quest,true);
 
 	if (job_exp)
-		clif_displayexp(sd,(nextj ? job_exp : 0),SP_JOBEXP,is_quest);
+		clif_displayexp(sd,(nextj ? job_exp : 0),SP_JOBEXP,is_quest,true);
 
 	if (sd->state.showexp) {
 		char output[256];
@@ -7174,7 +7174,7 @@ void pc_respawn(struct map_session_data *sd, clr_type clrtype)
 	pc_setstand(sd);
 	pc_setrestartvalue(sd,3);
 	if( pc_setpos(sd, sd->status.save_point.map, sd->status.save_point.x, sd->status.save_point.y, clrtype) )
-		clif_resurrection(&sd->bl, 1); //If warping fails, send a normal stand up packet.
+		clif_resurrection(&sd->bl, 1); //If warping fails, send a normal stand up packet
 }
 
 static int pc_respawn_timer(int tid, unsigned int tick, int id, intptr_t data)
@@ -7464,11 +7464,14 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 #endif
 
 		if( base_penalty > 0 ) {
+			uint32 exp, penalty = base_penalty / 100;
+
 			switch( battle_config.death_penalty_type ) {
 				case 1: base_penalty = (uint32)(pc_nextbaseexp(sd) * (base_penalty / 10000.)); break;
 				case 2: base_penalty = (uint32)(sd->status.base_exp * (base_penalty / 10000.)); break;
 			}
-
+			if( (exp = pc_nextbaseexp(sd)) > 0 && get_percentage(sd->status.base_exp,exp) < penalty )
+				base_penalty = sd->status.base_exp;
 			if( base_penalty > 0 ) { //Recheck after altering to speedup
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					base_penalty <<= 1;
@@ -7477,12 +7480,17 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			}
 		}
 
+		clif_displayexp(sd,(base_penalty ? base_penalty : 0),SP_BASEEXP,false,false);
+
 		if( job_penalty > 0 ) {
+			uint32 exp, penalty = job_penalty / 100;
+
 			switch( battle_config.death_penalty_type ) {
 				case 1: job_penalty = (uint32)(pc_nextjobexp(sd) * (job_penalty / 10000.)); break;
-				case 2: job_penalty = (uint32)(sd->status.job_exp * (job_penalty /10000.)); break;
+				case 2: job_penalty = (uint32)(sd->status.job_exp * (job_penalty / 10000.)); break;
 			}
-
+			if( (exp = pc_nextjobexp(sd)) > 0 && get_percentage(sd->status.job_exp,exp) < penalty )
+				job_penalty = sd->status.job_exp;
 			if( job_penalty > 0 ) {
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					job_penalty <<= 1;
@@ -7490,6 +7498,8 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 				clif_updatestatus(sd,SP_JOBEXP);
 			}
 		}
+
+		clif_displayexp(sd,(job_penalty ? job_penalty : 0),SP_JOBEXP,false,false);
 
 		if( zeny_penalty > 0 && !map[sd->bl.m].flag.nozenypenalty ) {
 			zeny_penalty = (uint32)(sd->status.zeny * (zeny_penalty / 10000.));
@@ -8300,20 +8310,18 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	pc_checkallowskill(sd);
 	pc_equiplookall(sd);
 	pc_show_questinfo(sd);
+	chrif_save(sd,0);
 
 	//If you were previously famous, not anymore.
-	if (fame_flag) {
-		chrif_save(sd,0);
+	if (fame_flag)
 		chrif_buildfamelist();
-	} else if (sd->status.fame > 0) {
-		//It may be that now they are famous?
- 		switch (sd->class_&MAPID_UPPERMASK) {
+	else if (sd->status.fame > 0) {
+ 		switch (sd->class_&MAPID_UPPERMASK) { //It may be that now they are famous?
 			case MAPID_BLACKSMITH:
 			case MAPID_ALCHEMIST:
 			case MAPID_TAEKWON:
-				chrif_save(sd,0);
 				chrif_buildfamelist();
-			break;
+				break;
 		}
 	}
 
@@ -8604,7 +8612,7 @@ void pc_setmadogear(struct map_session_data *sd, int flag)
  * Called from unit_attack and unit_attack_timer_sub
  * @return true Can attack
  */
-bool pc_can_attack(struct map_session_data *sd, int target_id)
+bool pc_can_attack_sc(struct map_session_data *sd, int target_id)
 {
 	nullpo_retr(false, sd);
 
@@ -8612,9 +8620,11 @@ bool pc_can_attack(struct map_session_data *sd, int target_id)
 		(sd->sc.data[SC_BASILICA] ||
 		(sd->sc.data[SC_GRAVITATION] && sd->sc.data[SC_GRAVITATION]->val3 == BCT_SELF) ||
 		sd->sc.data[SC__SHADOWFORM] ||
+		sd->sc.data[SC__MANHOLE] ||
 		sd->sc.data[SC_FALLENEMPIRE] ||
 		sd->sc.data[SC_CURSEDCIRCLE_ATKER] ||
 		sd->sc.data[SC_CURSEDCIRCLE_TARGET] ||
+		sd->sc.data[SC_CRYSTALIZE] ||
 		(sd->sc.data[SC_VOICEOFSIREN] && sd->sc.data[SC_VOICEOFSIREN]->val2 == target_id) ||
 		sd->sc.data[SC_ALL_RIDING] || //The client doesn't let you, this is to make cheat-safe
 		sd->sc.data[SC_KINGS_GRACE]) )
@@ -9192,10 +9202,10 @@ static int pc_checkcombo(struct map_session_data *sd, struct item_data *data) {
 						bool do_continue = false; //Used to continue that specific loop with some check that also use some loop
 						uint8 z;
 
-						for( z = 0; z < nb_itemCombo - 1; z++ )
+						for( z = 0; z < nb_itemCombo - 1; z++ ) {
 							if( combo_idx[z].idx == index ) //We already have that index recorded
 								do_continue = true;
-
+						}
 						if( do_continue )
 							continue;
 					}
@@ -9856,9 +9866,8 @@ static int pc_calc_pvprank_sub(struct block_list *bl,va_list ap)
 	sd1 = (struct map_session_data *)bl;
 	sd2 = va_arg(ap,struct map_session_data *);
 
-	//Cannot register pvp rank for hidden GMs
-	if( sd1->sc.option&OPTION_INVISIBLE || sd2->sc.option&OPTION_INVISIBLE )
-		return 0;
+	if( pc_isinvisible(sd1) || pc_isinvisible(sd2) )
+		return 0; //Cannot register pvp rank for hidden GMs
 
 	if( sd1->pvp_point > sd2->pvp_point )
 		sd2->pvp_rank++;
@@ -9893,8 +9902,8 @@ int pc_calc_pvprank_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 	sd->pvp_timer = INVALID_TIMER;
 
-	if(sd->sc.option&OPTION_INVISIBLE) //Do not calculate the pvp rank for a hidden GM
-		return 0;
+	if(pc_isinvisible(sd))
+		return 0; //Do not calculate the pvp rank for a hidden GM
 
 	if(pc_calc_pvprank(sd) > 0)
 		sd->pvp_timer = add_timer(gettick() + PVP_CALCRANK_INTERVAL,pc_calc_pvprank_timer,id,data);

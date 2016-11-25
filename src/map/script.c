@@ -16455,7 +16455,6 @@ BUILDIN_FUNC(getunittype)
 
 	if( !bl ) {
 		ShowWarning("buildin_getunittype: Error in finding object with given game ID %d!\n", script_getnum(st,2));
-		script_pushint(st,-1);
 		return 1;
 	}
 
@@ -17329,6 +17328,22 @@ BUILDIN_FUNC(unitskillusepos)
 		unit_skilluse_pos2(bl, skill_x, skill_y, skill_id, skill_lv, (casttime * 1000) + skill_castfix(bl, skill_id, skill_lv), skill_get_castcancel(skill_id));
 	}
 
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/// Check if the given Game ID exists
+///
+/// unitexist <unit id>;
+BUILDIN_FUNC(unitexist)
+{
+	struct block_list *bl;
+
+	if( !(bl = map_id2bl(script_getnum(st,2))) || status_isdead(bl) ) {
+		script_pushint(st,0);
+		return 1;
+	}
+
+	script_pushint(st,1);
 	return SCRIPT_CMD_SUCCESS;
 }
 // <--- [zBuffer] List of unit control commands
@@ -21040,6 +21055,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(unitemote,"ii"),
 	BUILDIN_DEF(unitskilluseid,"ivi??"), //Originally by Qamera [Celest]
 	BUILDIN_DEF(unitskillusepos,"iviii?"), //[Celest]
+	BUILDIN_DEF(unitexist,"i"),
 	// <--- [zBuffer] List of unit control commands
 	BUILDIN_DEF(sleep,"i"),
 	BUILDIN_DEF(sleep2,"i"),

@@ -38,10 +38,10 @@ char char_server_ip[32] = "127.0.0.1";
 char char_server_id[32] = "ragnarok";
 char char_server_pw[32] = "";
 char char_server_db[32] = "ragnarok";
-char default_codepage[32] = ""; // Feature by irmin.
+char default_codepage[32] = ""; // Feature by irmin
 
 static struct accreg *accreg_pt;
-unsigned int party_share_level = 10;
+unsigned int party_share_level = 15;
 
 // Recv. packet list
 int inter_recv_packet_length[] = {

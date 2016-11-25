@@ -1476,7 +1476,7 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 			if(!battle_check_range(&md->bl, tbl, md->status.rhw.range)
 			&& ( //Can't attack back and can't reach back
 					(!can_move && DIFF_TICK(tick, md->ud.canmove_tick) > 0 && ((battle_config.mob_ai&0x2) || (md->sc.data[SC_SPIDERWEB] && md->sc.data[SC_SPIDERWEB]->val1)
-						|| md->sc.data[SC_BITE] || md->sc.data[SC_MAGNETICFIELD] || md->sc.data[SC_VACUUM_EXTREME] || md->sc.data[SC_THORNSTRAP]
+						|| md->sc.data[SC_ELECTRICSHOCKER] || md->sc.data[SC_BITE] || md->sc.data[SC_MAGNETICFIELD] || md->sc.data[SC_VACUUM_EXTREME] || md->sc.data[SC_THORNSTRAP]
 						|| md->walktoxy_fail_count > 0)
 					)
 					|| !mob_can_reach(md, tbl, chase_range, MSS_RUSH)
@@ -1492,14 +1492,14 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 			(md->sc.count && md->sc.data[SC_CONFUSION] && md->sc.data[SC_CONFUSION]->val4))) {
 			int dist;
 
-			if(md->bl.m != abl->m || abl->prev == NULL
+			if(md->bl.m != abl->m || !abl->prev
 				|| (dist = distance_bl(&md->bl, abl)) >= MAX_MINCHASE //Attacker longer than visual area
 				|| battle_check_target(&md->bl, abl, BCT_ENEMY) <= 0 //Attacker is not enemy of mob
 				|| (battle_config.mob_ai&0x2 && !status_check_skilluse(&md->bl, abl, 0, 0)) //Cannot normal attack back to attacker
 				|| (!battle_check_range(&md->bl, abl, md->status.rhw.range) //Not on melee range
 				&& ( //Reach check
 						(!can_move && DIFF_TICK(tick, md->ud.canmove_tick) > 0 && (battle_config.mob_ai&0x2 || (md->sc.data[SC_SPIDERWEB] && md->sc.data[SC_SPIDERWEB]->val1)
-							|| md->sc.data[SC_BITE] || md->sc.data[SC_MAGNETICFIELD] || md->sc.data[SC_VACUUM_EXTREME] || md->sc.data[SC_THORNSTRAP]
+							|| md->sc.data[SC_ELECTRICSHOCKER] || md->sc.data[SC_BITE] || md->sc.data[SC_MAGNETICFIELD] || md->sc.data[SC_VACUUM_EXTREME] || md->sc.data[SC_THORNSTRAP]
 							|| md->walktoxy_fail_count > 0)
 						)
 						|| !mob_can_reach(md, abl, dist + md->db->range3, MSS_RUSH)
@@ -1651,9 +1651,12 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 	}
 
 	//Monsters in berserk state, unable to use normal attacks, will always attempt a skill
-	if(md->ud.walktimer == INVALID_TIMER && (md->state.skillstate == MSS_BERSERK || md->state.skillstate == MSS_ANGRY))
-		if(DIFF_TICK(md->ud.canmove_tick, tick) <= MIN_MOBTHINKTIME && DIFF_TICK(md->ud.canact_tick, tick) < -MIN_MOBTHINKTIME * IDLE_SKILL_INTERVAL) 
-			mobskill_use(md, tick, -1); //Only use skill if able to walk on next tick and not used a skill the last second
+	if(md->ud.walktimer == INVALID_TIMER && (md->state.skillstate == MSS_BERSERK || md->state.skillstate == MSS_ANGRY)) {
+		if(DIFF_TICK(md->ud.canmove_tick, tick) <= MIN_MOBTHINKTIME && DIFF_TICK(md->ud.canact_tick, tick) < -MIN_MOBTHINKTIME * IDLE_SKILL_INTERVAL) {
+			if(mobskill_use(md, tick, -1))
+				return true; //Only use skill if able to walk on next tick and not used a skill the last second
+		}
+	}
 
 	//Target still in attack range, no need to chase the target
 	if(battle_check_range(&md->bl, tbl, md->status.rhw.range))
@@ -2035,7 +2038,6 @@ void mob_log_damage(struct mob_data *md, struct block_list *src, int damage)
 			if( md->dmglog[i].id == 0 ) { //Store data in first empty slot
 				md->dmglog[i].id = char_id;
 				md->dmglog[i].flag = flag;
-
 				if( md->db->mexp )
 					pc_damage_log_add(map_charid2sd(char_id), md->bl.id);
 				break;
@@ -2321,7 +2323,6 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		}
 		for(i = 0; i < pnum; i++) //Party share
 			party_exp_share(pt[i].p, &md->bl, pt[i].base_exp,pt[i].job_exp,pt[i].zeny);
-
 	}
 
 	if(!(type&1) && !map[m].flag.nomobloot && !md->state.rebirth && (
@@ -2489,7 +2490,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		mexp = (unsigned int)cap_value(exp, 1, UINT_MAX);
 		clif_mvp_effect(mvp_sd);
 		clif_mvp_exp(mvp_sd,mexp);
-		pc_gainexp(mvp_sd, &md->bl, mexp,0, false);
+		pc_gainexp(mvp_sd, &md->bl, mexp, 0, false);
 		log_mvp[1] = mexp;
 		if(!(map[m].flag.nomvploot || type&1)) { //Order might be random depending on item_drop_mvp_mode config setting
 			int mdrop_id[MAX_MVP_DROP];

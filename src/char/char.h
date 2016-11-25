@@ -41,6 +41,12 @@ enum e_char_delete {
 	CHAR_DEL_BIRTHDATE
 };
 
+enum e_char_delete_restriction {
+	CHAR_DEL_RESTRICT_PARTY = 1,
+	CHAR_DEL_RESTRICT_GUILD,
+	CHAR_DEL_RESTRICT_ALL
+};
+
 int memitemdata_to_sql(const struct item items[], int max, int id, int tableswitch);
 
 int mapif_sendall(unsigned char *buf, unsigned int len);

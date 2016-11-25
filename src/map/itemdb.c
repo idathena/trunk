@@ -246,7 +246,7 @@ char itemdb_pc_get_itemgroup(uint16 group_id, struct map_session_data *sd) {
  * @return *item_data if item is exist, or NULL if not
  */
 struct item_data *itemdb_exists(unsigned short nameid) {
-	return ((struct item_data*)uidb_get(itemdb,nameid));
+	return ((struct item_data *)uidb_get(itemdb,nameid));
 }
 
 /// Returns human readable name for given item type.
@@ -406,7 +406,7 @@ struct item_data *itemdb_search(unsigned short nameid) {
 
 	if (nameid == dummy_item->nameid)
 		id = dummy_item;
-	else if (!(id = (struct item_data*)uidb_get(itemdb, nameid))) {
+	else if (!(id = (struct item_data *)uidb_get(itemdb, nameid))) {
 		ShowWarning("itemdb_search: Item ID %hu does not exists in the item_db. Using dummy data.\n", nameid);
 		id = dummy_item;
 	}
@@ -492,7 +492,7 @@ bool itemdb_canauction_sub(struct item_data *item, int gmlv, int unused) {
 	return (item && (!(item->flag.trade_restriction&ITR_NOAUCTION) || gmlv >= item->gm_lv_trade_override));
 }
 
-bool itemdb_isrestricted(struct item *item, int gmlv, int gmlv2, bool (*func)(struct item_data*, int, int))
+bool itemdb_isrestricted(struct item *item, int gmlv, int gmlv2, bool (*func)(struct item_data *, int, int))
 {
 	struct item_data *item_data = itemdb_search(item->nameid);
 	int i;
@@ -1274,7 +1274,7 @@ static bool itemdb_parse_dbrow(char **str, const char *source, int line, int scr
 	if (id->type == IT_DELAYCONSUME) { //Items that are consumed only after target confirmation
 		id->type = IT_USABLE;
 		id->flag.delay_consume = 1;
-	} else //In case of an itemdb reload and the item type changed.
+	} else //In case of an itemdb reload and the item type changed
 		id->flag.delay_consume = 0;
 
 	//When a particular price is not given, we should base it off the other one

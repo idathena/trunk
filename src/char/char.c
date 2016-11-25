@@ -122,7 +122,7 @@ int char_del_option =
 	CHAR_DEL_EMAIL
 #endif
 	;
-int char_del_aegis = 1; // Verify if char is in guild/party or char and reacts as Aegis does (doesn't allow deletion), see char_delete2_req for more information
+int char_del_restriction = CHAR_DEL_RESTRICT_ALL;
 
 int log_char = 1;	// Loggin char or not [devil]
 int log_inter = 1;	// Loggin inter or not [devil]
@@ -1811,11 +1811,19 @@ int delete_char_sql(int char_id)
 
 	//Check for config char del condition [Lupus]
 	//@TODO: Move this out to packet processing (0x68/0x1fb).
-	if( ( char_del_level > 0 && base_level >= char_del_level )
-	 || ( char_del_level < 0 && base_level <= -char_del_level )
-	) {
-			ShowInfo("Char deletion aborted: %s, BaseLevel: %i\n", name, base_level);
-			return -1;
+	if( (char_del_level > 0 && base_level >= char_del_level) || (char_del_level < 0 && base_level <= -char_del_level) ) {
+		ShowInfo("Char deletion aborted: %s, BaseLevel: %i\n", name, base_level);
+		return -1;
+	}
+
+	if( (char_del_restriction&CHAR_DEL_RESTRICT_GUILD) && guild_id ) { //Character is in guild
+		ShowInfo("Char deletion aborted: %s, Guild ID: %i\n", name, guild_id);
+		return -1;
+	}
+
+	if( (char_del_restriction&CHAR_DEL_RESTRICT_PARTY) && party_id ) { //Character is in party
+		ShowInfo("Char deletion aborted: %s, Party ID: %i\n", name, party_id);
+		return -1;
 	}
 
 	/* Divorce [Wizputer] */
@@ -3706,7 +3714,7 @@ int parse_frommap(int fd)
 					int aid, cid;
 					aid = RFIFOL(fd,2);
 					cid = RFIFOL(fd,6);
-					if( SQL_ERROR == Sql_Query(sql_handle, "SELECT skill, tick FROM `%s` WHERE `account_id` = '%d' AND `char_id`='%d'",
+					if( SQL_ERROR == Sql_Query(sql_handle, "SELECT skill, tick, duration FROM `%s` WHERE `account_id` = '%d' AND `char_id`='%d'",
 						skillcooldown_db, aid, cid) )
 					{
 						Sql_ShowDebug(sql_handle);
@@ -3724,6 +3732,7 @@ int parse_frommap(int fd)
 						for( count = 0; count < MAX_SKILLCOOLDOWN && SQL_SUCCESS == Sql_NextRow(sql_handle); ++count ) {
 							Sql_GetData(sql_handle, 0, &data, NULL); scd.skill_id = atoi(data);
 							Sql_GetData(sql_handle, 1, &data, NULL); scd.tick = atoi(data);
+							Sql_GetData(sql_handle, 2, &data, NULL); scd.duration = atoi(data);
 							memcpy(WFIFOP(fd, 14 + count * sizeof(struct skill_cooldown_data)), &scd, sizeof(struct skill_cooldown_data));
 						}
 						if( count >= MAX_SKILLCOOLDOWN )
@@ -3831,12 +3840,12 @@ int parse_frommap(int fd)
 						int i;
 
 						StringBuf_Init(&buf);
-						StringBuf_Printf(&buf, "INSERT INTO `%s` (`account_id`, `char_id`, `skill`, `tick`) VALUES ", skillcooldown_db);
+						StringBuf_Printf(&buf, "INSERT INTO `%s` (`account_id`, `char_id`, `skill`, `tick`, `duration`) VALUES ", skillcooldown_db);
 						for( i = 0; i < count; ++i ) {
 							memcpy(&data,RFIFOP(fd, 14 + i * sizeof(struct skill_cooldown_data)), sizeof(struct skill_cooldown_data));
 							if( i > 0 )
 								StringBuf_AppendStr(&buf, ", ");
-							StringBuf_Printf(&buf, "('%d','%d','%d','%d')", aid, cid, data.skill_id, data.tick);
+							StringBuf_Printf(&buf, "('%d','%d','%d','%d','%d')", aid, cid, data.skill_id, data.tick, data.duration);
 						}
 						if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) )
 							Sql_ShowDebug(sql_handle);
@@ -4207,7 +4216,7 @@ static void char_delete2_req(int fd, struct char_session_data *sd)
 		return;
 	}
 
-	if( SQL_SUCCESS != Sql_Query(sql_handle, "SELECT `delete_date` FROM `%s` WHERE `char_id`='%d'", char_db, char_id) ||
+	if( SQL_SUCCESS != Sql_Query(sql_handle, "SELECT `delete_date`, `party_id`, `guild_id` FROM `%s` WHERE `char_id`='%d'", char_db, char_id) ||
 		SQL_SUCCESS != Sql_NextRow(sql_handle) ) {
 		Sql_ShowDebug(sql_handle);
 		char_delete2_ack(fd, char_id, 3, 0);
@@ -4215,34 +4224,22 @@ static void char_delete2_req(int fd, struct char_session_data *sd)
 	}
 
 	Sql_GetData(sql_handle, 0, &data, NULL); delete_date = strtoul(data, NULL, 10);
+	Sql_GetData(sql_handle, 1, &data, NULL); party_id = strtoul(data, NULL, 10);
+	Sql_GetData(sql_handle, 2, &data, NULL); guild_id = strtoul(data, NULL, 10);
 
 	if( delete_date ) { // Character already queued for deletion
 		char_delete2_ack(fd, char_id, 0, 0);
 		return;
 	}
 
-	// This check is imposed by Aegis to avoid dead entries in databases
-	// _it is not needed_ as we clear data properly
-	if( char_del_aegis ) {
-		if( SQL_SUCCESS != Sql_Query(sql_handle, "SELECT `party_id`, `guild_id` FROM `%s` WHERE `char_id`='%d'", char_db, char_id) ||
-			SQL_SUCCESS != Sql_NextRow(sql_handle) ) {
-			Sql_ShowDebug(sql_handle);
-			char_delete2_ack(fd, char_id, 3, 0);
-			return;
-		}
+	if( (char_del_restriction&CHAR_DEL_RESTRICT_GUILD) && guild_id ) { // Character is in guild
+		char_delete2_ack(fd, char_id, 4, 0);
+		return;
+	}
 
-		Sql_GetData(sql_handle, 0, &data, NULL); party_id = atoi(data);
-		Sql_GetData(sql_handle, 1, &data, NULL); guild_id = atoi(data);
-
-		if( guild_id ) {
-			char_delete2_ack(fd, char_id, 4, 0);
-			return;
-		}
-
-		if( party_id ) {
-			char_delete2_ack(fd, char_id, 5, 0);
-			return;
-		}
+	if( (char_del_restriction&CHAR_DEL_RESTRICT_PARTY) && party_id ) { // Character is in party
+		char_delete2_ack(fd, char_id, 5, 0);
+		return;
 	}
 
 	// Success
@@ -5926,8 +5923,8 @@ int char_config_read(const char *cfgName)
 			char_del_delay = atoi(w2);
 		else if(strcmpi(w1, "char_del_option") == 0)
 			char_del_option = atoi(w2);
-		else if(strcmpi(w1, "char_del_aegis") == 0)
-			char_del_aegis = atoi(w2);
+		else if(strcmpi(w1, "char_del_restriction") == 0)
+			char_del_restriction = atoi(w2);
 		else if(strcmpi(w1, "db_path") == 0)
 			safestrncpy(db_path, w2, sizeof(db_path));
 		else if(strcmpi(w1, "console") == 0)

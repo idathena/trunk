@@ -246,6 +246,9 @@ static void party_check_state(struct party_data *p)
 			case JOB_MONK:
 			case JOB_BABY_MONK:
 			case JOB_CHAMPION:
+			case JOB_SURA:
+			case JOB_SURA_T:
+			case JOB_BABY_SURA:
 				p->state.monk = 1;
 				break;
 			case JOB_STAR_GLADIATOR:
@@ -419,10 +422,17 @@ int party_reply_invite(struct map_session_data *sd,int party_id,int flag)
 		sd->party_invite_account = 0;
 		return 0;
 	}
+
+	// The character is already in a party, possibly left a party invite open and created his own party
+	if( sd->status.party_id ) { // On Aegis no rejection packet is sent to the inviting player
+		sd->party_invite = 0;
+		sd->party_invite_account = 0;
+		return 0;
+	}
+ 
 	tsd = map_id2sd(sd->party_invite_account);
 
-	if( flag == 1 && !sd->party_creating && !sd->party_joining ) {
-		// Accepted and allowed
+	if( flag == 1 && !sd->party_creating && !sd->party_joining ) { // Accepted and allowed
 		sd->party_joining = true;
 		party_fill_member(&member, sd, 0);
 		intif_party_addmember(sd->party_invite, &member);
@@ -430,7 +440,7 @@ int party_reply_invite(struct map_session_data *sd,int party_id,int flag)
 	} else { // Rejected or failure
 		sd->party_invite = 0;
 		sd->party_invite_account = 0;
-		if( tsd != NULL )
+		if( tsd )
 			clif_party_inviteack(tsd, sd->status.name, 1);
 		return 0;
 	}

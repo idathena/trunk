@@ -2703,7 +2703,7 @@ REPLACE INTO `item_db` VALUES (5479,'Shaman\'s_Hair_Ornament','Shaman\'s Hair De
 REPLACE INTO `item_db` VALUES (5480,'Bizofnil_Wing_Deco','Bijofnil Wings',4,20,NULL,1000,NULL,3,NULL,0,0xFFFFFFFF,7,2,256,NULL,30,1,477,'bonus bAllStats,2; bonus3 bAutoSpell,"PR_IMPOSITIO",3,3;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (5481,'Hermose_Cap','Hermode Cap',4,20,NULL,1000,NULL,1,NULL,1,0xFFFFFFFF,7,2,256,NULL,1,1,478,'bonus bAspdRate,10; bonus bBaseAtk,-20; bonus bMatkRate,-10;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (5482,'Dark_Knight_Mask','Dark Knight Mask',4,NULL,NULL,3000,NULL,5,NULL,0,0xFFFFFFFF,7,2,769,NULL,80,1,479,'bonus bStr,3;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (5483,'Odin_Mask','Odin Mask',4,20,NULL,100,NULL,1,NULL,0,0xFFFFFFFF,7,2,513,NULL,50,0,480,'bonus bHit,-10; bonus2 bAddRace,RC_Demihuman,6;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (5483,'Odin_Mask','Odin Mask',4,20,NULL,100,NULL,1,NULL,0,0xFFFFFFFF,7,2,513,NULL,50,0,480,'bonus bHit,-10; bonus2 bAddRace,RC_DemiHuman,6;',NULL,NULL);
 #REPLACE INTO `item_db` VALUES (5484,'Taiwan_Flag_Hat','Holidays Hat',4,20,NULL,500,NULL,4,NULL,0,0xFFFFFFFF,7,2,256,NULL,0,0,482,'bonus bAllStats,5; bonus2 bResEff,Eff_Stun,500;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (5485,'Tiger_Face','Tiger Face',4,20,NULL,1000,NULL,3,NULL,0,0xFFFFFFFF,7,2,769,NULL,60,1,483,'bonus2 bSubRace,RC_Brute,5; bonus2 bAddRace,RC_Brute,5; bonus2 bMagicAddRace,RC_Brute,5;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (5486,'J_Anniversary_Hat','Anniversary Hat',4,20,NULL,300,NULL,3,NULL,0,0xFFFFFFFF,7,2,256,NULL,0,1,395,'bonus bAllStats,2;',NULL,NULL);
@@ -4921,7 +4921,7 @@ REPLACE INTO `item_db` VALUES (12315,'Goddess_Bless','Goddess of Blessing',2,0,N
 REPLACE INTO `item_db` VALUES (12316,'Angel_Bless','Angel of Blessing',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (12317,'Powder_Snow','Snow Powder',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'end;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12318,'Little_Heart','Small Hearts',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `item_db` VALUES (12319,'Strawberry_Cake','Rune Strawberry Cake',2,0,NULL,300,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'sc_start SC_INCATKRATE,600000,5; sc_start SC_INCMATKRATE,600000,5;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (12319,'Strawberry_Cake','Rune Strawberry Cake',2,0,NULL,300,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'sc_start SC_ATKPOTION,600000,5; sc_start SC_MATKPOTION,600000,5;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12320,'Pineapple_Juice','Schwartzwald Pine Jubilee',2,0,NULL,300,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'sc_start SC_HITFOOD,600000,10; sc_start SC_FLEEFOOD,600000,20;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12321,'Spicy_Sandwich','Arunafeltz Desert Sandwich',2,0,NULL,300,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'sc_start SC_CRIFOOD,600000,7;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12322,'Chocolate_Pie','Chocolate Pie',0,0,NULL,50,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'percentheal 5,5;',NULL,NULL);
@@ -6630,5 +6630,5 @@ REPLACE INTO `item_db` VALUES (19506,'T_Valkyrie_Feather_Band','T Valkyrie Feath
 REPLACE INTO `item_db` VALUES (19507,'Clear_Sun','Clear Sun',4,0,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,7,2,1024,NULL,1,0,654,NULL,NULL,NULL);
 # New Item
 #===================================================================
-REPLACE INTO `item_db` VALUES (22540,'Runstone_Luxanima','Lux Anima Rune',11,2,NULL,100,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'itemskill "RK_LUXANIMA",1;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (22540,'Runstone_Lux','Lux Anima Rune',11,2,NULL,100,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'itemskill "RK_LUXANIMA",1;',NULL,NULL);
 

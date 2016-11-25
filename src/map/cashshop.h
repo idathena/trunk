@@ -48,7 +48,7 @@ struct cash_item_data {
 };
 
 struct cash_item_db {
-	struct cash_item_data** item;
+	struct cash_item_data **item;
 	uint32 count;
 };
 

@@ -97,6 +97,10 @@ enum e_skill_inf3 {
 //If you change this, make sure it's an odd value (for icewall block behavior)
 #define WALK_SKILL_INTERVAL 5
 
+//Time that's added to canact delay on castbegin and substracted on castend
+//This is to prevent hackers from sending a skill packet after cast but before a timer triggers castend
+#define SECURITY_CASTTIME 100
+
 //Flags passed to skill_attack/skill_area_sub
 enum e_skill_display {
 	SD_LEVEL     = 0x1000, //skill_attack will send -1 instead of skill level (affects display of some skills)
@@ -247,8 +251,10 @@ struct skill_unit {
 	struct skill_unit_group *group; //Skill group reference
 	int limit;
 	int val1, val2, val3, val4;
-	short alive, range;
+	short range;
+	unsigned alive : 1;
 	int prev;
+	unsigned hidden : 1;
 };
 
 #define MAX_SKILLUNITGROUPTICKSET 25
@@ -270,7 +276,7 @@ enum {
 	UF_ENSEMBLE      = 0x0200, //Duet
 	UF_SONG          = 0x0400, //Song
 	UF_DUALMODE      = 0x0800, //Unit should trigger both ontimer and onplace/onout/onleft effects
-	//UF_????        = 0x1000, //Unused flag
+	UF_HIDDEN_TRAP   = 0x1000, //Hidden trap [Cydh]
 	UF_RANGEDSINGLEUNIT = 0x2000 //Hack for ranged layout, only display center
 };
 
@@ -382,7 +388,7 @@ int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned sh
 //Skills unit
 struct skill_unit_group *skill_id2group(int group_id);
 struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_id, uint16 skill_lv, short x, short y, int flag);
-struct skill_unit *skill_initunit(struct skill_unit_group *group, int idx, int x, int y, int val1, int val2, int val3, int val4);
+struct skill_unit *skill_initunit(struct skill_unit_group *group, int idx, int x, int y, int val1, int val2, int val3, int val4, bool hidden);
 int skill_delunit(struct skill_unit *unit);
 struct skill_unit_group *skill_initunitgroup(struct block_list *src, int count, uint16 skill_id, uint16 skill_lv, int unit_id, int limit, int interval);
 int skill_delunitgroup_(struct skill_unit_group *group, const char *file, int line, const char *func);
@@ -391,6 +397,9 @@ void skill_clear_unitgroup(struct block_list *src);
 int skill_clear_group(struct block_list *bl, int flag);
 void ext_skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, unsigned int tick);
 int skill_unit_ondamaged(struct skill_unit *unit, int64 damage);
+//Skill unit visibility [Cydh]
+void skill_getareachar_skillunit_visibilty(struct skill_unit *su, enum send_target target);
+void skill_getareachar_skillunit_visibilty_single(struct skill_unit *su, struct block_list *bl);
 
 int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
 int skill_castfix_sc(struct block_list *bl, double time);
@@ -2075,6 +2084,9 @@ void skill_combo_toogle_inf(struct block_list *bl, uint16 skill_id, int inf);
 void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int tick);
 
 void skill_toggle_magicpower(struct block_list *bl, uint16 skill_id);
+
+bool skill_check_condition_target(struct block_list *src, struct block_list *bl, unsigned short skill_id);
+void skill_reveal_trap_inarea(struct block_list *src, int range, int x, int y);
 
 //Skill Damage target
 #ifdef ADJUST_SKILL_DAMAGE
