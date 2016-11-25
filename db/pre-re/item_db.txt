@@ -2672,7 +2672,7 @@
 5480,Bizofnil_Wing_Deco,Bijofnil Wings,4,20,,1000,,3,,0,0xFFFFFFFF,7,2,256,,30,1,477,{ bonus bAllStats,2; bonus3 bAutoSpell,"PR_IMPOSITIO",3,3; },{},{}
 5481,Hermose_Cap,Hermode Cap,4,20,,1000,,1,,1,0xFFFFFFFF,7,2,256,,1,1,478,{ bonus bAspdRate,10; bonus bBaseAtk,-20; bonus bMatkRate,-10; },{},{}
 5482,Dark_Knight_Mask,Dark Knight Mask,4,,,3000,,5,,0,0xFFFFFFFF,7,2,769,,80,1,479,{ bonus bStr,3; },{},{}
-5483,Odin_Mask,Odin Mask,4,20,,100,,1,,0,0xFFFFFFFF,7,2,513,,50,0,480,{ bonus bHit,-10; bonus2 bAddRace,RC_Demihuman,6; },{},{}
+5483,Odin_Mask,Odin Mask,4,20,,100,,1,,0,0xFFFFFFFF,7,2,513,,50,0,480,{ bonus bHit,-10; bonus2 bAddRace,RC_DemiHuman,6; },{},{}
 //5484,Taiwan_Flag_Hat,Holidays Hat,4,20,,500,,4,,0,0xFFFFFFFF,7,2,256,,0,0,482,{ bonus bAllStats,5; bonus2 bResEff,Eff_Stun,500; },{},{}
 5485,Tiger_Face,Tiger Face,4,20,,1000,,3,,0,0xFFFFFFFF,7,2,769,,60,1,483,{ bonus2 bSubRace,RC_Brute,5; bonus2 bAddRace,RC_Brute,5; bonus2 bMagicAddRace,RC_Brute,5; },{},{}
 5486,J_Anniversary_Hat,Anniversary Hat,4,20,,300,,3,,0,0xFFFFFFFF,7,2,256,,0,1,395,{ bonus bAllStats,2; },{},{}
@@ -4890,7 +4890,7 @@
 12316,Angel_Bless,Angel of Blessing,2,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{},{},{}
 12317,Powder_Snow,Snow Powder,2,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ end; },{},{}
 12318,Little_Heart,Small Hearts,2,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{},{},{}
-12319,Strawberry_Cake,Rune Strawberry Cake,2,0,,300,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_INCATKRATE,600000,5; sc_start SC_INCMATKRATE,600000,5; },{},{}
+12319,Strawberry_Cake,Rune Strawberry Cake,2,0,,300,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_ATKPOTION,600000,5; sc_start SC_MATKPOTION,600000,5; },{},{}
 12320,Pineapple_Juice,Schwartzwald Pine Jubilee,2,0,,300,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_HITFOOD,600000,10; sc_start SC_FLEEFOOD,600000,20; },{},{}
 12321,Spicy_Sandwich,Arunafeltz Desert Sandwich,2,0,,300,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_CRIFOOD,600000,7; },{},{}
 12322,Chocolate_Pie,Chocolate Pie,0,0,,50,,,,,0xFFFFFFFF,7,2,,,,,,{ percentheal 5,5; },{},{}
@@ -6599,4 +6599,4 @@
 19507,Clear_Sun,Clear Sun,4,0,,0,,0,,0,0xFFFFFFFF,7,2,1024,,1,0,654,{},{},{}
 // New Item
 //===================================================================
-22540,Runstone_Luxanima,Lux Anima Rune,11,2,,100,,,,,0xFFFFFFFF,7,2,,,,,,{ itemskill "RK_LUXANIMA",1; },{},{}
+22540,Runstone_Lux,Lux Anima Rune,11,2,,100,,,,,0xFFFFFFFF,7,2,,,,,,{ itemskill "RK_LUXANIMA",1; },{},{}

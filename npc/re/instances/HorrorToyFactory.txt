@@ -2159,6 +2159,8 @@ OnMyMobDead:
 	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#finalbs2")+"::OnMyMobDead");
 	if (!.@mob_dead_num)
 		donpcevent instance_npcname("#finalbs2")+"::OnEnd";
+	if (!unitexist('CelineKimi))
+		stopnpctimer;
 	end;
 OnTimer1000:
 	set .@map$,instance_mapname("1@xm_d");

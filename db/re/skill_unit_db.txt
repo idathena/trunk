@@ -18,8 +18,8 @@
 //      0x0200(UF_ENSEMBLE)		Ensemble skill
 //      0x0400(UF_SONG)			Song skill
 //      0x0800(UF_DUALMODE)		Unit has effects both at an interval and when you step in/out
-//      0x1000(UF_????)			Unused flag
-//      0x2000(UF_RANGEDSINGLEUNIT)     Layout hack, use layout range propriety but only display center
+//      0x1000(UF_HIDDEN_TRAP)		Hidden trap, see 'traps_setting' skill config to enable this flag
+//      0x2000(UF_RANGEDSINGLEUNIT)	Layout hack, use layout range propriety but only display center
 // 	Example: 0x006 = 0x002+0x004 -> Cannot be stacked nor cast near targets
 //
 // Notes:
@@ -43,13 +43,13 @@
  89,0x86,    ,  4, 1, 450,enemy, 0x018	//WZ_STORMGUST
  91,0x86,    ,  2, 0,1000,enemy, 0x010	//WZ_HEAVENDRIVE
  92,0x8e,    ,  2, 0,  -1,enemy, 0x010	//WZ_QUAGMIRE
-115,0x90,    ,  0, 1,1000,enemy, 0x006	//HT_SKIDTRAP
+115,0x90,    ,  0, 1,1000,enemy, 0x1006	//HT_SKIDTRAP
 116,0x93,    ,  0, 1,1000,enemy, 0x006	//HT_LANDMINE
-117,0x91,    ,  0, 1,1000,enemy, 0x006	//HT_ANKLESNARE
-118,0x94,    ,  0, 1,1000,enemy, 0x006	//HT_SHOCKWAVE
-119,0x95,    ,  0, 1,1000,enemy, 0x006	//HT_SANDMAN
-120,0x96,    ,  0, 1,1000,enemy, 0x006	//HT_FLASHER
-121,0x97,    ,  0, 1,1000,enemy, 0x006	//HT_FREEZINGTRAP
+117,0x91,    ,  0, 1,1000,enemy, 0x1006	//HT_ANKLESNARE
+118,0x94,    ,  0, 1,1000,enemy, 0x1006	//HT_SHOCKWAVE
+119,0x95,    ,  0, 1,1000,enemy, 0x1006	//HT_SANDMAN
+120,0x96,    ,  0, 1,1000,enemy, 0x1006	//HT_FLASHER
+121,0x97,    ,  0, 1,1000,enemy, 0x1006	//HT_FREEZINGTRAP
 122,0x8f,    ,  0, 1,1000,enemy, 0x006	//HT_BLASTMINE
 123,0x98,    ,  0, 1,1000,enemy, 0x006	//HT_CLAYMORETRAP
 125,0x99,    ,  0, 1,1000,all,   0x000	//HT_TALKIEBOX
@@ -97,7 +97,7 @@
 521,0xbe,    ,  0, 1,1000,enemy, 0x000	//GS_GROUNDDRIFT
 525,0x86,    ,  0, 2, 100,enemy, 0x018  //NJ_HUUMA
 527,0xbc,    , -1, 0,2000,enemy, 0x018	//NJ_TATAMIGAESHI
-535,0xbd,    , -1, 0,  20,enemy, 0x010	//NJ_KAENSIN
+535,0xbd,    , -1, 0, 100,enemy, 0x010	//NJ_KAENSIN
 538,0xbb,    ,  1:1:1:2:2:2:3:3:3:4,0,-1,all, 0x010 //NJ_SUITON
 541,0x86,    ,  0, 3:3:4:4:5, 100,enemy, 0x018 //NJ_RAIGEKISAI
 653,0xc6,    ,  0, 5:7:9:11:13:5:7:9:11:13,300,enemy, 0x010 //NPC_EARTHQUAKE
@@ -128,9 +128,9 @@
 2274,0xe3,    ,  2, 0,  -1,all,   0x000	//NC_STEALTHFIELD
 
 2299,0xcc,    ,  0, 1,1000,all,   0x006  //SC_MANHOLE
-2300,0xcd,    ,  0, 0,1000,all,   0x006  //SC_DIMENSIONDOOR
-2301,0xce,    ,  2, 0,  -1,all,   0x200E //SC_CHAOSPANIC
-2302,0xcf,    ,  2, 0,  -1,all,   0x2002 //SC_MAELSTROM
+2300,0xcd,    ,  0, 1,1000,all,   0x006  //SC_DIMENSIONDOOR
+2301,0xce,    ,  0, 2,1000,all,   0x00C  //SC_CHAOSPANIC
+2302,0xcf,    ,  2, 0,  -1,all,   0x2010 //SC_MAELSTROM
 2303,0xd0,    ,  3, 0,  -1,all,   0x2058 //SC_BLOODYLUST
 2304,0xd1,    ,  0, 2, 500,enemy, 0x018  //SC_FEINTBOMB
 
@@ -170,7 +170,7 @@
 3020,0xf8,    ,  0, 2, 500,all, 0x018   //KO_ZENKAI
 
 5006,0x101,   ,  0, 3, 500,enemy, 0x018	//NC_MAGMA_ERUPTION
-5010,0x91,    ,  0, 1,1000,enemy, 0x000	//SC_ESCAPE
+5010,0x91,    ,  0, 1,1000,enemy, 0x1000	//SC_ESCAPE
 5013,0x102,   ,  3, 0,  -1,friend,   0x2002	//LG_KINGS_GRACE
 
 5027,0x106,   ,  1:1:2:2:3, 0,  -1,enemy, 0x2010 //SU_CN_POWDERING
@@ -184,10 +184,10 @@
 8043,0xf7,    ,  1, 0,  -1,all, 0x2018 	//MH_VOLCANIC_ASH
 
 8208,0x86,    ,  0, 2,1000,enemy, 0x080	//MA_SHOWER
-8209,0x90,    ,  0, 1,1000,enemy, 0x006	//MA_SKIDTRAP
+8209,0x90,    ,  0, 1,1000,enemy, 0x1006	//MA_SKIDTRAP
 8210,0x93,    ,  0, 1,1000,enemy, 0x006	//MA_LANDMINE
-8211,0x95,    ,  0, 1,1000,enemy, 0x006	//MA_SANDMAN
-8212,0x97,    ,  0, 1,1000,enemy, 0x006	//MA_FREEZINGTRAP
+8211,0x95,    ,  0, 1,1000,enemy, 0x1006	//MA_SANDMAN
+8212,0x97,    ,  0, 1,1000,enemy, 0x1006	//MA_FREEZINGTRAP
 
 8403,0xed,    , -1, 0,  20,enemy, 0x018 //EL_FIRE_MANTLE
 8406,0xee,    ,  1, 0,  -1,friend,0x2018	//EL_WATER_BARRIER

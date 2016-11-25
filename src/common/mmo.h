@@ -266,7 +266,7 @@ struct bonus_script_data {
 
 struct skill_cooldown_data {
   unsigned short skill_id;
-  long tick;
+  long tick, duration;
 };
 
 //For saving status changes across sessions [Skotlex]

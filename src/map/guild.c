@@ -403,7 +403,7 @@ int guild_created(int account_id,int guild_id)
 	clif_guild_created(sd,0);
 
 	if(battle_config.guild_emperium_check)
-		pc_delitem(sd,pc_search_inventory(sd,ITEMID_EMPERIUM),1,0,0,LOG_TYPE_CONSUME); //emperium consumption
+		pc_delitem(sd,pc_search_inventory(sd,ITEMID_EMPERIUM),1,0,0,LOG_TYPE_CONSUME); //Emperium consumption
 	return 0;
 }
 

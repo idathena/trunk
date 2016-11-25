@@ -5147,12 +5147,12 @@ OnTimer44000:
 
 cmd_in01,16,21,0	script	s_dance#up	139,1,3,{
 OnInit:
-	disablenpc "s_dance#up";
+	donpcevent "s_dance#up::OnDisable";
 	end;
 
 OnEnable:
-	specialeffect EF_SUMMONSLAVE;
 	enablenpc "s_dance#up";
+	specialeffect EF_SUMMONSLAVE;
 	end;
 
 OnDisable:
@@ -5207,8 +5207,8 @@ OnInit:
 	end;
 
 OnEnable:
-	specialeffect EF_SUMMONSLAVE;
 	enablenpc "s_dance#down";
+	specialeffect EF_SUMMONSLAVE;
 	end;
 
 OnDisable:
@@ -5282,10 +5282,9 @@ OnInit:
 	donpcevent "s_dance#left::OnDisable";
 	end;
 
-
 OnEnable:
-	specialeffect EF_SUMMONSLAVE;
 	enablenpc "s_dance#left";
+	specialeffect EF_SUMMONSLAVE;
 	end;
 
 OnDisable:
@@ -5352,8 +5351,8 @@ OnInit:
 	end;
 
 OnEnable:
-	specialeffect EF_SUMMONSLAVE;
 	enablenpc "s_dance#right";
+	specialeffect EF_SUMMONSLAVE;
 	end;
 
 OnDisable:
@@ -5426,8 +5425,8 @@ OnInit:
 	end;
 
 OnEnable:
-	specialeffect EF_SUMMONSLAVE;
 	enablenpc "s_dance#cen";
+	specialeffect EF_SUMMONSLAVE;
 	end;
 
 OnDisable:

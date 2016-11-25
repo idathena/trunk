@@ -1310,6 +1310,7 @@ int chrif_skillcooldown_save(struct map_session_data *sd) {
 		if (!timer || timer->func != skill_blockpc_end || DIFF_TICK(timer->tick, tick) < 0)
 			continue;
 		data.tick = DIFF_TICK(timer->tick, tick);
+		data.duration = sd->scd[i]->duration;
 		data.skill_id = sd->scd[i]->skill_id;
 		memcpy(WFIFOP(char_fd,14 + count * sizeof (struct skill_cooldown_data)), &data, sizeof (struct skill_cooldown_data));
 		count++;
@@ -1384,7 +1385,7 @@ int chrif_skillcooldown_load(int fd) {
 		struct skill_cooldown_data *data = (struct skill_cooldown_data *)RFIFOP(fd,14 + i * sizeof(struct skill_cooldown_data));
 
 		if (skill_blockpc_start(sd, data->skill_id, data->tick))
-			clif_skill_cooldown_list(sd, data->skill_id, data->tick);
+			clif_skill_cooldown_list(sd, data);
 	}
 
 	return 0;

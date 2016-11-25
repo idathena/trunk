@@ -321,7 +321,7 @@ enum useskill_fail_cause
 	USESKILL_FAIL_DRAGON = 25,
 	USESKILL_FAIL_POS = 26,
 	USESKILL_FAIL_HELPER_SP_INSUFFICIENT = 27,
-	USESKILL_FAIL_NEER_WALL = 28,
+	USESKILL_FAIL_NEED_WALL = 28,
 	USESKILL_FAIL_NEED_EXP_1PERCENT = 29,
 	USESKILL_FAIL_CHORUS_SP_INSUFFICIENT = 30,
 	USESKILL_FAIL_GC_WEAPONBLOCKING = 31,
@@ -617,7 +617,7 @@ void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x,
 void clif_skillcastcancel(struct block_list *bl);
 void clif_skill_fail(struct map_session_data *sd,uint16 skill_id,enum useskill_fail_cause cause,int btype,int val);
 void clif_skill_cooldown(struct map_session_data *sd, uint16 skill_id, unsigned int tick);
-void clif_skill_cooldown_list(struct map_session_data *sd, uint16 skill_id, unsigned int tick);
+void clif_skill_cooldown_list(struct map_session_data *sd, struct skill_cooldown_data *data);
 int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 damage,int div,uint16 skill_id,uint16 skill_lv,int type);
 //int clif_skill_damage2(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 damage,int div,uint16 skill_id,uint16 skill_lv,int type);
 int clif_skill_nodamage(struct block_list *src,struct block_list *dst,uint16 skill_id,int heal,int fail);
@@ -631,7 +631,7 @@ void clif_cooking_list(struct map_session_data *sd, int trigger, uint16 skill_id
 
 void clif_produceeffect(struct map_session_data *sd, int result, unsigned short nameid);
 
-void clif_getareachar_skillunit(struct block_list *bl, struct skill_unit *unit, enum send_target target, uint8 flag);
+void clif_getareachar_skillunit(struct block_list *bl, struct skill_unit *unit, enum send_target target, bool visible);
 void clif_skill_delunit(struct skill_unit *unit);
 
 void clif_skillunit_update(struct block_list *bl);
@@ -839,7 +839,7 @@ void clif_quest_delete(struct map_session_data *sd, int quest_id);
 void clif_quest_update_status(struct map_session_data *sd, int quest_id, bool active);
 void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd, int mobid);
 void clif_quest_show_event(struct map_session_data *sd, struct block_list *bl, short effect, short color);
-void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, bool is_quest);
+void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, bool is_quest, bool gain);
 
 int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target type);
 void do_init_clif(void);

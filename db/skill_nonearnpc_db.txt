@@ -26,5 +26,9 @@
 //	Chaos Panic can't be placed within 2 ground cells of a warp portal.
 //	(Because SC_CHAOSPANIC doesn't have splash range, it uses layout range.)
 
-SC_CHAOSPANIC,4,1
-SC_MAELSTROM,4,1
+SC_MANHOLE,0
+SC_DIMENSIONDOOR,0
+SC_CHAOSPANIC,0
+SC_MAELSTROM,0,1
+SC_BLOODYLUST,0
+WM_POEMOFNETHERWORLD,0

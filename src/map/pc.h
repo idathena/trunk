@@ -145,7 +145,7 @@ struct s_autobonus {
 
 struct skill_cooldown_entry {
 	unsigned short skill_id;
-	int timer;
+	int timer, duration;
 };
 
 #ifdef VIP_ENABLE
@@ -303,7 +303,7 @@ struct map_session_data {
 	uint16 skill_id_old, skill_lv_old;
 	uint16 skill_id_dance, skill_lv_dance;
 	short cook_mastery; //Range: [0,1999] [Inkfish]
-	struct skill_cooldown_entry * scd[MAX_SKILLCOOLDOWN]; // Skill Cooldown
+	struct skill_cooldown_entry *scd[MAX_SKILLCOOLDOWN]; //Skill Cooldown
 	int cloneskill_idx, //Stores index of copied skill by Intimidate/Plagiarism
 		reproduceskill_idx; //Stores index of copied skill by Reproduce
 	int menuskill_id, menuskill_val, menuskill_val2;
@@ -1058,7 +1058,7 @@ void pc_bleeding(struct map_session_data *sd, unsigned int diff_tick);
 void pc_regen(struct map_session_data *sd, unsigned int diff_tick);
 
 void pc_setstand(struct map_session_data *sd);
-bool pc_can_attack(struct map_session_data *sd, int target_id);
+bool pc_can_attack_sc(struct map_session_data *sd, int target_id);
 bool pc_candrop(struct map_session_data *sd, struct item *item);
 
 int pc_jobid2mapid(unsigned short b_class);	// Skotlex

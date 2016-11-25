@@ -222,7 +222,7 @@ int battle_delay_damage_sub(int tid, unsigned int tick, int id, intptr_t data) {
 		struct block_list *src = NULL;
 		struct block_list *target = map_id2bl(dat->target_id);
 
-		if( !target || status_isdead(target) ) { /* Nothing we can do */
+		if( !target || status_isdead(target) ) { //Nothing we can do
 			if( dat->src_type == BL_PC && (src = map_id2bl(dat->src_id)) &&
 				--((TBL_PC *)src)->delayed_damage == 0 && ((TBL_PC *)src)->state.hold_recalc ) {
 				((TBL_PC *)src)->state.hold_recalc = 0;
@@ -507,6 +507,9 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 	s_race2 = (enum e_race2)status_get_race2(src);
 	s_defele = (tsd ? (enum e_element)status_get_element(src) : ELE_NONE);
 
+//Official servers apply the cardfix value on a base of 1000 and round down the reduction/increase
+#define APPLY_CARDFIX(damage, fix) { (damage) = (damage) - (int64)(((damage) * (1000 - (fix))) / 1000); }
+
 	switch( attack_type ) {
 		case BF_MAGIC:
 			if( sd && !(nk&NK_NO_CARDFIX_ATK) ) { //Affected by attacker ATK bonuses
@@ -522,8 +525,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 						continue;
 					cardfix = cardfix * (100 + sd->add_mdmg[i].rate) / 100;
 				}
-				if( cardfix != 1000 )
-					damage = damage * cardfix / 1000;
+				APPLY_CARDFIX(damage,cardfix);
 			}
 			if( tsd && !(nk&NK_NO_CARDFIX_DEF) ) { //Affected by target DEF bonuses
 				cardfix = 1000; //Reset var for target
@@ -561,8 +563,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				cardfix = cardfix * (100 - tsd->bonus.magic_def_rate) / 100;
 				if( tsd->sc.data[SC_MDEF_RATE] )
 					cardfix = cardfix * (100 - tsd->sc.data[SC_MDEF_RATE]->val1) / 100;
-				if( cardfix != 1000 )
-					damage = damage * cardfix / 1000;
+				APPLY_CARDFIX(damage,cardfix);
 			}
 			break;
 		case BF_WEAPON:
@@ -700,10 +701,11 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				if( flag&BF_LONG )
 					cardfix = cardfix * (100 + sd->bonus.long_attack_atk_rate) / 100;
 #endif
-				if( (left&1) && cardfix_ != 1000 )
-					damage = damage * cardfix_ / 1000;
-				else if( cardfix != 1000 )
-					damage = damage * cardfix / 1000;
+				if( left&1 ) {
+					APPLY_CARDFIX(damage,cardfix_);
+				} else {
+					APPLY_CARDFIX(damage,cardfix);
+				}
 			} else if( tsd && !(nk&NK_NO_CARDFIX_DEF) && !(left&2) ) { //Affected by target DEF bonuses
 				if( !(nk&NK_NO_ELEFIX) ) { //Affected by Element modifier bonuses
 					int ele_fix = tsd->subele[rh_ele] + tsd->subele[ELE_ALL];
@@ -749,8 +751,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 					cardfix = cardfix * (100 - tsd->bonus.long_attack_def_rate) / 100;
 				if( tsd->sc.data[SC_DEF_RATE] )
 					cardfix = cardfix * (100 - tsd->sc.data[SC_DEF_RATE]->val1) / 100;
-				if( cardfix != 1000 )
-					damage = damage * cardfix / 1000;
+				APPLY_CARDFIX(damage,cardfix);
 			}
 			break;
 		case BF_MISC:
@@ -780,11 +781,12 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 					cardfix = cardfix * (100 - tsd->bonus.near_attack_def_rate) / 100;
 				else
 					cardfix = cardfix * (100 - tsd->bonus.long_attack_def_rate) / 100;
-				if( cardfix != 1000 )
-					damage = damage * cardfix / 1000;
+				APPLY_CARDFIX(damage,cardfix);
 			}
 			break;
 	}
+
+#undef APPLY_CARDFIX
 
 	return (int)cap_value(damage - original_damage,INT_MIN,INT_MAX);
 }
@@ -909,7 +911,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		return damage; //This skill bypass everything else
 
 	if( sc && sc->count ) { //SC_* that reduce damage to 0
-		if( sc->data[SC_BASILICA] && !(status_get_mode(src)&MD_BOSS) ) {
+		if( sc->data[SC_BASILICA] && !is_boss(src) ) {
 			d->dmg_lv = ATK_BLOCK;
 			return 0;
 		}
@@ -1293,10 +1295,10 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 #endif
 
 		//Finally added to remove the status of immobile when Aimed Bolt is used [Jobbie]
-		if( skill_id == RA_AIMEDBOLT && (sc->data[SC_BITE] || sc->data[SC_ANKLE] || sc->data[SC_ELECTRICSHOCKER]) ) {
-			status_change_end(bl,SC_BITE,INVALID_TIMER);
+		if( skill_id == RA_AIMEDBOLT && (sc->data[SC_ANKLE] || sc->data[SC_ELECTRICSHOCKER] || sc->data[SC_BITE]) ) {
 			status_change_end(bl,SC_ANKLE,INVALID_TIMER);
 			status_change_end(bl,SC_ELECTRICSHOCKER,INVALID_TIMER);
+			status_change_end(bl,SC_BITE,INVALID_TIMER);
 		}
 
 		if( damage > 0 ) {
@@ -2535,6 +2537,8 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 	}
 
 	if(sc) {
+		if(sc->data[SC_TAROTCARD])
+			hitrate += sc->data[SC_TAROTCARD]->val1;
 		if(sc->data[SC_MTF_ASPD])
 			hitrate += sc->data[SC_MTF_ASPD]->val2;
 		if(sc->data[SC_MTF_ASPD2])
@@ -3256,7 +3260,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 		}
 	}
 
-	if(skill_id == RA_AIMEDBOLT && tsc && (tsc->data[SC_BITE] || tsc->data[SC_ANKLE] || tsc->data[SC_ELECTRICSHOCKER]))
+	if(skill_id == RA_AIMEDBOLT && tsc && (tsc->data[SC_ANKLE] || tsc->data[SC_ELECTRICSHOCKER] || tsc->data[SC_BITE]))
 		wd.div_ = tstatus->size + 2 + (rnd()%100 < 50 - tstatus->size * 10 ? 1 : 0);
 
 	return wd;
@@ -4431,6 +4435,10 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 					break;
 			}
 		}
+		if(sc->data[SC_INCATKRATE] && src->type == BL_PC) {
+			ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_INCATKRATE]->val1);
+			RE_ALLATK_ADDRATE(wd, sc->data[SC_INCATKRATE]->val1);
+		}
 		//Sonic Blow +25% dmg on GVG, +100% dmg on non GVG
 		if(skill_id == AS_SONICBLOW && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_ASSASIN) {
 			ATK_ADDRATE(wd.damage, wd.damage2, (map_flag_gvg2(src->m) ? 25 : 100));
@@ -4439,6 +4447,10 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 		if(skill_id == CR_SHIELDBOOMERANG && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_CRUSADER) {
 			ATK_ADDRATE(wd.damage, wd.damage2, 100);
 			RE_ALLATK_ADDRATE(wd, 100);
+		}
+		if(sc->data[SC_TAROTCARD]) {
+			ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_TAROTCARD]->val1);
+			RE_ALLATK_ADDRATE(wd, sc->data[SC_TAROTCARD]->val1);
 		}
 		if(!skill_id) {
 			if(sc->data[SC_ENCHANTBLADE]) { //[((Skill Level x 20) + 100) x (Caster's Base Level / 150)] + Caster's INT + MATK - MDEF - MDEF2
@@ -4576,7 +4588,8 @@ static short battle_get_defense(struct block_list *src, struct block_list *targe
 	if(battle_config.vit_penalty_type && battle_config.vit_penalty_target&target->type) {
 		unsigned char target_count; //256 max targets should be a sane max
 
-		target_count = unit_counttargeted(target);
+		//Official servers limit the count to 22 targets
+		target_count = min(unit_counttargeted(target), (100 / battle_config.vit_penalty_num) + (battle_config.vit_penalty_count - 1));
 		if(target_count >= battle_config.vit_penalty_count) {
 			if(battle_config.vit_penalty_type == 1) {
 				if(!tsc || !tsc->data[SC_STEELBODY])
@@ -4980,7 +4993,7 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 					rdamage = min(wd.damage, status_get_max_hp(target)) * sce->val2 / 100; //Amplify damage
 					wd.damage = rdamage * 30 / 100; //Player receives 30% of the amplified damage
 					rdamage = rdamage * 70 / 100; //Target receives 70% of the amplified damage [Rytech]
-					clif_skill_damage(src, target, gettick(), status_get_amotion(src), 0, -30000, 1, RK_DEATHBOUND, sce->val1, DMG_SKILL);
+					clif_skill_damage(target, src, gettick(), status_get_amotion(src), 0, -30000, 1, RK_DEATHBOUND, -1, DMG_SKILL);
 					skill_blown(target, src, skill_get_blewcount(RK_DEATHBOUND, sce->val1), unit_getdir(src), 0);
 					status_fix_damage(target, src, rdamage, clif_damage(target, src, gettick(), 0, 0, rdamage, 0, DMG_NORMAL, 0, false));
 					status_change_end(target, SC_DEATHBOUND, INVALID_TIMER);
@@ -5738,7 +5751,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 		//Fall through
 		case NJ_KAENSIN:
 		case PR_SANCTUARY:
-			ad.dmotion = 0; //No flinch animation
+			ad.dmotion = 1; //No flinch animation
 			break;
 	}
 
@@ -6800,8 +6813,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 #endif
 
 			if(battle_config.agi_penalty_type && battle_config.agi_penalty_target&target->type) {
-				//256 max targets should be a sane max
-				unsigned char attacker_count = unit_counttargeted(target);
+				unsigned char attacker_count = unit_counttargeted(target); //256 max targets should be a sane max
 
 				if(attacker_count >= battle_config.agi_penalty_count) {
 					if(battle_config.agi_penalty_type == 1)
@@ -7324,9 +7336,8 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 			rate += rate * sc->data[SC_SKILLRATE_UP]->val2 / 100;
 			status_change_end(src,SC_SKILLRATE_UP,INVALID_TIMER);
 		}
-		if (rnd()%100 < rate) {
-			//Need to apply canact_tick here because it doesn't go through skill_castend_id
-			sd->ud.canact_tick = tick + skill_delayfix(src,MO_TRIPLEATTACK,lv);
+		if (rnd()%100 < rate) { //Need to apply canact_tick here because it doesn't go through skill_castend_id
+			sd->ud.canact_tick = max(tick + skill_delayfix(src,MO_TRIPLEATTACK,lv),sd->ud.canact_tick);
 			if( skill_attack(BF_WEAPON,src,src,target,MO_TRIPLEATTACK,lv,tick,0) )
 				return ATK_DEF;
 			return ATK_MISS;
@@ -7573,7 +7584,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 					}
 				}
 				sd->state.autocast = 1;
-				skill_consume_requirement(sd,r_skill,r_lv,3);
+				skill_consume_requirement(sd,r_skill,r_lv,1);
 				switch (type) {
 					case CAST_GROUND:
 						skill_castend_pos2(src,target->x,target->y,r_skill,r_lv,tick,flag);
@@ -7586,7 +7597,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 						break;
 				}
 				sd->state.autocast = 0;
-				sd->ud.canact_tick = tick + skill_delayfix(src,r_skill,r_lv);
+				sd->ud.canact_tick = max(tick + skill_delayfix(src,r_skill,r_lv),sd->ud.canact_tick);
 				clif_status_change(src,SI_POSTDELAY,1,skill_delayfix(src,r_skill,r_lv),0,0,1);
 		}
 		if (wd.flag&BF_WEAPON && target->id != src->id && damage > 0) {
@@ -8100,7 +8111,7 @@ static const struct _battle_data {
 	{ "player_damage_delay_rate",           &battle_config.pc_damage_delay_rate,            100,    0,      INT_MAX,        },
 	{ "defunit_not_enemy",                  &battle_config.defnotenemy,                     0,      0,      1,              },
 	{ "gvg_traps_target_all",               &battle_config.vs_traps_bctall,                 BL_PC,  BL_NUL, BL_ALL,         },
-	{ "traps_setting",                      &battle_config.traps_setting,                   0,      0,      1,              },
+	{ "traps_setting",                      &battle_config.traps_setting,                   0,      0,      2,              },
 	{ "summon_flora_setting",               &battle_config.summon_flora,                    1|2,    0,      1|2,            },
 	{ "clear_skills_on_death",              &battle_config.clear_unit_ondeath,              BL_NUL, BL_NUL, BL_ALL,         },
 	{ "clear_skills_on_warp",               &battle_config.clear_unit_onwarp,               BL_ALL, BL_NUL, BL_ALL,         },
@@ -8458,7 +8469,7 @@ static const struct _battle_data {
 	{ "max_trans_parameter",                &battle_config.max_trans_parameter,             99,     10,     SHRT_MAX,       },
 	{ "max_third_trans_parameter",          &battle_config.max_third_trans_parameter,       130,    10,     SHRT_MAX,       },
 	{ "max_extended_parameter",             &battle_config.max_extended_parameter,          125,    10,     SHRT_MAX,       },
-	{ "skill_amotion_leniency",             &battle_config.skill_amotion_leniency,          90,     0,      300,            },
+	{ "skill_amotion_leniency",             &battle_config.skill_amotion_leniency,          0,      0,      300,            },
 	{ "mvp_tomb_enabled",                   &battle_config.mvp_tomb_enabled,                1,      0,      1,              },
 	{ "feature.atcommand_suggestions",      &battle_config.atcommand_suggestions_enabled,   0,      0,      1,              },
 	{ "min_npc_vendchat_distance",          &battle_config.min_npc_vendchat_distance,       3,      0,      100,            },

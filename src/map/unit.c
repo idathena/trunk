@@ -1074,38 +1074,35 @@ int unit_blown(struct block_list *bl, int dx, int dy, int count, int flag)
  *  0x1 - Offensive (not set: self skill, e.g. Backslide)
  *  0x2 - Knockback type (not set: Stop type, e.g. Ankle Snare)
  *  0x4 - Boss attack
+ *  0x8 - Ignores players' special_state.no_knockback
  * @return reason for immunity
  *  0 - Can be knocked back / stopped
  *  1 - At WOE/BG map
- *  2 - Target is emperium
- *  3 - Target is MD_KNOCKBACK_IMMUNE|MD_BOSS
- *  4 - Target has 'special_state.no_knockback'
- *  5 - Target is in Basilica area
- *  6 - Target is trap that can't be knocked back
+ *  2 - Target is MD_KNOCKBACK_IMMUNE|MD_BOSS
+ *  3 - Target has 'special_state.no_knockback'
+ *  4 - Target is in Basilica area
+ *  5 - Target is trap that can't be knocked back
  */
 int unit_blown_immune(struct block_list *bl, int flag)
 {
-	if ((flag&0x1) && (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) &&
-		!(battle_config.skill_trap_type&0x1))
+	if ((flag&0x1) && (map_flag_gvg(bl->m) || map[bl->m].flag.battleground) && ((flag&0x2) || !(battle_config.skill_trap_type&0x1)))
 		return 1; //No knocking back in WoE / BG
 
 	switch (bl->type) {
 		case BL_MOB: {
 				struct mob_data *md = BL_CAST(BL_MOB, bl);
 
-				if (md->mob_id == MOBID_EMPERIUM)
-					return 2; //Emperium can't be knocked back
-				if ((flag&0x1) && (status_get_mode(bl)&(MD_KNOCKBACK_IMMUNE|MD_BOSS)) && !(battle_config.skill_trap_type&0x2))
-					return 3; //Bosses or immune can't be knocked back
+				if ((flag&0x1) && (status_get_mode(bl)&(MD_KNOCKBACK_IMMUNE|MD_BOSS)) && ((flag&0x2) || !(battle_config.skill_trap_type&0x2)))
+					return 2; //Bosses or immune can't be knocked back
 			}
 			break;
 		case BL_PC: {
 				struct map_session_data *sd = BL_CAST(BL_PC, bl);
 
-				if ((flag&0x1) && (flag&0x2) && sd->special_state.no_knockback)
-					return 4; //Target has special_state.no_knockback (equip)
-				if (sd->sc.data[SC_BASILICA] && sd->sc.data[SC_BASILICA]->val4 == sd->bl.id && !(flag&0x4))
-					return 5; //Basilica caster can't be knocked back by normal monsters
+				if ((flag&(0x1|0x2)) && !(flag&8) && sd->special_state.no_knockback)
+					return 3; //Target has special_state.no_knockback (equip)
+				if (!(flag&0x4) && sd->sc.data[SC_BASILICA] && sd->sc.data[SC_BASILICA]->val4 == sd->bl.id)
+					return 4; //Basilica caster can't be knocked back by normal monsters
 			}
 			break;
 		case BL_SKILL: {
@@ -1117,7 +1114,7 @@ int unit_blown_immune(struct block_list *bl, int flag)
 						case UNT_ANKLESNARE:
 						case UNT_REVERBERATION:
 						case UNT_POEMOFNETHERWORLD:
-							return 6; //Trap cannot be knocked back
+							return 5; //Trap cannot be knocked back
 					}
 				}
 			}
@@ -1364,12 +1361,9 @@ int unit_resume_running(int tid, unsigned int tick, int id, intptr_t data)
 	TBL_PC *sd = map_id2sd(id);
 
 	if (sd && pc_isridingwug(sd))
-		clif_skill_nodamage(ud->bl,ud->bl,RA_WUGDASH,ud->skill_lv,
-			sc_start4(ud->bl,ud->bl,status_skill2sc(RA_WUGDASH),100,ud->skill_lv,unit_getdir(ud->bl),0,0,0));
+		clif_skill_nodamage(ud->bl,ud->bl,RA_WUGDASH,ud->skill_lv,sc_start4(ud->bl,ud->bl,status_skill2sc(RA_WUGDASH),100,ud->skill_lv,unit_getdir(ud->bl),0,0,0));
 	else
-		clif_skill_nodamage(ud->bl,ud->bl,TK_RUN,ud->skill_lv,
-			sc_start4(ud->bl,ud->bl,status_skill2sc(TK_RUN),100,ud->skill_lv,unit_getdir(ud->bl),0,0,0));
-
+		clif_skill_nodamage(ud->bl,ud->bl,TK_RUN,ud->skill_lv,sc_start4(ud->bl,ud->bl,status_skill2sc(TK_RUN),100,ud->skill_lv,unit_getdir(ud->bl),0,0,0));
 	if (sd)
 		clif_walkok(sd);
 	return 0;
@@ -1407,8 +1401,8 @@ int unit_set_walkdelay(struct block_list *bl, unsigned int tick, int delay, int 
 	}
 	ud->canmove_tick = tick + delay;
 	if (ud->walktimer != INVALID_TIMER) { //Stop walking, if chasing, readjust timers
-		if (delay == 1) //Minimal delay (walk-delay) disabled. Just stop walking
-			unit_stop_walking(bl,4);
+		if (delay == 1) //Minimal delay (walk-delay) disabled, just stop walking
+			unit_stop_walking(bl,0);
 		else {
 			if (ud->state.running) //Resume running after can move again [Kevin]
 				add_timer(ud->canmove_tick, unit_resume_running, bl->id, (intptr_t)ud);
@@ -1545,13 +1539,6 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	if( !status_check_skilluse(src, target, skill_id, 0) )
 		return 0;
 
-	//Fail if the targetted skill is near NPC [Cydh]
-	if( (skill_get_inf2(skill_id)&INF2_NO_NEARNPC) && skill_isNotOk_npcRange(src, skill_id, skill_lv, target->x, target->y) ) {
-		if( sd )
-			clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
-		return 0;
-	}
-
 	if( target->id != src->id && status_isdead(target) ) {
 		switch( skill_id ) { //Skills that may be cast on dead targets
 			case NPC_WIDESOULDRAIN:
@@ -1625,8 +1612,11 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 			sd = map_id2sd(m_src->id);
 	}
 
-	if( sd ) { //Temporarily disabled, awaiting for confirmation
-#if 0
+	if( !skill_check_condition_target(src, target, skill_id) )
+		return 0;
+
+	if( sd ) {
+#if 0 //Temporarily disabled, awaiting for confirmation
 		if( sd->skillitem != skill_id && !skill_check_condition_castbegin(sd, skill_id, skill_lv) )
 #else
 		if( !skill_check_condition_castbegin(sd, skill_id, skill_lv) )
@@ -1687,8 +1677,6 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		case ALL_RESURRECTION:
 			if( battle_check_undead(tstatus->race, tstatus->def_ele) )
 				combo = 1;
-			else if( !status_isdead(target) )
-				return 0; //Can't cast on non-dead characters
 			break;
 		case MO_FINGEROFFENSIVE:
 			if( sd )
@@ -1718,10 +1706,6 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		case TK_RUN:
 			if( sc && sc->data[SC_RUN] )
 				casttime = -1;
-			break;
-		case HP_BASILICA:
-			if( sc && sc->data[SC_BASILICA] )
-				casttime = -1; //No Casting time on basilica cancel
 			break;
 		case KN_CHARGEATK: { //+0.5s every 3 cells of distance but hard-limited to 1.5s
 				unsigned int k = distance_bl(src, target) / 3;
@@ -1836,7 +1820,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		ud->state.skillcastcancel = 0;
 
 	if( !sd || sd->skillitem != skill_id || skill_get_cast(skill_id,skill_lv) )
-		ud->canact_tick = tick + casttime + 100;
+		ud->canact_tick = tick + max(casttime,max(status_get_amotion(src),battle_config.min_skill_delay_limit)) + SECURITY_CASTTIME;
 
 	if( sd ) {
 		switch( skill_id ) {
@@ -1929,7 +1913,7 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 		if(skill_isNotOk(skill_id, sd) || !skill_check_condition_castbegin(sd, skill_id, skill_lv))
 			return 0;
 		/**
-		 * "WHY IS IT HEREE": Ice Wall cannot be canceled past this point, the client displays the animation even,
+		 * "WHY IS IT HERE": Ice Wall cannot be canceled past this point, the client displays the animation even,
 		 * if we cancel it from castend_pos, so it has to be here for it to not display the animation.
 		 */
 		if(skill_id == WZ_ICEWALL && map_getcell(src->m, skill_x, skill_y, CELL_CHKNOICEWALL))
@@ -1944,13 +1928,6 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	if(!status_check_skilluse(src, NULL, skill_id, 0))
 		return 0;
 
-	//Fail if the targetted skill is near NPC [Cydh]
-	if(skill_get_inf2(skill_id)&INF2_NO_NEARNPC && skill_isNotOk_npcRange(src, skill_id, skill_lv, skill_x, skill_y)) {
-		if(sd)
-			clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
-		return 0;
-	}
-
 	//Can't cast ground targeted spells on wall cells
 	if(map_getcell(src->m, skill_x, skill_y, CELL_CHKWALL)) {
 		if(sd)
@@ -1963,7 +1940,7 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	bl.m = src->m;
 	bl.x = skill_x;
 	bl.y = skill_y;
-	
+
 	if(src->type == BL_NPC) //NPC-objects can override cast distance
 		range = AREA_SIZE; //Maximum visible distance before NPC goes out of sight
 	else
@@ -2005,7 +1982,7 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 
 	ud->state.skillcastcancel = (castcancel && casttime > 0 ? 1 : 0);
 	if(!sd || sd->skillitem != skill_id || skill_get_cast(skill_id,skill_lv))
-		ud->canact_tick  = tick + casttime + 100;
+		ud->canact_tick = tick + max(casttime,max(status_get_amotion(src),battle_config.min_skill_delay_limit)) + SECURITY_CASTTIME;
 	//if(sd) {
 		//switch(skill_id) {
 			//case ????:
@@ -2067,7 +2044,7 @@ int unit_set_target(struct unit_data *ud, int target_id)
 
 		if(ud->target && (target = map_id2bl(ud->target)) && (ux = unit_bl2ud(target)) && ux->target_count > 0)
 			ux->target_count--;
-		if(target_id && (target = map_id2bl(target_id)) && (ux = unit_bl2ud(target)))
+		if(target_id && (target = map_id2bl(target_id)) && (ux = unit_bl2ud(target)) && ux->target_count < 255)
 			ux->target_count++;
 	}
 
@@ -2163,7 +2140,7 @@ int unit_attack(struct block_list *src,int target_id,int continuous)
 	nullpo_ret(ud = unit_bl2ud(src));
 
 	target = map_id2bl(target_id);
-	if(target == NULL || status_isdead(target)) {
+	if(!target || status_isdead(target)) {
 		unit_unattackable(src);
 		return 1;
 	}
@@ -2179,7 +2156,7 @@ int unit_attack(struct block_list *src,int target_id,int continuous)
 			unit_stop_attack(src);
 			return 0;
 		}
-		if(!pc_can_attack(sd, target_id)) {
+		if(!pc_can_attack_sc(sd, target_id)) {
 			unit_stop_attack(src);
 			return 0;
 		}
@@ -2418,7 +2395,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 #ifdef OFFICIAL_WALKPATH 
 		|| !path_search_long(NULL,src->m,src->x,src->y,target->x,target->y,CELL_CHKWALL)
 #endif
-		|| (sd && !pc_can_attack(sd,ud->target)) )
+		|| (sd && !pc_can_attack_sc(sd,ud->target)) )
 		return 0; //Can't attack under these conditions
 
 	if( sd && sd->sc.count && sd->sc.data[SC_HEAT_BARREL_AFTER] )
@@ -2857,7 +2834,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 						sd->debug_file,sd->debug_line,sd->debug_func,file,line,func);
 				} else if (--map[bl->m].users == 0 && battle_config.dynamic_mobs) //[Skotlex]
 					map_removemobs(bl->m);
-				if (!(sd->sc.option&OPTION_INVISIBLE)) //Decrement the number of active pvp players on the map
+				if (!pc_isinvisible(sd)) //Decrement the number of active pvp players on the map
 					--map[bl->m].users_pvp;
 				if (sd->state.hpmeter_visible) {
 					map[bl->m].hpmeter_visible--;

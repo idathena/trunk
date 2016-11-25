@@ -1,2 +1,2 @@
 //Pesan ini dapat diubah sesuai kebutuhan
-Selamat Datang di idAthena SVN, tolong laporkan bila kalian menemukan bug kepada tim kami.
+Selamat datang di idAthena, tolong laporkan bila kalian menemukan bug kepada tim kami.

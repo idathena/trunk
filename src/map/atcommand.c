@@ -648,7 +648,7 @@ ACMD_FUNC(who)
 
 	iter = mapit_getallusers();
 	for (pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter))	{
-		if (!((pc_has_permission(pl_sd, PC_PERM_HIDE_SESSION) || (pl_sd->sc.option&OPTION_INVISIBLE)) && pc_get_group_level(pl_sd) > level)) { // you can look only lower or same level
+		if (!((pc_has_permission(pl_sd, PC_PERM_HIDE_SESSION) || pc_isinvisible(pl_sd)) && pc_get_group_level(pl_sd) > level)) { // you can look only lower or same level
 			if (stristr(pl_sd->status.name, player_name) == NULL || // Search with no case sensitive
 				(map_id >= 0 && pl_sd->bl.m != map_id))
 				continue;
@@ -755,7 +755,7 @@ ACMD_FUNC(whogm)
 				continue;
 		}
 		if (pl_level > level) {
-			if (pl_sd->sc.option&OPTION_INVISIBLE)
+			if (pc_isinvisible(pl_sd))
 				continue;
 			sprintf(atcmd_output, msg_txt(913), pl_sd->status.name); // Name: %s (GM)
 			clif_displaymessage(fd, atcmd_output);
@@ -974,7 +974,7 @@ ACMD_FUNC(hide)
 {
 	nullpo_retr(-1, sd);
 
-	if (sd->sc.option&OPTION_INVISIBLE) {
+	if (pc_isinvisible(sd)) {
 		sd->sc.option &= ~OPTION_INVISIBLE;
 		if (sd->disguise)
 			status_set_viewdata(&sd->bl, sd->disguise);
@@ -3093,7 +3093,7 @@ ACMD_FUNC(doommap)
 static void atcommand_raise_sub(struct map_session_data *sd) {
 	
 	status_revive(&sd->bl, 100, 100);
-	
+
 	clif_skill_nodamage(&sd->bl,&sd->bl,ALL_RESURRECTION,4,1);
 	clif_displaymessage(sd->fd, msg_txt(63)); // Mercy has been shown.
 }

@@ -649,6 +649,7 @@ CREATE TABLE IF NOT EXISTS `skillcooldown` (
   `char_id` int(11) unsigned NOT NULL,
   `skill` smallint(11) unsigned NOT NULL default '0',
   `tick` int(11) NOT NULL,
+  `duration` int(11) NOT NULL,
   KEY `account_id` (`account_id`),
   KEY `char_id` (`char_id`)
 ) ENGINE=MyISAM default CHARSET=latin1;
@@ -705,6 +706,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1400256139);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1409590380);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1414975503);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1435860840);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1436360978);
 
 --
 -- Table structure for table `sstatus`
