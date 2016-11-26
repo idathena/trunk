@@ -1089,12 +1089,9 @@ int unit_blown_immune(struct block_list *bl, int flag)
 		return 1; //No knocking back in WoE / BG
 
 	switch (bl->type) {
-		case BL_MOB: {
-				struct mob_data *md = BL_CAST(BL_MOB, bl);
-
-				if ((flag&0x1) && (status_get_mode(bl)&(MD_KNOCKBACK_IMMUNE|MD_BOSS)) && ((flag&0x2) || !(battle_config.skill_trap_type&0x2)))
-					return 2; //Bosses or immune can't be knocked back
-			}
+		case BL_MOB:
+			if ((flag&0x1) && (status_get_mode(bl)&(MD_KNOCKBACK_IMMUNE|MD_BOSS)) && ((flag&0x2) || !(battle_config.skill_trap_type&0x2)))
+				return 2; //Bosses or immune can't be knocked back
 			break;
 		case BL_PC: {
 				struct map_session_data *sd = BL_CAST(BL_PC, bl);

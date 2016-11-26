@@ -30,6 +30,7 @@ struct guild;
 struct battleground_data;
 struct quest;
 struct party_booking_ad_info;
+struct skill_cooldown_data;
 #include <stdarg.h>
 
 enum { // packet_db
