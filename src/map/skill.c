@@ -13169,6 +13169,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 		case UNT_PSYCHIC_WAVE:
 		case UNT_MAGMA_ERUPTION:
 		case UNT_MAKIBISHI:
+		case UNT_VENOMFOG:
 		case UNT_HELLBURNING:
 			skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,skill_id,skill_lv,tick,0);
 			break;
@@ -13818,19 +13819,6 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 				}
 			} else
 				sc_start2(src,bl,type,100,group->val1,group->val2,skill_get_time2(skill_id,skill_lv));
-			break;
-
-		case UNT_VENOMFOG:
-			if (battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0)
-				skill_attack(BF_MISC,src,&unit->bl,bl,skill_id,skill_lv,tick,0);
-			else {
-				int heal = 2000;
-
-				if (tstatus->hp >= tstatus->max_hp)
-					break;
-				clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
-				status_heal(bl,heal,0,0);
-			}
 			break;
 
 		case UNT_B_TRAP:

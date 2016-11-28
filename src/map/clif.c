@@ -10396,13 +10396,13 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		if((battle_config.bg_flee_penalty != 100 || battle_config.gvg_flee_penalty != 100) &&
 			(map_flag_gvg2(sd->state.pmap) || map_flag_gvg2(sd->bl.m) || map[sd->state.pmap].flag.battleground || map[sd->bl.m].flag.battleground))
 			status_calc_bl(&sd->bl,SCB_FLEE); //Refresh flee penalty
-		if(night_flag && map[sd->bl.m].flag.nightenabled) { //Display night
+		if(night_flag && map[sd->bl.m].flag.nightenabled) {
 			if(!sd->state.night) {
-				sd->state.night = 1;
+				sd->state.night = 1; //Display night
 				clif_status_load(&sd->bl,SI_SKE,1);
 			}
-		} else if(sd->state.night) { //Clear night display.
-			sd->state.night = 0;
+		} else if(sd->state.night) {
+			sd->state.night = 0; //Clear night display
 			clif_status_load(&sd->bl,SI_SKE,0);
 		}
 		if(map[sd->bl.m].flag.battleground) {

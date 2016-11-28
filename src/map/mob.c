@@ -2475,26 +2475,23 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 
 	if(mvp_sd && md->db->mexp > 0 && !md->special_state.ai) {
 		unsigned int log_mvp[2] = { 0 };
-		unsigned int mexp;
-		struct item item;
-		double exp;
 
-		//mapflag: noexp check [Lorky]
-		if(map[m].flag.nobaseexp || type&2)
-			exp = 1;
-		else {
-			exp = md->db->mexp;
+		if(!(map[m].flag.nobaseexp || type&2)) { //Mapflag: noexp check [Lorky]
+			unsigned int mexp;
+			double exp = md->db->mexp;
+
 			if(count > 1)
 				exp += exp * (battle_config.exp_bonus_attacker * (count - 1)) / 100.; //[Gengar]
+			mexp = (unsigned int)cap_value(exp, 1, UINT_MAX);
+			clif_mvp_effect(mvp_sd);
+			clif_mvp_exp(mvp_sd, mexp);
+			pc_gainexp(mvp_sd, &md->bl, mexp, 0, false);
+			log_mvp[1] = mexp;
 		}
-		mexp = (unsigned int)cap_value(exp, 1, UINT_MAX);
-		clif_mvp_effect(mvp_sd);
-		clif_mvp_exp(mvp_sd,mexp);
-		pc_gainexp(mvp_sd, &md->bl, mexp, 0, false);
-		log_mvp[1] = mexp;
 		if(!(map[m].flag.nomvploot || type&1)) { //Order might be random depending on item_drop_mvp_mode config setting
 			int mdrop_id[MAX_MVP_DROP];
 			int mdrop_p[MAX_MVP_DROP];
+			struct item item;
 
 			memset(mdrop_id, 0, MAX_MVP_DROP * sizeof(int));
 			memset(mdrop_p, 0, MAX_MVP_DROP * sizeof(int));

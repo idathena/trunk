@@ -1,0 +1,3499 @@
+//===== rAthena Script ======================================= 
+//= Faceworm Nest
+//===== By: ================================================== 
+//= exneval
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= [Official Conversion]
+//= Faceworm Nest Instance
+//===== Additional Comments: ================================= 
+//= 1.0 First version.
+//============================================================ 
+
+// Timeless Item Quests
+// The Owner Of Old Ring
+//============================================================
+payon,157,54,5	script	An Old Woman#pa0829	8_F_GRANDMOTHER,{
+	if (!checkweight(1201,1)) {
+		mes "You have too many kind of belongings. Let's try again after reducing the kind of items.";
+		close;
+	}
+	if (MaxWeight - Weight < 1000) {
+		mes "Your belongings are too heavy to continue. Let's try again after reducing the weight.";
+		close;
+	}
+	if (BaseLevel < 140) {
+		mes "[Jeum-sun]";
+		mes "I am still living in the memory. Make more memories...";
+		next;
+		mes "[Jeum-sun]";
+		mes "Oh are you level 140 yet? I won't talk to any weak adventurers.";
+		close;
+	}
+	set .@face_time,isbegin_quest(12326,PLAYTIME);
+	if (!.@face_time) {
+		mes "[Jeum-sun]";
+		mes "When I was a young girl many years ago there was a man who I had crush on. I didn't know to tell him how I felt...";
+		next;
+		mes "[Jeum-sun]";
+		mes "I used to tease his Peco Peco and wanted him to notice that I was interested. This went on and on for a while.";
+		next;
+		mes "[Jeum-sun]";
+		mes "Then we started dating somehow. It's still embarrasing to talk about it.";
+		next;
+		mes "[Jeum-sun]";
+		mes "Anyway, we got married when we became old enough to marry. He used to say sorry for not being able to afford to buy a ring for me.";
+		next;
+		mes "[Jeum-sun]";
+		mes "It has been 40 years since we were married and he still says ^0000ff'Darling~ Do you want to have a ring?'^000000.";
+		next;
+		mes "[Jeum-sun]";
+		mes "I told him.. What good is a ring for an old lady?";
+		next;
+		mes "[Jeum-sun]";
+		mes "I should have stopped him. I still remember his face early.";
+		next;
+		select("What happened to him?");
+		mes "[Jeum-sun]";
+		mes "He had not came back since he left home to buy a ring.";
+		next;
+		mes "^0000ffThe old lady turned her face down with reddened eyes.^000000";
+		if (countitem(6650)) {
+			next;
+			if (select("Stop talking.:Show the ring from the Faceworm's Nest.") == 2) {
+				mes "[Jeum-sun]";
+				mes "What about this ring?";
+				next;
+				mes "[Jeum-sun]";
+				mes "Oh... Darling~";
+				next;
+				mes "^0000ffThe lady read an inscription inside the ring and started weeping.";
+				mes "[Jeum-sun, my darling flower]^000000";
+				next;
+				mes "^0000ffYou sense a warm energy emanating. Maybe this is the wish of the man who made this ring.^000000";
+				specialeffect EF_SPHERE;
+				next;
+				mes "The warm energy has inspired you with strength.";
+				delitem 6650,1; //Shabby_Ring
+				setquest 12326;
+				getexp 70000,55000;
+			}
+		}
+	} else if (.@face_time == 1)
+		mes "The lady keeps crying over and over holding a ring. It seems to be no use talking to her right now.";
+	else if (.@face_time == 2) {
+		mes "Sadly, this woman does not seem to remember the past because of abrupt emotional changes. Let's talk carefully and listen to her story.";
+		erasequest 12326;
+	}
+	close;
+}
+
+// The Memory Of Old Photo Album
+//============================================================
+payon,161,54,3	script	Exotic Merchant#pa0829	4W_M_03,{
+	if (!checkweight(1201,1)) {
+		mes "You have too many types of belongings. Let's try again after reducing the types of items.";
+		close;
+	}
+	if (MaxWeight - Weight < 1000) {
+		mes "Your belongings are too heavy to continue. Let's try again after reducing the weight.";
+		close;
+	}
+	if (BaseLevel < 140) {
+		mes "[Sergio]";
+		mes "Fortune or fame is not important. The most important thing is family.";
+		next;
+		mes "[Sergio]";
+		mes "Are you at least level 140 yet?";
+		close;
+	}
+	set .@face_time,isbegin_quest(12327,PLAYTIME);
+	if (!.@face_time) {
+		mes "[Sergio]";
+		mes "I have a blurry memory of when I used to travel with my father's armed-merchant group.";
+		next;
+		mes "[Sergio]";
+		mes "I vaguely remember everyone of the group were scattered after being attacked by a giant snake-like creature.";
+		next;
+		mes "[Sergio]";
+		mes "I had lost my family at that time. I do not clearly remember even their faces.";
+		next;
+		mes "[Sergio]";
+		mes "Now I've made my own armed-merchant group and got my life back. But the memory of my past keeps haunting me.";
+		next;
+		mes "[Sergio]";
+		mes "I just stopped by this town to possibly find a record of my family and the armed-merchant group but so far I've found nothing.";
+		if (countitem(6652)) {
+			next;
+			if (select("Stop talking.:Show him the Old Photo Album") == 2) {
+				mes "[Sergio]";
+				mes "Yes! I remembered. This is the one who used to work for my father's armed-merchant group.";
+				next;
+				mes "[Sergio]";
+				mes "Oh my... There are other pictures here too...";
+				next;
+				mes "^0000ffA smile of lonely satisfaction spreads over the face of Sergio while looking at a photo album.^000000";
+				next;
+				mes "^0000ffA gentle energy surrounds Sergio.^000000";
+				specialeffect EF_SPHERE;
+				next;
+				mes "You are touched by seeing the satisfaction on Sergio's face.";
+				delitem 6652,1;
+				setquest 12327;
+				getexp 70000,55000;
+			}
+		}
+	} else if (.@face_time == 1)
+		mes "Sergio keeps looking at the photo album. Let's leave him alone.";
+	else if (.@face_time == 2) {
+		mes "You can talk to Sergio again when you pick up a new photo album from the Faceworm's Nest.";
+		erasequest 12327;
+	}
+	close;
+}
+
+// Dol-Seoi's Sorrow
+//============================================================
+payon,161,50,1	script	Strong Looking Man#pa829	4_M_ORIENT01,{
+	if (!checkweight(1201,1)) {
+		mes "You have too many types of belongings. Let's try again after reducing the types of items.";
+		close;
+	}
+	if (MaxWeight - Weight < 1000) {
+		mes "Your belongings are too heavy to continue. Let's try again after reducing the weight.";
+		close;
+	}
+	if (BaseLevel < 140) {
+		mes "[Dol-Seoi]";
+		mes "What can I do for you?";
+		next;
+		mes "[Dol-Seoi]";
+		mes "Are you at least level 140 yet?";
+		close;
+	}
+	set .@face_time,isbegin_quest(12328,PLAYTIME);
+	if (!.@face_time) {
+		mes "[Dol-Seoi]";
+		mes "I used to be a servant to a very wealthy lady. She was always kind to me but she suffered from a severe cough that wouldn't go away unless she took a special pill.";
+		next;
+		mes "[Dol-Seoi]";
+		mes "I used to get the pill from a group of armed-merchants but I heard that they were attacked by a snake and that's when I couldn't get any more pills.";
+		next;
+		mes "[Dol-Seoi]";
+		mes "I searched everywhere but no one could get that pill for me so eventually my lady passed away. If it wasn't for that slithering...";
+		next;
+		select("Do you want to revenge?");
+		mes "[Dol-Seoi]";
+		mes "Well...";
+		next;
+		mes "[Dol-Seoi]";
+		mes "Yes... But, I have nothing to do with that snake. I am just a worthless servant who once served for my lady.";
+		next;
+		mes "^0000ffYou catch a glimpse of complicated rage and sorrow in his eyes.^000000";
+		if (countitem(6653)) {
+			next;
+			if (select("Stop talking.:Show him the Old Pill.") == 2) {
+				mes "[Dol-Seoi]";
+				mes "Wait! Where did you get this?";
+				next;
+				select("I killed a snake...");
+				mes "[Dol-Seoi]";
+				mes "This pill... My lady, if I had this pill...";
+				next;
+				mes "^0000ffHe begins to weep like a wounded Muka. She must have meant a lot to him...^000000";
+				next;
+				mes "^0000ffI feel gentle energy around Dol-Seoi.^000000";
+				specialeffect EF_SPHERE;
+				delitem 6653,1;
+				setquest 12328;
+				getexp 70000,55000;
+			}
+		}
+	} else if (.@face_time == 1)
+		mes "Dol-Seoi is standing absent-mindedly clutching the Old Pill. Let's leave him alone now.";
+	else if (.@face_time == 2) {
+		mes "If you find a pill from the Faceworm's Nest, please show it to Dol-Seoi.";
+		erasequest 12328;
+	}
+	close;
+}
+
+// Keaton's Bracelet
+//============================================================
+payon,139,68,4	script	A dreary man#pa0829	4_M_NFDEADMAN,{
+	if (!checkweight(1201,1)) {
+		mes "You have too many types of belongings. Let's try again after reducing the types of items.";
+		close;
+	}
+	if (MaxWeight - Weight < 1000) {
+		mes "Your belongings are too heavy to continue. Let's try again after reducing the weight.";
+		close;
+	}
+	if (BaseLevel < 140) {
+		mes "[Keaton]";
+		mes "...";
+		next;
+		mes "[Keaton]";
+		mes "Unless you're level 140, I won't have a real conversation with you.";
+		close;
+	}
+	set .@face_time,isbegin_quest(12329,PLAYTIME);
+	if (!.@face_time) {
+		mes "^0000ffIt looks like a dead soul but you don't feel maliciousness from it. His thoughts have been delivered piece by piece so it isn't easy to understand.^000000";
+		next;
+		mes "^999999[Keaton]";
+		mes "Keaton... Not good at speaking.^000000";
+		next;
+		mes "^999999[Keaton]";
+		mes "Keaton has died long time ago. Keaton is not bad.^000000";
+		next;
+		mes "^999999[Keaton]";
+		mes "Keaton... Need bracelet, that is important. Keaton's friend gave the bracelet.^000000";
+		next;
+		mes "^999999[Keaton]";
+		mes "Keaton, will go after a snake to find a bracelet. The bad snake killed keaton.^000000";
+		if (countitem(6651)) {
+			next;
+			if (select("Stop talking.:Show him the Rusty Bracelet.") == 2) {
+				mes "^999999[Keaton]";
+				mes "It is the bracelet of Keaton!!^000000";
+				specialeffect EF_MAPPILLAR2;
+				next;
+				mes "^999999[Keaton]";
+				mes "Keaton...glad. Defeat bad snake!!^000000";
+				next;
+				mes "^0000ffKeaton seems to shine brighter.^000000";
+				delitem 6651,1;
+				setquest 12329;
+				getexp 70000,55000;
+			}
+		}
+	} else if (.@face_time == 1)
+		mes "Keaton's soul seems to be smiling. Best to give him whatever peace he can have for now.";
+	else if (.@face_time == 2) {
+		mes "Keaton is very sad maybe it is because the bracelet was broken. Bring him any other Rusty Bracelets found in the Faceworm's Nest.";
+		erasequest 12329;
+	}
+	close;
+}
+
+dali,83,67,5	script	Old Sign#1	4_BOARD3,{
+	set .@face_str$,$120719_str_face$;
+	set .@face_num,$120719_num_face;
+	set .@face_num2,$120903_num_face;
+	set .@time_m,.@face_num/60;
+	set .@time_s,.@face_num-(.@time_m*60);
+	if (.@face_num < 60)
+		set .@time_txt$,.@time_s+" "+(.@time_s>1?"Seconds":"Second");
+	else
+		set .@time_txt$,.@time_m+" "+(.@time_m>1?"Minutes":"Minute")+" "+.@time_s+" "+(.@time_s>1?"Seconds":"Second");
+	if (.@face_str$ == "" || .@face_str$ == "0") {
+		mes "There's no sign because no one updates the record."; //Custom text
+		close;
+	} else {
+		if (!.@face_num2) {
+			mes "-- Faceworm's Nest Records --";
+			mes "Best time belongs to adventurer ^ff0044"+.@face_str$+"^000000.";
+	 		mes "Current record time is ^0000ff"+.@time_txt$+"^000000.";
+			close;
+		} else {
+			mes "-- Faceworm's Nest Records --";
+			mes "Best time belongs to adventurer ^ff0044"+.@face_str$+"^000000 with ^ff0044"+.@face_num2+" party "+(.@face_num2>1?"members":"member")+"^000000.";
+	 		mes "Current record time is ^0000ff"+.@time_txt$+"^000000.";
+			close;
+		}
+	}
+	end;
+OnInit:
+	if (!$120719_num_face)
+		set $120719_num_face,3600;
+	if (rand(1,100) > 97) {
+		set $120719_num_face,3600;
+		set $120719_str_face$,"";
+	}
+	end;
+}
+
+dali,80,60,4	script	Magic Scholar	4_M_SAGE_C,{
+	if (BaseLevel < 140) {
+		mes "[Magic Scholar]";
+		mes "You are not qualified enough to enter here. How about visiting other places until you become level 140.";
+		close;
+	}
+	set .@party_id,getcharid(1);
+	set .@ins_mas,getpartyleader(.@party_id,2);
+	set .@p_name$,getpartyname(.@party_id);
+	set .@p_reader$,strcharinfo(0);
+	set .@md_name$,"Faceworm's Nest";
+	set .@face_time,isbegin_quest(12325,PLAYTIME);
+	if (!instance_check_party(.@party_id)) {
+		mes "[Magic Scholar]";
+		mes "You don't have a party? Please come back again after creating a party even if you've come alone.";
+		close;
+	}
+	if (!.@face_time) {
+		if (getcharid(0) == .@ins_mas) {
+			mes "[Magic Scholar]";
+			mes "What can I do for you?";
+			next;
+			switch (select("Reserve Faceworm's Nest:What are you doing here?:Stop Talking.")) {
+				case 1:
+					switch (instance_create(.@md_name$)) {
+						case -3:
+							dispbottom "Memorial Dungeon, '"+.@md_name$+"' is already in progress.",0xFFFFFF;
+							break;
+						case -4:
+						case -2:
+						case -1:
+							mes "[Magic Scholar]";
+							mes "Opps, my hands are slip off. It is required to activate the craks again.";
+							close;
+					}
+					mes "[Magic Scholar]";
+					mes "The spaces are under control.";
+					mes "Please wait for a minute.";
+					close;
+				case 2:
+					break;
+				case 3:
+					mes "[Magic Scholar]";
+					mes "Okay, I got it. Please come back again if you change your mind.";
+					close;
+			}
+		}
+		mes "[Magic Scholar]";
+		mes "I am researching the dimensional cracks in space here.";
+		next;
+		mes "[Magic Scholar]";
+		mes "My research is to stabilize the space here with magic to utilize it for dimensional travel.";
+		next;
+		mes "[Magic Scholar]";
+		mes "This particular crack in space goes to a memory of the past. Many adventurers have been in there but no one will tell me what is in there...";
+		next;
+		mes "[Magic Scholar]";
+		mes "And there's this strange sign here that records names and times on it which I can only assume belongs to those adventurers.";
+		next;
+		mes "[Magic Scholar]";
+		mes "Anyways, I can activate the passage for you if you're a party leader.";
+		close;
+	} else if (.@face_time == 1) {
+		mes "[Magic Scholar]";
+		mes "The crack in time is not safe enough to pass back and forth. Please come back again if the after effect timer has passed.";
+		close;
+	} else if (.@face_time == 2) {
+		mes "^0000ffThe trace of dimensional space travelling has disappeared. You can now move between dimensions.^000000";
+		erasequest 12325;
+		close;
+	}
+}
+
+dali,72,55,4	script	Interdimensional Device	CLEAR_NPC,{
+	if (BaseLevel < 140) {
+		mes "[Interdimensional Device]";
+		mes "Your power level is not high enough to travel the space. Please come back again when you reach at least level 140.";
+		close;
+	}
+	set .@party_id,getcharid(1);
+	set .@ins_mas,getpartyleader(.@party_id,2);
+	set .@p_name$,getpartyname(.@party_id);
+	set .@p_reader$,strcharinfo(0);
+	set .@md_name$,"Faceworm's Nest";
+	set .@face_time,isbegin_quest(12325,PLAYTIME);
+	if (!instance_check_party(.@party_id)) {
+		mes "[Interdimensional Device]";
+		mes "No party? Please come back again after creating a party even if you've come alone.";
+		close;
+	}
+	if (!.@face_time) {
+		switch (instance_enter(.@md_name$)) {
+			case 3:
+				mes "[Interdimensional Device]";
+				mes "An unknown error has occurred.";
+				close;
+			case 2:
+				mes "[Interdimensional Device]";
+				mes "The passage for space travel is not activated yet.";
+				close;
+			case 1: //Custom text
+				mes "[Interdimensional Device]";
+				mes "You are not allowed to access the device.";
+				close;
+			case 0:
+				mapannounce "dali",.@p_name$+" party's party member "+.@p_reader$+" enters "+.@md_name$+".",bc_map,"0x00ff99";
+				setquest 12325;
+				//warp "1@face",112,374;
+				end;
+		}
+	} else if (.@face_time == 1) {
+		mes "[Interdimensional Device]";
+		mes "Traces of recent space travel have been detected. Access is denied.";
+		close;
+	} else if (.@face_time == 2) {
+		mes "^0000ffThe trace of dimensional space travelling has disappeared. You can now move between dimensions.^000000";
+		erasequest 12325;
+		close;
+	}
+}
+
+// Instance Scripts :: in_face
+// 1st Stage
+//============================================================
+1@face,110,348,6	script	Chaos#0	4_M_CHAOS,{
+	cutin "h_chaos01",2;
+	if (getcharid(0) != getpartyleader(getcharid(1),2)) {
+		mes "[Chaos]";
+		mes "I do not know what this is about, but I'm talking to your leader so please wait for a while ok?";
+		close2;
+		cutin "h_chaos01",255;
+		end;
+	}
+	mes "[Chaos]";
+	mes "Really? I didn't know that a bounty hunter was coming here.";
+	unittalk getnpcid(0),"Chaos: Really? I didn't know that a bounty hunter was coming here.";
+	next;
+	select("Wait! It's a misunderstanding.");
+	cutin "h_chaos01",255;
+	mes "["+strcharinfo(0)+"]";
+	mes "No! I think you're mistaken! We are not bounty hunters...";
+	unittalk getcharid(3),strcharinfo(0)+": No! I think you're mistaken! We are not bounty hunters...";
+	next;
+	cutin "h_chaos01",2;
+	mes "[Chaos]";
+	mes "No, No need to make an excuse... The faceworm belongs to nobody.";
+	unittalk getnpcid(0),"Chaos: No, No need to make an excuse... The faceworm belongs to nobody.";
+	next;
+	select("Faceworm?");
+	cutin "h_chaos01",255;
+	mes "["+strcharinfo(0)+"]";
+	mes "Faceworm? I've never heard about it.";
+	unittalk getcharid(3),strcharinfo(0)+": Faceworm? I've never heard about it.";
+	close2;
+	donpcevent instance_npcname("Chaos#01")+"::OnStart";
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Chaos#0")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Chaos#0");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Chaos#0");
+	end;
+}
+
+1@face,110,348,6	script	Chaos#01	4_M_CHAOS,{
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	donpcevent instance_npcname("#globaltimer22")+"::OnT_s";
+	donpcevent instance_npcname("Chaos#01")+"::OnEnable";
+	donpcevent instance_npcname("Chaos#0")+"::OnDisable";
+	sleep 5000;
+	unittalk getnpcid(0),"Chaos: Hahaha, you really never heard about it? Faceworm is the name of a monster which has recently showed up in this area.";
+	sleep 5000;
+	unittalk getnpcid(0),"Chaos: I don't care. I would not care as long as you don't disturb me.";
+	sleep 5000;
+	unittalk getnpcid(0,instance_npcname("Iris#0")),"Iris: Ah~ A gentle breeze~";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#0")),"Iris: Hehe, the weather has been great. I'm so happy~";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#0")),"Iris: How about you Chaos?";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: It will only be for the time being.";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: A black wind has started blowing.";
+	sleep 4000;
+	unittalk getnpcid(0),"Chaos: Iris! I feel like faceworms are around here. Maybe, the queen's nest is in the deepest side of this forest!";
+	sleep 5000;
+	unittalk getnpcid(0,instance_npcname("Iris#0")),"Iris: Ahah~ Let's take care of it as always like usual ok?";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: Yes, let's take care of it and go back. Hey, adventurers. Watch out! I'm sure lots of faceworms will be here soon.";
+	sleep 6000;
+	donpcevent instance_npcname("Chaos#01")+"::OnDisable";
+	donpcevent instance_npcname("Iris#0")+"::OnDisable";
+	donpcevent instance_npcname("#fwormcontrol1")+"::OnStart";
+	mapannounce .@map$,"Faceworm time attack has started. Faster kill times gives a higher percentage of rewards.",bc_map,"0xffffff";
+	donpcevent instance_npcname("#fwormprize1")+"::OnStart";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Chaos#01")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Chaos#01");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Chaos#01");
+	end;
+}
+
+1@face,116,346,3	script	Iris#0	4_F_IRIS,{
+	cutin "h_iris02",2;
+	mes "[Iris]";
+	mes "Sorry~ I enjoy a gentle breeze so talk to me next time.";
+	close2;
+	cutin "h_iris02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Iris#0")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Iris#0");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Iris#0");
+	end;
+}
+
+1@face,1,5,3	script	#fwormcontrol1	CLEAR_NPC,{
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_c,getmapusers(.@map$)+1;
+	set .@mon_num,.@mob_c*2;
+	areamonster .@map$,65,330,179,336,"Faceworm",2528,.@mon_num,instance_npcname("#fwormcontrol1")+"::OnMyMobDead";
+	set .@mon_num,.@mob_c*7;
+	areamonster .@map$,62,62,68,332,"Faceworm",2528,.@mon_num,instance_npcname("#fwormcontrol1")+"::OnMyMobDead";
+	set .@mon_num,.@mob_c*2;
+	areamonster .@map$,66,59,172,65,"Faceworm",2528,.@mon_num,instance_npcname("#fwormcontrol1")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormcontrol1")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormcontrol1");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormcontrol1");
+	end;
+OnMyMobDead:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormcontrol1")+"::OnMyMobDead");
+	mapannounce .@map$,"There are "+.@mob_dead_num+" "+(.@mob_dead_num>1?"faceworms":"faceworm")+" still alive.",bc_map,"0xffffff";
+	if (.@mob_dead_num < 3)
+		initnpctimer;
+	end;
+OnTimer1000:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormcontrol1")+"::OnMyMobDead";
+	donpcevent instance_npcname("#fwormboss1")+"::OnStart";
+	mapannounce .@map$,"A giant faceworm has suddenly appeared.",bc_map,"0xffffff";
+	stopnpctimer;
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss1	CLEAR_NPC,{
+	end;
+OnHeal04:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '1BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,(.@mapcount+1)*150000;
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '1BOSS,2,.@dfacehp;
+	mapannounce .@map$,"Dark faceworm absorbs the energy of 4 unbroken eggs recovering "+.@r_hpp+" energy.",bc_map,"0xff00ee";
+	end;
+OnHeal03:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '1BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,(.@mapcount+1)*55000;
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '1BOSS,2,.@dfacehp;
+	mapannounce .@map$,"Dark faceworm absorbs the energy of 3 unbroken eggs recovering "+.@r_hpp+" energy.",bc_map,"0xff00ee";
+	end;
+OnHeal02:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '1BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,(.@mapcount+1)*20000;
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '1BOSS,2,.@dfacehp;
+	mapannounce .@map$,"Dark faceworm absorbs the energy of 2 unbroken eggs recovering "+.@r_hpp+" energy.",bc_map,"0xff00ee";
+	end;
+OnHeal01:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '1BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,(.@mapcount+1)*7200;
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '1BOSS,2,.@dfacehp;
+	mapannounce .@map$,"Dark faceworm absorbs the energy of 1 unbroken egg recovering "+.@r_hpp+" energy.",bc_map,"0xff00ee";
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	areamonster .@map$,140,69,150,79,"Dark Faceworm",2530,1,instance_npcname("#fwormboss1")+"::OnMyMobDead";
+	set '1BOSS,$@mobid[0];
+	set .@mapcount,getmapusers(.@map$);
+	set .@dfacehp,(13-.@mapcount)*200000;
+	set .@MOB_HP,5200000-.@dfacehp;
+	if (.@MOB_HP < 1500000)
+		set .@MOB_HP,1500000;
+	setunitdata '1BOSS,2,.@MOB_HP;
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss1")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss1");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss1");
+	end;
+OnMyMobDead:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss1")+"::OnMyMobDead");
+	if (!.@mob_dead_num) {
+		donpcevent instance_npcname("#fwormprize1")+"::OnEnable";
+		donpcevent instance_npcname("#fwormenter1")+"::OnEnable";
+		donpcevent instance_npcname("#fwormexit1")+"::OnEnable";
+		donpcevent instance_npcname("Chaos#1")+"::OnEnable";
+		donpcevent instance_npcname("Iris#1")+"::OnEnable";
+		donpcevent instance_npcname("#fwormboss12")+"::OnEnd";
+		mapannounce .@map$,"A hole appears after killing the dark faceworm.",bc_map,"0xffffff";
+		stopnpctimer;
+	}
+	end;
+OnTimer1111:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	if (.@mapcount) {
+		if (rand(1,22-.@mapcount) < 17) {
+			getunitdata '1BOSS,.@arr;
+			set .@MOB_HP,.@arr[2];
+			if (.@MOB_HP > 3000000 && .@MOB_HP < 4900000)
+				donpcevent instance_npcname("#fwormboss12")+"::OnStart1";
+			else if (.@MOB_HP > 10000 && .@MOB_HP < 2500001)
+				donpcevent instance_npcname("#fwormboss12")+"::OnStart2";
+		}
+	} else
+		setunitdata '1BOSS,2,5000000;
+	end;
+OnTimer14000:
+	stopnpctimer;
+	getunitdata '1BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	if (.@MOB_HP > 10000)
+		initnpctimer;
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss12	CLEAR_NPC,{
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss12")+"::OnMyMobDead";
+	stopnpctimer;
+	end;
+OnStart1:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss12")+"::OnMyMobDead");
+	if (.@mob_dead_num > 3)
+		killmonster .@map$,instance_npcname("#fwormboss12")+"::OnMyMobDead";
+	getunitdata '1BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
+	end;
+OnStart2:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss12")+"::OnMyMobDead");
+	if (.@mob_dead_num > 6)
+		killmonster .@map$,instance_npcname("#fwormboss12")+"::OnMyMobDead";
+	getunitdata '1BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby+4,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby-4,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss12")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss12");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss12");
+	end;
+OnMyMobDead:
+	end;
+OnTimer12000:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss12")+"::OnMyMobDead");
+	if (.@mob_dead_num > 3)
+		donpcevent instance_npcname("#fwormboss1")+"::OnHeal04";
+	else if (.@mob_dead_num > 2)
+		donpcevent instance_npcname("#fwormboss1")+"::OnHeal03";
+	else if (.@mob_dead_num > 1)
+		donpcevent instance_npcname("#fwormboss1")+"::OnHeal02";
+	else if (.@mob_dead_num > 0)
+		donpcevent instance_npcname("#fwormboss1")+"::OnHeal01";
+	donpcevent instance_npcname("#fwormboss12")+"::OnEnd";
+	end;
+}
+
+1@face,149,92,0	script	#fwormenter1	WARPNPC,2,2,{
+	end;
+OnTouch:
+	set .@map$,instance_mapname("1@face");
+	warp .@map$,127,95;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormenter1")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#fwormenter1");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#fwormenter1");
+	end;
+}
+
+1@face,129,86,0	script	#fwormexit1	WARPNPC,2,2,{
+	end;
+OnTouch:
+	set .@map$,instance_mapname("1@face");
+	warp .@map$,156,76;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormexit1")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#fwormexit1");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#fwormexit1");
+	end;
+}
+
+// 2nd Stage
+//============================================================
+1@face,120,97,6	script	Chaos#1	4_M_CHAOS,{
+	cutin "h_chaos01",2;
+	if (getcharid(0) != getpartyleader(getcharid(1),2)) {
+		mes "[Chaos]";
+		mes "I do not know what this is about, but I'm talking to your leader so please wait for a while ok?";
+		close2;
+		cutin "h_chaos01",255;
+		end;
+	}
+	mes "[Chaos]";
+	mes "Wow, you're fast enough to follow me.";
+	unittalk getnpcid(0),"Chaos: Wow, you're fast enough to follow me.";
+	next;
+	select("The big one, just right before...");
+	cutin "h_chaos01",255;
+	mes "["+strcharinfo(0)+"]";
+	mes "The big one just right before we saw is a boss here?";
+	unittalk getcharid(3),strcharinfo(0)+": The big one just right before we saw is a boss here?";
+	next;
+	cutin "h_chaos01",2;
+	mes "[Chaos]";
+	mes "No~~ It can't be the faceworm queen.";
+	close2;
+	donpcevent instance_npcname("Chaos#11")+"::OnStart";
+	cutin "h_chaos01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Chaos#1")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Chaos#1");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Chaos#1");
+	end;
+}
+
+1@face,120,97,6	script	Chaos#11	4_M_CHAOS,{
+	end;
+OnStart:
+	donpcevent instance_npcname("Chaos#11")+"::OnEnable";
+	donpcevent instance_npcname("Chaos#1")+"::OnDisable";
+	unittalk getnpcid(0),"Chaos: No~~ It can't be the faceworm queen.";
+	sleep 4000;
+	unittalk getnpcid(0),"Chaos: The one we just saw before is a mutant faceworm.";
+	sleep 5000;
+	unittalk getnpcid(0),"Chaos: Wait! The dead faceworm's castoff skin might be useful.";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#1")),"Iris: But, if the fight takes too long. The scales might be damaged. They'll be worthless!";
+	sleep 5000;
+	unittalk getnpcid(0,instance_npcname("Iris#1")),"Iris: I heard that skillful hunters are good at taking the scales off super fast.";
+	sleep 6000;
+	unittalk getnpcid(0,instance_npcname("Iris#1")),"Iris: Chaos, are you any good at it?";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: No... Not at all! I use Magnum Break only, so the scales will probably get burned...";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#1")),"Iris: Useless Chaos.";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: Besides, the one we are looking for is not here. I will go back first, so take care of the rest ok?";
+	sleep 5000;
+	donpcevent instance_npcname("Chaos#11")+"::OnDisable";
+	unittalk getnpcid(0,instance_npcname("Iris#1")),"Iris: Chaos! Are you leaving me alone?";
+	sleep 3000;
+	donpcevent instance_npcname("Iris#1")+"::OnDisable";
+	donpcevent instance_npcname("#fwormcontrol2")+"::OnStart";
+	donpcevent instance_npcname("#fwormprize2")+"::OnStart";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Chaos#11")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Chaos#11");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Chaos#11");
+	end;
+}
+
+1@face,129,97,3	script	Iris#1	4_F_IRIS,{
+	cutin "h_iris02",2;
+	mes "[Iris]";
+	mes "Chaos is a good friend even though he's only able to use Magnum Break...";
+	close2;
+	cutin "h_iris02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Iris#1")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Iris#1");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Iris#1");
+	end;
+}
+
+1@face,2,5,3	script	#fwormcontrol2	CLEAR_NPC,{
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_c,getmapusers(.@map$)+1;
+	set .@mon_num,.@mob_c*2;
+	areamonster .@map$,107,102,113,154,"Faceworm",2528,.@mon_num,instance_npcname("#fwormcontrol2")+"::OnMyMobDead";
+	set .@mon_num,.@mob_c*2;
+	areamonster .@map$,115,175,121,209,"Faceworm",2528,.@mon_num,instance_npcname("#fwormcontrol2")+"::OnMyMobDead";
+	set .@mon_num,.@mob_c*7;
+	areamonster .@map$,118,240,204,292,"Faceworm",2528,.@mon_num,instance_npcname("#fwormcontrol2")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormcontrol2")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormcontrol2");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormcontrol2");
+	end;
+OnMyMobDead:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormcontrol2")+"::OnMyMobDead");
+	mapannounce .@map$,"There are "+.@mob_dead_num+" "+(.@mob_dead_num>1?"faceworms":"faceworm")+" still alive.",bc_map,"0xffffff";
+	if (.@mob_dead_num < 3)
+		initnpctimer;
+	end;
+OnTimer1000:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormcontrol2")+"::OnMyMobDead";
+	donpcevent instance_npcname("#fwormboss2")+"::OnStart";
+	mapannounce .@map$,"A giant faceworm has suddenly appeared.",bc_map,"0xffffff";
+	stopnpctimer;
+	end;
+}
+
+1@face,2,5,3	script	#fwormboss2	CLEAR_NPC,{
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	areamonster .@map$,156,267,166,277,"Dark Faceworm",2530,1,instance_npcname("#fwormboss2")+"::OnMyMobDead";
+	set '2BOSS,$@mobid[0];
+	set .@mapcount,getmapusers(.@map$);
+	set .@dfacehp,(13-.@mapcount)*200000;
+	set .@MOB_HP,5200000-.@dfacehp;
+	if (.@MOB_HP < 1500000)
+		set .@MOB_HP,1500000;
+	setunitdata '2BOSS,2,.@MOB_HP;
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss2")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss2");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss2");
+	end;
+OnMyMobDead:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss2")+"::OnMyMobDead");
+	if (!.@mob_dead_num) {
+		donpcevent instance_npcname("#fwormprize2")+"::OnEnable";
+		donpcevent instance_npcname("#fwormenter2")+"::OnEnable";
+		donpcevent instance_npcname("#fwormexit2")+"::OnEnable";
+		donpcevent instance_npcname("Chaos#2")+"::OnEnable";
+		donpcevent instance_npcname("Iris#2")+"::OnEnable";
+		donpcevent instance_npcname("#fwormboss22")+"::OnEnd";
+		mapannounce .@map$,"You hear something loud in the south. It must be the nest of the one we just got rid of.",bc_map,"0xffffff";
+		stopnpctimer;
+	}
+	end;
+OnTimer1111:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	if (.@mapcount) {
+		if (rand(1,22-.@mapcount) < 17) {
+			getunitdata '2BOSS,.@arr;
+			set .@MOB_HP,.@arr[2];
+			if (.@MOB_HP > 2000000 && .@MOB_HP < 5000000)
+				donpcevent instance_npcname("#fwormboss22")+"::OnStart1";
+			else if (.@MOB_HP > 10000 && .@MOB_HP < 2000000)
+				donpcevent instance_npcname("#fwormboss22")+"::OnStart2";
+		}
+	} else
+		setunitdata '2BOSS,2,5000000;
+	end;
+OnTimer12000:
+	stopnpctimer;
+	getunitdata '2BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	if (.@MOB_HP > 10000)
+		initnpctimer;
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss22	CLEAR_NPC,{
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss22")+"::OnMyMobDead";
+	stopnpctimer;
+	end;
+OnStart1:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss22")+"::OnMyMobDead");
+	if (.@mob_dead_num > 6)
+		killmonster .@map$,instance_npcname("#fwormboss22")+"::OnMyMobDead";
+	getunitdata '2BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
+	end;
+OnStart2:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss22")+"::OnMyMobDead");
+	if (.@mob_dead_num > 12)
+		killmonster .@map$,instance_npcname("#fwormboss22")+"::OnMyMobDead";
+	getunitdata '2BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby+4,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby-4,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss22");
+	end;
+OnMyMobDead:
+	end;
+OnTimer20000:
+	donpcevent instance_npcname("#fwormboss22")+"::OnEnd";
+	end;
+}
+
+1@face,139,100,0	script	#fwormenter2	WARPNPC,2,2,{
+	end;
+OnTouch:
+	set .@map$,instance_mapname("1@face");
+	warp .@map$,156,117;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormenter2")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#fwormenter2");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#fwormenter2");
+	end;
+}
+
+1@face,151,106,0	script	#fwormexit2	WARPNPC,2,2,{
+	end;
+OnTouch:
+	set .@map$,instance_mapname("1@face");
+	warp .@map$,127,95;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormexit2")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#fwormexit2");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#fwormexit2");
+	end;
+}
+
+// 3rd Stage
+//============================================================
+1@face,153,113,7	script	Chaos#2	4_M_CHAOS,{
+	cutin "h_chaos01",2;
+	if (getcharid(0) != getpartyleader(getcharid(1),2)) {
+		mes "[Chaos]";
+		mes "I do not know what this is about, but I'm talking to your leader so please wait for a while ok?";
+		close2;
+		cutin "h_chaos01",255;
+		end;
+	}
+	mes "[Chaos]";
+	mes "You're pretty good! But you have to be careful from now on. This narrow canyon seems to be full of dangers.";
+	unittalk getnpcid(0),"Chaos: You're pretty good! But you have to be careful from now on. This narrow canyon seems to be full of dangers.";
+	close2;
+	donpcevent instance_npcname("Chaos#22")+"::OnStart";
+	cutin "h_chaos01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Chaos#2")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Chaos#2");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Chaos#2");
+	end;
+}
+
+1@face,153,113,7	script	Chaos#22	4_M_CHAOS,{
+	end;
+OnStart:
+	donpcevent instance_npcname("Chaos#22")+"::OnEnable";
+	donpcevent instance_npcname("Chaos#2")+"::OnDisable";
+	sleep 4000;
+	unittalk getnpcid(0,instance_npcname("Iris#2")),"Iris: I do not feel good here. Let's get outta here right now Chaos!";
+	sleep 4000;
+	unittalk getnpcid(0),"Chaos: Ok, let's get out of here. Carefully follow me!";
+	sleep 4000;
+	donpcevent instance_npcname("Chaos#22")+"::OnDisable";
+	donpcevent instance_npcname("Iris#2")+"::OnDisable";
+	donpcevent instance_npcname("#fwormcontrol3")+"::OnStart";
+	donpcevent instance_npcname("#fwormprize3")+"::OnStart";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Chaos#22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Chaos#22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Chaos#22");
+	end;
+}
+
+1@face,160,113,1	script	Iris#2	4_F_IRIS,{
+	cutin "h_iris01",2;
+	mes "[Iris]";
+	mes "This canyon. I am not feeling good here. I don't want to stay anymore.";
+	close2;
+	cutin "h_iris01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Iris#2")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Iris#2");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Iris#2");
+	end;
+}
+
+1@face,2,5,3	script	#fwormcontrol3	CLEAR_NPC,{
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_c,getmapusers(.@map$)+1;
+	set .@mon_num,.@mob_c*11;
+	areamonster .@map$,238,274,308,344,"Faceworm",2528,.@mon_num,instance_npcname("#fwormcontrol3")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormcontrol3")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormcontrol3");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormcontrol3");
+	end;
+OnMyMobDead:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormcontrol3")+"::OnMyMobDead");
+	mapannounce .@map$,"There are "+.@mob_dead_num+" "+(.@mob_dead_num>1?"faceworms":"faceworm")+" still alive.",bc_map,"0xffffff";
+	if (.@mob_dead_num < 3)
+		initnpctimer;
+	end;
+OnTimer1000:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormcontrol3")+"::OnMyMobDead";
+	donpcevent instance_npcname("#fwormboss3")+"::OnStart";
+	mapannounce .@map$,"A giant faceworm has suddenly appeared.",bc_map,"0xffffff";
+	stopnpctimer;
+	end;
+}
+
+1@face,2,5,3	script	#fwormboss3	CLEAR_NPC,{
+	end;
+OnHeal01:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '3BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,((.@mapcount+1)*5000)*rand(1,10);
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '3BOSS,2,.@dfacehp;
+	mapannounce .@map$,"Dark faceworm has dropped a sack of fatal poison and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x66ff00";
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	areamonster .@map$,273,303,283,313,"Dark Faceworm",2530,1,instance_npcname("#fwormboss3")+"::OnMyMobDead";
+	set '3BOSS,$@mobid[0];
+	set .@mapcount,getmapusers(.@map$);
+	set .@dfacehp,(13-.@mapcount)*200000;
+	set .@MOB_HP,5200000-.@dfacehp;
+	if (.@MOB_HP < 1500000)
+		set .@MOB_HP,1500000;
+	setunitdata '3BOSS,2,.@MOB_HP;
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss3")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss3");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss3");
+	end;
+OnMyMobDead:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss3")+"::OnMyMobDead");
+	if (!.@mob_dead_num) {
+		donpcevent instance_npcname("#fwormprize3")+"::OnEnable";
+		donpcevent instance_npcname("#fwormenter3")+"::OnEnable";
+		donpcevent instance_npcname("#fwormexit3")+"::OnEnable";
+		donpcevent instance_npcname("#chaoson")+"::OnEnable";
+		donpcevent instance_npcname("#fwormboss32")+"::OnEnd";
+		mapannounce .@map$,"You hear the pile of stones collapsing. This might be a gateway to go to other spaces.",bc_map,"0xffffff";
+		stopnpctimer;
+	}
+	end;
+OnTimer1111:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	if (.@mapcount) {
+		if (rand(1,22-.@mapcount) < 17) {
+			getunitdata '3BOSS,.@arr;
+			set .@MOB_HP,.@arr[2];
+			if (.@MOB_HP > 4200000 && .@MOB_HP < 5000000)
+				donpcevent instance_npcname("#fwormboss32")+"::OnStart1";
+			else if (.@MOB_HP > 3200000 && .@MOB_HP < 4000000)
+				donpcevent instance_npcname("#fwormboss32")+"::OnStart1";
+			else if (.@MOB_HP > 2200000 && .@MOB_HP < 3000000)
+				donpcevent instance_npcname("#fwormboss32")+"::OnStart1";
+			else if (.@MOB_HP > 1200000 && .@MOB_HP < 2000000)
+				donpcevent instance_npcname("#fwormboss32")+"::OnStart2";
+			else if (.@MOB_HP > 10000 && .@MOB_HP < 1000000)
+				donpcevent instance_npcname("#fwormboss32")+"::OnStart2";
+		}
+	} else
+		setunitdata '3BOSS,2,5000000;
+	end;
+OnTimer7000:
+	stopnpctimer;
+	getunitdata '3BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	if (.@MOB_HP > 10000)
+		initnpctimer;
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss32	CLEAR_NPC,{
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss32")+"::OnMyMobDead";
+	end;
+OnStart1:
+	set .@map$,instance_mapname("1@face");
+	getunitdata '3BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	set .@vmobx,.@mobx-3;
+	while (1) {
+		set .@vmoby,.@moby+3;
+		while (2) {
+			monster .@map$,.@vmobx,.@vmoby,"Venom Bug",2531,1,instance_npcname("#fwormboss32")+"::OnMyMobDead";
+			set .@vmoby,.@vmoby-2;
+			if (.@vmoby < (.@moby-3))
+				break;
+		}
+		set .@vmobx,.@vmobx+2;
+		if (.@vmobx > (.@mobx+3))
+			break;
+	}
+	donpcevent instance_npcname("#fwormboss3")+"::OnHeal01";
+	end;
+OnStart2:
+	set .@map$,instance_mapname("1@face");
+	getunitdata '3BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	set .@vmobx,.@mobx-5;
+	while (1) {
+		set .@vmoby,.@moby+5;
+		while (2) {
+			monster .@map$,.@vmobx,.@vmoby,"Venom Bug",2531,1,instance_npcname("#fwormboss32")+"::OnMyMobDead";
+			set .@vmoby,.@vmoby-2;
+			if (.@vmoby < (.@moby-5))
+				break;
+		}
+		set .@vmobx,.@vmobx+2;
+		if (.@vmobx > (.@mobx+5))
+			break;
+	}
+	donpcevent instance_npcname("#fwormboss3")+"::OnHeal01";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss32")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss32");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss32");
+	end;
+OnMyMobDead:
+	end;
+}
+
+1@face,248,185,0	script	#fwormenter3	WARPNPC,2,2,{
+	end;
+OnTouch:
+	set .@map$,instance_mapname("1@face");
+	warp .@map$,261,170;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormenter3")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#fwormenter3");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#fwormenter3");
+	end;
+}
+
+1@face,254,175,0	script	#fwormexit3	WARPNPC,2,2,{
+	end;
+OnTouch:
+	set .@map$,instance_mapname("1@face");
+	warp .@map$,244,192;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormexit3")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#fwormexit3");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#fwormexit3");
+	end;
+}
+
+// 4th Stage
+//============================================================
+1@face,261,169,0	script	#chaoson	HIDDEN_WARP_NPC,7,7,{
+	end;
+OnTouch_:
+	donpcevent instance_npcname("#chaoson")+"::OnDisable";
+	donpcevent instance_npcname("#announcer1")+"::OnStart";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#chaoson")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#chaoson");
+	hideoffnpc instance_npcname("#chaoson");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#chaoson");
+	disablenpc instance_npcname("#chaoson");
+	end;
+}
+
+1@face,1,10,7	script	#announcer1	CLEAR_NPC,{
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	mapannounce .@map$,"The voice of Chaos: Hey adventurers, you should be careful! Avoid the poison!",bc_map,"0xffff00";
+	sleep 6000;
+	mapannounce .@map$,"The voice of Chaos: We are looking for another nest so let me know if you find anything.",bc_map,"0xffff00";
+	donpcevent instance_npcname("#fwormcontrol4")+"::OnStart";
+	donpcevent instance_npcname("#fwormcontrol42")+"::OnStart";
+	donpcevent instance_npcname("#fwormprize4")+"::OnStart";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#announcer1")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#announcer1");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#announcer1");
+	end;
+}
+
+1@face,2,5,3	script	#fwormcontrol4	CLEAR_NPC,{
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_c,getmapusers(.@map$)+1;
+	set .@mon_num,.@mob_c*6;
+	areamonster .@map$,250,94,330,174,"Faceworm",2528,.@mon_num,instance_npcname("#fwormcontrol4")+"::OnMyMobDead";
+	set .@mon_num,.@mob_c*5;
+	areamonster .@map$,223,51,303,111,"Faceworm",2528,.@mon_num,instance_npcname("#fwormcontrol4")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormcontrol4")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormcontrol4");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormcontrol4");
+	end;
+OnMyMobDead:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormcontrol4")+"::OnMyMobDead");
+	mapannounce .@map$,"There are "+.@mob_dead_num+" "+(.@mob_dead_num>1?"faceworms":"faceworm")+" still alive.",bc_map,"0xffffff";
+	if (.@mob_dead_num < 3)
+		initnpctimer;
+	end;
+OnTimer1000:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormcontrol4")+"::OnMyMobDead";
+	donpcevent instance_npcname("#fwormboss4")+"::OnStart";
+	mapannounce .@map$,"You hear something screaming to the west.",bc_map,"0xffffff";
+	stopnpctimer;
+	end;
+}
+
+1@face,2,6,3	script	#fwormcontrol42	CLEAR_NPC,{
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormcontrol42")+"::OnMyMobDead";
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_c,getmapusers(.@map$)+8;
+	set .@mon_num,.@mob_c*5;
+	areamonster .@map$,237,71,337,171,"#toxicarea",2536,.@mon_num,instance_npcname("#fwormcontrol42")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormcontrol42")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormcontrol42");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormcontrol42");
+	end;
+OnMyMobDead:
+	end;
+}
+
+1@face,2,5,3	script	#fwormboss4	CLEAR_NPC,{
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	areamonster .@map$,209,103,219,113,"Dark Faceworm",2530,1,instance_npcname("#fwormboss4")+"::OnMyMobDead";
+	set '4BOSS,$@mobid[0];
+	set .@mapcount,getmapusers(.@map$);
+	set .@dfacehp,(13-.@mapcount)*200000;
+	set .@MOB_HP,5200000-.@dfacehp;
+	if (.@MOB_HP < 1500000)
+		set .@MOB_HP,1500000;
+	setunitdata '4BOSS,2,.@MOB_HP;
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss4")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss4");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss4");
+	end;
+OnMyMobDead:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss4")+"::OnMyMobDead");
+	if (!.@mob_dead_num) {
+		donpcevent instance_npcname("#fwormcontrol42")+"::OnEnd";
+		donpcevent instance_npcname("#fwormprize4")+"::OnEnable";
+		donpcevent instance_npcname("#fwormenter4")+"::OnEnable";
+		donpcevent instance_npcname("#fwormexit4")+"::OnEnable";
+		donpcevent instance_npcname("Chaos#4")+"::OnEnable";
+		donpcevent instance_npcname("Iris#4")+"::OnEnable";
+		donpcevent instance_npcname("#chaoson2")+"::OnEnable";
+		donpcevent instance_npcname("#fwormboss42")+"::OnEnd";
+		mapannounce .@map$,"You hear the pile of stones collapsing. I think another gateway is found.",bc_map,"0xffffff";
+		stopnpctimer;
+	}
+	end;
+OnTimer1111:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	if (.@mapcount) {
+		if (rand(1,22-.@mapcount) < 17) {
+			getunitdata '4BOSS,.@arr;
+			set .@MOB_HP,.@arr[2];
+			if (.@MOB_HP > 4300000 && .@MOB_HP < 5000000)
+				donpcevent instance_npcname("#fwormboss42")+"::OnStart1";
+			else if (.@MOB_HP > 3300000 && .@MOB_HP < 4000000)
+				donpcevent instance_npcname("#fwormboss42")+"::OnStart1";
+			else if (.@MOB_HP > 2300000 && .@MOB_HP < 3000000)
+				donpcevent instance_npcname("#fwormboss42")+"::OnStart2";
+			else if (.@MOB_HP > 1300000 && .@MOB_HP < 2000000)
+				donpcevent instance_npcname("#fwormboss42")+"::OnStart2";
+			else if (.@MOB_HP > 10000 && .@MOB_HP < 1000000)
+				donpcevent instance_npcname("#fwormboss42")+"::OnStart2";
+		}
+	} else
+		setunitdata '4BOSS,2,5000000;
+	end;
+OnTimer10000:
+	stopnpctimer;
+	getunitdata '4BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	if (.@MOB_HP > 10000)
+		initnpctimer;
+	else
+		donpcevent instance_npcname("#fwormboss42")+"::OnEnd";
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss42	CLEAR_NPC,{
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	stopnpctimer;
+	end;
+OnStart1:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss42")+"::OnMyMobDead");
+	if (.@mob_dead_num > 12)
+		killmonster .@map$,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	getunitdata '4BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-3,.@moby+3,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx+3,.@moby+3,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx-3,.@moby-3,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx+3,.@moby-3,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	end;
+OnStart2:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss42")+"::OnMyMobDead");
+	if (.@mob_dead_num > 27)
+		killmonster .@map$,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	getunitdata '4BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-5,.@moby+5,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby+5,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx+5,.@moby+5,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx-5,.@moby,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx+5,.@moby,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx-5,.@moby-5,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby-5,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	monster .@map$,.@mobx+5,.@moby-5,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss42")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss42");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss42");
+	end;
+OnMyMobDead:
+	end;
+OnTimer30000:
+	donpcevent instance_npcname("#fwormboss42")+"::OnEnd";
+	end;
+}
+
+1@face,204,122,0	script	#fwormenter4	WARPNPC,2,2,{
+	end;
+OnTouch:
+	set .@map$,instance_mapname("1@face");
+	warp .@map$,210,145;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormenter4")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#fwormenter4");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#fwormenter4");
+	end;
+}
+
+1@face,198,142,0	script	#fwormexit4	WARPNPC,2,2,{
+	end;
+OnTouch:
+	set .@map$,instance_mapname("1@face");
+	warp .@map$,211,114;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormexit4")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#fwormexit4");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#fwormexit4");
+	end;
+}
+
+// 5th Stage (Final Boss Room)
+//============================================================
+1@face,213,147,0	script	#chaoson2	HIDDEN_WARP_NPC,7,7,{
+	end;
+OnTouch_:
+	donpcevent instance_npcname("#chaoson2")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#4")+"::OnStart";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#chaoson2")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#chaoson2");
+	hideoffnpc instance_npcname("#chaoson2");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#chaoson2");
+	disablenpc instance_npcname("#chaoson2");
+	end;
+}
+
+1@face,213,153,6	script	Chaos#5	4_M_CHAOS,{
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Chaos#5")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Chaos#5");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Chaos#5");
+	end;
+}
+
+1@face,208,149,7	script	Chaos#4	4_M_CHAOS,{
+	cutin "h_chaos01",2;
+	mes "[Chaos]";
+	mes "Hew. This puddle is weird.";
+	close2;
+	cutin "h_chaos01",255;
+	end;
+
+OnStart:
+	sleep 2000;
+	unittalk getnpcid(0),"Chaos: Iris, what is this puddle for?";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#4")),"Iris: Well, I think it is too big to be the nest of a faceworm.";
+	sleep 4000;
+	unittalk getnpcid(0),"Chaos: Hmm, okay, should I go down there and check it out?";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#4")),"Iris: Chaos! Cut the crap.";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: Why not? It doesn't even look that dangerous!";
+	sleep 5000;
+	donpcevent instance_npcname("Chaos#4")+"::OnDisable";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#4")),"Iris: Arrghh, Chaos you're such a troublemaker.";
+	sleep 6000;
+	unittalk getnpcid(0,instance_npcname("Chaos#5")),"Chaos: Ugh! Arrgh!! What is this?";
+	sleep 2000;
+	unittalk getnpcid(0,instance_npcname("Iris#4")),"Iris: Chaos! What is it?";
+	sleep 2000;
+	unittalk getnpcid(0,instance_npcname("Chaos#5")),"Chaos: Ah";
+	sleep 100;
+	unittalk getnpcid(0,instance_npcname("Chaos#5")),"Chaos: Argh";
+	sleep 100;
+	unittalk getnpcid(0,instance_npcname("Chaos#5")),"Chaos: Argghh";
+	sleep 100;
+	unittalk getnpcid(0,instance_npcname("Chaos#5")),"Chaos: Argghhhhh";
+	sleep 100;
+	unittalk getnpcid(0,instance_npcname("Chaos#5")),"Chaos: Argghhhhhhh";
+	sleep 100;
+	unittalk getnpcid(0,instance_npcname("Chaos#5")),"Chaos: Argghhhhhhhhh";
+	sleep 100;
+	unittalk getnpcid(0,instance_npcname("Chaos#5")),"Chaos: Argghhhhhhhhhhh!!";
+	sleep 5000;
+	donpcevent instance_npcname("Chaos#4")+"::OnEnable";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: Damn, I was close to being eaten alive.";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#4")),"Iris: I asked you what happened dummy!";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: Uhh, the faceworm queen is crawling up now and it looks like really pissed off. So let's, uh, get outta here.";
+	sleep 6000;
+	donpcevent instance_npcname("Chaos#4")+"::OnDisable";
+	sleep 1000;
+	unittalk getnpcid(0,instance_npcname("Iris#4")),"Iris: Chaos you idiot!!";
+	specialeffect EF_DUSTSTORM,AREA,instance_npcname("Chaos#5");
+	specialeffect EF_MAPPILLAR2,AREA,instance_npcname("Chaos#5");
+	sleep 5000;
+	donpcevent instance_npcname("Iris#4")+"::OnDisable";
+	sleep 9000;
+	donpcevent instance_npcname("#fwormboss5")+"::OnStart";
+	donpcevent instance_npcname("#fwormprize5")+"::OnStart";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Chaos#4")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Chaos#4");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Chaos#4");
+	end;
+}
+
+1@face,220,149,1	script	Iris#4	4_F_IRIS,{
+	cutin "h_iris01",2;
+	mes "[Iris]";
+	mes "Something seems fishy around here. It's dangerous.";
+	close2;
+	cutin "h_iris01",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Iris#4")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Iris#4");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Iris#4");
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss5	CLEAR_NPC,{
+	callfunc "F_GM_NPC";
+	if (callfunc("F_GM_NPC",1854,0) == 1) {
+		set .@map$,instance_mapname("1@face");
+		set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead");
+		mes ""+.@mob_dead_num;
+		close;
+	}
+
+OnHeal05:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,((.@mapcount+1)*20000)*rand(1,10);
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '5BOSS,2,.@dfacehp;
+	mapannounce .@map$,"The Faceworm Queen has dropped a sack of fatal poison and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x66ff00",FW_NORMAL,14;
+	end;
+OnHeal04:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,.@mapcount*1000000;
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '5BOSS,2,.@dfacehp;
+	mapannounce .@map$,"The Faceworm Queen absorbs the energy of 4 unbroken eggs and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x66ff00",FW_NORMAL,14;
+	end;
+OnHeal03:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,.@mapcount*250000;
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '5BOSS,2,.@dfacehp;
+	mapannounce .@map$,"The Faceworm Queen absorbs the energy of 3 unbroken eggs and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x00ff00",FW_NORMAL,14;
+	end;
+OnHeal02:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,.@mapcount*100000;
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '5BOSS,2,.@dfacehp;
+	mapannounce .@map$,"The Faceworm Queen absorbs the energy of 2 unbroken eggs and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x00ff00",FW_NORMAL,14;
+	end;
+OnHeal01:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp,.@mapcount*50000;
+	set .@dfacehp,.@MOB_HP+.@r_hpp;
+	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
+	if (.@dfacehp > .@r_hpp2)
+		set .@dfacehp,.@r_hpp2;
+	setunitdata '5BOSS,2,.@dfacehp;
+	mapannounce .@map$,"The Faceworm Queen absorbs the energy of 1 unbroken egg and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x00ff00",FW_NORMAL,14;
+	end;
+OnDamage:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	set .@r_hpp_1,(.@mapcount+7)*25;
+	set .@dr_hpp,rand(20,.@r_hpp_1)*10000;
+	set .@dfacehp,.@MOB_HP-.@dr_hpp;
+	if (.@dfacehp < 5000000)
+		set .@dfacehp,5000000;
+	setunitdata '5BOSS,2,.@dfacehp;
+	mapannounce .@map$,"Chaos deals "+.@dr_hpp+" deadly damage hit points!!",bc_map,"0xffff33",FW_NORMAL,17;
+	end;
+OnBerserk2:
+	set .@map$,instance_mapname("1@face");
+	getunitdata '5BOSS,.@arr;
+	set .@ber_x,.@arr[6];
+	set .@ber_y,.@arr[7];
+	set .@MOB_HP1,.@arr[2];
+	getunitdata '5BOSS_HP,.@arr;
+	set .@MOB_HP2,.@arr[2];
+	set .@MOB_HP3,(((.@MOB_HP2-.@MOB_HP1)*8)/1000)*100;
+	set .@MOB_HP4,.@MOB_HP1+.@MOB_HP3;
+	killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	monster .@map$,.@ber_x,.@ber_y,"Faceworm Queen",2532,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	set '5BOSS,$@mobid[0];
+	setunitdata '5BOSS,2,.@MOB_HP4;
+	monster .@map$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	set '5BOSS_HP,$@mobid[0];
+	setunitdata '5BOSS_HP,2,.@MOB_HP4;
+	mapannounce .@map$,"The faceworm rages recovering "+.@MOB_HP3+" and its attack power is increased.",bc_map,"0xff8888",FW_NORMAL,13;
+	end;
+OnBerserk:
+	set .@map$,instance_mapname("1@face");
+	getunitdata '5BOSS,.@arr;
+	set .@ber_x,.@arr[6];
+	set .@ber_y,.@arr[7];
+	if (.@ber_x < 190 || .@ber_x > 230 || .@ber_y < 135 || .@ber_y > 175) {
+		set .@MOB_HP,.@arr[2];
+		killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		monster .@map$,.@ber_x,.@ber_y,"Faceworm Queen",2532,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		set '5BOSS,$@mobid[0];
+		setunitdata '5BOSS,2,.@MOB_HP;
+		monster .@map$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		set '5BOSS_HP,$@mobid[0];
+		setunitdata '5BOSS_HP,2,.@MOB_HP;
+		donpcevent instance_npcname("#fwormboss50")+"::OnCalm";
+		mapannounce .@map$,"It is too far away from the nest. The Faceworm Queen begins raging.",bc_map,"0xff3333",FW_NORMAL,15;
+	}
+	end;
+OnCalm:
+	getunitdata '5BOSS,.@arr;
+	set .@cal_x,.@arr[6];
+	set .@cal_y,.@arr[7];
+	set .@MOB_HP,.@arr[2];
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	monster .@map$,.@cal_x,.@cal_y,"Faceworm Queen",2529,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	set '5BOSS,$@mobid[0];
+	setunitdata '5BOSS,2,.@MOB_HP;
+	monster .@map$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	set '5BOSS_HP,$@mobid[0];
+	setunitdata '5BOSS_HP,2,.@MOB_HP;
+	end;
+OnChange:
+	set .@map$,instance_mapname("1@face");
+	getunitdata '5BOSS,.@arr;
+	set .@mobx2,.@arr[6];
+	set .@moby2,.@arr[7];
+	set .@MOB_HP,.@arr[2];
+	set .@chan_f,rand(1,14);
+	if (.@chan_f > 0 && .@chan_f < 3) {
+		mapannounce .@map$,"Faceworm Queen is trying to shed its skin to wind attribute.",bc_map,"0xffff00";
+		sleep 1000;
+		killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		monster .@map$,.@mobx2,.@moby2,"Faceworm Queen",2535,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		set '5BOSS,$@mobid[0];
+	} else if (.@chan_f > 2 && .@chan_f < 5) {
+		mapannounce .@map$,"Faceworm Queen is trying to shed its skin to earth attribute.",bc_map,"0x55ff00";
+		sleep 1000;
+		killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		monster .@map$,.@mobx2,.@moby2,"Faceworm Queen",2533,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		set '5BOSS,$@mobid[0];
+	} else if (.@chan_f > 4 && .@chan_f < 7) {
+		mapannounce .@map$,"Faceworm Queen is trying to shed its skin to water attribute.",bc_map,"0x9999ff";
+		sleep 1000;
+		killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		monster .@map$,.@mobx2,.@moby2,"Faceworm Queen",2534,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		set '5BOSS,$@mobid[0];
+	} else if (.@chan_f > 6 && .@chan_f < 10) {
+		mapannounce .@map$,"Faceworm Queen is trying to shed its skin to its original attribute.",bc_map,"0xffffff";
+		sleep 1000;
+		killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		monster .@map$,.@mobx2,.@moby2,"Faceworm Queen",2529,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+		set '5BOSS,$@mobid[0];
+	} else
+		end;
+	setunitdata '5BOSS,2,.@MOB_HP;
+	monster .@map$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	set '5BOSS_HP,$@mobid[0];
+	setunitdata '5BOSS_HP,2,.@MOB_HP;
+	end;
+OnWarning:
+	set .@map$,instance_mapname("1@face");
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	if (.@mobx < 190 || .@mobx > 230 || .@moby < 135 || .@moby > 175)
+		mapannounce .@map$,"Please do not go farther from the nest. The Faceworm Queen can be violent.",bc_map,"0xff5555",FW_NORMAL,15;
+	end;
+OnReset_m:
+	donpcevent instance_npcname("#fwormboss51")+"::OnEnd";
+	donpcevent instance_npcname("#fwormboss52")+"::OnEnd";
+	donpcevent instance_npcname("#fwormboss53")+"::OnEnd";
+	donpcevent instance_npcname("#fwormboss54")+"::OnEnd";
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	stopnpctimer;
+	end;
+OnStart:
+	set .@map$,instance_mapname("1@face");
+	monster .@map$,213,153,"Faceworm Queen",2529,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	set '5BOSS,$@mobid[0];
+	monster .@map$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
+	set '5BOSS_HP,$@mobid[0];
+	set .@mapcount,getmapusers(.@map$);
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP1,.@arr[2];
+	set .@dfacehp,(13-.@mapcount)*2000000;
+	set .@MOB_HP2,52000000-.@dfacehp;
+	if (.@MOB_HP2 < 15000000)
+		set .@MOB_HP2,15000000;
+	setunitdata '5BOSS,2,.@MOB_HP2;
+	setunitdata '5BOSS_HP,2,.@MOB_HP1;
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss5")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss5");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss5");
+	end;
+OnMyMobDead:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead");
+	if (.@mob_dead_num < 2) {
+		donpcevent instance_npcname("#fwormprize5")+"::OnEnable";
+		donpcevent instance_npcname("Chaos#6")+"::OnEnable";
+		donpcevent instance_npcname("Iris#6")+"::OnEnable";
+		donpcevent instance_npcname("#chaoson3")+"::OnEnable";
+		for (set .@i,1; .@i<=4; set .@i,.@i+1)
+			donpcevent instance_npcname("#fwormboss5"+.@i)+"::OnEnd";
+		donpcevent instance_npcname("#fwormboss5")+"::OnEnd";
+	}
+	end;
+OnTimer1000:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead");
+	if (.@mob_dead_num < 2) {
+		stopnpctimer;
+		end;
+	}
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	setunitdata '5BOSS_HP,2,.@MOB_HP;
+	end;
+OnTimer5555:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	if (.@mapcount) {
+		if (rand(1,22-.@mapcount) < 17) {
+			getunitdata '5BOSS,.@arr;
+			set .@MOB_HP,.@arr[2];
+			if (.@MOB_HP > 45000000 && .@MOB_HP < 48000000)
+				donpcevent instance_npcname("#fwormboss51")+"::OnStart1";
+			else if (.@MOB_HP > 40000000 && .@MOB_HP < 45000000)
+				donpcevent instance_npcname("#fwormboss52")+"::OnStart1";
+			else if (.@MOB_HP > 35000000 && .@MOB_HP < 40000000)
+				donpcevent instance_npcname("#fwormboss53")+"::OnStart1";
+			else if (.@MOB_HP > 30000000 && .@MOB_HP < 35000000)
+				donpcevent instance_npcname("#fwormboss54")+"::OnStart1";
+			else if (.@MOB_HP > 25000000 && .@MOB_HP < 30000000)
+				donpcevent instance_npcname("#fwormboss51")+"::OnStart2";
+			else if (.@MOB_HP > 20000000 && .@MOB_HP < 25000000)
+				donpcevent instance_npcname("#fwormboss52")+"::OnStart2";
+			else if (.@MOB_HP > 15000000 && .@MOB_HP < 20000000)
+				donpcevent instance_npcname("#fwormboss53")+"::OnStart2";
+			else if (.@MOB_HP > 10000000 && .@MOB_HP < 15000000)
+				donpcevent instance_npcname("#fwormboss54")+"::OnStart2";
+			else if (.@MOB_HP > 5000000 && .@MOB_HP < 10000000) {
+				if (rand(1,3) == 1)
+					donpcevent instance_npcname("#fwormboss53")+"::OnStart1";
+				else
+					donpcevent instance_npcname("#fwormboss51")+"::OnStart1";
+				donpcevent instance_npcname("#fwormboss54")+"::OnStart1";
+			} else if (.@MOB_HP > 500000 && .@MOB_HP < 5000000) {
+				if (rand(1,3) == 1)
+					donpcevent instance_npcname("#fwormboss53")+"::OnStart2";
+				else
+					donpcevent instance_npcname("#fwormboss51")+"::OnStart2";
+				donpcevent instance_npcname("#fwormboss54")+"::OnStart2";
+			}
+		}
+	} else {
+		setunitdata '5BOSS,2,50000000;
+		for (set .@i,1; .@i<=4; set .@i,.@i+1)
+			donpcevent instance_npcname("#fwormboss5"+.@i)+"::OnEnd";
+		stopnpctimer;
+	}
+	end;
+OnTimer10000:
+	donpcevent instance_npcname("#fwormboss5")+"::OnWarning";
+	end;
+OnTimer12000:
+	donpcevent instance_npcname("#fwormboss5")+"::OnChange";
+	end;
+OnTimer13000:
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	if (.@MOB_HP > 7000000)
+		donpcevent instance_npcname("#support")+"::OnSupport_2";
+	if (!unitexist('5BOSS))
+		stopnpctimer;
+	end;
+OnTimer14000:
+	donpcevent instance_npcname("#fwormboss5")+"::OnBerserk";
+	end;
+OnTimer19000:
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP1,.@arr[2];
+	getunitdata '5BOSS_HP,.@arr;
+	set .@MOB_HP2,.@arr[2];
+	if (.@MOB_HP2 > .@MOB_HP1) {
+		set .@MOB_HP3,.@MOB_HP2-.@MOB_HP1;
+		set .@map$,instance_mapname("1@face");
+		set .@mapcount,getmapusers(.@map$);
+		if (.@mapcount) {
+			set .@bsk_dg,(.@mapcount+7)*400000;
+			if (.@MOB_HP3 > .@bsk_dg)
+				donpcevent instance_npcname("#fwormboss5")+"::OnBerserk2";
+		}
+	}
+	end;
+OnTimer25000:
+	stopnpctimer;
+	getunitdata '5BOSS,.@arr;
+	set .@MOB_HP,.@arr[2];
+	if (.@MOB_HP > 200000)
+		initnpctimer;
+	else {
+		for (set .@i,1; .@i<=4; set .@i,.@i+1)
+			donpcevent instance_npcname("#fwormboss5"+.@i)+"::OnEnd";
+	}
+	end;
+}
+
+1@face,2,3,5	script	#support	CLEAR_NPC,{
+	end;
+OnSupport_2:
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	set .@sup_m,.@mapcount+10;
+	if (.@sup_m < 8)
+		set .@sup_m,8;
+	set .@chan_f,rand(1,.@sup_m);
+	if (.@chan_f > 0 && .@chan_f < 3) {
+		donpcevent instance_npcname("#chaos_north")+"::OnStart";
+		mapannounce .@map$,"The voice of Chaos: Hey! Lure it to the north! I will beat it!",bc_map,"0xff44aa",FW_NORMAL,14;
+	} else if (.@chan_f > 2 && .@chan_f < 5) {
+		donpcevent instance_npcname("#chaos_south")+"::OnStart";
+		mapannounce .@map$,"The voice of Chaos: Hey! Lure it to the south! I will beat it!",bc_map,"0xff44aa",FW_NORMAL,14;
+	} else if (.@chan_f > 4 && .@chan_f < 7) {
+		donpcevent instance_npcname("#chaos_east")+"::OnStart";
+		mapannounce .@map$,"The voice of Chaos: Hey! Lure it to the east! I will beat it!",bc_map,"0xff44aa",FW_NORMAL,14;
+	} else if (.@chan_f > 6 && .@chan_f < 9) {
+		donpcevent instance_npcname("#chaos_west")+"::OnStart";
+		mapannounce .@map$,"The voice of Chaos: Hey! Lure it to the west! I will beat it!",bc_map,"0xff44aa",FW_NORMAL,14;
+	}
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#support")+"::OnEnable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#support");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#support");
+	end;
+}
+
+1@face,214,172,0	script	#chaos_north	HIDDEN_WARP_NPC,2,2,{
+	end;
+OnTouch_:
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	if (.@mobx > 205 && .@mobx < 223 && .@moby > 163 && .@moby < 181) {
+		specialeffect EF_MAGNUMBREAK,AREA,instance_npcname("Chaos#north");
+		specialeffect EF_LORD,AREA,instance_npcname("Chaos#north");
+		donpcevent instance_npcname("#fwormboss5")+"::OnDamage";
+	} else
+		unittalk getnpcid(0,instance_npcname("Chaos#north")),"Chaos: You can't even manage to lure the queen to me?";
+	donpcevent instance_npcname("#chaos_north")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#north")+"::OnEnd";
+	end;
+OnStart:
+	initnpctimer;
+	donpcevent instance_npcname("#chaos_north")+"::OnEnable";
+	donpcevent instance_npcname("Chaos#north")+"::OnEnable";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#chaos_north")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#chaos_north");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#chaos_north");
+	end;
+OnTimer15000:
+	donpcevent instance_npcname("#chaos_north")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#north")+"::OnDisable";
+	stopnpctimer;
+	end;
+}
+
+1@face,214,143,0	script	#chaos_south	HIDDEN_WARP_NPC,2,2,{
+	end;
+OnTouch_:
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	if (.@mobx > 205 && .@mobx < 223 && .@moby > 134 && .@moby < 152) {
+		specialeffect EF_MAGNUMBREAK,AREA,instance_npcname("Chaos#south");
+		specialeffect EF_LORD,AREA,instance_npcname("Chaos#south");
+		donpcevent instance_npcname("#fwormboss5")+"::OnDamage";
+	} else
+		unittalk getnpcid(0,instance_npcname("Chaos#south")),"Chaos: Hey~ We are partners. You can't just keep running alone!";
+	donpcevent instance_npcname("#chaos_south")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#south")+"::OnEnd";
+	end;
+OnStart:
+	initnpctimer;
+	donpcevent instance_npcname("#chaos_south")+"::OnEnable";
+	donpcevent instance_npcname("Chaos#south")+"::OnEnable";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#chaos_south")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#chaos_south");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#chaos_south");
+	end;
+OnTimer15000:
+	donpcevent instance_npcname("#chaos_south")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#south")+"::OnDisable";
+	stopnpctimer;
+	end;
+}
+
+1@face,226,158,0	script	#chaos_east	HIDDEN_WARP_NPC,2,2,{
+	end;
+OnTouch_:
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	if (.@mobx > 217 && .@mobx < 235 && .@moby > 149 && .@moby < 167) {
+		specialeffect EF_MAGNUMBREAK,AREA,instance_npcname("Chaos#east");
+		specialeffect EF_LORD,AREA,instance_npcname("Chaos#east");
+		donpcevent instance_npcname("#fwormboss5")+"::OnDamage";
+	} else
+		unittalk getnpcid(0,instance_npcname("Chaos#east")),"Chaos: Lure and bring it with you, I can't beat it alone!";
+	donpcevent instance_npcname("#chaos_east")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#east")+"::OnEnd";
+	end;
+OnStart:
+	initnpctimer;
+	donpcevent instance_npcname("#chaos_east")+"::OnEnable";
+	donpcevent instance_npcname("Chaos#east")+"::OnEnable";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#chaos_east")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#chaos_east");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#chaos_east");
+	end;
+OnTimer15000:
+	donpcevent instance_npcname("#chaos_east")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#east")+"::OnDisable";
+	stopnpctimer;
+	end;
+}
+
+1@face,200,158,0	script	#chaos_west	HIDDEN_WARP_NPC,2,2,{
+	end;
+OnTouch_:
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	if (.@mobx > 191 && .@mobx < 209 && .@moby > 149 && .@moby < 167) {
+		specialeffect EF_MAGNUMBREAK,AREA,instance_npcname("Chaos#west");
+		specialeffect EF_LORD,AREA,instance_npcname("Chaos#west");
+		donpcevent instance_npcname("#fwormboss5")+"::OnDamage";
+	} else
+		unittalk getnpcid(0,instance_npcname("Chaos#west")),"Chaos: Why'd you leave the queen behind? Our lives are at stake here. Pull it together!";
+	donpcevent instance_npcname("#chaos_west")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#west")+"::OnEnd";
+	end;
+OnStart:
+	initnpctimer;
+	donpcevent instance_npcname("#chaos_west")+"::OnEnable";
+	donpcevent instance_npcname("Chaos#west")+"::OnEnable";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#chaos_west")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#chaos_west");
+	end;
+OnDisable:
+	disablenpc instance_npcname("#chaos_west");
+	end;
+OnTimer15000:
+	donpcevent instance_npcname("#chaos_west")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#west")+"::OnDisable";
+	stopnpctimer;
+	end;
+}
+
+1@face,214,172,5	script	Chaos#north	4_M_CHAOS,{
+	end;
+OnEnd:
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname(strnpcinfo(0));
+	end;
+OnDisable:
+	hideonnpc instance_npcname(strnpcinfo(0));
+	end;
+OnTimer1000:
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	stopnpctimer;
+	end;
+}
+
+1@face,214,143,0	duplicate(Chaos#north)	Chaos#south	4_M_CHAOS
+1@face,226,158,3	duplicate(Chaos#north)	Chaos#east	4_M_CHAOS
+1@face,200,158,6	duplicate(Chaos#north)	Chaos#west	4_M_CHAOS
+
+1@face,1,4,3	script	#fwormboss50	CLEAR_NPC,{
+	end;
+OnCalm:
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss50")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss50");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss50");
+	end;
+OnTimer15000:
+	donpcevent instance_npcname("#fwormboss5")+"::OnCalm";
+	stopnpctimer;
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss51	CLEAR_NPC,{
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss51")+"::OnMyMobDead";
+	stopnpctimer;
+	end;
+OnStart1:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss51")+"::OnMyMobDead");
+	if (.@mob_dead_num > 3)
+		killmonster .@map$,instance_npcname("#fwormboss51")+"::OnMyMobDead";
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
+	end;
+OnStart2:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss51")+"::OnMyMobDead");
+	if (.@mob_dead_num > 6)
+		killmonster .@map$,instance_npcname("#fwormboss51")+"::OnMyMobDead";
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby+4,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby-4,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss51")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss51");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss51");
+	end;
+OnMyMobDead:
+	end;
+OnTimer12000:
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss51")+"::OnMyMobDead");
+	if (.@mob_dead_num > 3)
+		donpcevent instance_npcname("#fwormboss5")+"::OnHeal04";
+	else if (.@mob_dead_num > 2)
+		donpcevent instance_npcname("#fwormboss5")+"::OnHeal03";
+	else if (.@mob_dead_num > 1)
+		donpcevent instance_npcname("#fwormboss5")+"::OnHeal02";
+	else if (.@mob_dead_num > 0)
+		donpcevent instance_npcname("#fwormboss5")+"::OnHeal01";
+	donpcevent instance_npcname("#fwormboss51")+"::OnEnd";
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss52	CLEAR_NPC,{
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	stopnpctimer;
+	end;
+OnStart1:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss52")+"::OnMyMobDead");
+	if (.@mob_dead_num > 6)
+		killmonster .@map$,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby+4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby-4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	end;
+OnStart2:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss52")+"::OnMyMobDead");
+	if (.@mob_dead_num > 12)
+		killmonster .@map$,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby+4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby-4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx-4,.@moby+4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx-4,.@moby-4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby+4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	monster .@map$,.@mobx+4,.@moby-4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss52")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss52");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss52");
+	end;
+OnMyMobDead:
+	end;
+OnTimer20000:
+	donpcevent instance_npcname("#fwormboss52")+"::OnEnd";
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss53	CLEAR_NPC,{
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss53")+"::OnMyMobDead";
+	end;
+OnStart1:
+	set .@map$,instance_mapname("1@face");
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	set .@vmobx,.@mobx-5;
+	while (1) {
+		set .@vmoby,.@moby+5;
+		while (2) {
+			monster .@map$,.@vmobx,.@vmoby,"Venom Bug",2531,1,instance_npcname("#fwormboss53")+"::OnMyMobDead";
+			set .@vmoby,.@vmoby-2;
+			if (.@vmoby < (.@moby-5))
+				break;
+		}
+		set .@vmobx,.@vmobx+2;
+		if (.@vmobx > (.@mobx+5))
+			break;
+	}
+	donpcevent instance_npcname("#fwormboss5")+"::OnHeal05";
+	end;
+OnStart2:
+	set .@map$,instance_mapname("1@face");
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	set .@vmobx,.@mobx-7;
+	while (1) {
+		set .@vmoby,.@moby+7;
+		while (2) {
+			monster .@map$,.@vmobx,.@vmoby,"Venom Bug",2531,1,instance_npcname("#fwormboss53")+"::OnMyMobDead";
+			set .@vmoby,.@vmoby-2;
+			if (.@vmoby < (.@moby-7))
+				break;
+		}
+		set .@vmobx,.@vmobx+2;
+		if (.@vmobx > (.@mobx+7))
+			break;
+	}
+	donpcevent instance_npcname("#fwormboss5")+"::OnHeal05";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss53")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss53");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss53");
+	end;
+OnMyMobDead:
+	end;
+}
+
+1@face,1,4,3	script	#fwormboss54	CLEAR_NPC,{
+	end;
+OnEnd:
+	set .@map$,instance_mapname("1@face");
+	killmonster .@map$,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	stopnpctimer;
+	end;
+OnStart1:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss54")+"::OnMyMobDead");
+	if (.@mob_dead_num > 20)
+		killmonster .@map$,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-3,.@moby+3,"#venomfog",2536,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx+3,.@moby+3,"#venomfog",2536,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx-3,.@moby-3,"#venomfog",2536,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx+3,.@moby-3,"#venomfog",2536,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	end;
+OnStart2:
+	stopnpctimer;
+	initnpctimer;
+	set .@map$,instance_mapname("1@face");
+	set .@mob_dead_num,mobcount(.@map$,instance_npcname("#fwormboss54")+"::OnMyMobDead");
+	if (.@mob_dead_num > 45)
+		killmonster .@map$,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	getunitdata '5BOSS,.@arr;
+	set .@mobx,.@arr[6];
+	set .@moby,.@arr[7];
+	monster .@map$,.@mobx-5,.@moby+5,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby+5,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx+5,.@moby+5,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx-5,.@moby,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx+5,.@moby,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx-5,.@moby-5,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx,.@moby-5,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	monster .@map$,.@mobx+5,.@moby-5,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormboss54")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormboss54");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormboss54");
+	end;
+OnMyMobDead:
+	end;
+OnTimer30000:
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnd";
+	end;
+}
+
+1@face,212,156,0	script	#chaoson3	HIDDEN_WARP_NPC,7,7,{
+	end;
+OnTouch_:
+	donpcevent instance_npcname("#chaoson3")+"::OnDisable";
+	donpcevent instance_npcname("Chaos#6")+"::OnStart";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#chaoson3")+"::OnDisable";
+	end;
+OnEnable:
+	enablenpc instance_npcname("#chaoson3");
+	hideoffnpc instance_npcname("#chaoson3");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#chaoson3");
+	disablenpc instance_npcname("#chaoson3");
+	end;
+}
+
+1@face,209,159,6	script	Chaos#6	4_M_CHAOS,{
+	cutin "h_chaos01",2;
+	mes "[Chaos]";
+	mes "Hmm.. You are pretty good, I am impressed.";
+	close2;
+	cutin "h_chaos01",255;
+	end;
+
+OnStart:
+	donpcevent instance_npcname("Chaos#east")+"::OnEnd";
+	donpcevent instance_npcname("Chaos#west")+"::OnEnd";
+	donpcevent instance_npcname("Chaos#south")+"::OnEnd";
+	donpcevent instance_npcname("Chaos#north")+"::OnEnd";
+	donpcevent instance_npcname("Chaos#6")+"::OnEnable";
+	donpcevent instance_npcname("Iris#6")+"::OnEnable";
+	sleep 2000;
+	unittalk getnpcid(0),"Chaos: Phew... That was quite a long fight.";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#6")),"Iris: But that is not the one we were looking for.";
+	sleep 4000;
+	unittalk getnpcid(0),"Chaos: We can't help it. Our equipment is damaged so we should retreat for now.";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#6")),"Iris: Yes, I feel bad that we could not see the Faceworm King. But luckily we weren't hurt.";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: So... Hey, you over there! You're not too shabby.";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: Today's hunting is all yours, I won't touch it.";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: Ahah~ I hoped that there would be some treasure that the merchant prince dropped...";
+	sleep 3000;
+	unittalk getnpcid(0,instance_npcname("Iris#6")),"Iris: Chaos, I am getting tired. Let's go back to the village.";
+	sleep 3000;
+	unittalk getnpcid(0),"Chaos: Sorry, shall we go?";
+	sleep 3000;
+	donpcevent instance_npcname("Chaos#6")+"::OnDisable";
+	donpcevent instance_npcname("Iris#6")+"::OnDisable";
+	donpcevent instance_npcname("Dimensional Device#6")+"::OnEnable";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("Chaos#6")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Chaos#6");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Chaos#6");
+	end;
+}
+
+1@face,220,159,4	script	Iris#6	4_F_IRIS,{
+	cutin "h_iris02",2;
+	mes "[Iris]";
+	mes "That was dangerous. Hehehe...";
+	close2;
+	cutin "h_iris02",255;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Iris#6")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Iris#6");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Iris#6");
+	end;
+}
+
+1@face,215,159,4	script	Dimensional Device#6	PORTAL,{
+	mes "[Dimensional Device]";
+	mes "Your time is finished here. You may look arround or go leave. What do you want to do?";
+	next;
+	if (select("Stop:Return to Dimensional Gap") == 2)
+		warp "dali",85,62;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname("Dimensional Device#6")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("Dimensional Device#6");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("Dimensional Device#6");
+	end;
+}
+
+// Instance Traps :: in_face_l
+//============================================================
+1@face,61,132,5	script	Suspicious Mound#1	4_SOIL,5,5,{
+	end;
+OnTouch_:
+	set .@map$,instance_mapname("1@face");
+	setarray .@num[0],3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,
+		              3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,
+		              3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,
+					  3,2,1,3,2,1,3,2,1;
+	specialeffect EF_VENOMDUST;
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	getmapxy(.@map$,.@x,.@y,1);
+	set .@mon_num,.@num[atoi(strnpcinfo(2))-1];
+	areamonster .@map$,.@x-1,.@y-1,.@x+1,.@y+1,"Faceworm Larva",2541,.@mon_num,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
+	end;
+OnEnable:
+	enablenpc instance_npcname(strnpcinfo(0));
+	end;
+OnDisable:
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
+OnMyMobDead:
+	end;
+}
+
+1@face,62,195,5	duplicate(Suspicious Mound#1)	Suspicious Mound#2	4_SOIL,5,5
+1@face,66,94,5	duplicate(Suspicious Mound#1)	Suspicious Mound#3	4_SOIL,5,5
+1@face,68,265,5	duplicate(Suspicious Mound#1)	Suspicious Mound#4	4_SOIL,5,5
+1@face,68,108,5	duplicate(Suspicious Mound#1)	Suspicious Mound#5	4_SOIL,5,5
+1@face,72,202,5	duplicate(Suspicious Mound#1)	Suspicious Mound#6	4_SOIL,5,5
+1@face,75,73,5	duplicate(Suspicious Mound#1)	Suspicious Mound#7	4_SOIL,5,5
+1@face,76,241,5	duplicate(Suspicious Mound#1)	Suspicious Mound#8	4_SOIL,5,5
+1@face,79,274,5	duplicate(Suspicious Mound#1)	Suspicious Mound#9	4_SOIL,5,5
+1@face,79,119,5	duplicate(Suspicious Mound#1)	Suspicious Mound#10	4_SOIL,5,5
+1@face,97,59,5	duplicate(Suspicious Mound#1)	Suspicious Mound#11	4_SOIL,5,5
+1@face,99,211,5	duplicate(Suspicious Mound#1)	Suspicious Mound#12	4_SOIL,5,5
+1@face,100,122,5	duplicate(Suspicious Mound#1)	Suspicious Mound#13	4_SOIL,5,5
+1@face,105,190,5	duplicate(Suspicious Mound#1)	Suspicious Mound#14	4_SOIL,5,5
+1@face,108,264,5	duplicate(Suspicious Mound#1)	Suspicious Mound#15	4_SOIL,5,5
+1@face,108,74,5	duplicate(Suspicious Mound#1)	Suspicious Mound#16	4_SOIL,5,5
+1@face,111,178,5	duplicate(Suspicious Mound#1)	Suspicious Mound#17	4_SOIL,5,5
+1@face,112,137,5	duplicate(Suspicious Mound#1)	Suspicious Mound#18	4_SOIL,5,5
+1@face,112,159,5	duplicate(Suspicious Mound#1)	Suspicious Mound#19	4_SOIL,5,5
+1@face,112,236,5	duplicate(Suspicious Mound#1)	Suspicious Mound#20	4_SOIL,5,5
+1@face,118,109,5	duplicate(Suspicious Mound#1)	Suspicious Mound#21	4_SOIL,5,5
+1@face,119,201,5	duplicate(Suspicious Mound#1)	Suspicious Mound#22	4_SOIL,5,5
+1@face,123,257,5	duplicate(Suspicious Mound#1)	Suspicious Mound#23	4_SOIL,5,5
+1@face,124,216,5	duplicate(Suspicious Mound#1)	Suspicious Mound#24	4_SOIL,5,5
+1@face,125,228,5	duplicate(Suspicious Mound#1)	Suspicious Mound#25	4_SOIL,5,5
+1@face,126,290,5	duplicate(Suspicious Mound#1)	Suspicious Mound#26	4_SOIL,5,5
+1@face,128,174,5	duplicate(Suspicious Mound#1)	Suspicious Mound#27	4_SOIL,5,5
+1@face,133,244,5	duplicate(Suspicious Mound#1)	Suspicious Mound#28	4_SOIL,5,5
+1@face,139,218,5	duplicate(Suspicious Mound#1)	Suspicious Mound#29	4_SOIL,5,5
+1@face,140,255,5	duplicate(Suspicious Mound#1)	Suspicious Mound#30	4_SOIL,5,5
+1@face,148,238,5	duplicate(Suspicious Mound#1)	Suspicious Mound#31	4_SOIL,5,5
+1@face,157,293,5	duplicate(Suspicious Mound#1)	Suspicious Mound#32	4_SOIL,5,5
+1@face,158,138,5	duplicate(Suspicious Mound#1)	Suspicious Mound#33	4_SOIL,5,5
+1@face,158,163,5	duplicate(Suspicious Mound#1)	Suspicious Mound#34	4_SOIL,5,5
+1@face,167,277,5	duplicate(Suspicious Mound#1)	Suspicious Mound#35	4_SOIL,5,5
+1@face,168,194,5	duplicate(Suspicious Mound#1)	Suspicious Mound#36	4_SOIL,5,5
+1@face,170,251,5	duplicate(Suspicious Mound#1)	Suspicious Mound#37	4_SOIL,5,5
+1@face,171,62,5	duplicate(Suspicious Mound#1)	Suspicious Mound#38	4_SOIL,5,5
+1@face,171,149,5	duplicate(Suspicious Mound#1)	Suspicious Mound#39	4_SOIL,5,5
+1@face,172,173,5	duplicate(Suspicious Mound#1)	Suspicious Mound#40	4_SOIL,5,5
+1@face,175,296,5	duplicate(Suspicious Mound#1)	Suspicious Mound#41	4_SOIL,5,5
+1@face,178,234,5	duplicate(Suspicious Mound#1)	Suspicious Mound#42	4_SOIL,5,5
+1@face,183,185,5	duplicate(Suspicious Mound#1)	Suspicious Mound#43	4_SOIL,5,5
+1@face,191,289,5	duplicate(Suspicious Mound#1)	Suspicious Mound#44	4_SOIL,5,5
+1@face,194,192,5	duplicate(Suspicious Mound#1)	Suspicious Mound#45	4_SOIL,5,5
+1@face,196,207,5	duplicate(Suspicious Mound#1)	Suspicious Mound#46	4_SOIL,5,5
+1@face,198,257,5	duplicate(Suspicious Mound#1)	Suspicious Mound#47	4_SOIL,5,5
+1@face,199,273,5	duplicate(Suspicious Mound#1)	Suspicious Mound#48	4_SOIL,5,5
+1@face,211,244,5	duplicate(Suspicious Mound#1)	Suspicious Mound#49	4_SOIL,5,5
+1@face,229,200,5	duplicate(Suspicious Mound#1)	Suspicious Mound#50	4_SOIL,5,5
+1@face,232,271,5	duplicate(Suspicious Mound#1)	Suspicious Mound#51	4_SOIL,5,5
+1@face,250,223,5	duplicate(Suspicious Mound#1)	Suspicious Mound#52	4_SOIL,5,5
+1@face,254,324,5	duplicate(Suspicious Mound#1)	Suspicious Mound#53	4_SOIL,5,5
+1@face,255,263,5	duplicate(Suspicious Mound#1)	Suspicious Mound#54	4_SOIL,5,5
+
+// Instance Venom Bugs :: in_face_v
+//============================================================
+1@face,163,130,0	script	#toxicarea1	HIDDEN_WARP_NPC,10,10,{
+	end;
+OnTouch_:
+	set .@map$,instance_mapname("1@face");
+	setarray .@num[0],25,30,50,30,50,30,40,50,50;
+	specialeffect EF_VENOMDUST;
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	set .@val,atoi(charat(strnpcinfo(2),9));
+	switch (.@val) {
+		case 1: setarray .@xy[0],167,142,15; break;
+		case 2: setarray .@xy[0],163,161,15; break;
+		case 3: setarray .@xy[0],167,185,20; break;
+		case 4: setarray .@xy[0],197,203,15; break;
+		case 5: setarray .@xy[0],227,203,20; break;
+		case 6: setarray .@xy[0],244,232,15; break;
+		case 7: setarray .@xy[0],243,259,15; break;
+		case 8: setarray .@xy[0],292,277,50; break;
+		case 9: setarray .@xy[0],248,322,50; break;
+	}
+	set .@mon_num,.@num[.@val-1];
+	areamonster .@map$,.@xy[0]-.@xy[2],.@xy[1]-.@xy[2],.@xy[0]+.@xy[2],.@xy[1]+.@xy[2],"Venom Bug",2531,.@mon_num,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
+	end;
+OnEnable:
+	enablenpc instance_npcname(strnpcinfo(0));
+	end;
+OnDisable:
+	disablenpc instance_npcname(strnpcinfo(0));
+	end;
+OnMyMobDead:
+	end;
+OnTimer15000:
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
+	stopnpctimer;
+	end;
+}
+
+1@face,165,147,0	duplicate(#toxicarea1)	#toxicarea2	HIDDEN_WARP_NPC,10,10
+1@face,163,166,0	duplicate(#toxicarea1)	#toxicarea3	HIDDEN_WARP_NPC,10,10
+1@face,183,197,0	duplicate(#toxicarea1)	#toxicarea4	HIDDEN_WARP_NPC,10,10
+1@face,202,204,0	duplicate(#toxicarea1)	#toxicarea5	HIDDEN_WARP_NPC,10,10
+1@face,237,220,0	duplicate(#toxicarea1)	#toxicarea6	HIDDEN_WARP_NPC,10,10
+1@face,245,241,0	duplicate(#toxicarea1)	#toxicarea7	HIDDEN_WARP_NPC,10,10
+1@face,292,277,0	duplicate(#toxicarea1)	#toxicarea8	HIDDEN_WARP_NPC,10,10
+1@face,248,322,0	duplicate(#toxicarea1)	#toxicarea9	HIDDEN_WARP_NPC,10,10
+
+// Instance Timer :: in_facetimer
+//============================================================
+1@face,3,1,5	script	#globaltimer22	CLEAR_NPC,{
+	end;
+OnT_s:
+	initnpctimer;
+	end;
+OnT_s2:
+	set .@face_num,$120719_num_face;
+	if (!.@face_num)
+		set .@face_num,3600;
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$)-1;
+	set .@gd_name$,'120903_str_face$;
+	set .@face_num2,getnpctimer(0)/1000;
+	if (.@face_num2 < 60)
+		end;
+	set .@time_m,.@face_num2/60;
+	set .@time_s,.@face_num2-(.@time_m*60);
+	if (.@face_num2 < 60)
+		set .@time_txt$,.@time_s+" "+(.@time_s>1?"Seconds":"Second");
+	else
+		set .@time_txt$,.@time_m+" "+(.@time_m>1?"Minutes":"Minute")+" "+.@time_s+" "+(.@time_s>1?"Seconds":"Second");
+	if (.@face_num > .@face_num2) {
+		if (!.@mapcount)
+			announce .@gd_name$+" beat the best record for completing the Faceworm's Nest ("+.@time_txt$+").",bc_all,"0xffff33",FW_NORMAL,15;
+		else
+			announce .@gd_name$+" with "+.@mapcount+" party "+(.@mapcount>1?"members":"members")+" beat the best record for completing the Faceworm's Nest ("+.@time_txt$+").",bc_all,"0xffff33",FW_NORMAL,15;
+		set $120719_str_face$,.@gd_name$;
+		set $120719_num_face,.@face_num2;
+		set $120903_num_face,.@mapcount;
+	} else
+		mapannounce .@map$,"A time of "+.@time_txt$+" has been recorded on the board. But it did not beat the best record.",bc_map,"0xffff33";
+	end;
+OnT_s3:
+	for (set .@i,1; .@i<=27; set .@i,.@i+1) {
+		if (rand(1,100) > 50)
+			donpcevent instance_npcname("Merchant Prince's Box#"+.@i)+"::OnEnable";
+	}
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#globaltimer22")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#globaltimer22");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#globaltimer22");
+	end;
+OnTimer3600000:
+	stopnpctimer;
+	end;
+}
+
+// Instance Prizes :: in_face_c
+//============================================================
+1@face,155,82,3	script	#fwormprize1	4_TREASURE_BOX,{
+	set .@map$,instance_mapname("1@face");
+	set .@face_num2,getnpctimer(0)/1000;
+	if (.@face_num2 < 1)
+		end;
+	set .@time_m,.@face_num2/60;
+	set .@time_s,.@face_num2-(.@time_m*60);
+	if (.@face_num2 < 60)
+		set .@time_txt$,.@time_s+" "+(.@time_s>1?"Seconds":"Second");
+	else
+		set .@time_txt$,.@time_m+" "+(.@time_m>1?"Minutes":"Minute")+" "+.@time_s+" "+(.@time_s>1?"Seconds":"Second");
+	mapannounce .@map$,"The actual time for the battle at this stage remaining is "+.@time_txt$+".",bc_map,"0xffff33";
+	set .@dr_st2,getnpctimer(0)/1000;
+	if (.@dr_st2 < 1)
+		set .@dr_st2,1200;
+	stopnpctimer;
+	specialeffect EF_COIN;
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	switch (atoi(charat(strnpcinfo(2),10))) {
+		case 1:
+			set .@x,155;
+			set .@y,82;
+			setarray .@val[0],200,200,95;
+			break;
+		case 2:
+			set .@x,162;
+			set .@y,271;
+			setarray .@val[0],800,400,90;
+			break;
+		case 3:
+			set .@x,278;
+			set .@y,308;
+			setarray .@val[0],1100,600,85;
+			break;
+		case 4:
+			set .@x,214;
+			set .@y,108;
+			setarray .@val[0],1250,800,80;
+			break;
+	}
+	set .@en_name_4,0;
+	set .@en_name_3,0;
+	set .@en_name_2,0;
+	set .@dr_st1,120;
+	if (.@dr_st2 < .@dr_st1)
+		set .@dr_st2,.@dr_st1+1;
+	set .@dr_t,.@dr_st2-.@dr_st1;
+	set .@dr_t1,(.@dr_t/15)+1;
+	if (.@dr_t1 < 1)
+		set .@dr_t1,1;
+	if (.@dr_t1 > 3)
+		set .@dr_t1,3;
+	set .@r_st1,7-.@dr_t1;
+	set .@r_st2,.@r_st1-4;
+	set .@ppt,rand(.@r_st2,.@r_st1);
+	set .@dr_t1,.@dr_t*10;
+	if (.@dr_t1 > .@val[0])
+		set .@dr_t1,.@val[0]+1;
+	set .@r_st,(.@val[0]+2)-.@dr_t1;
+	set .@ren_e_m,rand(.@r_st,1316);
+	     if (.@ren_e_m < 201) set .@en_name_4,0;
+	else if (.@ren_e_m < 301) set .@en_name_4,4740; //Vitality1
+	else if (.@ren_e_m < 401) set .@en_name_4,4700; //Strength1
+	else if (.@ren_e_m < 501) set .@en_name_4,4730; //Agility1
+	else if (.@ren_e_m < 601) set .@en_name_4,4720; //Dexterity1
+	else if (.@ren_e_m < 701) set .@en_name_4,4710; //Inteligence1
+	else if (.@ren_e_m < 801) set .@en_name_4,4750; //Luck1
+	else if (.@ren_e_m < 851) set .@en_name_4,4741; //Vitality2
+	else if (.@ren_e_m < 901) set .@en_name_4,4701; //Strength2
+	else if (.@ren_e_m < 951) set .@en_name_4,4731; //Agility2
+	else if (.@ren_e_m < 1001) set .@en_name_4,4721; //Dexterity2
+	else if (.@ren_e_m < 1051) set .@en_name_4,4711; //Inteligence2
+	else if (.@ren_e_m < 1101) set .@en_name_4,4751; //Luck2
+	else if (.@ren_e_m < 1126) set .@en_name_4,4742; //Vitality3
+	else if (.@ren_e_m < 1151) set .@en_name_4,4702; //Strength3
+	else if (.@ren_e_m < 1176) set .@en_name_4,4732; //Agility3
+	else if (.@ren_e_m < 1201) set .@en_name_4,4722; //Dexterity3
+	else if (.@ren_e_m < 1226) set .@en_name_4,4712; //Inteligence3
+	else if (.@ren_e_m < 1251) set .@en_name_4,4752; //Luck3
+	else if (.@ren_e_m < 1261) set .@en_name_4,4743; //Vitality4
+	else if (.@ren_e_m < 1271) set .@en_name_4,4703; //Strength4
+	else if (.@ren_e_m < 1281) set .@en_name_4,4733; //Agility4
+	else if (.@ren_e_m < 1291) set .@en_name_4,4723; //Dexterity4
+	else if (.@ren_e_m < 1301) set .@en_name_4,4713; //Inteligence4
+	else if (.@ren_e_m < 1311) set .@en_name_4,4753; //Luck4
+	else if (.@ren_e_m < 1312) set .@en_name_4,4744; //Vitality5
+	else if (.@ren_e_m < 1313) set .@en_name_4,4704; //Strength5
+	else if (.@ren_e_m < 1314) set .@en_name_4,4734; //Agility5
+	else if (.@ren_e_m < 1315) set .@en_name_4,4724; //Dexterity5
+	else if (.@ren_e_m < 1316) set .@en_name_4,4714; //Inteligence5
+	else if (.@ren_e_m < 1317) set .@en_name_4,4754; //Luck5
+	set .@dr_t1,.@dr_t*5;
+	if (.@dr_t1 > 600)
+		set .@dr_t1,601;
+	set .@r_st,602-.@dr_t1;
+	set .@ren_e_m,rand(.@r_st,1716);
+	     if (.@ren_e_m < 601) set .@en_name_3,0;
+	else if (.@ren_e_m < 701) set .@en_name_3,4740; //Vitality1
+	else if (.@ren_e_m < 801) set .@en_name_3,4700; //Strength1
+	else if (.@ren_e_m < 901) set .@en_name_3,4730; //Agility1
+	else if (.@ren_e_m < 1001) set .@en_name_3,4720; //Dexterity1
+	else if (.@ren_e_m < 1101) set .@en_name_3,4710; //Inteligence1
+	else if (.@ren_e_m < 1201) set .@en_name_3,4750; //Luck1
+	else if (.@ren_e_m < 1251) set .@en_name_3,4741; //Vitality2
+	else if (.@ren_e_m < 1301) set .@en_name_3,4701; //Strength2
+	else if (.@ren_e_m < 1351) set .@en_name_3,4731; //Agility2
+	else if (.@ren_e_m < 1401) set .@en_name_3,4721; //Dexterity2
+	else if (.@ren_e_m < 1451) set .@en_name_3,4711; //Inteligence2
+	else if (.@ren_e_m < 1501) set .@en_name_3,4751; //Luck2
+	else if (.@ren_e_m < 1526) set .@en_name_3,4742; //Vitality3
+	else if (.@ren_e_m < 1551) set .@en_name_3,4702; //Strength3
+	else if (.@ren_e_m < 1576) set .@en_name_3,4732; //Agility3
+	else if (.@ren_e_m < 1601) set .@en_name_3,4722; //Dexterity3
+	else if (.@ren_e_m < 1626) set .@en_name_3,4712; //Inteligence3
+	else if (.@ren_e_m < 1651) set .@en_name_3,4752; //Luck3
+	else if (.@ren_e_m < 1661) set .@en_name_3,4743; //Vitality4
+	else if (.@ren_e_m < 1671) set .@en_name_3,4703; //Strength4
+	else if (.@ren_e_m < 1681) set .@en_name_3,4733; //Agility4
+	else if (.@ren_e_m < 1691) set .@en_name_3,4723; //Dexterity4
+	else if (.@ren_e_m < 1701) set .@en_name_3,4713; //Inteligence4
+	else if (.@ren_e_m < 1711) set .@en_name_3,4753; //Luck4
+	else if (.@ren_e_m < 1712) set .@en_name_3,4744; //Vitality5
+	else if (.@ren_e_m < 1713) set .@en_name_3,4704; //Strength5
+	else if (.@ren_e_m < 1714) set .@en_name_3,4734; //Agility5
+	else if (.@ren_e_m < 1715) set .@en_name_3,4724; //Dexterity5
+	else if (.@ren_e_m < 1716) set .@en_name_3,4714; //Inteligence5
+	else if (.@ren_e_m < 1717) set .@en_name_3,4754; //Luck5
+	set .@dr_t1,.@dr_t*5;
+	if (.@dr_t1 > .@val[1])
+		set .@dr_t1,.@val[1];
+	set .@r_st,(.@val[1]+1)-.@dr_t1;
+	set .@ren_e_m,rand(.@r_st,1100);
+	     if (.@ren_e_m < 1001) set .@en_name_2,0;
+	else if (.@ren_e_m < 1100) {
+		switch (.@en_name_3) {
+			case 4700: case 4701: case 4702: case 4703: case 4704:
+				set .@en_name_2,4853; //S_Str
+				break;
+			case 4740: case 4741: case 4742: case 4743: case 4744:
+				set .@en_name_2,4855; //S_Vital
+				break;
+			case 4730: case 4731: case 4732: case 4733: case 4734:
+				set .@en_name_2,4854; //S_Agi
+				break;
+			case 4720: case 4721: case 4722: case 4723: case 4724:
+				set .@en_name_2,4857; //S_Dex
+				break;
+			case 4750: case 4751: case 4752: case 4753: case 4754:
+				set .@en_name_2,4858; //S_Luck
+				break;
+			case 4710: case 4711: case 4712: case 4713: case 4714:
+				set .@en_name_2,4856; //S_Int
+				break;
+		}
+	}
+	if (!.@en_name_4) {
+		set .@en_name_2,0;
+		set .@en_name_3,0;
+	} else if (!.@en_name_3)
+		set .@en_name_2,0;
+	if (rand(1,100) > .@val[2])
+		set .@d_item,20718; //FaceWorm_Skin_
+	else
+		set .@d_item,20717; //FaceWorm_Skin
+	makeitem2 .@d_item,1,.@map$,.@x,.@y,0,.@ppt,0,0,.@en_name_2,.@en_name_3,.@en_name_4;
+	end;
+OnStart:
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname(strnpcinfo(0));
+	end;
+OnDisable:
+	hideonnpc instance_npcname(strnpcinfo(0));
+	end;
+OnTimer3600000:
+	stopnpctimer;
+	end;
+}
+
+1@face,162,271,3	duplicate(#fwormprize1)	#fwormprize2	4_TREASURE_BOX
+1@face,278,308,3	duplicate(#fwormprize1)	#fwormprize3	4_TREASURE_BOX
+1@face,214,108,3	duplicate(#fwormprize1)	#fwormprize4	4_TREASURE_BOX
+
+1@face,213,157,3	script	#fwormprize5	4_TREASURE_BOX,{
+	set .@map$,instance_mapname("1@face");
+	set '120903_str_face$,strcharinfo(0);
+	donpcevent instance_npcname("#globaltimer22")+"::OnT_s2";
+	donpcevent instance_npcname("#globaltimer22")+"::OnT_s3";
+	set .@dr_st2,getnpctimer(0)/1000;
+	if (.@dr_st2 < 1)
+		set .@dr_st2,1200;
+	specialeffect EF_COIN;
+	donpcevent instance_npcname("#fwormprize5")+"::OnDisable";
+	set .@en_name_4,0;
+	set .@en_name_3,0;
+	set .@en_name_2,0;
+	set .@dr_st1,270;
+	for (set .@i,1; .@i<=2; set .@i,.@i+1) {
+		if (.@dr_st2 < .@dr_st1)
+			set .@dr_st2,.@dr_st1+1;
+		set .@dr_t,.@dr_st2-.@dr_st1;
+		set .@dr_t1,(.@dr_t/15)+1;
+		if (.@dr_t1 < 1)
+			set .@dr_t1,1;
+		if (.@dr_t1 > 4)
+			set .@dr_t1,4;
+		set .@r_st1,12-.@dr_t1;
+		set .@r_st2,.@r_st1-7;
+		set .@ppt,rand(.@r_st2,.@r_st1);
+		set .@dr_t1,.@dr_t*10;
+		if (.@dr_t1 > 1850)
+			set .@dr_t1,1851;
+		set .@r_st,1852-.@dr_t1;
+		set .@ren_e_m,rand(.@r_st,1934);
+		       if (.@ren_e_m < 201) set .@en_name_4,0;
+		else if (.@ren_e_m < 301) set .@en_name_4,4740; //Vitality1
+		else if (.@ren_e_m < 401) set .@en_name_4,4700; //Strength1
+		else if (.@ren_e_m < 501) set .@en_name_4,4730; //Agility1
+		else if (.@ren_e_m < 601) set .@en_name_4,4720; //Dexterity1
+		else if (.@ren_e_m < 701) set .@en_name_4,4710; //Inteligence1
+		else if (.@ren_e_m < 801) set .@en_name_4,4750; //Luck1
+		else if (.@ren_e_m < 901) set .@en_name_4,4741; //Vitality2
+		else if (.@ren_e_m < 1001) set .@en_name_4,4701; //Strength2
+		else if (.@ren_e_m < 1101) set .@en_name_4,4731; //Agility2
+		else if (.@ren_e_m < 1201) set .@en_name_4,4721; //Dexterity2
+		else if (.@ren_e_m < 1301) set .@en_name_4,4711; //Inteligence2
+		else if (.@ren_e_m < 1401) set .@en_name_4,4751; //Luck2
+		else if (.@ren_e_m < 1451) set .@en_name_4,4742; //Vitality3
+		else if (.@ren_e_m < 1501) set .@en_name_4,4702; //Strength3
+		else if (.@ren_e_m < 1551) set .@en_name_4,4732; //Agility3
+		else if (.@ren_e_m < 1601) set .@en_name_4,4722; //Dexterity3
+		else if (.@ren_e_m < 1651) set .@en_name_4,4712; //Inteligence3
+		else if (.@ren_e_m < 1701) set .@en_name_4,4752; //Luck3
+		else if (.@ren_e_m < 1726) set .@en_name_4,4743; //Vitality4
+		else if (.@ren_e_m < 1751) set .@en_name_4,4703; //Strength4
+		else if (.@ren_e_m < 1776) set .@en_name_4,4733; //Agility4
+		else if (.@ren_e_m < 1801) set .@en_name_4,4723; //Dexterity4
+		else if (.@ren_e_m < 1826) set .@en_name_4,4713; //Inteligence4
+		else if (.@ren_e_m < 1851) set .@en_name_4,4753; //Luck4
+		else if (.@ren_e_m < 1861) set .@en_name_4,4744; //Vitality5
+		else if (.@ren_e_m < 1871) set .@en_name_4,4704; //Strength5
+		else if (.@ren_e_m < 1881) set .@en_name_4,4734; //Agility5
+		else if (.@ren_e_m < 1891) set .@en_name_4,4724; //Dexterity5
+		else if (.@ren_e_m < 1901) set .@en_name_4,4714; //Inteligence5
+		else if (.@ren_e_m < 1911) set .@en_name_4,4754; //Luck5
+		else if (.@ren_e_m < 1914) set .@en_name_4,4745; //Vitality6
+		else if (.@ren_e_m < 1917) set .@en_name_4,4705; //Strength6
+		else if (.@ren_e_m < 1920) set .@en_name_4,4735; //Agility6
+		else if (.@ren_e_m < 1923) set .@en_name_4,4725; //Dexterity6
+		else if (.@ren_e_m < 1926) set .@en_name_4,4715; //Inteligence6
+		else if (.@ren_e_m < 1929) set .@en_name_4,4755; //Luck6
+		else if (.@ren_e_m < 1930) set .@en_name_4,4746; //Vitality7
+		else if (.@ren_e_m < 1931) set .@en_name_4,4706; //Strength7
+		else if (.@ren_e_m < 1932) set .@en_name_4,4736; //Agility7
+		else if (.@ren_e_m < 1933) set .@en_name_4,4726; //Dexterity7
+		else if (.@ren_e_m < 1934) set .@en_name_4,4716; //Inteligence7
+		else if (.@ren_e_m < 1935) set .@en_name_4,4756; //Luck7
+		set .@dr_t1,.@dr_t*10;
+		if (.@dr_t1 > 1400)
+			set .@dr_t1,1401;
+		set .@r_st,1402-.@dr_t1;
+		set .@ren_e_m,rand(.@r_st,1934);
+		     if (.@ren_e_m < 201) set .@en_name_3,0;
+		else if (.@ren_e_m < 301) set .@en_name_3,4740; //Vitality1
+		else if (.@ren_e_m < 401) set .@en_name_3,4700; //Strength1
+		else if (.@ren_e_m < 501) set .@en_name_3,4730; //Agility1
+		else if (.@ren_e_m < 601) set .@en_name_3,4720; //Dexterity1
+		else if (.@ren_e_m < 701) set .@en_name_3,4710; //Inteligence1
+		else if (.@ren_e_m < 801) set .@en_name_3,4750; //Luck1
+		else if (.@ren_e_m < 901) set .@en_name_3,4741; //Vitality2
+		else if (.@ren_e_m < 1001) set .@en_name_3,4701; //Strength2
+		else if (.@ren_e_m < 1101) set .@en_name_3,4731; //Agility2
+		else if (.@ren_e_m < 1201) set .@en_name_3,4721; //Dexterity2
+		else if (.@ren_e_m < 1301) set .@en_name_3,4711; //Inteligence2
+		else if (.@ren_e_m < 1401) set .@en_name_3,4751; //Luck2
+		else if (.@ren_e_m < 1451) set .@en_name_3,4742; //Vitality3
+		else if (.@ren_e_m < 1501) set .@en_name_3,4702; //Strength3
+		else if (.@ren_e_m < 1551) set .@en_name_3,4732; //Agility3
+		else if (.@ren_e_m < 1601) set .@en_name_3,4722; //Dexterity3
+		else if (.@ren_e_m < 1651) set .@en_name_3,4712; //Inteligence3
+		else if (.@ren_e_m < 1701) set .@en_name_3,4752; //Luck3
+		else if (.@ren_e_m < 1726) set .@en_name_3,4743; //Vitality4
+		else if (.@ren_e_m < 1751) set .@en_name_3,4703; //Strength4
+		else if (.@ren_e_m < 1776) set .@en_name_3,4733; //Agility4
+		else if (.@ren_e_m < 1801) set .@en_name_3,4723; //Dexterity4
+		else if (.@ren_e_m < 1826) set .@en_name_3,4713; //Inteligence4
+		else if (.@ren_e_m < 1851) set .@en_name_3,4753; //Luck4
+		else if (.@ren_e_m < 1861) set .@en_name_3,4744; //Vitality5
+		else if (.@ren_e_m < 1871) set .@en_name_3,4704; //Strength5
+		else if (.@ren_e_m < 1881) set .@en_name_3,4734; //Agility5
+		else if (.@ren_e_m < 1891) set .@en_name_3,4724; //Dexterity5
+		else if (.@ren_e_m < 1901) set .@en_name_3,4714; //Inteligence5
+		else if (.@ren_e_m < 1911) set .@en_name_3,4754; //Luck5
+		else if (.@ren_e_m < 1914) set .@en_name_3,4745; //Vitality6
+		else if (.@ren_e_m < 1917) set .@en_name_3,4705; //Strength6
+		else if (.@ren_e_m < 1920) set .@en_name_3,4735; //Agility6
+		else if (.@ren_e_m < 1923) set .@en_name_3,4725; //Dexterity6
+		else if (.@ren_e_m < 1926) set .@en_name_3,4715; //Inteligence6
+		else if (.@ren_e_m < 1929) set .@en_name_3,4755; //Luck6
+		else if (.@ren_e_m < 1930) set .@en_name_3,4746; //Vitality7
+		else if (.@ren_e_m < 1931) set .@en_name_3,4706; //Strength7
+		else if (.@ren_e_m < 1932) set .@en_name_3,4736; //Agility7
+		else if (.@ren_e_m < 1933) set .@en_name_3,4726; //Dexterity7
+		else if (.@ren_e_m < 1934) set .@en_name_3,4716; //Inteligence7
+		else if (.@ren_e_m < 1935) set .@en_name_3,4756; //Luck7
+		set .@dr_t1,.@dr_t*5;
+		if (.@dr_t1 > 999)
+			set .@dr_t1,999;
+		set .@r_st,1000-.@dr_t1;
+		set .@ren_e_m,rand(.@r_st,1100);
+		     if (.@ren_e_m < 1001) set .@en_name_2,0;
+		else if (.@ren_e_m < 1100) {
+			switch (.@en_name_3) {
+				case 4700: case 4701: case 4702: case 4703: case 4704:
+					set .@en_name_2,4853; //S_Str
+					break;
+				case 4740: case 4741: case 4742: case 4743: case 4744:
+					set .@en_name_2,4855; //S_Vital
+					break;
+				case 4730: case 4731: case 4732: case 4733: case 4734:
+					set .@en_name_2,4854; //S_Agi
+					break;
+				case 4720: case 4721: case 4722: case 4723: case 4724:
+					set .@en_name_2,4857; //S_Dex
+					break;
+				case 4750: case 4751: case 4752: case 4753: case 4754:
+					set .@en_name_2,4858; //S_Luck
+					break;
+				case 4710: case 4711: case 4712: case 4713: case 4714:
+					set .@en_name_2,4856; //S_Int
+					break;
+			}
+		}
+		if (!.@en_name_4) {
+			set .@en_name_2,0;
+			set .@en_name_3,0;
+		} else if (!.@en_name_3)
+			set .@en_name_2,0;
+		if (rand(1,100) > 40)
+			set .@d_item,20718; //FaceWorm_Skin_
+		else
+			set .@d_item,20717; //FaceWorm_Skin
+		makeitem2 .@d_item,1,.@map$,rand(209,217),rand(152,161),0,.@ppt,0,0,.@en_name_2,.@en_name_3,.@en_name_4;
+	}
+	end;
+OnStart:
+	initnpctimer;
+	end;
+OnInstanceInit:
+	donpcevent instance_npcname("#fwormprize5")+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#fwormprize5");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#fwormprize5");
+	end;
+OnTimer3600000:
+	stopnpctimer;
+	end;
+}
+
+// Instance Treasures :: in_face_t
+//============================================================
+1@face,183,314,3	script	Merchant Prince's Box#1	4_TREASURE_BOX,{
+	specialeffect EF_COIN;
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	initnpctimer;
+	end;
+
+OnInstanceInit:
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	end;
+OnEnable:
+	hideoffnpc instance_npcname(strnpcinfo(0));
+	end;
+OnDisable:
+	hideonnpc instance_npcname(strnpcinfo(0));
+	end;
+OnTimer1000:
+	set .@map$,instance_mapname("1@face");
+	set .@val,atoi(strnpcinfo(2));
+	switch (.@val) {
+		case 1:
+			setarray .@xy[0],184,321;
+			setarray .@item[0],718,22507; //Dark_Red_Jewel,ShabbyOldScroll
+			break;
+		case 2:
+			setarray .@xy[0],162,337;
+			setarray .@item[0],719,6650; //Violet_Jewel,Shabby_Ring
+			break;
+		case 3:
+			setarray .@xy[0],29,362;
+			setarray .@item[0],720,6651; //Skyblue_Jewel,Rusty_Bracelet
+			break;
+		case 4:
+			setarray .@xy[0],24,288;
+			setarray .@item[0],721,6652; //Azure_Jewel,Old_Photo_Album
+			break;
+		case 5:
+			setarray .@xy[0],58,274;
+			setarray .@item[0],722,6653; //Scarlet_Jewel,Shabby_Pill
+			break;
+		case 6:
+			setarray .@xy[0],73,214;
+			setarray .@item[0],725,22507; //Red_Jewel,ShabbyOldScroll
+			break;
+		case 7:
+			setarray .@xy[0],49,176;
+			setarray .@item[0],726,6650; //Blue_Jewel,Shabby_Ring
+			break;
+		case 8:
+			setarray .@xy[0],259,66;
+			setarray .@item[0],727,6651; //White_Jewel,Rusty_Bracelet
+			break;
+		case 9:
+			setarray .@xy[0],68,38;
+			setarray .@item[0],718,6652; //Dark_Red_Jewel,Old_Photo_Album
+			break;
+		case 10:
+			setarray .@xy[0],178,54;
+			setarray .@item[0],719,6653; //Violet_Jewel,Shabby_Pill
+			break;
+		case 11:
+			setarray .@xy[0],120,137;
+			setarray .@item[0],720,22507; //Skyblue_Jewel,ShabbyOldScroll
+			break;
+		case 12:
+			setarray .@xy[0],110,224;
+			setarray .@item[0],721,6650; //Azure_Jewel,Shabby_Ring
+			break;
+		case 13:
+			setarray .@xy[0],118,294;
+			setarray .@item[0],722,6651; //Scarlet_Jewel,Rusty_Bracelet
+			break;
+		case 14:
+			setarray .@xy[0],126,292;
+			setarray .@item[0],725,6652; //Red_Jewel,Old_Photo_Album
+			break;
+		case 15:
+			setarray .@xy[0],150,162;
+			setarray .@item[0],726,6653; //Blue_Jewel,Shabby_Pill
+			break;
+		case 16:
+			setarray .@xy[0],169,206;
+			setarray .@item[0],727,22507; //White_Jewel,ShabbyOldScroll
+			break;
+		case 17:
+			setarray .@xy[0],262,220;
+			setarray .@item[0],718,6650; //Dark_Red_Jewel,Shabby_Ring
+			break;
+		case 18:
+			setarray .@xy[0],218,350;
+			setarray .@item[0],719,6651; //Violet_Jewel,Rusty_Bracelet
+			break;
+		case 19:
+			setarray .@xy[0],304,263;
+			setarray .@item[0],720,6652; //Skyblue_Jewel,Old_Photo_Album
+			break;
+		case 20:
+			setarray .@xy[0],302,151;
+			setarray .@item[0],721,6653; //Azure_Jewel,Shabby_Pill
+			break;
+		case 21:
+			setarray .@xy[0],305,63;
+			setarray .@item[0],722,22507; //Scarlet_Jewel,ShabbyOldScroll
+			break;
+		case 22:
+			setarray .@xy[0],234,66;
+			setarray .@item[0],725,6650; //Red_Jewel,Shabby_Ring
+			break;
+		case 23:
+			setarray .@xy[0],218,89;
+			setarray .@item[0],726,6651; //Blue_Jewel,Rusty_Bracelet
+			break;
+		case 24:
+			setarray .@xy[0],233,99;
+			setarray .@item[0],727,6652; //White_Jewel,Old_Photo_Album
+		case 25:
+			setarray .@xy[0],280,158;
+			setarray .@item[0],718,6653; //Dark_Red_Jewel,Shabby_Pill
+			break;
+		case 26:
+			setarray .@xy[0],182,353;
+			setarray .@item[0],719,22507; //Violet_Jewel,ShabbyOldScroll
+			break;
+		case 27:
+			setarray .@xy[0],43,220;
+			setarray .@item[0],720,6650; //Skyblue_Jewel,Shabby_Ring
+			break;
+	}
+	setarray .@max[0],5,4,6,3,7,4,3,5,5,4,6,3,7,4,3,
+	                  5,5,4,6,3,7,4,3,5,5,4,6;
+	set .@idnum,rand(1,.@max[.@val-1]);
+	for (set .@i,0; .@i<.@idnum; set .@i,.@i+1) {
+		set .@idx,rand(.@xy[0],.@xy[0]+4);
+		set .@idy,rand(.@xy[1],.@xy[1]+4);
+		makeitem .@item[0],1,.@map$,.@idx,.@idy;
+	}
+	makeitem .@item[1],1,.@map$,.@xy[0]+2,.@y[1]+3;
+	if (rand(1,1000) > 400)
+		makeitem 6648,1,.@map$,.@xy[0]+1,.@xy[1]+2; //Shabby_Crown
+	if (rand(1,1000) > 700)
+		makeitem 7228,1,.@map$,.@xy[0]+2,.@xy[1]+2; //Gold_Bullion
+	if (rand(1,1000) > 900)
+		makeitem 7229,1,.@map$,.@xy[0]+3,.@xy[1]+2; //Silver_Bullion
+	stopnpctimer;
+	end;
+}
+
+1@face,164,343,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#2	4_TREASURE_BOX
+1@face,31,364,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#3	4_TREASURE_BOX
+1@face,26,290,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#4	4_TREASURE_BOX
+1@face,56,269,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#5	4_TREASURE_BOX
+1@face,80,213,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#6	4_TREASURE_BOX
+1@face,51,174,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#7	4_TREASURE_BOX
+1@face,261,62,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#8	4_TREASURE_BOX
+1@face,70,36,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#9	4_TREASURE_BOX
+1@face,182,51,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#10	4_TREASURE_BOX
+1@face,128,139,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#11	4_TREASURE_BOX
+1@face,108,232,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#12	4_TREASURE_BOX
+1@face,117,303,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#13	4_TREASURE_BOX
+1@face,134,294,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#14	4_TREASURE_BOX
+1@face,152,159,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#15	4_TREASURE_BOX
+1@face,177,208,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#16	4_TREASURE_BOX
+1@face,260,220,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#17	4_TREASURE_BOX
+1@face,216,357,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#18	4_TREASURE_BOX
+1@face,310,263,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#19	4_TREASURE_BOX
+1@face,307,158,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#20	4_TREASURE_BOX
+1@face,307,56,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#21	4_TREASURE_BOX
+1@face,240,64,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#22	4_TREASURE_BOX
+1@face,214,90,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#23	4_TREASURE_BOX
+1@face,237,108,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#24	4_TREASURE_BOX
+1@face,284,165,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#25	4_TREASURE_BOX
+1@face,184,363,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#26	4_TREASURE_BOX
+1@face,48,220,3	duplicate(Merchant Prince's Box#1)	Merchant Prince's Box#27	4_TREASURE_BOX
+
+// Instance GM Function :: in_face_ad
+//==========================================
+1@face,1,1,3	script	#forestspirit1	CLEAR_NPC,{
+	callfunc "F_GM_NPC";
+	if (callfunc("F_GM_NPC",1854,0) == 1) {
+		set .@map$,instance_mapname("1@face");
+		mes "[Time Manager]";
+		mes "What time would you like to return?";
+		next;
+		switch (select("Cancel:1st Stage Start:2nd Stage Start:3rd Stage Start:4th Stage Start:Boss Start:Treasures")) {
+			case 1:
+				break;
+			case 2:
+				donpcevent instance_npcname("Chaos#0")+"::OnDisable";
+				donpcevent instance_npcname("Iris#0")+"::OnDisable";
+				donpcevent instance_npcname("#fwormcontrol1")+"::OnStart";
+				mapannounce .@map$,"Faceworm time attack has started. Faster kill times gives a higher percentage of rewards.",bc_map,"0xffffff";
+				donpcevent instance_npcname("#globaltimer22")+"::OnT_s";
+				donpcevent instance_npcname("#fwormprize1")+"::OnStart";
+				warp .@map$,110,348;
+				break;
+			case 3:
+				donpcevent instance_npcname("#fwormenter1")+"::OnEnable";
+				donpcevent instance_npcname("#fwormexit1")+"::OnEnable";
+				donpcevent instance_npcname("Chaos#1")+"::OnEnable";
+				donpcevent instance_npcname("Iris#1")+"::OnEnable";
+				mapannounce .@map$,"A hole appears after killing the dark faceworm.",bc_map,"0xffffff";
+				warp .@map$,127,95;
+				break;
+			case 4:
+				donpcevent instance_npcname("#fwormenter2")+"::OnEnable";
+				donpcevent instance_npcname("#fwormexit2")+"::OnEnable";
+				donpcevent instance_npcname("Chaos#2")+"::OnEnable";
+				donpcevent instance_npcname("Iris#2")+"::OnEnable";
+				mapannounce .@map$,"You hear something loud in the south. It must be the nest of the one we just got rid of.",bc_map,"0xffffff";
+				warp .@map$,156,117;
+				break;
+			case 5:
+				donpcevent instance_npcname("#fwormenter3")+"::OnEnable";
+				donpcevent instance_npcname("#fwormexit3")+"::OnEnable";
+				donpcevent instance_npcname("#chaoson")+"::OnEnable";
+				mapannounce .@map$,"You hear the pile of stones collapsing. This might be a gateway to go to other spaces.",bc_map,"0xffffff";
+				warp .@map$,261,170;
+				break;
+			case 6:
+				donpcevent instance_npcname("#fwormenter4")+"::OnEnable";
+				donpcevent instance_npcname("#fwormexit4")+"::OnEnable";
+				donpcevent instance_npcname("Chaos#4")+"::OnEnable";
+				donpcevent instance_npcname("Iris#4")+"::OnEnable";
+				donpcevent instance_npcname("#chaoson2")+"::OnEnable";
+				mapannounce .@map$,"You hear the pile of stones collapsing. I think another gateway is found.",bc_map,"0xffffff";
+				warp .@map$,210,145;
+				break;
+			case 7:
+				donpcevent instance_npcname("#fwormprize5")+"::OnStart";
+				donpcevent instance_npcname("#fwormprize5")+"::OnEnable";
+				warp .@map$,210,145;
+				break;
+		}
+	}
+	close;
+}
+
+1@face,3,1,3	script	#forestspiritboss1	CLEAR_NPC,{
+	set .@map$,instance_mapname("1@face");
+	set .@mapcount,getmapusers(.@map$);
+	mes .@mapcount+" people.";
+	callfunc "F_GM_NPC";
+	if (callfunc("F_GM_NPC",1854,0) == 1) {
+		mes "[Boss Manager]";
+		mes "What time would you like to return?";
+		next;
+		switch (select("Cancel:1st Boss:2nd Boss:3rd Boss:4th Boss:Final Boss")) {
+			case 1:
+				break;
+			case 2:
+				donpcevent instance_npcname("Chaos#0")+"::OnDisable";
+				donpcevent instance_npcname("Iris#0")+"::OnDisable";
+				donpcevent instance_npcname("#fwormboss1")+"::OnStart";
+				donpcevent instance_npcname("#globaltimer22")+"::OnT_s";
+				donpcevent instance_npcname("#fwormprize1")+"::OnStart";
+				warp .@map$,140,70;
+				break;
+			case 3:
+				donpcevent instance_npcname("#fwormboss2")+"::OnStart";
+				donpcevent instance_npcname("#fwormprize2")+"::OnStart";
+				warp .@map$,160,270;
+				break;
+			case 4:
+				donpcevent instance_npcname("#fwormboss3")+"::OnStart";
+				donpcevent instance_npcname("#fwormprize3")+"::OnStart";
+				warp .@map$,270,300;
+				break;
+			case 5:
+				donpcevent instance_npcname("#fwormboss4")+"::OnStart";
+				donpcevent instance_npcname("#fwormprize4")+"::OnStart";
+				warp .@map$,210,105;
+				break;
+			case 6:
+				donpcevent instance_npcname("#fwormboss5")+"::OnStart";
+				donpcevent instance_npcname("#fwormprize5")+"::OnStart";
+				warp .@map$,214,148;
+				break;
+		}
+	}
+	close;
+
+OnInstanceInit:
+	set .@map$,instance_mapname("1@face");
+	donpcevent instance_npcname("#forestspiritboss1")+"::OnEnable";
+	monster .@map$,0,0,"Greatest General",1277,50;
+	monster .@map$,0,0,"Beetle King",1494,25;
+	monster .@map$,0,0,"Savage",1166,25;
+	end;
+OnEnable:
+	hideoffnpc instance_npcname("#forestspiritboss1");
+	end;
+OnDisable:
+	hideonnpc instance_npcname("#forestspiritboss1");
+	end;
+}

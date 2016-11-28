@@ -165,7 +165,7 @@ xmas,237,303,3	script	Catherine Jet Johnson	4_F_SKULL06GIRL,{
 			switch (instance_create(.@md_name$)) {
 				case -3:
 					dispbottom "Memorial Dungeon, '"+.@md_name$+"' is already in progress.",0xFFFFFF;
-					end;
+					break;
 				case -4:
 				case -2:
 				case -1:
@@ -236,7 +236,7 @@ xmas,233,305,4	script	Factory Dim. Teleporter	PORTAL,{
 				mes "You over there. Stop!";
 				close;
 			case 0:
-				mapannounce "xmas",.@p_name$+" party's party member "+.@p_reader$+" enters " +.@md_name$,bc_map,"0x00ff99";
+				mapannounce "xmas",.@p_name$+" party's party member "+.@p_reader$+" enters "+.@md_name$+".",bc_map,"0x00ff99";
 				setquest 12331;
 				//warp "1@xm_d",111,22;
 				end;
@@ -1372,19 +1372,8 @@ OnAlert:
 	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
 	sleep 3000;
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-	switch (atoi(strnpcinfo(2))) {
-		case 1: setarray .@xy[0],151,94,159,102; break;
-		case 2: setarray .@xy[0],126,68,134,76; break;
-		case 3: setarray .@xy[0],130,30,138,38; break;
-		case 4: setarray .@xy[0],191,24,199,32; break;
-		case 5: setarray .@xy[0],224,26,232,34; break;
-		case 6: setarray .@xy[0],199,51,207,59; break;
-		case 7: setarray .@xy[0],128,48,136,56; break;
-		case 8: setarray .@xy[0],158,48,164,54; break;
-		case 9: setarray .@xy[0],229,23,237,31; break;
-		case 10: setarray .@xy[0],205,23,213,31; break;
-	}
-	areamonster .@map$,.@xy[0],.@xy[1],.@xy[2],.@xy[3],"Guard",2990,20,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	getmapxy(.@map$,.@x,.@y,1);
+	areamonster .@map$,.@x-4,.@y-4,.@x+4,.@y+4,"Guard",2990,20,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnStart";
 	initnpctimer;
 	end;
@@ -2375,121 +2364,61 @@ OnDisable:
 	end;
 OnTimer1000:
 	set .@map$,instance_mapname("1@xm_d");
-	switch (atoi(strnpcinfo(2))) {
+	set .@val,atoi(strnpcinfo(2));
+	switch (.@val) {
 		case 1:
-			set .@min,4;
-			set .@max,8;
-			setarray .@x[0],208,212;
-			setarray .@y[0],139,143;
 			setarray .@chance[0],150,600,900;
 			setarray .@item[0],644,617,22534; //Gift_Box,Old_Violet_Box,Closedmind_Box
-			setarray .@x_item[0],209,210,211;
-			set .@y_item,141;
 			break;
 		case 2:
-			set .@min,3;
-			set .@max,7;
-			setarray .@x[0],212,216;
-			setarray .@y[0],139,143;
 			setarray .@chance[0],400,700,950;
 			setarray .@item[0],603,616,13442; //Old_Blue_Box,Old_Card_Album,Old_Parasol
-			setarray .@x_item[0],213,214,215;
-			set .@y_item,141;
 			break;
 		case 3:
-			set .@min,2;
-			set .@max,6;
-			setarray .@x[0],216,220;
-			setarray .@y[0],139,143;
 			setarray .@chance[0],850,800,950;
 			setarray .@item[0],7229,12246,2486; //Silver_Bullion,Magic_Card_Album,Shadow_Walk_
-			setarray .@x_item[0],217,218,219;
-			set .@y_item,141;
 			break;
 		case 4:
-			set .@min,4;
-			set .@max,8;
-			setarray .@x[0],220,224;
-			setarray .@y[0],139,143;
 			setarray .@chance[0],700,600,900;
 			setarray .@item[0],7288,617,22534; //Gold_Bullion,Old_Violet_Box,Closedmind_Box
-			setarray .@x_item[0],221,222,223;
-			set .@y_item,141;
 			break;
 		case 5:
-			set .@min,3;
-			set .@max,7;
-			setarray .@x[0],224,228;
-			setarray .@y[0],139,143;
 			setarray .@chance[0],150,700,950;
 			setarray .@item[0],644,616,2976; //Gift_Box,Old_Card_Album,Red_Lantern
-			setarray .@x_item[0],225,226,227;
-			set .@y_item,141;
 			break;
 		case 6:
-			set .@min,2;
-			set .@max,6;
-			setarray .@x[0],208,212;
-			setarray .@y[0],134,138;
 			setarray .@chance[0],400,800,950;
 			setarray .@item[0],603,12246,2977; //Old_Blue_Box,Magic_Card_Album,Hurt_Mind
-			setarray .@x_item[0],209,210,211;
-			set .@y_item,136;
 			break;
 		case 7:
-			set .@min,4;
-			set .@max,8;
-			setarray .@x[0],212,216;
-			setarray .@y[0],134,138;
 			setarray .@chance[0],850,600,900;
 			setarray .@item[0],7229,617,22534; //Silver_Bullion,Old_Violet_Box,Closedmind_Box
-			setarray .@x_item[0],213,214,215;
-			set .@y_item,136;
 			break;
 		case 8:
-			set .@min,3;
-			set .@max,7;
-			setarray .@x[0],216,220;
-			setarray .@y[0],134,138;
 			setarray .@chance[0],700,700,950;
 			setarray .@item[0],7228,616,2978; //Gold_Bullion,Old_Card_Album,KindHeart
-			setarray .@x_item[0],217,218,219;
-			set .@y_item,136;
 			break;
 		case 9:
-			set .@min,2;
-			set .@max,6;
-			setarray .@x[0],220,224;
-			setarray .@y[0],134,138;
 			setarray .@chance[0],150,800,950;
 			setarray .@item[0],644,12246,18848; //Gift_Box,Magic_Card_Album,Lush_Rose
-			setarray .@x_item[0],221,222,223;
-			set .@y_item,136;
 			break;
 		case 10:
-			set .@min,4;
-			set .@max,8;
-			setarray .@x[0],224,228;
-			setarray .@y[0],134,138;
 			setarray .@chance[0],400,600,900;
 			setarray .@item[0],603,617,22534; //Old_Blue_Box,Old_Violet_Box,Closedmind_Box
-			setarray .@x_item[0],225,226,227;
-			set .@y_item,136;
 			break;
 	}
-	set .@idnum,rand(.@min,.@max);
-	while (1) {
-		if (.@id < .@idnum) {
-			set .@idx,rand(.@x[0],.@x[1]);
-			set .@idy,rand(.@y[0],.@y[1]);
-			makeitem 7642,1,.@map$,.@idx,.@idy; //Bloody_Coin
-			set .@id,.@id+1;
-		} else
-			break;
+	setarray .@min[0],4,3,2,4,3,2,4,3,2,4;
+	setarray .@max[0],8,7,6,8,7,6,8,7,6,8;
+	set .@idnum,rand(.@min[.@val-1],.@max[.@val-1]);
+	getmapxy(.@map$,.@x,.@y,1);
+	for (set .@i,0; .@i<.@idnum; set .@i,.@i+1) {
+		set .@idx,rand(.@x-2,.@x+2);
+		set .@idy,rand(.@y-2,.@y+2);
+		makeitem 7642,1,.@map$,.@idx,.@idy; //Bloody_Coin
 	}
 	for (set .@i,0; .@i<=2; .@i++) {
 		if (rand(1,1000) > .@chance[.@i])
-			makeitem2 .@item[.@i],1,.@map$,.@x_item[.@i],.@y_item,0,0,0,0,0,0,0;
+			makeitem2 .@item[.@i],1,.@map$,.@x+(.@i-1),.@y,0,0,0,0,0,0,0;
 	}
 	stopnpctimer;
 	end;
@@ -2521,7 +2450,7 @@ OnTouch_:
 		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
 		getmapxy(.@map$,.@x,.@y,1);
 		set .@mon_num,.@num[atoi(strnpcinfo(2))-61];
-		areamonster .@map$,.@x-5,.@y-5,.@x+5,.@y+5,"Toy Factory Guard",2990,.@mon_num,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+		areamonster .@map$,.@x-10,.@y-10,.@x+10,.@y+10,"Toy Factory Guard",2990,.@mon_num,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 		initnpctimer;
 	}
 	end;
@@ -2593,6 +2522,7 @@ OnTimer45000:
 1@xm_d,1,1,3	script	#adsw	CLEAR_NPC,{
 	callfunc "F_GM_NPC";
 	if (callfunc("F_GM_NPC",1854,0) == 1) {
+		set .@map$,instance_mapname("1@xm_d");
 		mes "[Time Manager]";
 		mes "What time would you like to return?";
 		next;
@@ -2600,31 +2530,26 @@ OnTimer45000:
 			case 1:
 				break;
 			case 2:
-				set .@map$,instance_mapname("1@xm_d");
 				transform 1246,180000;
 				donpcevent instance_npcname("Coordinator#fac1bs")+"::OnEnable";
 				mapannounce .@map$,"Coordinator's announcement: Huh? Where's everyone! How dare you workers to be absent their line and muck around!",bc_map,"0xff8800";
 				warp .@map$,70,125;
 				break;
 			case 3:
-				set .@map$,instance_mapname("1@xm_d");
 				for (set .@i,1; .@i<=10; set .@i,.@i+1)
 					donpcevent instance_npcname("Worker#"+.@i)+"::OnDisable";
 				donpcevent instance_npcname("#fac2wpc")+"::OnStart";
 				warp .@map$,131,210;
 				break;
 			case 4:
-				set .@map$,instance_mapname("1@xm_d");
 				donpcevent instance_npcname("#fac3ct3")+"::OnEnd";
 				warp .@map$,131,210;
 				break;
 			case 5:
-				set .@map$,instance_mapname("1@xm_d");
 				donpcevent instance_npcname("#finalbs2")+"::OnStart";
 				warp .@map$,215,182;
 				break;
 			case 6:
-				set .@map$,instance_mapname("1@xm_d");
 				donpcevent instance_npcname("#finalbs2")+"::OnEnd";
 				warp .@map$,215,182;
 				break;
