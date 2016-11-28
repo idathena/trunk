@@ -124,6 +124,42 @@ function	script	F_19686	{ //C_SantaHairband
 	return;
 }
 
+function	script	F_22507	{ //ShabbyOldScroll
+	switch (rand(1,10)) {
+		case 1:
+			warp "pay_fild01",141,211;
+			break;
+		case 2:
+			warp "payon_in03",99,190;
+			break;
+		case 3:
+			warp "pay_dun04",120,116;
+			break;
+		case 4:
+			warp "pay_gld",202,186;
+			break;
+		case 5:
+			warp "gld_dun01",61,155;
+			break;
+		case 6:
+			warp "pay_fild04",348,333;
+			break;
+		case 7:
+			warp "payon_in02",17,62;
+			break;
+		case 8:
+			warp "payon_in01",144,15;
+			break;
+		case 9:
+			warp "pay_fild07",200,186;
+			break;
+		case 10:
+			warp "pay_fild10",147,267;
+			break;
+	}
+	return;
+}
+
 function	script	F_22750	{ //Trans_Scroll_Horn_Scaraba
 	showscript "Traaaansformation-!! Horn Scaraba form!!";
 	return;

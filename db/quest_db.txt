@@ -2440,6 +2440,13 @@
 12321,0,0,0,0,0,0,0,"Time Conqueror"
 12322,0,0,0,0,0,0,0,"Space Distortion"
 
+// Faceworm's Nest
+12325,82800,0,0,0,0,0,0,"Faceworm's Nest after-effects"
+12326,86400,0,0,0,0,0,0,"The owner of old ring"
+12327,86400,0,0,0,0,0,0,"The memory of old photo album"
+12328,86400,0,0,0,0,0,0,"Dol-Seoi's Sorrow"
+12329,86400,0,0,0,0,0,0,"Keaton's Bracelet"
+
 // Horror Toy Factory
 12330,0,0,0,0,0,0,0,"Skull-faced Girl"
 12331,82800,0,0,0,0,0,0,"Trail of Toy Factory"

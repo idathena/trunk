@@ -5980,6 +5980,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						else
 							skillratio += 900 + 500 * skill_lv; 
 						break;
+					case NPC_VENOMFOG:
+						skillratio += 600 + 100 * skill_lv;
+						break;
 					case NPC_HELLBURNING:
 						skillratio += 900;
 						break;
@@ -6597,9 +6600,6 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			break;
 		case NPC_EVILLAND:
 			md.damage = skill_calc_heal(src, target, skill_id, skill_lv, false);
-			break;
-		case NPC_VENOMFOG:
-			md.damage = 2000;
 			break;
 		case NPC_MAXPAIN_ATK:
 			md.damage = battle_damage_temp[0] * skill_lv * 10 / 100;
