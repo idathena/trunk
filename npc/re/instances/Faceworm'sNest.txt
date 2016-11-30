@@ -1,5 +1,5 @@
 //===== rAthena Script ======================================= 
-//= Faceworm Nest
+//= Faceworm's Nest
 //===== By: ================================================== 
 //= exneval
 //===== Current Version: ===================================== 
@@ -215,7 +215,7 @@ payon,161,50,1	script	Strong Looking Man#pa829	4_M_ORIENT01,{
 	} else if (.@face_time == 1)
 		mes "Dol-Seoi is standing absent-mindedly clutching the Old Pill. Let's leave him alone now.";
 	else if (.@face_time == 2) {
-		mes "If you find a pill from the Faceworm's Nest, please show it to Dol-Seoi.";
+		mes "You can talk to Dol-Seoi again if you get another Old Pill from the Faceworm's Nest.";
 		erasequest 12328;
 	}
 	close;
@@ -2653,9 +2653,9 @@ OnDisable:
 OnTouch_:
 	set .@map$,instance_mapname("1@face");
 	setarray .@num[0],3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,
-		              3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,
-		              3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,
-					  3,2,1,3,2,1,3,2,1;
+	                  3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,
+	                  3,2,1,3,2,1,3,2,1,3,2,1,3,2,1,
+	                  3,2,1,3,2,1,3,2,1;
 	specialeffect EF_VENOMDUST;
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
 	getmapxy(.@map$,.@x,.@y,1);

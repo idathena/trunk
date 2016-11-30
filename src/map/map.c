@@ -2885,7 +2885,6 @@ int map_getcellp(struct map_data *m,int16 x,int16 y,cell_chk cellchk)
 		case CELL_CHKCLIFF:
 			return (!cell.walkable && cell.shootable);
 
-
 		//Base cell type checks
 		case CELL_CHKNPC:
 			return (cell.npc);
@@ -2897,6 +2896,8 @@ int map_getcellp(struct map_data *m,int16 x,int16 y,cell_chk cellchk)
 			return (cell.novending);
 		case CELL_CHKNOCHAT:
 			return (cell.nochat);
+		case CELL_CHKMAELSTROM:
+			return (cell.maelstrom);
 		case CELL_CHKICEWALL:
 			return (cell.icewall);
 		case CELL_CHKNOICEWALL:
@@ -2955,7 +2956,8 @@ void map_setcell(int16 m, int16 x, int16 y, cell_t cell, bool flag)
 		case CELL_LANDPROTECTOR: map[m].cell[j].landprotector = flag; break;
 		case CELL_NOVENDING:     map[m].cell[j].novending = flag;     break;
 		case CELL_NOCHAT:        map[m].cell[j].nochat = flag;        break;
-		case CELL_ICEWALL:		 map[m].cell[j].icewall = flag;		  break;
+		case CELL_MAELSTROM:     map[m].cell[j].maelstrom = flag;     break;
+		case CELL_ICEWALL:       map[m].cell[j].icewall = flag;       break;
 		case CELL_NOICEWALL:     map[m].cell[j].noicewall = flag;     break;
 
 		default:
@@ -3752,7 +3754,9 @@ int map_config_read(char *cfgName)
 		else if (strcmpi(w1, "use_grf") == 0)
 			enable_grf = config_switch(w2);
 		else if (strcmpi(w1, "console_msg_log") == 0)
-			console_msg_log = atoi(w2);//[Ind]
+			console_msg_log = atoi(w2); //[Ind]
+		else if (strcmpi(w1, "console_log_filepath") == 0)
+			safestrncpy(console_log_filepath, w2, sizeof(console_log_filepath));
 		else if (strcmpi(w1, "import") == 0)
 			map_config_read(w2);
 		else
@@ -4373,6 +4377,7 @@ int do_init(int argc, char *argv[])
 	SCRIPT_CONF_NAME = "conf/script_athena.conf";
 	MSG_CONF_NAME = "conf/msg_conf/map_msg.conf";
 	GRF_PATH_FILENAME = "conf/grf-files.txt";
+	safestrncpy(console_log_filepath, "./log/map-msg_log.log", sizeof(console_log_filepath));
 
 	// Default map
 	safestrncpy(map_default.mapname, "prontera", MAP_NAME_LENGTH);

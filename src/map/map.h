@@ -491,6 +491,7 @@ typedef enum {
 	CELL_LANDPROTECTOR,
 	CELL_NOVENDING,
 	CELL_NOCHAT,
+	CELL_MAELSTROM,
 	CELL_ICEWALL,
 	CELL_NOICEWALL
 
@@ -515,6 +516,7 @@ typedef enum {
 	CELL_CHKLANDPROTECTOR, // Whether the cell has Land Protector
 	CELL_CHKNOVENDING,     // Whether the cell denies MC_VENDING skill
 	CELL_CHKNOCHAT,        // Whether the cell denies Player Chat Window
+	CELL_CHKMAELSTROM,     // Whether the cell has Maelstrom
 	CELL_CHKICEWALL,       // Whether the cell has Ice Wall
 	CELL_CHKNOICEWALL      // Whether the cell isn't allowed to cast Ice Wall
 } cell_chk;
@@ -535,6 +537,7 @@ struct mapcell
 		novending : 1,
 		nochat : 1,
 		icewall : 1,
+		maelstrom : 1,
 		noicewall : 1;
 
 #ifdef CELL_NOSTACK
