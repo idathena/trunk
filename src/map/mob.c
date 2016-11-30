@@ -1238,7 +1238,7 @@ static int mob_ai_sub_hard_slavemob(struct mob_data *md,unsigned int tick)
 		return 1;
 	}
 
-	if(bl->prev == NULL)
+	if(!bl->prev)
 		return 0; //Master not on a map? Could be warping, do not process
 
 	if(status_get_mode(&md->bl)&MD_CANMOVE) { //If the mob can move, follow around [Check by Skotlex]

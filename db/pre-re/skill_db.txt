@@ -910,11 +910,11 @@
 2296,3,6,1,0,0x1,0,3,1,yes,0,0,0,none,0,0,	SC_UNLUCKY,Masquerade - Unlucky
 2297,3,6,1,0,0x1,0,3,1,yes,0,0,0,none,0,0,	SC_WEAKNESS,Masquerade - Weakness
 2298,3,6,1,0,0x1,0,5,1,yes,0,0,0,none,0,0x1000,	SC_STRIPACCESSARY,Strip Accessory
-2299,7,6,2,0,0x1,0,3,1,yes,0,0,3,magic,0,0,	SC_MANHOLE,Man Hole
-2300,7,6,2,0,0x1,0,3,1,yes,0,0,1,magic,0,0,	SC_DIMENSIONDOOR,Dimension Door
+2299,7,6,2,0,0x1,0,3,1,yes,0,0x8000,3,magic,0,0,	SC_MANHOLE,Man Hole
+2300,7,6,2,0,0x1,0,3,1,yes,0,0x8000,1,magic,0,0,	SC_DIMENSIONDOOR,Dimension Door
 2301,7,6,2,0,0x1,0,3,1,yes,0,0x8000,0,magic,0,0,	SC_CHAOSPANIC,Chaos Panic
 2302,7,6,2,0,0x1,0,3,1,yes,0,0x8000,0,magic,0,0,	SC_MAELSTROM,Maelstrom
-2303,7,6,2,0,0x1,0,3,1,yes,0,0,0,magic,0,0,	SC_BLOODYLUST,Bloody Lust
+2303,7,6,2,0,0x1,0,3,1,yes,0,0x8000,0,magic,0,0,	SC_BLOODYLUST,Bloody Lust
 2304,0,6,4,-1,0,0,3,1,no,0,0,0,weapon,3:6:9,0,	SC_FEINTBOMB,Feint Bomb
 
 //****
@@ -986,7 +986,7 @@
 2416,1,6,1,0,0x6,2,5,1,no,0,0,0,magic,0,0,	WM_REVERBERATION_MAGIC,Reverberation Magic
 2417,11,6,2,0,0x3,5,1,1,no,0,0,0,none,0,0,	WM_DOMINION_IMPULSE,Dominion Impulse
 2418,9,6,2,0,0x1,0,5,1,yes,0,0,0,none,0,0,	WM_SEVERE_RAINSTORM,Severe Rainstorm
-2419,9,6,2,0,0x3,1,5,1,yes,0,0,5,none,0,0,	WM_POEMOFNETHERWORLD,Poem of The Netherworld
+2419,9,6,2,0,0x3,1,5,1,yes,0,0x8000,5,none,0,0,	WM_POEMOFNETHERWORLD,Poem of The Netherworld
 2420,0,6,4,0,0x2,2:3:4:5:6,5,1,yes,0,0,0,none,0,0,	WM_VOICEOFSIREN,Voice of Siren
 2421,7,6,1,0,0x1,0,5,1,yes,0,0,0,none,0,0,	WM_DEADHILLHERE,Valley of Death
 2422,0,6,4,0,0x3,5:6:7:8:9,5,1,yes,0,0,0,none,0,0,	WM_LULLABY_DEEPSLEEP,Deep Sleep Lullaby
@@ -1092,7 +1092,7 @@
 2552,0,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	RL_RICHS_COIN,Rich's Coin
 2553,14,6,1,0,0x40,0,5,1,yes,0,0,0,weapon,0,0,	RL_MASS_SPIRAL,Mass Spiral
 2554,-9,6,1,-1,0x2,2,5,1,yes,0,0,0,weapon,0,0,	RL_BANISHING_BUSTER,Banishing Buster
-2555,0,6,4,0,0x1,0,5,1,yes,0,0,1,misc,0,0,	RL_B_TRAP,Bind Trap
+2555,0,6,4,0,0x1,0,5,1,yes,0,0,0,misc,0,0,	RL_B_TRAP,Bind Trap
 2556,0,6,4,0,0x3,-1,1,1,no,0,0,0,none,0,0,	RL_FLICKER,Flicker
 2557,-9,6,1,-1,0x2,2,5,1,yes,0,0,0,weapon,0,0,	RL_S_STORM,Shatter Storm
 2558,0,6,4,0,0x1,0,10,1,yes,0,0,0,none,0,0,	RL_E_CHAIN,Eternal Chain

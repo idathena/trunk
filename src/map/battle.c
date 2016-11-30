@@ -899,13 +899,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			return 0;
 	}
 
-	if( sc ) {
-		if( sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF] )
-			return 1;
-
-		if( sc->data[SC__MAELSTROM] && skill_get_type(skill_id) != BF_MISC && skill_get_casttype(skill_id) == CAST_GROUND )
-			return 0;
-	}
+	if( sc && sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF] )
+		return 1;
 
 	if( skill_id == PA_PRESSURE || skill_id == HW_GRAVITATION || d->isvanishdamage )
 		return damage; //This skill bypass everything else
@@ -6779,13 +6774,8 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		case RL_B_TRAP:
 			md.damage = 3 * skill_lv * tstatus->hp / 100 + 10 * sstatus->dex;
 			break;
-		case MH_EQC: {
-				int targetHP = tstatus->hp,
-					sourceHP = sstatus->hp;
-
-				md.damage = targetHP - sourceHP;
-				md.damage = max(md.damage, 0);
-			}
+		case MH_EQC:
+			md.damage = max(tstatus->hp - sstatus->hp, 0);
 			break;
 	}
 

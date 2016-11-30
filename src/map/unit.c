@@ -264,7 +264,7 @@ int unit_step_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 	bl = map_id2bl(id);
 
-	if(!bl || bl->prev == NULL)
+	if(!bl || !bl->prev)
 		return 0;
 
 	ud = unit_bl2ud(bl);
@@ -331,7 +331,7 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 	TBL_MOB *md = NULL;
 
 	bl = map_id2bl(id);
-	if(bl == NULL)
+	if(!bl)
 		return 0;
 
 	switch(bl->type) { //Avoid useless cast, we can only be 1 type
@@ -344,7 +344,7 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 	}
 
 	ud = unit_bl2ud(bl);
-	if(ud == NULL)
+	if(!ud)
 		return 0;
 
 	if(ud->walktimer != tid) {
@@ -354,7 +354,7 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 
 	ud->walktimer = INVALID_TIMER;
 
-	if(bl->prev == NULL)
+	if(!bl->prev)
 		return 0; //Stop moved because it is missing from the block_list
 
 	if(ud->walkpath.path_pos >= ud->walkpath.path_len)
@@ -428,8 +428,8 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 				npc_touchnext_areanpc(sd,false);
 			if(map_getcell(bl->m,x,y,CELL_CHKNPC)) {
 				npc_touch_areanpc(sd,bl->m,x,y);
-				if(bl->prev == NULL) //Script could have warped char, abort remaining of the function
-					return 0;
+				if(!bl->prev)
+					return 0; //Script could have warped char, abort remaining of the function
 			} else
 				npc_untouch_areanpc(sd,bl->m,x,y);
 			pc_cell_basilica(sd);
@@ -551,7 +551,7 @@ int unit_delay_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct block_list *bl = map_id2bl(id);
 
-	if (!bl || bl->prev == NULL)
+	if (!bl || !bl->prev)
 		return 0;
 
 	unit_walktoxy(bl, (short)((data>>16)&0xffff), (short)(data&0xffff), 0);
@@ -570,7 +570,7 @@ int unit_delay_walktobl_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct block_list *bl = map_id2bl(id);
 
-	if (!bl || bl->prev == NULL || !data)
+	if (!bl || !bl->prev || !data)
 		return 0;
 	else {
 		struct unit_data *ud = unit_bl2ud(bl);
@@ -940,7 +940,7 @@ int unit_movepos(struct block_list *bl, short dst_x, short dst_y, int easy, bool
 			npc_touchnext_areanpc(sd, false);
 		if( map_getcell(bl->m, bl->x, bl->y, CELL_CHKNPC) ) {
 			npc_touch_areanpc(sd, bl->m, bl->x, bl->y);
-			if( bl->prev == NULL ) //Script could have warped char, abort remaining of the function
+			if( !bl->prev ) //Script could have warped char, abort remaining of the function
 				return 0;
 		} else
 			npc_untouch_areanpc(sd, bl->m, bl->x, bl->y);
@@ -1139,7 +1139,7 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
 	nullpo_ret(bl);
 
 	ud = unit_bl2ud(bl);
-	if (bl->prev == NULL || !ud)
+	if (!bl->prev || !ud)
 		return 1;
 
 	//Type 1 is invalid, since you shouldn't warp a bl with the "death"
@@ -1909,17 +1909,10 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	if(sd) {
 		if(skill_isNotOk(skill_id, sd) || !skill_check_condition_castbegin(sd, skill_id, skill_lv))
 			return 0;
-		/**
-		 * "WHY IS IT HERE": Ice Wall cannot be canceled past this point, the client displays the animation even,
-		 * if we cancel it from castend_pos, so it has to be here for it to not display the animation.
-		 */
+		//Ice Wall cannot be canceled past this point, the client displays the animation even,
+		//if we cancel it from castend_pos, so it has to be here for it to not display the animation
 		if(skill_id == WZ_ICEWALL && map_getcell(src->m, skill_x, skill_y, CELL_CHKNOICEWALL))
 			return 0;
-	}
-
-	if(sc && sc->data[SC__MAELSTROM] && (skill_id >= SC_MANHOLE && skill_id <= SC_FEINTBOMB)) {
-		clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
-		return 0;
 	}
 
 	if(!status_check_skilluse(src, NULL, skill_id, 0))
@@ -2693,7 +2686,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 
 	nullpo_ret(ud);
 
-	if (bl->prev == NULL)
+	if (!bl->prev)
 		return 0; //Already removed?
 
 	map_freeblock_lock();

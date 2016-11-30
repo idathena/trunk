@@ -681,7 +681,6 @@ void initChangeTables(void) {
 	set_sc_with_vfx( SC_MANHOLE  , SC__MANHOLE        , SI_MANHOLE         , SCB_NONE );
 	add_sc( SC_CHAOSPANIC        , SC_CONFUSION       );
 	set_sc( SC_BLOODYLUST        , SC_BERSERK         , SI_BERSERK         , SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN );
-	set_sc( SC_MAELSTROM         , SC__MAELSTROM      , SI_BLANK           , SCB_NONE );
 	add_sc( SC_FEINTBOMB         , SC__FEINTBOMB      );
 	add_sc( SC_ESCAPE            , SC_ANKLE           );
 
@@ -1927,10 +1926,9 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 	switch (skill_id) {
 		case AL_TELEPORT:
 		case ALL_ODINS_POWER:
-			//Should fail when used on top of Land Protector [Skotlex]
 			if (src && map_getcell(src->m, src->x, src->y, CELL_CHKLANDPROTECTOR) &&
 				!(status->mode&MD_BOSS) && (src->type != BL_PC || ((TBL_PC *)src)->skillitem != skill_id))
-				return false;
+				return false; //Should fail when used on top of Land Protector [Skotlex]
 			break;
 		case ALL_RESURRECTION:
 			if (target && battle_check_undead(status_get_race(target), status_get_element(target)))

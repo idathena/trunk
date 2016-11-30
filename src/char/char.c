@@ -5823,13 +5823,17 @@ int char_config_read(const char *cfgName)
 
 		remove_control_chars(w1);
 		remove_control_chars(w2);
-		if(strcmpi(w1,"timestamp_format") == 0)
+		if(strcmpi(w1, "timestamp_format") == 0)
 			safestrncpy(timestamp_format, w2, sizeof(timestamp_format));
-		else if(strcmpi(w1,"console_silent") == 0) {
+		else if(strcmpi(w1, "console_silent") == 0) {
 			msg_silent = atoi(w2);
 			if(msg_silent) //Only bother if its actually enabled
 				ShowInfo("Console Silent Setting: %d\n", atoi(w2));
-		} else if(strcmpi(w1, "stdout_with_ansisequence") == 0)
+		} else if(strcmpi(w1, "console_msg_log") == 0)
+			console_msg_log = atoi(w2);
+		else if(strcmpi(w1, "console_log_filepath") == 0)
+			safestrncpy(console_log_filepath, w2, sizeof(console_log_filepath));
+		else if(strcmpi(w1, "stdout_with_ansisequence") == 0)
 			stdout_with_ansisequence = config_switch(w2);
 		else if(strcmpi(w1, "userid") == 0)
 			safestrncpy(userid, w2, sizeof(userid));
@@ -6095,10 +6099,12 @@ int do_init(int argc, char **argv)
 
 	safestrncpy(default_map, "prontera", MAP_NAME_LENGTH);
 
+	//Init default value
 	CHAR_CONF_NAME = "conf/char_athena.conf";
 	LAN_CONF_NAME = "conf/subnet_athena.conf";
 	SQL_CONF_NAME = "conf/inter_athena.conf";
 	MSG_CONF_NAME = "conf/msg_conf/char_msg.conf";
+	safestrncpy(console_log_filepath, "./log/char-msg_log.log", sizeof(console_log_filepath));
 
 	cli_get_options(argc,argv);
 

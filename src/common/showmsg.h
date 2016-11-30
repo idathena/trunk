@@ -18,12 +18,12 @@
 #define CL_CLS		"\033[2J"
 #define CL_CLL		"\033[K"
 
-// font settings
+//Font settings
 #define CL_BOLD		"\033[1m"
 #define CL_NORM		CL_RESET
 #define CL_NORMAL	CL_RESET
 #define CL_NONE		CL_RESET
-// foreground color and bold font (bright color on windows)
+//Foreground color and bold font (bright color on windows)
 #define CL_WHITE	"\033[1;37m"
 #define CL_GRAY		"\033[1;30m"
 #define CL_RED		"\033[1;31m"
@@ -33,7 +33,7 @@
 #define CL_MAGENTA	"\033[1;35m"
 #define CL_CYAN		"\033[1;36m"
 
-// background color
+//Background color
 #define CL_BG_BLACK		"\033[40m"
 #define CL_BG_RED		"\033[41m"
 #define CL_BG_GREEN		"\033[42m"
@@ -42,7 +42,7 @@
 #define CL_BG_MAGENTA	"\033[45m"
 #define CL_BG_CYAN		"\033[46m"
 #define CL_BG_WHITE		"\033[47m"
-// foreground color and normal font (normal color on windows)
+//Foreground color and normal font (normal color on windows)
 #define CL_LT_BLACK		"\033[0;30m"
 #define CL_LT_RED		"\033[0;31m"
 #define CL_LT_GREEN		"\033[0;32m"
@@ -51,7 +51,7 @@
 #define CL_LT_MAGENTA	"\033[0;35m"
 #define CL_LT_CYAN		"\033[0;36m"
 #define CL_LT_WHITE		"\033[0;37m"
-// foreground color and bold font (bright color on windows)
+//Foreground color and bold font (bright color on windows)
 #define CL_BT_BLACK		"\033[1;30m"
 #define CL_BT_RED		"\033[1;31m"
 #define CL_BT_GREEN		"\033[1;32m"
@@ -61,15 +61,16 @@
 #define CL_BT_CYAN		"\033[1;36m"
 #define CL_BT_WHITE		"\033[1;37m"
 
-#define CL_WTBL			"\033[37;44m"	// white on blue
-#define CL_XXBL			"\033[0;44m"	// default on blue
-#define CL_PASS			"\033[0;32;42m"	// green on green
+#define CL_WTBL			"\033[37;44m"	//White on blue
+#define CL_XXBL			"\033[0;44m"	//Default on blue
+#define CL_PASS			"\033[0;32;42m"	//Green on green
 
-#define CL_SPACE		"           "	// space aquivalent of the print messages
+#define CL_SPACE		"           "	//Space aquivalent of the print messages
 
-extern int stdout_with_ansisequence; //If the color ansi sequences are to be used. [flaviojs]
-extern int msg_silent; //Specifies how silent the console is. [Skotlex]
-extern int console_msg_log; //Specifies what error messages to log. [Ind]
+extern int stdout_with_ansisequence; //If the color ansi sequences are to be used [flaviojs]
+extern int msg_silent; //Specifies how silent the console is [Skotlex]
+extern int console_msg_log; //Specifies what error messages to log [Ind]
+extern char console_log_filepath[32]; //Filepath to save console_msg_log [Cydh]
 extern char timestamp_format[20]; //For displaying Timestamps [Skotlex]
 
 enum msg_type {

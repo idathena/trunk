@@ -1753,7 +1753,11 @@ int login_config_read(const char *cfgName)
 			msg_silent = atoi(w2);
 			if(msg_silent) /* Only bother if we actually have this enabled */
 				ShowInfo("Console Silent Setting: %d\n", atoi(w2));
-		} else if(!strcmpi(w1, "bind_ip")) {
+		} else if(!strcmpi(w1, "console_msg_log"))
+			console_msg_log = atoi(w2);
+		else if(!strcmpi(w1, "console_log_filepath"))
+			safestrncpy(console_log_filepath, w2, sizeof(console_log_filepath));
+		else if(!strcmpi(w1, "bind_ip")) {
 			login_config.login_ip = host2ip(w2);
 			if(login_config.login_ip) {
 				char ip_str[16];
@@ -1973,6 +1977,7 @@ int do_init(int argc, char **argv)
 	int i;
 
 	runflag = LOGINSERVER_ST_STARTING;
+
 	// Intialize engines (to accept config settings)
 	for( i = 0; account_engines[i].constructor; ++i )
 		account_engines[i].db = account_engines[i].constructor();
@@ -1980,9 +1985,11 @@ int do_init(int argc, char **argv)
 	// Read login-server configuration
 	login_set_defaults();
 
+	// Init default value
 	LOGIN_CONF_NAME = "conf/login_athena.conf";
 	LAN_CONF_NAME = "conf/subnet_athena.conf";
 	MSG_CONF_NAME = "conf/msg_conf/login_msg.conf";
+	safestrncpy(console_log_filepath, "./log/login-msg_log.log", sizeof(console_log_filepath));
 
 	cli_get_options(argc,argv);
 

@@ -9463,13 +9463,12 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 		if( idx >= 0 ) {
 			switch( sd->inventory_data[idx]->look ) {
 				case AMMO_ARROW:
-					if( id->look != W_BOW )
+					if( id->look != W_BOW && id->look != W_MUSICAL && id->look != W_WHIP )
 						pc_unequipitem(sd,idx,2|8);
 					break;
 				case AMMO_BULLET:
 				case AMMO_SHELL:
-					if( id->look != W_REVOLVER && id->look != W_RIFLE &&
-						id->look != W_GATLING && id->look != W_SHOTGUN )
+					if( id->look != W_REVOLVER && id->look != W_RIFLE && id->look != W_GATLING && id->look != W_SHOTGUN )
 						pc_unequipitem(sd,idx,2|8);
 					break;
 				case AMMO_GRENADE:
@@ -9712,6 +9711,8 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 		if( !(flag&8) && battle_config.ammo_unequip ) {
 			switch( sd->inventory_data[n]->look ) {
 				case W_BOW:
+				case W_MUSICAL:
+				case W_WHIP:
 				case W_REVOLVER:
 				case W_RIFLE:
 				case W_GATLING:

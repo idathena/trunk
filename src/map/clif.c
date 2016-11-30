@@ -405,7 +405,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 
 		case AREA:
 		case AREA_WOSC:
-			if (sd && bl->prev == NULL) //Otherwise source misses the packet [Skotlex]
+			if (sd && !bl->prev) //Otherwise source misses the packet [Skotlex]
 				clif_send(buf, len, bl, SELF);
 		case AREA_WOC:
 		case AREA_WOS:
@@ -6012,7 +6012,7 @@ void clif_efst_status_change_sub(struct map_session_data *sd, struct block_list 
 		if (td)
 			tick = DIFF_TICK(td->tick,gettick());
 #if PACKETVER > 20120418
-		clif_efst_status_change((target == SELF) ? &sd->bl : bl,bl->id,target,StatusIconChangeTable[type],tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
+		clif_efst_status_change((target == SELF ? &sd->bl : bl),bl->id,target,StatusIconChangeTable[type],tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
 #else
 		clif_status_change_sub(&sd->bl,bl->id,StatusIconChangeTable[type],1,tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
 #endif
