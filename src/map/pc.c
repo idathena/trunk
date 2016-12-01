@@ -6297,8 +6297,8 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 		//Kyoki pointed out that the max overcarry exp is the exp needed for the previous level -1 [Skotlex]
 		if (!battle_config.multi_level_up && sd->status.job_exp > next - 1)
 			sd->status.job_exp = next - 1;
-		sd->status.job_level ++;
-		sd->status.skill_point ++;
+		sd->status.job_level++;
+		sd->status.skill_point++;
 	} while ((next = pc_nextjobexp(sd)) > 0 && sd->status.job_exp >= next);
 
 	clif_updatestatus(sd,SP_JOBLEVEL);

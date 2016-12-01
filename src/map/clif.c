@@ -5970,7 +5970,7 @@ void clif_status_change(struct block_list *bl, int type, int flag, int tick, int
 	if (type == SI_BLANK)
 		return;
 
-	if (type == SI_POSTDELAY && tick == 0)
+	if (type == SI_POSTDELAY && !tick)
 		return;
 
 	nullpo_retv(bl);
@@ -17548,7 +17548,7 @@ int clif_spellbook_list(struct map_session_data *sd)
 	WFIFOHEAD(fd, 8 * 8 + 8);
 	WFIFOW(fd,0) = 0x1ad;
 
-	for( i = 0, c = 0; i < MAX_INVENTORY; i ++ ) {
+	for( i = 0, c = 0; i < MAX_INVENTORY; i++ ) {
 		if( itemdb_is_spellbook2(sd->status.inventory[i].nameid) ) {
 			WFIFOW(fd, c * 2 + 4) = sd->status.inventory[i].nameid;
 			c++;
@@ -17581,7 +17581,7 @@ int clif_magicdecoy_list(struct map_session_data *sd, uint16 skill_lv, short x, 
 	WFIFOHEAD(fd, 8 * 8 + 8);
 	WFIFOW(fd,0) = 0x1ad; //This is the official packet [pakpil]
 
-	for( i = 0, c = 0; i < MAX_INVENTORY; i ++ ) {
+	for( i = 0, c = 0; i < MAX_INVENTORY; i++ ) {
 		if( itemdb_is_elementpoint(sd->status.inventory[i].nameid) && sd->status.inventory[i].amount >= 2 ) {
 			WFIFOW(fd, c * 2 + 4) = sd->status.inventory[i].nameid;
 			c++;
@@ -17612,12 +17612,12 @@ int clif_poison_list(struct map_session_data *sd, uint16 skill_lv) {
 
 	fd = sd->fd;
 	WFIFOHEAD(fd, 8 * 8 + 8);
-	WFIFOW(fd,0) = 0x1ad; // This is the official packet. [pakpil]
+	WFIFOW(fd,0) = 0x1ad; //This is the official packet [pakpil]
 
-	for( i = 0, c = 0; i < MAX_INVENTORY; i ++ ) {
+	for( i = 0, c = 0; i < MAX_INVENTORY; i++ ) {
 		if( itemdb_is_guillotinepoison(sd->status.inventory[i].nameid) ) {
 			WFIFOW(fd, c * 2 + 4) = sd->status.inventory[i].nameid;
-			c ++;
+			c++;
 		}
 	}
 	if( c > 0 ) {
