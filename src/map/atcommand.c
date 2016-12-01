@@ -92,7 +92,7 @@ static char atcmd_output[CHAT_SIZE_MAX];
 static char atcmd_player_name[NAME_LENGTH];
 const char *parent_cmd;
 
-static AtCommandInfo* get_atcommandinfo_byname(const char *name); //@help
+static AtCommandInfo *get_atcommandinfo_byname(const char *name); //@help
 static const char *atcommand_checkalias(const char *aliasname); //@help
 static void atcommand_get_suggestions(struct map_session_data *sd, const char *name, bool atcommand); //@help
 static void warp_get_suggestions(struct map_session_data *sd, const char *name); //@rura, @warp, @mapmove
@@ -122,7 +122,7 @@ static const char *atcommand_help_string(const char *command)
 
 	if( *command == atcommand_symbol || *command == charcommand_symbol ) {
 		// Remove the prefix symbol for the raw name of the command
-		command ++;
+		command++;
 	}
 
 	// Convert alias to the real command name
@@ -8793,7 +8793,7 @@ static void atcommand_commands_sub(struct map_session_data *sd, const int fd, At
 {
 	char line_buff[CHATBOX_SIZE];
 	char *cur = line_buff;
-	AtCommandInfo* cmd;
+	AtCommandInfo *cmd;
 	DBIterator *iter = db_iterator(atcommand_db);
 	int count = 0;
 
@@ -10002,7 +10002,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(bodystyle),
 		ACMD_DEF(adopt),
 	};
-	AtCommandInfo* atcommand;
+	AtCommandInfo *atcommand;
 	int i;
 
 	for( i = 0; i < ARRAYLENGTH(atcommand_base); i++ ) {
@@ -10027,17 +10027,17 @@ bool atcommand_exists(const char *name)
 	return strdb_exists(atcommand_db, name);
 }
 
-static AtCommandInfo* get_atcommandinfo_byname(const char *name)
+static AtCommandInfo *get_atcommandinfo_byname(const char *name)
 {
 	if (strdb_exists(atcommand_db, name))
-		return (AtCommandInfo*)strdb_get(atcommand_db, name);
+		return (AtCommandInfo *)strdb_get(atcommand_db, name);
 	return NULL;
 }
 
 static const char *atcommand_checkalias(const char *aliasname)
 {
 	AliasInfo *alias_info = NULL;
-	if ((alias_info = (AliasInfo*)strdb_get(atcommand_alias_db, aliasname)) != NULL)
+	if ((alias_info = (AliasInfo *)strdb_get(atcommand_alias_db, aliasname)) != NULL)
 		return alias_info->command->command;
 	return aliasname;
 }
@@ -10046,9 +10046,9 @@ static const char *atcommand_checkalias(const char *aliasname)
 static void atcommand_get_suggestions(struct map_session_data *sd, const char *name, bool atcommand) {
 	DBIterator *atcommand_iter;
 	DBIterator *alias_iter;
-	AtCommandInfo* command_info = NULL;
-	AliasInfo* alias_info = NULL;
-	AtCommandType type = atcommand ? COMMAND_ATCOMMAND : COMMAND_CHARCOMMAND;
+	AtCommandInfo *command_info = NULL;
+	AliasInfo *alias_info = NULL;
+	AtCommandType type = (atcommand ? COMMAND_ATCOMMAND : COMMAND_CHARCOMMAND);
 	char *full_match[MAX_SUGGESTIONS];
 	char *suggestions[MAX_SUGGESTIONS];
 	char *match;
@@ -10060,29 +10060,29 @@ static void atcommand_get_suggestions(struct map_session_data *sd, const char *n
 
 	atcommand_iter = db_iterator(atcommand_db);
 	alias_iter = db_iterator(atcommand_alias_db);
-	
+
 	// Build the matches
-	for (command_info = dbi_first(atcommand_iter); dbi_exists(atcommand_iter); command_info = dbi_next(atcommand_iter))     {
+	for (command_info = dbi_first(atcommand_iter); dbi_exists(atcommand_iter); command_info = dbi_next(atcommand_iter)) {
 		match = strstr(command_info->command, name);
 		can_use = pc_can_use_command(sd, command_info->command, type);
-		if ( prefix_count < MAX_SUGGESTIONS && match == command_info->command && can_use ) {
+		if (prefix_count < MAX_SUGGESTIONS && match == command_info->command && can_use) {
 			suggestions[prefix_count] = command_info->command;
 			++prefix_count;
 		}
-		if ( full_count < MAX_SUGGESTIONS && match != NULL && match != command_info->command && can_use ) {
+		if (full_count < MAX_SUGGESTIONS && match != NULL && match != command_info->command && can_use) {
 			full_match[full_count] = command_info->command;
 			++full_count;
 		}
 	}
-	
+
 	for (alias_info = dbi_first(alias_iter); dbi_exists(alias_iter); alias_info = dbi_next(alias_iter)) {
 		match = strstr(alias_info->alias, name);
 		can_use = pc_can_use_command(sd, alias_info->command->command, type);
-		if ( prefix_count < MAX_SUGGESTIONS && match == alias_info->alias && can_use) {
+		if (prefix_count < MAX_SUGGESTIONS && match == alias_info->alias && can_use) {
 			suggestions[prefix_count] = alias_info->alias;
 			++prefix_count;
 		}
-		if ( full_count < MAX_SUGGESTIONS && match != NULL && match != alias_info->alias && can_use ) {
+		if (full_count < MAX_SUGGESTIONS && match != NULL && match != alias_info->alias && can_use) {
 			full_match[full_count] = alias_info->alias;
 			++full_count;
 		}
@@ -10094,15 +10094,15 @@ static void atcommand_get_suggestions(struct map_session_data *sd, const char *n
 
 		// Merge full match and prefix match results
 		if (prefix_count < MAX_SUGGESTIONS) {
-			memmove(&suggestions[prefix_count], full_match, sizeof(char *) * (MAX_SUGGESTIONS-prefix_count));
+			memmove(&suggestions[prefix_count], full_match, sizeof(char *) * (MAX_SUGGESTIONS - prefix_count));
 			prefix_count = min(prefix_count + full_count, MAX_SUGGESTIONS);
 		}
 
 		// Build the suggestion string
 		strcpy(buffer, msg_txt(205));
 		strcat(buffer, "\n");
-		
-		for(i=0; i < prefix_count; ++i) {
+
+		for (i = 0; i < prefix_count; ++i) {
 			strcat(buffer, suggestions[i]);
 			strcat(buffer, " ");
 		}
@@ -10134,8 +10134,8 @@ bool is_atcommand(const int fd, struct map_session_data *sd, const char *message
 	//Reconstructed message
 	char atcmd_msg[CHAT_SIZE_MAX];
 	
-	TBL_PC * ssd = NULL; //sd for target
-	AtCommandInfo * info;
+	TBL_PC *ssd = NULL; //sd for target
+	AtCommandInfo *info;
 
 	nullpo_retr(false, sd);
 
@@ -10405,7 +10405,7 @@ static void atcommand_config_read(const char *config_filename)
 }
 void atcommand_db_load_groups(int *group_ids) {
 	DBIterator *iter = db_iterator(atcommand_db);
-	AtCommandInfo* cmd;
+	AtCommandInfo *cmd;
 	int i;
 	
 	for (cmd = dbi_first(iter); dbi_exists(iter); cmd = dbi_next(iter)) {
@@ -10431,7 +10431,7 @@ void atcommand_db_clear(void) {
 	
 	if (atcommand_db != NULL) {
 		DBIterator *iter = db_iterator(atcommand_db);
-		AtCommandInfo* cmd;
+		AtCommandInfo *cmd;
 		
 		for (cmd = dbi_first(iter); dbi_exists(iter); cmd = dbi_next(iter)) {
 			aFree(cmd->at_groups);
