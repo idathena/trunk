@@ -18912,6 +18912,37 @@ void clif_hat_effect_single(struct map_session_data *sd, uint16 effectId, bool e
 }
 
 
+/// Starts navigation to the given target on client side (ZC_NAVIGATION_ACTIVE).
+/// 08E2 <Length>.W <Type>.B <SetType>.B <Hide>.B <MapName>.24B <xPos>.W <yPos>.W <sprIndex>.W
+void clif_navigateTo(struct map_session_data *sd, const char *mapname, uint16 x, uint16 y, uint8 flag, bool hideWindow, uint16 mob_id) {
+#if PACKETVER >= 20111010
+	int fd = sd->fd;
+
+	WFIFOHEAD(fd,27);
+	WFIFOW(fd,0) = 0x8e2;
+	//How detailed will our navigation be?
+	if( mob_id > 0 ) {
+		x = 0;
+		y = 0;
+		WFIFOB(fd,2) = 3; //Monster with destination field
+	} else if( x > 0 && y > 0 ) {
+		WFIFOB(fd,2) = 0; //With coordinates
+	} else {
+		x = 0;
+		y = 0;
+		WFIFOB(fd,2) = 1; //Without coordinates(will fail if you are already on the map)
+	}
+	WFIFOB(fd,3) = flag; //Which services can be used for transportation?
+	WFIFOB(fd,4) = hideWindow; //If this flag is set, the navigation window will not be opened up
+	safestrncpy((char *)WFIFOP(fd,5),mapname,MAP_NAME_LENGTH_EXT); //Target map
+	WFIFOW(fd,21) = x; //Target x
+	WFIFOW(fd,23) = y; //Target y
+	WFIFOW(fd,25) = mob_id; //Target monster ID
+	WFIFOSET(fd,27);
+#endif
+}
+
+
 #ifdef DUMP_UNKNOWN_PACKET
 void DumpUnknow(int fd,TBL_PC *sd,int cmd,int packet_len) {
 	const char *packet_txt = "save/packet.txt";

@@ -2428,6 +2428,16 @@ void script_hardcoded_constants(void)
 	script_set_constant("ADOPT_MORE_CHILDREN", ADOPT_MORE_CHILDREN, false);
 	script_set_constant("ADOPT_LEVEL_70", ADOPT_LEVEL_70, false);
 	script_set_constant("ADOPT_MARRIED", ADOPT_MARRIED, false);
+
+	/* Navigation */
+	script_set_constant("NAV_NONE", NAV_NONE, false);
+	script_set_constant("NAV_AIRSHIP_ONLY", NAV_AIRSHIP_ONLY, false);
+	script_set_constant("NAV_SCROLL_ONLY", NAV_SCROLL_ONLY, false);
+	script_set_constant("NAV_AIRSHIP_AND_SCROLL", NAV_AIRSHIP_AND_SCROLL, false);
+	script_set_constant("NAV_KAFRA_ONLY", NAV_KAFRA_ONLY, false);
+	script_set_constant("NAV_KAFRA_AND_AIRSHIP", NAV_KAFRA_AND_AIRSHIP, false);
+	script_set_constant("NAV_KAFRA_AND_SCROLL", NAV_KAFRA_AND_SCROLL, false);
+	script_set_constant("NAV_ALL", NAV_ALL, false);
 }
 
 /*==========================================
@@ -20623,6 +20633,45 @@ BUILDIN_FUNC(adopt)
 	return SCRIPT_CMD_FAILURE;
 }
 
+/**
+ * navigateto("<map>"{,<x>,<y>,<flag>,<hide_window>,<monster_id>,<char_id>});
+ */
+BUILDIN_FUNC(navigateto) {
+#if PACKETVER >= 20111010
+	TBL_PC *sd;
+	const char *mapname;
+	uint16 x = 0, y = 0, monster_id = 0;
+	uint8 flag = NAV_KAFRA_AND_AIRSHIP;
+	bool hideWindow = true;
+
+	mapname = script_getstr(st,2);
+
+	if (script_hasdata(st,3))
+		x = script_getnum(st,3);
+
+	if (script_hasdata(st,4))
+		y = script_getnum(st,4);
+
+	if (script_hasdata(st,5))
+		flag = (uint8)script_getnum(st,5);
+
+	if (script_hasdata(st,6))
+		hideWindow = (script_getnum(st,6) ? true : false);
+
+	if (script_hasdata(st,7))
+		monster_id = script_getnum(st,7);
+
+	if (!script_charid2sd(8,sd))
+        return 1;
+
+	clif_navigateTo(sd,mapname,x,y,flag,hideWindow,monster_id);
+
+	return SCRIPT_CMD_SUCCESS;
+#else
+	return SCRIPT_CMD_FAILURE;
+#endif
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -21198,6 +21247,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(opendressroom,"i?"),
 	BUILDIN_DEF(hateffect,"ii"),
 	BUILDIN_DEF(adopt,"vv"),
+	BUILDIN_DEF(navigateto,"s???????"),
 
 #include "../custom/script_def.inc"
 

@@ -993,6 +993,7 @@ void clif_parse_RouletteGenerate(int fd, struct map_session_data *sd);
 void clif_parse_RouletteRecvItem(int fd, struct map_session_data *sd);
 
 void clif_dressing_room(struct map_session_data *sd, int flag);
+void clif_navigateTo(struct map_session_data *sd, const char *map, uint16 x, uint16 y, uint8 flag, bool hideWindow, uint16 mob_id);
 void clif_SelectCart(struct map_session_data *sd);
 
 #endif /* _CLIF_H_ */

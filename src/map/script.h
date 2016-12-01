@@ -156,6 +156,17 @@ enum script_parse_options {
 	SCRIPT_RETURN_EMPTY_SCRIPT = 0x4// returns the script object instead of NULL for empty scripts
 };
 
+enum navigation_service {
+	NAV_NONE = 0, //0
+	NAV_AIRSHIP_ONLY = 1, //1 (actually 1-9)
+	NAV_SCROLL_ONLY = 10, //10
+	NAV_AIRSHIP_AND_SCROLL = NAV_AIRSHIP_ONLY + NAV_SCROLL_ONLY, //11 (actually 11-99)
+	NAV_KAFRA_ONLY = 100, //100
+	NAV_KAFRA_AND_AIRSHIP = NAV_KAFRA_ONLY + NAV_AIRSHIP_ONLY, //101 (actually 101-109)
+	NAV_KAFRA_AND_SCROLL = NAV_KAFRA_ONLY + NAV_SCROLL_ONLY, //110
+	NAV_ALL = NAV_AIRSHIP_ONLY + NAV_SCROLL_ONLY + NAV_KAFRA_ONLY //111 (actually 111-255)
+};
+
 const char *skip_space(const char *p);
 void script_error(const char *src, const char *file, int start_line, const char *error_msg, const char *error_pos);
 void script_warning(const char *src, const char *file, int start_line, const char *error_msg, const char *error_pos);
