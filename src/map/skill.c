@@ -1641,11 +1641,12 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			skill_castend_damage_id(src,bl,id,5,tick,0);
 
 			if( ud ) { //Set can act delay [Skotlex]
-				rate = skill_delayfix(src,id,skill_lv);
-				if( DIFF_TICK(ud->canact_tick,tick + rate) < 0 ) {
-					ud->canact_tick = max(tick + rate,ud->canact_tick);
+				int delay = skill_delayfix(src,id,skill_lv);
+
+				if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
+					ud->canact_tick = max(tick + delay,ud->canact_tick);
 					if( battle_config.display_status_timers )
-						clif_status_change(src,SI_POSTDELAY,1,rate,0,0,0);
+						clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
 				}
 			}
 		}
@@ -1738,11 +1739,12 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			ud = unit_bl2ud(src);
 
 			if( ud ) {
-				rate = skill_delayfix(src,id_,lv_);
-				if( DIFF_TICK(ud->canact_tick,tick + rate) < 0 ) {
-					ud->canact_tick = max(tick + rate,ud->canact_tick);
+				int delay = skill_delayfix(src,id_,lv_);
+
+				if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
+					ud->canact_tick = max(tick + delay,ud->canact_tick);
 					if( battle_config.display_status_timers )
-						clif_status_change(src,SI_POSTDELAY,1,rate,0,0,0);
+						clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
 				}
 			}
 		}
@@ -2099,11 +2101,12 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 			ud = unit_bl2ud(bl);
 
 			if(ud) {
-				rate = skill_delayfix(bl,id,lv);
-				if(DIFF_TICK(ud->canact_tick, tick + rate) < 0) {
-					ud->canact_tick = max(tick + rate,ud->canact_tick);
+				int delay = skill_delayfix(bl,id,lv);
+
+				if(DIFF_TICK(ud->canact_tick, tick + delay) < 0) {
+					ud->canact_tick = max(tick + delay,ud->canact_tick);
 					if(battle_config.display_status_timers)
-						clif_status_change(bl,SI_POSTDELAY,1,rate,0,0,0);
+						clif_status_change(bl,SI_POSTDELAY,1,delay,0,0,0);
 				}
 			}
 		}
@@ -4947,9 +4950,9 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case WL_TETRAVORTEX: {
-				uint16 i, id = 0;
-				uint8 j = 0;
+				int i, j = 0;
 				int types[][2] = { {0,0},{0,0},{0,0},{0,0} };
+				uint16 id;
 
 				if (!sd) {
 					for (i = 1; i <= 4; i++) {
@@ -4975,14 +4978,9 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 						j++;
 					}
 				} else if (sc) {
-					for (i = SC_SPHERE_1; i <= SC_SPHERE_5; i++) {
+					for (i = SC_SPHERE_5; i >= SC_SPHERE_1; i--) {
 						if (sc->data[i]) {
-							switch (sc->data[i]->val1) {
-								case WLS_FIRE:  id = WL_TETRAVORTEX_FIRE; break;
-								case WLS_WATER: id = WL_TETRAVORTEX_WATER; break;
-								case WLS_WIND:  id = WL_TETRAVORTEX_WIND; break;
-								case WLS_STONE: id = WL_TETRAVORTEX_GROUND; break;
-							}
+							id = WL_TETRAVORTEX_FIRE + (sc->data[i]->val1 - WLS_FIRE) + (sc->data[i]->val1 == WLS_WIND) - (sc->data[i]->val1 == WLS_WATER);
 							if (j < 4) {
 								int sc_index = 0, rate = 0;
 
@@ -4994,7 +4992,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 										if (types[j][0] == sc_index)
 											rate += types[j][1];
 								}
-								skill_addtimerskill(src,tick + (i - SC_SPHERE_1) * 206,bl->id,sc_index,rate,id,skill_lv,j,flag);
+								skill_addtimerskill(src,tick + (SC_SPHERE_5 - i) * 206,bl->id,sc_index,rate,id,skill_lv,j,flag);
 							}
 							status_change_end(src,(sc_type)i,INVALID_TIMER);
 							j++;
@@ -5013,11 +5011,11 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				if (sc->data[SC_FREEZE_SP]) //Check sealed spells
 					skill_addtimerskill(src,tick + status_get_adelay(src),bl->id,0,0,skill_id,skill_lv,BF_MAGIC,flag);
 				else { //Summon Balls
-					for (i = SC_SPHERE_1; i <= SC_SPHERE_5; i++) {
+					for (i = SC_SPHERE_5; i >= SC_SPHERE_1; i--) {
 						if (sc->data[i]) {
 							int id = WL_SUMMON_ATK_FIRE + (sc->data[i]->val1 - WLS_FIRE);
 
-							skill_addtimerskill(src,tick + (i - SC_SPHERE_1) * status_get_adelay(src),bl->id,0,0,id,sc->data[i]->val3,BF_MAGIC,flag);
+							skill_addtimerskill(src,tick + (SC_SPHERE_5 - i) * status_get_adelay(src),bl->id,0,0,id,sc->data[i]->val2,BF_MAGIC,flag);
 							status_change_end(src,(sc_type)i,INVALID_TIMER);
 							if (skill_lv == 1)
 								break;
@@ -9088,39 +9086,26 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case WL_SUMMONWB:
 		case WL_SUMMONSTONE:
 			{
-				short element = 0, sctype = 0, pos = -1;
-				struct status_change *sc = status_get_sc(src);
+				int i;
 
-				if( !sc )
-					break;
 				for( i = SC_SPHERE_1; i <= SC_SPHERE_5; i++ ) {
-					if( !sctype && !sc->data[i] )
-						sctype = i; //Take the free SC
-					if( sc->data[i] )
-						pos = max(sc->data[i]->val2,pos);
+					if( tsc && !tsc->data[i] ) { //Officially it doesn't work like a stack
+						int ele = WLS_FIRE + (skill_id - WL_SUMMONFB) - (skill_id == WL_SUMMONSTONE ? 4 : 0);
+
+						clif_skill_nodamage(src,bl,skill_id,skill_lv,
+							sc_start2(src,bl,(sc_type)i,100,ele,skill_lv,skill_get_time(skill_id,skill_lv)));
+						break;
+					}
 				}
-				if( !sctype ) {
-					if( sd ) //No free slots to put SC
-						clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON,0,0);
-					break;
-				}
-				pos++; //Used in val2 for SC, indicates the order of this ball
-				switch( skill_id ) { //Set val1, the SC element for this ball
-					case WL_SUMMONFB:    element = WLS_FIRE;  break;
-					case WL_SUMMONBL:    element = WLS_WIND;  break;
-					case WL_SUMMONWB:    element = WLS_WATER; break;
-					case WL_SUMMONSTONE: element = WLS_STONE; break;
-				}
-				sc_start4(src,src,(sc_type)sctype,100,element,pos,skill_lv,0,skill_get_time(skill_id,skill_lv));
-				clif_skill_nodamage(src,bl,skill_id,0,0);
 			}
 			break;
 
 		case WL_READING_SB:
 			if( sd ) {
-				for( i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++ )
+				for( i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++ ) {
 					if( !(tsc && tsc->data[i]) )
 						break;
+				}
 				if( i == SC_MAXSPELLBOOK ) {
 					clif_skill_fail(sd,WL_READING_SB,USESKILL_FAIL_SPELLBOOK_READING,0,0);
 					break;
@@ -14942,9 +14927,11 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 			{
 				int i, j = 0;
 
-				for( i = SC_SPHERE_1; i <= SC_SPHERE_5; i++ )
-					if( sc && sc->data[i] )
-						j++;
+				for( i = SC_SPHERE_1; i <= SC_SPHERE_5; i++ ) {
+					if( !(sc && sc->data[i]) )
+						continue;
+					j++;
+				}
 				switch( skill_id ) {
 					case WL_TETRAVORTEX:
 						if( j < 4 ) {
