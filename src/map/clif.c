@@ -338,7 +338,7 @@ static int clif_send_sub(struct block_list *bl, va_list ap) {
 		!sd->sc.data[SC_INTRAVISION] && battle_check_target(src_bl, &sd->bl, BCT_ENEMY) > 0)
 		return 0; //Unless visible, hold it here
 
-	if (session[fd] == NULL)
+	if (!session[fd])
 		return 0;
 
 	WFIFOHEAD(fd, len);
@@ -1455,7 +1455,7 @@ int clif_spawn(struct block_list *bl)
 					clif_spiritcharm(sd);
 				if (sd->status.robe)
 					clif_refreshlook(bl,bl->id,LOOK_ROBE,sd->status.robe,AREA);
-				clif_efst_status_change_sub(sd,bl,AREA);
+				clif_efst_set_enter(sd,bl,AREA);
 				clif_hat_effects(sd,bl,AREA);
 			}
 			break;
@@ -4554,7 +4554,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_sendbgemblem_single(sd->fd,tsd);
 				if (tsd->status.robe)
 					clif_refreshlook(&sd->bl,bl->id,LOOK_ROBE,tsd->status.robe,SELF);
-				clif_efst_status_change_sub(sd,bl,SELF);
+				clif_efst_set_enter(sd,bl,SELF);
 				clif_hat_effects(sd,bl,SELF);
 			}
 			break;
@@ -5935,7 +5935,7 @@ void clif_status_change_sub(struct block_list *bl, int id, int type, int flag, i
 	else
 		WBUFW(buf,offset + 0) = 0x196; //For non-pc unit
 	WBUFW(buf,offset + 2) = type;
-	WBUFL(buf,offset + 4) = bl->id;
+	WBUFL(buf,offset + 4) = id;
 	WBUFB(buf,offset + 8) = flag;
 #if PACKETVER >= 20090121
 	if (flag && battle_config.display_status_timers) {
@@ -5985,44 +5985,10 @@ void clif_status_change(struct block_list *bl, int type, int flag, int tick, int
 }
 
 
-/**
- * Send any active EFST to those around.
- * @param sd: Player to send the packet to
- * @param bl: Objects walking into view
- * @param target: Client send type
- */
-void clif_efst_status_change_sub(struct map_session_data *sd, struct block_list *bl, enum send_target target) {
-	struct map_session_data *tsd = NULL;
-	unsigned char i;
-
-	nullpo_retv(sd);
-	nullpo_retv(bl);
-
-	if (target == SELF)
-		tsd = (TBL_PC *)bl;
-	else
-		tsd = sd;
-
-	for (i = 0; i < tsd->sc_display_count; i++) {
-		enum sc_type type = tsd->sc_display[i]->type;
-		struct status_change *sc = status_get_sc(bl);
-		const struct TimerData *td = (sc && sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
-		int tick = 0;
-
-		if (td)
-			tick = DIFF_TICK(td->tick,gettick());
-#if PACKETVER > 20120418
-		clif_efst_status_change((target == SELF ? &sd->bl : bl),bl->id,target,StatusIconChangeTable[type],tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3);
-#else
-		clif_status_change_sub(&sd->bl,bl->id,StatusIconChangeTable[type],1,tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
-#endif
-	}
-}
-
 /// Notifies the client when a player enters the screen with an active EFST.
 /// 08ff <id>.L <index>.W <remain msec>.L { <val>.L }*3  (ZC_EFST_SET_ENTER) (PACKETVER >= 20111108)
 /// 0984 <id>.L <index>.W <total msec>.L <remain msec>.L { <val>.L }*3 (ZC_EFST_SET_ENTER2) (PACKETVER >= 20120618)
-void clif_efst_status_change(struct block_list *bl, int tid, enum send_target target, int type, int tick, int val1, int val2, int val3) {
+void clif_efst_set_enter_sub(struct block_list *bl, int id, int type, int tick, int val1, int val2, int val3, enum send_target target) {
 #if PACKETVER >= 20111108
 	unsigned char buf[32];
 #if PACKETVER >= 20120618
@@ -6041,7 +6007,7 @@ void clif_efst_status_change(struct block_list *bl, int tid, enum send_target ta
 		tick = 9999;
 
 	WBUFW(buf,offset + 0) = cmd;
-	WBUFL(buf,offset + 2) = tid;
+	WBUFL(buf,offset + 2) = id;
 	WBUFW(buf,offset + 6) = type;
 #if PACKETVER >= 20111108
 	WBUFL(buf,offset + 8) = tick; //Set remaining status duration [exneval]
@@ -6055,6 +6021,41 @@ void clif_efst_status_change(struct block_list *bl, int tid, enum send_target ta
 #endif
 	clif_send(buf,packet_len(cmd),bl,target);
 #endif
+}
+
+
+/**
+ * Send any active EFST to those around.
+ * @param sd: Player to send the packet to
+ * @param bl: Objects walking into view
+ * @param target: Client send type
+ */
+void clif_efst_set_enter(struct map_session_data *sd, struct block_list *bl, enum send_target target) {
+	struct map_session_data *tsd = NULL;
+	unsigned char i;
+
+	nullpo_retv(sd);
+	nullpo_retv(bl);
+
+	if (target == SELF)
+		tsd = (TBL_PC *)bl;
+	else if ((tsd = sd) && !tsd->state.connect_new)
+		return;
+
+	for (i = 0; i < tsd->sc_display_count; i++) {
+		enum sc_type type = tsd->sc_display[i]->type;
+		struct status_change *sc = status_get_sc(bl);
+		const struct TimerData *td = (sc && sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
+		int tick = 0;
+
+		if (td)
+			tick = DIFF_TICK(td->tick,gettick());
+#if PACKETVER > 20120418
+		clif_efst_set_enter_sub(&sd->bl,bl->id,StatusIconChangeTable[type],tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
+#else
+		clif_status_change_sub(&sd->bl,bl->id,StatusIconChangeTable[type],1,tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
+#endif
+	}
 }
 
 

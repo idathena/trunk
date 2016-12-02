@@ -3164,6 +3164,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	sd->critical_rate = sd->hit_rate = sd->flee_rate = sd->flee2_rate = 100;
 	sd->def_rate = sd->def2_rate = sd->mdef_rate = sd->mdef2_rate = 100;
 	sd->regen.state.block = 0;
+	sd->add_max_weight = 0;
 
 	//Zeroed arrays, order follows the order in pc.h
 	//Add new arrays to the end of zeroed area in pc.h (see comments) and size here [zzo]
@@ -3761,6 +3762,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 
 	//----- MISC CALCULATIONS -----
 	//Weight
+	sd->max_weight += sd->add_max_weight;
 	if((lv = pc_checkskill(sd,MC_INCCARRY)) > 0)
 		sd->max_weight += lv * 2000;
 	if(pc_isriding(sd) && pc_checkskill(sd,KN_RIDING) > 0)

@@ -1570,7 +1570,7 @@ void pc_reg_received(struct map_session_data *sd)
 	intif_Mail_requestinbox(sd->status.char_id, 0); //MAIL SYSTEM - Request Mail Inbox
 	intif_request_questlog(sd);
 
-	if (sd->state.connect_new == 0 && sd->fd) { //Character already loaded map! Gotta trigger LoadEndAck manually
+	if (!sd->state.connect_new && sd->fd) { //Character already loaded map! Gotta trigger LoadEndAck manually
 		sd->state.connect_new = 1;
 		clif_parse_LoadEndAck(sd->fd, sd);
 	}
@@ -3055,7 +3055,7 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 #endif
 		case SP_ADDMAXWEIGHT:
 			if(sd->state.lr_flag != 2)
-				sd->max_weight += val;
+				sd->add_max_weight += val;
 			break;
 		case SP_ABSORB_DMG_MAXHP:
 			sd->bonus.absorb_dmg_maxhp = max(sd->bonus.absorb_dmg_maxhp, val);

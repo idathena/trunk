@@ -10318,7 +10318,7 @@ BUILDIN_FUNC(sc_start)
 		bl = map_id2bl(st->rid);
 
 	//When there isn't a duration specified, try to get it from the skill_db
-	if(tick == 0 && val1 > 0 && type > SC_NONE && type < SC_MAX && status_sc2skill(type) != 0)
+	if(!tick && val1 > 0 && type > SC_NONE && type < SC_MAX && status_sc2skill(type))
 		tick = skill_get_time(status_sc2skill(type), val1);
 
 	if(potion_flag == 1 && potion_target) { //skill.c set the flags before running the script, this is a potion-pitched effect
@@ -20663,7 +20663,7 @@ BUILDIN_FUNC(navigateto) {
 		monster_id = script_getnum(st,7);
 
 	if (!script_charid2sd(8,sd))
-        return 1;
+		return 1;
 
 	clif_navigateTo(sd,mapname,x,y,flag,hideWindow,monster_id);
 
