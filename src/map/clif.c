@@ -6023,7 +6023,6 @@ void clif_efst_set_enter_sub(struct block_list *bl, int id, int type, int tick, 
 #endif
 }
 
-
 /**
  * Send any active EFST to those around.
  * @param sd: Player to send the packet to
@@ -6039,21 +6038,31 @@ void clif_efst_set_enter(struct map_session_data *sd, struct block_list *bl, enu
 
 	if (target == SELF)
 		tsd = (TBL_PC *)bl;
-	else if ((tsd = sd) && !tsd->state.connect_new)
-		return;
+	else 
+		tsd = sd;
 
 	for (i = 0; i < tsd->sc_display_count; i++) {
 		enum sc_type type = tsd->sc_display[i]->type;
 		struct status_change *sc = status_get_sc(bl);
 		const struct TimerData *td = (sc && sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
-		int tick = 0;
+		int tick = 0, icon = StatusIconChangeTable[type];
 
+		switch (icon) {
+			case SI_SUMMON1:
+			case SI_SUMMON2:
+			case SI_SUMMON3:
+			case SI_SUMMON4:
+			case SI_SUMMON5:
+				if (tsd->bl.id == sd->bl.id && !sd->state.connect_new)
+					continue; //Prevent displaying double summoned sphere on caster side [exneval]
+				break;
+		}
 		if (td)
 			tick = DIFF_TICK(td->tick,gettick());
 #if PACKETVER > 20120418
-		clif_efst_set_enter_sub(&sd->bl,bl->id,StatusIconChangeTable[type],tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
+		clif_efst_set_enter_sub(&sd->bl,bl->id,icon,tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
 #else
-		clif_status_change_sub(&sd->bl,bl->id,StatusIconChangeTable[type],1,tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
+		clif_status_change_sub(&sd->bl,bl->id,icon,1,tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
 #endif
 	}
 }
@@ -10425,9 +10434,8 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		}
 		map_iwall_get(sd); //Updates Walls Info on this Map to Client
 		status_calc_pc(sd,SCO_NONE); //Some conditions are map-dependent so we must recalculate
-		//Instances do not need their own channels
-		if(channel_config.map_enable && channel_config.map_autojoin &&
-			!map[sd->bl.m].flag.chmautojoin && !map[sd->bl.m].instance_id)
+		if(channel_config.map_enable && channel_config.map_autojoin && !map[sd->bl.m].flag.nochmautojoin &&
+			!map[sd->bl.m].instance_id) //Instances do not need their own channels
 			channel_mjoin(sd); //Join new map
 #ifdef VIP_ENABLE
 		if(!sd->disableshowrate) {

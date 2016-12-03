@@ -4053,8 +4053,8 @@ ACMD_FUNC(mapinfo)
 		strcat(atcmd_output, " GuildLock |");
 	if (map[m_id].flag.loadevent)
 		strcat(atcmd_output, " Loadevent |");
-	if (map[m_id].flag.chmautojoin)
-		strcat(atcmd_output, " Chmautojoin |");
+	if (map[m_id].flag.nochmautojoin)
+		strcat(atcmd_output, " NoChmAutoJoin |");
 	if (map[m_id].flag.nousecart)
 		strcat(atcmd_output, " NoUsecart |");
 	if (map[m_id].flag.noitemconsumption)
@@ -7946,7 +7946,7 @@ ACMD_FUNC(mapflag) {
 		checkflag(nojobexp);		checkflag(nomobloot);		checkflag(nomvploot);		checkflag(nightenabled);
 		checkflag(restricted);		checkflag(nodrop);		checkflag(novending);		checkflag(loadevent);
 		checkflag(nochat);		checkflag(partylock);		checkflag(guildlock);		checkflag(reset);
-		checkflag(chmautojoin);		checkflag(nousecart);		checkflag(noitemconsumption);	checkflag(nosumstarmiracle);
+		checkflag(nochmautojoin);		checkflag(nousecart);		checkflag(noitemconsumption);	checkflag(nosumstarmiracle);
 		checkflag(nomineeffect);	checkflag(nolockon);		checkflag(notomb);		checkflag(nocashshop);
 		checkflag(nobanking);
 #ifdef ADJUST_SKILL_DAMAGE
@@ -7973,7 +7973,7 @@ ACMD_FUNC(mapflag) {
 	setflag(nojobexp);		setflag(nomobloot);		setflag(nomvploot);		setflag(nightenabled);
 	setflag(restricted);		setflag(nodrop);		setflag(novending);		setflag(loadevent);
 	setflag(nochat);		setflag(partylock);		setflag(guildlock);		setflag(reset);
-	setflag(chmautojoin);		setflag(nousecart);		setflag(noitemconsumption);	setflag(nosumstarmiracle);
+	setflag(nochmautojoin);		setflag(nousecart);		setflag(noitemconsumption);	setflag(nosumstarmiracle);
 	setflag(nomineeffect);		setflag(nolockon);		setflag(notomb);		setflag(nocashshop);
 	setflag(nobanking);
 #ifdef ADJUST_SKILL_DAMAGE
@@ -7990,7 +7990,7 @@ ACMD_FUNC(mapflag) {
 	clif_displaymessage(sd->fd,"nozenypenalty, notrade, noskill, nowarp, nowarpto, noicewall, snow, clouds, clouds2,");
 	clif_displaymessage(sd->fd,"fog, fireworks, sakura, leaves, nogo, nobaseexp, nojobexp, nomobloot, nomvploot,");
 	clif_displaymessage(sd->fd,"nightenabled, restricted, nodrop, novending, loadevent, nochat, partylock, guildlock,");
-	clif_displaymessage(sd->fd,"reset, chmautojoin, nousecart, noitemconsumption, nosumstarmiracle, nolockon, notomb,");
+	clif_displaymessage(sd->fd,"reset, nochmautojoin, nousecart, noitemconsumption, nosumstarmiracle, nolockon, notomb,");
 #ifdef ADJUST_SKILL_DAMAGE
 	clif_displaymessage(sd->fd,"nocashshop, nobanking, skill_damage");
 #else

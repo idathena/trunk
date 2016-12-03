@@ -480,7 +480,7 @@ enum {
 	MF_PVP_NOCALCRANK, //50
 	MF_BATTLEGROUND,
 	MF_RESET,
-	MF_CHANNELAUTOJOIN,
+	MF_NOMAPCHANNELAUTOJOIN,
 	MF_NOUSECART,
 	MF_NOITEMCONSUMPTION,
 	MF_SUMSTARTMIRACLE,
@@ -2348,96 +2348,7 @@ static void read_constdb(void)
  */
 void script_hardcoded_constants(void)
 {
-	/* Server defines */
-	script_set_constant("PACKETVER", PACKETVER, false);
-	script_set_constant("MAX_LEVEL", MAX_LEVEL, false);
-	script_set_constant("MAX_STORAGE", MAX_STORAGE, false);
-	script_set_constant("MAX_INVENTORY", MAX_INVENTORY, false);
-	script_set_constant("MAX_CART", MAX_CART, false);
-	script_set_constant("MAX_ZENY", MAX_ZENY, false);
-	script_set_constant("MAX_PARTY", MAX_PARTY, false);
-	script_set_constant("MAX_GUILD", MAX_GUILD, false);
-	script_set_constant("MAX_GUILDLEVEL", MAX_GUILDLEVEL, false);
-	script_set_constant("MAX_GUILD_STORAGE", MAX_GUILD_STORAGE, false);
-	script_set_constant("MAX_BG_MEMBERS", MAX_BG_MEMBERS, false);
-	script_set_constant("MAX_CHAT_USERS", MAX_CHAT_USERS, false);
-	script_set_constant("VIP_SCRIPT", VIP_SCRIPT, false);
-	script_set_constant("MIN_STORAGE", MIN_STORAGE, false);
-	script_set_constant("MAX_REFINE", MAX_REFINE, false);
-
-	/* Status options */
-	script_set_constant("Option_Nothing", OPTION_NOTHING, false);
-	script_set_constant("Option_Sight", OPTION_SIGHT, false);
-	script_set_constant("Option_Ruwach", OPTION_RUWACH, false);
-	script_set_constant("Option_Hide", OPTION_HIDE, false);
-	script_set_constant("Option_Cloak", OPTION_CLOAK, false);
-	script_set_constant("Option_Falcon", OPTION_FALCON, false);
-	script_set_constant("Option_Riding", OPTION_RIDING, false);
-	script_set_constant("Option_Invisible", OPTION_INVISIBLE, false);
-	script_set_constant("Option_Orcish", OPTION_ORCISH, false);
-	script_set_constant("Option_Wedding", OPTION_WEDDING, false);
-	script_set_constant("Option_Chasewalk", OPTION_CHASEWALK, false);
-	script_set_constant("Option_Flying", OPTION_FLYING, false);
-	script_set_constant("Option_Xmas", OPTION_XMAS, false);
-	script_set_constant("Option_Transform", OPTION_TRANSFORM, false);
-	script_set_constant("Option_Summer", OPTION_SUMMER, false);
-	script_set_constant("Option_Dragon1", OPTION_DRAGON1, false);
-	script_set_constant("Option_Wug", OPTION_WUG, false);
-	script_set_constant("Option_Wugrider", OPTION_WUGRIDER, false);
-	script_set_constant("Option_Madogear", OPTION_MADOGEAR, false);
-	script_set_constant("Option_Dragon2", OPTION_DRAGON2, false);
-	script_set_constant("Option_Dragon3", OPTION_DRAGON3, false);
-	script_set_constant("Option_Dragon4", OPTION_DRAGON4, false);
-	script_set_constant("Option_Dragon5", OPTION_DRAGON5, false);
-	script_set_constant("Option_Hanbok", OPTION_HANBOK, false);
-	script_set_constant("Option_Oktoberfest", OPTION_OKTOBERFEST, false);
-
-	/* Status option compounds */
-	script_set_constant("Option_Dragon", OPTION_DRAGON, false);
-	script_set_constant("Option_Costume", OPTION_COSTUME, false);
-
-	/* Bonus script flags */
-	script_set_constant("BSF_REM_ON_DEAD", BSF_REM_ON_DEAD, false);
-	script_set_constant("BSF_REM_ON_DISPELL", BSF_REM_ON_DISPELL, false);
-	script_set_constant("BSF_REM_ON_CLEARANCE", BSF_REM_ON_CLEARANCE, false);
-	script_set_constant("BSF_REM_ON_LOGOUT", BSF_REM_ON_LOGOUT, false);
-	script_set_constant("BSF_REM_ON_BANISHING_BUSTER", BSF_REM_ON_BANISHING_BUSTER, false);
-	script_set_constant("BSF_REM_ON_REFRESH", BSF_REM_ON_REFRESH, false);
-	script_set_constant("BSF_REM_ON_LUXANIMA", BSF_REM_ON_LUXANIMA, false);
-	script_set_constant("BSF_REM_ON_MADOGEAR", BSF_REM_ON_MADOGEAR, false);
-	script_set_constant("BSF_REM_ON_DAMAGED", BSF_REM_ON_DAMAGED, false);
-	script_set_constant("BSF_PERMANENT", BSF_PERMANENT, false);
-	script_set_constant("BSF_FORCE_REPLACE", BSF_FORCE_REPLACE, false);
-	script_set_constant("BSF_FORCE_DUPLICATE", BSF_FORCE_DUPLICATE, false);
-
-	/* Status change flags */
-	script_set_constant("SCFLAG_NONE", SCFLAG_NONE, false);
-	script_set_constant("SCFLAG_NOAVOID", SCFLAG_NOAVOID, false);
-	script_set_constant("SCFLAG_FIXEDTICK", SCFLAG_FIXEDTICK, false);
-	script_set_constant("SCFLAG_LOADED", SCFLAG_LOADED, false);
-	script_set_constant("SCFLAG_FIXEDRATE", SCFLAG_FIXEDRATE, false);
-	script_set_constant("SCFLAG_NOICON", SCFLAG_NOICON, false);
-
-	/* Adoption */
-	script_set_constant("ADOPT_ALLOWED", ADOPT_ALLOWED, false);
-	script_set_constant("ADOPT_ALREADY_ADOPTED", ADOPT_ALREADY_ADOPTED, false);
-	script_set_constant("ADOPT_MARRIED_AND_PARTY", ADOPT_MARRIED_AND_PARTY, false);
-	script_set_constant("ADOPT_EQUIP_RINGS", ADOPT_EQUIP_RINGS, false);
-	script_set_constant("ADOPT_NOT_NOVICE", ADOPT_NOT_NOVICE, false);
-	script_set_constant("ADOPT_CHARACTER_NOT_FOUND", ADOPT_CHARACTER_NOT_FOUND, false);
-	script_set_constant("ADOPT_MORE_CHILDREN", ADOPT_MORE_CHILDREN, false);
-	script_set_constant("ADOPT_LEVEL_70", ADOPT_LEVEL_70, false);
-	script_set_constant("ADOPT_MARRIED", ADOPT_MARRIED, false);
-
-	/* Navigation */
-	script_set_constant("NAV_NONE", NAV_NONE, false);
-	script_set_constant("NAV_AIRSHIP_ONLY", NAV_AIRSHIP_ONLY, false);
-	script_set_constant("NAV_SCROLL_ONLY", NAV_SCROLL_ONLY, false);
-	script_set_constant("NAV_AIRSHIP_AND_SCROLL", NAV_AIRSHIP_AND_SCROLL, false);
-	script_set_constant("NAV_KAFRA_ONLY", NAV_KAFRA_ONLY, false);
-	script_set_constant("NAV_KAFRA_AND_AIRSHIP", NAV_KAFRA_AND_AIRSHIP, false);
-	script_set_constant("NAV_KAFRA_AND_SCROLL", NAV_KAFRA_AND_SCROLL, false);
-	script_set_constant("NAV_ALL", NAV_ALL, false);
+	#include "script_constants.h"
 }
 
 /*==========================================
@@ -2518,11 +2429,11 @@ void script_warning(const char *src, const char *file, int start_line, const cha
 /*==========================================
  * Analysis of the script
  *------------------------------------------*/
-struct script_code* parse_script(const char *src,const char *file,int line,int options)
+struct script_code *parse_script(const char *src,const char *file,int line,int options)
 {
 	const char *p, *tmpp;
 	int i;
-	struct script_code* code = NULL;
+	struct script_code *code = NULL;
 	static int first = 1;
 	char end;
 	bool unresolved_names = false;
@@ -3209,7 +3120,7 @@ void script_free_vars(struct DBMap *storage)
 		db_destroy(storage);
 }
 
-void script_free_code(struct script_code* code)
+void script_free_code(struct script_code *code)
 {
 	nullpo_retv(code);
 
@@ -3225,7 +3136,7 @@ void script_free_code(struct script_code* code)
 /// @param rid Who is running the script (attached player)
 /// @param oid Where the code is being run (npc 'object')
 /// @return Script state
-struct script_state *script_alloc_state(struct script_code* script, int pos, int rid, int oid)
+struct script_state *script_alloc_state(struct script_code *script, int pos, int rid, int oid)
 {
 	struct script_state *st;
 
@@ -4908,7 +4819,7 @@ BUILDIN_FUNC(callfunc)
 {
 	int i, j;
 	struct script_retinfo *ri;
-	struct script_code* scr;
+	struct script_code *scr;
 	const char *str = script_getstr(st,2);
 	DBMap **ref = NULL;
 
@@ -7603,31 +7514,6 @@ BUILDIN_FUNC(charid2rid)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-// Aegis->Athena slot position conversion table
-static unsigned int equip[] = {
-	EQP_HEAD_TOP,
-	EQP_ARMOR,
-	EQP_HAND_L,
-	EQP_HAND_R,
-	EQP_GARMENT,
-	EQP_SHOES,
-	EQP_ACC_L,
-	EQP_ACC_R,
-	EQP_HEAD_MID,
-	EQP_HEAD_LOW,
-	EQP_COSTUME_HEAD_LOW,
-	EQP_COSTUME_HEAD_MID,
-	EQP_COSTUME_HEAD_TOP,
-	EQP_COSTUME_GARMENT,
-	EQP_AMMO,
-	EQP_SHADOW_ARMOR,
-	EQP_SHADOW_WEAPON,
-	EQP_SHADOW_SHIELD,
-	EQP_SHADOW_SHOES,
-	EQP_SHADOW_ACC_R,
-	EQP_SHADOW_ACC_L
-};
-
 /**
  * getequipid(<equipment slot>{,<char_id>})
  */
@@ -7642,14 +7528,14 @@ BUILDIN_FUNC(getequipid)
 		return 1;
 	}
 
-	num = script_getnum(st,2) - 1;
-	if( num < 0 || num >= ARRAYLENGTH(equip) ) {
+	num = script_getnum(st,2);
+	if( !equip_index_check(num) ) {
 		script_pushint(st,-1);
 		return 1;
 	}
 
 	// Get inventory position of item
-	i = pc_checkequip(sd,equip[num]);
+	i = pc_checkequip(sd,equip_bitmask[num]);
 	if( i < 0 ) {
 		script_pushint(st,-1);
 		return 1;
@@ -7678,14 +7564,14 @@ BUILDIN_FUNC(getequipuniqueid)
 		return 1;
 	}
 
-	num = script_getnum(st,2) - 1;
-	if( num < 0 || num >= ARRAYLENGTH(equip) ) {
+	num = script_getnum(st,2);
+	if( !equip_index_check(num) ) {
 		script_pushconststr(st,"");
 		return 1;
 	}
 
 	// Get inventory position of item
-	i = pc_checkequip(sd,equip[num]);
+	i = pc_checkequip(sd,equip_bitmask[num]);
 	if( i < 0 ) {
 		script_pushconststr(st,"");
 		return 1;
@@ -7721,14 +7607,14 @@ BUILDIN_FUNC(getequipname)
 		return 1;
 	}
 
-	num = script_getnum(st,2) - 1;
-	if( num < 0 || num >= ARRAYLENGTH(equip) ) {
+	num = script_getnum(st,2);
+	if( !equip_index_check(num) ) {
 		script_pushconststr(st,"");
 		return 0;
 	}
 
 	// Get inventory position of item
-	i = pc_checkequip(sd,equip[num]);
+	i = pc_checkequip(sd,equip_bitmask[num]);
 	if( i < 0 ) {
 		script_pushconststr(st,"");
 		return 0;
@@ -7842,8 +7728,8 @@ BUILDIN_FUNC(getequipisequiped)
 		return SCRIPT_CMD_FAILURE;
 
 	num = script_getnum(st,2);
-	if(num > 0 && num <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[num - 1]);
+	if(equip_index_check(num))
+		i = pc_checkequip(sd,equip_bitmask[num]);
 
 	if(i >= 0)
 		script_pushint(st,1);
@@ -7871,8 +7757,8 @@ BUILDIN_FUNC(getequipisenableref)
 	}
 
 	num = script_getnum(st,2);
-	if(num > 0 && num <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[num - 1]);
+	if(equip_index_check(num))
+		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0 && sd->inventory_data[i] && !sd->inventory_data[i]->flag.no_refine && !sd->status.inventory[i].expire_time)
 		script_pushint(st,1);
 	else
@@ -7899,8 +7785,8 @@ BUILDIN_FUNC(getequiprefinerycnt)
 	}
 
 	num = script_getnum(st,2);
-	if(num > 0 && num <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[num - 1]);
+	if(equip_index_check(num))
+		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0)
 		script_pushint(st,sd->status.inventory[i].refine);
 	else
@@ -7928,8 +7814,10 @@ BUILDIN_FUNC(getequipweaponlv)
 	}
 
 	num = script_getnum(st,2);
-	if(num > 0 && num <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[num - 1]);
+	if(num == -1)
+		i = current_equip_item_index;
+	else if(equip_index_check(num))
+		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0 && sd->inventory_data[i])
 		script_pushint(st,sd->inventory_data[i]->wlv);
 	else
@@ -7956,8 +7844,8 @@ BUILDIN_FUNC(getequippercentrefinery)
 	}
 
 	num = script_getnum(st,2);
-	if(num > 0 && num <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[num - 1]);
+	if(equip_index_check(num))
+		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0 && sd->status.inventory[i].nameid && sd->status.inventory[i].refine < MAX_REFINE)
 		script_pushint(st,status_get_refine_chance((enum refine_type)itemdb_wlv(sd->status.inventory[i].nameid), (int)sd->status.inventory[i].refine));
 	else
@@ -7984,8 +7872,8 @@ BUILDIN_FUNC(successrefitem)
 	if(script_hasdata(st,3))
 		up = script_getnum(st,3);
 	pos = script_getnum(st,2);
-	if(pos > 0 && pos <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[pos - 1]);
+	if(equip_index_check(pos))
+		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
 		unsigned int ep = sd->status.inventory[i].equip;
 
@@ -8051,8 +7939,8 @@ BUILDIN_FUNC(failedrefitem)
 	}
 
 	pos = script_getnum(st,2);
-	if(pos > 0 && pos <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[pos - 1]);
+	if(equip_index_check(pos))
+		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
 		sd->status.inventory[i].refine = 0;
 		pc_unequipitem(sd,i,3); //Recalculate bonus
@@ -8088,8 +7976,8 @@ BUILDIN_FUNC(downrefitem)
 	pos = script_getnum(st,2);
 	if(script_hasdata(st,3))
 		down = script_getnum(st,3);
-	if(pos > 0 && pos <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[pos - 1]);
+	if(equip_index_check(pos))
+		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
 		unsigned int ep = sd->status.inventory[i].equip;
 
@@ -8135,8 +8023,8 @@ BUILDIN_FUNC(delequip)
 	}
 
 	pos = script_getnum(st,2);
-	if(pos > 0 && pos <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[pos - 1]);
+	if(equip_index_check(pos))
+		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
 		pc_unequipitem(sd,i,3); //Recalculate bonus
 		pc_delitem(sd,i,1,0,2,LOG_TYPE_SCRIPT);
@@ -8163,8 +8051,8 @@ BUILDIN_FUNC(breakequip)
 		return 1;
 
 	pos = script_getnum(st,2);
-	if(pos > 0 && pos <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[pos - 1]);
+	if(equip_index_check(pos))
+		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
 		sd->status.inventory[i].attribute = 1;
 		pc_unequipitem(sd,i,3);
@@ -9941,10 +9829,10 @@ BUILDIN_FUNC(announce)
 	const char *mes       = script_getstr(st,2);
 	int         flag      = script_getnum(st,3);
 	const char *fontColor = script_hasdata(st,4) ? script_getstr(st,4) : NULL;
-	int         fontType  = script_hasdata(st,5) ? script_getnum(st,5) : 0x190; // default fontType (FW_NORMAL)
-	int         fontSize  = script_hasdata(st,6) ? script_getnum(st,6) : 12;    // default fontSize
-	int         fontAlign = script_hasdata(st,7) ? script_getnum(st,7) : 0;     // default fontAlign
-	int         fontY     = script_hasdata(st,8) ? script_getnum(st,8) : 0;     // default fontY
+	int         fontType  = script_hasdata(st,5) ? script_getnum(st,5) : FW_NORMAL; // Default fontType
+	int         fontSize  = script_hasdata(st,6) ? script_getnum(st,6) : 12; // Default fontSize
+	int         fontAlign = script_hasdata(st,7) ? script_getnum(st,7) : 0; // Default fontAlign
+	int         fontY     = script_hasdata(st,8) ? script_getnum(st,8) : 0; // Default fontY
 	
 	if (flag&(BC_TARGET_MASK|BC_SOURCE_MASK)) { // Broadcast source or broadcast region defined
 		send_target target;
@@ -9998,10 +9886,10 @@ BUILDIN_FUNC(mapannounce)
 	const char *mes       = script_getstr(st,3);
 	int         flag      = script_getnum(st,4);
 	const char *fontColor = script_hasdata(st,5) ? script_getstr(st,5) : NULL;
-	int         fontType  = script_hasdata(st,6) ? script_getnum(st,6) : 0x190; // default fontType (FW_NORMAL)
-	int         fontSize  = script_hasdata(st,7) ? script_getnum(st,7) : 12;    // default fontSize
-	int         fontAlign = script_hasdata(st,8) ? script_getnum(st,8) : 0;     // default fontAlign
-	int         fontY     = script_hasdata(st,9) ? script_getnum(st,9) : 0;     // default fontY
+	int         fontType  = script_hasdata(st,6) ? script_getnum(st,6) : FW_NORMAL; // Default fontType
+	int         fontSize  = script_hasdata(st,7) ? script_getnum(st,7) : 12; // Default fontSize
+	int         fontAlign = script_hasdata(st,8) ? script_getnum(st,8) : 0; // Default fontAlign
+	int         fontY     = script_hasdata(st,9) ? script_getnum(st,9) : 0; // Default fontY
 	int16 m;
 
 	if ((m = map_mapname2mapid(mapname)) < 0)
@@ -10024,10 +9912,10 @@ BUILDIN_FUNC(areaannounce)
 	const char *mes       = script_getstr(st,7);
 	int         flag      = script_getnum(st,8);
 	const char *fontColor = script_hasdata(st,9) ? script_getstr(st,9) : NULL;
-	int         fontType  = script_hasdata(st,10) ? script_getnum(st,10) : 0x190; // default fontType (FW_NORMAL)
-	int         fontSize  = script_hasdata(st,11) ? script_getnum(st,11) : 12;    // default fontSize
-	int         fontAlign = script_hasdata(st,12) ? script_getnum(st,12) : 0;     // default fontAlign
-	int         fontY     = script_hasdata(st,13) ? script_getnum(st,13) : 0;     // default fontY
+	int         fontType  = script_hasdata(st,10) ? script_getnum(st,10) : FW_NORMAL; // Default fontType
+	int         fontSize  = script_hasdata(st,11) ? script_getnum(st,11) : 12; // Default fontSize
+	int         fontAlign = script_hasdata(st,12) ? script_getnum(st,12) : 0; // Default fontAlign
+	int         fontY     = script_hasdata(st,13) ? script_getnum(st,13) : 0; // Default fontY
 	int16 m;
 
 	if ((m = map_mapname2mapid(mapname)) < 0)
@@ -10798,7 +10686,7 @@ BUILDIN_FUNC(changebase)
 
 	if( !sd->disguise && vclass != sd->vd.class_ ) {
 		status_set_viewdata(&sd->bl,vclass);
-		//Updated client view. Base, Weapon, Cloth Colors and Body.
+		//Updated client view. Base, Weapon, Cloth Colors and Body
 		clif_changelook(&sd->bl,LOOK_BASE,sd->vd.class_);
 		clif_changelook(&sd->bl,LOOK_WEAPON,sd->status.weapon);
 		if( sd->vd.cloth_color )
@@ -11368,7 +11256,7 @@ BUILDIN_FUNC(getmapflag)
 			case MF_PVP_NOCALCRANK:		script_pushint(st,map[m].flag.pvp_nocalcrank); break;
 			case MF_BATTLEGROUND:		script_pushint(st,map[m].flag.battleground); break;
 			case MF_RESET:			script_pushint(st,map[m].flag.reset); break;
-			case MF_CHANNELAUTOJOIN:	script_pushint(st,map[m].flag.chmautojoin); break;
+			case MF_NOMAPCHANNELAUTOJOIN:	script_pushint(st,map[m].flag.nochmautojoin); break;
 			case MF_NOUSECART:		script_pushint(st,map[m].flag.nousecart); break;
 			case MF_NOITEMCONSUMPTION:	script_pushint(st,map[m].flag.noitemconsumption); break;
 			case MF_SUMSTARTMIRACLE:	script_pushint(st,map[m].flag.nosumstarmiracle); break;
@@ -11494,7 +11382,7 @@ BUILDIN_FUNC(setmapflag)
 			case MF_PVP_NOCALCRANK:		map[m].flag.pvp_nocalcrank = 1; break;
 			case MF_BATTLEGROUND:		map[m].flag.battleground = (val <= 0 || val > 2) ? 1 : val; break;
 			case MF_RESET:			map[m].flag.reset = 1; break;
-			case MF_CHANNELAUTOJOIN:	map[m].flag.chmautojoin = 1 ; break;
+			case MF_NOMAPCHANNELAUTOJOIN:	map[m].flag.nochmautojoin = 1 ; break;
 			case MF_NOUSECART:		map[m].flag.nousecart = 1 ; break;
 			case MF_NOITEMCONSUMPTION:	map[m].flag.noitemconsumption = 1 ; break;
 			case MF_SUMSTARTMIRACLE:	map[m].flag.nosumstarmiracle = 1 ; break;
@@ -11609,7 +11497,7 @@ BUILDIN_FUNC(removemapflag)
 			case MF_PVP_NOCALCRANK:		map[m].flag.pvp_nocalcrank = 0; break;
 			case MF_BATTLEGROUND:		map[m].flag.battleground = 0; break;
 			case MF_RESET:			map[m].flag.reset = 0; break;
-			case MF_CHANNELAUTOJOIN:	map[m].flag.chmautojoin = 0 ; break;
+			case MF_NOMAPCHANNELAUTOJOIN:	map[m].flag.nochmautojoin = 0 ; break;
 			case MF_NOUSECART:		map[m].flag.nousecart = 0 ; break;
 			case MF_NOITEMCONSUMPTION:	map[m].flag.noitemconsumption = 0 ; break;
 			case MF_SUMSTARTMIRACLE:	map[m].flag.nosumstarmiracle = 0 ; break;
@@ -12018,8 +11906,8 @@ BUILDIN_FUNC(getequipcardcnt)
 	if (sd == NULL)
 		return 1;
 
-	if (num > 0 && num <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[num - 1]);
+	if (equip_index_check(num))
+		i = pc_checkequip(sd,equip_bitmask[num]);
 
 	if (i < 0 || !sd->inventory_data[i]) {
 		script_pushint(st,0);
@@ -12051,8 +11939,8 @@ BUILDIN_FUNC(successremovecards) {
 	if (sd == NULL)
 		return 1;
 
-	if (num > 0 && num <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[num - 1]);
+	if (equip_index_check(num))
+		i = pc_checkequip(sd,equip_bitmask[num]);
 
 	if (i < 0 || !sd->inventory_data[i])
 		return 0;
@@ -12119,8 +12007,8 @@ BUILDIN_FUNC(failedremovecards) {
 	if (sd == NULL)
 		return 1;
 
-	if (num > 0 && num <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[num-1]);
+	if (equip_index_check(num))
+		i = pc_checkequip(sd,equip_bitmask[num]);
 
 	if (i < 0 || !sd->inventory_data[i])
 		return 0;
@@ -12735,8 +12623,8 @@ BUILDIN_FUNC(getequipcardid)
 
 	if (sd == NULL)
 		return 1;
-	if (num > 0 && num <= ARRAYLENGTH(equip))
-		i = pc_checkequip(sd,equip[num-1]);
+	if (equip_index_check(num))
+		i = pc_checkequip(sd,equip_bitmask[num]);
 	if (i >= 0 && slot >= 0 && slot < 4)
 		script_pushint(st,sd->status.inventory[i].card[slot]);
 	else
@@ -13664,13 +13552,14 @@ BUILDIN_FUNC(getpetinfo)
 	}
 	pd = sd->pd;
 	switch( type ) {
-		case 0: script_pushint(st,pd->pet.pet_id); break;
-		case 1: script_pushint(st,pd->pet.class_); break;
-		case 2: script_pushstrcopy(st,pd->pet.name); break;
-		case 3: script_pushint(st,pd->pet.intimate); break;
-		case 4: script_pushint(st,pd->pet.hungry); break;
-		case 5: script_pushint(st,pd->pet.rename_flag); break;
-		case 6: script_pushint(st,(int)pd->pet.level); break;
+		case PETINFO_ID:       script_pushint(st,pd->pet.pet_id); break;
+		case PETINFO_CLASS:    script_pushint(st,pd->pet.class_); break;
+		case PETINFO_NAME:     script_pushstrcopy(st,pd->pet.name); break;
+		case PETINFO_INTIMATE: script_pushint(st,pd->pet.intimate); break;
+		case PETINFO_HUNGRY:   script_pushint(st,pd->pet.hungry);  break;
+		case PETINFO_RENAMED:  script_pushint(st,pd->pet.rename_flag); break;
+		case PETINFO_LEVEL:    script_pushint(st,(int)pd->pet.level); break;
+		case PETINFO_BLOCKID:  script_pushint(st,pd->bl.id); break;
 		default:
 			script_pushint(st,0);
 			break;
@@ -14010,17 +13899,18 @@ BUILDIN_FUNC(getlook)
 	val = -1;
 	type = script_getnum(st,2);
 	switch( type ) {
-		case LOOK_HAIR:     	val = sd->status.hair; break; //1
-		case LOOK_WEAPON:   	val = sd->status.weapon; break; //2
-		case LOOK_HEAD_BOTTOM:	val = sd->status.head_bottom; break; //3
-		case LOOK_HEAD_TOP: 	val = sd->status.head_top; break; //4
-		case LOOK_HEAD_MID: 	val = sd->status.head_mid; break; //5
-		case LOOK_HAIR_COLOR:	val = sd->status.hair_color; break; //6
-		case LOOK_CLOTHES_COLOR:	val = sd->status.clothes_color; break; //7
-		case LOOK_SHIELD:   	val = sd->status.shield; break; //8
-		case LOOK_SHOES:    	break; //9
-		case LOOK_ROBE:     	val = sd->status.robe; break; //12
-		case LOOK_BODY2:		val = sd->status.body; break; //13
+		case LOOK_BASE:          val = sd->status.class_; break;
+		case LOOK_HAIR:          val = sd->status.hair; break;
+		case LOOK_WEAPON:        val = sd->status.weapon; break;
+		case LOOK_HEAD_BOTTOM:   val = sd->status.head_bottom; break;
+		case LOOK_HEAD_TOP:      val = sd->status.head_top; break;
+		case LOOK_HEAD_MID:      val = sd->status.head_mid; break;
+		case LOOK_HAIR_COLOR:    val = sd->status.hair_color; break;
+		case LOOK_CLOTHES_COLOR: val = sd->status.clothes_color; break;
+		case LOOK_SHIELD:        val = sd->status.shield; break;
+		case LOOK_SHOES: break;
+		case LOOK_ROBE:          val = sd->status.robe; break;
+		case LOOK_BODY2:         val = sd->status.body; break;
 	}
 	script_pushint(st,val);
 	return SCRIPT_CMD_SUCCESS;
@@ -14535,8 +14425,8 @@ BUILDIN_FUNC(unequip)
 		return 1;
 
 	pos = script_getnum(st,2);
-	if (pos >= 1 && pos <= ARRAYLENGTH(equip)) {
-		short i = pc_checkequip(sd,equip[pos - 1]);
+	if (equip_index_check(pos)) {
+		short i = pc_checkequip(sd,equip_bitmask[pos]);
 
 		if (i >= 0) {
 			pc_unequipitem(sd,i,1|2);
@@ -16202,7 +16092,7 @@ BUILDIN_FUNC(getmonsterinfo)
 	mob_id = script_getnum(st,2);
 	if( !mobdb_checkid(mob_id) ) {
 		//ShowError("buildin_getmonsterinfo: Wrong Monster ID: %i\n", mob_id);
-		if( !script_getnum(st,3) ) //Requested a string
+		if( script_getnum(st,3) == MOB_NAME ) //Requested the name
 			script_pushconststr(st,"null");
 		else
 			script_pushint(st,-1);
@@ -16210,31 +16100,33 @@ BUILDIN_FUNC(getmonsterinfo)
 	}
 	mob = mob_db(mob_id);
 	switch( script_getnum(st,3) ) {
-		case 0: script_pushstrcopy(st,mob->jname); break;
-		case 1: script_pushint(st,mob->lv); break;
-		case 2: script_pushint(st,mob->status.max_hp); break;
-		case 3: script_pushint(st,mob->base_exp); break;
-		case 4: script_pushint(st,mob->job_exp); break;
-		case 5: script_pushint(st,mob->status.rhw.atk); break;
-		case 6: script_pushint(st,mob->status.rhw.atk2); break;
-		case 7: script_pushint(st,mob->status.def); break;
-		case 8: script_pushint(st,mob->status.mdef); break;
-		case 9: script_pushint(st,mob->status.str); break;
-		case 10: script_pushint(st,mob->status.agi); break;
-		case 11: script_pushint(st,mob->status.vit); break;
-		case 12: script_pushint(st,mob->status.int_); break;
-		case 13: script_pushint(st,mob->status.dex); break;
-		case 14: script_pushint(st,mob->status.luk); break;
-		case 15: script_pushint(st,mob->status.rhw.range); break;
-		case 16: script_pushint(st,mob->range2); break;
-		case 17: script_pushint(st,mob->range3); break;
-		case 18: script_pushint(st,mob->status.size); break;
-		case 19: script_pushint(st,mob->status.race); break;
-		case 20: script_pushint(st,mob->status.class_); break;
-		case 21: script_pushint(st,mob->status.def_ele); break;
-		case 22: script_pushint(st,mob->status.mode); break;
-		case 23: script_pushint(st,mob->mexp); break;
-		default: script_pushint(st,-1); //Wrong index
+		case MOB_NAME: script_pushstrcopy(st,mob->jname); break;
+		case MOB_LV: script_pushint(st,mob->lv); break;
+		case MOB_MAXHP: script_pushint(st,mob->status.max_hp); break;
+		case MOB_BASEEXP: script_pushint(st,mob->base_exp); break;
+		case MOB_JOBEXP: script_pushint(st,mob->job_exp); break;
+		case MOB_ATK1: script_pushint(st,mob->status.rhw.atk); break;
+		case MOB_ATK2: script_pushint(st,mob->status.rhw.atk2); break;
+		case MOB_DEF: script_pushint(st,mob->status.def); break;
+		case MOB_MDEF: script_pushint(st,mob->status.mdef); break;
+		case MOB_STR: script_pushint(st,mob->status.str); break;
+		case MOB_AGI: script_pushint(st,mob->status.agi); break;
+		case MOB_VIT: script_pushint(st,mob->status.vit); break;
+		case MOB_INT: script_pushint(st,mob->status.int_); break;
+		case MOB_DEX: script_pushint(st,mob->status.dex); break;
+		case MOB_LUK: script_pushint(st,mob->status.luk); break;
+		case MOB_RANGE: script_pushint(st,mob->status.rhw.range); break;
+		case MOB_RANGE2: script_pushint(st,mob->range2); break;
+		case MOB_RANGE3: script_pushint(st,mob->range3); break;
+		case MOB_SIZE: script_pushint(st,mob->status.size); break;
+		case MOB_RACE: script_pushint(st,mob->status.race); break;
+		case MOB_CLASS: script_pushint(st,mob->status.class_); break;
+		case MOB_ELEMENT: script_pushint(st,mob->status.def_ele); break;
+		case MOB_MODE: script_pushint(st,mob->status.mode); break;
+		case MOB_MVPEXP: script_pushint(st,mob->mexp); break;
+		default:
+			script_pushint(st,-1); //Wrong index
+			break;
 	}
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -17824,11 +17716,25 @@ BUILDIN_FUNC(questinfo)
 	icon = script_getnum(st,3);
 
 #if PACKETVER >= 20120410
-	if( icon < 0 || (icon > 8 && icon != 9999) || icon == 7 )
-		icon = 9999; //Default to nothing if icon id is invalid
+	switch( icon ) {
+		case QTYPE_QUEST:
+		case QTYPE_QUEST2:
+		case QTYPE_JOB:
+		case QTYPE_JOB2:
+		case QTYPE_EVENT:
+		case QTYPE_EVENT2:
+		case QTYPE_WARG:
+		case QTYPE_WARG2:
+			break; //Leave everything as it is
+		case QTYPE_NONE:
+		//Fall through
+		default:
+			icon = QTYPE_NONE; //Default to nothing if icon id is invalid
+			break;
+	}
 #else
-	if( icon < 0 || icon > 7 )
-		icon = 0;
+	if( icon < QTYPE_QUEST || icon > 7 ) //TODO: Check why 7 and not QTYPE_WARG, might be related to icon + 1 below
+		icon = QTYPE_QUEST;
 	else
 		icon = icon + 1;
 #endif
@@ -18547,15 +18453,14 @@ BUILDIN_FUNC(instance_announce) {
 	const char *mes         = script_getstr(st,3);
 	int         flag        = script_getnum(st,4);
 	const char *fontColor   = script_hasdata(st,5) ? script_getstr(st,5) : NULL;
-	int         fontType    = script_hasdata(st,6) ? script_getnum(st,6) : 0x190; //Default fontType (FW_NORMAL)
-	int         fontSize    = script_hasdata(st,7) ? script_getnum(st,7) : 12;    //Default fontSize
-	int         fontAlign   = script_hasdata(st,8) ? script_getnum(st,8) : 0;     //Default fontAlign
-	int         fontY       = script_hasdata(st,9) ? script_getnum(st,9) : 0;     //Default fontY
+	int         fontType    = script_hasdata(st,6) ? script_getnum(st,6) : FW_NORMAL; //Default fontType
+	int         fontSize    = script_hasdata(st,7) ? script_getnum(st,7) : 12; //Default fontSize
+	int         fontAlign   = script_hasdata(st,8) ? script_getnum(st,8) : 0; //Default fontAlign
+	int         fontY       = script_hasdata(st,9) ? script_getnum(st,9) : 0; //Default fontY
 	int i;
 
-	if( instance_id == -1 ) {
+	if( instance_id == -1 )
 		instance_id = script_instancegetid(st);
-	}
 
 	if( !instance_id && &instance_data[instance_id] != NULL )
 		return 0;
@@ -18812,23 +18717,22 @@ BUILDIN_FUNC(pushpc)
 	int cells, dx, dy;
 	struct map_session_data *sd;
 
-	if( (sd = script_rid2sd(st)) == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	dir = script_getnum(st,2);
 	cells = script_getnum(st,3);
 
-	if( dir > 7 ) {
+	if( dir >= DIR_MAX ) {
 		ShowWarning("buildin_pushpc: Invalid direction %d specified.\n", dir);
 		script_reportsrc(st);
-
-		dir %= 8;  //Trim spin-over
+		dir %= DIR_MAX; //Trim spin-over
 	}
 
-	if( !cells ) { //Zero distance
+	if( !cells ) //Zero distance
 		return 0;
-	} else if( cells < 0 ) { //Pushing backwards
-		dir = (dir + 4)%8;  //Turn around
+	else if( cells < 0 ) { //Pushing backwards
+		dir = (dir + DIR_MAX / 2)%DIR_MAX;  //Turn around
 		cells = -cells;
 	}
 

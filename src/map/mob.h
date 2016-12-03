@@ -103,7 +103,9 @@ enum mob_mobid {
 //Used hardcoded Random Monster group in src
 enum e_Random_Monster {
 	MOBG_Branch_Of_Dead_Tree = 0,
+	MOBG_Poring_Box = 1,
 	MOBG_Bloody_Dead_Branch = 2,
+	MOBG_Red_Pouch_Of_Surprise = 3,
 	MOBG_ClassChange = 4,
 };
 

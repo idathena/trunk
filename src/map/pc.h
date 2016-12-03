@@ -37,8 +37,8 @@
 //Total number of classes (for data storage)
 #define CLASS_COUNT (JOB_MAX - JOB_NOVICE_HIGH + JOB_MAX_BASIC)
 
-//Equip indexes constants. (eg: sd->equip_index[EQI_AMMO] returns the index
-//where the arrows are equipped)
+//Equip indexes constants.
+//Eg: sd->equip_index[EQI_AMMO] returns the index where the arrows are equipped
 enum equip_index {
 	EQI_ACC_L = 0,
 	EQI_ACC_R,
@@ -50,9 +50,9 @@ enum equip_index {
 	EQI_ARMOR,
 	EQI_HAND_L,
 	EQI_HAND_R,
-	EQI_COSTUME_TOP,
-	EQI_COSTUME_MID,
-	EQI_COSTUME_LOW,
+	EQI_COSTUME_HEAD_TOP,
+	EQI_COSTUME_HEAD_MID,
+	EQI_COSTUME_HEAD_LOW,
 	EQI_COSTUME_GARMENT,
 	EQI_AMMO,
 	EQI_SHADOW_ARMOR,
@@ -63,6 +63,33 @@ enum equip_index {
 	EQI_SHADOW_ACC_L,
 	EQI_MAX
 };
+
+//Translation table from athena equip index to aegis bitmask
+static unsigned int equip_bitmask[EQI_MAX] = {
+	EQP_ACC_L,
+	EQP_ACC_R,
+	EQP_SHOES,
+	EQP_GARMENT,
+	EQP_HEAD_LOW,
+	EQP_HEAD_MID,
+	EQP_HEAD_TOP,
+	EQP_ARMOR,
+	EQP_HAND_L,
+	EQP_HAND_R,
+	EQP_COSTUME_HEAD_TOP,
+	EQP_COSTUME_HEAD_MID,
+	EQP_COSTUME_HEAD_LOW,
+	EQP_COSTUME_GARMENT,
+	EQP_AMMO,
+	EQP_SHADOW_ARMOR,
+	EQP_SHADOW_WEAPON,
+	EQP_SHADOW_SHIELD,
+	EQP_SHADOW_SHOES,
+	EQP_SHADOW_ACC_R,
+	EQP_SHADOW_ACC_L
+};
+
+#define equip_index_check(i) ( (i) >= EQI_ACC_L && (i) < EQI_MAX )
 
 struct weapon_data {
 	int atkmods[3];
