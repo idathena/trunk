@@ -794,11 +794,13 @@ int npc_settimerevent_tick(struct npc_data *nd, int newtimer)
 	nd->u.scr.rid = 0;
 
 	//Check if timer is started
-	flag = (nd->u.scr.timerid != INVALID_TIMER);
+	flag = (nd->u.scr.timerid != INVALID_TIMER || nd->u.scr.timertick);
 
 	if( flag )
 		npc_timerevent_stop(nd);
+
 	nd->u.scr.timer = newtimer;
+
 	if( flag )
 		npc_timerevent_start(nd, -1);
 
@@ -3926,7 +3928,7 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 	else if (!strcmpi(w3,"reset"))
 		map[m].flag.reset = state;
 	else if (!strcmpi(w3,"nomapchannelautojoin"))
-		map[m].flag.chmautojoin = state;
+		map[m].flag.nochmautojoin = state;
 	else if (!strcmpi(w3,"nousecart"))
 		map[m].flag.nousecart = state;
 	else if (!strcmpi(w3,"noitemconsumption"))

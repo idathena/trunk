@@ -2053,8 +2053,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 		}
 	}
 
-	if (tsc && (tsc->data[SC_STEALTHFIELD] || tsc->data[SC_SUHIDE]) &&
-		!(status->mode&(MD_BOSS|MD_DETECTOR)) && (!skill_id || !flag))
+	if (tsc && (tsc->data[SC_STEALTHFIELD] || tsc->data[SC_SUHIDE]) && !(status->mode&(MD_BOSS|MD_DETECTOR)) && (!skill_id || !flag))
 		return false;
 
 	switch (target->type) {

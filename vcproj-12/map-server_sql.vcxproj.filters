@@ -297,6 +297,9 @@
     <ClInclude Include="..\src\map\script.h">
       <Filter>map_sql</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\map\script_constants.h">
+      <Filter>map_sql</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\map\searchstore.h">
       <Filter>map_sql</Filter>
     </ClInclude>

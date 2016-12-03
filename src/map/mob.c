@@ -2373,26 +2373,23 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 					drop_rate += (int)(0.5 + drop_rate * status_get_luk(src) * battle_config.drops_by_luk2 / 10000.);
 			}
 			if(sd) {
-				int bonus = 0;
+				int drop_rate_bonus = 0;
 
 				if(battle_config.pk_mode && (int)(md->level - sd->status.base_level) >= 20)
 					drop_rate = (int)(drop_rate * 1.25); //pk_mode increase drops if 20 level difference [Valaris]
+				//Add class and race specific bonuses
+				drop_rate_bonus += sd->dropaddrace[md->status.race] + sd->dropaddrace[RC_ALL];
+				drop_rate_bonus += sd->dropaddclass[md->status.class_] + sd->dropaddclass[CLASS_ALL];
 				//Increase drop rate if user has SC_ITEMBOOST
-				if(sd->sc.data[SC_ITEMBOOST]) //Now rig the drop rate to never be over 90% unless it is originally > 90%
-					drop_rate = max(drop_rate, (int)cap_value(0.5 + drop_rate * sd->sc.data[SC_ITEMBOOST]->val1 / 100., 0, 9000));
-				if(sd->dropaddrace[status_get_race(&md->bl)])
-					bonus += sd->dropaddrace[status_get_race(&md->bl)];
-				if(sd->dropaddrace[RC_ALL])
-					bonus += sd->dropaddrace[RC_ALL];
-				if(sd->dropaddclass[status_get_class_(&md->bl)])
-					bonus += sd->dropaddclass[status_get_class_(&md->bl)];
-				if(sd->dropaddclass[CLASS_ALL])
-					bonus += sd->dropaddclass[CLASS_ALL];
-				if(bonus) //Increase item drop rate from bDropAddRace and bDropAddClass [exneval]
-					drop_rate += (int)(0.5 + (drop_rate * bonus) / 10000.);
-				if(battle_config.vip_drop_increase && pc_isvip(sd)) //Increase item drop rate for VIP
-					drop_rate += (int)(0.5 + (drop_rate * battle_config.vip_drop_increase) / 10000.);
-				drop_rate = min(drop_rate, 10000); //Cap it to 100%
+				if(sd->sc.data[SC_ITEMBOOST])
+					drop_rate_bonus += sd->sc.data[SC_ITEMBOOST]->val1;
+				drop_rate_bonus += (int)(0.5 + drop_rate * drop_rate_bonus / 100.);
+				//Now rig the drop rate to never be over 90% unless it is originally > 90%
+				drop_rate = max(drop_rate, cap_value(drop_rate_bonus, 0, 9000));
+				if(battle_config.vip_drop_increase && pc_isvip(sd)) { //Increase item drop rate for VIP
+					drop_rate += (int)(0.5 + (drop_rate * battle_config.vip_drop_increase) / 100.);
+					drop_rate = min(drop_rate, 10000); //Cap it to 100%
+				}
 			}
 #ifdef RENEWAL_DROP
 			if(drop_modifier != 100) {

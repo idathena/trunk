@@ -82,7 +82,7 @@ typedef enum c_op {
 
 struct script_retinfo {
 	struct DBMap *var_function;// scope variables
-	struct script_code* script;// script code
+	struct script_code *script;// script code
 	int pos;// script location
 	int nargs;// argument count
 	int defsp;// default stack pointer
@@ -151,10 +151,76 @@ struct script_regstr {
 };
 
 enum script_parse_options {
-	SCRIPT_USE_LABEL_DB = 0x1,// records labels in scriptlabel_db
-	SCRIPT_IGNORE_EXTERNAL_BRACKETS = 0x2,// ignores the check for {} brackets around the script
-	SCRIPT_RETURN_EMPTY_SCRIPT = 0x4// returns the script object instead of NULL for empty scripts
+	SCRIPT_USE_LABEL_DB = 0x1, //Records labels in scriptlabel_db
+	SCRIPT_IGNORE_EXTERNAL_BRACKETS = 0x2, //Ignores the check for {} brackets around the script
+	SCRIPT_RETURN_EMPTY_SCRIPT = 0x4 //Returns the script object instead of NULL for empty scripts
 };
+
+enum monsterinfo_types {
+	MOB_NAME = 0,
+	MOB_LV,
+	MOB_MAXHP,
+	MOB_BASEEXP,
+	MOB_JOBEXP,
+	MOB_ATK1,
+	MOB_ATK2,
+	MOB_DEF,
+	MOB_MDEF,
+	MOB_STR,
+	MOB_AGI,
+	MOB_VIT,
+	MOB_INT,
+	MOB_DEX,
+	MOB_LUK,
+	MOB_RANGE,
+	MOB_RANGE2,
+	MOB_RANGE3,
+	MOB_SIZE,
+	MOB_RACE,
+	MOB_CLASS,
+	MOB_ELEMENT,
+	MOB_MODE,
+	MOB_MVPEXP
+};
+
+enum petinfo_types {
+	PETINFO_ID = 0,
+	PETINFO_CLASS,
+	PETINFO_NAME,
+	PETINFO_INTIMATE,
+	PETINFO_HUNGRY,
+	PETINFO_RENAMED,
+	PETINFO_LEVEL,
+	PETINFO_BLOCKID
+};
+
+enum questinfo_types {
+	QTYPE_QUEST = 0,
+	QTYPE_QUEST2,
+	QTYPE_JOB,
+	QTYPE_JOB2,
+	QTYPE_EVENT,
+	QTYPE_EVENT2,
+	QTYPE_WARG,
+	//7 = free
+	QTYPE_WARG2 = 8,
+	//9 - 9998 = free
+	QTYPE_NONE = 9999
+};
+
+#ifndef WIN32 //These are declared in wingdi.h
+	//Font Weights
+	#define FW_DONTCARE   0
+	#define FW_THIN       100
+	#define FW_EXTRALIGHT 200
+	#define FW_LIGHT      300
+	#define FW_NORMAL     400
+	#define FW_MEDIUM     500
+	#define FW_SEMIBOLD   600
+	#define FW_BOLD       700
+	#define FW_EXTRABOLD  800
+	#define FW_HEAVY      900
+#endif
 
 enum navigation_service {
 	NAV_NONE = 0, //0
@@ -171,7 +237,7 @@ const char *skip_space(const char *p);
 void script_error(const char *src, const char *file, int start_line, const char *error_msg, const char *error_pos);
 void script_warning(const char *src, const char *file, int start_line, const char *error_msg, const char *error_pos);
 
-struct script_code* parse_script(const char *src,const char *file,int line,int options);
+struct script_code *parse_script(const char *src,const char *file,int line,int options);
 void run_script_sub(struct script_code *rootscript, int pos, int rid, int oid, char *file, int lineno);
 void run_script(struct script_code *rootscript, int pos, int rid, int oid);
 
@@ -183,9 +249,9 @@ void run_script_main(struct script_state *st);
 
 void script_stop_sleeptimers(int id);
 struct linkdb_node* script_erase_sleepdb(struct linkdb_node *n);
-void script_free_code(struct script_code* code);
+void script_free_code(struct script_code *code);
 void script_free_vars(struct DBMap *storage);
-struct script_state *script_alloc_state(struct script_code* script, int pos, int rid, int oid);
+struct script_state *script_alloc_state(struct script_code *script, int pos, int rid, int oid);
 void script_free_state(struct script_state *st);
 
 struct DBMap *script_get_label_db(void);

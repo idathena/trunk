@@ -22,6 +22,19 @@ struct shootpath_data {
 	int y[MAX_WALKPATH];
 };
 
+enum directions{
+	DIR_CENTER = -1,
+	DIR_NORTH = 0,
+	DIR_NORTHWEST = 1,
+	DIR_WEST = 2,
+	DIR_SOUTHWEST = 3,
+	DIR_SOUTH = 4,
+	DIR_SOUTHEAST = 5,
+	DIR_EAST = 6,
+	DIR_NORTHEAST = 7,
+	DIR_MAX
+};
+
 struct path_interface *path;
 
 #define check_distance_bl(bl1, bl2, distance) check_distance((bl1)->x - (bl2)->x, (bl1)->y - (bl2)->y, distance)

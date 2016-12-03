@@ -73,8 +73,6 @@ struct fame_list smith_fame_list[MAX_FAME_LIST];
 struct fame_list chemist_fame_list[MAX_FAME_LIST];
 struct fame_list taekwon_fame_list[MAX_FAME_LIST];
 
-static unsigned int equip_pos[EQI_MAX] = { EQP_ACC_L,EQP_ACC_R,EQP_SHOES,EQP_GARMENT,EQP_HEAD_LOW,EQP_HEAD_MID,EQP_HEAD_TOP,EQP_ARMOR,EQP_HAND_L,EQP_HAND_R,EQP_COSTUME_HEAD_TOP,EQP_COSTUME_HEAD_MID,EQP_COSTUME_HEAD_LOW,EQP_COSTUME_GARMENT,EQP_AMMO,EQP_SHADOW_ARMOR,EQP_SHADOW_WEAPON,EQP_SHADOW_SHIELD,EQP_SHADOW_SHOES,EQP_SHADOW_ACC_R,EQP_SHADOW_ACC_L };
-
 #define MOTD_LINE_SIZE 128
 static char motd_text[MOTD_LINE_SIZE][CHAT_SIZE_MAX]; // Message of the day buffer [Valaris]
 
@@ -866,21 +864,19 @@ void pc_setequipindex(struct map_session_data *sd)
 	for(i = 0; i < MAX_INVENTORY; i++) {
 		if(sd->status.inventory[i].nameid <= 0)
 			continue;
-
 		if(sd->status.inventory[i].equip) {
 			uint8 j;
 
-			for(j = 0; j < EQI_MAX; j++)
-				if(sd->status.inventory[i].equip&equip_pos[j])
+			for(j = 0; j < EQI_MAX; j++) {
+				if(sd->status.inventory[i].equip&equip_bitmask[j])
 					sd->equip_index[j] = i;
-
+			}
 			if(sd->status.inventory[i].equip&EQP_HAND_R) {
 				if(sd->inventory_data[i])
 					sd->weapontype1 = sd->inventory_data[i]->look;
 				else
 					sd->weapontype1 = 0;
 			}
-
 			if(sd->status.inventory[i].equip&EQP_HAND_L) {
 				if(sd->inventory_data[i] && sd->inventory_data[i]->type == IT_WEAPON)
 					sd->weapontype2 = sd->inventory_data[i]->look;
@@ -5601,7 +5597,7 @@ short pc_checkequip(struct map_session_data *sd,int pos)
 	nullpo_retr(-1, sd);
 
 	for(i = 0; i < EQI_MAX; i++) {
-		if(pos&equip_pos[i])
+		if(pos&equip_bitmask[i])
 			return sd->equip_index[i];
 	}
 
@@ -5622,7 +5618,7 @@ bool pc_checkequip2(struct map_session_data *sd, unsigned short nameid, int min,
 	int i;
 
 	for(i = min; i < max; i++) {
-		if(equip_pos[i]) {
+		if(equip_bitmask[i]) {
 			short idx = sd->equip_index[i];
 
 			if(sd->status.inventory[idx].nameid == nameid)
@@ -9429,7 +9425,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 			flag = (id->range != sd->inventory_data[idx]->range);
 	}
 	for( i = 0; i < EQI_MAX; i++ ) {
-		if( pos&equip_pos[i] ) {
+		if( pos&equip_bitmask[i] ) {
 			if( sd->equip_index[i] >= 0 ) //Slot taken, remove item from there
 				pc_unequipitem(sd,sd->equip_index[i],2|8);
 			sd->equip_index[i] = n;
@@ -9652,9 +9648,10 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 	}
 	if( battle_config.battle_log )
 		ShowInfo("Unequip %d %x:%x\n",n,pc_equippoint(sd,n),sd->status.inventory[n].equip);
-	for( i = 0; i < EQI_MAX; i++ )
-		if( sd->status.inventory[n].equip&equip_pos[i] )
+	for( i = 0; i < EQI_MAX; i++ ) {
+		if( sd->status.inventory[n].equip&equip_bitmask[i] )
 			sd->equip_index[i] = -1;
+	}
 	if( sd->status.inventory[n].equip&EQP_HAND_R ) {
 		sd->weapontype1 = 0;
 		sd->status.weapon = sd->weapontype2;
@@ -11723,9 +11720,9 @@ bool pc_is_same_equip_index(enum equip_index eqi, short *equip_index, short inde
 		return true; //Headgear with Mid & Low location
 	if (eqi == EQI_HEAD_TOP && (equip_index[EQI_HEAD_MID] == index || equip_index[EQI_HEAD_LOW] == index))
 		return true; //Headgear with Top & Mid or Low location
-	if (eqi == EQI_COSTUME_MID && equip_index[EQI_COSTUME_LOW] == index)
+	if (eqi == EQI_COSTUME_HEAD_MID && equip_index[EQI_COSTUME_HEAD_LOW] == index)
 		return true; //Headgear with Mid & Low location
-	if (eqi == EQI_COSTUME_TOP && (equip_index[EQI_COSTUME_MID] == index || equip_index[EQI_COSTUME_LOW] == index))
+	if (eqi == EQI_COSTUME_HEAD_TOP && (equip_index[EQI_COSTUME_HEAD_MID] == index || equip_index[EQI_COSTUME_HEAD_LOW] == index))
 		return true; //Headgear with Top & Mid or Low location
 
 	return false;

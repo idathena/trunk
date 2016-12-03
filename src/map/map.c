@@ -1834,6 +1834,8 @@ int map_quit(struct map_session_data *sd) {
 		status_change_end(&sd->bl,SC_WEIGHT90,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_SATURDAYNIGHTFEVER,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_ALL_RIDING,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_DEFSET_PER,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_MDEFSET_PER,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_MOONSTAR,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_SUPER_STAR,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_STRANGELIGHTS,INVALID_TIMER);

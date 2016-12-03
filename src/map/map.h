@@ -346,6 +346,8 @@ enum auto_trigger_flag {
 	ATF_WEAPON = 0x10,
 	ATF_MAGIC  = 0x20,
 	ATF_MISC   = 0x40,
+
+	ATF_SKILL  = ATF_MAGIC|ATF_MISC,
 };
 
 struct block_list {
@@ -652,7 +654,7 @@ struct map_data {
 		unsigned partylock : 1;
 		unsigned guildlock : 1;
 		unsigned reset : 1; // [Daegaladh]
-		unsigned chmautojoin : 1; // Prevent to auto join map channel
+		unsigned nochmautojoin : 1; // Prevent to auto join map channel
 		unsigned nousecart : 1;	// Prevent open up cart @FIXME client side only atm
 		unsigned noitemconsumption : 1; // Prevent item usage
 		unsigned nosumstarmiracle : 1; // Allow SG miracle to happen ?
