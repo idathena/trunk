@@ -16,7 +16,7 @@
 //============================================================ 
 
 valkyrie,53,56,3	script	Gypsy#Valkyrie	101,{
-	if (ADVJOB == 0 || Upper != 1) {
+	if (ADVJOB == 0 && Upper != 1) {
 		set .@karma_d,rand(1,10);
 		if (.@karma_d > 4) {
 			mes "[Gypsy]";

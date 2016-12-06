@@ -351,8 +351,7 @@ einbroch,54,97,3	script	Bouncer	4_M_REBELLION,{
 		next;
 		select("I want to talk to the poster publisher.");
 		mes "[Bouncer]";
-		mes "Your problem is a bit out of my league. Get in. If I find out you're the real deal all along,";
-		mes "I'll see that you'll never see the outside again.";
+		mes "Your problem is a bit out of my league. Get in. If I find out you're the real deal all along, I'll see that you'll never see the outside again.";
 		close2;
 		warp "job_gun",81,29;
 		end;
@@ -467,7 +466,7 @@ job_gun,86,29,3	script	Kulbertinov	4_M_REBELLION,{
 		}
 		next;
 		mes "[Kulbertinov]";
-		mes "Talk to Enwin Conick. She guides drifting spirits like you to the way of the Rebellion. I'll send word to her. Ah, and don't point your gun at her";
+		mes "Talk to Enwin Conick. She guides drifting spirits like you to the way of the Rebellion. I'll send word to her. Ah, and don't point your gun at her.";
 		setquest 12341;
 		completequest 12340;
 		close2;
@@ -695,14 +694,18 @@ job_gun,117,46,3	script	Elwin Conick#2	4_F_REBELLION,{
 		mes "You'll be asked to control switches on the machine and select 5 standard Steel Artifacts.";
 		next;
 		mes "[Elwin Conick]";
-		mes "You'll then take them to the next Assembly Room and assemble them into a complete firearm. You'll be given 3 minutes to finish all that.";
-		mes "^0000ffTo check the elapsed time, you'll be transformed into a different job^000000.";
+		mes "You'll then take them to the next Assembly Room and assemble them into a complete firearm. You'll be given 3 minutes to finish all that. ^0000ffTo check the elapsed time, you'll be transformed into a different job^000000.";
 		next;
 		mes "[Elwin Conick]";
 		mes "I'll be in the next room, waiting for you to bring me a complete firearm. Remember, ^0000ffyou fail the test when your transformation expires after 3 minutes^000000.";
 		transform 3169,180000;
 		close;
 	}
+	mes "[Elwin Conick]";
+	mes "Ah? Are you lost? You need to register first and then get back here.";
+	close2;
+	warp "job_gun",81,29;
+	end;
 }
 
 job_gun,198,39,3	script	Elwin Conick#3	4_F_REBELLION,{

@@ -12974,7 +12974,8 @@ iz_ac02_d,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_d	4_F_MADA
 	mes "The training grounds have been revised.";
 	mes "I will send you to Izlude.";
 	close2;
-	erasequest 7117,7127;
+	for (.@i = 7117; .@i < 7128; .@i++)
+		erasequest .@i;
 	if(strnpcinfo(4) == "new_1-1" || strnpcinfo(4) == "new_1-2" || strnpcinfo(4) == "new_1-3" || strnpcinfo(4) == "new_1-4") {
 		.@warp$ = "iz_int";
 	} else if(strnpcinfo(4) == "new_2-1" || strnpcinfo(4) == "new_2-2" || strnpcinfo(4) == "new_2-3" || strnpcinfo(4) == "new_2-4") {

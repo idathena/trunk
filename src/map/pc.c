@@ -4884,9 +4884,9 @@ int pc_useitem(struct map_session_data *sd, int n)
 			clif_useitemack(sd,n,0,false);
 	}
 	if( item.card[0] == CARD0_CREATE && pc_famerank(MakeDWord(item.card[2],item.card[3]), MAPID_ALCHEMIST) ) {
-	    potion_flag = 2; //Famous player's potions have 50% more efficiency
-		 if( sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_ROGUE )
-			 potion_flag = 3; //Even more effective potions
+		potion_flag = 2; //Famous player's potions have 50% more efficiency
+		if( sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_ROGUE )
+			potion_flag = 3; //Even more effective potions
 	}
 
 	//Update item use time
