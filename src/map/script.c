@@ -9012,8 +9012,7 @@ BUILDIN_FUNC(guildopenstorage)
 /// itemskill "<skill name>",<level>,{flag}
 BUILDIN_FUNC(itemskill)
 {
-	int id;
-	int lv;
+	uint16 skill_id, skill_lv;
 	TBL_PC *sd;
 	struct script_data *data;
 
@@ -9023,16 +9022,16 @@ BUILDIN_FUNC(itemskill)
 
 	data = script_getdata(st,2);
 	get_val(st,data); //Convert into value in case of a variable
-	id = (data_isstring(data) ? skill_name2id(script_getstr(st,2)) : script_getnum(st,2));
-	lv = script_getnum(st,3);
+	skill_id = (data_isstring(data) ? skill_name2id(script_getstr(st,2)) : script_getnum(st,2));
+	skill_lv = script_getnum(st,3);
 #if 0 //Temporarily disabled, awaiting for confirmation
 	if( !script_hasdata(st,4) )
-		if( !skill_check_condition_castbegin(sd,id,lv) || !skill_check_condition_castend(sd,id,lv) )
+		if( !skill_check_condition_castbegin(sd,skill_id,skill_lv) || !skill_check_condition_castend(sd,skill_id,skill_lv) )
 			return 0;
 #endif
-	sd->skillitem = id;
-	sd->skillitemlv = lv;
-	clif_item_skill(sd,id,lv);
+	sd->skillitem = skill_id;
+	sd->skillitemlv = skill_lv;
+	clif_item_skill(sd,skill_id,skill_lv);
 	return SCRIPT_CMD_SUCCESS;
 }
 /*==========================================

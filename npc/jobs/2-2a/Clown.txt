@@ -18,7 +18,7 @@
 //============================================================ 
 
 valkyrie,53,54,3	script	Minstrel#Valkyrie	741,{
-	if (ADVJOB == 0 || Upper != 1) {
+	if (ADVJOB == 0 && Upper != 1) {
 		set .@karma_d,rand(1,10);
 		if (.@karma_d > 4) {
 			mes "[Minstrel]";

@@ -635,7 +635,7 @@ int npc_timerevent_start(struct npc_data *nd, int rid)
 		return 1;
 	}
 
-	// Check if timer is already started.
+	// Check if timer is already started
 	if( sd ) {
 		if( sd->npc_timer_id != INVALID_TIMER )
 			return 0;
@@ -651,7 +651,7 @@ int npc_timerevent_start(struct npc_data *nd, int rid)
 		ted->time = nd->u.scr.timer_event[j].timer;
 		next = nd->u.scr.timer_event[j].timer - nd->u.scr.timer;
 		if( sd ) {
-			ted->rid = sd->bl.id; // Attach only the player if attachplayerrid was used.
+			ted->rid = sd->bl.id; // Attach only the player if attachplayerrid was used
 			sd->npc_timer_id = add_timer(tick + next,npc_timerevent,nd->bl.id,(intptr_t)ted);
 		} else {
 			ted->rid = 0;

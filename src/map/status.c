@@ -4292,14 +4292,19 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 			regen->flag &= ~sce->val4; //Remove regen as specified by val4
 	}
 
+	if( sc->data[SC_ANGEL_PROTECT] ) {
+		regen->rate.hp += 50;
+		regen->rate.sp += 50;
+	}
+
 	if( sc->data[SC_GT_REVITALIZE] ) {
 		regen->hp += cap_value(regen->hp * sc->data[SC_GT_REVITALIZE]->val3 / 100, 1, SHRT_MAX);
 		regen->state.walk = 1;
 	}
 
 	if( sc->data[SC_CATNIPPOWDER] ) {
-		regen->rate.hp <<= 1;
-		regen->rate.sp <<= 1;
+		regen->rate.hp += 100;
+		regen->rate.sp += 100;
 	}
 
 	if( bl->type == BL_ELEM ) {
@@ -4310,25 +4315,25 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 			case ELEMENTALID_AGNI_M:
 			case ELEMENTALID_AGNI_L:
 				if(sc->data[SC_FIRE_INSIGNIA] && sc->data[SC_FIRE_INSIGNIA]->val1 == 1)
-					regen->rate.hp <<= 1;
+					regen->rate.hp += 100;
 				break;
 			case ELEMENTALID_AQUA_S:
 			case ELEMENTALID_AQUA_M:
 			case ELEMENTALID_AQUA_L:
 				if(sc->data[SC_WATER_INSIGNIA] && sc->data[SC_WATER_INSIGNIA]->val1 == 1)
-					regen->rate.hp <<= 1;
+					regen->rate.hp += 100;
 				break;
 			case ELEMENTALID_VENTUS_S:
 			case ELEMENTALID_VENTUS_M:
 			case ELEMENTALID_VENTUS_L:
 				if(sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 1)
-					regen->rate.hp <<= 1;
+					regen->rate.hp += 100;
 				break;
 			case ELEMENTALID_TERA_S:
 			case ELEMENTALID_TERA_M:
 			case ELEMENTALID_TERA_L:
 				if(sc->data[SC_EARTH_INSIGNIA] && sc->data[SC_EARTH_INSIGNIA]->val1 == 1)
-					regen->rate.hp <<= 1;
+					regen->rate.hp += 100;
 				break;
 		}
 	}

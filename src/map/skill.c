@@ -3723,25 +3723,20 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					} else {
 						struct status_change *sc = status_get_sc(src);
 
-						if (sc) {
-							if (sc->data[SC_SPIRIT] &&
-								sc->data[SC_SPIRIT]->val2 == SL_WIZARD &&
-								sc->data[SC_SPIRIT]->val3 == skl->skill_id)
-								sc->data[SC_SPIRIT]->val3 = 0; //Clear bounced spell check
-						}
+						if (sc && sc->data[SC_SPIRIT] &&
+							sc->data[SC_SPIRIT]->val2 == SL_WIZARD &&
+							sc->data[SC_SPIRIT]->val3 == skl->skill_id)
+							sc->data[SC_SPIRIT]->val3 = 0; //Clear bounced spell check
 					}
 					break;
 				case WL_CHAINLIGHTNING_ATK: {
-						//Hit a Lightning on the current Target
-						skill_attack(BF_MAGIC,src,src,target,skl->skill_id,skl->skill_lv,tick,(9 - skl->type));
+						skill_attack(BF_MAGIC,src,src,target,skl->skill_id,skl->skill_lv,tick,9 - skl->type); //Attack the current target
 						skill_toggle_magicpower(src,skl->skill_id);
-						if (skl->type < (4 + skl->skill_lv - 1) && skl->x < 3) { //Remaining Chains Hit
-							struct block_list *nbl = NULL; //Next Target of Chain
+						if (skl->type < (4 + skl->skill_lv - 1) && skl->x < 3) { //Remaining bounces
+							struct block_list *nbl = NULL; //Next bounce target
 
-							//After 2 bounces, it will bounce to other targets in 7x7 range
-							nbl = battle_getenemyarea(src,target->x,target->y,(skl->type > 2 ? 2 : 3),
-								BL_CHAR|BL_SKILL,target->id); //Search for a new Target around current one
-							if (!nbl)
+							//Search for a new target around current one in 7x7 range
+							if (!(nbl = battle_getenemyarea(src,target->x,target->y,3,BL_CHAR|BL_SKILL,target->id)))
 								skl->x++;
 							else 
 								skl->x = 0;
@@ -3783,10 +3778,11 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 								uint16 r_skill_id, r_skill_lv, point, s = 0;
 								int spell[SC_MAXSPELLBOOK - SC_SPELLBOOK1 + 1];
 
-								for (i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++) //List all available spell to be released
+								for (i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++) { //List all available spell to be released
 									if (sc->data[i])
 										spell[s++] = i;
-								if (s == 0)
+								}
+								if (!s)
 									break;
 								i = spell[(s == 1 ? 0 : rnd()%s)]; //Random select of spell to be released
 								if (sc->data[i]) { //Now extract the data from the preserved spell
@@ -6112,6 +6108,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case ST_PRESERVE:
 		case NPC_INVINCIBLE:
 		case NPC_INVINCIBLEOFF:
+		case ALL_ANGEL_PROTECT:
 		case RK_CRUSHSTRIKE:
 		case RA_FEARBREEZE:
 		case AB_EXPIATIO:
@@ -6224,14 +6221,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SM_ENDURE:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-			break;
-
-		case ALL_ANGEL_PROTECT:
-			if (dstsd)
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,
-					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-			else if (sd)
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			break;
 
 		case AS_ENCHANTPOISON: //Prevent spamming [Valaris]
@@ -12332,11 +12321,12 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 				ARR_FIND(0,MAX_SKILL_ITEM_REQUIRE,i,req.itemid[i] && (req.itemid[i] == ITEMID_TRAP || req.itemid[i] == ITEMID_SPECIAL_ALLOY_TRAP));
 				if( i != MAX_SKILL_ITEM_REQUIRE && req.itemid[i] )
 					req_item = req.itemid[i];
-				if( map_flag_gvg2(src->m) || map[src->m].flag.battleground )
-					limit *= 4; //Longer trap times in WoE [celest]
-				if( skill_id != RL_B_TRAP && battle_config.vs_traps_bctall && map_flag_vs(src->m) && (src->type&battle_config.vs_traps_bctall) )
-					target = BCT_ALL;
-				else
+				if( skill_id != RL_B_TRAP ) {
+					if( map_flag_gvg2(src->m) || map[src->m].flag.battleground )
+						limit *= 4; //Longer trap times in WoE [celest]
+					if( battle_config.vs_traps_bctall && map_flag_vs(src->m) && (src->type&battle_config.vs_traps_bctall) )
+						target = BCT_ALL;
+				} else
 					skill_clear_group(src,128);
 			}
 			break;
@@ -15929,13 +15919,7 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 					if( sd->special_state.no_gemstone == 2 ) //Remove all Magic Stone required for all skills for VIP
 						require.itemid[i] = require.amount[i] = 0;
 					else { //All gem skills except Hocus Pocus and Ganbantein can cast for free with Mistress card [helvetica]
-						if( sd->special_state.no_gemstone ) {
-							if( skill_id != SA_ABRACADABRA && skill_id != HW_GANBANTEIN )
-		 						require.itemid[i] = require.amount[i] = 0;
-							else if( --require.amount[i] < 1 )
-								require.amount[i] = 1;
-						}
-						if( sc && sc->data[SC_INTOABYSS] ) {
+						if( (sd->special_state.no_gemstone || (sc && sc->data[SC_INTOABYSS])) && skill_id != HW_GANBANTEIN ) {
 							if( skill_id != SA_ABRACADABRA )
 								require.itemid[i] = require.amount[i] = 0;
 							else if( --require.amount[i] < 1 )

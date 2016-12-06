@@ -171,26 +171,26 @@ valkyrie,48,86,4	script	Valkyrie#	811,{
 			mes "And I pray that the new life to which the goddess Skuld will guide you will be even more honorable than your last.";
 			close2;
 			switch (ADVJOB) {
-			case 4008:
-			case 4015:
+			case Job_Lord_Knight:
+			case Job_Paladin:
 				if (checkre(0)) warp "izlude",129,97;
 				else warp "izlude",94,103;
 				break;
-			case 4009:
-			case 4016:
+			case Job_High_Priest:
+			case Job_Champion:
 				warp "prontera",273,354; break;
-			case 4010:
-			case 4017:
+			case Job_High_Wizard:
+			case Job_Professor:
 				warp "geffen",120,60; break;
-			case 4011:
-			case 4019:
+			case Job_Whitesmith:
+			case Job_Creator:
 				warp "alberta",116,57; break;
-			case 4012:
-			case 4020:
-			case 4021:
+			case Job_Sniper:
+			case Job_Clown:
+			case Job_Gypsy:
 				warp "payon",69,100; break;
-			case 4013:
-			case 4018:
+			case Job_Assassin_Cross:
+			case Job_Stalker:
 				warp "morocc",154,50; break;
 			default:
 				warp "yuno_in02",93,205; break;
@@ -353,9 +353,8 @@ yuno_in05,49,43,1	script	Heart of Ymir	111,{
 }
 
 valkyrie,44,33,5	script	Teleporter	124,{
-	if (Upper != 1) {
-		set .@karma_d,rand(1,10);
-		if (.@karma_d > 4) {
+	if (ADVJOB == 0 && Upper != 1) {
+		if (rand(1,10) > 4) {
 			mes "[Teleporter]";
 			mes "Congratulations.";
 			mes "Honor to the warriors!";
