@@ -64,30 +64,7 @@ enum equip_index {
 	EQI_MAX
 };
 
-//Translation table from athena equip index to aegis bitmask
-static unsigned int equip_bitmask[EQI_MAX] = {
-	EQP_ACC_L,
-	EQP_ACC_R,
-	EQP_SHOES,
-	EQP_GARMENT,
-	EQP_HEAD_LOW,
-	EQP_HEAD_MID,
-	EQP_HEAD_TOP,
-	EQP_ARMOR,
-	EQP_HAND_L,
-	EQP_HAND_R,
-	EQP_COSTUME_HEAD_TOP,
-	EQP_COSTUME_HEAD_MID,
-	EQP_COSTUME_HEAD_LOW,
-	EQP_COSTUME_GARMENT,
-	EQP_AMMO,
-	EQP_SHADOW_ARMOR,
-	EQP_SHADOW_WEAPON,
-	EQP_SHADOW_SHIELD,
-	EQP_SHADOW_SHOES,
-	EQP_SHADOW_ACC_R,
-	EQP_SHADOW_ACC_L
-};
+extern unsigned int equip_bitmask[EQI_MAX];
 
 #define equip_index_check(i) ( (i) >= EQI_ACC_L && (i) < EQI_MAX )
 
