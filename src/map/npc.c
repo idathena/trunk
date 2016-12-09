@@ -210,12 +210,11 @@ int npc_enable_sub(struct block_list *bl, va_list ap)
 		TBL_PC *sd = (TBL_PC *)bl;
 		int ontouch, ontouch2;
 
-		if( nd->sc.option&OPTION_INVISIBLE )
+		if( nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE) )
 			return 1;
-		//Failed to run OnTouch event, so just click the npc
 		ontouch = npc_ontouch_event(sd, nd);
 		ontouch2 = npc_ontouch2_event(sd, nd);
-		if( ontouch > 0 && ontouch2 > 0 ) {
+		if( ontouch > 0 && ontouch2 > 0 ) { //Failed to run OnTouch event, so just click the npc
 			if( sd->npc_id )
 				return 0;
 			pc_stop_walking(sd, 1);
@@ -931,8 +930,8 @@ int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 		//return 1;
 
 	for( i = 0; i < map[m].npc_num; i++ ) {
-		if( map[m].npc[i]->sc.option&OPTION_INVISIBLE ) {
-			f = 0; //A npc was found, but it is disabled; don't print warning
+		if( map[m].npc[i]->sc.option&(OPTION_HIDE|OPTION_INVISIBLE) ) {
+			f = 0; //A npc was found, but it isn't visible, don't print warning
 			continue;
 		}
 		switch( map[m].npc[i]->subtype ) {
@@ -975,8 +974,8 @@ int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 						continue;
 					if( (sd->bl.x >= (map[m].npc[j]->bl.x - map[m].npc[j]->u.warp.xs) && sd->bl.x <= (map[m].npc[j]->bl.x + map[m].npc[j]->u.warp.xs)) &&
 						(sd->bl.y >= (map[m].npc[j]->bl.y - map[m].npc[j]->u.warp.ys) && sd->bl.y <= (map[m].npc[j]->bl.y + map[m].npc[j]->u.warp.ys)) ) {
-							if( pc_ishiding(sd) || (sd->sc.count && (sd->sc.data[SC_CAMOUFLAGE] || sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__SHADOWFORM])) || pc_isdead(sd) )
-								break; //Hidden or dead chars cannot use warps
+						if( pc_ishiding(sd) || (sd->sc.count && (sd->sc.data[SC_CAMOUFLAGE] || sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__SHADOWFORM])) || pc_isdead(sd) )
+							break; //Hidden or dead chars cannot use warps
 						pc_setpos(sd,map[m].npc[j]->u.warp.mapindex,map[m].npc[j]->u.warp.x,map[m].npc[j]->u.warp.y,CLR_OUTSIGHT);
 						found_warp = 1;
 						break;
@@ -984,10 +983,9 @@ int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 				}
 				if( found_warp > 0 )
 					break;
-				//Failed to run OnTouch event, so just click the npc
 				ontouch = npc_ontouch_event(sd,map[m].npc[i]);
 				ontouch2 = npc_ontouch2_event(sd,map[m].npc[i]);
-				if( ontouch > 0 && ontouch2 > 0 ) {
+				if( ontouch > 0 && ontouch2 > 0 ) { //Failed to run OnTouch event, so just click the npc
 					struct unit_data *ud = unit_bl2ud(&sd->bl);
 
 					//Since walktimer always == INVALID_TIMER at this time, we stop walking manually [Inkfish]
@@ -1037,9 +1035,8 @@ int npc_touch_areanpc2(struct mob_data *md)
 	int xs, ys;
 
 	for( i = 0; i < map[m].npc_num; i++ ) {
-		if( map[m].npc[i]->sc.option&OPTION_INVISIBLE )
+		if( map[m].npc[i]->sc.option&(OPTION_HIDE|OPTION_INVISIBLE) )
 			continue;
-
 		switch( map[m].npc[i]->subtype ) {
 			case NPCTYPE_WARP:
 				if( !( battle_config.mob_warp&1 ) )
@@ -1099,15 +1096,16 @@ int npc_touch_areanpc2(struct mob_data *md)
 int npc_check_areanpc(int flag, int16 m, int16 x, int16 y, int16 range)
 {
 	int i;
-	int x0,y0,x1,y1;
-	int xs,ys;
+	int x0, y0, x1, y1;
+	int xs, ys;
 
-	if( range < 0 ) return 0;
+	if( range < 0 )
+		return 0;
 	x0 = max(x - range, 0);
 	y0 = max(y - range, 0);
 	x1 = min(x + range, map[m].xs - 1);
 	y1 = min(y + range, map[m].ys - 1);
-	
+
 	//First check for npc_cells on the range given
 	i = 0;
 	for( ys = y0; ys <= y1 && !i; ys++ ) {
@@ -1116,13 +1114,12 @@ int npc_check_areanpc(int flag, int16 m, int16 x, int16 y, int16 range)
 				i = 1;
 		}
 	}
-	if( !i ) return 0; //No NPC_CELLs.
-
-	//Now check for the actual NPC on said range.
+	if( !i )
+		return 0; //No NPC_CELLs
+	//Now check for the actual NPC on said range
 	for( i = 0; i < map[m].npc_num; i++ ) {
-		if( map[m].npc[i]->sc.option&OPTION_INVISIBLE )
+		if( map[m].npc[i]->sc.option&(OPTION_HIDE|OPTION_INVISIBLE) )
 			continue;
-
 		switch( map[m].npc[i]->subtype ) {
 			case NPCTYPE_WARP:
 				if( !(flag&1) )
@@ -1237,13 +1234,13 @@ int npc_click(struct map_session_data *sd, struct npc_data *nd)
 	nullpo_retr(1, sd);
 
 	//This usually happens when the player clicked on a NPC that has the view id
-	//of a mob, to activate this kind of npc it's needed to be in a 2,2 range
-	//from it. If the OnTouch area of a npc, coincides with the 2,2 range of 
+	//of a mob, to activate this kind of NPC it's needed to be in a 2,2 range
+	//from it. If the OnTouch area of a NPC, coincides with the 2,2 range of 
 	//another it's expected that the OnTouch event be put first in stack, because
 	//unit_walktoxy_timer is executed before any other function in this case
 	//so it's best practice to put an 'end;' before OnTouch events in npcs that 
 	//have view ids of mobs to avoid this "issue" [Panikon]
-	if (sd->npc_id) { //The player clicked a npc after entering an OnTouch area
+	if (sd->npc_id) { //The player clicked a NPC after entering an OnTouch area
 		if (sd->areanpc_id != sd->npc_id)
 			ShowError("npc_click: npc_id != 0\n");
 		return 1;
@@ -1252,12 +1249,11 @@ int npc_click(struct map_session_data *sd, struct npc_data *nd)
 	if (!nd)
 		return 1;
 
-	if ((nd = npc_checknear(sd,&nd->bl)) == NULL)
+	if (!(nd = npc_checknear(sd,&nd->bl)))
 		return 1;
 
-	//Hidden/Disabled npc
 	if (nd->class_ < 0 || nd->sc.option&(OPTION_INVISIBLE|OPTION_HIDE))
-		return 1;
+		return 1; //Hidden/disabled NPC
 
 	switch (nd->subtype) {
 		case NPCTYPE_SHOP:
@@ -1354,11 +1350,11 @@ int npc_buysellsel(struct map_session_data *sd, int id, int type)
 		return 1;
 	}
 
-	if (nd->sc.option&OPTION_INVISIBLE)	// Can't buy if npc is not visible (hack?)
-		return 1;
+	if (nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE))
+		return 1; //Can't buy if NPC isn't visible (hack?)
 
-	if (nd->class_ < 0 && !sd->state.callshop) // Not called through a script and is not a visible NPC so an invalid call
-		return 1;
+	if (nd->class_ < 0 && !sd->state.callshop)
+		return 1; //Not called through a script and is not a visible NPC so an invalid call
 
 	if (nd->subtype == NPCTYPE_ITEMSHOP) {
 		char output[CHAT_SIZE_MAX];

@@ -3846,7 +3846,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 				case GN_SPORE_EXPLOSION:
 					clif_skill_damage(src,target,tick,status_get_amotion(src),0,-30000,1,skl->skill_id,skl->skill_lv,DMG_SKILL);
 					map_foreachinrange(skill_area_sub,target,skill_get_splash(skl->skill_id,skl->skill_lv),BL_CHAR,
-						src,skl->skill_id,skl->skill_lv,0,skl->flag|BCT_ENEMY|1,skill_castend_damage_id);
+						src,skl->skill_id,skl->skill_lv,tick,skl->flag|BCT_ENEMY|1,skill_castend_damage_id);
 					break;
 				//For SR_FLASHCOMBO
 				case SR_DRAGONCOMBO:
@@ -4045,6 +4045,84 @@ void skill_reveal_trap_inarea(struct block_list *src, int range, int x, int y)
 		return;
 	nullpo_retv(src);
 	map_foreachinarea(skill_reveal_trap, src->m, x-range, y-range, x+range, y+range, BL_SKILL);
+}
+
+/**
+ * Process tarot card's effects
+ * @author: [Playtester]
+ * @param src: Source of the tarot card effect
+ * @param bl: Target of the tartor card effect
+ * @param skill_id: ID of the skill used
+ * @param skill_lv: Level of the skill used
+ * @param tick: Processing tick time
+ * @return Card number
+ */
+static int skill_tarotcard(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int tick)
+{
+	int rate = rnd()%100;
+
+	if (rate < 10) { //The Fool
+		status_percent_damage(src, bl, 0, 100, false);
+		return 1;
+	} else if (rate < 20) { //The Magician
+		sc_start(src, bl, SC_INCMATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
+		return 2;
+	} else if (rate < 30) { //The High Priestess
+		status_change_clear_buffs(bl, SCCB_BUFFS|SCCB_CHEM_PROTECT, 0);
+		return 3;
+	} else if (rate < 37) { //The Chariot
+		status_fix_damage(src, bl, 1000,
+			clif_damage(src, bl, tick, 0, 0, 1000, 0, DMG_NORMAL, 0, false));
+		if (!status_isdead(bl)) {
+			int pos[] = { EQP_HELM,EQP_SHIELD,EQP_ARMOR };
+
+			skill_break_equip(src, bl, pos[rnd()%3], 10000, BCT_ENEMY);
+		}
+		return 4;
+	} else if (rate < 47) { //Strength
+		sc_start(src, bl, SC_INCATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
+		return 5;
+	} else if (rate < 62) { //The Lovers
+		if (!map_flag_vs(bl->m))
+			unit_warp(bl, -1, -1, -1, CLR_TELEPORT);
+		status_heal(src, 2000, 0, 0);
+		return 6;
+	} else if (rate < 63) { //Wheel of Fortune
+		//Recursive call
+		skill_tarotcard(src, bl, skill_id, skill_lv, tick);
+		skill_tarotcard(src, bl, skill_id, skill_lv, tick);
+		return 7;
+	} else if (rate < 69) { //The Hanged Man
+		enum sc_type sc[] = { SC_STONE,SC_FREEZE,SC_STOP };
+
+		sc_start(src, bl, sc[rnd()%3], 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+		return 8;
+	} else if (rate < 74) { //Death
+		sc_start(src, bl, SC_POISON, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+		sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+		status_change_start(src, bl, SC_COMA, 10000, skill_lv, 0, src->id, 0, 0, SCFLAG_NONE);
+		return 9;
+	} else if (rate < 82) { //Temperance
+		sc_start(src, bl, SC_CONFUSION, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+		return 10;
+	} else if (rate < 83) { //The Devil
+		status_fix_damage(src, bl, 6666,
+			clif_damage(src, bl, tick, 0, 0, 6666, 0, DMG_NORMAL, 0, false));
+		sc_start(src, bl, SC_INCATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
+		sc_start(src, bl, SC_INCMATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
+		sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+		return 11;
+	} else if (rate < 85) { //The Tower
+		status_fix_damage(src, bl, 4444,
+			clif_damage(src, bl, tick, 0, 0, 4444, 0, DMG_NORMAL, 0, false));
+		return 12;
+	} else if (rate < 90) { //The Star
+		sc_start(src, bl, SC_STUN, 100, skill_lv, 5000);
+		return 13;
+	} else { //The Sun
+		sc_start(src, bl, SC_TAROTCARD, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+		return 14;
+	}
 }
 
 /*==========================================
@@ -8035,9 +8113,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case CG_TAROTCARD: {
-				int eff, count = -1;
+				int card = -1;
 
-				if ((tsc && tsc->data[SC_BASILICA]) || (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd)))) {
+				if ((tsc && (tsc->data[SC_BASILICA] || tsc->data[SC_TAROTCARD])) ||
+					(dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd)))) {
 					map_freeblock_unlock();
 					return 1;
 				}
@@ -8051,75 +8130,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 					status_zap(src,0,req.sp); //Consume sp only if succeeded [Inkfish]
 				}
-				do {
-					eff = rnd()%14;
-					switch (eff) {
-						case 0: //The Fool
-							status_percent_damage(src,bl,0,100,false);
-							break;
-						case 1:	//The Magician
-							sc_start(src,bl,SC_INCMATKRATE,100,-50,skill_get_time2(skill_id,skill_lv));
-							break;
-						case 2:	//The High Priestess
-							status_change_clear_buffs(bl,SCCB_BUFFS|SCCB_CHEM_PROTECT,0);
-							break;
-						case 3: //The Chariot
-							status_fix_damage(src,bl,1000,
-								clif_damage(src,bl,tick,0,0,1000,0,DMG_NORMAL,0,false));
-							if (!status_isdead(bl)) {
-								int pos[] = { EQP_HELM,EQP_SHIELD,EQP_ARMOR };
-
-								skill_break_equip(src,bl,pos[rnd()%3],10000,BCT_ENEMY);
-							}
-							break;
-						case 4:	//Strength
-							sc_start(src,bl,SC_INCATKRATE,100,-50,skill_get_time2(skill_id,skill_lv));
-							break;
-						case 5:	//The Lovers
-							if (!map_flag_vs(bl->m))
-								unit_warp(bl,-1,-1,-1,CLR_TELEPORT);
-							status_heal(src,2000,0,0);
-							break;
-						case 6:	//Wheel of Fortune
-							if (count == -1)
-								count = 3;
-							else //Should not re-trigger this one
-								count++;
-							break;
-						case 7:	{ //The Hanged Man
-								enum sc_type sc[] = { SC_STONE,SC_FREEZE,SC_STOP };
-
-								sc_start(src,bl,sc[rnd()%3],100,skill_lv,skill_get_time2(skill_id,skill_lv));
-							}
-							break;
-						case 8: //Death
-							sc_start(src,bl,SC_POISON,100,skill_lv,skill_get_time2(skill_id,skill_lv));
-							sc_start(src,bl,SC_CURSE,100,skill_lv,skill_get_time2(skill_id,skill_lv));
-							status_change_start(src,bl,SC_COMA,10000,skill_lv,0,src->id,0,0,SCFLAG_NONE);
-							break;
-						case 9:	//Temperance
-							sc_start(src,bl,SC_CONFUSION,100,skill_lv,skill_get_time2(skill_id,skill_lv));
-							break;
-						case 10: //The Devil
-							status_fix_damage(src,bl,6666,
-								clif_damage(src,bl,tick,0,0,6666,0,DMG_NORMAL,0,false));
-							sc_start(src,bl,SC_INCATKRATE,100,-50,skill_get_time2(skill_id,skill_lv));
-							sc_start(src,bl,SC_INCMATKRATE,100,-50,skill_get_time2(skill_id,skill_lv));
-							sc_start(src,bl,SC_CURSE,100,skill_lv,skill_get_time2(skill_id,skill_lv));
-							break;
-						case 11: //The Tower
-							status_fix_damage(src,bl,4444,
-								clif_damage(src,bl,tick,0,0,4444,0,DMG_NORMAL,0,false));
-							break;
-						case 12: //The Star
-							sc_start(src,bl,SC_STUN,100,skill_lv,5000);
-							break;
-						case 13: //The Sun
-							sc_start(src,bl,SC_TAROTCARD,100,-20,skill_get_time2(skill_id,skill_lv));
-							break;
-					}
-				} while ((--count) > 0);
-				clif_specialeffect((eff != 5 ? bl : src),523 + eff,AREA);
+				card = skill_tarotcard(src,bl,skill_id,skill_lv,tick); //Actual effect is executed here
+				clif_specialeffect((card == 6 ? src : bl),522 + card,AREA);
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			}
 			break;
@@ -14343,6 +14355,12 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			if( is_boss(bl) || battle_check_undead(status_get_race(bl),status_get_element(bl)) ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false;
+			}
+			break;
+		case ALL_ANGEL_PROTECT:
+			if( sd && bl->type != BL_PC ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				return false;
 			}
 			break;

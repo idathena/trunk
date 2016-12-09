@@ -406,7 +406,7 @@ void initChangeTables(void) {
 	set_sc( WS_CARTBOOST         , SC_CARTBOOST       , SI_CARTBOOST       , SCB_SPEED );
 	set_sc( ST_CHASEWALK         , SC_CHASEWALK       , SI_CHASEWALK       , SCB_SPEED );
 	set_sc( ST_REJECTSWORD       , SC_REJECTSWORD     , SI_SWORDREJECT     , SCB_NONE );
-	set_sc( CG_TAROTCARD         , SC_TAROTCARD	      , SI_TAROTCARD       , SCB_MATK|SCB_FLEE|SCB_DEF );
+	set_sc( CG_TAROTCARD         , SC_TAROTCARD       , SI_TAROTCARD       , SCB_NONE );
 	set_sc( CG_MARIONETTE        , SC_MARIONETTE      , SI_MARIONETTE_MASTER, SCB_STR|SCB_AGI|SCB_VIT|SCB_INT|SCB_DEX|SCB_LUK );
 	set_sc( CG_MARIONETTE        , SC_MARIONETTE2     , SI_MARIONETTE      , SCB_STR|SCB_AGI|SCB_VIT|SCB_INT|SCB_DEX|SCB_LUK );
 	add_sc( LK_SPIRALPIERCE      , SC_STOP            );
@@ -3163,6 +3163,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	sd->critical_rate = sd->hit_rate = sd->flee_rate = sd->flee2_rate = 100;
 	sd->def_rate = sd->def2_rate = sd->mdef_rate = sd->mdef2_rate = 100;
 	sd->regen.state.block = 0;
+	sd->regen.state.walk = 0;
 	sd->add_max_weight = 0;
 
 	//Zeroed arrays, order follows the order in pc.h
@@ -3777,8 +3778,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 
 	if(pc_checkskill(sd,SM_MOVINGRECOVERY) > 0)
 		sd->regen.state.walk = 1;
-	else
-		sd->regen.state.walk = 0;
 
 	//Skill SP cost
 	if((lv = pc_checkskill(sd,HP_MANARECHARGE)) > 0)
@@ -4158,13 +4157,13 @@ void status_calc_regen(struct block_list *bl, struct status_data *status, struct
 			val = regen->sp * (100 + lv * 3) / 100;
 			regen->sp = cap_value(val, 1, SHRT_MAX);
 		}
-		sregen = regen->sregen; //Only players have skill/sitting skill regen for now
 
+		//Skill regeneration
+		sregen = regen->sregen;
 		val = 0;
 		if( (lv = pc_checkskill(sd, SM_RECOVERY)) > 0 )
 			val += lv * 5 + lv * status->max_hp / 500;
 		sregen->hp = cap_value(val, 0, SHRT_MAX);
-
 		val = 0;
 		if( (lv = pc_checkskill(sd, MG_SRECOVERY)) > 0 )
 			val += lv * 3 + lv * status->max_sp / 500;
@@ -4173,15 +4172,15 @@ void status_calc_regen(struct block_list *bl, struct status_data *status, struct
 		if( (lv = pc_checkskill(sd, WM_LESSON)) > 0 )
 			val += lv * 3 + lv * status->max_sp / 500;
 		sregen->sp = cap_value(val, 0, SHRT_MAX);
-		sregen = regen->ssregen; //Skill-related recovery (only when sit)
 
+		//Sitting skill regeneration
+		sregen = regen->ssregen;
 		val = 0;
 		if( (lv = pc_checkskill(sd, MO_SPIRITSRECOVERY)) > 0 )
 			val += lv * 4 + lv * status->max_hp / 500;
 		if( (lv = pc_checkskill(sd, TK_HPTIME)) > 0 && sd->state.rest )
 			val += lv * 30 + lv * status->max_hp / 500;
 		sregen->hp = cap_value(val, 0, SHRT_MAX);
-
 		val = 0;
 		if( (lv = pc_checkskill(sd, TK_SPTIME)) > 0 && sd->state.rest ) {
 			val += lv * 3 + lv * status->max_sp / 500;
@@ -4207,13 +4206,11 @@ void status_calc_regen(struct block_list *bl, struct status_data *status, struct
 	} else if( bl->type == BL_MER ) {
 		val = (status->max_hp * status->vit / 10000 + 1) * 6;
 		regen->hp = cap_value(val, 1, SHRT_MAX);
-
 		val = (status->max_sp * (status->int_ + 10) / 750) + 1;
 		regen->sp = cap_value(val, 1, SHRT_MAX);
 	} else if( bl->type == BL_ELEM ) {
 		val = (status->max_hp * status->vit / 10000 + 1) * 6;
 		regen->hp = cap_value(val, 1, SHRT_MAX);
-
 		val = (status->max_sp * (status->int_ + 10) / 750) + 1;
 		regen->sp = cap_value(val, 1, SHRT_MAX);
 	}
@@ -4293,8 +4290,8 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 	}
 
 	if( sc->data[SC_ANGEL_PROTECT] ) {
-		regen->rate.hp += 50;
-		regen->rate.sp += 50;
+		regen->hp += cap_value(regen->hp * 50 / 100, 1, SHRT_MAX);
+		regen->sp += cap_value(regen->sp * 50 / 100, 1, SHRT_MAX);
 	}
 
 	if( sc->data[SC_GT_REVITALIZE] ) {
@@ -5337,7 +5334,7 @@ static unsigned short status_calc_batk(struct block_list *bl, struct status_chan
 		batk += sc->data[SC_QUEST_BUFF3]->val1;
 	if(sc->data[SC_2011RWC_SCROLL])
 		batk += 30;
-	if(sc->data[SC_INCATKRATE] && bl->type == BL_MOB)
+	if(sc->data[SC_INCATKRATE] && bl->type != BL_PC)
 		batk += batk * sc->data[SC_INCATKRATE]->val1 / 100;
 	if(sc->data[SC_PROVOKE]
 #ifdef RENEWAL
@@ -5494,8 +5491,6 @@ static unsigned short status_calc_matk(struct block_list *bl, struct status_chan
 			matk += matk * sc->data[SC_INCMATKRATE]->val1 / 100;
 		if(sc->data[SC_MINDBREAKER])
 			matk += matk * sc->data[SC_MINDBREAKER]->val2 / 100;
-		if(sc->data[SC_TAROTCARD])
-			matk += matk * sc->data[SC_TAROTCARD]->val1 / 100;
 		return (unsigned short)cap_value(matk,0,USHRT_MAX);
 	}
 #ifndef RENEWAL
@@ -5601,8 +5596,6 @@ static short status_calc_hit(struct block_list *bl, struct status_change *sc, in
 		hit += sc->data[SC_MERC_HITUP]->val2;
 	if(sc->data[SC_MTF_HITFLEE])
 		hit += sc->data[SC_MTF_HITFLEE]->val1;
-	if(sc->data[SC_INCHITRATE])
-		hit += hit * sc->data[SC_INCHITRATE]->val1 / 100;
 	if(sc->data[SC_ADJUSTMENT])
 		hit -= 30;
 	if(sc->data[SC_ILLUSIONDOPING])
@@ -5673,8 +5666,6 @@ static short status_calc_flee(struct block_list *bl, struct status_change *sc, i
 		flee += sc->data[SC_GOLDENE_FERSE]->val2;
 	if(sc->data[SC_INCFLEERATE])
 		flee += flee * sc->data[SC_INCFLEERATE]->val1 / 100;
-	if(sc->data[SC_TAROTCARD])
-		flee += flee * sc->data[SC_TAROTCARD]->val1 / 100;
 	if(sc->data[SC_WIND_STEP_OPTION])
 		flee += flee * sc->data[SC_WIND_STEP_OPTION]->val2 / 100;
 	if(sc->data[SC_SMOKEPOWDER])
@@ -5744,8 +5735,6 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 #endif
 		if(sc->data[SC_INCDEFRATE])
 			def += def * sc->data[SC_INCDEFRATE]->val1 / 100;
-		if(sc->data[SC_TAROTCARD])
-			def += def * sc->data[SC_TAROTCARD]->val1 / 100;
 		if(sc->data[SC_NEUTRALBARRIER])
 			def += def * sc->data[SC_NEUTRALBARRIER]->val2 / 100;
 		if(sc->data[SC_FORCEOFVANGUARD])
@@ -8954,6 +8943,13 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val2 = tick / tick_time;
 					status_change_clear_buffs(bl,SCCB_BUFFS|SCCB_DEBUFFS|SCCB_CHEM_PROTECT|SCCB_REFRESH,0); //Remove buffs/debuffs
 				}
+				break;
+			case SC_TAROTCARD:
+				sc_start(src,bl,SC_INCATKRATE,100,-20,tick);
+				sc_start(src,bl,SC_INCMATKRATE,100,-20,tick);
+				sc_start(src,bl,SC_INCHITRATE,100,-20,tick);
+				sc_start(src,bl,SC_INCFLEERATE,100,-20,tick);
+				sc_start(src,bl,SC_INCDEFRATE,100,-20,tick);
 				break;
 			case SC_MARIONETTE: {
 					int stat;
@@ -13197,7 +13193,7 @@ static int status_natural_heal(struct block_list *bl, va_list args)
 	//Natural HP regen
 	if (flag&RGN_HP) {
 		rate = (int)(natural_heal_diff_tick * (regen->rate.hp / 100. * multi));
-		if (ud && ud->walktimer != INVALID_TIMER)
+		if (ud && ud->walktimer != INVALID_TIMER && !(sc && sc->data[SC_GT_REVITALIZE]))
 			rate /= 2;
 		//Homun HP regen fix (they should regen as if they were sitting (twice as fast)
 		if (bl->type == BL_HOM)
@@ -13274,7 +13270,7 @@ static int status_natural_heal(struct block_list *bl, va_list args)
 	return flag;
 }
 
-//Natural heal main timer.
+//Natural heal main timer
 static int status_natural_heal_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	natural_heal_diff_tick = DIFF_TICK(tick,natural_heal_prev_tick);

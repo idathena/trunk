@@ -9486,10 +9486,8 @@ BUILDIN_FUNC(doevent)
 	const char *event = script_getstr(st,2);
 	struct map_session_data *sd;
 
-	if( ( sd = script_rid2sd(st) ) == NULL ) {
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
-	}
-
 	check_event(st,event);
 	npc_event(sd,event,0);
 	return SCRIPT_CMD_SUCCESS;
@@ -9500,9 +9498,11 @@ BUILDIN_FUNC(doevent)
 BUILDIN_FUNC(donpcevent)
 {
 	const char *event = script_getstr(st,2);
+
 	check_event(st,event);
 	if( !npc_event_do(event) ) {
 		struct npc_data *nd = map_id2nd(st->oid);
+
 		ShowDebug("NPCEvent '%s' not found! (source: %s)\n",event,nd?nd->name:"Unknown");
 		script_pushint(st,0);
 	} else
@@ -9510,13 +9510,14 @@ BUILDIN_FUNC(donpcevent)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/// for Aegis compatibility
-/// basically a specialized 'donpcevent', with the event specified as two arguments instead of one
+/// For Aegis compatibility
+/// Basically a specialized 'donpcevent', with the event specified as two arguments instead of one
 BUILDIN_FUNC(cmdothernpc) //Added by RoVeRT
 {
 	const char *npc = script_getstr(st,2);
 	const char *command = script_getstr(st,3);
 	char event[EVENT_NAME_LENGTH];
+
 	snprintf(event,sizeof(event),"%s::OnCommand%s",npc,command);
 	check_event(st,event);
 	npc_event_do(event);
@@ -13269,6 +13270,7 @@ BUILDIN_FUNC(specialeffect)
 
 	if( script_hasdata(st,4) ) {
 		TBL_NPC *nd = npc_name2id(script_getstr(st,4));
+
 		if( nd )
 			clif_specialeffect(&nd->bl,type,target);
 	} else {
