@@ -6097,9 +6097,9 @@ Examples:
 
 These two commands will disable and enable, respectively, an NPC object 
 specified by name. The disabled NPC will disappear from sight and will no longer 
-be triggerable in the normal way. It is not clear whether it will still be 
-accessible through 'donpcevent' and other triggering commands, but it probably 
-will be. You can disable even warp NPCs if you know their object names, which is 
+be triggerable in the normal way. It will still be accessible through 'donpcevent'
+or 'doevent', but will not trigger OnTouch label or any event such as OnMyMobDead.
+You can disable even warp NPCs if you know their object names, which is 
 an easy way to make a map only accessible through walking half the time. Then 
 you 'enablenpc' them back.
 
@@ -6114,14 +6114,9 @@ copies, and then disable all except one.
 *hideoffnpc "<NPC object name>";
 
 These commands will make the NPC object specified display as hidden/visible, 
-even though not actually disabled per se. Hidden as in thief Hide skill, but 
-unfortunately, not detectable by Ruwach or Sight.
+even though not actually disabled. The hidden NPC will not trigger OnTouch label.
 
-As they are now, these commands are pointless, it is suggested to use 
-'disablenpc'/'enablenpc', because these two commands actually unload the NPC 
-sprite location and other accompanying data from memory when it is not used.
-However, you can use these for some quest ideas (such as cloaking NPCs talking 
-while hidden then revealing.... you can wonder around =P
+Hidden as in thief Hide skill, but unfortunately, not detectable by Ruwach or Sight.
 
 ---------------------------------------
 

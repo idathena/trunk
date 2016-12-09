@@ -2532,8 +2532,8 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 	}
 
 	if(sc) {
-		if(sc->data[SC_TAROTCARD])
-			hitrate += sc->data[SC_TAROTCARD]->val1;
+		if(sc->data[SC_INCHITRATE])
+			hitrate += sc->data[SC_INCHITRATE]->val1;
 		if(sc->data[SC_MTF_ASPD])
 			hitrate += sc->data[SC_MTF_ASPD]->val2;
 		if(sc->data[SC_MTF_ASPD2])
@@ -4442,10 +4442,6 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 		if(skill_id == CR_SHIELDBOOMERANG && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_CRUSADER) {
 			ATK_ADDRATE(wd.damage, wd.damage2, 100);
 			RE_ALLATK_ADDRATE(wd, 100);
-		}
-		if(sc->data[SC_TAROTCARD]) {
-			ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_TAROTCARD]->val1);
-			RE_ALLATK_ADDRATE(wd, sc->data[SC_TAROTCARD]->val1);
 		}
 		if(!skill_id) {
 			if(sc->data[SC_ENCHANTBLADE]) { //[((Skill Level x 20) + 100) x (Caster's Base Level / 150)] + Caster's INT + MATK - MDEF - MDEF2
