@@ -25,12 +25,12 @@ geffen_in,110,172,0	script	Christopher#1	63,{
 	mes "Welcome to Christopher's Workshop. Ye can get all yer stuff for forging here. What business";
 	mes "brings ye to me?";
 	next;
-	switch(select("Purchase Anvil:Purchase Forging Item:Purchase Metal:Purify Rough Ores:Cancel")) {
+	switch (select("Purchase Anvil:Purchase Forging Item:Purchase Metal:Purify Rough Ores:Cancel")) {
 	case 1:
 		mes "[Christopher Guillenrow]";
 		mes "A better Anvil gives ye a greeeater chance to make better weapons, ye know? But they'll cost ye more zeny. Just get it off yer chest and buy what fits your purposes best, laddy.";
 		next;
-		switch(select("Anvil - 30,000 zeny:Oridecon Anvil - 120,000 zeny:Golden Anvil - 300,000 zeny:Better Anvil than the others.:Cancel.")) {
+		switch (select("Anvil - 30,000 zeny:Oridecon Anvil - 120,000 zeny:Golden Anvil - 300,000 zeny:Better Anvil than the others.:Cancel.")) {
 		case 1:
 			if (Zeny < 30000) {
 				mes "[Christopher Guillenrow]";
@@ -80,12 +80,12 @@ geffen_in,110,172,0	script	Christopher#1	63,{
 		mes "[Christopher Guillenrow]";
 		mes "A respectable blacksmith uses fine tools. Ye can become one o'those with me Stuff. Choose anything ye want.";
 		next;
-		switch(select("Mini-Furnace - 150 zeny:Iron Hammer - 1000 zeny:Golden Hammer - 3000 zeny:Oridecon Hammer - 5000 zeny:Cancel.")) {
+		switch (select("Mini-Furnace - 150 zeny:Iron Hammer - 1000 zeny:Golden Hammer - 3000 zeny:Oridecon Hammer - 5000 zeny:Cancel.")) {
 		case 1:
 			mes "[Christopher Guillenrow]";
 			mes "It's a much needed tool fer refining metal! So, How many do ye wish to buy? If ye want to quit, just type the number '0.'";
 			next;
-			while(1) {
+			while (1) {
 				input .@input;
 				if (.@input == 0) {
 					mes "[Christopher Guillenrow]";
@@ -159,12 +159,12 @@ geffen_in,110,172,0	script	Christopher#1	63,{
 		mes "[Christopher Guillenrow]";
 		mes "I prepare every Metal, and only the high quality ones o'course. Now then, which one do ye need?";
 		next;
-		switch(select("Phracon - 200z.:Emveretarcon - 1000z.:Cancel.")) {
+		switch (select("Phracon - 200z.:Emveretarcon - 1000z.:Cancel.")) {
 		case 1:
 			mes "[Christopher Guillenrow]";
 			mes "So, How many do ye wish to buy? If ye dont want anything, just type the number as '0.'";
 			next;
-			while(1) {
+			while (1) {
 				input .@input;
 				if (.@input == 0) {
 					mes "[Christopher Guillenrow]";
@@ -202,7 +202,7 @@ geffen_in,110,172,0	script	Christopher#1	63,{
 			mes "[Christopher Guillenrow]";
 			mes "So, how many do ye wish to buy? If ye dont want anything at all, just type the number as '0.'";
 			next;
-			while(1) {
+			while (1) {
 				input .@input;
 				if (.@input == 0) {
 					mes "[Christopher Guillenrow]";
@@ -245,7 +245,7 @@ geffen_in,110,172,0	script	Christopher#1	63,{
 		mes "[Christopher Guillenrow]";
 		mes "I can purify yer Oridecon and Elunium. I make a refined Ore out of 5 o'each rough ones. Well... Which one do ye want to make?";
 		next;
-		switch(select("Make Oridecon:Make Elunium:Cancel.")) {
+		switch (select("Make Oridecon:Make Elunium:Cancel.")) {
 		case 1:
 			if (countitem(756) < 5) {
 				mes "[Christopher Guillenrow]";
@@ -300,13 +300,13 @@ ein_in01,38,29,0	script	Paul Spanner	63,{
 	mes "In my shop, you will find everything that you need in forging.";
 	mes "Tell me what you need.";
 	next;
-	switch(select("Purchase Anvil.:Purchase Forging Items.:Purchase Metal.:Process Ores.:Quit.")) {
+	switch (select("Purchase Anvil.:Purchase Forging Items.:Purchase Metal.:Process Ores.:Quit.")) {
 	case 1:
 		mes "[Paul Spanner]";
 		mes "Anvil is the most necessary item for Blacksmiths.";
 		mes "Since you will use an Anvil more than once, you'd better buy a nice one.";
 		next;
-		switch(select("Anvil - 30,000z.:Oridecon Anvil - 120,000z.:Golden Anvil - 300,000z.:I need a better anvil.:Cancel.")) {
+		switch (select("Anvil - 30,000z.:Oridecon Anvil - 120,000z.:Golden Anvil - 300,000z.:I need a better anvil.:Cancel.")) {
 		case 1:
 			if (Zeny < 30000) {
 				mes "[Paul Spanner]";
@@ -358,7 +358,7 @@ ein_in01,38,29,0	script	Paul Spanner	63,{
 		mes "You need various materials to process ores and to forge weapons.";
 		mes "I have everything that you need. Take a look.";
 		next;
-		switch(select("Mini Furnace - 150z.:Iron Hammer - 1,000z.:Golden Hammer - 3,000z.:Oridecon Hammer - 5,000z.:Cancel.")) {
+		switch (select("Mini Furnace - 150z.:Iron Hammer - 1,000z.:Golden Hammer - 3,000z.:Oridecon Hammer - 5,000z.:Cancel.")) {
 		case 1:
 			set .@item,612;
 			set .@item_cost,150;
@@ -390,7 +390,7 @@ ein_in01,38,29,0	script	Paul Spanner	63,{
 		mes "[Paul Spanner]";
 		mes "So, how many do you need? If you want to cancel the trade, enter '0'.";
 		next;
-		while(1) {
+		while (1) {
 			input .@input;
 			if (.@input == 0) {
 				mes "[Paul Spanner]";
@@ -427,7 +427,7 @@ ein_in01,38,29,0	script	Paul Spanner	63,{
 		mes "I have high quality metal.";
 		mes "So, which metal would you like to buy?";
 		next;
-		switch(select("Phracon - 200z.:Emveretarcon - 1,000z.:Quit.")) {
+		switch (select("Phracon - 200z.:Emveretarcon - 1,000z.:Quit.")) {
 		case 1:
 			set .@item,1010;
 			set .@item_price,200;
@@ -444,7 +444,7 @@ ein_in01,38,29,0	script	Paul Spanner	63,{
 		mes "[Paul Spanner]";
 		mes "So, how many of them do you need? If you want to cancel the trade, enter '0'.";
 		next;
-		while(1) {
+		while (1) {
 			input .@input;
 			if (.@input == 0) {
 				mes "[Paul Spanner]";
@@ -481,7 +481,7 @@ ein_in01,38,29,0	script	Paul Spanner	63,{
 		mes "I can process Oridecon and Elunium for you.";
 		mes "You need 5 ores to process them into one Oridecon or Elunium.";
 		mes "So, which one do you want to process?";
-		switch(select("Oridecon:Elunium:Quit.")) {
+		switch (select("Oridecon:Elunium:Quit.")) {
 		case 1:
 			if (countitem(756) < 5) {
 				mes "[Paul Spanner]";
@@ -568,23 +568,22 @@ function	script	refinemain	{
 	mes "know what you want me to refine.";
 	next;
 
-	setarray .@position$[1], "Head","Body","Left hand","Right hand","Robe","Shoes","Accessory 1","Accessory 2","Head 2","Head 3";
-	set .@menu$,"";
-	for(set .@i,1; .@i<=10; set .@i,.@i+1) {
-		if(getequipisequiped(.@i)) {
-			set .@menu$, .@menu$ + .@position$[.@i] + "-" + "[" + getequipname(.@i) + "]";
+	setarray .@indices[1], EQI_HEAD_TOP, EQI_ARMOR, EQI_HAND_L, EQI_HAND_R, EQI_GARMENT, EQI_SHOES, EQI_ACC_L, EQI_ACC_R, EQI_HEAD_MID, EQI_HEAD_LOW;
+	for (set .@i,1; .@i<getarraysize(.@indices); set .@i,.@i+1) {
+		if (getequipisequiped(.@indices[.@i])) {
+			set .@menu$, .@menu$ + F_getpositionname(.@indices[.@i]) + "-[" + getequipname(.@indices[.@i]) + "]";
 			set .@equipped,1;
 		}
 		set .@menu$, .@menu$ + ":";
 	}
-	if (.@equipped == 0) {
+	if (!.@equipped) {
 		mes "[" + getarg(0) + "]";
 		mes "I don't think I can refine any items you have...";
 		close;
 	}
-	set .@part, select(.@menu$);
+	set .@part, .@indices[ select(.@menu$) ];
 
-	if(!getequipisequiped(.@part)) { //custom check
+	if (!getequipisequiped(.@part)) { //custom check
 		mes "[" + getarg(0) + "]";
 		mes "You're not wearing";
 		mes "anything there that";
@@ -593,14 +592,14 @@ function	script	refinemain	{
 		close;
 	}
 	//Check if the item is refinable...
-	if(!getequipisenableref(.@part)) {
+	if (!getequipisenableref(.@part)) {
 		mes "[" + getarg(0) + "]";
 		mes "I don't think I can";
 		mes "refine this item at all...";
 		close;
 	}
 	//Check to see if the items is already +10
-	if(getequiprefinerycnt(.@part) >= 10) {
+	if (getequiprefinerycnt(.@part) >= 10) {
 		mes "[" + getarg(0) + "]";
 		mes "I can't refine this";
 		mes "any more. This is as";
@@ -609,33 +608,33 @@ function	script	refinemain	{
 	}
 	set .@refineitemid, getequipid(.@part); // save id of the item
 	set .@refinerycnt, getequiprefinerycnt(.@part); //save refinery count
-	switch(getequipweaponlv(.@part)){
-	case 0: 	//Refine Armor
+	switch (getequipweaponlv(.@part)) {
+	case 0: //Refine Armor
 		set .@price,2000;
 		set .@material,985; //Elunium
 		set .@safe,4;
 		break;
-	case 1: 	//Refine Level 1 Weapon
+	case 1: //Refine Level 1 Weapon
 		set .@price,50;
 		set .@material,1010; //Phracon
 		set .@safe,7;
 		break;
-	case 2: 	//Refine Level 2 Weapon
+	case 2: //Refine Level 2 Weapon
 		set .@price,200;
 		set .@material,1011; //Emveretarcon
 		set .@safe,6;
 		break;
-	case 3: 	//Refine Level 3 Weapon
+	case 3: //Refine Level 3 Weapon
 		set .@price,5000;
 		set .@material,984; //Oridecon
 		set .@safe,5;
 		break;
-	case 4: 	//Refine Level 4 Weapon
+	case 4: //Refine Level 4 Weapon
 		set .@price,20000;
 		set .@material,984; //Oridecon
 		set .@safe,4;
 		break;
-	case 5: 	//Refine other stuff?
+	case 5: //Refine other stuff?
 		set .@price,2000;
 		set .@material,985; //Elunium
 		set .@safe,4;
@@ -644,7 +643,7 @@ function	script	refinemain	{
 
 	// If the VIP system is enabled, the prices for non-VIP players are considerably higher.
 	if (VIP_SCRIPT && !vip_status(1)) {
-		switch(getequipweaponlv(.@part)) {
+		switch (getequipweaponlv(.@part)) {
 			case 0: set .@price, .@price * 10; break;
 			case 1: set .@price, .@price * 40; break;
 			case 2: set .@price, .@price * 50; break;
@@ -654,25 +653,25 @@ function	script	refinemain	{
 		}
 	}
 
-	if(.@features != 1) {
+	if (.@features != 1) {
 		mes "[" + getarg(0) + "]";
 		mes "To refine this I need";
 		mes "one ^003366"+getitemname(.@material)+"^000000 and";
 		mes "a service fee of " + .@price + " Zeny.";
 		mes "Do you really wish to continue?";
 		next;
-		if(select("Yes:No") == 2){
+		if (select("Yes:No") == 2) {
 			mes "[" + getarg(0) + "]";
 			mes "Yeah...";
 			mes "There's no need to";
 			mes "rush. Take your time.";
 			close;
 		}
-		if(getequippercentrefinery(.@part) < 100) {
+		if (getequippercentrefinery(.@part) < 100) {
 			mes "[" + getarg(0) + "]";
 			mes "Oh no! If I continue to";
 			mes "refine this, there's a risk it could";
-			switch(.@material) {
+			switch (.@material) {
 			case 985:
 				mes "be destroyed! That means that ^FF0000this equipment^000000, and ^FF0000any cards^000000 or special properties added to this armor, ^FF0000will be gone^000000.";
 				break;
@@ -690,14 +689,14 @@ function	script	refinemain	{
 			mes "^FF0000lose this weapon^000000 forever.";
 			mes "Do you still want to refine?";
 			next;
-			if(select("Yes:No") == 2){
+			if (select("Yes:No") == 2) {
 				mes "[" + getarg(0) + "]";
 				mes "I completely agree...";
 				mes "I might be a great refiner, but sometimes even I make mistakes.";
 				close;
 			}
 		}
-		if((countitem(.@material) < 1) || (Zeny < .@price)) {
+		if (countitem(.@material) == 0 || Zeny < .@price) {
 			mes "[" + getarg(0) + "]";
 			mes "You don't seem to have";
 			mes "enough Zeny or "+getitemname(.@material)+"...";
@@ -719,7 +718,7 @@ function	script	refinemain	{
 			close;
 		}
 
-		if(getequippercentrefinery(.@part) <= rand(100)) {
+		if (getequippercentrefinery(.@part) <= rand(100)) {
 			failedrefitem .@part;
 			mes "[" + getarg(0) + "]";
 			emotion (!rand(5))?e_cash:e_omg;
@@ -729,7 +728,7 @@ function	script	refinemain	{
 				mes "Damn it! Not again!";
 				mes "I'm terribly sorry, but you know practice does make perfect.";
 				mes "Um, right? Heh heh...";
-			} else if(.@lose == 2) {
+			} else if (.@lose == 2) {
 				mes "Nooooooo!";
 				mes "It broke!";
 				mes "I-I'm sorry!";
@@ -751,7 +750,7 @@ function	script	refinemain	{
 			mes "Once again,";
 			mes "flawless work";
 			mes "from the master~";
-		} else if(.@win == 2) {
+		} else if (.@win == 2) {
 			mes "Success...!";
 			mes "Yet again, my amazing";
 			mes "talent truly dazzles";
@@ -767,14 +766,14 @@ function	script	refinemain	{
 	}
 
 // New Refining Functions ========================
-	if(getequiprefinerycnt(.@part) < .@safe) {
+	if (getequiprefinerycnt(.@part) < .@safe) {
 		mes "[" + getarg(0) + "]";
 		mes "I can refine this to the safe limit or a desired number of times. It's your choice.";
 		next;
 		set .@menu2,select("To the safe limit, please.","I'll decide how many times.","I've changed my mind...");
 	} else
 		set .@menu2,2;
-	switch(.@menu2){
+	switch (.@menu2) {
 	case 1: 
 		set .@refinecnt,.@safe - getequiprefinerycnt(.@part);
 		break;
@@ -790,12 +789,12 @@ function	script	refinemain	{
 			mes "I can't refine this item that many times.";
 			close;
 		}
-		if(.@refinecheck > .@safe) {
+		if (.@refinecheck > .@safe) {
 			set .@refinecheck,.@refinecheck - .@safe;
 			mes "[" + getarg(0) + "]";
 			mes "This will try to refine the equipment " + .@refinecheck + " times past the safe limit. Your equipment may be destroyed... is that ok?";
 			next;
-			if(select("Yes...","No...") == 2){
+			if (select("Yes...","No...") == 2) {
 				mes "[" + getarg(0) + "]";
 				mes "You said so... So be it.";
 				close;
@@ -812,20 +811,20 @@ function	script	refinemain	{
 	mes "[" + getarg(0) + "]";
 	mes "That will cost you " + .@refinecnt + " " + getitemname(.@material) + " and " + .@fullprice + " Zeny. Is that ok?";
 	next;
-	if(select("Yes","No...") == 2){
+	if (select("Yes","No...") == 2) {
 		mes "[" + getarg(0) + "]";
 		mes "You said so... So be it.";
 		close;
 	}
-	if(countitem(.@material) < .@refinecnt || Zeny < .@fullprice) {
+	if (countitem(.@material) < .@refinecnt || Zeny < .@fullprice) {
 		mes "[" + getarg(0) + "]";
 		mes "Is that all you got? Unfortunately I can't work for you at a lower price. Try putting yourself in my shoes.";
 		close;
 	}
 	set Zeny, Zeny - .@fullprice;
 	delitem .@material,.@refinecnt;
-	while(.@refinecnt){
-		if (getequipisequiped(.@part) == 0) {
+	while (.@refinecnt) {
+		if (!getequipisequiped(.@part)) {
 			mes "[" + getarg(0) + "]";
 			mes "Look here... you don't have any items on...";
 			close;
@@ -838,13 +837,13 @@ function	script	refinemain	{
 			close;
 		} 
 		mes "Clang, clang!!!";
-		if(.@menu2 == 2 && getequippercentrefinery(.@part) <= rand(100)) {
+		if (.@menu2 == 2 && getequippercentrefinery(.@part) <= rand(100)) {
 			failedrefitem .@part;
 			emotion e_omg;
 			mes "[" + getarg(0) + "]";
 			mes "WAHHHH!!! I'm so sorry... I warned you this could happen...";
 			set .@refinecnt,.@refinecnt - 1;
-			if(.@refinecnt == 0) close;
+			if (.@refinecnt == 0) close;
 			mes "Here's the unused Zeny and materials back...";
 			getitem .@material,.@refinecnt;
 			set .@fullprice,.@refinecnt * .@price;
@@ -910,7 +909,7 @@ function	script	phramain	{
 	mes "Weapons, and ^007777Emveretarcon^000000";
 	mes "for Level 2 Weapons.";
 	next;
-	switch(select("Phracon - 200 Zeny:Emveretarcon - 1000 Zeny:Ask about other Metals")) {
+	switch (select("Phracon - 200 Zeny:Emveretarcon - 1000 Zeny:Ask about other Metals")) {
 	case 1:
 		set .@material,1010;
 		set .@price,200;
@@ -930,7 +929,7 @@ function	script	phramain	{
 	mes "So how many do you wish to buy?";
 	mes "If you don't want any, please enter the number, '0.'";
 	next;
-	while(1) {
+	while (1) {
 		input .@input;
 		if (.@input == 0) {
 			mes "[" + getarg(0) + "]";
@@ -1023,7 +1022,7 @@ function	script	orimain	{
 	mes "5 Rough Stones to make";
 	mes "1 pure one for you.";
 	next;
-	switch(select("Make Oridecon:Make Elunium:Ask about Enchanted Stones")) {
+	switch (select("Make Oridecon:Make Elunium:Ask about Enchanted Stones")) {
 	case 1:
 		if (countitem(756) > 4) {
 			delitem 756,5;  //Oridecon_Stone
@@ -1157,7 +1156,7 @@ function	script	repairmain	{
 	mes "You can count on me";
 	mes "for item repairs!";
 	next;
-	switch(select("Actually, I do have some items...:None at the moment.")) {
+	switch (select("Actually, I do have some items...:None at the moment.")) {
 	case 1:
 		set .@checkitem,1;
 		while (1) {
@@ -1187,7 +1186,7 @@ function	script	repairmain	{
 		mes "["+getarg(0)+"]";
 		mes "Each repair costs " + .@repairprice + " Zeny. So to repair all your damaged items would cost " + .@totalcost + " Zeny! Would you like to repair the items?";
 		next;
-		switch(select("Yes:No")) {
+		switch (select("Yes:No")) {
 		case 1:
 			if (Zeny < .@totalcost) {
 				mes "["+getarg(0)+"]";
