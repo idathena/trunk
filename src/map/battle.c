@@ -1451,7 +1451,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			(flag&BF_MAGIC && battle_config.skill_min_damage&2) ||
 			(flag&BF_MISC && battle_config.skill_min_damage&4) )
 		{
-			int div_ = skill_get_num(skill_id,skill_lv);
+			int div_ = (skill_id ? skill_get_num(skill_id,skill_lv) : div);
 
 			switch( skill_id ) {
 				case SU_CN_METEOR:
@@ -1459,13 +1459,9 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 					damage = div_ * -1;
 					break;
 				default:
-					if( !skill_id )
-						div_ = div;
-					damage = (div_ ? div_ : 0);
+					damage = max(div_,0);
 					//Damage that just look like multiple hits but are actually one will show "miss" but still do 1 damage to plants
-					if( !damage )
-						d->dmg_lv = ATK_FLEE;
-					else if( damage > 1 && d->miscflag&1 ) {
+					if( damage > 1 && d->miscflag&1 ) {
 						damage = 1;
 						d->dmg_lv = ATK_FLEE;
 					}
