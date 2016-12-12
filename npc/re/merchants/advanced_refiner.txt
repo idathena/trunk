@@ -29,14 +29,13 @@ malangdo,221,174,6	script	Holink#mal_cash	559,{
 	mes "My daughter is so proud of me, Holink~";
 	mes "What should Holink~ refine today?";
 	next;
-	setarray .@position$[1],"Head","Body","Left Hand","Right Hand","Robe","Shoes","Accessory 1","Accessory 2","Head 2","Head 3";
-	set .@menu$,"";
-	for(set .@i,1; .@i<=10; set .@i,.@i+1)
-		set .@menu$, .@menu$+((getequipisequiped(.@i))?getequipname(.@i):.@position$[.@i]+"-[Empty]")+":";
-	set .@part, select(.@menu$);
+	setarray .@indices[1], EQI_HEAD_TOP, EQI_ARMOR, EQI_HAND_L, EQI_HAND_R, EQI_GARMENT, EQI_SHOES, EQI_ACC_L, EQI_ACC_R, EQI_HEAD_MID, EQI_HEAD_LOW;
+	for (set .@i,1; .@i<=10; set .@i,.@i+1)
+		set .@menu$, .@menu$ + ( getequipisequiped(.@indices[.@i]) ? getequipname(.@indices[.@i]) : F_getpositionname(.@indices[.@i]) +"-[Empty]" ) +":";
+	set .@part, .@indices[ select(.@menu$) ];
 	if (!getequipisequiped(.@part)) {
 		mes "[Holink]";
-		switch(.@part) {
+		switch (.@part) {
 		case 1:
 			mes "My teacher Aragam said meow~";
 			mes "There's no cure for stupidity...";
@@ -78,7 +77,7 @@ malangdo,221,174,6	script	Holink#mal_cash	559,{
 		close;
 	}
 	mes "[Holink]";
-	switch(getequipweaponlv(.@part)) {
+	switch (getequipweaponlv(.@part)) {
 	default:
 	case 0: // Armor
 		set .@price,15000;
@@ -116,7 +115,7 @@ malangdo,221,174,6	script	Holink#mal_cash	559,{
 	mes "You need ^ff9999"+getitemname(.@material)+"^000000 and ^ff9999"+.@price+"^000000 Zeny for this refine, meow~";
 	mes "Want to continue, meow?~";
 	next;
-	if(select("Yes!!:No!!") == 2) {
+	if (select("Yes!!:No!!") == 2) {
 		mes "[Holink]";
 		mes "Kyack!!";
 		mes "You don't belive in refine master Holink, meow?~";
@@ -142,7 +141,7 @@ malangdo,221,174,6	script	Holink#mal_cash	559,{
 		mes "^ff0000cards and enchantments will vanish for sure^000000.";
 		mes "You still want to try, meow~?";
 		next;
-		if(select("Yes, I do!!:Forget about it!!") == 2) {
+		if (select("Yes, I do!!:Forget about it!!") == 2) {
 			mes "[Holink]";
 			mes "Meow! Wise choice, meow.";
 			mes "But!!";
@@ -176,7 +175,7 @@ malangdo,221,174,6	script	Holink#mal_cash	559,{
 	mes "[Holink]";
 	mes "Meo~ Meow~ Kyaaak!!";
 	next;
-	switch(rand(1,5)) {
+	switch (rand(1,5)) {
 		case 1: emotion e_sob; break;
 		case 2: emotion e_swt2; break;
 		case 3: emotion e_wah; break;

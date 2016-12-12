@@ -37,21 +37,20 @@ payon,157,146,6	script	Suhnbi#cash	85,{
 	mes "know what you want to refine.";
 	next;
 
-	setarray .@position$[1], "Head","Body","Left hand","Right hand","Robe","Shoes","Accessory 1","Accessory 2","Head 2","Head 3";
-	set .@menu$,"";
-	for(set .@i,1; .@i<=10; set .@i,.@i+1) {
-		if (getequipisequiped(.@i)) {
-			set .@menu$, .@menu$ + .@position$[.@i] + "-" + "[" + getequipname(.@i) + "]";
+	setarray .@indices[1], EQI_HEAD_TOP, EQI_ARMOR, EQI_HAND_L, EQI_HAND_R, EQI_GARMENT, EQI_SHOES, EQI_ACC_L, EQI_ACC_R, EQI_HEAD_MID, EQI_HEAD_LOW;
+	for (set .@i,1; .@i<=10; set .@i,.@i+1) {
+		if (getequipisequiped(.@indices[.@i])) {
+			set .@menu$, .@menu$ + F_getpositionname(.@indices[.@i]) + "-[" + getequipname(.@indices[.@i]) + "]";
 			set .@equipped,1;
 		}
 		set .@menu$, .@menu$ + ":";
 	}
-	if (.@equipped == 0) {
+	if (!.@equipped) {
 		mes "[Suhnbi]";
 		mes "I don't think I can refine any items you have...";
 		close;
 	}
-	set .@part, select(.@menu$);
+	set .@part, .@indices[ select(.@menu$) ];
 
 	if (!getequipisequiped(.@part)) //custom check
 		close;
@@ -68,7 +67,7 @@ payon,157,146,6	script	Suhnbi#cash	85,{
 
 	// Make sure you have the neccessary items and Zeny to refine your items
 	// Determines chance of failure and verifies that you want to continue.
-	switch(getequipweaponlv(.@part)) {
+	switch (getequipweaponlv(.@part)) {
 		case 1: callsub S_RefineValidate,1,7620,50,.@part; break;
 		case 2: callsub S_RefineValidate,2,7620,200,.@part; break;
 		case 3: callsub S_RefineValidate,3,7620,5000,.@part; break;
@@ -105,7 +104,7 @@ S_RefineValidate:
 
 	// If the VIP system is enabled, the prices for non-VIP players are considerably higher.
 	if (VIP_SCRIPT && !vip_status(1)) {
-		switch(getarg(0)){
+		switch (getarg(0)) {
 			case 0: set .@price, .@price * 10; break;
 			case 1: set .@price, .@price * 40; break;
 			case 2: set .@price, .@price * 50; break;
@@ -120,7 +119,7 @@ S_RefineValidate:
 	mes "To refine that, you'll need to have one ^ff9999" + getitemname(getarg(1)) + "^000000 and " + .@price + " zeny.";
 	mes "Would you like to continue?";
 	next;
-	if(select("Yes:No") == 1) {
+	if (select("Yes:No") == 1) {
 		if (getequippercentrefinery(getarg(3)) < 100) {
 			if (getarg(0)) {
 				mes "[Suhnbi]";
@@ -137,7 +136,7 @@ S_RefineValidate:
 				mes "^ff0000Besides, the equipment will break!^000000";
 				mes "Are you sure you still want to continue?";
 				next;
-				if(select("Yes:No") == 2) {
+				if (select("Yes:No") == 2) {
 					mes "[Suhnbi]";
 					mes "Good.";
 					mes "Because if the weapon breaks from unreasonable refining, then I get a bad mood, too.";
@@ -153,7 +152,7 @@ S_RefineValidate:
 				//mes "Everything will disappear. As in... GONE!";
 				mes "Do you really wish to continue?";
 				next;
-				if(select("Yes:No") == 2) {
+				if (select("Yes:No") == 2) {
 					mes "[Suhnbi]";
 					mes "What nonsense. You waste my precious time.";
 					mes "Get lost, punk.";
