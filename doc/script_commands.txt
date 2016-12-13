@@ -4390,7 +4390,7 @@ Is subject to EXP bonuses and to the `quest_exp_rate` config option.
 
     getexp 10000,5000;
 
-You can also use the "set" command with the parameters defined in 'db/const.txt':
+You can also use the "set" command with the parameters defined in 'src/map/script_constants.h':
 
     set BaseExp,BaseExp+10000;
     set JobExp,JobExp+5000;

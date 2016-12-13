@@ -6489,14 +6489,14 @@ unsigned int pc_maxjoblv(struct map_session_data *sd) {
 unsigned int pc_nextbaseexp(struct map_session_data *sd) {
 	nullpo_ret(sd);
 
-	if(sd->status.base_level >= pc_maxbaselv(sd) || sd->status.base_level == 0)
+	if (sd->status.base_level >= pc_maxbaselv(sd) || sd->status.base_level == 0)
 		return 0;
 	return job_info[pc_class2idx(sd->status.class_)].exp_table[0][sd->status.base_level - 1];
 }
 
 //Base exp needed for this level.
 unsigned int pc_thisbaseexp(struct map_session_data *sd) {
-	if(sd->status.base_level > pc_maxbaselv(sd) || sd->status.base_level <= 1)
+	if (sd->status.base_level > pc_maxbaselv(sd) || sd->status.base_level <= 1)
 		return 0;
 	return job_info[pc_class2idx(sd->status.class_)].exp_table[0][sd->status.base_level - 2];
 }
@@ -6511,14 +6511,14 @@ unsigned int pc_thisbaseexp(struct map_session_data *sd) {
 unsigned int pc_nextjobexp(struct map_session_data *sd) {
 	nullpo_ret(sd);
 
-	if(sd->status.job_level >= pc_maxjoblv(sd) || sd->status.job_level == 0)
+	if (sd->status.job_level >= pc_maxjoblv(sd) || sd->status.job_level == 0)
 		return 0;
 	return job_info[pc_class2idx(sd->status.class_)].exp_table[1][sd->status.job_level - 1];
 }
 
 //Job exp needed for this level.
 unsigned int pc_thisjobexp(struct map_session_data *sd) {
-	if(sd->status.job_level > pc_maxjoblv(sd) || sd->status.job_level <= 1)
+	if (sd->status.job_level > pc_maxjoblv(sd) || sd->status.job_level <= 1)
 		return 0;
 	return job_info[pc_class2idx(sd->status.class_)].exp_table[1][sd->status.job_level - 2];
 }
@@ -7877,7 +7877,7 @@ bool pc_setparam(struct map_session_data *sd,int type,int val) {
 			}
 			break;
 		case SP_SEX:
-			sd->status.sex = val ? SEX_MALE : SEX_FEMALE;
+			sd->status.sex = (val ? SEX_MALE : SEX_FEMALE);
 			break;
 		case SP_WEIGHT:
 			sd->weight = val;

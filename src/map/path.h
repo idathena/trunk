@@ -22,7 +22,7 @@ struct shootpath_data {
 	int y[MAX_WALKPATH];
 };
 
-enum directions{
+enum directions {
 	DIR_CENTER = -1,
 	DIR_NORTH = 0,
 	DIR_NORTHWEST = 1,
