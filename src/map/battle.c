@@ -400,18 +400,8 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 		switch( atk_elem ) {
 			case ELE_FIRE:
 				if( tsc->data[SC_SPIDERWEB] ) {
-					struct unit_data *ud = unit_bl2ud(map_id2bl(tsc->data[SC_SPIDERWEB]->val3));
-					uint8 i;
-
-					if( (tsc->data[SC_SPIDERWEB]->val2)-- > 0 )
-						ratio += 100; //Double damage
-					if( !tsc->data[SC_SPIDERWEB]->val2 )
-						status_change_end(target, SC_SPIDERWEB, INVALID_TIMER);
-					if( ud ) {
-						ARR_FIND(0, MAX_SKILLUNITGROUP, i, ud->skillunit[i] && ud->skillunit[i]->skill_id == PF_SPIDERWEB);
-						if( i < MAX_SKILLUNITGROUP && ud->skillunit[i] )
-							skill_delunit(ud->skillunit[i]->unit);
-					}
+					ratio += 100; //Double damage
+					status_change_end(target,SC_SPIDERWEB,INVALID_TIMER);
 				}
 				if( tsc->data[SC_THORNSTRAP] ) {
 					struct skill_unit_group *group = skill_id2group(tsc->data[SC_THORNSTRAP]->val3);
@@ -420,7 +410,7 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 						skill_delunitgroup(group);
 				}
 				if( tsc->data[SC_CRYSTALIZE] )
-					status_change_end(target, SC_CRYSTALIZE, INVALID_TIMER);
+					status_change_end(target,SC_CRYSTALIZE,INVALID_TIMER);
 				if( tsc->data[SC_EARTH_INSIGNIA] )
 					ratio += 50;
 				break;
@@ -446,7 +436,7 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 				if( tsc->data[SC_WIND_INSIGNIA] )
 					ratio += 50;
 				if( tsc->data[SC_MAGNETICFIELD] )
-					status_change_end(target, SC_MAGNETICFIELD, INVALID_TIMER); //Freed if received earth damage
+					status_change_end(target,SC_MAGNETICFIELD,INVALID_TIMER); //Freed if received earth damage
 				break;
 			case ELE_NEUTRAL:
 				if( tsc->data[SC_ANTI_M_BLAST] )
@@ -8557,6 +8547,7 @@ static const struct _battle_data {
 	{ "max_summoner_parameter",             &battle_config.max_summoner_parameter,          120,    10,     SHRT_MAX,       },
 	{ "monster_eye_range_bonus",            &battle_config.mob_eye_range_bonus,             0,      0,      10,             },
 	{ "crimsonrock_knockback",              &battle_config.crimsonrock_knockback,           1,      0,      1,              },
+	{ "tarotcard_equal_chance",             &battle_config.tarotcard_equal_chance,          0,      0,      1,              },
 };
 #ifndef STATS_OPT_OUT
 /**

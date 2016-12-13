@@ -7803,6 +7803,9 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_VARCASTRATE:		val = sd->bonus.varcastrate; break;
 		case SP_ADD_VARIABLECAST:	val = sd->bonus.add_varcast; break;
 #endif
+		default:
+			ShowError("pc_readparam: Attempt to read unknown parameter '%d'.\n", type);
+			return -1;
 	}
 
 	return val;

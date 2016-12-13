@@ -7721,6 +7721,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			if( (type == SC_FREEZING && sc->data[SC_BURNING]) || sc->data[SC_WARMER] )
 				return 0; //Burning makes you immune to freezing
 			break;
+		case SC_BLIND:
+			if( sc->data[SC_FEAR] )
+				return 0;
+			break;
 		case SC_PROVOKE:
 			if( undead_flag )
 				return 0;
@@ -8207,6 +8211,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 		case SC_FOOD_LUK_CASH:
 			status_change_end(bl,SC_LUKFOOD,INVALID_TIMER);
+			break;
+		case SC_FEAR:
+			status_change_end(bl,SC_BLIND,INVALID_TIMER);
 			break;
 		case SC_ADORAMUS:
 			status_change_end(bl,SC_DECREASEAGI,INVALID_TIMER);
@@ -8944,13 +8951,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					status_change_clear_buffs(bl,SCCB_BUFFS|SCCB_DEBUFFS|SCCB_CHEM_PROTECT|SCCB_REFRESH,0); //Remove buffs/debuffs
 				}
 				break;
-			case SC_TAROTCARD:
-				sc_start(src,bl,SC_INCATKRATE,100,-20,tick);
-				sc_start(src,bl,SC_INCMATKRATE,100,-20,tick);
-				sc_start(src,bl,SC_INCHITRATE,100,-20,tick);
-				sc_start(src,bl,SC_INCFLEERATE,100,-20,tick);
-				sc_start(src,bl,SC_INCDEFRATE,100,-20,tick);
-				break;
 			case SC_MARIONETTE: {
 					int stat;
 
@@ -9349,9 +9349,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 2; //Splendide group
 				break;
 			case SC_FEAR:
-				val2 = 2;
-				tick_time = 1000;
-				val4 = tick / tick_time;
+				status_change_start(src,bl,SC_ANKLE,10000,val1,0,0,0,2000,SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
 				break;
 			case SC_BURNING:
 				tick_time = 3000;
@@ -10276,7 +10274,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_CONFUSION:
 		case SC_CLOSECONFINE:
 		case SC_CLOSECONFINE2:
-		case SC_FEAR:
 		case SC__MANHOLE:
 		case SC_PARALYSIS:
 		case SC_MEIKYOUSISUI:
@@ -10899,6 +10896,41 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 	if (tid == INVALID_TIMER) {
 		if (type == SC_ENDURE && sce->val4)
 			return 0; //Do not end infinite endure
+		if (type == SC_SPIDERWEB) {
+			//Delete the unit group first to expire found in the status change
+			struct skill_unit_group *group = NULL, *group2 = NULL;
+			unsigned int tick = gettick();
+			int pos = 1;
+
+			if (sce->val2 && !(group = skill_id2group(sce->val2)))
+				sce->val2 = 0;
+			if (sce->val3) {
+				if (!(group2 = skill_id2group(sce->val3)))
+					sce->val3 = 0;
+				else if (!group || ((group->limit - DIFF_TICK(tick,group->tick)) > (group2->limit - DIFF_TICK(tick,group2->tick)))) {
+					group = group2;
+					pos = 2;
+				}
+			}
+			if (sce->val4) {
+				if (!(group2 = skill_id2group(sce->val4)))
+					sce->val4 = 0;
+				else if (!group || ((group->limit - DIFF_TICK(tick,group->tick)) > (group2->limit - DIFF_TICK(tick,group2->tick)))) {
+					group = group2;
+					pos = 3;
+				}
+			}
+			if (pos == 1)
+				sce->val2 = 0;
+			else if (pos == 2)
+				sce->val3 = 0;
+			else if (pos == 3)
+				sce->val4 = 0;
+			if (group)
+				skill_delunitgroup(group);
+			if (!status_isdead(bl) && (sce->val2 || sce->val3 || sce->val4))
+				return 0; //Don't end the status change yet as there are still unit groups associated with it
+		}
 		if (sce->timer != INVALID_TIMER) //Could be a SC with infinite duration
 			delete_timer(sce->timer,status_change_timer);
 		if (sc->opt1) {
@@ -12135,15 +12167,6 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			}
 			break;
 
-		case SC_FEAR:
-			if( --(sce->val4) >= 0 ) {
-				if( sce->val2 > 0 )
-					sce->val2--;
-				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
-				return 0;
-			}
-			break;
-
 		case SC_SPHERE_1:
 		case SC_SPHERE_2:
 		case SC_SPHERE_3:
@@ -13051,11 +13074,12 @@ int status_change_spread(struct block_list *src, struct block_list *bl, bool typ
 			//case SC__STRIPACCESSORY:
 			//case SC_BITE:
 			//Additional Commons
+			case SC_FEAR:
 			case SC_FREEZING:
 			case SC_VENOMBLEED:
 				if( sc->data[i]->timer != INVALID_TIMER ) {
 					timer = get_timer(sc->data[i]->timer);
-					if( timer == NULL || timer->func != status_change_timer || DIFF_TICK(timer->tick,tick) < 0 )
+					if( !timer || timer->func != status_change_timer || DIFF_TICK(timer->tick,tick) < 0 )
 						continue;
 					data.tick = DIFF_TICK(timer->tick,tick);
 				} else
@@ -13069,7 +13093,6 @@ int status_change_spread(struct block_list *src, struct block_list *bl, bool typ
 			case SC_LEECHESEND:
 				if( type )
 					continue;
-			case SC_FEAR:
 				data.tick = sc->data[i]->val4 * 1000;
 				break;
 			case SC_BURNING:
@@ -13089,6 +13112,7 @@ int status_change_spread(struct block_list *src, struct block_list *bl, bool typ
 			case SC_TOXIN:
 				if( type )
 					continue;
+			//Fall through
 			case SC_BLEEDING:
 				data.tick = sc->data[i]->val4 * 10000;
 				break;

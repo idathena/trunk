@@ -7166,19 +7166,37 @@ BUILDIN_FUNC(disableitemuse)
 /*==========================================
  * Returns a character's specified stat.
  * Check pc_readparam for available options.
- * readparam <param>{,"<nick>"}
+ * readparam <param>{,"<character name>"}
+ * readparam <param>{,<char_id>}
  *------------------------------------------*/
 BUILDIN_FUNC(readparam)
 {
-	int type;
+	int value;
+	struct script_data *data = script_getdata(st,2);
 	TBL_PC *sd;
 
-	type = script_getnum(st,2);
-	if( !script_nick2sd(3,sd) ) {
-		script_pushint(st,-1);
-		return 1;
+	if( script_hasdata(st,3) ) {
+		if( script_isint(st,3) ) {
+			if( !script_charid2sd(3,sd) ) {
+				script_pushint(st,-1);
+				return 1;
+			}
+		} else {
+			if( !script_nick2sd(3,sd) ) {
+				script_pushint(st,-1);
+				return 1;
+			}
+		}
 	}
-	script_pushint(st,pc_readparam(sd,type));
+
+	//If you use a parameter, return the value behind it
+	if( reference_toparam(data) ) {
+		get_val_(st,data,sd);
+		value = (int)data->u.num;
+	} else
+		value = pc_readparam(sd,script_getnum(st,2));
+
+	script_pushint(st,value);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -7202,7 +7220,7 @@ BUILDIN_FUNC(getcharid)
 	else
 		sd = script_rid2sd(st);
 
-	if( sd == NULL ) {
+	if( !sd ) {
 		script_pushint(st,0); //Return 0, according docs
 		return 0;
 	}
@@ -7230,7 +7248,7 @@ BUILDIN_FUNC(getnpcid)
 	struct npc_data *nd = NULL;
 
 	if( script_hasdata(st,3) ) { // Unique npc name
-		if( ( nd = npc_name2id(script_getstr(st,3)) ) == NULL ) {
+		if( !(nd = npc_name2id(script_getstr(st,3))) ) {
 			ShowError("buildin_getnpcid: No such NPC '%s'.\n", script_getstr(st,3));
 			script_pushint(st,0);
 			return 1;
@@ -7239,7 +7257,7 @@ BUILDIN_FUNC(getnpcid)
 
 	switch( num ) {
 		case 0:
-			script_pushint(st,nd ? nd->bl.id : st->oid);
+			script_pushint(st,(nd ? nd->bl.id : st->oid));
 			break;
 		default:
 			ShowError("buildin_getnpcid: invalid parameter (%d).\n", num);
@@ -7260,7 +7278,7 @@ BUILDIN_FUNC(getpartyname)
 
 	party_id = script_getnum(st,2);
 
-	if( (p = party_search(party_id)) != NULL )
+	if( (p = party_search(party_id)) )
 		script_pushstrcopy(st,p->party.name);
 	else
 		script_pushconststr(st,"null");
@@ -7280,9 +7298,7 @@ BUILDIN_FUNC(getpartymember)
 	struct party_data *p;
 	unsigned char j = 0;
 
-	p = party_search(script_getnum(st,2));
-
-	if( p != NULL ) {
+	if( (p = party_search(script_getnum(st,2))) ) {
 		unsigned char i;
 		int type = 0;
 
@@ -20332,6 +20348,14 @@ BUILDIN_FUNC(getvar) {
 	}
 
 	name = reference_getname(data);
+	if (reference_toparam(data)) {
+		ShowError("buildin_getvar: '%s' is a parameter - please use readparam instead\n", name);
+		script_reportdata(data);
+		script_pushnil(st);
+		st->state = END;
+		return 1;
+	}
+
 	if (name[0] == '.' || name[0] == '$' || name[0] == '\'') { //Not a PC variable
 		ShowError("buildin_getvar: Invalid scope (not PC variable)\n");
 		script_reportdata(data);

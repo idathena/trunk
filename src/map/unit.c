@@ -1320,8 +1320,7 @@ int unit_can_move(struct block_list *bl) {
 
 	if (sc) {
 		if (sc->cant.move || //Status placed here are ones that cannot be cached by sc->cant.move for they depend on other conditions other than their availability
-			(sc->data[SC_FEAR] && sc->data[SC_FEAR]->val2 > 0) ||
-			(sc->data[SC_SPIDERWEB] && sc->data[SC_SPIDERWEB]->val1) ||
+			sc->data[SC_SPIDERWEB] ||
 			(sc->data[SC_DANCING] && sc->data[SC_DANCING]->val4 &&
 			(!sc->data[SC_LONGING] ||
 			(sc->data[SC_DANCING]->val1&0xFFFF) == CG_MOONLIT ||
