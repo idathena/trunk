@@ -4059,70 +4059,101 @@ void skill_reveal_trap_inarea(struct block_list *src, int range, int x, int y)
  */
 static int skill_tarotcard(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int tick)
 {
-	int rate = rnd()%100;
+	uint8 card = 0;
 
-	if (rate < 10) { //The Fool
-		status_percent_damage(src, bl, 0, 100, false);
-		return 1;
-	} else if (rate < 20) { //The Magician
-		sc_start(src, bl, SC_INCMATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
-		return 2;
-	} else if (rate < 30) { //The High Priestess
-		status_change_clear_buffs(bl, SCCB_BUFFS|SCCB_CHEM_PROTECT, 0);
-		return 3;
-	} else if (rate < 37) { //The Chariot
-		status_fix_damage(src, bl, 1000,
-			clif_damage(src, bl, tick, 0, 0, 1000, 0, DMG_NORMAL, 0, false));
-		if (!status_isdead(bl)) {
-			int pos[] = { EQP_HELM,EQP_SHIELD,EQP_ARMOR };
+	if (battle_config.tarotcard_equal_chance) //eAthena equal chances
+		card = rnd()%14 + 1;
+	else { //Official chances
+		int rate = rnd()%100;
 
-			skill_break_equip(src, bl, pos[rnd()%3], 10000, BCT_ENEMY);
-		}
-		return 4;
-	} else if (rate < 47) { //Strength
-		sc_start(src, bl, SC_INCATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
-		return 5;
-	} else if (rate < 62) { //The Lovers
-		if (!map_flag_vs(bl->m))
-			unit_warp(bl, -1, -1, -1, CLR_TELEPORT);
-		status_heal(src, 2000, 0, 0);
-		return 6;
-	} else if (rate < 63) { //Wheel of Fortune
-		//Recursive call
-		skill_tarotcard(src, bl, skill_id, skill_lv, tick);
-		skill_tarotcard(src, bl, skill_id, skill_lv, tick);
-		return 7;
-	} else if (rate < 69) { //The Hanged Man
-		enum sc_type sc[] = { SC_STONE,SC_FREEZE,SC_STOP };
-
-		sc_start(src, bl, sc[rnd()%3], 100, skill_lv, skill_get_time2(skill_id, skill_lv));
-		return 8;
-	} else if (rate < 74) { //Death
-		sc_start(src, bl, SC_POISON, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
-		sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
-		status_change_start(src, bl, SC_COMA, 10000, skill_lv, 0, src->id, 0, 0, SCFLAG_NONE);
-		return 9;
-	} else if (rate < 82) { //Temperance
-		sc_start(src, bl, SC_CONFUSION, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
-		return 10;
-	} else if (rate < 83) { //The Devil
-		status_fix_damage(src, bl, 6666,
-			clif_damage(src, bl, tick, 0, 0, 6666, 0, DMG_NORMAL, 0, false));
-		sc_start(src, bl, SC_INCATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
-		sc_start(src, bl, SC_INCMATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
-		sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
-		return 11;
-	} else if (rate < 85) { //The Tower
-		status_fix_damage(src, bl, 4444,
-			clif_damage(src, bl, tick, 0, 0, 4444, 0, DMG_NORMAL, 0, false));
-		return 12;
-	} else if (rate < 90) { //The Star
-		sc_start(src, bl, SC_STUN, 100, skill_lv, 5000);
-		return 13;
-	} else { //The Sun
-		sc_start(src, bl, SC_TAROTCARD, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
-		return 14;
+		if (rate < 10) card = 1;
+		else if (rate < 20) card = 2;
+		else if (rate < 30) card = 3;
+		else if (rate < 37) card = 4;
+		else if (rate < 47) card = 5;
+		else if (rate < 62) card = 6;
+		else if (rate < 63) card = 7;
+		else if (rate < 69) card = 8;
+		else if (rate < 74) card = 9;
+		else if (rate < 82) card = 10;
+		else if (rate < 83) card = 11;
+		else if (rate < 85) card = 12;
+		else if (rate < 90) card = 13;
+		else card = 14;
 	}
+	switch (card) {
+		case 1: //The Fool
+			status_percent_damage(src, bl, 0, 100, false);
+			break;
+		case 2: //The Magician
+			sc_start(src, bl, SC_INCMATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
+			break;
+		case 3: //The High Priestess
+			status_change_clear_buffs(bl, SCCB_BUFFS|SCCB_CHEM_PROTECT, 0);
+			break;
+		case 4: //The Chariot
+			status_fix_damage(src, bl, 1000,
+				clif_damage(src, bl, tick, 0, 0, 1000, 0, DMG_NORMAL, 0, false));
+			if (!status_isdead(bl)) {
+				int pos[] = { EQP_HELM,EQP_SHIELD,EQP_ARMOR };
+
+				skill_break_equip(src, bl, pos[rnd()%3], 10000, BCT_ENEMY);
+			}
+			break;
+		case 5: //Strength
+			sc_start(src, bl, SC_INCATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
+			break;
+		case 6: //The Lovers
+			if (!map_flag_vs(bl->m))
+				unit_warp(bl, -1, -1, -1, CLR_TELEPORT);
+			status_heal(src, 2000, 0, 0);
+			break;
+		case 7: //Wheel of Fortune
+			//Recursive call
+			skill_tarotcard(src, bl, skill_id, skill_lv, tick);
+			skill_tarotcard(src, bl, skill_id, skill_lv, tick);
+			break;
+		case 8: { //The Hanged Man
+				enum sc_type sc[] = { SC_STONE,SC_FREEZE,SC_STOP };
+
+				sc_start(src, bl, sc[rnd()%3], 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+			}
+			break;
+		case 9: //Death
+			sc_start(src, bl, SC_POISON, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+			sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+			status_change_start(src, bl, SC_COMA, 10000, skill_lv, 0, src->id, 0, 0, SCFLAG_NONE);
+			break;
+		case 10: //Temperance
+			sc_start(src, bl, SC_CONFUSION, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+			break;
+		case 11: //The Devil
+			status_fix_damage(src, bl, 6666,
+				clif_damage(src, bl, tick, 0, 0, 6666, 0, DMG_NORMAL, 0, false));
+			sc_start(src, bl, SC_INCATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
+			sc_start(src, bl, SC_INCMATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
+			sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+			break;
+		case 12: //The Tower
+			status_fix_damage(src, bl, 4444,
+				clif_damage(src, bl, tick, 0, 0, 4444, 0, DMG_NORMAL, 0, false));
+			break;
+		case 13: //The Star
+			sc_start(src, bl, SC_STUN, 100, skill_lv, 5000);
+			break;
+		case 14: //The Sun
+#ifdef RENEWAL
+			sc_start(src, bl, SC_TAROTCARD, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+#endif
+			sc_start(src,bl,SC_INCATKRATE, 100, -20, skill_get_time2(skill_id, skill_lv));
+			sc_start(src,bl,SC_INCMATKRATE, 100, -20, skill_get_time2(skill_id, skill_lv));
+			sc_start(src,bl,SC_INCHITRATE, 100, -20, skill_get_time2(skill_id, skill_lv));
+			sc_start(src,bl,SC_INCFLEERATE, 100, -20, skill_get_time2(skill_id, skill_lv));
+			sc_start(src,bl,SC_INCDEFRATE, 100, -20, skill_get_time2(skill_id, skill_lv));
+			break;
+	}
+
+	return card;
 }
 
 /*==========================================
@@ -12808,27 +12839,42 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 
 	switch( group->unit_id ) {
 		case UNT_SPIDERWEB:
-			if( group->val2 )
-				break;
-			if( battle_check_target(&unit->bl,bl,group->target_flag) > 0 ) {
-				const struct TimerData *td = (sce ? get_timer(sce->timer) : NULL);
-				int time = (bl->type == BL_PC ? skill_get_time(skill_id,skill_lv) / 2 : skill_get_time(skill_id,skill_lv));
+			if( sc ) {
+				//Duration in PVM is: 1st - 8s, 2nd - 16s, 3rd - 8s
+				//Duration in PVP is: 1st - 4s, 2nd - 8s, 3rd - 12s
+				int time = skill_get_time2(skill_id,skill_lv);
+				const struct TimerData *td;
 
-				if( td ) {
-					int sec = DIFF_TICK(td->tick,tick);
-
-					time += sec;
-				}
-				if( sc && sc->data[SC_SPIDERWEB] ) {
-					uint8 val2 = sc->data[SC_SPIDERWEB]->val2;
-
-					val2++;
-					sc_start4(src,bl,type,100,skill_lv,val2,src->id,0,time);
-				} else if( sc_start4(src,bl,type,100,skill_lv,1,src->id,0,time) ) {
+				if( map_flag_vs(bl->m) )
+					time /= 2;
+				if( sc->data[type] ) {
+					if( sc->data[type]->val2 && sc->data[type]->val3 && sc->data[type]->val4 ) {
+						group->limit = DIFF_TICK(tick,group->tick);
+						break; //Already triple affected, immune
+					}
+					//Don't increase val1 here, we need a higher val in status_change_start so it overwrites the old one
+					if( map_flag_vs(bl->m) && sc->data[type]->val1 < 3 )
+						time *= (sc->data[type]->val1 + 1);
+					else if( !map_flag_vs(bl->m) && sc->data[type]->val1 < 2 )
+						time *= (sc->data[type]->val1 + 1);
+					//Add group id to status change
+					if( !sc->data[type]->val2 )
+						sc->data[type]->val2 = group->group_id;
+					else if( !sc->data[type]->val3 )
+						sc->data[type]->val3 = group->group_id;
+					else if( !sc->data[type]->val4 )
+						sc->data[type]->val4 = group->group_id;
+					//Overwrite status change with new duration
+					if( (td = get_timer(sc->data[type]->timer)) )
+						sc_start4(src,bl,type,100,sc->data[type]->val1 + 1,sc->data[type]->val2,sc->data[type]->val3,sc->data[type]->val4,max(DIFF_TICK(td->tick,tick),time));
+				} else if( sc_start4(src,bl,type,100,1,group->group_id,0,0,time) ) {
+					td = (sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
+					if( td )
+						time = DIFF_TICK(td->tick,tick);
 					if( !unit_blown_immune(bl,0x9) && unit_movepos(bl,unit->bl.x,unit->bl.y,0,false) )
 						clif_blown(bl,&unit->bl);
-					group->val2 = bl->id;
 				}
+				group->val2 = bl->id;
 				group->limit = DIFF_TICK(tick,group->tick) + time;
 			}
 			break;
@@ -13834,8 +13880,8 @@ static int skill_unit_onout(struct skill_unit *unit, struct block_list *bl, unsi
 	type = status_skill2sc(group->skill_id);
 	sce = (sc && type != SC_NONE) ? sc->data[type] : NULL;
 
-	if( !bl->prev || (status_isdead(bl) && //Need to delete the trap if the source died
-		group->unit_id != UNT_ANKLESNARE && group->unit_id != UNT_SPIDERWEB) )
+	if( !bl->prev ||
+		(status_isdead(bl) && group->unit_id != UNT_ANKLESNARE) ) //Need to delete the trap if the source died
 		return 0;
 
 	switch( group->unit_id ) {
@@ -18189,7 +18235,6 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 	struct skill_unit_group *group = NULL;
 	unsigned int tick = va_arg(ap,unsigned int);
 	bool dissonance;
-	struct block_list *bl = &unit->bl;
 
 	if( !unit || !unit->alive || !unit->group )
 		return 0;
@@ -18209,7 +18254,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 			case UNT_GROUNDDRIFT_WATER:
 			case UNT_GROUNDDRIFT_FIRE:
 				group->unit_id = UNT_USED_TRAPS;
-				//clif_changetraplook(bl,UNT_FIREPILLAR_ACTIVE);
+				//clif_changetraplook(&unit->bl,UNT_FIREPILLAR_ACTIVE);
 				group->limit = DIFF_TICK(tick + 1500,group->tick);
 				unit->limit = DIFF_TICK(tick + 1500,group->tick);
 				break;
@@ -18248,7 +18293,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 						memset(&item_tmp,0,sizeof(item_tmp));
 						item_tmp.nameid = group->item_id;
 						item_tmp.identify = 1;
-						map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y,0,0,0,4,0);
+						map_addflooritem(&item_tmp,1,unit->bl.m,unit->bl.x,unit->bl.y,0,0,0,4,0);
 					}
 					skill_delunit(unit);
 				}
@@ -18284,13 +18329,30 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 				}
 				break;
 
+			case UNT_SPIDERWEB: {
+				struct block_list *bl = map_id2bl(group->val2);
+				struct status_change *sc;
+
+				//Clear group id from status change
+				if (bl && (sc = status_get_sc(bl)) && sc->data[SC_SPIDERWEB]) {
+					if (sc->data[SC_SPIDERWEB]->val2 == group->group_id)
+						sc->data[SC_SPIDERWEB]->val2 = 0;
+					else if (sc->data[SC_SPIDERWEB]->val3 == group->group_id)
+						sc->data[SC_SPIDERWEB]->val3 = 0;
+					else if (sc->data[SC_SPIDERWEB]->val4 == group->group_id)
+						sc->data[SC_SPIDERWEB]->val4 = 0;
+				}
+				skill_delunit(unit);
+			}
+			break;
+
 			case UNT_REVERBERATION:
 				if( unit->val1 <= 0 ) { //If it was deactivated
 					skill_delunit(unit);
 					break;
 				}
-				clif_changetraplook(bl,UNT_USED_TRAPS);
-				map_foreachinrange(skill_trap_splash,bl,skill_get_splash(group->skill_id,group->skill_lv),group->bl_flag,bl,tick);
+				clif_changetraplook(&unit->bl,UNT_USED_TRAPS);
+				map_foreachinrange(skill_trap_splash,&unit->bl,skill_get_splash(group->skill_id,group->skill_lv),group->bl_flag,&unit->bl,tick);
 				group->limit = DIFF_TICK(tick,group->tick) + 1000;
 				unit->limit = DIFF_TICK(tick,group->tick) + 1000;
 				group->unit_id = UNT_USED_TRAPS;
@@ -18328,7 +18390,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 						memset(&item_tmp,0,sizeof(item_tmp));
 						item_tmp.nameid = group->item_id;
 						item_tmp.identify = 1;
-						map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y,0,0,0,4,0);
+						map_addflooritem(&item_tmp,1,unit->bl.m,unit->bl.x,unit->bl.y,0,0,0,4,0);
 					}
 					skill_delunit(unit);
 				}
@@ -18361,7 +18423,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 					if( group->unit_id == UNT_ANKLESNARE && group->val2 )
 						skill_delunit(unit);
 					else {
-						clif_changetraplook(bl,(group->unit_id == UNT_LANDMINE ? UNT_FIREPILLAR_ACTIVE : UNT_USED_TRAPS));
+						clif_changetraplook(&unit->bl,(group->unit_id == UNT_LANDMINE ? UNT_FIREPILLAR_ACTIVE : UNT_USED_TRAPS));
 						group->limit = DIFF_TICK(tick,group->tick) + 1500;
 						group->unit_id = UNT_USED_TRAPS;
 					}
@@ -18369,8 +18431,8 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 				break;
 			case UNT_REVERBERATION:
 				if( unit->val1 <= 0 ) {
-					clif_changetraplook(bl,UNT_USED_TRAPS);
-					map_foreachinrange(skill_trap_splash,bl,skill_get_splash(group->skill_id,group->skill_lv),group->bl_flag,bl,tick);
+					clif_changetraplook(&unit->bl,UNT_USED_TRAPS);
+					map_foreachinrange(skill_trap_splash,&unit->bl,skill_get_splash(group->skill_id,group->skill_lv),group->bl_flag,&unit->bl,tick);
 					group->limit = DIFF_TICK(tick,group->tick) + 1000;
 					unit->limit = DIFF_TICK(tick,group->tick) + 1000;
 					group->unit_id = UNT_USED_TRAPS;
@@ -18386,7 +18448,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 						struct block_list *src;
 
 						if( (src = map_id2bl(group->src_id)) ) {
-							clif_skill_poseffect(src,group->skill_id,group->skill_lv,bl->x,bl->y,tick);
+							clif_skill_poseffect(src,group->skill_id,group->skill_lv,unit->bl.x,unit->bl.y,tick);
 							group->val2 = 1;
 						}
 					}
@@ -18404,9 +18466,9 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 
 	if( unit->range >= 0 && group->interval != -1 && unit->bl.id != unit->prev ) {
 		if( battle_config.skill_wall_check )
-			map_foreachinshootrange(skill_unit_timer_sub_onplace,bl,unit->range,group->bl_flag,bl,tick);
+			map_foreachinshootrange(skill_unit_timer_sub_onplace,&unit->bl,unit->range,group->bl_flag,&unit->bl,tick);
 		else
-			map_foreachinrange(skill_unit_timer_sub_onplace,bl,unit->range,group->bl_flag,bl,tick);
+			map_foreachinrange(skill_unit_timer_sub_onplace,&unit->bl,unit->range,group->bl_flag,&unit->bl,tick);
 		if( unit->range == -1 ) //Unit disabled, but it should not be deleted yet
 			group->unit_id = UNT_USED_TRAPS;
 		else if( group->unit_id == UNT_TATAMIGAESHI ) {
