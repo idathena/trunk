@@ -7176,17 +7176,16 @@ BUILDIN_FUNC(readparam)
 	TBL_PC *sd;
 
 	if( script_hasdata(st,3) ) {
-		if( script_isint(st,3) ) {
-			if( !script_charid2sd(3,sd) ) {
-				script_pushint(st,-1);
-				return 1;
-			}
-		} else {
-			if( !script_nick2sd(3,sd) ) {
-				script_pushint(st,-1);
-				return 1;
-			}
-		}
+		if( script_isint(st,3) )
+			script_charid2sd(3,sd);
+		else
+			script_nick2sd(3,sd);
+	} else
+		sd = script_rid2sd(st);
+
+	if( !sd ) {
+		script_pushint(st,-1);
+		return 1;
 	}
 
 	//If you use a parameter, return the value behind it
@@ -20506,16 +20505,14 @@ BUILDIN_FUNC(adopt)
 	if (data_isstring(data)) {
 		const char *name = conv_str(st,data);
 
-		sd = map_nick2sd(name);
-		if (sd == NULL) {
+		if (!(sd = map_nick2sd(name))) {
 			ShowError("buildin_adopt: Non-existant parent character %s requested.\n", name);
 			return 1;
 		}
 	} else if (data_isint(data)) {
 		uint32 char_id = conv_num(st,data);
 
-		sd = map_charid2sd(char_id);
-		if (sd == NULL) {
+		if (!(sd = map_charid2sd(char_id))) {
 			ShowError("buildin_adopt: Non-existant parent character %d requested.\n", char_id);
 			return 1;
 		}
@@ -20530,16 +20527,14 @@ BUILDIN_FUNC(adopt)
 	if (data_isstring(data)) {
 		const char *name = conv_str(st,data);
 
-		b_sd = map_nick2sd(name);
-		if (b_sd == NULL) {
+		if (!(b_sd = map_nick2sd(name))) {
 			ShowError("buildin_adopt: Non-existant baby character %s requested.\n", name);
 			return 1;
 		}
 	} else if (data_isint(data)) {
 		uint32 char_id = conv_num(st,data);
 
-		b_sd = map_charid2sd(char_id);
-		if (b_sd == NULL) {
+		if (!(b_sd = map_charid2sd(char_id))) {
 			ShowError("buildin_adopt: Non-existant baby character %d requested.\n", char_id);
 			return 1;
 		}
@@ -20555,12 +20550,10 @@ BUILDIN_FUNC(adopt)
 
 		b_sd->adopt_invite = sd->status.account_id;
 		clif_Adopt_request(b_sd,sd,p_sd->status.account_id);
-		script_pushint(st,ADOPT_ALLOWED);
-		return SCRIPT_CMD_SUCCESS;
 	}
 
 	script_pushint(st,response);
-	return SCRIPT_CMD_FAILURE;
+	return SCRIPT_CMD_SUCCESS;
 }
 
 /**

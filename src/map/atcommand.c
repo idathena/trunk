@@ -8942,7 +8942,7 @@ ACMD_FUNC(set) {
 		return -1;
 	}
 
-	is_str = ( reg[strlen(reg) - 1] == '$' ) ? true : false;
+	is_str = (reg[strlen(reg) - 1] == '$' ? true : false);
 
 	if( (len = strlen(val)) > 1 ) {
 		if( val[0] == '"' && val[len-1] == '"') {
@@ -8953,7 +8953,7 @@ ACMD_FUNC(set) {
 
 	if( toset >= 2 ) { // We only set the var if there is an val, otherwise we only output the value
 		if( is_str )
-			set_var(sd, reg, (void *) val);
+			set_var(sd, reg, (void *)val);
 		else
 			set_var(sd, reg, (void *)__64BPRTSIZE((atoi(val))));
 	}
@@ -8978,8 +8978,7 @@ ACMD_FUNC(set) {
 				data->u.str = pc_readglobalreg_str(sd, reg);
 				break;
 		}
-
-		if( data->u.str == NULL || data->u.str[0] == '\0' ) { // Empty string
+		if( !data->u.str || data->u.str[0] == '\0' ) { // Empty string
 			data->type = C_CONSTSTR;
 			data->u.str = "";
 		} else { // Duplicate string
