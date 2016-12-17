@@ -10960,7 +10960,7 @@ void pc_readdb(void)
 					p++;
 				attr_fix_table[lv - 1][i][j] = atoi(p);
 #ifndef RENEWAL
-				if( battle_config.attr_recover == 0 && attr_fix_table[lv - 1][i][j] < 0 )
+				if( !battle_config.attr_recover && attr_fix_table[lv - 1][i][j] < 0 )
 					attr_fix_table[lv - 1][i][j] = 0;
 #endif
 				p = strchr(p, ',');

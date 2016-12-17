@@ -292,10 +292,10 @@ void set_nonblocking(int fd, unsigned long yes)
 }
 
 void setsocketopts(int fd,int delay_timeout){
-	int yes = 1; // reuse fix
+	int yes = 1; // Reuse fix
 
 #if !defined(WIN32)
-	// set SO_REAUSEADDR to true, unix only. on windows this option causes
+	// Set SO_REAUSEADDR to true, unix only. on windows this option causes
 	// the previous owner of the socket to give up, which is not desirable
 	// in most cases, neither compatible with unix.
 	sSetsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(char *)&yes,sizeof(yes));
@@ -308,23 +308,28 @@ void setsocketopts(int fd,int delay_timeout){
 	// The RO protocol is mainly single-packet request/response, plus the FIFO model already does packet grouping anyway.
 	sSetsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&yes, sizeof(yes));
 
-	// force the socket into no-wait, graceful-close mode (should be the default, but better make sure)
-	//(http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winsock/winsock/closesocket_2.asp)
+	// Force the socket into no-wait, graceful-close mode (should be the default, but better make sure)
+	//(https://msdn.microsoft.com/en-us/library/windows/desktop/ms737582%28v=vs.85%29.aspx)
 	{
-	struct linger opt;
-	opt.l_onoff = 0; // SO_DONTLINGER
-	opt.l_linger = 0; // Do not care
-	if( sSetsockopt(fd, SOL_SOCKET, SO_LINGER, (char*)&opt, sizeof(opt)) )
-		ShowWarning("setsocketopts: Unable to set SO_LINGER mode for connection #%d!\n", fd);
+		struct linger opt;
+
+		opt.l_onoff = 0; // SO_DONTLINGER
+		opt.l_linger = 0; // Do not care
+		if( sSetsockopt(fd, SOL_SOCKET, SO_LINGER, (char*)&opt, sizeof(opt)) )
+			ShowWarning("setsocketopts: Unable to set SO_LINGER mode for connection #%d!\n", fd);
 	}
-	if(delay_timeout){
+	if( delay_timeout ){
+#if defined(WIN32)
+		int timeout = delay_timeout * 1000;
+#else
 		struct timeval timeout;
+
 		timeout.tv_sec = delay_timeout;
 		timeout.tv_usec = 0;
-
-		if (sSetsockopt (fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
+#endif
+		if( sSetsockopt (fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,sizeof(timeout)) < 0 )
 			ShowError("setsocketopts: Unable to set SO_RCVTIMEO timeout for connection #%d!\n");
-		if (sSetsockopt (fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
+		if( sSetsockopt (fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,sizeof(timeout)) < 0 )
 			ShowError("setsocketopts: Unable to set SO_SNDTIMEO timeout for connection #%d!\n");
 	}
 }
@@ -527,7 +532,8 @@ int make_listen_bind(uint32 ip, uint16 port)
 		exit(EXIT_FAILURE);
 	}
 
-	if(fd_max <= fd) fd_max = fd + 1;
+	if( fd_max <= fd )
+		fd_max = fd + 1;
 	sFD_SET(fd, &readfds);
 
 	create_session(fd, connect_client, null_send, null_parse);
@@ -569,7 +575,40 @@ int make_connection(uint32 ip, uint16 port, bool silent, int timeout) {
 
 	if( !silent )
 		ShowStatus("Connecting to %d.%d.%d.%d:%i\n", CONVIP(ip), port);
+#ifdef WIN32
+	// On Windows we have to set the socket non-blocking before the connection to make timeout work. [Lemongrass]
+	set_nonblocking(fd, 1);
 
+	result = sConnect(fd, (struct sockaddr *)(&remote_address), sizeof(struct sockaddr_in));
+
+	// Only enter if a socket error occurred
+	// Create a pseudo scope to be able to break out in case of successful connection
+	while( result == SOCKET_ERROR ){
+		// Specially handle the error number for connection attempts that would block, because we want to use a timeout
+		if( sErrno == S_EWOULDBLOCK ){
+			fd_set writeSet;
+			struct timeval tv;
+
+			sFD_ZERO(&writeSet);
+			sFD_SET(fd,&writeSet);
+
+			tv.tv_sec = timeout;
+			tv.tv_usec = 0;
+
+			// Try to find out if the socket is writeable yet(within the timeout) and check if it is really writeable afterwards
+			if( sSelect(0, NULL, &writeSet, NULL, &tv) != 0 && sFD_ISSET(fd, &writeSet) != 0 )
+				break; // Our socket is writeable now => we have connected successfully, and leave the pseudo scope
+			// Our connection attempt timed out or the socket was not writeable
+		}
+
+		if( !silent )
+			ShowError("make_connection: connect failed (socket #%d, %s)!\n", fd, error_msg());
+
+		do_close(fd);
+		return -1;
+	}
+	// Keep the socket in non-blocking mode, since we would set it to non-blocking here on unix. [Lemongrass]
+#else
 	result = sConnect(fd, (struct sockaddr *)(&remote_address), sizeof(struct sockaddr_in));
 	if( result == SOCKET_ERROR ) {
 		if( !silent )
@@ -577,10 +616,13 @@ int make_connection(uint32 ip, uint16 port, bool silent, int timeout) {
 		do_close(fd);
 		return -1;
 	}
+
 	//Now the socket can be made non-blocking. [Skotlex]
 	set_nonblocking(fd, 1);
+#endif
 
-	if (fd_max <= fd) fd_max = fd + 1;
+	if( fd_max <= fd )
+		fd_max = fd + 1;
 	sFD_SET(fd,&readfds);
 
 	create_session(fd, recv_to_fifo, send_from_fifo, default_func_parse);
