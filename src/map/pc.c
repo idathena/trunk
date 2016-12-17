@@ -9911,7 +9911,7 @@ int pc_calc_pvprank(struct map_session_data *sd)
 
 	sd->pvp_rank = 1;
 	map_foreachinmap(pc_calc_pvprank_sub,sd->bl.m,BL_PC,sd);
-	if(old != sd->pvp_rank || sd->pvp_lastusers != m->users_pvp)
+	if( old != sd->pvp_rank || sd->pvp_lastusers != m->users_pvp )
 		clif_pvpset(sd,sd->pvp_rank,sd->pvp_lastusers = m->users_pvp,0);
 	return sd->pvp_rank;
 }
@@ -9923,15 +9923,15 @@ int pc_calc_pvprank_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct map_session_data *sd = map_id2sd(id);
 
-	if(sd == NULL)
+	if( !sd )
 		return 0;
 
 	sd->pvp_timer = INVALID_TIMER;
 
-	if(pc_isinvisible(sd))
+	if( pc_isinvisible(sd) )
 		return 0; //Do not calculate the pvp rank for a hidden GM
 
-	if(pc_calc_pvprank(sd) > 0)
+	if( pc_calc_pvprank(sd) > 0 )
 		sd->pvp_timer = add_timer(gettick() + PVP_CALCRANK_INTERVAL,pc_calc_pvprank_timer,id,data);
 	return 0;
 }
@@ -9944,9 +9944,9 @@ int pc_calc_pvprank_timer(int tid, unsigned int tick, int id, intptr_t data)
  *------------------------------------------*/
 int pc_ismarried(struct map_session_data *sd)
 {
-	if(sd == NULL)
+	if( !sd )
 		return -1;
-	if(sd->status.partner_id > 0)
+	if( sd->status.partner_id )
 		return sd->status.partner_id;
 	else
 		return 0;
@@ -9960,9 +9960,7 @@ int pc_ismarried(struct map_session_data *sd)
  *------------------------------------------*/
 bool pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd)
 {
-	if(sd == NULL || dstsd == NULL ||
-		sd->status.partner_id > 0 || dstsd->status.partner_id > 0 ||
-		(sd->class_&JOBL_BABY) || (dstsd->class_&JOBL_BABY))
+	if( !sd || !dstsd || sd->status.partner_id || dstsd->status.partner_id || (sd->class_&JOBL_BABY) || (dstsd->class_&JOBL_BABY) )
 		return false;
 	sd->status.partner_id = dstsd->status.char_id;
 	dstsd->status.partner_id = sd->status.char_id;
@@ -9980,19 +9978,19 @@ bool pc_divorce(struct map_session_data *sd)
 	struct map_session_data *p_sd;
 	int i;
 
-	if( sd == NULL || !pc_ismarried(sd) )
+	if( !sd || !pc_ismarried(sd) )
 		return false;
 
 	if( !sd->status.partner_id )
-		return false; // Char is not married
+		return false; //Char is not married
 
-	if( (p_sd = map_charid2sd(sd->status.partner_id)) == NULL ) { // Lets char server do the divorce
+	if( !(p_sd = map_charid2sd(sd->status.partner_id)) ) { //Lets char server do the divorce
 		if( chrif_divorce(sd->status.char_id, sd->status.partner_id) )
-			return false; // No char server connected
+			return false; //No char server connected
 		return true;
 	}
 
-	// Both players online, lets do the divorce manually
+	//Both players online, lets do the divorce manually
 	sd->status.partner_id = 0;
 	p_sd->status.partner_id = 0;
 	for( i = 0; i < MAX_INVENTORY; i++ ) {
@@ -10015,7 +10013,7 @@ bool pc_divorce(struct map_session_data *sd)
  */
 struct map_session_data *pc_get_partner(struct map_session_data *sd)
 {
-	if (!sd || !pc_ismarried(sd))
+	if( !sd || !pc_ismarried(sd) )
 		return NULL;
 	return map_charid2sd(sd->status.partner_id);
 }
@@ -10027,7 +10025,7 @@ struct map_session_data *pc_get_partner(struct map_session_data *sd)
  */
 struct map_session_data *pc_get_father(struct map_session_data *sd)
 {
-	if (!sd || !(sd->class_&JOBL_BABY) || !sd->status.father)
+	if( !sd || !(sd->class_&JOBL_BABY) || !sd->status.father )
 		return NULL;
 	return map_charid2sd(sd->status.father);
 }
@@ -10039,7 +10037,7 @@ struct map_session_data *pc_get_father(struct map_session_data *sd)
  */
 struct map_session_data *pc_get_mother(struct map_session_data *sd)
 {
-	if (!sd || (sd->class_&JOBL_BABY) || !sd->status.mother)
+	if( !sd || !(sd->class_&JOBL_BABY) || !sd->status.mother )
 		return NULL;
 	return map_charid2sd(sd->status.mother);
 }
@@ -10051,7 +10049,7 @@ struct map_session_data *pc_get_mother(struct map_session_data *sd)
  */
 struct map_session_data *pc_get_child(struct map_session_data *sd)
 {
-	if (!sd || !pc_ismarried(sd) || !sd->status.child)
+	if( !sd || !pc_ismarried(sd) || !sd->status.child )
 		return NULL;
 	return map_charid2sd(sd->status.child);
 }
@@ -10063,7 +10061,7 @@ void pc_bleeding(struct map_session_data *sd, unsigned int diff_tick)
 {
 	int hp = 0, sp = 0;
 
-	if( pc_isdead(sd) )
+	if (pc_isdead(sd))
 		return;
 
 	if (sd->hp_loss.value) {
@@ -10072,8 +10070,8 @@ void pc_bleeding(struct map_session_data *sd, unsigned int diff_tick)
 			hp += sd->hp_loss.value;
 			sd->hp_loss.tick -= sd->hp_loss.rate;
 		}
-		if(hp >= sd->battle_status.hp)
-			hp = sd->battle_status.hp-1; //Script drains cannot kill you.
+		if (hp >= sd->battle_status.hp)
+			hp = sd->battle_status.hp - 1; //Script drains cannot kill you
 	}
 	
 	if (sd->sp_loss.value) {
@@ -10137,26 +10135,26 @@ static int pc_autosave(int tid, unsigned int tick, int id, intptr_t data)
 	struct map_session_data *sd;
 	static int last_save_id = 0, save_flag = 0;
 
-	if(save_flag == 2) //Someone was saved on last call, normal cycle
+	if (save_flag == 2) //Someone was saved on last call, normal cycle
 		save_flag = 0;
 	else
-		save_flag = 1; //Noone was saved, so save first found char.
+		save_flag = 1; //Noone was saved, so save first found char
 
 	iter = mapit_getallusers();
-	for(sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter)) {
-		if(sd->bl.id == last_save_id && save_flag != 1) {
+	for (sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter)) {
+		if (sd->bl.id == last_save_id && save_flag != 1) {
 			save_flag = 1;
 			continue;
 		}
 
-		if(save_flag != 1) //Not our turn to save yet.
+		if (save_flag != 1) //Not our turn to save yet
 			continue;
 
-		//Save char.
+		//Save char
 		last_save_id = sd->bl.id;
 		save_flag = 2;
 #ifdef VIP_ENABLE
-		if(pc_isvip(sd)) //Check if we're still vip
+		if (pc_isvip(sd)) //Check if we're still vip
 			chrif_req_login_operation(sd->status.account_id,sd->status.name,CHRIF_OP_LOGIN_VIP,0,1);
 #endif
 		chrif_save(sd,0);
@@ -10165,7 +10163,7 @@ static int pc_autosave(int tid, unsigned int tick, int id, intptr_t data)
 	mapit_free(iter);
 
 	interval = autosave_interval / (map_usercount() + 1);
-	if(interval < minsave_interval)
+	if (interval < minsave_interval)
 		interval = minsave_interval;
 	add_timer(gettick() + interval,pc_autosave,0,0);
 
@@ -10174,7 +10172,7 @@ static int pc_autosave(int tid, unsigned int tick, int id, intptr_t data)
 
 static int pc_daynight_timer_sub(struct map_session_data *sd,va_list ap)
 {
-	if (sd->state.night != night_flag && map[sd->bl.m].flag.nightenabled) { //Night/day state does not match.
+	if (sd->state.night != night_flag && map[sd->bl.m].flag.nightenabled) { //Night/day state does not match
 		clif_status_load(&sd->bl, SI_SKE, night_flag); //New night effect by dynamix [Skotlex]
 		sd->state.night = night_flag;
 		return 1;
@@ -10189,15 +10187,15 @@ int map_day_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	char tmp_soutput[1024];
 
-	if (data == 0 && battle_config.day_duration <= 0) //If we want a day
+	if (!data && battle_config.day_duration <= 0) //If we want a day
 		return 0;
 
 	if (!night_flag)
-		return 0; //Already day.
+		return 0; //Already day
 
 	night_flag = 0; //0 = day, 1 = night [Yor]
 	map_foreachpc(pc_daynight_timer_sub);
-	strcpy(tmp_soutput, (data == 0) ? msg_txt(502) : msg_txt(60)); // The day has arrived!
+	strcpy(tmp_soutput, (!data ? msg_txt(502) : msg_txt(60))); // The day has arrived!
 	intif_broadcast(tmp_soutput, strlen(tmp_soutput) + 1, BC_DEFAULT);
 	return 0;
 }
@@ -10210,15 +10208,15 @@ int map_night_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	char tmp_soutput[1024];
 
-	if (data == 0 && battle_config.night_duration <= 0) //If we want a night
+	if (!data && battle_config.night_duration <= 0) //If we want a night
 		return 0;
 
 	if (night_flag)
-		return 0; //Already night.
+		return 0; //Already night
 
-	night_flag = 1; // 0 = day, 1 = night [Yor]
+	night_flag = 1; //0 = day, 1 = night [Yor]
 	map_foreachpc(pc_daynight_timer_sub);
-	strcpy(tmp_soutput, (data == 0) ? msg_txt(503) : msg_txt(59)); // The night has fallen
+	strcpy(tmp_soutput, (!data ? msg_txt(503) : msg_txt(59))); // The night has fallen
 	intif_broadcast(tmp_soutput, strlen(tmp_soutput) + 1, BC_DEFAULT);
 	return 0;
 }

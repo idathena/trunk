@@ -7884,14 +7884,14 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				struct map_session_data *m_sd = pc_get_mother(sd);
 				bool we_baby_parents = false;
 
-				if (m_sd && check_distance_bl(bl,&m_sd->bl,AREA_SIZE)) {
-					sc_start(src,&m_sd->bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
-					clif_specialeffect(&m_sd->bl,408,AREA);
-					we_baby_parents = true;
-				}
 				if (f_sd && check_distance_bl(bl,&f_sd->bl,AREA_SIZE)) {
 					sc_start(src,&f_sd->bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 					clif_specialeffect(&f_sd->bl,408,AREA);
+					we_baby_parents = true;
+				}
+				if (m_sd && check_distance_bl(bl,&m_sd->bl,AREA_SIZE)) {
+					sc_start(src,&m_sd->bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
+					clif_specialeffect(&m_sd->bl,408,AREA);
 					we_baby_parents = true;
 				}
 				if (!we_baby_parents ||
@@ -7914,7 +7914,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				hp = sstatus->max_hp / 10;
 				sp = hp * 10 * skill_lv / 100;
 				if (!status_charge(src,hp,0)) {
-					if (sd) clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+					if (sd)
+						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
@@ -10831,7 +10832,6 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 				}
 			//Fall through
 			case AM_RESURRECTHOMUN:
-			case PF_SPIDERWEB:
 				//Find a random spot to place the skill [Skotlex]
 				inf2 = skill_get_splash(ud->skill_id,ud->skill_lv);
 				ud->skillx = target->x + inf2;
@@ -10842,6 +10842,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 				}
 				ud->skilltimer = tid;
 				return skill_castend_pos(tid,tick,id,data);
+			case PF_SPIDERWEB:
 			case SU_SV_ROOTTWIST:
 			case GN_WALLOFTHORN:
 			case RL_B_TRAP:
@@ -18337,21 +18338,21 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 				break;
 
 			case UNT_SPIDERWEB: {
-				struct block_list *bl = map_id2bl(group->val2);
-				struct status_change *sc;
+					struct block_list *bl = map_id2bl(group->val2);
+					struct status_change *sc;
 
-				//Clear group id from status change
-				if (bl && (sc = status_get_sc(bl)) && sc->data[SC_SPIDERWEB]) {
-					if (sc->data[SC_SPIDERWEB]->val2 == group->group_id)
-						sc->data[SC_SPIDERWEB]->val2 = 0;
-					else if (sc->data[SC_SPIDERWEB]->val3 == group->group_id)
-						sc->data[SC_SPIDERWEB]->val3 = 0;
-					else if (sc->data[SC_SPIDERWEB]->val4 == group->group_id)
-						sc->data[SC_SPIDERWEB]->val4 = 0;
+					//Clear group id from status change
+					if (bl && (sc = status_get_sc(bl)) && sc->data[SC_SPIDERWEB]) {
+						if (sc->data[SC_SPIDERWEB]->val2 == group->group_id)
+							sc->data[SC_SPIDERWEB]->val2 = 0;
+						else if (sc->data[SC_SPIDERWEB]->val3 == group->group_id)
+							sc->data[SC_SPIDERWEB]->val3 = 0;
+						else if (sc->data[SC_SPIDERWEB]->val4 == group->group_id)
+							sc->data[SC_SPIDERWEB]->val4 = 0;
+					}
+					skill_delunit(unit);
 				}
-				skill_delunit(unit);
-			}
-			break;
+				break;
 
 			case UNT_REVERBERATION:
 				if( unit->val1 <= 0 ) { //If it was deactivated
