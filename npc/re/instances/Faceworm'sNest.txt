@@ -349,7 +349,7 @@ dali,80,60,4	script	Magic Scholar	4_M_SAGE_C,{
 						case -2:
 						case -1:
 							mes "[Magic Scholar]";
-							mes "Opps, my hands are slip off. It is required to activate the craks again.";
+							mes "Oops, my hands are slip off. It is required to activate the craks again.";
 							close;
 					}
 					mes "[Magic Scholar]";
@@ -2658,9 +2658,11 @@ OnTouch_:
 	                  3,2,1,3,2,1,3,2,1;
 	specialeffect EF_VENOMDUST;
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 	getmapxy(.@map$,.@x,.@y,1);
 	set .@mon_num,.@num[atoi(strnpcinfo(2))-1];
 	areamonster .@map$,.@x-1,.@y-1,.@x+1,.@y+1,"Faceworm Larva",2541,.@mon_num,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	initnpctimer;
 	end;
 OnInstanceInit:
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
@@ -2672,6 +2674,10 @@ OnDisable:
 	disablenpc instance_npcname(strnpcinfo(0));
 	end;
 OnMyMobDead:
+	end;
+OnTimer45000:
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -2738,6 +2744,7 @@ OnTouch_:
 	setarray .@num[0],25,30,50,30,50,30,40,50,50;
 	specialeffect EF_VENOMDUST;
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
+	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 	set .@val,atoi(charat(strnpcinfo(2),9));
 	switch (.@val) {
 		case 1: setarray .@xy[0],167,142,15; break;
@@ -2752,6 +2759,7 @@ OnTouch_:
 	}
 	set .@mon_num,.@num[.@val-1];
 	areamonster .@map$,.@xy[0]-.@xy[2],.@xy[1]-.@xy[2],.@xy[0]+.@xy[2],.@xy[1]+.@xy[2],"Venom Bug",2531,.@mon_num,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
+	initnpctimer;
 	end;
 OnInstanceInit:
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
@@ -3338,7 +3346,7 @@ OnTimer1000:
 		set .@idy,rand(.@xy[1],.@xy[1]+4);
 		makeitem .@item[0],1,.@map$,.@idx,.@idy;
 	}
-	makeitem .@item[1],1,.@map$,.@xy[0]+2,.@y[1]+3;
+	makeitem .@item[1],1,.@map$,.@xy[0]+2,.@xy[1]+3;
 	if (rand(1,1000) > 400)
 		makeitem 6648,1,.@map$,.@xy[0]+1,.@xy[1]+2; //Shabby_Crown
 	if (rand(1,1000) > 700)

@@ -12229,7 +12229,7 @@ BUILDIN_FUNC(ispartneron)
 {
 	TBL_PC *sd;
 
-	if(!script_charid2sd(2,sd) || !pc_ismarried(sd) || map_charid2sd(sd->status.partner_id) == NULL) {
+	if(!script_charid2sd(2,sd) || !pc_ismarried(sd) || !map_charid2sd(sd->status.partner_id)) {
 		script_pushint(st,0);
 		return 1;
 	}
@@ -12293,7 +12293,7 @@ BUILDIN_FUNC(getfatherid)
 {
 	TBL_PC *sd;
 
-	if (!script_charid2sd(2,sd)) {
+	if(!script_charid2sd(2,sd)) {
 		script_pushint(st,0);
 		return 1;
 	}
@@ -12304,23 +12304,23 @@ BUILDIN_FUNC(getfatherid)
 
 BUILDIN_FUNC(warppartner)
 {
-	int x,y;
+	int x, y;
 	unsigned short mapindex;
 	const char *str;
-	TBL_PC *sd=script_rid2sd(st);
-	TBL_PC *p_sd=NULL;
+	TBL_PC *sd = script_rid2sd(st);
+	TBL_PC *p_sd = NULL;
 
-	if(sd==NULL || !pc_ismarried(sd) || (p_sd=map_charid2sd(sd->status.partner_id)) == NULL) {
+	if(!sd || !pc_ismarried(sd) || !(p_sd = map_charid2sd(sd->status.partner_id))) {
 		script_pushint(st,0);
 		return 0;
 	}
 
-	str=script_getstr(st,2);
-	x=script_getnum(st,3);
-	y=script_getnum(st,4);
+	str = script_getstr(st,2);
+	x = script_getnum(st,3);
+	y = script_getnum(st,4);
 
 	mapindex = mapindex_name2id(str);
-	if (mapindex) {
+	if(mapindex) {
 		pc_setpos(p_sd,mapindex,x,y,CLR_OUTSIGHT);
 		script_pushint(st,1);
 	} else
@@ -12333,12 +12333,11 @@ BUILDIN_FUNC(warppartner)
  *------------------------------------------------*/
 BUILDIN_FUNC(strmobinfo)
 {
-
-	int num=script_getnum(st,2);
-	int class_=script_getnum(st,3);
+	int num = script_getnum(st,2);
+	int class_ = script_getnum(st,3);
 
 	if (!mobdb_checkid(class_)) {
-		if (num < 3) //requested a string
+		if (num < 3) //Requested a string
 			script_pushconststr(st,"");
 		else
 			script_pushint(st,0);

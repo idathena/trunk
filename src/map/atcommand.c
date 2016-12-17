@@ -5621,15 +5621,15 @@ void getring(struct map_session_data *sd)
 	unsigned short item_id;
 	struct item item_tmp;
 
-	item_id = (sd->status.sex) ? WEDDING_RING_M : WEDDING_RING_F;
+	item_id = (sd->status.sex ? WEDDING_RING_M : WEDDING_RING_F);
 	memset(&item_tmp, 0, sizeof(item_tmp));
 	item_tmp.nameid = item_id;
 	item_tmp.identify = 1;
 	item_tmp.card[0] = 255;
 	item_tmp.card[2] = sd->status.partner_id;
-	item_tmp.card[3] = sd->status.partner_id >> 16;
+	item_tmp.card[3] = sd->status.partner_id>>16;
 
-	if((flag = pc_additem(sd,&item_tmp,1,LOG_TYPE_COMMAND))) {
+	if ((flag = pc_additem(sd,&item_tmp,1,LOG_TYPE_COMMAND))) {
 		clif_additem(sd,0,0,flag);
 		map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,4,0);
 	}
@@ -5650,7 +5650,7 @@ ACMD_FUNC(marry)
 		return -1;
 	}
 
-	if ((pl_sd = map_nick2sd(player_name)) == NULL) {
+	if (!(pl_sd = map_nick2sd(player_name))) {
 		clif_displaymessage(fd, msg_txt(3));
 		return -1;
 	}
@@ -9688,7 +9688,7 @@ ACMD_FUNC(adopt)
 		return -1;
 	}
 
-	if ((b_sd = map_nick2sd((char *)atcmd_player_name)) == NULL) {
+	if (!(b_sd = map_nick2sd((char *)atcmd_player_name))) {
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
 	}

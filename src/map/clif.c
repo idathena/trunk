@@ -8874,7 +8874,7 @@ void clif_callpartner(struct map_session_data *sd)
 		const char *p = map_charid2nick(sd->status.partner_id);
 		struct map_session_data *p_sd = pc_get_partner(sd);
 
-		if( p != NULL && p_sd != NULL && !p_sd->state.autotrade )
+		if( p && p_sd && !p_sd->state.autotrade )
 			memcpy(WBUFP(buf,2), p, NAME_LENGTH);
 		else
 			WBUFB(buf,2) = 0;
@@ -15944,18 +15944,18 @@ void clif_parse_Adopt_reply(int fd, struct map_session_data *sd)
 	int result = RFIFOL(fd,info->pos[2]);
 	struct map_session_data *p1_sd = map_id2sd(p1_id);
 	struct map_session_data *p2_sd = map_id2sd(p2_id);
-
 	int pid = sd->adopt_invite;
+
 	sd->adopt_invite = 0;
 
-	if( p1_sd == NULL || p2_sd == NULL )
-		return; // Both players need to be online
+	if( !p1_sd || !p2_sd )
+		return; //Both players need to be online
 
 	if( pid != p1_sd->status.account_id )
-		return; // Incorrect values
+		return; //Incorrect values
 
-	if( result == 0 )
-		return; // Rejected
+	if( !result )
+		return; //Rejected
 
 	pc_adoption(p1_sd, p2_sd, sd);
 }
@@ -15974,15 +15974,15 @@ void clif_bossmapinfo(int fd, struct mob_data *md, short flag)
 	memset(WFIFOP(fd,0),0,70);
 	WFIFOW(fd,0) = 0x293;
 
-	if( md != NULL ) {
-		if( md->bl.prev != NULL ) { // Boss on This Map
+	if( md ) {
+		if( md->bl.prev ) { //Boss on This Map
 			if( flag ) {
 				WFIFOB(fd,2) = 1;
 				WFIFOL(fd,3) = md->bl.x;
 				WFIFOL(fd,7) = md->bl.y;
 			} else
-				WFIFOB(fd,2) = 2; // First Time
-		} else if( md->spawn_timer != INVALID_TIMER ) { // Boss is Dead
+				WFIFOB(fd,2) = 2; //First Time
+		} else if( md->spawn_timer != INVALID_TIMER ) { //Boss is Dead
 			const struct TimerData *timer_data = get_timer(md->spawn_timer);
 			unsigned int seconds;
 			int hours, minutes;
@@ -15993,8 +15993,8 @@ void clif_bossmapinfo(int fd, struct mob_data *md, short flag)
 			minutes = seconds / 60;
 
 			WFIFOB(fd,2) = 3;
-			WFIFOW(fd,11) = hours; // Hours
-			WFIFOW(fd,13) = minutes; // Minutes
+			WFIFOW(fd,11) = hours; //Hours
+			WFIFOW(fd,13) = minutes; //Minutes
 		}
 		safestrncpy((char *)WFIFOP(fd,19), md->db->jname, NAME_LENGTH);
 	}
@@ -16010,7 +16010,7 @@ void clif_parse_ViewPlayerEquip(int fd, struct map_session_data *sd)
 	int aid = RFIFOL(fd, packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
 	struct map_session_data *tsd = map_id2sd(aid);
 	
-	if (!tsd)
+	if( !tsd )
 		return;
 
 	if( tsd->status.show_equip || pc_has_permission(sd, PC_PERM_VIEW_EQUIPMENT) )
@@ -16031,6 +16031,7 @@ void clif_parse_EquipTick(int fd, struct map_session_data *sd)
 {
 	//int type = RFIFOL(fd,packet_db[sd->packet_ver][cmd].pos[0]);
 	bool flag = (bool)RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[1]);
+
 	sd->status.show_equip = flag;
 	clif_equiptickack(sd, flag);
 }
@@ -16041,7 +16042,8 @@ void clif_parse_EquipTick(int fd, struct map_session_data *sd)
 ///	 1 = enabled
 void clif_parse_PartyTick(int fd, struct map_session_data *sd)
 {
-	bool flag = RFIFOB(fd,6) ? true : false;
+	bool flag = (RFIFOB(fd,6) ? true : false);
+
 	sd->status.allow_party = flag;
 	clif_partytickack(sd, flag);
 }

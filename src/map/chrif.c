@@ -991,17 +991,17 @@ int chrif_divorceack(int char_id, int partner_id) {
 	if( !char_id || !partner_id )
 		return 0;
 
-	if( ( sd = map_charid2sd(char_id) ) != NULL && sd->status.partner_id == partner_id ) {
+	if( (sd = map_charid2sd(char_id)) && sd->status.partner_id == partner_id ) {
 		sd->status.partner_id = 0;
-		for(i = 0; i < MAX_INVENTORY; i++)
-			if (sd->status.inventory[i].nameid == WEDDING_RING_M || sd->status.inventory[i].nameid == WEDDING_RING_F)
+		for( i = 0; i < MAX_INVENTORY; i++ )
+			if( sd->status.inventory[i].nameid == WEDDING_RING_M || sd->status.inventory[i].nameid == WEDDING_RING_F )
 				pc_delitem(sd, i, 1, 0, 0, LOG_TYPE_OTHER);
 	}
 
-	if( ( sd = map_charid2sd(partner_id) ) != NULL && sd->status.partner_id == char_id ) {
+	if( (sd = map_charid2sd(partner_id)) && sd->status.partner_id == char_id ) {
 		sd->status.partner_id = 0;
-		for(i = 0; i < MAX_INVENTORY; i++)
-			if (sd->status.inventory[i].nameid == WEDDING_RING_M || sd->status.inventory[i].nameid == WEDDING_RING_F)
+		for( i = 0; i < MAX_INVENTORY; i++ )
+			if( sd->status.inventory[i].nameid == WEDDING_RING_M || sd->status.inventory[i].nameid == WEDDING_RING_F )
 				pc_delitem(sd, i, 1, 0, 0, LOG_TYPE_OTHER);
 	}
 
@@ -1014,7 +1014,7 @@ int chrif_deadopt(int father_id, int mother_id, int child_id) {
 	struct map_session_data *sd;
 	uint16 idx = skill_get_index(WE_CALLBABY);
 
-	if( father_id && (sd = map_charid2sd(father_id)) != NULL && sd->status.child == child_id ) {
+	if( father_id && (sd = map_charid2sd(father_id)) && sd->status.child == child_id ) {
 		sd->status.child = 0;
 		sd->status.skill[idx].id = 0;
 		sd->status.skill[idx].lv = 0;
@@ -1022,7 +1022,7 @@ int chrif_deadopt(int father_id, int mother_id, int child_id) {
 		clif_deleteskill(sd,WE_CALLBABY);
 	}
 
-	if( mother_id && (sd = map_charid2sd(mother_id)) != NULL && sd->status.child == child_id ) {
+	if( mother_id && (sd = map_charid2sd(mother_id)) && sd->status.child == child_id ) {
 		sd->status.child = 0;
 		sd->status.skill[idx].id = 0;
 		sd->status.skill[idx].lv = 0;

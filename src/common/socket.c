@@ -590,14 +590,14 @@ int make_connection(uint32 ip, uint16 port, bool silent, int timeout) {
 			struct timeval tv;
 
 			sFD_ZERO(&writeSet);
-			sFD_SET(fd,&writeSet);
+			sFD_SET(fd, &writeSet);
 
 			tv.tv_sec = timeout;
 			tv.tv_usec = 0;
 
 			// Try to find out if the socket is writeable yet(within the timeout) and check if it is really writeable afterwards
 			if( sSelect(0, NULL, &writeSet, NULL, &tv) != 0 && sFD_ISSET(fd, &writeSet) != 0 )
-				break; // Our socket is writeable now => we have connected successfully, and leave the pseudo scope
+				break; // Our socket is writeable now => we have connected successfully and leave the pseudo scope
 			// Our connection attempt timed out or the socket was not writeable
 		}
 
