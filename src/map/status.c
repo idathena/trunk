@@ -417,7 +417,7 @@ void initChangeTables(void) {
 	set_sc( PF_MEMORIZE          , SC_MEMORIZE        , SI_MEMORIZE        , SCB_NONE );
 	set_sc( PF_FOGWALL           , SC_FOGWALL         , SI_FOGWALL         , SCB_NONE );
 	set_sc( PF_SPIDERWEB         , SC_SPIDERWEB       , SI_SPIDERWEB       , SCB_FLEE );
-	set_sc( WE_BABY              , SC_BABY            , SI_PROTECTEXP            , SCB_NONE );
+	set_sc( WE_BABY              , SC_BABY            , SI_PROTECTEXP      , SCB_NONE );
 	set_sc( TK_RUN               , SC_RUN             , SI_RUN             , SCB_SPEED|SCB_DSPD );
 	set_sc( TK_RUN               , SC_STRUP           , SI_STRUP           , SCB_STR );
 	set_sc( TK_READYSTORM        , SC_READYSTORM      , SI_STORMKICK_ON    , SCB_NONE );

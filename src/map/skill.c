@@ -2855,6 +2855,9 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				if (skill_id == WZ_WATERBALL && skill_lv > 1)
 					sp = sp / ((skill_lv|1) * (skill_lv|1)); //Estimate SP cost of a single water-ball
 				status_heal(bl, 0, sp, 2);
+#ifndef RENEWAL 
+				clif_skill_nodamage(bl, bl, SA_MAGICROD, skill_lv, 1);
+#endif
 			}
 			if ((dmg.damage || dmg.damage2) && tsc->data[SC_HALLUCINATIONWALK] && rnd()%100 < tsc->data[SC_HALLUCINATIONWALK]->val3) {
 				dmg.damage = dmg.damage2 = 0;
@@ -7348,8 +7351,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				int splash = skill_get_splash(skill_id,skill_lv);
 
 				if( flag&1 || splash < 1 ) {
-					if( (!map_flag_vs(bl->m) && !sd->duel_group && battle_check_target(src,bl,BCT_PARTY) <= 0) ||
-						rnd()%100 >= 50 + 10 * skill_lv ) {
+					if( sd && dstsd && !map_flag_vs(bl->m) && (!sd->duel_group || sd->duel_group != dstsd->duel_group) &&
+						battle_check_target(src,bl,BCT_PARTY) <= 0 ) {
+						map_freeblock_unlock();
+						return 1;
+					}
+					if( rnd()%100 >= 50 + 10 * skill_lv ) {
 						if( sd )
 							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 						map_freeblock_unlock();
@@ -7621,7 +7628,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case SA_MAGICROD:
-			clif_skill_nodamage(src,src,SA_MAGICROD,skill_lv,1);
+#ifdef RENEWAL
+			clif_skill_nodamage(src,src,skill_id,skill_lv,1);
+#endif
 			sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 
@@ -15070,10 +15079,8 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 			{
 				int c = 0;
 				int maxcount = skill_get_maxcount(skill_id,skill_lv);
-				int mob_id = MOBID_SILVERSNIPER;
+				int mob_id = (skill_id == MOBID_SILVERSNIPER ? MOBID_SILVERSNIPER : MOBID_MAGICDECOY_FIRE);
 
-				if( skill_id == NC_MAGICDECOY )
-					mob_id = MOBID_MAGICDECOY_FIRE;
 				if( battle_config.land_skill_limit && maxcount > 0 && (battle_config.land_skill_limit&BL_PC) ) {
 					if( skill_id == NC_MAGICDECOY ) {
 						int j;

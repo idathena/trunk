@@ -17275,8 +17275,7 @@ BUILDIN_FUNC(sleep)
 	int ticks;
 
 	ticks = script_getnum(st,2);
-	//Detach the player
-	script_detach_rid(st);
+	script_detach_rid(st); //Detach the player
 	if( ticks > 0 ) {
 		if( !st->sleep.tick ) { //Sleep for the target amount of time
 			st->state = RERUNLINE;
