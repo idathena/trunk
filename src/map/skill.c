@@ -11570,10 +11570,11 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 				map_foreachinarea(skill_cell_overlap,src->m,x-i,y-i,x+i,y+i,BL_SKILL,skill_id,&dummy,src);
 				clif_skill_poseffect(src,skill_id,skill_lv,x,y,tick);
 			} else {
-				if( sd )
+				if( sd ) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-				skill_consume_requirement(sd,skill_id,skill_lv,2); //Consume gem even if failed
-				return 1;
+					skill_consume_requirement(sd,skill_id,skill_lv,2); //Consume gem even if failed
+					return 1;
+				}
 			}
 			break;
 
