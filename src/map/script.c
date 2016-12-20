@@ -390,7 +390,7 @@ typedef struct script_function {
 
 extern script_function buildin_func[];
 
-static struct linkdb_node* sleep_db; //int oid -> struct script_state*
+static struct linkdb_node *sleep_db; //int oid -> struct script_state*
 
 #ifdef BETA_THREAD_TEST
 /**
@@ -3167,11 +3167,13 @@ void script_free_state(struct script_state *st)
 		ShowDebug("script_free_state: Previous script state lost (rid=%d, oid=%d, state=%d, bk_npcid=%d).\n", st->bk_st->rid, st->bk_st->oid, st->bk_st->state, st->bk_npcid);
 	if(st->sleep.timer != INVALID_TIMER)
 		delete_timer(st->sleep.timer, run_script_timer);
-	script_free_vars(st->stack->var_function);
-	pop_stack(st, 0, st->stack->sp);
-	aFree(st->stack->stack_data);
-	aFree(st->stack);
-	st->stack = NULL;
+	if(st->stack) {
+		script_free_vars(st->stack->var_function);
+		pop_stack(st, 0, st->stack->sp);
+		aFree(st->stack->stack_data);
+		aFree(st->stack);
+		st->stack = NULL;
+	}
 	st->pos = -1;
 	aFree(st);
 }
@@ -3534,7 +3536,7 @@ int run_func(struct script_state *st)
 	for( i = end_sp-1; i > 0 ; --i )
 		if( st->stack->stack_data[i].type == C_ARG )
 			break;
-	if( i == 0 ) {
+	if( !i ) {
 		ShowError("script:run_func: C_ARG not found. please report this!!!\n");
 		st->state = END;
 		script_reportsrc(st);
@@ -3610,7 +3612,7 @@ void run_script(struct script_code *rootscript, int pos, int rid, int oid)
 {
 	struct script_state *st;
 
-	if( rootscript == NULL || pos < 0 )
+	if( !rootscript || pos < 0 )
 		return;
 
 	//@TODO: In jAthena, this function can take over the pending script in the player [FlavioJS]
@@ -3625,7 +3627,7 @@ void script_stop_sleeptimers(int id)
 	for( ;; ) {
 		struct script_state *st = (struct script_state *)linkdb_erase(&sleep_db,(void *)__64BPRTSIZE(id));
 
-		if( st == NULL )
+		if( !st )
 			break; //No more sleep timers
 		script_free_state(st);
 	}
@@ -3634,13 +3636,13 @@ void script_stop_sleeptimers(int id)
 /*==========================================
  * Delete the specified node from sleep_db
  *------------------------------------------*/
-struct linkdb_node* script_erase_sleepdb(struct linkdb_node *n)
+struct linkdb_node *script_erase_sleepdb(struct linkdb_node *n)
 {
 	struct linkdb_node *retnode;
 
-	if( n == NULL)
+	if( !n )
 		return NULL;
-	if( n->prev == NULL )
+	if( !n->prev )
 		sleep_db = n->next;
 	else
 		n->prev->next = n->next;
@@ -3664,8 +3666,8 @@ int run_script_timer(int tid, unsigned int tick, int id, intptr_t data)
 		st->rid = 0;
 		st->state = END;
 	}
-	while( node && st->sleep.timer != INVALID_TIMER ) {
-		if( (int)__64BPRTSIZE(node->key) == st->oid && ((struct script_state *)node->data)->sleep.timer == st->sleep.timer ) {
+	while(node && st->sleep.timer != INVALID_TIMER) {
+		if((int)__64BPRTSIZE(node->key) == st->oid && ((struct script_state *)node->data)->sleep.timer == st->sleep.timer) {
 			script_erase_sleepdb(node);
 			st->sleep.timer = INVALID_TIMER;
 			break;
@@ -19352,7 +19354,7 @@ BUILDIN_FUNC(npcskill)
 		return 1;
 	}
 
-	if( nd == NULL )
+	if( !nd )
 		return 1;
 
 	nd->level = npc_level;
@@ -19390,14 +19392,14 @@ BUILDIN_FUNC(consumeitem)
 	if( data_isstring(data)) {
 		const char *name = conv_str(st,data);
 
-		if( (item_data = itemdb_searchname(name)) == NULL ) {
+		if( !(item_data = itemdb_searchname(name)) ) {
 			ShowError("buildin_consumeitem: Nonexistant item %s requested.\n",name);
 			return 1;
 		}
 	} else if( data_isint(data) ) {
 		unsigned short nameid = conv_num(st,data);
 
-		if( (item_data = itemdb_exists(nameid)) == NULL ) {
+		if( !(item_data = itemdb_exists(nameid)) ) {
 			ShowError("buildin_consumeitem: Nonexistant item %hu requested.\n",nameid);
 			return 1;
 		}
@@ -19425,7 +19427,7 @@ BUILDIN_FUNC(sit)
 	else
 		sd = script_rid2sd(st);
 
-	if( sd == NULL )
+	if( !sd )
 		return 1;
 
 	if( !pc_issit(sd) ) {
@@ -19448,7 +19450,7 @@ BUILDIN_FUNC(stand)
 	else
 		sd = script_rid2sd(st);
 
-	if( sd == NULL )
+	if( !sd )
 		return 1;
 
 	if( pc_issit(sd) ) {
@@ -19499,7 +19501,7 @@ BUILDIN_FUNC(checkbound) {
 	unsigned short nameid = script_getnum(st,2);
 	TBL_PC *sd;
 
-	if( (sd = script_rid2sd(st)) == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	if( !(itemdb_exists(nameid)) ) {
