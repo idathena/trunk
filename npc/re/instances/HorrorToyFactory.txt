@@ -312,54 +312,51 @@ xmas,240,297,3	script	Vagrant Cain#pa0829	4_M_06,{
 	mes "Oh, I'm sure that you came here because you don't like ordinaries.";
 	mes "Just talk to me. I will make anything if you have prepared the reasonable charge and the proper materials.";
 	next;
-	set .@menu$,"Nothing that I want.:I want ^0000ffCeline's Ribbon^000000.:I'm seeking ^0000ffNoble Cross^000000.:I'd like to get ^0000ffEvil Spirit Gloves^000000.";
-	set .option,select(.@menu$);
-	switch (.option) {
+	switch (select("Nothing that I want.:I want ^0000ffCeline's Ribbon^000000.:I'm seeking ^0000ffNoble Cross^000000.:I'd like to get ^0000ffEvil Spirit Gloves^000000.")) {
 		case 1:
 			mes "[Vagrant Cain]";
 			mes "Yes, yes. Everyone says like you at first. See you later.";
 			close;
 		case 2:
-			callsub L_Trade,"unique headgear","1000","+9 or greater Lush Rose","Celine's Ribbon",1000,18849; //Celines_Ribbon
+			callsub L_Trade,2,"unique headgear",1000,"+9 or greater Lush Rose","Celine's Ribbon",18849; //Celines_Ribbon
 			break;
 		case 3:
-			callsub L_Trade,"precious weapon","2000","Grand Cross (slot)","Noble Cross",2000,16029; //Noble_Cross
+			callsub L_Trade,3,"precious weapon",2000,"Grand Cross (slot)","Noble Cross",16029; //Noble_Cross
 			break;
 		case 4:
-			callsub L_Trade,"rare accessory","1000","Hurt Mind, Kind Heart, and Red Lantern","Evil Spirit Gloves",1000,2980; //Evilspirit_Gloves
+			callsub L_Trade,4,"rare accessory",1000,"Hurt Mind, Kind Heart, and Red Lantern","Evil Spirit Gloves",2980; //Evilspirit_Gloves
 			break;
 	}
 
 L_Trade:
 	mes "[Vagrant Cain]";
-	mes "Ho~ You are looking for a very "+getarg(0)+", my friend. You have great discernment.";
+	mes "Ho~ You are looking for a very "+getarg(1)+", my friend. You have great discernment.";
 	next;
 	mes "[Vagrant Cain]";
-	mes "I need ^0000ff"+getarg(1)+"^000000 Bloody Coins"+(.option==4?",":" and")+" one ^0000ff"+getarg(2)+"^000000 each for ^0000ff"+getarg(3)+"^000000. Don't forget!";
+	mes "I need ^0000ff"+getarg(2)+"^000000 Bloody Coins"+(getarg(0)==4?",":" and")+" one ^0000ff"+getarg(3)+"^000000 each for ^0000ff"+getarg(4)+"^000000. Don't forget!";
 	next;
 	if (select("I don't have them now:Exchange them right away") == 1) {
 		mes "[Vagrant Cain]";
 		mes "Come back when you are ready. Let me remind you of the materials.";
 		next;
 		mes "[Vagrant Cain]";
-		mes "You should prepare ^0000ff"+getarg(1)+"^000000 Bloody Coins"+(.option==4?",":" and")+" one ^0000ff"+getarg(2)+"^000000 each for ^0000ff"+getarg(3)+"^000000. Don't forget!";
+		mes "You should prepare ^0000ff"+getarg(2)+"^000000 Bloody Coins"+(getarg(0)==4?",":" and")+" one ^0000ff"+getarg(3)+"^000000 each for ^0000ff"+getarg(4)+"^000000. Don't forget!";
 		close;
 	}
 	mes "[Vagrant Cain]";
-	mes "Are you really going to trade them?";
-	mes "^ff0000The refine levels, effects, and card of the item will disappear and you cannot get a refund^000000. "+(.option==4?"Besides, if you have the same sort of things, I don't know which one will be chosen. Think about that.":"Please consider it!");
+	mes "Are you really going to trade them? ^ff0000The refine levels, effects, and card of the item will disappear and you cannot get a refund^000000. "+(getarg(0)==4?"Besides, if you have the same sort of things, I don't know which one will be chosen. Think about that.":"Please consider it!");
 	next;
 	if (select("Maybe next time:Exchange them right away") == 1) {
 		mes "[Vagrant Cain]";
 		mes "Okay, you are determined. Hope we can see each other next time, huhu.";
 		close;
 	}
-	switch (.option) {
+	switch (getarg(0)) {
 		case 2:
 			set .@part,EQI_HEAD_TOP;
 			if (!getequipisequiped(.@part)) {
 				mes "[Vagrant Cain]";
-				mes "Hmm.. You don't wear it on your head. Come back later with wearing "+getarg(2)+" on your head.";
+				mes "Hmm.. You don't wear it on your head. Come back later with wearing "+getarg(3)+" on your head.";
 				close;
 			}
 			if (getequipid(.@part) != 18848) {
@@ -377,12 +374,12 @@ L_Trade:
 			set .@part,EQI_HAND_R;
 			if (!getequipisequiped(.@part)) {
 				mes "[Vagrant Cain]";
-				mes "Hmm.. There's nothing on your right hand. Would you put on "+getarg(2)+" and talk to me once again?";
+				mes "Hmm.. There's nothing on your right hand. Would you put on "+getarg(3)+" and talk to me once again?";
 				close;
 			}
 			if (getequipid(.@part) != 1540) {
 				mes "[Vagrant Cain]";
-				mes "The thing on your right hand is not "+getarg(2)+". Bring me the right thing I told you, kukuku.";
+				mes "The thing on your right hand is not "+getarg(3)+". Bring me the right thing I told you, kukuku.";
 				close;
 			}
 			break;
@@ -392,25 +389,25 @@ L_Trade:
 				mes "You don't have enough materials.";
 				next;
 				mes "[Vagrant Cain]";
-				mes "You should prepare ^0000ff"+getarg(1)+"^000000 Bloody Coins, one ^0000ff"+getarg(2)+"^000000 each for ^0000ff"+getarg(3)+"^000000.";
+				mes "You should prepare ^0000ff"+getarg(2)+"^000000 Bloody Coins, one ^0000ff"+getarg(3)+"^000000 each for ^0000ff"+getarg(4)+"^000000.";
 				close;
 			}
 			break;
 	}
-	if (countitem(7642) < getarg(4)) {
+	if (countitem(7642) < getarg(2)) {
 		mes "[Vagrant Cain]";
-		mes "Well, you are short of Bloody Coins. You need to gather exactly "+getarg(4)+" of them. Less than that.. It can't be helped.";
+		mes "Well, you are short of Bloody Coins. You need to gather exactly "+getarg(2)+" of them. Less than that.. It can't be helped.";
 		close;
 	}
 	mes "[Vagrant Cain]";
 	mes "The deal has completed. Take a look at it.";
-	if (.option == 4) {
+	if (getarg(0) == 4) {
 		delitem 2976,1; //Red_Lantern
 		delitem 2977,1; //Hurt_Mind
 		delitem 2978,1; //KindHeart
 	} else
 		delequip .@part;
-	delitem 7642,getarg(4); //Bloody_Coin
+	delitem 7642,getarg(2); //Bloody_Coin
 	getitem getarg(5),1;
 	close;
 }
@@ -461,7 +458,8 @@ xmas,240,294,3	script	White Beard Joe#1	4_M_05,{
 		close;
 	}
 	set .@equip_id,getequipid(.@part);
-	setarray .@equip_card[0], getequipcardid(.@part,0),getequipcardid(.@part,1),getequipcardid(.@part,2),getequipcardid(.@part,3);
+	set .@equip_refine,getequiprefinerycnt(.@part);
+	setarray .@equip_card[0],getequipcardid(.@part,0),getequipcardid(.@part,1),getequipcardid(.@part,2),getequipcardid(.@part,3);
 	switch (.@equip_id) {
 		case 2486: //Shadow_Walk_
 			set .@enchant_allow,1;
@@ -753,7 +751,6 @@ L_Socket:
 	mes "Hmm.. It was successful. Take a look at it.";
 	specialeffect2 EF_REPAIRWEAPON;
 	delitem 7642,15; //Bloody_Coin
-	set .@equip_refine,getequiprefinerycnt(.@part);
 	delequip .@part;
 	getitem2 .@equip_id,1,1,.@equip_refine,0,.@equip_card[0],.@equip_card[1],.@equip_card[2],.@equip_card[3];
 	close;
@@ -2517,7 +2514,7 @@ OnTimer45000:
 1@xm_d,230,80,0	duplicate(alert#61)	alert#103	HIDDEN_WARP_NPC,10,10
 1@xm_d,230,110,0	duplicate(alert#61)	alert#104	HIDDEN_WARP_NPC,10,10
 
-// Instance GM Function :: mx_xm_ad
+// Instance GM Functions :: mx_xm_ad
 //==========================================
 1@xm_d,1,1,3	script	#adsw	CLEAR_NPC,{
 	callfunc "F_GM_NPC";
