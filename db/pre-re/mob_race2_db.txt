@@ -4,14 +4,22 @@
 // Race2ID,MobID1,MobID2,MobID3,...,MobID9
 
 // Goblins
-1,1122,1123,1124,1125,1126,1258,1299
+RC2_Goblin,1122,1123,1124,1125,1126,1258,1299
 // Kobolds
-2,1133,1134,1135,1282,1296
+RC2_Kobold,1133,1134,1135,1282,1296
 // Orcs
-3,1023,1152,1153,1189,1213,1273
+RC2_Orc,1023,1152,1153,1189,1213,1273
 // Golems
-4,1040,1278,1366,1497,2024
+RC2_Golem,1040,1278,1366,1497,2024
 // Guardians
-5,1285,1286,1287
+RC2_Guardian,1285,1286,1287
 // Ninja Classes (Pirate's_Pride)
-6,1315,1364,1401,1560
+RC2_Ninja,1315,1364,1401,1560
+// Poring Classes (Bow__)
+RC2_Poring,1002,1113,1031,1242
+// Insects (Mosquito_Coil)
+RC2_Insect,1048,1051,1053,1054,1095,1097,1105,1160
+// Manuk (Manuk's_Opportunity, Manuk's_Courage, Manuk's_Faith)
+RC2_Manuk,1986,1987,1988,1989,1990,1999
+// Splendide (Pinguicula's_fruit_Jam, Luciola's_Honey_Jam, Cornus'_Tears)
+RC2_Splendide,1991,1992,1993,1994,1995

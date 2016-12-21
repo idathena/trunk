@@ -93,8 +93,31 @@ izlude_b	mapflag	nobranch
 izlude_c	mapflag	nobranch
 izlude_d	mapflag	nobranch
 
+// Glast Heim Memorial Dungeon =
+1@gl_k	mapflag	nobranch
+2@gl_k	mapflag	nobranch
+
+// Nightmare Glast Heim ========
+gl_chyard_	mapflag	nobranch
+gl_cas02_	mapflag	nobranch
+
+// Heroes' Trails - Part 1 =====
+1@gef	mapflag	nobranch
+1@face	mapflag	nobranch
+1@sara	mapflag	nobranch
+1@gef_in	mapflag	nobranch
+
+// Wave Mode Memorial Dungeon ==
+1@def01	mapflag	nobranch
+1@def02	mapflag	nobranch
+1@def03	mapflag	nobranch
+
 // Nightmarish Jitterbug =======
 1@jtb	mapflag	nobranch
 
 // Horror Toy Factory ==========
 1@xm_d	mapflag	nobranch
+
+// Nightmare Clock Tower =======
+c_tower2_	mapflag	nobranch
+c_tower3_	mapflag	nobranch

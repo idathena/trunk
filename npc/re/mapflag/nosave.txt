@@ -13,7 +13,7 @@
 //= 1.0 Renewal split. [Euphy]
 //============================================================
 
-// Job Quests ====================
+// Job Quests =================================
 // 3-1
 job3_arch01	mapflag	nosave	SavePoint
 job3_arch02	mapflag	nosave	SavePoint
@@ -45,21 +45,21 @@ gld2_gef	mapflag	nosave	SavePoint
 gld2_pay	mapflag	nosave	SavePoint
 gld2_prt	mapflag	nosave	SavePoint
 
-// Misty Forest Labyrinth =========
+// Misty Forest Labyrinth =====================
 1@mist	mapflag	nosave	SavePoint
 
-// Octopus Cave ===================
+// Octopus Cave ===============================
 1@cash	mapflag	nosave	SavePoint
 
-// Drain ==========================
+// Malangdo Culvert ===========================
 1@pump	mapflag	nosave	SavePoint
 2@pump	mapflag	nosave	SavePoint
 
-// Somatology Laboratory ==========
+// Somatology Laboratory ======================
 que_lhz	mapflag	nosave	SavePoint
 1@lhz	mapflag	nosave	SavePoint
 
-// Port Malaya ====================
+// Port Malaya ================================
 ma_zif01	mapflag	nosave	SavePoint
 ma_zif02	mapflag	nosave	SavePoint
 ma_zif03	mapflag	nosave	SavePoint
@@ -70,36 +70,36 @@ ma_zif07	mapflag	nosave	SavePoint
 ma_zif08	mapflag	nosave	SavePoint
 ma_zif09	mapflag	nosave	SavePoint
 
-// Bangungot Hospital F2 ==========
+// Bangungot Hospital F2 ======================
 1@ma_h	mapflag	nosave	SavePoint
 
-// Buwaya Cave ====================
+// Buwaya Cave ================================
 1@ma_c	mapflag	nosave	SavePoint
 
-// Bakonawa Hideout ===============
+// Bakonawa Hideout ===========================
 1@ma_b	mapflag	nosave	SavePoint
 
-// Inside Eclage ==================
+// Inside Eclage ==============================
 que_avan01	mapflag	nosave	SavePoint
 1@ecl	mapflag	nosave	SavePoint
 
-// Glast Heim Memorial Dungeon ====
+// Glast Heim Memorial Dungeon ================
 1@gl_k	mapflag	nosave	SavePoint
 2@gl_k	mapflag	nosave	SavePoint
 
-// Wave Mode Memorial Dungeon =====
-1@def01	mapflag	nosave	SavePoint
-1@def02	mapflag	nosave	SavePoint
-1@def03	mapflag	nosave	SavePoint
-
-// Heroes' Trails ========
+// Heroes' Trails =============================
 1@gef	mapflag	nosave	SavePoint
 1@face	mapflag	nosave	SavePoint
 1@sara	mapflag	nosave	SavePoint
 1@gef_in	mapflag	nosave	SavePoint
 
-// Nightmarish Jitterbug =========
+// Wave Mode Memorial Dungeon =================
+1@def01	mapflag	nosave	SavePoint
+1@def02	mapflag	nosave	SavePoint
+1@def03	mapflag	nosave	SavePoint
+
+// Nightmarish Jitterbug ======================
 1@jtb	mapflag	nosave	SavePoint
 
-// Horror Toy Factory =========
+// Horror Toy Factory =========================
 1@xm_d	mapflag	nosave	SavePoint

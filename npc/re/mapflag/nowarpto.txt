@@ -24,7 +24,7 @@ que_house_s	mapflag	nowarpto
 2@pump	mapflag	nowarpto
 1@cash	mapflag	nowarpto
 
-// Lighthalzen Dungeon F4 ========
+// Somatology Laboratory =========
 1@lhz	mapflag	nowarpto
 lhz_dun04	mapflag	nowarpto
 que_lhz	mapflag	nowarpto
@@ -37,20 +37,17 @@ que_lhz	mapflag	nowarpto
 // 14.2 Eclage ===================
 1@ecl	mapflag	nowarpto
 
-// Pyramids Basement Nightmare Mode
+// Nightmare Pyramids Basement ===
 moc_prydn1	mapflag	nowarpto
 moc_prydn2	mapflag	nowarpto
 
 // Glast Heim Memorial Dungeon ===
 1@gl_k	mapflag	nowarpto
 2@gl_k	mapflag	nowarpto
+
+// Nightmare Glast Heim ==========
 gl_chyard_	mapflag	nowarpto
 gl_cas02_	mapflag	nowarpto
-
-// Wave Mode Memorial Dungeon ====
-1@def01	mapflag	nowarpto
-1@def02	mapflag	nowarpto
-1@def03	mapflag	nowarpto
 
 // Heroes' Trails - Part 1 =======
 1@gef	mapflag	nowarpto
@@ -58,8 +55,17 @@ gl_cas02_	mapflag	nowarpto
 1@sara	mapflag	nowarpto
 1@gef_in	mapflag	nowarpto
 
+// Wave Mode Memorial Dungeon ====
+1@def01	mapflag	nowarpto
+1@def02	mapflag	nowarpto
+1@def03	mapflag	nowarpto
+
 // Nightmarish Jitterbug =========
 1@jtb	mapflag	nowarpto
 
 // Horror Toy Factory ============
 1@xm_d	mapflag	nowarpto
+
+// Nightmare Clock Tower =========
+c_tower2_	mapflag	nowarpto
+c_tower3_	mapflag	nowarpto

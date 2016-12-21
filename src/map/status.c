@@ -881,12 +881,6 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_FLEEFOOD] = SI_FOOD_BASICAVOIDANCE;
 	StatusIconChangeTable[SC_HITFOOD] = SI_FOOD_BASICHIT;
 	StatusIconChangeTable[SC_CRIFOOD] = SI_FOOD_CRITICALSUCCESSVALUE;
-	StatusIconChangeTable[SC_MANU_ATK] = SI_MANU_ATK;
-	StatusIconChangeTable[SC_MANU_DEF] = SI_MANU_DEF;
-	StatusIconChangeTable[SC_SPL_ATK] = SI_SPL_ATK;
-	StatusIconChangeTable[SC_SPL_DEF] = SI_SPL_DEF;
-	StatusIconChangeTable[SC_MANU_MATK] = SI_MANU_MATK;
-	StatusIconChangeTable[SC_SPL_MATK] = SI_SPL_MATK;
 	StatusIconChangeTable[SC_ATKPOTION] = SI_PLUSATTACKPOWER;
 	StatusIconChangeTable[SC_MATKPOTION] = SI_PLUSMAGICPOWER;
 	StatusIconChangeTable[SC_FOOD_STR_CASH] = SI_FOOD_STR_CASH;
@@ -1906,12 +1900,10 @@ int status_fixed_revive(struct block_list *bl, unsigned int per_hp, unsigned int
  *------------------------------------------*/
 bool status_check_skilluse(struct block_list *src, struct block_list *target, uint16 skill_id, int flag)
 {
-	struct status_data *status;
+	struct status_data *status = status_get_status_data(src);
 	struct status_change *sc = status_get_sc(src);
 	struct status_change *tsc = status_get_sc(target);
 	int hide_flag;
-
-	status = (src ? status_get_status_data(src) : &dummy_status);
 
 	if (src && src->type != BL_PC && status_isdead(src))
 		return false;
@@ -3199,6 +3191,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->sp_gain_race)
 		+ sizeof(sd->dropaddrace)
 		+ sizeof(sd->dropaddclass)
+		+ sizeof(sd->magic_addrace2)
 		);
 
 	memset(&sd->right_weapon.overrefine, 0, sizeof(sd->right_weapon) - sizeof(sd->right_weapon.atkmods));
@@ -5462,8 +5455,6 @@ static unsigned short status_calc_ematk(struct block_list *bl, struct status_cha
 		matk += sc->data[SC_MOONLITSERENADE]->val4;
 	if(sc->data[SC_IZAYOI])
 		matk += 25 * sc->data[SC_IZAYOI]->val1;
-	if(sc->data[SC_ZANGETSU])
-		matk += sc->data[SC_ZANGETSU]->val3;
 	if(sc->data[SC_QUEST_BUFF1])
 		matk += sc->data[SC_QUEST_BUFF1]->val1;
 	if(sc->data[SC_QUEST_BUFF2])
@@ -5487,6 +5478,8 @@ static unsigned short status_calc_matk(struct block_list *bl, struct status_chan
 		return (unsigned short)cap_value(matk,0,USHRT_MAX);
 
 	if(!viewable) { //Some statuses that are hidden in the status window
+		if(sc->data[SC_ZANGETSU])
+			matk += sc->data[SC_ZANGETSU]->val3;
 		if(sc->data[SC_INCMATKRATE])
 			matk += matk * sc->data[SC_INCMATKRATE]->val1 / 100;
 		if(sc->data[SC_MINDBREAKER])
@@ -5515,8 +5508,6 @@ static unsigned short status_calc_matk(struct block_list *bl, struct status_chan
 		matk += sc->data[SC_MOONLITSERENADE]->val4;
 	if(sc->data[SC_IZAYOI])
 		matk += 25 * sc->data[SC_IZAYOI]->val1;
-	if(sc->data[SC_ZANGETSU])
-		matk += sc->data[SC_ZANGETSU]->val3;
 	if(sc->data[SC_QUEST_BUFF1])
 		matk += sc->data[SC_QUEST_BUFF1]->val1;
 	if(sc->data[SC_QUEST_BUFF2])
@@ -6956,7 +6947,7 @@ int status_isdead(struct block_list *bl)
 {
 	nullpo_ret(bl);
 
-	return status_get_status_data(bl)->hp == 0;
+	return !status_get_status_data(bl)->hp;
 }
 
 int status_isimmune(struct block_list *bl)
@@ -9337,16 +9328,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_REBIRTH:
 				val2 = 20 * val1; //% of life to be revived with
-				break;
-			case SC_MANU_DEF:
-			case SC_MANU_ATK:
-			case SC_MANU_MATK:
-				val2 = 1; //Manuk group
-				break;
-			case SC_SPL_DEF:
-			case SC_SPL_ATK:
-			case SC_SPL_MATK:
-				val2 = 2; //Splendide group
 				break;
 			case SC_FEAR:
 				status_change_start(src,bl,SC_ANKLE,10000,val1,0,0,0,2000,SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);

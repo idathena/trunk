@@ -21,51 +21,39 @@ job_gun,1,1,0	script	Admin1	CLEAR_NPC,{
 		next;
 		switch (select("Cancel:Test monster spawn:Start from beginning:Furnace Zone:Shooting Zone:Complete the test")) {
 			case 1:
-				break;
+				close;
 			case 2:
 				donpcevent "#target::OnStart";
 				donpcevent "#nontarget::OnStart";
-				break;
+				close;
 			case 3:
-				for (set .@i,0; .@i<=5; set .@i,.@i+1) {
-					set .@quest,12340+.@i;
-					if (isbegin_quest(.@quest))
-						erasequest .@quest;
-				}
+				callsub L_Quest,0,0;
 				break;
 			case 4:
-				for (set .@i,0; .@i<=5; set .@i,.@i+1) {
-					set .@quest,12340+.@i;
-					if (isbegin_quest(.@quest))
-						erasequest .@quest;
-				}
-				for (set .@i,0; .@i<=1; set .@i,.@i+1) {
-					setquest 12340+.@i;
-					completequest 12340+.@i;
-				}
+				callsub L_Quest,12341,12341;
 				break;
 			case 5:
-				for (set .@i,0; .@i<=5; set .@i,.@i+1) {
-					set .@quest,12340+.@i;
-					if (isbegin_quest(.@quest))
-						erasequest .@quest;
-				}
-				for (set .@i,0; .@i<=2; set .@i,.@i+1) {
-					setquest 12340+.@i;
-					completequest 12340+.@i;
-				}
+				callsub L_Quest,12342,12342;
 				break;
 			case 6:
-				for (set .@i,0; .@i<=5; set .@i,.@i+1) {
-					set .@quest,12340+.@i;
-					if (isbegin_quest(.@quest))
-						erasequest .@quest;
-					setquest .@quest;
-				}
-				for (set .@i,0; .@i<=4; set .@i,.@i+1)
-					completequest 12340+.@i;
+				callsub L_Quest,12345,12344;
 				break;
 		}
+	}
+
+L_Quest:
+	setarray .@quest[0],getarg(0),getarg(1);
+	for (set .@i,12340; .@i<=12345; set .@i,.@i+1) {
+		if (isbegin_quest(.@i))
+			erasequest .@i;
+	}
+	for (set .@i,12340; .@i<=12345; set .@i,.@i+1) {
+		if (.@i <= .@quest[0])
+			setquest .@i;
+	}
+	for (set .@i,12340; .@i<=12345; set .@i,.@i+1) {
+		if (.@i <= .@quest[1])
+			completequest .@i;
 	}
 	close;
 }
@@ -425,9 +413,9 @@ job_gun,86,29,3	script	Kulbertinov	4_M_REBELLION,{
 		mes "[Kulbertinov]";
 		mes "What do you want?";
 		next;
-		select("I'm mistaken for a criminal!.");
+		select("I'm mistaken for a criminal!");
 		mes "[Kulbertinov]";
-		mes "Wait a minute... Mwah hah hah!";
+		mes "Wait a minute... Mwahahah!";
 		next;
 		mes "^0000ffHe scans your face, then guffaws.^000000";
 		next;

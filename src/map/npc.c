@@ -231,7 +231,7 @@ int npc_enable(const char *name, int flag)
 {
 	struct npc_data *nd = npc_name2id(name);
 
-	if( nd == NULL ) {
+	if( !nd ) {
 		ShowError("npc_enable: Attempted to %s a non-existing NPC '%s' (flag=%d).\n", (flag&3) ? "show" : "hide", name, flag);
 		return 0;
 	}
@@ -838,7 +838,7 @@ int npc_event(struct map_session_data *sd, const char *eventname, int ontouch)
 
 	nullpo_ret(sd);
 
-	if( ev == NULL || (nd = ev->nd) == NULL ) {
+	if( !ev || !(nd = ev->nd) ) {
 		if( !ontouch )
 			ShowError("npc_event: event not found [%s]\n", eventname);
 		return ontouch;
@@ -853,7 +853,6 @@ int npc_event(struct map_session_data *sd, const char *eventname, int ontouch)
 			sd->areanpc_id = nd->bl.id;
 			break;
 	}
-
 	return npc_event_sub(sd,ev,eventname);
 }
 
@@ -880,7 +879,6 @@ int npc_touchnext_areanpc_sub(struct block_list *bl, va_list ap)
 		return 0;
 
 	npc_event(sd,name,1);
-
 	return 1;
 }
 
@@ -902,7 +900,8 @@ int npc_touchnext_areanpc(struct map_session_data *sd, bool leavemap)
 	if( sd->bl.m != nd->bl.m ||
 		sd->bl.x < nd->bl.x - xs || sd->bl.x > nd->bl.x + xs ||
 		sd->bl.y < nd->bl.y - ys || sd->bl.y > nd->bl.y + ys ||
-		pc_ishiding(sd) || leavemap )
+		(nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE)) || pc_ishiding(sd) ||
+		leavemap )
 	{
 		char name[EVENT_NAME_LENGTH];
 
@@ -2036,7 +2035,7 @@ int npc_unload(struct npc_data *nd, bool single) {
 		}
 		if( nd->u.scr.timer_event )
 			aFree(nd->u.scr.timer_event);
-		if( nd->src_id == 0 ) {
+		if( !nd->src_id ) {
 			if( nd->u.scr.script ) {
 				script_free_code(nd->u.scr.script);
 				nd->u.scr.script = NULL;

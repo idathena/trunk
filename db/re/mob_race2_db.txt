@@ -1,21 +1,37 @@
 // Monster Racial Groups Database
 //
 // Structure of Database:
-// Race2ID,MobID1,MobID2,MobID3,...,MobID9
+// Race2ID,MobID1,MobID2,MobID3,...,MobID100
 
 // Goblins
-1,1122,1123,1124,1125,1126,1258,1299
+RC2_Goblin,1122,1123,1124,1125,1126,1258,1299
 // Kobolds
-2,1133,1134,1135,1282,1296
+RC2_Kobold,1133,1134,1135,1282,1296
 // Orcs
-3,1023,1152,1153,1189,1213,1273
+RC2_Orc,1023,1152,1153,1189,1213,1273
 // Golems
-4,1040,1278,1366,1497,2024
+RC2_Golem,1040,1278,1366,1497,2024
 // Guardians
-5,1285,1286,1287
+RC2_Guardian,1285,1286,1287
 // Ninja Classes (Pirate's_Pride)
-6,1315,1364,1401,1560
-// Scarabas
-7,2083,2084,2085,2086,2087,2088,2089,2090,2091,2144,2145
+RC2_Ninja,1315,1364,1401,1560
+// Poring Classes (Bow__)
+RC2_Poring,1002,1113,1031,1242
+// Insects (Mosquito_Coil)
+RC2_Insect,1048,1051,1053,1054,1095,1097,1105,1160
+// Manuk (Manuk's_Opportunity, Manuk's_Courage, Manuk's_Faith)
+RC2_Manuk,1986,1987,1988,1989,1990,1999
+// Splendide (Pinguicula's_fruit_Jam, Luciola's_Honey_Jam, Cornus'_Tears)
+RC2_Splendide,1991,1992,1993,1994,1995
 // Turtles (Drooping_Permeter)
-8,1312,1314,1315,1316,1318,1319
+RC2_Turtle,1312,1314,1315,1316,1318,1319
+// Scarabas (Q_Scaraba_Card)
+RC2_Scaraba,2083,2084,2085,2086,2087,2144,2145,2161,2162,2163,2164,2165,2170,2171,2172,2173
+// Mora (Mora_Berry)
+RC2_Mora,2132,2133,2134,2136,2137
+// Port Malaya (Kalasak)
+RC2_Malaya,2309,2310,2311,2312,2313,2314,2315,2316,2317,2318,2319,2320,2321,2322,2327,2329,2330,2331,2332,2333
+// Hidden Mobs (GLAST_HIDDEN)
+RC2_Hidden,2337,2343,2495
+// Faceworms (Faceworm_Egg_Shell)
+RC2_Faceworm,2528,2529,2530,2532,2533,2534,2535,2541

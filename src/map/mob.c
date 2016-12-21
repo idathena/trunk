@@ -110,10 +110,6 @@ struct s_randomsummon_group {
 
 static DBMap *mob_summon_db; //Random summon DB, struct s_randomsummon_group -> group_id
 
-//Defines the Manuk/Splendide mob groups for the status reductions [Epoque]
-const int mob_manuk[8] = { MOBID_TATACHO, MOBID_CENTIPEDE, MOBID_NEPENTHES, MOBID_HILLSRION, MOBID_HARDROCK_MOMMOTH, MOBID_G_TATACHO, MOBID_G_HILLSRION, MOBID_CENTIPEDE_LARVA };
-const int mob_splendide[5] = { MOBID_TENDRILRION, MOBID_CORNUS, MOBID_NAGA, MOBID_LUCIOLA_VESPA, MOBID_PINGUICULA };
-
 /*==========================================
  * Local prototype declaration (only required thing)
  *------------------------------------------*/
@@ -421,7 +417,7 @@ int mob_get_random_id(int type, int flag, int lv)
 	} while ((!rand || //Skip default first
 		mob == mob_dummy ||
 		mob_is_clone(mob_id) ||
-		(flag&0x01 && (entry->rate < 1000000 && entry->rate <= rnd()%1000000)) ||
+		(flag&0x01 && (entry->rate < 1000000 && rnd()%1000000 >= entry->rate)) ||
 		(flag&0x02 && lv < mob->lv) ||
 		(flag&0x04 && mob->status.mode&MD_BOSS) ||
 		(flag&0x08 && mob->spawn[0].qty < 1) ||
@@ -2433,7 +2429,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				if(battle_config.drops_by_luk2) //Drops affected by luk as a % increase [Skotlex]
 					drop_rate += (int)(0.5 + drop_rate * status_get_luk(src) * battle_config.drops_by_luk2 / 10000.);
 			}
-			if(sd) {
+			if(sd) { //Player specific drop rate adjustments
 				int drop_rate_bonus = 0;
 
 				if(battle_config.pk_mode && (int)(md->level - sd->status.base_level) >= 20)
@@ -2475,7 +2471,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			//By popular demand, use base drop rate for autoloot code [Skotlex]
 			mob_item_drop(md, dlist, ditem, 0, md->db->dropitem[i].p, homkillonly);
 		}
-		if(sd == mvp_sd && pc_checkskill(sd,BS_FINDINGORE) > 0 && battle_config.finding_ore_rate / 10 >= rnd()%10000) { //Ore Discovery [Celest]
+		if(sd == mvp_sd && pc_checkskill(sd,BS_FINDINGORE) > 0 && rnd()%10000 < battle_config.finding_ore_rate / 10) { //Ore Discovery [Celest]
 			ditem = mob_setdropitem(itemdb_searchrandomid(IG_FINDINGORE, 1), 1, md->mob_id);
 			mob_item_drop(md, dlist, ditem, 0, battle_config.finding_ore_rate / 10, homkillonly);
 		}
@@ -4509,7 +4505,12 @@ static bool mob_readdb_race2(char *fields[], int columns, int current)
 {
 	int race, i;
 
-	race = atoi(fields[0]);
+	if (ISDIGIT(fields[0][0]))
+		race = atoi(fields[0]);
+	else if (!script_get_constant(fields[0], &race)) {
+		ShowWarning("mob_readdb_race2: Unknown race2 constant \"%s\".\n", fields[0]);
+		return false;
+	}
 
 	if (!CHK_RACE2(race)) {
 		ShowWarning("mob_readdb_race2: Unknown race2 %d.\n", race);
@@ -4517,13 +4518,13 @@ static bool mob_readdb_race2(char *fields[], int columns, int current)
 	}
 
 	for (i = 1; i < columns; i++) {
-		int mobid = atoi(fields[i]);
+		int mob_id = atoi(fields[i]);
 
-		if (mob_db(mobid) == mob_dummy) {
-			ShowWarning("mob_readdb_race2: Unknown mob id %d for race2 %d.\n", mobid, race);
+		if (mob_db(mob_id) == mob_dummy) {
+			ShowWarning("mob_readdb_race2: Unknown mob id %d for race2 %d.\n", mob_id, race);
 			continue;
 		}
-		mob_db_data[mobid]->race2 = race;
+		mob_db_data[mob_id]->race2 = (enum e_race2)race;
 	}
 	return true;
 }
@@ -4539,7 +4540,7 @@ static bool mob_readdb_itemratio(char *str[], int columns, int current)
 
 	nameid = atoi(str[0]);
 
-	if (itemdb_exists(nameid) == NULL) {
+	if (!itemdb_exists(nameid)) {
 		ShowWarning("mob_readdb_itemratio: Invalid item id %hu.\n", nameid);
 		return false;
 	}
@@ -4564,7 +4565,6 @@ static bool mob_readdb_itemratio(char *str[], int columns, int current)
 		item_ratio->nameid = nameid;
 		idb_put(mob_item_drop_ratio, nameid, item_ratio);
 	}
-
 	return true;
 }
 
@@ -4575,7 +4575,6 @@ static int mob_item_drop_ratio_free(DBKey key, DBData *data, va_list ap) {
 	struct s_mob_item_drop_ratio *item_ratio = db_data2ptr(data);
 
 	aFree(item_ratio);
-
 	return 0;
 }
 
@@ -4616,7 +4615,7 @@ static void mob_drop_ratio_adjust(void) {
 			nameid = mob->mvpitem[j].nameid;
 			rate = mob->mvpitem[j].p;
 
-			if (nameid == 0 || rate == 0)
+			if (!nameid || !rate)
 				continue;
 
 			rate_adjust = battle_config.item_rate_mvp;
@@ -4651,7 +4650,7 @@ static void mob_drop_ratio_adjust(void) {
 			nameid = mob->dropitem[j].nameid;
 			rate = mob->dropitem[j].p;
 
-			if (nameid == 0 || rate == 0)
+			if (!nameid || !rate)
 				continue;
 
 			id = itemdb_search(nameid);
@@ -4848,7 +4847,7 @@ static void mob_load(void)
 		mob_readskilldb();
 	}
 	sv_readdb(db_path, "mob_avail.txt", ',', 2, 12, -1, &mob_readdb_mobavail);
-	sv_readdb(db_path, DBPATH"mob_race2_db.txt", ',', 2, 20, -1, &mob_readdb_race2);
+	sv_readdb(db_path, DBPATH"mob_race2_db.txt", ',', 2, MAX_RACE2_MOBS, -1, &mob_readdb_race2);
 	sv_readdb(db_path, "mob_item_ratio.txt", ',', 2, 2 + MAX_ITEMRATIO_MOBS, -1, &mob_readdb_itemratio);
 	sv_readdb(db_path, "mob_chat_db.txt", '#', 3, 3, MAX_MOB_CHAT, &mob_parse_row_chatdb);
 	sv_readdb(db_path, DBPATH"mob_effect.txt",   ',', 2, 2, -1, &mob_readdb_effect);

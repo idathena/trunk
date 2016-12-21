@@ -12,48 +12,48 @@
 //= 1.0 Renewal split. [Euphy]
 //============================================================
 
-// Misty Forest Labyrinth ===========
+// Misty Forest Labyrinth ======
 1@mist	mapflag	noicewall
 
-// Octopus Cave ===========
+// Octopus Cave ================
 1@cash	mapflag	noicewall
 
-// Drain ===========
+// Malangdo Culvert ============
 1@pump	mapflag	noicewall
 2@pump	mapflag	noicewall
 
-// Somatology Laboratory ===========
+// Somatology Laboratory =======
 1@lhz	mapflag	noicewall
 
-// Bangungot Hospital F2 ===========
+// Bangungot Hospital F2 =======
 1@ma_h	mapflag	noicewall
 
-// Buwaya Cave ===========
+// Buwaya Cave =================
 1@ma_c	mapflag	noicewall
 
-// Bakonawa Hideout ===========
+// Bakonawa Hideout ============
 1@ma_b	mapflag	noicewall
 
-// Inside Eclage ===========
+// Inside Eclage ===============
 1@ecl	mapflag	noicewall
 
-// Glast Heim Memorial Dungeon ====
+// Glast Heim Memorial Dungeon =
 1@gl_k	mapflag	noicewall
 2@gl_k	mapflag	noicewall
 
-// Wave Mode Memorial Dungeon =====
-1@def01	mapflag	noicewall
-1@def02	mapflag	noicewall
-1@def03	mapflag	noicewall
-
-// Heroes' Trails - Part 1 ========
+// Heroes' Trails - Part 1 =====
 1@gef	mapflag	noicewall
 1@face	mapflag	noicewall
 1@sara	mapflag	noicewall
 1@gef_in	mapflag	noicewall
 
-// Nightmarish Jitterbug =========
+// Wave Mode Memorial Dungeon ==
+1@def01	mapflag	noicewall
+1@def02	mapflag	noicewall
+1@def03	mapflag	noicewall
+
+// Nightmarish Jitterbug =======
 1@jtb	mapflag	noicewall
 
-// Horror Toy Factory =========
+// Horror Toy Factory ==========
 1@xm_d	mapflag	noicewall

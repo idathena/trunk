@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Last Updated: ========================================
-//= 20161110
+//= 20161219
 //===== Description: =========================================
 //= List of script instructions used in item bonuses.
 //============================================================
@@ -25,7 +25,8 @@ This list contains all available constants referenced in the 'bonus' commands.
 	RC_Demon, RC_DemiHuman, RC_Angel, RC_Dragon, RC_All
 
 * Monster Race (mr)
-	RC2_Goblin, RC2_Kobold, RC2_Orc, RC2_Golem, RC2_Guardian, RC2_Ninja, RC2_Scaraba, RC2_Turtle
+	RC2_Goblin, RC2_Kobold, RC2_Orc, RC2_Golem, RC2_Guardian, RC2_Ninja, RC2_Poring, RC2_Insect,
+	RC2_Manuk, RC2_Splendide, RC2_Turtle, RC2_Scaraba, RC2_Mora, RC2_Malaya, RC2_Hidden, RC2_Faceworm
 
 * Class (c)
 	Class_Normal, Class_Boss, Class_Guardian, Class_All
@@ -235,6 +236,7 @@ bonus2 bAddDefMonster,mid,n;		+ n% physical damage reduction against monster mid
 bonus2 bAddMdefMonster,mid,n;		+ n% magical damage reduction against monster mid
 					NOTE: Against players, mid is the player's job id
 bonus2 bAddRace2,mr,n;			+ n% physical damage against monster race mr
+bonus2 bMagicAddRace2,mr,n;		+ n% magical damage against monster race mr
 bonus2 bSubRace2,mr,n;			+ n% damage reduction against monster race mr
 bonus2 bSubSkill,sk,n;  		Reduces n% damage received from skill sk
 bonus bAbsorbDmgMaxHP,n;		If the damage received is more than n% of Max HP, the damage received is [TotalDamage] - [n% of MaxHP] (Doesn't stack, will use the highest value)

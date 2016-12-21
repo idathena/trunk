@@ -2065,7 +2065,7 @@ struct map_session_data *map_nick2sd(const char *nick)
 /*==========================================
  * Looksup id_db DBMap and returns BL pointer of 'id' or NULL if not found
  *------------------------------------------*/
-struct block_list * map_id2bl(int id) {
+struct block_list *map_id2bl(int id) {
 	return (struct block_list *)idb_get(id_db,id);
 }
 
@@ -2517,7 +2517,7 @@ int map_delinstancemap(int m)
 	// Do the unit cleanup
 	map_foreachinmap(map_instancemap_clean, m, BL_ALL);
 
-	if( map[m].mob_delete_timer != INVALID_TIMER )
+	if(map[m].mob_delete_timer != INVALID_TIMER)
 		delete_timer(map[m].mob_delete_timer, map_removemobs_timer);
 
 	mapindex_removemap( map[m].index );

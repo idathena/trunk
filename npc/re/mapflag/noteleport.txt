@@ -94,16 +94,6 @@ iz_ac02_d	mapflag	noteleport
 1@gl_k	mapflag	monster_noteleport
 2@gl_k	mapflag	noteleport
 2@gl_k	mapflag	monster_noteleport
-gl_chyard_	mapflag	noteleport
-gl_cas02_	mapflag	noteleport
-
-// Wave Mode Memorial Dungeon ====
-1@def01	mapflag	noteleport
-1@def01	mapflag	monster_noteleport
-1@def02	mapflag	noteleport
-1@def02	mapflag	monster_noteleport
-1@def03	mapflag	noteleport
-1@def03	mapflag	monster_noteleport
 
 // Heroes' Trails ================
 1@gef	mapflag	noteleport
@@ -116,6 +106,14 @@ gl_cas02_	mapflag	noteleport
 1@gef_in	mapflag	monster_noteleport
 dali	mapflag	noteleport
 dali02	mapflag	noteleport
+
+// Wave Mode Memorial Dungeon ====
+1@def01	mapflag	noteleport
+1@def01	mapflag	monster_noteleport
+1@def02	mapflag	noteleport
+1@def02	mapflag	monster_noteleport
+1@def03	mapflag	noteleport
+1@def03	mapflag	monster_noteleport
 
 // Nightmarish Jitterbug =========
 1@jtb	mapflag	noteleport
