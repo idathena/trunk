@@ -270,7 +270,7 @@ static inline unsigned char clif_bl_type(struct block_list *bl) {
 #endif
 
 static bool clif_session_isValid(struct map_session_data *sd) {
-	if (sd != NULL && sd->packet_ver <= MAX_PACKET_VER && session_isActive(sd->fd))
+	if (sd && sd->packet_ver <= MAX_PACKET_VER && session_isActive(sd->fd))
 		return true;
 	return false;
 }
@@ -407,6 +407,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 		case AREA_WOSC:
 			if (sd && !bl->prev) //Otherwise source misses the packet [Skotlex]
 				clif_send(buf, len, bl, SELF);
+		//Fall through
 		case AREA_WOC:
 		case AREA_WOS:
 			map_foreachinarea(clif_send_sub, bl->m, bl->x - AREA_SIZE, bl->y - AREA_SIZE, bl->x + AREA_SIZE, bl->y + AREA_SIZE,
@@ -438,7 +439,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 					if (type == CHAT_WOS && cd->usersd[i] == sd)
 						continue;
 					if (packet_db[cd->usersd[i]->packet_ver][RBUFW(buf,0)].len) { //Packet must exist for the client version
-						if ((fd = cd->usersd[i]->fd) > 0 && session[fd]) { //Added check to see if session exists [PoW]
+						if ((fd = cd->usersd[i]->fd) && session[fd]) { //Added check to see if session exists [PoW]
 							WFIFOHEAD(fd,len);
 							memcpy(WFIFOP(fd,0), buf, len);
 							WFIFOSET(fd,len);
@@ -578,9 +579,9 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 		case BG_SAMEMAP_WOS:
 		case BG:
 		case BG_WOS:
-			if (sd && sd->bg_id && (bg = bg_team_search(sd->bg_id)) != NULL) {
+			if (sd && sd->bg_id && (bg = bg_team_search(sd->bg_id))) {
 				for (i = 0; i < MAX_BG_MEMBERS; i++) {
-					if ((sd = bg->members[i].sd) == NULL || !(fd = sd->fd))
+					if (!(sd = bg->members[i].sd) || !(fd = sd->fd))
 						continue;
 					if (sd->bl.id == bl->id && (type == BG_WOS || type == BG_SAMEMAP_WOS || type == BG_AREA_WOS))
 						continue;
@@ -710,7 +711,7 @@ void clif_charselectok(int id, uint8 ok)
 	struct map_session_data *sd;
 	int fd;
 
-	if ((sd = map_id2sd(id)) == NULL || !sd->fd)
+	if (!(sd = map_id2sd(id)) || !sd->fd)
 		return;
 
 	fd = sd->fd;
@@ -3316,7 +3317,7 @@ void clif_updatestatus(struct map_session_data *sd,int type)
 			len = 14;
 			break;
 		default:
-			ShowError("clif_updatestatus : unrecognized type %d\n",type);
+			ShowError("clif_updatestatus: Unrecognized type %d\n",type);
 			return;
 	}
 	WFIFOSET(fd,len);
@@ -3340,7 +3341,7 @@ void clif_changestatus(struct map_session_data *sd,int type,int val)
 			WBUFL(buf,8) = val;
 			break;
 		default:
-			ShowError("clif_changestatus : unrecognized type %d.\n",type);
+			ShowError("clif_changestatus: Unrecognized type %d\n",type);
 			return;
 	}
 
@@ -4891,17 +4892,59 @@ static void clif_graffiti(struct block_list *bl, struct skill_unit *unit, enum s
 /// Notifies the client of a skill unit.
 /// 011f <id>.L <creator id>.L <x>.W <y>.W <unit id>.B <visible>.B (ZC_SKILL_ENTRY)
 /// 08c7 <lenght>.W <id> L <creator id>.L <x>.W <y>.W <unit id>.B <range>.W <visible>.B (ZC_SKILL_ENTRY3)
-/// 099f <lenght>.W <id> L <creator id>.L <x>.W <y>.W <unit id>.L <range>.W <visible>.B (ZC_SKILL_ENTRY4)
+/// 099f <lenght>.W <id> L <creator id>.L <x>.W <y>.W <unit id>.L <range>.B <visible>.B (ZC_SKILL_ENTRY4)
 /// 09ca <lenght>.W <id> L <creator id>.L <x>.W <y>.W <unit id>.L <range>.B <visible>.B <skill level>.B (ZC_SKILL_ENTRY5)
+static inline int clif_getareachar_skillunit_addunit(char *buf, int unit_id, struct skill_unit *unit, bool visible) {
+	int header;
+
+#if PACKETVER < 20110420
+	header = 0x011f;
+#elif PACKETVER < 20121212
+	header = 0x08c7;
+#elif PACKETVER < 20130731
+	header = 0x099f;
+#else
+	header = 0x09ca;
+#endif
+
+	WBUFL(buf,0) = unit->bl.id;
+	WBUFL(buf,4) = unit->group->src_id;
+	WBUFW(buf,8) = unit->bl.x;
+	WBUFW(buf,10) = unit->bl.y;
+
+	switch( header ) {
+		case 0x011f:
+			WBUFB(buf,12) = (unsigned char)unit_id;
+			WBUFB(buf,13) = (unsigned char)visible;
+			return 14;
+		case 0x08c7:
+			WBUFB(buf,12) = (unsigned char)unit_id;
+			WBUFW(buf,13) = (unsigned short)unit->range;
+			WBUFB(buf,15) = (unsigned char)visible;
+			return 16;
+		case 0x099f:
+			WBUFL(buf,12) = unit_id;
+			WBUFB(buf,16) = (unsigned char)unit->range;
+			WBUFB(buf,17) = (unsigned char)visible;
+			return 18;
+		case 0x09ca:
+			WBUFL(buf,12) = unit_id;
+			WBUFB(buf,16) = (unsigned char)unit->range;
+			WBUFB(buf,17) = (unsigned char)visible;
+			WBUFB(buf,18) = (unsigned char)unit->group->skill_lv;
+			return 19;
+	}
+
+	ShowError("clif_getareachar_skillunit_addunit: Code inconsistency detected! header %04x is not implemented\n",header);
+	return 0;
+}
+
 void clif_getareachar_skillunit(struct block_list *bl, struct skill_unit *unit, enum send_target target, bool visible)
 {
-	int header = 0, unit_id = 0, pos = 0, fd = 0, len = -1;
+	int header = 0, unit_id = 0, len = 0, fd = 0;
 	unsigned char buf[128];
 
 	nullpo_retv(bl);
-
-	if( bl->type == BL_PC )
-		fd = ((TBL_PC *)bl)->fd;
 
 	if( !unit || !unit->group )
 		return;
@@ -4909,73 +4952,55 @@ void clif_getareachar_skillunit(struct block_list *bl, struct skill_unit *unit, 
 	if( unit->group->state.guildaura )
 		return;
 
-	if( (unit->group->state.song_dance&0x1) && (unit->val2&UF_ENSEMBLE) )
-		unit_id = (unit->val2&UF_SONG) ? UNT_DISSONANCE : UNT_UGLYDANCE;
-	else if( (skill_get_unit_flag(unit->group->skill_id)&UF_RANGEDSINGLEUNIT) && !(unit->val4&UF_RANGEDSINGLEUNIT) )
-		unit_id = UNT_DUMMYSKILL; //Use invisible unit id for other case of rangedsingle unit
-	else
-		unit_id = unit->group->unit_id;
-
-	if( !visible )
-		unit_id = UNT_DUMMYSKILL;
-
 #if PACKETVER >= 3
-	if( unit_id == UNT_GRAFFITI ) { //Graffiti [Valaris]
+	if( unit->group->unit_id == UNT_GRAFFITI ) { //Graffiti [Valaris]
 		clif_graffiti(bl,unit,target);
 		return;
 	}
 #endif
 
-#if PACKETVER <= 20120702
+	if( bl->type == BL_PC )
+		fd = ((TBL_PC *)bl)->fd;
+
+	if( !visible )
+		unit_id = UNT_DUMMYSKILL; //Hack to makes hidden trap really hidden!
+	else {
+		if( (unit->group->state.song_dance&0x1) && (unit->val2&UF_ENSEMBLE) )
+			unit_id = (unit->val2&UF_SONG) ? UNT_DISSONANCE : UNT_UGLYDANCE;
+		else if( (skill_get_unit_flag(unit->group->skill_id)&UF_RANGEDSINGLEUNIT) && !(unit->val4&UF_RANGEDSINGLEUNIT) )
+			unit_id = UNT_DUMMYSKILL; //Use invisible unit id for other case of rangedsingle unit
+		else
+			unit_id = unit->group->unit_id;
+	}
+
+#if PACKETVER < 20110420
 	header = 0x011f;
-//#if PACKETVER < 20110718
-//	header = 0x011f;
-//#elif PACKETVER < 20121212
-//	header = 0x08c7;
+#elif PACKETVER < 20121212
+	header = 0x08c7;
 #elif PACKETVER < 20130731
 	header = 0x099f;
 #else
 	header = 0x09ca;
 #endif
 
-	len = packet_len(header);
-	WBUFW(buf,pos) = header;
+	WBUFW(buf,0) = header;
 
-	if( header != 0x011f ) {
-		WBUFW(buf,pos + 2) = len;
-		pos += 2;
-	}
-
-	WBUFL(buf,pos + 2) = unit->bl.id;
-	WBUFL(buf,pos + 6) = unit->group->src_id;
-	WBUFW(buf,pos + 10) = unit->bl.x;
-	WBUFW(buf,pos + 12) = unit->bl.y;
-
-	switch( header ) {
-		case 0x011f:
-			WBUFB(buf,pos + 14) = unit_id;
-			WBUFB(buf,pos + 15) = visible;
-			break;
-		case 0x08c7:
-			WBUFB(buf,pos + 14) = unit_id;
-			WBUFW(buf,pos + 15) = unit->range;
-			WBUFB(buf,pos + 17) = visible;
-			break;
-		case 0x099f:
-			WBUFL(buf,pos + 14) = unit_id;
-			WBUFW(buf,pos + 18) = unit->range;
-			WBUFB(buf,pos + 20) = visible;
-		case 0x09ca:
-			WBUFL(buf,pos + 14) = unit_id;
-			WBUFB(buf,pos + 18) = (unsigned char)unit->range;
-			WBUFB(buf,pos + 19) = visible;
-			WBUFB(buf,pos + 20) = (unsigned char)unit->group->skill_lv;
-			break;
+	if( header == 0x011f ) {
+		len = 2; //PACKET_ZC_SKILL_ENTRY is PACKETTYPE_STATIC, so no packetLength paramter after header
+		len += clif_getareachar_skillunit_addunit((char *)WBUFP(buf,len),unit_id,unit,visible);
+		if( len == 2 )
+			return; //Nothing has been added
+	} else {
+		len = 4; //Newer packets have dynamic length, supporting multiple units send at once
+		len += clif_getareachar_skillunit_addunit((char *)WBUFP(buf,len),unit_id,unit,visible);
+		if( len == 4 )
+			return;
+		WBUFW(buf,2) = len;
 	}
 
 	clif_send(buf,len,bl,target);
 
-	if( unit->group->skill_id == WZ_ICEWALL )
+	if( fd && unit->group->skill_id == WZ_ICEWALL )
 		clif_changemapcell(fd,unit->bl.m,unit->bl.x,unit->bl.y,5,SELF);
 }
 
@@ -9474,7 +9499,7 @@ void clif_charnameack(int fd, struct block_list *bl)
 			memcpy(WBUFP(buf,6), ((TBL_ELEM *)bl)->db->name, NAME_LENGTH);
 			break;
 		default:
-			ShowError("clif_charnameack: bad type %d(%d)\n", bl->type, bl->id);
+			ShowError("clif_charnameack: Bad type %d(%d)\n", bl->type, bl->id);
 			return;
 	}
 
@@ -10094,7 +10119,7 @@ void clif_parse_WantToConnection(int fd, struct map_session_data *sd)
 	int packet_ver;	//5: old, 6: 7july04, 7: 13july04, 8: 26july04, 9: 9aug04/16aug04/17aug04, 10: 6sept04, 11: 21sept04, 12: 18oct04, 13: 25oct04 (by [Yor])
 
 	if (sd) {
-		ShowError("clif_parse_WantToConnection : invalid request (character already logged in)\n");
+		ShowError("clif_parse_WantToConnection: Invalid request (character already logged in)\n");
 		return;
 	}
 
@@ -10130,7 +10155,7 @@ void clif_parse_WantToConnection(int fd, struct map_session_data *sd)
 	//Check for double login
 	bl = map_id2bl(account_id);
 	if (bl && bl->type != BL_PC) {
-		ShowError("clif_parse_WantToConnection: a non-player object already has id %d, please increase the starting account number\n", account_id);
+		ShowError("clif_parse_WantToConnection: A non-player object already has id %d, please increase the starting account number\n", account_id);
 		WFIFOHEAD(fd,packet_len(0x6a));
 		WFIFOW(fd,0) = 0x6a;
 		WFIFOB(fd,2) = 3; //Rejected by server
@@ -13245,7 +13270,7 @@ void clif_parse_GuildRequestInfo(int fd, struct map_session_data *sd)
 			clif_guild_expulsionlist(sd);
 			break;
 		default:
-			ShowError("clif: guild request info: unknown type %d\n", type);
+			ShowError("clif: guild request info: Unknown type %d\n", type);
 			break;
 	}
 }
@@ -19352,7 +19377,7 @@ void packetdb_readdb(bool reload)
 		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 		0,  0,  0, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	//#0x08C0
-		0,  0,  0,  0,  0,  0,  0, 20, 34,  2,  0,  0,  0,  0,  0, 10,
+		0,  0,  0,  0,  0,  0,  0, -1, 34,  2,  0,  0,  0,  0,  0, 10,
 		9,  7, 10,  0,  0,  0,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 24,
@@ -19368,11 +19393,11 @@ void packetdb_readdb(bool reload)
 		0,  0,  0,  0,  2,  0,  0, 14,  6, 50, -1, 16,  4,288, 12, -1,
 	//#0x0980
 		7,  0,  0, 29, 28, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-		31,-1, -1, -1, -1, -1, -1, -1,  8, 11,  9,  8,  0,  0,  0, 22,
+		31,-1, -1, -1, -1, -1, -1, -1,  8, 11,  9,  8,  0,  0,  0, -1,
 		0,  0,  0,  0,  0,  0, 12, 10, 16, 10, 16,  6,  0,  0,  0,  0,
 		0,  0,  0,  0,  0,  0,  6,  4,  6,  4,  0,  0,  0,  0,  0,  0,
 	//#0x09C0
-		0, 10,  0,  0,  0,  0,  0,  0,  0,  0, 23, 17,  0,  0,102,  0,
+		0, 10,  0,  0,  0,  0,  0,  0,  0,  0, -1, 17,  0,  0,102,  0,
 		0,  0,  0,  0,  2,  0, -1, -1,  2,  0,  0, -1, -1, -1,  0,  7,
 		0,  0,  0,  0,  0, 18, 22,  3, 11,  0, 11, -1,  0,  3, 11,  0,
 		0, 11, 12, 11,  0,  0,  0, 75, -1,143,  0,  0,  0, -1, -1, -1,
@@ -19655,7 +19680,7 @@ void packetdb_readdb(bool reload)
 
 	clif_config.packet_db_ver = MAX_PACKET_VER;
 	sprintf(line,"%s/packet_db.txt",db_path);
-	if( (fp = fopen(line,"r")) == NULL ) {
+	if( !(fp = fopen(line,"r")) ) {
 		ShowFatalError("Can't read %s\n",line);
 		exit(EXIT_FAILURE);
 	}
@@ -19673,17 +19698,17 @@ void packetdb_readdb(bool reload)
 				skip_ver = false;
 				packet_ver = atoi(w2);
 				if( packet_ver > MAX_PACKET_VER ) { //Check to avoid overflowing [Skotlex]
-					if( (warned&1) == 0 )
+					if( !(warned&1) )
 						ShowWarning("The packet_db table only has support up to version %d.\n",MAX_PACKET_VER);
 					warned &= 1;
 					skip_ver = true;
 				} else if( packet_ver < 0 ) {
-					if( (warned&2) == 0 )
+					if( !(warned&2) )
 						ShowWarning("Negative packet versions are not supported.\n");
 					warned &= 2;
 					skip_ver = true;
 				} else if( packet_ver == SERVER ) {
-					if( (warned&4) == 0 )
+					if( !(warned&4) )
 						ShowWarning("Packet version %d is reserved for server use only.\n",SERVER);
 					warned &= 4;
 					skip_ver = true;
@@ -19699,7 +19724,7 @@ void packetdb_readdb(bool reload)
 				memcpy(&packet_db[packet_ver],&packet_db[prev_ver],sizeof(packet_db[0]));
 				memcpy(&packet_db_ack[packet_ver],&packet_db_ack[prev_ver],sizeof(packet_db_ack[0]));
 				continue;
-			} else if( strcmpi(w1,"packet_db_ver") == 0 ) {
+			} else if( !strcmpi(w1,"packet_db_ver") ) {
 				if( strcmpi(w2,"default") == 0 ) //This is the preferred version
 					clif_config.packet_db_ver = MAX_PACKET_VER;
 				else //To manually set the packet DB version
@@ -19707,7 +19732,7 @@ void packetdb_readdb(bool reload)
 				continue;
 			}
 #ifdef PACKET_OBFUSCATION
-			else if( !reload && strcmpi(w1,"packet_keys") == 0 ) {
+			else if( !reload && !strcmpi(w1,"packet_keys") ) {
 				char key1[12] = { 0 }, key2[12] = { 0 }, key3[12] = { 0 };
 
 				trim(w2);
@@ -19722,11 +19747,11 @@ void packetdb_readdb(bool reload)
 						ShowInfo("Packet Ver:%d -> Keys: 0x%08X, 0x%08X, 0x%08X\n",packet_ver,packet_keys[packet_ver]->keys[0],packet_keys[packet_ver]->keys[1],packet_keys[packet_ver]->keys[2]);
 				}
 				continue;
-			} else if (!reload && strcmpi(w1,"packet_keys_use") == 0) {
+			} else if( !reload && !strcmpi(w1,"packet_keys_use") ) {
 				char key1[12] = { 0 }, key2[12] = { 0 }, key3[12] = { 0 };
 
 				trim(w2);
-				if( strcmpi(w2,"default") == 0 )
+				if( !strcmpi(w2,"default") )
 					continue;
 				if( sscanf(w2,"%11[^,],%11[^,],%11[^ \r\n/]",key1,key2,key3) == 3 ) {
 					clif_cryptKey[0] = strtol(key1,NULL,0);
@@ -19750,7 +19775,7 @@ void packetdb_readdb(bool reload)
 			p = strchr(p,',');
 			if( p ) *p++ = 0;
 		}
-		if( str[0] == NULL )
+		if( !str[0] )
 			continue;
 		cmd = strtol(str[0],(char **)NULL,0);
 
@@ -19758,25 +19783,25 @@ void packetdb_readdb(bool reload)
 			max_cmd = cmd;
 		if( cmd <= 0 || cmd > MAX_PACKET_DB )
 			continue;
-		if( str[1] == NULL ) {
-			ShowError("packet_db: packet len error\n");
+		if( !str[1] ) {
+			ShowError("packet_db: Packet len error\n");
 			continue;
 		}
 
 		packet_db[packet_ver][cmd].len = (short)atoi(str[1]);
 
-		if( str[2] == NULL ) {
+		if( !str[2] ) {
 			packet_db[packet_ver][cmd].func = NULL;
 			ln++;
 			continue;
 		}
 
 		//Look up processing function by name
-		ARR_FIND(0,ARRAYLENGTH(clif_parse_func),j,clif_parse_func[j].name != NULL && strcmp(str[2],clif_parse_func[j].name) == 0);
+		ARR_FIND(0,ARRAYLENGTH(clif_parse_func),j,clif_parse_func[j].name && !strcmp(str[2],clif_parse_func[j].name));
 		if( j < ARRAYLENGTH(clif_parse_func) )
 			packet_db[packet_ver][cmd].func = clif_parse_func[j].func;
 		else { //Search if it's a mapped ack func
-			ARR_FIND(0,ARRAYLENGTH(clif_ack_func),j,clif_ack_func[j].name != NULL && strcmp(str[2],clif_ack_func[j].name) == 0);
+			ARR_FIND(0,ARRAYLENGTH(clif_ack_func),j,clif_ack_func[j].name && !strcmp(str[2],clif_ack_func[j].name));
 			if( j < ARRAYLENGTH(clif_ack_func)) {
 				int fidx = clif_ack_func[j].funcidx;
 
@@ -19786,11 +19811,11 @@ void packetdb_readdb(bool reload)
 		}
 
 		//Set the identifying cmd for the packet_db version
-		if( strcmp(str[2],"wanttoconnection") == 0 )
+		if( !strcmp(str[2],"wanttoconnection") )
 			clif_config.connect_cmd[packet_ver] = cmd;
 
-		if( str[3] == NULL ) {
-			ShowError("packet_db: packet error\n");
+		if( !str[3] ) {
+			ShowError("packet_db: Packet error\n");
 			exit(EXIT_FAILURE);
 		}
 		for( j = 0, p2 = str[3]; p2; j++ ) {
@@ -19798,12 +19823,13 @@ void packetdb_readdb(bool reload)
 
 			str2[j] = p2;
 			p2 = strchr(p2,':');
-			if( p2 ) *p2++ = 0;
+			if( p2 )
+				*p2++ = 0;
 			k = atoi(str2[j]);
 			//if (packet_db[packet_ver][cmd].pos[j] != k && clif_config.prefer_packet_db) //Not used for now
 
 			if( j >= MAX_PACKET_POS ) {
-				ShowError("Too many positions found for packet 0x%04x (max=%d).\n",cmd,MAX_PACKET_POS);
+				ShowError("packet_db: Too many positions found for packet 0x%04x (max=%d).\n",cmd,MAX_PACKET_POS);
 				break;
 			}
 
@@ -19827,7 +19853,7 @@ void packetdb_readdb(bool reload)
 		int use_key = last_key_defined;
 
 		if( last_key_defined == -1 )
-			ShowError("Can't find packet obfuscation keys!\n");
+			ShowError("packet_db: Can't find packet obfuscation keys!\n");
 		else {
 			if( packet_keys[clif_config.packet_db_ver] )
 				use_key = clif_config.packet_db_ver;
