@@ -4303,6 +4303,12 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, 100 * sc->data[SC_SATURDAYNIGHTFEVER]->val1);
 #endif
 		}
+		if(sc->data[SC_ZANGETSU]) {
+			ATK_ADD(wd.damage, wd.damage2, sc->data[SC_ZANGETSU]->val2);
+#ifdef RENEWAL
+			ATK_ADD(wd.statusAtk, wd.statusAtk2, sc->data[SC_ZANGETSU]->val2);
+#endif
+		}
 		if(sc->data[SC_ZENKAI] && sstatus->rhw.ele == sc->data[SC_ZENKAI]->val2) {
 			ATK_ADD(wd.damage, wd.damage2, 200);
 #ifdef RENEWAL

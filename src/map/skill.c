@@ -372,9 +372,9 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 	switch( skill_id ) {
 		case BA_APPLEIDUN: //HP recovery
 #ifdef RENEWAL
-			hp = 100 + skill_lv * 5 + 5 * (status_get_vit(src) / 10);
+			hp = 100 + skill_lv * 5 + (status_get_vit(src) / 2);
 #else
-			hp = 30 + skill_lv * 5 + 5 * (status_get_vit(src) / 10);
+			hp = 30 + skill_lv * 5 + (status_get_vit(src) / 2);
 #endif
 			if( sd )
 				hp += 5 * pc_checkskill(sd,BA_MUSICALLESSON);
@@ -12398,18 +12398,23 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 			}
 			break;
 		case BA_WHISTLE:
-			val1 = skill_lv + status->agi / 10; //Flee increase
-			val2 = ((skill_lv + 1) / 2) + status->luk / 10; //Perfect dodge increase
+#ifdef RENEWAL //Flee increase
+			val1 = 3 * skill_lv + status->agi / 15;
+#else
+			val1 = skill_lv + status->agi / 10;
+#endif
+			val2 = (skill_lv + 1) / 2 + status->luk / 30; //Perfect dodge increase
 			if( sd ) {
-				val1 += pc_checkskill(sd,BA_MUSICALLESSON);
-				val2 += pc_checkskill(sd,BA_MUSICALLESSON);
+				val1 += pc_checkskill(sd,BA_MUSICALLESSON) / 2;
+				val2 += pc_checkskill(sd,BA_MUSICALLESSON) / 5;
 			}
 			val2 *= 10;
 			break;
 		case DC_HUMMING:
-			val1 = 2 * skill_lv + status->dex / 10; //Hit increase
-#ifdef RENEWAL
-			val1 <<= 1;
+#ifdef RENEWAL //Hit increase
+			val1 = 20 + 2 * skill_lv + status->dex / 15;
+#else
+			val1 = 1 + 2 * skill_lv + status->dex / 10;
 #endif
 			if( sd )
 				val1 += pc_checkskill(sd,DC_DANCINGLESSON);
@@ -12424,51 +12429,59 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 			}
 			break;
 		case DC_DONTFORGETME:
-			val1 = 30 * skill_lv + status->dex; //ASPD decrease 
-			val2 = 2 * skill_lv + status->agi / 10; //Movement speed adjustment
+#ifdef RENEWAL
+			val1 = 3 * skill_lv + status->dex / 15; //ASPD decrease
+			val2 = 2 * skill_lv + status->agi / 20; //Movement speed adjustment
+#else
+			val1 = 5 + 3 * skill_lv + status->dex / 10;
+			val2 = 5 + 3 * skill_lv + status->agi / 10;
+#endif
 			if( sd ) {
-				val1 += 10 * pc_checkskill(sd,DC_DANCINGLESSON);
-				val2 += (pc_checkskill(sd,DC_DANCINGLESSON) + 1) / 2; //Movement speed -1% per 2 lvl
+				val1 += pc_checkskill(sd,DC_DANCINGLESSON);
+#ifdef RENEWAL
+				val2 += pc_checkskill(sd,DC_DANCINGLESSON) / 2;
+#else
+				val2 += pc_checkskill(sd,DC_DANCINGLESSON);
+#endif
 			}
+			val1 *= 10; //ASPD works with 1000 as 100%
 			break;
 		case BA_APPLEIDUN:
 			val1 = 5 + 2 * skill_lv + status->vit / 10; //MaxHP percent increase
 			if( sd )
-				val1 += pc_checkskill(sd,BA_MUSICALLESSON);
+				val1 += pc_checkskill(sd,BA_MUSICALLESSON) / 2;
 			break;
 		case DC_SERVICEFORYOU:
-			//val1: MaxSP percent increase
-			val1 = 15 + skill_lv + status->int_ / 10; //Bonus rate by Dancer's INT
-			//val2: SP cost reduction
-			val2 = 20 + 3 * skill_lv + status->int_ / 10; //Bonus rate by Dancer's INT
-			if( sd ) { //Bonus rate by DC_DANCINGLESSON
-				val1 += (pc_checkskill(sd,DC_DANCINGLESSON) + 1) / 2;
-				val2 += (pc_checkskill(sd,DC_DANCINGLESSON) + 1) / 2;
+			val1 = 15 + skill_lv + status->int_ / 10; //MaxSP percent increase
+			val2 = 20 + 3 * skill_lv + status->int_ / 10; //SP cost reduction
+			if( sd ) {
+				val1 += pc_checkskill(sd,DC_DANCINGLESSON) / 2;
+				val2 += pc_checkskill(sd,DC_DANCINGLESSON) / 2;
 			}
 			break;
 		case BA_ASSASSINCROSS:
 #ifdef RENEWAL //ASPD increase
 			val1 = skill_lv + status->agi / 20;
 #else
-			val1 = 10 + skill_lv + status->agi / 10;
+			val1 = 5 + skill_lv + status->agi / 20;
 #endif
 			if( sd )
-				val1 += (pc_checkskill(sd,BA_MUSICALLESSON) + 1) / 2; //ASPD +1% per 2 lvl
-			val1 *= 10; //ASPD works with 1000 as 100%
+				val1 += pc_checkskill(sd,BA_MUSICALLESSON) / 2;
+			val1 *= 10;
 			break;
 		case DC_FORTUNEKISS:
-			val1 = 10 + skill_lv + (status->luk / 10); //Critical increase
-			if( sd )
-				val1 += pc_checkskill(sd,DC_DANCINGLESSON);
+			val1 = 10 + skill_lv + status->luk / 10; //Critical increase
 			val1 *= 10; //Because every 10 crit is an actual cri point
+			if( sd )
+				val1 += 5 * pc_checkskill(sd,DC_DANCINGLESSON);
 			break;
 		case BD_DRUMBATTLEFIELD:
 #ifdef RENEWAL
 			val1 = (skill_lv + 5) * 25; //Atk increase
 			val2 = skill_lv * 10; //Def increase
 #else
-			val1 = (skill_lv + 1) * 25; //Atk increase
-			val2 = (skill_lv + 1) * 2; //Def increase
+			val1 = (skill_lv + 1) * 25;
+			val2 = (skill_lv + 1) * 2;
 #endif
 			break;
 		case BD_RINGNIBELUNGEN:
