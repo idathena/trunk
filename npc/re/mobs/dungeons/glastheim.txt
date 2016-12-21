@@ -207,7 +207,7 @@ gl_cas02_,0,0,0,0	monster	Mimic (Nightmare)	2479,40,5000,0,0
 gl_cas02_,0,0,0,0	monster	Rideword (Nightmare)	2478,40,5000,0,0
 gl_cas02_,0,0,0,0	monster	Wanderer (Nightmare)	2477,120,5000,0,0
 gl_cas02_,0,0,0,0	monster	Baphomet (Nightmare)	2483,1,7200000,0,0
-gl_cas02_,0,0,0,0	monster	Swift Wanderer (Nightmare)	2734,2,300000,0,0
+gl_cas02_,0,0,0,0	monster	Swift Wanderer (Nightmare)	2734,2,180000,0,0
 
 //==================================================
 // gl_chyard_ - Nightmare Mode Churchyard
@@ -215,4 +215,4 @@ gl_cas02_,0,0,0,0	monster	Swift Wanderer (Nightmare)	2734,2,300000,0,0
 gl_chyard_,0,0,0,0	monster	Wraith Dead (Nightmare)	2481,200,5000,0,0
 gl_chyard_,0,0,0,0	monster	Evil Druid (Nightmare)	2480,5,60000,0,0
 gl_chyard_,0,0,0,0	monster	Mimic (Nightmare)	2479,5,60000,0,0
-gl_chyard_,0,0,0,0	monster	Elusive Wraith Dead (Nightmare)	2733,2,300000,0,0
+gl_chyard_,0,0,0,0	monster	Elusive Wraith Dead (Nightmare)	2733,2,180000,0,0

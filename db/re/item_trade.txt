@@ -2782,7 +2782,7 @@
 14619,475,100	// INT_Biscuit_Stick
 14620,475,100	// DEX_Biscuit_Stick
 14621,475,100	// LUK_Biscuit_Stick
-14623,475,100	// Golden_Treasure_Box
+14623,475,100	// Golden_Treasure_Box_
 14627,475,100	// Christmas_Scroll
 14628,475,100	// Costume_Festival_Box
 14663,475,100	// Scroll_Sealed_Dark_Lord

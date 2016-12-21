@@ -13,7 +13,7 @@
 //= 1.1 Added Izlude duplicates. [Euphy]
 //============================================================
 
-// Towns ====================
+// Towns =============================
 brasilis	mapflag	nopenalty
 bra_in01	mapflag	nopenalty
 dicastes01	mapflag	nopenalty

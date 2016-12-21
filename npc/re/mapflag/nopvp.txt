@@ -13,7 +13,7 @@
 //= 1.1 Added Izlude duplicates. [Euphy]
 //============================================================
 
-// Instances ===================
+// Instances =====================
 1@mist	mapflag	pvp	off
 1@cash	mapflag	pvp	off
 1@pump	mapflag	pvp	off

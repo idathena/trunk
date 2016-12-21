@@ -1086,7 +1086,7 @@ int unit_blown(struct block_list *bl, int dx, int dy, int count, int flag)
  */
 int unit_blown_immune(struct block_list *bl, int flag)
 {
-	if ((flag&0x1) && (map_flag_gvg(bl->m) || map[bl->m].flag.battleground) && ((flag&0x2) || !(battle_config.skill_trap_type&0x1)))
+	if ((flag&0x1) && (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) && ((flag&0x2) || !(battle_config.skill_trap_type&0x1)))
 		return 1; //No knocking back in WoE / BG
 
 	switch (bl->type) {

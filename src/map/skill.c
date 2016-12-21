@@ -884,11 +884,11 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 					break; //If a normal attack is a skill, it's splash damage [Inkfish]
 				if( sd ) {
 					if( pc_isfalcon(sd) && sd->status.weapon == W_BOW && (lv = pc_checkskill(sd,HT_BLITZBEAT)) > 0 &&
-						rnd()%1000 <= sstatus->luk * 10 / 3 + 1 ) { //Automatic trigger of Blitz Beat
+						rnd()%1000 < sstatus->luk * 10 / 3 + 1 ) { //Automatic trigger of Blitz Beat
 						rate = (status_get_job_lv(src) + 9) / 10;
 						skill_castend_damage_id(src,bl,HT_BLITZBEAT,(sd->class_&JOBL_THIRD ? lv : min(lv,rate)),tick,SD_LEVEL);
 					}
-					if( pc_iswug(sd) && (lv = pc_checkskill(sd,RA_WUGSTRIKE)) > 0 && rnd()%1000 <= sstatus->luk * 10 / 3 + 1 )
+					if( pc_iswug(sd) && (lv = pc_checkskill(sd,RA_WUGSTRIKE)) > 0 && rnd()%1000 < sstatus->luk * 10 / 3 + 1 )
 						skill_castend_damage_id(src,bl,RA_WUGSTRIKE,lv,tick,0); //Automatic trigger of Warg Strike [Jobbie]
 					if( dstmd && sd->status.weapon != W_BOW && (lv = pc_checkskill(sd,RG_SNATCHER)) > 0 &&
 						55 + lv * 15 + pc_checkskill(sd,TF_STEAL) * 10 > rnd()%1000 ) { //Gank
@@ -5583,7 +5583,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			case NPC_WIDESOULDRAIN:
 			case PR_REDEMPTIO:
 			case ALL_RESURRECTION:
-			case AB_EPICLESIS:
 			case WM_DEADHILLHERE:
 				break;
 			default:
@@ -5612,7 +5611,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if(sd && battle_check_undead(tstatus->race,tstatus->def_ele) && skill_id != AL_INCAGI) {
 				if(battle_check_target(src,bl,BCT_ENEMY) <= 0) //Offensive heal does not works on non-enemies [Skotlex]
 					return 0;
-				return skill_castend_damage_id(src,bl,skill_id,skill_lv,tick,flag);
+				return skill_castend_damage_id(src,bl,(AB_HIGHNESSHEAL ? AL_HEAL : skill_id),skill_lv,tick,flag);
 			}
 			break;
 		case RK_MILLENNIUMSHIELD:
@@ -5672,7 +5671,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				} else if(rate == 19)
 					status_percent_heal(src,100,100);
 				else if(rate == 20 && sd->status.party_id)
-					party_foreachsamemap(skill_area_sub,sd,skill_get_splash(ALL_RESURRECTION,1),src,ALL_RESURRECTION,1,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
+					party_foreachsamemap(skill_area_sub,sd,skill_get_splash(ALL_RESURRECTION,1),src,ALL_RESURRECTION,1,tick,flag|BCT_PARTY,skill_castend_nodamage_id);
 				skill_consume_requirement(sd,skill_id,skill_lv,2);
 				return 0;
 			}
@@ -5786,7 +5785,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 				if(!status_isdead(bl))
 					break;
-				if(sd && (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground)) { //No reviving in WoE grounds!
+				if(sd && (map_flag_gvg(bl->m) || map[bl->m].flag.battleground)) { //No reviving in WoE grounds!
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
@@ -5803,8 +5802,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if(dstsd && dstsd->special_state.restart_full_recover)
 					per = sper = 100;
 				if(status_revive(bl,per,sper)) {
-					clif_skill_nodamage(src,bl,ALL_RESURRECTION,skill_lv,1);
-					if(sd && dstsd && battle_config.resurrection_exp > 0) {
+					if(!(flag&1)) //AB_EPICLESIS have no resurrection animation
+						clif_skill_nodamage(src,bl,ALL_RESURRECTION,skill_lv,1);
+					if(sd && dstsd && battle_config.resurrection_exp) {
 						int exp = 0, jexp = 0;
 						int lv = status_get_lv(bl) - status_get_lv(src),
 							jlv = status_get_job_lv(bl) - status_get_job_lv(src);
@@ -7395,8 +7395,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_READYCOUNTER:			case SC_DODGE:			case SC_WARM:
 							case SC_AUTOTRADE:			case SC_CRITICALWOUND:		case SC_JEXPBOOST:
 							case SC_INVINCIBLE:			case SC_INVINCIBLEOFF:		case SC_HELLPOWER:
-							case SC_MANU_ATK:			case SC_MANU_DEF:		case SC_SPL_ATK:
-							case SC_SPL_DEF:			case SC_MANU_MATK:		case SC_SPL_MATK:
 							case SC_RICHMANKIM:			case SC_ETERNALCHAOS:		case SC_DRUMBATTLE:
 							case SC_NIBELUNGEN:			case SC_ROKISWEIL:		case SC_INTOABYSS:
 							case SC_SIEGFRIED:			case SC_FOOD_STR_CASH:		case SC_FOOD_AGI_CASH:
@@ -8779,11 +8777,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 			break;
 
-		case AB_EPICLESIS:
-			if( (flag&1) && status_isdead(bl) )
-				status_revive(bl,50,0);
-			break;
-
 		case AB_ORATIO:
 			if( flag&1 )
 				sc_start(src,bl,type,40 + 5 * skill_lv,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -8877,8 +8870,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_READYCOUNTER:			case SC_DODGE:			case SC_WARM:
 						case SC_AUTOTRADE:			case SC_CRITICALWOUND:		case SC_JEXPBOOST:
 						case SC_INVINCIBLE:			case SC_INVINCIBLEOFF:		case SC_HELLPOWER:
-						case SC_MANU_ATK:			case SC_MANU_DEF:		case SC_SPL_ATK:
-						case SC_SPL_DEF:			case SC_MANU_MATK:		case SC_SPL_MATK:
 						case SC_RICHMANKIM:			case SC_ETERNALCHAOS:		case SC_DRUMBATTLE:
 						case SC_NIBELUNGEN:			case SC_ROKISWEIL:		case SC_INTOABYSS:
 						case SC_SIEGFRIED:			case SC_FOOD_STR_CASH:		case SC_FOOD_AGI_CASH:
@@ -11666,11 +11657,12 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			break;
 
 		case AB_EPICLESIS:
-			if( skill_unitsetting(src,skill_id,skill_lv,x,y,0) ) {
+			if( !map_flag_vs(src->m) ) {
 				i = skill_get_splash(skill_id,skill_lv);
 				map_foreachinarea(skill_area_sub,src->m,x-i,y-i,x+i,y+i,BL_CHAR,src,
-					AB_EPICLESIS,skill_lv,tick,flag|BCT_NOENEMY|1,skill_castend_nodamage_id);
+					ALL_RESURRECTION,3,tick,flag|BCT_NOENEMY|1,skill_castend_nodamage_id);
 			}
+			skill_unitsetting(src,skill_id,skill_lv,x,y,0);
 			break;
 
 		case WL_EARTHSTRAIN: {
@@ -13636,11 +13628,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 					sp = tstatus->max_sp * sp / 100;
 					if (tsc && tsc->data[SC_AKAITSUKI] && hp)
 						hp = ~hp + 1;
-					if (tstatus->hp < tstatus->max_hp)
-						clif_skill_nodamage(&unit->bl,bl,AL_HEAL,hp,1);
-					if (tstatus->sp < tstatus->max_sp)
-						clif_skill_nodamage(&unit->bl,bl,MG_SRECOVERY,sp,1);
-					status_heal(bl,hp,sp,1);
+					status_heal(bl,hp,sp,2);
 				}
 				if (++group->val2%5 == 0) { //Un-hides players every 5 seconds
 					status_change_end(bl,SC_HIDING,INVALID_TIMER);
@@ -13650,7 +13638,8 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 					if (tsc && tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
 						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 				}
-				sc_start(src,bl,type,100,skill_lv,group->interval + 100);
+				if (!tsc || !tsc->data[SC_BERSERK] || !tsc->data[SC_SATURDAYNIGHTFEVER])
+					sc_start(src,bl,type,100,skill_lv,group->interval + 100);
 			}
 			break;
 
@@ -15456,7 +15445,8 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	if( require.ammo ) {
 		short idx = sd->equip_index[EQI_AMMO];
 
-		if( idx < 0 || !sd->inventory_data[idx] || sd->status.inventory[idx].amount < require.ammo_qty ) {
+		if( idx < 0 || !sd->inventory_data[idx] || (1<<sd->inventory_data[idx]->look) != require.ammo ||
+			sd->status.inventory[idx].amount < require.ammo_qty ) {
 			switch( skill_id ) {
 				case BA_MUSICALSTRIKE:
 				case DC_THROWARROW:
@@ -15465,6 +15455,13 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 					break;
 				case RA_ARROWSTORM:
 					clif_arrow_fail(sd,0);
+					return false;
+				case NC_ARMSCANNON:
+				case GN_CARTCANNON:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_CANONBALL,0,0);
+					return false;
+				case GN_SLINGITEM:
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_WRONG_WEAPON,0,0);
 					return false;
 				default:
 					if( require.ammo&((1<<AMMO_BULLET)|(1<<AMMO_SHELL)|(1<<AMMO_GRENADE)) ) {
@@ -15707,8 +15704,6 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 		if( idx < 0 || !sd->inventory_data[idx] || sd->status.inventory[idx].amount < require.ammo_qty ) {
 			if( require.ammo&((1<<AMMO_BULLET)|(1<<AMMO_SHELL)|(1<<AMMO_GRENADE)) )
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_BULLET,0,0);
-			else if( require.ammo&(1<<AMMO_CANNONBALL) )
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_CANONBALL,0,0);
 			else if( require.ammo&(1<<AMMO_KUNAI) )
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT_KUNAI,0,0);
 			else
@@ -15921,8 +15916,8 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 	if( require.ammo_qty )
 		require.ammo = skill_db[idx].require.ammo;
 
-	if( !require.ammo && skill_id && skill_isammotype(sd,skill_id) ) { //Assume this skill is using the weapon, therefore it requires arrows.
-		require.ammo = 0xFFFFFFFF; //Enable use on all ammo types.
+	if( !require.ammo && skill_id && skill_isammotype(sd,skill_id) ) { //Assume this skill is using the weapon, therefore it requires arrows
+		require.ammo = 0xFFFFFFFF; //Enable use on all ammo types
 		require.ammo_qty = 1;
 	}
 

@@ -3206,7 +3206,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 		case SP_ADD_DAMAGE_CLASS:
 			switch(sd->state.lr_flag) {
 				case 0: //Right hand
-					ARR_FIND(0, ARRAYLENGTH(sd->right_weapon.add_dmg), i, sd->right_weapon.add_dmg[i].rate == 0 || sd->right_weapon.add_dmg[i].class_ == type2);
+					ARR_FIND(0, ARRAYLENGTH(sd->right_weapon.add_dmg), i, (!sd->right_weapon.add_dmg[i].rate || sd->right_weapon.add_dmg[i].class_ == type2));
 					if(i == ARRAYLENGTH(sd->right_weapon.add_dmg)) {
 						ShowError("pc_bonus2: SP_ADD_DAMAGE_CLASS: Reached max (%d) number of add Class dmg bonuses per character!\n", ARRAYLENGTH(sd->right_weapon.add_dmg));
 						break;
@@ -3217,7 +3217,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 						memmove(&sd->right_weapon.add_dmg[i], &sd->right_weapon.add_dmg[i + 1], sizeof(sd->right_weapon.add_dmg) - (i + 1) * sizeof(sd->right_weapon.add_dmg[0]));
 					break;
 				case 1: //Left hand
-					ARR_FIND(0, ARRAYLENGTH(sd->left_weapon.add_dmg), i, sd->left_weapon.add_dmg[i].rate == 0 || sd->left_weapon.add_dmg[i].class_ == type2);
+					ARR_FIND(0, ARRAYLENGTH(sd->left_weapon.add_dmg), i, (!sd->left_weapon.add_dmg[i].rate || sd->left_weapon.add_dmg[i].class_ == type2));
 					if(i == ARRAYLENGTH(sd->left_weapon.add_dmg)) {
 						ShowError("pc_bonus2: SP_ADD_DAMAGE_CLASS: Reached max (%d) number of add Class dmg bonuses per character!\n", ARRAYLENGTH(sd->left_weapon.add_dmg));
 						break;
@@ -3232,7 +3232,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 		case SP_ADD_MAGIC_DAMAGE_CLASS:
 			if(sd->state.lr_flag == 2)
 				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->add_mdmg), i, sd->add_mdmg[i].rate == 0 || sd->add_mdmg[i].class_ == type2);
+			ARR_FIND(0, ARRAYLENGTH(sd->add_mdmg), i, (!sd->add_mdmg[i].rate || sd->add_mdmg[i].class_ == type2));
 			if(i == ARRAYLENGTH(sd->add_mdmg)) {
 				ShowError("pc_bonus2: SP_ADD_MAGIC_DAMAGE_CLASS: Reached max (%d) number of add Class magic dmg bonuses per character!\n", ARRAYLENGTH(sd->add_mdmg));
 				break;
@@ -3245,7 +3245,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 		case SP_ADD_DEF_MONSTER:
 			if(sd->state.lr_flag == 2)
 				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->add_def), i, sd->add_def[i].rate == 0 || sd->add_def[i].class_ == type2);
+			ARR_FIND(0, ARRAYLENGTH(sd->add_def), i, (!sd->add_def[i].rate || sd->add_def[i].class_ == type2));
 			if(i == ARRAYLENGTH(sd->add_def)) {
 				ShowError("pc_bonus2: SP_ADD_DEF_MONSTER: Reached max (%d) number of add Class def bonuses per character!\n", ARRAYLENGTH(sd->add_def));
 				break;
@@ -3258,7 +3258,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 		case SP_ADD_MDEF_MONSTER:
 			if(sd->state.lr_flag == 2)
 				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->add_mdef), i, sd->add_mdef[i].rate == 0 || sd->add_mdef[i].class_ == type2);
+			ARR_FIND(0, ARRAYLENGTH(sd->add_mdef), i, (!sd->add_mdef[i].rate || sd->add_mdef[i].class_ == type2));
 			if(i == ARRAYLENGTH(sd->add_mdef)) {
 				ShowError("pc_bonus2: SP_ADD_MDEF_MONSTER: Reached max (%d) number of add Class mdef bonuses per character!\n", ARRAYLENGTH(sd->add_mdef));
 				break;
@@ -3694,6 +3694,11 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 			PC_BONUS_CHK_CLASS(type2, SP_DROP_ADDCLASS);
 			if(sd->state.lr_flag != 2)
 				sd->dropaddclass[type2] += val;
+			break;
+		case SP_MAGIC_ADDRACE2:
+			PC_BONUS_CHK_RACE2(type2, SP_MAGIC_ADDRACE2);
+			if(sd->state.lr_flag != 2)
+				sd->magic_addrace2[type2] += val;
 			break;
 		default:
 			ShowWarning("pc_bonus2: Unknown type %d %d %d!\n", type, type2, val);

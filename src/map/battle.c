@@ -502,6 +502,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 
 	switch( attack_type ) {
 		case BF_MAGIC:
+			t_race2 = (enum e_race2)status_get_race2(target);
 			if( sd && !(nk&NK_NO_CARDFIX_ATK) ) { //Affected by attacker ATK bonuses
 				cardfix = cardfix * (100 + sd->magic_addrace[tstatus->race] + sd->magic_addrace[RC_ALL]) / 100;
 				if( !(nk&NK_NO_ELEFIX) ) { //Affected by element modifier bonuses
@@ -509,6 +510,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 					cardfix = cardfix * (100 + sd->magic_atkele[rh_ele] + sd->magic_atkele[ELE_ALL]) / 100;
 				}
 				cardfix = cardfix * (100 + sd->magic_addsize[tstatus->size] + sd->magic_addsize[SZ_ALL]) / 100;
+				cardfix = cardfix * (100 + sd->magic_addrace2[t_race2]) / 100;
 				cardfix = cardfix * (100 + sd->magic_addclass[tstatus->class_] + sd->magic_addclass[CLASS_ALL]) / 100;
 				for( i = 0; i < ARRAYLENGTH(sd->add_mdmg) && sd->add_mdmg[i].rate;i++ ) {
 					if( sd->add_mdmg[i].class_ != t_class )
@@ -892,8 +894,20 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 	if( sc && sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF] )
 		return 1;
 
-	if( skill_id == PA_PRESSURE || skill_id == HW_GRAVITATION || d->isvanishdamage )
-		return damage; //This skill bypass everything else
+	switch( skill_id ) {
+		case CR_GRANDCROSS:
+		case NPC_GRANDDARKNESS:
+			if( sd )
+				break;
+			d->dmg_lv = ATK_MISS;
+			return 0;
+		case PA_PRESSURE:
+		case HW_GRAVITATION:
+			return damage; //This skill bypass everything else
+	}
+
+	if( d->isvanishdamage )
+		return damage;
 
 	if( sc && sc->count ) { //SC_* that reduce damage to 0
 		if( sc->data[SC_BASILICA] && !is_boss(src) ) {
@@ -1201,27 +1215,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( sc->data[SC_SU_STOOP] )
 			damage -= damage * 90 / 100;
 
-		if( src->type == BL_MOB ) { //Compressed code, fixed by map.h [Epoque]
-			int i;
-
-			if( (sce = sc->data[SC_MANU_DEF]) ) {
-				for( i = 0; ARRAYLENGTH(mob_manuk) > i; i++ ) {
-					if( mob_manuk[i] == ((TBL_MOB *)src)->mob_id ) {
-						damage -= damage * sce->val1 / 100;
-						break;
-					}
-				}
-			}
-			if( (sce = sc->data[SC_SPL_DEF]) ) {
-				for( i = 0; ARRAYLENGTH(mob_splendide) > i; i++ ) {
-					if( mob_splendide[i] == ((TBL_MOB *)src)->mob_id ) {
-						damage -= damage * sce->val1 / 100;
-						break;
-					}
-				}
-			}
-		}
-
 		if( (sce = sc->data[SC_ARMOR]) && //NPC_DEFENDER
 			sce->val3&flag && sce->val4&flag )
 			damage -= damage * sce->val2 / 100;
@@ -1254,7 +1247,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( (sce = sc->data[SC_DARKCROW]) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) )
 			damage += damage * sce->val2 / 100;
 
-		if( (sce = sc->data[SC_MAGMA_FLOW]) && rnd()%100 <= sce->val2 )
+		if( (sce = sc->data[SC_MAGMA_FLOW]) && rnd()%100 < sce->val2 )
 			skill_castend_nodamage_id(bl,bl,MH_MAGMA_FLOW,sce->val1,gettick(),flag|2);
 
 		if( damage > 0 && (sce = sc->data[SC_STONEHARDSKIN]) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) ) {
@@ -1351,30 +1344,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 		if( damage > 0 && (sce = tsc->data[SC_BLOODLUST]) && flag&BF_WEAPON && rnd()%100 < sce->val3 )
 			status_heal(src,damage * sce->val4 / 100,0,3);
-
-		//[Epoque]
-		if( bl->type == BL_MOB ) {
-			int i;
-
-			if( ((sce = tsc->data[SC_MANU_ATK]) && flag&BF_WEAPON) ||
-				((sce = tsc->data[SC_MANU_MATK]) && flag&BF_MAGIC) ) {
-				for( i = 0; ARRAYLENGTH(mob_manuk) > i; i++ ) {
-					if( ((TBL_MOB *)bl)->mob_id == mob_manuk[i] ) {
-						damage += damage * sce->val1 / 100;
-						break;
-					}
-				}
-			}
-			if( ((sce = tsc->data[SC_SPL_ATK]) && flag&BF_WEAPON) ||
-				((sce = tsc->data[SC_SPL_MATK]) && flag&BF_MAGIC) ) {
-				for( i = 0; ARRAYLENGTH(mob_splendide) > i; i++ ) {
-					if( ((TBL_MOB *)bl)->mob_id == mob_splendide[i] ) {
-						damage += damage * sce->val1 / 100;
-						break;
-					}
-				}
-			}
-		}
 
 		if( (sce = tsc->data[SC_SHIELDSPELL_REF]) && sce->val1 == 1 && flag&BF_WEAPON )
 			skill_break_equip(src,bl,EQP_ARMOR,10000,BCT_ENEMY);
@@ -3350,7 +3319,8 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			skillratio += 50 * skill_lv;
 			break;
 		case KN_BRANDISHSPEAR:
-		case ML_BRANDISH: {
+		case ML_BRANDISH:
+			{
 				int ratio = 100 + 20 * skill_lv;
 
 				skillratio += -100 + ratio;
@@ -6374,8 +6344,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					struct Damage wd = battle_calc_weapon_attack(src, target, skill_id, skill_lv, ad.miscflag);
 
 					ad.damage = battle_attr_fix(src, target, wd.damage + ad.damage, s_ele, tstatus->def_ele, tstatus->ele_lv) * (100 + 40 * skill_lv) / 100;
-					if(src == target) {
-						if(src->type == BL_PC)
+					if(target->id == src->id) {
+						if(sd)
 							ad.damage >>= 1;
 						else
 							ad.damage = 0;
@@ -7309,7 +7279,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 		}
 		if (rnd()%100 < rate) { //Need to apply canact_tick here because it doesn't go through skill_castend_id
 			sd->ud.canact_tick = max(tick + skill_delayfix(src,MO_TRIPLEATTACK,lv),sd->ud.canact_tick);
-			if( skill_attack(BF_WEAPON,src,src,target,MO_TRIPLEATTACK,lv,tick,0) )
+			if (skill_attack(BF_WEAPON,src,src,target,MO_TRIPLEATTACK,lv,tick,0))
 				return ATK_DEF;
 			return ATK_MISS;
 		}

@@ -363,6 +363,7 @@ struct map_session_data {
 	short sp_gain_race[RC_MAX];
 	int dropaddrace[RC_MAX];
 	int dropaddclass[CLASS_MAX];
+	int magic_addrace2[RC2_MAX];
 	//Zeroed arrays end here
 
 	//Zeroed structures start here

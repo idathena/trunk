@@ -19,7 +19,7 @@
 // Octopus Cave ===================
 1@cash	mapflag	partylock
 
-// Drain ==========================
+// Malangdo Culvert ===============
 1@pump	mapflag	partylock
 2@pump	mapflag	partylock
 
@@ -42,16 +42,16 @@
 1@gl_k	mapflag	partylock
 2@gl_k	mapflag	partylock
 
-// Wave Mode Memorial Dungeon =====
-1@def01	mapflag	partylock
-1@def02	mapflag	partylock
-1@def03	mapflag	partylock
-
 // Heroes' Trails - Part 1 ========
 1@gef	mapflag	partylock
 1@face	mapflag	partylock
 1@sara	mapflag	partylock
 1@gef_in	mapflag	partylock
+
+// Wave Mode Memorial Dungeon =====
+1@def01	mapflag	partylock
+1@def02	mapflag	partylock
+1@def03	mapflag	partylock
 
 // Nightmarish Jitterbug ==========
 1@jtb	mapflag	partylock
