@@ -878,8 +878,8 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_INTFOOD] = SI_FOOD_INT;
 	StatusIconChangeTable[SC_DEXFOOD] = SI_FOOD_DEX;
 	StatusIconChangeTable[SC_LUKFOOD] = SI_FOOD_LUK;
-	StatusIconChangeTable[SC_FLEEFOOD] = SI_FOOD_BASICAVOIDANCE;
 	StatusIconChangeTable[SC_HITFOOD] = SI_FOOD_BASICHIT;
+	StatusIconChangeTable[SC_FLEEFOOD] = SI_FOOD_BASICAVOIDANCE;
 	StatusIconChangeTable[SC_CRIFOOD] = SI_FOOD_CRITICALSUCCESSVALUE;
 	StatusIconChangeTable[SC_ATKPOTION] = SI_PLUSATTACKPOWER;
 	StatusIconChangeTable[SC_MATKPOTION] = SI_PLUSMAGICPOWER;
@@ -1092,8 +1092,8 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_INTFOOD] |= SCB_INT;
 	StatusChangeFlagTable[SC_DEXFOOD] |= SCB_DEX;
 	StatusChangeFlagTable[SC_LUKFOOD] |= SCB_LUK;
-	StatusChangeFlagTable[SC_FLEEFOOD] |= SCB_FLEE;
 	StatusChangeFlagTable[SC_HITFOOD] |= SCB_HIT;
+	StatusChangeFlagTable[SC_FLEEFOOD] |= SCB_FLEE;
 	StatusChangeFlagTable[SC_CRIFOOD] |= SCB_CRI;
 	StatusChangeFlagTable[SC_BATKFOOD] |= SCB_BATK;
 	StatusChangeFlagTable[SC_WATKFOOD] |= SCB_WATK;
@@ -1900,10 +1900,12 @@ int status_fixed_revive(struct block_list *bl, unsigned int per_hp, unsigned int
  *------------------------------------------*/
 bool status_check_skilluse(struct block_list *src, struct block_list *target, uint16 skill_id, int flag)
 {
-	struct status_data *status = status_get_status_data(src);
+	struct status_data *status;
 	struct status_change *sc = status_get_sc(src);
 	struct status_change *tsc = status_get_sc(target);
 	int hide_flag;
+
+	status = (src ? status_get_status_data(src) : &dummy_status);
 
 	if (src && src->type != BL_PC && status_isdead(src))
 		return false;
@@ -6756,7 +6758,7 @@ struct status_data *status_get_status_data(struct block_list *bl)
 		case BL_HOM: return &((TBL_HOM *)bl)->battle_status;
 		case BL_MER: return &((TBL_MER *)bl)->battle_status;
 		case BL_ELEM: return &((TBL_ELEM *)bl)->battle_status;
-		case BL_NPC: return ((mobdb_checkid(((TBL_NPC *)bl)->class_) == 0) ? &((TBL_NPC *)bl)->status : &dummy_status);
+		case BL_NPC: return (!mobdb_checkid(((TBL_NPC *)bl)->class_) ? &((TBL_NPC *)bl)->status : &dummy_status);
 		default:
 			return &dummy_status;
 	}
@@ -8456,8 +8458,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					return 1;
 				break;
 			case SC_ENDURE:
+			case SC_SPEEDUP0:
 				if( sce->val4 && !val4 )
-					return 1; //Don't let you override infinite endure
+					return 1;
 				if( sce->val1 > val1 )
 					return 1;
 				break;
@@ -10728,6 +10731,8 @@ int status_change_clear(struct block_list *bl,int type)
 				case SC_FOOD_LUK_CASH:
 				case SC_DEF_RATE:
 				case SC_MDEF_RATE:
+				case SC_DEFSET_PER:
+				case SC_MDEFSET_PER:
 				case SC_INCHEALRATE:
 				case SC_INCFLEE2:
 				case SC_INCHIT:
@@ -10873,8 +10878,8 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		return 0;
 
 	if (tid == INVALID_TIMER) {
-		if (type == SC_ENDURE && sce->val4)
-			return 0; //Do not end infinite endure
+		if ((type == SC_ENDURE || type == SC_SPEEDUP0) && sce->val4)
+			return 0;
 		if (type == SC_SPIDERWEB) {
 			//Delete the unit group first to expire found in the status change
 			struct skill_unit_group *group = NULL, *group2 = NULL;

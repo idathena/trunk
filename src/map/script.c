@@ -5377,8 +5377,8 @@ BUILDIN_FUNC(itemheal)
  *------------------------------------------*/
 BUILDIN_FUNC(percentheal)
 {
-	int hp,sp;
 	TBL_PC *sd;
+	int hp,sp;
 
 	hp = script_getnum(st,2);
 	sp = script_getnum(st,3);
@@ -5390,7 +5390,7 @@ BUILDIN_FUNC(percentheal)
 	}
 
 	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !sd )
 		return 0;
 
 	if( sd->sc.data[SC_EXTREMITYFIST2] )
@@ -15407,7 +15407,7 @@ BUILDIN_FUNC(setnpcdisplay)
 	}
 
 	nd = npc_name2id(name);
-	if( nd == NULL ) { //Not found
+	if( !nd ) { //Not found
 		script_pushint(st,1);
 		return 0;
 	}

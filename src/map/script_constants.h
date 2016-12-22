@@ -946,6 +946,7 @@
 	export_constant(SC_LUKFOOD);
 	export_constant(SC_HITFOOD);
 	export_constant(SC_FLEEFOOD);
+	export_constant(SC_CRIFOOD);
 	export_constant(SC_BATKFOOD);
 	export_constant(SC_WATKFOOD);
 	export_constant(SC_MATKFOOD);
@@ -1364,7 +1365,6 @@
 	export_constant(SC_REUSE_LIMIT_ASPD_POTION);
 	export_constant(SC_INCMHP);
 	export_constant(SC_INCMSP);
-	export_constant(SC_CRIFOOD);
 	export_constant(SC_PARTYFLEE);
 	export_constant(SC_ATTHASTE_CASH);
 	export_constant(SC_DEFSET_PER);
