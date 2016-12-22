@@ -3401,11 +3401,11 @@ void npc_setclass(struct npc_data *nd, short class_)
 		return;
 
 	if( map[nd->bl.m].users )
-		clif_clearunit_area(&nd->bl, CLR_OUTSIGHT);// fade out
+		clif_clearunit_area(&nd->bl, CLR_OUTSIGHT); //Fade out
 	nd->class_ = class_;
 	status_set_viewdata(&nd->bl, class_);
 	if( map[nd->bl.m].users )
-		clif_spawn(&nd->bl);// fade in
+		clif_spawn(&nd->bl); //Fade in
 }
 
 // @commands (script based)

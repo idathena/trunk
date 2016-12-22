@@ -372,9 +372,9 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 	switch( skill_id ) {
 		case BA_APPLEIDUN: //HP recovery
 #ifdef RENEWAL
-			hp = 100 + skill_lv * 5 + (status_get_vit(src) / 2);
+			hp = 100 + skill_lv * 5 + status_get_vit(src) / 2;
 #else
-			hp = 30 + skill_lv * 5 + (status_get_vit(src) / 2);
+			hp = 30 + skill_lv * 5 + status_get_vit(src) / 2;
 #endif
 			if( sd )
 				hp += 5 * pc_checkskill(sd,BA_MUSICALLESSON);
@@ -7610,12 +7610,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					}
 					//HP damage only on vs-maps when against players and skill need to be at level 5
 					if ((!dstsd || map_flag_vs(bl->m)) && skill_lv >= 5)
-						hp = tstatus->max_hp / 50; //Recover 2% HP [Skotlex]
+						hp = tstatus->max_hp / 50; //Damage 2% HP [Skotlex]
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 					unit_skillcastcancel(bl,0);
 					sp = skill_get_sp(bl_skill_id,bl_skill_lv);
-					status_zap(bl,hp,sp);
-					if (hp) //Recover half damaged HP [Skotlex]
+					status_damage(src,bl,hp,sp,clif_damage(src,bl,tick,0,0,hp,0,DMG_NORMAL,0,false),1);
+					if (hp) //Absorb half damaged HP [Skotlex]
 						hp >>= 1;
 					if (sp) //Recover some of the SP used
 						sp = sp * (25 * (skill_lv - 1)) / 100;

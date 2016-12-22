@@ -835,6 +835,7 @@ static int clif_clearunit_delayed_sub(int tid, unsigned int tick, int id, intptr
 	ers_free(delay_clearunit_ers,bl);
 	return 0;
 }
+
 void clif_clearunit_delayed(struct block_list *bl, clr_type type, unsigned int tick)
 {
 	struct block_list *tbl = ers_alloc(delay_clearunit_ers, struct block_list);

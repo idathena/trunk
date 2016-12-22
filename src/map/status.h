@@ -261,6 +261,7 @@ typedef enum sc_type {
 	SC_LUKFOOD,
 	SC_HITFOOD,
 	SC_FLEEFOOD,
+	SC_CRIFOOD,
 	SC_BATKFOOD,
 	SC_WATKFOOD,
 	SC_MATKFOOD,
@@ -733,7 +734,6 @@ typedef enum sc_type {
 	//Misc
 	SC_INCMHP,
 	SC_INCMSP,
-	SC_CRIFOOD,
 	SC_PARTYFLEE,
 	SC_ATTHASTE_CASH,
 	SC_DEFSET_PER,

@@ -1830,6 +1830,10 @@ int map_quit(struct map_session_data *sd) {
 			sd->sc.data[SC_ENDURE]->val4 = 0; //No need to save infinite endure
 			status_change_end(&sd->bl,SC_ENDURE,INVALID_TIMER);
 		}
+		if (sd->sc.data[SC_SPEEDUP0] && sd->sc.data[SC_SPEEDUP0]->val4) {
+			sd->sc.data[SC_SPEEDUP0]->val4 = 0;
+			status_change_end(&sd->bl,SC_SPEEDUP0,INVALID_TIMER);
+		}
 		status_change_end(&sd->bl,SC_WEIGHT50,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_WEIGHT90,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_SATURDAYNIGHTFEVER,INVALID_TIMER);
