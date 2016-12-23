@@ -205,6 +205,38 @@ bool mob_is_spotted(struct mob_data *md) {
 }
 
 /**
+ * Tomb spawn time calculations
+ * @param nd: NPC data
+ */
+int mvptomb_setdelayspawn(struct npc_data *nd) {
+	if(nd->u.tomb.spawn_timer != INVALID_TIMER)
+		delete_timer(nd->u.tomb.spawn_timer, mvptomb_delayspawn);
+	nd->u.tomb.spawn_timer = add_timer(gettick() + battle_config.mvp_tomb_delay, mvptomb_delayspawn, nd->bl.id, 0);
+	return 0;
+}
+
+/**
+ * Tomb spawn with delay (timer function)
+ * @param tid: Timer ID
+ * @param tick: Time
+ * @param id: Block list ID
+ * @param data: Used for add_timer_func_list
+ */
+int mvptomb_delayspawn(int tid, unsigned int tick, int id, intptr_t data) {
+	struct npc_data *nd = BL_CAST(BL_NPC, map_id2bl(id));
+
+	if(nd) {
+		if(nd->u.tomb.spawn_timer != tid) {
+			ShowError("mvptomb_delayspawn: Timer mismatch: %d != %d\n", tid, nd->u.tomb.spawn_timer);
+			return 0;
+		}
+		nd->u.tomb.spawn_timer = INVALID_TIMER;
+		clif_spawn(&nd->bl);
+	}
+	return 0;
+}
+
+/**
  * Create and display a tombstone on the map
  * @author [GreenBox]
  * @param md : the mob to create a tombstone for
@@ -231,6 +263,7 @@ void mvptomb_create(struct mob_data *md, char *killer, time_t time)
 
 	nd->u.tomb.md = md;
 	nd->u.tomb.kill_time = time;
+	nd->u.tomb.spawn_timer = INVALID_TIMER;
 
 	if(killer)
 		safestrncpy(nd->u.tomb.killer_name, killer, NAME_LENGTH);
@@ -240,13 +273,15 @@ void mvptomb_create(struct mob_data *md, char *killer, time_t time)
 	map_addnpc(nd->bl.m, nd);
 	if(map_addblock(&nd->bl))
 		return;
+
 	status_set_viewdata(&nd->bl, nd->class_);
 	status_change_init(&nd->bl);
 	unit_dataset(&nd->bl);
-	clif_spawn(&nd->bl);
+	mvptomb_setdelayspawn(nd);
 }
 
-/** Destroys MVP Tomb
+/**
+ * Destroys MVP Tomb
  * @param md
  */
 void mvptomb_destroy(struct mob_data *md) {
@@ -4903,6 +4938,7 @@ void do_init_mob(void)
 	add_timer_func_list(mob_timer_delete,"mob_timer_delete");
 	add_timer_func_list(mob_spawn_guardian_sub,"mob_spawn_guardian_sub");
 	add_timer_func_list(mob_respawn,"mob_respawn");
+	add_timer_func_list(mvptomb_delayspawn,"mvptomb_delayspawn");
 	add_timer_interval(gettick() + MIN_MOBTHINKTIME,mob_ai_hard,0,0,MIN_MOBTHINKTIME);
 	add_timer_interval(gettick() + MIN_MOBTHINKTIME * 10,mob_ai_lazy,0,0,MIN_MOBTHINKTIME * 10);
 }

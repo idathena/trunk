@@ -18838,15 +18838,16 @@ void clif_parse_Oneclick_Itemidentify(int fd, struct map_session_data *sd)
 	//- Invalid item ID or item doesn't exist
 	//- Item is already identified
 	if( idx < 0 || idx >= MAX_INVENTORY ||
-		sd->status.inventory[idx].nameid <= 0 || sd->inventory_data[idx] == NULL ||
+		sd->status.inventory[idx].nameid <= 0 || !sd->inventory_data[idx] ||
 		sd->status.inventory[idx].identify )
 		return;
 
 	//Ignore the request - No magnifiers in inventory
-	if( (magnifier_idx = pc_search_inventory(sd, ITEMID_MAGNIFIER)) == INDEX_NOT_FOUND )
+	if( (magnifier_idx = pc_search_inventory(sd, ITEMID_MAGNIFIER)) == INDEX_NOT_FOUND &&
+		(magnifier_idx = pc_search_inventory(sd, ITEMID_NOVICE_MAGNIFIER)) == INDEX_NOT_FOUND )
 		return;
 
-	if( pc_delitem(sd, magnifier_idx, 1, 0, 0, LOG_TYPE_OTHER) != 0 )
+	if( pc_delitem(sd, magnifier_idx, 1, 0, 0, LOG_TYPE_OTHER) )
 		return; //TODO: Deleting magnifier failed, for whatever reason
 
 	skill_identify(sd, idx);

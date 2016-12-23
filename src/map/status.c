@@ -3094,14 +3094,14 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		sd->regen.ssregen = &sd->ssregen;
 		sd->weight = 0;
 		for (i = 0; i < MAX_INVENTORY; i++) {
-			if (sd->status.inventory[i].nameid == 0 || sd->inventory_data[i] == NULL)
+			if (!sd->status.inventory[i].nameid || !sd->inventory_data[i])
 				continue;
 			sd->weight += sd->inventory_data[i]->weight * sd->status.inventory[i].amount;
 		}
 		sd->cart_weight = 0;
 		sd->cart_num = 0;
 		for (i = 0; i < MAX_CART; i++) {
-			if (sd->status.cart[i].nameid == 0)
+			if (!sd->status.cart[i].nameid)
 				continue;
 			sd->cart_weight += itemdb_weight(sd->status.cart[i].nameid) * sd->status.cart[i].amount;
 			sd->cart_num++;
@@ -3260,8 +3260,8 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		if((opt&SCO_FIRST) && sd->inventory_data[index]->equip_script && (pc_has_permission(sd,PC_PERM_USE_ALL_EQUIPMENT) ||
 			!itemdb_isNoEquip(sd->inventory_data[index],sd->bl.m))) { //Execute equip-script on login
 			run_script(sd->inventory_data[index]->equip_script,0,sd->bl.id,0);
-			if (!calculating)
-				return 1;
+			if(!calculating)
+				return 1; //Abort, run_script retriggered status_calc_pc [Skotlex]
 		}
 		//Sanitize the refine level in case someone decreased the value inbetween
 		if(sd->status.inventory[index].refine > MAX_REFINE)
@@ -3288,7 +3288,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 					sd->state.lr_flag = 0;
 				} else
 					run_script(sd->inventory_data[index]->script,0,sd->bl.id,0);
-				if(!calculating) //Abort, run_script retriggered this [Skotlex]
+				if(!calculating)
 					return 1;
 			}
 			watk->atk = sd->inventory_data[index]->atk;
@@ -3328,7 +3328,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 				run_script(sd->inventory_data[index]->script,0,sd->bl.id,0);
 				if(i == EQI_HAND_L) //Shield
 					sd->state.lr_flag = 0;
-				if(!calculating) //Abort, run_script retriggered this [Skotlex]
+				if(!calculating)
 					return 1;
 			}
 		} else if(sd->inventory_data[index]->type == IT_SHADOWGEAR) { //Shadow System
@@ -3349,7 +3349,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			if(sd->inventory_data[index]->look != AMMO_THROWABLE_ITEM)
 				run_script(sd->inventory_data[index]->script,0,sd->bl.id,0);
 			sd->state.lr_flag = 0;
-			if(!calculating) //Abort, run_script retriggered status_calc_pc [Skotlex]
+			if(!calculating)
 				return 1;
 		}
 	}
@@ -3379,7 +3379,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			if(no_run)
 				continue;
 			run_script(sd->combos.bonus[i],0,sd->bl.id,0);
-			if(!calculating) //Abort, run_script retriggered this
+			if(!calculating)
 				return 1;
 		}
 	}
@@ -3433,7 +3433,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 					sd->state.lr_flag = 0;
 				} else
 					run_script(data->script,0,sd->bl.id,0);
-				if(!calculating) //Abort, run_script his function [Skotlex]
+				if(!calculating)
 					return 1;
 			}
 		}
@@ -4740,7 +4740,7 @@ void status_calc_bl_(struct block_list *bl, enum scb_flag flag, enum e_status_ca
 	struct status_data b_status; //Previous battle status
 	struct status_data *status; //Pointer to current battle status
 
-	if( bl->type == BL_PC && ((TBL_PC *)bl)->delayed_damage != 0 ) {
+	if( bl->type == BL_PC && ((TBL_PC *)bl)->delayed_damage ) {
 		if( opt&SCO_FORCE )
 			((TBL_PC *)bl)->state.hold_recalc = 0; //Clear and move on
 		else {
@@ -10561,7 +10561,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 
 	if(sd) {
 		if(sd->pd)
-			pet_sc_check(sd,type); //Skotlex: Pet Status Effect Healing
+			pet_sc_check(sd,type); //Pet Status Effect Healing [Skotlex]
 		switch(type) {
 			case SC_BERSERK:
 			case SC_MERC_HPUP:
