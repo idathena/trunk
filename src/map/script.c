@@ -10228,7 +10228,7 @@ BUILDIN_FUNC(sc_start)
 
 	if(potion_flag == 1 && potion_target) { //skill.c set the flags before running the script, this is a potion-pitched effect
 		bl = map_id2bl(potion_target);
-		tick /= 2; //Thrown potions only last half.
+		tick /= 2; //Thrown potions only last half
 		val4 = 1; //Mark that this was a thrown sc_effect
 	}
 
@@ -10275,7 +10275,7 @@ BUILDIN_FUNC(sc_end)
 
 	if( type >= 0 && type < SC_MAX ) {
 		struct status_change *sc = status_get_sc(bl);
-		struct status_change_entry *sce = sc ? sc->data[type] : NULL;
+		struct status_change_entry *sce = (sc ? sc->data[type] : NULL);
 
 		if( !sce )
 			return 0;
@@ -10299,7 +10299,7 @@ BUILDIN_FUNC(sc_end)
 				break;
 		}
 
-		//This should help status_change_end force disabling the SC in case it has no limit.
+		//This should help status_change_end force disabling the SC in case it has no limit
 		sce->val1 = sce->val2 = sce->val3 = sce->val4 = 0;
 		status_change_end(bl, (sc_type)type, INVALID_TIMER);
 	} else
@@ -15967,7 +15967,7 @@ BUILDIN_FUNC(setitemscript)
 		n = script_getnum(st,4);
 	i_data = itemdb_exists(item_id);
 
-	if( !i_data || script == NULL || ( script[0] && script[0] != '{' ) ) {
+	if( !i_data || !script || (script[0] && script[0] != '{') ) {
 		script_pushint(st,0);
 		return 0;
 	}
@@ -18765,11 +18765,12 @@ BUILDIN_FUNC(buyingstore)
 {
 	struct map_session_data *sd;
 
-	if( ( sd = script_rid2sd(st) ) == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	if( npc_isnear(&sd->bl) ) {
 		char output[150];
+
 		sprintf(output,msg_txt(662),battle_config.min_npc_vendchat_distance);
 		clif_displaymessage(sd->fd,output);
 		return 0;
@@ -18787,9 +18788,8 @@ BUILDIN_FUNC(searchstores)
 	unsigned int uses;
 	struct map_session_data *sd;
 
-	if( ( sd = script_rid2sd(st) ) == NULL ) {
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
-	}
 
 	uses   = script_getnum(st,2);
 	effect = script_getnum(st,3);
@@ -18816,7 +18816,7 @@ BUILDIN_FUNC(showdigit)
 	int value;
 	struct map_session_data *sd;
 
-	if( (sd = script_rid2sd(st)) == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	value = script_getnum(st,2);

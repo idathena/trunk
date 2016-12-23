@@ -9410,7 +9410,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 		clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
 	}
-	if (!(id = sd->inventory_data[n]))
+	if( !(id = sd->inventory_data[n]) )
 		return false;
 	pos = pc_equippoint(sd,n); //With a few exceptions, item should go in all specified slots
 	if( battle_config.battle_log )
@@ -9549,9 +9549,8 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 	}
 	pc_checkallowskill(sd); //Check if status changes should be halted
 	iflag = sd->npc_item_flag;
-	//Check for combos (MUST be before status_calc_pc)
 	if( id->combos_count )
-		pc_checkcombo(sd,id);
+		pc_checkcombo(sd,id); //Check for combos
 	if( itemdb_isspecial(sd->status.inventory[n].card[0]) && itemdb_isspecial(sd->status.inventory[n].card[1]) &&
 		itemdb_isspecial(sd->status.inventory[n].card[2]) && itemdb_isspecial(sd->status.inventory[n].card[3]) )
 		; //No cards
@@ -9561,14 +9560,10 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 
 			if( !sd->status.inventory[n].card[i] )
 				continue;
-			if( (data = itemdb_exists(sd->status.inventory[n].card[i])) != NULL )
-				if( data->combos_count )
-					pc_checkcombo(sd,data);
+			if( (data = itemdb_exists(sd->status.inventory[n].card[i])) && data->combos_count )
+				pc_checkcombo(sd,data);
 		}
 	}
-	status_calc_pc(sd,SCO_NONE);
-	if( flag ) //Update skill data
-		clif_skillinfoblock(sd);
 	//OnEquip script [Skotlex]
 	if( id->equip_script && (pc_has_permission(sd,PC_PERM_USE_ALL_EQUIPMENT) || !itemdb_isNoEquip(id,sd->bl.m)) )
 		run_script(id->equip_script,0,sd->bl.id,fake_nd->bl.id); //Only run the script if item isn't restricted
@@ -9581,32 +9576,31 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 
 			if( !sd->status.inventory[n].card[i] )
 				continue;
-			if( ( data = itemdb_exists(sd->status.inventory[n].card[i]) ) != NULL ) {
-				if( data->equip_script && (pc_has_permission(sd,PC_PERM_USE_ALL_EQUIPMENT) || !itemdb_isNoEquip(data,sd->bl.m)) )
-					run_script(data->equip_script,0,sd->bl.id,fake_nd->bl.id);
-			}
+			if( (data = itemdb_exists(sd->status.inventory[n].card[i])) && data->equip_script &&
+				(pc_has_permission(sd,PC_PERM_USE_ALL_EQUIPMENT) || !itemdb_isNoEquip(data,sd->bl.m)) )
+				run_script(data->equip_script,0,sd->bl.id,fake_nd->bl.id);
 		}
 	}
+	status_calc_pc(sd,SCO_FORCE);
+	if( flag ) //Update skill data
+		clif_skillinfoblock(sd);
 	sd->npc_item_flag = iflag;
 	return true;
 }
 
 static void pc_unequipitem_sub(struct map_session_data *sd, int n, int flag) {
 	int i = 0, iflag = 0;
-	bool status_cacl = false;
+	bool status_calc = false;
 
 	//Check for activated autobonus [Inkfish]
 	if( sd->state.autobonus&sd->status.inventory[n].equip )
 		sd->state.autobonus &= ~sd->status.inventory[n].equip;
-
 	sd->status.inventory[n].equip = 0;
+	pc_checkallowskill(sd);
 	iflag = sd->npc_item_flag;
-
-	if( sd->inventory_data[n] ) { //Check for combos (MUST be before status_calc_pc)
-		if( sd->inventory_data[n]->combos_count ) {
-			if( pc_removecombo(sd,sd->inventory_data[n]) )
-				status_cacl = true;
-		}
+	if( sd->inventory_data[n] ) { //Check for combos
+		if( sd->inventory_data[n]->combos_count && pc_removecombo(sd,sd->inventory_data[n]) )
+			status_calc = true;
 		if( itemdb_isspecial(sd->status.inventory[n].card[0]) && itemdb_isspecial(sd->status.inventory[n].card[1]) &&
 			itemdb_isspecial(sd->status.inventory[n].card[2]) && itemdb_isspecial(sd->status.inventory[n].card[3]) )
 			; //No cards
@@ -9616,14 +9610,10 @@ static void pc_unequipitem_sub(struct map_session_data *sd, int n, int flag) {
 
 				if( !sd->status.inventory[n].card[i] )
 					continue;
-				if( (data = itemdb_exists(sd->status.inventory[n].card[i])) != NULL && data->combos_count && pc_removecombo(sd,data) )
-					status_cacl = true;
+				if( (data = itemdb_exists(sd->status.inventory[n].card[i])) && data->combos_count && pc_removecombo(sd,data) )
+					status_calc = true;
 			}
 		}
-	}
-	if( (flag&1) || status_cacl ) {
-		pc_checkallowskill(sd);
-		status_calc_pc(sd,SCO_NONE);
 	}
 	if( sd->inventory_data[n] ) { //OnUnEquip script [Skotlex]
 		if( sd->inventory_data[n]->unequip_script )
@@ -9637,12 +9627,13 @@ static void pc_unequipitem_sub(struct map_session_data *sd, int n, int flag) {
 
 				if( !sd->status.inventory[n].card[i] )
 					continue;
-				if( (data = itemdb_exists(sd->status.inventory[n].card[i])) != NULL && data->unequip_script )
+				if( (data = itemdb_exists(sd->status.inventory[n].card[i])) && data->unequip_script )
 					run_script(data->unequip_script,0,sd->bl.id,fake_nd->bl.id);
 			}
 		}
 	}
-
+	if( (flag&1) || status_calc )
+		status_calc_pc(sd,SCO_FORCE);
 	sd->npc_item_flag = iflag;
 }
 
@@ -9730,9 +9721,7 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 		sd->status.robe = (pc_checkequip(sd,EQP_GARMENT) >= 0) ? sd->inventory_data[pc_checkequip(sd,EQP_GARMENT)]->look : 0;
 		clif_changelook(&sd->bl,LOOK_ROBE,sd->status.robe);
 	}
-
 	clif_unequipitemack(sd,n,sd->status.inventory[n].equip,1);
-
 	//On equipment change
 	if( !(flag&4) )
 		status_change_end(&sd->bl,SC_CONCENTRATION,INVALID_TIMER);
@@ -9779,7 +9768,6 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 	//On ammo change
 	if( sd->inventory_data[n]->type == IT_AMMO )
 		status_change_end(&sd->bl,SC_P_ALTER,INVALID_TIMER);
-
 	pc_unequipitem_sub(sd,n,flag);
 }
 
