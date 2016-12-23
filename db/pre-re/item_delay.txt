@@ -18,48 +18,35 @@
 //     delay group and the delay will be stored in character's
 //     data that has limit set in src/map/itemdb.h as MAX_ITEMDELAYS.
 
-// SC_REUSE_REFRESH 317
-12725,120000,317	// Runstone_Nosiege
+14538,300000,SC_REUSE_LIMIT_A	// Glass_Of_Illusion
 
-// SC_REUSE_LIMIT_A 616
-14538,300000,616	// Glass_Of_Illusion
+14586,180000,SC_REUSE_LIMIT_B	// Spark_Candy
 
-// SC_REUSE_LIMIT_B 617
-14586,180000,617	// Spark_Candy
+12208,60000,SC_REUSE_LIMIT_C	// Battle_Manual
 
-// SC_REUSE_LIMIT_C 618
-12208,60000,618	// Battle_Manual
+12210,60000,SC_REUSE_LIMIT_D	// Bubble_Gum
 
-// SC_REUSE_LIMIT_D 619
-12210,60000,619	// Bubble_Gum
+11522,1000,SC_REUSE_LIMIT_E	// Red_Raffle_Sap
+11523,2000,SC_REUSE_LIMIT_E	// Yellow_Raffle_Sap
+11524,3000,SC_REUSE_LIMIT_E	// White_Raffle_Sap
 
-// SC_REUSE_LIMIT_E 620
-11522,1000,620	// Red_Raffle_Sap
-11523,2000,620	// Yellow_Raffle_Sap
-11524,3000,620	// White_Raffle_Sap
+//607,5000,SC_REUSE_LIMIT_F	// Yggdrasil_Berry
 
-// SC_REUSE_LIMIT_F 621
-//607,5000,621	// Yggdrasil_Berry
+//608,3000,SC_REUSE_LIMIT_G	// Yggdrasil_Seed
 
-// SC_REUSE_LIMIT_G 622
-//608,3000,622	// Yggdrasil_Seed
+11525,5000,SC_REUSE_LIMIT_H	// Mora_Hip_Tea
 
-// SC_REUSE_LIMIT_H 623
-11525,5000,623	// Mora_Hip_Tea
+12727,60000,SC_REUSE_MILLENNIUMSHIELD	// Runstone_Verkana
 
-// SC_REUSE_MILLENNIUMSHIELD 624
-12727,60000,624	// Runstone_Verkana
+12726,30000,SC_REUSE_CRUSHSTRIKE	// Runstone_Rhydo
 
-// SC_REUSE_CRUSHSTRIKE 625
-12726,30000,625	// Runstone_Rhydo
+12725,120000,SC_REUSE_REFRESH	// Runstone_Nosiege
 
-// SC_REUSE_STORMBLAST 626
-12732,1000,626	// Runstone_Pertz
+12732,1000,SC_REUSE_STORMBLAST	// Runstone_Pertz
 
-// SC_REUSE_LIMIT_RECALL 630
-12968,300000,630	// Emergency_Scroll1
-12969,300000,630	// Emergency_Scroll2
-12970,300000,630	// Emergency_Scroll3
+12968,300000,SC_REUSE_LIMIT_RECALL	// Emergency_Scroll1
+12969,300000,SC_REUSE_LIMIT_RECALL	// Emergency_Scroll2
+12970,300000,SC_REUSE_LIMIT_RECALL	// Emergency_Scroll3
 
 // Misc
 //12202,60000	// Str_Dish10_

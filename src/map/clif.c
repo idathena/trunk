@@ -8148,15 +8148,16 @@ void clif_guild_created(struct map_session_data *sd,int flag)
 /// mode:
 ///     &0x01 = allow invite
 ///     &0x10 = allow expel
-void clif_guild_belonginfo(struct map_session_data *sd, struct guild *g)
+void clif_guild_belonginfo(struct map_session_data *sd)
 {
 	int ps, fd;
+	struct guild *g;
 
 	nullpo_retv(sd);
-	nullpo_retv(g);
+	nullpo_retv(g = sd->guild);
 
 	fd = sd->fd;
-	ps = guild_getposition(g,sd);
+	ps = guild_getposition(sd);
 	WFIFOHEAD(fd,packet_len(0x16c));
 	WFIFOW(fd,0) = 0x16c;
 	WFIFOL(fd,2) = g->guild_id;
@@ -8563,12 +8564,13 @@ void clif_guild_skillinfo(struct map_session_data *sd)
 
 /// Sends guild notice to client (ZC_GUILD_NOTICE).
 /// 016f <subject>.60B <notice>.120B
-void clif_guild_notice(struct map_session_data *sd, struct guild *g)
+void clif_guild_notice(struct map_session_data *sd)
 {
 	int fd;
+	struct guild *g;
 
 	nullpo_retv(sd);
-	nullpo_retv(g);
+	nullpo_retv(g = sd->guild);
 
 	fd = sd->fd;
 
@@ -9376,6 +9378,7 @@ void clif_refresh(struct map_session_data *sd)
 		clif_clearunit_single(sd->bl.id, CLR_DEAD, sd->fd);
 	else
 		clif_changed_dir(&sd->bl, SELF);
+	clif_efst_set_enter(sd, &sd->bl, SELF);
 	//Unlike vending, resuming buyingstore crashes the client
 	buyingstore_close(sd);
 	mail_clear(sd);
@@ -9390,13 +9393,17 @@ void clif_refresh(struct map_session_data *sd)
 
 
 /// Updates the object's (bl) name on client.
+/// Used to update when a char leaves a party/guild. [Skotlex]
+/// Needed because when you send a 0x95 packet, the client will not remove the cached party/guild info that is not sent.
 /// 0095 <id>.L <char name>.24B (ZC_ACK_REQNAME)
 /// 0195 <id>.L <char name>.24B <party name>.24B <guild name>.24B <position name>.24B (ZC_ACK_REQNAMEALL)
-void clif_charnameack(int fd, struct block_list *bl)
+/// 0a30 <id>.L <char name>.24B <party name>.24B <guild name>.24B <position name>.24B <title ID>.L (ZC_ACK_REQNAMEALL2)
+void clif_name(struct block_list *src, struct block_list *bl, send_target target)
 {
-	unsigned char buf[103];
+	unsigned char buf[106];
 	int cmd = 0x95;
 
+	nullpo_retv(src);
 	nullpo_retv(bl);
 
 	WBUFW(buf,0) = cmd;
@@ -9404,78 +9411,81 @@ void clif_charnameack(int fd, struct block_list *bl)
 
 	switch( bl->type ) {
 		case BL_PC: {
-				struct map_session_data *ssd = (struct map_session_data *)bl;
+				struct map_session_data *sd = (struct map_session_data *)bl;
 				struct party_data *p = NULL;
-				struct guild *g = NULL;
-				int ps = -1;
 
-				//Requesting your own "shadow" name. [Skotlex]
-				if (ssd->fd == fd && ssd->disguise)
+#if PACKETVER >= 20150513
+				WBUFW(buf,0) = cmd = 0xa30;
+#else
+				WBUFW(buf,0) = cmd = 0x195;
+#endif
+				//Requesting your own "shadow" name [Skotlex]
+				if( bl->id == src->id && target == SELF && sd->disguise )
 					WBUFL(buf,2) = -bl->id;
-				if( ssd->fakename[0] ) {
-					WBUFW(buf,0) = cmd = 0x195;
-					memcpy(WBUFP(buf,6), ssd->fakename, NAME_LENGTH);
+				if( sd->fakename[0] ) {
+					safestrncpy((char *)WBUFP(buf,6), sd->fakename, NAME_LENGTH);
 					WBUFB(buf,30) = WBUFB(buf,54) = WBUFB(buf,78) = 0;
+#if PACKETVER >= 20150513
+					WBUFL(buf,102) = 0; //Title ID
+#endif
 					break;
 				}
-				memcpy(WBUFP(buf,6), ssd->status.name, NAME_LENGTH);
-				if( ssd->status.party_id )
-					p = party_search(ssd->status.party_id);
-				if( ssd->status.guild_id ) {
-					if( (g = ssd->guild) != NULL ) {
-						int i;
-
-						ARR_FIND(0, g->max_member, i, g->member[i].account_id == ssd->status.account_id && g->member[i].char_id == ssd->status.char_id);
-						if( i < g->max_member )
-							ps = g->member[i].position;
-					}
-				}
-				if( !battle_config.display_party_name && g == NULL ) //Do not display party unless the player is also in a guild
-					p = NULL;
-				if( p == NULL && g == NULL )
-					break;
-				WBUFW(buf, 0) = cmd = 0x195;
-				if( p )
-					memcpy(WBUFP(buf,30), p->party.name, NAME_LENGTH);
+				safestrncpy((char *)WBUFP(buf,6), sd->status.name, NAME_LENGTH);
+				if( sd->status.party_id )
+					p = party_search(sd->status.party_id);
+				//Do not display party unless the player is also in a guild
+				if( p && (sd->guild || battle_config.display_party_name) )
+					safestrncpy((char *)WBUFP(buf,30), p->party.name, NAME_LENGTH);
 				else
 					WBUFB(buf,30) = 0;
-				if( g && ps >= 0 && ps < MAX_GUILDPOSITION ) {
-					memcpy(WBUFP(buf,54), g->name,NAME_LENGTH);
-					memcpy(WBUFP(buf,78), g->position[ps].name, NAME_LENGTH);
-				} else { //Assume no guild.
+				if( sd->guild ) {
+					int position;
+
+					//Will get the position of the guild the player is in
+					position = guild_getposition(sd);
+
+					safestrncpy((char *)WBUFP(buf,54), sd->guild->name, NAME_LENGTH);
+					safestrncpy((char *)WBUFP(buf,78), sd->guild->position[position].name, NAME_LENGTH);
+				} else { //Assume no guild
 					WBUFB(buf,54) = 0;
 					WBUFB(buf,78) = 0;
 				}
+#if PACKETVER >= 20150513
+				WBUFL(buf,102) = 0;
+#endif
 			}
 			break;
 		//[blackhole89]
 		case BL_HOM:
-			memcpy(WBUFP(buf,6), ((TBL_HOM *)bl)->homunculus.name, NAME_LENGTH);
+			safestrncpy((char *)WBUFP(buf,6), ((TBL_HOM *)bl)->homunculus.name, NAME_LENGTH);
 			break;
 		case BL_MER:
-			memcpy(WBUFP(buf,6), ((TBL_MER *)bl)->db->name, NAME_LENGTH);
+			safestrncpy((char *)WBUFP(buf,6), ((TBL_MER *)bl)->db->name, NAME_LENGTH);
 			break;
 		case BL_PET:
-			memcpy(WBUFP(buf,6), ((TBL_PET *)bl)->pet.name, NAME_LENGTH);
+			safestrncpy((char *)WBUFP(buf,6), ((TBL_PET *)bl)->pet.name, NAME_LENGTH);
 			break;
 		case BL_NPC:
-			memcpy(WBUFP(buf,6), ((TBL_NPC *)bl)->name, NAME_LENGTH);
+			safestrncpy((char *)WBUFP(buf,6), ((TBL_NPC *)bl)->name, NAME_LENGTH);
 			break;
 		case BL_MOB: {
 				struct mob_data *md = (struct mob_data *)bl;
 
 				nullpo_retv(md);
 
-				memcpy(WBUFP(buf,6), md->name, NAME_LENGTH);
+#if PACKETVER >= 20150513
+				WBUFW(buf,0) = cmd = 0xa30;
+#else
+				WBUFW(buf,0) = cmd = 0x195;
+#endif
+				safestrncpy((char *)WBUFP(buf,6), md->name, NAME_LENGTH);
 				if( md->guardian_data && md->guardian_data->g ) {
-					WBUFW(buf, 0) = cmd = 0x195;
 					WBUFB(buf,30) = 0;
-					memcpy(WBUFP(buf,54), md->guardian_data->g->name, NAME_LENGTH);
-					memcpy(WBUFP(buf,78), md->guardian_data->castle->castle_name, NAME_LENGTH);
+					safestrncpy((char *)WBUFP(buf,54), md->guardian_data->g->name, NAME_LENGTH);
+					safestrncpy((char *)WBUFP(buf,78), md->guardian_data->castle->castle_name, NAME_LENGTH);
 				} else if( battle_config.show_mob_info ) {
 					char mobhp[50], *str_p = mobhp;
 
-					WBUFW(buf, 0) = cmd = 0x195;
 					if( battle_config.show_mob_info&4 )
 						str_p += sprintf(str_p, "Lv. %d | ", md->level);
 					if( battle_config.show_mob_info&1 )
@@ -9485,84 +9495,29 @@ void clif_charnameack(int fd, struct block_list *bl)
 					//Even thought mobhp ain't a name, we send it as one so the client can parse it [Skotlex]
 					if( str_p != mobhp ) {
 						*(str_p - 3) = '\0'; //Remove trailing space + pipe
-						memcpy(WBUFP(buf,30), mobhp, NAME_LENGTH);
+						safestrncpy((char *)WBUFP(buf,30), mobhp, NAME_LENGTH);
 						WBUFB(buf,54) = 0;
 						WBUFB(buf,78) = 0;
 					}
 				}
+#if PACKETVER >= 20150513
+				WBUFL(buf,102) = 0;
+#endif
 			}
 			break;
 		case BL_CHAT: //FIXME: Clients DO request this, what should be done about it? The chat's title may not fit [Skotlex]
-			//memcpy(WBUFP(buf,6), (struct chat*)->title, NAME_LENGTH);
+			//safestrncpy((char *)WBUFP(buf,6), (struct chat *)->title, NAME_LENGTH);
 			//break;
 			return;
 		case BL_ELEM:
-			memcpy(WBUFP(buf,6), ((TBL_ELEM *)bl)->db->name, NAME_LENGTH);
+			safestrncpy((char *)WBUFP(buf,6), ((TBL_ELEM *)bl)->db->name, NAME_LENGTH);
 			break;
 		default:
-			ShowError("clif_charnameack: Bad type %d(%d)\n", bl->type, bl->id);
+			ShowError("clif_name: Bad type %d(%d)\n", bl->type, bl->id);
 			return;
 	}
 
-	//If no receipient specified just update nearby clients
-	if( fd == 0 )
-		clif_send(buf, packet_len(cmd), bl, AREA);
-	else {
-		WFIFOHEAD(fd,packet_len(cmd));
-		memcpy(WFIFOP(fd,0), buf, packet_len(cmd));
-		WFIFOSET(fd,packet_len(cmd));
-	}
-}
-
-
-//Used to update when a char leaves a party/guild. [Skotlex]
-//Needed because when you send a 0x95 packet, the client will not remove the cached party/guild info that is not sent.
-void clif_charnameupdate (struct map_session_data *ssd)
-{
-	unsigned char buf[103];
-	int cmd = 0x195, ps = -1;
-	struct party_data *p = NULL;
-	struct guild *g = NULL;
-
-	nullpo_retv(ssd);
-
-	if( ssd->fakename[0] )
-		return; //No need to update as the party/guild was not displayed anyway.
-
-	WBUFW(buf,0) = cmd;
-	WBUFL(buf,2) = ssd->bl.id;
-
-	memcpy(WBUFP(buf,6), ssd->status.name, NAME_LENGTH);
-			
-	if (!battle_config.display_party_name) {
-		if (ssd->status.party_id > 0 && ssd->status.guild_id > 0 && (g = ssd->guild) != NULL)
-			p = party_search(ssd->status.party_id);
-	} else {
-		if (ssd->status.party_id > 0)
-			p = party_search(ssd->status.party_id);
-	}
-
-	if( ssd->status.guild_id > 0 && (g = ssd->guild) != NULL ) {
-		int i;
-		ARR_FIND(0, g->max_member, i, g->member[i].account_id == ssd->status.account_id && g->member[i].char_id == ssd->status.char_id);
-		if( i < g->max_member ) ps = g->member[i].position;
-	}
-
-	if( p )
-		memcpy(WBUFP(buf,30), p->party.name, NAME_LENGTH);
-	else
-		WBUFB(buf,30) = 0;
-
-	if( g && ps >= 0 && ps < MAX_GUILDPOSITION ) {
-		memcpy(WBUFP(buf,54), g->name,NAME_LENGTH);
-		memcpy(WBUFP(buf,78), g->position[ps].name, NAME_LENGTH);
-	} else {
-		WBUFB(buf,54) = 0;
-		WBUFB(buf,78) = 0;
-	}
-
-	// Update nearby clients
-	clif_send(buf, packet_len(cmd), &ssd->bl, AREA);
+	clif_send(buf, packet_len(cmd), src, target);
 }
 
 
@@ -10421,7 +10376,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		} else
 			sd->state.warp_clean = 1;
 		if(sd->guild && (battle_config.guild_notice_changemap == 2 || (battle_config.guild_notice_changemap == 1 && sd->state.changemap)))
-			clif_guild_notice(sd,sd->guild);
+			clif_guild_notice(sd);
 	}
 
 	if(sd->state.changemap) { //Restore information that gets lost on map-change
@@ -10510,7 +10465,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 
 	//This should be displayed last
 	if(sd->guild && first_time)
-		clif_guild_notice(sd,sd->guild);
+		clif_guild_notice(sd);
 
 	//For automatic triggering of NPCs after map loading (so you don't need to walk 1 step first)
 	if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y,CELL_CHKNPC))
@@ -10784,7 +10739,7 @@ void clif_parse_GetCharNameRequest(int fd, struct map_session_data *sd)
 	}
 	*/
 
-	clif_charnameack(fd, bl);
+	clif_name(&sd->bl, bl, SELF);
 }
 
 
@@ -19410,7 +19365,7 @@ void packetdb_readdb(bool reload)
 #endif
 		1,  0,  0, 26,  0,  0,  0,  0, 14,  2, 23,  2, -1,  2,  3,  2,
 	   21,  3,  5,  0, 66,  0,  0,  8,  3,  0,  0, -1,  0, -1,  0,  0,
- 		0,  0,  0,  0,  0,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	  106,  0,  0,  0,  0,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 	};
 	struct {
 		void (*func)(int, struct map_session_data *);

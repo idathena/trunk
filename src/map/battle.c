@@ -2221,7 +2221,7 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 		short cri = sstatus->cri;
 
 		if(sd) {
-			if(sd->status.weapon == W_KATAR)
+			if(!battle_config.show_status_katar_crit && sd->status.weapon == W_KATAR)
 				cri <<= 1; //On official double critical bonus from katar won't showed in status display
 			cri += sd->critaddrace[tstatus->race] + sd->critaddrace[RC_ALL];
 			if(is_skill_using_arrow(src, skill_id))
@@ -2481,18 +2481,8 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 		if((lv = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0)
 			hitrate += hitrate * 2 * lv / 100;
 #endif
-		if((sd->status.weapon == W_1HSWORD || sd->status.weapon == W_DAGGER) &&
-			(lv = pc_checkskill(sd,GN_TRAINING_SWORD)) > 0)
+		if((sd->status.weapon == W_1HSWORD || sd->status.weapon == W_DAGGER) && (lv = pc_checkskill(sd,GN_TRAINING_SWORD)) > 0)
 			hitrate += 3 * lv;
-	}
-
-	if(sc) {
-		if(sc->data[SC_INCHITRATE])
-			hitrate += sc->data[SC_INCHITRATE]->val1;
-		if(sc->data[SC_MTF_ASPD])
-			hitrate += sc->data[SC_MTF_ASPD]->val2;
-		if(sc->data[SC_MTF_ASPD2])
-			hitrate += sc->data[SC_MTF_ASPD2]->val2;
 	}
 
 	hitrate = cap_value(hitrate,battle_config.min_hitrate,battle_config.max_hitrate);
@@ -4303,12 +4293,6 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, 100 * sc->data[SC_SATURDAYNIGHTFEVER]->val1);
 #endif
 		}
-		if(sc->data[SC_ZANGETSU]) {
-			ATK_ADD(wd.damage, wd.damage2, sc->data[SC_ZANGETSU]->val2);
-#ifdef RENEWAL
-			ATK_ADD(wd.statusAtk, wd.statusAtk2, sc->data[SC_ZANGETSU]->val2);
-#endif
-		}
 		if(sc->data[SC_ZENKAI] && sstatus->rhw.ele == sc->data[SC_ZENKAI]->val2) {
 			ATK_ADD(wd.damage, wd.damage2, 200);
 #ifdef RENEWAL
@@ -4391,10 +4375,6 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 #endif
 					break;
 			}
-		}
-		if(sc->data[SC_INCATKRATE] && src->type == BL_PC) {
-			ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_INCATKRATE]->val1);
-			RE_ALLATK_ADDRATE(wd, sc->data[SC_INCATKRATE]->val1);
 		}
 		//Sonic Blow +25% dmg on GVG, +100% dmg on non GVG
 		if(skill_id == AS_SONICBLOW && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_ASSASIN) {
@@ -4488,13 +4468,13 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 	return wd;
 }
 
-/*====================================
- * Get defense
- *------------------------------------
- * Credits:
- *	Original coder Skotlex
- *	Initial refactoring by Baalberith
- *	Refined and optimized by helvetica
+/**
+ * Calculates defense based on src and target
+ * @param src: Source object
+ * @param target: Target object
+ * @param skill_id: Skill used
+ * @param flag: 0 - Return armor defense, 1 - Return status defense
+ * @return defense
  */
 static short battle_get_defense(struct block_list *src, struct block_list *target, uint16 skill_id, uint8 flag)
 {
@@ -4604,9 +4584,14 @@ static short battle_get_defense(struct block_list *src, struct block_list *targe
 	return (flag ? vit_def : (short)def1);
 }
 
-/*====================================
- * Calc defense damage reduction
- *------------------------------------
+/**
+ * Calculate defense damage reduction
+ * @param wd: Weapon data
+ * @param src: Source object
+ * @param target: Target object
+ * @param skill_id: Skill used
+ * @param skill_lv: Skill level used
+ * @return weapon data
  * Credits:
  *	Original coder Skotlex
  *	Initial refactoring by Baalberith
@@ -6270,8 +6255,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				i = sd->ignore_mdef_by_race[tstatus->race] + sd->ignore_mdef_by_race[RC_ALL];
 				i += sd->ignore_mdef_by_class[tstatus->class_] + sd->ignore_mdef_by_class[CLASS_ALL];
 				if(i) {
-					if(i > 100)
-						i = 100;
+					i = min(i, 100);
 					mdef -= mdef * i / 100;
 					mdef2 -= mdef2 * i / 100;
 				}
@@ -8524,6 +8508,7 @@ static const struct _battle_data {
 	{ "monster_eye_range_bonus",            &battle_config.mob_eye_range_bonus,             0,      0,      10,             },
 	{ "crimsonrock_knockback",              &battle_config.crimsonrock_knockback,           1,      0,      1,              },
 	{ "tarotcard_equal_chance",             &battle_config.tarotcard_equal_chance,          0,      0,      1,              },
+	{ "show_status_katar_crit",             &battle_config.show_status_katar_crit,          0,      0,      1,              },
 };
 #ifndef STATS_OPT_OUT
 /**

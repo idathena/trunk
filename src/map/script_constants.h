@@ -944,9 +944,9 @@
 	export_constant(SC_INTFOOD);
 	export_constant(SC_DEXFOOD);
 	export_constant(SC_LUKFOOD);
+	export_constant(SC_CRIFOOD);
 	export_constant(SC_HITFOOD);
 	export_constant(SC_FLEEFOOD);
-	export_constant(SC_CRIFOOD);
 	export_constant(SC_BATKFOOD);
 	export_constant(SC_WATKFOOD);
 	export_constant(SC_MATKFOOD);
@@ -1048,7 +1048,6 @@
 	export_constant(SC_MILLENNIUMSHIELD);
 	export_constant(SC_CRUSHSTRIKE);
 	export_constant(SC_REFRESH);
-	export_constant(SC_REUSE_REFRESH);
 	export_constant(SC_GIANTGROWTH);
 	export_constant(SC_STONEHARDSKIN);
 	export_constant(SC_VITALITYACTIVATION);
@@ -1357,6 +1356,7 @@
 	export_constant(SC_REUSE_LIMIT_H);
 	export_constant(SC_REUSE_MILLENNIUMSHIELD);
 	export_constant(SC_REUSE_CRUSHSTRIKE);
+	export_constant(SC_REUSE_REFRESH);
 	export_constant(SC_REUSE_STORMBLAST);
 	export_constant(SC_ALL_RIDING_REUSE_LIMIT);
 	export_constant(SC_REUSE_LIMIT_MTF);

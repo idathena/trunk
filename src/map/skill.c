@@ -7380,7 +7380,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_CP_ARMOR:			case SC_CP_HELM:		case SC_COMBO:
 							case SC_STRFOOD:			case SC_AGIFOOD:		case SC_VITFOOD:
 							case SC_INTFOOD:			case SC_DEXFOOD:		case SC_LUKFOOD:
-							case SC_HITFOOD:			case SC_FLEEFOOD:		case SC_CRIFOOD:
+							case SC_CRIFOOD:			case SC_HITFOOD:		case SC_FLEEFOOD:
 							case SC_BATKFOOD:			case SC_WATKFOOD:		case SC_MATKFOOD:
 							case SC_DANCING:			case SC_LEADERSHIP:		case SC_GLORYWOUNDS:
 							case SC_SOULCOLD:			case SC_HAWKEYES:		case SC_REGENERATION:
@@ -8855,7 +8855,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_CP_ARMOR:			case SC_CP_HELM:		case SC_COMBO:
 						case SC_STRFOOD:			case SC_AGIFOOD:		case SC_VITFOOD:
 						case SC_INTFOOD:			case SC_DEXFOOD:		case SC_LUKFOOD:
-						case SC_HITFOOD:			case SC_FLEEFOOD:		case SC_CRIFOOD:
+						case SC_CRIFOOD:			case SC_HITFOOD:		case SC_FLEEFOOD:
 						case SC_BATKFOOD:			case SC_WATKFOOD:		case SC_MATKFOOD:
 						case SC_DANCING:			case SC_LEADERSHIP:		case SC_GLORYWOUNDS:
 						case SC_SOULCOLD:			case SC_HAWKEYES:		case SC_REGENERATION:
@@ -8880,7 +8880,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_CHASEWALK2:			case SC_GATLINGFEVER:		case SC_INCREASING:
 						case SC_INCMATKRATE:			case SC_ADJUSTMENT:		case SC_MADNESSCANCEL:
 						case SC_EXTREMITYFIST2:			case SC_NORECOVER_STATE:	case SC_TAROTCARD:
-						case SC_SPIRIT:
+						case SC_SPIRIT:				case SC_ATKPOTION:		case SC_MATKPOTION:
 						//RK
 						case SC_DEATHBOUND:
 						//AB
