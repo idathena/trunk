@@ -458,7 +458,7 @@ struct item_data {
 	//bugreport:309
 	struct item_combo **combos;
 	unsigned char combos_count;
-	short delay_sc; //Use delay group if any instead using player's item_delay data [Cydh]
+	int delay_sc; //Use delay group if any instead using player's item_delay data [Cydh]
 };
 
 struct item_data *itemdb_searchname(const char *name);

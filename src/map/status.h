@@ -259,9 +259,9 @@ typedef enum sc_type {
 	SC_INTFOOD,
 	SC_DEXFOOD,
 	SC_LUKFOOD,
+	SC_CRIFOOD,
 	SC_HITFOOD,
 	SC_FLEEFOOD,
-	SC_CRIFOOD,
 	SC_BATKFOOD,
 	SC_WATKFOOD,
 	SC_MATKFOOD,
@@ -369,7 +369,6 @@ typedef enum sc_type {
 	SC_MILLENNIUMSHIELD,
 	SC_CRUSHSTRIKE,
 	SC_REFRESH,
-	SC_REUSE_REFRESH,
 	SC_GIANTGROWTH,
 	SC_STONEHARDSKIN,
 	SC_VITALITYACTIVATION,
@@ -724,6 +723,7 @@ typedef enum sc_type {
 	SC_REUSE_LIMIT_H,
 	SC_REUSE_MILLENNIUMSHIELD,
 	SC_REUSE_CRUSHSTRIKE,
+	SC_REUSE_REFRESH,
 	SC_REUSE_STORMBLAST,
 	SC_ALL_RIDING_REUSE_LIMIT,
 	SC_REUSE_LIMIT_MTF,
@@ -2235,14 +2235,45 @@ int status_calc_mercenary_(struct mercenary_data *md, enum e_status_calc_opt opt
 int status_calc_elemental_(struct elemental_data *ed, enum e_status_calc_opt opt);
 int status_calc_npc_(struct npc_data *nd, enum e_status_calc_opt opt);
 
+void status_calc_misc(struct block_list *bl, struct status_data *status, int level);
+void status_calc_regen(struct block_list *bl, struct status_data *status, struct regen_data *regen);
+void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, struct status_change *sc);
+
+unsigned short status_calc_str(struct block_list *bl, struct status_change *sc, int str);
+unsigned short status_calc_agi(struct block_list *bl, struct status_change *sc, int agi);
+unsigned short status_calc_vit(struct block_list *bl, struct status_change *sc, int vit);
+unsigned short status_calc_int(struct block_list *bl, struct status_change *sc, int int_);
+unsigned short status_calc_dex(struct block_list *bl, struct status_change *sc, int dex);
+unsigned short status_calc_luk(struct block_list *bl, struct status_change *sc, int luk);
+unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc, int batk, bool viewable);
+unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc, int watk, bool viewable);
+unsigned short status_calc_matk(struct block_list *bl, struct status_change *sc, int matk, bool viewable);
+#ifdef RENEWAL
+unsigned short status_calc_ematk(struct block_list *bl, struct status_change *sc, int matk);
+#endif
+short status_calc_critical(struct block_list *bl, struct status_change *sc, int critical);
+short status_calc_hit(struct block_list *bl, struct status_change *sc, int hit, bool viewable);
+short status_calc_flee(struct block_list *bl, struct status_change *sc, int flee);
+short status_calc_flee2(struct block_list *bl, struct status_change *sc, int flee2);
 defType status_calc_def(struct block_list *bl, struct status_change *sc, int def, bool viewable);
 short status_calc_def2(struct block_list *bl, struct status_change *sc, int def2, bool viewable);
 defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int mdef, bool viewable);
 short status_calc_mdef2(struct block_list *bl, struct status_change *sc, int mdef2, bool viewable);
-
-void status_calc_misc(struct block_list *bl, struct status_data *status, int level);
-void status_calc_regen(struct block_list *bl, struct status_data *status, struct regen_data *regen);
-void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, struct status_change *sc);
+unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc, int speed);
+#ifdef RENEWAL_ASPD
+short status_calc_aspd(struct block_list *bl, struct status_change *sc, short flag);
+#endif
+short status_calc_fix_aspd(struct block_list *bl, struct status_change *sc, int aspd);
+short status_calc_aspd_rate(struct block_list *bl, struct status_change *sc, int aspd_rate);
+unsigned short status_calc_dmotion(struct block_list *bl, struct status_change *sc, int dmotion);
+unsigned int status_calc_maxhp(struct block_list *bl, uint64 maxhp);
+unsigned int status_calc_maxsp(struct block_list *bl, uint64 maxsp);
+unsigned char status_calc_element(struct block_list *bl, struct status_change *sc, int element);
+unsigned char status_calc_element_lv(struct block_list *bl, struct status_change *sc, int lv);
+unsigned short status_calc_mode(struct block_list *bl, struct status_change *sc, int mode);
+int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type);
+int status_get_spbonus(struct block_list *bl, enum e_status_bonus type);
+unsigned int status_calc_maxhpsp_pc(struct map_session_data *sd, bool isHP);
 
 bool status_check_skilluse(struct block_list *src, struct block_list *target, uint16 skill_id, int flag); //[Skotlex]
 int status_check_visibility(struct block_list *src, struct block_list *target); //[Skotlex]

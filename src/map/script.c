@@ -16670,8 +16670,8 @@ BUILDIN_FUNC(setunitdata)
 			switch( type ) {
 				case 0: md->status.size = (unsigned char)value; break;
 				case 1: md->level = (unsigned short)value; break;
-				case 2: status_set_hp(bl, (unsigned int)value, 0); break;
-				case 3: status_set_maxhp(bl, (unsigned int)value, 0); break;
+				case 2: status_set_hp(bl, (unsigned int)value, 0); if( battle_config.show_mob_info&3 ) clif_name_area(&md->bl); break;
+				case 3: status_set_maxhp(bl, (unsigned int)value, 0); if( battle_config.show_mob_info&3 ) clif_name_area(&md->bl); break;
 				case 4: md->master_id = value; break;
 				case 5: if( mapname ) value = map_mapname2mapid(mapname); unit_warp(bl, (short)value, 0, 0, CLR_TELEPORT); break;
 				case 6: if( !unit_walktoxy(bl, (short)value, md->bl.y, 2) ) unit_movepos(bl, (short)value, md->bl.y, 0, false); break;
@@ -16937,7 +16937,7 @@ BUILDIN_FUNC(setunitname)
 			return 1;
 	}
 
-	clif_charnameack(0, bl); //Send update to client
+	clif_name_area(bl); //Send update to client
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -18165,7 +18165,7 @@ BUILDIN_FUNC(bg_monster_set_team)
 	mob_stop_attack(md);
 	mob_stop_walking(md, 0);
 	md->target_id = md->attacked_id = 0;
-	clif_charnameack(0, &md->bl);
+	clif_name_area(&md->bl);
 
 	return SCRIPT_CMD_SUCCESS;
 }

@@ -2142,7 +2142,7 @@ void mob_damage(struct mob_data *md, struct block_list *src, int damage)
 	}
 
 	if( battle_config.show_mob_info&3 )
-		clif_charnameack(0, &md->bl);
+		clif_name_area(&md->bl);
 
 	if( !src )
 		return;
@@ -2717,7 +2717,7 @@ void mob_revive(struct mob_data *md, unsigned int hp)
 	skill_unit_move(&md->bl,tick,1);
 	mobskill_use(md, tick, MSC_SPAWN);
 	if (battle_config.show_mob_info&3)
-		clif_charnameack(0, &md->bl);
+		clif_name_area(&md->bl);
 }
 
 int mob_guardian_guildchange(struct mob_data *md)
@@ -2841,7 +2841,7 @@ int mob_class_change(struct mob_data *md, int mob_id)
 	md->target_id = md->attacked_id = 0;
 
 	//Need to update name display
-	clif_charnameack(0,&md->bl);
+	clif_name_area(&md->bl);
 	status_change_end(&md->bl,SC_KEEPING,INVALID_TIMER);
 	return 0;
 }
@@ -2852,7 +2852,7 @@ int mob_class_change(struct mob_data *md, int mob_id)
 void mob_heal(struct mob_data *md, unsigned int heal)
 {
 	if( battle_config.show_mob_info&3 )
-		clif_charnameack(0,&md->bl);
+		clif_name_area(&md->bl);
 
 #if PACKETVER >= 20120404
 	if( battle_config.monster_hp_bars_info ) {
@@ -4052,7 +4052,7 @@ static void mob_read_randommonster_sub(const char *filename)
 	char line[1024];
 	unsigned int entries = 0;
 
-	if((fp = fopen(filename, "r")) == NULL) {
+	if(!(fp = fopen(filename, "r"))) {
 		ShowError("mob_read_randommonster: can't read %s\n", filename);
 		return;
 	}
@@ -4084,7 +4084,7 @@ static void mob_read_randommonster_sub(const char *filename)
 			if(p)
 				*p++ = 0;
 		}
-		if(str[0] == NULL || str[2] == NULL)
+		if(!str[0] || !str[2])
 			continue;
 		if(ISDIGIT(str[0][0]) && ISDIGIT(str[0][1]))
 			group = atoi(str[0]);
@@ -4143,8 +4143,8 @@ static bool mob_parse_row_chatdb(char *fields[], int columns, int current)
 
 	msg_id = atoi(fields[0]);
 
-	if (msg_id <= 0 || msg_id > MAX_MOB_CHAT){
-		ShowError("mob_parse_row_chatdb: Invalid chat ID: %d at %s, line %d\n", msg_id, columns, current);
+	if (msg_id <= 0 || msg_id > MAX_MOB_CHAT) {
+		ShowError("mob_parse_row_chatdb: Invalid chat ID '%d' in line %d\n", msg_id, current);
 		return false;
 	}
 
@@ -4294,11 +4294,11 @@ static bool mob_parse_row_mobskilldb(char **str, int columns, int current)
 
 	//State
 	ARR_FIND(0, ARRAYLENGTH(state), j, strcmp(str[2],state[j].str) == 0);
-	if( j < ARRAYLENGTH(state) )
+	if (j < ARRAYLENGTH(state))
 		ms->state = state[j].id;
 	else {
-		ShowWarning("mob_parse_row_mobskilldb: Unrecognized state %s\n", str[2]);
-		ms->state = MSS_ANY;
+		ShowError("mob_parse_row_mobskilldb: Unrecognized state '%s' in line %d\n", str[2], current);
+		return false;
 	}
 
 	//Skill ID

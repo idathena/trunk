@@ -619,6 +619,7 @@ extern struct Battle_Config
 	int mob_eye_range_bonus; //Vulture's Eye and Snake's Eye range bonus
 	int crimsonrock_knockback;
 	int tarotcard_equal_chance; //Official or equal chance for each card
+	int show_status_katar_crit;
 } battle_config;
 
 void do_init_battle(void);

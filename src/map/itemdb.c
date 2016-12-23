@@ -802,8 +802,15 @@ static bool itemdb_read_itemdelay(char *str[], int columns, int current)
 
 	if( columns == 2 )
 		id->delay_sc = SC_NONE;
-	else
-		id->delay_sc = atoi(str[2]);
+	else {
+		trim(str[2]);
+		if( ISDIGIT(str[2][0]) )
+			id->delay_sc = atoi(str[2]);
+		else if( !script_get_constant(trim(str[2]), &id->delay_sc) ) {
+			ShowWarning("itemdb_read_itemdelay: Unknown SC_GroupID constant \"%s\".\n", str[2]);
+			return false;
+		}
+	}
 
 	return true;
 }
