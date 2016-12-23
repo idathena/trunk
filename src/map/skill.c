@@ -18079,6 +18079,28 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char *file, int li
 	}
 
 	switch( group->skill_id ) {
+		case PF_SPIDERWEB: {
+				struct block_list *bl = map_id2bl(group->val2);
+				struct status_change *sc;
+				bool removed = true;
+
+				//Clear group id from status change
+				if( bl && (sc = status_get_sc(bl)) && sc->data[SC_SPIDERWEB] ) {
+					if( sc->data[SC_SPIDERWEB]->val2 == group->group_id )
+						sc->data[SC_SPIDERWEB]->val2 = 0;
+					else if( sc->data[SC_SPIDERWEB]->val3 == group->group_id )
+						sc->data[SC_SPIDERWEB]->val3 = 0;
+					else if( sc->data[SC_SPIDERWEB]->val4 == group->group_id )
+						sc->data[SC_SPIDERWEB]->val4 = 0;
+					else //Group was already removed in status_change_end, don't call it again!
+						removed = false;
+
+					//The last group was cleared, end status change
+					if( removed && !sc->data[SC_SPIDERWEB]->val2 && !sc->data[SC_SPIDERWEB]->val3 && !sc->data[SC_SPIDERWEB]->val4 )
+						status_change_end(bl, SC_SPIDERWEB, INVALID_TIMER);
+				}
+			}
+			break;
 		case SG_SUN_WARM:
 		case SG_MOON_WARM:
 		case SG_STAR_WARM:
@@ -18113,12 +18135,13 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char *file, int li
 	group->alive_count = 0;
 
 	//Remove all unit cells
-	if( group->unit != NULL )
+	if( group->unit ) {
 		for( i = 0; i < group->unit_count; i++ )
 			skill_delunit(&group->unit[i]);
+	}
 
 	//Clear Talkie-box string
-	if( group->valstr != NULL ) {
+	if( group->valstr ) {
 		aFree(group->valstr);
 		group->valstr = NULL;
 	}
@@ -18341,23 +18364,6 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 						group->val2 = 0;
 						if( sd && !map[sd->bl.m].flag.nowarp )
 							pc_setpos(sd,map_id2index(unit->bl.m),unit->bl.x,unit->bl.y,CLR_TELEPORT);
-					}
-					skill_delunit(unit);
-				}
-				break;
-
-			case UNT_SPIDERWEB: {
-					struct block_list *bl = map_id2bl(group->val2);
-					struct status_change *sc;
-
-					//Clear group id from status change
-					if (bl && (sc = status_get_sc(bl)) && sc->data[SC_SPIDERWEB]) {
-						if (sc->data[SC_SPIDERWEB]->val2 == group->group_id)
-							sc->data[SC_SPIDERWEB]->val2 = 0;
-						else if (sc->data[SC_SPIDERWEB]->val3 == group->group_id)
-							sc->data[SC_SPIDERWEB]->val3 = 0;
-						else if (sc->data[SC_SPIDERWEB]->val4 == group->group_id)
-							sc->data[SC_SPIDERWEB]->val4 = 0;
 					}
 					skill_delunit(unit);
 				}
