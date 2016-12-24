@@ -3142,7 +3142,7 @@ struct script_state *script_alloc_state(struct script_code *script, int pos, int
 	struct script_state *st;
 
 	CREATE(st, struct script_state, 1);
-	st->stack = (struct script_stack*)aMalloc(sizeof(struct script_stack));
+	st->stack = (struct script_stack *)aMalloc(sizeof(struct script_stack));
 	st->stack->sp = 0;
 	st->stack->sp_max = 64;
 	CREATE(st->stack->stack_data, struct script_data, st->stack->sp_max);
