@@ -273,7 +273,7 @@ void pc_addspiritball(struct map_session_data *sd, int interval, int max)
 	}
 
 	tid = add_timer(gettick() + interval, pc_spiritball_timer, sd->bl.id, 0);
-	ARR_FIND(0, sd->spiritball, i, sd->spiritball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->spiritball_timer[i])->tick) < 0);
+	ARR_FIND(0, sd->spiritball, i, (sd->spiritball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->spiritball_timer[i])->tick) < 0));
 
 	if( i != sd->spiritball )
 		memmove(sd->spiritball_timer + i + 1, sd->spiritball_timer + i, (sd->spiritball - i) * sizeof(int));
@@ -9423,7 +9423,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 		clif_equipitemack(sd,n,0,res);
 		return false;
 	}
-	if( !(pos&req_pos) || sd->status.inventory[n].equip != 0 || sd->status.inventory[n].attribute == 1 ) { //[Valaris]
+	if( !(pos&req_pos) || sd->status.inventory[n].equip || sd->status.inventory[n].attribute == 1 ) { //[Valaris]
 		clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
 	}

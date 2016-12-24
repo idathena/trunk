@@ -2248,7 +2248,8 @@ bool unit_can_reach_pos(struct block_list *bl,int x,int y, int easy)
  */
 bool unit_can_reach_bl(struct block_list *bl,struct block_list *tbl, int range, int easy, short *x, short *y)
 {
-	short dx,dy;
+	struct walkpath_data wpd;
+	short dx, dy;
 
 	nullpo_retr(false, bl);
 	nullpo_retr(false, tbl);
@@ -2282,9 +2283,22 @@ bool unit_can_reach_bl(struct block_list *bl,struct block_list *tbl, int range, 
 
 	if( x )
 		*x = tbl->x - dx;
+
 	if( y )
 		*y = tbl->y - dy;
-	return path_search(NULL,bl->m,bl->x,bl->y,tbl->x - dx,tbl->y - dy,easy,CELL_CHKNOREACH);
+
+	if( !path_search(&wpd,bl->m,bl->x,bl->y,tbl->x - dx,tbl->y - dy,easy,CELL_CHKNOREACH) )
+		return false;
+
+#ifdef OFFICIAL_WALKPATH
+	if( !path_search_long(NULL,bl->m,bl->x,bl->y,tbl->x - dx,tbl->y - dy,CELL_CHKNOPASS) && //Check if there is an obstacle between
+		wpd.path_len > 14 && //Official number of walkable cells is 14 if and only if there is an obstacle between [malufett]
+		(bl->type != BL_NPC) ) //If type is a NPC, please disregard
+		return false;
+#endif
+
+	return true;
+	
 }
 
 /**

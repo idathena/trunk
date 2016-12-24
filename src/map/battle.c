@@ -3561,9 +3561,11 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case NJ_KIRIKAGE:
 			skillratio += 100 * (skill_lv - 1);
 			break;
+#ifdef RENEWAL
 		case NJ_KUNAI:
 			skillratio += 200;
 			break;
+#endif
 		case KN_CHARGEATK: { //+100% every 3 cells of distance but hard-limited to 500%
 				unsigned int k = wd.miscflag / 3;
 

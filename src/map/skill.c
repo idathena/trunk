@@ -6481,25 +6481,16 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case CH_SOULCOLLECT:
 			if (sd) {
-				int limit = pc_getmaxspiritball(sd,5);
+				int max = pc_getmaxspiritball(sd,5);
 
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				for (i = 0; i < limit; i++)
-					pc_addspiritball(sd,skill_get_time(skill_id,skill_lv),limit);
+				for (i = 0; i < max; i++)
+					pc_addspiritball(sd,skill_get_time(skill_id,skill_lv),max);
 			}
 			break;
 
 		case MO_KITRANSLATION:
-			if (sd) {
-				if (dstsd && (dstsd->spiritball >= 5 ||
-					(dstsd->class_&MAPID_BASEMASK) == MAPID_GUNSLINGER ||
-					(dstsd->class_&MAPID_UPPERMASK) == MAPID_REBELLION))
-				{
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					map_freeblock_unlock();
-					return 1;
-				}
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			if (sd && dstsd) {
 				pc_delspiritball(sd,1,0);
 				pc_addspiritball(dstsd,skill_get_time(skill_id,skill_lv),5);
 			}
@@ -9580,7 +9571,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					sc_start(src,bl,SC_EXPLOSIONSPIRITS,100,pc_checkskill(sd,MO_EXPLOSIONSPIRITS),skill_get_time(skill_id,skill_lv));
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,
 					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-				max = pc_getmaxspiritball(sd,0);
+				max = pc_getmaxspiritball(sd,5);
 				for( i = 0; i < max; i++ ) //Don't call more than max available spheres
 					pc_addspiritball(sd,skill_get_time(MO_CALLSPIRITS,1),max);
 			}
@@ -9610,11 +9601,11 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case SR_POWERVELOCITY:
 			if( sd && dstsd && (dstsd->class_&MAPID_BASEMASK) != MAPID_GUNSLINGER && (dstsd->class_&MAPID_UPPERMASK) != MAPID_REBELLION ) {
-				int max = pc_getmaxspiritball(dstsd,0);
+				int max = pc_getmaxspiritball(dstsd,5);
 
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				pc_delspiritball(sd,sd->spiritball,0);
-				for( i = 0; i < sd->spiritball; i++ )
+				for( i = 0; i < max; i++ )
 					pc_addspiritball(dstsd,skill_get_time(MO_CALLSPIRITS,1),max);
 			}
 			break;
@@ -14410,6 +14401,16 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					return false;
 				}
+			}
+			break;
+		case MO_KITRANSLATION:
+			if( tsd && (tsd->spiritball >= 5 ||
+				(tsd->class_&MAPID_BASEMASK) == MAPID_GUNSLINGER ||
+				(tsd->class_&MAPID_UPPERMASK) == MAPID_REBELLION) )
+			{
+				if( sd )
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false;
 			}
 			break;
 		case PF_MINDBREAKER:

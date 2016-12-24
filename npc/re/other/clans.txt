@@ -1,10 +1,16 @@
 //===== rAthena Script =======================================
 //= Clan masters
+//===== By: ==================================================
+//= Lemongrass
+//===== Current Version: =====================================
+//= 1.2
+//===== Compatible With: =====================================
+//= rAthena SVN
 //===== Description: =========================================
 //= The clan master NPCs that allow you to join and leave
 //= one of the clans.
-//===== Changelogs: ==========================================
-//= 1.0 Initial release. [Lemongrass]
+//===== Additional Comments: =================================
+//= 1.0 First version.
 //= 1.1 iRO translation. [RagnarokNova]
 //= 1.2 Dialogue cleanup. [Aleos]
 //============================================================
@@ -404,7 +410,7 @@ prt_in,37,114,5	script	Berman Aire	4_M_BIRMAN,{
 prt_in,39,114,5	script	Shaam Rumi	4_M_TAMARIN,{
 	cutin "sham01",2;
 	mes "[Shaam Rumi]";
-	mes "Hi, there! I'm Shaam, master of the ^3131ffCrossbow Clan^000000 What can I do for you?";
+	mes "Hi, there! I'm Shaam, master of the ^3131ffCrossbow Clan^000000. What can I do for you?";
 	next;
 	switch (select("Clan Information:Join.:Leave.")) {
 		case 1:
