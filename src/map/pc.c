@@ -11992,6 +11992,7 @@ void do_init_pc(void) {
 	if (battle_config.day_duration > 0 && battle_config.night_duration > 0) {
 		int day_duration = battle_config.day_duration;
 		int night_duration = battle_config.night_duration;
+
 		//Add night/day timer [Yor]
 		add_timer_func_list(map_day_timer, "map_day_timer");
 		add_timer_func_list(map_night_timer, "map_night_timer");

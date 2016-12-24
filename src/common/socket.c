@@ -292,10 +292,10 @@ void set_nonblocking(int fd, unsigned long yes)
 }
 
 void setsocketopts(int fd,int delay_timeout){
-	int yes = 1; // Reuse fix
+	int yes = 1; // reuse fix
 
 #if !defined(WIN32)
-	// Set SO_REAUSEADDR to true, unix only. on windows this option causes
+	// set SO_REAUSEADDR to true, unix only. on windows this option causes
 	// the previous owner of the socket to give up, which is not desirable
 	// in most cases, neither compatible with unix.
 	sSetsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(char *)&yes,sizeof(yes));
@@ -308,28 +308,23 @@ void setsocketopts(int fd,int delay_timeout){
 	// The RO protocol is mainly single-packet request/response, plus the FIFO model already does packet grouping anyway.
 	sSetsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&yes, sizeof(yes));
 
-	// Force the socket into no-wait, graceful-close mode (should be the default, but better make sure)
-	//(https://msdn.microsoft.com/en-us/library/windows/desktop/ms737582%28v=vs.85%29.aspx)
+	// force the socket into no-wait, graceful-close mode (should be the default, but better make sure)
+	//(http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winsock/winsock/closesocket_2.asp)
 	{
-		struct linger opt;
-
-		opt.l_onoff = 0; // SO_DONTLINGER
-		opt.l_linger = 0; // Do not care
-		if( sSetsockopt(fd, SOL_SOCKET, SO_LINGER, (char*)&opt, sizeof(opt)) )
-			ShowWarning("setsocketopts: Unable to set SO_LINGER mode for connection #%d!\n", fd);
+	struct linger opt;
+	opt.l_onoff = 0; // SO_DONTLINGER
+	opt.l_linger = 0; // Do not care
+	if( sSetsockopt(fd, SOL_SOCKET, SO_LINGER, (char*)&opt, sizeof(opt)) )
+		ShowWarning("setsocketopts: Unable to set SO_LINGER mode for connection #%d!\n", fd);
 	}
-	if( delay_timeout ){
-#if defined(WIN32)
-		int timeout = delay_timeout * 1000;
-#else
+	if(delay_timeout){
 		struct timeval timeout;
-
 		timeout.tv_sec = delay_timeout;
 		timeout.tv_usec = 0;
-#endif
-		if( sSetsockopt (fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,sizeof(timeout)) < 0 )
+
+		if (sSetsockopt (fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
 			ShowError("setsocketopts: Unable to set SO_RCVTIMEO timeout for connection #%d!\n");
-		if( sSetsockopt (fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,sizeof(timeout)) < 0 )
+		if (sSetsockopt (fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
 			ShowError("setsocketopts: Unable to set SO_SNDTIMEO timeout for connection #%d!\n");
 	}
 }
@@ -532,8 +527,7 @@ int make_listen_bind(uint32 ip, uint16 port)
 		exit(EXIT_FAILURE);
 	}
 
-	if( fd_max <= fd )
-		fd_max = fd + 1;
+	if(fd_max <= fd) fd_max = fd + 1;
 	sFD_SET(fd, &readfds);
 
 	create_session(fd, connect_client, null_send, null_parse);
@@ -575,40 +569,7 @@ int make_connection(uint32 ip, uint16 port, bool silent, int timeout) {
 
 	if( !silent )
 		ShowStatus("Connecting to %d.%d.%d.%d:%i\n", CONVIP(ip), port);
-#ifdef WIN32
-	// On Windows we have to set the socket non-blocking before the connection to make timeout work. [Lemongrass]
-	set_nonblocking(fd, 1);
 
-	result = sConnect(fd, (struct sockaddr *)(&remote_address), sizeof(struct sockaddr_in));
-
-	// Only enter if a socket error occurred
-	// Create a pseudo scope to be able to break out in case of successful connection
-	while( result == SOCKET_ERROR ){
-		// Specially handle the error number for connection attempts that would block, because we want to use a timeout
-		if( sErrno == S_EWOULDBLOCK ){
-			fd_set writeSet;
-			struct timeval tv;
-
-			sFD_ZERO(&writeSet);
-			sFD_SET(fd, &writeSet);
-
-			tv.tv_sec = timeout;
-			tv.tv_usec = 0;
-
-			// Try to find out if the socket is writeable yet(within the timeout) and check if it is really writeable afterwards
-			if( sSelect(0, NULL, &writeSet, NULL, &tv) != 0 && sFD_ISSET(fd, &writeSet) != 0 )
-				break; // Our socket is writeable now => we have connected successfully and leave the pseudo scope
-			// Our connection attempt timed out or the socket was not writeable
-		}
-
-		if( !silent )
-			ShowError("make_connection: connect failed (socket #%d, %s)!\n", fd, error_msg());
-
-		do_close(fd);
-		return -1;
-	}
-	// Keep the socket in non-blocking mode, since we would set it to non-blocking here on unix. [Lemongrass]
-#else
 	result = sConnect(fd, (struct sockaddr *)(&remote_address), sizeof(struct sockaddr_in));
 	if( result == SOCKET_ERROR ) {
 		if( !silent )
@@ -616,13 +577,10 @@ int make_connection(uint32 ip, uint16 port, bool silent, int timeout) {
 		do_close(fd);
 		return -1;
 	}
-
 	//Now the socket can be made non-blocking. [Skotlex]
 	set_nonblocking(fd, 1);
-#endif
 
-	if( fd_max <= fd )
-		fd_max = fd + 1;
+	if (fd_max <= fd) fd_max = fd + 1;
 	sFD_SET(fd,&readfds);
 
 	create_session(fd, recv_to_fifo, send_from_fifo, default_func_parse);
@@ -802,17 +760,17 @@ int do_sockets(int next)
 #ifdef SEND_SHORTLIST
 	send_shortlist_do_sends();
 #else
-	for( i = 1; i < fd_max; i++ )
+	for (i = 1; i < fd_max; i++)
 	{
-		if( !session[i] )
+		if(!session[i])
 			continue;
 
-		if( session[i]->wdata_size )
+		if(session[i]->wdata_size)
 			session[i]->func_send(i);
 	}
 #endif
 
-	// Can timeout until the next tick
+	// can timeout until the next tick
 	timeout.tv_sec  = next/1000;
 	timeout.tv_usec = next%1000*1000;
 
@@ -826,22 +784,21 @@ int do_sockets(int next)
 			ShowFatalError("do_sockets: select() failed, %s!\n", error_msg());
 			exit(EXIT_FAILURE);
 		}
-		return 0; // Interrupted by a signal, just loop and try again
+		return 0; // interrupted by a signal, just loop and try again
 	}
 
 	last_tick = time(NULL);
 
 #if defined(WIN32)
-	// On windows, enumerating all members of the fd_set is way faster if we access the internals
+	// on windows, enumerating all members of the fd_set is way faster if we access the internals
 	for( i = 0; i < (int)rfd.fd_count; ++i )
 	{
 		int fd = sock2fd(rfd.fd_array[i]);
-
 		if( session[fd] )
 			session[fd]->func_recv(fd);
 	}
 #else
-	// Otherwise assume that the fd_set is a bit-array and enumerate it in a standard way
+	// otherwise assume that the fd_set is a bit-array and enumerate it in a standard way
 	for( i = 1; ret && i < fd_max; ++i )
 	{
 		if(sFD_ISSET(i,&rfd) && session[i])
@@ -856,30 +813,30 @@ int do_sockets(int next)
 #ifdef SEND_SHORTLIST
 	send_shortlist_do_sends();
 #else
-	for( i = 1; i < fd_max; i++ )
+	for (i = 1; i < fd_max; i++)
 	{
-		if( !session[i] )
+		if(!session[i])
 			continue;
 
-		if( session[i]->wdata_size )
+		if(session[i]->wdata_size)
 			session[i]->func_send(i);
 
-		if( session[i]->flag.eof ) //func_send can't free a session, this is safe.
+		if(session[i]->flag.eof) //func_send can't free a session, this is safe.
 		{	//Finally, even if there is no data to parse, connections signalled eof should be closed, so we call parse_func [Skotlex]
 			session[i]->func_parse(i); //This should close the session immediately.
 		}
 	}
 #endif
 
-	// Parse input data on each socket
-	for( i = 1; i < fd_max; i++ )
+	// parse input data on each socket
+	for(i = 1; i < fd_max; i++)
 	{
-		if( !session[i] )
+		if(!session[i])
 			continue;
 
-		if( session[i]->rdata_tick && DIFF_TICK(last_tick, session[i]->rdata_tick) > stall_time ) {
-			if( session[i]->flag.server ) { // Server is special
-				if( session[i]->flag.ping != 2 ) // Only update if necessary otherwise it'd resend the ping unnecessarily
+		if (session[i]->rdata_tick && DIFF_TICK(last_tick, session[i]->rdata_tick) > stall_time) {
+			if( session[i]->flag.server ) {/* server is special */
+				if( session[i]->flag.ping != 2 )/* only update if necessary otherwise it'd resend the ping unnecessarily */
 					session[i]->flag.ping = 1;
 			} else {
 				ShowInfo("Session #%d timed out\n", i);
@@ -889,11 +846,11 @@ int do_sockets(int next)
 
 		session[i]->func_parse(i);
 
-		if( !session[i] )
+		if(!session[i])
 			continue;
 
-		// After parse, check client's RFIFO size to know if there is an invalid packet (too big and not parsed)
-		if( session[i]->rdata_size == RFIFO_SIZE && session[i]->max_rdata == RFIFO_SIZE ) {
+		// after parse, check client's RFIFO size to know if there is an invalid packet (too big and not parsed)
+		if (session[i]->rdata_size == RFIFO_SIZE && session[i]->max_rdata == RFIFO_SIZE) {
 			set_eof(i);
 			continue;
 		}
@@ -901,7 +858,7 @@ int do_sockets(int next)
 	}
 
 #ifdef SHOW_SERVER_STATS
-	if( last_tick != socket_data_last_tick ) {
+	if (last_tick != socket_data_last_tick) {
 		char buf[1024];
 
 		sprintf(buf, "In: %.03f kB/s (%.03f kB/s, Q: %.03f kB) | Out: %.03f kB/s (%.03f kB/s, Q: %.03f kB) | RAM: %.03f MB", socket_data_i/1024., socket_data_ci/1024., socket_data_qi/1024., socket_data_o/1024., socket_data_co/1024., socket_data_qo/1024., malloc_usage()/1024.);
@@ -1230,9 +1187,9 @@ void socket_final(void)
 	ConnectHistory* hist;
 	ConnectHistory* next_hist;
 
-	for( i = 0; i < 0x10000; ++i ) {
+	for( i=0; i < 0x10000; ++i ){
 		hist = connect_history[i];
-		while( hist ) {
+		while( hist ){
 			next_hist = hist->next;
 			aFree(hist);
 			hist = next_hist;
@@ -1244,10 +1201,9 @@ void socket_final(void)
 		aFree(access_deny);
 #endif
 
-	for( i = 1; i < fd_max; i++ ) {
-		if( session[i] )
+	for( i = 1; i < fd_max; i++ )
+		if(session[i])
 			do_close(i);
-	}
 
 	// session[0]
 	aFree(session[0]->rdata);
@@ -1255,11 +1211,6 @@ void socket_final(void)
 	aFree(session[0]->session_data);
 	aFree(session[0]);
 	session[0] = NULL;
-
-#ifdef WIN32
-	if( WSACleanup() ) // Shut down windows networking
-		ShowError("socket_final: WinSock could not be cleaned up! %s\n", error_msg());
-#endif
 }
 
 /// Closes a socket.
@@ -1269,11 +1220,10 @@ void do_close(int fd)
 		return;// invalid
 
 	flush_fifo(fd); // Try to send what's left (although it might not succeed since it's a nonblocking socket)
-	sFD_CLR(fd, &readfds); // This needs to be done before closing the socket
+	sFD_CLR(fd, &readfds);// this needs to be done before closing the socket
 	sShutdown(fd, SHUT_RDWR); // Disallow further reads/writes
 	sClose(fd); // We don't really care if these closing functions return an error, we are just shutting down and not reusing this socket.
-	if( session[fd] )
-		delete_session(fd);
+	if (session[fd]) delete_session(fd);
 }
 
 /// Retrieve local ips in host byte order.
