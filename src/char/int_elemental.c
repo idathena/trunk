@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-bool mapif_elemental_save(struct s_elemental* ele) {
+bool mapif_elemental_save(struct s_elemental *ele) {
 	bool flag = true;
 
 	if( ele->elemental_id == 0 ) { // Create new DB entry
@@ -104,7 +104,7 @@ static void mapif_elemental_send(int fd, struct s_elemental *ele, unsigned char 
 	WFIFOSET(fd,size);
 }
 
-static void mapif_parse_elemental_create(int fd, struct s_elemental* ele) {
+static void mapif_parse_elemental_create(int fd, struct s_elemental *ele) {
 	bool result = mapif_elemental_save(ele);
 	mapif_elemental_send(fd, ele, result);
 }
@@ -135,7 +135,7 @@ static void mapif_elemental_saved(int fd, unsigned char flag) {
 	WFIFOSET(fd,3);
 }
 
-static void mapif_parse_elemental_save(int fd, struct s_elemental* ele) {
+static void mapif_parse_elemental_save(int fd, struct s_elemental *ele) {
 	bool result = mapif_elemental_save(ele);
 	mapif_elemental_saved(fd, result);
 }

@@ -20,6 +20,7 @@
 #include "channel.h"
 #include "chat.h"
 #include "chrif.h"
+#include "clan.h"
 #include "clif.h"
 #include "date.h" // is_day_of_*()
 #include "duel.h"
@@ -528,7 +529,7 @@ static int pc_inventory_rental_end(int tid, unsigned int tick, int id, intptr_t 
 {
 	struct map_session_data *sd = map_id2sd(id);
 
-	if( sd == NULL )
+	if( !sd )
 		return 0;
 	if( tid != sd->rental_timer ) {
 		ShowError("pc_inventory_rental_end: invalid timer id.\n");
@@ -641,25 +642,26 @@ void pc_rental_expire(struct map_session_data *sd, int i)
 void pc_inventory_rentals(struct map_session_data *sd)
 {
 	int i, c = 0;
-	unsigned int expire_tick, next_tick = UINT_MAX;
+	unsigned int next_tick = UINT_MAX;
 
 	for( i = 0; i < MAX_INVENTORY; i++ ) { // Check for Rentals on Inventory
-		if( sd->status.inventory[i].nameid == 0 )
+		if( !sd->status.inventory[i].nameid )
 			continue; // Nothing here
-		if( sd->status.inventory[i].expire_time == 0 )
+		if( !sd->status.inventory[i].expire_time )
 			continue;
 		if( sd->status.inventory[i].expire_time <= time(NULL) )
 			pc_rental_expire(sd, i);
 		else {
-			expire_tick = (unsigned int)(sd->status.inventory[i].expire_time - time(NULL)) * 1000;
-			clif_rental_time(sd->fd, sd->status.inventory[i].nameid, (int)(expire_tick / 1000));
-			next_tick = min(expire_tick, next_tick);
+			unsigned int expire_tick = (unsigned int)(sd->status.inventory[i].expire_time - time(NULL));
+
+			clif_rental_time(sd->fd, sd->status.inventory[i].nameid, (int)expire_tick);
+			next_tick = min(expire_tick * 1000, next_tick);
 			c++;
 		}
 	}
 
 	if( c > 0 ) // min(next_tick, 3600000) 1 hour each timer to keep announcing to the owner, and to avoid a but with rental time > 15 days
-		sd->rental_timer = add_timer(gettick() + min(next_tick,3600000), pc_inventory_rental_end, sd->bl.id, 0);
+		sd->rental_timer = add_timer(gettick() + min(next_tick, 3600000), pc_inventory_rental_end, sd->bl.id, 0);
 	else
 		sd->rental_timer = INVALID_TIMER;
 }
@@ -668,7 +670,7 @@ void pc_inventory_rental_add(struct map_session_data *sd, int seconds)
 {
 	int tick = seconds * 1000;
 
-	if( sd == NULL )
+	if( !sd )
 		return;
 
 	if( sd->rental_timer != INVALID_TIMER ) {
@@ -1558,6 +1560,8 @@ void pc_reg_received(struct map_session_data *sd)
 		party_member_joined(sd);
 	if (sd->status.guild_id)
 		guild_member_joined(sd);
+	if (sd->status.clan_id)
+		clan_member_joined(sd);
 
 	//Pet
 	if (sd->status.pet_id > 0)

@@ -7511,7 +7511,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_REUSE_LIMIT_ASPD_POTION:	case SC_SPRITEMABLE:		case SC_BITESCAR:
 							case SC_ACTIVE_MONSTER_TRANSFORM:	case SC_TELEPORT_FIXEDCASTINGDELAY:	case SC_HAT_EFFECT:
 							case SC_QSCARABA:			case SC_LJOSALFAR:		case SC_MAPLE_FALLS:
-							case SC_MERMAID_LONGING:		case SC_TIME_ACCESSORY:
+							case SC_MERMAID_LONGING:		case SC_TIME_ACCESSORY:		case SC_CLAN_INFO:
+							case SC_SWORDCLAN:			case SC_ARCWANDCLAN:		case SC_GOLDENMACECLAN:
+							case SC_CROSSBOWCLAN:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )
@@ -8980,7 +8982,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_REUSE_LIMIT_ASPD_POTION:	case SC_SPRITEMABLE:		case SC_ACTIVE_MONSTER_TRANSFORM:
 						case SC_TELEPORT_FIXEDCASTINGDELAY:	case SC_HAT_EFFECT:		case SC_QSCARABA:
 						case SC_LJOSALFAR:			case SC_MAPLE_FALLS:		case SC_MERMAID_LONGING:
-						case SC_TIME_ACCESSORY:
+						case SC_TIME_ACCESSORY:			case SC_CLAN_INFO:		case SC_SWORDCLAN:
+						case SC_ARCWANDCLAN:			case SC_GOLDENMACECLAN:		case SC_CROSSBOWCLAN:
 							continue;
 						case SC_SILENCE:
 							if( tsc->data[i]->val4 )
@@ -14244,8 +14247,7 @@ int skill_check_condition_char_sub(struct block_list *bl, va_list ap)
 					{
 						p_sd[(*c)++] = tsd->bl.id;
 						return skill_lv;
-					} else
-						return 0;
+					}
 				}
 				break;
 		}

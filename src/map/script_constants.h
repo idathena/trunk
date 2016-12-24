@@ -2,7 +2,7 @@
 // For more information,see LICENCE in the main folder
 
 #ifndef _SCRIPT_CONSTANTS_H_
-	#define _SCRIPT_CONSTANTS_H_
+#define _SCRIPT_CONSTANTS_H_
 
 	#define export_constant(a) script_set_constant(#a,a,false)
 
@@ -1363,6 +1363,12 @@
 	export_constant(SC_REUSE_LIMIT_ECL);
 	export_constant(SC_REUSE_LIMIT_RECALL);
 	export_constant(SC_REUSE_LIMIT_ASPD_POTION);
+	export_constant(SC_CLAN_INFO);
+	export_constant(SC_SWORDCLAN);
+	export_constant(SC_ARCWANDCLAN);
+	export_constant(SC_GOLDENMACECLAN);
+	export_constant(SC_CROSSBOWCLAN);
+	export_constant(SC_JUMPINGCLAN);
 	export_constant(SC_INCMHP);
 	export_constant(SC_INCMSP);
 	export_constant(SC_PARTYFLEE);
@@ -2521,6 +2527,7 @@
 	export_constant(BG_SAMEMAP_WOS);
 	export_constant(BG_AREA);
 	export_constant(BG_AREA_WOS);
+	export_constant(CLAN);
 
 	/* Mercenary guilds */
 	export_constant(ARCH_MERC_GUILD);

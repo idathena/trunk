@@ -802,17 +802,17 @@ int do_sockets(int next)
 #ifdef SEND_SHORTLIST
 	send_shortlist_do_sends();
 #else
-	for (i = 1; i < fd_max; i++)
+	for( i = 1; i < fd_max; i++ )
 	{
-		if(!session[i])
+		if( !session[i] )
 			continue;
 
-		if(session[i]->wdata_size)
+		if( session[i]->wdata_size )
 			session[i]->func_send(i);
 	}
 #endif
 
-	// can timeout until the next tick
+	// Can timeout until the next tick
 	timeout.tv_sec  = next/1000;
 	timeout.tv_usec = next%1000*1000;
 
@@ -826,21 +826,22 @@ int do_sockets(int next)
 			ShowFatalError("do_sockets: select() failed, %s!\n", error_msg());
 			exit(EXIT_FAILURE);
 		}
-		return 0; // interrupted by a signal, just loop and try again
+		return 0; // Interrupted by a signal, just loop and try again
 	}
 
 	last_tick = time(NULL);
 
 #if defined(WIN32)
-	// on windows, enumerating all members of the fd_set is way faster if we access the internals
+	// On windows, enumerating all members of the fd_set is way faster if we access the internals
 	for( i = 0; i < (int)rfd.fd_count; ++i )
 	{
 		int fd = sock2fd(rfd.fd_array[i]);
+
 		if( session[fd] )
 			session[fd]->func_recv(fd);
 	}
 #else
-	// otherwise assume that the fd_set is a bit-array and enumerate it in a standard way
+	// Otherwise assume that the fd_set is a bit-array and enumerate it in a standard way
 	for( i = 1; ret && i < fd_max; ++i )
 	{
 		if(sFD_ISSET(i,&rfd) && session[i])
@@ -855,30 +856,30 @@ int do_sockets(int next)
 #ifdef SEND_SHORTLIST
 	send_shortlist_do_sends();
 #else
-	for (i = 1; i < fd_max; i++)
+	for( i = 1; i < fd_max; i++ )
 	{
-		if(!session[i])
+		if( !session[i] )
 			continue;
 
-		if(session[i]->wdata_size)
+		if( session[i]->wdata_size )
 			session[i]->func_send(i);
 
-		if(session[i]->flag.eof) //func_send can't free a session, this is safe.
+		if( session[i]->flag.eof ) //func_send can't free a session, this is safe.
 		{	//Finally, even if there is no data to parse, connections signalled eof should be closed, so we call parse_func [Skotlex]
 			session[i]->func_parse(i); //This should close the session immediately.
 		}
 	}
 #endif
 
-	// parse input data on each socket
-	for(i = 1; i < fd_max; i++)
+	// Parse input data on each socket
+	for( i = 1; i < fd_max; i++ )
 	{
-		if(!session[i])
+		if( !session[i] )
 			continue;
 
-		if (session[i]->rdata_tick && DIFF_TICK(last_tick, session[i]->rdata_tick) > stall_time) {
-			if( session[i]->flag.server ) {/* server is special */
-				if( session[i]->flag.ping != 2 )/* only update if necessary otherwise it'd resend the ping unnecessarily */
+		if( session[i]->rdata_tick && DIFF_TICK(last_tick, session[i]->rdata_tick) > stall_time ) {
+			if( session[i]->flag.server ) { // Server is special
+				if( session[i]->flag.ping != 2 ) // Only update if necessary otherwise it'd resend the ping unnecessarily
 					session[i]->flag.ping = 1;
 			} else {
 				ShowInfo("Session #%d timed out\n", i);
@@ -888,11 +889,11 @@ int do_sockets(int next)
 
 		session[i]->func_parse(i);
 
-		if(!session[i])
+		if( !session[i] )
 			continue;
 
-		// after parse, check client's RFIFO size to know if there is an invalid packet (too big and not parsed)
-		if (session[i]->rdata_size == RFIFO_SIZE && session[i]->max_rdata == RFIFO_SIZE) {
+		// After parse, check client's RFIFO size to know if there is an invalid packet (too big and not parsed)
+		if( session[i]->rdata_size == RFIFO_SIZE && session[i]->max_rdata == RFIFO_SIZE ) {
 			set_eof(i);
 			continue;
 		}
@@ -900,7 +901,7 @@ int do_sockets(int next)
 	}
 
 #ifdef SHOW_SERVER_STATS
-	if (last_tick != socket_data_last_tick) {
+	if( last_tick != socket_data_last_tick ) {
 		char buf[1024];
 
 		sprintf(buf, "In: %.03f kB/s (%.03f kB/s, Q: %.03f kB) | Out: %.03f kB/s (%.03f kB/s, Q: %.03f kB) | RAM: %.03f MB", socket_data_i/1024., socket_data_ci/1024., socket_data_qi/1024., socket_data_o/1024., socket_data_co/1024., socket_data_qo/1024., malloc_usage()/1024.);
@@ -1229,9 +1230,9 @@ void socket_final(void)
 	ConnectHistory* hist;
 	ConnectHistory* next_hist;
 
-	for( i=0; i < 0x10000; ++i ){
+	for( i = 0; i < 0x10000; ++i ) {
 		hist = connect_history[i];
-		while( hist ){
+		while( hist ) {
 			next_hist = hist->next;
 			aFree(hist);
 			hist = next_hist;
@@ -1243,9 +1244,10 @@ void socket_final(void)
 		aFree(access_deny);
 #endif
 
-	for( i = 1; i < fd_max; i++ )
-		if(session[i])
+	for( i = 1; i < fd_max; i++ ) {
+		if( session[i] )
 			do_close(i);
+	}
 
 	// session[0]
 	aFree(session[0]->rdata);
@@ -1253,6 +1255,11 @@ void socket_final(void)
 	aFree(session[0]->session_data);
 	aFree(session[0]);
 	session[0] = NULL;
+
+#ifdef WIN32
+	if( WSACleanup() ) // Shut down windows networking
+		ShowError("socket_final: WinSock could not be cleaned up! %s\n", error_msg());
+#endif
 }
 
 /// Closes a socket.
@@ -1262,10 +1269,11 @@ void do_close(int fd)
 		return;// invalid
 
 	flush_fifo(fd); // Try to send what's left (although it might not succeed since it's a nonblocking socket)
-	sFD_CLR(fd, &readfds);// this needs to be done before closing the socket
+	sFD_CLR(fd, &readfds); // This needs to be done before closing the socket
 	sShutdown(fd, SHUT_RDWR); // Disallow further reads/writes
 	sClose(fd); // We don't really care if these closing functions return an error, we are just shutting down and not reusing this socket.
-	if (session[fd]) delete_session(fd);
+	if( session[fd] )
+		delete_session(fd);
 }
 
 /// Retrieve local ips in host byte order.

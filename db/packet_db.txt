@@ -2309,6 +2309,12 @@ packet_keys: 0x631C511C,0x111C111C,0x111C111C //[Shakto]
 //New Packets
 0x097A,-1 //ZC_ALL_QUEST_LIST2
 0x097E,12 //ZC_UPDATE_RANKING_POINT
+//Clan System
+0x0988,6
+0x0989,2
+0x098A,-1
+0x098D,-1,clanchat,2:4
+0x098E,-1
 0x09B4,6,dull,0 //Cash Shop - Special Tab
 0x09C1,10,ZC_C_MARKERINFO,2:6:8
 0x09CE,102,itemmonster,2

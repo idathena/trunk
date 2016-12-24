@@ -78,6 +78,8 @@
 #define MAX_GUARDIANS 8 //Local max per castle. [Skotlex]
 #define MAX_QUEST_OBJECTIVES 3 //Max quest objectives for a quest
 #define MAX_PC_BONUS_SCRIPT 50 //Max bonus script can be fetched from `bonus_script` table on player load [Cydh]
+#define MAX_CLAN 500
+#define MAX_CLANALLIANCE 6
 
 //For produce
 #define MIN_ATTRIBUTE 0
@@ -391,7 +393,7 @@ struct mmo_charstatus {
 	short manner; // Defines how many minutes a char will be muted, each negative point is equivalent to a minute
 	unsigned char karma;
 	short hair,hair_color,clothes_color,body;
-	int party_id,guild_id,pet_id,hom_id,mer_id,ele_id;
+	int party_id,guild_id,pet_id,hom_id,mer_id,ele_id,clan_id;
 	int fame;
 
 	// Mercenary Guilds Rank
@@ -832,6 +834,22 @@ enum bound_type {
 
 	BOUND_ONEQUIP = 1, //Shows notification when item will be bound on equip
 	BOUND_DISPYELLOW = 2, //Shows the item name in yellow color
+};
+
+struct clan_alliance {
+	int opposition;
+	int clan_id;
+	char name[NAME_LENGTH];
+};
+
+struct clan {
+	int id;
+	char name[NAME_LENGTH];
+	char master[NAME_LENGTH];
+	char map[MAP_NAME_LENGTH_EXT];
+	short max_member,connect_member;
+	struct map_session_data *members[MAX_CLAN];
+	struct clan_alliance alliance[MAX_CLANALLIANCE];
 };
 
 // Sanity checks

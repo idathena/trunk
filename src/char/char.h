@@ -110,6 +110,8 @@ extern char elemental_db[256];
 extern char interreg_db[32];
 extern char skillcooldown_db[256];
 extern char bonus_script_db[256];
+extern char clan_db[256];
+extern char clan_alliance_db[256];
 
 extern int db_use_sqldbs; //Added for sql item_db read for char server [Valaris]
 

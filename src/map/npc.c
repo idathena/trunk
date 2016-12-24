@@ -1309,7 +1309,7 @@ int npc_scriptcont(struct map_session_data *sd, int id, bool closing)
 	}
 
 	if (id != fake_nd->bl.id) { //Not item script
-		if ((npc_checknear(sd,map_id2bl(id))) == NULL) {
+		if (!(npc_checknear(sd,map_id2bl(id)))) {
 			ShowWarning("npc_scriptcont: failed npc_checknear test.\n");
 			return 1;
 		}
