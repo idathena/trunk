@@ -68,7 +68,7 @@ int clan_getMemberIndex(struct clan *clan, uint32 account_id) {
 
 	nullpo_retr(-1, clan);
 
-	ARR_FIND(0, clan->max_member, i, clan->members[i] && clan->members[i]->status.account_id == account_id);
+	ARR_FIND(0, clan->max_member, i, (clan->members[i] && clan->members[i]->status.account_id == account_id));
 
 	if (i == clan->max_member)
 		return -1;
