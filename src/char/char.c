@@ -71,6 +71,8 @@ char elemental_db[256] = "elemental";
 char interreg_db[32] = "interreg";
 char skillcooldown_db[256] = "skillcooldown";
 char bonus_script_db[256] = "bonus_script";
+char clan_db[256] = "clan";
+char clan_alliance_db[256] = "clan_alliance";
 
 // Show loading/saving messages
 int save_log = 1;
@@ -559,7 +561,8 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 		(p->head_mid != cp->head_mid) || (p->head_bottom != cp->head_bottom) || (p->delete_date != cp->delete_date) ||
 		(p->rename != cp->rename) || (p->robe != cp->robe) || (p->character_moves != cp->character_moves) ||
 		(p->show_equip != cp->show_equip) || (p->allow_party != cp->allow_party) || (p->font != cp->font) ||
-		(p->uniqueitem_counter != cp->uniqueitem_counter) || (p->hotkey_rowshift != cp->hotkey_rowshift)
+		(p->uniqueitem_counter != cp->uniqueitem_counter) || (p->hotkey_rowshift != cp->hotkey_rowshift) ||
+		(p->clan_id != cp->clan_id)
 	) {	//Save status
 		unsigned int opt = 0;
 
@@ -576,7 +579,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 			"`weapon`='%d',`shield`='%d',`head_top`='%d',`head_mid`='%d',`head_bottom`='%d',"
 			"`last_map`='%s',`last_x`='%d',`last_y`='%d',`save_map`='%s',`save_x`='%d',`save_y`='%d',`rename`='%d',"
 			"`delete_date`='%lu',`robe`='%d',`moves`='%d',`char_opt`='%u',`font`='%u',`uniqueitem_counter`='%u',"
-			"`hotkey_rowshift`='%d'"
+			"`hotkey_rowshift`='%d',`clan_id`='%d'"
 			" WHERE `account_id`='%d' AND `char_id` = '%d'",
 			char_db, p->base_level, p->job_level,
 			p->base_exp, p->job_exp, p->zeny,
@@ -587,7 +590,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 			mapindex_id2name(p->last_point.map), p->last_point.x, p->last_point.y,
 			mapindex_id2name(p->save_point.map), p->save_point.x, p->save_point.y, p->rename,
 			(unsigned long)p->delete_date, //FIXME: platform-dependent size
-			p->robe,p->character_moves,opt,p->font,p->uniqueitem_counter,p->hotkey_rowshift,
+			p->robe,p->character_moves,opt,p->font,p->uniqueitem_counter,p->hotkey_rowshift,p->clan_id,
 			p->account_id,p->char_id) )
 		{
 			Sql_ShowDebug(sql_handle);
@@ -1240,7 +1243,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus *p, bool load_everything
 		"`status_point`,`skill_point`,`option`,`karma`,`manner`,`party_id`,`guild_id`,`pet_id`,`homun_id`,`elemental_id`,`hair`,"
 		"`hair_color`,`clothes_color`,`body`,`weapon`,`shield`,`head_top`,`head_mid`,`head_bottom`,`last_map`,`last_x`,`last_y`,"
 		"`save_map`,`save_x`,`save_y`,`partner_id`,`father`,`mother`,`child`,`fame`,`rename`,`delete_date`,`robe`,`moves`,"
-		"`char_opt`,`font`,`unban_time`,`uniqueitem_counter`,`sex`,`hotkey_rowshift`"
+		"`char_opt`,`font`,`unban_time`,`uniqueitem_counter`,`sex`,`hotkey_rowshift`,`clan_id`"
 		" FROM `%s` WHERE `char_id`=? LIMIT 1", char_db)
 	||	SQL_ERROR == SqlStmt_BindParam(stmt, 0, SQLDT_INT, &char_id, 0)
 	||	SQL_ERROR == SqlStmt_Execute(stmt)
@@ -1304,6 +1307,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus *p, bool load_everything
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 57, SQLDT_UINT32, &p->uniqueitem_counter, 0, NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 58, SQLDT_ENUM,   &sex, sizeof(sex), NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 59, SQLDT_UCHAR,  &p->hotkey_rowshift, 0, NULL, NULL)
+	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 60, SQLDT_INT,    &p->clan_id, 0, NULL, NULL)
 	)
 	{
 		SqlStmt_ShowDebug(stmt);
@@ -5717,8 +5721,12 @@ void sql_config_read(const char *cfgName)
 			safestrncpy(interreg_db, w2, sizeof(interreg_db));
 		else if(!strcmpi(w1, "skillcooldown_db"))
 			safestrncpy(skillcooldown_db, w2, sizeof(skillcooldown_db));
-		else if(!strcmpi(w1,"bonus_script_db"))
+		else if(!strcmpi(w1, "bonus_script_db"))
 			safestrncpy(bonus_script_db, w2, sizeof(bonus_script_db));
+		else if(!strcmpi(w1, "clan_db"))
+			safestrncpy(clan_db, w2, sizeof(clan_db));
+		else if(!strcmpi(w1, "clan_alliance_db"))
+			safestrncpy(clan_alliance_db, w2, sizeof(clan_alliance_db));
 		//Support the import command, just like any other config
 		else if(!strcmpi(w1, "import"))
 			sql_config_read(w2);

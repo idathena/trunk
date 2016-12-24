@@ -216,7 +216,7 @@ void usercheck(void)
 /*======================================
  *	CORE : MAINROUTINE
  *--------------------------------------*/
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 	{ // Initialize program arguments
 		char *p1 = SERVER_NAME = argv[0];
@@ -268,6 +268,7 @@ int main (int argc, char **argv)
 	// Main runtime cycle
 	while (runflag != CORE_ST_STOP) {
 		int next = do_timer(gettick_nocache());
+
 		do_sockets(next);
 	}
 

@@ -12,6 +12,7 @@
 
 #include "map.h"
 #include "battle.h"
+#include "clan.h"
 #include "clif.h"
 #include "intif.h"
 #include "npc.h"
@@ -502,6 +503,7 @@ int chrif_connectack(int fd) {
 		char_init_done = true;
 		ShowStatus("Event '"CL_WHITE"OnInterIfInitOnce"CL_RESET"' executed with '"CL_WHITE"%d"CL_RESET"' NPCs.\n", npc_event_doall("OnInterIfInitOnce"));
 		guild_castle_map_init();
+		intif_clan_requestclans();
 	}
 
 	socket_datasync(fd, true); 

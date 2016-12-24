@@ -90,11 +90,12 @@ static char log_picktype2char(e_log_pick_type type)
 static char log_chattype2char(e_log_chat_type type)
 {
 	switch( type ) {
-		case LOG_CHAT_GLOBAL:   return 'O';  // Gl(O)bal
-		case LOG_CHAT_WHISPER:  return 'W';  // (W)hisper
-		case LOG_CHAT_PARTY:    return 'P';  // (P)arty
-		case LOG_CHAT_GUILD:    return 'G';  // (G)uild
-		case LOG_CHAT_MAINCHAT: return 'M';  // (M)ain chat
+		case LOG_CHAT_GLOBAL:   return 'O'; // Gl(O)bal
+		case LOG_CHAT_WHISPER:  return 'W'; // (W)hisper
+		case LOG_CHAT_PARTY:    return 'P'; // (P)arty
+		case LOG_CHAT_GUILD:    return 'G'; // (G)uild
+		case LOG_CHAT_MAINCHAT: return 'M'; // (M)ain
+		case LOG_CHAT_CLAN:     return 'C'; // (C)lan
 	}
 
 	// Should not get here, fallback
@@ -103,7 +104,7 @@ static char log_chattype2char(e_log_chat_type type)
 }
 
 
-static char log_cashtype2char( e_log_cash_type type )
+static char log_cashtype2char(e_log_cash_type type)
 {
 	switch( type ) {
 		case LOG_CASH_TYPE_CASH:

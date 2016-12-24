@@ -3351,6 +3351,11 @@ ACMD_FUNC(guild)
 
 	memset(guild, '\0', sizeof(guild));
 
+	if (sd->clan) {
+		clif_displaymessage(fd, msg_txt(733)); // You cannot create a guild because you are in a clan.
+		return -1;
+	}
+
 	if (!message || !*message || sscanf(message, "%23[^\n]", guild) < 1) {
 		clif_displaymessage(fd, msg_txt(1030)); // Please enter a guild name (usage: @guild <guild_name>).
 		return -1;
@@ -3391,7 +3396,6 @@ ACMD_FUNC(breakguild)
 		clif_displaymessage(fd, msg_txt(252)); // You are not in a guild.
 		return -1;
 	}
-	return 0;
 }
 
 /*==========================================

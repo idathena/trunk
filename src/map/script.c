@@ -20,6 +20,7 @@
 
 #include "map.h"
 #include "path.h"
+#include "clan.h"
 #include "clif.h"
 #include "chrif.h"
 #include "itemdb.h"
@@ -3009,7 +3010,7 @@ struct script_data *push_val2(struct script_stack *stack, enum c_op type, int va
 	stack->stack_data[stack->sp].u.num = val;
 	stack->stack_data[stack->sp].ref   = ref;
 	stack->sp++;
-	return &stack->stack_data[stack->sp-1];
+	return &stack->stack_data[stack->sp - 1];
 }
 
 /// Pushes a string into the stack
@@ -3460,32 +3461,32 @@ static void script_check_buildin_argtype(struct script_state *st, int func)
 
 	for( idx = 2; script_hasdata(st, idx); idx++ ) {
 		struct script_data *data = script_getdata(st, idx);
-		script_function* sf = &buildin_func[str_data[func].val];
+		script_function *sf = &buildin_func[str_data[func].val];
 		char type = sf->arg[idx - 2];
 
 		if( type == '?' || type == '*' )
-			break; // Optional argument or unknown number of optional parameters (no types are after this)
-		else if( type == 0 ) { // More arguments than necessary (should not happen, as it is checked before)
+			break; //Optional argument or unknown number of optional parameters (no types are after this)
+		else if( !type ) { //More arguments than necessary (should not happen, as it is checked before)
 			ShowWarning("Found more arguments than necessary. unexpected arg type %s\n", script_op2name(data->type));
 			invalid++;
 			break;
 		} else {
 			const char *name = NULL;
 
-			// Get name for variables to determine the type they refer to
+			//Get name for variables to determine the type they refer to
 			if( data_isreference(data) )
 				name = reference_getname(data);
 
 			switch( type ) {
 				case 'v':
-					if( !data_isstring(data) && !data_isint(data) && !data_isreference(data) ) { // Variant
+					if( !data_isstring(data) && !data_isint(data) && !data_isreference(data) ) { //Variant
 						ShowWarning("Unexpected type for argument %d. Expected string, number or variable.\n", idx - 1);
 						script_reportdata(data);
 						invalid++;
 					}
 					break;
 				case 's':
-					if( !data_isstring(data) && !(data_isreference(data) && is_string_variable(name)) ) { // String
+					if( !data_isstring(data) && !(data_isreference(data) && is_string_variable(name)) ) { //String
 						ShowWarning("Unexpected type for argument %d. Expected string.\n", idx - 1);
 						script_reportdata(data);
 						invalid++;
@@ -3494,21 +3495,21 @@ static void script_check_buildin_argtype(struct script_state *st, int func)
 				case 'i':
 					if( !data_isint(data) && !(data_isreference(data) &&
 						(reference_toparam(data) || reference_toconstant(data) || !is_string_variable(name))) ) {
-						// Int (params and constants are always int)
+						//Int (params and constants are always int)
 						ShowWarning("Unexpected type for argument %d. Expected number.\n", idx - 1);
 						script_reportdata(data);
 						invalid++;
 					}
 					break;
 				case 'r':
-					if( !data_isreference(data) ) { // Variables
+					if( !data_isreference(data) ) { //Variables
 						ShowWarning("Unexpected type for argument %d. Expected variable, got %s.\n", idx - 1, script_op2name(data->type));
 						script_reportdata(data);
 						invalid++;
 					}
 					break;
 				case 'l':
-					if( !data_islabel(data) && !data_isfunclabel(data) ) { // Label
+					if( !data_islabel(data) && !data_isfunclabel(data) ) { //Label
 						ShowWarning("Unexpected type for argument %d. Expected label, got %s\n", idx - 1, script_op2name(data->type));
 						script_reportdata(data);
 						invalid++;
@@ -3530,19 +3531,26 @@ static void script_check_buildin_argtype(struct script_state *st, int func)
 int run_func(struct script_state *st)
 {
 	struct script_data *data;
-	int i,start_sp,end_sp,func;
+	int i, start_sp, end_sp, func;
 
-	end_sp = st->stack->sp;// position after the last argument
-	for( i = end_sp-1; i > 0 ; --i )
-		if( st->stack->stack_data[i].type == C_ARG )
-			break;
-	if( !i ) {
-		ShowError("script:run_func: C_ARG not found. please report this!!!\n");
-		st->state = END;
+	if( !st->stack ) {
+		ShowError("script:run_func: Failed to execute a buildin command\n");
 		script_reportsrc(st);
+		st->state = END;
 		return 1;
 	}
-	start_sp = i-1;// C_NAME of the command
+	end_sp = st->stack->sp; //Position after the last argument
+	for( i = end_sp - 1; i > 0 ; --i ) {
+		if( st->stack->stack_data[i].type == C_ARG )
+			break;
+	}
+	if( !i ) {
+		ShowError("script:run_func: C_ARG not found, please report this!!!\n");
+		script_reportsrc(st);
+		st->state = END;
+		return 1;
+	}
+	start_sp = i - 1; //C_NAME of the command
 	st->start = start_sp;
 	st->end = end_sp;
 
@@ -3551,7 +3559,7 @@ int run_func(struct script_state *st)
 		func = data->u.num;
 		st->funcname = reference_getname(data);
 	} else {
-		ShowError("script:run_func: not a buildin command.\n");
+		ShowError("script:run_func: Not a buildin command.\n");
 		script_reportdata(data);
 		script_reportsrc(st);
 		st->state = END;
@@ -3561,8 +3569,8 @@ int run_func(struct script_state *st)
 	if( script_config.warn_func_mismatch_argtypes )
 		script_check_buildin_argtype(st, func);
 
-	if(str_data[func].func) {
-		if (str_data[func].func(st)) //Report error
+	if( str_data[func].func ) {
+		if( str_data[func].func(st) ) //Report error
 			script_reportsrc(st);
 	} else {
 		ShowError("script:run_func: '%s' (id=%d type=%s) has no C function. please report this!!!\n", get_str(func), func, script_op2name(str_data[func].type));
@@ -3570,7 +3578,7 @@ int run_func(struct script_state *st)
 		st->state = END;
 	}
 
-	// Stack's datum are used when re-running functions [Eoe]
+	//Stack's datum are used when re-running functions [Eoe]
 	if( st->state == RERUNLINE )
 		return 0;
 
@@ -3581,8 +3589,8 @@ int run_func(struct script_state *st)
 		int nargs;
 
 		pop_stack(st, st->stack->defsp, st->start); //Pop distractions from the stack
-		if( st->stack->defsp < 1 || st->stack->stack_data[st->stack->defsp-1].type != C_RETINFO ) {
-			ShowWarning("script:run_func: return without callfunc or callsub!\n");
+		if( st->stack->defsp < 1 || st->stack->stack_data[st->stack->defsp - 1].type != C_RETINFO ) {
+			ShowWarning("script:run_func: Return without callfunc or callsub!\n");
 			script_reportsrc(st);
 			st->state = END;
 			return 1;
@@ -3597,7 +3605,7 @@ int run_func(struct script_state *st)
 		st->stack->defsp = ri->defsp;
 		memset(ri, 0, sizeof(struct script_retinfo));
 
-		pop_stack(st, olddefsp-nargs - 1, olddefsp); //Pop arguments and retinfo
+		pop_stack(st, olddefsp - nargs - 1, olddefsp); //Pop arguments and retinfo
 
 		st->state = GOTO;
 	}
@@ -3720,7 +3728,7 @@ static void script_attach_state(struct script_state *st)
 {
 	struct map_session_data *sd;
 
-	if(st->rid && (sd = map_id2sd(st->rid)) != NULL) {
+	if(st->rid && (sd = map_id2sd(st->rid))) {
 		if(st != sd->st) {
 			if(st->bk_st) //There is already a backup
 				ShowDebug("script_free_state: Previous script state lost (rid=%d, oid=%d, state=%d, bk_npcid=%d).\n", st->bk_st->rid, st->bk_st->oid, st->bk_st->state, st->bk_npcid);
@@ -5335,8 +5343,8 @@ BUILDIN_FUNC(warpguild)
 BUILDIN_FUNC(heal)
 {
 	TBL_PC *sd;
-	int hp,sp;
-	
+	int hp, sp;
+
 	sd = script_rid2sd(st);
 	if( !sd )
 		return 0;
@@ -5353,7 +5361,7 @@ BUILDIN_FUNC(heal)
 BUILDIN_FUNC(itemheal)
 {
 	TBL_PC *sd;
-	int hp,sp;
+	int hp, sp;
 
 	hp = script_getnum(st,2);
 	sp = script_getnum(st,3);
@@ -5378,7 +5386,7 @@ BUILDIN_FUNC(itemheal)
 BUILDIN_FUNC(percentheal)
 {
 	TBL_PC *sd;
-	int hp,sp;
+	int hp, sp;
 
 	hp = script_getnum(st,2);
 	sp = script_getnum(st,3);
@@ -5422,7 +5430,7 @@ BUILDIN_FUNC(jobchange)
 	if( pcdb_checkid(job) ) {
 		TBL_PC *sd = script_rid2sd(st);
 
-		if( sd == NULL )
+		if( !sd )
 			return 0;
 
 		pc_jobchange(sd, job, upper);
@@ -7209,6 +7217,7 @@ BUILDIN_FUNC(readparam)
  *	2 : guild_id
  *	3 : account_id
  *	4 : bg_id
+ *	5 : clan_id
  *------------------------------------------*/
 BUILDIN_FUNC(getcharid)
 {
@@ -7232,6 +7241,7 @@ BUILDIN_FUNC(getcharid)
 		case 2: script_pushint(st,sd->status.guild_id); break;
 		case 3: script_pushint(st,sd->status.account_id); break;
 		case 4: script_pushint(st,sd->bg_id); break;
+		case 5: script_pushint(st,sd->status.clan_id); break;
 		default:
 			ShowError("buildin_getcharid: invalid parameter (%d).\n", num);
 			script_pushint(st,0);
@@ -19549,9 +19559,9 @@ BUILDIN_FUNC(party_create)
 {
 	char party_name[NAME_LENGTH];
 	int item1 = 0, item2 = 0;
-	TBL_PC *sd;
+	TBL_PC *sd = NULL;
 
-	if( (!script_hasdata(st,3) && !(sd = script_rid2sd(st))) || (script_hasdata(st,3) && !(sd = map_charid2sd(script_getnum(st,3)))) ) {
+	if( !script_charid2sd(3,sd) ) {
 		script_pushint(st,-1);
 		return 0;
 	}
@@ -20595,6 +20605,48 @@ BUILDIN_FUNC(navigateto) {
 #endif
 }
 
+// Clan System
+/**
+ * Join a clan
+ * clan_join(<clan id>{,<char id>});
+ */
+BUILDIN_FUNC(clan_join) {
+	struct map_session_data *sd;
+	int clan_id = script_getnum(st,2);
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (clan_member_join(sd,clan_id,sd->status.account_id,sd->status.char_id))
+		script_pushint(st,true);
+	else
+		script_pushint(st,false);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Leave the clan
+ * clan_leave({<char id>});
+ */
+BUILDIN_FUNC(clan_leave) {
+	struct map_session_data *sd;
+
+	if (!script_charid2sd(2,sd)) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (clan_member_leave(sd,sd->status.clan_id,sd->status.account_id,sd->status.char_id))
+		script_pushint(st,true);
+	else
+		script_pushint(st,false);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -21171,6 +21223,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(hateffect,"ii"),
 	BUILDIN_DEF(adopt,"vv"),
 	BUILDIN_DEF(navigateto,"s???????"),
+	//Clan system
+	BUILDIN_DEF(clan_join,"i?"),
+	BUILDIN_DEF(clan_leave,"?"),
 
 #include "../custom/script_def.inc"
 

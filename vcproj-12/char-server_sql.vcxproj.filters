@@ -55,6 +55,9 @@
     <ClCompile Include="..\src\char\int_auction.c">
       <Filter>char_sql</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\char\int_clan.c">
+      <Filter>char_sql</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\char\int_elemental.c">
       <Filter>char_sql</Filter>
     </ClCompile>
@@ -178,6 +181,9 @@
       <Filter>char_sql</Filter>
     </ClInclude>
     <ClInclude Include="..\src\char\int_auction.h">
+      <Filter>char_sql</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\char\int_clan.h">
       <Filter>char_sql</Filter>
     </ClInclude>
     <ClInclude Include="..\src\char\int_elemental.h">
