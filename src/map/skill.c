@@ -7510,7 +7510,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 								if( tsc->data[i]->val4 )
 									continue; //Silence from Silent Breeze can't be dispeled
 								break;
-							//bugreport:4888 these songs may only be dispelled if you're not in their song area anymore
 							case SC_WHISTLE:
 							case SC_ASSNCROS:
 							case SC_POEMBRAGI:
@@ -7519,8 +7518,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_DONTFORGETME:
 							case SC_FORTUNE:
 							case SC_SERVICE4U:
-								if( !tsc->data[i]->val4 )
-									continue; //If in song-area don't end it
+								if( !battle_config.dispel_song || !tsc->data[i]->val4 )
+									continue; //If in song area don't end it, even if config enabled
 								break;
 							case SC_ASSUMPTIO:
 								if( bl->type == BL_MOB )
@@ -8978,9 +8977,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							continue;
 						case SC_SILENCE:
 							if( tsc->data[i]->val4 )
-								continue; //Silence from Silent Breeze can't be dispeled
+								continue;
 							break;
-						//bugreport:4888 these songs may only be dispelled if you're not in their song area anymore
 						case SC_WHISTLE:
 						case SC_ASSNCROS:
 						case SC_POEMBRAGI:
@@ -8989,8 +8987,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_DONTFORGETME:
 						case SC_FORTUNE:
 						case SC_SERVICE4U:
-							if( !tsc->data[i]->val4 )
-								continue; //If in song-area don't end it
+							if( !battle_config.dispel_song || !tsc->data[i]->val4 )
+								continue;
 							break;
 						case SC_ASSUMPTIO:
 							if( bl->type == BL_MOB )

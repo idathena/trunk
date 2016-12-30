@@ -8300,6 +8300,7 @@ static const struct _battle_data {
 	{ "item_rate_adddrop",                  &battle_config.item_rate_adddrop,               100,    0,      1000000,        },
 	{ "item_rate_treasure",                 &battle_config.item_rate_treasure,              100,    0,      1000000,        },
 	{ "prevent_logout",                     &battle_config.prevent_logout,                  10000,  0,      60000,          },
+	{ "prevent_logout_trigger",             &battle_config.prevent_logout_trigger,          0xE,    0,      0xF,            },
 	{ "alchemist_summon_reward",            &battle_config.alchemist_summon_reward,         1,      0,      2,              },
 	{ "drops_by_luk",                       &battle_config.drops_by_luk,                    0,      0,      INT_MAX,        },
 	{ "drops_by_luk2",                      &battle_config.drops_by_luk2,                   0,      0,      INT_MAX,        },
@@ -8545,6 +8546,7 @@ static const struct _battle_data {
 	{ "crimsonrock_knockback",              &battle_config.crimsonrock_knockback,           1,      0,      1,              },
 	{ "tarotcard_equal_chance",             &battle_config.tarotcard_equal_chance,          0,      0,      1,              },
 	{ "show_status_katar_crit",             &battle_config.show_status_katar_crit,          0,      0,      1,              },
+	{ "dispel_song",                        &battle_config.dispel_song,                     0,      0,      1,              },
 };
 #ifndef STATS_OPT_OUT
 /**
