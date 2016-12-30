@@ -745,11 +745,13 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#01")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Aigu#02")+"::OnEnable";
-		donpcevent instance_npcname("Runane#02")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Aigu#02")+"::OnEnable";
+	donpcevent instance_npcname("Runane#02")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -921,11 +923,13 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("Runane#02")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Gelkah#03")+"::OnEnable";
-		donpcevent instance_npcname("Rohtert#03")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Gelkah#03")+"::OnEnable";
+	donpcevent instance_npcname("Rohtert#03")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -1089,10 +1093,12 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("Rohtert#03")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("???#4")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("???#4")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -1177,13 +1183,15 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("???#4")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Aigu#05")+"::OnEnable";
-		donpcevent instance_npcname("Arang#05")+"::OnEnable";
-		donpcevent instance_npcname("Shalosh#5")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#05")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Aigu#05")+"::OnEnable";
+	donpcevent instance_npcname("Arang#05")+"::OnEnable";
+	donpcevent instance_npcname("Shalosh#5")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#05")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -1357,12 +1365,14 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#05")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Aigu#06")+"::OnEnable";
-		donpcevent instance_npcname("Runane#06")+"::OnEnable";
-		donpcevent instance_npcname("Roel#06")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Aigu#06")+"::OnEnable";
+	donpcevent instance_npcname("Runane#06")+"::OnEnable";
+	donpcevent instance_npcname("Roel#06")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -1497,12 +1507,14 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("Roel#06")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Shalosh#7")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#07")+"::OnEnable";
-		donpcevent instance_npcname("Mingmin#07")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Shalosh#7")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#07")+"::OnEnable";
+	donpcevent instance_npcname("Mingmin#07")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -1646,12 +1658,14 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("Mingmin#07")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Shalosh#8")+"::OnEnable";
-		donpcevent instance_npcname("Ragi#08")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#08")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Shalosh#8")+"::OnEnable";
+	donpcevent instance_npcname("Ragi#08")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#08")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -1858,13 +1872,15 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#08")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Roel#09")+"::OnEnable";
-		donpcevent instance_npcname("Shalosh#9")+"::OnEnable";
-		donpcevent instance_npcname("Runane#09")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#09")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Roel#09")+"::OnEnable";
+	donpcevent instance_npcname("Shalosh#9")+"::OnEnable";
+	donpcevent instance_npcname("Runane#09")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#09")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -2009,14 +2025,16 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#09")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Roel#10")+"::OnEnable";
-		donpcevent instance_npcname("Mingmin#10")+"::OnEnable";
-		donpcevent instance_npcname("Aigu#10")+"::OnEnable";
-		donpcevent instance_npcname("Arang#10")+"::OnEnable";
-		donpcevent instance_npcname("Runane#10")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Roel#10")+"::OnEnable";
+	donpcevent instance_npcname("Mingmin#10")+"::OnEnable";
+	donpcevent instance_npcname("Aigu#10")+"::OnEnable";
+	donpcevent instance_npcname("Arang#10")+"::OnEnable";
+	donpcevent instance_npcname("Runane#10")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -2258,10 +2276,12 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("Runane#10")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Mingmin#11")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Mingmin#11")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -2365,11 +2385,13 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("Mingmin#11")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Melody-Jack#12")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#12")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Melody-Jack#12")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#12")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -2515,15 +2537,17 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#12")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Aigu#13")+"::OnEnable";
-		donpcevent instance_npcname("Ragi#13")+"::OnEnable";
-		donpcevent instance_npcname("Shalosh#13")+"::OnEnable";
-		donpcevent instance_npcname("Roel#13")+"::OnEnable";
-		donpcevent instance_npcname("Mingmin#13")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#13")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Aigu#13")+"::OnEnable";
+	donpcevent instance_npcname("Ragi#13")+"::OnEnable";
+	donpcevent instance_npcname("Shalosh#13")+"::OnEnable";
+	donpcevent instance_npcname("Roel#13")+"::OnEnable";
+	donpcevent instance_npcname("Mingmin#13")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#13")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -2792,17 +2816,19 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#13")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Shalosh#14")+"::OnEnable";
-		donpcevent instance_npcname("Roel#14")+"::OnEnable";
-		donpcevent instance_npcname("Mingmin#14")+"::OnEnable";
-		donpcevent instance_npcname("Runane#14")+"::OnEnable";
-		donpcevent instance_npcname("Arang#14")+"::OnEnable";
-		donpcevent instance_npcname("Rohtert#14")+"::OnEnable";
-		donpcevent instance_npcname("Gelkah#14")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#14")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Shalosh#14")+"::OnEnable";
+	donpcevent instance_npcname("Roel#14")+"::OnEnable";
+	donpcevent instance_npcname("Mingmin#14")+"::OnEnable";
+	donpcevent instance_npcname("Runane#14")+"::OnEnable";
+	donpcevent instance_npcname("Arang#14")+"::OnEnable";
+	donpcevent instance_npcname("Rohtert#14")+"::OnEnable";
+	donpcevent instance_npcname("Gelkah#14")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#14")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -3064,12 +3090,14 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#14")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Mingmin#15")+"::OnEnable";
-		donpcevent instance_npcname("Rohtert#15")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#15")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Mingmin#15")+"::OnEnable";
+	donpcevent instance_npcname("Rohtert#15")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#15")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -3215,12 +3243,14 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#15")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Aigu#16")+"::OnEnable";
-		donpcevent instance_npcname("Runane#16")+"::OnEnable";
-		donpcevent instance_npcname("Shalosh#16")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Aigu#16")+"::OnEnable";
+	donpcevent instance_npcname("Runane#16")+"::OnEnable";
+	donpcevent instance_npcname("Shalosh#16")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -3405,12 +3435,14 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("Shalosh#16")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Roel#17")+"::OnEnable";
-		donpcevent instance_npcname("Runane#17")+"::OnEnable";
-		donpcevent instance_npcname("Shalosh#17")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Roel#17")+"::OnEnable";
+	donpcevent instance_npcname("Runane#17")+"::OnEnable";
+	donpcevent instance_npcname("Shalosh#17")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -3600,17 +3632,19 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("Shalosh#17")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Arang#18")+"::OnEnable";
-		donpcevent instance_npcname("Ragi#18")+"::OnEnable";
-		donpcevent instance_npcname("Gelkah#18")+"::OnEnable";
-		donpcevent instance_npcname("Rohtert#18")+"::OnEnable";
-		donpcevent instance_npcname("Aigu#18")+"::OnEnable";
-		donpcevent instance_npcname("Mingmin#18")+"::OnEnable";
-		donpcevent instance_npcname("Melody-Jack#18")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#18")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Arang#18")+"::OnEnable";
+	donpcevent instance_npcname("Ragi#18")+"::OnEnable";
+	donpcevent instance_npcname("Gelkah#18")+"::OnEnable";
+	donpcevent instance_npcname("Rohtert#18")+"::OnEnable";
+	donpcevent instance_npcname("Aigu#18")+"::OnEnable";
+	donpcevent instance_npcname("Mingmin#18")+"::OnEnable";
+	donpcevent instance_npcname("Melody-Jack#18")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#18")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -3892,11 +3926,13 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#18")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Gelkah#19")+"::OnEnable";
-		donpcevent instance_npcname("Roel#19")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Gelkah#19")+"::OnEnable";
+	donpcevent instance_npcname("Roel#19")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -4048,20 +4084,22 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("Roel#19")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("Rohtert#20")+"::OnEnable";
-		donpcevent instance_npcname("Arang#20")+"::OnEnable";
-		donpcevent instance_npcname("Aigu#20")+"::OnEnable";
-		donpcevent instance_npcname("Ragi#20")+"::OnEnable";
-		donpcevent instance_npcname("Runane#20")+"::OnEnable";
-		donpcevent instance_npcname("Roel#20")+"::OnEnable";
-		donpcevent instance_npcname("Shalosh#20")+"::OnEnable";
-		donpcevent instance_npcname("Gelkah#20")+"::OnEnable";
-		donpcevent instance_npcname("Mingmin#20")+"::OnEnable";
-		donpcevent instance_npcname("Melody-Jack#20")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#20")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("Rohtert#20")+"::OnEnable";
+	donpcevent instance_npcname("Arang#20")+"::OnEnable";
+	donpcevent instance_npcname("Aigu#20")+"::OnEnable";
+	donpcevent instance_npcname("Ragi#20")+"::OnEnable";
+	donpcevent instance_npcname("Runane#20")+"::OnEnable";
+	donpcevent instance_npcname("Roel#20")+"::OnEnable";
+	donpcevent instance_npcname("Shalosh#20")+"::OnEnable";
+	donpcevent instance_npcname("Gelkah#20")+"::OnEnable";
+	donpcevent instance_npcname("Mingmin#20")+"::OnEnable";
+	donpcevent instance_npcname("Melody-Jack#20")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#20")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -4501,13 +4539,15 @@ OnDisable:
 OnMyMobDead:
 	.@map$ = instance_mapname("1@jtb");
 	.@mob_num = mobcount(.@map$,instance_npcname("New Oz#20")+"::OnMyMobDead");
-	if (!.@mob_num) {
-		sleep2 1500;
-		donpcevent instance_npcname("#jtwarp21")+"::OnEnable";
-		donpcevent instance_npcname("Shalosh#22")+"::OnEnable";
-		donpcevent instance_npcname("Ferre#22")+"::OnEnable";
-		donpcevent instance_npcname("New Oz#22")+"::OnEnable";
-	}
+	if (!.@mob_num)
+		initnpctimer;
+	end;
+OnTimer2000:
+	donpcevent instance_npcname("#jtwarp21")+"::OnEnable";
+	donpcevent instance_npcname("Shalosh#22")+"::OnEnable";
+	donpcevent instance_npcname("Ferre#22")+"::OnEnable";
+	donpcevent instance_npcname("New Oz#22")+"::OnEnable";
+	stopnpctimer;
 	end;
 }
 
@@ -5088,11 +5128,7 @@ OnMyMobDead:
 	mes "[Rohtert]";
 	mes "Don't look at me. Is that an exit?";
 	unittalk getnpcid(0,instance_npcname("Rohtert#22")),"Rohtert : Don't look at me. Is that an exit?";
-	close2;
-	areawarp instance_mapname("1@jtb"),305,339,338,312,instance_mapname("1@jtb"),359,23;
-	cutin "rote01",255;
 	'jitRoom = 100;
-	sleep2 500;
 	donpcevent instance_npcname("Gelkah#23")+"::OnEnable";
 	donpcevent instance_npcname("Roel#23")+"::OnEnable";
 	donpcevent instance_npcname("Arang#23")+"::OnEnable";
@@ -5103,6 +5139,9 @@ OnMyMobDead:
 	donpcevent instance_npcname("Ragi#23")+"::OnEnable";
 	donpcevent instance_npcname("Mingmin#23")+"::OnEnable";
 	donpcevent instance_npcname("New Oz#23")+"::OnEnable";
+	close2;
+	cutin "rote01",255;
+	areawarp instance_mapname("1@jtb"),305,339,338,312,instance_mapname("1@jtb"),359,23;
 	end;
 
 OnInstanceInit:

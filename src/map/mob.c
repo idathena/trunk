@@ -2764,7 +2764,7 @@ int mob_guardian_guildchange(struct mob_data *md)
 	if (!md->guardian_data)
 		return 0;
 
-	if (md->guardian_data->castle->guild_id == 0) { //Castle with no owner? Delete the guardians
+	if (!md->guardian_data->castle->guild_id) { //Castle with no owner? Delete the guardians
 		if (md->mob_id == MOBID_EMPERIUM) //But don't delete the emperium, just clear it's guild-data
 			md->guardian_data->g = NULL;
 		else {
@@ -2775,8 +2775,7 @@ int mob_guardian_guildchange(struct mob_data *md)
 		return 0;
 	}
 
-	g = guild_search(md->guardian_data->castle->guild_id);
-	if (g == NULL) { //Properly remove guardian info from Castle data
+	if (!(g = guild_search(md->guardian_data->castle->guild_id))) { //Properly remove guardian info from Castle data
 		ShowError("mob_guardian_guildchange: New Guild (id %d) does not exists!\n", md->guardian_data->castle->guild_id);
 		if (md->guardian_data->number >= 0 && md->guardian_data->number < MAX_GUARDIANS)
 			guild_castledatasave(md->guardian_data->castle->castle_id, 10 + md->guardian_data->number, 0);

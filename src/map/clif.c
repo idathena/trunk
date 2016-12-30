@@ -9518,6 +9518,10 @@ void clif_name(struct block_list *src, struct block_list *bl, send_target target
 						WBUFB(buf,54) = 0;
 						WBUFB(buf,78) = 0;
 					}
+				} else {
+					WBUFB(buf,30) = 0;
+					WBUFB(buf,54) = 0;
+					WBUFB(buf,78) = 0;
 				}
 #if PACKETVER >= 20150513
 				WBUFL(buf,102) = 0;

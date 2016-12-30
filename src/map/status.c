@@ -492,7 +492,7 @@ void initChangeTables(void) {
 #endif
 		SCB_NONE );
 
-	set_sc( ALL_PARTYFLEE        , SC_INCFLEE         , SI_PARTYFLEE       , SCB_NONE );
+	set_sc( ALL_PARTYFLEE        , SC_INCFLEE         , SI_PARTYFLEE       , SCB_FLEE );
 	set_sc( ALL_ODINS_POWER      , SC_ODINS_POWER     , SI_ODINS_POWER     , SCB_WATK|SCB_MATK|SCB_DEF|SCB_MDEF );
 
 	set_sc( CR_SHRINK            , SC_SHRINK          , SI_CR_SHRINK       , SCB_NONE );
@@ -1043,7 +1043,6 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_INCDEX] |= SCB_DEX;
 	StatusChangeFlagTable[SC_INCLUK] |= SCB_LUK;
 	StatusChangeFlagTable[SC_INCHIT] |= SCB_HIT;
-	StatusChangeFlagTable[SC_INCHITRATE] |= SCB_HIT;
 	StatusChangeFlagTable[SC_INCFLEE] |= SCB_FLEE;
 	StatusChangeFlagTable[SC_INCFLEERATE] |= SCB_FLEE;
 	StatusChangeFlagTable[SC_INCCRI] |= SCB_CRI;
@@ -4462,28 +4461,28 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			temp += status->batk;
 			status->batk = cap_value(temp, 0, USHRT_MAX);
 		}
-		status->batk = status_calc_batk(bl, sc, status->batk, true);
+		status->batk = status_calc_batk(bl, sc, status->batk);
 	}
 
 	if( flag&SCB_WATK ) {
 #ifndef RENEWAL
-		status->rhw.atk = status_calc_watk(bl, sc, b_status->rhw.atk, true);
+		status->rhw.atk = status_calc_watk(bl, sc, b_status->rhw.atk);
 		if( !sd ) //Should not affect weapon refine bonus
-			status->rhw.atk2 = status_calc_watk(bl, sc, b_status->rhw.atk2, true);
+			status->rhw.atk2 = status_calc_watk(bl, sc, b_status->rhw.atk2);
 		if( b_status->lhw.atk ) {
 			if( sd ) {
 				sd->state.lr_flag = 1;
-				status->lhw.atk = status_calc_watk(bl, sc, b_status->lhw.atk, true);
+				status->lhw.atk = status_calc_watk(bl, sc, b_status->lhw.atk);
 				sd->state.lr_flag = 0;
 			} else {
-				status->lhw.atk = status_calc_watk(bl, sc, b_status->lhw.atk, true);
-				status->lhw.atk2 = status_calc_watk(bl, sc, b_status->lhw.atk2, true);
+				status->lhw.atk = status_calc_watk(bl, sc, b_status->lhw.atk);
+				status->lhw.atk2 = status_calc_watk(bl, sc, b_status->lhw.atk2);
 			}
 		}
 #else
-		status->watk = status_calc_watk(bl, sc, b_status->watk, true);
+		status->watk = status_calc_watk(bl, sc, b_status->watk);
 		if( b_status->watk2 )
-			status->watk2 = status_calc_watk(bl, sc, b_status->watk2, true);
+			status->watk2 = status_calc_watk(bl, sc, b_status->watk2);
 #endif
 	}
 
@@ -4503,13 +4502,13 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			&& status->luk == b_status->luk
 #endif
 			)
-			status->hit = status_calc_hit(bl, sc, b_status->hit, true);
+			status->hit = status_calc_hit(bl, sc, b_status->hit);
 		else
 			status->hit = status_calc_hit(bl, sc, b_status->hit + (status->dex - b_status->dex)
 #ifdef RENEWAL
 			 + (status->luk / 3 - b_status->luk / 3)
 #endif
-			, true);
+			);
 	}
 
 	if( flag&SCB_FLEE ) {
@@ -5320,20 +5319,11 @@ unsigned short status_calc_luk(struct block_list *bl, struct status_change *sc, 
 	return (unsigned short)cap_value(luk,0,USHRT_MAX);
 }
 
-unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc, int batk, bool viewable)
+unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc, int batk)
 {
 	if(!sc || !sc->count)
 		return (unsigned short)cap_value(batk,0,USHRT_MAX);
 
-	if(!viewable) { //Some statuses that are hidden in the status window
-		if(sc->data[SC_ATKPOTION])
-			batk += sc->data[SC_ATKPOTION]->val1;
-		if(sc->data[SC_ZANGETSU])
-			batk += sc->data[SC_ZANGETSU]->val2;
-		if(sc->data[SC_INCATKRATE])
-			batk += batk * sc->data[SC_INCATKRATE]->val1 / 100;
-		return (unsigned short)cap_value(batk,0,USHRT_MAX);
-	}
 #ifndef RENEWAL
 	if(sc->data[SC_MADNESSCANCEL])
 		batk += 100;
@@ -5386,16 +5376,11 @@ unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc,
 	return (unsigned short)cap_value(batk,0,USHRT_MAX);
 }
 
-unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc, int watk, bool viewable)
+unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc, int watk)
 {
 	if(!sc || !sc->count)
 		return (unsigned short)cap_value(watk,0,USHRT_MAX);
 
-	if(!viewable) {
-		if(sc->data[SC_INCATKRATE] && bl->type == BL_PC)
-			watk += watk * sc->data[SC_INCATKRATE]->val1 / 100;
-		return (unsigned short)cap_value(watk,0,USHRT_MAX);
-	}
 	if(sc->data[SC_WATKFOOD])
 		watk += sc->data[SC_WATKFOOD]->val1;
 	if(sc->data[SC_IMPOSITIO])
@@ -5426,16 +5411,16 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 		watk += sc->data[SC_FULL_SWING_K]->val1;
 	if(sc->data[SC_ANGRIFFS_MODUS])
 		watk += sc->data[SC_ANGRIFFS_MODUS]->val2;
-#ifndef RENEWAL
-	if(sc->data[SC_CONCENTRATION])
-		watk += watk * sc->data[SC_CONCENTRATION]->val2 / 100;
-#endif
 	if(sc->data[SC_PROVOKE]
 #ifdef RENEWAL
 		&& bl->type != BL_PC
 #endif
 		)
 		watk += watk * sc->data[SC_PROVOKE]->val3 / 100;
+#ifndef RENEWAL
+	if(sc->data[SC_CONCENTRATION])
+		watk += watk * sc->data[SC_CONCENTRATION]->val2 / 100;
+#endif
 	if(sc->data[SC_FLEET])
 		watk += watk * sc->data[SC_FLEET]->val3 / 100;
 	if((sc->data[SC_FIRE_INSIGNIA] && sc->data[SC_FIRE_INSIGNIA]->val1 == 2) ||
@@ -5464,7 +5449,7 @@ unsigned short status_calc_matk(struct block_list *bl, struct status_change *sc,
 	if(!sc || !sc->count)
 		return (unsigned short)cap_value(matk,0,USHRT_MAX);
 
-	if(!viewable) {
+	if(!viewable) { //Some statuses that are hidden in the status window
 		if(sc->data[SC_MATKPOTION])
 			matk += sc->data[SC_MATKPOTION]->val1;
 		if(sc->data[SC_ZANGETSU])
@@ -5524,8 +5509,6 @@ unsigned short status_calc_ematk(struct block_list *bl, struct status_change *sc
 	if(!sc || !sc->count)
 		return (unsigned short)cap_value(matk,0,USHRT_MAX);
 
-	if(sc->data[SC_MATKPOTION])
-		matk += sc->data[SC_MATKPOTION]->val1;
 	if(sc->data[SC_MATKFOOD])
 		matk += sc->data[SC_MATKFOOD]->val1;
 	if(sc->data[SC_MANA_PLUS])
@@ -5594,20 +5577,11 @@ short status_calc_critical(struct block_list *bl, struct status_change *sc, int 
 	return (short)cap_value(critical,10,SHRT_MAX);
 }
 
-short status_calc_hit(struct block_list *bl, struct status_change *sc, int hit, bool viewable)
+short status_calc_hit(struct block_list *bl, struct status_change *sc, int hit)
 {
 	if(!sc || !sc->count)
 		return (short)cap_value(hit,1,SHRT_MAX);
 
-	if(!viewable) {
-		if(sc->data[SC_MTF_ASPD])
-			hit += sc->data[SC_MTF_ASPD]->val2;
-		if(sc->data[SC_MTF_ASPD2])
-			hit += sc->data[SC_MTF_ASPD2]->val2;
-		if(sc->data[SC_INCHITRATE])
-			hit += hit * sc->data[SC_INCHITRATE]->val1 / 100;
-		return (short)cap_value(hit,1,SHRT_MAX);
-	}
 	if(sc->data[SC_INCHIT])
 		hit += sc->data[SC_INCHIT]->val1;
 	if(sc->data[SC_HITFOOD])
