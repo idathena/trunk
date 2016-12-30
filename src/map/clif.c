@@ -5118,7 +5118,7 @@ int clif_outsight(struct block_list *bl,va_list ap)
 	sd = BL_CAST(BL_PC, bl);
 	tsd = BL_CAST(BL_PC, tbl);
 
-	if (tsd && tsd->fd) { //tsd has lost sight of the bl object.
+	if (tsd && tsd->fd) { //tsd has lost sight of the bl object
 		switch (bl->type) {
 			case BL_PC:
 				if (sd->vd.class_ != INVISIBLE_CLASS)
@@ -10999,7 +10999,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 			}
 			pc_delinvincibletimer(sd);
 			sd->idletime = last_tick;
-			unit_attack(&sd->bl, target_id, action_type);
+			unit_attack(&sd->bl, target_id, (action_type != 0));
 			break;
 		case 0x02: //Sitdown
 			if( battle_config.basic_skill_check && pc_checkskill(sd, NV_BASIC) < 3 && pc_checkskill(sd, SU_BASIC_SKILL) < 1 ) {
@@ -14795,7 +14795,7 @@ void clif_parse_HomAttack(int fd,struct map_session_data *sd)
 		return;
 
 	unit_stop_attack(bl);
-	unit_attack(bl, target_id, action_type);
+	unit_attack(bl, target_id, (action_type != 0));
 }
 
 

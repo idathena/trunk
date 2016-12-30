@@ -334,6 +334,7 @@ extern struct Battle_Config
 	int item_drop_adddrop_min,item_drop_adddrop_max; //[Skotlex]
 
 	int prevent_logout;	//Added by RoVeRT
+	int prevent_logout_trigger;
 
 	int alchemist_summon_reward; //[Valaris]
 	int drops_by_luk;
@@ -621,6 +622,7 @@ extern struct Battle_Config
 	int crimsonrock_knockback;
 	int tarotcard_equal_chance; //Official or equal chance for each card
 	int show_status_katar_crit;
+	int dispel_song; //Can songs be dispelled?
 } battle_config;
 
 void do_init_battle(void);

@@ -1842,7 +1842,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	} else
 		skill_castend_id(ud->skilltimer, tick, src->id, 0);
 
-	if( sd )
+	if( sd && (battle_config.prevent_logout_trigger&PLT_SKILL) )
 		sd->canlog_tick = gettick();
 
 	return 1;
@@ -1885,42 +1885,42 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 
 	nullpo_ret(src);
 
-	if(!src->prev)
+	if( !src->prev )
 		return 0; //Not on the map
 
-	if(status_isdead(src))
+	if( status_isdead(src) )
 		return 0;
 
 	sd = BL_CAST(BL_PC, src);
 	ud = unit_bl2ud(src);
 
-	if(ud == NULL)
+	if( !ud )
 		return 0;
 
 	//Normally not needed since clif.c checks for it, but at/char/script commands don't! [Skotlex]
-	if(ud->skilltimer != INVALID_TIMER)
+	if( ud->skilltimer != INVALID_TIMER )
 		return 0;
 
 	sc = status_get_sc(src);
 
-	if(sc && !sc->count)
+	if( sc && !sc->count )
 		sc = NULL;
 
-	if(sd) {
-		if(skill_isNotOk(skill_id, sd) || !skill_check_condition_castbegin(sd, skill_id, skill_lv))
+	if( sd ) {
+		if( skill_isNotOk(skill_id, sd) || !skill_check_condition_castbegin(sd, skill_id, skill_lv) )
 			return 0;
 		//Ice Wall cannot be canceled past this point, the client displays the animation even,
 		//if we cancel it from castend_pos, so it has to be here for it to not display the animation
-		if(skill_id == WZ_ICEWALL && map_getcell(src->m, skill_x, skill_y, CELL_CHKNOICEWALL))
+		if( skill_id == WZ_ICEWALL && map_getcell(src->m, skill_x, skill_y, CELL_CHKNOICEWALL) )
 			return 0;
 	}
 
-	if(!status_check_skilluse(src, NULL, skill_id, 0))
+	if( !status_check_skilluse(src, NULL, skill_id, 0) )
 		return 0;
 
 	//Can't cast ground targeted spells on wall cells
-	if(map_getcell(src->m, skill_x, skill_y, CELL_CHKWALL)) {
-		if(sd)
+	if( map_getcell(src->m, skill_x, skill_y, CELL_CHKWALL) ) {
+		if( sd )
 			clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 		return 0;
 	}
@@ -1931,16 +1931,16 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	bl.x = skill_x;
 	bl.y = skill_y;
 
-	if(src->type == BL_NPC) //NPC-objects can override cast distance
+	if( src->type == BL_NPC ) //NPC-objects can override cast distance
 		range = AREA_SIZE; //Maximum visible distance before NPC goes out of sight
 	else
 		range = skill_get_range2(src, skill_id, skill_lv); //Skill cast distance from database
 
 	//New action request received, delete previous action request if not executed yet
-	if(ud->stepaction || ud->steptimer != INVALID_TIMER)
+	if( ud->stepaction || ud->steptimer != INVALID_TIMER )
 		unit_stop_stepaction(src);
 	//Remember the skill request from the client while walking to the next cell
-	if(src->type == BL_PC && ud->walktimer != INVALID_TIMER && !battle_check_range(src, &bl, range - 1)) {
+	if( src->type == BL_PC && ud->walktimer != INVALID_TIMER && !battle_check_range(src, &bl, range - 1) ) {
 		struct map_data *md = &map[src->m];
 
 		//Convert coordinates to target_to so we can use it as target later
@@ -1951,30 +1951,30 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 		return 0; //Attacking will be handled by unit_walktoxy_timer in this case
 	}
 
-	if(skill_get_state(ud->skill_id) == ST_MOVE_ENABLE) {
-		if(!unit_can_reach_bl(src, &bl, range + 1, 1, NULL, NULL))
+	if( skill_get_state(ud->skill_id) == ST_MOVE_ENABLE ) {
+		if( !unit_can_reach_bl(src, &bl, range + 1, 1, NULL, NULL) )
 			return 0; //Walk-path check failed
-	} else if(!battle_check_range(src, &bl, range))
+	} else if( !battle_check_range(src, &bl, range) )
 		return 0; //Arrow-path check failed
 
 	unit_stop_attack(src);
 
 	//Moved here to prevent Suffragium from ending if skill fails
 #ifndef RENEWAL_CAST
-	if(!(skill_get_castnodex(skill_id, skill_lv)&2))
+	if( !(skill_get_castnodex(skill_id, skill_lv)&2) )
 		casttime = skill_castfix_sc(src, casttime);
 #else
 	casttime = skill_vfcastfix(src, casttime, skill_id, skill_lv);
 #endif
 
-	if(src->type == BL_NPC) //NPC-objects do not have cast time
+	if( src->type == BL_NPC ) //NPC-objects do not have cast time
 		casttime = 0;
 
 	ud->state.skillcastcancel = (castcancel && casttime > 0 ? 1 : 0);
-	if(!sd || sd->skillitem != skill_id || skill_get_cast(skill_id,skill_lv))
+	if( !sd || sd->skillitem != skill_id || skill_get_cast(skill_id,skill_lv) )
 		ud->canact_tick = tick + max(casttime,max(status_get_amotion(src),battle_config.min_skill_delay_limit)) + SECURITY_CASTTIME;
-	//if(sd) {
-		//switch(skill_id) {
+	//if( sd ) {
+		//switch( skill_id ) {
 			//case ????:
 				//sd->canequip_tick = tick + casttime;
 		//}
@@ -1985,14 +1985,14 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	ud->skilly       = skill_y;
 	ud->skilltarget  = 0;
 
-	if(sc) { //Why the if else chain: These 3 status do not stack, so its efficient that way
-		if(sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4)) {
+	if( sc ) { //Why the if else chain: These 3 status do not stack, so its efficient that way
+		if( sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4) ) {
 			status_change_end(src, SC_CLOAKING, INVALID_TIMER);
-			if(!src->prev)
+			if( !src->prev )
 				return 0; //Warped away!
-		} else if(sc->data[SC_CLOAKINGEXCEED] && !(sc->data[SC_CLOAKINGEXCEED]->val4&4)) {
+		} else if( sc->data[SC_CLOAKINGEXCEED] && !(sc->data[SC_CLOAKINGEXCEED]->val4&4) ) {
 			status_change_end(src, SC_CLOAKINGEXCEED, INVALID_TIMER);
-			if(!src->prev)
+			if( !src->prev )
 				return 0;
 		}
 	}
@@ -2002,17 +2002,17 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	//In official this is triggered even if no cast time
 	clif_skillcasting(src, src->id, 0, skill_x, skill_y, skill_id, skill_get_ele(skill_id, skill_lv), casttime);
 
-	if(casttime > 0) {
+	if( casttime > 0 ) {
 		unit_setdir(src, map_calc_dir(src, skill_x, skill_y));
 		ud->skilltimer = add_timer( tick + casttime, skill_castend_pos, src->id, 0 );
-		if(sd && (pc_checkskill(sd, SA_FREECAST) > 0 || skill_id == LG_EXEEDBREAK))
+		if( sd && (pc_checkskill(sd, SA_FREECAST) > 0 || skill_id == LG_EXEEDBREAK) )
 			status_calc_bl(&sd->bl, SCB_SPEED|SCB_ASPD);
 	} else {
 		ud->skilltimer = INVALID_TIMER;
 		skill_castend_pos(ud->skilltimer,tick,src->id,0);
 	}
 
-	if(sd)
+	if( sd && (battle_config.prevent_logout_trigger&PLT_SKILL) )
 		sd->canlog_tick = gettick();
 
 	return 1;
@@ -2503,7 +2503,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 		ud->attacktimer = add_timer(ud->attackabletime,unit_attack_timer,src->id,0);
 	}
 
-	if( sd )
+	if( sd && battle_config.prevent_logout_trigger&PLT_ATTACK )
 		sd->canlog_tick = gettick();
 
 	return 1;
