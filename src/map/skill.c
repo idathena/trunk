@@ -9055,7 +9055,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case WL_MARSHOFABYSS:
 			if( !(i = sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv))) ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
+				if( sd )
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				map_freeblock_unlock();
 				return 1;
 			}
@@ -10746,14 +10747,12 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 	struct status_change *sc = NULL, *tsc = NULL;
 	int inf, inf2, flag = 0, i = 0;
 
-	src = map_id2bl(id);
-	if( src == NULL ) {
+	if( !(src = map_id2bl(id)) ) {
 		ShowDebug("skill_castend_id: src == NULL (tid=%d, id=%d)\n",tid,id);
 		return 0; //Not found
 	}
 
-	ud = unit_bl2ud(src);
-	if( ud == NULL ) {
+	if( !(ud = unit_bl2ud(src)) ) {
 		ShowDebug("skill_castend_id: ud == NULL (tid=%d, id=%d)\n",tid,id);
 		return 0; //???
 	}
@@ -10762,7 +10761,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 	md = BL_CAST(BL_MOB,src);
 	hd = BL_CAST(BL_HOM,src);
 
-	if( src->prev == NULL ) {
+	if( !src->prev ) {
 		ud->skilltimer = INVALID_TIMER;
 		return 0;
 	}
@@ -10787,7 +10786,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 		target = map_id2bl(ud->skilltarget);
 
 	do { //Use a do so that you can break out of it when the skill fails
-		if( !target || target->prev == NULL )
+		if( !target || !target->prev )
 			break;
 		if( src->m != target->m || status_isdead(src) )
 			break;
@@ -10972,10 +10971,6 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			if( sc->data[SC_DANCING] && (skill_get_inf2(ud->skill_id)&INF2_SONG_DANCE) && sd )
 				skill_blockpc_start(sd,BD_ADAPTATION,3000);
 		}
-		if( ud->skill_id == PA_GOSPEL )
-			unit_setdir(src,ud->dir);
-		else if( (!i || tid != INVALID_TIMER) && !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL) && target->id != src->id )
-			unit_setdir(src,map_calc_dir(src,target->x,target->y));
 		if( sd && ud->skill_id != SA_ABRACADABRA && ud->skill_id != WM_RANDOMIZESPELL )
 			sd->skillitem = sd->skillitemlv = 0; //They just set the data so leave it as it is [Inkfish]
 		if( ud->skilltimer == INVALID_TIMER ) {
@@ -10984,7 +10979,8 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			else //Mobs can't clear this one as it is used for skill condition 'afterskill'
 				ud->skill_id = 0;
 			ud->skill_lv = ud->skilltarget = 0;
-		}
+		} else if( !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL) && target->id != src->id )
+			unit_setdir(src,map_calc_dir(src,target->x,target->y));
 		map_freeblock_unlock();
 		return 1;
 	} while( 0 );
@@ -11129,10 +11125,6 @@ int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data)
 				skill_blockhomun_start(hd,ud->skill_id,inf);
 		}
 		status_change_end(src,SC_CAMOUFLAGE,INVALID_TIMER);
-		if( ud->skill_id == NJ_SHADOWJUMP || ud->skill_id == GN_WALLOFTHORN )
-			unit_setdir(src,ud->dir);
-		else if( (!i || tid != INVALID_TIMER) && !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL) )
-			unit_setdir(src,map_calc_dir(src,ud->skillx,ud->skilly));
 		if( sd && sd->skillitem != AL_WARP )
 			sd->skillitem = sd->skillitemlv = 0; //Warp-Portal through items will clear data in skill_castend_map [Inkfish]
 		if( ud->skilltimer == INVALID_TIMER ) {
@@ -11141,7 +11133,8 @@ int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data)
 			else //Non mobs can't clear this one as it is used for skill condition 'afterskill'
 				ud->skill_id = 0;
 			ud->skill_lv = ud->skillx = ud->skilly = 0;
-		}
+		} else if( !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL) )
+			unit_setdir(src,map_calc_dir(src,ud->skillx,ud->skilly));
 		map_freeblock_unlock();
 		return 1;
 	} while( 0 );
@@ -14425,7 +14418,7 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			}
 			break;
 		case WL_WHITEIMPRISON:
-			if( bl->id != src->id || (battle_check_target(src,bl,BCT_ENEMY) > 0 && is_boss(bl)) ) {
+			if( bl->id != src->id && (battle_check_target(src,bl,BCT_ENEMY) > 0 && is_boss(bl)) ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				return false;

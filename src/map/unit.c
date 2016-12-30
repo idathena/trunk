@@ -2503,7 +2503,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 		ud->attacktimer = add_timer(ud->attackabletime,unit_attack_timer,src->id,0);
 	}
 
-	if( sd && battle_config.prevent_logout_trigger&PLT_ATTACK )
+	if( sd && (battle_config.prevent_logout_trigger&PLT_ATTACK) )
 		sd->canlog_tick = gettick();
 
 	return 1;
