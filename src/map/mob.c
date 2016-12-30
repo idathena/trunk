@@ -1348,7 +1348,7 @@ static int mob_ai_sub_hard_slavemob(struct mob_data *md,unsigned int tick)
 			return 0;
 
 		//Approach master if within view range, chase back to Master's area also if standing on top of the master
-		if((md->master_dist>MOB_SLAVEDISTANCE || md->master_dist == 0) && unit_can_move(&md->bl)) {
+		if((md->master_dist>MOB_SLAVEDISTANCE || !md->master_dist) && unit_can_move(&md->bl)) {
 			short x = bl->x, y = bl->y;
 
 			mob_stop_attack(md);
