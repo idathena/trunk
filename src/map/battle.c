@@ -2485,6 +2485,15 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 			hitrate += 3 * lv;
 	}
 
+	if(sc) {
+		if(sc->data[SC_INCHITRATE])
+			hitrate += hitrate * sc->data[SC_INCHITRATE]->val1 / 100;
+		if(sc->data[SC_MTF_ASPD])
+			hitrate += sc->data[SC_MTF_ASPD]->val2;
+		if(sc->data[SC_MTF_ASPD2])
+			hitrate += sc->data[SC_MTF_ASPD2]->val2;
+	}
+
 	hitrate = cap_value(hitrate,battle_config.min_hitrate,battle_config.max_hitrate);
 	return (rnd()%100 < hitrate);
 }
@@ -4247,6 +4256,12 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 	int inf3 = skill_get_inf3(skill_id);
 
 	if(sc) { //The following are applied on top of current damage and are stackable
+		if(sc->data[SC_ATKPOTION]) {
+			ATK_ADD(wd.damage, wd.damage2, sc->data[SC_ATKPOTION]->val1);
+#ifdef RENEWAL
+			ATK_ADD(wd.statusAtk, wd.statusAtk2, sc->data[SC_ATKPOTION]->val1);
+#endif
+		}
 		if(sc->data[SC_FIGHTINGSPIRIT]) {
 			ATK_ADD(wd.damage, wd.damage2, sc->data[SC_FIGHTINGSPIRIT]->val1);
 #ifdef RENEWAL
@@ -4299,6 +4314,12 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.damage, wd.damage2, 200);
 #ifdef RENEWAL
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, 200);
+#endif
+		}
+		if(sc->data[SC_ZANGETSU]) {
+			ATK_ADD(wd.damage, wd.damage2, sc->data[SC_ZANGETSU]->val2);
+#ifdef RENEWAL
+			ATK_ADD(wd.statusAtk, wd.statusAtk2, sc->data[SC_ZANGETSU]->val2);
 #endif
 		}
 		if(sc->data[SC_STYLE_CHANGE]) {
@@ -4376,6 +4397,18 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 	#endif
 #endif
 					break;
+			}
+		}
+		if(sc->data[SC_INCATKRATE]) {
+			ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_INCATKRATE]->val1);
+#ifdef RENEWAL
+			ATK_ADDRATE(wd.statusAtk, wd.statusAtk2, sc->data[SC_INCATKRATE]->val1);
+#endif
+			if(src->type == BL_PC) {
+				ATK_ADDRATE(wd.damage, wd.damage2, sc->data[SC_INCATKRATE]->val1);
+#ifdef RENEWAL
+				ATK_ADDRATE(wd.weaponAtk, wd.weaponAtk2, sc->data[SC_INCATKRATE]->val1);
+#endif
 			}
 		}
 		//Sonic Blow +25% dmg on GVG, +100% dmg on non GVG

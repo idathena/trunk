@@ -2253,14 +2253,14 @@ unsigned short status_calc_vit(struct block_list *bl, struct status_change *sc, 
 unsigned short status_calc_int(struct block_list *bl, struct status_change *sc, int int_);
 unsigned short status_calc_dex(struct block_list *bl, struct status_change *sc, int dex);
 unsigned short status_calc_luk(struct block_list *bl, struct status_change *sc, int luk);
-unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc, int batk, bool viewable);
-unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc, int watk, bool viewable);
+unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc, int batk);
+unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc, int watk);
 unsigned short status_calc_matk(struct block_list *bl, struct status_change *sc, int matk, bool viewable);
 #ifdef RENEWAL
 unsigned short status_calc_ematk(struct block_list *bl, struct status_change *sc, int matk);
 #endif
 short status_calc_critical(struct block_list *bl, struct status_change *sc, int critical);
-short status_calc_hit(struct block_list *bl, struct status_change *sc, int hit, bool viewable);
+short status_calc_hit(struct block_list *bl, struct status_change *sc, int hit);
 short status_calc_flee(struct block_list *bl, struct status_change *sc, int flee);
 short status_calc_flee2(struct block_list *bl, struct status_change *sc, int flee2);
 defType status_calc_def(struct block_list *bl, struct status_change *sc, int def, bool viewable);
