@@ -724,7 +724,7 @@
 1389,E_Tomahawk_C,Tomahawk,5,2,,0,200,,1,0,0x000444A2,63,2,34,4,0,0,7,{ bonus bAtkEle,Ele_Wind; },{},{}
 1390,E_Right_Epsilon_C,Light Epsilon,5,1,,0,229,,1,0,0x000444A2,63,2,34,4,1,0,7,{ bonus bAtkEle,Ele_Holy; bonus bStr,10; },{},{}
 1391,P_Two_Handed_Axe1,Eden Two-Handed Axe I,5,0,,0,195,,1,0,0x000444A2,63,2,34,3,60,0,7,{},{},{}
-1392,Ygnus_Stale,Ignus Steel,5,56000,,1900,250,,1,1,0x000444A2,63,2,34,4,95,1,7,{ bonus bAtkEle,Ele_Fire; bonus4 bAddEff,Eff_Burning,300,ATF_SHORT,3000; bonus4 bAddEff,Eff_Burning,100,ATF_SELF,3000; bonus bUnbreakableWeapon,0; },{},{}
+1392,Ygnus_Stale,Ignus Steel,5,56000,,1900,250,,1,1,0x000444A2,63,2,34,4,95,1,7,{ bonus bAtkEle,Ele_Fire; bonus2 bAddEff,Eff_Burning,2000; bonus3 bAddEff,Eff_Burning,1000,ATF_SELF; bonus bUnbreakableWeapon,0; },{},{}
 1393,End_Sektura,End Sectora,5,56000,,1900,250,,1,1,0x000444A2,63,2,34,4,95,1,7,{ bonus bAtkEle,Ele_Water; bonus4 bAddEff,Eff_Freezing,300,ATF_SHORT,3000; bonus4 bAddEff,Eff_Freezing,100,ATF_SELF,3000; bonus bUnbreakableWeapon,0; },{},{}
 1394,Upg_Two_Handed_Axe,Upg Two Handed Axe,5,20,,2000,110,,1,1,0x000444A2,63,2,34,3,1,1,7,{ bonus bBaseAtk,getrefine()*14; if(BaseLevel>70) bonus bBaseAtk,((BaseLevel-70)/10)*10; },{},{}
 1395,Velum_Buster,Vellum Buster,5,20,,2500,50,,1,0,0x000444A2,63,2,34,4,95,1,7,{ bonus3 bSPVanishRaceRate,RC_DemiHuman,1000,10; bonus3 bSPVanishRaceRate,RC_Brute,1000,10; bonus bUnbreakableWeapon,0; },{},{}
@@ -822,7 +822,7 @@
 1486,Krieger_Twohand_Spear1,Glorious Lance,5,20,,0,220,,3,0,0x00004082,63,2,34,4,80,1,5,{ set .@r,getrefine(); bonus2 bAddRace,RC_DemiHuman,70; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,25; bonus bUnbreakableWeapon,0; if(.@r>5) { bonus2 bAddRace,RC_DemiHuman,pow((.@r>14?14:.@r)-4,2); bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5; } if(.@r>8) { if(BaseJob==Job_Knight) bonus4 bAutoSpellOnSkill,"KN_PIERCE","NPC_CRITICALWOUND",2,200; else if(BaseJob==Job_Crusader) bonus3 bAutoSpell,"PA_PRESSURE",5,200; } },{},{}
 1487,Lance_C,Lance,5,0,,0,220,,3,0,0x00004082,63,2,34,3,1,0,5,{ bonus2 bAddSize,Size_All,50; },{},{}
 1488,Ahlspiess_C,Ahlspiess,5,20,,0,135,,3,0,0x00004080,63,2,34,4,1,1,5,{ bonus bIgnoreDefClass,Class_Normal; bonus bIgnoreDefClass,Class_Boss; bonus2 bAddRace,RC_DemiHuman,10; bonus3 bAutoSpell,"KN_PIERCE",5,30; },{},{}
-1489,Spearfish_,Marlin,5,0,,0,220,,3,0,0x00004082,18,2,34,1,50,0,5,{ bonus3 bAddEffOnSkill,"KN_PIERCE",Eff_Bleeding,1500; bonus3 bAddEffOnSkill,"LK_SPIRALPIERCE",Eff_Bleeding,1500; bonus2 bSkillAtk,"KN_PIERCE",50; bonus2 bSkillAtk,"LK_SPIRALPIERCE",100; bonus4 bAddEff,Eff_Freezing,100,ATF_SELF,3000; if(BaseLevel>99) bonus bBaseAtk,30; bonus bUnbreakableWeapon,0; },{},{}
+1489,Spearfish_,Marlin,5,0,,0,220,,3,0,0x00004082,18,2,34,1,50,0,5,{ bonus3 bAddEffOnSkill,"KN_PIERCE",Eff_Bleeding,150; bonus3 bAddEffOnSkill,"LK_SPIRALPIERCE",Eff_Bleeding,150; bonus2 bSkillAtk,"KN_PIERCE",50; bonus2 bSkillAtk,"LK_SPIRALPIERCE",100; bonus4 bAddEff,Eff_Freezing,100,ATF_SELF,3000; if(BaseLevel>99) bonus bBaseAtk,30; bonus bUnbreakableWeapon,0; },{},{}
 1490,Giant_Lance,Gigantic Lance,5,20,,20000,20,,3,0,0x00000080,63,2,34,4,140,1,5,{ bonus bAspd,-10; bonus2 bSkillCooldown,"LK_SPIRALPIERCE",20000; if(readparam(bStr)>=120) bonus bBaseAtk,300; },{},{ heal 0,-600; }
 1491,Upg_Lance,Upg Lance,5,20,,1500,105,,3,1,0x00004082,63,2,34,3,1,1,5,{ bonus bBaseAtk,getrefine()*12; if(BaseLevel>70) bonus bBaseAtk,((BaseLevel-70)/10)*10; },{},{}
 1492,Velum_Glaive,Vellum Glaive,5,20,,4500,250,,3,0,0x00004082,63,2,34,4,95,1,5,{ set .@r,getrefine(); bonus2 bAddRace,RC_DemiHuman,80; bonus2 bAddRace,RC_Brute,80; if(.@r>=6) { bonus2 bSkillAtk,"LK_SPIRALPIERCE",100; bonus2 bSkillAtk,"LG_OVERBRAND",50; } if(.@r>=9) { bonus bShortWeaponDamageReturn,20; autobonus2 "{ bonus5 bAutoSpellWhenHit,\"NPC_MAGICMIRROR\",7,1000,BF_MAGIC,0; }",400,2000,BF_MAGIC; } },{},{}
@@ -2654,17 +2654,17 @@
 4507,Q_Scaraba_Card,Queen Scaraba Card,6,20,,10,,,,,,,,2,,,,,{ bonus2 bAddRace2,RC2_Scaraba,30; bonus2 bAddMonsterDropItem,12806,30; },{},{}
 4508,Gold_Scaraba_Card,Gold Scaraba Card,6,20,,10,,,,,,,,136,,,,,{ bonus bBaseAtk,20; bonus bMaxHPrate,-1; },{},{}
 4509,Gold_Q_Scaraba_Card,Gold Queen Scaraba Card,6,20,,10,,,,,,,,769,,,,,{ bonus bInt,3; bonus2 bSubRace,RC_Insect,10; if(getrefine()>=9) bonus2 bSubRace,RC_Insect,5; },{},{}
-4510,Miming_Card,Miming Card,6,20,,10,,,,,,,,2,,,,,{ bonus3 bAddEff,Eff_Deepsleep,500,ATF_SHORT; },{},{}
-4511,Little_Fatum_Card,Little Fatum Card,6,20,,10,,,,,,,,2,,,,,{ bonus3 bAddEff,Eff_Silence,500,ATF_SKILL; },{},{}
+4510,Miming_Card,Miming Card,6,20,,10,,,,,,,,2,,,,,{ bonus4 bAddEff,Eff_Deepsleep,500,ATF_SHORT,3000; },{},{}
+4511,Little_Fatum_Card,Little Fatum Card,6,20,,10,,,,,,,,2,,,,,{ bonus3 bAddEff,Eff_Silence,100,ATF_SKILL; },{},{}
 4512,Parus_Card,Parus Card,6,20,,10,,,,,,,,769,,,,,{ bonus bHealPower,3; if(BaseClass==Job_Acolyte) bonus bHealPower,getrefine()/2; },{},{}
 4513,Angra_Mantis_Card,Angra Mantis Card,6,20,,10,,,,,,,,769,,,,,{ bonus bCritAtkRate,2; if(BaseClass==Job_Thief) bonus bCritAtkRate,getrefine()/2; },{},{}
 4514,Pom_Spider_Card,Pom Spider Card,6,20,,10,,,,,,,,2,,,,,{ bonus2 bAddRace,RC_Undead,20; },{},{}
 4515,Alnoldi_Card,Alnoldi Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubRace,RC_Plant,30; },{},{}
 4516,Comodo_Card,Comodo Card,6,20,,10,,,,,,,,16,,,,,{ bonus bDef,50; bonus bFlee,-25; },{},{}
 4517,Cendrawasih_Card,Cendrawasih Card,6,20,,10,,,,,,,,769,,,,,{ bonus bInt,2; if(BaseClass==Job_Mage) bonus bInt,getrefine()/3; },{},{}
-4518,Banaspaty_Card,Banaspaty Card,6,20,,10,,,,,,,,2,,,,,{ bonus2 bAddEff,Eff_Burning,1500; },{},{}
+4518,Banaspaty_Card,Banaspaty Card,6,20,,10,,,,,,,,2,,,,,{ bonus2 bAddEff,Eff_Burning,300; },{},{}
 4519,Butoijo_Card,Butoijo Card,6,20,,10,,,,,,,,2,,,,,{ bonus2 bAddRace,RC_Angel,20; },{},{}
-4520,Leak_Card,Leak Card,6,20,,10,,,,,,,,4,,,,,{ bonus bStr,3; bonus2 bAddEffWhenHit,Eff_Confusion,5000; bonus3 bAddEffWhenHit,Eff_Confusion,5000,ATF_SKILL; bonus2 bAddEffWhenHit,Eff_Fear,5000; bonus3 bAddEffWhenHit,Eff_Fear,5000,ATF_SKILL; },{},{}
+4520,Leak_Card,Leak Card,6,20,,10,,,,,,,,4,,,,,{ bonus bStr,3; bonus2 bAddEffWhenHit,Eff_Confusion,1000; bonus3 bAddEffWhenHit,Eff_Confusion,1000,ATF_SKILL; bonus2 bAddEffWhenHit,Eff_Fear,1000; bonus3 bAddEffWhenHit,Eff_Fear,1000,ATF_SKILL; },{},{}
 4521,Sedora_Card,Sedora Card,6,20,,10,,,,,,,,2,,,,,{ bonus bCritAtkRate,15; },{},{}
 4522,Sropho_Card,Sropho Card,6,20,,10,,,,,,,,2,,,,,{ bonus4 bAddEff,Eff_Crystalize,500,ATF_SHORT,3000; },{},{}
 4523,Pot_Dofle_Card,Pot Dofle Card,6,20,,10,,,,,,,,16,,,,,{ bonus bDefEle,Ele_Water; bonus2 bSubRace,RC_Fish,10; },{},{}
@@ -7121,7 +7121,7 @@
 13117,TE_Woe_Pistol,TE Woe Pistol,5,0,,0,60,,7,0,0x01000000,63,2,34,3,40,1,17,{ bonus2 bAddRace,RC_DemiHuman,40; bonus2 bAddEff,Eff_Curse,1000; },{},{}
 13118,Tiny_Flame,Fading Flame,5,1,,100,0,,7,0,0x01000000,63,2,34,1,1,1,17,{},{},{}
 13119,Freedom_Flame,Freedom Flame,5,1,,100,100,,7,2,0x01000000,63,2,34,3,99,1,17,{},{},{}
-13120,H_FEATHER_H_FIRE,Heaven's Feather & Hell's Fire,5,1200000,,800,150,,7,1,0x01000000,63,2,34,3,99,1,17,{ bonus2 bSkillAtk,"GS_DESPERADO",20; bonus2 bSkillAtk,"RL_FALLEN_ANGEL",20; bonus2 bAddEff,Eff_Burning,100; },{},{}
+13120,H_FEATHER_H_FIRE,Heaven's Feather & Hell's Fire,5,1200000,,800,150,,7,1,0x01000000,63,2,34,3,99,1,17,{ bonus2 bSkillAtk,"GS_DESPERADO",20; bonus2 bAddEff,Eff_Burning,200; },{},{}
 13122,ALTAIR_ARES,Altair & Ares,5,1450000,,1000,200,,7,0,0x01000000,63,2,34,3,140,1,17,{ bonus bHit,5; bonus bDelayrate,10; bonus bLongAtkRate,30; },{},{}
 13124,ALTAIR_ARES_,Altair & Ares,5,10,,1000,200,,7,1,0x01000000,63,2,34,3,140,1,17,{ bonus bHit,5; bonus bDelayrate,10; bonus bLongAtkRate,30; },{},{}
 13125,Metal_Revolver,Metal Revolver,5,0,,0,30,,7,1,0x01000000,63,2,34,3,1,0,17,{ bonus bBaseAtk,getrefine(); bonus bLongAtkRate,1; if(BaseLevel>=20&&BaseLevel<=120) bonus bBaseAtk,3*(BaseLevel/10); },{},{}

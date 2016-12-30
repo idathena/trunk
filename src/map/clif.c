@@ -10667,10 +10667,7 @@ void clif_parse_WalkToXY(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	if( pc_cant_act(sd) || (sd->sc.opt1 && sd->sc.opt1 != OPT1_STONEWAIT) )
-		return;
-
-	if( sd->sc.data[SC_RUN] || sd->sc.data[SC_WUGDASH] )
+	if( pc_cant_act(sd) || sd->sc.data[SC_RUN] || sd->sc.data[SC_WUGDASH] )
 		return;
 
 	RFIFOPOS(fd, packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0], &x, &y, NULL);
@@ -10989,7 +10986,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 		case 0x00: //Once attack
 		case 0x07: //Continuous attack
 			if( (target = map_id2bl(target_id)) && target->type == BL_NPC ) {
-				npc_click(sd,(TBL_NPC *)target);
+				npc_click(sd, (TBL_NPC *)target);
 				return;
 			}
 			if( pc_cant_act(sd) || (sd->sc.option&OPTION_HIDE) )
@@ -11002,7 +10999,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 			}
 			pc_delinvincibletimer(sd);
 			sd->idletime = last_tick;
-			unit_attack(&sd->bl, target_id, action_type != 0);
+			unit_attack(&sd->bl, target_id, action_type);
 			break;
 		case 0x02: //Sitdown
 			if( battle_config.basic_skill_check && pc_checkskill(sd, NV_BASIC) < 3 && pc_checkskill(sd, SU_BASIC_SKILL) < 1 ) {
@@ -11642,17 +11639,16 @@ static void clif_noask_sub(struct map_session_data *src, struct map_session_data
 
 /// Request to begin a trade (CZ_REQ_EXCHANGE_ITEM).
 /// 00e4 <account id>.L
-void clif_parse_TradeRequest(int fd,struct map_session_data *sd)
+void clif_parse_TradeRequest(int fd, struct map_session_data *sd)
 {
 	struct map_session_data *t_sd;
 	
 	t_sd = map_id2sd(RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]));
 
-	if(!sd->chatID && pc_cant_act(sd))
+	if(pc_cant_act(sd) && !sd->chatID)
 		return; //You can trade while in a chatroom
 
-	//@noask [LuzZza]
-	if(t_sd && t_sd->state.noask) {
+	if(t_sd && t_sd->state.noask) { //@noask [LuzZza]
 		clif_noask_sub(sd, t_sd, 0);
 		return;
 	}
@@ -14799,7 +14795,7 @@ void clif_parse_HomAttack(int fd,struct map_session_data *sd)
 		return;
 
 	unit_stop_attack(bl);
-	unit_attack(bl, target_id, action_type != 0);
+	unit_attack(bl, target_id, action_type);
 }
 
 

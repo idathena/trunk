@@ -1213,7 +1213,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sc_start(src,bl,SC_FEAR,3 + skill_lv * 2,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case RK_DRAGONBREATH:
-			sc_start4(src,bl,SC_BURNING,15,skill_lv,1000,src->id,0,skill_get_time(skill_id,skill_lv));
+			sc_start4(src,bl,SC_BURNING,15,skill_lv,1000,src->id,0,skill_get_time2(skill_id,skill_lv));
 			break;
 		case RK_DRAGONBREATH_WATER:
 			sc_start(src,bl,SC_FREEZING,15,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -1286,7 +1286,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			}
 			break;
 		case NC_FLAMELAUNCHER:
-			sc_start4(src,bl,SC_BURNING,20 + skill_lv * 10,skill_lv,1000,src->id,0,skill_get_time(skill_id,skill_lv));
+			sc_start4(src,bl,SC_BURNING,20 + skill_lv * 10,skill_lv,1000,src->id,0,skill_get_time2(skill_id,skill_lv));
 			break;
 		case NC_COLDSLOWER:
 			//Status chances are applied officially through a check
@@ -2901,7 +2901,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			if (dmg.dmg_lv < ATK_DEF)
 				break;
 			if (!(flag&ELE_DARK))
-				sc_start4(src, bl, SC_BURNING, 55 + 5 * skill_lv, skill_lv, 1000, src->id, 0, skill_get_time(skill_id, skill_lv));
+				sc_start4(src, bl, SC_BURNING, 55 + 5 * skill_lv, skill_lv, 1000, src->id, 0, skill_get_time2(skill_id, skill_lv));
 			break;
 		case SC_TRIANGLESHOT:
 			if (rnd()%100 >= skill_lv + 1)
@@ -3756,7 +3756,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					skill_toggle_magicpower(src,skl->skill_id);
 					if( skl->type == 4 ) { //Status inflicts are depend on what summoned element is used
 						const enum sc_type scs[] = { SC_BURNING,SC_BLEEDING,SC_FREEZING,SC_STUN };
-						int rate = skl->y, index = skl->x - 1, time = skill_get_time(WL_TETRAVORTEX,index + 1);
+						int rate = skl->y, index = skl->x - 1, time = skill_get_time2(WL_TETRAVORTEX,index + 1);
 
 						if( !index )
 							sc_start4(src,target,scs[index],rate,skl->skill_lv,1000,src->id,0,time);
