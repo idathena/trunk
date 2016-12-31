@@ -592,11 +592,10 @@ static void script_reportsrc(struct script_state *st)
 {
 	struct block_list *bl;
 
-	if( st->oid == 0 )
+	if( !st->oid )
 		return; //Can't report source.
 
-	bl = map_id2bl(st->oid);
-	if( bl == NULL )
+	if( !(bl = map_id2bl(st->oid)) )
 		return;
 
 	switch( bl->type ) {
@@ -618,7 +617,7 @@ static void script_reportsrc(struct script_state *st)
 /// Reports on the console information about the script data.
 static void script_reportdata(struct script_data *data)
 {
-	if( data == NULL )
+	if( !data )
 		return;
 	switch( data->type ) {
 		case C_NOP: //No value
@@ -628,7 +627,7 @@ static void script_reportdata(struct script_data *data)
 			ShowDebug("Data: number value=%d\n", data->u.num);
 			break;
 		case C_STR:
-		case C_CONSTSTR:// string
+		case C_CONSTSTR: //String
 			if( data->u.str )
 				ShowDebug("Data: string value=\"%s\"\n", data->u.str);
 			else
@@ -637,15 +636,16 @@ static void script_reportdata(struct script_data *data)
 		case C_NAME: //Reference
 			if( reference_tovariable(data) ) { //Variable
 				const char *name = reference_getname(data);
+
 				if( not_array_variable(*name) )
 					ShowDebug("Data: variable name='%s'\n", name);
 				else
 					ShowDebug("Data: variable name='%s' index=%d\n", name, reference_getindex(data));
 			} else if( reference_toconstant(data) ) //Constant
 				ShowDebug("Data: constant name='%s' value=%d\n", reference_getname(data), reference_getconstant(data));
-			else if( reference_toparam(data) ) { //Param
+			else if( reference_toparam(data) ) //Param
 				ShowDebug("Data: param name='%s' type=%d\n", reference_getname(data), reference_getparamtype(data));
-			} else { //???
+			else {
 				ShowDebug("Data: reference name='%s' type=%s\n", reference_getname(data), script_op2name(data->type));
 				ShowDebug("Please report this!!! - str_data.type=%s\n", script_op2name(str_data[reference_getid(data)].type));
 			}
@@ -3164,8 +3164,6 @@ struct script_state *script_alloc_state(struct script_code *script, int pos, int
 /// @param st Script state
 void script_free_state(struct script_state *st)
 {
-	if(st->bk_st) //Backup was not restored
-		ShowDebug("script_free_state: Previous script state lost (rid=%d, oid=%d, state=%d, bk_npcid=%d).\n", st->bk_st->rid, st->bk_st->oid, st->bk_st->state, st->bk_npcid);
 	if(st->sleep.timer != INVALID_TIMER)
 		delete_timer(st->sleep.timer, run_script_timer);
 	if(st->stack) {
@@ -3696,7 +3694,7 @@ static void script_detach_state(struct script_state *st, bool dequeue_event)
 {
 	struct map_session_data *sd;
 
-	if(st->rid && (sd = map_id2sd(st->rid)) != NULL) {
+	if(st->rid && (sd = map_id2sd(st->rid))) {
 		sd->st = st->bk_st;
 		sd->npc_id = st->bk_npcid;
 		sd->state.disable_atcommand_on_npc = 0;
@@ -3705,9 +3703,8 @@ static void script_detach_state(struct script_state *st, bool dequeue_event)
 			st->bk_npcid = 0;
 		} else if(dequeue_event) {
 #ifdef SECURE_NPCTIMEOUT
-			//We're done with this NPC session, so we cancel the timer (if existent) and move on
-			if(sd->npc_idle_timer != INVALID_TIMER) {
-				delete_timer(sd->npc_idle_timer,npc_rr_secure_timeout_timer);
+			if(sd->npc_idle_timer != INVALID_TIMER) { //We're done with this NPC session, so we cancel the timer (if existent) and move on
+				delete_timer(sd->npc_idle_timer, npc_rr_secure_timeout_timer);
 				sd->npc_idle_timer = INVALID_TIMER;
 			}
 #endif
@@ -3731,7 +3728,7 @@ static void script_attach_state(struct script_state *st)
 	if(st->rid && (sd = map_id2sd(st->rid))) {
 		if(st != sd->st) {
 			if(st->bk_st) //There is already a backup
-				ShowDebug("script_free_state: Previous script state lost (rid=%d, oid=%d, state=%d, bk_npcid=%d).\n", st->bk_st->rid, st->bk_st->oid, st->bk_st->state, st->bk_npcid);
+				ShowDebug("script_attach_state: Previous script state lost (rid=%d, oid=%d, state=%d, bk_npcid=%d).\n", st->bk_st->rid, st->bk_st->oid, st->bk_st->state, st->bk_npcid);
 			st->bk_st = sd->st;
 			st->bk_npcid = sd->npc_id;
 		}
@@ -3890,7 +3887,7 @@ int script_config_read(char *cfgName)
 	char line[1024],w1[1024],w2[1024];
 	FILE *fp = fopen(cfgName,"r");
 
-	if (fp == NULL) {
+	if (!fp) {
 		ShowError("File not found: %s\n",cfgName);
 		return 1;
 	}
@@ -3902,20 +3899,19 @@ int script_config_read(char *cfgName)
 		i = sscanf(line,"%1023[^:]: %1023[^\r\n]",w1,w2);
 		if (i != 2)
 			continue;
-
-		if (strcmpi(w1,"warn_func_mismatch_paramnum") == 0)
+		if (!strcmpi(w1,"warn_func_mismatch_paramnum"))
 			script_config.warn_func_mismatch_paramnum = config_switch(w2);
-		else if (strcmpi(w1,"check_cmdcount") == 0)
+		else if (!strcmpi(w1,"check_cmdcount"))
 			script_config.check_cmdcount = config_switch(w2);
-		else if (strcmpi(w1,"check_gotocount") == 0)
+		else if (!strcmpi(w1,"check_gotocount"))
 			script_config.check_gotocount = config_switch(w2);
-		else if (strcmpi(w1,"input_min_value") == 0)
+		else if (!strcmpi(w1,"input_min_value"))
 			script_config.input_min_value = config_switch(w2);
-		else if (strcmpi(w1,"input_max_value") == 0)
+		else if (!strcmpi(w1,"input_max_value"))
 			script_config.input_max_value = config_switch(w2);
-		else if (strcmpi(w1,"warn_func_mismatch_argtypes") == 0)
+		else if (!strcmpi(w1,"warn_func_mismatch_argtypes"))
 			script_config.warn_func_mismatch_argtypes = config_switch(w2);
-		else if (strcmpi(w1,"import") == 0)
+		else if (!strcmpi(w1,"import"))
 			script_config_read(w2);
 		else
 			ShowWarning("Unknown setting '%s' in file %s\n",w1,cfgName);
@@ -17331,8 +17327,7 @@ BUILDIN_FUNC(awake)
 	struct npc_data *nd;
 	struct linkdb_node *node = (struct linkdb_node *)sleep_db;
 
-	nd = npc_name2id(script_getstr(st, 2));
-	if( nd == NULL ) {
+	if( !(nd = npc_name2id(script_getstr(st, 2))) ) {
 		ShowError("awake: NPC \"%s\" not found\n", script_getstr(st,2));
 		return 1;
 	}
@@ -17342,16 +17337,15 @@ BUILDIN_FUNC(awake)
 			struct script_state *tst = (struct script_state*)node->data;
 			TBL_PC *sd = map_id2sd(tst->rid);
 
-			if( tst->sleep.timer == INVALID_TIMER ) { //Already awake???
+			if( tst->sleep.timer == INVALID_TIMER ) { //Already awake?
 				node = node->next;
 				continue;
 			}
+			//Char not online anymore / another char of the same account is online - Cancel execution
 			if( (sd && sd->status.char_id != tst->sleep.charid) || (tst->rid && !sd) ) {
-				//Char not online anymore / another char of the same account is online - Cancel execution
 				tst->state = END;
 				tst->rid = 0;
 			}
-
 			delete_timer(tst->sleep.timer,run_script_timer);
 			node = script_erase_sleepdb(node);
 			tst->sleep.timer = INVALID_TIMER;
