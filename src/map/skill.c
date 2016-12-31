@@ -20008,9 +20008,8 @@ void skill_usave_add(struct map_session_data *sd, uint16 skill_id, uint16 skill_
 {
 	struct skill_usave *sus = NULL;
 
-	if( idb_exists(skillusave_db,sd->status.char_id) ) {
+	if( idb_exists(skillusave_db,sd->status.char_id) )
 		idb_remove(skillusave_db,sd->status.char_id);
-	}
 
 	CREATE(sus, struct skill_usave, 1);
 	idb_put(skillusave_db, sd->status.char_id, sus);

@@ -12350,7 +12350,7 @@ void clif_parse_NpcSelectMenu(int fd,struct map_session_data *sd)
 	int npc_id = RFIFOL(fd,info->pos[0]);
 	uint8 select = RFIFOB(fd,info->pos[1]);
 
-	if( (select > sd->npc_menu && select != 0xff) || select == 0 ) {
+	if( (select > sd->npc_menu && select != 0xff) || !select ) {
 #ifdef SECURE_NPCTIMEOUT
 		if( sd->npc_idle_timer != INVALID_TIMER ) {
 #endif
@@ -13046,12 +13046,13 @@ void clif_PartyBookingInsertNotify(struct map_session_data *sd, struct party_boo
 	int i;
 	uint8 buf[38 + PARTY_BOOKING_JOBS * 2];
 
-	if(pb_ad == NULL) return;
+	if(!pb_ad)
+		return;
 
 	WBUFW(buf,0) = 0x809;
 	WBUFL(buf,2) = pb_ad->index;
 	memcpy(WBUFP(buf,6), pb_ad->charname, NAME_LENGTH);
-	WBUFL(buf,30) = pb_ad->starttime;  // FIXME: This is expire time
+	WBUFL(buf,30) = pb_ad->starttime; //FIXME: This is expire time
 	WBUFW(buf,34) = pb_ad->p_detail.level;
 	WBUFW(buf,36) = pb_ad->p_detail.mapid;
 	for(i = 0; i < PARTY_BOOKING_JOBS; i++)
@@ -13068,13 +13069,14 @@ void clif_PartyBookingUpdateNotify(struct map_session_data *sd, struct party_boo
 	int i;
 	uint8 buf[6 + PARTY_BOOKING_JOBS * 2];
 
-	if(pb_ad == NULL) return;
+	if(!pb_ad)
+		return;
 
 	WBUFW(buf,0) = 0x80a;
 	WBUFL(buf,2) = pb_ad->index;
 	for(i = 0; i < PARTY_BOOKING_JOBS; i++)
 		WBUFW(buf,6 + i * 2) = pb_ad->p_detail.job[i];
-	clif_send(buf, packet_len(0x80a), &sd->bl, ALL_CLIENT); // Now UPDATE all client
+	clif_send(buf, packet_len(0x80a), &sd->bl, ALL_CLIENT); //Now UPDATE all client
 }
 
 
@@ -13103,9 +13105,8 @@ void clif_parse_CloseVending(int fd, struct map_session_data *sd)
 /// 0130 <account id>.L
 void clif_parse_VendingListReq(int fd, struct map_session_data *sd)
 {
-	if( sd->npc_id ) // Using an NPC
+	if( sd->npc_id ) //Using an NPC
 		return;
-
 	vending_vendinglistreq(sd,RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]));
 }
 

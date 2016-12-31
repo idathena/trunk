@@ -3088,9 +3088,9 @@ Example:
     prontera,164,299,3%TAB%script%TAB%Nyah%TAB%730,{
         mes "My name is Nyah.";
         mes "I will now search for Meh all across the world!";
-        if (getmapxy(@mapname$,@mapx,@mapy,1,"Meh")!=0) {
-                mes "I can't seem to find Meh anywhere!";
-                close;
+        if (getmapxy(@mapname$,@mapx,@mapy,1,"Meh")) {
+            mes "I can't seem to find Meh anywhere!";
+            close;
         }
         mes "And I found him on map "+@mapname$+" at X:"+@mapx+" Y:"+@mapy+" !";
         close;
@@ -7121,9 +7121,9 @@ must be used.
 *emotion <emotion number>{,<target>{,"<target name>"}};
 
 This command makes an object display an emotion sprite above their own as 
-if they were doing that emotion. For a full list of emotion numbers, 
-see 'db/const.txt' under 'e_'. The not so obvious ones are 'e_what' (a question mark) 
-and 'e_gasp' (the exclamation mark).
+if they were doing that emotion. For a full list of emotion numbers, see
+'src/map/script_constants.h' under 'e_'. The not so obvious ones are
+'e_what' (a question mark) and 'e_gasp' (the exclamation mark).
 
 The optional target parameter specifies who will get the emotion on top of
 their head. If 0 (the default if omitted), the NPC in current use will show
