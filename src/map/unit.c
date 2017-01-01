@@ -894,7 +894,10 @@ int unit_escape(struct block_list *bl, struct block_list *target, short dist)
  * @param bl: Object to instant warp
  * @param dst_x: X coordinate to warp to
  * @param dst_y: Y coordinate to warp to
- * @param easy: Easy(1) or Hard(0) path check (hard attempts to go around obstacles)
+ * @param easy: 
+ *   0: Hard path check (attempt to go around obstacle)
+ *   1: Easy path check (no obstacle on movement path)
+ *   2: Long path check (no obstacle on line from start to destination)
  * @param checkpath: Whether or not to do a cell and path check for NOPASS and NOREACH
  * @return 1: Success 0: Fail
  */
@@ -909,7 +912,7 @@ int unit_movepos(struct block_list *bl, short dst_x, short dst_y, int easy, bool
 	sd = BL_CAST(BL_PC, bl);
 	ud = unit_bl2ud(bl);
 
-	if( ud == NULL )
+	if( !ud )
 		return 0;
 
 	unit_stop_walking(bl, 1);
@@ -1207,6 +1210,7 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
  *  &0x2: Force the unit to move one cell if it hasn't yet
  *  &0x4: Enable moving to the next cell when unit was already half-way there
  *    (may cause on-touch/place side-effects, such as a scripted map change)
+ *  &0x8: Force stop moving, even if walktimer is currently INVALID_TIMER
  * @return Success(1); Failed(0);
  */
 int unit_stop_walking(struct block_list *bl,int type)
@@ -1218,15 +1222,17 @@ int unit_stop_walking(struct block_list *bl,int type)
 	nullpo_ret(bl);
 
 	ud = unit_bl2ud(bl);
-	if(!ud || ud->walktimer == INVALID_TIMER)
+	if(!ud || (!(type&0x08) && ud->walktimer == INVALID_TIMER))
 		return 0;
 
 	//NOTE: We are using timer data after deleting it because we know the
 	//delete_timer function does not messes with it. If the function's
 	//behaviour changes in the future, this code could break!
-	td = get_timer(ud->walktimer);
-	delete_timer(ud->walktimer, unit_walktoxy_timer);
-	ud->walktimer = INVALID_TIMER;
+	if(ud->walktimer != INVALID_TIMER) {
+		td = get_timer(ud->walktimer);
+		delete_timer(ud->walktimer, unit_walktoxy_timer);
+		ud->walktimer = INVALID_TIMER;
+	}
 	ud->state.change_walk_target = 0;
 	tick = gettick();
 
@@ -1391,8 +1397,10 @@ int unit_set_walkdelay(struct block_list *bl, unsigned int tick, int delay, int 
 		if (DIFF_TICK(ud->canmove_tick, tick + delay) > 0)
 			return 0; //Make sure walk delay is not decreased
 	} else {
-		if (!unit_can_move(bl))
+		if (!unit_can_move(bl)) {
+			unit_stop_walking(bl,4); //Unit might still be moving even though it can't move
 			return 0; //Don't set walk delays when already trapped
+		}
 		if (DIFF_TICK(ud->canmove_tick, tick - delay) > 0)
 			return 0; //Immune to being stopped for double the flinch time
 	}
@@ -1635,7 +1643,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	if( src->type == BL_NPC ) //NPC-objects can override cast distance
 		range = AREA_SIZE; //Maximum visible distance before NPC goes out of sight
 	else
-		range = skill_get_range2(src, skill_id, skill_lv); //Skill cast distance from database
+		range = skill_get_range2(src, skill_id, skill_lv, true); //Skill cast distance from database
 
 	//New action request received, delete previous action request if not executed yet
 	if( ud->stepaction || ud->steptimer != INVALID_TIMER )
@@ -1899,9 +1907,8 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	if( !ud )
 		return 0;
 
-	//Normally not needed since clif.c checks for it, but at/char/script commands don't! [Skotlex]
 	if( ud->skilltimer != INVALID_TIMER )
-		return 0;
+		return 0; //Normally not needed since clif.c checks for it, but at/char/script commands don't! [Skotlex]
 
 	sc = status_get_sc(src);
 
@@ -1920,13 +1927,6 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	if( !status_check_skilluse(src, NULL, skill_id, 0) )
 		return 0;
 
-	//Can't cast ground targeted spells on wall cells
-	if( map_getcell(src->m, skill_x, skill_y, CELL_CHKWALL) ) {
-		if( sd )
-			clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
-		return 0;
-	}
-
 	//Check range and obstacle
 	bl.type = BL_NUL;
 	bl.m = src->m;
@@ -1936,7 +1936,7 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	if( src->type == BL_NPC ) //NPC-objects can override cast distance
 		range = AREA_SIZE; //Maximum visible distance before NPC goes out of sight
 	else
-		range = skill_get_range2(src, skill_id, skill_lv); //Skill cast distance from database
+		range = skill_get_range2(src, skill_id, skill_lv, true); //Skill cast distance from database
 
 	//New action request received, delete previous action request if not executed yet
 	if( ud->stepaction || ud->steptimer != INVALID_TIMER )
@@ -2381,8 +2381,9 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 	struct mob_data *md = NULL;
 	int range;
 
-	if( (ud = unit_bl2ud(src)) == NULL )
+	if( !(ud = unit_bl2ud(src)) )
 		return 0;
+
 	if( ud->attacktimer != tid ) {
 		ShowError("unit_attack_timer %d != %d\n",ud->attacktimer,tid);
 		return 0;
@@ -2393,7 +2394,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 	ud->attacktimer = INVALID_TIMER;
 	target = map_id2bl(ud->target);
 
-	if( src == NULL || src->prev == NULL || target == NULL || target->prev == NULL )
+	if( !src || !src->prev || !target || !target->prev )
 		return 0;
 
 	if( status_isdead(src) || status_isdead(target) ||
@@ -2469,8 +2470,8 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 			if( md->state.skillstate == MSS_ANGRY || md->state.skillstate == MSS_BERSERK ) {
 				if( mobskill_use(md,tick,-1) )
 					return 1;
-			} else //Set mob's ANGRY/BERSERK states
-				md->state.skillstate = (md->state.aggressive ? MSS_ANGRY : MSS_BERSERK);
+			}
+			md->state.skillstate = (md->state.aggressive ? MSS_ANGRY : MSS_BERSERK); //Set mob's ANGRY/BERSERK states
 			//Link monsters nearby [Skotlex]
 			if( sstatus->mode&MD_ASSIST && DIFF_TICK(md->last_linktime,tick) < MIN_MOBLINKTIME ) {
 				md->last_linktime = tick;
