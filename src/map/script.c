@@ -3631,7 +3631,7 @@ void run_script(struct script_code *rootscript, int pos, int rid, int oid)
 void script_stop_sleeptimers(int id)
 {
 	for( ;; ) {
-		struct script_state *st = (struct script_state *)linkdb_erase(&sleep_db,(void *)__64BPRTSIZE(id));
+		struct script_state *st = (struct script_state *)linkdb_erase(&sleep_db, (void *)__64BPRTSIZE(id));
 
 		if( !st )
 			break; //No more sleep timers
@@ -18656,7 +18656,7 @@ static int buildin_mobuseskill_sub(struct block_list *bl,va_list ap)
 		case 1: tbl = map_id2bl(md->target_id); break;
 		case 2: tbl = map_id2bl(md->master_id); break;
 		default:
-			tbl = battle_getenemy(&md->bl,DEFAULT_ENEMY_TYPE(md),skill_get_range2(&md->bl,skill_id,skill_lv)); break;
+			tbl = battle_getenemy(&md->bl,DEFAULT_ENEMY_TYPE(md),skill_get_range2(&md->bl,skill_id,skill_lv,true)); break;
 	}
 
 	if( !tbl )

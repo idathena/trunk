@@ -188,8 +188,8 @@ struct s_skill_db {
 };
 extern struct s_skill_db skill_db[MAX_SKILL_DB];
 
-#define MAX_SKILL_UNIT_LAYOUT 55
-#define MAX_SQUARE_LAYOUT 5 //11 * 11 Placement of a maximum unit
+#define MAX_SQUARE_LAYOUT 7 //15 * 15 Placement of a maximum unit
+#define MAX_SKILL_UNIT_LAYOUT (50 + MAX_SQUARE_LAYOUT) //50 special ones + the square ones
 #define MAX_SKILL_UNIT_COUNT ((MAX_SQUARE_LAYOUT * 2 + 1) * (MAX_SQUARE_LAYOUT * 2 + 1))
 struct s_skill_unit_layout {
 	int count;
@@ -203,7 +203,7 @@ struct s_skill_nounit_layout {
 	int dy[MAX_SKILL_UNIT_COUNT];
 };
 
-#define MAX_SKILLTIMERSKILL 15
+#define MAX_SKILLTIMERSKILL 50
 struct skill_timerskill {
 	int timer;
 	int src_id;
@@ -332,7 +332,7 @@ int skill_get_ele(uint16 skill_id, uint16 skill_lv);
 int skill_get_nk(uint16 skill_id);
 int skill_get_max(uint16 skill_id);
 int skill_get_range(uint16 skill_id, uint16 skill_lv);
-int skill_get_range2(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
+int skill_get_range2(struct block_list *bl, uint16 skill_id, uint16 skill_lv, bool isServer);
 int skill_get_splash(uint16 skill_id, uint16 skill_lv);
 int skill_get_num(uint16 skill_id, uint16 skill_lv);
 int skill_get_cast(uint16 skill_id, uint16 skill_lv);

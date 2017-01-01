@@ -544,8 +544,8 @@
 480,4,8,1,0,0,0,5,5,no,0,0,0,weapon,0,0x4000,	PA_SHIELDCHAIN,Shield Chain
 481,0,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	HP_MANARECHARGE,Mana Recharge
 482,0,6,4,0,0x1,0,5,1,no,0,0,0,magic,0,0,	PF_DOUBLECASTING,Double Casting
-483,14,6,2,0,0x1,1:2:3:4:5,1,1,no,0,0,0,none,0,0,	HW_GANBANTEIN,Ganbantein
-484,14,6,2,2,0xD1,0,5,1,yes,0,0x4000,0,misc,0,0x12,	HW_GRAVITATION,Gravitation Field
+483,18,6,2,0,0x1,1:2:3:4:5,1,1,no,0,0,0,none,0,0,	HW_GANBANTEIN,Ganbantein
+484,18,6,2,2,0xD1,0,5,1,yes,0,0x4000,0,misc,0,0x12,	HW_GRAVITATION,Gravitation Field
 485,-1,6,1,-1,0x8,0,10,1,no,0,0,0,weapon,0,0,	WS_CARTTERMINATION,Cart Termination
 486,0,6,4,0,0x1,0,5,1,no,0,0,0,weapon,0,0,	WS_OVERTHRUSTMAX,Maximum Power Thrust
 487,0,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0x8,	CG_LONGINGFREEDOM,Longing for Freedom
@@ -582,7 +582,7 @@
 518,2,6,1,-1,0,0,10,1,no,0,0,0,weapon,5,0,	GS_DUST,Dust
 519,-9,6,1,-1,0,0,10,1,yes,0,0,0,weapon,0,0x100,	GS_FULLBUSTER,Full Buster
 520,-9,6,1,-1,0x3,1:1:1:2:2:2:3:3:3:4,10,1,no,0,0,0,weapon,0,0x100,	GS_SPREADATTACK,Spread Attack
-521,-9,6,2,-1,0xC0,1,10,1,no,0,0,0,misc,3,0x100,	GS_GROUNDDRIFT,Ground Drift
+521,-9,6,2,-1,0x42,1,10,1,no,0,0,0,weapon,3,0x100,	GS_GROUNDDRIFT,Ground Drift
 522,0,0,0,0,0,0,10,1,no,0,0,0,weapon,0,0,	NJ_TOBIDOUGU,Shuriken Training
 523,9,6,1,-1,0x40,0,10,1,no,0,0,0,weapon,0,0,	NJ_SYURIKEN,Throw Shuriken
 524,9,8,1,-1,0x8,0,5,3,no,0,0,0,weapon,0,0,	NJ_KUNAI,Throw Kunai
@@ -597,12 +597,12 @@
 533,0,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	NJ_NINPOU,Spirit of the Blade
 534,9,8,1,3,0,0,10,1:2:3:4:5:6:7:8:9:10,yes,0,0,0,magic,0,0,	NJ_KOUENKA,Crimson Fire Petal
 535,0,8,4,3,0,0,10,1,yes,0,0,0,magic,0,0,	NJ_KAENSIN,Crimson Fire Formation
-536,9,8,1,3,0x2,2,5,3,yes,0,0,0,magic,0,0,	NJ_BAKUENRYU,Raging Fire Dragon
+536,9,8,1,3,0,0,5,-3,yes,0,0,0,magic,0,0,	NJ_BAKUENRYU,Raging Fire Dragon
 537,9,8,1,1,0,0,10,3:4:5:6:7:8:9:10:11:12,yes,0,0,0,magic,0,0,	NJ_HYOUSENSOU,Spear of Ice
 538,9,6,2,1,0x1,0,10,1,yes,0,0,0,magic,0,0,	NJ_SUITON,Hidden Water
-539,0,6,4,1,0x2,3,5,1,yes,0,0,0,magic,0,0,	NJ_HYOUSYOURAKU,Ice Meteor
+539,0,6,4,1,0,0,5,1,yes,0,0,0,magic,0,0,	NJ_HYOUSYOURAKU,Ice Meteor
 540,9,8,1,4,0,0,10,1:2:2:3:3:4:4:5:5:6,yes,0,0,0,magic,0,0,	NJ_HUUJIN,Wind Blade
-541,0,6,4,4,0x2,2:2:3:3:4,5,1,yes,0,0,0,magic,0,0,	NJ_RAIGEKISAI,Lightning Strike of Destruction
+541,0,6,4,4,0,0,5,1,yes,0,0,0,magic,0,0,	NJ_RAIGEKISAI,Lightning Strike of Destruction
 542,5:6:7:8:9,8,1,4,0,3,5,1,yes,0,0,5:6:7:8:9,magic,0,0,	NJ_KAMAITACHI,Kamaitachi
 543,0,6,4,0,0x1,0,5,1,yes,0,0,0,none,0,0,	NJ_NEN,Soul
 544,-5,6,1,0,0x40,0,10,1,no,0,0,0,weapon,0,0,	NJ_ISSEN,Final Strike
@@ -625,7 +625,7 @@
 667,0,6,4,0,0x3,2:5:8:11:14,5,1,no,0,0x2,0,none,0,0,	NPC_WIDECONFUSE,Wide Confusion
 668,0,6,4,0,0x3,2:5:8:11:14,5,1,no,0,0x2,0,none,0,0,	NPC_WIDESLEEP,Wide Sleep
 669,0,6,4,3,0x3,5,1,1,no,0,0x2,0,magic,0,0,	NPC_WIDESIGHT,Wide Sight
-670,7,6,2,7,0x91,0,10,1,no,0,0x2,0,misc,0,0,	NPC_EVILLAND,Evil Land
+670,7,6,2,7,0xD1,0,10,1,no,0,0x2,0,misc,0,0,	NPC_EVILLAND,Evil Land
 671,0,6,4,0,0x1,0,5,1,no,0,0x2,0,magic,0,0,	NPC_MAGICMIRROR,Magic Mirror
 672,0,6,4,0,0x3,2:5:8:11:14,5,1,no,0,0x2,0,none,0,0,	NPC_SLOWCAST,Slow Cast
 673,-7,6,1,-1,0,0,5,1,no,0,0x2,0,weapon,0,0,	NPC_CRITICALWOUND,Critical Wounds

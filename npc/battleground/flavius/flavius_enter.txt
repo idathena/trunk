@@ -39,8 +39,8 @@ bat_room,133,178,5	script	Flavius Officer#01a	418,{
 				mes "I'm very pleased that you want to join us and fight the Croix Army, but I'm sorry: I can't send a rookie like you to die on the cruel battlefield.";
 			}
 			else {
-				set .@chk_urtime,checkquest(2070,PLAYTIME);
-				if ((.@chk_urtime == 0)|| (.@chk_urtime == 1)) {
+				set .@chk_urtime,isbegin_quest(2070,PLAYTIME);
+				if (.@chk_urtime == 1) {
 					mes "[Guillaume Army Officer]";
 					mes "You seem to have just returned from the battlefield.";
 					mes "It's too early for you to go back. Go rest, and leave the enemies to us!";
@@ -106,8 +106,8 @@ bat_room,133,121,1	script	Flavius Officer#01b	414,{
 				mes "I'm very pleased that you want to join us and fight the Guillaume Army, but I'm sorry: I can't send a rookie like you to die on the cruel battlefield.";
 			}
 			else {
-				set .@chk_urtime,checkquest(2070,PLAYTIME);
-				if ((.@chk_urtime == 0)|| (.@chk_urtime == 1)) {
+				set .@chk_urtime,isbegin_quest(2070,PLAYTIME);
+				if (.@chk_urtime == 1) {
 					mes "[Croix Army Officer]";
 					mes "You seem to have just returned from the battlefield.";
 					mes "It's too early for you to go back. Go rest, and leave the enemies to us!";
@@ -263,8 +263,8 @@ bat_room,148,178,5	script	Flavius Officer#02a	418,{
 				mes "I'm very pleased that you want to join us and fight the Croix Army, but I'm sorry: I can't send a rookie like you to die on the cruel battlefield.";
 			}
 			else {
-				set .@chk_urtime,checkquest(2070,PLAYTIME);
-				if ((.@chk_urtime == 0)|| (.@chk_urtime == 1)) {
+				set .@chk_urtime,isbegin_quest(2070,PLAYTIME);
+				if (.@chk_urtime == 1) {
 					mes "[Guillaume Army Officer]";
 					mes "You seem to have just returned from the battlefield.";
 					mes "It's too early for you to go back. Go rest, and leave the enemies to us!";
@@ -330,8 +330,8 @@ bat_room,148,121,1	script	Flavius Officer#02b	414,{
 				mes "I'm very pleased that you want to join us and fight the Guillaume Army, but I'm sorry: I can't send a rookie like you to die on the cruel battlefield.";
 			}
 			else {
-				set .@chk_urtime,checkquest(2070,PLAYTIME);
-				if ((.@chk_urtime == 0)|| (.@chk_urtime == 1)) {
+				set .@chk_urtime,isbegin_quest(2070,PLAYTIME);
+				if (.@chk_urtime == 1) {
 					mes "[Croix Army Officer]";
 					mes "You seem to have just returned from the battlefield.";
 					mes "It's too early for you to go back. Go rest, and leave the enemies to us!";

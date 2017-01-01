@@ -1191,7 +1191,7 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 	}
 
 	if(sd->sc.count) {
-		if((item->equip&EQP_ARMS) && item->type == IT_WEAPON && (sd->sc.data[SC_STRIPWEAPON] || sd->sc.data[SC_PYROCLASTIC]))
+		if((item->equip&EQP_ARMS) && item->type == IT_WEAPON && sd->sc.data[SC_STRIPWEAPON])
 			return ITEM_EQUIP_ACK_FAIL; //Also works with left-hand weapons [DracoRPG]
 		if((item->equip&EQP_SHIELD) && item->type == IT_ARMOR && sd->sc.data[SC_STRIPSHIELD])
 			return ITEM_EQUIP_ACK_FAIL;
@@ -1201,7 +1201,7 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 			return ITEM_EQUIP_ACK_FAIL;
 		if((item->equip&EQP_ACC) && sd->sc.data[SC__STRIPACCESSORY])
 			return ITEM_EQUIP_ACK_FAIL;
-		if(item->equip && (sd->sc.data[SC_BERSERK] || sd->sc.data[SC_SATURDAYNIGHTFEVER] || sd->sc.data[SC_KYOUGAKU]))
+		if(item->equip && sd->sc.data[SC_KYOUGAKU])
 			return ITEM_EQUIP_ACK_FAIL;
 		//Spirit of Super Novice equip bonuses [Skotlex]
 		if(sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_SUPERNOVICE) {
@@ -6779,7 +6779,7 @@ int pc_skillup(struct map_session_data *sd,uint16 skill_id)
 			pc_check_skilltree(sd,skill_id); //Check if a new skill can Lvlup
 
 		lv = sd->status.skill[skill_id].lv;
-		range = skill_get_range2(&sd->bl,skill_id,lv);
+		range = skill_get_range2(&sd->bl,skill_id,lv,false);
 		upgradable = (lv < skill_tree_get_max(sd->status.skill[skill_id].id, sd->status.class_)) ? 1 : 0;
 		clif_skillup(sd,skill_id,lv,range,upgradable);
 		clif_updatestatus(sd,SP_SKILLPOINT);
@@ -7233,7 +7233,7 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 	else
 		return;
 	
-	if( !src || src == &sd->bl )
+	if( !src )
 		return;
 
 	if( pc_issit(sd) ) {
@@ -8564,7 +8564,7 @@ bool pc_setcart(struct map_session_data *sd, int type) {
 	if( type < 0 || type > MAX_CARTS )
 		return false; //Never trust the values sent by the client! [Skotlex]
 
-	if( pc_checkskill(sd,MC_PUSHCART) <= 0 && type != 0 )
+	if( pc_checkskill(sd,MC_PUSHCART) <= 0 && type )
 		return false; //Push cart is required
 
 #ifdef NEW_CARTS
@@ -9430,6 +9430,15 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 		clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
 	}
+	if( sd->sc.count &&
+		(sd->sc.data[SC_BERSERK] ||
+		sd->sc.data[SC_SATURDAYNIGHTFEVER] ||
+		sd->sc.data[SC_KYOUGAKU] ||
+		(sd->sc.data[SC_PYROCLASTIC] && sd->inventory_data[n]->type == IT_WEAPON)) )
+	{
+		clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
+		return false;
+	}
 	if( id->flag.bindOnEquip && !sd->status.inventory[n].bound ) {
 		sd->status.inventory[n].bound = (char)battle_config.default_bind_on_equip;
 		clif_notify_bindOnEquip(sd,n);
@@ -9671,8 +9680,7 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 		(sd->sc.data[SC_BERSERK] ||
 		sd->sc.data[SC_SATURDAYNIGHTFEVER] ||
 		sd->sc.data[SC_KYOUGAKU] ||
-		(sd->sc.data[SC_PYROCLASTIC] &&
-		(sd->status.inventory[n].equip&EQP_ARMS) && sd->inventory_data[n]->type == IT_WEAPON)) )
+		(sd->sc.data[SC_PYROCLASTIC] && sd->inventory_data[n]->type == IT_WEAPON)) )
 	{
 		clif_unequipitemack(sd,n,0,0);
 		return; //Cannot unequip

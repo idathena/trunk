@@ -102,6 +102,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 int64 battle_calc_gvg_damage(struct block_list *src, struct block_list *bl, int64 damage, uint16 skill_id, int flag);
 int64 battle_calc_bg_damage(struct block_list *src, struct block_list *bl, int64 damage, uint16 skill_id, int flag);
 
+void battle_damage(struct block_list *src, struct block_list *target, int64 damage, int delay, uint16 skill_lv, uint16 skill_id, enum damage_lv dmg_lv, unsigned short attack_type, bool additional_effects, unsigned int tick, bool isspdamage);
 int battle_delay_damage(unsigned int tick, int amotion, struct block_list *src, struct block_list *target, int attack_type, uint16 skill_id, uint16 skill_lv, int64 damage, enum damage_lv dmg_lv, int ddelay, bool additional_effects, bool isspdamage);
 
 //Summary normal attack treatment (basic attack)
@@ -623,6 +624,7 @@ extern struct Battle_Config
 	int tarotcard_equal_chance; //Official or equal chance for each card
 	int show_status_katar_crit;
 	int dispel_song; //Can songs be dispelled?
+	int mob_stuck_warning; //Show warning if a monster is stuck too long
 } battle_config;
 
 void do_init_battle(void);
