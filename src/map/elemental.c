@@ -717,7 +717,7 @@ static int elemental_ai_sub_timer(struct elemental_data *ed, struct map_session_
 	if(ed->ud.walkpath.path_pos < ed->ud.walkpath.path_len && ed->ud.target == sd->bl.id)
 		return 0; //No thinking until be near the master
 
-	if( ed->sc.count && ed->sc.data[SC_BLIND] )
+	if( ed->sc.count && ed->sc.data[SC_BLIND] && md->sc.data[SC_PYREXIA] )
 		view_range = 3;
 	else
 		view_range = ed->db->range2;

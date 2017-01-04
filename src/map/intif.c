@@ -1240,7 +1240,7 @@ int intif_homunculus_requestdelete(int homun_id)
 
 /**
  * Receive a whisper request from char-serv transmit it to player
- * @author : rewritten by [Yor]
+ * @author rewritten by [Yor]
  * @param fd : char-serv link
  * @return 0 = Not found or ignored, 1 = Transmited
  */

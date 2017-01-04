@@ -71,7 +71,7 @@ void do_init_storage(void)
 
 /**
  * Destroy storage module
- * @author : [MC Cameri]
+ * @author [MC Cameri]
  * Called from map.c::do_final()
  */
 void do_final_storage(void)
@@ -351,7 +351,7 @@ void storage_storagegettocart(struct map_session_data *sd, int index, int amount
 
 /**
  * Make player close his storage
- * @author : [massdriller] / modified by [Valaris]
+ * @author [massdriller] / modified by [Valaris]
  * @param sd : player
  */
 void storage_storageclose(struct map_session_data *sd)
@@ -417,7 +417,7 @@ struct guild_storage *gstorage_guild2storage(int guild_id)
 
 /**
  * See if the guild_storage exist in db and fetch it if it's the case
- * @author : [Skotlex]
+ * @author [Skotlex]
  * @param guild_id : guild_id to search the storage
  * @return guild_storage or NULL
  */

@@ -1078,7 +1078,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 				sc_start(src,bl,SC_STUN,30 + skill_lv * 10,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case NPC_PETRIFYATTACK:
-			sc_start4(src,bl,status_skill2sc(skill_id),50 + skill_lv * 10,
+			sc_start4(src,bl,status_skill2sc(skill_id),20 * skill_lv,
 				skill_lv,0,0,skill_get_time(skill_id,skill_lv),skill_get_time2(skill_id,skill_lv));
 			break;
 		case NPC_CURSEATTACK:
@@ -1086,16 +1086,13 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case NPC_BLINDATTACK:
 		case NPC_POISON:
 		case NPC_SILENCEATTACK:
+		case NPC_BLEEDING:
 		case NPC_STUNATTACK:
-		case NPC_HELLPOWER:
-			sc_start(src,bl,status_skill2sc(skill_id),50 + skill_lv * 10,skill_lv,skill_get_time2(skill_id,skill_lv));
+			sc_start(src,bl,status_skill2sc(skill_id),20 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case NPC_ACIDBREATH:
 		case NPC_ICEBREATH:
 			sc_start(src,bl,status_skill2sc(skill_id),70,skill_lv,skill_get_time2(skill_id,skill_lv));
-			break;
-		case NPC_BLEEDING:
-			sc_start(src,bl,SC_BLEEDING,20 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case NPC_MENTALBREAKER:
 			//Based on observations by Tharis, Mental Breaker should do SP damage
@@ -2961,7 +2958,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	//Display damage
 	switch (skill_id) {
 		case PA_GOSPEL: //Should look like Holy Cross [Skotlex]
-			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, CR_HOLYCROSS, -1, DMG_SPLASH);
+			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, CR_HOLYCROSS, -1, DMG_SPLASH);
 			break;
 		//Skills that need be passed as a normal attack for the client to display correctly
 		case HVAN_EXPLOSION:
@@ -4069,7 +4066,7 @@ void skill_reveal_trap_inarea(struct block_list *src, int range, int x, int y)
 
 /**
  * Process tarot card's effects
- * @author: [Playtester]
+ * @author [Playtester]
  * @param src: Source of the tarot card effect
  * @param bl: Target of the tartor card effect
  * @param skill_id: ID of the skill used
@@ -4135,13 +4132,15 @@ static int skill_tarotcard(struct block_list *src, struct block_list *bl, uint16
 			break;
 		case 8: { //The Hanged Man
 				enum sc_type sc[] = { SC_STONE,SC_FREEZE,SC_STOP };
+				uint8 rand_eff = rnd()%3;
+				int time = (!rand_eff ? skill_get_time2(skill_id, skill_lv) : skill_get_time2(status_sc2skill(sc[rand_eff]), 1));
 
-				sc_start(src, bl, sc[rnd()%3], 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+				sc_start(src, bl, sc[rand_eff], 100, skill_lv, time);
 			}
 			break;
 		case 9: //Death
-			sc_start(src, bl, SC_POISON, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
-			sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+			sc_start(src, bl, SC_POISON, 100, skill_lv, skill_get_time2(status_sc2skill(SC_POISON), 1));
+			sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(status_sc2skill(SC_CURSE), 1));
 			sc_start(src, bl, SC_COMA, 100, skill_lv, 0);
 			break;
 		case 10: //Temperance
@@ -4152,14 +4151,14 @@ static int skill_tarotcard(struct block_list *src, struct block_list *bl, uint16
 				clif_damage(src, bl, tick, 0, 0, 6666, 0, DMG_NORMAL, 0, false));
 			sc_start(src, bl, SC_INCATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
 			sc_start(src, bl, SC_INCMATKRATE, 100, -50, skill_get_time2(skill_id, skill_lv));
-			sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(skill_id, skill_lv));
+			sc_start(src, bl, SC_CURSE, 100, skill_lv, skill_get_time2(status_sc2skill(SC_CURSE), 1));
 			break;
 		case 12: //The Tower
 			status_fix_damage(src, bl, 4444,
 				clif_damage(src, bl, tick, 0, 0, 4444, 0, DMG_NORMAL, 0, false));
 			break;
 		case 13: //The Star
-			sc_start(src, bl, SC_STUN, 100, skill_lv, 5000);
+			sc_start(src, bl, SC_STUN, 100, skill_lv, skill_get_time2(status_sc2skill(SC_STUN), 1));
 			break;
 		case 14: //The Sun
 #ifdef RENEWAL
@@ -5816,8 +5815,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				}
 				if(map[bl->m].flag.pvp && dstsd && dstsd->pvp_point < 0)
 					break;
-				if(tsc && tsc->data[SC_HELLPOWER])
+				if(tsc && tsc->data[SC_HELLPOWER]) {
+					clif_skill_nodamage(src,bl,ALL_RESURRECTION,skill_lv,1);
 					break;
+				}
 				switch(skill_lv) {
 					case 1: per = 10; break;
 					case 2: per = 30; break;
@@ -5900,12 +5901,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					abra_skill_lv = min(skill_lv,skill_get_max(abra_skill_id));
 				} while (checked++ < checked_max && (abra_skill_id == 0 ||
 					rnd()%10000 >= skill_abra_db[i].per[max(skill_lv - 1,0)]));
-
 				if (!skill_get_index(abra_skill_id))
 					break;
-
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-
 				if (sd) { //Player-casted
 					sd->state.abra_flag = 1;
 					sd->skillitem = abra_skill_id;
@@ -6232,7 +6230,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SG_SUN_COMFORT:
 		case SG_MOON_COMFORT:
 		case SG_STAR_COMFORT:
-		case NPC_HALLUCINATION:
 		case NPC_MAXPAIN:
 		case GS_MADNESSCANCEL:
 		case GS_ADJUSTMENT:
@@ -6302,6 +6299,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				bonus += 5 * (sd ? (pc_checkskill(sd,SA_FLAMELAUNCHER) + pc_checkskill(sd,SA_FROSTWEAPON) + pc_checkskill(sd,SA_LIGHTNINGLOADER) + pc_checkskill(sd,SA_SEISMICWEAPON)) : 1);
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start2(src,bl,type,100,skill_lv,bonus,skill_get_time(skill_id,skill_lv)));
 			}
+			break;
+
+		case NPC_HALLUCINATION:
+		case NPC_HELLPOWER:
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,
+				sc_start(src,bl,type,20 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv)));
 			break;
 
 		case NPC_STOP:
@@ -6472,7 +6475,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					(dstsd->sc.data[type] && dstsd->sc.data[type]->val1 != src->id) || //Cannot Devote a player devoted from another source
 					(skill_id == ML_DEVOTION && (!mer || mer != dstsd->md)) || //Mercenary only can devote owner
 					(dstsd->class_&MAPID_UPPERMASK) == MAPID_CRUSADER || //Crusader Cannot be devoted
-					(dstsd->sc.data[SC_HELLPOWER])) //Players affected by SC_HELLPOWERR cannot be devoted
+					(dstsd->sc.data[SC_HELLPOWER])) //Players affected by SC_HELLPOWER cannot be devoted
 				{
 					if (sd)
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -13519,7 +13522,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_GOSPEL:
-			if (rnd()%100 >= skill_lv * 10 || bl->id == src->id)
+			if (rnd()%100 >= 50 + skill_lv * 5 || bl->id == src->id)
 				break;
 			if (battle_check_target(src,bl,BCT_PARTY) > 0) { //Support Effect only on party, not guild
 				int heal;
@@ -13527,8 +13530,8 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 				int time = skill_get_time2(skill_id,skill_lv); //Duration
 
 				switch (i) {
-					case 0: //Heal 1~9999 HP
-						heal = rnd()%9999 + 1;
+					case 0: //Heal 1000~9999 HP
+						heal = rnd()%9000 + 1000;
 						clif_skill_nodamage(src,bl,AL_HEAL,heal,1);
 						status_heal(bl,heal,0,0);
 						break;
@@ -13558,10 +13561,10 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 							clif_gospel_info(tsd,0x19);
 						break;
 					case 6: //Level 10 Blessing
-						sc_start(src,bl,SC_BLESSING,100,10,time);
+						sc_start(src,bl,SC_BLESSING,100,10,skill_get_time(AL_BLESSING,10));
 						break;
 					case 7: //Level 10 Increase AGI
-						sc_start(src,bl,SC_INCREASEAGI,100,10,time);
+						sc_start(src,bl,SC_INCREASEAGI,100,10,skill_get_time(AL_INCAGI,10));
 						break;
 					case 8: //Enchant weapon with Holy element
 						if (tsd)
@@ -13576,7 +13579,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 					case 10: //DEF +25%
 						if (tsd)
 							clif_gospel_info(tsd,0x1e);
-						sc_start(src,bl,SC_INCDEFRATE,100,25,time);
+						sc_start(src,bl,SC_INCDEFRATE,100,25,10000); //10 seconds
 						break;
 					case 11: //ATK +100%
 						if (tsd)
@@ -13591,36 +13594,37 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 						break;
 				}
 			} else if (battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0) { //Offensive Effect
-				int i = rnd()%9; //Negative buff count
-				int time = skill_get_time2(skill_id,skill_lv);
+				int i = rnd()%10; //Negative buff count
 
 				switch (i) {
-					case 0: //Deal 1~9999 damage
-						skill_attack(BF_MISC,src,&unit->bl,bl,skill_id,skill_lv,tick,0);
+					case 0: //Deal 3000~7999 damage reduced by DEF
+					case 1: //Deal 1500~5499 damage unreducable
+						skill_attack(BF_MISC,src,&unit->bl,bl,skill_id,skill_lv,tick,1);
 						break;
-					case 1: //Curse
-						sc_start(src,bl,SC_CURSE,100,1,time);
+					case 2: //Curse
+						sc_start(src,bl,SC_CURSE,100,1,1800000); //30 minutes
 						break;
-					case 2: //Blind
-						sc_start(src,bl,SC_BLIND,100,1,time);
+					case 3: //Blind
+						sc_start(src,bl,SC_BLIND,100,1,1800000);
 						break;
-					case 3: //Poison
-						sc_start(src,bl,SC_POISON,100,1,time);
+					case 4: //Poison
+						sc_start(src,bl,SC_POISON,100,1,1800000);
 						break;
-					case 4: //Level 10 Provoke
-						sc_start(src,bl,SC_PROVOKE,100,10,time);
+					case 5: //Level 10 Provoke
+						clif_skill_nodamage(NULL,bl,SM_PROVOKE,10,
+							sc_start(src,bl,SC_PROVOKE,100,10,-1)); //Infinite
 						break;
-					case 5: //DEF -100%
-						sc_start(src,bl,SC_INCDEFRATE,100,-100,time);
+					case 6: //DEF -100%
+						sc_start(src,bl,SC_INCDEFRATE,100,-100,20000); //20 seconds
 						break;
-					case 6: //ATK -100%
-						sc_start(src,bl,SC_INCATKRATE,100,-100,time);
+					case 7: //ATK -100%
+						sc_start(src,bl,SC_INCATKRATE,100,-100,20000);
 						break;
-					case 7: //Flee -100%
-						sc_start(src,bl,SC_INCFLEERATE,100,-100,time);
+					case 8: //Flee -100%
+						sc_start(src,bl,SC_INCFLEERATE,100,-100,20000);
 						break;
-					case 8: //Speed/ASPD -25%
-						sc_start4(src,bl,SC_GOSPEL,100,1,0,0,BCT_ENEMY,time);
+					case 9: //Speed/ASPD -25%
+						sc_start4(src,bl,SC_GOSPEL,100,1,0,0,BCT_ENEMY,20000);
 						break;
 				}
 			}
@@ -14536,15 +14540,9 @@ static bool skill_check_condition_sc_required(struct map_session_data *sd, unsig
 					return false;
 				}
 				break;
-			case SC_ROLLINGCUTTER:
-				if( !sc->data[SC_ROLLINGCUTTER] ) {
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_CONDITION,0,0);
-					return false;
-				}
-				break;
 			default:
 				if( !sc->data[req_sc] ) {
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_CONDITION,0,0);
 					return false;
 				}
 				break;

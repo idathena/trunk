@@ -1579,7 +1579,7 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 		return false;
 	}
 
-	if(md->sc.count && md->sc.data[SC_BLIND])
+	if(md->sc.count && md->sc.data[SC_BLIND] && md->sc.data[SC_PYREXIA])
 		view_range = chase_range = 3;
 	else {
 		view_range = md->db->range2;
