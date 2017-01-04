@@ -2042,7 +2042,7 @@ void clif_parse_NPCShopClosed(int fd, struct map_session_data *sd) {
 
 /**
  * Presents list of items, that can be sold to a Market shop.
- * @author: Ind and Yommy
+ * @author Ind and Yommy
  */
 void clif_npc_market_open(struct map_session_data *sd, struct npc_data *nd)
 {
@@ -3882,6 +3882,11 @@ void clif_changeoption(struct block_list *bl)
 	} else
 		clif_send(buf,packet_len(0x119),bl,AREA);
 #endif
+
+	//Whenever we send "changeoption" to the client, the provoke icon is lost
+	//There is probably an option for the provoke icon, but as we don't know it, we have to do this for now
+	if(sc->data[SC_PROVOKE] && sc->data[SC_PROVOKE]->timer == INVALID_TIMER)
+		clif_status_change(bl,StatusIconChangeTable[SC_PROVOKE],1,-1,0,0,0);
 }
 
 
@@ -4657,6 +4662,28 @@ static int clif_calc_walkdelay(struct block_list *bl, int delay, char type, int6
 }
 
 
+/**
+ * Returns hallucination damage the client displays
+ * @author [Playtester]
+ */
+static int clif_hallucination_damage(void)
+{
+	int digit = rnd()%5 + 1;
+
+	switch (digit) {
+		case 1:
+			return (rnd()%10);
+		case 2:
+			return (rnd()%100);
+		case 3:
+			return (rnd()%1000);
+		case 4:
+			return (rnd()%10000);
+	}
+	return (rnd()%32767);
+}
+
+
 /// Sends a 'damage' packet (src performs action on dst)
 /// 008a <src ID>.L <dst ID>.L <server tick>.L <src speed>.L <dst speed>.L <damage>.W <div>.W <type>.B <damage2>.W (ZC_NOTIFY_ACT)
 /// 02e1 <src ID>.L <dst ID>.L <server tick>.L <src speed>.L <dst speed>.L <damage>.L <div>.W <type>.B <damage2>.L (ZC_NOTIFY_ACT2)
@@ -4701,18 +4728,16 @@ int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tic
 	if((sc = status_get_sc(dst)) && sc->count) {
 		if(sc->data[SC_HALLUCINATION]) {
 			if(damage)
-				damage = damage * sc->data[SC_HALLUCINATION]->val2 + rnd()%100;
+				damage = clif_hallucination_damage();
 			if(damage2)
-				damage2 = damage2 * sc->data[SC_HALLUCINATION]->val2 + rnd()%100;
+				damage2 = clif_hallucination_damage();
 		}
 		if(sc->data[SC_PYREXIA]) {
 			if(damage != 100) { //Exclude damage from poison itself
-				if(!damage)
-					damage = rnd()%999 + 1;
-				damage = damage * 3 + rnd()%100;
-				if(!damage2)
-					damage2 = rnd()%999 + 1;
-				damage2 = damage2 * 3 + rnd()%100;
+				if(damage)
+					damage = clif_hallucination_damage();
+				if(damage2)
+					damage2 = clif_hallucination_damage();
 			}
 		}
 	}
@@ -5521,13 +5546,8 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int
 	type = clif_calc_delay(type,div,damage,ddelay);
 
 	if((sc = status_get_sc(dst)) && sc->count) {
-		if(sc->data[SC_HALLUCINATION] && damage)
-			damage = damage * sc->data[SC_HALLUCINATION]->val2 + rnd()%100;
-		if(sc->data[SC_PYREXIA]) {
-			if(!damage)
-				damage = rnd()%9999 + 1;
-			damage = damage * 3 + rnd()%100;
-		}
+		if((sc->data[SC_HALLUCINATION] || sc->data[SC_PYREXIA]) && damage)
+			damage = clif_hallucination_damage();
 	}
 
 #if PACKETVER < 3
@@ -5616,11 +5636,10 @@ int clif_skill_damage2(struct block_list *src,struct block_list *dst,unsigned in
 
 	type = (type > 0) ? type : skill_get_hit(skill_id);
 	type = clif_calc_delay(type,div,damage,ddelay);
-	sc = status_get_sc(dst);
 
-	if(sc && sc->count) {
-		if(sc->data[SC_HALLUCINATION] && damage)
-			damage = damage * (sc->data[SC_HALLUCINATION]->val2) + rnd()%100;
+	if((sc = status_get_sc(dst)) && sc->count) {
+		if((sc->data[SC_HALLUCINATION] || sc->data[SC_PYREXIA]) && damage)
+			damage = clif_hallucination_damage();
 	}
 
 	WBUFW(buf,0) = 0x115;
@@ -6988,7 +7007,7 @@ void clif_bank_deposit(struct map_session_data *sd, enum e_BANKING_DEPOSIT_ACK r
 
 /**
  * Request saving some money in bank
- * @author : original [Yommy]
+ * @author [Yommy]
  * 09A7 <AID>L <Money>L (PACKET_CZ_REQ_BANKING_DEPOSIT)
  */
 void clif_parse_BankDeposit(int fd, struct map_session_data *sd) {
@@ -18182,8 +18201,8 @@ void clif_parse_GMFullStrip(int fd, struct map_session_data *sd) {
  * Close script when player is idle
  * 08d6 <npc id>.L (ZC_CLEAR_DIALOG)
  * @author [Ind]
- * @param sd : player pointer
- * @param npcid : npc gid to close
+ * @param sd: player pointer
+ * @param npcid: npc gid to close
  */
 void clif_scriptclear(struct map_session_data *sd, int npcid) {
 	struct s_packet_db *info;

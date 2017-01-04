@@ -167,7 +167,7 @@ void initChangeTables(void) {
 	set_sc( NPC_STUNATTACK    , SC_STUN      , SI_BLANK    , SCB_NONE );
 	set_sc( NPC_SLEEPATTACK   , SC_SLEEP     , SI_BLANK    , SCB_NONE );
 	set_sc( NPC_POISON        , SC_POISON    , SI_BLANK    , SCB_DEF2|SCB_REGEN );
-	set_sc( NPC_CURSEATTACK   , SC_CURSE     , SI_BLANK    , SCB_LUK|SCB_BATK|SCB_WATK|SCB_SPEED );
+	set_sc( NPC_WIDECURSE     , SC_CURSE     , SI_BLANK    , SCB_LUK|SCB_BATK|SCB_WATK|SCB_SPEED );
 	set_sc( NPC_SILENCEATTACK , SC_SILENCE   , SI_BLANK    , SCB_NONE );
 	set_sc( NPC_WIDECONFUSE   , SC_CONFUSION , SI_BLANK    , SCB_NONE );
 	set_sc( NPC_BLINDATTACK   , SC_BLIND     , SI_BLANK    , SCB_HIT|SCB_FLEE );
@@ -7156,7 +7156,7 @@ void status_change_init(struct block_list *bl)
 /**
  * Returns the interval for status changes that iterate multiple times
  * through the timer (e.g. those that deal damage in regular intervals)
- * @author: [Playtester]
+ * @author [Playtester]
  * @param type: Status change (SC_*)
  */
 int status_get_sc_interval(enum sc_type type)
@@ -7247,6 +7247,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		case SC_POISON:
 		case SC_DPOISON:
 			sc_def = status->vit * 100;
+#ifndef RENEWAL
 			sc_def2 = status->luk * 10 + SCDEF_LVL_DIFF(bl,src,99,10);
 			if (sd) { //For players: 60000 - 450 * vit - 100 * luk
 				tick_def = status->vit * 75;
@@ -7255,6 +7256,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 				tick >>= 1;
 				tick_def = status->vit * 200 / 3;
 			}
+#endif
 			break;
 		case SC_STUN:
 			sc_def = status->vit * 100;
@@ -8589,7 +8591,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					tick = -1;
 				break;
 			case SC_AUTOBERSERK:
-				if( status->hp < status->max_hp>>2 && (!sc->data[SC_PROVOKE] || sc->data[SC_PROVOKE]->val2 == 0) )
+				if( status->hp < status->max_hp>>2 && (!sc->data[SC_PROVOKE] || !sc->data[SC_PROVOKE]->val2) )
 					sc_start4(src,bl,SC_PROVOKE,100,10,1,0,0,60000);
 				tick = -1;
 				break;
@@ -8830,8 +8832,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_PYREXIA:
 				if( type == SC_POISON && val1 == SO_CLOUD_KILL )
 					clif_status_change(bl,SI_CLOUD_KILL,1,tick,0,0,0);
-				if( type == SC_PYREXIA )
-					status_change_start(src,bl,SC_BLIND,10000,val1,0,0,0,tick,SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
 				tick_time = status_get_sc_interval(type);
 				val4 = tick - tick_time; //Remaining time
 				break;
@@ -9334,9 +9334,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_SUFFRAGIUM:
 				val2 = 15 * val1; //Speed cast decrease
-				break;
-			case SC_HALLUCINATION:
-				val2 = 5 + val1; //Factor by which displayed damage is increased by
 				break;
 			case SC_DOUBLECAST:
 				val2 = 30 + 10 * val1; //Trigger rate
@@ -10389,6 +10386,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			sc->opt2 |= OPT2_SIGNUMCRUCIS;
 			break;
 		case SC_BLIND:
+		case SC_PYREXIA:
 			sc->opt2 |= OPT2_BLIND;
 			break;
 		case SC_ANGELUS:
@@ -11515,6 +11513,9 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			break;
 		case SC_FEAR:
 			sc->opt2 &= ~OPT2_FEAR;
+			break;
+		case SC_PYREXIA:
+			sc->opt2 &= ~OPT2_BLIND;
 			break;
 		//OPT3
 		case SC_TWOHANDQUICKEN:

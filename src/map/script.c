@@ -1288,7 +1288,7 @@ const char *parse_variable(const char *p) {
  * followed by a hexadecimal or decimal number literal literal and is NOT
  * followed by a underscore or letter.
  *
- * @author : Ind
+ * @author Ind
  * @param p Pointer to the string to check
  * @return Whether the string is a number literal
  */
@@ -19796,7 +19796,7 @@ BUILDIN_FUNC(is_clientver) {
  * @param val2: Value for SC
  * @param val3: Value for SC
  * @param val4: Value for SC
- * @author: malufett
+ * @author malufett
  * @return val: 1 - success, 0 - failed
  */
 BUILDIN_FUNC(montransform) {

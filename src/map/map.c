@@ -785,7 +785,7 @@ int map_foreachinarea(int (*func)(struct block_list *, va_list), int16 m, int16 
 
 /**
  * Same as foreachinarea, but there must be a shoot-able range between area center and target.
- * @author: [Playtester]
+ * @author [Playtester]
  * @param m: ID of map
  * @param x0: West end of area
  * @param y0: South end of area
@@ -1909,6 +1909,8 @@ int map_quit(struct map_session_data *sd) {
 			sd->sc.data[SC_SPEEDUP0]->val4 = 0;
 			status_change_end(&sd->bl,SC_SPEEDUP0,INVALID_TIMER);
 		}
+		if (sd->sc.data[SC_PROVOKE] && sd->sc.data[SC_PROVOKE]->timer == INVALID_TIMER)
+			status_change_end(&sd->bl,SC_PROVOKE,INVALID_TIMER); //Infinite provoke ends on logout
 		status_change_end(&sd->bl,SC_WEIGHT50,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_WEIGHT90,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_SATURDAYNIGHTFEVER,INVALID_TIMER);
