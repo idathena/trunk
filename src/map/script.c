@@ -3666,11 +3666,21 @@ int run_script_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct script_state *st     = (struct script_state *)data;
 	struct linkdb_node *node    = (struct linkdb_node *)sleep_db;
-	TBL_PC *sd = map_id2sd(st->rid);
 
-	if((sd && sd->status.char_id != id) || (st->rid && !sd)) { //Character mismatch, cancel execution
-		st->rid = 0;
-		st->state = END;
+	if(id != 0 && st->rid) { //If it was a player before going to sleep and there is still a unit attached to the script
+		struct map_session_data *sd = map_id2sd(st->rid);
+
+		if(!sd) { //Attached player is offline or another unit type - should not happen
+			ShowWarning("Script sleep timer called by an offline character or non player unit.\n");
+			script_reportsrc(st);
+			st->rid = 0;
+			st->state = END;
+		} else if(sd->status.char_id != id) { //Character mismatch, cancel execution
+			ShowWarning("Script sleep timer detected a character mismatch CID %d != %d\n", sd->status.char_id, id);
+			script_reportsrc(st);
+			st->rid = 0;
+			st->state = END;
+		}
 	}
 	while(node && st->sleep.timer != INVALID_TIMER) {
 		if((int)__64BPRTSIZE(node->key) == st->oid && ((struct script_state *)node->data)->sleep.timer == st->sleep.timer) {
@@ -11075,7 +11085,7 @@ static int buildin_addrid_sub(struct block_list *bl,va_list ap)
 	struct map_session_data *sd = (TBL_PC *)bl;
 	struct script_state *st;
 
-	st = va_arg(ap,struct script_state*);
+	st = va_arg(ap,struct script_state *);
 	forceflag = va_arg(ap,int);
 	if(!forceflag || !sd->st)
 		if(sd->status.account_id != st->rid)
@@ -11710,10 +11720,9 @@ static int buildin_maprespawnguildid_sub_mob(struct block_list *bl,va_list ap)
 {
 	struct mob_data *md = (struct mob_data *)bl;
 
-	if(!md->guardian_data && md->mob_id != MOBID_EMPERIUM)
+	if(!md->guardian_data && md->mob_id != MOBID_EMPERIUM && (!mob_is_clone(md->mob_id) || battle_config.guild_maprespawn_clones))
 		status_kill(bl);
-
-	return 0;
+	return 1;
 }
 
 /*
@@ -11737,7 +11746,7 @@ BUILDIN_FUNC(maprespawnguildid)
 
 	//Catch ALL players (in case some are 'between maps' on execution time)
 	map_foreachpc(buildin_maprespawnguildid_sub_pc,m,g_id,flag);
-	if (flag&4) //Remove script mobs
+	if(flag&4) //Remove script mobs
 		map_foreachinmap(buildin_maprespawnguildid_sub_mob,m,BL_MOB);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -17296,8 +17305,8 @@ BUILDIN_FUNC(sleep)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/// Pauses the execution of the script, keeping the player attached
-/// Returns if a player is still attached
+/// Pauses the execution of the script, keeping the unit attached
+/// Returns if the unit is still attached
 ///
 /// sleep2(<mili secconds>) -> <bool>
 BUILDIN_FUNC(sleep2)
@@ -17306,14 +17315,14 @@ BUILDIN_FUNC(sleep2)
 
 	ticks = script_getnum(st,2);
 	if( ticks <= 0 )
-		script_pushint(st,(map_id2sd(st->rid) != NULL));
+		script_pushint(st,(map_id2bl(st->rid) != NULL));
 	else if( !st->sleep.tick ) { //Sleep for the target amount of time
 		st->state = RERUNLINE;
 		st->sleep.tick = ticks;
 	} else { //Sleep time is over
 		st->state = RUN;
 		st->sleep.tick = 0;
-		script_pushint(st,(map_id2sd(st->rid) != NULL));
+		script_pushint(st,(map_id2bl(st->rid) != NULL));
 	}
 
 	return SCRIPT_CMD_SUCCESS;
@@ -17327,31 +17336,21 @@ BUILDIN_FUNC(awake)
 	struct npc_data *nd;
 	struct linkdb_node *node = (struct linkdb_node *)sleep_db;
 
-	if( !(nd = npc_name2id(script_getstr(st, 2))) ) {
+	if( !(nd = npc_name2id(script_getstr(st,2))) ) {
 		ShowError("awake: NPC \"%s\" not found\n", script_getstr(st,2));
 		return 1;
 	}
-
 	while( node ) {
 		if( (int)__64BPRTSIZE(node->key) == nd->bl.id ) { //Sleep timer for the npc
-			struct script_state *tst = (struct script_state*)node->data;
-			TBL_PC *sd = map_id2sd(tst->rid);
+			struct script_state *tst = (struct script_state *)node->data;
 
 			if( tst->sleep.timer == INVALID_TIMER ) { //Already awake?
 				node = node->next;
 				continue;
 			}
-			//Char not online anymore / another char of the same account is online - Cancel execution
-			if( (sd && sd->status.char_id != tst->sleep.charid) || (tst->rid && !sd) ) {
-				tst->state = END;
-				tst->rid = 0;
-			}
 			delete_timer(tst->sleep.timer,run_script_timer);
 			node = script_erase_sleepdb(node);
-			tst->sleep.timer = INVALID_TIMER;
-			if( tst->state != RERUNLINE )
-				tst->sleep.tick = 0;
-			run_script_main(tst);
+			run_script_timer(INVALID_TIMER, gettick(), tst->sleep.charid, (intptr_t)tst);
 		} else
 			node = node->next;
 	}

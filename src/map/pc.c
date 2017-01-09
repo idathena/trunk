@@ -2718,11 +2718,11 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 				sd->bonus.long_attack_def_rate += val;
 			break;
 		case SP_DOUBLE_RATE:
-			if(sd->state.lr_flag == 0 && sd->bonus.double_rate < val)
+			if(!sd->state.lr_flag && sd->bonus.double_rate < val)
 				sd->bonus.double_rate = val;
 			break;
 		case SP_DOUBLE_ADD_RATE:
-			if(sd->state.lr_flag == 0)
+			if(!sd->state.lr_flag)
 				sd->bonus.double_add_rate += val;
 			break;
 		case SP_MATK_RATE:
@@ -11747,7 +11747,6 @@ short pc_get_itemgroup_bonus_group(struct map_session_data *sd, uint16 group_id)
 bool pc_is_same_equip_index(enum equip_index eqi, short *equip_index, short index) {
 	if (index < 0 || index >= MAX_INVENTORY)
 		return true;
-
 	if (eqi == EQI_HAND_R && equip_index[EQI_HAND_L] == index)
 		return true; //Dual weapon checks
 	if (eqi == EQI_HEAD_MID && equip_index[EQI_HEAD_LOW] == index)
