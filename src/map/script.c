@@ -12216,8 +12216,9 @@ BUILDIN_FUNC(wedding_effect)
 	TBL_PC *sd = script_rid2sd(st);
 	struct block_list *bl;
 
-	if(sd == NULL)
-		return 1; //bl = map_id2bl(st->oid);
+	if(!sd)
+		return 1;
+	//bl = map_id2bl(st->oid);
 	bl = &sd->bl;
 	clif_wedding_effect(bl);
 	return SCRIPT_CMD_SUCCESS;
