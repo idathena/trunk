@@ -7056,9 +7056,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case AL_HOLYWATER:
 			if(sd) {
-				if (skill_produce_mix(sd,skill_id,ITEMID_HOLY_WATER,0,0,0,0,1))
+				if (skill_produce_mix(sd,skill_id,ITEMID_HOLY_WATER,0,0,0,0,1)) {
+					struct skill_unit *unit;
+
+					if ((unit = map_find_skill_unit_oncell(bl,bl->x,bl->y,NJ_SUITON,NULL,0)))
+						skill_delunit(unit);
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				else
+				} else
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			}
 			break;
@@ -14677,6 +14681,12 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				return false;
 			}
 			break;
+		case AL_HOLYWATER:
+			if( map_getcell(sd->bl.m,sd->bl.x,sd->bl.y,CELL_CHKLANDPROTECTOR) ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false; //Aqua Benedicta will not cast on LP [secretdataz]
+			}
+			break;
 		case SO_SPELLFIST:
 			if( sd->skill_id_old != MG_FIREBOLT && sd->skill_id_old != MG_COLDBOLT && sd->skill_id_old != MG_LIGHTNINGBOLT ) {
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -14695,7 +14705,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 					static const int dy[] = {-1,0,1, 0,-1,-1,1, 1};
 					int i;
 
-					ARR_FIND(0,8,i,map_getcell(sd->bl.m,sd->bl.x + dx[i],sd->bl.y + dy[i],CELL_CHKNOPASS) != 0);
+					ARR_FIND(0,8,i,map_getcell(sd->bl.m,sd->bl.x + dx[i],sd->bl.y + dy[i],(CELL_CHKNOPASS) != 0));
 					if( i == 8 ) {
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 						return false;

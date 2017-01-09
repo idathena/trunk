@@ -919,7 +919,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 	switch( skill_id ) {
 		case CR_GRANDCROSS:
 		case NPC_GRANDDARKNESS:
-			if( sd )
+			if( tsd )
 				break;
 			d->dmg_lv = ATK_MISS;
 			return 0;
@@ -2156,7 +2156,7 @@ bool target_has_infinite_defense(struct block_list *target, uint16 skill_id, int
  */
 static bool is_skill_using_arrow(struct block_list *src, uint16 skill_id)
 {
-	if(src != NULL) {
+	if(src) {
 		struct status_data *sstatus = status_get_status_data(src);
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
 
@@ -2177,11 +2177,11 @@ static bool is_skill_using_arrow(struct block_list *src, uint16 skill_id)
  */
 static bool is_attack_right_handed(struct block_list *src, uint16 skill_id)
 {
-	if(src != NULL) {
+	if(src) {
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
 
 		//Skills ALWAYS use ONLY your right-hand weapon (tested on Aegis 10.2)
-		if(!skill_id && sd && sd->weapontype1 == 0 && sd->weapontype2 > 0)
+		if(!skill_id && sd && !sd->weapontype1 && sd->weapontype2 > 0)
 			return false;
 	}
 	return true;
@@ -2197,16 +2197,18 @@ static bool is_attack_right_handed(struct block_list *src, uint16 skill_id)
  */
 static bool is_attack_left_handed(struct block_list *src, uint16 skill_id)
 {
-	if(src != NULL) {
+	if(src) {
 		struct status_data *sstatus = status_get_status_data(src);
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
 
 		if(!skill_id) { //Skills ALWAYS use ONLY your right-hand weapon (tested on Aegis 10.2)
-			if(sd && sd->weapontype1 == 0 && sd->weapontype2 > 0)
-				return true;
+			if(sd) {
+				if(!sd->weapontype1 && sd->weapontype2 > 0)
+					return true;
+				if(sd->status.weapon == W_KATAR)
+					return true;
+			}
 			if(sstatus->lhw.atk)
-				return true;
-			if(sd && sd->status.weapon == W_KATAR)
 				return true;
 		}
 	}
@@ -2298,7 +2300,7 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
  *	Initial refactoring by Baalberith
  *	Refined and optimized by helvetica
  */
-static int is_attack_piercing(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, short weapon_position)
+static bool is_attack_piercing(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, short weapon_position)
 {
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct status_data *tstatus = status_get_status_data(target);
@@ -2316,14 +2318,14 @@ static int is_attack_piercing(struct Damage wd, struct block_list *src, struct b
 		case RK_DRAGONBREATH_WATER:
 		case NC_SELFDESTRUCTION:
 		case KO_HAPPOKUNAI:
-			return 0;
+			return false;
 		case MO_INVESTIGATE:
 		case RL_MASS_SPIRAL:
-			return 1;
+			return true;
 		default:
 #ifndef RENEWAL //Renewal critical gains ice pick effect [helvetica]
 			if(is_attack_critical(wd, src, target, skill_id, skill_lv, false))
-				return 0;
+				return false;
 #endif
 			break;
 	}
@@ -2333,19 +2335,19 @@ static int is_attack_piercing(struct Damage wd, struct block_list *src, struct b
 			(sd->right_weapon.def_ratio_atk_race&(1<<tstatus->race)) || (sd->right_weapon.def_ratio_atk_race&(1<<RC_ALL)) ||
 			(sd->right_weapon.def_ratio_atk_class&(1<<tstatus->class_)) || (sd->right_weapon.def_ratio_atk_class&(1<<CLASS_ALL)))
 			if(weapon_position == EQI_HAND_R)
-				return 1;
+				return true;
 		if((sd->left_weapon.def_ratio_atk_ele&(1<<tstatus->def_ele)) || (sd->left_weapon.def_ratio_atk_ele&(1<<ELE_ALL)) ||
 			(sd->left_weapon.def_ratio_atk_race&(1<<tstatus->race)) || (sd->left_weapon.def_ratio_atk_race&(1<<RC_ALL)) ||
 			(sd->left_weapon.def_ratio_atk_class&(1<<tstatus->class_)) || (sd->left_weapon.def_ratio_atk_class&(1<<CLASS_ALL)))
 		{ //Pass effect onto right hand if configured so [Skotlex]
 			if(battle_config.left_cardfix_to_right && is_attack_right_handed(src, skill_id)) {
 				if(weapon_position == EQI_HAND_R)
-					return 1;
+					return true;
 			} else if(weapon_position == EQI_HAND_L)
-				return 1;
+				return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 static bool battle_skill_get_damage_properties(uint16 skill_id, int is_splash)
@@ -2549,7 +2551,6 @@ static bool attack_ignores_def(struct Damage wd, struct block_list *src, struct 
 #endif
 	if(sc && sc->data[SC_FUSION])
 		return true;
-
 	if(sd) { //Ignore Defense
 		if((sd->right_weapon.ignore_def_ele&(1<<tstatus->def_ele)) || (sd->right_weapon.ignore_def_ele&(1<<ELE_ALL)) ||
 			(sd->right_weapon.ignore_def_race&(1<<tstatus->race)) || (sd->right_weapon.ignore_def_race&(1<<RC_ALL)) ||
@@ -4666,9 +4667,10 @@ struct Damage battle_calc_defense_reduction(struct Damage wd, struct block_list 
 	short def1 = battle_get_defense(src, target, skill_id, 0);
 	short vit_def = battle_get_defense(src, target, skill_id, 1);
 
+	if(attack_ignores_def(wd, src, target, skill_id, skill_lv, EQI_HAND_R) || attack_ignores_def(wd, src, target, skill_id, skill_lv, EQI_HAND_L))
+		return wd;
 #ifdef RENEWAL
-	if(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_R) || (is_attack_left_handed(src, skill_id) &&
-		is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_L)))
+	if(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_R) || is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_L))
 		return wd;
 	switch(skill_id) {
 		case MO_EXTREMITYFIST:
@@ -4699,8 +4701,8 @@ struct Damage battle_calc_defense_reduction(struct Damage wd, struct block_list 
 	if(def1 > 100)
 		def1 = 100;
 	ATK_RATE2(wd.damage, wd.damage2,
-		(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_R) ? is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_R) * (def1 + vit_def) : (100 - def1)),
-		(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_L) ? is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_L) * (def1 + vit_def) : (100 - def1))
+		(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_R) ? (def1 + vit_def) : (100 - def1)),
+		(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_L) ? (def1 + vit_def) : (100 - def1))
 	);
 	ATK_ADD2(wd.damage, wd.damage2,
 		(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_R) ? 0 : -vit_def),
@@ -5374,8 +5376,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 #endif
 
 	if(wd.damage + wd.damage2) { //Check if attack ignores DEF
-		if((!attack_ignores_def(wd, src, target, skill_id, skill_lv, EQI_HAND_R) || (is_attack_left_handed(src, skill_id) &&
-			!attack_ignores_def(wd, src, target, skill_id, skill_lv, EQI_HAND_L))) && !target_has_infinite_defense(target, skill_id, wd.flag))
+		if(!target_has_infinite_defense(target, skill_id, wd.flag))
 			wd = battle_calc_defense_reduction(wd, src, target, skill_id, skill_lv);
 		if(wd.dmg_lv != ATK_FLEE)
 			wd = battle_calc_attack_post_defense(wd, src, target, skill_id, skill_lv);
@@ -8586,7 +8587,9 @@ static const struct _battle_data {
 	{ "show_status_katar_crit",             &battle_config.show_status_katar_crit,          0,      0,      1,              },
 	{ "dispel_song",                        &battle_config.dispel_song,                     0,      0,      1,              },
 	{ "monster_stuck_warning",              &battle_config.mob_stuck_warning,               0,      0,      1,              },
+	{ "guild_maprespawn_clones",            &battle_config.guild_maprespawn_clones,         0,      0,      1,              },
 };
+
 #ifndef STATS_OPT_OUT
 /**
  * rAthena anonymous statistic usage report -- packet is built here, and sent to char server to report.

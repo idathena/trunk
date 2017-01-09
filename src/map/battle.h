@@ -625,6 +625,7 @@ extern struct Battle_Config
 	int show_status_katar_crit;
 	int dispel_song; //Can songs be dispelled?
 	int mob_stuck_warning; //Show warning if a monster is stuck too long
+	int guild_maprespawn_clones; //Should clones be killed by maprespawnguildid?
 } battle_config;
 
 void do_init_battle(void);
