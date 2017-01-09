@@ -524,7 +524,14 @@ void pc_setrestartvalue(struct map_session_data *sd, char type) {
 	Rental System
  *------------------------------------------*/
 
-/* Ends rental */
+/**
+ * Ends a rental and removes the item/effect
+ * @param tid: Tick ID
+ * @param tick: Timer
+ * @param id: Timer ID
+ * @param data: Data
+ * @return 0 - failure, 1 - success
+ */
 static int pc_inventory_rental_end(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct map_session_data *sd = map_id2sd(id);
@@ -540,6 +547,10 @@ static int pc_inventory_rental_end(int tid, unsigned int tick, int id, intptr_t 
 	return 1;
 }
 
+/**
+ * Removes the rental timer from the player
+ * @param sd: Player data
+ */
 void pc_inventory_rental_clear(struct map_session_data *sd)
 {
 	if( sd->rental_timer != INVALID_TIMER ) {
@@ -548,97 +559,10 @@ void pc_inventory_rental_clear(struct map_session_data *sd)
 	}
 }
 
-//Assumes I is valid (from default areas where it is called, it is)
-void pc_rental_expire(struct map_session_data *sd, int i)
-{
-	unsigned short nameid = sd->status.inventory[i].nameid;
-
-	switch( nameid ) {
-		case ITEMID_BOARDING_HALTER:
-			if( sd->sc.data[SC_ALL_RIDING] )
-				status_change_end(&sd->bl, SC_ALL_RIDING, INVALID_TIMER);
-			break;
-		case ITEMID_LOVE_ANGEL:
-			if( sd->status.font == 1 ) {
-				sd->status.font = 0;
-				clif_font(sd);
-			}
-			break;
-		case ITEMID_SQUIRREL:
-			if( sd->status.font == 2 ) {
-				sd->status.font = 0;
-				clif_font(sd);
-			}
-			break;
-		case ITEMID_GOGO:
-			if( sd->status.font == 3 ) {
-				sd->status.font = 0;
-				clif_font(sd);
-			}
-			break;
-		case ITEMID_PICTURE_DIARY:
-			if( sd->status.font == 4 ) {
-				sd->status.font = 0;
-				clif_font(sd);
-			}
-			break;
-		case ITEMID_MINI_HEART:
-			if( sd->status.font == 5 ) {
-				sd->status.font = 0;
-				clif_font(sd);
-			}
-			break;
-		case ITEMID_NEWCOMER:
-			if( sd->status.font == 6 ) {
-				sd->status.font = 0;
-				clif_font(sd);
-			}
-			break;
-		case ITEMID_KID:
-			if( sd->status.font == 7 ) {
-				sd->status.font = 0;
-				clif_font(sd);
-			}
-			break;
-		case ITEMID_MAGIC_CASTLE:
-			if( sd->status.font == 8 ) {
-				sd->status.font = 0;
-				clif_font(sd);
-			}
-			break;
-		case ITEMID_BULGING_HEAD:
-			if( sd->status.font == 9 ) {
-				sd->status.font = 0;
-				clif_font(sd);
-			}
-			break;
-	}
-	if( &sd->sc ) {
-		if( sd->sc.data[SC_MOONSTAR] )
-			status_change_end(&sd->bl, SC_MOONSTAR, INVALID_TIMER);
-		if( sd->sc.data[SC_SUPER_STAR] )
-			status_change_end(&sd->bl, SC_SUPER_STAR, INVALID_TIMER);
-		if( sd->sc.data[SC_STRANGELIGHTS] )
-			status_change_end(&sd->bl, SC_STRANGELIGHTS, INVALID_TIMER);
-		if( sd->sc.data[SC_DECORATION_OF_MUSIC] )
-			status_change_end(&sd->bl, SC_DECORATION_OF_MUSIC, INVALID_TIMER);
-		if( sd->sc.data[SC_HAT_EFFECT] )
-			status_change_end(&sd->bl, SC_HAT_EFFECT, INVALID_TIMER);
-		if( sd->sc.data[SC_QSCARABA] )
-			status_change_end(&sd->bl, SC_QSCARABA, INVALID_TIMER);
-		if( sd->sc.data[SC_LJOSALFAR] )
-			status_change_end(&sd->bl, SC_LJOSALFAR, INVALID_TIMER);
-		if( sd->sc.data[SC_MAPLE_FALLS] )
-			status_change_end(&sd->bl, SC_MAPLE_FALLS, INVALID_TIMER);
-		if( sd->sc.data[SC_MERMAID_LONGING] )
-			status_change_end(&sd->bl, SC_MERMAID_LONGING, INVALID_TIMER);
-		if( sd->sc.data[SC_TIME_ACCESSORY] )
-			status_change_end(&sd->bl, SC_TIME_ACCESSORY, INVALID_TIMER);
-	}
-	clif_rental_expired(sd->fd, i, sd->status.inventory[i].nameid);
-	pc_delitem(sd, i, sd->status.inventory[i].amount, 0, 0, LOG_TYPE_OTHER);
-}
-
+/**
+ * Check for items in the player's inventory that are rental type
+ * @param sd: Player data
+ */
 void pc_inventory_rentals(struct map_session_data *sd)
 {
 	int i, c = 0;
@@ -649,9 +573,12 @@ void pc_inventory_rentals(struct map_session_data *sd)
 			continue; // Nothing here
 		if( !sd->status.inventory[i].expire_time )
 			continue;
-		if( sd->status.inventory[i].expire_time <= time(NULL) )
-			pc_rental_expire(sd, i);
-		else {
+		if( sd->status.inventory[i].expire_time <= time(NULL) ) {
+			if( sd->inventory_data[i]->unequip_script )
+				run_script(sd->inventory_data[i]->unequip_script, 0, sd->bl.id, fake_nd->bl.id);
+			clif_rental_expired(sd->fd, i, sd->status.inventory[i].nameid);
+			pc_delitem(sd, i, sd->status.inventory[i].amount, 0, 0, LOG_TYPE_OTHER);
+		} else {
 			unsigned int expire_tick = (unsigned int)(sd->status.inventory[i].expire_time - time(NULL));
 
 			clif_rental_time(sd->fd, sd->status.inventory[i].nameid, (int)expire_tick);
@@ -666,6 +593,11 @@ void pc_inventory_rentals(struct map_session_data *sd)
 		sd->rental_timer = INVALID_TIMER;
 }
 
+/**
+ * Add a rental item to the player and adjusts the rental timer appropriately
+ * @param sd: Player data
+ * @param seconds: Rental time
+ */
 void pc_inventory_rental_add(struct map_session_data *sd, int seconds)
 {
 	int tick = seconds * 1000;
@@ -4481,13 +4413,14 @@ char pc_additem(struct map_session_data *sd,struct item *item,int amount,e_log_p
 		pc_equipitem(sd, i, id->equip);
 
 	if( item->expire_time ) { //Rental item check
-		if( time(NULL) > item->expire_time )
-			pc_rental_expire(sd, i);
-		else {
-			int seconds = (int)(item->expire_time - time(NULL));
+		if( time(NULL) > item->expire_time ) {
+			clif_rental_expired(sd->fd, i, sd->status.inventory[i].nameid);
+			pc_delitem(sd, i, sd->status.inventory[i].amount, 1, 0, LOG_TYPE_OTHER);
+		} else {
+			unsigned int seconds = (unsigned int)(item->expire_time - time(NULL));
 
-			clif_rental_time(sd->fd, sd->status.inventory[i].nameid, seconds);
-			pc_inventory_rental_add(sd, seconds);
+			clif_rental_time(sd->fd, sd->status.inventory[i].nameid, (int)seconds);
+			pc_inventory_rental_add(sd, (int)seconds);
 		}
 	}
 
@@ -5215,7 +5148,7 @@ int pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 ski
 	flag = pc_additem(sd,&tmp_item,1,LOG_TYPE_PICKDROP_PLAYER);
 
 	//@TODO: Should we disable stealing when the item you stole couldn't be added to your inventory? Perhaps players will figure out a way to exploit this behaviour otherwise?
-	md->state.steal_flag = UCHAR_MAX; //you can't steal from this mob any more
+	md->state.steal_flag = UCHAR_MAX; //You can't steal from this mob any more
 
 	if( flag ) { //Failed to steal due to overweight
 		clif_additem(sd,0,0,flag);
@@ -9200,7 +9133,7 @@ static int pc_checkcombo(struct map_session_data *sd, struct item_data *data) {
 		unsigned int pos = 0;
 
 		//Ensure this isn't a duplicate combo
-		if( sd->combos.bonus != NULL ) {
+		if( sd->combos.bonus ) {
 			int x;
 
 			ARR_FIND(0, sd->combos.count, x, sd->combos.id[x] == data->combos[i]->id);
@@ -9406,6 +9339,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 	int i = 0, pos = 0, flag = 0, iflag = 0;
 	struct item_data *id;
 	uint8 res = ITEM_EQUIP_ACK_OK;
+	bool status_calc = false;
 
 	nullpo_retr(false,sd);
 
@@ -9565,8 +9499,8 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 	}
 	pc_checkallowskill(sd); //Check if status changes should be halted
 	iflag = sd->npc_item_flag;
-	if( id->combos_count )
-		pc_checkcombo(sd,id); //Check for combos
+	if( id->combos_count && pc_checkcombo(sd,id) ) //Check for combos
+		status_calc = true;
 	if( itemdb_isspecial(sd->status.inventory[n].card[0]) )
 		; //No cards
 	else {
@@ -9575,10 +9509,12 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 
 			if( !sd->status.inventory[n].card[i] )
 				continue;
-			if( (data = itemdb_exists(sd->status.inventory[n].card[i])) && data->combos_count )
-				pc_checkcombo(sd,data);
+			if( (data = itemdb_exists(sd->status.inventory[n].card[i])) && data->combos_count && pc_checkcombo(sd,data) )
+				status_calc = true;
 		}
 	}
+	if( status_calc )
+		status_calc_pc(sd,SCO_NONE);
 	//OnEquip script [Skotlex]
 	if( id->equip_script && (pc_has_permission(sd,PC_PERM_USE_ALL_EQUIPMENT) || !itemdb_isNoEquip(id,sd->bl.m)) )
 		run_script(id->equip_script,0,sd->bl.id,fake_nd->bl.id); //Only run the script if item isn't restricted
@@ -9628,6 +9564,8 @@ static void pc_unequipitem_sub(struct map_session_data *sd, int n, int flag) {
 			}
 		}
 	}
+	if( status_calc )
+		status_calc_pc(sd,SCO_NONE);
 	if( sd->inventory_data[n] ) { //OnUnEquip script [Skotlex]
 		if( sd->inventory_data[n]->unequip_script )
 			run_script(sd->inventory_data[n]->unequip_script,0,sd->bl.id,fake_nd->bl.id);
@@ -9644,7 +9582,7 @@ static void pc_unequipitem_sub(struct map_session_data *sd, int n, int flag) {
 			}
 		}
 	}
-	if( (flag&1) || status_calc )
+	if( flag&1 )
 		status_calc_pc(sd,SCO_FORCE);
 	sd->npc_item_flag = iflag;
 }
@@ -11267,18 +11205,24 @@ void pc_damage_log_clear(struct map_session_data *sd, int id) {
 	}
 }
 
-/* Status change data arrived from char-server */
+/**
+ * Status change data arrived from char-server
+ * @param sd: Player data
+ */
 void pc_scdata_received(struct map_session_data *sd) {
-	return; //Nothing todo yet
+	pc_inventory_rentals(sd); //Needed here to remove rentals that have status changes after chrif_load_scdata has finished
 }
 
-/** Check expiration time and rental items
- * @param sd
+/**
+ * Check player account expiration time and rental item expirations
+ * @param sd: Player data
  */
 void pc_check_expiration(struct map_session_data *sd) {
-	pc_inventory_rentals(sd);
+#ifndef ENABLE_SC_SAVING
+	pc_inventory_rentals(sd); //Check here if status change saving is disabled
+#endif
 
-	if( sd->expiration_time != 0 ) { //Don't display if it's unlimited or unknow value
+	if( sd->expiration_time ) { //Don't display if it's unlimited or unknow value
 		time_t exp_time = sd->expiration_time;
 		char tmpstr[1024];
 

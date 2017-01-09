@@ -7127,8 +7127,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				} else
 					dur = skill_get_time(skill_id,skill_lv) + (sstatus->dex - tstatus->dex) * 500;
 
-				if(dur < 0)
-					dur = 0; //Minimum duration 0ms
+				dur = max(dur,0); //Minimum duration 0ms
 
 				switch(skill_id) {
 					case RG_STRIPWEAPON:
@@ -12299,7 +12298,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 	layout = skill_get_unit_layout(skill_id,skill_lv,src,x,y);
 
 	if( map[src->m].unit_count ) {
-		ARR_FIND(0,map[src->m].unit_count,i,map[src->m].units[i]->skill_id == skill_id );
+		ARR_FIND(0,map[src->m].unit_count,i,map[src->m].units[i]->skill_id == skill_id);
 		if( i < map[src->m].unit_count )
 			limit = limit * map[src->m].units[i]->modifier / 100;
 	}
