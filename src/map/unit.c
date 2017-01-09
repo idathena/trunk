@@ -1665,7 +1665,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 			return 0; //Walk-path check failed
 		else if( src->type == BL_MER && skill_id == MA_REMOVETRAP && !battle_check_range(battle_get_master(src), target, range + 1) )
 			return 0; //Aegis calc remove trap based on Master position, ignoring mercenary
-		else if( !battle_check_range(src, target, range + (skill_id == RG_CLOSECONFINE ? 0 : 2)) )
+		else if( !battle_check_range(src, target, range) )
 			return 0; //Arrow-path check failed
 	}
 
@@ -2036,7 +2036,7 @@ int unit_set_target(struct unit_data *ud, int target_id)
 
 		if(ud->target && (target = map_id2bl(ud->target)) && (ux = unit_bl2ud(target)) && ux->target_count > 0)
 			ux->target_count--;
-		if(target_id && (target = map_id2bl(target_id)) && (ux = unit_bl2ud(target)) && ux->target_count < 255)
+		if(target_id && (target = map_id2bl(target_id)) && (ux = unit_bl2ud(target)) && ux->target_count < UCHAR_MAX)
 			ux->target_count++;
 	}
 

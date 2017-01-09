@@ -6313,9 +6313,9 @@
 12284,Internet_Cafe3,Internet Cafe3,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INCINT,5400000,8; sc_start SC_INCVIT,5400000,4; sc_start SC_INCDEX,5400000,6; sc_start SC_MATKPOTION,5400000,40; },{},{}
 12285,Internet_Cafe4,Internet Cafe4,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INCDEX,5400000,8; sc_start SC_INCLUK,5400000,4; sc_start SC_INCAGI,5400000,6; sc_start SC_ATKPOTION,5400000,24; sc_start SC_MATKPOTION,5400000,24; },{},{}
 12286,Masquerade_Ball_Box2,Masquerade Ball Box2,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Masquerade_2,1); },{},{}
-12287,Love_Angel,Love Angel Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 1; },{},{}
-12288,Squirrel,Squirrel Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 2; },{},{}
-12289,Gogo,Gogo Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 3; },{},{}
+12287,Love_Angel,Love Angel Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 1; },{},{ setfont 0; }
+12288,Squirrel,Squirrel Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 2; },{},{ setfont 0; }
+12289,Gogo,Gogo Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 3; },{},{ setfont 0; }
 12290,Mysterious_Can,Mysterious Can Magic Powder,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 5,0; skilleffect "AL_BLESSING",0; sc_start SC_BLESSING,120000,5; },{},{}
 12291,Mysterious_PET_Bottle,Mysterious PET Bottle,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 5,0; skilleffect "AL_INCAGI",0; sc_start SC_INCREASEAGI,120000,5; },{},{}
 12292,Unripe_Fruit,Unripe Yggdrasilberry,0,500,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 20,0; },{},{}
@@ -6330,12 +6330,12 @@
 12301,Doppelganger_Scroll,Doppelganger Contract,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ mercenary_create 1966,1800000; },{},{}
 12302,Ygnizem_Scroll,Egnigem Cenia Contract,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ mercenary_create 1967,1800000; },{},{}
 12303,Water_Of_Blessing,Blessing of Water,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
-12304,Picture_Diary,Diary Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 4; },{},{}
-12305,Mini_Heart,Mini Heart Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 5; },{},{}
-12306,Newcomer,Freshman Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 6; },{},{}
-12307,Kid,Kid Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 7; },{},{}
-12308,Magic_Castle,Magic Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 8; },{},{}
-12309,Bulging_Head,JJangu Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 9; },{},{}
+12304,Picture_Diary,Diary Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 4; },{},{ setfont 0; }
+12305,Mini_Heart,Mini Heart Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 5; },{},{ setfont 0; }
+12306,Newcomer,Freshman Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 6; },{},{ setfont 0; }
+12307,Kid,Kid Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 7; },{},{ setfont 0; }
+12308,Magic_Castle,Magic Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 8; },{},{ setfont 0; }
+12309,Bulging_Head,JJangu Magic Powder,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ setfont 9; },{},{ setfont 0; }
 12310,Spray_Of_Flowers,Spray of Flowers,2,0,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FLEEFOOD,300000,5; },{},{}
 12311,Large_Spray_Of_Flowers,Huge Spray of Flowers,11,0,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "ALL_PARTYFLEE",5; },{},{}
 12312,Thick_Manual50,Thick Battle Manual,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_EXPBOOST,3600000,50; },{},{}
@@ -6643,7 +6643,7 @@
 12619,Cgrade_Pocket,C Grade Coin Bag,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_Cgrade_Pocket); },{},{}
 12620,Dgrade_Pocket,D Grade Coin Bag,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_Dgrade_Pocket); },{},{}
 12621,Egrade_Pocket,E Grade Coin Bag,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_Egrade_Pocket); },{},{}
-12622,Boarding_Halter,Reins of Mount,11,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ setmounting(); },{},{}
+12622,Boarding_Halter,Reins of Mount,11,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ setmounting(); },{},{ if (ismounting()) setmounting(); }
 12623,High_Weapon_Box,Advanced Weapons Box,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Advanced_Weapons_Box,1); },{},{}
 12624,Delicious_Jelly,Delicious Jelly,0,20,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 3,3; },{},{}
 12625,Sapa_Feat_Cert_Pack,Sapa Feat Cert Pack,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
@@ -10993,12 +10993,12 @@
 24177,S_M_Vibration_Weapon,Magic Formless Shadow Weapon,12,20,,0,,,,0,0xFFFFFFFF,63,2,131072,,1,1,0,{ bonus2 bIgnoreMdefRaceRate,RC_Formless,5+getrefine()/2; },{},{}
 24178,S_M_Holy_Water_Weapon,Magic Holy Water Shadow Weapon,12,20,,0,,,,0,0xFFFFFFFF,63,2,131072,,1,1,0,{ bonus2 bIgnoreMdefRaceRate,RC_Undead,5+getrefine()/2; },{},{}
 24179,S_M_Scissors_Weapon,Magic Scissors Shadow Weapon,12,20,,0,,,,0,0xFFFFFFFF,63,2,131072,,1,1,0,{ bonus2 bIgnoreMdefRaceRate,RC_Plant,5+getrefine()/2; },{},{}
-24180,S_Bearers_Armor,Bearer's Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ bonus bMdef,1+getrefine()/2; },{ if(isequipped(24181,24182,24183,24184,24185)) { if(@bearer_refine>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24181,24182,24183,24184,24185)) { if(@bearer_refine>=45) sc_end SC_ENDURE; } }
-24181,S_Bearers_Shoes,Bearer's Shadow Shoes,12,20,,0,,,,0,0xFFFFFFFF,63,2,524288,,1,1,0,{ bonus bMaxSP,50+(getrefine()/2)*5; },{ if(isequipped(24180,24182,24183,24184,24185)) { if(@bearer_refine>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24182,24183,24184,24185)) { if(@bearer_refine>=45) sc_end SC_ENDURE; } }
-24182,S_Bearers_Shield,Bearer's Shadow Shield,12,20,,0,,,,0,0xFFFFFFFF,63,2,262144,,1,1,0,{ bonus bDef,5+getrefine()/2; },{ if(isequipped(24180,24181,24183,24184,24185)) { if(@bearer_refine>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24181,24183,24184,24185)) { if(@bearer_refine>=45) sc_end SC_ENDURE; } }
-24183,S_Bearers_Weapon,Bearer's Shadow Weapon,12,20,,0,,,,0,0xFFFFFFFF,63,2,131072,,1,1,0,{ bonus bMaxHP,100+(getrefine()/2)*10; },{ if(isequipped(24180,24181,24182,24184,24185)) { if(@bearer_refine>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24181,24182,24184,24185)) { if(@bearer_refine>=45) sc_end SC_ENDURE; } }
-24184,S_Bearers_Earring,Bearer's Shadow Earring,12,20,,0,,,,0,0xFFFFFFFF,63,2,1048576,,1,1,0,{ bonus bMatk,5+getrefine()/2; },{ if(isequipped(24180,24181,24182,24183,24185)) { if(@bearer_refine>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24181,24182,24183,24185)) { if(@bearer_refine>=45) sc_end SC_ENDURE; } }
-24185,S_Bearers_Pendant,Bearer's Shadow Pendant,12,20,,0,,,,0,0xFFFFFFFF,63,2,2097152,,1,1,0,{ bonus bBaseAtk,5+getrefine()/2; },{ if(isequipped(24180,24181,24182,24183,24184)) { if(@bearer_refine>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24181,24182,24183,24184)) { if(@bearer_refine>=45) sc_end SC_ENDURE; } }
+24180,S_Bearers_Armor,Bearer's Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ bonus bMdef,1+getrefine()/2; },{ if(isequipped(24181,24182,24183,24184,24185)) { if(s_bearers>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24181,24182,24183,24184,24185)) { if(s_bearers>=45) sc_end SC_ENDURE; set s_bearers,0: } }
+24181,S_Bearers_Shoes,Bearer's Shadow Shoes,12,20,,0,,,,0,0xFFFFFFFF,63,2,524288,,1,1,0,{ bonus bMaxSP,50+(getrefine()/2)*5; },{ if(isequipped(24180,24182,24183,24184,24185)) { if(s_bearers>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24182,24183,24184,24185)) { if(s_bearers>=45) sc_end SC_ENDURE; set s_bearers,0: } }
+24182,S_Bearers_Shield,Bearer's Shadow Shield,12,20,,0,,,,0,0xFFFFFFFF,63,2,262144,,1,1,0,{ bonus bDef,5+getrefine()/2; },{ if(isequipped(24180,24181,24183,24184,24185)) { if(s_bearers>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24181,24183,24184,24185)) { if(s_bearers>=45) sc_end SC_ENDURE; set s_bearers,0: } }
+24183,S_Bearers_Weapon,Bearer's Shadow Weapon,12,20,,0,,,,0,0xFFFFFFFF,63,2,131072,,1,1,0,{ bonus bMaxHP,100+(getrefine()/2)*10; },{ if(isequipped(24180,24181,24182,24184,24185)) { if(s_bearers>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24181,24182,24184,24185)) { if(s_bearers>=45) sc_end SC_ENDURE; set s_bearers,0: } }
+24184,S_Bearers_Earring,Bearer's Shadow Earring,12,20,,0,,,,0,0xFFFFFFFF,63,2,1048576,,1,1,0,{ bonus bMatk,5+getrefine()/2; },{ if(isequipped(24180,24181,24182,24183,24185)) { if(s_bearers>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24181,24182,24183,24185)) { if(s_bearers>=45) sc_end SC_ENDURE; set s_bearers,0: } }
+24185,S_Bearers_Pendant,Bearer's Shadow Pendant,12,20,,0,,,,0,0xFFFFFFFF,63,2,2097152,,1,1,0,{ bonus bBaseAtk,5+getrefine()/2; },{ if(isequipped(24180,24181,24182,24183,24184)) { if(s_bearers>=45) sc_start4 SC_ENDURE,60000,10,0,0,1; } },{ if(isequipped(24180,24181,24182,24183,24184)) { if(s_bearers>=45) sc_end SC_ENDURE; set s_bearers,0: } }
 24186,S_Basis_Armor,Basis Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ set .@r,getrefine(); bonus2 bAddDefEle,Ele_Neutral,1+.@r/2; bonus2 bMagicAddDefEle,Ele_Neutral,1+.@r/2; },{},{}
 24187,S_Hallowed_Armor,Hallowed Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ set .@r,getrefine(); bonus2 bAddDefEle,Ele_Dark,1+.@r/2; bonus2 bMagicAddDefEle,Ele_Dark,1+.@r/2; },{},{}
 24188,S_Saharic_Armor,Saharic Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ set .@r,getrefine(); bonus2 bAddDefEle,Ele_Water,1+.@r/2; bonus2 bMagicAddDefEle,Ele_Water,1+.@r/2; },{},{}
@@ -11009,8 +11009,8 @@
 24193,S_Damned_Armor,Damned Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ set .@r,getrefine(); bonus2 bAddDefEle,Ele_Holy,1+.@r/2; bonus2 bMagicAddDefEle,Ele_Holy,1+.@r/2; },{},{}
 24194,S_Geist_Armor,Geist Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ set .@r,getrefine(); bonus2 bAddDefEle,Ele_Ghost,1+.@r/2; bonus2 bMagicAddDefEle,Ele_Ghost,1+.@r/2; },{},{}
 24195,S_Divine_Armor,Divine Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ set .@r,getrefine(); bonus2 bAddDefEle,Ele_Undead,1+.@r/2; bonus2 bMagicAddDefEle,Ele_Undead,1+.@r/2; },{},{}
-24196,S_Hasty_Shoes,Hasty Shadow Shoes,12,20,,0,,,,0,0xFFFFFFFF,63,2,524288,,1,1,0,{ bonus bFlee,5+.@r/2; },{ if(isequipped(24197)) { if(@hasty_refine>=15) sc_start4 SC_SPEEDUP0,60000,25,0,0,1; } },{ if(isequipped(24197)) { if(@hasty_refine>=15) sc_end SC_SPEEDUP0; } }
-24197,S_Hasty_Armor,Hasty Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ bonus bFlee,5+.@r/2; },{ if(isequipped(24196)) { if(@hasty_refine>=15) sc_start4 SC_SPEEDUP0,60000,25,0,0,1; } },{ if(isequipped(24196)) { if(@hasty_refine>=15) sc_end SC_SPEEDUP0; } }
+24196,S_Hasty_Shoes,Hasty Shadow Shoes,12,20,,0,,,,0,0xFFFFFFFF,63,2,524288,,1,1,0,{ bonus bFlee,5+.@r/2; },{ if(isequipped(24197)) { if(s_hasty>=15) sc_start4 SC_SPEEDUP0,60000,25,0,0,1; } },{ if(isequipped(24197)) { if(s_hasty>=15) sc_end SC_SPEEDUP0; set s_hasty,0; } }
+24197,S_Hasty_Armor,Hasty Shadow Armor,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ bonus bFlee,5+.@r/2; },{ if(isequipped(24196)) { if(s_hasty>=15) sc_start4 SC_SPEEDUP0,60000,25,0,0,1; } },{ if(isequipped(24196)) { if(s_hasty>=15) sc_end SC_SPEEDUP0; set s_hasty,0; } }
 24198,S_Basis_Shield,Basis Shadow Shield,12,20,,0,,,,0,0xFFFFFFFF,63,2,262144,,1,1,0,{ set .@r,getrefine(); bonus2 bSubDefEle,Ele_Neutral,1+(.@r>=9?2:(.@r>=7?1:0)); },{},{}
 24199,S_Hallowed_Shield,Hallowed Shadow Shield,12,20,,0,,,,0,0xFFFFFFFF,63,2,262144,,1,1,0,{ set .@r,getrefine(); bonus2 bSubDefEle,Ele_Dark,1+(.@r>=9?2:(.@r>=7?1:0)); },{},{}
 24200,S_Saharic_Shield,Saharic Shadow Shield,12,20,,0,,,,0,0xFFFFFFFF,63,2,262144,,1,1,0,{ set .@r,getrefine(); bonus2 bSubDefEle,Ele_Water,1+(.@r>=9?2:(.@r>=7?1:0)); },{},{}
