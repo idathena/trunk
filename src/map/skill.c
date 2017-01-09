@@ -6614,8 +6614,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				map_foreachinshootrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
 			else
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
-			if (skill_id == GC_COUNTERSLASH)
-				status_change_end(src,SC_WEAPONBLOCKING,INVALID_TIMER);
 			break;
 
 		case GS_SPREADATTACK:
@@ -10894,7 +10892,6 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 					if( tsc && tsc->data[SC_SILENCE] )
 						check_target = false;
 					break;
-				case CR_DEVOTION:
 				case MO_EXTREMITYFIST:
 					check_target = false; //Check it later
 					break;
@@ -12303,7 +12300,6 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 
 	if( map[src->m].unit_count ) {
 		ARR_FIND(0,map[src->m].unit_count,i,map[src->m].units[i]->skill_id == skill_id );
-
 		if( i < map[src->m].unit_count )
 			limit = limit * map[src->m].units[i]->modifier / 100;
 	}
@@ -18072,7 +18068,7 @@ int skill_delunitgroup_(struct skill_unit_group *group, const char *file, int li
 	short i, j;
 	int link_group_id;
 
-	if( group == NULL ) {
+	if( !group ) {
 		ShowDebug("skill_delunitgroup: group is NULL (source=%s:%d, %s)! Please report this! (#3504)\n", file, line, func);
 		return 0;
 	}

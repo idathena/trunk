@@ -6007,7 +6007,7 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 	TBL_PC *sd = BL_CAST(BL_PC, bl);
 	int speed_rate;
 
-	if( sc == NULL || (sd && sd->state.permanent_speed) )
+	if( !sc || (sd && sd->state.permanent_speed) )
 		return (unsigned short)cap_value(speed,MIN_WALK_SPEED,MAX_WALK_SPEED);
 
 	if( sd && sd->ud.skilltimer != INVALID_TIMER && (pc_checkskill(sd,SA_FREECAST) > 0 || sd->ud.skill_id == LG_EXEEDBREAK) ) {
@@ -6114,7 +6114,6 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 					val = max( val, 90 );
 				if( sc->data[SC_CATNIPPOWDER] )
 					val = max( val, sc->data[SC_CATNIPPOWDER]->val3 );
-
 				if( sd && sd->bonus.speed_rate + sd->bonus.speed_add_rate > 0 ) //Permanent item-based speedup
 					val = max( val, sd->bonus.speed_rate + sd->bonus.speed_add_rate );
 			}
@@ -7646,6 +7645,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			switch( type ) {
 				case SC_SAFETYWALL:
 				case SC_PNEUMA:
+				case SC_RENOVATIO:
 				case SC_NEUTRALBARRIER:
 				case SC_STEALTHFIELD:
 					break;
