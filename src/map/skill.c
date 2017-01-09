@@ -19538,7 +19538,7 @@ bool skill_arrow_create(struct map_session_data *sd, unsigned short nameid)
 	for( i = 0; i < MAX_ARROW_RESULT; i++ ) {
 		char flag = 0;
 
-		if( skill_arrow_db[idx].cre_id[i] == 0 || !itemdb_exists(skill_arrow_db[idx].cre_id[i]) || skill_arrow_db[idx].cre_amount[i] == 0 )
+		if( !skill_arrow_db[idx].cre_id[i] || !itemdb_exists(skill_arrow_db[idx].cre_id[i]) || !skill_arrow_db[idx].cre_amount[i] )
 			continue;
 		memset(&tmp_item,0,sizeof(tmp_item));
 		tmp_item.identify = 1;
