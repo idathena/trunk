@@ -7780,14 +7780,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				return 0; //Overthrust and Overthrust Max cannot be used on Mado Gear [Ind]
 			break;
 		case SC_ADRENALINE:
-			if( sd && !pc_check_weapontype(sd,skill_get_weapontype(BS_ADRENALINE)) )
-				return 0;
-			if( sc->data[SC_QUAGMIRE] || sc->data[SC_DECREASEAGI] )
-				return 0;
-			break;
 		case SC_ADRENALINE2:
-			if( sd && !pc_check_weapontype(sd,skill_get_weapontype(BS_ADRENALINE2)) )
-				return 0;
 			if( sc->data[SC_QUAGMIRE] || sc->data[SC_DECREASEAGI] )
 				return 0;
 			break;
@@ -9155,18 +9148,20 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 20 * val1; //Power increase
 				break;
 			case SC_OVERTHRUST:
-				//val2 holds if it was casted on self, or is bonus received from others
-				val3 = 5 * val1; //Power increase
-				if( sd && pc_checkskill(sd,BS_HILTBINDING) > 0 )
-					tick += tick / 10;
-				break;
-			case SC_ADRENALINE2:
 			case SC_ADRENALINE:
-				val3 = (val2 ? 300 : 200); //Aspd increase
-			//Fall through
+			case SC_ADRENALINE2:
 			case SC_WEAPONPERFECTION:
-				if( sd && pc_checkskill(sd,BS_HILTBINDING) > 0 )
-					tick += tick / 10;
+				{
+					struct map_session_data *tsd = BL_CAST(BL_PC,src);
+
+					//val2 holds if it was casted on self, or is bonus received from others
+					if( type == SC_OVERTHRUST )
+						val3 = (val2 ? 5 * val1 : 5); //Power increase
+					else if( type == SC_ADRENALINE || type == SC_ADRENALINE2 )
+						val3 = (val2 ? 300 : 200); //Aspd increase
+					if( tsd && pc_checkskill(tsd,BS_HILTBINDING) > 0 )
+						tick += tick / 10; //If caster has Hilt Binding, duration increases by 10%
+				}
 				break;
 			case SC_CONCENTRATION:
 				val2 = 5 * val1; //Atk Increase
