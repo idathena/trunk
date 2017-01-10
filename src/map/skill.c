@@ -9403,7 +9403,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if( tsc && tsc->data[type] )
 				status_change_end(bl,type,INVALID_TIMER);
 			else
-				status_change_start(src,bl,type,10000,skill_lv,0,0,0,skill_get_time(skill_id,skill_lv),SCFLAG_NOICON);
+				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
 
@@ -12830,6 +12830,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 	TBL_PC *sd;
 	struct status_change *sc;
 	struct status_change_entry *sce;
+	struct status_data *tstatus;
 	enum sc_type type;
 	uint16 skill_id, skill_lv;
 
@@ -12844,6 +12845,8 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 	group = unit->group;
 
 	nullpo_ret(src = map_id2bl(group->src_id));
+
+	tstatus = status_get_status_data(bl);
 
 	skill_id = group->skill_id; //In case the group is deleted, we need to return the correct skill id, still
 	skill_lv = group->skill_lv;
@@ -13064,16 +13067,31 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 			skill_blown(src,bl,skill_get_blewcount(skill_id,skill_lv),unit_getdir(bl),0);
 			break;
 
-		case UNT_NEUTRALBARRIER:
-			if( !sce )
-				status_change_start(src,bl,type,10000,skill_lv,0,0,0,group->limit,SCFLAG_NOICON);
-			break;
-
 		case UNT_STEALTHFIELD:
 			if( bl->id == src->id )
 				break;
+		//Fall through
+		case UNT_EPICLESIS:
+		case UNT_NEUTRALBARRIER:
 			if( !sce )
 				sc_start(src,bl,type,100,skill_lv,group->limit);
+			break;
+
+		case UNT_CLOUD_KILL:
+			if( !sce && sc_start4(src,bl,type,100,skill_lv,src->id,unit->bl.id,0,group->limit) )
+				status_change_start(src,bl,SC_POISON,10000,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDRATE);
+			break;
+
+		case UNT_WARMER: {
+#ifdef RENEWAL
+				struct mob_data *md = BL_CAST(BL_MOB,bl);
+
+				if( md && md->mob_id == MOBID_EMPERIUM )
+					break;
+#endif
+				if( !sce )
+					sc_start2(src,bl,type,100,skill_lv,src->id,group->limit);
+			}
 			break;
 
 		case UNT_FIRE_EXPANSION_SMOKE_POWDER:
@@ -13657,35 +13675,6 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 				sc_start2(src,bl,(sc_type)group->val2,100,group->val3,src->id,skill_get_time2(GC_POISONINGWEAPON,1));
 			break;
 
-		case UNT_EPICLESIS:
-			if (bl->type == BL_PC && !battle_check_undead(tstatus->race,tstatus->def_ele) && tstatus->race != RC_DEMON) {
-				if (++group->val1%3 == 0) { //Recovers players every 3 seconds
-					int hp, sp;
-
-					switch (skill_lv) {
-						case 1: case 2: hp = 3; sp = 2; break;
-						case 3: case 4: hp = 4; sp = 3; break;
-						case 5: default: hp = 5; sp = 4; break;
-					}
-					hp = tstatus->max_hp * hp / 100;
-					sp = tstatus->max_sp * sp / 100;
-					if (tsc && tsc->data[SC_AKAITSUKI] && hp)
-						hp = ~hp + 1;
-					status_heal(bl,hp,sp,2);
-				}
-				if (++group->val2%5 == 0) { //Un-hides players every 5 seconds
-					status_change_end(bl,SC_HIDING,INVALID_TIMER);
-					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
-					status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
-					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
-					if (tsc && tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
-						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
-				}
-				if (!tsc || !tsc->data[SC_BERSERK] || !tsc->data[SC_SATURDAYNIGHTFEVER])
-					sc_start(src,bl,type,100,skill_lv,group->interval + 100);
-			}
-			break;
-
 		case UNT_MANHOLE:
 			if (!group->val2 && bl->id != src->id) {
 				int range = skill_get_unit_range(skill_id,skill_lv);
@@ -13775,35 +13764,6 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 					skill_attack(skill_get_type(GN_HELLS_PLANT_ATK),src,&unit->bl,bl,GN_HELLS_PLANT_ATK,skill_lv,tick,0);
 				if (bl->id != src->id) //The caster is the only one who can step on the plants, without destroying them
 					skill_delunit(group->unit); //Deleting it directly to avoid extra hits
-			}
-			break;
-
-		case UNT_CLOUD_KILL:
-			if (!(tsc && tsc->data[type]))
-				status_change_start(src,bl,type,10000,skill_id,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDRATE);
-			skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,skill_id,skill_lv,tick,0);
-			break;
-
-		case UNT_WARMER: { //It has effect on everything, including monsters, undead property and demon
-#ifdef RENEWAL
-				struct mob_data *md = BL_CAST(BL_MOB,bl);
-
-				if (md && md->mob_id == MOBID_EMPERIUM)
-					break;
-#endif
-				if (++group->val1%3 == 0) {
-					struct status_change *ssc = status_get_sc(src);
-					int hp = 0;
-
-					if (ssc && ssc->data[SC_HEATER_OPTION])
-						hp = tstatus->max_hp * 3 * skill_lv / 100;
-					else
-						hp = tstatus->max_hp * skill_lv / 100;
-					if (tsc && tsc->data[SC_AKAITSUKI] && hp)
-						hp = ~hp + 1;
-					status_heal(bl,hp,0,1);
-				}
-				status_change_start(src,bl,type,10000,skill_lv,0,0,0,group->interval + 100,SCFLAG_NOICON);
 			}
 			break;
 
@@ -14028,10 +13988,13 @@ int skill_unit_onleft(uint16 skill_id, struct block_list *bl, unsigned int tick)
 		case HW_GRAVITATION:
 		case CG_HERMODE:
 		case NJ_SUITON:
+		case AB_EPICLESIS:
 		case NC_STEALTHFIELD:
 		case NC_NEUTRALBARRIER:
 		case SC_MAELSTROM:
 		case SC_BLOODYLUST:
+		case SO_CLOUD_KILL:
+		case SO_WARMER:
 		case SO_FIRE_INSIGNIA:
 		case SO_WATER_INSIGNIA:
 		case SO_WIND_INSIGNIA:

@@ -461,6 +461,7 @@ typedef enum sc_type {
 	//Sorcerer
 	SC_SPELLFIST,
 	SC_CRYSTALIZE,
+	SC_CLOUD_KILL,
 	SC_STRIKING,
 	SC_WARMER,
 	SC_VACUUM_EXTREME,

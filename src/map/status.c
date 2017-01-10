@@ -691,7 +691,7 @@ void initChangeTables(void) {
 	set_sc( SO_ELECTRICWALK      , SC_PROPERTYWALK    , SI_PROPERTYWALK    , SCB_NONE );
 	set_sc( SO_SPELLFIST         , SC_SPELLFIST       , SI_SPELLFIST       , SCB_NONE );
 	set_sc_with_vfx( SO_DIAMONDDUST , SC_CRYSTALIZE   , SI_COLD            , SCB_NONE );
-	add_sc( SO_CLOUD_KILL        , SC_POISON          );
+	set_sc( SO_CLOUD_KILL        , SC_CLOUD_KILL      , SI_CLOUD_KILL      , SCB_NONE );
 	set_sc( SO_STRIKING          , SC_STRIKING        , SI_STRIKING        , SCB_WATK|SCB_CRI );
 	set_sc( SO_WARMER            , SC_WARMER          , SI_WARMER          , SCB_NONE );
 	set_sc( SO_VACUUM_EXTREME    , SC_VACUUM_EXTREME  , SI_VACUUM_EXTREME  , SCB_NONE );
@@ -7648,6 +7648,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				case SC_RENOVATIO:
 				case SC_NEUTRALBARRIER:
 				case SC_STEALTHFIELD:
+				case SC_WARMER:
 					break;
 				default:
 					return 0; //GVG/BG Monsters can't be afflicted by status changes
@@ -7750,6 +7751,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			if( sc->data[SC_FEAR] )
 				return 0;
 			break;
+		case SC_BLEEDING:
+			if( sc->data[SC_POWER_OF_GAIA] )
+				return 0;
+			break;
 		case SC_PROVOKE:
 			if( undead_flag )
 				return 0;
@@ -7759,7 +7764,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				return 0;
 			break;
 		case SC_SIGNUMCRUCIS: //Only affects demons and undead element (but not players)
-			if( (!undead_flag && status->race != RC_DEMON) || bl->type == BL_PC )
+			if( bl->type == BL_PC || (!undead_flag && status->race != RC_DEMON) )
 				return 0;
 			break;
 		case SC_AETERNA:
@@ -7946,6 +7951,14 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			if( (sc->data[SC_LUKFOOD] && sc->data[SC_LUKFOOD]->val1 > val1) || sc->data[SC_2011RWC_SCROLL] )
 				return 0;
 			break;
+		case SC_EPICLESIS:
+			if( bl->type != BL_PC || undead_flag )
+				return 0;
+		//Fall through
+		case SC_LERADSDEW:
+			if( sc->data[SC_BERSERK] || sc->data[SC_SATURDAYNIGHTFEVER] )
+				return 0;
+			break;
 		case SC_RENOVATIO:
 			if( undead_flag && bl->type == BL_PC )
 				return 0;
@@ -7986,10 +7999,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 		case SC_MAGNETICFIELD:
 			if( sc->data[SC_HOVERING] )
-				return 0;
-			break;
-		case SC_BLEEDING:
-			if( sc->data[SC_POWER_OF_GAIA] )
 				return 0;
 			break;
 		case SC_SATURDAYNIGHTFEVER:
@@ -8080,7 +8089,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 
 	switch( type ) { //Before overlapping fail, one must check for status cured
 		case SC_BLESSING:
-			if( (!undead_flag && status->race != RC_DEMON) || bl->type == BL_PC ) {
+			if( bl->type == BL_PC || (!undead_flag && status->race != RC_DEMON) ) {
 				if( sc->data[SC_STONE] && sc->opt1 == OPT1_STONE )
 					status_change_end(bl,SC_STONE,INVALID_TIMER);
 				if( sc->data[SC_CURSE] ) {
@@ -8486,6 +8495,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_ARMOR_ELEMENT:
 			case SC_ARMOR_RESIST:
 			case SC_ATTHASTE_CASH:
+			case SC_SHAPESHIFT:
+			case SC_PROPERTYWALK:
 			case SC_PUSH_CART:
 				break;
 			case SC_GOSPEL:
@@ -8506,13 +8517,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = sce->val2;
 				val3 = sce->val3;
 				val4 = sce->val4;
-				break;
-			case SC_LERADSDEW:
-				if( sc && (sc->data[SC_BERSERK] || sc->data[SC_SATURDAYNIGHTFEVER]) )
-					return 0;
-			//Fall through
-			case SC_SHAPESHIFT:
-			case SC_PROPERTYWALK:
 				break;
 			case SC_LEADERSHIP:
 			case SC_GLORYWOUNDS:
@@ -8830,8 +8834,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_MAGICMUSHROOM:
 			case SC_LEECHESEND:
 			case SC_PYREXIA:
-				if( type == SC_POISON && val1 == SO_CLOUD_KILL )
-					clif_status_change(bl,SI_CLOUD_KILL,1,tick,0,0,0);
 				tick_time = status_get_sc_interval(type);
 				val4 = tick - tick_time; //Remaining time
 				break;
@@ -9135,7 +9137,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val3 = 5 * val1; //SP cost
 				break;
 			case SC_BLESSING:
-				if( (!undead_flag && status->race != RC_DEMON) || bl->type == BL_PC )
+				if( bl->type == BL_PC || (!undead_flag && status->race != RC_DEMON) )
 					val2 = val1;
 				else
 					val2 = 0; //Offensive blessing -> Half stat
@@ -9401,6 +9403,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_EPICLESIS:
 				val2 = 5 * val1; //HP rate bonus
+				tick_time = 1000;
+				val4 = tick / tick_time;
 				break;
 			case SC_VENOMIMPRESS:
 				val2 = 10 * val1;
@@ -9456,6 +9460,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_NEUTRALBARRIER:
 				val2 = 10 + 5 * val1; //DEF/MDEF increase
+				tick = -1;
 				break;
 			case SC_STEALTHFIELD_MASTER:
 				tick_time = val3 = 2000 + 1000 * val1;
@@ -9559,10 +9564,20 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_PROPERTYWALK:
 				val3 = 0;
 				break;
+			case SC_CLOUD_KILL:
+				tick_time = 500;
+				val4 = tick / tick_time;
+				tick = -1;
+				break;
 			case SC_STRIKING:
 				val3 = 6 - val1; //SP cost
 				tick_time = 1000;
 				val4 = tick / tick_time;
+				break;
+			case SC_WARMER:
+				tick_time = 3000;
+				val4 = tick / tick_time;
+				tick = -1;
 				break;
 			case SC_CRYSTALIZE:
 				tick_time = 1000;
@@ -9680,6 +9695,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val3 = 25 + 5 * val1; //Number of Reflects
 				tick_time = 1000;
 				val4 = tick / tick_time;
+				tick = -1;
 				break;
 			case SC_FORCEOFVANGUARD:
 				val2 = 8 + 12 * val1; //Chance Of Getting A Rage Counter
@@ -11024,10 +11040,6 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			if (sd)
 				skill_break_equip(bl,bl,EQP_WEAPON,10000,BCT_SELF);
 			break;
-		case SC_POISON:
-			if (sce->val1 == SO_CLOUD_KILL)
-				clif_status_load(bl,SI_CLOUD_KILL,0);
-			break;
 		case SC_KEEPING: {
 				struct unit_data *ud = unit_bl2ud(bl);
 
@@ -12151,6 +12163,33 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 			return 0;
 
+		case SC_EPICLESIS:
+			++sce->val3;
+			if( !(sce->val3%3) ) { //Recovers players every 3 seconds
+				int hp, sp;
+
+				switch( sce->val1 ) {
+					case 1: case 2: hp = 3; sp = 2; break;
+					case 3: case 4: hp = 4; sp = 3; break;
+					case 5: default: hp = 5; sp = 4; break;
+				}
+				hp = status->max_hp * hp / 100;
+				sp = status->max_sp * sp / 100;
+				if( sc->data[SC_AKAITSUKI] && hp )
+					hp = ~hp + 1;
+				status_heal(bl,hp,sp,2);
+			}
+			if( !(sce->val3%5) ) { //Un-hides players every 5 seconds
+				status_change_end(bl,SC_HIDING,INVALID_TIMER);
+				status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
+				status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
+				status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+				if( sc->data[SC__SHADOWFORM] && rnd()%100 < 100 - sc->data[SC__SHADOWFORM]->val1 * 10 )
+					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
+			}
+			sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
+			return 0;
+
 		case SC_RENOVATIO:
 			if( --(sce->val4) >= 0 ) {
 				struct block_list *src = map_id2bl(sce->val2);
@@ -12158,7 +12197,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 				map_freeblock_lock();
 				if( battle_check_undead(status->race,status->def_ele) ) {
-					if( !src || (src && (status_isdead(src) || src->m != bl->m)) )
+					if( !src || status_isdead(src) || src->m != bl->m )
 						break;
 					skill_attack(BF_MAGIC,src,src,bl,status_sc2skill(type),sce->val1,tick,SD_LEVEL|SD_ANIMATION);
 				} else {
@@ -12239,6 +12278,22 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 			return 0;
 
+		case SC_CLOUD_KILL: {
+				struct block_list *src = map_id2bl(sce->val2), *unit_bl = map_id2bl(sce->val3);
+
+				if( !src || status_isdead(src) || src->m != bl->m )
+					break;
+				map_freeblock_lock();
+				if( unit_bl )
+					skill_attack(BF_MAGIC,src,unit_bl,bl,status_sc2skill(type),sce->val1,tick,0);
+				if( sc->data[type] ) {
+					sc_timer_next(500 + tick,status_change_timer,bl->id,data);
+				}
+				map_freeblock_unlock();
+				return 0;
+			}
+			break;
+
 		case SC_STRIKING:
 			if( --(sce->val4) >= 0 ) {
 				if( !status_charge(bl,0,sce->val3) )
@@ -12247,6 +12302,19 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				return 0;
 			}
 			break;
+
+		case SC_WARMER: {
+				struct status_change *ssc = status_get_sc(map_id2bl(sce->val2));
+				int heal = status->max_hp * sce->val1 / 100;
+
+				if( ssc && ssc->data[SC_HEATER_OPTION] )
+					heal *= 3;
+				if( sc->data[SC_AKAITSUKI] && heal )
+					heal = ~heal + 1;
+				status_heal(bl,heal,0,1);
+				sc_timer_next(3000 + tick,status_change_timer,bl->id,data);
+			}
+			return 0;
 
 		case SC_VACUUM_EXTREME:
 			if( sce->val4 ) {
@@ -12308,7 +12376,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				struct block_list *src = map_id2bl(sce->val2);
 				struct skill_unit_group *group = skill_id2group(sce->val3);
 
-				if( !src || (src && (status_isdead(src) || src->m != bl->m)) )
+				if( !src || status_isdead(src) || src->m != bl->m )
 					break;
 				map_freeblock_lock();
 				if( group )
@@ -12326,7 +12394,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				struct block_list *src = map_id2bl(sce->val2);
 				int heal;
 
-				if( !src || (src && (status_isdead(src) || src->m != bl->m || distance_bl(src,bl) >= 12)) )
+				if( !src || status_isdead(src) || src->m != bl->m || distance_bl(src,bl) >= 12 )
 					break;
 				map_freeblock_lock();
 				heal = 200 + 100 * sce->val1 + status_get_int(src);
@@ -12469,7 +12537,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			if( --(sce->val3) >= 0 ) {
 				struct block_list *src = map_id2bl(sce->val2);
 
-				if( !src || (src && (status_isdead(src) || src->m != bl->m)) )
+				if( !src || status_isdead(src) || src->m != bl->m )
 					break;
 				if( !status_charge(bl,0,50) )
 					status_zap(bl,0,status->sp);
@@ -12666,7 +12734,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				struct block_list *src = map_id2bl(sce->val2);
 				struct skill_unit_group *group = skill_id2group(sce->val3);
 
-				if( !src || (src && (status_isdead(src) || src->m != bl->m)) )
+				if( !src || status_isdead(src) || src->m != bl->m )
 					break;
 				map_freeblock_lock();
 				if( group )

@@ -1126,6 +1126,7 @@
 	export_constant(SC_INSPIRATION);
 	export_constant(SC_SPELLFIST);
 	export_constant(SC_CRYSTALIZE);
+	export_constant(SC_CLOUD_KILL);
 	export_constant(SC_STRIKING);
 	export_constant(SC_WARMER);
 	export_constant(SC_VACUUM_EXTREME);
