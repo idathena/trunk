@@ -7524,7 +7524,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_QSCARABA:			case SC_LJOSALFAR:		case SC_MAPLE_FALLS:
 							case SC_MERMAID_LONGING:		case SC_TIME_ACCESSORY:		case SC_CLAN_INFO:
 							case SC_SWORDCLAN:			case SC_ARCWANDCLAN:		case SC_GOLDENMACECLAN:
-							case SC_CROSSBOWCLAN:
+							case SC_CROSSBOWCLAN:			case SC_ARMOR_ELEMENT:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )
@@ -8996,6 +8996,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_LJOSALFAR:			case SC_MAPLE_FALLS:		case SC_MERMAID_LONGING:
 						case SC_TIME_ACCESSORY:			case SC_CLAN_INFO:		case SC_SWORDCLAN:
 						case SC_ARCWANDCLAN:			case SC_GOLDENMACECLAN:		case SC_CROSSBOWCLAN:
+						case SC_ARMOR_ELEMENT:
 							continue;
 						case SC_SILENCE:
 							if( tsc->data[i]->val4 )

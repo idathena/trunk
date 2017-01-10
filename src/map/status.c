@@ -2904,8 +2904,6 @@ int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type) {
 			struct map_session_data *sd = map_id2sd(bl->id);
 
 			bonus += -100 + sd->hprate; //Default hprate is 100, so it should be add 0%
-			if (pc_is_taekwon_ranker(sd))
-				bonus += 200; //+200% for top ranking Taekwons over level 90
 		}
 		if (sc) { //Bonus by SC
 			//Increasing
@@ -3022,8 +3020,6 @@ int status_get_spbonus(struct block_list *bl, enum e_status_bonus type) {
 				bonus += i;
 			if ((i = pc_checkskill(sd,HW_SOULDRAIN)) > 0)
 				bonus += 2 * i;
-			if (pc_is_taekwon_ranker(sd))
-				bonus += 200; //+200% for top ranking Taekwons over level 90
 		}
 		if (sc) { //Bonus by SC
 			if (sc->data[SC_INCMSPRATE])
@@ -3065,11 +3061,11 @@ unsigned int status_calc_maxhpsp_pc(struct map_session_data *sd, bool isHP)
 	level = max(sd->status.base_level, 1);
 
 	if (isHP) { //Calculates MaxHP
-		max = job_info[idx].base_hp[level - 1] * (1 + max(sd->battle_status.vit, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : 1);
+		max = job_info[idx].base_hp[level - 1] * (1 + max(sd->battle_status.vit, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
 		max += status_get_hpbonus(&sd->bl, STATUS_BONUS_FIX);
 		max += (int64)(max * status_get_hpbonus(&sd->bl, STATUS_BONUS_RATE) / 100); //Aegis accuracy
 	} else { //Calculates MaxSP
-		max = job_info[idx].base_sp[level - 1] * (1 + max(sd->battle_status.int_, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : 1);
+		max = job_info[idx].base_sp[level - 1] * (1 + max(sd->battle_status.int_, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
 		max += status_get_spbonus(&sd->bl, STATUS_BONUS_FIX);
 		max += (int64)(max * status_get_spbonus(&sd->bl, STATUS_BONUS_RATE) / 100);
 	}
@@ -10770,6 +10766,7 @@ int status_change_clear(struct block_list *bl,int type)
 				case SC_READYCOUNTER:
 				case SC_READYTURN:
 				case SC_DODGE:
+				case SC_MIRACLE:
 				case SC_JAILED:
 				case SC_EXPBOOST:
 				case SC_ITEMBOOST:
@@ -12798,7 +12795,7 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
 
 	switch( type ) {
 		case SC_SIGHT: //Un-hides targets on 7*7 range
-			if( tsc && tsc->data[SC__SHADOWFORM] && (sce && sce->val4 > 0 && sce->val4%2000 == 0) && //For every 2 seconds do the checking
+			if( tsc && tsc->data[SC__SHADOWFORM] && (sce && sce->val4 > 0 && !(sce->val4%2000)) && //For every 2 seconds do the checking
 				rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 ) //[100 - (Skill Level x 10)] %
 				status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 		//Fall through
@@ -12820,7 +12817,7 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
 					if( battle_check_target(src, bl, BCT_ENEMY) > 0 )
 						skill_attack(BF_MAGIC, src, src, bl, status_sc2skill(type), 1, tick, 0);
 				}
-				if( tsc->data[SC__SHADOWFORM] && (sce && sce->val4 > 0 && sce->val4%2000 == 0) &&
+				if( tsc->data[SC__SHADOWFORM] && (sce && sce->val4 > 0 && !(sce->val4%2000)) &&
 					rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
 					status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 			}
@@ -12835,7 +12832,7 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
 					if( skill_attack(BF_MAGIC, src, src, bl, status_sc2skill(type), sce->val1, tick, 0x1000) &&
 						(!su || !su->group || !(skill_get_inf2(su->group->skill_id)&INF2_TRAP)) ) //The hit is not counted if it's against a trap
 						sce->val2 = 0; //This signals it to end
-					else if( (bl->type&BL_SKILL) && sce->val4%2 == 0 )
+					else if( (bl->type&BL_SKILL) && !(sce->val4%2) )
 						sce->val4++;
 				}
 			}

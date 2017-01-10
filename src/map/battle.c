@@ -2413,8 +2413,7 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 				flee = (flee * (100 - (attacker_count - (battle_config.agi_penalty_count - 1)) * battle_config.agi_penalty_num)) / 100;
 			else //Assume type 2 : absolute reduction
 				flee -= (attacker_count - (battle_config.agi_penalty_count - 1)) * battle_config.agi_penalty_num;
-			if(flee < 1)
-				flee = 1;
+			flee = max(flee,1);
 		}
 	}
 
@@ -2502,10 +2501,8 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 	if(sd) {
 		uint16 lv;
 
-#ifdef RENEWAL //Weaponry Research hidden bonus
-		if((lv = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0)
+		if((lv = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0) //Weaponry Research hidden bonus
 			hitrate += hitrate * 2 * lv / 100;
-#endif
 		if((sd->status.weapon == W_1HSWORD || sd->status.weapon == W_DAGGER) && (lv = pc_checkskill(sd,GN_TRAINING_SWORD)) > 0)
 			hitrate += 3 * lv;
 	}
