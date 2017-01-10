@@ -5274,9 +5274,10 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 			status_change_end(&sd->bl, SC_CLOAKINGEXCEED, INVALID_TIMER);
 			status_change_end(&sd->bl, SC_PROPERTYWALK, INVALID_TIMER);
 		}
-		for( i = 0; i < EQI_MAX; i++ )
+		for( i = 0; i < EQI_MAX; i++ ) {
 			if( sd->equip_index[i] >= 0 && pc_isequip(sd, sd->equip_index[i]) )
 				pc_unequipitem(sd, sd->equip_index[i], 2);
+		}
 		if( battle_config.clear_unit_onwarp&BL_PC )
 			skill_clear_unitgroup(&sd->bl);
 		party_send_dot_remove(sd); // Minimap dot fix [Kevin]
@@ -5340,7 +5341,7 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 		vending_closevending(sd);
 	}
 
-	if( sd->bl.prev != NULL ) {
+	if( sd->bl.prev ) {
 		unit_remove_map_pc(sd, clrtype);
 		clif_changemap(sd, m, x, y); // [MouseJstr]
 	} else if( sd->state.active ) // Tag player for rewarping after map-loading is done [Skotlex]
@@ -6854,9 +6855,10 @@ int pc_resetlvl(struct map_session_data *sd,int type)
 	clif_updatestatus(sd, SP_UDEX);
 	clif_updatestatus(sd, SP_ULUK); //End Addition
 
-	for (i = 0; i < EQI_MAX; i++) //Unequip items that can't be equipped by base 1 [Valaris]
+	for (i = 0; i < EQI_MAX; i++) { //Unequip items that can't be equipped by base 1 [Valaris]
 		if (sd->equip_index[i] >= 0 && pc_isequip(sd, sd->equip_index[i]))
 			pc_unequipitem(sd, sd->equip_index[i], 2);
+	}
 
 	if ((type == 1 || type == 2 || type == 3) && sd->status.party_id)
 		party_send_levelup(sd);
@@ -8208,9 +8210,10 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	clif_updatestatus(sd,SP_JOBEXP);
 	clif_updatestatus(sd,SP_NEXTJOBEXP);
 
-	for (i = 0; i < EQI_MAX; i++)
+	for (i = 0; i < EQI_MAX; i++) {
 		if (sd->equip_index[i] >= 0 && pc_isequip(sd,sd->equip_index[i]))
 			pc_unequipitem(sd,sd->equip_index[i],2); //Unequip invalid item for class
+	}
 
 	//Change look, if disguised, you need to undisguise
 	//to correctly calculate new job sprite without
