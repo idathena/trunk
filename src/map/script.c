@@ -3164,15 +3164,15 @@ struct script_state *script_alloc_state(struct script_code *script, int pos, int
 /// @param st Script state
 void script_free_state(struct script_state *st)
 {
+	if(st->bk_st) //Backup was not restored
+		ShowDebug("script_free_state: Previous script state lost (rid=%d, oid=%d, state=%d, bk_npcid=%d).\n", st->bk_st->rid, st->bk_st->oid, st->bk_st->state, st->bk_npcid);
 	if(st->sleep.timer != INVALID_TIMER)
 		delete_timer(st->sleep.timer, run_script_timer);
-	if(st->stack) {
-		script_free_vars(st->stack->var_function);
-		pop_stack(st, 0, st->stack->sp);
-		aFree(st->stack->stack_data);
-		aFree(st->stack);
-		st->stack = NULL;
-	}
+	script_free_vars(st->stack->var_function);
+	pop_stack(st, 0, st->stack->sp);
+	aFree(st->stack->stack_data);
+	aFree(st->stack);
+	st->stack = NULL;
 	st->pos = -1;
 	aFree(st);
 }
@@ -3314,7 +3314,7 @@ void op_2num(struct script_state *st, int op, int i1, int i2)
 		case C_L_SHIFT: ret = i1<<i2;	break;
 		case C_DIV:
 		case C_MOD:
-			if( i2 == 0 ) {
+			if( !i2 ) {
 				ShowError("script:op_2num: division by zero detected op=%s i1=%d i2=%d\n", script_op2name(op), i1, i2);
 				script_reportsrc(st);
 				script_pushnil(st);
@@ -3531,12 +3531,6 @@ int run_func(struct script_state *st)
 	struct script_data *data;
 	int i, start_sp, end_sp, func;
 
-	if( !st->stack ) {
-		ShowError("script:run_func: Failed to execute a buildin command\n");
-		script_reportsrc(st);
-		st->state = END;
-		return 1;
-	}
 	end_sp = st->stack->sp; //Position after the last argument
 	for( i = end_sp - 1; i > 0 ; --i ) {
 		if( st->stack->stack_data[i].type == C_ARG )
@@ -3856,11 +3850,10 @@ void run_script_main(struct script_state *st)
 	}
 
 	if (st->sleep.tick > 0) {
-		if (!(sd = map_id2sd(st->rid))) { //Get sd since script might have attached someone while running [Inkfish]
-			script_detach_state(st, false); //Restore previous script (only for 'sleep') [exneval]
-			st->sleep.charid = 0;
-		} else
-			st->sleep.charid = sd->status.char_id;
+		script_detach_state(st, false); //Restore previous script
+		if ((sd = map_id2sd(st->rid))) //Get sd since script might have attached someone while running [Inkfish]
+			sd->npc_id = st->oid;
+		st->sleep.charid = (sd ? sd->status.char_id : 0);
 		//Delay execution
 		st->sleep.timer = add_timer(gettick() + st->sleep.tick, run_script_timer, st->sleep.charid, (intptr_t)st);
 		linkdb_insert(&sleep_db, (void *)__64BPRTSIZE(st->oid), st);
@@ -4404,7 +4397,7 @@ BUILDIN_FUNC(mes)
 {
 	TBL_PC *sd = script_rid2sd(st);
 
-	if( sd == NULL )
+	if( !sd )
 		return 0;
 	if( !script_hasdata(st, 3) ) { //Only a single line detected in the script
 		clif_scriptmes(sd, st->oid, script_getstr(st, 2));
@@ -4424,10 +4417,9 @@ BUILDIN_FUNC(mes)
 /// next;
 BUILDIN_FUNC(next)
 {
-	TBL_PC *sd;
+	TBL_PC *sd = script_rid2sd(st);
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !sd )
 		return 0;
 #ifdef SECURE_NPCTIMEOUT
 	sd->npc_idle_type = NPCT_WAIT;
@@ -4443,22 +4435,19 @@ BUILDIN_FUNC(next)
 /// close;
 BUILDIN_FUNC(close)
 {
-	TBL_PC *sd;
+	TBL_PC *sd = script_rid2sd(st);
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !sd )
 		return 0;
-
 	if( !st->mes_active ) {
 		TBL_NPC *nd = map_id2nd(st->oid);
 
-		st->state = END; // Keep backwards compatibility
+		st->state = END; //Keep backwards compatibility
 		ShowWarning("Incorrect use of 'close' command! (source:%s / path:%s)\n",nd?nd->name:"Unknown",nd?nd->path:"Unknown");
 	} else {
 		st->state = CLOSE;
 		st->mes_active = 0;
 	}
-
 	clif_scriptclose(sd, st->oid);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -4469,17 +4458,13 @@ BUILDIN_FUNC(close)
 /// close2;
 BUILDIN_FUNC(close2)
 {
-	TBL_PC *sd;
+	TBL_PC *sd = script_rid2sd(st);
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !sd )
 		return 0;
-
 	st->state = STOP;
-
 	if( st->mes_active )
 		st->mes_active = 0;
-
 	clif_scriptclose(sd, st->oid);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -11170,9 +11155,8 @@ BUILDIN_FUNC(attachrid)
 {
 	int rid = script_getnum(st,2);
 
-	if (map_id2sd(rid) != NULL) {
+	if (map_id2sd(rid)) {
 		script_detach_rid(st);
-
 		st->rid = rid;
 		script_attach_state(st);
 		script_pushint(st,1);

@@ -3419,7 +3419,7 @@ int npc_do_atcmd_event(struct map_session_data *sd, const char *command, const c
 
 	nullpo_ret(sd);
 
-	if( ev == NULL || (nd = ev->nd) == NULL ) {
+	if( !ev || !(nd = ev->nd) ) {
 		ShowError("npc_event: event not found [%s]\n", eventname);
 		return 0;
 	}
