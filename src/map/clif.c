@@ -4736,19 +4736,10 @@ int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tic
 
 	type = clif_calc_delay(type,div,damage + damage2,ddelay);
 	if((sc = status_get_sc(dst)) && sc->count) {
-		if(sc->data[SC_HALLUCINATION]) {
-			if(damage)
-				damage = clif_hallucination_damage();
-			if(damage2)
-				damage2 = clif_hallucination_damage();
-		}
-		if(sc->data[SC_PYREXIA]) {
-			if(damage != 100) { //Exclude damage from poison itself
-				if(damage)
-					damage = clif_hallucination_damage();
-				if(damage2)
-					damage2 = clif_hallucination_damage();
-			}
+		if(sc->data[SC_HALLUCINATION] ||
+			(sc->data[SC_PYREXIA] && damage != 100)) { //Exclude damage from poison itself
+			damage = clif_hallucination_damage();
+			damage2 = clif_hallucination_damage();
 		}
 	}
 
