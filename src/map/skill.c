@@ -3746,12 +3746,11 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 							int ux = skl->x + layout->dx[i];
 							int uy = skl->y + layout->dy[i];
 
-							unit = map_find_skill_unit_oncell(src,ux,uy,WZ_WATERBALL,NULL,0);
-							if (unit)
+							if ((unit = map_find_skill_unit_oncell(src,ux,uy,WZ_WATERBALL,NULL,0)))
 								break;
 						}
 					}
-					//Fall through
+				//Fall through
 				case WZ_JUPITEL: //Official behaviour is to hit as long as there is a line of sight, regardless of distance
 					if (skl->type > 0 && !status_isdead(target) && path_search_long(NULL,src->m,src->x,src->y,target->x,target->y,CELL_CHKWALL)) {
 						//Apply canact delay here to prevent hacks (unlimited casting)
@@ -3774,7 +3773,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					break;
 				case WL_CHAINLIGHTNING_ATK: {
 						skill_attack(BF_MAGIC,src,src,target,skl->skill_id,skl->skill_lv,tick,9 - skl->type); //Attack the current target
-						skill_toggle_magicpower(src,skl->skill_id);
+						skill_toggle_magicpower(src,skl->skill_id); //Only the first hit will be amplified
 						if (skl->type < (4 + skl->skill_lv - 1) && skl->x < 3) { //Remaining bounces
 							struct block_list *nbl = NULL; //Next bounce target
 
@@ -16201,9 +16200,10 @@ int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv) {
 		struct map_session_data *sd = BL_CAST(BL_PC, bl);
 		struct status_change *sc = status_get_sc(bl);
 		int reduce_ct_r = 0;
+		uint8 flag = skill_get_castnodex(skill_id, skill_lv);
 
 		//Calculate base cast time (reduced by dex)
-		if( !(skill_get_castnodex(skill_id, skill_lv)&1) ) {
+		if( !(flag&1) ) {
 			int scale = battle_config.castrate_dex_scale - status_get_dex(bl);
 
 			if( scale > 0 ) //Not instant cast
@@ -16213,11 +16213,12 @@ int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv) {
 		}
 
 		//Calculate cast time reduced by item/card bonuses
-		if( !(skill_get_castnodex(skill_id, skill_lv)&4) && sd ) {
+		if( sd ) {
 			int i;
 
-			if( sd->castrate != 100 )
+			if( !(flag&4) && sd->castrate != 100 )
 				reduce_ct_r += 100 - sd->castrate;
+			//Skill-specific reductions work regardless of flag
 			for( i = 0; i < ARRAYLENGTH(sd->skillcast) && sd->skillcast[i].id; i++ ) {
 				if( sd->skillcast[i].id == skill_id ) {
 					reduce_ct_r -= sd->skillcast[i].val;
@@ -16226,16 +16227,19 @@ int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv) {
 			}
 		}
 
-		//NOTE: Magic Strings and Foresight are treated as separate factors in the calculation
-		//They are not added to the other modifiers [iRO Wiki]
-		if( sc && sc->count && !(skill_get_castnodex(skill_id, skill_lv)&2) ) {
+		//These cast time reductions are processed even if the skill fails
+		if( sc && sc->count ) {
+			//Magic Strings stacks additively with item bonuses
+			if( !(flag&2) && sc->data[SC_POEMBRAGI] )
+				reduce_ct_r += sc->data[SC_POEMBRAGI]->val2;
+			//Foresight halves the cast time, it does not stack additively
 			if( sc->data[SC_MEMORIZE] ) {
-				reduce_ct_r += 50;
+				if( !(flag&2) )
+					time -= time * 50 / 100;
+				//Foresight counter gets reduced even if the skill is not affected by it
 				if( (--sc->data[SC_MEMORIZE]->val2) <= 0 )
 					status_change_end(bl, SC_MEMORIZE, INVALID_TIMER);
 			}
-			if( sc->data[SC_POEMBRAGI] )
-				reduce_ct_r += sc->data[SC_POEMBRAGI]->val2;
 		}
 
 		time = time * (1 - (float)reduce_ct_r / 100);
@@ -16248,7 +16252,7 @@ int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv) {
 
 	//Return final cast time
 	time = max(time, 0);
-	//ShowInfo("Castime castfix = %d\n",time);
+	//ShowInfo("Castime castfix = %f\n",time);
 
 	return (int)time;
 }
@@ -16259,7 +16263,7 @@ int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv) {
  * @param time: Cast time before Status Change addition or reduction
  * @return time: Modified castime after status change addition or reduction
  */
-int skill_castfix_sc(struct block_list *bl, double time)
+int skill_castfix_sc(struct block_list *bl, double time, uint8 flag)
 {
 	struct status_change *sc = status_get_sc(bl);
 
@@ -16270,20 +16274,24 @@ int skill_castfix_sc(struct block_list *bl, double time)
 		return (int)time;
 
 	if( sc && sc->count ) {
-		if( sc->data[SC_SLOWCAST] )
-			time += time * sc->data[SC_SLOWCAST]->val2 / 100;
-		if( sc->data[SC_PARALYSIS] )
-			time += sc->data[SC_PARALYSIS]->val3;
+		if( !(flag&2) ) {
+			if( sc->data[SC_SLOWCAST] )
+				time += time * sc->data[SC_SLOWCAST]->val2 / 100;
+			if( sc->data[SC_PARALYSIS] )
+				time += sc->data[SC_PARALYSIS]->val3;
+			if( sc->data[SC_IZAYOI] )
+				time -= time * 50 / 100;
+		}
 		if( sc->data[SC_SUFFRAGIUM] ) {
-			time -= time * sc->data[SC_SUFFRAGIUM]->val2 / 100;
+			if( !(flag&2) )
+				time -= time * sc->data[SC_SUFFRAGIUM]->val2 / 100;
+			//Suffragium ends even if the skill is not affected by it
 			status_change_end(bl, SC_SUFFRAGIUM, INVALID_TIMER);
 		}
-		if( sc->data[SC_IZAYOI] )
-			time -= time * 50 / 100;
 	}
 
 	time = max(time, 0);
-	//ShowInfo("Castime castfix_sc = %d\n",time);
+	//ShowInfo("Castime castfix_sc = %f\n",time);
 
 	return (int)time;
 }
@@ -16299,7 +16307,8 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 {
 	struct status_change *sc = status_get_sc(bl);
 	struct map_session_data *sd = BL_CAST(BL_PC,bl);
-	int fixed = skill_get_fixed_cast(skill_id, skill_lv), fixcast_r = 0, varcast_r = 0, i = 0, reduce_ct_r = 0;
+	int fixed = skill_get_fixed_cast(skill_id, skill_lv), fixcast_r = 0, varcast_r = 0, reduce_ct_r = 0;
+	uint8 i = 0, flag = skill_get_castnodex(skill_id, skill_lv);
 
 	if( time < 0 )
 		return 0;
@@ -16307,14 +16316,15 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 	if( bl->type == BL_MOB ) //Mobs casttime is fixed nothing to alter
 		return (int)time;
 
-	if( fixed == 0 ) {
+	if( fixed < 0 || !battle_config.default_fixed_castrate ) //No fixed cast time
+		fixed = 0;
+	else if( !fixed ) {
 		fixed = (int)time * battle_config.default_fixed_castrate / 100; //Fixed time
 		time = time * (100 - battle_config.default_fixed_castrate) / 100; //Variable time
-	} else if( fixed < 0 || !battle_config.default_fixed_castrate ) //No fixed cast time
-		fixed = 0;
+	}
 
 	//Increases/Decreases fixed/variable cast time of a skill by item/card bonuses
-	if( sd && !(skill_get_castnodex(skill_id, skill_lv)&4) ) {
+	if( sd && !(flag&4) ) {
 		if( sd->bonus.varcastrate != 0 )
 			reduce_ct_r += sd->bonus.varcastrate;
 		if( sd->bonus.fixcastrate != 0 )
@@ -16349,7 +16359,7 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 		}
 	}
 
-	if( sc && sc->count && !(skill_get_castnodex(skill_id, skill_lv)&2) ) {
+	if( sc && sc->count && !(flag&2) ) {
 		//All variable cast additive bonuses must come first
 		if( sc->data[SC_SLOWCAST] )
 			VARCAST_REDUCTION(-sc->data[SC_SLOWCAST]->val2);
@@ -16418,14 +16428,14 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 	}
 
 	//Sacrament lowers Mystical Amplification cast time
-	if( sc && sc->data[SC_SECRAMENT] && skill_id == HW_MAGICPOWER && (skill_get_castnodex(skill_id, skill_lv)&2) )
+	if( sc && sc->data[SC_SECRAMENT] && skill_id == HW_MAGICPOWER && (flag&2) )
 		fixcast_r = max(fixcast_r, sc->data[SC_SECRAMENT]->val2);
 
 	//Now compute overall factors
 	if( varcast_r < 0 )
 		time = time * (1 - (float)min(varcast_r, 100) / 100);
 
-	if( !(skill_get_castnodex(skill_id, skill_lv)&1) ) //Reduction from status point
+	if( !(flag&1) ) //Reduction from status point
 		time = time * (1 - sqrt(((float)(status_get_dex(bl) * 2 + status_get_int(bl)) / battle_config.vcast_stat_scale)));
 
 	time = time * (1 - (float)min(reduce_ct_r, 100) / 100);
@@ -16448,17 +16458,17 @@ int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 	nullpo_ret(bl);
 	sd = BL_CAST(BL_PC, bl);
 
-	if (skill_id == SA_ABRACADABRA || skill_id == WM_RANDOMIZESPELL)
+	if( skill_id == SA_ABRACADABRA || skill_id == WM_RANDOMIZESPELL )
 		return 0; //Will use picked skill's delay
 
-	if (bl->type&battle_config.no_skill_delay)
+	if( bl->type&battle_config.no_skill_delay )
 		return battle_config.min_skill_delay_limit;
 
-	if (time < 0)
+	if( time < 0 )
 		time = -time + status_get_amotion(bl); //If set to < 0, add to attack motion
 
 	//Delay reductions
-	switch (skill_id) {
+	switch( skill_id ) {
 		case MO_TRIPLEATTACK:
 		case MO_CHAINCOMBO:
 		case MO_COMBOFINISH:
@@ -16468,23 +16478,23 @@ int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 		case SR_FALLENEMPIRE:
 			//Monk combo skills have their delay reduced by agi/dex
 			//If delay not specified, it will be 1000 - 4 * agi - 2 * dex
-			if (time == 0)
+			if( !time )
 				time = 1000;
 			time -= (4 * status_get_agi(bl) + 2 * status_get_dex(bl));
 			break;
 		default:
-			if (battle_config.delay_dependon_dex && !(delaynodex&1)) { //If skill delay is allowed to be reduced by dex
+			if( battle_config.delay_dependon_dex && !(delaynodex&1) ) { //If skill delay is allowed to be reduced by dex
 				int scale = battle_config.castrate_dex_scale - status_get_dex(bl);
 
-				if (scale > 0)
+				if( scale > 0 )
 					time = time * scale / battle_config.castrate_dex_scale;
 				else //To be capped later to minimum
 					time = 0;
 			}
-			if (battle_config.delay_dependon_agi && !(delaynodex&1)) { //If skill delay is allowed to be reduced by agi
+			if( battle_config.delay_dependon_agi && !(delaynodex&1) ) { //If skill delay is allowed to be reduced by agi
 				int scale = battle_config.castrate_dex_scale - status_get_agi(bl);
 
-				if (scale > 0)
+				if( scale > 0 )
 					time = time * scale / battle_config.castrate_dex_scale;
 				else
 					time = 0;
@@ -16492,36 +16502,36 @@ int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 			break;
 	}
 
-	if (sc && sc->data[SC_SPIRIT]) {
+	if( sc && sc->data[SC_SPIRIT] ) {
 		switch (skill_id) {
 			case CR_SHIELDBOOMERANG:
-				if (sc->data[SC_SPIRIT]->val2 == SL_CRUSADER)
+				if( sc->data[SC_SPIRIT]->val2 == SL_CRUSADER )
 					time /= 2;
 				break;
 			case AS_SONICBLOW:
-				if (!map_flag_gvg2(bl->m) && !map[bl->m].flag.battleground && sc->data[SC_SPIRIT]->val2 == SL_ASSASIN)
+				if( !map_flag_gvg2(bl->m) && !map[bl->m].flag.battleground && sc->data[SC_SPIRIT]->val2 == SL_ASSASIN )
 					time /= 2;
 				break;
 		}
 	}
 
-	if (!(delaynodex&2)) {
-		if (sc && sc->count) {
-			if (sc->data[SC_POEMBRAGI])
+	if( !(delaynodex&2) ) {
+		if( sc && sc->count ) {
+			if( sc->data[SC_POEMBRAGI] )
 				time -= time * sc->data[SC_POEMBRAGI]->val3 / 100;
-			if (sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 3 &&
-				skill_get_type(skill_id) == BF_MAGIC && skill_get_ele(skill_id, skill_lv) == ELE_WIND)
+			if( sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 3 &&
+				skill_get_type(skill_id) == BF_MAGIC && skill_get_ele(skill_id, skill_lv) == ELE_WIND )
 				time /= 2; //After Delay of Wind element spells reduced by 50%
 		}
 	}
 
-	if (!(delaynodex&4) && sd && sd->delayrate != 100)
+	if( !(delaynodex&4) && sd && sd->delayrate != 100 )
 		time = time * sd->delayrate / 100;
 
-	if (battle_config.delay_rate != 100)
+	if( battle_config.delay_rate != 100 )
 		time = time * battle_config.delay_rate / 100;
 
-	//ShowInfo("Delay delayfix = %d\n", time);
+	//ShowInfo("Delay delayfix = %f\n", time);
 	return max(time, 0);
 }
 
