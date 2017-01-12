@@ -1216,19 +1216,19 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
 int unit_stop_walking(struct block_list *bl,int type)
 {
 	struct unit_data *ud;
-	const struct TimerData *td;
+	const struct TimerData *td = NULL;
 	unsigned int tick;
 
 	nullpo_ret(bl);
 
 	ud = unit_bl2ud(bl);
-	if(!ud || (!(type&0x08) && ud->walktimer == INVALID_TIMER))
+	if (!ud || (!(type&0x08) && ud->walktimer == INVALID_TIMER))
 		return 0;
 
 	//NOTE: We are using timer data after deleting it because we know the
 	//delete_timer function does not messes with it. If the function's
 	//behaviour changes in the future, this code could break!
-	if(ud->walktimer != INVALID_TIMER) {
+	if (ud->walktimer != INVALID_TIMER) {
 		td = get_timer(ud->walktimer);
 		delete_timer(ud->walktimer, unit_walktoxy_timer);
 		ud->walktimer = INVALID_TIMER;
@@ -1450,7 +1450,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	sd = BL_CAST(BL_PC, src);
 	ud = unit_bl2ud(src);
 
-	if( ud == NULL )
+	if( !ud )
 		return 0;
 
 	sc = status_get_sc(src);
@@ -1459,9 +1459,13 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		sc = NULL; //Unneeded
 
 	//Temp: Used to signal combo-skills right now
-	if( sc && sc->data[SC_COMBO] && (sc->data[SC_COMBO]->val1 == skill_id ||
+	if( sc && sc->data[SC_COMBO] &&
+		skill_is_combo(skill_id) &&
+		(sc->data[SC_COMBO]->val1 == skill_id ||
 		(sd ? skill_check_condition_castbegin(sd, skill_id, skill_lv) : 0)) ) {
-		if( sc->data[SC_COMBO]->val2 )
+		if( skill_is_combo(skill_id) == 2 && target_id == src->id && ud->target > 0 )
+			target_id = ud->target;
+		else if( sc->data[SC_COMBO]->val2 )
 			target_id = sc->data[SC_COMBO]->val2;
 		else if( target_id == src->id || ud->target > 0 )
 			target_id = ud->target;

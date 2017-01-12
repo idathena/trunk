@@ -627,6 +627,7 @@ extern struct Battle_Config
 	int mob_stuck_warning; //Show warning if a monster is stuck too long
 	int guild_maprespawn_clones; //Should clones be killed by maprespawnguildid?
 	int skill_eightpath_algorithm; //Official path algorithm
+	int can_damage_skill; //Which BL types can damage traps
 } battle_config;
 
 void do_init_battle(void);

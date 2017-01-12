@@ -37,7 +37,8 @@
 static int check_connect_char_server(int tid, unsigned int tick, int id, intptr_t data);
 
 static struct eri *auth_db_ers; //For reutilizing player login structures.
-static DBMap *auth_db; // int id -> struct auth_node*
+static DBMap *auth_db; //int id -> struct auth_node*
+static bool char_init_done = false; //Server already initialized? Used for InterInitOnce and vending loadings
 
 static const int packet_len_table[0x3d] = { // U - used, F - free
 	60, 3,-1,-1,10,-1, 6,-1,	// 2af8-2aff: U->2af8, U->2af9, U->2afa, U->2afb, U->2afc, U->2afd, U->2afe, U->2aff
@@ -115,7 +116,7 @@ static uint32 char_ip = 0;
 static uint16 char_port = 6121;
 static char userid[NAME_LENGTH], passwd[NAME_LENGTH];
 static int chrif_state = 0;
-int other_mapserver_count=0; //Holds count of how many other map servers are online (apart of this instance) [Skotlex]
+int other_mapserver_count = 0; //Holds count of how many other map servers are online (apart of this instance) [Skotlex]
 
 //Interval at which map server updates online listing. [Valaris]
 #define CHECK_INTERVAL 3600000
@@ -485,8 +486,6 @@ int chrif_changemapserverack(int account_id, int login_id1, int login_id2, int c
  * 0x2af9 <errCode>B
  */
 int chrif_connectack(int fd) {
-	static bool char_init_done = false;
-
 	if (RFIFOB(fd,2)) {
 		ShowFatalError("Connection to char-server failed %d.\n", RFIFOB(fd,2));
 		exit(EXIT_FAILURE);
@@ -500,7 +499,6 @@ int chrif_connectack(int fd) {
 
 	ShowStatus("Event '"CL_WHITE"OnInterIfInit"CL_RESET"' executed with '"CL_WHITE"%d"CL_RESET"' NPCs.\n", npc_event_doall("OnInterIfInit"));
 	if( !char_init_done ) {
-		char_init_done = true;
 		ShowStatus("Event '"CL_WHITE"OnInterIfInitOnce"CL_RESET"' executed with '"CL_WHITE"%d"CL_RESET"' NPCs.\n", npc_event_doall("OnInterIfInitOnce"));
 		guild_castle_map_init();
 		intif_clan_requestclans();
@@ -568,8 +566,11 @@ void chrif_on_ready(void) {
 	guild_castle_reconnect(-1, 0, 0);
 
 	//Charserver is ready for loading autotrader
-	do_init_buyingstore_autotrade();
-	do_init_vending_autotrade();
+	if( !char_init_done ) {
+		do_init_buyingstore_autotrade();
+		do_init_vending_autotrade();
+		char_init_done = true;
+	}
 }
 
 

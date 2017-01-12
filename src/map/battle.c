@@ -1142,13 +1142,11 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			return 0; //Attack blocked by Parrying
 		}
 
-		if( (sce = sc->data[SC_DODGE]) && (!sc->opt1 || sc->opt1 == OPT1_BURNING) &&
-			((flag&BF_LONG) || sc->data[SC_STRUP]) && rnd()%100 < 20 ) {
+		if( (sce = sc->data[SC_DODGE]) && ((flag&BF_LONG) || sc->data[SC_STRUP]) && rnd()%100 < 20 ) {
 			if( sd && pc_issit(sd) )
 				pc_setstand(sd); //Stand it to dodge
 			clif_skill_nodamage(bl,bl,TK_DODGE,sce->val1,1);
-			if( !sc->data[SC_COMBO] )
-				sc_start4(src,bl,SC_COMBO,100,TK_JUMPKICK,src->id,1,0,2000);
+			sc_start4(src,bl,SC_COMBO,100,TK_JUMPKICK,src->id,1,0,2000);
 			return 0;
 		}
 
@@ -7847,54 +7845,45 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 			break;
 		case BL_SKILL: {
 				TBL_SKILL *su = ((TBL_SKILL *)target);
+				uint16 skill_id = battle_getcurrentskill(src);
 
 				if( !su || !su->group )
 					return 0;
 				if( skill_get_inf2(su->group->skill_id)&INF2_TRAP && su->group->unit_id != UNT_USED_TRAPS ) {
-					switch( battle_getcurrentskill(src) ) { //Only a few skills can target traps
-						case RK_DRAGONBREATH: //It can only hit traps in pvp/gvg maps
-						case RK_DRAGONBREATH_WATER:
-							if( !map[m].flag.pvp && !map[m].flag.gvg )
+					if( !skill_id ) {
+						;
+					} else if( skill_get_inf2(skill_id)&INF2_HIT_TRAP ) { //Only a few skills can target traps
+						switch( skill_id ) {
+							case RK_DRAGONBREATH:
+							case RK_DRAGONBREATH_WATER:
+							case NC_SELFDESTRUCTION:
+							case NC_AXETORNADO:
+							case SR_SKYNETBLOW:
+								if( !map[m].flag.pvp && !map[m].flag.gvg )
+									return 0; //Can only hit traps in PVP/GVG maps
 								break;
-						case 0: //You can hit them without skills
-						case MA_REMOVETRAP:
-						case HT_REMOVETRAP:
-						case AC_SHOWER:
-						case MA_SHOWER:
-						case WZ_SIGHTRASHER:
-						case WZ_SIGHTBLASTER:
-						case SM_MAGNUM:
-						case MS_MAGNUM:
-						case RA_DETONATOR:
-						case RA_SENSITIVEKEEN:
-						case RK_STORMBLAST:
-						case SR_RAMPAGEBLASTER:
-						case NC_COLDSLOWER:
-						case NC_SELFDESTRUCTION:
-#ifdef RENEWAL
-						case KN_BOWLINGBASH:
-						case KN_SPEARSTAB:
-						case LK_SPIRALPIERCE:
-						case ML_SPIRALPIERCE:
-						case MO_FINGEROFFENSIVE:
-						case MO_INVESTIGATE:
-						case MO_TRIPLEATTACK:
-						case MO_EXTREMITYFIST:
-						case CR_HOLYCROSS:
-						case ASC_METEORASSAULT:
-						case RG_RAID:
-						case MC_CARTREVOLUTION:
-						case HT_CLAYMORETRAP:
-						case RA_ICEBOUNDTRAP:
-						case RA_FIRINGTRAP:
-#endif
-							state |= BCT_ENEMY;
-							strip_enemy = 0;
-							break;
-						default:
-							return 0;
-					}
+						}
+					} else
+						return 0;
+					state |= BCT_ENEMY;
+					strip_enemy = 0;
 				} else if( su->group->skill_id == WZ_ICEWALL || su->group->skill_id == GN_WALLOFTHORN ) {
+					switch( skill_id ) {
+						case RK_DRAGONBREATH:
+						case RK_DRAGONBREATH_WATER:
+						case NC_SELFDESTRUCTION:
+						case NC_AXETORNADO:
+						case SR_SKYNETBLOW:
+							if( !map[m].flag.pvp && !map[m].flag.gvg )
+								return 0;
+							break;
+						case HT_CLAYMORETRAP:
+							return 0; //Can't hit icewall
+						default:
+							if( (flag&BCT_ALL) == BCT_ALL && !skill_get_inf2(skill_id)&INF2_HIT_TRAP )
+								return -1; //Usually BCT_ALL stands for only hitting chars, but skills specifically set to hit traps also hit icewall
+							break;
+					}
 					state |= BCT_ENEMY;
 					strip_enemy = 0;
 				} else //Excepting traps, icewall, wall of thornes, you should not be able to target skills
@@ -8024,8 +8013,8 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 			break;
 	}
 
-	if( (flag&BCT_ALL) == BCT_ALL ) { //All actually stands for all attackable chars
-		if( target->type&BL_CHAR )
+	if( (flag&BCT_ALL) == BCT_ALL ) { //All actually stands for all attackable chars, icewall and traps
+		if( target->type&(BL_CHAR|BL_SKILL) )
 			return 1;
 		else
 			return -1;
@@ -8648,6 +8637,7 @@ static const struct _battle_data {
 	{ "monster_stuck_warning",              &battle_config.mob_stuck_warning,               0,      0,      1,              },
 	{ "guild_maprespawn_clones",            &battle_config.guild_maprespawn_clones,         0,      0,      1,              },
 	{ "skill_eightpath_algorithm",          &battle_config.skill_eightpath_algorithm,       1,      0,      1,              },
+	{ "can_damage_skill",                   &battle_config.can_damage_skill,                1,      0,      BL_ALL,         },
 };
 
 #ifndef STATS_OPT_OUT
