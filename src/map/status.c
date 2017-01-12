@@ -2318,10 +2318,8 @@ void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_m
 			*matk_min = (*matk_min) * sd->matk_rate / 100;
 			*matk_max = (*matk_max) * sd->matk_rate / 100;
 		}
-		if( pc_checkskill(sd, SU_POWEROFLAND) > 0 && pc_checkskill(sd, SU_SV_STEMSPEAR) == 5 &&
-			pc_checkskill(sd, SU_CN_POWDERING) == 5 && pc_checkskill(sd, SU_CN_METEOR) == 5 &&
-			pc_checkskill(sd, SU_SV_ROOTTWIST) == 5 )
-		{
+		if( pc_checkskill(sd, SU_POWEROFLAND) > 0 && (pc_checkskill(sd, SU_SV_STEMSPEAR) +
+			pc_checkskill(sd, SU_CN_POWDERING) + pc_checkskill(sd, SU_CN_METEOR) + pc_checkskill(sd, SU_SV_ROOTTWIST)) == 20 ) {
 			*matk_min += *matk_min * 20 / 100;
 			*matk_max += *matk_max * 20 / 100;
 		}
@@ -3599,6 +3597,11 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	if (sd->matk_rate != 100) {
 		status->matk_max = status->matk_max * sd->matk_rate / 100;
 		status->matk_min = status->matk_min * sd->matk_rate / 100;
+	}
+	if (pc_checkskill(sd, SU_POWEROFLAND) > 0 && (pc_checkskill(sd, SU_SV_STEMSPEAR) +
+		pc_checkskill(sd, SU_CN_POWDERING) + pc_checkskill(sd, SU_CN_METEOR) + pc_checkskill(sd, SU_SV_ROOTTWIST)) == 20) {
+		status->matk_min += status->matk_min * 20 / 100;
+		status->matk_max += status->matk_max * 20 / 100;
 	}
 
 	sd->hit_rate = max(sd->hit_rate,0);

@@ -653,7 +653,7 @@ int map_foreachinrange(int (*func)(struct block_list *, va_list), struct block_l
 /*==========================================
  * Same as foreachinrange, but there must be a shoot-able range between center and target to be counted in. [Skotlex]
  *------------------------------------------*/
-int map_foreachinshootrange(int (*func)(struct block_list *, va_list), struct block_list *center, int16 range, int type,...)
+int map_foreachinshootrange(int (*func)(struct block_list *, va_list), struct block_list *center, int16 range, int type, ...)
 {
 	int bx, by, m;
 	int returnCount = 0; //Total sum of returned values of func() [Skotlex]
