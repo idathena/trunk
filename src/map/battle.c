@@ -1937,6 +1937,9 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		skill_id == NJ_KIRIKAGE)
 		return BF_SHORT;
 
+	if(src->type == BL_MOB && skill_id == AC_SHOWER) //When monsters use Arrow Shower, it is always short range
+		return BF_SHORT;
+
 	//Skill range criteria
 	if(battle_config.skillrange_by_distance && (src->type&battle_config.skillrange_by_distance)) {
 		if(check_distance_bl(src, target, 3)) //Based on distance between src/target [Skotlex]
@@ -3602,17 +3605,11 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 #endif
 		case KN_CHARGEATK: { //+100% every 3 cells of distance but hard-limited to 500%
-				unsigned int k = wd.miscflag / 3;
+				unsigned int k = (wd.miscflag - 1) / 3;
 
-				if( k < 2 )
+				if(k < 0)
 					k = 0;
-				else if( k > 1 && k < 3 )
-					k = 1;
-				else if( k > 2 && k < 4 )
-					k = 2;
-				else
-					k = 3;
-				if( wd.miscflag > 12 )
+				else if(k > 4)
 					k = 4;
 				skillratio += 100 * k;
 			}

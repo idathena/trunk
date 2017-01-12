@@ -1716,21 +1716,16 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 			if( sc && sc->data[SC_RUN] )
 				casttime = -1;
 			break;
-		case KN_CHARGEATK: { //+0.5s every 3 cells of distance but hard-limited to 1.5s
-				unsigned int k = distance_bl(src, target) / 3;
+#ifndef RENEWAL_CAST
+		case KN_CHARGEATK: {
+				unsigned int k = (distance_bl(src,target) - 1) / 3; //Range 0-3: 500ms, Range 4-6: 1000ms, Range 7+: 1500ms
 
-				if( k < 2 )
-					k = 0;
-				else if( k > 1 && k < 3 )
-					k = 1;
-				else if( k > 2 )
+				if( k > 2 )
 					k = 2;
 				casttime += casttime * k;
-#ifdef RENEWAL
-				casttime += 250 * k;
-#endif
 			}
 			break;
+#endif
 		case GD_EMERGENCYCALL: //Emergency Call double cast when the user has learned Leap [Daegaladh]
 			if( sd && (pc_checkskill(sd,TK_HIGHJUMP) || pc_checkskill(sd,SU_LOPE) >= 3) )
 				casttime <<= 1;
@@ -1795,6 +1790,8 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 
 	if( !ud->state.running ) //Need TK_RUN or WUGDASH handler to be done before that, see bugreport:6026
 		unit_stop_walking(src, 1); //Eventhough this is not how official works but this will do the trick bugreport:6829
+
+	skill_toggle_magicpower(src, skill_id); //SC_MAGICPOWER needs to switch states at start of cast
 
 	//In official this is triggered even if no cast time
 	clif_skillcasting(src, src->id, target_id, 0, 0, skill_id, skill_get_ele(skill_id, skill_lv), casttime);
@@ -2002,6 +1999,8 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	}
 
 	unit_stop_walking(src,1);
+
+	skill_toggle_magicpower(src, skill_id); //SC_MAGICPOWER needs to switch states at start of cast
 
 	//In official this is triggered even if no cast time
 	clif_skillcasting(src, src->id, 0, skill_x, skill_y, skill_id, skill_get_ele(skill_id, skill_lv), casttime);
