@@ -390,16 +390,31 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 	if( sc && sc->count ) { //Increase damage by src status
 		switch( atk_elem ) {
 			case ELE_FIRE:
-				if( sc->data[SC_VOLCANO] )
+				if( sc->data[SC_VOLCANO] ) {
+#ifdef RENEWAL
 					ratio += sc->data[SC_VOLCANO]->val3;
+#else
+					damage += (int64)(damage * sc->data[SC_VOLCANO]->val3 / 100);
+#endif
+				}
 				break;
 			case ELE_WIND:
-				if( sc->data[SC_VIOLENTGALE] )
+				if( sc->data[SC_VIOLENTGALE] ) {
+#ifdef RENEWAL
 					ratio += sc->data[SC_VIOLENTGALE]->val3;
+#else
+					damage += (int64)(damage * sc->data[SC_VIOLENTGALE]->val3 / 100);
+#endif
+				}
 				break;
 			case ELE_WATER:
-				if( sc->data[SC_DELUGE] )
+				if( sc->data[SC_DELUGE] ) {
+#ifdef RENEWAL
 					ratio += sc->data[SC_DELUGE]->val3;
+#else
+					damage += (int64)(damage * sc->data[SC_DELUGE]->val3 / 100);
+#endif
+				}
 				break;
 		}
 	}
@@ -410,7 +425,7 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 		struct skill_unit_group *sg = NULL;
 		struct block_list *src = NULL;
 
-		if( !su || !su->alive || (sg = su->group) == NULL || (src = map_id2bl(sg->src_id)) == NULL || status_isdead(src) )
+		if( !su || !su->alive || !(sg = su->group) || !(src = map_id2bl(sg->src_id)) || status_isdead(src) )
 			return 0;
 		sg->unit_id = UNT_USED_TRAPS;
 		sg->limit = 0;
@@ -421,8 +436,12 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 	if( tsc && tsc->count ) { //Since an atk can only have one type let's optimise this a bit
 		switch( atk_elem ) {
 			case ELE_FIRE:
-				if( tsc->data[SC_SPIDERWEB] ) {
-					ratio += 100; //Double damage
+				if( tsc->data[SC_SPIDERWEB] ) { //Double damage
+#ifdef RENEWAL
+					ratio += 100;
+#else
+					damage *= 2;
+#endif
 					status_change_end(target,SC_SPIDERWEB,INVALID_TIMER);
 				}
 				if( tsc->data[SC_THORNSTRAP] ) {
@@ -433,46 +452,92 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 				}
 				if( tsc->data[SC_CRYSTALIZE] )
 					status_change_end(target,SC_CRYSTALIZE,INVALID_TIMER);
-				if( tsc->data[SC_EARTH_INSIGNIA] )
+				if( tsc->data[SC_EARTH_INSIGNIA] ) {
+#ifdef RENEWAL
 					ratio += 50;
+#else
+					damage += (int64)(damage * 50 / 100);
+#endif
+				}
 				break;
 			case ELE_HOLY:
-				if( tsc->data[SC_ORATIO] )
+				if( tsc->data[SC_ORATIO] ) {
+#ifdef RENEWAL
 					ratio += tsc->data[SC_ORATIO]->val2;
+#else
+					damage += (int64)(damage * tsc->data[SC_ORATIO]->val2 / 100);
+#endif
+				}
 				break;
 			case ELE_POISON:
-				if( tsc->data[SC_VENOMIMPRESS] )
+				if( tsc->data[SC_VENOMIMPRESS] ) {
+#ifdef RENEWAL
 					ratio += tsc->data[SC_VENOMIMPRESS]->val2;
+#else
+					damage += (int64)(damage * tsc->data[SC_VENOMIMPRESS]->val2 / 100);
+#endif
+				}
 				break;
 			case ELE_WIND:
-				if( tsc->data[SC_CRYSTALIZE] )
+				if( tsc->data[SC_CRYSTALIZE] ) {
+#ifdef RENEWAL
 					ratio += 50;
-				if( tsc->data[SC_WATER_INSIGNIA] )
+#else
+					damage += (int64)(damage * 50 / 100);
+#endif
+				}
+				if( tsc->data[SC_WATER_INSIGNIA] ) {
+#ifdef RENEWAL
 					ratio += 50;
+#else
+					damage += (int64)(damage * 50 / 100);
+#endif
+				}
 				break;
 			case ELE_WATER:
-				if( tsc->data[SC_FIRE_INSIGNIA] )
+				if( tsc->data[SC_FIRE_INSIGNIA] ) {
+#ifdef RENEWAL
 					ratio += 50;
+#else
+					damage += (int64)(damage * 50 / 100);
+#endif
+				}
 				break;
 			case ELE_EARTH:
-				if( tsc->data[SC_WIND_INSIGNIA] )
+				if( tsc->data[SC_WIND_INSIGNIA] ) {
+#ifdef RENEWAL
 					ratio += 50;
-				if( tsc->data[SC_MAGNETICFIELD] )
-					status_change_end(target,SC_MAGNETICFIELD,INVALID_TIMER); //Freed if received earth damage
+#else
+					damage += (int64)(damage * 50 / 100);
+#endif
+				}
+				if( tsc->data[SC_MAGNETICFIELD] ) //Freed if received earth damage
+					status_change_end(target,SC_MAGNETICFIELD,INVALID_TIMER);
 				break;
 			case ELE_NEUTRAL:
-				if( tsc->data[SC_ANTI_M_BLAST] )
+				if( tsc->data[SC_ANTI_M_BLAST] ) {
+#ifdef RENEWAL
 					ratio += tsc->data[SC_ANTI_M_BLAST]->val2;
+#else
+					damage += (int64)(damage * tsc->data[SC_ANTI_M_BLAST]->val2 / 100);
+#endif
+				}
 				break;
 		}
 	}
 
-	if( ratio < 100 )
-		damage = damage - (damage * (100 - ratio) / 100);
-	else
-		damage = damage + (damage * (ratio - 100) / 100);
+	if( !battle_config.attr_recover && ratio < 0 )
+		ratio = 0;
 
-	return max(damage,0);
+#ifdef RENEWAL
+	//In renewal, reductions are always rounded down so damage can never reach 0 unless ratio is 0
+	damage = damage - (int64)(damage * (100 - ratio) / 100);
+#else
+	damage = (int64)(damage * ratio / 100);
+#endif
+
+	//Damage can be negative, see battle_config.attr_recover
+	return damage;
 }
 
 /**
@@ -520,7 +585,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 	s_defele = (tsd ? (enum e_element)status_get_element(src) : ELE_NONE);
 
 //Official servers apply the cardfix value on a base of 1000 and round down the reduction/increase
-#define APPLY_CARDFIX(damage, fix) { (damage) = (damage) - (int64)(((damage) * (1000 - (fix))) / 1000); }
+#define APPLY_CARDFIX(damage, fix) { (damage) = (damage) - (int64)((damage) * (1000 - (fix)) / 1000); }
 
 	switch( attack_type ) {
 		case BF_MAGIC:

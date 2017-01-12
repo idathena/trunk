@@ -10902,10 +10902,6 @@ void pc_readdb(void)
 				while( *p > 0 && *p == 32 ) //Skipping newline and space (32 = ' ')
 					p++;
 				attr_fix_table[lv - 1][i][j] = atoi(p);
-#ifndef RENEWAL
-				if( !battle_config.attr_recover && attr_fix_table[lv - 1][i][j] < 0 )
-					attr_fix_table[lv - 1][i][j] = 0;
-#endif
 				p = strchr(p, ',');
 				if( p )
 					*p++ = 0;
