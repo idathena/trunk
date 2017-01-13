@@ -507,7 +507,7 @@ int intif_send_guild_storage(int account_id,struct guild_storage *gstor)
 	WFIFOW(inter_fd,2) = (unsigned short)sizeof(struct guild_storage) + 12;
 	WFIFOL(inter_fd,4) = account_id;
 	WFIFOL(inter_fd,8) = gstor->guild_id;
-	memcpy( WFIFOP(inter_fd,12),gstor, sizeof(struct guild_storage) );
+	memcpy(WFIFOP(inter_fd,12),gstor,sizeof(struct guild_storage));
 	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
 
 	return 1;
@@ -528,13 +528,13 @@ int intif_create_party(struct party_member *member,char *name,int item,int item2
 
 	nullpo_ret(member);
 
-	WFIFOHEAD(inter_fd,64);
+	WFIFOHEAD(inter_fd,6 + NAME_LENGTH + sizeof(struct party_member));
 	WFIFOW(inter_fd,0) = 0x3020;
-	WFIFOW(inter_fd,2) = 30 + sizeof(struct party_member);
-	memcpy(WFIFOP(inter_fd,4),name, NAME_LENGTH);
+	WFIFOW(inter_fd,2) = 6 + NAME_LENGTH + sizeof(struct party_member);
+	memcpy(WFIFOP(inter_fd,4),name,NAME_LENGTH);
 	WFIFOB(inter_fd,28) = item;
 	WFIFOB(inter_fd,29) = item2;
-	memcpy(WFIFOP(inter_fd,30), member, sizeof(struct party_member));
+	memcpy(WFIFOP(inter_fd,30),member,sizeof(struct party_member));
 	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
 
 	return 1;

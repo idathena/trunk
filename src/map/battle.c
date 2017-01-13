@@ -6566,12 +6566,9 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 	}
 
 	s_ele = skill_get_ele(skill_id, skill_lv);
-	if(s_ele < 0 && s_ele != -3) {
-		if(skill_id == HT_BLITZBEAT || skill_id == SN_FALCONASSAULT)
-			s_ele = (sd && sd->bonus.arrow_ele ? sd->bonus.arrow_ele : sstatus->rhw.ele);
-		else //Attack that takes weapon's element for misc attacks? Make it neutral [Skotlex]
-			s_ele = ELE_NEUTRAL;
-	} else if(s_ele == -3) //Use random element
+	if(s_ele < 0 && s_ele != -3) //Attack that takes weapon's element for misc attacks? Make it neutral [Skotlex]
+		s_ele = ELE_NEUTRAL;
+	else if(s_ele == -3) //Use random element
 		s_ele = rnd()%ELE_ALL;
 
 	//Skill Range Criteria
@@ -6957,8 +6954,6 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 	if(!(nk&NK_NO_ELEFIX) && md.damage > 0) {
 		md.damage = battle_attr_fix(src, target, md.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
 		switch(skill_id) {
-			case HT_BLITZBEAT:
-			case SN_FALCONASSAULT:
 			case NC_MAGMA_ERUPTION:
 				//Forced neutral [exneval]
 				md.damage = battle_attr_fix(src, target, md.damage, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);

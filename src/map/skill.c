@@ -1789,7 +1789,7 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 	uint8 i;
 	struct block_list *tbl;
 
-	if( sd == NULL || !skill_id )
+	if( !sd || !skill_id )
 		return 0;
 
 	for( i = 0; i < ARRAYLENGTH(sd->autospell3) && sd->autospell3[i].flag; i++ ) {
@@ -1810,7 +1810,7 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 
 		sd->state.autocast = 0;
 
-		if( id >= 0 && bl == NULL )
+		if( id >= 0 && !bl )
 			continue; //No target
 
 		if( rnd()%1000 >= sd->autospell3[i].rate )
