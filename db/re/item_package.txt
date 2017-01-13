@@ -793,6 +793,24 @@ IG_Mysterious_Travel_Sack3,S_Mdef_Potion_Box30,80,1,1,0,0,1
 IG_Mysterious_Travel_Sack3,Max_Weight_Up_Box,80,1,1,0,0,1
 IG_Mysterious_Travel_Sack3,Regeneration_Box10,100,1,1,0,0,1
 
+IG_Mysterious_Travel_Sack4,Charming_Ribbon,1,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Twin_Ribbon,2,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Ribbon_Pink,2,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Ribbon_Orange,2,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Ribbon_White,2,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Red_Glasses,1,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Ribbon_Of_Bride,2,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Dun_Tele_Scroll1_Box,5,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Max_Weight_Up_Box,80,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Small_Life_Potion_Box30,203,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Med_Life_Potion_Box30,203,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Regeneration_Box10,203,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Shadow_Armor_S_Box10,5,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Holy_Armor_S_Box10,5,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,S_Def_Potion_Box30,203,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,S_Mdef_Potion_Box30,80,1,1,0,0,1
+IG_Mysterious_Travel_Sack4,Dun_Tele_Scroll1,1,1,1,0,0,1
+
 IG_Magician_Card_Box,Blood_Butterfly_Card,0,1,0,0,0,1
 IG_Magician_Card_Box,Parasite_Card,0,1,0,0,0,1
 IG_Magician_Card_Box,Harpy_Card,0,1,0,0,0,1
