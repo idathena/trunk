@@ -70,7 +70,7 @@
 4,0,0,0,0,0,0,10,0,no,0,0,0,none,0,0,		SM_RECOVERY,Increase HP Recovery
 5,-1,6,1,-1,0,0,10,1,no,0,0,0,weapon,0,0,	SM_BASH,Bash
 6,9,6,1,0,1,0,10,1,no,0,0,0,none,0,0,		SM_PROVOKE,Provoke
-7,0,6,4,3,0x3,2,10,1,no,0,0x10000,0,weapon,2,0,	SM_MAGNUM,Magnum Break
+7,0,6,4,3,0x3,2:2:2:2:2:2:2:2:2:2:4,10,1,no,0,0x10000,0,weapon,2,0,	SM_MAGNUM,Magnum Break
 8,0,6,4,0,0x1,0,10,1,no,0,0,0,weapon,0,0,	SM_ENDURE,Endure
 9,0,0,0,0,0,0,10,0,no,0,0,0,none,0,0,		MG_SRECOVERY,Increase SP Recovery
 10,0,6,4,3,0x3,3,1,1,yes,0,0,0,magic,0,0,	MG_SIGHT,Sight
@@ -143,7 +143,7 @@
 77,5,6,1,6,0x28,0,10,1,yes,0,0,0,magic,0,0,	PR_TURNUNDEAD,Turn Undead
 78,9,6,1,0,0x1,0,1,0,yes,0,0,0,magic,0,0,	PR_LEXAETERNA,Lex Aeterna
 79,9,8,2,6,0,0,10,1:2:3:4:5:6:7:8:9:10,yes,0,0,0,magic,0,0,	PR_MAGNUS,Magnus Exorcismus
-80,9,8,2,3,0x20,1:1:1:1:1:2:2:2:2:2:2,10,-3:-4:-5:-6:-7:-8:-9:-10:-11:-12:-12,yes,0,0,5,magic,0,0x20,	WZ_FIREPILLAR,Fire Pillar
+80,9,8,2,3,0x20,1:1:1:1:1:2:2:2:2:2,10,3:4:5:6:7:8:9:10:11:12,yes,0,0,5,magic,0,0x20,	WZ_FIREPILLAR,Fire Pillar
 81,0,6,4,3,0x2,7,10,1,yes,0,0x10000,0,magic,5,0x20,	WZ_SIGHTRASHER,Sightrasher
 83,9,8,2,3,0,3:3:3:3:3:3:3:3:3:3:14,10,1:1:2:2:3:3:4:4:5:5:15,yes,0,0,0,magic,0,0x20,	WZ_METEOR,Meteor Storm
 84,9,8,1,4,0,0,10,3:4:5:6:7:8:9:10:11:12,yes,0,0,0,magic,2:3:3:4:4:5:5:6:6:7,0x20,	WZ_JUPITEL,Jupitel Thunder
@@ -172,7 +172,7 @@
 107,0,0,0,0,0,0,10,0,no,0,0,0,weapon,0,0,	BS_WEAPONRESEARCH,Weaponry Research
 108,2,6,16,0,0x1,0,1,1,yes,0,0,0,weapon,0,0,	BS_REPAIRWEAPON,Weapon Repair
 109,0,0,0,0,0,0,5,0,no,0,0,0,weapon,0,0,	BS_SKINTEMPER,Skin Tempering
-110,1,6,2,0,0x3,2:2:2:2:2:14,5,1,no,0,0,0,weapon,0,0,	BS_HAMMERFALL,Hammer Fall
+110,1,6,2,0,0x3,2:2:2:2:2:12,5,1,no,0,0,0,weapon,0,0,	BS_HAMMERFALL,Hammer Fall
 111,0,6,4,0,0x3,-1,5,1,no,0,0,0,weapon,0,0,	BS_ADRENALINE,Adrenaline Rush
 112,0,6,4,0,0x3,-1,5,1,no,0,0,0,weapon,0,0,	BS_WEAPONPERFECT,Weapon Perfection
 113,0,6,4,0,0x3,-1,5,1,no,0,0,0,weapon,0,0,	BS_OVERTHRUST,Power-Thrust

@@ -7799,6 +7799,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_TWOHANDQUICKEN:
 			if( sc->data[SC_DECREASEAGI] )
 				return 0;
+		//Fall through
 		case SC_CONCENTRATE:
 		case SC_SPEARQUICKEN:
 		case SC_TRUESIGHT:
@@ -7807,6 +7808,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_ASSNCROS:
 			if( sc->option&OPTION_MADOGEAR )
 				return 0; //Mado is immune to wind walk, cart boost, etc (others above) [Ind]
+		//Fall through
 		case SC_INCREASEAGI:
 			if( sc->data[SC_QUAGMIRE] )
 				return 0;
