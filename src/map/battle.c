@@ -5958,10 +5958,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						skillratio += -100 + (100 + skill_lv * 10) * 2 / 3;
 						break;
 					case WZ_FIREPILLAR:
-						if(skill_lv > 10)
-							skillratio += 2300; //200% MATK each hit
-						else
-							skillratio += -60 + 20 * skill_lv; //20% MATK each hit
+						if(sd && ad.div_ > 0)
+							ad.div_ *= -1; //For players, damage is divided by number of hits
+						skillratio += -60 + 20 * skill_lv; //20% MATK each hit
 						break;
 					case WZ_SIGHTRASHER:
 						skillratio += 20 * skill_lv;
@@ -6057,18 +6056,14 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case WZ_METEOR:
 						skillratio += 25;
 						break;
-					case WZ_VERMILION: {
-    						int interval = 0, per = interval, ratio = per;
+					case WZ_VERMILION:
+						if(sd) {
+							int per = 0;
 
-    						while((per++) < skill_lv) {
-     							ratio += interval;
-     							if(per%3 == 0)
-									interval += 20;
-    						}
-							if(skill_lv > 9)
-								ratio -= 10;
-							skillratio += ratio;
-						}
+							while((++per) < skill_lv)
+								skillratio += per * 5; //100% 105% 115% 130% 150% 175% 205% 240% 280% 325%
+						} else
+							skillratio += 20 * skill_lv - 20; //Monsters use old formula
 						break;
 					case AM_ACIDTERROR:
 						skillratio += 40 * skill_lv;

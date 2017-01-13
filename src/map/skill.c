@@ -959,7 +959,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 #ifndef RENEWAL
 		case WZ_FROSTNOVA:
 #endif
-			if( !sc_start(src,bl,SC_FREEZE,35 + skill_lv * 3,skill_lv,skill_get_time2(skill_id,skill_lv)) &&
+			if( !sc_start(src,bl,SC_FREEZE,min(35 + skill_lv * 3,60 + skill_lv),skill_lv,skill_get_time2(skill_id,skill_lv)) &&
 				sd && skill_id == MG_FROSTDIVER )
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			break;
@@ -985,7 +985,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sc_start(src,bl,SC_STUN,3 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case WZ_VERMILION:
-			sc_start(src,bl,SC_BLIND,4 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
+			sc_start(src,bl,SC_BLIND,min(4 * skill_lv,40),skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case WZ_HEAVENDRIVE:
 			status_change_end(bl,SC_SV_ROOTTWIST,INVALID_TIMER);
@@ -4774,8 +4774,8 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 
 		case SM_MAGNUM:
 		case MS_MAGNUM:
-			if (flag&1) //Damage depends on distance, so add it to flag if it is > 1
-				skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION|distance_bl(src,bl));
+			if (flag&1) //For players, damage depends on distance, so add it to flag if it is > 1
+				skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION|(sd ? distance_bl(src,bl) : 0));
 			break;
 
 		case KN_BRANDISHSPEAR:
@@ -5902,18 +5902,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case AL_DECAGI:
-			i = sc_start(src,bl,type,(50 + skill_lv * 3 + (status_get_lv(src) + sstatus->int_) / 5),skill_lv,
-				//Monsters using lvl 48 get the rate benefit but the duration of lvl 10
-				(src->type == BL_MOB && skill_lv == 48) ? skill_get_time(skill_id,10) : skill_get_time(skill_id,skill_lv));
-			if (!i) {
-				if (sd)
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-				map_freeblock_unlock();
-				return 1;
-			}
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,i);
-			break;
-
 		case MER_DECAGI:
 			if (!(i = sc_start(src,bl,type,(50 + skill_lv * 3 + (status_get_lv(src) + sstatus->int_) / 5),skill_lv,skill_get_time(skill_id,skill_lv)))) {
 				if (sd)
@@ -5921,7 +5909,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				map_freeblock_unlock();
 				return 1;
 			}
-			clif_skill_nodamage (src,bl,skill_id,skill_lv,i);
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,i);
 			break;
 
 		case AL_CRUCIS:
@@ -6636,7 +6624,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case BS_HAMMERFALL:
-			skill_addtimerskill(src,tick + 1000,bl->id,0,0,skill_id,skill_lv,(20 + 10 * skill_lv),flag);
+			skill_addtimerskill(src,tick + 1000,bl->id,0,0,skill_id,skill_lv,min(20 + 10 * skill_lv,50 + 5 * skill_lv),flag);
 			break;
 
 		case RG_RAID:
@@ -6698,11 +6686,11 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case ML_BRANDISH:
 			skill_area_temp[1] = bl->id;
 			if (skill_lv >= 10)
-				map_foreachindir(skill_area_sub,src->m,src->x,src->y,bl->x,bl->y,skill_get_splash(skill_id,skill_lv),1,skill_get_maxcount(skill_id,skill_lv) - 1,splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|3,skill_castend_damage_id);
+				map_foreachindir(skill_area_sub,src->m,src->x,src->y,bl->x,bl->y,skill_get_splash(skill_id,skill_lv),1,skill_get_maxcount(skill_id,skill_lv) - 1,splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|(sd ? 3 : 0),skill_castend_damage_id);
 			if (skill_lv >= 7)
-				map_foreachindir(skill_area_sub,src->m,src->x,src->y,bl->x,bl->y,skill_get_splash(skill_id,skill_lv),1,skill_get_maxcount(skill_id,skill_lv) - 2,splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|2,skill_castend_damage_id);
+				map_foreachindir(skill_area_sub,src->m,src->x,src->y,bl->x,bl->y,skill_get_splash(skill_id,skill_lv),1,skill_get_maxcount(skill_id,skill_lv) - 2,splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|(sd ? 2 : 0),skill_castend_damage_id);
 			if (skill_lv >= 4)
-				map_foreachindir(skill_area_sub,src->m,src->x,src->y,bl->x,bl->y,skill_get_splash(skill_id,skill_lv),1,skill_get_maxcount(skill_id,skill_lv) - 3,splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
+				map_foreachindir(skill_area_sub,src->m,src->x,src->y,bl->x,bl->y,skill_get_splash(skill_id,skill_lv),1,skill_get_maxcount(skill_id,skill_lv) - 3,splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|(sd ? 1 : 0),skill_castend_damage_id);
 			map_foreachindir(skill_area_sub,src->m,src->x,src->y,bl->x,bl->y,skill_get_splash(skill_id,skill_lv),skill_get_maxcount(skill_id,skill_lv) - 3,0,splash_target(src),src,skill_id,skill_lv,tick,flag|BCT_ENEMY|0,skill_castend_damage_id);
 			break;
 
