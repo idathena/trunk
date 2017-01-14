@@ -9381,6 +9381,15 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				tick_time = 10000;
 				val4 = tick / tick_time;
 				break;
+			case SC_CRUSHSTRIKE:
+				if( sd ) { //ATK [{Weapon Level * (Weapon Upgrade Level + 6) * 100} + (Weapon ATK) + (Weapon Weight)]%
+					short index = sd->equip_index[EQI_HAND_R];
+
+					if( index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON )
+						val2 = sd->inventory_data[index]->wlv * (sd->status.inventory[index].refine + 6) * 100 +
+							sd->inventory_data[index]->atk + sd->inventory_data[index]->weight / 10;
+				}
+				break;
 			case SC_GIANTGROWTH:
 				val2 = 15; //Success rate
 				break;
@@ -9705,12 +9714,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_EXEEDBREAK:
 				val2 = 150 * val1;
-				if( sd ) { //Players
+				if( sd ) {
 					short index = sd->equip_index[EQI_HAND_R];
 
 					if( index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON )
 						val2 += 15 * status_get_job_lv(bl) + sd->inventory_data[index]->weight / 10 * sd->inventory_data[index]->wlv * status_get_lv(bl) / 100;
-				} else //Monster use
+				} else
 					val2 += 750;
 				break;
 			case SC_PRESTIGE:
