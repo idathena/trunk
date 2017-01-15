@@ -14507,7 +14507,7 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			}
 			break;
 		case WL_WHITEIMPRISON:
-			if( bl->id != src->id && (battle_check_target(src,bl,BCT_ENEMY) > 0 && is_boss(bl)) ) {
+			if( (bl->id != src->id && battle_check_target(src,bl,BCT_ENEMY) <= 0) || is_boss(bl) ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				return false;
