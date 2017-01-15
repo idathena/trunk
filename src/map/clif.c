@@ -433,7 +433,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 					cd = (struct chat_data *)bl;
 				else
 					break;
-				if (cd == NULL)
+				if (!cd)
 					break;
 				for (i = 0; i < cd->users; i++) {
 					if (type == CHAT_WOS && cd->usersd[i] == sd)
@@ -471,8 +471,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 						continue;
 					if (type != PARTY && type != PARTY_WOS && bl->m != sd->bl.m)
 						continue;
-					if ((type == PARTY_AREA || type == PARTY_AREA_WOS) && (sd->bl.x < x0 || sd->bl.y < y0 ||
-						sd->bl.x > x1 || sd->bl.y > y1))
+					if ((type == PARTY_AREA || type == PARTY_AREA_WOS) && (sd->bl.x < x0 || sd->bl.y < y0 || sd->bl.x > x1 || sd->bl.y > y1))
 						continue;
 					if (packet_db[sd->packet_ver][RBUFW(buf,0)].len) { //Packet must exist for the client version
 						WFIFOHEAD(fd,len);
@@ -558,7 +557,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 				if (!enable_spy) //Skip unnecessary parsing [Skotlex]
 					break;
 				iter = mapit_getallusers();
-				while ((tsd = (TBL_PC *)mapit_next(iter)) != NULL) { //Packet must exist for the client version
+				while ((tsd = (TBL_PC *)mapit_next(iter))) { //Packet must exist for the client version
 					if (tsd->guildspy == g->guild_id && packet_db[tsd->packet_ver][RBUFW(buf,0)].len) {
 						WFIFOHEAD(tsd->fd,len);
 						memcpy(WFIFOP(tsd->fd,0), buf, len);
@@ -3128,6 +3127,7 @@ static int clif_hpmeter_sub(struct block_list *bl, va_list ap)
 static int clif_hpmeter(struct map_session_data *sd)
 {
 	nullpo_ret(sd);
+
 	map_foreachinarea(clif_hpmeter_sub,sd->bl.m,sd->bl.x - AREA_SIZE,sd->bl.y - AREA_SIZE,
 		sd->bl.x + AREA_SIZE,sd->bl.y + AREA_SIZE,BL_PC,sd);
 	return 0;
@@ -5401,11 +5401,11 @@ void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x,
 #endif
 
 	if (disguised(bl)) {
-		clif_send(buf,packet_len(cmd), bl, AREA_WOS);
+		clif_send(buf,packet_len(cmd),bl,AREA_WOS);
 		WBUFL(buf,2) = -src_id;
-		clif_send(buf,packet_len(cmd), bl, SELF);
+		clif_send(buf,packet_len(cmd),bl,SELF);
 	} else
-		clif_send(buf,packet_len(cmd), bl, AREA);
+		clif_send(buf,packet_len(cmd),bl,AREA);
 }
 
 
@@ -5419,7 +5419,7 @@ void clif_skillcastcancel(struct block_list *bl)
 
 	WBUFW(buf,0) = 0x1b9;
 	WBUFL(buf,2) = bl->id;
-	clif_send(buf,packet_len(0x1b9), bl, AREA);
+	clif_send(buf,packet_len(0x1b9),bl,AREA);
 }
 
 
@@ -10305,7 +10305,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 
 	//Info about nearby objects
 	//Must use foreachinarea (CIRCULAR_AREA interferes with foreachinrange)
-	map_foreachinarea(clif_getareachar,sd->bl.m,sd->bl.x-AREA_SIZE,sd->bl.y-AREA_SIZE,sd->bl.x+AREA_SIZE,sd->bl.y+AREA_SIZE,BL_ALL,sd);
+	map_foreachinarea(clif_getareachar,sd->bl.m,sd->bl.x - AREA_SIZE,sd->bl.y - AREA_SIZE,sd->bl.x + AREA_SIZE,sd->bl.y + AREA_SIZE,BL_ALL,sd);
 
 	//Pet
 	if(sd->pd) {

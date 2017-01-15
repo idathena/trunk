@@ -2978,7 +2978,7 @@ struct Damage battle_calc_damage_parts(struct Damage wd, struct block_list *src,
 	wd.statusAtk += battle_calc_status_attack(sstatus, EQI_HAND_R);
 	wd.statusAtk2 += battle_calc_status_attack(sstatus, EQI_HAND_L);
 
-	if(skill_id || (sd && sd->sc.data[SC_SEVENWIND])) { //Mild Wind applies element to status ATK as well as weapon ATK [helvetica]
+	if(skill_id || sd->sc.data[SC_SEVENWIND]) { //Mild Wind applies element to status ATK as well as weapon ATK [helvetica]
 		wd.statusAtk = battle_attr_fix(src, target, wd.statusAtk, right_element, tstatus->def_ele, tstatus->ele_lv);
 		wd.statusAtk2 = battle_attr_fix(src, target, wd.statusAtk, left_element, tstatus->def_ele, tstatus->ele_lv);
 	} else { //Status ATK is considered neutral on normal attacks [helvetica]
@@ -5403,20 +5403,12 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		}
 
 		//Add any miscellaneous player skill ATK rate bonuses
-		if(sd && (i = pc_skillatk_bonus(sd, id))) {
+		if(sd && (i = pc_skillatk_bonus(sd, id)))
 			ATK_ADDRATE(wd.damage, wd.damage2, i);
-			RE_ALLATK_ADDRATE(wd, i);
-		}
-
-		if(tsd && (i = pc_sub_skillatk_bonus(tsd, id))) {
+		if(tsd && (i = pc_sub_skillatk_bonus(tsd, id)))
 			ATK_ADDRATE(wd.damage, wd.damage2, -i);
-			RE_ALLATK_ADDRATE(wd, -i);
-		}
-
-		if((i = battle_adjust_skill_damage(src->m, id))) {
+		if((i = battle_adjust_skill_damage(src->m, id)))
 			ATK_RATE(wd.damage, wd.damage2, i);
-			RE_ALLATK_RATE(wd, i);
-		}
 	} else if(wd.div_ < 0)
 		wd.div_ *= -1;
 
@@ -7738,10 +7730,10 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 	m = target->m;
 
 	//s_bl/t_bl hold the 'master' of the attack, while src/target are the actual objects involved
-	if( (s_bl = battle_get_master(src)) == NULL )
+	if( !(s_bl = battle_get_master(src)) )
 		s_bl = src;
 
-	if( (t_bl = battle_get_master(target)) == NULL )
+	if( !(t_bl = battle_get_master(target)) )
 		t_bl = target;
 
 	if( s_bl->type == BL_PC ) {
@@ -7796,7 +7788,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 
 				if( !su || !su->group )
 					return 0;
-				if( skill_get_inf2(su->group->skill_id)&INF2_TRAP && su->group->unit_id != UNT_USED_TRAPS ) {
+				if( (skill_get_inf2(su->group->skill_id)&INF2_TRAP) && su->group->unit_id != UNT_USED_TRAPS ) {
 					if( !skill_id ) {
 						;
 					} else if( skill_get_inf2(skill_id)&INF2_HIT_TRAP ) { //Only a few skills can target traps
@@ -7827,7 +7819,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 						case HT_CLAYMORETRAP:
 							return 0; //Can't hit icewall
 						default:
-							if( (flag&BCT_ALL) == BCT_ALL && !skill_get_inf2(skill_id)&INF2_HIT_TRAP )
+							if( (flag&BCT_ALL) == BCT_ALL && !(skill_get_inf2(skill_id)&INF2_HIT_TRAP) )
 								return -1; //Usually BCT_ALL stands for only hitting chars, but skills specifically set to hit traps also hit icewall
 							break;
 					}
@@ -7888,20 +7880,20 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 		case BL_SKILL: {
 				struct skill_unit *su = (struct skill_unit *)src;
 				struct status_change *tsc = status_get_sc(target);
+				int inf2;
 
 				if( !su || !su->group )
 					return 0;
+				inf2 = skill_get_inf2(su->group->skill_id);
 				if( su->group->src_id == target->id ) {
-					int inf2 = skill_get_inf2(su->group->skill_id);
-
 					if( inf2&INF2_NO_TARGET_SELF )
 						return -1;
 					if( inf2&INF2_TARGET_SELF )
 						return 1;
 				}
 				//Status changes that prevent traps from triggering
-				if( tsc && tsc->count && skill_get_inf2(su->group->skill_id)&INF2_TRAP &&
-					tsc->data[SC_SIGHTBLASTER] && tsc->data[SC_SIGHTBLASTER]->val2 > 0 && !(tsc->data[SC_SIGHTBLASTER]->val4%2) )
+				if( (inf2&INF2_TRAP) && tsc && tsc->count && tsc->data[SC_SIGHTBLASTER] &&
+					tsc->data[SC_SIGHTBLASTER]->val2 > 0 && !(tsc->data[SC_SIGHTBLASTER]->val4%2) )
 					return -1;
 			}
 			break;
