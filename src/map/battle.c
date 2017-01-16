@@ -1684,6 +1684,7 @@ int64 battle_addmastery(struct map_session_data *sd, struct block_list *target, 
 			if((lv = pc_checkskill(sd,AM_AXEMASTERY)) > 0)
 				damage += lv * 3;
 #endif
+		//Fall through
 		case W_DAGGER:
 			if((lv = pc_checkskill(sd,SM_SWORD)) > 0)
 				damage += lv * 4;
@@ -2875,8 +2876,6 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 		}
 		//General skill masteries
 #ifdef RENEWAL
-		if(skill_id == TF_POISON) //Additional ATK from Envenom is treated as mastery type damage [helvetica]
-			ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 15 * skill_lv);
 		if(skill_id != MC_CARTREVOLUTION && pc_checkskill(sd, BS_HILTBINDING) > 0)
 			ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 4);
 		if(skill_id != CR_SHIELDBOOMERANG)
@@ -2892,13 +2891,26 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 				ATK_ADDRATE(wd.masteryAtk, wd.masteryAtk2, 2 * lv * (members - 1));
 		}
 #endif
-		if(skill_id == NJ_SYURIKEN && (lv = pc_checkskill(sd, NJ_TOBIDOUGU)) > 0) {
-			ATK_ADD(wd.damage, wd.damage2, 3 * lv);
-#ifdef RENEWAL
-			ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 3 * lv);
-#endif
-		}
 		switch(skill_id) {
+			case TF_POISON:
+				ATK_ADD(wd.damage, wd.damage2, 15 * skill_lv);
+#ifdef RENEWAL //Additional ATK from Envenom is treated as mastery type damage [helvetica]
+				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 15 * skill_lv);
+#endif
+				break;
+#ifndef RENEWAL
+			case GS_GROUNDDRIFT:
+				ATK_ADD(wd.damage, wd.damage2, 50 * skill_lv);
+				break;
+#endif
+			case NJ_SYURIKEN:
+				if((lv = pc_checkskill(sd, NJ_TOBIDOUGU)) > 0) {
+					ATK_ADD(wd.damage, wd.damage2, 3 * lv);
+#ifdef RENEWAL
+					ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 3 * lv);
+#endif
+				}
+				break;
 			case RA_WUGDASH:
 			case RA_WUGSTRIKE:
 			case RA_WUGBITE:
@@ -2911,8 +2923,18 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 				break;
 		}
 		if(sc) { //Status change considered as masteries
-			uint8 i;
+			uint8 i = 0;
 
+#ifdef RENEWAL //The level 4 weapon limitation has been removed
+			if(sc->data[SC_NIBELUNGEN])
+				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, sc->data[SC_NIBELUNGEN]->val2);
+#endif
+			if(sc->data[SC_AURABLADE]) {
+				ATK_ADD(wd.damage, wd.damage2, 20 * sc->data[SC_AURABLADE]->val1);
+#ifdef RENEWAL
+				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 20 * sc->data[SC_AURABLADE]->val1);
+#endif
+			}
 			if(sc->data[SC_CAMOUFLAGE]) {
 				ATK_ADD(wd.damage, wd.damage2, 30 * min(10, sc->data[SC_CAMOUFLAGE]->val3));
 #ifdef RENEWAL
@@ -4796,21 +4818,6 @@ struct Damage battle_calc_attack_post_defense(struct Damage wd, struct block_lis
 	struct status_change *sc = status_get_sc(src);
 	struct status_data *sstatus = status_get_status_data(src);
 
-	//Post skill/vit reduction damage increases
-	if(sc && sc->data[SC_NIBELUNGEN]) {
-		if(sd) {
-			short index = sd->equip_index[(sd->state.lr_flag ? EQI_HAND_L : EQI_HAND_R)];
-
-			//In renewal, the level 4 weapon limitation has been removed
-			//But still need to check whether have equipped a weapon or not (bare hand means no bonus damage)
-			if(index >= 0 && sd->inventory_data[index]
-#ifndef RENEWAL
-				&& sd->inventory_data[index]->wlv == 4
-#endif
-				)
-				ATK_ADD(wd.damage, wd.damage2, sc->data[SC_NIBELUNGEN]->val2);
-		}
-	}
 #ifndef RENEWAL
 	wd = battle_calc_attack_masteries(wd, src, target, skill_id, skill_lv);
 	//Refine bonus
@@ -5326,7 +5333,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		wd = battle_calc_skill_base_damage(wd, src, target, skill_id, skill_lv); //Base skill damage
 
 #ifdef RENEWAL
-		//In renewal, we only cardfix to the weapon and equip ATK
 		if(sd) { //Card Fix for attacker (sd), 2 is added to the "left" flag meaning "attacker cards only"
 			wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 2, wd.flag);
 			wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 2, wd.flag);
@@ -5353,11 +5359,15 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				case SO_VARETYR_SPEAR:
 					break; //Do card fix later
 				default:
+					wd.statusAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk, 0, wd.flag);
 					wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 0, wd.flag);
 					wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 0, wd.flag);
+					wd.masteryAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk, 0, wd.flag);
 					if(is_attack_left_handed(src, skill_id)) {
+						wd.statusAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk2, 1, wd.flag);
 						wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 1, wd.flag);
 						wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 1, wd.flag);
+						wd.masteryAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk2, 1, wd.flag);
 					}
 					break;
 			}
@@ -5455,14 +5465,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 
 	//Damage disregard acurracy and defense check
 	switch(skill_id) {
-#ifndef RENEWAL
-		case TF_POISON:
-			ATK_ADD(wd.damage, wd.damage2, 15 * skill_lv);
-			break;
-		case GS_GROUNDDRIFT:
-			ATK_ADD(wd.damage, wd.damage2, 50 * skill_lv);
-			break;
-#endif
 		case TK_DOWNKICK:
 		case TK_STORMKICK:
 		case TK_TURNKICK:
@@ -5509,9 +5511,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		return wd; //Enough, rest is not needed
 
 #ifndef RENEWAL
-	if(sc && sc->data[SC_AURABLADE] && battle_skill_stacks_masteries_vvs(skill_id))
-		ATK_ADD(wd.damage, wd.damage2, sc->data[SC_AURABLADE]->val1 * 20);
-
 	if(sd) {
 		switch(skill_id) {
 			case RK_DRAGONBREATH:
@@ -5605,12 +5604,9 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			}
 		}
 	}
-
-	//Fixed damage and no elemental [exneval]
-	if(sc && sc->data[SC_AURABLADE] && battle_skill_stacks_masteries_vvs(skill_id))
-		ATK_ADD(wd.damage, wd.damage2, sc->data[SC_AURABLADE]->val1 * 20);
 #endif
 
+	//Fixed damage and no elemental [exneval]
 	switch(skill_id) {
 		case CR_SHIELDBOOMERANG:
 		case PA_SHIELDCHAIN:

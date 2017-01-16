@@ -323,7 +323,13 @@ void initChangeTables(void) {
 		|SCB_WATK
 #endif
 		);
-	set_sc( BD_RINGNIBELUNGEN    , SC_NIBELUNGEN      , SI_RINGNIBELUNGEN  , SCB_NONE );
+	set_sc( BD_RINGNIBELUNGEN    , SC_NIBELUNGEN      , SI_RINGNIBELUNGEN  ,
+#ifdef RENEWAL
+		SCB_NONE
+#else
+		SCB_WATK
+#endif
+		);
 	set_sc( BD_ROKISWEIL         , SC_ROKISWEIL       , SI_ROKISWEIL       , SCB_NONE );
 	set_sc( BD_INTOABYSS         , SC_INTOABYSS       , SI_INTOABYSS       , SCB_NONE );
 	set_sc( BD_SIEGFRIED         , SC_SIEGFRIED       , SI_SIEGFRIED       , SCB_ALL );
@@ -5385,6 +5391,17 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 		watk += sc->data[SC_VOLCANO]->val2;
 	if(sc->data[SC_DRUMBATTLE])
 		watk += sc->data[SC_DRUMBATTLE]->val2;
+	if(sc->data[SC_NIBELUNGEN]) {
+		if(bl->type != BL_PC)
+			watk += sc->data[SC_NIBELUNGEN]->val2;
+		else {
+			TBL_PC *sd = (TBL_PC *)bl;
+			short index = sd->equip_index[sd->state.lr_flag ? EQI_HAND_L : EQI_HAND_R];
+
+			if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->wlv == 4)
+				watk += sc->data[SC_NIBELUNGEN]->val2;
+		}
+	}
 #endif
 	if(sc->data[SC_MERC_ATKUP])
 		watk += sc->data[SC_MERC_ATKUP]->val2;
