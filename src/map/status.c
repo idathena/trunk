@@ -10078,17 +10078,17 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val4 = tick / tick_time;
 				break;
 			case SC_HEAT_BARREL: {
-					uint8 n = (uint8)(sd ? sd->spiritball_old : 10);
+					uint8 coin = (uint8)(sd ? sd->spiritball_old : 10);
 
-					val2 = (6 + 2 * val1) * n; //+Atk
-					val3 = 5 * n; //-%Fixed cast
+					val2 = (6 + 2 * val1) * coin; //+Atk%
+					val3 = 5 * coin; //-Fixed cast%
 					val4 = 75 - 5 * val1; //-Flee
 				}
 				break;
 			case SC_P_ALTER: {
-					uint8 n = (uint8)(sd ? sd->spiritball_old : 10);
+					uint8 coin = (uint8)(sd ? sd->spiritball_old : 10);
 
-					val2 = 10 * (val1 + n); //+Atk
+					val2 = 10 * (val1 + coin); //+Atk
 					val3 = val1 * 15; //+Def (Custom)
 				}
 				break;

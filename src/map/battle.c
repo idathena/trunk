@@ -4403,6 +4403,12 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.statusAtk, wd.statusAtk2, sce->val2);
 #endif
 		}
+		if((sce = sc->data[SC_P_ALTER])) {
+			ATK_ADD(wd.damage, wd.damage2, sce->val2);
+#ifdef RENEWAL
+			ATK_ADD(wd.equipAtk, wd.equipAtk2, sce->val2);
+#endif
+		}
 		if(sc->data[SC_STYLE_CHANGE]) {
 			TBL_HOM *hd = BL_CAST(BL_HOM, src);
 
@@ -4518,12 +4524,6 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADDRATE(wd.damage, wd.damage2, -sce->val2);
 #ifdef RENEWAL
 			ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, -sce->val2);
-#endif
-		}
-		if((sce = sc->data[SC_P_ALTER])) {
-			ATK_ADDRATE(wd.damage, wd.damage2, sce->val2);
-#ifdef RENEWAL
-			ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, sce->val2);
 #endif
 		}
 		if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
