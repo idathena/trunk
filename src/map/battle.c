@@ -2787,7 +2787,7 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 		//Non-pc physical melee attacks (mob, pet, homun) are "no elemental", they deal 100% to all target elements
 		//However the "no elemental" attacks still get reduced by "Neutral resistance"
 		//Also non-pc units have only a defending element, but can inflict elemental attacks using skills [exneval]
-		if(battle_config.attack_attr_none&src->type && ((!skill_id && !right_element) ||
+		if((battle_config.attack_attr_none&src->type) && ((!skill_id && !right_element) ||
 			(skill_id && (element == -1 || !right_element))) && (wd.flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON))
 			return wd;
 		switch(skill_id) {
@@ -5359,15 +5359,17 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				case SO_VARETYR_SPEAR:
 					break; //Do card fix later
 				default:
-					wd.statusAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk, 0, wd.flag);
-					wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 0, wd.flag);
-					wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 0, wd.flag);
-					wd.masteryAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk, 0, wd.flag);
-					if(is_attack_left_handed(src, skill_id)) {
-						wd.statusAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk2, 1, wd.flag);
-						wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 1, wd.flag);
-						wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 1, wd.flag);
-						wd.masteryAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk2, 1, wd.flag);
+					if(sd) {
+						wd.statusAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk, 0, wd.flag);
+						wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 0, wd.flag);
+						wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 0, wd.flag);
+						wd.masteryAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk, 0, wd.flag);
+						if(is_attack_left_handed(src, skill_id)) {
+							wd.statusAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk2, 1, wd.flag);
+							wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 1, wd.flag);
+							wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 1, wd.flag);
+							wd.masteryAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk2, 1, wd.flag);
+						}
 					}
 					break;
 			}
@@ -5528,6 +5530,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				break;
 		}
 	}
+#endif
 
 	if(tsd) {
 		switch(skill_id) {
@@ -5535,13 +5538,18 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			case SO_VARETYR_SPEAR:
 				break;
 			default:
+#ifdef RENEWAL
+				if(sd)
+					break;
+#endif
 				wd.damage += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage, 0, wd.flag);
 				if(is_attack_left_handed(src, skill_id))
 					wd.damage2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage2, 1, wd.flag);
 				break;
 		}
 	}
-#else
+
+#ifdef RENEWAL
 	//Renewal elemental attribute fix [helvetica]
 	//Skills gain benefits from the weapon element
 	//But final damage is considered to "the forced" and resistances are applied again
