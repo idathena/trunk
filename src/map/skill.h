@@ -2078,6 +2078,7 @@ bool skill_check_shadowform(struct block_list *bl, uint16 skill_id, int64 damage
 int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv, unsigned short *item_list);
 
 int skill_changematerial(struct map_session_data *sd, int n, unsigned short *item_list);
+int skill_akaitsuki_damage(struct block_list *src, struct block_list *bl, int damage, uint16 skill_id, uint16 skill_lv, unsigned int tick);
 int skill_get_elemental_type(uint16 skill_id, uint16 skill_lv);
 
 int skill_is_combo(uint16 skill_id);
