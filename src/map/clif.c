@@ -295,7 +295,7 @@ static int clif_send_sub(struct block_list *bl, va_list ap) {
 	nullpo_ret(sd = (struct map_session_data *)bl);
 
 	fd = sd->fd;
-	if (!fd) //Don't send to disconnected clients
+	if (!fd || !session[fd]) //Don't send to disconnected clients
 		return 0;
 
 	buf = va_arg(ap,unsigned char *);
@@ -316,30 +316,21 @@ static int clif_send_sub(struct block_list *bl, va_list ap) {
 				if (src_bl->type == BL_PC) {
 					struct map_session_data *ssd = (struct map_session_data *)src_bl;
 
-					if (ssd && sd->chatID && (sd->chatID == ssd->chatID))
+					if (ssd && sd->chatID && sd->chatID == ssd->chatID)
 						return 0;
 				} else if (src_bl->type == BL_NPC) {
 					struct npc_data *nd = (struct npc_data *)src_bl;
 
-					if (nd && sd->chatID && (sd->chatID == nd->chat_id))
+					if (nd && sd->chatID && sd->chatID == nd->chat_id)
 						return 0;
 				}
 			}
 			break;
-#if PACKETVER > 20120418 && PACKETVER < 20130000
-		case AREA: //0x120 crashes the client when warping for this packetver range [Ind]
-			if (WBUFW(buf,0) == 0x120 && sd->state.warping)
-				return 0;
-			break;
-#endif
 	}
 
 	if (!battle_config.update_enemy_position && ally_only && !sd->special_state.intravision &&
 		!sd->sc.data[SC_INTRAVISION] && battle_check_target(src_bl, &sd->bl, BCT_ENEMY) > 0)
 		return 0; //Unless visible, hold it here
-
-	if (!session[fd])
-		return 0;
 
 	WFIFOHEAD(fd, len);
 	if (WFIFOP(fd,0) == buf) {
@@ -455,6 +446,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 			y0 = bl->y - AREA_SIZE;
 			x1 = bl->x + AREA_SIZE;
 			y1 = bl->y + AREA_SIZE;
+		//Fall through
 		case PARTY:
 		case PARTY_WOS:
 		case PARTY_SAMEMAP:
@@ -526,6 +518,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 			y0 = bl->y - AREA_SIZE;
 			x1 = bl->x + AREA_SIZE;
 			y1 = bl->y + AREA_SIZE;
+		//Fall through
 		case GUILD_SAMEMAP:
 		case GUILD_SAMEMAP_WOS:
 		case GUILD:
@@ -574,6 +567,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 			y0 = bl->y - AREA_SIZE;
 			x1 = bl->x + AREA_SIZE;
 			y1 = bl->y + AREA_SIZE;
+		//Fall through
 		case BG_SAMEMAP:
 		case BG_SAMEMAP_WOS:
 		case BG:
@@ -586,8 +580,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 						continue;
 					if (type != BG && type != BG_WOS && sd->bl.m != bl->m)
 						continue;
-					if ((type == BG_AREA || type == BG_AREA_WOS) && (sd->bl.x < x0 || sd->bl.y < y0 ||
-						sd->bl.x > x1 || sd->bl.y > y1))
+					if ((type == BG_AREA || type == BG_AREA_WOS) && (sd->bl.x < x0 || sd->bl.y < y0 || sd->bl.x > x1 || sd->bl.y > y1))
 						continue;
 					if (packet_db[sd->packet_ver][RBUFW(buf,0)].len) { //Packet must exist for the client version
 						WFIFOHEAD(fd,len);
