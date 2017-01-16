@@ -5800,8 +5800,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						heal = 0; //Needed so that it actually displays 0 when healing
 				}
 
-				if(tsc && tsc->data[SC_AKAITSUKI] && heal && skill_id != HLIF_HEAL)
-					heal = ~heal + 1;
+				if(tsc && tsc->data[SC_AKAITSUKI] && heal && (skill_id == AL_HEAL || skill_id == AB_HIGHNESSHEAL)) {
+					skill_akaitsuki_damage(src,bl,heal,skill_id,skill_lv,tick);
+					break;
+				}
 
 				if(skill_id == AL_HEAL)
 					status_change_end(bl,SC_BITESCAR,INVALID_TIMER);
@@ -8837,8 +8839,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						i = 0;
 					if( dstsd && pc_ismadogear(dstsd) )
 						break;
-					if( tsc && tsc->data[SC_AKAITSUKI] && i )
-						i = ~i + 1;
 					clif_skill_nodamage(src,bl,skill_id,i,1);
 					status_heal(bl,i,0,0);
 				}
@@ -13125,11 +13125,21 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 			skill_blown(src,bl,skill_get_blewcount(skill_id,skill_lv),unit_getdir(bl),0);
 			break;
 
+		case UNT_EPICLESIS:
+			status_change_end(bl,SC_HIDING,INVALID_TIMER);
+			status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
+			status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
+			status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+			if( sc && sc->data[SC__SHADOWFORM] && rnd()%100 < 100 - sc->data[SC__SHADOWFORM]->val1 * 10 )
+				status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
+			if( !sce )
+				sc_start(src,bl,type,100,skill_lv,group->limit);
+			break;
+
 		case UNT_STEALTHFIELD:
 			if( bl->id == src->id )
 				break;
 		//Fall through
-		case UNT_EPICLESIS:
 		case UNT_NEUTRALBARRIER:
 			if( !sce )
 				sc_start(src,bl,type,100,skill_lv,group->limit);
@@ -13398,9 +13408,11 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 				if (status_isimmune(bl))
 					heal = 0;
 				if (tsc && tsc->data[SC_AKAITSUKI] && heal)
-					heal = ~heal + 1;
-				clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
-				status_heal(bl,heal,0,0);
+					skill_akaitsuki_damage(&unit->bl,bl,heal,skill_id,skill_lv,tick);
+				else {
+					clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
+					status_heal(bl,heal,0,0);
+				}
 			}
 			break;
 
@@ -13574,9 +13586,11 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 					break;
 				heal = skill_calc_heal(src,bl,skill_id,skill_lv,true);
 				if (tsc && tsc->data[SC_AKAITSUKI] && heal)
-					heal = ~heal + 1;
-				clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
-				status_heal(bl,heal,0,0);
+					skill_akaitsuki_damage(&unit->bl,bl,heal,skill_id,skill_lv,tick);
+				else {
+					clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
+					status_heal(bl,heal,0,0);
+				}
 				if (!battle_config.song_timer_reset)
 					sc_start4(src,bl,type,100,skill_lv,group->val1,group->val2,0,group->limit);
 			}
@@ -19811,6 +19825,17 @@ static int skill_destroy_trap(struct block_list *bl, va_list ap) {
 		}
 		skill_delunit(su); //Traps aren't recovered
 	}
+	return 0;
+}
+
+/**
+ * Deals damage to the affected target if healed from one of the following skills:
+ * AL_HEAL, PR_SANCTUARY, BA_APPLEIDUN, AB_RENOVATIO, AB_HIGHNESSHEAL, SO_WARMER
+ */
+int skill_akaitsuki_damage(struct block_list *src, struct block_list *bl, int damage, uint16 skill_id, uint16 skill_lv, unsigned int tick) {
+	damage = damage / 2; //Damage is half of the heal amount
+	clif_skill_damage(src, bl, tick, status_get_amotion(src), status_get_dmotion(bl), damage, 1, (skill_id == AB_HIGHNESSHEAL ? AL_HEAL : skill_id), skill_lv, DMG_SKILL);
+	status_zap(bl, damage, 0);
 	return 0;
 }
 

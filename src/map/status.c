@@ -12184,8 +12184,6 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				}
 				hp = status->max_hp * hp / 100;
 				sp = status->max_sp * sp / 100;
-				if( sc->data[SC_AKAITSUKI] && hp )
-					hp = ~hp + 1;
 				status_heal(bl,hp,sp,2);
 			}
 			if( !(sce->val3%5) ) { //Un-hides players every 5 seconds
@@ -12211,8 +12209,9 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 					skill_attack(BF_MAGIC,src,src,bl,status_sc2skill(type),sce->val1,tick,SD_LEVEL|SD_ANIMATION);
 				} else {
 					if( sc->data[SC_AKAITSUKI] && heal )
-						heal = ~heal + 1;
-					status_heal(bl,heal,0,3);
+						skill_akaitsuki_damage(bl,bl,heal,status_sc2skill(type),sce->val1,tick);
+					else
+						status_heal(bl,heal,0,3);
 				}
 				if( sc->data[type] ) {
 					sc_timer_next(5000 + tick,status_change_timer,bl->id,data);
@@ -12319,8 +12318,9 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				if( ssc && ssc->data[SC_HEATER_OPTION] )
 					heal *= 3;
 				if( sc->data[SC_AKAITSUKI] && heal )
-					heal = ~heal + 1;
-				status_heal(bl,heal,0,1);
+					skill_akaitsuki_damage(bl,bl,heal,status_sc2skill(type),sce->val1,tick);
+				else
+					status_heal(bl,heal,0,1);
 				sc_timer_next(3000 + tick,status_change_timer,bl->id,data);
 			}
 			return 0;
