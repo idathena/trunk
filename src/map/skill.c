@@ -926,7 +926,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 					struct status_change_entry *sce;
 
 					//Enchant Poison gives a chance to poison attacked enemies
-					if( (sce = sc->data[SC_ENCPOISON]) ) //Don't use sc_start since chance comes in 1/10000 rate
+					if( (sce = sc->data[SC_ENCPOISON]) ) //NOTE: Don't use sc_start since chance comes in 1/10000 rate
 						status_change_start(src,bl,SC_POISON,sce->val2,sce->val1,0,0,0,skill_get_time2(AS_ENCHANTPOISON,sce->val1),SCFLAG_NONE);
 					if( (sce = sc->data[SC_EDP]) ) //Enchant Deadly Poison gives a chance to deadly poison attacked enemies
 						sc_start(src,bl,SC_DPOISON,sce->val2,sce->val1,skill_get_time2(ASC_EDP,sce->val1));
@@ -11826,7 +11826,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 
 		case SC_FEINTBOMB:
 			if( skill_unitsetting(src,skill_id,skill_lv,x,y,0) ) { //Set bomb on current position
-				skill_blown(src,src,skill_get_blewcount(skill_id,skill_lv),unit_getdir(src),2);
+				skill_blown(src,src,3 * skill_lv,unit_getdir(src),2);
 				clif_skill_nodamage(src,src,skill_id,skill_lv,
 					sc_start(src,src,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 			} else {
@@ -11921,7 +11921,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 				struct skill_unit_group *sg;
 				uint16 lv = 0;
 
-				if( (sg = skill_locate_element_field(src)) != NULL ) {
+				if( (sg = skill_locate_element_field(src)) ) {
 					if( sg->skill_id == GN_DEMONIC_FIRE &&
 						distance_xy(x,y,sg->unit->bl.x,sg->unit->bl.y) < 3 ) {
 						switch( skill_lv ) {
@@ -13111,7 +13111,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 			break;
 
 		//Officially, icewall has no problems existing on occupied cells [ultramage]
-		//case UNT_ICEWALL: //Destroy the cell. [Skotlex]
+		//case UNT_ICEWALL: //Destroy the cell [Skotlex]
 			//unit->val1 = 0;
 			//if( unit->limit + group->tick > tick + 700 )
 				//unit->limit = DIFF_TICK(tick + 700,group->tick);
@@ -13137,7 +13137,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 
 		case UNT_CLOUD_KILL:
 			if( !sce && sc_start4(src,bl,type,100,skill_lv,src->id,unit->bl.id,0,group->limit) )
-				status_change_start(src,bl,SC_POISON,10000,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDRATE);
+				status_change_start(src,bl,SC_POISON,10000,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
 			break;
 
 		case UNT_WARMER: {
@@ -14655,7 +14655,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	if( sd->skillitem == skill_id && !sd->state.abra_flag ) {
 		if( (i = sd->itemindex) == -1 ||
 			sd->status.inventory[i].nameid != sd->itemid ||
-			sd->inventory_data[i] == NULL ||
+			!sd->inventory_data[i] ||
 			!sd->inventory_data[i]->flag.delay_consume ||
 			sd->status.inventory[i].amount < 1 )
 		{ //Something went wrong, item exploit?
@@ -15528,6 +15528,8 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_COIN,(require.spiritball > 0 ? require.spiritball : 0),0);
 				return false;
 			}
+			if( require.spiritball == -1 )
+				sd->spiritball_old = sd->spiritball;
 			break;
 		default:
 			if( (require.spiritball > 0 && sd->spiritball < require.spiritball) ||
@@ -15535,6 +15537,8 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_SPIRIT,(require.spiritball > 0 ? require.spiritball : 0),0);
 				return false;
 			}
+			if( require.spiritball == -1 )
+				sd->spiritball_old = sd->spiritball;
 			break;
 	}
 
@@ -15854,10 +15858,8 @@ void skill_consume_requirement(struct map_session_data *sd, uint16 skill_id, uin
 
 		if( require.spiritball > 0 )
 			pc_delspiritball(sd,require.spiritball,0);
-		else if( require.spiritball == -1 ) {
-			sd->spiritball_old = sd->spiritball;
+		else if( require.spiritball == -1 )
 			pc_delspiritball(sd,sd->spiritball,0);
-		}
 
 		if( require.zeny > 0 ) {
 			if( skill_id == NJ_ZENYNAGE )

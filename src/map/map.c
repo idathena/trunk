@@ -780,7 +780,7 @@ int map_foreachinarea(int (*func)(struct block_list *, va_list), int16 m, int16 
 	map_freeblock_unlock();
 
 	bl_list_count = blockcount;
-	return returnCount;	//[Skotlex]
+	return returnCount; //[Skotlex]
 }
 
 /**
