@@ -123,6 +123,8 @@ bool battle_check_range(struct block_list *src, struct block_list *bl, int range
 
 void battle_consume_ammo(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 
+short battle_get_defense(struct block_list *src, struct block_list *target, uint16 skill_id, uint8 flag);
+
 bool target_has_infinite_defense(struct block_list *target, uint16 skill_id, int flag);
 
 //Settings

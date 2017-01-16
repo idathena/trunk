@@ -2993,9 +2993,13 @@ struct Damage battle_calc_damage_parts(struct Damage wd, struct block_list *src,
 	wd.weaponAtk2 = battle_attr_fix(src, target, wd.weaponAtk2, left_element, tstatus->def_ele, tstatus->ele_lv);
 
 	wd.equipAtk += battle_calc_equip_attack(src, skill_id);
+	if(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_R))
+		wd.equipAtk += battle_get_defense(src, target, skill_id, 0) / 2;
 	wd.equipAtk = battle_attr_fix(src, target, wd.equipAtk, right_element, tstatus->def_ele, tstatus->ele_lv);
 
 	wd.equipAtk2 += battle_calc_equip_attack(src, skill_id);
+	if(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_L))
+		wd.equipAtk2 += battle_get_defense(src, target, skill_id, 0) / 2;
 	wd.equipAtk2 = battle_attr_fix(src, target, wd.equipAtk2, left_element, tstatus->def_ele, tstatus->ele_lv);
 
 	//Mastery ATK is a special kind of ATK that has no elemental properties
@@ -4605,7 +4609,7 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
  * @param flag: 0 - Return armor defense, 1 - Return status defense
  * @return defense
  */
-static short battle_get_defense(struct block_list *src, struct block_list *target, uint16 skill_id, uint8 flag)
+short battle_get_defense(struct block_list *src, struct block_list *target, uint16 skill_id, uint8 flag)
 {
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct map_session_data *tsd = BL_CAST(BL_PC, target);
@@ -5323,22 +5327,43 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 
 #ifdef RENEWAL
 		//In renewal, we only cardfix to the weapon and equip ATK
-		//Card Fix for attacker (sd), 2 is added to the "left" flag meaning "attacker cards only"
-		wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 2, wd.flag);
-		wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 2, wd.flag);
-		if(is_attack_left_handed(src, skill_id)) {
-			wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 3, wd.flag);
-			wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 3, wd.flag);
+		if(sd) { //Card Fix for attacker (sd), 2 is added to the "left" flag meaning "attacker cards only"
+			wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 2, wd.flag);
+			wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 2, wd.flag);
+			if(is_attack_left_handed(src, skill_id)) {
+				wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 3, wd.flag);
+				wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 3, wd.flag);
+			}
 		}
 
 		//Final attack bonuses that aren't affected by cards
 		wd = battle_attack_sc_bonus(wd, src, target, skill_id, skill_lv);
 
+		if(tsd) { //Card Fix for target (tsd), 2 is not added to the "left" flag meaning "target cards only"
+			switch(skill_id) {
+				case AM_DEMONSTRATION:
+				case AM_ACIDTERROR:
+				case NJ_ISSEN:
+				case GS_MAGICALBULLET:
+				case HW_MAGICCRASHER:
+				case ASC_BREAKER:
+				case CR_ACIDDEMONSTRATION:
+				case GN_FIRE_EXPANSION_ACID:
+				case NPC_EARTHQUAKE:
+				case SO_VARETYR_SPEAR:
+					break; //Do card fix later
+				default:
+					wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 0, wd.flag);
+					wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 0, wd.flag);
+					if(is_attack_left_handed(src, skill_id)) {
+						wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 1, wd.flag);
+						wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 1, wd.flag);
+					}
+					break;
+			}
+		}
+
 		if(sd) { //Monsters, homuns and pets have their damage computed directly
-			ATK_ADD2(wd.equipAtk, wd.equipAtk2, //RE Pierce Defense: Every 2 eDEF gains 1 equip ATK
-				(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_R) ? (battle_get_defense(src, target, skill_id, 0) / 2) : 0),
-				(is_attack_piercing(wd, src, target, skill_id, skill_lv, EQI_HAND_L) ? (battle_get_defense(src, target, skill_id, 0) / 2) : 0)
-			);
 			wd.damage = wd.statusAtk + wd.weaponAtk + wd.equipAtk + wd.masteryAtk;
 			wd.damage2 = wd.statusAtk2 + wd.weaponAtk2 + wd.equipAtk2 + wd.masteryAtk2;
 			if(wd.flag&BF_LONG) { //Affects the entirety of the damage
@@ -5487,7 +5512,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	if(sc && sc->data[SC_AURABLADE] && battle_skill_stacks_masteries_vvs(skill_id))
 		ATK_ADD(wd.damage, wd.damage2, sc->data[SC_AURABLADE]->val1 * 20);
 
-	if(sd) { //Card Fix for attacker (sd), 2 is added to the "left" flag meaning "attacker cards only"
+	if(sd) {
 		switch(skill_id) {
 			case RK_DRAGONBREATH:
 			case RK_DRAGONBREATH_WATER:
@@ -5504,23 +5529,12 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				break;
 		}
 	}
-#endif
 
-	if(tsd) { //Card Fix for target (tsd), 2 is not added to the "left" flag meaning "target cards only"
+	if(tsd) {
 		switch(skill_id) {
-#ifdef RENEWAL
-			case AM_DEMONSTRATION:
-			case AM_ACIDTERROR:
-			case NJ_ISSEN:
-			case GS_MAGICALBULLET:
-			case HW_MAGICCRASHER:
-			case ASC_BREAKER:
-			case CR_ACIDDEMONSTRATION:
-			case GN_FIRE_EXPANSION_ACID:
-#endif
 			case NPC_EARTHQUAKE:
 			case SO_VARETYR_SPEAR:
-				break; //Do card fix later
+				break;
 			default:
 				wd.damage += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage, 0, wd.flag);
 				if(is_attack_left_handed(src, skill_id))
@@ -5528,8 +5542,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				break;
 		}
 	}
-
-#ifdef RENEWAL
+#else
 	//Renewal elemental attribute fix [helvetica]
 	//Skills gain benefits from the weapon element
 	//But final damage is considered to "the forced" and resistances are applied again
