@@ -13809,8 +13809,8 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 
 				if (is_boss(bl))
 					break;
-				if (((map_flag_vs(bl->m) && (!tsd || !tsd->status.party_id ||
-					battle_check_target(src,bl,BCT_PARTY) <= 0)) && bl->type != BL_HOM) ||
+				if ((map_flag_vs(bl->m) && tsd && (!tsd->status.party_id ||
+					battle_check_target(src,bl,BCT_PARTY) <= 0)) ||
 					battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0)
 					skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,skill_id,skill_lv,tick,4);
 				skill_blown(&unit->bl,bl,skill_get_blewcount(skill_id,skill_lv),unit_getdir(bl),2);
