@@ -2898,11 +2898,9 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 15 * skill_lv);
 #endif
 				break;
-#ifndef RENEWAL
 			case GS_GROUNDDRIFT:
 				ATK_ADD(wd.damage, wd.damage2, 50 * skill_lv);
 				break;
-#endif
 			case NJ_SYURIKEN:
 				if((lv = pc_checkskill(sd, NJ_TOBIDOUGU)) > 0) {
 					ATK_ADD(wd.damage, wd.damage2, 3 * lv);
@@ -4438,10 +4436,8 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 		if(sc->data[SC_STYLE_CHANGE]) {
 			TBL_HOM *hd = BL_CAST(BL_HOM, src);
 
-			if(hd) {
+			if(hd)
 				ATK_ADD(wd.damage, wd.damage2, hd->homunculus.spiritball * 3);
-				RE_ALLATK_ADD(wd, hd->homunculus.spiritball * 3);
-			}
 		}
 		if((sce = sc->data[SC_FLASHCOMBO])) {
 			ATK_ADD(wd.damage, wd.damage2, sce->val2);
@@ -4815,7 +4811,6 @@ struct Damage battle_calc_defense_reduction(struct Damage wd, struct block_list 
 struct Damage battle_calc_attack_post_defense(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv)
 {
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
-	struct status_change *sc = status_get_sc(src);
 	struct status_data *sstatus = status_get_status_data(src);
 
 #ifndef RENEWAL
@@ -5593,6 +5588,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 					wd.damage2 = battle_attr_fix(src, target, wd.damage2, (sd && sd->bonus.arrow_ele ? sd->bonus.arrow_ele : ELE_NEUTRAL), tstatus->def_ele, tstatus->ele_lv);
 				break;
 			case PA_SACRIFICE:
+			case GS_GROUNDDRIFT:
 			case RK_DRAGONBREATH:
 			case RK_DRAGONBREATH_WATER:
 			case NC_SELFDESTRUCTION:

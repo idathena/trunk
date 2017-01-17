@@ -654,6 +654,7 @@
 	script_set_constant("bDropAddRace",SP_DROP_ADDRACE,false);
 	script_set_constant("bDropAddClass",SP_DROP_ADDCLASS,false);
 	script_set_constant("bMagicAddRace2",SP_MAGIC_ADDRACE2,false);
+	script_set_constant("bNoMagicGearFuel",SP_NO_MAGIC_GEAR_FUEL,false);
 
 	/* Equip indices */
 	export_constant(EQI_HEAD_TOP);

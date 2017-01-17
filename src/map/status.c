@@ -162,16 +162,16 @@ void initChangeTables(void) {
 	memset(StatusDisplayType, 0, sizeof(StatusDisplayType));
 
 	//First we define the skill for common ailments, these are used in skill_additional_effect through sc cards [Skotlex]
-	set_sc( NPC_PETRIFYATTACK , SC_STONE     , SI_BLANK    , SCB_DEF|SCB_MDEF|SCB_DEF_ELE );
-	set_sc( NPC_WIDEFREEZE    , SC_FREEZE    , SI_BLANK    , SCB_DEF|SCB_MDEF|SCB_DEF_ELE );
-	set_sc( NPC_STUNATTACK    , SC_STUN      , SI_BLANK    , SCB_NONE );
-	set_sc( NPC_SLEEPATTACK   , SC_SLEEP     , SI_BLANK    , SCB_NONE );
-	set_sc( NPC_POISON        , SC_POISON    , SI_BLANK    , SCB_DEF2|SCB_REGEN );
-	set_sc( NPC_WIDECURSE     , SC_CURSE     , SI_BLANK    , SCB_LUK|SCB_BATK|SCB_WATK|SCB_SPEED );
-	set_sc( NPC_SILENCEATTACK , SC_SILENCE   , SI_BLANK    , SCB_NONE );
-	set_sc( NPC_WIDECONFUSE   , SC_CONFUSION , SI_BLANK    , SCB_NONE );
-	set_sc( NPC_BLINDATTACK   , SC_BLIND     , SI_BLANK    , SCB_HIT|SCB_FLEE );
-	set_sc( NPC_BLEEDING      , SC_BLEEDING  , SI_BLOODING , SCB_REGEN );
+	set_sc( NPC_PETRIFYATTACK    , SC_STONE           , SI_BLANK           , SCB_DEF|SCB_MDEF|SCB_DEF_ELE );
+	set_sc( NPC_WIDEFREEZE       , SC_FREEZE          , SI_BLANK           , SCB_DEF|SCB_MDEF|SCB_DEF_ELE );
+	set_sc( NPC_STUNATTACK       , SC_STUN            , SI_BLANK           , SCB_NONE );
+	set_sc( NPC_SLEEPATTACK      , SC_SLEEP           , SI_BLANK           , SCB_NONE );
+	set_sc( NPC_POISON           , SC_POISON          , SI_BLANK           , SCB_DEF2|SCB_REGEN );
+	set_sc( NPC_WIDECURSE        , SC_CURSE           , SI_BLANK           , SCB_LUK|SCB_BATK|SCB_WATK|SCB_SPEED );
+	set_sc( NPC_SILENCEATTACK    , SC_SILENCE         , SI_BLANK           , SCB_NONE );
+	set_sc( NPC_WIDECONFUSE      , SC_CONFUSION       , SI_BLANK           , SCB_NONE );
+	set_sc( NPC_BLINDATTACK      , SC_BLIND           , SI_BLANK           , SCB_HIT|SCB_FLEE );
+	set_sc( NPC_BLEEDING         , SC_BLEEDING        , SI_BLOODING        , SCB_REGEN );
 
 	//The main status definitions
 	add_sc( SM_BASH              , SC_STUN            );
@@ -377,6 +377,7 @@ void initChangeTables(void) {
 	add_sc( PA_GOSPEL            , SC_SCRESIST        );
 	add_sc( CH_TIGERFIST         , SC_STOP            );
 	set_sc( ASC_EDP              , SC_EDP             , SI_EDP             , SCB_NONE );
+	add_sc( ASC_EDP              , SC_DPOISON         );
 	set_sc( SN_SIGHT             , SC_TRUESIGHT       , SI_TRUESIGHT       , SCB_STR|SCB_AGI|SCB_VIT|SCB_INT|SCB_DEX|SCB_LUK|SCB_HIT|SCB_CRI );
 	set_sc( SN_WINDWALK          , SC_WINDWALK        , SI_WINDWALK        , SCB_FLEE|SCB_SPEED );
 	set_sc( WS_MELTDOWN          , SC_MELTDOWN        , SI_MELTDOWN        , SCB_NONE );
@@ -837,7 +838,7 @@ void initChangeTables(void) {
 	SkillStatusChangeTable[SL_NINJA]       = (sc_type)MAPID_NINJA,
 	SkillStatusChangeTable[SL_GUNNER]      = (sc_type)MAPID_GUNSLINGER,
 
-	//Status that don't have a skill associated.
+	//Status that don't have a skill associated
 	StatusIconChangeTable[SC_WEIGHT50] = SI_WEIGHTOVER50;
 	StatusIconChangeTable[SC_WEIGHT90] = SI_WEIGHTOVER90;
 	StatusIconChangeTable[SC_ASPDPOTION0] = SI_ATTHASTE_POTION1;
@@ -4684,7 +4685,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 #ifdef RENEWAL_ASPD
 			amotion = ((TBL_HOM *)bl)->homunculusDB->baseASPD;
 			amotion -= amotion * status_get_homdex(bl) / 1000 + status_get_homagi(bl) * amotion / 250;
-			amotion = (amotion * status_calc_aspd(bl, sc, 1) + status_calc_aspd(bl, sc, 2)) / -100 + amotion;
+			amotion = (amotion * status_calc_aspd(bl, sc, true) + status_calc_aspd(bl, sc, false)) / -100 + amotion;
 #else
 			amotion = (1000 - 4 * status->agi - status->dex) * ((TBL_HOM *)bl)->homunculusDB->baseASPD / 1000;
 			amotion = status_calc_aspd_rate(bl, sc, amotion);
@@ -4723,15 +4724,15 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 				val += (lv - 1) / 2 + 1;
 			if( (lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && (sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE) )
 				val += ((lv + 1) / 2);
-			amotion -= (int)(temp + (float)((status_calc_aspd(bl, sc, 1) + val) * status->agi) / 200) * 10;
+			amotion -= (int)(temp + (float)((status_calc_aspd(bl, sc, true) + val) * status->agi) / 200) * 10;
 			//Absolute ASPD % modifier
 			if( status->aspd_rate != 1000 )
 				amotion = (200 - (200 - amotion / 10) * status->aspd_rate / 1000) * 10;
 			if( sd->ud.skilltimer != INVALID_TIMER && (lv = pc_checkskill(sd, SA_FREECAST)) > 0 )
 				amotion = (200 - (200 - amotion / 10) * (lv + 10) * 5 / 100) * 10;
 			//RE ASPD % modifier
-			if( (status_calc_aspd(bl, sc, 2) + status->aspd_rate2) != 0 )
-				amotion -= (amotion - pc_maxaspd(sd)) * (status_calc_aspd(bl, sc, 2) + status->aspd_rate2) / 100 + 5; //Don't have round()
+			if( (status_calc_aspd(bl, sc, false) + status->aspd_rate2) != 0 )
+				amotion -= (amotion - pc_maxaspd(sd)) * (status_calc_aspd(bl, sc, false) + status->aspd_rate2) / 100 + 5; //Don't have round()
 			amotion += sd->bonus.aspd_add;
 #endif
 			amotion = status_calc_fix_aspd(bl, sc, amotion);
@@ -6211,56 +6212,52 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 }
 
 #ifdef RENEWAL_ASPD
-/*==========================================
-* Renewal attack speed modifiers after base calculation
-* NOTE: This function only affects RENEWAL players
-* @param bl: Object to change aspd (PC)
-* @param sc: Object's status change information
-* @param flag:  flag&1 - fixed value [malufett]
-*               flag&2 - percentage value
-* @return modified aspd
-*------------------------------------------*/
-short status_calc_aspd(struct block_list *bl, struct status_change *sc, short flag)
+/**
+ * Renewal attack speed modifiers after base calculation
+ * NOTE: This function only affects RENEWAL players
+ * @param bl: Object to change aspd (PC)
+ * @param sc: Object's status change information
+ * @param fixed: true - fixed value [malufett]
+ *               false - percentage value
+ * @return modified aspd
+ */
+short status_calc_aspd(struct block_list *bl, struct status_change *sc, bool fixed)
 {
-	int i, pots = 0, skills1 = 0, skills2 = 0;
+	int bonus = 0;
 
 	if(!sc || !sc->count)
 		return 0;
-	//Fixed ASPD value
-	if(sc->data[i = SC_ASPDPOTION3] ||
-		sc->data[i = SC_ASPDPOTION2] ||
-		sc->data[i = SC_ASPDPOTION1] ||
-		sc->data[i = SC_ASPDPOTION0])
-		pots += sc->data[i]->val1;
-	if(sc->data[SC_ATTHASTE_CASH])
-		pots += sc->data[SC_ATTHASTE_CASH]->val1;
-	if(!sc->data[SC_QUAGMIRE]) {
-		struct status_change_entry *sce;
+	if(fixed) {
+		enum sc_type sc_val;
 
-		if(sc->data[SC_TWOHANDQUICKEN] && skills1 < 7)
-			skills1 = 7;
-		if(sc->data[SC_ONEHAND] && skills1 < 7)
-			skills1 = 7;
-		if(sc->data[SC_MERC_QUICKEN] && skills1 < 7) //Needs more info
-			skills1 = 7;
-		if((sce = sc->data[SC_ADRENALINE2]) && skills1 < (sce->val2 ? 7 : 6))
-			skills1 = (sce->val2 ? 7 : 6);
-		if((sce = sc->data[SC_ADRENALINE]) && skills1 < (sce->val2 ? 7 : 6))
-			skills1 = (sce->val2 ? 7 : 6);
-		if(sc->data[SC_SPEARQUICKEN] && skills1 < 7)
-			skills1 = 7;
-		if(sc->data[SC_FLEET] && skills1 < 5)
-			skills1 = 5;
-	}
-	if(sc->data[SC_BERSERK] && skills1 < 15)
-		skills1 = 15;
-	if(sc->data[SC_MADNESSCANCEL] && skills1 < 20)
-		skills1 = 20;
-	//Percentage ASPD value
-	if(!skills1) { //Don't stack with skill1 modifiers
-		if(sc->data[SC_ASSNCROS] && skills2 < sc->data[SC_ASSNCROS]->val2 / 10) {
+		if(!sc->data[SC_QUAGMIRE]) {
+			struct status_change_entry *sce;
+
+			if((sc->data[SC_TWOHANDQUICKEN] ||
+				sc->data[SC_ONEHAND] ||
+				sc->data[SC_MERC_QUICKEN] ||
+				sc->data[SC_SPEARQUICKEN]) && bonus < 7)
+				bonus = 7;
+			else if(((sce = sc->data[SC_ADRENALINE]) || (sce = sc->data[SC_ADRENALINE2])) && bonus < (sce->val2 ? 7 : 6))
+				bonus = (sce->val2 ? 7 : 6);
+			else if(sc->data[SC_FLEET] && bonus < 5)
+				bonus = 5;
+		}
+		if(sc->data[SC_MADNESSCANCEL] && bonus < 20)
+			bonus = 20;
+		else if(sc->data[SC_BERSERK] && bonus < 15)
+			bonus = 15;
+		if(sc->data[sc_val = SC_ASPDPOTION3] ||
+			sc->data[sc_val = SC_ASPDPOTION2] ||
+			sc->data[sc_val = SC_ASPDPOTION1] ||
+			sc->data[sc_val = SC_ASPDPOTION0])
+			bonus += sc->data[sc_val]->val1;
+		if(sc->data[SC_ATTHASTE_CASH])
+			bonus += sc->data[SC_ATTHASTE_CASH]->val1;
+	} else {
+		if(sc->data[SC_ASSNCROS] && bonus < sc->data[SC_ASSNCROS]->val2 / 10) {
 			if(bl->type != BL_PC)
-				skills2 = sc->data[SC_ASSNCROS]->val2 / 10;
+				bonus = sc->data[SC_ASSNCROS]->val2 / 10;
 			else {
 				switch(((TBL_PC *)bl)->status.weapon) {
 					case W_BOW:	case W_REVOLVER:
@@ -6268,72 +6265,72 @@ short status_calc_aspd(struct block_list *bl, struct status_change *sc, short fl
 					case W_SHOTGUN:	case W_GRENADE:
 						break;
 					default:
-						skills2 = sc->data[SC_ASSNCROS]->val2 / 10;
+						bonus = sc->data[SC_ASSNCROS]->val2 / 10;
 						break;
 				}
 			}
 		}
-		if(sc->data[SC_SWINGDANCE] && skills2 < sc->data[SC_SWINGDANCE]->val3)
-			skills2 = sc->data[SC_SWINGDANCE]->val3;
-		if(sc->data[SC_DANCEWITHWUG] && skills2 < sc->data[SC_DANCEWITHWUG]->val3)
-			skills2 = sc->data[SC_DANCEWITHWUG]->val3;
+		if(sc->data[SC_SWINGDANCE] && bonus < sc->data[SC_SWINGDANCE]->val3)
+			bonus = sc->data[SC_SWINGDANCE]->val3;
+		if(sc->data[SC_DANCEWITHWUG] && bonus < sc->data[SC_DANCEWITHWUG]->val3)
+			bonus = sc->data[SC_DANCEWITHWUG]->val3;
+		if(sc->data[SC_GT_CHANGE])
+			bonus += sc->data[SC_GT_CHANGE]->val3;
+		if(sc->data[SC_BOOST500])
+			bonus += sc->data[SC_BOOST500]->val1;
+		if(sc->data[SC_EXTRACT_SALAMINE_JUICE])
+			bonus += sc->data[SC_EXTRACT_SALAMINE_JUICE]->val1;
+		if(sc->data[SC_GOLDENE_FERSE])
+			bonus += sc->data[SC_GOLDENE_FERSE]->val3;
+		if(sc->data[SC_INCASPDRATE])
+			bonus += sc->data[SC_INCASPDRATE]->val1;
+		if(sc->data[SC_GATLINGFEVER])
+			bonus += sc->data[SC_GATLINGFEVER]->val1;
+		if(sc->data[SC_STAR_COMFORT])
+			bonus += 3 * sc->data[SC_STAR_COMFORT]->val1;
+		if(sc->data[SC_DONTFORGETME])
+			bonus -= sc->data[SC_DONTFORGETME]->val2 / 10;
+		if(sc->data[SC_LONGING])
+			bonus -= sc->data[SC_LONGING]->val2 / 10;
+		if(sc->data[SC_STEELBODY])
+			bonus -= 25;
+		if(sc->data[SC_SKA])
+			bonus -= 25;
+		if(sc->data[SC_DEFENDER])
+			bonus -= sc->data[SC_DEFENDER]->val4 / 10;
+		if(sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_ENEMY) //Needs more info
+			bonus -= 25;
+		if(sc->data[SC_GRAVITATION] && sc->data[SC_GRAVITATION]->val3 != BCT_SELF)
+			bonus -= sc->data[SC_GRAVITATION]->val2 / 10;
+		if(sc->data[SC_JOINTBEAT]) { //Needs more info
+			if( sc->data[SC_JOINTBEAT]->val2&BREAK_WRIST )
+				bonus -= 25;
+			if( sc->data[SC_JOINTBEAT]->val2&BREAK_KNEE )
+				bonus -= 10;
+		}
+		if(sc->data[SC_FREEZING])
+			bonus -= 30;
+		if(sc->data[SC_HALLUCINATIONWALK_POSTDELAY])
+			bonus -= 50;
+		if(sc->data[SC_PARALYSE])
+			bonus -= 10;
+		if(sc->data[SC__BODYPAINT])
+			bonus -= 5 * sc->data[SC__BODYPAINT]->val1;
+		if(sc->data[SC__INVISIBILITY])
+			bonus -= sc->data[SC__INVISIBILITY]->val3;
+		if(sc->data[SC__GROOMY])
+			bonus -= sc->data[SC__GROOMY]->val3;
+		if(sc->data[SC_GLOOMYDAY])
+			bonus -= sc->data[SC_GLOOMYDAY]->val3;
+		if(sc->data[SC_EARTHDRIVE])
+			bonus -= 25;
+		if(sc->data[SC_MELON_BOMB])
+			bonus -= sc->data[SC_MELON_BOMB]->val3;
+		if(sc->data[SC_PAIN_KILLER])
+			bonus -= sc->data[SC_PAIN_KILLER]->val2;
 	}
-	if(sc->data[SC_GT_CHANGE])
-		skills2 += sc->data[SC_GT_CHANGE]->val3;
-	if(sc->data[SC_BOOST500])
-		skills2 += sc->data[SC_BOOST500]->val1;
-	if(sc->data[SC_EXTRACT_SALAMINE_JUICE])
-		skills2 += sc->data[SC_EXTRACT_SALAMINE_JUICE]->val1;
-	if(sc->data[SC_GOLDENE_FERSE])
-		skills2 += sc->data[SC_GOLDENE_FERSE]->val3;
-	if(sc->data[SC_INCASPDRATE])
-		skills2 += sc->data[SC_INCASPDRATE]->val1;
-	if(sc->data[SC_GATLINGFEVER])
-		skills2 += sc->data[SC_GATLINGFEVER]->val1;
-	if(sc->data[SC_STAR_COMFORT])
-		skills2 += 3 * sc->data[SC_STAR_COMFORT]->val1;
-	if(sc->data[SC_DONTFORGETME])
-		skills2 -= sc->data[SC_DONTFORGETME]->val2 / 10;
-	if(sc->data[SC_LONGING])
-		skills2 -= sc->data[SC_LONGING]->val2 / 10;
-	if(sc->data[SC_STEELBODY])
-		skills2 -= 25;
-	if(sc->data[SC_SKA])
-		skills2 -= 25;
-	if(sc->data[SC_DEFENDER])
-		skills2 -= sc->data[SC_DEFENDER]->val4 / 10;
-	if(sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_ENEMY) //Needs more info
-		skills2 -= 25;
-	if(sc->data[SC_GRAVITATION] && sc->data[SC_GRAVITATION]->val3 != BCT_SELF)
-		skills2 -= sc->data[SC_GRAVITATION]->val2 / 10;
-	if(sc->data[SC_JOINTBEAT]) { //Needs more info
-		if( sc->data[SC_JOINTBEAT]->val2&BREAK_WRIST )
-			skills2 -= 25;
-		if( sc->data[SC_JOINTBEAT]->val2&BREAK_KNEE )
-			skills2 -= 10;
-	}
-	if(sc->data[SC_FREEZING])
-		skills2 -= 30;
-	if(sc->data[SC_HALLUCINATIONWALK_POSTDELAY])
-		skills2 -= 50;
-	if(sc->data[SC_PARALYSE])
-		skills2 -= 10;
-	if(sc->data[SC__BODYPAINT])
-		skills2 -= 5 * sc->data[SC__BODYPAINT]->val1;
-	if(sc->data[SC__INVISIBILITY])
-		skills2 -= sc->data[SC__INVISIBILITY]->val3;
-	if(sc->data[SC__GROOMY])
-		skills2 -= sc->data[SC__GROOMY]->val3;
-	if(sc->data[SC_GLOOMYDAY])
-		skills2 -= sc->data[SC_GLOOMYDAY]->val3;
-	if(sc->data[SC_EARTHDRIVE])
-		skills2 -= 25;
-	if(sc->data[SC_MELON_BOMB])
-		skills2 -= sc->data[SC_MELON_BOMB]->val3;
-	if(sc->data[SC_PAIN_KILLER])
-		skills2 -= sc->data[SC_PAIN_KILLER]->val2;
 
-	return (flag&1 ? (skills1 + pots) : skills2);
+	return bonus;
 }
 #endif
 

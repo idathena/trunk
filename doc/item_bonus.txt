@@ -404,3 +404,4 @@ bonus bPerfectHide,n;			Hidden/cloaked character is no longer detected by monste
 bonus bRestartFullRecover,n;		When reviving, HP and SP are fully healed (n is meaningless)
 bonus bClassChange,n;			Gives n/100% chance to change the attacked monster's class with normal attack
 bonus bAddStealRate,n;			Increases success rate of Steal skill by n/100%
+bonus bNoMagicGearFuel,n;		Skills requiring Magic Gear Fuel do not require them (n is meaningless)
