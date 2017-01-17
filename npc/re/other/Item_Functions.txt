@@ -22,6 +22,31 @@ function	script	F_4875	{ //Bear's_Power
 	return;
 }
 
+function	script	F_4876	{ //Runaway_Magic
+	showscript "Yoooooooo!!!!!";
+	return;
+}
+
+function	script	F_4877	{ //Speed_Of_Light
+	showscript "My speed is 10 times faster than before!!";
+	return;
+}
+
+function	script	F_4878	{ //Muscle_Fool
+	showscript "MAN IS VIT! VIT!! VIT!!!!!";
+	return;
+}
+
+function	script	F_4879	{ //Hawkeye
+	showscript "Maximum Dexterity!";
+	return;
+}
+
+function	script	F_4880	{ //Lucky_Day
+	showscript "LUKCY MAX-!!";
+	return;
+}
+
 function	script	F_5497	{ //King_Tiger_Doll_Hat
 	showscript "fee-faw-fum-!!! I totally feel like a tiger!!!";
 	return;

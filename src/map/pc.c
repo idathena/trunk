@@ -3027,6 +3027,10 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			if(sd->state.lr_flag != 2)
 				sd->bonus.weapon_matk_rate += val;
 			break;
+		case SP_NO_MAGIC_GEAR_FUEL:
+			if(sd->state.lr_flag != 2)
+				sd->special_state.no_magic_gear_fuel = 1;
+			break;
 		default:
 			ShowWarning("pc_bonus: Unknown type %d %d !\n", type, val);
 			break;
@@ -7750,6 +7754,7 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_VARCASTRATE:		val = sd->bonus.varcastrate; break;
 		case SP_ADD_VARIABLECAST:	val = sd->bonus.add_varcast; break;
 #endif
+		case SP_NO_MAGIC_GEAR_FUEL:	val = (sd->special_state.no_magic_gear_fuel ? 1 : 0); break;
 		default:
 			ShowError("pc_readparam: Attempt to read unknown parameter '%d'.\n", type);
 			return -1;

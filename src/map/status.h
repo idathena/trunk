@@ -2280,7 +2280,7 @@ defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int md
 short status_calc_mdef2(struct block_list *bl, struct status_change *sc, int mdef2, bool viewable);
 unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc, int speed);
 #ifdef RENEWAL_ASPD
-short status_calc_aspd(struct block_list *bl, struct status_change *sc, short flag);
+short status_calc_aspd(struct block_list *bl, struct status_change *sc, bool fixed);
 #endif
 short status_calc_fix_aspd(struct block_list *bl, struct status_change *sc, int aspd);
 short status_calc_aspd_rate(struct block_list *bl, struct status_change *sc, int aspd_rate);

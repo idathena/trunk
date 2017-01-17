@@ -3847,10 +3847,11 @@ void clif_changeoption(struct block_list *bl)
 	struct map_session_data *sd;
 
 	nullpo_retv(bl);
-	sc = status_get_sc(bl);
-	if(!sc)
-		return; //How can an option change if there's no sc?
-	sd = BL_CAST(BL_PC, bl);
+
+	if(!(sc = status_get_sc(bl)))
+		return;
+
+	sd = BL_CAST(BL_PC,bl);
 	
 #if PACKETVER >= 7
 	WBUFW(buf,0) = 0x229;
