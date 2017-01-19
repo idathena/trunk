@@ -98,13 +98,13 @@ CREATE TABLE IF NOT EXISTS `npclog` (
   INDEX (`char_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 ;
 
-#ChatLog types Gl(O)bal,(W)hisper,(P)arty,(G)uild,(M)ain chat
+#ChatLog types Gl(O)bal,(W)hisper,(P)arty,(G)uild,(M)ain chat,(C)lan chat
 #Database: ragnarok
 #Table: chatlog
 CREATE TABLE IF NOT EXISTS `chatlog` (
   `id` bigint(20) NOT NULL auto_increment,
   `time` datetime NOT NULL default '0000-00-00 00:00:00',
-  `type` enum('O','W','P','G','M') NOT NULL default 'O',
+  `type` enum('O','W','P','G','M','C') NOT NULL default 'O',
   `type_id` int(11) NOT NULL default '0',
   `src_charid` int(11) NOT NULL default '0',
   `src_accountid` int(11) NOT NULL default '0',

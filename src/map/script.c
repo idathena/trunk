@@ -13349,8 +13349,7 @@ int atcommand_sub(struct script_state *st,int type) {
 
 	cmd = script_getstr(st,2);
 	if( st->rid ) {
-		sd = script_rid2sd(st);
-		if( sd == NULL )
+		if( !(sd = script_rid2sd(st)) )
 			return 1;
 		fd = sd->fd;
 	} else { //Use a dummy character.
@@ -13363,7 +13362,7 @@ int atcommand_sub(struct script_state *st,int type) {
 			memcpy(&dummy_sd.bl,bl,sizeof(struct block_list));
 			if( bl->type == BL_NPC )
 				safestrncpy(dummy_sd.status.name,((TBL_NPC *)bl)->name,NAME_LENGTH);
-			sd->mapindex = (bl->m > 0) ? bl->m : mapindex_name2id(map_default.mapname);
+			sd->mapindex = (bl->m > 0) ? map_id2index(bl->m) : mapindex_name2id(map_default.mapname);
 		}
 
 		// Init Group ID, Level, & permissions

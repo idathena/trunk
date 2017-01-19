@@ -2051,7 +2051,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 		case BL_HOM:
 		case BL_MER:
 		case BL_ELEM:
-			if (target->type == BL_HOM && skill_id && (battle_config.hom_setting&HOMSET_NO_SUPPORT_SKILL) && (skill_get_inf(skill_id)&INF_SUPPORT_SKILL) && battle_get_master(target) != src)
+			if (target->type == BL_HOM && (battle_config.hom_setting&HOMSET_NO_SUPPORT_SKILL) && skill_id && (skill_get_inf(skill_id)&INF_SUPPORT_SKILL) && skill_id != GN_WALLOFTHORN && battle_get_master(target) != src)
 				return false; //Can't use support skills on Homunculus (Only Master/Self)
 			if (target->type == BL_MER && (skill_id == PR_ASPERSIO || (skill_id >= SA_FLAMELAUNCHER && skill_id <= SA_SEISMICWEAPON)) && battle_get_master(target) != src)
 				return false; //Can't use Weapon endow skills on Mercenary (Only Master)
