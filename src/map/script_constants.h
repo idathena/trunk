@@ -405,6 +405,7 @@
 	export_constant(CELL_NOCHAT);
 	export_constant(CELL_MAELSTROM);
 	export_constant(CELL_ICEWALL);
+	export_constant(CELL_NOICEWALL);
 
 	/* Getcell types */
 	export_constant(CELL_CHKWALL);
