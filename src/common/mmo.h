@@ -96,6 +96,8 @@
 //For character names, title names, guilds, maps, etc.
 //Includes null-terminator as it is the length of the array.
 #define NAME_LENGTH (23 + 1)
+//24 for npc name + 24 for label + 2 for a "::" and 1 for EOS
+#define EVENT_NAME_LENGTH (NAME_LENGTH * 2 + 3)
 //For item names, which tend to have much longer names.
 #define ITEM_NAME_LENGTH 50
 //For Map Names, which the client considers to be 16 in length including the .gat extension
@@ -578,7 +580,7 @@ struct guild_castle {
 	int castle_id;
 	int mapindex;
 	char castle_name[NAME_LENGTH];
-	char castle_event[NAME_LENGTH];
+	char castle_event[EVENT_NAME_LENGTH];
 	int guild_id;
 	int economy;
 	int defense;

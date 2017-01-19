@@ -1566,7 +1566,7 @@ bool battle_can_hit_gvg_target(struct block_list *src, struct block_list *bl, ui
 	if( md && md->guardian_data ) {
 		if( mob_id == MOBID_EMPERIUM && flag&BF_SKILL && !(skill_get_inf3(skill_id)&INF3_HIT_EMP) )
 			return false; //Skill immunity
-		if( src->type != BL_MOB ) {
+		if( src->type != BL_MOB || mob_is_clone(((struct mob_data *)src)->mob_id) ) {
 			struct guild *g = (src->type == BL_PC ? ((TBL_PC *)src)->guild : guild_search(status_get_guild_id(src)));
 
 			if( mob_id == MOBID_EMPERIUM && (!g || guild_checkskill(g,GD_APPROVAL) <= 0) )

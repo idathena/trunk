@@ -2048,8 +2048,6 @@ OnTimer13000:
 	set .@MOB_HP,.@arr[2];
 	if (.@MOB_HP > 7000000)
 		donpcevent instance_npcname("#support")+"::OnSupport_2";
-	if (!unitexist('5BOSS))
-		stopnpctimer;
 	end;
 OnTimer14000:
 	donpcevent instance_npcname("#fwormboss5")+"::OnBerserk";
@@ -2300,7 +2298,8 @@ OnDisable:
 	hideonnpc instance_npcname("#fwormboss50");
 	end;
 OnTimer15000:
-	donpcevent instance_npcname("#fwormboss5")+"::OnCalm";
+	if (unitexist('5BOSS))
+		donpcevent instance_npcname("#fwormboss5")+"::OnCalm";
 	stopnpctimer;
 	end;
 }
@@ -2802,7 +2801,7 @@ OnT_s2:
 	set .@mapcount,getmapusers(.@map$)-1;
 	set .@gd_name$,'120903_str_face$;
 	set .@face_num2,getnpctimer(0)/1000;
-	if (.@face_num2 < 60)
+	if (.@face_num2 < 1)
 		end;
 	set .@time_m,.@face_num2/60;
 	set .@time_s,.@face_num2-(.@time_m*60);
@@ -2857,29 +2856,21 @@ OnTimer3600000:
 	mapannounce .@map$,"The actual time for the battle at this stage remaining is "+.@time_txt$+".",bc_map,"0xffff33";
 	set .@dr_st2,getnpctimer(0)/1000;
 	if (.@dr_st2 < 1)
-		set .@dr_st2,1200;
+		set .@dr_st2,120;
 	stopnpctimer;
 	specialeffect EF_COIN;
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
 	switch (atoi(charat(strnpcinfo(2),10))) {
 		case 1:
-			set .@x,155;
-			set .@y,82;
 			setarray .@val[0],200,200,95;
 			break;
 		case 2:
-			set .@x,162;
-			set .@y,271;
 			setarray .@val[0],800,400,90;
 			break;
 		case 3:
-			set .@x,278;
-			set .@y,308;
 			setarray .@val[0],1100,600,85;
 			break;
 		case 4:
-			set .@x,214;
-			set .@y,108;
 			setarray .@val[0],1250,800,80;
 			break;
 	}
@@ -2888,7 +2879,7 @@ OnTimer3600000:
 	set .@en_name_2,0;
 	set .@dr_st1,120;
 	if (.@dr_st2 < .@dr_st1)
-		set .@dr_st2,.@dr_st1+1;
+		set .@dr_st2,.@dr_st1;
 	set .@dr_t,.@dr_st2-.@dr_st1;
 	set .@dr_t1,(.@dr_t/15)+1;
 	if (.@dr_t1 < 1)
@@ -3007,6 +2998,7 @@ OnTimer3600000:
 		set .@d_item,20718; //FaceWorm_Skin_
 	else
 		set .@d_item,20717; //FaceWorm_Skin
+	getmapxy(.@map$,.@x,.@y,1);
 	makeitem2 .@d_item,1,.@map$,.@x,.@y,0,.@ppt,0,0,.@en_name_2,.@en_name_3,.@en_name_4;
 	end;
 OnStart:
@@ -3037,7 +3029,7 @@ OnTimer3600000:
 	donpcevent instance_npcname("#globaltimer22")+"::OnT_s3";
 	set .@dr_st2,getnpctimer(0)/1000;
 	if (.@dr_st2 < 1)
-		set .@dr_st2,1200;
+		set .@dr_st2,270;
 	specialeffect EF_COIN;
 	donpcevent instance_npcname("#fwormprize5")+"::OnDisable";
 	set .@en_name_4,0;
@@ -3046,7 +3038,7 @@ OnTimer3600000:
 	set .@dr_st1,270;
 	for (set .@i,1; .@i<=2; set .@i,.@i+1) {
 		if (.@dr_st2 < .@dr_st1)
-			set .@dr_st2,.@dr_st1+1;
+			set .@dr_st2,.@dr_st1;
 		set .@dr_t,.@dr_st2-.@dr_st1;
 		set .@dr_t1,(.@dr_t/15)+1;
 		if (.@dr_t1 < 1)
@@ -3061,7 +3053,7 @@ OnTimer3600000:
 			set .@dr_t1,1851;
 		set .@r_st,1852-.@dr_t1;
 		set .@ren_e_m,rand(.@r_st,1934);
-		       if (.@ren_e_m < 201) set .@en_name_4,0;
+		     if (.@ren_e_m < 201) set .@en_name_4,0;
 		else if (.@ren_e_m < 301) set .@en_name_4,4740; //Vitality1
 		else if (.@ren_e_m < 401) set .@en_name_4,4700; //Strength1
 		else if (.@ren_e_m < 501) set .@en_name_4,4730; //Agility1

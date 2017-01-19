@@ -2377,7 +2377,7 @@ OnTimer1000:
 			break;
 		case 4:
 			setarray .@chance[0],700,600,900;
-			setarray .@item[0],7288,617,22534; //Gold_Bullion,Old_Violet_Box,Closedmind_Box
+			setarray .@item[0],7228,617,22534; //Gold_Bullion,Old_Violet_Box,Closedmind_Box
 			break;
 		case 5:
 			setarray .@chance[0],150,700,950;
