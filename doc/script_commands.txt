@@ -8071,7 +8071,7 @@ Each of these can be 'on' or 'off'. Together they define a cell's behavior.
 
 This command lets you alter these flags for all map cells in the specified
 (x1,y1)-(x2,y2) rectangle. The 'flag' can be 0 or 1 (0:clear flag, 1:set flag).
-The 'type' defines which flag to modify. Possible options see 'db/const.txt'.
+The 'type' defines which flag to modify. Possible options see 'src/map/script_constants.h'.
 
 Example:
 

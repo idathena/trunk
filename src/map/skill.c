@@ -17776,7 +17776,6 @@ struct skill_unit *skill_initunit(struct skill_unit_group *group, int idx, int x
 	//Perform oninit actions
 	switch (group->skill_id) {
 		case WZ_ICEWALL:
-			map_setcell(unit->bl.m,unit->bl.x,unit->bl.y,CELL_NOICEWALL,false);
 			map_setgatcell(unit->bl.m,unit->bl.x,unit->bl.y,5);
 			clif_changemapcell(0,unit->bl.m,unit->bl.x,unit->bl.y,5,AREA);
 			skill_unitsetmapcell(unit,WZ_ICEWALL,group->skill_lv,CELL_ICEWALL,true);
@@ -17833,11 +17832,12 @@ int skill_delunit(struct skill_unit *unit)
 			}
 			break;
 		case WZ_ICEWALL:
+			map_setcell(unit->bl.m,unit->bl.x,unit->bl.y,CELL_NOICEWALL,false);
 			map_setgatcell(unit->bl.m,unit->bl.x,unit->bl.y,unit->val2);
 			clif_changemapcell(0,unit->bl.m,unit->bl.x,unit->bl.y,unit->val2,ALL_SAMEMAP); //Hack to avoid clientside cell bug
 			skill_unitsetmapcell(unit,WZ_ICEWALL,group->skill_lv,CELL_ICEWALL,false);
-			//AS_CLOAKING in low levels requires a wall to be cast,
-			//thus it needs to be checked again when a wall disapears! issue:8182 [Panikon]
+			//AS_CLOAKING in low levels requires a wall to be cast
+			//Thus it needs to be checked again when a wall disapears! issue:8182 [Panikon]
 			map_foreachinarea(skill_check_cloaking_end,unit->bl.m,
 				unit->bl.x - 1,unit->bl.y - 1,unit->bl.x + 1,unit->bl.x + 1,BL_PC); //Use 3x3 area to check for users near cell
 			break;
