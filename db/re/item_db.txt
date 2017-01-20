@@ -2747,8 +2747,8 @@
 4600,LichternG_Card,Lichtern Green Card,6,20,,10,,,,,,,,769,,,,,{ bonus bMatk,10; bonus2 bMagicAtkEle,Ele_Earth,(getrefine()>=9?10:5); },{},{}
 4601,Amdarais_Card,Amdarais Card,6,20,,10,,,,,,,,16,,,,,{ bonus2 bAddClass,Class_All,15; bonus bMatkRate,15; bonus2 bHPLossRate,666,4000; bonus2 bSPLossRate,66,4000; },{},{ heal -6666,-666; }
 4602,AmdaraisH_Card,Realized Amdarais Card,6,20,,10,,,,,,,,16,,,,,{ bonus2 bAddClass,Class_All,20; bonus bMatkRate,20; bonus2 bHPLossRate,666,6000; bonus2 bSPLossRate,66,6000; },{},{ heal -6666,-666; }
-4603,CorruptionRoot_Card,Corruption Root Card,6,20,,10,,,,,,,,2,,,,,{ bonus bBaseAtk,20; bonus5 bAutoSpellWhenHit,"NPC_WIDESTONE",1,70,BF_WEAPON,0; bonus5 bAutoSpellWhenHit,"NPC_WIDESLEEP",1,70,BF_WEAPON,0; bonus5 bAutoSpellWhenHit,"NPC_WIDECURSE",1,70,BF_WEAPON,0; },{},{}
-4604,CorruptionRootH_Card,Realized Corruption Root Card,6,20,,10,,,,,,,,2,,,,,{ bonus bBaseAtk,30; bonus5 bAutoSpellWhenHit,"NPC_WIDESTONE",2,70,BF_WEAPON,0; bonus5 bAutoSpellWhenHit,"NPC_WIDESLEEP",2,70,BF_WEAPON,0; bonus5 bAutoSpellWhenHit,"NPC_WIDECURSE",2,70,BF_WEAPON,0; },{},{}
+4603,CorruptionRoot_Card,Corruption Root Card,6,20,,10,,,,,,,,2,,,,,{ bonus bBaseAtk,20; bonus3 bAutoSpell,"NPC_WIDESTONE",1,50; bonus3 bAutoSpell,"NPC_WIDECURSE",1,50; bonus3 bAutoSpell,"NPC_WIDESLEEP",1,50; },{},{}
+4604,CorruptionRootH_Card,Realized Corruption Root Card,6,20,,10,,,,,,,,2,,,,,{ bonus bBaseAtk,30; bonus3 bAutoSpell,"NPC_WIDESTONE",2,50; bonus3 bAutoSpell,"NPC_WIDECURSE",2,50; bonus3 bAutoSpell,"NPC_WIDESLEEP",2,50; },{},{}
 4605,UndeadKnightM_Card,Agony of Royal Knight Card,6,20,,10,,,,,,,,16,,,,,{ bonus bMaxHPrate,-44; bonus bHPGainValue,200+10*getrefine(); },{},{}
 4606,UndeadKnightF_Card,Grudge of Royal Knight Card,6,20,,10,,,,,,,,4,,,,,{ if(!isequipped(20778)) { bonus bMaxSPrate,-44; bonus bSPGainValue,20+getrefine()/2; } },{},{ heal 0,-444; }
 4607,FaithfulManager_Card,Faithful Manager Card,6,20,,10,,,,,,,,2,,,,,{ set .@r,getrefine(); bonus bBaseAtk,5; bonus bMatk,5; if(getiteminfo(getequipid(EQI_HAND_R),11)==15) { bonus bBaseAtk,(.@r>=14?40:(.@r>=10?20:0)); bonus bMatk,(.@r>=14?40:(.@r>=10?20:0)); } },{},{}

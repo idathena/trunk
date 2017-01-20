@@ -391,19 +391,23 @@ int guild_created(int account_id,int guild_id)
 {
 	struct map_session_data *sd = map_id2sd(account_id);
 
-	if(sd == NULL)
+	if( !sd )
 		return 0;
 
-	if(!guild_id) {
-		clif_guild_created(sd, 2); // Creation failure (presence of the same name Guild)
+	if( !guild_id ) {
+		clif_guild_created(sd,2); // Creation failure (presence of the same name Guild)
 		return 0;
 	}
 
 	sd->status.guild_id = guild_id;
 	clif_guild_created(sd,0);
 
-	if(battle_config.guild_emperium_check)
-		pc_delitem(sd,pc_search_inventory(sd,ITEMID_EMPERIUM),1,0,0,LOG_TYPE_CONSUME); //Emperium consumption
+	if( battle_config.guild_emperium_check ) {
+		int index = pc_search_inventory(sd,ITEMID_EMPERIUM);
+
+		if( index > 0 )
+			pc_delitem(sd,index,1,0,0,LOG_TYPE_CONSUME); // Emperium consumption
+	}
 	return 0;
 }
 
