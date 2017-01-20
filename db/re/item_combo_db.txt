@@ -347,7 +347,7 @@
 2986:2987:18872,{ bonus2 bAddMonsterDropItem,22559,50; }
 2986:18872,{ bonus bBaseAtk,BaseLevel/4; }
 2987:18872,{ bonus bMatk,BaseLevel/4; }
-2990:2991,{ bonus5 bAutoSpellWhenHit,"SC_MAELSTROM",1,100,BF_MAGIC,0; }
+2990:2991,{ bonus5 bAutoSpellWhenHit,"SC_MAELSTROM",1,50,BF_MAGIC,0; bonus bAllStats,5; }
 2995:15110,{ bonus2 bSkillAtk,"NC_AXEBOOMERANG",100; bonus2 bSkillCooldown,"NC_AXEBOOMERANG",-2000; }
 2996:15111:20733:22044,{ bonus2 bSkillAtk,"NC_ARMSCANNON",50; }
 2997:2999,{ bonus2 bAddClass,Class_All,10; bonus bMatkRate,10; }
