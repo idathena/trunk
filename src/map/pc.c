@@ -4596,7 +4596,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 	item = sd->inventory_data[n];
 	nameid = sd->status.inventory[n].nameid;
 
-	if( item == NULL )
+	if( !item )
 		return false;
 
 	if( !itemdb_is_item_usable(item) ) //Not consumable item
@@ -4632,10 +4632,6 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 	switch( nameid ) {
 		case ITEMID_ANODYNE:
 			if( map_flag_gvg2(sd->bl.m) )
-				return false;
-		//Fall through
-		case ITEMID_ALOEBERA:
-			if( pc_issit(sd) )
 				return false;
 			break;
 		case ITEMID_WING_OF_FLY:
@@ -4685,7 +4681,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 		case ITEMID_M_CENTER_POTION:
 		case ITEMID_M_AWAKENING_POTION:
 		case ITEMID_M_BERSERK_POTION:
-			if( sd->md == NULL || sd->md->db == NULL )
+			if( !sd->md || !sd->md->db )
 				return false;
 			if( sd->md->sc.data[SC_BERSERK] )
 				return false;
@@ -4705,7 +4701,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 	}
 
 	//Mercenary Scrolls
-	if( nameid >= ITEMID_BOW_MERCENARY_SCROLL1 && nameid <= ITEMID_SPEARMERCENARY_SCROLL10 && sd->md != NULL )
+	if( nameid >= ITEMID_BOW_MERCENARY_SCROLL1 && nameid <= ITEMID_SPEARMERCENARY_SCROLL10 && sd->md )
 		return false;
 
 	if( itemdb_is_rune(nameid) && (sd->class_&MAPID_THIRDMASK) != MAPID_RUNE_KNIGHT )

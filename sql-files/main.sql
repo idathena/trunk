@@ -912,7 +912,7 @@ INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (1,1,67
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (2,1,678,1,0); -- Poison_Bottle
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (3,1,604,1,0); -- Branch_Of_Dead_Tree
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (4,1,522,1,0); -- Fruit_Of_Mastela
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (5,1,671,1,0); -- Old_Ore_Box
+INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (5,1,12609,1,0); -- Old_Ore_Box
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (6,1,12523,1,0); -- E_Inc_Agi_10_Scroll
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (7,1,985,1,0); -- Elunium
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (8,1,984,1,0); -- Oridecon
@@ -944,7 +944,7 @@ INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (29,4,6
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (30,5,671,1,1); -- Gold_Coin
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (31,5,12246,1,0); -- Magic_Card_Album
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (32,5,12263,1,0); -- Comp_Battle_Manual
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (33,5,671,1,0); -- Potion_Box
+INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (33,5,12831,1,0); -- Potion_Box
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (34,5,6235,1,0); -- Guarantee_Armor_6Up
 
 INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (35,6,671,1,1); -- Gold_Coin

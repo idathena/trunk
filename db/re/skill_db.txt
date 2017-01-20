@@ -724,7 +724,7 @@
 1006,0,6,4,3,0,1,1,1,yes,0,0x10001,0,magic,3,0,	WZ_SIGHTBLASTER,Sight Blaster
 1007,0,6,4,0,0x1,0,1,0,no,0,0x1,0,none,0,0,	SA_CREATECON,Create Elemental Converter
 1008,9,6,1,1,0x1,0,1,1,yes,0,0x1,0,magic,0,0,	SA_ELEMENTWATER,Elemental Change Water
-1009,-9,6,1,0,0,0,1,1,no,0,0x1,0,weapon,3,0,	HT_PHANTASMIC,Phantasmic Arrow
+1009,-9,6,1,-1,0,0,1,1,no,0,0x1,0,weapon,3,0,	HT_PHANTASMIC,Phantasmic Arrow
 1010,9,6,1,0,0x1,0,1,0,no,0,0x1,0,misc,0,0,	BA_PANGVOICE,Pang Voice
 1011,9,6,1,0,0x1,0,1,0,no,0,0x1,0,misc,0,0,	DC_WINKCHARM,Wink of Charm
 1012,0,0,0,0,0,0,1,0,no,0,0x1,0,weapon,0,0,	BS_UNFAIRLYTRICK,Unfair Trick

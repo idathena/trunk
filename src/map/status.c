@@ -10045,7 +10045,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = (val1 == 1 ? 6 : 6 - val1);
 				tick_time = 1000;
 				val4 = tick / tick_time;
-				tick = -1;
 				break;
 			case SC_REBOUND:
 				tick_time = 2000;
@@ -11980,7 +11979,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 		case SC_LEECHESEND:
 			if( sce->val4 >= 0 ) {
 				//{Target's VIT x (New Poison Research Skill Level - 3)} + (Target's HP / 100)
-				int64 damage = status->vit * (sce->val1 - 3) + status->max_hp / 100;
+				int64 damage = status->vit * (sce->val1 - 3) + (int)status->max_hp / 100;
 
 				map_freeblock_lock();
 				dounlock = true;
