@@ -794,7 +794,7 @@ static bool itemdb_read_itemdelay(char *str[], int columns, int current)
 	delay = atoi(str[1]);
 
 	if( delay < 0 ) {
-		ShowWarning("itemdb_read_itemdelay: Invalid delay %d for item id %hu.\n", id->delay, nameid);
+		ShowWarning("itemdb_read_itemdelay: Invalid delay %d for item id %hu.\n", delay, nameid);
 		return false;
 	}
 
