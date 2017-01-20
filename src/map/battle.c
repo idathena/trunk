@@ -5548,7 +5548,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	//Renewal elemental attribute fix [helvetica]
 	//Skills gain benefits from the weapon element
 	//But final damage is considered to "the forced" and resistances are applied again
-	if(!(nk&NK_NO_ELEFIX) && (wd.damage > 0 || wd.damage2 > 0)) {
+	if(sd && !(nk&NK_NO_ELEFIX) && (wd.damage > 0 || wd.damage2 > 0)) {
 		switch(skill_id) {
 			case SR_TIGERCANNON:
 				if(wd.miscflag&16)
@@ -5583,9 +5583,9 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				break;
 			case GN_CARTCANNON:
 			case KO_HAPPOKUNAI:
-				wd.damage = battle_attr_fix(src, target, wd.damage, (sd && sd->bonus.arrow_ele ? sd->bonus.arrow_ele : ELE_NEUTRAL), tstatus->def_ele, tstatus->ele_lv);
+				wd.damage = battle_attr_fix(src, target, wd.damage, (sd->bonus.arrow_ele ? sd->bonus.arrow_ele : ELE_NEUTRAL), tstatus->def_ele, tstatus->ele_lv);
 				if(is_attack_left_handed(src, skill_id))
-					wd.damage2 = battle_attr_fix(src, target, wd.damage2, (sd && sd->bonus.arrow_ele ? sd->bonus.arrow_ele : ELE_NEUTRAL), tstatus->def_ele, tstatus->ele_lv);
+					wd.damage2 = battle_attr_fix(src, target, wd.damage2, (sd->bonus.arrow_ele ? sd->bonus.arrow_ele : ELE_NEUTRAL), tstatus->def_ele, tstatus->ele_lv);
 				break;
 			case PA_SACRIFICE:
 			case GS_GROUNDDRIFT:
