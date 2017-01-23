@@ -7503,14 +7503,14 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 				rate = max(rate,5000); //50%
 				break;
 		}
-		if (sd && type > SC_NONE && type < SC_MAX) { //Item resistance (only applies to rate%)
+		if (sd) {
 			int bonus = 0;
 
-			if (sd->reseff[type])
+			if (sd->reseff[type] && type > SC_NONE && type < SC_MAX)
 				bonus += rate * sd->reseff[type] / 10000;
-			if (sd->sc.data[SC_COMMONSC_RESIST])
+			if (sd->sc.data[SC_COMMONSC_RESIST] && type >= SC_COMMON_MIN && type <= SC_COMMON_MAX)
 				bonus += rate * sd->sc.data[SC_COMMONSC_RESIST]->val1 / 100;
-			rate -= bonus;
+			rate -= bonus; //Item resistance (only applies to rate%)
 		}
 		if (rate && rate%10)
 			rate += (10 - rate%10); //Aegis accuracy
