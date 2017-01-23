@@ -7623,17 +7623,18 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case TK_HIGHJUMP: {
 				int x, y, dir = unit_getdir(src);
+				int range = skill_get_range(skill_id,skill_lv);
 
 				//Fails on noteleport maps, except for GvG and BG maps [Skotlex]
 				if (map[src->m].flag.noteleport && !(map[src->m].flag.battleground || map_flag_gvg2(src->m))) {
 					x = src->x;
 					y = src->y;
 				} else if (dir%2) { //Diagonal
-					x = src->x + dirx[dir] * (skill_lv * 4) / 3;
-					y = src->y + diry[dir] * (skill_lv * 4) / 3;
+					x = src->x + dirx[dir] * range * 2 / 3;
+					y = src->y + diry[dir] * range * 2 / 3;
 				} else {
-					x = src->x + dirx[dir] * skill_lv * 2;
-					y = src->y + diry[dir] * skill_lv * 2;
+					x = src->x + dirx[dir] * range;
+					y = src->y + diry[dir] * range;
 				}
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				if (!map_count_oncell(src->m,x,y,BL_PC|BL_NPC|BL_MOB,0) && map_getcell(src->m,x,y,CELL_CHKREACH) && unit_movepos(src,x,y,1,false))
