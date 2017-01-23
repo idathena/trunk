@@ -8047,7 +8047,7 @@ void clif_spiritball(struct block_list *bl) {
 
 /// Notifies clients in area of a character's combo delay (ZC_COMBODELAY).
 /// 01d2 <account id>.L <delay>.L
-void clif_combo_delay(struct block_list *bl,int wait)
+void clif_combo_delay(struct block_list *bl, int wait)
 {
 	unsigned char buf[32];
 
