@@ -419,20 +419,6 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 		}
 	}
 
-	//Wall of Thorn damaged by Fire element type attacks (non unit)
-	if( target && target->type == BL_SKILL && atk_elem == ELE_FIRE && battle_getcurrentskill(target) == GN_WALLOFTHORN ) {
-		struct skill_unit *su = (struct skill_unit *)target;
-		struct skill_unit_group *sg = NULL;
-		struct block_list *src = NULL;
-
-		if( !su || !su->alive || !(sg = su->group) || !(src = map_id2bl(sg->src_id)) || status_isdead(src) )
-			return 0;
-		sg->unit_id = UNT_USED_TRAPS;
-		sg->limit = 0;
-		src->val1 = skill_get_time(sg->skill_id,sg->skill_lv) - DIFF_TICK(gettick(),sg->tick); //Fire Wall duration [exneval]
-		skill_unitsetting(src,sg->skill_id,sg->skill_lv,sg->val3>>16,sg->val3&0xffff,1);
-	}
-
 	if( tsc && tsc->count ) { //Since an atk can only have one type let's optimise this a bit
 		switch( atk_elem ) {
 			case ELE_FIRE:
@@ -1427,26 +1413,27 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( tsc->data[SC_INVINCIBLE] && !tsc->data[SC_INVINCIBLEOFF] )
 			damage += damage * 75 / 100;
 
-		if( damage > 0 && (sce = tsc->data[SC_BLOODLUST]) && flag&BF_WEAPON && rnd()%100 < sce->val3 )
-			status_heal(src,damage * sce->val4 / 100,0,3);
-
-		if( (sce = tsc->data[SC_SHIELDSPELL_REF]) && sce->val1 == 1 && flag&BF_WEAPON )
-			skill_break_equip(src,bl,EQP_ARMOR,10000,BCT_ENEMY);
-
 		if( damage > 0 ) {
-			if( (sce = tsc->data[SC_POISONINGWEAPON]) && skill_id != GC_VENOMPRESSURE && flag&BF_WEAPON && rnd()%100 < sce->val3 )
-				sc_start(src,bl,(sc_type)sce->val2,100,sce->val1,skill_get_time2(GC_POISONINGWEAPON,1));
+			if( flag&BF_WEAPON ) {
+				if( (sce = tsc->data[SC_POISONINGWEAPON]) && skill_id != GC_VENOMPRESSURE && rnd()%100 < sce->val3 )
+					sc_start(src,bl,(sc_type)sce->val2,100,sce->val1,skill_get_time2(GC_POISONINGWEAPON,1));
+				if( (sce = tsc->data[SC_SHIELDSPELL_REF]) && sce->val1 == 1 ) {
+					skill_break_equip(src,bl,EQP_ARMOR,10000,BCT_ENEMY);
+					status_change_end(src,SC_SHIELDSPELL_REF,INVALID_TIMER);
+				}
+				if( (sce = tsc->data[SC_GT_ENERGYGAIN]) && rnd()%100 < sce->val2 && tsd )
+					pc_addspiritball(tsd,skill_get_time2(SR_GENTLETOUCH_ENERGYGAIN,sce->val1),pc_getmaxspiritball(tsd,5));
+				if( (sce = tsc->data[SC_BLOODLUST]) && rnd()%100 < sce->val3 )
+					status_heal(src,damage * sce->val4 / 100,0,3);
+			}
 			if( (sce = tsc->data[SC__DEADLYINFECT]) && (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT && rnd()%100 < 30 + 10 * sce->val1 )
 				status_change_spread(src,bl,false);
-			if( tsd && (sce = tsc->data[SC_GT_ENERGYGAIN]) && flag&BF_WEAPON && rnd()%100 < sce->val2 )
-				pc_addspiritball(tsd,skill_get_time2(SR_GENTLETOUCH_ENERGYGAIN,sce->val1),pc_getmaxspiritball(tsd,5));
-		}
+			if( (sce = tsc->data[SC_STYLE_CHANGE]) && sce->val1 == MH_MD_FIGHTING ) { //When attacking
+				TBL_HOM *hd = BL_CAST(BL_HOM,src);
 
-		if( (sce = tsc->data[SC_STYLE_CHANGE]) && sce->val1 == MH_MD_FIGHTING ) { //When attacking
-			TBL_HOM *hd = BL_CAST(BL_HOM,src);
-
-			if( hd && rnd()%100 < 20 + status_get_lv(&hd->bl) / 5 )
-				hom_addspiritball(hd,10);
+				if( hd && rnd()%100 < 20 + status_get_lv(&hd->bl) / 5 )
+					hom_addspiritball(hd,10);
+			}
 		}
 	}
 
@@ -1477,7 +1464,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 	if( sd ) {
 		if( pc_ismadogear(sd) && rnd()%100 < 50 ) {
-			short element = skill_get_ele(skill_id,skill_lv);
+			int element = skill_get_ele(skill_id,skill_lv);
 
 			if( !skill_id || element == -1 ) //Take weapon's element
 				element = (tsd && tsd->bonus.arrow_ele ? tsd->bonus.arrow_ele : tstatus->rhw.ele);
@@ -7472,13 +7459,28 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 		if (sd && sd->bonus.splash_range)
 			skill_castend_damage_id(src,target,0,1,tick,0);
 		if (target->type == BL_SKILL) {
-			TBL_SKILL *su = (TBL_SKILL *)target;
+			struct skill_unit *su = (struct skill_unit *)target;
+			struct skill_unit_group *sg;
 
-			if (su && su->group) {
-				if (su->group->skill_id == HT_BLASTMINE)
+			if (su && (sg = su->group)) {
+				if (sg->skill_id == HT_BLASTMINE)
 					skill_blown(src,target,3,-1,0);
-				if (su->group->skill_id == GN_WALLOFTHORN && --su->val2 <= 0)
-					skill_delunit(su); //Max hits reached
+				if (sg->skill_id == GN_WALLOFTHORN) {
+					int right_element = battle_get_weapon_element(wd,src,target,0,0,EQI_HAND_R);
+
+					if (--su->val2 <= 0)
+						skill_delunit(su); //Max hits reached
+					if (right_element == ELE_FIRE) {
+						struct block_list *ssrc = map_id2bl(sg->src_id);
+
+						if(ssrc) {
+							sg->unit_id = UNT_USED_TRAPS;
+							sg->limit = 0;
+							ssrc->val1 = skill_get_time(sg->skill_id,sg->skill_lv) - DIFF_TICK(tick,sg->tick); //Fire Wall duration [exneval]
+							skill_unitsetting(ssrc,sg->skill_id,sg->skill_lv,sg->val3>>16,sg->val3&0xffff,1);
+						}
+					}
+				}
 			}
 		}
 	}

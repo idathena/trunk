@@ -2868,7 +2868,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	#endif
 				//Official Magic Reflection Behavior : Reflected damage also affected by caster's gears
 				if (dmg.dmg_lv != ATK_MISS) { //Wiz SL cancelled and consumed fragment
-					short s_ele = skill_get_ele(skill_id, skill_lv);
+					int s_ele = skill_get_ele(skill_id, skill_lv);
 
 					if (s_ele == -1) //The skill takes the weapon's element
 						s_ele = sstatus->rhw.ele;
@@ -3249,6 +3249,25 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			case WM_METALICSOUND:
 				status_zap(bl, 0, damage * 100 / (100 * (110 - (sd ? pc_checkskill(sd,WM_LESSON) : 10) * 10)));
 				break;
+		}
+		if (skill_id && bl->type == BL_SKILL) { //Wall of Thorn damaged by Fire element skill
+			struct skill_unit *su = (struct skill_unit *)bl;
+			struct skill_unit_group *sg;
+			struct block_list *ssrc;
+			int element = skill_get_ele(skill_id, skill_lv);
+
+			if (element == -1)
+				element = sstatus->rhw.ele;
+			else if (element == -2)
+				element = status_get_attack_sc_element(src, status_get_sc(src));
+			else if (element == -3)
+				element = rnd()%ELE_ALL;
+			if (su && (sg = su->group) && sg->skill_id == GN_WALLOFTHORN && element == ELE_FIRE && (ssrc = map_id2bl(sg->src_id))) {
+				sg->unit_id = UNT_USED_TRAPS;
+				sg->limit = 0;
+				ssrc->val1 = skill_get_time(sg->skill_id, sg->skill_lv) - DIFF_TICK(gettick(), sg->tick); //Fire Wall duration [exneval]
+				skill_unitsetting(ssrc, sg->skill_id, sg->skill_lv, sg->val3>>16, sg->val3&0xffff, 1);
+			}
 		}
 		if (sd)
 			skill_onskillusage(sd, bl, skill_id, tick);
@@ -4471,17 +4490,11 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case KN_CHARGEATK: {
 				bool path = path_search_long(NULL,src->m,src->x,src->y,bl->x,bl->y,CELL_CHKWALL);
 				unsigned int dist = distance_bl(src,bl);
-				uint8 x, y, dir = map_calc_dir(bl,src->x,src->y);
+				uint8 dir = map_calc_dir(bl,src->x,src->y);
 
-				if (dir < 4) { //Target position is actually one cell next to the target
-					x = bl->x + 2 * (dir > 0) - 3 * (dir > 0);
-					y = bl->y + 1 - (dir / 2) - (dir > 2);
-				} else {
-					x = bl->x + 2 * (dir > 4) - 1 * (dir > 4);
-					y = bl->y + (dir / 6) - 1 + (dir > 6);
-				}
-				if (!map_flag_gvg2(src->m) && !map[src->m].flag.battleground && unit_movepos(src,x,y,0,true))
-					clif_blown(src,bl); //Teleport to target (if not on WoE grounds)
+				//Teleport to target (if not on WoE grounds)
+				if (!map_flag_gvg2(src->m) && !map[src->m].flag.battleground && unit_movepos(src,bl->x,bl->y,0,true))
+					skill_blown(src,src,1,(dir + 4)%8,0); //Target position is actually one cell next to the target
 				if (path) { //Cause damage and knockback if the path to target was a straight one
 					if (skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,dist))
 						skill_blown(src,bl,dist,dir,0);
@@ -5076,17 +5089,10 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case MH_STAHL_HORN:
 		case MH_TINDER_BREAKER:
 			{
-				uint8 x, y, dir = map_calc_dir(bl,src->x,src->y);
+				uint8 dir = map_calc_dir(bl,src->x,src->y);
 
-				if (dir < 4) {
-					x = bl->x + 2 * (dir > 0) - 3 * (dir > 0);
-					y = bl->y + 1 - (dir / 2) - (dir > 2);
-				} else {
-					x = bl->x + 2 * (dir > 4) - 1 * (dir > 4);
-					y = bl->y + (dir / 6) - 1 + (dir > 6);
-				}
-				if (unit_movepos(src,x,y,1,true)) {
-					clif_blown(src,bl);
+				if (unit_movepos(src,bl->x,bl->y,1,true)) {
+					skill_blown(src,src,1,(dir + 4)%8,0);
 					if (skill_id == SR_KNUCKLEARROW)
 						flag |= 2;
 					skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
@@ -5288,17 +5294,10 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case LG_PINPOINTATTACK: {
-				uint8 x, y, dir = map_calc_dir(bl,src->x,src->y);
+				uint8 dir = map_calc_dir(bl,src->x,src->y);
 
-				if (dir < 4) {
-					x = bl->x + 2 * (dir > 0) - 3 * (dir > 0);
-					y = bl->y + 1 - (dir / 2) - (dir > 2);
-				} else {
-					x = bl->x + 2 * (dir > 4) - 1 * (dir > 4);
-					y = bl->y + (dir / 6) - 1 + (dir > 6);
-				}
-				if (!map_flag_gvg2(src->m) && !map[src->m].flag.battleground && unit_movepos(src,x,y,1,true))
-					clif_blown(src,bl);
+				if (!map_flag_gvg2(src->m) && !map[src->m].flag.battleground && unit_movepos(src,bl->x,bl->y,1,true))
+					skill_blown(src,src,1,(dir + 4)%8,0);
 				skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 			}
 			break;
@@ -13288,7 +13287,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 
 	//Wall of Thorn damaged by Fire element unit [Cydh]
 	//NOTE: This check doesn't matter the location, as long as one of units touched, this check will be executed
-	if (bl->type == BL_SKILL && (skill_id == GN_WALLOFTHORN || skill_get_ele(skill_id,skill_lv) == ELE_FIRE)) {
+	if (bl->type == BL_SKILL && (skill_get_ele(skill_id,skill_lv) == ELE_FIRE || (skill_id == GN_WALLOFTHORN && group->unit_id == UNT_FIREWALL))) {
 		struct skill_unit *su = (struct skill_unit *)bl;
 		struct skill_unit_group *sg;
 		struct block_list *ssrc;
