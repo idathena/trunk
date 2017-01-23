@@ -3,7 +3,7 @@
 //===== By ===================================================
 //= MasterOfMuppets
 //===== Version ==============================================
-//= 1.9
+//= 2.0
 //===== Compatible With ======================================
 //= rAthena SVN
 //===== Description ==========================================
@@ -24,6 +24,7 @@
 //= 1.7 Replaced effect numerics with constants. [L0ne_W0lf]
 //= 1.8 Updated RE/Pre-RE EXP. [Euphy]
 //= 1.9 Added GM management NPC. [Euphy]
+//= 2.0 Added Juperos Ruins History quest logs. [Capuche]
 //============================================================
 
 yuno_in04,190,125,4	script	Scholar	700,{
@@ -146,6 +147,7 @@ yuno_in04,190,125,4	script	Scholar	700,{
 			mes "the wise and benevolent";
 			mes "King Tristram III.";
 			set yuno_hist,2;
+			setquest 11017;
 			next;
 			mes "[Fayruz]";
 			mes "Well, "+strcharinfo(0)+",";
@@ -165,7 +167,7 @@ yuno_in04,190,125,4	script	Scholar	700,{
 			close;
 		}
 	case 2:
-		if ((countitem(7352)) || (countitem(7353)) || (countitem(7354)) || (countitem(7355))) {
+		if (countitem(7352) || countitem(7353) || countitem(7354) || countitem(7355)) {
 			mes "[Fayruz]";
 			mes "Ah, it's you! Listen,";
 			mes "I just found a record of";
@@ -249,6 +251,7 @@ yuno_in04,190,125,4	script	Scholar	700,{
 			mes "who was vain and extravagant,";
 			mes "with your own eyes at the place where the light passes through.";
 			set yuno_hist,4;
+			changequest 11018,11019;
 			next;
 			mes "[Fayruz]";
 			mes "Ah, usually, descriptions";
@@ -293,7 +296,7 @@ yuno_in04,190,125,4	script	Scholar	700,{
 			mes "sometimes, you know?";
 			close;
 		case 2:
-			if ((countitem(7352)) || (countitem(7353)) || (countitem(7354)) || (countitem(7355))) {
+			if (countitem(7352) || countitem(7353) || countitem(7354) || countitem(7355)) {
 				mes "[Fayruz]";
 				mes "Oh, really?!";
 				mes "That's great news!";
@@ -509,7 +512,7 @@ yuno_in04,190,125,4	script	Scholar	700,{
 		next;
 		switch(select("I found another Transparent Plate.:Just visiting, really.")) {
 		case 1:
-			if ((countitem(7352)) || (countitem(7353)) || (countitem(7354)) || (countitem(7355))) {
+			if (countitem(7352) || countitem(7353) || countitem(7354) || countitem(7355)) {
 				mes "[Fayruz]";
 				mes "Hmm, well, we've made as";
 				mes "much headway as we can";
@@ -579,6 +582,7 @@ function	script	Func_JupHist	{
 		mes "gently brought back to reality.^000000";
 		delitem getarg(0),1;
 		set yuno_hist,5;
+		changequest 11019,11020;
 		set jupe_hist,getarg(1);
 		getexp (checkre(3))?10000:100000,0;
 		next;
@@ -598,7 +602,7 @@ function	script	Func_JupHist	{
 		mes "then, I'll see you, adventurer~";
 		close;
 	case 5:
-		if ((countitem(getarg(0))) || (countitem(getarg(1))) || (countitem(getarg(2)))) {
+		if (countitem(getarg(0)) || countitem(getarg(1)) || countitem(getarg(2))) {
 			mes "[Fayruz]";
 			mes "Oh, that's unexpected.";
 			mes "This Transparent Plate";
@@ -656,6 +660,7 @@ function	script	Func_JupHist	{
 				else set jupe_hist,jupe_hist +8;
 			}
 			set yuno_hist,6;
+			changequest 11020,11021;
 			getexp (checkre(3))?10000:100000,0;
 			next;
 			mes "[Fayruz]";
@@ -710,7 +715,7 @@ function	script	Func_JupHist	{
 			close;
 		}
 	case 7:
-		if ((countitem(getarg(0))) || (countitem(getarg(1)))) {
+		if (countitem(getarg(0)) || countitem(getarg(1))) {
 			mes "[Fayruz]";
 			mes "Is this another";
 			mes "Transparent Plate?";
@@ -780,6 +785,7 @@ function	script	Func_JupHist	{
 				else set jupe_hist,jupe_hist +8;
 			}
 			set yuno_hist,8;
+			changequest 11021,11022;
 			getexp (checkre(3))?10000:100000,0;
 			next;
 			mes "[Fayruz]";
@@ -791,7 +797,7 @@ function	script	Func_JupHist	{
 			mes "to me, alright? See you later~";
 			close;
 		}
-		else if ((countitem(getarg(2))) || (countitem(getarg(3)))) {
+		else if (countitem(getarg(2)) || countitem(getarg(3))) {
 			mes "[Fayruz]";
 			mes "Oh, this one seems";
 			mes "to have been created";
@@ -876,6 +882,7 @@ function	script	Func_JupHist	{
 			else if (getarg(0) == 7354) set jupe_hist,jupe_hist+4;
 			else set jupe_hist,jupe_hist+8;
 			set yuno_hist,10;
+			completequest 11022;
 			delitem getarg(0),1;
 			getexp (checkre(3))?10000:100000,0;
 			next;
@@ -888,7 +895,7 @@ function	script	Func_JupHist	{
 			mes "research progress~";
 			close;
 		}
-		else if ((countitem(getarg(1))) || (countitem(getarg(2))) || (countitem(getarg(3)))) {
+		else if (countitem(getarg(1)) || countitem(getarg(2)) || countitem(getarg(3))) {
 			mes "[Fayruz]";
 			mes "Hmm...";
 			mes "This one seems to be created in a similar time";
@@ -1299,6 +1306,7 @@ juperos_01,99,112,4	script	Bronze Statue#1	844,{
 				mes "to the Juno Library and";
 				mes "tell her what I found.";
 				set yuno_hist,3;
+				changequest 11017,11018;
 				close;
 			}
 			mes "["+strcharinfo(0)+"]";
@@ -1307,7 +1315,7 @@ juperos_01,99,112,4	script	Bronze Statue#1	844,{
 			mes "Juno, could make sense";
 			mes "of what this stuff says.";
 			close;
-		case 2: 
+		case 2:
 			close;
 		}
 	}

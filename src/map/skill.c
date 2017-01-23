@@ -12713,7 +12713,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 	group->link_group_id = link_group_id;
 	group->target_flag = target;
 	group->bl_flag = bl;
-	group->state.ammo_consume = (sd && sd->state.arrow_atk && skill_id != GS_GROUNDDRIFT); //Store if this skill needs to consume ammo
+	group->state.ammo_consume = (sd && sd->state.arrow_atk && skill_id != GS_GROUNDDRIFT && skill_id != GN_WALLOFTHORN); //Store if this skill needs to consume ammo
 	group->state.song_dance = (unit_flag&(UF_DANCE|UF_SONG) ? 1 : 0)|(unit_flag&UF_ENSEMBLE ? 2 : 0); //Signals if this is a song/dance/duet
 	group->state.guildaura = (skill_id >= GD_LEADERSHIP && skill_id <= GD_HAWKEYES) ? 1 : 0;
   	group->item_id = req_item;

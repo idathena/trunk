@@ -7819,7 +7819,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 						return 0;
 					state |= BCT_ENEMY;
 					strip_enemy = 0;
-				} else if( su->group->skill_id == WZ_ICEWALL || su->group->skill_id == GN_WALLOFTHORN ) {
+				} else if( su->group->skill_id == WZ_ICEWALL || (su->group->skill_id == GN_WALLOFTHORN && su->group->unit_id != UNT_FIREWALL) ) {
 					switch( skill_id ) {
 						case RK_DRAGONBREATH:
 						case RK_DRAGONBREATH_WATER:

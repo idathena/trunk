@@ -10778,10 +10778,10 @@ BUILDIN_FUNC(globalmes)
 	if( !(mes = script_getstr(st,2)) )
 		return 0;
 
-	if( script_hasdata(st,3) ) //NPC name to display
+	if( script_hasdata(st,3) )
 		name = script_getstr(st,3);
 	else
-		name = nd->name; //Use current npc name
+		name = nd->name; //Use attached NPC
 
 	npc_globalmessage(name,mes); //Broadcast to all players connected
 
