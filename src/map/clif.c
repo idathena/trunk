@@ -10193,7 +10193,7 @@ void clif_parse_WantToConnection(int fd, struct map_session_data *sd)
 void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	bool first_time = false;
 
-	if(sd->bl.prev != NULL)
+	if(sd->bl.prev)
 		return;
 
 	if(!sd->state.active) { //Character loading is not complete yet!
@@ -19257,10 +19257,10 @@ static int clif_parse(int fd)
 
 		if( packet_db[packet_ver][cmd].func == clif_parse_debug )
 			packet_db[packet_ver][cmd].func(fd, sd);
-		else if( packet_db[packet_ver][cmd].func != NULL ) {
+		else if( packet_db[packet_ver][cmd].func ) {
 			if( !sd && packet_db[packet_ver][cmd].func != clif_parse_WantToConnection )
 				; //Only valid packet when there is no session
-			else if( sd && sd->bl.prev == NULL && packet_db[packet_ver][cmd].func != clif_parse_LoadEndAck )
+			else if( sd && !sd->bl.prev && packet_db[packet_ver][cmd].func != clif_parse_LoadEndAck )
 				; //Only valid packet when player is not on a map
 			else
 				packet_db[packet_ver][cmd].func(fd, sd); 

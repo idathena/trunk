@@ -10775,8 +10775,7 @@ BUILDIN_FUNC(globalmes)
 	struct npc_data *nd = (struct npc_data *)bl;
 	const char *name = NULL, *mes;
 
-	mes = script_getstr(st,2);
-	if( mes == NULL )
+	if( !(mes = script_getstr(st,2)) )
 		return 0;
 
 	if( script_hasdata(st,3) ) //NPC name to display
