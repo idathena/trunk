@@ -3050,6 +3050,9 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case SU_LUNATICCARROTBEAT:
 			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (flag&1 ? DMG_MULTI_HIT : DMG_NORMAL), 0, false);
 			break;
+		case AB_HIGHNESSHEAL:
+			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, AL_HEAL, -1, DMG_SKILL);
+			break;
 		case WL_HELLINFERNO:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SKILL);
 			break;
@@ -5521,8 +5524,8 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case MH_EQC: {
 				TBL_HOM *hd = BL_CAST(BL_HOM,src);
 
-				if (hd && is_boss(bl)) {
-					if (hd->master)
+				if (is_boss(bl)) {
+					if (hd && hd->master)
 						clif_skill_fail(hd->master,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 					break;
 				}
@@ -5686,7 +5689,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if(sd && battle_check_undead(tstatus->race,tstatus->def_ele) && skill_id != AL_INCAGI) {
 				if(battle_check_target(src,bl,BCT_ENEMY) <= 0) //Offensive heal does not works on non-enemies [Skotlex]
 					return 0;
-				return skill_castend_damage_id(src,bl,(AB_HIGHNESSHEAL ? AL_HEAL : skill_id),skill_lv,tick,flag);
+				return skill_castend_damage_id(src,bl,skill_id,skill_lv,tick,flag);
 			}
 			break;
 		case RK_MILLENNIUMSHIELD:
@@ -15518,6 +15521,12 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		case GS_BULLSEYE:
 		case GS_ADJUSTMENT:
 		case GS_MAGICALBULLET:
+		case MH_SONIC_CRAW:
+		case MH_SILVERVEIN_RUSH:
+		case MH_MIDNIGHT_FRENZY:
+		case MH_TINDER_BREAKER:
+		case MH_CBC:
+		case MH_EQC:
 			break;
 		case GS_INCREASING:
 		case GS_CRACKER:
@@ -19837,7 +19846,8 @@ static int skill_destroy_trap(struct block_list *bl, va_list ap) {
  */
 int skill_akaitsuki_damage(struct block_list *src, struct block_list *bl, int damage, uint16 skill_id, uint16 skill_lv, unsigned int tick) {
 	damage = damage / 2; //Damage is half of the heal amount
-	clif_skill_damage(src, bl, tick, status_get_amotion(src), status_get_dmotion(bl), damage, 1, (skill_id == AB_HIGHNESSHEAL ? AL_HEAL : skill_id), skill_lv, DMG_SKILL);
+	clif_skill_damage(src, bl, tick, status_get_amotion(src), status_get_dmotion(bl), damage, 1,
+		(skill_id == AB_HIGHNESSHEAL ? AL_HEAL : skill_id), (skill_id == AB_HIGHNESSHEAL ? -1 : skill_lv), DMG_SKILL);
 	status_zap(bl, damage, 0);
 	return 0;
 }
