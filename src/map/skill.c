@@ -5671,11 +5671,17 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 	tstatus = status_get_status_data(bl);
 
 	switch(skill_id) {
-		case HLIF_HEAL:	//[orn]
-			if(bl->type != BL_HOM) {
-				if(sd)
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-				break;
+		case HLIF_HEAL:	{ //[orn]
+				struct block_list *m_bl = battle_get_master(src);
+
+				if(m_bl) {
+					bl = m_bl;
+					if(bl->type != BL_HOM) {
+						if(sd)
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+						break;
+					}
+				}
 			}
 		//Fall through
  		case AL_HEAL:
@@ -5685,7 +5691,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case PR_ASPERSIO:
 			//Check for undead skills that convert a no-damage skill into a damage one [Skotlex]
 			//Apparently only player casted skills can be offensive like this
-			if(sd && battle_check_undead(tstatus->race,tstatus->def_ele) && skill_id != AL_INCAGI) {
+			if(sd && battle_check_undead(status_get_race(bl),status_get_element(bl)) && skill_id != AL_INCAGI) {
 				if(battle_check_target(src,bl,BCT_ENEMY) <= 0) //Offensive heal does not works on non-enemies [Skotlex]
 					return 0;
 				return skill_castend_damage_id(src,bl,skill_id,skill_lv,tick,flag);
@@ -5787,8 +5793,16 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case AB_HIGHNESSHEAL:
 		case SU_TUNABELLY:
 			{
-				int heal = skill_calc_heal(src,bl,skill_id,skill_lv,true);
-				int heal_get_jobexp;
+				int heal, heal_get_jobexp;
+
+				if(skill_id == HLIF_HEAL) {
+					struct block_list *m_bl = battle_get_master(src);
+
+					if(m_bl)
+						bl = m_bl;
+				}
+
+				heal = skill_calc_heal(src,bl,skill_id,skill_lv,true);
 
 				if(status_isimmune(bl) || (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd))))
 					heal = 0;
@@ -6376,9 +6390,14 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case HLIF_AVOID:
 		case HAMI_DEFENCE:
-			i = skill_get_time(skill_id,skill_lv);
-			clif_skill_nodamage(bl,bl,skill_id,skill_lv,sc_start(src,bl,type,100,skill_lv,i)); //Master
-			clif_skill_nodamage(src,src,skill_id,skill_lv,sc_start(src,src,type,100,skill_lv,i)); //Homun
+			{
+				struct block_list *m_bl = battle_get_master(src);
+
+				i = skill_get_time(skill_id,skill_lv);
+				if (m_bl)
+					clif_skill_nodamage(m_bl,m_bl,skill_id,skill_lv,sc_start(src,m_bl,type,100,skill_lv,i)); //Master
+				clif_skill_nodamage(src,src,skill_id,skill_lv,sc_start(src,src,type,100,skill_lv,i)); //Homun
+			}
 			break;
 
 		case NJ_BUNSINJYUTSU:
@@ -7929,24 +7948,32 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case WE_MALE:
 			if (sd) {
-				if (status_get_hp(src) > status_get_max_hp(src) / 10) {
-					int hp_rate = (!skill_lv) ? 0 : skill_get_hp_rate(skill_id, skill_lv);
-					//The earned is the same % of the target HP than it costed the caster [Skotlex]
-					int gain_hp = tstatus->max_hp * abs(hp_rate) / 100;
+				struct map_session_data *p_sd = map_charid2sd(sd->status.partner_id);
 
-					clif_skill_nodamage(src,bl,skill_id,status_heal(bl,gain_hp,0,0),1);
+				if (status_get_hp(src) > status_get_max_hp(src) / 10) {
+					int hp_rate = (!skill_lv ? 0 : skill_get_hp_rate(skill_id,skill_lv));
+					int gain_hp; //The earned is the same % of the target HP than it costed the caster [Skotlex]
+
+					if (p_sd) {
+						gain_hp = status_get_max_hp(&p_sd->bl) * abs(hp_rate) / 100;
+						clif_skill_nodamage(src,&p_sd->bl,skill_id,status_heal(&p_sd->bl,gain_hp,0,0),1);
+					}
 				} else
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			}
 			break;
 		case WE_FEMALE:
 			if (sd) {
-				if (status_get_sp(src) > status_get_max_sp(src) / 10) {
-					int sp_rate = (!skill_lv) ? 0 : skill_get_sp_rate(skill_id, skill_lv);
-					//The earned is the same % of the target SP than it costed the caster [Skotlex]
-					int gain_sp = tstatus->max_sp * abs(sp_rate) / 100;
+				struct map_session_data *p_sd = map_charid2sd(sd->status.partner_id);
 
-					clif_skill_nodamage(src,bl,skill_id,status_heal(bl,0,gain_sp,0),1);
+				if (status_get_sp(src) > status_get_max_sp(src) / 10) {
+					int sp_rate = (!skill_lv ? 0 : skill_get_sp_rate(skill_id,skill_lv));
+					int gain_sp; //The earned is the same % of the target SP than it costed the caster [Skotlex]
+
+					if (p_sd) {
+						gain_sp = status_get_max_sp(&p_sd->bl) * abs(sp_rate) / 100;
+						clif_skill_nodamage(src,&p_sd->bl,skill_id,status_heal(&p_sd->bl,0,gain_sp,0),1);
+					}
 				} else
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			}
@@ -8454,17 +8481,18 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case HAMI_CASTLE: //[orn]
-			if (bl->id != src->id && rnd()%100 < 20 * skill_lv) {
+			if (rnd()%100 < 20 * skill_lv) {
+				struct block_list *m_bl = battle_get_master(src);
 				int x = src->x, y = src->y;
 
-				if (unit_movepos(src,bl->x,bl->y,0,false)) { //Move source
+				if (m_bl && unit_movepos(src,m_bl->x,m_bl->y,0,false)) { //Move source
 					clif_skill_nodamage(src,src,skill_id,skill_lv,1);
-					clif_blown(src,bl);
-					if (unit_movepos(bl,x,y,0,false)) { //Move target
-						clif_skill_nodamage(bl,bl,skill_id,skill_lv,1);
-						clif_blown(bl,bl);
+					clif_blown(src,m_bl);
+					if (unit_movepos(m_bl,x,y,0,false)) { //Move target
+						clif_skill_nodamage(m_bl,m_bl,skill_id,skill_lv,1);
+						clif_blown(m_bl,m_bl);
 					}
-					map_foreachinrange(unit_changetarget,src,AREA_SIZE,BL_MOB,bl,src); //Only affect monsters
+					map_foreachinrange(unit_changetarget,src,AREA_SIZE,BL_MOB,m_bl,src); //Only affect monsters
 				}
 			} else if (hd && hd->master) //Failed
 				clif_skill_fail(hd->master,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -14490,6 +14518,17 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 				}
 			}
 			break;
+		case WE_MALE:
+		case WE_FEMALE:
+			if( sd ) {
+				struct map_session_data *p_sd = map_charid2sd(sd->status.partner_id);
+
+				if( !p_sd || !&p_sd->bl ) {
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+					return false;
+				}
+			}
+			break;
 		case MO_KITRANSLATION:
 			if( tsd && (tsd->spiritball >= 5 ||
 				(tsd->class_&MAPID_BASEMASK) == MAPID_GUNSLINGER ||
@@ -14539,6 +14578,13 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				return false;
 			}
+			break;
+		case HLIF_HEAL:
+		case HLIF_AVOID:
+		case HAMI_DEFENCE:
+		case HAMI_CASTLE:
+			if( !battle_get_master(src) )
+				return false;
 			break;
 	}
 

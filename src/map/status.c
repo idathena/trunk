@@ -4539,7 +4539,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			)
 			status->flee = status_calc_flee(bl, sc, b_status->flee);
 		else
-			status->flee = status_calc_flee(bl, sc, b_status->flee +(status->agi - b_status->agi)
+			status->flee = status_calc_flee(bl, sc, b_status->flee + (status->agi - b_status->agi)
 #ifdef RENEWAL
 			+ (status->luk / 5 - b_status->luk / 5)
 #endif
@@ -5719,8 +5719,10 @@ short status_calc_flee(struct block_list *bl, struct status_change *sc, int flee
 		flee -= sc->data[SC_HEAT_BARREL]->val4;
 	if(sc->data[SC_SPIDERWEB])
 		flee -= flee * 50 / 100;
+#ifndef RENEWAL
 	if(sc->data[SC_BERSERK])
 		flee -= flee * 50 / 100;
+#endif
 	if(sc->data[SC_BLIND] || sc->data[SC_PYREXIA])
 		flee -= flee * 25 / 100;
 	if(sc->data[SC_FEAR])
@@ -5783,8 +5785,10 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 		return (defType)cap_value(def,DEFTYPE_MIN,DEFTYPE_MAX);
 	}
 
+#ifndef RENEWAL
 	if(sc->data[SC_BERSERK])
 		return 0;
+#endif
 	if(sc->data[SC_BARRIER])
 		return 100;
 	if(sc->data[SC_KEEPING])
@@ -5884,8 +5888,10 @@ short status_calc_def2(struct block_list *bl, struct status_change *sc, int def2
 #endif
 	}
 
+#ifndef RENEWAL
 	if(sc->data[SC_BERSERK])
 		return 0;
+#endif
 	if(sc->data[SC_ETERNALCHAOS])
 		return 0;
 	if(sc->data[SC_DEFSET_NUM])
@@ -5957,8 +5963,10 @@ defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int md
 		return (defType)cap_value(mdef,DEFTYPE_MIN,DEFTYPE_MAX);
 	}
 
+#ifndef RENEWAL
 	if(sc->data[SC_BERSERK])
 		return 0;
+#endif
 	if(sc->data[SC_BARRIER])
 		return 100;
 #ifndef RENEWAL //No longer provides 90 MDEF in renewal mode
@@ -6021,8 +6029,10 @@ short status_calc_mdef2(struct block_list *bl, struct status_change *sc, int mde
 #endif
 	}
 
+#ifndef RENEWAL
 	if(sc->data[SC_BERSERK])
 		return 0;
+#endif
 	if(sc->data[SC_SKA])
 		return 90;
 	if(sc->data[SC_MDEFSET_NUM])
