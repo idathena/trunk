@@ -1322,13 +1322,10 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			skill_castend_nodamage_id(bl,bl,MH_MAGMA_FLOW,sce->val1,gettick(),flag|2);
 
 		if( damage > 0 && (sce = sc->data[SC_STONEHARDSKIN]) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) ) {
-			sce->val2 -= (int)cap_value(damage,INT_MIN,INT_MAX);
 			if( src->type == BL_MOB ) //Using explicit call instead break_equip for duration
 				sc_start(src,src,SC_STRIPWEAPON,30,0,skill_get_time2(RK_STONEHARDSKIN,sce->val1));
 			else
 				skill_break_equip(src,src,EQP_WEAPON,3000,BCT_SELF);
-			if( sce->val2 <= 0 )
-				status_change_end(bl,SC_STONEHARDSKIN,INVALID_TIMER);
 		}
 
 #ifdef RENEWAL
@@ -6824,7 +6821,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			md.damage = 3 * skill_lv * tstatus->hp / 100 + 10 * sstatus->dex;
 			break;
 		case MH_EQC:
-			md.damage = max(tstatus->hp - sstatus->hp, 0);
+			md.damage = max((int)(tstatus->hp - sstatus->hp), 0);
 			break;
 	}
 

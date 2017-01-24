@@ -362,7 +362,13 @@ void initChangeTables(void) {
 #endif
 		);
 	set_sc( LK_TENSIONRELAX      , SC_TENSIONRELAX    , SI_TENSIONRELAX    , SCB_REGEN );
-	set_sc( LK_BERSERK           , SC_BERSERK         , SI_BERSERK         , SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN );
+	set_sc( LK_BERSERK           , SC_BERSERK         , SI_BERSERK         ,
+#ifndef RENEWAL
+		SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN
+#else
+		SCB_MAXHP|SCB_SPEED|SCB_ASPD|SCB_REGEN
+#endif
+		);
 	set_sc( HP_ASSUMPTIO         , SC_ASSUMPTIO       ,
 #ifndef RENEWAL
 		SI_ASSUMPTIO             ,
@@ -543,7 +549,13 @@ void initChangeTables(void) {
 	set_sc( MS_REFLECTSHIELD     , SC_REFLECTSHIELD   , SI_REFLECTSHIELD   , SCB_NONE );
 	set_sc( ML_DEFENDER          , SC_DEFENDER        , SI_DEFENDER        , SCB_SPEED|SCB_ASPD );
 	set_sc( MS_PARRYING          , SC_PARRYING        , SI_PARRYING        , SCB_NONE );
-	set_sc( MS_BERSERK           , SC_BERSERK         , SI_BERSERK         , SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN );
+	set_sc( MS_BERSERK           , SC_BERSERK         , SI_BERSERK         ,
+#ifndef RENEWAL
+		SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN
+#else
+		SCB_MAXHP|SCB_SPEED|SCB_ASPD|SCB_REGEN
+#endif
+		);
 	add_sc( ML_SPIRALPIERCE      , SC_STOP            );
 	set_sc( MER_QUICKEN          , SC_MERC_QUICKEN    , SI_BLANK           , SCB_ASPD );
 	add_sc( ML_DEVOTION          , SC_DEVOTION        );
@@ -658,7 +670,13 @@ void initChangeTables(void) {
 	set_sc( SC_STRIPACCESSARY    , SC__STRIPACCESSORY , SI_STRIPACCESSARY  , SCB_INT|SCB_DEX|SCB_LUK );
 	set_sc_with_vfx( SC_MANHOLE  , SC__MANHOLE        , SI_MANHOLE         , SCB_NONE );
 	add_sc( SC_CHAOSPANIC        , SC_CONFUSION       );
-	set_sc( SC_BLOODYLUST        , SC_BERSERK         , SI_BERSERK         , SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN );
+	set_sc( SC_BLOODYLUST        , SC_BERSERK         , SI_BERSERK         ,
+#ifndef RENEWAL
+		SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN
+#else
+		SCB_MAXHP|SCB_SPEED|SCB_ASPD|SCB_REGEN
+#endif
+		);
 	add_sc( SC_FEINTBOMB         , SC__FEINTBOMB      );
 	add_sc( SC_ESCAPE            , SC_ANKLE           );
 
@@ -5789,7 +5807,7 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 	if(sc->data[SC_EARTH_INSIGNIA] && sc->data[SC_EARTH_INSIGNIA]->val1 == 2)
 		def += 50;
 	if(sc->data[SC_STONEHARDSKIN])
-		def += sc->data[SC_STONEHARDSKIN]->val1;
+		def += sc->data[SC_STONEHARDSKIN]->val2;
 	if(sc->data[SC_SHIELDSPELL_REF] && sc->data[SC_SHIELDSPELL_REF]->val1 == 2)
 		def += sc->data[SC_SHIELDSPELL_REF]->val2;
 	if(sc->data[SC_PRESTIGE])
@@ -5959,7 +5977,7 @@ defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int md
 	if(sc->data[SC_ENDURE] && !sc->data[SC_ENDURE]->val3) //It has been confirmed that eddga card grants 1 MDEF, not 0, not 10, but 1
 		mdef += (!sc->data[SC_ENDURE]->val4 ? sc->data[SC_ENDURE]->val1 : 1);
 	if(sc->data[SC_STONEHARDSKIN])
-		mdef += sc->data[SC_STONEHARDSKIN]->val1;
+		mdef += sc->data[SC_STONEHARDSKIN]->val2;
 	if(sc->data[SC_STONE] && sc->opt1 == OPT1_STONE)
 		mdef += mdef * 25 / 100;
 	if(sc->data[SC_FREEZE])
@@ -8197,10 +8215,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				status_change_end(bl,SC_AURABLADE,INVALID_TIMER);
 				status_change_end(bl,SC_MERC_QUICKEN,INVALID_TIMER);
 			}
-#ifdef RENEWAL
-			else
-				status_change_end(bl,SC_TWOHANDQUICKEN,INVALID_TIMER);
-#endif
 			break;
 		case SC_ASSUMPTIO:
 			status_change_end(bl,SC_KYRIE,INVALID_TIMER);
@@ -9377,19 +9391,16 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_MILLENNIUMSHIELD:
 				clif_millenniumshield(bl,val2);
 				break;
-			case SC_VITALITYACTIVATION:
-				val2 = 50; //Increase HP recovery effects by 50%
-				val3 = 50; //Reduce SP recovery effects by 50%
-				break;
 			case SC_STONEHARDSKIN:
-				val2 = status->hp * 20 / 100;
-				if( val2 )
-					status_heal(bl,-val2,0,0); //Reduce health by 20%
-				val1 = status_get_job_lv(bl) * (sd ? pc_checkskill(sd,RK_RUNEMASTERY) : 10) / 4
+				val2 = status_get_job_lv(bl) * (sd ? pc_checkskill(sd,RK_RUNEMASTERY) : 10) / 4
 #ifndef RENEWAL
 					/ 10
 #endif
 					; //DEF/MDEF Increase
+				break;
+			case SC_VITALITYACTIVATION:
+				val2 = 50; //Increase HP recovery effects by 50%
+				val3 = 50; //Reduce SP recovery effects by 50%
 				break;
 			case SC_ABUNDANCE:
 				tick_time = 10000;
@@ -10721,6 +10732,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_SATURDAYNIGHTFEVER:
 			if (!sce->val2)
 				status_heal(bl,status->max_hp,0,1);
+		//Fall through
 		case SC_RAISINGDRAGON:
 			sce->val2 = status->max_hp / 100; //Officially tested its 1% HP drain [Jobbie]
 			break;
