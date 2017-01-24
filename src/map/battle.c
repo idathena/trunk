@@ -8052,6 +8052,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 
 	return (flag&state) ? 1 : -1;
 }
+
 /*==========================================
  * Check if can attack from this range
  * Basic check then calling path_search for obstacle etc

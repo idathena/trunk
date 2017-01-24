@@ -1487,39 +1487,18 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		combo = 1;
 	}
 
-	//Target_id checking
-	if( sd ) {
+	if( sd ) { //Target_id checking
 		if( skill_isNotOk(skill_id, sd) ) //[MouseJstr]
 			return 0;
 		switch( skill_id ) { //Check for skills that auto-select target
 			case MO_CHAINCOMBO:
 				if( sc && sc->data[SC_BLADESTOP] && !(target = map_id2bl(sc->data[SC_BLADESTOP]->val4)) )
 					return 0;
-				break;
-			case WE_MALE:
-			case WE_FEMALE:
-				if( !sd->status.partner_id )
-					return 0;
-				target = (struct block_list *)map_charid2sd(sd->status.partner_id);
-				if( !target ) {
-					clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
-					return 0;
-				}
-				break;
-		}
-		if( target )
-			target_id = target->id;
-	} else if( src->type == BL_HOM ) {
-		switch( skill_id ) { //Homun auto-target skills
-			case HLIF_HEAL:
-			case HLIF_AVOID:
-			case HAMI_DEFENCE:
-			case HAMI_CASTLE:
-				target = battle_get_master(src);
-				if( !target )
-					return 0;
 				target_id = target->id;
 				break;
+		}
+	} else if( src->type == BL_HOM ) {
+		switch( skill_id ) { //Homun auto-target skills
 			case MH_SONIC_CRAW:
 				if( sc && sc->data[SC_MIDNIGHT_FRENZY_POSTDELAY] ) {
 					target_id = sc->data[SC_MIDNIGHT_FRENZY_POSTDELAY]->val2;
