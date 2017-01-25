@@ -670,9 +670,9 @@
 //703,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_WIDECOLD,Wide Crystalize
 //704,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_WIDE_DEEP_SLEEP,Wide Deep Sleep
 //705,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_WIDESIREN,Wide Siren's Voice
-706,1,6,4,5,0,0,3,1,no,0,0x2,0,magic,0,0x1,	NPC_VENOMFOG,Venom Fog
+706,1,6,4,5,0,0,10,1,no,0,0x2,0,magic,0,0x1,	NPC_VENOMFOG,Venom Fog
 //707,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_MILLENNIUMSHIELD,Millenium Shield 2
-708,9,8,2,0,0,0,5,-20,no,0,0x2,0,magic,2,0x400,	NPC_COMET,Comet 2
+708,11,8,2,0,0,0,5,-20,no,0,0x2,0,magic,2,0x400,	NPC_COMET,Comet 2
 //709,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_ICEMINE,Ice Mine
 //710,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_ICEEXPLO,Ice Explosion
 //711,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_FLAMECROSS,Flame Cross
