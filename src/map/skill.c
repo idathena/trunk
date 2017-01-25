@@ -12239,7 +12239,7 @@ static int skill_dance_overlap_sub(struct block_list *bl, va_list ap)
 	struct skill_unit *src = va_arg(ap, struct skill_unit *);
 	int flag = va_arg(ap, int);
 
-	if (src == target)
+	if (target->id == src->id)
 		return 0;
 
 	if (!target->group || !(target->group->state.song_dance&0x1))
@@ -12290,7 +12290,7 @@ static bool skill_dance_switch(struct skill_unit *unit, int flag)
 	static struct skill_unit_group backup;
 	struct skill_unit_group *group;
 
-	if( unit == NULL || (group = unit->group) == NULL )
+	if( !unit || !(group = unit->group) )
 		return false;
 
 	//val2&UF_ENSEMBLE is a hack to indicate dissonance
@@ -12486,7 +12486,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 
 				//HelloKitty confirmed that these are interchangeable
 				//So you can change element and not consume gemstones
-				if( (old_sg = skill_locate_element_field(src)) != NULL ) {
+				if( (old_sg = skill_locate_element_field(src)) ) {
 					if( (old_sg->skill_id == SA_VOLCANO || old_sg->skill_id == SA_DELUGE ||
 						old_sg->skill_id == SA_VIOLENTGALE) && old_sg->limit > 0 ) {
 						//Use the previous limit (minus the elapsed time) [Skotlex]

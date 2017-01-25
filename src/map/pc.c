@@ -378,7 +378,7 @@ int pc_banding(struct map_session_data *sd, uint16 skill_lv) {
 		//No more Royal Guards in Banding found
 		struct status_change *sc;
 
-		if( (sc = status_get_sc(&sd->bl)) != NULL  && sc->data[SC_BANDING] ) {
+		if( (sc = status_get_sc(&sd->bl)) && sc->data[SC_BANDING] ) {
 			sc->data[SC_BANDING]->val2 = 0; //Reset the counter
 			status_calc_bl(&sd->bl,status_sc2scb_flag(SC_BANDING));
 		}
@@ -393,7 +393,7 @@ int pc_banding(struct map_session_data *sd, uint16 skill_lv) {
 	for( j = 0; j < i; j++ ) {
 		struct map_session_data *bsd = map_id2sd(b_sd[j]);
 
-		if( bsd != NULL )
+		if( bsd )
 			hp += status_get_hp(&bsd->bl);
 	}
 
@@ -405,7 +405,7 @@ int pc_banding(struct map_session_data *sd, uint16 skill_lv) {
 		int tmp_hp = 0;
 		struct map_session_data *bsd = map_id2sd(b_sd[j]);
 
-		if( bsd != NULL && (tmp_hp = hp - status_get_max_hp(&bsd->bl)) > 0 ) {
+		if( bsd && (tmp_hp = hp - status_get_max_hp(&bsd->bl)) > 0 ) {
 			extra_hp += tmp_hp;
 			tmp_qty++;
 		}
@@ -417,11 +417,11 @@ int pc_banding(struct map_session_data *sd, uint16 skill_lv) {
 	for( j = 0; j < i; j++ ) {
 		struct map_session_data *bsd = map_id2sd(b_sd[j]);
 
-		if( bsd != NULL ) {
+		if( bsd ) {
 			struct status_change *sc;
 
 			status_set_hp(&bsd->bl,hp,0); //Set HP
-			if( (sc = status_get_sc(&bsd->bl)) != NULL && sc->data[SC_BANDING] ) {
+			if( (sc = status_get_sc(&bsd->bl)) && sc->data[SC_BANDING] ) {
 				sc->data[SC_BANDING]->val2 = c; //Set the counter
 				status_calc_bl(&bsd->bl,status_sc2scb_flag(SC_BANDING)); //Set ATK and DEF
 			}
