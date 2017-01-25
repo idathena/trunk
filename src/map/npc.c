@@ -379,7 +379,7 @@ int npc_event_doall_sub(DBKey key, DBData *data, va_list ap)
 	rid = va_arg(ap,int);
 
 	p = strchr(p,':'); //Match only the event name
-	if( p && strcmpi(name,p) == 0 /* && !ev->nd->src_id */ ) { //Do not run on duplicates [Paradox924X]
+	if( p && !strcmpi(name,p) /* && !ev->nd->src_id */ ) { //Do not run on duplicates [Paradox924X]
 		if( rid ) //A player may only have 1 script running at the same time
 			npc_event_sub(map_id2sd(rid),ev,key.str);
 		else
@@ -862,18 +862,22 @@ int npc_event(struct map_session_data *sd, const char *eventname, int ontouch)
 int npc_touchnext_areanpc_sub(struct block_list *bl, va_list ap)
 {
 	struct map_session_data *sd;
-	int pc_id;
+	struct npc_data *nd;
+	int pc_id, npc_id;
 	char *name;
 
 	nullpo_ret(bl);
 	nullpo_ret((sd = map_id2sd(bl->id)));
 
 	pc_id = va_arg(ap,int);
+	npc_id = va_arg(ap,int);
 	name = va_arg(ap,char *);
-	
-	if( sd->state.warping )
+
+	if( (nd = map_id2nd(npc_id)) && (nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE)) )
 		return 0;
 	if( pc_ishiding(sd) )
+		return 0;
+	if( sd->state.warping )
 		return 0;
 	if( pc_id == sd->bl.id )
 		return 0;
@@ -907,7 +911,7 @@ int npc_touchnext_areanpc(struct map_session_data *sd, bool leavemap)
 
 		nd->touching_id = sd->touching_id = 0;
 		snprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.ontouch_name);
-		map_forcountinarea(npc_touchnext_areanpc_sub,nd->bl.m,nd->bl.x - xs,nd->bl.y - ys,nd->bl.x + xs,nd->bl.y + ys,1,BL_PC,sd->bl.id,name);
+		map_forcountinarea(npc_touchnext_areanpc_sub,nd->bl.m,nd->bl.x - xs,nd->bl.y - ys,nd->bl.x + xs,nd->bl.y + ys,1,BL_PC,sd->bl.id,nd->bl.id,name);
 	}
 	return 0;
 }

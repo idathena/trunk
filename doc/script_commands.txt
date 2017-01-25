@@ -5972,7 +5972,7 @@ is, all non-permanent monsters) on the specified map will be killed regardless
 of the event label value.
 
 As of r12876 killmonster now supports an optional argument type. Using 1 for type
-will make the command fire "OnMyMobDead" events from any monsters that do die
+will make the command fire 'OnMyMobDead' events from any monsters that do die
 as a result of this command.
 
 ---------------------------------------
@@ -6104,7 +6104,7 @@ Examples:
 These two commands will disable and enable, respectively, an NPC object 
 specified by name. The disabled NPC will disappear from sight and will no longer 
 be triggerable in the normal way. It will still be accessible through 'donpcevent'
-or 'doevent', but will not trigger OnTouch label or any event such as OnMyMobDead.
+or 'doevent', but will not trigger OnTouch label or any event such as 'OnMyMobDead'.
 You can disable even warp NPCs if you know their object names, which is 
 an easy way to make a map only accessible through walking half the time. Then 
 you 'enablenpc' them back.
