@@ -12720,6 +12720,9 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 		case NPC_EARTHQUAKE:
 			clif_skill_damage(src,src,gettick(),status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 			break;
+		case NPC_VENOMFOG:
+			interval *= skill_lv;
+			break;
 	}
 
 	//Init skill unit group
@@ -20089,39 +20092,38 @@ int skill_split_str (char *str, char **val, int num)
  * @param val : array of MAX_SKILL_LEVEL to put value into
  * @return 0:error, x:number of value assign (should be MAX_SKILL_LEVEL)
  */
-int skill_split_atoi (char *str, int *val)
+int skill_split_atoi(char *str, int *val)
 {
 	int i, j, step = 1;
 
 	for( i = 0; i < MAX_SKILL_LEVEL; i++ ) {
-		if( !str ) break;
+		if( !str )
+			break;
 		val[i] = atoi(str);
 		str = strchr(str,':');
 		if( str )
 			*str++ = 0;
 	}
-	if( i == 0 ) //No data found.
+	if( !i ) //No data found
 		return 0;
-	if( i == 1 ) { //Single value, have the whole range have the same value.
+	if( i == 1 ) { //Single value, have the whole range have the same value
 		for( ; i < MAX_SKILL_LEVEL; i++ )
 			val[i] = val[i - 1];
 		return i;
 	}
-	//Check for linear change with increasing steps until we reach half of the data acquired.
+	//Check for linear change with increasing steps until we reach half of the data acquired
 	for( step = 1; step <= i / 2; step++ ) {
 		int diff = val[i - 1] - val[i - step - 1];
 
-		for( j = i - 1; j >= step; j-- )
+		for( j = i - 1; j >= step; j-- ) {
 			if( (val[j] - val[j - step]) != diff )
 				break;
-
-		if( j >= step ) //No match, try next step.
+		}
+		if( j >= step ) //No match, try next step
 			continue;
-
 		for( ; i < MAX_SKILL_LEVEL; i++ ) { //Apply linear increase
 			val[i] = val[i - step] + diff;
-			if( val[i] < 1 && val[i - 1] >= 0 ) {
-				//Check if we have switched from + to -, cap the decrease to 0 in said cases.
+			if( val[i] < 1 && val[i - 1] >= 0 ) { //Check if we have switched from + to -, cap the decrease to 0 in said cases
 				val[i] = 1;
 				diff = 0;
 				step = 1;
@@ -20129,7 +20131,7 @@ int skill_split_atoi (char *str, int *val)
 		}
 		return i;
 	}
-	//Okay.. we can't figure this one out, just fill out the stuff with the previous value.
+	//We can't figure this one out, just fill out the stuff with the previous value
 	for( ; i < MAX_SKILL_LEVEL; i++ )
 		val[i] = val[i - 1];
 	return i;
@@ -21000,21 +21002,21 @@ static bool skill_parse_row_unitdb(char *split[], int columns, int current)
 	skill_split_atoi(split[4],skill_db[idx].unit_range);
 	skill_db[idx].unit_interval = atoi(split[5]);
 
-	if( strcmpi(split[6],"noenemy") == 0 ) skill_db[idx].unit_target = BCT_NOENEMY;
-	else if( strcmpi(split[6],"friend") == 0 ) skill_db[idx].unit_target = BCT_NOENEMY;
-	else if( strcmpi(split[6],"party") == 0 ) skill_db[idx].unit_target = BCT_PARTY;
-	else if( strcmpi(split[6],"ally") == 0 ) skill_db[idx].unit_target = BCT_PARTY|BCT_GUILD;
-	else if( strcmpi(split[6],"guild") == 0 ) skill_db[idx].unit_target = BCT_GUILD;
-	else if( strcmpi(split[6],"all") == 0 ) skill_db[idx].unit_target = BCT_ALL;
-	else if( strcmpi(split[6],"enemy") == 0 ) skill_db[idx].unit_target = BCT_ENEMY;
-	else if( strcmpi(split[6],"self") == 0 ) skill_db[idx].unit_target = BCT_SELF;
-	else if( strcmpi(split[6],"sameguild") == 0 ) skill_db[idx].unit_target = BCT_GUILD|BCT_SAMEGUILD;
-	else if( strcmpi(split[6],"noone") == 0 ) skill_db[idx].unit_target = BCT_NOONE;
+	if( !strcmpi(split[6],"noenemy") ) skill_db[idx].unit_target = BCT_NOENEMY;
+	else if( !strcmpi(split[6],"friend") ) skill_db[idx].unit_target = BCT_NOENEMY;
+	else if( !strcmpi(split[6],"party") ) skill_db[idx].unit_target = BCT_PARTY;
+	else if( !strcmpi(split[6],"ally") ) skill_db[idx].unit_target = BCT_PARTY|BCT_GUILD;
+	else if( !strcmpi(split[6],"guild") ) skill_db[idx].unit_target = BCT_GUILD;
+	else if( !strcmpi(split[6],"all") ) skill_db[idx].unit_target = BCT_ALL;
+	else if( !strcmpi(split[6],"enemy") ) skill_db[idx].unit_target = BCT_ENEMY;
+	else if( !strcmpi(split[6],"self") ) skill_db[idx].unit_target = BCT_SELF;
+	else if( !strcmpi(split[6],"sameguild") ) skill_db[idx].unit_target = BCT_GUILD|BCT_SAMEGUILD;
+	else if( !strcmpi(split[6],"noone") ) skill_db[idx].unit_target = BCT_NOONE;
 	else skill_db[idx].unit_target = strtol(split[6],NULL,16);
 
 	skill_db[idx].unit_flag = strtol(split[7],NULL,16);
 
-	if (skill_db[idx].unit_flag&UF_DEFNOTENEMY && battle_config.defnotenemy)
+	if( skill_db[idx].unit_flag&UF_DEFNOTENEMY && battle_config.defnotenemy )
 		skill_db[idx].unit_target = BCT_NOENEMY;
 
 	//By default, target just characters

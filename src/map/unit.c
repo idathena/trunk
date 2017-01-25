@@ -234,10 +234,10 @@ int unit_check_start_teleport_timer(struct block_list *sbl) {
 	if(msd && max_dist) {
 		int *msd_tid = unit_get_masterteleport_timer(sbl);
 
-		if(msd_tid == NULL)
+		if(!msd_tid)
 			return 0;
 		if(!check_distance_bl(&msd->bl, sbl, max_dist)) {
-			if(*msd_tid == INVALID_TIMER || *msd_tid == 0)
+			if(*msd_tid == INVALID_TIMER || !*msd_tid)
 				*msd_tid = add_timer(gettick() + 3000,unit_teleport_timer,sbl->id,max_dist);
 		} else {
 			if(*msd_tid && *msd_tid != INVALID_TIMER)

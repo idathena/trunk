@@ -875,9 +875,9 @@ int npc_touchnext_areanpc_sub(struct block_list *bl, va_list ap)
 
 	if( (nd = map_id2nd(npc_id)) && (nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE)) )
 		return 0;
-	if( pc_ishiding(sd) )
-		return 0;
 	if( sd->state.warping )
+		return 0;
+	if( pc_ishiding(sd) )
 		return 0;
 	if( pc_id == sd->bl.id )
 		return 0;

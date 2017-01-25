@@ -104,7 +104,7 @@
 653,0xc6,    ,  0, 5:7:9:11:13:5:7:9:11:13,300,enemy, 0x010 //NPC_EARTHQUAKE
 670,0xc7,    ,  1, 5:5:5:5:5:5:5:5:5:13,1000,all, 0x008 //NPC_EVILLAND
 
-706,0xfd,     ,  2, 0,  20,enemy, 0x018	//NPC_VENOMFOG
+706,0xfd,     ,  2:2:2:2:2:2:2:2:2:5, 0,  50,enemy, 0x018	//NPC_VENOMFOG
 708,0x86,     ,  0, 9, 100,enemy, 0x018	//NPC_COMET
 
 719,0x100,    ,  1, 0,  20,enemy, 0x2018	//NPC_HELLBURNING
