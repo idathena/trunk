@@ -191,12 +191,12 @@ que_ng,152,167,3	script	Master Miller	901,{
 			close;
 		}
 	} else {
-		if (Class == Job_Gunslinger) {
+		if (BaseClass == Job_Gunslinger) {
 			mes "[Master Miller]";
 			mes "Oh! Long time, no see,";
 			mes "friend. How have you been?";
 			mes "I hope you've been keeping";
-			mes "you Gun well maintained.";
+			mes "your Gun well maintained.";
 			mes "Take care of it, and it'll take";
 			mes "care of you. Remember it.";
 			close;

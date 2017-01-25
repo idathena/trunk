@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Muad_Dib
 //===== Current Version: =====================================
-//= 1.1
+//= 1.2
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: =========================================
@@ -13,6 +13,7 @@
 //= 1.0 Adapted from official release. [Euphy]
 //= 1.0a Added 'npcskill' command. [Euphy]
 //= 1.1 Kagerou/Oboro support (Class -> BaseClass) [Euphy]
+//= 1.2 Rebellion support (Class -> BaseClass) [exneval]
 //============================================================
 
 hu_fild01,140,163,5	script	Tower Keeper	852,3,3,{
@@ -2197,7 +2198,7 @@ OnTimer13000:
 OnTimer16000:
 	mapannounce "thana_boss","Thanatos : Come, be the first to fall before my might!",bc_map,"0xff0000"; //FW_NORMAL 12 0 0
 	donpcevent "Memory Seal#tt5::OnDisable";
-	donpcevent "#sommon_thanatos::OnEnable";
+	donpcevent "#summon_thanatos::OnEnable";
 	set $@thana_summon2, 5;
 	stopnpctimer;
 	end;
@@ -2217,14 +2218,15 @@ OnDisable:
 	end;
 }
 
-thana_boss,141,218,0	script	#sommon_thanatos	-1,{
+thana_boss,141,218,0	script	#summon_thanatos	139,{
+	end;
 OnEnable:
-	specialeffect EF_MAPPILLAR2,AREA,"#sommon_thanatos";
-	specialeffect EF_SEISMICWEAPON,AREA,"#sommon_thanatos";
-	monster "thana_boss",141,218,"Thanatos Phantom",1708,1,"#sommon_thanatos::OnMyMobDead";
+	specialeffect EF_MAPPILLAR2;
+	specialeffect EF_SEISMICWEAPON;
+	monster "thana_boss",141,218,"Thanatos Phantom",1708,1,"#summon_thanatos::OnMyMobDead";
 	end;
 OnMyMobDead:
-	if (mobcount("thana_boss","#sommon_thanatos::OnMyMobDead") < 1) {
+	if (mobcount("thana_boss","#summon_thanatos::OnMyMobDead") < 1) {
 		mapannounce "thana_boss","RAWWWWWWWWWWR........ This can't be.........................",bc_map,"0xff0000"; //FW_NORMAL 12 0 0
 		donpcevent "#cooltime_thana::OnEnable";
 		set $@thana_summon, 6;
@@ -2292,7 +2294,7 @@ tha_t04,81,36,0	warp	to 5th Floor	1,1,tha_t05,62,8
 tha_t06,119,120,0	script	to 7th Floor	45,1,1,{
 	end;
 OnTouch:
-	if (eaclass()&(EAJL_2|EAJL_UPPER) || eaclass()&EAJL_THIRD || ((Class == Job_SuperNovice || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Soul_Linker || BaseClass == Job_Ninja || Class == Job_Gunslinger) && BaseLevel > 94)) {
+	if (eaclass()&(EAJL_2|EAJL_UPPER) || eaclass()&EAJL_THIRD || ((Class == Job_SuperNovice || Class == Job_Taekwon || Class == Job_Star_Gladiator || Class == Job_Soul_Linker || BaseClass == Job_Ninja || BaseClass == Job_Gunslinger) && BaseLevel > 94)) {
 		if (countitem(7425) > 0) {
 			mes "The shadow of a Black Key is gleaming in the center of the portal.";
 			mes "To pass this way, looks like I need something.";
