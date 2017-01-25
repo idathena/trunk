@@ -1494,9 +1494,10 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 			case MO_CHAINCOMBO:
 				if( sc && sc->data[SC_BLADESTOP] && !(target = map_id2bl(sc->data[SC_BLADESTOP]->val4)) )
 					return 0;
-				target_id = target->id;
 				break;
 		}
+		if( target )
+			target_id = target->id;
 	} else if( src->type == BL_HOM ) {
 		switch( skill_id ) { //Homun auto-target skills
 			case MH_SONIC_CRAW:
