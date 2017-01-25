@@ -62,7 +62,7 @@ int unit_unattackable(struct block_list *bl);
  */
 struct unit_data *unit_bl2ud(struct block_list *bl)
 {
-	if( bl == NULL )
+	if( !bl )
 		return NULL;
 	switch( bl->type ) {
 		case BL_PC: return &((struct map_session_data *)bl)->ud;
@@ -89,8 +89,7 @@ int unit_walktoxy_sub(struct block_list *bl)
 
 	nullpo_retr(1,bl);
 
-	ud = unit_bl2ud(bl);
-	if( ud == NULL )
+	if( !(ud = unit_bl2ud(bl)) )
 		return 0;
 
 	if( !path_search(&wpd,bl->m,bl->x,bl->y,ud->to_x,ud->to_y,ud->state.walk_easy,CELL_CHKNOPASS) )
@@ -187,9 +186,9 @@ int unit_teleport_timer(int tid, unsigned int tick, int id, intptr_t data) {
 	struct block_list *bl = map_id2bl(id);
 	int *mast_tid = unit_get_masterteleport_timer(bl);
 
-	if(tid == INVALID_TIMER || mast_tid == NULL)
+	if(tid == INVALID_TIMER || !mast_tid)
 		return 0;
-	else if(*mast_tid != tid || bl == NULL)
+	else if(*mast_tid != tid || !bl)
 		return 0;
 	else {
 		TBL_PC *msd = unit_get_master(bl);
