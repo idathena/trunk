@@ -12239,7 +12239,7 @@ static int skill_dance_overlap_sub(struct block_list *bl, va_list ap)
 	struct skill_unit *src = va_arg(ap, struct skill_unit *);
 	int flag = va_arg(ap, int);
 
-	if (target->id == src->id)
+	if (target == src)
 		return 0;
 
 	if (!target->group || !(target->group->state.song_dance&0x1))
