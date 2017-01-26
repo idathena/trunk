@@ -1388,7 +1388,7 @@
 	export_constant(SC_QUEST_BUFF1);
 	export_constant(SC_QUEST_BUFF2);
 	export_constant(SC_QUEST_BUFF3);
-	export_constant(SC_2011RWC_SCROLL);
+	export_constant(SC_ALMIGHTY);
 	export_constant(SC_JP_EVENT04);
 	export_constant(SC_GEFFEN_MAGIC1);
 	export_constant(SC_GEFFEN_MAGIC2);

@@ -7586,7 +7586,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_PUSH_CART:			case SC_FULL_THROTTLE:		case SC_REBOUND:
 							case SC_FREEZING:			case SC_ANGEL_PROTECT:		case SC_MOONSTAR:
 							case SC_SUPER_STAR:			case SC_STRANGELIGHTS:		case SC_DECORATION_OF_MUSIC:
-							case SC_2011RWC_SCROLL:			case SC_JP_EVENT04:		case SC_MTF_ASPD:
+							case SC_ALMIGHTY:			case SC_JP_EVENT04:		case SC_MTF_ASPD:
 							case SC_MTF_ASPD2:			case SC_MTF_RANGEATK:		case SC_MTF_RANGEATK2:
 							case SC_MTF_MATK:			case SC_MTF_MATK2:		case SC_MTF_MLEATKED:
 							case SC_MTF_MHP:			case SC_MTF_MSP:		case SC_MTF_HITFLEE:
@@ -7602,7 +7602,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_QSCARABA:			case SC_LJOSALFAR:		case SC_MAPLE_FALLS:
 							case SC_MERMAID_LONGING:		case SC_TIME_ACCESSORY:		case SC_CLAN_INFO:
 							case SC_SWORDCLAN:			case SC_ARCWANDCLAN:		case SC_GOLDENMACECLAN:
-							case SC_CROSSBOWCLAN:			case SC_ARMOR_ELEMENT:
+							case SC_CROSSBOWCLAN:			case SC_ARMOR_ELEMENT:		case SC_QUEST_BUFF1:
+							case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )
@@ -9055,7 +9056,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_PUSH_CART:			case SC_FULL_THROTTLE:		case SC_REBOUND:
 						case SC_ANGEL_PROTECT:			case SC_MOONSTAR:
 						case SC_SUPER_STAR:			case SC_STRANGELIGHTS:		case SC_DECORATION_OF_MUSIC:
-						case SC_2011RWC_SCROLL:			case SC_JP_EVENT04:		case SC_MTF_ASPD:
+						case SC_ALMIGHTY:			case SC_JP_EVENT04:		case SC_MTF_ASPD:
 						case SC_MTF_ASPD2:			case SC_MTF_RANGEATK:		case SC_MTF_RANGEATK2:
 						case SC_MTF_MATK:			case SC_MTF_MATK2:		case SC_MTF_MLEATKED:
 						case SC_MTF_MHP:			case SC_MTF_MSP:		case SC_MTF_HITFLEE:
@@ -9071,7 +9072,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_LJOSALFAR:			case SC_MAPLE_FALLS:		case SC_MERMAID_LONGING:
 						case SC_TIME_ACCESSORY:			case SC_CLAN_INFO:		case SC_SWORDCLAN:
 						case SC_ARCWANDCLAN:			case SC_GOLDENMACECLAN:		case SC_CROSSBOWCLAN:
-						case SC_ARMOR_ELEMENT:
+						case SC_ARMOR_ELEMENT:			case SC_QUEST_BUFF1:		case SC_QUEST_BUFF2:
+						case SC_QUEST_BUFF3:
 							continue;
 						case SC_SILENCE:
 							if( tsc->data[i]->val4 )

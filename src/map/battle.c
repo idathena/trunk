@@ -4351,6 +4351,30 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.statusAtk, wd.statusAtk2, sce->val1);
 #endif
 		}
+		if((sce = sc->data[SC_QUEST_BUFF1])) {
+			ATK_ADD(wd.damage, wd.damage2, sce->val1);
+#ifdef RENEWAL
+			ATK_ADD(wd.equipAtk, wd.equipAtk2, sce->val1);
+#endif
+		}
+		if((sce = sc->data[SC_QUEST_BUFF2])) {
+			ATK_ADD(wd.damage, wd.damage2, sce->val1);
+#ifdef RENEWAL
+			ATK_ADD(wd.equipAtk, wd.equipAtk2, sce->val1);
+#endif
+		}
+		if((sce = sc->data[SC_QUEST_BUFF3])) {
+			ATK_ADD(wd.damage, wd.damage2, sce->val1);
+#ifdef RENEWAL
+			ATK_ADD(wd.equipAtk, wd.equipAtk2, sce->val1);
+#endif
+		}
+		if(sc->data[SC_ALMIGHTY]) {
+			ATK_ADD(wd.damage, wd.damage2, 30);
+#ifdef RENEWAL
+			ATK_ADD(wd.equipAtk, wd.equipAtk2, 30);
+#endif
+		}
 		if((sce = sc->data[SC_FIGHTINGSPIRIT])) {
 			ATK_ADD(wd.damage, wd.damage2, sce->val1);
 #ifdef RENEWAL

@@ -227,6 +227,7 @@ int quest_update_objective_sub(struct block_list *bl, va_list ap) {
 
 	if( !sd->avail_quests )
 		return 0;
+
 	if( sd->status.party_id != party )
 		return 0;
 
@@ -241,22 +242,22 @@ int quest_update_objective_sub(struct block_list *bl, va_list ap) {
  * @param sd     Character's data
  * @param mob_id Monster ID
  */
-void quest_update_objective(TBL_PC *sd, int mob) {
+void quest_update_objective(TBL_PC *sd, int mob_id) {
 	int i, j;
 
 	for( i = 0; i < sd->avail_quests; i++ ) {
 		struct quest_db *qi = NULL;
 
-		if( sd->quest_log[i].state != Q_ACTIVE ) // Skip inactive quests
+		if( sd->quest_log[i].state == Q_COMPLETE ) // Skip complete quests
 			continue;
 
 		qi = quest_search(sd->quest_log[i].quest_id);
 
 		for( j = 0; j < qi->num_objectives; j++ ) {
-			if( qi->mob[j] == mob && sd->quest_log[i].count[j] < qi->count[j] )  {
+			if( qi->mob[j] == mob_id && sd->quest_log[i].count[j] < qi->count[j] )  {
 				sd->quest_log[i].count[j]++;
 				sd->save_quest = true;
-				clif_quest_update_objective(sd, &sd->quest_log[i], mob);
+				clif_quest_update_objective(sd, &sd->quest_log[i], mob_id);
 			}
 		}
 	}
@@ -405,6 +406,7 @@ int quest_read_db(void) {
 			ShowError("quest_read_db: Invalid quest ID '%d' in line '%s' (min: 0, max: %d.)\n", entry.id, line, INT_MAX);
 			continue;
 		}
+
 		if( !(quest = (struct quest_db *)idb_get(questdb, entry.id)) )
 			CREATE(quest, struct quest_db, 1);
 
