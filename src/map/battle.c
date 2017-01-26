@@ -2033,7 +2033,7 @@ static int battle_blewcount_bonus(struct map_session_data *sd, uint16 skill_id)
  */
 static bool battle_skill_damage_iscaster(uint8 caster, enum bl_type src_type)
 {
-	if(caster == 0)
+	if(!caster)
 		return false;
 
 	switch(src_type) {
@@ -5419,12 +5419,14 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		}
 
 		//Add any miscellaneous player skill ATK rate bonuses
-		if(sd && (i = pc_skillatk_bonus(sd, id)))
-			ATK_ADDRATE(wd.damage, wd.damage2, i);
+		if(sd) {
+			if((i = pc_skillatk_bonus(sd, id)))
+				ATK_ADDRATE(wd.damage, wd.damage2, i);
+			if((i = battle_adjust_skill_damage(src->m, id)))
+				ATK_RATE(wd.damage, wd.damage2, i);
+		}
 		if(tsd && (i = pc_sub_skillatk_bonus(tsd, id)))
 			ATK_ADDRATE(wd.damage, wd.damage2, -i);
-		if((i = battle_adjust_skill_damage(src->m, id)))
-			ATK_RATE(wd.damage, wd.damage2, i);
 	} else if(wd.div_ < 0)
 		wd.div_ *= -1;
 
@@ -5802,7 +5804,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			break;
 	}
 
-	if(!(flag.infdef) && (tstatus->mode&MD_IGNOREMAGIC) && (ad.flag&BF_MAGIC)) //Magic
+	if(!flag.infdef && (tstatus->mode&MD_IGNOREMAGIC) && (ad.flag&BF_MAGIC)) //Magic
 		flag.infdef = 1;
 
 	if(!flag.infdef) { //No need to do the math for plants
@@ -5870,6 +5872,21 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				break;
 			default:
 				MATK_ADD(status_get_matk(src, 2));
+
+#ifdef RENEWAL
+				switch(skill_id) {
+					case AM_DEMONSTRATION:
+					case AM_ACIDTERROR:
+					case HW_MAGICCRASHER:
+					case ASC_BREAKER:
+					case CR_ACIDDEMONSTRATION:
+					case GN_FIRE_EXPANSION_ACID:
+						break; //Do card fix later
+					default:
+						ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 0, ad.flag);
+						break;
+				}
+#endif
 
 				//Divide MATK in case of multiple targets skill
 				if(nk&NK_SPLASHSPLIT) {
@@ -6290,21 +6307,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				break;
 		}
 
-#ifdef RENEWAL
-		switch(skill_id) {
-			case AM_DEMONSTRATION:
-			case AM_ACIDTERROR:
-			case HW_MAGICCRASHER:
-			case ASC_BREAKER:
-			case CR_ACIDDEMONSTRATION:
-			case GN_FIRE_EXPANSION_ACID:
-				break; //Do card fix later
-			default:
-				ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 0, ad.flag);
-				break;
-		}
-#endif
-
 		switch(skill_id) {
 			case WL_CHAINLIGHTNING_ATK:
 				id = WL_CHAINLIGHTNING;
@@ -6333,20 +6335,19 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 		}
 
 		if(sd) {
+			if((i = pc_skillatk_bonus(sd, id)))
+				MATK_ADDRATE(i); //Damage rate bonuses
+			if((i = battle_adjust_skill_damage(src->m, id)))
+				MATK_RATE(i);
 			if(!flag.imdef &&
 				((sd->bonus.ignore_mdef_ele&(1<<tstatus->def_ele)) || (sd->bonus.ignore_mdef_ele&(1<<ELE_ALL)) ||
 				(sd->bonus.ignore_mdef_race&(1<<tstatus->race)) || (sd->bonus.ignore_mdef_race&(1<<RC_ALL)) ||
 				(sd->bonus.ignore_mdef_class&(1<<tstatus->class_)) || (sd->bonus.ignore_mdef_class&(1<<CLASS_ALL))))
 				flag.imdef = 1; //Ignore MDEF
-			if((i = pc_skillatk_bonus(sd, id)))
-				MATK_ADDRATE(i); //Damage rate bonuses
 		}
 
 		if(tsd && (i = pc_sub_skillatk_bonus(tsd, id)))
 			MATK_ADDRATE(-i);
-
-		if((i = battle_adjust_skill_damage(src->m, id)))
-			MATK_RATE(i);
 
 		if(!flag.imdef) {
 			defType mdef = tstatus->mdef; //eMDEF
@@ -6361,7 +6362,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				if(i) {
 					i = min(i, 100);
 					mdef -= mdef * i / 100;
-					mdef2 -= mdef2 * i / 100;
+					//mdef2 -= mdef2 * i / 100;
 				}
 			}
 
@@ -6381,8 +6382,10 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 #endif
 		}
 
-		if(ad.damage > 0 && sc) { //@TODO: There is another factor that contribute with the damage and need to be formulated [malufett]
-			switch(skill_id) {
+		if(ad.damage < 1)
+			ad.damage = 1;
+		else if(sc) { //Only applies when hit
+			switch(skill_id) { //@TODO: There is another factor that contribute with the damage and need to be formulated [malufett]
 				case MG_LIGHTNINGBOLT:
 				case MG_THUNDERSTORM:
 					if(sc->data[SC_GUST_OPTION])
@@ -6405,8 +6408,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					break;
 			}
 		}
-
-		ad.damage = max(ad.damage,1);
 
 		if(!(nk&NK_NO_ELEFIX)
 #ifdef RENEWAL //Keep neutral reduction from ghost element armor
@@ -6894,14 +6895,15 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			break;
 	}
 
-	if(sd && (i = pc_skillatk_bonus(sd, id)))
-		md.damage += md.damage * i / 100;
+	if(sd) {
+		if((i = pc_skillatk_bonus(sd, id)))
+			md.damage += md.damage * i / 100;
+		if((i = battle_adjust_skill_damage(src->m, id)))
+			md.damage = md.damage * i / 100;
+	}
 
 	if(tsd && (i = pc_sub_skillatk_bonus(tsd, id)))
 		md.damage -= md.damage * i / 100;
-
-	if((i = battle_adjust_skill_damage(src->m, id)))
-		md.damage = md.damage * i / 100;
 
 	if(md.damage > 0) {
 		if(tstatus->mode&MD_PLANT) {

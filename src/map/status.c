@@ -3340,8 +3340,17 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			if (sd->bonus.weapon_matk_rate)
 				watk->matk += watk->matk * sd->bonus.weapon_matk_rate / 100;
 			watk->wlv = wlv;
-			if (r && sd->weapontype1 != W_BOW) //Renewal magic attack refine bonus
-				watk->matk += refine_info[wlv].bonus[r - 1] / 100;
+			switch (sd->status.weapon) {
+				case W_BOW:	case W_MUSICAL:
+				case W_WHIP:	case W_REVOLVER:
+				case W_RIFLE:	case W_GATLING:
+				case W_SHOTGUN:	case W_GRENADE:
+					break;
+				default:
+					if (r) //Renewal magic attack refine bonus
+						watk->matk += refine_info[wlv].bonus[r - 1] / 100;
+					break;
+			}
 #endif
 			if (r) //Overrefine bonus
 				wd->overrefine = refine_info[wlv].randombonus_max[r - 1] / 100;
