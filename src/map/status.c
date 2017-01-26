@@ -3341,8 +3341,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 				watk->matk += watk->matk * sd->bonus.weapon_matk_rate / 100;
 			watk->wlv = wlv;
 			switch (sd->status.weapon) {
-				case W_BOW:	case W_MUSICAL:
-				case W_WHIP:	case W_REVOLVER:
+				case W_BOW:	case W_REVOLVER:
 				case W_RIFLE:	case W_GATLING:
 				case W_SHOTGUN:	case W_GRENADE:
 					break;
