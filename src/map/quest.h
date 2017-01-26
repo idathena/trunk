@@ -4,8 +4,6 @@
 #ifndef _QUEST_H_
 #define _QUEST_H_
 
-#define MAX_QUEST_DB (62238 + 1) //Highest quest ID + 1
-
 struct quest_db {
 	int id;
 	unsigned int time;
@@ -30,7 +28,7 @@ int quest_add(TBL_PC *sd, int quest_id);
 int quest_delete(TBL_PC *sd, int quest_id);
 int quest_change(TBL_PC *sd, int qid1, int qid2);
 int quest_update_objective_sub(struct block_list *bl, va_list ap);
-void quest_update_objective(TBL_PC *sd, int mob);
+void quest_update_objective(TBL_PC *sd, int mob_id);
 int quest_update_status(TBL_PC *sd, int quest_id, enum quest_state status);
 int quest_check(TBL_PC *sd, int quest_id, enum quest_check_type type);
 void quest_clear(void);

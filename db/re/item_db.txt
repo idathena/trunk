@@ -6823,7 +6823,7 @@
 12793,Combat_Pill_Box10,Combat Pill Box10,2,20,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 12791,10; },{},{}
 12794,P_Combat_Pill_Box10,Advance Combat Pill Box10,2,20,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 12792,10; },{},{}
 12795,2011_RWC_Scroll_Kr,2011 RWC Scroll Kr,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
-12796,Red_Booster,Red Booster,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_POTION_BERSERK; bonus_script "{ bonus bBaseAtk,10; bonus bMatk,30; bonus bAspdRate,5; bonus bVariableCastrate,-5; bonus bMaxHPrate,-10; bonus bMaxSPrate,-10; bonus3 bAutoSpell,\"AC_CONCENTRATION\",(getskilllv(\"AC_CONCENTRATION\")<3?3:getskilllv(\"AC_CONCENTRATION\")),30; }",600,1; callfunc "F_12796"; },{},{}
+12796,Red_Booster,Red Booster,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_POTION_BERSERK; bonus_script "{ bonus bBaseAtk,30; bonus bMatk,30; bonus bAspdRate,5; bonus bVariableCastrate,-5; bonus bMaxHPrate,-10; bonus bMaxSPrate,-10; bonus3 bAutoSpell,\"AC_CONCENTRATION\",(getskilllv(\"AC_CONCENTRATION\")<3?3:getskilllv(\"AC_CONCENTRATION\")),30; }",600,1,0,SI_2011RWC_SCROLL; callfunc "F_12796"; },{},{}
 12797,Wish_Maiden_Scroll,Wish Maiden Scroll,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ mercenary_create 2344,1800000; },{},{}
 12798,Zealotus_Scroll,Zealotus Scroll,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ mercenary_create 2345,1800000; },{},{}
 12799,PCBang_Coupon_Box5,PCBang Coupon Box5,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
@@ -6885,7 +6885,7 @@
 12868,GLAST_STATE,GLAST_STATE,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bAllStats,20; }",30,1,0,SI_GLASTHEIM_STATE; },{},{}
 12869,GLAST_ITEMDEF,GLAST_ITEMDEF,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bDef,200; bonus bMdef,50; }",30,1,0,SI_GLASTHEIM_ITEMDEF; },{},{}
 12870,GLAST_HPSP,GLAST_HPSP,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bMaxHP,10000; bonus bMaxSP,1000; }",30,1,0,SI_GLASTHEIM_HPSP; },{},{}
-12883,Almighty,Almighty,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_BASH3D; sc_start SC_2011RWC_SCROLL,1800000,10; },{},{}
+12883,Almighty,Almighty,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_BASH3D; sc_start SC_ALMIGHTY,1800000,10; },{},{}
 12884,C_Center_Potion,Infinite Concentration Potion,11,10,,0,,,,0,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_ASPDPOTION0,1800000,4; },{},{}
 12885,C_Awakening_Potion,Infinite Awakening Potion,11,10,,0,,,,0,0xFFF7FEEF,63,2,,,,,,{ sc_start SC_ASPDPOTION1,1800000,6; },{},{}
 12886,C_Berserk_Potion,Infinite Berserk Potion,11,10,,0,,,,0,0x01E646A6,63,2,,,,,,{ sc_start SC_ASPDPOTION2,1800000,9; },{},{}
