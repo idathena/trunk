@@ -275,7 +275,7 @@ int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t dat
 	unsigned int timeout = NPC_SECURE_TIMEOUT_NEXT;
 	int cur_tick = gettick(); //Ensure we are on last tick
 
-	if( (sd = map_id2sd(id)) == NULL || !sd->npc_id || sd->state.ignoretimeout ) {
+	if( !(sd = map_id2sd(id)) || !sd->npc_id || sd->state.ignoretimeout ) {
 		if( sd )
 			sd->npc_idle_timer = INVALID_TIMER;
 		return 0; //Not logged in anymore or no longer attached to a NPC or using 'ignoretimeout' script command
@@ -1343,7 +1343,7 @@ int npc_buysellsel(struct map_session_data *sd, int id, int type)
 
 	nullpo_retr(1, sd);
 
-	if ((nd = npc_checknear(sd,map_id2bl(id))) == NULL)
+	if (!(nd = npc_checknear(sd,map_id2bl(id))))
 		return 1;
 
 	if (nd->subtype != NPCTYPE_SHOP && nd->subtype != NPCTYPE_ITEMSHOP && nd->subtype != NPCTYPE_POINTSHOP) {
@@ -1355,9 +1355,6 @@ int npc_buysellsel(struct map_session_data *sd, int id, int type)
 
 	if (nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE))
 		return 1; //Can't buy if NPC isn't visible (hack?)
-
-	if (nd->class_ < 0 && !sd->state.callshop)
-		return 1; //Not called through a script and is not a visible NPC so an invalid call
 
 	if (nd->subtype == NPCTYPE_ITEMSHOP) {
 		char output[CHAT_SIZE_MAX];
@@ -1378,11 +1375,9 @@ int npc_buysellsel(struct map_session_data *sd, int id, int type)
 		clif_broadcast(&sd->bl,output,strlen(output) + 1,0x10,SELF);
 	}
 
-	// Reset the callshop state for future calls
-	sd->state.callshop = 0;
 	sd->npc_shopid = id;
 
-	if (type == 0)
+	if (!type)
 		clif_buylist(sd,nd);
 	else
 		clif_selllist(sd);

@@ -6077,7 +6077,7 @@ BUILDIN_FUNC(countitem)
 	else //Item id
 		id = itemdb_exists(conv_num(st, data));
 
-	if( id == NULL ) {
+	if( !id ) {
 		ShowError("buildin_%s: Invalid item '%s'.\n", command, script_getstr(st,2)); //Returns string, regardless of what it was
 		script_pushint(st,0);
 		return 1;
@@ -6165,7 +6165,7 @@ int checkweight_sub(TBL_PC *sd, int nbargs, unsigned short *eitemid, int32 *eamo
 
 /*==========================================
  * Check if item with this amount can fit in inventory
- * Checking : weight, stack amount >32k, slots amount >(MAX_INVENTORY)
+ * Checking : weight, stack amount >(MAX_AMOUNT), slots amount >(MAX_INVENTORY)
  * Return
  *	0 : fail
  *	1 : success (npc side only)
@@ -6178,7 +6178,7 @@ BUILDIN_FUNC(checkweight)
 	int32 amount[SCRIPT_MAX_ARRAYSIZE];
 	uint16 nbargs, i, j = 0;
 
-	if( (sd = script_rid2sd(st)) == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	nbargs = script_lastdata(st) + 1;
@@ -6191,13 +6191,13 @@ BUILDIN_FUNC(checkweight)
 	for( i = 2; i < nbargs; i = i + 2 ) {
 		struct script_data *data = script_getdata(st,i);
 
-		get_val(st,data);  // Convert into value in case of a variable
+		get_val(st,data); // Convert into value in case of a variable
 		if( data_isstring(data) ) // Item name
 			id = itemdb_searchname(conv_str(st,data));
 		else // Item id
 			id = itemdb_exists(conv_num(st,data));
-		if( id == NULL ) {
-			ShowError("buildin_checkweight: Invalid item '%s'.\n",script_getstr(st,i));  // Returns string, regardless of what it was
+		if( !id ) {
+			ShowError("buildin_checkweight: Invalid item '%s'.\n",script_getstr(st,i)); // Returns string, regardless of what it was
 			script_pushint(st,0);
 			return 1;
 		}
@@ -8550,8 +8550,12 @@ BUILDIN_FUNC(end)
 	if( st->mes_active )
 		st->mes_active = 0;
 
-	if( sd )
-		clif_scriptclose(sd, st->oid); // If a menu/select/prompt is active, close it
+	if( sd ) {
+		if( sd->state.callshop )
+			sd->state.callshop = 0;
+		else
+			clif_scriptclose(sd, st->oid); //If a menu/select/prompt is active, close it
+	}
 
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -15732,8 +15736,7 @@ BUILDIN_FUNC(callshop)
 	const char *shopname;
 	int flag = 0;
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 1;
 	shopname = script_getstr(st,2);
 	if( script_hasdata(st,3) )

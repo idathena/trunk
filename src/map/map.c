@@ -2134,11 +2134,6 @@ int map_quit(struct map_session_data *sd) {
 	if (map[sd->bl.m].instance_id)
 		instance_delusers(map[sd->bl.m].instance_id);
 
-	if (sd->ed) {
-		elemental_clean_effect(sd->ed);
-		unit_remove_map(&sd->ed->bl,CLR_RESPAWN);
-	}
-
 	unit_remove_map_pc(sd,CLR_RESPAWN);
 
 	if (map[sd->bl.m].instance_id) { //Avoid map conflicts and warnings on next login
@@ -2679,6 +2674,7 @@ int map_addinstancemap(const char *name, int id)
 
 	map[dst_m].index = mapindex_addmap(-1, map[dst_m].name);
 	map[dst_m].channel = NULL;
+	map[dst_m].mob_delete_timer = INVALID_TIMER;
 
 	map_addmap2db(&map[dst_m]);
 
@@ -2705,20 +2701,14 @@ static int map_instancemap_leave(struct block_list *bl, va_list ap)
  *------------------------------------------*/
 static int map_instancemap_clean(struct block_list *bl, va_list ap)
 {
-	nullpo_retr(0,bl);
+	nullpo_retr(0, bl);
 
-	switch(bl->type) {
-		case BL_PC:
-			map_quit((struct map_session_data *)bl);
-			break;
+	switch(bl->type) { //BL_PET, BL_HOM, BL_MER, and BL_ELEM are moved when BL_PC warped out in 'map_instancemap_leave'
 		case BL_NPC:
-			npc_unload((struct npc_data *)bl,true);
+			npc_unload((struct npc_data *)bl, true);
 			break;
 		case BL_MOB:
-			unit_free(bl,CLR_OUTSIGHT);
-			break;
-		case BL_PET:
-			//There is no need for this, the pet is removed together with the player. [Skotlex]
+			unit_free(bl, CLR_OUTSIGHT);
 			break;
 		case BL_ITEM:
 			map_clearflooritem(bl);
@@ -2750,20 +2740,16 @@ int map_delinstancemap(int m)
 	if(map[m].mob_delete_timer != INVALID_TIMER)
 		delete_timer(map[m].mob_delete_timer, map_removemobs_timer);
 
-	mapindex_removemap( map[m].index );
-
 	// Free memory
 	aFree(map[m].cell);
 	aFree(map[m].block);
 	aFree(map[m].block_mob);
 	map_free_questinfo(m);
 
+	mapindex_removemap(map[m].index);
 	map_removemapdb(&map[m]);
 	memset(&map[m], 0x00, sizeof(map[0]));
-
-	// Make delete timers invalid to avoid errors
 	map[m].mob_delete_timer = INVALID_TIMER;
-
 	return 1;
 }
 
@@ -2863,6 +2849,9 @@ void map_removemobs(int16 m)
 {
 	if (map[m].mob_delete_timer != INVALID_TIMER) //Should never happen
 		return; //Mobs are already scheduled for removal
+
+	if (map[m].instance_id)
+		return; //Don't remove mobs on instance map
 
 	map[m].mob_delete_timer = add_timer(gettick() + battle_config.mob_remove_delay, map_removemobs_timer, m, 0);
 }
