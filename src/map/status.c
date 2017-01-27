@@ -3491,26 +3491,25 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	if (sd->pd) { //Pet Bonus
 		struct pet_data *pd = sd->pd;
 
-		if (pd && pd->petDB && pd->petDB->pet_friendly_script && pd->pet.intimate >= battle_config.pet_bonus_min_friendly) {
-			run_script(pd->petDB->pet_friendly_script,0,sd->bl.id,0);
-			if (!calculating)
-				return 1;
-		}
-		if (pd && pd->pet.intimate > 0 && (!battle_config.pet_equip_required || pd->pet.equip > 0) && pd->state.skillbonus == 1 && pd->bonus) {
-			if (pd->bonus->val2)
-				pc_bonus2(sd,pd->bonus->type,pd->bonus->val1,pd->bonus->val2);
-			else
-				pc_bonus(sd,pd->bonus->type,pd->bonus->val1);
+		if (pd) {
+			if (pd->petDB && pd->petDB->pet_friendly_script && pd->pet.intimate >= battle_config.pet_bonus_min_friendly) {
+				run_script(pd->petDB->pet_friendly_script,0,sd->bl.id,0);
+				if (!calculating)
+					return 1;
+			}
+			if (pd->pet.intimate > 0 && (!battle_config.pet_equip_required || pd->pet.equip > 0) && pd->state.skillbonus == 1 && pd->bonus) {
+				if (pd->bonus->val2)
+					pc_bonus2(sd,pd->bonus->type,pd->bonus->val1,pd->bonus->val2);
+				else
+					pc_bonus(sd,pd->bonus->type,pd->bonus->val1);
+			}
 		}
 	}
 
 	//Param_bonus now holds card bonuses
-	if (status->rhw.range < 1)
-		status->rhw.range = 1;
-	if (status->lhw.range < 1)
-		status->lhw.range = 1;
-	if (status->rhw.range < status->lhw.range)
-		status->rhw.range = status->lhw.range;
+	status->rhw.range = max(status->rhw.range,1);
+	status->lhw.range = max(status->lhw.range,1);
+	status->rhw.range = max(status->rhw.range,status->lhw.range);
 
 	sd->bonus.double_rate += sd->bonus.double_add_rate;
 	sd->bonus.perfect_hit += sd->bonus.perfect_hit_add;

@@ -8709,6 +8709,7 @@ duration in seconds and will be repeated for certain delay in seconds.
 
 For a full bonus list, see 'doc/item_bonus.txt'
 NOTE: Currently ONLY supported for bonuses that used by 'bonus' and 'bonus2' script.
+NOTE2: Currently ONLY supported one bonus/bonus2 at one time or it will be overwritten.
 
 ---------------------------------------
 

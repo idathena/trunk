@@ -8616,6 +8616,7 @@ static const struct _battle_data {
 	{ "guild_maprespawn_clones",            &battle_config.guild_maprespawn_clones,         0,      0,      1,              },
 	{ "skill_eightpath_algorithm",          &battle_config.skill_eightpath_algorithm,       1,      0,      1,              },
 	{ "can_damage_skill",                   &battle_config.can_damage_skill,                1,      0,      BL_ALL,         },
+	{ "atcommand_levelup_events",           &battle_config.atcommand_levelup_events,        0,      0,      1,              },
 };
 
 #ifndef STATS_OPT_OUT

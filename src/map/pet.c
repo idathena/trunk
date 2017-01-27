@@ -138,9 +138,9 @@ int pet_target_check(struct pet_data *pd, struct block_list *bl, int type)
 
 	nullpo_ret(pd);
 
-	Assert((pd->master == NULL) || (pd->master->pd == pd));
+	Assert(!pd->master || pd->master->pd == pd);
 
-	if(bl == NULL || bl->type != BL_MOB || bl->prev == NULL ||
+	if(!bl || bl->type != BL_MOB || !bl->prev ||
 		pd->pet.intimate < battle_config.pet_support_min_friendly ||
 		pd->pet.hungry < 1 ||
 		pd->pet.class_ == status_get_class(bl))
@@ -321,7 +321,7 @@ int pet_data_init(struct map_session_data *sd, struct s_pet *pet)
 
 	nullpo_retr(1,sd);
 
-	Assert((sd->status.pet_id == 0 || sd->pd == NULL) || sd->pd->master == sd);
+	Assert(!sd->status.pet_id || !sd->pd || sd->pd->master == sd);
 
 	if(sd->status.account_id != pet->account_id || sd->status.char_id != pet->char_id) {
 		sd->status.pet_id = 0;
@@ -374,15 +374,13 @@ int pet_data_init(struct map_session_data *sd, struct s_pet *pet)
 	if(pd->petDB) {
 		if(pd->petDB->pet_friendly_script)
 			status_calc_pc(sd,SCO_NONE);
-
 		if(battle_config.pet_hungry_delay_rate != 100)
 			interval = pd->petDB->hungry_delay * battle_config.pet_hungry_delay_rate / 100;
 		else
 			interval = pd->petDB->hungry_delay;
 	}
 
-	if(interval <= 0)
-		interval = 1;
+	interval = max(interval,1);
 	pd->pet_hungry_timer = add_timer(gettick() + interval,pet_hungry,sd->bl.id,0);
 	pd->masterteleport_timer = INVALID_TIMER;
 	return 0;
@@ -392,7 +390,7 @@ int pet_birth_process(struct map_session_data *sd, struct s_pet *pet)
 {
 	nullpo_retr(1, sd);
 
-	Assert((sd->status.pet_id == 0 || sd->pd == NULL) || sd->pd->master == sd);
+	Assert(!sd->status.pet_id || !sd->pd || sd->pd->master == sd);
 
 	if(sd->status.pet_id && pet->incubate == 1) {
 		sd->status.pet_id = 0;
@@ -412,7 +410,7 @@ int pet_birth_process(struct map_session_data *sd, struct s_pet *pet)
 	if(save_settings&8)
 		chrif_save(sd, 0); //Is it REALLY Needed to save the char for hatching a pet? [Skotlex]
 
-	if(sd->bl.prev != NULL) {
+	if(sd->bl.prev) {
 		if(map_addblock(&sd->pd->bl))
 			return 1;
 		clif_spawn(&sd->pd->bl);
@@ -421,7 +419,7 @@ int pet_birth_process(struct map_session_data *sd, struct s_pet *pet)
 		clif_pet_equip_area(sd->pd);
 		clif_send_petstatus(sd);
 	}
-	Assert((sd->status.pet_id == 0 || sd->pd == NULL) || sd->pd->master == sd);
+	Assert(!sd->status.pet_id || !sd->pd || sd->pd->master == sd);
 
 	return 0;
 }
@@ -811,7 +809,7 @@ static int pet_randomwalk(struct pet_data *pd,unsigned int tick)
 {
 	nullpo_ret(pd);
 
-	Assert((pd->master == NULL) || (pd->master->pd == pd));
+	Assert(!pd->master || pd->master->pd == pd);
 
 	if(DIFF_TICK(pd->next_walktime,tick) < 0 && unit_can_move(&pd->bl)) {
 		const int retrycount = 20;

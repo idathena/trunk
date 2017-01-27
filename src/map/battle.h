@@ -630,6 +630,7 @@ extern struct Battle_Config
 	int guild_maprespawn_clones; //Should clones be killed by maprespawnguildid?
 	int skill_eightpath_algorithm; //Official path algorithm
 	int can_damage_skill; //Which BL types can damage traps
+	int atcommand_levelup_events;
 } battle_config;
 
 void do_init_battle(void);

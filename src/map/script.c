@@ -8141,9 +8141,8 @@ BUILDIN_FUNC(bonus)
 	TBL_PC *sd;
 	struct script_data *data;
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
-		return 0; // No player attached
+	if( !(sd = script_rid2sd(st)) )
+		return 0; //No player attached
 
 	type = script_getnum(st,2);
 	switch( type ) {
@@ -8164,9 +8163,9 @@ BUILDIN_FUNC(bonus)
 		case SP_FIXCASTRATE:
 		case SP_SKILL_USE_SP:
 		case SP_SUB_SKILL:
-			// These bonuses support skill names
+			//These bonuses support skill names
 			data = script_getdata(st,3);
-			get_val(st,data); // Convert into value in case of a variable
+			get_val(st,data); //Convert into value in case of a variable
 			val1 = (data_isstring(data) ? skill_name2id(script_getstr(st,3)) : script_getnum(st,3));
 			break;
 		default:
@@ -8189,24 +8188,22 @@ BUILDIN_FUNC(bonus)
 			break;
 		case 4:
 			data = script_getdata(st,4);
-			get_val(st, data); // Convert into value in case of a variable
+			get_val(st, data); //Convert into value in case of a variable
 			if( type == SP_AUTOSPELL_ONSKILL && data_isstring(data) )
-				val2 = skill_name2id(script_getstr(st,4)); // 2nd value can be skill name
+				val2 = skill_name2id(script_getstr(st,4)); //2nd value can be skill name
 			else
 				val2 = script_getnum(st,4);
-
 			val3 = script_getnum(st,5);
 			val4 = script_getnum(st,6);
 			pc_bonus4(sd,type,val1,val2,val3,val4);
 			break;
 		case 5:
 			data = script_getdata(st,4);
-			get_val(st,data); // Convert into value in case of a variable
+			get_val(st,data); //Convert into value in case of a variable
 			if( type == SP_AUTOSPELL_ONSKILL && data_isstring(data) )
-				val2 = skill_name2id(script_getstr(st,4)); // 2nd value can be skill name
+				val2 = skill_name2id(script_getstr(st,4)); //2nd value can be skill name
 			else
 				val2 = script_getnum(st,4);
-
 			val3 = script_getnum(st,5);
 			val4 = script_getnum(st,6);
 			val5 = script_getnum(st,7);
@@ -12644,7 +12641,7 @@ BUILDIN_FUNC(getequipcardid)
 	slot = script_getnum(st,3);
 	sd = script_rid2sd(st);
 
-	if (sd == NULL)
+	if (!sd)
 		return 1;
 	if (equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
@@ -12665,7 +12662,7 @@ BUILDIN_FUNC(petskillbonus)
 	char bonus_type;
 	const char *command = script_getfuncname(st);
 
-	if (sd == NULL || sd->pd == NULL)
+	if (!sd || !sd->pd)
 		return 1;
 
 	pd = sd->pd;
@@ -12673,9 +12670,9 @@ BUILDIN_FUNC(petskillbonus)
 		if (pd->bonus->timer != INVALID_TIMER)
 			delete_timer(pd->bonus->timer, pet_skill_bonus_timer);
 	} else //Init
-		pd->bonus = (struct pet_bonus *) aMalloc(sizeof(struct pet_bonus));
+		pd->bonus = (struct pet_bonus *)aMalloc(sizeof(struct pet_bonus));
 
-	if(strstr(command, "2"))
+	if (strstr(command,"2"))
 		bonus_type = 2;
 	else
 		bonus_type = 1;
@@ -12699,7 +12696,7 @@ BUILDIN_FUNC(petskillbonus)
 		pd->state.skillbonus = 0; //Waiting state
 
 	//Wait for timer to start
-	if (battle_config.pet_equip_required && pd->pet.equip == 0)
+	if (battle_config.pet_equip_required && !pd->pet.equip)
 		pd->bonus->timer = INVALID_TIMER;
 	else
 		pd->bonus->timer = add_timer(gettick() + pd->bonus->delay * 1000, pet_skill_bonus_timer, sd->bl.id, 0);
@@ -12715,7 +12712,7 @@ BUILDIN_FUNC(petloot)
 	struct pet_data *pd;
 	TBL_PC *sd = script_rid2sd(st);
 
-	if(sd == NULL || sd->pd == NULL)
+	if(!sd || !sd->pd)
 		return 0;
 
 	max = script_getnum(st,2);
@@ -12726,7 +12723,7 @@ BUILDIN_FUNC(petloot)
 		max = MAX_PETLOOT_SIZE;
 
 	pd = sd->pd;
-	if(pd->loot != NULL) { //Release whatever was there already and reallocate memory
+	if(pd->loot) { //Release whatever was there already and reallocate memory
 		pet_lootitem_drop(pd, pd->master);
 		aFree(pd->loot->item);
 	} else
@@ -13080,7 +13077,7 @@ BUILDIN_FUNC(petheal)
 	struct pet_data *pd;
 	TBL_PC *sd = script_rid2sd(st);
 
-	if( sd == NULL || sd->pd == NULL )
+	if( !sd || !sd->pd )
 		return 0;
 
 	pd = sd->pd;
@@ -13102,7 +13099,7 @@ BUILDIN_FUNC(petheal)
 	pd->s_skill->sp = script_getnum(st,5);
 
 	//Use delay as initial offset to avoid skill/heal exploits
-	if( battle_config.pet_equip_required && pd->pet.equip == 0 )
+	if( battle_config.pet_equip_required && !pd->pet.equip )
 		pd->s_skill->timer = INVALID_TIMER;
 	else
 		pd->s_skill->timer = add_timer(gettick() + pd->s_skill->delay * 1000,pet_heal_timer,sd->bl.id,0);
@@ -13191,7 +13188,7 @@ BUILDIN_FUNC(petskillsupport)
 	TBL_PC *sd = script_rid2sd(st);
 	int id = 0;
 
-	if( sd == NULL || sd->pd == NULL )
+	if( !sd || !sd->pd )
 		return 1;
 
 	data = script_getdata(st,2);
@@ -13220,7 +13217,7 @@ BUILDIN_FUNC(petskillsupport)
 	pd->s_skill->sp = script_getnum(st,6);
 
 	//Use delay as initial offset to avoid skill/heal exploits
-	if( battle_config.pet_equip_required && pd->pet.equip == 0 )
+	if( battle_config.pet_equip_required && !pd->pet.equip )
 		pd->s_skill->timer = INVALID_TIMER;
 	else
 		pd->s_skill->timer = add_timer(gettick() + pd->s_skill->delay * 1000,pet_skill_support_timer,sd->bl.id,0);
