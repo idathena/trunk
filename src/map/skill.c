@@ -10370,6 +10370,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case EL_CIRCLE_OF_FIRE:
+		case EL_FIRE_CLOAK:
+		case EL_WATER_DROP:
+		case EL_WIND_STEP:
+		case EL_WIND_CURTAIN:
+		case EL_SOLID_SKIN:
+		case EL_STONE_SHIELD:
 		case EL_PYROTECHNIC:
 		case EL_HEATER:
 		case EL_TROPIC:
@@ -10382,17 +10388,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case EL_PETROLOGY:
 		case EL_CURSED_SOIL:
 		case EL_UPHEAVAL:
-		case EL_FIRE_CLOAK:
-		case EL_WATER_DROP:
-		case EL_WIND_CURTAIN:
-		case EL_SOLID_SKIN:
-		case EL_STONE_SHIELD:
-		case EL_WIND_STEP:
 			{
 				struct elemental_data *ed = BL_CAST(BL_ELEM,src);
 
-				if( ed ) {
+				if( ed && ed->master ) {
 					struct status_change *sc = status_get_sc(&ed->bl);
+					struct block_list *e_bl = &ed->master->bl;
 					sc_type type2 = (sc_type)(type - 1);
 
 					if( (sc && sc->data[type2]) || (tsc && tsc->data[type]) )
@@ -10400,37 +10401,30 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					else {
 						switch( skill_id ) {
 							case EL_WIND_STEP: //There aren't teleport, just push the master away
-								clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
-								skill_blown(src,bl,(rnd()%skill_get_blewcount(skill_id,skill_lv)) + 1,rnd()%8,0);
+								clif_skill_damage(src,e_bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
+								skill_blown(src,e_bl,(rnd()%skill_get_blewcount(skill_id,skill_lv)) + 1,rnd()%8,0);
 								break;
 							case EL_SOLID_SKIN:
 								clif_skill_damage(src,src,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
-								clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
+								clif_skill_damage(src,e_bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 								break;
 							default:
 								clif_skill_damage(src,src,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 								break;
 						}
 						sc_start(src,src,type2,100,skill_lv,skill_get_time(skill_id,skill_lv));
-						sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
+						sc_start(src,e_bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 					}
 				}
 			}
 			break;
 
-		case EL_FIRE_MANTLE:
-		case EL_WATER_BARRIER:
-		case EL_ZEPHYR:
-		case EL_POWER_OF_GAIA:
-			clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
-			skill_unitsetting(src,skill_id,skill_lv,bl->x,bl->y,0);
-			break;
-
 		case EL_WATER_SCREEN: {
 				struct elemental_data *ed = BL_CAST(BL_ELEM,src);
 
-				if( ed ) {
+				if( ed && ed->master ) {
 					struct status_change *sc = status_get_sc(&ed->bl);
+					struct block_list *e_bl = &ed->master->bl;
 					sc_type type2 = (sc_type)(type - 1);
 
 					if( (sc && sc->data[type2]) || (tsc && tsc->data[type]) )
@@ -10438,7 +10432,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					else { //This not heals at the end
 						clif_skill_damage(src,src,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 						sc_start(src,src,type2,100,skill_lv,skill_get_time(skill_id,skill_lv));
-						sc_start(src,bl,type,100,src->id,skill_get_time(skill_id,skill_lv));
+						sc_start(src,e_bl,type,100,src->id,skill_get_time(skill_id,skill_lv));
 					}
 				}
 			}
@@ -11319,6 +11313,10 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case LG_EARTHDRIVE:
 		case RL_FIRE_RAIN:
 		case SU_CN_METEOR:
+		case EL_FIRE_MANTLE:
+		case EL_WATER_BARRIER:
+		case EL_ZEPHYR:
+		case EL_POWER_OF_GAIA:
 			break; //Effect is displayed on respective switch case
 		default:
 			if( skill_get_inf(skill_id)&INF_SELF_SKILL )
@@ -11998,6 +11996,22 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case SO_ARRULLO:
 			i = skill_get_splash(skill_id,skill_lv);
 			map_foreachinarea(skill_area_sub,src->m,x-i,y-i,x+i,y+i,BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
+			break;
+
+		case EL_FIRE_MANTLE:
+		case EL_WATER_BARRIER:
+		case EL_ZEPHYR:
+		case EL_POWER_OF_GAIA:
+			{
+				struct elemental_data *ed = BL_CAST(BL_ELEM,src);
+
+				if( ed && ed->master ) {
+					struct block_list *e_bl = &ed->master->bl;
+
+					clif_skill_damage(src,e_bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
+					skill_unitsetting(src,skill_id,skill_lv,e_bl->x,e_bl->y,0);
+				}
+			}
 			break;
 
 		case KO_MAKIBISHI:

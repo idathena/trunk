@@ -381,7 +381,7 @@ int elemental_clean_effect(struct elemental_data *ed) {
 	status_change_end(&ed->bl, SC_CIRCLE_OF_FIRE, INVALID_TIMER);
 	status_change_end(&ed->bl, SC_TIDAL_WEAPON, INVALID_TIMER);
 
-	if( (sd = ed->master) == NULL )
+	if( !(sd = ed->master) )
 		return 0;
 
 	//Master side
@@ -520,12 +520,9 @@ int elemental_change_mode_ack(struct elemental_data *ed, int mode) {
 	ed->target_id = bl->id;	//Set new target
 	ed->last_thinktime = gettick();
 
-	if( skill_get_inf(skill_id) & INF_GROUND_SKILL )
-		unit_skilluse_pos(&ed->bl, bl->x, bl->y, skill_id, skill_lv);
-	else
-		unit_skilluse_id(&ed->bl,bl->id,skill_id,skill_lv);
+	unit_skilluse_id(&ed->bl, ed->bl.id, skill_id, skill_lv); //Passive and assist spirit skills are self skill
 
-	ed->target_id = 0;	//Reset target after casting the skill  to avoid continious attack
+	ed->target_id = 0; //Reset target after casting the skill to avoid continious attack
 
 	return 1;
 }
