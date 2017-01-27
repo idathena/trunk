@@ -2935,8 +2935,10 @@ void unit_remove_map_pc(struct map_session_data *sd, clr_type clrtype)
 		unit_remove_map(&sd->hd->bl, clrtype);
 	if (sd->md)
 		unit_remove_map(&sd->md->bl, clrtype);
-	if (sd->ed)
+	if (sd->ed) {
+		elemental_clean_effect(sd->ed);
 		unit_remove_map(&sd->ed->bl, clrtype);
+	}
 }
 
 /**

@@ -1985,7 +1985,7 @@ void clif_buylist(struct map_session_data *sd, struct npc_data *nd)
 		struct item_data *id = itemdb_exists(nd->u.shop.shop_item[i].nameid);
 		int val = nd->u.shop.shop_item[i].value;
 
-		if( id == NULL )
+		if( !id )
 			continue;
 		WFIFOL(fd,4 + c * 11) = val;
 		WFIFOL(fd,8 + c * 11) = (discount) ? pc_modifybuyvalue(sd,val) : val;
@@ -2014,13 +2014,10 @@ void clif_selllist(struct map_session_data *sd)
 		if( sd->status.inventory[i].nameid > 0 && sd->inventory_data[i] ) {
 			if( !itemdb_cansell(&sd->status.inventory[i], pc_get_group_level(sd)) )
 				continue;
-
 			if( sd->status.inventory[i].expire_time || (sd->status.inventory[i].bound && !pc_can_give_bounded_items(sd)) )
 				continue; // Cannot Sell Rental Items or Account Bounded Items
-
 			if( sd->status.inventory[i].bound && !pc_can_give_bounded_items(sd))
 				continue; // Don't allow sale of bound items
-
 			val = sd->inventory_data[i]->value_sell;
 			if( val < 0 )
 				continue;
@@ -11432,7 +11429,7 @@ void clif_parse_NpcClicked(int fd,struct map_session_data *sd)
 			clif_parse_ActionRequest_sub(sd,0x07,bl->id,gettick());
 			break;
 		case BL_NPC:
-			if (bl->m != -1) // The user can't click floating npcs directly (hack attempt)
+			if (bl->m != -1) //The user can't click floating npcs directly (hack attempt)
 				npc_click(sd,(TBL_NPC *)bl);
 			break;
 	}
@@ -11444,12 +11441,13 @@ void clif_parse_NpcClicked(int fd,struct map_session_data *sd)
 /// type:
 ///     0 = buy
 ///     1 = sell
-void clif_parse_NpcBuySellSelected(int fd,struct map_session_data *sd)
+void clif_parse_NpcBuySellSelected(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
 
 	if (sd->state.trading)
 		return;
+
 	npc_buysellsel(sd,RFIFOL(fd,info->pos[0]),RFIFOB(fd,info->pos[1]));
 }
 
@@ -11523,7 +11521,6 @@ void clif_parse_NpcSellListSend(int fd,struct map_session_data *sd)
 		fail = npc_selllist(sd,n,item_list);
 
 	sd->npc_shopid = 0; //Clear shop data
-
 	clif_npc_sell_result(sd, fail);
 }
 
@@ -12026,6 +12023,9 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 			return;
 #endif
 	}
+
+	if( sd->npc_shopid )
+		return;
 
 	if( (pc_cant_act2(sd) || sd->chatID) && skill_id != RK_REFRESH && !(skill_id == SR_GENTLETOUCH_CURE &&
 		(sd->sc.opt1 == OPT1_STONE || sd->sc.opt1 == OPT1_FREEZE || sd->sc.opt1 == OPT1_STUN)) &&
@@ -16912,20 +16912,20 @@ void clif_parse_ItemListWindowSelected(int fd, struct map_session_data *sd) {
 	int type = RFIFOL(fd,info->pos[1]);
 	int flag = RFIFOL(fd,info->pos[2]); // Button clicked: 0 = Cancel, 1 = OK
 	unsigned short *item_list = (unsigned short *)RFIFOP(fd,info->pos[3]);
-	
+
 	if( sd->state.trading || sd->npc_shopid )
 		return;
-	
-	if( flag == 0 || n == 0 ) {
+
+	if( !flag || !n ) {
 		clif_menuskill_clear(sd);
-		return; // Canceled by player.
+		return; // Canceled by player
 	}
-	
+
 	if( sd->menuskill_id != SO_EL_ANALYSIS && sd->menuskill_id != GN_CHANGEMATERIAL ) {
 		clif_menuskill_clear(sd);
-		return; // Prevent hacking.
+		return; // Prevent hacking
 	}
-	
+
 	switch( type ) {
 		case 0: // Change Material
 			skill_changematerial(sd,n,item_list);
@@ -16936,8 +16936,6 @@ void clif_parse_ItemListWindowSelected(int fd, struct map_session_data *sd) {
 			break;
 	}
 	clif_menuskill_clear(sd);
-	
-	return;
 }
 
 /*==========================================

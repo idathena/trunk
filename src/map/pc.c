@@ -4791,6 +4791,9 @@ int pc_useitem(struct map_session_data *sd, int n)
 #endif
 	}
 
+	if( sd->npc_shopid )
+		return 0;
+
 	item = sd->status.inventory[n];
 	id = sd->inventory_data[n];
 
@@ -5378,6 +5381,13 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 		sd->md->bl.x = sd->md->ud.to_x = x;
 		sd->md->bl.y = sd->md->ud.to_y = y;
 		sd->md->ud.dir = sd->ud.dir;
+	}
+
+	if( sd->ed ) {
+		sd->ed->bl.m = m;
+		sd->ed->bl.x = sd->ed->ud.to_x = x;
+		sd->ed->bl.y = sd->ed->ud.to_y = y;
+		sd->ed->ud.dir = sd->ud.dir;
 	}
 
 	pc_cell_basilica(sd);
@@ -8951,7 +8961,7 @@ bool pc_setreg2(struct map_session_data *sd, const char *reg, int val) {
 		return false;
 	}
 
-	val = cap_value(val, 0, INT_MAX);
+	val = cap_value(val, INT_MIN, INT_MAX);
 
 	switch (prefix) {
 		case '.':

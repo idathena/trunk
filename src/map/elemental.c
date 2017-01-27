@@ -620,7 +620,7 @@ int elemental_set_target(struct map_session_data *sd, struct block_list *bl) {
 	if( !status_check_skilluse(&ed->bl, bl, 0, 0) )
 		return 0;
 
-	if( ed->target_id == 0 )
+	if( !ed->target_id )
 		ed->target_id = bl->id;
 
 	return 1;
