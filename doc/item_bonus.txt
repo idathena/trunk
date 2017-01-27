@@ -26,7 +26,8 @@ This list contains all available constants referenced in the 'bonus' commands.
 
 * Monster Race (mr)
 	RC2_Goblin, RC2_Kobold, RC2_Orc, RC2_Golem, RC2_Guardian, RC2_Ninja, RC2_Poring, RC2_Insect,
-	RC2_Manuk, RC2_Splendide, RC2_Turtle, RC2_Scaraba, RC2_Mora, RC2_Malaya, RC2_Hidden, RC2_Faceworm
+	RC2_Manuk, RC2_Splendide, RC2_Turtle, RC2_Scaraba, RC2_Mora, RC2_Malaya, RC2_Malaya_Boss,
+	RC2_Hidden, RC2_Faceworm
 
 * Class (c)
 	Class_Normal, Class_Boss, Class_Guardian, Class_All

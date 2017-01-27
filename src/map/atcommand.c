@@ -1439,6 +1439,7 @@ ACMD_FUNC(baselevelup)
 		sd->status.base_level -= (unsigned int)level;
 		clif_displaymessage(fd, msg_txt(22)); // Base level lowered.
 		status_calc_pc(sd, SCO_FORCE);
+		level *= -1;
 	}
 	sd->status.base_exp = 0;
 	clif_updatestatus(sd, SP_STATUSPOINT);
@@ -1448,6 +1449,9 @@ ACMD_FUNC(baselevelup)
 	pc_baselevelchanged(sd);
 	if(sd->status.party_id)
 		party_send_levelup(sd);
+	if(level > 0 && battle_config.atcommand_levelup_events)
+		npc_script_event(sd, NPCE_BASELVUP);
+
 	return 0;
 }
 
@@ -1490,6 +1494,7 @@ ACMD_FUNC(joblevelup)
 		else
 			sd->status.skill_point -= level;
 		clif_displaymessage(fd, msg_txt(25)); // Job level lowered.
+		level *= -1;
 	}
 	sd->status.job_exp = 0;
 	clif_updatestatus(sd, SP_JOBLEVEL);
@@ -1497,6 +1502,8 @@ ACMD_FUNC(joblevelup)
 	clif_updatestatus(sd, SP_NEXTJOBEXP);
 	clif_updatestatus(sd, SP_SKILLPOINT);
 	status_calc_pc(sd, SCO_FORCE);
+	if(level > 0 && battle_config.atcommand_levelup_events)
+		npc_script_event(sd,NPCE_JOBLVUP);
 
 	return 0;
 }
@@ -4253,8 +4260,8 @@ ACMD_FUNC(guildspy)
 		return -1;
 	}
 
-	if ((g = guild_searchname(guild_name)) != NULL || // name first to avoid error when name begin with a number
-	    (g = guild_search(atoi(message))) != NULL) {
+	if ((g = guild_searchname(guild_name)) || // Name first to avoid error when name begin with a number
+	    (g = guild_search(atoi(message)))) {
 		if (sd->guildspy == g->guild_id) {
 			sd->guildspy = 0;
 			sprintf(atcmd_output, msg_txt(103), g->name); // No longer spying on the %s guild.
@@ -4294,8 +4301,8 @@ ACMD_FUNC(partyspy)
 		return -1;
 	}
 
-	if ((p = party_searchname(party_name)) != NULL || // name first to avoid error when name begin with a number
-	    (p = party_search(atoi(message))) != NULL) {
+	if ((p = party_searchname(party_name)) || // Name first to avoid error when name begin with a number
+	    (p = party_search(atoi(message)))) {
 		if (sd->partyspy == p->party.party_id) {
 			sd->partyspy = 0;
 			sprintf(atcmd_output, msg_txt(105), p->party.name); // No longer spying on the %s party.
@@ -4307,6 +4314,44 @@ ACMD_FUNC(partyspy)
 		}
 	} else {
 		clif_displaymessage(fd, msg_txt(96)); // Incorrect name/ID, or no one from the specified party is online.
+		return -1;
+	}
+
+	return 0;
+}
+
+ACMD_FUNC(clanspy)
+{
+	char clan_name[NAME_LENGTH];
+	struct clan *c;
+	nullpo_retr(-1, sd);
+
+	memset(clan_name, '\0', sizeof(clan_name));
+	memset(atcmd_output, '\0', sizeof(atcmd_output));
+
+	if (!enable_spy) {
+		clif_displaymessage(fd, msg_txt(1125)); // The mapserver has spy command support disabled.
+		return -1;
+	}
+
+	if (!message || !*message || sscanf(message, "%23[^\n]", clan_name) < 1) {
+		clif_displaymessage(fd, msg_txt(734)); // Please enter a clan name/ID (usage: @clanspy <clan_name/ID>).
+		return -1;
+	}
+
+	if ((c = clan_searchname(clan_name)) || // Name first to avoid error when name begin with a number
+		(c = clan_search(atoi(message)))) {
+		if (sd->clanspy == c->id) {
+			sd->clanspy = 0;
+			sprintf(atcmd_output, msg_txt(735), c->name); // No longer spying on the %s clan.
+			clif_displaymessage(fd, atcmd_output);
+		} else {
+			sd->clanspy = c->id;
+			sprintf(atcmd_output, msg_txt(736), c->name); // Spying on the %s clan.
+			clif_displaymessage(fd, atcmd_output);
+		}
+	} else {
+		clif_displaymessage(fd, msg_txt(737)); // Incorrect clan name/ID.
 		return -1;
 	}
 
@@ -7530,7 +7575,7 @@ ACMD_FUNC(iteminfo)
 		sprintf(atcmd_output, msg_txt(1277), // Item: '%s'/'%s'[%d] (%hu) Type: %s | Extra Effect: %s
 			item_data->name,item_data->jname,item_data->slot,item_data->nameid,
 			(item_data->type == IT_AMMO) ? itemdb_typename_ammo((enum e_item_ammo)item_data->look) : itemdb_typename((enum item_types)item_data->type),
-			(item_data->script == NULL) ? msg_txt(1278) : msg_txt(1279) // None / With script
+			(!item_data->script ? msg_txt(1278) : msg_txt(1279)) // None / With script
 		);
 		clif_displaymessage(fd, atcmd_output);
 
@@ -7583,7 +7628,7 @@ ACMD_FUNC(whodrops)
 		sprintf(atcmd_output, msg_txt(1285), item_data->jname, item_data->slot, item_data->nameid); // Item: '%s'[%d] (ID: %hu)
 		clif_displaymessage(fd, atcmd_output);
 
-		if (item_data->mob[0].chance == 0) {
+		if (!item_data->mob[0].chance) {
 			strcpy(atcmd_output, msg_txt(1286)); // - Item is not dropped by mobs.
 			clif_displaymessage(fd, atcmd_output);
 		} else {
@@ -9851,6 +9896,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF2("mount", mount_peco),
 		ACMD_DEF(guildspy),
 		ACMD_DEF(partyspy),
+		ACMD_DEF(clanspy),
 		ACMD_DEF(repairall),
 		ACMD_DEF(guildrecall),
 		ACMD_DEF(partyrecall),

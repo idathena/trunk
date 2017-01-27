@@ -23,7 +23,7 @@
 // 18. attack_rate			Rate of which the pet will attack (requires at least pet_support_min_friendly intimacy).
 // 19. defence_attack_rate	Rate of which the pet will retaliate when master is being attacked (requires at least pet_support_min_friendly intimacy).
 // 20. change_target_rate	Rate of which the pet will change its attack target.
-// 21. pet_script		Script to execute when the pet is hatched.
+// 21. pet_script		Script to execute when the pet is hatched (requires pet_status_support to be enabled).
 // 22. friendly_script		Script to execute when the pet is hatched (requires at least pet_bonus_min_friendly intimacy, independent of pet_script).
 // NOTE: The max value (100%) of attack_rate, defense_rate & change_target_rate is 10000.
 
@@ -38,7 +38,7 @@
 1049,PICKY,Picky,623,9005,10012,507,80,60,40,100,250,20,2000,150,1,0,500,600,50,{ /* petskillbonus bStr,3,10,50; */ },{ bonus bStr,(getpetinfo(3)>=910?2:1); bonus bBaseAtk,(getpetinfo(3)>=910?8:5); }
 1011,CHONCHON,ChonChon,624,9006,10002,537,80,60,30,100,250,20,1500,150,1,0,500,500,250,{ /* petskillbonus bAgi,4,10,50; */ },{ bonus bAgi,(getpetinfo(3)>=910?2:1); bonus bFlee,(getpetinfo(3)>=910?3:2); }
 1042,STEEL_CHONCHON,Steel ChonChon,625,9007,10002,1002,80,60,20,100,250,20,1000,150,1,0,500,500,200,{ /* petskillbonus bAgiVit,4,20,40; */ },{ bonus bFlee,(getpetinfo(3)>=910?9:6); }
-1035,HUNTER_FLY,Hunter Fly,626,9008,10002,716,80,60,10,100,250,20,500,150,1,0,500,500,200,{ /* petskillattack2 "NPC_WINDATTACK",888,2,0,10; */ },{ bonus bFlee2,2; if(getpetinfo(3)>=910) { bonus bHit,1; } }
+1035,HUNTER_FLY,Hunter Fly,626,9008,10002,716,80,60,10,100,250,20,500,150,1,0,500,500,200,{ /* petskillattack2 "NPC_WINDATTACK",888,2,0,10; */ },{ bonus bFlee2,2; if(getpetinfo(3)>=910) bonus bHit,1; }
 1167,SAVAGE_BABE,Savage Babe,627,9009,10015,537,80,60,40,100,250,20,1500,150,0,0,500,500,200,{ /* petskillbonus bVit,4,10,50; */ },{ bonus bVit,(getpetinfo(3)>=910?2:1); bonus bMaxHP,(getpetinfo(3)>=910?75:50); }
 1107,DESERT_WOLF_B,Baby Desert Wolf,628,9010,10003,537,80,60,40,100,250,20,1000,150,0,0,400,400,400,{ /* petskillattack "SM_PROVOKE",1,0,5; */ },{ bonus bInt,(getpetinfo(3)>=910?2:1); bonus bMaxSP,(getpetinfo(3)>=910?75:50); }
 1052,ROCKER,Rocker,629,9011,10014,537,80,60,30,100,250,20,1500,150,0,0,350,350,600,{ /* petskillbonus bAllStats,1,10,50; */ },{ bonus bHPrecovRate,(getpetinfo(3)>=910?8:5); bonus bMaxHP,(getpetinfo(3)>=910?38:25); }
@@ -52,7 +52,7 @@
 1110,DOKEBI,Dokebi,637,9019,10005,537,80,60,20,100,250,20,500,150,0,0,300,300,800,{ /* petskillattack "BS_HAMMERFALL",1,0,10; */ },{ bonus bMatkRate,(getpetinfo(3)>=910?2:1); }
 1170,SOHEE,Sohee,638,9020,10016,537,80,60,10,100,250,20,500,150,0,0,100,1000,200,{ /* petheal 400,60,33,100; */ },{ bonus bStr,(getpetinfo(3)>=910?2:1); bonus bDex,(getpetinfo(3)>=910?2:1); }
 1029,ISIS,Isis,639,9021,10006,537,80,60,10,100,250,20,500,150,0,0,650,450,150,{ /* petskillsupport "PR_MAGNIFICAT",2,60,50,50; */ },{ bonus2 bAddClass,Class_All,(getpetinfo(3)>=910?2:1); }
-1155,PETIT,Petite,640,9022,10011,537,80,60,20,100,250,20,500,150,0,0,800,400,100,{ /* petskillattack2 "WZ_HEAVENDRIVE",500,1,0,10; */ },{ bonus bAspdRate,1; if(getpetinfo(3)>=910) { bonus bAgi,1; } }
+1155,PETIT,Petite,640,9022,10011,537,80,60,20,100,250,20,500,150,0,0,800,400,100,{ /* petskillattack2 "WZ_HEAVENDRIVE",500,1,0,10; */ },{ bonus bAspdRate,1; if(getpetinfo(3)>=910) bonus bAgi,1; }
 1109,DEVIRUCHI,Deviruchi,641,9023,10004,711,80,60,10,100,250,20,500,150,0,0,800,200,100,{ /* petskillbonus bAgiDexStr,6,20,40; */ },{ bonus2 bAddClass,Class_All,1; bonus bMatkRate,1; if(getpetinfo(3)>=910) { bonus bMaxHPrate,1; bonus bMaxSPrate,1; } }
 1101,BAPHOMET_,Baphomet Jr.,642,9024,10001,518,80,60,10,100,250,20,200,150,0,0,1000,100,200,{ /* petskillattack2 "NPC_DARKNESSATTACK",1776,4,0,5; */ },{ bonus bDef,(getpetinfo(3)>=910?2:1); bonus bMdef,(getpetinfo(3)>=910?2:1); bonus2 bResEff,Eff_Stun,(getpetinfo(3)>=910?200:100); }
 1188,BON_GUN,Bon Gun,659,9025,10020,537,80,60,30,100,250,20,500,150,1,0,600,200,400,{ /* petskillattack2 "NPC_DARKNESSATTACK",555,1,1,1; */ },{ bonus bVit,(getpetinfo(3)>=910?2:1); bonus2 bResEff,Eff_Stun,(getpetinfo(3)>=910?200:100); }
@@ -84,16 +84,16 @@
 1504,DULLAHAN,Dullahan,12367,9049,10031,6107,80,60,10,100,250,20,200,150,0,0,300,300,800,{},{ bonus bCritAtkRate,(getpetinfo(3)>=910?8:5); }
 1148,MEDUSA,Medusa,12368,9050,10032,6108,80,60,10,100,250,20,200,150,0,0,300,300,800,{},{ bonus bVit,(getpetinfo(3)>=910?2:1); bonus2 bResEff,Eff_Stone,(getpetinfo(3)>=910?800:500); }
 1495,STONE_SHOOTER,Stone Shooter,12369,9051,10033,6109,80,60,20,100,250,20,500,150,0,0,300,300,800,{},{ bonus2 bSubEle,Ele_Fire,(getpetinfo(3)>=910?5:3); }
-1374,INCUBUS,Incubus,12370,9052,10034,6110,80,60,10,100,250,20,50,150,0,0,300,300,800,{ petskillbonus bMaxSPrate,3,3600,0; petskillbonus2 bSPDrainRate,10,1,3600,0; },{ if(getpetinfo(3)>=910) { bonus bMaxSPrate,5; bonus2 bSPDrainRate,20,1; } }
+1374,INCUBUS,Incubus,12370,9052,10034,6110,80,60,10,100,250,20,50,150,0,0,300,300,800,{},{ bonus bMaxSPrate,(getpetinfo(3)>=910?5:3); bonus2 bSPDrainRate,20,1; }
 1040,GOLEM,Golem,12371,9053,10035,6111,80,60,20,100,250,20,500,150,0,0,300,300,800,{},{ bonus bMaxHP,(getpetinfo(3)>=910?150:100); }
-1379,NIGHTMARE_TERROR,Nightmare Terror,12372,9054,10036,6112,80,60,10,100,250,20,200,150,0,0,300,300,800,{},{ if(getpetinfo(3)>=910) { bonus bInt,1; } bonus2 bResEff,Eff_Sleep,10000; }
-1370,SUCCUBUS,Succubus,12373,9055,10037,6113,80,60,10,100,250,20,200,150,0,0,300,300,800,{},{ if(getpetinfo(3)>=910) { bonus bMaxHPrate,1; } bonus2 bHPDrainRate,20,5; }
+1379,NIGHTMARE_TERROR,Nightmare Terror,12372,9054,10036,6112,80,60,10,100,250,20,200,150,0,0,300,300,800,{},{ bonus2 bResEff,Eff_Sleep,10000; if(getpetinfo(3)>=910) bonus bInt,1; }
+1370,SUCCUBUS,Succubus,12373,9055,10037,6113,80,60,10,100,250,20,200,150,0,0,300,300,800,{},{ bonus2 bHPDrainRate,20,5; if(getpetinfo(3)>=910) bonus bMaxHPrate,1; }
 1837,IMP,Fire Imp,12374,9056,10038,6114,80,60,10,100,250,20,200,150,0,0,300,300,800,{},{ bonus2 bSubEle,Ele_Fire,(getpetinfo(3)>=910?3:2); bonus2 bAddEle,Ele_Fire,(getpetinfo(3)>=910?2:1); }
 
 // New pets
 2200,J_TAINI,Tiny,0,9057,0,512,80,60,10,100,250,20,0,150,1,0,300,300,800,{},{}
 2210,XMAS_LUNATIC,Christmas Snow Rabbit,0,9058,0,529,80,60,10,100,250,20,0,150,1,0,300,300,800,{},{}
-2313,TIKBALANG,Tikbalang,12699,9059,0,528,80,60,10,100,250,20,1000,150,1,0,300,300,800,{ petskillbonus bMdef,3,3600,0; petskillbonus2 bAddDamageClass,2320,10,3600,0; petskillbonus2 bAddDamageClass,2321,10,3600,0; petskillbonus2 bAddDamageClass,2322,10,3600,0; petskillbonus2 bAddDamageClass,2317,10,3600,0; petskillbonus2 bAddDamageClass,2318,10,3600,0; petskillbonus2 bAddDamageClass,2327,10,3600,0; petskillbonus2 bAddDamageClass,2319,10,3600,0; petskillbonus2 bAddDamageClass,2333,10,3600,0; petskillbonus2 bAddDamageClass,2332,10,3600,0; },{ if(getpetinfo(3)>=910) { bonus bMdef,5; bonus2 bAddDamageClass,2320,10; bonus2 bAddDamageClass,2321,10; bonus2 bAddDamageClass,2322,10; bonus2 bAddDamageClass,2317,10; bonus2 bAddDamageClass,2318,10; bonus2 bAddDamageClass,2327,10; bonus2 bAddDamageClass,2319,10; bonus2 bAddDamageClass,2333,10; bonus2 bAddDamageClass,2332,10; } }
+2313,TIKBALANG,Tikbalang,12699,9059,0,528,80,60,10,100,250,20,1000,150,1,0,300,300,800,{},{ bonus2 bAddRace2,RC2_Malaya_Boss,10; bonus bMdef,(getpetinfo(3)>=910?5:3); }
 1242,MARIN,Marin,12789,9061,10039,6534,80,60,50,100,250,20,2000,150,1,0,300,300,800,{},{}
 2398,LITTLE_PORING,Little Poring,12846,9062,0,531,80,60,1000,0,250,0,5000,150,0,0,300,300,800,{},{ bonus bHPrecovRate,(getpetinfo(3)>=910?75:50); }
 
@@ -102,7 +102,7 @@
 2081,E_HYDRA,Strange Hydra,12408,6221,0,0,0,0,0,0,0,0,50,0,0,0,350,400,800,{},{} // iRO/cRO version
 
 // New pets from kRO 2014-10-08 (Needs more info)
-//1090,MASTERING,Mastering,<LureID>,9069,<EquipID>,<FoodID>,<Fullness>,<HungryDelay>,<R_Hungry>,<R_Full>,<Intimate>,<Die>,<Capture>,<Speed>,<S_Performance>,<talk_convert_class>,<attack_rate>,<defence_attack_rate>,<change_target_rate>,{ petskillbonus bLuk,(getpetinfo(3)>=250?3:2),3600,0; petskillbonus bCritical,(getpetinfo(3)>=910?3:(getpetinfo(3)>=750?2:1)),3600,0; },{}
-//1166,SAVAGE,Savage,<LureID>,9070,<EquipID>,<FoodID>,<Fullness>,<HungryDelay>,<R_Hungry>,<R_Full>,<Intimate>,<Die>,<Capture>,<Speed>,<S_Performance>,<talk_convert_class>,<attack_rate>,<defence_attack_rate>,<change_target_rate>,{ petskillbonus bVit,(getpetinfo(3)>=250?2:1),3600,0; petskillbonus bMaxHP,(getpetinfo(3)>=910?200:(getpetinfo(3)>=750?100:50)),3600,0; },{}
-//1369,GRAND_PECO,Grand Peco,<LureID>,9071,<EquipID>,<FoodID>,<Fullness>,<HungryDelay>,<R_Hungry>,<R_Full>,<Intimate>,<Die>,<Capture>,<Speed>,<S_Performance>,<talk_convert_class>,<attack_rate>,<defence_attack_rate>,<change_target_rate>,( petskillbonus bMaxHP,(getpetinfo(3)>=910?400:(getpetinfo(3)>=750?300:(getpetinfo(3)>=250?200:150))),3600,0; petskillbonus bMaxSP,(getpetinfo(3)<250?-10:0),3600,0; ),{}
-//1213,HIGH_ORC,High Orc,<LureID>,9087,<EquipID>,<FoodID>,<Fullness>,<HungryDelay>,<R_Hungry>,<R_Full>,<Intimate>,<Die>,<Capture>,<Speed>,<S_Performance>,<talk_convert_class>,<attack_rate>,<defence_attack_rate>,<change_target_rate>,{ petskillbonus bBaseAtk,(getpetinfo(3)>=910?25:(getpetinfo(3)>=750?20:(getpetinfo(3)>=250?15:10))),3600,0; petskillbonus bDef,(getpetinfo(3)<250?-3:0),3600,0; },{}
+//1090,MASTERING,Mastering,<LureID>,9069,<EquipID>,<FoodID>,<Fullness>,<HungryDelay>,<R_Hungry>,<R_Full>,<Intimate>,<Die>,<Capture>,<Speed>,<S_Performance>,<talk_convert_class>,<attack_rate>,<defence_attack_rate>,<change_target_rate>,{},{ bonus bLuk,(getpetinfo(3)>=250?3:2); bonus bCritical,(getpetinfo(3)>=910?3:(getpetinfo(3)>=750?2:1)); }
+//1166,SAVAGE,Savage,<LureID>,9070,<EquipID>,<FoodID>,<Fullness>,<HungryDelay>,<R_Hungry>,<R_Full>,<Intimate>,<Die>,<Capture>,<Speed>,<S_Performance>,<talk_convert_class>,<attack_rate>,<defence_attack_rate>,<change_target_rate>,{},{ bonus bVit,(getpetinfo(3)>=250?2:1); bonus bMaxHP,(getpetinfo(3)>=910?200:(getpetinfo(3)>=750?100:50)); }
+//1369,GRAND_PECO,Grand Peco,<LureID>,9071,<EquipID>,<FoodID>,<Fullness>,<HungryDelay>,<R_Hungry>,<R_Full>,<Intimate>,<Die>,<Capture>,<Speed>,<S_Performance>,<talk_convert_class>,<attack_rate>,<defence_attack_rate>,<change_target_rate>,(),{ bonus bMaxHP,(getpetinfo(3)>=910?400:(getpetinfo(3)>=750?300:(getpetinfo(3)>=250?200:150))); bonus bMaxSP,(getpetinfo(3)<250?-10:0); }
+//1213,HIGH_ORC,High Orc,<LureID>,9087,<EquipID>,<FoodID>,<Fullness>,<HungryDelay>,<R_Hungry>,<R_Full>,<Intimate>,<Die>,<Capture>,<Speed>,<S_Performance>,<talk_convert_class>,<attack_rate>,<defence_attack_rate>,<change_target_rate>,{},{ bonus bBaseAtk,(getpetinfo(3)>=910?25:(getpetinfo(3)>=750?20:(getpetinfo(3)>=250?15:10))); bonus bDef,(getpetinfo(3)<250?-3:0); }

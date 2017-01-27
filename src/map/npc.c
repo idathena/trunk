@@ -2433,13 +2433,13 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 	struct npc_data *nd;
 	enum npc_subtype type;
 
-	if( strcmp(w1,"-") == 0 ) { //'Floating' shop?
+	if( !strcmp(w1,"-") ) { //'Floating' shop?
 		x = y = dir = 0;
 		m = -1;
 	} else { //w1 = <map name>,<x>,<y>,<facing>
 		char mapname[32];
 
-		if( sscanf(w1, "%31[^,],%d,%d,%d", mapname, &x, &y, &dir) != 4 || strchr(w4,',') == NULL ) {
+		if( sscanf(w1, "%31[^,],%d,%d,%d", mapname, &x, &y, &dir) != 4 || !strchr(w4,',') ) {
 			ShowError("npc_parse_shop: Invalid shop definition in file '%s', line '%d'.\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n", filepath, strline(buffer, start - buffer), w1, w2, w3, w4);
 			return strchr(start,'\n'); //Skip and continue
 		}
@@ -2522,7 +2522,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 		struct item_data *id;
 		bool skip = false;
 
-		if( p == NULL )
+		if( !p )
 			break;
 
 		switch( type ) {
@@ -2545,7 +2545,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 		if( skip )
 			break;
 
-		if( (id = itemdb_exists(nameid)) == NULL ) {
+		if( !(id = itemdb_exists(nameid)) ) {
 			ShowWarning("npc_parse_shop: Invalid sell item in file '%s', line '%d' (id '%hu').\n", filepath, strline(buffer, start - buffer), nameid);
 			p = strchr(p + 1,',');
 			continue;
@@ -2558,7 +2558,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 				value = 0; //Cashshop doesn't have a "buy price" in the item_db
 		}
 
-		if( value == 0 && (type == NPCTYPE_SHOP || type == NPCTYPE_ITEMSHOP ||
+		if( !value && (type == NPCTYPE_SHOP || type == NPCTYPE_ITEMSHOP ||
 			type == NPCTYPE_POINTSHOP || type == NPCTYPE_MARKETSHOP) ) { //NPC selling items for free!
 			ShowWarning("npc_parse_shop: Item %s [%hu] is being sold for FREE in file '%s', line '%d'.\n",
 				id->name, nameid, filepath, strline(buffer, start - buffer));
@@ -2575,7 +2575,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 		}
 
 		//For logs filters, atcommands and iteminfo script command
-		if( id->maxchance == 0 )
+		if( !id->maxchance )
 			id->maxchance = -1; //-1 Would show that the item's sold in NPC Shop
 
 #if PACKETVER >= 20131223

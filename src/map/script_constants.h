@@ -2382,6 +2382,7 @@
 	export_constant(RC2_SCARABA);
 	export_constant(RC2_MORA);
 	export_constant(RC2_MALAYA);
+	export_constant(RC2_MALAYA_BOSS);
 	export_constant(RC2_HIDDEN);
 	export_constant(RC2_FACEWORM);
 	export_constant(RC2_MAX);

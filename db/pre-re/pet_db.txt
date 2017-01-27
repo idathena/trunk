@@ -23,7 +23,7 @@
 // 18. attack_rate			Rate of which the pet will attack (requires at least pet_support_min_friendly intimacy).
 // 19. defence_attack_rate	Rate of which the pet will retaliate when master is being attacked (requires at least pet_support_min_friendly intimacy).
 // 20. change_target_rate	Rate of which the pet will change its attack target.
-// 21. pet_script		Script to execute when the pet is hatched.
+// 21. pet_script		Script to execute when the pet is hatched (requires pet_status_support to be enabled).
 // 22. friendly_script		Script to execute when the pet is hatched (requires at least pet_bonus_min_friendly intimacy, independent of pet_script).
 // NOTE: The max value (100%) of attack_rate, defense_rate & change_target_rate is 10000.
 
