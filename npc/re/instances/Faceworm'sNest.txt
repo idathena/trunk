@@ -2675,8 +2675,8 @@ OnDisable:
 OnMyMobDead:
 	end;
 OnTimer45000:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
 	stopnpctimer;
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
 	end;
 }
 
@@ -2772,8 +2772,8 @@ OnDisable:
 OnMyMobDead:
 	end;
 OnTimer15000:
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
 	stopnpctimer;
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
 	end;
 }
 
