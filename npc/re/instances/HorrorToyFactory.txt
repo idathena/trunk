@@ -2464,9 +2464,9 @@ OnMyMobDead:
 	end;
 OnTimer45000:
 	set .@map$,instance_mapname("1@xm_d");
-	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
 	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 	stopnpctimer;
+	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";
 	end;
 }
 
