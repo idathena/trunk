@@ -6967,7 +6967,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case AL_CURE:
-			if(status_isimmune(bl)) {
+			if (status_isimmune(bl)) {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,0);
 				break;
 			}
@@ -6984,11 +6984,11 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case PR_STRECOVERY:
-			if(status_isimmune(bl)) {
+			if (status_isimmune(bl)) {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,0);
 				break;
 			}
-			if(tsc && tsc->opt1) {
+			if (tsc && tsc->opt1) {
 				status_change_end(bl,SC_FREEZE,INVALID_TIMER);
 				status_change_end(bl,SC_STONE,INVALID_TIMER);
 				status_change_end(bl,SC_SLEEP,INVALID_TIMER);
@@ -6997,9 +6997,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			}
 			status_change_end(bl,SC_STASIS,INVALID_TIMER);
 			status_change_end(bl,SC_NETHERWORLD,INVALID_TIMER);
-			skill_addtimerskill(src,tick + 1000,bl->id,0,0,skill_id,skill_lv,100,flag);
+			if (battle_check_undead(tstatus->race,tstatus->def_ele))
+				skill_addtimerskill(src,tick + 1000,bl->id,0,0,skill_id,skill_lv,100,flag);
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			if(dstmd)
+			if (dstmd)
 				mob_unlocktarget(dstmd,tick);
 			break;
 
