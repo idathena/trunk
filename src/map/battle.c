@@ -4516,17 +4516,9 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 					break;
 			}
 		}
-		if((sce = sc->data[SC_INCATKRATE])) {
+		if((sce = sc->data[SC_INCATKRATE]) && sd) {
 			ATK_ADDRATE(wd.damage, wd.damage2, sce->val1);
-#ifdef RENEWAL
-			ATK_ADDRATE(wd.statusAtk, wd.statusAtk2, sce->val1);
-#endif
-			if(sd) {
-				ATK_ADDRATE(wd.damage, wd.damage2, sce->val1);
-#ifdef RENEWAL
-				ATK_ADDRATE(wd.weaponAtk, wd.weaponAtk2, sce->val1);
-#endif
-			}
+			RE_ALLATK_ADDRATE(wd, sce->val1);
 		}
 		if(skill_id == AS_SONICBLOW && (sce = sc->data[SC_SPIRIT]) && sce->val2 == SL_ASSASIN) {
 			ATK_ADDRATE(wd.damage, wd.damage2, (map_flag_gvg2(src->m) ? 25 : 100));
