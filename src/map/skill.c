@@ -7251,16 +7251,16 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			{
 				int hp = 0, sp = 0;
 
-				if( dstmd ) {
-					if( dstmd->mob_id != MOBID_EMPERIUM && sd )
-						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					map_freeblock_unlock();
-					return 1;
-				}
 				if( sd ) {
 					int x, bonus = 100;
 					struct skill_condition req = skill_get_requirement(sd,skill_id,skill_lv);
 
+					if( dstmd ) {
+						if( dstmd->mob_id != MOBID_EMPERIUM )
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+						map_freeblock_unlock();
+						return 1;
+					}
 					x = skill_lv%11 - 1;
 					i = pc_search_inventory(sd,req.itemid[x]);
 					if( i == INDEX_NOT_FOUND || req.itemid[x] <= 0 || !sd->inventory_data[i] ||
