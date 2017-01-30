@@ -2300,8 +2300,11 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 			if(!battle_config.show_status_katar_crit && sd->status.weapon == W_KATAR)
 				cri <<= 1; //On official double critical bonus from katar won't showed in status display
 			cri += sd->critaddrace[tstatus->race] + sd->critaddrace[RC_ALL];
-			if(is_skill_using_arrow(src, skill_id))
+			if(is_skill_using_arrow(src, skill_id)) {
 				cri += sd->bonus.arrow_cri;
+				if(!skill_id)
+					cri += sd->bonus.critical_rangeatk;
+			}
 		}
 
 		if(sc && sc->data[SC_CAMOUFLAGE])
@@ -7566,6 +7569,8 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 		}
 		sp = skill_get_sp(skill_id,skill_lv) * 2 / 3;
 		if (status_charge(src,0,sp)) {
+			struct unit_data *ud = unit_bl2ud(src);
+
 			switch (skill_get_casttype(skill_id)) {
 				case CAST_GROUND:
 					skill_castend_pos2(src,target->x,target->y,skill_id,skill_lv,tick,flag);
@@ -7576,6 +7581,15 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 				case CAST_DAMAGE:
 					skill_castend_damage_id(src,target,skill_id,skill_lv,tick,flag);
 					break;
+			}
+			if (ud) {
+				int autospell_tick = skill_delayfix(src,skill_id,skill_lv);
+
+				if (DIFF_TICK(ud->canact_tick,tick + autospell_tick) < 0) {
+					ud->canact_tick = max(tick + autospell_tick,ud->canact_tick);
+					if (battle_config.display_status_timers && sd)
+						clif_status_change(src,SI_POSTDELAY,1,autospell_tick,0,0,0);
+				}
 			}
 		}
 	}

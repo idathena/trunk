@@ -103,7 +103,7 @@ function	script	F_IzludeChannel	{
 	set .@i,select(getarg(0)+":Don't teleport.");
 	if(.@i < 6) {
 		setarray .@maps$[1],"izlude","izlude_a","izlude_b","izlude_c","izlude_d";
-		areasavepoint .@maps$[.@i],127,97,129,99;
+		savepoint .@maps$[.@i],128,98,1,1;
 		warp .@maps$[.@i],128,98;
 	}
 	close;

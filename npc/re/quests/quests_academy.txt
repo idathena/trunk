@@ -177,7 +177,7 @@ iz_int04,91,81,3	duplicate(Lumin)	Lumin#iz_int04	4_M_NOV_RUMIN
 	end;
 
 OnTouch:
-	areasavepoint strnpcinfo(2),127,97,129,99;
+	savepoint strnpcinfo(2),128,98,1,1;
 	warp strnpcinfo(2),195,209;
 	end;
 }
@@ -4264,7 +4264,7 @@ iz_ac01_d,100,39,5	duplicate(AcademyReceptionist)	Academy Receptionist#1_d	4_F_0
 						next;
 						mes "[Kafra Guide Trainer]";
 						mes "Voila~!";
-						areasavepoint "izlude"+substr(strnpcinfo(4),7,8),127,97,129,99;
+						savepoint "izlude"+substr(strnpcinfo(4),7,8),128,98,1,1;
 						next;
 						mes "[Kafra Guide Trainer]";
 						mes "It's already done. Easy huh?";
@@ -5161,7 +5161,7 @@ iz_ac01_d,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_d	4_F_03
 				mes "[Therapist]";
 				mes "I see...";
 				mes "For emergency situations, in case you've fainted and want to be brought back here, I will save your current location.";
-				savepoint strnpcinfo(4),45,45;
+				savepoint strnpcinfo(4),45,46,1,1;
 				close;
 			}
 			mes "[Therapist]";
@@ -12986,7 +12986,7 @@ iz_ac02_d,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_d	4_F_MADA
 	} else if(strnpcinfo(4) == "new_5-1" || strnpcinfo(4) == "new_5-2" || strnpcinfo(4) == "new_5-3" || strnpcinfo(4) == "new_5-4") {
 		.@warp$ = "iz_int04";
 	}
-	savepoint .@warp$,98,88;
+	savepoint .@warp$,98,88,1,1;
 	warp .@warp$,98,88;
 	end;
 }

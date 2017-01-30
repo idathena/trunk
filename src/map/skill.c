@@ -1360,7 +1360,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			if( rnd()%100 < rate && dstsd )
 				skill_addtimerskill(src,tick + 500,bl->id,0,0,skill_id,skill_lv,BF_WEAPON,0);
 			else if( dstmd )
-				sc_start(src,bl,SC_STOP,100,skill_lv,1000 * rnd()%3);
+				sc_start(src,bl,SC_STOP,100,skill_lv,skill_get_time(skill_id,skill_lv) + 1000 * rnd()%3);
 			break;
 		case LG_RAYOFGENESIS: //50% chance to cause Blind on Undead and Demon monsters
 			if( battle_check_undead(tstatus->race,tstatus->def_ele) || tstatus->race == RC_DEMON )
@@ -13539,8 +13539,8 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 
 		case UNT_LANDMINE: //Land Mine only hits single target
 			skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,skill_id,skill_lv,tick,0);
-			clif_changetraplook(&unit->bl,UNT_FIREPILLAR_ACTIVE);
 			group->unit_id = UNT_USED_TRAPS;
+			clif_changetraplook(&unit->bl,UNT_FIREPILLAR_ACTIVE);
 			group->limit = DIFF_TICK(tick,group->tick) + 1500;
 			break;
 
@@ -13562,9 +13562,9 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 				map_foreachinshootrange(skill_trap_splash,&unit->bl,skill_get_splash(skill_id,skill_lv),group->bl_flag,&unit->bl,tick);
 			else
 				map_foreachinrange(skill_trap_splash,&unit->bl,skill_get_splash(skill_id,skill_lv),group->bl_flag,&unit->bl,tick);
+			group->unit_id = UNT_USED_TRAPS;
 			if (group->unit_id != UNT_FIREPILLAR_ACTIVE)
 				clif_changetraplook(&unit->bl,UNT_USED_TRAPS);
-			group->unit_id = UNT_USED_TRAPS;
 			group->limit = DIFF_TICK(tick,group->tick) + 1500;
 			break;
 
@@ -13815,10 +13815,10 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_REVERBERATION:
-			clif_changetraplook(&unit->bl,UNT_USED_TRAPS);
 			map_foreachinrange(skill_trap_splash,&unit->bl,skill_get_splash(skill_id,skill_lv),group->bl_flag,&unit->bl,tick);
-			group->limit = DIFF_TICK(tick,group->tick) + 1000;
 			group->unit_id = UNT_USED_TRAPS;
+			clif_changetraplook(&unit->bl,UNT_USED_TRAPS);
+			group->limit = DIFF_TICK(tick,group->tick) + 1000;
 			break;
 
 		case UNT_SEVERE_RAINSTORM:

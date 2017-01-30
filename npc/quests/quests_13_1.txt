@@ -7624,7 +7624,7 @@ function Catwarp;
 		next;
 		switch(select("Save your location:Cancel")) {
 		case 1:
-			savepoint "mid_camp",56,139;
+			savepoint "mid_camp",56,139,1,1;
 			mes "[Cat Hand Agent]";
 			mes "Thank you.";
 			mes "Your location has been saved.";
@@ -7643,7 +7643,7 @@ function Catwarp;
 		next;
 		switch(select("Save your location:Cancel")) {
 		case 1:
-			savepoint "mid_camp",56,139;
+			savepoint "mid_camp",56,139,1,1;
 			mes "[Cat Hand Agent]";
 			mes "Thank you.";
 			mes "Your location has been saved.";
@@ -7662,7 +7662,7 @@ function Catwarp;
 		next;
 		switch(select("Save your location:Use Storage:Cancel")) {
 		case 1:
-			savepoint "mid_camp",56,139;
+			savepoint "mid_camp",56,139,1,1;
 			mes "[Cat Hand Agent]";
 			mes "Thank you.";
 			mes "Your location has been saved.";
@@ -7713,7 +7713,7 @@ function Catwarp;
 		next;
 		switch(select("Save your location:Use Storage:Use Cat Warp (Midgard):Cancel")) {
 		case 1:
-			savepoint "mid_camp",56,139;
+			savepoint "mid_camp",56,139,1,1;
 			mes "[Cat Hand Agent]";
 			mes "Thank you.";
 			mes "Your location has been saved.";
@@ -7839,7 +7839,7 @@ function Catwarp;
 		next;
 		switch(select("Save your location:Use Storage:Use Cat Warp (Midgard):Use Cat Warp (Jottunheim):Cancel")) {
 		case 1:
-			savepoint "mid_camp",56,139;
+			savepoint "mid_camp",56,139,1,1;
 			mes "[Cat Hand Agent]";
 			mes "Thank you.";
 			mes "Your location has been saved.";

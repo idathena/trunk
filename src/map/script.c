@@ -8835,64 +8835,50 @@ BUILDIN_FUNC(setmadogear)
 
 /// Sets the save point of the player.
 ///
-/// save "<map name>",<x>,<y>{,<char_id>}
-/// savepoint "<map name>",<x>,<y>{,<char_id>}
+/// save "<map name>",<x>,<y>{,{<range x>,<range y>,}<char_id>}
+/// savepoint "<map name>",<x>,<y>{,{<range x>,<range y>,}<char_id>}
 BUILDIN_FUNC(savepoint)
 {
-	int x, y;
-	short map;
+	int x, y, m, cid_pos = 5;
+	unsigned short map_idx;
 	const char *str;
 	TBL_PC *sd;
 
-	if( !script_charid2sd(5,sd) )
-		return 1; // No player attached, report source
+	if( script_lastdata(st) > 5 )
+		cid_pos = 7;
+
+	if( !script_charid2sd(cid_pos,sd) )
+		return SCRIPT_CMD_FAILURE; //No player attached, report source
 
 	str = script_getstr(st,2);
-	x   = script_getnum(st,3);
-	y   = script_getnum(st,4);
-	map = mapindex_name2id(str);
+	map_idx = mapindex_name2id(str);
 
-	if( map )
-		pc_setsavepoint(sd,map,x,y);
+	if( !map_idx )
+		return 1;
 
-	return SCRIPT_CMD_SUCCESS;
-}
+	x = script_getnum(st,3);
+	y = script_getnum(st,4);
+	m = map_mapindex2mapid(map_idx);
 
-/// areasave "<map name>",<x0>,<y0>,<x1>,<y1>{,<char_id>}
-/// areasavepoint "<map name>",<x0>,<y0>,<x1>,<y1>{,<char_id>}
-BUILDIN_FUNC(areasavepoint)
-{
-	int x0, y0, x1, y1;
-	short map;
-	const char *str;
-	TBL_PC *sd;
+	if( cid_pos == 7 ) {
+		int dx = script_getnum(st,5), dy = script_getnum(st,6),
+			x1 = x + dx, y1 = y + dy,
+			x0 = x - dx, y0 = y - dy;
+		uint8 n = 10;
 
-	if( !script_charid2sd(7,sd) )
-		return 1; // No player attached, report source
-
-	str = script_getstr(st,2);
-	x0  = script_getnum(st,3);
-	y0  = script_getnum(st,4);
-	x1  = script_getnum(st,5);
-	y1  = script_getnum(st,6);
-	map = mapindex_name2id(str);
-
-	if( map ) {
-		int max, tx, ty, j = 0;
-
-		if( x1 < x0 )
-			swap(x1,x0);
-		if( y1 < y0 )
-			swap(y1,y0);
-		if( (max = (y1 - y0 + 1) * (x1 - x0 + 1) * 3) > 1000 )
-			max = 1000;
 		do {
-			tx = rnd()%(x1 - x0 + 1) + x0;
-			ty = rnd()%(y1 - y0 + 1) + y0;
-			j++;
-		} while( map_getcell(map,tx,ty,CELL_CHKNOPASS) && j < max );
-		pc_setsavepoint(sd,map,tx,ty);
+			x = x0 + rnd()%(x1 - x0 + 1);
+			y = y0 + rnd()%(y1 - y0 + 1);
+		} while( m != -1 && (--n) > 0 && !map_getcell(m,x,y,CELL_CHKPASS) );
 	}
+
+	//Check for valid coordinates if map in local map-server
+	if( m != -1 && !map_getcell(m,x,y,CELL_CHKPASS) ) {
+		ShowError("buildin_savepoint: Invalid coordinates %d,%d at map %s.\n",x,y,str);
+		return 1;
+	}
+
+	pc_setsavepoint(sd,map_idx,x,y);
 
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -20796,10 +20782,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(checkwug,"?"),
 	BUILDIN_DEF(checkmadogear,"?"),
 	BUILDIN_DEF(setmadogear,"??"),
-	BUILDIN_DEF2(savepoint,"save","sii?"),
-	BUILDIN_DEF(savepoint,"sii?"),
-	BUILDIN_DEF2(areasavepoint,"areasave","siiii?"),
-	BUILDIN_DEF(areasavepoint,"siiii?"),
+	BUILDIN_DEF2(savepoint,"save","sii???"),
+	BUILDIN_DEF(savepoint,"sii???"),
 	BUILDIN_DEF(gettimetick,"i"),
 	BUILDIN_DEF(gettime,"i"),
 	BUILDIN_DEF(gettimestr,"si"),

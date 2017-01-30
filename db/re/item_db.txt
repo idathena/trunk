@@ -1093,7 +1093,7 @@
 1761,Curse_Arrow,Cursed Arrow,10,10,,3,1,,,,0x000A1848,63,2,32768,,1,,1,{ bonus2 bAddEff,Eff_Curse,1000; },{},{}
 1762,Rusty_Arrow,Rusty Arrow,10,3,,2,30,,,,0x000A1848,63,2,32768,,1,,1,{ bonus bAtkEle,Ele_Poison; },{},{}
 1763,Poison_Arrow,Poison Arrow,10,10,,3,1,,,,0x000A1848,63,2,32768,,1,,1,{ bonus bAtkEle,Ele_Poison; bonus2 bAddEff,Eff_Poison,2000; },{},{}
-1764,Incisive_Arrow,Sharp Arrow,10,20,,3,10,,,,0x000A1848,63,2,32768,,1,,1,{ bonus bCritical,20; },{},{}
+1764,Incisive_Arrow,Sharp Arrow,10,20,,3,10,,,,0x000A1848,63,2,32768,,1,,1,{ bonus bCriticalLong,20; },{},{}
 1765,Oridecon_Arrow,Oridecon Arrow,10,30,,3,50,,,,0x000A1848,63,2,32768,,1,,1,{},{},{}
 1766,Arrow_Of_Counter_Evil,Arrow of Counter Evil,10,40,,3,50,,,,0x000A1848,63,2,32768,,1,,1,{ bonus bAtkEle,Ele_Holy; },{},{}
 1767,Arrow_Of_Shadow,Arrow of Shadow,10,3,,2,30,,,,0x000A1848,63,2,32768,,1,,1,{ bonus bAtkEle,Ele_Dark; },{},{}
@@ -2565,7 +2565,7 @@
 4418,Gazeti_Card,Gazeti Card,6,20,,10,,,,,,,,136,,,,,{ bonus3 bAutoSpell,"MG_COLDBOLT",2,100; },{},{}
 4419,Ktullanux_Card,Ktullanux Card,6,20,,10,,,,,,,,16,,,,,{ bonus2 bAddDefEle,Ele_Fire,50; bonus5 bAutoSpellWhenHit,"WZ_FROSTNOVA",10,20,BF_WEAPON|BF_MAGIC,0; },{},{}
 4420,Muscipular_Card,Muscipular Card,6,20,,10,,,,,,,,32,,,,,{ bonus3 bAutoSpellWhenHit,"AL_HEAL",1,100; bonus3 bAutoSpellWhenHit,"AL_INCAGI",1,100; },{},{}
-4421,Drosera_Card,Drosera Card,6,20,,10,,,,,,,,2,,,,,{ if(getiteminfo(getequipid(EQI_HAND_R),9)>3) bonus bCritical,15; },{},{}
+4421,Drosera_Card,Drosera Card,6,20,,10,,,,,,,,2,,,,,{ bonus bCriticalLong,15; },{},{}
 4422,Roween_Card,Roween Card,6,20,,10,,,,,,,,4,,,,,{ bonus bFlee,5; bonus bFlee2,3; bonus2 bAddDefEle,Ele_Water,10; bonus2 bCriticalAddRace,RC_Fish,15; },{},{}
 4423,Galion_Card,Galion Card,6,20,,10,,,,,,,,136,,,,,{ bonus bHit,5; bonus2 bAddDefEle,Ele_Water,5; },{},{}
 4424,Stapo_Card,Stapo Card,6,20,,10,,,,,,,,136,,,,,{ skill "TF_PICKSTONE",1; skill "TF_THROWSTONE",1; },{},{}
@@ -2694,7 +2694,7 @@
 4547,Upd_Byorgue_Card,Upgrade Byorgue Card,6,20,,10,,,,,,,,16,,,,,{ if(BaseJob==Job_Rogue) { bonus2 bAddClass,Class_All,10; bonus bMatkRate,10; } bonus bMaxHPrate,getrefine()/2; bonus3 bAddEffOnSkill,"SC_BODYPAINT",Eff_Confusion,100; },{},{}
 4548,Upd_Salamander_Card,Upgrade Salamander Card,6,20,,10,,,,,,,,4,,,,,{ bonus2 bSkillAtk,"WZ_FIREPILLAR",40; bonus2 bSkillAtk,"WZ_METEOR",40; },{},{}
 4549,Upd_Maya_Puple_Card,Upgrade Maya Puple Card,6,20,,10,,,,,,,,769,,,,,{ bonus bIntravision,0; bonus bAllStats,1; skill "AL_RUWACH",1; },{},{}
-4550,Upd_Bow_Guardian_Card,Upgrade Bow Guardian Card,6,20,,10,,,,,,,,2,,,,,{ if(getiteminfo(getequipid(EQI_HAND_R),11)==11) { bonus2 bSkillAtk,"RA_ARROWSTORM",50;  bonus bCritical,25+(getequiprefinerycnt(EQI_HAND_R)/4)*10; bonus bHit,5; bonus3 bAutoSpell,"HT_PHANTASMIC",1,100; } },{},{}
+4550,Upd_Bow_Guardian_Card,Upgrade Bow Guardian Card,6,20,,10,,,,,,,,2,,,,,{ if(getiteminfo(getequipid(EQI_HAND_R),11)==11) { bonus2 bSkillAtk,"RA_ARROWSTORM",50;  bonus bCriticalLong,25+(getequiprefinerycnt(EQI_HAND_R)/4)*10; bonus bHit,5; bonus3 bAutoSpell,"HT_PHANTASMIC",1,100; } },{},{}
 4551,Upd_Necromancer_Card,Upgrade Necromancer Card,6,20,,10,,,,,,,,2,,,,,{ set .@r,getrefine(); if(getiteminfo(getequipid(EQI_HAND_R),11)==10) { bonus bInt,1; bonus2 bIgnoreMdefClassRate,Class_Normal,2+.@r/4; bonus2 bIgnoreMdefClassRate,Class_Boss,2+.@r/4; } },{},{}
 4552,Manny_Card,Manny Card,6,20,,10,,,,,,,,136,,,,,{ bonus bMaxHP,10; },{},{}
 4553,Sid_Card,Sid Card,6,20,,10,,,,,,,,16,,,,,{ bonus bMaxHP,100; },{},{}
@@ -10597,7 +10597,7 @@
 // New Items
 //===================================================================
 22507,ShabbyOldScroll,Old Scroll,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ callfunc "F_22507"; },{},{}
-22508,Para_Team_Mark_,Eden Group Mark,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ unitskilluseid getcharid(3),"AL_TELEPORT",3; },{},{}
+22508,Para_Team_Mark_,Eden Group Mark,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ warp "moc_para",171,115; },{},{}
 22510,King_Wolf_Scroll,King Wolf Scroll,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ /* TODO: confirm the rates */ getitem callfunc("F_Rand",6635,19598,5658,6238,6239),1; },{},{}
 22513,King_Of_Gift_Box,King of Gift Box,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ /* TODO: confirm the rates */ getitem callfunc("F_Rand",12817,4403,14512),1; },{},{}
 22514,Candy_Holder,Candy Holder,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Candy_Holder,1); getrandgroupitem(IG_Candy_Holder,1); getrandgroupitem(IG_Candy_Holder,1); },{},{}
