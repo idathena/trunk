@@ -3019,6 +3019,12 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 		case SP_ABSORB_DMG_MAXHP:
 			sd->bonus.absorb_dmg_maxhp = max(sd->bonus.absorb_dmg_maxhp, val);
 			break;
+		case SP_CRITICAL_RANGEATK:
+			if(sd->state.lr_flag != 2)
+				sd->bonus.critical_rangeatk += val * 10;
+			else
+				sd->bonus.arrow_cri += val * 10;
+			break;
 		case SP_WEAPON_ATK_RATE:
 			if(sd->state.lr_flag != 2)
 				sd->bonus.weapon_atk_rate += val;

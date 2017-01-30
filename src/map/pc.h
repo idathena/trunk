@@ -464,6 +464,7 @@ struct map_session_data {
 		short eatk; //Atk bonus from equipment
 		uint8 absorb_dmg_maxhp; //[Cydh]
 		short weapon_atk_rate, weapon_matk_rate;
+		short critical_rangeatk;
 	} bonus;
 	//Zeroed vars end here
 

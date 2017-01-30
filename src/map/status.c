@@ -5817,7 +5817,7 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 	if(sc->data[SC_SHIELDSPELL_REF] && sc->data[SC_SHIELDSPELL_REF]->val1 == 2)
 		def += sc->data[SC_SHIELDSPELL_REF]->val2;
 	if(sc->data[SC_PRESTIGE])
-		def += sc->data[SC_PRESTIGE]->val1;
+		def += sc->data[SC_PRESTIGE]->val3;
 #ifndef RENEWAL
 	if(sc->data[SC_BANDING] && sc->data[SC_BANDING]->val2 > 1)
 		def += (5 + sc->data[SC_BANDING]->val1) * sc->data[SC_BANDING]->val2 / 10;
@@ -8293,7 +8293,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_DECREASEAGI,INVALID_TIMER);
 			break;
 		case SC_MARSHOFABYSS:
-			status_change_end(bl,SC_INCAGI,INVALID_TIMER);
+			status_change_end(bl,SC_INCREASEAGI,INVALID_TIMER);
 			status_change_end(bl,SC_WINDWALK,INVALID_TIMER);
 			status_change_end(bl,SC_ASPDPOTION0,INVALID_TIMER);
 			status_change_end(bl,SC_ASPDPOTION1,INVALID_TIMER);
@@ -8495,6 +8495,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC__LAZINESS:
 			case SC__UNLUCKY:
 			case SC__WEAKNESS:
+			case SC_CURSEDCIRCLE_TARGET:
 			case SC_DEEPSLEEP:
 			case SC_NETHERWORLD:
 			case SC_CRYSTALIZE:
@@ -9033,8 +9034,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					struct block_list *pbl = map_id2bl(val1);
 					struct status_change *psc = (pbl ? status_get_sc(pbl) : NULL);
 					struct status_change_entry *psce = (psc ? psc->data[SC_MARIONETTE] : NULL);
-					//Fetch target's stats
-					struct status_data *status = status_get_status_data(bl); //Battle status
 
 					if( !psce )
 						return 0;
@@ -9042,29 +9041,27 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val3 = 0;
 					val4 = 0;
 					max_stat = battle_config.max_parameter; //Cap to 99 (default)
-					stat = (psce->val3>>16)&0xFF; stat = min(stat,max_stat - status->str); val3 |= cap_value(stat,0,0xFF)<<16;
-					stat = (psce->val3>>8)&0xFF; stat = min(stat,max_stat - status->agi); val3 |= cap_value(stat,0,0xFF)<<8;
-					stat = (psce->val3>>0)&0xFF; stat = min(stat,max_stat - status->vit); val3 |= cap_value(stat,0,0xFF);
-					stat = (psce->val4>>16)&0xFF; stat = min(stat,max_stat - status->int_); val4 |= cap_value(stat,0,0xFF)<<16;
-					stat = (psce->val4>>8)&0xFF; stat = min(stat,max_stat - status->dex); val4 |= cap_value(stat,0,0xFF)<<8;
-					stat = (psce->val4>>0)&0xFF; stat = min(stat,max_stat - status->luk); val4 |= cap_value(stat,0,0xFF);
+					stat = (psce->val3>>16)&0xFF; stat = min(stat,max_stat - status_get_base_status(bl)->str); val3 |= cap_value(stat,0,0xFF)<<16;
+					stat = (psce->val3>>8)&0xFF; stat = min(stat,max_stat - status_get_base_status(bl)->agi); val3 |= cap_value(stat,0,0xFF)<<8;
+					stat = (psce->val3>>0)&0xFF; stat = min(stat,max_stat - status_get_base_status(bl)->vit); val3 |= cap_value(stat,0,0xFF);
+					stat = (psce->val4>>16)&0xFF; stat = min(stat,max_stat - status_get_base_status(bl)->int_); val4 |= cap_value(stat,0,0xFF)<<16;
+					stat = (psce->val4>>8)&0xFF; stat = min(stat,max_stat - status_get_base_status(bl)->dex); val4 |= cap_value(stat,0,0xFF)<<8;
+					stat = (psce->val4>>0)&0xFF; stat = min(stat,max_stat - status_get_base_status(bl)->luk); val4 |= cap_value(stat,0,0xFF);
 				}
 				break;
 			case SC_SPIRIT: //1st Transcendent Spirit works similar to Marionette Control
 				if( sd && val2 == SL_HIGH ) {
 					int stat, max_stat;
-					//Fetch target's stats
-					struct status_data *status2 = status_get_status_data(bl); //Battle status
 
 					val3 = 0;
 					val4 = 0;
 					max_stat = (status_get_lv(bl) - 10 < 50) ? status_get_lv(bl) - 10 : 50;
-					stat = max(0,max_stat - status2->str); val3 |= cap_value(stat,0,0xFF)<<16;
-					stat = max(0,max_stat - status2->agi); val3 |= cap_value(stat,0,0xFF)<<8;
-					stat = max(0,max_stat - status2->vit); val3 |= cap_value(stat,0,0xFF);
-					stat = max(0,max_stat - status2->int_); val4 |= cap_value(stat,0,0xFF)<<16;
-					stat = max(0,max_stat - status2->dex); val4 |= cap_value(stat,0,0xFF)<<8;
-					stat = max(0,max_stat - status2->luk); val4 |= cap_value(stat,0,0xFF);
+					stat = max(0,max_stat - status_get_base_status(bl)->str); val3 |= cap_value(stat,0,0xFF)<<16;
+					stat = max(0,max_stat - status_get_base_status(bl)->agi); val3 |= cap_value(stat,0,0xFF)<<8;
+					stat = max(0,max_stat - status_get_base_status(bl)->vit); val3 |= cap_value(stat,0,0xFF);
+					stat = max(0,max_stat - status_get_base_status(bl)->int_); val4 |= cap_value(stat,0,0xFF)<<16;
+					stat = max(0,max_stat - status_get_base_status(bl)->dex); val4 |= cap_value(stat,0,0xFF)<<8;
+					stat = max(0,max_stat - status_get_base_status(bl)->luk); val4 |= cap_value(stat,0,0xFF);
 				}
 				break;
 			case SC_REJECTSWORD:
@@ -9761,11 +9758,11 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_PRESTIGE:
 				val2 = (status->int_ + status->luk) * val1 / 20 * status_get_lv(bl) / 200 + val1; //Chance to evade magic damage
-				val1 = 15 * val1 + (sd ? 10 * pc_checkskill(sd,CR_DEFENDER) : 0); //DEF increase
-				val1 = val1 * status_get_lv(bl) / 100;
+				val3 = 15 * val1 + (sd ? 10 * pc_checkskill(sd,CR_DEFENDER) : 5) * status_get_lv(bl) / 100
 #ifndef RENEWAL
-				val1 = val1 / 10;
+					/ 10
 #endif
+					; //DEF increase
 				break;
 			case SC_BANDING:
 				tick_time = 5000;

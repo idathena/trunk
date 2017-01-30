@@ -572,6 +572,7 @@
 	script_set_constant("bHealPower",SP_ADD_HEAL_RATE,false);
 	script_set_constant("bHealPower2",SP_ADD_HEAL2_RATE,false);
 	script_set_constant("bAbsorbDmgMaxHP",SP_ABSORB_DMG_MAXHP,false);
+	script_set_constant("bCriticalLong",SP_CRITICAL_RANGEATK,false);
 
 	script_set_constant("bRestartFullRecover",SP_RESTART_FULL_RECOVER,false);
 	script_set_constant("bNoCastCancel",SP_NO_CASTCANCEL,false);
