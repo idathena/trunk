@@ -17,5 +17,4 @@
 // ecl_fild01 - Blooming Flower Land
 //==================================================
 ecl_fild01,0,0,0,0	monster	Menblatt	2363,50,5000,0,0
-ecl_fild01,0,0,0,0	monster	Petal	2364,20,5000,0,0
-ecl_fild01,0,0,0,0	monster	Elusive Menblatt	2758,2,300000,0,0
+ecl_fild01,0,0,0,0	monster	Petal	2364,50,5000,0,0

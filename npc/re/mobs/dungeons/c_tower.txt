@@ -18,7 +18,6 @@ c_tower1,0,0,0,0	monster	Rideword	1195,70,5000,0,0
 c_tower1,0,0,0,0	monster	Punk	1199,70,5000,0,0
 c_tower1,0,0,0,0	monster	Bathory	1102,1,5000,0,0
 c_tower1,0,0,0,0	monster	Clock Tower Manager	1270,1,5000,0,0
-c_tower1,0,0,0,0	monster	Solid Rideword	2682,2,300000,0,0
 
 //==================================================
 // c_tower2 - Clock Tower 2f
@@ -29,7 +28,6 @@ c_tower2,0,0,0,0	monster	Rideword	1195,12,5000,0,0
 c_tower2,0,0,0,0	monster	Mimic	1191,3,5000,0,0
 c_tower2,0,0,0,0	monster	Elder	1377,2,5000,0,0
 c_tower2,0,0,0,0	monster	Clock Tower Manager	1270,1,5000,0,0
-c_tower2,0,0,0,0	monster	Furious Clock	2871,2,300000,0,0
 
 //==================================================
 // c_tower3 - Clock Tower 3f
@@ -38,7 +36,6 @@ c_tower3,0,0,0,0	monster	Alarm	1193,80,5000,0,0
 c_tower3,0,0,0,0	monster	Mimic	1191,7,5000,0,0
 c_tower3,0,0,0,0	monster	Rideword	1195,6,5000,0,0
 c_tower3,0,0,0,0	monster	Clock Tower Manager	1270,3,5000,0,0
-c_tower3,0,0,0,0	monster	Elusive Alarm	2910,2,300000,0,0
 
 //==================================================
 // c_tower4 - Clock Tower 4f
@@ -51,7 +48,6 @@ c_tower4,0,0,0,0	monster	Mimic	1191,12,5000,0,0
 c_tower4,0,0,0,0	monster	Whisper	1179,5,5000,0,0
 c_tower4,0,0,0,0	monster	Clock Tower Manager	1270,3,5000,0,0
 c_tower4,0,0,0,0	monster	Elder	1377,2,5000,0,0
-c_tower4,0,0,0,0	monster	Clock Ringleader	2870,2,300000,0,0
 
 //==================================================
 // c_tower2_ - Clock Tower Nightmare 2f
@@ -73,4 +69,4 @@ c_tower3_,0,0,0,0	monster	Big Bell	2917,110,5000,0,0
 c_tower3_,0,0,0,0	monster	Time Keeper	2918,3,5000,0,0
 c_tower3_,0,0,0,0	monster	Owl Viscount	2921,1,5000,1800000,0
 c_tower3_,0,0,0,0	monster	Owl Marquis	2923,1,5000,5000,0
-c_tower3_,0,0,0,0	boss_monster	Time Holder	3074,1,7200000,0,0
+c_tower3_,0,0,0,0	boss_monster	Time Holder	3074,1,7200000,600000,0

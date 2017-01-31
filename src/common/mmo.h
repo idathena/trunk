@@ -77,6 +77,7 @@
 #define MAX_GUILDLEVEL 50 //Max Guild level
 #define MAX_GUARDIANS 8 //Local max per castle. [Skotlex]
 #define MAX_QUEST_OBJECTIVES 3 //Max quest objectives for a quest
+#define MAX_QUEST_DROPS 3 //Max quest drops for a quest
 #define MAX_PC_BONUS_SCRIPT 50 //Max bonus script can be fetched from `bonus_script` table on player load [Cydh]
 #define MAX_CLAN 500
 #define MAX_CLANALLIANCE 6
