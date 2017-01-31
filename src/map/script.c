@@ -2781,7 +2781,8 @@ void *get_val2(struct script_state *st, int uid, struct DBMap **ref)
 	push_val2(st->stack, C_NAME, uid, ref);
 	data = script_getdatatop(st, -1);
 	get_val(st, data);
-	return (data->type == C_INT ? (void *)__64BPRTSIZE(data->u.num) : (void *)__64BPRTSIZE(data->u.str));
+	//@TODO: Support data->u.num as int64 instead cast it to int? (in get_val, it was casted to int)
+	return (data->type == C_INT ? (void*)__64BPRTSIZE((int)data->u.num) : (void*)__64BPRTSIZE(data->u.str));
 }
 
 /*==========================================

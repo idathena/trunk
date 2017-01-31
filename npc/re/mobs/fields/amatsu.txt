@@ -35,4 +35,3 @@ ama_fild01,171,314,0,0	monster	Hydra	1068,1,69000,34500,0
 ama_fild01,171,315,0,0	monster	Hydra	1068,1,69000,34500,0
 ama_fild01,175,314,0,0	monster	Hydra	1068,1,72000,39000,0
 ama_fild01,169,315,0,0	monster	Hydra	1068,1,72000,39000,0
-ama_fild01,0,0,0,0	monster	Swift Karakasa	2789,2,300000,0,0

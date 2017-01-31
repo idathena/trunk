@@ -3532,7 +3532,7 @@ static const char *npc_parse_mob(char *w1, char *w2, char *w3, char *w4, const c
 	int mob_lv = -1, ai = -1, size = -1;
 	char mapname[32], mobname[NAME_LENGTH];
 	struct spawn_data mob, *data;
-	struct mob_db* db;
+	struct mob_db *db;
 
 	memset(&mob, 0, sizeof(struct spawn_data));
 

@@ -17238,32 +17238,3 @@ bif_fild02,311,91,3	script	Dead Laphine#ecltl	4_FAIRYDEADLEAF,{
 		mes "It's a Laphine's corpse.";
 	close;
 }
-
-ecl_fild01,1,1,0	script	ep14_2_quest	-1,{
-OnInit:
-	enablenpc "ep14_2_quest";
-	donpcevent "ep14_2_quest::OnEnable";
-	end;
-
-OnEnable:
-	monster "ecl_fild01",0,0,"Petal",2364,30,"ep14_2_quest::OnMyMobDead";
-	initnpctimer;
-	end;
-
-OnDisable:
-	stopnpctimer;
-	killmonster "ecl_fild01","ep14_2_quest::OnMyMobDead";
-	disablenpc "ep14_2_quest";
-	end;
-
-OnTimer600000:
-	killmonster "ecl_fild01","ep14_2_quest::OnMyMobDead";
-	stopnpctimer;
-	donpcevent "ep14_2_quest::OnEnable";
-	end;
-
-OnMyMobDead:
-	if (mobcount("ecl_fild01","ep14_2_quest::OnMyMobDead") < 30 && (ep14_2_profe == 3 || ep14_2_profe == 10))
-		getitem 6542,1; //Star_Shape_Mushroom
-	end;
-}

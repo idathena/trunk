@@ -94,6 +94,14 @@ struct s_mob_skill {
 };
 static DBMap *mob_skill_db; //Monster skill temporary db. s_mob_skill -> mobid
 
+struct mob_db *mobdb_exists(uint16 mob_id) {
+	struct mob_db *db = mob_db(mob_id);
+
+	if(db == mob_dummy)
+		return NULL;
+	return db;
+}
+
 static struct eri *item_drop_ers; //For loot drops delay structures
 static struct eri *item_drop_list_ers;
 
@@ -135,7 +143,7 @@ int mobdb_searchname(const char *str)
 	return 0;
 }
 
-static int mobdb_searchname_array_sub(struct mob_db* mob, const char *str)
+static int mobdb_searchname_array_sub(struct mob_db *mob, const char *str)
 {
 	if(mob == mob_dummy)
 		return 1;
@@ -307,10 +315,10 @@ void mvptomb_destroy(struct mob_data *md) {
 /*==========================================
  * Founds up to N matches. Returns number of matches [Skotlex]
  *------------------------------------------*/
-int mobdb_searchname_array(struct mob_db** data, int size, const char *str)
+int mobdb_searchname_array(struct mob_db **data, int size, const char *str)
 {
 	int count = 0, i;
-	struct mob_db* mob;
+	struct mob_db *mob;
 
 	for (i = 0; i <= MAX_MOB_DB; i++) {
 		mob = mob_db(i);
@@ -3518,7 +3526,7 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 	int i, j, inf, fd;
 	struct mob_data *md;
 	struct mob_skill *ms;
-	struct mob_db* db;
+	struct mob_db *db;
 	struct status_data *status;
 
 	nullpo_ret(sd);

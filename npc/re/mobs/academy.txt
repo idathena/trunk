@@ -42,31 +42,26 @@ prt_fild08,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
 prt_fild08,0,0,0,0	monster	Pupa	1008,40,5000,0,0
 prt_fild08,0,0,0,0	monster	Fabre	1007,60,5000,0,0
 prt_fild08,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-prt_fild08,0,0,0,0	monster	Solid Lunatic	2770,2,300000,0,0
 prt_fild08a,0,0,0,0	monster	Poring	1002,120,5000,0,0
 prt_fild08a,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
 prt_fild08a,0,0,0,0	monster	Pupa	1008,40,5000,0,0
 prt_fild08a,0,0,0,0	monster	Fabre	1007,60,5000,0,0
 prt_fild08a,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-prt_fild08a,0,0,0,0	monster	Swift Poring	2699,2,300000,0,0
 prt_fild08b,0,0,0,0	monster	Poring	1002,120,5000,0,0
 prt_fild08b,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
 prt_fild08b,0,0,0,0	monster	Pupa	1008,40,5000,0,0
 prt_fild08b,0,0,0,0	monster	Fabre	1007,60,5000,0,0
 prt_fild08b,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-prt_fild08b,0,0,0,0	monster	Elusive Poring	2698,2,300000,0,0
 prt_fild08c,0,0,0,0	monster	Poring	1002,120,5000,0,0
 prt_fild08c,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
 prt_fild08c,0,0,0,0	monster	Pupa	1008,40,5000,0,0
 prt_fild08c,0,0,0,0	monster	Fabre	1007,60,5000,0,0
 prt_fild08c,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-prt_fild08c,0,0,0,0	monster	Furious Poring	2697,2,300000,0,0
 prt_fild08d,0,0,0,0	monster	Poring	1002,120,5000,0,0
 prt_fild08d,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
 prt_fild08d,0,0,0,0	monster	Pupa	1008,40,5000,0,0
 prt_fild08d,0,0,0,0	monster	Fabre	1007,60,5000,0,0
 prt_fild08d,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-prt_fild08d,0,0,0,0	monster	Poring Ringleader	2696,2,300000,0,0
 
 //==================================================
 // treasure_n1 - Izlude Sunken Ship 1F
@@ -97,7 +92,6 @@ treasure_n1,55,155,9,9	monster	Spore	1014,2,60000,0,0
 treasure_n1,22,160,0,0	monster	Weak Skeleton	2405,3,8000,0,0
 treasure_n1,163,155,13,13	monster	Weak Skeleton	2405,5,8000,0,0
 treasure_n1,163,155,13,13	monster	Zombie	1015,1,8000,0,0
-treasure_n1,69,112,9,9	monster	Swift Spore	2646,2,300000,0,0
 
 //==================================================
 // treasure_n2 - Izlude Sunken Ship 2F
@@ -129,10 +123,8 @@ treasure_n2,100,85,13,13	monster	Weak Soldier Skeleton	2406,2,50000,0,0
 treasure_n2,100,160,13,13	monster	Weak Soldier Skeleton	2406,5,120000,0,0
 treasure_n2,100,160,13,13	monster	Weak Skeleton	2405,7,200000,0,0
 treasure_n2,100,160,13,13	monster	Dead Plankton	2404,4,60000,0,0
-treasure_n2,150,40,13,13	monster	Weak Skeleton Ringleader	2619,2,300000,0,0
 
 //==================================================
 // new_1-3 - Novice Training Grounds
 //==================================================
 new_1-3,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-new_1-3,0,0,0,0	monster	Little Poring Ringleader	2776,2,300000,0,0
