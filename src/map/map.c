@@ -2121,12 +2121,16 @@ int map_quit(struct map_session_data *sd) {
 		}
 	}
 
-	for (i = 0; i < EQI_MAX; i++)
+	for (i = 0; i < EQI_MAX; i++) {
 		if (sd->equip_index[i] >= 0 && pc_isequip(sd, sd->equip_index[i]))
 			pc_unequipitem(sd, sd->equip_index[i], 2);
+	}
 
 	if (sd->pd) //Return loot to owner
 		pet_lootitem_drop(sd->pd,sd);
+
+	if (sd->ed) //Remove effects here rather than unit_remove_map_pc so we don't clear on Teleport/map change
+		elemental_clean_effect(sd->ed);
 
 	if (sd->state.storage_flag == 1) //No need to double save storage on quit
 		sd->state.storage_flag = 0;

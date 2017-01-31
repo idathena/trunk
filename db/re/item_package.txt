@@ -2224,29 +2224,6 @@ IG_Earth_Type_Scroll,Sealed_Lady_Tanee_Card,1,1,1,1,0,0
 IG_Earth_Type_Scroll,Silvervine_Fruit_Box10,1600,1,1,0,0,0
 IG_Earth_Type_Scroll,Diabolic_Scroll,1600,5,1,0,0,0
 
-//Duplicated?
-//IG_Earth_Type_Scroll,5745,150,1,1,1,0,0
-//IG_Earth_Type_Scroll,5744,150,1,1,1,0,0
-//IG_Earth_Type_Scroll,Virgo_Diadem,150,1,1,1,0,0
-//IG_Earth_Type_Scroll,Virgo_Crown,150,1,1,1,0,0
-//IG_Earth_Type_Scroll,Taurus_Diadem,150,1,1,1,0,0
-//IG_Earth_Type_Scroll,Taurus_Crown,150,1,1,1,0,0
-//IG_Earth_Type_Scroll,Teardrop,50,1,1,1,0,0
-//IG_Earth_Type_Scroll,Abacus_In_Mouth,300,1,1,1,0,0
-//IG_Earth_Type_Scroll,Unbreak_Weap_Box,194,1,1,0,0,0
-//IG_Earth_Type_Scroll,Unbreak_Def_Box,194,1,1,0,0,0
-//IG_Earth_Type_Scroll,Token_Of_Siegfried_Box,1600,1,1,0,0,0
-//IG_Earth_Type_Scroll,Bubble_Gum_Box,1600,1,1,0,0,0
-//IG_Earth_Type_Scroll,Battle_Manual_Box,1600,1,1,0,0,0
-//IG_Earth_Type_Scroll,Balloon_Hat,5,1,1,1,0,0
-//IG_Earth_Type_Scroll,Hexagon_Spectacles,300,1,1,1,0,0
-//IG_Earth_Type_Scroll,Rabbit_Bonnet,5,1,1,1,0,0
-//IG_Earth_Type_Scroll,Hen_Set_Box,50,1,1,1,0,0
-//IG_Earth_Type_Scroll,Sealed_Knight_WS_Card,1,1,1,1,0,0
-//IG_Earth_Type_Scroll,Sealed_Lady_Tanee_Card,1,1,1,1,0,0
-//IG_Earth_Type_Scroll,Fruit_Of_Mastela_Box2,1600,1,1,0,0,0 //The different only here
-//IG_Earth_Type_Scroll,Diabolic_Scroll,1600,5,1,0,0,0
-
 IG_Splash_Scroll,Songpyun_Box50,1200,1,1,0,0,0
 IG_Splash_Scroll,Love_Chick_Hat,130,1,1,1,0,0
 IG_Splash_Scroll,Convex_Mirror_Box,800,1,1,0,0,0
