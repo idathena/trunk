@@ -7442,7 +7442,11 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 		if( pc_isvip(sd) ) { //EXP penalty for VIP
 			base_penalty = battle_config.vip_exp_penalty_base;
+			if( battle_config.death_penalty_base != 100 )
+				base_penalty = min(base_penalty,battle_config.death_penalty_base);
 			job_penalty = battle_config.vip_exp_penalty_job;
+			if( battle_config.death_penalty_job != 100 )
+				job_penalty = min(job_penalty,battle_config.death_penalty_job);
 			zeny_penalty = battle_config.vip_zeny_penalty;
 		} else {
 			base_penalty = battle_config.death_penalty_base;

@@ -2178,7 +2178,7 @@ ACMD_FUNC(refine)
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
 	if (!message || !*message || sscanf(message, "%d %d", &position, &refine) < 2) {
-		clif_displaymessage(fd, msg_txt(996)); // Please enter a position and an amount (usage: @refine <equip position> <+/- amount>).
+		clif_displaymessage(fd, msg_txt(996)); // Please enter a position and an amount (usage: @refine <equip position> <+/-amount>).
 		sprintf(atcmd_output, msg_txt(997), EQP_HEAD_LOW); // %d: Lower Headgear
 		clif_displaymessage(fd, atcmd_output);
 		sprintf(atcmd_output, msg_txt(998), EQP_HAND_R); // %d: Right Hand
@@ -2906,9 +2906,9 @@ ACMD_FUNC(char_ban)
 
 	parent_cmd = atcommand_checkalias(command + 1);
 
-	if (strcmpi(parent_cmd, "charban") == 0)
+	if (!strcmpi(parent_cmd, "charban"))
 		bantype = CHRIF_OP_BAN;
-	else if (strcmpi(parent_cmd, "ban") == 0)
+	else if (!strcmpi(parent_cmd, "ban"))
 		bantype = CHRIF_OP_LOGIN_BAN;
 	else
 		return -1;
@@ -2924,12 +2924,12 @@ ACMD_FUNC(char_ban)
 	modif_p = atcmd_output;
 	timediff = (int32)solve_time(modif_p); // Discard seconds
 
-	if (timediff == 0) { // Allow negative ?
+	if (!timediff) { // Allow negative?
 		char output[256];
 
 		safesnprintf(output, sizeof(output), msg_txt(85), command, timediff); // Invalid time for %s command (time=%d)
 		clif_displaymessage(fd, output);
-		clif_displaymessage(fd, msg_txt(702)); // Time parameter format is +/-<value> to alter. y/a = Year, m = Month, d/j = Day, h = Hour, n/mn = Minute, s = Second.
+		clif_displaymessage(fd, msg_txt(702)); // Time parameter format is <+/-value> to alter. y/a = Year, m = Month, d/j = Day, h = Hour, n/mn = Minute, s = Second.
 		return -1;
 	}
 
@@ -4743,11 +4743,11 @@ ACMD_FUNC(jailfor) {
 
 	if (!jailtime) {
 		clif_displaymessage(fd, msg_txt(1136)); // Invalid time for jail command.
-		clif_displaymessage(fd, msg_txt(702)); // Time parameter format is +/-<value> to alter. y/a = Year, m = Month, d/j = Day, h = Hour, n/mn = Minute, s = Second.
+		clif_displaymessage(fd, msg_txt(702)); // Time parameter format is <+/-value> to alter. y/a = Year, m = Month, d/j = Day, h = Hour, n/mn = Minute, s = Second.
 		return -1;
 	}
 
-	if ((pl_sd = map_nick2sd(atcmd_player_name)) == NULL) {
+	if (!(pl_sd = map_nick2sd(atcmd_player_name))) {
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
 	}
@@ -9453,7 +9453,7 @@ ACMD_FUNC(vip) {
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
 	if (!message || !*message || sscanf(message, "%255s %23[^\n]",atcmd_output,atcmd_player_name) < 2) {
-		clif_displaymessage(fd, msg_txt(700)); // Usage: @vip <time> <character name>
+		clif_displaymessage(fd, msg_txt(700)); // Usage: @vip <+/-time> <player name>
 		return -1;
 	}
 
@@ -9464,7 +9464,7 @@ ACMD_FUNC(vip) {
 
 	if (!vipdifftime) {
 		clif_displaymessage(fd, msg_txt(701)); // Invalid time for vip command.
-		clif_displaymessage(fd, msg_txt(702)); // Time parameter format is +/-<value> to alter. y/a = Year, m = Month, d/j = Day, h = Hour, n/mn = Minute, s = Second.
+		clif_displaymessage(fd, msg_txt(702)); // Time parameter format is <+/-value> to alter. y/a = Year, m = Month, d/j = Day, h = Hour, n/mn = Minute, s = Second.
 		return -1;
 	}
 

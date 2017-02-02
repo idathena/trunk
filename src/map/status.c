@@ -723,7 +723,7 @@ void initChangeTables(void) {
 	set_sc( SO_ARRULLO           , SC_DEEPSLEEP       , SI_DEEP_SLEEP      , SCB_NONE );
 	set_sc( SO_FIRE_INSIGNIA     , SC_FIRE_INSIGNIA   , SI_FIRE_INSIGNIA   , SCB_WATK|SCB_MATK|SCB_ATK_ELE|SCB_REGEN );
 	set_sc( SO_WATER_INSIGNIA    , SC_WATER_INSIGNIA  , SI_WATER_INSIGNIA  , SCB_WATK|SCB_ATK_ELE|SCB_REGEN );
-	set_sc( SO_WIND_INSIGNIA     , SC_WIND_INSIGNIA   , SI_WIND_INSIGNIA   , SCB_WATK|SCB_ATK_ELE|SCB_REGEN );
+	set_sc( SO_WIND_INSIGNIA     , SC_WIND_INSIGNIA   , SI_WIND_INSIGNIA   , SCB_WATK|SCB_ASPD|SCB_ATK_ELE|SCB_REGEN );
 	set_sc( SO_EARTH_INSIGNIA    , SC_EARTH_INSIGNIA  , SI_EARTH_INSIGNIA  , SCB_MAXHP|SCB_MAXSP|SCB_WATK|SCB_DEF|SCB_MDEF|SCB_ATK_ELE|SCB_REGEN );
 
 	set_sc( GN_CARTBOOST                  , SC_GN_CARTBOOST, SI_GN_CARTBOOST               , SCB_SPEED );
@@ -827,7 +827,7 @@ void initChangeTables(void) {
 	add_sc( SU_SCRATCH              , SC_BLEEDING     );
 	set_sc( SU_STOOP                , SC_SU_STOOP     , SI_SU_STOOP        , SCB_NONE );
 	add_sc( SU_SV_STEMSPEAR         , SC_BLEEDING     );
-	set_sc( SU_CN_POWDERING         , SC_CATNIPPOWDER , SI_CATNIPPOWDER    , SCB_WATK|SCB_MATK|SCB_SPEED|SCB_REGEN );
+	set_sc( SU_CN_POWDERING         , SC_CATNIPPOWDER , SI_CATNIPPOWDER    , SCB_BATK|SCB_MATK|SCB_SPEED|SCB_REGEN );
 	add_sc( SU_CN_METEOR            , SC_CURSE        );
 	set_sc_with_vfx( SU_SV_ROOTTWIST, SC_SV_ROOTTWIST , SI_SV_ROOTTWIST    , SCB_NONE );
 	set_sc( SU_SCAROFTAROU          , SC_BITESCAR     , SI_BITESCAR        , SCB_NONE );
@@ -5397,6 +5397,8 @@ unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc,
 		batk -= batk * sc->data[SC__ENERVATION]->val2 / 100;
 	if(sc->data[SC_ASH])
 		batk -= batk * sc->data[SC_ASH]->val4 / 100;
+	if(sc->data[SC_CATNIPPOWDER] && bl->type != BL_PC)
+		batk -= batk * sc->data[SC_CATNIPPOWDER]->val2 / 100;
 
 	return (unsigned short)cap_value(batk,0,USHRT_MAX);
 }
@@ -5474,8 +5476,6 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 #endif
 	if(sc->data[SC__ENERVATION])
 		watk -= watk * sc->data[SC__ENERVATION]->val2 / 100;
-	if(sc->data[SC_CATNIPPOWDER])
-		watk -= watk * sc->data[SC_CATNIPPOWDER]->val2 / 100;
 
 	return (unsigned short)cap_value(watk,0,USHRT_MAX);
 }
@@ -6321,6 +6321,8 @@ short status_calc_aspd(struct block_list *bl, struct status_change *sc, bool fix
 			bonus += sc->data[SC_GATLINGFEVER]->val1;
 		if(sc->data[SC_STAR_COMFORT])
 			bonus += 3 * sc->data[SC_STAR_COMFORT]->val1;
+		if(sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 2)
+			bonus += 10;
 		if(sc->data[SC_DONTFORGETME])
 			bonus -= sc->data[SC_DONTFORGETME]->val2 / 10;
 		if(sc->data[SC_LONGING])
@@ -6488,6 +6490,8 @@ short status_calc_aspd_rate(struct block_list *bl, struct status_change *sc, int
 		aspd_rate -= 10 * sc->data[SC_INCASPDRATE]->val1;
 	if(sc->data[SC_GOLDENE_FERSE])
 		aspd_rate -= 10 * sc->data[SC_GOLDENE_FERSE]->val3;
+	if(sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 2)
+		aspd_rate -= 100;
 	if(sc->data[SC_DONTFORGETME])
 		aspd_rate += sc->data[SC_DONTFORGETME]->val2;
 	if(sc->data[SC_LONGING])
@@ -8117,6 +8121,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_PAIN_KILLER:
 			case SC_KYOMU:
 			case SC_AKAITSUKI:
+			case SC_CATNIPPOWDER:
 			case SC_BITESCAR:
 			case SC_FRESHSHRIMP:
 				return 0;
@@ -10138,7 +10143,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					tick = -1;
 				break;
 			case SC_CATNIPPOWDER:
-				val2 = 50; //Watk%, Matk%
+				val2 = 50; //-Atk%, -Matk%
 				val3 = 25 * val1; //Move speed reduction
 				break;
 			case SC_SV_ROOTTWIST:
