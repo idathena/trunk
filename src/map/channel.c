@@ -1040,7 +1040,7 @@ int channel_pcsetopt(struct map_session_data *sd, char *chname, const char *opti
 void channel_read_config(void) {
 	config_t channels_conf;
 	config_setting_t *chsys = NULL;
-	const char *config_filename = "conf/channels.conf"; // FIXME hardcoded name
+	const char *config_filename = "conf/channels.conf"; // FIXME: hardcoded name
 
 	if (conf_read_file(&channels_conf, config_filename))
 		return;

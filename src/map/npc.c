@@ -1984,12 +1984,17 @@ int npc_unload(struct npc_data *nd, bool single) {
 	if( single && nd->path ) {
 		struct npc_path_data *npd = NULL;
 
-		if( nd->path && nd->path != npc_last_ref )
+		if( nd->path )
 			npd = strdb_get(npc_path_db, nd->path);
 
 		if( npd && --(npd->references) == 0 ) {
 			strdb_remove(npc_path_db, nd->path); //Remove from db
 			aFree(nd->path); //Remove now that no other instances exist
+			if( npd == npc_last_npd ) {
+				npc_last_npd = NULL;
+				npc_last_ref = NULL;
+				npc_last_path = NULL;
+			}
 		}
 	}
 
@@ -2076,14 +2081,15 @@ static void npc_clearsrcfile(void)
 /**
  * Adds a npc source file (or removes all)
  * @param name : file to add
+ * @param loadscript : flag to parse the script immediately after adding the src file
  * @return 0 = Error, 1 = Success
  */
-int npc_addsrcfile(const char *name)
+int npc_addsrcfile(const char *name, bool loadscript)
 {
 	struct npc_src_list* file;
 	struct npc_src_list* file_prev = NULL;
 
-	if( strcmpi(name, "clear") == 0 ) {
+	if( !strcmpi(name, "clear") ) {
 		npc_clearsrcfile();
 		return 1;
 	}
@@ -2093,8 +2099,8 @@ int npc_addsrcfile(const char *name)
 
 	//Prevent multiple insert of source files
 	file = npc_src_files;
-	while( file != NULL ) {
-		if( strcmp(name, file->name) == 0 )
+	while( file ) {
+		if( !strcmp(name, file->name) )
 			return 0; //Found the file, no need to insert it again
 		file_prev = file;
 		file = file->next;
@@ -2103,10 +2109,12 @@ int npc_addsrcfile(const char *name)
 	file = (struct npc_src_list*)aMalloc(sizeof(struct npc_src_list) + strlen(name));
 	file->next = NULL;
 	safestrncpy(file->name, name, strlen(name) + 1);
-	if( file_prev == NULL )
+	if( !file_prev )
 		npc_src_files = file;
 	else
 		file_prev->next = file;
+	if( loadscript )
+		return npc_parsesrcfile(file->name, true);
 
 	return 1;
 }
@@ -3712,7 +3720,7 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 		char savemap[32];
 		int savex, savey;
 
-		if (state == 0)
+		if (!state)
 			; //Map flag disabled
 		else if (w4 && !strcmpi(w4,"SavePoint")) {
 			map[m].save.map = 0;
@@ -3777,7 +3785,7 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 
 			if (!strcmpi(drop_arg1,"random"))
 				drop_id = -1;
-			else if (itemdb_exists((drop_id = atoi(drop_arg1))) == NULL)
+			else if (!itemdb_exists((drop_id = atoi(drop_arg1))))
 				drop_id = 0;
 			if (!strcmpi(drop_arg2,"inventory"))
 				drop_type = 1;
@@ -3906,11 +3914,11 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 	} else if (!strcmpi(w3,"jexp")) {
 		map[m].adjust.jexp = (state) ? atoi(w4) : 100;
 		if( map[m].adjust.jexp < 0 ) map[m].adjust.jexp = 100;
-		map[m].flag.nojobexp = (map[m].adjust.jexp == 0) ? 1 : 0;
+		map[m].flag.nojobexp = (!map[m].adjust.jexp ? 1 : 0);
 	} else if (!strcmpi(w3,"bexp")) {
 		map[m].adjust.bexp = (state) ? atoi(w4) : 100;
 		if( map[m].adjust.bexp < 0 ) map[m].adjust.bexp = 100;
-		 map[m].flag.nobaseexp = (map[m].adjust.bexp == 0) ? 1 : 0;
+		 map[m].flag.nobaseexp = (!map[m].adjust.bexp ? 1 : 0);
 	} else if (!strcmpi(w3,"loadevent"))
 		map[m].flag.loadevent = state;
 	else if (!strcmpi(w3,"nochat"))

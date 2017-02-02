@@ -2526,11 +2526,11 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				//Increase drop rate if user has SC_ITEMBOOST
 				if(sd->sc.data[SC_ITEMBOOST])
 					drop_rate_bonus += sd->sc.data[SC_ITEMBOOST]->val1;
-				drop_rate_bonus = (int)(0.5 + drop_rate * drop_rate_bonus / 100.);
+				drop_rate_bonus = drop_rate + (int)(0.5 + drop_rate * drop_rate_bonus / 100.);
 				//Now rig the drop rate to never be over 90% unless it is originally > 90%
 				drop_rate = max(drop_rate, cap_value(drop_rate_bonus, 0, 9000));
-				if(battle_config.vip_drop_increase && pc_isvip(sd)) { //Increase item drop rate for VIP
-					drop_rate += (int)(0.5 + (drop_rate * battle_config.vip_drop_increase) / 100.);
+				if(pc_isvip(sd)) { //Increase item drop rate for VIP
+					drop_rate += (int)(0.5 + drop_rate * battle_config.vip_drop_increase / 100.);
 					drop_rate = min(drop_rate, 10000); //Cap it to 100%
 				}
 			}
@@ -2784,7 +2784,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 /**
  * Resurect a mob with x hp (reset value and respawn on map)
  * @param md : mob pointer
- * @param hp : hp to resurect him with, @FIXME unused atm
+ * @param hp : hp to resurect him with, FIXME: unused atm
  */
 void mob_revive(struct mob_data *md, unsigned int hp)
 {

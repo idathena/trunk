@@ -236,8 +236,10 @@ extern struct Battle_Config
 	int pet_max_stats; //[Skotlex]
 	int pet_max_atk1; //[Skotlex]
 	int pet_max_atk2; //[Skotlex]
-	int pet_no_gvg; //Disables pets in gvg. [Skotlex]
+	int pet_no_gvg; //Disables pets in gvg [Skotlex]
 	int pet_equip_required;
+	int pet_ignore_infinite_def; //Makes fixed damage of petskillattack2 ignores infinite defense
+	int pet_master_dead;
 
 	int skill_min_damage;
 	int finger_offensive_type;
@@ -545,10 +547,9 @@ extern struct Battle_Config
 	int vip_storage_increase;
 	int vip_base_exp_increase;
 	int vip_job_exp_increase;
-	int vip_exp_penalty_base_normal;
 	int vip_exp_penalty_base;
-	int vip_exp_penalty_job_normal;
 	int vip_exp_penalty_job;
+	int vip_zeny_penalty;
 	int vip_bm_increase;
 	int vip_drop_increase;
 	int vip_gemstone;
@@ -607,7 +608,6 @@ extern struct Battle_Config
 	int stormgust_knockback;
 	int default_fixed_castrate;
 	int default_bind_on_equip;
-	int pet_ignore_infinite_def; //Makes fixed damage of petskillattack2 ignores infinite defense
 	int homunculus_evo_intimacy_need;
 	int homunculus_evo_intimacy_reset;
 	int monster_loot_search_type;
@@ -631,6 +631,7 @@ extern struct Battle_Config
 	int skill_eightpath_algorithm; //Official path algorithm
 	int can_damage_skill; //Which BL types can damage traps
 	int atcommand_levelup_events;
+	int hide_fav_sell;
 } battle_config;
 
 void do_init_battle(void);

@@ -575,8 +575,8 @@ bool skill_isNotOk(uint16 skill_id, struct map_session_data *sd)
 		(map_flag_gvg2(m) && skill_get_nocast(skill_id)&4) ||
 		(map[m].flag.battleground && skill_get_nocast(skill_id)&8) ||
 		(map[m].flag.restricted && map[m].zone && skill_get_nocast(skill_id)&(8 * map[m].zone))) {
-			clif_msg(sd, SKILL_CANT_USE_AREA); //This skill cannot be used within this area
-			return true;
+		clif_msg(sd, SKILL_CANT_USE_AREA); //This skill cannot be used within this area
+		return true;
 	}
 
 	if (sd->sc.data[SC_ALL_RIDING])

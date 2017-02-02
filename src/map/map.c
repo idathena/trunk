@@ -1999,6 +1999,13 @@ void map_deliddb(struct block_list *bl)
 int map_quit(struct map_session_data *sd) {
 	int i;
 
+	if (!sd->state.keepshop) { //Close vending/buyingstore
+		if (sd->state.vending)
+			vending_closevending(sd);
+		else if (sd->state.buyingstore)
+			buyingstore_close(sd);
+	}
+
 	if (!sd->state.active) { //Removing a player that is not active
 		struct auth_node *node = chrif_search(sd->status.account_id);
 
@@ -3655,7 +3662,7 @@ int map_waterheight(char *mapname)
 	// Read & convert fn
 	rsw = (char *)grfio_read (fn);
 	if (rsw) { // Load water height from file
-		//FIXME Casting between integer* and float* which have an incompatible binary data representation.
+		//FIXME: Casting between integer* and float* which have an incompatible binary data representation.
 		int wh = (int)*(float *)(rsw + 166);
 
 		aFree(rsw);
@@ -3945,7 +3952,7 @@ int map_config_read(char *cfgName)
 		else if (strcmpi(w1, "delmap") == 0)
 			map_delmap(w2);
 		else if (strcmpi(w1, "npc") == 0)
-			npc_addsrcfile(w2);
+			npc_addsrcfile(w2, false);
 		else if (strcmpi(w1, "delnpc") == 0)
 			npc_delsrcfile(w2);
 		else if (strcmpi(w1, "autosave_time") == 0) {
@@ -4020,7 +4027,7 @@ void map_reloadnpc_sub(char *cfgName)
 		*ptr = '\0';
 			
 		if (strcmpi(w1, "npc") == 0)
-			npc_addsrcfile(w2);
+			npc_addsrcfile(w2, false);
 		else if (strcmpi(w1, "delnpc") == 0)
 			npc_delsrcfile(w2);
 		else if (strcmpi(w1, "import") == 0)
@@ -4035,7 +4042,7 @@ void map_reloadnpc_sub(char *cfgName)
 void map_reloadnpc(bool clear)
 {
 	if (clear)
-		npc_addsrcfile("clear"); //This will clear the current script list
+		npc_addsrcfile("clear", false); //This will clear the current script list
 
 #ifdef RENEWAL
 	map_reloadnpc_sub("npc/re/scripts_main.conf");

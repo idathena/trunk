@@ -5,6 +5,7 @@
 //
 // The MobID*, NameID*, and Rate* reflect special values for quests that can drop an item at given rate from given mob.
 // If no MobID* is given, then any mob has a chance to drop the given ItemID*.
+// For Rate*, 10000 -> 100% chance to drop.
 
 101,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Introduction to the Professor"
 102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Looking for Instructors"

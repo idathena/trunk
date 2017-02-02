@@ -685,16 +685,16 @@ void chrif_authok(int fd) {
 
 	//Check if we don't already have player data in our server
 	//Causes problems if the currently connected player tries to quit or this data belongs to an already connected player which is trying to re-auth.
-	if( (sd = map_id2sd(account_id)) != NULL )
+	if( (sd = map_id2sd(account_id)) )
 		return;
 
-	if( (node = chrif_search(account_id)) == NULL )
+	if( !(node = chrif_search(account_id)) )
 		return; //Should not happen
 
 	if( node->state != ST_LOGIN )
 		return; //Character in logout phase, do not touch that data.
 
-	if( node->sd == NULL ) {
+	if( !node->sd ) {
 		/*
 		//When we receive double login info and the client has not connected yet,
 		//discard the older one and keep the new one.
@@ -706,7 +706,7 @@ void chrif_authok(int fd) {
 	sd = node->sd;
 
 	if( runflag == MAPSERVER_ST_RUNNING &&
-		node->char_dat == NULL &&
+		!node->char_dat &&
 		node->account_id == account_id &&
 		node->char_id == char_id &&
 		node->login_id1 == login_id1 )
@@ -851,6 +851,10 @@ int chrif_changeemail(int id, const char *actual_email, const char *new_email) {
  * @operation_type : see chrif_req_op
  * @timediff : tick to add or remove to unixtimestamp
  * @val1 : extra data value to transfer for operation
+ * CHRIF_OP_LOGIN_VIP: 0x1 : Select info and update old_groupid
+ *                     0x2 : VIP duration is changed by atcommand or script
+ *                     0x4 : Show status reply by char-server through 0x2b0f
+ *                     0x8 : First request on player login
  */
 int chrif_req_login_operation(int aid, const char *character_name, enum chrif_req_op operation_type, int32 timediff, int val1) {
 	chrif_check(-1);
@@ -1054,12 +1058,13 @@ int chrif_ban(int fd) {
 	else
 		sd = map_id2sd(id);
 
-	if( id < 0 || sd == NULL )
+	if( id < 0 || !sd )
 		return 0; //Nothing to do on map if player not connected
 
 	sd->login_id1++; //Change identify, because if player come back in char within the 5 seconds, he can change its characters
-	if( res == 0 ) {
+	if( !res ) {
 		int ret_status = RFIFOL(fd,7); //Status or final date of a banishment
+
 		if( 0 < ret_status && ret_status <= 9 )
 			clif_displaymessage(sd->fd, msg_txt(411 + ret_status));
 		else if( ret_status == 100 )
@@ -1073,7 +1078,7 @@ int chrif_ban(int fd) {
 
 		timestamp = (time_t)RFIFOL(fd,7); //Status or final date of a banishment
 		strftime(strtime, 24, "%d-%m-%Y %H:%M:%S", localtime(&timestamp));
-		safesnprintf(tmpstr, sizeof(tmpstr), msg_txt(423), res == 2 ? "char" : "account", strtime); // "Your %s has been banished until %s "
+		safesnprintf(tmpstr, sizeof(tmpstr), msg_txt(423), (res == 2 ? "char" : "account"), strtime); // "Your %s has been banished until %s "
 		clif_displaymessage(sd->fd, tmpstr);
 	}
 
@@ -1111,30 +1116,24 @@ int chrif_disconnectplayer(int fd) {
 	struct map_session_data *sd;
 	int account_id = RFIFOL(fd, 2);
 
-	sd = map_id2sd(account_id);
-	if( sd == NULL ) {
+	if( !(sd = map_id2sd(account_id)) ) {
 		struct auth_node *auth = chrif_search(account_id);
-		
-		if( auth != NULL && chrif_auth_delete(account_id, auth->char_id, ST_LOGIN) )
+
+		if( auth && chrif_auth_delete(account_id, auth->char_id, ST_LOGIN) )
 			return 0;
-			
+
 		return -1;
 	}
 
-	if (!sd->fd) { //No connection
-		if (sd->state.autotrade) {
-			if (sd->state.vending)
-				vending_closevending(sd);
-			else if (sd->state.buyingstore)
-				buyingstore_close(sd);
+	if( !sd->fd ) { //No connection
+		if( sd->state.autotrade )
 			map_quit(sd); //Remove it
-		}
 		//Else we don't remove it because the char should have a timer to remove the player because it force-quit before,
 		//and we don't want them kicking their previous instance before the 10 secs penalty time passes [Skotlex]
 		return 0;
 	}
 
-	switch(RFIFOB(fd, 6)) {
+	switch( RFIFOB(fd,6) ) {
 		case 1: clif_authfail_fd(sd->fd, 1); break; //Server closed
 		case 2: clif_authfail_fd(sd->fd, 2); break; //Someone else logged in
 		case 3: clif_authfail_fd(sd->fd, 4); break; //Server overpopulated
@@ -1530,38 +1529,43 @@ void chrif_keepalive_ack(int fd) {
  */
 void chrif_parse_ack_vipActive(int fd) {
 #ifdef VIP_ENABLE
-	int aid = RFIFOL(fd,2);
+	uint32 aid = RFIFOL(fd,2);
 	uint32 vip_time = RFIFOL(fd,6);
-	bool isvip = RFIFOB(fd,10);
-	int group_id = RFIFOL(fd,11);
+	uint8 flag = RFIFOB(fd,10);
+	uint32 group_id = RFIFOL(fd,11);
 	TBL_PC *sd = map_id2sd(aid);
+	bool changed = false;
 
-	if (sd == NULL)
+	if (!sd)
 		return;
 
 	sd->group_id = group_id;
 	pc_group_pc_load(sd);
 
-	if (isvip) {
-		sd->vip.enabled = 1;
-		sd->vip.time = vip_time;
-		// Increase storage size for VIP.
-		sd->storage_size = battle_config.vip_storage_increase + MIN_STORAGE;
-		if (sd->storage_size > MAX_STORAGE) {
-			ShowError("intif_parse_ack_vipActive: Storage size for player %s (%d:%d) is larger than MAX_STORAGE. Storage size has been set to MAX_STORAGE.\n", sd->status.name, sd->status.account_id, sd->status.char_id);
-			sd->storage_size = MAX_STORAGE;
-		}
-		// Magic Stone requirement avoidance for VIP.
-		if (battle_config.vip_gemstone)
-			sd->special_state.no_gemstone = 2;
-	} else {
-		if (pc_isvip(sd)) {
+	if (flag&0x2) //isgm
+		clif_displaymessage(sd->fd,msg_txt(437)); // GM's cannot become a VIP.
+	else {
+		changed = (sd->vip.enabled != (flag&0x1));
+		if (flag&0x1) { //isvip
+			sd->vip.enabled = 1;
+			sd->vip.time = vip_time;
+			sd->storage_size = battle_config.vip_storage_increase + MIN_STORAGE; //Increase storage size for VIP
+			if (sd->storage_size > MAX_STORAGE) {
+				ShowError("intif_parse_ack_vipActive: Storage size for player %s (%d:%d) is larger than MAX_STORAGE. Storage size has been set to MAX_STORAGE.\n", sd->status.name, sd->status.account_id, sd->status.char_id);
+				sd->storage_size = MAX_STORAGE;
+			}
+		} else if (sd->vip.enabled) {
 			sd->vip.enabled = 0;
 			sd->vip.time = 0;
 			sd->storage_size = MIN_STORAGE;
 			sd->special_state.no_gemstone = 0;
-			clif_displaymessage(sd->fd, msg_txt(438));
+			clif_displaymessage(sd->fd, msg_txt(438)); // You are no longer VIP.
 		}
+	}
+
+	if (((flag&0x4) || changed) && !sd->vip.disableshowrate) { //Show info if status changed
+		clif_display_pinfo(sd, ZC_PERSONAL_INFOMATION);
+		//clif_vip_display_info(sd, ZC_PERSONAL_INFOMATION_CHN);
 	}
 #endif
 }

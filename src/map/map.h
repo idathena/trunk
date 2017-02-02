@@ -663,7 +663,7 @@ struct map_data {
 		unsigned guildlock : 1;
 		unsigned reset : 1; // [Daegaladh]
 		unsigned nochmautojoin : 1; // Prevent to auto join map channel
-		unsigned nousecart : 1;	// Prevent open up cart @FIXME client side only atm
+		unsigned nousecart : 1;	// Prevent open up cart FIXME: client side only atm
 		unsigned noitemconsumption : 1; // Prevent item usage
 		unsigned nosumstarmiracle : 1; // Allow SG miracle to happen ?
 		unsigned nomineeffect : 1; // Allow /mineeffect

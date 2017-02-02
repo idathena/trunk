@@ -165,6 +165,7 @@ struct skill_cooldown_entry {
 struct vip_info {
 	unsigned int enabled : 1;
 	time_t time;
+	bool disableshowrate; //State to disable clif_display_pinfo() [Cydh]
 };
 #endif
 
@@ -257,6 +258,7 @@ struct map_session_data {
 		uint8 isBoundTrading; //Player is currently add bound item to trade list [Cydh]
 		unsigned int warp_clean : 1;
 		bool ignoretimeout; //Prevent the SECURE_NPCTIMEOUT function from closing current script
+		bool keepshop; //Whether shop data should be removed when the player disconnects
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -660,10 +662,9 @@ struct map_session_data {
 	struct s_pc_itemgrouphealrate **itemgrouphealrate; //List of Item Group Heal rate bonus
 	uint8 itemgrouphealrate_count; //Number of rate bonuses
 
-	int storage_size; //Holds player storage size (VIP system).
+	int storage_size; //Holds player storage size (VIP system)
 #ifdef VIP_ENABLE
 	struct vip_info vip;
-	bool disableshowrate; //State to disable clif_display_pinfo(). [Cydh]
 #endif
 
 	short last_addeditem_index; //Index of latest item added
