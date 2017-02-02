@@ -597,7 +597,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				if( !(nk&NK_NO_ELEFIX) ) { //Affected by element modifier bonuses
 					int ele_fix = tsd->subele[rh_ele] + tsd->subele[ELE_ALL];
 
-					for( i = 0; ARRAYLENGTH(tsd->subele2) > i && tsd->subele2[i].rate != 0; i++ ) {
+					for( i = 0; ARRAYLENGTH(tsd->subele2) > i && tsd->subele2[i].rate; i++ ) {
 						if( tsd->subele2[i].ele != rh_ele )
 							continue;
 						if( !(((tsd->subele2[i].flag)&flag)&BF_WEAPONMASK &&
@@ -775,7 +775,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				if( !(nk&NK_NO_ELEFIX) ) { //Affected by Element modifier bonuses
 					int ele_fix = tsd->subele[rh_ele] + tsd->subele[ELE_ALL];
 
-					for( i = 0; ARRAYLENGTH(tsd->subele2) > i && tsd->subele2[i].rate != 0; i++ ) {
+					for( i = 0; ARRAYLENGTH(tsd->subele2) > i && tsd->subele2[i].rate; i++ ) {
 						if( tsd->subele2[i].ele != rh_ele )
 							continue;
 						if( !(((tsd->subele2[i].flag)&flag)&BF_WEAPONMASK &&
@@ -788,7 +788,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 					if( left&1 && lh_ele != rh_ele ) {
 						int ele_fix_lh = tsd->subele[lh_ele] + tsd->subele[ELE_ALL];
 
-						for( i = 0; ARRAYLENGTH(tsd->subele2) > i && tsd->subele2[i].rate != 0; i++ ) {
+						for( i = 0; ARRAYLENGTH(tsd->subele2) > i && tsd->subele2[i].rate; i++ ) {
 							if( tsd->subele2[i].ele != lh_ele )
 								continue;
 							if( !(((tsd->subele2[i].flag)&flag)&BF_WEAPONMASK &&
@@ -824,7 +824,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				if( !(nk&NK_NO_ELEFIX) ) { //Affected by Element modifier bonuses
 					int ele_fix = tsd->subele[rh_ele] + tsd->subele[ELE_ALL];
 
-					for( i = 0; ARRAYLENGTH(tsd->subele2) > i && tsd->subele2[i].rate != 0; i++ ) {
+					for( i = 0; ARRAYLENGTH(tsd->subele2) > i && tsd->subele2[i].rate; i++ ) {
 						if( tsd->subele2[i].ele != rh_ele )
 							continue;
 						if( !(((tsd->subele2[i].flag)&flag)&BF_WEAPONMASK &&
@@ -4519,9 +4519,15 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 					break;
 			}
 		}
-		if((sce = sc->data[SC_INCATKRATE]) && sd) {
-			ATK_ADDRATE(wd.damage, wd.damage2, sce->val1);
-			RE_ALLATK_ADDRATE(wd, sce->val1);
+		if(sd) {
+			if((sce = sc->data[SC_INCATKRATE])) {
+				ATK_ADDRATE(wd.damage, wd.damage2, sce->val1);
+				RE_ALLATK_ADDRATE(wd, sce->val1);
+			}
+			if((sce = sc->data[SC_CATNIPPOWDER])) {
+				ATK_ADDRATE(wd.damage, wd.damage2, -sce->val2);
+				RE_ALLATK_ADDRATE(wd, -sce->val2);
+			}
 		}
 		if(skill_id == AS_SONICBLOW && (sce = sc->data[SC_SPIRIT]) && sce->val2 == SL_ASSASIN) {
 			ATK_ADDRATE(wd.damage, wd.damage2, (map_flag_gvg2(src->m) ? 25 : 100));
@@ -5883,6 +5889,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case AB_RENOVATIO:
 				ad.damage = status_get_lv(src) * 10 + sstatus->int_;
 				break;
+			case GN_HELLS_PLANT_ATK:
+				ad.damage = 10 * skill_lv * status_get_lv(target) + 7 * sstatus->int_ / 2 * (18 + status_get_job_lv(src) / 4) * 5 / (10 - (sd ? pc_checkskill(sd, AM_CANNIBALIZE) : 5));
+				break;
 			case OB_OBOROGENSOU_TRANSITION_ATK:
 				ad.damage = battle_damage_temp[0]; //Recieved magic damage * skill_lv / 10
 				break;
@@ -6348,6 +6357,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case WM_REVERBERATION_MAGIC:
 				id = WM_REVERBERATION;
 				break;
+			case GN_HELLS_PLANT_ATK:
+				id = GN_HELLS_PLANT;
+				break;
 			default:
 				id = skill_id;
 				break;
@@ -6532,8 +6544,6 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 #endif
 	short i, nk;
 	short s_ele;
-	uint16 id;
-
 	struct map_session_data *sd, *tsd;
 	struct Damage md; //DO NOT CONFUSE with md of mob_data!
 	struct status_data *sstatus, *tstatus;
@@ -6804,18 +6814,25 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		case RA_CLUSTERBOMB:
 		case RA_FIRINGTRAP:
 		case RA_ICEBOUNDTRAP:
-			md.damage = skill_lv * sstatus->dex + sstatus->int_ * 5 ;
-			RE_LVL_TMDMOD();
-			if(sd) {
-				int researchskill_lv = pc_checkskill(sd, RA_RESEARCHTRAP);
+			{
+				struct Damage atk = battle_calc_weapon_attack(src, target, skill_id, skill_lv, md.miscflag);
 
-				if(researchskill_lv)
-					md.damage = md.damage * 20 * researchskill_lv / (skill_id == RA_CLUSTERBOMB ? 50 : 100);
-				else
-					md.damage = 0;
-			} else
-				md.damage = md.damage * 200 / (skill_id == RA_CLUSTERBOMB ? 50 : 100);
-			nk |= NK_NO_ELEFIX|NK_IGNORE_FLEE|NK_NO_CARDFIX_DEF;
+				md.damage = skill_lv * sstatus->dex + sstatus->int_ * 5 ;
+				RE_LVL_TMDMOD();
+				if(sd) {
+					int researchskill_lv = pc_checkskill(sd, RA_RESEARCHTRAP);
+
+					if(researchskill_lv)
+						md.damage = md.damage * 20 * researchskill_lv / (skill_id == RA_CLUSTERBOMB ? 50 : 100);
+					else
+						md.damage = 0;
+				} else
+					md.damage = md.damage * 200 / (skill_id == RA_CLUSTERBOMB ? 50 : 100);
+				md.damage += atk.damage;
+				if(skill_id != RA_CLUSTERBOMB)
+					md.flag |= BF_WEAPON;
+				nk |= NK_IGNORE_FLEE|NK_NO_CARDFIX_DEF;
+			}
 			break;
 		case NC_MAGMA_ERUPTION:
 			md.damage = 800 + 200 * skill_lv;
@@ -6829,13 +6846,6 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			break;
 		case GN_BLOOD_SUCKER:
 			md.damage = 200 + 100 * skill_lv + sstatus->int_;
-			break;
-		case GN_HELLS_PLANT_ATK:
-			md.damage = 10 * skill_lv * status_get_lv(src) + 7 * sstatus->int_ / 2 *
-				(18 + status_get_job_lv(src) / 4) * 5 / (10 - (sd ? pc_checkskill(sd, AM_CANNIBALIZE) : 5));
-			if(map_flag_gvg2(src->m))
-				md.damage >>= 1;
-			md.flag |= BF_WEAPON;
 			break;
 		case RL_B_TRAP:
 			md.damage = 3 * skill_lv * tstatus->hp / 100 + 10 * sstatus->dex;
@@ -6905,23 +6915,14 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			break;
 	}
 
-	switch(skill_id) {
-		case GN_HELLS_PLANT_ATK:
-			id = GN_HELLS_PLANT;
-			break;
-		default:
-			id = skill_id;
-			break;
-	}
-
 	if(sd) {
-		if((i = pc_skillatk_bonus(sd, id)))
+		if((i = pc_skillatk_bonus(sd, skill_id)))
 			md.damage += md.damage * i / 100;
-		if((i = battle_adjust_skill_damage(src->m, id)))
+		if((i = battle_adjust_skill_damage(src->m, skill_id)))
 			md.damage = md.damage * i / 100;
 	}
 
-	if(tsd && (i = pc_sub_skillatk_bonus(tsd, id)))
+	if(tsd && (i = pc_sub_skillatk_bonus(tsd, skill_id)))
 		md.damage -= md.damage * i / 100;
 
 	if(md.damage > 0) {
@@ -6956,6 +6957,9 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 	if(!(nk&NK_NO_ELEFIX) && md.damage > 0) {
 		md.damage = battle_attr_fix(src, target, md.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
 		switch(skill_id) {
+			case RA_CLUSTERBOMB:
+			case RA_FIRINGTRAP:
+			case RA_ICEBOUNDTRAP:
 			case NC_MAGMA_ERUPTION:
 				//Forced neutral [exneval]
 				md.damage = battle_attr_fix(src, target, md.damage, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
@@ -6964,18 +6968,6 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 	}
 
 	switch(skill_id) {
-		case RA_FIRINGTRAP:
- 		case RA_ICEBOUNDTRAP:
-			if(md.damage == 1)
-				break; //Keep damage to 1 against "plant"-type mobs
-		//Fall through
-		case RA_CLUSTERBOMB:
-			{
-				struct Damage wd = battle_calc_weapon_attack(src, target, skill_id, skill_lv, md.miscflag);
-
-				md.damage += wd.damage;
-			}
-			break;
 		case NJ_ZENYNAGE:
 			if(sd) {
 				if(md.damage > sd->status.zeny)
