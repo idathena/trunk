@@ -1256,7 +1256,7 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 		sd->state.showzeny = 1;
 #ifdef VIP_ENABLE
 	if (!battle_config.vip_disp_rate)
-		sd->disableshowrate = 1;
+		sd->vip.disableshowrate = 1;
 #endif
 
 	if (!(battle_config.display_skill_fail&2))
@@ -1524,7 +1524,7 @@ void pc_reg_received(struct map_session_data *sd)
 #ifdef VIP_ENABLE
 	sd->vip.time = 0;
 	sd->vip.enabled = 0;
-	chrif_req_login_operation(sd->status.account_id, sd->status.name, CHRIF_OP_LOGIN_VIP, 0, 1); //Request VIP informations
+	chrif_req_login_operation(sd->status.account_id, sd->status.name, CHRIF_OP_LOGIN_VIP, 0, 1|8); //Request VIP information
 #endif
 	intif_Mail_requestinbox(sd->status.char_id, 0); //MAIL SYSTEM - Request Mail Inbox
 	intif_request_questlog(sd);
@@ -6338,8 +6338,11 @@ static void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsi
 
 	*base_exp = (unsigned int)cap_value(*base_exp + (double)*base_exp * (bonus + vip_bonus_base) / 100., 0, UINT_MAX);
 
-	if (sd->sc.data[SC_JEXPBOOST])
+	if (sd->sc.data[SC_JEXPBOOST]) {
 		bonus += sd->sc.data[SC_JEXPBOOST]->val1;
+		if (battle_config.vip_bm_increase && pc_isvip(sd)) //Increase Job Manual EXP rate for VIP
+			bonus += (sd->sc.data[SC_JEXPBOOST]->val1 / battle_config.vip_bm_increase);
+	}
 
 	*job_exp = (unsigned int)cap_value(*job_exp + (double)*job_exp * (bonus + vip_bonus_job) / 100., 0, UINT_MAX);
 }
@@ -7268,7 +7271,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 	if( (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->state.snovice_dead_flag ) {
 		unsigned int next = pc_nextbaseexp(sd);
 
-		if( next == 0 )
+		if( !next )
 			next = pc_thisbaseexp(sd);
 		if( get_percentage(sd->status.base_exp,next) >= 99 ) {
 			sd->state.snovice_dead_flag = 1;
@@ -7433,19 +7436,19 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		!map[sd->bl.m].flag.noexppenalty && !map_flag_gvg2(sd->bl.m) &&
 		!sd->sc.data[SC_BABY] && !sd->sc.data[SC_LIFEINSURANCE] )
 	{
-		uint32 base_penalty = battle_config.death_penalty_base;
-		uint32 job_penalty = battle_config.death_penalty_job;
-		uint32 zeny_penalty = battle_config.zeny_penalty;
+		uint32 base_penalty = 0;
+		uint32 job_penalty = 0;
+		uint32 zeny_penalty = 0;
 
-#ifdef VIP_ENABLE
-		if( pc_isvip(sd) ) {
-			base_penalty *= battle_config.vip_exp_penalty_base;
-			job_penalty *= battle_config.vip_exp_penalty_job;
+		if( pc_isvip(sd) ) { //EXP penalty for VIP
+			base_penalty = battle_config.vip_exp_penalty_base;
+			job_penalty = battle_config.vip_exp_penalty_job;
+			zeny_penalty = battle_config.vip_zeny_penalty;
 		} else {
-			base_penalty *= battle_config.vip_exp_penalty_base_normal;
-			job_penalty *= battle_config.vip_exp_penalty_job_normal;
+			base_penalty = battle_config.death_penalty_base;
+			job_penalty = battle_config.death_penalty_job;
+			zeny_penalty = battle_config.zeny_penalty;
 		}
-#endif
 
 		if( base_penalty > 0 ) {
 			uint32 exp, penalty = base_penalty / 100;
@@ -7502,7 +7505,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			int per = map[sd->bl.m].drop_list[j].drop_per;
 			int i;
 
-			if( id == 0 )
+			if( !id )
 				continue;
 			if( id == -1 ) {
 				int eq_num = 0, eq_n[MAX_INVENTORY];
@@ -10108,17 +10111,13 @@ static int pc_autosave(int tid, unsigned int tick, int id, intptr_t data)
 			save_flag = 1;
 			continue;
 		}
-
 		if (save_flag != 1) //Not our turn to save yet
 			continue;
-
 		//Save char
 		last_save_id = sd->bl.id;
 		save_flag = 2;
-#ifdef VIP_ENABLE
 		if (pc_isvip(sd)) //Check if we're still vip
 			chrif_req_login_operation(sd->status.account_id,sd->status.name,CHRIF_OP_LOGIN_VIP,0,1);
-#endif
 		chrif_save(sd,0);
 		break;
 	}

@@ -10301,7 +10301,7 @@ BUILDIN_FUNC(sc_end)
 }
 
 /*==========================================
- * @FIXME atm will return reduced tick, 0 immune, 1 no tick
+ * FIXME: atm will return reduced tick, 0 immune, 1 no tick
  *------------------------------------------*/
 BUILDIN_FUNC(getscrate)
 {
@@ -19995,13 +19995,8 @@ BUILDIN_FUNC(vip_time) {
 	else
 		sd = script_rid2sd(st);
 
-	if (sd == NULL)
+	if (!sd)
 		return 0;
-
-	if (pc_get_group_level(sd) > 5) {
-		clif_displaymessage(sd->fd,msg_txt(437)); // GM's cannot become a VIP
-		return 0;
-	}
 
 	chrif_req_login_operation(sd->status.account_id,sd->status.name,CHRIF_OP_LOGIN_VIP,viptime,7);
 #endif
@@ -20396,7 +20391,7 @@ BUILDIN_FUNC(ignoretimeout)
 	if (!sd)
 		return 1;
 
-	sd->state.ignoretimeout = script_getnum(st,2) > 0;
+	sd->state.ignoretimeout = (script_getnum(st,2) > 0);
 #endif
 	return SCRIPT_CMD_SUCCESS;
 }

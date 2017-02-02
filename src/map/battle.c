@@ -4471,18 +4471,18 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 #endif
 		if((sce = sc->data[SC_EDP])) {
 			switch(skill_id) {
-				//Pre-Renewal only: Soul Breaker and Meteor Assault ignores EDP 
+				case AS_SPLASHER:
+				case ASC_METEORASSAULT:
+				//Pre-Renewal only: Soul Breaker ignores EDP 
 				//Renewal only: Grimtooth and Venom Knife ignore EDP
-				//Both: Venom Splasher ignores EDP [helvetica]
+				//Both: Venom Splasher and Meteor Assault ignore EDP [helvetica]
 #ifndef RENEWAL_EDP
 				case ASC_BREAKER:
-				case ASC_METEORASSAULT:
 #else
 				case AS_GRIMTOOTH:
 				case AS_VENOMKNIFE:
 #endif
-				case AS_SPLASHER:
-					break; //Skills above have no effect with edp
+					break; //Skills above have no effect with EDP
 #ifdef RENEWAL_EDP
 				//Renewal EDP: damage gets a half modifier on top of EDP bonus for skills [helvetica]
 				//* Sonic Blow
@@ -8234,6 +8234,9 @@ static const struct _battle_data {
 	{ "pet_max_atk1",                       &battle_config.pet_max_atk1,                    750,    0,      INT_MAX,        },
 	{ "pet_max_atk2",                       &battle_config.pet_max_atk2,                    1000,   0,      INT_MAX,        },
 	{ "pet_disable_in_gvg",                 &battle_config.pet_no_gvg,                      0,      0,      1,              },
+	{ "pet_ignore_infinite_def",            &battle_config.pet_ignore_infinite_def,         0,      0,      1,              },
+	{ "pet_equip_required",                 &battle_config.pet_equip_required,              0,      0,      1,              },
+	{ "pet_master_dead",                    &battle_config.pet_master_dead,                 0,      0,      1,              },
 	{ "skill_min_damage",                   &battle_config.skill_min_damage,                2|4,    0,      1|2|4,          },
 	{ "finger_offensive_type",              &battle_config.finger_offensive_type,           0,      0,      1,              },
 	{ "heal_exp",                           &battle_config.heal_exp,                        0,      0,      INT_MAX,        },
@@ -8381,7 +8384,6 @@ static const struct _battle_data {
 	{ "pk_mode",                            &battle_config.pk_mode,                         0,      0,      2,              },
 	{ "pk_level_range",                     &battle_config.pk_level_range,                  0,      0,      INT_MAX,        },
 	{ "manner_system",                      &battle_config.manner_system,                   0xFFF,  0,      0xFFF,          },
-	{ "pet_equip_required",                 &battle_config.pet_equip_required,              0,      0,      1,              },
 	{ "multi_level_up",                     &battle_config.multi_level_up,                  0,      0,      1,              },
 	{ "max_exp_gain_rate",                  &battle_config.max_exp_gain_rate,               0,      0,      INT_MAX,        },
 	{ "backstab_bow_penalty",               &battle_config.backstab_bow_penalty,            0,      0,      1,              },
@@ -8541,10 +8543,9 @@ static const struct _battle_data {
 #endif
 	{ "vip_base_exp_increase",              &battle_config.vip_base_exp_increase,           0,      0,      INT_MAX,        },
 	{ "vip_job_exp_increase",               &battle_config.vip_job_exp_increase,            0,      0,      INT_MAX,        },
-	{ "vip_exp_penalty_base_normal",        &battle_config.vip_exp_penalty_base_normal,     0,      0,      INT_MAX,        },
-	{ "vip_exp_penalty_job_normal",         &battle_config.vip_exp_penalty_job_normal,      0,      0,      INT_MAX,        },
 	{ "vip_exp_penalty_base",               &battle_config.vip_exp_penalty_base,            0,      0,      INT_MAX,        },
 	{ "vip_exp_penalty_job",                &battle_config.vip_exp_penalty_job,             0,      0,      INT_MAX,        },
+	{ "vip_zeny_penalty",                   &battle_config.vip_zeny_penalty,                0,      0,      INT_MAX,        },
 	{ "vip_bm_increase",                    &battle_config.vip_bm_increase,                 0,      0,      INT_MAX,        },
 	{ "vip_drop_increase",                  &battle_config.vip_drop_increase,               0,      0,      INT_MAX,        },
 	{ "vip_gemstone",                       &battle_config.vip_gemstone,                    0,      0,      1,              },
@@ -8599,7 +8600,6 @@ static const struct _battle_data {
 	{ "stormgust_knockback",                &battle_config.stormgust_knockback,             1,      0,      1,              },
 	{ "default_fixed_castrate",             &battle_config.default_fixed_castrate,          20,     0,      100,            },
 	{ "default_bind_on_equip",              &battle_config.default_bind_on_equip,    BOUND_CHAR, BOUND_NONE, BOUND_MAX - 1, },
-	{ "pet_ignore_infinite_def",            &battle_config.pet_ignore_infinite_def,         0,      0,      1,              },
 	{ "homunculus_evo_intimacy_need",       &battle_config.homunculus_evo_intimacy_need,    91100,  0,      INT_MAX,        },
 	{ "homunculus_evo_intimacy_reset",      &battle_config.homunculus_evo_intimacy_reset,   1000,   0,      INT_MAX,        },
 	{ "monster_loot_search_type",           &battle_config.monster_loot_search_type,        1,      0,      1,              },
@@ -8623,6 +8623,7 @@ static const struct _battle_data {
 	{ "skill_eightpath_algorithm",          &battle_config.skill_eightpath_algorithm,       1,      0,      1,              },
 	{ "can_damage_skill",                   &battle_config.can_damage_skill,                1,      0,      BL_ALL,         },
 	{ "atcommand_levelup_events",           &battle_config.atcommand_levelup_events,        0,      0,      1,              },
+	{ "hide_fav_sell",                      &battle_config.hide_fav_sell,                   0,      0,      1,              },
 };
 
 #ifndef STATS_OPT_OUT

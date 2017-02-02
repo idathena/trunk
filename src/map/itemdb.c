@@ -753,7 +753,7 @@ static bool itemdb_read_itemtrade(char *str[], int columns, int current)
 	if( (id = itemdb_exists(nameid)) == NULL ) {
 		//ShowWarning("itemdb_read_itemtrade: Invalid item id %d.\n", nameid);
 		//return false;
-		//@FIXME: item_trade.txt contains items, which are commented in item database.
+		//FIXME: item_trade.txt contains items, which are commented in item database.
 		return true;
 	}
 

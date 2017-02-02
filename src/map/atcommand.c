@@ -4506,16 +4506,14 @@ ACMD_FUNC(loadnpc)
 		return -1;
 	}
 
-	// Add to list of script sources and run it
-	if( !npc_addsrcfile(message) //Try to read file
-		|| !npc_parsesrcfile(message, true) ){
-		clif_displaymessage(fd, msg_txt(261));
+	if (!npc_addsrcfile(message, true)) {
+		clif_displaymessage(fd, msg_txt(261)); // Script could not be loaded.
 		return -1;
 	}
 
 	npc_read_event_script();
 
-	clif_displaymessage(fd, msg_txt(262));
+	clif_displaymessage(fd, msg_txt(262)); // Script loaded.
 	return 0;
 }
 
@@ -4532,7 +4530,7 @@ ACMD_FUNC(unloadnpc)
 		return -1;
 	}
 
-	if ((nd = npc_name2id(NPCname)) == NULL) {
+	if (!(nd = npc_name2id(NPCname))) {
 		clif_displaymessage(fd, msg_txt(111)); // This NPC doesn't exist.
 		return -1;
 	}
@@ -6869,18 +6867,18 @@ ACMD_FUNC(refreshall)
  *------------------------------------------*/
 ACMD_FUNC(identify)
 {
-	int i,num;
+	int i, num;
 
 	nullpo_retr(-1, sd);
 
 	for (i = num = 0; i < MAX_INVENTORY; i++) {
-		if(sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].identify != 1)
+		if (sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].identify != 1)
 			num++;
 	}
 	if (num > 0)
 		clif_item_identify_list(sd);
 	else
-		clif_displaymessage(fd,msg_txt(1238)); // There are no items to appraise.
+		clif_displaymessage(fd, msg_txt(1238)); // There are no items to appraise.
 	return 0;
 }
 
@@ -6891,11 +6889,13 @@ ACMD_FUNC(identify)
 ACMD_FUNC(identifyall)
 {
 	int i;
+
 	nullpo_retr(-1, sd);
-	for(i=0; i<MAX_INVENTORY; i++) {
-		if (sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].identify!=1) {
-			sd->status.inventory[i].identify=1;
-			clif_item_identified(sd,i,0);
+
+	for (i = 0; i < MAX_INVENTORY; i++) {
+		if (sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].identify != 1) {
+			sd->status.inventory[i].identify = 1;
+			clif_item_identified(sd, i, 0);
 		}
 	}
 	return 0;
@@ -6909,25 +6909,22 @@ ACMD_FUNC(gmotd)
 {
 	FILE *fp;
 
-	if( (fp = fopen(motd_txt, "r")) != NULL ) {
+	if ((fp = fopen(motd_txt, "r"))) {
 		char buf[CHAT_SIZE_MAX];
 		size_t len;
 
-		while( fgets(buf, sizeof(buf), fp) ) {
-			if( buf[0] == '/' && buf[1] == '/' ) {
+		while (fgets(buf, sizeof(buf), fp)) {
+			if (buf[0] == '/' && buf[1] == '/')
 				continue;
-			}
 
 			len = strlen(buf);
 
-			while( len && ( buf[len-1] == '\r' || buf[len-1] == '\n' ) ) { // strip trailing EOL characters
+			while (len && (buf[len - 1] == '\r' || buf[len - 1] == '\n')) // Strip trailing EOL characters
 				len--;
-			}
 
-			if( len ) {
+			if (len) {
 				buf[len] = 0;
-
-				intif_broadcast(buf, len+1, 0);
+				intif_broadcast(buf, len + 1, 0);
 			}
 		}
 		fclose(fp);
@@ -6944,7 +6941,7 @@ ACMD_FUNC(misceffect)
 		return -1;
 	if (sscanf(message, "%d", &effect) < 1)
 		return -1;
-	clif_misceffect(&sd->bl,effect);
+	clif_misceffect(&sd->bl, effect);
 
 	return 0;
 }
@@ -7008,18 +7005,15 @@ ACMD_FUNC(mobinfo)
 		base_exp = mob->base_exp;
 		job_exp = mob->job_exp;
 
+		if (pc_isvip(sd)) { // Display EXP rate increase for VIP.
+			base_exp += base_exp * battle_config.vip_base_exp_increase / 100;
+			job_exp += base_exp * battle_config.vip_job_exp_increase / 100;
+		}
+
 #ifdef RENEWAL_EXP
 		if (battle_config.atcommand_mobinfo_type) {
 			base_exp = base_exp * pc_level_penalty_mod(sd, mob->lv, mob->status.class_ , 1) / 100;
 			job_exp = job_exp * pc_level_penalty_mod(sd, mob->lv, mob->status.class_ , 1) / 100;
-		}
-#endif
-
-#ifdef VIP_ENABLE
-		// Display EXP rate increase for VIP.
-		if (pc_isvip(sd) && (battle_config.vip_base_exp_increase || battle_config.vip_job_exp_increase)) {
-			base_exp += base_exp * battle_config.vip_base_exp_increase / 100;
-			job_exp += base_exp * battle_config.vip_job_exp_increase / 100;
 		}
 #endif
 
@@ -7056,11 +7050,9 @@ ACMD_FUNC(mobinfo)
 		for (i = 0; i < MAX_MOB_DROP; i++) {
 			float droprate;
 
-			if (mob->dropitem[i].nameid <= 0 || mob->dropitem[i].p < 1 || (item_data = itemdb_exists(mob->dropitem[i].nameid)) == NULL)
+			if (mob->dropitem[i].nameid <= 0 || mob->dropitem[i].p < 1 || !(item_data = itemdb_exists(mob->dropitem[i].nameid)))
 				continue;
-
 			droprate = (float)mob->dropitem[i].p;
-
 #ifdef RENEWAL_DROP
 			if (battle_config.atcommand_mobinfo_type) {
 				droprate = droprate * pc_level_penalty_mod(sd, mob->lv, mob->status.class_, 2) / 100;
@@ -7069,27 +7061,22 @@ ACMD_FUNC(mobinfo)
 					droprate = 1;
 			}
 #endif
-#ifdef VIP_ENABLE
-			// Display item rate increase for VIP.
-			if (pc_isvip(sd) && battle_config.vip_drop_increase)
-				droprate += battle_config.vip_drop_increase;
-#endif
+			if (pc_isvip(sd)) // Display item rate increase for VIP.
+				droprate += droprate * battle_config.vip_drop_increase / 100;
 			if (item_data->slot)
 				sprintf(atcmd_output2, " - %s[%d]  %02.02f%%", item_data->jname, item_data->slot, droprate / 100);
 			else
 				sprintf(atcmd_output2, " - %s  %02.02f%%", item_data->jname, droprate / 100);
-
 			strcat(atcmd_output, atcmd_output2);
-
-			if (++j%3 == 0) {
+			if (!(++j%3)) {
 				clif_displaymessage(fd, atcmd_output);
 				strcpy(atcmd_output, " ");
 			}
 		}
 
-		if (j == 0)
+		if (!j)
 			clif_displaymessage(fd, msg_txt(1246)); // This monster has no drops.
-		else if (j%3 != 0)
+		else if (j%3)
 			clif_displaymessage(fd, atcmd_output);
 
 		// Mvp
@@ -7098,16 +7085,15 @@ ACMD_FUNC(mobinfo)
 
 			sprintf(atcmd_output, msg_txt(1247), mob->mexp); // MVP Bonus EXP:%u
 			clif_displaymessage(fd, atcmd_output);
-
 			strcpy(atcmd_output, msg_txt(1248)); // MVP Items:
 			mvpremain = 100.0; // Remaining drop chance for official mvp drop mode
 			j = 0;
 			for (i = 0; i < MAX_MVP_DROP; i++) {
-				if (mob->mvpitem[i].nameid <= 0 || (item_data = itemdb_exists(mob->mvpitem[i].nameid)) == NULL)
+				if (mob->mvpitem[i].nameid <= 0 || !(item_data = itemdb_exists(mob->mvpitem[i].nameid)))
 					continue;
 				// Because if there are 3 MVP drops at 50%, the first has a chance of 50%, the second 25% and the third 12.5%
 				mvppercent = (float)mob->mvpitem[i].p * mvpremain / 10000;
-				if (battle_config.item_drop_mvp_mode == 0)
+				if (!battle_config.item_drop_mvp_mode)
 					mvpremain -= mvppercent;
 				if (mvppercent > 0) {
 					j++;
@@ -7125,7 +7111,7 @@ ACMD_FUNC(mobinfo)
 					strcat(atcmd_output, atcmd_output2);
 				}
 			}
-			if (j == 0)
+			if (!j)
 				clif_displaymessage(fd, msg_txt(1249)); // This monster has no MVP prizes.
 			else
 				clif_displaymessage(fd, atcmd_output);
@@ -7609,7 +7595,7 @@ ACMD_FUNC(whodrops)
 		return -1;
 	}
 
-	if ((item_array[0] = itemdb_exists(atoi(message))) == NULL)
+	if (!(item_array[0] = itemdb_exists(atoi(message))))
 		count = itemdb_searchname_array(item_array, MAX_SEARCH, message);
 
 	if (!count) {
@@ -7627,14 +7613,12 @@ ACMD_FUNC(whodrops)
 		item_data = item_array[i];
 		sprintf(atcmd_output, msg_txt(1285), item_data->jname, item_data->slot, item_data->nameid); // Item: '%s'[%d] (ID: %hu)
 		clif_displaymessage(fd, atcmd_output);
-
 		if (!item_data->mob[0].chance) {
 			strcpy(atcmd_output, msg_txt(1286)); // - Item is not dropped by mobs.
 			clif_displaymessage(fd, atcmd_output);
 		} else {
 			sprintf(atcmd_output, msg_txt(1287), MAX_SEARCH); // - Common mobs with highest drop chance (only max %d are listed):
 			clif_displaymessage(fd, atcmd_output);
-
 			for (j = 0; j < MAX_SEARCH && item_data->mob[j].chance > 0; j++) {
 				float dropchance = (float)item_data->mob[j].chance;
 
@@ -7642,11 +7626,8 @@ ACMD_FUNC(whodrops)
 				if (battle_config.atcommand_mobinfo_type)
 					dropchance = dropchance * pc_level_penalty_mod(sd, mob_db(item_data->mob[j].id)->lv, mob_db(item_data->mob[j].id)->status.class_, 2) / 100;
 #endif
-#ifdef VIP_ENABLE
-				// Display item rate increase for VIP.
-				if (pc_isvip(sd) && battle_config.vip_drop_increase)
-					dropchance += battle_config.vip_drop_increase;
-#endif
+				if (pc_isvip(sd)) // Display item rate increase for VIP.
+					dropchance += dropchance * battle_config.vip_drop_increase / 100;
 				sprintf(atcmd_output, "- %s (%d): %02.02f%%", mob_db(item_data->mob[j].id)->jname, item_data->mob[j].id, dropchance / 100);
 				clif_displaymessage(fd, atcmd_output);
 			}
@@ -7756,30 +7737,33 @@ ACMD_FUNC(mutearea)
 ACMD_FUNC(rates)
 {
 	char buf[CHAT_SIZE_MAX];
-	int base_exp_rate = 0, job_exp_rate = 0, item_rate = 0;
+	int base_exp_rate = 0, job_exp_rate = 0;
 
 	nullpo_ret(sd);
 	memset(buf, '\0', sizeof(buf));
 
-#ifdef VIP_ENABLE
-	// Display EXP and item rate increase for VIP.
-	if (pc_isvip(sd) && (battle_config.vip_base_exp_increase || battle_config.vip_job_exp_increase || battle_config.vip_drop_increase)) {
-		base_exp_rate += battle_config.vip_base_exp_increase;
-		job_exp_rate += battle_config.vip_job_exp_increase;
-		item_rate += battle_config.vip_drop_increase;
-	}
-#endif
 	snprintf(buf, CHAT_SIZE_MAX, msg_txt(1298), // Experience rates: Base %.2fx / Job %.2fx
-		(battle_config.base_exp_rate + base_exp_rate) / 100., (battle_config.job_exp_rate + job_exp_rate) / 100.);
+		(battle_config.base_exp_rate + (pc_isvip(sd) ? battle_config.vip_base_exp_increase * battle_config.base_exp_rate / 100 : 0)) / 100.,
+		(battle_config.job_exp_rate + (pc_isvip(sd) ? battle_config.vip_job_exp_increase * battle_config.job_exp_rate / 100 : 0)) / 100.);
 	clif_displaymessage(fd, buf);
 	snprintf(buf, CHAT_SIZE_MAX, msg_txt(1299), // Normal Drop Rates: Common %.2fx / Healing %.2fx / Usable %.2fx / Equipment %.2fx / Card %.2fx
-		(battle_config.item_rate_common + item_rate) / 100., (battle_config.item_rate_heal + item_rate) / 100., (battle_config.item_rate_use + item_rate) / 100., (battle_config.item_rate_equip + item_rate) / 100., (battle_config.item_rate_card + item_rate) / 100.);
+		(battle_config.item_rate_common + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_common / 100 : 0)) / 100.,
+		(battle_config.item_rate_heal + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_heal / 100 : 0)) / 100.,
+		(battle_config.item_rate_use + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_use / 100 : 0)) / 100.,
+		(battle_config.item_rate_equip + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_equip / 100 : 0)) / 100.,
+		(battle_config.item_rate_card + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_card / 100 : 0)) / 100.);
 	clif_displaymessage(fd, buf);
 	snprintf(buf, CHAT_SIZE_MAX, msg_txt(1300), // Boss Drop Rates: Common %.2fx / Healing %.2fx / Usable %.2fx / Equipment %.2fx / Card %.2fx
-		(battle_config.item_rate_common_boss + item_rate) / 100., (battle_config.item_rate_heal_boss + item_rate) / 100., (battle_config.item_rate_use_boss + item_rate) / 100., (battle_config.item_rate_equip_boss + item_rate) / 100., (battle_config.item_rate_card_boss + item_rate) / 100.);
+		(battle_config.item_rate_common_boss + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_common_boss / 100 : 0)) / 100.,
+		(battle_config.item_rate_heal_boss + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_heal_boss / 100 : 0)) / 100.,
+		(battle_config.item_rate_use_boss + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_use_boss / 100 : 0)) / 100.,
+		(battle_config.item_rate_equip_boss + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_equip_boss / 100 : 0)) / 100.,
+		(battle_config.item_rate_card_boss + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_card_boss / 100 : 0)) / 100.);
 	clif_displaymessage(fd, buf);
 	snprintf(buf, CHAT_SIZE_MAX, msg_txt(1301), // Other Drop Rates: MvP %.2fx / Card-Based %.2fx / Treasure %.2fx
-		(battle_config.item_rate_mvp + item_rate) / 100., (battle_config.item_rate_adddrop + item_rate) / 100., (battle_config.item_rate_treasure + item_rate) / 100.);
+		(battle_config.item_rate_mvp + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_mvp / 100 : 0)) / 100.,
+		(battle_config.item_rate_adddrop + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_adddrop / 100 : 0)) / 100.,
+		(battle_config.item_rate_treasure + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_treasure / 100 : 0)) / 100.);
 	clif_displaymessage(fd, buf);
 
 	return 0;
@@ -9160,6 +9144,26 @@ ACMD_FUNC(unloadnpcfile) {
 	return 0;
 }
 
+ACMD_FUNC(reloadnpcfile) {
+	if( !message || !*message ) {
+		clif_displaymessage(fd, msg_txt(543)); // Please enter a NPC file name (usage: @reloadnpcfile <file name>).
+		return -1;
+	}
+
+	if( npc_unloadfile(message) )
+		clif_displaymessage(fd, msg_txt(1386)); // File unloaded. Be aware that mapflags and monsters spawned directly are not removed.
+
+	if( !npc_addsrcfile(message, true) ) {
+		clif_displaymessage(fd, msg_txt(261)); // Script could not be loaded.
+		return -1;
+	}
+
+	npc_read_event_script();
+
+	clif_displaymessage(fd, msg_txt(262)); // Script loaded.
+	return 0;
+}
+
 ACMD_FUNC(cart) {
 #define MC_CART_MDFY(x) \
 	sd->status.skill[MC_PUSHCART].id = x ? MC_PUSHCART : 0; \
@@ -9458,13 +9462,13 @@ ACMD_FUNC(vip) {
 	modif_p = atcmd_output;
 	vipdifftime = (int32)solve_time(modif_p);
 
-	if (vipdifftime == 0) {
+	if (!vipdifftime) {
 		clif_displaymessage(fd, msg_txt(701)); // Invalid time for vip command.
 		clif_displaymessage(fd, msg_txt(702)); // Time parameter format is +/-<value> to alter. y/a = Year, m = Month, d/j = Day, h = Hour, n/mn = Minute, s = Second.
 		return -1;
 	}
 
-	if ((pl_sd = map_nick2sd(atcmd_player_name)) == NULL) {
+	if (!(pl_sd = map_nick2sd(atcmd_player_name))) {
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
 	}
@@ -9474,19 +9478,12 @@ ACMD_FUNC(vip) {
 		return -1;
 	}
 
-	if (pc_get_group_level(pl_sd) > 5) {
-		clif_displaymessage(fd, msg_txt(437)); // GM's cannot become a VIP.
-		return -1;
-	}
-
-	if (pl_sd->vip.time == 0)
+	if (!pl_sd->vip.time)
 		pl_sd->vip.time = now;
 
 	pl_sd->vip.time += vipdifftime; // Increase or reduce VIP duration
 
 	if (pl_sd->vip.time <= now) {
-		pl_sd->vip.time = 0;
-		pl_sd->vip.enabled = 0;
 		clif_displaymessage(pl_sd->fd, msg_txt(703)); // GM has removed your VIP time.
 		clif_displaymessage(fd, msg_txt(704)); // Player is no longer VIP.
 	} else {
@@ -9518,12 +9515,12 @@ ACMD_FUNC(vip) {
 ACMD_FUNC(showrate) {
 	nullpo_retr(-1,sd);
 
-	if (!sd->disableshowrate) {
+	if (!sd->vip.disableshowrate) {
 		sprintf(atcmd_output, msg_txt(718)); //Personal rate information is not displayed now.
-		sd->disableshowrate = 1;
+		sd->vip.disableshowrate = 1;
 	} else {
 		sprintf(atcmd_output, msg_txt(719)); //Personal rate information will be shown.
-		sd->disableshowrate = 0;
+		sd->vip.disableshowrate = 0;
 	}
 
 	clif_displaymessage(fd, atcmd_output);
@@ -10038,6 +10035,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(addperm),
 		ACMD_DEF2("rmvperm", addperm),
 		ACMD_DEF(unloadnpcfile),
+		ACMD_DEF(reloadnpcfile),
 		ACMD_DEF(cart),
 		ACMD_DEF(mount2),
 		ACMD_DEF(join),

@@ -429,7 +429,7 @@ int chrif_send_accdata(int fd, uint32 aid) {
 	char birthdate[10 + 1] = "";
 	char pincode[PINCODE_LENGTH + 1];
 	char isvip = false;
-	uint8 char_slots = MIN_CHARS, char_vip = 0;
+	uint8 char_slots = MIN_CHARS, char_vip = 0, char_billing = 0;
 
 	memset(pincode,0,PINCODE_LENGTH + 1);
 	if( !accounts->load_num(accounts, &acc, aid) )
@@ -448,6 +448,7 @@ int chrif_send_accdata(int fd, uint32 aid) {
 			char_slots = login_config.char_per_account + char_vip;
 		} else
 			char_slots = login_config.char_per_account;
+		char_billing = MAX_CHAR_BILLING; //@TODO: Create a config for this
 #endif
 	}
 
@@ -459,11 +460,11 @@ int chrif_send_accdata(int fd, uint32 aid) {
 	WFIFOB(fd,50) = (unsigned char)group_id;
 	WFIFOB(fd,51) = char_slots;
 	safestrncpy((char *)WFIFOP(fd,52), birthdate, 10 + 1);
-	safestrncpy((char *)WFIFOP(fd,63), pincode, 4 + 1 );
+	safestrncpy((char *)WFIFOP(fd,63), pincode, 4 + 1);
 	WFIFOL(fd,68) = (uint32)acc.pincode_change;
 	WFIFOB(fd,72) = isvip;
 	WFIFOB(fd,73) = char_vip;
-	WFIFOB(fd,74) = MAX_CHAR_BILLING; //@TODO: Create a config for this
+	WFIFOB(fd,74) = char_billing;
 	WFIFOSET(fd,75);
 	return 0;
 }
@@ -473,6 +474,7 @@ int chrif_parse_reqaccdata(int fd, int cid, char *ip) {
 		return 0;
 	else {
 		uint32 aid = RFIFOL(fd,2);
+
 		RFIFOSKIP(fd,6);
 		if( chrif_send_accdata(fd,aid) < 0 )
 			ShowNotice("Char-server '%s': account %d NOT found (ip: %s).\n", server[cid].name, aid, ip);
@@ -480,13 +482,20 @@ int chrif_parse_reqaccdata(int fd, int cid, char *ip) {
 	return 0;
 }
 
-int chrif_sendvipdata(int fd, struct mmo_account acc, char isvip, int mapfd) {
+/**
+ * Transmit vip specific data to char-serv (will be transfered to mapserv)
+ * @param fd
+ * @param acc
+ * @param flag 0x1: VIP, 0x2: GM, 0x4: Show rates on player
+ * @param mapfd
+ */
+int chrif_sendvipdata(int fd, struct mmo_account acc, uint8 flag, int mapfd) {
 #ifdef VIP_ENABLE
 	WFIFOHEAD(fd,19);
 	WFIFOW(fd,0) = 0x2743;
 	WFIFOL(fd,2) = acc.account_id;
 	WFIFOL(fd,6) = (uint32)acc.vip_time;
-	WFIFOB(fd,10) = isvip;
+	WFIFOB(fd,10) = flag;
 	WFIFOL(fd,11) = acc.group_id; //New group id
 	WFIFOL(fd,15) = mapfd; //Link to mapserv
 	WFIFOSET(fd,19);
@@ -497,9 +506,10 @@ int chrif_sendvipdata(int fd, struct mmo_account acc, char isvip, int mapfd) {
 
 /**
  * Received a vip data request from char
- * type is the query to perform
- *  &1 : Select info and update old_groupid
- *  &2 : Update vip time
+ * flag is the query to perform
+ *  0x1 : Select info and update old_groupid
+ *  0x2 : VIP duration is changed by atcommand or script
+ *  0x8 : First request on player login
  * @param fd link to charserv
  * @return 0 missing data, 1 succeed
  */
@@ -509,8 +519,8 @@ int chrif_parse_reqvipdata(int fd) {
 		return 0;
 	else { //Request vip info
 		struct mmo_account acc;
-		int aid = RFIFOL(fd,2);
-		int8 type = RFIFOB(fd,6);
+		uint32 aid = RFIFOL(fd,2);
+		uint8 flag = RFIFOB(fd,6);
 		int32 timediff = RFIFOL(fd,7);
 		int mapfd = RFIFOL(fd,11);
 
@@ -520,7 +530,11 @@ int chrif_parse_reqvipdata(int fd) {
 			time_t vip_time = acc.vip_time;
 			bool isvip = false;
 
-			if( type&2 ) {
+			if( acc.group_id > login_config.vip_sys.group_id ) { //Don't change group if it's higher
+				chrif_sendvipdata(fd, acc, 0x2|((flag&0x8) ? 0x4 : 0), mapfd);
+				return 1;
+			}
+			if( flag&2 ) {
 				if( !vip_time )
 					vip_time = now; //New entry
 				vip_time += timediff; //Set new duration
@@ -533,16 +547,15 @@ int chrif_parse_reqvipdata(int fd) {
 				isvip = true;
 			} else { //Expired or @vip -xx
 				vip_time = 0;
-				//Prevent alteration in case account wasn't registered as vip yet
-				if( acc.group_id == login_config.vip_sys.group_id )
+				if( acc.group_id == login_config.vip_sys.group_id ) //Prevent alteration in case account wasn't registered as vip yet
 					acc.group_id = acc.old_group;
 				acc.old_group = 0;
 				acc.char_slots = login_config.char_per_account;
 			}
 			acc.vip_time = vip_time;
 			accounts->save(accounts, &acc);
-			if( type&1 )
-				chrif_sendvipdata(fd, acc, isvip, mapfd);
+			if( flag&1 )
+				chrif_sendvipdata(fd, acc, (isvip ? 0x1 : 0)|((flag&0x8) ? 0x4 : 0), mapfd);
 		}
 	}
 #endif
@@ -1736,7 +1749,7 @@ int login_config_read(const char *cfgName)
 	char line[1024], w1[32], w2[1024];
 	FILE *fp = fopen(cfgName, "r");
 
-	if(fp == NULL) {
+	if(!fp) {
 		ShowError("Configuration file (%s) not found.\n", cfgName);
 		return 1;
 	}
@@ -1810,9 +1823,9 @@ int login_config_read(const char *cfgName)
 				struct client_hash_node *nnode;
 
 				CREATE(nnode, struct client_hash_node, 1);
-				if(strcmpi(md5, "disabled") == 0) {
+				if(!strcmpi(md5, "disabled"))
 					nnode->hash[0] = '\0';
-				} else {
+				else {
 					int i;
 
 					for(i = 0; i < 32; i += 2) {
@@ -1829,7 +1842,7 @@ int login_config_read(const char *cfgName)
 				nnode->next = login_config.client_hash_nodes;
 				login_config.client_hash_nodes = nnode;
 			}
-		} else if(strcmpi(w1, "chars_per_account") == 0) { //Max chars per account [Sirius]
+		} else if(!strcmpi(w1, "chars_per_account")) { //Max chars per account [Sirius]
 			login_config.char_per_account = atoi(w2);
 			if(login_config.char_per_account <= 0 || login_config.char_per_account > MAX_CHARS) {
 				if(login_config.char_per_account > MAX_CHARS) {
@@ -1840,13 +1853,18 @@ int login_config_read(const char *cfgName)
 			}
 		}
 #ifdef VIP_ENABLE
-		else if(strcmpi(w1, "vip_group") == 0)
+		else if(!strcmpi(w1, "vip_group"))
 			login_config.vip_sys.group_id = cap_value(atoi(w2), 0, 99);
-		else if(strcmpi(w1, "vip_char_increase") == 0) {
-			if(login_config.vip_sys.char_increase > (unsigned int)MAX_CHARS - login_config.char_per_account)
+		else if(!strcmpi(w1, "vip_char_increase")) {
+			if(atoi(w2) == -1)
+				login_config.vip_sys.char_increase = MAX_CHAR_VIP;
+			else
+				login_config.vip_sys.char_increase = atoi(w2);
+			if(login_config.vip_sys.char_increase > (unsigned int)MAX_CHARS - login_config.char_per_account) {
 				ShowWarning("vip_char_increase too high, can only go up to %d, according to your char_per_account config %d\n",
 					MAX_CHARS - login_config.char_per_account, login_config.char_per_account);
-			login_config.vip_sys.char_increase =  cap_value(atoi(w2), 0, MAX_CHARS - login_config.char_per_account);
+				login_config.vip_sys.char_increase = MAX_CHARS - login_config.char_per_account;
+			}
 		}
 #endif
 		else if(!strcmpi(w1, "import"))

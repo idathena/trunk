@@ -204,8 +204,8 @@ void pincode_notifyLoginPinError(int account_id);
 void pincode_decrypt(uint32 userSeed, char *pin);
 int pincode_compare(int fd, struct char_session_data *sd, char *pin);
 
-void mapif_vipack(int mapfd, uint32 aid, uint32 vip_time, uint8 isvip, int group_id);
-int loginif_reqvipdata(uint32 aid, uint8 type, int32 timediff, int mapfd);
+void mapif_vipack(int mapfd, uint32 aid, uint32 vip_time, uint8 flag, uint32 group_id);
+int loginif_reqvipdata(uint32 aid, uint8 flag, int32 timediff, int mapfd);
 void loginif_parse_vipack(int fd);
 void loginif_parse_changesex(int sex, int acc, int char_id, int class_, int guild_id);
 void loginif_parse_ackchangecharsex(int char_id, int sex);
@@ -2173,8 +2173,8 @@ int mmo_char_send006b(int fd, struct char_session_data *sd) {
 	WFIFOW(fd,0) = 0x6b;
 	if( newvers ) { //20100413
 		WFIFOB(fd,4) = MAX_CHARS; //Max slots
-		WFIFOB(fd,5) = MAX_CHARS - sd->chars_billing - sd->chars_vip; //PremiumStartSlot
-		WFIFOB(fd,6) = MAX_CHARS - sd->chars_billing; //PremiumEndSlot
+		WFIFOB(fd,5) = MIN_CHARS; //PremiumStartSlot
+		WFIFOB(fd,6) = MIN_CHARS + sd->chars_vip; //PremiumEndSlot
 		/* this+0x7  char dummy1_beginbilling */
 		/* this+0x8  unsigned long code */
 		/* this+0xc  unsigned long time1 */
@@ -2198,12 +2198,12 @@ void mmo_char_send082d(int fd, struct char_session_data *sd) {
 	WFIFOHEAD(fd,29);
 	WFIFOW(fd,0) = 0x82d;
 	WFIFOW(fd,2) = 29;
-	WFIFOB(fd,4) = MAX_CHARS - sd->chars_billing - sd->chars_vip; //NormalSlotNum
+	WFIFOB(fd,4) = MIN_CHARS; //NormalSlotNum
 	WFIFOB(fd,5) = sd->chars_vip; //PremiumSlotNum
 	WFIFOB(fd,6) = sd->chars_billing; //BillingSlotNum
 	WFIFOB(fd,7) = sd->char_slots; //ProducibleSlotNum
-	WFIFOB(fd,8) = sd->char_slots; //ValidSlotNum
-	memset(WFIFOP(fd,9),0,20); // Unused bytes
+	WFIFOB(fd,8) = MAX_CHARS; //ValidSlotNum
+	memset(WFIFOP(fd,9),0,20); //Unused bytes
 	WFIFOSET(fd,29);
 }
 
@@ -2213,7 +2213,7 @@ void mmo_char_send(int fd, struct char_session_data *sd) {
 		mmo_char_send082d(fd,sd);
 		char_charlist_notify(fd,sd);
 	}
-	mmo_char_send006b(fd,sd); //@FIXME dump from kRO doesn't show 6b transmission
+	mmo_char_send006b(fd,sd); //FIXME: dump from kRO doesn't show 6b transmission
 	if( sd->version > date2version(20060819) )
 		char_block_character(fd,sd);
 }
@@ -2316,7 +2316,7 @@ static void char_auth_ok(int fd, struct char_session_data *sd)
 {
 	struct online_char_data *character;
 
-	if ((character = (struct online_char_data *)idb_get(online_char_db, sd->account_id)) != NULL) {
+	if ((character = (struct online_char_data *)idb_get(online_char_db, sd->account_id))) {
 		//Check if character is not online already. [Skotlex]
 		if (character->server > -1) { //Character already online. KICK KICK KICK
 			mapif_disconnectplayer(server[character->server].fd, character->account_id, character->char_id, 2);
@@ -2363,14 +2363,14 @@ void mapif_server_reset(int id);
  * HZ 0x2b2b
  * Transmist vip data to mapserv
  */
-void mapif_vipack(int mapfd, uint32 aid, uint32 vip_time, uint8 isvip, int group_id) {
+void mapif_vipack(int mapfd, uint32 aid, uint32 vip_time, uint8 flag, uint32 group_id) {
 #ifdef VIP_ENABLE
-	uint8 buf[16];
+	uint8 buf[15];
 
 	WBUFW(buf,0) = 0x2b2b;
 	WBUFL(buf,2) = aid;
 	WBUFL(buf,6) = vip_time;
-	WBUFB(buf,10) = isvip;
+	WBUFB(buf,10) = flag;
 	WBUFL(buf,11) = group_id;
 	mapif_send(mapfd, buf, 15); //Inform the mapserv back
 #endif
@@ -2378,20 +2378,20 @@ void mapif_vipack(int mapfd, uint32 aid, uint32 vip_time, uint8 isvip, int group
 
 /**
  * HZ 0x2742
- * Request vip data from loginserv
+ * Request vip data to loginserv
  * @param aid : account_id to request the vip data
- * @param type : &2 define new duration, &1 load info
+ * @param flag : 0x1 Select info and update old_groupid, 0x2 VIP duration is changed by atcommand or script, 0x8 First request on player login
  * @param timediff : tick to add to vip timestamp
  * @param mapfd: link to mapserv for ack
  * @return 0 if success
  */
-int loginif_reqvipdata(uint32 aid, uint8 type, int32 timediff, int mapfd) {
+int loginif_reqvipdata(uint32 aid, uint8 flag, int32 timediff, int mapfd) {
 	loginif_check(-1);
 #ifdef VIP_ENABLE
 	WFIFOHEAD(login_fd,15);
 	WFIFOW(login_fd,0) = 0x2742;
 	WFIFOL(login_fd,2) = aid; //AID
-	WFIFOB(login_fd,6) = type; //Type
+	WFIFOB(login_fd,6) = flag; //Flag
 	WFIFOL(login_fd,7) = timediff; //req_inc_duration
 	WFIFOL(login_fd,11) = mapfd; //req_inc_duration
 	WFIFOSET(login_fd,15);
@@ -2410,12 +2410,12 @@ void loginif_parse_vipack(int fd) {
 	else {
 		uint32 aid = RFIFOL(fd,2); //AID
 		uint32 vip_time = RFIFOL(fd,6); //vip_time
-		uint8 isvip = RFIFOB(fd,10); //isvip
-		int group_id = RFIFOL(fd,11); //New group id
+		uint8 flag = RFIFOB(fd,10); //Flag
+		uint32 group_id = RFIFOL(fd,11); //New group id
 		int mapfd = RFIFOL(fd,15); //Link to mapserv for ack
 
 		RFIFOSKIP(fd,19);
-		mapif_vipack(mapfd, aid, vip_time, isvip, group_id);
+		mapif_vipack(mapfd, aid, vip_time, flag, group_id);
 	}
 #endif
 }
@@ -2689,7 +2689,7 @@ int parse_fromlogin(int fd) {
 					return 0;
 
 				// Find the authenticated session with this account id
-				ARR_FIND( 0, fd_max, i, session[i] && (sd = (struct char_session_data *)session[i]->session_data) && sd->auth && sd->account_id == RFIFOL(fd,2) );
+				ARR_FIND(0, fd_max, i, session[i] && (sd = (struct char_session_data *)session[i]->session_data) && sd->auth && sd->account_id == RFIFOL(fd,2));
 				if( i < fd_max ) {
 					memcpy(sd->email, RFIFOP(fd,6), 40);
 					sd->expiration_time = (time_t)RFIFOL(fd,46);
@@ -2707,7 +2707,7 @@ int parse_fromlogin(int fd) {
 					sd->chars_vip = RFIFOB(fd,73);
 					sd->chars_billing = RFIFOB(fd,74);
 					// Continued from char_auth_ok
-					if( (max_connect_user == 0 && sd->group_id != gm_allow_group) ||
+					if( (!max_connect_user && sd->group_id != gm_allow_group) ||
 						(max_connect_user > 0 && count_users() >= max_connect_user && sd->group_id != gm_allow_group) ) {
 						// Refuse connection (over populated)
 						char_reject(i,0);
@@ -3205,7 +3205,7 @@ int mapif_parse_reqcharban(int fd) {
 		return 0;
 	else {
 		//int aid = RFIFOL(fd,2); AID of player who as requested the ban
-		int timediff = RFIFOL(fd,6);
+		int32 timediff = RFIFOL(fd,6);
 		const char *name = (char *)RFIFOP(fd,10); //Name of the target character
 
 		RFIFOSKIP(fd,10 + NAME_LENGTH);
@@ -3664,7 +3664,7 @@ int parse_frommap(int fd)
 						node->login_id1 = RFIFOL(fd,6);
 						node->login_id2 = RFIFOL(fd,10);
 						node->sex = RFIFOB(fd,30);
-						node->expiration_time = 0; //FIXME (this thing isn't really supported we could as well purge it instead of fixing)
+						node->expiration_time = 0; //FIXME: (this thing isn't really supported we could as well purge it instead of fixing)
 						node->ip = ntohl(RFIFOL(fd,31));
 						node->group_id = RFIFOL(fd,35);
 						node->changing_mapservers = 1;
@@ -4013,7 +4013,7 @@ int parse_frommap(int fd)
 						WFIFOL(fd,4) = account_id;
 						WFIFOL(fd,8) = node->login_id1;
 						WFIFOL(fd,12) = node->login_id2;
-						//@FIXME: Will wrap to negative after "19-Jan-2038, 03:14:07 AM GMT"
+						//FIXME: Will wrap to negative after "19-Jan-2038, 03:14:07 AM GMT"
 						WFIFOL(fd,16) = (uint32)node->expiration_time;
 						WFIFOL(fd,20) = node->group_id;
 						WFIFOB(fd,24) = node->changing_mapservers;

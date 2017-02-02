@@ -239,7 +239,7 @@ static int add_path(struct node_heap *heap, struct path_node *tp, int16 x, int16
 		return 0;
 	}
 
-	if (tp[i].x || tp[i].y) // Index is already taken; see `tp` array FIXME for details
+	if (tp[i].x || tp[i].y) // Index is already taken; see `tp` array FIXME: for details
 		return 1;
 
 	// New node

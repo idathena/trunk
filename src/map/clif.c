@@ -2025,10 +2025,12 @@ void clif_selllist(struct map_session_data *sd)
 		if( sd->status.inventory[i].nameid > 0 && sd->inventory_data[i] ) {
 			if( !itemdb_cansell(&sd->status.inventory[i], pc_get_group_level(sd)) )
 				continue;
+			if( battle_config.hide_fav_sell && sd->status.inventory[i].favorite )
+				continue; //Cannot sell favs [Jey]
 			if( sd->status.inventory[i].expire_time || (sd->status.inventory[i].bound && !pc_can_give_bounded_items(sd)) )
-				continue; // Cannot Sell Rental Items or Account Bounded Items
+				continue; //Cannot Sell Rental Items or Account Bounded Items
 			if( sd->status.inventory[i].bound && !pc_can_give_bounded_items(sd))
-				continue; // Don't allow sale of bound items
+				continue; //Don't allow sale of bound items
 			val = sd->inventory_data[i]->value_sell;
 			if( val < 0 )
 				continue;
@@ -2799,9 +2801,9 @@ void clif_inventorylist(struct map_session_data *sd) {
 	}
 #if PACKETVER >= 20111122 && PACKETVER < 20120925
 	for( i = 0; i < MAX_INVENTORY; i++ ) {
-		if( sd->status.inventory[i].nameid <= 0 || sd->inventory_data[i] == NULL )
+		if( sd->status.inventory[i].nameid <= 0 || !sd->inventory_data[i] )
 			continue;
-		if ( sd->status.inventory[i].favorite )
+		if( sd->status.inventory[i].favorite )
 			clif_favorite_item(sd, i);
 	}
 #endif
@@ -9017,15 +9019,15 @@ void clif_disp_message(struct block_list *src, const char *mes, int len, enum se
 {
 	unsigned char buf[256];
 
-	if( len == 0 )
+	if( !len )
 		return;
 	else if( len > sizeof(buf) - 5 ) {
 		ShowWarning("clif_disp_message: Truncated message '%s' (len=%d, max=%d, aid=%d).\n", mes, len, sizeof(buf) - 5, src->id);
 		len = sizeof(buf) - 5;
 	}
 
-	WBUFW(buf, 0) = 0x17f;
-	WBUFW(buf, 2) = len + 5;
+	WBUFW(buf,0) = 0x17f;
+	WBUFW(buf,2) = len + 5;
 	safestrncpy((char *)WBUFP(buf,4), mes, len + 1);
 	clif_send(buf, WBUFW(buf,2), src, target);
 }
@@ -9053,22 +9055,22 @@ void clif_GM_kickack(struct map_session_data *sd, int result)
 
 void clif_GM_kick(struct map_session_data *sd, struct map_session_data *tsd)
 {
-	int fd = tsd->fd;
+	int fd;
+
+	nullpo_retv(tsd);
+
+	fd = tsd->fd;
+
+	if( !sd )
+		tsd->state.keepshop = true;
 
 	if( fd > 0 )
-		clif_authfail_fd(fd, 15); //Forced to dc by gm
-	else {
-		if( sd ) { //Only gm should kick autotraders
-			if( tsd->state.vending )
-				vending_closevending(tsd);
-			else if( tsd->state.buyingstore )
-				buyingstore_close(tsd);
-		}
+		clif_authfail_fd(fd, 15);
+	else
 		map_quit(tsd);
-	}
 
 	if( sd )
-		clif_GM_kickack(sd, 1);
+		clif_GM_kickack(sd, tsd->status.account_id);
 }
 
 
@@ -10363,7 +10365,6 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		int lv;
 
 		first_time = true;
-		sd->state.connect_new = 0;
 		clif_skillinfoblock(sd);
 		clif_hotkeys_send(sd);
 		clif_updatestatus(sd,SP_BASEEXP);
@@ -10458,18 +10459,19 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		}
 		map_iwall_get(sd); //Updates Walls Info on this Map to Client
 		status_calc_pc(sd,SCO_NONE); //Some conditions are map-dependent so we must recalculate
-		if(channel_config.map_enable && channel_config.map_autojoin && !map[sd->bl.m].flag.nochmautojoin &&
-			!map[sd->bl.m].instance_id) //Instances do not need their own channels
-			channel_mjoin(sd); //Join new map
 #ifdef VIP_ENABLE
-		if(!sd->disableshowrate) {
+		if (!sd->state.connect_new &&
+			!sd->vip.disableshowrate &&
+			sd->state.pmap != sd->bl.m &&
+			map[sd->state.pmap].adjust.bexp != map[sd->bl.m].adjust.bexp)
+		{
 			clif_display_pinfo(sd,ZC_PERSONAL_INFOMATION);
 			//clif_vip_display_info(sd,ZC_PERSONAL_INFOMATION_CHN);
 		}
-		if(battle_config.vip_gemstone && pc_isvip(sd))
-			sd->special_state.no_gemstone = 2;
 #endif
-		sd->state.changemap = 0;
+		//Instances do not need their own channels
+		if(channel_config.map_enable && channel_config.map_autojoin && !map[sd->bl.m].flag.nochmautojoin && !map[sd->bl.m].instance_id)
+			channel_mjoin(sd); //Join new map
 	}
 
 	mail_clear(sd);
@@ -10536,6 +10538,9 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 
 	pc_show_questinfo_reinit(sd);
 	pc_show_questinfo(sd);
+
+	sd->state.connect_new = 0;
+	sd->state.changemap = 0;
 }
 
 
@@ -13793,7 +13798,7 @@ void clif_parse_GMKickAll(int fd, struct map_session_data *sd) {
 /// Request to warp to a character with given name.
 /// 01bb <char name>.24B
 void clif_parse_GMShift(int fd, struct map_session_data *sd)
-{ //@FIXME: remove is supposed to receive account name for clients prior 20100803RE
+{ //FIXME: remove is supposed to receive account name for clients prior 20100803RE
 	char *player_name;
 	char command[NAME_LENGTH + 8];
 
@@ -13831,7 +13836,7 @@ void clif_parse_GMRemove2(int fd, struct map_session_data *sd)
 /// Request to summon a player with given name to own position.
 /// 01bd <char name>.24B
 void clif_parse_GMRecall(int fd, struct map_session_data *sd)
-{ //@FIXME: recall is supposed to receive account name for clients prior 20100803RE
+{ //FIXME: recall is supposed to receive account name for clients prior 20100803RE
 	char *player_name;
 	char command [NAME_LENGTH + 8];
 
@@ -18031,14 +18036,13 @@ void clif_display_pinfo(struct map_session_data *sd, int cmdtype) {
 		int details_bexp[PINFO_MAX];
 		int details_drop[PINFO_MAX];
 		int details_penalty[PINFO_MAX];
-		int penalty_const;
 
 		/**
 		 * Set for EXP
 		 */
 		//0:PCRoom
 		details_bexp[0] = map[sd->bl.m].adjust.bexp;
-		if(details_bexp[0] == 100 || details_bexp[0] == 0)
+		if(details_bexp[0] == 100 || !details_bexp[0])
 			details_bexp[0] = 0;
 		else {
 			if(details_bexp[0] < 100) {
@@ -18079,7 +18083,7 @@ void clif_display_pinfo(struct map_session_data *sd, int cmdtype) {
 		details_drop[0] = 0;
 
 		//1:Premium
-		details_drop[1] = battle_config.vip_drop_increase;
+		details_drop[1] = battle_config.vip_drop_increase * battle_config.item_rate_common / 100;
 		if(pc_isvip(sd)) {
 			if(details_drop[1] < 0)
 				details_drop[1] = 0 - details_drop[1];
@@ -18105,15 +18109,12 @@ void clif_display_pinfo(struct map_session_data *sd, int cmdtype) {
 		/**
 		 * Set for Penalty rate
 		 */
-		//! FIXME: Current penalty system, makes this announcement hardly to gives info + or - rate
-		penalty_const = battle_config.death_penalty_base * battle_config.vip_exp_penalty_base_normal;
-
 		//0:PCRoom
 		details_penalty[0] = 0;
 
 		//1:Premium
 		if(pc_isvip(sd)) {
-			details_penalty[1] = battle_config.vip_exp_penalty_base * 10000 / penalty_const;
+			details_penalty[1] = battle_config.vip_exp_penalty_base;
 			if(details_penalty[1] == 100)
 				details_penalty[1] = 0;
 			else {
@@ -18123,11 +18124,13 @@ void clif_display_pinfo(struct map_session_data *sd, int cmdtype) {
 				} else
 					details_penalty[1] = details_penalty[1] - 100;
 			}
+			if(battle_config.death_penalty_base > battle_config.vip_exp_penalty_base)
+				details_penalty[1] = battle_config.vip_exp_penalty_base - battle_config.death_penalty_base;
 		} else
 			details_penalty[1] = 0;
 
 		//2:Server
-		details_penalty[2] = battle_config.vip_exp_penalty_base_normal * 10000 / penalty_const;
+		details_penalty[2] = battle_config.death_penalty_base;
 		if(details_penalty[2] == 100)
 			details_penalty[2] = 0;
 		else {
@@ -18163,29 +18166,28 @@ void clif_display_pinfo(struct map_session_data *sd, int cmdtype) {
 
 		for(i = 0; i < maxinfotype; i++) {
 			WFIFOB(fd,info->pos[4] + (i * szdetails)) = i; //Infotype //0 PCRoom, 1 Premium, 2 Server, 3 TPlus
-
 			WFIFOL(fd,info->pos[5] + (i * szdetails)) = details_bexp[i] * factor;
 			WFIFOL(fd,info->pos[6] + (i * szdetails)) = details_penalty[i] * factor;
 			WFIFOL(fd,info->pos[7] + (i * szdetails)) = details_drop[i] * factor;
 
 			tot_baseexp += details_bexp[i] * factor;
-			tot_drop += details_penalty[i] * factor;
-			tot_penalty += details_drop[i] * factor;
+			tot_penalty += details_penalty[i] * factor;
+			tot_drop += details_drop[i] * factor;
 
 			len += szdetails;
 		}
 		WFIFOW(fd,info->pos[0])  = len; //Packetlen
 		if(cmd == 0x8cb) { //0x8cb version
 			WFIFOW(fd,info->pos[1])  = tot_baseexp;
-			WFIFOW(fd,info->pos[2])  = tot_drop;
-			WFIFOW(fd,info->pos[3])  = tot_penalty;
+			WFIFOW(fd,info->pos[2])  = tot_penalty;
+			WFIFOW(fd,info->pos[3])  = tot_drop;
 		} else { //2013-08-07aRagexe uses 0x097b
 			WFIFOL(fd,info->pos[1])  = tot_baseexp;
-			WFIFOL(fd,info->pos[2])  = tot_drop;
-			WFIFOL(fd,info->pos[3])  = tot_penalty;
+			WFIFOL(fd,info->pos[2])  = tot_penalty;
+			WFIFOL(fd,info->pos[3])  = tot_drop;
 		}
 		if(cmdtype == ZC_PERSONAL_INFOMATION_CHN)
-			WFIFOW(fd,info->pos[8])  = 0; //Activity rate case of event ??
+			WFIFOW(fd,info->pos[8])  = 0; //Activity rate case of event?
 		WFIFOSET(fd,len);
 	}
 }
