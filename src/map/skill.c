@@ -6009,11 +6009,15 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				sc_start(src,bl,type,100,skill_lv,skill_get_time2(skill_id,skill_lv)));
 			break;
 
-		case SA_FULLRECOVERY:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			if (status_isimmune(bl))
-				break;
-			status_percent_heal(bl,100,100);
+		case SA_FULLRECOVERY: {
+				int heal = 100;
+
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				if (status_isimmune(bl))
+					heal = 0;
+				if (heal)
+					status_percent_heal(bl,100,100);
+			}
 			break;
 
 		case NPC_ALLHEAL: {
