@@ -7281,8 +7281,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			case SC_GLORIA:		case SC_WINDWALK:	case SC_MAGICROD:
 			case SC_HALLUCINATION:	case SC_STONE:		case SC_QUAGMIRE:
 			case SC_SUITON:		case SC_SECRAMENT:	case SC_ADORAMUS:
-			case SC_WHITEIMPRISON:	case SC_MARSHOFABYSS:	case SC__MANHOLE:
-			case SC__BLOODYLUST:
+			case SC_WHITEIMPRISON:	case SC__MANHOLE:	case SC__BLOODYLUST:
 				return 0;
 		}
 	}
