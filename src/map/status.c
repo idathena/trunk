@@ -3074,30 +3074,30 @@ int status_get_spbonus(struct block_list *bl, enum e_status_bonus type) {
  * The calculation needs base_level, battle_status (vit or int), additive modifier, and multiplicative modifier
  * @param sd Player
  * @param isHP true - calculates MaxHP, false - calculated MaxSP
- * @return max The max value of HP or SP
+ * @return dmax The max value of HP or SP
  */
 unsigned int status_calc_maxhpsp_pc(struct map_session_data *sd, bool isHP)
 {
-	double max = 0;
+	double dmax = 0;
 	uint16 idx, level, job_id;
 
 	nullpo_ret(sd);
 
 	job_id = pc_mapid2jobid(sd->class_, sd->status.sex);
 	idx = pc_class2idx(job_id);
-	level = max(sd->status.base_level, 1);
+	level = u16max(sd->status.base_level, 1);
 
 	if (isHP) { //Calculates MaxHP
-		max = job_info[idx].base_hp[level - 1] * (1 + max(sd->battle_status.vit, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
-		max += status_get_hpbonus(&sd->bl, STATUS_BONUS_FIX);
-		max += (int64)(max * status_get_hpbonus(&sd->bl, STATUS_BONUS_RATE) / 100); //Aegis accuracy
+		dmax = job_info[idx].base_hp[level - 1] * (1 + u16max(sd->battle_status.vit, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
+		dmax += status_get_hpbonus(&sd->bl, STATUS_BONUS_FIX);
+		dmax += (int64)(dmax * status_get_hpbonus(&sd->bl, STATUS_BONUS_RATE) / 100); //Aegis accuracy
 	} else { //Calculates MaxSP
-		max = job_info[idx].base_sp[level - 1] * (1 + max(sd->battle_status.int_, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
-		max += status_get_spbonus(&sd->bl, STATUS_BONUS_FIX);
-		max += (int64)(max * status_get_spbonus(&sd->bl, STATUS_BONUS_RATE) / 100);
+		dmax = job_info[idx].base_sp[level - 1] * (1 + u16max(sd->battle_status.int_, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
+		dmax += status_get_spbonus(&sd->bl, STATUS_BONUS_FIX);
+		dmax += (int64)(dmax * status_get_spbonus(&sd->bl, STATUS_BONUS_RATE) / 100);
 	}
 
-	return (unsigned int)cap_value(max, 1, UINT_MAX);
+	return (unsigned int)cap_value(dmax, 1, UINT_MAX);
 }
 
 //Calculates player data from scratch without counting SC adjustments.
@@ -4028,12 +4028,12 @@ int status_calc_homunculus_(struct homun_data *hd, enum e_status_calc_opt opt)
 
 	if( (skill_lv = hom_checkskill(hd, HAMI_SKIN)) > 0 ) {
 		status->max_hp += skill_lv * 2 * status->max_hp / 100;
-		status->max_hp = min(status->max_hp, battle_config.max_homunculus_hp);
+		status->max_hp = umin(status->max_hp, battle_config.max_homunculus_hp);
 	}
 
 	if( (skill_lv = hom_checkskill(hd, HLIF_BRAIN)) > 0 ) {
 		status->max_sp += (1 + skill_lv / 2 - skill_lv / 4 + skill_lv / 5) * status->max_sp / 100;
-		status->max_sp = min(status->max_sp, battle_config.max_homunculus_sp);
+		status->max_sp = umin(status->max_sp, battle_config.max_homunculus_sp);
 	}
 
 	if( opt&SCO_FIRST ) {
@@ -4359,13 +4359,12 @@ void status_calc_state(struct block_list *bl, struct status_change *sc, enum scs
 
 	if( flag&SCS_NOMOVE ) { //Can move?
 		if( !(flag&SCS_NOMOVECOND) )
-			sc->cant.move += (start ? 1 : -1);
+			sc->cant.move += (start ? 1 : (sc->cant.move ? -1 : 0));
 		else if( (sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_SELF) || //Can't move while gospel is in effect
 			(sc->data[SC_BASILICA] && sc->data[SC_BASILICA]->val4 == bl->id) || //Basilica caster cannot move
 			(sc->data[SC_GRAVITATION] && sc->data[SC_GRAVITATION]->val3 == BCT_SELF) ||
 			(sc->data[SC_CAMOUFLAGE] && sc->data[SC_CAMOUFLAGE]->val1 < 3) )
-			sc->cant.move += (start ? 1 : -1);
-		sc->cant.move = max(sc->cant.move, 0); //Safe check
+			sc->cant.move += (start ? 1 : (sc->cant.move ? -1 : 0));
 	}
 
 	if( flag&SCS_NOCAST && !(flag&SCS_NOCASTCOND) ) //Can't use skills
@@ -4655,7 +4654,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->max_hp = status_calc_maxhpsp_pc(sd, true);
 			if( battle_config.hp_rate != 100 )
 				status->max_hp = (unsigned int)(battle_config.hp_rate * (status->max_hp / 100.));
-			status->max_hp = min(status->max_hp, (unsigned int)battle_config.max_hp);
+			status->max_hp = umin(status->max_hp, battle_config.max_hp);
 		} else
 			status->max_hp = status_calc_maxhp(bl, b_status->max_hp);
 
@@ -4671,7 +4670,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->max_sp = status_calc_maxhpsp_pc(sd, false);
 			if( battle_config.sp_rate != 100 )
 				status->max_sp = (unsigned int)(battle_config.sp_rate * (status->max_sp / 100.));
-			status->max_sp = min(status->max_sp, (unsigned int)battle_config.max_sp);
+			status->max_sp = umin(status->max_sp, battle_config.max_sp);
 		} else
 			status->max_sp = status_calc_maxsp(bl, b_status->max_sp);
 

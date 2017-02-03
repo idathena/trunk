@@ -595,10 +595,10 @@ int map_foreachinrange(int (*func)(struct block_list *, va_list), struct block_l
 	va_list ap;
 
 	m = center->m;
-	x0 = max(center->x - range, 0);
-	y0 = max(center->y - range, 0);
-	x1 = min(center->x + range, map[m].xs - 1);
-	y1 = min(center->y + range, map[m].ys - 1);
+	x0 = i16max(center->x - range, 0);
+	y0 = i16max(center->y - range, 0);
+	x1 = i16min(center->x + range, map[m].xs - 1);
+	y1 = i16min(center->y + range, map[m].ys - 1);
 
 	if( type&~BL_MOB ) {
 		for( by = y0 / BLOCK_SIZE; by <= y1 / BLOCK_SIZE; by++ ) {
@@ -666,10 +666,10 @@ int map_foreachinshootrange(int (*func)(struct block_list *, va_list), struct bl
 	if( m < 0 )
 		return 0;
 
-	x0 = max(center->x - range, 0);
-	y0 = max(center->y - range, 0);
-	x1 = min(center->x + range, map[m].xs - 1);
-	y1 = min(center->y + range, map[m].ys - 1);
+	x0 = i16max(center->x - range, 0);
+	y0 = i16max(center->y - range, 0);
+	x1 = i16min(center->x + range, map[m].xs - 1);
+	y1 = i16min(center->y + range, map[m].ys - 1);
 
 	if( type&~BL_MOB ) {
 		for( by = y0 / BLOCK_SIZE; by <= y1 / BLOCK_SIZE; by++ ) {
@@ -745,10 +745,10 @@ int map_foreachinarea(int (*func)(struct block_list *, va_list), int16 m, int16 
 	if( y1 < y0 )
 		swap(y0, y1);
 
-	x0 = max(x0, 0);
-	y0 = max(y0, 0);
-	x1 = min(x1, map[m].xs - 1);
-	y1 = min(y1, map[m].ys - 1);
+	x0 = i16max(x0, 0);
+	y0 = i16max(y0, 0);
+	x1 = i16min(x1, map[m].xs - 1);
+	y1 = i16min(y1, map[m].ys - 1);
 
 	if( type&~BL_MOB )
 		for( by = y0 / BLOCK_SIZE; by <= y1 / BLOCK_SIZE; by++ )
@@ -810,10 +810,10 @@ int map_foreachinshootarea(int (*func)(struct block_list *, va_list), int16 m, i
 	if( y1 < y0 )
 		swap(y0, y1);
 
-	x0 = max(x0, 0);
-	y0 = max(y0, 0);
-	x1 = min(x1, map[m].xs - 1);
-	y1 = min(y1, map[m].ys - 1);
+	x0 = i16max(x0, 0);
+	y0 = i16max(y0, 0);
+	x1 = i16min(x1, map[m].xs - 1);
+	y1 = i16min(y1, map[m].ys - 1);
 
 	cx = x0 + (x1 - x0) / 2;
 	cy = y0 + (y1 - y0) / 2;
@@ -868,10 +868,10 @@ int map_forcountinrange(int (*func)(struct block_list *, va_list), struct block_
 	va_list ap;
 
 	m = center->m;
-	x0 = max(center->x - range, 0);
-	y0 = max(center->y - range, 0);
-	x1 = min(center->x + range, map[m].xs - 1);
-	y1 = min(center->y + range, map[m].ys - 1);
+	x0 = i16max(center->x - range, 0);
+	y0 = i16max(center->y - range, 0);
+	x1 = i16min(center->x + range, map[m].xs - 1);
+	y1 = i16min(center->y + range, map[m].ys - 1);
 
 	if( type&~BL_MOB ) {
 		for( by = y0 / BLOCK_SIZE; by <= y1 / BLOCK_SIZE; by++ ) {
@@ -942,10 +942,10 @@ int map_forcountinarea(int (*func)(struct block_list *, va_list), int16 m, int16
 	if( y1 < y0 )
 		swap(y0, y1);
 
-	x0 = max(x0, 0);
-	y0 = max(y0, 0);
-	x1 = min(x1, map[m].xs - 1);
-	y1 = min(y1, map[m].ys - 1);
+	x0 = i16max(x0, 0);
+	y0 = i16max(y0, 0);
+	x1 = i16min(x1, map[m].xs - 1);
+	y1 = i16min(y1, map[m].ys - 1);
 
 	if( type&~BL_MOB )
 		for( by = y0 / BLOCK_SIZE; by <= y1 / BLOCK_SIZE; by++ )
@@ -993,7 +993,7 @@ int map_foreachinmovearea(int (*func)(struct block_list *, va_list), struct bloc
 	int returnCount = 0; //Total sum of returned values of func() [Skotlex]
 	struct block_list *bl;
 	int blockcount = bl_list_count, i;
-	int x0, x1, y0, y1;
+	int16 x0, x1, y0, y1;
 	va_list ap;
 
 	if( !range )
@@ -1028,10 +1028,10 @@ int map_foreachinmovearea(int (*func)(struct block_list *, va_list), struct bloc
 				x1 = x0 + dx - 1;
 		}
 
-		x0 = max(x0, 0);
-		y0 = max(y0, 0);
-		x1 = min(x1, map[m].xs - 1);
-		y1 = min(y1, map[m].ys - 1);
+		x0 = i16max(x0, 0);
+		y0 = i16max(y0, 0);
+		x1 = i16min(x1, map[m].xs - 1);
+		y1 = i16min(y1, map[m].ys - 1);
 
 		for( by = y0 / BLOCK_SIZE; by <= y1 / BLOCK_SIZE; by++ ) {
 			for( bx = x0 / BLOCK_SIZE; bx <= x1 / BLOCK_SIZE; bx++ ) {
@@ -1055,10 +1055,10 @@ int map_foreachinmovearea(int (*func)(struct block_list *, va_list), struct bloc
 			}
 		}
 	} else { // Diagonal movement
-		x0 = max(x0, 0);
-		y0 = max(y0, 0);
-		x1 = min(x1, map[m].xs - 1);
-		y1 = min(y1, map[m].ys - 1);
+		x0 = i16max(x0, 0);
+		y0 = i16max(y0, 0);
+		x1 = i16min(x1, map[m].xs - 1);
+		y1 = i16min(y1, map[m].ys - 1);
 
 		for( by = y0 / BLOCK_SIZE; by <= y1 / BLOCK_SIZE; by++ ) {
 			for( bx = x0 / BLOCK_SIZE; bx <= x1 / BLOCK_SIZE; bx++ ) {
@@ -1203,7 +1203,7 @@ int map_foreachinpath(int (*func)(struct block_list *, va_list), int16 m, int16 
 	//method specific variables
 	int magnitude2, len_limit; //The square of the magnitude
 	int k, xi, yi, xu, yu;
-	int mx0 = x0, mx1 = x1, my0 = y0, my1 = y1;
+	int16 mx0 = x0, mx1 = x1, my0 = y0, my1 = y1;
 	va_list ap;
 
 	//Avoid needless calculations by not getting the sqrt right away
@@ -1248,12 +1248,12 @@ int map_foreachinpath(int (*func)(struct block_list *, va_list), int16 m, int16 
 	if( my0 > my1 )
 		swap(my0, my1);
 
-	mx0 = max(mx0, 0);
-	my0 = max(my0, 0);
-	mx1 = min(mx1, map[ m ].xs - 1);
-	my1 = min(my1, map[ m ].ys - 1);
+	mx0 = i16max(mx0, 0);
+	my0 = i16max(my0, 0);
+	mx1 = i16min(mx1, map[ m ].xs - 1);
+	my1 = i16min(my1, map[ m ].ys - 1);
 
-	range *= range << 8; //Values are shifted later on for higher precision using int math.
+	range *= (range<<8); //Values are shifted later on for higher precision using int math.
 
 	if( type&~BL_MOB ) {
 		for( by = my0 / BLOCK_SIZE; by <= my1 / BLOCK_SIZE; by++ ) {
@@ -1364,8 +1364,8 @@ int map_foreachindir(int(*func)(struct block_list *, va_list), int16 m, int16 x0
 	int returnCount = 0; //Total sum of returned values of func()
 	int i, blockcount = bl_list_count;
 	struct block_list *bl;
-	int bx, by;
-	int mx0, mx1, my0, my1, rx, ry;
+	int bx, by, rx, ry;
+	int16 mx0, mx1, my0, my1;
 	uint8 dir = map_calc_dir_xy(x0, y0, x1, y1, 6);
 	short dx = dirx[dir];
 	short dy = diry[dir];
@@ -1407,10 +1407,10 @@ int map_foreachindir(int(*func)(struct block_list *, va_list), int16 m, int16 x0
 	mx1 += abs(range * dirx[(dir + 2)%8]);
 	my1 += abs(range * diry[(dir + 2)%8]);
 
-	mx0 = max(mx0, 0);
-	my0 = max(my0, 0);
-	mx1 = min(mx1, map[m].xs - 1);
-	my1 = min(my1, map[m].ys - 1);
+	mx0 = i16max(mx0, 0);
+	my0 = i16max(my0, 0);
+	mx1 = i16min(mx1, map[m].xs - 1);
+	my1 = i16min(my1, map[m].ys - 1);
 
 	if( type&~BL_MOB ) {
 		for( by = my0 / BLOCK_SIZE; by <= my1 / BLOCK_SIZE; by++ ) {

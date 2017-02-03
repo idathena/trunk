@@ -582,13 +582,13 @@ void pc_inventory_rentals(struct map_session_data *sd)
 			unsigned int expire_tick = (unsigned int)(sd->status.inventory[i].expire_time - time(NULL));
 
 			clif_rental_time(sd->fd, sd->status.inventory[i].nameid, (int)expire_tick);
-			next_tick = min(expire_tick * 1000, next_tick);
+			next_tick = umin(expire_tick * 1000, next_tick);
 			c++;
 		}
 	}
 
-	if( c > 0 ) // min(next_tick, 3600000) 1 hour each timer to keep announcing to the owner, and to avoid a but with rental time > 15 days
-		sd->rental_timer = add_timer(gettick() + min(next_tick, 3600000), pc_inventory_rental_end, sd->bl.id, 0);
+	if( c > 0 ) // umin(next_tick, 3600000) 1 hour each timer to keep announcing to the owner, and to avoid a but with rental time > 15 days
+		sd->rental_timer = add_timer(gettick() + umin(next_tick, 3600000), pc_inventory_rental_end, sd->bl.id, 0);
 	else
 		sd->rental_timer = INVALID_TIMER;
 }
@@ -598,9 +598,9 @@ void pc_inventory_rentals(struct map_session_data *sd)
  * @param sd: Player data
  * @param seconds: Rental time
  */
-void pc_inventory_rental_add(struct map_session_data *sd, int seconds)
+void pc_inventory_rental_add(struct map_session_data *sd, unsigned int seconds)
 {
-	int tick = seconds * 1000;
+	unsigned int tick = seconds * 1000;
 
 	if( !sd )
 		return;
@@ -614,7 +614,7 @@ void pc_inventory_rental_add(struct map_session_data *sd, int seconds)
 			sd->rental_timer = add_timer(gettick() + tick, pc_inventory_rental_end, sd->bl.id, 0);
 		}
 	} else
-		sd->rental_timer = add_timer(gettick() + min(tick, 3600000), pc_inventory_rental_end, sd->bl.id, 0);
+		sd->rental_timer = add_timer(gettick() + umin(tick, 3600000), pc_inventory_rental_end, sd->bl.id, 0);
 }
 
 /**
@@ -2093,7 +2093,7 @@ static void pc_bonus_addeff(struct s_addeffect* effect, int pmax, enum sc_type s
 		if( effect[i].sc == sc && effect[i].flag == flag ) {
 			effect[i].rate += rate;
 			effect[i].arrow_rate += arrow_rate;
-			effect[i].duration = max(effect[i].duration, duration);
+			effect[i].duration = umax(effect[i].duration, duration);
 			return;
 		}
 	}
@@ -2126,7 +2126,7 @@ static void pc_bonus_addeff_onskill(struct s_addeffectonskill* effect, int pmax,
 	for( i = 0; i < pmax && effect[i].skill_id; i++ ) {
 		if( effect[i].sc == sc && effect[i].skill_id == skill_id && effect[i].target == target ) {
 			effect[i].rate += rate;
-			effect[i].duration = max(effect[i].duration, duration);
+			effect[i].duration = umax(effect[i].duration, duration);
 			return;
 		}
 	}
@@ -3017,7 +3017,7 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 				sd->add_max_weight += val;
 			break;
 		case SP_ABSORB_DMG_MAXHP:
-			sd->bonus.absorb_dmg_maxhp = max(sd->bonus.absorb_dmg_maxhp, val);
+			sd->bonus.absorb_dmg_maxhp = u8max(sd->bonus.absorb_dmg_maxhp, val);
 			break;
 		case SP_CRITICAL_RANGEATK:
 			if(sd->state.lr_flag != 2)
@@ -5485,7 +5485,7 @@ bool pc_memo(struct map_session_data *sd, int pos)
 
 		// Prevent memo-ing the same map multiple times
 		ARR_FIND(0, MAX_MEMOPOINTS, i, sd->status.memo_point[i].map == map_id2index(sd->bl.m));
-		memmove(&sd->status.memo_point[1], &sd->status.memo_point[0], (min(i,MAX_MEMOPOINTS - 1)) * sizeof(struct point));
+		memmove(&sd->status.memo_point[1], &sd->status.memo_point[0], (u8min(i,MAX_MEMOPOINTS - 1)) * sizeof(struct point));
 		pos = 0;
 	}
 	if( map[sd->bl.m].instance_id ) {
@@ -7453,10 +7453,10 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		if( pc_isvip(sd) ) { //EXP penalty for VIP
 			base_penalty = battle_config.vip_exp_penalty_base;
 			if( battle_config.death_penalty_base != 100 )
-				base_penalty = min(base_penalty,battle_config.death_penalty_base);
+				base_penalty = u32min(base_penalty,battle_config.death_penalty_base);
 			job_penalty = battle_config.vip_exp_penalty_job;
 			if( battle_config.death_penalty_job != 100 )
-				job_penalty = min(job_penalty,battle_config.death_penalty_job);
+				job_penalty = u32min(job_penalty,battle_config.death_penalty_job);
 			zeny_penalty = battle_config.vip_zeny_penalty;
 		} else {
 			base_penalty = battle_config.death_penalty_base;
@@ -7476,7 +7476,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			if( base_penalty > 0 ) { //Recheck after altering to speedup
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					base_penalty <<= 1;
-				sd->status.base_exp -= min(sd->status.base_exp,base_penalty);
+				sd->status.base_exp -= u32min(sd->status.base_exp,base_penalty);
 				clif_updatestatus(sd,SP_BASEEXP);
 			}
 		}
@@ -7495,7 +7495,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			if( job_penalty > 0 ) {
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					job_penalty <<= 1;
-				sd->status.job_exp -= min(sd->status.job_exp,job_penalty);
+				sd->status.job_exp -= u32min(sd->status.job_exp,job_penalty);
 				clif_updatestatus(sd,SP_JOBEXP);
 			}
 		}
@@ -10231,7 +10231,7 @@ void pc_overheat(struct map_session_data *sd, int val)
 		status_change_end(&sd->bl,SC_OVERHEAT_LIMITPOINT,INVALID_TIMER);
 	}
 
-	heat = max(0,heat); //Avoid negative heat
+	heat = max(heat,0); //Avoid negative heat
 	if( heat >= limit[skill_lv] )
 		sc_start(&sd->bl,&sd->bl,SC_OVERHEAT,100,0,1000);
 	else //Cooling down if reached 30 seconds

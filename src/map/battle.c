@@ -897,7 +897,7 @@ static void battle_absorb_damage(struct block_list *bl, struct Damage *d)
 		d->damage2 = dmg_new;
 	else {
 		d->damage = dmg_new;
-		d->damage2 = max(dmg_new * d->damage2 / dmg_ori / 100,1);
+		d->damage2 = i64max(dmg_new * d->damage2 / dmg_ori / 100,1);
 		d->damage = d->damage - d->damage2;
 	}
 }
@@ -1312,7 +1312,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			int div_ = (skill_id ? skill_get_num(skill_id,skill_lv) : div);
 
 			damage -= (div_ < 0 ? sce->val3 : div_ * sce->val3);
-			damage = max(damage,1);
+			damage = i64max(damage,1);
 		}
 
 		if( (sce = sc->data[SC_DARKCROW]) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) )
@@ -1449,7 +1449,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			if( flag&BF_LONG )
 				damage = damage * battle_config.pk_long_damage_rate / 100;
 		}
-		damage = max(damage,1); //Min 1 damage
+		damage = i64max(damage,1); //Min 1 damage
 	}
 
 	if( bl->type == BL_MOB && !status_isdead(bl) && bl->id != src->id ) {
@@ -1538,7 +1538,7 @@ int64 battle_calc_bg_damage(struct block_list *src, struct block_list *bl, int64
 			damage = damage * battle_config.bg_long_damage_rate / 100;
 	}
 
-	damage = max(damage,1);
+	damage = i64max(damage,1);
 	return damage;
 }
 
@@ -1596,7 +1596,7 @@ int64 battle_calc_gvg_damage(struct block_list *src, struct block_list *bl, int6
 			damage = damage * battle_config.gvg_long_damage_rate / 100;
 	}
 
-	damage  = max(damage,1);
+	damage = i64max(damage,1);
 	return damage;
 }
 
@@ -1782,8 +1782,8 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 			dstr = status->str;
 		variance = 5.0f * watk->atk * watk->wlv / 100.0f;
 		strdex_bonus = watk->atk * dstr / 200.0f;
-		atkmin = max(0, (int)(atkmin - variance + strdex_bonus));
-		atkmax = min(UINT16_MAX, (int)(atkmax + variance + strdex_bonus));
+		atkmin = u16max((uint16)(atkmin - variance + strdex_bonus),0);
+		atkmax = u16min((uint16)(atkmax + variance + strdex_bonus),UINT16_MAX);
 	}
 
 	if(!(sc && sc->data[SC_MAXIMIZEPOWER])) {
@@ -1816,8 +1816,8 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 			break;
 	}
 
-	damage = battle_calc_sizefix(damage, sd, tstatus->size, type, weapon_perfection);
-	return (int)cap_value(damage, INT_MIN, INT_MAX);
+	damage = battle_calc_sizefix(damage,sd,tstatus->size,type,weapon_perfection);
+	return (int)cap_value(damage,INT_MIN,INT_MAX);
 }
 #endif
 
@@ -4656,7 +4656,7 @@ short battle_get_defense(struct block_list *src, struct block_list *target, uint
 		int val = sd->ignore_def_by_race[tstatus->race] + sd->ignore_def_by_race[RC_ALL];
 
 		if(sd->spiritcharm_type == CHARM_TYPE_LAND && sd->spiritcharm > 0) {
-			short i = 10 * sd->spiritcharm; //KO Earth Charm effect +10% eDEF
+			uint8 i = 10 * sd->spiritcharm; //KO Earth Charm effect +10% eDEF
 
 			def1 = def1 * (100 + i) / 100;
 		}
@@ -4670,9 +4670,9 @@ short battle_get_defense(struct block_list *src, struct block_list *target, uint
 		}
 	}
 	if(sc && sc->data[SC_EXPIATIO]) {
-		short i = 5 * sc->data[SC_EXPIATIO]->val1; //5% per level
+		uint8 i = 5 * sc->data[SC_EXPIATIO]->val1; //5% per level
 
-		i = min(i, 100);
+		i = u8min(i, 100);
 		def1 = def1 * (100 - i) / 100;
 #ifndef RENEWAL
 		def2 = def2 * (100 - i) / 100;
@@ -4918,7 +4918,7 @@ struct Damage battle_calc_attack_left_right_hands(struct Damage wd, struct block
 					lv = pc_checkskill(sd,KO_RIGHT);
 					ATK_RATER(wd.damage, 70 + lv * 10);
 				}
-				wd.damage = max(wd.damage, 1);
+				wd.damage = i64max(wd.damage, 1);
 			}
 			if(wd.damage2 > 0) {
 				if((sd->class_&MAPID_BASEMASK) == MAPID_THIEF) {
@@ -4928,7 +4928,7 @@ struct Damage battle_calc_attack_left_right_hands(struct Damage wd, struct block
 					lv = pc_checkskill(sd,KO_LEFT);
 					ATK_RATEL(wd.damage2, 50 + lv * 10);
 				}
-				wd.damage2 = max(wd.damage2, 1);
+				wd.damage2 = i64max(wd.damage2, 1);
 			}
 		}
 	}
@@ -5072,7 +5072,7 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 				int64 rdamage = 0;
 
 				if(distance_bl(src, target) <= 0 || !map_check_dir(dir, t_dir)) {
-					rdamage = min(wd.damage, status_get_max_hp(target)) * sce->val2 / 100; //Amplify damage
+					rdamage = i64min(wd.damage, status_get_max_hp(target)) * sce->val2 / 100; //Amplify damage
 					wd.damage = rdamage * 30 / 100; //Player receives 30% of the amplified damage
 					rdamage = rdamage * 70 / 100; //Target receives 70% of the amplified damage [Rytech]
 					clif_skill_damage(target, src, gettick(), status_get_amotion(src), 0, -30000, 1, RK_DEATHBOUND, -1, DMG_SKILL);
@@ -6740,7 +6740,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 				md.damage -= (md.damage * (int64)status_get_def(target)) / 100;
 #endif
 				md.damage -= tstatus->def2;
-				md.damage = max(md.damage, 0);
+				md.damage = i64max(md.damage, 0);
 			}
 			break;
 		case CR_ACIDDEMONSTRATION:
@@ -6851,7 +6851,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			md.damage = 3 * skill_lv * tstatus->hp / 100 + 10 * sstatus->dex;
 			break;
 		case MH_EQC:
-			md.damage = max((int)(tstatus->hp - sstatus->hp), 0);
+			md.damage = max(tstatus->hp - sstatus->hp, 0);
 			break;
 	}
 
@@ -7058,7 +7058,7 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 #ifdef RENEWAL
 	#define CAP_RDAMAGE(d) ( (d) = cap_value((d),1,max_rdamage) )
 #else
-	#define CAP_RDAMAGE(d) ( (d) = max((d),1) )
+	#define CAP_RDAMAGE(d) ( (d) = i64max((d),1) )
 #endif
 
 	if( (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT ) { //Bounces back part of the damage
