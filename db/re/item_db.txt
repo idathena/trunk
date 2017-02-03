@@ -10597,7 +10597,7 @@
 // New Items
 //===================================================================
 22507,ShabbyOldScroll,Old Scroll,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ callfunc "F_22507"; },{},{}
-22508,Para_Team_Mark_,Eden Group Mark,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ warp "moc_para",171,115; },{},{}
+22508,Para_Team_Mark_,Eden Group Mark,11,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ warp "moc_para01",171,115; },{},{}
 22510,King_Wolf_Scroll,King Wolf Scroll,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ /* TODO: confirm the rates */ getitem callfunc("F_Rand",6635,19598,5658,6238,6239),1; },{},{}
 22513,King_Of_Gift_Box,King of Gift Box,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ /* TODO: confirm the rates */ getitem callfunc("F_Rand",12817,4403,14512),1; },{},{}
 22514,Candy_Holder,Candy Holder,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Candy_Holder,1); getrandgroupitem(IG_Candy_Holder,1); getrandgroupitem(IG_Candy_Holder,1); },{},{}

@@ -4036,37 +4036,15 @@ int parse_frommap(int fd)
 				}
 				break;
 
-				case 0x2b28: mapif_parse_reqcharban(fd); break; //charban
+			case 0x2b28: mapif_parse_reqcharban(fd); break; //charban
 
-				case 0x2b2a: mapif_parse_reqcharunban(fd); break; //charunban
+			case 0x2b2a: mapif_parse_reqcharunban(fd); break; //charunban
 
-				//case 0x2b2c: /* Free */; break;
+			//case 0x2b2c: /* Free */; break;
 
-				case 0x2b2d: bonus_script_get(fd); break; //Load data
+			case 0x2b2d: bonus_script_get(fd); break; //Load data
 
-				case 0x2b2e: bonus_script_save(fd); break;//Save data
-
-			case 0x3008:
-				if( RFIFOREST(fd) < RFIFOW(fd,4) )
-					return 0; /* Packet wasn't fully received yet (still fragmented) */
-				else {
-					int sfd; /* Stat server fd */
-					RFIFOSKIP(fd, 2); /* We skip first 2 bytes which are the 0x3008, so we end up with a buffer equal to the one we send */
-
-					if( (sfd = make_connection(host2ip("stats.rathena.org"), (uint16)25421, true, 10) ) == -1 ) {
-						RFIFOSKIP(fd,RFIFOW(fd,2)); /* Skip this packet */
-						break; /* Connection not possible, we drop the report */
-					}
-
-					session[sfd]->flag.server = 1; /* To ensure we won't drop our own packet */
-					WFIFOHEAD(sfd,RFIFOW(fd,2));
-					memcpy((char *)WFIFOP(sfd,0), (char *)RFIFOP(fd, 0), RFIFOW(fd,2));
-					WFIFOSET(sfd,RFIFOW(fd,2));
-					flush_fifo(sfd);
-					do_close(sfd);
-					RFIFOSKIP(fd,RFIFOW(fd,2)); /* Skip this packet */
-				}
-				break;
+			case 0x2b2e: bonus_script_save(fd); break;//Save data
 
 			default: {
 				//inter-server packet
