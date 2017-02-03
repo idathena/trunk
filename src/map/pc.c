@@ -4136,19 +4136,19 @@ uint8 pc_inventoryblank(struct map_session_data *sd)
 	nullpo_ret(sd);
 
 	for(i = 0, b = 0; i < MAX_INVENTORY; i++)
-		if(sd->status.inventory[i].nameid == 0)
+		if(!sd->status.inventory[i].nameid)
 			b++;
 
 	return b;
 }
 
 /**
- * Attempts to remove zeny from player (sd)
- * @param sd
- * @param zeny Zeny removed
- * @param type e_log_pick_type
- * @param tsd (just for log?)
- * @return 0 - Success, 1 - Failed
+ * Attempts to remove zeny from player
+ * @param sd: Player
+ * @param zeny: Zeny removed
+ * @param type: Log type
+ * @param tsd: (optional) From who to log (if null take sd)
+ * @return 0: Success, 1: Failed (Removing negative Zeny or not enough Zeny), 2: Player not found
  */
 char pc_payzeny(struct map_session_data *sd, int zeny, enum e_log_pick_type type, struct map_session_data *tsd)
 {
@@ -4170,7 +4170,7 @@ char pc_payzeny(struct map_session_data *sd, int zeny, enum e_log_pick_type type
 
 	log_zeny(sd, type, tsd, -zeny);
 	if( zeny > 0 && sd->state.showzeny ) {
-		char output[255];
+		char output[CHAT_SIZE_MAX];
 
 		sprintf(output, "Removed %dz.", zeny);
 		clif_disp_onlyself(sd, output, strlen(output));
@@ -4180,14 +4180,14 @@ char pc_payzeny(struct map_session_data *sd, int zeny, enum e_log_pick_type type
 }
 
 /**
- * Attempts to give zeny to player (sd)
- * tsd (optional) from who for log (if null take sd)
- * @param zeny Zeny gained
- * @param type e_log_pick_type
- * @param tsd (just for log?)
- * @return 0 - Success, 1 - Failed
+ * Attempts to give zeny to player
+ * @param sd: Player
+ * @param zeny: Zeny gained
+ * @param type: Log type
+ * @param tsd: (optional) From who to log (if null take sd)
+ * @return -1: Player not found, 0: Success, 1: Giving negative Zeny
  */
-char pc_getzeny(struct map_session_data *sd,int zeny, enum e_log_pick_type type, struct map_session_data *tsd)
+char pc_getzeny(struct map_session_data *sd, int zeny, enum e_log_pick_type type, struct map_session_data *tsd)
 {
 	nullpo_retr(-1, sd);
 
@@ -4208,7 +4208,7 @@ char pc_getzeny(struct map_session_data *sd,int zeny, enum e_log_pick_type type,
 
 	log_zeny(sd, type, tsd, zeny);
 	if( zeny > 0 && sd->state.showzeny ) {
-		char output[255];
+		char output[CHAT_SIZE_MAX];
 
 		sprintf(output, "Gained %dz.", zeny);
 		clif_disp_onlyself(sd, output, strlen(output));
@@ -4217,14 +4217,16 @@ char pc_getzeny(struct map_session_data *sd,int zeny, enum e_log_pick_type type,
 	return 0;
 }
 
-/** Makes player pays by using cash points
- * @param sd Player who pays
- * @param price How many point player has to pay
- * @param points
- * @param type e_log_pick_type
- * @return -2: Paying negative points, -1: Not enough points, otherwise is succes (cash+points)
+/**
+ * Attempts to remove Cash Points from player
+ * @param sd: Player
+ * @param price: Points player has to pay
+ * @param points: Points player has
+ * @param type: Log type
+ * @return -2: Paying negative points, -1: Not enough points, otherwise success (cash+points)
  */
-int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_type type ) {
+int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_type type)
+{
 	int cash;
 
 	nullpo_retr(-1, sd);
@@ -4254,9 +4256,8 @@ int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_ty
 	if( points )
 		log_cash(sd, type, LOG_CASH_TYPE_KAFRA, -points);
 
-
 	if( battle_config.cashshop_show_points ) {
-		char output[128];
+		char output[CHAT_SIZE_MAX];
 
 		sprintf(output, msg_txt(504), points, cash, sd->kafraPoints, sd->cashPoints);
 		clif_disp_onlyself(sd, output, strlen(output));
@@ -4265,8 +4266,17 @@ int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_ty
 	return cash + points;
 }
 
-int pc_getcash( struct map_session_data *sd, int cash, int points, e_log_pick_type type ) {
-	char output[128];
+/**
+ * Attempts to give Cash Points to player
+ * @param sd: Player
+ * @param cash: Cash player gets
+ * @param points: Points player has
+ * @param type: Log type
+ * @return -2: Error, -1: Giving negative cash/points, otherwise success (cash or points)
+ */
+int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_type type)
+{
+	char output[CHAT_SIZE_MAX];
 
 	nullpo_retr(-1, sd);
 

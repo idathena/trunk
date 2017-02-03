@@ -2119,7 +2119,7 @@ void clif_npc_market_purchase_ack(struct map_session_data *sd, uint8 res, uint8 
 	nullpo_retv((nd = map_id2nd(sd->npc_shopid)));
 
 	info = &packet_db[sd->packet_ver][cmd];
-	if( !info || info->len == 0 )
+	if( !info || !info->len )
 		return;
 
 	fd = sd->fd;
@@ -2163,7 +2163,7 @@ void clif_parse_NPCMarketPurchase(int fd, struct map_session_data *sd) {
 		return;
 
 	info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
-	if( !info || info->len == 0 )
+	if( !info || !info->len )
 		return;
 	len = RFIFOW(fd,info->pos[0]);
 	n = (len - 4) / 6;
@@ -15798,7 +15798,7 @@ void clif_parse_cashshop_list_request(int fd, struct map_session_data *sd) {
 /// 0287 <packet len>.W <cash point>.L <kafra point>.L { <sell price>.L <discount price>.L <item type>.B <name id>.W }* (PACKETVER >= 20070711)
 void clif_cashshop_show(struct map_session_data *sd, struct npc_data *nd)
 {
-	int fd,i;
+	int fd, i, cost[2] = { 0, 0 };
 #if PACKETVER < 20070711
 	const int offset = 8;
 #else
@@ -15808,14 +15808,16 @@ void clif_cashshop_show(struct map_session_data *sd, struct npc_data *nd)
 	nullpo_retv(sd);
 	nullpo_retv(nd);
 
+	npc_shop_currency_type(sd, nd, cost, true);
+
 	fd = sd->fd;
 	sd->npc_shopid = nd->bl.id;
 	WFIFOHEAD(fd,offset + nd->u.shop.count * 11);
 	WFIFOW(fd,0) = 0x287;
 	WFIFOW(fd,2) = offset + nd->u.shop.count * 11;
-	WFIFOL(fd,4) = sd->cashPoints; //Cash Points
+	WFIFOL(fd,4) = cost[0];
 #if PACKETVER >= 20070711
-	WFIFOL(fd,8) = sd->kafraPoints; //Kafra Points
+	WFIFOL(fd,8) = cost[1];
 #endif
 
 	for( i = 0; i < nd->u.shop.count; i++ ) {
@@ -15829,7 +15831,6 @@ void clif_cashshop_show(struct map_session_data *sd, struct npc_data *nd)
 	WFIFOSET(fd,WFIFOW(fd,2));
 }
 
-
 /// Cashshop Buy Ack (ZC_PC_CASH_POINT_UPDATE).
 /// 0289 <cash point>.L <error>.W
 /// 0289 <cash point>.L <kafra point>.L <error>.W (PACKETVER >= 20070711)
@@ -15841,22 +15842,30 @@ void clif_cashshop_show(struct map_session_data *sd, struct npc_data *nd)
 ///     4 = You cannot purchase items while you are in a trade. (ERROR_TYPE_EXCHANGE)
 ///     5 = The Purchase has failed because the Item Information was incorrect. (ERROR_TYPE_ITEM_ID)
 ///     6 = You do not have enough Kafra Credit Points. (ERROR_TYPE_MONEY)
-///     7 = You can purchase up to 10 items.
-///     8 = Some items could not be purchased.
+///     7 = You can purchase up to 10 items. (ERROR_TYPE_AMOUNT)
+///     8 = Some items could not be purchased. (ERROR_TYPE_PURCHASE_FAIL)
 void clif_cashshop_ack(struct map_session_data *sd, int error)
 {
-	int fd = sd->fd;
+	int fd, cost[2] = { 0, 0 };
+	struct npc_data *nd;
 
-	WFIFOHEAD(fd, packet_len(0x289));
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	nd = map_id2nd(sd->npc_shopid);
+
+	npc_shop_currency_type(sd, nd, cost, false);
+
+	WFIFOHEAD(fd,packet_len(0x289));
 	WFIFOW(fd,0) = 0x289;
-	WFIFOL(fd,2) = sd->cashPoints;
+	WFIFOL(fd,2) = cost[0];
 #if PACKETVER < 20070711
 	WFIFOW(fd,6) = TOW(error);
 #else
-	WFIFOL(fd,6) = sd->kafraPoints;
+	WFIFOL(fd,6) = cost[1];
 	WFIFOW(fd,10) = TOW(error);
 #endif
-	WFIFOSET(fd, packet_len(0x289));
+	WFIFOSET(fd,packet_len(0x289));
 }
 
 void clif_cashshop_result(struct map_session_data *sd, unsigned short item_id, uint16 result) {
@@ -15887,8 +15896,8 @@ void clif_parse_cashshop_buy(int fd, struct map_session_data *sd)
 		clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(1511)); // Cash Shop is disabled in this map
 		return;
 	}
-	if( sd->state.trading || !sd->npc_shopid || !cash_shop_defined ) {
-		clif_cashshop_ack(sd,1);
+	if( sd->state.trading || !sd->npc_shopid ) {
+		clif_cashshop_ack(sd,ERROR_TYPE_NPC);
 		return;
 	} else {
 #if PACKETVER < 20101116
@@ -15910,7 +15919,7 @@ void clif_parse_cashshop_buy(int fd, struct map_session_data *sd)
 		}
 		if( cmd == 0x848 ) {
 			if( cashshop_buylist(sd,points,count,item_list) )
-				clif_cashshop_ack(sd,0);
+				clif_cashshop_ack(sd,ERROR_TYPE_NONE);
 			return;
 		} else {
 			clif_cashshop_ack(sd,npc_cashshop_buylist(sd,points,count,item_list));
