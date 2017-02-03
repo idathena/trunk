@@ -2171,7 +2171,7 @@ void clif_parse_NPCMarketPurchase(int fd, struct map_session_data *sd) {
 	CREATE(item_list, struct s_npc_buy_list, n);
 	for( i = 0; i < n; i++ ) {
 		item_list[i].nameid = RFIFOW(fd,info->pos[1] + i * 6);
-		item_list[i].qty = (uint16)min(RFIFOL(fd,info->pos[2] + i * 6),USHRT_MAX);
+		item_list[i].qty = u16min(RFIFOL(fd,info->pos[2] + i * 6),UINT16_MAX);
 	}
 
 	res = npc_buylist(sd, n, item_list);
@@ -7030,7 +7030,7 @@ void clif_parse_BankDeposit(int fd, struct map_session_data *sd) {
 		int money = RFIFOL(fd,info->pos[1]);
 
 		if(sd->status.account_id == aid) {
-			enum e_BANKING_DEPOSIT_ACK reason = pc_bank_deposit(sd,max(0,money));
+			enum e_BANKING_DEPOSIT_ACK reason = pc_bank_deposit(sd,max(money,0));
 
 			clif_bank_deposit(sd,reason);
 		}
@@ -7082,7 +7082,7 @@ void clif_parse_BankWithdraw(int fd, struct map_session_data *sd) {
 		int money = RFIFOL(fd,info->pos[1]);
 
 		if(sd->status.account_id == aid) {
-			enum e_BANKING_WITHDRAW_ACK reason = pc_bank_withdraw(sd,max(0,money));
+			enum e_BANKING_WITHDRAW_ACK reason = pc_bank_withdraw(sd,max(money,0));
 
 			clif_bank_withdraw(sd,reason);
 		}
@@ -8142,7 +8142,7 @@ void clif_mvp_exp(struct map_session_data *sd, unsigned int exp)
 #else
 	WFIFOHEAD(fd,packet_len(0x10b));
 	WFIFOW(fd,0) = 0x10b;
-	WFIFOL(fd,2) = min(exp,(unsigned int)INT32_MAX);
+	WFIFOL(fd,2) = umin(exp, INT32_MAX);
 	WFIFOSET(fd,packet_len(0x10b));
 #endif
 }
@@ -11614,7 +11614,7 @@ void clif_parse_ChatRoomStatusChange(int fd, struct map_session_data *sd)
 		return; //Invalid input
 
 	safestrncpy(s_password, password, CHATROOM_PASS_SIZE);
-	safestrncpy(s_title, title, min(len+1,CHATROOM_TITLE_SIZE)); //NOTE: assumes that safestrncpy will not access the len+1'th byte
+	safestrncpy(s_title, title, min(len + 1,CHATROOM_TITLE_SIZE)); //NOTE: assumes that safestrncpy will not access the len+1'th byte
 
 	chat_changechatstatus(sd, s_title, s_password, limit, pub);
 }
@@ -16365,7 +16365,7 @@ void clif_mercenary_updatestatus(struct map_session_data *sd, int type)
 			}
 			break;
 		case SP_MATK1:
-			WFIFOL(fd,4) = min(status->matk_max, UINT16_MAX);
+			WFIFOL(fd,4) = u16min(status->matk_max, UINT16_MAX);
 			break;
 		case SP_HIT:
 			WFIFOL(fd,4) = status->hit;
@@ -17393,40 +17393,40 @@ static void clif_parse_SearchStoreInfo(int fd, struct map_session_data *sd)
 ///     1 = "next" label to retrieve more results
 void clif_search_store_info_ack(struct map_session_data *sd)
 {
-	const unsigned int blocksize = MESSAGE_SIZE+26;
+	const unsigned int blocksize = MESSAGE_SIZE + 26;
 	int fd = sd->fd;
 	unsigned int i, start, end;
 
-	start = sd->searchstore.pages*SEARCHSTORE_RESULTS_PER_PAGE;
-	end   = min(sd->searchstore.count, start+SEARCHSTORE_RESULTS_PER_PAGE);
+	start = sd->searchstore.pages * SEARCHSTORE_RESULTS_PER_PAGE;
+	end = umin(sd->searchstore.count, start + SEARCHSTORE_RESULTS_PER_PAGE);
 
-	WFIFOHEAD(fd,7+(end-start)*blocksize);
+	WFIFOHEAD(fd,7 + (end - start) * blocksize);
 	WFIFOW(fd,0) = 0x836;
-	WFIFOW(fd,2) = 7+(end-start)*blocksize;
-	WFIFOB(fd,4) = !sd->searchstore.pages;
+	WFIFOW(fd,2) = 7 + (end - start) * blocksize;
+	WFIFOB(fd,4) = (sd->searchstore.pages == 0);
 	WFIFOB(fd,5) = searchstore_querynext(sd);
-	WFIFOB(fd,6) = (unsigned char)min(sd->searchstore.uses, UINT8_MAX);
+	WFIFOB(fd,6) = (unsigned char)umin(sd->searchstore.uses, UINT8_MAX);
 
 	for( i = start; i < end; i++ ) {
 		struct s_search_store_info_item *ssitem = &sd->searchstore.items[i];
 		struct item it;
 
-		WFIFOL(fd,i*blocksize+ 7) = ssitem->store_id;
-		WFIFOL(fd,i*blocksize+11) = ssitem->account_id;
-		memcpy(WFIFOP(fd,i*blocksize+15), ssitem->store_name, MESSAGE_SIZE);
-		WFIFOW(fd,i*blocksize+15+MESSAGE_SIZE) = ssitem->nameid;
-		WFIFOB(fd,i*blocksize+17+MESSAGE_SIZE) = itemtype(ssitem->nameid);
-		WFIFOL(fd,i*blocksize+18+MESSAGE_SIZE) = ssitem->price;
-		WFIFOW(fd,i*blocksize+22+MESSAGE_SIZE) = ssitem->amount;
-		WFIFOB(fd,i*blocksize+24+MESSAGE_SIZE) = ssitem->refine;
+		WFIFOL(fd,i * blocksize + 7) = ssitem->store_id;
+		WFIFOL(fd,i * blocksize + 11) = ssitem->account_id;
+		memcpy(WFIFOP(fd,i * blocksize + 15), ssitem->store_name, MESSAGE_SIZE);
+		WFIFOW(fd,i * blocksize + 15 + MESSAGE_SIZE) = ssitem->nameid;
+		WFIFOB(fd,i * blocksize + 17 + MESSAGE_SIZE) = itemtype(ssitem->nameid);
+		WFIFOL(fd,i * blocksize + 18 + MESSAGE_SIZE) = ssitem->price;
+		WFIFOW(fd,i * blocksize + 22 + MESSAGE_SIZE) = ssitem->amount;
+		WFIFOB(fd,i * blocksize + 24 + MESSAGE_SIZE) = ssitem->refine;
 
-		// make-up an item for clif_addcards
+		//Make-up an item for clif_addcards
 		memset(&it, 0, sizeof(it));
 		memcpy(&it.card, &ssitem->card, sizeof(it.card));
 		it.nameid = ssitem->nameid;
 		it.amount = ssitem->amount;
 
-		clif_addcards(WFIFOP(fd,i*blocksize+25+MESSAGE_SIZE), &it);
+		clif_addcards(WFIFOP(fd,i * blocksize + 25 + MESSAGE_SIZE), &it);
 	}
 
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -17473,7 +17473,7 @@ void clif_open_search_store_info(struct map_session_data *sd)
 	WFIFOW(fd,0) = 0x83a;
 	WFIFOW(fd,2) = sd->searchstore.effect;
 #if PACKETVER > 20100701
-	WFIFOB(fd,4) = (unsigned char)min(sd->searchstore.uses, UINT8_MAX);
+	WFIFOB(fd,4) = (unsigned char)umin(sd->searchstore.uses, UINT8_MAX);
 #endif
 	WFIFOSET(fd,packet_len(0x83a));
 }

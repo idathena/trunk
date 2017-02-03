@@ -2429,7 +2429,7 @@ void skill_combo_toogle_inf(struct block_list *bl, uint16 skill_id, int inf) {
 }
 
 void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int tick) {
-	int duration = 0; //Set to duration the user can use a combo skill or 1 for aftercast delay of pre-skill
+	unsigned int duration = 0; //Set to duration the user can use a combo skill or 1 for aftercast delay of pre-skill
 	int nodelay = 0; //Set to 1 for no walk/attack delay, set to 2 for no walk delay
 	int target_id = bl->id; //Set to 0 if combo skill should not autotarget
 	struct status_change_entry *sce;
@@ -2519,7 +2519,7 @@ void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_l
 	if (duration) { //Possible to chain
 		if (sd && duration == 1)
 			duration = DIFF_TICK(sd->ud.canact_tick, tick); //Auto calculation duration
-		duration = max(status_get_amotion(src), duration); //Never less than aMotion
+		duration = umax(status_get_amotion(src), duration); //Never less than aMotion
 		sc_start4(src, src, SC_COMBO, 100, skill_id, target_id, nodelay, 0, duration);
 		clif_combo_delay(src, duration);
 	}
@@ -4626,7 +4626,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 #endif
 				} else {
 #ifdef RENEWAL
-					status_set_hp(src,max(status_get_max_hp(src) / 100,1),0);
+					status_set_hp(src,umax(status_get_max_hp(src) / 100,1),0);
 #else
 					status_set_hp(src,1,0);
 #endif
@@ -10462,10 +10462,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case KO_KAZEHU_SEIRAN:
 		case KO_DOHU_KOUKAI:
 			if( sd ) {
-				int type = skill_get_ele(skill_id,skill_lv);
+				int ele_type = skill_get_ele(skill_id,skill_lv);
 
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				pc_addspiritcharm(sd,skill_get_time(skill_id,skill_lv),MAX_SPIRITCHARM,type);
+				pc_addspiritcharm(sd,skill_get_time(skill_id,skill_lv),MAX_SPIRITCHARM,ele_type);
 			}
 			break;
 

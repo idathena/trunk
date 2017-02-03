@@ -624,7 +624,7 @@ int inter_accreg_tosql(int account_id, int char_id, struct accreg* reg, int type
 	StringBuf_Printf(&buf, "INSERT INTO `%s` (`type`,`account_id`,`char_id`,`str`,`value`) VALUES ", reg_db);
 
 	for( i = 0; i < reg->reg_num; ++i ) {
-		struct global_reg* r = &reg->reg[i];
+		struct global_reg *r = &reg->reg[i];
 
 		if( r->str[0] != '\0' && r->value[0] != '\0' ) {
 			char str[32];
@@ -681,14 +681,14 @@ int inter_accreg_fromsql(int account_id,int char_id, struct accreg *reg, int typ
 			return 0;
 	}
 	for( i = 0; i < MAX_REG_NUM && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i ) {
-		struct global_reg* r = &reg->reg[i];
+		struct global_reg *r = &reg->reg[i];
 
 		// str
 		Sql_GetData(sql_handle, 0, &data, &len);
-		memcpy(r->str, data, min(len, sizeof(r->str)));
+		memcpy(r->str, data, zmin(len, sizeof(r->str)));
 		// value
 		Sql_GetData(sql_handle, 1, &data, &len);
-		memcpy(r->value, data, min(len, sizeof(r->value)));
+		memcpy(r->value, data, zmin(len, sizeof(r->value)));
 	}
 	reg->reg_num = i;
 	Sql_FreeResult(sql_handle);
@@ -1042,7 +1042,7 @@ int mapif_parse_WisRequest(int fd)
 	} else { // Character exists. So, ask all map-servers to be sure of the correct name, rewrite it
 		Sql_GetData(sql_handle, 0, &data, &len);
 		memset(name, 0, NAME_LENGTH);
-		memcpy(name, data, min(len, NAME_LENGTH));
+		memcpy(name, data, zmin(len, NAME_LENGTH));
 		// If source is destination, don't ask other servers.
 		if (strncmp((const char *)RFIFOP(fd,4), name, NAME_LENGTH) == 0) {
 			uint8 buf[27];

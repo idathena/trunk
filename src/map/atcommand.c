@@ -378,7 +378,7 @@ static void warp_get_suggestions(struct map_session_data *sd, const char *name) 
 
 	// Check for maps that contain string
 	for (i = 0; i < MAX_MAP_PER_SERVER; i++) {
-		if (count < MAX_SUGGESTIONS && strstr(map[i].name, name) != NULL) {
+		if (count < MAX_SUGGESTIONS && strstr(map[i].name, name)) {
 			strcat(buffer, map[i].name);
 			strcat(buffer, " ");
 			if (++count >= MAX_SUGGESTIONS)
@@ -3302,12 +3302,12 @@ ACMD_FUNC(lostskill)
  *------------------------------------------*/
 ACMD_FUNC(spiritball)
 {
-	int max_spiritballs;
+	uint32 max_spiritballs;
 	int number;
 	nullpo_retr(-1, sd);
-	
-	max_spiritballs = min(ARRAYLENGTH(sd->spiritball_timer), 0x7FFF);
-	
+
+	max_spiritballs = zmin(ARRAYLENGTH(sd->spiritball_timer), 0x7FFF);
+
 	if( !message || !*message || (number = atoi(message)) < 0 || number > max_spiritballs ) {
 		char msg[CHAT_SIZE_MAX];
 
@@ -3320,7 +3320,7 @@ ACMD_FUNC(spiritball)
 		pc_delspiritball(sd, sd->spiritball, 1);
 	sd->spiritball = number;
 	clif_spiritball(&sd->bl);
-	// no message, player can look the difference
+	// No message, player can look the difference
 
 	return 0;
 }
