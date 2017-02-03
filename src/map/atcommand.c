@@ -8260,7 +8260,7 @@ ACMD_FUNC(cash)
 
 	nullpo_retr(-1, sd);
 
-	if( !message || !*message || (value = atoi(message)) == 0 ) {
+	if( !message || !*message || !(value = atoi(message)) ) {
 		clif_displaymessage(fd, msg_txt(1322)); // Please enter an amount.
 		return -1;
 	}
