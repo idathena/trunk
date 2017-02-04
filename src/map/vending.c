@@ -321,7 +321,7 @@ int8 vending_openvending(struct map_session_data *sd, const char *message, const
 
 		sd->vending[i].index = index;
 		sd->vending[i].amount = amount;
-		sd->vending[i].value = umin(value, battle_config.vending_max_value);
+		sd->vending[i].value = umin(value, (unsigned int)battle_config.vending_max_value);
 
 		//Player just moved item to cart and we don't have the correct cart ID yet
 		if( battle_config.feature_autotrade && sd->status.cart[sd->vending[i].index].id == 0 ) {

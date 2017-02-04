@@ -2171,7 +2171,7 @@ void clif_parse_NPCMarketPurchase(int fd, struct map_session_data *sd) {
 	CREATE(item_list, struct s_npc_buy_list, n);
 	for( i = 0; i < n; i++ ) {
 		item_list[i].nameid = RFIFOW(fd,info->pos[1] + i * 6);
-		item_list[i].qty = u16min(RFIFOL(fd,info->pos[2] + i * 6),UINT16_MAX);
+		item_list[i].qty = u32min(RFIFOL(fd,info->pos[2] + i * 6),UINT16_MAX);
 	}
 
 	res = npc_buylist(sd, n, item_list);

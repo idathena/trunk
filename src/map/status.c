@@ -3085,14 +3085,14 @@ unsigned int status_calc_maxhpsp_pc(struct map_session_data *sd, bool isHP)
 
 	job_id = pc_mapid2jobid(sd->class_, sd->status.sex);
 	idx = pc_class2idx(job_id);
-	level = u16max(sd->status.base_level, 1);
+	level = umax(sd->status.base_level, 1);
 
 	if (isHP) { //Calculates MaxHP
-		dmax = job_info[idx].base_hp[level - 1] * (1 + u16max(sd->battle_status.vit, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
+		dmax = job_info[idx].base_hp[level - 1] * (1 + max(sd->battle_status.vit, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
 		dmax += status_get_hpbonus(&sd->bl, STATUS_BONUS_FIX);
 		dmax += (int64)(dmax * status_get_hpbonus(&sd->bl, STATUS_BONUS_RATE) / 100); //Aegis accuracy
 	} else { //Calculates MaxSP
-		dmax = job_info[idx].base_sp[level - 1] * (1 + u16max(sd->battle_status.int_, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
+		dmax = job_info[idx].base_sp[level - 1] * (1 + max(sd->battle_status.int_, 1) * 0.01) * (sd->class_&JOBL_UPPER ? 1.25 : (pc_is_taekwon_ranker(sd) ? 3 : 1));
 		dmax += status_get_spbonus(&sd->bl, STATUS_BONUS_FIX);
 		dmax += (int64)(dmax * status_get_spbonus(&sd->bl, STATUS_BONUS_RATE) / 100);
 	}
@@ -4028,12 +4028,12 @@ int status_calc_homunculus_(struct homun_data *hd, enum e_status_calc_opt opt)
 
 	if( (skill_lv = hom_checkskill(hd, HAMI_SKIN)) > 0 ) {
 		status->max_hp += skill_lv * 2 * status->max_hp / 100;
-		status->max_hp = umin(status->max_hp, battle_config.max_homunculus_hp);
+		status->max_hp = umin(status->max_hp, (unsigned int)battle_config.max_homunculus_hp);
 	}
 
 	if( (skill_lv = hom_checkskill(hd, HLIF_BRAIN)) > 0 ) {
 		status->max_sp += (1 + skill_lv / 2 - skill_lv / 4 + skill_lv / 5) * status->max_sp / 100;
-		status->max_sp = umin(status->max_sp, battle_config.max_homunculus_sp);
+		status->max_sp = umin(status->max_sp, (unsigned int)battle_config.max_homunculus_sp);
 	}
 
 	if( opt&SCO_FIRST ) {
@@ -4654,7 +4654,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->max_hp = status_calc_maxhpsp_pc(sd, true);
 			if( battle_config.hp_rate != 100 )
 				status->max_hp = (unsigned int)(battle_config.hp_rate * (status->max_hp / 100.));
-			status->max_hp = umin(status->max_hp, battle_config.max_hp);
+			status->max_hp = umin(status->max_hp, (unsigned int)battle_config.max_hp);
 		} else
 			status->max_hp = status_calc_maxhp(bl, b_status->max_hp);
 
@@ -4670,7 +4670,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->max_sp = status_calc_maxhpsp_pc(sd, false);
 			if( battle_config.sp_rate != 100 )
 				status->max_sp = (unsigned int)(battle_config.sp_rate * (status->max_sp / 100.));
-			status->max_sp = umin(status->max_sp, battle_config.max_sp);
+			status->max_sp = umin(status->max_sp, (unsigned int)battle_config.max_sp);
 		} else
 			status->max_sp = status_calc_maxsp(bl, b_status->max_sp);
 

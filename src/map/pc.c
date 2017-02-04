@@ -7476,7 +7476,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			if( base_penalty > 0 ) { //Recheck after altering to speedup
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					base_penalty <<= 1;
-				sd->status.base_exp -= u32min(sd->status.base_exp,base_penalty);
+				sd->status.base_exp -= u32min(base_penalty,sd->status.base_exp);
 				clif_updatestatus(sd,SP_BASEEXP);
 			}
 		}
@@ -7495,7 +7495,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			if( job_penalty > 0 ) {
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					job_penalty <<= 1;
-				sd->status.job_exp -= u32min(sd->status.job_exp,job_penalty);
+				sd->status.job_exp -= u32min(job_penalty,sd->status.job_exp);
 				clif_updatestatus(sd,SP_JOBEXP);
 			}
 		}
