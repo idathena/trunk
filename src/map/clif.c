@@ -294,8 +294,7 @@ static int clif_send_sub(struct block_list *bl, va_list ap) {
 	nullpo_ret(bl);
 	nullpo_ret(sd = (struct map_session_data *)bl);
 
-	fd = sd->fd;
-	if (!fd || !session[fd]) //Don't send to disconnected clients
+	if (!(fd = sd->fd) || !session[fd]) //Don't send to disconnected clients
 		return 0;
 
 	buf = va_arg(ap,unsigned char *);
@@ -405,10 +404,10 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 				BL_PC, buf, len, bl, type);
 			break;
 		case AREA_CHAT_WOC: {
-				uint8 size = AREA_SIZE - 5; //9 Cells
+				uint8 size = CHAT_AREA_SIZE;
 
 				if (bl->type == BL_NPC)
-					size = AREA_SIZE + 4; //18 Cells
+					size <<= 1; //In official, NPC has chat area size two times wider than player [exneval]
 				map_foreachinarea(clif_send_sub, bl->m, bl->x - size, bl->y - size, bl->x + size, bl->y + size, BL_PC, buf, len, bl, AREA_WOC);
 			}
 			break;

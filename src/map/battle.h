@@ -389,6 +389,7 @@ extern struct Battle_Config
 
 	int castrate_dex_scale; //added by [MouseJstr]
 	int area_size; //added by [MouseJstr]
+	int chat_area_size; //added by [gumi]
 
 	int max_def, over_def_bonus; //added by [Skotlex]
 

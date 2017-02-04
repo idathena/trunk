@@ -1846,34 +1846,34 @@ moc_para01,112,96,5	script	Administrator Michael	4_M_RUSMAN1,{
 				close;
 			}
 			mes "[Michael]";
-			if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Crusader) {
+			if (BaseClass == Job_Swordman) {
 				callsub S_Select,"We have one and two-handed swords",
 					13423,"Eden Saber I","One-handed sword","Attack 147","This is what we strive for.", //P_Sabre1
 					1192,"Eden Slayer I","Two-handed sword","Attack 162",""; //P_Slayer1
 			}
-			if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Ninja || Class == Job_Novice || Class == Job_Novice_High) {
+			else if (BaseClass == Job_Thief || BaseClass == Job_Ninja || BaseClass == Job_Novice) {
 				callsub S_Select,"",
 					13050,"Eden Dagger I","Dagger","MATK+60, Attack 124","This is what we strive for."; //P_Dagger1
 			}
-			if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Alchemist) {
+			else if (BaseClass == Job_Merchant) {
 				callsub S_Select,"We have a mace and a one-handed sword",
 					16004,"Eden Mace I","Mace","Attack 142","", //P_Mace1
 					13423,"Eden Saber I","One-handed sword","Attack 147","This is what we strive for."; //P_Sabre1
 			}
-			if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Dancer || Class == Job_Bard) {
+			else if (BaseClass == Job_Archer) {
 				callsub S_Select,"",
 					1747,"Eden Bow I","Bow","Attack 82",""; //P_Bow1
 			}
-			if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_Monk) {
+			else if (BaseClass == Job_Acolyte) {
 				callsub S_Select,"We have a mace and a staff",
 					16004,"Eden Mace I","Mace","Attack 142","", //P_Mace1
 					1650,"Eden Staff I","Staff","INT+2, MATK+125, Attack 60",""; //P_Staff1
 			}
-			if (Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_Sage) {
+			else if (BaseClass == Job_Mage) {
 				callsub S_Select,"",
 					1650,"Eden Staff I","Staff","INT+2, MATK+125, Attack 60",""; //P_Staff1
 			}
-			if (Class == Job_Gunslinger) {
+			else if (BaseClass == Job_Gunslinger) {
 				callsub S_Select,"",
 					13112,"Eden Revolver I","Revolver","HIT-5, Attack 44",""; //P_Revolver1
 			}
@@ -1927,38 +1927,38 @@ moc_para01,112,96,5	script	Administrator Michael	4_M_RUSMAN1,{
 				close;
 			}
 			mes "[Michael]";
-			if (Class == Job_Swordman || Class == Job_Swordman_High || Class == Job_Knight || Class == Job_Crusader) {
+			if (BaseClass == Job_Swordman) {
 				callsub S_Select,"We have one and two-handed swords",
 					13424,"Eden Saber II","One-handed sword","Attack 170","", //P_Sabre2
 					1193,"Eden Slayer II","Two-handed sword","Attack 185",""; //P_Slayer2
 			}
-			if (Class == Job_Thief || Class == Job_Thief_High || Class == Job_Assassin || Class == Job_Rogue || Class == Job_Novice || Class == Job_Novice_High || Class == Job_SuperNovice || Class == Job_Soul_Linker || Class == Job_Ninja) {
+			else if (BaseClass == Job_Thief || BaseClass == Job_Novice || BaseJob == Job_Soul_Linker || BaseClass == Job_Ninja) {
 				callsub S_Select,"",
 					13051,"Eden Dagger II","Dagger","MATK+70, Attack 158",""; //P_Dagger2
 			}
-			if (Class == Job_Acolyte || Class == Job_Acolyte_High || Class == Job_Priest || Class == Job_Monk) {
+			else if (BaseClass == Job_Acolyte) {
 				callsub S_Select,"We have a mace and a staff",
 					16005,"Eden Mace II","Mace","Attack 163","", //P_Mace2
 					1651,"Eden Staff II","Staff","INT+3, MATK+150, Attack 60",""; //P_Staff2
 			}
-			if (Class == Job_Archer || Class == Job_Archer_High || Class == Job_Hunter || Class == Job_Dancer || Class == Job_Bard) {
+			else if ((BaseClass == Job_Archer) {
 				callsub S_Select,"",
 					1748,"Eden Bow II","Bow","Attack 82",""; //P_Bow2
 			}
-			if (Class == Job_Mage || Class == Job_Mage_High || Class == Job_Wizard || Class == Job_Sage) {
+			else if (BaseClass == Job_Mage) {
 				callsub S_Select,"",
 					1651,"Eden Staff II","Staff","INT+3, MATK+155, Attack 60",""; //P_Staff2
 			}
-			if (Class == Job_Merchant || Class == Job_Merchant_High || Class == Job_Blacksmith || Class == Job_Alchemist) {
+			else if (BaseClass == Job_Merchant) {
 				callsub S_Select,"We have a mace and a one-handed sword",
 					16005,"Eden Mace II","Mace","Attack 163","", //P_Mace2
 					13424,"Eden Saber II","One-handed sword","Attack 170",""; //P_Sabre2
 			}
-			if (Class == Job_Gunslinger) {
+			else if (BaseClass == Job_Gunslinger) {
 				callsub S_Select,"",
 					13113,"Eden Revolver II","Revolver","HIT-5, Attack 60",""; //P_Revolver2
 			}
-			if (Class == Job_Summoner) {
+			else if (Class == Job_Summoner) {
 				callsub S_Select,"",
 					26100,"Eden Foxtail Staff II","Staff","DEX+4, INT+4, Ranged Attack+6%, MATK+165, Attack 135",""; //P_Foxtail_Staff2
 			}
@@ -2022,12 +2022,12 @@ moc_para01,112,96,5	script	Administrator Michael	4_M_RUSMAN1,{
 				mes "What status bonus do you want to upgrade?";
 				next;
 				switch (select("Upgrade STR:Upgrade AGI:Upgrade VIT:Upgrade INT:Upgrade DEX:Upgrade LUK:Nevermind.")) {
-				case 1: callsub S_Upgrade,"STR",4701;
-				case 2: callsub S_Upgrade,"AGI",4731;
-				case 3: callsub S_Upgrade,"VIT",4741;
-				case 4: callsub S_Upgrade,"INT",4711;
-				case 5: callsub S_Upgrade,"DEX",4721;
-				case 6: callsub S_Upgrade,"LUK",4751;
+				case 1: callsub S_Upgrade,"STR",4701; //Strength2
+				case 2: callsub S_Upgrade,"AGI",4731; //Agility2
+				case 3: callsub S_Upgrade,"VIT",4741; //Vitality2
+				case 4: callsub S_Upgrade,"INT",4711; //Inteligence2
+				case 5: callsub S_Upgrade,"DEX",4721; //Dexterity2
+				case 6: callsub S_Upgrade,"LUK",4751; //Luck2
 				case 7:
 					mes "[Michael]";
 					mes "Why? It'll be beter than it is.";
@@ -3959,19 +3959,19 @@ moc_para01,111,83,3	script	Blacksmith Thorn#2nd10	2_M_OLDBLSMITH,{
 					1986,"Eden Group Whip I","Whip, Attack 125", //P_Tail1
 					18106,"Eden Group Bow III","Bow, Attack 140"; //P_Bow3
 			}
-			else if (Class == Job_Ninja) {
+			else if (BaseClass == Job_Ninja) {
 				callsub L_Select,"",
 					13066,"Eden Group Dagger III","Dagger, MATK +80, ATK 165", //P_Dagger3
 					13310,"Eden Group Huuma Shuriken I","Huuma Suriken, MATK +50, ATK 170"; //P_Huuma_Suriken1
 			}
-			else if (Class == Job_Star_Gladiator)
+			else if (BaseJob == Job_Star_Gladiator)
 				getitem 1583,1; //P_Book1
-			else if (Class == Job_Soul_Linker) {
+			else if (BaseJob == Job_Soul_Linker) {
 				callsub L_Select,"",
 					1658,"Eden Group Staff III","Staff, MATK +170, INT +4, ATK 60", //P_Staff3
 					13066,"Eden Group Dagger III","Dagger, MATK +80, ATK 165"; //P_Dagger3
 			}
-			else if (Class == Job_Gunslinger)
+			else if (BaseClass == Job_Gunslinger)
 				getitem 13114,1; //P_Revolver3
 			else if (Class == Job_Summoner)
 				getitem 26101,1; //P_Foxtail_Staff3
@@ -4119,22 +4119,10 @@ moc_para01,112,79,3	script	Weapons Expert BK#2nd11	4_M_REPAIR,{
 		1831,  //P_Knuckle1
 		13310, //P_Huuma_Shuriken1
 		26101; //P_Foxtail_Staff3
-	.@menu$ = "Eden Group Slayer III:" +
-		"Eden Group Saber III:" +
-		"Eden Group Dagger III:" +
-		"Eden Group Katar I:" +
-		"Eden Group Axe I:" +
-		"Eden Group Spear I:" +
-		"Eden Group Staff III:" +
-		"Eden Group Mace III:" +
-		"Eden Group Bow III:" +
-		"Eden Group Dictionary I:" +
-		"Eden Group Guitar I:" +
-		"Eden Group Whip I:" +
-		"Eden Group Revolver III:" +
-		"Eden Group Knuckles I:" +
-		"Eden Group Huuma Shuriken I:" +
-		"Eden Group Foxtail Staff III";
+	.@wplist_size = getarraysize(.@wplist);
+	for ( .@i = 0; .@i < .@wplist_size; .@i++ ) {
+		set .@menu$, .@menu$ + getitemname(.@wplist[.@i]) + ":";
+	}
 	mes "[BK]";
 	mes "What's happening?";
 	mes "No way?!";

@@ -35,6 +35,7 @@ void map_do_final_msg(void);
 
 #define MAX_NPC_PER_MAP 512
 #define AREA_SIZE battle_config.area_size
+#define CHAT_AREA_SIZE battle_config.chat_area_size
 #define DAMAGELOG_SIZE 30
 #define LOOTITEM_SIZE 10
 #define MAX_MOBSKILL 50 //Max 128, see mob skill_idx type if need this higher
