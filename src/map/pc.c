@@ -51,17 +51,19 @@
 #include <time.h>
 #include <math.h>
 
-#define PVP_CALCRANK_INTERVAL 1000 // PVP calculation interval
+#define PVP_CALCRANK_INTERVAL 1000 //PVP calculation interval
+#define MAX_LEVEL_BASE_EXP 99999999 //Max Base EXP for player on Max Base Level
+#define MAX_LEVEL_JOB_EXP 999999999 //Max Job EXP for player on Max Job Level
 
 static unsigned int statp[MAX_LEVEL + 1];
 #if defined(RENEWAL_DROP) || defined(RENEWAL_EXP)
 static unsigned int level_penalty[3][CLASS_MAX][MAX_LEVEL * 2 + 1];
 #endif
 
-// H-files are for declarations, not for implementations... [Shinomori]
+//H-files are for declarations, not for implementations [Shinomori]
 struct skill_tree_entry skill_tree[CLASS_COUNT][MAX_SKILL_TREE];
 
-// Timer for night and day implementation
+//Timer for night and day implementation
 int day_timer_tid = INVALID_TIMER;
 int night_timer_tid = INVALID_TIMER;
 
@@ -75,7 +77,7 @@ struct fame_list chemist_fame_list[MAX_FAME_LIST];
 struct fame_list taekwon_fame_list[MAX_FAME_LIST];
 
 #define MOTD_LINE_SIZE 128
-static char motd_text[MOTD_LINE_SIZE][CHAT_SIZE_MAX]; // Message of the day buffer [Valaris]
+static char motd_text[MOTD_LINE_SIZE][CHAT_SIZE_MAX]; //Message of the day buffer [Valaris]
 
 //Translation table from athena equip index to aegis bitmask
 unsigned int equip_bitmask[EQI_MAX] = {
@@ -6205,7 +6207,7 @@ int pc_follow(struct map_session_data *sd,int target_id)
 {
 	struct block_list *bl = map_id2bl(target_id);
 
-	if (bl == NULL /*|| bl->type != BL_PC*/)
+	if (!bl /*|| bl->type != BL_PC*/)
 		return 1;
 	if (sd->followtimer != INVALID_TIMER)
 		pc_stop_following(sd);
@@ -6219,7 +6221,7 @@ int pc_follow(struct map_session_data *sd,int target_id)
 int pc_checkbaselevelup(struct map_session_data *sd) {
 	unsigned int next = pc_nextbaseexp(sd);
 
-	if (!next || sd->status.base_exp < next)
+	if (!next || sd->status.base_exp < next || pc_is_maxbaselv(sd))
 		return 0;
 
 	do {
@@ -6230,31 +6232,35 @@ int pc_checkbaselevelup(struct map_session_data *sd) {
 		next = pc_gets_status_point(sd->status.base_level);
 		sd->status.base_level++;
 		sd->status.status_point += next;
+		if (pc_is_maxbaselv(sd)) {
+			sd->status.base_exp = u32min(sd->status.base_exp, MAX_LEVEL_BASE_EXP);
+			break;
+		}
 	} while ((next = pc_nextbaseexp(sd)) > 0 && sd->status.base_exp >= next);
 
 	if (battle_config.pet_lv_rate && sd->pd) //Update pet's level [Skotlex]
-		status_calc_pet(sd->pd,SCO_NONE);
+		status_calc_pet(sd->pd, SCO_NONE);
 
-	clif_updatestatus(sd,SP_STATUSPOINT);
-	clif_updatestatus(sd,SP_BASELEVEL);
-	clif_updatestatus(sd,SP_BASEEXP);
-	clif_updatestatus(sd,SP_NEXTBASEEXP);
-	status_calc_pc(sd,SCO_FORCE);
-	status_percent_heal(&sd->bl,100,100);
+	clif_updatestatus(sd, SP_STATUSPOINT);
+	clif_updatestatus(sd, SP_BASELEVEL);
+	clif_updatestatus(sd, SP_BASEEXP);
+	clif_updatestatus(sd, SP_NEXTBASEEXP);
+	status_calc_pc(sd, SCO_FORCE);
+	status_percent_heal(&sd->bl, 100, 100);
 
 	if ((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE) {
-		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_KYRIE),100,1,skill_get_time(PR_KYRIE,1));
-		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_IMPOSITIO),100,1,skill_get_time(PR_IMPOSITIO,1));
-		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_MAGNIFICAT),100,1,skill_get_time(PR_MAGNIFICAT,1));
-		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_GLORIA),100,1,skill_get_time(PR_GLORIA,1));
-		sc_start(&sd->bl,&sd->bl,status_skill2sc(PR_SUFFRAGIUM),100,1,skill_get_time(PR_SUFFRAGIUM,1));
+		sc_start(&sd->bl, &sd->bl, status_skill2sc(PR_KYRIE), 100, 1, skill_get_time(PR_KYRIE, 1));
+		sc_start(&sd->bl, &sd->bl, status_skill2sc(PR_IMPOSITIO), 100, 1, skill_get_time(PR_IMPOSITIO, 1));
+		sc_start(&sd->bl, &sd->bl, status_skill2sc(PR_MAGNIFICAT), 100, 1, skill_get_time(PR_MAGNIFICAT, 1));
+		sc_start(&sd->bl, &sd->bl, status_skill2sc(PR_GLORIA), 100, 1, skill_get_time(PR_GLORIA, 1));
+		sc_start(&sd->bl, &sd->bl, status_skill2sc(PR_SUFFRAGIUM), 100, 1, skill_get_time(PR_SUFFRAGIUM, 1));
 		if (sd->state.snovice_dead_flag)
 			sd->state.snovice_dead_flag = 0; //Re-enable steel body resurrection on dead
 	} else if ((sd->class_&MAPID_BASEMASK) == MAPID_TAEKWON) {
-		sc_start(&sd->bl,&sd->bl,status_skill2sc(AL_INCAGI),100,10,600000);
-		sc_start(&sd->bl,&sd->bl,status_skill2sc(AL_BLESSING),100,10,600000);
+		sc_start(&sd->bl, &sd->bl, status_skill2sc(AL_INCAGI), 100, 10, 600000);
+		sc_start(&sd->bl, &sd->bl, status_skill2sc(AL_BLESSING), 100, 10, 600000);
 	}
-	clif_misceffect(&sd->bl,0);
+	clif_misceffect(&sd->bl, 0);
 	npc_script_event(sd, NPCE_BASELVUP); //LORDALFA - LVLUPEVENT
 
 	if (sd->status.party_id)
@@ -6281,7 +6287,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 
 	nullpo_ret(sd);
 
-	if(!next || sd->status.job_exp < next)
+	if (!next || sd->status.job_exp < next || pc_is_maxjoblv(sd))
 		return 0;
 
 	do {
@@ -6291,18 +6297,22 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 			sd->status.job_exp = next - 1;
 		sd->status.job_level++;
 		sd->status.skill_point++;
+		if (pc_is_maxjoblv(sd)) {
+			sd->status.job_exp = u32min(sd->status.job_exp, MAX_LEVEL_JOB_EXP);
+			break;
+		}
 	} while ((next = pc_nextjobexp(sd)) > 0 && sd->status.job_exp >= next);
 
-	clif_updatestatus(sd,SP_JOBLEVEL);
-	clif_updatestatus(sd,SP_JOBEXP);
-	clif_updatestatus(sd,SP_NEXTJOBEXP);
-	clif_updatestatus(sd,SP_SKILLPOINT);
-	status_calc_pc(sd,SCO_FORCE);
-	clif_misceffect(&sd->bl,1);
-	if (pc_checkskill(sd,SG_DEVIL) && !pc_nextjobexp(sd))
-		clif_status_change(&sd->bl,SI_DEVIL1,1,0,0,0,1); //Permanent blind effect from SG_DEVIL
+	clif_updatestatus(sd, SP_JOBLEVEL);
+	clif_updatestatus(sd, SP_JOBEXP);
+	clif_updatestatus(sd, SP_NEXTJOBEXP);
+	clif_updatestatus(sd, SP_SKILLPOINT);
+	status_calc_pc(sd, SCO_FORCE);
+	clif_misceffect(&sd->bl, 1);
+	if (pc_checkskill(sd, SG_DEVIL) && pc_is_maxbaselv(sd))
+		clif_status_change(&sd->bl, SI_DEVIL1, 1, 0, 0, 0, 1); //Permanent blind effect from SG_DEVIL
 
-	npc_script_event(sd,NPCE_JOBLVUP);
+	npc_script_event(sd, NPCE_JOBLVUP);
 	return 1;
 }
 
@@ -6330,47 +6340,75 @@ static void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsi
 			bonus += sd->expaddclass[CLASS_ALL];
 		if (battle_config.pk_mode && (int)(status_get_lv(src) - sd->status.base_level) >= 20)
 			bonus += 15; //pk_mode additional exp if monster > 20 levels [Valaris]
-#ifdef VIP_ENABLE
 		if (src->type == BL_MOB && pc_isvip(sd)) { //EXP bonus for VIP player
 			vip_bonus_base = battle_config.vip_base_exp_increase;
 			vip_bonus_job = battle_config.vip_job_exp_increase;
 		}
-#endif
 		if (sd->sc.data[SC_JP_EVENT04] && status->race == RC_FISH)
 			bonus += sd->sc.data[SC_JP_EVENT04]->val1;
 	}
 
+	//Give EXPBOOST for quests even if src is NULL
 	if (sd->sc.data[SC_EXPBOOST]) {
 		bonus += sd->sc.data[SC_EXPBOOST]->val1;
 		if (battle_config.vip_bm_increase && pc_isvip(sd)) //Increase Battle Manual EXP rate for VIP
 			bonus += (sd->sc.data[SC_EXPBOOST]->val1 / battle_config.vip_bm_increase);
 	}
 
-	*base_exp = (unsigned int)cap_value(*base_exp + (double)*base_exp * (bonus + vip_bonus_base) / 100., 0, UINT_MAX);
+	if (*base_exp)
+		*base_exp = (unsigned int)cap_value(*base_exp + (double)*base_exp * (bonus + vip_bonus_base) / 100., 1, UINT_MAX);
 
+	//Give JEXPBOOST for quests even if src is NULL
 	if (sd->sc.data[SC_JEXPBOOST]) {
 		bonus += sd->sc.data[SC_JEXPBOOST]->val1;
 		if (battle_config.vip_bm_increase && pc_isvip(sd)) //Increase Job Manual EXP rate for VIP
 			bonus += (sd->sc.data[SC_JEXPBOOST]->val1 / battle_config.vip_bm_increase);
 	}
 
-	*job_exp = (unsigned int)cap_value(*job_exp + (double)*job_exp * (bonus + vip_bonus_job) / 100., 0, UINT_MAX);
+	if (*job_exp)
+		*job_exp = (unsigned int)cap_value(*job_exp + (double)*job_exp * (bonus + vip_bonus_job) / 100., 1, UINT_MAX);
 }
 
 /**
- * Gives a determined EXP amount to sd and calculates remaining EXP for next level
- * @param src if is NULL no bonuses are taken into account
- * @param is_quest Used to let client know that the EXP was from a quest (clif->displayexp) PACKETVER >= 20091027
- * @return true success
+ * Show EXP gained by player in percentage by @showexp
+ * @param sd Player
+ * @param base_exp Base EXP gained/loss
+ * @param next_base_exp Base EXP needed for next base level
+ * @param job_exp Job EXP gained/loss
+ * @param next_job_exp Job EXP needed for next job level
+ * @param lost True:EXP penalty, lose EXP
  */
-bool pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned int base_exp, unsigned int job_exp, bool is_quest)
+void pc_gainexp_disp(struct map_session_data *sd, unsigned int base_exp, unsigned int next_base_exp, unsigned int job_exp, unsigned int next_job_exp, bool lost)
+{
+	char output[CHAT_SIZE_MAX];
+
+	nullpo_retv(sd);
+
+	sprintf(output, msg_txt(740), // Experience %s Base:%ld (%0.2f%%) Job:%ld (%0.2f%%)
+		(lost) ? msg_txt(739) : msg_txt(738),
+		(long)base_exp * (lost ? -1 : 1), (base_exp / (float)next_base_exp * 100 * (lost ? -1 : 1)),
+		(long)job_exp * (lost ? -1 : 1), (job_exp / (float)next_job_exp * 100 * (lost ? -1 : 1)));
+	clif_disp_onlyself(sd, output, strlen(output));
+}
+
+/**
+ * Give Base or Job EXP to player, then calculate remaining exp for next lvl
+ * @param sd Player
+ * @param src EXP source
+ * @param base_exp Base EXP gained
+ * @param base_exp Job EXP gained
+ * @param quest True if EXP from quest, false otherwise.
+ * @return true if success
+ */
+bool pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned int base_exp, unsigned int job_exp, bool quest)
 {
 	float nextbp = 0, nextjp = 0;
 	unsigned int nextb = 0, nextj = 0;
+	uint8 flag = 0; //1: Base EXP given, 2: Job EXP given, 4: Max Base level, 8: Max Job Level
 
 	nullpo_ret(sd);
 
-	if (sd->bl.prev == NULL || pc_isdead(sd))
+	if (!sd->bl.prev || pc_isdead(sd))
 		return false;
 
 	if (!battle_config.pvp_exp && map[sd->bl.m].flag.pvp) //[MouseJstr]
@@ -6379,12 +6417,28 @@ bool pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned in
 	if (sd->status.guild_id > 0)
 		base_exp -= guild_payexp(sd,base_exp);
 
-	pc_calcexp(sd, &base_exp, &job_exp, src); //Give (J)EXPBOOST for quests even if src is NULL
+	pc_calcexp(sd, &base_exp, &job_exp, src);
 
 	nextb = pc_nextbaseexp(sd);
 	nextj = pc_nextjobexp(sd);
 
-	if (sd->state.showexp || battle_config.max_exp_gain_rate) {
+	flag = (base_exp ? 1 : 0)|(job_exp ? 2 : 0)|(pc_is_maxbaselv(sd) ? 4 : 0)|(pc_is_maxjoblv(sd) ? 8 : 0);
+
+	if (flag&4) {
+		if (sd->status.base_exp >= MAX_LEVEL_BASE_EXP)
+			base_exp = 0;
+		else if ((uint64)sd->status.base_exp + base_exp >= MAX_LEVEL_BASE_EXP)
+			base_exp = MAX_LEVEL_BASE_EXP - sd->status.base_exp;
+	}
+
+	if (flag&8) {
+		if (sd->status.job_exp >= MAX_LEVEL_JOB_EXP)
+			job_exp = 0;
+		else if ((uint64)sd->status.job_exp + job_exp >= MAX_LEVEL_JOB_EXP)
+			job_exp = MAX_LEVEL_JOB_EXP - sd->status.job_exp;
+	}
+
+	if ((base_exp || job_exp) && (sd->state.showexp || battle_config.max_exp_gain_rate)) {
 		if (nextb > 0)
 			nextbp = (float)base_exp / (float)nextb;
 		if (nextj > 0)
@@ -6405,96 +6459,106 @@ bool pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned in
 		}
 	}
 
-	//Cap exp to the level up requirement of the previous level when you are at max level,
-	//otherwise cap at UINT_MAX (this is required for some S. Novice bonuses) [Skotlex]
+	//Give EXP for Base Level
 	if (base_exp) {
-		nextb = (nextb ? UINT_MAX : pc_thisbaseexp(sd));
-		if (sd->status.base_exp > nextb - base_exp) {
-			sd->status.base_exp = nextb;
-			nextb = 0;
-		} else
+		if ((uint64)sd->status.base_exp + base_exp > UINT32_MAX)
+			sd->status.base_exp = UINT32_MAX;
+		else
 			sd->status.base_exp += base_exp;
-		pc_checkbaselevelup(sd);
-		clif_updatestatus(sd,SP_BASEEXP);
+		if (!pc_checkbaselevelup(sd))
+			clif_updatestatus(sd, SP_BASEEXP);
 	}
 
+	//Give EXP for Job Level
 	if (job_exp) {
-		nextj = (nextj ? UINT_MAX : pc_thisjobexp(sd));
-		if (sd->status.job_exp > nextj - job_exp) {
-			sd->status.job_exp = nextj;
-			nextj = 0;
-		} else
+		if ((uint64)sd->status.job_exp + job_exp > UINT32_MAX)
+			sd->status.job_exp = UINT32_MAX;
+		else
 			sd->status.job_exp += job_exp;
-		pc_checkjoblevelup(sd);
-		clif_updatestatus(sd,SP_JOBEXP);
+		if (!pc_checkjoblevelup(sd))
+			clif_updatestatus(sd, SP_JOBEXP);
 	}
 
-	if (base_exp)
-		clif_displayexp(sd,(nextb ? base_exp : 0),SP_BASEEXP,is_quest,true);
+	if (flag&1)
+		clif_displayexp(sd, (flag&4) ? 0 : base_exp, SP_BASEEXP, quest, false);
 
-	if (job_exp)
-		clif_displayexp(sd,(nextj ? job_exp : 0),SP_JOBEXP,is_quest,true);
+	if (flag&2)
+		clif_displayexp(sd, (flag&8) ? 0 : job_exp, SP_JOBEXP, quest, false);
 
-	if (sd->state.showexp) {
-		char output[256];
-
-		sprintf(output,"Experience Gained Base:%u (%.2f%%) Job:%u (%.2f%%)",base_exp,nextbp * (float)100,job_exp,nextjp * (float)100);
-		clif_disp_onlyself(sd,output,strlen(output));
-	}
+	if (sd->state.showexp)
+		pc_gainexp_disp(sd, base_exp, nextb, job_exp, nextj, false);
 
 	return true;
 }
 
-/*==========================================
- * Returns max level for this character.
- *------------------------------------------*/
+/**
+ * Returns max base level for this character.
+ * @param sd Player
+ * @return Max Base Level
+ */
 unsigned int pc_maxbaselv(struct map_session_data *sd) {
 	return job_info[pc_class2idx(sd->status.class_)].max_level[0];
 }
 
+/**
+ * Returns max job level for this character.
+ * @param sd Player
+ * @return Max Job Level
+ */
 unsigned int pc_maxjoblv(struct map_session_data *sd) {
 	return job_info[pc_class2idx(sd->status.class_)].max_level[1];
 }
 
-/*==========================================
- * Base level exp lookup.
- *------------------------------------------*/
-//Base exp needed for next level.
+/**
+ * Check if player is reached max base level
+ * @param sd
+ * @return True if reached max level
+ */
+bool pc_is_maxbaselv(struct map_session_data *sd) {
+	nullpo_retr(false, sd);
+
+	return (sd->status.base_level >= pc_maxbaselv(sd));
+}
+
+/**
+ * Check if player is reached max base level
+ * @param sd
+ * @return True if reached max level
+ */
+bool pc_is_maxjoblv(struct map_session_data *sd) {
+	nullpo_retr(false, sd);
+
+	return (sd->status.job_level >= pc_maxjoblv(sd));
+}
+
+/**
+ * Base exp needed for player to level up.
+ * @param sd
+ * @return Base EXP needed for next base level
+ */
 unsigned int pc_nextbaseexp(struct map_session_data *sd) {
 	nullpo_ret(sd);
 
-	if (sd->status.base_level >= pc_maxbaselv(sd) || sd->status.base_level == 0)
+	if (!sd->status.base_level) //Is this even possible?
 		return 0;
+	if (pc_is_maxbaselv(sd))
+		return MAX_LEVEL_BASE_EXP; //On max level, player's base EXP limit is 99,999,999
 	return job_info[pc_class2idx(sd->status.class_)].exp_table[0][sd->status.base_level - 1];
 }
 
-//Base exp needed for this level.
-unsigned int pc_thisbaseexp(struct map_session_data *sd) {
-	if (sd->status.base_level > pc_maxbaselv(sd) || sd->status.base_level <= 1)
-		return 0;
-	return job_info[pc_class2idx(sd->status.class_)].exp_table[0][sd->status.base_level - 2];
-}
-
-/*==========================================
- * Job level exp lookup
- * Return:
- *	0 = not found
- *	x = exp for level
- *------------------------------------------*/
-//Job exp needed for next level.
+/**
+ * Job exp needed for player to level up.
+ * @param sd
+ * @return Job EXP needed for next job level
+ */
 unsigned int pc_nextjobexp(struct map_session_data *sd) {
 	nullpo_ret(sd);
 
-	if (sd->status.job_level >= pc_maxjoblv(sd) || sd->status.job_level == 0)
+	if (!sd->status.job_level) //Is this even possible?
 		return 0;
+	if (pc_is_maxjoblv(sd))
+		return MAX_LEVEL_JOB_EXP; //On max level, player's job EXP limit is 999,999,999
 	return job_info[pc_class2idx(sd->status.class_)].exp_table[1][sd->status.job_level - 1];
-}
-
-//Job exp needed for this level.
-unsigned int pc_thisjobexp(struct map_session_data *sd) {
-	if (sd->status.job_level > pc_maxjoblv(sd) || sd->status.job_level <= 1)
-		return 0;
-	return job_info[pc_class2idx(sd->status.class_)].exp_table[1][sd->status.job_level - 2];
 }
 
 /// Returns the value of the specified stat.
@@ -6977,7 +7041,7 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 		//It has been confirmed on official servers that when you reset skills with a ranked Taekwon your skills are not reset (because you have all of them anyway)
 		if( pc_is_taekwon_ranker(sd) )
 			return 0;
-		if( pc_checkskill(sd, SG_DEVIL) &&  !pc_nextjobexp(sd) )
+		if( pc_checkskill(sd, SG_DEVIL) && pc_is_maxjoblv(sd) )
 			clif_status_load(&sd->bl, SI_DEVIL1, 0); //Remove perma blindness due to skill-reset [Skotlex]
 		i = sd->sc.option;
 		if( i&OPTION_RIDING && pc_checkskill(sd, KN_RIDING) )
@@ -7279,11 +7343,9 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 	//Activate Steel body if a super novice dies at 99+% exp [celest]
 	//Super Novices have no kill or die functions attached when saved by their angel
 	if( (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->state.snovice_dead_flag ) {
-		unsigned int next = pc_nextbaseexp(sd);
+		unsigned int exp = pc_nextbaseexp(sd);
 
-		if( !next )
-			next = pc_thisbaseexp(sd);
-		if( get_percentage(sd->status.base_exp,next) >= 99 ) {
+		if( exp && get_percentage(sd->status.base_exp,exp) >= 99 ) {
 			sd->state.snovice_dead_flag = 1;
 			pc_setrestartvalue(sd,1);
 			status_percent_heal(&sd->bl,100,100);
@@ -7464,43 +7526,40 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			zeny_penalty = battle_config.zeny_penalty;
 		}
 
-		if( base_penalty > 0 ) {
-			uint32 exp, penalty = base_penalty / 100;
-
+		if( ((battle_config.death_penalty_maxlv&1) || !pc_is_maxbaselv(sd)) && base_penalty > 0 ) {
 			switch( battle_config.death_penalty_type ) {
 				case 1: base_penalty = (uint32)(pc_nextbaseexp(sd) * (base_penalty / 10000.)); break;
 				case 2: base_penalty = (uint32)(sd->status.base_exp * (base_penalty / 10000.)); break;
 			}
-			if( (exp = pc_nextbaseexp(sd)) > 0 && get_percentage(sd->status.base_exp,exp) < penalty )
-				base_penalty = sd->status.base_exp;
-			if( base_penalty > 0 ) { //Recheck after altering to speedup
+			if( base_penalty ) { //Recheck after altering to speedup
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					base_penalty <<= 1;
-				sd->status.base_exp -= u32min(base_penalty,sd->status.base_exp);
+				base_penalty = u32min(sd->status.base_exp,base_penalty);
+				sd->status.base_exp -= base_penalty;
+				clif_displayexp(sd,base_penalty,SP_BASEEXP,false,true);
 				clif_updatestatus(sd,SP_BASEEXP);
 			}
-		}
+		} else
+			base_penalty = 0;
 
-		clif_displayexp(sd,(base_penalty ? base_penalty : 0),SP_BASEEXP,false,false);
-
-		if( job_penalty > 0 ) {
-			uint32 exp, penalty = job_penalty / 100;
-
+		if( ((battle_config.death_penalty_maxlv&2) || !pc_is_maxjoblv(sd)) && job_penalty > 0 ) {
 			switch( battle_config.death_penalty_type ) {
 				case 1: job_penalty = (uint32)(pc_nextjobexp(sd) * (job_penalty / 10000.)); break;
 				case 2: job_penalty = (uint32)(sd->status.job_exp * (job_penalty / 10000.)); break;
 			}
-			if( (exp = pc_nextjobexp(sd)) > 0 && get_percentage(sd->status.job_exp,exp) < penalty )
-				job_penalty = sd->status.job_exp;
-			if( job_penalty > 0 ) {
+			if( job_penalty ) {
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					job_penalty <<= 1;
-				sd->status.job_exp -= u32min(job_penalty,sd->status.job_exp);
+				job_penalty = u32min(sd->status.job_exp,job_penalty);
+				sd->status.job_exp -= job_penalty;
+				clif_displayexp(sd,job_penalty,SP_JOBEXP,false,true);
 				clif_updatestatus(sd,SP_JOBEXP);
 			}
-		}
+		} else
+			job_penalty = 0;
 
-		clif_displayexp(sd,(job_penalty ? job_penalty : 0),SP_JOBEXP,false,false);
+		if( sd->state.showexp && (base_penalty || job_penalty) )
+			pc_gainexp_disp(sd,base_penalty,pc_nextbaseexp(sd),job_penalty,pc_nextjobexp(sd),true);
 
 		if( zeny_penalty > 0 && !map[sd->bl.m].flag.nozenypenalty ) {
 			zeny_penalty = (uint32)(sd->status.zeny * (zeny_penalty / 10000.));
@@ -7847,14 +7906,22 @@ bool pc_setparam(struct map_session_data *sd,int type,int val) {
 			break;
 		case SP_BASEEXP:
 			if( pc_nextbaseexp(sd) > 0 ) {
-				sd->status.base_exp = val;
-				pc_checkbaselevelup(sd);
+				if( pc_is_maxbaselv(sd) )
+					sd->status.base_exp = u32min(val, MAX_LEVEL_BASE_EXP);
+				else
+					sd->status.base_exp = val;
+				if( !pc_checkbaselevelup(sd) )
+					clif_updatestatus(sd, SP_BASEEXP);
 			}
 			break;
 		case SP_JOBEXP:
 			if( pc_nextjobexp(sd) > 0 ) {
-				sd->status.job_exp = val;
-				pc_checkjoblevelup(sd);
+				if( pc_is_maxjoblv(sd) )
+					sd->status.job_exp = u32min(val, MAX_LEVEL_JOB_EXP);
+				else
+					sd->status.job_exp = val;
+				if( !pc_checkjoblevelup(sd) )
+					clif_updatestatus(sd, SP_JOBEXP);
 			}
 			break;
 		case SP_SEX:
@@ -11897,9 +11964,6 @@ void pc_check_supernovice_call(struct map_session_data *sd, const char *message)
 
 	if ((sd->class_&MAPID_UPPERMASK) != MAPID_SUPER_NOVICE)
 		return;
-
-	if (!next)
-		next = pc_thisbaseexp(sd);
 
 	if (!next)
 		return;
