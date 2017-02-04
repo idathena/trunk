@@ -2018,12 +2018,12 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 	WBUFW(buf,70) = p->hair_color;
 	WBUFW(buf,72) = p->clothes_color;
 	memcpy(WBUFP(buf,74),p->name,NAME_LENGTH);
-	WBUFB(buf,98) = (unsigned char)u16min(p->str,UINT8_MAX);
-	WBUFB(buf,99) = (unsigned char)u16min(p->agi,UINT8_MAX);
-	WBUFB(buf,100) = (unsigned char)u16min(p->vit,UINT8_MAX);
-	WBUFB(buf,101) = (unsigned char)u16min(p->int_,UINT8_MAX);
-	WBUFB(buf,102) = (unsigned char)u16min(p->dex,UINT8_MAX);
-	WBUFB(buf,103) = (unsigned char)u16min(p->luk,UINT8_MAX);
+	WBUFB(buf,98) = min(p->str,UINT8_MAX);
+	WBUFB(buf,99) = min(p->agi,UINT8_MAX);
+	WBUFB(buf,100) = min(p->vit,UINT8_MAX);
+	WBUFB(buf,101) = min(p->int_,UINT8_MAX);
+	WBUFB(buf,102) = min(p->dex,UINT8_MAX);
+	WBUFB(buf,103) = min(p->luk,UINT8_MAX);
 	WBUFW(buf,104) = p->slot;
 	WBUFW(buf,106) = (p->rename > 0) ? 0 : 1;
 	offset += 2;

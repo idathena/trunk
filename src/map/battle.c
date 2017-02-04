@@ -6851,7 +6851,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			md.damage = 3 * skill_lv * tstatus->hp / 100 + 10 * sstatus->dex;
 			break;
 		case MH_EQC:
-			md.damage = max(tstatus->hp - sstatus->hp, 0);
+			md.damage = max((int)(tstatus->hp - sstatus->hp), 0);
 			break;
 	}
 
