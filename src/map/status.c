@@ -3750,7 +3750,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 #ifndef RENEWAL_ASPD
 	if ((lv = pc_checkskill(sd,SA_ADVANCEDBOOK)) > 0 && sd->status.weapon == W_BOOK)
 		status->aspd_rate -= lv * 5;
-	if ((lv = pc_checkskill(sd,SG_DEVIL)) > 0 && !pc_nextjobexp(sd))
+	if ((lv = pc_checkskill(sd,SG_DEVIL)) > 0 && pc_is_maxjoblv(sd))
 		status->aspd_rate -= lv * 30;
 	if ((lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && (sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE))
 		status->aspd_rate -= ((lv + 1) / 2) * 10;
@@ -3759,7 +3759,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	else if ((lv = pc_checkskill(sd,RK_DRAGONTRAINING)) > 0 && pc_isridingdragon(sd))
 		status->aspd_rate += 250 - lv * 50;
 #else //Needs more info
-	if ((lv = pc_checkskill(sd,SG_DEVIL)) > 0 && !pc_nextjobexp(sd))
+	if ((lv = pc_checkskill(sd,SG_DEVIL)) > 0 && pc_is_maxjoblv(sd))
 		status->aspd_rate += 10 + lv * 10;
 	if ((lv = pc_checkskill(sd,KN_CAVALIERMASTERY)) > 0 && pc_isriding(sd))
 		status->aspd_rate -= 500 - lv * 100;

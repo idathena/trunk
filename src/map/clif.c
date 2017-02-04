@@ -2070,7 +2070,7 @@ void clif_npc_market_open(struct map_session_data *sd, struct npc_data *nd)
 		return;
 
 	info = &packet_db[sd->packet_ver][cmd];
-	if( !info || info->len == 0 )
+	if( !info || !info->len )
 		return;
 
 	fd = sd->fd;
@@ -2136,8 +2136,7 @@ void clif_npc_market_purchase_ack(struct map_session_data *sd, uint8 res, uint8 
 		for( i = 0; i < n; i++ ) {
 			WFIFOW(fd,5 + i * 8) = list[i].nameid;
 			WFIFOW(fd,7 + i * 8) = list[i].qty;
-
-			ARR_FIND(0, count, j, list[i].nameid == shop[j].nameid);
+			ARR_FIND(0, count, j, (list[i].nameid == shop[j].nameid));
 			WFIFOL(fd,9 + i * 8) = (j != count) ? shop[j].value : 0;
 		}
 	}
@@ -2170,7 +2169,7 @@ void clif_parse_NPCMarketPurchase(int fd, struct map_session_data *sd) {
 	CREATE(item_list, struct s_npc_buy_list, n);
 	for( i = 0; i < n; i++ ) {
 		item_list[i].nameid = RFIFOW(fd,info->pos[1] + i * 6);
-		item_list[i].qty = u32min(RFIFOL(fd,info->pos[2] + i * 6),UINT16_MAX);
+		item_list[i].qty = (uint16)u32min(RFIFOL(fd,info->pos[2] + i * 6),UINT16_MAX);
 	}
 
 	res = npc_buylist(sd, n, item_list);
@@ -10492,7 +10491,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	if(!sd->state.autotrade && map[sd->bl.m].flag.loadevent) //Lance
 		npc_script_event(sd,NPCE_LOADMAP);
 
-	if(pc_checkskill(sd,SG_DEVIL) && !pc_nextjobexp(sd))
+	if(pc_checkskill(sd,SG_DEVIL) && pc_is_maxjoblv(sd))
 		clif_status_load(&sd->bl,SI_DEVIL1,1); //Blindness [Komurka]
 
 	if(sd->sc.opt2) //Client loses these on warp
@@ -14200,12 +14199,10 @@ void clif_parse_NoviceExplosionSpirits(int fd, struct map_session_data *sd)
 	//It sends the request when the criteria doesn't match (and of course we let it fail)
 	//So restoring the old parse_globalmes method
 	if( (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE ) {
-		unsigned int next = pc_nextbaseexp(sd);
+		unsigned int exp = pc_nextbaseexp(sd);
 
-		if( next == 0 )
-			next = pc_thisbaseexp(sd);
-		if( next ) {
-			int percent = (int)(((float)sd->status.base_exp / (float)next) * 1000.);
+		if( exp ) {
+			int percent = (int)(((float)sd->status.base_exp / (float)exp) * 1000.);
 
 			if( percent && !(percent%100) ) { //10.0%, 20.0%, ..., 90.0%
 				sc_start(&sd->bl, &sd->bl, status_skill2sc(MO_EXPLOSIONSPIRITS), 100, 17, skill_get_time(MO_EXPLOSIONSPIRITS, 5)); //Lv17-> +50 critical (noted by Poki) [Skotlex]
@@ -16866,14 +16863,21 @@ void clif_party_show_picker(struct map_session_data *sd, struct item * item_data
 }
 
 
-/// Display gained exp (ZC_NOTIFY_EXP).
-/// 07f6 <account id>.L <amount>.L <var id>.W <exp type>.W
-/// var id:
-///     SP_BASEEXP, SP_JOBEXP
-/// exp type:
-///     0 = normal exp gain/loss
-///     1 = quest exp gain/loss
-void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, bool is_quest, bool gain)
+/** Display gained exp (ZC_NOTIFY_EXP).
+ * 07f6 <account id>.L <amount>.L <var id>.W <exp type>.W
+ * amount: INT32_MIN ~ INT32_MAX
+ * var id:
+ *     SP_BASEEXP, SP_JOBEXP
+ * exp type:
+ *     0 = normal exp gained/lost
+ *     1 = quest exp gained/lost
+ * @param sd Player
+ * @param exp EXP value gained/loss
+ * @param type SP_BASEEXP, SP_JOBEXP
+ * @param quest False:Normal EXP; True:Quest EXP (displayed in purple color)
+ * @param lost True:if lossing EXP
+ */
+void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, bool quest, bool lost)
 {
 	int fd;
 
@@ -16881,12 +16885,12 @@ void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, b
 
 	fd = sd->fd;
 
-	WFIFOHEAD(fd, packet_len(0x7f6));
+	WFIFOHEAD(fd,packet_len(0x7f6));
 	WFIFOW(fd,0) = 0x7f6;
 	WFIFOL(fd,2) = sd->bl.id;
-	WFIFOL(fd,6) = exp * (gain ? 1 : -1);
+	WFIFOL(fd,6) = (int)umin(exp, INT_MAX) * (lost ? -1 : 1);
 	WFIFOW(fd,10) = type;
-	WFIFOW(fd,12) = (is_quest && type == SP_BASEEXP ? 1 : 0); //Normal exp and quest job exp is shown in yellow, quest base exp is shown in purple
+	WFIFOW(fd,12) = (quest && type == SP_BASEEXP ? 1 : 0); //Normal exp and quest job exp is shown in yellow, quest base exp is shown in purple
 	WFIFOSET(fd,packet_len(0x7f6));
 }
 

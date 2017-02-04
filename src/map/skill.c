@@ -5848,22 +5848,24 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					status_set_sp(src,1,0);
 				}
 				skill_area_temp[0]++;
-				skill_area_temp[0] = max(5 - skill_area_temp[0],0); //The actual penalty
-				if(skill_area_temp[0]) {
-					uint32 base_penalty = (uint32)(2 * pc_nextbaseexp(sd) * (skill_area_temp[0] / 1000.)); //0.2% penalty per each
+				skill_area_temp[0] = battle_config.exp_cost_redemptio_limit - skill_area_temp[0]; //The actual penalty
+				if(skill_area_temp[0] > 0 && battle_config.exp_cost_redemptio) { //If total penalty is 1% => reduced 0.2% penalty per each revived player
+					unsigned int base_penalty = u32min(sd->status.base_exp,(pc_nextbaseexp(sd) * skill_area_temp[0] * battle_config.exp_cost_redemptio / battle_config.exp_cost_redemptio_limit) / 100);
 
-					sd->status.base_exp -= min(sd->status.base_exp,base_penalty);
+					sd->status.base_exp -= base_penalty;
+					clif_displayexp(sd,base_penalty,SP_BASEEXP,false,true);
 					clif_updatestatus(sd,SP_BASEEXP);
-					clif_displayexp(sd,(base_penalty ? base_penalty : 0),SP_BASEEXP,false,false);
+					if(sd->state.showexp)
+						pc_gainexp_disp(sd,base_penalty,pc_nextbaseexp(sd),0,pc_nextjobexp(sd),true);
 				}
 				status_revive(bl,50,0);
 				clif_skill_nodamage(bl,bl,ALL_RESURRECTION,-1,1);
 			} else if(sd) {
 				struct skill_condition req = skill_get_requirement(sd,skill_id,skill_lv);
-				uint32 exp;
+				unsigned int exp, exp_needp = battle_config.exp_cost_redemptio;
 
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				if((exp = pc_nextbaseexp(sd)) > 0 && get_percentage(sd->status.base_exp,exp) < 1) {
+				if(exp_needp && (exp = pc_nextbaseexp(sd)) > 0 && get_percentage(sd->status.base_exp,exp) < exp_needp) {
 					map_freeblock_unlock();
 					return 1; //Not enough EXP
 				}
@@ -9628,12 +9630,14 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case LG_INSPIRATION:
-			if( sd ) {
-				uint32 base_penalty = (uint32)(pc_nextbaseexp(sd) / 100.); //1% penalty
+			if( sd && battle_config.exp_cost_inspiration ) {
+				unsigned int base_penalty = u32min(sd->status.base_exp, pc_nextbaseexp(sd) * battle_config.exp_cost_inspiration / 100); //1% penalty
 
-				sd->status.base_exp -= min(sd->status.base_exp,base_penalty);
+				sd->status.base_exp -= base_penalty;
+				clif_displayexp(sd,base_penalty,SP_BASEEXP,false,true);
 				clif_updatestatus(sd,SP_BASEEXP);
-				clif_displayexp(sd,(base_penalty ? base_penalty : 0),SP_BASEEXP,false,false);
+				if( sd->state.showexp )
+					pc_gainexp_disp(sd,base_penalty,pc_nextbaseexp(sd),0,pc_nextjobexp(sd),true);
 			}
 			status_change_clear_buffs(bl,SCCB_BUFFS|SCCB_DEBUFFS|SCCB_REFRESH,0);
 			clif_skill_nodamage(bl,src,skill_id,skill_lv,
@@ -15301,9 +15305,9 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				return false; //Just fails, no msg here
 			break;
 		case LG_INSPIRATION: {
-				uint32 exp;
+				unsigned int exp, exp_needp = battle_config.exp_cost_inspiration;
 
-				if( (exp = pc_nextbaseexp(sd)) > 0 && get_percentage(sd->status.base_exp,exp) < 1 ) {
+				if( exp_needp && (exp = pc_nextbaseexp(sd)) > 0 && get_percentage(sd->status.base_exp,exp) < exp_needp ) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EXP_1PERCENT,0,0);
 					return false;
 				}
