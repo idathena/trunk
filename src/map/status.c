@@ -1664,7 +1664,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 		if (sd->bg_id) {
 			struct battleground_data *bg;
 
-			if ((bg = bg_team_search(sd->bg_id)) != NULL && bg->die_event[0])
+			if ((bg = bg_team_search(sd->bg_id)) && bg->die_event[0])
 				npc_event(sd,bg->die_event, 0);
 		}
 		npc_script_event(sd,NPCE_DIE);
@@ -7850,6 +7850,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			if( sc->data[SC_DECREASEAGI] )
 				return 0;
 		//Fall through
+		case SC_INCREASEAGI:
 		case SC_CONCENTRATE:
 		case SC_SPEARQUICKEN:
 		case SC_TRUESIGHT:
@@ -7857,9 +7858,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_CARTBOOST:
 		case SC_ASSNCROS:
 			if( sc->option&OPTION_MADOGEAR )
-				return 0; //Mado is immune to wind walk, cart boost, etc (others above) [Ind]
-		//Fall through
-		case SC_INCREASEAGI:
+				return 0; //Mado is immune to increase agi, wind walk, cart boost, etc (others above) [Ind]
 			if( sc->data[SC_QUAGMIRE] )
 				return 0;
 			break;

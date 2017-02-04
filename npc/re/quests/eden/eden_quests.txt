@@ -1941,7 +1941,7 @@ moc_para01,112,96,5	script	Administrator Michael	4_M_RUSMAN1,{
 					16005,"Eden Mace II","Mace","Attack 163","", //P_Mace2
 					1651,"Eden Staff II","Staff","INT+3, MATK+150, Attack 60",""; //P_Staff2
 			}
-			else if ((BaseClass == Job_Archer) {
+			else if (BaseClass == Job_Archer) {
 				callsub S_Select,"",
 					1748,"Eden Bow II","Bow","Attack 82",""; //P_Bow2
 			}
