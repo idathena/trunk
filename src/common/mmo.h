@@ -855,6 +855,13 @@ struct clan {
 	struct clan_alliance alliance[MAX_CLANALLIANCE];
 };
 
+enum e_party_member_withdraw {
+	PARTY_MEMBER_WITHDRAW_LEAVE,	  //Leave
+	PARTY_MEMBER_WITHDRAW_EXPEL,	  //Kicked
+	PARTY_MEMBER_WITHDRAW_CANT_LEAVE, //@TODO: Cannot leave
+	PARTY_MEMBER_WITHDRAW_CANT_EXPEL, //@TODO: Cannot be kicked
+};
+
 // Sanity checks
 #if MAX_ZENY > INT_MAX
 	#error MAX_ZENY is too big

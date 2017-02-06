@@ -2457,7 +2457,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 								job_exp = (unsigned int)cap_value(apply_rate(job_exp, rate), 1, UINT_MAX);
 						}
 #endif
-						pc_gainexp(tmpsd[i], &md->bl, base_exp, job_exp, false);
+						pc_gainexp(tmpsd[i], &md->bl, base_exp, job_exp, 0);
 					}
 				}
 				if(zeny) //Zeny from mobs [Valaris]
@@ -2627,7 +2627,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			mexp = (unsigned int)cap_value(exp, 1, UINT_MAX);
 			clif_mvp_effect(mvp_sd);
 			clif_mvp_exp(mvp_sd, mexp);
-			pc_gainexp(mvp_sd, &md->bl, mexp, 0, false);
+			pc_gainexp(mvp_sd, &md->bl, mexp, 0, 0);
 			log_mvp[1] = mexp;
 		}
 		if(!(map[m].flag.nomvploot || type&1)) { //Order might be random depending on item_drop_mvp_mode config setting

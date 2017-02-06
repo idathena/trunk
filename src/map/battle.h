@@ -637,6 +637,8 @@ extern struct Battle_Config
 	int exp_cost_redemptio;
 	int exp_cost_redemptio_limit;
 	int exp_cost_inspiration;
+	int block_account_in_same_party;
+	int change_party_leader_samemap;
 } battle_config;
 
 void do_init_battle(void);

@@ -4380,24 +4380,26 @@ the character will also have their skills reset upon 'changecharsex'.
 
 ---------------------------------------
 
-*getexp <base xp>,<job xp>{,<char_id>};
+*getexp <base_exp>,<job_exp>{,<char_id>};
 
 This command will give the invoking character a specified number of base and job 
-experience points. Should be used as a quest reward. Negative values won't work.
-Is subject to EXP bonuses and to the `quest_exp_rate` config option.
+experience points. Used for a quest reward. Negative values won't work.
+
+The EXP values are adjustted by 'quest_exp_rate' config value, VIP bonus, Guild 
+Tax and EXP boost items such Battle Manual, Bubble Gum, or items that have 
+SC_EXPBOOST or SC_ITEMBOOST.
 
     getexp 10000,5000;
 
-You can also use the "set" command with the parameters defined in 'src/map/script_constants.h':
+---------------------------------------
 
-    set BaseExp,BaseExp+10000;
-    set JobExp,JobExp+5000;
+*getexp2 <base_exp>,<job_exp>{,<char_id>};
 
-You can also reduce the amount of experience points:
+This command is safety version of 'set' command for BaseExp and JobExp. If using 
+'set' while the BaseExp or JobExp value is more than 2,147,483,647 (INT_MAX) will 
+causing overflow error.
 
-    set BaseExp,BaseExp-10000;
-
-When setting the parameters directly no bonuses or config options are applied.
+Unlike 'getexp', this command ignores the adjustment factors!
 
 ---------------------------------------
 
@@ -9121,6 +9123,7 @@ The command returns 1 upon success, and these values upon failure:
 -2: Player already has a party.
 -3: Party not found.
 -4: Party is full.
+-5: Another character from the same account is already in the party.
 
 ---------------------------------------
 

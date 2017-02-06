@@ -8621,6 +8621,8 @@ static const struct _battle_data {
 	{ "exp_cost_redemptio",                 &battle_config.exp_cost_redemptio,              1,      0,      100,            },
 	{ "exp_cost_redemptio_limit",           &battle_config.exp_cost_redemptio_limit,        5,      0,      MAX_PARTY,      },
 	{ "exp_cost_inspiration",               &battle_config.exp_cost_inspiration,            1,      0,      100,            },
+	{ "block_account_in_same_party",        &battle_config.block_account_in_same_party,     1,      0,      1,              },
+	{ "change_party_leader_samemap",        &battle_config.change_party_leader_samemap,     1,      0,      1,              },
 };
 
 /*==========================

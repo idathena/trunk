@@ -4123,28 +4123,28 @@ void clif_joinchatok(struct map_session_data *sd,struct chat_data *cd)
 	nullpo_retv(cd);
 
 	fd = sd->fd;
-	if (!session_isActive(fd))
+	if( !session_isActive(fd) )
 		return;
 	t = (int)(cd->owner->type == BL_NPC);
-	WFIFOHEAD(fd, 8 + (28*(cd->users+t)));
-	WFIFOW(fd, 0) = 0xdb;
-	WFIFOW(fd, 2) = 8 + (28*(cd->users+t));
-	WFIFOL(fd, 4) = cd->bl.id;
-	
-	if(cd->owner->type == BL_NPC){
-		WFIFOL(fd, 30) = 1;
-		WFIFOL(fd, 8) = 0;
-		memcpy(WFIFOP(fd, 12), ((struct npc_data *)cd->owner)->name, NAME_LENGTH);
-		for (i = 0; i < cd->users; i++) {
-			WFIFOL(fd, 8+(i+1)*28) = 1;
-			memcpy(WFIFOP(fd, 8+(i+t)*28+4), cd->usersd[i]->status.name, NAME_LENGTH);
+	WFIFOHEAD(fd,8 + (28 * (cd->users + t)));
+	WFIFOW(fd,0) = 0xdb;
+	WFIFOW(fd,2) = 8 + (28 * (cd->users + t));
+	WFIFOL(fd,4) = cd->bl.id;
+	if( cd->owner->type == BL_NPC ) {
+		WFIFOL(fd,30) = 1;
+		WFIFOL(fd,8) = 0;
+		memcpy(WFIFOP(fd,12),((struct npc_data *)cd->owner)->name,NAME_LENGTH);
+		for( i = 0; i < cd->users; i++ ) {
+			WFIFOL(fd,8 + (i + 1) * 28) = 1;
+			memcpy(WFIFOP(fd,8 + (i + t) * 28 + 4),cd->usersd[i]->status.name,NAME_LENGTH);
 		}
-	} else
-	for (i = 0; i < cd->users; i++) {
-		WFIFOL(fd, 8+i*28) = (i != 0 || cd->owner->type == BL_NPC);
-		memcpy(WFIFOP(fd, 8+(i+t)*28+4), cd->usersd[i]->status.name, NAME_LENGTH);
+	} else {
+		for( i = 0; i < cd->users; i++ ) {
+			WFIFOL(fd,8 + i * 28) = (i || cd->owner->type == BL_NPC);
+			memcpy(WFIFOP(fd,8 + (i + t) * 28 + 4),cd->usersd[i]->status.name,NAME_LENGTH);
+		}
 	}
-	WFIFOSET(fd, WFIFOW(fd, 2));
+	WFIFOSET(fd,WFIFOW(fd,2));
 }
 
 
@@ -4224,7 +4224,8 @@ void clif_traderequest(struct map_session_data *sd, const char *name)
 #else
 	struct map_session_data *tsd = map_id2sd(sd->trade_partner);
 
-	if( !tsd ) return;
+	if( !tsd )
+		return;
 	
 	WFIFOHEAD(fd,packet_len(0x1f4));
 	WFIFOW(fd,0) = 0x1f4;
@@ -7477,7 +7478,7 @@ void clif_party_invite(struct map_session_data *sd,struct map_session_data *tsd)
 
 	fd = tsd->fd;
 
-	if( (p = party_search(sd->status.party_id)) == NULL )
+	if( !(p = party_search(sd->status.party_id)) )
 		return;
 
 	WFIFOHEAD(fd,packet_len(cmd));
@@ -7491,24 +7492,17 @@ void clif_party_invite(struct map_session_data *sd,struct map_session_data *tsd)
 /// Party invite result.
 /// 00fd <nick>.24S <result>.B (ZC_ACK_REQ_JOIN_GROUP)
 /// 02c5 <nick>.24S <result>.L (ZC_PARTY_JOIN_REQ_ACK)
-/// result=0 : char is already in a party -> MsgStringTable[80]
-/// result=1 : party invite was rejected -> MsgStringTable[81]
-/// result=2 : party invite was accepted -> MsgStringTable[82]
-/// result=3 : party is full -> MsgStringTable[83]
-/// result=4 : char of the same account already joined the party -> MsgStringTable[608]
-/// result=5 : char blocked party invite -> MsgStringTable[1324] (since 20070904)
-/// result=7 : char is not online or doesn't exist -> MsgStringTable[71] (since 20070904)
-/// result=8 : (%s) @TODO: Instance related? -> MsgStringTable[1388] (since 20080527)
-/// return=9 : @TODO: Map prohibits party joining? -> MsgStringTable[1871] (since 20110205)
-void clif_party_inviteack(struct map_session_data *sd, const char *nick, int result)
+void clif_party_invite_reply(struct map_session_data *sd, const char *nick, enum e_party_invite_reply reply)
 {
 	int fd;
+
 	nullpo_retv(sd);
-	fd=sd->fd;
+
+	fd = sd->fd;
 
 #if PACKETVER < 20070904
-	if( result == 7 ) {
-		clif_displaymessage(fd, msg_txt(3));
+	if( reply == PARTY_REPLY_OFFLINE ) {
+		clif_displaymessage(fd,msg_txt(3));
 		return;
 	}
 #endif
@@ -7517,13 +7511,13 @@ void clif_party_inviteack(struct map_session_data *sd, const char *nick, int res
 	WFIFOHEAD(fd,packet_len(0xfd));
 	WFIFOW(fd,0) = 0xfd;
 	safestrncpy((char *)WFIFOP(fd,2),nick,NAME_LENGTH);
-	WFIFOB(fd,26) = result;
+	WFIFOB(fd,26) = reply;
 	WFIFOSET(fd,packet_len(0xfd));
 #else
 	WFIFOHEAD(fd,packet_len(0x2c5));
 	WFIFOW(fd,0) = 0x2c5;
 	safestrncpy((char *)WFIFOP(fd,2),nick,NAME_LENGTH);
-	WFIFOL(fd,26) = result;
+	WFIFOL(fd,26) = reply;
 	WFIFOSET(fd,packet_len(0x2c5));
 #endif
 }
@@ -7573,37 +7567,26 @@ void clif_party_option(struct party_data *p,struct map_session_data *sd,int flag
 }
 
 
-/// 0105 <account id>.L <char name>.24B <result>.B (ZC_DELETE_MEMBER_FROM_GROUP).
-/// result:
-///     0 = leave
-///     1 = expel
-///     2 = cannot leave party on this map
-///     3 = cannot expel from party on this map
-void clif_party_withdraw(struct party_data *p, struct map_session_data *sd, int account_id, const char *name, int flag)
+/**
+ * 0105 <account id>.L <char name>.24B <result>.B (ZC_DELETE_MEMBER_FROM_GROUP).
+ * @param sd Send the notification for this player
+ * @param account_id Account ID of kicked member
+ * @param name Name of kicked member
+ * @param result Party leave result @see PARTY_MEMBER_WITHDRAW
+ * @param target Send target
+ */
+void clif_party_withdraw(struct map_session_data *sd, uint32 account_id, const char *name, enum e_party_member_withdraw result, enum send_target target)
 {
-	unsigned char buf[64];
-
-	nullpo_retv(p);
-
-	if( !sd && (flag&0xf0) == 0 ) {
-		int i;
-
-		ARR_FIND(0,MAX_PARTY,i,p->data[i].sd);
-		if( i < MAX_PARTY )
-			sd = p->data[i].sd;
-	}
+	unsigned char buf[2 + 4 + NAME_LENGTH + 1];
 
 	if( !sd )
 		return;
 
-	WBUFW(buf,0) = 0x105;
+	WBUFW(buf,0) = 0x0105;
 	WBUFL(buf,2) = account_id;
-	memcpy(WBUFP(buf,6),name,NAME_LENGTH);
-	WBUFB(buf,30) = flag&0x0f;
-	if( (flag&0xf0) == 0 )
-		clif_send(buf,packet_len(0x105),&sd->bl,PARTY);
-	else
-		clif_send(buf,packet_len(0x105),&sd->bl,SELF);
+	memcpy(WBUFP(buf,6), name, NAME_LENGTH);
+	WBUFB(buf,6 + NAME_LENGTH) = result;
+	clif_send(buf,2 + 4 + NAME_LENGTH + 1,&sd->bl,target);
 }
 
 

@@ -9118,8 +9118,38 @@ BUILDIN_FUNC(getexp)
 	base = (int)cap_value(base * bonus,0,INT_MAX);
 	job = (int)cap_value(job * bonus,0,INT_MAX);
 
-	pc_gainexp(sd,&sd->bl,base,job,true);
+	pc_gainexp(sd,&sd->bl,base,job,1);
 
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Safety Base/Job EXP addition than using `set BaseExp,n;` or `set JobExp,n;`
+ * Unlike `getexp` that affected by some adjustments.
+ * getexp2 <base_exp>,<job_exp>{,<char_id>};
+ * @author [Cydh]
+ */
+BUILDIN_FUNC(getexp2)
+{
+	TBL_PC *sd = NULL;
+	int base_exp = script_getnum(st,2);
+	int job_exp = script_getnum(st,3);
+
+	if( !script_charid2sd(4,sd) )
+		return 1;
+
+	if( !base_exp && !job_exp )
+		return 0;
+
+	if( base_exp > 0 )
+		pc_gainexp(sd,NULL,base_exp,0,2);
+	else if( base_exp < 0 )
+		pc_lostexp(sd,base_exp * -1,0);
+
+	if( job_exp > 0 )
+		pc_gainexp(sd,NULL,0,job_exp,2);
+	else if( job_exp < 0 )
+		pc_lostexp(sd,0,job_exp * -1);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -9131,8 +9161,7 @@ BUILDIN_FUNC(guildgetexp)
 	TBL_PC *sd;
 	int exp;
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	exp = script_getnum(st,2);
@@ -19654,6 +19683,7 @@ BUILDIN_FUNC(party_create)
  * @param party_id: The party that will be entered by player
  * @param char_id: Char id of player that will be joined to the party
  * @return val: Result value
+ *	-5	- another character of the same account is in the party
  *	-4	- party is full
  *	-3	- party is not found
  *	-2	- player is in party already
@@ -19669,22 +19699,32 @@ BUILDIN_FUNC(party_addmember)
 
 	if( !(sd = map_charid2sd(script_getnum(st,3))) ) {
 		script_pushint(st,-1);
-		return 0;
+		return 1;
 	}
 
 	if( sd->status.party_id ) {
 		script_pushint(st,-2);
-		return 0;
+		return 1;
 	}
 
 	if( !(party = party_search(party_id)) ) {
 		script_pushint(st,-3);
-		return 0;
+		return 1;
 	}
 
 	if( party->party.count >= MAX_PARTY ) {
 		script_pushint(st,-4);
-		return 0;
+		return 1;
+	}
+
+	if( battle_config.block_account_in_same_party ) {
+		int i;
+
+		ARR_FIND(0, MAX_PARTY, i, party->party.member[i].account_id == sd->status.account_id);
+		if( i < MAX_PARTY ) {
+			script_pushint(st,-5);
+			return 1;
+		}
 	}
 	sd->party_invite = party_id;
 	script_pushint(st,party_add_member(party_id,sd));
@@ -19806,10 +19846,11 @@ BUILDIN_FUNC(party_destroy)
 
 		for( j = 0; j < MAX_PARTY; j++ ) {
 			TBL_PC *sd = party->data[j].sd;
+
 			if( sd )
-				party_member_withdraw(party->party.party_id,sd->status.account_id,sd->status.char_id);
+				party_member_withdraw(party->party.party_id,sd->status.account_id,sd->status.char_id,sd->status.name,PARTY_MEMBER_WITHDRAW_LEAVE);
 			else if( party->party.member[j].char_id )
-				intif_party_leave(party->party.party_id,party->party.member[j].account_id,party->party.member[j].char_id);
+				intif_party_leave(party->party.party_id,party->party.member[j].account_id,party->party.member[j].char_id,party->party.member[j].name,PARTY_MEMBER_WITHDRAW_LEAVE);
 		}
 		party_broken(party->party.party_id);
 		script_pushint(st,1);
@@ -20976,6 +21017,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getitemslots,"i"),
 	BUILDIN_DEF(makepet,"i"),
 	BUILDIN_DEF(getexp,"ii?"),
+	BUILDIN_DEF(getexp2,"ii?"),
 	BUILDIN_DEF(getinventorylist,"?"),
 	BUILDIN_DEF(getcartinventorylist,""),
 	BUILDIN_DEF(getskilllist,"?"),
