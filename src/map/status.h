@@ -154,7 +154,7 @@ typedef enum sc_type {
 	SC_VIOLENTGALE,
 	SC_WATK_ELEMENT,
 	SC_ARMOR,
-	SC_ARMOR_ELEMENT,
+	SC_MAXPAIN,
 	SC_NOCHAT,
 	SC_BABY,
 	SC_AURABLADE,
@@ -763,7 +763,6 @@ typedef enum sc_type {
 	SC_GEFFEN_MAGIC2,
 	SC_GEFFEN_MAGIC3,
 	SC_FENRIR_CARD,
-	SC_MAXPAIN,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

@@ -842,7 +842,6 @@
 	export_constant(SC_VIOLENTGALE);
 	export_constant(SC_WATK_ELEMENT);
 	export_constant(SC_ARMOR);
-	export_constant(SC_ARMOR_ELEMENT);
 	export_constant(SC_NOCHAT);
 	export_constant(SC_BABY);
 	export_constant(SC_AURABLADE);

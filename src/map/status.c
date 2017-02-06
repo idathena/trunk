@@ -1092,7 +1092,6 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_BATKFOOD] |= SCB_BATK;
 	StatusChangeFlagTable[SC_WATKFOOD] |= SCB_WATK;
 	StatusChangeFlagTable[SC_MATKFOOD] |= SCB_MATK;
-	StatusChangeFlagTable[SC_ARMOR_ELEMENT] |= SCB_ALL;
 	StatusChangeFlagTable[SC_ARMOR_RESIST] |= SCB_ALL;
 	StatusChangeFlagTable[SC_SPCOST_RATE] |= SCB_ALL;
 	StatusChangeFlagTable[SC_WALKSPEED] |= SCB_SPEED;
@@ -1943,8 +1942,8 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 		if (sc->opt1 && sc->opt1 != OPT1_BURNING && skill_id != RK_REFRESH && skill_id != SR_GENTLETOUCH_CURE) { //Stuned/Frozen/etc
 			if (flag != 1)
 				return false; //Can't cast, casted spells can't damage
-			if (!(skill_get_inf(skill_id)&INF_GROUND_SKILL))
-				return false; //Target/self casted spells can't come off
+			if (skill_get_casttype(skill_id) == CAST_DAMAGE)
+				return false; //Damage skills can't come off
 		}
 		if ((sc->data[SC_TRICKDEAD] && skill_id != NV_TRICKDEAD) ||
 			(sc->data[SC_AUTOCOUNTER] && !flag && skill_id) ||
@@ -3862,12 +3861,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		if (sc->data[SC_PROVIDENCE] && (i = sc->data[SC_PROVIDENCE]->val2)) {
 			sd->subele[ELE_HOLY] += i;
 			sd->subrace[RC_DEMON] += i;
-		}
-		if (sc->data[SC_ARMOR_ELEMENT]) { //This status change should grant card-type elemental resist
-			sd->subele[ELE_WATER] += sc->data[SC_ARMOR_ELEMENT]->val1;
-			sd->subele[ELE_EARTH] += sc->data[SC_ARMOR_ELEMENT]->val2;
-			sd->subele[ELE_FIRE] += sc->data[SC_ARMOR_ELEMENT]->val3;
-			sd->subele[ELE_WIND] += sc->data[SC_ARMOR_ELEMENT]->val4;
 		}
 		if (sc->data[SC_ARMOR_RESIST]) { //Undead Scroll
 			sd->subele[ELE_WATER] += sc->data[SC_ARMOR_RESIST]->val1;
@@ -7455,8 +7448,11 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		case SC_ELECTRICSHOCKER:
 			tick_def2 = (status->vit + status->agi) * 70;
 			break;
-		case SC_DEEPSLEEP: //kRO balance update lists this formula
-			tick_def2 = (sd ? sd->status.int_ : b_status->int_) * 50 + SCDEF_LVL_CAP(bl,150) * 50;
+		case SC_DEEPSLEEP:
+			tick_def2 = b_status->int_ * 25 + status_get_lv(bl) * 50;
+			break;
+		case SC_VOICEOFSIREN:
+			tick_def2 = status_get_lv(bl) * 100 + status_get_job_lv(bl) * 200;
 			break;
 		case SC_NETHERWORLD:
 			tick_def2 = SCDEF_LVL_CAP(bl,150) * 20 + SCDEF_JOBLVL_CAP(bl,50) * 100;
@@ -7572,7 +7568,6 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			tick = max(tick,5000 + status_get_lv(src) * 10); //5 secs + (Caster's Base Level * 0.01)
 			break;
 		case SC_MARSHOFABYSS:
-		case SC_DEEPSLEEP:
 			tick = max(tick,5000); //5 secs
 			break;
 		case SC_WHITEIMPRISON:
@@ -7580,6 +7575,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		//Fall through
 		case SC_BURNING:
 		case SC_FREEZING:
+		case SC_VOICEOFSIREN:
 			tick = max(tick,10000); //10 secs
 			break;
 		case SC_STASIS:
@@ -8194,11 +8190,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_OVERTHRUST,INVALID_TIMER);
 			break;
 		case SC_MAGNIFICAT:
-		case SC_OFFERTORIUM:
-			if( sc->data[type] )
-				break;
 			status_change_end(bl,SC_OFFERTORIUM,INVALID_TIMER);
-			status_change_end(bl,SC_MAGNIFICAT,INVALID_TIMER);
 			break;
 		case SC_KYRIE: //Cancels Assumptio
 			status_change_end(bl,SC_ASSUMPTIO,INVALID_TIMER);
@@ -8404,6 +8396,25 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_INVINCIBLEOFF:
 			status_change_end(bl,SC_INVINCIBLE,INVALID_TIMER);
 			break;
+		case SC_OFFERTORIUM:
+			status_change_end(bl,SC_MAGNIFICAT,INVALID_TIMER);
+			status_change_end(bl,SC_BLIND,INVALID_TIMER);
+			status_change_end(bl,SC_CURSE,INVALID_TIMER);
+			status_change_end(bl,SC_POISON,INVALID_TIMER);
+			status_change_end(bl,SC_HALLUCINATION,INVALID_TIMER);
+			status_change_end(bl,SC_CONFUSION,INVALID_TIMER);
+			status_change_end(bl,SC_BLEEDING,INVALID_TIMER);
+			status_change_end(bl,SC_BURNING,INVALID_TIMER);
+			status_change_end(bl,SC_FREEZING,INVALID_TIMER);
+			status_change_end(bl,SC_TOXIN,INVALID_TIMER);
+			status_change_end(bl,SC_PARALYSE,INVALID_TIMER);
+			status_change_end(bl,SC_VENOMBLEED,INVALID_TIMER);
+			status_change_end(bl,SC_MAGICMUSHROOM,INVALID_TIMER);
+			status_change_end(bl,SC_DEATHHURT,INVALID_TIMER);
+			status_change_end(bl,SC_PYREXIA,INVALID_TIMER);
+			status_change_end(bl,SC_LEECHESEND,INVALID_TIMER);
+			status_change_end(bl,SC_MANDRAGORA,INVALID_TIMER);
+			break;
 		case SC_KINGS_GRACE:
 			status_change_end(bl,SC_POISON,INVALID_TIMER);
 			status_change_end(bl,SC_BLIND,INVALID_TIMER);
@@ -8536,7 +8547,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_ATKPOTION:
 			case SC_MATKPOTION:
 			case SC_ENCHANTARMS:
-			case SC_ARMOR_ELEMENT:
 			case SC_ARMOR_RESIST:
 			case SC_ATTHASTE_CASH:
 			case SC_SHAPESHIFT:
@@ -10355,6 +10365,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		//Fall through
 		case SC_CURSEDCIRCLE_ATKER:
 		case SC_FALLENEMPIRE:
+		case SC_KINGS_GRACE:
 			unit_stop_attack(bl);
 			if (type == SC_FREEZE || type == SC_STUN || type == SC_SLEEP || type == SC_STONE)
 				break;

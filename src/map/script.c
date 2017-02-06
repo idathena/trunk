@@ -6027,12 +6027,12 @@ BUILDIN_FUNC(viewpoint)
 /// storagecountitem2 <nameID>,<Identified>,<Refine>,<Attribute>,<Card0>,<Card1>,<Card2>,<Card3>{,<accountID>})
 BUILDIN_FUNC(countitem)
 {
-	int i = 0, count = 0, aid = 3;
+	int i = 0, aid = 3;
 	struct item_data *id = NULL;
 	struct script_data *data;
 	char *command = (char *)script_getfuncname(st);
 	uint8 loc = 0;
-	uint16 size;
+	uint16 size, count = 0;
 	struct item *items;
 	TBL_PC *sd = NULL;
 
@@ -6227,7 +6227,7 @@ BUILDIN_FUNC(checkweight2) {
 
 	TBL_PC *sd = script_rid2sd(st);
 
-	if( sd == NULL )
+	if( !sd )
 		return 1;
 
 	data_it = script_getdata(st,2);
@@ -6290,8 +6290,8 @@ BUILDIN_FUNC(checkweight2) {
  *------------------------------------------*/
 BUILDIN_FUNC(getitem)
 {
-	int amount, get_count, i;
-	unsigned short nameid;
+	int get_count, i;
+	unsigned short nameid, amount;
 	struct item it;
 	TBL_PC *sd;
 	struct script_data *data;
@@ -6384,8 +6384,7 @@ BUILDIN_FUNC(getitem)
  *------------------------------------------*/
 BUILDIN_FUNC(getitem2)
 {
-	int amount;
-	unsigned short nameid;
+	unsigned short nameid, amount;
 	int iden, ref, attr;
 	unsigned short c1, c2, c3, c4;
 	char bound = BOUND_NONE;
@@ -6711,12 +6710,12 @@ BUILDIN_FUNC(grouprandomitem)
  */
 BUILDIN_FUNC(makeitem)
 {
-	int16 nameid;
-	uint16 amount, flag = 0, x, y;
+	uint16 nameid, amount, x, y;
 	const char *mapname;
 	int m;
 	struct item item_tmp;
 	struct script_data *data;
+	struct item_data *id;
 
 	data = script_getdata(st,2);
 	get_val(st,data);
@@ -6736,7 +6735,7 @@ BUILDIN_FUNC(makeitem)
 	x = script_getnum(st,5);
 	y = script_getnum(st,6);
 
-	if( strcmp(mapname,"this") == 0 ) {
+	if( !strcmp(mapname,"this") ) {
 		TBL_PC *sd = script_rid2sd(st);
 
 		if( !sd )
@@ -6745,19 +6744,10 @@ BUILDIN_FUNC(makeitem)
 	} else
 		m = map_mapname2mapid(mapname);
 
-	if( nameid < 0 ) {
-		nameid = -nameid;
-		flag = 1;
-	}
-
-	if( nameid > 0 ) {
+	if( (id = itemdb_search(nameid)) ) {
 		memset(&item_tmp,0,sizeof(item_tmp));
 		item_tmp.nameid = nameid;
-		if( !flag )
-			item_tmp.identify = 1;
-		else
-			item_tmp.identify = itemdb_isidentified(nameid);
-
+		item_tmp.identify = 1;
 		map_addflooritem(&item_tmp,amount,m,x,y,0,0,0,4,0);
 	}
 	return SCRIPT_CMD_SUCCESS;
@@ -6793,10 +6783,9 @@ BUILDIN_FUNC(makeitem2) {
 	x = script_getnum(st,5);
 	y = script_getnum(st,6);
 
-	if( strcmp(mapname,"this") == 0 ) {
-		TBL_PC *sd;
+	if( !strcmp(mapname,"this") ) {
+		TBL_PC *sd = script_rid2sd(st);
 
-		sd = script_rid2sd(st);
 		if( !sd )
 			return 0; //Failed
 		m = sd->bl.m;
@@ -10092,8 +10081,8 @@ BUILDIN_FUNC(getareausers)
  *------------------------------------------*/
 static int buildin_getareadropitem_sub(struct block_list *bl,va_list ap)
 {
-	int nameid = va_arg(ap,int);
-	int *amount = va_arg(ap,int *);
+	unsigned short nameid = va_arg(ap,unsigned short);
+	unsigned short *amount = va_arg(ap,unsigned short *);
 	struct flooritem_data *drop = (struct flooritem_data *)bl;
 
 	if (drop->item.nameid == nameid)
@@ -10105,7 +10094,7 @@ BUILDIN_FUNC(getareadropitem)
 {
 	const char *str;
 	int16 m, x0, y0, x1, y1;
-	int nameid, amount = 0;
+	unsigned short nameid, amount = 0;
 	struct script_data *data;
 
 	str = script_getstr(st,2);
@@ -15535,6 +15524,98 @@ BUILDIN_FUNC(distance)
 	script_pushint(st,distance_xy(x0,y0,x1,y1));
 	return SCRIPT_CMD_SUCCESS;
 }
+
+/**
+ * Returns the minimum or maximum of all the given parameters for integer variables.
+ *
+ * min( <value or array>{,value or array 2,...} );
+ * minimum( <value or array>{,value or array 2,...} );
+ * max( <value or array>{,value or array 2,...} );
+ * maximum( <value or array>{,value or array 2,...} );
+*/
+BUILDIN_FUNC(minmax) {
+	char *functionname;
+	unsigned int i;
+	int value;
+	int32 (*func)(int32,int32); //Function pointer for our comparison function (either min or max at the moment)
+
+	functionname = script_getfuncname(st); //Get the real function name
+
+	i = 2; //Our data should start at offset 2
+
+	if (!script_hasdata(st,i)) {
+		ShowError("buildin_%s: no arguments given!\n", functionname);
+		st->state = END;
+		return 1;
+	}
+
+	if (!strnicmp(functionname,"min",strlen("min"))) {
+		value = INT_MAX;
+		func = i32min;
+	} else if (!strnicmp(functionname,"max",strlen("max"))) {
+		value = INT_MIN;
+		func = i32max;
+	} else {
+		ShowError("buildin_%s: Unknown call case for min/max!\n", functionname);
+		st->state = END;
+		return 1;
+	}
+
+	while (script_hasdata(st,i)) { //As long as we have data on our script stack
+		struct script_data *data = script_getdata(st,i); //Get the next piece of data from the script stack
+
+		if (data_isint(data)) //Is the current parameter a single integer?
+			value = func(value,script_getnum(st,i));
+		else if (data_isreference(data)) { //Is the current parameter an array variable?
+			struct map_session_data *sd;
+			const char *name;
+			int32 id;
+			unsigned int start, end;
+
+			id = reference_getid(data); //For getting the values we need the id of the array
+			name = reference_getname(data); //Get the name of the variable
+
+			if (is_string_variable(name)) { //Check if it's a string variable
+				ShowError("buildin_%s: illegal type, need integer!\n", functionname);
+				script_reportdata(data);
+				st->state = END;
+				return 1;
+			}
+
+			sd = (st->rid ? map_id2sd(st->rid) : NULL); //Get the session data, if a player is attached
+
+			if (not_server_variable(*name) && !sd) {
+				ShowError("buildin_%s: no player attached!\n", functionname);
+				script_reportdata(data);
+				st->state = END;
+				return 1;
+			}
+
+			//Get the start and end indices of the array
+			start = reference_getindex(data);
+			end = getarraysize(st,id,start,0,reference_getref(data));
+
+			if (start < end) { //Skip empty arrays
+				for (; start < end; start++) { //Loop through each value stored in the array
+					value = func(value,(int32)get_val2(st,reference_uid(id,start),reference_getref(data)));
+
+					script_removetop(st,-1,0);
+				}
+			}
+		} else {
+			ShowError("buildin_%s: not a supported data type!\n", functionname);
+			script_reportdata(data);
+			st->state = END;
+			return 1;
+		}
+
+		i++; //Continue with the next stack entry
+	}
+
+	script_pushint(st,value);
+
+	return SCRIPT_CMD_SUCCESS;
+}
 // <--- [zBuffer] List of mathematics commands
 
 BUILDIN_FUNC(md5)
@@ -15827,8 +15908,7 @@ BUILDIN_FUNC(npcshopadditem)
 	const char *npcname = script_getstr(st,2);
 	struct npc_data *nd = npc_name2id(npcname);
 	int n, i;
-	int amount;
-	uint16 offs = 2;
+	uint16 offs = 2, amount;
 
 	if( !nd || (nd->subtype != NPCTYPE_SHOP && nd->subtype != NPCTYPE_CASHSHOP && nd->subtype != NPCTYPE_ITEMSHOP &&
 		nd->subtype != NPCTYPE_POINTSHOP && nd->subtype != NPCTYPE_MARKETSHOP) ) { //Not found
@@ -15884,9 +15964,8 @@ BUILDIN_FUNC(npcshopdelitem)
 	const char *npcname = script_getstr(st,2);
 	struct npc_data *nd = npc_name2id(npcname);
 	unsigned short nameid;
-	int n, i;
-	int amount;
-	int size;
+	int n, i, size;
+	unsigned short amount;
 
 	if( !nd || (nd->subtype != NPCTYPE_SHOP && nd->subtype != NPCTYPE_CASHSHOP && nd->subtype != NPCTYPE_ITEMSHOP &&
 		nd->subtype != NPCTYPE_POINTSHOP && nd->subtype != NPCTYPE_MARKETSHOP) ) { //Not found
@@ -20175,8 +20254,7 @@ BUILDIN_FUNC(mergeitem) {
 BUILDIN_FUNC(mergeitem2) {
 	struct map_session_data *sd;
 	struct item *items = NULL;
-	uint16 i, count = 0;
-	int nameid = 0;
+	uint16 i, count = 0, nameid = 0;
 
 	if (!script_charid2sd(3,sd))
 		return 1;
@@ -21001,6 +21079,10 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(sqrt,"i"),
 	BUILDIN_DEF(pow,"ii"),
 	BUILDIN_DEF(distance,"iiii"),
+	BUILDIN_DEF2(minmax,"min","*"),
+	BUILDIN_DEF2(minmax,"minimum","*"),
+	BUILDIN_DEF2(minmax,"max","*"),
+	BUILDIN_DEF2(minmax,"maximum","*"),
 	//<--- [zBuffer] List of mathematics commands
 	BUILDIN_DEF(md5,"s"),
 	//[zBuffer] List of dynamic var commands --->
