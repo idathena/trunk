@@ -1371,6 +1371,16 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	sd->hatEffectIDs = NULL;
 	sd->hatEffectCount = 0;
 
+	//Check EXP overflow, since in previous revision EXP on Max Level can be more than 'official' Max EXP
+	if (pc_is_maxbaselv(sd) && sd->status.base_exp > MAX_LEVEL_BASE_EXP) {
+		sd->status.base_exp = MAX_LEVEL_BASE_EXP;
+		clif_updatestatus(sd,SP_BASEEXP);
+	}
+	if (pc_is_maxjoblv(sd) && sd->status.job_exp > MAX_LEVEL_JOB_EXP) {
+		sd->status.job_exp = MAX_LEVEL_JOB_EXP;
+		clif_updatestatus(sd,SP_JOBEXP);
+	}
+
 	//Request all registries (auth is considered completed whence they arrive)
 	intif_request_registry(sd,7);
 	return true;
@@ -3047,7 +3057,10 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 				sd->special_state.no_magic_gear_fuel = 1;
 			break;
 		default:
-			ShowWarning("pc_bonus: Unknown type %d %d !\n", type, val);
+			if(running_npc_stat_calc_event)
+				ShowWarning("pc_bonus: unknown bonus type %d %d in OnPCStatCalcEvent!\n", type, val);
+			else
+				ShowWarning("pc_bonus: unknown bonus type %d %d in item #%d\n", type, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
 	}
 }
@@ -3658,7 +3671,10 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->magic_addrace2[type2] += val;
 			break;
 		default:
-			ShowWarning("pc_bonus2: Unknown type %d %d %d!\n", type, type2, val);
+			if(running_npc_stat_calc_event)
+				ShowWarning("pc_bonus2: unknown bonus type %d %d %d in OnPCStatCalcEvent!\n", type, type2, val);
+			else
+				ShowWarning("pc_bonus2: unknown bonus type %d %d %d in item #%d\n", type, type2, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
 	}
 }
@@ -3760,7 +3776,10 @@ void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int 
 			}
 			break;
 		default:
-			ShowWarning("pc_bonus3: Unknown type %d %d %d %d!\n", type, type2, type3, val);
+			if(running_npc_stat_calc_event)
+				ShowWarning("pc_bonus3: unknown bonus type %d %d %d %d in OnPCStatCalcEvent!\n", type, type2, type3, val);
+			else
+				ShowWarning("pc_bonus3: unknown bonus type %d %d %d %d in item #%d\n", type, type2, type3, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
 	}
 }
@@ -3826,7 +3845,10 @@ void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int 
 			sd->mdef_set_race[type2].value = val;
 			break;
 		default:
-			ShowWarning("pc_bonus4: Unknown type %d %d %d %d %d!\n", type, type2, type3, type4, val);
+			if(running_npc_stat_calc_event)
+				ShowWarning("pc_bonus4: unknown bonus type %d %d %d %d %d in OnPCStatCalcEvent!\n", type, type2, type3, type4, val);
+			else
+				ShowWarning("pc_bonus4: unknown bonus type %d %d %d %d %d in item #%d\n", type, type2, type3, type4, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
 	}
 }
@@ -3863,7 +3885,10 @@ void pc_bonus5(struct map_session_data *sd, int type, int type2, int type3, int 
 				pc_bonus_addeff_onskill(sd->addeff3, ARRAYLENGTH(sd->addeff3), (sc_type)type3, type4, type2, type5, val);
 			break;
 		default:
-			ShowWarning("pc_bonus5: Unknown type %d %d %d %d %d %d!\n", type, type2, type3, type4, type5, val);
+			if(running_npc_stat_calc_event)
+				ShowWarning("pc_bonus5: unknown bonus type %d %d %d %d %d %d in OnPCStatCalcEvent!\n", type, type2, type3, type4, type5, val);
+			else
+				ShowWarning("pc_bonus5: unknown bonus type %d %d %d %d %d %d in item #%d\n", type, type2, type3, type4, type5, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
 	}
 }
@@ -6362,8 +6387,10 @@ static void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsi
 			bonus += (sd->sc.data[SC_EXPBOOST]->val1 / battle_config.vip_bm_increase);
 	}
 
-	if (*base_exp)
-		*base_exp = (unsigned int)cap_value(*base_exp + (double)*base_exp * (bonus + vip_bonus_base) / 100., 1, UINT_MAX);
+	if (*base_exp) {
+		unsigned int exp = (unsigned int)(*base_exp + (double)*base_exp * (bonus + vip_bonus_base) / 100.);
+		*base_exp =  cap_value(exp, 1, UINT_MAX);
+	}
 
 	//Give JEXPBOOST for quests even if src is NULL
 	if (sd->sc.data[SC_JEXPBOOST]) {
@@ -6372,8 +6399,10 @@ static void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsi
 			bonus += (sd->sc.data[SC_JEXPBOOST]->val1 / battle_config.vip_bm_increase);
 	}
 
-	if (*job_exp)
-		*job_exp = (unsigned int)cap_value(*job_exp + (double)*job_exp * (bonus + vip_bonus_job) / 100., 1, UINT_MAX);
+	if (*job_exp) {
+		unsigned int exp = (unsigned int)(*job_exp + (double)*job_exp * (bonus + vip_bonus_job) / 100.);
+		*job_exp = cap_value(exp, 1, UINT_MAX);
+	}
 }
 
 /**
@@ -6404,32 +6433,33 @@ void pc_gainexp_disp(struct map_session_data *sd, unsigned int base_exp, unsigne
  * @param src EXP source
  * @param base_exp Base EXP gained
  * @param base_exp Job EXP gained
- * @param quest True if EXP from quest, false otherwise.
+ * @param exp_flag 1: Quest EXP; 2: Param Exp (Ignore Guild EXP tax, EXP adjustments)
  * @return true if success
  */
-bool pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned int base_exp, unsigned int job_exp, bool quest)
+void pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned int base_exp, unsigned int job_exp, uint8 exp_flag)
 {
-	float nextbp = 0, nextjp = 0;
 	unsigned int nextb = 0, nextj = 0;
 	uint8 flag = 0; //1: Base EXP given, 2: Job EXP given, 4: Max Base level, 8: Max Job Level
 
-	nullpo_ret(sd);
+	nullpo_retv(sd);
 
 	if (!sd->bl.prev || pc_isdead(sd))
-		return false;
+		return;
 
-	if (!battle_config.pvp_exp && map[sd->bl.m].flag.pvp) //[MouseJstr]
-		return false; //No exp on pvp maps
+	if (!(exp_flag&2)) {
+		if (!battle_config.pvp_exp && map[sd->bl.m].flag.pvp) //[MouseJstr]
+			return; //No exp on pvp maps
+		if (sd->status.guild_id > 0)
+			base_exp -= guild_payexp(sd,base_exp);
+	}
 
-	if (sd->status.guild_id > 0)
-		base_exp -= guild_payexp(sd,base_exp);
+	flag = (base_exp ? 1 : 0)|(job_exp ? 2 : 0)|(pc_is_maxbaselv(sd) ? 4 : 0)|(pc_is_maxjoblv(sd) ? 8 : 0);
 
-	pc_calcexp(sd, &base_exp, &job_exp, src);
+	if (!(exp_flag&2))
+		pc_calcexp(sd, &base_exp, &job_exp, src);
 
 	nextb = pc_nextbaseexp(sd);
 	nextj = pc_nextjobexp(sd);
-
-	flag = (base_exp ? 1 : 0)|(job_exp ? 2 : 0)|(pc_is_maxbaselv(sd) ? 4 : 0)|(pc_is_maxjoblv(sd) ? 8 : 0);
 
 	if (flag&4) {
 		if (sd->status.base_exp >= MAX_LEVEL_BASE_EXP)
@@ -6445,24 +6475,19 @@ bool pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned in
 			job_exp = MAX_LEVEL_JOB_EXP - sd->status.job_exp;
 	}
 
-	if ((base_exp || job_exp) && (sd->state.showexp || battle_config.max_exp_gain_rate)) {
-		if (nextb > 0)
-			nextbp = (float)base_exp / (float)nextb;
-		if (nextj > 0)
-			nextjp = (float)job_exp / (float)nextj;
-		if (battle_config.max_exp_gain_rate) {
-			if (nextbp > battle_config.max_exp_gain_rate / 1000.) {
-				//Note that this value should never be greater than the original
-				//base_exp, therefore no overflow checks are needed [Skotlex]
+	//Note that this value should never be greater than the original therefore no overflow checks are needed [Skotlex]
+	if (!(exp_flag&2) && battle_config.max_exp_gain_rate && (base_exp || job_exp)) {
+		if (nextb > 0) {
+			float nextbp = (float)base_exp / (float)nextb;
+
+			if (nextbp > battle_config.max_exp_gain_rate / 1000.)
 				base_exp = (unsigned int)(battle_config.max_exp_gain_rate / 1000. * nextb);
-				if (sd->state.showexp)
-					nextbp = (float)base_exp / (float)nextb;
-			}
-			if (nextjp > battle_config.max_exp_gain_rate / 1000.) {
+		}
+		if (nextj > 0) {
+			float nextjp = (float)job_exp / (float)nextj;
+
+			if (nextjp > battle_config.max_exp_gain_rate / 1000.)
 				job_exp = (unsigned int)(battle_config.max_exp_gain_rate / 1000. * nextj);
-				if (sd->state.showexp)
-					nextjp = (float)job_exp / (float)nextj;
-			}
 		}
 	}
 
@@ -6487,15 +6512,41 @@ bool pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned in
 	}
 
 	if (flag&1)
-		clif_displayexp(sd, (flag&4) ? 0 : base_exp, SP_BASEEXP, quest, false);
+		clif_displayexp(sd, (flag&4) ? 0 : base_exp, SP_BASEEXP, exp_flag&1, false);
 
 	if (flag&2)
-		clif_displayexp(sd, (flag&8) ? 0 : job_exp, SP_JOBEXP, quest, false);
+		clif_displayexp(sd, (flag&8) ? 0 : job_exp, SP_JOBEXP, exp_flag&1, false);
 
-	if (sd->state.showexp)
+	if (sd->state.showexp && (base_exp || job_exp))
 		pc_gainexp_disp(sd, base_exp, nextb, job_exp, nextj, false);
+}
 
-	return true;
+/**
+ * Lost Base/Job EXP from a player
+ * @param sd Player
+ * @param base_exp Base EXP lost
+ * @param job_exp Job EXP lost
+ */
+void pc_lostexp(struct map_session_data *sd, unsigned int base_exp, unsigned int job_exp)
+{
+	nullpo_retv(sd);
+
+	if (base_exp) {
+		base_exp = u32min(sd->status.base_exp, base_exp);
+		sd->status.base_exp -= base_exp;
+		clif_displayexp(sd, base_exp, SP_BASEEXP, false, true);
+		clif_updatestatus(sd, SP_BASEEXP);
+	}
+
+	if (job_exp) {
+		job_exp = u32min(sd->status.job_exp, job_exp);
+		sd->status.job_exp -= job_exp;
+		clif_displayexp(sd, job_exp, SP_JOBEXP, false, true);
+		clif_updatestatus(sd, SP_JOBEXP);
+	}
+
+	if (sd->state.showexp && (base_exp || job_exp))
+		pc_gainexp_disp(sd, base_exp, pc_nextbaseexp(sd), job_exp, pc_nextjobexp(sd), true);
 }
 
 /**
@@ -7560,9 +7611,6 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					base_penalty <<= 1;
 				base_penalty = u32min(sd->status.base_exp,base_penalty);
-				sd->status.base_exp -= base_penalty;
-				clif_displayexp(sd,base_penalty,SP_BASEEXP,false,true);
-				clif_updatestatus(sd,SP_BASEEXP);
 			}
 		} else
 			base_penalty = 0;
@@ -7576,15 +7624,12 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 				if( battle_config.pk_mode && src && src->type == BL_PC )
 					job_penalty <<= 1;
 				job_penalty = u32min(sd->status.job_exp,job_penalty);
-				sd->status.job_exp -= job_penalty;
-				clif_displayexp(sd,job_penalty,SP_JOBEXP,false,true);
-				clif_updatestatus(sd,SP_JOBEXP);
 			}
 		} else
 			job_penalty = 0;
 
-		if( sd->state.showexp && (base_penalty || job_penalty) )
-			pc_gainexp_disp(sd,base_penalty,pc_nextbaseexp(sd),job_penalty,pc_nextjobexp(sd),true);
+		if( base_penalty || job_penalty )
+			pc_lostexp(sd,base_penalty,job_penalty);
 
 		if( zeny_penalty > 0 && !map[sd->bl.m].flag.nozenypenalty ) {
 			zeny_penalty = (uint32)(sd->status.zeny * (zeny_penalty / 10000.));
@@ -7930,25 +7975,19 @@ bool pc_setparam(struct map_session_data *sd,int type,int val) {
 			sd->status.zeny = cap_value(val, 0, MAX_ZENY);
 			break;
 		case SP_BASEEXP:
-			if( pc_nextbaseexp(sd) > 0 ) {
-				if( pc_is_maxbaselv(sd) )
-					sd->status.base_exp = u32min(val, MAX_LEVEL_BASE_EXP);
-				else
-					sd->status.base_exp = val;
-				if( !pc_checkbaselevelup(sd) )
-					clif_updatestatus(sd, SP_BASEEXP);
-			}
-			break;
+			val = cap_value(val, 0, INT_MAX);
+			if ((unsigned int)val < sd->status.base_exp) //Lost
+				pc_lostexp(sd, sd->status.base_exp - val, 0);
+			else //Gained
+				pc_gainexp(sd, NULL, val - sd->status.base_exp, 0, 2);
+			return true;
 		case SP_JOBEXP:
-			if( pc_nextjobexp(sd) > 0 ) {
-				if( pc_is_maxjoblv(sd) )
-					sd->status.job_exp = u32min(val, MAX_LEVEL_JOB_EXP);
-				else
-					sd->status.job_exp = val;
-				if( !pc_checkjoblevelup(sd) )
-					clif_updatestatus(sd, SP_JOBEXP);
-			}
-			break;
+			val = cap_value(val, 0, INT_MAX);
+			if ((unsigned int)val < sd->status.job_exp) //Lost
+				pc_lostexp(sd, 0, sd->status.job_exp - val);
+			else //Gained
+				pc_gainexp(sd, NULL, 0, val - sd->status.job_exp, 2);
+			return true;
 		case SP_SEX:
 			sd->status.sex = (val ? SEX_MALE : SEX_FEMALE);
 			break;

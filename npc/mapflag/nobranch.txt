@@ -130,6 +130,7 @@ job_soul	mapflag	nobranch
 job_star	mapflag	nobranch
 
 // Special Quests Places =======
+que_ba	mapflag	nobranch
 que_god01	mapflag	nobranch
 que_god02	mapflag	nobranch
 que_bingo	mapflag	nobranch

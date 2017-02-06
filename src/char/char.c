@@ -214,9 +214,15 @@ void loginif_parse_ackchangecharsex(int char_id, int sex);
 bool char_move_enabled = true;
 bool char_movetoused = true;
 bool char_moves_unlimited = false;
+bool char_rename_party = false;
+bool char_rename_guild = false;
 
 void moveCharSlot(int fd, struct char_session_data *sd, unsigned short from, unsigned short to);
 void moveCharSlotReply(int fd, struct char_session_data *sd, unsigned short index, short reason);
+void char_reqrename_response(int fd, struct char_session_data *sd, bool name_valid);
+void char_rename_response(int fd, struct char_session_data *sd, int16 response);
+int char_parse_reqrename(int fd, struct char_session_data *sd);
+int char_parse_ackrename(int fd, struct char_session_data *sd);
 
 // Custom limits for the fame lists [Skotlex]
 int fame_list_size_chemist = MAX_FAME_LIST;
@@ -1521,52 +1527,6 @@ int mmo_char_sql_init(void)
 //-----------------------------------
 // Function to change chararcter's names
 //-----------------------------------
-int rename_char_sql(struct char_session_data *sd, int char_id)
-{
-	struct mmo_charstatus char_dat;
-	char esc_name[NAME_LENGTH * 2 + 1];
-
-	if( sd->new_name[0] == 0 ) // Not ready for rename
-		return 2;
-
-	if( !mmo_char_fromsql(char_id, &char_dat, false) ) // Only the short data is needed
-		return 2;
-
-	if( char_dat.rename == 0 )
-		return 1;
-
-	Sql_EscapeStringLen(sql_handle, esc_name, sd->new_name, strnlen(sd->new_name, NAME_LENGTH));
-
-	// Check if the char exist
-	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT 1 FROM `%s` WHERE `name` LIKE '%s' LIMIT 1", char_db, esc_name) ) {
-		Sql_ShowDebug(sql_handle);
-		return 4;
-	}
-
-	if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `name` = '%s', `rename` = '%d' WHERE `char_id` = '%d'",
-		char_db, esc_name, --char_dat.rename, char_id) ) {
-		Sql_ShowDebug(sql_handle);
-		return 3;
-	}
-
-	// Change character's name into guild_db.
-	if( char_dat.guild_id )
-		inter_guild_charname_changed(char_dat.guild_id, sd->account_id, char_id, sd->new_name);
-
-	safestrncpy(char_dat.name, sd->new_name, NAME_LENGTH);
-	memset(sd->new_name,0,sizeof(sd->new_name));
-
-	// Log change
-	if( log_char ) {
-		if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` (`time`, `char_msg`,`account_id`,`char_id`,`char_num`,`name`,`str`,`agi`,`vit`,`int`,`dex`,`luk`,`hair`,`hair_color`)"
-			"VALUES (NOW(), '%s', '%d', '%d', '%d', '%s', '0', '0', '0', '0', '0', '0', '0', '0')",
-			charlog_db, "change char name", sd->account_id, char_dat.char_id, char_dat.slot, esc_name) )
-			Sql_ShowDebug(sql_handle);
-	}
-
-	return 0;
-}
-
 int check_char_name(char *name, char *esc_name)
 {
 	int i;
@@ -1583,11 +1543,9 @@ int check_char_name(char *name, char *esc_name)
 	// Check content of character name
 	if( remove_control_chars(name) )
 		return -2; // Control chars in name
-
 	// Check for reserved names
 	if( strcmpi(name, wisp_server_name) == 0 )
 		return -1; // Nick reserved for internal server messages
-
 	// Check authorized letters/symbols in the name of the character
 	if( char_name_option == 1 ) { // Only letters/symbols in char_name_letters are authorized
 		for( i = 0; i < NAME_LENGTH && name[i]; i++ )
@@ -1611,6 +1569,65 @@ int check_char_name(char *name, char *esc_name)
 	}
 	if( Sql_NumRows(sql_handle) > 0 )
 		return -1; // Name already exists
+
+	return 0;
+}
+
+int rename_char_sql(struct char_session_data *sd, int char_id)
+{
+	struct mmo_charstatus char_dat;
+	char esc_name[NAME_LENGTH * 2 + 1];
+
+	if( !sd->new_name[0] ) // Not ready for rename
+		return 2;
+
+	if( !mmo_char_fromsql(char_id, &char_dat, false) ) // Only the short data is needed
+		return 2;
+
+	if( !strcmp(sd->new_name, char_dat.name) ) // If the new name is exactly the same as the old one
+		return 0;
+
+	if( !char_dat.rename )
+		return 1;
+
+	if( !char_rename_party && char_dat.party_id )
+		return 6;
+
+	if( !char_rename_guild && char_dat.guild_id )
+		return 5;
+
+	Sql_EscapeStringLen(sql_handle, esc_name, sd->new_name, strnlen(sd->new_name, NAME_LENGTH));
+
+	switch( check_char_name(sd->new_name, esc_name) ) {
+		case 0:
+			break;
+		case -1: // Character already exists
+			return 4;
+		default:
+			return 8;
+	}
+
+	if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `name` = '%s', `rename` = '%d' WHERE `char_id` = '%d'",
+		char_db, esc_name, --char_dat.rename, char_id) ) {
+		Sql_ShowDebug(sql_handle);
+		return 3;
+	}
+
+	if( char_dat.party_id ) // Update party and party members with the new player name
+		inter_party_charname_changed(char_dat.party_id, char_id, sd->new_name);
+
+	if( char_dat.guild_id ) // Change character's name into guild_db
+		inter_guild_charname_changed(char_dat.guild_id, sd->account_id, char_id, sd->new_name);
+
+	safestrncpy(char_dat.name, sd->new_name, NAME_LENGTH);
+	memset(sd->new_name, 0, sizeof(sd->new_name));
+
+	if( log_char ) { // Log change
+		if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` (`time`, `char_msg`,`account_id`,`char_id`,`char_num`,`name`,`str`,`agi`,`vit`,`int`,`dex`,`luk`,`hair`,`hair_color`)"
+			"VALUES (NOW(), '%s', '%d', '%d', '%d', '%s', '0', '0', '0', '0', '0', '0', '0', '0')",
+			charlog_db, "change char name", sd->account_id, char_dat.char_id, char_dat.slot, esc_name) )
+			Sql_ShowDebug(sql_handle);
+	}
 
 	return 0;
 }
@@ -1852,7 +1869,7 @@ int delete_char_sql(int char_id)
 
 	//Make the character leave the party [Skotlex]
 	if( party_id )
-		inter_party_leave(party_id, account_id, char_id);
+		inter_party_leave(party_id, account_id, char_id, name);
 
 	/* Delete char's pet */
 	//Delete the hatched pet if you have one.
@@ -4749,96 +4766,19 @@ int parse_char(int fd)
 			//Client keep-alive packet (every 12 seconds)
 			//R 0187 <account ID>.l
 			case 0x187:
-				if (RFIFOREST(fd) < 6)
+				if( RFIFOREST(fd) < 6 )
 					return 0;
 				RFIFOSKIP(fd,6);
 				break;
-			//char rename request
-			//R 08fc <char ID>.l <new name>.24B
-			case 0x8fc:
-				FIFOSD_CHECK(30);
-				{
-					int i, cid = RFIFOL(fd,2);
-					char name[NAME_LENGTH];
-					char esc_name[NAME_LENGTH * 2 + 1];
-					safestrncpy(name,(char *)RFIFOP(fd,6),NAME_LENGTH);
-					RFIFOSKIP(fd,30);
 
-					ARR_FIND(0,MAX_CHARS,i,sd->found_char[i] == cid);
-					if( i == MAX_CHARS )
-						break;
-
-					normalize_name(name,TRIM_CHARS);
-					Sql_EscapeStringLen(sql_handle,esc_name,name,strnlen(name,NAME_LENGTH));
-					if( !check_char_name(name,esc_name) ) {
-						i = 1;
-						safestrncpy(sd->new_name,name,NAME_LENGTH);
-					} else
-						i = 0;
-
-					WFIFOHEAD(fd,4);
-					WFIFOW(fd,0) = 0x28e;
-					WFIFOW(fd,2) = i;
-					WFIFOSET(fd,4);
-				}
-				break;
+			//Char rename request without confirmation
+			case 0x8fc: char_parse_ackrename(fd,sd); break;
 
 			//Char rename request
-			//R 028d <account ID>.l <char ID>.l <new name>.24B
-			case 0x28d:
-				FIFOSD_CHECK(34);
-				{
-					int i, aid = RFIFOL(fd,2), cid = RFIFOL(fd,6);
-					char name[NAME_LENGTH];
-					char esc_name[NAME_LENGTH * 2 + 1];
-					safestrncpy(name,(char *)RFIFOP(fd,10),NAME_LENGTH);
-					RFIFOSKIP(fd,34);
+			case 0x28d: char_parse_reqrename(fd,sd); break;
 
-					if( aid != sd->account_id )
-						break;
-					ARR_FIND(0,MAX_CHARS,i,sd->found_char[i] == cid);
-					if( i == MAX_CHARS )
-						break;
-
-					normalize_name(name,TRIM_CHARS);
-					Sql_EscapeStringLen(sql_handle,esc_name,name,strnlen(name,NAME_LENGTH));
-					if( !check_char_name(name,esc_name) ) {
-						i = 1;
-						safestrncpy(sd->new_name,name,NAME_LENGTH);
-					} else
-						i = 0;
-
-					WFIFOHEAD(fd,4);
-					WFIFOW(fd,0) = 0x28e;
-					WFIFOW(fd,2) = i;
-					WFIFOSET(fd,4);
-				}
-				break;
-			//Confirm change name
-			//0x28f <char_id>.L
-			case 0x28f:
-				//0: Sucessfull
-				//1: This character's name has already been changed. You cannot change a character's name more than once.
-				//2: User information is not correct.
-				//3: You have failed to change this character's name.
-				//4: Another user is using this character name, so please select another one.
-				FIFOSD_CHECK(6);
-				{
-					int i;
-					int cid = RFIFOL(fd,2);
-					RFIFOSKIP(fd,6);
-
-					ARR_FIND(0,MAX_CHARS,i,sd->found_char[i] == cid);
-					if( i == MAX_CHARS )
-						break;
-					i = rename_char_sql(sd,cid);
-
-					WFIFOHEAD(fd,4);
-					WFIFOW(fd,0) = 0x290;
-					WFIFOW(fd,2) = i;
-					WFIFOSET(fd,4);
-				}
-				break;
+			//Confirm change char rename
+			case 0x28f: char_parse_ackrename(fd,sd); break;
 
 			//Captcha code request (not implemented)
 			//R 07e5 <?>.w <aid>.l
@@ -5301,7 +5241,7 @@ void pincode_decrypt(uint32 userSeed, char *pin) {
 //------------------------------------------------
 //Add On system
 //------------------------------------------------
-void moveCharSlot( int fd, struct char_session_data *sd, unsigned short from, unsigned short to ) {
+void moveCharSlot(int fd, struct char_session_data *sd, unsigned short from, unsigned short to) {
 	// Have we changed to often or is it disabled?
 	if( !char_move_enabled || ( !char_moves_unlimited && sd->char_moves[from] <= 0 ) ) {
 		moveCharSlotReply( fd, sd, from, 1 );
@@ -5359,6 +5299,129 @@ void moveCharSlotReply( int fd, struct char_session_data *sd, unsigned short ind
 	WFIFOW(fd,4) = reason;
 	WFIFOW(fd,6) = sd->char_moves[index];
 	WFIFOSET(fd,8);
+}
+
+// Tells the client if the name was accepted or not
+// 028e <result>.W (HC_ACK_IS_VALID_CHARNAME)
+// result:
+//		0 = name is not OK
+//		1 = name is OK
+void char_reqrename_response(int fd, struct char_session_data *sd, bool name_valid) {
+	WFIFOHEAD(fd,4);
+	WFIFOW(fd,0) = 0x28e;
+	WFIFOW(fd,2) = name_valid;
+	WFIFOSET(fd,4);
+}
+
+// Request for checking the new name on character renaming
+// 028d <account ID>.l <char ID>.l <new name>.24B (CH_REQ_IS_VALID_CHARNAME)
+int char_parse_reqrename(int fd, struct char_session_data *sd) {
+	int i, aid, cid;
+	char name[NAME_LENGTH], esc_name[NAME_LENGTH * 2 + 1];
+
+	FIFOSD_CHECK(34);
+	aid = RFIFOL(fd,2);
+	cid = RFIFOL(fd,6);
+	safestrncpy(name, (char *)RFIFOP(fd,10), NAME_LENGTH);
+	RFIFOSKIP(fd,34);
+
+	if( aid != sd->account_id )
+		return 1;
+
+	ARR_FIND(0, MAX_CHARS, i, sd->found_char[i] == cid);
+	if( i == MAX_CHARS )
+		return 1;
+
+	normalize_name(name, TRIM_CHARS);
+	Sql_EscapeStringLen(sql_handle, esc_name, name, strnlen(name, NAME_LENGTH));
+	if( !check_char_name(name, esc_name) ) {
+		i = 1;
+		safestrncpy(sd->new_name, name, NAME_LENGTH);
+	} else
+		i = 0;
+
+	char_reqrename_response(fd, sd, (i > 0));
+
+	return 1;
+}
+
+// Sends the response to a rename request to the client.
+// 0290 <result>.W (HC_ACK_CHANGE_CHARNAME)
+// 08fd <result>.L (HC_ACK_CHANGE_CHARACTERNAME)
+// result:
+//		0: Successful
+//		1: This character's name has already been changed. You cannot change a character's name more than once.
+//		2: User information is not correct.
+//		3: You have failed to change this character's name.
+//		4: Another user is using this character name, so please select another one.
+//		5: In order to change the character name, you must leave the guild.
+//		6: In order to change the character name, you must leave the party.
+//		7: Length exceeds the maximum size of the character name you want to change.
+//		8: Name contains invalid characters. Character name change failed.
+//		9: The name change is prohibited. Character name change failed.
+//		10: Character name change failed, due an unknown error.
+void char_rename_response(int fd, struct char_session_data *sd, int16 response) {
+#if PACKETVER >= 20111101
+	WFIFOHEAD(fd,6);
+	WFIFOW(fd,0) = 0x8fd;
+	WFIFOL(fd,2) = response;
+	WFIFOSET(fd,6);
+#else
+	WFIFOHEAD(fd,4);
+	WFIFOW(fd,0) = 0x290;
+	WFIFOW(fd,2) = response;
+	WFIFOSET(fd,4);
+#endif
+}
+
+// Request to change a character name
+// 028f <char_id>.L (CH_REQ_CHANGE_CHARNAME)
+// 08fc <char_id>.L <new name>.24B (CH_REQ_CHANGE_CHARACTERNAME)
+int char_parse_ackrename(int fd, struct char_session_data *sd) {
+#if PACKETVER >= 20111101
+	FIFOSD_CHECK(30)
+	{
+		int i, cid;
+		char name[NAME_LENGTH], esc_name[NAME_LENGTH * 2 + 1];
+
+		cid = RFIFOL(fd,2);
+		safestrncpy(name, (char *)RFIFOP(fd,6), NAME_LENGTH);
+		RFIFOSKIP(fd,30);
+
+		ARR_FIND(0, MAX_CHARS, i, sd->found_char[i] == cid);
+		if( i == MAX_CHARS )
+			return 1;
+
+		normalize_name(name, TRIM_CHARS);
+		Sql_EscapeStringLen(sql_handle, esc_name, name, strnlen(name, NAME_LENGTH));
+
+		safestrncpy(sd->new_name, name, NAME_LENGTH);
+
+		i = rename_char_sql(sd, cid); // Start the renaming process
+
+		char_rename_response(fd, sd, i);
+
+		if( !i ) // If the renaming was successful, we need to resend the characters
+			mmo_char_send(fd, sd);
+
+		return 1;
+	}
+#else
+	FIFOSD_CHECK(6)
+	{
+		int i;
+		int cid = RFIFOL(fd,2);
+		RFIFOSKIP(fd,6);
+
+		ARR_FIND(0, MAX_CHARS, i, sd->found_char[i] == cid);
+		if( i == MAX_CHARS )
+			return 1;
+		i = rename_char_sql(sd, cid);
+
+		char_rename_response(fd, sd, i);
+	}
+	return 1;
+#endif
 }
 
 /**
@@ -5959,6 +6022,10 @@ int char_config_read(const char *cfgName)
 			char_movetoused = config_switch(w2);
 		else if(strcmpi(w1, "char_moves_unlimited") == 0)
 			char_moves_unlimited = config_switch(w2);
+		else if(strcmpi(w1, "char_rename_party") == 0)
+			char_rename_party = (bool)config_switch(w2);
+		else if(strcmpi(w1, "char_rename_guild") == 0)
+			char_rename_guild = (bool)config_switch(w2);
 		else if(strcmpi(w1, "char_maintenance_min_group_id") == 0)
 			char_maintenance_min_group_id = atoi(w2);
 		else if(strcmpi(w1, "default_map") == 0)

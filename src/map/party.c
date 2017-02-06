@@ -96,9 +96,8 @@ static TBL_PC *party_sd_check(int party_id, int account_id, int char_id)
 
 	if( sd->status.party_id == 0 )
 		sd->status.party_id = party_id; //Auto-join if not in a party
-	if (sd->status.party_id != party_id) {
-		//If player belongs to a different party, kick him out.
-		intif_party_leave(party_id,account_id,char_id);
+	if (sd->status.party_id != party_id) { //If player belongs to a different party, kick him out
+		intif_party_leave(party_id,account_id,char_id,sd->status.name,PARTY_MEMBER_WITHDRAW_LEAVE);
 		return NULL;
 	}
 
@@ -177,10 +176,9 @@ void party_created(int account_id,int char_id,int fail,int party_id,char *name)
 	struct map_session_data *sd;
 	sd = map_id2sd(account_id);
 
-	if (!sd || sd->status.char_id != char_id || !sd->party_creating ) {
-		//Character logged off before creation ack?
-		if (!fail) //Break up party since player could not be added to it.
-			intif_party_leave(party_id,account_id,char_id);
+	if (!sd || sd->status.char_id != char_id || !sd->party_creating ) { //Character logged off before creation ack?
+		if (!fail) //Break up party since player could not be added to it
+			intif_party_leave(party_id,account_id,char_id,"",PARTY_MEMBER_WITHDRAW_LEAVE);
 		return;
 	}
 
@@ -277,26 +275,29 @@ int party_recv_info(struct party *sp, int char_id)
 	int added[MAX_PARTY]; // Member_id in new data
 	int added_count = 0;
 	int member_id;
+	bool rename = false;
 	
 	nullpo_ret(sp);
 
 	p = (struct party_data *)idb_get(party_db, sp->party_id);
-	if( p != NULL ) { // Diff members
+	if( p ) { // Diff members
 		int i;
 
 		for( member_id = 0; member_id < MAX_PARTY; ++member_id ) {
 			member = &p->party.member[member_id];
-			if( member->char_id == 0 )
+			if( !member->char_id )
 				continue; // Empty
 			ARR_FIND(0, MAX_PARTY, i,
 				sp->member[i].account_id == member->account_id &&
 				sp->member[i].char_id == member->char_id);
 			if( i == MAX_PARTY )
 				removed[removed_count++] = member_id;
+			else if( !rename && strcmp(member->name,sp->member[i].name) )
+				rename = true; // If the member already existed, compare the old to the (possible) new name
 		}
 		for( member_id = 0; member_id < MAX_PARTY; ++member_id ) {
 			member = &sp->member[member_id];
-			if( member->char_id == 0 )
+			if( !member->char_id )
 				continue; // Empty
 			ARR_FIND(0, MAX_PARTY, i,
 				p->party.member[i].account_id == member->account_id &&
@@ -304,34 +305,43 @@ int party_recv_info(struct party *sp, int char_id)
 			if( i == MAX_PARTY )
 				added[added_count++] = member_id;
 		}
+		ARR_FIND(0, MAX_PARTY, i, p->party.member[i].leader == 1);
+		if( i == MAX_PARTY ) { // Leader has changed
+			int j;
+
+			ARR_FIND(0, MAX_PARTY, j, sp->member[j].leader == 1);
+			if( j < MAX_PARTY )
+				clif_PartyLeaderChanged(map_charid2sd(sp->member[j].char_id), 0, sp->member[j].account_id);
+			else
+				party_broken(p->party.party_id); // Should not happen, party is leaderless, disband
+		}
 	} else {
-		for( member_id = 0; member_id < MAX_PARTY; ++member_id )
-			if( sp->member[member_id].char_id != 0 )
+		for( member_id = 0; member_id < MAX_PARTY; ++member_id ) {
+			if( sp->member[member_id].char_id )
 				added[added_count++] = member_id;
+		}
 		CREATE(p, struct party_data, 1);
 		idb_put(party_db, sp->party_id, p);
 	}
 	while( removed_count > 0 ) { // No longer in party
 		member_id = removed[--removed_count];
-		sd = p->data[member_id].sd;
-		if( sd == NULL )
+		if( !(sd = p->data[member_id].sd) )
 			continue; // Not online
-		party_member_withdraw(sp->party_id, sd->status.account_id, sd->status.char_id);
+		party_member_withdraw(sp->party_id, sd->status.account_id, sd->status.char_id, sd->status.name, PARTY_MEMBER_WITHDRAW_LEAVE);
 	}
 	memcpy(&p->party, sp, sizeof(struct party));
 	memset(&p->state, 0, sizeof(p->state));
 	memset(&p->data, 0, sizeof(p->data));
 	for( member_id = 0; member_id < MAX_PARTY; member_id++ ) {
 		member = &p->party.member[member_id];
-		if( member->char_id == 0 )
+		if( !member->char_id )
 			continue; // Empty
 		p->data[member_id].sd = party_sd_check(sp->party_id, member->account_id, member->char_id);
 	}
 	party_check_state(p);
 	while( added_count > 0 ) { // New in party
 		member_id = added[--added_count];
-		sd = p->data[member_id].sd;
-		if( sd == NULL )
+		if( !(sd = p->data[member_id].sd) )
 			continue; // Not online
 		clif_name_area(&sd->bl); // Update other people's display [Skotlex]
 		clif_party_member_info(p, sd);
@@ -339,25 +349,26 @@ int party_recv_info(struct party *sp, int char_id)
 		if( sd->party_creating )
 			clif_party_option(p, sd, 0x100);
 		clif_party_info(p, NULL);
-		if( p->instance_id != 0 )
+		if( p->instance_id )
 			instance_reqinfo(sd, p->instance_id);
 	}
-	if( char_id != 0 ) { // Requester
-		sd = map_charid2sd(char_id);
-		if( sd && sd->status.party_id == sp->party_id && party_getmemberid(p, sd) == -1 )
-			sd->status.party_id = 0; // Was not in the party
-	}
+	// If a player was renamed, make sure to resend the party information
+	if( rename )
+		clif_party_info(p,NULL);
+	if( char_id && (sd = map_charid2sd(char_id)) && sd->status.party_id == sp->party_id && party_getmemberid(p, sd) == -1 ) // Requester
+		sd->status.party_id = 0; // Was not in the party
 	return 0;
 }
 
-int party_invite(struct map_session_data *sd,struct map_session_data *tsd)
+/// @TODO: Party invitation cross map-server through inter-server, so does with the reply
+int party_invite(struct map_session_data *sd, struct map_session_data *tsd)
 {
 	struct party_data *p;
 	int i;
 
 	nullpo_ret(sd);
 
-	if( (p = party_search(sd->status.party_id)) == NULL )
+	if( !(p = party_search(sd->status.party_id)) )
 		return 0;
 
 	// Confirm if this player is a party leader
@@ -368,11 +379,19 @@ int party_invite(struct map_session_data *sd,struct map_session_data *tsd)
 		return 0;
 	}
 
+	if( tsd && battle_config.block_account_in_same_party ) {
+		ARR_FIND(0, MAX_PARTY, i, p->party.member[i].account_id == tsd->status.account_id);
+		if( i < MAX_PARTY ) {
+			clif_party_invite_reply(sd, tsd->status.name, PARTY_REPLY_DUAL);
+			return 0;
+		}
+	}
+
 	// Confirm if there is an open slot in the party
 	ARR_FIND(0, MAX_PARTY, i, p->party.member[i].account_id == 0);
 
 	if( i == MAX_PARTY ) {
-		clif_party_inviteack(sd, (tsd ? tsd->status.name : ""), 3);
+		clif_party_invite_reply(sd, (tsd ? tsd->status.name : ""), PARTY_REPLY_FULL);
 		return 0;
 	}
 
@@ -382,29 +401,28 @@ int party_invite(struct map_session_data *sd,struct map_session_data *tsd)
 		return 0;
 	}
 
-	if( tsd == NULL) {
-		clif_party_inviteack(sd, "", 7);
+	if( !tsd ) {
+		clif_party_invite_reply(sd, "", PARTY_REPLY_OFFLINE);
 		return 0;
 	}
 
 	if( !battle_config.invite_request_check ) {
 		if( tsd->guild_invite > 0 || tsd->trade_partner || tsd->adopt_invite ) {
-			clif_party_inviteack(sd, tsd->status.name, 0);
+			clif_party_invite_reply(sd, tsd->status.name, PARTY_REPLY_JOIN_OTHER_PARTY);
 			return 0;
 		}
 	}
 
 	if( !tsd->fd ) { // You can't invite someone who has already disconnected.
-		clif_party_inviteack(sd, tsd->status.name, 1);
+		clif_party_invite_reply(sd, tsd->status.name, PARTY_REPLY_REJECTED);
 		return 0;
 	}
 
-	if( tsd->status.party_id > 0 || tsd->party_invite > 0 ) {
-		// Already associated with a party
-		clif_party_inviteack(sd, tsd->status.name, 0);
+	if( tsd->status.party_id > 0 || tsd->party_invite > 0 ) { // Already associated with a party
+		clif_party_invite_reply(sd, tsd->status.name, PARTY_REPLY_JOIN_OTHER_PARTY);
 		return 0;
 	}
-		
+
 	tsd->party_invite = sd->status.party_id;
 	tsd->party_invite_account = sd->status.account_id;
 
@@ -441,7 +459,7 @@ int party_reply_invite(struct map_session_data *sd,int party_id,int flag)
 		sd->party_invite = 0;
 		sd->party_invite_account = 0;
 		if( tsd )
-			clif_party_inviteack(tsd, sd->status.name, 1);
+			clif_party_invite_reply(tsd, sd->status.name, PARTY_REPLY_REJECTED);
 		return 0;
 	}
 	return 0;
@@ -456,30 +474,30 @@ void party_member_joined(struct map_session_data *sd)
 	struct party_data *p = party_search(sd->status.party_id);
 	int i;
 
-	if (!p) {
+	if( !p ) {
 		party_request_info(sd->status.party_id, sd->status.char_id);
 		return;
 	}
-	ARR_FIND(0, MAX_PARTY, i, p->party.member[i].account_id == sd->status.account_id && p->party.member[i].char_id == sd->status.char_id);
-	if (i < MAX_PARTY) {
+	ARR_FIND(0, MAX_PARTY, i, (p->party.member[i].account_id == sd->status.account_id && p->party.member[i].char_id == sd->status.char_id));
+	if( i < MAX_PARTY ) {
 		p->data[i].sd = sd;
 		if( p->instance_id )
 			instance_reqinfo(sd, p->instance_id);
 	} else
-		sd->status.party_id = 0; //He does not belongs to the party really?
+		sd->status.party_id = 0; // He does not belongs to the party really?
 }
 
 /// Invoked (from char-server) when a new member is added to the party.
 /// flag: 0-success, 1-failure
-int party_member_added(int party_id,int account_id,int char_id, int flag)
+int party_member_added(int party_id, int account_id, int char_id, int flag)
 {
-	struct map_session_data *sd = map_id2sd(account_id),*sd2;
+	struct map_session_data *sd = map_id2sd(account_id), *sd2;
 	struct party_data *p = party_search(party_id);
 	int i;
 
-	if( sd == NULL || sd->status.char_id != char_id || !sd->party_joining ) {
-		if( !flag ) // Char logged off before being accepted into party.
-			intif_party_leave(party_id,account_id,char_id);
+	if( !sd || sd->status.char_id != char_id || !sd->party_joining ) {
+		if( !flag ) // Char logged off before being accepted into party
+			intif_party_leave(party_id, account_id, char_id, "", PARTY_MEMBER_WITHDRAW_LEAVE);
 		return 0;
 	}
 
@@ -490,37 +508,36 @@ int party_member_added(int party_id,int account_id,int char_id, int flag)
 	sd->party_invite_account = 0;
 
 	if( !p ) {
-		ShowError("party_member_added: party %d not found.\n",party_id);
-		intif_party_leave(party_id,account_id,char_id);
+		ShowError("party_member_added: party %d not found.\n", party_id);
+		intif_party_leave(party_id, account_id, char_id, "", PARTY_MEMBER_WITHDRAW_LEAVE);
 		return 0;
 	}
 
 	if( flag ) { // Failed
-		if( sd2 != NULL )
-			clif_party_inviteack(sd2,sd->status.name,3);
+		if( sd2 )
+			clif_party_invite_reply(sd2, sd->status.name, PARTY_REPLY_FULL);
 		return 0;
 	}
 
 	sd->status.party_id = party_id;
 
-	clif_party_member_info(p,sd);
-	clif_party_option(p,sd,0x100);
-	clif_party_info(p,sd);
+	clif_party_member_info(p, sd);
+	clif_party_option(p, sd, 0x100);
+	clif_party_info(p, sd);
 
-	if( sd2 != NULL )
-		clif_party_inviteack(sd2,sd->status.name,2);
+	if( sd2 )
+		clif_party_invite_reply(sd2, sd->status.name, PARTY_REPLY_ACCEPTED);
 
 	for( i = 0; i < ARRAYLENGTH(p->data); ++i ) { // Hp of the other party members
-		sd2 = p->data[i].sd;
-		if( sd2 && sd2->status.account_id != account_id && sd2->status.char_id != char_id )
-			clif_hpmeter_single(sd->fd,sd2->bl.id,sd2->battle_status.hp,sd2->battle_status.max_hp);
+		if( (sd2 = p->data[i].sd) && sd2->status.account_id != account_id && sd2->status.char_id != char_id )
+			clif_hpmeter_single(sd->fd, sd2->bl.id, sd2->battle_status.hp, sd2->battle_status.max_hp);
 	}
 	clif_party_hp(sd);
 	clif_party_xy(sd);
 	clif_name_area(&sd->bl); //Update char name's display [Skotlex]
 
 	if( p->instance_id )
-		instance_reqinfo(sd,p->instance_id);
+		instance_reqinfo(sd, p->instance_id);
 
 	return 0;
 }
@@ -531,34 +548,32 @@ int party_removemember(struct map_session_data *sd, int account_id, char *name)
 	struct party_data *p;
 	int i;
 
-	p = party_search(sd->status.party_id);
-	if( p == NULL )
+	if( !(p = party_search(sd->status.party_id)) )
 		return 0;
 
 	// Check the requesting char's party membership
-	ARR_FIND(0, MAX_PARTY, i, p->party.member[i].account_id == sd->status.account_id && p->party.member[i].char_id == sd->status.char_id);
+	ARR_FIND(0, MAX_PARTY, i, (p->party.member[i].account_id == sd->status.account_id && p->party.member[i].char_id == sd->status.char_id));
 	if( i == MAX_PARTY )
 		return 0; // Request from someone not in party? o.O
 	if( !p->party.member[i].leader )
 		return 0; // Only party leader may remove members
 
-	ARR_FIND(0, MAX_PARTY, i, p->party.member[i].account_id == account_id && strncmp(p->party.member[i].name,name,NAME_LENGTH) == 0);
+	ARR_FIND(0, MAX_PARTY, i, (p->party.member[i].account_id == account_id && !strncmp(p->party.member[i].name, name, NAME_LENGTH)));
 	if( i == MAX_PARTY )
 		return 0; // No such char in party
 
 	party_trade_bound_cancel(sd);
-	intif_party_leave(p->party.party_id,account_id,p->party.member[i].char_id);
+	intif_party_leave(p->party.party_id, account_id, p->party.member[i].char_id, p->party.member[i].name, PARTY_MEMBER_WITHDRAW_EXPEL);
 	return 1;
 }
 
-int party_removemember2(struct map_session_data *sd,int char_id,int party_id)
+int party_removemember2(struct map_session_data *sd, int char_id, int party_id)
 {
 	if( sd ) {
 		if( !sd->status.party_id )
 			return -3;
-
 		party_trade_bound_cancel(sd);
-		intif_party_leave(sd->status.party_id,sd->status.account_id,sd->status.char_id);
+		intif_party_leave(sd->status.party_id, sd->status.account_id, sd->status.char_id, sd->status.name, PARTY_MEMBER_WITHDRAW_EXPEL);
 		return 1;
 	} else {
 		int i;
@@ -566,12 +581,10 @@ int party_removemember2(struct map_session_data *sd,int char_id,int party_id)
 
 		if( !p )
 			return -2;
-
-		ARR_FIND(0,MAX_PARTY,i,p->party.member[i].char_id == char_id);
+		ARR_FIND(0, MAX_PARTY, i, p->party.member[i].char_id == char_id);
 		if( i >= MAX_PARTY )
 			return -1;
-
-		intif_party_leave(party_id,p->party.member[i].account_id,char_id);
+		intif_party_leave(party_id, p->party.member[i].account_id, char_id, p->party.member[i].name, PARTY_MEMBER_WITHDRAW_EXPEL);
 		return 1;
 	}
 	return 0;
@@ -583,38 +596,37 @@ int party_leave(struct map_session_data *sd)
 	struct party_data *p;
 	int i;
 
-	p = party_search(sd->status.party_id);
-	if( p == NULL )
+	if( !(p = party_search(sd->status.party_id)) )
 		return 0;
 
-	ARR_FIND(0, MAX_PARTY, i, p->party.member[i].account_id == sd->status.account_id && p->party.member[i].char_id == sd->status.char_id);
+	ARR_FIND(0, MAX_PARTY, i, (p->party.member[i].account_id == sd->status.account_id && p->party.member[i].char_id == sd->status.char_id));
 	if( i == MAX_PARTY )
 		return 0;
 
 	party_trade_bound_cancel(sd);
-	intif_party_leave(p->party.party_id,sd->status.account_id,sd->status.char_id);
+	intif_party_leave(p->party.party_id, sd->status.account_id, sd->status.char_id, sd->status.name, PARTY_MEMBER_WITHDRAW_LEAVE);
 	return 1;
 }
 
 /// Invoked (from char-server) when a party member leaves the party.
-int party_member_withdraw(int party_id, int account_id, int char_id)
+int party_member_withdraw(int party_id, uint32 account_id, uint32 char_id, char *name, enum e_party_member_withdraw type)
 {
-	struct map_session_data *sd = map_id2sd(account_id);
+	struct map_session_data *sd = map_charid2sd(char_id);
 	struct party_data *p = party_search(party_id);
 
 	if( p ) {
 		int i;
 
-		ARR_FIND(0, MAX_PARTY, i, p->party.member[i].account_id == account_id && p->party.member[i].char_id == char_id);
+		clif_party_withdraw(party_getavailablesd(p), account_id, name, type, PARTY);
+		ARR_FIND(0, MAX_PARTY, i, (p->party.member[i].account_id == account_id && p->party.member[i].char_id == char_id));
 		if( i < MAX_PARTY ) {
-			clif_party_withdraw(p, sd,account_id, p->party.member[i].name, 0x0);
 			memset(&p->party.member[i], 0, sizeof(p->party.member[0]));
 			memset(&p->data[i], 0, sizeof(p->data[0]));
 			p->party.count--;
 			party_check_state(p);
 		}
 
-		if( sd && sd->status.party_id == party_id && sd->status.char_id == char_id ) {
+		if( sd && sd->status.party_id == party_id ) {
 #ifdef BOUND_ITEMS
 			int idxlist[MAX_INVENTORY]; //Or malloc to reduce consumtion
 			int j, k;
@@ -648,18 +660,17 @@ int party_broken(int party_id)
 	struct party_data *p;
 	int i;
 
-	p = party_search(party_id);
-	if( p == NULL )
+	if( !(p = party_search(party_id)) )
 		return 0;
-		
+
 	if( p->instance_id ) {
 		instance_data[p->instance_id].party_id = 0;
 		instance_destroy(p->instance_id);
 	}
 
 	for( i = 0; i < MAX_PARTY; i++ ) {
-		if( p->data[i].sd!=NULL ) {
-			clif_party_withdraw(p,p->data[i].sd,p->party.member[i].account_id,p->party.member[i].name,0x10);
+		if( p->data[i].sd ) {
+			clif_party_withdraw(p->data[i].sd,p->party.member[i].account_id,p->party.member[i].name,PARTY_MEMBER_WITHDRAW_EXPEL,SELF);
 			p->data[i].sd->status.party_id = 0;
 		}
 	}
@@ -672,7 +683,7 @@ int party_changeoption(struct map_session_data *sd,int exp,int item)
 {
 	nullpo_ret(sd);
 
-	if( sd->status.party_id == 0 )
+	if( !sd->status.party_id )
 		return -3;
 	intif_party_changeoption(sd->status.party_id,sd->status.account_id,exp,item);
 	return 0;
@@ -742,7 +753,7 @@ int party_changeleader(struct map_session_data *sd, struct map_session_data *tsd
 			return 0;
 		}
 
-		if ((p = party_search(sd->status.party_id)) == NULL )
+		if (!(p = party_search(sd->status.party_id)))
 			return -1;
 
 		ARR_FIND(0, MAX_PARTY, mi, p->data[mi].sd == sd);
@@ -757,6 +768,11 @@ int party_changeleader(struct map_session_data *sd, struct map_session_data *tsd
 		ARR_FIND(0, MAX_PARTY, tmi, p->data[tmi].sd == tsd);
 		if (tmi == MAX_PARTY)
 			return 0; //Shouldn't happen
+
+		if (battle_config.change_party_leader_samemap && p->party.member[mi].map != p->party.member[tmi].map) {
+			clif_msg(sd, PARTY_MASTER_CHANGE_SAME_MAP);
+			return 0;
+		}
 	} else {
 		ARR_FIND(0,MAX_PARTY,mi,p->party.member[mi].leader);
 		ARR_FIND(0,MAX_PARTY,tmi,p->data[tmi].sd ==  tsd);
@@ -995,24 +1011,36 @@ int party_send_xy_clear(struct party_data *p)
 	return 0;
 }
 
-//Exp share and added zeny share [Valaris]
-int party_exp_share(struct party_data *p, struct block_list *src, unsigned int base_exp, unsigned int job_exp, int zeny)
+/** Party EXP and Zeny sharing
+ * @param p Party data
+ * @param src EXP source (for renewal level penalty)
+ * @param base_exp Base EXP gained from killed mob
+ * @param job_exp Job EXP gained from killed mob
+ * @param zeny Zeny gained from killed mob
+ * @author Valaris
+ */
+void party_exp_share(struct party_data *p, struct block_list *src, unsigned int base_exp, unsigned int job_exp, int zeny)
 {
 	struct map_session_data *sd[MAX_PARTY];
 	unsigned int i, c;
 #ifdef RENEWAL_EXP
-	uint32 base_exp_bonus, job_exp_bonus;
+	TBL_MOB *md = BL_CAST(BL_MOB,src);
+
+	if (!md)
+		return;
 #endif
-	nullpo_ret(p);
+
+	nullpo_retv(p);
 
 	//Count the number of players eligible for exp sharing
 	for (i = c = 0; i < MAX_PARTY; i++) {
-		if ((sd[c] = p->data[i].sd) == NULL || sd[c]->bl.m != src->m || pc_isdead(sd[c]) || (battle_config.idle_no_share && pc_isidle(sd[c])))
+		if (!(sd[c] = p->data[i].sd) || sd[c]->bl.m != src->m || pc_isdead(sd[c]) || (battle_config.idle_no_share && pc_isidle(sd[c])))
 			continue;
 		c++;
 	}
+
 	if (c < 1)
-		return 0;
+		return;
 
 	base_exp /= c;
 	job_exp /= c;
@@ -1022,38 +1050,34 @@ int party_exp_share(struct party_data *p, struct block_list *src, unsigned int b
 		double bonus = 100 + battle_config.party_even_share_bonus * (c - 1);
 
 		if (base_exp)
-			base_exp = (unsigned int)cap_value(base_exp * bonus / 100, 0, UINT_MAX);
+			base_exp = (unsigned int)cap_value(base_exp * bonus / 100,0,UINT_MAX);
 		if (job_exp)
-			job_exp = (unsigned int)cap_value(job_exp * bonus / 100, 0, UINT_MAX);
+			job_exp = (unsigned int)cap_value(job_exp * bonus / 100,0,UINT_MAX);
 		if (zeny)
-			zeny = (unsigned int)cap_value(zeny * bonus / 100, INT_MIN, INT_MAX);
+			zeny = (unsigned int)cap_value(zeny * bonus / 100,INT_MIN,INT_MAX);
 	}
-
-#ifdef RENEWAL_EXP
-	base_exp_bonus = base_exp;
-	job_exp_bonus = job_exp;
-#endif
 
 	for (i = 0; i < c; i++) {
 #ifdef RENEWAL_EXP
-		if (!(src && src->type == BL_MOB && ((TBL_MOB *)src)->db->mexp)) {
-			TBL_MOB *md = BL_CAST(BL_MOB, src);
-			int rate = 0;
+		uint32 base_gained = base_exp, job_gained = job_exp;
 
-			if (!md)
-				return 0;
+		if (base_exp || job_exp) {
+			int rate = pc_level_penalty_mod(sd[i],md->db->lv,md->db->status.class_,1);
 
-			rate = pc_level_penalty_mod(sd[i], md->db->lv, md->db->status.class_, 1);
-			base_exp = (unsigned int)cap_value(base_exp_bonus * rate / 100, 1, UINT_MAX);
-			job_exp = (unsigned int)cap_value(job_exp_bonus * rate / 100, 1, UINT_MAX);
+			if (rate != 100) {
+				if (base_exp)
+					base_gained = (unsigned int)cap_value(apply_rate(base_exp,rate),1,UINT_MAX);
+				if (job_exp)
+					job_gained = (unsigned int)cap_value(apply_rate(job_exp,rate),1,UINT_MAX);
+			}
 		}
+		pc_gainexp(sd[i],src,base_gained,job_gained,0);
+#else
+		pc_gainexp(sd[i],src,base_exp,job_exp,0);
 #endif
-		pc_gainexp(sd[i], src, base_exp, job_exp, false);
-
 		if (zeny) //Zeny from mobs [Valaris]
 			pc_getzeny(sd[i],zeny,LOG_TYPE_PICKDROP_MONSTER,NULL);
 	}
-	return 0;
 }
 
 //Does party loot. first_charid holds the charid of the player who has time priority to take the item
@@ -1062,8 +1086,7 @@ int party_share_loot(struct party_data *p, struct map_session_data *sd, struct i
 	TBL_PC *target = NULL;
 	int i;
 
-	if (p && (p->party.item&2) && (first_charid || !(battle_config.party_share_type&1))) {
-		//Item distribution to party members
+	if (p && (p->party.item&2) && (first_charid || !(battle_config.party_share_type&1))) { //Item distribution to party members
 		if (battle_config.party_share_type&2) { //Round Robin
 			TBL_PC *psd;
 
@@ -1073,7 +1096,7 @@ int party_share_loot(struct party_data *p, struct map_session_data *sd, struct i
 				if (i >= MAX_PARTY)
 					i = 0; //Reset counter to 1st person in party so it'll stop when it reaches "itemc"
 
-				if ((psd = p->data[i].sd) == NULL || sd->bl.m != psd->bl.m ||
+				if (!(psd = p->data[i].sd) || sd->bl.m != psd->bl.m ||
 					pc_isdead(psd) || (battle_config.idle_no_share && pc_isidle(psd)))
 					continue;
 				
@@ -1091,7 +1114,7 @@ int party_share_loot(struct party_data *p, struct map_session_data *sd, struct i
 
 			//Collect pick candidates
 			for (i = 0; i < MAX_PARTY; i++) {
-				if ((psd[count] = p->data[i].sd) == NULL || psd[count]->bl.m != sd->bl.m ||
+				if (!(psd[count] = p->data[i].sd) || psd[count]->bl.m != sd->bl.m ||
 					pc_isdead(psd[count]) || (battle_config.idle_no_share && pc_isidle(psd[count])))
 					continue;
 

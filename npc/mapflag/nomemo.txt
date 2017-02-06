@@ -231,6 +231,7 @@ job_soul	mapflag	nomemo
 que_ng	mapflag	nomemo
 
 // Special Quests Places =====
+que_ba	mapflag	nomemo
 que_god01	mapflag	nomemo
 que_god02	mapflag	nomemo
 que_bingo	mapflag	nomemo
