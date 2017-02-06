@@ -268,9 +268,9 @@ int skill_tree_get_max(uint16 skill_id, int b_class)
 	int i;
 
 	b_class = pc_class2idx(b_class);
-	ARR_FIND(0, MAX_SKILL_TREE, i, skill_tree[b_class][i].id == 0 || skill_tree[b_class][i].id == skill_id);
+	ARR_FIND(0, MAX_SKILL_TREE, i, (!skill_tree[b_class][i].id || skill_tree[b_class][i].id == skill_id));
 	if( i < MAX_SKILL_TREE && skill_tree[b_class][i].id == skill_id )
-		return skill_tree[b_class][i].max;
+		return skill_tree[b_class][i].lv;
 	else
 		return skill_get_max(skill_id);
 }
@@ -5633,7 +5633,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 	struct status_change *tsc;
 	struct status_change_entry *tsce;
 	enum sc_type type;
-	int i = 0, rate = 0, partybonus = 0;
+	int i = 0, partybonus = 0;
 
 	if(skill_id && !skill_lv)
 		return 0; //Celest
@@ -6314,6 +6314,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case AB_EXPIATIO:
 		case AB_DUPLELIGHT:
 		case AB_SECRAMENT:
+		case AB_OFFERTORIUM:
 		case NC_ACCELERATION:
 		case NC_HOVERING:
 		case NC_SHAPESHIFT:
@@ -6769,7 +6770,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case MER_MAGNIFICAT:
-			if (mer != NULL) {
+			if (mer) {
 				clif_skill_nodamage(bl,bl,skill_id,skill_lv,sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 				if (mer->master && mer->master->status.party_id != 0 && !(flag&1))
 					party_foreachsamemap(skill_area_sub,mer->master,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
@@ -7612,8 +7613,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_QSCARABA:			case SC_LJOSALFAR:		case SC_MAPLE_FALLS:
 							case SC_MERMAID_LONGING:		case SC_TIME_ACCESSORY:		case SC_CLAN_INFO:
 							case SC_SWORDCLAN:			case SC_ARCWANDCLAN:		case SC_GOLDENMACECLAN:
-							case SC_CROSSBOWCLAN:			case SC_ARMOR_ELEMENT:		case SC_QUEST_BUFF1:
-							case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:
+							case SC_CROSSBOWCLAN:			case SC_QUEST_BUFF1:		case SC_QUEST_BUFF2:
+							case SC_QUEST_BUFF3:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )
@@ -9082,8 +9083,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_LJOSALFAR:			case SC_MAPLE_FALLS:		case SC_MERMAID_LONGING:
 						case SC_TIME_ACCESSORY:			case SC_CLAN_INFO:		case SC_SWORDCLAN:
 						case SC_ARCWANDCLAN:			case SC_GOLDENMACECLAN:		case SC_CROSSBOWCLAN:
-						case SC_ARMOR_ELEMENT:			case SC_QUEST_BUFF1:		case SC_QUEST_BUFF2:
-						case SC_QUEST_BUFF3:
+						case SC_QUEST_BUFF1:			case SC_QUEST_BUFF2:		case SC_QUEST_BUFF3:
 							continue;
 						case SC_SILENCE:
 							if( tsc->data[i]->val4 )
@@ -9115,29 +9115,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			map_foreachinrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,
 				PR_LEXDIVINA,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
-			break;
-
-		case AB_OFFERTORIUM:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,
-				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-			if( !tsc || !tsc->count )
-				break;
-			for( i = 0; i < SC_MAX; i++) {
-				if( !tsc->data[i] )
-					continue;
-				switch( i ) {
-					case SC_BLIND:		case SC_CURSE:
-					case SC_POISON:		case SC_HALLUCINATION:
-					case SC_CONFUSION:	case SC_BLEEDING:
-					case SC_BURNING:	case SC_FREEZING:
-					case SC_TOXIN:		case SC_PARALYSE:
-					case SC_VENOMBLEED:	case SC_MAGICMUSHROOM:
-					case SC_DEATHHURT:	case SC_PYREXIA:
-					case SC_LEECHESEND:	case SC_MANDRAGORA:
-						status_change_end(bl,(sc_type)i,INVALID_TIMER);
-						break;
-				}
-			}
 			break;
 
 		case WL_WHITEIMPRISON: {
@@ -9435,7 +9412,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SC_UNLUCKY:
 		case SC_WEAKNESS:
 			{
-				int joblvbonus = 0;
+				int joblvbonus = 0, rate = 0;
 
 				joblvbonus = status_get_job_lv(src);
 				//First we set the success chance based on the caster's build which increases the chance
@@ -9796,10 +9773,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case WM_LULLABY_DEEPSLEEP:
 			if( flag&1 ) { //[(Skill Level x 4) + (Voice Lessons Skill Level x 2) + (Caster's Base Level / 15) + (Caster's Job Level / 5)] %
+				int rate = 4 * skill_lv + 2 * (sd ? pc_checkskill(sd,WM_LESSON) : 10) + status_get_lv(src) / 15 + status_get_job_lv(src) / 5;
+				int duration = skill_get_time(skill_id,skill_lv) - (status_get_base_status(bl)->int_ * 50 + status_get_lv(bl) * 50); //Duration reduction for Deep Sleep Lullaby is doubled
+
 				if( bl->id == src->id )
 					break;
-				rate = min(60,4 * skill_lv + 2 * (sd ? pc_checkskill(sd,WM_LESSON) : 10) + min(50,status_get_job_lv(src)) / 5 + min(150,status_get_lv(src)) / 15);
-				sc_start(src,bl,type,rate,skill_lv,skill_get_time(skill_id,skill_lv));
+				sc_start(src,bl,type,rate,skill_lv,duration);
 			} else {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				map_foreachinrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ALL|1,skill_castend_nodamage_id);
@@ -9819,20 +9798,16 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case WM_VOICEOFSIREN:
 			if( flag&1 ) {
-				int duration = skill_get_time(skill_id,skill_lv) - (1000 * (status_get_lv(bl) / 10 + (sd ? status_get_job_lv(bl) : 0) / 5));
+				int rate = 6 * skill_lv + 2 * (sd ? pc_checkskill(sd,WM_LESSON) : 10) + status_get_job_lv(src) / 2;
 
-				duration = max(duration,10000); //Duration can't be reduced below 10 seconds
 				if( bl->id == src->id )
 					break;
-				sc_start2(src,bl,type,100,skill_lv,src->id,duration);
+				sc_start2(src,bl,type,rate,skill_lv,src->id,skill_get_time(skill_id,skill_lv));
 			} else {
-				rate = 6 * skill_lv + 2 * (sd ? pc_checkskill(sd,WM_LESSON) : 10) + min(50,status_get_job_lv(src)) / 2;
-				if( rnd()%100 < rate ) {
-					int sflag = (map_flag_vs(src->m) ? BCT_ENEMY : BCT_ALL);
+				int sflag = (map_flag_vs(src->m) ? BCT_ENEMY : BCT_ALL);
 
-					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-					map_foreachinrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_CHAR|BL_SKILL,src,skill_id,skill_lv,tick,flag|sflag|1,skill_castend_nodamage_id);
-				}
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				map_foreachinrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_CHAR|BL_SKILL,src,skill_id,skill_lv,tick,flag|sflag|1,skill_castend_nodamage_id);
 			}
 			break;
 
@@ -10077,13 +10052,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			}
 			break;
 
-		case SO_ARRULLO:
-			//[(15 + 5 * Skill Level) + (Caster's INT / 5) + (Caster's Job Level / 5) - (Target's INT / 6) - (Target's LUK / 10)]%
-			rate = (15 + 5 * skill_lv) + status_get_int(src) / 5 + status_get_job_lv(src) / 5;
-			rate -= status_get_int(bl) / 6 - status_get_luk(bl) / 10;
-			tick = status_get_lv(bl) / 20 + (sd ? sd->status.int_ : status_get_base_status(bl)->int_) / 40;
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			status_change_start(src,bl,type,rate * 100,skill_lv,0,0,0,max(skill_get_time(skill_id,skill_lv) - (1000 * tick),5000),SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
+		case SO_ARRULLO: { //[(15 + 5 * Skill Level) + (Caster's INT / 5) + (Caster's Job Level / 5) - (Target's INT / 6) - (Target's LUK / 10)]%
+				int rate = (15 + 5 * skill_lv) + status_get_int(src) / 5 + status_get_job_lv(src) / 5 - status_get_int(bl) / 6 - status_get_luk(bl) / 10;
+
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				sc_start(src,bl,type,rate,skill_lv,skill_get_time(skill_id,skill_lv));
+			}
 			break;
 
 		case SO_SUMMON_AGNI:
@@ -13129,22 +13103,37 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 			if( !sce )
 				sc_start4(src,bl,type,100,skill_lv,group->val1,group->val2,0,group->limit);
 			break;
+		case UNT_APPLEIDUN:
+			if( !battle_config.song_timer_reset && sce )
+				return 0; //Aegis style: Apple of idun doesn't update its effect
+		//Fall through
 		case UNT_WHISTLE:
 		case UNT_ASSASSINCROSS:
 		case UNT_POEMBRAGI:
-		case UNT_APPLEIDUN:
 		case UNT_HUMMING:
 		case UNT_DONTFORGETME:
 		case UNT_FORTUNEKISS:
 		case UNT_SERVICEFORYOU:
 			if( bl->id == src->id && !(sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_BARDDANCER) )
-				return 0;
+				return 0; //Don't buff themselves without link
 			if( !sce )
 				sc_start4(src,bl,type,100,skill_lv,group->val1,group->val2,0,group->limit);
-			else if( battle_config.song_timer_reset && sce->val4 == 1 ) { //Readjust timers since the effect will not last long
+			else if( battle_config.song_timer_reset && //eA style: Readjust timers since the effect will not last long
+				sce->val4 == 1 ) { //From here songs are already active
 				sce->val4 = 0; //Remove the mark that we stepped out
 				delete_timer(sce->timer,status_change_timer);
 				sce->timer = add_timer(tick + group->limit,status_change_timer,bl->id,type); //Put duration 1 back
+			} else if( !battle_config.song_timer_reset ) { //Aegis style: Songs won't renew unless finished
+				const struct TimerData *td = get_timer(sce->timer);
+
+				if( DIFF_TICK(td->tick,tick) < group->interval ) { //Update with new values as the current one will vanish soon
+					delete_timer(sce->timer,status_change_timer);
+					sce->timer = add_timer(tick + group->limit,status_change_timer,bl->id,type);
+					sce->val1 = skill_lv;
+					sce->val2 = group->val1;
+					sce->val3 = group->val2;
+					sce->val4 = 0;
+				}
 			}
 			break;
 
@@ -13631,19 +13620,20 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 				if (md && md->mob_id == MOBID_EMPERIUM)
 					break;
 #endif
-				if ((bl->id == src->id &&
-					!(tsc && tsc->data[SC_SPIRIT] && tsc->data[SC_SPIRIT]->val2 == SL_BARDDANCER)) ||
-					(!battle_config.song_timer_reset && tsc && tsc->data[type] && tsc->data[type]->val4 == 1))
-					break;
-				heal = skill_calc_heal(src,bl,skill_id,skill_lv,true);
-				if (tsc && tsc->data[SC_AKAITSUKI] && heal)
-					skill_akaitsuki_damage(&unit->bl,bl,heal,skill_id,skill_lv,tick);
-				else {
-					clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
-					status_heal(bl,heal,0,0);
-				}
-				if (!battle_config.song_timer_reset)
+				if (bl->id == src->id && !(tsc && tsc->data[SC_SPIRIT] && tsc->data[SC_SPIRIT]->val2 == SL_BARDDANCER))
+					break; //Don't buff themselves!
+				if (!battle_config.song_timer_reset && //Aegis style: Check if the remaining time is enough to survive the next update
+					!(tsc && tsc->data[type] && tsc->data[type]->val4 == 1)) //Apple of Idun is not active, start it now
 					sc_start4(src,bl,type,100,skill_lv,group->val1,group->val2,0,group->limit);
+				if (tstatus->hp < tstatus->max_hp) {
+					heal = skill_calc_heal(src,bl,skill_id,skill_lv,true);
+					if (tsc && tsc->data[SC_AKAITSUKI] && heal)
+						skill_akaitsuki_damage(&unit->bl,bl,heal,skill_id,skill_lv,tick);
+					else {
+						clif_skill_nodamage(&unit->bl,bl,AL_HEAL,heal,1);
+						status_heal(bl,heal,0,0);
+					}
+				}
 			}
 			break;
 
@@ -13654,11 +13644,24 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 		case UNT_DONTFORGETME:
 		case UNT_FORTUNEKISS:
 		case UNT_SERVICEFORYOU:
-			if (battle_config.song_timer_reset ||
-				(!battle_config.song_timer_reset && tsc && tsc->data[type] && tsc->data[type]->val4 == 1) ||
-				(bl->id == src->id && !(tsc && tsc->data[SC_SPIRIT] && tsc->data[SC_SPIRIT]->val2 == SL_BARDDANCER)))
-				break;
-			sc_start4(src,bl,type,100,skill_lv,group->val1,group->val2,0,group->limit);
+			if (battle_config.song_timer_reset)
+				break; //eA style: Doesn't need this
+			if (bl->id == src->id && !(tsc && tsc->data[SC_SPIRIT] && tsc->data[SC_SPIRIT]->val2 == SL_BARDDANCER))
+				break; //Don't let buff themselves!
+			if (!battle_config.song_timer_reset && //Aegis style: Check if song has enough time to survive the next check
+				tsc && tsc->data[type] && tsc->data[type]->val4 == 1) {
+				const struct TimerData *td = get_timer(tsc->data[type]->timer);
+
+				if (DIFF_TICK(td->tick,tick) < group->interval) { //Update with new values as the current one will vanish
+					delete_timer(tsc->data[type]->timer,status_change_timer);
+					tsc->data[type]->timer = add_timer(tick + group->limit,status_change_timer,bl->id,type);
+					tsc->data[type]->val1 = skill_lv;
+					tsc->data[type]->val2 = group->val1;
+					tsc->data[type]->val3 = group->val2;
+					tsc->data[type]->val4 = 0;
+				}
+			} else
+				sc_start4(src,bl,type,100,skill_lv,group->val1,group->val2,0,group->limit); //Song was not active. start it now
 			break;
 
 		case UNT_GOSPEL:
@@ -14052,7 +14055,7 @@ static int skill_unit_onout(struct skill_unit *unit, struct block_list *bl, unsi
 		case UNT_DONTFORGETME:
 		case UNT_FORTUNEKISS:
 		case UNT_SERVICEFORYOU:
-			if( group->src_id == bl->id && !(sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_BARDDANCER) )
+			if( bl->id == group->src_id && !(sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_BARDDANCER) )
 				return -1;
 			break;
 	}
@@ -14145,7 +14148,7 @@ int skill_unit_onleft(uint16 skill_id, struct block_list *bl, unsigned int tick)
 						if (sce && !sce->val4) { //We don't want dissonance updating this anymore
 							delete_timer(sce->timer, status_change_timer);
 							sce->val4 = 1; //Store the fact that this is a "reduced" duration effect
-							sce->timer = add_timer(tick + skill_get_time2(i, 1), status_change_timer, bl->id, type);
+							sce->timer = add_timer(tick + skill_get_time2(i, sce->val1), status_change_timer, bl->id, type);
 						}
 					}
 				}
@@ -14160,13 +14163,11 @@ int skill_unit_onleft(uint16 skill_id, struct block_list *bl, unsigned int tick)
 		case DC_FORTUNEKISS:
 		case DC_SERVICEFORYOU:
 			if (sce) {
-				if (battle_config.song_timer_reset || //Athena-style
-					(!battle_config.song_timer_reset && sce->val4 != 1)) {
+				if (battle_config.song_timer_reset || //eA style: Update every time
+					(!battle_config.song_timer_reset && sce->val4 != 1)) { //Aegis style: Update only when it was not a reduced effect
 					delete_timer(sce->timer, status_change_timer);
-					//NOTE: It'd be nice if we could get the skill_lv for a more accurate extra time, but still
-					//not possible on our current implementation
 					sce->val4 = 1;
-					sce->timer = add_timer(tick + skill_get_time2(skill_id, 1), status_change_timer, bl->id, type);
+					sce->timer = add_timer(tick + skill_get_time2(skill_id, sce->val1), status_change_timer, bl->id, type);
 				}
 			}
 			break;
@@ -17955,7 +17956,7 @@ static int skill_unit_group_newid = MAX_SKILL_DB; //Skill Unit Group ID
  */
 static int skill_get_new_group_id(void)
 {
-	if( skill_unit_group_newid >= MAX_SKILL_DB && skill_id2group(skill_unit_group_newid) == NULL )
+	if( skill_unit_group_newid >= MAX_SKILL_DB && !skill_id2group(skill_unit_group_newid) )
 		return skill_unit_group_newid++; //Available
 	{ //Find next id
 		int base_id = skill_unit_group_newid;
@@ -17963,7 +17964,7 @@ static int skill_get_new_group_id(void)
 		while( base_id != ++skill_unit_group_newid ) {
 			if( skill_unit_group_newid < MAX_SKILL_DB )
 				skill_unit_group_newid = MAX_SKILL_DB;
-			if( skill_id2group(skill_unit_group_newid) == NULL )
+			if( !skill_id2group(skill_unit_group_newid) )
 				return skill_unit_group_newid++; //Available
 		}
 		//Full loop, nothing available

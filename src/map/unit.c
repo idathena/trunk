@@ -303,7 +303,7 @@ int unit_step_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		if(!tbl || !status_check_visibility(bl,tbl))
 			return 0;
-		if(ud->stepskill_id == 0)
+		if(!ud->stepskill_id)
 			unit_attack(bl,tbl->id,ud->state.attack_continue + 2); //Execute normal attack
 		else
 			unit_skilluse_id(bl,tbl->id,ud->stepskill_id,ud->stepskill_lv); //Execute non-ground skill
