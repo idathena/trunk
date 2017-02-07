@@ -3726,7 +3726,7 @@ static const char *npc_parse_mob(char *w1, char *w2, char *w3, char *w4, const c
 	}
 
 	//Now that all has been validated. We allocate the actual memory that the re-spawn data will use.
-	data = (struct spawn_data*)aMalloc(sizeof(struct spawn_data));
+	data = (struct spawn_data *)aMalloc(sizeof(struct spawn_data));
 	memcpy(data, &mob, sizeof(struct spawn_data));
 
 	//Spawn / cache the new mobs
