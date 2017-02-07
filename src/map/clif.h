@@ -32,6 +32,7 @@ struct battleground_data;
 struct quest;
 struct party_booking_ad_info;
 struct skill_cooldown_data;
+enum e_party_member_withdraw;
 #include <stdarg.h>
 
 enum { // packet_db
