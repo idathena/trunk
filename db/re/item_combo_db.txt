@@ -236,9 +236,9 @@
 2481:2731,{ set .@r,getequiprefinerycnt(EQI_SHOES); bonus bMatkRate,.@r/2; bonus bVariableCastrate,-.@r/2; }
 2481:10031,{ bonus bCritical,(getequiprefinerycnt(EQI_SHOES)/2)*10; }
 2482:2585:2895:2896:15045:18578,{ bonus bMaxHP,500; bonus bMaxSP,300; bonus bBaseAtk,10; bonus bDef,10; }
-2483:2586:15046,{ bonus bVit,5; bonus2 bSubRace,RC_DemiHuman,15; }
-2484:2586:15047,{ bonus bDex,5; bonus2 bSubRace,RC_DemiHuman,15; }
-2485:2587:15048,{ bonus bInt,5; bonus bMdef,10; bonus2 bSubRace,RC_DemiHuman,15; }
+2483:2586:15046,{ bonus bVit,5; bonus2 bSubRace,RC_DemiHuman,15; bonus2 bSubRace,RC_Brute,15; }
+2484:2586:15047,{ bonus bDex,5; bonus2 bSubRace,RC_DemiHuman,15; bonus2 bSubRace,RC_Brute,15; }
+2485:2587:15048,{ bonus bInt,5; bonus bMdef,10; bonus2 bSubRace,RC_DemiHuman,15; bonus2 bSubRace,RC_Brute,15; }
 2495:15061:18728:20700,{ bonus bAllStats,1; bonus2 bSubEle,Ele_Water,20; }
 2507:15146,{ set .@r,getequiprefinerycnt(EQI_ARMOR); bonus bMaxSPrate,10+.@r; bonus bFlee,10+.@r; }
 2509:15146,{ set .@r,getequiprefinerycnt(EQI_ARMOR); bonus bMaxHPrate,10+.@r; bonus bMatkRate,2+.@r; }

@@ -2538,7 +2538,6 @@ int unit_skillcastcancel(struct block_list *bl, uint8 type)
 	if (type&2) { //See if it can be cancelled
 		if (!ud->state.skillcastcancel)
 			return 0;
-
 		if (sd && !sd->sc.data[SC_TOXIN] && (sd->special_state.no_castcancel2 ||
 			((sd->sc.data[SC_UNLIMITEDHUMMINGVOICE] || sd->special_state.no_castcancel) &&
 			!map_flag_gvg2(bl->m) && !map[bl->m].flag.battleground))) //Fixed flags being read the wrong way around [blackhole89]

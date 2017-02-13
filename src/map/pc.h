@@ -1037,8 +1037,8 @@ int pc_readparam(struct map_session_data *,int);
 bool pc_setparam(struct map_session_data *,int,int);
 int pc_readreg(struct map_session_data *,int);
 bool pc_setreg(struct map_session_data *,int,int);
-char *pc_readregstr(struct map_session_data *sd,int reg);
-bool pc_setregstr(struct map_session_data *sd,int reg,const char *str);
+char *pc_readregstr(struct map_session_data *sd, int reg);
+bool pc_setregstr(struct map_session_data *sd, int reg, const char *str);
 
 #define pc_readglobalreg(sd,reg) pc_readregistry(sd,reg,3)
 #define pc_setglobalreg(sd,reg,val) pc_setregistry(sd,reg,val,3)
@@ -1052,10 +1052,10 @@ bool pc_setregstr(struct map_session_data *sd,int reg,const char *str);
 #define pc_setaccountreg2(sd,reg,val) pc_setregistry(sd,reg,val,1)
 #define pc_readaccountreg2str(sd,reg) pc_readregistry_str(sd,reg,1)
 #define pc_setaccountreg2str(sd,reg,val) pc_setregistry_str(sd,reg,val,1)
-int pc_readregistry(struct map_session_data *,const char *,int);
-bool pc_setregistry(struct map_session_data *,const char *,int,int);
-char *pc_readregistry_str(struct map_session_data *,const char *,int);
-bool pc_setregistry_str(struct map_session_data *,const char *,const char *,int);
+int pc_readregistry(struct map_session_data *sd, const char *reg, int type);
+bool pc_setregistry(struct map_session_data *sd, const char *reg, int val, int type);
+char *pc_readregistry_str(struct map_session_data *sd, const char *reg, int type);
+bool pc_setregistry_str(struct map_session_data *sd, const char *reg, const char *val, int type);
 
 bool pc_setreg2(struct map_session_data *sd, const char *reg, int val);
 int pc_readreg2(struct map_session_data *sd, const char *reg);

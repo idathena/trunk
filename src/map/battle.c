@@ -465,13 +465,6 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 				}
 				break;
 			case ELE_WIND:
-				if( tsc->data[SC_CRYSTALIZE] ) {
-#ifdef RENEWAL
-					ratio += 50;
-#else
-					damage += (int64)(damage * 50 / 100);
-#endif
-				}
 				if( tsc->data[SC_WATER_INSIGNIA] ) {
 #ifdef RENEWAL
 					ratio += 50;
@@ -2005,6 +1998,7 @@ static inline int battle_adjust_skill_damage(int m, unsigned short skill_id)
 	if(map[m].skill_count) {
 		int i;
 
+		skill_id = skill_dummy2skill_id(skill_id);
 		ARR_FIND(0, map[m].skill_count, i, map[m].skills[i]->skill_id == skill_id);
 		if(i < map[m].skill_count)
 			return map[m].skills[i]->modifier;
@@ -2159,8 +2153,9 @@ static int battle_skill_damage(struct block_list *src, struct block_list *target
 {
 	nullpo_ret(src);
 
-	if(!target)
+	if(!target || !skill_id)
 		return 0;
+	skill_id = skill_dummy2skill_id(skill_id);
 	return battle_skill_damage_skill(src, target, skill_id) + battle_skill_damage_map(src, target, skill_id);
 }
 #endif
@@ -5107,7 +5102,6 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 			break;
 	}
 
-	//Skill damage adjustment
 #ifdef ADJUST_SKILL_DAMAGE
 	if((skill_damage = battle_skill_damage(src, target, skill_id)))
 		ATK_ADDRATE(wd.damage, wd.damage2, skill_damage);
@@ -5278,7 +5272,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	struct status_change *sc, *tsc;
 	struct status_data *tstatus;
 	int right_element, left_element, nk;
-	uint16 id;
 	uint16 lv;
 	int i;
 
@@ -5401,54 +5394,14 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		const_val = battle_calc_skill_constant_addition(wd, src, target, skill_id, skill_lv); //Other skill bonuses
 		ATK_ADD(wd.damage, wd.damage2, const_val);
 
-		switch(skill_id) {
-			case AB_DUPLELIGHT_MELEE:
-				id = AB_DUPLELIGHT;
-				break;
-			case NC_MAGMA_ERUPTION_DOTDAMAGE:
-				id = NC_MAGMA_ERUPTION;
-				break;
-			case LG_OVERBRAND_BRANDISH:
-			case LG_OVERBRAND_PLUSATK:
-				id = LG_OVERBRAND;
-				break;
-			case WM_SEVERE_RAINSTORM_MELEE:
-				id = WM_SEVERE_RAINSTORM;
-				break;
-			case WM_REVERBERATION_MELEE:
-				id = WM_REVERBERATION;
-				break;
-			case GN_CRAZYWEED_ATK:
-				id = GN_CRAZYWEED;
-				break;
-			case GN_SLINGITEM_RANGEMELEEATK:
-				id = GN_SLINGITEM;
-				break;
-			case RL_R_TRIP_PLUSATK:
-				id = RL_R_TRIP;
-				break;
-			case RL_B_FLICKER_ATK:
-				id = RL_FLICKER;
-				break;
-			case RL_GLITTERING_GREED_ATK:
-				id = RL_GLITTERING_GREED;
-				break;
-			case SU_PICKYPECK_DOUBLE_ATK:
-				id = SU_PICKYPECK;
-				break;
-			default:
-				id = skill_id;
-				break;
-		}
-
 		//Add any miscellaneous player skill ATK rate bonuses
 		if(sd) {
-			if((i = pc_skillatk_bonus(sd, id)))
+			if((i = pc_skillatk_bonus(sd, skill_id)))
 				ATK_ADDRATE(wd.damage, wd.damage2, i);
-			if((i = battle_adjust_skill_damage(src->m, id)))
+			if((i = battle_adjust_skill_damage(src->m, skill_id)))
 				ATK_RATE(wd.damage, wd.damage2, i);
 		}
-		if(tsd && (i = pc_sub_skillatk_bonus(tsd, id)))
+		if(tsd && (i = pc_sub_skillatk_bonus(tsd, skill_id)))
 			ATK_ADDRATE(wd.damage, wd.damage2, -i);
 	} else if(wd.div_ < 0)
 		wd.div_ *= -1;
@@ -5719,7 +5672,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 	int skill_damage = 0;
 #endif
 	short s_ele = 0;
-	uint16 id;
 	TBL_PC *sd;
 	TBL_PC *tsd;
 	struct status_change *sc, *tsc;
@@ -6333,40 +6285,10 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				break;
 		}
 
-		switch(skill_id) {
-			case WL_CHAINLIGHTNING_ATK:
-				id = WL_CHAINLIGHTNING;
-				break;
-			case AB_DUPLELIGHT_MAGIC:
-				id = AB_DUPLELIGHT;
-				break;
-			case WL_TETRAVORTEX_FIRE:
-			case WL_TETRAVORTEX_WATER:
-			case WL_TETRAVORTEX_WIND:
-			case WL_TETRAVORTEX_GROUND:
-				id = WL_TETRAVORTEX;
-				break;
-			case WL_SUMMON_ATK_FIRE:
-			case WL_SUMMON_ATK_WIND:
-			case WL_SUMMON_ATK_WATER:
-			case WL_SUMMON_ATK_GROUND:
-				id = WL_RELEASE;
-				break;
-			case WM_REVERBERATION_MAGIC:
-				id = WM_REVERBERATION;
-				break;
-			case GN_HELLS_PLANT_ATK:
-				id = GN_HELLS_PLANT;
-				break;
-			default:
-				id = skill_id;
-				break;
-		}
-
 		if(sd) {
-			if((i = pc_skillatk_bonus(sd, id)))
+			if((i = pc_skillatk_bonus(sd, skill_id)))
 				MATK_ADDRATE(i); //Damage rate bonuses
-			if((i = battle_adjust_skill_damage(src->m, id)))
+			if((i = battle_adjust_skill_damage(src->m, skill_id)))
 				MATK_RATE(i);
 			if(!flag.imdef &&
 				((sd->bonus.ignore_mdef_ele&(1<<tstatus->def_ele)) || (sd->bonus.ignore_mdef_ele&(1<<ELE_ALL)) ||
@@ -6375,7 +6297,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				flag.imdef = 1; //Ignore MDEF
 		}
 
-		if(tsd && (i = pc_sub_skillatk_bonus(tsd, id)))
+		if(tsd && (i = pc_sub_skillatk_bonus(tsd, skill_id)))
 			MATK_ADDRATE(-i);
 
 		if(!flag.imdef) {
@@ -6513,9 +6435,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			break;
 	}
 
-	//Skill damage adjustment
 #ifdef ADJUST_SKILL_DAMAGE
-	if((skill_damage = battle_skill_damage(src, target, skill_id)) != 0)
+	if((skill_damage = battle_skill_damage(src, target, skill_id)))
 		MATK_ADDRATE(skill_damage);
 #endif
 
@@ -6989,9 +6910,8 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			break;
 	}
 
-	//Skill damage adjustment
 #ifdef ADJUST_SKILL_DAMAGE
-	if((skill_damage = battle_skill_damage(src, target, skill_id)) != 0)
+	if((skill_damage = battle_skill_damage(src, target, skill_id)))
 		md.damage += (int64)md.damage * skill_damage / 100;
 #endif
 

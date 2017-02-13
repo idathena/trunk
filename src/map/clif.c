@@ -10742,8 +10742,7 @@ void clif_parse_GetCharNameRequest(int fd, struct map_session_data *sd)
 	if( id < 0 && -id == sd->bl.id ) //For disguises [Valaris]
 		id = sd->bl.id;
 
-	bl = map_id2bl(id);
-	if( bl == NULL )
+	if( !(bl = map_id2bl(id)) )
 		return;	//Lagged clients could request names of already gone mobs/players [Skotlex]
 
 	if( sd->bl.m != bl->m || !check_distance_bl(&sd->bl, bl, AREA_SIZE) )
@@ -18160,7 +18159,7 @@ void clif_display_pinfo(struct map_session_data *sd, int cmdtype) {
 		WFIFOW(fd,0) = cmd;
 
 		for(i = 0; i < maxinfotype; i++) {
-			WFIFOB(fd,info->pos[4] + (i * szdetails)) = i; //Infotype //0 PCRoom, 1 Premium, 2 Server, 3 TPlus
+			WFIFOB(fd,info->pos[4] + (i * szdetails)) = i; //Infotype: 0 PCRoom, 1 Premium, 2 Server, 3 TPlus
 			WFIFOL(fd,info->pos[5] + (i * szdetails)) = details_bexp[i] * factor;
 			WFIFOL(fd,info->pos[6] + (i * szdetails)) = details_penalty[i] * factor;
 			WFIFOL(fd,info->pos[7] + (i * szdetails)) = details_drop[i] * factor;

@@ -3224,9 +3224,11 @@ int mapif_parse_reqcharban(int fd) {
 		//int aid = RFIFOL(fd,2); AID of player who as requested the ban
 		int32 timediff = RFIFOL(fd,6);
 		const char *name = (char *)RFIFOP(fd,10); //Name of the target character
+		char esc_name[NAME_LENGTH * 2 + 1];
 
 		RFIFOSKIP(fd,10 + NAME_LENGTH);
-		if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `account_id`,`char_id`,`unban_time` FROM `%s` WHERE `name` = '%s'", char_db, name) )
+		Sql_EscapeStringLen(sql_handle, esc_name, name, strnlen(name, NAME_LENGTH));
+		if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `account_id`,`char_id`,`unban_time` FROM `%s` WHERE `name` = '%s'", char_db, esc_name) )
 			Sql_ShowDebug(sql_handle);
 		else if( Sql_NumRows(sql_handle) == 0 ) {
 			return -1; //1-player not found
@@ -3286,9 +3288,11 @@ int mapif_parse_reqcharunban(int fd) {
 		return 0;
 	else {
 		const char *name = (char *)RFIFOP(fd,6);
+		char esc_name[NAME_LENGTH * 2 + 1];
 
 		RFIFOSKIP(fd,6 + NAME_LENGTH);
-		if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `unban_time` = '0' WHERE `name` = '%s' LIMIT 1", char_db, name) ) {
+		Sql_EscapeStringLen(sql_handle, esc_name, name, strnlen(name, NAME_LENGTH));
+		if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `unban_time` = '0' WHERE `name` = '%s' LIMIT 1", char_db, esc_name) ) {
 			Sql_ShowDebug(sql_handle);
 			return -1;
 		}
