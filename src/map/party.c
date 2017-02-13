@@ -345,8 +345,7 @@ int party_recv_info(struct party *sp, int char_id)
 			continue; // Not online
 		clif_name_area(&sd->bl); // Update other people's display [Skotlex]
 		clif_party_member_info(p, sd);
-		// Only send this on party creation, otherwise it will be sent by party_send_movemap [Lemongrass]
-		if( sd->party_creating )
+		if( sd->party_creating ) // Only send this on party creation, otherwise it will be sent by party_send_movemap [Lemongrass]
 			clif_party_option(p, sd, 0x100);
 		clif_party_info(p, NULL);
 		if( p->instance_id )

@@ -999,7 +999,7 @@
 1662,Bone_Wand_,Evil Bone Wand,5,20,,700,40:110,,1,2,0x00818314,63,2,2,3,24,1,10,{ bonus bAtkEle,Ele_Undead; bonus bInt,4; },{},{}
 1663,Staff_Of_Bordeaux_,Staff of Bordeaux,5,20,,500,30:170,,1,2,0x00010204,18,2,2,4,50,1,10,{ bonus bInt,2; bonus bDex,1; if(getskilllv(SA_DRAGONOLOGY)==5) { bonus bUseSPrate,-15; bonus bInt,3; } },{},{}
 1664,Thorn_Staff_,Thorn Staff of Darkness,5,20,,700,60:160,,1,1,0x00018314,50,2,2,4,75,1,10,{ set .@r,getrefine(); bonus bAtkEle,Ele_Dark; bonus bInt,3; bonus bDex,3; bonus2 bIgnoreMdefClassRate,Class_Normal,.@r; bonus2 bIgnoreMdefClassRate,Class_Boss,.@r; bonus bDelayrate,-(.@r*3/2); },{},{}
-1665,Piercing_Staff_,Staff of Piercing,5,20,,500,80,,1,2,0x00018314,18,2,2,3,70,1,10,{ set .@r,getrefine(); bonus bInt,4; bonus bMatkRate,15; bonus2 bIgnoreMdefClassRate,Class_Normal,10+.@r; bonus2 bIgnoreMdefClassRate,Class_Boss,10+.@r; },{},{}
+1665,Piercing_Staff_,Staff of Piercing,5,20,,500,80:145,,1,2,0x00018314,18,2,2,3,70,1,10,{ set .@r,getrefine(); bonus bInt,4; bonus2 bIgnoreMdefClassRate,Class_Normal,10+.@r; bonus2 bIgnoreMdefClassRate,Class_Boss,10+.@r; },{},{}
 1666,Healing_Staff_,Staff of Healing,5,20,,0,10:125,,1,2,0x00008110,18,2,2,3,1,1,10,{ bonus bAtkEle,Ele_Holy; bonus bHealPower,15; },{},{}
 1667,TE_Woe_Staff,TE Woe Staff,5,0,,0,50:100,,1,0,0x00818314,63,2,2,3,40,0,10,{ bonus2 bMagicAddRace,RC_DemiHuman,10; bonus bHealPower,5; bonus3 bAddEff,Eff_Blind,1000,ATF_SKILL; },{},{}
 1668,Sword_Stick,Sword Stick,5,20,,500,120:150,,1,2,0x00800200,63,2,2,4,80,1,10,{ bonus bAspdRate,10; },{},{}

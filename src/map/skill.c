@@ -351,6 +351,60 @@ int skill_get_range2(struct block_list *bl, uint16 skill_id, uint16 skill_lv, bo
 	return range;
 }
 
+/** Copy Referral: dummy skills should point to their source.
+ * @param skill_id Dummy skill ID
+ * @return Real skill id if found
+ */
+unsigned short skill_dummy2skill_id(unsigned short skill_id) {
+	switch( skill_id ) {
+		case AB_DUPLELIGHT_MELEE:
+		case AB_DUPLELIGHT_MAGIC:
+			return AB_DUPLELIGHT;
+		case WL_CHAINLIGHTNING_ATK:
+			return WL_CHAINLIGHTNING;
+		case WL_TETRAVORTEX_FIRE:
+		case WL_TETRAVORTEX_WATER:
+		case WL_TETRAVORTEX_WIND:
+		case WL_TETRAVORTEX_GROUND:
+			return WL_TETRAVORTEX;
+		case WL_SUMMON_ATK_FIRE:
+			return WL_SUMMONFB;
+		case WL_SUMMON_ATK_WIND:
+			return WL_SUMMONBL;
+		case WL_SUMMON_ATK_WATER:
+			return WL_SUMMONWB;
+		case WL_SUMMON_ATK_GROUND:
+			return WL_SUMMONSTONE;
+		case NC_MAGMA_ERUPTION_DOTDAMAGE:
+			return NC_MAGMA_ERUPTION;
+		case LG_OVERBRAND_BRANDISH:
+		case LG_OVERBRAND_PLUSATK:
+			return LG_OVERBRAND;
+		case WM_REVERBERATION_MELEE:
+		case WM_REVERBERATION_MAGIC:
+			return WM_REVERBERATION;
+		case WM_SEVERE_RAINSTORM_MELEE:
+			return WM_SEVERE_RAINSTORM;
+		case GN_CRAZYWEED_ATK:
+			return GN_CRAZYWEED;
+		case GN_HELLS_PLANT_ATK:
+			return GN_HELLS_PLANT;
+		case GN_SLINGITEM_RANGEMELEEATK:
+			return GN_SLINGITEM;
+		case RL_R_TRIP_PLUSATK:
+			return RL_R_TRIP;
+		case RL_B_FLICKER_ATK:
+			return RL_FLICKER;
+		case RL_GLITTERING_GREED_ATK:
+			return RL_GLITTERING_GREED;
+		case SU_PICKYPECK_DOUBLE_ATK:
+			return SU_PICKYPECK;
+		case NPC_MAXPAIN_ATK:
+			return NPC_MAXPAIN;
+	}
+	return skill_id;
+}
+
 /** Calculates heal value of skill's effect
  * @param src
  * @param target
@@ -2540,76 +2594,25 @@ static void skill_do_copy(struct block_list *src,struct block_list *bl, uint16 s
 		uint16 idx;
 		unsigned char lv;
 
-		//Copy Referal: dummy skills should point to their source upon copying
-		switch (skill_id) {
-			case AB_DUPLELIGHT_MELEE:
-			case AB_DUPLELIGHT_MAGIC:
-				skill_id = AB_DUPLELIGHT;
-				break;
-			case WL_CHAINLIGHTNING_ATK:
-				skill_id = WL_CHAINLIGHTNING;
-				break;
-			case WL_TETRAVORTEX_FIRE:
-			case WL_TETRAVORTEX_WATER:
-			case WL_TETRAVORTEX_WIND:
-			case WL_TETRAVORTEX_GROUND:
-				skill_id = WL_TETRAVORTEX;
-				break;
-			case WL_SUMMON_ATK_FIRE:
-				skill_id = WL_SUMMONFB;
-				break;
-			case WL_SUMMON_ATK_WIND:
-				skill_id = WL_SUMMONBL;
-				break;
-			case WL_SUMMON_ATK_WATER:
-				skill_id = WL_SUMMONWB;
-				break;
-			case WL_SUMMON_ATK_GROUND:
-				skill_id = WL_SUMMONSTONE;
-				break;
-			case NC_MAGMA_ERUPTION_DOTDAMAGE:
-				skill_id = NC_MAGMA_ERUPTION;
-				break;
-			case LG_OVERBRAND_BRANDISH:
-			case LG_OVERBRAND_PLUSATK:
-				skill_id = LG_OVERBRAND;
-				break;
-			case WM_REVERBERATION_MELEE:
-			case WM_REVERBERATION_MAGIC:
-				skill_id = WM_REVERBERATION;
-				break;
-			case WM_SEVERE_RAINSTORM_MELEE:
-				skill_id = WM_SEVERE_RAINSTORM;
-				break;
-			case GN_CRAZYWEED_ATK:
-				skill_id = GN_CRAZYWEED;
-				break;
-			case GN_HELLS_PLANT_ATK:
-				skill_id = GN_HELLS_PLANT;
-				break;
-			case GN_SLINGITEM_RANGEMELEEATK:
-				skill_id = GN_SLINGITEM;
-				break;
-		}
+		skill_id = skill_dummy2skill_id(skill_id);
 
 		//Use skill index, avoiding out-of-bound array [Cydh]
 		if (!(idx = skill_get_index(skill_id)))
 			return;
 
 		switch (skill_isCopyable(tsd, skill_id)) {
-			case 1: { //Copied by Plagiarism
-					if (tsd->cloneskill_idx >= 0 && tsd->status.skill[tsd->cloneskill_idx].flag == SKILL_FLAG_PLAGIARIZED) {
-						tsd->status.skill[tsd->cloneskill_idx].id = 0;
-						tsd->status.skill[tsd->cloneskill_idx].lv = 0;
-						tsd->status.skill[tsd->cloneskill_idx].flag = SKILL_FLAG_PERMANENT;
-						clif_deleteskill(tsd, tsd->status.skill[tsd->cloneskill_idx].id);
-					}
-					//Copied level never be > player's RG_PLAGIARISM level
-					lv = min(skill_lv, pc_checkskill(tsd, RG_PLAGIARISM));
-					tsd->cloneskill_idx = idx;
-					pc_setglobalreg(tsd, SKILL_VAR_PLAGIARISM, skill_id);
-					pc_setglobalreg(tsd, SKILL_VAR_PLAGIARISM_LV, lv);
+			case 1: //Copied by Plagiarism
+				if (tsd->cloneskill_idx >= 0 && tsd->status.skill[tsd->cloneskill_idx].flag == SKILL_FLAG_PLAGIARIZED) {
+					tsd->status.skill[tsd->cloneskill_idx].id = 0;
+					tsd->status.skill[tsd->cloneskill_idx].lv = 0;
+					tsd->status.skill[tsd->cloneskill_idx].flag = SKILL_FLAG_PERMANENT;
+					clif_deleteskill(tsd, tsd->status.skill[tsd->cloneskill_idx].id);
 				}
+				//Copied level never be > player's RG_PLAGIARISM level
+				lv = min(skill_lv, pc_checkskill(tsd, RG_PLAGIARISM));
+				tsd->cloneskill_idx = idx;
+				pc_setglobalreg(tsd, SKILL_VAR_PLAGIARISM, skill_id);
+				pc_setglobalreg(tsd, SKILL_VAR_PLAGIARISM_LV, lv);
 				break;
 			case 2: { //Copied by Reproduce
 					struct status_change *tsc = status_get_sc(bl);
@@ -3134,7 +3137,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	map_freeblock_lock();
 
 	//Can't copy skills if the blow will kill you [Skotlex]
-	if (skill_id && skill_get_index(skill_id) > 0 && (dmg.flag&BF_SKILL) && dmg.damage + dmg.damage2 > 0 && damage < status_get_hp(bl))
+	if (skill_id && skill_get_index(skill_id) > 0 && (dmg.flag&BF_SKILL) && (dmg.damage + dmg.damage2) > 0 && damage < status_get_hp(bl))
 		skill_do_copy(src, bl, skill_id, skill_lv);
 
 	//Skills with can't walk delay also stop normal attacking for that duration when the attack connects [Skotlex]
@@ -13173,7 +13176,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 
 		case UNT_CLOUD_KILL:
 			if( !sce && sc_start4(src,bl,type,100,skill_lv,src->id,unit->bl.id,0,group->limit) )
-				status_change_start(src,bl,SC_POISON,10000,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
+				status_change_start(src,bl,SC_POISON,10000,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDTICK);
 			break;
 
 		case UNT_WARMER: {
@@ -17698,7 +17701,7 @@ bool skill_check_shadowform(struct block_list *bl, uint16 skill_id, int64 damage
 
 	nullpo_retr(false, bl);
 
-	if (!damage)
+	if( !damage )
 		return false;
 
 	sc = status_get_sc(bl);

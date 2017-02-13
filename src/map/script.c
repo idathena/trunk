@@ -3659,10 +3659,10 @@ struct linkdb_node *script_erase_sleepdb(struct linkdb_node *n)
  *------------------------------------------*/
 int run_script_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
-	struct script_state *st     = (struct script_state *)data;
-	struct linkdb_node *node    = (struct linkdb_node *)sleep_db;
+	struct script_state *st = (struct script_state *)data;
+	struct linkdb_node *node = (struct linkdb_node *)sleep_db;
 
-	if(id != 0 && st->rid) { //If it was a player before going to sleep and there is still a unit attached to the script
+	if(id && st->rid) { //If it was a player before going to sleep and there is still a unit attached to the script
 		struct map_session_data *sd = map_id2sd(st->rid);
 
 		if(!sd) { //Attached player is offline or another unit type - should not happen

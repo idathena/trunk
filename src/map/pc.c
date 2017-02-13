@@ -4321,7 +4321,6 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 			ShowWarning("pc_getcash: Cash point overflow (cash=%d, have cash=%d, account_id=%d, char_id=%d).\n", cash, sd->cashPoints, sd->status.account_id, sd->status.char_id);
 			cash = MAX_ZENY - sd->cashPoints;
 		}
-
 		pc_setaccountreg(sd, "#CASHPOINTS", sd->cashPoints + cash);
 		if( cash )
 			log_cash(sd, type, LOG_CASH_TYPE_CASH, cash);
@@ -4690,6 +4689,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 				clif_skill_teleportmessage(sd,0);
 				return false;
 			}
+		//Fall through
 		case ITEMID_WING_OF_BUTTERFLY:
 		case ITEMID_DUN_TELE_SCROLL1:
 		case ITEMID_DUN_TELE_SCROLL2:
@@ -7248,6 +7248,7 @@ int pc_skillatk_bonus(struct map_session_data *sd, uint16 skill_id)
 
 	nullpo_ret(sd);
 
+	skill_id = skill_dummy2skill_id(skill_id);
 	ARR_FIND(0, ARRAYLENGTH(sd->skillatk), i, sd->skillatk[i].id == skill_id);
 	if( i < ARRAYLENGTH(sd->skillatk) )
 		bonus = sd->skillatk[i].val;
@@ -7261,6 +7262,7 @@ int pc_sub_skillatk_bonus(struct map_session_data *sd, uint16 skill_id)
 
 	nullpo_ret(sd);
 
+	skill_id = skill_dummy2skill_id(skill_id);
 	ARR_FIND(0, ARRAYLENGTH(sd->subskill), i, sd->subskill[i].id == skill_id);
 	if( i < ARRAYLENGTH(sd->subskill) )
 		bonus = sd->subskill[i].val;
@@ -8849,12 +8851,13 @@ bool pc_setregstr(struct map_session_data *sd, int reg, const char *str)
 
 	ARR_FIND(0, sd->regstr_num, i, sd->regstr[i].index == reg);
 	if( i < sd->regstr_num ) { //Found entry, update
-		if( str == NULL || *str == '\0' ) { //Empty string
-			if( sd->regstr[i].data != NULL )
+		if( !str || *str == '\0' ) { //Empty string
+			if( sd->regstr[i].data )
 				aFree(sd->regstr[i].data);
 			sd->regstr[i].data = NULL;
 		} else if( sd->regstr[i].data ) { //Recreate
 			size_t len = strlen(str) + 1;
+
 			RECREATE(sd->regstr[i].data, char, len);
 			memcpy(sd->regstr[i].data, str, len * sizeof(char));
 		} else //Create
@@ -8862,7 +8865,7 @@ bool pc_setregstr(struct map_session_data *sd, int reg, const char *str)
 		return true;
 	}
 
-	if( str == NULL || *str == '\0' )
+	if( !str || *str == '\0' )
 		return true; //Nothing to add, empty string
 
 	ARR_FIND(0, sd->regstr_num, i, sd->regstr[i].data == NULL);
@@ -8876,13 +8879,13 @@ bool pc_setregstr(struct map_session_data *sd, int reg, const char *str)
 	return true;
 }
 
-int pc_readregistry(struct map_session_data *sd,const char *reg,int type)
+int pc_readregistry(struct map_session_data *sd, const char *reg, int type)
 {
 	struct global_reg *sd_reg;
 	int i, max;
 
 	nullpo_ret(sd);
-	switch (type) {
+	switch( type ) {
 		case 3: //Char reg
 			sd_reg = sd->save_reg.global;
 			max = sd->save_reg.global_num;
@@ -8898,10 +8901,10 @@ int pc_readregistry(struct map_session_data *sd,const char *reg,int type)
 		default:
 			return 0;
 	}
-	if (max == -1) {
+	if( max == -1 ) {
 		ShowError("pc_readregistry: Trying to read reg value %s (type %d) before it's been loaded!\n", reg, type);
 		//This really shouldn't happen, so it's possible the data was lost somewhere, we should request it again.
-		intif_request_registry(sd, type == 3 ? 4 : type);
+		intif_request_registry(sd, (type == 3 ? 4 : type));
 		return 0;
 	}
 
@@ -8909,13 +8912,13 @@ int pc_readregistry(struct map_session_data *sd,const char *reg,int type)
 	return (i < max) ? atoi(sd_reg[i].value) : 0;
 }
 
-char *pc_readregistry_str(struct map_session_data *sd,const char *reg,int type)
+char *pc_readregistry_str(struct map_session_data *sd, const char *reg, int type)
 {
 	struct global_reg *sd_reg;
 	int i, max;
 	
 	nullpo_ret(sd);
-	switch (type) {
+	switch( type ) {
 		case 3: //Char reg
 			sd_reg = sd->save_reg.global;
 			max = sd->save_reg.global_num;
@@ -8931,10 +8934,10 @@ char *pc_readregistry_str(struct map_session_data *sd,const char *reg,int type)
 		default:
 			return NULL;
 	}
-	if (max == -1) {
+	if( max == -1 ) {
 		ShowError("pc_readregistry: Trying to read reg value %s (type %d) before it's been loaded!\n", reg, type);
 		//This really shouldn't happen, so it's possible the data was lost somewhere, we should request it again.
-		intif_request_registry(sd, type == 3 ? 4 : type);
+		intif_request_registry(sd, (type == 3 ? 4 : type));
 		return NULL;
 	}
 
@@ -8942,7 +8945,7 @@ char *pc_readregistry_str(struct map_session_data *sd,const char *reg,int type)
 	return (i < max) ? sd_reg[i].value : NULL;
 }
 
-bool pc_setregistry(struct map_session_data *sd,const char *reg,int val,int type)
+bool pc_setregistry(struct map_session_data *sd, const char *reg, int val, int type)
 {
 	struct global_reg *sd_reg;
 	int i, *max, regmax;
@@ -8951,13 +8954,13 @@ bool pc_setregistry(struct map_session_data *sd,const char *reg,int val,int type
 
 	switch( type ) {
 		case 3: //Char reg
-			if( !strcmp(reg,"PC_DIE_COUNTER") && sd->die_counter != val ) {
+			if( !strcmp(reg, "PC_DIE_COUNTER") && sd->die_counter != val ) {
 				i = (!sd->die_counter && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE);
 				sd->die_counter = val;
 				if( i )
-					status_calc_pc(sd,SCO_NONE); //Lost the bonus
+					status_calc_pc(sd, SCO_NONE); //Lost the bonus
 			} else if( !strcmp(reg,"COOK_MASTERY") && sd->cook_mastery != val ) {
-				val = cap_value(val,0,1999);
+				val = cap_value(val, 0, 1999);
 				sd->cook_mastery = val;
 			}
 			sd_reg = sd->save_reg.global;
@@ -8965,11 +8968,11 @@ bool pc_setregistry(struct map_session_data *sd,const char *reg,int val,int type
 			regmax = GLOBAL_REG_NUM;
 			break;
 		case 2: //Account reg
-			if( !strcmp(reg,"#CASHPOINTS") && sd->cashPoints != val ) {
-				val = cap_value(val,0,MAX_ZENY);
+			if( !strcmp(reg, "#CASHPOINTS") && sd->cashPoints != val ) {
+				val = cap_value(val, 0, MAX_ZENY);
 				sd->cashPoints = val;
 			} else if( !strcmp(reg,"#KAFRAPOINTS") && sd->kafraPoints != val ) {
-				val = cap_value(val,0,MAX_ZENY);
+				val = cap_value(val, 0, MAX_ZENY);
 				sd->kafraPoints = val;
 			}
 			sd_reg = sd->save_reg.account;
@@ -8986,45 +8989,45 @@ bool pc_setregistry(struct map_session_data *sd,const char *reg,int val,int type
 	}
 
 	if( *max == -1 ) {
-		ShowError("pc_setregistry : refusing to set %s (type %d) until vars are received.\n",reg,type);
+		ShowError("pc_setregistry : refusing to set %s (type %d) until vars are received.\n", reg, type);
 		return true;
 	}
-	
+
 	//Delete reg
-	if( val == 0 ) {
-		ARR_FIND(0,*max,i,strcmp(sd_reg[i].str,reg) == 0);
+	if( !val ) {
+		ARR_FIND(0, *max, i, strcmp(sd_reg[i].str,reg) == 0);
 		if( i < *max ) {
 			if( i != *max - 1 )
-				memcpy(&sd_reg[i],&sd_reg[*max - 1],sizeof(struct global_reg));
-			memset(&sd_reg[*max - 1],0,sizeof(struct global_reg));
+				memcpy(&sd_reg[i], &sd_reg[*max - 1], sizeof(struct global_reg));
+			memset(&sd_reg[*max - 1], 0, sizeof(struct global_reg));
 			(*max)--;
 			sd->state.reg_dirty |= 1<<(type - 1); //Mark this registry as "need to be saved"
 		}
 		return true;
 	}
 	//Change value if found
-	ARR_FIND(0,*max,i,strcmp(sd_reg[i].str,reg) == 0);
+	ARR_FIND(0, *max, i, strcmp(sd_reg[i].str,reg) == 0);
 	if( i < *max ) {
-		safesnprintf(sd_reg[i].value,sizeof(sd_reg[i].value),"%d",val);
+		safesnprintf(sd_reg[i].value, sizeof(sd_reg[i].value), "%d", val);
 		sd->state.reg_dirty |= 1<<(type - 1);
 		return true;
 	}
 
 	//Add value if not found
 	if( i < regmax ) {
-		memset(&sd_reg[i],0,sizeof(struct global_reg));
-		safestrncpy(sd_reg[i].str,reg,sizeof(sd_reg[i].str));
-		safesnprintf(sd_reg[i].value,sizeof(sd_reg[i].value),"%d",val);
+		memset(&sd_reg[i], 0, sizeof(struct global_reg));
+		safestrncpy(sd_reg[i].str, reg, sizeof(sd_reg[i].str));
+		safesnprintf(sd_reg[i].value, sizeof(sd_reg[i].value), "%d", val);
 		(*max)++;
 		sd->state.reg_dirty |= 1<<(type - 1);
 		return true;
 	}
 
-	ShowError("pc_setregistry : couldn't set %s, limit of registries reached (%d)\n",reg,regmax);
+	ShowError("pc_setregistry : couldn't set %s, limit of registries reached (%d)\n", reg, regmax);
 	return false;
 }
 
-bool pc_setregistry_str(struct map_session_data *sd,const char *reg,const char *val,int type)
+bool pc_setregistry_str(struct map_session_data *sd, const char *reg, const char *val, int type)
 {
 	struct global_reg *sd_reg;
 	int i, *max, regmax;
@@ -9176,7 +9179,7 @@ static int pc_eventtimer(int tid, unsigned int tick, int id, intptr_t data)
 	char *p = (char *)data;
 	int i;
 
-	if (sd == NULL)
+	if (!sd)
 		return 0;
 
 	ARR_FIND(0, MAX_EVENTTIMER, i, sd->eventtimer[i] == tid);

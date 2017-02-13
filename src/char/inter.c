@@ -62,7 +62,7 @@ int inter_recv_packet_length[] = {
 struct WisData {
 	int id, fd, count, len;
 	unsigned long tick;
-	unsigned char src[24], dst[24], msg[512];
+	unsigned char src[NAME_LENGTH], dst[NAME_LENGTH], msg[512];
 };
 static DBMap *wis_db = NULL; // int wis_id -> struct WisData*
 static int wis_dellist[WISDELLIST_MAX], wis_delnum;
@@ -113,10 +113,8 @@ const char *job_name(int class_) {
 			return msg_txt(71);
 
 		case JOB_HANBOK:
-			return msg_txt(105);
-
 		case JOB_OKTOBERFEST:
-			return msg_txt(106);
+			return msg_txt(105 - JOB_HANBOK + class_);
 
 		case JOB_NOVICE_HIGH:
 		case JOB_SWORDMAN_HIGH:
@@ -281,10 +279,12 @@ const char *job_name(int class_) {
 
 		case JOB_KAGEROU:
 		case JOB_OBORO:
+		case JOB_REBELLION:
+		case JOB_SUMMONER:
 			return msg_txt(103 - JOB_KAGEROU + class_);
 
 		default:
-			return msg_txt(107);
+			return msg_txt(109);
 	}
 }
 
@@ -471,6 +471,7 @@ void inter_to_fd(int fd, int u_fd, int aid, char *msg, ...) {
 
 	return;
 }
+
 /* [Dekamaster/Nightroad] */
 void mapif_parse_accinfo(int fd) {
 	int u_fd = RFIFOL(fd,2), aid = RFIFOL(fd,6), castergroup = RFIFOL(fd,10);
@@ -529,6 +530,7 @@ void mapif_parse_accinfo(int fd) {
 
 	return;
 }
+
 void mapif_parse_accinfo2(bool success, int map_fd, int u_fd, int u_aid, int account_id, const char *userid, const char *user_pass, const char *email, const char *last_ip, const char *lastlogin, const char *pin_code, const char *birthdate, int group_id, int logincount, int state) {
 	if( map_fd <= 0 || !session_isActive(map_fd) )
 		return; // Check if we have a valid fd
@@ -585,6 +587,7 @@ void mapif_parse_accinfo2(bool success, int map_fd, int u_fd, int u_aid, int acc
 
 	return;
 }
+
 //--------------------------------------------------------
 // Save registry to sql
 int inter_accreg_tosql(int account_id, int char_id, struct accreg* reg, int type)
@@ -640,9 +643,8 @@ int inter_accreg_tosql(int account_id, int char_id, struct accreg* reg, int type
 		}
 	}
 
-	if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) ) {
+	if( SQL_ERROR == Sql_QueryStr(sql_handle, StringBuf_Value(&buf)) )
 		Sql_ShowDebug(sql_handle);
-	}
 
 	StringBuf_Destroy(&buf);
 
@@ -656,7 +658,7 @@ int inter_accreg_fromsql(int account_id,int char_id, struct accreg *reg, int typ
 	size_t len;
 	int i;
 
-	if( reg == NULL)
+	if( reg == NULL )
 		return 0;
 
 	memset(reg, 0, sizeof(struct accreg));

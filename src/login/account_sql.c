@@ -421,7 +421,7 @@ static bool account_db_sql_load_str(AccountDB *self, struct mmo_account* acc, co
 {
 	AccountDB_SQL *db = (AccountDB_SQL *)self;
 	Sql *sql_handle = db->accounts;
-	char esc_userid[2*NAME_LENGTH+1];
+	char esc_userid[NAME_LENGTH * 2 + 1];
 	int account_id;
 	char *data;
 

@@ -630,7 +630,7 @@ ACMD_FUNC(who)
 
 	nullpo_retr(-1, sd);
 
-	if (strstr(command, "map") != NULL) {
+	if (strstr(command, "map")) {
 		char map_name[MAP_NAME_LENGTH_EXT] = "";
 
 		if (sscanf(message, "%15s %23s", map_name, player_name) < 1 || (map_id = map_mapname2mapid(map_name)) < 0)
@@ -638,9 +638,9 @@ ACMD_FUNC(who)
 	} else
 		sscanf(message, "%23s", player_name);
 
-	if (strstr(command, "2") != NULL)
+	if (strstr(command, "2"))
 		display_type = 2;
-	else if (strstr(command, "3") != NULL)
+	else if (strstr(command, "3"))
 		display_type = 3;
 
 	level = pc_get_group_level(sd);
@@ -648,20 +648,19 @@ ACMD_FUNC(who)
 
 	iter = mapit_getallusers();
 	for (pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter))	{
-		if (!((pc_has_permission(pl_sd, PC_PERM_HIDE_SESSION) || pc_isinvisible(pl_sd)) && pc_get_group_level(pl_sd) > level)) { // you can look only lower or same level
-			if (stristr(pl_sd->status.name, player_name) == NULL || // Search with no case sensitive
+		if (!((pc_has_permission(pl_sd, PC_PERM_HIDE_SESSION) || pc_isinvisible(pl_sd)) && pc_get_group_level(pl_sd) > level)) { // You can look only lower or same level
+			if (!stristr(pl_sd->status.name, player_name) || // Search with no case sensitive
 				(map_id >= 0 && pl_sd->bl.m != map_id))
 				continue;
 			switch (display_type) {
-				case 2: {
+				case 2:
 					StringBuf_Printf(&buf, msg_txt(343), pl_sd->status.name); // "Name: %s "
 					if (pc_get_group_id(pl_sd) > 0) // Player title, if exists
 						StringBuf_Printf(&buf, msg_txt(344), pc_group_id2name(pc_get_group_id(pl_sd))); // "(%s) "
 					StringBuf_Printf(&buf, msg_txt(347), pl_sd->status.base_level, pl_sd->status.job_level,
 						job_name(pl_sd->status.class_)); // "| Lv:%d/%d | Job: %s"
 					break;
-				}
-				case 3: {
+				case 3:
 					if (pc_has_permission(sd, PC_PERM_WHO_DISPLAY_AID))
 						StringBuf_Printf(&buf, msg_txt(912), pl_sd->status.char_id, pl_sd->status.account_id);	// "(CID:%d/AID:%d) "
 					StringBuf_Printf(&buf, msg_txt(343), pl_sd->status.name); // "Name: %s "
@@ -669,20 +668,19 @@ ACMD_FUNC(who)
 						StringBuf_Printf(&buf, msg_txt(344), pc_group_id2name(pc_get_group_id(pl_sd))); // "(%s) "
 					StringBuf_Printf(&buf, msg_txt(348), mapindex_id2name(pl_sd->mapindex), pl_sd->bl.x, pl_sd->bl.y); // "| Location: %s %d %d"
 					break;
-				}
 				default: {
-					struct party_data *p = party_search(pl_sd->status.party_id);
-					struct guild *g = pl_sd->guild;
+						struct party_data *p = party_search(pl_sd->status.party_id);
+						struct guild *g = pl_sd->guild;
 
-					StringBuf_Printf(&buf, msg_txt(343), pl_sd->status.name); // "Name: %s "
-					if (pc_get_group_id(pl_sd) > 0) // Player title, if exists
-						StringBuf_Printf(&buf, msg_txt(344), pc_group_id2name(pc_get_group_id(pl_sd))); // "(%s) "
-					if (p != NULL)
-						StringBuf_Printf(&buf, msg_txt(345), p->party.name); // " | Party: '%s'"
-					if (g != NULL)
-						StringBuf_Printf(&buf, msg_txt(346), g->name); // " | Guild: '%s'"
+						StringBuf_Printf(&buf, msg_txt(343), pl_sd->status.name); // "Name: %s "
+						if (pc_get_group_id(pl_sd) > 0) // Player title, if exists
+							StringBuf_Printf(&buf, msg_txt(344), pc_group_id2name(pc_get_group_id(pl_sd))); // "(%s) "
+						if (p)
+							StringBuf_Printf(&buf, msg_txt(345), p->party.name); // " | Party: '%s'"
+						if (g)
+							StringBuf_Printf(&buf, msg_txt(346), g->name); // " | Guild: '%s'"
+					}
 					break;
-				}
 			}
 			clif_colormes(sd->fd, color_table[COLOR_DEFAULT], StringBuf_Value(&buf));
 			StringBuf_Clear(&buf);
@@ -692,14 +690,14 @@ ACMD_FUNC(who)
 	mapit_free(iter);
 
 	if (map_id < 0) {
-		if (count == 0)
+		if (!count)
 			StringBuf_Printf(&buf, msg_txt(28)); // No player found.
 		else if (count == 1)
 			StringBuf_Printf(&buf, msg_txt(29)); // 1 player found.
 		else
 			StringBuf_Printf(&buf, msg_txt(30), count); // %d players found.
 	} else {
-		if (count == 0)
+		if (!count)
 			StringBuf_Printf(&buf, msg_txt(54), map[map_id].name); // No player found in map '%s'.
 		else if (count == 1)
 			StringBuf_Printf(&buf, msg_txt(55), map[map_id].name); // 1 player found in map '%s'.

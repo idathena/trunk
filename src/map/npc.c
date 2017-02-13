@@ -2981,7 +2981,7 @@ const char *npc_parse_duplicate(char *w1, char *w2, char *w3, char *w4, const ch
 	safestrncpy(srcname, w2 + 10, length - 10);
 
 	dnd = npc_name2id(srcname);
-	if( dnd == NULL) {
+	if( !dnd ) {
 		ShowError("npc_parse_script: original npc not found for duplicate in file '%s', line '%d': %s\n", filepath, strline(buffer, start - buffer), srcname);
 		return end; //Next line, try to continue
 	}
