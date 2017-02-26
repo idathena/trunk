@@ -5555,7 +5555,7 @@ ACMD_FUNC(useskill)
 
 	if (!strcmp(target,"self"))
 		pl_sd = sd; // Quick keyword
-	else if ((pl_sd = map_nick2sd(target)) == NULL) {
+	else if (!(pl_sd = map_nick2sd(target))) {
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
 	}
@@ -5565,8 +5565,7 @@ ACMD_FUNC(useskill)
 		return -1;
 	}
 
-	if (skill_id >= HM_SKILLBASE && skill_id < HM_SKILLBASE + MAX_HOMUNSKILL &&
-		sd->hd && hom_is_active(sd->hd)) // (If used with @useskill, put the homunc as dest)
+	if (skill_id >= HM_SKILLBASE && skill_id < HM_SKILLBASE + MAX_HOMUNSKILL && hom_is_active(sd->hd)) // (If used with @useskill, put the homunc as dest)
 		bl = &sd->hd->bl;
 	else
 		bl = &sd->bl;

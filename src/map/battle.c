@@ -3668,7 +3668,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 #endif
 		case KN_CHARGEATK: { //+100% every 3 cells of distance but hard-limited to 500%
-				unsigned int k = (wd.miscflag - 1) / 3;
+				int k = (wd.miscflag - 1) / 3;
 
 				if(k < 0)
 					k = 0;
@@ -8448,18 +8448,18 @@ static const struct _battle_data {
 	{ "emblem_woe_change",                  &battle_config.emblem_woe_change,               0,      0,      1,              },
 	{ "emblem_transparency_limit",          &battle_config.emblem_transparency_limit,      80,      0,    100,              },
 #ifdef VIP_ENABLE
-	{ "vip_storage_increase",               &battle_config.vip_storage_increase,            0,      0,      MAX_STORAGE - MIN_STORAGE, },
+	{ "vip_storage_increase",               &battle_config.vip_storage_increase,           300,      0,      MAX_STORAGE - MIN_STORAGE, },
 #else
-	{ "vip_storage_increase",               &battle_config.vip_storage_increase,            0,      0,      MAX_STORAGE, },
+	{ "vip_storage_increase",               &battle_config.vip_storage_increase,           300,      0,      MAX_STORAGE, },
 #endif
-	{ "vip_base_exp_increase",              &battle_config.vip_base_exp_increase,           0,      0,      INT_MAX,        },
-	{ "vip_job_exp_increase",               &battle_config.vip_job_exp_increase,            0,      0,      INT_MAX,        },
-	{ "vip_exp_penalty_base",               &battle_config.vip_exp_penalty_base,            0,      0,      INT_MAX,        },
-	{ "vip_exp_penalty_job",                &battle_config.vip_exp_penalty_job,             0,      0,      INT_MAX,        },
+	{ "vip_base_exp_increase",              &battle_config.vip_base_exp_increase,          50,      0,      INT_MAX,        },
+	{ "vip_job_exp_increase",               &battle_config.vip_job_exp_increase,           50,      0,      INT_MAX,        },
+	{ "vip_exp_penalty_base",               &battle_config.vip_exp_penalty_base,          100,      0,      INT_MAX,        },
+	{ "vip_exp_penalty_job",                &battle_config.vip_exp_penalty_job,           100,      0,      INT_MAX,        },
 	{ "vip_zeny_penalty",                   &battle_config.vip_zeny_penalty,                0,      0,      INT_MAX,        },
-	{ "vip_bm_increase",                    &battle_config.vip_bm_increase,                 0,      0,      INT_MAX,        },
-	{ "vip_drop_increase",                  &battle_config.vip_drop_increase,               0,      0,      INT_MAX,        },
-	{ "vip_gemstone",                       &battle_config.vip_gemstone,                    0,      0,      1,              },
+	{ "vip_bm_increase",                    &battle_config.vip_bm_increase,                 2,      0,      INT_MAX,        },
+	{ "vip_drop_increase",                  &battle_config.vip_drop_increase,              50,      0,      INT_MAX,        },
+	{ "vip_gemstone",                       &battle_config.vip_gemstone,                    2,      0,      2,              },
 	{ "vip_disp_rate",                      &battle_config.vip_disp_rate,                   1,      0,      1,              },
 	{ "discount_item_point_shop",           &battle_config.discount_item_point_shop,        0,      0,      3,              },
 	{ "oktoberfest_ignorepalette",          &battle_config.oktoberfest_ignorepalette,       0,      0,      1,              },

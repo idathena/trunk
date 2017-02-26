@@ -2985,7 +2985,7 @@ const char *npc_parse_duplicate(char *w1, char *w2, char *w3, char *w4, const ch
 		ShowError("npc_parse_script: original npc not found for duplicate in file '%s', line '%d': %s\n", filepath, strline(buffer, start - buffer), srcname);
 		return end; //Next line, try to continue
 	}
-	src_id = dnd->bl.id;
+	src_id = (dnd->src_id ? dnd->src_id : dnd->bl.id);
 	type = dnd->subtype;
 
 	//Get placement
@@ -3147,6 +3147,7 @@ int npc_duplicate4instance(struct npc_data *snd, int16 m) {
 		wnd->u.warp.ys = snd->u.warp.ys;
 		wnd->bl.type = BL_NPC;
 		wnd->subtype = NPCTYPE_WARP;
+		wnd->src_id = (snd->src_id ? snd->src_id : snd->bl.id);
 		npc_setcells(wnd);
 		if( map_addblock(&wnd->bl) )
 			return 1;

@@ -4753,15 +4753,20 @@ int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tic
 	WBUFL(buf,14) = sdelay;
 	WBUFL(buf,18) = ddelay;
 	if(battle_config.hide_woe_damage && map_flag_gvg2(src->m)) {
+#if PACKETVER < 20071113
 		WBUFW(buf,22) = (damage ? div : 0);
 		WBUFW(buf,27 + offset) = (damage2 ? div : 0);
+#else
+		WBUFL(buf,22) = (damage ? div : 0);
+		WBUFL(buf,27 + offset) = (damage2 ? div : 0);
+#endif
 	} else {
 #if PACKETVER < 20071113
 		WBUFW(buf,22) = min(damage,INT16_MAX);
 		WBUFW(buf,27 + offset) = damage2;
 #else
-	WBUFL(buf,22) = damage;
-	WBUFL(buf,27 + offset) = damage2;
+		WBUFL(buf,22) = damage;
+		WBUFL(buf,27 + offset) = damage2;
 #endif
 	}
 #if PACKETVER >= 20131223

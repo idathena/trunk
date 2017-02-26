@@ -382,7 +382,7 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 
 	//Monsters will walk into an icewall from the west and south if they already started walking
 	if(map_getcell(bl->m,x + dx,y + dy,CELL_CHKNOPASS) &&
-		(icewall_walk_block == 0 || !map_getcell(bl->m,x + dx,y + dy,CELL_CHKICEWALL) || dx < 0 || dy < 0))
+		(!icewall_walk_block || !map_getcell(bl->m,x + dx,y + dy,CELL_CHKICEWALL) || dx < 0 || dy < 0))
 		return unit_walktoxy_sub(bl);
 
 	//Monsters can only leave icewalls to the west and south
@@ -837,7 +837,7 @@ bool unit_run(struct block_list *bl, struct map_session_data *sd, enum sc_type t
 
 	//Search for available path
 	for( i = 0; i < AREA_SIZE; i++ ) {
-		if( !map_getcell(bl->m, to_x + dir_x, to_y + dir_y, CELL_CHKPASS) )
+		if( map_getcell(bl->m, to_x + dir_x, to_y + dir_y, CELL_CHKNOPASS) )
 			break;
 
 		//If sprinting and there's a PC/Mob/NPC, block the path [Kevin]

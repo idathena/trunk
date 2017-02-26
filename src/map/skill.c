@@ -2804,13 +2804,11 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	if (tsc && !tsc->count)
 		tsc = NULL; //Don't need it
 
-	//Trick Dead protects you from damage, but not from buffs and the like, hence it's placed here
 	if (tsc && tsc->data[SC_TRICKDEAD])
-		return 0;
+		return 0; //Trick Dead protects you from damage, but not from buffs and the like, hence it's placed here
 
-	//When Gravitational Field is active, damage can only be dealt by Gravitational Field and Autospells
 	if (sc && sc->data[SC_GRAVITATION] && sc->data[SC_GRAVITATION]->val3 == BCT_SELF && skill_id != HW_GRAVITATION && sd && !sd->state.autocast)
-		return 0;
+		return 0; //When Gravitational Field is active, damage can only be dealt by Gravitational Field and Autospells
 
 	dmg = battle_calc_attack(attack_type, src, bl, skill_id, skill_lv, flag&0xFFF);
 
@@ -8424,7 +8422,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					if ((dstsd = g->member[i].sd) != NULL && sd != dstsd && !dstsd->state.autotrade && !pc_isdead(dstsd)) {
 						if (map[dstsd->bl.m].flag.nowarp && !map_flag_gvg2(dstsd->bl.m))
 							continue;
-						if (map_getcell(src->m,src->x+dx[j],src->y+dy[j],CELL_CHKNOREACH))
+						if (map_getcell(src->m,src->x+dx[j],src->y + dy[j],CELL_CHKNOREACH))
 							dx[j] = dy[j] = 0;
 						if (!pc_setpos(dstsd,map_id2index(src->m),src->x + dx[j],src->y + dy[j],CLR_RESPAWN))
 							called++;
@@ -9779,8 +9777,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			else {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				clif_specialeffect(bl,851,AREA);
-				clif_specialeffect(bl,852,AREA);
 				map_foreachinrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_PC,src,skill_id,skill_lv,tick,flag|BCT_ALL|1,skill_castend_nodamage_id);
 			}
 			break;
@@ -12764,7 +12760,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 		if( ux <= 0 || uy <= 0 || ux >= map[src->m].xs || uy >= map[src->m].ys )
 			continue; //Are the coordinates out of range?
 
-		if( !group->state.song_dance && !map_getcell(src->m,ux,uy,CELL_CHKREACH) )
+		if( !group->state.song_dance && map_getcell(src->m,ux,uy,CELL_CHKNOREACH) )
 			continue; //Don't place skill units on walls (except for songs/dances/encores)
 
 		if( battle_config.skill_wall_check && (unit_flag&UF_PATHCHECK) && !path_search_long(NULL,src->m,ux,uy,src->x,src->y,CELL_CHKWALL) )
@@ -12930,7 +12926,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 
 	if( skill_get_type(skill_id) == BF_MAGIC && ((skill_id != SA_LANDPROTECTOR &&
 		map_getcell(unit->bl.m,unit->bl.x,unit->bl.y,CELL_CHKLANDPROTECTOR)) ||
-		map_getcell(unit->bl.m,unit->bl.x,unit->bl.y,CELL_CHKMAELSTROM)) )
+		map_getcell(bl->m,bl->x,bl->y,CELL_CHKMAELSTROM)) )
 		return 0; //AoE skills are ineffective [Skotlex]
 
 	if( skill_get_inf2(skill_id)&(INF2_SONG_DANCE|INF2_ENSEMBLE_SKILL) && map_getcell(bl->m,bl->x,bl->y,CELL_CHKBASILICA) )
@@ -13000,7 +12996,6 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 			break;
 
 		case UNT_PNEUMA:
-		case UNT_MAELSTROM:
 			if( !sce )
 				sc_start2(src,bl,type,100,skill_lv,group->group_id,group->limit);
 			break;
@@ -18278,9 +18273,9 @@ int skill_unit_timer_sub_onplace(struct block_list *bl, va_list ap)
 
 	group = unit->group;
 
-	if( !(skill_get_inf3(group->skill_id)&(INF3_NOLP)) && !(skill_get_inf2(group->skill_id)&(INF2_TRAP)) &&
+	if( !(skill_get_inf2(group->skill_id)&(INF2_TRAP)) && !(skill_get_inf3(group->skill_id)&(INF3_NOLP)) &&
 		(map_getcell(unit->bl.m,unit->bl.x,unit->bl.y,CELL_CHKLANDPROTECTOR) ||
-		map_getcell(unit->bl.m,unit->bl.x,unit->bl.y,CELL_CHKMAELSTROM)) )
+		map_getcell(bl->m,bl->x,bl->y,CELL_CHKMAELSTROM)) )
 		return 0; //AoE skills are ineffective except non-essamble dance skills and traps
 
 	if( group->skill_id != GN_WALLOFTHORN && battle_check_target(&unit->bl,bl,group->target_flag) <= 0 )
@@ -18579,7 +18574,7 @@ int skill_unit_move_sub(struct block_list *bl, va_list ap)
 
 	nullpo_ret(target);
 
-	if( target->prev == NULL )
+	if( !target->prev )
 		return 0;
 
 	group = unit->group;
@@ -19620,7 +19615,8 @@ int skill_magicdecoy(struct map_session_data *sd, unsigned short nameid) {
 	//Spawn Position
 	x = sd->sc.pos_x;
 	y = sd->sc.pos_y;
-	sd->sc.pos_x = sd->sc.pos_y = 0;
+	sd->sc.pos_x = 0;
+	sd->sc.pos_y = 0;
 
 	//Item picked decides the mob class
 	switch( nameid ) {

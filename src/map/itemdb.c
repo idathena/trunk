@@ -887,7 +887,7 @@ static bool itemdb_read_nouse(char *fields[], int columns, int current)
 
 	nameid = atoi(fields[0]);
 
-	if( (id = itemdb_exists(nameid)) == NULL ) {
+	if( !(id = itemdb_exists(nameid)) ) {
 		ShowWarning("itemdb_read_nouse: Invalid item id %hu.\n", nameid);
 		return false;
 	}
