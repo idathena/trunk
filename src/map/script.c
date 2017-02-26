@@ -8859,11 +8859,11 @@ BUILDIN_FUNC(savepoint)
 		do {
 			x = x0 + rnd()%(x1 - x0 + 1);
 			y = y0 + rnd()%(y1 - y0 + 1);
-		} while( m != -1 && (--n) > 0 && !map_getcell(m,x,y,CELL_CHKPASS) );
+		} while( m != -1 && (--n) > 0 && map_getcell(m,x,y,CELL_CHKNOPASS) );
 	}
 
 	//Check for valid coordinates if map in local map-server
-	if( m != -1 && !map_getcell(m,x,y,CELL_CHKPASS) ) {
+	if( m != -1 && map_getcell(m,x,y,CELL_CHKNOPASS) ) {
 		ShowError("buildin_savepoint: Invalid coordinates %d,%d at map %s.\n",x,y,str);
 		return 1;
 	}
@@ -9463,7 +9463,9 @@ BUILDIN_FUNC(killmonsterall)
 BUILDIN_FUNC(clone)
 {
 	TBL_PC *sd, *msd = NULL;
-	int char_id, master_id = 0, x, y, mode = 0, flag = 0, m;
+	uint32 char_id, master_id = 0, x, y, flag = 0;
+	int16 m;
+	enum e_mode mode = 0;
 	unsigned int duration = 0;
 	const char *map, *event;
 

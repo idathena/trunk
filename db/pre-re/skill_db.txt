@@ -806,8 +806,8 @@
 // WL Warlock
 2201,11,6,16,0,0,0,5,1,no,0,0,0,magic,0,0x400,	WL_WHITEIMPRISON,White Imprison
 2202,11,8,1,8,0x2,1:1:1:2:2,5,-2,yes,0,0,0,magic,0,0x400,	WL_SOULEXPANSION,Soul Expansion
-2203,1,8,4,1,0x3,9,5,-3:-4:-5:-6:-7,yes,0,0,0,magic,0,0,	WL_FROSTMISTY,Frosty Misty
-2204,1,8,4,1,0x3,5:6:7:8:9,5,-5,yes,0,0,0,magic,0,0,	WL_JACKFROST,Jack Frost
+2203,1,8,4,1,0x2,9,5,-3:-4:-5:-6:-7,yes,0,0,0,magic,0,0,	WL_FROSTMISTY,Frosty Misty
+2204,1,8,4,1,0x2,5:6:7:8:9,5,-5,yes,0,0,0,magic,0,0,	WL_JACKFROST,Jack Frost
 2205,11,6,1,0,0x1,0,5,1,yes,0,0,0,magic,0,0x400,	WL_MARSHOFABYSS,Marsh of Abyss
 2206,1,6,4,0,0x1,0,5,1,yes,0,0,0,magic,0,0,	WL_RECOGNIZEDSPELL,Recognized Spell
 2207,7,6,1,2,0x3,1:2:2:3:3,5,0,yes,0,0,0,magic,0,0x400,	WL_SIENNAEXECRATE,Sienna Execrate
@@ -981,7 +981,7 @@
 //****
 // WM Wanderer/Minstrel
 2412,1,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	WM_LESSON,Lesson
-2413,9,8,1,-1,0,0,5,-2:-2:-3:-3:-4,yes,0,0,0,magic,0,0,	WM_METALICSOUND,Metallic Sound
+2413,9,8,1,0,0,0,5,-2:-2:-3:-3:-4,yes,0,0,0,magic,0,0,	WM_METALICSOUND,Metallic Sound
 2414,9,6,2,0,0x3,2,5,1,yes,0,0x80,0,none,0,0,	WM_REVERBERATION,Reverberation
 2415,1,6,1,-1,0x6,2,5,1,no,0,0,0,weapon,0,0,	WM_REVERBERATION_MELEE,Reverberation Melee
 2416,1,6,1,0,0x6,2,5,1,no,0,0,0,magic,0,0,	WM_REVERBERATION_MAGIC,Reverberation Magic

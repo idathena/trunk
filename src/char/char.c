@@ -5415,8 +5415,8 @@ int char_parse_ackrename(int fd, struct char_session_data *sd) {
 	{
 		int i;
 		int cid = RFIFOL(fd,2);
-		RFIFOSKIP(fd,6);
 
+		RFIFOSKIP(fd,6);
 		ARR_FIND(0, MAX_CHARS, i, sd->found_char[i] == cid);
 		if( i == MAX_CHARS )
 			return 1;
