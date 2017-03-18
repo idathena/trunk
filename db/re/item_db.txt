@@ -6011,7 +6011,7 @@
 11594,Trance_Candy_Y,Trans Candy Yellow,0,20,,30,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal 45,0; transform 1130,600000,SC_MTF_PUMPKIN,2000; callfunc "F_11594"; },{},{}
 11595,Trance_Candy_G,Trans Candy Green,0,20,,30,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal 45,0; transform 1508,600000,SC_MTF_HITFLEE,10,20; callfunc "F_11595"; },{},{}
 11596,Blood_In_Skull,Blood In Skull,0,20,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(600,800),0; },{},{}
-11597,Iron_Bug,Iron Worm,0,10,,10,,,,0,0xFFFFFFFF,63,2,,,,,,{},{},{}
+11597,Iron_Bug,Metal Bug,0,10,,10,,,,0,0xFFFFFFFF,63,2,,,,,,{},{},{}
 11598,Bitter_Cacao_Bean,Bitter Cacao Bean,0,10,,0,,,,0,0xFFFFFFFF,63,2,,,,,,{},{},{}
 11599,Superstar_Potion,Superstar Potion,0,10,,10,,,,0,0xFFFFFFFF,63,2,,,,,,{},{},{}
 11600,Shining_Holy_Water,Shining Holy Water,0,10,,15,,,,0,0xFFFFFFFF,63,2,,,,,,{ if(strcharinfo(3)=="prt_q") { bonus_script "{ bonus2 bSubSize,Size_All,10; }",600; sc_end SC_SILENCE; sc_end SC_POISON; sc_end SC_CURSE; heal 1000,0; } },{},{}
@@ -10605,8 +10605,8 @@
 22513,King_Of_Gift_Box,King of Gift Box,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ /* TODO: confirm the rates */ getitem callfunc("F_Rand",12817,4403,14512),1; },{},{}
 22514,Candy_Holder,Candy Holder,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Candy_Holder,1); getrandgroupitem(IG_Candy_Holder,1); getrandgroupitem(IG_Candy_Holder,1); },{},{}
 22515,Twisted_Key_Of_Time,Twisted Key of Time,3,10,,300,,,,,,,,,,,,,{},{},{}
-22516,Dark_Red_Stone,Dark Red Stone,2,1440,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ if(rand(1000)<300) sc_start SC_CURSE,30000,0; },{},{}
-22517,Rocker_Summoning_Scroll,Rocker Summoning Scroll,3,10,,0,,,,,,,,,,,,,{},{},{}
+22516,Dark_Red_Clot,Dark Red Clot,2,1440,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ if(rand(1000)<300) sc_start SC_CURSE,30000,0; },{},{}
+22517,Loki_Summon_Scroll,Loki Summon Scroll,3,10,,0,,,,,,,,,,,,,{},{},{}
 22518,Egg_Of_Wisdom,Egg of Wisdom,18,10,,10,,,,,0xFFFFFFFF,63,2,,,1,,,{ /* TODO: Confirm the rates */ getitem callfunc("F_Rand",4263,6229,6233,6230,6234,12259,5505,12213,5361),1; },{},{}
 22519,Stops_Buff,Stops Buff,3,10,,0,,,,,,,,,,,,,{},{},{}
 22520,Stops_Buff_Reset,Stops Buff Reset,3,10,,0,,,,,,,,,,,,,{},{},{}
@@ -10701,10 +10701,10 @@
 22674,June_Gift_Box,June Gift Box,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ /* 1 Potion Box */ },{},{}
 22675,Mysterious_Scroll,Mysterious Scroll,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INTFOOD,3600000,30; },{},{}
 22676,Hangul_Day_Event_Box,Hangul Day Event Box,2,20,,0,,,,,0xFFFFFFFF,63,2,,,0,,,{ getitem 22675,10; getitem 607,9; },{},{}
-22679,Death_Bin,Death Bin,18,10,,0,,,,,0xFFFFFFFF,63,2,,,170,,,{ /* TODO */ },{},{}
+22679,Chest_Of_Death,Death Bin,18,10,,0,,,,,0xFFFFFFFF,63,2,,,170,,,{ /* TODO */ },{},{}
 22685,Solo_Christmas_Gift,Single Union Christmas Gift,2,0,,0,,,,,0xFFFFFFFF,63,2,,,0,,,{ getgroupitem(IG_Solo_Christmas_Gift); },{},{}
 22686,Solo_Cookie,Single Cookie,0,0,,50,,,,,0xFFFFFFFF,63,2,,,0,,,{ percentheal 5,5; },{},{}
-22687,Fragments_Vicious_Mind,Fragments Vicious Mind,3,10,,1,,,,,0xFFFFFFFF,63,2,,,,,,{ /* TODO */ },{},{}
+22687,Pieces_Of_Sentiment,Fragments Vicious Mind,3,10,,1,,,,,0xFFFFFFFF,63,2,,,,,,{ /* TODO */ },{},{}
 22691,Record_Fragment1,Record Fragment,3,10,,0,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22692,Record_Fragment2,Record Fragment,3,10,,0,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22693,Record_Fragment3,Record Fragment,3,10,,0,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
@@ -10749,12 +10749,12 @@
 22762,Centipede_Transportin,Centipede Transportin,2,10,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ /* No Info */ },{},{}
 22764,Pet_Exchange_Ticket_Box_,Pet Exchange Ticket Box,18,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ /* TODO: Confirm the allowed pet_id and chance */ getitem callfunc("F_Rand",6116,6117,6118,6129,6130,6130,6132,6133,6134,6135,6136,6137,6138,6139,6140,6141,6142,6143),1; },{},{}
 22770,Grilled_Shark_Skewer,Grilled Shark Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ /* No Info */ },{},{}
-22771,Grilled_Tuna_Skewer,Grilled Tuna Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus2 bAddClass,Class_All,30; }",5,1; },{},{}
-22772,Grilled_Snapper_Skewer,Grilled Snapper Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bMatkRate,30; }",5,1; },{},{}
-22773,Grilled_Piranha_Skewer,Grilled Piranha Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bAspd,5; }",5,1; },{},{}
-22774,Grilled_Salmon_Skewer,Grilled Salmon Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bSpeedRate,25; }",5,1; },{},{}
-22775,Grilled_Eel_Skewer,Grilled Eel Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus2 bSubRace,RC_All,30; }",5,1; },{},{}
-22776,Grilled_Carp_Skewer,Grilled Carp Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus2 bSubRace,RC_All,30; }",5,1; },{},{}
+22771,Grilled_Tuna_Skewer,Grilled Tuna Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_ENHANCE; bonus_script "{ bonus2 bAddClass,Class_All,30; }",5,1,0,SI_SUMMEREVENT01; },{},{}
+22772,Grilled_Snapper_Skewer,Grilled Snapper Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_ENHANCE; bonus_script "{ bonus bMatkRate,30; }",5,1,0,SI_SUMMEREVENT02; },{},{}
+22773,Grilled_Piranha_Skewer,Grilled Piranha Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_ENHANCE; bonus_script "{ bonus bAspd,5; }",5,1,0,SI_SUMMEREVENT03; },{},{}
+22774,Grilled_Salmon_Skewer,Grilled Salmon Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_ENHANCE; bonus_script "{ bonus bSpeedRate,25; }",5,1; },{},{}
+22775,Grilled_Eel_Skewer,Grilled Eel Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_ENHANCE; bonus_script "{ bonus2 bSubRace,RC_All,30; }",5,1,0,SI_SUMMEREVENT04; },{},{}
+22776,Grilled_Carp_Skewer,Grilled Carp Skewer,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_ENHANCE; bonus_script "{ bonus2 bSubRace,RC_All,30; }",5,1,0,SI_SUMMEREVENT05; },{},{}
 22777,Gift_Buff_Set,Gift Buff Set,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_Gift_Buff_Set); },{},{}
 22781,PC_Bang_Normal_Box,PC Bang Normal Box,2,10,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 547,50; },{},{}
 22782,PC_Bang_Wooden_Box,PC Bang Wooden Box,2,10,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 547,80; },{},{}

@@ -1606,7 +1606,6 @@ bool itemdb_is_item_usable(struct item_data *item) {
  * Read all item-related databases
  */
 static void itemdb_read(void) {
-
 	if (db_use_sqldbs)
 		itemdb_read_sqldb();
 	else

@@ -788,7 +788,7 @@
 6656,499,100	// Goast_Free_Charm
 6657,499,100	// Memory_Of_Jack
 6671,467,100	// Geffen_Coin_Magic_Tournament
-6672,467,100	// Black_As_Night_Piece
+6672,467,100	// Gray_Piece
 6673,507,100	// Bossnia_Tickets
 6674,507,100	// GM_Coin
 6681,467,100	// XMAS_Cookie
@@ -3706,7 +3706,7 @@
 22510,475,100	// King_Wolf_Scroll
 //22511,467,100	//
 22513,499,100	// King_Of_Gift_Box
-22517,507,100	// Rocker_Summoning_Scroll
+22517,507,100	// Loki_Summon_Scroll
 22521,507,100	// Level_Up_Box_
 22522,507,100	// Level_Up_Box100
 22523,507,100	// Level_Up_Box120
