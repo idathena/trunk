@@ -11122,9 +11122,9 @@
 28419,Lesser_Bunny_Talisman,Lesser Bunny Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,100,0,0,{ bonus bDex,1; },{},{}
 28420,Intermediate_Bunny_Talisman,Intermediate Bunny Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,140,0,0,{ bonus bDex,2; },{},{}
 28421,Superior_Bunny_Talisman,Superior Bunny Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,175,0,0,{ bonus bDex,3; },{},{}
-28422,Shining_Eggplant_Talisman,Shining Eggplant Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,100,0,0,{ bonus2 bVariableCastrate,"SU_SV_STEMSPEAR",-50; if(getskilllv("SU_SV_STEMSPEAR")) { bonus2 bSkillAtk,"SU_SV_STEMSPEAR",readparam(bInt)/2+getskilllv("SU_SV_STEMSPEAR")*20; } },{},{}
+28422,Shining_Eggplant_Talisman,Shining Eggplant Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,100,0,0,{ bonus2 bVariableCastrate,"SU_SV_STEMSPEAR",-50; if(getskilllv("SU_SV_STEMSPEAR")) { bonus2 bSkillAtk,"SU_SV_STEMSPEAR",getskilllv("SU_SV_STEMSPEAR")*readparam(bInt)/6; } },{},{}
 28423,Fresh_Tuna_Talisman,Fresh Tuna Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,100,0,0,{ bonus2 bSkillCooldown,"SU_TUNAPARTY",-5000; bonus3 bAutoSpellWhenHit,"SU_TUNAPARTY",(getskilllv("SU_TUNAPARTY")>1?getskilllv("SU_TUNAPARTY"):1),10; },{},{}
-28424,Chubby_Earthworm_Talisman,Chubby Earthworm Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,100,0,0,{ bonus2 bVariableCastrate,"SU_PICKYPECK",-50; if(getskilllv("SU_PICKYPECK")) { bonus2 bSkillAtk,"SU_PICKYPECK",readparam(bDex)/2+getskilllv("SU_PICKYPECK")*20; } },{},{}
+28424,Chubby_Earthworm_Talisman,Chubby Earthworm Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,100,0,0,{ bonus2 bVariableCastrate,"SU_PICKYPECK",-50; if(getskilllv("SU_PICKYPECK")) { bonus2 bSkillAtk,"SU_PICKYPECK",getskilllv("SU_PICKYPECK")*readparam(bDex)/6; } },{},{}
 28600,Ru_Blue_Book,Blue Book,5,20,,500,200,,1,1,0x00000100,56,2,2,3,100,1,15,{ bonus bVit,5; bonus bInt,5; /* Gold PC Room: bonus bMatkRate,20; bonus bDelayRate,-10; */ },{},{}
 28601,Ru_Gold_Book,Gold Book,5,20,,500,160,,1,2,0x00000100,56,2,2,3,120,1,15,{ bonus bVit,8; bonus bInt,8; },{},{}
 28602,Demon_Hunting_Bible,Demon Hunting Bible,5,20,,500,30:170,,1,2,0x00000100,56,2,2,3,110,1,15,{ bonus bInt,2; bonus bDex,2; bonus2 bSkillAtk,"PR_MAGNUS",30+(readparam(bInt)>120?120:readparam(bInt)); },{},{}

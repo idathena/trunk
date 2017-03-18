@@ -56,7 +56,7 @@ OnInit:
 	// Remove old depreciated settings.
 	set $signbmps,0;
 	set $signmazemonster,0;
-	
+
 	// Set the time zone of the server.
 	// - Not official but seemed like a nice way to handle it.
 	set $timezonestring$,"^FF0000GMT^000000";
@@ -12238,11 +12238,13 @@ OnInit:
 	end;
 
 OnTouch:
-	set geffenia_warp,rand(1,4);
-	if (geffenia_warp == 1) warp "gefenia01",58,169;
-	else if (geffenia_warp == 2) warp "gefenia02",116,115;
-	else if (geffenia_warp == 3) warp "gefenia03",130,206;
-	else if (geffenia_warp == 4) warp "gefenia04",133,88;
+	if (geffenia_warp)
+		set geffenia_warp,0; //Clear old variable value
+	set .@geffenia_warp,rand(1,4);
+	if (.@geffenia_warp == 1) warp "gefenia01",58,169;
+	else if (.@geffenia_warp == 2) warp "gefenia02",116,115;
+	else if (.@geffenia_warp == 3) warp "gefenia03",130,206;
+	else if (.@geffenia_warp == 4) warp "gefenia04",133,88;
 	else warp "geffen",116,115;
 	end;
 

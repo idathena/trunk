@@ -999,7 +999,7 @@ void clif_channel_msg(struct Channel *channel, struct map_session_data *sd, char
 #define clif_menuskill_clear(sd) (sd)->menuskill_id = (sd)->menuskill_val = (sd)->menuskill_val2 = 0;
 
 void clif_ranklist(struct map_session_data *sd, int16 rankingType);
-void clif_update_rankingpoint(struct map_session_data *sd, int rankingtype, int point);
+void clif_update_rankingpoint(struct map_session_data *sd, enum e_rank rankingtype, int point);
 
 //Bank System [Yommy]
 void clif_bank_deposit(struct map_session_data *sd, enum e_BANKING_DEPOSIT_ACK reason);

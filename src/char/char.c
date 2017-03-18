@@ -181,19 +181,28 @@ char default_map[MAP_NAME_LENGTH];
 unsigned short default_map_x = 156;
 unsigned short default_map_y = 191;
 
+#if PACKETVER_SUPPORTS_PINCODE
 // Pincode system
-#define PINCODE_OK 0
-#define PINCODE_ASK 1
-#define PINCODE_NOTSET 2
-#define PINCODE_EXPIRED 3
-#define PINCODE_NEW 4
-#define PINCODE_PASSED 7
-#define	PINCODE_WRONG 8
+enum pincode_state {
+	PINCODE_OK = 0,
+	PINCODE_ASK = 1,
+	PINCODE_NOTSET = 2,
+	PINCODE_EXPIRED = 3,
+	PINCODE_NEW = 4,
+	PINCODE_ILLEGAL = 5,
+#if 0
+	PINCODE_KSSN = 6, // Not supported since we do not store KSSN
+#endif
+	PINCODE_PASSED = 7,
+	PINCODE_WRONG = 8
+};
 
 bool pincode_enabled = true;
 int pincode_changetime = 0;
 int pincode_maxtry = 3;
 bool pincode_force = true;
+bool pincode_allow_repeated = false;
+bool pincode_allow_sequential = false;
 
 void pincode_check(int fd, struct char_session_data *sd);
 void pincode_change(int fd, struct char_session_data *sd);
@@ -203,6 +212,8 @@ void pincode_notifyLoginPinUpdate(int account_id, char *pin);
 void pincode_notifyLoginPinError(int account_id);
 void pincode_decrypt(uint32 userSeed, char *pin);
 int pincode_compare(int fd, struct char_session_data *sd, char *pin);
+bool pincode_allowed(char *pincode);
+#endif
 
 void mapif_vipack(int mapfd, uint32 aid, uint32 vip_time, uint8 flag, uint32 group_id);
 int loginif_reqvipdata(uint32 aid, uint8 flag, int32 timediff, int mapfd);
@@ -2575,8 +2586,7 @@ void loginif_on_ready(void)
 }
 
 
-int loginif_parse_reqpincode(int fd, struct char_session_data *sd) {
-#if PACKETVER >=  20110309
+void loginif_parse_reqpincode(int fd, struct char_session_data *sd) {
 	if( pincode_enabled ) { // PIN code system enabled
 		ShowInfo("Asking to start pincode to AID: %d\n", sd->account_id);
 		if( sd->pincode[0] == '\0' ) { // No PIN code has been set yet
@@ -2597,8 +2607,6 @@ int loginif_parse_reqpincode(int fd, struct char_session_data *sd) {
 		}
 	} else // PIN code system disabled
 		pincode_sendstate(fd, sd, PINCODE_OK);
-#endif
-    return 0;
 }
 
 
@@ -2730,7 +2738,9 @@ int parse_fromlogin(int fd) {
 						char_reject(i,0);
 					} else { // Send characters to player
 						mmo_char_send(i,sd);
+#if PACKETVER_SUPPORTS_PINCODE
 						loginif_parse_reqpincode(i,sd);
+#endif
 					}
 				}
 				RFIFOSKIP(fd,75);
@@ -3803,10 +3813,13 @@ int parse_frommap(int fd)
 					int fame_pos;
 
 					switch( type ) {
-						case 1:  size = fame_list_size_smith;   list = smith_fame_list;   break;
-						case 2:  size = fame_list_size_chemist; list = chemist_fame_list; break;
-						case 3:  size = fame_list_size_taekwon; list = taekwon_fame_list; break;
-						default: size = 0;                      list = NULL;              break;
+						case RANK_BLACKSMITH: size = fame_list_size_smith; list = smith_fame_list; break;
+						case RANK_ALCHEMIST: size = fame_list_size_chemist; list = chemist_fame_list; break;
+						case RANK_TAEKWON: size = fame_list_size_taekwon; list = taekwon_fame_list; break;
+						default:
+							size = 0;
+							list = NULL;
+							break;
 					}
 
 					ARR_FIND(0, size, player_pos, list[player_pos].id == cid); //Position of the player
@@ -4827,6 +4840,7 @@ int parse_char(int fd)
 				RFIFOSKIP(fd,6);
 				break;
 
+#if PACKETVER_SUPPORTS_PINCODE
 			//Checks the entered pin
 			case 0x8b8:
 				if( RFIFOREST(fd) < 10 )
@@ -4866,6 +4880,7 @@ int parse_char(int fd)
 				}
 				RFIFOSKIP(fd,6);
 				break;
+#endif
 
 			//Character movement request
 			case 0x8d4:
@@ -5089,7 +5104,7 @@ int check_connect_login_server(int tid, unsigned int tick, int id, intptr_t data
 
 	ShowInfo("Attempt to connect to login-server...\n");
 	login_fd = make_connection(login_ip,login_port,false,10);
-	if( login_fd == -1 ) { //Try again later. [Skotlex]
+	if( login_fd == -1 ) { //Try again later [Skotlex]
 		login_fd = 0;
 		return 0;
 	}
@@ -5113,6 +5128,7 @@ int check_connect_login_server(int tid, unsigned int tick, int id, intptr_t data
 	return 1;
 }
 
+#if PACKETVER_SUPPORTS_PINCODE
 //------------------------------------------------
 //Pincode system
 //------------------------------------------------
@@ -5143,6 +5159,59 @@ int pincode_compare(int fd, struct char_session_data *sd, char *pin) {
 	}
 }
 
+/**
+ * Helper function to check if a new pincode contains illegal characters or combinations
+ */
+bool pincode_allowed(char *pincode) {
+	int i;
+	char c, n, compare[PINCODE_LENGTH + 1];
+
+	memset(compare,0,PINCODE_LENGTH + 1);
+
+	//Sanity check for bots to prevent errors
+	for( i = 0; i < PINCODE_LENGTH; i++ ) {
+		c = pincode[i];
+		if( c < '0' || c > '9' )
+			return false;
+	}
+
+	//Is it forbidden to use only the same character?
+	if( !pincode_allow_repeated ) {
+		c = pincode[0];
+		//Check if the first character equals the rest of the input
+		for( i = 0; i < PINCODE_LENGTH; i++ )
+			compare[i] = c;
+		if( strncmp(pincode,compare,PINCODE_LENGTH + 1) == 0 )
+			return false;
+	}
+
+	//Is it forbidden to use a sequential combination of numbers?
+	if( !pincode_allow_sequential ) {
+		c = pincode[0];
+		//Check if it is an ascending sequence
+		for( i = 0; i < PINCODE_LENGTH; i++ ) {
+			n = c + i;
+			if( n > '9' )
+				compare[i] = '0' + (n - '9') - 1;
+			else
+				compare[i] = n;
+		}
+		if( strncmp(pincode,compare,PINCODE_LENGTH + 1) == 0 )
+			return false;
+		//Check if it is an descending sequence
+		for( i = 0; i < PINCODE_LENGTH; i++ ) {
+			n = c - i;
+			if( n < '0' )
+				compare[i] = '9' - ('0' - n) + 1;
+			else
+				compare[i] = n;
+		}
+		if( strncmp(pincode,compare,PINCODE_LENGTH + 1) == 0 )
+			return false;
+	}
+	return true;
+}
+
 void pincode_change(int fd, struct char_session_data *sd) {
 	char oldpin[PINCODE_LENGTH + 1];
 	char newpin[PINCODE_LENGTH + 1];
@@ -5159,11 +5228,13 @@ void pincode_change(int fd, struct char_session_data *sd) {
 	strncpy(newpin,(char *)RFIFOP(fd,10),PINCODE_LENGTH);
 	pincode_decrypt(sd->pincode_seed,newpin);
 
-	pincode_notifyLoginPinUpdate(sd->account_id,newpin);
-	strncpy(sd->pincode,newpin,sizeof(newpin));
-	ShowInfo("Pincode changed for AID: %d\n",sd->account_id);
-
-	pincode_sendstate(fd,sd,PINCODE_PASSED);
+	if( pincode_allowed(newpin) ) {
+		pincode_notifyLoginPinUpdate(sd->account_id,newpin);
+		strncpy(sd->pincode,newpin,sizeof(newpin));
+		ShowInfo("Pincode changed for AID: %d\n",sd->account_id);
+		pincode_sendstate(fd,sd,PINCODE_PASSED);
+	} else
+		pincode_sendstate(fd,sd,PINCODE_ILLEGAL);
 }
 
 void pincode_setnew(int fd, struct char_session_data *sd) {
@@ -5174,10 +5245,12 @@ void pincode_setnew(int fd, struct char_session_data *sd) {
 	strncpy(newpin,(char *)RFIFOP(fd,6),PINCODE_LENGTH);
 	pincode_decrypt(sd->pincode_seed,newpin);
 
-	pincode_notifyLoginPinUpdate(sd->account_id,newpin);
-	strncpy(sd->pincode,newpin,strlen(newpin));
-
-	pincode_sendstate(fd,sd,PINCODE_PASSED);
+	if( pincode_allowed(newpin) ) {
+		pincode_notifyLoginPinUpdate(sd->account_id,newpin);
+		strncpy(sd->pincode,newpin,strlen(newpin));
+		pincode_sendstate(fd,sd,PINCODE_PASSED);
+	} else
+		pincode_sendstate(fd,sd,PINCODE_ILLEGAL);
 }
 
 // 0 = Disabled / pin is correct
@@ -5241,6 +5314,7 @@ void pincode_decrypt(uint32 userSeed, char *pin) {
 	strcpy(pin,buf);
 	aFree(buf);
 }
+#endif
 
 //------------------------------------------------
 //Add On system
@@ -6006,20 +6080,25 @@ int char_config_read(const char *cfgName)
 			}
 		} else if(strcmpi(w1, "guild_exp_rate") == 0)
 			guild_exp_rate = atoi(w2);
-		else if(strcmpi(w1, "pincode_enabled") == 0) {
+		else if(strcmpi(w1, "pincode_enabled") == 0)
+#if PACKETVER_SUPPORTS_PINCODE
 			pincode_enabled = config_switch(w2);
-#if PACKETVER < 20110309
-			if(pincode_enabled) {
-				ShowWarning("pincode_enabled requires PACKETVER 20110309 or higher. Disabling...\n");
-				pincode_enabled = false;
-			}
-#endif
-		} else if(strcmpi(w1, "pincode_changetime") == 0)
+		else if(strcmpi(w1, "pincode_changetime") == 0)
 			pincode_changetime = atoi(w2) * 60 * 60 * 24;
 		else if(strcmpi(w1, "pincode_maxtry") == 0)
 			pincode_maxtry = atoi(w2);
 		else if(strcmpi(w1, "pincode_force") == 0)
 			pincode_force = config_switch(w2);
+		else if(strcmpi(w1, "pincode_allow_repeated") == 0)
+			pincode_allow_repeated = config_switch(w2);
+		else if(strcmpi(w1, "pincode_allow_sequential") == 0)
+			pincode_allow_sequential = config_switch(w2);
+#else
+		{
+			if(config_switch(w2))
+				ShowWarning("pincode_enabled requires PACKETVER 20110309 or higher.\n");
+		}
+#endif
 		else if(strcmpi(w1, "char_move_enabled") == 0)
 			char_move_enabled = config_switch(w2);
 		else if(strcmpi(w1, "char_movetoused") == 0)

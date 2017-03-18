@@ -2455,7 +2455,7 @@ int skill_is_combo(uint16 skill_id) {
 /**
  * Combo handler, start stop combo status
  */
-void skill_combo_toogle_inf(struct block_list *bl, uint16 skill_id, int inf) {
+void skill_combo_toggle_inf(struct block_list *bl, uint16 skill_id, int inf) {
 	TBL_PC *sd = BL_CAST(BL_PC,bl);
 
 	switch (skill_id) {
@@ -13066,7 +13066,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 		case UNT_SUITON:
 			if( !sce )
 				sc_start4(src,bl,type,100,skill_lv,
-				map_flag_vs(bl->m) || (battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0 ? 1 : 0), //Send val2 to reduce agi
+				(map_flag_vs(bl->m) || (battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0 ? 1 : 0)), //Send val2 to reduce agi
 				0,0,group->limit);
 			break;
 
@@ -13216,10 +13216,8 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 			break;
 
 		case UNT_SV_ROOTTWIST:
-			if( group->val2 )
-				break;
-			sc_start4(src,bl,type,100,skill_lv,src->id,group->group_id,0,group->limit);
-			group->val2 = bl->id;
+			if( !sce )
+				sc_start4(src,bl,type,100,skill_lv,src->id,group->group_id,0,group->limit);
 			break;
 
 		case UNT_GD_LEADERSHIP:
@@ -13807,9 +13805,8 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_CHAOSPANIC:
-			if (tsc && tsc->data[type])
-				break;
-			sc_start4(src,bl,type,100,skill_lv,group->group_id,0,1,skill_get_time2(skill_id,skill_lv));
+			if (!(tsc && tsc->data[type]))
+				sc_start4(src,bl,type,100,skill_lv,group->group_id,0,1,skill_get_time2(skill_id,skill_lv));
 			break;
 
 		case UNT_REVERBERATION:
@@ -13954,10 +13951,10 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_B_TRAP:
-			if (tsc && tsc->data[type])
-				break;
-			sc_start(src,bl,type,100,skill_lv,skill_get_time2(skill_id,skill_lv));
-			unit->val2++; //Mark as ever been used
+			if (!(tsc && tsc->data[type])) {
+				sc_start(src,bl,type,100,skill_lv,skill_get_time2(skill_id,skill_lv));
+				unit->val2++; //Mark as ever been used
+			}
 			break;
 
 		case UNT_FIRE_RAIN:
@@ -14116,7 +14113,6 @@ int skill_unit_onleft(uint16 skill_id, struct block_list *bl, unsigned int tick)
 		case EL_WATER_BARRIER:
 		case EL_ZEPHYR:
 		case EL_POWER_OF_GAIA:
-		case SU_SV_ROOTTWIST:
 			if (sce)
 				status_change_end(bl, type, INVALID_TIMER);
 			break;

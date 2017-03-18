@@ -2050,6 +2050,7 @@ int map_quit(struct map_session_data *sd) {
 		status_change_end(&sd->bl,SC_READYDOWN,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_READYTURN,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_READYCOUNTER,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_DODGE,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_MIRACLE,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_BERSERK,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_LEADERSHIP,INVALID_TIMER);
@@ -4632,7 +4633,8 @@ int do_init(int argc, char *argv[])
 
 		ip2str(addr_[0], ip_str);
 
-		ShowWarning("Not all IP addresses in map_athena.conf configured, autodetecting...\n");
+		if (runflag != CORE_ST_STOP) // Skip this warning if the server is run with run-once flag
+			ShowWarning("Not all IP addresses in map_athena.conf configured, autodetecting...\n");
 
 		if (naddr_ == 0)
 			ShowError("Unable to determine your IP address...\n");

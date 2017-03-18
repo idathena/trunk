@@ -3589,21 +3589,21 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 		case TK_DOWNKICK:
 		case TK_STORMKICK:
-			skillratio += 60 + 20 * skill_lv + 10 * pc_checkskill(sd,TK_RUN); //+Dmg (to Kick skills, %)
+			skillratio += 60 + 20 * skill_lv;
 			break;
 		case TK_TURNKICK:
 		case TK_COUNTER:
-			skillratio += 90 + 30 * skill_lv + 10 * pc_checkskill(sd,TK_RUN);
+			skillratio += 90 + 30 * skill_lv;
 			break;
-		case TK_JUMPKICK:
-			skillratio += -70 + 10 * skill_lv + 10 * pc_checkskill(sd,TK_RUN);
+		case TK_JUMPKICK: //Different damage formulas depending on damage trigger
 			if(sc && sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == skill_id)
-				skillratio += 10 * status_get_lv(src) / 3; //Tumble bonus
-			if(wd.miscflag) { //Running bonus
-				skillratio += 10 * status_get_lv(src) / 3; //@TODO: Check the real value?
-				if(sc && sc->data[SC_STRUP]) //Strup bonus
-					skillratio <<= 1;
-			}
+				skillratio += -100 + 4 * status_get_lv(src); //Tumble formula [4%*baselevel]
+			else if(wd.miscflag) {
+				skillratio += -100 + 4 * status_get_lv(src); //Running formula [4%*baselevel]
+				if(sc && sc->data[SC_STRUP])
+					skillratio <<= 1; //Strup formula [8%*baselevel]
+			} else
+				skillratio += -70 + 10 * skill_lv;
 			break;
 		case GS_TRIPLEACTION:
 			skillratio += 50 * skill_lv;
@@ -5272,7 +5272,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	struct status_change *sc, *tsc;
 	struct status_data *tstatus;
 	int right_element, left_element, nk;
-	uint16 lv;
 	int i;
 
 	memset(&wd, 0, sizeof(wd));
@@ -5428,15 +5427,8 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		case TK_STORMKICK:
 		case TK_TURNKICK:
 		case TK_COUNTER:
-		case TK_JUMPKICK:
-			if(sd && (lv = pc_checkskill(sd, TK_RUN)) > 0) {
-				switch(lv) {
-					case 1: case 4: case 7: case 10: i = 1; break;
-					case 2: case 5: case 8: i = 2; break;
-					default: i = 0; break;
-				}
-				ATK_ADD(wd.damage, wd.damage2, 10 * lv - i); //No miss damage (Kick skills)
-			}
+			if(sd && sd->weapontype1 == W_FIST && sd->weapontype2 == W_FIST)
+				ATK_ADD(wd.damage, wd.damage2, 10 * pc_checkskill(sd, TK_RUN));
 			break;
 		case HW_MAGICCRASHER:
 			if(sd) {

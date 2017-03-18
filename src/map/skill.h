@@ -2083,7 +2083,7 @@ int skill_akaitsuki_damage(struct block_list *src, struct block_list *bl, int da
 int skill_get_elemental_type(uint16 skill_id, uint16 skill_lv);
 
 int skill_is_combo(uint16 skill_id);
-void skill_combo_toogle_inf(struct block_list *bl, uint16 skill_id, int inf);
+void skill_combo_toggle_inf(struct block_list *bl, uint16 skill_id, int inf);
 void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int tick);
 
 void skill_toggle_magicpower(struct block_list *bl, uint16 skill_id);

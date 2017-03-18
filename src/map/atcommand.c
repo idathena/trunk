@@ -446,9 +446,8 @@ ACMD_FUNC(mapmove)
 	if (!message || !*message ||
 		(sscanf(message, "%15s %hd %hd", map_name, &x, &y) < 3 &&
 		 sscanf(message, "%15[^,],%hd,%hd", map_name, &x, &y) < 1)) {
-		 
-			clif_displaymessage(fd, msg_txt(909)); // Please enter a map (usage: @warp/@rura/@mapmove <mapname> <x> <y>).
-			return -1;
+		clif_displaymessage(fd, msg_txt(909)); // Please enter a map (usage: @warp/@rura/@mapmove <mapname> <x> <y>).
+		return -1;
 	}
 
 	mapindex = mapindex_name2id(map_name);
@@ -457,7 +456,6 @@ ACMD_FUNC(mapmove)
 
 	if (!mapindex) { // m < 0 means on different server! [Kevin]
 		clif_displaymessage(fd, msg_txt(1)); // Map not found.
-
 		if (battle_config.warp_suggestions_enabled)
 			warp_get_suggestions(sd, map_name);
 		return -1;
@@ -468,11 +466,11 @@ ACMD_FUNC(mapmove)
 		return -1;
 	}
 
+	//This is to prevent the pc_setpos call from printing an error
 	if ((x || y) && map_getcell(m, x, y, CELL_CHKNOPASS) && pc_get_group_level(sd) < battle_config.gm_ignore_warpable_area) {
-		//This is to prevent the pc_setpos call from printing an error.
 		clif_displaymessage(fd, msg_txt(2));
 		if (!map_search_freecell(NULL, m, &x, &y, 10, 10, 1))
-			x = y = 0; //Invalid cell, use random spot.
+			x = y = 0; //Invalid cell, use random spot
 	}
 	if (map[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(247));
@@ -482,7 +480,7 @@ ACMD_FUNC(mapmove)
 		clif_displaymessage(fd, msg_txt(248));
 		return -1;
 	}
-	if (pc_setpos(sd, mapindex, x, y, CLR_TELEPORT) != 0) {
+	if (pc_setpos(sd, mapindex, x, y, CLR_TELEPORT) != SETPOS_OK) {
 		clif_displaymessage(fd, msg_txt(1)); //Map not found.
 		return -1;
 	}
@@ -1213,7 +1211,7 @@ ACMD_FUNC(item)
 
 	parent_cmd = atcommand_checkalias(command + 1);
 
-	if (strcmpi(parent_cmd, "itembound") == 0) {
+	if (!strcmpi(parent_cmd, "itembound")) {
 		if (!message || !*message || (
 			sscanf(message, "\"%99[^\"]\" %d %d", item_name, &number, &bound) < 3 &&
 			sscanf(message, "%99s %d %d", item_name, &number, &bound) < 3))
@@ -1235,9 +1233,8 @@ ACMD_FUNC(item)
 	}
 
 	itemlist = strtok(item_name, ":");
-	while (itemlist != NULL && j < 10) {
-		if ((item_data[j] = itemdb_searchname(itemlist)) == NULL &&
-		    (item_data[j] = itemdb_exists(atoi(itemlist))) == NULL) {
+	while (itemlist && j < 10) {
+		if (!(item_data[j] = itemdb_searchname(itemlist)) && !(item_data[j] = itemdb_exists(atoi(itemlist)))) {
 			clif_displaymessage(fd, msg_txt(19)); //Invalid item ID or name.
 			return -1;
 		}
@@ -1245,9 +1242,7 @@ ACMD_FUNC(item)
 		j++;
 	}
 
-	if (number <= 0)
-		number = 1;
-	get_count = number;
+	get_count = max(number, 1);
 
 	for (j--; j >= 0; j--) { //Produce items in list
 		unsigned short nameid = item_data[j]->nameid;
@@ -1269,7 +1264,7 @@ ACMD_FUNC(item)
 		}
 	}
 
-	if (flag == 0)
+	if (!flag)
 		clif_displaymessage(fd, msg_txt(18)); //Item created.
 	return 0;
 }
@@ -1292,7 +1287,7 @@ ACMD_FUNC(item2)
 
 	parent_cmd = atcommand_checkalias(command + 1);
 
-	if (strcmpi(parent_cmd, "itembound2") == 0) {
+	if (!strcmpi(parent_cmd, "itembound2")) {
 		if (!message || !*message || (
 			sscanf(message, "\"%99[^\"]\" %d %d %d %d %d %d %d %d %d", item_name, &number, &identify, &refine, &attr, &c1, &c2, &c3, &c4, &bound) < 10 &&
 			sscanf(message, "%99s %d %d %d %d %d %d %d %d %d", item_name, &number, &identify, &refine, &attr, &c1, &c2, &c3, &c4, &bound) < 10))
@@ -1315,53 +1310,48 @@ ACMD_FUNC(item2)
 		return -1;
 	}
 
-	if (number <= 0)
-		number = 1;
-
 	nameid = 0;
-	if ((item_data = itemdb_searchname(item_name)) != NULL ||
-	    (item_data = itemdb_exists(atoi(item_name))) != NULL)
+	if ((item_data = itemdb_searchname(item_name)) || (item_data = itemdb_exists(atoi(item_name))))
 		nameid = item_data->nameid;
 
+	number = max(number, 1);
 	if (nameid > 500) {
 		int loop, get_count, i;
 		char flag = 0;
 
-		loop = 1;
-		get_count = number;
-		if (item_data->type == IT_WEAPON || item_data->type == IT_ARMOR ||
-			item_data->type == IT_PETEGG || item_data->type == IT_PETARMOR ||
-			item_data->flag.guid)
-		{
+		//Check if it's stackable
+		if (!itemdb_isstackable2(item_data) || item_data->flag.guid) {
 			loop = number;
 			get_count = 1;
-			if (item_data->type == IT_PETEGG) {
-				identify = 1;
-				refine = 0;
-			}
-			if (item_data->type == IT_PETARMOR)
-				refine = 0;
-			if (refine > MAX_REFINE)
-				refine = MAX_REFINE;
 		} else {
+			loop = 1;
+			get_count = number;
+		}
+
+		if (itemdb_isequip2(item_data))
+			refine = cap_value(refine, 0, MAX_REFINE);
+		else { //All other items cannot be refined and are always identified
 			identify = 1;
 			refine = attr = 0;
 		}
+
 		for (i = 0; i < loop; i++) {
-			memset(&item_tmp, 0, sizeof(item_tmp));
-			item_tmp.nameid = nameid;
-			item_tmp.identify = identify;
-			item_tmp.refine = refine;
-			item_tmp.attribute = attr;
-			item_tmp.card[0] = c1;
-			item_tmp.card[1] = c2;
-			item_tmp.card[2] = c3;
-			item_tmp.card[3] = c4;
-			item_tmp.bound = bound;
-			if ((flag = pc_additem(sd, &item_tmp, get_count, LOG_TYPE_COMMAND)))
-				clif_additem(sd, 0, 0, flag);
+			if (!pet_create_egg(sd, nameid)) { //If not pet egg
+				memset(&item_tmp, 0, sizeof(item_tmp));
+				item_tmp.nameid = nameid;
+				item_tmp.identify = identify;
+				item_tmp.refine = refine;
+				item_tmp.attribute = attr;
+				item_tmp.card[0] = c1;
+				item_tmp.card[1] = c2;
+				item_tmp.card[2] = c3;
+				item_tmp.card[3] = c4;
+				item_tmp.bound = bound;
+				if ((flag = pc_additem(sd, &item_tmp, get_count, LOG_TYPE_COMMAND)))
+					clif_additem(sd, 0, 0, flag);
+			}
 		}
-		if (flag == 0)
+		if (!flag)
 			clif_displaymessage(fd, msg_txt(18)); // Item created.
 	} else {
 		clif_displaymessage(fd, msg_txt(19)); // Invalid item ID or name.
@@ -1994,7 +1984,7 @@ ACMD_FUNC(go)
 			clif_displaymessage(fd, msg_txt(248));
 			return -1;
 		}
-		if (pc_setpos(sd, mapindex_name2id(data[town].map), data[town].x, data[town].y, CLR_TELEPORT) == 0)
+		if (pc_setpos(sd, mapindex_name2id(data[town].map), data[town].x, data[town].y, CLR_TELEPORT) == SETPOS_OK)
 			clif_displaymessage(fd, msg_txt(0)); // Warped.
 		else {
 			clif_displaymessage(fd, msg_txt(1)); // Map not found.
@@ -2856,7 +2846,11 @@ ACMD_FUNC(recall) {
 	if (pl_sd->bl.m == sd->bl.m && pl_sd->bl.x == sd->bl.x && pl_sd->bl.y == sd->bl.y)
 		return -1;
 
-	pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN);
+	if (pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN) == SETPOS_AUTOTRADE) {
+		clif_displaymessage(fd, msg_txt(544)); // The player cannot be recalled, because he is in autotrading state.
+		return -1;
+	}
+
 	sprintf(atcmd_output, msg_txt(46), pl_sd->status.name); // %s recalled!
 	clif_displaymessage(fd, atcmd_output);
 
@@ -3545,13 +3539,8 @@ ACMD_FUNC(recallall)
 				continue; // Don't waste time warping the character to the same place.
 			if (pl_sd->bl.m >= 0 && map[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE))
 				count++;
-			else {
-				if (pc_isdead(pl_sd)) { //Wake them up
-					pc_setstand(pl_sd);
-					pc_setrestartvalue(pl_sd,1);
-				}
-				pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN);
-			}
+			else if (pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN) == SETPOS_AUTOTRADE)
+				count++;
 		}
 	}
 	mapit_free(iter);
@@ -3590,8 +3579,8 @@ ACMD_FUNC(guildrecall)
 		return -1;
 	}
 
-	if ((g = guild_searchname(guild_name)) == NULL && // name first to avoid error when name begin with a number
-	    (g = guild_search(atoi(message))) == NULL)
+	if (!(g = guild_searchname(guild_name)) && // Name first to avoid error when name begin with a number
+	    !(g = guild_search(atoi(message))))
 	{
 		clif_displaymessage(fd, msg_txt(94)); // Incorrect name/ID, or no one from the guild is online.
 		return -1;
@@ -3606,8 +3595,8 @@ ACMD_FUNC(guildrecall)
 				continue; //Skip GMs greater than you.
 			if (pl_sd->bl.m >= 0 && map[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE))
 				count++;
-			else
-				pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN);
+			else if (pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN) == SETPOS_AUTOTRADE)
+				count++;
 		}
 	}
 	mapit_free(iter);
@@ -3647,8 +3636,8 @@ ACMD_FUNC(partyrecall)
 		return -1;
 	}
 
-	if ((p = party_searchname(party_name)) == NULL && // name first to avoid error when name begin with a number
-	    (p = party_search(atoi(message))) == NULL)
+	if (!(p = party_searchname(party_name)) && // Name first to avoid error when name begin with a number
+	    !(p = party_search(atoi(message))))
 	{
 		clif_displaymessage(fd, msg_txt(96)); // Incorrect name or ID, or no one from the party is online.
 		return -1;
@@ -3663,8 +3652,8 @@ ACMD_FUNC(partyrecall)
 				continue; //Skip GMs greater than you.
 			if (pl_sd->bl.m >= 0 && map[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE))
 				count++;
-			else
-				pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN);
+			else if (pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN) == SETPOS_AUTOTRADE)
+				count++;
 		}
 	}
 	mapit_free(iter);
@@ -4421,7 +4410,7 @@ ACMD_FUNC(nuke)
  *------------------------------------------*/
 ACMD_FUNC(tonpc)
 {
-	char npcname[NAME_LENGTH+1];
+	char npcname[NAME_LENGTH + 1];
 	struct npc_data *nd;
 
 	nullpo_retr(-1, sd);
@@ -4434,7 +4423,7 @@ ACMD_FUNC(tonpc)
 	}
 
 	if ((nd = npc_name2id(npcname)) != NULL) {
-		if (nd->bl.m != -1 && pc_setpos(sd, map_id2index(nd->bl.m), nd->bl.x, nd->bl.y, CLR_TELEPORT) == 0)
+		if (nd->bl.m != -1 && pc_setpos(sd, map_id2index(nd->bl.m), nd->bl.x, nd->bl.y, CLR_TELEPORT) == SETPOS_OK)
 			clif_displaymessage(fd, msg_txt(0)); // Warped.
 		else
 			return -1;

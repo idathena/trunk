@@ -45,7 +45,7 @@ prt_castle,45,169,5	script	Senior Crusader	752,{
 		mes "You don't belong here, my friend.";
 		mes "Be advised to continue practicing yourself.";
 		close;
-	} 
+	}
 	else if(BaseJob != Job_Swordman) {
 		if(BaseJob == Job_Crusader) {
 			mes "Go and train yourself in preparation for the holy war that is coming. Victory will be in the hands of those who are most ready to receive it.";
@@ -69,20 +69,6 @@ prt_castle,45,169,5	script	Senior Crusader	752,{
 		next;
 		mes "[Michael Halig]";
 		mes "As it happened one thousand years ago, evil forces will one day attack in droves in an attempt to take over the world once again.";
-		close;
-	} 
-	else if(CRUS_Q <= 3 && countitem(1004) && countitem(1009)) {
-		mes "Ah...";
-		mes "I see that you have been called to become a Crusader. We are assured of your will, but now we must test your capabilities.";
-		next;
-		mes "[Michael Halig]";
-		mes "Meet with Moorenak Miyol who is training in the underground dungeon of the Prontera Castle. Go, and speak with him first.";
-		next;
-		delitem 1004, 1;
-		delitem 1009, 1;
-		set CRUS_Q,4;
-		mes "[Michael Halig]";
-		mes "Moorenak and others like him will test the limits of your capabilities and help you find your path. Return to me after you have completed their tests...";
 		close;
 	}
 	else if(CRUS_Q == 0) {
@@ -214,6 +200,30 @@ prt_castle,45,169,5	script	Senior Crusader	752,{
 	else if(CRUS_Q >= 1 && CRUS_Q <= 3) {
 		mes "Have you proven your determination with the task I have given you, or do you possess the items proving that you have received your calling?";
 		next;
+		if (countitem(1004) && countitem(1009)) {
+			mes "[Michael Halig]";
+			mes "Ah...";
+			mes "I see that you have been called to become a Crusader. We are assured of your will, but now we must test your capabilities.";
+			next;
+			mes "[Michael Halig]";
+			mes "Meet with Moorenak Miyol who is training in the underground dungeon of the Prontera Castle. Go, and speak with him first.";
+			next;
+			delitem 1004, 1;
+			delitem 1009, 1;
+			set CRUS_Q,4;
+			if(checkquest(3006) != -1) {
+				changequest 3006,3009;
+			}
+			else if(checkquest(3007) != -1) {
+				changequest 3007,3009;
+			}
+			else {
+				changequest 3008,3009;
+			}
+			mes "[Michael Halig]";
+			mes "Moorenak and others like him will test the limits of your capabilities and help you find your path. Return to me after you have completed their tests...";
+			close;
+		}
 		switch(CRUS_Q) {
 		case 1:
 			set .@item1, 957;

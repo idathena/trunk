@@ -440,7 +440,7 @@ int pc_banding(struct map_session_data *sd, uint16 skill_lv) {
  */
 void pc_addfame(struct map_session_data *sd, int count)
 {
-	int ranktype = -1;
+	enum e_rank rankingtype;
 
 	nullpo_retv(sd);
 
@@ -449,18 +449,15 @@ void pc_addfame(struct map_session_data *sd, int count)
 		sd->status.fame = MAX_FAME;
 
 	switch(sd->class_&MAPID_UPPERMASK) {
-		case MAPID_BLACKSMITH:
-			ranktype = 0;
-			break;
-		case MAPID_ALCHEMIST:
-			ranktype = 1;
-			break;
-		case MAPID_TAEKWON:
-			ranktype = 2;
-			break;
+		case MAPID_BLACKSMITH: rankingtype = RANK_BLACKSMITH; break;
+		case MAPID_ALCHEMIST: rankingtype = RANK_ALCHEMIST; break;
+		case MAPID_TAEKWON: rankingtype = RANK_TAEKWON; break;
+		default:
+			ShowWarning("pc_addfame: Trying to add fame to class '%s'(%d).\n", job_name(sd->class_), sd->class_);
+			return;
 	}
 
-	clif_update_rankingpoint(sd, ranktype, count);
+	clif_update_rankingpoint(sd, rankingtype, count);
 	chrif_updatefamelist(sd);
 }
 
@@ -1302,11 +1299,10 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	sd->qi_count = 0;
 
 	//Warp player
-	if ((i = pc_setpos(sd,sd->status.last_point.map, sd->status.last_point.x, sd->status.last_point.y, CLR_OUTSIGHT)) != 0) {
+	if ((i = pc_setpos(sd,sd->status.last_point.map, sd->status.last_point.x, sd->status.last_point.y, CLR_OUTSIGHT)) != SETPOS_OK) {
 		ShowError ("Last_point_map %s - id %d not found (error code %d)\n", mapindex_id2name(sd->status.last_point.map), sd->status.last_point.map, i);
-
 		//Try warping to a default map instead (church graveyard)
-		if (pc_setpos(sd, mapindex_name2id(MAP_PRONTERA), 273, 354, CLR_OUTSIGHT) != 0) {
+		if (pc_setpos(sd, mapindex_name2id(MAP_PRONTERA), 273, 354, CLR_OUTSIGHT) != SETPOS_OK) {
 			//If we fail again
 			clif_authfail_fd(sd->fd, 0);
 			return false;
@@ -5270,21 +5266,24 @@ int pc_steal_coin(struct map_session_data *sd,struct block_list *target)
  * @param x
  * @param y
  * @param clrtype
- * @return 0 - Success; 1 - Invalid map index; 2 - Map not in this map-server, and failed to locate alternate map-server.
+ * @return SETPOS_OK           Success
+ *         SETPOS_MAPINDEX     Invalid map index
+ *         SETPOS_NO_MAPSERVER Map not in this map-server, and failed to locate alternate map-server.
+ *         SETPOS_AUTOTRADE    Player is in autotrade state
  */
-char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int y, clr_type clrtype)
+enum e_setpos pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int y, clr_type clrtype)
 {
 	int16 m;
 
-	nullpo_ret(sd);
+	nullpo_retr(SETPOS_OK, sd);
 
 	if( !mapindex || !mapindex_id2name(mapindex) ) {
 		ShowDebug("pc_setpos: Passed mapindex(%d) is invalid!\n", mapindex);
-		return 1;
+		return SETPOS_MAPINDEX;
 	}
 
 	if( !battle_config.feature_autotrade_move && sd->state.autotrade && (sd->vender_id || sd->buyer_id) )
-		return 1;
+		return SETPOS_AUTOTRADE;
 
 	if( battle_config.revive_onwarp && pc_isdead(sd) ) { // Revive dead people before warping them
 		pc_setstand(sd);
@@ -5299,7 +5298,7 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 	if( sd->status.party_id && map[sd->bl.m].instance_id && sd->state.changemap && !map[m].instance_id ) {
 		struct party_data *p;
 
-		if( (p = party_search(sd->status.party_id)) != NULL && p->instance_id )
+		if( (p = party_search(sd->status.party_id)) && p->instance_id )
 			instance_delusers(p->instance_id);
 	}
 
@@ -5309,7 +5308,7 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 		sd->state.pmap = sd->bl.m;
 		if( sd->sc.count ) { // Cancel some map related stuff
 			if( sd->sc.data[SC_JAILED] )
-				return 1; // You may not get out!
+				return SETPOS_MAPINDEX; // You may not get out!
 			status_change_end(&sd->bl, SC_BOSSMAPINFO, INVALID_TIMER);
 			status_change_end(&sd->bl, SC_CLOAKING, INVALID_TIMER);
 			status_change_end(&sd->bl, SC_WARM, INVALID_TIMER);
@@ -5352,7 +5351,7 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 
 		// If can't find any map-servers, just abort setting position
 		if( !sd->mapindex || map_mapname2ipport(mapindex, &ip, &port) )
-			return 2;
+			return SETPOS_NO_MAPSERVER;
 		if( sd->npc_id )
 			npc_event_dequeue(sd);
 		npc_script_event(sd, NPCE_LOGOUT);
@@ -5366,7 +5365,7 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 		chrif_changemapserver(sd, ip, (short)port);
 		// Free session data from this map server [Kevin]
 		unit_free_pc(sd);
-		return 0;
+		return SETPOS_OK;
 	}
 
 	if( x < 0 || x >= map[m].xs || y < 0 || y >= map[m].ys ) {
@@ -5383,7 +5382,7 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 			c++;
 			if( c > (map[m].xs * map[m].ys) * 3 ) { //Force out
 				ShowError("pc_setpos: couldn't found a valid coordinates for player '%s' (%d:%d) on (%s), preventing warp\n", sd->status.name, sd->status.account_id, sd->status.char_id, mapindex_id2name(mapindex));
-				return 0; //Preventing warp
+				return SETPOS_OK; //Preventing warp
 				//break; //Allow warp anyway
 			}
 		} while( map_getcell(m, x, y, CELL_CHKNOPASS) || (!battle_config.teleport_on_portal && npc_check_areanpc(1, m, x, y, 1)) );
@@ -5453,7 +5452,7 @@ char pc_setpos(struct map_session_data *sd, unsigned short mapindex, int x, int 
 	if( battle_config.feature_autotrade_move && sd->state.autotrade && (sd->vender_id || sd->buyer_id) )
 		clif_parse_LoadEndAck(0, sd);
 
-	return 0;
+	return SETPOS_OK;
 }
 
 /**
@@ -7311,7 +7310,7 @@ void pc_respawn(struct map_session_data *sd, clr_type clrtype)
 
 	pc_setstand(sd);
 	pc_setrestartvalue(sd,3);
-	if( pc_setpos(sd, sd->status.save_point.map, sd->status.save_point.x, sd->status.save_point.y, clrtype) )
+	if( pc_setpos(sd, sd->status.save_point.map, sd->status.save_point.x, sd->status.save_point.y, clrtype) != SETPOS_OK )
 		clif_resurrection(&sd->bl, 1); //If warping fails, send a normal stand up packet
 }
 
