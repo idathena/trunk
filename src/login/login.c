@@ -970,12 +970,13 @@ int parse_fromchar(int fd) {
 				RFIFOSKIP(fd,6);
 				break;
 
-			case 0x2737: //Request to set all offline.
+			case 0x2737: //Request to set all offline
 				ShowInfo("Setting accounts from char-server %d offline.\n", id);
 				online_db->foreach(online_db, online_db_setoffline, id);
 				RFIFOSKIP(fd,2);
 				break;
 
+#if PACKETVER_SUPPORTS_PINCODE
 			case 0x2738: //Change PIN Code for a account
 				if( RFIFOREST(fd) < 8 + PINCODE_LENGTH + 1 )
 					return 0;
@@ -1009,6 +1010,7 @@ int parse_fromchar(int fd) {
 					RFIFOSKIP(fd,6);
 				}
 				break;
+#endif
 
 			case 0x2742: chrif_parse_reqvipdata(fd); break; //Vip sys
 

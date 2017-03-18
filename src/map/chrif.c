@@ -238,7 +238,8 @@ void chrif_setpasswd(char *pwd) {
 
 //Security check, prints warning if using default password
 void chrif_checkdefaultlogin(void) {
-	if (strcmp(userid, "s1") == 0 && strcmp(passwd, "p1") == 0) {
+	//Skip this check if the server is run with run-once flag
+	if (runflag != CORE_ST_STOP && !strcmp(userid, "s1") && !strcmp(passwd, "p1")) {
 		ShowWarning("Using the default user/password s1/p1 is NOT RECOMMENDED.\n");
 		ShowNotice("Please edit your 'login' table to create a proper inter-server user/password (gender 'S')\n");
 		ShowNotice("and then edit your user/password in conf/map_athena.conf (or conf/import/map_conf.txt)\n");
@@ -1152,9 +1153,9 @@ int chrif_updatefamelist(struct map_session_data *sd) {
 	chrif_check(-1);
 
 	switch(sd->class_&MAPID_UPPERMASK) {
-		case MAPID_BLACKSMITH: type = 1; break;
-		case MAPID_ALCHEMIST:  type = 2; break;
-		case MAPID_TAEKWON:    type = 3; break;
+		case MAPID_BLACKSMITH: type = RANK_BLACKSMITH; break;
+		case MAPID_ALCHEMIST: type = RANK_ALCHEMIST; break;
+		case MAPID_TAEKWON: type = RANK_TAEKWON; break;
 		default:
 			return 0;
 	}
@@ -1226,10 +1227,11 @@ int chrif_updatefamelist_ack(int fd) {
 	uint8 index;
 
 	switch (RFIFOB(fd,2)) {
-		case 1: list = smith_fame_list;   break;
-		case 2: list = chemist_fame_list; break;
-		case 3: list = taekwon_fame_list; break;
-		default: return 0;
+		case RANK_BLACKSMITH: list = smith_fame_list; break;
+		case RANK_ALCHEMIST: list = chemist_fame_list; break;
+		case RANK_TAEKWON: list = taekwon_fame_list; break;
+		default:
+			return 0;
 	}
 
 	index = RFIFOB(fd,3);

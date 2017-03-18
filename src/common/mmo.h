@@ -24,6 +24,8 @@
 	#define PACKETVER 20151104
 #endif
 
+//Check if the specified packetversion supports the pincode system
+#define PACKETVER_SUPPORTS_PINCODE PACKETVER >= 20110309
 //Check if the client needs delete_date as remaining time and not the actual delete_date (actually it was tested for clients since 2013)
 #define PACKETVER_CHAR_DELETEDATE (PACKETVER >= 20130320 && PACKETVER < 20141016) || PACKETVER >= 20150826
 //Remove/Comment this line to disable sc_data saving. [Skotlex]
@@ -860,6 +862,13 @@ enum e_party_member_withdraw {
 	PARTY_MEMBER_WITHDRAW_EXPEL,	  //Kicked
 	PARTY_MEMBER_WITHDRAW_CANT_LEAVE, //@TODO: Cannot leave
 	PARTY_MEMBER_WITHDRAW_CANT_EXPEL, //@TODO: Cannot be kicked
+};
+
+enum e_rank {
+	RANK_BLACKSMITH = 0,
+	RANK_ALCHEMIST = 1,
+	RANK_TAEKWON = 2,
+	RANK_KILLER = 3
 };
 
 // Sanity checks
