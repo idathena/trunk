@@ -87,6 +87,7 @@ char mob_skill_db_db[32] = "mob_skill_db";
 char mob_skill_db_re_db[32] = "mob_skill_db_re";
 char mob_skill_db2_db[32] = "mob_skill_db2";
 char roulette_db[32] = "roulette";
+char sales_db[32] = "sales";
 char vendings_db[32] = "vendings";
 char vending_items_db[32] = "vending_items";
 
@@ -4096,8 +4097,10 @@ int inter_config_read(char *cfgName)
 			strcpy(mob_skill_db_re_db, w2);
 		else if( strcmpi(w1, "mob_skill_db2_db") == 0 )
 			strcpy(mob_skill_db2_db, w2);
-		else if( strcmpi(w1, "db_roulette_table") == 0 )
+		else if( strcmpi(w1, "roulette_db") == 0 )
 			strcpy(roulette_db, w2);
+		else if( strcmpi(w1, "sales_db") == 0 )
+			strcpy(sales_db, w2);
 		else if( strcmpi(w1, "vendings_db") == 0 )
 			strcpy(vendings_db, w2);
 		else if( strcmpi(w1, "vending_items_db") == 0 )
