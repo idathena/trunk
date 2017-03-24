@@ -1242,7 +1242,7 @@ ACMD_FUNC(item)
 		j++;
 	}
 
-	get_count = max(number, 1);
+	get_count = number = max(number, 1);
 
 	for (j--; j >= 0; j--) { //Produce items in list
 		unsigned short nameid = item_data[j]->nameid;

@@ -4681,12 +4681,14 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 			break;
 		case ITEMID_WING_OF_FLY:
 		case ITEMID_GIANT_FLY_WING:
+		case ITEMID_N_FLY_WING:
 			if( map[sd->bl.m].flag.noteleport || map_flag_gvg2(sd->bl.m) ) {
 				clif_skill_teleportmessage(sd,0);
 				return false;
 			}
 		//Fall through
 		case ITEMID_WING_OF_BUTTERFLY:
+		case ITEMID_N_BUTTERFLY_WING:
 		case ITEMID_DUN_TELE_SCROLL1:
 		case ITEMID_DUN_TELE_SCROLL2:
 		case ITEMID_DUN_TELE_SCROLL3:
@@ -4699,8 +4701,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 				clif_displaymessage(sd->fd, msg_txt(663));
 				return false;
 			}
-			if( nameid != ITEMID_WING_OF_FLY &&
-				nameid != ITEMID_GIANT_FLY_WING && map[sd->bl.m].flag.noreturn )
+			if( map[sd->bl.m].flag.noreturn && nameid != ITEMID_WING_OF_FLY && nameid != ITEMID_GIANT_FLY_WING && nameid != ITEMID_N_FLY_WING )
 				return false;
 			break;
 		case ITEMID_BUBBLE_GUM:
