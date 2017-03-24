@@ -12450,7 +12450,7 @@ void clif_parse_ItemIdentify(int fd, struct map_session_data *sd)
  	//- Invalid item ID or item doesn't exist
  	//- Item is already identified
  	if (idx < 0 || idx >= MAX_INVENTORY ||
- 		sd->status.inventory[idx].nameid <= 0 || sd->inventory_data[idx] == NULL ||
+ 		sd->status.inventory[idx].nameid <= 0 || !sd->inventory_data[idx] ||
  		sd->status.inventory[idx].identify) { //Cancel pressed
  			clif_menuskill_clear(sd);
  			return;
@@ -12466,8 +12466,7 @@ void clif_parse_SelectArrow(int fd, struct map_session_data *sd)
 {
 	unsigned short nameid = RFIFOW(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
 
-	if (pc_istrading(sd)) {
-		//Make it fail to avoid shop exploits where you sell something different than you see.
+	if (pc_istrading(sd)) { //Make it fail to avoid shop exploits where you sell something different than you see
 		clif_skill_fail(sd,sd->ud.skill_id,USESKILL_FAIL_LEVEL,0,0);
 		clif_menuskill_clear(sd);
 		return;

@@ -37,7 +37,7 @@ static bool cashshop_parse_dbrow( char *fields[], int columns, int current ){
 	unsigned short nameid = atoi( fields[1] );
 	uint32 price = atoi( fields[2] );
 	int j;
-	struct cash_item_data* cid;
+	struct cash_item_data *cid;
 
 	if( !itemdb_exists( nameid ) ){
 		ShowWarning( "cashshop_parse_dbrow: Invalid ID %hu in line '%d', skipping...\n", nameid, current );
