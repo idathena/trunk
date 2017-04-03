@@ -7093,7 +7093,7 @@
 13086,Goldsmithing_Dagger,Goldsmithing Dagger,5,20,,500,35:25,,1,0,0x028756E6,63,2,2,1,1,1,1,{},{},{}
 13088,Greater_Lease,Greater Lease,5,20,,500,110:50,,1,1,0x028F5EEE,63,2,2,4,30,1,1,{ set .@r,getrefine(); bonus bMatk,(.@r>=9?50:(.@r>=7?40:(.@r>=5?30:0))); },{},{}
 13089,FaceWorm_Leg,Faceworm Leg,5,20,,500,110:50,,1,1,0x028F5EEF,63,2,2,3,24,1,1,{ bonus bAtkEle,Ele_Poison; autobonus "{}",30,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2528,5000; }"; },{},{}
-13090,FaceWormQueen_Leg,Faceworm Queen Leg,5,20,,500,180:120,,1,2,0x028F5EEF,63,2,2,4,100,1,1,{ bonus bInt,3; autobonus "{ bonus4 bAutoSpell,\"NPC_EARTHQUAKE\",1,200; }",8,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2529,5000; }"; },{},{}
+13090,FaceWormQueen_Leg,Faceworm Queen Leg,5,20,,500,180:120,,1,2,0x028F5EEF,63,2,2,4,100,1,1,{ bonus bInt,3; autobonus "{ bonus3 bAutoSpell,\"NPC_EARTHQUAKE\",1,200; }",8,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2529,5000; }"; },{},{}
 13092,RWC_Memory_Knife,RWC Memory Knife,5,1000,500,650,50,,1,1,0x02800075,63,2,2,3,1,1,1,{ set .@r,getrefine(); bonus bBaseAtk,(.@r/3)*20; bonus bMatk,(.@r/3)*20; bonus2 bAddClass,Class_All,(.@r>8?10:(.@r>5?5:0)); bonus bMatkRate,(.@r>8?10:(.@r>5?5:0)); if(.@r>8) bonus3 bAutoSpellWhenHit,"BS_WEAPONPERFECT",1,20; bonus bUnbreakableWeapon,0; },{},{}
 13093,Thanos_Dagger,Thanatos Dagger,5,20,,800,100:130,,1,1,0x000E5CEA,63,2,2,4,120,1,1,{ bonus bInt,6; bonus bVit,6; bonus bLuk,-6; bonus2 bHPDrainRate,50,5; bonus2 bSPDrainRate,10,5; bonus2 bHPLossRate,100,10000; },{},{ heal -1000,0; }
 13094,Dagger_Of_Evil_Slayer,Evil Slayer Stabber Dagger,5,20,,900,120,,1,1,0x028F5EEF,63,2,2,3,100,1,1,{ set .@r,getrefine(); bonus2 bAddRace,RC_Undead,10; bonus2 bAddClass,Class_All,(.@r>=12?12:(.@r>=9?5:0)); },{},{}
@@ -9663,7 +9663,7 @@
 19027,Type_10_Glasses,Type-10 Glasses,4,20,,200,,0,,0,0xFFFFFFFF,63,2,512,,10,0,1237,{ bonus2 bMagicAddRace,RC_Brute,4; bonus2 bSubRace,RC_Brute,5; },{},{}
 19028,Devils_Minion,Devil's Minion,4,20,,200,,0,,0,0xFFFFFFFF,63,2,512,,40,0,1036,{ skill "AM_POTIONPITCHER",3; },{},{}
 19029,Alice_Friesinger_Hat_69,Alice Friesinger Hat 69,4,20,,300,,0,,1,0xFFFFFFFF,63,2,256,,1,0,1249,{ bonus2 bAddClass,Class_Boss,15; },{},{}
-19030,Pretty_Rabbit_Hood,Pretty Rabbit Hood,4,20,,100,,20,,1,0xFFFFFFFF,63,2,1,,1,1,1085,{ bonus bMaxHP,BaseLevel*15; },{},{}
+19030,Pretty_Rabbit_Hood,Pretty Rabbit Hood,4,20,,100,,20,,1,0xFFFFFFFF,63,2,769,,1,1,1085,{ bonus bMaxHP,BaseLevel*15; },{},{}
 19031,Fallen_Angel_Blessing,Fallen Angel Blessing,4,20,,200,,1,,0,0xFFFFFFFF,63,2,512,,10,1,1250,{ bonus2 bAddRace,RC_Angel,5; bonus2 bSubRace,RC_Angel,5; },{},{}
 19033,Ancient_Decoration_Of_The_Goddess,Ancient Decoration of The Goddess,4,20,,0,,2,,1,0xFFFFFFFF,63,2,256,,100,1,376,{},{},{}
 19038,12_Anniversary_Crown_Of_Saint,12 Anniversary Crown of Saint,4,20,,120,,12,,1,0xFFFFFFFF,63,2,256,,0,1,1117,{ bonus bAllStats,2; bonus bMdef,12; },{},{}
