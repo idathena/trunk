@@ -16,6 +16,7 @@
 	export_constant(MAX_PARTY);
 	export_constant(MAX_GUILD);
 	export_constant(MAX_GUILDLEVEL);
+	export_constant(MAX_GUARDIANS);
 	export_constant(MAX_GUILD_STORAGE);
 	export_constant(MAX_BG_MEMBERS);
 	export_constant(MAX_CHAT_USERS);
@@ -393,6 +394,10 @@
 	export_constant(MF_SKILL_DAMAGE);
 	export_constant(MF_NOCASHSHOP);
 	export_constant(MF_NOBANKING);
+	export_constant(MF_GVG_TE_CASTLE);
+	export_constant(MF_GVG_TE);
+	export_constant(MF_NOCOSTUME);
+	export_constant(MF_HIDEMOBHPBAR);
 
 	/* Setcell types */
 	export_constant(CELL_WALKABLE);
@@ -842,6 +847,7 @@
 	export_constant(SC_VIOLENTGALE);
 	export_constant(SC_WATK_ELEMENT);
 	export_constant(SC_ARMOR);
+	export_constant(SC_MAXPAIN);
 	export_constant(SC_NOCHAT);
 	export_constant(SC_BABY);
 	export_constant(SC_AURABLADE);
@@ -1394,7 +1400,7 @@
 	export_constant(SC_GEFFEN_MAGIC2);
 	export_constant(SC_GEFFEN_MAGIC3);
 	export_constant(SC_FENRIR_CARD);
-	export_constant(SC_MAXPAIN);
+	export_constant(SC_RAY_OF_PROTECTION);
 
 	/* Status icons */
 	export_constant(SI_BLANK);

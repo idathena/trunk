@@ -3889,6 +3889,22 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 	} else if (!strcmpi(w3,"gvg_castle")) {
 		map[m].flag.gvg_castle = state;
 		if (state) map[m].flag.pvp = 0;
+	} else if (!strcmpi(w3,"gvg_te")) {
+		map[m].flag.gvg_te = state;
+		if (state && map[m].flag.pvp) {
+			map[m].flag.pvp = 0;
+			ShowWarning("npc_parse_mapflag: You can't set PvP and GvG flags for the same map! Removing PvP flag from %s (file '%s', line '%d').\n",map[m].name,filepath,strline(buffer,start - buffer));
+		}
+		if (state && map[m].flag.battleground) {
+			map[m].flag.battleground = 0;
+			ShowWarning("npc_parse_mapflag: You can't set GvG and BattleGround flags for the same map! Removing BattleGround flag from %s (file '%s', line '%d').\n",map[m].name,filepath,strline(buffer,start - buffer));
+		}
+	} else if (!strcmpi(w3,"gvg_te_castle")) {
+		map[m].flag.gvg_te_castle = state;
+		if (state) {
+			map[m].flag.gvg_castle = 0;
+			map[m].flag.pvp = 0;
+		}
 	} else if (!strcmpi(w3,"battleground")) {
 		if (state) {
 			if (sscanf(w4,"%d",&state) == 1)
@@ -4007,6 +4023,10 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 		map[m].flag.nocashshop = state;
 	else if (!strcmpi(w3,"nobanking"))
 		map[m].flag.nobanking = state;
+	else if (!strcmpi(w3,"nocostume"))
+		map[m].flag.nocostume = state;
+	else if (!strcmpi(w3,"hidemobhpbar"))
+		map[m].flag.hidemobhpbar = state;
 	else if (!strcmpi(w3,"skill_damage")) {
 #ifdef ADJUST_SKILL_DAMAGE
 		char skill[SKILL_NAME_LENGTH];
@@ -4418,12 +4438,12 @@ int npc_reload(void) {
 
 	//Execute main initialisation events
 	//The correct initialisation order is:
-	//OnInit -> OnInterIfInit -> OnAgitInit -> OnAgitInit2
+	//OnInit -> OnInterIfInit -> OnAgitInit -> OnAgitInit2 -> OnAgitInit3
 	npc_event_do_oninit(true);
 
 	do_reload_instance();
 
-	//Execute rest of the startup events if connected to char-server. [Lance]
+	//Execute rest of the startup events if connected to char-server [Lance]
 	if( !CheckForCharServer() )
 		ShowStatus("Event '"CL_WHITE"OnInterIfInit"CL_RESET"' executed with '"CL_WHITE"%d"CL_RESET"' NPCs.\n", npc_event_doall("OnInterIfInit"));
 
@@ -4431,6 +4451,7 @@ int npc_reload(void) {
 	//These events are only executed after receiving castle information from char-server
 	npc_event_doall("OnAgitInit");
 	npc_event_doall("OnAgitInit2");
+	npc_event_doall("OnAgitInit3");
 
 #if PACKETVER >= 20131223
 	npc_market_checkall();

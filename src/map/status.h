@@ -763,6 +763,7 @@ typedef enum sc_type {
 	SC_GEFFEN_MAGIC2,
 	SC_GEFFEN_MAGIC3,
 	SC_FENRIR_CARD,
+	SC_RAY_OF_PROTECTION,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 
@@ -2229,6 +2230,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data);
 int status_change_timer_sub(struct block_list *bl, va_list ap);
 int status_change_clear(struct block_list *bl, int type);
 void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1);
+void status_change_clear_onChangeMap(struct block_list *bl, struct status_change *sc);
 
 #define status_calc_bl(bl, flag) status_calc_bl_(bl, (enum scb_flag)(flag), SCO_NONE)
 #define status_calc_mob(md, opt) status_calc_bl_(&(md)->bl, SCB_ALL, opt)

@@ -2226,7 +2226,7 @@ void mob_damage(struct mob_data *md, struct block_list *src, int damage)
 		clif_name_area(&md->bl);
 
 #if PACKETVER >= 20120404
-	if( battle_config.monster_hp_bars_info ) {
+	if( battle_config.monster_hp_bars_info && !map[md->bl.m].flag.hidemobhpbar ) {
 		int i;
 
 		for( i = 0; i < DAMAGELOG_SIZE; i++ ) { //Must show hp bar to all char who already hit the mob
@@ -2942,7 +2942,7 @@ void mob_heal(struct mob_data *md, unsigned int heal)
 		clif_name_area(&md->bl);
 
 #if PACKETVER >= 20120404
-	if( battle_config.monster_hp_bars_info ) {
+	if( battle_config.monster_hp_bars_info && !map[md->bl.m].flag.hidemobhpbar ) {
 		int i;
 
 		for( i = 0; i < DAMAGELOG_SIZE; i++ ) { //Must show hp bar to all char who already hit the mob
@@ -3517,6 +3517,22 @@ int mob_is_clone(int mob_id)
 	return mob_id;
 }
 
+/**
+ * Previously, using skill_nocast with flag 16
+ * @param skill_id
+ * @return True:If disabled, False:If enabled
+ * @TODO: Move this hardcodes!
+ */
+static bool mob_clone_disabled_skills(uint16 skill_id)
+{
+	switch (skill_id) {
+		case PR_TURNUNDEAD:
+		case PR_MAGNUS:
+			return true;
+	}
+	return false;
+}
+
 //Flag values:
 //&1: Set special ai (fight mobs, not players)
 //If mode is not passed, a default aggressive mode is used.
@@ -3579,7 +3595,7 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 
 		if (!skill_id || sd->status.skill[skill_id].lv < 1 ||
 			(skill_get_inf2(skill_id)&(INF2_WEDDING_SKILL|INF2_GUILD_SKILL)) ||
-			skill_get_nocast(skill_id)&16)
+			mob_clone_disabled_skills(skill_id))
 			continue;
 
 		//Normal aggressive mob, disable skills that cannot help them fight

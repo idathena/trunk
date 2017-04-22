@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Current Version: =====================================
-//= 1.1
+//= 1.2
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -13,6 +13,7 @@
 //===== Additional Comments: ================================= 
 //= 1.0 Renewal split. [Euphy]
 //= 1.1 Added Izlude duplicates. [Euphy]
+//= 1.2 Added WOE:TE maps [Cydh]
 //============================================================
 
 // 3rd Class Job Maps & Paradise
@@ -121,3 +122,17 @@ gl_cas02_	mapflag	nobranch
 // Nightmare Clock Tower =======
 c_tower2_	mapflag	nobranch
 c_tower3_	mapflag	nobranch
+
+// WOE:TE Maps ===================
+te_alde_gld	mapflag	nobranch
+te_prt_gld	mapflag	nobranch
+te_prtcas01	mapflag	nobranch
+te_prtcas02	mapflag	nobranch
+te_prtcas03	mapflag	nobranch
+te_prtcas04	mapflag	nobranch
+te_prtcas05	mapflag	nobranch
+te_aldecas1	mapflag	nobranch
+te_aldecas2	mapflag	nobranch
+te_aldecas3	mapflag	nobranch
+te_aldecas4	mapflag	nobranch
+te_aldecas5	mapflag	nobranch

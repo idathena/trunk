@@ -472,7 +472,7 @@ ACMD_FUNC(mapmove)
 		if (!map_search_freecell(NULL, m, &x, &y, 10, 10, 1))
 			x = y = 0; //Invalid cell, use random spot
 	}
-	if (map[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if ((map[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) || !pc_job_can_entermap((enum e_job)sd->status.class_, m, sd->group_level)) {
 		clif_displaymessage(fd, msg_txt(247));
 		return -1;
 	}
@@ -3396,74 +3396,116 @@ ACMD_FUNC(breakguild)
 	}
 }
 
-/*==========================================
- *
- *------------------------------------------*/
+/**
+ * Start WoE:FE
+ */
 ACMD_FUNC(agitstart)
 {
 	nullpo_retr(-1, sd);
-	if (agit_flag == 1) {
+
+	if (agit_flag) {
 		clif_displaymessage(fd, msg_txt(73)); // War of Emperium is currently in progress.
 		return -1;
 	}
 
-	agit_flag = 1;
+	agit_flag = true;
 	guild_agit_start();
 	clif_displaymessage(fd, msg_txt(72)); // War of Emperium has been initiated.
 
 	return 0;
 }
 
-/*==========================================
- *
- *------------------------------------------*/
+/**
+ * Start WoE:SE
+ */
 ACMD_FUNC(agitstart2)
 {
 	nullpo_retr(-1, sd);
-	if (agit2_flag == 1) {
+
+	if (agit2_flag) {
 		clif_displaymessage(fd, msg_txt(404)); // "War of Emperium SE is currently in progress."
 		return -1;
 	}
 
-	agit2_flag = 1;
+	agit2_flag = true;
 	guild_agit2_start();
 	clif_displaymessage(fd, msg_txt(403)); // "War of Emperium SE has been initiated."
 
 	return 0;
 }
 
-/*==========================================
- *
- *------------------------------------------*/
+/**
+ * Start WoE:TE
+ */
+ACMD_FUNC(agitstart3)
+{
+	nullpo_retr(-1, sd);
+
+	if (agit3_flag) {
+		clif_displaymessage(fd, msg_txt(742)); // "War of Emperium TE is currently in progress."
+		return -1;
+	}
+
+	agit3_flag = true;
+	guild_agit3_start();
+	clif_displaymessage(fd, msg_txt(741)); // "War of Emperium TE has been initiated."
+
+	return 0;
+}
+
+/**
+ * End WoE:FE
+ */
 ACMD_FUNC(agitend)
 {
 	nullpo_retr(-1, sd);
-	if (agit_flag == 0) {
+
+	if (!agit_flag) {
 		clif_displaymessage(fd, msg_txt(75)); // War of Emperium is currently not in progress.
 		return -1;
 	}
 
-	agit_flag = 0;
+	agit_flag = false;
 	guild_agit_end();
 	clif_displaymessage(fd, msg_txt(74)); // War of Emperium has been ended.
 
 	return 0;
 }
 
-/*==========================================
- *
- *------------------------------------------*/
+/**
+ * End WoE:SE
+ */
 ACMD_FUNC(agitend2)
 {
 	nullpo_retr(-1, sd);
-	if (agit2_flag == 0) {
+
+	if (!agit2_flag) {
 		clif_displaymessage(fd, msg_txt(406)); // "War of Emperium SE is currently not in progress."
 		return -1;
 	}
 
-	agit2_flag = 0;
+	agit2_flag = false;
 	guild_agit2_end();
 	clif_displaymessage(fd, msg_txt(405)); // "War of Emperium SE has been ended."
+
+	return 0;
+}
+
+/**
+ * End WoE:TE
+ */
+ACMD_FUNC(agitend3)
+{
+	nullpo_retr(-1, sd);
+
+	if (!agit3_flag) {
+		clif_displaymessage(fd, msg_txt(744)); // War of Emperium TE is currently not in progress.
+		return -1;
+	}
+
+	agit3_flag = false;
+	guild_agit3_end();
+	clif_displaymessage(fd, msg_txt(743)); // War of Emperium TE has been ended.
 
 	return 0;
 }
@@ -3958,6 +4000,10 @@ ACMD_FUNC(mapinfo)
 		strcat(atcmd_output, " GvG Dungeon |");
 	if (map[m_id].flag.gvg_castle)
 		strcat(atcmd_output, " GvG Castle |");
+	if (map[m_id].flag.gvg_te)
+		strcat(atcmd_output, " GvG TE |");
+	if (map[m_id].flag.gvg_te_castle)
+		strcat(atcmd_output, " GvG TE Castle |");
 	if (map[m_id].flag.gvg_noparty)
 		strcat(atcmd_output, " NoParty |");
 	clif_displaymessage(fd, atcmd_output);
@@ -4032,6 +4078,8 @@ ACMD_FUNC(mapinfo)
 		strcat(atcmd_output, " AllowKS |");
 	if (map[m_id].flag.reset)
 		strcat(atcmd_output, " Reset |");
+	if (map[m_id].flag.hidemobhpbar)
+		strcat(atcmd_output, " HideMobHPBar |");
 	clif_displaymessage(fd, atcmd_output);
 
 	strcpy(atcmd_output,msg_txt(1051)); // Other Flags:
@@ -4069,6 +4117,8 @@ ACMD_FUNC(mapinfo)
 		strcat(atcmd_output, " NoCashShop |");
 	if (map[m_id].flag.nobanking)
 		strcat(atcmd_output, " NoBanking |");
+	if (map[m_id].flag.nocostume)
+		strcat(atcmd_output, " NoCostume |");
 	clif_displaymessage(fd, atcmd_output);
 
 	switch (list) {
@@ -7723,7 +7773,6 @@ ACMD_FUNC(mutearea)
 ACMD_FUNC(rates)
 {
 	char buf[CHAT_SIZE_MAX];
-	int base_exp_rate = 0, job_exp_rate = 0;
 
 	nullpo_ret(sd);
 	memset(buf, '\0', sizeof(buf));
@@ -7968,9 +8017,10 @@ ACMD_FUNC(mapflag) {
 		checkflag(nojobexp);		checkflag(nomobloot);		checkflag(nomvploot);		checkflag(nightenabled);
 		checkflag(restricted);		checkflag(nodrop);		checkflag(novending);		checkflag(loadevent);
 		checkflag(nochat);		checkflag(partylock);		checkflag(guildlock);		checkflag(reset);
-		checkflag(nochmautojoin);		checkflag(nousecart);		checkflag(noitemconsumption);	checkflag(nosumstarmiracle);
+		checkflag(nochmautojoin);	checkflag(nousecart);		checkflag(noitemconsumption);	checkflag(nosumstarmiracle);
 		checkflag(nomineeffect);	checkflag(nolockon);		checkflag(notomb);		checkflag(nocashshop);
-		checkflag(nobanking);
+		checkflag(nobanking);		checkflag(gvg_te);		checkflag(gvg_te_castle);	checkflag(nocostume);
+		checkflag(hidemobhpbar);
 #ifdef ADJUST_SKILL_DAMAGE
 		checkflag(skill_damage);
 #endif
@@ -7997,7 +8047,8 @@ ACMD_FUNC(mapflag) {
 	setflag(nochat);		setflag(partylock);		setflag(guildlock);		setflag(reset);
 	setflag(nochmautojoin);		setflag(nousecart);		setflag(noitemconsumption);	setflag(nosumstarmiracle);
 	setflag(nomineeffect);		setflag(nolockon);		setflag(notomb);		setflag(nocashshop);
-	setflag(nobanking);
+	setflag(nobanking);		setflag(gvg_te);		setflag(gvg_te_castle);		setflag(nocostume);
+	setflag(hidemobhpbar);
 #ifdef ADJUST_SKILL_DAMAGE
 	setflag(skill_damage);
 #endif
@@ -8013,10 +8064,9 @@ ACMD_FUNC(mapflag) {
 	clif_displaymessage(sd->fd,"fog, fireworks, sakura, leaves, nogo, nobaseexp, nojobexp, nomobloot, nomvploot,");
 	clif_displaymessage(sd->fd,"nightenabled, restricted, nodrop, novending, loadevent, nochat, partylock, guildlock,");
 	clif_displaymessage(sd->fd,"reset, nochmautojoin, nousecart, noitemconsumption, nosumstarmiracle, nolockon, notomb,");
+	clif_displaymessage(sd->fd,"nocashshop, nobanking, gvg_te, gvg_te_castle, nocostume, hidemobhpbar");
 #ifdef ADJUST_SKILL_DAMAGE
-	clif_displaymessage(sd->fd,"nocashshop, nobanking, skill_damage");
-#else
-	clif_displaymessage(sd->fd,"nocashshop, nobanking");
+	clif_displaymessage(sd->fd,"skill_damage");
 #endif
 
 #undef checkflag
@@ -10039,6 +10089,8 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(clonestat),
 		ACMD_DEF(bodystyle),
 		ACMD_DEF(adopt),
+		ACMD_DEF(agitstart3),
+		ACMD_DEF(agitend3),
 	};
 	AtCommandInfo *atcommand;
 	int i;

@@ -1361,8 +1361,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 				if( sce->val2 <= 0 )
 					status_change_end(bl,SC_TUNAPARTY,INVALID_TIMER);
 			}
-			if( sc->data[SC_MEIKYOUSISUI] && rnd()%100 < 40 ) //Custom value
-				status_change_end(bl,SC_MEIKYOUSISUI,INVALID_TIMER);
+			if( sc->data[SC_MEIKYOUSISUI] && rnd()%100 < 50 )
+				damage = 0;
 		} else
 			return 0;
 
@@ -1793,6 +1793,9 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 		if(r)
 			atkmax += (rnd()%100)%r + 1;
 	}
+
+	if(sd->spiritcharm_type == CHARM_TYPE_LAND && sd->spiritcharm > 0) //KO Earth Charm effect +15% wATK
+		atkmax += atkmax * 15 * sd->spiritcharm / 100;
 
 	damage = atkmax;
 
@@ -2694,15 +2697,14 @@ static int battle_get_weapon_element(struct Damage wd, struct block_list *src, s
 			element = sstatus->rhw.ele;
 		else
 			element = sstatus->lhw.ele;
-		if(is_skill_using_arrow(src, skill_id) && sd && sd->bonus.arrow_ele && weapon_position == EQI_HAND_R)
-			element = sd->bonus.arrow_ele;
-		if(sd && sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm >= MAX_SPIRITCHARM)
-			element = sd->spiritcharm_type; //Summoning 10 spiritcharm will endow your weapon
-		//On official endows override all other elements [helvetica]
-		if(sc && sc->data[SC_ENCHANTARMS]) //Check for endows
-			element = sc->data[SC_ENCHANTARMS]->val2;
+		if(sd) {
+			if(sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm >= MAX_SPIRITCHARM)
+				element = sd->spiritcharm_type; //Summoning 10 spiritcharm will endow your weapon
+			if(is_skill_using_arrow(src, skill_id) && sd->bonus.arrow_ele && weapon_position == EQI_HAND_R)
+				element = sd->bonus.arrow_ele;
+		}
 	} else if(element == -2) //Use enchantment's element
-		element = status_get_attack_sc_element(src,sc);
+		element = status_get_attack_sc_element(src, sc);
 	else if(element == -3) //Use random element
 		element = rnd()%ELE_ALL;
 
@@ -2779,7 +2781,6 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 			//Fall through
 			case MC_CARTREVOLUTION:
 			case RA_CLUSTERBOMB:
-			case NC_ARMSCANNON:
 			case SR_CRESCENTELBOW_AUTOSPELL:
 			case SR_GATEOFHELL:
 			case KO_BAKURETSU:
@@ -3180,8 +3181,8 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 			if(is_skill_using_arrow(src, skill_id) && sd) {
 				switch(sd->status.weapon) {
 					case W_BOW:	case W_REVOLVER:
-					case W_GATLING:	case W_SHOTGUN:
-					case W_GRENADE:
+					case W_RIFLE:	case W_GATLING:
+					case W_SHOTGUN:	case W_GRENADE:
 						break;
 					default:
 						i |= 16; //For ex. shuriken must not be influenced by DEX
@@ -3222,8 +3223,19 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 					if(sd->status.party_id && (lv = pc_checkskill(sd, TK_POWER)) > 0 &&
 						(i = party_foreachsamemap(party_sub_count, sd, 0)) > 1) //Exclude the player himself [Inkfish]
 						ATK_ADDRATE(wd.damage, wd.damage2, 2 * lv * (i - 1));
+					if(sd->spiritcharm_type == CHARM_TYPE_LAND && sd->spiritcharm > 0)
+						ATK_ADDRATE(wd.damage, wd.damage2, 15 * sd->spiritcharm);
 				}
 #endif
+				if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
+					if(pc_checkskill(sd, SU_POWEROFLIFE) > 0 && (pc_checkskill(sd, SU_SCAROFTAROU) +
+						pc_checkskill(sd, SU_PICKYPECK) + pc_checkskill(sd, SU_ARCLOUSEDASH) +
+						pc_checkskill(sd, SU_LUNATICCARROTBEAT)) == 20)
+					{
+						ATK_ADDRATE(wd.damage, wd.damage2, 20);
+						RE_ALLATK_ADDRATE(wd, 20);
+					}
+				}
 			}
 			break;
 	} //End switch(skill_id)
@@ -4601,23 +4613,6 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			}
 		}
 	}
-	if(sd) {
-		if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
-			if(pc_checkskill(sd, SU_POWEROFLIFE) > 0 && (pc_checkskill(sd, SU_SCAROFTAROU) +
-				pc_checkskill(sd, SU_PICKYPECK) + pc_checkskill(sd, SU_ARCLOUSEDASH) +
-				pc_checkskill(sd, SU_LUNATICCARROTBEAT)) == 20)
-			{
-				ATK_ADDRATE(wd.damage, wd.damage2, 20);
-				RE_ALLATK_ADDRATE(wd, 20);
-			}
-		}
-		if(sd->spiritcharm_type == CHARM_TYPE_LAND && sd->spiritcharm > 0) { //KO Earth Charm effect +15% wATK
-			ATK_ADDRATE(wd.damage, wd.damage2, 15 * sd->spiritcharm);
-#ifdef RENEWAL
-			ATK_ADDRATE(wd.weaponAtk, wd.weaponAtk2, 15 * sd->spiritcharm);
-#endif
-		}
-	}
 	return wd;
 }
 
@@ -4645,14 +4640,14 @@ short battle_get_defense(struct block_list *src, struct block_list *target, uint
 	def1 = status_calc_def(target, tsc, def1, false);
 	def2 = status_calc_def2(target, tsc, def2, false);
 
+	if(tsd && tsd->spiritcharm_type == CHARM_TYPE_LAND && tsd->spiritcharm > 0) {
+		uint8 i = 10 * tsd->spiritcharm; //KO Earth Charm effect +10% eDEF
+
+		def1 = def1 * (100 + i) / 100;
+	}
 	if(sd) {
 		int val = sd->ignore_def_by_race[tstatus->race] + sd->ignore_def_by_race[RC_ALL];
 
-		if(sd->spiritcharm_type == CHARM_TYPE_LAND && sd->spiritcharm > 0) {
-			uint8 i = 10 * sd->spiritcharm; //KO Earth Charm effect +10% eDEF
-
-			def1 = def1 * (100 + i) / 100;
-		}
 		val += sd->ignore_def_by_class[tstatus->class_] + sd->ignore_def_by_class[CLASS_ALL];
 		if(val) {
 			val = min(val, 100); //Cap it to 100 for 0 DEF min
@@ -4965,7 +4960,8 @@ struct Damage battle_calc_attack_gvg_bg(struct Damage wd, struct block_list *src
 	if( wd.damage + wd.damage2 ) { //There is a total damage value
 		if( target->id != src->id && //Don't reflect your own damage (Grand Cross)
 			(!skill_id || skill_id ||
-			(src->type == BL_SKILL && (skill_id == SG_SUN_WARM || skill_id == SG_MOON_WARM || skill_id == SG_STAR_WARM))) ) {
+			(src->type == BL_SKILL && (skill_id == SG_SUN_WARM || skill_id == SG_MOON_WARM || skill_id == SG_STAR_WARM))) )
+		{
 				int64 damage = wd.damage + wd.damage2, rdamage = 0;
 				struct map_session_data *tsd = BL_CAST(BL_PC, target);
 				struct status_data *sstatus = status_get_status_data(src);
@@ -5510,21 +5506,16 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			//Fall through
 			case MC_CARTREVOLUTION:
 			case MO_INVESTIGATE:
-			case AM_ACIDTERROR:
 			case CR_SHIELDBOOMERANG:
 			case PA_SHIELDCHAIN:
-			case CR_ACIDDEMONSTRATION:
 			case RA_CLUSTERBOMB:
-			case NC_ARMSCANNON:
 			case SR_CRESCENTELBOW_AUTOSPELL:
 			case SR_GATEOFHELL:
-			case GN_FIRE_EXPANSION_ACID:
 			case KO_BAKURETSU:
 				wd.damage = battle_attr_fix(src, target, wd.damage, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 				if(is_attack_left_handed(src, skill_id))
 					wd.damage2 = battle_attr_fix(src, target, wd.damage2, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 				break;
-			case AM_DEMONSTRATION:
 			case RA_FIRINGTRAP:
 				wd.damage = battle_attr_fix(src, target, wd.damage, ELE_FIRE, tstatus->def_ele, tstatus->ele_lv);
 				if(is_attack_left_handed(src, skill_id))
@@ -6312,7 +6303,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 #ifdef RENEWAL
 			/**
 			 * RE MDEF Reduction
-			 * Damage = Magic Attack * (1000 + eMDEF) / (1000 + eMDEF) - sMDEF
+			 * Damage = Magic Attack * (1000 + eMDEF) / (1000 + eMDEF * 10) - sMDEF
 			 */
 			if(mdef < -99) //It stops at -99
 				mdef = 99; //In aegis it set to 1 but in our case it may lead to exploitation so limit it to 99
@@ -6357,23 +6348,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			|| skill_id == NPC_EARTHQUAKE
 #endif
 			)
-		{
-			switch(skill_id) {
-#ifdef RENEWAL
-				case AM_ACIDTERROR:
-				case CR_ACIDDEMONSTRATION:
-				case GN_FIRE_EXPANSION_ACID:
-					ad.damage = battle_attr_fix(src, target, ad.damage, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
-					break;
-				case AM_DEMONSTRATION:
-					ad.damage = battle_attr_fix(src, target, ad.damage, ELE_FIRE, tstatus->def_ele, tstatus->ele_lv);
-					break;
-#endif
-				default:
-					ad.damage = battle_attr_fix(src, target, ad.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
-					break;
-			}
-		}
+			ad.damage = battle_attr_fix(src, target, ad.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
 
 		switch(skill_id) { //Apply the physical part of the skill's damage [Skotlex]
 			case CR_GRANDCROSS:
@@ -6506,7 +6481,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		case MA_LANDMINE:
 		case HT_BLASTMINE:
 		case HT_CLAYMORETRAP:
-			md.damage = skill_lv * sstatus->dex * (3 + status_get_lv(src) / 100) * (1 + sstatus->int_ / 35);
+			md.damage = (int64)(skill_lv * sstatus->dex * (3.0 + (float)status_get_lv(src) / 100.0) * (1.0 + (float)sstatus->int_ / 35.0));
 			md.damage += md.damage * (rnd()%20 - 10) / 100;
 			md.damage += 40 * (sd ? pc_checkskill(sd, RA_RESEARCHTRAP) : 5);
 			break;
@@ -7205,6 +7180,7 @@ int battle_damage_area(struct block_list *bl, va_list ap) {
 
 	return 0;
 }
+
 /*==========================================
  * Do a basic physical attack (call through unit_attack_timer)
  *------------------------------------------*/
@@ -7807,8 +7783,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 		case BL_MOB: {
 				struct mob_data *md = BL_CAST(BL_MOB, t_bl);
 
-				if( !((agit_flag || agit2_flag) && map[m].flag.gvg_castle) &&
-					md->guardian_data && (md->guardian_data->g || md->guardian_data->castle->guild_id) )
+				if( !map_flag_gvg(m) && md->guardian_data && (md->guardian_data->g || md->guardian_data->castle->guild_id) )
 					return 0; //Disable guardians/emperium owned by Guilds on non-woe times
 			}
 			break;
@@ -7874,8 +7849,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 		case BL_MOB: {
 				struct mob_data *md = BL_CAST(BL_MOB, s_bl);
 
-				if( !((agit_flag || agit2_flag) && map[m].flag.gvg_castle) &&
-					md->guardian_data && (md->guardian_data->g || md->guardian_data->castle->guild_id) )
+				if( !map_flag_gvg(m) && md->guardian_data && (md->guardian_data->g || md->guardian_data->castle->guild_id) )
 					return 0; //Disable guardians/emperium owned by Guilds on non-woe times
 				if( !md->special_state.ai ) { //Normal mobs
 					if( (target->type == BL_MOB && t_bl->type == BL_PC &&
@@ -7926,12 +7900,19 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 		if( (flag&(BCT_PARTY|BCT_ENEMY)) ) {
 			int s_party = status_get_party_id(s_bl);
 			int s_guild = status_get_guild_id(s_bl);
+			int t_guild = status_get_guild_id(t_bl);
 
-			if( s_party && s_party == status_get_party_id(t_bl) && !(map[m].flag.pvp && map[m].flag.pvp_noparty) &&
-				!(map_flag_gvg2(m) && map[m].flag.gvg_noparty && !(s_guild && s_guild == status_get_guild_id(t_bl))) &&
-				(!map[m].flag.battleground || sbg_id == tbg_id) )
-				state |= BCT_PARTY;
-			else
+			if( s_party && s_party == status_get_party_id(t_bl) ) {
+				if( map_flag_gvg2(m) && map[m].flag.gvg_noparty ) {
+					if( s_guild && t_guild && (s_guild == t_guild || guild_isallied(s_guild, t_guild)) )
+						state |= BCT_PARTY;
+					else
+						state |= (flag&BCT_ENEMY) ? BCT_ENEMY : BCT_PARTY;
+				} else if( !(map[m].flag.pvp && map[m].flag.pvp_noparty) && (!map[m].flag.battleground || sbg_id == tbg_id) )
+					state |= BCT_PARTY;
+				else
+					state |= BCT_ENEMY;
+			} else
 				state |= BCT_ENEMY;
 		}
 

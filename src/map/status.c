@@ -61,6 +61,10 @@ int current_equip_card_id; /// To prevent card-stacking (from jA) [Skotlex]
 bool running_npc_stat_calc_event; /// Indicate if OnPCStatCalcEvent is running
 // We need it for new cards 15 Feb 2005, to check if the combo cards are insrerted into the CURRENT weapon only to avoid cards exploits
 
+unsigned int SCDisabled[SC_MAX]; /// List of disabled SC on map zones [Cydh]
+static bool status_change_isDisabledOnMap_(sc_type type, bool mapIsVS, bool mapIsPVP, bool mapIsGVG, bool mapIsBG, unsigned int mapZone, bool mapIsTE);
+#define status_change_isDisabledOnMap(type, m) ( status_change_isDisabledOnMap_((type), map_flag_vs2((m)), map[(m)].flag.pvp, map_flag_gvg2_no_te((m)), map[(m)].flag.battleground, map[(m)].zone << 3, map_flag_gvg2_te((m))) )
+
 /**
  * Returns the status change associated with a skill.
  * @param skill The skill to look up
@@ -161,6 +165,7 @@ void initChangeTables(void) {
 	memset(StatusChangeFlagTable, 0, sizeof(StatusChangeFlagTable));
 	memset(StatusChangeStateTable, 0, sizeof(StatusChangeStateTable));
 	memset(StatusDisplayType, 0, sizeof(StatusDisplayType));
+	memset(SCDisabled, 0, sizeof(SCDisabled));
 
 	//First we define the skill for common ailments, these are used in skill_additional_effect through sc cards [Skotlex]
 	set_sc( NPC_PETRIFYATTACK    , SC_STONE           , SI_BLANK           , SCB_DEF|SCB_MDEF|SCB_DEF_ELE );
@@ -1055,6 +1060,7 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_GOLDENMACECLAN] = SI_GOLDENMACECLAN;
 	StatusIconChangeTable[SC_CROSSBOWCLAN] = SI_CROSSBOWCLAN;
 	StatusIconChangeTable[SC_JUMPINGCLAN] = SI_JUMPINGCLAN;
+	StatusIconChangeTable[SC_RAY_OF_PROTECTION] = SI_RAY_OF_PROTECTION;
 
 	//Other SC which are not necessarily associated to skills
 	StatusChangeFlagTable[SC_ASPDPOTION0] |= SCB_ASPD;
@@ -7690,6 +7696,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 	if( status_isdead(bl) && type != SC_NOCHAT ) //SC_NOCHAT should work even on dead characters
 		return 0;
 
+	if( status_change_isDisabledOnMap(type,bl->m) )
+		return 0;
+
 	if( bl->type == BL_MOB ) {
 		struct mob_data *md = BL_CAST(BL_MOB,bl);
 
@@ -7748,6 +7757,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				return 0;
 		}
 	}
+
+	if( sc->data[SC_RAY_OF_PROTECTION] && type >= SC_COMMON_MIN && type <= SC_COMMON_MAX )
+		return 0;
 
 	sd = BL_CAST(BL_PC,bl);
 
@@ -8460,6 +8472,18 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_TINDER_BREAKER_POSTDELAY,INVALID_TIMER);
 			status_change_end(bl,SC_CBC_POSTDELAY,INVALID_TIMER);
 			break;
+		case SC_RAY_OF_PROTECTION:
+			status_change_end(bl,SC_STUN,INVALID_TIMER);
+			status_change_end(bl,SC_SLEEP,INVALID_TIMER);
+			status_change_end(bl,SC_CURSE,INVALID_TIMER);
+			status_change_end(bl,SC_STONE,INVALID_TIMER);
+			status_change_end(bl,SC_POISON,INVALID_TIMER);
+			status_change_end(bl,SC_BLIND,INVALID_TIMER);
+			status_change_end(bl,SC_SILENCE,INVALID_TIMER);
+			status_change_end(bl,SC_BLEEDING,INVALID_TIMER);
+			status_change_end(bl,SC_CONFUSION,INVALID_TIMER);
+			status_change_end(bl,SC_FREEZE,INVALID_TIMER);
+			break;
 	}
 
 	if( (sce = sc->data[type]) ) { //Check for overlapping fails
@@ -8717,7 +8741,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				//val3 : 0 = Called by skill 1 = Called by script (fixed level)
 				if( !val2 )
 					val2 = rnd()%ELE_ALL;
-				if( val1 == 1 && val3 == 0 )
+				if( val1 == 1 && !val3 )
 					val1 = 1 + rnd()%4;
 				else if( val1 > 4 )
 					val1 = 4; //Max level
@@ -9355,8 +9379,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val4 = BF_WEAPON|BF_MISC; //Type
 				break;
 			case SC_ENCHANTARMS:
-				//End previous enchants
-				skill_enchant_elemental_end(bl,type);
+				skill_enchant_elemental_end(src,SC_ENCHANTARMS); //End previous enchants
 				//Make sure the received element is valid
 				if( val2 >= ELE_ALL )
 					val2 = val2%ELE_ALL;
@@ -13453,11 +13476,89 @@ static int status_natural_heal_timer(int tid, unsigned int tick, int id, intptr_
  * @param refine The target refine level
  * @return The chance to refine the item, in percent (0~100)
  */
-int status_get_refine_chance(enum refine_type wlv, int refine) {
-
+int status_get_refine_chance(enum refine_type wlv, int refine)
+{
 	 if (refine < 0 || refine >= MAX_REFINE)
 		return 0;
 	return refine_info[wlv].chance[refine];
+}
+
+/**
+ * Check if status is disabled on a map
+ * @param type: Status Change data
+ * @param mapIsVS: If the map is a map_flag_vs type
+ * @param mapisPVP: If the map is a PvP type
+ * @param mapIsGVG: If the map is a map_flag_gvg type
+ * @param mapIsBG: If the map is a Battleground type
+ * @param mapZone: Map Zone type
+ * @param mapIsTE: If the map us WOE TE
+ * @return True - SC disabled on map; False - SC not disabled on map/Invalid SC
+ */
+static bool status_change_isDisabledOnMap_(sc_type type, bool mapIsVS, bool mapIsPVP, bool mapIsGVG, bool mapIsBG, unsigned int mapZone, bool mapIsTE)
+{
+	if (type <= SC_NONE || type >= SC_MAX)
+		return false;
+	if ((!mapIsVS && SCDisabled[type]&1) ||
+		(mapIsPVP && SCDisabled[type]&2) ||
+		(mapIsGVG && SCDisabled[type]&4) ||
+		(mapIsBG && SCDisabled[type]&8) ||
+		(mapIsTE && SCDisabled[type]&16) ||
+		(SCDisabled[type]&(mapZone)))
+		return true;
+
+	return false;
+}
+
+/**
+ * Clear a status if it is disabled on a map
+ * @param bl: Block list data
+ * @param sc: Status Change data
+ */
+void status_change_clear_onChangeMap(struct block_list *bl, struct status_change *sc)
+{
+	nullpo_retv(bl);
+
+	if (sc && sc->count) {
+		unsigned short i;
+		bool mapIsVS = map_flag_vs2(bl->m);
+		bool mapIsPVP = map[bl->m].flag.pvp;
+		bool mapIsGVG = map_flag_gvg2_no_te(bl->m);
+		bool mapIsBG = map[bl->m].flag.battleground;
+		bool mapIsTE = map_flag_gvg2_te(bl->m);
+		unsigned int mapZone = map[bl->m].zone << 3;
+
+		for (i = 0; i < SC_MAX; i++) {
+			if (!sc->data[i] || !SCDisabled[i])
+				continue;
+			if (status_change_isDisabledOnMap_((sc_type)i, mapIsVS, mapIsPVP, mapIsGVG, mapIsBG, mapZone, mapIsTE))
+				status_change_end(bl, (sc_type)i, INVALID_TIMER);
+		}
+	}
+}
+
+/**
+ * Read status_disabled.txt file
+ * @param str: Fields passed from sv_readdb
+ * @param columns: Columns passed from sv_readdb function call
+ * @param current: Current row being read into SCDisabled array
+ * @return True - Successfully stored, False - Invalid SC
+ */
+static bool status_readdb_status_disabled(char **str, int columns, int current)
+{
+	int type = SC_NONE;
+
+	if (ISDIGIT(str[0][0]))
+		type = atoi(str[0]);
+	else {
+		if (!script_get_constant(str[0],&type))
+			type = SC_NONE;
+	}
+	if (type <= SC_NONE || type >= SC_MAX) {
+		ShowError("status_readdb_status_disabled: Invalid SC with type %s.\n", str[0]);
+		return false;
+	}
+	SCDisabled[type] = (unsigned int)atol(str[1]);
+	return true;
 }
 
 static bool status_readdb_sizefix(char *fields[], int columns, int current)
@@ -13510,11 +13611,15 @@ static bool status_readdb_refine(char *fields[], int columns, int current)
 int status_readdb(void)
 {
 	int i, j;
+
 	//Initialize databases to default
+	memset(SCDisabled, 0, sizeof(SCDisabled));
+
 	//size_fix.txt
-	for(i = 0; i < ARRAYLENGTH(atkmods); i++)
+	for(i = 0; i < ARRAYLENGTH(atkmods); i++) {
 		for(j = 0; j < MAX_WEAPON_TYPE; j++)
 			atkmods[i][j] = 100;
+	}
 	//refine_db.txt
 	for(i = 0; i < ARRAYLENGTH(refine_info); i++) {
 		for(j = 0; j < MAX_REFINE; j++) {
@@ -13526,6 +13631,7 @@ int status_readdb(void)
 
 	//Read databases
 	//path,filename,separator,mincol,maxcol,maxrow,func_parsor
+	sv_readdb(db_path, "status_disabled.txt", ',', 2, 2, -1, &status_readdb_status_disabled);
 	sv_readdb(db_path, DBPATH"size_fix.txt", ',', MAX_WEAPON_TYPE, MAX_WEAPON_TYPE, ARRAYLENGTH(atkmods), &status_readdb_sizefix);
 	sv_readdb(db_path, DBPATH"refine_db.txt", ',', 4 + MAX_REFINE, 4 + MAX_REFINE, ARRAYLENGTH(refine_info), &status_readdb_refine);
 	return 0;

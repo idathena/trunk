@@ -9,6 +9,7 @@
 // 2    - restricted in PVP
 // 4    - restricted in GVG
 // 8    - restricted in Battlegrounds
+// 16   - restricted in WOE:TE castles
 // Restricted zones - configured by 'restricted <number>' mapflag
 // 32   - restricted in zone 1
 // 64   - restricted in zone 2
@@ -17,6 +18,7 @@
 // 512  - restricted in zone 5
 // 1024 - restricted in zone 6
 // 2048 - restricted in zone 7
+// 4096 - restricted in zone 8
 //
 // Examples:
 // 1201,1   // Knife can't be worn on normal maps
@@ -109,3 +111,49 @@
 // Zone 7 - Towns
 //----------------------------------------------------------------------------
 14529,2048	//Greed_Scroll
+
+//----------------------------------------------------------------------------
+// WoE:TE Items - Only can be used in WoE:TE Castles (All except &16)
+//----------------------------------------------------------------------------
+1299,8175	//TE_Woe_Katar
+1319,8175	//TE_Woe_Axe
+1399,8175	//TE_Woe_Two_Handed_Axe
+1437,8175	//TE_Woe_Pike
+1495,8175	//TE_Woe_Lance
+1591,8175	//TE_Woe_Book
+1667,8175	//TE_Woe_Staff
+1834,8175	//TE_Woe_Fist
+1932,8175	//TE_Woe_Guitar
+1987,8175	//TE_Woe_Rope
+2019,8175	//TE_Woe_Two_Hand_Staff
+2178,8175	//TE_Woe_Buckler
+2179,8175	//TE_Woe_Shield
+2180,8175	//TE_Woe_Magic_Guard
+2496,8175	//TE_Woe_Shoes
+2497,8175	//TE_Woe_Boots
+2498,8175	//TE_Woe_Magic_Sandal
+2944,8175	//TE_Ring_Of_Protection
+2945,8175	//TE_Ring_Of_Rage
+2946,8175	//TE_Ring_Of_Defiance
+11557,8175	//TE_White_Potion
+11558,8175	//TE_White_Slim_Potion
+13083,8175	//TE_Woe_Knife
+13117,8175	//TE_Woe_Pistol
+13184,8175	//TE_Woe_Rifle
+13185,8175	//TE_Woe_Gatling
+13186,8175	//TE_Woe_Shotgun
+13187,8175	//TE_Woe_Grenade
+13317,8175	//TE_Woe_Huuma
+13439,8175	//TE_Woe_Sword
+15062,8175	//TE_Woe_Coat
+15063,8175	//TE_Woe_Chain_Mail
+15064,8175	//TE_Woe_Mage_Coat
+16025,8175	//TE_Woe_Mace
+18118,8175	//TE_Woe_Bow
+18732,8175	//TE_Woe_Cap
+18733,8175	//TE_Woe_Bone_Helm
+18734,8175	//TE_Woe_Magic_Eyes
+20702,8175	//TE_Woe_Muffler
+20703,8175	//TE_Woe_Manteau
+20704,8175	//TE_Woe_Magic_Manteau
+21006,8175	//TE_Woe_Two_Hand_Sword

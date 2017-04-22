@@ -683,6 +683,8 @@ struct map_session_data {
 		bool claimPrize;
 	} roulette;
 
+	short setlook_head_top, setlook_head_mid, setlook_head_bottom, setlook_robe; //Stores 'setlook' script command values
+
 #if PACKETVER >= 20150513
 	uint32 *hatEffectIDs;
 	uint8 hatEffectCount;
@@ -756,6 +758,10 @@ struct {
 	struct s_params {
 		uint16 str, agi, vit, int_, dex, luk;
 	} max_param;
+	struct s_job_noenter_map {
+		uint32 zone;
+		uint8 group_lv;
+	} noenter_map;
 } job_info[CLASS_COUNT];
 
 #define EQP_WEAPON EQP_HAND_R
@@ -1039,6 +1045,7 @@ void pc_setriding(struct map_session_data *sd, int flag);
 void pc_setmadogear(struct map_session_data *sd, int flag);
 void pc_changelook(struct map_session_data *sd, int type, int val);
 void pc_equiplookall(struct map_session_data *sd);
+void pc_set_costume_view(struct map_session_data *sd);
 
 int pc_readparam(struct map_session_data *,int);
 bool pc_setparam(struct map_session_data *,int,int);
@@ -1201,6 +1208,8 @@ bool pc_is_same_equip_index(enum equip_index eqi, short *equip_index, short inde
 
 void pc_show_questinfo(struct map_session_data *sd);
 void pc_show_questinfo_reinit(struct map_session_data *sd);
+
+bool pc_job_can_entermap(enum e_job jobid, int m, int group_lv);
 
 #if defined(RENEWAL_DROP) || defined(RENEWAL_EXP)
 int pc_level_penalty_mod(struct map_session_data *sd, int mob_level, uint32 mob_class, int type);

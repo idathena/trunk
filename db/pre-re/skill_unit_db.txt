@@ -165,8 +165,6 @@
 2555,0x104,   ,  0, 1:2:2:3:3,500,enemy,0x000	//RL_B_TRAP
 2567,0x105,   , -1, 0, 100,enemy, 0x098	//RL_FIRE_RAIN
 
-3006,0x86,    ,  0, 1, 100,enemy, 0x018	//KO_BAKURETSU
-3009,0x86,    ,  0, 3, 100,enemy, 0x018 //KO_HUUMARANKA
 3010,0xfc,    ,  0, 1,5000,enemy, 0x018 //KO_MAKIBISHI
 3020,0xf8,    ,  0, 2, 500,all, 0x018   //KO_ZENKAI
 

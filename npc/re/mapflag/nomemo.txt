@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Current Version: =====================================
-//= 1.0
+//= 1.1
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -11,6 +11,7 @@
 //= Also disables marriage warp skills.
 //===== Additional Comments: ================================= 
 //= 1.0 Renewal split. [Euphy]
+//= 1.1 Added GVG TE Maps. [Cydh]
 //============================================================
 
 // Episode 13 ====================
@@ -157,3 +158,17 @@ dali02	mapflag	nomemo
 // Nightmare Clock Tower =========
 c_tower2_	mapflag	nomemo
 c_tower3_	mapflag	nomemo
+
+// WOE:TE Maps ===================
+te_prtcas01	mapflag	nomemo
+te_prtcas02	mapflag	nomemo
+te_prtcas03	mapflag	nomemo
+te_prtcas04	mapflag	nomemo
+te_prtcas05	mapflag	nomemo
+te_aldecas1	mapflag	nomemo
+te_aldecas2	mapflag	nomemo
+te_aldecas3	mapflag	nomemo
+te_aldecas4	mapflag	nomemo
+te_aldecas5	mapflag	nomemo
+teg_dun01	mapflag	nomemo
+teg_dun02	mapflag	nomemo
