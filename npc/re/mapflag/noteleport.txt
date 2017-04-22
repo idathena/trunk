@@ -16,7 +16,7 @@
 //=   Fly Wing (601), Giant Fly Wing (12212)
 //===== Additional Comments: ================================= 
 //= 1.0 Renewal split. [Euphy]
-//= 1.1 Added WOE:TE maps [Cydh,Capuche]
+//= 1.1 Added WOE:TE maps [Cydh, Capuche]
 //============================================================
 
 // Cities ========================

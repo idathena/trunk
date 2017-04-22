@@ -4338,7 +4338,7 @@ int cleanup_sub(struct block_list *bl, va_list ap)
 {
 	nullpo_ret(bl);
 
-	switch(bl->type) {
+	switch( bl->type ) {
 		case BL_PC:
 			map_quit((struct map_session_data *) bl);
 			break;
@@ -4370,7 +4370,7 @@ int cleanup_sub(struct block_list *bl, va_list ap)
 void map_skill_damage_free(struct map_data *m) {
 	uint8 i;
 
-	for(i = 0; i < m->skill_damage.count; i++) {
+	for( i = 0; i < m->skill_damage.count; i++ ) {
 		ers_free(map_skill_damage_ers, m->skill_damage.entries[i]);
 		m->skill_damage.entries[i] = NULL;
 	}
@@ -4394,11 +4394,11 @@ void map_skill_damage_add(struct map_data *m, uint16 skill_id, int pc, int mob, 
 	struct s_skill_damage *entry;
 	int i = 0;
 
-	if(m->skill_damage.count >= UINT8_MAX)
+	if( m->skill_damage.count >= UINT8_MAX )
 		return;
 
-	for(i = 0; i < m->skill_damage.count; i++) {
-		if(m->skill_damage.entries[i]->skill_id == skill_id) {
+	for( i = 0; i < m->skill_damage.count; i++ ) {
+		if( m->skill_damage.entries[i]->skill_id == skill_id ) {
 			m->skill_damage.entries[i]->pc = pc;
 			m->skill_damage.entries[i]->mob = mob;
 			m->skill_damage.entries[i]->boss = boss;
@@ -4447,10 +4447,10 @@ void do_final(void)
 		map_quit(sd);
 	mapit_free(iter);
 
-	/* Prepares npcs for a faster shutdown process */
+	//Prepares npcs for a faster shutdown process
 	do_clear_npc();
 
-	// Remove all objects on maps
+	//Remove all objects on maps
 	for( i = 0; i < map_num; i++ ) {
 		ShowStatus("Cleaning up maps [%d/%d]: %s..."CL_CLL"\r", i + 1, map_num, map[i].name);
 		if( map[i].m >= 0 ) {
@@ -4499,7 +4499,7 @@ void do_final(void)
 	map_db->destroy(map_db, map_db_final);
 
 	mapindex_final();
-	if(enable_grf)
+	if( enable_grf )
 		grfio_final();
 
 	id_db->destroy(id_db, NULL);

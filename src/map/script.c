@@ -17949,7 +17949,7 @@ BUILDIN_FUNC(questinfo)
 	int quest_id, icon;
 	struct questinfo qi, *q2;
 
-	if( nd == NULL ) {
+	if( nd == NULL || nd->bl.m == -1 ) {
 		ShowError("buildin_questinfo: No NPC attached.\n");
 		return 1;
 	}
