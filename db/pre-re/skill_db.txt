@@ -1038,7 +1038,7 @@
 2474,1,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	GN_TRAINING_SWORD,Sword Training
 2475,1,0,0,0,0,0,5,0,no,0,0,0,none,0,0,	GN_REMODELING_CART,Cart Remodeling
 2476,1,6,4,-1,0x3,2,5,1,no,0,0,0,weapon,2,0,	GN_CART_TORNADO,Cart Tornado
-2477,7:8:9:10:11,6,1,-1,0x62,1:1:2:2:3,5,1,yes,0,0,0,weapon,0,0,	GN_CARTCANNON,Cart Cannon
+2477,7:8:9:10:11,6,1,-1,0x42,1:1:2:2:3,5,1,yes,0,0,0,weapon,0,0,	GN_CARTCANNON,Cart Cannon
 2478,1,6,4,0,0x1,0,5,1,yes,0,0,0,none,0,0,	GN_CARTBOOST,Cart Boost
 2479,9,6,2,0,0x40,0,5,1,yes,0,0x80,3,misc,0,0,	GN_THORNS_TRAP,Thorn Trap
 2480,11,6,1,0,0x41,0,5,1,yes,0,0,3,misc,0,0,	GN_BLOOD_SUCKER,Blood Sucker
@@ -1079,7 +1079,7 @@
 //2540,1,6,4,0,0x1,0,5,1,no,0,0x2,0,none,0,0,	NPC_DISSONANCE,Dissonance 2
 //2541,1,6,4,0,0x1,0,5,1,no,0,0x2,0,none,0,0,	NPC_UGLYDANCE,Ugly Dance 2
 //2542,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	ALL_TETANY,Tetany
-//2543,1,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	ALL_RAY_OF_PROTECTION,Ray of Protection
+2543,1,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	ALL_RAY_OF_PROTECTION,Ray of Protection
 2544,1,6,4,0,0x1,0,1,1,no,0,0x1,0,none,0,0,	MC_CARTDECORATE,Decorate Cart
 //2545,1,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	GM_ITEM_ATKMAX,Maximize Attack
 //2546,1,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	GM_ITEM_ATKMIN,Minimize Attack
@@ -1121,7 +1121,7 @@
 3003,1,0,0,0,0,0,5,0,no,0,0,0,weapon,0,0,	KO_LEFT,Left Hand Mastery
 3004,3:4:5:6:7,8,1,-1,0,0,5,-2,no,0,0,0,weapon,0,0,	KO_JYUMONJIKIRI,Cross Slash
 3005,2,6,1,-1,0,0,5,1,no,0,0,0,weapon,0,0,	KO_SETSUDAN,Soul Cutter
-3006,7:8:9:10:11,6,2,-1,0x42,2,5,1,no,0,0,0,weapon,0,0,	KO_BAKURETSU,Kunai Explosion
+3006,7:8:9:10:11,6,2,-1,0x42,1,5,1,no,0,0,0,weapon,0,0,	KO_BAKURETSU,Kunai Explosion
 3007,9,6,4,-1,0x43,4:4:4:4:5,5,1,no,0,0,0,weapon,0,0,	KO_HAPPOKUNAI,Kunai Splash
 3008,11,8,2,0,0xD6,1:1:1:1:1:1:1:1:1:2,10,-10,no,0,0,0,misc,0,0,	KO_MUCHANAGE,Rapid Throw
 3009,9:10:11:12:13,8,2,-1,0x2,3,5,-5,no,0,0,0,weapon,0,0,	KO_HUUMARANKA,Swirling Petal

@@ -1115,16 +1115,9 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 #endif
 
 #if PACKETVER >= 20120221
-	if( battle_config.monster_hp_bars_info && bl->type == BL_MOB && (status_get_hp(bl) < status_get_max_hp(bl)) ) {
-		TBL_MOB *md = ((TBL_MOB *)bl);
-
-		if( mob_is_battleground(md) || mob_is_gvg(md) || mob_is_treasure(md) || mob_is_guardian(md->mob_id) ) {
-			WBUFL(buf,55) = -1;
-			WBUFL(buf,59) = -1;
-		} else {
-			WBUFL(buf,55) = status_get_max_hp(bl); //maxHP
-			WBUFL(buf,59) = status_get_hp(bl); //HP
-		}
+	if( battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && (status_get_hp(bl) < status_get_max_hp(bl)) ) {
+		WBUFL(buf,55) = status_get_max_hp(bl); //maxHP
+		WBUFL(buf,59) = status_get_hp(bl); //HP
 	} else {
 		WBUFL(buf,55) = -1;
 		WBUFL(buf,59) = -1;
@@ -1279,16 +1272,9 @@ static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, un
 #endif
 
 #if PACKETVER >= 20120221
-	if( battle_config.monster_hp_bars_info && bl->type == BL_MOB && (status_get_hp(bl) < status_get_max_hp(bl)) ) {
-		TBL_MOB *md = ((TBL_MOB *)bl);
-
-		if( mob_is_battleground(md) || mob_is_gvg(md) || mob_is_treasure(md) || mob_is_guardian(md->mob_id) ) {
-			WBUFL(buf,62) = -1;
-			WBUFL(buf,66) = -1;
-		} else {
-			WBUFL(buf,62) = status_get_max_hp(bl); //maxHP
-			WBUFL(buf,66) = status_get_hp(bl); //HP
-		}
+	if( battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && (status_get_hp(bl) < status_get_max_hp(bl)) ) {
+		WBUFL(buf,62) = status_get_max_hp(bl); //maxHP
+		WBUFL(buf,66) = status_get_hp(bl); //HP
 	} else {
 		WBUFL(buf,62) = -1;
 		WBUFL(buf,66) = -1;
@@ -4628,7 +4614,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 				}
 #endif
 #if PACKETVER >= 20120404
-				if (battle_config.monster_hp_bars_info) {
+				if (battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar) {
 					int i;
 
 					for (i = 0; i < DAMAGELOG_SIZE; i++) { //Must show hp bar to all char who already hit the mob
@@ -6365,7 +6351,7 @@ void clif_maptypeproperty2(struct block_list *bl, enum send_target t) {
 		((map[bl->m].flag.pvp ? 1 : 0)<<5)| //COUNT_PK - Show the PvP counter
 		((map[bl->m].flag.partylock ? 1 : 0)<<6)| //NO_PARTY_FORMATION - Prevents party creation/modification (Might be used for instance dungeons)
 		((map[bl->m].flag.battleground ? 1 : 0)<<7)| //BATTLEFIELD - Unknown (Does something for battlegrounds areas)
-		((map[bl->m].flag.noitemconsumption ? 1 : 0)<<8)| //DISABLE_COSTUMEITEM - Unknown - (Prevents wearing of costume items?)
+		((map[bl->m].flag.nocostume ? 1 : 0)<<8)| //DISABLE_COSTUMEITEM - Disable costume sprites
 		((map[bl->m].flag.nousecart ? 0 : 1)<<9)| //USECART - Allow opening cart inventory (Well force it to always allow it)
 		((map[bl->m].flag.nosumstarmiracle ? 0 : 1)<<10); //SUNMOONSTAR_MIRACLE - Unknown - (Guessing it blocks Star Gladiator's Miracle from activating)
 		//(1<<11); //Unused bits. 1 - 10 is 0x1 length and 11 is 0x15 length. May be used for future settings
@@ -10211,6 +10197,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 #else
 	clif_changelook(&sd->bl,LOOK_WEAPON,0);
 #endif
+	pc_set_costume_view(sd);
 
 	if(sd->vd.cloth_color)
 		clif_refreshlook(&sd->bl,sd->bl.id,LOOK_CLOTHES_COLOR,sd->vd.cloth_color,SELF);
@@ -10443,6 +10430,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			if(sd->sc.data[SC_ANTI_M_BLAST])
 				status_change_end(&sd->bl,SC_ANTI_M_BLAST,INVALID_TIMER);
 		}
+		status_change_clear_onChangeMap(&sd->bl,&sd->sc);
 		map_iwall_get(sd); //Updates Walls Info on this Map to Client
 		status_calc_pc(sd,SCO_NONE); //Some conditions are map-dependent so we must recalculate
 #ifdef VIP_ENABLE
@@ -10651,12 +10639,17 @@ void clif_progressbar_abort(struct map_session_data *sd)
 void clif_parse_progressbar(int fd, struct map_session_data *sd)
 {
 	int npc_id = sd->progressbar.npc_id;
+	bool fail = false;
 
-	if( gettick() < sd->progressbar.timeout && sd->st )
+	if( gettick() < sd->progressbar.timeout && sd->st ) {
 		pc_close_npc(sd, 1);
-	else //Don't continue the script if fail
-		npc_scriptcont(sd, npc_id, false);
+		fail = true;
+	}
+
 	sd->progressbar.npc_id = sd->progressbar.timeout = 0;
+
+	if( !fail ) //Don't continue if it fails
+		npc_scriptcont(sd, npc_id, false);
 }
 
 
@@ -13355,7 +13348,7 @@ void clif_parse_GuildChangeEmblem(int fd,struct map_session_data *sd) {
 
 	if( !emblem_len || !sd->state.gmaster_flag )
 		return;
-	if( !(battle_config.emblem_woe_change) && (agit_flag || agit2_flag) ) {
+	if( !battle_config.emblem_woe_change && is_agit_start() ) {
 		clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(385)); //"You not allowed to change emblem during woe"
 		return;
 	}

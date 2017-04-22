@@ -423,7 +423,6 @@ int guild_npc_request_info(int guild_id,const char *event)
 	if( guild_search(guild_id) ) {
 		if( event && *event )
 			npc_event_do(event);
-
 		return 0;
 	}
 
@@ -605,7 +604,7 @@ int guild_invite(struct map_session_data *sd, struct map_session_data *tsd) {
 		return 0;
 
 	if( (i = guild_getposition(sd)) < 0 || !(g->position[i].mode&0x0001) )
-		return 0; //Invite permission.
+		return 0; //Invite permission
 
 	if( !battle_config.invite_request_check ) {
 		if (tsd->party_invite > 0 || tsd->trade_partner || tsd->adopt_invite) { //Checking if there no other invitation pending
@@ -614,14 +613,14 @@ int guild_invite(struct map_session_data *sd, struct map_session_data *tsd) {
 		}
 	}
 	
-	if( !tsd->fd ) { //You can't invite someone who has already disconnected.
+	if( !tsd->fd ) { //You can't invite someone who has already disconnected
 		clif_guild_inviteack(sd,1);
 		return 0;
 	}
 
 	if( tsd->status.guild_id > 0 || tsd->guild_invite > 0 ||
-		((agit_flag || agit2_flag) && map[tsd->bl.m].flag.gvg_castle && !battle_config.guild_castle_invite) ) {
-		clif_guild_inviteack(sd,0); //Can't invite people inside castles. [Skotlex]
+		(map_flag_gvg(tsd->bl.m) && !battle_config.guild_castle_invite) ) {
+		clif_guild_inviteack(sd,0); //Can't invite people inside castles [Skotlex]
 		return 0;
 	}
 
@@ -757,7 +756,7 @@ int guild_member_added(int guild_id,int account_id,int char_id,int flag)
 	sd->status.guild_id = g->guild_id;
 	sd->guild_emblem_id = g->emblem_id;
 	sd->guild = g;
-	//Packets which were sent in the previous 'guild_sent' implementation.
+	//Packets which were sent in the previous 'guild_sent' implementation
 	clif_guild_belonginfo(sd);
 	clif_guild_notice(sd);
 
@@ -787,7 +786,7 @@ int guild_leave(struct map_session_data *sd, int guild_id, int account_id, int c
 		return 0;
 
 	if( sd->status.account_id != account_id || sd->status.char_id != char_id || sd->status.guild_id != guild_id ||
-		((agit_flag || agit2_flag) && map[sd->bl.m].flag.gvg_castle && !battle_config.guild_castle_expulsion) )
+		(map_flag_gvg(sd->bl.m) && !battle_config.guild_castle_expulsion) )
 		return 0;
 
 	guild_trade_bound_cancel(sd);
@@ -818,8 +817,7 @@ int guild_expulsion(struct map_session_data *sd, int guild_id, int account_id, i
 		return 0; //Expulsion permission
 
 	//Can't leave inside guild castles
-	if( tsd && tsd->status.char_id == char_id && ((agit_flag || agit2_flag) &&
-		map[tsd->bl.m].flag.gvg_castle && !battle_config.guild_castle_expulsion) )
+	if( tsd && tsd->status.char_id == char_id && map_flag_gvg(tsd->bl.m) && !battle_config.guild_castle_expulsion )
 		return 0;
 
 	//Find the member and perform expulsion
@@ -1375,7 +1373,7 @@ void guild_guildaura_refresh(struct map_session_data *sd, uint16 skill_id, uint1
 	struct skill_unit_group *group = NULL;
 	enum sc_type type = status_skill2sc(skill_id);
 
-	if( !(battle_config.guild_aura&((agit_flag || agit2_flag) ? 2 : 1)) &&
+	if( !(battle_config.guild_aura&(is_agit_start() ? 2 : 1)) &&
 		!(battle_config.guild_aura&(map_flag_gvg2(sd->bl.m) ? 8 : 4)) )
 		return;
 	if( !skill_lv )
@@ -1449,7 +1447,7 @@ int guild_reqalliance(struct map_session_data *sd,struct map_session_data *tsd)
 	struct guild *g[2];
 	int i;
 
-	if( agit_flag || agit2_flag ) { // Disable alliance creation during woe [Valaris]
+	if( is_agit_start() ) { // Disable alliance creation during woe [Valaris]
 		clif_displaymessage(sd->fd,msg_txt(676)); // "Alliances cannot be made during Guild Wars!"
 		return 0;
 	} // End addition [Valaris]
@@ -1507,53 +1505,49 @@ int guild_reply_reqalliance(struct map_session_data *sd,int account_id,int flag)
 
 	nullpo_ret(sd);
 	tsd = map_id2sd( account_id );
-	if (!tsd) { //Character left? Cancel alliance.
+	if (!tsd) { // Character left? Cancel alliance.
 		clif_guild_allianceack(sd,3);
 		return 0;
 	}
 
-	if (sd->guild_alliance != tsd->status.guild_id) // proposed guild_id alliance doesn't match tsd guildid
+	if (sd->guild_alliance != tsd->status.guild_id) // Proposed guild_id alliance doesn't match tsd guildid
 		return 0;
 
-	if (flag == 1) { // consent
+	if (flag == 1) { // Consent
 		int i;
 
 		struct guild *g, *tg; // Reconfirm the number of alliance
-		g=sd->guild;
-		tg=tsd->guild;
+		g = sd->guild;
+		tg = tsd->guild;
 
-		if(g==NULL || guild_get_alliance_count(g,0) >= battle_config.max_guild_alliance) {
+		if (g == NULL || guild_get_alliance_count(g,0) >= battle_config.max_guild_alliance) {
 			clif_guild_allianceack(sd,4);
 			clif_guild_allianceack(tsd,3);
 			return 0;
 		}
-		if(tg==NULL || guild_get_alliance_count(tg,0) >= battle_config.max_guild_alliance) {
+		if (tg == NULL || guild_get_alliance_count(tg,0) >= battle_config.max_guild_alliance) {
 			clif_guild_allianceack(sd,3);
 			clif_guild_allianceack(tsd,4);
 			return 0;
 		}
 
-		for(i=0;i<MAX_GUILDALLIANCE;i++) {
-			if(g->alliance[i].guild_id==tsd->status.guild_id &&
-				g->alliance[i].opposition==1)
-				intif_guild_alliance( sd->status.guild_id,tsd->status.guild_id,
-					sd->status.account_id,tsd->status.account_id,9 );
-		}
-		for(i=0;i<MAX_GUILDALLIANCE;i++) {
-			if(tg->alliance[i].guild_id==sd->status.guild_id &&
-				tg->alliance[i].opposition==1)
-				intif_guild_alliance( tsd->status.guild_id,sd->status.guild_id,
-					tsd->status.account_id,sd->status.account_id,9 );
+		for (i = 0; i < MAX_GUILDALLIANCE; i++) {
+			if (g->alliance[i].guild_id == tsd->status.guild_id && g->alliance[i].opposition == 1)
+				intif_guild_alliance(sd->status.guild_id,tsd->status.guild_id,sd->status.account_id,tsd->status.account_id,9);
 		}
 
-		// inform other servers
-		intif_guild_alliance( sd->status.guild_id,tsd->status.guild_id,
-			sd->status.account_id,tsd->status.account_id,0 );
+		for (i = 0; i < MAX_GUILDALLIANCE; i++) {
+			if (tg->alliance[i].guild_id == sd->status.guild_id && tg->alliance[i].opposition == 1)
+				intif_guild_alliance(tsd->status.guild_id,sd->status.guild_id,tsd->status.account_id,sd->status.account_id,9);
+		}
+
+		// Inform other servers
+		intif_guild_alliance( sd->status.guild_id,tsd->status.guild_id,sd->status.account_id,tsd->status.account_id,0 );
 		return 0;
-	} else { // deny
-		sd->guild_alliance=0;
-		sd->guild_alliance_account=0;
-		if(tsd!=NULL)
+	} else { // Deny
+		sd->guild_alliance = 0;
+		sd->guild_alliance_account = 0;
+		if (tsd != NULL)
 			clif_guild_allianceack(tsd,3);
 	}
 	return 0;
@@ -1566,12 +1560,12 @@ int guild_delalliance(struct map_session_data *sd,int guild_id,int flag)
 {
 	nullpo_ret(sd);
 
-	if(agit_flag || agit2_flag)	{	// Disable alliance breaking during woe [Valaris]
+	if (is_agit_start()) { // Disable alliance breaking during woe [Valaris]
 		clif_displaymessage(sd->fd,msg_txt(677)); // "Alliances cannot be broken during Guild Wars!"
 		return 0;
-	}	// end addition [Valaris]
+	} // End addition [Valaris]
 
-	intif_guild_alliance( sd->status.guild_id,guild_id,sd->status.account_id,0,flag|8 );
+	intif_guild_alliance(sd->status.guild_id,guild_id,sd->status.account_id,0,flag|8);
 	return 0;
 }
 
@@ -1586,35 +1580,33 @@ int guild_opposition(struct map_session_data *sd,struct map_session_data *tsd)
 	nullpo_ret(sd);
 
 	g = sd->guild;
-	if(g == NULL || tsd == NULL)
+	if (g == NULL || tsd == NULL)
 		return 0;
 
 	// Prevent creation opposition with same guilds [LuzZza]
-	if(sd->status.guild_id == tsd->status.guild_id)
+	if (sd->status.guild_id == tsd->status.guild_id)
 		return 0;
 
-	if(guild_get_alliance_count(g,1) >= battle_config.max_guild_alliance) {
+	if (guild_get_alliance_count(g,1) >= battle_config.max_guild_alliance) {
 		clif_guild_oppositionack(sd,1);
 		return 0;
 	}
 
-	for(i = 0; i < MAX_GUILDALLIANCE; i++) { // Checking relations
-		if(g->alliance[i].guild_id == tsd->status.guild_id) {
-			if(g->alliance[i].opposition == 1) { // Check if not already hostile
+	for (i = 0; i < MAX_GUILDALLIANCE; i++) { // Checking relations
+		if (g->alliance[i].guild_id == tsd->status.guild_id) {
+			if (g->alliance[i].opposition == 1) { // Check if not already hostile
 				clif_guild_oppositionack(sd,2);
 				return 0;
 			}
-			if(agit_flag || agit2_flag) // Prevent the changing of alliances to oppositions during WoE.
+			if (is_agit_start()) // Prevent the changing of alliances to oppositions during WoE
 				return 0;
-			//Change alliance to opposition.
-			intif_guild_alliance( sd->status.guild_id,tsd->status.guild_id,
-				sd->status.account_id,tsd->status.account_id,8 );
+			// Change alliance to opposition
+			intif_guild_alliance(sd->status.guild_id,tsd->status.guild_id,sd->status.account_id,tsd->status.account_id,8);
 		}
 	}
 
 	// Inform other servers
-	intif_guild_alliance(sd->status.guild_id,tsd->status.guild_id,
-			sd->status.account_id,tsd->status.account_id,1);
+	intif_guild_alliance(sd->status.guild_id,tsd->status.guild_id,sd->status.account_id,tsd->status.account_id,1);
 	return 0;
 }
 
@@ -2018,8 +2010,8 @@ int guild_castledatasave(int castle_id, int index, int value)
 		case 9:
 			gc->visibleC = value; break;
 		default:
-			if (index > 9 && index <= 9+MAX_GUARDIANS) {
-				gc->guardian[index-10].visible = value;
+			if (index > 9 && index <= 9 + MAX_GUARDIANS) {
+				gc->guardian[index - 10].visible = value;
 				break;
 			}
 			ShowWarning("guild_castledatasave: index = '%d' is out of allowed range\n", index);
@@ -2084,6 +2076,7 @@ int guild_castledataloadack(int len, struct guild_castle *gc)
 	if( ev < 0 ) { //No castles owned, invoke OnAgitInit as it is
 		npc_event_doall("OnAgitInit");
 		npc_event_doall("OnAgitInit2");
+		npc_event_doall("OnAgitInit3");
 	} else { //Load received castles into memory, one by one
 		for( i = 0; i < n; i++, gc++ ) {
 			struct guild_castle *c = guild_castle_search(gc->castle_id);
@@ -2102,6 +2095,7 @@ int guild_castledataloadack(int len, struct guild_castle *gc)
 				else { //Last owned one
 					guild_npc_request_info(c->guild_id, "::OnAgitInit");
 					guild_npc_request_info(c->guild_id, "::OnAgitInit2");
+					guild_npc_request_info(c->guild_id, "::OnAgitInit3");
 				}
 			}
 		}
@@ -2110,44 +2104,64 @@ int guild_castledataloadack(int len, struct guild_castle *gc)
 	return 0;
 }
 
-/*====================================================
- * Start normal woe and triggers all npc OnAgitStart
- *---------------------------------------------------*/
+/**
+ * Start WoE:FE and triggers all npc OnAgitStart
+ */
 void guild_agit_start(void)
-{	//Run All NPC_Event[OnAgitStart]
+{
 	int c = npc_event_doall("OnAgitStart");
 
 	ShowStatus("NPC_Event:[OnAgitStart] Run (%d) Events by @AgitStart.\n",c);
 }
 
-/*====================================================
- * End normal woe and triggers all npc OnAgitEnd
- *---------------------------------------------------*/
+/**
+ * End WoE:FE and triggers all npc OnAgitEnd
+ */
 void guild_agit_end(void)
-{	//Run All NPC_Event[OnAgitEnd]
+{
 	int c = npc_event_doall("OnAgitEnd");
 
 	ShowStatus("NPC_Event:[OnAgitEnd] Run (%d) Events by @AgitEnd.\n",c);
 }
 
-/*====================================================
- * Start woe2 and triggers all npc OnAgitStart2
- *---------------------------------------------------*/
+/**
+ * Start WoE:SE and triggers all npc OnAgitStart2
+ */
 void guild_agit2_start(void)
-{	//Run All NPC_Event[OnAgitStart2]
+{
 	int c = npc_event_doall("OnAgitStart2");
 
 	ShowStatus("NPC_Event:[OnAgitStart2] Run (%d) Events by @AgitStart2.\n",c);
 }
 
-/*====================================================
- * End woe2 and triggers all npc OnAgitEnd2
- *---------------------------------------------------*/
+/**
+ * End WoE:SE and triggers all npc OnAgitEnd2
+ */
 void guild_agit2_end(void)
-{	//Run All NPC_Event[OnAgitEnd2]
+{
 	int c = npc_event_doall("OnAgitEnd2");
 
 	ShowStatus("NPC_Event:[OnAgitEnd2] Run (%d) Events by @AgitEnd2.\n",c);
+}
+
+/**
+ * Start WoE:TE and triggers all npc OnAgitStart3
+ */
+void guild_agit3_start(void)
+{
+	int c = npc_event_doall("OnAgitStart3");
+
+	ShowStatus("NPC_Event:[OnAgitStart3] Run (%d) Events by @AgitStart3.\n",c);
+}
+
+/**
+ * End WoE:TE and triggers all npc OnAgitEnd3
+ */
+void guild_agit3_end(void)
+{
+	int c = npc_event_doall("OnAgitEnd3");
+
+	ShowStatus("NPC_Event:[OnAgitEnd3] Run (%d) Events by @AgitEnd3.\n",c);
 }
 
 //How many castles does this guild have?

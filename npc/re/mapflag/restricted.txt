@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Current Version: =====================================
-//= 1.1
+//= 1.2
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -12,6 +12,7 @@
 //===== Additional Comments: ================================= 
 //= 1.0 Renewal split. [Euphy]
 //= 1.1 Copied towns into this file. [Euphy]
+//= 1.2 Added WOE:TE maps [Cydh]
 //============================================================
 
 // Instances =====================
@@ -48,3 +49,7 @@ izlude_d	mapflag	restricted	7
 malangdo	mapflag	restricted	7
 malaya	mapflag	restricted	7
 mora	mapflag	restricted	7
+
+// WOE:TE Maps ===================
+teg_dun01	mapflag	restricted	8
+teg_dun02	mapflag	restricted	8

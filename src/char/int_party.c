@@ -711,7 +711,7 @@ int mapif_parse_BreakParty(int fd,int party_id)
 	if(!p)
 		return 0;
 	inter_party_tosql(&p->party,PS_BREAK,0);
-	mapif_party_broken(fd,party_id);
+	mapif_party_broken(party_id,1);
 	return 0;
 }
 
