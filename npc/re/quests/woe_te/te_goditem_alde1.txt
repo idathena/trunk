@@ -17,7 +17,8 @@ te_aldecas1,226,34,3	script	Blacksmith Cano#tegod01	4_M_RACHMAN1,{
 	if (checkweight(1201,1) == 0) {
 		mes "You have too many items to proceed with the quest.";
 		mes "Please lighten your load and try again.";
-		close;	}
+		close;
+	}
 
 	.@guild_id = getcastledata("te_aldecas1",1);
 	.@economy  = getcastledata("te_aldecas1",2);

@@ -16,7 +16,7 @@
 
 // NPCs at ship
 //============================================================
--	script	::CaptainCarocc	-1,{
+iz_int,100,91,3	script	Captain Carocc#iz_int	4_M_REINDEER,{
 	if(Class == Job_Novice) {
 		cutin "fly_trock",2;
 		if(!isbegin_quest(7471)) {
@@ -71,13 +71,12 @@
 	}
 }
 
-iz_int,100,91,3	duplicate(CaptainCarocc)	Captain Carocc#iz_int	4_M_REINDEER
-iz_int01,100,91,3	duplicate(CaptainCarocc)	Captain Carocc#iz_int01	4_M_REINDEER
-iz_int02,100,91,3	duplicate(CaptainCarocc)	Captain Carocc#iz_int02	4_M_REINDEER
-iz_int03,100,91,3	duplicate(CaptainCarocc)	Captain Carocc#iz_int03	4_M_REINDEER
-iz_int04,100,91,3	duplicate(CaptainCarocc)	Captain Carocc#iz_int04	4_M_REINDEER
+iz_int01,100,91,3	duplicate(Captain Carocc#iz_int)	Captain Carocc#iz_int01	4_M_REINDEER
+iz_int02,100,91,3	duplicate(Captain Carocc#iz_int)	Captain Carocc#iz_int02	4_M_REINDEER
+iz_int03,100,91,3	duplicate(Captain Carocc#iz_int)	Captain Carocc#iz_int03	4_M_REINDEER
+iz_int04,100,91,3	duplicate(Captain Carocc#iz_int)	Captain Carocc#iz_int04	4_M_REINDEER
 
--	script	::Lumin	-1,{
+iz_int,91,81,3	script	Lumin#iz_int	4_M_NOV_RUMIN,{
 	if(Class == Job_Novice) {
 		if(!isbegin_quest(7471)) {
 			mes "[Lumin]";
@@ -167,13 +166,12 @@ iz_int04,100,91,3	duplicate(CaptainCarocc)	Captain Carocc#iz_int04	4_M_REINDEER
 	}
 }
 
-iz_int,91,81,3	duplicate(Lumin)	Lumin#iz_int	4_M_NOV_RUMIN
-iz_int01,91,81,3	duplicate(Lumin)	Lumin#iz_int01	4_M_NOV_RUMIN
-iz_int02,91,81,3	duplicate(Lumin)	Lumin#iz_int02	4_M_NOV_RUMIN
-iz_int03,91,81,3	duplicate(Lumin)	Lumin#iz_int03	4_M_NOV_RUMIN
-iz_int04,91,81,3	duplicate(Lumin)	Lumin#iz_int04	4_M_NOV_RUMIN
+iz_int01,91,81,3	duplicate(Lumin#iz_int)	Lumin#iz_int01	4_M_NOV_RUMIN
+iz_int02,91,81,3	duplicate(Lumin#iz_int)	Lumin#iz_int02	4_M_NOV_RUMIN
+iz_int03,91,81,3	duplicate(Lumin#iz_int)	Lumin#iz_int03	4_M_NOV_RUMIN
+iz_int04,91,81,3	duplicate(Lumin#iz_int)	Lumin#iz_int04	4_M_NOV_RUMIN
 
--	script	::toIzlude	-1,{
+iz_int,96,73,0	script	#izlude	WARPNPC,2,2,{
 	end;
 
 OnTouch:
@@ -182,15 +180,14 @@ OnTouch:
 	end;
 }
 
-iz_int,96,73,0	duplicate(toIzlude)	#izlude	WARPNPC,2,2
-iz_int01,96,73,0	duplicate(toIzlude)	#izlude_a	WARPNPC,2,2
-iz_int02,96,73,0	duplicate(toIzlude)	#izlude_b	WARPNPC,2,2
-iz_int03,96,73,0	duplicate(toIzlude)	#izlude_c	WARPNPC,2,2
-iz_int04,96,73,0	duplicate(toIzlude)	#izlude_d	WARPNPC,2,2
+iz_int01,96,73,0	duplicate(#izlude)	#izlude_a	WARPNPC,2,2
+iz_int02,96,73,0	duplicate(#izlude)	#izlude_b	WARPNPC,2,2
+iz_int03,96,73,0	duplicate(#izlude)	#izlude_c	WARPNPC,2,2
+iz_int04,96,73,0	duplicate(#izlude)	#izlude_d	WARPNPC,2,2
 
 // Izlude NPCs
 //============================================================
--	script	::CaptainCaroccIzlude	-1,{
+izlude,198,213,3	script	Captain Carocc#iz	4_M_REINDEER,5,5,{
 	cutin "fly_trock",2;
 	if(Class == Job_Novice && BaseLevel < 15) {
 		if(isbegin_quest(4269) == 2) {
@@ -581,13 +578,12 @@ OnInit:
 	end;
 }
 
-izlude,198,213,3	duplicate(CaptainCaroccIzlude)	Captain Carocc#iz	4_M_REINDEER,5,5
-izlude_a,198,213,3	duplicate(CaptainCaroccIzlude)	Captain Carocc#iz_a	4_M_REINDEER,5,5
-izlude_b,198,213,3	duplicate(CaptainCaroccIzlude)	Captain Carocc#iz_b	4_M_REINDEER,5,5
-izlude_c,198,213,3	duplicate(CaptainCaroccIzlude)	Captain Carocc#iz_c	4_M_REINDEER,5,5
-izlude_d,198,213,3	duplicate(CaptainCaroccIzlude)	Captain Carocc#iz_d	4_M_REINDEER,5,5
+izlude_a,198,213,3	duplicate(Captain Carocc#iz)	Captain Carocc#iz_a	4_M_REINDEER,5,5
+izlude_b,198,213,3	duplicate(Captain Carocc#iz)	Captain Carocc#iz_b	4_M_REINDEER,5,5
+izlude_c,198,213,3	duplicate(Captain Carocc#iz)	Captain Carocc#iz_c	4_M_REINDEER,5,5
+izlude_d,198,213,3	duplicate(Captain Carocc#iz)	Captain Carocc#iz_d	4_M_REINDEER,5,5
 
--	script	::IncreaseAgiAco	-1,{
+izlude,179,209,3	script	Increase Agi Aco#iz	4_F_ACOLYTE,{
 	mes "[Acolyte]";
 	mes "Welcome welcome! I know you Criatura students need a lot of energy to get to your classes on time.";
 	next;
@@ -614,18 +610,17 @@ OnInit:
 	end;
 }
 
-izlude,179,209,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#iz	4_F_ACOLYTE
-izlude,127,229,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#2iz	4_F_ACOLYTE
-izlude_a,179,209,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#iz_a	4_F_ACOLYTE
-izlude_a,127,229,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#2iz_a	4_F_ACOLYTE
-izlude_b,179,209,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#iz_b	4_F_ACOLYTE
-izlude_b,127,229,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#2iz_b	4_F_ACOLYTE
-izlude_c,179,209,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#iz_c	4_F_ACOLYTE
-izlude_c,127,229,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#2iz_c	4_F_ACOLYTE
-izlude_d,179,209,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#iz_d	4_F_ACOLYTE
-izlude_d,127,229,3	duplicate(IncreaseAgiAco)	Increase Agi Aco#2iz_d	4_F_ACOLYTE
+izlude,127,229,3	duplicate(Increase Agi Aco#iz)	Increase Agi Aco#2iz	4_F_ACOLYTE
+izlude_a,179,209,3	duplicate(Increase Agi Aco#iz)	Increase Agi Aco#iz_a	4_F_ACOLYTE
+izlude_a,127,229,3	duplicate(Increase Agi Aco#iz)	Increase Agi Aco#2iz_a	4_F_ACOLYTE
+izlude_b,179,209,3	duplicate(Increase Agi Aco#iz)	Increase Agi Aco#iz_b	4_F_ACOLYTE
+izlude_b,127,229,3	duplicate(Increase Agi Aco#iz)	Increase Agi Aco#2iz_b	4_F_ACOLYTE
+izlude_c,179,209,3	duplicate(Increase Agi Aco#iz)	Increase Agi Aco#iz_c	4_F_ACOLYTE
+izlude_c,127,229,3	duplicate(Increase Agi Aco#iz)	Increase Agi Aco#2iz_c	4_F_ACOLYTE
+izlude_d,179,209,3	duplicate(Increase Agi Aco#iz)	Increase Agi Aco#iz_d	4_F_ACOLYTE
+izlude_d,127,229,3	duplicate(Increase Agi Aco#iz)	Increase Agi Aco#2iz_d	4_F_ACOLYTE
 
--	script	::CriaturaAcademyStaff	-1,{
+izlude,122,207,3	script	Criatura Academy Staff#0	4_M_KHKYEL,3,3,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- Your inventory is too full.";
 		mes "- Continue the quest after re-organizing your inventory.";
@@ -921,13 +916,12 @@ OnInit:
 	end;
 }
 
-izlude,122,207,3	duplicate(CriaturaAcademyStaff)	Criatura Academy Staff#0	4_M_KHKYEL,3,3
-izlude_a,122,207,3	duplicate(CriaturaAcademyStaff)	Criatura Academy Staff#a	4_M_KHKYEL,3,3
-izlude_b,122,207,3	duplicate(CriaturaAcademyStaff)	Criatura Academy Staff#b	4_M_KHKYEL,3,3
-izlude_c,122,207,3	duplicate(CriaturaAcademyStaff)	Criatura Academy Staff#c	4_M_KHKYEL,3,3
-izlude_d,122,207,3	duplicate(CriaturaAcademyStaff)	Criatura Academy Staff#d	4_M_KHKYEL,3,3
+izlude_a,122,207,3	duplicate(Criatura Academy Staff#0)	Criatura Academy Staff#a	4_M_KHKYEL,3,3
+izlude_b,122,207,3	duplicate(Criatura Academy Staff#0)	Criatura Academy Staff#b	4_M_KHKYEL,3,3
+izlude_c,122,207,3	duplicate(Criatura Academy Staff#0)	Criatura Academy Staff#c	4_M_KHKYEL,3,3
+izlude_d,122,207,3	duplicate(Criatura Academy Staff#0)	Criatura Academy Staff#d	4_M_KHKYEL,3,3
 
--	script	::InformationStaff	-1,{
+izlude,120,207,4	script	Information Staff#0	8W_SOLDIER,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- Quest cannont be continued due to the inventory being full.";
 		mes "- Please try it again after re-organizing your items.";
@@ -1234,13 +1228,12 @@ OnInit:
 	end;
 }
 
-izlude,120,207,4	duplicate(InformationStaff)	Information Staff#0	8W_SOLDIER
-izlude_a,120,207,4	duplicate(InformationStaff)	Information Staff#a	8W_SOLDIER
-izlude_b,120,207,4	duplicate(InformationStaff)	Information Staff#b	8W_SOLDIER
-izlude_c,120,207,4	duplicate(InformationStaff)	Information Staff#c	8W_SOLDIER
-izlude_d,120,207,4	duplicate(InformationStaff)	Information Staff#d	8W_SOLDIER
+izlude_a,120,207,4	duplicate(Information Staff#0)	Information Staff#a	8W_SOLDIER
+izlude_b,120,207,4	duplicate(Information Staff#0)	Information Staff#b	8W_SOLDIER
+izlude_c,120,207,4	duplicate(Information Staff#0)	Information Staff#c	8W_SOLDIER
+izlude_d,120,207,4	duplicate(Information Staff#0)	Information Staff#d	8W_SOLDIER
 
--	script	::BulletinBoardAirship	-1,{
+izlude,179,75,3	script	Free Airship#iz	4_BULLETIN_BOARD2,3,3,{
 	mes "=== Information Airship Route ===";
 	if(isbegin_quest(7474) == 1) {
 		if(!isbegin_quest(7475)) {
@@ -1371,13 +1364,12 @@ OnInit:
 	end;
 }
 
-izlude,179,75,3	duplicate(BulletinBoardAirship)	Free Airship#iz	4_BULLETIN_BOARD2,3,3
-izlude_a,179,75,3	duplicate(BulletinBoardAirship)	Free Airship#iz_a	4_BULLETIN_BOARD2,3,3
-izlude_b,179,75,3	duplicate(BulletinBoardAirship)	Free Airship#iz_b	4_BULLETIN_BOARD2,3,3
-izlude_c,179,75,3	duplicate(BulletinBoardAirship)	Free Airship#iz_c	4_BULLETIN_BOARD2,3,3
-izlude_d,179,75,3	duplicate(BulletinBoardAirship)	Free Airship#iz_d	4_BULLETIN_BOARD2,3,3
+izlude_a,179,75,3	duplicate(Free Airship#iz)	Free Airship#iz_a	4_BULLETIN_BOARD2,3,3
+izlude_b,179,75,3	duplicate(Free Airship#iz)	Free Airship#iz_b	4_BULLETIN_BOARD2,3,3
+izlude_c,179,75,3	duplicate(Free Airship#iz)	Free Airship#iz_c	4_BULLETIN_BOARD2,3,3
+izlude_d,179,75,3	duplicate(Free Airship#iz)	Free Airship#iz_d	4_BULLETIN_BOARD2,3,3
 
--	script	::BulletinBoardArena	-1,{
+izlude,207,167,3	script	Arena#iz	4_BULLETIN_BOARD2,3,3,{
 	mes "=== Challenge! Arena! ===";
 	if(isbegin_quest(7474) == 1) {
 		if(!isbegin_quest(7476))
@@ -1501,13 +1493,12 @@ OnInit:
 	end;
 }
 
-izlude,207,167,3	duplicate(BulletinBoardArena)	Arena#iz	4_BULLETIN_BOARD2,3,3
-izlude_a,207,167,3	duplicate(BulletinBoardArena)	Arena#iz_a	4_BULLETIN_BOARD2,3,3
-izlude_b,207,167,3	duplicate(BulletinBoardArena)	Arena#iz_b	4_BULLETIN_BOARD2,3,3
-izlude_c,207,167,3	duplicate(BulletinBoardArena)	Arena#iz_c	4_BULLETIN_BOARD2,3,3
-izlude_d,207,167,3	duplicate(BulletinBoardArena)	Arena#iz_d	4_BULLETIN_BOARD2,3,3
+izlude_a,207,167,3	duplicate(Arena#iz)	Arena#iz_a	4_BULLETIN_BOARD2,3,3
+izlude_b,207,167,3	duplicate(Arena#iz)	Arena#iz_b	4_BULLETIN_BOARD2,3,3
+izlude_c,207,167,3	duplicate(Arena#iz)	Arena#iz_c	4_BULLETIN_BOARD2,3,3
+izlude_d,207,167,3	duplicate(Arena#iz)	Arena#iz_d	4_BULLETIN_BOARD2,3,3
 
--	script	::BulletinBoardBridge	-1,{
+izlude,45,94,3	script	Bulletin Boardf#iz	4_BULLETIN_BOARD2,3,3,{
 	mes "=== Information ===";
 	if(isbegin_quest(7474) == 1) {
 		if(!isbegin_quest(7477))
@@ -1635,13 +1626,12 @@ OnInit:
 	end;
 }
 
-izlude,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz	4_BULLETIN_BOARD2,3,3
-izlude_a,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_a	4_BULLETIN_BOARD2,3,3
-izlude_b,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_b	4_BULLETIN_BOARD2,3,3
-izlude_c,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_c	4_BULLETIN_BOARD2,3,3
-izlude_d,45,94,3	duplicate(BulletinBoardBridge)	Bulletin Boardf#iz_d	4_BULLETIN_BOARD2,3,3
+izlude_a,45,94,3	duplicate(Bulletin Boardf#iz)	Bulletin Boardf#iz_a	4_BULLETIN_BOARD2,3,3
+izlude_b,45,94,3	duplicate(Bulletin Boardf#iz)	Bulletin Boardf#iz_b	4_BULLETIN_BOARD2,3,3
+izlude_c,45,94,3	duplicate(Bulletin Boardf#iz)	Bulletin Boardf#iz_c	4_BULLETIN_BOARD2,3,3
+izlude_d,45,94,3	duplicate(Bulletin Boardf#iz)	Bulletin Boardf#iz_d	4_BULLETIN_BOARD2,3,3
 
--	script	::InstructorArgos	-1,{
+izlude,140,260,3	script	Instructor Argos#iz	4_M_LIEMAN,{
 	if(Class == Job_Novice && !getskilllv("NV_TRICKDEAD")) {
 		if(isbegin_quest(15001) == 2) {
 			mes "[Instructor Argos]";
@@ -1805,13 +1795,12 @@ OnInit:
 	end;
 }
 
-izlude,140,260,3	duplicate(InstructorArgos)	Instructor Argos#iz	4_M_LIEMAN
-izlude_a,140,260,3	duplicate(InstructorArgos)	Instructor Argos#iz_a	4_M_LIEMAN
-izlude_b,140,260,3	duplicate(InstructorArgos)	Instructor Argos#iz_b	4_M_LIEMAN
-izlude_c,140,260,3	duplicate(InstructorArgos)	Instructor Argos#iz_c	4_M_LIEMAN
-izlude_d,140,260,3	duplicate(InstructorArgos)	Instructor Argos#iz_d	4_M_LIEMAN
+izlude_a,140,260,3	duplicate(Instructor Argos#iz)	Instructor Argos#iz_a	4_M_LIEMAN
+izlude_b,140,260,3	duplicate(Instructor Argos#iz)	Instructor Argos#iz_b	4_M_LIEMAN
+izlude_c,140,260,3	duplicate(Instructor Argos#iz)	Instructor Argos#iz_c	4_M_LIEMAN
+izlude_d,140,260,3	duplicate(Instructor Argos#iz)	Instructor Argos#iz_d	4_M_LIEMAN
 
--	script	::ShopHelper	-1,{
+izlude,115,181,5	script	Shop Helper#iz	4_F_KHELLISIA,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- Quest cannot be continued due to the overloaded inventory.";
 		close;
@@ -2018,13 +2007,12 @@ OnInit:
 	end;
 }
 
-izlude,115,181,5	duplicate(ShopHelper)	Shop Helper#iz	4_F_KHELLISIA
-izlude_a,115,181,5	duplicate(ShopHelper)	Shop Helper#iz_a	4_F_KHELLISIA
-izlude_b,115,181,5	duplicate(ShopHelper)	Shop Helper#iz_b	4_F_KHELLISIA
-izlude_c,115,181,5	duplicate(ShopHelper)	Shop Helper#iz_c	4_F_KHELLISIA
-izlude_d,115,181,5	duplicate(ShopHelper)	Shop Helper#iz_d	4_F_KHELLISIA
+izlude_a,115,181,5	duplicate(Shop Helper#iz)	Shop Helper#iz_a	4_F_KHELLISIA
+izlude_b,115,181,5	duplicate(Shop Helper#iz)	Shop Helper#iz_b	4_F_KHELLISIA
+izlude_c,115,181,5	duplicate(Shop Helper#iz)	Shop Helper#iz_c	4_F_KHELLISIA
+izlude_d,115,181,5	duplicate(Shop Helper#iz)	Shop Helper#iz_d	4_F_KHELLISIA
 
--	script	::EnchanterMounds	-1,{
+izlude,96,125,7	script	Enchanter Mounds#iz	4_CAT_SAILOR2,{
 	disable_items;
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- As you have too many items in your inventory, quest can't be continued.";
@@ -2382,13 +2370,12 @@ OnInit:
 	end;
 }
 
-izlude,96,125,7	duplicate(EnchanterMounds)	Enchanter Mounds#iz	4_CAT_SAILOR2
-izlude_a,96,125,7	duplicate(EnchanterMounds)	Enchanter Mounds#iz_a	4_CAT_SAILOR2
-izlude_b,96,125,7	duplicate(EnchanterMounds)	Enchanter Mounds#iz_b	4_CAT_SAILOR2
-izlude_c,96,125,7	duplicate(EnchanterMounds)	Enchanter Mounds#iz_c	4_CAT_SAILOR2
-izlude_d,96,125,7	duplicate(EnchanterMounds)	Enchanter Mounds#iz_d	4_CAT_SAILOR2
+izlude_a,96,125,7	duplicate(Enchanter Mounds#iz)	Enchanter Mounds#iz_a	4_CAT_SAILOR2
+izlude_b,96,125,7	duplicate(Enchanter Mounds#iz)	Enchanter Mounds#iz_b	4_CAT_SAILOR2
+izlude_c,96,125,7	duplicate(Enchanter Mounds#iz)	Enchanter Mounds#iz_c	4_CAT_SAILOR2
+izlude_d,96,125,7	duplicate(Enchanter Mounds#iz)	Enchanter Mounds#iz_d	4_CAT_SAILOR2
 
--	script	::EnchanterAlmondJ	-1,{
+izlude,108,139,7	script	Enchanter Almond J#iz	4_CAT_SAILOR3,{
 	disable_items;
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- As you have too many items in your inventory, quest can't be continued.";
@@ -2548,13 +2535,12 @@ izlude_d,96,125,7	duplicate(EnchanterMounds)	Enchanter Mounds#iz_d	4_CAT_SAILOR2
 	}
 }
 
-izlude,108,139,7	duplicate(EnchanterAlmondJ)	Enchanter Almond J#iz	4_CAT_SAILOR3
-izlude_a,108,139,7	duplicate(EnchanterAlmondJ)	Enchanter Almond J#iz_a	4_CAT_SAILOR3
-izlude_b,108,139,7	duplicate(EnchanterAlmondJ)	Enchanter Almond J#iz_b	4_CAT_SAILOR3
-izlude_c,108,139,7	duplicate(EnchanterAlmondJ)	Enchanter Almond J#iz_c	4_CAT_SAILOR3
-izlude_d,108,139,7	duplicate(EnchanterAlmondJ)	Enchanter Almond J#iz_d	4_CAT_SAILOR3
+izlude_a,108,139,7	duplicate(Enchanter Almond J#iz)	Enchanter Almond J#iz_a	4_CAT_SAILOR3
+izlude_b,108,139,7	duplicate(Enchanter Almond J#iz)	Enchanter Almond J#iz_b	4_CAT_SAILOR3
+izlude_c,108,139,7	duplicate(Enchanter Almond J#iz)	Enchanter Almond J#iz_c	4_CAT_SAILOR3
+izlude_d,108,139,7	duplicate(Enchanter Almond J#iz)	Enchanter Almond J#iz_d	4_CAT_SAILOR3
 
--	script	::RefineryOwnerHan	-1,{
+izlude,153,126,1	script	Refinery Owner Han#iz	4_M_02,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- As you have too many items in your inventory, quest can't be continued.";
 		close;
@@ -2787,11 +2773,10 @@ OnInit:
 	end;
 }
 
-izlude,153,126,1	duplicate(RefineryOwnerHan)	Refinery Owner Han#iz	4_M_02
-izlude_a,153,126,1	duplicate(RefineryOwnerHan)	Refinery Owner Han#iz_a	4_M_02
-izlude_b,153,126,1	duplicate(RefineryOwnerHan)	Refinery Owner Han#iz_b	4_M_02
-izlude_c,153,126,1	duplicate(RefineryOwnerHan)	Refinery Owner Han#iz_c	4_M_02
-izlude_d,153,126,1	duplicate(RefineryOwnerHan)	Refinery Owner Han#iz_d	4_M_02
+izlude_a,153,126,1	duplicate(Refinery Owner Han#iz)	Refinery Owner Han#iz_a	4_M_02
+izlude_b,153,126,1	duplicate(Refinery Owner Han#iz)	Refinery Owner Han#iz_b	4_M_02
+izlude_c,153,126,1	duplicate(Refinery Owner Han#iz)	Refinery Owner Han#iz_c	4_M_02
+izlude_d,153,126,1	duplicate(Refinery Owner Han#iz)	Refinery Owner Han#iz_d	4_M_02
 
 -	script	::RefiningMachineWagjak	-1,{
 	disable_items;
@@ -2947,7 +2932,7 @@ izlude_b,153,121,3	duplicate(RefiningMachineWagjak)	Refining Machine Wagjak::iz_
 izlude_c,153,121,3	duplicate(RefiningMachineWagjak)	Refining Machine Wagjak::iz_c	2_MONEMUS
 izlude_d,153,121,3	duplicate(RefiningMachineWagjak)	Refining Machine Wagjak::iz_d	2_MONEMUS
 
--	script	::Tadde	-1,{
+izlude,145,122,7	script	Tadde#iz	4_M_04,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- As you have too many items in your inventory, quest can't be continued.";
 		close;
@@ -3124,13 +3109,12 @@ izlude_d,153,121,3	duplicate(RefiningMachineWagjak)	Refining Machine Wagjak::iz_
 	}
 }
 
-izlude,145,122,7	duplicate(Tadde)	Tadde#iz	4_M_04
-izlude_a,145,122,7	duplicate(Tadde)	Tadde#iz_a	4_M_04
-izlude_b,145,122,7	duplicate(Tadde)	Tadde#iz_b	4_M_04
-izlude_c,145,122,7	duplicate(Tadde)	Tadde#iz_c	4_M_04
-izlude_d,145,122,7	duplicate(Tadde)	Tadde#iz_d	4_M_04
+izlude_a,145,122,7	duplicate(Tadde#iz)	Tadde#iz_a	4_M_04
+izlude_b,145,122,7	duplicate(Tadde#iz)	Tadde#iz_b	4_M_04
+izlude_c,145,122,7	duplicate(Tadde#iz)	Tadde#iz_c	4_M_04
+izlude_d,145,122,7	duplicate(Tadde#iz)	Tadde#iz_d	4_M_04
 
--	script	::Locas	-1,{
+izlude,155,132,3	script	Locas#iz	4_M_02,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- As you have too many items in your inventory, quest can't be continued.";
 		close;
@@ -3396,13 +3380,12 @@ izlude_d,145,122,7	duplicate(Tadde)	Tadde#iz_d	4_M_04
 	}
 }
 
-izlude,155,132,3	duplicate(Locas)	Locas#iz	4_M_02
-izlude_a,155,132,3	duplicate(Locas)	Locas#iz_a	4_M_02
-izlude_b,155,132,3	duplicate(Locas)	Locas#iz_b	4_M_02
-izlude_c,155,132,3	duplicate(Locas)	Locas#iz_c	4_M_02
-izlude_d,155,132,3	duplicate(Locas)	Locas#iz_d	4_M_02
+izlude_a,155,132,3	duplicate(Locas#iz)	Locas#iz_a	4_M_02
+izlude_b,155,132,3	duplicate(Locas#iz)	Locas#iz_b	4_M_02
+izlude_c,155,132,3	duplicate(Locas#iz)	Locas#iz_c	4_M_02
+izlude_d,155,132,3	duplicate(Locas#iz)	Locas#iz_d	4_M_02
 
--	script	::RepairingBlacksmith	-1,{
+izlude,147,131,5	script	Repairing Blacksmith#0	4_F_JOB_BLACKSMITH,5,5,{
 	mes "[Working Blacksmith]";
 	mes "They guy sitting over there has been staring at Wagjak. I was told that only one knife is left after losing all weapons?";
 	next;
@@ -3415,13 +3398,12 @@ OnTouch:
 	end;
 }
 
-izlude,147,131,5	duplicate(RepairingBlacksmith)	Repairing Blacksmith#0	4_F_JOB_BLACKSMITH,5,5
-izlude_a,147,131,5	duplicate(RepairingBlacksmith)	Repairing Blacksmith#a	4_F_JOB_BLACKSMITH,5,5
-izlude_b,147,131,5	duplicate(RepairingBlacksmith)	Repairing Blacksmith#b	4_F_JOB_BLACKSMITH,5,5
-izlude_c,147,131,5	duplicate(RepairingBlacksmith)	Repairing Blacksmith#c	4_F_JOB_BLACKSMITH,5,5
-izlude_d,147,131,5	duplicate(RepairingBlacksmith)	Repairing Blacksmith#d	4_F_JOB_BLACKSMITH,5,5
+izlude_a,147,131,5	duplicate(Repairing Blacksmith#0)	Repairing Blacksmith#a	4_F_JOB_BLACKSMITH,5,5
+izlude_b,147,131,5	duplicate(Repairing Blacksmith#0)	Repairing Blacksmith#b	4_F_JOB_BLACKSMITH,5,5
+izlude_c,147,131,5	duplicate(Repairing Blacksmith#0)	Repairing Blacksmith#c	4_F_JOB_BLACKSMITH,5,5
+izlude_d,147,131,5	duplicate(Repairing Blacksmith#0)	Repairing Blacksmith#d	4_F_JOB_BLACKSMITH,5,5
 
--	script	::RefiningManiac	-1,{
+izlude,148,122,5	script	Refining Maniac#iz	4_M_SITDOWN,{
 	mes "[Refining Maniac]";
 	mes "Shh...! Be quiet.";
 	mes "I am focusing on ^4d4fffrefining^000000.";
@@ -3448,13 +3430,12 @@ izlude_d,147,131,5	duplicate(RepairingBlacksmith)	Repairing Blacksmith#d	4_F_JOB
 	close;
 }
 
-izlude,148,122,5	duplicate(RefiningManiac)	Refining Maniac#iz	4_M_SITDOWN
-izlude_a,148,122,5	duplicate(RefiningManiac)	Refining Maniac#iz_a	4_M_SITDOWN
-izlude_b,148,122,5	duplicate(RefiningManiac)	Refining Maniac#iz_b	4_M_SITDOWN
-izlude_c,148,122,5	duplicate(RefiningManiac)	Refining Maniac#iz_c	4_M_SITDOWN
-izlude_d,148,122,5	duplicate(RefiningManiac)	Refining Maniac#iz_d	4_M_SITDOWN
+izlude_a,148,122,5	duplicate(Refining Maniac#iz)	Refining Maniac#iz_a	4_M_SITDOWN
+izlude_b,148,122,5	duplicate(Refining Maniac#iz)	Refining Maniac#iz_b	4_M_SITDOWN
+izlude_c,148,122,5	duplicate(Refining Maniac#iz)	Refining Maniac#iz_c	4_M_SITDOWN
+izlude_d,148,122,5	duplicate(Refining Maniac#iz)	Refining Maniac#iz_d	4_M_SITDOWN
 
--	script	::RepairMan	-1,{
+izlude,158,130,3	script	Repair Man#iz	4_M_04,{
 	mes "[Repair Man]";
 	mes "Repairing broken equipment!! if you have a broken equipment, bring it to me anytime.";
 	next;
@@ -3538,13 +3519,12 @@ izlude_d,148,122,5	duplicate(RefiningManiac)	Refining Maniac#iz_d	4_M_SITDOWN
 	}
 }
 
-izlude,158,130,3	duplicate(RepairMan)	Repair Man#iz	4_M_04
-izlude_a,158,130,3	duplicate(RepairMan)	Repair Man#iz_a	4_M_04
-izlude_b,158,130,3	duplicate(RepairMan)	Repair Man#iz_b	4_M_04
-izlude_c,158,130,3	duplicate(RepairMan)	Repair Man#iz_c	4_M_04
-izlude_d,158,130,3	duplicate(RepairMan)	Repair Man#iz_d	4_M_04
+izlude_a,158,130,3	duplicate(Repair Man#iz)	Repair Man#iz_a	4_M_04
+izlude_b,158,130,3	duplicate(Repair Man#iz)	Repair Man#iz_b	4_M_04
+izlude_c,158,130,3	duplicate(Repair Man#iz)	Repair Man#iz_c	4_M_04
+izlude_d,158,130,3	duplicate(Repair Man#iz)	Repair Man#iz_d	4_M_04
 
--	script	::RomanticFemale	-1,{
+izlude,97,138,5	script	Romantic Female#iz	4_F_SITDOWN,{
 	mes "[Romantic Female]";
 	mes "Shout like this when I miss you, honey!!";
 	next;
@@ -3581,13 +3561,12 @@ izlude_d,158,130,3	duplicate(RepairMan)	Repair Man#iz_d	4_M_04
 	close;
 }
 
-izlude,97,138,5	duplicate(RomanticFemale)	Romantic Female#iz	4_F_SITDOWN
-izlude_a,97,138,5	duplicate(RomanticFemale)	Romantic Female#iz_a	4_F_SITDOWN
-izlude_b,97,138,5	duplicate(RomanticFemale)	Romantic Female#iz_b	4_F_SITDOWN
-izlude_c,97,138,5	duplicate(RomanticFemale)	Romantic Female#iz_c	4_F_SITDOWN
-izlude_d,97,138,5	duplicate(RomanticFemale)	Romantic Female#iz_d	4_F_SITDOWN
+izlude_a,97,138,5	duplicate(Romantic Female#iz)	Romantic Female#iz_a	4_F_SITDOWN
+izlude_b,97,138,5	duplicate(Romantic Female#iz)	Romantic Female#iz_b	4_F_SITDOWN
+izlude_c,97,138,5	duplicate(Romantic Female#iz)	Romantic Female#iz_c	4_F_SITDOWN
+izlude_d,97,138,5	duplicate(Romantic Female#iz)	Romantic Female#iz_d	4_F_SITDOWN
 
--	script	::RomanticMale	-1,{
+izlude,99,138,3	script	Romantic Male#iz	4_M_SITDOWN,{
 	mes "[Romantic Male]";
 	mes "Let's go~~ together hand in hand~~";
 	mes "Put everything aside~~ in the dark blue of Jawaii~~ under the stars~~";
@@ -3611,13 +3590,12 @@ izlude_d,97,138,5	duplicate(RomanticFemale)	Romantic Female#iz_d	4_F_SITDOWN
 	close;
 }
 
-izlude,99,138,3	duplicate(RomanticMale)	Romantic Male#iz	4_M_SITDOWN
-izlude_a,99,138,3	duplicate(RomanticMale)	Romantic Male#iz_a	4_M_SITDOWN
-izlude_b,99,138,3	duplicate(RomanticMale)	Romantic Male#iz_b	4_M_SITDOWN
-izlude_c,99,138,3	duplicate(RomanticMale)	Romantic Male#iz_c	4_M_SITDOWN
-izlude_d,99,138,3	duplicate(RomanticMale)	Romantic Male#iz_d	4_M_SITDOWN
+izlude_a,99,138,3	duplicate(Romantic Male#iz)	Romantic Male#iz_a	4_M_SITDOWN
+izlude_b,99,138,3	duplicate(Romantic Male#iz)	Romantic Male#iz_b	4_M_SITDOWN
+izlude_c,99,138,3	duplicate(Romantic Male#iz)	Romantic Male#iz_c	4_M_SITDOWN
+izlude_d,99,138,3	duplicate(Romantic Male#iz)	Romantic Male#iz_d	4_M_SITDOWN
 
--	script	::ManufacturingManiac	-1,{
+izlude,93,143,3	script	Manufacturing Maniac#0	2_M_ALCHE,{
 	mes "[Manufacturing Maniac]";
 	mes "Hi~! I am an Alchemist.";
 	mes "It's one of the second jobs after Merchant.";
@@ -3643,13 +3621,12 @@ OnInit:
 	end;
 }
 
-izlude,93,143,3	duplicate(ManufacturingManiac)	Manufacturing Maniac#0	2_M_ALCHE
-izlude_a,93,143,3	duplicate(ManufacturingManiac)	Manufacturing Maniac#a	2_M_ALCHE
-izlude_b,93,143,3	duplicate(ManufacturingManiac)	Manufacturing Maniac#b	2_M_ALCHE
-izlude_c,93,143,3	duplicate(ManufacturingManiac)	Manufacturing Maniac#c	2_M_ALCHE
-izlude_d,93,143,3	duplicate(ManufacturingManiac)	Manufacturing Maniac#d	2_M_ALCHE
+izlude_a,93,143,3	duplicate(Manufacturing Maniac#0)	Manufacturing Maniac#a	2_M_ALCHE
+izlude_b,93,143,3	duplicate(Manufacturing Maniac#0)	Manufacturing Maniac#b	2_M_ALCHE
+izlude_c,93,143,3	duplicate(Manufacturing Maniac#0)	Manufacturing Maniac#c	2_M_ALCHE
+izlude_d,93,143,3	duplicate(Manufacturing Maniac#0)	Manufacturing Maniac#d	2_M_ALCHE
 
--	script	::Mom	-1,{
+izlude,95,146,5	script	Mom#iz	4_F_CAVE1,{
 	mes "[Mom]";
 	mes "Honey~~~";
 	next;
@@ -3710,13 +3687,12 @@ izlude_d,93,143,3	duplicate(ManufacturingManiac)	Manufacturing Maniac#d	2_M_ALCH
 	close;
 }
 
-izlude,95,146,5	duplicate(Mom)	Mom#iz	4_F_CAVE1
-izlude_a,95,146,5	duplicate(Mom)	Mom#iz_a	4_F_CAVE1
-izlude_b,95,146,5	duplicate(Mom)	Mom#iz_b	4_F_CAVE1
-izlude_c,95,146,5	duplicate(Mom)	Mom#iz_c	4_F_CAVE1
-izlude_d,95,146,5	duplicate(Mom)	Mom#iz_d	4_F_CAVE1
+izlude_a,95,146,5	duplicate(Mom#iz)	Mom#iz_a	4_F_CAVE1
+izlude_b,95,146,5	duplicate(Mom#iz)	Mom#iz_b	4_F_CAVE1
+izlude_c,95,146,5	duplicate(Mom#iz)	Mom#iz_c	4_F_CAVE1
+izlude_d,95,146,5	duplicate(Mom#iz)	Mom#iz_d	4_F_CAVE1
 
--	script	::Dad	-1,{
+izlude,97,147,3	script	Dad#iz	1_M_JOBGUIDER,{
 	mes "[Dad]";
 	mes "Got this boy ten years ago after years of childlessness.";
 	next;
@@ -3731,33 +3707,27 @@ izlude_d,95,146,5	duplicate(Mom)	Mom#iz_d	4_F_CAVE1
 	close;
 }
 
-izlude,97,147,3	duplicate(Dad)	Dad#iz	1_M_JOBGUIDER
-izlude_a,97,147,3	duplicate(Dad)	Dad#iz_a	1_M_JOBGUIDER
-izlude_b,97,147,3	duplicate(Dad)	Dad#iz_b	1_M_JOBGUIDER
-izlude_c,97,147,3	duplicate(Dad)	Dad#iz_c	1_M_JOBGUIDER
-izlude_d,97,147,3	duplicate(Dad)	Dad#iz_d	1_M_JOBGUIDER
+izlude_a,97,147,3	duplicate(Dad#iz)	Dad#iz_a	1_M_JOBGUIDER
+izlude_b,97,147,3	duplicate(Dad#iz)	Dad#iz_b	1_M_JOBGUIDER
+izlude_c,97,147,3	duplicate(Dad#iz)	Dad#iz_c	1_M_JOBGUIDER
+izlude_d,97,147,3	duplicate(Dad#iz)	Dad#iz_d	1_M_JOBGUIDER
 
--	script	::Etinifni	-1,{
+izlude,97,144,1	script	Etinifni#iz	4_M_DEWBOY,{
 	mes "[Etinifni]";
 	mes "Once you have time, come to Orc Dungeon!";
 	close;
 
 OnInit:
-	hideonnpc "Etinifni#iz";
-	hideonnpc "Etinifni#iz_a";
-	hideonnpc "Etinifni#iz_b";
-	hideonnpc "Etinifni#iz_c";
-	hideonnpc "Etinifni#iz_d";
+	hideonnpc strnpcinfo(0);
 	end;
 }
 
-izlude,97,144,1	duplicate(Etinifni)	Etinifni#iz	4_M_DEWBOY
-izlude_a,97,144,1	duplicate(Etinifni)	Etinifni#iz_a	4_M_DEWBOY
-izlude_b,97,144,1	duplicate(Etinifni)	Etinifni#iz_b	4_M_DEWBOY
-izlude_c,97,144,1	duplicate(Etinifni)	Etinifni#iz_c	4_M_DEWBOY
-izlude_d,97,144,1	duplicate(Etinifni)	Etinifni#iz_d	4_M_DEWBOY
+izlude_a,97,144,1	duplicate(Etinifni#iz)	Etinifni#iz_a	4_M_DEWBOY
+izlude_b,97,144,1	duplicate(Etinifni#iz)	Etinifni#iz_b	4_M_DEWBOY
+izlude_c,97,144,1	duplicate(Etinifni#iz)	Etinifni#iz_c	4_M_DEWBOY
+izlude_d,97,144,1	duplicate(Etinifni#iz)	Etinifni#iz_d	4_M_DEWBOY
 
--	script	::WeddingSecretary	-1,{
+izlude,102,150,5	script	Wedding Secretary#iz	1_F_LIBRARYGIRL,{
 	if(Class == Job_Novice) {
 		mes "[Wedding Secretary]";
 		mes "You are the just a beginner.";
@@ -3861,13 +3831,12 @@ izlude_d,97,144,1	duplicate(Etinifni)	Etinifni#iz_d	4_M_DEWBOY
 	}
 }
 
-izlude,102,150,5	duplicate(WeddingSecretary)	Wedding Secretary#iz	1_F_LIBRARYGIRL
-izlude_a,102,150,5	duplicate(WeddingSecretary)	Wedding Secretary#iz_a	1_F_LIBRARYGIRL
-izlude_b,102,150,5	duplicate(WeddingSecretary)	Wedding Secretary#iz_b	1_F_LIBRARYGIRL
-izlude_c,102,150,5	duplicate(WeddingSecretary)	Wedding Secretary#iz_c	1_F_LIBRARYGIRL
-izlude_d,102,150,5	duplicate(WeddingSecretary)	Wedding Secretary#iz_d	1_F_LIBRARYGIRL
+izlude_a,102,150,5	duplicate(Wedding Secretary#iz)	Wedding Secretary#iz_a	1_F_LIBRARYGIRL
+izlude_b,102,150,5	duplicate(Wedding Secretary#iz)	Wedding Secretary#iz_b	1_F_LIBRARYGIRL
+izlude_c,102,150,5	duplicate(Wedding Secretary#iz)	Wedding Secretary#iz_c	1_F_LIBRARYGIRL
+izlude_d,102,150,5	duplicate(Wedding Secretary#iz)	Wedding Secretary#iz_d	1_F_LIBRARYGIRL
 
--	script	::TalkativeKid	-1,{
+izlude,143,205,7	script	Talkative Kid#0	4_F_KID2,{
 	end;
 
 OnTimer64000:
@@ -3920,13 +3889,12 @@ OnInit:
 	end;
 }
 
-izlude,143,205,7	duplicate(TalkativeKid)	Talkative Kid#0	4_F_KID2
-izlude_a,143,205,7	duplicate(TalkativeKid)	Talkative Kid#a	4_F_KID2
-izlude_b,143,205,7	duplicate(TalkativeKid)	Talkative Kid#b	4_F_KID2
-izlude_c,143,205,7	duplicate(TalkativeKid)	Talkative Kid#c	4_F_KID2
-izlude_d,143,205,7	duplicate(TalkativeKid)	Talkative Kid#d	4_F_KID2
+izlude_a,143,205,7	duplicate(Talkative Kid#0)	Talkative Kid#a	4_F_KID2
+izlude_b,143,205,7	duplicate(Talkative Kid#0)	Talkative Kid#b	4_F_KID2
+izlude_c,143,205,7	duplicate(Talkative Kid#0)	Talkative Kid#c	4_F_KID2
+izlude_d,143,205,7	duplicate(Talkative Kid#0)	Talkative Kid#d	4_F_KID2
 
--	script	::TalkativeAdventurer	-1,{
+izlude,146,205,7	script	Talkative Adventurer#0	4_M_KID1,{
 	end;
 
 OnTimer69000:
@@ -3985,13 +3953,12 @@ OnInit:
 	end;
 }
 
-izlude,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#0	4_M_KID1
-izlude_a,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#a	4_M_KID1
-izlude_b,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#b	4_M_KID1
-izlude_c,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#c	4_M_KID1
-izlude_d,146,205,7	duplicate(TalkativeAdventurer)	Talkative Adventurer#d	4_M_KID1
+izlude_a,146,205,7	duplicate(Talkative Adventurer#0)	Talkative Adventurer#a	4_M_KID1
+izlude_b,146,205,7	duplicate(Talkative Adventurer#0)	Talkative Adventurer#b	4_M_KID1
+izlude_c,146,205,7	duplicate(Talkative Adventurer#0)	Talkative Adventurer#c	4_M_KID1
+izlude_d,146,205,7	duplicate(Talkative Adventurer#0)	Talkative Adventurer#d	4_M_KID1
 
--	script	::RestingAdventurer	-1,{
+prt_fild08,338,217,7	script	Resting Adventurer#08	4_F_SITDOWN,{
 	end;
 
 OnTimer60000:
@@ -4006,15 +3973,14 @@ OnInit:
 	end;
 }
 
-prt_fild08,338,217,7	duplicate(RestingAdventurer)	Resting Adventurer#08	4_F_SITDOWN
-prt_fild08a,338,217,7	duplicate(RestingAdventurer)	Resting Adventurer#08a	4_F_SITDOWN
-prt_fild08b,338,217,7	duplicate(RestingAdventurer)	Resting Adventurer#08b	4_F_SITDOWN
-prt_fild08c,338,217,7	duplicate(RestingAdventurer)	Resting Adventurer#08c	4_F_SITDOWN
-prt_fild08d,338,217,7	duplicate(RestingAdventurer)	Resting Adventurer#08d	4_F_SITDOWN
+prt_fild08a,338,217,7	duplicate(Resting Adventurer#08)	Resting Adventurer#08a	4_F_SITDOWN
+prt_fild08b,338,217,7	duplicate(Resting Adventurer#08)	Resting Adventurer#08b	4_F_SITDOWN
+prt_fild08c,338,217,7	duplicate(Resting Adventurer#08)	Resting Adventurer#08c	4_F_SITDOWN
+prt_fild08d,338,217,7	duplicate(Resting Adventurer#08)	Resting Adventurer#08d	4_F_SITDOWN
 
 // Criatura Academy NPCs 1F
 //============================================================
--	script	::EdenTeleportOfficer	-1,{
+iz_ac01,105,36,5	script	Eden Teleport Officer#34	4_F_NOVICE,{
 	mes "[Eden Teleport Officer]";
 	mes "We're a long way from home Adventurer.";
 	next;
@@ -4032,13 +3998,12 @@ prt_fild08d,338,217,7	duplicate(RestingAdventurer)	Resting Adventurer#08d	4_F_SI
 	end;
 }
 
-iz_ac01,105,36,5	duplicate(EdenTeleportOfficer)	Eden Teleport Officer#34	4_F_NOVICE
-iz_ac01_a,105,36,5	duplicate(EdenTeleportOfficer)	Eden Teleport Officer#35	4_F_NOVICE
-iz_ac01_b,105,36,5	duplicate(EdenTeleportOfficer)	Eden Teleport Officer#36	4_F_NOVICE
-iz_ac01_c,105,36,5	duplicate(EdenTeleportOfficer)	Eden Teleport Officer#37	4_F_NOVICE
-iz_ac01_d,105,36,5	duplicate(EdenTeleportOfficer)	Eden Teleport Officer#38	4_F_NOVICE
+iz_ac01_a,105,36,5	duplicate(Eden Teleport Officer#34)	Eden Teleport Officer#35	4_F_NOVICE
+iz_ac01_b,105,36,5	duplicate(Eden Teleport Officer#34)	Eden Teleport Officer#36	4_F_NOVICE
+iz_ac01_c,105,36,5	duplicate(Eden Teleport Officer#34)	Eden Teleport Officer#37	4_F_NOVICE
+iz_ac01_d,105,36,5	duplicate(Eden Teleport Officer#34)	Eden Teleport Officer#38	4_F_NOVICE
 
--	script	::AcademyReceptionist	-1,{
+iz_ac01,100,39,5	script	Academy Receptionist#1	4_F_01,{
 	if(isbegin_quest(7117) == 1) { erasequest 7117; }
 	if(isbegin_quest(7118) == 1) { erasequest 7118; }
 	if(isbegin_quest(7119) == 1) { erasequest 7119; }
@@ -4224,13 +4189,12 @@ OnInit:
 	end;
 }
 
-iz_ac01,100,39,5	duplicate(AcademyReceptionist)	Academy Receptionist#1	4_F_01
-iz_ac01_a,100,39,5	duplicate(AcademyReceptionist)	Academy Receptionist#1_a	4_F_01
-iz_ac01_b,100,39,5	duplicate(AcademyReceptionist)	Academy Receptionist#1_b	4_F_01
-iz_ac01_c,100,39,5	duplicate(AcademyReceptionist)	Academy Receptionist#1_c	4_F_01
-iz_ac01_d,100,39,5	duplicate(AcademyReceptionist)	Academy Receptionist#1_d	4_F_01
+iz_ac01_a,100,39,5	duplicate(Academy Receptionist#1)	Academy Receptionist#1_a	4_F_01
+iz_ac01_b,100,39,5	duplicate(Academy Receptionist#1)	Academy Receptionist#1_b	4_F_01
+iz_ac01_c,100,39,5	duplicate(Academy Receptionist#1)	Academy Receptionist#1_c	4_F_01
+iz_ac01_d,100,39,5	duplicate(Academy Receptionist#1)	Academy Receptionist#1_d	4_F_01
 
--	script	::KafraGuideTrainer	-1,{
+iz_ac01,95,46,5	script	Kafra Guide Trainer#ac	4_F_KAFRA1,{
 	cutin "kafra_01",2;
 	if(isbegin_quest(4269) == 2) {
 		mes "[Kafra Guide Trainer]";
@@ -4416,13 +4380,12 @@ iz_ac01_d,100,39,5	duplicate(AcademyReceptionist)	Academy Receptionist#1_d	4_F_0
 	}
 }
 
-iz_ac01,95,46,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#ac	4_F_KAFRA1
-iz_ac01_a,95,46,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#ac_a	4_F_KAFRA1
-iz_ac01_b,95,46,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#ac_b	4_F_KAFRA1
-iz_ac01_c,95,46,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#ac_c	4_F_KAFRA1
-iz_ac01_d,95,46,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#ac_d	4_F_KAFRA1
+iz_ac01_a,95,46,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#ac_a	4_F_KAFRA1
+iz_ac01_b,95,46,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#ac_b	4_F_KAFRA1
+iz_ac01_c,95,46,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#ac_c	4_F_KAFRA1
+iz_ac01_d,95,46,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#ac_d	4_F_KAFRA1
 
--	script	::LateStudent	-1,{
+iz_ac01,103,42,3	script	Late Student#ac	4_F_CHNDOCTOR,{
 	if(!isbegin_quest(101)) {
 		mes "[Late Student]";
 		mes "Oh gosh, oh gosh.";
@@ -4459,23 +4422,21 @@ OnInit:
 	end;
 }
 
-iz_ac01,103,42,3	duplicate(LateStudent)	Late Student#ac	4_F_CHNDOCTOR
-iz_ac01_a,103,42,3	duplicate(LateStudent)	Late Student#ac_a	4_F_CHNDOCTOR
-iz_ac01_b,103,42,3	duplicate(LateStudent)	Late Student#ac_b	4_F_CHNDOCTOR
-iz_ac01_c,103,42,3	duplicate(LateStudent)	Late Student#ac_c	4_F_CHNDOCTOR
-iz_ac01_d,103,42,3	duplicate(LateStudent)	Late Student#ac_d	4_F_CHNDOCTOR
+iz_ac01_a,103,42,3	duplicate(Late Student#ac)	Late Student#ac_a	4_F_CHNDOCTOR
+iz_ac01_b,103,42,3	duplicate(Late Student#ac)	Late Student#ac_b	4_F_CHNDOCTOR
+iz_ac01_c,103,42,3	duplicate(Late Student#ac)	Late Student#ac_c	4_F_CHNDOCTOR
+iz_ac01_d,103,42,3	duplicate(Late Student#ac)	Late Student#ac_d	4_F_CHNDOCTOR
 
--	script	::ac_board	-1,{
+iz_ac01,93,44,5	script	[Dispensary]#ac	2_BULLETIN_BOARD,{
 	end;
 }
 
-iz_ac01,93,44,5	duplicate(ac_board)	[Dispensary]#ac	2_BULLETIN_BOARD
-iz_ac01_a,93,44,5	duplicate(ac_board)	[Dispensary]#ac_a	2_BULLETIN_BOARD
-iz_ac01_b,93,44,5	duplicate(ac_board)	[Dispensary]#ac_b	2_BULLETIN_BOARD
-iz_ac01_c,93,44,5	duplicate(ac_board)	[Dispensary]#ac_c	2_BULLETIN_BOARD
-iz_ac01_d,93,44,5	duplicate(ac_board)	[Dispensary]#ac_d	2_BULLETIN_BOARD
+iz_ac01_a,93,44,5	duplicate([Dispensary]#ac)	[Dispensary]#ac_a	2_BULLETIN_BOARD
+iz_ac01_b,93,44,5	duplicate([Dispensary]#ac)	[Dispensary]#ac_b	2_BULLETIN_BOARD
+iz_ac01_c,93,44,5	duplicate([Dispensary]#ac)	[Dispensary]#ac_c	2_BULLETIN_BOARD
+iz_ac01_d,93,44,5	duplicate([Dispensary]#ac)	[Dispensary]#ac_d	2_BULLETIN_BOARD
 
--	script	::OtterSamssoon	-1,{
+iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 	mes "[Otter Samssoon]";
 	mes "Welcome~";
 	mes "I am Samssoon~! I am a royal hair designer otter sent to academy.";
@@ -4861,13 +4822,12 @@ L_cutin:
 	return;
 }
 
-iz_ac01,69,36,3	duplicate(OtterSamssoon)	Otter Samssoon#ac	4W_SAILOR
-iz_ac01_a,69,36,3	duplicate(OtterSamssoon)	Otter Samssoon#ac_a	4W_SAILOR
-iz_ac01_b,69,36,3	duplicate(OtterSamssoon)	Otter Samssoon#ac_b	4W_SAILOR
-iz_ac01_c,69,36,3	duplicate(OtterSamssoon)	Otter Samssoon#ac_c	4W_SAILOR
-iz_ac01_d,69,36,3	duplicate(OtterSamssoon)	Otter Samssoon#ac_d	4W_SAILOR
+iz_ac01_a,69,36,3	duplicate(Otter Samssoon#ac)	Otter Samssoon#ac_a	4W_SAILOR
+iz_ac01_b,69,36,3	duplicate(Otter Samssoon#ac)	Otter Samssoon#ac_b	4W_SAILOR
+iz_ac01_c,69,36,3	duplicate(Otter Samssoon#ac)	Otter Samssoon#ac_c	4W_SAILOR
+iz_ac01_d,69,36,3	duplicate(Otter Samssoon#ac)	Otter Samssoon#ac_d	4W_SAILOR
 
--	script	::GeneralStoreOwner	-1,{
+iz_ac01,68,49,3	script	General Store Owner#ac	4_F_03,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- Quest cannot be continued due to the overloaded inventory.";
 		mes "- Please try it again after organizing the items.";
@@ -4960,13 +4920,12 @@ iz_ac01_d,69,36,3	duplicate(OtterSamssoon)	Otter Samssoon#ac_d	4W_SAILOR
 	}
 }
 
-iz_ac01,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac	4_F_03
-iz_ac01_a,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_a	4_F_03
-iz_ac01_b,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_b	4_F_03
-iz_ac01_c,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_c	4_F_03
-iz_ac01_d,68,49,3	duplicate(GeneralStoreOwner)	General Store Owner#ac_d	4_F_03
+iz_ac01_a,68,49,3	duplicate(General Store Owner#ac)	General Store Owner#ac_a	4_F_03
+iz_ac01_b,68,49,3	duplicate(General Store Owner#ac)	General Store Owner#ac_b	4_F_03
+iz_ac01_c,68,49,3	duplicate(General Store Owner#ac)	General Store Owner#ac_c	4_F_03
+iz_ac01_d,68,49,3	duplicate(General Store Owner#ac)	General Store Owner#ac_d	4_F_03
 
--	script	::Therapist	-1,{
+iz_ac01,59,43,3	script	Therapist#ac	4_M_6THPRIN1,{
 	if(isbegin_quest(108) == 1)
 		changequest 108,109;
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
@@ -5176,13 +5135,12 @@ OnInit:
 	end;
 }
 
-iz_ac01,59,43,3	duplicate(Therapist)	Therapist#ac	4_M_6THPRIN1
-iz_ac01_a,59,43,3	duplicate(Therapist)	Therapist#ac_a	4_M_6THPRIN1
-iz_ac01_b,59,43,3	duplicate(Therapist)	Therapist#ac_b	4_M_6THPRIN1
-iz_ac01_c,59,43,3	duplicate(Therapist)	Therapist#ac_c	4_M_6THPRIN1
-iz_ac01_d,59,43,3	duplicate(Therapist)	Therapist#ac_d	4_M_6THPRIN1
+iz_ac01_a,59,43,3	duplicate(Therapist#ac)	Therapist#ac_a	4_M_6THPRIN1
+iz_ac01_b,59,43,3	duplicate(Therapist#ac)	Therapist#ac_b	4_M_6THPRIN1
+iz_ac01_c,59,43,3	duplicate(Therapist#ac)	Therapist#ac_c	4_M_6THPRIN1
+iz_ac01_d,59,43,3	duplicate(Therapist#ac)	Therapist#ac_d	4_M_6THPRIN1
 
--	script	::AcademyStudent	-1,{
+izlude,140,249,7	script	Academy Student#0	4_M_NOV_RUMIN,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- Your inventory is too full so you can't continue this quest.";
 		mes "- Please try it again after organizing the items.";
@@ -5285,14 +5243,14 @@ OnInit:
 	end;
 }
 
-izlude,140,249,7	duplicate(AcademyStudent)	Academy Student#0	4_M_NOV_RUMIN
-izlude_a,140,249,7	duplicate(AcademyStudent)	Academy Student#a	4_M_NOV_RUMIN
-izlude_b,140,249,7	duplicate(AcademyStudent)	Academy Student#b	4_M_NOV_RUMIN
-izlude_c,140,249,7	duplicate(AcademyStudent)	Academy Student#c	4_M_NOV_RUMIN
-izlude_d,140,249,7	duplicate(AcademyStudent)	Academy Student#d	4_M_NOV_RUMIN
+izlude_a,140,249,7	duplicate(Academy Student#0)	Academy Student#a	4_M_NOV_RUMIN
+izlude_b,140,249,7	duplicate(Academy Student#0)	Academy Student#b	4_M_NOV_RUMIN
+izlude_c,140,249,7	duplicate(Academy Student#0)	Academy Student#c	4_M_NOV_RUMIN
+izlude_d,140,249,7	duplicate(Academy Student#0)	Academy Student#d	4_M_NOV_RUMIN
 
--	script	::CultivatedRedPlant	1078,{
+izlude,141,251,0	script	Cultivated Red Plant#0	1078,3,3,{
 	end;
+
 OnTimer30000:
 	stopnpctimer;
 OnEnable:
@@ -5313,31 +5271,25 @@ OnDisable:
 	end;
 }
 
-izlude,141,251,0	duplicate(CultivatedRedPlant)	Cultivated Red Plant#0	1078,3,3
-izlude_a,141,251,0	duplicate(CultivatedRedPlant)	Cultivated Red Plant#a	1078,3,3
-izlude_b,141,251,0	duplicate(CultivatedRedPlant)	Cultivated Red Plant#b	1078,3,3
-izlude_c,141,251,0	duplicate(CultivatedRedPlant)	Cultivated Red Plant#c	1078,3,3
-izlude_d,141,251,0	duplicate(CultivatedRedPlant)	Cultivated Red Plant#d	1078,3,3
+izlude_a,141,251,0	duplicate(Cultivated Red Plant#0)	Cultivated Red Plant#a	1078,3,3
+izlude_b,141,251,0	duplicate(Cultivated Red Plant#0)	Cultivated Red Plant#b	1078,3,3
+izlude_c,141,251,0	duplicate(Cultivated Red Plant#0)	Cultivated Red Plant#c	1078,3,3
+izlude_d,141,251,0	duplicate(Cultivated Red Plant#0)	Cultivated Red Plant#d	1078,3,3
 
--	script	::RedPlantEffect	1078,{
+izlude,141,251,0	script	Red Plant Effect#0	1078,3,3,{
 	end;
 
 OnInit:
-	hideonnpc "Red Plant Effect#0";
-	hideonnpc "Red Plant Effect#a";
-	hideonnpc "Red Plant Effect#b";
-	hideonnpc "Red Plant Effect#c";
-	hideonnpc "Red Plant Effect#d";
+	hideonnpc strnpcinfo(0);
 	end;
 }
 
-izlude,141,251,0	duplicate(RedPlantEffect)	Red Plant Effect#0	1078,3,3
-izlude_a,141,251,0	duplicate(RedPlantEffect)	Red Plant Effect#a	1078,3,3
-izlude_b,141,251,0	duplicate(RedPlantEffect)	Red Plant Effect#b	1078,3,3
-izlude_c,141,251,0	duplicate(RedPlantEffect)	Red Plant Effect#c	1078,3,3
-izlude_d,141,251,0	duplicate(RedPlantEffect)	Red Plant Effect#d	1078,3,3
+izlude_a,141,251,0	duplicate(Red Plant Effect#0)	Red Plant Effect#a	1078,3,3
+izlude_b,141,251,0	duplicate(Red Plant Effect#0)	Red Plant Effect#b	1078,3,3
+izlude_c,141,251,0	duplicate(Red Plant Effect#0)	Red Plant Effect#c	1078,3,3
+izlude_d,141,251,0	duplicate(Red Plant Effect#0)	Red Plant Effect#d	1078,3,3
 
--	script	::OddNovice	-1,{
+iz_ac01,36,52,3	script	Odd Novice#ac	4_M_SIT_NOVICE,{
 	mes "[Odd Novice]";
 	mes "Ahaaa~~ Sticking at the dispensary.";
 	mes "Playing hooky is cool and awesome.";
@@ -5485,19 +5437,18 @@ izlude_d,141,251,0	duplicate(RedPlantEffect)	Red Plant Effect#d	1078,3,3
 	close;
 }
 
-iz_ac01,36,52,3	duplicate(OddNovice)	Odd Novice#ac	4_M_SIT_NOVICE
-iz_ac01_a,36,52,3	duplicate(OddNovice)	Odd Novice#ac_a	4_M_SIT_NOVICE
-iz_ac01_b,36,52,3	duplicate(OddNovice)	Odd Novice#ac_b	4_M_SIT_NOVICE
-iz_ac01_c,36,52,3	duplicate(OddNovice)	Odd Novice#ac_c	4_M_SIT_NOVICE
-iz_ac01_d,36,52,3	duplicate(OddNovice)	Odd Novice#ac_d	4_M_SIT_NOVICE
+iz_ac01_a,36,52,3	duplicate(Odd Novice#ac)	Odd Novice#ac_a	4_M_SIT_NOVICE
+iz_ac01_b,36,52,3	duplicate(Odd Novice#ac)	Odd Novice#ac_b	4_M_SIT_NOVICE
+iz_ac01_c,36,52,3	duplicate(Odd Novice#ac)	Odd Novice#ac_c	4_M_SIT_NOVICE
+iz_ac01_d,36,52,3	duplicate(Odd Novice#ac)	Odd Novice#ac_d	4_M_SIT_NOVICE
 
-iz_ac01,106,44,3	duplicate(ac_board)	[Cafetaria]#ac	2_BULLETIN_BOARD
-iz_ac01_a,106,44,3	duplicate(ac_board)	[Cafetaria]#ac_a	2_BULLETIN_BOARD
-iz_ac01_b,106,44,3	duplicate(ac_board)	[Cafetaria]#ac_b	2_BULLETIN_BOARD
-iz_ac01_c,106,44,3	duplicate(ac_board)	[Cafetaria]#ac_c	2_BULLETIN_BOARD
-iz_ac01_d,106,44,3	duplicate(ac_board)	[Cafetaria]#ac_d	2_BULLETIN_BOARD
+iz_ac01,106,44,3	duplicate([Dispensary]#ac)	[Cafetaria]#ac	2_BULLETIN_BOARD
+iz_ac01_a,106,44,3	duplicate([Dispensary]#ac)	[Cafetaria]#ac_a	2_BULLETIN_BOARD
+iz_ac01_b,106,44,3	duplicate([Dispensary]#ac)	[Cafetaria]#ac_b	2_BULLETIN_BOARD
+iz_ac01_c,106,44,3	duplicate([Dispensary]#ac)	[Cafetaria]#ac_c	2_BULLETIN_BOARD
+iz_ac01_d,106,44,3	duplicate([Dispensary]#ac)	[Cafetaria]#ac_d	2_BULLETIN_BOARD
 
--	script	::BrokeTrainee	-1,{
+iz_ac01,133,34,5	script	Broke Trainee#ac	4_M_SITDOWN,{
 	mes "[Have-No-Money Trainee]";
 	mes "Since the prices have risen I try to get my belly full at every chance I get.";
 	next;
@@ -5511,13 +5462,12 @@ iz_ac01_d,106,44,3	duplicate(ac_board)	[Cafetaria]#ac_d	2_BULLETIN_BOARD
 	close;
 }
 
-iz_ac01,133,34,5	duplicate(BrokeTrainee)	Broke Trainee#ac	4_M_SITDOWN
-iz_ac01_a,133,34,5	duplicate(BrokeTrainee)	Broke Trainee#ac_a	4_M_SITDOWN
-iz_ac01_b,133,34,5	duplicate(BrokeTrainee)	Broke Trainee#ac_b	4_M_SITDOWN
-iz_ac01_c,133,34,5	duplicate(BrokeTrainee)	Broke Trainee#ac_c	4_M_SITDOWN
-iz_ac01_d,133,34,5	duplicate(BrokeTrainee)	Broke Trainee#ac_d	4_M_SITDOWN
+iz_ac01_a,133,34,5	duplicate(Broke Trainee#ac)	Broke Trainee#ac_a	4_M_SITDOWN
+iz_ac01_b,133,34,5	duplicate(Broke Trainee#ac)	Broke Trainee#ac_b	4_M_SITDOWN
+iz_ac01_c,133,34,5	duplicate(Broke Trainee#ac)	Broke Trainee#ac_c	4_M_SITDOWN
+iz_ac01_d,133,34,5	duplicate(Broke Trainee#ac)	Broke Trainee#ac_d	4_M_SITDOWN
 
--	script	::TrainerMainz	-1,{
+iz_ac01,134,47,5	script	Trainer Mainz#ac	4_M_KY_KNT,4,4,{
 	if(isbegin_quest(4269) == 2) {
 		if(!isbegin_quest(15000)) {
 			mes "[Mainz]";
@@ -5980,13 +5930,12 @@ OnTouch:
 	end;
 }
 
-iz_ac01,134,47,5	duplicate(TrainerMainz)	Trainer Mainz#ac	4_M_KY_KNT,4,4
-iz_ac01_a,134,47,5	duplicate(TrainerMainz)	Trainer Mainz#ac_a	4_M_KY_KNT,4,4
-iz_ac01_b,134,47,5	duplicate(TrainerMainz)	Trainer Mainz#ac_b	4_M_KY_KNT,4,4
-iz_ac01_c,134,47,5	duplicate(TrainerMainz)	Trainer Mainz#ac_c	4_M_KY_KNT,4,4
-iz_ac01_d,134,47,5	duplicate(TrainerMainz)	Trainer Mainz#ac_d	4_M_KY_KNT,4,4
+iz_ac01_a,134,47,5	duplicate(Trainer Mainz#ac)	Trainer Mainz#ac_a	4_M_KY_KNT,4,4
+iz_ac01_b,134,47,5	duplicate(Trainer Mainz#ac)	Trainer Mainz#ac_b	4_M_KY_KNT,4,4
+iz_ac01_c,134,47,5	duplicate(Trainer Mainz#ac)	Trainer Mainz#ac_c	4_M_KY_KNT,4,4
+iz_ac01_d,134,47,5	duplicate(Trainer Mainz#ac)	Trainer Mainz#ac_d	4_M_KY_KNT,4,4
 
--	script	::Dacquoise	-1,{
+iz_ac01,147,50,3	script	Dacquoise#ac	4_COOK,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "[Dacquoise]";
 		mes "Why are you carrying so much stuff?";
@@ -6562,51 +6511,47 @@ OnInit:
 	end;
 }
 
-iz_ac01,147,50,3	duplicate(Dacquoise)	Dacquoise#ac	4_COOK
-iz_ac01_a,147,50,3	duplicate(Dacquoise)	Dacquoise#ac_a	4_COOK
-iz_ac01_b,147,50,3	duplicate(Dacquoise)	Dacquoise#ac_b	4_COOK
-iz_ac01_c,147,50,3	duplicate(Dacquoise)	Dacquoise#ac_c	4_COOK
-iz_ac01_d,147,50,3	duplicate(Dacquoise)	Dacquoise#ac_d	4_COOK
+iz_ac01_a,147,50,3	duplicate(Dacquoise#ac)	Dacquoise#ac_a	4_COOK
+iz_ac01_b,147,50,3	duplicate(Dacquoise#ac)	Dacquoise#ac_b	4_COOK
+iz_ac01_c,147,50,3	duplicate(Dacquoise#ac)	Dacquoise#ac_c	4_COOK
+iz_ac01_d,147,50,3	duplicate(Dacquoise#ac)	Dacquoise#ac_d	4_COOK
 
--	script	::Eclaire	-1,{
+iz_ac01,149,46,3	script	Eclaire#ac	4_F_KAFRA7,{
 	mes "[Eclaire]";
 	mes "Cooking is caring!";
 	close;
 }
 
-iz_ac01,149,46,3	duplicate(Eclaire)	Eclaire#ac	4_F_KAFRA7
-iz_ac01_a,149,46,3	duplicate(Eclaire)	Eclaire#ac_a	4_F_KAFRA7
-iz_ac01_b,149,46,3	duplicate(Eclaire)	Eclaire#ac_b	4_F_KAFRA7
-iz_ac01_c,149,46,3	duplicate(Eclaire)	Eclaire#ac_c	4_F_KAFRA7
-iz_ac01_d,149,46,3	duplicate(Eclaire)	Eclaire#ac_d	4_F_KAFRA7
+iz_ac01_a,149,46,3	duplicate(Eclaire#ac)	Eclaire#ac_a	4_F_KAFRA7
+iz_ac01_b,149,46,3	duplicate(Eclaire#ac)	Eclaire#ac_b	4_F_KAFRA7
+iz_ac01_c,149,46,3	duplicate(Eclaire#ac)	Eclaire#ac_c	4_F_KAFRA7
+iz_ac01_d,149,46,3	duplicate(Eclaire#ac)	Eclaire#ac_d	4_F_KAFRA7
 
--	script	::MilleFeuille	-1,{
+iz_ac01,150,50,3	script	Mille Feuille#ac	4_F_KAFRA8,{
 	mes "[Mille Feuille]";
 	mes "Ahh. Hey is Sir. Orleons doing well?";
 	emotion e_lv;
 	close;
 }
 
-iz_ac01,150,50,3	duplicate(MilleFeuille)	Mille Feuille#ac	4_F_KAFRA8
-iz_ac01_a,150,50,3	duplicate(MilleFeuille)	Mille Feuille#ac_a	4_F_KAFRA8
-iz_ac01_b,150,50,3	duplicate(MilleFeuille)	Mille Feuille#ac_b	4_F_KAFRA8
-iz_ac01_c,150,50,3	duplicate(MilleFeuille)	Mille Feuille#ac_c	4_F_KAFRA8
-iz_ac01_d,150,50,3	duplicate(MilleFeuille)	Mille Feuille#ac_d	4_F_KAFRA8
+iz_ac01_a,150,50,3	duplicate(Mille Feuille#ac)	Mille Feuille#ac_a	4_F_KAFRA8
+iz_ac01_b,150,50,3	duplicate(Mille Feuille#ac)	Mille Feuille#ac_b	4_F_KAFRA8
+iz_ac01_c,150,50,3	duplicate(Mille Feuille#ac)	Mille Feuille#ac_c	4_F_KAFRA8
+iz_ac01_d,150,50,3	duplicate(Mille Feuille#ac)	Mille Feuille#ac_d	4_F_KAFRA8
 
--	script	::HungryTrainee	-1,{
+iz_ac01,159,32,3	script	Hungry Trainee#ac	4_M_SIT_NOVICE,{
 	mes "[Hungry Trainee]";
 	mes "Wonder when my order will get taken... It's already been an hour...";
 	mes "Look at the helpers lingering on the side...";
 	close;
 }
 
-iz_ac01,159,32,3	duplicate(HungryTrainee)	Hungry Trainee#ac	4_M_SIT_NOVICE
-iz_ac01_a,159,32,3	duplicate(HungryTrainee)	Hungry Trainee#ac_a	4_M_SIT_NOVICE
-iz_ac01_b,159,32,3	duplicate(HungryTrainee)	Hungry Trainee#ac_b	4_M_SIT_NOVICE
-iz_ac01_c,159,32,3	duplicate(HungryTrainee)	Hungry Trainee#ac_c	4_M_SIT_NOVICE
-iz_ac01_d,159,32,3	duplicate(HungryTrainee)	Hungry Trainee#ac_d	4_M_SIT_NOVICE
+iz_ac01_a,159,32,3	duplicate(Hungry Trainee#ac)	Hungry Trainee#ac_a	4_M_SIT_NOVICE
+iz_ac01_b,159,32,3	duplicate(Hungry Trainee#ac)	Hungry Trainee#ac_b	4_M_SIT_NOVICE
+iz_ac01_c,159,32,3	duplicate(Hungry Trainee#ac)	Hungry Trainee#ac_c	4_M_SIT_NOVICE
+iz_ac01_d,159,32,3	duplicate(Hungry Trainee#ac)	Hungry Trainee#ac_d	4_M_SIT_NOVICE
 
--	script	::AcademyChef	-1,{
+iz_ac01,160,50,3	script	Chef#ac	4_F_GODEMOM,{
 	mes "[Chef]";
 	mes "Are you the new Criatura trainee?";
 	mes "Then go look for Dacquoise.";
@@ -6620,31 +6565,29 @@ iz_ac01_d,159,32,3	duplicate(HungryTrainee)	Hungry Trainee#ac_d	4_M_SIT_NOVICE
 	close;
 }
 
-iz_ac01,160,50,3	duplicate(AcademyChef)	Chef#ac	4_F_GODEMOM
-iz_ac01_a,160,50,3	duplicate(AcademyChef)	Chef#ac_a	4_F_GODEMOM
-iz_ac01_b,160,50,3	duplicate(AcademyChef)	Chef#ac_b	4_F_GODEMOM
-iz_ac01_c,160,50,3	duplicate(AcademyChef)	Chef#ac_c	4_F_GODEMOM
-iz_ac01_d,160,50,3	duplicate(AcademyChef)	Chef#ac_d	4_F_GODEMOM
+iz_ac01_a,160,50,3	duplicate(Chef#ac)	Chef#ac_a	4_F_GODEMOM
+iz_ac01_b,160,50,3	duplicate(Chef#ac)	Chef#ac_b	4_F_GODEMOM
+iz_ac01_c,160,50,3	duplicate(Chef#ac)	Chef#ac_c	4_F_GODEMOM
+iz_ac01_d,160,50,3	duplicate(Chef#ac)	Chef#ac_d	4_F_GODEMOM
 
--	script	::ScholarshipTrainee	-1,{
+iz_ac01,164,36,3	script	Scholarship Trainee#ac	1_F_PUBGIRL,{
 	mes "[Labor Scholarship Trainee]";
 	mes "I've worked at many different places but this place is the strangest.";
 	close;
 }
 
-iz_ac01,164,36,3	duplicate(ScholarshipTrainee)	Scholarship Trainee#ac	1_F_PUBGIRL
-iz_ac01_a,164,36,3	duplicate(ScholarshipTrainee)	Scholarship Trainee#ac_a	1_F_PUBGIRL
-iz_ac01_b,164,36,3	duplicate(ScholarshipTrainee)	Scholarship Trainee#ac_b	1_F_PUBGIRL
-iz_ac01_c,164,36,3	duplicate(ScholarshipTrainee)	Scholarship Trainee#ac_c	1_F_PUBGIRL
-iz_ac01_d,164,36,3	duplicate(ScholarshipTrainee)	Scholarship Trainee#ac_d	1_F_PUBGIRL
+iz_ac01_a,164,36,3	duplicate(Scholarship Trainee#ac)	Scholarship Trainee#ac_a	1_F_PUBGIRL
+iz_ac01_b,164,36,3	duplicate(Scholarship Trainee#ac)	Scholarship Trainee#ac_b	1_F_PUBGIRL
+iz_ac01_c,164,36,3	duplicate(Scholarship Trainee#ac)	Scholarship Trainee#ac_c	1_F_PUBGIRL
+iz_ac01_d,164,36,3	duplicate(Scholarship Trainee#ac)	Scholarship Trainee#ac_d	1_F_PUBGIRL
 
-iz_ac01,93,76,5	duplicate(ac_board)	[Armory]#ac	2_BULLETIN_BOARD
-iz_ac01_a,93,76,5	duplicate(ac_board)	[Armory]#ac_a	2_BULLETIN_BOARD
-iz_ac01_b,93,76,5	duplicate(ac_board)	[Armory]#ac_b	2_BULLETIN_BOARD
-iz_ac01_c,93,76,5	duplicate(ac_board)	[Armory]#ac_c	2_BULLETIN_BOARD
-iz_ac01_d,93,76,5	duplicate(ac_board)	[Armory]#ac_d	2_BULLETIN_BOARD
+iz_ac01,93,76,5	duplicate([Dispensary]#ac)	[Armory]#ac	2_BULLETIN_BOARD
+iz_ac01_a,93,76,5	duplicate([Dispensary]#ac)	[Armory]#ac_a	2_BULLETIN_BOARD
+iz_ac01_b,93,76,5	duplicate([Dispensary]#ac)	[Armory]#ac_b	2_BULLETIN_BOARD
+iz_ac01_c,93,76,5	duplicate([Dispensary]#ac)	[Armory]#ac_c	2_BULLETIN_BOARD
+iz_ac01_d,93,76,5	duplicate([Dispensary]#ac)	[Armory]#ac_d	2_BULLETIN_BOARD
 
--	script	::BattleInstructor	-1,{
+iz_ac01,59,83,3	script	Battle Instructor#08	4_M_NOV_HUNT,{
 	if(isbegin_quest(102) == 1 && !isbegin_quest(103))
 		setquest 103;
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
@@ -6883,13 +6826,12 @@ OnInit:
 	end;
 }
 
-iz_ac01,59,83,3	duplicate(BattleInstructor)	Battle Instructor#08	4_M_NOV_HUNT
-iz_ac01_a,59,83,3	duplicate(BattleInstructor)	Battle Instructor#08a	4_M_NOV_HUNT
-iz_ac01_b,59,83,3	duplicate(BattleInstructor)	Battle Instructor#08b	4_M_NOV_HUNT
-iz_ac01_c,59,83,3	duplicate(BattleInstructor)	Battle Instructor#08c	4_M_NOV_HUNT
-iz_ac01_d,59,83,3	duplicate(BattleInstructor)	Battle Instructor#08d	4_M_NOV_HUNT
+iz_ac01_a,59,83,3	duplicate(Battle Instructor#08)	Battle Instructor#08a	4_M_NOV_HUNT
+iz_ac01_b,59,83,3	duplicate(Battle Instructor#08)	Battle Instructor#08b	4_M_NOV_HUNT
+iz_ac01_c,59,83,3	duplicate(Battle Instructor#08)	Battle Instructor#08c	4_M_NOV_HUNT
+iz_ac01_d,59,83,3	duplicate(Battle Instructor#08)	Battle Instructor#08d	4_M_NOV_HUNT
 
--	script	::BattleInstructorField	-1,{
+prt_fild08,343,216,3	script	Battle Instructor#01	4_M_NOV_HUNT,{
 	if(Class == Job_Novice) {
 		mes "[Battle Instructor Subino]";
 		mes "Greetings Novice!";
@@ -6913,13 +6855,12 @@ iz_ac01_d,59,83,3	duplicate(BattleInstructor)	Battle Instructor#08d	4_M_NOV_HUNT
 	}
 }
 
-prt_fild08,343,216,3	duplicate(BattleInstructorField)	Battle Instructor#01	4_M_NOV_HUNT
-prt_fild08a,343,216,3	duplicate(BattleInstructorField)	Battle Instructor#01_a	4_M_NOV_HUNT
-prt_fild08b,343,216,3	duplicate(BattleInstructorField)	Battle Instructor#01_b	4_M_NOV_HUNT
-prt_fild08c,343,216,3	duplicate(BattleInstructorField)	Battle Instructor#01_c	4_M_NOV_HUNT
-prt_fild08d,343,216,3	duplicate(BattleInstructorField)	Battle Instructor#01_d	4_M_NOV_HUNT
+prt_fild08a,343,216,3	duplicate(Battle Instructor#01)	Battle Instructor#01_a	4_M_NOV_HUNT
+prt_fild08b,343,216,3	duplicate(Battle Instructor#01)	Battle Instructor#01_b	4_M_NOV_HUNT
+prt_fild08c,343,216,3	duplicate(Battle Instructor#01)	Battle Instructor#01_c	4_M_NOV_HUNT
+prt_fild08d,343,216,3	duplicate(Battle Instructor#01)	Battle Instructor#01_d	4_M_NOV_HUNT
 
--	script	::AttributeExpert	-1,{
+iz_ac01,53,74,3	script	Attribute Expert#ac	1_M_WIZARD,{
 	if(isbegin_quest(102) == 1 && !isbegin_quest(105))
 		setquest 105;
 	mes "[Attribute Expert]";
@@ -7100,11 +7041,10 @@ OnInit:
 	end;
 }
 
-iz_ac01,53,74,3	duplicate(AttributeExpert)	Attribute Expert#ac	1_M_WIZARD
-iz_ac01_a,53,74,3	duplicate(AttributeExpert)	Attribute Expert#ac_a	1_M_WIZARD
-iz_ac01_b,53,74,3	duplicate(AttributeExpert)	Attribute Expert#ac_b	1_M_WIZARD
-iz_ac01_c,53,74,3	duplicate(AttributeExpert)	Attribute Expert#ac_c	1_M_WIZARD
-iz_ac01_d,53,74,3	duplicate(AttributeExpert)	Attribute Expert#ac_d	1_M_WIZARD
+iz_ac01_a,53,74,3	duplicate(Attribute Expert#ac)	Attribute Expert#ac_a	1_M_WIZARD
+iz_ac01_b,53,74,3	duplicate(Attribute Expert#ac)	Attribute Expert#ac_b	1_M_WIZARD
+iz_ac01_c,53,74,3	duplicate(Attribute Expert#ac)	Attribute Expert#ac_c	1_M_WIZARD
+iz_ac01_d,53,74,3	duplicate(Attribute Expert#ac)	Attribute Expert#ac_d	1_M_WIZARD
 
 function	script	F_PetInformation	{
 	switch(select("Taming a monster:Hatching "+(getarg(0)?"an":"the")+" egg:Monitoring pet's status:Feeding:Performances:Removing the accessory:Transforming back to egg:End Conversation")) {
@@ -7187,7 +7127,7 @@ function	script	F_PetInformation	{
 	return;
 }
 
--	script	::AdeptAdventurer	-1,{
+iz_ac01,45,80,5	script	Adept Adventurer#ac	4_M_JOB_BLACKSMITH,{
 	if(isbegin_quest(102) == 1 && !isbegin_quest(104))
 		setquest 104;
 	if(isbegin_quest(2298) == 2) {
@@ -7272,11 +7212,10 @@ OnInit:
 	end;
 }
 
-iz_ac01,45,80,5	duplicate(AdeptAdventurer)	Adept Adventurer#ac	4_M_JOB_BLACKSMITH
-iz_ac01_a,45,80,5	duplicate(AdeptAdventurer)	Adept Adventurer#ac_a	4_M_JOB_BLACKSMITH
-iz_ac01_b,45,80,5	duplicate(AdeptAdventurer)	Adept Adventurer#ac_b	4_M_JOB_BLACKSMITH
-iz_ac01_c,45,80,5	duplicate(AdeptAdventurer)	Adept Adventurer#ac_c	4_M_JOB_BLACKSMITH
-iz_ac01_d,45,80,5	duplicate(AdeptAdventurer)	Adept Adventurer#ac_d	4_M_JOB_BLACKSMITH
+iz_ac01_a,45,80,5	duplicate(Adept Adventurer#ac)	Adept Adventurer#ac_a	4_M_JOB_BLACKSMITH
+iz_ac01_b,45,80,5	duplicate(Adept Adventurer#ac)	Adept Adventurer#ac_b	4_M_JOB_BLACKSMITH
+iz_ac01_c,45,80,5	duplicate(Adept Adventurer#ac)	Adept Adventurer#ac_c	4_M_JOB_BLACKSMITH
+iz_ac01_d,45,80,5	duplicate(Adept Adventurer#ac)	Adept Adventurer#ac_d	4_M_JOB_BLACKSMITH
 
 new_1-3,92,169,5	script	Adept Adventurer#new	4_M_JOB_BLACKSMITH,{
 	if(isbegin_quest(2293) == 1) {
@@ -7558,8 +7497,9 @@ new_1-3,105,163,5	script	Foolish Poring#pet_3	2398,{ end; }
 
 new_1-3,96,176,0	warp	to_ac_armory#new	2,2,iz_ac01,49,73
 
--	script	::AdventurersPet	-1,{
+iz_ac01,43,80,7	script	Adventurer's Pet#ac	4_DEVIRUCHI,{
 	end;
+
 OnTimer60000:
 	stopnpctimer;
 	set .@rnd,rand(1,4);
@@ -7578,19 +7518,18 @@ OnInit:
 	end;
 }
 
-iz_ac01,43,80,7	duplicate(AdventurersPet)	Adventurer's Pet#ac	4_DEVIRUCHI
-iz_ac01_a,43,80,7	duplicate(AdventurersPet)	Adventurer's Pet#ac_a	4_DEVIRUCHI
-iz_ac01_b,43,80,7	duplicate(AdventurersPet)	Adventurer's Pet#ac_b	4_DEVIRUCHI
-iz_ac01_c,43,80,7	duplicate(AdventurersPet)	Adventurer's Pet#ac_c	4_DEVIRUCHI
-iz_ac01_d,43,80,7	duplicate(AdventurersPet)	Adventurer's Pet#ac_d	4_DEVIRUCHI
+iz_ac01_a,43,80,7	duplicate(Adventurer's Pet#ac)	Adventurer's Pet#ac_a	4_DEVIRUCHI
+iz_ac01_b,43,80,7	duplicate(Adventurer's Pet#ac)	Adventurer's Pet#ac_b	4_DEVIRUCHI
+iz_ac01_c,43,80,7	duplicate(Adventurer's Pet#ac)	Adventurer's Pet#ac_c	4_DEVIRUCHI
+iz_ac01_d,43,80,7	duplicate(Adventurer's Pet#ac)	Adventurer's Pet#ac_d	4_DEVIRUCHI
 
-iz_ac01,106,76,3	duplicate(ac_board)	[Library]#ac	2_BULLETIN_BOARD
-iz_ac01_a,106,76,3	duplicate(ac_board)	[Library]#ac_a	2_BULLETIN_BOARD
-iz_ac01_b,106,76,3	duplicate(ac_board)	[Library]#ac_b	2_BULLETIN_BOARD
-iz_ac01_c,106,76,3	duplicate(ac_board)	[Library]#ac_c	2_BULLETIN_BOARD
-iz_ac01_d,106,76,3	duplicate(ac_board)	[Library]#ac_d	2_BULLETIN_BOARD
+iz_ac01,106,76,3	duplicate([Dispensary]#ac)	[Library]#ac	2_BULLETIN_BOARD
+iz_ac01_a,106,76,3	duplicate([Dispensary]#ac)	[Library]#ac_a	2_BULLETIN_BOARD
+iz_ac01_b,106,76,3	duplicate([Dispensary]#ac)	[Library]#ac_b	2_BULLETIN_BOARD
+iz_ac01_c,106,76,3	duplicate([Dispensary]#ac)	[Library]#ac_c	2_BULLETIN_BOARD
+iz_ac01_d,106,76,3	duplicate([Dispensary]#ac)	[Library]#ac_d	2_BULLETIN_BOARD
 
--	script	::Lady	-1,{
+iz_ac01,138,69,3	script	Lady#ac	1_F_ORIENT_02,{
 	mes "[Lady]";
 	mes "^4d4fffIs the east window enlightened?";
 	mes "Pecopeco is singing.^000000";
@@ -7611,11 +7550,10 @@ iz_ac01_d,106,76,3	duplicate(ac_board)	[Library]#ac_d	2_BULLETIN_BOARD
 	close;
 }
 
-iz_ac01,138,69,3	duplicate(Lady)	Lady#ac	1_F_ORIENT_02
-iz_ac01_a,138,69,3	duplicate(Lady)	Lady#ac_a	1_F_ORIENT_02
-iz_ac01_b,138,69,3	duplicate(Lady)	Lady#ac_b	1_F_ORIENT_02
-iz_ac01_c,138,69,3	duplicate(Lady)	Lady#ac_c	1_F_ORIENT_02
-iz_ac01_d,138,69,3	duplicate(Lady)	Lady#ac_d	1_F_ORIENT_02
+iz_ac01_a,138,69,3	duplicate(Lady#ac)	Lady#ac_a	1_F_ORIENT_02
+iz_ac01_b,138,69,3	duplicate(Lady#ac)	Lady#ac_b	1_F_ORIENT_02
+iz_ac01_c,138,69,3	duplicate(Lady#ac)	Lady#ac_c	1_F_ORIENT_02
+iz_ac01_d,138,69,3	duplicate(Lady#ac)	Lady#ac_d	1_F_ORIENT_02
 
 -	script	::MidgardsHeaviestThing	-1,{
 	if(!isbegin_quest(106)) {
@@ -7649,19 +7587,19 @@ iz_ac01_b,149,87,0	duplicate(MidgardsHeaviestThing)	Midgard's Heaviest Thing::ac
 iz_ac01_c,149,87,0	duplicate(MidgardsHeaviestThing)	Midgard's Heaviest Thing::ac_c	HIDDEN_NPC
 iz_ac01_d,149,87,0	duplicate(MidgardsHeaviestThing)	Midgard's Heaviest Thing::ac_d	HIDDEN_NPC
 
-iz_ac01,103,89,3	duplicate(ac_board)	[Great Hall]#ac	2_BULLETIN_BOARD
-iz_ac01_a,103,89,3	duplicate(ac_board)	[Great Hall]#ac_a	2_BULLETIN_BOARD
-iz_ac01_b,103,89,3	duplicate(ac_board)	[Great Hall]#ac_b	2_BULLETIN_BOARD
-iz_ac01_c,103,89,3	duplicate(ac_board)	[Great Hall]#ac_c	2_BULLETIN_BOARD
-iz_ac01_d,103,89,3	duplicate(ac_board)	[Great Hall]#ac_d	2_BULLETIN_BOARD
+iz_ac01,103,89,3	duplicate([Dispensary]#ac)	[Great Hall]#ac	2_BULLETIN_BOARD
+iz_ac01_a,103,89,3	duplicate([Dispensary]#ac)	[Great Hall]#ac_a	2_BULLETIN_BOARD
+iz_ac01_b,103,89,3	duplicate([Dispensary]#ac)	[Great Hall]#ac_b	2_BULLETIN_BOARD
+iz_ac01_c,103,89,3	duplicate([Dispensary]#ac)	[Great Hall]#ac_c	2_BULLETIN_BOARD
+iz_ac01_d,103,89,3	duplicate([Dispensary]#ac)	[Great Hall]#ac_d	2_BULLETIN_BOARD
 
-iz_ac01,89,103,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#01	4_F_KAFRA1
-iz_ac01_a,89,103,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#01_a	4_F_KAFRA1
-iz_ac01_b,89,103,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#01_b	4_F_KAFRA1
-iz_ac01_c,89,103,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#01_c	4_F_KAFRA1
-iz_ac01_d,89,103,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#01_d	4_F_KAFRA1
+iz_ac01,89,103,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#01	4_F_KAFRA1
+iz_ac01_a,89,103,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#01_a	4_F_KAFRA1
+iz_ac01_b,89,103,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#01_b	4_F_KAFRA1
+iz_ac01_c,89,103,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#01_c	4_F_KAFRA1
+iz_ac01_d,89,103,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#01_d	4_F_KAFRA1
 
--	script	::ProfOldman	-1,{
+iz_ac01,99,146,3	script	Prof. Oldman#ac	4_M_HUGRANFA,{
 	if(isbegin_quest(101) == 1) {
 		mes "[Professor]";
 		mes "Harumph! You were almost late today...Er...";
@@ -7741,21 +7679,20 @@ iz_ac01_d,89,103,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#01_d	4_F_KAF
 	close;
 }
 
-iz_ac01,99,146,3	duplicate(ProfOldman)	Prof. Oldman#ac	4_M_HUGRANFA
-iz_ac01_a,99,146,3	duplicate(ProfOldman)	Prof. Oldman#ac_a	4_M_HUGRANFA
-iz_ac01_b,99,146,3	duplicate(ProfOldman)	Prof. Oldman#ac_b	4_M_HUGRANFA
-iz_ac01_c,99,146,3	duplicate(ProfOldman)	Prof. Oldman#ac_c	4_M_HUGRANFA
-iz_ac01_d,99,146,3	duplicate(ProfOldman)	Prof. Oldman#ac_d	4_M_HUGRANFA
+iz_ac01_a,99,146,3	duplicate(Prof. Oldman#ac)	Prof. Oldman#ac_a	4_M_HUGRANFA
+iz_ac01_b,99,146,3	duplicate(Prof. Oldman#ac)	Prof. Oldman#ac_b	4_M_HUGRANFA
+iz_ac01_c,99,146,3	duplicate(Prof. Oldman#ac)	Prof. Oldman#ac_c	4_M_HUGRANFA
+iz_ac01_d,99,146,3	duplicate(Prof. Oldman#ac)	Prof. Oldman#ac_d	4_M_HUGRANFA
 
 // Criatura Academy NPCs 2F
 //============================================================
-iz_ac02,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2	2_BULLETIN_BOARD
-iz_ac02_a,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_a	2_BULLETIN_BOARD
-iz_ac02_b,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_b	2_BULLETIN_BOARD
-iz_ac02_c,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_c	2_BULLETIN_BOARD
-iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
+iz_ac02,98,50,5	duplicate([Dispensary]#ac)	[Swordman Classroom]#2	2_BULLETIN_BOARD
+iz_ac02_a,98,50,5	duplicate([Dispensary]#ac)	[Swordman Classroom]#2_a	2_BULLETIN_BOARD
+iz_ac02_b,98,50,5	duplicate([Dispensary]#ac)	[Swordman Classroom]#2_b	2_BULLETIN_BOARD
+iz_ac02_c,98,50,5	duplicate([Dispensary]#ac)	[Swordman Classroom]#2_c	2_BULLETIN_BOARD
+iz_ac02_d,98,50,5	duplicate([Dispensary]#ac)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 
--	script	::SwordmanTrainer	-1,{
+iz_ac02,60,51,5	script	Swordman Trainer#2ac	4_M_SWORDMAN,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- Quest can't be continued due to your overloaded inventory.";
 		close;
@@ -8028,13 +7965,12 @@ iz_ac02_d,98,50,5	duplicate(ac_board)	[Swordman Classroom]#2_d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,60,51,5	duplicate(SwordmanTrainer)	Swordman Trainer#2ac	4_M_SWORDMAN
-iz_ac02_a,60,51,5	duplicate(SwordmanTrainer)	Swordman Trainer#2ac_a	4_M_SWORDMAN
-iz_ac02_b,60,51,5	duplicate(SwordmanTrainer)	Swordman Trainer#2ac_b	4_M_SWORDMAN
-iz_ac02_c,60,51,5	duplicate(SwordmanTrainer)	Swordman Trainer#2ac_c	4_M_SWORDMAN
-iz_ac02_d,60,51,5	duplicate(SwordmanTrainer)	Swordman Trainer#2ac_d	4_M_SWORDMAN
+iz_ac02_a,60,51,5	duplicate(Swordman Trainer#2ac)	Swordman Trainer#2ac_a	4_M_SWORDMAN
+iz_ac02_b,60,51,5	duplicate(Swordman Trainer#2ac)	Swordman Trainer#2ac_b	4_M_SWORDMAN
+iz_ac02_c,60,51,5	duplicate(Swordman Trainer#2ac)	Swordman Trainer#2ac_c	4_M_SWORDMAN
+iz_ac02_d,60,51,5	duplicate(Swordman Trainer#2ac)	Swordman Trainer#2ac_d	4_M_SWORDMAN
 
--	script	::SwordmanAssistant	-1,{
+iz_ac02,53,48,5	script	Swordman Assistant#2ac	4_M_KY_KNT,{
 	if(Class == Job_Novice && isbegin_quest(4269) == 2) {
 		if(JobLevel >= 10) {
 			mes "[Assitant Trainer Neals]";
@@ -8127,19 +8063,18 @@ iz_ac02_d,60,51,5	duplicate(SwordmanTrainer)	Swordman Trainer#2ac_d	4_M_SWORDMAN
 	}
 }
 
-iz_ac02,53,48,5	duplicate(SwordmanAssistant)	Swordman Assistant#2ac	4_M_KY_KNT
-iz_ac02_a,53,48,5	duplicate(SwordmanAssistant)	Swordman Assistant#2ac_a	4_M_KY_KNT
-iz_ac02_b,53,48,5	duplicate(SwordmanAssistant)	Swordman Assistant#2ac_b	4_M_KY_KNT
-iz_ac02_c,53,48,5	duplicate(SwordmanAssistant)	Swordman Assistant#2ac_c	4_M_KY_KNT
-iz_ac02_d,53,48,5	duplicate(SwordmanAssistant)	Swordman Assistant#2ac_d	4_M_KY_KNT
+iz_ac02_a,53,48,5	duplicate(Swordman Assistant#2ac)	Swordman Assistant#2ac_a	4_M_KY_KNT
+iz_ac02_b,53,48,5	duplicate(Swordman Assistant#2ac)	Swordman Assistant#2ac_b	4_M_KY_KNT
+iz_ac02_c,53,48,5	duplicate(Swordman Assistant#2ac)	Swordman Assistant#2ac_c	4_M_KY_KNT
+iz_ac02_d,53,48,5	duplicate(Swordman Assistant#2ac)	Swordman Assistant#2ac_d	4_M_KY_KNT
 
-iz_ac02,109,50,3	duplicate(ac_board)	[Lounge]#2ac	2_BULLETIN_BOARD
-iz_ac02_a,109,50,3	duplicate(ac_board)	[Lounge]#2ac_a	2_BULLETIN_BOARD
-iz_ac02_b,109,50,3	duplicate(ac_board)	[Lounge]#2ac_b	2_BULLETIN_BOARD
-iz_ac02_c,109,50,3	duplicate(ac_board)	[Lounge]#2ac_c	2_BULLETIN_BOARD
-iz_ac02_d,109,50,3	duplicate(ac_board)	[Lounge]#2ac_d	2_BULLETIN_BOARD
+iz_ac02,109,50,3	duplicate([Dispensary]#ac)	[Lounge]#2ac	2_BULLETIN_BOARD
+iz_ac02_a,109,50,3	duplicate([Dispensary]#ac)	[Lounge]#2ac_a	2_BULLETIN_BOARD
+iz_ac02_b,109,50,3	duplicate([Dispensary]#ac)	[Lounge]#2ac_b	2_BULLETIN_BOARD
+iz_ac02_c,109,50,3	duplicate([Dispensary]#ac)	[Lounge]#2ac_c	2_BULLETIN_BOARD
+iz_ac02_d,109,50,3	duplicate([Dispensary]#ac)	[Lounge]#2ac_d	2_BULLETIN_BOARD
 
--	script	::CreamPuff	-1,{
+iz_ac02,143,55,3	script	Cream Puff#2ac	4_M_KID1,{
 	cutin "choucream_n",2;
 	if(Class == Job_Novice) {
 		mes "[Cream Puff]";
@@ -8793,13 +8728,12 @@ iz_ac02_d,109,50,3	duplicate(ac_board)	[Lounge]#2ac_d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac	4_M_KID1
-iz_ac02_a,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_a	4_M_KID1
-iz_ac02_b,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_b	4_M_KID1
-iz_ac02_c,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_c	4_M_KID1
-iz_ac02_d,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_d	4_M_KID1
+iz_ac02_a,143,55,3	duplicate(Cream Puff#2ac)	Cream Puff#2ac_a	4_M_KID1
+iz_ac02_b,143,55,3	duplicate(Cream Puff#2ac)	Cream Puff#2ac_b	4_M_KID1
+iz_ac02_c,143,55,3	duplicate(Cream Puff#2ac)	Cream Puff#2ac_c	4_M_KID1
+iz_ac02_d,143,55,3	duplicate(Cream Puff#2ac)	Cream Puff#2ac_d	4_M_KID1
 
--	script	::Ragi	-1,{
+iz_ac02,149,43,3	script	Ragi#2ac	1_M_BARD,{
 	mes "[Ragi]";
 	mes "A sudden poetic inspiration hit me!";
 	next;
@@ -8909,19 +8843,18 @@ iz_ac02_d,143,55,3	duplicate(CreamPuff)	Cream Puff#2ac_d	4_M_KID1
 	}
 }
 
-iz_ac02,149,43,3	duplicate(Ragi)	Ragi#2ac	1_M_BARD
-iz_ac02_a,149,43,3	duplicate(Ragi)	Ragi#2ac_a	1_M_BARD
-iz_ac02_b,149,43,3	duplicate(Ragi)	Ragi#2ac_b	1_M_BARD
-iz_ac02_c,149,43,3	duplicate(Ragi)	Ragi#2ac_c	1_M_BARD
-iz_ac02_d,149,43,3	duplicate(Ragi)	Ragi#2ac_d	1_M_BARD
+iz_ac02_a,149,43,3	duplicate(Ragi#2ac)	Ragi#2ac_a	1_M_BARD
+iz_ac02_b,149,43,3	duplicate(Ragi#2ac)	Ragi#2ac_b	1_M_BARD
+iz_ac02_c,149,43,3	duplicate(Ragi#2ac)	Ragi#2ac_c	1_M_BARD
+iz_ac02_d,149,43,3	duplicate(Ragi#2ac)	Ragi#2ac_d	1_M_BARD
 
-iz_ac02,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2	2_BULLETIN_BOARD
-iz_ac02_a,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_a	2_BULLETIN_BOARD
-iz_ac02_b,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_b	2_BULLETIN_BOARD
-iz_ac02_c,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_c	2_BULLETIN_BOARD
-iz_ac02_d,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_d	2_BULLETIN_BOARD
+iz_ac02,98,80,5	duplicate([Dispensary]#ac)	[Taekwon Classroom]#2	2_BULLETIN_BOARD
+iz_ac02_a,98,80,5	duplicate([Dispensary]#ac)	[Taekwon Classroom]#2_a	2_BULLETIN_BOARD
+iz_ac02_b,98,80,5	duplicate([Dispensary]#ac)	[Taekwon Classroom]#2_b	2_BULLETIN_BOARD
+iz_ac02_c,98,80,5	duplicate([Dispensary]#ac)	[Taekwon Classroom]#2_c	2_BULLETIN_BOARD
+iz_ac02_d,98,80,5	duplicate([Dispensary]#ac)	[Taekwon Classroom]#2_d	2_BULLETIN_BOARD
 
--	script	::Arang	-1,{
+iz_ac02,70,85,5	script	Arang#1	4_F_TAEKWON,{
 	cutin "arang03",0;
 	mes "[Arang]";
 	mes "Hi, Good morning!";
@@ -9110,11 +9043,10 @@ iz_ac02_d,98,80,5	duplicate(ac_board)	[Taekwon Classroom]#2_d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,70,85,5	duplicate(Arang)	Arang#1	4_F_TAEKWON
-iz_ac02_a,70,85,5	duplicate(Arang)	Arang#1_a	4_F_TAEKWON
-iz_ac02_b,70,85,5	duplicate(Arang)	Arang#1_b	4_F_TAEKWON
-iz_ac02_c,70,85,5	duplicate(Arang)	Arang#1_c	4_F_TAEKWON
-iz_ac02_d,70,85,5	duplicate(Arang)	Arang#1_d	4_F_TAEKWON
+iz_ac02_a,70,85,5	duplicate(Arang#1)	Arang#1_a	4_F_TAEKWON
+iz_ac02_b,70,85,5	duplicate(Arang#1)	Arang#1_b	4_F_TAEKWON
+iz_ac02_c,70,85,5	duplicate(Arang#1)	Arang#1_c	4_F_TAEKWON
+iz_ac02_d,70,85,5	duplicate(Arang#1)	Arang#1_d	4_F_TAEKWON
 
 pay_fild08,153,83,1	script	Lady Harvesting Herbs#2	1_F_ORIENT_02,{
 	mes "[Lady]";
@@ -9126,13 +9058,13 @@ pay_fild08,153,83,1	script	Lady Harvesting Herbs#2	1_F_ORIENT_02,{
 	close;
 }
 
-iz_ac02,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#0	2_BULLETIN_BOARD
-iz_ac02_a,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#a	2_BULLETIN_BOARD
-iz_ac02_b,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#b	2_BULLETIN_BOARD
-iz_ac02_c,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#c	2_BULLETIN_BOARD
-iz_ac02_d,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#d	2_BULLETIN_BOARD
+iz_ac02,109,80,3	duplicate([Dispensary]#ac)	[Gunslinger Classroom]#0	2_BULLETIN_BOARD
+iz_ac02_a,109,80,3	duplicate([Dispensary]#ac)	[Gunslinger Classroom]#a	2_BULLETIN_BOARD
+iz_ac02_b,109,80,3	duplicate([Dispensary]#ac)	[Gunslinger Classroom]#b	2_BULLETIN_BOARD
+iz_ac02_c,109,80,3	duplicate([Dispensary]#ac)	[Gunslinger Classroom]#c	2_BULLETIN_BOARD
+iz_ac02_d,109,80,3	duplicate([Dispensary]#ac)	[Gunslinger Classroom]#d	2_BULLETIN_BOARD
 
--	script	::Lusa	-1,{
+iz_ac02,142,85,5	script	Lusa#2ac	4_F_GUNSLINGER,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- Quest can't be continued as your overloaded items.";
 		close;
@@ -9400,24 +9332,22 @@ iz_ac02_d,109,80,3	duplicate(ac_board)	[Gunslinger Classroom]#d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,142,85,5	duplicate(Lusa)	Lusa#2ac	4_F_GUNSLINGER
-iz_ac02_a,142,85,5	duplicate(Lusa)	Lusa#2ac_a	4_F_GUNSLINGER
-iz_ac02_b,142,85,5	duplicate(Lusa)	Lusa#2ac_b	4_F_GUNSLINGER
-iz_ac02_c,142,85,5	duplicate(Lusa)	Lusa#2ac_c	4_F_GUNSLINGER
-iz_ac02_d,142,85,5	duplicate(Lusa)	Lusa#2ac_d	4_F_GUNSLINGER
+iz_ac02_a,142,85,5	duplicate(Lusa#2ac)	Lusa#2ac_a	4_F_GUNSLINGER
+iz_ac02_b,142,85,5	duplicate(Lusa#2ac)	Lusa#2ac_b	4_F_GUNSLINGER
+iz_ac02_c,142,85,5	duplicate(Lusa#2ac)	Lusa#2ac_c	4_F_GUNSLINGER
+iz_ac02_d,142,85,5	duplicate(Lusa#2ac)	Lusa#2ac_d	4_F_GUNSLINGER
 
--	script	::Lusa'sDesk	-1,{
+iz_ac02,131,82,4	script	Lusa's Desk#ac	CLEAR_NPC,{
 	mes "There is a stack of papers on the desk.";
 	close;
 }
 
-iz_ac02,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac	CLEAR_NPC
-iz_ac02_a,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac_a	CLEAR_NPC
-iz_ac02_b,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac_b	CLEAR_NPC
-iz_ac02_c,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac_c	CLEAR_NPC
-iz_ac02_d,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac_d	CLEAR_NPC
+iz_ac02_a,131,82,4	duplicate(Lusa's Desk#ac)	Lusa's Desk#ac_a	CLEAR_NPC
+iz_ac02_b,131,82,4	duplicate(Lusa's Desk#ac)	Lusa's Desk#ac_b	CLEAR_NPC
+iz_ac02_c,131,82,4	duplicate(Lusa's Desk#ac)	Lusa's Desk#ac_c	CLEAR_NPC
+iz_ac02_d,131,82,4	duplicate(Lusa's Desk#ac)	Lusa's Desk#ac_d	CLEAR_NPC
 
--	script	::QuiteTrainee	-1,{
+iz_ac02,143,77,3	script	Quite Trainee#2ac	4_F_KID2,{
 	if(Class == Job_Novice) {
 		set .@rnd,rand(1,5);
 		if(.@rnd == 1) {
@@ -9452,13 +9382,12 @@ iz_ac02_d,131,82,4	duplicate(Lusa'sDesk)	Lusa's Desk#ac_d	CLEAR_NPC
 	}
 }
 
-iz_ac02,143,77,3	duplicate(QuiteTrainee)	Quite Trainee#2ac	4_F_KID2
-iz_ac02_a,143,77,3	duplicate(QuiteTrainee)	Quite Trainee#2ac_a	4_F_KID2
-iz_ac02_b,143,77,3	duplicate(QuiteTrainee)	Quite Trainee#2ac_b	4_F_KID2
-iz_ac02_c,143,77,3	duplicate(QuiteTrainee)	Quite Trainee#2ac_c	4_F_KID2
-iz_ac02_d,143,77,3	duplicate(QuiteTrainee)	Quite Trainee#2ac_d	4_F_KID2
+iz_ac02_a,143,77,3	duplicate(Quite Trainee#2ac)	Quite Trainee#2ac_a	4_F_KID2
+iz_ac02_b,143,77,3	duplicate(Quite Trainee#2ac)	Quite Trainee#2ac_b	4_F_KID2
+iz_ac02_c,143,77,3	duplicate(Quite Trainee#2ac)	Quite Trainee#2ac_c	4_F_KID2
+iz_ac02_d,143,77,3	duplicate(Quite Trainee#2ac)	Quite Trainee#2ac_d	4_F_KID2
 
--	script	::NoisyTrainee	-1,{
+iz_ac02,152,79,3	script	Noisy Trainee#2ac	4_M_HUBOY,{
 	if(Class == Job_Novice) {
 		mes "[Noisy Trainee]";
 		mes "Hey, do you know about the gunslinger's own weapon?";
@@ -9492,25 +9421,23 @@ iz_ac02_d,143,77,3	duplicate(QuiteTrainee)	Quite Trainee#2ac_d	4_F_KID2
 	}
 }
 
-iz_ac02,152,79,3	duplicate(NoisyTrainee)	Noisy Trainee#2ac	4_M_HUBOY
-iz_ac02_a,152,79,3	duplicate(NoisyTrainee)	Noisy Trainee#2ac_a	4_M_HUBOY
-iz_ac02_b,152,79,3	duplicate(NoisyTrainee)	Noisy Trainee#2ac_b	4_M_HUBOY
-iz_ac02_c,152,79,3	duplicate(NoisyTrainee)	Noisy Trainee#2ac_c	4_M_HUBOY
-iz_ac02_d,152,79,3	duplicate(NoisyTrainee)	Noisy Trainee#2ac_d	4_M_HUBOY
+iz_ac02_a,152,79,3	duplicate(Noisy Trainee#2ac)	Noisy Trainee#2ac_a	4_M_HUBOY
+iz_ac02_b,152,79,3	duplicate(Noisy Trainee#2ac)	Noisy Trainee#2ac_b	4_M_HUBOY
+iz_ac02_c,152,79,3	duplicate(Noisy Trainee#2ac)	Noisy Trainee#2ac_c	4_M_HUBOY
+iz_ac02_d,152,79,3	duplicate(Noisy Trainee#2ac)	Noisy Trainee#2ac_d	4_M_HUBOY
 
--	script	::FrightenedTrainee	-1,{
+iz_ac02,159,79,7	script	Frightened Trainee#2ac	4_F_HUGIRL,{
 	mes "[Frightened Trainee]";
 	mes "That man looks too scary.";
 	close;
 }
 
-iz_ac02,159,79,7	duplicate(FrightenedTrainee)	Frightened Trainee#2ac	4_F_HUGIRL
-iz_ac02_a,159,79,7	duplicate(FrightenedTrainee)	Frightened Trainee#2ac_a	4_F_HUGIRL
-iz_ac02_b,159,79,7	duplicate(FrightenedTrainee)	Frightened Trainee#2ac_b	4_F_HUGIRL
-iz_ac02_c,159,79,7	duplicate(FrightenedTrainee)	Frightened Trainee#2ac_c	4_F_HUGIRL
-iz_ac02_d,159,79,7	duplicate(FrightenedTrainee)	Frightened Trainee#2ac_d	4_F_HUGIRL
+iz_ac02_a,159,79,7	duplicate(Frightened Trainee#2ac)	Frightened Trainee#2ac_a	4_F_HUGIRL
+iz_ac02_b,159,79,7	duplicate(Frightened Trainee#2ac)	Frightened Trainee#2ac_b	4_F_HUGIRL
+iz_ac02_c,159,79,7	duplicate(Frightened Trainee#2ac)	Frightened Trainee#2ac_c	4_F_HUGIRL
+iz_ac02_d,159,79,7	duplicate(Frightened Trainee#2ac)	Frightened Trainee#2ac_d	4_F_HUGIRL
 
--	script	::StaffSentByGuild	-1,{
+iz_ac02,162,86,3	script	Staff Sent By Guild#2	4W_M_02,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- You are carrying too many items. -";
 		close;
@@ -9520,19 +9447,18 @@ iz_ac02_d,159,79,7	duplicate(FrightenedTrainee)	Frightened Trainee#2ac_d	4_F_HUG
 	close;
 }
 
-iz_ac02,162,86,3	duplicate(StaffSentByGuild)	Staff Sent By Guild#2	4W_M_02
-iz_ac02_a,162,86,3	duplicate(StaffSentByGuild)	Staff Sent By Guild#2_a	4W_M_02
-iz_ac02_b,162,86,3	duplicate(StaffSentByGuild)	Staff Sent By Guild#2_b	4W_M_02
-iz_ac02_c,162,86,3	duplicate(StaffSentByGuild)	Staff Sent By Guild#2_c	4W_M_02
-iz_ac02_d,162,86,3	duplicate(StaffSentByGuild)	Staff Sent By Guild#2_d	4W_M_02
+iz_ac02_a,162,86,3	duplicate(Staff Sent By Guild#2)	Staff Sent By Guild#2_a	4W_M_02
+iz_ac02_b,162,86,3	duplicate(Staff Sent By Guild#2)	Staff Sent By Guild#2_b	4W_M_02
+iz_ac02_c,162,86,3	duplicate(Staff Sent By Guild#2)	Staff Sent By Guild#2_c	4W_M_02
+iz_ac02_d,162,86,3	duplicate(Staff Sent By Guild#2)	Staff Sent By Guild#2_d	4W_M_02
 
-iz_ac02,98,110,5	duplicate(ac_board)	[Archer Classroom]#2ac	2_BULLETIN_BOARD
-iz_ac02_a,98,110,5	duplicate(ac_board)	[Archer Classroom]#2ac_a	2_BULLETIN_BOARD
-iz_ac02_b,98,110,5	duplicate(ac_board)	[Archer Classroom]#2ac_b	2_BULLETIN_BOARD
-iz_ac02_c,98,110,5	duplicate(ac_board)	[Archer Classroom]#2ac_c	2_BULLETIN_BOARD
-iz_ac02_d,98,110,5	duplicate(ac_board)	[Archer Classroom]#2ac_d	2_BULLETIN_BOARD
+iz_ac02,98,110,5	duplicate([Dispensary]#ac)	[Archer Classroom]#2ac	2_BULLETIN_BOARD
+iz_ac02_a,98,110,5	duplicate([Dispensary]#ac)	[Archer Classroom]#2ac_a	2_BULLETIN_BOARD
+iz_ac02_b,98,110,5	duplicate([Dispensary]#ac)	[Archer Classroom]#2ac_b	2_BULLETIN_BOARD
+iz_ac02_c,98,110,5	duplicate([Dispensary]#ac)	[Archer Classroom]#2ac_c	2_BULLETIN_BOARD
+iz_ac02_d,98,110,5	duplicate([Dispensary]#ac)	[Archer Classroom]#2ac_d	2_BULLETIN_BOARD
 
--	script	::ArcherTeacher	-1,{
+iz_ac02,65,109,5	script	Archer Teacher#2ac	4_M_ARCHER,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "[Marlbron]";
 		mes "Why are you carrying so much with you?";
@@ -9750,19 +9676,18 @@ iz_ac02_d,98,110,5	duplicate(ac_board)	[Archer Classroom]#2ac_d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,65,109,5	duplicate(ArcherTeacher)	Archer Teacher#2ac	4_M_ARCHER
-iz_ac02_a,65,109,5	duplicate(ArcherTeacher)	Archer Teacher#2ac_a	4_M_ARCHER
-iz_ac02_b,65,109,5	duplicate(ArcherTeacher)	Archer Teacher#2ac_b	4_M_ARCHER
-iz_ac02_c,65,109,5	duplicate(ArcherTeacher)	Archer Teacher#2ac_c	4_M_ARCHER
-iz_ac02_d,65,109,5	duplicate(ArcherTeacher)	Archer Teacher#2ac_d	4_M_ARCHER
+iz_ac02_a,65,109,5	duplicate(Archer Teacher#2ac)	Archer Teacher#2ac_a	4_M_ARCHER
+iz_ac02_b,65,109,5	duplicate(Archer Teacher#2ac)	Archer Teacher#2ac_b	4_M_ARCHER
+iz_ac02_c,65,109,5	duplicate(Archer Teacher#2ac)	Archer Teacher#2ac_c	4_M_ARCHER
+iz_ac02_d,65,109,5	duplicate(Archer Teacher#2ac)	Archer Teacher#2ac_d	4_M_ARCHER
 
-iz_ac02,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac	2_BULLETIN_BOARD
-iz_ac02_a,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac_a	2_BULLETIN_BOARD
-iz_ac02_b,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac_b	2_BULLETIN_BOARD
-iz_ac02_c,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac_c	2_BULLETIN_BOARD
-iz_ac02_d,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac_d	2_BULLETIN_BOARD
+iz_ac02,109,110,3	duplicate([Dispensary]#ac)	[Mage Classroom]#2ac	2_BULLETIN_BOARD
+iz_ac02_a,109,110,3	duplicate([Dispensary]#ac)	[Mage Classroom]#2ac_a	2_BULLETIN_BOARD
+iz_ac02_b,109,110,3	duplicate([Dispensary]#ac)	[Mage Classroom]#2ac_b	2_BULLETIN_BOARD
+iz_ac02_c,109,110,3	duplicate([Dispensary]#ac)	[Mage Classroom]#2ac_c	2_BULLETIN_BOARD
+iz_ac02_d,109,110,3	duplicate([Dispensary]#ac)	[Mage Classroom]#2ac_d	2_BULLETIN_BOARD
 
--	script	::MageChuck	-1,{
+iz_ac02,148,110,3	script	Mage Chuck#2ac	4_M_JOB_WIZARD,{
 	cutin "nov_magicsoul01",2;
 	if(Class == Job_Novice) {
 		if(isbegin_quest(4269) == 2) {
@@ -9998,19 +9923,18 @@ iz_ac02_d,109,110,3	duplicate(ac_board)	[Mage Classroom]#2ac_d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,148,110,3	duplicate(MageChuck)	Mage Chuck#2ac	4_M_JOB_WIZARD
-iz_ac02_a,148,110,3	duplicate(MageChuck)	Mage Chuck#2ac_a	4_M_JOB_WIZARD
-iz_ac02_b,148,110,3	duplicate(MageChuck)	Mage Chuck#2ac_b	4_M_JOB_WIZARD
-iz_ac02_c,148,110,3	duplicate(MageChuck)	Mage Chuck#2ac_c	4_M_JOB_WIZARD
-iz_ac02_d,148,110,3	duplicate(MageChuck)	Mage Chuck#2ac_d	4_M_JOB_WIZARD
+iz_ac02_a,148,110,3	duplicate(Mage Chuck#2ac)	Mage Chuck#2ac_a	4_M_JOB_WIZARD
+iz_ac02_b,148,110,3	duplicate(Mage Chuck#2ac)	Mage Chuck#2ac_b	4_M_JOB_WIZARD
+iz_ac02_c,148,110,3	duplicate(Mage Chuck#2ac)	Mage Chuck#2ac_c	4_M_JOB_WIZARD
+iz_ac02_d,148,110,3	duplicate(Mage Chuck#2ac)	Mage Chuck#2ac_d	4_M_JOB_WIZARD
 
-iz_ac02,98,140,5	duplicate(ac_board)	[Thief Classroom]#2ac	2_BULLETIN_BOARD
-iz_ac02_a,98,140,5	duplicate(ac_board)	[Thief Classroom]#2ac_a	2_BULLETIN_BOARD
-iz_ac02_b,98,140,5	duplicate(ac_board)	[Thief Classroom]#2ac_b	2_BULLETIN_BOARD
-iz_ac02_c,98,140,5	duplicate(ac_board)	[Thief Classroom]#2ac_c	2_BULLETIN_BOARD
-iz_ac02_d,98,140,5	duplicate(ac_board)	[Thief Classroom]#2ac_d	2_BULLETIN_BOARD
+iz_ac02,98,140,5	duplicate([Dispensary]#ac)	[Thief Classroom]#2ac	2_BULLETIN_BOARD
+iz_ac02_a,98,140,5	duplicate([Dispensary]#ac)	[Thief Classroom]#2ac_a	2_BULLETIN_BOARD
+iz_ac02_b,98,140,5	duplicate([Dispensary]#ac)	[Thief Classroom]#2ac_b	2_BULLETIN_BOARD
+iz_ac02_c,98,140,5	duplicate([Dispensary]#ac)	[Thief Classroom]#2ac_c	2_BULLETIN_BOARD
+iz_ac02_d,98,140,5	duplicate([Dispensary]#ac)	[Thief Classroom]#2ac_d	2_BULLETIN_BOARD
 
--	script	::LuminAcademy	-1,{
+iz_ac02,62,139,3	script	Lumin#2ac	4_M_NOV_RUMIN,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- Quest cannot be continued due to the overloaded inventory.";
 		mes "- Please try it again after organizing the items.";
@@ -10163,11 +10087,10 @@ OnInit:
 	end;
 }
 
-iz_ac02,62,139,3	duplicate(LuminAcademy)	Lumin#2ac	4_M_NOV_RUMIN
-iz_ac02_a,62,139,3	duplicate(LuminAcademy)	Lumin#2ac_a	4_M_NOV_RUMIN
-iz_ac02_b,62,139,3	duplicate(LuminAcademy)	Lumin#2ac_b	4_M_NOV_RUMIN
-iz_ac02_c,62,139,3	duplicate(LuminAcademy)	Lumin#2ac_c	4_M_NOV_RUMIN
-iz_ac02_d,62,139,3	duplicate(LuminAcademy)	Lumin#2ac_d	4_M_NOV_RUMIN
+iz_ac02_a,62,139,3	duplicate(Lumin#2ac)	Lumin#2ac_a	4_M_NOV_RUMIN
+iz_ac02_b,62,139,3	duplicate(Lumin#2ac)	Lumin#2ac_b	4_M_NOV_RUMIN
+iz_ac02_c,62,139,3	duplicate(Lumin#2ac)	Lumin#2ac_c	4_M_NOV_RUMIN
+iz_ac02_d,62,139,3	duplicate(Lumin#2ac)	Lumin#2ac_d	4_M_NOV_RUMIN
 
 -	script	tf_mobct#2ac	-1,{
 	end;
@@ -10635,7 +10558,7 @@ OnInit:
 	end;
 }
 
--	script	::GuestLecturerMayssel	-1,{
+iz_ac02,52,136,3	script	Guest Lecturer Mayssel#0	4_F_MAYSEL,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- Quest cannot be continued due to the overloaded inventory.";
 		mes "- Please try it again after organizing the items.";
@@ -11132,13 +11055,12 @@ OnInit:
 	end;
 }
 
-iz_ac02,52,136,3	duplicate(GuestLecturerMayssel)	Guest Lecturer Mayssel#0	4_F_MAYSEL
-iz_ac02_a,52,136,3	duplicate(GuestLecturerMayssel)	Guest Lecturer Mayssel#a	4_F_MAYSEL
-iz_ac02_b,52,136,3	duplicate(GuestLecturerMayssel)	Guest Lecturer Mayssel#b	4_F_MAYSEL
-iz_ac02_c,52,136,3	duplicate(GuestLecturerMayssel)	Guest Lecturer Mayssel#c	4_F_MAYSEL
-iz_ac02_d,52,136,3	duplicate(GuestLecturerMayssel)	Guest Lecturer Mayssel#d	4_F_MAYSEL
+iz_ac02_a,52,136,3	duplicate(Guest Lecturer Mayssel#0)	Guest Lecturer Mayssel#a	4_F_MAYSEL
+iz_ac02_b,52,136,3	duplicate(Guest Lecturer Mayssel#0)	Guest Lecturer Mayssel#b	4_F_MAYSEL
+iz_ac02_c,52,136,3	duplicate(Guest Lecturer Mayssel#0)	Guest Lecturer Mayssel#c	4_F_MAYSEL
+iz_ac02_d,52,136,3	duplicate(Guest Lecturer Mayssel#0)	Guest Lecturer Mayssel#d	4_F_MAYSEL
 
--	script	::Vicente	-1,{
+iz_ac02,49,134,5	script	Vicente#2ac	4_M_HUMAN_02,{
 	cutin "sc_vicente01",2;
 	if(isbegin_quest(4269) == 2) {
 		if(Class == Job_Novice) {
@@ -11521,14 +11443,13 @@ OnInit:
 	end;
 }
 
-iz_ac02,49,134,5	duplicate(Vicente)	Vicente#2ac	4_M_HUMAN_02
-iz_ac02_a,49,134,5	duplicate(Vicente)	Vicente#2ac_a	4_M_HUMAN_02
-iz_ac02_b,49,134,5	duplicate(Vicente)	Vicente#2ac_b	4_M_HUMAN_02
-iz_ac02_c,49,134,5	duplicate(Vicente)	Vicente#2ac_c	4_M_HUMAN_02
-iz_ac02_d,49,134,5	duplicate(Vicente)	Vicente#2ac_d	4_M_HUMAN_02
+iz_ac02_a,49,134,5	duplicate(Vicente#2ac)	Vicente#2ac_a	4_M_HUMAN_02
+iz_ac02_b,49,134,5	duplicate(Vicente#2ac)	Vicente#2ac_b	4_M_HUMAN_02
+iz_ac02_c,49,134,5	duplicate(Vicente#2ac)	Vicente#2ac_c	4_M_HUMAN_02
+iz_ac02_d,49,134,5	duplicate(Vicente#2ac)	Vicente#2ac_d	4_M_HUMAN_02
 
--	script	::Verkhasel	-1,{
-cutin "gc_verkhasel01",0;
+iz_ac02,55,134,3	script	Verkhasel#2ac	4_M_GUILLOTINE,{
+	cutin "gc_verkhasel01",0;
 	if(isbegin_quest(4269) == 2) {
 		if(Class == Job_Novice) {
 			if(!isbegin_quest(7480)) {
@@ -11881,19 +11802,18 @@ OnInit:
 	end;
 }
 
-iz_ac02,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac	4_M_GUILLOTINE
-iz_ac02_a,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_a	4_M_GUILLOTINE
-iz_ac02_b,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_b	4_M_GUILLOTINE
-iz_ac02_c,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_c	4_M_GUILLOTINE
-iz_ac02_d,55,134,3	duplicate(Verkhasel)	Verkhasel#2ac_d	4_M_GUILLOTINE
+iz_ac02_a,55,134,3	duplicate(Verkhasel#2ac)	Verkhasel#2ac_a	4_M_GUILLOTINE
+iz_ac02_b,55,134,3	duplicate(Verkhasel#2ac)	Verkhasel#2ac_b	4_M_GUILLOTINE
+iz_ac02_c,55,134,3	duplicate(Verkhasel#2ac)	Verkhasel#2ac_c	4_M_GUILLOTINE
+iz_ac02_d,55,134,3	duplicate(Verkhasel#2ac)	Verkhasel#2ac_d	4_M_GUILLOTINE
 
-iz_ac02,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac	2_BULLETIN_BOARD
-iz_ac02_a,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac_a	2_BULLETIN_BOARD
-iz_ac02_b,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac_b	2_BULLETIN_BOARD
-iz_ac02_c,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac_c	2_BULLETIN_BOARD
-iz_ac02_d,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac_d	2_BULLETIN_BOARD
+iz_ac02,109,140,3	duplicate([Dispensary]#ac)	[Ninja Classroom]#2ac	2_BULLETIN_BOARD
+iz_ac02_a,109,140,3	duplicate([Dispensary]#ac)	[Ninja Classroom]#2ac_a	2_BULLETIN_BOARD
+iz_ac02_b,109,140,3	duplicate([Dispensary]#ac)	[Ninja Classroom]#2ac_b	2_BULLETIN_BOARD
+iz_ac02_c,109,140,3	duplicate([Dispensary]#ac)	[Ninja Classroom]#2ac_c	2_BULLETIN_BOARD
+iz_ac02_d,109,140,3	duplicate([Dispensary]#ac)	[Ninja Classroom]#2ac_d	2_BULLETIN_BOARD
 
--	script	::NinjaGuide	-1,{
+iz_ac02,140,139,5	script	Ninja Guide#2ac	4_M_NINJA_BLUE,{
 	cutin "aca_ninja_k",2;
 	if(Class == Job_Novice) {
 		if(Upper == 2) {
@@ -12087,19 +12007,18 @@ iz_ac02_d,109,140,3	duplicate(ac_board)	[Ninja Classroom]#2ac_d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,140,139,5	duplicate(NinjaGuide)	Ninja Guide#2ac	4_M_NINJA_BLUE
-iz_ac02_a,140,139,5	duplicate(NinjaGuide)	Ninja Guide#2ac_a	4_M_NINJA_BLUE
-iz_ac02_b,140,139,5	duplicate(NinjaGuide)	Ninja Guide#2ac_b	4_M_NINJA_BLUE
-iz_ac02_c,140,139,5	duplicate(NinjaGuide)	Ninja Guide#2ac_c	4_M_NINJA_BLUE
-iz_ac02_d,140,139,5	duplicate(NinjaGuide)	Ninja Guide#2ac_d	4_M_NINJA_BLUE
+iz_ac02_a,140,139,5	duplicate(Ninja Guide#2ac)	Ninja Guide#2ac_a	4_M_NINJA_BLUE
+iz_ac02_b,140,139,5	duplicate(Ninja Guide#2ac)	Ninja Guide#2ac_b	4_M_NINJA_BLUE
+iz_ac02_c,140,139,5	duplicate(Ninja Guide#2ac)	Ninja Guide#2ac_c	4_M_NINJA_BLUE
+iz_ac02_d,140,139,5	duplicate(Ninja Guide#2ac)	Ninja Guide#2ac_d	4_M_NINJA_BLUE
 
-iz_ac02,98,170,5	duplicate(ac_board)	[Merchant Classroom]#2	2_BULLETIN_BOARD
-iz_ac02_a,98,170,5	duplicate(ac_board)	[Merchant Classroom]#2_a	2_BULLETIN_BOARD
-iz_ac02_b,98,170,5	duplicate(ac_board)	[Merchant Classroom]#2_b	2_BULLETIN_BOARD
-iz_ac02_c,98,170,5	duplicate(ac_board)	[Merchant Classroom]#2_c	2_BULLETIN_BOARD
-iz_ac02_d,98,170,5	duplicate(ac_board)	[Merchant Classroom]#2_d	2_BULLETIN_BOARD
+iz_ac02,98,170,5	duplicate([Dispensary]#ac)	[Merchant Classroom]#2	2_BULLETIN_BOARD
+iz_ac02_a,98,170,5	duplicate([Dispensary]#ac)	[Merchant Classroom]#2_a	2_BULLETIN_BOARD
+iz_ac02_b,98,170,5	duplicate([Dispensary]#ac)	[Merchant Classroom]#2_b	2_BULLETIN_BOARD
+iz_ac02_c,98,170,5	duplicate([Dispensary]#ac)	[Merchant Classroom]#2_c	2_BULLETIN_BOARD
+iz_ac02_d,98,170,5	duplicate([Dispensary]#ac)	[Merchant Classroom]#2_d	2_BULLETIN_BOARD
 
--	script	::StewardAydin	-1,{
+iz_ac02,53,171,3	script	Steward Aydin#2ac	4_M_MANAGER,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- As you are overloaded with so many items, quest can't be proceeded.";
 		close;
@@ -12213,13 +12132,12 @@ iz_ac02_d,98,170,5	duplicate(ac_board)	[Merchant Classroom]#2_d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,53,171,3	duplicate(StewardAydin)	Steward Aydin#2ac	4_M_MANAGER
-iz_ac02_a,53,171,3	duplicate(StewardAydin)	Steward Aydin#2ac_a	4_M_MANAGER
-iz_ac02_b,53,171,3	duplicate(StewardAydin)	Steward Aydin#2ac_b	4_M_MANAGER
-iz_ac02_c,53,171,3	duplicate(StewardAydin)	Steward Aydin#2ac_c	4_M_MANAGER
-iz_ac02_d,53,171,3	duplicate(StewardAydin)	Steward Aydin#2ac_d	4_M_MANAGER
+iz_ac02_a,53,171,3	duplicate(Steward Aydin#2ac)	Steward Aydin#2ac_a	4_M_MANAGER
+iz_ac02_b,53,171,3	duplicate(Steward Aydin#2ac)	Steward Aydin#2ac_b	4_M_MANAGER
+iz_ac02_c,53,171,3	duplicate(Steward Aydin#2ac)	Steward Aydin#2ac_c	4_M_MANAGER
+iz_ac02_d,53,171,3	duplicate(Steward Aydin#2ac)	Steward Aydin#2ac_d	4_M_MANAGER
 
--	script	::SalimHamid	-1,{
+iz_ac02,50,169,3	script	Salim Hamid#2ac	1_M_MERCHANT,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- As you are overloaded with so many items, quest can't be proceeded.";
 		close;
@@ -12627,15 +12545,14 @@ iz_ac02_d,53,171,3	duplicate(StewardAydin)	Steward Aydin#2ac_d	4_M_MANAGER
 	}
 }
 
-iz_ac02,50,169,3	duplicate(SalimHamid)	Salim Hamid#2ac	1_M_MERCHANT
-iz_ac02_a,50,169,3	duplicate(SalimHamid)	Salim Hamid#2ac_a	1_M_MERCHANT
-iz_ac02_b,50,169,3	duplicate(SalimHamid)	Salim Hamid#2ac_b	1_M_MERCHANT
-iz_ac02_c,50,169,3	duplicate(SalimHamid)	Salim Hamid#2ac_c	1_M_MERCHANT
-iz_ac02_d,50,169,3	duplicate(SalimHamid)	Salim Hamid#2ac_d	1_M_MERCHANT
+iz_ac02_a,50,169,3	duplicate(Salim Hamid#2ac)	Salim Hamid#2ac_a	1_M_MERCHANT
+iz_ac02_b,50,169,3	duplicate(Salim Hamid#2ac)	Salim Hamid#2ac_b	1_M_MERCHANT
+iz_ac02_c,50,169,3	duplicate(Salim Hamid#2ac)	Salim Hamid#2ac_c	1_M_MERCHANT
+iz_ac02_d,50,169,3	duplicate(Salim Hamid#2ac)	Salim Hamid#2ac_d	1_M_MERCHANT
 
 -	shop	shop_2ac	-1,910:-1,912:-1
 
--	script	::BrokenVendingMachine	-1,{
+iz_ac02,44,175,5	script	Broken Vending Machine#0	2_VENDING_MACHINE1,{
 	if(isbegin_quest(12306) == 1) {
 		callshop "shop_2ac",1;
 		npcshopattach "shop_2ac";
@@ -12666,19 +12583,18 @@ OnInit:
 	end;
 }
 
-iz_ac02,44,175,5	duplicate(BrokenVendingMachine)	Broken Vending Machine#0	2_VENDING_MACHINE1
-iz_ac02_a,44,175,5	duplicate(BrokenVendingMachine)	Broken Vending Machine#a	2_VENDING_MACHINE1
-iz_ac02_b,44,175,5	duplicate(BrokenVendingMachine)	Broken Vending Machine#b	2_VENDING_MACHINE1
-iz_ac02_c,44,175,5	duplicate(BrokenVendingMachine)	Broken Vending Machine#c	2_VENDING_MACHINE1
-iz_ac02_d,44,175,5	duplicate(BrokenVendingMachine)	Broken Vending Machine#d	2_VENDING_MACHINE1
+iz_ac02_a,44,175,5	duplicate(Broken Vending Machine#0)	Broken Vending Machine#a	2_VENDING_MACHINE1
+iz_ac02_b,44,175,5	duplicate(Broken Vending Machine#0)	Broken Vending Machine#b	2_VENDING_MACHINE1
+iz_ac02_c,44,175,5	duplicate(Broken Vending Machine#0)	Broken Vending Machine#c	2_VENDING_MACHINE1
+iz_ac02_d,44,175,5	duplicate(Broken Vending Machine#0)	Broken Vending Machine#d	2_VENDING_MACHINE1
 
-iz_ac02,109,170,3	duplicate(ac_board)	[Acolyte Classroom]#2	2_BULLETIN_BOARD
-iz_ac02_a,109,170,3	duplicate(ac_board)	[Acolyte Classroom]#2_a	2_BULLETIN_BOARD
-iz_ac02_b,109,170,3	duplicate(ac_board)	[Acolyte Classroom]#2_b	2_BULLETIN_BOARD
-iz_ac02_c,109,170,3	duplicate(ac_board)	[Acolyte Classroom]#2_c	2_BULLETIN_BOARD
-iz_ac02_d,109,170,3	duplicate(ac_board)	[Acolyte Classroom]#2_d	2_BULLETIN_BOARD
+iz_ac02,109,170,3	duplicate([Dispensary]#ac)	[Acolyte Classroom]#2	2_BULLETIN_BOARD
+iz_ac02_a,109,170,3	duplicate([Dispensary]#ac)	[Acolyte Classroom]#2_a	2_BULLETIN_BOARD
+iz_ac02_b,109,170,3	duplicate([Dispensary]#ac)	[Acolyte Classroom]#2_b	2_BULLETIN_BOARD
+iz_ac02_c,109,170,3	duplicate([Dispensary]#ac)	[Acolyte Classroom]#2_c	2_BULLETIN_BOARD
+iz_ac02_d,109,170,3	duplicate([Dispensary]#ac)	[Acolyte Classroom]#2_d	2_BULLETIN_BOARD
 
--	script	::aNun	-1,{
+iz_ac02,152,165,5	script	A Nun#2ac	4_F_SISTER,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
 		mes "- You have too many items.";
 		mes "- Clear inventory and try again.";
@@ -12730,13 +12646,12 @@ iz_ac02_d,109,170,3	duplicate(ac_board)	[Acolyte Classroom]#2_d	2_BULLETIN_BOARD
 	}
 }
 
-iz_ac02,152,165,5	duplicate(aNun)	A Nun#2ac	4_F_SISTER
-iz_ac02_a,152,165,5	duplicate(aNun)	A Nun#2ac_a	4_F_SISTER
-iz_ac02_b,152,165,5	duplicate(aNun)	A Nun#2ac_b	4_F_SISTER
-iz_ac02_c,152,165,5	duplicate(aNun)	A Nun#2ac_c	4_F_SISTER
-iz_ac02_d,152,165,5	duplicate(aNun)	A Nun#2ac_d	4_F_SISTER
+iz_ac02_a,152,165,5	duplicate(A Nun#2ac)	A Nun#2ac_a	4_F_SISTER
+iz_ac02_b,152,165,5	duplicate(A Nun#2ac)	A Nun#2ac_b	4_F_SISTER
+iz_ac02_c,152,165,5	duplicate(A Nun#2ac)	A Nun#2ac_c	4_F_SISTER
+iz_ac02_d,152,165,5	duplicate(A Nun#2ac)	A Nun#2ac_d	4_F_SISTER
 
--	script	::AcolyteLeaderAlice	-1,{
+iz_ac02,156,169,5	script	Acolyte Leader Alice#2	4_F_ACOLYTE,{
 	cutin "acact_01",2;
 	if(isbegin_quest(11343) == 2) {
 		mes "[Alcie Yisha]";
@@ -12913,25 +12828,24 @@ iz_ac02_d,152,165,5	duplicate(aNun)	A Nun#2ac_d	4_F_SISTER
 	}
 }
 
-iz_ac02,156,169,5	duplicate(AcolyteLeaderAlice)	Acolyte Leader Alice#2	4_F_ACOLYTE
-iz_ac02_a,156,169,5	duplicate(AcolyteLeaderAlice)	Acolyte Leader Alice#2_a	4_F_ACOLYTE
-iz_ac02_b,156,169,5	duplicate(AcolyteLeaderAlice)	Acolyte Leader Alice#2_b	4_F_ACOLYTE
-iz_ac02_c,156,169,5	duplicate(AcolyteLeaderAlice)	Acolyte Leader Alice#2_c	4_F_ACOLYTE
-iz_ac02_d,156,169,5	duplicate(AcolyteLeaderAlice)	Acolyte Leader Alice#2_d	4_F_ACOLYTE
+iz_ac02_a,156,169,5	duplicate(Acolyte Leader Alice#2)	Acolyte Leader Alice#2_a	4_F_ACOLYTE
+iz_ac02_b,156,169,5	duplicate(Acolyte Leader Alice#2)	Acolyte Leader Alice#2_b	4_F_ACOLYTE
+iz_ac02_c,156,169,5	duplicate(Acolyte Leader Alice#2)	Acolyte Leader Alice#2_c	4_F_ACOLYTE
+iz_ac02_d,156,169,5	duplicate(Acolyte Leader Alice#2)	Acolyte Leader Alice#2_d	4_F_ACOLYTE
 
-iz_ac02,101,176,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#02	4_F_KAFRA1
-iz_ac02_a,101,176,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#02_a	4_F_KAFRA1
-iz_ac02_b,101,176,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#02_b	4_F_KAFRA1
-iz_ac02_c,101,176,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#02_c	4_F_KAFRA1
-iz_ac02_d,101,176,5	duplicate(KafraGuideTrainer)	Kafra Guide Trainer#02_d	4_F_KAFRA1
+iz_ac02,101,176,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#02	4_F_KAFRA1
+iz_ac02_a,101,176,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#02_a	4_F_KAFRA1
+iz_ac02_b,101,176,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#02_b	4_F_KAFRA1
+iz_ac02_c,101,176,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#02_c	4_F_KAFRA1
+iz_ac02_d,101,176,5	duplicate(Kafra Guide Trainer#ac)	Kafra Guide Trainer#02_d	4_F_KAFRA1
 
-iz_ac02,107,180,3	duplicate(ac_board)	[Principal Office]#2ac	2_BULLETIN_BOARD
-iz_ac02_a,107,180,3	duplicate(ac_board)	[Principal Office]#2ac_a	2_BULLETIN_BOARD
-iz_ac02_b,107,180,3	duplicate(ac_board)	[Principal Office]#2ac_b	2_BULLETIN_BOARD
-iz_ac02_c,107,180,3	duplicate(ac_board)	[Principal Office]#2ac_c	2_BULLETIN_BOARD
-iz_ac02_d,107,180,3	duplicate(ac_board)	[Principal Office]#2ac_d	2_BULLETIN_BOARD
+iz_ac02,107,180,3	duplicate([Dispensary]#ac)	[Principal Office]#2ac	2_BULLETIN_BOARD
+iz_ac02_a,107,180,3	duplicate([Dispensary]#ac)	[Principal Office]#2ac_a	2_BULLETIN_BOARD
+iz_ac02_b,107,180,3	duplicate([Dispensary]#ac)	[Principal Office]#2ac_b	2_BULLETIN_BOARD
+iz_ac02_c,107,180,3	duplicate([Dispensary]#ac)	[Principal Office]#2ac_c	2_BULLETIN_BOARD
+iz_ac02_d,107,180,3	duplicate([Dispensary]#ac)	[Principal Office]#2ac_d	2_BULLETIN_BOARD
 
--	script	::AcademyPrincipal	-1,{
+iz_ac02,103,209,3	script	Academy Principal#2ac	4_F_MADAME,{
 	if(isbegin_quest(110) == 1) {
 		mes "[Academy Principal]";
 		mes "Welcome "+strcharinfo(0)+".";
@@ -12958,17 +12872,16 @@ iz_ac02_d,107,180,3	duplicate(ac_board)	[Principal Office]#2ac_d	2_BULLETIN_BOAR
 	close;
 }
 
-iz_ac02,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac	4_F_MADAME
-iz_ac02_a,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_a	4_F_MADAME
-iz_ac02_b,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_b	4_F_MADAME
-iz_ac02_c,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_c	4_F_MADAME
-iz_ac02_d,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_d	4_F_MADAME
+iz_ac02_a,103,209,3	duplicate(Academy Principal#2ac)	Academy Principal#2ac_a	4_F_MADAME
+iz_ac02_b,103,209,3	duplicate(Academy Principal#2ac)	Academy Principal#2ac_b	4_F_MADAME
+iz_ac02_c,103,209,3	duplicate(Academy Principal#2ac)	Academy Principal#2ac_c	4_F_MADAME
+iz_ac02_d,103,209,3	duplicate(Academy Principal#2ac)	Academy Principal#2ac_d	4_F_MADAME
 
 // =============================================================================
 // = Old Novice Training Grounds
 // = These NPCs will teleport any stuck player to the new starting area.
 // =============================================================================
--	script	::TrainingInstructor	4_F_03,{
+new_1-1,53,114,3	script	Training Instructor#1a	4_F_03,{
 	mes "[Training Instructor]";
 	mes "The training grounds have been revised.";
 	mes "I will send you to Izlude.";
@@ -12991,37 +12904,36 @@ iz_ac02_d,103,209,3	duplicate(AcademyPrincipal)	Academy Principal#2ac_d	4_F_MADA
 	end;
 }
 
-new_1-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#1a	4_F_03
-new_1-2,100,29,4	duplicate(TrainingInstructor)	Training Instructor#1b	4_F_03
-new_1-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#1c	4_F_03
-new_1-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#1d	4_F_03
-new_1-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#1e	4_F_03
-new_1-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#1f	4_F_03
-new_2-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#2a	4_F_03
-new_2-2,100,29,4	duplicate(TrainingInstructor)	Training Instructor#2b	4_F_03
-new_2-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#2c	4_F_03
-new_2-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#2d	4_F_03
-new_2-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#2e	4_F_03
-new_2-3,96,30,4	duplicate(TrainingInstructor)	Training Instructor#2f	4_F_03
-new_2-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#2g	4_F_03
-new_3-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#3a	4_F_03
-new_3-2,100,29,4	duplicate(TrainingInstructor)	Training Instructor#3b	4_F_03
-new_3-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#3c	4_F_03
-new_3-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#3d	4_F_03
-new_3-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#3e	4_F_03
-new_3-3,96,30,4	duplicate(TrainingInstructor)	Training Instructor#3f	4_F_03
-new_3-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#3g	4_F_03
-new_4-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#4a	4_F_03
-new_4-2,53,114,3	duplicate(TrainingInstructor)	Training Instructor#4b	4_F_03
-new_4-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#4c	4_F_03
-new_4-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#4d	4_F_03
-new_4-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#4e	4_F_03
-new_4-3,96,30,4	duplicate(TrainingInstructor)	Training Instructor#4f	4_F_03
-new_4-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#4g	4_F_03
-new_5-1,53,114,3	duplicate(TrainingInstructor)	Training Instructor#5a	4_F_03
-new_5-2,100,29,4	duplicate(TrainingInstructor)	Training Instructor#5b	4_F_03
-new_5-2,100,105,3	duplicate(TrainingInstructor)	Training Instructor#5c	4_F_03
-new_5-2,161,182,5	duplicate(TrainingInstructor)	Training Instructor#5d	4_F_03
-new_5-2,33,172,4	duplicate(TrainingInstructor)	Training Instructor#5e	4_F_03
-new_5-3,96,30,4	duplicate(TrainingInstructor)	Training Instructor#5f	4_F_03
-new_5-4,100,29,1	duplicate(TrainingInstructor)	Training Instructor#5g	4_F_03
+new_1-2,100,29,4	duplicate(Training Instructor#1a)	Training Instructor#1b	4_F_03
+new_1-2,100,105,3	duplicate(Training Instructor#1a)	Training Instructor#1c	4_F_03
+new_1-2,161,182,5	duplicate(Training Instructor#1a)	Training Instructor#1d	4_F_03
+new_1-2,33,172,4	duplicate(Training Instructor#1a)	Training Instructor#1e	4_F_03
+new_1-4,100,29,1	duplicate(Training Instructor#1a)	Training Instructor#1f	4_F_03
+new_2-1,53,114,3	duplicate(Training Instructor#1a)	Training Instructor#2a	4_F_03
+new_2-2,100,29,4	duplicate(Training Instructor#1a)	Training Instructor#2b	4_F_03
+new_2-2,100,105,3	duplicate(Training Instructor#1a)	Training Instructor#2c	4_F_03
+new_2-2,161,182,5	duplicate(Training Instructor#1a)	Training Instructor#2d	4_F_03
+new_2-2,33,172,4	duplicate(Training Instructor#1a)	Training Instructor#2e	4_F_03
+new_2-3,96,30,4	duplicate(Training Instructor#1a)	Training Instructor#2f	4_F_03
+new_2-4,100,29,1	duplicate(Training Instructor#1a)	Training Instructor#2g	4_F_03
+new_3-1,53,114,3	duplicate(Training Instructor#1a)	Training Instructor#3a	4_F_03
+new_3-2,100,29,4	duplicate(Training Instructor#1a)	Training Instructor#3b	4_F_03
+new_3-2,100,105,3	duplicate(Training Instructor#1a)	Training Instructor#3c	4_F_03
+new_3-2,161,182,5	duplicate(Training Instructor#1a)	Training Instructor#3d	4_F_03
+new_3-2,33,172,4	duplicate(Training Instructor#1a)	Training Instructor#3e	4_F_03
+new_3-3,96,30,4	duplicate(Training Instructor#1a)	Training Instructor#3f	4_F_03
+new_3-4,100,29,1	duplicate(Training Instructor#1a)	Training Instructor#3g	4_F_03
+new_4-1,53,114,3	duplicate(Training Instructor#1a)	Training Instructor#4a	4_F_03
+new_4-2,53,114,3	duplicate(Training Instructor#1a)	Training Instructor#4b	4_F_03
+new_4-2,100,105,3	duplicate(Training Instructor#1a)	Training Instructor#4c	4_F_03
+new_4-2,161,182,5	duplicate(Training Instructor#1a)	Training Instructor#4d	4_F_03
+new_4-2,33,172,4	duplicate(Training Instructor#1a)	Training Instructor#4e	4_F_03
+new_4-3,96,30,4	duplicate(Training Instructor#1a)	Training Instructor#4f	4_F_03
+new_4-4,100,29,1	duplicate(Training Instructor#1a)	Training Instructor#4g	4_F_03
+new_5-1,53,114,3	duplicate(Training Instructor#1a)	Training Instructor#5a	4_F_03
+new_5-2,100,29,4	duplicate(Training Instructor#1a)	Training Instructor#5b	4_F_03
+new_5-2,100,105,3	duplicate(Training Instructor#1a)	Training Instructor#5c	4_F_03
+new_5-2,161,182,5	duplicate(Training Instructor#1a)	Training Instructor#5d	4_F_03
+new_5-2,33,172,4	duplicate(Training Instructor#1a)	Training Instructor#5e	4_F_03
+new_5-3,96,30,4	duplicate(Training Instructor#1a)	Training Instructor#5f	4_F_03
+new_5-4,100,29,1	duplicate(Training Instructor#1a)	Training Instructor#5g	4_F_03
