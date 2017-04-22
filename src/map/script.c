@@ -3634,7 +3634,8 @@ void script_stop_sleeptimers(int id)
 
 		if( !st )
 			break; //No more sleep timers
-		script_free_state(st);
+		if( st->oid == id )
+			script_free_state(st);
 	}
 }
 
@@ -17571,7 +17572,7 @@ BUILDIN_FUNC(awake)
 				node = node->next;
 				continue;
 			}
-			delete_timer(tst->sleep.timer,run_script_timer);
+			delete_timer(tst->sleep.timer, run_script_timer);
 			node = script_erase_sleepdb(node);
 			run_script_timer(INVALID_TIMER, gettick(), tst->sleep.charid, (intptr_t)tst);
 		} else
