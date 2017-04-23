@@ -1401,6 +1401,15 @@
 	export_constant(SC_GEFFEN_MAGIC3);
 	export_constant(SC_FENRIR_CARD);
 	export_constant(SC_RAY_OF_PROTECTION);
+	export_constant(SC_GVG_GIANT);
+	export_constant(SC_GVG_GOLEM);
+	export_constant(SC_GVG_STUN);
+	export_constant(SC_GVG_STONE);
+	export_constant(SC_GVG_FREEZ);
+	export_constant(SC_GVG_SLEEP);
+	export_constant(SC_GVG_CURSE);
+	export_constant(SC_GVG_SILENCE);
+	export_constant(SC_GVG_BLIND);
 
 	/* Status icons */
 	export_constant(SI_BLANK);

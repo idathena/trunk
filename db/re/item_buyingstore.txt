@@ -743,7 +743,7 @@
 22699	// Test_Reagent
 22679	// Chest_Of_Death
 22687	// Pieces_Of_Sentiment
-//6615
+6615	// Siege_Guild_Coin
 //--- 2013 / 08 / 02
 6750	// Failed_Engine
 6751	// Crushed_Can_Iron_Plate

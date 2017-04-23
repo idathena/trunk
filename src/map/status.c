@@ -1061,6 +1061,15 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_CROSSBOWCLAN] = SI_CROSSBOWCLAN;
 	StatusIconChangeTable[SC_JUMPINGCLAN] = SI_JUMPINGCLAN;
 	StatusIconChangeTable[SC_RAY_OF_PROTECTION] = SI_RAY_OF_PROTECTION;
+	StatusIconChangeTable[SC_GVG_GIANT] = SI_GVG_GIANT;
+	StatusIconChangeTable[SC_GVG_GOLEM] = SI_GVG_GOLEM;
+	StatusIconChangeTable[SC_GVG_STUN] = SI_GVG_STUN;
+	StatusIconChangeTable[SC_GVG_STONE] = SI_GVG_STONE;
+	StatusIconChangeTable[SC_GVG_FREEZ] = SI_GVG_FREEZ;
+	StatusIconChangeTable[SC_GVG_SLEEP] = SI_GVG_SLEEP;
+	StatusIconChangeTable[SC_GVG_CURSE] = SI_GVG_CURSE;
+	StatusIconChangeTable[SC_GVG_SILENCE] = SI_GVG_SILENCE;
+	StatusIconChangeTable[SC_GVG_BLIND] = SI_GVG_BLIND;
 
 	//Other SC which are not necessarily associated to skills
 	StatusChangeFlagTable[SC_ASPDPOTION0] |= SCB_ASPD;
@@ -3910,6 +3919,27 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			sd->magic_addrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC2]->val1;
 		if (sc->data[SC_GEFFEN_MAGIC3])
 			sd->subrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC3]->val1;
+		if (sc->data[SC_GVG_GIANT]) {
+			sd->right_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GIANT]->val3;
+			sd->left_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GIANT]->val3;
+			sd->magic_addrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GIANT]->val3;
+		}
+		if (sc->data[SC_GVG_GOLEM])
+			sd->subrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GOLEM]->val3;
+		if (sc->data[SC_GVG_STUN])
+			sd->reseff[SC_STUN] = 10000;
+		if (sc->data[SC_GVG_STONE])
+			sd->reseff[SC_STONE] = 10000;
+		if (sc->data[SC_GVG_FREEZ])
+			sd->reseff[SC_FREEZE] = 10000;
+		if (sc->data[SC_GVG_SLEEP])
+			sd->reseff[SC_SLEEP] = 10000;
+		if (sc->data[SC_GVG_CURSE])
+			sd->reseff[SC_CURSE] = 10000;
+		if (sc->data[SC_GVG_SILENCE])
+			sd->reseff[SC_SILENCE] = 10000;
+		if (sc->data[SC_GVG_BLIND])
+			sd->reseff[SC_BLIND] = 10000;
 	}
 	status_cpy(&sd->battle_status,status);
 
@@ -10796,6 +10826,18 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_C_MARKER:
 			if (src && src->type == BL_PC && (sd = map_id2sd(src->id)))
 				clif_crimson_marker(sd,bl,0); //Send mini-map, don't wait for first timer triggered
+			break;
+		case SC_GVG_GIANT:
+		case SC_GVG_GOLEM:
+		case SC_GVG_STUN:
+		case SC_GVG_STONE:
+		case SC_GVG_FREEZ:
+		case SC_GVG_SLEEP:
+		case SC_GVG_CURSE:
+		case SC_GVG_SILENCE:
+		case SC_GVG_BLIND:
+			if (val1 || val2)
+				status_zap(bl,(val1 ? val1 : 0),(val2 ? val2 : 0));
 			break;
 	}
 

@@ -4540,6 +4540,7 @@
 6611,Colorful_Key,Colorful Key,3,50000,,10,,,,,,,,,,,,,{},{},{}
 6612,Gold_Coin_Basket,Gold Coin Basket,3,300000,,200,,,,,,,,,,,,,{},{},{}
 6613,Colorful_Brooch,Colorful_Brooch,3,100000,,10,,,,,,,,,,,,,{},{},{}
+6615,Siege_Guild_Coin,Siege Guild Coin,3,0,,10,,,,,,,,,,,,,{},{},{}
 6616,Lmtd_Manny_Card,Lmtd Manny Card,3,20,,10,,,,,,,,,,,,,{},{},{}
 6617,Lmtd_Sid_Card,Lmtd Sid Card,3,20,,10,,,,,,,,,,,,,{},{},{}
 6618,Lmtd_Diego_Card,Lmtd Diego Card,3,20,,10,,,,,,,,,,,,,{},{},{}
@@ -6903,6 +6904,15 @@
 12869,GLAST_ITEMDEF,GLAST_ITEMDEF,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bDef,200; bonus bMdef,50; }",30,1,0,SI_GLASTHEIM_ITEMDEF; },{},{}
 12870,GLAST_HPSP,GLAST_HPSP,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bMaxHP,10000; bonus bMaxSP,1000; }",30,1,0,SI_GLASTHEIM_HPSP; },{},{}
 12873,TE_Potion_Box,TE Potion Box,18,0,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 11558,10; },{},{}
+12874,Frost_Giant_Blood,Frost Giant Blood,2,0,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_POTION_CON; sc_start4 SC_GVG_GIANT,10000,3000,0,100,0; },{},{}
+12875,Golem_Stone,Golem Stone,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_POTION_CON; sc_start4 SC_GVG_GOLEM,10000,0,200,50,0; },{},{}
+12876,Elf_Tear_Stun,Elf Tear Stun,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_STUN,10000,3000,0; },{},{}
+12877,Elf_Tear_Stone_Curse,Elf Tear Stone Curse,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_STONE,10000,3000,0; },{},{}
+12878,Elf_Tear_Freezing,Elf Tear Freezing,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_FREEZ,10000,3000,0; },{},{}
+12879,Elf_Tear_Sleep,Elf Tear Sleep,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_SLEEP,10000,3000,0; },{},{}
+12880,Elf_Tear_Curse,Elf Tear Curse,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_CURSE,10000,3000,0; },{},{}
+12881,Elf_Tear_Silence,Elf Tear Silence,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_SILENCE,10000,3000,0; },{},{}
+12882,Elf_Tear_Blind,Elf Tear Blind,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_BLIND,10000,3000,0; },{},{}
 12883,Almighty,Almighty,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_BASH3D; sc_start SC_ALMIGHTY,1800000,10; },{},{}
 12884,C_Center_Potion,Infinite Concentration Potion,11,10,,0,,,,0,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_ASPDPOTION0,1800000,4; },{},{}
 12885,C_Awakening_Potion,Infinite Awakening Potion,11,10,,0,,,,0,0xFFF7FEEF,63,2,,,,,,{ sc_start SC_ASPDPOTION1,1800000,6; },{},{}

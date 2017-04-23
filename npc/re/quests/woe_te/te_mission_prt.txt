@@ -44,4 +44,4 @@ te_prtcas05,2,3,0	duplicate(pop_mission_TE)	#popb_prt05	CLEAR_NPC
 te_prtcas05,2,3,0	duplicate(pop_mission_TE)	#popc_prt05	CLEAR_NPC
 te_prtcas05,2,3,0	duplicate(pop_mission_TE)	#popd_prt05	CLEAR_NPC
 
-te_prt_gld,125,149,3	duplicate(Training_Instructor_TE)	Gloria Instructor#tem01	4_M_HUMAN_02
+te_prt_gld,125,149,3	duplicate(Training_Instructor_TE)	Gloria TE Instructor::tem01	4_M_HUMAN_02

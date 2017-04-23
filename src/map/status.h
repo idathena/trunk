@@ -764,6 +764,15 @@ typedef enum sc_type {
 	SC_GEFFEN_MAGIC3,
 	SC_FENRIR_CARD,
 	SC_RAY_OF_PROTECTION,
+	SC_GVG_GIANT,
+	SC_GVG_GOLEM,
+	SC_GVG_STUN,
+	SC_GVG_STONE,
+	SC_GVG_FREEZ,
+	SC_GVG_SLEEP,
+	SC_GVG_CURSE,
+	SC_GVG_SILENCE,
+	SC_GVG_BLIND,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

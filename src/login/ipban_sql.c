@@ -215,6 +215,7 @@ void ipban_log(uint32 ip)
 	// If over the limit, add a temporary ban entry
 	if( failures >= login_config.dynamic_pass_failure_ban_limit ) {
 		uint8 *p = (uint8 *)&ip;
+
 		if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s`(`list`,`btime`,`rtime`,`reason`) VALUES ('%u.%u.%u.*', NOW() , NOW() +  INTERVAL %d MINUTE ,'Password error ban')",
 			ipban_table, p[3], p[2], p[1], login_config.dynamic_pass_failure_ban_duration) )
 			Sql_ShowDebug(sql_handle);
