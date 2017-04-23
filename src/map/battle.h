@@ -113,7 +113,7 @@ struct block_list *battle_get_master(struct block_list *src);
 struct block_list *battle_gettargeted(struct block_list *target);
 struct block_list *battle_getenemy(struct block_list *target, int type, int range);
 int battle_gettarget(struct block_list *bl);
-int battle_getcurrentskill(struct block_list *bl);
+uint16 battle_getcurrentskill(struct block_list *bl);
 
 #define	is_boss(bl)	(status_get_class_(bl) == CLASS_BOSS) //Can refine later [Aru]
 
@@ -579,7 +579,6 @@ extern struct Battle_Config
 	int fame_pharmacy_7;
 	int fame_pharmacy_10;
 
-	int disp_serverbank_msg;
 	int disp_servervip_msg;
 	int warg_can_falcon;
 	int path_blown_halt;
@@ -644,7 +643,6 @@ extern struct Battle_Config
 void do_init_battle(void);
 void do_final_battle(void);
 extern int battle_config_read(const char *cfgName);
-extern void battle_validate_conf(void);
 extern void battle_set_defaults(void);
 int battle_set_value(const char *w1, const char *w2);
 int battle_get_value(const char *w1);

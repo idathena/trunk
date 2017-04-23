@@ -7827,9 +7827,13 @@ BUILDIN_FUNC(getequipweaponlv)
 	}
 
 	num = script_getnum(st,2);
-	if(num == -1)
+	if(num == -1) {
+		if(current_equip_item_index == -1) {
+			script_pushint(st,0);
+			return 1;
+		}
 		i = current_equip_item_index;
-	else if(equip_index_check(num))
+	} else if(equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0 && sd->inventory_data[i])
 		script_pushint(st,sd->inventory_data[i]->wlv);
@@ -11983,7 +11987,7 @@ BUILDIN_FUNC(getcastledata)
 
 	if (gc == NULL) {
 		script_pushint(st,0);
-		ShowWarning("buildin_setcastledata: guild castle for map '%s' not found\n", mapname);
+		ShowWarning("buildin_getcastledata: guild castle for map '%s' not found\n", mapname);
 		return 1;
 	}
 
@@ -12012,7 +12016,7 @@ BUILDIN_FUNC(getcastledata)
 				break;
 			}
 			script_pushint(st,0);
-			ShowWarning("buildin_setcastledata: index = '%d' is out of allowed range\n", index);
+			ShowWarning("buildin_getcastledata: index = '%d' is out of allowed range\n", index);
 			return 1;
 	}
 	return SCRIPT_CMD_SUCCESS;
@@ -14555,10 +14559,14 @@ BUILDIN_FUNC(getrefine)
 {
 	TBL_PC *sd = script_rid2sd(st);
 
-	if (sd == NULL)
-		return 1;
-
-	script_pushint(st,sd->status.inventory[current_equip_item_index].refine);
+	if (sd) {
+		if (current_equip_item_index == -1) {
+			script_pushint(st,0);
+			return 1;
+		}
+		script_pushint(st,sd->status.inventory[current_equip_item_index].refine);
+	} else
+		script_pushint(st,0);
 	return SCRIPT_CMD_SUCCESS;
 }
 

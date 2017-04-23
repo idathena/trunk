@@ -84,6 +84,128 @@
 20307,8	//C_Beginner_Cap
 
 //----------------------------------------------------------------------------
+// CANNOT be consumed/equipped in WoE:TE Castles (16)
+//----------------------------------------------------------------------------
+// Krieger Gear
+1187,16	//Krieger_Twohand_Sword1
+1281,16	//Krieger_Katar1
+1282,16	//Krieger_Katar2
+1310,16	//Krieger_Onehand_Axe1
+1382,16	//Krieger_Twohand_Axe1
+1426,16	//Krieger_Onehand_Spear1
+1486,16	//Krieger_Twohand_Spear1
+1546,16	//Krieger_Onehand_Mace1
+1576,16	//Krieger_Book1
+1577,16	//Krieger_Book2
+1640,16	//Krieger_Onehand_Staff1
+1641,16	//Krieger_Onehand_Staff2
+1743,16	//Krieger_Bow1
+1826,16	//Krieger_Knuckle1
+1827,16	//Krieger_Knuckle2
+1927,16	//Krieger_Instrument1
+1981,16	//Krieger_Whip1
+2002,16	//Krieger_Twohand_Staff1
+2394,16	//Krieger_Suit1
+2395,16	//Krieger_Suit2
+2396,16	//Krieger_Suit3
+2444,16	//Krieger_Shoes1
+2445,16	//Krieger_Shoes2
+2446,16	//Krieger_Shoes3
+2549,16	//Krieger_Muffler1
+2772,16	//Krieger_Ring1
+2773,16	//Krieger_Ring2
+2774,16	//Krieger_Ring3
+13042,16	//Krieger_Dagger1
+13110,16	//Krieger_Pistol1
+13176,16	//Krieger_Rifle1
+13177,16	//Krieger_Gatling1
+13178,16	//Krieger_Shotgun1
+13179,16	//Krieger_Launcher1
+13307,16	//Krieger_Huuma_Shuriken1
+13416,16	//Krieger_Onehand_Sword1
+13417,16	//Krieger_Onehand_Sword2
+13418,16	//Krieger_Onehand_Sword3
+
+// Vellum Gear
+1293,16	//Velum_Jamadhar
+1294,16	//Velum_Scare
+1395,16	//Velum_Buster
+1396,16	//Velum_Guillotine
+1436,16	//Velum_Spear
+1492,16	//Velum_Glaive
+1586,16	//Velum_Bible
+1587,16	//Velum_Encyclopedia
+1832,16	//Velum_Claw
+2016,16	//Velum_Arc_Wand
+13072,16	//Velum_Damascus
+16020,16	//Velum_Stunner
+16021,16	//Velum_Flail
+18113,16	//Velum_Arbalest
+18114,16	//Velum_CrossBow
+21001,16	//Velum_Claymore
+21002,16	//Velum_Katzbalger
+
+// Siege Gear
+1775,16	//Siege_Arrow_A
+1776,16	//Siege_Arrow_S
+2483,16	//Siege_Greave
+2484,16	//Siege_Boots
+2485,16	//Siege_Shoes
+2586,16	//Siege_Manteau
+2587,16	//Siege_Muffler
+15046,16	//Siege_Plate
+15047,16	//Siege_Suits
+15048,16	//Siege_Robe
+
+// God Items
+1530,16	//Mjolnir
+2383,16	//Brynhild
+2410,16	//Sleipnir
+2541,16	//Asprika
+2629,16	//Magingiorde
+2630,16	//Brysinggamen
+
+// Misc
+605,16	//Anodyne
+2365,16	//Orleans_Gown
+4077,16	//Phen_Card
+4128,16	//Golden_Bug_Card
+4198,16	//Maya_Puple_Card
+4327,16	//Blood_Butterfly_Card
+11503,16	//Siege_White_Potion
+11504,16	//Siege_Blue_Potion
+11547,16	//Woe_Violet_Potion
+11548,16	//Woe_White_Potion
+11549,16	//Woe_Blue_Potion
+12033,16	//Box_Of_Sunlight
+12213,16	//Neuralizer
+12218,16	//Assumptio_5_Scroll
+12388,16	//Runstone_Crush
+12389,16	//Runstone_Storm
+12390,16	//Runstone_Millennium
+12422,16	//HP_Increase_PotionS
+12423,16	//HP_Increase_PotionM
+12424,16	//HP_Increase_PotionL
+12425,16	//SP_Increase_PotionS
+12426,16	//SP_Increase_PotionM
+12427,16	//SP_Increase_PotionL
+12428,16	//Enrich_White_PotionZ
+12429,16	//Savage_BBQ
+12430,16	//Wug_Blood_Cocktail
+12431,16	//Minor_Brisket
+12432,16	//Siroma_Icetea
+12433,16	//Drocera_Herb_Stew
+12434,16	//Petti_Tail_Noodle
+12435,16	//Black_Thing
+12436,16	//Vitata500
+12437,16	//Enrich_Celermine_Juice
+12580,16	//Vending_Search_Scroll
+12581,16	//Vending_Search_Scroll2
+12591,16	//Uni_Catalog_Bz
+12600,16	//Treasure_Box_Scroll
+14590,16	//Pty_Assumptio_Scroll
+
+//----------------------------------------------------------------------------
 // Zone 1 - Aldebaran Turbo Track
 //----------------------------------------------------------------------------
 601,32	//Wing_Of_Fly

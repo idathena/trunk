@@ -41,7 +41,7 @@ int64 battle_damage_temp[2];
 struct Battle_Config battle_config;
 static struct eri *delay_damage_ers; //For battle delay damage structures
 
-int battle_getcurrentskill(struct block_list *bl) { //Returns the current/last skill in use by this bl
+uint16 battle_getcurrentskill(struct block_list *bl) { //Returns the current/last skill in use by this bl
 	struct unit_data *ud;
 
 	if( bl->type == BL_SKILL ) {
@@ -4346,6 +4346,7 @@ static int64 battle_calc_skill_constant_addition(struct Damage wd,struct block_l
 struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv)
 {
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
+	struct map_session_data *tsd = BL_CAST(BL_PC, target);
 	struct status_change *sc = status_get_sc(src);
 	struct status_data *sstatus = status_get_status_data(src);
 	struct status_data *tstatus = status_get_status_data(target);
@@ -8444,7 +8445,6 @@ static const struct _battle_data {
 	{ "feature.autotrade_sit",              &battle_config.feature_autotrade_sit,           1,      -1,     1,              },
 	{ "feature.autotrade_open_delay",       &battle_config.feature_autotrade_open_delay,    5000,   1000,   INT_MAX,        },
 	{ "feature.autotrade_move",             &battle_config.feature_autotrade_move,          0,      0,      1,              },
-	{ "disp_serverbank_msg",                &battle_config.disp_serverbank_msg,             0,      0,      1,              },
 	{ "disp_servervip_msg",                 &battle_config.disp_servervip_msg,              0,      0,      1,              },
 	{ "warg_can_falcon",                    &battle_config.warg_can_falcon,                 0,      0,      1,              },
 	{ "path_blown_halt",                    &battle_config.path_blown_halt,                 1,      0,      1,              },
