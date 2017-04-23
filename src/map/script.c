@@ -17572,9 +17572,27 @@ BUILDIN_FUNC(awake)
 				node = node->next;
 				continue;
 			}
+			if( tst->sleep.charid && tst->rid ) {
+				struct map_session_data *sd = map_id2sd(tst->rid);
+
+				if( !sd ) {
+					ShowWarning("Script sleep timer called by an offline character or non player unit.\n");
+					script_reportsrc(tst);
+					tst->rid = 0;
+					tst->state = END;
+				} else if( sd->status.char_id != tst->sleep.charid ) {
+					ShowWarning("Script sleep timer detected a character mismatch CID %d != %d\n", sd->status.char_id, tst->sleep.charid);
+					script_reportsrc(tst);
+					tst->rid = 0;
+					tst->state = END;
+				}
+			}
 			delete_timer(tst->sleep.timer, run_script_timer);
 			node = script_erase_sleepdb(node);
-			run_script_timer(INVALID_TIMER, gettick(), tst->sleep.charid, (intptr_t)tst);
+			tst->sleep.timer = INVALID_TIMER;
+			if( tst->state != RERUNLINE )
+				tst->sleep.tick = 0;
+			run_script_main(tst);
 		} else
 			node = node->next;
 	}
