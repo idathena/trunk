@@ -4637,9 +4637,6 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 	if( !itemdb_is_item_usable(item) ) //Not consumable item
 		return false;
 
-	if( !item->script ) //If it has no script, you can't really consume it!
-		return false;
-
 	if( pc_has_permission(sd,PC_PERM_ITEM_UNCONDITIONAL) )
 		return true;
 
