@@ -17697,21 +17697,18 @@ bool skill_check_shadowform(struct block_list *bl, uint16 skill_id, int64 damage
 
 	nullpo_retr(false, bl);
 
-	if( !damage )
-		return false;
-
 	sc = status_get_sc(bl);
 
-	if( sc && sc->data[SC__SHADOWFORM] && skill_id != PA_PRESSURE && skill_id != HW_GRAVITATION && skill_id != NPC_EVILLAND ) {
+	if( sc && sc->data[SC__SHADOWFORM] && damage &&
+		skill_id != PA_PRESSURE && skill_id != HW_GRAVITATION && skill_id != NPC_EVILLAND ) {
 		struct block_list *src = map_id2bl(sc->data[SC__SHADOWFORM]->val2);
 
 		if( !src || src->m != bl->m || status_isdead(src) ) {
 			status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 			return false;
 		}
-		clif_damage(src, src, gettick(), 0, 0, damage, div, (div > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0, false);
-		status_fix_damage(bl, src, damage, 0);
-		if( --(sc->data[SC__SHADOWFORM]->val3) <= 0 )
+		status_damage(bl, src, damage, 0, clif_damage(src, src, gettick(), 500, 500, damage, div, (div > 1 ? DMG_MULTI_HIT : DMG_NORMAL), 0, false), 0);
+		if( sc->data[SC__SHADOWFORM] && --(sc->data[SC__SHADOWFORM]->val3) <= 0 )
 			status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 		return true;
 	}
