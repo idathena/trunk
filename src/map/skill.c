@@ -3229,36 +3229,37 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		}
 	}
 
-	if (damage > 0 && !(tstatus->mode&MD_BOSS)) {
-		if (skill_id == RG_INTIMIDATE) {
-			int rate = 50 + skill_lv * 5;
-
-			rate = rate + (status_get_lv(src) - status_get_lv(bl));
-			if (rnd()%100 < rate)
-				skill_addtimerskill(src, tick + 800, bl->id, 0, 0, skill_id, skill_lv, 0, flag);
-		} else if (skill_id == SC_FATALMENACE)
-			skill_addtimerskill(src, tick + 800, bl->id, skill_area_temp[4], skill_area_temp[5], skill_id, skill_lv, 0, flag);
-	}
-
 	if (skill_id == CR_GRANDCROSS || skill_id == NPC_GRANDDARKNESS)
 		dmg.flag |= BF_WEAPON;
 
-	if (sd && bl->id != src->id && damage > 0 && skill_id != AM_DEMONSTRATION && (dmg.flag&BF_WEAPON || (dmg.flag&BF_MISC &&
-		(skill_id == RA_CLUSTERBOMB || skill_id == RA_FIRINGTRAP || skill_id == RA_ICEBOUNDTRAP || skill_id == NC_MAGMA_ERUPTION)))) {
-		if (battle_config.left_cardfix_to_right)
-			battle_drain(sd, bl, dmg.damage, dmg.damage, tstatus->race, tstatus->class_);
-		else
-			battle_drain(sd, bl, dmg.damage, dmg.damage2, tstatus->race, tstatus->class_);
-	}
-
 	if (damage > 0) { //Post-damage effects
 		switch (skill_id) {
+			case RG_INTIMIDATE: {
+					int rate = 50 + skill_lv * 5;
+
+					rate = rate + (status_get_lv(src) - status_get_lv(bl));
+					if (rnd()%100 < rate && !(tstatus->mode&MD_BOSS))
+						skill_addtimerskill(src, tick + 800, bl->id, 0, 0, skill_id, skill_lv, 0, flag);
+				}
+				break;
+			case SC_FATALMENACE:
+				if (!(tstatus->mode&MD_BOSS))
+					skill_addtimerskill(src, tick + 800, bl->id, skill_area_temp[4], skill_area_temp[5], skill_id, skill_lv, 0, flag);
+				skill_addtimerskill(src, tick + 800, src->id, skill_area_temp[4], skill_area_temp[5], skill_id, skill_lv, 0, flag); //To teleport Self
+				break;
 			case SR_TIGERCANNON:
 				status_zap(bl, 0, damage / 10); //10% of damage dealt
 				break;
 			case WM_METALICSOUND:
 				status_zap(bl, 0, damage * 100 / (100 * (110 - (sd ? pc_checkskill(sd,WM_LESSON) : 10) * 10)));
 				break;
+		}
+		if (sd && bl->id != src->id && skill_id != AM_DEMONSTRATION && (dmg.flag&BF_WEAPON || (dmg.flag&BF_MISC &&
+			(skill_id == RA_CLUSTERBOMB || skill_id == RA_FIRINGTRAP || skill_id == RA_ICEBOUNDTRAP || skill_id == NC_MAGMA_ERUPTION)))) {
+			if (battle_config.left_cardfix_to_right)
+				battle_drain(sd, bl, dmg.damage, dmg.damage, tstatus->race, tstatus->class_);
+			else
+				battle_drain(sd, bl, dmg.damage, dmg.damage2, tstatus->race, tstatus->class_);
 		}
 		if (skill_id && bl->type == BL_SKILL) { //Wall of Thorn damaged by Fire element skill
 			struct skill_unit *su = (struct skill_unit *)bl;
@@ -3933,7 +3934,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					skill_castend_damage_id(src,target,skl->skill_id,skl->skill_lv,tick,skl->flag|SD_LEVEL|SD_ANIMATION);
 					break;
 				case SC_FATALMENACE:
-					if (src == target) //Casters Part
+					if (target->id == src->id) //Caster's Part
 						unit_warp(src,-1,skl->x,skl->y,CLR_TELEPORT);
 					else { //Target's Part
 						short x = skl->x,y = skl->y;
@@ -5299,8 +5300,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				skill_area_temp[4] = x;
 				skill_area_temp[5] = y;
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),splash_target(src),
-				src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
-				skill_addtimerskill(src,tick + 800,src->id,x,y,skill_id,skill_lv,0,flag); //To teleport Self
+					src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
 				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 			}
 			break;
@@ -14499,6 +14499,7 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 		case AL_HEAL:
 		case AL_INCAGI:
 		case AL_DECAGI:
+		case SA_DISPELL: //Mado Gear is immuned to Dispell according to bugreport:49 [Ind]
 		case AB_RENOVATIO:
 		case AB_HIGHNESSHEAL:
 		case SU_TUNABELLY:
