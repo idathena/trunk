@@ -6348,6 +6348,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			default:
 				ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 0, ad.flag);
 				break;
+		}
 #endif
 
 		switch(skill_id) {
