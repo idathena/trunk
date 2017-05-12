@@ -10308,6 +10308,15 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_KYOUGAKU:
 				val1 = MOBID_PORING;
 				break;
+			case SC_SWORDCLAN:
+			case SC_ARCWANDCLAN:
+			case SC_GOLDENMACECLAN:
+			case SC_CROSSBOWCLAN:
+			case SC_JUMPINGCLAN:
+			case SC_CLAN_INFO:
+				if( sd && !sd->status.clan_id )
+					return 0; //If the player still has a clan status, but was removed from his clan
+				break;
 		}
 	}
 
