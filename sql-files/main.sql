@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS `char` (
   `sex` ENUM('M','F','U') NOT NULL default 'U',
   `hotkey_rowshift` tinyint(3) unsigned NOT NULL default '0',
   `clan_id` int(11) unsigned NOT NULL default '0',
+  `last_login` datetime DEFAULT NULL,
   PRIMARY KEY (`char_id`),
   UNIQUE KEY `name_key` (`name`),
   KEY `account_id` (`account_id`),
@@ -768,6 +769,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1440688342);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1450241859);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1450367880);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1457638175);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1467934919);
 
 
 --

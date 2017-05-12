@@ -2548,9 +2548,18 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			break;
 		case SP_ATKELE:
 			PC_BONUS_CHK_ELEMENT(val, SP_ATKELE);
-			switch (sd->state.lr_flag) {
+			switch(sd->state.lr_flag) {
 				case 2:
-					sd->bonus.arrow_ele = val;
+					switch(sd->status.weapon) {
+						case W_BOW:	case W_REVOLVER:
+						case W_RIFLE:	case W_GATLING:
+						case W_SHOTGUN:	case W_GRENADE:
+							status->rhw.ele = val; //Become weapon element
+							break;
+						default:
+							sd->bonus.arrow_ele = val; //Become ammo element
+							break;
+					}
 					break;
 				case 1:
 					status->lhw.ele = val;
@@ -4672,6 +4681,27 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 			if( map[sd->bl.m].flag.noteleport || map_flag_gvg2(sd->bl.m) ) {
 				clif_skill_teleportmessage(sd,0);
 				return false;
+			}
+			if( nameid == ITEMID_GIANT_FLY_WING ) {
+				struct party_data *pd = party_search(sd->status.party_id);
+
+				if( pd ) {
+					int i;
+
+					ARR_FIND(0,MAX_PARTY,i,(pd->data[i].sd == sd && pd->party.member[i].leader));
+					if( i == MAX_PARTY ) { //User is not party leader
+						clif_msg(sd,ITEM_PARTY_MEMBER_NOT_SUMMONED);
+						break;
+					}
+					ARR_FIND(0,MAX_PARTY,i,(pd->data[i].sd && pd->data[i].sd != sd && pd->data[i].sd->bl.m == sd->bl.m && !pc_isdead(pd->data[i].sd)));
+					if( i == MAX_PARTY ) { //No party members found on same map
+						clif_msg(sd,ITEM_PARTY_NO_MEMBER_IN_MAP);
+						break;
+					}
+				} else {
+					clif_msg(sd,ITEM_PARTY_MEMBER_NOT_SUMMONED);
+					break;
+				}
 			}
 		//Fall through
 		case ITEMID_WING_OF_BUTTERFLY:
@@ -7447,7 +7477,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			pet_unlocktarget(sd->pd);
 	}
 
-	if( sd->status.hom_id > 0 && battle_config.homunculus_auto_vapor && sd->hd )
+	if( hom_is_active(sd->hd) && battle_config.homunculus_auto_vapor )
 		hom_vaporize(sd,HOM_ST_REST);
 
 	if( sd->md )

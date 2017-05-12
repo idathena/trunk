@@ -415,6 +415,8 @@ enum clif_messages {
 	//NOTE: These values below need client version validation
 	ITEM_CANT_OBTAIN_WEIGHT = 0x34,
 	ITEM_NOUSE_SITTING = 0x297,
+	ITEM_PARTY_MEMBER_NOT_SUMMONED = 0x4c5,
+	ITEM_PARTY_NO_MEMBER_IN_MAP = 0x4c6,
 	MERC_MSG_BASE = 0x4f2,
 	SKILL_CANT_USE_AREA = 0x536,
 	ITEM_CANT_USE_AREA =  0x537,

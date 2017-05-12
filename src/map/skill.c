@@ -1077,7 +1077,6 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			//Chance to cause blind status vs demon and undead element, but not against players
 			if( !dstsd && (battle_check_undead(tstatus->race,tstatus->def_ele) || tstatus->race == RC_DEMON) )
 				sc_start(src,bl,SC_BLIND,100,skill_lv,skill_get_time2(skill_id,skill_lv));
-			attack_type |= BF_WEAPON;
 			break;
 		case NPC_GRANDDARKNESS:
 			sc_start(src,bl,SC_BLIND,100,skill_lv,skill_get_time2(skill_id,skill_lv));
@@ -3063,11 +3062,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case SU_LUNATICCARROTBEAT:
 			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (flag&1 ? DMG_MULTI_HIT : DMG_NORMAL), 0, false);
 			break;
-		case RK_DRAGONBREATH:
-		case RK_DRAGONBREATH_WATER:
-		case LG_SHIELDPRESS:
-			dmg.dmotion = clif_skill_damage(src, bl, tick, status_get_amotion(src), dmg.dmotion, damage, dmg.div_, skill_id, skill_lv, DMG_SKILL);
-			break;
 		case AB_HIGHNESSHEAL:
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, AL_HEAL, -1, DMG_SKILL);
 			break;
@@ -3092,6 +3086,9 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			break;
 		case GN_FIRE_EXPANSION_ACID:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, CR_ACIDDEMONSTRATION, skill_lv, DMG_MULTI_HIT);
+			break;
+		case LG_SHIELDPRESS:
+			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, status_get_amotion(src), dmg.dmotion, damage, dmg.div_, skill_id, skill_lv, DMG_SKILL);
 			break;
 		case LG_OVERBRAND:
 		case LG_OVERBRAND_BRANDISH:
@@ -3787,7 +3784,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					break;
 				case RG_INTIMIDATE:
 					if (!unit_warp(src,-1,-1,-1,CLR_TELEPORT)) {
-						short x,y;
+						short x, y;
 
 						map_search_freecell(src,0,&x,&y,1,1,0);
 						if (target->id != src->id && !status_isdead(target))
@@ -3937,7 +3934,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					if (target->id == src->id) //Caster's Part
 						unit_warp(src,-1,skl->x,skl->y,CLR_TELEPORT);
 					else { //Target's Part
-						short x = skl->x,y = skl->y;
+						short x = skl->x, y = skl->y;
 
 						map_search_freecell(NULL,target->m,&x,&y,2,2,1);
 						unit_warp(target,-1,x,y,CLR_TELEPORT);
@@ -4428,7 +4425,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case LG_OVERBRAND_BRANDISH:
 		case LG_SHIELDPRESS:
 		case LG_RAGEBURST:
-		case LG_RAYOFGENESIS:
 		case LG_HESPERUSLIT:
 		case SR_DRAGONCOMBO:
 		case SR_FALLENEMPIRE:
@@ -5034,6 +5030,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case NPC_SMOKING:
 		case GS_FLING:
 		case NJ_ZENYNAGE:
+		case LG_RAYOFGENESIS:
 		case RL_B_TRAP:
 			skill_attack(BF_MISC,src,src,bl,skill_id,skill_lv,tick,flag);
 			break;
