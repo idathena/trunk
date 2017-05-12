@@ -10756,21 +10756,12 @@ REPLACE INTO `mob_skill_db_re` VALUES (3073,'Awakened Ferre@NPC_WIDECONFUSE','at
 REPLACE INTO `mob_skill_db_re` VALUES (3073,'Awakened Ferre@NPC_DARKNESSBREATH','attack',658,10,2000,2000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3073,'Awakened Ferre@PR_LEXAETERNA','attack',78,5,5000,2000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@AL_TELEPORT','idle',26,1,10000,0,0,'yes','self','rudeattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@AL_TELEPORT','idle',26,1,5000,0,5000,'yes','self','rudeattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@AL_TELEPORT','walk',26,1,5000,0,5000,'yes','self','rudeattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_AGIUP','attack',350,5,10000,0,30000,'yes','self','myhpltmaxrate','30',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@AL_INCAGI','chase',29,10,2000,700,300000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@AL_DECAGI','attack',30,48,500,0,20000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@AL_DECAGI','chase',30,48,500,0,20000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@WZ_METEOR','attack',83,11,5000,500,2000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@WZ_METEOR','chase',83,11,5000,500,2000,'no','target','skillused','18',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@WZ_METEOR','chase',83,11,5000,500,2000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_HELLJUDGEMENT','chase',662,10,10000,1000,10000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_HELLJUDGEMENT','attack',662,10,10000,1000,10000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_PULSESTRIKE','attack',661,5,2000,0,30000,'yes','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_SUMMONSLAVE','attack',196,5,10000,700,10000,'no','self','slavele','0',2917,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_SUMMONSLAVE','idle',196,5,10000,700,10000,'no','self','slavele','0',2917,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_AGIUP','idle',350,1,2000,0,10000,'no','self','always','30',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@AL_INCAGI','chase',29,10,2000,0,10000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@AL_DECAGI','chase',30,48,2000,0,10000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@WZ_METEOR','attack',83,11,1000,1000,10000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_HELLJUDGEMENT','attack',662,10,3000,0,10000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_WIDECURSE','attack',677,5,2000,0,10000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 REPLACE INTO `mob_skill_db_re` VALUES (3108,'Jitterbug@NPC_WIDESILENCE','attack',663,5,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3108,'Jitterbug@NPC_DARKNESSBREATH','attack',658,5,1000,2000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);

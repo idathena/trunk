@@ -2632,9 +2632,9 @@ static bool battle_skill_stacks_masteries_vvs(uint16 skill_id)
 	switch(skill_id) {
 		case MO_INVESTIGATE:
 		case MO_EXTREMITYFIST:
-		case CR_GRANDCROSS:
 		case PA_SACRIFICE:
 #ifndef RENEWAL
+		case CR_GRANDCROSS:
 		case NJ_ISSEN:
 		case LK_SPIRALPIERCE:
 		case ML_SPIRALPIERCE:
@@ -5327,6 +5327,8 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			switch(skill_id) {
 				case AM_DEMONSTRATION:
 				case AM_ACIDTERROR:
+				case CR_GRANDCROSS:
+				case NPC_GRANDDARKNESS:
 				case NJ_ISSEN:
 				case GS_MAGICALBULLET:
 				case HW_MAGICCRASHER:
@@ -5472,17 +5474,19 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 
 	if(tsd) {
 		switch(skill_id) {
+#ifndef RENEWAL
 			case NPC_EARTHQUAKE:
 			case SO_VARETYR_SPEAR:
 			case LG_RAYOFGENESIS:
 				break;
-			default:
-				if(sc && sc->data[SC_SPELLFIST] && !skill_id)
-					break;
-#ifdef RENEWAL
-				if(sd)
-					break;
 #endif
+			default:
+#ifndef RENEWAL
+				if(sc && sc->data[SC_SPELLFIST] && !skill_id)
+#else
+				if(sd)
+#endif
+					break;
 				wd.damage += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage, 0, wd.flag);
 				if(is_attack_left_handed(src, skill_id))
 					wd.damage2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage2, 1, wd.flag);
@@ -6337,20 +6341,13 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			)
 			ad.damage = battle_attr_fix(src, target, ad.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
 
-		if(skill_id == CR_GRANDCROSS || skill_id == NPC_GRANDDARKNESS) { //Apply the physical part of the skill's damage [Skotlex]
-			struct Damage wd = battle_calc_weapon_attack(src, target, skill_id, skill_lv, ad.miscflag);
-
-			ad.damage = battle_attr_fix(src, target, wd.damage + ad.damage, s_ele, tstatus->def_ele, tstatus->ele_lv) * (100 + 40 * skill_lv) / 100;
-			if(target->id == src->id) {
-				if(sd)
-					ad.damage >>= 1;
-				else
-					ad.damage = 0;
-			}
-		}
-
 #ifndef RENEWAL
-		ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 0, ad.flag);
+		switch(skill_id) {
+			case LG_RAYOFGENESIS:
+				break;
+			default:
+				ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 0, ad.flag);
+				break;
 #endif
 
 		switch(skill_id) {
@@ -6360,6 +6357,31 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				if(sc && sc->data[SC_SPELLFIST] && ad.miscflag&BF_SHORT) { //val1 = used spellfist level, val4 = used bolt level [Rytech]
 					ad.damage = ad.damage * (50 * sc->data[SC_SPELLFIST]->val1 + sc->data[SC_SPELLFIST]->val4 * 100) / 100;
 					return ad;
+				}
+				break;
+			case CR_GRANDCROSS:
+			case NPC_GRANDDARKNESS:
+				{ //Apply the physical part of the skill's damage [Skotlex]
+					struct Damage wd = battle_calc_weapon_attack(src, target, skill_id, skill_lv, ad.miscflag);
+#ifdef RENEWAL
+					short totaldef, totalmdef;
+
+					ad.damage += wd.damage;
+					ad.damage = ad.damage * (100 + 40 * skill_lv) / 100;
+					totaldef = (short)status_get_def(target) + tstatus->def2;
+					totalmdef = tstatus->mdef + tstatus->mdef2;
+					ad.damage -= totaldef + totalmdef;
+#else
+					ad.damage += wd.damage;
+					ad.damage = ad.damage * (100 + 40 * skill_lv) / 100;
+#endif
+					ad.damage = battle_attr_fix(src, target, ad.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
+					if(target->id == src->id) {
+						if(sd)
+							ad.damage >>= 1;
+						else
+							ad.damage = 0;
+					}
 				}
 				break;
 			case SO_VARETYR_SPEAR: {
