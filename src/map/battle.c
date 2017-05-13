@@ -1629,7 +1629,7 @@ int64 battle_addmastery(struct map_session_data *sd, struct block_list *target, 
 	nullpo_ret(sd);
 
 	if((lv = pc_checkskill(sd,AL_DEMONBANE)) > 0 &&
-		target->type == BL_MOB && //This bonus doesn't work against players.
+		target->type == BL_MOB && //This bonus doesn't work against players
 		(battle_check_undead(status->race,status->def_ele) || status->race == RC_DEMON))
 		damage += lv * (int)(3 + (sd->status.base_level + 1) * 0.05); //[orn]
 
@@ -2633,8 +2633,8 @@ static bool battle_skill_stacks_masteries_vvs(uint16 skill_id)
 		case MO_INVESTIGATE:
 		case MO_EXTREMITYFIST:
 		case PA_SACRIFICE:
-#ifndef RENEWAL
 		case CR_GRANDCROSS:
+#ifndef RENEWAL
 		case NJ_ISSEN:
 		case LK_SPIRALPIERCE:
 		case ML_SPIRALPIERCE:
@@ -2760,6 +2760,7 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 {
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct status_change *sc = status_get_sc(src);
+	struct status_data *sstatus = status_get_status_data(src);
 	struct status_data *tstatus = status_get_status_data(target);
 	int element = skill_get_ele(skill_id, skill_lv);
 	int left_element = battle_get_weapon_element(wd, src, target, skill_id, skill_lv, EQI_HAND_L);
@@ -2813,14 +2814,13 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 					wd.damage2 = battle_attr_fix(src, target, wd.damage2, left_element, tstatus->def_ele, tstatus->ele_lv);
 				break;
 		}
-		if(sc && sc->data[SC_WATK_ELEMENT] && battle_skill_stacks_masteries_vvs(skill_id)) {
-			int64 dmg, dmg2;
+		if(sc && sc->data[SC_WATK_ELEMENT]) { //Descriptions indicate this means adding a percent of a normal attack in another element [Skotlex]
+			int64 damage = battle_calc_base_damage(src, sstatus, &sstatus->rhw, sc, tstatus->size, sd, (is_skill_using_arrow(src, skill_id) ? 2 : 0)) * sc->data[SC_WATK_ELEMENT]->val2 / 100;
 
-			dmg = wd.damage * sc->data[SC_WATK_ELEMENT]->val2 / 100;
-			wd.damage += battle_attr_fix(src, target, dmg, sc->data[SC_WATK_ELEMENT]->val1, tstatus->def_ele, tstatus->ele_lv);
+			wd.damage += battle_attr_fix(src, target, damage, sc->data[SC_WATK_ELEMENT]->val1, tstatus->def_ele, tstatus->ele_lv);
 			if(is_attack_left_handed(src, skill_id)) {
-				dmg2 = wd.damage2 * sc->data[SC_WATK_ELEMENT]->val2 / 100;
-				wd.damage2 += battle_attr_fix(src, target, dmg2, sc->data[SC_WATK_ELEMENT]->val1, tstatus->def_ele, tstatus->ele_lv);
+				damage = battle_calc_base_damage(src, sstatus, &sstatus->lhw, sc, tstatus->size, sd, (is_skill_using_arrow(src, skill_id) ? 2 : 0)) * sc->data[SC_WATK_ELEMENT]->val2 / 100;
+				wd.damage2 += battle_attr_fix(src, target, damage, sc->data[SC_WATK_ELEMENT]->val1, tstatus->def_ele, tstatus->ele_lv);
 			}
 		}
 	}
@@ -4469,6 +4469,8 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, 100);
 		if((sce = sc->data[SC_GATLINGFEVER]))
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, 20 + 10 * sce->val1);
+		if((sce = sc->data[SC_WATK_ELEMENT]) && skill_id != ASC_METEORASSAULT)
+			ATK_ADDRATE(wd.weaponAtk, wd.weaponAtk2, sce->val2);
 #else
 		if((sce = sc->data[SC_TRUESIGHT]))
 			ATK_ADDRATE(wd.damage, wd.damage2, 2 * sce->val1);
@@ -5542,16 +5544,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 					wd.damage2 = battle_attr_fix(src, target, wd.damage2, left_element, tstatus->def_ele, tstatus->ele_lv);
 				break;
 		}
-		if(sc && sc->data[SC_WATK_ELEMENT] && battle_skill_stacks_masteries_vvs(skill_id) && skill_id != ASC_METEORASSAULT) {
-			int64 dmg, dmg2;
-
-			dmg = wd.damage * sc->data[SC_WATK_ELEMENT]->val2 / 100;
-			wd.damage += battle_attr_fix(src, target, dmg, sc->data[SC_WATK_ELEMENT]->val1, tstatus->def_ele, tstatus->ele_lv);
-			if(is_attack_left_handed(src, skill_id)) {
-				dmg2 = wd.damage2 * sc->data[SC_WATK_ELEMENT]->val2 / 100;
-				wd.damage2 += battle_attr_fix(src, target, dmg2, sc->data[SC_WATK_ELEMENT]->val1, tstatus->def_ele, tstatus->ele_lv);
-			}
-		}
 	}
 #endif
 
@@ -6367,14 +6359,14 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 #ifdef RENEWAL
 					short totaldef, totalmdef;
 
-					ad.damage += wd.damage;
-					ad.damage = ad.damage * (100 + 40 * skill_lv) / 100;
+					//Official renewal formula [exneval]
+					//Damage = [((ATK + MATK) / 2 * skillratio) - (eDEF + sDEF + eMDEF + sMDEF)] * Holy attribute modifier
+					ad.damage = (wd.damage + ad.damage) / 2 * (100 + 40 * skill_lv) / 100;
 					totaldef = (short)status_get_def(target) + tstatus->def2;
 					totalmdef = tstatus->mdef + tstatus->mdef2;
 					ad.damage -= totaldef + totalmdef;
 #else
-					ad.damage += wd.damage;
-					ad.damage = ad.damage * (100 + 40 * skill_lv) / 100;
+					ad.damage = (wd.damage + ad.damage) * (100 + 40 * skill_lv) / 100;
 #endif
 					ad.damage = battle_attr_fix(src, target, ad.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
 					if(target->id == src->id) {
@@ -6411,9 +6403,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 		case ASC_BREAKER:
 		case CR_ACIDDEMONSTRATION:
 		case GN_FIRE_EXPANSION_ACID:
+#endif
 		case LG_RAYOFGENESIS:
 			return ad; //Do GVG fix later
-#endif
 		default:
 			ad.damage = battle_calc_damage(src, target, &ad, ad.damage, skill_id, skill_lv);
 			if(map_flag_gvg2(target->m))
