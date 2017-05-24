@@ -6429,6 +6429,16 @@ the script ends. The color format is in RGB (0xRRGGBB). The color is
 currently ignored by the client and appears always green.
 
 ---------------------------------------
+
+*npcprogressbar "<color>",<seconds>{,"<NPC Name>"}};
+
+This command behaves identically to 'progressbar', but will display
+a progress bar above of the currently attached NPC.
+
+<NPC name> parameter will display the progress bar on another NPC. If the NPC
+specified does not exist, the command will do nothing.
+
+---------------------------------------
 //
 5,1.- End of time-related commands
 //

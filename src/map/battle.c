@@ -157,6 +157,7 @@ struct block_list *battle_getenemy(struct block_list *target, int type, int rang
 
 	return bl_list[rnd()%c];
 }
+
 static int battle_getenemyarea_sub(struct block_list *bl, va_list ap) {
 	struct block_list **bl_list, *src;
 	int *c, ignore_id;
@@ -5824,6 +5825,10 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case SU_SV_ROOTTWIST_ATK:
 				ad.damage = 100;
 				break;
+			case NPC_ICEMINE:
+			case NPC_FLAMECROSS:
+				ad.damage = sstatus->rhw.atk * 20 * skill_lv;
+				break;
 			default:
 				MATK_ADD(status_get_matk(src, 2));
 
@@ -5989,6 +5994,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						break;
 					case NPC_VENOMFOG:
 						skillratio += 600 + 100 * skill_lv;
+						break;
+					case NPC_PULSESTRIKE2:
+						skillratio += 100;
 						break;
 					case NPC_HELLBURNING:
 						skillratio += 900;
@@ -6245,8 +6253,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 
 				MATK_RATE(skillratio);
 
-				//Constant/misc additions from skills
-				if(skill_id == WZ_FIREPILLAR)
+				if(skill_id == WZ_FIREPILLAR) //Constant/misc additions from skills
 					MATK_ADD(100 + 50 * skill_lv);
 				break;
 		}

@@ -7568,11 +7568,10 @@ BUILDIN_FUNC(getequipid)
 	i = pc_checkequip(sd,equip_bitmask[num]);
 	if( i < 0 ) {
 		script_pushint(st,-1);
-		return 1;
+		return 0;
 	}
 
-	item = sd->inventory_data[i];
-	if( item != 0 )
+	if( (item = sd->inventory_data[i]) )
 		script_pushint(st,item->nameid);
 	else
 		script_pushint(st,0);
@@ -9107,11 +9106,7 @@ BUILDIN_FUNC(makepet)
 		pet_id = search_petDB_index(id, PET_EGG);
 	if( pet_id >= 0 && sd ) {
 		sd->catch_target_class = pet_db[pet_id].class_;
-		intif_create_pet(
-			sd->status.account_id, sd->status.char_id,
-			(short)pet_db[pet_id].class_,(short)mob_db(pet_db[pet_id].class_)->lv,
-			(short)pet_db[pet_id].EggID,0,(short)pet_db[pet_id].intimate,
-			100,0,1,pet_db[pet_id].jname);
+		intif_create_pet(sd->status.account_id, sd->status.char_id, pet_db[pet_id].class_, mob_db(pet_db[pet_id].class_)->lv, pet_db[pet_id].EggID, 0, pet_db[pet_id].intimate, 100, 0, 1, pet_db[pet_id].jname);
 	}
 
 	return SCRIPT_CMD_SUCCESS;
@@ -18997,6 +18992,32 @@ BUILDIN_FUNC(progressbar)
     return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(npcprogressbar)
+{
+	struct block_list *bl = map_id2bl(st->oid);
+	const char *color;
+	unsigned int second;
+
+	color = script_getstr(st,2);
+	second = script_getnum(st,3);
+
+	if( !st->sleep.tick ) {
+		st->state = RERUNLINE;
+		st->sleep.tick = second * 1000;
+		if( script_hasdata(st,4) ) {
+			struct npc_data *nd = npc_name2id(script_getstr(st,4));
+
+			if( nd )
+				bl = &nd->bl;
+		}
+		clif_progressbar2(bl, strtol(color, (char **)NULL, 0), second);
+	} else {
+		st->state = RUN;
+		st->sleep.tick = 0;
+    }
+	return SCRIPT_CMD_SUCCESS;
+}
+
 BUILDIN_FUNC(pushpc)
 {
 	uint8 dir;
@@ -19152,11 +19173,11 @@ BUILDIN_FUNC(setdragon) {
 		return 1;
 
 	if( !pc_checkskill(sd,RK_DRAGONTRAINING) || (sd->class_&MAPID_THIRDMASK) != MAPID_RUNE_KNIGHT )
-		script_pushint(st,0);//Doesn't have the skill or it's not a Rune Knight
-	else if ( pc_isridingdragon(sd) ) {//Is mounted; release
+		script_pushint(st,0); //Doesn't have the skill or it's not a Rune Knight
+	else if ( pc_isridingdragon(sd) ) { //Is mounted; release
 		pc_setoption(sd, sd->sc.option&~OPTION_DRAGON);
 		script_pushint(st,1);
-	} else {//Not mounted; Mount now.
+	} else { //Not mounted; Mount now
 		unsigned int option = OPTION_DRAGON1;
 		if( color ) {
 			option = ( color == 1 ? OPTION_DRAGON1 :
@@ -21478,6 +21499,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(setfont,"i"),
 	BUILDIN_DEF(areamobuseskill,"siiiiviiiii"),
 	BUILDIN_DEF(progressbar,"si"),
+	BUILDIN_DEF(npcprogressbar,"si?"),
 	BUILDIN_DEF(pushpc,"ii"),
 	BUILDIN_DEF(buyingstore,"i"),
 	BUILDIN_DEF(searchstores,"ii"),

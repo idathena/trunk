@@ -568,6 +568,7 @@ void initChangeTables(void) {
 	set_sc( MER_KYRIE            , SC_KYRIE           , SI_KYRIE           , SCB_NONE );
 	set_sc( MER_BLESSING         , SC_BLESSING        , SI_BLESSING        , SCB_STR|SCB_INT|SCB_DEX );
 	set_sc( MER_INCAGI           , SC_INCREASEAGI     , SI_INC_AGI         , SCB_AGI|SCB_SPEED );
+	set_sc( MER_INVINCIBLEOFF2   , SC_INVINCIBLEOFF   , SI_BLANK           , SCB_SPEED );
 
 	set_sc( GD_LEADERSHIP        , SC_LEADERSHIP      , SI_BLANK           , SCB_STR );
 	set_sc( GD_GLORYWOUNDS       , SC_GLORYWOUNDS     , SI_BLANK           , SCB_VIT );
@@ -3797,14 +3798,16 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	sd->max_weight += sd->add_max_weight;
 	if ((lv = pc_checkskill(sd,MC_INCCARRY)) > 0)
 		sd->max_weight += lv * 2000;
-	if (pc_isriding(sd) && pc_checkskill(sd,KN_RIDING) > 0)
+	if (pc_isriding(sd))
 		sd->max_weight += 10000;
-	else if (pc_isridingdragon(sd) && (lv = pc_checkskill(sd,RK_DRAGONTRAINING)) > 0)
+	if (pc_isridingdragon(sd) && (lv = pc_checkskill(sd,RK_DRAGONTRAINING)) > 0)
 		sd->max_weight += 5000 + lv * 2000;
 	if (sc->data[SC_KNOWLEDGE])
 		sd->max_weight += sd->max_weight * sc->data[SC_KNOWLEDGE]->val1 / 10;
 	if ((lv = pc_checkskill(sd,ALL_INCCARRY)) > 0)
 		sd->max_weight += lv * 2000;
+	if (pc_ismadogear(sd))
+		sd->max_weight += 15000;
 
 	sd->cart_weight_max = battle_config.max_cart_weight + (pc_checkskill(sd,GN_REMODELING_CART) * 5000);
 
@@ -4200,6 +4203,10 @@ void status_calc_regen(struct block_list *bl, struct status_data *status, struct
 	if( sd ) {
 		struct regen_data_sub *sregen;
 
+		if( pc_ismadogear(sd) ) {
+			val = regen->hp * 2;
+			regen->hp = cap_value(val, 1, SHRT_MAX);
+		}
 		if( (lv = pc_checkskill(sd, HP_MEDITATIO)) > 0 ) {
 			val = regen->sp * (100 + lv * 3) / 100;
 			regen->sp = cap_value(val, 1, SHRT_MAX);
@@ -6112,15 +6119,10 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 			if( sc->data[SC_ALL_RIDING] )
 				val = battle_config.rental_mount_speed_boost;
 			else if( sd ) {
-				if( pc_isriding(sd) || sd->sc.option&(OPTION_DRAGON) )
+				if( pc_isriding(sd) || pc_isridingdragon(sd) || pc_ismadogear(sd) )
 					val = 25; //Same bonus
 				else if( pc_isridingwug(sd) )
 					val = 15 + 5 * pc_checkskill(sd,RA_WUGRIDER);
-				else if( pc_ismadogear(sd) ) {
-					val = -(50 - 10 * pc_checkskill(sd,NC_MADOLICENCE));
-					if( sc->data[SC_ACCELERATION] )
-						val += 25;
-				}
 			}
 
 			speed_rate -= val;
@@ -6233,6 +6235,8 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 				val = max( val, 10 * sc->data[SC_AVOID]->val1 );
 			if( sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF] )
 				val = max( val, 75 );
+			if( sc->data[SC_ACCELERATION] )
+				val = max( val, 25 );
 			if( sc->data[SC_CLOAKINGEXCEED] )
 				val = max( val, sc->data[SC_CLOAKINGEXCEED]->val3 );
 			if( sc->data[SC_GN_CARTBOOST] )
@@ -6257,8 +6261,12 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 
 	//GetSpeed()
 	{
-		if( sd && pc_iscarton(sd) )
-			speed += speed * (50 - 5 * pc_checkskill(sd,MC_PUSHCART)) / 100;
+		if( sd ) {
+			if( pc_iscarton(sd) )
+				speed += speed * (50 - 5 * pc_checkskill(sd,MC_PUSHCART)) / 100;
+			if( pc_ismadogear(sd) )
+				speed += speed * (50 - 10 * pc_checkskill(sd,NC_MADOLICENCE)) / 100;
+		}
 		if( sc->data[SC_PARALYSE] )
 			speed += speed * 50 / 100;
 		if( speed_rate != 100 )

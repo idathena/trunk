@@ -4241,7 +4241,7 @@ static void mob_read_randommonster(void) {
 static bool mob_parse_row_chatdb(char *fields[], int columns, int current)
 {
 	char *msg;
-	struct mob_chat *ms;
+	struct mob_chat *mc;
 	int msg_id;
 	size_t len;
 
@@ -4253,18 +4253,18 @@ static bool mob_parse_row_chatdb(char *fields[], int columns, int current)
 	}
 
 	if (mob_chat_db[msg_id] == NULL)
-		mob_chat_db[msg_id] = (struct mob_chat*)aCalloc(1, sizeof (struct mob_chat));
+		mob_chat_db[msg_id] = (struct mob_chat *)aCalloc(1, sizeof(struct mob_chat));
 
-	ms = mob_chat_db[msg_id];
+	mc = mob_chat_db[msg_id];
 	//MSG ID
-	ms->msg_id = msg_id;
+	mc->msg_id = msg_id;
 	//Color
-	ms->color = strtoul(fields[1],NULL,0);
+	mc->color = strtoul(fields[1], NULL, 0);
 	//Message
 	msg = fields[2];
 	len = strlen(msg);
 
-	while (len && (msg[len - 1] == '\r' || msg[len - 1] == '\n')) // Find EOL to strip
+	while (len && (msg[len - 1] == '\r' || msg[len - 1] == '\n')) //Find EOL to strip
 		len--;
 
 	if (len > (CHAT_SIZE_MAX - 1)) {
@@ -4275,8 +4275,8 @@ static bool mob_parse_row_chatdb(char *fields[], int columns, int current)
 		return false;
 	}
 
-	msg[len] = 0;  // strip previously found EOL
-	safestrncpy(ms->msg, fields[2], CHAT_SIZE_MAX);
+	msg[len] = 0; //Strip previously found EOL
+	safestrncpy(mc->msg, fields[2], CHAT_SIZE_MAX);
 
 	return true;
 }
@@ -4504,7 +4504,7 @@ static bool mob_parse_row_mobskilldb(char **str, int columns, int current)
 	else
 		ms->emotion = -1;
 
-	if(str[18] != NULL && mob_chat_db[atoi(str[18])] != NULL)
+	if(*str[18] && mob_chat_db[atoi(str[18])])
 		ms->msg_id = atoi(str[18]);
 	else
 		ms->msg_id = 0;
@@ -4943,6 +4943,7 @@ static void mob_skill_db_set(void) {
  */
 static void mob_load(void)
 {
+	sv_readdb(db_path, "mob_chat_db.txt", '#', 3, 3, MAX_MOB_CHAT, &mob_parse_row_chatdb);
 	if (db_use_sqldbs) {
 		mob_read_sqldb();
 		mob_read_sqlskilldb();
@@ -4953,7 +4954,6 @@ static void mob_load(void)
 	sv_readdb(db_path, "mob_avail.txt", ',', 2, 12, -1, &mob_readdb_mobavail);
 	sv_readdb(db_path, DBPATH"mob_race2_db.txt", ',', 2, MAX_RACE2_MOBS, -1, &mob_readdb_race2);
 	sv_readdb(db_path, "mob_item_ratio.txt", ',', 2, 2 + MAX_ITEMRATIO_MOBS, -1, &mob_readdb_itemratio);
-	sv_readdb(db_path, "mob_chat_db.txt", '#', 3, 3, MAX_MOB_CHAT, &mob_parse_row_chatdb);
 	sv_readdb(db_path, DBPATH"mob_effect.txt",   ',', 2, 2, -1, &mob_readdb_effect);
 	mob_drop_ratio_adjust();
 	mob_skill_db_set();

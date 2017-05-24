@@ -91,6 +91,8 @@ List of GM Management NPCs (incomplete)
 - Faceworm's Nest (RE)
 - Old Glast Heim (RE)
 - Horror Toy Factory (RE)
+- Sarah and Fenrir#a2
+- Airship Assault#air0
 
 [ Job-related ]
 ----- 3rd Class (RE) -----

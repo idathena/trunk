@@ -106,6 +106,9 @@
 
 706,0xfd,     ,  2:2:2:2:2:2:2:2:2:5, 0,  50,enemy, 0x018	//NPC_VENOMFOG
 708,0x86,     ,  0, 9, 100,enemy, 0x018	//NPC_COMET
+709,0xfe,     ,  0, 3,1000,enemy, 0x018	//NPC_ICEMINE
+
+711,0xff,     , -1, 0,1000,enemy, 0x018	//NPC_FLAMECROSS
 
 719,0x100,    ,  1, 0,  20,enemy, 0x2018	//NPC_HELLBURNING
 

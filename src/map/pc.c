@@ -3802,9 +3802,9 @@ void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int 
 			break;
 		case SP_AUTOSPELL_ONSKILL:
 			if(sd->state.lr_flag != 2) {
-				int target = skill_get_inf(type2); //Support or Self (non-auto-target) skills should pick self
+				int target = skill_get_inf(type3); //Support or Self (non-auto-target) skills should pick self
 
-				target = (target&INF_SUPPORT_SKILL) || ((target&INF_SELF_SKILL) && !(skill_get_inf2(type2)&INF2_NO_TARGET_SELF));
+				target = (target&INF_SUPPORT_SKILL) || ((target&INF_SELF_SKILL) && !(skill_get_inf2(type3)&INF2_NO_TARGET_SELF));
 				pc_bonus_autospell_onskill(sd->autospell3, ARRAYLENGTH(sd->autospell3), type2, (target ? -type3 : type3), type4, val, current_equip_card_id);
 			}
 			break;
@@ -8731,6 +8731,8 @@ bool pc_setcart(struct map_session_data *sd, int type) {
 void pc_setfalcon(TBL_PC *sd, int flag)
 {
 	if( flag ) {
+		if( (pc_iswug(sd) || pc_isridingwug(sd)) && !battle_config.warg_can_falcon )
+			return;
 		if( pc_checkskill(sd,HT_FALCON) > 0 ) //Add falcon if he have the skill
 			pc_setoption(sd,sd->sc.option|OPTION_FALCON);
 	} else if( pc_isfalcon(sd) )
@@ -8758,7 +8760,7 @@ void pc_setriding(TBL_PC *sd, int flag)
 void pc_setmadogear(struct map_session_data *sd, int flag)
 {
 	if( flag ) {
-		if( (sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC )
+		if( pc_checkskill(sd,NC_MADOLICENCE) > 0 )
 			pc_setoption(sd,sd->sc.option|OPTION_MADOGEAR);
 	} else if( pc_ismadogear(sd) )
 		pc_setoption(sd,sd->sc.option&~OPTION_MADOGEAR);

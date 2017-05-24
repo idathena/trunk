@@ -1064,7 +1064,7 @@
 7625,507,100	// Registration_Ticket
 7630,499,100	// Clean_Beach_Brush
 7631,499,100	// Trash_Debris
-7641,507,100	// Medical_Cure_Box
+7641,507,100	// Cure_Box
 7690,475,100	// Special_Exchange_Coupons
 7701,499,100	// Dragon_Spirit
 7704,507,100	// Broken_Thermometer

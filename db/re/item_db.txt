@@ -4677,7 +4677,7 @@
 6795,Ticket_Special_RO2,Ticket Special RO2,3,10,,0,,,,,,,,,,,,,{},{},{}
 6796,RO2_Name_Card,RO2 Name Card,3,10,,0,,,,,,,,,,,,,{},{},{}
 6797,11th_Coin,11th Anniversary Coin,3,0,,0,,,,,,,,,,,,,{},{},{}
-6803,Fragments_Of_Gigan,Fragments of Gigan,3,10,,10,,,,,,,,,,,,,{},{},{}
+6803,Piece_Of_Gigantes,Shard of Gigantes,3,10,,10,,,,,,,,,,,,,{},{},{}
 6804,ORGANIC_PUMPKIN,Organic Pumpkin,3,20,,10,,,,,,,,,,,,,{},{},{}
 6805,INORGANIC_PUMPKIN,Inorganic Pumpkin,3,20,,10,,,,,,,,,,,,,{},{},{}
 6813,Kafra_Ticket,Kafra Ticket,3,10,,10,,,,,,,,,,,,,{},{},{}
@@ -5439,7 +5439,7 @@
 7638,TW_Green_Box,TW Green Box,3,0,,10,,,,,,,,,,,,,{},{},{}
 7639,TW_Red_Box,TW Red Box,3,0,,10,,,,,,,,,,,,,{},{},{}
 7640,Butterfly_Hair_Decoration,Butterfly Hair Decoration,3,2000,,10,,,,,,,,,,,,,{},{},{}
-7641,Medical_Cure_Box,Medical Cure Box,3,10,,0,,,,,,,,,,,,,{},{},{}
+7641,Cure_Box,Cure Box,3,10,,0,,,,,,,,,,,,,{},{},{}
 7642,Bloody_Coin,Bloody Coin,3,10,,0,,,,,,,,,,,,,{},{},{}
 7643,Bloody_Letter,Bloody Letter,3,220,,10,,,,,,,,,,,,,{},{},{}
 7644,Unsent_Letter,Unsent Letter,3,560,,0,,,,,,,,,,,,,{},{},{}
@@ -6888,7 +6888,7 @@
 12845,Amatsu_Butterfly_Wing,Amatsu Butterfly Wing,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 12846,Little_Unripe_Apple,Little Unripe Apple,2,10,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ pet 2398; },{},{}
 12847,Old_Equipment_Box,Old Equipment Box,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Old_Equipment_Box); },{},{}
-12848,Falcon_Flute,Falcon Flute,11,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ if(getskilllv("HT_FALCON")) { if(!checkoption(Option_Wug) && !checkoption(Option_Wugrider)) setfalcon (!checkfalcon()); } },{},{}
+12848,Falcon_Flute,Falcon Flute,11,0,,10,,,,,0x00000800,63,2,,,,,,{ setfalcon (!checkfalcon()); },{},{}
 12849,Combination_Kit,Combination Kit,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ cooking 30; },{},{}
 12850,Heaven_Scroll,Heaven Scroll,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_Heaven_Scroll); },{},{}
 12851,Vocation_Scroll,Vocation Scroll,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_Vocation_Scroll); },{},{}
@@ -10125,7 +10125,7 @@
 19911,C_Triangle_Roof_Hat,Costume Triangle Roof Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1099,{},{},{}
 19912,C_Cat_Eye,Costume Cat Eye,4,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,1,0,1100,{},{},{}
 19913,C_Poo_Poo_Hat,Costume Poo Poo Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,76,{},{},{}
-19914,C_Tarlock's_Hat,Costume Tarlock's Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1101,{},{},{}
+19914,Felock_Cap,Ferlock's Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1101,{},{},{}
 19915,C_Little_Devil_Horns,Costume Little Devil Horns,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1103,{},{},{}
 19916,C_Black_Hat,Costume Black Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1105,{},{},{}
 19917,C_Gloomy_Pumpkin_Hat,Costume Pumpkin Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,691,{},{},{}
@@ -10632,7 +10632,7 @@
 22514,Candy_Holder,Candy Holder,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Candy_Holder,1); getrandgroupitem(IG_Candy_Holder,1); getrandgroupitem(IG_Candy_Holder,1); },{},{}
 22515,Twisted_Key_Of_Time,Twisted Key of Time,3,10,,300,,,,,,,,,,,,,{},{},{}
 22516,Dark_Red_Clot,Dark Red Clot,2,1440,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ if(rand(1000)<300) sc_start SC_CURSE,30000,0; },{},{}
-22517,Loki_Summon_Scroll,Loki Summon Scroll,3,10,,0,,,,,,,,,,,,,{},{},{}
+22517,Loki_Summon_Scroll,Loki Summon Scroll,2,10,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ mercenary_create 2937,1800000; },{},{}
 22518,Egg_Of_Wisdom,Egg of Wisdom,18,10,,10,,,,,0xFFFFFFFF,63,2,,,1,,,{ /* TODO: Confirm the rates */ getitem callfunc("F_Rand",4263,6229,6233,6230,6234,12259,5505,12213,5361),1; },{},{}
 22519,Stops_Buff,Stops Buff,3,10,,0,,,,,,,,,,,,,{},{},{}
 22520,Stops_Buff_Reset,Stops Buff Reset,3,10,,0,,,,,,,,,,,,,{},{},{}
@@ -10840,6 +10840,7 @@
 22902,Sealed_Card_Album_Scroll_II,Sealed Card Album Scroll II,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem callfunc("F_Rand",6238,6239,17474,22829,24243,24244,24245),1; },{},{}
 22984,Kalona_Milk,Kalona Milk,0,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus2 bHPRegenRate,10,10000; }",180,1,0,SI_DORAM_BUF_01; },{},{}
 22985,Basil,Basil,0,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus2 bSPRegenRate,5,10000; }",180,1,0,SI_DORAM_BUF_02; },{},{}
+23277,Mado_Box,Emergency Magic Gear,2,10000,,3000,,,,,0x00000400,56,2,,,100,,,{ setmadogear 1; },{},{}
 // Shadow Equips
 //===================================================================
 24000,S_T_Str1_Armor,T STR1 Armor Shadow,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ bonus bStr,1; },{},{}
@@ -11115,8 +11116,8 @@
 28203,Half_BF_Rifle1,Half BF Rifle1,5,0,,0,50,,9,0,0x01000000,63,2,34,3,80,1,18,{ bonus bDex,2; bonus bHit,8; bonus bCritical,8; bonus2 bAddRace,RC_DemiHuman,30; bonus2 bVariableCastrate,"GS_TRACKING",-20; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,10; bonus bUnbreakableWeapon,0; },{},{}
 28204,Half_BF_Shotgun1,Half BF Shotgun1,5,0,,0,100,,9,0,0x01000000,63,2,34,3,80,1,20,{ bonus bSplashRange,1; bonus bDex,2; bonus2 bAddRace,RC_DemiHuman,30; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,10; autobonus "{ bonus bBaseAtk,80; bonus2 bHPLossRate,100,1000; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_BASH3D; }"; bonus bUnbreakableWeapon,0; },{},{}
 28306,Bless_Of_Moon,Luna's Blessing,4,0,,100,,5,,1,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bMdef,2; bonus bAllStats,1; bonus5 bAutoSpell,"CG_TAROTCARD",5,100,BF_WEAPON|BF_MAGIC,1; },{},{}
-28310,Earring_Of_Sarah_L,Sarah's Left Earring,4,0,,100,,0,,0,0xFFFFFFFF,63,2,128,,145,0,0,{ skill "AL_HEAL",1; },{},{}
-28311,Earring_Of_Sarah_R,Sarah's Right Earring,4,0,,100,,0,,0,0xFFFFFFFF,63,2,8,,145,0,0,{ skill "AL_TELEPORT",1; },{},{}
+28310,Earring_Of_Sarah_L,Sarah's Left Earring,4,0,,100,,0,,0,0xFFFFFFFF,63,2,136,,145,0,0,{ skill "AL_HEAL",1; },{},{}
+28311,Earring_Of_Sarah_R,Sarah's Right Earring,4,0,,100,,0,,0,0xFFFFFFFF,63,2,136,,145,0,0,{ skill "AL_TELEPORT",1; },{},{}
 28315,RCC2013_ARMLET,RCC2013_ARMLET,4,20,,200,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus2 bAddClass,Class_All,1; },{},{}
 28316,RCC2013_ARMLET_,RCC2013_ARMLET_,4,20,,200,,0,,1,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus2 bAddClass,Class_All,1; },{},{}
 28317,RCC2013_RING,RCC2013_RING,4,20,,200,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus2 bAddClass,Class_All,1; },{},{}
