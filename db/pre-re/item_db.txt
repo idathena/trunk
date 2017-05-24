@@ -5232,7 +5232,7 @@
 12772,Cool_Hat_Box2,Cool Hat Box2,2,0,,0,,,,,0xFFFFFFFF,7,2,,,,,,{},{},{}
 12773,Victory_Hat_Box2,Victory Hat Box2,2,0,,0,,,,,0xFFFFFFFF,7,2,,,,,,{},{},{}
 12846,Little_Unripe_Apple,Little Unripe Apple,2,10,,50,,,,,0xFFFFFFFF,7,2,,,,,,{},{},{}
-12848,Falcon_Flute,Falcon Flute,11,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ if(getskilllv("HT_FALCON")) { if(!checkoption(Option_Wug) && !checkoption(Option_Wugrider)) setfalcon (!checkfalcon()); } },{},{}
+12848,Falcon_Flute,Falcon Flute,11,0,,10,,,,,0x00000800,7,2,,,,,,{ setfalcon (!checkfalcon()); },{},{}
 12900,Battle_Manual_Box,Battle Manual Box,18,20,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ getitem 12208,10; },{},{}
 12901,Insurance_Package,Insurance Package,18,20,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ getitem 12209,10; },{},{}
 12902,Bubble_Gum_Box,Bubble Gum Box,18,20,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ getitem 12210,10; },{},{}
@@ -6600,3 +6600,4 @@
 // New Item
 //===================================================================
 22540,Runstone_Lux,Lux Anima Rune,11,2,,100,,,,,0xFFFFFFFF,7,2,,,,,,{ itemskill "RK_LUXANIMA",1; },{},{}
+23277,Mado_Box,Emergency Magic Gear,2,10000,,3000,,,,,0x00000400,8,2,,,100,,,{ setmadogear 1; },{},{}

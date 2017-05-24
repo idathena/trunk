@@ -77,8 +77,7 @@ int CheckForCharServer(void)
  * @param pet_name
  * @return
  */
-int intif_create_pet(int account_id,int char_id,short pet_class,short pet_lv,short pet_egg_id,
-	short pet_equip,short intimate,short hungry,char rename_flag,char incubate,char *pet_name)
+int intif_create_pet(uint32 account_id,uint32 char_id,short pet_class,short pet_lv, unsigned short pet_egg_id, unsigned short pet_equip,short intimate,short hungry,char rename_flag,char incubate,char *pet_name)
 {
 	if (CheckForCharServer())
 		return 0;

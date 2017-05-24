@@ -67,7 +67,7 @@ mid_camp,212,290,3	script	Time Travel Guide#camp2	852,{
 	close;
 }
 
-mid_camp,210,291,0	script	Dimensional Device#camp	10007,{
+mid_camp,210,292,0	script	Dimensional Device#camp	10007,{
 	mes "Enter the Dimensional Gap of time";
 	mes "and space?";
 	next;

@@ -1399,6 +1399,18 @@
 7563,72000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Standby for Kafragaten Challenge 1"
 7564,72000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Standby for Kafragaten Challenge 2"
 
+// Devil's Tower
+7568,5400,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Explore the tower"
+7569,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Treat the injured"
+7570,0,2939,7,2940,7,2941,7,0,0,0,0,0,0,0,0,0,"Destroy the demons!"
+7571,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Tower Expedition"
+7572,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Lucile...?"
+7573,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Magic Swordman Thanatos"
+7574,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Thanatos Tower"
+7575,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Evil followers"
+7576,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Morocc castle seal"
+7577,82800,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Space distortion"
+
 8000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Quitting Job Change"
 8001,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Job Change to Assassin"
 8002,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Job Change to Assassin"
@@ -1773,6 +1785,11 @@
 9259,0,2363,5,2364,30,0,0,0,0,0,0,0,0,0,0,0,"Confirming Cruyan's statements"
 9260,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Survey investigation notes"
 9262,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Mystery Robbery Incident 16"
+
+// Sarah and Fenrir
+9335,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Search for Fragments of Gigantes"
+9336,604800,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Go back to Professor Bernhard"
+9337,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Wrapping up the Adventure"
 
 10000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"To the Prontera Royal Court"
 10001,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Qualification Test"
@@ -2758,6 +2775,11 @@
 15006,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Bios Island Exploration"
 15007,300,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Memorial Dungeon: Bios Island"
 15008,82800,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Memorial Dungeon: Bios Island"
+
+// Airship Assault
+15050,82800,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Memorial Dungeon: Airship Assault"
+15051,300,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Memorial Dungeon: Airship Assault"
+15052,300,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Memorial Dungeon: Airship Assault"
 
 // 2013 Christmas Event
 15055,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Christmas : We are the great Single Union Army!"

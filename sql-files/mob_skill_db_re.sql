@@ -8504,14 +8504,14 @@ REPLACE INTO `mob_skill_db_re` VALUES (2472,'Bloody Knight (Memorial)@NPC_PULSES
 REPLACE INTO `mob_skill_db_re` VALUES (2473,'1st Commander of Destruction@NPC_DARKSTRIKE','idle',340,5,3000,0,10000,'yes','target','rudeattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2473,'1st Commander of Destruction@NPC_DARKSTRIKE','chase',340,5,3000,500,10000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2473,'1st Commander of Destruction@NPC_GRANDDARKNESS','attack',339,10,1000,2000,10000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (2473,'1st Commander of Destruction@@NPC_PETRIFYATTACK','attack',180,5,500,500,10000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2473,'1st Commander of Destruction@NPC_PETRIFYATTACK','attack',180,5,500,500,10000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2473,'1st Commander of Destruction@NPC_POWERUP','attack',349,1,500,1000,10000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2473,'1st Commander of Destruction@NPC_CRITICALSLASH','attack',170,1,500,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2473,'1st Commander of Destruction@SM_MAGNUM','attack',7,25,10000,0,2000,'yes','self','myhpltmaxrate','30',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2474,'2nd Commander of Destruction@NPC_DARKSTRIKE','idle',340,5,3000,0,10000,'yes','target','rudeattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2474,'2nd Commander of Destruction@NPC_DARKSTRIKE','chase',340,5,3000,500,10000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2474,'2nd Commander of Destruction@NPC_DARKCROSS','attack',338,10,5000,0,10000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (2474,'2nd Commander of Destruction@@NPC_SILENCEATTACK','attack',178,5,500,500,10000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2474,'2nd Commander of Destruction@NPC_SILENCEATTACK','attack',178,5,500,500,10000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2474,'2nd Commander of Destruction@NPC_AGIUP','attack',350,1,500,1000,10000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2474,'2nd Commander of Destruction@NPC_CRITICALSLASH','attack',170,1,500,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2474,'2nd Commander of Destruction@SM_MAGNUM','attack',7,25,10000,0,2000,'yes','self','myhpltmaxrate','30',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -10653,6 +10653,32 @@ REPLACE INTO `mob_skill_db_re` VALUES (2923,'Owl Marquees@NPC_EMOTION','chase',1
 REPLACE INTO `mob_skill_db_re` VALUES (2923,'Owl Marquees@NPC_EMOTION','idle',197,1,2000,0,5000,'yes','self','always','0',6,0x37B5,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2923,'Owl Marquees@NPC_SUMMONSLAVE','idle',196,2,10000,2000,60000,'no','self','slavele','0',2921,NULL,NULL,NULL,NULL,NULL,NULL);
 
+#Devil's Tower
+REPLACE INTO `mob_skill_db_re` VALUES (2939,'Evil Shadow@NPC_PIERCINGATT','chase',158,1,4000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2939,'Evil Shadow@NPC_CURSEATTACK','attack',181,5,3500,0,20000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2940,'Evil Shadow@NPC_DARKSTRIKE','attack',340,1,3000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2941,'Evil Shadow@NPC_CRITICALSLASH','chase',170,1,3000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2941,'Evil Shadow@NPC_PETRIFYATTACK','attack',180,5,3500,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','idle',685,1,10000,0,20000,'no','self','myhpltmaxrate','100',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','100',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','90',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','80',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','70',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','60',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','50',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','40',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','30',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','20',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_INVINCIBLE','attack',685,1,10000,0,20000,'no','self','myhpltmaxrate','10',NULL,NULL,NULL,NULL,NULL,NULL,'42');
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_DANCINGBLADE','attack',713,1,1000,0,15000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_PULSESTRIKE2','attack',712,1,800,0,15000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2942,'Evil Believer@NPC_DARKPIERCING','attack',715,1,2500,0,60000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2943,'Ice Mine@NPC_INVISIBLE','idle',353,1,10000,0,300000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2943,'Ice Mine@NPC_ICEMINE','idle',709,1,10000,0,300000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
+REPLACE INTO `mob_skill_db_re` VALUES (2960,'Flame Cross@NPC_INVISIBLE','idle',353,1,10000,0,300000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2960,'Flame Cross@NPC_FLAMECROSS','idle',711,1,10000,0,300000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
 #Horror Toy Factory
 REPLACE INTO `mob_skill_db_re` VALUES (2987,'Decorated Evil Tree@AS_GRIMTOOTH','chase',137,5,2000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2987,'Decorated Evil Tree@NPC_CURSEATTACK','attack',181,3,1000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
@@ -10769,4 +10795,50 @@ REPLACE INTO `mob_skill_db_re` VALUES (3108,'Jitterbug@PR_LEXAETERNA','attack',7
 REPLACE INTO `mob_skill_db_re` VALUES (3109,'Jitterbug@NPC_WIDECONFUSE','attack',667,5,3000,2000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3109,'Jitterbug@PR_LEXAETERNA','attack',78,3,2000,2000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3109,'Jitterbug@WM_REVERBERATION','attack',2414,3,2000,1000,4000,'no','around6','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
+# Airship Assault
+REPLACE INTO `mob_skill_db_re` VALUES (3180,'Wyvern@MG_FIREBALL','attack',17,5,10000,0,30000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3181,'Out of control Captain@AC_DOUBLE','attack',46,10,2000,0,30000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,'44');
+REPLACE INTO `mob_skill_db_re` VALUES (3181,'Out of control Captain@NPC_COMBOATTACK','attack',171,5,2000,2500,30000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,'45');
+REPLACE INTO `mob_skill_db_re` VALUES (3181,'Out of control Captain@AC_CHARGEARROW','attack',148,1,2000,1500,30000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,'46');
+REPLACE INTO `mob_skill_db_re` VALUES (3181,'Out of control Captain@AC_CHARGEARROW','chase',148,1,500,1000,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,'47');
+REPLACE INTO `mob_skill_db_re` VALUES (3187,'Wyvern@MG_FIREBALL','attack',17,5,10000,0,30000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3188,'Out of control Captain@AC_DOUBLE','attack',46,10,2000,0,30000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,'44');
+REPLACE INTO `mob_skill_db_re` VALUES (3188,'Out of control Captain@NPC_COMBOATTACK','attack',171,5,2000,2500,30000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,'45');
+REPLACE INTO `mob_skill_db_re` VALUES (3188,'Out of control Captain@AC_CHARGEARROW','attack',148,1,2000,1500,30000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,'46');
+REPLACE INTO `mob_skill_db_re` VALUES (3188,'Out of control Captain@AC_CHARGEARROW','chase',148,1,500,1000,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,'47');
+
+# Sarah and Fenrir
+REPLACE INTO `mob_skill_db_re` VALUES (3190,'Sarah Irene@NPC_DARKBREATH','attack',202,5,500,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3190,'Sarah Irene@NPC_HELLJUDGEMENT','attack',662,5,10000,0,15000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3190,'Sarah Irene@NPC_WIDESTONE','attack',666,5,10000,0,15000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3190,'Sarah Irene@NPC_WIDESOULDRAIN','attack',680,5,10000,0,15000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3191,'Gigantes@NPC_BLINDATTACK','attack',177,5,2000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3191,'Gigantes@NPC_SILENCEATTACK','attack',178,5,2000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3191,'Gigantes@NPC_PETRIFYATTACK','attack',180,5,2000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3191,'Gigantes@NPC_CURSEATTACK','attack',181,5,2000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3192,'Gigantes@NPC_BLINDATTACK','attack',177,5,2000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3192,'Gigantes@NPC_SILENCEATTACK','attack',178,5,2000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3192,'Gigantes@NPC_PETRIFYATTACK','attack',180,5,2000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3192,'Gigantes@NPC_CURSEATTACK','attack',181,5,2000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3197,'Mutant Gargoyle@AC_CHARGEARROW','attack',148,1,500,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3197,'Mutant Gargoyle@NPC_BLINDATTACK','attack',177,5,500,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3197,'Mutant Gargoyle@NPC_KEEPING','attack',201,1,2000,0,5000,'yes','self','myhpltmaxrate','30',NULL,NULL,NULL,NULL,NULL,'9',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3197,'Mutant Gargoyle@NPC_WINDATTACK','attack',187,3,2000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3198,'Mutant Galion@AS_SONICBLOW','attack',136,5,500,800,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'0',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3198,'Mutant Galion@NPC_COMBOATTACK','attack',171,1,500,500,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3198,'Mutant Galion@NPC_DARKNESSATTACK','attack',190,1,2000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3198,'Mutant Galion@NPC_EMOTION','idle',197,1,2000,0,5000,'yes','self','always',NULL,7,0x3095,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3198,'Mutant Galion@NPC_WINDATTACK','attack',187,3,500,500,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3199,'Wicked Mutant Dragonoid@MG_FIREBALL','chase',17,44,500,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3199,'Wicked Mutant Dragonoid@NPC_BLEEDING','attack',660,3,1000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'32',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3199,'Wicked Mutant Dragonoid@NPC_FIREATTACK','attack',186,5,500,500,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3199,'Wicked Mutant Dragonoid@SM_MAGNUM','attack',7,25,500,500,5000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@CR_AUTOGUARD','attack',249,5,500,0,300000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@CR_AUTOGUARD','chase',249,5,2000,0,300000,'yes','self','longrangeattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@NPC_FIREATTACK','attack',186,5,500,500,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@NPC_SHIELDBRAKE','attack',346,5,500,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@NPC_SPLASHATTACK','attack',174,1,2000,0,5000,'yes','target','attackpcge','2',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@WZ_HEAVENDRIVE','attack',91,5,500,1200,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@WZ_HEAVENDRIVE','chase',91,5,500,1200,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
 

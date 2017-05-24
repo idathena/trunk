@@ -150,7 +150,7 @@
 //Mercenary System
 #define MC_SKILLBASE 8201
 #define MAX_MERCSKILL 41
-#define MAX_MERCENARY_CLASS 61
+#define MAX_MERCENARY_CLASS 62
 
 //Elemental System
 #define EL_SKILLBASE 8401
@@ -317,10 +317,10 @@ struct s_pet {
 	int pet_id;
 	short class_;
 	short level;
-	short egg_id;//pet egg id
-	short equip;//pet equip name_id
-	short intimate;//pet friendly
-	short hungry;//pet hungry
+	unsigned short egg_id; //Pet egg id
+	unsigned short equip; //Pet equip name_id
+	short intimate; //Pet friendly
+	short hungry; //Pet hungry
 	char name[NAME_LENGTH];
 	char rename_flag;
 	char incubate;
