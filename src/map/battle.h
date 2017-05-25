@@ -223,6 +223,7 @@ extern struct Battle_Config
 	int pet_rename;
 	int pet_friendly_rate;
 	int pet_hungry_delay_rate;
+	int pet_hungry_feeding_increase;
 	int pet_hungry_friendly_decrease;
 	int pet_status_support;
 	int pet_attack_support;
