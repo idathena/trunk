@@ -33,7 +33,7 @@
 
 1002,PORING,Poring,619,9001,10013,531,3,60,50,100,250,20,2000,150,1,0,350,400,800,{ /* petloot 10; */ },{ bonus bLuk,(getpetinfo(3)>=910?3:2); bonus bCritical,1; }
 1113,DROPS,Drops,620,9002,10013,508,4,60,40,100,250,20,1500,150,1,0,300,400,500,{ /* petloot 10; */ },{ bonus bHit,(getpetinfo(3)>=910?5:3); bonus bBaseAtk,(getpetinfo(3)>=910?5:3); }
-1031,POPORING,Poporing,621,9003,10013,511,5,60,30,100,250,20,1000,150,1,0,300,500,400,{ /* petloot 15; */ },{ bonus bLuk,(getpetinfo(3)>=910?3:2); bonus2 bSubEle,Ele_Poison,(getpetinfo(3)>=910?15:10); }
+1031,POPORING,Poporing,621,9003,10013,511,5,60,30,100,250,20,1000,150,1,0,300,500,400,{ /* petloot 15; */ },{ bonus bLuk,(getpetinfo(3)>=910?3:2); bonus2 bResEff,Eff_Poison,(getpetinfo(3)>=910?1500:1000); }
 1063,LUNATIC,Lunatic,622,9004,10007,534,4,60,40,100,250,20,1500,150,0,0,300,300,1000,{ /* petskillbonus bLuk,3,10,50; */ },{ bonus bCritical,(getpetinfo(3)>=910?3:2); bonus bBaseAtk,(getpetinfo(3)>=910?3:2); }
 1049,PICKY,Picky,623,9005,10012,507,4,60,40,100,250,20,2000,150,1,0,500,600,50,{ /* petskillbonus bStr,3,10,50; */ },{ bonus bStr,(getpetinfo(3)>=910?2:1); bonus bBaseAtk,(getpetinfo(3)>=910?8:5); }
 1011,CHONCHON,ChonChon,624,9006,10002,537,6,60,30,100,250,20,1500,150,1,0,500,500,250,{ /* petskillbonus bAgi,4,10,50; */ },{ bonus bAgi,(getpetinfo(3)>=910?2:1); bonus bFlee,(getpetinfo(3)>=910?3:2); }
