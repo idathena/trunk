@@ -83,6 +83,7 @@ enum mob_mobid {
 	MOBID_S_GIANT_HORNET,
 	MOBID_S_LUCIOLA_VESPA,
 	MOBID_KO_ZANZOU = 2308,
+	MOBID_LITTLE_PORING = 2398,
 };
 
 //Used hardcoded Random Monster group in src
