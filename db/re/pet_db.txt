@@ -98,8 +98,8 @@
 2398,LITTLE_PORING,Little Poring,12846,9062,0,531,3,60,100,100,250,20,1000,150,0,0,300,300,800,{},{ bonus bHPrecovRate,(getpetinfo(3)>=910?75:50); }
 
 // Brasilis Quest - Suspicious Beach [UNHATCHABLE]
-2057,E_CRAMP,Strange Cramp,12408,6221,0,0,0,0,0,0,0,0,500,0,0,0,350,400,800,{},{} // kRO version
-2081,E_HYDRA,Strange Hydra,12408,6221,0,0,0,0,0,0,0,0,500,0,0,0,350,400,800,{},{} // iRO/cRO version
+2057,E_CRAMP,Strange Cramp,12408,6221,0,0,0,0,0,0,0,0,5000,0,0,0,350,400,800,{},{} // kRO version
+2081,E_HYDRA,Strange Hydra,12408,6221,0,0,0,0,0,0,0,0,5000,0,0,0,350,400,800,{},{} // iRO/cRO version
 
 // New pets from kRO 2014-10-08 (Needs more info)
 //1090,MASTERING,Mastering,<LureID>,9069,<EquipID>,<FoodID>,<Fullness>,<HungryDelay>,<R_Hungry>,<R_Full>,<Intimate>,<Die>,<Capture>,<Speed>,<S_Performance>,<talk_convert_class>,<attack_rate>,<defence_attack_rate>,<change_target_rate>,{},{ bonus bLuk,(getpetinfo(3)>=250?3:2); bonus bCritical,(getpetinfo(3)>=910?3:(getpetinfo(3)>=750?2:1)); }
