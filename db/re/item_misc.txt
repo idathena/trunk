@@ -1308,3 +1308,24 @@ IG_Prize_Of_Hero,15098,1	// Hero_Taget_Suits
 IG_Prize_Of_Hero,22035,1	// Vet_Nepen_Heel
 IG_Prize_Of_Hero,22036,1	// Vet_SliverFox_Boots
 IG_Prize_Of_Hero,22037,1	// Vet_Ungo_Boots
+// God Material Box
+IG_God_Material_Box,7073,1	// Jewel_Of_Prayer
+IG_God_Material_Box,7074,1	// Iron_Glove
+IG_God_Material_Box,7075,1	// Iron_Maiden
+IG_God_Material_Box,7076,1	// Mystery_Wheel
+IG_God_Material_Box,7077,1	// Silver_Fancy
+IG_God_Material_Box,7078,1	// Anger_Of_Valkurye
+IG_God_Material_Box,7079,1	// Feather_Of_Angel
+IG_God_Material_Box,7080,1	// Foot_Step_Of_Cat
+IG_God_Material_Box,7081,1	// Beard_Of_Women
+IG_God_Material_Box,7082,1	// Root_Of_Stone
+IG_God_Material_Box,7083,1	// Soul_Of_Fish
+IG_God_Material_Box,7084,1	// Saliva_Of_Bird
+IG_God_Material_Box,7085,1	// Tendon_Of_Bear
+IG_God_Material_Box,7086,1	// Symbol_Of_Sun
+IG_God_Material_Box,7087,1	// Breath_Of_Soul
+IG_God_Material_Box,7088,1	// Crystal_Of_Snow
+IG_God_Material_Box,7089,1	// Indication_Of_Tempest
+IG_God_Material_Box,7090,1	// Slilince_Wave
+IG_God_Material_Box,7091,1	// Rough_Billows
+IG_God_Material_Box,7092,1	// Air_Stream
