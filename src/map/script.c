@@ -18409,7 +18409,7 @@ BUILDIN_FUNC(bg_monster)
 	y      = script_getnum(st,5);
 	str    = script_getstr(st,6);
 	class_ = script_getnum(st,7);
-	if( script_hasdata(st,8)
+	if( script_hasdata(st,8) )
 		evt = script_getstr(st,8);
 	check_event(st,evt);
 	script_pushint(st,mob_spawn_bg(map,x,y,str,class_,evt,bg_id));
