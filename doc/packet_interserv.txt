@@ -343,7 +343,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0
 	len: 2
 	parameter:
-		- cmd : packet identification (0x2735
+		- cmd : packet identification (0x2735)
 	desc:
 		- ip address update signal from login server
 
@@ -981,7 +981,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,6
 	len: 10
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x304a)
 		- cid
 		- mail_id
 	desc:
@@ -993,7 +993,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,6
 	len: 10
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x304b)
 		- cid
 		- mail_id
 	desc:
@@ -1005,7 +1005,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,6
 	len: 10
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x304c)
 		- cid
 		- mail_id
 	desc:
@@ -1017,7 +1017,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,4,8
 	len: variable: 8+mail_message
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x304d)
 		- len
 		- aid
 		- msg
@@ -1030,7 +1030,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,4,8,10,14,16
 	len: variable: 16+NAME_LENGTH
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x3050)
 		- len
 		- cid
 		- type
@@ -1046,7 +1046,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,4
 	len: variable: 4+auction_data
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x3051)
 		- len
 		- auction_data
 	desc:
@@ -1058,7 +1058,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,6
 	len: 10
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x3052)
 		- cid
 		- auction_id
 	desc:
@@ -1070,7 +1070,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,6
 	len: 10
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x3053)
 		- cid
 		- auction_id
 	desc:
@@ -1082,7 +1082,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,4,8,12,16
 	len: variable: 16+NAME_LENGTH
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x3055)
 		- len
 		- cid
 		- auction_id
@@ -1096,7 +1096,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,6,10
 	len: 12
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x3056)
 		- cid
 		- aid
 		- guild_id
@@ -1109,7 +1109,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2
 	len: 6
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x3060)
 		- cid
 	desc:
 		- Requests a character's quest log entries to the inter server.
@@ -1120,7 +1120,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,4,8
 	len: variable: 8+num_quests
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x3061)
 	desc:
 		- Requests to the inter server to save a character's quest log entries.
 
@@ -1130,7 +1130,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,4
 	len: variable: 4+s_mercenary
 	parameter:
-		- cmd : packet identification (0x3093)
+		- cmd : packet identification (0x3070)
 		- size
 		- merc
 	desc:
@@ -2131,7 +2131,7 @@ Currently the max packet size is 0xFFFF (see 'WFIFOSET()' in 'src/common/socket.
 	index: 0,2,4,8,9
 	len: variable: 9+s_homunculus
 	parameter:
-		- cmd : packet identification (0x3890)
+		- cmd : packet identification (0x3891)
 		- size
 		- account_id
 		- flag: 0 means failed to retrieve homunculus data
