@@ -18401,7 +18401,7 @@ BUILDIN_FUNC(bg_warp)
 BUILDIN_FUNC(bg_monster)
 {
 	int class_ = 0, x = 0, y = 0, bg_id = 0;
-	const char *str,*map, *evt="";
+	const char *str, *map, *evt = "";
 
 	bg_id  = script_getnum(st,2);
 	map    = script_getstr(st,3);
@@ -18409,9 +18409,10 @@ BUILDIN_FUNC(bg_monster)
 	y      = script_getnum(st,5);
 	str    = script_getstr(st,6);
 	class_ = script_getnum(st,7);
-	if( script_hasdata(st,8) ) evt = script_getstr(st,8);
-	check_event(st, evt);
-	script_pushint(st, mob_spawn_bg(map,x,y,str,class_,evt,bg_id));
+	if( script_hasdata(st,8)
+		evt = script_getstr(st,8);
+	check_event(st,evt);
+	script_pushint(st,mob_spawn_bg(map,x,y,str,class_,evt,bg_id));
 	return SCRIPT_CMD_SUCCESS;
 }
 
