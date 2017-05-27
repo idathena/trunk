@@ -188,9 +188,10 @@ int impossible_trade_check(struct map_session_data *sd)
 	//Remove this part: arrows can be trade and equiped
 	//Re-added! [celest]
 	//Remove equiped items (they can not be trade)
-	for (i = 0; i < MAX_INVENTORY; i++)
+	for (i = 0; i < MAX_INVENTORY; i++) {
 		if (inventory[i].nameid > 0 && inventory[i].equip && !(inventory[i].equip&EQP_AMMO))
 			memset(&inventory[i], 0, sizeof(struct item));
+	}
 
 	//Check items in player inventory
 	for (i = 0; i < 10; i++) {
