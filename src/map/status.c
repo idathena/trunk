@@ -3516,6 +3516,9 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 
 		if (pd) {
 			if (pd->petDB && pd->petDB->pet_friendly_script && pd->pet.intimate >= battle_config.pet_bonus_min_friendly) {
+				//Temporary fix for 'autobonus' on pets [exneval]
+				current_equip_item_index = sd->equip_index[EQI_GARMENT];
+				current_equip_combo_pos = 0;
 				run_script(pd->petDB->pet_friendly_script,0,sd->bl.id,0);
 				if (!calculating)
 					return 1;

@@ -726,7 +726,7 @@ int pc_equippoint(struct map_session_data *sd, int n)
 
 	if(!itemdb_isequip2(sd->inventory_data[n]))
 		return 0; //Not equippable by players
-	
+
 	ep = sd->inventory_data[n]->equip;
 	if(sd->inventory_data[n]->look == W_DAGGER	||
 		sd->inventory_data[n]->look == W_1HSWORD ||
@@ -2257,7 +2257,7 @@ bool pc_addautobonus(struct s_autobonus *bonus,char max,const char *script,short
 	return true;
 }
 
-void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus,char max,bool restore)
+void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, char max, bool restore)
 {
 	int i;
 
@@ -2272,9 +2272,10 @@ void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus,
 					unsigned int equip_pos = 0;
 
 					//Create a list of all equipped positions to see if all items needed for the autobonus are still present [Playtester]
-					for( j = 0; j < EQI_MAX; j++ )
+					for( j = 0; j < EQI_MAX; j++ ) {
 						if( sd->equip_index[j] >= 0 )
 							equip_pos |= sd->status.inventory[sd->equip_index[j]].equip;
+					}
 					if( (equip_pos&autobonus[i].pos) == autobonus[i].pos )
 						script_run_autobonus(autobonus[i].bonus_script,sd,autobonus[i].pos);
 				}
@@ -2295,7 +2296,7 @@ void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus,
 	}
 }
 
-void pc_exeautobonus(struct map_session_data *sd,struct s_autobonus *autobonus)
+void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus)
 {
 	if( !sd || !autobonus )
 		return;
@@ -2305,9 +2306,10 @@ void pc_exeautobonus(struct map_session_data *sd,struct s_autobonus *autobonus)
 		unsigned int equip_pos = 0;
 
 		//Create a list of all equipped positions to see if all items needed for the autobonus are still present [Playtester]
-		for( j = 0; j < EQI_MAX; j++ )
+		for( j = 0; j < EQI_MAX; j++ ) {
 			if( sd->equip_index[j] >= 0 )
 				equip_pos |= sd->status.inventory[sd->equip_index[j]].equip;
+		}
 		if( (equip_pos&autobonus->pos) == autobonus->pos )
 			script_run_autobonus(autobonus->other_script,sd,autobonus->pos);
 	}

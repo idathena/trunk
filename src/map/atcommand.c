@@ -1370,9 +1370,8 @@ ACMD_FUNC(itemreset)
 	nullpo_retr(-1, sd);
 
 	for (i = 0; i < MAX_INVENTORY; i++) {
-		if (sd->status.inventory[i].amount && sd->status.inventory[i].equip == 0) {
+		if (sd->status.inventory[i].amount && sd->status.inventory[i].equip == 0)
 			pc_delitem(sd, i, sd->status.inventory[i].amount, 0, 0, LOG_TYPE_COMMAND);
-		}
 	}
 	clif_displaymessage(fd, msg_txt(20)); // All of your items have been removed.
 
@@ -6808,9 +6807,10 @@ ACMD_FUNC(changesex)
 
 	pc_resetskill(sd,4);
 	// To avoid any problem with equipment and invalid sex, equipment is unequiped.
-	for( i = 0; i < EQI_MAX; i++ )
+	for( i = 0; i < EQI_MAX; i++ ) {
 		if( sd->equip_index[i] >= 0 )
 			pc_unequipitem(sd, sd->equip_index[i], 3);
+	}
 	chrif_changesex(sd, true);
 
 	return 0;
@@ -6827,9 +6827,10 @@ ACMD_FUNC(changecharsex)
 
 	pc_resetskill(sd,4);
 	// To avoid any problem with equipment and invalid sex, equipment is unequiped.
-	for( i = 0; i < EQI_MAX; i++ )
+	for( i = 0; i < EQI_MAX; i++ ) {
 		if( sd->equip_index[i] >= 0 )
 			pc_unequipitem(sd, sd->equip_index[i], 3);
+	}
 	chrif_changesex(sd, false);
 
 	return 0;

@@ -372,10 +372,10 @@ const char *parse_syntax_close_sub(const char *p,int *flag);
 const char *parse_syntax(const char *p);
 static int parse_syntax_for_flag = 0;
 
-extern short current_equip_item_index; //For New CARDS Scripts. It contains Inventory Index of the EQUIP_SCRIPT caller item. [Lupus]
+extern short current_equip_item_index; //For New CARDS Scripts. It contains Inventory Index of the EQUIP_SCRIPT caller item [Lupus]
 extern unsigned int current_equip_combo_pos;
 
-int potion_flag = 0; //For use on Alchemist improved potions/Potion Pitcher. [Skotlex]
+int potion_flag = 0; //For use on Alchemist improved potions/Potion Pitcher [Skotlex]
 int potion_hp = 0, potion_per_hp = 0, potion_sp = 0, potion_per_sp = 0;
 int potion_target = 0;
 
@@ -3948,7 +3948,7 @@ void script_run_autobonus(const char *autobonus, struct map_session_data *sd, un
 	if( script ) {
 		int j;
 
-		ARR_FIND(0, EQI_MAX, j, sd->equip_index[j] >= 0 && sd->status.inventory[sd->equip_index[j]].equip == pos);
+		ARR_FIND(0, EQI_MAX, j, (sd->equip_index[j] >= 0 && sd->status.inventory[sd->equip_index[j]].equip == pos));
 		if( j < EQI_MAX ) { //Single item autobonus
 			current_equip_item_index = sd->equip_index[j];
 			current_equip_combo_pos = 0;
@@ -10781,9 +10781,10 @@ BUILDIN_FUNC(changecharsex)
 		return 1;
 
 	pc_resetskill(sd,4);
-	for( i = 0; i < EQI_MAX; i++ )
+	for( i = 0; i < EQI_MAX; i++ ) {
 		if( sd->equip_index[i] >= 0 )
 			pc_unequipitem(sd,sd->equip_index[i],3);
+	}
 	chrif_changesex(sd,false);
 	return SCRIPT_CMD_SUCCESS;
 #else
@@ -13493,7 +13494,7 @@ BUILDIN_FUNC(nude)
 		return SCRIPT_CMD_FAILURE;
 
 	for( i = 0 ; i < EQI_MAX; i++ ) {
-		if( sd->equip_index[ i ] >= 0 ) {
+		if( sd->equip_index[i] >= 0 ) {
 			if( !calcflag )
 				calcflag = 1;
 			pc_unequipitem(sd,sd->equip_index[i],2);

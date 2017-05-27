@@ -75,7 +75,7 @@
 1513,CIVIL_SERVANT,Mao Guai,12358,9040,10022,6095,3,60,10,100,250,20,1000,150,0,0,300,300,800,{},{ bonus bMaxSP,(getpetinfo(3)>=910?15:10); }
 1586,LEAF_CAT,Leaf Cat,12359,9041,10023,6096,7,60,20,100,250,20,1000,150,0,0,300,300,800,{},{ bonus2 bSubRace,RC_Brute,(getpetinfo(3)>=910?5:3); }
 1505,LOLI_RURI,Loli Ruri,12360,9042,10024,6097,3,60,15,100,250,20,1000,150,0,0,300,300,800,{},{ bonus bMaxHPrate,3; bonus3 bAutoSpellWhenHit,"AL_HEAL",(getpetinfo(3)>=910?2:1),10; }
-1143,MARIONETTE,Marionette,12361,9043,10025,6098,3,60,10,100,250,20,1000,150,0,0,300,300,800,{},{ set .@i,(getpetinfo(3)>=910?5000:3000); autobonus2 "{ bonus2 bSubEle,Ele_Neutral,20; bonus2 bHPRegenRate,100,2000; }",10,.@i,BF_WEAPON; }
+1143,MARIONETTE,Marionette,12361,9043,10025,6098,3,60,10,100,250,20,1000,150,0,0,300,300,800,{},{ set .@i,(getpetinfo(3)>=910?5000:3000); autobonus2 "{ bonus2 bSubEle,Ele_Neutral,20; bonus2 bHPRegenRate,100,2000; }",10,.@i,BF_WEAPON,"{ specialeffect2 EF_ENERGYCOAT; }"; }
 1401,SHINOBI,Shinobi,12362,9044,10026,6099,7,60,20,100,250,20,1000,150,0,0,300,300,800,{},{ bonus bAgi,(getpetinfo(3)>=910?3:2); }
 1179,WHISPER,Whisper,12363,9045,10027,6100,7,60,20,100,250,20,1000,150,0,0,300,300,800,{},{ bonus bFlee,(getpetinfo(3)>=910?10:7); skill "TF_HIDING",1; }
 1299,GOBLIN_LEADER,Goblin Leader,12364,9046,10028,6104,7,60,10,100,250,20,1000,150,0,0,300,300,800,{},{ bonus2 bAddRace,RC_DemiHuman,(getpetinfo(3)>=910?5:3); }
