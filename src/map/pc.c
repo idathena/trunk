@@ -95,6 +95,7 @@ unsigned int equip_bitmask[EQI_MAX] = {
 	EQP_COSTUME_HEAD_MID,
 	EQP_COSTUME_HEAD_LOW,
 	EQP_COSTUME_GARMENT,
+	EQP_PET,
 	EQP_AMMO,
 	EQP_SHADOW_ARMOR,
 	EQP_SHADOW_WEAPON,
@@ -2275,6 +2276,8 @@ void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus,
 					for( j = 0; j < EQI_MAX; j++ ) {
 						if( sd->equip_index[j] >= 0 )
 							equip_pos |= sd->status.inventory[sd->equip_index[j]].equip;
+						else if( j == EQI_PET && sd->status.pet_id > 0 && sd->pd )
+							equip_pos |= EQP_PET;
 					}
 					if( (equip_pos&autobonus[i].pos) == autobonus[i].pos )
 						script_run_autobonus(autobonus[i].bonus_script,sd,autobonus[i].pos);
@@ -2309,6 +2312,8 @@ void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus)
 		for( j = 0; j < EQI_MAX; j++ ) {
 			if( sd->equip_index[j] >= 0 )
 				equip_pos |= sd->status.inventory[sd->equip_index[j]].equip;
+			else if( j == EQI_PET && sd->status.pet_id > 0 && sd->pd )
+				equip_pos |= EQP_PET;
 		}
 		if( (equip_pos&autobonus->pos) == autobonus->pos )
 			script_run_autobonus(autobonus->other_script,sd,autobonus->pos);

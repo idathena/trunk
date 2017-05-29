@@ -373,7 +373,7 @@ const char *parse_syntax(const char *p);
 static int parse_syntax_for_flag = 0;
 
 extern short current_equip_item_index; //For New CARDS Scripts. It contains Inventory Index of the EQUIP_SCRIPT caller item [Lupus]
-extern unsigned int current_equip_combo_pos;
+extern unsigned int current_equip_pos;
 
 int potion_flag = 0; //For use on Alchemist improved potions/Potion Pitcher [Skotlex]
 int potion_hp = 0, potion_per_hp = 0, potion_sp = 0, potion_per_sp = 0;
@@ -3951,10 +3951,10 @@ void script_run_autobonus(const char *autobonus, struct map_session_data *sd, un
 		ARR_FIND(0, EQI_MAX, j, (sd->equip_index[j] >= 0 && sd->status.inventory[sd->equip_index[j]].equip == pos));
 		if( j < EQI_MAX ) { //Single item autobonus
 			current_equip_item_index = sd->equip_index[j];
-			current_equip_combo_pos = 0;
+			current_equip_pos = 0;
 		} else { //Combo autobonus
 			current_equip_item_index = -1;
-			current_equip_combo_pos = pos;
+			current_equip_pos = pos;
 		}
 		run_script(script,0,sd->bl.id,0);
 	}
@@ -8240,8 +8240,8 @@ BUILDIN_FUNC(autobonus)
 	if( sd == NULL )
 		return 0; // No player attached
 
-	if( current_equip_combo_pos )
-		pos = current_equip_combo_pos;
+	if( current_equip_pos )
+		pos = current_equip_pos;
 	else
 		pos = sd->status.inventory[current_equip_item_index].equip;
 
@@ -8281,8 +8281,8 @@ BUILDIN_FUNC(autobonus2)
 	if( sd == NULL )
 		return 0; // No player attached
 
-	if( current_equip_combo_pos )
-		pos = current_equip_combo_pos;
+	if( current_equip_pos )
+		pos = current_equip_pos;
 	else
 		pos = sd->status.inventory[current_equip_item_index].equip;
 
@@ -8322,8 +8322,8 @@ BUILDIN_FUNC(autobonus3)
 	if( sd == NULL )
 		return 0; // No player attached
 
-	if( current_equip_combo_pos )
-		pos = current_equip_combo_pos;
+	if( current_equip_pos )
+		pos = current_equip_pos;
 	else
 		pos = sd->status.inventory[current_equip_item_index].equip;
 
@@ -10760,9 +10760,10 @@ BUILDIN_FUNC(changesex)
 
 	pc_resetskill(sd,4);
 	//To avoid any problem with equipment and invalid sex, equipment is unequiped
-	for( i = 0; i < EQI_MAX; i++ )
+	for( i = 0; i < EQI_MAX; i++ ) {
 		if( sd->equip_index[i] >= 0 )
 			pc_unequipitem(sd,sd->equip_index[i],3);
+	}
 	chrif_changesex(sd,true);
 	return SCRIPT_CMD_SUCCESS;
 }
