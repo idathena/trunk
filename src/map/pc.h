@@ -1036,7 +1036,7 @@ void pc_damage(struct map_session_data *sd, struct block_list *src, unsigned int
 int pc_dead(struct map_session_data *sd, struct block_list *src);
 void pc_revive(struct map_session_data *sd, unsigned int hp, unsigned int sp);
 void pc_heal(struct map_session_data *sd, unsigned int hp, unsigned int sp, int type);
-int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp);
+int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fixed);
 int pc_percentheal(struct map_session_data *sd, int, int);
 bool pc_jobchange(struct map_session_data *sd, int job, char upper);
 void pc_setoption(struct map_session_data *, int);

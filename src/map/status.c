@@ -1139,7 +1139,8 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_BANANA_BOMB] |= SCB_LUK;
 	StatusChangeFlagTable[SC_PROMOTE_HEALTH_RESERCH] |= SCB_MAXHP;
 	StatusChangeFlagTable[SC_ENERGY_DRINK_RESERCH] |= SCB_MAXSP;
-	StatusChangeFlagTable[SC_VITATA_500] |= SCB_MAXSP;
+	StatusChangeFlagTable[SC_EXTRACT_WHITE_POTION_Z] |= SCB_REGEN;
+	StatusChangeFlagTable[SC_VITATA_500] |= SCB_MAXSP|SCB_REGEN;
 	StatusChangeFlagTable[SC_EXTRACT_SALAMINE_JUICE] |= SCB_ASPD;
 	StatusChangeFlagTable[SC_BOOST500] |= SCB_ASPD;
 	StatusChangeFlagTable[SC_FULL_SWING_K] |= SCB_WATK;
@@ -4354,6 +4355,12 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 		regen->hp += cap_value(regen->hp * sc->data[SC_GT_REVITALIZE]->val3 / 100, 1, SHRT_MAX);
 		regen->state.walk = 1;
 	}
+
+	if( sc->data[SC_EXTRACT_WHITE_POTION_Z] )
+		regen->hp += cap_value(regen->hp * sc->data[SC_EXTRACT_WHITE_POTION_Z]->val1 / 100, 1, SHRT_MAX);
+
+	if( sc->data[SC_VITATA_500] )
+		regen->sp += cap_value(regen->sp * sc->data[SC_VITATA_500]->val1 / 100, 1, SHRT_MAX);
 
 	if( sc->data[SC_CATNIPPOWDER] ) {
 		regen->rate.hp += 100;

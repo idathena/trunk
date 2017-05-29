@@ -5374,9 +5374,13 @@ BUILDIN_FUNC(itemheal)
 {
 	TBL_PC *sd;
 	int hp, sp;
+	bool flag = false;
 
 	hp = script_getnum(st,2);
 	sp = script_getnum(st,3);
+
+	if( script_hasdata(st,4) )
+		flag = (bool)script_getnum(st,4);
 
 	if( potion_flag == 1 ) {
 		potion_hp = hp;
@@ -5387,7 +5391,7 @@ BUILDIN_FUNC(itemheal)
 	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
-	pc_itemheal(sd,sd->itemid,hp,sp);
+	pc_itemheal(sd,sd->itemid,hp,sp,flag);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -21133,7 +21137,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(cutin,"si"),
 	BUILDIN_DEF(viewpoint,"iiiii"),
 	BUILDIN_DEF(heal,"ii"),
-	BUILDIN_DEF(itemheal,"ii"),
+	BUILDIN_DEF(itemheal,"ii?"),
 	BUILDIN_DEF(percentheal,"ii"),
 	BUILDIN_DEF(rand,"i?"),
 	BUILDIN_DEF(countitem,"v?"),
