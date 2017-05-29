@@ -55,8 +55,8 @@ static int atkmods[3][MAX_WEAPON_TYPE];	/// ATK weapon modification for size (si
 static struct eri *sc_data_ers; /// For sc_data entries
 static struct status_data dummy_status;
 
-short current_equip_item_index; /// Contains inventory index of an equipped item. To pass it into the EQUP_SCRIPT [Lupus]
-unsigned int current_equip_combo_pos; /// For combo items we need to save the position of all involved items here
+short current_equip_item_index; /// Contains inventory index of an equipped item. To pass it into the EQUIP_SCRIPT [Lupus]
+unsigned int current_equip_pos; /// For combo items we need to save the position of all involved items here
 int current_equip_card_id; /// To prevent card-stacking (from jA) [Skotlex]
 bool running_npc_stat_calc_event; /// Indicate if OnPCStatCalcEvent is running
 // We need it for new cards 15 Feb 2005, to check if the combo cards are insrerted into the CURRENT weapon only to avoid cards exploits
@@ -3307,7 +3307,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	for (i = 0; i < EQI_MAX; i++) {
 		//We pass INDEX to current_equip_item_index - for EQUIP_SCRIPT (new cards solution) [Lupus]
 		current_equip_item_index = index = sd->equip_index[i];
-		current_equip_combo_pos = 0;
+		current_equip_pos = 0;
 		if (index < 0)
 			continue;
 		if (i == EQI_AMMO)
@@ -3431,7 +3431,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			struct item_combo *combo = NULL;
 
 			current_equip_item_index = -1;
-			current_equip_combo_pos = sd->combos.pos[i];
+			current_equip_pos = sd->combos.pos[i];
 			if (!sd->combos.bonus[i] || !(combo = itemdb_combo_exists(sd->combos.id[i])))
 				continue;
 			//Check combo items
@@ -3463,7 +3463,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	for (i = 0; i < EQI_MAX; i++) {
 		//We pass INDEX to current_equip_item_index - for EQUIP_SCRIPT (new cards solution) [Lupus]
 		current_equip_item_index = index = sd->equip_index[i];
-		current_equip_combo_pos = 0;
+		current_equip_pos = 0;
 		if (index < 0)
 			continue;
 		if (i == EQI_AMMO)
@@ -3516,9 +3516,8 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 
 		if (pd) {
 			if (pd->petDB && pd->petDB->pet_friendly_script && pd->pet.intimate >= battle_config.pet_bonus_min_friendly) {
-				//Temporary fix for 'autobonus' on pets [exneval]
-				current_equip_item_index = sd->equip_index[EQI_GARMENT];
-				current_equip_combo_pos = 0;
+				current_equip_item_index = -1;
+				current_equip_pos = EQP_PET;
 				run_script(pd->petDB->pet_friendly_script,0,sd->bl.id,0);
 				if (!calculating)
 					return 1;

@@ -8637,8 +8637,6 @@ ACMD_FUNC(itemlist)
 				strcat(equipstr, msg_txt(522)); // Top/Mid/Lower Costume Head,
 			if( it->equip&EQP_COSTUME_GARMENT )
 				strcat(equipstr, msg_txt(523)); // Costume Robe,
-			//if( it->equip&EQP_COSTUME_FLOOR )
-				//strcat(equipstr, msg_txt(524)); // Costume Floor,
 			if( it->equip&EQP_AMMO )
 				strcat(equipstr, msg_txt(525)); // Ammo,
 			if( it->equip&EQP_SHADOW_ARMOR )

@@ -1741,7 +1741,7 @@ enum e_joint_break
 };
 
 extern short current_equip_item_index;
-extern unsigned int current_equip_combo_pos;
+extern unsigned int current_equip_pos;
 extern int current_equip_card_id;
 extern bool running_npc_stat_calc_event;
 
