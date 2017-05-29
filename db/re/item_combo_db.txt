@@ -421,7 +421,7 @@
 5007:18913,{ bonus2 bExpAddRace,RC_All,5; }
 5040:5442,{ bonus bAspdRate,3; bonus bVariableCastrate,3; }
 5040:18672,{ bonus bSPrecovRate,3; }
-5040:18673,{ bonus bHealPower2,10; }
+5040:18673,{ bonus bHealPower2,10; bonus bAddItemHealRate,10; }
 5041:18538,{ bonus2 bSubRace,RC_Angel,9; }
 5048:18538,{ bonus2 bSubRace,RC_Demon,9; }
 5066:28319,{ bonus bLuk,2; }
@@ -482,7 +482,7 @@
 15156:20790:22085:28380:28421,{ bonus bMaxHPrate,30; bonus bMaxSPrate,9; bonus2 bSkillAtk,"SU_LUNATICCARROTBEAT",200; }
 18507:18539,{ bonus bUseSPrate,-3; }
 18607:18672,{ bonus bSPrecovRate,3; }
-18607:18673,{ bonus bHealPower2,10; }
+18607:18673,{ bonus bHealPower2,10; bonus bAddItemHealRate,10; }
 18510:18511,{ bonus2 bAddRace,RC_Angel,3; }
 18559:18560,{ bonus bCritAtkRate,5; }
 18563:18564,{ bonus bFixedCastrate,-10; }

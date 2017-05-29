@@ -4173,7 +4173,7 @@ character and produces no other output whatsoever.
 
 ---------------------------------------
 
-*itemheal <hp>,<sp>;
+*itemheal <hp>,<sp>{,<flag>};
 
 This command heals relative amounts of HP and/or SP on the invoking character.
 Unlike heal, this command is intended for use in item scripts. It applies
@@ -4187,6 +4187,8 @@ Example:
     // If the player has 50 vit and no bonuses, this will heal
     // anything from 200 to 300 HP and 5 SP
     itemheal rand(100,150),5;
+
+If <flag> is set to 1, HP and/or SP will be a fixed amounts. By default is 0.
 
 ---------------------------------------
 

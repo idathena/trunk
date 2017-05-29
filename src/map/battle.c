@@ -3354,10 +3354,13 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		if(sc->data[SC_CONCENTRATION])
 			skillratio += sc->data[SC_CONCENTRATION]->val2;
 #endif
-		if(sc->data[SC_CRUSHSTRIKE] && (!skill_id || skill_id == KN_AUTOCOUNTER)) {
-			skillratio += -100 + sc->data[SC_CRUSHSTRIKE]->val2;
-			skill_break_equip(src,src,EQP_WEAPON,2000,BCT_SELF);
-			status_change_end(src,SC_CRUSHSTRIKE,INVALID_TIMER);
+		if(!skill_id || skill_id == KN_AUTOCOUNTER) {
+			if(sc->data[SC_CRUSHSTRIKE]) {
+				skillratio += -100 + sc->data[SC_CRUSHSTRIKE]->val2;
+				skill_break_equip(src,src,EQP_WEAPON,2000,BCT_SELF);
+				status_change_end(src,SC_CRUSHSTRIKE,INVALID_TIMER);
+			} else if(sc->data[SC_GIANTGROWTH])
+				skillratio += 250;
 		}
 		if(sc->data[SC_HEAT_BARREL])
 			skillratio += sc->data[SC_HEAT_BARREL]->val2;
@@ -3741,8 +3744,8 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 				skillratio += 100 * skill_lv;
 			break;
 		case RK_STORMBLAST:
-			//ATK = [{Rune Mastery Skill Level + (Caster's INT / 8)} x 100] %
-			skillratio += -100 + 100 * ((sd ? pc_checkskill(sd,RK_RUNEMASTERY) : 10) + sstatus->int_ / 8);
+			//ATK = [{Rune Mastery Skill Level + (Caster's STR / 8)} x 100] %
+			skillratio += -100 + 100 * ((sd ? pc_checkskill(sd,RK_RUNEMASTERY) : 10) + sstatus->str / 8);
 			break;
 		case RK_PHANTOMTHRUST:
 			//ATK = [{(Skill Level x 50) + (Spear Master Level x 10)} x Caster's Base Level / 150] %
@@ -4595,8 +4598,8 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 				}
 			}
 			if((sce = sc->data[SC_GIANTGROWTH]) && rnd()%100 < sce->val2) {
-				ATK_ADDRATE(wd.damage, wd.damage2, 200);
-				RE_ALLATK_ADDRATE(wd, 200);
+				ATK_ADDRATE(wd.damage, wd.damage2, 100);
+				RE_ALLATK_ADDRATE(wd, 100);
 			}
 			if((sce = sc->data[SC_EXEEDBREAK])) {
 				ATK_ADDRATE(wd.damage, wd.damage2, sce->val2);
@@ -5673,7 +5676,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 	//Initial Values
 	ad.damage = 1;
 	ad.div_ = skill_get_num(skill_id, skill_lv);
-	//Amotion should be 0 for ground skills.
+	//Amotion should be 0 for ground skills
 	ad.amotion = (skill_get_inf(skill_id)&INF_GROUND_SKILL ? 0 : sstatus->amotion);
 	ad.dmotion = tstatus->dmotion;
 	ad.blewcount = skill_get_blewcount(skill_id, skill_lv);
