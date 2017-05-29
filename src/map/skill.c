@@ -8726,7 +8726,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					skill_area_temp[5] = 70 + 7 * i; //Attack Bonus
 					party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 				} else
-					sc_start2(src,bl,type,100,7,pc_checkskill(sd,RK_RUNEMASTERY) * 4,skill_get_time(skill_id,skill_lv));
+					sc_start2(src,bl,type,100,77,pc_checkskill(sd,RK_RUNEMASTERY) * 4,skill_get_time(skill_id,skill_lv));
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			}
 			break;
