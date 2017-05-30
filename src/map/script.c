@@ -20942,6 +20942,23 @@ BUILDIN_FUNC(clan_leave) {
 }
 
 /**
+ * Show clan emblem next to npc name
+ * clan_master(<clan id>);
+ */
+BUILDIN_FUNC(clan_master)
+{
+	struct block_list *bl = map_id2bl(st->oid);
+	int clan_id = script_getnum(st,2);
+
+	if (!bl)
+		return 0;
+
+	sc_start2(NULL,bl,SC_CLAN_INFO,100,0,clan_id,-1);
+	clif_efst_set_enter_unit(bl,AREA);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
  * jobcanentermap("<mapname>"{,<JobID>});
  * Check if (player with) JobID can enter the map.
  * @param mapname Map name
@@ -21619,6 +21636,7 @@ struct script_function buildin_func[] = {
 	//Clan system
 	BUILDIN_DEF(clan_join,"i?"),
 	BUILDIN_DEF(clan_leave,"?"),
+	BUILDIN_DEF(clan_master,"i"),
 	BUILDIN_DEF(jobcanentermap,"s?"),
 	//WoE TE
 	BUILDIN_DEF(agitstart3,""),

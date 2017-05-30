@@ -41,10 +41,10 @@ struct npc_data *fake_nd;
 
 //Linked list of npc source files
 struct npc_src_list {
-	struct npc_src_list* next;
+	struct npc_src_list *next;
 	char name[4]; //Dynamic array, the structure is allocated with extra bytes (string length)
 };
-static struct npc_src_list* npc_src_files = NULL;
+static struct npc_src_list *npc_src_files = NULL;
 
 static int npc_id = START_NPC_NUM;
 static int npc_warp = 0;
@@ -53,6 +53,8 @@ static int npc_script = 0;
 static int npc_mob = 0;
 static int npc_delay_mob = 0;
 static int npc_cache_mob = 0;
+
+struct eri *npc_sc_display_ers = NULL;
 
 //Market Shop
 #if PACKETVER >= 20131223
@@ -1208,7 +1210,7 @@ void run_tomb(struct map_session_data *sd, struct npc_data *nd)
 {
 	char buffer[200];
     char time[10];
-	
+
     strftime(time, sizeof(time), "%H:%M", localtime(&nd->u.tomb.kill_time));
 
 	// @TODO: Find exact color?
@@ -2028,6 +2030,7 @@ void npc_unload_duplicates(struct npc_data *nd)
 int npc_unload(struct npc_data *nd, bool single) {
 	nullpo_ret(nd);
 
+	status_change_clear(&nd->bl, 1);
 	npc_remove_map(nd);
 	map_deliddb(&nd->bl);
 
@@ -2112,6 +2115,15 @@ int npc_unload(struct npc_data *nd, bool single) {
 		}
 		if( nd->u.scr.guild_id )
 			guild_flag_remove(nd);
+		if( nd->sc_display_count ) {
+			unsigned char i;
+
+			for( i = 0; i < nd->sc_display_count; i++ )
+				ers_free(npc_sc_display_ers, nd->sc_display[i]);
+			nd->sc_display_count = 0;
+			aFree(nd->sc_display);
+			nd->sc_display = NULL;
+		}
 	}
 
 	script_stop_sleeptimers(nd->bl.id);
@@ -2126,10 +2138,10 @@ int npc_unload(struct npc_data *nd, bool single) {
 /// Clears the npc source file list
 static void npc_clearsrcfile(void)
 {
-	struct npc_src_list* file = npc_src_files;
+	struct npc_src_list *file = npc_src_files;
 
 	while( file != NULL ) {
-		struct npc_src_list* file_tofree;
+		struct npc_src_list *file_tofree;
 
 		file_tofree = file;
 		file = file->next;
@@ -2146,8 +2158,8 @@ static void npc_clearsrcfile(void)
  */
 int npc_addsrcfile(const char *name, bool loadscript)
 {
-	struct npc_src_list* file;
-	struct npc_src_list* file_prev = NULL;
+	struct npc_src_list *file;
+	struct npc_src_list *file_prev = NULL;
 
 	if( !strcmpi(name, "clear") ) {
 		npc_clearsrcfile();
@@ -2182,8 +2194,8 @@ int npc_addsrcfile(const char *name, bool loadscript)
 /// Removes a npc source file (or all)
 void npc_delsrcfile(const char *name)
 {
-	struct npc_src_list* file = npc_src_files;
-	struct npc_src_list* file_prev = NULL;
+	struct npc_src_list *file = npc_src_files;
+	struct npc_src_list *file_prev = NULL;
 
 	if( strcmpi(name, "all") == 0 )
 	{
@@ -2343,6 +2355,8 @@ struct npc_data *npc_create_npc(int m, int x, int y)
 	nd->bl.x = x;
 	nd->bl.y = y;
 	nd->area_size = AREA_SIZE + 1;
+	nd->sc_display = NULL;
+	nd->sc_display_count = 0;
 
 	return nd;
 }
@@ -4433,7 +4447,7 @@ int npc_reload(void) {
 	//Reprocess npc files
 	npc_process_files(npc_new_min);
 
-	//Re-read the NPC Script Events cache.
+	//Re-read the NPC Script Events cache
 	npc_read_event_script();
 
 	//Execute main initialisation events
@@ -4461,15 +4475,15 @@ int npc_reload(void) {
 }
 
 //Unload all npc in the given file
-bool npc_unloadfile( const char *path ) {
-	DBIterator * iter = db_iterator(npcname_db);
+bool npc_unloadfile(const char *path) {
+	DBIterator *iter = db_iterator(npcname_db);
 	struct npc_data *nd = NULL;
 	bool found = false;
 
 	for( nd = dbi_first(iter); dbi_exists(iter); nd = dbi_next(iter) ) {
-		if( nd->path && strcasecmp(nd->path,path) == 0 ) {
+		if( nd->path && !strcasecmp(nd->path,path) ) {
 			found = true;
-			npc_unload_duplicates(nd);/* unload any npcs which could duplicate this but be in a different file */
+			npc_unload_duplicates(nd); //Unload any npcs which could duplicate this but be in a different file
 			npc_unload(nd, true);
 		}
 	}
@@ -4501,6 +4515,7 @@ void do_final_npc(void) {
 	NPCMarketDB->destroy(NPCMarketDB, npc_market_free);
 #endif
 	ers_destroy(timer_event_ers);
+	ers_destroy(npc_sc_display_ers);
 	npc_clearsrcfile();
 }
 
@@ -4559,11 +4574,12 @@ void do_init_npc(void)
 	npcname_db = strdb_alloc(DB_OPT_BASE,NAME_LENGTH);
 	npc_path_db = strdb_alloc(DB_OPT_BASE|DB_OPT_DUP_KEY|DB_OPT_RELEASE_DATA,80);
 #if PACKETVER >= 20131223
-	NPCMarketDB = strdb_alloc(DB_OPT_BASE, NAME_LENGTH+1);
+	NPCMarketDB = strdb_alloc(DB_OPT_BASE, NAME_LENGTH + 1);
 	npc_market_fromsql();
 #endif
 
 	timer_event_ers = ers_new(sizeof(struct timer_event_data),"clif.c::timer_event_ers",ERS_OPT_NONE);
+	npc_sc_display_ers = ers_new(sizeof(struct sc_display_entry),"npc.c:npc_sc_display_ers",ERS_OPT_NONE);
 
 	npc_process_files(START_NPC_NUM);
 

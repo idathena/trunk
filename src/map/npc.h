@@ -92,7 +92,12 @@ struct npc_data {
 			int spawn_timer;
 		} tomb;
 	} u;
+
+	struct sc_display_entry **sc_display;
+	unsigned char sc_display_count;
 };
+
+struct eri *npc_sc_display_ers;
 
 #define START_NPC_NUM 110000000
 
@@ -186,7 +191,7 @@ void npc_timerevent_quit(struct map_session_data *sd);
 int npc_gettimerevent_tick(struct npc_data *nd);
 int npc_settimerevent_tick(struct npc_data *nd, int newtimer);
 int npc_remove_map(struct npc_data *nd);
-void npc_unload_duplicates (struct npc_data *nd);
+void npc_unload_duplicates(struct npc_data *nd);
 int npc_unload(struct npc_data *nd, bool single);
 int npc_reload(void);
 void npc_read_event_script(void);

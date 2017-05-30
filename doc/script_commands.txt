@@ -9294,5 +9294,11 @@ If <char id> is specified, the specified player is used rather than the attached
 
 ---------------------------------------
 
+*clan_master(<clan id>);
+
+Show the emblem of the given <clan id> to the current NPC.
+
+---------------------------------------
+
 Whew.
 That's about all of them.

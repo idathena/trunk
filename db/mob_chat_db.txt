@@ -44,7 +44,7 @@
 39#0xFF0000#How much will the outside world change if you stay here in solitude for one thousand years?
 40#0xFF0000#Yes! Yearn for your freedom from this confined place, your captivity here will be permanent !!
 41#0xFFFFFF#Millenium Shield!
-42#0xFF0000#I was born to conquer this world! None shall stop me!
+42#0xFF0000#I am invincible, you stupid humans!
 44#0xFF0000#I will end all of you with my exodus joker XIII doom rifle!
 45#0xFF0000#Move! Can't you see I'm busy! I will shoot you If I have to!
 46#0xFF0000#Khahahaha... I love this fresh trigger reaction!

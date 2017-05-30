@@ -680,7 +680,8 @@ void clif_changemapcell(int fd, int16 m, int x, int y, int type, enum send_targe
 
 #define clif_status_load(bl, type, flag) clif_status_change((bl), (type), (flag), 0, 0, 0, 0)
 void clif_status_change(struct block_list *bl, int type, int flag, int tick, int val1, int val2, int val3);
-void clif_efst_set_enter(struct map_session_data *sd, struct block_list *bl, enum send_target target);
+void clif_efst_set_enter_pc(struct map_session_data *sd, struct block_list *bl, enum send_target target);
+void clif_efst_set_enter_unit(struct block_list *bl, enum send_target target);
 
 void clif_wis_message(int fd, const char *nick, const char *mes, int mes_len);
 void clif_wis_end(int fd, int result);
