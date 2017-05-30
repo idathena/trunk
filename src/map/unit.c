@@ -3113,6 +3113,15 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 					aFree(md->lootitem);
 					md->lootitem = NULL;
 				}
+				if( md->sc_display_count ) {
+					unsigned char i;
+
+					for( i = 0; i < md->sc_display_count; i++ )
+						ers_free(mob_sc_display_ers, md->sc_display[i]);
+					md->sc_display_count = 0;
+					aFree(md->sc_display);
+					md->sc_display = NULL;
+				}
 				if( md->guardian_data ) {
 					struct guild_castle *gc = md->guardian_data->castle;
 

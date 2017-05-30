@@ -244,7 +244,12 @@ struct mob_data {
 	 * MvP Tombstone NPC ID
 	 */
 	int tomb_nid;
+
+	struct sc_display_entry **sc_display;
+	unsigned char sc_display_count;
 };
+
+struct eri *mob_sc_display_ers;
 
 enum {
 	MST_TARGET	=	0,

@@ -7650,52 +7650,150 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 }
 
 //[Ind] Fast-Checking sc-display array
-void status_display_add(struct map_session_data *sd, enum sc_type type, int dval1, int dval2, int dval3) {
+void status_display_add(struct block_list *bl, enum sc_type type, int dval1, int dval2, int dval3) {
 	struct sc_display_entry *entry;
+	struct map_session_data *sd = map_id2sd(bl->id);
+	struct npc_data *nd = map_id2nd(bl->id);
+	struct mob_data *md = map_id2md(bl->id);
 	int i;
 
-	for( i = 0; i < sd->sc_display_count; i++ ) {
-		if( sd->sc_display[i]->type == type )
+	switch( bl->type ) {
+		case BL_PC:
+			for( i = 0; i < sd->sc_display_count; i++ ) {
+				if( sd->sc_display[i]->type == type )
+					break;
+			}
+			if( i != sd->sc_display_count ) {
+				sd->sc_display[i]->val1 = dval1;
+				sd->sc_display[i]->val2 = dval2;
+				sd->sc_display[i]->val3 = dval3;
+				return;
+			}
+			entry = ers_alloc(pc_sc_display_ers, struct sc_display_entry);
+			entry->type = type;
+			entry->val1 = dval1;
+			entry->val2 = dval2;
+			entry->val3 = dval3;
+			RECREATE(sd->sc_display, struct sc_display_entry *, ++sd->sc_display_count);
+			sd->sc_display[sd->sc_display_count - 1] = entry;
+			break;
+		case BL_NPC:
+			for( i = 0; i < nd->sc_display_count; i++ ) {
+				if( nd->sc_display[i]->type == type )
+					break;
+			}
+			if( i != nd->sc_display_count ) {
+				nd->sc_display[i]->val1 = dval1;
+				nd->sc_display[i]->val2 = dval2;
+				nd->sc_display[i]->val3 = dval3;
+				return;
+			}
+			entry = ers_alloc(npc_sc_display_ers, struct sc_display_entry);
+			entry->type = type;
+			entry->val1 = dval1;
+			entry->val2 = dval2;
+			entry->val3 = dval3;
+			RECREATE(nd->sc_display, struct sc_display_entry *, ++nd->sc_display_count);
+			nd->sc_display[nd->sc_display_count - 1] = entry;
+			break;
+		case BL_MOB:
+			for( i = 0; i < md->sc_display_count; i++ ) {
+				if( md->sc_display[i]->type == type )
+					break;
+			}
+			if( i != md->sc_display_count ) {
+				md->sc_display[i]->val1 = dval1;
+				md->sc_display[i]->val2 = dval2;
+				md->sc_display[i]->val3 = dval3;
+				return;
+			}
+			entry = ers_alloc(mob_sc_display_ers, struct sc_display_entry);
+			entry->type = type;
+			entry->val1 = dval1;
+			entry->val2 = dval2;
+			entry->val3 = dval3;
+			RECREATE(md->sc_display, struct sc_display_entry *, ++md->sc_display_count);
+			md->sc_display[md->sc_display_count - 1] = entry;
 			break;
 	}
-	if( i != sd->sc_display_count ) {
-		sd->sc_display[i]->val1 = dval1;
-		sd->sc_display[i]->val2 = dval2;
-		sd->sc_display[i]->val3 = dval3;
-		return;
-	}
-	entry = ers_alloc(pc_sc_display_ers, struct sc_display_entry);
-	entry->type = type;
-	entry->val1 = dval1;
-	entry->val2 = dval2;
-	entry->val3 = dval3;
-	RECREATE(sd->sc_display, struct sc_display_entry *, ++sd->sc_display_count);
-	sd->sc_display[sd->sc_display_count - 1] = entry;
 }
 
-void status_display_remove(struct map_session_data *sd, enum sc_type type) {
+void status_display_remove(struct block_list *bl, enum sc_type type) {
+	struct map_session_data *sd = map_id2sd(bl->id);
+	struct npc_data *nd = map_id2nd(bl->id);
+	struct mob_data *md = map_id2md(bl->id);
 	int i;
 
-	for( i = 0; i < sd->sc_display_count; i++ ) {
-		if( sd->sc_display[i]->type == type )
-			break;
-	}
-	if( i != sd->sc_display_count ) {
-		int cursor;
+	switch( bl->type ) {
+		case BL_PC:
+			for( i = 0; i < sd->sc_display_count; i++ ) {
+				if( sd->sc_display[i]->type == type )
+					break;
+			}
+			if( i != sd->sc_display_count ) {
+				int cursor;
 
-		ers_free(pc_sc_display_ers, sd->sc_display[i]);
-		sd->sc_display[i] = NULL;
-		for( i = 0, cursor = 0; i < sd->sc_display_count; i++ ) { //The all-mighty compact-o-matic
-			if( !sd->sc_display[i] )
-				continue;
-			if( i != cursor )
-				sd->sc_display[cursor] = sd->sc_display[i];
-			cursor++;
-		}
-		if( !(sd->sc_display_count = cursor) ) {
-			aFree(sd->sc_display);
-			sd->sc_display = NULL;
-		}
+				ers_free(pc_sc_display_ers, sd->sc_display[i]);
+				sd->sc_display[i] = NULL;
+				for( i = 0, cursor = 0; i < sd->sc_display_count; i++ ) { //The all-mighty compact-o-matic
+					if( !sd->sc_display[i] )
+						continue;
+					if( i != cursor )
+						sd->sc_display[cursor] = sd->sc_display[i];
+					cursor++;
+				}
+				if( !(sd->sc_display_count = cursor) ) {
+					aFree(sd->sc_display);
+					sd->sc_display = NULL;
+				}
+			}
+			break;
+		case BL_NPC:
+			for( i = 0; i < nd->sc_display_count; i++ ) {
+				if( nd->sc_display[i]->type == type )
+					break;
+			}
+			if( i != nd->sc_display_count ) {
+				int cursor;
+
+				ers_free(npc_sc_display_ers, nd->sc_display[i]);
+				nd->sc_display[i] = NULL;
+				for( i = 0, cursor = 0; i < nd->sc_display_count; i++ ) { //The all-mighty compact-o-matic
+					if( !nd->sc_display[i] )
+						continue;
+					if( i != cursor )
+						nd->sc_display[cursor] = nd->sc_display[i];
+					cursor++;
+				}
+				if( !(nd->sc_display_count = cursor) ) {
+					aFree(nd->sc_display);
+					nd->sc_display = NULL;
+				}
+			}
+			break;
+		case BL_MOB:
+			for( i = 0; i < md->sc_display_count; i++ ) {
+				if( md->sc_display[i]->type == type )
+					break;
+			}
+			if( i != md->sc_display_count ) {
+				int cursor;
+
+				ers_free(mob_sc_display_ers, md->sc_display[i]);
+				md->sc_display[i] = NULL;
+				for( i = 0, cursor = 0; i < md->sc_display_count; i++ ) { //The all-mighty compact-o-matic
+					if( !md->sc_display[i] )
+						continue;
+					if( i != cursor )
+						md->sc_display[cursor] = md->sc_display[i];
+					cursor++;
+				}
+				if( !(md->sc_display_count = cursor) ) {
+					aFree(md->sc_display);
+					md->sc_display = NULL;
+				}
+			}
+			break;
 	}
 }
 
@@ -7740,7 +7838,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 	if( !sc ) //Unable to receive status changes
 		return 0;
 
-	if( status_isdead(bl) && type != SC_NOCHAT ) //SC_NOCHAT should work even on dead characters
+	if( bl->type != BL_NPC && status_isdead(bl) && type != SC_NOCHAT ) //SC_NOCHAT should work even on dead characters
 		return 0;
 
 	if( status_change_isDisabledOnMap(type,bl->m) )
@@ -9497,10 +9595,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 #endif
 					; //DEF/MDEF Increase
 				break;
-			case SC_VITALITYACTIVATION:
-				val2 = 50; //Increase HP recovery effects by 50%
-				val3 = 50; //Reduce SP recovery effects by 50%
-				break;
 			case SC_ABUNDANCE:
 				tick_time = 10000;
 				val4 = tick / tick_time;
@@ -10406,7 +10500,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 	}
 
-	if (sd && StatusDisplayType[type]) { //[Ind]
+	if (StatusDisplayType[type]) { //[Ind]
 		int dval1 = 0, dval2 = 0, dval3 = 0;
 
 		switch (type) {
@@ -10422,7 +10516,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				dval1 = val1;
 				break;
 		}
-		status_display_add(sd,type,dval1,dval2,dval3);
+		status_display_add(bl,type,dval1,dval2,dval3);
 	}
 
 	switch (type) {
@@ -11177,8 +11271,8 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 
 	sc->data[type] = NULL;
 
-	if (sd && StatusDisplayType[type])
-		status_display_remove(sd,type);
+	if (StatusDisplayType[type])
+		status_display_remove(bl,type);
 
 	if (sc->option&(OPTION_HIDE|OPTION_CLOAK))
 		invisible = true;

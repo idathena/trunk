@@ -118,6 +118,8 @@ struct s_randomsummon_group {
 
 static DBMap *mob_summon_db; //Random summon DB, struct s_randomsummon_group -> group_id
 
+struct eri *mob_sc_display_ers = NULL;
+
 /*==========================================
  * Local prototype declaration (only required thing)
  *------------------------------------------*/
@@ -1099,6 +1101,9 @@ int mob_spawn(struct mob_data *md)
 
 	if( md->db->option ) //Added for carts, falcons and pecos for cloned monsters [Valaris]
 		md->sc.option = md->db->option;
+
+	md->sc_display = NULL;
+	md->sc_display_count = 0;
 
 	//MvP tomb [GreenBox]
 	if( md->tomb_nid )
@@ -3556,7 +3561,7 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 	if(mob_id >= MOB_CLONE_END)
 		return 0;
 
-	db = mob_db_data[mob_id] = (struct mob_db*)aCalloc(1, sizeof(struct mob_db));
+	db = mob_db_data[mob_id] = (struct mob_db *)aCalloc(1, sizeof(struct mob_db));
 	status = &db->status;
 	strcpy(db->sprite,sd->status.name);
 	strcpy(db->name,sd->status.name);
@@ -3759,7 +3764,7 @@ static int mob_makedummymobdb(int mob_id)
 		return 0;
 	}
 	//Initialize dummy data.
-	mob_dummy = (struct mob_db*)aCalloc(1,sizeof(struct mob_db)); //Initializing the dummy mob.
+	mob_dummy = (struct mob_db *)aCalloc(1,sizeof(struct mob_db)); //Initializing the dummy mob.
 	sprintf(mob_dummy->sprite,"DUMMY");
 	sprintf(mob_dummy->name,"Dummy");
 	sprintf(mob_dummy->jname,"Dummy");
@@ -4009,7 +4014,7 @@ static bool mob_parse_dbrow(char **str)
 
 	//Finally insert monster's data into the database
 	if (mob_db_data[mob_id] == NULL)
-		mob_db_data[mob_id] = (struct mob_db*)aCalloc(1, sizeof(struct mob_db));
+		mob_db_data[mob_id] = (struct mob_db *)aCalloc(1, sizeof(struct mob_db));
 	else //Copy over spawn data
 		memcpy(&db->spawn, mob_db_data[mob_id]->spawn, sizeof(db->spawn));
 
@@ -4991,10 +4996,11 @@ void mob_clear_spawninfo() { //Clear spawn related information for a script relo
 void do_init_mob(void)
 { //Initialize the mob database
 	memset(mob_db_data,0,sizeof(mob_db_data)); //Clear the array
-	mob_db_data[0] = (struct mob_db*)aCalloc(1, sizeof (struct mob_db));	//This mob is used for random spawns
+	mob_db_data[0] = (struct mob_db *)aCalloc(1, sizeof (struct mob_db));	//This mob is used for random spawns
 	mob_makedummymobdb(0); //The first time this is invoked, it creates the dummy mob
 	item_drop_ers = ers_new(sizeof(struct item_drop),"mob.c::item_drop_ers",ERS_OPT_NONE);
 	item_drop_list_ers = ers_new(sizeof(struct item_drop_list),"mob.c::item_drop_list_ers",ERS_OPT_NONE);
+	mob_sc_display_ers = ers_new(sizeof(struct sc_display_entry),"mob.c:mob_sc_display_ers",ERS_OPT_NONE);
 	mob_item_drop_ratio = idb_alloc(DB_OPT_BASE);
 	mob_skill_db = idb_alloc(DB_OPT_BASE);
 	mob_summon_db = idb_alloc(DB_OPT_BASE);
@@ -5040,4 +5046,5 @@ void do_final_mob(void)
 	mob_summon_db->destroy(mob_summon_db, mob_summon_db_free);
 	ers_destroy(item_drop_ers);
 	ers_destroy(item_drop_list_ers);
+	ers_destroy(mob_sc_display_ers);
 }

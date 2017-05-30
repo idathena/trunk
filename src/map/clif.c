@@ -1461,7 +1461,7 @@ int clif_spawn(struct block_list *bl)
 					clif_spiritcharm(sd);
 				if (sd->status.robe)
 					clif_refreshlook(bl,bl->id,LOOK_ROBE,sd->status.robe,AREA);
-				clif_efst_set_enter(sd,bl,AREA);
+				clif_efst_set_enter_pc(sd,bl,AREA);
 				clif_hat_effects(sd,bl,AREA);
 			}
 			break;
@@ -1474,6 +1474,7 @@ int clif_spawn(struct block_list *bl)
 					clif_specialeffect(bl,423,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect(bl,421,AREA);
+				clif_efst_set_enter_unit(bl,AREA);
 #if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
 	#if PACKETVER >= 20130000
@@ -4576,7 +4577,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_sendbgemblem_single(sd->fd,tsd);
 				if (tsd->status.robe)
 					clif_refreshlook(&sd->bl,bl->id,LOOK_ROBE,tsd->status.robe,SELF);
-				clif_efst_set_enter(sd,bl,SELF);
+				clif_efst_set_enter_pc(sd,bl,SELF);
 				clif_hat_effects(sd,bl,SELF);
 			}
 			break;
@@ -4593,6 +4594,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if (nd->size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
+				clif_efst_set_enter_unit(bl,AREA);
 			}
 			break;
 		case BL_MOB: {
@@ -4604,6 +4606,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
+				clif_efst_set_enter_unit(bl,AREA);
 #if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
 	#if PACKETVER >= 20130000
@@ -6088,7 +6091,7 @@ void clif_efst_set_enter_sub(struct block_list *bl, int id, int type, int tick, 
  * @param bl: Objects walking into view
  * @param target: Client send type
  */
-void clif_efst_set_enter(struct map_session_data *sd, struct block_list *bl, enum send_target target) {
+void clif_efst_set_enter_pc(struct map_session_data *sd, struct block_list *bl, enum send_target target) {
 	struct map_session_data *tsd = NULL;
 	unsigned char i;
 
@@ -6123,6 +6126,59 @@ void clif_efst_set_enter(struct map_session_data *sd, struct block_list *bl, enu
 #else
 		clif_status_change_sub(&sd->bl,bl->id,icon,1,tick,tsd->sc_display[i]->val1,tsd->sc_display[i]->val2,tsd->sc_display[i]->val3,target);
 #endif
+	}
+}
+
+/**
+ * Send any active EFST to those around.
+ * @param nd: NPC to send the packet to
+ * @param bl: Objects walking into view
+ * @param target: Client send type
+ */
+void clif_efst_set_enter_unit(struct block_list *bl, enum send_target target) {
+	unsigned char i;
+
+	nullpo_retv(bl);
+
+	switch (bl->type) {
+		case BL_NPC: {
+				struct npc_data *nd = map_id2nd(bl->id);
+
+				for (i = 0; i < nd->sc_display_count; i++) {
+					enum sc_type type = nd->sc_display[i]->type;
+					struct status_change *sc = status_get_sc(bl);
+					const struct TimerData *td = (sc && sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
+					int tick = 0, icon = StatusIconChangeTable[type];
+
+					if (td)
+						tick = DIFF_TICK(td->tick,gettick());
+#if PACKETVER > 20120418
+					clif_efst_set_enter_sub(&nd->bl,bl->id,icon,tick,nd->sc_display[i]->val1,nd->sc_display[i]->val2,nd->sc_display[i]->val3,target);
+#else
+					clif_status_change_sub(&nd->bl,bl->id,icon,1,tick,nd->sc_display[i]->val1,nd->sc_display[i]->val2,nd->sc_display[i]->val3,target);
+#endif
+				}
+			}
+			break;
+		case BL_MOB: {
+				struct mob_data *md = map_id2md(bl->id);
+
+				for (i = 0; i < md->sc_display_count; i++) {
+					enum sc_type type = md->sc_display[i]->type;
+					struct status_change *sc = status_get_sc(bl);
+					const struct TimerData *td = (sc && sc->data[type] ? get_timer(sc->data[type]->timer) : NULL);
+					int tick = 0, icon = StatusIconChangeTable[type];
+
+					if (td)
+						tick = DIFF_TICK(td->tick,gettick());
+#if PACKETVER > 20120418
+					clif_efst_set_enter_sub(&md->bl,bl->id,icon,tick,md->sc_display[i]->val1,md->sc_display[i]->val2,md->sc_display[i]->val3,target);
+#else
+					clif_status_change_sub(&md->bl,bl->id,icon,1,tick,md->sc_display[i]->val1,md->sc_display[i]->val2,md->sc_display[i]->val3,target);
+#endif
+				}
+			}
+			break;
 	}
 }
 
@@ -9391,7 +9447,7 @@ void clif_refresh(struct map_session_data *sd)
 		clif_clearunit_single(sd->bl.id, CLR_DEAD, sd->fd);
 	else
 		clif_changed_dir(&sd->bl, SELF);
-	clif_efst_set_enter(sd, &sd->bl, SELF);
+	clif_efst_set_enter_pc(sd, &sd->bl, SELF);
 	//Unlike vending, resuming buyingstore crashes the client
 	buyingstore_close(sd);
 	mail_clear(sd);
