@@ -3344,11 +3344,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			skillratio += sc->data[SC_OVERTHRUST]->val3;
 		if(sc->data[SC_MAXOVERTHRUST])
 			skillratio += sc->data[SC_MAXOVERTHRUST]->val2;
-		if(sc->data[SC_BERSERK])
-#ifndef RENEWAL
-			skillratio += 100;
-#else
-			skillratio += 200;
+#ifdef RENEWAL
 		if(sc->data[SC_TRUESIGHT])
 			skillratio += 2 * sc->data[SC_TRUESIGHT]->val1;
 		if(sc->data[SC_CONCENTRATION])
@@ -3359,8 +3355,16 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 				skillratio += -100 + sc->data[SC_CRUSHSTRIKE]->val2;
 				skill_break_equip(src,src,EQP_WEAPON,2000,BCT_SELF);
 				status_change_end(src,SC_CRUSHSTRIKE,INVALID_TIMER);
-			} else if(sc->data[SC_GIANTGROWTH])
-				skillratio += 250;
+			} else {
+				if(sc->data[SC_BERSERK])
+#ifdef RENEWAL
+					skillratio += 200;
+#else
+					skillratio += 100;
+#endif
+				if(sc->data[SC_GIANTGROWTH])
+					skillratio += 250 / (map_flag_vs(src->m) ? 2 : 1);
+			}
 		}
 		if(sc->data[SC_HEAT_BARREL])
 			skillratio += sc->data[SC_HEAT_BARREL]->val2;
