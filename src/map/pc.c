@@ -8181,7 +8181,7 @@ int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fi
 		}
 		if(sp) {
 			bonus = 100 + (sd->battle_status.int_<<1) + pc_checkskill(sd,MG_SRECOVERY) * 10 + pc_checkskill(sd,AM_LEARNINGPOTION) * 5;
-			if(potion_flag == 2)
+			if(potion_flag > 1)
 				bonus += 50;
 			tmp = sp * bonus / 100;
 			if(bonus != 100 && tmp > sp)
