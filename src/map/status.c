@@ -9588,12 +9588,15 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_MILLENNIUMSHIELD:
 				clif_millenniumshield(bl,val2);
 				break;
-			case SC_STONEHARDSKIN:
-				val2 = status_get_job_lv(bl) * (sd ? pc_checkskill(sd,RK_RUNEMASTERY) : 10) / 4
+			case SC_STONEHARDSKIN: { //Get src data for Lux Anima effect
+					struct map_session_data *ssd = map_id2sd(src->id);
+
+					val2 = status_get_job_lv(src) * (ssd ? pc_checkskill(ssd,RK_RUNEMASTERY) : 10) / 4
 #ifndef RENEWAL
-					/ 10
+						/ 10
 #endif
-					; //DEF/MDEF Increase
+						; //DEF/MDEF Increase
+				}
 				break;
 			case SC_ABUNDANCE:
 				tick_time = 10000;
@@ -12626,14 +12629,13 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_THORNSTRAP:
 			if( --(sce->val4) >= 0 ) {
-				struct block_list *src = map_id2bl(sce->val2);
-				struct skill_unit_group *group = skill_id2group(sce->val3);
+				struct block_list *src = map_id2bl(sce->val2), *unit_bl = map_id2bl(sce->val3);
 
 				if( !src || status_isdead(src) || src->m != bl->m )
 					break;
 				map_freeblock_lock();
-				if( group )
-					skill_attack(BF_MISC,src,src,bl,group->skill_id,group->skill_lv,tick,SD_LEVEL|SD_ANIMATION);
+				if( unit_bl )
+					skill_attack(BF_MISC,src,unit_bl,bl,status_sc2skill(type),sce->val1,tick,0);
 				if( sc->data[type] ) {
 					sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				}
@@ -12645,17 +12647,14 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 		case SC_BLOODSUCKER:
 			if( --(sce->val4) >= 0 ) {
 				struct block_list *src = map_id2bl(sce->val2);
-				int heal;
 
 				if( !src || status_isdead(src) || src->m != bl->m || distance_bl(src,bl) >= 12 )
 					break;
 				map_freeblock_lock();
-				heal = 200 + 100 * sce->val1 + status_get_int(src);
 				skill_attack(BF_MISC,src,src,bl,status_sc2skill(type),sce->val1,tick,SD_LEVEL|SD_ANIMATION);
 				if( sc->data[type] ) {
 					sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				}
-				status_heal(src,heal * (5 + 5 * sce->val1) / 100,0,0); //5 + 5% per level
 				map_freeblock_unlock();
 				return 0;
 			}
@@ -12984,14 +12983,13 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_SV_ROOTTWIST:
 			if( --(sce->val4) >= 0 ) {
-				struct block_list *src = map_id2bl(sce->val2);
-				struct skill_unit_group *group = skill_id2group(sce->val3);
+				struct block_list *src = map_id2bl(sce->val2), *unit_bl = map_id2bl(sce->val3);
 
 				if( !src || status_isdead(src) || src->m != bl->m )
 					break;
 				map_freeblock_lock();
-				if( group )
-					skill_attack(BF_MAGIC,src,src,bl,SU_SV_ROOTTWIST_ATK,group->skill_lv,tick,SD_LEVEL|SD_ANIMATION);
+				if( unit_bl )
+					skill_attack(BF_MAGIC,src,unit_bl,bl,SU_SV_ROOTTWIST_ATK,sce->val1,tick,0);
 				if( sc->data[type] ) {
 					sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				}

@@ -3065,6 +3065,9 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case EL_STONE_RAIN:
 			dmg.amotion = dmg.dmotion = 0;
 		//Fall through
+		case SU_BITE:
+		case SU_SV_STEMSPEAR:
+		case SU_SCAROFTAROU:
 		case SU_LUNATICCARROTBEAT:
 			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, (flag&1 ? DMG_MULTI_HIT : DMG_NORMAL), 0, false);
 			break;
@@ -3255,6 +3258,9 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				break;
 			case WM_METALICSOUND:
 				status_zap(bl, 0, damage * 100 / (100 * (110 - (sd ? pc_checkskill(sd,WM_LESSON) : 10) * 10)));
+				break;
+			case GN_BLOOD_SUCKER:
+				status_heal(src, damage * (5 + 5 * skill_lv) / 100, 0, 0); //5 + 5% per level
 				break;
 		}
 		if (sd && bl->id != src->id && skill_id != AM_DEMONSTRATION && (dmg.flag&BF_WEAPON || (dmg.flag&BF_MISC &&
@@ -5556,10 +5562,10 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case SU_BITE:
-		case SU_SCAROFTAROU:
 		case SU_SV_STEMSPEAR:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION);
+		case SU_SCAROFTAROU:
+			clif_skill_damage(src,bl,tick,status_get_amotion(src),status_get_dmotion(src),-30000,1,skill_id,skill_lv,DMG_SPLASH);
+			skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
 			if (!flag && status_get_lv(src) >= 30 && (rnd()%100 < (int)(status_get_lv(src) / 30) + 10)) //Custom
 				skill_addtimerskill(src,tick + skill_get_delay(skill_id,skill_lv),bl->id,0,0,skill_id,skill_lv,skill_get_type(skill_id),flag|1);
 			break;
@@ -6875,7 +6881,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case LG_FORCEOFVANGUARD:
 		case SC_REPRODUCE:
 		case KO_YAMIKUMO:
-		case SU_HIDE:
 			if (tsce)
 				i = status_change_end(bl,type,INVALID_TIMER);
 			else {
@@ -10780,6 +10785,14 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_ANIMATION|SD_SPLASH|1,skill_castend_damage_id);
 			break;
 
+		case SU_HIDE:
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			if (tsce)
+				status_change_end(bl,type,INVALID_TIMER);
+			else
+				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
+			break;
+
 		case SU_BUNCHOFSHRIMP:
 			if( !sd || !sd->status.party_id || flag&1 ) {
 				int heal = skill_lv * status_get_max_hp(bl) / 100; //Custom
@@ -13249,7 +13262,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 
 		case UNT_SV_ROOTTWIST:
 			if( !sce )
-				sc_start4(src,bl,type,100,skill_lv,src->id,group->group_id,0,group->limit);
+				sc_start4(src,bl,type,100,skill_lv,src->id,unit->bl.id,0,group->limit);
 			break;
 
 		case UNT_GD_LEADERSHIP:
@@ -13851,7 +13864,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_SEVERE_RAINSTORM:
-			skill_attack(BF_WEAPON,src,&unit->bl,bl,WM_SEVERE_RAINSTORM_MELEE,skill_lv,tick,SD_LEVEL|SD_ANIMATION|SD_SPLASH);
+			skill_attack(BF_WEAPON,src,&unit->bl,bl,WM_SEVERE_RAINSTORM_MELEE,skill_lv,tick,0);
 			break;
 
 		case UNT_POEMOFNETHERWORLD:
@@ -13868,7 +13881,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			if (!(tsc && tsc->data[type])) {
 				int time = group->limit - DIFF_TICK(tick,group->tick);
 
-				sc_start4(src,bl,type,100,skill_lv,src->id,group->group_id,0,time);
+				sc_start4(src,bl,type,100,skill_lv,src->id,unit->bl.id,0,time);
 				group->val2 = bl->id;
 			}
 			break;
