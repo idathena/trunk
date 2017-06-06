@@ -1096,18 +1096,24 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 				break;
 			case AMMO_BULLET:
 			case AMMO_SHELL:
-				if(battle_config.ammo_check_weapon && sd->status.weapon != W_REVOLVER &&
-					sd->status.weapon != W_RIFLE && sd->status.weapon != W_GATLING && sd->status.weapon != W_SHOTGUN) {
+				if(battle_config.ammo_check_weapon && sd->status.weapon != W_REVOLVER && sd->status.weapon != W_RIFLE &&
+					sd->status.weapon != W_GATLING && sd->status.weapon != W_SHOTGUN
+#ifdef RENEWAL
+					&& sd->status.weapon != W_GRENADE
+#endif
+				) {
 					clif_msg(sd,ITEM_BULLET_EQUIP_FAIL);
 					return ITEM_EQUIP_ACK_FAIL;
 				}
 				break;
+#ifndef RENEWAL
 			case AMMO_GRENADE:
 				if(battle_config.ammo_check_weapon && sd->status.weapon != W_GRENADE) {
 					clif_msg(sd,ITEM_BULLET_EQUIP_FAIL);
 					return ITEM_EQUIP_ACK_FAIL;
 				}
 				break;
+#endif
 			case AMMO_CANNONBALL:
 				if(!pc_ismadogear(sd) && (sd->status.class_ == JOB_MECHANIC_T || sd->status.class_ == JOB_MECHANIC)) {
 					clif_msg(sd,ITEM_NEED_MADOGEAR); // Item can only be used when Mado Gear is mounted.
@@ -4817,7 +4823,6 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 		sd->sc.data[SC_CRYSTALIZE] ||
 		sd->sc.data[SC_KAGEHUMI] ||
 		(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOITEM) ||
-		sd->sc.data[SC_HEAT_BARREL_AFTER] ||
 		sd->sc.data[SC_KINGS_GRACE] ||
 		sd->sc.data[SC_SUHIDE]) )
 		return false;
@@ -9646,13 +9651,19 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 					break;
 				case AMMO_BULLET:
 				case AMMO_SHELL:
-					if( id->look != W_REVOLVER && id->look != W_RIFLE && id->look != W_GATLING && id->look != W_SHOTGUN )
+					if( id->look != W_REVOLVER && id->look != W_RIFLE && id->look != W_GATLING && id->look != W_SHOTGUN
+#ifdef RENEWAL
+						&& id->look != W_GRENADE
+#endif
+						)
 						pc_unequipitem(sd,idx,2|8);
 					break;
+#ifndef RENEWAL
 				case AMMO_GRENADE:
 					if( id->look != W_GRENADE )
 						pc_unequipitem(sd,idx,2|8);
 					break;
+#endif
 			}
 		}
 	}

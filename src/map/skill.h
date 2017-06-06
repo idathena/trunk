@@ -2025,9 +2025,9 @@ enum {
 	UNT_GLITTERING_GREED,
 	UNT_B_TRAP,
 	UNT_FIRE_RAIN,
-
 	UNT_CATNIPPOWDER,
 	UNT_SV_ROOTTWIST,
+	UNT_GROUNDDRIFT_NEUTRAL,
 
 	//Guild Auras
 	UNT_GD_LEADERSHIP = 0xc1,
@@ -2088,7 +2088,7 @@ void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_l
 
 void skill_toggle_magicpower(struct block_list *bl, uint16 skill_id);
 
-bool skill_check_condition_target(struct block_list *src, struct block_list *bl, unsigned short skill_id);
+bool skill_check_condition_target(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv);
 void skill_reveal_trap_inarea(struct block_list *src, int range, int x, int y);
 
 //Skill Damage target

@@ -208,6 +208,12 @@ enum questinfo_types {
 	QTYPE_NONE = 9999
 };
 
+enum vip_status_type {
+	VIP_STATUS_ACTIVE = 1,
+	VIP_STATUS_EXPIRE,
+	VIP_STATUS_REMAINING
+};
+
 #ifndef WIN32 //These are declared in wingdi.h
 	//Font Weights
 	#define FW_DONTCARE   0

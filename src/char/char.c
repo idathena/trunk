@@ -2102,22 +2102,19 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 // Tell client how many pages, kRO sends 17 (Yommy)
 //----------------------------------------
 void char_charlist_notify(int fd, struct char_session_data *sd) {
-	int found = 0, count = 0, i = 0;
-
-	for( i = 0; i < MAX_CHARS; i++ ) {
-		if( sd->found_char[i] != -1 )
-			found = 1;
-		if( i%3 && found ) { //Each page contains 3char max
-			count++;
-			found = 0;
-		}
-	}
-
+#if PACKETVER >= 20151104 //2016 RE clients go here
+	WFIFOHEAD(fd,10);
+	WFIFOW(fd,0) = 0x9a0;
+	WFIFOL(fd,2) = (sd->char_slots > 3 ? sd->char_slots / 3 : 1);
+	WFIFOL(fd,6) = sd->char_slots;
+	WFIFOSET(fd,10);
+#else
 	WFIFOHEAD(fd,6);
 	WFIFOW(fd,0) = 0x9a0;
 	//Pages to req / send them all in 1 until mmo_chars_fromsql can split them up
-	WFIFOL(fd,2) = (count ? count : 1);
+	WFIFOL(fd,2) = (sd->char_slots > 3 ? sd->char_slots / 3 : 1); //int TotalCnt (nb page to load)
 	WFIFOSET(fd,6);
+#endif
 }
 
 void char_block_character(int fd, struct char_session_data *sd);

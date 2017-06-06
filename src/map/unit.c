@@ -1601,7 +1601,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 			sd = map_id2sd(m_src->id);
 	}
 
-	if( !skill_check_condition_target(src, target, skill_id) )
+	if( !skill_check_condition_target(src, target, skill_id, skill_lv) )
 		return 0;
 
 	if( sd ) {
@@ -2387,9 +2387,6 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 #endif
 		|| (sd && !pc_can_attack_sc(sd,ud->target)) )
 		return 0; //Can't attack under these conditions
-
-	if( sd && sd->sc.count && sd->sc.data[SC_HEAT_BARREL_AFTER] )
-		return 0;
 
 	if( src->m != target->m ) {
 		if( src->type == BL_MOB && mob_warpchase((TBL_MOB *)src,target) )

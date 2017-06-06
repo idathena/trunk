@@ -1227,7 +1227,7 @@
 	export_constant(SC_GENSOU);
 	export_constant(SC_AKAITSUKI);
 	export_constant(SC_HEAT_BARREL);
-	export_constant(SC_HEAT_BARREL_AFTER);
+	export_constant(SC_FALLEN_ANGEL);
 	export_constant(SC_P_ALTER);
 	export_constant(SC_E_CHAIN);
 	export_constant(SC_C_MARKER);
@@ -1410,6 +1410,7 @@
 	export_constant(SC_GVG_CURSE);
 	export_constant(SC_GVG_SILENCE);
 	export_constant(SC_GVG_BLIND);
+	export_constant(SC_MAGICALBULLET);
 
 	/* Status icons */
 	export_constant(SI_BLANK);
@@ -2653,6 +2654,11 @@
 	export_constant(QTYPE_WARG);
 	export_constant(QTYPE_WARG2);
 	export_constant(QTYPE_NONE);
+
+	/* VIP status */
+	export_constant(VIP_STATUS_ACTIVE);
+	export_constant(VIP_STATUS_EXPIRE);
+	export_constant(VIP_STATUS_REMAINING);
 
 	/* Font weight types */
 	export_constant(FW_DONTCARE);

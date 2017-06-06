@@ -801,9 +801,9 @@ struct {
 #define pc_ischasewalk(sd)    ( (sd)->sc.option&OPTION_CHASEWALK )
 
 #ifdef VIP_ENABLE
-	#define pc_isvip(sd)      ( (sd)->vip.enabled ? 1 : 0 )
+	#define pc_isvip(sd)      ( (sd)->vip.enabled ? true : false )
 #else
-	#define pc_isvip(sd)      ( 0 )
+	#define pc_isvip(sd)      ( false )
 #endif
 
 #ifdef NEW_CARTS

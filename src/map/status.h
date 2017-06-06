@@ -566,7 +566,7 @@ typedef enum sc_type {
 
 	//Rebellion
 	SC_HEAT_BARREL,
-	SC_HEAT_BARREL_AFTER,
+	SC_FALLEN_ANGEL,
 	SC_P_ALTER,
 	SC_E_CHAIN,
 	SC_C_MARKER,
@@ -773,6 +773,8 @@ typedef enum sc_type {
 	SC_GVG_CURSE,
 	SC_GVG_SILENCE,
 	SC_GVG_BLIND,
+
+	SC_MAGICALBULLET,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 
@@ -1943,9 +1945,8 @@ enum e_status_change_clear_buffs_flags {
 	SCCB_BUFFS            = 0x01,
 	SCCB_DEBUFFS          = 0x02,
 	SCCB_CHEM_PROTECT     = 0x04,
-	SCCB_BANISHING_BUSTER = 0x08,
-	SCCB_REFRESH          = 0x10,
-	SCCB_LUXANIMA         = 0x20,
+	SCCB_REFRESH          = 0x08,
+	SCCB_LUXANIMA         = 0x10,
 };
 
 //Enum for bonus_script's flag [Cydh]
