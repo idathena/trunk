@@ -928,7 +928,7 @@ job_gun,220,132,3	script	Ivan Sidorenko#2	10062,{
 	}
 }
 
-job_gun,220,138,4	shop	Prop Vending Machine	2_VENDING_MACHINE1,13210:-1,13211:-1,13212:-1,13213:-1,13214:-1,7663:-1,7664:-1,7665:-1
+job_gun,220,138,4	shop	Prop Vending Machine	2_VENDING_MACHINE1,25187:-1,7663:-1,7664:-1,7665:-1
 
 job_gun,216,138,4	script	Butler Karlex	1_M_01,{
 	mes "[Butler Karlex]";

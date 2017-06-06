@@ -461,6 +461,9 @@ void initChangeTables(void) {
 		);
 	set_sc( GS_ADJUSTMENT        , SC_ADJUSTMENT      , SI_GS_ADJUSTMENT   , SCB_HIT|SCB_FLEE );
 	set_sc( GS_INCREASING        , SC_INCREASING      , SI_GS_ACCURACY     , SCB_AGI|SCB_DEX|SCB_HIT );
+#ifdef RENEWAL
+	set_sc( GS_MAGICALBULLET     , SC_MAGICALBULLET   , SI_GS_MAGICAL_BULLET, SCB_NONE );
+#endif
 	set_sc( GS_GATLINGFEVER      , SC_GATLINGFEVER    , SI_GS_GATLINGFEVER , SCB_FLEE|SCB_SPEED|SCB_ASPD
 #ifndef RENEWAL
 		|SCB_BATK
@@ -826,9 +829,10 @@ void initChangeTables(void) {
 	set_sc_with_vfx( RL_C_MARKER, SC_C_MARKER           , SI_C_MARKER             , SCB_FLEE          );
 	set_sc( RL_H_MINE           , SC_H_MINE             , SI_H_MINE               , SCB_NONE          );
 	set_sc( RL_P_ALTER          , SC_P_ALTER            , SI_P_ALTER              , SCB_NONE          );
+	set_sc( RL_FALLEN_ANGEL     , SC_FALLEN_ANGEL       , SI_FALLEN_ANGEL         , SCB_NONE          );
 	set_sc( RL_SLUGSHOT         , SC_STUN               , SI_SLUGSHOT             , SCB_NONE          );
 	set_sc_with_vfx( RL_AM_BLAST, SC_ANTI_M_BLAST       , SI_ANTI_M_BLAST         , SCB_NONE          );
-	set_sc( RL_HEAT_BARREL      , SC_HEAT_BARREL        , SI_HEAT_BARREL          , SCB_FLEE|SCB_ASPD );
+	set_sc( RL_HEAT_BARREL      , SC_HEAT_BARREL        , SI_HEAT_BARREL          , SCB_HIT|SCB_ASPD  );
 
 	set_sc( SU_HIDE                 , SC_SUHIDE       , SI_SUHIDE          , SCB_NONE );
 	add_sc( SU_SCRATCH              , SC_BLEEDING     );
@@ -1004,7 +1008,6 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_MOONSTAR] = SI_MOONSTAR;
 	StatusIconChangeTable[SC_SUPER_STAR] = SI_SUPER_STAR;
 	StatusIconChangeTable[SC_QD_SHOT_READY] = SI_E_QD_SHOT_READY;
-	StatusIconChangeTable[SC_HEAT_BARREL_AFTER] = SI_HEAT_BARREL_AFTER;
 	StatusIconChangeTable[SC_STRANGELIGHTS] = SI_STRANGELIGHTS;
 	StatusIconChangeTable[SC_DECORATION_OF_MUSIC] = SI_DECORATION_OF_MUSIC;
 	StatusIconChangeTable[SC_QUEST_BUFF1] = SI_QUEST_BUFF1;
@@ -1313,7 +1316,6 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_DEEPSLEEP]           |= SCS_NOCAST;
 	StatusChangeStateTable[SC_CRYSTALIZE]          |= SCS_NOCAST;
 	StatusChangeStateTable[SC_KINGS_GRACE]         |= SCS_NOCAST;
-	StatusChangeStateTable[SC_HEAT_BARREL_AFTER]   |= SCS_NOCAST;
 
 	//StatusChangeState (SCS_) NOCHAT (skills)
 	StatusChangeStateTable[SC_BERSERK]             |= SCS_NOCHAT;
@@ -5698,6 +5700,8 @@ short status_calc_hit(struct block_list *bl, struct status_change *sc, int hit)
 		hit -= hit * 50 / 100;
 	if(sc->data[SC_ASH])
 		hit -= hit * sc->data[SC_ASH]->val2 / 100;
+	if(sc->data[SC_HEAT_BARREL])
+		hit -= sc->data[SC_HEAT_BARREL]->val4;
 
 	return (short)cap_value(hit,1,SHRT_MAX);
 }
@@ -5768,8 +5772,6 @@ short status_calc_flee(struct block_list *bl, struct status_change *sc, int flee
 		flee -= sc->data[SC_ANGRIFFS_MODUS]->val3;
 	if(sc->data[SC_C_MARKER])
 		flee -= 10;
-	if(sc->data[SC_HEAT_BARREL])
-		flee -= sc->data[SC_HEAT_BARREL]->val4;
 	if(sc->data[SC_SPIDERWEB])
 		flee -= flee * 50 / 100;
 #ifndef RENEWAL
@@ -10302,14 +10304,15 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 
 					val2 = (6 + 2 * val1) * coin; //+Atk%
 					val3 = 5 * coin; //-Fixed cast%
-					val4 = 75 - 5 * val1; //-Flee
+					val4 = 25 + 5 * val1; //-Hit
 				}
 				break;
 			case SC_P_ALTER: {
 					uint8 coin = (uint8)(sd ? sd->spiritball_old : 10);
 
 					val2 = 10 * (val1 + coin); //+Atk
-					val3 = val1 * 15; //+Def (Custom)
+					val3 = status->max_hp * val1 * 5 / 100; //% MaxHP to absorb
+					val4 = 3 + val1; //Hits
 				}
 				break;
 			case SC_ANTI_M_BLAST:
@@ -10588,7 +10591,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC__INVISIBILITY:
 		case SC_VOICEOFSIREN:
 		case SC_ALL_RIDING:
-		case SC_HEAT_BARREL_AFTER:
 		case SC_WEDDING:
 		case SC_XMAS:
 		case SC_SUMMER:
@@ -11060,7 +11062,6 @@ int status_change_clear(struct block_list *bl,int type)
 				case SC_STYLE_CHANGE:
 				case SC_MOONSTAR:
 				case SC_SUPER_STAR:
-				case SC_HEAT_BARREL_AFTER:
 				case SC_STRANGELIGHTS:
 				case SC_DECORATION_OF_MUSIC:
 				case SC_QUEST_BUFF1:
@@ -11700,10 +11701,6 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 				if (sce->val1 == MOBID_LOLI_RURI)
 					clif_ShowScript(bl,"I will be with you for ever!!");
 			}
-			break;
-		case SC_HEAT_BARREL:
-			if (sd)
-				sc_start(bl,bl,SC_HEAT_BARREL_AFTER,100,sce->val1,skill_get_time2(RL_HEAT_BARREL,sce->val1));
 			break;
 		case SC_C_MARKER: {
 				struct map_session_data *sd = map_id2sd(sce->val2);
@@ -13113,7 +13110,6 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
  *  SCCB_BUFFS: Clear Buffs
  *  SCCB_DEBUFFS: Clear Debuffs
  *  SCCB_CHEM_PROTECT: Clear AM_CP_ARMOR/HELM/SHIELD/WEAPON
- *  SCCB_BANISHING_BUSTER: Clear specific buffs through RL_BANISHING_BUSTER
  *  SCCB_REFRESH: Clear specific debuffs through RK_REFRESH
  *  SCCB_LUXANIMA: Bonus Script removed through RK_LUXANIMA
  * @param val1: Additional value
@@ -13121,18 +13117,17 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
 void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 {
 	int i;
-	uint8 j = 0;
 	struct status_change *sc = status_get_sc(bl);
-	enum sc_type types[SC_MAX];
 
 	if( !sc || !sc->count )
 		return;
 
 	map_freeblock_lock();
 
-	if( type&(SCCB_DEBUFFS|SCCB_REFRESH) ) //Debuffs and spesific debuffs with a RK_REFRESH
+	if( type&(SCCB_DEBUFFS|SCCB_REFRESH) ) { //Debuffs and spesific debuffs with a RK_REFRESH
 		for( i = SC_COMMON_MIN; i <= SC_COMMON_MAX; i++ )
 			status_change_end(bl, (sc_type)i, INVALID_TIMER);
+	}
 
 	for( i = SC_COMMON_MAX + 1; i < SC_MAX; i++ ) {
 		if( !sc->data[i] )
@@ -13206,7 +13201,6 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 			case SC_MTF_MATK:
 			case SC_MTF_MLEATKED:
 			case SC_MTF_CRIDAMAGE:
-			case SC_HEAT_BARREL_AFTER:
 			case SC_STRANGELIGHTS:
 			case SC_DECORATION_OF_MUSIC:
 			case SC_QUEST_BUFF1:
@@ -13303,33 +13297,16 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 			//The rest are buffs that can be removed
 			case SC_BERSERK:
 			case SC_SATURDAYNIGHTFEVER:
-				if( !(type&(SCCB_BUFFS|SCCB_BANISHING_BUSTER)) )
+				if( !(type&(SCCB_BUFFS)) )
 					continue;
 				sc->data[i]->val2 = 0;
 				break;
 			default:
-				if( !(type&(SCCB_BUFFS|SCCB_BANISHING_BUSTER)) )
+				if( !(type&(SCCB_BUFFS)) )
 					continue;
 				break;
 		}
-		if( !(type&SCCB_BANISHING_BUSTER) )
-			status_change_end(bl, (sc_type)i, INVALID_TIMER);
-		types[j] = (sc_type)i;
-		j++;
-	}
-
-	if( type&SCCB_BANISHING_BUSTER ) { //Remove 'skill level' random buffs [exneval]
-		uint8 k, x;
-
-		for( x = j - 1; x > 0; x-- ) {
-			uint8 y = rnd()%(x + 1);
-			enum sc_type tmp_type = types[x];
-
-			types[x] = types[y];
-			types[y] = tmp_type;
-		}
-		for( k = 0; k < val1; k++ )
-			status_change_end(bl, types[k], INVALID_TIMER);
+		status_change_end(bl, (sc_type)i, INVALID_TIMER);
 	}
 
 	if( bl->type == BL_PC ) { //Removes bonus_script
@@ -13338,8 +13315,6 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 			i |= BSF_REM_BUFF;
 		if( type&SCCB_DEBUFFS )
 			i |= BSF_REM_DEBUFF;
-		if( type&SCCB_BANISHING_BUSTER )
-			i |= BSF_REM_ON_BANISHING_BUSTER;
 		if( type&SCCB_REFRESH )
 			i |= BSF_REM_ON_REFRESH;
 		if( type&SCCB_LUXANIMA )

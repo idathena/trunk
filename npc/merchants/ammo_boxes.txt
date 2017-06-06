@@ -29,16 +29,26 @@ alberta,118,157,3	script	Magazine Dealer Kenny::mdk	4_M_01,{
 		mes "easily when they're in Magazines. Now, can I interest you in";
 		mes "anything in particular?";
 		next;
-		switch(select("Wind Sphere Pack:Shadow Sphere Pack:Poison Sphere Pack:Water Sphere Pack:Fire Sphere Pack:Cartridge:Blood Cartridge:Silver Cartridge:Cancel")) {
-		case 1: callsub S_Casing,13204,12144;// <bullet id>, <pack id>
-		case 2: callsub S_Casing,13206,12145;
-		case 3: callsub S_Casing,13205,12146;
-		case 4: callsub S_Casing,13207,12147;
-		case 5: callsub S_Casing,13203,12148;
+		if (checkre(0))
+			set .@menu$,"Wind Bullet Pack:Shadow Bullet Pack:Poison Bullet Pack:Water Bullet Pack:Fire Bullet Pack:Cartridge:Blood Cartridge:Silver Cartridge:Armor Piercing Cartridge:Blazing Cartridge:Freezing Cartridge:Lightning Cartridge:Magical Stone Cartridge:Purifying Cartridge:Cancel";
+		else
+			set .@menu$,"Wind Sphere Pack:Shadow Sphere Pack:Poison Sphere Pack:Water Sphere Pack:Fire Sphere Pack:Cartridge:Blood Cartridge:Silver Cartridge:::::::Cancel";
+		switch(select(.@menu$)) {
+		case 1: callsub S_Casing,(checkre(0)?13229:13204),(checkre(0)?23124:12144);// <bullet id>, <pack id>
+		case 2: callsub S_Casing,(checkre(0)?13232:13206),(checkre(0)?23127:12145);
+		case 3: callsub S_Casing,(checkre(0)?13231:13205),(checkre(0)?23126:12146);
+		case 4: callsub S_Casing,(checkre(0)?13230:13207),(checkre(0)?23125:12147);
+		case 5: callsub S_Casing,(checkre(0)?13228:13203),(checkre(0)?23123:12148);
 		case 6: callsub S_Casing,13200,12149;
 		case 7: callsub S_Casing,13202,12150;
 		case 8: callsub S_Casing,13201,12151;
-		case 9:
+		case 9: callsub S_Casing,13215,22744;
+		case 10: callsub S_Casing,13216,22745;
+		case 11: callsub S_Casing,13217,22746;
+		case 12: callsub S_Casing,13218,22747;
+		case 13: callsub S_Casing,13219,22748;
+		case 14: callsub S_Casing,13220,22749;
+		case 15:
 			mes "[Kenny]";
 			mes "Well, if you ever find";
 			mes "that you have too many";

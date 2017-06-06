@@ -40,7 +40,7 @@ enum e_rank;
 enum { // packet_db
 	MIN_PACKET_DB = 0x064,
 	MAX_PACKET_DB = 0xAFF,
-	MAX_PACKET_VER = 51,
+	MAX_PACKET_VER = 52,
 	MAX_PACKET_POS = 20,
 };
 

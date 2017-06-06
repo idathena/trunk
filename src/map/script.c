@@ -20262,16 +20262,14 @@ BUILDIN_FUNC(bonus_script_clear) {
 
 /** Returns various information about a player's VIP status. Need to enable VIP system
  * vip_status <type>,{"<character name>"};
- * @param type: Info type, 1: VIP status, 2: Expired date, 3: Remaining time
+ * @param type: Info type, see enum vip_status_type
  * @param name: Character name (Optional)
  * @return val: 1 - success, 0 - failed
  */
 BUILDIN_FUNC(vip_status) {
 #ifdef VIP_ENABLE
 	TBL_PC *sd;
-	char vip_str[26];
-	time_t now = time(NULL);
-	int type = script_getnum(st,2);
+	int type;
 
 	if( script_hasdata(st,3) )
 		sd = map_nick2sd(script_getstr(st,3));
@@ -20281,30 +20279,27 @@ BUILDIN_FUNC(vip_status) {
 	if( sd == NULL )
 		return 0;
 
+	type = script_getnum(st,2);
+
 	switch( type ) {
-		case 1: //Get VIP status
+		case VIP_STATUS_ACTIVE: //Get VIP status
 			script_pushint(st,pc_isvip(sd));
 			break;
-		case 2: //Get VIP expire date
-			if( pc_isvip(sd) ) {
-				time_t viptime = sd->vip.time;
-				strftime(vip_str,24,"%Y-%m-%d %H:%M",localtime(&viptime));
-				vip_str[25] = '\0';
-				script_pushstrcopy(st,vip_str);
-			} else
-				script_pushint(st, 0);
-			break;
-		case 3: //Get remaining time
-			if( pc_isvip(sd) ) {
-				time_t viptime_remain = sd->vip.time - now;
-				int year = 0, month = 0, day = 0, hour = 0, min = 0, sec = 0;
-
-				split_time((int)viptime_remain,&year,&month,&day,&hour,&min,&sec);
-				safesnprintf(vip_str,sizeof(vip_str),"%d-%d-%d %d:%d",year,month,day,hour,min);
-				script_pushstrcopy(st,vip_str);
-			} else
+		case VIP_STATUS_EXPIRE: //Get VIP expire date
+			if( pc_isvip(sd) )
+				script_pushint(st,sd->vip.time);
+			else
 				script_pushint(st,0);
 			break;
+		case VIP_STATUS_REMAINING: //Get remaining time
+			if( pc_isvip(sd) )
+				script_pushint(st,sd->vip.time - time(NULL));
+			else
+				script_pushint(st,0);
+			break;
+		default:
+			ShowError("buildin_vip_status: Unsupported type %d.\n",type);
+			return 1;
 	}
 #else
 	script_pushint(st,0);

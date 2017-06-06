@@ -7156,6 +7156,7 @@
 13126,Infinity_Revolver,Infinity Revolver,5,20,,500,175,,7,1,0x01000000,63,2,34,4,100,0,17,{},{},{}
 13127,Crimson_Revolver,Crimson Revolver,5,20,,1000,100,,7,2,0x01000000,63,2,34,3,70,1,17,{ set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); if(BaseLevel>70) bonus bBaseAtk,((BaseLevel-70)/10)*5; },{},{}
 13128,Revolver_Of_Vicious_Mind,Revolver of Vicious Mind,5,20,,1500,150,,7,1,0x01000000,63,2,34,4,160,1,17,{ set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); },{},{}
+13138,Dark_Rose,Dark Rose,5,20,,1800,150,,7,2,0x01000000,63,2,34,3,120,1,17,{ set .@r,getrefine(); bonus bAspdRate,10; bonus bLongAtkRate,(.@r>6?15:0); bonus bAspd,(.@r>8?1:0); },{},{}
 // Guns
 //===================================================================
 13150,Branch,Branch,5,3000,,500,50,,9,3,0x01000000,63,2,34,1,1,1,18,{},{},{}
@@ -7179,12 +7180,12 @@
 13168,Thunder_P,Thunder P,5,76000,,700,80,,9,1,0x01000000,63,2,34,3,70,1,20,{ bonus bSplashRange,1; bonus bHit,-5; bonus bAspdRate,20; },{},{}
 13169,Thunder_P_,Thunder P,5,76000,,700,80,,9,2,0x01000000,63,2,34,3,70,1,20,{ bonus bSplashRange,1; bonus bHit,-5; bonus bAspdRate,20; },{},{}
 13170,Lever_Action_Rifle,Lever Action Rifle,5,20,,770,138,,9,2,0x01000000,63,2,34,3,70,1,18,{ bonus bHit,20; bonus bCritical,50; bonus bAspdRate,-5; },{},{}
-13171,BF_Rifle1,Soldier Rifle,5,0,,0,50,,9,0,0x01000000,63,2,34,3,80,1,18,{ bonus bDex,2; bonus bHit,10; bonus bCritical,10; bonus2 bAddRace,RC_DemiHuman,75; bonus2 bVariableCastrate,"GS_TRACKING",-25; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; bonus bUnbreakableWeapon,0; },{},{}
+13171,BF_Rifle1,Soldier Rifle,5,0,,0,50,,9,0,0x01000000,63,2,34,3,80,1,18,{ bonus bDex,2; bonus bHit,10; bonus bCritical,10; bonus2 bAddRace,RC_DemiHuman,75; bonus2 bFixedCastrate,"GS_TRACKING",-25; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; bonus bUnbreakableWeapon,0; },{},{}
 13172,BF_Gatling_Gun1,Soldier Gatling Gun,5,0,,0,80,,9,0,0x01000000,63,2,34,3,80,1,19,{ bonus bDex,2; bonus2 bAddRace,RC_DemiHuman,35; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; autobonus "{ bonus bBaseAtk,80; bonus2 bHPLossRate,120,1000; }",10,6000,BF_WEAPON,"{ specialeffect2 EF_BASH3D; }"; bonus bUnbreakableWeapon,0; },{},{}
 13173,BF_Shotgun1,Soldier Shotgun,5,0,,0,100,,9,0,0x01000000,63,2,34,3,80,1,20,{ bonus bSplashRange,1; bonus bDex,2; bonus2 bAddRace,RC_DemiHuman,55; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; autobonus "{ bonus bBaseAtk,80; bonus2 bHPLossRate,100,1000; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_BASH3D; }"; bonus bUnbreakableWeapon,0; },{},{}
 13174,BF_Launcher1,Soldier Grenade Launcher,5,0,,0,300,,9,0,0x01000000,63,2,34,3,80,1,21,{ bonus bSplashRange,1; bonus bDex,2; bonus2 bAddRace,RC_DemiHuman,55; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; autobonus "{ bonus bBaseAtk,300; bonus2 bHPLossRate,120,1000; }",30,9000,BF_WEAPON,"{ specialeffect2 EF_BASH3D; }"; bonus bUnbreakableWeapon,0; },{},{}
 13175,Lever_Action_Rifle_C,Lever Action Rifle,5,20,,0,170,,9,0,0x01000000,63,2,34,3,1,0,18,{ bonus bHit,20; bonus bCritical,50; bonus bAspdRate,-5; bonus2 bAddClass,Class_All,40; },{},{}
-13176,Krieger_Rifle1,Glorious Rifle,5,0,,0,90,,9,0,0x01000000,63,2,34,4,80,1,18,{ set .@r,getrefine(); bonus2 bAddRace,RC_DemiHuman,75; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; bonus2 bSkillAtk,"GS_TRIPLEACTION",30; if(.@r>5) { bonus2 bAddRace,RC_DemiHuman,pow((.@r>14?14:.@r)-4,2); bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5; } if(.@r>8) { bonus2 bVariableCastrate,"GS_TRACKING",25; bonus2 bSkillAtk,"GS_TRACKING",.@r*3; } bonus bUnbreakableWeapon,0; },{},{}
+13176,Krieger_Rifle1,Glorious Rifle,5,0,,0,90,,9,0,0x01000000,63,2,34,4,80,1,18,{ set .@r,getrefine(); bonus2 bAddRace,RC_DemiHuman,75; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; bonus2 bSkillAtk,"GS_TRIPLEACTION",30; if(.@r>5) { bonus2 bAddRace,RC_DemiHuman,pow((.@r>14?14:.@r)-4,2); bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5; } if(.@r>8) { bonus2 bFixedCastrate,"GS_TRACKING",-25; bonus2 bSkillAtk,"GS_TRACKING",.@r*3; } bonus bUnbreakableWeapon,0; },{},{}
 13177,Krieger_Gatling1,Glorious Gatling Gun,5,0,,0,90,,9,0,0x01000000,63,2,34,4,80,1,19,{ set .@r,getrefine(); bonus2 bAddRace,RC_DemiHuman,35; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; bonus2 bSkillAtk,"GS_TRIPLEACTION",30; if(.@r>5) { bonus2 bAddRace,RC_DemiHuman,pow((.@r>10?10:.@r)-4,2); bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5; } if(.@r>8) bonus2 bAddClass,Class_All,.@r; bonus bUnbreakableWeapon,0; },{},{}
 13178,Krieger_Shotgun1,Glorious Shotgun,5,0,,0,110,,9,0,0x01000000,63,2,34,4,80,1,20,{ set .@r,getrefine(); bonus2 bAddRace,RC_DemiHuman,55; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; bonus2 bSkillAtk,"GS_TRIPLEACTION",30; if(.@r>5) { bonus2 bAddRace,RC_DemiHuman,pow((.@r>10?10:.@r)-4,2); bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5; } if(.@r>8) { bonus2 bSkillAtk,"GS_SPREADATTACK",.@r*2; bonus3 bAddEffOnSkill,"GS_SPREADATTACK",Eff_Stun,2000; } bonus bUnbreakableWeapon,0; },{},{}
 13179,Krieger_Launcher1,Glorious Grenade Launcher,5,0,,0,330,,9,0,0x01000000,63,2,34,4,80,1,21,{ set .@r,getrefine(); bonus2 bAddRace,RC_DemiHuman,35; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; bonus2 bSkillAtk,"GS_TRIPLEACTION",30; if(.@r>5) { bonus2 bAddRace,RC_DemiHuman,pow((.@r>10?10:.@r)-4,2); bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5; } if(.@r>8) { bonus2 bSkillAtk,"GS_GROUNDDRIFT",.@r*2; bonus3 bAddEffOnSkill,"GS_SPREADATTACK",Eff_Stun,2000; autobonus "{ bonus bAspdRate,20; }",200,20000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; } bonus bUnbreakableWeapon,0; },{},{}
@@ -7208,33 +7209,38 @@
 13199,TEMPEST_,Tempest,5,10,,2500,250,,9,1,0x01000000,63,2,34,4,140,1,19,{ bonus bHit,-25; bonus bCritical,10; bonus bLongAtkRate,20; },{},{}
 // Bullets
 //===================================================================
-13200,Bullet,Bullet,10,1,,2,10,,,,0x01000000,63,2,32768,,1,,3,{},{},{}
+13200,Bullet,Bullet,10,1,,1,25,,,,0x01000000,63,2,32768,,1,,3,{},{},{}
 13201,Silver_Bullet,Silver Bullet,10,15,,2,15,,,,0x01000000,63,2,32768,,1,,3,{ bonus bAtkEle,Ele_Holy; },{},{}
 13202,Shell_Of_Blood,Bloody Shell,10,30,,2,30,,,,0x01000000,63,2,32768,,1,,3,{ bonus2 bAddEff,Eff_Bleeding,100; },{},{}
-13203,Flare_Sphere,Flare Sphere,10,80,,5,50,,,,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Fire; },{},{}
-13204,Lighting_Sphere,Lightning Sphere,10,80,,5,50,,,,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Wind; },{},{}
-13205,Poison_Sphere,Poison Sphere,10,80,,5,50,,,,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Poison; bonus2 bAddEff,Eff_Poison,500; },{},{}
-13206,Blind_Sphere,Blind Sphere,10,80,,5,50,,,,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Dark; bonus2 bAddEff,Eff_Blind,500; },{},{}
-13207,Freezing_Sphere,Freezing Sphere,10,80,,5,50,,,,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Water; },{},{}
+13203,Flare_Sphere,Flare Sphere,10,80,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Fire; },{},{}
+13204,Lighting_Sphere,Lightning Sphere,10,80,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Wind; },{},{}
+13205,Poison_Sphere,Poison Sphere,10,80,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Poison; bonus2 bAddEff,Eff_Poison,500; },{},{}
+13206,Blind_Sphere,Blind Sphere,10,80,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Dark; bonus2 bAddEff,Eff_Blind,500; },{},{}
+13207,Freezing_Sphere,Freezing Sphere,10,80,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Water; },{},{}
 13208,Gong_Bug,Sow Bug,10,0,,5,50,,,,0x01000000,63,2,32768,,50,,3,{ bonus2 bAddEff,Eff_Stun,1000; },{},{}
-13210,Slug_Bullet_1,Slug Ammunition L,10,250,,250,30,,,,0x01000000,63,2,32768,,1,,3,{},{},{}
-13211,Slug_Bullet_2,Slug Ammunition M,10,500,,500,30,,,,0x01000000,63,2,32768,,1,,3,{},{},{}
-13212,Slug_Bullet_3,Slug Ammunition H,10,750,,750,30,,,,0x01000000,63,2,32768,,1,,3,{},{},{}
-13213,Slug_Bullet_4,Slug Ammunition SH,10,1000,,1000,30,,,,0x01000000,63,2,32768,,1,,3,{},{},{}
-13214,Slug_Bullet_5,Slug Ammunition XH,10,1200,,1200,30,,,,0x01000000,63,2,32768,,1,,3,{},{},{}
-13215,AP_Ammo,Armor-Piercing Bullet,10,15,,2,50,,,0,0x01000000,63,2,32768,,100,,3,{ bonus bIgnoreDefClass,Class_Normal; },{},{}
-13216,Blaze_Bullet,Blazing Bullet,10,10,,2,40,,,0,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Fire; },{},{}
-13217,Freezing_Bullet,Freezing Bullet,10,10,,2,40,,,0,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Water; },{},{}
-13218,Electric_Shock_Bullet,Lightning Bullet,10,10,,2,40,,,0,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Wind; },{},{}
-13219,Magical_Stone_Bullet,Magical Stone Bullet,10,10,,2,40,,,0,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Earth; },{},{}
-13220,Sanctified_Bullet,Purifying Bullet,10,10,,2,40,,,0,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Holy; },{},{}
-13221,Silver_Bullet_,Silver Bullet,10,5,,2,15,,,0,0x01000000,63,2,32768,,1,,3,{ bonus bAtkEle,Ele_Holy; },{},{}
-13222,Shell_Of_Blood_,Bloody Shell,10,10,,2,30,,,0,0x01000000,63,2,32768,,1,,3,{ bonus2 bAddEff,Eff_Bleeding,100; },{},{}
-13223,Flare_Sphere_,Flare Sphere,10,15,,5,50,,,0,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Fire; },{},{}
-13224,Lighting_Sphere_,Lightning Sphere,10,15,,5,50,,,0,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Wind; },{},{}
-13225,Poison_Sphere_,Poison Sphere,10,15,,5,50,,,0,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Poison; },{},{}
-13226,Blind_Sphere_,Blind Sphere,10,15,,5,50,,,0,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Dark; },{},{}
-13227,Freezing_Sphere_,Freezing Sphere,10,15,,5,50,,,0,0x01000000,63,2,32768,,1,,5,{ bonus bAtkEle,Ele_Water; },{},{}
+13210,Slug_Bullet_1,Slug Ammunition L,10,250,,250,30,,,,,,,32768,,,,3,{},{},{}
+13211,Slug_Bullet_2,Slug Ammunition M,10,500,,500,30,,,,,,,32768,,,,3,{},{},{}
+13212,Slug_Bullet_3,Slug Ammunition H,10,750,,750,30,,,,,,,32768,,,,3,{},{},{}
+13213,Slug_Bullet_4,Slug Ammunition SH,10,1000,,1000,30,,,,,,,32768,,,,3,{},{},{}
+13214,Slug_Bullet_5,Slug Ammunition XH,10,1200,,1200,30,,,,,,,32768,,,,3,{},{},{}
+13215,AP_Ammo,Armor-Piercing Bullet,10,15,,2,50,,,,0x01000000,63,2,32768,,100,,3,{ bonus bIgnoreDefClass,Class_Normal; },{},{}
+13216,Blaze_Bullet,Blazing Bullet,10,10,,2,40,,,,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Fire; },{},{}
+13217,Freezing_Bullet,Freezing Bullet,10,10,,2,40,,,,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Water; },{},{}
+13218,Electric_Shock_Bullet,Lightning Bullet,10,10,,2,40,,,,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Wind; },{},{}
+13219,Magical_Stone_Bullet,Magical Stone Bullet,10,10,,2,40,,,,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Earth; },{},{}
+13220,Sanctified_Bullet,Purifying Bullet,10,10,,2,40,,,,0x01000000,63,2,32768,,100,,3,{ bonus bAtkEle,Ele_Holy; },{},{}
+13221,Silver_Bullet_,Silver Bullet,10,5,,2,15,,,,0x01000000,63,2,32768,,1,,3,{ bonus bAtkEle,Ele_Holy; },{},{}
+13222,Shell_Of_Blood_,Bloody Shell,10,10,,1,30,,,,0x01000000,63,2,32768,,1,,3,{ bonus2 bAddEff,Eff_Bleeding,100; },{},{}
+13223,Flare_Sphere_,Flare Sphere,10,15,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Fire; },{},{}
+13224,Lighting_Sphere_,Lightning Sphere,10,15,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Wind; },{},{}
+13225,Poison_Sphere_,Poison Sphere,10,15,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Poison; },{},{}
+13226,Blind_Sphere_,Blind Sphere,10,15,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Dark; },{},{}
+13227,Freezing_Sphere_,Freezing Sphere,10,15,,5,50,,,,,,,32768,,,,5,{ bonus bAtkEle,Ele_Water; },{},{}
+13228,Flare_Bullet,Flare Bullet,10,80,,2,20,,,,0x01000000,63,2,32768,,1,,3,{ bonus bAtkEle,Ele_Fire; },{},{}
+13229,Lighting_Bullet,Lightning Bullet,10,80,,2,20,,,,0x01000000,63,2,32768,,1,,3,{ bonus bAtkEle,Ele_Wind; },{},{}
+13230,Ice_Bullet,Ice Bullet,10,80,,2,20,,,,0x01000000,63,2,32768,,1,,3,{ bonus bAtkEle,Ele_Water; },{},{}
+13231,Poison_Bullet,Poison Bullet,10,80,,2,20,,,,0x01000000,63,2,32768,,1,,3,{ bonus bAtkEle,Ele_Poison; bonus2 bAddEff,Eff_Poison,500; },{},{}
+13232,Blind_Bullet,Blind Bullet,10,80,,2,20,,,,0x01000000,63,2,32768,,1,,3,{ bonus bAtkEle,Ele_Dark; bonus2 bAddEff,Eff_Blind,500; },{},{}
 // Shurikens & Kunais
 //===================================================================
 13250,Shuriken,Shuriken,10,4,,5,20,,,,0x02000000,63,2,32768,,1,,6,{},{},{}
@@ -8290,7 +8296,7 @@
 14542,B_Def_Potion,Big Defense Potion,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_GUARD; sc_start SC_DEF_RATE,180000,3; },{},{}
 14543,S_Mdef_Potion,Small Magic Defense Potion,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_SPELLBREAKER; sc_start SC_MDEF_RATE,60000,3; },{},{}
 14544,B_Mdef_Potion,Big Magic Defense Potion,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_SPELLBREAKER; sc_start SC_MDEF_RATE,180000,3; },{},{}
-14545,Battle_Manual_X3,Field Manual 300%,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_EXPBOOST,1800000,200; },{},{}
+14545,Battle_Manual_X3,Field Manual 300%,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_EXPBOOST,1800000,300; },{},{}
 14546,Fire_Cracker_Love,I Love You Firecracker,2,2,,20,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 14547,Fire_Cracker_Wday,Whiteday Firecracker,2,2,,20,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 14548,Fire_Cracker_Valentine,Valentine's Day Firecracker,2,2,,20,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
@@ -10843,6 +10849,11 @@
 22984,Kalona_Milk,Kalona Milk,0,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus2 bHPRegenRate,10,10000; }",180,1,0,SI_DORAM_BUF_01; },{},{}
 22985,Basil,Basil,0,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus2 bSPRegenRate,5,10000; }",180,1,0,SI_DORAM_BUF_02; },{},{}
 23277,Mado_Box,Emergency Magic Gear,2,10000,,3000,,,,,0x00000400,56,2,,,100,,,{ setmadogear 1; },{},{}
+23123,Bullet_Case_Flare,Flare Bullet Cartridge,2,40000,,250,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 13228,500; },{},{}
+23124,Bullet_Case_Lighting,Lightning Bullet Cartridge,2,40000,,250,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 13229,500; },{},{}
+23125,Bullet_Case_Ice,Ice Bullet Cartridge,2,40000,,250,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 13230,500; },{},{}
+23126,Bullet_Case_Poison,Poison Bullet Cartridge,2,40000,,250,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 13231,500; },{},{}
+23127,Bullet_Case_Blind,Blind Bullet Cartridge,2,40000,,250,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 13232,500; },{},{}
 // Shadow Equips
 //===================================================================
 24000,S_T_Str1_Armor,T STR1 Armor Shadow,12,20,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ bonus bStr,1; },{},{}
@@ -11092,6 +11103,7 @@
 24244,S_Reload_Shield,Reload Shadow Shield,12,10,,0,,,,0,0xFFFFFFFF,63,2,262144,,1,1,0,{ set .@r,getrefine(); bonus bDelayrate,-1-(.@r>=9?2:(.@r>=7?1:0)); },{},{}
 24245,S_Reload_Armor,Reload Shadow Armor,12,10,,0,,,,0,0xFFFFFFFF,63,2,65536,,1,1,0,{ set .@r,getrefine(); bonus bDelayrate,-1-(.@r>=9?2:(.@r>=7?1:0)); },{},{}
 25142,Doram_Token,Doram Token,3,0,,0,,,,,,,,,,,,,{},{},{}
+25187,Slug_Bullet,Slug Bullet,3,1200,,1200,,,,,,,,,,,,,{},{},{}
 // New Items
 //===================================================================
 26100,P_Foxtail_Staff2,Eden Foxtail Staff II,5,20,,0,135:165,,1,0,0x04000000,7,2,2,2,40,0,10,{ bonus bDex,4; bonus bInt,4; bonus bLongAtkRate,6; },{},{}
@@ -11115,8 +11127,12 @@
 28200,END_OF_HORIZON,End of Horizon,5,2700000,,2400,410,,9,1,0x01000000,63,2,34,3,110,1,21,{},{},{}
 28201,Southern_Cross_R,Southern Cross,5,2800000,,2000,480,,9,0,0x01000000,63,2,34,3,141,1,21,{ bonus3 bAutoSpell,"GC_CROSSIMPACT",1,50; },{},{}
 28202,Southern_Cross_R_,Southern Cross,5,10,,2000,480,,9,1,0x01000000,63,2,34,3,141,1,21,{ bonus3 bAutoSpell,"GC_CROSSIMPACT",1,50; },{},{}
-28203,Half_BF_Rifle1,Half BF Rifle1,5,0,,0,50,,9,0,0x01000000,63,2,34,3,80,1,18,{ bonus bDex,2; bonus bHit,8; bonus bCritical,8; bonus2 bAddRace,RC_DemiHuman,30; bonus2 bVariableCastrate,"GS_TRACKING",-20; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,10; bonus bUnbreakableWeapon,0; },{},{}
+28203,Half_BF_Rifle1,Half BF Rifle1,5,0,,0,50,,9,0,0x01000000,63,2,34,3,80,1,18,{ bonus bDex,2; bonus bHit,8; bonus bCritical,8; bonus2 bAddRace,RC_DemiHuman,30; bonus2 bFixedCastrate,"GS_TRACKING",-20; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,10; bonus bUnbreakableWeapon,0; },{},{}
 28204,Half_BF_Shotgun1,Half BF Shotgun1,5,0,,0,100,,9,0,0x01000000,63,2,34,3,80,1,20,{ bonus bSplashRange,1; bonus bDex,2; bonus2 bAddRace,RC_DemiHuman,30; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,10; autobonus "{ bonus bBaseAtk,80; bonus2 bHPLossRate,100,1000; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_BASH3D; }"; bonus bUnbreakableWeapon,0; },{},{}
+28223,Just_Finish,Just Finish,5,20,,2000,200,,9,2,0x01000000,63,2,34,3,120,1,18,{ set .@r,getrefine(); bonus bLongAtkRate,15; if(.@r>6) { bonus2 bSkillAtk,"RL_MASS_SPIRAL",30; bonus2 bSkillAtk,"RL_AM_BLAST",30; } bonus2 bSkillCooldown,"RL_AM_BLAST",(.@r>8?-1000:0); },{},{}
+28224,Dust_Fire,Dust Fire,5,20,,1300,300,,5,2,0x01000000,63,2,34,3,120,1,20,{ set .@r,getrefine(); bonus bSplashRange,1; bonus2 bAddEff,Eff_Blind,100; bonus2 bSkillAtk,"RL_S_STORM",(.@r>6?15:0); bonus2 bSkillAtk,"RL_BANISHING_BUSTER",(.@r>8?15:0); },{},{}
+28225,Burning_Rose,Burning Rose,5,20,,2500,200,,9,2,0x01000000,63,2,34,3,120,1,19,{ set .@r,getrefine(); bonus bLongAtkRate,15; bonus2 bSkillAtk,"RL_FIRE_RAIN",(.@r>6?30:0); bonus2 bSkillCooldown,"RL_FIRE_RAIN",(.@r>8?-1000:0); },{},{}
+28226,Revenge,Revenge,5,20,,1800,350,,9,2,0x01000000,63,2,34,3,120,1,21,{ set .@r,getrefine(); bonus bLongAtkRate,20; bonus2 bSkillAtk,"RL_D_TAIL",(.@r>6?15:0); bonus2 bSkillCooldown,"RL_H_MINE",(.@r>8?-1000:0); },{},{}
 28306,Bless_Of_Moon,Luna's Blessing,4,0,,100,,5,,1,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bMdef,2; bonus bAllStats,1; bonus5 bAutoSpell,"CG_TAROTCARD",5,100,BF_WEAPON|BF_MAGIC,1; },{},{}
 28310,Earring_Of_Sarah_L,Sarah's Left Earring,4,0,,100,,0,,0,0xFFFFFFFF,63,2,136,,145,0,0,{ skill "AL_HEAL",1; },{},{}
 28311,Earring_Of_Sarah_R,Sarah's Right Earring,4,0,,100,,0,,0,0xFFFFFFFF,63,2,136,,145,0,0,{ skill "AL_TELEPORT",1; },{},{}
