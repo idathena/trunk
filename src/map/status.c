@@ -3413,8 +3413,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		}
 	}
 
-	if (sd->equip_index[EQI_AMMO] >= 0) {
-		index = sd->equip_index[EQI_AMMO];
+	if ((index = sd->equip_index[EQI_AMMO]) >= 0) {
 		if (sd->inventory_data[index]) { //Arrows
 			sd->bonus.arrow_atk += sd->inventory_data[index]->atk;
 			sd->state.lr_flag = 2;
