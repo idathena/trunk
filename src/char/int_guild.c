@@ -316,7 +316,7 @@ int inter_guild_tosql(struct guild *g,int flag)
 }
 
 // Read guild from sql
-struct guild * inter_guild_fromsql(int guild_id)
+struct guild *inter_guild_fromsql(int guild_id)
 {
 	struct guild *g;
 	char *data;
@@ -390,8 +390,8 @@ struct guild * inter_guild_fromsql(int guild_id)
 	}
 
 	// load guild member info
-	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `account_id`,`char_id`,`hair`,`hair_color`,`gender`,`class`,`lv`,`exp`,`exp_payper`,`online`,`position`,`name` "
-		"FROM `%s` WHERE `guild_id`='%d' ORDER BY `position`", guild_member_db, guild_id) )
+	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `m`.`account_id`,`m`.`char_id`,`m`.`hair`,`m`.`hair_color`,`m`.`gender`,`m`.`class`,`m`.`lv`,`m`.`exp`,`m`.`exp_payper`,`m`.`online`,`m`.`position`,`m`.`name`,coalesce(UNIX_TIMESTAMP(`c`.`last_login`),0) "
+		"FROM `%s` `m` INNER JOIN `%s` `c` on `c`.`char_id`=`m`.`char_id` WHERE `m`.`guild_id`='%d' ORDER BY `position`", guild_member_db, char_db, guild_id) )
 	{
 		Sql_ShowDebug(sql_handle);
 		aFree(g);
@@ -415,6 +415,7 @@ struct guild * inter_guild_fromsql(int guild_id)
 		if( m->position >= MAX_GUILDPOSITION ) // Fix reduction of MAX_GUILDPOSITION [PoW]
 			m->position = MAX_GUILDPOSITION - 1;
 		Sql_GetData(sql_handle, 11, &data, &len); memcpy(m->name, data, zmin(len, NAME_LENGTH));
+		Sql_GetData(sql_handle, 12, &data, NULL); m->last_login = atoi(data);
 		m->modified = GS_MEMBER_UNMODIFIED;
 	}
 
@@ -1188,7 +1189,7 @@ int mapif_parse_CreateGuild(int fd,int account_id,char *name,struct guild_member
 // Return guild info to client
 int mapif_parse_GuildInfo(int fd,int guild_id)
 {
-	struct guild * g = inter_guild_fromsql(guild_id); //We use this because on start-up the info of castle-owned guilds is requied. [Skotlex]
+	struct guild *g = inter_guild_fromsql(guild_id); //We use this because on start-up the info of castle-owned guilds is requied. [Skotlex]
 	if(g)
 	{
 		if (!guild_calcinfo(g))
@@ -1202,7 +1203,7 @@ int mapif_parse_GuildInfo(int fd,int guild_id)
 // Add member to guild
 int mapif_parse_GuildAddMember(int fd,int guild_id,struct guild_member *m)
 {
-	struct guild * g;
+	struct guild *g;
 	int i;
 
 	g = inter_guild_fromsql(guild_id);
@@ -1297,7 +1298,7 @@ int mapif_parse_GuildLeave(int fd, int guild_id, int account_id, int char_id, in
 int mapif_parse_GuildChangeMemberInfoShort(int fd,int guild_id,int account_id,int char_id,int online,int lv,int class_)
 {
 	// Could speed up by manipulating only guild_member
-	struct guild * g;
+	struct guild *g;
 	int i,sum,c;
 	int prev_count, prev_alv;
 
@@ -1349,7 +1350,7 @@ int mapif_parse_GuildChangeMemberInfoShort(int fd,int guild_id,int account_id,in
 // BreakGuild
 int mapif_parse_BreakGuild(int fd,int guild_id)
 {
-	struct guild * g;
+	struct guild *g;
 	
 	g = inter_guild_fromsql(guild_id);
 	if(g==NULL)
@@ -1475,7 +1476,7 @@ int mapif_parse_GuildMemberInfoChange(int fd,int guild_id,int account_id,int cha
 {
 	// Could make some improvement in speed, because only change guild_member
 	int i;
-	struct guild * g;
+	struct guild *g;
 
 	g = inter_guild_fromsql(guild_id);
 	if(g==NULL)
@@ -1623,7 +1624,7 @@ int inter_guild_charname_changed(int guild_id,int account_id, int char_id, char 
 int mapif_parse_GuildPosition(int fd,int guild_id,int idx,struct guild_position *p)
 {
 	// Could make some improvement in speed, because only change guild_position
-	struct guild * g;
+	struct guild *g;
 
 	g = inter_guild_fromsql(guild_id);
 	if(g==NULL || idx<0 || idx>=MAX_GUILDPOSITION)
@@ -1639,7 +1640,7 @@ int mapif_parse_GuildPosition(int fd,int guild_id,int idx,struct guild_position 
 // Guild Skill UP
 int mapif_parse_GuildSkillUp(int fd,int guild_id,uint16 skill_id,int account_id,int max)
 {
-	struct guild * g;
+	struct guild *g;
 	int idx = skill_id - GD_SKILLBASE;
 
 	g = inter_guild_fromsql(guild_id);
@@ -1753,7 +1754,7 @@ int mapif_parse_GuildNotice(int fd,int guild_id,const char *mes1,const char *mes
 
 int mapif_parse_GuildEmblem(int fd,int len,int guild_id,int dummy,const char *data)
 {
-	struct guild * g;
+	struct guild *g;
 
 	g = inter_guild_fromsql(guild_id);
 	if(g==NULL)
@@ -1815,7 +1816,7 @@ int mapif_parse_GuildCastleDataSave(int fd, int castle_id, int index, int value)
 
 int mapif_parse_GuildMasterChange(int fd, int guild_id, const char *name, int len)
 {
-	struct guild * g;
+	struct guild *g;
 	struct guild_member gm;
 	int pos;
 
