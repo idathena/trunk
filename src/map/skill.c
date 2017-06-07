@@ -12787,7 +12787,6 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 			skill_clear_group(src,1); //Delete previous Kaensins/Suitons
 			break;
 		case GS_GROUNDDRIFT: {
-				int element[5] = { ELE_WIND,ELE_DARK,ELE_POISON,ELE_WATER,ELE_FIRE };
 #ifdef RENEWAL
 				int ammo_id[5] = { ITEMID_LIGHTING_BULLET,ITEMID_BLIND_BULLET,ITEMID_POISON_BULLET,ITEMID_ICE_BULLET,ITEMID_FLARE_BULLET };
 				short idx;
@@ -12802,6 +12801,8 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 						val1 = ELE_NEUTRAL;
 				}
 #else
+				int element[5] = { ELE_WIND,ELE_DARK,ELE_POISON,ELE_WATER,ELE_FIRE };
+
 				val1 = status->rhw.ele;
 				if( !val1 )
 					val1 = element[rnd()%5];
