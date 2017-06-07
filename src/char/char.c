@@ -2102,7 +2102,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 // Tell client how many pages, kRO sends 17 (Yommy)
 //----------------------------------------
 void char_charlist_notify(int fd, struct char_session_data *sd) {
-#if PACKETVER >= 20151104 //2016 RE clients go here
+#if PACKETVER > 20151104 //2016 RE clients go here
 	WFIFOHEAD(fd,10);
 	WFIFOW(fd,0) = 0x9a0;
 	WFIFOL(fd,2) = (sd->char_slots > 3 ? sd->char_slots / 3 : 1);
