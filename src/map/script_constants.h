@@ -2161,7 +2161,7 @@
 	export_constant(SI_E_QD_SHOT_READY);
 	export_constant(SI_C_MARKER);
 	export_constant(SI_H_MINE);
-	export_constant(SI_H_MINE_SPLASH);
+	export_constant(SI_H_MINE_EXPLOSION);
 	export_constant(SI_P_ALTER);
 	export_constant(SI_HEAT_BARREL);
 	export_constant(SI_ANTI_M_BLAST);
