@@ -21,7 +21,7 @@
 // See conf/battle/client.conf for other version
 
 #ifndef PACKETVER
-	#define PACKETVER 20160203
+	#define PACKETVER 20161228
 #endif
 
 //Check if the specified packetversion supports the pincode system
@@ -542,6 +542,7 @@ struct guild_member {
 	char name[NAME_LENGTH];
 	struct map_session_data *sd;
 	unsigned char modified;
+	uint32 last_login;
 };
 
 struct guild_position {

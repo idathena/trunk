@@ -714,24 +714,19 @@ void pc_setnewpc(struct map_session_data *sd, int account_id, int char_id, int l
 /**
  * Get equip point for an equip
  * @param sd
- * @param n Equip index in inventory
+ * @param id
  */
-int pc_equippoint(struct map_session_data *sd, int n)
+int pc_equippoint_sub(struct map_session_data *sd, struct item_data *id)
 {
 	int ep = 0;
 
 	nullpo_ret(sd);
 
-	if(!sd->inventory_data[n])
-		return 0;
-
-	if(!itemdb_isequip2(sd->inventory_data[n]))
+	if(!id || !itemdb_isequip2(id))
 		return 0; //Not equippable by players
 
-	ep = sd->inventory_data[n]->equip;
-	if(sd->inventory_data[n]->look == W_DAGGER	||
-		sd->inventory_data[n]->look == W_1HSWORD ||
-		sd->inventory_data[n]->look == W_1HAXE) {
+	ep = id->equip;
+	if(id->look == W_DAGGER	|| id->look == W_1HSWORD || id->look == W_1HAXE) {
 		if((pc_checkskill(sd,AS_LEFT) > 0 ||
 			(sd->class_&MAPID_UPPERMASK) == MAPID_ASSASSIN ||
 			(sd->class_&MAPID_UPPERMASK) == MAPID_KAGEROUOBORO)) { //Kagerou and Oboro can dual wield daggers [Rytech]
@@ -742,6 +737,18 @@ int pc_equippoint(struct map_session_data *sd, int n)
 		}
 	}
 	return ep;
+}
+
+/**
+ * Get equip point for an equip
+ * @param sd
+ * @param n Equip index in inventory
+ */
+int pc_equippoint(struct map_session_data *sd, int n)
+{
+	nullpo_ret(sd);
+
+	return pc_equippoint_sub(sd,sd->inventory_data[n]);
 }
 
 /**
