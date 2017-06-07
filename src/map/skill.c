@@ -12223,7 +12223,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 				int i, dir = map_calc_dir(src,x,y);
 				int sx = x, sy = y;
 
-				for( i = 0; i < 10; i = i + 2 ) {
+				for( i = 0; i < 10; i++ ) {
 					switch( dir ) {
 						case DIR_NORTH: case DIR_NORTHWEST: case DIR_NORTHEAST: sy = y + i; break;
 						case DIR_SOUTHWEST: case DIR_SOUTH: case DIR_SOUTHEAST: sy = y - i; break;
