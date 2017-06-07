@@ -3328,7 +3328,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 		if(hitnumber > 1) { //Needed to allow critical attacks to hit when not hitting more then once
 			wd.div_ = hitnumber;
 			wd.type = DMG_MULTI_HIT;
-			if(is_qds_ready)
+			if(is_qds_ready && !(sc && sc->data[SC_QD_SHOT_READY]))
 				sc_start(src,src,SC_QD_SHOT_READY,100,target->id,skill_get_time(RL_QD_SHOT,1));
 		}
 	}
