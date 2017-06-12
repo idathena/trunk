@@ -403,9 +403,9 @@ unsigned short skill_dummy2skill_id(unsigned short skill_id) {
 			return SU_SV_ROOTTWIST;
 		case SU_PICKYPECK_DOUBLE_ATK:
 			return SU_PICKYPECK;
-		case SU_CN_METEOR_ATK:
+		case SU_CN_METEOR2:
 			return SU_CN_METEOR;
-		case SU_LUNATICCARROTBEAT_ATK:
+		case SU_LUNATICCARROTBEAT2:
 			return SU_LUNATICCARROTBEAT;
 		case NPC_MAXPAIN_ATK:
 			return NPC_MAXPAIN;
@@ -1804,14 +1804,14 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case SU_SV_STEMSPEAR:
 			sc_start(src,bl,SC_BLEEDING,10,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
-		case SU_CN_METEOR_ATK:
+		case SU_CN_METEOR2:
 			sc_start(src,bl,SC_CURSE,20,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case SU_SCAROFTAROU:
 			sc_start(src,bl,SC_BITESCAR,10,skill_lv,skill_get_time(skill_id,skill_lv)); //Custom
 			status_change_start(src,bl,SC_STUN,100,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDTICK); //Custom
 			break;
-		case SU_LUNATICCARROTBEAT_ATK:
+		case SU_LUNATICCARROTBEAT2:
 			sc_start(src,bl,SC_STUN,20,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case MER_INVINCIBLEOFF2:
@@ -3249,7 +3249,8 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case EL_STONE_RAIN:
 			dmg.amotion = dmg.dmotion = 0;
 		//Fall through
-		case SU_LUNATICCARROTBEAT_ATK:
+		case SU_LUNATICCARROTBEAT:
+		case SU_LUNATICCARROTBEAT2:
 			dmg.dmotion = clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, DMG_MULTI_HIT, 0, false);
 			break;
 		case SU_BITE:
@@ -5769,10 +5770,13 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case SU_LUNATICCARROTBEAT:
+		case SU_LUNATICCARROTBEAT2:
 			if (flag&1)
-				skill_attack(BF_WEAPON,src,src,bl,SU_LUNATICCARROTBEAT_ATK,skill_lv,tick,flag);
+				skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 			else {
-				clif_skill_nodamage(src,bl,SU_LUNATICCARROTBEAT_ATK,skill_lv,1);
+				if (sd && pc_search_inventory(sd,ITEMID_CARROT) != INDEX_NOT_FOUND)
+					skill_id = SU_LUNATICCARROTBEAT2;
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,
 					skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
@@ -6039,7 +6043,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if(skill_id == AL_HEAL)
 					status_change_end(bl,SC_BITESCAR,INVALID_TIMER);
 				else if(skill_id == SU_TUNABELLY)
-					flag |= 1|2;
+					flag |= 3;
 
 				clif_skill_nodamage(src,bl,skill_id,(flag ? skill_lv : heal),1);
 				heal_get_jobexp = status_heal(bl,heal,0,flag);
@@ -11759,8 +11763,12 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			break;
 
 		case SU_CN_METEOR:
-			if( sd && pc_checkskill(sd,SU_SPIRITOFLAND) > 0 )
-				sc_start(src,src,SC_DORAM_SVSP,100,skill_lv,skill_get_time(SU_SPIRITOFLAND,1));
+			if( sd ) {
+				if( pc_checkskill(sd,SU_SPIRITOFLAND) > 0 )
+					sc_start(src,src,SC_DORAM_SVSP,100,skill_lv,skill_get_time(SU_SPIRITOFLAND,1));
+				if( pc_search_inventory(sd,ITEMID_CATNIP_FRUIT) != INDEX_NOT_FOUND )
+					skill_id = SU_CN_METEOR2;
+			}
 		//Fall through
 		case WZ_METEOR:
 			{
@@ -12683,6 +12691,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 			break;
 		case WZ_METEOR:
 		case SU_CN_METEOR:
+		case SU_CN_METEOR2:
 			limit = flag;
 			flag = 0; //Flag should not influence anything else for these skills
 			break;
@@ -13670,9 +13679,6 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 				case GS_DESPERADO:
 					if (rnd()%100 < unit->val1)
 						skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,skill_id,skill_lv,tick,0);
-					break;
-				case SU_CN_METEOR:
-					skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,SU_CN_METEOR_ATK,skill_lv,tick,0);
 					break;
 				default:
 					skill_attack(skill_get_type(skill_id),src,&unit->bl,bl,skill_id,skill_lv,tick,0);
@@ -18749,7 +18755,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 				break;
 
 			default:
-				if( group->val2 && (group->skill_id == WZ_METEOR || group->skill_id == SU_CN_METEOR) )
+				if( group->val2 && (group->skill_id == WZ_METEOR || group->skill_id == SU_CN_METEOR || group->skill_id == SU_CN_METEOR2) )
 					break; //Deal damage before expiration
 				skill_delunit(unit);
 				break;
@@ -18799,12 +18805,12 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 					skill_delunit(unit);
 				break;
 			default:
-				if( group->skill_id == WZ_METEOR || group->skill_id == SU_CN_METEOR ) { //Unit will expire the next interval, start dropping Meteor
+				if( group->skill_id == WZ_METEOR || group->skill_id == SU_CN_METEOR || group->skill_id == SU_CN_METEOR2 ) { //Unit will expire the next interval, start dropping Meteor
 					if( !group->val2 && (DIFF_TICK(tick,group->tick) >= group->limit - group->interval || DIFF_TICK(tick,group->tick) >= unit->limit - group->interval) ) {
 						struct block_list *src;
 
 						if( (src = map_id2bl(group->src_id)) ) {
-							clif_skill_poseffect(src,(group->skill_id == SU_CN_METEOR ? SU_CN_METEOR_ATK : group->skill_id),group->skill_lv,unit->bl.x,unit->bl.y,tick);
+							clif_skill_poseffect(src,group->skill_id,group->skill_lv,unit->bl.x,unit->bl.y,tick);
 							group->val2 = 1;
 						}
 					}
@@ -18834,7 +18840,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 				group->target_flag = BCT_NOONE;
 				group->bl_flag = BL_NUL;
 			}
-		} else if( group->skill_id == WZ_METEOR || group->skill_id == SU_CN_METEOR ) {
+		} else if( group->skill_id == WZ_METEOR || group->skill_id == SU_CN_METEOR || group->skill_id == SU_CN_METEOR2 ) {
 			skill_delunit(unit);
 			return 0;
 		}

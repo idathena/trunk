@@ -1484,8 +1484,10 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			int div_ = (skill_id ? skill_get_num(skill_id,skill_lv) : div);
 
 			switch( skill_id ) {
-				case SU_CN_METEOR_ATK:
-				case SU_LUNATICCARROTBEAT_ATK:
+				case SU_CN_METEOR:
+				case SU_CN_METEOR2:
+				case SU_LUNATICCARROTBEAT:
+				case SU_LUNATICCARROTBEAT2:
 					damage = div_ * -1;
 					break;
 				default:
@@ -4318,7 +4320,8 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
 				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
 			break;
-		case SU_LUNATICCARROTBEAT_ATK:
+		case SU_LUNATICCARROTBEAT:
+		case SU_LUNATICCARROTBEAT2:
 			skillratio += 100 + 100 * skill_lv;
 			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
 				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
@@ -4617,6 +4620,12 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADDRATE(wd.damage, wd.damage2, -sce->val2);
 #ifdef RENEWAL
 			ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, -sce->val2);
+#endif
+		}
+		if((sce = sc->data[SC_SHRIMP])) {
+			ATK_ADDRATE(wd.damage, wd.damage2, sce->val2);
+#ifdef RENEWAL
+			ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, sce->val2);
 #endif
 		}
 		if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
@@ -6296,7 +6305,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case SU_SV_STEMSPEAR:
 						skillratio += 600;
 						break;
-					case SU_CN_METEOR_ATK:
+					case SU_CN_METEOR:
+					case SU_CN_METEOR2:
 						skillratio += 100 + 100 * skill_lv;
 						break;
 				}

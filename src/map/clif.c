@@ -12257,7 +12257,7 @@ static void clif_parse_UseSkillToPosSub(int fd, struct map_session_data *sd, uin
 		if( (lv = pc_checkskill(sd, skill_id)) > 0 ) {
 			if( skill_lv > lv )
 				skill_lv = lv;
-			unit_skilluse_pos(&sd->bl, x, y, skill_id,skill_lv);
+			unit_skilluse_pos(&sd->bl, x, y, skill_id, skill_lv);
 		}
 	}
 }

@@ -843,7 +843,7 @@ void initChangeTables(void) {
 	set_sc( SU_SCAROFTAROU          , SC_BITESCAR     , SI_BITESCAR        , SCB_NONE  );
 	set_sc( SU_ARCLOUSEDASH         , SC_ARCLOUSEDASH , SI_ARCLOUSEDASH    , SCB_AGI|SCB_SPEED );
 	set_sc( SU_TUNAPARTY            , SC_TUNAPARTY    , SI_TUNAPARTY       , SCB_NONE  );
-	set_sc( SU_BUNCHOFSHRIMP        , SC_SHRIMP       , SI_SHRIMP          , SCB_BATK|SCB_MATK );
+	set_sc( SU_BUNCHOFSHRIMP        , SC_SHRIMP       , SI_SHRIMP          , SCB_MATK );
 	set_sc( SU_FRESHSHRIMP          , SC_FRESHSHRIMP  , SI_FRESHSHRIMP     , SCB_NONE  );
 	set_sc( SU_HISS                 , SC_HISS         , SI_HISS            , SCB_FLEE2 );
 	set_sc( SU_NYANGGRASS           , SC_NYANGGRASS   , SI_NYANGGRASS      , SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2  );
@@ -5449,8 +5449,6 @@ unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc,
 		batk += batk * sc->data[SC_BLOODLUST]->val2 / 100;
 	if(sc->data[SC_FLEET])
 		batk += batk * sc->data[SC_FLEET]->val3 / 100;
-	if(sc->data[SC_SHRIMP])
-		batk += batk * sc->data[SC_SHRIMP]->val2 / 100;
 	if(sc->data[SC_CURSE])
 		batk -= batk * 25 / 100;
 #ifdef RENEWAL
@@ -10409,15 +10407,20 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( sd && (sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER )
 					val4 = 10; //Ranged Atk increase
 				break;
-			case SC_SHRIMP:
-				val2 = 10; //Batk%, Matk%
+			case SC_SHRIMP: {
+					int heal = status_get_matk(src, 3);
+
+					heal += (15 * ((int)((status_get_lv(src) - 4) / 5.0 + 1) + (int)((status_get_int(src) - 4) / 5.0 + 1))); //Heal formula [exneval]
+					status_heal(bl,heal,0,3);
+					val2 = 10; //Atk%, Matk%
+				}
 				break;
 			case SC_FRESHSHRIMP: {
 					struct map_session_data *ssd = map_id2sd(src->id);
-					struct status_data *b_status = status_get_base_status(src);
-					int bInt = b_status->int_;
 
-					val2 = 8 * ((int)((status_get_lv(src) - 2) / 5.0 + 1) + (int)((bInt - 4) / 5.0 + 1)) + bInt - ((bInt - 1) / 3 + 1); //Heal
+					//Heal formula [exneval]
+					val2 = 8 * ((int)((status_get_lv(src) - 2) / 5.0 + 1) + (int)((status_get_int(src) - 4) / 5.0 + 1));
+					val2 += status_get_int(src) - ((status_get_int(src) - 1) / 3 + 1);
 					if( ssd ) {
 						if( pc_checkskill(ssd,SU_POWEROFSEA) > 0 ) {
 							val2 += val2 * 10 / 100;
@@ -10449,7 +10452,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 100; //Flee
 				break;
 			case SC_CHATTERING:
-				val2 = 100; //eATK & eMATK
+				val2 = 100; //Watk & Matk
 				sc_start(src,bl,SC_DORAM_WALKSPEED,100,50,skill_get_time2(SU_CHATTERING,val1));
 				break;
 			case SC_DORAM_MATK:
