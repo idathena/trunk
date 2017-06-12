@@ -2071,7 +2071,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 	offset += 4;
 #endif
 #if PACKETVER >= 20110111
-	WBUFL(buf,128) = p->robe;
+	WBUFL(buf,128) = (p->class_ != JOB_SUMMONER ? p->robe : 0);
 	offset += 4;
 #endif
 #if PACKETVER != 20111116 //2011-11-16 wants 136, ask gravity

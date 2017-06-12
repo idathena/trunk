@@ -8714,7 +8714,7 @@ void battle_adjust_conf()
 		battle_config.feature_roulette = 0;
 	}
 #elif PACKETVER >= 20150401
-	if (battle_config.feature_auction) {
+	if (battle_config.feature_roulette) {
 		ShowWarning("conf/battle/feature.conf roulette is enabled but it is not available for clients from 2015-04-01 on, disabling...\n");
 		battle_config.feature_roulette = 0;
 	}
