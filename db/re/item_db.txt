@@ -1357,7 +1357,7 @@
 2185,Magic_Reflector,Magic Reflector,4,20,,1000,,50,,1,0xFFFFFFFF,63,2,32,,99,1,3,{ set .@r,getrefine(); bonus bMdef,10; bonus bMagicDamageReturn,3+(.@r>=9?6:(.@r>=7?3:0)); },{},{}
 2186,Revised_Encyclopedia,Revised Encyclopedia,4,20,,200,,50,,1,0x00410100,63,2,32,,99,1,4,{ set .@r,getrefine(); bonus bMatk,5+(.@r>=9?5:0); bonus bInt,3; bonus bDex,2; bonus bCritical,3+(.@r>=7?2:0); },{},{}
 2187,Gray_Shield,Gray Shield,4,20,,2000,,75,,1,0xFFFFFFFF,56,2,32,,120,1,3,{ set .@r,getrefine(); bonus2 bSubEle,Ele_Holy,30+.@r; bonus bMdef,10+.@r/3; },{},{}
-2188,Svalinn,Svalinn,4,20,,500,,80,,1,0xFFFFFFFF,63,2,32,,65,1,3,{ set .@r,getrefine(); bonus bMdef,5; bonus bMaxHPrate,.@r/3; bonus2 bSubEle,Ele_Water,10+(.@r/3)*5; },{},{}
+2188,Svalinn_J,Svalinn,4,20,,500,,80,,1,0xFFFFFFFF,63,2,32,,65,1,3,{ set .@r,getrefine(); bonus bMdef,5; bonus bMaxHPrate,.@r/3; bonus2 bSubEle,Ele_Water,10+(.@r/3)*5; },{},{}
 2189,Mad_Bunny,Mad Bunny,4,20,,100,,40,,1,0xFFFFFFFF,63,2,32,,30,1,6,{ bonus2 bSubEle,Ele_All,5; bonus bMdef,6; bonus bDex,1; },{},{}
 2190,Ancient_Shield_Of_Aeon,Ancient Shield of Aeon,4,20,,200,,5,,1,0x000FDF80,63,2,32,,130,1,2,{ bonus2 bSubEle,Ele_Neutral,10; bonus2 bSubEle,Ele_Fire,10; bonus2 bSubEle,Ele_Water,10; bonus2 bSubEle,Ele_Wind,10; bonus2 bSubEle,Ele_Earth,10; bonus2 bSubEle,Ele_Dark,10; bonus2 bSubEle,Ele_Holy,10; bonus2 bSubEle,Ele_Ghost,10; bonus bMaxHP,500; bonus bMaxSP,50; if(getrefine()>=14) skill "MG_STONECURSE",5; },{},{}
 2196,White_Gold_Shield,White Gold Shield,4,20,,1800,,140,,1,0xFFFFFFFF,63,2,32,,100,1,3,{ autobonus2 "{ bonus bMagicDamageReturn,20; }",20,2000,BF_MAGIC; },{},{}
@@ -9496,7 +9496,7 @@
 18740,Hair_Of_The_Strong,RMSC2012 Special Costume,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,0,0,879,{},{},{}
 18741,C_Will_O_Wisp,Costume Will O Wisp,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,880,{},{ sc_start SC_STRANGELIGHTS,-1,0; },{ sc_end SC_STRANGELIGHTS; }
 18742,C_MoonStar_Accessory,Costume Moon and Stars,4,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,1,0,881,{},{ sc_start SC_MOONSTAR,-1,0; },{ sc_end SC_MOONSTAR; }
-18743,Spirit_Of_Chung_E,Spirit of Chung E,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,882,{},{},{}
+18743,C_Spirit_Of_Chung_E,Costume Spirit of Chung E,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,882,{},{},{}
 18744,C_World_Star,Costume Twilight,4,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,1,0,883,{},{ sc_start SC_SUPER_STAR,-1,0; },{ sc_end SC_SUPER_STAR; }
 18745,Choco_Stick_In_Mouth,Choco Stick In Mouth,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1,,10,0,884,{ bonus bMaxSP,50; },{},{}
 18746,Chilly_Breath,Chilly Breath,4,20,,100,,0,,0,0xFFFFFFFF,63,2,1,,10,0,885,{ bonus bInt,1; },{},{}
@@ -9609,7 +9609,7 @@
 18857,Curupira_Hat,Curupira Hat,4,20,,100,,20,,1,0xFFFFFFFF,63,2,256,,1,1,974,{ bonus bDex,3; bonus2 bAddEffWhenHit,Eff_Confusion,500; },{},{}
 18859,Angeling_Bubble,Angeling Bubble,4,20,,50,,5,,0,0xFFFFFFFF,63,2,1,,1,0,975,{ bonus bDex,1; bonus bMatkRate,2; bonus bMaxHP,100; },{},{}
 18860,Preschool_Hat,Preschool Hat,4,20,,100,,8,,1,0xFFFFFFFF,63,2,256,,1,1,977,{ bonus bMaxHP,500; bonus2 bSubEle,Ele_Fire,(getrefine()>=6?10:5); },{},{}
-18861,Zaha_Doll_J_Hat,Zaha Doll J Hat,4,20,,100,,0,,1,0xFFFFFFFF,63,2,256,,50,1,461,{ bonus bHealPower,15; bonus bUseSPrate,15; },{},{}
+18861,Zaha_Doll_Hat_J,Zaha Doll Hat,4,20,,100,,0,,1,0xFFFFFFFF,63,2,256,,50,1,461,{ bonus bHealPower,15; bonus bUseSPrate,15; },{},{}
 18863,Exorcist_Robe,Exorcist Robe,4,20,,1700,,57,,1,0xFFFFFFFF,63,2,16,,60,1,0,{ bonus bMdef,5; bonus2 bSubRace,RC_Undead,((getrefine()/3)*5)+(BaseClass==Job_Acolyte?10:0); },{},{}
 18864,Earth_Goddess_Flower,Earth Goddess Flower,4,20,,250,,6,,0,0xFFFFFFFF,63,2,256,,1,1,864,{ bonus bVit,2; skill "WZ_EARTHSPIKE",5; bonus2 bSubEle,Ele_Earth,(getrefine()>=8?20:15); },{},{}
 18865,Sword_Master_Crown,Sword Master Crown,4,20,,1000,,30,,1,0xFFFFFFFF,63,2,256,,50,1,981,{ bonus bBaseAtk,(BaseLevel>150?15:(BaseLevel>100?10:(BaseLevel>50?5:0))); if(getskilllv("SM_TWOHAND")==10) bonus bUseSPrate,-5; if(getskilllv("KN_SPEARMASTERY")==10) bonus bDelayrate,-10; if(getskilllv("AM_AXEMASTERY")==10) bonus bVariableCastrate,-15; if(getskilllv("AS_KATAR")==10) bonus bCritAtkRate,20; if(getskilllv("PR_MACEMASTERY")==10) bonus bAspdRate,10; },{},{}

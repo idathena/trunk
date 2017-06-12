@@ -999,6 +999,9 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case MER_CRASH:
 			sc_start(src,bl,SC_STUN,6 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
+		case AL_HOLYLIGHT:
+			status_change_end(bl,SC_P_ALTER,INVALID_TIMER);
+			break;
 		case AS_VENOMKNIFE:
 			if( sd ) //Poison chance must be that of Envenom [Skotlex]
 				skill_lv = pc_checkskill(sd,TF_POISON);
@@ -5637,7 +5640,9 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case RL_H_MINE:
-			if (!(flag&1)) {
+			if (flag&1)
+				skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION);
+			else {
 				//Direct attack
 				if (!sd || !sd->flicker) {
 					if (skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag))
@@ -5648,13 +5653,13 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				if (sd && sd->flicker && tsc && tsc->data[SC_H_MINE] && tsc->data[SC_H_MINE]->val2 == src->id) {
 					//Splash damage around it!
 					map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR|BL_SKILL,src,
-						skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
+						skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
 					flag |= 1; //Don't consume requirement
 					tsc->data[SC_H_MINE]->val3 = 1; //Mark the SC end because not expired
+					clif_status_load(bl,SI_H_MINE_EXPLOSION,1);
 					status_change_end(bl,SC_H_MINE,INVALID_TIMER);
 				}
-			} else
-				skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
+			}
 			if (sd && sd->flicker)
 				flag |= 1; //Don't consume requirement
 			break;
@@ -10915,6 +10920,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if( sd ) {
 				sd->flicker = true;
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 				skill_area_temp[1] = 0;
 				//Detonate RL_B_TRAP
 				if( pc_checkskill(sd,RL_B_TRAP) > 0 )
@@ -10940,6 +10946,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case RL_C_MARKER:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 			if( sd ) {
 				if( tsce && tsce->val2 != src->id ) //If marked by someone else remove it
 					status_change_end(bl,type,INVALID_TIMER);
@@ -17578,6 +17585,7 @@ static int skill_bind_trap(struct block_list *bl, va_list ap) {
 	if (su->group->unit_id != UNT_B_TRAP || su->group->src_id != src->id)
 		return 0;
 
+	clif_skill_damage(src,bl,gettick(),status_get_amotion(src),0,-30000,1,su->group->skill_id,su->group->skill_lv,DMG_SKILL);
 	map_foreachinrange(skill_trap_splash,bl,su->range,BL_CHAR,bl,su->group->tick);
 	clif_changetraplook(bl,UNT_USED_TRAPS);
 	su->group->unit_id = UNT_USED_TRAPS;
@@ -17812,7 +17820,8 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 				skill_attack(BF_MISC,ss,src,bl,skill_id,skill_lv,tick,group->val1|SD_LEVEL);
 			break;
 		case UNT_B_TRAP:
-			skill_attack(BF_MISC,ss,src,bl,skill_id,skill_lv,tick,SD_SPLASH);
+			clif_status_load(bl,SI_H_MINE_EXPLOSION,1);
+			skill_attack(BF_MISC,ss,src,bl,skill_id,skill_lv,tick,SD_ANIMATION);
 			break;
 		case UNT_CLAYMORETRAP:
 			if( bl->id == src->id )
