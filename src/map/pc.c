@@ -1146,7 +1146,7 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 			return ITEM_EQUIP_ACK_FAIL;
 		if((item->equip&EQP_ACC) && sd->sc.data[SC__STRIPACCESSORY])
 			return ITEM_EQUIP_ACK_FAIL;
-		if(item->equip && sd->sc.data[SC_KYOUGAKU])
+		if(item->equip && (sd->sc.data[SC_KYOUGAKU] || sd->sc.data[SC_SUHIDE]))
 			return ITEM_EQUIP_ACK_FAIL;
 		//Spirit of Super Novice equip bonuses [Skotlex]
 		if(sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_SUPERNOVICE) {
@@ -5599,6 +5599,31 @@ uint8 pc_checkskill(struct map_session_data *sd, uint16 skill_id)
 	return 0;
 }
 
+uint8 pc_checkskill_summoner(struct map_session_data *sd, enum e_summoner_type type)
+{
+	uint8 count = 0;
+
+	if( sd == NULL )
+		return 0;
+
+	switch( type ) {
+		case TYPE_SEAFOOD:
+			count = pc_checkskill(sd,SU_TUNABELLY) + pc_checkskill(sd,SU_TUNAPARTY) + pc_checkskill(sd,SU_BUNCHOFSHRIMP) + pc_checkskill(sd,SU_FRESHSHRIMP) +
+				pc_checkskill(sd,SU_GROOMING) + pc_checkskill(sd,SU_PURRING) + pc_checkskill(sd,SU_SHRIMPARTY);
+			break;
+		case TYPE_PLANT:
+			count = pc_checkskill(sd,SU_SV_STEMSPEAR) + pc_checkskill(sd,SU_CN_POWDERING) + pc_checkskill(sd,SU_CN_METEOR) + pc_checkskill(sd,SU_SV_ROOTTWIST) +
+				pc_checkskill(sd,SU_CHATTERING) + pc_checkskill(sd,SU_MEOWMEOW) + pc_checkskill(sd,SU_NYANGGRASS);
+			break;
+		case TYPE_ANIMAL:
+			count = pc_checkskill(sd,SU_SCAROFTAROU) + pc_checkskill(sd,SU_PICKYPECK) + pc_checkskill(sd,SU_ARCLOUSEDASH) + pc_checkskill(sd,SU_LUNATICCARROTBEAT) +
+				pc_checkskill(sd,SU_HISS) + pc_checkskill(sd,SU_POWEROFFLOCK) + pc_checkskill(sd,SU_SVG_SPIRIT);
+			break;
+	}
+
+	return count;
+}
+
 /**
  * Check if we still have the correct weapon to continue the skill (actually status)
  * If not ending it
@@ -7181,7 +7206,7 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 			pc_setoption(sd, i);
 		if( hom_is_active(sd->hd) && pc_checkskill(sd, AM_CALLHOMUN) )
 			hom_vaporize(sd, HOM_ST_REST);
-		if( sd->sc.data[SC_SPRITEMABLE] && pc_checkskill(sd, SU_SPRITEMABLE) )
+		if( sd->sc.data[SC_SPRITEMABLE] && pc_checkskill(sd, SU_SPRITEMABLE) > 0 )
 			status_change_end(&sd->bl, SC_SPRITEMABLE, INVALID_TIMER);
 	}
 
@@ -11166,7 +11191,7 @@ void pc_readdb(void)
 
 	//Reset and read skilltree (needs to be read after pc_readdb_job_exp to get max base and job levels)
 	memset(skill_tree, 0, sizeof(skill_tree));
-	sv_readdb(db_path, DBPATH"skill_tree.txt", ',', 3 + MAX_PC_SKILL_REQUIRE * 2, 4 + MAX_PC_SKILL_REQUIRE * 2, -1, &pc_readdb_skilltree);
+	sv_readdb(db_path, DBPATH"skill_tree.txt", ',', 3 + MAX_PC_SKILL_REQUIRE * 2, 5 + MAX_PC_SKILL_REQUIRE * 2, -1, &pc_readdb_skilltree);
 
 	//Checking if all class have their data
 	for( i = 0; i < JOB_MAX; i++ ) {

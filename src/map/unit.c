@@ -1980,7 +1980,7 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 		}
 	}
 
-	unit_stop_walking(src,1);
+	unit_stop_walking(src, 1);
 
 	skill_toggle_magicpower(src, skill_id); //SC_MAGICPOWER needs to switch states at start of cast
 

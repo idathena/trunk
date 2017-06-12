@@ -2081,6 +2081,7 @@ int map_quit(struct map_session_data *sd) {
 		status_change_end(&sd->bl,SC_STRANGELIGHTS,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_DECORATION_OF_MUSIC,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_SPRITEMABLE,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_SV_ROOTTWIST,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_HAT_EFFECT,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_QSCARABA,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_LJOSALFAR,INVALID_TIMER);
@@ -2128,6 +2129,7 @@ int map_quit(struct map_session_data *sd) {
 			status_change_end(&sd->bl,SC_GEFFEN_MAGIC1,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_GEFFEN_MAGIC2,INVALID_TIMER);
 			status_change_end(&sd->bl,SC_GEFFEN_MAGIC3,INVALID_TIMER);
+			status_change_end(&sd->bl,SC_ARCLOUSEDASH,INVALID_TIMER);
 		}
 	}
 
