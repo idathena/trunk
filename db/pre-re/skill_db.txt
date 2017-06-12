@@ -1194,35 +1194,35 @@
 5025,1,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_POWEROFLAND,Power of Land
 5026,9,6,1,2:3:1:4:8,0,0,5,1,yes,0,0,0,magic,0,0,	SU_SV_STEMSPEAR,Silvervine Stem Spear
 5027,9,6,1,0,0x1,0,5,1,yes,0,0,1,none,0,0,	SU_CN_POWDERING,Catnip Powdering
-5028,9,8,2,0,0x2,1:1:2:2:3,5,-5,yes,0,0,0,magic,0,0,	SU_CN_METEOR,Catnip Meteor
+5028,9,6,2,0,0x2,1:1:2:2:3,5,0,yes,0,0,0,magic,0,0,	SU_CN_METEOR,Catnip Meteor
 5029,9,6,1,0,0x1,0,5,1,yes,0,0,3,none,0,0,	SU_SV_ROOTTWIST,Silvervine Root Twist
-5030,9,6,1,5,0xB0,0,5,1,no,0,0,0,magic,0,0,	SU_SV_ROOTTWIST_ATK,Silver Vine Root Twist Attack
+5030,9,6,1,5,0xD0,0,5,1,no,0,0,0,misc,0,0,	SU_SV_ROOTTWIST_ATK,Silver Vine Root Twist Attack
 5031,1,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_POWEROFLIFE,Power of Life
 5032,9,6,1,-1,0,0,5,1,yes,0,0,0,weapon,0,0,	SU_SCAROFTAROU,Scar of Tarou
 5033,9,8,1,-1,0,0,5,-5,yes,0,0,0,weapon,0,0,	SU_PICKYPECK,Picky Peck
 5034,9,8,1,-1,0,0,5,-5,no,0,0,0,weapon,0,0,	SU_PICKYPECK_DOUBLE_ATK,Picky Peck Double Attack
 5035,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_ARCLOUSEDASH,Arclouse Dash
-5036,9,8,1,-1,0x2,1:1:2:2:3,5,-3,yes,0,0,0,weapon,0,0,	SU_LUNATICCARROTBEAT,Lunatic Carrot Beat
+5036,9,6,1,0,0x2,1:1:2:2:3,5,0,yes,0,0,0,weapon,0,0,	SU_LUNATICCARROTBEAT,Lunatic Carrot Beat
 5037,1,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_POWEROFSEA,Power of Sea
 5038,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_TUNABELLY,Tuna Belly
 5039,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_TUNAPARTY,Tuna Party
 5040,1,6,4,0,0x3,-1,5,1,yes,0,0,0,none,0,0,	SU_BUNCHOFSHRIMP,Bunch of Shrimp
 5041,9,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_FRESHSHRIMP,Fresh Shrimp
-5042,0,8,2,0,0,0,5,1,yes,0,0,0,magic,0,0,	SU_CN_METEOR2,Catnip Meteor 2
-5043,0,8,1,0,0,0,5,1,yes,0,0,0,weapon,0,0,	SU_LUNATICCARROTBEAT2,Lunatic Carrot Beat 2
-//5044,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SOULATTACK,
-//5045,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_POWEROFFLOCK,
-//5046,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SVG_SPIRIT,
-//5047,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_HISS,
-//5048,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_NYANGGRASS,
-//5049,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_GROOMING,
-//5050,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_PURRING,
-//5051,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SHRIMPARTY,
-//5052,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SPIRITOFLIFE,
-//5053,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_MEOWMEOW,
-//5054,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SPIRITOFLAND,
-//5055,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_CHATTERING,
-//5056,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	SU_SPIRITOFSEA,
+5042,9,8,1,0,0,0,5,-5,no,0,0,0,magic,0,0,	SU_CN_METEOR_ATK,Catnip Meteor Attack
+5043,9,8,1,-1,0,0,5,-3,no,0,0,0,weapon,0,0,	SU_LUNATICCARROTBEAT_ATK,Lunatic Carrot Beat Attack
+5044,14,0,0,0,0,0,1,0,no,0,0,0,none,0,0,	SU_SOULATTACK,Soul Attack
+5045,1,6,4,0,0x3,3:4:5:6:-1,5,0,yes,0,0,0,magic,0,0,	SU_POWEROFFLOCK,Power of Flock
+5046,9,8,1,-1,0,1,5,1,yes,0,0,14,weapon,0,0,	SU_SVG_SPIRIT,Spirit of Savage
+5047,1,6,4,0,0x3,-1,5,1,yes,0,0,0,magic,0,0,	SU_HISS,Hiss
+5048,9,6,2,0,0x1,0,5,1,yes,0,0,1,none,0,0,	SU_NYANGGRASS,Nyang Grass
+5049,1,6,4,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_GROOMING,Grooming
+5050,1,6,4,0,0x3,-1,5,1,yes,0,0,0,magic,0,0,	SU_PURRING,Purring
+5051,1,6,4,0,0x3,-1,5,1,yes,0,0,0,magic,0,0,	SU_SHRIMPARTY,Tasty Shrimp Party
+5052,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_SPIRITOFLIFE,Spirit of Life
+5053,1,6,4,0,0x3,-1,5,1,yes,0,0,0,magic,0,0,	SU_MEOWMEOW,Meow Meow
+5054,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_SPIRITOFLAND,Spirit of Land
+5055,1,6,4,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SU_CHATTERING,Chattering
+5056,0,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SU_SPIRITOFSEA,Spirit of Sea
 
 8001,1,6,4,0,0x1,0,5,1,no,0,0,0,magic,0,0,	HLIF_HEAL,Healing Touch
 8002,1,6,4,0,0x3,-1,5,1,no,0,0,0,none,0,0,	HLIF_AVOID,Avoid

@@ -5631,17 +5631,26 @@ ACMD_FUNC(displayskill)
 	unsigned int tick;
 	uint16 skill_id;
 	uint16 skill_lv = 1;
+	short type;
 	nullpo_retr(-1, sd);
 
-	if (!message || !*message || sscanf(message, "%hu %hu", &skill_id, &skill_lv) < 1) {
-		clif_displaymessage(fd, msg_txt(1166)); // Usage: @displayskill <skill ID> {<skill level>}
+	if (!message || !*message || sscanf(message, "%hu %hu %hd", &skill_id, &skill_lv, &type) < 1) {
+		clif_displaymessage(fd, msg_txt(1166)); // Usage: @displayskill <skill ID> {<skill level>} {<type>}
 		return -1;
 	}
 	status = status_get_status_data(&sd->bl);
 	tick = gettick();
-	clif_skill_damage(&sd->bl, &sd->bl, tick, status->amotion, status->dmotion, 1, 1, skill_id, skill_lv, DMG_SPLASH);
-	clif_skill_nodamage(&sd->bl, &sd->bl, skill_id, skill_lv, 1);
-	clif_skill_poseffect(&sd->bl, skill_id, skill_lv, sd->bl.x, sd->bl.y, tick);
+	switch (type) {
+		case 1:
+			clif_skill_damage(&sd->bl, &sd->bl, tick, status->amotion, status->dmotion, 1, 1, skill_id, skill_lv, DMG_SPLASH);
+			break;
+		case 2:
+			clif_skill_poseffect(&sd->bl, skill_id, skill_lv, sd->bl.x, sd->bl.y, tick);
+			break;
+		default:
+			clif_skill_nodamage(&sd->bl, &sd->bl, skill_id, skill_lv, 1);
+			break;
+	}
 	return 0;
 }
 

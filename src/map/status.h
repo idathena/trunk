@@ -775,6 +775,16 @@ typedef enum sc_type {
 	SC_GVG_BLIND,
 
 	SC_MAGICALBULLET,
+
+	SC_HISS,
+	SC_NYANGGRASS,
+	SC_GROOMING,
+	SC_SHRIMPBLESSING,
+	SC_CHATTERING,
+	SC_DORAM_WALKSPEED,
+	SC_DORAM_MATK,
+	SC_DORAM_FLEE2,
+	SC_DORAM_SVSP,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 
@@ -2280,7 +2290,7 @@ unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc,
 unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc, int watk);
 unsigned short status_calc_matk(struct block_list *bl, struct status_change *sc, int matk, bool viewable);
 #ifdef RENEWAL
-unsigned short status_calc_ematk(struct block_list *bl, struct status_change *sc, int matk);
+unsigned short status_calc_ematk(struct block_list *bl, struct status_change *sc, int matk, bool viewable);
 #endif
 short status_calc_critical(struct block_list *bl, struct status_change *sc, int critical);
 short status_calc_hit(struct block_list *bl, struct status_change *sc, int hit);

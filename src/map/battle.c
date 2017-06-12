@@ -431,12 +431,8 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 #endif
 					status_change_end(target,SC_SPIDERWEB,INVALID_TIMER);
 				}
-				if( tsc->data[SC_THORNSTRAP] ) {
-					struct skill_unit_group *group = skill_id2group(tsc->data[SC_THORNSTRAP]->val3);
-
-					if( group )
-						skill_delunitgroup(group);
-				}
+				if( tsc->data[SC_THORNSTRAP] && battle_getcurrentskill(src) != GN_CARTCANNON )
+					status_change_end(target,SC_THORNSTRAP,INVALID_TIMER);
 				if( tsc->data[SC_CRYSTALIZE] )
 					status_change_end(target,SC_CRYSTALIZE,INVALID_TIMER);
 				if( tsc->data[SC_EARTH_INSIGNIA] ) {
@@ -1367,10 +1363,12 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			}
 			if( (sce = sc->data[SC_TUNAPARTY]) ) {
 				sce->val2 -= (int)cap_value(damage,INT_MIN,INT_MAX);
-				if( sce->val2 >= 0 )
-					damage = 0;
-				else
-					damage = -sce->val2;
+				if( flag&BF_WEAPON ) {
+					if( sce->val2 >= 0 )
+						damage = 0;
+					else
+						damage = -sce->val2;
+				}
 				if( sce->val2 <= 0 )
 					status_change_end(bl,SC_TUNAPARTY,INVALID_TIMER);
 			}
@@ -1486,8 +1484,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			int div_ = (skill_id ? skill_get_num(skill_id,skill_lv) : div);
 
 			switch( skill_id ) {
-				case SU_CN_METEOR:
-				case SU_LUNATICCARROTBEAT:
+				case SU_CN_METEOR_ATK:
+				case SU_LUNATICCARROTBEAT_ATK:
 					damage = div_ * -1;
 					break;
 				default:
@@ -3239,14 +3237,10 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 						ATK_ADDRATE(wd.damage, wd.damage2, 15 * sd->spiritcharm);
 				}
 #endif
-				if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
-					if(pc_checkskill(sd, SU_POWEROFLIFE) > 0 && (pc_checkskill(sd, SU_SCAROFTAROU) +
-						pc_checkskill(sd, SU_PICKYPECK) + pc_checkskill(sd, SU_ARCLOUSEDASH) +
-						pc_checkskill(sd, SU_LUNATICCARROTBEAT)) == 20)
-					{
-						ATK_ADDRATE(wd.damage, wd.damage2, 20);
-						RE_ALLATK_ADDRATE(wd, 20);
-					}
+				if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON) &&
+					pc_checkskill(sd, SU_POWEROFLIFE) > 0 && pc_checkskill_summoner(sd, TYPE_ANIMAL) >= 20) {
+					ATK_ADDRATE(wd.damage, wd.damage2, 20);
+					RE_ALLATK_ADDRATE(wd, 20);
 				}
 			}
 			break;
@@ -4309,17 +4303,30 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			break;
 		case SU_SCAROFTAROU:
 			skillratio += -100 + 100 * skill_lv;
+			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
+				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
 			if(is_boss(target))
 				skillratio <<= 1;
 			break;
 		case SU_PICKYPECK:
 			skillratio += 100 + 100 * skill_lv;
+			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
+				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
 			break;
 		case SU_PICKYPECK_DOUBLE_ATK:
 			skillratio += 300 + 200 * skill_lv;
+			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
+				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
 			break;
-		case SU_LUNATICCARROTBEAT:
+		case SU_LUNATICCARROTBEAT_ATK:
 			skillratio += 100 + 100 * skill_lv;
+			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
+				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
+			break;
+		case SU_SVG_SPIRIT:
+			skillratio += 150 + 150 * skill_lv;
+			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
+				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
 			break;
 	}
 	return skillratio;
@@ -5874,9 +5881,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case OB_OBOROGENSOU_TRANSITION_ATK:
 				ad.damage = battle_damage_temp[0]; //Recieved magic damage * skill_lv / 10
 				break;
-			case SU_SV_ROOTTWIST_ATK:
-				ad.damage = 100;
-				break;
 			case NPC_ICEMINE:
 			case NPC_FLAMECROSS:
 				ad.damage = sstatus->rhw.atk * 20 * skill_lv;
@@ -6292,7 +6296,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case SU_SV_STEMSPEAR:
 						skillratio += 600;
 						break;
-					case SU_CN_METEOR:
+					case SU_CN_METEOR_ATK:
 						skillratio += 100 + 100 * skill_lv;
 						break;
 				}
@@ -6814,6 +6818,9 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		case RL_B_TRAP:
 			md.damage = 3 * skill_lv * tstatus->hp / 100 + 10 * sstatus->dex;
 			break;
+		case SU_SV_ROOTTWIST_ATK:
+			md.damage = 100;
+			break;
 		case MH_EQC:
 			md.damage = max((int)(tstatus->hp - sstatus->hp), 0);
 			break;
@@ -7292,34 +7299,35 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 			status_change_end(src,SC_CLOAKINGEXCEED,INVALID_TIMER);
 	}
 
-	if (tsc && tsc->data[SC_AUTOCOUNTER] && status_check_skilluse(target,src,KN_AUTOCOUNTER,1)) {
-		uint8 dir = map_calc_dir(target,src->x,src->y);
-		int t_dir = unit_getdir(target);
-		int dist = distance_bl(src,target);
+	if (tsc) {
+		if (tsc->data[SC_AUTOCOUNTER] && status_check_skilluse(target,src,KN_AUTOCOUNTER,1)) {
+			uint8 dir = map_calc_dir(target,src->x,src->y);
+			int t_dir = unit_getdir(target);
+			int dist = distance_bl(src,target);
 
-		if (dist <= 0 || (!map_check_dir(dir,t_dir) && dist <= tstatus->rhw.range + 1)) {
-			uint16 skill_lv = tsc->data[SC_AUTOCOUNTER]->val1;
+			if (dist <= 0 || (!map_check_dir(dir,t_dir) && dist <= tstatus->rhw.range + 1)) {
+				uint16 skill_lv = tsc->data[SC_AUTOCOUNTER]->val1;
 
-			clif_skillcastcancel(target); //Remove the casting bar [Skotlex]
-			clif_damage(src,target,tick,sstatus->amotion,1,0,1,DMG_NORMAL,0,false); //Display miss
-			status_change_end(target,SC_AUTOCOUNTER,INVALID_TIMER);
-			skill_attack(BF_WEAPON,target,target,src,KN_AUTOCOUNTER,skill_lv,tick,0);
-			return ATK_BLOCK;
+				clif_skillcastcancel(target); //Remove the casting bar [Skotlex]
+				clif_damage(src,target,tick,sstatus->amotion,1,0,1,DMG_NORMAL,0,false); //Display miss
+				status_change_end(target,SC_AUTOCOUNTER,INVALID_TIMER);
+				skill_attack(BF_WEAPON,target,target,src,KN_AUTOCOUNTER,skill_lv,tick,0);
+				return ATK_BLOCK;
+			}
 		}
-	}
+		if (tsc->data[SC_BLADESTOP_WAIT] && !is_boss(src) && (src->type == BL_PC || !tsd ||
+			distance_bl(src,target) <= (tsd->status.weapon == W_FIST ? 1 : 2))) {
+			uint16 skill_lv = tsc->data[SC_BLADESTOP_WAIT]->val1;
+			int duration = skill_get_time2(MO_BLADESTOP,skill_lv);
 
-	if (tsc && tsc->data[SC_BLADESTOP_WAIT] && !is_boss(src) && (src->type == BL_PC || !tsd ||
-		distance_bl(src,target) <= (tsd->status.weapon == W_FIST ? 1 : 2))) {
-		uint16 skill_lv = tsc->data[SC_BLADESTOP_WAIT]->val1;
-		int duration = skill_get_time2(MO_BLADESTOP,skill_lv);
-
-		status_change_end(target,SC_BLADESTOP_WAIT,INVALID_TIMER);
-		//Target locked
-		if (sc_start4(src,src,SC_BLADESTOP,100,(sd ? pc_checkskill(sd,MO_BLADESTOP) : 5),0,0,target->id,duration)) {
-			clif_damage(src,target,tick,sstatus->amotion,1,0,1,DMG_NORMAL,0,false);
-			clif_bladestop(target,src->id,1);
-			sc_start4(src,target,SC_BLADESTOP,100,skill_lv,0,0,src->id,duration);
-			return ATK_BLOCK;
+			status_change_end(target,SC_BLADESTOP_WAIT,INVALID_TIMER);
+			//Target locked
+			if (sc_start4(src,src,SC_BLADESTOP,100,(sd ? pc_checkskill(sd,MO_BLADESTOP) : 5),0,0,target->id,duration)) {
+				clif_damage(src,target,tick,sstatus->amotion,1,0,1,DMG_NORMAL,0,false);
+				clif_bladestop(target,src->id,1);
+				sc_start4(src,target,SC_BLADESTOP,100,skill_lv,0,0,src->id,duration);
+				return ATK_BLOCK;
+			}
 		}
 	}
 
