@@ -5627,7 +5627,7 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int
 	}
 #endif
 
-	//Because the damage delay must be synced with the client, here is where the can-walk tick must be updated. [Skotlex]
+	//Because the damage delay must be synced with the client, here is where the can-walk tick must be updated [Skotlex]
 	return clif_calc_walkdelay(dst,ddelay,type,damage,div);
 }
 

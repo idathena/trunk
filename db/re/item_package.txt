@@ -1180,7 +1180,7 @@ IG_Buddah_Scroll,Sleeping_Kitty_Cat,100,1,1,1,0,0
 IG_Buddah_Scroll,18600,10,1,1,1,0,0
 IG_Buddah_Scroll,Guarantee_Weapon_5Up,70,1,1,1,0,0
 IG_Buddah_Scroll,Red_Hood,100,1,1,1,0,0
-IG_Buddah_Scroll,Spirit_Of_Chung_E,20,1,1,1,0,0
+IG_Buddah_Scroll,C_Spirit_Of_Chung_E,20,1,1,1,0,0
 IG_Buddah_Scroll,Guarantee_Weapon_9Up,5,1,1,1,0,0
 IG_Buddah_Scroll,Sealed_Samurai_Card,3,1,1,1,0,0
 IG_Buddah_Scroll,Kirin_Wing,10,1,1,1,0,0
