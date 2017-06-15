@@ -215,7 +215,7 @@ int quest_delete(TBL_PC *sd, int quest_id) {
 /**
  * Map iterator subroutine to update quest objectives for a party after killing a monster.
  *
- * @see map_foreachinrange
+ * @see map_foreachinallrange
  * @param ap Argument list, expecting:
  *           int Party ID
  *           int Mob ID

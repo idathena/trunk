@@ -159,7 +159,7 @@ int npc_isnear_sub(struct block_list *bl, va_list args) {
 bool npc_isnear(struct block_list *bl) {
 
 	if( battle_config.min_npc_vendchat_distance > 0 &&
-			map_foreachinrange(npc_isnear_sub, bl, battle_config.min_npc_vendchat_distance, BL_NPC, 0) )
+			map_foreachinallrange(npc_isnear_sub, bl, battle_config.min_npc_vendchat_distance, BL_NPC, 0) )
 		return true;
 
 	return false;
@@ -259,7 +259,7 @@ int npc_enable(const char *name, int flag)
 		clif_changeoption(&nd->bl);
 
 	if( (flag&3) && (nd->u.scr.xs >= 0 || nd->u.scr.ys >= 0) ) //Check if player standing on a OnTouchArea
-		map_foreachinarea(npc_enable_sub, nd->bl.m, nd->bl.x - nd->u.scr.xs, nd->bl.y - nd->u.scr.ys, nd->bl.x + nd->u.scr.xs, nd->bl.y + nd->u.scr.ys, BL_PC, nd);
+		map_foreachinallarea(npc_enable_sub, nd->bl.m, nd->bl.x - nd->u.scr.xs, nd->bl.y - nd->u.scr.ys, nd->bl.x + nd->u.scr.xs, nd->bl.y + nd->u.scr.ys, BL_PC, nd);
 
 	return 0;
 }
@@ -3379,9 +3379,9 @@ static void npc_market_fromsql(void) {
 void npc_setcells(struct npc_data *nd)
 {
 	int16 m = nd->bl.m, x = nd->bl.x, y = nd->bl.y, xs, ys;
-	int i,j;
+	int i, j;
 
-	switch(nd->subtype) {
+	switch (nd->subtype) {
 		case NPCTYPE_WARP:
 			xs = nd->u.warp.xs;
 			ys = nd->u.warp.ys;
@@ -3391,14 +3391,14 @@ void npc_setcells(struct npc_data *nd)
 			ys = nd->u.scr.ys;
 			break;
 		default:
-			return; // Other types doesn't have touch area
+			return; //Other types doesn't have touch area
 	}
 
 	if (m < 0 || xs < 0 || ys < 0) //invalid range or map
 		return;
 
-	for (i = y-ys; i <= y+ys; i++) {
-		for (j = x-xs; j <= x+xs; j++) {
+	for (i = y - ys; i <= y + ys; i++) {
+		for (j = x - xs; j <= x + xs; j++) {
 			if (map_getcell(m, j, i, CELL_CHKNOPASS))
 				continue;
 			map_setcell(m, j, i, CELL_NPC, true);
@@ -3410,7 +3410,9 @@ int npc_unsetcells_sub(struct block_list *bl, va_list ap)
 {
 	struct npc_data *nd = (struct npc_data *)bl;
 	int id =  va_arg(ap,int);
-	if (nd->bl.id == id) return 0;
+
+	if (nd->bl.id == id)
+		return 0;
 	npc_setcells(nd);
 	return 1;
 }
@@ -3433,31 +3435,34 @@ void npc_unsetcells(struct npc_data *nd)
 
 	//Locate max range on which we can locate npc cells
 	//FIXME: does this really do what it's supposed to do? [ultramage]
-	for(x0 = x-xs; x0 > 0 && map_getcell(m, x0, y, CELL_CHKNPC); x0--);
-	for(x1 = x+xs; x1 < map[m].xs-1 && map_getcell(m, x1, y, CELL_CHKNPC); x1++);
-	for(y0 = y-ys; y0 > 0 && map_getcell(m, x, y0, CELL_CHKNPC); y0--);
-	for(y1 = y+ys; y1 < map[m].ys-1 && map_getcell(m, x, y1, CELL_CHKNPC); y1++);
+	for (x0 = x - xs; x0 > 0 && map_getcell(m, x0, y, CELL_CHKNPC); x0--);
+	for (x1 = x + xs; x1 < map[m].xs - 1 && map_getcell(m, x1, y, CELL_CHKNPC); x1++);
+	for (y0 = y - ys; y0 > 0 && map_getcell(m, x, y0, CELL_CHKNPC); y0--);
+	for (y1 = y + ys; y1 < map[m].ys - 1 && map_getcell(m, x, y1, CELL_CHKNPC); y1++);
 
 	//Erase this npc's cells
-	for (i = y-ys; i <= y+ys; i++)
-		for (j = x-xs; j <= x+xs; j++)
+	for (i = y - ys; i <= y + ys; i++) {
+		for (j = x - xs; j <= x + xs; j++)
 			map_setcell(m, j, i, CELL_NPC, false);
+	}
 
-	//Re-deploy NPC cells for other nearby npcs.
-	map_foreachinarea( npc_unsetcells_sub, m, x0, y0, x1, y1, BL_NPC, nd->bl.id );
+	//Re-deploy NPC cells for other nearby npcs
+	map_foreachinallarea(npc_unsetcells_sub, m, x0, y0, x1, y1, BL_NPC, nd->bl.id);
 }
 
 void npc_movenpc(struct npc_data *nd, int16 x, int16 y)
 {
 	const int16 m = nd->bl.m;
-	if (m < 0 || nd->bl.prev == NULL) return;	//Not on a map.
 
-	x = cap_value(x, 0, map[m].xs-1);
-	y = cap_value(y, 0, map[m].ys-1);
+	if (m < 0 || nd->bl.prev == NULL)
+		return; //Not on a map
 
-	map_foreachinrange(clif_outsight, &nd->bl, AREA_SIZE, BL_PC, &nd->bl);
+	x = cap_value(x, 0, map[m].xs - 1);
+	y = cap_value(y, 0, map[m].ys - 1);
+
+	map_foreachinallrange(clif_outsight, &nd->bl, AREA_SIZE, BL_PC, &nd->bl);
 	map_moveblock(&nd->bl, x, y, gettick());
-	map_foreachinrange(clif_insight, &nd->bl, AREA_SIZE, BL_PC, &nd->bl);
+	map_foreachinallrange(clif_insight, &nd->bl, AREA_SIZE, BL_PC, &nd->bl);
 }
 
 /// Changes the display name of the npc.
