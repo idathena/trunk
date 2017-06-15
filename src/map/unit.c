@@ -2456,7 +2456,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 			//Link monsters nearby [Skotlex]
 			if( sstatus->mode&MD_ASSIST && DIFF_TICK(md->last_linktime,tick) < MIN_MOBLINKTIME ) {
 				md->last_linktime = tick;
-				map_foreachinrange(mob_linksearch,src,md->db->range2,BL_MOB,md->mob_id,target,tick);
+				map_foreachinallrange(mob_linksearch,src,md->db->range2,BL_MOB,md->mob_id,target,tick);
 			}
 		}
 		if( src->type == BL_PET && pet_attackskill((TBL_PET *)src,target->id) )

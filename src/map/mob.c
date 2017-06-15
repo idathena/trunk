@@ -1053,7 +1053,7 @@ int mob_spawn(struct mob_data *md)
 				md->spawn_timer = add_timer(tick + 5000,mob_delayspawn,md->bl.id,0);
 				return 1;
 			}
-		} else if( battle_config.no_spawn_on_player > 99 && map_foreachinrange(mob_count_sub,&md->bl,AREA_SIZE,BL_PC) ) {
+		} else if( battle_config.no_spawn_on_player > 99 && map_foreachinallrange(mob_count_sub,&md->bl,AREA_SIZE,BL_PC) ) {
 			//Retry again later (players on sight)
 			if( md->spawn_timer != INVALID_TIMER )
 				delete_timer(md->spawn_timer,mob_delayspawn);
@@ -1559,7 +1559,7 @@ int mob_warpchase(struct mob_data *md, struct block_list *target)
 		return 1; //Already walking to a warp
 
 	//Search for warps within mob's viewing range
-	map_foreachinrange(mob_warpchase_sub,&md->bl,md->db->range2,BL_NPC,target,&warp,&distance);
+	map_foreachinallrange(mob_warpchase_sub,&md->bl,md->db->range2,BL_NPC,target,&warp,&distance);
 
 	if(warp && unit_walktobl(&md->bl,&warp->bl,1,1))
 		return 1;
@@ -1690,12 +1690,12 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 		map_foreachinshootrange(mob_ai_sub_hard_lootsearch, &md->bl, view_range, BL_ITEM, md, &tbl);
 
 	if((!tbl && (mode&MD_AGGRESSIVE)) || md->state.skillstate == MSS_FOLLOW)
-		map_foreachinrange(mob_ai_sub_hard_activesearch, &md->bl, view_range, DEFAULT_ENEMY_TYPE(md), md, &tbl, mode);
+		map_foreachinallrange(mob_ai_sub_hard_activesearch, &md->bl, view_range, DEFAULT_ENEMY_TYPE(md), md, &tbl, mode);
 	else if((mode&MD_CHANGECHASE) && (md->state.skillstate == MSS_RUSH || md->state.skillstate == MSS_FOLLOW ||
 		(md->sc.count && md->sc.data[SC_CONFUSION] && md->sc.data[SC_CONFUSION]->val4))) {
 		int search_size = (view_range < md->status.rhw.range ? view_range : md->status.rhw.range);
 
-		map_foreachinrange(mob_ai_sub_hard_changechase, &md->bl, search_size, DEFAULT_ENEMY_TYPE(md), md, &tbl);
+		map_foreachinallrange(mob_ai_sub_hard_changechase, &md->bl, search_size, DEFAULT_ENEMY_TYPE(md), md, &tbl);
 	}
 
 	if(!tbl) { //No targets available
@@ -1703,7 +1703,7 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 		if(md->bg_id && (mode&MD_CANATTACK)) {
 			if(md->ud.walktimer != INVALID_TIMER)
 				return true; //We are already moving
-			map_foreachinrange(mob_ai_sub_hard_bg_ally, &md->bl, view_range, BL_PC, md, &tbl, mode);
+			map_foreachinallrange(mob_ai_sub_hard_bg_ally, &md->bl, view_range, BL_PC, md, &tbl, mode);
 			if(tbl && (distance_blxy(&md->bl, tbl->x, tbl->y) <= 3 || unit_walktobl(&md->bl, tbl, 1, 1)))
 				return true; //We're moving or close enough don't unlock the target
 		}
@@ -1853,7 +1853,7 @@ static int mob_ai_sub_foreachclient(struct map_session_data *sd,va_list ap)
 {
 	unsigned int tick = va_arg(ap, unsigned int);
 
-	map_foreachinrange(mob_ai_sub_hard_timer, &sd->bl, AREA_SIZE + ACTIVE_AI_RANGE, BL_MOB, sd->status.char_id, tick);
+	map_foreachinallrange(mob_ai_sub_hard_timer, &sd->bl, AREA_SIZE + ACTIVE_AI_RANGE, BL_MOB, sd->status.char_id, tick);
 	return 0;
 }
 
@@ -2735,7 +2735,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				pc_setglobalreg(sd, "TK_MISSION_COUNT", sd->mission_count);
 			}
 			if(sd->status.party_id)
-				map_foreachinrange(quest_update_objective_sub, &md->bl, AREA_SIZE, BL_PC, sd->status.party_id, md->mob_id);
+				map_foreachinallrange(quest_update_objective_sub, &md->bl, AREA_SIZE, BL_PC, sd->status.party_id, md->mob_id);
 			else if(sd->avail_quests)
 				quest_update_objective(sd, md->mob_id);
 
@@ -3174,7 +3174,7 @@ static struct block_list *mob_getfriendhprate(struct mob_data *md,int min_rate,i
 	if (md->special_state.ai) //Summoned creatures [Skotlex]
 		type = BL_PC;
 	
-	map_foreachinrange(mob_getfriendhprate_sub, &md->bl, 8, type, md, min_rate, max_rate, &fr);
+	map_foreachinallrange(mob_getfriendhprate_sub, &md->bl, 8, type, md, min_rate, max_rate, &fr);
 	return fr;
 }
 /*==========================================
@@ -3233,7 +3233,7 @@ struct mob_data *mob_getfriendstatus(struct mob_data *md,int cond1,int cond2)
 
 	nullpo_ret(md);
 
-	map_foreachinrange(mob_getfriendstatus_sub, &md->bl, 8, BL_MOB, md, cond1, cond2, &fr);
+	map_foreachinallrange(mob_getfriendstatus_sub, &md->bl, 8, BL_MOB, md, cond1, cond2, &fr);
 	return fr;
 }
 
