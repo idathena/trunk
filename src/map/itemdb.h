@@ -59,6 +59,8 @@ enum item_itemid {
 	ITEMID_ALOEBERA,
 	ITEMID_MAGNIFIER = 611,
 	ITEMID_POISON_BOTTLE = 678,
+	ITEMID_EARTH_SCROLL_1_3 = 686,
+	ITEMID_EARTH_SCROLL_1_5 = 687,
 	ITEMID_EMPTY_BOTTLE = 713,
 	ITEMID_EMPERIUM,
 	ITEMID_YELLOW_GEMSTONE,
@@ -377,14 +379,6 @@ enum ItemTradeRestrictions {
 	ITR_ALL             = 0x1FF  //Sum of all the above values
 };
 
-//Item No-use restrictions
-enum ItemNouseRestrictions {
-	INR_NONE    = 0x0, //No restrictions
-	INR_SITTING = 0x1, //Item can't be used while sitting
-
-	INR_ALL     = 0x1 //Sum of all the above values
-};
-
 //Struct of Roulette db
 struct s_roulette_db {
 	unsigned short *nameid[MAX_ROULETTE_LEVEL], //Item ID
@@ -435,7 +429,7 @@ struct item_data {
 		unsigned available : 1;
 		uint32 no_equip;
 		unsigned no_refine : 1;	//[celest]
-		unsigned delay_consume : 1;	//Signifies items that are not consumed immediately upon double-click [Skotlex]
+		unsigned restricted_consume : 1; //Usable items that under restricted rules for usage
 		unsigned trade_restriction : 9;	//Item trade restrictions mask (@see enum ItemTradeRestrictions)
 		unsigned autoequip: 1;
 		unsigned buyingstore : 1;
@@ -444,6 +438,7 @@ struct item_data {
 		unsigned guid : 1; //This item always be attached with GUID and make it as bound item! [Cydh]
 		unsigned broadcast : 1; //Will be broadcasted if someone obtain the item [Cydh]
 		bool bindOnEquip; //Set item as bound when equipped
+		bool keepAfterUse; //Keep item after being consumed
 	} flag;
 	struct { //Item stacking limitation
 		unsigned short amount;

@@ -1420,6 +1420,7 @@
 	export_constant(SC_DORAM_MATK);
 	export_constant(SC_DORAM_FLEE2);
 	export_constant(SC_DORAM_SVSP);
+	export_constant(SC_STEAMPACK);
 
 	/* Status icons */
 	export_constant(SI_BLANK);
@@ -2582,7 +2583,7 @@
 	export_constant(IT_PETEGG);
 	export_constant(IT_PETARMOR);
 	export_constant(IT_AMMO);
-	export_constant(IT_DELAYCONSUME);
+	export_constant(IT_RESTRICTEDCONSUME);
 	export_constant(IT_SHADOWGEAR);
 	export_constant(IT_CASH);
 

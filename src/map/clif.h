@@ -712,7 +712,7 @@ void clif_item_refine_list(struct map_session_data *sd);
 void clif_hat_effects(struct map_session_data *sd, struct block_list *bl, enum send_target target);
 void clif_hat_effect_single(struct map_session_data *sd, uint16 effectId, bool enable);
 
-void clif_item_skill(struct map_session_data *sd,uint16 skill_id,uint16 skill_lv);
+void clif_item_skill(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv, int inf);
 
 void clif_mvp_effect(struct map_session_data *sd);
 void clif_mvp_item(struct map_session_data *sd, unsigned short nameid);

@@ -4994,7 +4994,7 @@ items. It will not work properly if there is a visible dialog window or menu.
 If the skill is self or auto-targeting, it will be used immediately. Otherwise a
 target cursor is shown.
 
-Flag is a optional param and, when present, the command will not check for skill requirements.
+Flag is a optional param and, when present, the command will be a self-skill.
 
 // When Anodyne is used, it will cast Endure (8), Level 1, as if the actual
 // skill has been used from skill tree.

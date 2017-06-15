@@ -9032,13 +9032,14 @@ BUILDIN_FUNC(guildopenstorage)
 /*==========================================
  * Make player use a skill trought item usage
  *------------------------------------------*/
-/// itemskill <skill id>,<level>,{flag}
-/// itemskill "<skill name>",<level>,{flag}
+/// itemskill <skill id>,<level>,{<flag>}
+/// itemskill "<skill name>",<level>,{<flag>}
 BUILDIN_FUNC(itemskill)
 {
 	uint16 skill_id, skill_lv;
 	TBL_PC *sd;
 	struct script_data *data;
+	int inf;
 
 	sd = script_rid2sd(st);
 	if( sd == NULL || sd->ud.skilltimer != INVALID_TIMER )
@@ -9048,14 +9049,11 @@ BUILDIN_FUNC(itemskill)
 	get_val(st,data); //Convert into value in case of a variable
 	skill_id = (data_isstring(data) ? skill_name2id(script_getstr(st,2)) : script_getnum(st,2));
 	skill_lv = script_getnum(st,3);
-#if 0 //Temporarily disabled, awaiting for confirmation
-	if( !script_hasdata(st,4) )
-		if( !skill_check_condition_castbegin(sd,skill_id,skill_lv) || !skill_check_condition_castend(sd,skill_id,skill_lv) )
-			return 0;
-#endif
+	inf = (script_hasdata(st,4) ? INF_SELF_SKILL : 0);
 	sd->skillitem = skill_id;
 	sd->skillitemlv = skill_lv;
-	clif_item_skill(sd,skill_id,skill_lv);
+	sd->skilliteminf = inf;
+	clif_item_skill(sd,skill_id,skill_lv,inf);
 	return SCRIPT_CMD_SUCCESS;
 }
 /*==========================================
@@ -19621,8 +19619,7 @@ BUILDIN_FUNC(cleanmap)
  */
 BUILDIN_FUNC(npcskill)
 {
-	uint16 skill_id;
-	unsigned short skill_level;
+	uint16 skill_id, skill_lv;
 	unsigned int stat_point;
 	unsigned int npc_level;
 	struct npc_data *nd;
@@ -19632,7 +19629,7 @@ BUILDIN_FUNC(npcskill)
 	data = script_getdata(st,2);
 	get_val(st,data); //Convert into value in case of a variable
 	skill_id = data_isstring(data) ? skill_name2id(script_getstr(st,2)) : script_getnum(st,2);
-	skill_level = script_getnum(st,3);
+	skill_lv = script_getnum(st,3);
 	stat_point = script_getnum(st,4);
 	npc_level = script_getnum(st,5);
 
@@ -19663,9 +19660,9 @@ BUILDIN_FUNC(npcskill)
 		status_calc_npc(nd,SCO_NONE);
 
 	if( skill_get_inf(skill_id)&INF_GROUND_SKILL )
-		unit_skilluse_pos(&nd->bl,sd->bl.x,sd->bl.y,skill_id,skill_level);
+		unit_skilluse_pos(&nd->bl,sd->bl.x,sd->bl.y,skill_id,skill_lv);
 	else
-		unit_skilluse_id(&nd->bl,sd->bl.id,skill_id,skill_level);
+		unit_skilluse_id(&nd->bl,sd->bl.id,skill_id,skill_lv);
 	return SCRIPT_CMD_SUCCESS;
 }
 

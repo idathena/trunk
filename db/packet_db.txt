@@ -2602,7 +2602,7 @@ packet_keys: 0x4C17382A,0x7ED174C9,0x29961E4F //[Winnie]
 0x088D,5,hommenu,2:4
 0x0940,36,storagepassword,2:4:20
 
-//2016-12-28eRagexeRE
+//2016-12-28aRagexeRE
 packet_ver: 52
 packet_keys: 0x09366971,0x005672F1,0x6F3712AE
 0x093D,7,actionrequest,2:6

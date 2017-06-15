@@ -254,18 +254,18 @@ struct item_data *itemdb_exists(unsigned short nameid) {
 const char *itemdb_typename(enum item_types type)
 {
 	switch (type) {
-		case IT_HEALING:      return "Potion/Food";
-		case IT_USABLE:       return "Usable";
-		case IT_ETC:          return "Etc.";
-		case IT_ARMOR:        return "Armor";
-		case IT_WEAPON:       return "Weapon";
-		case IT_CARD:         return "Card";
-		case IT_PETEGG:       return "Pet Egg";
-		case IT_PETARMOR:     return "Pet Accessory";
-		case IT_AMMO:         return "Arrow/Ammunition";
-		case IT_DELAYCONSUME: return "Delay-Consume Usable";
-		case IT_SHADOWGEAR:   return "Shadow Equipment";
-		case IT_CASH:         return "Cash Usable";
+		case IT_HEALING:           return "Potion/Food";
+		case IT_USABLE:            return "Usable";
+		case IT_ETC:               return "Etc.";
+		case IT_ARMOR:             return "Armor";
+		case IT_WEAPON:            return "Weapon";
+		case IT_CARD:              return "Card";
+		case IT_PETEGG:            return "Pet Egg";
+		case IT_PETARMOR:          return "Pet Accessory";
+		case IT_AMMO:              return "Arrow/Ammunition";
+		case IT_RESTRICTEDCONSUME: return "Restricted-Consume Usable";
+		case IT_SHADOWGEAR:        return "Shadow Equipment";
+		case IT_CASH:              return "Cash Usable";
 	}
 	return "Unknown Type";
 }
@@ -523,6 +523,7 @@ char itemdb_isidentified(unsigned short nameid)
 		case IT_WEAPON:
 		case IT_ARMOR:
 		case IT_PETARMOR:
+		case IT_SHADOWGEAR:
 			return 0;
 		default:
 			return 1;
@@ -876,36 +877,14 @@ static bool itemdb_read_buyingstore(char *fields[], int columns, int current)
 	return true;
 }
 
-/** Item usage restriction (item_nouse.txt)
- * Structure: <nameid>,<flag>,<override>
- */
-static bool itemdb_read_nouse(char *fields[], int columns, int current)
-{
-	unsigned short nameid;
-	int flag, override;
-	struct item_data *id;
-
-	nameid = atoi(fields[0]);
-
-	if( !(id = itemdb_exists(nameid)) ) {
-		ShowWarning("itemdb_read_nouse: Invalid item id %hu.\n", nameid);
-		return false;
-	}
-
-	flag = atoi(fields[1]);
-	override = atoi(fields[2]);
-
-	id->item_usage.flag = flag;
-	id->item_usage.override = override;
-
-	return true;
-}
-
 /** Misc Item flags
  * <item_id>,<flag>
- * &1 - As dead branch item
- * &2 - As item container
- * &4 - GUID item, cannot be stacked even same or stackable item
+ * &1  - As dead branch item
+ * &2  - As item container
+ * &4  - GUID item, cannot be stacked even same or stackable item
+ * &8  - Item will be bound item when equipped
+ * &16 - Special Broadcast
+ * &32 - Keep after being consumed
  */
 static bool itemdb_read_flag(char *fields[], int columns, int current) {
 	unsigned short nameid = atoi(fields[0]);
@@ -935,6 +914,9 @@ static bool itemdb_read_flag(char *fields[], int columns, int current) {
 
 	if( flag&16 )
 		id->flag.broadcast = 1;
+
+	if( flag&32 )
+		id->flag.keepAfterUse = true;
 
 	return true;
 }
@@ -1278,11 +1260,11 @@ static bool itemdb_parse_dbrow(char **str, const char *source, int line, int scr
 		id->type = IT_ETC;
 	}
 
-	if (id->type == IT_DELAYCONSUME) { //Items that are consumed only after target confirmation
+	if (id->type == IT_RESTRICTEDCONSUME) { //Items that are consumed only after target confirmation
 		id->type = IT_USABLE;
-		id->flag.delay_consume = 1;
+		id->flag.restricted_consume = 1;
 	} else //In case of an itemdb reload and the item type changed
-		id->flag.delay_consume = 0;
+		id->flag.restricted_consume = 0;
 
 	//When a particular price is not given, we should base it off the other one
 	//(it is important to make a distinction between 'no price' and 0z)
@@ -1618,7 +1600,6 @@ static void itemdb_read(void) {
 	sv_readdb(db_path, DBPATH"item_delay.txt",   ',', 2, 3, -1, &itemdb_read_itemdelay);
 	sv_readdb(db_path, DBPATH"item_flag.txt",    ',', 2, 2, -1, &itemdb_read_flag);
 	sv_readdb(db_path, DBPATH"item_noequip.txt", ',', 2, 2, -1, &itemdb_read_noequip);
-	sv_readdb(db_path, "item_nouse.txt",         ',', 3, 3, -1, &itemdb_read_nouse);
 	sv_readdb(db_path, "item_stack.txt",         ',', 3, 3, -1, &itemdb_read_stack);
 	sv_readdb(db_path, DBPATH"item_trade.txt",   ',', 3, 3, -1, &itemdb_read_itemtrade);
 }

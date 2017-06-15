@@ -10679,6 +10679,8 @@ REPLACE INTO `mob_skill_db_re` VALUES (2943,'Ice Mine@NPC_ICEMINE','idle',709,1,
 REPLACE INTO `mob_skill_db_re` VALUES (2960,'Flame Cross@NPC_INVISIBLE','idle',353,1,10000,0,300000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2960,'Flame Cross@NPC_FLAMECROSS','idle',711,1,10000,0,300000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
+REPLACE INTO `mob_skill_db_re` VALUES (2985,'Mysterious Bug@NPC_AGIUP','loot',350,1,1000,0,10000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
 #Horror Toy Factory
 REPLACE INTO `mob_skill_db_re` VALUES (2987,'Decorated Evil Tree@AS_GRIMTOOTH','chase',137,5,2000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2987,'Decorated Evil Tree@NPC_CURSEATTACK','attack',181,3,1000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);

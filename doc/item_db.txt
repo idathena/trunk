@@ -33,11 +33,10 @@ Type:
 	7	Pet egg
 	8	Pet equipment
 	10	Ammo (Arrows/Bullets/etc)
-	11	Usable with delayed consumption (intended for 'itemskill')
-		Items using the 'itemskill' script command are consumed after
-		selecting a target. Any other command will NOT consume the item.
+	11	Restricted Usable item (for now the knowing behaviour is
+		not able to use while sit/mount)
 	12	Shadow Equipment
-	18	Another delayed consume that requires user confirmation before
+	18	Delayed consume that requires user confirmation before
 		using item.
 
 ---------------------------------------
