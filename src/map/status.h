@@ -785,6 +785,8 @@ typedef enum sc_type {
 	SC_DORAM_MATK,
 	SC_DORAM_FLEE2,
 	SC_DORAM_SVSP,
+
+	SC_STEAMPACK,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

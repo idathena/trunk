@@ -1080,6 +1080,7 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_GVG_CURSE] = SI_GVG_CURSE;
 	StatusIconChangeTable[SC_GVG_SILENCE] = SI_GVG_SILENCE;
 	StatusIconChangeTable[SC_GVG_BLIND] = SI_GVG_BLIND;
+	StatusIconChangeTable[SC_STEAMPACK] = SI_STEAMPACK;
 
 	//Other SC which are not necessarily associated to skills
 	StatusChangeFlagTable[SC_ASPDPOTION0] |= SCB_ASPD;
@@ -1197,6 +1198,7 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_DORAM_WALKSPEED] |= SCB_SPEED;
 	StatusChangeFlagTable[SC_DORAM_MATK] |= SCB_MATK;
 	StatusChangeFlagTable[SC_DORAM_FLEE2] |= SCB_FLEE2;
+	StatusChangeFlagTable[SC_STEAMPACK] |= SCB_WATK|SCB_ASPD;
 
 	//StatusDisplayType Table [Ind]
 	StatusDisplayType[SC_ALL_RIDING]	  = true;
@@ -1589,6 +1591,8 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 			status_change_end(target, SC_RAISINGDRAGON, INVALID_TIMER);
 		if (sc->data[SC_SATURDAYNIGHTFEVER] && status->hp <= 100)
 			status_change_end(target, SC_SATURDAYNIGHTFEVER, INVALID_TIMER);
+		if (sc->data[SC_STEAMPACK] && status->hp <= 100)
+			status_change_end(target, SC_STEAMPACK, INVALID_TIMER);
 	}
 
 	switch (target->type) {
@@ -5517,6 +5521,8 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 		watk += sc->data[SC_ANGRIFFS_MODUS]->val2;
 	if(sc->data[SC_CHATTERING])
 		watk += sc->data[SC_CHATTERING]->val2;
+	if(sc->data[SC_STEAMPACK])
+		watk += 20;
 	if(sc->data[SC_PROVOKE]
 #ifdef RENEWAL
 		&& bl->type != BL_PC
@@ -6426,6 +6432,8 @@ short status_calc_aspd(struct block_list *bl, struct status_change *sc, bool fix
 			bonus += 3 * sc->data[SC_STAR_COMFORT]->val1;
 		if(sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 2)
 			bonus += 10;
+		if(sc->data[SC_STEAMPACK])
+			bonus += 25;
 		if(sc->data[SC_DONTFORGETME])
 			bonus -= sc->data[SC_DONTFORGETME]->val2 / 10;
 		if(sc->data[SC_LONGING])
@@ -6595,6 +6603,8 @@ short status_calc_aspd_rate(struct block_list *bl, struct status_change *sc, int
 		aspd_rate -= 10 * sc->data[SC_GOLDENE_FERSE]->val3;
 	if(sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 2)
 		aspd_rate -= 100;
+	if(sc->data[SC_STEAMPACK])
+		aspd_rate -= 250;
 	if(sc->data[SC_DONTFORGETME])
 		aspd_rate += sc->data[SC_DONTFORGETME]->val2;
 	if(sc->data[SC_LONGING])
@@ -9882,6 +9892,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					tick = tick_time;
 				val4 = tick / tick_time;
 				break;
+			case SC_STEAMPACK:
+				if( !(sc->data[SC_ENDURE] && sc->data[SC_ENDURE]->val4) )
+					sc_start4(src,bl,SC_ENDURE,100,10,0,0,2,tick);
+			//Fall through
 			case SC_THORNSTRAP:
 			case SC_BLOODSUCKER:
 			case SC_SV_ROOTTWIST:
@@ -11760,7 +11774,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			if (sce->val2) {
 				struct block_list *src = map_id2bl(sce->val2);
 
-				if (src) {
+				if (src && !status_isdead(src)) {
 					struct status_change *sc = status_get_sc(src);
 
 					if (sc)
@@ -11865,6 +11879,12 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		case SC_CROSSBOWCLAN:
 		case SC_JUMPINGCLAN:
 			status_change_end(bl,SC_CLAN_INFO,INVALID_TIMER);
+			break;
+		case SC_STEAMPACK:
+			if( sc->data[SC_ENDURE] && sc->data[SC_ENDURE]->val4 == 2 ) {
+				sc->data[SC_ENDURE]->val4 = 0;
+				status_change_end(bl,SC_ENDURE,INVALID_TIMER);
+			}
 			break;
 	}
 
@@ -13124,6 +13144,13 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			if( --(sce->val4) >= 0 ) {
 				status_heal(bl,sce->val2,0,3);
 				sc_timer_next(sce->val3 + tick,status_change_timer,bl->id,data);
+				return 0;
+			}
+			break;
+
+		case SC_STEAMPACK:
+			if( --(sce->val4) >= 0 && status_charge(bl,100,0) && status->hp > 100 ) {
+				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
 			break;

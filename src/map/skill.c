@@ -1754,7 +1754,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 						case SC_TELEPORT_FIXEDCASTINGDELAY:	case SC_MERMAID_LONGING:	case SC_TIME_ACCESSORY:
 						case SC_CLAN_INFO:			case SC_SWORDCLAN:		case SC_ARCWANDCLAN:
 						case SC_GOLDENMACECLAN:			case SC_CROSSBOWCLAN:		case SC_QUEST_BUFF1:
-						case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:
+						case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:		case SC_STEAMPACK:
 							continue;
 						case SC_SILENCE:
 							if( tsc->data[i]->val4 )
@@ -4052,8 +4052,8 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 					}
 					break;
 				case WL_CHAINLIGHTNING_ATK:
-					skill_attack(BF_MAGIC,src,src,target,skl->skill_id,skl->skill_lv,tick,9 - skl->type); //Attack the current target
 					skill_toggle_magicpower(src,skl->skill_id); //Only the first hit will be amplified
+					skill_attack(BF_MAGIC,src,src,target,skl->skill_id,skl->skill_lv,tick,9 - skl->type); //Attack the current target
 					if (skl->type < (4 + skl->skill_lv - 1) && skl->x < 3) { //Remaining bounces
 						struct block_list *nbl = NULL; //Next bounce target
 
@@ -6186,7 +6186,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					sd->state.abra_flag = 1;
 					sd->skillitem = abra_skill_id;
 					sd->skillitemlv = abra_skill_lv;
-					clif_item_skill(sd,abra_skill_id,abra_skill_lv);
+					sd->skilliteminf = 0;
+					clif_item_skill(sd,abra_skill_id,abra_skill_lv,0);
 				} else { //Mob-casted
 					struct unit_data *ud = unit_bl2ud(src);
 					int inf = skill_get_inf(abra_skill_id);
@@ -7844,7 +7845,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_TELEPORT_FIXEDCASTINGDELAY:	case SC_MERMAID_LONGING:	case SC_TIME_ACCESSORY:
 							case SC_CLAN_INFO:			case SC_SWORDCLAN:		case SC_ARCWANDCLAN:
 							case SC_GOLDENMACECLAN:			case SC_CROSSBOWCLAN:		case SC_QUEST_BUFF1:
-							case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:
+							case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:		case SC_STEAMPACK:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )
@@ -9308,7 +9309,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_TELEPORT_FIXEDCASTINGDELAY:	case SC_MERMAID_LONGING:	case SC_TIME_ACCESSORY:
 						case SC_CLAN_INFO:			case SC_SWORDCLAN:		case SC_ARCWANDCLAN:
 						case SC_GOLDENMACECLAN:			case SC_CROSSBOWCLAN:		case SC_QUEST_BUFF1:
-						case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:
+						case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:		case SC_STEAMPACK:
 							continue;
 						case SC_SILENCE:
 							if( tsc->data[i]->val4 )
@@ -10148,7 +10149,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					sd->state.abra_flag = 2;
 					sd->skillitem = improv_skill_id;
 					sd->skillitemlv = improv_skill_lv;
-					clif_item_skill(sd,improv_skill_id,improv_skill_lv);
+					sd->skilliteminf = 0;
+					clif_item_skill(sd,improv_skill_id,improv_skill_lv,0);
 				} else {
 					struct unit_data *ud = unit_bl2ud(src);
 					int inf = skill_get_inf(improv_skill_id);
@@ -10434,10 +10436,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				int chance = 25 + (10 * skill_lv) - (tstatus->vit + tstatus->luk) / 5;
 
 				if( chance < 10 )
-					chance = 10; //Minimal chance is 10%.
-				if( bl->type == BL_MOB )
+					chance = 10; //Minimal chance is 10%
+				if( tsc && tsc->data[type] )
 					break;
-				if( rnd()%100 < chance ) { //Coded to both inflect status and drain target's SP only when successful. [Rytech]
+				if( rnd()%100 < chance ) { //Coded to both inflect status and drain target's SP only when successful [Rytech]
 					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 					status_zap(bl,0,status_get_max_sp(bl) * (25 + 5 * skill_lv) / 100);
 				}
@@ -11320,7 +11322,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 		if( (ud->skill_id == RL_QD_SHOT || !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL)) && target->id != src->id )
 			unit_setdir(src,map_calc_dir(src,target->x,target->y));
 		if( sd && ud->skill_id != SA_ABRACADABRA && ud->skill_id != WM_RANDOMIZESPELL )
-			sd->skillitem = sd->skillitemlv = 0; //They just set the data so leave it as it is [Inkfish]
+			sd->skillitem = sd->skillitemlv = sd->skilliteminf = 0; //They just set the data so leave it as it is [Inkfish]
 		if( ud->skilltimer == INVALID_TIMER ) {
 			if( md )
 				md->skill_idx = -1;
@@ -11341,7 +11343,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 	//sent in ALL cases, even cases where skill_check_condition fails
 	//which would lead to double 'skill failed' messages u.u [Skotlex]
 	if( sd )
-		sd->skillitem = sd->skillitemlv = 0;
+		sd->state.abra_flag = sd->skillitem = sd->skillitemlv = sd->skilliteminf = 0;
 	else if( md )
 		md->skill_idx = -1;
 	return 0;
@@ -11481,7 +11483,7 @@ int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data)
 		if( !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL) && ud->skill_id != NJ_SHADOWJUMP && ud->skill_id != SU_LOPE )
 			unit_setdir(src,map_calc_dir(src,ud->skillx,ud->skilly));
 		if( sd && sd->skillitem != AL_WARP )
-			sd->skillitem = sd->skillitemlv = 0; //Warp-Portal through items will clear data in skill_castend_map [Inkfish]
+			sd->skillitem = sd->skillitemlv = sd->skilliteminf = 0; //Warp-Portal through items will clear data in skill_castend_map [Inkfish]
 		if( ud->skilltimer == INVALID_TIMER ) {
 			if( md )
 				md->skill_idx = -1;
@@ -11499,9 +11501,9 @@ int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data)
 	ud->skill_id = ud->skill_lv = 0;
 
 	if( sd )
-		sd->skillitem = sd->skillitemlv = 0;
+		sd->state.abra_flag = sd->skillitem = sd->skillitemlv = sd->skilliteminf = 0;
 	else if( md )
-		md->skill_idx  = -1;
+		md->skill_idx = -1;
 	return 0;
 
 }
@@ -12487,7 +12489,7 @@ int skill_castend_map(struct map_session_data *sd, uint16 skill_id, const char *
 				}
 
 				skill_consume_requirement(sd,sd->menuskill_id,lv,2);
-				sd->skillitem = sd->skillitemlv = 0; //Clear data that's skipped in 'skill_castend_pos' [Inkfish]
+				sd->skillitem = sd->skillitemlv = sd->skilliteminf = 0; //Clear data that's skipped in 'skill_castend_pos' [Inkfish]
 
 				if( (group = skill_unitsetting(&sd->bl,skill_id,lv,wx,wy,0)) == NULL ) {
 					skill_failed(sd);
@@ -15048,26 +15050,6 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	if( sc && !sc->count )
 		sc = NULL;
 
-	//When a target was selected, consume items that were skipped in pc_use_item [Skotlex]
-	if( sd->skillitem == skill_id && !sd->state.abra_flag ) {
-		if( (i = sd->itemindex) == -1 ||
-			sd->status.inventory[i].nameid != sd->itemid ||
-			!sd->inventory_data[i] ||
-			!sd->inventory_data[i]->flag.delay_consume ||
-			sd->status.inventory[i].amount < 1 )
-		{ //Something went wrong, item exploit?
-			sd->itemid = sd->itemindex = -1;
-			return false;
-		}
-		//Consume
-		sd->itemid = sd->itemindex = -1;
-		if( skill_id == WZ_EARTHSPIKE && sc && sc->data[SC_EARTHSCROLL] && rnd()%100 >= sc->data[SC_EARTHSCROLL]->val2 ) //[marquis007]
-			; //Do not consume item
-		else if( !sd->status.inventory[i].expire_time )
-			pc_delitem(sd,i,1,0,0,LOG_TYPE_CONSUME); //Rental usable items are not consumed until expiration
-		return true;
-	}
-
 	if( pc_is90overweight(sd) ) {
 		clif_skill_fail(sd,skill_id,USESKILL_FAIL_WEIGHTOVER,0,0);
 		return false;
@@ -16041,9 +16023,6 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 
 	nullpo_retr(false,sd);
 
-	if( sd->skillitem == skill_id && !sd->state.abra_flag ) //Casting finished (Item skill) 
-		return true;
-
 	switch( skill_id ) {
 		case MO_INVESTIGATE:
 		case MO_FINGEROFFENSIVE:
@@ -16206,9 +16185,6 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 		}
 	}
 
-	if( sd->state.abra_flag ) //Hocus-Pocus was used [Inkfish]
-		sd->state.abra_flag = 0;
-
 	return true;
 }
 
@@ -16324,9 +16300,6 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 	if( !sd )
 		return require;
 
-	if( sd->skillitem == skill_id && !sd->state.abra_flag )
-		return require;
-
 	sc = &sd->sc;
 
 	if( sc && !sc->count )
@@ -16385,6 +16358,9 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 		if( sc->data[SC_OFFERTORIUM] )
 			require.sp += require.sp * sc->data[SC_OFFERTORIUM]->val3 / 100;
 	}
+
+	if( sd->skillitem == skill_id )
+		require.sp = 0;
 
 	require.zeny = skill_db[idx].require.zeny[skill_lv - 1];
 
@@ -19128,7 +19104,7 @@ short skill_can_produce_mix(struct map_session_data *sd, unsigned short nameid, 
 
 	for( i = 0; i < MAX_SKILL_PRODUCE_DB; i++ ) {
 		if( skill_produce_db[i].nameid == nameid && skill_produce_db[i].unique_id == unique_id ) {
-			if( (j = skill_produce_db[i].req_skill) > 0 && pc_checkskill(sd,j) < skill_produce_db[i].req_skill_lv )
+			if( (j = skill_produce_db[i].req_skill) > 0 && !sd->state.abra_flag && pc_checkskill(sd,j) < skill_produce_db[i].req_skill_lv )
 				continue; //Must iterate again to check other skills that produce it [malufett]
 			if( j > 0 && sd->menuskill_id > 0 && sd->menuskill_id != j )
 				continue; //Special case
@@ -19208,15 +19184,11 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 	if( sd->skill_id_old == skill_id ) 
 		skill_lv = sd->skill_lv_old;
 
-	if( !(idx = skill_can_produce_mix(sd,nameid,unique_id,-1,qty)) ) {
-		ShowError("skill_produce_mix: can't produce the material item\n");
+	if( !(idx = skill_can_produce_mix(sd,nameid,unique_id,-1,qty)) )
 		return false;
-	}
 
 	idx--;
-
-	if( qty < 1 )
-		qty = 1;
+	qty = max(qty,1);
 
 	if( !skill_id ) //A skill can be specified for some override cases
 		skill_id = skill_produce_db[idx].req_skill;

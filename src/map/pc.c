@@ -4677,11 +4677,6 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 		(itemdb_is_cashfood(nameid) && DIFF_TICK(sd->canusecashfood_tick,gettick()) > 0) )
 		return false;
 
-	if( (item->item_usage.flag&INR_SITTING) && (pc_issit(sd) == 1) && (pc_get_group_level(sd) < item->item_usage.override) ) {
-		clif_msg(sd,ITEM_NOUSE_SITTING); // You cannot use this item while sitting.
-		return false;
-	}
-
 	if( sd->state.storage_flag && item->type != IT_CASH ) {
 		clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(388)); // You cannot use this item while storage is open.
 		return false;
@@ -4892,29 +4887,23 @@ int pc_useitem(struct map_session_data *sd, int n)
 	if( nameid != ITEMID_NAUTHIZ && sd->sc.opt1 && sd->sc.opt1 != OPT1_STONEWAIT && sd->sc.opt1 != OPT1_BURNING )
 		return 0;
 
-	//Items with delayed consume are not meant to work while in mounts except ITEMID_BOARDING_HALTER
-	if( id->flag.delay_consume ) {
+	if( id->flag.restricted_consume ) {
+		if( pc_issit(sd) ) {
+			clif_msg(sd,ITEM_NOUSE_SITTING); // You cannot use this item while sitting.
+			return 0;
+		}
 		if( sd->sc.data[SC_ALL_RIDING] && nameid != ITEMID_BOARDING_HALTER )
-			return 0;
-		else if( pc_issit(sd) )
-			return 0;
+			return 0; //Items with delayed consume are not meant to work while in mounts except ITEMID_BOARDING_HALTER
 	}
-
-	//Since most delay-consume items involve using a "skill-type" target cursor,
-	//perform a skill-use check before going through [Skotlex]
-	//resurrection was picked as testing skill, as a non-offensive, generic skill, it will do
-	//FIXME: Is this really needed here? It'll be checked in unit.c after all and this prevents skill items using when silenced [Inkfish]
-	if( id->flag.delay_consume && (sd->ud.skilltimer != INVALID_TIMER /*|| !status_check_skilluse(&sd->bl, &sd->bl, ALL_RESURRECTION, 0)*/) )
-		return 0;
 
 	if( id->delay > 0 && !pc_has_permission(sd,PC_PERM_ITEM_UNCONDITIONAL) && pc_itemcd_check(sd,id,tick,n) )
 		return 0;
 
 	//On restricted maps the item is consumed but the effect is not used
 	if( !pc_has_permission(sd,PC_PERM_ITEM_UNCONDITIONAL) && itemdb_isNoEquip(id,sd->bl.m) ) {
-		clif_msg(sd,ITEM_CANT_USE_AREA); //This item cannot be used within this area
+		clif_msg(sd,ITEM_CANT_USE_AREA); // This item cannot be used within this area.
 		//Need confirmation for delayed consumption items
-		if( battle_config.allow_consume_restricted_item && !id->flag.delay_consume ) {
+		if( battle_config.allow_consume_restricted_item && !item.expire_time ) {
 			clif_useitemack(sd,n,item.amount - 1,true);
 			pc_delitem(sd,n,1,1,0,LOG_TYPE_CONSUME);
 		}
@@ -4923,21 +4912,13 @@ int pc_useitem(struct map_session_data *sd, int n)
 
 	sd->itemid = item.nameid;
 	sd->itemindex = n;
+
 	if( sd->catch_target_class != -1 ) //Abort pet catching
 		sd->catch_target_class = -1;
 
 	amount = item.amount;
 	script = id->script;
-	//Check if the item is to be consumed immediately [Skotlex]
-	if( id->flag.delay_consume )
-		clif_useitemack(sd,n,amount,true);
-	else {
-		if( !item.expire_time && nameid != ITEMID_BOARDING_HALTER ) {
-			clif_useitemack(sd,n,amount - 1,true);
-			pc_delitem(sd,n,1,1,0,LOG_TYPE_CONSUME); //Rental Usable Items are not deleted until expiration
-		} else
-			clif_useitemack(sd,n,0,false);
-	}
+
 	if( item.card[0] == CARD0_CREATE && pc_famerank(MakeDWord(item.card[2],item.card[3]), MAPID_ALCHEMIST) ) {
 		potion_flag = 2; //Famous player's potions have 50% more efficiency
 		if( sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_ROGUE )
@@ -4946,11 +4927,22 @@ int pc_useitem(struct map_session_data *sd, int n)
 
 	//Update item use time
 	sd->canuseitem_tick = tick + battle_config.item_use_interval;
+
 	if( itemdb_is_cashfood(nameid) )
 		sd->canusecashfood_tick = tick + battle_config.cashfood_use_interval;
 
 	run_script(script,0,sd->bl.id,fake_nd->bl.id);
 	potion_flag = 0;
+
+	//Check if the item is to be consumed immediately [Skotlex]
+	if( id->flag.keepAfterUse || ((nameid == ITEMID_EARTH_SCROLL_1_3 || ITEMID_EARTH_SCROLL_1_5) &&
+		sd->sc.data[SC_EARTHSCROLL] && rnd()%100 >= sd->sc.data[SC_EARTHSCROLL]->val2) ) //[marquis007]
+		clif_useitemack(sd,n,amount,true); //Do not consume item
+	else {
+		clif_useitemack(sd,n,amount - 1,true);
+		pc_delitem(sd,n,1,1,0,LOG_TYPE_CONSUME);
+	}
+
 	return 1;
 }
 

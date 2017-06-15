@@ -6076,7 +6076,7 @@ ACMD_FUNC(autolootitem)
  * Flags:
  * 1:   IT_HEALING,  2:   IT_UNKNOWN,  4:    IT_USABLE, 8:    IT_ETC,
  * 16:  IT_ARMOR,    32:  IT_WEAPON,   64:   IT_CARD,   128:  IT_PETEGG,
- * 256: IT_PETARMOR, 512: IT_UNKNOWN2, 1024: IT_AMMO,   2048: IT_DELAYCONSUME
+ * 256: IT_PETARMOR, 512: IT_UNKNOWN2, 1024: IT_AMMO,   2048: IT_RESTRICTEDCONSUME
  * 262144: IT_CASH
  *------------------------------------------
  * Credits:

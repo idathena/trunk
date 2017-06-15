@@ -1,0 +1,23 @@
+//===== rAthena Script =======================================
+//= Mysterious Bug Monster Spawn Script
+//===== By: ==================================================
+//= exneval
+//===== Current Version: =====================================
+//= 1.0
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: =========================================
+//= Spawns monsters that drop various items of shadow gears.
+//===== Additional Comments: =================================
+//= 1.0 First version.
+//============================================================
+
+prontera,0,0,0,0	monster	Mysterious Bug	2985,1,5000,0,0
+alberta,0,0,0,0	monster	Mysterious Bug	2985,1,5000,0,0
+payon,0,0,0,0	monster	Mysterious Bug	2985,1,5000,0,0
+geffen,0,0,0,0	monster	Mysterious Bug	2985,1,5000,0,0
+izlude,0,0,0,0	monster	Mysterious Bug	2985,1,5000,0,0
+izlude_a,0,0,0,0	monster	Mysterious Bug	2985,1,5000,0,0
+izlude_b,0,0,0,0	monster	Mysterious Bug	2985,1,5000,0,0
+izlude_c,0,0,0,0	monster	Mysterious Bug	2985,1,5000,0,0
+izlude_d,0,0,0,0	monster	Mysterious Bug	2985,1,5000,0,0

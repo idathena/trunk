@@ -1246,6 +1246,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 #ifndef RENEWAL
 			skill_id != HT_BLITZBEAT && skill_id != SN_FALCONASSAULT &&
 			skill_id != ASC_BREAKER && skill_id != CR_ACIDDEMONSTRATION &&
+			skill_id != GN_FIRE_EXPANSION_ACID &&
 #endif
 			skill_id != NJ_ZENYNAGE && skill_id != KO_MUCHANAGE )
 			damage -= damage * sce->val2 / 100;
@@ -6734,7 +6735,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			else
 				md.damage = 0;
 #endif
-			if(skill_id == CR_ACIDDEMONSTRATION && tsd)
+			if(tsd)
 				md.damage >>= 1;
 			break;
 		case NJ_ZENYNAGE:

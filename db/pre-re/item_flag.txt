@@ -7,7 +7,7 @@
 //  4 - GUID Item: When this item is obtained, will generates GUID that cannot be stacked even same or stackable item
 //  8 - Item will be bound item when equipped
 // 16 - Special Broadcast: When item dropped by monster and player loot it, will be broadcasted!
-// NOTE: For removing flag, use "-" to remove the flag. Example, 604,-1 will removes flag 1 from Branch_Of_Dead_Tree
+// 32 - Keep item after being consumed
 
 // Logged as Dead Branch item
 604,1 //Branch_Of_Dead_Tree
@@ -55,3 +55,9 @@
 12702,2 //Old_Bleu_Box
 12714,2 //Easter_Scroll
 14596,2 //Pierre_Treasurebox
+
+// Keep after being used
+12213,32 //Neuralizer
+12443,32 //F_Neuralizer
+12499,32 //E_Neuralizer
+12848,32 //Falcon_Flute

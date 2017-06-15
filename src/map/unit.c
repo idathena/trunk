@@ -1756,7 +1756,8 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	casttime = skill_vfcastfix(src, casttime, skill_id, skill_lv);
 #endif
 
-	if( src->type == BL_NPC ) //NPC-objects do not have cast time
+	if( src->type == BL_NPC || //NPC-objects do not have cast time
+		(sd && sd->skillitem == skill_id && (sd->skilliteminf&INF_SELF_SKILL)) )
 		casttime = 0;
 
 	if( sc ) { //Why the if else chain: These 3 status do not stack, so its efficient that way

@@ -6822,7 +6822,7 @@ void clif_item_refine_list(struct map_session_data *sd)
 
 /// Notification of an auto-casted skill (ZC_AUTORUN_SKILL).
 /// 0147 <skill id>.W <type>.L <level>.W <sp cost>.W <atk range>.W <skill name>.24B <upgradable>.B
-void clif_item_skill(struct map_session_data *sd,uint16 skill_id,uint16 skill_lv)
+void clif_item_skill(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv, int inf)
 {
 	int fd;
 
@@ -6833,7 +6833,7 @@ void clif_item_skill(struct map_session_data *sd,uint16 skill_id,uint16 skill_lv
 	WFIFOHEAD(fd,packet_len(0x147));
 	WFIFOW(fd,0) = 0x147;
 	WFIFOW(fd,2) = skill_id;
-	WFIFOW(fd,4) = skill_get_inf(skill_id);
+	WFIFOW(fd,4) = (inf ? inf : skill_get_inf(skill_id));
 	WFIFOW(fd,6) = 0;
 	WFIFOW(fd,8) = skill_lv;
 	WFIFOW(fd,10) = skill_get_sp(skill_id, skill_lv);
@@ -12168,7 +12168,7 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	sd->skillitem = sd->skillitemlv = 0;
+	sd->skillitem = sd->skillitemlv = sd->skilliteminf = 0;
 
 	if( skill_id >= GD_SKILLBASE ) {
 		if( sd->state.gmaster_flag )
@@ -12253,7 +12253,7 @@ static void clif_parse_UseSkillToPosSub(int fd, struct map_session_data *sd, uin
 	} else {
 		int lv;
 
-		sd->skillitem = sd->skillitemlv = 0;
+		sd->skillitem = sd->skillitemlv = sd->skilliteminf = 0;
 		if( (lv = pc_checkskill(sd, skill_id)) > 0 ) {
 			if( skill_lv > lv )
 				skill_lv = lv;
