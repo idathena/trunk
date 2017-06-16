@@ -466,19 +466,18 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 				hp = (status_get_lv(src) + status_get_int(src)) / 8 * (skill_lv * 8 + 4);
 #endif
 			}
-			if( sd && ((lv = pc_checkskill(sd, HP_MEDITATIO)) > 0) )
-				hp += hp * lv * 2 / 100;
-			else if( sd && pc_checkskill(sd, SU_POWEROFSEA) > 0 ) {
-				short sea_heal = 10;
-
-				if( pc_checkskill_summoner(sd, TYPE_SEAFOOD) >= 20 )
-					sea_heal += 20;
-				hp += hp * sea_heal / 100;
+			if( sd ) {
+				if( ((lv = pc_checkskill(sd, HP_MEDITATIO)) > 0) )
+					hp += hp * lv * 2 / 100;
+				if( pc_checkskill(sd, SU_POWEROFSEA) > 0 ) {
+					hp += hp * 8 / 100;
+					if( pc_checkskill_summoner(sd, TYPE_SEAFOOD) >= 20 )
+						hp += hp * 16 / 100;
+				}
+				if( tsd && sd->status.partner_id == tsd->status.char_id && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex )
+					hp <<= 1;
 			} else if( src->type == BL_HOM && (lv = hom_checkskill(((TBL_HOM *)src), HLIF_BRAIN)) > 0 )
 				hp += hp * lv * 2 / 100;
-			if( sd && tsd && sd->status.partner_id == tsd->status.char_id &&
-				(sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex )
-				hp <<= 1;
 			break;
 	}
 
@@ -1663,8 +1662,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 						case SC_MAGNETICFIELD:			case SC_NEUTRALBARRIER:		case SC_NEUTRALBARRIER_MASTER:
 						case SC_STEALTHFIELD_MASTER:		case SC_ANALYZE:		case SC_STEALTHFIELD:
 						//WL
-						case SC_FREEZE_SP:			case SC_MARSHOFABYSS:		case SC_RECOGNIZEDSPELL:
-						case SC_TELEKINESIS_INTENSE:
+						case SC_MARSHOFABYSS:			case SC_RECOGNIZEDSPELL:	case SC_TELEKINESIS_INTENSE:
 						//SC
 						case SC__REPRODUCE:			case SC__SHADOWFORM:		case SC__INVISIBILITY:
 						case SC__STRIPACCESSORY:		case SC__MANHOLE:		case SC__BODYPAINT:
@@ -7747,8 +7745,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_MAGNETICFIELD:			case SC_NEUTRALBARRIER:		case SC_NEUTRALBARRIER_MASTER:
 							case SC_STEALTHFIELD_MASTER:		case SC_ANALYZE:		case SC_STEALTHFIELD:
 							//WL
-							case SC_FREEZE_SP:			case SC_MARSHOFABYSS:		case SC_RECOGNIZEDSPELL:
-							case SC_TELEKINESIS_INTENSE:
+							case SC_MARSHOFABYSS:			case SC_RECOGNIZEDSPELL:	case SC_TELEKINESIS_INTENSE:
 							//SC
 							case SC__REPRODUCE:			case SC__SHADOWFORM:		case SC__INVISIBILITY:
 							case SC__STRIPACCESSORY:		case SC__MANHOLE:		case SC__BODYPAINT:
@@ -15441,9 +15438,10 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 						}
 						break;
 					case WL_RELEASE:
-						for( i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++ )
+						for( i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++ ) {
 							if( sc && sc->data[i] )
 								j++;
+						}
 						if( j == 0 ) {
 							clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON_NONE,0,0);
 							return false;
@@ -19922,9 +19920,10 @@ void skill_spellbook(struct map_session_data *sd, unsigned short nameid) {
 	sc = status_get_sc(&sd->bl);
 	status_change_end(&sd->bl, SC_STOP, INVALID_TIMER);
 
-	for( i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++ )
+	for( i = SC_SPELLBOOK1; i <= SC_MAXSPELLBOOK; i++ ) {
 		if( !(sc && sc->data[i]) )
 			break;
+	}
 
 	if( i > SC_MAXSPELLBOOK ) {
 		clif_skill_fail(sd, WL_READING_SB, USESKILL_FAIL_SPELLBOOK_READING, 0, 0);
@@ -19935,7 +19934,7 @@ void skill_spellbook(struct map_session_data *sd, unsigned short nameid) {
 	if( i == MAX_SKILL_SPELLBOOK_DB )
 		return;
 
-	if( !pc_checkskill(sd, (skill_id = skill_spellbook_db[i].skill_id)) ) { //User doesn't learn the skill.
+	if( !pc_checkskill(sd, (skill_id = skill_spellbook_db[i].skill_id)) ) { //User doesn't learn the skill
 		sc_start(&sd->bl, &sd->bl, SC_SLEEP, 100, 1, skill_get_time(WL_READING_SB, pc_checkskill(sd, WL_READING_SB)));
 		clif_skill_fail(sd, WL_READING_SB, USESKILL_FAIL_SPELLBOOK_DIFFICULT_SLEEP, 0, 0);
 		return;
