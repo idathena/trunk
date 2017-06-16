@@ -2926,7 +2926,7 @@ int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type) {
 			if (pc_checkskill(sd,SU_POWEROFSEA) > 0) {
 				bonus += 1000;
 				if (pc_checkskill_summoner(sd,TYPE_SEAFOOD) >= 20)
-					bonus += 2000;
+					bonus += 3000;
 			}
 #ifndef HP_SP_TABLES
 			if ((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && sd->status.base_level >= 99)
@@ -3052,7 +3052,7 @@ int status_get_spbonus(struct block_list *bl, enum e_status_bonus type) {
 			if (pc_checkskill(sd,SU_POWEROFSEA) > 0) {
 				bonus += 100;
 				if (pc_checkskill_summoner(sd,TYPE_SEAFOOD) >= 20)
-					bonus += 200;
+					bonus += 300;
 			}
 		}
 		if (sc) { //Bonus by SC
@@ -10424,9 +10424,17 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val4 = 10; //Ranged Atk increase
 				break;
 			case SC_SHRIMP: {
+					struct map_session_data *ssd = map_id2sd(src->id);
 					int heal = status_get_matk(src, 3);
 
 					heal += (15 * ((int)((status_get_lv(src) - 4) / 5.0 + 1) + (int)((status_get_int(src) - 4) / 5.0 + 1))); //Heal formula [exneval]
+					if( ssd ) {
+						if( pc_checkskill(ssd,SU_POWEROFSEA) > 0 ) {
+							val2 += val2 * 8 / 100;
+							if( pc_checkskill_summoner(ssd,TYPE_SEAFOOD) >= 20 )
+								val2 += val2 * 16 / 100;
+						}
+					}
 					status_heal(bl,heal,0,3);
 					val2 = 10; //Atk%, Matk%
 				}
@@ -10439,12 +10447,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val2 += status_get_int(src) - ((status_get_int(src) - 1) / 3 + 1);
 					if( ssd ) {
 						if( pc_checkskill(ssd,SU_POWEROFSEA) > 0 ) {
-							val2 += val2 * 10 / 100;
+							val2 += val2 * 8 / 100;
 							if( pc_checkskill_summoner(ssd,TYPE_SEAFOOD) >= 20 )
-								val2 += val2 * 20 / 100;
+								val2 += val2 * 16 / 100;
 						}
 						if( pc_checkskill(ssd,SU_SPIRITOFSEA) > 0 )
-							val2 <<= 1;
+							val2 = val2 * 160 / 100;
 					}
 					status_heal(bl,val2,0,3);
 					val3 = 11000 - 1000 * val1; //Heal interval

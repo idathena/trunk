@@ -4307,30 +4307,30 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case SU_SCAROFTAROU:
 			skillratio += -100 + 100 * skill_lv;
 			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
-				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
+				skillratio += (skillratio + skillratio * 20 / 100) * status_get_hp(src) / status_get_max_hp(src);
 			if(is_boss(target))
 				skillratio <<= 1;
 			break;
 		case SU_PICKYPECK:
 			skillratio += 100 + 100 * skill_lv;
 			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
-				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
+				skillratio += (skillratio + skillratio * 20 / 100) * status_get_hp(src) / status_get_max_hp(src);
 			break;
 		case SU_PICKYPECK_DOUBLE_ATK:
 			skillratio += 300 + 200 * skill_lv;
 			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
-				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
+				skillratio += (skillratio + skillratio * 20 / 100) * status_get_hp(src) / status_get_max_hp(src);
 			break;
 		case SU_LUNATICCARROTBEAT:
 		case SU_LUNATICCARROTBEAT2:
 			skillratio += 100 + 100 * skill_lv;
 			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
-				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
+				skillratio += (skillratio + skillratio * 20 / 100) * status_get_hp(src) / status_get_max_hp(src);
 			break;
 		case SU_SVG_SPIRIT:
 			skillratio += 150 + 150 * skill_lv;
 			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
-				skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
+				skillratio += (skillratio + skillratio * 20 / 100) * status_get_hp(src) / status_get_max_hp(src);
 			break;
 	}
 	return skillratio;

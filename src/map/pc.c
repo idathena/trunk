@@ -1628,7 +1628,7 @@ void pc_calc_skilltree(struct map_session_data *sd)
 
 	for( i = 0; i < MAX_SKILL; i++ ) {
 		if( sd->status.skill[i].flag != SKILL_FLAG_PLAGIARIZED && sd->status.skill[i].flag != SKILL_FLAG_PERM_GRANTED ) //Don't touch these
-			sd->status.skill[i].id = 0; //First clear skills.
+			sd->status.skill[i].id = 0; //First clear skills
 		//Permanent skills that must be re-checked
 		if( sd->status.skill[i].flag == SKILL_FLAG_PERM_GRANTED ) {
 			switch( i ) {
@@ -1727,7 +1727,7 @@ void pc_calc_skilltree(struct map_session_data *sd)
 			int f;
 
 			if( sd->status.skill[id].id )
-				continue; //Skill already known.
+				continue; //Skill already known
 
 			f = 1;
 			if( !battle_config.skillfree ) {
@@ -6927,13 +6927,12 @@ int pc_skillup(struct map_session_data *sd,uint16 skill_id)
 
 		sd->status.skill[skill_id].lv++;
 		sd->status.skill_point--;
-		if( !skill_get_inf(skill_id) )
-			status_calc_pc(sd,SCO_NONE); //Only recalculate for passive skills
-		else if( sd->status.skill_point == 0 && pc_is_taekwon_ranker(sd) )
+		if( !skill_get_inf(skill_id) || (skill_id >= SU_TUNABELLY && skill_id <= SU_FRESHSHRIMP) || (skill_id >= SU_GROOMING && skill_id <= SU_SHRIMPARTY) )
+			status_calc_pc(sd,SCO_NONE); //Only recalculate for passive skills, and also recalculate on Summoner's Sea skills for SU_POWEROFSEA's bonuses
+		else if( !sd->status.skill_point && pc_is_taekwon_ranker(sd) )
 			pc_calc_skilltree(sd); //Required to grant all TK Ranker skills
 		else
 			pc_check_skilltree(sd,skill_id); //Check if a new skill can Lvlup
-
 		lv = sd->status.skill[skill_id].lv;
 		range = skill_get_range2(&sd->bl,skill_id,lv,false);
 		upgradable = (lv < skill_tree_get_max(sd->status.skill[skill_id].id, sd->status.class_)) ? 1 : 0;
