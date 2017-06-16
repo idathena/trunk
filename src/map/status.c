@@ -8786,7 +8786,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_REUSE_LIMIT_ECL:
 			case SC_REUSE_LIMIT_RECALL:
 			case SC_REUSE_LIMIT_ASPD_POTION:
-			case SC_CHATTERING:
 				return 0;
 			case SC_COMBO:
 			case SC_DANCING:
