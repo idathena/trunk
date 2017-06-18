@@ -1799,7 +1799,7 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 	}
 
 	if(type == EQI_HAND_R && index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON &&
-		watk->range <= 3 && (refine = sd->status.inventory[index].refine) < 16 && refine) {
+		watk->range <= 3 && (refine = sd->inventory.u.items_inventory[index].refine) < 16 && refine) {
 		int r = refine_info[watk->wlv].randombonus_max[refine + (4 - watk->wlv)] / 100;
 
 		if(r)
@@ -1993,7 +1993,8 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		skill_id == NJ_KIRIKAGE)
 		return BF_SHORT;
 
-	if(src->type == BL_MOB && skill_id == AC_SHOWER) //When monsters use Arrow Shower, it is always short range
+	//When monsters use Arrow Shower or Bomb, it is always short range
+	if(src->type == BL_MOB && (skill_id == AC_SHOWER || skill_id == AM_DEMONSTRATION))
 		return BF_SHORT;
 
 	//Skill range criteria
@@ -3304,7 +3305,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 		//This checks if the generated value is within fear breeze's success chance range for the level used as set by gendetect
 		if(sc && sc->data[SC_FEARBREEZE] && generate <= gendetect[sc->data[SC_FEARBREEZE]->val1 - 1] &&
 			sd->weapontype1 == W_BOW && (i = sd->equip_index[EQI_AMMO]) >= 0 && sd->inventory_data[i] &&
-			sd->status.inventory[i].amount > 1)
+			sd->inventory.u.items_inventory[i].amount > 1)
 		{
 				if(generate >= 1 && generate <= 12) //12% chance to deal 2 hits
 					hitnumber = 2;
@@ -3314,7 +3315,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 					hitnumber = 4;
 				else if(generate >= 28 && generate <= 30) //3% chance to deal 5 hits
 					hitnumber = 5;
-				hitnumber = min(hitnumber,sd->status.inventory[i].amount);
+				hitnumber = min(hitnumber,sd->inventory.u.items_inventory[i].amount);
 				sc->data[SC_FEARBREEZE]->val4 = hitnumber - 1;
 		}
 		//If the generated value is higher then Fear Breeze's success chance range,
@@ -3338,9 +3339,9 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 		case RL_QD_SHOT: {
 				short i, hitnumber = 1;
 
-				if((i = sd->equip_index[EQI_AMMO]) >= 0 && sd->inventory_data[i] && sd->status.inventory[i].amount > 0) {
+				if((i = sd->equip_index[EQI_AMMO]) >= 0 && sd->inventory_data[i] && sd->inventory.u.items_inventory[i].amount > 0) {
 					hitnumber += status_get_job_lv(src) / 20;
-					hitnumber = min(hitnumber,sd->status.inventory[i].amount);
+					hitnumber = min(hitnumber,sd->inventory.u.items_inventory[i].amount);
 					if(battle_config.ammo_decrement && hitnumber > 1)
 						pc_delitem(sd,i,hitnumber - 1,0,1,LOG_TYPE_CONSUME);
 				}
@@ -4379,7 +4380,7 @@ static int64 battle_calc_skill_constant_addition(struct Damage wd,struct block_l
 				short index = sd->equip_index[EQI_HAND_L];
 
 				if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_ARMOR)
-					damagevalue = sstatus->vit * sd->status.inventory[index].refine;
+					damagevalue = sstatus->vit * sd->inventory.u.items_inventory[index].refine;
 				atk = damagevalue;
 			}
 			break;
@@ -5497,7 +5498,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				short index = sd->equip_index[EQI_HAND_R];
 
 				if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON)
-					ATK_ADD(wd.damage, wd.damage2, sd->status.inventory[index].refine);
+					ATK_ADD(wd.damage, wd.damage2, sd->inventory.u.items_inventory[index].refine);
 			}
 			break;
 	}
@@ -5626,7 +5627,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				short index = sd->equip_index[EQI_HAND_L];
 
 				if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_ARMOR)
-					ATK_ADD(wd.damage, wd.damage2, 10 * sd->status.inventory[index].refine);
+					ATK_ADD(wd.damage, wd.damage2, 10 * sd->inventory.u.items_inventory[index].refine);
 			}
 			break;
 #ifndef RENEWAL
@@ -7406,7 +7407,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 		if (battle_config.ammo_decrement && sc && sc->data[SC_FEARBREEZE] && sc->data[SC_FEARBREEZE]->val4 > 0) {
 			short idx = sd->equip_index[EQI_AMMO];
 
-			if (idx >= 0 && sd->status.inventory[idx].amount >= sc->data[SC_FEARBREEZE]->val4) {
+			if (idx >= 0 && sd->inventory_data[idx] && sd->inventory.u.items_inventory[idx].amount >= sc->data[SC_FEARBREEZE]->val4) {
 				pc_delitem(sd,idx,sc->data[SC_FEARBREEZE]->val4,0,1,LOG_TYPE_CONSUME);
 				sc->data[SC_FEARBREEZE]->val4 = 0;
 			}

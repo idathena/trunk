@@ -156,15 +156,15 @@ void vending_purchasereq(struct map_session_data *sd, int aid, int uid, const ui
 			return;
 
 		}
-		w += itemdb_weight(vsd->status.cart[idx].nameid) * amount;
+		w += itemdb_weight(vsd->cart.u.items_cart[idx].nameid) * amount;
 		if( w + sd->weight > sd->max_weight ) {
 			clif_buyvending(sd, idx, amount, 2); //You can not buy, because overweight
 			return;
 		}
 
 		//Check to see if cart/vend info is in sync.
-		if( vending[j].amount > vsd->status.cart[idx].amount )
-			vending[j].amount = vsd->status.cart[idx].amount;
+		if( vending[j].amount > vsd->cart.u.items_cart[idx].amount )
+			vending[j].amount = vsd->cart.u.items_cart[idx].amount;
 
 		//If they try to add packets (example: get twice or more 2 apples if marchand has only 3 apples).
 		//Here, we check cumulative amounts
@@ -176,7 +176,7 @@ void vending_purchasereq(struct map_session_data *sd, int aid, int uid, const ui
 
 		vending[j].amount -= amount;
 
-		switch( pc_checkadditem(sd, vsd->status.cart[idx].nameid, amount) ) {
+		switch( pc_checkadditem(sd, vsd->cart.u.items_cart[idx].nameid, amount) ) {
 			case CHKADDITEM_EXIST:
 				break; //We'd add this item to the existing one (in buyers inventory)
 			case CHKADDITEM_NEW:
@@ -201,17 +201,17 @@ void vending_purchasereq(struct map_session_data *sd, int aid, int uid, const ui
 		idx -= 2;
 		z = 0.; //Zeny counter
 		//Vending item
-		pc_additem(sd, &vsd->status.cart[idx], amount, LOG_TYPE_VENDING);
+		pc_additem(sd, &vsd->cart.u.items_cart[idx], amount, LOG_TYPE_VENDING);
 		vsd->vending[vend_list[i]].amount -= amount;
 		z += ((double)vsd->vending[i].value * (double)amount);
 
 		if( vsd->vending[vend_list[i]].amount ) {
 			if( Sql_Query(mmysql_handle, "UPDATE `%s` SET `amount` = %d WHERE `vending_id` = %d and `cartinventory_id` = %d",
-				vending_items_db, vsd->vending[vend_list[i]].amount, vsd->vender_id, vsd->status.cart[idx].id) != SQL_SUCCESS )
+				vending_items_db, vsd->vending[vend_list[i]].amount, vsd->vender_id, vsd->cart.u.items_cart[idx].id) != SQL_SUCCESS )
 				Sql_ShowDebug(mmysql_handle);
 		} else {
 			if( Sql_Query(mmysql_handle, "DELETE FROM `%s` WHERE `vending_id` = %d and `cartinventory_id` = %d",
-				vending_items_db, vsd->vender_id, vsd->status.cart[idx].id) != SQL_SUCCESS )
+				vending_items_db, vsd->vender_id, vsd->cart.u.items_cart[idx].id) != SQL_SUCCESS )
 				Sql_ShowDebug(mmysql_handle);
 		}
 
@@ -245,9 +245,9 @@ void vending_purchasereq(struct map_session_data *sd, int aid, int uid, const ui
 	vsd->vend_num = cursor;
 
 	//Always save BOTH: customer (buyer) and vender
-	if( save_settings&2 ) {
-		chrif_save(sd,0);
-		chrif_save(vsd,0);
+	if( save_settings&CHARSAVE_VENDING ) {
+		chrif_save(sd,CSAVE_INVENTORY|CSAVE_CART);
+		chrif_save(vsd,CSAVE_INVENTORY|CSAVE_CART);
 	}
 
 	//Check for @AUTOTRADE users [durf]
@@ -297,8 +297,8 @@ int8 vending_openvending(struct map_session_data *sd, const char *message, const
 		return 3;
 	}
 
-	if( save_settings&2 ) // Avoid invalid data from saving
-		chrif_save(sd, 0);
+	if( save_settings&CHARSAVE_VENDING ) // Avoid invalid data from saving
+		chrif_save(sd, CSAVE_INVENTORY|CSAVE_CART);
 
 	//Filter out invalid items
 	i = 0;
@@ -312,28 +312,16 @@ int8 vending_openvending(struct map_session_data *sd, const char *message, const
 		if( index < 0 || index >= MAX_CART || //Invalid position
 			pc_cartitem_amount(sd, index, amount) < 0 || //Invalid item or insufficient quantity
 			//NOTE: Official server does not do any of the following checks!
-			!sd->status.cart[index].identify || //Unidentified item
-			sd->status.cart[index].attribute == 1 || //Broken item
-			sd->status.cart[index].expire_time || //It should not be in the cart but just in case
-			(sd->status.cart[index].bound && !pc_can_give_bounded_items(sd)) || //Can't trade account bound items and has no permission
-			!itemdb_cantrade(&sd->status.cart[index], pc_get_group_level(sd), pc_get_group_level(sd)) ) //Untradeable item
+			!sd->cart.u.items_cart[index].identify || //Unidentified item
+			sd->cart.u.items_cart[index].attribute == 1 || //Broken item
+			sd->cart.u.items_cart[index].expire_time || //It should not be in the cart but just in case
+			(sd->cart.u.items_cart[index].bound && !pc_can_give_bounded_items(sd)) || //Can't trade account bound items and has no permission
+			!itemdb_cantrade(&sd->cart.u.items_cart[index], pc_get_group_level(sd), pc_get_group_level(sd)) ) //Untradeable item
 			continue;
 
 		sd->vending[i].index = index;
 		sd->vending[i].amount = amount;
 		sd->vending[i].value = umin(value, (unsigned int)battle_config.vending_max_value);
-
-		//Player just moved item to cart and we don't have the correct cart ID yet
-		if( battle_config.feature_autotrade && sd->status.cart[sd->vending[i].index].id == 0 ) {
-			struct item_data *idb = itemdb_search(sd->status.cart[index].nameid);
-			char msg[256];
-
-			sprintf(msg, msg_txt(725), idb->jname); // Item '%s' has not yet saved well to the cart. Please re-log your character.
-			clif_displaymessage(sd->fd, msg);
-			clif_skill_fail(sd, MC_VENDING, USESKILL_FAIL_LEVEL, 0, 0);
-			return 4;
-		}
-
 		i++; //Item successfully added
 	}
 
@@ -359,9 +347,9 @@ int8 vending_openvending(struct map_session_data *sd, const char *message, const
 
 	StringBuf_Init(&buf);
 	StringBuf_Printf(&buf, "INSERT INTO `%s`(`vending_id`,`index`,`cartinventory_id`,`amount`,`price`) VALUES", vending_items_db);
-	for( i = 0; i < count; i++ ) {
-		StringBuf_Printf(&buf, "(%d,%d,%d,%d,%d)", sd->vender_id, i, sd->status.cart[sd->vending[i].index].id, sd->vending[i].amount, sd->vending[i].value);
-		if( i < count - 1 )
+	for( j = 0; j < i; j++ ) {
+		StringBuf_Printf(&buf, "(%d,%d,%d,%d,%d)", sd->vender_id, j, sd->cart.u.items_cart[sd->vending[j].index].id, sd->vending[j].amount, sd->vending[j].value);
+		if( j < i - 1 )
 			StringBuf_AppendStr(&buf, ",");
 	}
 	if( SQL_ERROR == Sql_QueryStr(mmysql_handle, StringBuf_Value(&buf)) )
@@ -390,7 +378,7 @@ bool vending_search(struct map_session_data *sd, unsigned short nameid) {
 	if( !sd->state.vending ) //Not vending
 		return false;
 
-	ARR_FIND(0, sd->vend_num, i, sd->status.cart[sd->vending[i].index].nameid == (short)nameid);
+	ARR_FIND(0, sd->vend_num, i, sd->cart.u.items_cart[sd->vending[i].index].nameid == (short)nameid);
 	if( i == sd->vend_num ) //Not found
 		return false;
 
@@ -414,11 +402,11 @@ bool vending_searchall(struct map_session_data *sd, const struct s_search_store_
 		return true;
 
 	for( idx = 0; idx < s->item_count; idx++ ) {
-		ARR_FIND(0, sd->vend_num, i, sd->status.cart[sd->vending[i].index].nameid == (short)s->itemlist[idx]);
+		ARR_FIND(0, sd->vend_num, i, sd->cart.u.items_cart[sd->vending[i].index].nameid == (short)s->itemlist[idx]);
 		if( i == sd->vend_num ) //Not found
 			continue;
 
-		it = &sd->status.cart[sd->vending[i].index];
+		it = &sd->cart.u.items_cart[sd->vending[i].index];
 
 		if( s->min_price && s->min_price > sd->vending[i].value ) //Too low price
 			continue;
@@ -475,7 +463,7 @@ void vending_reopen(struct map_session_data *sd) {
 			uint32 *value  = (uint32 *)(p + 4);
 
 			//Find item position in cart
-			ARR_FIND(0, MAX_CART, entry->index, sd->status.cart[entry->index].id == entry->cartinventory_id);
+			ARR_FIND(0, MAX_CART, entry->index, sd->cart.u.items_cart[entry->index].id == entry->cartinventory_id);
 
 			if( entry->index == MAX_CART ) {
 				count--;
@@ -483,7 +471,7 @@ void vending_reopen(struct map_session_data *sd) {
 			}
 
 			*index = entry->index + 2;
-			*amount = itemdb_isstackable(sd->status.cart[entry->index].nameid) ? entry->amount : 1;
+			*amount = itemdb_isstackable(sd->cart.u.items_cart[entry->index].nameid) ? entry->amount : 1;
 			*value = entry->price;
 
 			p += 8;
@@ -509,7 +497,7 @@ void vending_reopen(struct map_session_data *sd) {
 			}
 
 			//Immediate save
-			chrif_save(sd, 3);
+			chrif_save(sd, CSAVE_AUTOTRADE);
 
 			ShowInfo("Vending loaded for '"CL_WHITE"%s"CL_RESET"' with '"CL_WHITE"%d"CL_RESET"' items at "CL_WHITE"%s (%d,%d)"CL_RESET"\n",
 				sd->status.name, count, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y);

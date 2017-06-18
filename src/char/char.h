@@ -7,6 +7,7 @@
 #include "../config/core.h"
 #include "../common/core.h" // CORE_ST_LAST
 #include "../common/msg_conf.h"
+#include "../common/mmo.h"
 
 enum E_CHARSERVER_ST
 {
@@ -29,13 +30,6 @@ int char_msg_config_read(char *cfgName);
 const char *char_msg_txt(int msg_number);
 void char_do_final_msg(void);
 
-enum {
-	TABLE_INVENTORY,
-	TABLE_CART,
-	TABLE_STORAGE,
-	TABLE_GUILD_STORAGE,
-};
-
 enum e_char_delete {
 	CHAR_DEL_EMAIL = 1,
 	CHAR_DEL_BIRTHDATE
@@ -47,7 +41,8 @@ enum e_char_delete_restriction {
 	CHAR_DEL_RESTRICT_ALL
 };
 
-int memitemdata_to_sql(const struct item items[], int max, int id, int tableswitch);
+int memitemdata_to_sql(const struct item items[], int max, int id, enum storage_type tableswitch, uint8 stor_id);
+bool memitemdata_from_sql(struct s_storage *p, int max, int id, enum storage_type tableswitch, uint8 stor_id);
 
 int mapif_sendall(unsigned char *buf, unsigned int len);
 int mapif_sendallwos(int fd, unsigned char *buf, unsigned int len);
@@ -78,40 +73,40 @@ extern bool char_gm_read;
 extern int autosave_interval;
 extern int save_log;
 extern char db_path[];
-extern char char_db[256];
-extern char scdata_db[256];
-extern char cart_db[256];
-extern char inventory_db[256];
-extern char charlog_db[256];
-extern char storage_db[256];
-extern char interlog_db[256];
-extern char reg_db[256];
-extern char skill_db[256];
-extern char memo_db[256];
-extern char guild_db[256];
-extern char guild_alliance_db[256];
-extern char guild_castle_db[256];
-extern char guild_expulsion_db[256];
-extern char guild_member_db[256];
-extern char guild_position_db[256];
-extern char guild_skill_db[256];
-extern char guild_storage_db[256];
-extern char party_db[256];
-extern char pet_db[256];
-extern char mail_db[256];
-extern char auction_db[256];
-extern char quest_db[256];
-extern char homunculus_db[256];
-extern char skill_homunculus_db[256];
-extern char mercenary_db[256];
-extern char mercenary_owner_db[256];
-extern char ragsrvinfo_db[256];
-extern char elemental_db[256];
+extern char char_db[DB_NAME_LEN];
+extern char scdata_db[DB_NAME_LEN];
+extern char cart_db[DB_NAME_LEN];
+extern char inventory_db[DB_NAME_LEN];
+extern char charlog_db[DB_NAME_LEN];
+extern char storage_db[DB_NAME_LEN];
+extern char interlog_db[DB_NAME_LEN];
+extern char reg_db[DB_NAME_LEN];
+extern char skill_db[DB_NAME_LEN];
+extern char memo_db[DB_NAME_LEN];
+extern char guild_db[DB_NAME_LEN];
+extern char guild_alliance_db[DB_NAME_LEN];
+extern char guild_castle_db[DB_NAME_LEN];
+extern char guild_expulsion_db[DB_NAME_LEN];
+extern char guild_member_db[DB_NAME_LEN];
+extern char guild_position_db[DB_NAME_LEN];
+extern char guild_skill_db[DB_NAME_LEN];
+extern char guild_storage_db[DB_NAME_LEN];
+extern char party_db[DB_NAME_LEN];
+extern char pet_db[DB_NAME_LEN];
+extern char mail_db[DB_NAME_LEN];
+extern char auction_db[DB_NAME_LEN];
+extern char quest_db[DB_NAME_LEN];
+extern char homunculus_db[DB_NAME_LEN];
+extern char skill_homunculus_db[DB_NAME_LEN];
+extern char mercenary_db[DB_NAME_LEN];
+extern char mercenary_owner_db[DB_NAME_LEN];
+extern char ragsrvinfo_db[DB_NAME_LEN];
+extern char elemental_db[DB_NAME_LEN];
 extern char interreg_db[32];
-extern char skillcooldown_db[256];
-extern char bonus_script_db[256];
-extern char clan_db[256];
-extern char clan_alliance_db[256];
+extern char skillcooldown_db[DB_NAME_LEN];
+extern char bonus_script_db[DB_NAME_LEN];
+extern char clan_db[DB_NAME_LEN];
+extern char clan_alliance_db[DB_NAME_LEN];
 
 extern int db_use_sqldbs; //Added for sql item_db read for char server [Valaris]
 

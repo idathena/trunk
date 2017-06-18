@@ -2452,7 +2452,7 @@ int skill_break_equip(struct block_list *src, struct block_list *bl, unsigned sh
 		for (i = 0; i < EQI_MAX; i++) {
 			short j = sd->equip_index[i];
 
-			if (j < 0 || sd->status.inventory[j].attribute == 1 || !sd->inventory_data[j])
+			if (j < 0 || sd->inventory.u.items_inventory[j].attribute == 1 || !sd->inventory_data[j])
 				continue;
 			switch(i) {
 				case EQI_HEAD_TOP: //Upper Head
@@ -2476,7 +2476,7 @@ int skill_break_equip(struct block_list *src, struct block_list *bl, unsigned sh
 					continue;
 			}
 			if (flag) {
-				sd->status.inventory[j].attribute = 1;
+				sd->inventory.u.items_inventory[j].attribute = 1;
 				pc_unequipitem(sd,j,7);
 			}
 		}
@@ -3713,7 +3713,7 @@ static int skill_check_condition_mercenary(struct block_list *bl, uint16 skill_i
 	if( skill_lv < 1 || skill_lv > MAX_SKILL_LEVEL )
 		return 0;
 
-	nullpo_ret(bl);
+	nullpo_retr(0,bl);
 
 	switch( bl->type ) {
 		case BL_HOM: sd = ((TBL_HOM *)bl)->master; break;
@@ -3775,10 +3775,6 @@ static int skill_check_condition_mercenary(struct block_list *bl, uint16 skill_i
 				}
 				break;
 			case MH_SONIC_CRAW:
-				if( !hd->homunculus.spiritball ) { //Requires at least 1 spirit sphere
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_SPIRIT,1,0);
-					return 0;
-				}
 				if( !(sc && sc->data[SC_STYLE_CHANGE] && sc->data[SC_STYLE_CHANGE]->val1 == MH_MD_FIGHTING) ) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_STYLE_CHANGE_FIGHTER,0,0);
 					return 0;
@@ -3879,7 +3875,7 @@ static int skill_check_condition_mercenary(struct block_list *bl, uint16 skill_i
 		if( itemid[i] <= 0 )
 			continue; //No item
 		index[i] = pc_search_inventory(sd, itemid[i]);
-		if( index[i] == INDEX_NOT_FOUND || sd->status.inventory[index[i]].amount < amount[i] ) {
+		if( index[i] == INDEX_NOT_FOUND || sd->inventory.u.items_inventory[index[i]].amount < amount[i] ) {
 			clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			return 0;
 		}
@@ -7314,7 +7310,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					return 1;
 				} else {
 					sd->state.prevend = 1;
-					clif_openvendingreq(sd,2 + skill_lv);
+					sd->vend_skill_lv = skill_lv;
+					ARR_FIND(0,MAX_CART,i,(sd->cart.u.items_cart[i].nameid && !sd->cart.u.items_cart[i].id));
+					if( i < MAX_CART )
+						intif_storage_save(sd,&sd->cart);
+					else
+						clif_openvendingreq(sd,2 + skill_lv);
 				}
 			}
 			break;
@@ -7489,7 +7490,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					x = skill_lv%11 - 1;
 					i = pc_search_inventory(sd,req.itemid[x]);
 					if( i == INDEX_NOT_FOUND || req.itemid[x] <= 0 || !sd->inventory_data[i] ||
-						sd->status.inventory[i].amount < req.amount[x] ) {
+						sd->inventory.u.items_inventory[i].amount < req.amount[x] ) {
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 						map_freeblock_unlock();
 						return 1;
@@ -7633,7 +7634,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				if( ebottle != INDEX_NOT_FOUND )
-					ebottle = sd->status.inventory[ebottle].amount;
+					ebottle = sd->inventory.u.items_inventory[ebottle].amount;
 #ifdef RENEWAL //In renewal, as long as have all three books and 200 Empty Bottle, can do any combination except "Fire Bottle without Alcohol" [exneval]
 				if( balcohol != INDEX_NOT_FOUND && bgrenade != INDEX_NOT_FOUND && bacid != INDEX_NOT_FOUND && ebottle >= 200 ) {
 					if( skill_can_produce_mix(sd,ITEMID_ALCOHOL,0,-1,100) ) {  //100 Alcohol
@@ -8356,7 +8357,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 				i = pc_search_inventory(sd,req.itemid[0]);
 				if (i == INDEX_NOT_FOUND || req.itemid[0] <= 0 || !sd->inventory_data[i] ||
-					sd->status.inventory[i].amount < req.amount[0]) {
+					sd->inventory.u.items_inventory[i].amount < req.amount[0]) {
 					skill_consume_requirement(sd,skill_id,skill_lv,1);
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					map_freeblock_unlock();
@@ -9707,7 +9708,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				else {
 					shield_def = shield_data->def;
 					shield_mdef = sd->bonus.shieldmdef;
-					shield_refine = sd->status.inventory[sd->equip_index[EQI_HAND_L]].refine;
+					shield_refine = sd->inventory.u.items_inventory[sd->equip_index[EQI_HAND_L]].refine;
 				}
 				switch( skill_lv ) {
 					case 1: { //DEF Based
@@ -11837,7 +11838,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 				i = skill_lv%11 - 1;
 				j = pc_search_inventory(sd,req.itemid[i]);
 				if( j == INDEX_NOT_FOUND || req.itemid[i] <= 0 || !sd->inventory_data[j] ||
-					sd->status.inventory[j].amount < req.amount[i] ) {
+					sd->inventory.u.items_inventory[j].amount < req.amount[i] ) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					return 1;
 				}
@@ -12884,7 +12885,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 
 				if( sd && (idx = sd->equip_index[EQI_AMMO]) >= 0 && sd->inventory_data[idx] ) {
 					for( i = 0; i < ARRAYLENGTH(ammo_id); i++ ) {
-						if( sd->status.inventory[idx].nameid != ammo_id[i] )
+						if( sd->inventory.u.items_inventory[idx].nameid != ammo_id[i] )
 							continue;
 						val1 = status->rhw.ele;
 					}
@@ -15387,15 +15388,15 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				int count = 0;
 
 				for( i = 0; i < MAX_INVENTORY; i++ ) {
-					if( sd->status.inventory[i].nameid == ITEMID_ANCILLA )
-						count += sd->status.inventory[i].amount;
+					if( sd->inventory.u.items_inventory[i].nameid == ITEMID_ANCILLA )
+						count += sd->inventory.u.items_inventory[i].amount;
 				}
 				if( count >= 3 ) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_ANCILLA_NUMOVER,0,0);
 					return false;
 				}
 				i = pc_search_inventory(sd,require.itemid[0]);
-				if( i == INDEX_NOT_FOUND || sd->status.inventory[i].amount < require.amount[0] ) {
+				if( i == INDEX_NOT_FOUND || sd->inventory.u.items_inventory[i].amount < require.amount[0] ) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_BLUEJAMSTONE,0,0);
 					return false;
 				}
@@ -15403,7 +15404,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 			break;
 		case AB_EPICLESIS:
 			i = pc_search_inventory(sd,require.itemid[0]);
-			if( i == INDEX_NOT_FOUND || sd->status.inventory[i].amount < require.amount[0] ) {
+			if( i == INDEX_NOT_FOUND || sd->inventory.u.items_inventory[i].amount < require.amount[0] ) {
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_HOLYWATER,0,0);
 				return false;
 			}
@@ -15411,7 +15412,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		case AB_ADORAMUS:
 		case WL_COMET:
 			i = pc_search_inventory(sd,require.itemid[0]);
-			if( i == INDEX_NOT_FOUND || sd->status.inventory[i].amount < require.amount[0] ) {
+			if( i == INDEX_NOT_FOUND || sd->inventory.u.items_inventory[i].amount < require.amount[0] ) {
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_ITEM,require.amount[0],require.itemid[0]);
 				return false;
 			}
@@ -15821,7 +15822,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				if( !require.itemid[i] )
 					continue;
 				index[i] = pc_search_inventory(sd,require.itemid[i]);
-				if( index[i] == INDEX_NOT_FOUND || sd->status.inventory[index[i]].amount < require.amount[i] ) {
+				if( index[i] == INDEX_NOT_FOUND || sd->inventory.u.items_inventory[index[i]].amount < require.amount[i] ) {
 					switch( require.itemid[i] ) {
 						case ITEMID_YELLOW_GEMSTONE:
 						case ITEMID_RED_GEMSTONE:
@@ -15892,7 +15893,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		short idx = sd->equip_index[EQI_AMMO];
 
 		if( idx < 0 || !sd->inventory_data[idx] || (1<<sd->inventory_data[idx]->look) != require.ammo ||
-			sd->status.inventory[idx].amount < require.ammo_qty ) {
+			sd->inventory.u.items_inventory[idx].amount < require.ammo_qty ) {
 			switch( skill_id ) {
 				case BA_MUSICALSTRIKE:
 				case DC_THROWARROW:
@@ -16097,7 +16098,7 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 				if( !require.itemid[i] )
 					continue;
 				index[i] = pc_search_inventory(sd,require.itemid[i]);
-				if( index[i] == INDEX_NOT_FOUND || sd->status.inventory[index[i]].amount < require.amount[i] ) {
+				if( index[i] == INDEX_NOT_FOUND || sd->inventory.u.items_inventory[index[i]].amount < require.amount[i] ) {
 					if( skill_id == SA_DISPELL || skill_id == HP_BASILICA || skill_id == HW_GANBANTEIN ) {
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 						return false;
@@ -16144,7 +16145,7 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 	if( require.ammo ) {
 		short idx = sd->equip_index[EQI_AMMO];
 
-		if( idx < 0 || !sd->inventory_data[idx] || sd->status.inventory[idx].amount < require.ammo_qty ) {
+		if( idx < 0 || !sd->inventory_data[idx] || sd->inventory.u.items_inventory[idx].amount < require.ammo_qty ) {
 			if( require.ammo&((1<<AMMO_BULLET)|(1<<AMMO_SHELL)|(1<<AMMO_GRENADE)) )
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_BULLET,0,0);
 			else if( require.ammo&(1<<AMMO_KUNAI) )
@@ -16410,7 +16411,7 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 						short item_index;
 
 						if( (item_index = pc_search_inventory(sd,require.itemid[i])) == INDEX_NOT_FOUND ||
-							sd->status.inventory[item_index].amount < require.amount[i] ) {
+							sd->inventory.u.items_inventory[item_index].amount < require.amount[i] ) {
 							require.itemid[i] = ITEMID_SPECIAL_ALLOY_TRAP;
 							require.amount[i] = 1;
 						}
@@ -16946,7 +16947,7 @@ void skill_repairweapon(struct map_session_data *sd, int idx) {
 	if( idx < 0 || idx >= MAX_INVENTORY )
 		return; //Invalid index??
 
-	item = &target_sd->status.inventory[idx];
+	item = &target_sd->inventory.u.items_inventory[idx];
 	if( !(item->nameid) || !item->attribute )
 		return; //Again invalid item
 
@@ -16989,9 +16990,9 @@ void skill_identify (struct map_session_data *sd, int idx)
 	nullpo_retv(sd);
 
 	if(idx >= 0 && idx < MAX_INVENTORY) {
-		if(sd->status.inventory[idx].nameid > 0 && sd->status.inventory[idx].identify == 0) {
+		if(sd->inventory.u.items_inventory[idx].nameid > 0 && sd->inventory.u.items_inventory[idx].identify == 0) {
 			flag = 0;
-			sd->status.inventory[idx].identify = 1;
+			sd->inventory.u.items_inventory[idx].identify = 1;
 		}
 	}
 	clif_item_identified(sd,idx,flag);
@@ -17008,7 +17009,7 @@ void skill_weaponrefine(struct map_session_data *sd, int idx)
 		struct item *item;
 		struct item_data *ditem = sd->inventory_data[idx];
 
-		item = &sd->status.inventory[idx];
+		item = &sd->inventory.u.items_inventory[idx];
 		if (item->nameid > 0 && ditem->type == IT_WEAPON) {
 			int i = 0, per;
 			int material[5] = { 0,ITEMID_PHRACON,ITEMID_EMVERETARCON,ITEMID_ORIDECON,ITEMID_ORIDECON };
@@ -17525,7 +17526,7 @@ static int skill_bind_trap(struct block_list *bl, va_list ap) {
 	if (su->group->unit_id != UNT_B_TRAP || su->group->src_id != src->id)
 		return 0;
 
-	clif_skill_damage(src,bl,gettick(),status_get_amotion(src),0,-30000,1,su->group->skill_id,su->group->skill_lv,DMG_SKILL);
+	clif_skill_damage(src,src,gettick(),status_get_amotion(src),0,-30000,1,su->group->skill_id,su->group->skill_lv,DMG_SKILL);
 	map_foreachinallrange(skill_trap_splash,bl,su->range,BL_CHAR,bl,su->group->tick);
 	clif_changetraplook(bl,UNT_USED_TRAPS);
 	su->group->unit_id = UNT_USED_TRAPS;
@@ -19106,8 +19107,8 @@ short skill_can_produce_mix(struct map_session_data *sd, unsigned short nameid, 
 			unsigned short idx, amt;
 
 			for( idx = 0, amt = 0; idx < MAX_INVENTORY; idx++ ) {
-				if( sd->status.inventory[idx].nameid == nameid )
-					amt += sd->status.inventory[idx].amount;
+				if( sd->inventory.u.items_inventory[idx].nameid == nameid )
+					amt += sd->inventory.u.items_inventory[idx].amount;
 			}
 			if( itemdb_is_gemstone(nameid) && sd->special_state.no_gemstone )
 				continue;
@@ -19193,13 +19194,13 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 			temp_qty = 1;
 		if( data->stack.inventory ) {
 			for( i = 0; i < MAX_INVENTORY; i++ ) {
-				if( sd->status.inventory[i].nameid == nameid ) {
-					if( sd->status.inventory[i].amount >= data->stack.amount ) {
+				if( sd->inventory.u.items_inventory[i].nameid == nameid ) {
+					if( sd->inventory.u.items_inventory[i].amount >= data->stack.amount ) {
 						clif_msg(sd,RUNE_CANT_CREATE);
 						return false;
 					} else { //The amount fits, say we got temp_qty 4 and 19 runes, we trim temp_qty to 1
-						if( temp_qty + sd->status.inventory[i].amount >= data->stack.amount )
-							temp_qty = data->stack.amount - sd->status.inventory[i].amount;
+						if( temp_qty + sd->inventory.u.items_inventory[i].amount >= data->stack.amount )
+							temp_qty = data->stack.amount - sd->inventory.u.items_inventory[i].amount;
 					}
 					break;
 				}
@@ -19222,7 +19223,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 
 			j = pc_search_inventory(sd,id);
 			if( j != INDEX_NOT_FOUND ) {
-				y = sd->status.inventory[j].amount;
+				y = sd->inventory.u.items_inventory[j].amount;
 				if( y > x )
 					y = x;
 				pc_delitem(sd,j,y,0,0,LOG_TYPE_PRODUCE);
@@ -20009,7 +20010,7 @@ int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv,
 			del_amount -= (del_amount % 10);
 		add_amount = (skill_lv == 1) ? del_amount * (5 + rnd()%5) : del_amount / 10 ;
 
-		if( (nameid = sd->status.inventory[idx].nameid) <= 0 || del_amount > sd->status.inventory[idx].amount ) {
+		if( (nameid = sd->inventory.u.items_inventory[idx].nameid) <= 0 || del_amount > sd->inventory.u.items_inventory[idx].amount ) {
 			clif_skill_fail(sd,SO_EL_ANALYSIS,USESKILL_FAIL_LEVEL,0,0);
 			return 1;
 		}
@@ -20076,9 +20077,9 @@ int skill_changematerial(struct map_session_data *sd, int n, unsigned short *ite
 						for( k = 0; k < n; k++ ) {
 							int idx = item_list[k * 2 + 0] - 2;
 
-							nameid = sd->status.inventory[idx].nameid;
+							nameid = sd->inventory.u.items_inventory[idx].nameid;
 							amount = item_list[k * 2 + 1];
-							if( nameid > 0 && sd->status.inventory[idx].identify == 0 ) {
+							if( nameid > 0 && sd->inventory.u.items_inventory[idx].identify == 0 ) {
 								clif_msg_skill(sd,GN_CHANGEMATERIAL,ITEM_UNIDENTIFIED);
 								return 0;
 							}

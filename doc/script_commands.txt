@@ -3021,7 +3021,7 @@ See the sample in 'doc/sample/getiteminfo.txt'.
 
 Returns value from equipped item slot in the indicated slot (0, 1, 2, or 3).
 
-This function returns CARD ID, 255,254,-255 (for card 0, if the item is produced).
+This function returns CARD ID, CARD0_FORGE, CARD0_CREATE, or CARD0_PET (for card 0, if the item is produced)..
 It's useful for when you want to check whether an item contains cards or if it's signed.
 
 ---------------------------------------
@@ -4540,6 +4540,8 @@ quite a few item scripts. For more examples check just about any official script
 
 *getitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
 *getitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*getitem3 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+*getitem3 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
 
 This command will give an amount of specified items to the invoking character. 
 If an optional account ID is specified, and the target character is currently 
@@ -4625,6 +4627,18 @@ command, creating a pet which is the same, but simultaneously exists in two
 eggs, and may hatch from either, although, I'm not sure what kind of a mess will 
 this really cause.
 
+'getitem3' is advance version of 'getitem2' that also use Item Random Option as additional values.
+<RandomIDArray>    : Array variable of ID for item random option, see db/[pre-]re/item_randomopt_db.txt
+<RandomValueArray> : Array variable of item random option's value.
+<RandomParamArray> : Array variable of item random option's param.
+
+Example to get Crimson Weapon with Ghost property:
+	// +9 Crimson Dagger [2]
+	setarray .@OptID[0],RDMOPT_WEAPON_ATTR_TELEKINESIS;
+	setarray .@OptVal[0],0;
+	setarray .@OptParam[0],0;
+	getitem3 28705,1,1,9,0,0,0,0,0,.@OptID,.@OptVal,.@OptParam;
+
 ---------------------------------------
 
 *getitembound <item id>,<amount>,<bound type>{,<account ID>};
@@ -4645,6 +4659,8 @@ Valid bound types are:
 
 *getitembound2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>{,<account ID>};
 *getitembound2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>{,<account ID>};
+*getitembound3 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+*getitembound3 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
 
 This command behaves identically to 'getitem2', but the items created will be
 bound to the target character as specified by the bound type. All items created
@@ -4652,6 +4668,18 @@ in this manner cannot be dropped, sold, vended, auctioned, or mailed, and in
 some cases cannot be traded or stored.
 
 For a list of bound types see 'getitembound'.
+
+'getitembound3' is advance version of 'getitembound2' that also use Item Random Option as additional values.
+<RandomIDArray>    : Array variable of ID for item random option, see db/[pre-]re/item_randomopt_db.txt
+<RandomValueArray> : Array variable of item random option's value.
+<RandomParamArray> : Array variable of item random option's param.
+
+Example to get Crimson Weapon with Ghost property:
+	// +9 Crimson Dagger [2]
+	setarray .@OptID[0],RDMOPT_WEAPON_ATTR_TELEKINESIS;
+	setarray .@OptVal[0],0;
+	setarray .@OptParam[0],0;
+	getitembound3 28705,1,1,9,0,0,0,0,0,BOUND_CHAR,.@OptID,.@OptVal,.@OptParam;
 
 ---------------------------------------
 
@@ -4759,11 +4787,25 @@ NOTE: 'delitem' in an NPC script can still remove rental items.
 
 *rentitem2 <item id>,<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account_id>};
 *rentitem2 "<item name>",<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account_id>};
+*rentitem3 <item id>,<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account_id>};
+*rentitem3 "<item name>",<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account_id>};
 
 Creates a rental item in the attached character's inventory. The item will expire 
 in <time> seconds and be automatically deleted. See 'rentitem' for further details.
 
 See 'getitem2' for an explanation of the expanded parameters.
+
+'rentitem3' is advance version of 'rentitem2' that also use Item Random Option as additional values.
+<RandomIDArray>    : Array variable of ID for item random option, see db/[pre-]re/item_randomopt_db.txt
+<RandomValueArray> : Array variable of item random option's value.
+<RandomParamArray> : Array variable of item random option's param.
+
+Example to get Crimson Weapon with Ghost property:
+	// +9 Crimson Dagger [2]
+	setarray .@OptID[0],RDMOPT_WEAPON_ATTR_TELEKINESIS;
+	setarray .@OptVal[0],0;
+	setarray .@OptParam[0],0;
+	rentitem3 28705,(24*60*60),1,9,0,0,0,0,0,.@OptID,.@OptVal,.@OptParam;
 
 ---------------------------------------
 
@@ -4784,11 +4826,32 @@ If the map name is given as "this", the map the invoking character is on will be
 
 *makeitem2 <item id>,<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>;
 *makeitem2 "<item name>",<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>;
+*makeitem3 <item id>,<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>;
+*makeitem3 "<item name>",<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>;
 
 This command will create an item on the specified cell of a map. See 'makeitem' for
 further details.
 
 See 'getitem2' for an explanation of the expanded parameters.
+
+'makeitem3' is advance version of 'makeitem2' that also use Item Random Option as additional values.
+<RandomIDArray>    : Array variable of ID for item random option, see db/[pre-]re/item_randomopt_db.txt
+<RandomValueArray> : Array variable of item random option's value.
+<RandomParamArray> : Array variable of item random option's param.
+
+Example to get Crimson Weapon with Ghost property:
+	// 0.5% chance to get +0 Valkyrie Shield [1]
+	// with Neutral Resistance +10% and 5% damage reduction from Demi-Human or Player
+	// when Valkyrie Randgris killed
+	OnNPCKillEvent:
+		if (killedrid == 1751 && rand(0,1000) > 950) { // Valkyrie Randgris
+			getmapxy(.@map$,.@x,.@y,UNITTYPE_PC);
+			setarray .@OptID[0],RDMOPT_ATTR_TOLERACE_NOTHING,RDMOPT_RACE_TOLERACE_HUMAN;
+			setarray .@OptVal[0],10,5;
+			setarray .@OptParam[0],0;
+			makeitem3 2115,1,.@map$,.@x,.@y,0,0,0,0,0,0,0,.@OptID,.@OptVal,.@OptParam;
+		}
+		end;
 
 ---------------------------------------
 
@@ -4836,9 +4899,16 @@ database. If the name is not found, nothing will be deleted.
 
 *delitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
 *delitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*delitem3 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+*delitem3 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
 
 This command will remove a specified amount of items from the invoking/target character. 
 See 'getitem2' for an explanation of the expanded parameters.
+
+'delitem3' is advance version of 'delitem2' that also use Item Random Option as criteria.
+<RandomIDArray>    : Array variable of ID for item random option, see db/[pre-]re/item_randomopt_db.txt
+<RandomValueArray> : Array variable of item random option's value.
+<RandomParamArray> : Array variable of item random option's param.
 
 ---------------------------------------
 
@@ -4846,20 +4916,28 @@ See 'getitem2' for an explanation of the expanded parameters.
 *cartdelitem "<item name>",<amount>{,<account ID>};
 *storagedelitem <item id>,<amount>{,<account ID>};
 *storagedelitem "<item name>",<amount>{,<account ID>};
+*guildstoragedelitem <item id>,<amount>{,<account ID>};
+*guildstoragedelitem "<item name>",<amount>{,<account ID>};
 
 This command behaves identically to 'delitem', but deletes items from the player's
-cart or storage. If no cart is mounted, 'cartdelitem' will fail.
+cart, storage, or guild storage.
 
+If no cart is mounted, 'cartdelitem' will return -1.
+If player is not in a guild or storage is open, 'guildstoragedelitem' will return -1.
 ---------------------------------------
 
 *cartdelitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
 *cartdelitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
 *storagedelitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
 *storagedelitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*guildstoragedelitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
+*guildstoragedelitem2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>};
 
 This command behaves identically to 'delitem2', but deletes items from the player's
-cart or storage. If no cart is mounted, 'cartdelitem2' will fail.
+cart, storage, or guild storage.
 
+If no cart is mounted, 'cartdelitem2' will return -1.
+If player is not in a guild or storage is open, 'guildstoragedelitem2' will return -1.
 ---------------------------------------
 
 *countitem(<item id>)
@@ -4886,6 +4964,8 @@ adding up strings:
 
 *countitem2(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>)
 *countitem2("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>)
+*countitem3(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>)
+*countitem3("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>)
 
 Expanded version of 'countitem' function, used for created/carded/forged items.
 
@@ -4893,26 +4973,39 @@ This function will return the number of items for the specified item ID and
 other parameters that the invoking character has in the inventory.
 See 'getitem2' for an explanation of the expanded parameters.
 
+'countitem3' is advance version of 'countitem2' that also use Item Random Option as criteria.
+<RandomIDArray>    : Array variable of ID for item random option, see db/[pre-]re/item_randomopt_db.txt
+<RandomValueArray> : Array variable of item random option's value.
+<RandomParamArray> : Array variable of item random option's param.
+
 ---------------------------------------
 
-*cartcountitem(<item id>)
-*cartcountitem("<item name>")
-*storagecountitem(<item id>)
-*storagecountitem("<item name>")
+*cartcountitem(<item id>{,<accountID>})
+*cartcountitem("<item name>"{,<accountID>})
+*storagecountitem(<item id>{,<accountID>})
+*storagecountitem("<item name>"{,<accountID>})
+*guildstoragecountitem(<nameID>{,<accountID>})
+*guildstoragecountitem("<item name>"{,<accountID>})
 
 This command behaves identically to 'countitem', but counts items from the player's
-cart or storage. If no cart is mounted, 'cartcountitem' will return -1.
+cart, storage, or guild storage.
 
+If no cart is mounted, 'cartcountitem' will return -1.
+If player is not in a guild or storage is open, 'guildstoragecountitem' will return -1.
 ---------------------------------------
 
-*cartcountitem2(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>)
-*cartcountitem2("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>)
-*storagecountitem2(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>)
-*storagecountitem2("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>)
+*cartcountitem2(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*cartcountitem2("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*storagecountitem2(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*storagecountitem2("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<accountID>})
+*guildstoragecountitem2(<nameID>,<Identified>,<Refine>,<Attribute>,<Card0>,<Card1>,<Card2>,<Card3>{,<accountID>})
+*guildstoragecountitem2("<item name>",<Identified>,<Refine>,<Attribute>,<Card0>,<Card1>,<Card2>,<Card3>{,<accountID>})
 
 This command behaves identically to 'countitem2', but counts items from the player's
-cart or storage. If no cart is mounted, 'cartcountitem2' will return -1.
+cart, storage, or guild storage.
 
+If no cart is mounted, 'cartcountitem2' will return -1.
+If player is not in a guild or storage is open, 'guildstoragecountitem2' will return -1.
 ---------------------------------------
 
 *countbound({<bound type>{,<char_id>}})
@@ -5270,6 +5363,33 @@ window, to avoid any disruption when both windows overlap.
     close2;
     openstorage;
     end;
+
+*openstorage2 <storage_id>,<mode>{,<account_id>};
+
+Just like the 'openstorage' command, except this command can open additional storages
+by the specified <storage_id>. For <storage_id>, please read the conf/inter_server.conf
+for storage groups.
+
+Values for <mode> are:
+	STOR_MODE_NONE : Player only can read the storage entries.
+	STOR_MODE_GET  : Player can get items from the storage.
+	STOR_MODE_PUT  : Player can put items in the storage.
+
+Example:
+	if (vip_status(1)) {
+		mes "I will open your Premium storage.";
+		mes "Thank you for using our service.";
+		close2;
+		openstorage2 1,STOR_MODE_GET|STOR_MODE_PUT;
+	} else {
+		mes "Sorry, your Premium status is expired.";
+		mes "Storage will be opened but you can't put any item into it.";
+		close2;
+		openstorage2 1,STOR_MODE_GET;
+	}
+	end;
+
+---------------------------------------
 
 ---------------------------------------
 
@@ -9297,6 +9417,46 @@ If <char id> is specified, the specified player is used rather than the attached
 *clan_master(<clan id>);
 
 Show the emblem of the given <clan id> to the current NPC.
+
+---------------------------------------
+
+*getrandomoptinfo(<type>);
+
+Returns value of an attribute of current random option.
+
+Valid attributes are:
+ROA_ID - ID of current option
+ROA_VALUE - Value field of current option
+ROA_PARAM - Param field of current option
+
+This script command is intended for using in random option scripts.
+
+---------------------------------------
+
+*getequiprandomoption(<equipment index>,<index>,<type>{,<char id>});
+
+Returns value of an attribute of a random option on an equipped item.
+
+See 'getequipid' for a full list of valid equipment slots.
+
+index parameter can be 0 to MAX_ITEM_RDM_OPT-1 (default 0-4).
+
+For valid attribute types, see `getrandomoptinfo` command reference.
+
+---------------------------------------
+
+*setrandomoption(<equipment slot>,<index>,<id>,<value>,<param>{,<char id>});
+
+Sets <index+1>th random option for equipment equipped at <equipment slot>
+to <id>, <value> and <param>.
+
+See 'getequipid' for a full list of valid equipment slots.
+
+index parameter can be 0 to MAX_ITEM_RDM_OPT-1 (default 0-4).
+
+ID - ID of random option. See db/const.txt for constants.
+Value - Value of random option
+Param - Parameter of random option
 
 ---------------------------------------
 

@@ -458,6 +458,31 @@ struct item_data {
 	int delay_sc; //Use delay group if any instead using player's item_delay data [Cydh]
 };
 
+//Struct for item random option [Secret]
+struct s_random_opt_data
+{
+	unsigned short id;
+	struct script_code *script;
+};
+
+//Enum for Random Option Groups
+enum Random_Option_Group {
+	RDMOPTG_None = 0,
+	RDMOPTG_Crimson_Weapon,
+};
+
+//Struct for random option group entry
+struct s_random_opt_group_entry {
+	struct s_item_randomoption option[MAX_ITEM_RDM_OPT];
+};
+
+//Struct for Random Option Group
+struct s_random_opt_group {
+	uint8 id;
+	struct s_random_opt_group_entry *entries;
+	uint16 total;
+};
+
 struct item_data *itemdb_searchname(const char *name);
 int itemdb_searchname_array(struct item_data **data, int size, const char *str);
 struct item_data *itemdb_search(unsigned short nameid);
@@ -534,6 +559,10 @@ uint16 itemdb_get_randgroupitem_count(uint16 group_id, uint8 sub_group, unsigned
 
 bool itemdb_parse_roulette_db(void);
 
+struct s_random_opt_data *itemdb_randomopt_exists(short id);
+struct s_random_opt_group *itemdb_randomopt_group_exists(int id);
+
+void itemdb_reload_itemmob_data(void);
 void itemdb_reload(void);
 
 void do_final_itemdb(void);

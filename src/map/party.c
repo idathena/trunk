@@ -633,7 +633,7 @@ int party_member_withdraw(int party_id, uint32 account_id, uint32 char_id, char 
 			party_trade_bound_cancel(sd);
 			j = pc_bound_chk(sd, BOUND_PARTY, idxlist);
 			for( k = 0; k < j; k++ )
-				pc_delitem(sd, idxlist[k], sd->status.inventory[idxlist[k]].amount, 0, 1, LOG_TYPE_BOUND_REMOVAL);
+				pc_delitem(sd, idxlist[k], sd->inventory.u.items_inventory[idxlist[k]].amount, 0, 1, LOG_TYPE_BOUND_REMOVAL);
 #endif
 			sd->status.party_id = 0;
 			clif_name_area(&sd->bl); //Update name display [Skotlex]

@@ -418,8 +418,8 @@ int pet_birth_process(struct map_session_data *sd, struct s_pet *pet)
 	}
 
 	intif_save_petdata(sd->status.account_id,pet);
-	if(save_settings&8)
-		chrif_save(sd, 0); //Is it REALLY Needed to save the char for hatching a pet? [Skotlex]
+	if(save_settings&CHARSAVE_PET)
+		chrif_save(sd, CSAVE_INVENTORY); //Is it REALLY Needed to save the char for hatching a pet? [Skotlex]
 
 	if(sd->bl.prev) {
 		if(map_addblock(&sd->pd->bl))
@@ -451,8 +451,8 @@ int pet_recv_petdata(int account_id,struct s_pet *p,int flag)
 
 		//Delete egg from inventory. [Skotlex]
 		for(i = 0; i < MAX_INVENTORY; i++) {
-			if(sd->status.inventory[i].card[0] == CARD0_PET &&
-				p->pet_id == MakeDWord(sd->status.inventory[i].card[1], sd->status.inventory[i].card[2]))
+			if(sd->inventory.u.items_inventory[i].card[0] == CARD0_PET &&
+				p->pet_id == MakeDWord(sd->inventory.u.items_inventory[i].card[1], sd->inventory.u.items_inventory[i].card[2]))
 				break;
 		}
 		if(i >= MAX_INVENTORY) {
@@ -485,8 +485,8 @@ int pet_select_egg(struct map_session_data *sd,short egg_index)
 	if(egg_index < 0 || egg_index >= MAX_INVENTORY)
 		return 0; //Forged packet!
 
-	if(sd->status.inventory[egg_index].card[0] == CARD0_PET)
-		intif_request_petdata(sd->status.account_id,sd->status.char_id,MakeDWord(sd->status.inventory[egg_index].card[1],sd->status.inventory[egg_index].card[2]));
+	if(sd->inventory.u.items_inventory[egg_index].card[0] == CARD0_PET)
+		intif_request_petdata(sd->status.account_id,sd->status.char_id,MakeDWord(sd->inventory.u.items_inventory[egg_index].card[1],sd->inventory.u.items_inventory[egg_index].card[2]));
 	else
 		ShowError("Wrong egg item inventory %d\n",egg_index);
 
@@ -694,13 +694,12 @@ int pet_equipitem(struct map_session_data *sd,int index)
 
 	nullpo_retr(1, sd);
 
-	pd = sd->pd;
-	if (!pd)
+	if (!(pd = sd->pd))
 		return 1;
 
-	nameid = sd->status.inventory[index].nameid;
+	nameid = sd->inventory.u.items_inventory[index].nameid;
 
-	if (pd->petDB->AcceID == 0 || nameid != pd->petDB->AcceID || pd->pet.equip != 0) {
+	if (!pd->petDB->AcceID || nameid != pd->petDB->AcceID || pd->pet.equip) {
 		clif_equipitemack(sd,0,0,ITEM_EQUIP_ACK_FAIL);
 		return 1;
 	}

@@ -47,7 +47,6 @@
 #include "unit.h"
 #include "pet.h"
 #include "mail.h"
-#include "script.h"
 #include "quest.h"
 #include "elemental.h"
 #include "../config/core.h"
@@ -56,9 +55,6 @@
 	#include "../../3rdparty/pcre/include/pcre.h" // preg_match
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #ifndef WIN32
 	#include <sys/time.h>
@@ -3948,7 +3944,7 @@ void script_run_autobonus(const char *autobonus, struct map_session_data *sd, un
 	if( script ) {
 		int j;
 
-		ARR_FIND(0, EQI_MAX, j, (sd->equip_index[j] >= 0 && sd->status.inventory[sd->equip_index[j]].equip == pos));
+		ARR_FIND(0, EQI_MAX, j, (sd->equip_index[j] >= 0 && sd->inventory.u.items_inventory[sd->equip_index[j]].equip == pos));
 		if( j < EQI_MAX ) { //Single item autobonus
 			current_equip_item_index = sd->equip_index[j];
 			current_equip_pos = 0;
@@ -6040,6 +6036,78 @@ BUILDIN_FUNC(viewpoint)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * Set random options for new item
+ * @param st Script state
+ * @param it Temporary item data
+ * @param funcname Function name
+ * @param x First position of random option id array from the script
+ */
+static int script_getitem_randomoption(struct script_state *st, struct item *it, const char *funcname, int x) {
+	int i, opt_id_n, opt_val_n, opt_param_n;
+	struct script_data *opt_id = script_getdata(st,x);
+	struct script_data *opt_val = script_getdata(st,x + 1);
+	struct script_data *opt_param = script_getdata(st,x + 2);
+	const char *opt_id_var = reference_getname(opt_id);
+	const char *opt_val_var = reference_getname(opt_val);
+	const char *opt_param_var = reference_getname(opt_param);
+	int32 opt_id_id, opt_id_idx;
+	int32 opt_val_id, opt_val_idx;
+	int32 opt_param_id, opt_param_idx;
+
+	if( is_string_variable(opt_id_var) ) {
+		ShowError("buildin_%s: The array %s is not numeric type.\n", funcname, opt_id_var);
+		return 1;
+	}
+
+	if( is_string_variable(opt_val_var) ) {
+		ShowError("buildin_%s: The array %s is not numeric type.\n", funcname, opt_val_var);
+		return 1;
+	}
+
+	if( is_string_variable(opt_param_var) ) {
+		ShowError("buildin_%s: The array %s is not numeric type.\n", funcname, opt_param_var);
+		return 1;
+	}
+
+	opt_id_id = reference_getid(opt_id);
+	opt_val_id = reference_getid(opt_val);
+	opt_param_id = reference_getid(opt_param);
+
+	opt_id_idx = reference_getindex(opt_id);
+	opt_val_idx = reference_getindex(opt_val);
+	opt_param_idx = reference_getindex(opt_param);
+
+	opt_id_n = getarraysize(st, opt_id_id, opt_id_idx, 0, reference_getref(opt_id));
+	opt_val_n = getarraysize(st, opt_val_id, opt_val_idx, 0, reference_getref(opt_val));
+	opt_param_n = getarraysize(st, opt_param_id, opt_param_idx, 0, reference_getref(opt_param));
+
+	if( opt_id_n < 1 ) {
+		ShowError("buildin_%s: No option id listed.\n", funcname);
+		return 1;
+	}
+
+	if( opt_val_n < 1 ) {
+		ShowError("buildin_%s: No option value listed.\n", funcname);
+		return 1;
+	}
+
+	if( opt_param_n < 1 ) {
+		ShowError("buildin_%s: No option parameter listed.\n", funcname);
+		return 1;
+	}
+
+	for( i = 0; i < opt_id_n && i < MAX_ITEM_RDM_OPT; i++ ) {
+		it->option[i].id = (short)__64BPRTSIZE(get_val2(st, reference_uid(opt_id_id, opt_id_idx + i), reference_getref(opt_id)));
+		script_removetop(st,-1,0);
+		it->option[i].value = (short)__64BPRTSIZE(get_val2(st, reference_uid(opt_val_id, opt_val_idx + i), reference_getref(opt_val)));
+		script_removetop(st,-1,0);
+		it->option[i].param = (char)__64BPRTSIZE(get_val2(st, reference_uid(opt_param_id, opt_param_idx + i), reference_getref(opt_param)));
+		script_removetop(st,-1,0);
+	}
+	return SCRIPT_CMD_SUCCESS;
+}
+
 /// Returns number of items in inventory/cart/storage
 /// countitem <nameID>{,<accountID>});
 /// countitem2 <nameID>,<Identified>,<Refine>,<Attribute>,<Card0>,<Card1>,<Card2>,<Card3>{,<accountID>}) [Lupus]
@@ -6047,6 +6115,10 @@ BUILDIN_FUNC(viewpoint)
 /// cartcountitem2 <nameID>,<Identified>,<Refine>,<Attribute>,<Card0>,<Card1>,<Card2>,<Card3>{,<accountID>})
 /// storagecountitem <nameID>{,<accountID>});
 /// storagecountitem2 <nameID>,<Identified>,<Refine>,<Attribute>,<Card0>,<Card1>,<Card2>,<Card3>{,<accountID>})
+/// guildstoragecountitem <nameID>{,<accountID>});
+/// guildstoragecountitem2 <nameID>,<Identified>,<Refine>,<Attribute>,<Card0>,<Card1>,<Card2>,<Card3>{,<accountID>})
+/// countitem3(<item id>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>)
+/// countitem3("<item name>",<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>)
 BUILDIN_FUNC(countitem)
 {
 	int i = 0, aid = 3;
@@ -6057,10 +6129,14 @@ BUILDIN_FUNC(countitem)
 	uint16 size, count = 0;
 	struct item *items;
 	TBL_PC *sd = NULL;
+	struct s_storage *gstor = NULL;
 
 	if( command[strlen(command) - 1] == '2' ) {
 		i = 1;
 		aid = 10;
+	} else if (command[strlen(command) - 1] == '3') {
+		i = 1;
+		aid = 13;
 	}
 	if( script_hasdata(st,aid) ) {
 		if( !(sd = map_id2sd((aid = script_getnum(st,aid)))) ) {
@@ -6073,20 +6149,29 @@ BUILDIN_FUNC(countitem)
 			return 0;
 	}
 	if( !strncmp(command, "cart", 4) ) {
-		loc = 1;
+		loc = TABLE_CART;
 		size = MAX_CART;
-		items = sd->status.cart;
+		items = sd->cart.u.items_cart;
 	} else if( !strncmp(command, "storage", 7) ) {
-		loc = 2;
+		loc = TABLE_STORAGE;
 		size = MAX_STORAGE;
-		items = sd->status.storage.items;
-	} //@TODO: 3 - Guild Storage
-	else {
+		items = sd->storage.u.items_storage;
+	} else if( !strncmp(command, "guildstorage", 12) ) {
+		gstor = guild2storage2(sd->status.guild_id);
+		if( gstor && !sd->state.storage_flag ) {
+			loc = TABLE_GUILD_STORAGE;
+			size = MAX_GUILD_STORAGE;
+			items = gstor->u.items_guild;
+		} else {
+			script_pushint(st,-1);
+			return 0;
+		}
+	} else {
 		size = MAX_INVENTORY;
-		items = sd->status.inventory;
+		items = sd->inventory.u.items_inventory;
 	}
 
-	if( loc == 1 && !pc_iscarton(sd) ) {
+	if( loc == TABLE_CART && !pc_iscarton(sd) ) {
 		ShowError("buildin_%s: Player doesn't have cart (CID:%d).\n", command, sd->status.char_id);
 		script_pushint(st,-1);
 		return 0;
@@ -6106,32 +6191,65 @@ BUILDIN_FUNC(countitem)
 		return 1;
 	}
 
+	if( loc == TABLE_GUILD_STORAGE )
+		gstor->lock = true;
+
 	if( !i ) { //For count/cart/storagecountitem function
 		unsigned short nameid = id->nameid;
 
-		for( i = 0; i < size; i++ )
+		for( i = 0; i < size; i++ ) {
 			if( &items[i] && items[i].nameid == nameid )
 				count += items[i].amount;
+		}
 	} else { //For count/cart/storagecountitem2 function
-		unsigned short nameid;
-		int iden, ref, attr, c1, c2, c3, c4;
+		struct item it;
+		bool check_randomopt = false;
 
-		nameid = id->nameid;
-		iden = script_getnum(st,3);
-		ref  = script_getnum(st,4);
-		attr = script_getnum(st,5);
-		c1 = script_getnum(st,6);
-		c2 = script_getnum(st,7);
-		c3 = script_getnum(st,8);
-		c4 = script_getnum(st,9);
+		memset(&it, 0, sizeof(it));
 
-		for( i = 0; i < size; i++ )
-			if( &items[i] && items[i].nameid > 0 && items[i].nameid == nameid &&
-				items[i].amount > 0 && items[i].identify == iden &&
-				items[i].refine == ref && items[i].attribute == attr &&
-				items[i].card[0] == c1 && items[i].card[1] == c2 &&
-				items[i].card[2] == c3 && items[i].card[3] == c4 )
-				count += items[i].amount;
+		it.nameid = id->nameid;
+		it.identify = script_getnum(st,3);
+		it.refine  = script_getnum(st,4);
+		it.attribute = script_getnum(st,5);
+		it.card[0] = script_getnum(st,6);
+		it.card[1] = script_getnum(st,7);
+		it.card[2] = script_getnum(st,8);
+		it.card[3] = script_getnum(st,9);
+
+		if( command[strlen(command) - 1] == '3' ) {
+			int res = script_getitem_randomoption(st, &it, command, 10);
+
+			if( res != SCRIPT_CMD_SUCCESS )
+				return 1;
+			check_randomopt = true;
+		}
+
+		for( i = 0; i < size; i++ ) {
+			struct item *itm = &items[i];
+
+			if( !itm || !itm->nameid || itm->amount < 1 )
+				continue;
+			if( itm->nameid != it.nameid || itm->identify != it.identify || itm->refine != it.refine || itm->attribute != it.attribute )
+				continue;
+			if( memcmp(it.card, itm->card, sizeof(it.card)) )
+				continue;
+			if( check_randomopt ) {
+				uint8 j;
+
+				for( j = 0; j < MAX_ITEM_RDM_OPT; j++ ) {
+					if( itm->option[j].id != it.option[j].id || itm->option[j].value != it.option[j].value || itm->option[j].param != it.option[j].param )
+						break;
+				}
+				if( j != MAX_ITEM_RDM_OPT )
+					continue;
+			}
+			count += items[i].amount;
+		}
+	}
+
+	if( loc == TABLE_GUILD_STORAGE ) {
+		storage_guild_storageclose(sd);
+		gstor->lock = false;
 	}
 
 	script_pushint(st,count);
@@ -6397,6 +6515,12 @@ BUILDIN_FUNC(getitem)
  *
  * getitembound2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>{,<account ID>};
  * getitembound2 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>{,<account ID>};
+ *
+ * getitem3 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+ * getitem3 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+ *
+ * getitembound3 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+ * getitembound3 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<bound type>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
  * Type:
  *	0 - No bound
  *	1 - Account Bound
@@ -6415,23 +6539,38 @@ BUILDIN_FUNC(getitem2)
 	TBL_PC *sd;
 	struct script_data *data;
 	const char *command = script_getfuncname(st);
+	int offset = 0;
 
-	if( !strcmp(command,"getitembound2") ) {
+	if( !strncmp(command, "getitembound", 12) ) {
+		int aid_pos = 12;
+
 		bound = script_getnum(st,11);
 		if( bound < BOUND_NONE || bound >= BOUND_MAX ) {
-			ShowError("script_getitembound2: Not a correct bound type! Type=%d\n",bound);
+			ShowError("script_getitembound2: Not a correct bound type! Type=%d\n", bound);
 			return 1;
 		}
-		if( script_hasdata(st,12) )
-			sd = map_id2sd(script_getnum(st,12));
+		if( command[strlen(command) - 1] == '3' ) {
+			offset = 12;
+			aid_pos = 15;
+		}
+		if( script_hasdata(st,aid_pos) )
+			sd = map_id2sd(script_getnum(st,aid_pos));
 		else
 			sd = script_rid2sd(st); //Attached player
-	} else if( script_hasdata(st,11) )
-		sd = map_id2sd(script_getnum(st,11)); //<Account ID>
-	else
-		sd = script_rid2sd(st); //Attached player
+	} else {
+		int aid_pos = 11;
 
-	if( sd == NULL ) //No target
+		if( !strcmpi(command, "getitem3") ) {
+			offset = 11;
+			aid_pos = 14;
+		}
+		if( script_hasdata(st,aid_pos) )
+			sd = map_id2sd(script_getnum(st,aid_pos)); //<Account ID>
+		else
+			sd = script_rid2sd(st); //Attached player
+	}
+
+	if( !sd ) //No target
 		return 0;
 
 	data = script_getdata(st,2);
@@ -6439,14 +6578,14 @@ BUILDIN_FUNC(getitem2)
 	if( data_isstring(data) ) {
 		const char *name = conv_str(st,data);
 
-		if( (item_data = itemdb_searchname(name)) == NULL ) {
+		if( !(item_data = itemdb_searchname(name)) ) {
 			ShowError("buildin_getitem2: Nonexistant item %s requested (by conv_str).\n", name);
 			return 1; //No item created
 		}
 		nameid = item_data->nameid;
 	} else {
 		nameid = conv_num(st,data);
-		if( (item_data = itemdb_exists(nameid)) == NULL ) {
+		if( !(item_data = itemdb_exists(nameid)) ) {
 			ShowError("buildin_getitem2: Nonexistant item %d requested (by conv_num).\n", nameid);
 			return 1; //No item created
 		}
@@ -6486,6 +6625,13 @@ BUILDIN_FUNC(getitem2)
 		item_tmp.card[3] = c4;
 		item_tmp.bound = bound;
 
+		if( offset ) {
+			int res = script_getitem_randomoption(st, &item_tmp, command, offset);
+
+			if( res != SCRIPT_CMD_SUCCESS )
+				return 1;
+		}
+
 		//Check if it's stackable
 		if( !itemdb_isstackable2(item_data) )
 			get_count = 1;
@@ -6493,14 +6639,13 @@ BUILDIN_FUNC(getitem2)
 			get_count = amount;
 
 		for( i = 0; i < amount; i += get_count ) {
-			//If not pet egg
-			if( !pet_create_egg(sd,nameid) ) {
+			if( !pet_create_egg(sd, nameid) ) { //If not pet egg
 				unsigned char flag = 0;
 
-				if( (flag = pc_additem(sd,&item_tmp,get_count,LOG_TYPE_SCRIPT)) ) {
-					clif_additem(sd,0,0,flag);
-					if( pc_candrop(sd,&item_tmp) )
-						map_addflooritem(&item_tmp,get_count,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0);
+				if( (flag = pc_additem(sd, &item_tmp, get_count, LOG_TYPE_SCRIPT)) ) {
+					clif_additem(sd, 0, 0, flag);
+					if( pc_candrop(sd, &item_tmp) )
+						map_addflooritem(&item_tmp, get_count, sd->bl.m, sd->bl.x, sd->bl.y, 0, 0, 0, 0, 0);
 				}
 			}
 		}
@@ -6531,7 +6676,7 @@ BUILDIN_FUNC(rentitem)
 		const char *name = conv_str(st,data);
 		struct item_data *itd = itemdb_searchname(name);
 
-		if( itd == NULL ) {
+		if( !itd ) {
 			ShowError("buildin_rentitem: Nonexistant item %s requested.\n", name);
 			return 1;
 		}
@@ -6561,9 +6706,13 @@ BUILDIN_FUNC(rentitem)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/** Gives rental item to player with advanced option
+/**
+ * Gives rental item to player with advanced option
  * rentitem2 <item id>,<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account_id>};
  * rentitem2 "<item name>",<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account_id>};
+ *
+ * rentitem3 <item id>,<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account_id>};
+ * rentitem3 "<item name>",<time>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account_id>};
  */
 BUILDIN_FUNC(rentitem2) {
 	struct map_session_data *sd;
@@ -6574,18 +6723,22 @@ BUILDIN_FUNC(rentitem2) {
 	unsigned short nameid = 0;
 	unsigned char flag = 0;
 	int iden, ref, attr, c1, c2, c3, c4;
+	const char *funcname = script_getfuncname(st);
 
 	data = script_getdata(st,2);
 	get_val(st,data);
 
-	if( !script_accid2sd(11,sd) )
-		return SCRIPT_CMD_FAILURE;
+	if( funcname[strlen(funcname) - 1] == '3' ) {
+		if( !script_accid2sd(14,sd) )
+			return 1;
+	} else if( !script_accid2sd(11,sd) )
+		return 1;
 
 	if( data_isstring(data) ) {
 		const char *name = conv_str(st,data);
 
 		id = itemdb_searchname(name);
-		if( id == NULL ) {
+		if( !id ) {
 			ShowError("buildin_rentitem2: Nonexistant item %s requested.\n", name);
 			return 1;
 		}
@@ -6632,6 +6785,13 @@ BUILDIN_FUNC(rentitem2) {
 	it.card[2] = (short)c3;
 	it.card[3] = (short)c4;
 	it.expire_time = (unsigned int)(time(NULL) + seconds);
+
+	if( funcname[strlen(funcname) - 1] == '3' ) {
+		int res = script_getitem_randomoption(st, &it, funcname, 11);
+
+		if( res != SCRIPT_CMD_SUCCESS )
+			return 1;
+	}
 
 	if( (flag = pc_additem(sd, &it, 1, LOG_TYPE_SCRIPT)) ) {
 		clif_additem(sd, 0, 0, flag);
@@ -6778,6 +6938,9 @@ BUILDIN_FUNC(makeitem)
 /**
  * makeitem2 <item id>,<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>;
  * makeitem2 "<item name>",<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>;
+ *
+ * makeitem3 <item id>,<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>;
+ * makeitem3 "<item name>",<amount>,"<map name>",<X>,<Y>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>;
  */
 BUILDIN_FUNC(makeitem2) {
 	uint16 nameid, amount, x, y;
@@ -6786,6 +6949,7 @@ BUILDIN_FUNC(makeitem2) {
 	struct item item_tmp;
 	struct script_data *data;
 	struct item_data *id;
+	const char *funcname = script_getfuncname(st);
 
 	data = script_getdata(st,2);
 	get_val(st,data);
@@ -6805,7 +6969,7 @@ BUILDIN_FUNC(makeitem2) {
 	x = script_getnum(st,5);
 	y = script_getnum(st,6);
 
-	if( !strcmp(mapname,"this") ) {
+	if( !strcmp(mapname, "this") ) {
 		TBL_PC *sd = script_rid2sd(st);
 
 		if( !sd )
@@ -6843,7 +7007,14 @@ BUILDIN_FUNC(makeitem2) {
 		item_tmp.card[2] = script_getnum(st,12);
 		item_tmp.card[3] = script_getnum(st,13);
 
-		map_addflooritem(&item_tmp,amount,m,x,y,0,0,0,4,0);
+		if( funcname[strlen(funcname) - 1] == '3' ) {
+			int res = script_getitem_randomoption(st, &item_tmp, funcname, 14);
+
+			if( res != SCRIPT_CMD_SUCCESS )
+				return 1;
+		}
+
+		map_addflooritem(&item_tmp, amount, m, x, y, 0, 0, 0, 4, 0);
 	} else
 		return 1;
 	return SCRIPT_CMD_SUCCESS;
@@ -6856,16 +7027,21 @@ static void buildin_delitem_delete(struct map_session_data *sd, int idx, int *am
 {
 	int delamount;
 	struct item *itm = NULL;
+	struct s_storage *gstor = NULL;
 
 	switch( loc ) {
-		case 1: //Cart
-			itm = &sd->status.cart[idx];
+		case TABLE_CART:
+			itm = &sd->cart.u.items_cart[idx];
 			break;
-		case 2: //Storage
-			itm = &sd->status.storage.items[idx];
+		case TABLE_STORAGE:
+			itm = &sd->storage.u.items_storage[idx];
 			break;
-		default: //Inventory
-			itm = &sd->status.inventory[idx];
+		case TABLE_GUILD_STORAGE:
+			gstor = guild2storage2(sd->status.guild_id);
+			itm = &gstor->u.items_guild[idx];
+			break;
+		default: //TABLE_INVENTORY
+			itm = &sd->inventory.u.items_inventory[idx];
 			break;
 	}
 
@@ -6875,14 +7051,21 @@ static void buildin_delitem_delete(struct map_session_data *sd, int idx, int *am
 		if( itemdb_type(itm->nameid) == IT_PETEGG && itm->card[0] == CARD0_PET && CheckForCharServer() )
 			intif_delete_petdata(MakeDWord(itm->card[1],itm->card[2])); //Delete associated pet
 		switch( loc ) {
-			case 1:
+			case TABLE_CART:
 				pc_cart_delitem(sd,idx,delamount,0,LOG_TYPE_SCRIPT);
 				break;
-			case 2:
-				storage_delitem(sd,idx,delamount);
+			case TABLE_STORAGE:
+				storage_delitem(sd,&sd->storage,idx,delamount);
 				log_pick_pc(sd,LOG_TYPE_SCRIPT,-delamount,itm);
 				break;
-			default:
+			case TABLE_GUILD_STORAGE:
+				gstor->lock = true;
+				storage_guild_delitem(sd,gstor,idx,delamount);
+				log_pick_pc(sd,LOG_TYPE_SCRIPT,-delamount,itm);
+				storage_guild_storageclose(sd);
+				gstor->lock = false;
+				break;
+			default: //TABLE_INVENTORY
 				pc_delitem(sd,idx,delamount,0,0,LOG_TYPE_SCRIPT);
 				break;
 		}
@@ -6895,9 +7078,12 @@ static void buildin_delitem_delete(struct map_session_data *sd, int idx, int *am
 /// Searches for item(s) and checks, if there is enough of them.
 /// Used by delitem and delitem2
 /// Relies on all input data being already fully valid.
-/// @param exact_match will also match item attributes and cards, not just name id
+/// @param exact_match will also match item by specified attributes
+///   0x0: Only item id
+///   0x1: identify, attributes, cards
+///   0x2: random option
 /// @return true when all items could be deleted, false when there were not enough items to delete
-static bool buildin_delitem_search(struct map_session_data *sd, struct item *it, bool exact_match, uint8 loc)
+static bool buildin_delitem_search(struct map_session_data *sd, struct item *it, uint8 exact_match, uint8 loc)
 {
 	bool delete_items = false;
 	int i, amount, size;
@@ -6913,17 +7099,24 @@ static bool buildin_delitem_search(struct map_session_data *sd, struct item *it,
 	}
 
 	switch( loc ) {
-		case 1:	//Cart
+		case TABLE_CART:
 			size = MAX_CART;
-			items = sd->status.cart;
+			items = sd->cart.u.items_cart;
 			break;
-		case 2:	//Storage
+		case TABLE_STORAGE:
 			size = MAX_STORAGE;
-			items = sd->status.storage.items;
+			items = sd->storage.u.items_storage;
 			break;
-		default: //Inventory
+		case TABLE_GUILD_STORAGE: {
+				struct s_storage *gstor = guild2storage2(sd->status.guild_id);
+
+				size = MAX_GUILD_STORAGE;
+				items = gstor->u.items_guild;
+			}
+			break;
+		default: //TABLE_INVENTORY
 			size = MAX_INVENTORY;
-			items = sd->status.inventory;
+			items = sd->inventory.u.items_inventory;
 			break;
 	}
 
@@ -6945,8 +7138,18 @@ static bool buildin_delitem_search(struct map_session_data *sd, struct item *it,
 			}
 
 			if( exact_match ) {
-				if( itm->identify != it->identify || itm->attribute != it->attribute || memcmp(itm->card, it->card, sizeof(itm->card)) )
+				if( (exact_match&0x1) && (itm->identify != it->identify || itm->attribute != it->attribute || memcmp(itm->card, it->card, sizeof(itm->card))) )
 					continue; //Not matching exact attributes
+				if( exact_match&0x2 ) {
+					uint8 j;
+
+					for( j = 0; j < MAX_ITEM_RDM_OPT; j++ ) {
+						if( itm->option[j].id != it->option[j].id || itm->option[j].value != it->option[j].value || itm->option[j].param != it->option[j].param )
+							break;
+					}
+					if( j != MAX_ITEM_RDM_OPT )
+						continue;
+				}
 			} else {
 				if( itemdb_type(itm->nameid) == IT_PETEGG ) {
 					if( itm->card[0] == CARD0_PET && CheckForCharServer() ) //Pet which cannot be deleted
@@ -6975,10 +7178,22 @@ static bool buildin_delitem_search(struct map_session_data *sd, struct item *it,
 				if( itemdb_type(itm->nameid) == IT_PETEGG && itm->card[0] == CARD0_PET && CheckForCharServer() )
 					continue;
 
-				if( exact_match &&
-					(itm->refine != it->refine || itm->identify != it->identify || itm->attribute != it->attribute ||
-					memcmp(itm->card, it->card, sizeof(itm->card))) )
+				if( exact_match ) {
+					if( (exact_match&0x1) && (itm->refine != it->refine || itm->identify != it->identify ||
+						itm->attribute != it->attribute || memcmp(itm->card, it->card, sizeof(itm->card))) )
 						continue; //Not matching attributes
+					if( exact_match&0x2 ) {
+						uint8 j;
+
+						for( j = 0; j < MAX_ITEM_RDM_OPT; j++ ) {
+							if( itm->option[j].id != it->option[j].id || itm->option[j].value != it->option[j].value ||
+								itm->option[j].param != it->option[j].param )
+								break;
+						}
+						if( j != MAX_ITEM_RDM_OPT )
+							continue;
+					}
+				}
 
 				//Count/delete item
 				buildin_delitem_delete(sd, i, &amount, loc, delete_items);
@@ -7003,6 +7218,8 @@ static bool buildin_delitem_search(struct map_session_data *sd, struct item *it,
 /// cartdelitem "<item name>",<amount>{,<account id>}
 /// storagedelitem <item id>,<amount>{,<account id>}
 /// storagedelitem "<item name>",<amount>{,<account id>}
+/// guildstoragedelitem <item id>,<amount>{,<account id>}
+/// guildstoragedelitem "<item name>",<amount>{,<account id>}
 BUILDIN_FUNC(delitem)
 {
 	TBL_PC *sd;
@@ -7012,29 +7229,40 @@ BUILDIN_FUNC(delitem)
 	char *command = (char *)script_getfuncname(st);
 
 	if( !strncmp(command, "cart", 4) )
-		loc = 1;
+		loc = TABLE_CART;
 	else if( !strncmp(command, "storage", 7) )
-		loc = 2;
-	//@TODO: 3 - Guild Storage
+		loc = TABLE_STORAGE;
+	else if( !strncmp(command, "guildstorage", 12) )
+		loc = TABLE_GUILD_STORAGE;
 
 	if( script_hasdata(st,4) ) {
 		int account_id = script_getnum(st,4);
 
 		sd = map_id2sd(account_id); //<account id>
-		if( sd == NULL ) {
+		if( !sd ) {
 			ShowError("buildin_%s: player not found (AID=%d).\n", command, account_id);
 			st->state = END;
 			return 1;
 		}
 	} else {
 		sd = script_rid2sd(st); //Attached player
-		if( sd == NULL )
+		if( !sd )
 			return 0;
 	}
 
-	if( loc == 1 && !pc_iscarton(sd) ) {
+	if( loc == TABLE_CART && !pc_iscarton(sd) ) {
 		ShowError("buildin_cartdelitem: player doesn't have cart (CID=%d).\n", sd->status.char_id);
+		script_pushint(st,-1);
 		return 1;
+	}
+
+	if( loc == TABLE_GUILD_STORAGE ) {
+		struct s_storage *gstor = guild2storage2(sd->status.guild_id);
+
+		if( !gstor || sd->state.storage_flag ) {
+			script_pushint(st,-1);
+			return 1;
+		}
 	}
 
 	data = script_getdata(st,2);
@@ -7043,7 +7271,7 @@ BUILDIN_FUNC(delitem)
 		const char *item_name = conv_str(st, data);
 		struct item_data *id = itemdb_searchname(item_name);
 
-		if( id == NULL ) {
+		if( !id ) {
 			ShowError("buildin_%s: unknown item \"%s\".\n", command, item_name);
 			st->state = END;
 			return 1;
@@ -7063,7 +7291,7 @@ BUILDIN_FUNC(delitem)
 	if( it.amount <= 0 )
 		return 0; //Nothing to do
 
-	if( buildin_delitem_search(sd, &it, false, loc) ) //Success
+	if( buildin_delitem_search(sd, &it, 0, loc) ) //Success
 		return 0;
 
 	ShowError("buildin_%s: failed to delete %d items (AID=%d item_id=%hu).\n", command, it.amount, sd->status.account_id, it.nameid);
@@ -7081,6 +7309,10 @@ BUILDIN_FUNC(delitem)
 /// cartdelitem2 "<Item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>}
 /// storagedelitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>}
 /// storagedelitem2 "<Item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>}
+/// guildstoragedelitem2 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>}
+/// guildstoragedelitem2 "<Item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>{,<account ID>}
+/// delitem3 <item id>,<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
+/// delitem3 "<item name>",<amount>,<identify>,<refine>,<attribute>,<card1>,<card2>,<card3>,<card4>,<RandomIDArray>,<RandomValueArray>,<RandomParamArray>{,<account ID>};
 BUILDIN_FUNC(delitem2)
 {
 	TBL_PC *sd;
@@ -7088,33 +7320,50 @@ BUILDIN_FUNC(delitem2)
 	struct script_data *data;
 	uint8 loc = 0;
 	char *command = (char *)script_getfuncname(st);
+	int aid_pos = 11;
+	uint8 flag = 0x1;
 
 	if( !strncmp(command, "cart", 4) )
-		loc = 1;
+		loc = TABLE_CART;
 	else if( !strncmp(command, "storage", 7) )
-		loc = 2;
-	//@TODO: 3 - Guild Storage
+		loc = TABLE_STORAGE;
+	else if( !strncmp(command, "guildstorage", 12) )
+		loc = TABLE_GUILD_STORAGE;
 
-	if( script_hasdata(st,11) ) {
-		int account_id = script_getnum(st,11);
+	if( command[strlen(command) - 1] == '3' )
+		aid_pos = 14;
+
+	if( script_hasdata(st,aid_pos) ) {
+		int account_id = script_getnum(st,aid_pos);
 
 		sd = map_id2sd(account_id); //<account id>
-		if( sd == NULL ) {
+		if( !sd ) {
 			ShowError("buildin_%s: player not found (AID=%d).\n", command, account_id);
 			st->state = END;
 			return 1;
 		}
 	} else {
 		sd = script_rid2sd(st); //Attached player
-		if( sd == NULL )
+		if( !sd )
 			return 0;
 	}
 
-	if( loc == 1 && !pc_iscarton(sd) ) {
+	if( loc == TABLE_CART && !pc_iscarton(sd) ) {
 		ShowError("buildin_cartdelitem: player doesn't have cart (CID=%d).\n", sd->status.char_id);
 		script_pushint(st,-1);
 		return 1;
 	}
+
+	if( loc == TABLE_GUILD_STORAGE ) {
+		struct s_storage *gstor = guild2storage2(sd->status.guild_id);
+
+		if( !gstor || sd->state.storage_flag ) {
+			script_pushint(st,-1);
+			return 1;
+		}
+	}
+
+	memset(&it, 0, sizeof(it));
 
 	data = script_getdata(st,2);
 	get_val(st,data);
@@ -7122,7 +7371,7 @@ BUILDIN_FUNC(delitem2)
 		const char *item_name = conv_str(st,data);
 		struct item_data *id = itemdb_searchname(item_name);
 
-		if( id == NULL ) {
+		if( !id ) {
 			ShowError("buildin_%s: unknown item \"%s\".\n", command, item_name);
 			st->state = END;
 			return 1;
@@ -7146,10 +7395,18 @@ BUILDIN_FUNC(delitem2)
 	it.card[2] = (short)script_getnum(st,9);
 	it.card[3] = (short)script_getnum(st,10);
 
+	if( command[strlen(command) - 1] == '3' ) {
+		int res = script_getitem_randomoption(st, &it, command, 11);
+
+		if( res != SCRIPT_CMD_SUCCESS )
+			return 1;
+		flag |= 0x2;
+	}
+
 	if( it.amount <= 0 )
 		return 0; //Nothing to do
 
-	if( buildin_delitem_search(sd, &it, true, loc) ) //Success
+	if( buildin_delitem_search(sd, &it, flag, loc) ) //Success
 		return 0;
 
 	ShowError("buildin_%s: failed to delete %d items (AID=%d item_id=%hu).\n", command, it.amount, sd->status.account_id, it.nameid);
@@ -7610,7 +7867,7 @@ BUILDIN_FUNC(getequipuniqueid)
 		return 1;
 	}
 
-	item = &sd->status.inventory[i];
+	item = &sd->inventory.u.items_inventory[i];
 	if( item != 0 ) {
 		char buf[256];
 
@@ -7678,10 +7935,10 @@ BUILDIN_FUNC(getbrokenid)
 
 	num = script_getnum(st,2);
 	for(i = 0; i < MAX_INVENTORY; i++) {
-		if(sd->status.inventory[i].attribute) {
+		if(sd->inventory.u.items_inventory[i].attribute) {
 			brokencounter++;
 			if(num == brokencounter) {
-				id = sd->status.inventory[i].nameid;
+				id = sd->inventory.u.items_inventory[i].nameid;
 				break;
 			}
 		}
@@ -7706,12 +7963,12 @@ BUILDIN_FUNC(repair)
 
 	num = script_getnum(st,2);
 	for(i = 0; i < MAX_INVENTORY; i++) {
-		if(sd->status.inventory[i].attribute) {
+		if(sd->inventory.u.items_inventory[i].attribute) {
 				repaircounter++;
 				if(num == repaircounter) {
-					sd->status.inventory[i].attribute = 0;
+					sd->inventory.u.items_inventory[i].attribute = 0;
 					clif_equiplist(sd);
-					clif_produceeffect(sd,0,sd->status.inventory[i].nameid);
+					clif_produceeffect(sd,0,sd->inventory.u.items_inventory[i].nameid);
 					clif_misceffect(&sd->bl,3);
 					break;
 				}
@@ -7733,9 +7990,9 @@ BUILDIN_FUNC(repairall)
 		return 1;
 
 	for(i = 0; i < MAX_INVENTORY; i++) {
-		if(sd->status.inventory[i].nameid && sd->status.inventory[i].attribute) {
-			sd->status.inventory[i].attribute = 0;
-			clif_produceeffect(sd,0,sd->status.inventory[i].nameid);
+		if(sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].attribute) {
+			sd->inventory.u.items_inventory[i].attribute = 0;
+			clif_produceeffect(sd,0,sd->inventory.u.items_inventory[i].nameid);
 			repaircounter++;
 		}
 	}
@@ -7792,7 +8049,7 @@ BUILDIN_FUNC(getequipisenableref)
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
-	if(i >= 0 && sd->inventory_data[i] && !sd->inventory_data[i]->flag.no_refine && !sd->status.inventory[i].expire_time)
+	if(i >= 0 && sd->inventory_data[i] && !sd->inventory_data[i]->flag.no_refine && !sd->inventory.u.items_inventory[i].expire_time)
 		script_pushint(st,1);
 	else
 		script_pushint(st,0);
@@ -7821,7 +8078,7 @@ BUILDIN_FUNC(getequiprefinerycnt)
 	if(equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0)
-		script_pushint(st,sd->status.inventory[i].refine);
+		script_pushint(st,sd->inventory.u.items_inventory[i].refine);
 	else
 		script_pushint(st,0);
 
@@ -7883,8 +8140,8 @@ BUILDIN_FUNC(getequippercentrefinery)
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
-	if(i >= 0 && sd->status.inventory[i].nameid && sd->status.inventory[i].refine < MAX_REFINE)
-		script_pushint(st,status_get_refine_chance((enum refine_type)itemdb_wlv(sd->status.inventory[i].nameid), (int)sd->status.inventory[i].refine));
+	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
+		script_pushint(st,status_get_refine_chance((enum refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine));
 	else
 		script_pushint(st,0);
 
@@ -7912,32 +8169,32 @@ BUILDIN_FUNC(successrefitem)
 	if(equip_index_check(pos))
 		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
-		unsigned int ep = sd->status.inventory[i].equip;
+		unsigned int ep = sd->inventory.u.items_inventory[i].equip;
 
 		//Logs items, got from (N)PC scripts [Lupus]
-		log_pick_pc(sd,LOG_TYPE_SCRIPT,-1,&sd->status.inventory[i]);
+		log_pick_pc(sd,LOG_TYPE_SCRIPT,-1,&sd->inventory.u.items_inventory[i]);
 
-		if(sd->status.inventory[i].refine >= MAX_REFINE) {
+		if(sd->inventory.u.items_inventory[i].refine >= MAX_REFINE) {
 			script_pushint(st,MAX_REFINE);
 			return 0;
 		}
 
-		sd->status.inventory[i].refine += up;
-		sd->status.inventory[i].refine = cap_value(sd->status.inventory[i].refine,0,MAX_REFINE);
+		sd->inventory.u.items_inventory[i].refine += up;
+		sd->inventory.u.items_inventory[i].refine = cap_value(sd->inventory.u.items_inventory[i].refine,0,MAX_REFINE);
 		pc_unequipitem(sd,i,2); //Status calc will happen in pc_equipitem() below
 
 		clif_delitem(sd,i,1,3);
 		clif_inventorylist(sd);
-		clif_refine(sd->fd,0,i,sd->status.inventory[i].refine);
+		clif_refine(sd->fd,0,i,sd->inventory.u.items_inventory[i].refine);
 
 		//Logs items, got from (N)PC scripts [Lupus]
-		log_pick_pc(sd,LOG_TYPE_SCRIPT,1,&sd->status.inventory[i]);
+		log_pick_pc(sd,LOG_TYPE_SCRIPT,1,&sd->inventory.u.items_inventory[i]);
 
 		pc_equipitem(sd,i,ep);
 		clif_misceffect(&sd->bl,3);
-		if(sd->status.inventory[i].refine == 10 &&
-			sd->status.inventory[i].card[0] == CARD0_FORGE &&
-		  	sd->status.char_id == (int)MakeDWord(sd->status.inventory[i].card[2],sd->status.inventory[i].card[3])
+		if(sd->inventory.u.items_inventory[i].refine == 10 &&
+			sd->inventory.u.items_inventory[i].card[0] == CARD0_FORGE &&
+		  	sd->status.char_id == (int)MakeDWord(sd->inventory.u.items_inventory[i].card[2],sd->inventory.u.items_inventory[i].card[3])
 		) { // Fame point system [DracoRPG]
 	 		switch (sd->inventory_data[i]->wlv) {
 				case 1:
@@ -7951,7 +8208,7 @@ BUILDIN_FUNC(successrefitem)
 					break;
 	 	 	 }
 		}
-		script_pushint(st,sd->status.inventory[i].refine);
+		script_pushint(st,sd->inventory.u.items_inventory[i].refine);
 		return 0;
 	}
 
@@ -7979,9 +8236,9 @@ BUILDIN_FUNC(failedrefitem)
 	if(equip_index_check(pos))
 		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
-		sd->status.inventory[i].refine = 0;
+		sd->inventory.u.items_inventory[i].refine = 0;
 		pc_unequipitem(sd,i,3); //Recalculate bonus
-		clif_refine(sd->fd,1,i,sd->status.inventory[i].refine); //Notify client of failure
+		clif_refine(sd->fd,1,i,sd->inventory.u.items_inventory[i].refine); //Notify client of failure
 		pc_delitem(sd,i,1,0,2,LOG_TYPE_SCRIPT);
 		clif_misceffect(&sd->bl,2); //Display failure effect
 		script_pushint(st,1);
@@ -8016,25 +8273,25 @@ BUILDIN_FUNC(downrefitem)
 	if(equip_index_check(pos))
 		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
-		unsigned int ep = sd->status.inventory[i].equip;
+		unsigned int ep = sd->inventory.u.items_inventory[i].equip;
 
 		//Logs items, got from (N)PC scripts [Lupus]
-		log_pick_pc(sd,LOG_TYPE_SCRIPT,-1,&sd->status.inventory[i]);
+		log_pick_pc(sd,LOG_TYPE_SCRIPT,-1,&sd->inventory.u.items_inventory[i]);
 
-		sd->status.inventory[i].refine -= down;
-		sd->status.inventory[i].refine = cap_value(sd->status.inventory[i].refine,0,MAX_REFINE);
+		sd->inventory.u.items_inventory[i].refine -= down;
+		sd->inventory.u.items_inventory[i].refine = cap_value(sd->inventory.u.items_inventory[i].refine,0,MAX_REFINE);
 		pc_unequipitem(sd,i,2); //Status calc will happen in pc_equipitem() below
 
 		clif_delitem(sd,i,1,3);
 		clif_inventorylist(sd);
-		clif_refine(sd->fd,2,i,sd->status.inventory[i].refine);
+		clif_refine(sd->fd,2,i,sd->inventory.u.items_inventory[i].refine);
 
 		//Logs items, got from (N)PC scripts [Lupus]
-		log_pick_pc(sd,LOG_TYPE_SCRIPT,1,&sd->status.inventory[i]);
+		log_pick_pc(sd,LOG_TYPE_SCRIPT,1,&sd->inventory.u.items_inventory[i]);
 
 		pc_equipitem(sd,i,ep);
 		clif_misceffect(&sd->bl,2);
-		script_pushint(st,sd->status.inventory[i].refine);
+		script_pushint(st,sd->inventory.u.items_inventory[i].refine);
 		return 0;
 	}
 
@@ -8091,7 +8348,7 @@ BUILDIN_FUNC(breakequip)
 	if(equip_index_check(pos))
 		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
-		sd->status.inventory[i].attribute = 1;
+		sd->inventory.u.items_inventory[i].attribute = 1;
 		pc_unequipitem(sd,i,3);
 		clif_equiplist(sd);
 		script_pushint(st,1);
@@ -8247,7 +8504,7 @@ BUILDIN_FUNC(autobonus)
 	if( current_equip_pos )
 		pos = current_equip_pos;
 	else
-		pos = sd->status.inventory[current_equip_item_index].equip;
+		pos = sd->inventory.u.items_inventory[current_equip_item_index].equip;
 
 	if( (sd->state.autobonus&pos) == pos )
 		return 0;
@@ -8288,7 +8545,7 @@ BUILDIN_FUNC(autobonus2)
 	if( current_equip_pos )
 		pos = current_equip_pos;
 	else
-		pos = sd->status.inventory[current_equip_item_index].equip;
+		pos = sd->inventory.u.items_inventory[current_equip_item_index].equip;
 
 	if( (sd->state.autobonus&pos) == pos )
 		return 0;
@@ -8329,7 +8586,7 @@ BUILDIN_FUNC(autobonus3)
 	if( current_equip_pos )
 		pos = current_equip_pos;
 	else
-		pos = sd->status.inventory[current_equip_item_index].equip;
+		pos = sd->inventory.u.items_inventory[current_equip_item_index].equip;
 
 	if( (sd->state.autobonus&pos) == pos )
 		return 0;
@@ -9024,7 +9281,7 @@ BUILDIN_FUNC(guildopenstorage)
 	if( sd == NULL )
 		return 0;
 
-	ret = gstorage_storageopen(sd);
+	ret = storage_guild_storageopen(sd);
 	script_pushint(st,ret);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -9291,15 +9548,13 @@ BUILDIN_FUNC(getmobdrops)
 
 	mob = mob_db(class_);
 
-	for( i = 0; i < MAX_MOB_DROP; i++ ) {
+	for( i = 0; i < MAX_MOB_DROP_TOTAL; i++ ) {
 		if( mob->dropitem[i].nameid < 1 )
 			continue;
-		if( itemdb_exists(mob->dropitem[i].nameid) == NULL )
+		if( !itemdb_exists(mob->dropitem[i].nameid) )
 			continue;
-
 		mapreg_setreg(reference_uid(add_str("$@MobDrop_item"), j), mob->dropitem[i].nameid);
 		mapreg_setreg(reference_uid(add_str("$@MobDrop_rate"), j), mob->dropitem[i].p);
-
 		j++;
 	}
 
@@ -12097,14 +12352,14 @@ BUILDIN_FUNC(getequipcardcnt)
 		return 0;
 	}
 
-	if(itemdb_isspecial(sd->status.inventory[i].card[0])) {
+	if(itemdb_isspecial(sd->inventory.u.items_inventory[i].card[0])) {
 		script_pushint(st,0);
 		return 0;
 	}
 
 	count = 0;
 	for (j = 0; j < sd->inventory_data[i]->slot; j++)
-		if (sd->status.inventory[i].card[j] && itemdb_type(sd->status.inventory[i].card[j]) == IT_CARD)
+		if (sd->inventory.u.items_inventory[i].card[j] && itemdb_type(sd->inventory.u.items_inventory[i].card[j]) == IT_CARD)
 			count++;
 
 	script_pushint(st,count);
@@ -12128,17 +12383,17 @@ BUILDIN_FUNC(successremovecards) {
 	if (i < 0 || !sd->inventory_data[i])
 		return 0;
 
-	if (itemdb_isspecial(sd->status.inventory[i].card[0]))
+	if (itemdb_isspecial(sd->inventory.u.items_inventory[i].card[0]))
 		return 0;
 
 	for (c = sd->inventory_data[i]->slot - 1; c >= 0; --c) {
-		if (sd->status.inventory[i].card[c] && itemdb_type(sd->status.inventory[i].card[c]) == IT_CARD ) { // Extract this card from the item
+		if (sd->inventory.u.items_inventory[i].card[c] && itemdb_type(sd->inventory.u.items_inventory[i].card[c]) == IT_CARD ) { // Extract this card from the item
 			unsigned char flag = 0;
 			struct item item_tmp;
 
 			memset(&item_tmp,0,sizeof(item_tmp));
 			cardflag = 1;
-			item_tmp.nameid   = sd->status.inventory[i].card[c];
+			item_tmp.nameid   = sd->inventory.u.items_inventory[i].card[c];
 			item_tmp.identify = 1;
 
 			if ((flag = pc_additem(sd,&item_tmp,1,LOG_TYPE_SCRIPT))) { // Get back the cart in inventory
@@ -12154,15 +12409,21 @@ BUILDIN_FUNC(successremovecards) {
 
 		memset(&item_tmp,0,sizeof(item_tmp));
 
-		item_tmp.nameid      = sd->status.inventory[i].nameid;
+		item_tmp.nameid      = sd->inventory.u.items_inventory[i].nameid;
 		item_tmp.identify    = 1;
-		item_tmp.refine      = sd->status.inventory[i].refine;
-		item_tmp.attribute   = sd->status.inventory[i].attribute;
-		item_tmp.expire_time = sd->status.inventory[i].expire_time;
-		item_tmp.bound       = sd->status.inventory[i].bound;
+		item_tmp.refine      = sd->inventory.u.items_inventory[i].refine;
+		item_tmp.attribute   = sd->inventory.u.items_inventory[i].attribute;
+		item_tmp.expire_time = sd->inventory.u.items_inventory[i].expire_time;
+		item_tmp.bound       = sd->inventory.u.items_inventory[i].bound;
 
 		for (j = sd->inventory_data[i]->slot; j < MAX_SLOTS; j++)
-			item_tmp.card[j] = sd->status.inventory[i].card[j];
+			item_tmp.card[j] = sd->inventory.u.items_inventory[i].card[j];
+
+		for (j = 0; j < MAX_ITEM_RDM_OPT; j++) {
+			item_tmp.option[j].id = sd->inventory.u.items_inventory[i].option[j].id;
+			item_tmp.option[j].value = sd->inventory.u.items_inventory[i].option[j].value;
+			item_tmp.option[j].param = sd->inventory.u.items_inventory[i].option[j].param;
+		}
 
 		pc_delitem(sd,i,1,0,3,LOG_TYPE_SCRIPT);
 		if ((flag = pc_additem(sd,&item_tmp,1,LOG_TYPE_SCRIPT))) { // Check if can be spawn in inventory otherwise put on floor
@@ -12196,11 +12457,11 @@ BUILDIN_FUNC(failedremovecards) {
 	if (i < 0 || !sd->inventory_data[i])
 		return 0;
 
-	if (itemdb_isspecial(sd->status.inventory[i].card[0]))
+	if (itemdb_isspecial(sd->inventory.u.items_inventory[i].card[0]))
 		return 0;
 
 	for (c = sd->inventory_data[i]->slot - 1; c >= 0; --c) {
-		if (sd->status.inventory[i].card[c] && itemdb_type(sd->status.inventory[i].card[c]) == IT_CARD) {
+		if (sd->inventory.u.items_inventory[i].card[c] && itemdb_type(sd->inventory.u.items_inventory[i].card[c]) == IT_CARD) {
 			cardflag = 1;
 
 			if (typefail == 2) { // Add cards to inventory, clear
@@ -12209,7 +12470,7 @@ BUILDIN_FUNC(failedremovecards) {
 
 				memset(&item_tmp,0,sizeof(item_tmp));
 
-				item_tmp.nameid   = sd->status.inventory[i].card[c];
+				item_tmp.nameid   = sd->inventory.u.items_inventory[i].card[c];
 				item_tmp.identify = 1;
 
 				if ((flag = pc_additem(sd,&item_tmp,1,LOG_TYPE_SCRIPT))) {
@@ -12223,22 +12484,27 @@ BUILDIN_FUNC(failedremovecards) {
 	if (cardflag == 1) {
 		if (typefail == 0 || typefail == 2) // Destroy the item
 			pc_delitem(sd,i,1,0,2,LOG_TYPE_SCRIPT);
-
-		if (typefail == 1) { // Destroy the card
+		else if (typefail == 1) { // Destroy the card
 			unsigned char flag = 0, j;
 			struct item item_tmp;
 
 			memset(&item_tmp,0,sizeof(item_tmp));
 
-			item_tmp.nameid      = sd->status.inventory[i].nameid;
+			item_tmp.nameid      = sd->inventory.u.items_inventory[i].nameid;
 			item_tmp.identify    = 1;
-			item_tmp.refine      = sd->status.inventory[i].refine;
-			item_tmp.attribute   = sd->status.inventory[i].attribute;
-			item_tmp.expire_time = sd->status.inventory[i].expire_time;
-			item_tmp.bound       = sd->status.inventory[i].bound;
+			item_tmp.refine      = sd->inventory.u.items_inventory[i].refine;
+			item_tmp.attribute   = sd->inventory.u.items_inventory[i].attribute;
+			item_tmp.expire_time = sd->inventory.u.items_inventory[i].expire_time;
+			item_tmp.bound       = sd->inventory.u.items_inventory[i].bound;
 
 			for (j = sd->inventory_data[i]->slot; j < MAX_SLOTS; j++)
-				item_tmp.card[j] = sd->status.inventory[i].card[j];
+				item_tmp.card[j] = sd->inventory.u.items_inventory[i].card[j];
+
+			for (j = 0; j < MAX_ITEM_RDM_OPT; j++) {
+				item_tmp.option[j].id = sd->inventory.u.items_inventory[i].option[j].id;
+				item_tmp.option[j].value = sd->inventory.u.items_inventory[i].option[j].value;
+				item_tmp.option[j].param = sd->inventory.u.items_inventory[i].option[j].param;
+			}
 
 			pc_delitem(sd,i,1,0,2,LOG_TYPE_SCRIPT);
 
@@ -12809,7 +13075,7 @@ BUILDIN_FUNC(getequipcardid)
 	if (equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
 	if (i >= 0 && slot >= 0 && slot < 4)
-		script_pushint(st,sd->status.inventory[i].card[slot]);
+		script_pushint(st,sd->inventory.u.items_inventory[i].card[slot]);
 	else
 		script_pushint(st,0);
 	return SCRIPT_CMD_SUCCESS;
@@ -12915,23 +13181,23 @@ BUILDIN_FUNC(getinventorylist)
 	if (!script_charid2sd(2,sd))
 		return 1;
 	for (i = 0; i < MAX_INVENTORY; i++) {
-		if (sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].amount > 0) {
-			pc_setreg(sd,reference_uid(add_str("@inventorylist_id"),j),sd->status.inventory[i].nameid);
-			pc_setreg(sd,reference_uid(add_str("@inventorylist_amount"),j),sd->status.inventory[i].amount);
-			pc_setreg(sd,reference_uid(add_str("@inventorylist_equip"),j),sd->status.inventory[i].equip);
-			if (sd->status.inventory[i].equip)
+		if (sd->inventory.u.items_inventory[i].nameid > 0 && sd->inventory.u.items_inventory[i].amount > 0) {
+			pc_setreg(sd,reference_uid(add_str("@inventorylist_id"),j),sd->inventory.u.items_inventory[i].nameid);
+			pc_setreg(sd,reference_uid(add_str("@inventorylist_amount"),j),sd->inventory.u.items_inventory[i].amount);
+			pc_setreg(sd,reference_uid(add_str("@inventorylist_equip"),j),sd->inventory.u.items_inventory[i].equip);
+			if (sd->inventory.u.items_inventory[i].equip)
 				pc_setreg(sd,reference_uid(add_str("@inventorylist_equip"),j),pc_equippoint(sd,i));
 			else
 				pc_setreg(sd,reference_uid(add_str("@inventorylist_equip"),j),0);
-			pc_setreg(sd,reference_uid(add_str("@inventorylist_refine"),j),sd->status.inventory[i].refine);
-			pc_setreg(sd,reference_uid(add_str("@inventorylist_identify"),j),sd->status.inventory[i].identify);
-			pc_setreg(sd,reference_uid(add_str("@inventorylist_attribute"),j),sd->status.inventory[i].attribute);
+			pc_setreg(sd,reference_uid(add_str("@inventorylist_refine"),j),sd->inventory.u.items_inventory[i].refine);
+			pc_setreg(sd,reference_uid(add_str("@inventorylist_identify"),j),sd->inventory.u.items_inventory[i].identify);
+			pc_setreg(sd,reference_uid(add_str("@inventorylist_attribute"),j),sd->inventory.u.items_inventory[i].attribute);
 			for (k = 0; k < MAX_SLOTS; k++) {
 				sprintf(card_var,"@inventorylist_card%d",k + 1);
-				pc_setreg(sd,reference_uid(add_str(card_var),j),sd->status.inventory[i].card[k]);
+				pc_setreg(sd,reference_uid(add_str(card_var),j),sd->inventory.u.items_inventory[i].card[k]);
 			}
-			pc_setreg(sd,reference_uid(add_str("@inventorylist_expire"),j),sd->status.inventory[i].expire_time);
-			pc_setreg(sd,reference_uid(add_str("@inventorylist_bound"),j),sd->status.inventory[i].bound);
+			pc_setreg(sd,reference_uid(add_str("@inventorylist_expire"),j),sd->inventory.u.items_inventory[i].expire_time);
+			pc_setreg(sd,reference_uid(add_str("@inventorylist_bound"),j),sd->inventory.u.items_inventory[i].bound);
 			j++;
 		}
 	}
@@ -12948,19 +13214,19 @@ BUILDIN_FUNC(getcartinventorylist)
 	if (!sd)
 		return 0;
 	for (i = 0; i < MAX_CART; i++) {
-		if (sd->status.cart[i].nameid > 0 && sd->status.cart[i].amount > 0) {
-			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_id"),j),sd->status.cart[i].nameid);
-			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_amount"),j),sd->status.cart[i].amount);
-			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_equip"),j),sd->status.cart[i].equip);
-			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_refine"),j),sd->status.cart[i].refine);
-			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_identify"),j),sd->status.cart[i].identify);
-			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_attribute"),j),sd->status.cart[i].attribute);
+		if (sd->cart.u.items_cart[i].nameid > 0 && sd->cart.u.items_cart[i].amount > 0) {
+			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_id"),j),sd->cart.u.items_cart[i].nameid);
+			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_amount"),j),sd->cart.u.items_cart[i].amount);
+			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_equip"),j),sd->cart.u.items_cart[i].equip);
+			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_refine"),j),sd->cart.u.items_cart[i].refine);
+			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_identify"),j),sd->cart.u.items_cart[i].identify);
+			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_attribute"),j),sd->cart.u.items_cart[i].attribute);
 			for (k = 0; k < MAX_SLOTS; k++) {
 				sprintf(card_var,"@cartinventorylist_card%d",k + 1);
-				pc_setreg(sd,reference_uid(add_str(card_var),j),sd->status.cart[i].card[k]);
+				pc_setreg(sd,reference_uid(add_str(card_var),j),sd->cart.u.items_cart[i].card[k]);
 			}
-			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_expire"),j),sd->status.cart[i].expire_time);
-			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_bound"),j),sd->status.cart[i].bound);
+			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_expire"),j),sd->cart.u.items_cart[i].expire_time);
+			pc_setreg(sd,reference_uid(add_str("@cartinventorylist_bound"),j),sd->cart.u.items_cart[i].bound);
 			j++;
 		}
 	}
@@ -13003,8 +13269,8 @@ BUILDIN_FUNC(clearitem)
 		return 1;
 
 	for (i = 0; i < MAX_INVENTORY; i++)
-		if (sd->status.inventory[i].amount)
-			pc_delitem(sd,i,sd->status.inventory[i].amount,0,0,LOG_TYPE_SCRIPT);
+		if (sd->inventory.u.items_inventory[i].amount)
+			pc_delitem(sd,i,sd->inventory.u.items_inventory[i].amount,0,0,LOG_TYPE_SCRIPT);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -13796,7 +14062,7 @@ BUILDIN_FUNC(getmercinfo)
 
 	type = script_getnum(st,2);
 	if( script_hasdata(st,3) ) {
-		int char_id = script_getnum(st,3);
+		uint32 char_id = script_getnum(st,3);
 
 		if( (sd = map_charid2sd(char_id)) == NULL ) {
 			ShowError("buildin_getmercinfo: No such character (char_id=%d).\n",char_id);
@@ -13845,11 +14111,11 @@ BUILDIN_FUNC(checkequipedcard)
 	c = script_getnum(st,2);
 
 	for( i = 0; i < MAX_INVENTORY; i++ ) {
-		if( sd->status.inventory[i].nameid > 0 && sd->status.inventory[i].amount && sd->inventory_data[i] ) {
-			if( itemdb_isspecial(sd->status.inventory[i].card[0]) )
+		if( sd->inventory.u.items_inventory[i].nameid > 0 && sd->inventory.u.items_inventory[i].amount && sd->inventory_data[i] ) {
+			if( itemdb_isspecial(sd->inventory.u.items_inventory[i].card[0]) )
 				continue;
 			for( n = 0 ; n < sd->inventory_data[i]->slot; n++ ) {
-				if( sd->status.inventory[i].card[n] == c ) {
+				if( sd->inventory.u.items_inventory[i].card[n] == c ) {
 					script_pushint(st,1);
 					return 0;
 				}
@@ -14412,14 +14678,14 @@ BUILDIN_FUNC(isequippedcnt)
 
 			if (itemdb_type(id) != IT_CARD) { //No card. Count amount in inventory.
 				if (sd->inventory_data[index]->nameid == id)
-					ret += sd->status.inventory[index].amount;
+					ret += sd->inventory.u.items_inventory[index].amount;
 			} else { //Count cards.
 				short k;
 
-				if (itemdb_isspecial(sd->status.inventory[index].card[0]))
+				if (itemdb_isspecial(sd->inventory.u.items_inventory[index].card[0]))
 					continue; //No cards
 				for (k = 0; k < sd->inventory_data[index]->slot; k++) {
-					if (sd->status.inventory[index].card[k] == id)
+					if (sd->inventory.u.items_inventory[index].card[k] == id)
 						ret++; //[Lupus]
 				}
 			}
@@ -14481,13 +14747,13 @@ BUILDIN_FUNC(isequipped)
 				short k;
 
 				if (sd->inventory_data[index]->slot == 0 ||
-					itemdb_isspecial(sd->status.inventory[index].card[0]))
+					itemdb_isspecial(sd->inventory.u.items_inventory[index].card[0]))
 					continue;
 
 				for (k = 0; k < sd->inventory_data[index]->slot; k++) {
 					unsigned int hash = 0; //New hash system which should support up to 4 slots on any equipment. [Skotlex]
 
-					if (sd->status.inventory[index].card[k] != id)
+					if (sd->inventory.u.items_inventory[index].card[k] != id)
 						continue;
 
 					hash = 1<<((j < 5 ? j : j - 5) * 4 + k);
@@ -14552,12 +14818,12 @@ BUILDIN_FUNC(cardscnt)
 
 		if (itemdb_type(id) != IT_CARD) {
 			if (sd->inventory_data[index]->nameid == id)
-				ret += sd->status.inventory[index].amount;
+				ret += sd->inventory.u.items_inventory[index].amount;
 		} else {
-			if (itemdb_isspecial(sd->status.inventory[index].card[0]))
+			if (itemdb_isspecial(sd->inventory.u.items_inventory[index].card[0]))
 				continue;
 			for (k = 0; k < sd->inventory_data[index]->slot; k++) {
-				if (sd->status.inventory[index].card[k] == id)
+				if (sd->inventory.u.items_inventory[index].card[k] == id)
 					ret++;
 			}
 		}
@@ -14580,7 +14846,7 @@ BUILDIN_FUNC(getrefine)
 			script_pushint(st,0);
 			return 1;
 		}
-		script_pushint(st,sd->status.inventory[current_equip_item_index].refine);
+		script_pushint(st,sd->inventory.u.items_inventory[current_equip_item_index].refine);
 	} else
 		script_pushint(st,0);
 	return SCRIPT_CMD_SUCCESS;
@@ -14646,7 +14912,7 @@ BUILDIN_FUNC(equip)
 
 	nameid = script_getnum(st,2);
 	if ((item_data = itemdb_exists(nameid))) {
-		ARR_FIND(0,MAX_INVENTORY,i,sd->status.inventory[i].nameid == nameid);
+		ARR_FIND(0,MAX_INVENTORY,i,sd->inventory.u.items_inventory[i].nameid == nameid);
 		if (i < MAX_INVENTORY) {
 			pc_equipitem(sd,i,item_data->equip);
 			script_pushint(st,1);
@@ -14712,14 +14978,14 @@ BUILDIN_FUNC(equip2)
 	c3   = (unsigned short)script_getnum(st,7);
 	c4   = (unsigned short)script_getnum(st,8);
 
-	ARR_FIND(0, MAX_INVENTORY, i,(sd->status.inventory[i].equip == 0 &&
-		sd->status.inventory[i].nameid == nameid &&
-		sd->status.inventory[i].refine == ref &&
-		sd->status.inventory[i].attribute == attr &&
-		sd->status.inventory[i].card[0] == c1 &&
-		sd->status.inventory[i].card[1] == c2 &&
-		sd->status.inventory[i].card[2] == c3 &&
-		sd->status.inventory[i].card[3] == c4));
+	ARR_FIND(0, MAX_INVENTORY, i,(sd->inventory.u.items_inventory[i].equip == 0 &&
+		sd->inventory.u.items_inventory[i].nameid == nameid &&
+		sd->inventory.u.items_inventory[i].refine == ref &&
+		sd->inventory.u.items_inventory[i].attribute == attr &&
+		sd->inventory.u.items_inventory[i].card[0] == c1 &&
+		sd->inventory.u.items_inventory[i].card[1] == c2 &&
+		sd->inventory.u.items_inventory[i].card[2] == c3 &&
+		sd->inventory.u.items_inventory[i].card[3] == c4));
 
 	if( i < MAX_INVENTORY ) {
 		pc_equipitem(sd,i,item_data->equip);
@@ -16288,7 +16554,7 @@ BUILDIN_FUNC(addmonsterdrop)
 	if( mob ) { //We got a valid monster, check for available drop slot
 		unsigned char i, c = 0;
 
-		for( i = 0; i < MAX_MOB_DROP; i++ ) {
+		for( i = 0; i < MAX_MOB_DROP_TOTAL; i++ ) {
 			if( mob->dropitem[i].nameid ) {
 				if( mob->dropitem[i].nameid == item_id ) { //If it equals item_id we update that drop
 					c = i;
@@ -16302,6 +16568,7 @@ BUILDIN_FUNC(addmonsterdrop)
 		if( c ) { //Fill in the slot with the item and rate
 			mob->dropitem[c].nameid = item_id;
 			mob->dropitem[c].p = (rate > 10000) ? 10000 : rate;
+			itemdb_reload_itemmob_data(); //Reload the mob search data stored in the item_data
 			script_pushint(st,1);
 		} else //No place to put the new drop
 			script_pushint(st,0);
@@ -16342,10 +16609,11 @@ BUILDIN_FUNC(delmonsterdrop)
 	if( mob ) { //We got a valid monster, check for item drop on monster
 		unsigned char i;
 
-		for( i = 0; i < MAX_MOB_DROP; i++ ) {
+		for( i = 0; i < MAX_MOB_DROP_TOTAL; i++ ) {
 			if( mob->dropitem[i].nameid == item_id ) {
 				mob->dropitem[i].nameid = 0;
 				mob->dropitem[i].p = 0;
+				itemdb_reload_itemmob_data(); //Reload the mob search data stored in the item_data
 				script_pushint(st,1);
 				return 0;
 			}
@@ -19771,13 +20039,13 @@ BUILDIN_FUNC(countbound)
 	type = script_getnum(st,2);
 
 	for( i = 0; i < MAX_INVENTORY; i++ ) {
-		if( sd->status.inventory[i].nameid > 0 &&
-			((!type && sd->status.inventory[i].bound > 0) ||
-			(type && sd->status.inventory[i].bound == type)) )
+		if( sd->inventory.u.items_inventory[i].nameid > 0 &&
+			((!type && sd->inventory.u.items_inventory[i].bound > 0) ||
+			(type && sd->inventory.u.items_inventory[i].bound == type)) )
 		{
-			pc_setreg(sd,reference_uid(add_str("@bound_items"),k),sd->status.inventory[i].nameid);
+			pc_setreg(sd,reference_uid(add_str("@bound_items"),k),sd->inventory.u.items_inventory[i].nameid);
 			k++;
-			j += sd->status.inventory[i].amount;
+			j += sd->inventory.u.items_inventory[i].amount;
 		}
 	}
 
@@ -19809,17 +20077,17 @@ BUILDIN_FUNC(checkbound) {
 	if( type <= -1 || type >= BOUND_MAX )
 		ShowError("buildin_checkbound: Not a valid bind type! Type=%d\n",type);
 
-	ARR_FIND(0, MAX_INVENTORY, i, (sd->status.inventory[i].nameid == nameid &&
-		(sd->status.inventory[i].refine == (script_hasdata(st,4) ? (ref = script_getnum(st,4)) : sd->status.inventory[i].refine)) &&
-		(sd->status.inventory[i].attribute == (script_hasdata(st,5) ? (attr = script_getnum(st,5)) : sd->status.inventory[i].attribute)) &&
-		(sd->status.inventory[i].card[0] == (script_hasdata(st,6) ? (c1 = script_getnum(st,6)) : sd->status.inventory[i].card[0])) &&
-		(sd->status.inventory[i].card[1] == (script_hasdata(st,7) ? (c2 = script_getnum(st,7)) : sd->status.inventory[i].card[1])) &&
-		(sd->status.inventory[i].card[2] == (script_hasdata(st,8) ? (c3 = script_getnum(st,8)) : sd->status.inventory[i].card[2])) &&
-		(sd->status.inventory[i].card[3] == (script_hasdata(st,9) ? (c4 = script_getnum(st,9)) : sd->status.inventory[i].card[3])) &&
-		((!type && sd->status.inventory[i].bound > 0) || (type && sd->status.inventory[i].bound == type))));
+	ARR_FIND(0, MAX_INVENTORY, i, (sd->inventory.u.items_inventory[i].nameid == nameid &&
+		(sd->inventory.u.items_inventory[i].refine == (script_hasdata(st,4) ? (ref = script_getnum(st,4)) : sd->inventory.u.items_inventory[i].refine)) &&
+		(sd->inventory.u.items_inventory[i].attribute == (script_hasdata(st,5) ? (attr = script_getnum(st,5)) : sd->inventory.u.items_inventory[i].attribute)) &&
+		(sd->inventory.u.items_inventory[i].card[0] == (script_hasdata(st,6) ? (c1 = script_getnum(st,6)) : sd->inventory.u.items_inventory[i].card[0])) &&
+		(sd->inventory.u.items_inventory[i].card[1] == (script_hasdata(st,7) ? (c2 = script_getnum(st,7)) : sd->inventory.u.items_inventory[i].card[1])) &&
+		(sd->inventory.u.items_inventory[i].card[2] == (script_hasdata(st,8) ? (c3 = script_getnum(st,8)) : sd->inventory.u.items_inventory[i].card[2])) &&
+		(sd->inventory.u.items_inventory[i].card[3] == (script_hasdata(st,9) ? (c4 = script_getnum(st,9)) : sd->inventory.u.items_inventory[i].card[3])) &&
+		((!type && sd->inventory.u.items_inventory[i].bound > 0) || (type && sd->inventory.u.items_inventory[i].bound == type))));
 
 	if( i < MAX_INVENTORY ) {
-		script_pushint(st,sd->status.inventory[i].bound);
+		script_pushint(st,sd->inventory.u.items_inventory[i].bound);
 		return 0;
 	} else
 		script_pushint(st,0);
@@ -20516,7 +20784,7 @@ BUILDIN_FUNC(mergeitem2) {
 	}
 
 	for (i = 0; i < MAX_INVENTORY; i++) {
-		struct item *it = &sd->status.inventory[i];
+		struct item *it = &sd->inventory.u.items_inventory[i];
 
 		if (!it || !it->unique_id || it->expire_time || !itemdb_isstackable(it->nameid))
 			continue;
@@ -21043,6 +21311,162 @@ BUILDIN_FUNC(getguildalliance)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * openstorage2 <storage_id>,<mode>{,<account_id>}
+ * mode @see enum e_storage_mode
+ */
+BUILDIN_FUNC(openstorage2) {
+	int stor_id = script_getnum(st,2);
+	TBL_PC *sd = NULL;
+
+	if (!script_accid2sd(4,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+
+	if (!storage_exists(stor_id)) {
+		ShowError("buildin_openstorage2: Invalid storage_id '%d'!\n", stor_id);
+		return 1;
+	}
+
+	script_pushint(st,storage_premiumStorage_load(sd, stor_id, script_getnum(st,3)));
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Retrieves param of current random option. Intended for random option script only.
+ * getrandomoptinfo(<type>);
+ * @author [secretdataz]
+ */
+BUILDIN_FUNC(getrandomoptinfo) {
+	struct map_session_data *sd;
+	int val;
+	int param = script_getnum(st,2);
+
+	if ((sd = script_rid2sd(st)) && current_equip_item_index != -1 && current_equip_opt_index != -1 &&
+		sd->inventory.u.items_inventory[current_equip_item_index].option[current_equip_opt_index].id) {
+		switch (param) {
+			case ROA_ID:
+				val = sd->inventory.u.items_inventory[current_equip_item_index].option[current_equip_opt_index].id;
+				break;
+			case ROA_VALUE:
+				val = sd->inventory.u.items_inventory[current_equip_item_index].option[current_equip_opt_index].value;
+				break;
+			case ROA_PARAM:
+				val = sd->inventory.u.items_inventory[current_equip_item_index].option[current_equip_opt_index].param;
+				break;
+			default:
+				ShowWarning("buildin_getrandomoptinfo: Invalid attribute type %d (Max %d).\n", param, MAX_ITEM_RDM_OPT);
+				val = 0;
+				break;
+		}
+		script_pushint(st,val);
+	} else
+		script_pushint(st,0);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Retrieves a random option on an equipped item.
+ * getequiprandomoption(<equipment slot>,<index>,<type>{,<char id>});
+ * @author [secretdataz]
+ */
+BUILDIN_FUNC(getequiprandomoption) {
+	struct map_session_data *sd;
+	int val;
+	short i = -1;
+	int pos = script_getnum(st,2);
+	int index = script_getnum(st,3);
+	int type = script_getnum(st,4);
+
+	if (!script_charid2sd(5,sd)) {
+		script_pushint(st,-1);
+		return 1;
+	}
+	if (index < 0 || index >= MAX_ITEM_RDM_OPT) {
+		ShowError("buildin_getequiprandomoption: Invalid random option index %d.\n", index);
+		script_pushint(st, -1);
+		return 1;
+	}
+	if (equip_index_check(pos))
+		i = pc_checkequip(sd, equip_bitmask[pos]);
+	if (i < 0) {
+		ShowError("buildin_getequiprandomoption: No item equipped at pos %d (CID=%d/AID=%d).\n", pos, sd->status.char_id, sd->status.account_id);
+		script_pushint(st,-1);
+		return 1;
+	}
+	switch (type) {
+		case ROA_ID:
+			val = sd->inventory.u.items_inventory[i].option[index].id;
+			break;
+		case ROA_VALUE:
+			val = sd->inventory.u.items_inventory[i].option[index].value;
+			break;
+		case ROA_PARAM:
+			val = sd->inventory.u.items_inventory[i].option[index].param;
+			break;
+		default:
+			ShowWarning("buildin_getequiprandomoption: Invalid attribute type %d (Max %d).\n", type, MAX_ITEM_RDM_OPT);
+			val = 0;
+			break;
+	}
+	script_pushint(st,val);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Adds a random option on a random option slot on an equipped item and overwrites
+ * existing random option in the process.
+ * setrandomoption(<equipment slot>,<index>,<id>,<value>,<param>{,<char id>});
+ * @author [secretdataz]
+ */
+BUILDIN_FUNC(setrandomoption) {
+	struct map_session_data *sd;
+	struct s_random_opt_data *opt;
+	int pos, index, id, value, param, ep;
+	int i = -1;
+
+	if (!script_charid2sd(7,sd))
+		return SCRIPT_CMD_FAILURE;
+	pos = script_getnum(st,2);
+	index = script_getnum(st,3);
+	id = script_getnum(st,4);
+	value = script_getnum(st,5);
+	param = script_getnum(st,6);
+
+	if (!(opt = itemdb_randomopt_exists((short)id))) {
+		ShowError("buildin_setrandomoption: Random option ID %d does not exists.\n", id);
+		script_pushint(st,0);
+		return 1;
+	}
+	if (index < 0 || index >= MAX_ITEM_RDM_OPT) {
+		ShowError("buildin_setrandomoption: Invalid random option index %d.\n", index);
+		script_pushint(st,0);
+		return 1;
+	}
+	if (equip_index_check(pos))
+		i = pc_checkequip(sd, equip_bitmask[pos]);
+	if (i >= 0) {
+		ep = sd->inventory.u.items_inventory[i].equip;
+		log_pick_pc(sd, LOG_TYPE_SCRIPT, -1, &sd->inventory.u.items_inventory[i]);
+		pc_unequipitem(sd, i, 2);
+		sd->inventory.u.items_inventory[i].option[index].id = id;
+		sd->inventory.u.items_inventory[i].option[index].value = value;
+		sd->inventory.u.items_inventory[i].option[index].param = param;
+		clif_delitem(sd, i, 1, 3);
+		log_pick_pc(sd, LOG_TYPE_SCRIPT, -1, &sd->inventory.u.items_inventory[i]);
+		clif_additem(sd, i, 1, 0);
+		pc_equipitem(sd, i, ep);
+		script_pushint(st,1);
+		return 0;
+	}
+
+	ShowError("buildin_setrandomoption: No item equipped at pos %d (CID=%d/AID=%d).\n", pos, sd->status.char_id, sd->status.account_id);
+	script_pushint(st,0);
+	return SCRIPT_CMD_FAILURE;
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -21136,9 +21560,11 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(makeitem2,"visiiiiiiiii"),
 	BUILDIN_DEF(delitem,"vi?"),
 	BUILDIN_DEF2(delitem,"storagedelitem","vi?"),
+	BUILDIN_DEF2(delitem,"guildstoragedelitem","vi?"),
 	BUILDIN_DEF2(delitem,"cartdelitem","vi?"),
 	BUILDIN_DEF(delitem2,"viiiiiiii?"),
 	BUILDIN_DEF2(delitem2,"storagedelitem2","viiiiiiii?"),
+	BUILDIN_DEF2(delitem2,"guildstoragedelitem2","viiiiiiii?"),
 	BUILDIN_DEF2(delitem2,"cartdelitem2","viiiiiiii?"),
 	BUILDIN_DEF2(enableitemuse,"enable_items",""),
 	BUILDIN_DEF2(disableitemuse,"disable_items",""),
@@ -21150,9 +21576,11 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(rand,"i?"),
 	BUILDIN_DEF(countitem,"v?"),
 	BUILDIN_DEF2(countitem,"storagecountitem","v?"),
+	BUILDIN_DEF2(countitem,"guildstoragecountitem","v?"),
 	BUILDIN_DEF2(countitem,"cartcountitem","v?"),
 	BUILDIN_DEF2(countitem,"countitem2","viiiiiii?"),
 	BUILDIN_DEF2(countitem,"storagecountitem2","viiiiiii?"),
+	BUILDIN_DEF2(countitem,"guildstoragecountitem2","viiiiiii?"),
 	BUILDIN_DEF2(countitem,"cartcountitem2","viiiiiii?"),
 	BUILDIN_DEF(checkweight,"vi*"),
 	BUILDIN_DEF(checkweight2,"rr"),
@@ -21635,6 +22063,17 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(agitcheck3,""),
 	BUILDIN_DEF(gvgon3,"s"),
 	BUILDIN_DEF(gvgoff3,"s"),
+	BUILDIN_DEF(getrandomoptinfo,"i"),
+	BUILDIN_DEF(getequiprandomoption, "iii?"),
+	BUILDIN_DEF(setrandomoption,"iiiii?"),
+	BUILDIN_DEF(openstorage2,"ii?"),
+	//Item Random Option Extension [Cydh]
+	BUILDIN_DEF2(getitem2,"getitem3","viiiiiiiirrr?"),
+	BUILDIN_DEF2(getitem2,"getitembound3","viiiiiiiiirrr?"),
+	BUILDIN_DEF2(rentitem2,"rentitem3","viiiiiiiirrr?"),
+	BUILDIN_DEF2(makeitem2,"makeitem3","visiiiiiiiiirrr"),
+	BUILDIN_DEF2(delitem2,"delitem3","viiiiiiiirrr?"),
+	BUILDIN_DEF2(countitem,"countitem3","viiiiiiirrr?"),
 
 #include "../custom/script_def.inc"
 

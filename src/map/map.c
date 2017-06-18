@@ -2097,9 +2097,6 @@ int map_quit(struct map_session_data *sd) {
 	if (sd->ed) //Remove effects here rather than unit_remove_map_pc so we don't clear on Teleport/map change
 		elemental_clean_effect(sd->ed);
 
-	if (sd->state.storage_flag == 1) //No need to double save storage on quit
-		sd->state.storage_flag = 0;
-
 	if (map[sd->bl.m].instance_id)
 		instance_delusers(map[sd->bl.m].instance_id);
 
@@ -2133,7 +2130,7 @@ int map_quit(struct map_session_data *sd) {
 	pc_makesavestatus(sd);
 	pc_clean_skilltree(sd);
 	pc_crimson_marker_clear(sd);
-	chrif_save(sd,1);
+	chrif_save(sd,CSAVE_QUIT|CSAVE_INVENTORY|CSAVE_CART);
 	unit_free_pc(sd);
 	return 0;
 }
@@ -4477,7 +4474,7 @@ void do_final(void)
 
 static int map_abort_sub(struct map_session_data *sd, va_list ap)
 {
-	chrif_save(sd,1);
+	chrif_save(sd,CSAVE_QUIT|CSAVE_INVENTORY|CSAVE_CART);
 	return 1;
 }
 
@@ -4582,6 +4579,9 @@ int do_init(int argc, char *argv[])
 	rnd_init();
 	map_config_read(MAP_CONF_NAME);
 
+	if (save_settings&CHARSAVE_NONE)
+		ShowWarning("Value of 'save_settings' is not set, player's data only will be saved every 'autosave_time' (%d seconds).\n", autosave_interval / 1000);
+
 	// Loads npcs
 	map_reloadnpc(false);
 
@@ -4595,7 +4595,7 @@ int do_init(int argc, char *argv[])
 		if (runflag != CORE_ST_STOP) // Skip this warning if the server is run with run-once flag
 			ShowWarning("Not all IP addresses in map_athena.conf configured, autodetecting...\n");
 
-		if (naddr_ == 0)
+		if (!naddr_)
 			ShowError("Unable to determine your IP address...\n");
 		else if (naddr_ > 1)
 			ShowNotice("Multiple interfaces detected...\n");

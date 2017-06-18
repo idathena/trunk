@@ -4,19 +4,16 @@
 #ifndef _INT_STORAGE_SQL_H_
 #define _INT_STORAGE_SQL_H_
 
-struct storage_data;
-struct guild_storage;
+struct s_storage;
 
-int inter_storage_sql_init(void);
+void inter_storage_sql_init(void);
 void inter_storage_sql_final(void);
-int inter_storage_delete(int account_id);
-int inter_guild_storage_delete(int guild_id);
 
-int inter_storage_parse_frommap(int fd);
+bool inter_premiumStorage_exists(uint8 id);
+int inter_premiumStorage_getMax(uint8 id);
+const char *inter_premiumStorage_getTableName(uint8 id);
+const char *inter_premiumStorage_getPrintableName(uint8 id);
 
-//Exported for use in the TXT-SQL converter.
-int storage_fromsql(int account_id, struct storage_data* p);
-int storage_tosql(int account_id,struct storage_data *p);
-int guild_storage_tosql(int guild_id, struct guild_storage *p);
+bool inter_storage_parse_frommap(int fd);
 
 #endif /* _INT_STORAGE_SQL_H_ */

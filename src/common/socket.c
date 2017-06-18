@@ -145,7 +145,7 @@ int sSocket(int af, int type, int protocol)
 	return sock2newfd(s);
 }
 
-char* sErr(int code)
+char *sErr(int code)
 {
 	static char sbuf[512];
 	// strerror does not handle socket codes
@@ -257,7 +257,7 @@ static int create_session(int fd, RecvFunc func_recv, SendFunc func_send, ParseF
 	static int connect_check(uint32 ip);
 #endif
 
-const char* error_msg(void)
+const char *error_msg(void)
 {
 	static char buf[512];
 	int code = sErrno;
@@ -1067,7 +1067,7 @@ static int connect_check_clear(int tid, unsigned int tick, int id, intptr_t data
 
 /// Parses the ip address and mask and puts it into acc.
 /// Returns 1 is successful, 0 otherwise.
-int access_ipmask(const char* str, AccessControl* acc)
+int access_ipmask(const char *str, AccessControl* acc)
 {
 	uint32 ip;
 	uint32 mask;
@@ -1114,7 +1114,7 @@ int access_ipmask(const char* str, AccessControl* acc)
 #endif
 //////////////////////////////
 
-int socket_config_read(const char* cfgName)
+int socket_config_read(const char *cfgName)
 {
 	char line[1024],w1[1024],w2[1024];
 	FILE *fp;
@@ -1396,7 +1396,7 @@ bool session_isActive(int fd)
 }
 
 // Resolves hostname into a numeric ip.
-uint32 host2ip(const char* hostname)
+uint32 host2ip(const char *hostname)
 {
 	struct hostent* h = gethostbyname(hostname);
 	return (h != NULL) ? ntohl(*(uint32*)h->h_addr) : 0;
@@ -1404,7 +1404,7 @@ uint32 host2ip(const char* hostname)
 
 // Converts a numeric ip into a dot-formatted string.
 // Result is placed either into a user-provided buffer or a static system buffer.
-const char* ip2str(uint32 ip, char ip_str[16])
+const char *ip2str(uint32 ip, char ip_str[16])
 {
 	struct in_addr addr;
 	addr.s_addr = htonl(ip);
@@ -1412,7 +1412,7 @@ const char* ip2str(uint32 ip, char ip_str[16])
 }
 
 // Converts a dot-formatted ip string into a numeric ip.
-uint32 str2ip(const char* ip_str)
+uint32 str2ip(const char *ip_str)
 {
 	return ntohl(inet_addr(ip_str));
 }
@@ -1438,8 +1438,7 @@ void socket_datasync(int fd, bool send) {
 		{ sizeof(struct accreg) },
 		{ sizeof(struct skill_cooldown_data) },
 		{ sizeof(struct status_change_data) },
-		{ sizeof(struct storage_data) },
-		{ sizeof(struct guild_storage) },
+		{ sizeof(struct s_storage) },
 		{ sizeof(struct s_pet) },
 		{ sizeof(struct s_mercenary) },
 		{ sizeof(struct s_homunculus) },

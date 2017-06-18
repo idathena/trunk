@@ -273,36 +273,51 @@ int chrif_isconnected(void) {
 	return (char_fd > 0 && session[char_fd] != NULL && chrif_state == 2);
 }
 
-/*==========================================
+/**
  * Saves character data.
- * Flag = 1: Character is quitting
- * Flag = 2: Character is changing map-servers
- * Flag = 3: Character used @autotrade
- *------------------------------------------*/
-int chrif_save(struct map_session_data *sd, int flag) {
+ * @param sd: Player data
+ * @param flag: Save flag types:
+ *  CSAVE_NORMAL: Normal save
+ *  CSAVE_QUIT: Character is quitting
+ *  CSAVE_CHANGE_MAPSERV: Character is changing map-servers
+ *  CSAVE_AUTOTRADE: Character used @autotrade
+ *  CSAVE_INVENTORY: Character changed inventory data
+ *  CSAVE_CART: Character changed cart data
+ */
+int chrif_save(struct map_session_data *sd, enum e_chrif_save_opt flag) {
 	uint32 mmo_charstatus_len = 0;
+
 	nullpo_retr(-1, sd);
 
 	pc_makesavestatus(sd);
 
-	if (flag && sd->state.active) { //Store player data which is quitting
+	if ((flag&CSAVE_QUITTING) && sd->state.active) { //Store player data which is quitting
 		if (chrif_isconnected()) {
 			chrif_save_scdata(sd);
 			chrif_skillcooldown_save(sd);
 		}
-		if (flag != 3 && !chrif_auth_logout(sd, (flag == 1 ? ST_LOGOUT : ST_MAPCHANGE)))
+		if (!(flag&CSAVE_AUTOTRADE) && !chrif_auth_logout(sd, ((flag&CSAVE_QUIT) ? ST_LOGOUT : ST_MAPCHANGE)))
 			ShowError("chrif_save: Failed to set up player %d:%d for proper quitting!\n", sd->status.account_id, sd->status.char_id);
 	}
 
 	chrif_check(-1); //Character is saved on reconnect
 
-	chrif_bsdata_save(sd, (flag && (flag != 3)));
+	chrif_bsdata_save(sd, ((flag&CSAVE_QUITTING) && !(flag&CSAVE_AUTOTRADE)));
+
+	if (&sd->storage && sd->storage.dirty)
+		storage_storagesave(sd);
+	if (flag&CSAVE_INVENTORY)
+		intif_storage_save(sd, &sd->inventory);
+	if (flag&CSAVE_CART)
+		intif_storage_save(sd, &sd->cart);
 
 	//For data sync
 	if (sd->state.storage_flag == 2)
-		gstorage_storagesave(sd->status.account_id, sd->status.guild_id, flag);
+		storage_guild_storagesave(sd->status.account_id, sd->status.guild_id, flag);
+	if (&sd->premiumStorage && sd->premiumStorage.dirty)
+		storage_premiumStorage_save(sd);
 
-	if (flag)
+	if (flag&CSAVE_QUITTING)
 		sd->state.storage_flag = 0; //Force close it
 
 	//Saving of registry values.
@@ -319,7 +334,7 @@ int chrif_save(struct map_session_data *sd, int flag) {
 	WFIFOW(char_fd,2) = mmo_charstatus_len;
 	WFIFOL(char_fd,4) = sd->status.account_id;
 	WFIFOL(char_fd,8) = sd->status.char_id;
-	WFIFOB(char_fd,12) = (flag == 1) ? 1 : 0; //Flag to tell char-server this character is quitting.
+	WFIFOB(char_fd,12) = (flag&CSAVE_QUIT) ? 1 : 0; //Flag to tell char-server this character is quitting.
 
 	//If the user is on a instance map, we have to fake his current position
 	if (map[sd->bl.m].instance_id) {
@@ -518,28 +533,26 @@ static int chrif_reconnect(DBKey key, DBData *data, va_list ap) {
 
 	switch (node->state) {
 		case ST_LOGIN:
-			if ( node->sd && node->char_dat == NULL ) { //Since there is no way to request the char auth, make it fail.
+			if ( node->sd && !node->char_dat ) { //Since there is no way to request the char auth, make it fail
 				pc_authfail(node->sd);
 				chrif_char_offline(node->sd);
 				chrif_auth_delete(node->account_id, node->char_id, ST_LOGIN);
 			}
 			break;
 		case ST_LOGOUT:
-			//Re-send final save
-			chrif_save(node->sd, 1);
+			chrif_save(node->sd, CSAVE_QUIT|CSAVE_INVENTORY|CSAVE_CART); //Re-send final save
 			break;
-		case ST_MAPCHANGE: { //Re-send map-change request.
-			struct map_session_data *sd = node->sd;
-			uint32 ip;
-			uint16 port;
+		case ST_MAPCHANGE: { //Re-send map-change request
+				struct map_session_data *sd = node->sd;
+				uint32 ip;
+				uint16 port;
 
-			if( map_mapname2ipport(sd->mapindex,&ip,&port) == 0 )
-				chrif_changemapserver(sd, ip, port);
-			else //too much lag/timeout is the closest explanation for this error.
-				clif_authfail_fd(sd->fd, 3);
-			
-			break;
+				if( !map_mapname2ipport(sd->mapindex,&ip,&port) )
+					chrif_changemapserver(sd, ip, port);
+				else //Too much lag/timeout is the closest explanation for this error
+					clif_authfail_fd(sd->fd, 3);
 			}
+			break;
 	}
 
 	return 0;
@@ -755,14 +768,14 @@ void chrif_authfail(int fd) { /* HELLO WORLD. ip in RFIFOL 15 is not being used 
 int auth_db_cleanup_sub(DBKey key, DBData *data, va_list ap) {
 	struct auth_node *node = db_data2ptr(data);
 
-	if(DIFF_TICK(gettick(),node->node_created)>60000) {
+	if( DIFF_TICK(gettick(), node->node_created) > 60000 ) {
 		const char *states[] = { "Login", "Logout", "Map change" };
 
-		switch (node->state) {
+		switch( node->state ) {
 			case ST_LOGOUT:
 				//Re-save attempt (->sd should never be null here).
 				node->node_created = gettick(); //Refresh tick (avoid char-server load if connection is really bad)
-				chrif_save(node->sd, 1);
+				chrif_save(node->sd, CSAVE_QUIT|CSAVE_INVENTORY|CSAVE_CART);
 				break;
 			default:
 				//Clear data. any connected players should have timed out by now.
@@ -1002,14 +1015,14 @@ int chrif_divorceack(int char_id, int partner_id) {
 	if( (sd = map_charid2sd(char_id)) && sd->status.partner_id == partner_id ) {
 		sd->status.partner_id = 0;
 		for( i = 0; i < MAX_INVENTORY; i++ )
-			if( sd->status.inventory[i].nameid == WEDDING_RING_M || sd->status.inventory[i].nameid == WEDDING_RING_F )
+			if( sd->inventory.u.items_inventory[i].nameid == WEDDING_RING_M || sd->inventory.u.items_inventory[i].nameid == WEDDING_RING_F )
 				pc_delitem(sd, i, 1, 0, 0, LOG_TYPE_OTHER);
 	}
 
 	if( (sd = map_charid2sd(partner_id)) && sd->status.partner_id == char_id ) {
 		sd->status.partner_id = 0;
 		for( i = 0; i < MAX_INVENTORY; i++ )
-			if( sd->status.inventory[i].nameid == WEDDING_RING_M || sd->status.inventory[i].nameid == WEDDING_RING_F )
+			if( sd->inventory.u.items_inventory[i].nameid == WEDDING_RING_M || sd->inventory.u.items_inventory[i].nameid == WEDDING_RING_F )
 				pc_delitem(sd, i, 1, 0, 0, LOG_TYPE_OTHER);
 	}
 
@@ -1551,15 +1564,15 @@ void chrif_parse_ack_vipActive(int fd) {
 		if (flag&0x1) { //isvip
 			sd->vip.enabled = 1;
 			sd->vip.time = vip_time;
-			sd->storage_size = battle_config.vip_storage_increase + MIN_STORAGE; //Increase storage size for VIP
-			if (sd->storage_size > MAX_STORAGE) {
+			sd->storage.max_amount = battle_config.vip_storage_increase + MIN_STORAGE; //Increase storage size for VIP
+			if (sd->storage.max_amount > MAX_STORAGE) {
 				ShowError("intif_parse_ack_vipActive: Storage size for player %s (%d:%d) is larger than MAX_STORAGE. Storage size has been set to MAX_STORAGE.\n", sd->status.name, sd->status.account_id, sd->status.char_id);
-				sd->storage_size = MAX_STORAGE;
+				sd->storage.max_amount = MAX_STORAGE;
 			}
 		} else if (sd->vip.enabled) {
 			sd->vip.enabled = 0;
 			sd->vip.time = 0;
-			sd->storage_size = MIN_STORAGE;
+			sd->storage.max_amount = MIN_STORAGE;
 			sd->special_state.no_gemstone = 0;
 			clif_displaymessage(sd->fd, msg_txt(438)); // You are no longer VIP.
 		}
@@ -1918,8 +1931,13 @@ void do_final_chrif(void) {
  *------------------------------------------*/
 void do_init_chrif(void) {
 	if( sizeof(struct mmo_charstatus) > 0xFFFF ) {
-		ShowError("mmo_charstatus size = %d is too big to be transmitted. (must be below 0xFFFF) \n",
+		ShowError("mmo_charstatus size = %d is too big to be transmitted. (must be below 0xFFFF)\n",
 			sizeof(struct mmo_charstatus));
+		exit(EXIT_FAILURE);
+	}
+
+	if( sizeof(struct s_storage) > 0xFFFF ) {
+		ShowError("s_storage size = %d is too big to be transmitted. (must be below 0xFFFF)\n", sizeof(struct s_storage));
 		exit(EXIT_FAILURE);
 	}
 

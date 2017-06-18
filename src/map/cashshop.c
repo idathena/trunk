@@ -398,7 +398,7 @@ struct sale_item_data *sale_find_item( uint16 nameid, bool onsale ){
 	return sale_items.item[i];
 }
 
-void sale_notify_login( struct map_session_data* sd ){
+void sale_notify_login( struct map_session_data *sd ){
 	int i;
 
 	for( i = 0; i < sale_items.count; i++ ){
