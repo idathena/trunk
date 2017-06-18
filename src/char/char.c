@@ -4561,7 +4561,7 @@ int parse_char(int fd)
 
 					//Send NEW auth packet [Kevin]
 					//FIXME: is this case even possible? [ultramage]
-					if( (map_fd = server[i].fd) < 1 || session[map_fd] == NULL ) {
+					if( (map_fd = server[i].fd) < 1 || !session[map_fd] ) {
 						ShowError("parse_char: Attempting to write to invalid session %d! Map Server #%d disconnected.\n",map_fd,i);
 						server[i].fd = -1;
 						memset(&server[i],0,sizeof(struct mmo_map_server));
@@ -4573,15 +4573,8 @@ int parse_char(int fd)
 						break;
 					}
 
-					//Send player to map
-					WFIFOHEAD(fd,28);
-					WFIFOW(fd,0) = 0x71;
-					WFIFOL(fd,2) = cd->char_id;
-					mapindex_getmapname_ext(mapindex_id2name(cd->last_point.map),(char *)WFIFOP(fd,6));
 					subnet_map_ip = lan_subnetcheck(ipl); //Advanced subnet check [LuzZza]
-					WFIFOL(fd,22) = htonl((subnet_map_ip) ? subnet_map_ip : server[i].ip);
-					WFIFOW(fd,26) = ntows(htons(server[i].port)); //[!] LE byte order here [!]
-					WFIFOSET(fd,28);
+					char_send_map_info(fd,i,subnet_map_ip,cd); //Send player to map
 
 					//Create temporary auth entry
 					CREATE(node,struct auth_node,1);
@@ -5596,6 +5589,25 @@ void char_changemapserv_ack(int fd, bool nok) {
 	if(nok)
 		WFIFOL(fd,6) = 0; //Set login1 to 0 (Not OK)
 	WFIFOSET(fd,30);
+}
+
+void char_send_map_info(int fd, int i, uint32 subnet_map_ip, struct mmo_charstatus *cd)
+{
+#if PACKETVER < 20170329
+	const int cmd = 0x71;
+	const int len = 28;
+#else
+	const int cmd = 0xac5;
+	const int len = 156;
+#endif
+
+	WFIFOHEAD(fd,len);
+	WFIFOW(fd,0) = cmd;
+	WFIFOL(fd,2) = cd->char_id;
+	mapindex_getmapname_ext(mapindex_id2name(cd->last_point.map),(char *)WFIFOP(fd,6));
+	WFIFOL(fd,22) = htonl((subnet_map_ip) ? subnet_map_ip : server[i].ip);
+	WFIFOW(fd,26) = ntows(htons(server[i].port)); //[!] LE byte order here [!]
+	WFIFOSET(fd,len);
 }
 
 //------------------------------------------------

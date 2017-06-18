@@ -1244,6 +1244,7 @@ enum e_BANKING_WITHDRAW_ACK pc_bank_withdraw(struct map_session_data *sd, int mo
 
 bool pc_process_chat_message(struct map_session_data *sd, const char *message);
 void pc_check_supernovice_call(struct map_session_data *sd, const char *message);
+void pc_update_job_and_level(struct map_session_data *sd);
 
 enum e_summoner_type {
 	TYPE_SEAFOOD,

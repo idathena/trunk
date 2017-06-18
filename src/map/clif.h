@@ -39,7 +39,7 @@ enum e_rank;
 enum { // packet_db
 	MIN_PACKET_DB = 0x064,
 	MAX_PACKET_DB = 0xAFF,
-	MAX_PACKET_VER = 52,
+	MAX_PACKET_VER = 53,
 	MAX_PACKET_POS = 20,
 };
 
@@ -742,7 +742,9 @@ void clif_party_message(struct party_data *p, int account_id, const char *mes, i
 void clif_party_xy(struct map_session_data *sd);
 void clif_party_xy_single(int fd, struct map_session_data *sd);
 void clif_party_hp(struct map_session_data *sd);
+void clif_party_job_and_level(struct map_session_data *sd);
 void clif_hpmeter_single(int fd, int id, unsigned int hp, unsigned int maxhp);
+
 
 // Guild
 void clif_guild_created(struct map_session_data *sd,int flag);

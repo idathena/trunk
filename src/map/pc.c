@@ -8474,13 +8474,14 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	if (sd->sc.data[SC_SPRITEMABLE] && !pc_checkskill(sd,SU_SPRITEMABLE))
 		status_change_end(&sd->bl,SC_SPRITEMABLE,INVALID_TIMER);
 
-	if(sd->status.manner < 0)
+	if (sd->status.manner < 0)
 		clif_changestatus(sd,SP_MANNER,sd->status.manner);
 
 	status_calc_pc(sd,SCO_FORCE);
 	pc_checkallowskill(sd);
 	pc_equiplookall(sd);
 	pc_show_questinfo(sd);
+	pc_update_job_and_level(sd);
 	chrif_save(sd,CSAVE_NORMAL);
 
 	//If you were previously famous, not anymore.
@@ -12232,6 +12233,23 @@ void pc_set_costume_view(struct map_session_data *sd) {
 		clif_changelook(&sd->bl, LOOK_HEAD_TOP, sd->status.head_top);
 	if (robe != sd->status.robe)
 		clif_changelook(&sd->bl, LOOK_ROBE, sd->status.robe);
+}
+
+void pc_update_job_and_level(struct map_session_data *sd) {
+	nullpo_retv(sd);
+
+	if (sd->status.party_id) {
+		struct party_data *p;
+		int i;
+
+		if ((p = party_search(sd->status.party_id))) {
+			ARR_FIND(0, MAX_PARTY, i, p->party.member[i].char_id == sd->status.char_id);
+			if (i < MAX_PARTY) {
+				p->party.member[i].class_ = sd->status.class_;
+				clif_party_job_and_level(sd);
+			}
+		}
+	}
 }
 
 /*==========================================
