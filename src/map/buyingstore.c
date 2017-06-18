@@ -158,7 +158,7 @@ int8 buyingstore_create(struct map_session_data *sd, int zenylimit, unsigned cha
 			(idx = pc_search_inventory(sd, nameid)) == INDEX_NOT_FOUND )
 			break;
 
-		if( sd->status.inventory[idx].amount + amount > BUYINGSTORE_MAX_AMOUNT ) // Too many items of same kind
+		if( sd->inventory.u.items_inventory[idx].amount + amount > BUYINGSTORE_MAX_AMOUNT ) // Too many items of same kind
 			break;
 
 		if( i ) { // Duplicate check. As the client does this too, only malicious intent should be caught here
@@ -336,16 +336,16 @@ void buyingstore_trade(struct map_session_data *sd, int account_id, unsigned int
 			}
 		}
 
-		if( index < 0 || index >= ARRAYLENGTH(sd->status.inventory) || sd->inventory_data[index] == NULL ||
-			sd->status.inventory[index].nameid != nameid || sd->status.inventory[index].amount < amount )
+		if( index < 0 || index >= ARRAYLENGTH(sd->inventory.u.items_inventory) || sd->inventory_data[index] == NULL ||
+			sd->inventory.u.items_inventory[index].nameid != nameid || sd->inventory.u.items_inventory[index].amount < amount )
 		{ // Invalid input
 			clif_buyingstore_trade_failed_seller(sd, BUYINGSTORE_TRADE_SELLER_FAILED, nameid);
 			return;
 		}
 
-		if( sd->status.inventory[index].expire_time || (sd->status.inventory[index].bound && !pc_can_give_bounded_items(sd)) ||
-			!itemdb_cantrade(&sd->status.inventory[index], pc_get_group_level(sd), pc_get_group_level(pl_sd)) ||
-				memcmp(sd->status.inventory[index].card, buyingstore_blankslots, sizeof(buyingstore_blankslots)) )
+		if( sd->inventory.u.items_inventory[index].expire_time || (sd->inventory.u.items_inventory[index].bound && !pc_can_give_bounded_items(sd)) ||
+			!itemdb_cantrade(&sd->inventory.u.items_inventory[index], pc_get_group_level(sd), pc_get_group_level(pl_sd)) ||
+				memcmp(sd->inventory.u.items_inventory[index].card, buyingstore_blankslots, sizeof(buyingstore_blankslots)) )
 		{ // Non-tradable item
 			clif_buyingstore_trade_failed_seller(sd, BUYINGSTORE_TRADE_SELLER_FAILED, nameid);
 			return;
@@ -401,7 +401,7 @@ void buyingstore_trade(struct map_session_data *sd, int account_id, unsigned int
 		zeny = amount * pl_sd->buyingstore.items[listidx].price;
 
 		// Move item
-		pc_additem(pl_sd, &sd->status.inventory[index], amount, LOG_TYPE_BUYING_STORE);
+		pc_additem(pl_sd, &sd->inventory.u.items_inventory[index], amount, LOG_TYPE_BUYING_STORE);
 		pc_delitem(sd, index, amount, 1, 0, LOG_TYPE_BUYING_STORE);
 		pl_sd->buyingstore.items[listidx].amount -= amount;
 
@@ -425,9 +425,9 @@ void buyingstore_trade(struct map_session_data *sd, int account_id, unsigned int
 		clif_buyingstore_update_item(pl_sd, nameid, amount, sd->status.char_id, zeny);
 	}
 
-	if( save_settings&128 ) {
-		chrif_save(sd, 0);
-		chrif_save(pl_sd, 0);
+	if( save_settings&CHARSAVE_BUYINGSTORE ) {
+		chrif_save(sd, CSAVE_INVENTORY);
+		chrif_save(pl_sd, CSAVE_INVENTORY);
 	}
 
 	// Check whether or not there is still something to buy
@@ -559,7 +559,7 @@ void buyingstore_reopen(struct map_session_data *sd) {
 			}
 
 			// Immediate save
-			chrif_save(sd, 3);
+			chrif_save(sd, CSAVE_AUTOTRADE);
 
 			ShowInfo("Buyingstore loaded for '"CL_WHITE"%s"CL_RESET"' with '"CL_WHITE"%d"CL_RESET"' items at "CL_WHITE"%s (%d,%d)"CL_RESET"\n",
 				sd->status.name, count, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y);

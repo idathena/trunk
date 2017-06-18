@@ -773,6 +773,21 @@ extern char charhelp_txt[];
 
 extern char wisp_server_name[];
 
+// Type of 'save_settings'
+enum save_settings_type {
+	CHARSAVE_NONE    = 0,
+	CHARSAVE_TRADE       = 0x001, //After every successful trade
+	CHARSAVE_VENDING     = 0x002, //After opening vending/every vending transaction
+	CHARSAVE_STORAGE     = 0x004, //After closing storage/guild storage
+	CHARSAVE_PET         = 0x008, //After hatching/returning to egg a pet
+	CHARSAVE_MAIL        = 0x010, //After successfully sending a mail with attachment
+	CHARSAVE_AUCTION     = 0x020, //After successfully submitting an item for auction
+	CHARSAVE_QUEST       = 0x040, //After successfully get/delete/complete a quest
+	CHARSAVE_BUYINGSTORE = 0x080, //After every buyingstore transaction
+	CHARSAVE_BANK        = 0x100, //After every bank transaction (deposit/withdraw)
+	CHARSAVE_ALL         = 0x1FF,
+};
+
 struct s_map_default {
 	char mapname[MAP_NAME_LENGTH];
 	unsigned short x;

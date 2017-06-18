@@ -239,6 +239,12 @@ enum navigation_service {
 	NAV_ALL = NAV_AIRSHIP_ONLY + NAV_SCROLL_ONLY + NAV_KAFRA_ONLY //111 (actually 111-255)
 };
 
+enum random_option_attribute {
+	ROA_ID = 0,
+	ROA_VALUE,
+	ROA_PARAM,
+};
+
 const char *skip_space(const char *p);
 void script_error(const char *src, const char *file, int start_line, const char *error_msg, const char *error_pos);
 void script_warning(const char *src, const char *file, int start_line, const char *error_msg, const char *error_pos);

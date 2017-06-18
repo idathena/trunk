@@ -212,7 +212,7 @@ struct map_session_data {
 		unsigned int arrow_atk : 1;
 		unsigned int gangsterparadise : 1;
 		unsigned int rest : 1;
-		unsigned int storage_flag : 2; //0: Closed, 1: Normal Storage open, 2: Guild storage open [Skotlex]
+		unsigned int storage_flag : 3; //0: Closed, 1: Normal Storage open, 2: Guild storage open [Skotlex], 3: Premium Storage
 		unsigned int snovice_dead_flag : 1; //Explosion spirits on death: 0 off, 1 used
 		unsigned int abra_flag : 2; //Abracadabra bugfix by Aru
 		unsigned int autocast : 1; //Autospell flag [Inkfish]
@@ -260,6 +260,7 @@ struct map_session_data {
 		unsigned int warp_clean : 1;
 		bool ignoretimeout; //Prevent the SECURE_NPCTIMEOUT function from closing current script
 		bool keepshop; //Whether shop data should be removed when the player disconnects
+		bool pc_loaded; // Ensure inventory data and status data is loaded before we calculate player stats
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -283,6 +284,11 @@ struct map_session_data {
 	uint32 packet_ver;  //5: old, 6: 7july04, 7: 13july04, 8: 26july04, 9: 9aug04/16aug04/17aug04, 10: 6sept04, 11: 21sept04, 12: 18oct04, 13: 25oct04 ... 18
 	struct mmo_charstatus status;
 	struct registry save_reg;
+
+	//Item Storages
+	struct s_storage storage, premiumStorage;
+	struct s_storage inventory;
+	struct s_storage cart;
 
 	struct item_data *inventory_data[MAX_INVENTORY]; //Direct pointers to itemdb entries (faster than doing item_id lookups)
 	short equip_index[EQI_MAX];
@@ -524,6 +530,7 @@ struct map_session_data {
 	int vended_id;
 	int vender_id;
 	int vend_num;
+	uint16 vend_skill_lv;
 	char message[MESSAGE_SIZE];
 	struct s_vending vending[MAX_VENDING];
 
@@ -663,7 +670,6 @@ struct map_session_data {
 	struct s_pc_itemgrouphealrate **itemgrouphealrate; //List of Item Group Heal rate bonus
 	uint8 itemgrouphealrate_count; //Number of rate bonuses
 
-	int storage_size; //Holds player storage size (VIP system)
 #ifdef VIP_ENABLE
 	struct vip_info vip;
 #endif
@@ -742,6 +748,14 @@ enum adopt_responses {
 	ADOPT_MORE_CHILDREN,
 	ADOPT_LEVEL_70,
 	ADOPT_MARRIED,
+};
+
+enum item_check {
+	ITMCHK_NONE      = 0x0,
+	ITMCHK_INVENTORY = 0x1,
+	ITMCHK_CART      = 0x2,
+	ITMCHK_STORAGE   = 0x4,
+	ITMCHK_ALL       = ITMCHK_INVENTORY|ITMCHK_CART|ITMCHK_STORAGE,
 };
 
 struct {
@@ -914,6 +928,7 @@ void pc_reg_received(struct map_session_data *sd);
 void pc_close_npc(struct map_session_data *sd,int flag);
 int pc_close_npc_timer(int tid,unsigned int tick,int id,intptr_t data);
 
+void pc_setequipindex(struct map_session_data *sd);
 uint8 pc_isequip(struct map_session_data *sd, int n);
 int pc_equippoint_sub(struct map_session_data *sd, struct item_data *id);
 int pc_equippoint(struct map_session_data *sd, int n);
@@ -1025,7 +1040,7 @@ int pc_resethate(struct map_session_data *);
 bool pc_equipitem(struct map_session_data *sd, short n, int req_pos);
 void pc_unequipitem(struct map_session_data *sd, int n, int flag);
 void pc_checkitem(struct map_session_data *);
-void pc_check_available_item(struct map_session_data *sd);
+void pc_check_available_item(struct map_session_data *sd, uint8 type);
 int pc_useitem(struct map_session_data *,int);
 
 int pc_skillatk_bonus(struct map_session_data *sd, uint16 skill_id);

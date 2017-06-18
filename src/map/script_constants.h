@@ -2780,6 +2780,23 @@
 	export_constant(NAV_KAFRA_AND_SCROLL);
 	export_constant(NAV_ALL);
 
+	/* Random option attributes */
+	export_constant(ROA_ID);
+	export_constant(ROA_VALUE);
+	export_constant(ROA_PARAM);
+
+	export_constant(CARD0_FORGE);
+	export_constant(CARD0_CREATE);
+	export_constant(CARD0_PET);
+
+	export_constant(STOR_MODE_NONE);
+	export_constant(STOR_MODE_GET);
+	export_constant(STOR_MODE_PUT);
+
+	/* Item Random Option Group */
+	export_constant(RDMOPTG_None);
+	export_constant(RDMOPTG_Crimson_Weapon);
+
 	#undef export_constant
 
 #endif /* _SCRIPT_CONSTANTS_H_ */

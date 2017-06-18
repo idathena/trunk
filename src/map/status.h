@@ -1758,6 +1758,7 @@ extern short current_equip_item_index;
 extern unsigned int current_equip_pos;
 extern int current_equip_card_id;
 extern bool running_npc_stat_calc_event;
+extern short current_equip_opt_index;
 
 //Mode definitions to clear up code reading. [Skotlex]
 enum e_mode
@@ -1988,6 +1989,14 @@ enum e_bonus_script_flags {
 enum e_status_bonus {
 	STATUS_BONUS_FIX = 0,
 	STATUS_BONUS_RATE = 1,
+};
+
+//Enum for status_calc_weight and status_calc_cart_weight
+enum e_status_calc_weight_opt {
+	CALCWT_NONE = 0x0,
+	CALCWT_ITEM = 0x1,		//Recalculate item weight
+	CALCWT_MAXBONUS = 0x2,	//Recalculate max weight based on skill/status/configuration bonuses
+	CALCWT_CARTSTATE = 0x4,	//Whether to check for cart state
 };
 
 //Define to determine who gets HP/SP consumed on doing skills/etc. [Skotlex]
@@ -2269,6 +2278,8 @@ struct s_refine_info { //Bonus values and upgrade chances for refining equipment
 	int randombonus_max[MAX_REFINE]; //Cumulative maximum random bonus damage
 } refine_info[REFINE_TYPE_MAX];
 
+bool status_calc_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);
+bool status_calc_cart_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);
 void status_calc_bl_(struct block_list *bl, enum scb_flag flag, enum e_status_calc_opt opt);
 int status_calc_mob_(struct mob_data *md, enum e_status_calc_opt opt);
 void status_calc_pet_(struct pet_data *pd, enum e_status_calc_opt opt);

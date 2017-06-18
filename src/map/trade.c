@@ -183,7 +183,7 @@ int impossible_trade_check(struct map_session_data *sd)
 		return 1;
 
 	//Get inventory of player
-	memcpy(&inventory, &sd->status.inventory, sizeof(struct item) * MAX_INVENTORY);
+	memcpy(&inventory, &sd->inventory.u.items_inventory, sizeof(struct item) * MAX_INVENTORY);
 
 	//Remove this part: arrows can be trade and equiped
 	//Re-added! [celest]
@@ -247,8 +247,8 @@ int trade_check(struct map_session_data *sd, struct map_session_data *tsd)
 		return 0;
 
 	//Get inventory of player
-	memcpy(&inventory, &sd->status.inventory, sizeof(struct item) * MAX_INVENTORY);
-	memcpy(&inventory2, &tsd->status.inventory, sizeof(struct item) * MAX_INVENTORY);
+	memcpy(&inventory, &sd->inventory.u.items_inventory, sizeof(struct item) * MAX_INVENTORY);
+	memcpy(&inventory2, &tsd->inventory.u.items_inventory, sizeof(struct item) * MAX_INVENTORY);
 
 	//Check free slot in both inventory
 	for (trade_i = 0; trade_i < 10; trade_i++) {
@@ -351,10 +351,10 @@ void trade_tradeadditem(struct map_session_data *sd, short index, short amount)
 	//Item checks...
 	if( index < 0 || index >= MAX_INVENTORY )
 		return;
-	if( amount < 0 || amount > sd->status.inventory[index].amount )
+	if( amount < 0 || amount > sd->inventory.u.items_inventory[index].amount )
 		return;
 
-	item = &sd->status.inventory[index];
+	item = &sd->inventory.u.items_inventory[index];
 	src_lv = pc_get_group_level(sd);
 	dst_lv = pc_get_group_level(target_sd);
 	if( !itemdb_cantrade(item, src_lv, dst_lv) && //Can't trade
@@ -395,8 +395,8 @@ void trade_tradeadditem(struct map_session_data *sd, short index, short amount)
 	}
 
 	if( sd->deal.item[trade_i].index == index ) { //The same item as before is being readjusted.
-		if( sd->deal.item[trade_i].amount + amount > sd->status.inventory[index].amount ) { //Packet deal exploit check
-			amount = sd->status.inventory[index].amount - sd->deal.item[trade_i].amount;
+		if( sd->deal.item[trade_i].amount + amount > sd->inventory.u.items_inventory[index].amount ) { //Packet deal exploit check
+			amount = sd->inventory.u.items_inventory[index].amount - sd->deal.item[trade_i].amount;
 			trade_weight = sd->inventory_data[index]->weight * amount;
 		}
 		sd->deal.item[trade_i].amount += amount;
@@ -574,7 +574,7 @@ void trade_tradecommit(struct map_session_data *sd)
 		if (sd->deal.item[trade_i].amount) {
 			n = sd->deal.item[trade_i].index;
 
-			flag = pc_additem(tsd, &sd->status.inventory[n], sd->deal.item[trade_i].amount,LOG_TYPE_TRADE);
+			flag = pc_additem(tsd, &sd->inventory.u.items_inventory[n], sd->deal.item[trade_i].amount,LOG_TYPE_TRADE);
 			if (flag == 0)
 				pc_delitem(sd, n, sd->deal.item[trade_i].amount, 1, 6, LOG_TYPE_TRADE);
 			else
@@ -585,7 +585,7 @@ void trade_tradecommit(struct map_session_data *sd)
 		if (tsd->deal.item[trade_i].amount) {
 			n = tsd->deal.item[trade_i].index;
 
-			flag = pc_additem(sd, &tsd->status.inventory[n], tsd->deal.item[trade_i].amount,LOG_TYPE_TRADE);
+			flag = pc_additem(sd, &tsd->inventory.u.items_inventory[n], tsd->deal.item[trade_i].amount,LOG_TYPE_TRADE);
 			if (flag == 0)
 				pc_delitem(tsd, n, tsd->deal.item[trade_i].amount, 1, 6, LOG_TYPE_TRADE);
 			else
@@ -620,8 +620,8 @@ void trade_tradecommit(struct map_session_data *sd)
 	clif_tradecompleted(tsd, 0);
 
 	//Save both player to avoid crash: they always have no advantage/disadvantage between the 2 players
-	if (save_settings&1) {
-		chrif_save(sd, 0);
-		chrif_save(tsd, 0);
+	if (save_settings&CHARSAVE_TRADE) {
+		chrif_save(sd, CSAVE_INVENTORY|CSAVE_CART);
+		chrif_save(tsd, CSAVE_INVENTORY|CSAVE_CART);
 	}
 }
