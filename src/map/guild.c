@@ -1742,7 +1742,7 @@ int castle_guild_broken_sub(DBKey key, DBData *data, va_list ap)
 		safestrncpy(name, gc->castle_event, sizeof(name));
 		npc_event_do(strcat(name, "::OnGuildBreak"));
 
-		//Save the new 'owner', this should invoke guardian clean up and other such things.
+		// Save the new 'owner', this should invoke guardian clean up and other such things.
 		guild_castledatasave(gc->castle_id, 1, 0);
 	}
 	return 0;
@@ -1788,23 +1788,28 @@ int guild_broken(int guild_id,int flag)
  * @param guild_id
  * @param sd New guild master
  */
-int guild_gm_change(int guild_id, struct map_session_data *sd)
+int guild_gm_change(int guild_id, uint32 char_id)
 {
 	struct guild *g;
-	nullpo_ret(sd);
-
-	if (sd->status.guild_id != guild_id)
-		return 0;
+	char *name;
+	int i;
 
 	g = guild_search(guild_id);
 
 	nullpo_ret(g);
 
-	if (strcmp(g->master, sd->status.name) == 0) //Nothing to change.
+	ARR_FIND(0, MAX_GUILD, i, g->member[i].char_id == char_id);
+
+	if (i == MAX_GUILD) //Not part of the guild
+		return 0;
+
+	name = g->member[i].name;
+
+	if (strcmp(g->master, name) == 0) //Nothing to change.
 		return 0;
 
 	//Notify servers that master has changed.
-	intif_guild_change_gm(guild_id, sd->status.name, strlen(sd->status.name) + 1);
+	intif_guild_change_gm(guild_id, name, strlen(name) + 1);
 	return 1;
 }
 
@@ -1860,6 +1865,7 @@ int guild_gm_changed(int guild_id, int account_id, int char_id)
 		if (g->member[i].sd && g->member[i].sd->fd) {
 			clif_guild_basicinfo(g->member[i].sd);
 			clif_guild_memberlist(g->member[i].sd);
+			clif_guild_belonginfo(g->member[i].sd); //Update clientside guildmaster flag
 		}
 	}
 

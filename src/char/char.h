@@ -63,6 +63,7 @@ void char_refuse_delchar(int fd, uint8 errCode);
 void char_connectack(int fd, uint8 errCode);
 void char_charselres(int fd, uint32 aid, uint8 res);
 void char_changemapserv_ack(int fd, bool nok);
+void char_send_map_info(int fd, int i, uint32 subnet_map_ip, struct mmo_charstatus *cd);
 
 int request_accreg2(int account_id, int char_id);
 int save_accreg2(unsigned char *buf, int len);

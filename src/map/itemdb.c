@@ -1729,7 +1729,7 @@ static bool itemdb_read_randomopt_group(char *str[], int columns, int current) {
 		return false;
 	}
 
-	if ((columns - 2)%3 != 0) {
+	if ((columns - 2)%3) {
 		ShowError("itemdb_read_randomopt_group: Invalid column entries '%d'.\n", columns);
 		return false;
 	}

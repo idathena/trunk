@@ -2375,7 +2375,7 @@ packet_keys: 0x2DFF467C,0x444B37EE,0x2C1B634F // [YomRawr]
 0x0364,5,hommenu,2:4
 0x0936,36,storagepassword,0
 0x09DF,7
-//New packets
+//New Packets
 0x09E5,18 //ZC_DELETEITEM_FROM_MCSTORE2
 0x09E6,22 //ZC_UPDATE_ITEM_FROM_BUYING_STORE2
 0x09F7,75 //ZC_PROPERTY_HOMUN_2
@@ -2430,7 +2430,7 @@ packet_keys: 0x290551EA,0x2B952C75,0x2D67669B // [YomRawr]
 0x0955,18,bookingregreq,2:4:6
 0x096A,6,getcharnamerequest,2
 
-//New packets
+//New Packets
 0x0A18,14 //ZC_ACCEPT_ENTER3
 0x0A27,8 //ZC_RECOVERY2
 0x0A28,3 //ZC_ACK_OPENSTORE2
@@ -2528,7 +2528,7 @@ packet_keys: 0x62C86D09,0x75944F17,0x112C133D //[YomRawr]
 //OneClick Itemidentify
 0x0A35,4,oneclick_itemidentify,2 //CZ_REQ_ONECLICK_ITEMIDENTIFY
 
-//New packet
+//New Packet
 0x0A3B,-1 //ZC_HAT_EFFECT
 
 //2015-09-16Ragexe
@@ -2626,21 +2626,72 @@ packet_keys: 0x09366971,0x005672F1,0x6F3712AE
 0x0875,2,reqclosebuyingstore,0
 0x086A,-1,reqopenbuyingstore,2:4:8:9:89
 0x08A5,18,bookingregreq,2:4
-0x0935,8
+//0x0935,8 //CZ_JOIN_BATTLE_FIELD
 0x0889,-1,itemlistwindowselected,2:4:8
 0x086D,19,wanttoconnection,2:6:10:14:18
 0x0934,26,partyinvite2,2
-0x0938,4
+//0x0938,4 //CZ_GANGSI_RANK
 0x091C,26,friendslistadd,2
 0x085E,5,hommenu,4
 0x08AD,36,storagepassword,0
 
-//New packets
+//New Packets
+0x0A97,8
+0x0A98,12
+0x0A99,8
+0x0A9A,10
+0x0A9B,-1
+0x0A9C,2
+0x0A9D,4
+0x0A9E,2
+0x0A9F,2
 0x0AAD,47
 0x0AAE,2
 0x0AAF,6
 0x0AB0,6
 0x0AB1,14
 
+//2017-05-17aRagexeRE
+packet_ver: 53
+packet_keys: 0x2CC4749A,0x1FA954DC,0x72276857 //[4144]
+0x0437,7,actionrequest,2:6
+0x0815,10,useskilltoid,2:4:6
+0x08A8,5,walktoxy,2
+0x08A2,6,ticksend,2
+0x088D,5,changedir,2:4
+0x0964,6,takeitem,2
+0x093B,6,dropitem,2:4
+0x08AA,8,movetokafra,2:4
+0x088C,8,movefromkafra,2:4
+0x0817,10,useskilltopos,2:4:6:8
+0x0868,90,useskilltoposinfo,2:4:6:8:10
+0x0894,6,getcharnamerequest,2
+0x087B,6,solvecharname,2
+0x0896,12,searchstoreinfolistitemclick,2:6:10
+0x0875,2,searchstoreinfonextpage,0
+0x087D,-1,searchstoreinfo,2:4:5:9:13:14:15
+0x091B,-1,reqtradebuyingstore,2:4:8:12
+0x0946,6,reqclickbuyingstore,2
+0x089F,2,reqclosebuyingstore,0
+0x0367,-1,reqopenbuyingstore,2:4:8:9:89
+0x0802,18,bookingregreq,2:4
+//0x0364,8 //CZ_JOIN_BATTLE_FIELD
+0x0945,-1,itemlistwindowselected,2:4:8
+0x0923,19,wanttoconnection,2:6:10:14:18
+0x0899,26,partyinvite2,2
+//0x089E,4 //CZ_GANGSI_RANK
+0x0960,26,friendslistadd,2
+0x0958,5,hommenu,4
+0x0947,36,storagepassword,0
+
+//New Packets
+0x0A43,85
+0x0A44,-1
+0x0ABD,10
+0x0AC0,26
+0x0AC1,26
+0x0AC2,-1
+0x0AC3,2
+
 //Add new packets here
-//packet_ver: 53
+//packet_ver: 54
