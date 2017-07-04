@@ -1721,7 +1721,7 @@
 2551,Rider_Insignia_M,Crest of the Rider,4,20,,500,,4,,1,0xFFFFFFFE,18,2,4,,55,1,0,{ bonus bAgi,2; },{},{}
 2552,Mithril_Magic_Cape_M,Mithril Magic Manteau,4,20,,400,,3,,1,0x00098B1C,18,2,4,,70,1,0,{ bonus bMdef,3; bonus5 bAutoSpellWhenHit,"NPC_ANTIMAGIC",6,200,BF_MAGIC,0; },{},{}
 2553,Dragon_Manteau,Dragon Manteau,4,20,,1000,,14,,1,0xFFFFFFFE,18,2,4,,0,1,0,{ bonus bAgi,1; bonus bMdef,5; },{},{}
-2554,Piece_Of_Angent_Skin,Nydhorgg's Shadow Garb,4,20,,400,,25,,1,0xFFFFFFFE,18,2,4,,90,1,0,{ bonus2 bSubEle,Ele_All,7; bonus bMaxSP,BaseLevel/3+getrefine()*10; bonus2 bSPDrainRate,10,1; bonus bMdef,3; },{},{}
+2554,Piece_Of_Angent_Skin,Nidhoggur's Shadow Garb,4,20,,400,,25,,1,0xFFFFFFFE,18,2,4,,90,1,0,{ bonus2 bSubEle,Ele_All,7; bonus bMaxSP,BaseLevel/3+getrefine()*10; bonus2 bSPDrainRate,10,1; bonus bMdef,3; },{},{}
 2555,Freyja_SScarf7,Freyja Soul Scarf,4,20,,400,,4,,0,0xFFFFFFFF,63,2,4,,20,0,0,{ bonus bFlee,15; bonus2 bSubEle,Ele_Neutral,15; },{},{}
 2556,Freyja_SScarf30,Freyja Soul Scarf,4,20,,400,,4,,0,0xFFFFFFFF,63,2,4,,20,0,0,{ bonus bFlee,15; bonus2 bSubEle,Ele_Neutral,15; },{},{}
 2557,Freyja_SScarf60,Freyja Soul Scarf,4,20,,400,,4,,0,0xFFFFFFFF,63,2,4,,20,0,0,{ bonus bFlee,15; bonus2 bSubEle,Ele_Neutral,15; },{},{}
@@ -4584,14 +4584,14 @@
 6686,Brick,Brick,3,10,,2000,,,,,,,,,,,,,{},{},{}
 6687,Rope,Rope,3,10,,2000,,,,,,,,,,,,,{},{},{}
 6688,Wood,Wood,3,10,,2000,,,,,,,,,,,,,{},{},{}
-6689,Fire_Beetle_Shell,Fire Beetle Shell,3,10,,0,,,,,,,,,,,,,{},{},{}
-6690,Delicious_Stem,Delicious Stem,3,10,,0,,,,,,,,,,,,,{},{},{}
-6691,Fire_Feather,Fire Feather,3,10,,0,,,,,,,,,,,,,{},{},{}
-6692,Patrol_Journal,Patrol Journal,3,10,,1,,,,,,,,,,,,,{},{},{}
-6693,Stone_Blessing,Stone Blessing,3,10,,10,,,,,,,,,,,,,{},{},{}
-6694,Blood_Of_The_Monster,Blood of The Monster,3,10,,10,,,,,,,,,,,,,{},{},{}
-6695,Tooth_Rock_Of_Fire_Golem,Tooth Rock of Fire Golem,3,10,,100,,,,,,,,,,,,,{},{},{}
-6696,Fire_Frill,Fire Frill,3,10,,10,,,,,,,,,,,,,{},{},{}
+6689,BurningSkin,Burning Bug Skin,3,10,,0,,,,,,,,,,,,,{},{},{}
+6690,YummyStem,Yummy Stem,3,10,,0,,,,,,,,,,,,,{},{},{}
+6691,BurningFeather,Burning Feather,3,10,,0,,,,,,,,,,,,,{},{},{}
+6692,PatrolLog,Patrol Log,3,10,,1,,,,,,,,,,,,,{},{},{}
+6693,Stone_Of_Blessing,Stone Of Blessing,3,10,,10,,,,,,,,,,,,,{},{},{}
+6694,Monster_Blood,Monster Blood,3,10,,10,,,,,,,,,,,,,{},{},{}
+6695,ToothOfFlameGolem,Tooth of Fire Golem,3,10,,100,,,,,,,,,,,,,{},{},{}
+6696,ToothOfFlameFrilldora,Nape of Fire Frilldora,3,10,,10,,,,,,,,,,,,,{},{},{}
 6698,Wooden_Axe,Wooden Axe,3,10,,1000,,,,,,,,,,,,,{},{},{}
 6699,Faith_Silence,Faith Silence,3,10,,0,,,,,,,,,,,,,{},{},{}
 6700,White_Snake_Scale,White Snake Scale,3,10,,0,,,,,,,,,,,,,{},{},{}
@@ -4602,14 +4602,14 @@
 6705,Warrior_Certificate,Warrior Certificate,3,10,,0,,,,,,,,,,,,,{},{},{}
 6706,Guardian_Flowers,Guardian Flowers,3,10,,0,,,,,,,,,,,,,{},{},{}
 6707,Jeremy_Beauty_Coupon,Jeremy Beauty Coupon,3,10,,10,,,,,,,,,,,,,{},{},{}
-6708,Magic_Crystal,Magic Crystal,3,10,,,,,,,,,,,,,,,{},{},{}
+6708,Mana_Crystal,Mana Crystal,3,10,,,,,,,,,,,,,,,{},{},{}
 6709,Crisp_Silk,Crisp Silk,3,10,,0,,,,,,,,,,,,,{},{},{}
 6710,Tied_Snake,Tied Snake,3,10,,0,,,,,,,,,,,,,{},{},{}
 6697,Costumes_Exchange_Coupons,Costumes Exchange Coupons,3,10,,10,,,,,,,,,,,,,{},{},{}
 6712,Lovely_Stick,Lovely Stick,3,0,,0,,,,,,,,,,,,,{},{},{}
-6713,Heart_Of_Soul,Heart of Soul,3,0,,0,,,,,,,,,,,,,{},{},{}
-6714,Sheenas_Soul,Sheena's Soul,3,20,,0,,,,,,,,,,,,,{},{},{}
-6715,Gods_Soul_Piece,God's Soul Piece,3,20,,0,,,,,,,,,,,,,{},{},{}
+6713,Soul_Of_Ahat,Soul of Ahat,3,0,,0,,,,,,,,,,,,,{},{},{}
+6714,Soul_Of_Shnaim,Soul of Shnaim,3,20,,0,,,,,,,,,,,,,{},{},{}
+6715,P_Of_Evil_Soul,Darklord Soulpiece,3,20,,0,,,,,,,,,,,,,{},{},{}
 6716,Critical_Stone(Upper),Critical Stone(Upper),6,10,,100,,,,,,,,,,,,,{ bonus bCritical,1; },{},{}
 6717,Fitness_Stone(Middle),Fitness Stone(Middle),6,10,,100,,,,,,,,,,,,,{ bonus bMaxHP,50; },{},{}
 6718,Magical_Stone(Lower),Magical Stone(Lower),6,10,,100,,,,,,,,,,,,,{ bonus bMaxSP,10; },{},{}
@@ -7314,7 +7314,7 @@
 13316,Upg_Huuma_Shuriken,Upg Huuma Shuriken,5,20,,1500,55,,1,1,0x02000000,63,2,34,3,1,1,22,{ set .@r,getrefine(); bonus bBaseAtk,.@r*10; bonus bMatk,.@r*5; bonus bLongAtkRate,.@r; if(BaseLevel>=70) bonus bBaseAtk,(((BaseLevel-60)/10)*5); },{},{}
 13317,TE_Woe_Huuma,TE Woe Huuma,5,0,,0,80:100,,1,0,0x02000000,63,2,34,3,40,1,22,{ bonus2 bAddRace,RC_DemiHuman,40; bonus2 bAddEff,Eff_Bleeding,1000; },{},{}
 13321,Half_BF_Huuma_Shuriken2,Half BF Huuma Shuriken,5,20,,0,55,,1,0,0x02000000,63,2,34,3,80,1,22,{ bonus bStr,2; bonus bDex,1; bonus2 bAddRace,RC_DemiHuman,40; autobonus "{ bonus2 bSkillAtk,\"NJ_HUUMA\",100; bonus2 bSkillAtk,\"NJ_ISSEN\",100; }",50,10000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; bonus bUnbreakableWeapon,0; },{},{}
-13322,Huuma_Metal,Huuma Metal Shuriken,5,20,,0,50,,1,1,0x02000000,63,2,34,3,1,1,22,{ set .@r,getrefine(); bonus bBaseAtk,.@r*5; bonus bMatk,.@r*3; if(.@r>=2) bonus bNearAtkDef,.@r/2; if(BaseLevel>=20&&BaseLevel<=120) bonus bBaseAtk,.@r/10*3; bonus bUnbreakableWeapon,0; },{},{}
+13322,Huuma_Metal,Huuma Metal Shuriken,5,20,,0,50,,1,1,0x02000000,63,2,34,3,1,1,22,{ set .@r,getrefine(); bonus bBaseAtk,.@r*5; bonus bMatk,.@r*3; bonus bLongAtkRate,.@r/2; if(BaseLevel>=20&&BaseLevel<=120) bonus bBaseAtk,(.@r/10)*3; bonus bUnbreakableWeapon,0; },{},{}
 13323,Infinity_Huuma,Infinity Huuma Shuriken,5,20,,500,150:40,,1,1,0x02000000,63,2,34,4,100,1,22,{},{},{}
 13327,Crimson_Huuma,Crimson Huuma Shuriken,5,20,,1000,100,,1,2,0x02000000,63,2,34,3,70,1,22,{ set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); bonus bMatk,pow((.@r>15?15:.@r),2)/2; if(BaseLevel>70) bonus bBaseAtk,((BaseLevel-70)/10)*5; bonus bUnbreakableWeapon,0; },{},{}
 13328,Huuma_Of_Vicious_Mind,Huuma Shuriken of Vicious Mind,5,20,,1500,150:50,,1,1,0x02000000,63,2,34,4,160,1,22,{ set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); bonus bMatk,pow((.@r>15?15:.@r),2)/2; bonus bUnbreakableWeapon,0; },{},{}
@@ -10682,9 +10682,9 @@
 22558,Lucky_Bag,Lucky Bag,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Lucky_Bag,1); },{},{}
 22559,Mock_Strawberry,Mock Strawberry,11,20,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 50,50; itemskill "SM_ENDURE",3; },{},{}
 22563,Lucky_Bag_Of_New_Era,Lucky Bag of New Era,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ /* TODO */ },{},{}
-22566,Last_Years_Frost,Last Year's Frost,3,20,,0,,,,,,,,,,,,,{},{},{}
-22567,Expedition_Award_Box,Expedition Award Box,0,20,,100,,,,,0xFFFFFFFF,,,,,,,,{},{},{}
-22568,Nidhoggur_Summon_Scroll,Nidhoggur Summon Scroll,0,20,,100,,,,,0xFFFFFFFF,,,,,,,,{},{},{}
+22566,Frost_Crystal,Frost Crystal,3,20,,0,,,,,,,,,,,,,{},{},{}
+22567,Squad_Prize,Squad Prize,0,20,,100,,,,,0xFFFFFFFF,,,,,,,,{},{},{}
+22568,Nyd_Summon_Scroll,Nidhoggur Summon Scroll,0,20,,100,,,,,0xFFFFFFFF,,,,,,,,{},{},{}
 22569,Gift_New_start,Gift New start,18,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22571,Easter_Egg,Easter Egg,11,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22589,Savage_Ora_Ora,Savage Ora Ora,3,10,,0,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
@@ -11108,6 +11108,11 @@
 //===================================================================
 26100,P_Foxtail_Staff2,Eden Foxtail Staff II,5,20,,0,135:165,,1,0,0x04000000,7,2,2,2,40,0,10,{ bonus bDex,4; bonus bInt,4; bonus bLongAtkRate,6; },{},{}
 26101,P_Foxtail_Staff3,Eden Foxtail Staff III,5,20,,0,150:195,,1,0,0x04000000,7,2,2,3,60,0,10,{ bonus bDex,5; bonus bInt,5; bonus bLongAtkRate,7; },{},{}
+27026,Fire_Condor_Card,Fire Condor Card,6,20,,10,,,,,,,,136,,,,,{ bonus2 bVariableCastRate,"MG_FIREBALL",-50; bonus2 bSkillAtk,"MG_FIREBALL",100; },{},{}
+27027,Fire_Sandman_Card,Fire Sandman Card,6,20,,10,,,,,,,,16,,,,,{ bonus bDef,50; bonus2 bSubDefEle,Ele_Fire,10; },{},{}
+27028,Fire_Frilldora_Card,Fire Frilldora Card,6,20,,10,,,,,,,,2,,,,,{ set .@r,getrefine(); bonus2 bMagicAddEle,Ele_Earth,3+(.@r>=9?12:(.@r>=7?5:0)); },{},{}
+27029,Fire_Golem_Card,Fire Golem Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Fire,20; bonus2 bAddDefEle,Ele_Fire,5; },{},{}
+27030,Fulbuk_Card,Fire Bug Card,6,20,,10,,,,,,,,769,,,,,{ bonus3 bAddEff,Eff_Burning,700,ATF_WEAPON|ATF_SKILL; },{},{}
 28000,Thanos_Katar,Thanatos Katar,5,20,,1800,220:80,,1,1,0x00001000,63,2,34,4,120,1,16,{ bonus bInt,6; bonus bVit,6; bonus bLuk,-6; bonus2 bHPDrainRate,50,5; bonus2 bSPDrainRate,10,5; bonus2 bHPLossRate,100,10000; },{},{ heal -1000,0; }
 28001,Katar_Of_Evil_Slayer,Evil Slayer Ripper Katar,5,20,,1200,120,,1,1,0x00001000,63,2,34,3,100,1,16,{ set .@r,getrefine(); bonus2 bAddRace,RC_Demon,10; bonus2 bAddRace,RC_Undead,10; bonus2 bAddClass,Class_All,(.@r>=12?12:(.@r>=9?5:0)); },{},{}
 28002,Half_BF_Katar2,Half BF Katar2,5,20,,0,130,,1,0,0x00001000,63,2,34,3,80,1,16,{ bonus bStr,1; bonus bDex,1; bonus bLuk,1; bonus2 bAddRace,RC_DemiHuman,35; bonus bCritAtkRate,10; bonus bAspdRate,3; bonus bUnbreakableWeapon,0; },{},{}

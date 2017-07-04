@@ -274,7 +274,6 @@ void quest_update_objective(TBL_PC *sd, int mob_id) {
 
 			if( dropitem->mob_id && dropitem->mob_id != mob_id )
 				continue;
-			//@TODO: Should this be affected by server rates?
 			if( dropitem->rate < 10000 && rnd()%10000 >= dropitem->rate )
 				continue;
 			if( !itemdb_exists(dropitem->nameid) )
@@ -325,7 +324,7 @@ int quest_update_status(TBL_PC *sd, int quest_id, enum quest_state status) {
 	}
 
 	//The quest is complete, so it needs to be moved to the completed quests block at the end of the array
-	if( i < (--sd->avail_quests) ) {
+	if( i < --(sd->avail_quests) ) {
 		struct quest tmp_quest;
 
 		memcpy(&tmp_quest, &sd->quest_log[i], sizeof(struct quest));

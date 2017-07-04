@@ -5043,7 +5043,7 @@ void clif_getareachar_skillunit(struct block_list *bl, struct skill_unit *unit, 
 		if( (unit->group->state.song_dance&0x1) && (unit->val2&UF_ENSEMBLE) )
 			unit_id = (unit->val2&UF_SONG) ? UNT_DISSONANCE : UNT_UGLYDANCE;
 		else if( (skill_get_unit_flag(unit->group->skill_id)&UF_RANGEDSINGLEUNIT) && !(unit->val4&UF_RANGEDSINGLEUNIT) )
-			unit_id = UNT_DUMMYSKILL; //Use invisible unit id for other case of rangedsingle unit
+			unit_id = UNT_DUMMYSKILL; //Use invisible unit id for other case of ranged single unit
 		else
 			unit_id = unit->group->unit_id;
 	}
@@ -12269,7 +12269,7 @@ static void clif_parse_UseSkillToPosSub(int fd, struct map_session_data *sd, uin
 	unsigned int tick = gettick();
 
 	if( !(skill_get_inf(skill_id)&INF_GROUND_SKILL) )
-		return; //Using a target skill on the ground? WRONG.
+		return; //Using a target skill on the ground? WRONG
 		
 	if( skill_id >= HM_SKILLBASE && skill_id < HM_SKILLBASE + MAX_HOMUNSKILL ) {
 		clif_parse_UseSkillToPos_homun(sd->hd, sd, tick, skill_id, skill_lv, x, y, skillmoreinfo);
@@ -12325,7 +12325,7 @@ static void clif_parse_UseSkillToPosSub(int fd, struct map_session_data *sd, uin
 			skill_lv = sd->skillitemlv;
 		unit_skilluse_pos(&sd->bl, x, y, skill_id, skill_lv);
 	} else {
-		int lv;
+		uint8 lv;
 
 		sd->skillitem = sd->skillitemlv = sd->skilliteminf = 0;
 		if( (lv = pc_checkskill(sd, skill_id)) > 0 ) {
@@ -12344,8 +12344,10 @@ static void clif_parse_UseSkillToPosSub(int fd, struct map_session_data *sd, uin
 void clif_parse_UseSkillToPos(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
+
 	if (pc_cant_act(sd))
 		return;
+
 	if (pc_issit(sd))
 		return;
 
@@ -12366,11 +12368,13 @@ void clif_parse_UseSkillToPos(int fd, struct map_session_data *sd)
 void clif_parse_UseSkillToPosMoreInfo(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
+
 	if (pc_cant_act(sd))
 		return;
+
 	if (pc_issit(sd))
 		return;
-	
+
 	clif_parse_UseSkillToPosSub(fd, sd,
 		RFIFOW(fd,info->pos[0]), //Skill lv
 		RFIFOW(fd,info->pos[1]), //Skill num
@@ -19670,7 +19674,7 @@ void packetdb_readdb(bool reload)
 	    3, 28, 19, 11,  3, -1,  9,  5, 52, 51, 56, 58, 41,  2,  6,  6,
 #elif PACKETVER < 20071106	// 78-7b Lv99 effect for later Kameshima
 	    3, 28, 19, 11,  3, -1,  9,  5, 54, 53, 58, 60, 41,  2,  6,  6,
-#elif PACKETVER <= 20081217 // change in 0x78 and 0x7c
+#elif PACKETVER <= 20081217 // Change in 0x78 and 0x7c
 	    3, 28, 19, 11,  3, -1,  9,  5, 55, 53, 58, 60, 42,  2,  6,  6,
 #else
 	    3, 28, 19, 11,  3, -1,  9,  5, 55, 53, 58, 60, 44,  2,  6,  6,

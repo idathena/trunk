@@ -437,9 +437,11 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 		case BL_MOB:
 			//Movement was successful, reset walktoxy_fail_count
 			md->walktoxy_fail_count = 0;
-			if(map_getcell(bl->m,x,y,CELL_CHKNPC) && npc_touch_areanpc2(md))
-				return 0; //Warped
-			else
+			if(map_getcell(bl->m,x,y,CELL_CHKNPC)) {
+				npc_touch_areanpc2(md);
+				if(!bl->prev)
+					return 0; //Warped
+			} else
 				md->areanpc_id = 0;
 			if(md->min_chase > md->db->range3)
 				md->min_chase--;
@@ -1166,7 +1168,7 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
 			break;
 	}
 
-	if (x < 0 || y < 0) { //Random map position.
+	if (x < 0 || y < 0) { //Random map position
 		if (!map_search_freecell(NULL, m, &x, &y, -1, -1, 1)) {
 			ShowWarning("unit_warp failed. Unit Id:%d/Type:%d, target position map %d (%s) at [%d,%d]\n", bl->id, bl->type, m, map[m].name, x, y);
 			return 2;
@@ -2159,6 +2161,7 @@ int unit_attack(struct block_list *src,int target_id,int continuous)
 	//New action request received, delete previous action request if not executed yet
 	if(ud->stepaction || ud->steptimer != INVALID_TIMER)
 		unit_stop_stepaction(src);
+
 	//Remember the attack request from the client while walking to the next cell
 	if(src->type == BL_PC && ud->walktimer != INVALID_TIMER && !battle_check_range(src, target, range - 1)) {
 		ud->stepaction = true;

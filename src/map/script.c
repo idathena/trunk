@@ -17537,7 +17537,7 @@ BUILDIN_FUNC(unitkill)
 /// Warps the unit to the target position in the target map
 /// Returns if the request was successful
 ///
-/// unitwarp(<unit_id>,"<map name>",<x>,<y>); -> <bool>
+/// unitwarp(<unit_id>,"<map name>",<x>,<y>{,<flag>}); -> <bool>
 BUILDIN_FUNC(unitwarp)
 {
 	int unit_id;
@@ -17546,11 +17546,15 @@ BUILDIN_FUNC(unitwarp)
 	short y;
 	struct block_list *bl;
 	const char *mapname;
+	bool flag = false;
 
 	unit_id = script_getnum(st,2);
 	mapname = script_getstr(st,3);
 	x = (short)script_getnum(st,4);
 	y = (short)script_getnum(st,5);
+
+	if( script_hasdata(st,6) )
+		flag = script_getnum(st,6);
 
 	if( !unit_id ) //Warp the script's runner
 		bl = map_id2bl(st->rid);
@@ -17562,8 +17566,8 @@ BUILDIN_FUNC(unitwarp)
 	else
 		map = map_mapname2mapid(mapname);
 
-	if( map >= 0 && bl != NULL )
-		script_pushint(st,unit_warp(bl, map, x, y, CLR_OUTSIGHT));
+	if( map >= 0 && bl )
+		script_pushint(st,unit_warp(bl, map, x, y, (flag ? CLR_TELEPORT : CLR_OUTSIGHT)));
 	else
 		script_pushint(st,0);
 
@@ -20557,7 +20561,7 @@ BUILDIN_FUNC(vip_status) {
 			break;
 		case VIP_STATUS_REMAINING: //Get remaining time
 			if( pc_isvip(sd) )
-				script_pushint(st,sd->vip.time - time(NULL));
+				script_pushint(st,(int)(sd->vip.time - time(NULL)));
 			else
 				script_pushint(st,0);
 			break;
@@ -21897,7 +21901,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(unitwalk,"iii?"),
 	BUILDIN_DEF2(unitwalk,"unitwalkto","ii?"),
 	BUILDIN_DEF(unitkill,"i"),
-	BUILDIN_DEF(unitwarp,"isii"),
+	BUILDIN_DEF(unitwarp,"isii?"),
 	BUILDIN_DEF(unitattack,"iv?"),
 	BUILDIN_DEF(unitstopattack,"i"),
 	BUILDIN_DEF(unitstopwalk,"i"),
