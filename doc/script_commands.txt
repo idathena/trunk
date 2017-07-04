@@ -4845,7 +4845,7 @@ Example to get Crimson Weapon with Ghost property:
 	// when Valkyrie Randgris killed
 	OnNPCKillEvent:
 		if (killedrid == 1751 && rand(0,1000) > 950) { // Valkyrie Randgris
-			getmapxy(.@map$,.@x,.@y,UNITTYPE_PC);
+			getmapxy(.@map$,.@x,.@y,0);
 			setarray .@OptID[0],RDMOPT_ATTR_TOLERACE_NOTHING,RDMOPT_RACE_TOLERACE_HUMAN;
 			setarray .@OptVal[0],10,5;
 			setarray .@OptParam[0],0;
@@ -7511,12 +7511,14 @@ This command will kill a <GID>.
 
 ---------------------------------------
 
-*unitwarp <GID>,"<map name>",<x>,<y>;
+*unitwarp <GID>,"<map name>",<x>,<y>{,<flag>};
 
 This command will warp a <GID> to the specified map and coordinates.
 
 If <GID> is zero, the command runs for the unit that invoked the script. This can be
-used with "OnTouch" to warp monsters:
+used with "OnTouchNPC" to warp monsters:
+
+If <flag> is 1, the command will display teleportation effect.
 
 OnTouch:
 	unitwarp 0,"this",-1,-1;

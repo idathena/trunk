@@ -725,12 +725,12 @@
 22775	// Grilled_Eel_Skewer
 22776	// Grilled_Carp_Skewer
 //--- 2014 / 04 / 21
-6691	// Fire_Feather
-6692	// Patrol_Journal
-6693	// Stone_Blessing
-6694	// Blood_of_The_Monster
-6695	// Tooth_Rock_Of_Fire_Golem
-6696	// Fire_Frill
+6691	// BurningFeather
+6692	// PatrolLog
+6693	// Stone_Of_Blessing
+6694	// Monster_Blood
+6695	// ToothOfFlameGolem
+6696	// ToothOfFlameFrilldora
 12490	// Vivid_Notation
 22516	// Dark_Red_Clot
 22534	// Closedmind_Box

@@ -737,13 +737,15 @@ void initChangeTables(void) {
 	set_sc( SO_WIND_INSIGNIA     , SC_WIND_INSIGNIA   , SI_WIND_INSIGNIA   , SCB_WATK|SCB_ASPD|SCB_ATK_ELE|SCB_REGEN );
 	set_sc( SO_EARTH_INSIGNIA    , SC_EARTH_INSIGNIA  , SI_EARTH_INSIGNIA  , SCB_MAXHP|SCB_MAXSP|SCB_WATK|SCB_DEF|SCB_MDEF|SCB_ATK_ELE|SCB_REGEN );
 
-	set_sc( GN_CARTBOOST                  , SC_GN_CARTBOOST, SI_GN_CARTBOOST               , SCB_SPEED );
-	set_sc( GN_THORNS_TRAP                , SC_THORNSTRAP  , SI_THORNS_TRAP                , SCB_NONE );
-	set_sc_with_vfx( GN_BLOOD_SUCKER      , SC_BLOODSUCKER , SI_BLOOD_SUCKER               , SCB_NONE );
-	set_sc( GN_FIRE_EXPANSION_SMOKE_POWDER, SC_SMOKEPOWDER , SI_FIRE_EXPANSION_SMOKE_POWDER, SCB_FLEE );
-	set_sc( GN_FIRE_EXPANSION_TEAR_GAS    , SC_TEARGAS     , SI_FIRE_EXPANSION_TEAR_GAS    , SCB_HIT|SCB_FLEE );
-	set_sc( GN_MANDRAGORA                 , SC_MANDRAGORA  , SI_MANDRAGORA                 , SCB_INT );
-	set_sc_with_vfx( GN_ILLUSIONDOPING    , SC_ILLUSIONDOPING, SI_ILLUSIONDOPING           , SCB_HIT );
+	set_sc( GN_CARTBOOST                  , SC_GN_CARTBOOST   , SI_GN_CARTBOOST               , SCB_SPEED );
+	set_sc( GN_THORNS_TRAP                , SC_THORNSTRAP     , SI_THORNS_TRAP                , SCB_NONE );
+	set_sc_with_vfx( GN_BLOOD_SUCKER      , SC_BLOODSUCKER    , SI_BLOOD_SUCKER               , SCB_NONE );
+	set_sc( GN_SPORE_EXPLOSION            , SC_SPORE_EXPLOSION, SI_SPORE_EXPLOSION            , SCB_NONE );
+	set_sc( GN_DEMONIC_FIRE               , SC_DEMONIC_FIRE   , SI_DEMONIC_FIRE               , SCB_NONE );
+	set_sc( GN_FIRE_EXPANSION_SMOKE_POWDER, SC_SMOKEPOWDER    , SI_FIRE_EXPANSION_SMOKE_POWDER, SCB_FLEE );
+	set_sc( GN_FIRE_EXPANSION_TEAR_GAS    , SC_TEARGAS        , SI_FIRE_EXPANSION_TEAR_GAS    , SCB_HIT|SCB_FLEE );
+	set_sc( GN_MANDRAGORA                 , SC_MANDRAGORA     , SI_MANDRAGORA                 , SCB_INT );
+	set_sc_with_vfx( GN_ILLUSIONDOPING    , SC_ILLUSIONDOPING , SI_ILLUSIONDOPING             , SCB_HIT );
 
 	add_sc( MH_STAHL_HORN         , SC_STUN            );
 	set_sc( MH_ANGRIFFS_MODUS     , SC_ANGRIFFS_MODUS  , SI_ANGRIFFS_MODUS     , SCB_MAXHP|SCB_BATK|SCB_WATK|SCB_FLEE|SCB_DEF );
@@ -822,6 +824,7 @@ void initChangeTables(void) {
 	add_sc( NPC_WIDESIREN        , SC_VOICEOFSIREN       );
 	add_sc( NPC_COMET            , SC_BURNING            );
 	set_sc_with_vfx( NPC_MAXPAIN , SC_MAXPAIN            , SI_MAXPAIN               , SCB_NONE );
+	add_sc( NPC_JACKFROST        , SC_FREEZE             );
 
 	add_sc( RL_MASS_SPIRAL      , SC_BLEEDING           );
 	add_sc( RL_HAMMER_OF_GOD    , SC_STUN               );
@@ -3626,7 +3629,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 
 			for (j = 0; j < MAX_ITEM_RDM_OPT; j++) {
 				short opt_id = sd->inventory.u.items_inventory[index].option[j].id;
-				unsigned short nameid = sd->inventory.u.items_inventory[index].nameid;
 
 				if (!opt_id)
 					continue;
@@ -8015,10 +8017,13 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			switch( type ) {
 				case SC_SAFETYWALL:
 				case SC_PNEUMA:
+				case SC_SPLASHER:
 				case SC_RENOVATIO:
 				case SC_NEUTRALBARRIER:
 				case SC_STEALTHFIELD:
 				case SC_WARMER:
+				case SC_SPORE_EXPLOSION:
+				case SC_DEMONIC_FIRE:
 					break;
 				default:
 					return 0; //GVG/BG Monsters can't be afflicted by status changes
@@ -10285,6 +10290,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_TEARGAS:
 				val2 = status->max_hp * 5 / 100; //Drain 5% HP
+			//Fall through
+			case SC_DEMONIC_FIRE:
 				tick_time = 2000;
 				val4 = tick / tick_time;
 				break;
@@ -11657,11 +11664,13 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 				clif_updatestatus(sd,SP_MANNER);
 			}
 			break;
-		case SC_SPLASHER: {
-				struct block_list *src = map_id2bl(sce->val3);
+		case SC_SPLASHER:
+		case SC_SPORE_EXPLOSION:
+			{
+				struct block_list *src = map_id2bl(sce->val2);
 
 				if (src && tid != INVALID_TIMER)
-					skill_castend_damage_id(src,bl,sce->val2,sce->val1,gettick(),SD_LEVEL);
+					skill_castend_damage_id(src,bl,status_sc2skill(type),sce->val1,gettick(),SD_LEVEL);
 			}
 			break;
 		case SC_CLOSECONFINE2: {
@@ -12584,13 +12593,6 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			}
 			break;
 
-		case SC_SPLASHER:
-			if( (sce->val4 -= 500) >= 0 ) {
-				sc_timer_next(500 + tick,status_change_timer,bl->id,data);
-				return 0;
-			}
-			break;
-
 		case SC_MARIONETTE:
 		case SC_MARIONETTE2:
 			{
@@ -12896,6 +12898,23 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				skill_attack(BF_MISC,src,src,bl,status_sc2skill(type),sce->val1,tick,SD_LEVEL|SD_ANIMATION);
 				if( sc->data[type] ) {
 					sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
+				}
+				map_freeblock_unlock();
+				return 0;
+			}
+			break;
+
+		case SC_DEMONIC_FIRE:
+			if( --(sce->val4) >= 0 ) {
+				struct block_list *src = map_id2bl(sce->val2), *unit_bl = map_id2bl(sce->val3);
+
+				if( !src || status_isdead(src) || src->m != bl->m )
+					break;
+				map_freeblock_lock();
+				if( unit_bl )
+					skill_attack(BF_MAGIC,src,unit_bl,bl,status_sc2skill(type),sce->val1,tick,0);
+				if( sc->data[type] ) {
+					sc_timer_next(2000 + tick,status_change_timer,bl->id,data);
 				}
 				map_freeblock_unlock();
 				return 0;

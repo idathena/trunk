@@ -203,7 +203,7 @@
 138,1,6,16,5,0x1,0,10,1,no,0,0x400,0,weapon,0,0,	AS_ENCHANTPOISON,Enchant Poison
 139,1,6,4,0,0,0,10,1,no,0,0,0,weapon,0,0,	AS_POISONREACT,Poison React
 140,2,6,2,5,0x1,0,10,1,no,0,0,0,weapon,0,0,	AS_VENOMDUST,Venom Dust
-141,1,6,1,-1,0x51,2,10,1,yes,0,0,0,weapon,0,0,	AS_SPLASHER,Venom Splasher
+141,1,6,1,-1,0x7,2,10,1,yes,0,0,0,weapon,0,0,	AS_SPLASHER,Venom Splasher
 142,1,6,4,0,0x1,0,1,1,no,0,0x1,0,none,0,0,	NV_FIRSTAID,First Aid
 143,1,6,4,0,0x1,0,1,1,no,0,0x1,0,none,0,0,	NV_TRICKDEAD,Play Dead
 144,1,0,0,0,0,0,1,0,no,0,0x1,0,none,0,0,	SM_MOVINGRECOVERY,Moving HP-Recovery
@@ -684,8 +684,8 @@
 717,0,6,1,0,0xD2,14,10,1,no,0,0x2,0,misc,0,0,	NPC_MAXPAIN_ATK,Max Pain Attack
 //718,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_DEATHSUMMON,Death Summon
 719,1,6,4,3,0,0,1,1,no,0,0x2,0,magic,0,0x1,	NPC_HELLBURNING,Hell Burning
-//720,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_JACKFROST,Jack Frost 2
-//721,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_WIDEWEB,Wide Web
+720,1,8,4,1,0x2,5:6:7:8:9,5,-5,no,0,0x2,0,magic,0,0,	NPC_JACKFROST,Jack Frost 2
+721,1,6,4,0,0x3,7,1,1,no,0,0x2,0,none,0,0,	NPC_WIDEWEB,Wide Web
 //722,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_WIDESUCK,Wide Suck
 //723,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_STORMGUST2,Storm Gust 2
 //724,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_FIRESTORM,Fire Storm
@@ -1042,7 +1042,7 @@
 2478,1,6,4,0,0x1,0,5,1,yes,0,0,0,none,0,0,	GN_CARTBOOST,Cart Boost
 2479,9,6,2,0,0x40,0,5,1,yes,0,0x80,3,misc,0,0,	GN_THORNS_TRAP,Thorn Trap
 2480,11,6,1,0,0x41,0,5,1,yes,0,0,3,misc,0,0,	GN_BLOOD_SUCKER,Blood Sucker
-2481,11,6,1,-1,0x2,1:2:3:4:5,5,1,yes,0,0,0,weapon,0,0,	GN_SPORE_EXPLOSION,Spore Explosion
+2481,11,6,1,-1,0x3,1:2:3:4:5,5,1,yes,0,0,0,weapon,0,0,	GN_SPORE_EXPLOSION,Spore Explosion
 2482,11,6,16,0,0x8,0,5,1,yes,0,0,1,weapon,1,0,	GN_WALLOFTHORN,Wall of Thorns
 2483,11,6,2,0,0x3,4,10,1,yes,0,0,0,none,0,0x1,	GN_CRAZYWEED,Crazy Weed
 2484,1,6,2,2,0,0,10,1,no,0,0x10000,0,weapon,0,0x1,	GN_CRAZYWEED_ATK,Crazy Weed Attack

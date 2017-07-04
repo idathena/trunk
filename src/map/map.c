@@ -706,7 +706,7 @@ int map_foreachinshootrange(int (*func)(struct block_list *, va_list), struct bl
  */
 int map_foreachinareaV(int (*func)(struct block_list *, va_list), int16 m, int16 x0, int16 y0, int16 x1, int16 y1, int type, va_list ap, bool wall_check)
 {
-	int bx, by, cx, cy;
+	int bx, by, cx = 0, cy = 0;
 	int returnCount = 0; //Total sum of returned values of func()
 	struct block_list *bl;
 	int blockcount = bl_list_count, i;

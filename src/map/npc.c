@@ -919,7 +919,7 @@ int npc_touchnext_areanpc(struct map_session_data *sd, bool leavemap)
 }
 
 /*==========================================
- * Exec OnTouch for player if in range of area event
+ * Exec OnTouch for player if in range of area event
  *------------------------------------------*/
 int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 {
@@ -1058,7 +1058,7 @@ int npc_touch_areanpc2(struct mob_data *md)
 		}
 
 		//In the npc touch area
-		if( x >= map[m].npc[i]->bl.x-xs && x <= map[m].npc[i]->bl.x+xs && y >= map[m].npc[i]->bl.y-ys && y <= map[m].npc[i]->bl.y+ys ) {
+		if( x >= map[m].npc[i]->bl.x - xs && x <= map[m].npc[i]->bl.x + xs && y >= map[m].npc[i]->bl.y - ys && y <= map[m].npc[i]->bl.y + ys ) {
 			switch( map[m].npc[i]->subtype ) {
 				case NPCTYPE_WARP:
 					xs = map_mapindex2mapid(map[m].npc[i]->u.warp.mapindex);
@@ -3588,7 +3588,7 @@ static const char *npc_parse_function(char *w1, char *w2, char *w3, char *w4, co
 	func_db = script_get_userfunc_db();
 	if (func_db->put(func_db, db_str2key(w3), db_ptr2data(script), &old_data))
 	{
-		struct script_code *oldscript = (struct script_code*)db_data2ptr(&old_data);
+		struct script_code *oldscript = (struct script_code *)db_data2ptr(&old_data);
 		ShowWarning("npc_parse_function: Overwriting user function [%s] in file '%s', line '%d'.\n", w3, filepath, strline(buffer,start - buffer));
 		script_free_vars(oldscript->script_vars);
 		aFree(oldscript->script_buf);

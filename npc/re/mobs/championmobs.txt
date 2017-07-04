@@ -270,9 +270,9 @@ moc_fild13,0,0,0,0	monster	Solid Steel Chonchon	2642,3,180000,0,0
 moc_fild16,0,0,0,0	monster	Furious Sandman	2674,2,180000,0,0
 moc_fild17,0,0,0,0	monster	Furious Hode	2802,2,180000,0,0
 moc_fild18,0,0,0,0	monster	Elusive Scorpion	2670,3,180000,0,0
-moc_fild20,0,0,0,0	monster	Swift Incarnation of Morroc	2744,1,180000,0,0
-moc_fild21,0,0,0,0	monster	Elusive Incarnation of Morroc	2743,2,180000,0,0
-moc_fild22,0,0,0,0	monster	Furious Incarnation of Morroc	2742,3,180000,0,0
+moc_fild20,0,0,0,0	monster	Swift Incarnation of Morocc	2744,1,180000,0,0
+moc_fild21,0,0,0,0	monster	Elusive Incarnation of Morocc	2743,2,180000,0,0
+moc_fild22,0,0,0,0	monster	Furious Incarnation of Morocc	2742,3,180000,0,0
 mosk_fild02,0,0,0,0	monster	Solid Side Winder	2662,1,180000,0,0
 new_1-3,0,0,0,0	monster	Little Poring Ringleader	2776,1,300000,0,0
 niflheim,0,0,0,0	monster	Furious Lude	2772,1,180000,0,0

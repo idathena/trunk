@@ -161,11 +161,13 @@ struct block_list *battle_getenemy(struct block_list *target, int type, int rang
 static int battle_getenemyarea_sub(struct block_list *bl, va_list ap) {
 	struct block_list **bl_list, *src;
 	int *c, ignore_id;
+	uint16 skill_id;
 
 	bl_list = va_arg(ap, struct block_list **);
 	c = va_arg(ap, int *);
 	src = va_arg(ap, struct block_list *);
 	ignore_id = va_arg(ap, int);
+	skill_id = va_arg(ap, unsigned int);
 
 	if( bl->id == src->id || bl->id == ignore_id )
 		return 0; //Ignores Caster and a possible pre-target
@@ -173,7 +175,7 @@ static int battle_getenemyarea_sub(struct block_list *bl, va_list ap) {
 	if( *c >= 23 )
 		return 0;
 
-	if( status_isdead(bl) )
+	if( status_isdead(bl) || !status_check_skilluse(src, bl, skill_id, 2) )
 		return 0;
 
 	if( battle_check_target(src, bl, BCT_ENEMY) > 0 ) { //Is Enemy!
@@ -185,7 +187,7 @@ static int battle_getenemyarea_sub(struct block_list *bl, va_list ap) {
 }
 
 //Pick a random enemy
-struct block_list *battle_getenemyarea(struct block_list *src, int x, int y, int range, int type, int ignore_id) {
+struct block_list *battle_getenemyarea(struct block_list *src, int x, int y, int range, int type, int ignore_id, uint16 skill_id) {
 	struct block_list *bl_list[24];
 	int c = 0;
 
@@ -194,6 +196,7 @@ struct block_list *battle_getenemyarea(struct block_list *src, int x, int y, int
 
 	if( !c )
 		return NULL;
+
 	if( c >= 24 )
 		c = 23;
 
@@ -800,10 +803,12 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 						continue;
 					cardfix = cardfix * (100 - tsd->add_def[i].rate) / 100;
 				}
+#ifndef RENEWAL
 				if( flag&BF_SHORT )
 					cardfix = cardfix * (100 - tsd->bonus.near_attack_def_rate) / 100;
 				else
 					cardfix = cardfix * (100 - tsd->bonus.long_attack_def_rate) / 100;
+#endif
 				if( tsd->sc.data[SC_DEF_RATE] )
 					cardfix = cardfix * (100 - tsd->sc.data[SC_DEF_RATE]->val1) / 100;
 				APPLY_CARDFIX(damage,cardfix);
@@ -832,10 +837,12 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				cardfix = cardfix * (100 - (tsd->subrace[sstatus->race] + tsd->subrace[RC_ALL])) / 100;
 				cardfix = cardfix * (100 - (tsd->subclass[sstatus->class_] + tsd->subclass[CLASS_ALL])) / 100;
 				cardfix = cardfix * (100 - tsd->bonus.misc_def_rate) / 100;
+#ifndef RENEWAL
 				if( flag&BF_SHORT )
 					cardfix = cardfix * (100 - tsd->bonus.near_attack_def_rate) / 100;
 				else
 					cardfix = cardfix * (100 - tsd->bonus.long_attack_def_rate) / 100;
+#endif
 				APPLY_CARDFIX(damage,cardfix);
 			}
 			break;
@@ -1046,7 +1053,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 		if( ((sce = sc->data[SC_AUTOGUARD]) || (sce = battle_check_shadowform(bl,SC_AUTOGUARD))) && flag&BF_WEAPON &&
 #ifdef RENEWAL
-			skill_id != WS_CARTTERMINATION &&
+			skill_id != AS_SPLASHER && skill_id != WS_CARTTERMINATION && skill_id != GN_SPORE_EXPLOSION &&
 #endif
 			(skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
 			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK)) && rnd()%100 < sce->val2 )
@@ -1109,7 +1116,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 		if( (sce = sc->data[SC_PARRYING]) && flag&BF_WEAPON &&
 #ifdef RENEWAL
-			skill_id != WS_CARTTERMINATION &&
+			skill_id != AS_SPLASHER && skill_id != WS_CARTTERMINATION && skill_id != GN_SPORE_EXPLOSION &&
 #endif
 			(skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
 			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK)) && rnd()%100 < sce->val2 )
@@ -1132,8 +1139,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( sc->data[SC_TATAMIGAESHI] && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG )
 			return 0;
 
-		if( sc->data[SC_NEUTRALBARRIER] && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG &&
-			skill_id != NJ_ZENYNAGE && skill_id != KO_MUCHANAGE ) {
+		if( sc->data[SC_NEUTRALBARRIER] && (flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON) ) {
 			d->dmg_lv = ATK_MISS;
 			return 0;
 		}
@@ -2451,17 +2457,14 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 		return true;
 	else if(sc && (sc->data[SC_FUSION] || sc->data[SC_SPELLFIST]))
 		return true;
-	else if(skill_id == AS_SPLASHER && !wd.miscflag)
-		return true;
+	else if((skill_id == AS_SPLASHER || skill_id == GN_SPORE_EXPLOSION) && !(wd.miscflag&16))
+		return true; //Always hits the one exploding
 	else if(skill_id == CR_SHIELDBOOMERANG && sc && sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_CRUSADER)
 		return true;
 	else if(tsc && tsc->opt1 && tsc->opt1 != OPT1_STONEWAIT && tsc->opt1 != OPT1_BURNING)
 		return true;
 	else if(nk&NK_IGNORE_FLEE)
 		return true;
-
-	if(sc && sc->data[SC_NEUTRALBARRIER] && (wd.flag&(BF_LONG|BF_MAGIC)) == BF_LONG)
-		return false;
 
 	flee = tstatus->flee;
 #ifdef RENEWAL
@@ -2484,9 +2487,12 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 
 	hitrate += sstatus->hit - flee;
 
-	//Fogwall's hit penalty is only for normal ranged attacks
-	if(tsc && tsc->data[SC_FOGWALL] && !skill_id && (wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON))
-		hitrate -= 50;
+	if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
+		if(skill_id && sc && sc->data[SC_NEUTRALBARRIER])
+			hitrate -= 100;
+		if(!skill_id && tsc && tsc->data[SC_FOGWALL])
+			hitrate -= 50; //Fogwall's hit penalty is only for normal ranged attacks
+	}
 
 	if(sd && is_skill_using_arrow(src,skill_id))
 		hitrate += sd->bonus.arrow_hit;
@@ -2564,7 +2570,7 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 		hitrate += pc_checkskill(sd,TF_DOUBLE);
 
 	if(sd) {
-		uint16 lv;
+		uint8 lv = 0;
 
 		if((lv = pc_checkskill(sd,BS_WEAPONRESEARCH)) > 0) //Weaponry Research hidden bonus
 			hitrate += hitrate * 2 * lv / 100;
@@ -2857,7 +2863,7 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 	struct status_data *sstatus = status_get_status_data(src);
 	int t_class = status_get_class(target);
 	short div_ = max(wd.div_, 1);
-	uint16 lv;
+	uint8 lv = 0;
 
 	//Add mastery damage
 	if(sd && battle_skill_stacks_masteries_vvs(skill_id)) {
@@ -3617,9 +3623,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			skillratio += 100 + 100 * skill_lv;
 			break;
 		case AS_SPLASHER:
-			skillratio += 400 + 50 * skill_lv;
-			if(sd)
-				skillratio += 20 * pc_checkskill(sd,AS_POISONREACT);
+			skillratio += 400 + 50 * skill_lv + 20 * (sd ? pc_checkskill(sd,AS_POISONREACT) : 10);
 			break;
 #ifndef RENEWAL //Pre-Renewal: Skill ratio for weapon part of damage [helvetica]
 		case ASC_BREAKER:
@@ -4128,6 +4132,8 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case GN_SPORE_EXPLOSION:
 			skillratio += 100 + sstatus->int_ + 100 * skill_lv;
 			RE_LVL_DMOD(100);
+			if(wd.miscflag&16)
+				skillratio = skillratio * 75 / 100;
 			break;
 		case GN_WALLOFTHORN:
 			skillratio += 10 * skill_lv;
@@ -5435,13 +5441,31 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		if(sd) { //Monsters, homuns and pets have their damage computed directly
 			wd.damage = wd.statusAtk + wd.weaponAtk + wd.equipAtk + wd.masteryAtk;
 			wd.damage2 = wd.statusAtk2 + wd.weaponAtk2 + wd.equipAtk2 + wd.masteryAtk2;
-			if(wd.flag&BF_LONG) { //Affects the entirety of the damage
+			if(wd.flag&BF_LONG) {
 				switch(skill_id) {
 					case RA_WUGSTRIKE:
 					case RA_WUGBITE:
-						break; //Ignore % modifiers
+						wd.damage -= wd.equipAtk;
+						wd.damage2 -= wd.equipAtk2;
+					//Fall through
+					case SR_GATEOFHELL:
+						break;
 					default:
 						ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.long_attack_atk_rate);
+						break;
+				}
+			}
+		}
+
+		if(tsd) {
+			if(wd.flag&BF_LONG) {
+				switch(skill_id) {
+					case RA_WUGSTRIKE:
+					case RA_WUGBITE:
+					case SR_GATEOFHELL:
+						break;
+					default:
+						ATK_ADDRATE(wd.damage, wd.damage2, -tsd->bonus.long_attack_def_rate);
 						break;
 				}
 			}
@@ -6114,6 +6138,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						RE_LVL_DMOD(100);
 						break;
 					case WL_JACKFROST:
+					case NPC_JACKFROST:
 						if(tsc && tsc->data[SC_FREEZING]) {
 							skillratio += 900 + 300 * skill_lv;
 							RE_LVL_DMOD(100);

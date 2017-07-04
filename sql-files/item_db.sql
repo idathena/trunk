@@ -1470,7 +1470,7 @@ REPLACE INTO `item_db` VALUES (2550,'Fisher\'s_Muffler','Fisher\'s Muffler',4,20
 REPLACE INTO `item_db` VALUES (2551,'Rider_Insignia_M','Crest of the Rider',4,20,NULL,500,NULL,4,NULL,1,0xFFFFFFFE,2,2,4,NULL,55,1,0,'bonus bAgi,2;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2552,'Mithril_Magic_Cape_M','Mithril Magic Manteau',4,20,NULL,400,NULL,3,NULL,1,0x00098B1C,2,2,4,NULL,70,1,0,'bonus bMdef,3; bonus5 bAutoSpellWhenHit,"NPC_ANTIMAGIC",6,200,BF_MAGIC,0;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (2553,'Dragon_Manteau','Dragon Manteau',4,20,NULL,1000,NULL,5,NULL,1,0xFFFFFFFE,2,2,4,NULL,0,1,0,'bonus bAgi,1; bonus bMdef,5;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (2554,'Piece_Of_Angent_Skin','Nydhorgg\'s Shadow Garb',4,20,NULL,400,NULL,5,NULL,1,0xFFFFFFFE,2,2,4,NULL,90,1,0,'bonus2 bSubEle,Ele_All,7; bonus bMaxSP,(BaseLevel/3)+(getrefine()*10); bonus2 bSPDrainRate,10,1; bonus bMdef,3;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (2554,'Piece_Of_Angent_Skin','Nidhoggur\'s Shadow Garb',4,20,NULL,400,NULL,5,NULL,1,0xFFFFFFFE,2,2,4,NULL,90,1,0,'bonus2 bSubEle,Ele_All,7; bonus bMaxSP,(BaseLevel/3)+(getrefine()*10); bonus2 bSPDrainRate,10,1; bonus bMdef,3;',NULL,NULL);
 # Accessories
 #===================================================================
 REPLACE INTO `item_db` VALUES (2601,'Ring','Ring',4,30000,NULL,100,NULL,0,NULL,0,0xFFFFFFFE,7,2,136,NULL,20,0,0,'bonus bStr,2;',NULL,NULL);

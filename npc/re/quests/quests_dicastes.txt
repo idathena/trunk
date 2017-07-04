@@ -3661,9 +3661,11 @@ mid_campin,168,170,3	script	Inspector Doha#ep133	59,{
 	mes "[Doha]";
 	mes "There won't be any changes to the current policy.";
 	mes "Home land will continue to review the contents of your reports.";
+	next;
 	mes "[Doha]";
 	mes "All we can do for now is";
 	mes "do our best, right?";
+	next;
 	mes "He says its kindly but his eyes have a get out and do your work kind of look.";
 	close;
 }
@@ -6372,8 +6374,7 @@ function	script	eldicastes_c	{
 			mes "He will let you pass with my recommendations.";
 			next;
 			mes "[Vyhannus]";
-			mes "I'm a little excited.";
-			mes "on what our meeting will bring in the future.";
+			mes "I'm a little excited on what our meeting will bring in the future.";
 			mes "Only hope it won't be like a blizzard in the middle of the night.";
 			set ep13_3_invite, 4;
 			changequest 7182,7183;
