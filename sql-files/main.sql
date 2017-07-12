@@ -626,6 +626,17 @@ CREATE TABLE IF NOT EXISTS `mail` (
   `time` int(11) unsigned NOT NULL default '0',
   `status` tinyint(2) NOT NULL default '0',
   `zeny` int(11) unsigned NOT NULL default '0',
+  `type` smallint(5) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM;
+
+--
+-- Table structure for `mail_attachments`
+--
+
+CREATE TABLE IF NOT EXISTS `mail_attachments` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `index` smallint(5) unsigned NOT NULL default '0',
   `nameid` smallint(5) unsigned NOT NULL default '0',
   `amount` int(11) unsigned NOT NULL default '0',
   `refine` tinyint(3) unsigned NOT NULL default '0',
@@ -652,7 +663,7 @@ CREATE TABLE IF NOT EXISTS `mail` (
   `option_parm4` tinyint(3) unsigned NOT NULL default '0',
   `unique_id` bigint(20) unsigned NOT NULL default '0',
   `bound` tinyint(1) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`,`index`)
 ) ENGINE=MyISAM;
 
 --
@@ -846,7 +857,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1450367880);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1457638175);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1467934919);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1467935469);
-
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1475526420);
 
 --
 -- Table structure for table `sstatus`

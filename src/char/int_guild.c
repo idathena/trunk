@@ -861,7 +861,7 @@ int guild_calcinfo(struct guild *g)
 
 int mapif_guild_created(int fd,int account_id,struct guild *g)
 {
-	WFIFOHEAD(fd, 10);
+	WFIFOHEAD(fd,10);
 	WFIFOW(fd,0)=0x3830;
 	WFIFOL(fd,2)=account_id;
 	if(g != NULL)
@@ -907,7 +907,7 @@ int mapif_guild_info(int fd,struct guild *g)
 // ACK member add
 int mapif_guild_memberadded(int fd,int guild_id,int account_id,int char_id,int flag)
 {
-	WFIFOHEAD(fd, 15);
+	WFIFOHEAD(fd,15);
 	WFIFOW(fd,0)=0x3832;
 	WFIFOL(fd,2)=guild_id;
 	WFIFOL(fd,6)=account_id;
@@ -1091,14 +1091,14 @@ int mapif_guild_castle_dataload(int fd, int sz, int *castle_ids)
 	int len = 4 + num * sizeof(*gc);
 	int i;
 
-	WFIFOHEAD(fd, len);
+	WFIFOHEAD(fd,len);
 	WFIFOW(fd, 0) = 0x3840;
 	WFIFOW(fd, 2) = len;
 	for (i = 0; i < num; i++) {
 		gc = inter_guildcastle_fromsql(*(castle_ids++));
 		memcpy(WFIFOP(fd, 4 + i * sizeof(*gc)), gc, sizeof(*gc));
 	}
-	WFIFOSET(fd, len);
+	WFIFOSET(fd,len);
 	return 0;
 }
 

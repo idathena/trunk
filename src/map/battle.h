@@ -640,6 +640,10 @@ extern struct Battle_Config
 	int exp_cost_inspiration;
 	int block_account_in_same_party;
 	int change_party_leader_samemap;
+	int mail_daily_count;
+	int mail_zeny_fee;
+	int mail_attachment_price;
+	int mail_attachment_weight;
 } battle_config;
 
 void do_init_battle(void);

@@ -89,23 +89,27 @@ int intif_mercenary_delete(int merc_id);
 int intif_mercenary_save(struct s_mercenary *merc);
 
 // MAIL SYSTEM
-int intif_Mail_requestinbox(int char_id, unsigned char flag);
+int intif_Mail_requestinbox(int char_id, unsigned char flag, enum mail_inbox_type type);
 int intif_Mail_read(int mail_id);
-int intif_Mail_getattach(int char_id, int mail_id);
+bool intif_mail_getattach(struct map_session_data *sd, struct mail_message *msg, enum mail_attachment_type type);
 int intif_Mail_delete(int char_id, int mail_id);
 int intif_Mail_return(int char_id, int mail_id);
 int intif_Mail_send(int account_id, struct mail_message *msg);
+bool intif_mail_checkreceiver(struct map_session_data *sd, char *name);
+
 // AUCTION SYSTEM
 int intif_Auction_requestlist(int char_id, short type, int price, const char *searchtext, short page);
 int intif_Auction_register(struct auction_data *auction);
 int intif_Auction_cancel(int char_id, unsigned int auction_id);
 int intif_Auction_close(int char_id, unsigned int auction_id);
 int intif_Auction_bid(int char_id, const char *name, unsigned int auction_id, int bid);
+
 // ELEMENTAL SYSTEM
 int intif_elemental_create(struct s_elemental *ele);
 int intif_elemental_request(int ele_id, int char_id);
 int intif_elemental_delete(int ele_id);
 int intif_elemental_save(struct s_elemental *ele);
+
 // CLAN SYSTEM
 int intif_clan_requestclans(void);
 int intif_clan_message(int clan_id, uint32 account_id, const char *mes, int len);

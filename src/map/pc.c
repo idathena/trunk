@@ -1536,7 +1536,7 @@ void pc_reg_received(struct map_session_data *sd)
 	sd->vip.enabled = 0;
 	chrif_req_login_operation(sd->status.account_id, sd->status.name, CHRIF_OP_LOGIN_VIP, 0, 1|8); //Request VIP information
 #endif
-	intif_Mail_requestinbox(sd->status.char_id, 0); //MAIL SYSTEM - Request Mail Inbox
+	intif_Mail_requestinbox(sd->status.char_id, 0, MAIL_INBOX_NORMAL); //MAIL SYSTEM - Request Mail Inbox
 	intif_request_questlog(sd);
 
 	if (!sd->state.connect_new && sd->fd) { //Character already loaded map! Gotta trigger LoadEndAck manually
@@ -1549,7 +1549,6 @@ void pc_reg_received(struct map_session_data *sd)
 		clif_displaymessage(sd->fd, msg_txt(11)); // Invisible: On
 		//Decrement the number of pvp players on the map
 		map[sd->bl.m].users_pvp--;
-
 		if (map[sd->bl.m].flag.pvp && !map[sd->bl.m].flag.pvp_nocalcrank && sd->pvp_timer != INVALID_TIMER) {
 			//Unregister the player for ranking
 			delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);

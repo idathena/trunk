@@ -1462,7 +1462,7 @@ void socket_datasync(int fd, bool send) {
 	unsigned int alen = ARRAYLENGTH(data_list);
 	if( send ) {
 		unsigned short p_len = ( alen * 4 ) + 4;
-		WFIFOHEAD(fd, p_len);
+		WFIFOHEAD(fd,p_len);
 
 		WFIFOW(fd,0) = 0x2b13;
 		WFIFOW(fd,2) = p_len;
@@ -1480,7 +1480,7 @@ void socket_datasync(int fd, bool send) {
 				WFIFOW(fd,0) = 0x2b13;
 				WFIFOW(fd,2) = 8;
 				WFIFOL(fd,4) = 0;
-				WFIFOSET(fd, 8);
+				WFIFOSET(fd,8);
 				flush_fifo(fd);
 				/* Shut down */
 				ShowFatalError("Servers are out of sync! recompile from scratch (%d)\n",i);

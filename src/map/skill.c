@@ -1757,6 +1757,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 						case SC_CLAN_INFO:			case SC_SWORDCLAN:		case SC_ARCWANDCLAN:
 						case SC_GOLDENMACECLAN:			case SC_CROSSBOWCLAN:		case SC_QUEST_BUFF1:
 						case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:		case SC_STEAMPACK:
+						case SC_DAILYSENDMAILCNT:
 							continue;
 						case SC_SILENCE:
 							if( tsc->data[i]->val4 )
@@ -3152,9 +3153,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 
 	switch (skill_id) {
 		case WL_HELLINFERNO: //Hell Inferno burning status only starts if Fire part hits
-			if (dmg.dmg_lv < ATK_DEF)
-				break;
-			if (!(flag&ELE_DARK))
+			if (dmg.dmg_lv == ATK_DEF && !(flag&ELE_DARK))
 				sc_start(src, bl, SC_BURNING, 55 + 5 * skill_lv, skill_lv, skill_get_time2(skill_id, skill_lv));
 			break;
 		case SC_TRIANGLESHOT:
@@ -7813,6 +7812,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_CLAN_INFO:			case SC_SWORDCLAN:		case SC_ARCWANDCLAN:
 							case SC_GOLDENMACECLAN:			case SC_CROSSBOWCLAN:		case SC_QUEST_BUFF1:
 							case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:		case SC_STEAMPACK:
+							case SC_DAILYSENDMAILCNT:
 								continue;
 							case SC_SILENCE:
 								if( tsc->data[i]->val4 )
@@ -9287,6 +9287,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_CLAN_INFO:			case SC_SWORDCLAN:		case SC_ARCWANDCLAN:
 						case SC_GOLDENMACECLAN:			case SC_CROSSBOWCLAN:		case SC_QUEST_BUFF1:
 						case SC_QUEST_BUFF2:			case SC_QUEST_BUFF3:		case SC_STEAMPACK:
+						case SC_DAILYSENDMAILCNT:
 							continue;
 						case SC_SILENCE:
 							if( tsc->data[i]->val4 )

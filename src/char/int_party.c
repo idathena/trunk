@@ -338,7 +338,7 @@ int party_check_empty(struct party_data *p)
 // Create a party whether or not
 int mapif_party_created(int fd,int account_id,int char_id,struct party *p)
 {
-	WFIFOHEAD(fd, 39);
+	WFIFOHEAD(fd,39);
 	WFIFOW(fd,0)=0x3820;
 	WFIFOL(fd,2)=account_id;
 	WFIFOL(fd,6)=char_id;
@@ -360,7 +360,7 @@ int mapif_party_created(int fd,int account_id,int char_id,struct party *p)
 //Party information not found
 static void mapif_party_noinfo(int fd, int party_id, int char_id)
 {
-	WFIFOHEAD(fd, 12);
+	WFIFOHEAD(fd,12);
 	WFIFOW(fd,0) = 0x3821;
 	WFIFOW(fd,2) = 12;
 	WFIFOL(fd,4) = char_id;
@@ -386,7 +386,7 @@ static void mapif_party_info(int fd, struct party *p, int char_id)
 
 //Whether or not additional party members
 int mapif_party_memberadded(int fd, int party_id, int account_id, int char_id, int flag) {
-	WFIFOHEAD(fd, 15);
+	WFIFOHEAD(fd,15);
 	WFIFOW(fd,0) = 0x3822;
 	WFIFOL(fd,2) = party_id;
 	WFIFOL(fd,6) = account_id;

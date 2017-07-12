@@ -789,6 +789,7 @@ typedef enum sc_type {
 	SC_DORAM_SVSP,
 
 	SC_STEAMPACK,
+	SC_DAILYSENDMAILCNT,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

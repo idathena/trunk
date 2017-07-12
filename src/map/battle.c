@@ -1139,7 +1139,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( sc->data[SC_TATAMIGAESHI] && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG )
 			return 0;
 
-		if( sc->data[SC_NEUTRALBARRIER] && (flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON) ) {
+		if( sc->data[SC_NEUTRALBARRIER] && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG &&
+			skill_id != NJ_ZENYNAGE && skill_id != KO_MUCHANAGE ) {
 			d->dmg_lv = ATK_MISS;
 			return 0;
 		}
@@ -2487,12 +2488,11 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 
 	hitrate += sstatus->hit - flee;
 
-	if((wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON)) {
-		if(skill_id && sc && sc->data[SC_NEUTRALBARRIER])
-			hitrate -= 100;
-		if(!skill_id && tsc && tsc->data[SC_FOGWALL])
-			hitrate -= 50; //Fogwall's hit penalty is only for normal ranged attacks
-	}
+	if(sc && sc->data[SC_NEUTRALBARRIER] && skill_id && (wd.flag&(BF_LONG|BF_MAGIC)) == BF_LONG)
+		hitrate -= 100;
+
+	if(tsc && tsc->data[SC_FOGWALL] && !skill_id && (wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON))
+		hitrate -= 50; //Fogwall's hit penalty is only for normal ranged attacks
 
 	if(sd && is_skill_using_arrow(src,skill_id))
 		hitrate += sd->bonus.arrow_hit;
@@ -8622,6 +8622,10 @@ static const struct _battle_data {
 	{ "exp_cost_inspiration",               &battle_config.exp_cost_inspiration,            1,      0,      100,            },
 	{ "block_account_in_same_party",        &battle_config.block_account_in_same_party,     1,      0,      1,              },
 	{ "change_party_leader_samemap",        &battle_config.change_party_leader_samemap,     1,      0,      1,              },
+	{ "mail_daily_count",					&battle_config.mail_daily_count,				100,	0,		INT32_MAX,		},
+	{ "mail_zeny_fee",                      &battle_config.mail_zeny_fee,                   2,      0,      100,            },
+	{ "mail_attachment_price",              &battle_config.mail_attachment_price,           2500,   0,      INT32_MAX,      },
+	{ "mail_attachment_weight",             &battle_config.mail_attachment_weight,          2000,   0,      INT32_MAX,      },
 };
 
 /*==========================

@@ -1421,6 +1421,7 @@
 	export_constant(SC_DORAM_FLEE2);
 	export_constant(SC_DORAM_SVSP);
 	export_constant(SC_STEAMPACK);
+	export_constant(SC_DAILYSENDMAILCNT);
 
 	/* Status icons */
 	export_constant(SI_BLANK);
