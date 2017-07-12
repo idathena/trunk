@@ -20555,7 +20555,7 @@ BUILDIN_FUNC(vip_status) {
 			break;
 		case VIP_STATUS_EXPIRE: //Get VIP expire date
 			if( pc_isvip(sd) )
-				script_pushint(st,sd->vip.time);
+				script_pushint(st,(int)sd->vip.time);
 			else
 				script_pushint(st,0);
 			break;
@@ -21471,6 +21471,24 @@ BUILDIN_FUNC(setrandomoption) {
 	return SCRIPT_CMD_FAILURE;
 }
 
+BUILDIN_FUNC(unloadnpc) {
+	const char *name;
+	struct npc_data *nd;
+
+	name = script_getstr(st,2);
+	nd = npc_name2id(name);
+
+	if (!nd) {
+		ShowError("buildin_unloadnpc: npc '%s' was not found.\n", name);
+		return 1;
+	}
+
+	npc_unload_duplicates(nd);
+	npc_unload(nd, true);
+	npc_read_event_script();
+	return SCRIPT_CMD_SUCCESS;
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -22078,6 +22096,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(makeitem2,"makeitem3","visiiiiiiiiirrr"),
 	BUILDIN_DEF2(delitem2,"delitem3","viiiiiiiirrr?"),
 	BUILDIN_DEF2(countitem,"countitem3","viiiiiiirrr?"),
+	BUILDIN_DEF(unloadnpc,"s"),
 
 #include "../custom/script_def.inc"
 

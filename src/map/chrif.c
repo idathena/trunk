@@ -392,7 +392,7 @@ int chrif_sendmap(int fd) {
 	ShowStatus("Sending maps to char server...\n");
 
 	//Sending normal maps, not instances
-	WFIFOHEAD(fd, 4 + instance_start * 4);
+	WFIFOHEAD(fd,4 + instance_start * 4);
 	WFIFOW(fd,0) = 0x2afa;
 	for(i = 0; i < instance_start; i++)
 		WFIFOW(fd,4 + i * 4) = map_id2index(i);
@@ -1173,7 +1173,7 @@ int chrif_updatefamelist(struct map_session_data *sd) {
 			return 0;
 	}
 
-	WFIFOHEAD(char_fd, 11);
+	WFIFOHEAD(char_fd,11);
 	WFIFOW(char_fd,0) = 0x2b10;
 	WFIFOL(char_fd,2) = sd->status.char_id;
 	WFIFOL(char_fd,6) = sd->status.fame;
@@ -1824,7 +1824,7 @@ int send_users_tochar(void) {
 
 	users = map_usercount();
 
-	WFIFOHEAD(char_fd, 6+8*users);
+	WFIFOHEAD(char_fd,6+8*users);
 	WFIFOW(char_fd,0) = 0x2aff;
 
 	iter = mapit_getallusers();

@@ -1085,6 +1085,7 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_GVG_SILENCE] = SI_GVG_SILENCE;
 	StatusIconChangeTable[SC_GVG_BLIND] = SI_GVG_BLIND;
 	StatusIconChangeTable[SC_STEAMPACK] = SI_STEAMPACK;
+	StatusIconChangeTable[SC_DAILYSENDMAILCNT] = SI_DAILYSENDMAILCNT;
 
 	//Other SC which are not necessarily associated to skills
 	StatusChangeFlagTable[SC_ASPDPOTION0] |= SCB_ASPD;
@@ -5789,14 +5790,14 @@ short status_calc_critical(struct block_list *bl, struct status_change *sc, int 
 		critical += critical;
 #ifdef RENEWAL
 	if(sc->data[SC_SPEARQUICKEN])
-		critical += 3 * sc->data[SC_SPEARQUICKEN]->val1 * 10;
+		critical += sc->data[SC_SPEARQUICKEN]->val1 * 30;
 #endif
 	if(sc->data[SC_STRIKING])
 		critical += sc->data[SC_STRIKING]->val1 * 10;
 	if(sc->data[SC_BEYONDOFWARCRY])
 		critical += sc->data[SC_BEYONDOFWARCRY]->val3 * 10;
 	if(sc->data[SC__INVISIBILITY])
-		critical += critical * sc->data[SC__INVISIBILITY]->val2 / 100;
+		critical += sc->data[SC__INVISIBILITY]->val2 * 10;
 	if(sc->data[SC__UNLUCKY])
 		critical -= sc->data[SC__UNLUCKY]->val2;
 
@@ -8974,6 +8975,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_MERMAID_LONGING:
 			case SC_TIME_ACCESSORY:
 			case SC_CLAN_INFO:
+			case SC_DAILYSENDMAILCNT:
 				tick = -1; //Permanent effects
 				break;
 			case SC_DECREASEAGI:
@@ -10720,6 +10722,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_UPHEAVAL_OPTION:
 		case SC_CIRCLE_OF_FIRE_OPTION:
 		case SC_CLAN_INFO:
+		case SC_DAILYSENDMAILCNT:
 			val_flag |= 1|2;
 			break;
 		case SC_POISONINGWEAPON:
@@ -11341,6 +11344,7 @@ int status_change_clear(struct block_list *bl,int type)
 				case SC_GOLDENMACECLAN:
 				case SC_CROSSBOWCLAN:
 				case SC_JUMPINGCLAN:
+				case SC_DAILYSENDMAILCNT:
 					continue;
 			}
 		}
@@ -11390,6 +11394,7 @@ int status_change_clear(struct block_list *bl,int type)
 				case SC_GOLDENMACECLAN:
 				case SC_CROSSBOWCLAN:
 				case SC_JUMPINGCLAN:
+				case SC_DAILYSENDMAILCNT:
 					continue;
 			}
 		}

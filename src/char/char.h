@@ -21,6 +21,24 @@ struct mmo_charstatus;
 
 #define MAX_MAP_SERVERS 30
 
+struct mmo_map_server {
+	int fd;
+	uint32 ip;
+	uint16 port;
+	int users;
+	unsigned short map[MAX_MAP_PER_SERVER];
+} server[MAX_MAP_SERVERS];
+
+struct online_char_data {
+	int account_id;
+	int char_id;
+	int fd;
+	int waiting_disconnect;
+	short server; // -2: unknown server, -1: not connected, 0+: id of server
+	bool pincode_success;
+};
+DBMap *online_char_db; // int account_id -> struct online_char_data*
+
 #define DEFAULT_AUTOSAVE_INTERVAL 300 * 1000
 
 #define msg_config_read(cfgName) char_msg_config_read(cfgName)
@@ -95,6 +113,7 @@ extern char guild_storage_db[DB_NAME_LEN];
 extern char party_db[DB_NAME_LEN];
 extern char pet_db[DB_NAME_LEN];
 extern char mail_db[DB_NAME_LEN];
+extern char mail_attachment_db[DB_NAME_LEN];
 extern char auction_db[DB_NAME_LEN];
 extern char quest_db[DB_NAME_LEN];
 extern char homunculus_db[DB_NAME_LEN];
@@ -113,5 +132,8 @@ extern int db_use_sqldbs; //Added for sql item_db read for char server [Valaris]
 
 extern int guild_exp_rate;
 extern int log_inter;
+
+extern int mail_return_days;
+extern int mail_delete_days;
 
 #endif /* _CHAR_SQL_H_ */

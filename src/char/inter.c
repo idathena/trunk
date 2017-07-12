@@ -51,7 +51,7 @@ int inter_recv_packet_length[] = {
 	 6,-1, 0, 0,  0, 0, 0, 0, 10,-1, 0, 0,  0, 0,  0, 0, // 3010-
 	-1,10,-1,14,15 + NAME_LENGTH,19, 6,-1, 14,14, 6, 0,  0, 0,  0, 0, // 3020- Party
 	-1, 6,-1,-1, 55,19, 6,-1, 14,-1,-1,-1, 18,19,186,-1, // 3030-
-	-1, 9, 0, 0,  0, 0, 0, 0,  7, 6,10,10, 10,-1,  0, 0, // 3040-
+	-1, 9, 0, 0,  0, 0, 0, 0,  8, 6,11,10, 10,-1,6 + NAME_LENGTH, 0, // 3040-
 	-1,-1,10,10,  0,-1,12, 0,  0, 0, 0, 0,  0, 0,  0, 0, // 3050-  Auction System [Zephyrus]
 	 6,-1, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, // 3060-  Quest system [Kevin] [Inkfish]
 	-1,10, 6,-1,  0, 0, 0, 0,  0, 0, 0, 0, -1,10,  6,-1, // 3070-  Mercenary packets [Zephyrus], Elemental packets [pakpil]
@@ -1015,7 +1015,7 @@ static void mapif_account_reg(int fd, unsigned char *src)
 int mapif_account_reg_reply(int fd,int account_id,int char_id, int type)
 {
 	struct accreg *reg=accreg_pt;
-	WFIFOHEAD(fd, 13 + 5000);
+	WFIFOHEAD(fd,13 + 5000);
 	inter_accreg_fromsql(account_id,char_id,reg,type);
 
 	WFIFOW(fd,0)=0x3804;
@@ -1270,14 +1270,14 @@ int mapif_parse_RegistryRequest(int fd)
 
 static void mapif_namechange_ack(int fd, int account_id, int char_id, int type, int flag, char *name)
 {
-	WFIFOHEAD(fd, NAME_LENGTH+13);
+	WFIFOHEAD(fd,NAME_LENGTH+13);
 	WFIFOW(fd, 0) = 0x3806;
 	WFIFOL(fd, 2) = account_id;
 	WFIFOL(fd, 6) = char_id;
 	WFIFOB(fd,10) = type;
 	WFIFOB(fd,11) = flag;
 	memcpy(WFIFOP(fd, 12), name, NAME_LENGTH);
-	WFIFOSET(fd, NAME_LENGTH+13);
+	WFIFOSET(fd,NAME_LENGTH+13);
 }
 
 int mapif_parse_NameChangeRequest(int fd)

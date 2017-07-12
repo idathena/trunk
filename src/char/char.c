@@ -17,6 +17,7 @@
 #include "../common/ers.h"
 #include "int_guild.h"
 #include "int_homun.h"
+#include "int_mail.h"
 #include "int_mercenary.h"
 #include "int_elemental.h"
 #include "int_party.h"
@@ -58,6 +59,7 @@ char guild_storage_db[DB_NAME_LEN] = "guild_storage";
 char party_db[DB_NAME_LEN] = "party";
 char pet_db[DB_NAME_LEN] = "pet";
 char mail_db[DB_NAME_LEN] = "mail"; // MAIL SYSTEM
+char mail_attachment_db[DB_NAME_LEN] = "mail_attachments";
 char auction_db[DB_NAME_LEN] = "auction"; // Auctions System
 char friend_db[DB_NAME_LEN] = "friends";
 char hotkey_db[DB_NAME_LEN] = "hotkey";
@@ -82,14 +84,6 @@ static DBMap *char_db_; // int char_id -> struct mmo_charstatus*
 char db_path[1024] = "db";
 
 int db_use_sqldbs;
-
-struct mmo_map_server {
-	int fd;
-	uint32 ip;
-	uint16 port;
-	int users;
-	unsigned short map[MAX_MAP_PER_SERVER];
-} server[MAX_MAP_SERVERS];
 
 int login_fd = -1, char_fd = -1;
 char userid[24];
@@ -182,6 +176,8 @@ unsigned short default_map_x = 156;
 unsigned short default_map_y = 191;
 
 int clan_remove_inactive_days = 14;
+int mail_return_days = 15;
+int mail_delete_days = 15;
 
 #if PACKETVER_SUPPORTS_PINCODE
 // Pincode system
@@ -290,16 +286,6 @@ static DBMap *auth_db; // int account_id -> struct auth_node*
 // Online User Database
 //-----------------------------------------------------
 
-struct online_char_data {
-	int account_id;
-	int char_id;
-	int fd;
-	int waiting_disconnect;
-	short server; // -2: unknown server, -1: not connected, 0+: id of server
-	bool pincode_success;
-};
-
-static DBMap *online_char_db; // int account_id -> struct online_char_data*
 static int chardb_waiting_disconnect(int tid, unsigned int tick, int id, intptr_t data);
 int delete_char_sql(int char_id);
 
@@ -1869,6 +1855,10 @@ int delete_char_sql(int char_id)
 
 	/* Delete skills */
 	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id`='%d'", skill_db, char_id) )
+		Sql_ShowDebug(sql_handle);
+
+	/* Delete mail attachments (only received) */
+	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `id` IN ( SELECT `id` FROM `%s` WHERE `dest_id`='%d' )", mail_attachment_db, mail_db, char_id) )
 		Sql_ShowDebug(sql_handle);
 
 	/* Delete mails (only received) */
@@ -3952,7 +3942,7 @@ int parse_frommap(int fd)
 						WFIFOL(fd,20) = 0;
 						WFIFOB(fd,24) = 0;
 						memcpy(WFIFOP(fd,25), cd, sizeof(struct mmo_charstatus));
-						WFIFOSET(fd, WFIFOW(fd,2));
+						WFIFOSET(fd,WFIFOW(fd,2));
 
 						set_char_online(id, char_id, account_id);
 					} else if( runflag == CHARSERVER_ST_RUNNING &&
@@ -3981,7 +3971,7 @@ int parse_frommap(int fd)
 						WFIFOL(fd,20) = node->group_id;
 						WFIFOB(fd,24) = node->changing_mapservers;
 						memcpy(WFIFOP(fd,25), cd, sizeof(struct mmo_charstatus));
-						WFIFOSET(fd, WFIFOW(fd,2));
+						WFIFOSET(fd,WFIFOW(fd,2));
 
 						//Only use the auth once and mark user online
 						idb_remove(auth_db, account_id);
@@ -5479,7 +5469,7 @@ void bonus_script_get(int fd) {
 				bsdata.icon = tmp_bsdata.icon;
 				memcpy(WFIFOP(fd, 9 + i * sizeof(struct bonus_script_data)), &bsdata, sizeof(struct bonus_script_data));
 			}
-			WFIFOSET(fd, size);
+			WFIFOSET(fd,size);
 			ShowInfo("Bonus Script loaded for CID=%d. Total: %d.\n", cid, i);
 			if (SQL_ERROR == SqlStmt_Prepare(stmt,"DELETE FROM `%s` WHERE `char_id`='%d'",bonus_script_db,cid) ||
 				SQL_ERROR == SqlStmt_Execute(stmt))
@@ -5765,6 +5755,8 @@ void sql_config_read(const char *cfgName)
 			safestrncpy(pet_db, w2, sizeof(pet_db));
 		else if(!strcmpi(w1, "mail_db"))
 			safestrncpy(mail_db, w2, sizeof(mail_db));
+		else if(!strcmpi(w1, "mail_attachment_db"))
+			safestrncpy(mail_attachment_db, w2, sizeof(mail_attachment_db));
 		else if(!strcmpi(w1, "auction_db"))
 			safestrncpy(auction_db, w2, sizeof(auction_db));
 		else if(!strcmpi(w1, "friend_db"))
@@ -6068,6 +6060,10 @@ int char_config_read(const char *cfgName)
 			default_map_y = atoi(w2);
 		else if(strcmpi(w1, "clan_remove_inactive_days") == 0)
 			clan_remove_inactive_days = atoi(w2);
+		else if(strcmpi(w1, "mail_return_days") == 0)
+			mail_return_days = atoi(w2);
+		else if(strcmpi(w1, "mail_delete_days") == 0)
+			mail_delete_days = atoi(w2);
 		else if(strcmpi(w1, "import") == 0)
 			char_config_read(w2);
 	}
@@ -6249,6 +6245,14 @@ int do_init(int argc, char **argv)
 	//Periodically remove players that have not logged in for a long time from clans
 	add_timer_func_list(clan_member_cleanup, "clan_member_cleanup");
 	add_timer_interval(gettick() + 1000, clan_member_cleanup, 0, 0, 60 * 60 * 1000); //Every 60 minutes
+
+	//Periodically check if mails need to be returned to their sender
+	add_timer_func_list(mail_return_timer, "mail_return_timer");
+	add_timer_interval(gettick() + 1000, mail_return_timer, 0, 0, 5 * 60 * 1000); //Every 5 minutes
+
+	//Periodically check if mails need to be deleted completely
+	add_timer_func_list(mail_delete_timer, "mail_delete_timer");
+	add_timer_interval(gettick() + 1000, mail_delete_timer, 0, 0, 5 * 60 * 1000); //Every 5 minutes
 
 	//Cleaning the tables for NULL entrys @ startup [Sirius]
 	//Chardb clean
