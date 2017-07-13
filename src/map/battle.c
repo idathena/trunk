@@ -8622,7 +8622,7 @@ static const struct _battle_data {
 	{ "exp_cost_inspiration",               &battle_config.exp_cost_inspiration,            1,      0,      100,            },
 	{ "block_account_in_same_party",        &battle_config.block_account_in_same_party,     1,      0,      1,              },
 	{ "change_party_leader_samemap",        &battle_config.change_party_leader_samemap,     1,      0,      1,              },
-	{ "mail_daily_count",					&battle_config.mail_daily_count,				100,	0,		INT32_MAX,		},
+	{ "mail_daily_count",                   &battle_config.mail_daily_count,                100,    0,      INT32_MAX,      },
 	{ "mail_zeny_fee",                      &battle_config.mail_zeny_fee,                   2,      0,      100,            },
 	{ "mail_attachment_price",              &battle_config.mail_attachment_price,           2500,   0,      INT32_MAX,      },
 	{ "mail_attachment_weight",             &battle_config.mail_attachment_weight,          2000,   0,      INT32_MAX,      },

@@ -19477,8 +19477,9 @@ static uint8 clif_roulette_getitem(struct map_session_data *sd) {
 	it.nameid = rd.nameid[sd->roulette.prizeStage][sd->roulette.prizeIdx];
 	it.identify = 1;
 
-	if( (res = pc_additem(sd, &it, rd.qty[sd->roulette.prizeStage][sd->roulette.prizeIdx], LOG_TYPE_ROULETTE)) == ADDITEM_SUCCESS )
+	if( (res = pc_additem(sd, &it, rd.qty[sd->roulette.prizeStage][sd->roulette.prizeIdx], LOG_TYPE_ROULETTE)) == ADDITEM_SUCCESS ) {
 		; //onSuccess
+	}
 
 	sd->roulette.claimPrize = false;
 	sd->roulette.prizeStage = 0;
@@ -20448,7 +20449,7 @@ void packetdb_readdb(bool reload)
 		0,  0,  0,  0,  0, -1,  0,  0,  0,  0,  0,  0,  0, 47,  2,  6,
 		6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 10,  0,  0,
 	//#0x0AC0
-	   26, 26,  0,  0, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+	   26, 26,  0,  0, -1,156,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
 		0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //0x0AFF is currently defined as maximum

@@ -15879,7 +15879,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	if( require.ammo ) {
 		short idx = sd->equip_index[EQI_AMMO];
 
-		if( idx < 0 || !sd->inventory_data[idx] || (1<<sd->inventory_data[idx]->look) != require.ammo ||
+		if( idx < 0 || !sd->inventory_data[idx] || !(require.ammo&(1<<sd->inventory_data[idx]->look)) ||
 			sd->inventory.u.items_inventory[idx].amount < require.ammo_qty ) {
 			switch( skill_id ) {
 				case BA_MUSICALSTRIKE:
@@ -16131,8 +16131,16 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 
 	if( require.ammo ) {
 		short idx = sd->equip_index[EQI_AMMO];
+		int ammo_qty = require.ammo_qty;
 
-		if( idx < 0 || !sd->inventory_data[idx] || sd->inventory.u.items_inventory[idx].amount < require.ammo_qty ) {
+		switch( skill_id ) {
+			case WM_SEVERE_RAINSTORM:
+			case RL_R_TRIP:
+			case RL_FIRE_RAIN:
+				ammo_qty += 1; //2016-10-26 kRO update made these skills require an extra ammo to cast
+				break;
+		}
+		if( idx < 0 || !sd->inventory_data[idx] || sd->inventory.u.items_inventory[idx].amount < ammo_qty ) {
 			if( require.ammo&((1<<AMMO_BULLET)|(1<<AMMO_SHELL)|(1<<AMMO_GRENADE)) )
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_BULLET,0,0);
 			else if( require.ammo&(1<<AMMO_KUNAI) )
