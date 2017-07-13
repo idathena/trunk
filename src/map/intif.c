@@ -2279,7 +2279,7 @@ int intif_parse_Mail_delete(int fd)
 	}
 
 	if (!failed) {
-		enum mail_inbox_type type;
+		enum mail_inbox_type type = MAIL_INBOX_NORMAL;
 		int i;
 
 		ARR_FIND(0, MAIL_MAX_INBOX, i, sd->mail.inbox.msg[i].id == mail_id);
@@ -2336,7 +2336,7 @@ int intif_parse_Mail_return(int fd)
 	}
 
 	if (!fail) {
-		enum mail_inbox_type type;
+		enum mail_inbox_type type = MAIL_INBOX_NORMAL;
 		int i;
 
 		ARR_FIND(0, MAIL_MAX_INBOX, i, sd->mail.inbox.msg[i].id == mail_id);

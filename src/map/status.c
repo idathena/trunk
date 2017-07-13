@@ -3945,7 +3945,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	status_calc_weight(sd,CALCWT_MAXBONUS);
 	status_calc_cart_weight(sd,CALCWT_MAXBONUS);
 
-	if (pc_checkskill(sd,SM_MOVINGRECOVERY) > 0)
+	if (pc_checkskill(sd,SM_MOVINGRECOVERY) > 0 ||  pc_ismadogear(sd))
 		sd->regen.state.walk = 1;
 
 	//Skill SP cost
@@ -4331,10 +4331,6 @@ void status_calc_regen(struct block_list *bl, struct status_data *status, struct
 	if( sd ) {
 		struct regen_data_sub *sregen;
 
-		if( pc_ismadogear(sd) ) {
-			val = regen->hp * 2;
-			regen->hp = cap_value(val, 1, SHRT_MAX);
-		}
 		if( (lv = pc_checkskill(sd, HP_MEDITATIO)) > 0 ) {
 			val = regen->sp * (100 + lv * 3) / 100;
 			regen->sp = cap_value(val, 1, SHRT_MAX);
