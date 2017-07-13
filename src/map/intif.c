@@ -2271,7 +2271,6 @@ int intif_parse_Mail_delete(int fd)
 	int char_id = RFIFOL(fd,2);
 	int mail_id = RFIFOL(fd,6);
 	bool failed = RFIFOB(fd,10);
-	enum mail_inbox_type type;
 	struct map_session_data *sd = map_charid2sd(char_id);
 
 	if (sd == NULL) {
@@ -2280,6 +2279,7 @@ int intif_parse_Mail_delete(int fd)
 	}
 
 	if (!failed) {
+		enum mail_inbox_type type;
 		int i;
 
 		ARR_FIND(0, MAIL_MAX_INBOX, i, sd->mail.inbox.msg[i].id == mail_id);
@@ -2329,7 +2329,6 @@ int intif_parse_Mail_return(int fd)
 	struct map_session_data *sd = map_charid2sd(RFIFOL(fd,2));
 	int mail_id = RFIFOL(fd,6);
 	short fail = RFIFOB(fd,10);
-	enum mail_inbox_type type;
 
 	if (sd == NULL) {
 		ShowError("intif_parse_Mail_return: char not found %d\n", RFIFOL(fd,2));
@@ -2337,6 +2336,7 @@ int intif_parse_Mail_return(int fd)
 	}
 
 	if (!fail) {
+		enum mail_inbox_type type;
 		int i;
 
 		ARR_FIND(0, MAIL_MAX_INBOX, i, sd->mail.inbox.msg[i].id == mail_id);

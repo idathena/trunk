@@ -1975,7 +1975,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 	WBUFB(buf,102) = min(p->dex,UINT8_MAX);
 	WBUFB(buf,103) = min(p->luk,UINT8_MAX);
 	WBUFW(buf,104) = p->slot;
-	WBUFW(buf,106) = (p->rename > 0) ? 0 : 1;
+	WBUFW(buf,106) = (p->rename > 0 ? 0 : 1);
 	offset += 2;
 #if (PACKETVER >= 20100720 && PACKETVER <= 20100727) || PACKETVER >= 20100803
 	mapindex_getmapname_ext(mapindex_id2name(p->last_point.map),(char *)WBUFP(buf,108));
@@ -2006,7 +2006,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 		offset += 4;
 	#endif
 	#if PACKETVER >= 20111025
-		WBUFL(buf,136) = (p->rename > 0) ? 1 : 0;  //(0 = disabled, otherwise displays "Add-Ons" sidebar)
+		WBUFL(buf,136) = (p->rename > 0 ? 1 : 0);  //(0 = disabled, otherwise displays "Add-Ons" sidebar)
 		offset += 4;
 	#endif
 	#if PACKETVER >= 20141016
