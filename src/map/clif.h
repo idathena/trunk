@@ -514,20 +514,20 @@ enum e_personalinfo {
 };
 
 enum e_damage_type {
-	DMG_NORMAL = 0,       //Damage [ damage: total damage, div: amount of hits, damage2: assassin dual-wield damage ]
-	DMG_PICKUP_ITEM,      //Pick up item
-	DMG_SIT_DOWN,         //Sit down
-	DMG_STAND_UP,         //Stand up
-	DMG_ENDURE,           //Damage (Endure)
-	DMG_SPLASH,           //(Splash?)
-	DMG_SKILL,            //(Skill?)
-	DMG_REPEAT,           //(Repeat damage?)
-	DMG_MULTI_HIT,        //Multi-hit damage
-	DMG_MULTI_HIT_ENDURE, //Multi-hit damage (Endure)
-	DMG_CRITICAL,         //Critical hit
-	DMG_LUCY_DODGE,       //Lucky dodge
-	DMG_TOUCH,            //(Touch skill?)
-	DMG_CRITICAL2,        //Critical hit 2
+	DMG_NORMAL = 0,         //Damage [ damage: total damage, div: amount of hits, damage2: assassin dual-wield damage ]
+	DMG_PICKUP_ITEM,        //Pick up item
+	DMG_SIT_DOWN,           //Sit down
+	DMG_STAND_UP,           //Stand up
+	DMG_ENDURE,             //Damage (Endure)
+	DMG_SPLASH,             //(Splash?)
+	DMG_SKILL,              //(Skill?)
+	DMG_REPEAT,             //(Repeat damage?)
+	DMG_MULTI_HIT,          //Multi-hit damage
+	DMG_MULTI_HIT_ENDURE,   //Multi-hit damage (Endure)
+	DMG_CRITICAL,           //Critical hit
+	DMG_LUCY_DODGE,         //Lucky dodge
+	DMG_TOUCH,              //(Touch skill?)
+	DMG_MULTI_HIT_CRITICAL, //Multi-hit damage (Critical)
 };
 
 int clif_setip(const char *ip);
