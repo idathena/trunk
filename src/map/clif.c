@@ -4748,7 +4748,7 @@ static int clif_hallucination_damage(void)
 ///     10 = ATTACK_CRITICAL - critical hit
 ///     11 = ATTACK_LUCKY - lucky dodge
 ///     12 = TOUCHSKILL - (touch skill?)
-///     13 = ATTACK_CRITICAL2 - critical hit 2
+///     13 = ATTACK_MULTIPLE_CRITICAL - multi-hit damage (critical)
 int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tick, int sdelay, int ddelay, int64 in_damage, int div, enum e_damage_type type, int64 in_damage2, bool isspdamage)
 {
 	unsigned char buf[34];

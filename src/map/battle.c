@@ -2302,7 +2302,7 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 	struct map_session_data *tsd = BL_CAST(BL_PC, target);
 
 	if(!first_call)
-		return (wd.type == DMG_CRITICAL || wd.type == DMG_CRITICAL2);
+		return (wd.type == DMG_CRITICAL || wd.type == DMG_MULTI_HIT_CRITICAL);
 
 	if(skill_id == NPC_CRITICALSLASH || skill_id == LG_PINPOINTATTACK)
 		return true; //Always critical
@@ -5381,7 +5381,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	//Crit check is next since crits always hit on official [helvetica]
 	if(is_attack_critical(wd, src, target, skill_id, skill_lv, true)) {
 		if(battle_config.enable_critical_multihit) //kRO new critical behavior update [exneval]
-			wd.type = (!(wd.type&DMG_MULTI_HIT) ? DMG_CRITICAL : DMG_CRITICAL2);
+			wd.type = ((wd.type&DMG_MULTI_HIT) ? DMG_MULTI_HIT_CRITICAL : DMG_CRITICAL);
 		else
 			wd.type = DMG_CRITICAL;
 	}
@@ -7173,7 +7173,7 @@ void battle_vanish(struct map_session_data *sd, struct block_list *target, struc
 			wd->isvanishdamage = true;
 			wd->isspdamage = true;
 		}
-		if( (wd->type == DMG_CRITICAL || wd->type == DMG_CRITICAL2) && wd->isvanishdamage )
+		if( (wd->type == DMG_CRITICAL || wd->type == DMG_MULTI_HIT_CRITICAL) && wd->isvanishdamage )
 			wd->type = DMG_NORMAL;
 	} else {
 		short vrate_hp = cap_value(sd->bonus.hp_vanish_rate, 0, SHRT_MAX);
