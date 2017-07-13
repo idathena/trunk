@@ -4748,6 +4748,7 @@ static int clif_hallucination_damage(void)
 ///     10 = ATTACK_CRITICAL - critical hit
 ///     11 = ATTACK_LUCKY - lucky dodge
 ///     12 = TOUCHSKILL - (touch skill?)
+///     13 = ATTACK_CRITICAL2 - critical hit 2
 int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tick, int sdelay, int ddelay, int64 in_damage, int div, enum e_damage_type type, int64 in_damage2, bool isspdamage)
 {
 	unsigned char buf[34];
@@ -13501,13 +13502,21 @@ void clif_parse_GuildChangeMemberPosition(int fd, struct map_session_data *sd)
 	int i;
 	struct s_packet_db *info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
 	int len = RFIFOW(fd,info->pos[0]);
-	int len2 = RFIFOL(fd,12);
 	int idxgpos = info->pos[1];
 
 	if( !sd->state.gmaster_flag )
 		return;
 
-	if( len == 16 && !len2 ) { //Guild leadership change
+	if( len == 16 && RFIFOL(fd,12) == 0 ) { //Guild leadership change
+		if( !battle_config.guild_leaderchange_woe && is_agit_start() ) {
+			clif_msg(sd, GUILD_MASTER_WOE);
+			return;
+		}
+		if( battle_config.guild_leaderchange_delay &&
+			DIFF_TICK(time(NULL), sd->guild->last_leader_change) < battle_config.guild_leaderchange_delay ) {
+			clif_msg(sd, GUILD_MASTER_DELAY);
+			return;
+		}
 		guild_gm_change(sd->status.guild_id, RFIFOL(fd,8));
 		return;
 	}

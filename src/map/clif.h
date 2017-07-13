@@ -447,6 +447,8 @@ enum clif_messages {
 	SKILL_NEED_HOLY_BULLET = 0x9fe,
 	SKILL_NEED_GRENADE = 0xa01,
 	SKILL_REBEL_GUN_FAIL = 0xa02,
+	GUILD_MASTER_WOE = 0xb93,
+	GUILD_MASTER_DELAY = 0xb94,
 };
 
 enum e_CASHSHOP_ACK {
@@ -525,6 +527,7 @@ enum e_damage_type {
 	DMG_CRITICAL,         //Critical hit
 	DMG_LUCY_DODGE,       //Lucky dodge
 	DMG_TOUCH,            //(Touch skill?)
+	DMG_CRITICAL2,        //Critical hit 2
 };
 
 int clif_setip(const char *ip);

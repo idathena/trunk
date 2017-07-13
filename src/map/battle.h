@@ -644,6 +644,9 @@ extern struct Battle_Config
 	int mail_zeny_fee;
 	int mail_attachment_price;
 	int mail_attachment_weight;
+	int enable_critical_multihit;
+	int guild_leaderchange_delay;
+	int guild_leaderchange_woe;
 } battle_config;
 
 void do_init_battle(void);
