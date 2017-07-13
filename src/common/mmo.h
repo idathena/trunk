@@ -641,6 +641,7 @@ struct guild {
 	struct guild_expulsion expulsion[MAX_GUILDEXPULSION];
 	struct guild_skill skill[MAX_GUILDSKILL];
 	struct Channel *channel;
+	time_t last_leader_change;
 
 	/* TODO: still used for something? */
 	unsigned short save_flag; // For TXT saving

@@ -304,6 +304,7 @@ CREATE TABLE IF NOT EXISTS `guild` (
   `emblem_len` int(11) unsigned NOT NULL default '0',
   `emblem_id` int(11) unsigned NOT NULL default '0',
   `emblem_data` blob,
+  `last_master_change` datetime,
   PRIMARY KEY  (`guild_id`,`char_id`),
   UNIQUE KEY `guild_id` (`guild_id`),
   KEY `char_id` (`char_id`)
@@ -858,6 +859,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1457638175);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1467934919);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1467935469);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1475526420);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1477434595);
 
 --
 -- Table structure for table `sstatus`
