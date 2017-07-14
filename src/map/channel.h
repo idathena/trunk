@@ -55,7 +55,7 @@ struct Channel {
 
 DBMap *channel_get_db(void);
 
-struct Channel* channel_create(char *name, char *pass, unsigned char color, enum Channel_Type chantype, int val);
+struct Channel *channel_create(char *name, char *pass, unsigned char color, enum Channel_Type chantype, int val);
 int channel_delete(struct Channel *channel);
 
 int channel_join(struct Channel *channel, struct map_session_data *sd);
@@ -69,7 +69,7 @@ int channel_send(struct Channel *channel, struct map_session_data *sd, const cha
 void channel_read_config(void);
 
 int channel_chk(char *name, char *pass, int type);
-struct Channel* channel_name2channel(char *chname, struct map_session_data *sd, int flag);
+struct Channel *channel_name2channel(char *chname, struct map_session_data *sd, int flag);
 int channel_haspc(struct Channel *channel,struct map_session_data *sd);
 int channel_haspcbanned(struct Channel *channel,struct map_session_data *sd);
 int channel_pc_haschan(struct map_session_data *sd, struct Channel *channel);

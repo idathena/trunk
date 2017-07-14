@@ -647,6 +647,7 @@ extern struct Battle_Config
 	int enable_critical_multihit;
 	int guild_leaderchange_delay;
 	int guild_leaderchange_woe;
+	int banana_bomb_duration;
 } battle_config;
 
 void do_init_battle(void);

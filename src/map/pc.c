@@ -4288,7 +4288,7 @@ int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_ty
 	if( battle_config.cashshop_show_points ) {
 		char output[CHAT_SIZE_MAX];
 
-		sprintf(output, msg_txt(504), points, cash, sd->kafraPoints, sd->cashPoints);
+		sprintf(output, msg_txt(504), points, cash, sd->kafraPoints, sd->cashPoints); // Used %d kafra points and %d cash points. %d kafra and %d cash points remaining.
 		clif_disp_onlyself(sd, output, strlen(output));
 	}
 
@@ -11207,35 +11207,29 @@ int pc_read_motd(void)
 	//Read current MOTD
 	if( (fp = fopen(motd_txt, "r")) != NULL ) {
 		unsigned int entries = 0;
+		char buf[CHAT_SIZE_MAX];
 
-		while( entries < MOTD_LINE_SIZE && fgets(motd_text[entries], sizeof(motd_text[entries]), fp) ) {
-			char *buf = motd_text[entries];
+		while( entries < MOTD_LINE_SIZE && fgets(buf, CHAT_SIZE_MAX, fp) ) {
 			unsigned int lines = 0;
 			size_t len;
 
 			lines++;
-
-			buf = motd_text[entries];
-
 			if( buf[0] == '/' && buf[1] == '/' )
 				continue;
-
 			len = strlen(buf);
-
 			while( len && (buf[len-1] == '\r' || buf[len - 1] == '\n') ) //Strip trailing EOL characters
 				len--;
-
 			if( len ) {
 				char *ptr;
 
 				buf[len] = 0;
-
 				if( (ptr = strstr(buf, " :") ) != NULL && ptr - buf >= NAME_LENGTH) //Crashes newer clients
 					ShowWarning("Found sequence '"CL_WHITE" :"CL_RESET"' on line '"CL_WHITE"%u"CL_RESET"' in '"CL_WHITE"%s"CL_RESET"'. This can cause newer clients to crash.\n", lines, motd_txt);
 			} else { //Empty line
 				buf[0] = ' ';
 				buf[1] = 0;
 			}
+			safestrncpy(motd_text[entries], buf, CHAT_SIZE_MAX);
 			entries++;
 		}
 		fclose(fp);

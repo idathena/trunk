@@ -2621,12 +2621,14 @@ Note: SECURE_NPCTIMEOUT must be enabled for this to work.
 \\
 ---------------------------------------
 
-*getequipid(<equipment slot>{,<char_id>})
+*getequipid({<equipment slot>,<char_id>})
 
-This function returns the item ID of the item equipped in the equipment slot 
-specified on the invoking character. If nothing is equipped there, it returns -1. 
+This function returns the item ID of the item slot that calls the script
+on the invoking character or the specified equipment slot. If nothing is
+equipped there, it returns -1.
 Valid equipment slots are:
 
+EQI_COMPOUND_ON (-1)      - Item slot that calls this script (In context of item script)
 EQI_ACC_L (0)             - Accessory 1
 EQI_ACC_R (1)             - Accessory 2
 EQI_SHOES (2)             - Footgear (shoes, boots)
@@ -2785,9 +2787,6 @@ L_Refine_HeadGear:
 This function returns the weapon level for the weapon equipped in the specified 
 equipment slot on the invoking character. For a list of equipment slots see 
 'getequipid'.
-
-If -1 is passed as the equipment slot argument then the weapon level for the item calling this function, 
-assuming it is called by an item script, will be returned. Otherwise, 0 will be returned.
 
 Only EQI_HAND_L and EQI_HAND_R normally make sense, since only weapons have
 a weapon level. You can, however, probably, use this field for other equippable
@@ -6538,7 +6537,7 @@ sleep and sleep2 will pause the script for the given amount of milliseconds.
 Awake is used to cancel a sleep. When awake is called on a NPC it will run as
 if the sleep timer ran out, and thus making the script continue. Sleep and sleep2
 basically do the same, but the main difference is that sleep will not keep the rid,
-while sleep2 does.
+while sleep2 does. Also sleep2 will stop the script if there is no unit attached.
 
 Examples:
 	sleep 10000; //pause the script for 10 seconds and ditch the RID (so no player is attached anymore)
@@ -8797,6 +8796,8 @@ Example:
 Retrieves data related to given Battle Group. Type can be one of the following:
 
     0 - Amount of players currently belonging to the group.
+    1 - Store GID of players in <Battle Group> in a temporary global array $@arenamembers
+        and returns amount of players currently belonging to the group.
 
 ---------------------------------------
 
@@ -9419,12 +9420,6 @@ If <char id> is specified, the specified player is used rather than the attached
 The attached player will leave their clan. On a successful leave, true is returned,
 else false if the leave failed.
 If <char id> is specified, the specified player is used rather than the attached one.
-
----------------------------------------
-
-*clan_master(<clan id>);
-
-Show the emblem of the given <clan id> to the current NPC.
 
 ---------------------------------------
 

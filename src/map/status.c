@@ -7812,151 +7812,143 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 #undef SCDEF_JOBLVL_CAP
 }
 
-//[Ind] Fast-Checking sc-display array
+/**
+ * Applies SC effect
+ * @param bl: Source to apply effect
+ * @param type: Status change (SC_*)
+ * @param dval1~3: Depends on type of status change
+ * Author: Ind
+ */
 void status_display_add(struct block_list *bl, enum sc_type type, int dval1, int dval2, int dval3) {
+	struct eri *eri;
+	struct sc_display_entry **sc_display;
+	struct sc_display_entry ***sc_display_ptr;
 	struct sc_display_entry *entry;
-	struct map_session_data *sd = map_id2sd(bl->id);
-	struct npc_data *nd = map_id2nd(bl->id);
-	struct mob_data *md = map_id2md(bl->id);
 	int i;
+	unsigned char sc_display_count;
+	unsigned char *sc_display_count_ptr;
+
+	nullpo_retv(bl);
 
 	switch( bl->type ) {
-		case BL_PC:
-			for( i = 0; i < sd->sc_display_count; i++ ) {
-				if( sd->sc_display[i]->type == type )
-					break;
+		case BL_PC: {
+				struct map_session_data *sd = map_id2sd(bl->id);
+
+				sc_display_ptr = &sd->sc_display;
+				sc_display_count_ptr = &sd->sc_display_count;
+				eri = pc_sc_display_ers;
 			}
-			if( i != sd->sc_display_count ) {
-				sd->sc_display[i]->val1 = dval1;
-				sd->sc_display[i]->val2 = dval2;
-				sd->sc_display[i]->val3 = dval3;
-				return;
-			}
-			entry = ers_alloc(pc_sc_display_ers, struct sc_display_entry);
-			entry->type = type;
-			entry->val1 = dval1;
-			entry->val2 = dval2;
-			entry->val3 = dval3;
-			RECREATE(sd->sc_display, struct sc_display_entry *, ++sd->sc_display_count);
-			sd->sc_display[sd->sc_display_count - 1] = entry;
 			break;
-		case BL_NPC:
-			for( i = 0; i < nd->sc_display_count; i++ ) {
-				if( nd->sc_display[i]->type == type )
-					break;
+		case BL_NPC: {
+				struct npc_data *nd = map_id2nd(bl->id);
+
+				sc_display_ptr = &nd->sc_display;
+				sc_display_count_ptr = &nd->sc_display_count;
+				eri = npc_sc_display_ers;
 			}
-			if( i != nd->sc_display_count ) {
-				nd->sc_display[i]->val1 = dval1;
-				nd->sc_display[i]->val2 = dval2;
-				nd->sc_display[i]->val3 = dval3;
-				return;
-			}
-			entry = ers_alloc(npc_sc_display_ers, struct sc_display_entry);
-			entry->type = type;
-			entry->val1 = dval1;
-			entry->val2 = dval2;
-			entry->val3 = dval3;
-			RECREATE(nd->sc_display, struct sc_display_entry *, ++nd->sc_display_count);
-			nd->sc_display[nd->sc_display_count - 1] = entry;
 			break;
-		case BL_MOB:
-			for( i = 0; i < md->sc_display_count; i++ ) {
-				if( md->sc_display[i]->type == type )
-					break;
+		case BL_MOB: {
+				struct mob_data *md = map_id2md(bl->id);
+
+				sc_display_ptr = &md->sc_display;
+				sc_display_count_ptr = &md->sc_display_count;
+				eri = mob_sc_display_ers;
 			}
-			if( i != md->sc_display_count ) {
-				md->sc_display[i]->val1 = dval1;
-				md->sc_display[i]->val2 = dval2;
-				md->sc_display[i]->val3 = dval3;
-				return;
-			}
-			entry = ers_alloc(mob_sc_display_ers, struct sc_display_entry);
-			entry->type = type;
-			entry->val1 = dval1;
-			entry->val2 = dval2;
-			entry->val3 = dval3;
-			RECREATE(md->sc_display, struct sc_display_entry *, ++md->sc_display_count);
-			md->sc_display[md->sc_display_count - 1] = entry;
 			break;
+		default:
+			return;
 	}
+
+	sc_display = *sc_display_ptr;
+	sc_display_count = *sc_display_count_ptr;
+
+	ARR_FIND(0, sc_display_count, i, sc_display[i]->type == type);
+
+	if( i != sc_display_count ) {
+		sc_display[i]->val1 = dval1;
+		sc_display[i]->val2 = dval2;
+		sc_display[i]->val3 = dval3;
+		return;
+	}
+	entry = ers_alloc(eri, struct sc_display_entry);
+	entry->type = type;
+	entry->val1 = dval1;
+	entry->val2 = dval2;
+	entry->val3 = dval3;
+	RECREATE(sc_display, struct sc_display_entry *, ++sc_display_count);
+	sc_display[sc_display_count - 1] = entry;
+	*sc_display_ptr = sc_display;
+	*sc_display_count_ptr = sc_display_count;
 }
 
+/**
+ * Removes SC effect
+ * @param bl: Source to remove effect
+ * @param type: Status change (SC_*)
+ * Author: Ind
+ */
 void status_display_remove(struct block_list *bl, enum sc_type type) {
-	struct map_session_data *sd = map_id2sd(bl->id);
-	struct npc_data *nd = map_id2nd(bl->id);
-	struct mob_data *md = map_id2md(bl->id);
+	struct eri *eri;
+	struct sc_display_entry **sc_display;
+	struct sc_display_entry ***sc_display_ptr;
 	int i;
+	unsigned char sc_display_count;
+	unsigned char *sc_display_count_ptr;
+
+	nullpo_retv(bl);
 
 	switch( bl->type ) {
-		case BL_PC:
-			for( i = 0; i < sd->sc_display_count; i++ ) {
-				if( sd->sc_display[i]->type == type )
-					break;
-			}
-			if( i != sd->sc_display_count ) {
-				int cursor;
+		case BL_PC: {
+				struct map_session_data *sd = map_id2sd(bl->id);
 
-				ers_free(pc_sc_display_ers, sd->sc_display[i]);
-				sd->sc_display[i] = NULL;
-				for( i = 0, cursor = 0; i < sd->sc_display_count; i++ ) { //The all-mighty compact-o-matic
-					if( !sd->sc_display[i] )
-						continue;
-					if( i != cursor )
-						sd->sc_display[cursor] = sd->sc_display[i];
-					cursor++;
-				}
-				if( !(sd->sc_display_count = cursor) ) {
-					aFree(sd->sc_display);
-					sd->sc_display = NULL;
-				}
+				sc_display_ptr = &sd->sc_display;
+				sc_display_count_ptr = &sd->sc_display_count;
+				eri = pc_sc_display_ers;
 			}
 			break;
-		case BL_NPC:
-			for( i = 0; i < nd->sc_display_count; i++ ) {
-				if( nd->sc_display[i]->type == type )
-					break;
-			}
-			if( i != nd->sc_display_count ) {
-				int cursor;
+		case BL_NPC: {
+				struct npc_data *nd = map_id2nd(bl->id);
 
-				ers_free(npc_sc_display_ers, nd->sc_display[i]);
-				nd->sc_display[i] = NULL;
-				for( i = 0, cursor = 0; i < nd->sc_display_count; i++ ) { //The all-mighty compact-o-matic
-					if( !nd->sc_display[i] )
-						continue;
-					if( i != cursor )
-						nd->sc_display[cursor] = nd->sc_display[i];
-					cursor++;
-				}
-				if( !(nd->sc_display_count = cursor) ) {
-					aFree(nd->sc_display);
-					nd->sc_display = NULL;
-				}
+				sc_display_ptr = &nd->sc_display;
+				sc_display_count_ptr = &nd->sc_display_count;
+				eri = npc_sc_display_ers;
 			}
 			break;
-		case BL_MOB:
-			for( i = 0; i < md->sc_display_count; i++ ) {
-				if( md->sc_display[i]->type == type )
-					break;
-			}
-			if( i != md->sc_display_count ) {
-				int cursor;
+		case BL_MOB: {
+				struct mob_data *md = map_id2md(bl->id);
 
-				ers_free(mob_sc_display_ers, md->sc_display[i]);
-				md->sc_display[i] = NULL;
-				for( i = 0, cursor = 0; i < md->sc_display_count; i++ ) { //The all-mighty compact-o-matic
-					if( !md->sc_display[i] )
-						continue;
-					if( i != cursor )
-						md->sc_display[cursor] = md->sc_display[i];
-					cursor++;
-				}
-				if( !(md->sc_display_count = cursor) ) {
-					aFree(md->sc_display);
-					md->sc_display = NULL;
-				}
+				sc_display_ptr = &md->sc_display;
+				sc_display_count_ptr = &md->sc_display_count;
+				eri = mob_sc_display_ers;
 			}
 			break;
+		default:
+			return;
+	}
+
+	sc_display = *sc_display_ptr;
+	sc_display_count = *sc_display_count_ptr;
+
+	ARR_FIND(0, sc_display_count, i, sc_display[i]->type == type);
+
+	if( i != sc_display_count ) {
+		int cursor;
+
+		ers_free(eri, sc_display[i]);
+		sc_display[i] = NULL;
+		for( i = 0, cursor = 0; i < sc_display_count; i++ ) { //The all-mighty compact-o-matic
+			if( !sc_display[i] )
+				continue;
+			if( i != cursor )
+				sc_display[cursor] = sc_display[i];
+			cursor++;
+		}
+		if( !(sc_display_count = cursor) ) {
+			aFree(sc_display);
+			sc_display = NULL;
+		}
+		*sc_display_ptr = sc_display;
+		*sc_display_count_ptr = sc_display_count;
 	}
 }
 
@@ -10760,6 +10752,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 		}
 		status_display_add(bl,type,dval1,dval2,dval3);
+		clif_efst_set_enter(bl,bl,AREA);
 	}
 
 	switch (type) {

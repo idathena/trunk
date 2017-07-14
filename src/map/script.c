@@ -3666,9 +3666,7 @@ int run_script_timer(int tid, unsigned int tick, int id, intptr_t data)
 	if(id && st->rid) { //If it was a player before going to sleep and there is still a unit attached to the script
 		struct map_session_data *sd = map_id2sd(st->rid);
 
-		if(!sd) { //Attached player is offline or another unit type - should not happen
-			ShowWarning("Script sleep timer called by an offline character or non player unit.\n");
-			script_reportsrc(st);
+		if(!sd) { //Attached player is offline(logout) or another unit type(should not happen)
 			st->rid = 0;
 			st->state = END;
 		} else if(sd->status.char_id != id) { //Character mismatch, cancel execution
@@ -7806,36 +7804,37 @@ BUILDIN_FUNC(charid2rid)
 }
 
 /**
- * getequipid(<equipment slot>{,<char_id>})
+ * getequipid({<equipment slot>,<char_id>})
  */
 BUILDIN_FUNC(getequipid)
 {
 	int i, num;
 	TBL_PC *sd;
-	struct item_data *item;
 
 	if( !script_charid2sd(3,sd) ) {
 		script_pushint(st,-1);
 		return 1;
 	}
 
-	num = script_getnum(st,2);
-	if( !equip_index_check(num) ) {
+	if( script_hasdata(st,2) )
+		num = script_getnum(st,2);
+	else
+		num = EQI_COMPOUND_ON;
+
+	if( num == EQI_COMPOUND_ON )
+		i = current_equip_item_index;
+	else if( equip_index_check(num) ) //Get inventory position of item
+		i = pc_checkequip(sd,equip_bitmask[num]);
+	else {
+		ShowError("buildin_getequipid: Unknown equip index '%d'\n",num);
 		script_pushint(st,-1);
 		return 1;
 	}
 
-	// Get inventory position of item
-	i = pc_checkequip(sd,equip_bitmask[num]);
-	if( i < 0 ) {
-		script_pushint(st,-1);
-		return 0;
-	}
-
-	if( (item = sd->inventory_data[i]) )
-		script_pushint(st,item->nameid);
+	if( i >= 0 && i < MAX_INVENTORY && sd->inventory_data[i] )
+		script_pushint(st,sd->inventory_data[i]->nameid);
 	else
-		script_pushint(st,0);
+		script_pushint(st,-1);
 
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -16039,7 +16038,7 @@ BUILDIN_FUNC(minmax) {
 				return 1;
 			}
 
-			//Get the start and end indices of the array
+			//Get the start and end index of the array
 			start = reference_getindex(data);
 			end = getarraysize(st,id,start,0,reference_getref(data));
 
@@ -17808,41 +17807,59 @@ BUILDIN_FUNC(unitexist)
 /// sleep <mili seconds>;
 BUILDIN_FUNC(sleep)
 {
-	int ticks;
+	if( !st->sleep.tick ) { //First call(by function call)
+		int ticks;
 
-	ticks = script_getnum(st,2);
-	script_detach_rid(st); //Detach the player
-	if( ticks > 0 ) {
-		if( !st->sleep.tick ) { //Sleep for the target amount of time
-			st->state = RERUNLINE;
-			st->sleep.tick = ticks;
-		} else { //Sleep time is over
-			st->state = RUN;
-			st->sleep.tick = 0;
+		ticks = script_getnum(st,2);
+		if( ticks <= 0 ) {
+			ShowError("buildin_sleep2: negative amount('%d') of milli seconds is not supported\n", ticks);
+			return 1;
 		}
+		//Detach the player
+		script_detach_rid(st);
+		//Sleep for the target amount of time
+		st->state = RERUNLINE;
+		st->sleep.tick = ticks;
+	} else { //Second call(by timer after sleeping time is over)
+		//Continue the script
+		st->state = RUN;
+		st->sleep.tick = 0;
 	}
 
 	return SCRIPT_CMD_SUCCESS;
 }
 
 /// Pauses the execution of the script, keeping the unit attached
-/// Returns if the unit is still attached
+/// Stops the script if no unit is attached
 ///
-/// sleep2(<mili secconds>) -> <bool>
+/// sleep2(<milli seconds>)
 BUILDIN_FUNC(sleep2)
 {
-	int ticks;
+	if( !st->sleep.tick ) { //First call(by function call)
+		int ticks;
 
-	ticks = script_getnum(st,2);
-	if( ticks <= 0 )
-		script_pushint(st,(map_id2bl(st->rid) != NULL));
-	else if( !st->sleep.tick ) { //Sleep for the target amount of time
+		ticks = script_getnum(st,2);
+		if( ticks <= 0 ) {
+			ShowError("buildin_sleep2: negative amount('%d') of milli seconds is not supported\n", ticks);
+			return 1;
+		}
+		if( !map_id2bl(st->rid) ) {
+			ShowError("buildin_sleep2: no unit is attached\n");
+			return 1;
+		}
+		//Sleep for the target amount of time
 		st->state = RERUNLINE;
 		st->sleep.tick = ticks;
-	} else { //Sleep time is over
-		st->state = RUN;
-		st->sleep.tick = 0;
-		script_pushint(st,(map_id2bl(st->rid) != NULL));
+	} else { //Second call(by timer after sleeping time is over)
+		//Check if the unit is still attached
+		//NOTE: This should never happen, since run_script_timer already checks this
+		if( !map_id2bl(st->rid) ) { //The unit is not attached anymore - terminate the script
+			st->rid = 0;
+			st->state = END;
+		} else { //The unit is still attached - continue the script
+			st->state = RUN;
+			st->sleep.tick = 0;
+		}
 	}
 
 	return SCRIPT_CMD_SUCCESS;
@@ -18783,7 +18800,7 @@ BUILDIN_FUNC(bg_get_data)
 {
 	struct battleground_data *bg;
 	int bg_id = script_getnum(st,2),
-		type = script_getnum(st,3);
+		type = script_getnum(st,3), i;
 
 	if( (bg = bg_team_search(bg_id)) == NULL ) {
 		script_pushint(st,0);
@@ -18792,6 +18809,12 @@ BUILDIN_FUNC(bg_get_data)
 
 	switch( type ) {
 		case 0: script_pushint(st, bg->count); break;
+		case 1:
+			for( i = 0; bg->members[i].sd != NULL; i++ )
+				mapreg_setreg(reference_uid(add_str("$@arenamembers"), i), bg->members[i].sd->bl.id);
+			mapreg_setreg(add_str("$@arenamemberscount"), i);
+			script_pushint(st,i);
+			break;
 		default:
 			ShowError("script:bg_get_data: unknown data identifier %d\n", type);
 			break;
@@ -21205,23 +21228,6 @@ BUILDIN_FUNC(clan_leave) {
 }
 
 /**
- * Show clan emblem next to npc name
- * clan_master(<clan id>);
- */
-BUILDIN_FUNC(clan_master)
-{
-	struct block_list *bl = map_id2bl(st->oid);
-	int clan_id = script_getnum(st,2);
-
-	if (!bl)
-		return 0;
-
-	sc_start2(NULL,bl,SC_CLAN_INFO,100,0,clan_id,-1);
-	clif_efst_set_enter_unit(bl,AREA);
-	return SCRIPT_CMD_SUCCESS;
-}
-
-/**
  * jobcanentermap("<mapname>"{,<JobID>});
  * Check if (player with) JobID can enter the map.
  * @param mapname Map name
@@ -21618,7 +21624,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(strcharinfo,"i?"),
 	BUILDIN_DEF(strnpcinfo,"i"),
 	BUILDIN_DEF(charid2rid,"i"),
-	BUILDIN_DEF(getequipid,"i?"),
+	BUILDIN_DEF(getequipid,"??"),
 	BUILDIN_DEF(getequipuniqueid,"i?"),
 	BUILDIN_DEF(getequipname,"i?"),
 	BUILDIN_DEF(getbrokenid,"i?"), // [Valaris]
@@ -22077,7 +22083,6 @@ struct script_function buildin_func[] = {
 	//Clan system
 	BUILDIN_DEF(clan_join,"i?"),
 	BUILDIN_DEF(clan_leave,"?"),
-	BUILDIN_DEF(clan_master,"i"),
 	BUILDIN_DEF(jobcanentermap,"s?"),
 	//WoE TE
 	BUILDIN_DEF(agitstart3,""),

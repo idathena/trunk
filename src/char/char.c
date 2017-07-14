@@ -1089,7 +1089,7 @@ int mmo_gender(const struct char_session_data *sd, const struct mmo_charstatus *
 		case 'U':
 #if PACKETVER > 20151104
 			{
-				int account_id;
+				uint32 account_id;
 				char *data, *sex;
 
 				if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `account_id` FROM `%s` WHERE `char_id` = '%d'", char_db, p->char_id) )

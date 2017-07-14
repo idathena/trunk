@@ -40,8 +40,8 @@ struct chan_banentry {
  * return
  *  NULL : creation failed
  */
-struct Channel* channel_create(char *name, char *pass, unsigned char color, enum Channel_Type chantype, int val) {
-	struct Channel* channel;
+struct Channel *channel_create(char *name, char *pass, unsigned char color, enum Channel_Type chantype, int val) {
+	struct Channel *channel;
 
 	if(!name) return NULL;
 
@@ -409,7 +409,7 @@ int channel_chk(char *chname, char *chpass, int type){
  * return
  *  NULL : channel not found
  */
-struct Channel* channel_name2channel(char *chname, struct map_session_data *sd, int flag){
+struct Channel *channel_name2channel(char *chname, struct map_session_data *sd, int flag){
 	if(channel_chk(chname,NULL,1))
 		return NULL;
 	if(sd && strcmpi(chname + 1,channel_config.map_chname) == 0){
@@ -428,7 +428,6 @@ struct Channel* channel_name2channel(char *chname, struct map_session_data *sd, 
 	}
 	else
 		return (struct Channel*)strdb_get(channel_db,chname + 1);
-	return NULL;
 }
 
 /*

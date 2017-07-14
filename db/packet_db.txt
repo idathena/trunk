@@ -2795,7 +2795,7 @@ packet_keys: 0x09366971,0x005672F1,0x6F3712AE
 0x0934,26,partyinvite2,2
 //0x0938,4 //CZ_GANGSI_RANK
 0x091C,26,friendslistadd,2
-0x085E,5,hommenu,4
+0x085E,5,hommenu,2:4
 0x08AD,36,storagepassword,0
 
 //2016-12-28aRagexeRE
@@ -2891,7 +2891,7 @@ packet_keys: 0x2CC4749A,0x1FA954DC,0x72276857 //[4144]
 0x0899,26,partyinvite2,2
 //0x089E,4 //CZ_GANGSI_RANK
 0x0960,26,friendslistadd,2
-0x0958,5,hommenu,4
+0x0958,5,hommenu,2:4
 0x0947,36,storagepassword,0
 
 //Add new packets here
