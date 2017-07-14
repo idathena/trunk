@@ -73,7 +73,7 @@ struct AccountDBIterator
 	/// @param self Iterator
 	/// @param acc Account data
 	/// @return true if successful
-	bool (*next)(AccountDBIterator *self, struct mmo_account* acc);
+	bool (*next)(AccountDBIterator *self, struct mmo_account *acc);
 };
 
 
@@ -119,7 +119,7 @@ struct AccountDB
 	/// @param self Database
 	/// @param acc Account data
 	/// @return true if successful
-	bool (*create)(AccountDB *self, struct mmo_account* acc);
+	bool (*create)(AccountDB *self, struct mmo_account *acc);
 
 	/// Removes an account from this database.
 	///
@@ -134,7 +134,7 @@ struct AccountDB
 	/// @param self Database
 	/// @param acc Account data
 	/// @return true if successful
-	bool (*save)(AccountDB *self, const struct mmo_account* acc);
+	bool (*save)(AccountDB *self, const struct mmo_account *acc);
 
 	/// Finds an account with account_id and copies it to acc.
 	///
@@ -142,7 +142,7 @@ struct AccountDB
 	/// @param acc Pointer that receives the account data
 	/// @param account_id Target account id
 	/// @return true if successful
-	bool (*load_num)(AccountDB *self, struct mmo_account* acc, const int account_id);
+	bool (*load_num)(AccountDB *self, struct mmo_account *acc, const int account_id);
 
 	/// Finds an account with userid and copies it to acc.
 	///
@@ -150,7 +150,7 @@ struct AccountDB
 	/// @param acc Pointer that receives the account data
 	/// @param userid Target username
 	/// @return true if successful
-	bool (*load_str)(AccountDB *self, struct mmo_account* acc, const char *userid);
+	bool (*load_str)(AccountDB *self, struct mmo_account *acc, const char *userid);
 
 	/// Returns a new forward iterator.
 	///

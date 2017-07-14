@@ -1087,8 +1087,36 @@ int mmo_gender(const struct char_session_data *sd, const struct mmo_charstatus *
 		case 'F':
 			return SEX_FEMALE;
 		case 'U':
-		default:
-			return 99;
+#if PACKETVER > 20151104
+			{
+				int account_id;
+				char *data, *sex;
+
+				if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `account_id` FROM `%s` WHERE `char_id` = '%d'", char_db, p->char_id) )
+					Sql_ShowDebug(sql_handle);
+
+				if( SQL_SUCCESS != Sql_NextRow(sql_handle) ) {
+					Sql_FreeResult(sql_handle);
+					break;
+				}
+
+				Sql_GetData(sql_handle, 0, &data, NULL); account_id = atoi(data);
+				Sql_FreeResult(sql_handle);
+
+				if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `sex` FROM `login` WHERE `account_id` = '%d'", account_id) )
+					Sql_ShowDebug(sql_handle);
+
+				if( SQL_SUCCESS != Sql_NextRow(sql_handle) ) {
+					Sql_FreeResult(sql_handle);
+					break;
+				}
+
+				Sql_GetData(sql_handle, 0, &data, NULL); sex = data;
+				Sql_FreeResult(sql_handle);
+				return (sex[0] == 'M' ? SEX_MALE : SEX_FEMALE);
+			}
+#endif
+			break;
 	}
 #else
 	if( sex == 'M' || sex == 'F' ) {
@@ -1104,8 +1132,8 @@ int mmo_gender(const struct char_session_data *sd, const struct mmo_charstatus *
 		if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `sex` = 'U' WHERE `char_id` = '%d'", char_db, p->char_id) )
 			Sql_ShowDebug(sql_handle);
 	}
-	return 99;
 #endif
+	return 99;
 }
 
 int mmo_char_tobuf(uint8 *buf, struct mmo_charstatus *p);
