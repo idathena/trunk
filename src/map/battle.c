@@ -8633,6 +8633,7 @@ static const struct _battle_data {
 	{ "enable_critical_multihit",           &battle_config.enable_critical_multihit,        1,      0,      1,              },
 	{ "guild_leaderchange_delay",           &battle_config.guild_leaderchange_delay,        1440,   0,      INT32_MAX,      },
 	{ "guild_leaderchange_woe",             &battle_config.guild_leaderchange_woe,          0,      0,      1,              },
+	{ "banana_bomb_duration",               &battle_config.banana_bomb_duration,            0,      0,      UINT16_MAX,     },
 };
 
 /*==========================

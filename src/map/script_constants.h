@@ -663,7 +663,8 @@
 	script_set_constant("bMagicAddRace2",SP_MAGIC_ADDRACE2,false);
 	script_set_constant("bNoMagicGearFuel",SP_NO_MAGIC_GEAR_FUEL,false);
 
-	/* Equip indices */
+	/* Equip index */
+	export_constant(EQI_COMPOUND_ON);
 	export_constant(EQI_HEAD_TOP);
 	export_constant(EQI_ARMOR);
 	export_constant(EQI_HAND_L);
