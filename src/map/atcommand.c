@@ -682,7 +682,7 @@ ACMD_FUNC(who)
 					}
 					break;
 			}
-			clif_colormes(sd->fd, color_table[COLOR_DEFAULT], StringBuf_Value(&buf));
+			clif_displaymessage(fd, StringBuf_Value(&buf));
 			StringBuf_Clear(&buf);
 			count++;
 		}
@@ -6529,7 +6529,7 @@ ACMD_FUNC(npctalk)
 	strtok(name, "#"); // Discard extra name identifier if present
 	snprintf(temp, sizeof(temp), "%s : %s", name, mes);
 
-	if (ifcolor) clif_messagecolor(&nd->bl, color, temp);
+	if (ifcolor) clif_messagecolor(&nd->bl, color, temp, true, AREA_CHAT_WOC);
 	else clif_disp_overhead(&nd->bl, temp);
 
 	return 0;
@@ -8352,8 +8352,7 @@ ACMD_FUNC(cash)
 				// If this option is set, the message is already sent by pc function
 				if( !battle_config.cashshop_show_points ) {
 					sprintf(output, msg_txt(505), ret, sd->cashPoints); // Gained %d cash points. Total %d points.
-					clif_disp_onlyself(sd, output, strlen(output));
-					clif_displaymessage(fd, output);
+					clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 				}
 			} else
 				clif_displaymessage(fd, msg_txt(149)); // Impossible to increase the number/value.
@@ -8364,8 +8363,7 @@ ACMD_FUNC(cash)
 				// If this option is set, the message is already sent by pc function
 				if( !battle_config.cashshop_show_points ) {
 					sprintf(output, msg_txt(410), ret, sd->cashPoints); // Removed %d cash points. Total %d points.
-					clif_disp_onlyself(sd, output, strlen(output));
-					clif_displaymessage(fd, output);
+					clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 				}
 			} else
 				clif_displaymessage(fd, msg_txt(41)); // Unable to decrease the number/value.
@@ -8374,8 +8372,7 @@ ACMD_FUNC(cash)
 		if( value > 0 ) {
 			if( (ret = pc_getcash(sd, 0, value, LOG_TYPE_COMMAND)) >= 0 ) {
 				sprintf(output, msg_txt(506), ret, sd->kafraPoints); // Gained %d kafra points. Total %d points.
-				clif_disp_onlyself(sd, output, strlen(output));
-				clif_displaymessage(fd, output);
+				clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 			} else
 				clif_displaymessage(fd, msg_txt(149)); // Impossible to increase the number/value.
 		} else {
@@ -8383,8 +8380,7 @@ ACMD_FUNC(cash)
 				value = -sd->kafraPoints;
 			if( (ret = pc_paycash(sd, -value, -value, LOG_TYPE_COMMAND)) >= 0 ) {
 				sprintf(output, msg_txt(411), ret, sd->kafraPoints); // Removed %d kafra points. Total %d points.
-				clif_disp_onlyself(sd, output, strlen(output));
-				clif_displaymessage(fd, output);
+				clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 			} else
 				clif_displaymessage(fd, msg_txt(41)); // Unable to decrease the number/value.
 		}
@@ -8482,7 +8478,7 @@ ACMD_FUNC(request)
 
 	sprintf(atcmd_output, msg_txt(278), message); // (@request): %s
 	intif_wis_message_to_gm(sd->status.name, PC_PERM_RECEIVE_REQUESTS, atcmd_output);
-	clif_disp_onlyself(sd, atcmd_output, strlen(atcmd_output));
+	clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], atcmd_output, false, SELF);
 	clif_displaymessage(sd->fd, msg_txt(279)); // @request sent.
 	return 0;
 }
@@ -8506,7 +8502,7 @@ ACMD_FUNC(auction)
 	nullpo_ret(sd);
 
 	if (!battle_config.feature_auction) {
-		clif_colormes(sd->fd, color_table[COLOR_RED], msg_txt(1489)); // Auction system isn't available.
+		clif_messagecolor(&sd->bl, color_table[COLOR_RED], msg_txt(1489), false, SELF); // Auction system isn't available.
 		return 0;
 	}
 

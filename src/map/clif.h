@@ -644,7 +644,8 @@ void clif_storageclose(struct map_session_data *sd);
 int clif_insight(struct block_list *bl,va_list ap); // map_forallinmovearea callback
 int clif_outsight(struct block_list *bl,va_list ap); // map_forallinmovearea callback
 
-void clif_class_change(struct block_list *bl,int class_,int type);
+void clif_class_change_target(struct block_list *bl,int class_,int type, enum send_target target, struct map_session_data *sd);
+#define clif_class_change(bl, class_, type) clif_class_change_target(bl, class_, type, AREA, NULL)
 #define clif_mob_class_change(md, class_) clif_class_change(&md->bl, class_, 1)
 
 void clif_skillinfoblock(struct map_session_data *sd);
@@ -801,7 +802,6 @@ void clif_font(struct map_session_data *sd);
 
 // Atcommand
 void clif_displaymessage(const int fd, const char *mes);
-void clif_disp_onlyself(struct map_session_data *sd, const char *mes, int len);
 void clif_disp_message(struct block_list *src, const char *mes, int len, enum send_target target);
 void clif_broadcast(struct block_list *bl, const char *mes, int len, int type, enum send_target target);
 void clif_broadcast2(struct block_list *bl, const char *mes, int len, unsigned long fontColor, short fontType, short fontSize, short fontAlign, short fontY, enum send_target target);
@@ -834,8 +834,8 @@ void clif_friendslist_reqack(struct map_session_data *sd, struct map_session_dat
 void clif_weather(int16 m); // [Valaris]
 void clif_specialeffect(struct block_list *bl, int type, enum send_target target); // Special effects [Valaris]
 void clif_specialeffect_single(struct block_list *bl, int type, int fd);
-void clif_messagecolor(struct block_list *bl, unsigned long color, const char *msg); // Mob/Npc color talk [SnakeDrak]
-void clif_messagecolor2(struct map_session_data *sd, unsigned long color, const char *msg); // [Napster]
+void clif_messagecolor_target(struct block_list *bl, unsigned long color, const char *msg, bool rgb2bgr, enum send_target type, struct map_session_data *sd); // Mob/Npc color talk [SnakeDrak]
+#define clif_messagecolor(bl, color, msg, rgb2bgr, type) clif_messagecolor_target(bl, color, msg, rgb2bgr, type, NULL)
 void clif_specialeffect_value(struct block_list *bl, int effect_id, int num, send_target target);
 
 void clif_GM_kickack(struct map_session_data *sd, int result);
@@ -843,7 +843,8 @@ void clif_GM_kick(struct map_session_data *sd, struct map_session_data *tsd);
 void clif_manner_message(struct map_session_data *sd, uint32 type);
 void clif_GM_silence(struct map_session_data *sd, struct map_session_data *tsd, uint8 type);
 
-void clif_disp_overhead(struct block_list *bl, const char *mes);
+void clif_disp_overhead_(struct block_list *bl, const char *mes, enum send_target flag);
+#define clif_disp_overhead(bl, mes) clif_disp_overhead_(bl, mes, AREA)
 
 void clif_get_weapon_view(struct map_session_data *sd, unsigned short *rhand, unsigned short *lhand);
 
@@ -1017,10 +1018,10 @@ enum clif_colors {
 	COLOR_WHITE,
 	COLOR_YELLOW,
 	COLOR_CYAN,
+	COLOR_LIGHT_GREEN,
 	COLOR_MAX
 };
 unsigned long color_table[COLOR_MAX];
-int clif_colormes(int fd, unsigned long color, const char *msg);
 
 void clif_channel_msg(struct Channel *channel, struct map_session_data *sd, char *msg, short color);
 

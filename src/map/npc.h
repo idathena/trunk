@@ -61,6 +61,7 @@ struct npc_data {
 	void *chatdb; //Pointer to a npc_parse struct (see npc_chat.c)
 	char *path; //Path dir
 	enum npc_subtype subtype;
+	bool trigger_on_hidden;
 	int src_id;
 	union {
 		struct {

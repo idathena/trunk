@@ -2815,7 +2815,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 				if (map[bl->m].users <= 0 || sd->state.debug_remove_map) {
 					//This is only place where map users is decreased.
 					//If the mobs were removed too soon then this function was executed too many times [FlavioJS]
-					if (sd->debug_file == NULL || !(sd->state.debug_remove_map)) {
+					if (sd->debug_file == NULL || !sd->state.debug_remove_map) {
 						sd->debug_file = "";
 						sd->debug_line = 0;
 						sd->debug_func = "";
@@ -2973,7 +2973,7 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 	nullpo_ret(ud);
 
 	map_freeblock_lock();
-	if( bl->prev )	//Players are supposed to logout with a "warp" effect
+	if( bl->prev ) //Players are supposed to logout with a "warp" effect
 		unit_remove_map(bl, clrtype);
 
 	switch( bl->type ) {

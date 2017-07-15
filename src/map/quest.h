@@ -22,6 +22,7 @@ struct quest_objective {
 struct quest_db {
 	int id; //@TODO: find out if signed or unsigned in client
 	unsigned int time;
+	bool time_type;
 	uint8 objectives_count;
 	struct quest_objective *objectives;
 	uint8 dropitem_count;

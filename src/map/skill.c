@@ -1737,7 +1737,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 						case SC_FRESHSHRIMP:			case SC_HISS:			case SC_NYANGGRASS:
 						case SC_GROOMING:			case SC_SHRIMPBLESSING:		case SC_CHATTERING:
 						case SC_DORAM_WALKSPEED:		case SC_DORAM_MATK:		case SC_DORAM_FLEE2:
-						case SC_DORAM_SVSP:
+						case SC_DORAM_SVSP:			case SC_DORAM_BUF_01:		case SC_DORAM_BUF_02:
 						//Misc
 						case SC_SITDOWN_FORCE:			case SC_ALL_RIDING:		case SC_MONSTER_TRANSFORM:
 						case SC_PUSH_CART:			case SC_FULL_THROTTLE:		case SC_REBOUND:
@@ -7792,7 +7792,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_FRESHSHRIMP:			case SC_HISS:			case SC_NYANGGRASS:
 							case SC_GROOMING:			case SC_SHRIMPBLESSING:		case SC_CHATTERING:
 							case SC_DORAM_WALKSPEED:		case SC_DORAM_MATK:		case SC_DORAM_FLEE2:
-							case SC_DORAM_SVSP:
+							case SC_DORAM_SVSP:			case SC_DORAM_BUF_01:		case SC_DORAM_BUF_02:
 							//Misc
 							case SC_SITDOWN_FORCE:			case SC_ALL_RIDING:		case SC_MONSTER_TRANSFORM:
 							case SC_PUSH_CART:			case SC_FULL_THROTTLE:		case SC_REBOUND:
@@ -9268,6 +9268,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_HISS:				case SC_NYANGGRASS:		case SC_GROOMING:
 						case SC_SHRIMPBLESSING:			case SC_CHATTERING:		case SC_DORAM_WALKSPEED:
 						case SC_DORAM_MATK:			case SC_DORAM_FLEE2:		case SC_DORAM_SVSP:
+						case SC_DORAM_BUF_01:			case SC_DORAM_BUF_02:
 						//Misc
 						case SC_SITDOWN_FORCE:			case SC_ALL_RIDING:		case SC_MONSTER_TRANSFORM:
 						case SC_PUSH_CART:			case SC_FULL_THROTTLE:		case SC_REBOUND:
@@ -10848,7 +10849,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					//	char output[128];
 					//
 					//	safesnprintf(output,sizeof(output),msg_txt(378),(sce->val1 == MH_MD_FIGHTING ? "fighthing" : "grappling"));
-					//	clif_colormes(hd->master->fd,color_table[COLOR_RED],output);
+					//	clif_messagecolor(&hd->master->bl,color_table[COLOR_RED],output,false,SELF);
 					//}
 				}
 			}
@@ -15593,7 +15594,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 					char output[128];
 
 					sprintf(output,"%s",msg_txt(382)); // You're too close to a stone or emperium to do this skill
-					clif_colormes(sd->fd,color_table[COLOR_RED],output);
+					clif_messagecolor(&sd->bl,color_table[COLOR_RED],output,false,SELF);
 					return false;
 				}
 			}
@@ -19829,7 +19830,7 @@ int skill_poisoningweapon(struct map_session_data *sd, unsigned short nameid) {
 	if( sc_start4(&sd->bl,&sd->bl,SC_POISONINGWEAPON,100,
 		pc_checkskill(sd,GC_RESEARCHNEWPOISON),type,chance,0,skill_get_time(GC_POISONINGWEAPON,sd->menuskill_val)) ) {
 		sprintf(output,"[%s] Poison effect was applied to the weapon.",msg);
-		clif_colormes(sd->fd,color_table[COLOR_WHITE],output);
+		clif_messagecolor(&sd->bl,color_table[COLOR_WHITE],output,false,SELF);
 	}
 	return 0;
 }
