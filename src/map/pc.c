@@ -1340,7 +1340,7 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 		//Message of the Day [Valaris]
 		for (i = 0; i < MOTD_LINE_SIZE && motd_text[i][0]; i++) {
 			if (battle_config.motd_type)
-				clif_disp_onlyself(sd, motd_text[i], strlen(motd_text[i]));
+				clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], motd_text[i], false, SELF);
 			else
 				clif_displaymessage(sd->fd, motd_text[i]);
 		}
@@ -4202,7 +4202,7 @@ char pc_payzeny(struct map_session_data *sd, int zeny, enum e_log_pick_type type
 		char output[CHAT_SIZE_MAX];
 
 		sprintf(output, "Removed %dz.", zeny);
-		clif_disp_onlyself(sd, output, strlen(output));
+		clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 	}
 
 	return 0;
@@ -4240,7 +4240,7 @@ char pc_getzeny(struct map_session_data *sd, int zeny, enum e_log_pick_type type
 		char output[CHAT_SIZE_MAX];
 
 		sprintf(output, "Gained %dz.", zeny);
-		clif_disp_onlyself(sd, output, strlen(output));
+		clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 	}
 
 	return 0;
@@ -4289,7 +4289,7 @@ int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_ty
 		char output[CHAT_SIZE_MAX];
 
 		sprintf(output, msg_txt(504), points, cash, sd->kafraPoints, sd->cashPoints); // Used %d kafra points and %d cash points. %d kafra and %d cash points remaining.
-		clif_disp_onlyself(sd, output, strlen(output));
+		clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 	}
 
 	return cash + points;
@@ -4322,7 +4322,7 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 
 		if( battle_config.cashshop_show_points ) {
 			sprintf(output, msg_txt(505), cash, sd->cashPoints);
-			clif_disp_onlyself(sd, output, strlen(output));
+			clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 		}
 		return cash;
 	} else if( cash < 0 ) {
@@ -4342,7 +4342,7 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 
 		if( battle_config.cashshop_show_points ) {
 			sprintf(output, msg_txt(506), points, sd->kafraPoints);
-			clif_disp_onlyself(sd, output, strlen(output));
+			clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 		}
 		return points;
 	} else if( points < 0 ) {
@@ -4658,7 +4658,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 		return false;
 
 	if( sd->state.storage_flag && item->type != IT_CASH ) {
-		clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(388)); // You cannot use this item while storage is open.
+		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(388),false,SELF); // You cannot use this item while storage is open.
 		return false;
 	}
 
@@ -4774,7 +4774,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 			return false;
 		}
 		if( !pc_inventoryblank(sd) ) {
-			clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(1477)); // Item cannot be open when inventory is full.
+			clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1477),false,SELF); // Item cannot be open when inventory is full.
 			return false;
 		}
 	}
@@ -6458,7 +6458,7 @@ void pc_gainexp_disp(struct map_session_data *sd, unsigned int base_exp, unsigne
 		(lost) ? msg_txt(739) : msg_txt(738),
 		(long)base_exp * (lost ? -1 : 1), (base_exp / (float)next_base_exp * 100 * (lost ? -1 : 1)),
 		(long)job_exp * (lost ? -1 : 1), (job_exp / (float)next_job_exp * 100 * (lost ? -1 : 1)));
-	clif_disp_onlyself(sd, output, strlen(output));
+	clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 }
 
 /**
@@ -11295,7 +11295,7 @@ uint8 pc_itemcd_add(struct map_session_data *sd, struct item_data *id, unsigned 
 					sprintf(e_msg,msg_txt(379), (double)e_tick / 60); // Able to use %.1f min later.
 				else
 					sprintf(e_msg,msg_txt(380), e_tick + 1); // Able to use %d sec later.
-				clif_colormes(sd->fd,color_table[COLOR_YELLOW],e_msg);
+				clif_messagecolor(&sd->bl,color_table[COLOR_YELLOW],e_msg,false,SELF);
 				return 1; //Delay has not expired yet
 			}
 		} else //Not yet used item (all slots are initially empty)
@@ -11556,7 +11556,7 @@ enum e_BANKING_WITHDRAW_ACK pc_bank_withdraw(struct map_session_data *sd, int mo
 		return BWA_NO_MONEY;
 	else if( limit_check > MAX_ZENY ) {
 		//No official response for this scenario exists
-		clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(1509)); // You can't withdraw that much money.
+		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1509),false,SELF); // You can't withdraw that much money.
 		return BWA_UNKNOWN_ERROR;
 	}
 	if( pc_getzeny(sd,money,LOG_TYPE_BANK,NULL) )

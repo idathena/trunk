@@ -1423,6 +1423,8 @@
 	export_constant(SC_DORAM_SVSP);
 	export_constant(SC_STEAMPACK);
 	export_constant(SC_DAILYSENDMAILCNT);
+	export_constant(SC_DORAM_BUF_01);
+	export_constant(SC_DORAM_BUF_02);
 
 	/* Status icons */
 	export_constant(SI_BLANK);

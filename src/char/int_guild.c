@@ -568,8 +568,8 @@ static struct guild_castle *inter_guildcastle_fromsql(int castle_id)
 		Sql_GetData(sql_handle, 7, &data, NULL); gc->payTime = atoi(data);
 		Sql_GetData(sql_handle, 8, &data, NULL); gc->createTime = atoi(data);
 		Sql_GetData(sql_handle, 9, &data, NULL); gc->visibleC = atoi(data);
-		for (i = 10; i < 10+MAX_GUARDIANS; i++) {
-			Sql_GetData(sql_handle, i, &data, NULL); gc->guardian[i-10].visible = atoi(data);
+		for (i = 10; i < 10 + MAX_GUARDIANS; i++) {
+			Sql_GetData(sql_handle, i, &data, NULL); gc->guardian[i - 10].visible = atoi(data);
 		}
 	}
 	Sql_FreeResult(sql_handle);
@@ -1807,8 +1807,8 @@ int mapif_parse_GuildCastleDataSave(int fd, int castle_id, int index, int value)
 		case 8: gc->createTime = value; break;
 		case 9: gc->visibleC = value; break;
 		default:
-			if (index > 9 && index <= 9+MAX_GUARDIANS) {
-				gc->guardian[index-10].visible = value;
+			if (index > 9 && index <= 9 + MAX_GUARDIANS) {
+				gc->guardian[index - 10].visible = value;
 				break;
 			}
 			ShowError("mapif_parse_GuildCastleDataSave: not found index=%d\n", index);

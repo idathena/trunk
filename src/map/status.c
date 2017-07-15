@@ -1086,6 +1086,8 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_GVG_BLIND] = SI_GVG_BLIND;
 	StatusIconChangeTable[SC_STEAMPACK] = SI_STEAMPACK;
 	StatusIconChangeTable[SC_DAILYSENDMAILCNT] = SI_DAILYSENDMAILCNT;
+	StatusIconChangeTable[SC_DORAM_BUF_01] = SI_DORAM_BUF_01;
+	StatusIconChangeTable[SC_DORAM_BUF_02] = SI_DORAM_BUF_02;
 
 	//Other SC which are not necessarily associated to skills
 	StatusChangeFlagTable[SC_ASPDPOTION0] |= SCB_ASPD;
@@ -10589,6 +10591,11 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				tick = -1;
 				sc_start2(src,bl,SC_CLAN_INFO,100,0,val2,tick);
 				break;
+			case SC_DORAM_BUF_01:
+			case SC_DORAM_BUF_02:
+				tick_time = 10000; //Every 10 seconds
+				val4 = tick / tick_time;
+				break;
 			default:
 				if( calc_flag == SCB_NONE && StatusIconChangeTable[type] == SI_BLANK &&
 					!StatusSkillChangeTable[type] && !StatusChangeStateTable[type] ) {
@@ -11334,6 +11341,8 @@ int status_change_clear(struct block_list *bl,int type)
 				case SC_CROSSBOWCLAN:
 				case SC_JUMPINGCLAN:
 				case SC_DAILYSENDMAILCNT:
+				case SC_DORAM_BUF_01:
+				case SC_DORAM_BUF_02:
 					continue;
 			}
 		}
@@ -12224,12 +12233,8 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 	if (opt_flag&4) //Out of hiding, invoke on place
 		skill_unit_move(bl,gettick(),1);
 
-	if ((opt_flag&2) && sd) {
-		if (map_getcell(bl->m,bl->x,bl->y,CELL_CHKNPC))
-			npc_touch_areanpc(sd,bl->m,bl->x,bl->y); //Trigger on-touch event
-		else
-			npc_untouch_areanpc(sd,bl->m,bl->x,bl->y);
-	}
+	if ((opt_flag&2) && sd && !sd->state.warping && map_getcell(bl->m,bl->x,bl->y,CELL_CHKNPC))
+		npc_touch_areanpc(sd,bl->m,bl->x,bl->y); //Trigger on-touch event
 
 	ers_free(sc_data_ers,sce);
 	return 1;
@@ -13274,6 +13279,24 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				return 0;
 			}
 			break;
+
+		case SC_DORAM_BUF_01:
+			if( --(sce->val4) >= 0 ) {
+				if( status->hp < status->max_hp )
+					status_heal(bl,10,0,2);
+				sc_timer_next(10000 + tick,status_change_timer,bl->id,data);
+				return 0;
+			}
+			break;
+
+		case SC_DORAM_BUF_02:
+			if( --(sce->val4) >= 0 ) {
+				if( status->sp < status->max_sp )
+					status_heal(bl,0,5,2);
+				sc_timer_next(10000 + tick,status_change_timer,bl->id,data);
+				return 0;
+			}
+			break;
 	}
 
 	//If status has an interval and there is at least 100ms remaining time, wait for next interval
@@ -13508,6 +13531,15 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 			case SC_GEFFEN_MAGIC1:
 			case SC_GEFFEN_MAGIC2:
 			case SC_GEFFEN_MAGIC3:
+			case SC_CLAN_INFO:
+			case SC_SWORDCLAN:
+			case SC_ARCWANDCLAN:
+			case SC_GOLDENMACECLAN:
+			case SC_CROSSBOWCLAN:
+			case SC_JUMPINGCLAN:
+			case SC_DAILYSENDMAILCNT:
+			case SC_DORAM_BUF_01:
+			case SC_DORAM_BUF_02:
 				continue;
 			//Chemical Protection is only removed by some skills
 			case SC_CP_WEAPON:

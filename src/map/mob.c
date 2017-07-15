@@ -538,7 +538,7 @@ bool mob_ksprotected(struct block_list *src, struct block_list *target)
 		// Message to KS
 		if( DIFF_TICK(sd->ks_floodprotect_tick, tick) <= 0 ) {
 			sprintf(output, "[KS Warning!! - Owner : %s]", pl_sd->status.name);
-			clif_disp_onlyself(sd, output, strlen(output));
+			clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 
 			sd->ks_floodprotect_tick = tick + 2000;
 		}
@@ -546,7 +546,7 @@ bool mob_ksprotected(struct block_list *src, struct block_list *target)
 		// Message to Owner
 		if( DIFF_TICK(pl_sd->ks_floodprotect_tick, tick) <= 0 ) {
 			sprintf(output, "[Watch out! %s is trying to KS you!]", sd->status.name);
-			clif_disp_onlyself(pl_sd, output, strlen(output));
+			clif_messagecolor(&pl_sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 
 			pl_sd->ks_floodprotect_tick = tick + 2000;
 		}
@@ -3482,7 +3482,7 @@ int mobskill_use(struct mob_data *md, unsigned int tick, int event)
  			snprintf(name, sizeof name, "%s", md->name);
  			strtok(name, "#"); //Discard extra name identifier if present [Daegaladh]
  			snprintf(temp, sizeof temp, "%s : %s", name, mc->msg);
-			clif_messagecolor(&md->bl, mc->color, temp);
+			clif_messagecolor(&md->bl, mc->color, temp, true, AREA_CHAT_WOC);
 		}
 		if (!(battle_config.mob_ai&0x200)) { //Pass on delay to same skill
 			for (j = 0; j < md->db->maxskill; j++)

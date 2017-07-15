@@ -3653,6 +3653,7 @@
 19051,475,100	// Warrior_Moon_Cat_Hat
 19052,507,100	// Sigrun's_Wings_
 19053,475,100	// Fighter_Moon_Cat_Hat
+19084,467,100	// Parfaille_Vigilante_Hat
 19523,475,100	// Donation_Ribbon
 19531,475,100	// C_Cube_Mask
 19532,475,100	// C_Red_Bunny_Band
@@ -3838,6 +3839,12 @@
 //22950,475,100	//
 //22951,475,100	//
 //22952,475,100	//
+25043,499,100	// Thorny_Vine_Flute
+25045,499,100	// Luxurious_Cloth
+25046,499,100	// Boarding_Pass
+25047,499,100	// Kahlunac
+25048,499,100	// Hearty_Lunchbox
+25049,499,100	// Basilac_Clam
 26100,435,100	// P_Foxtail_Staff2
 26101,435,100	// P_Foxtail_Staff3
 28105,467,100	// Infinity_Twohand_Axe

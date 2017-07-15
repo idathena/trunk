@@ -962,8 +962,11 @@ int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 	}
 	switch( map[m].npc[i]->subtype ) {
 		case NPCTYPE_WARP:
-			if( pc_ishiding(sd) || (sd->sc.count && (sd->sc.data[SC_CAMOUFLAGE] || sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__SHADOWFORM])) || pc_isdead(sd) )
+			if( (!map[m].npc[i]->trigger_on_hidden && (pc_ishiding(sd) || (sd->sc.count && (sd->sc.data[SC_CAMOUFLAGE] ||
+				sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__SHADOWFORM])))) || pc_isdead(sd) )
 				break; //Hidden or dead chars cannot use warps
+			if( !pc_job_can_entermap((enum e_job)sd->status.class_,map_mapindex2mapid(map[m].npc[i]->u.warp.mapindex),sd->group_level) )
+				break;
 			if( sd->count_rewarp > 10 ) {
 				ShowWarning("Prevented infinite warp loop for player (%d:%d). Please fix NPC: '%s', path: '%s'\n",sd->status.account_id,sd->status.char_id,map[m].npc[i]->exname,map[m].npc[i]->path);
 				sd->count_rewarp = 0;
@@ -979,7 +982,8 @@ int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 						continue;
 					if( (sd->bl.x >= (map[m].npc[j]->bl.x - map[m].npc[j]->u.warp.xs) && sd->bl.x <= (map[m].npc[j]->bl.x + map[m].npc[j]->u.warp.xs)) &&
 						(sd->bl.y >= (map[m].npc[j]->bl.y - map[m].npc[j]->u.warp.ys) && sd->bl.y <= (map[m].npc[j]->bl.y + map[m].npc[j]->u.warp.ys)) ) {
-						if( pc_ishiding(sd) || (sd->sc.count && (sd->sc.data[SC_CAMOUFLAGE] || sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__SHADOWFORM])) || pc_isdead(sd) )
+						if( (!map[m].npc[i]->trigger_on_hidden && (pc_ishiding(sd) || (sd->sc.count && (sd->sc.data[SC_CAMOUFLAGE] ||
+							sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__SHADOWFORM])))) || pc_isdead(sd) )
 							break; //Hidden or dead chars cannot use warps
 						pc_setpos(sd,map[m].npc[j]->u.warp.mapindex,map[m].npc[j]->u.warp.x,map[m].npc[j]->u.warp.y,CLR_OUTSIGHT);
 						found_warp = 1;
@@ -1284,7 +1288,7 @@ int npc_click(struct map_session_data *sd, struct npc_data *nd)
 					if (nd->u.shop.shop_item[i].qty)
 						break;
 				if (i == nd->u.shop.count) {
-					clif_colormes(sd->fd,color_table[COLOR_RED],msg_txt(500));
+					clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(500),false,SELF);
 					return 0;
 				}
 				sd->npc_shopid = nd->bl.id;
@@ -1400,7 +1404,7 @@ static enum e_CASHSHOP_ACK npc_cashshop_process_payment(struct npc_data *nd, int
 					memset(output, '\0', sizeof(output));
 
 					sprintf(output, msg_txt(712), (id ? id->jname : "NULL"), (id ? id->nameid : 0)); // You do not have enough %s (ID: %hu).
-					clif_colormes(sd->fd, color_table[COLOR_RED], output);
+					clif_messagecolor(&sd->bl, color_table[COLOR_RED], output, false, SELF);
 					return ERROR_TYPE_PURCHASE_FAIL;
 				}
 				if( id )
@@ -1416,12 +1420,12 @@ static enum e_CASHSHOP_ACK npc_cashshop_process_payment(struct npc_data *nd, int
 
 				if( cost[0] < (price - points) ) {
 					sprintf(output, msg_txt(713), nd->u.shop.pointshop_str); // You do not have enough '%s'.
-					clif_colormes(sd->fd, color_table[COLOR_RED], output);
+					clif_messagecolor(&sd->bl, color_table[COLOR_RED], output, false, SELF);
 					return ERROR_TYPE_PURCHASE_FAIL;
 				}
 				pc_setreg2(sd, nd->u.shop.pointshop_str, cost[0] - (price - points));
 				sprintf(output, msg_txt(716), nd->u.shop.pointshop_str, cost[0] - (price - points)); // Your '%s' is now: %d
-				clif_disp_onlyself(sd, output, strlen(output) + 1);
+				clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 			}
 			break;
 	}
@@ -2403,9 +2407,10 @@ struct npc_data *npc_add_warp(char *name, short from_mapid, short from_x, short 
 	nd->u.warp.x = to_x;
 	nd->u.warp.y = to_y;
 	nd->u.warp.xs = xs;
-	nd->u.warp.ys = xs;
+	nd->u.warp.ys = ys;
 	nd->bl.type = BL_NPC;
 	nd->subtype = NPCTYPE_WARP;
+	nd->trigger_on_hidden = false;
 	npc_setcells(nd);
 	if( map_addblock(&nd->bl) )
 		return NULL;
@@ -2477,6 +2482,10 @@ static const char *npc_parse_warp(char *w1, char *w2, char *w3, char *w4, const 
 	npc_warp++;
 	nd->bl.type = BL_NPC;
 	nd->subtype = NPCTYPE_WARP;
+	if( !strcasecmp("warp2", w2) )
+		nd->trigger_on_hidden = true;
+	else
+		nd->trigger_on_hidden = false;
 	npc_setcells(nd);
 	if( map_addblock(&nd->bl) ) //Couldn't add on map
 		return strchr(start,'\n');
@@ -3074,6 +3083,7 @@ const char *npc_parse_duplicate(char *w1, char *w2, char *w3, char *w4, const ch
 			nd->u.warp.mapindex = dnd->u.warp.mapindex;
 			nd->u.warp.x = dnd->u.warp.x;
 			nd->u.warp.y = dnd->u.warp.y;
+			nd->trigger_on_hidden = dnd->trigger_on_hidden;
 			break;
 	}
 
@@ -3164,6 +3174,7 @@ int npc_duplicate4instance(struct npc_data *snd, int16 m) {
 		wnd->u.warp.ys = snd->u.warp.ys;
 		wnd->bl.type = BL_NPC;
 		wnd->subtype = NPCTYPE_WARP;
+		wnd->trigger_on_hidden = snd->trigger_on_hidden;
 		wnd->src_id = (snd->src_id ? snd->src_id : snd->bl.id);
 		npc_setcells(wnd);
 		if( map_addblock(&wnd->bl) )
@@ -4261,7 +4272,7 @@ int npc_parsesrcfile(const char *filepath, bool runOnInit)
 			}
 		}
 
-		if( strcasecmp(w2, "warp") == 0 && count > 3 )
+		if( (strcasecmp(w2, "warp") == 0 || strcasecmp(w2, "warp2") == 0) && count > 3 )
 			p = npc_parse_warp(w1, w2, w3, w4, p, buffer, filepath);
 		else if( (!strcasecmp(w2, "shop") || !strcasecmp(w2, "cashshop") || !strcasecmp(w2, "itemshop") ||
 			!strcasecmp(w2, "pointshop") || !strcasecmp(w2, "marketshop")) && count > 3 )

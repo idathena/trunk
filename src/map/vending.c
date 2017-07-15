@@ -225,7 +225,7 @@ void vending_purchasereq(struct map_session_data *sd, int aid, int uid, const ui
 			char temp[256];
 
 			sprintf(temp, msg_txt(265), sd->status.name);
-			clif_disp_onlyself(vsd,temp,strlen(temp));
+			clif_messagecolor(&vsd->bl, color_table[COLOR_LIGHT_GREEN], temp, false, SELF);
 		}
 	}
 
