@@ -493,15 +493,6 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 				if( tsc->data[SC_MAGNETICFIELD] ) //Freed if received earth damage
 					status_change_end(target,SC_MAGNETICFIELD,INVALID_TIMER);
 				break;
-			case ELE_NEUTRAL:
-				if( tsc->data[SC_ANTI_M_BLAST] ) {
-#ifdef RENEWAL
-					ratio += tsc->data[SC_ANTI_M_BLAST]->val2;
-#else
-					damage += (int64)(damage * tsc->data[SC_ANTI_M_BLAST]->val2 / 100);
-#endif
-				}
-				break;
 		}
 	}
 

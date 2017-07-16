@@ -10539,12 +10539,6 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			safesnprintf(output,sizeof(output),"[ Kill Steal Protection Disabled. KS is allowed in this map ]");
 			clif_broadcast(&sd->bl,output,strlen(output) + 1,BC_BLUE,SELF);
 		}
-		if(map_flag_gvg2(sd->bl.m)) {
-			if(sd->sc.data[SC_C_MARKER])
-				status_change_end(&sd->bl,SC_C_MARKER,INVALID_TIMER);
-			if(sd->sc.data[SC_ANTI_M_BLAST])
-				status_change_end(&sd->bl,SC_ANTI_M_BLAST,INVALID_TIMER);
-		}
 		status_change_clear_onChangeMap(&sd->bl,&sd->sc);
 		map_iwall_get(sd); //Updates Walls Info on this Map to Client
 		status_calc_pc(sd,(sd->state.autotrade ? SCO_FIRST : SCO_NONE)); //Some conditions are map-dependent so we must recalculate
