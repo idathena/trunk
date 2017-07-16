@@ -4079,6 +4079,8 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			sd->reseff[SC_SILENCE] = 10000;
 		if (sc->data[SC_GVG_BLIND])
 			sd->reseff[SC_BLIND] = 10000;
+		if (sc->data[SC_ANTI_M_BLAST])
+			sd->subrace[RC_DEMIHUMAN] -= sc->data[SC_ANTI_M_BLAST]->val2;
 	}
 	status_cpy(&sd->battle_status,status);
 

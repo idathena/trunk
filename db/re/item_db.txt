@@ -2136,7 +2136,7 @@
 2987,Snake_Pendant,Snake Pendant,4,20,,100,,3,,1,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bAgi,3; bonus bLuk,2; bonus bMdef,3; },{},{}
 2988,Winged_Ring_Of_Newoz,New Oz's Wing Ring,4,62000,,100,,0,,1,0x00080000,56,1,136,,130,0,0,{ bonus bVariableCastrate,-25; },{},{}
 2989,Floral_Bracelet_Of_Igu,Aigu's Floral Bracelet,4,62000,,100,,0,,1,0x00080000,56,0,136,,130,0,0,{ bonus bVariableCastrate,-25; },{},{}
-2990,Pendant_Of_Harmony,Pendant of Harmony,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,130,0,0,{ bonus bMatkRate,6; bonus bHPrecovRate,50; bonus bSPrecovRate,50; bonus2 bSubEle,Ele_Holy,5; bonus3 bAutoSpell,"AB_RENOVATIO",1,30; bonus3 bAutoSpellWhenHit,"PR_SANCTUARY",5,50; bonus bStr,-5; },{},{}
+2990,Pendant_Of_Harmony,Pendant of Harmony,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,130,0,0,{ bonus bMatkRate,6; bonus bHPrecovRate,50; bonus bSPrecovRate,50; bonus2 bSubEle,Ele_Holy,5; bonus3 bAutoSpell,"AB_RENOVATIO",1,30; bonus4 bAutoSpellWhenHit,"PR_SANCTUARY",5,50,0; bonus bStr,-5; },{},{}
 2991,Pendant_Of_Chaos,Pendant of Chaos,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,130,0,0,{ bonus2 bAddClass,Class_All,6; bonus2 bSubEle,Ele_Dark,5; bonus2 bResEff,Eff_Confusion,10000; bonus2 bAddEff,Eff_Confusion,500; bonus3 bAutoSpellWhenHit,"NPC_WIDECONFUSE",2,30; bonus bInt,-5; },{},{}
 2992,Pendant_Of_Maelstorm,Pendant of Maelstorm,4,20,,100,,0,,1,0xFFFFFFFF,63,2,136,,130,0,0,{ bonus2 bAddClass,Class_All,6; bonus bMatkRate,6; bonus bAllStats,1; bonus5 bAutoSpellWhenHit,"SC_MAELSTROM",1,100,BF_MAGIC,0; },{},{}
 2995,Supplement_Part_Dex,Supplement Part DEX,4,20,,100,,0,,1,0x00000400,56,2,136,,100,0,0,{ bonus bUseSPrate,-10; bonus bDelayrate,-10; bonus bVariableCastrate,-10; },{},{}
