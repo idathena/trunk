@@ -948,130 +948,137 @@ static int itemdb_combo_split_atoi(char *str, int *val) {
  * <combo{:combo{:combo:{..}}}>,<{ script }>
  */
 static void itemdb_read_combos() {
-	uint32 lines = 0, count = 0;
-	char line[1024];
+	const char *filename[] = {
+		DBPATH"item_combo_db.txt",
+		"item_combo_db2.txt"
+	};
+	int fi;
 
-	char path[256];
-	FILE *fp;
+	for (fi = 0; fi < ARRAYLENGTH(filename); ++fi) {
+		uint32 lines = 0, count = 0;
+		char line[1024];
+		char path[256];
+		FILE *fp;
 
-	sprintf(path, "%s/%s", db_path, DBPATH"item_combo_db.txt");
+		sprintf(path, "%s/%s", db_path, filename[fi]);
 
-	if ((fp = fopen(path, "r")) == NULL) {
-		ShowError("itemdb_read_combos: File not found \"%s\".\n", path);
-		return;
-	}
-
-	// Process rows one by one
-	while (fgets(line, sizeof(line), fp)) {
-		char *str[2], *p;
-
-		lines++;
-
-		if (line[0] == '/' && line[1] == '/')
-			continue;
-
-		memset(str, 0, sizeof(str));
-		p = line;
-		p = trim(p);
-
-		if (*p == '\0')
-			continue; // Empty line
-
-		if (!strchr(p,',')) {
-			// Is there even a single column?
-			ShowError("itemdb_read_combos: Insufficient columns in line %d of \"%s\", skipping.\n", lines, path);
-			continue;
+		if ((fp = fopen(path, "r")) == NULL) {
+			ShowError("itemdb_read_combos: File not found \"%s\".\n", path);
+			return;
 		}
 
-		str[0] = p;
-		p = strchr(p,',');
-		*p = '\0';
-		p++;
+		// Process rows one by one
+		while (fgets(line, sizeof(line), fp)) {
+			char *str[2], *p;
 
-		str[1] = p;
-		p = strchr(p,',');
-		p++;
+			lines++;
 
-		if (str[1][0] != '{') {
-			ShowError("itemdb_read_combos(#1): Invalid format (Script column) in line %d of \"%s\", skipping.\n", lines, path);
-			continue;
-		}
+			if (line[0] == '/' && line[1] == '/')
+				continue;
 
-		// No ending key anywhere (missing \}\)
-		if (str[1][strlen(str[1]) - 1] != '}') {
-			ShowError("itemdb_read_combos(#2): Invalid format (Script column) in line %d of \"%s\", skipping.\n", lines, path);
-			continue;
-		} else {
-			int items[MAX_ITEMS_PER_COMBO];
-			int v = 0, retcount = 0;
-			struct item_data *id = NULL;
-			int idx = 0;
+			memset(str, 0, sizeof(str));
+			p = line;
+			p = trim(p);
 
-			if ((retcount = itemdb_combo_split_atoi(str[0], items)) < 2) {
-				ShowError("itemdb_read_combos: line %d of \"%s\" doesn't have enough items to make for a combo (min:2), skipping.\n", lines, path);
+			if (*p == '\0')
+				continue; // Empty line
+
+			if (!strchr(p,',')) {
+				// Is there even a single column?
+				ShowError("itemdb_read_combos: Insufficient columns in line %d of \"%s\", skipping.\n", lines, path);
 				continue;
 			}
 
-			// Validate
-			for (v = 0; v < retcount; v++) {
-				if (!itemdb_exists(items[v])) {
-					ShowError("itemdb_read_combos: line %d of \"%s\" contains unknown item ID %d, skipping.\n", lines, path,items[v]);
-					break;
+			str[0] = p;
+			p = strchr(p,',');
+			*p = '\0';
+			p++;
+
+			str[1] = p;
+			p = strchr(p,',');
+			p++;
+
+			if (str[1][0] != '{') {
+				ShowError("itemdb_read_combos(#1): Invalid format (Script column) in line %d of \"%s\", skipping.\n", lines, path);
+				continue;
+			}
+
+			// No ending key anywhere (missing \}\)
+			if (str[1][strlen(str[1]) - 1] != '}') {
+				ShowError("itemdb_read_combos(#2): Invalid format (Script column) in line %d of \"%s\", skipping.\n", lines, path);
+				continue;
+			} else {
+				int items[MAX_ITEMS_PER_COMBO];
+				int v = 0, retcount = 0;
+				struct item_data *id = NULL;
+				int idx = 0;
+
+				if ((retcount = itemdb_combo_split_atoi(str[0], items)) < 2) {
+					ShowError("itemdb_read_combos: line %d of \"%s\" doesn't have enough items to make for a combo (min:2), skipping.\n", lines, path);
+					continue;
 				}
-			}
 
-			// Failed at some item
-			if (v < retcount)
-				continue;
+				// Validate
+				for (v = 0; v < retcount; v++) {
+					if (!itemdb_exists(items[v])) {
+						ShowError("itemdb_read_combos: line %d of \"%s\" contains unknown item ID %d, skipping.\n", lines, path, items[v]);
+						break;
+					}
+				}
 
-			id = itemdb_exists(items[0]);
-			idx = id->combos_count;
+				// Failed at some item
+				if (v < retcount)
+					continue;
 
-			// First entry, create
-			if (id->combos == NULL) {
-				CREATE(id->combos, struct item_combo*, 1);
-				id->combos_count = 1;
-			} else
-				RECREATE(id->combos, struct item_combo*, ++id->combos_count);
+				id = itemdb_exists(items[0]);
+				idx = id->combos_count;
 
-			CREATE(id->combos[idx],struct item_combo,1);
-			id->combos[idx]->nameid = aMalloc(retcount * sizeof(unsigned short));
-			id->combos[idx]->count = retcount;
-			id->combos[idx]->script = parse_script(str[1], path, lines, 0);
-			id->combos[idx]->id = count;
-			id->combos[idx]->isRef = false;
-
-			// Populate ->nameid field
-			for (v = 0; v < retcount; v++)
-				id->combos[idx]->nameid[v] = items[v];
-
-			// Populate the children to refer to this combo
-			for (v = 1; v < retcount; v++) {
-				struct item_data *it;
-				int index;
-
-				it = itemdb_exists(items[v]);
-				index = it->combos_count;
-
-				if (it->combos == NULL) {
-					CREATE(it->combos, struct item_combo*, 1);
-					it->combos_count = 1;
+				// First entry, create
+				if (id->combos == NULL) {
+					CREATE(id->combos, struct item_combo *, 1);
+					id->combos_count = 1;
 				} else
-					RECREATE(it->combos, struct item_combo*, ++it->combos_count);
+					RECREATE(id->combos, struct item_combo *, ++id->combos_count);
 
-				CREATE(it->combos[index],struct item_combo,1);
-				// We copy previously alloc'd pointers and just set it to reference
-				memcpy(it->combos[index],id->combos[idx],sizeof(struct item_combo));
-				// We flag this way to ensure we don't double-dealloc same data
-				it->combos[index]->isRef = true;
+				CREATE(id->combos[idx], struct item_combo, 1);
+				id->combos[idx]->nameid = aMalloc(retcount * sizeof(unsigned short));
+				id->combos[idx]->count = retcount;
+				id->combos[idx]->script = parse_script(str[1], path, lines, 0);
+				id->combos[idx]->id = count;
+				id->combos[idx]->isRef = false;
+
+				// Populate ->nameid field
+				for (v = 0; v < retcount; v++)
+					id->combos[idx]->nameid[v] = items[v];
+
+				// Populate the children to refer to this combo
+				for (v = 1; v < retcount; v++) {
+					struct item_data *it;
+					int index;
+
+					it = itemdb_exists(items[v]);
+					index = it->combos_count;
+
+					if (it->combos == NULL) {
+						CREATE(it->combos, struct item_combo *, 1);
+						it->combos_count = 1;
+					} else
+						RECREATE(it->combos, struct item_combo *, ++it->combos_count);
+
+					CREATE(it->combos[index], struct item_combo, 1);
+					// We copy previously alloc'd pointers and just set it to reference
+					memcpy(it->combos[index], id->combos[idx], sizeof(struct item_combo));
+					// We flag this way to ensure we don't double-dealloc same data
+					it->combos[index]->isRef = true;
+				}
+				uidb_put(itemdb_combo, id->combos[idx]->id, id->combos[idx]);
 			}
-			uidb_put(itemdb_combo,id->combos[idx]->id,id->combos[idx]);
+			count++;
 		}
-		count++;
-	}
 
-	fclose(fp);
-	ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"item_combo_db"CL_RESET"'.\n", count);
+		fclose(fp);
+		ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, path);
+	}
 }
 
 /**

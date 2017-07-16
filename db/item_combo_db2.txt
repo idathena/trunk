@@ -1,0 +1,4 @@
+// Items Combo Database
+//
+// Structure of Database:
+// ID:ID:ID:ID,{ Script }
