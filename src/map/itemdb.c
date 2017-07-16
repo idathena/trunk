@@ -722,10 +722,7 @@ static void itemdb_read_itemgroup(void)
 	itemdb_read_itemgroup_sub(path);
 }
 
-/** Read item forbidden by mapflag (can't equip item)
- * Structure: <nameid>,<mode>
- */
-static bool itemdb_read_noequip(char *str[], int columns, int current)
+static bool itemdb_noequip_parse_dbrow(char *str[], int columns, int current)
 {
 	unsigned short nameid;
 	struct item_data *id;
@@ -733,7 +730,7 @@ static bool itemdb_read_noequip(char *str[], int columns, int current)
 	nameid = atoi(str[0]);
 
 	if( (id = itemdb_exists(nameid)) == NULL ) {
-		ShowWarning("itemdb_read_noequip: Invalid item id %hu.\n", nameid);
+		ShowWarning("itemdb_noequip_parse_dbrow: Invalid item id %hu.\n", nameid);
 		return false;
 	}
 
@@ -742,11 +739,29 @@ static bool itemdb_read_noequip(char *str[], int columns, int current)
 	return true;
 }
 
-/** Reads item trade restrictions [Skotlex]
- * Structure: <nameid>,<mask>,<gm level>
+/** Read item forbidden by mapflag (can't equip item)
+ * Structure: <nameid>,<mode>
  */
-static bool itemdb_read_itemtrade(char *str[], int columns, int current)
-{
+static void itemdb_read_noequip() {
+	const char *filename[] = {
+		DBPATH"item_noequip.txt",
+		"item_noequip_db2.txt"
+	};
+	int fi;
+
+	for( fi = 0; fi < ARRAYLENGTH(filename); ++fi ) {
+		if( fi > 0 ) {
+			char path[256];
+
+			sprintf(path, "%s/%s", db_path, filename[fi]);
+			if( !exists(path) )
+				continue;
+		}
+		sv_readdb(db_path, filename[fi], ',', 2, 2, -1, &itemdb_noequip_parse_dbrow);
+	}
+}
+
+static bool itemdb_itemtrade_parse_dbrow(char *str[], int columns, int current) {
 	unsigned short nameid;
 	int flag, gmlv;
 	struct item_data *id;
@@ -754,7 +769,7 @@ static bool itemdb_read_itemtrade(char *str[], int columns, int current)
 	nameid = atoi(str[0]);
 
 	if( (id = itemdb_exists(nameid)) == NULL ) {
-		//ShowWarning("itemdb_read_itemtrade: Invalid item id %d.\n", nameid);
+		//ShowWarning("itemdb_itemtrade_parse_dbrow: Invalid item id %d.\n", nameid);
 		//return false;
 		//FIXME: item_trade.txt contains items, which are commented in item database.
 		return true;
@@ -764,11 +779,11 @@ static bool itemdb_read_itemtrade(char *str[], int columns, int current)
 	gmlv = atoi(str[2]);
 
 	if( flag > ITR_ALL ) { //Check range
-		ShowWarning("itemdb_read_itemtrade: Invalid trading mask %d for item id %hu.\n", flag, nameid);
+		ShowWarning("itemdb_itemtrade_parse_dbrow: Invalid trading mask %d for item id %hu.\n", flag, nameid);
 		return false;
 	}
 	if( gmlv < 1 ) {
-		ShowWarning("itemdb_read_itemtrade: Invalid override GM level %d for item id %hu.\n", gmlv, nameid);
+		ShowWarning("itemdb_itemtrade_parse_dbrow: Invalid override GM level %d for item id %hu.\n", gmlv, nameid);
 		return false;
 	}
 
@@ -776,6 +791,28 @@ static bool itemdb_read_itemtrade(char *str[], int columns, int current)
 	id->gm_lv_trade_override = gmlv;
 
 	return true;
+}
+
+/** Reads item trade restrictions [Skotlex]
+ * Structure: <nameid>,<mask>,<gm level>
+ */
+static void itemdb_read_itemtrade() {
+	const char *filename[] = {
+		DBPATH"item_trade.txt",
+		"item_trade_db2.txt"
+	};
+	int fi;
+
+	for( fi = 0; fi < ARRAYLENGTH(filename); ++fi ) {
+		if( fi > 0 ) {
+			char path[256];
+
+			sprintf(path, "%s/%s", db_path, filename[fi]);
+			if( !exists(path) )
+				continue;
+		}
+		sv_readdb(db_path, filename[fi], ',', 3, 3, -1, &itemdb_itemtrade_parse_dbrow);
+	}
 }
 
 /** Reads item delay amounts [Paradox924X]
@@ -854,29 +891,48 @@ static bool itemdb_read_stack(char *fields[], int columns, int current)
 	return true;
 }
 
-/** Reads items allowed to be sold in buying stores
- * Structure: <nameid>
- */
-static bool itemdb_read_buyingstore(char *fields[], int columns, int current)
+static bool itemdb_buyingstore_parse_dbrow(char *fields[], int columns, int current)
 {
 	unsigned short nameid;
 	struct item_data *id;
 
 	nameid = atoi(fields[0]);
 
-	if( (id = itemdb_exists(nameid)) == NULL ) {
-		ShowWarning("itemdb_read_buyingstore: Invalid item id %hu.\n", nameid);
+	if( !(id = itemdb_exists(nameid)) ) {
+		ShowWarning("itemdb_buyingstore_parse_dbrow: Invalid item id %hu.\n", nameid);
 		return false;
 	}
 
 	if( !itemdb_isstackable2(id) ) {
-		ShowWarning("itemdb_read_buyingstore: Non-stackable item id %hu cannot be enabled for buying store.\n", nameid);
+		ShowWarning("itemdb_buyingstore_parse_dbrow: Non-stackable item id %hu cannot be enabled for buying store.\n", nameid);
 		return false;
 	}
 
 	id->flag.buyingstore = 1;
 
 	return true;
+}
+
+/** Reads items allowed to be sold in buying stores
+ * Structure: <nameid>
+ */
+static void itemdb_read_buyingstore() {
+	const char *filename[] = {
+		DBPATH"item_buyingstore.txt",
+		"item_buyingstore_db2.txt"
+	};
+	int fi;
+
+	for( fi = 0; fi < ARRAYLENGTH(filename); ++fi ) {
+		if( fi > 0 ) {
+			char path[256];
+
+			sprintf(path, "%s/%s", db_path, filename[fi]);
+			if( !exists(path) )
+				continue;
+		}
+		sv_readdb(db_path, filename[fi], ',', 1, 1, -1, &itemdb_buyingstore_parse_dbrow);
+	}
 }
 
 /** Misc Item flags
@@ -1783,14 +1839,14 @@ static void itemdb_read(void) {
 
 	itemdb_read_combos();
 	itemdb_read_itemgroup();
+	itemdb_read_buyingstore();
+	itemdb_read_noequip();
+	itemdb_read_itemtrade();
 	itemdb_read_randomopt();
 	sv_readdb(db_path, "item_avail.txt",         ',', 2, 2, -1, &itemdb_read_itemavail);
-	sv_readdb(db_path, DBPATH"item_buyingstore.txt", ',', 1, 1, -1, &itemdb_read_buyingstore);
 	sv_readdb(db_path, DBPATH"item_delay.txt",   ',', 2, 3, -1, &itemdb_read_itemdelay);
 	sv_readdb(db_path, DBPATH"item_flag.txt",    ',', 2, 2, -1, &itemdb_read_flag);
-	sv_readdb(db_path, DBPATH"item_noequip.txt", ',', 2, 2, -1, &itemdb_read_noequip);
 	sv_readdb(db_path, "item_stack.txt",         ',', 3, 3, -1, &itemdb_read_stack);
-	sv_readdb(db_path, DBPATH"item_trade.txt",   ',', 3, 3, -1, &itemdb_read_itemtrade);
 	sv_readdb(db_path, DBPATH"item_randomopt_group.txt", ',', 5, 2 + 5 * MAX_ITEM_RDM_OPT, -1, &itemdb_read_randomopt_group);
 }
 
