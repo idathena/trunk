@@ -644,7 +644,7 @@ void clif_storageclose(struct map_session_data *sd);
 int clif_insight(struct block_list *bl,va_list ap); // map_forallinmovearea callback
 int clif_outsight(struct block_list *bl,va_list ap); // map_forallinmovearea callback
 
-void clif_class_change_target(struct block_list *bl,int class_,int type, enum send_target target, struct map_session_data *sd);
+void clif_class_change_target(struct block_list *bl, int class_, int type, enum send_target target, struct map_session_data *sd);
 #define clif_class_change(bl, class_, type) clif_class_change_target(bl, class_, type, AREA, NULL)
 #define clif_mob_class_change(md, class_) clif_class_change(&md->bl, class_, 1)
 

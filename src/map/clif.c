@@ -1330,7 +1330,7 @@ static void clif_setdisguise(struct block_list *bl, unsigned char *buf, int len)
 /// 01b0 <id>.L <type>.B <value>.L
 /// type:
 ///     unused
-void clif_class_change_target(struct block_list *bl,int class_,int type, enum send_target target, struct map_session_data *sd) {
+void clif_class_change_target(struct block_list *bl, int class_, int type, enum send_target target, struct map_session_data *sd) {
 	nullpo_retv(bl);
 
 	if(!pcdb_checkid(class_)) { //Player classes yield missing sprites
