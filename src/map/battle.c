@@ -2291,6 +2291,7 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 	struct status_change *tsc = status_get_sc(target);
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct map_session_data *tsd = BL_CAST(BL_PC, target);
+	bool allow_cri = false;
 
 	if(!first_call)
 		return (wd.type == DMG_CRITICAL || wd.type == DMG_MULTI_HIT_CRITICAL);
@@ -2298,11 +2299,25 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 	if(skill_id == NPC_CRITICALSLASH || skill_id == LG_PINPOINTATTACK)
 		return true; //Always critical
 
-	if((battle_config.enable_critical_multihit || !(wd.type&DMG_MULTI_HIT)) && sstatus->cri &&
-		(!skill_id || skill_id == KN_AUTOCOUNTER ||
-		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
-		skill_id == NJ_KIRIKAGE || skill_id == GC_COUNTERSLASH))
-	{
+	switch(skill_id) {
+		case 0:
+			if(battle_config.enable_critical_multihit || !(wd.type&DMG_MULTI_HIT))
+				allow_cri = true;
+			break;
+		case KN_AUTOCOUNTER:
+		case SN_SHARPSHOOTING:
+		case MA_SHARPSHOOTING:
+		case NJ_KIRIKAGE:
+		case GC_COUNTERSLASH:
+			allow_cri = true;
+			break;
+		case MO_TRIPLEATTACK:
+			if(battle_config.enable_critical_multihit)
+				allow_cri = true;
+			break;
+	}
+
+	if(allow_cri && sstatus->cri) {
 		short cri = sstatus->cri;
 
 		if(sd) {
@@ -2352,7 +2367,7 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 			cri = cri * (100 - tsd->bonus.critical_def) / 100;
 		return (rnd()%1000 < cri);
 	}
-	return 0;
+	return false;
 }
 
 /*==========================================================
@@ -7290,7 +7305,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 	struct status_data *sstatus, *tstatus;
 	struct status_change *sc, *tsc;
 	int64 damage;
-	uint16 lv;
+	uint8 lv;
 	struct Damage wd;
 
 	nullpo_retr(ATK_NONE,src);

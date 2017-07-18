@@ -13338,7 +13338,7 @@ BUILDIN_FUNC(classchange)
 	if (!nd)
 		return 1;
 	if (script_hasdata(st,4)) {
-		switch(script_getnum(st,4)) {
+		switch (script_getnum(st,4)) {
 			case BC_SELF: target = SELF; break;
 			case BC_AREA:
 			//Fall through
