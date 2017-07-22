@@ -1411,9 +1411,9 @@ int status_set_maxhp(struct block_list *bl, unsigned int maxhp, int flag)
 		return 0;
 	if (maxhp == status->max_hp)
 		return 0;
-	if (maxhp > status->max_hp) {
+	if (maxhp > status->max_hp)
 		status_heal(bl, maxhp - status->max_hp, 0, 1|flag);
-	} else
+	else
 		status_zap(bl, status->max_hp - maxhp, 0);
 
 	status->max_hp = maxhp;
@@ -1706,7 +1706,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 			struct battleground_data *bg;
 
 			if ((bg = bg_team_search(sd->bg_id)) && bg->die_event[0])
-				npc_event(sd,bg->die_event, 0);
+				npc_event(sd,bg->die_event,0);
 		}
 		npc_script_event(sd,NPCE_DIE);
 	}

@@ -269,7 +269,7 @@ int npc_enable(const char *name, int flag)
  *------------------------------------------*/
 struct npc_data *npc_name2id(const char *name)
 {
-	return (struct npc_data *) strdb_get(npcname_db, name);
+	return (struct npc_data *)strdb_get(npcname_db, name);
 }
 #ifdef SECURE_NPCTIMEOUT
 int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t data) {

@@ -9230,7 +9230,8 @@ static int pc_eventtimer(int tid, unsigned int tick, int id, intptr_t data)
 	} else
 		ShowError("pc_eventtimer: no such event timer\n");
 
-	if (p) aFree(p);
+	if (p)
+		aFree(p);
 	return 0;
 }
 
@@ -9277,7 +9278,7 @@ bool pc_deleventtimer(struct map_session_data *sd,const char *name)
 
 	delete_timer(sd->eventtimer[i],pc_eventtimer);
 	sd->eventtimer[i] = INVALID_TIMER;
-	if(sd->eventcount > 0)
+	if (sd->eventcount > 0)
 		sd->eventcount--;
 	aFree(p);
 
@@ -9293,12 +9294,12 @@ void pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick
 
 	nullpo_retv(sd);
 
-	for (i = 0; i < MAX_EVENTTIMER; i++)
-		if(sd->eventtimer[i] != INVALID_TIMER && strcmp(
-			(char *)(get_timer(sd->eventtimer[i])->data),name) == 0) {
-				addtick_timer(sd->eventtimer[i],tick);
-				break;
+	for (i = 0; i < MAX_EVENTTIMER; i++) {
+		if (sd->eventtimer[i] != INVALID_TIMER && strcmp((char *)(get_timer(sd->eventtimer[i])->data),name) == 0) {
+			addtick_timer(sd->eventtimer[i],tick);
+			break;
 		}
+	}
 }
 
 /*==========================================
@@ -9320,7 +9321,8 @@ void pc_cleareventtimer(struct map_session_data *sd)
 			sd->eventtimer[i] = INVALID_TIMER;
 			if (sd->eventcount > 0) //Avoid looping to max val
 				sd->eventcount--;
-			if (p) aFree(p);
+			if (p)
+				aFree(p);
 		}
 }
 
