@@ -17561,7 +17561,11 @@ static int skill_cell_overlap(struct block_list *bl, va_list ap)
 			}
 			if ((!(skill_get_inf2(unit->group->skill_id)&(INF2_TRAP)) && !(skill_get_inf3(unit->group->skill_id)&(INF3_NOLP))) ||
 				unit->group->skill_id == WZ_FIREPILLAR || unit->group->skill_id == GN_HELLS_PLANT) {
-				skill_delunit(unit);
+				if (skill_get_unit_flag(unit->group->skill_id)&UF_RANGEDSINGLEUNIT) {
+					if (unit->val4&UF_RANGEDSINGLEUNIT)
+						skill_delunitgroup(unit->group);
+				} else
+					skill_delunit(unit);
 				return 1;
 			}
 			break;
@@ -17650,7 +17654,11 @@ static int skill_cell_overlap(struct block_list *bl, va_list ap)
 				case UNT_GROUNDDRIFT_FIRE:	case UNT_GROUNDDRIFT_POISON:	case UNT_GROUNDDRIFT_WATER:
 				case UNT_GROUNDDRIFT_WIND:	case UNT_B_TRAP:		case UNT_FLAMECROSS:
 				case UNT_ICEMINE:		case UNT_GROUNDDRIFT_NEUTRAL:
-					skill_delunit(unit);
+					if (skill_get_unit_flag(unit->group->skill_id)&UF_RANGEDSINGLEUNIT) {
+						if (unit->val4&UF_RANGEDSINGLEUNIT)
+							skill_delunitgroup(unit->group);
+					} else
+						skill_delunit(unit);
 					return 1;
 			}
 			break;
