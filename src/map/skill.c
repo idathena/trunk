@@ -15039,14 +15039,15 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	if( sc && !sc->count )
 		sc = NULL;
 
-	if( pc_is90overweight(sd) ) {
+	if( pc_is90overweight(sd) && sd->skillitem != skill_id ) {
 		clif_skill_fail(sd,skill_id,USESKILL_FAIL_WEIGHTOVER,0,0);
 		return false;
 	}
 
 	inf3 = skill_get_inf3(skill_id);
 
-	if( pc_isridingwug(sd) && !(inf3&INF3_USABLE_WARG) ) //Check the skills that can be used while mounted on a warg
+	//Check the skills that can be used while mounted on a warg
+	if( pc_isridingwug(sd) && !(inf3&INF3_USABLE_WARG) && sd->skillitem != skill_id )
 		return false; //In official there is no fail message
 
 	if( pc_ismadogear(sd) ) { //Check the skills that can be used while mounted on a mado
