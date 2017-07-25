@@ -2753,11 +2753,13 @@ void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_l
 					duration = 1;
 					target_id = 0;
 				}
+			//Fall through
 			case CH_TIGERFIST:
 				if (!duration && pc_checkskill(sd, CH_CHAINCRUSH) > 0 && sd->spiritball > 1) {
 					duration = 1;
 					target_id = 0;
 				}
+			//Fall through
 			case CH_CHAINCRUSH:
 				if (!duration && pc_checkskill(sd, MO_EXTREMITYFIST) > 0 && sd->spiritball > 0 && sd->sc.data[SC_EXPLOSIONSPIRITS]) {
 					duration = 1;
@@ -19499,7 +19501,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 				break;
 			default:
 				if( sd->menuskill_id ==	AM_PHARMACY ) { //Assume Cooking Dish
-					int base_chance;
+					int base_chance = 0;
 
 					if( sd->menuskill_val == 30 ) //Combination Kit
 						base_chance = (status_get_lv(&sd->bl) < 20 ? 8000 : 1200);
@@ -20374,7 +20376,7 @@ void skill_usave_trigger(struct map_session_data *sd)
 {
 	struct skill_usave *sus = NULL;
 	struct skill_unit_group *group = NULL;
-	enum sc_type type;
+	enum sc_type type = SC_NONE;
 
 	if( !(sus = idb_get(skillusave_db,sd->status.char_id)) )
 		return;
@@ -20388,7 +20390,7 @@ void skill_usave_trigger(struct map_session_data *sd)
 			break;
 	}
 
-	if( (group = skill_unitsetting(&sd->bl,sus->skill_id,sus->skill_lv,sd->bl.x,sd->bl.y,0)) && type )
+	if( (group = skill_unitsetting(&sd->bl,sus->skill_id,sus->skill_lv,sd->bl.x,sd->bl.y,0)) && type != SC_NONE )
 		sc_start2(&sd->bl,&sd->bl,type,100,sus->skill_lv,group->group_id,skill_get_time(sus->skill_id,sus->skill_lv));
 	idb_remove(skillusave_db,sd->status.char_id);
 }
