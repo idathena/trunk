@@ -919,7 +919,7 @@ int unit_movepos(struct block_list *bl, short dst_x, short dst_y, int easy, bool
 	if( !ud )
 		return 0;
 
-	unit_stop_walking(bl, 1);
+	unit_stop_walking(bl, USW_FIXPOS);
 	unit_stop_attack(bl);
 
 	if( checkpath && (map_getcell(bl->m, dst_x, dst_y, CELL_CHKNOPASS) ||
@@ -1035,7 +1035,7 @@ int unit_blown(struct block_list *bl, int dx, int dy, int count, int flag)
 		ny = result&0xffff;
 
 		if (!su)
-			unit_stop_walking(bl, 0);
+			unit_stop_walking(bl, USW_NONE);
 
 		if (sd) {
 			unit_stop_stepaction(bl); //Stop stepaction when knocked back
@@ -1176,7 +1176,7 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
 			ShowWarning("unit_warp failed. Unit Id:%d/Type:%d, target position map %d (%s) at [%d,%d]\n", bl->id, bl->type, m, map[m].name, x, y);
 			return 2;
 		}
-	} else if (map_getcell(m,x,y,CELL_CHKNOREACH)) { //Invalid target cell
+	} else if (bl->type != BL_NPC && map_getcell(m,x,y,CELL_CHKNOREACH)) { //Invalid target cell
 		ShowWarning("unit_warp: Specified non-walkable target cell: %d (%s) at [%d,%d]\n", m, map[m].name, x,y);
 		if (!map_search_freecell(NULL, m, &x, &y, 4, 4, 1)) { //Can't find a nearby cell
 			ShowWarning("unit_warp failed. Unit Id:%d/Type:%d, target position map %d (%s) at [%d,%d]\n", bl->id, bl->type, m, map[m].name, x, y);
@@ -1210,11 +1210,11 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
  * Stops a unit from walking
  * @param bl: Object to stop walking
  * @param type: Options
- *  &0x1: Issue a fixpos packet afterwards
- *  &0x2: Force the unit to move one cell if it hasn't yet
- *  &0x4: Enable moving to the next cell when unit was already half-way there
+ *  USW_FIXPOS: Issue a fixpos packet afterwards
+ *  USW_MOVE_ONCE: Force the unit to move one cell if it hasn't yet
+ *  USW_MOVE_FULL_CELL: Enable moving to the next cell when unit was already half-way there
  *    (may cause on-touch/place side-effects, such as a scripted map change)
- *  &0x8: Force stop moving, even if walktimer is currently INVALID_TIMER
+ *  USW_FORCE_STOP: Force stop moving, even if walktimer is currently INVALID_TIMER
  * @return Success(1); Failed(0);
  */
 int unit_stop_walking(struct block_list *bl,int type)
@@ -1226,7 +1226,7 @@ int unit_stop_walking(struct block_list *bl,int type)
 	nullpo_ret(bl);
 
 	ud = unit_bl2ud(bl);
-	if (!ud || (!(type&0x08) && ud->walktimer == INVALID_TIMER))
+	if (!ud || (!(type&USW_FORCE_STOP) && ud->walktimer == INVALID_TIMER))
 		return 0;
 
 	//NOTE: We are using timer data after deleting it because we know the
@@ -1240,13 +1240,13 @@ int unit_stop_walking(struct block_list *bl,int type)
 	ud->state.change_walk_target = 0;
 	tick = gettick();
 
-	if ((type&0x02 && !ud->walkpath.path_pos) || //Force moving at least one cell
-		(type&0x04 && td && DIFF_TICK(td->tick, tick) <= td->data / 2)) { //Enough time has passed to cover half-cell
+	if ((type&USW_MOVE_ONCE && !ud->walkpath.path_pos) || //Force moving at least one cell
+		(type&USW_MOVE_FULL_CELL && td && DIFF_TICK(td->tick, tick) <= td->data / 2)) { //Enough time has passed to cover half-cell
 		ud->walkpath.path_len = ud->walkpath.path_pos + 1;
 		unit_walktoxy_timer(INVALID_TIMER, tick, bl->id, ud->walkpath.path_pos);
 	}
 
-	if(type&0x01)
+	if(type&USW_FIXPOS)
 		clif_fixpos(bl);
 
 	ud->walkpath.path_len = 0;
@@ -1254,7 +1254,7 @@ int unit_stop_walking(struct block_list *bl,int type)
 	ud->to_x = bl->x;
 	ud->to_y = bl->y;
 
-	if (bl->type == BL_PET && type&~0xff)
+	if (bl->type == BL_PET && type&~USW_ALL)
 		ud->canmove_tick = gettick() + (type>>8);
 
 	//Readded, the check in unit_set_walkdelay means dmg during running won't fall through to this place in code [Kevin]
@@ -1330,7 +1330,6 @@ int unit_can_move(struct block_list *bl) {
 
 	if (sc) {
 		if (sc->cant.move || //Status placed here are ones that cannot be cached by sc->cant.move for they depend on other conditions other than their availability
-			sc->data[SC_SPIDERWEB] ||
 			(sc->data[SC_DANCING] && sc->data[SC_DANCING]->val4 &&
 			(!sc->data[SC_LONGING] ||
 			(sc->data[SC_DANCING]->val1&0xFFFF) == CG_MOONLIT ||
@@ -1402,7 +1401,7 @@ int unit_set_walkdelay(struct block_list *bl, unsigned int tick, int delay, int 
 			return 0; //Make sure walk delay is not decreased
 	} else {
 		if (!unit_can_move(bl)) {
-			unit_stop_walking(bl,4); //Unit might still be moving even though it can't move
+			unit_stop_walking(bl,USW_MOVE_FULL_CELL); //Unit might still be moving even though it can't move
 			return 0; //Don't set walk delays when already trapped
 		}
 		if (DIFF_TICK(ud->canmove_tick, tick - delay) > 0)
@@ -1411,12 +1410,12 @@ int unit_set_walkdelay(struct block_list *bl, unsigned int tick, int delay, int 
 	ud->canmove_tick = tick + delay;
 	if (ud->walktimer != INVALID_TIMER) { //Stop walking, if chasing, readjust timers
 		if (delay == 1) //Minimal delay (walk-delay) disabled, just stop walking
-			unit_stop_walking(bl,0);
+			unit_stop_walking(bl,USW_NONE);
 		else {
 			if (ud->state.running) //Resume running after can move again [Kevin]
 				add_timer(ud->canmove_tick, unit_resume_running, bl->id, (intptr_t)ud);
 			else {
-				unit_stop_walking(bl,4);
+				unit_stop_walking(bl,USW_MOVE_FULL_CELL);
 				if (ud->target)
 					add_timer(ud->canmove_tick + 1, unit_walktobl_sub, bl->id, ud->target);
 				clif_fixpos(bl);
@@ -1665,8 +1664,6 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	else if( ud->attacktimer != INVALID_TIMER ) //Elsewise, delay current attack sequence
 		ud->attackabletime = tick + status_get_adelay(src);
 
-	ud->state.skillcastcancel = castcancel;
-
 	combo = 0; //Used to signal force cast now
 
 	switch( skill_id ) {
@@ -1778,7 +1775,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	}
 
 	if( !ud->state.running ) //Need TK_RUN or WUGDASH handler to be done before that, see bugreport:6026
-		unit_stop_walking(src, 1); //Eventhough this is not how official works but this will do the trick bugreport:6829
+		unit_stop_walking(src, USW_FIXPOS); //Eventhough this is not how official works but this will do the trick bugreport:6829
 
 	skill_toggle_magicpower(src, skill_id); //SC_MAGICPOWER needs to switch states at start of cast
 
@@ -1811,8 +1808,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		}
 	}
 
-	if( casttime <= 0 )
-		ud->state.skillcastcancel = 0;
+	ud->state.skillcastcancel = (castcancel && casttime > 0 ? 1 : 0);
 
 	if( !sd || sd->skillitem != skill_id || skill_get_cast(skill_id,skill_lv) )
 		ud->canact_tick = tick + max(casttime,max(status_get_amotion(src),battle_config.min_skill_delay_limit)) + SECURITY_CASTTIME;
@@ -1986,7 +1982,7 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 		}
 	}
 
-	unit_stop_walking(src, 1);
+	unit_stop_walking(src, USW_FIXPOS);
 
 	skill_toggle_magicpower(src, skill_id); //SC_MAGICPOWER needs to switch states at start of cast
 
@@ -2451,7 +2447,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 		if( battle_config.attack_direction_change && (src->type&battle_config.attack_direction_change) )
 			ud->dir = map_calc_dir(src,target->x,target->y);
 		if( ud->walktimer != INVALID_TIMER )
-			unit_stop_walking(src,1);
+			unit_stop_walking(src,USW_FIXPOS);
 		if( md ) {
 			//First attack is always a normal attack
 			if( md->state.skillstate == MSS_ANGRY || md->state.skillstate == MSS_BERSERK ) {
@@ -2695,7 +2691,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 	map_freeblock_lock();
 
 	if (ud->walktimer != INVALID_TIMER)
-		unit_stop_walking(bl,0);
+		unit_stop_walking(bl,USW_NONE);
 
 	if (ud->skilltimer != INVALID_TIMER)
 		unit_skillcastcancel(bl,0);

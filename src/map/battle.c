@@ -434,6 +434,14 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 #endif
 					status_change_end(target,SC_SPIDERWEB,INVALID_TIMER);
 				}
+				if( tsc->data[SC_WIDEWEB] ) {
+#ifdef RENEWAL
+					ratio += 100;
+#else
+					damage *= 2;
+#endif
+					status_change_end(target,SC_WIDEWEB,INVALID_TIMER);
+				}
 				if( tsc->data[SC_THORNSTRAP] && battle_getcurrentskill(src) != GN_CARTCANNON )
 					status_change_end(target,SC_THORNSTRAP,INVALID_TIMER);
 				if( tsc->data[SC_CRYSTALIZE] )
@@ -768,6 +776,8 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 							continue;
 						ele_fix += tsd->subele2[i].rate;
 					}
+					if( s_defele != ELE_NONE )
+						ele_fix += tsd->subdefele[s_defele] + tsd->subdefele[ELE_ALL];
 					cardfix = cardfix * (100 - ele_fix) / 100;
 					if( left&1 && lh_ele != rh_ele ) {
 						int ele_fix_lh = tsd->subele[lh_ele] + tsd->subele[ELE_ALL];
@@ -783,7 +793,6 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 						}
 						cardfix = cardfix * (100 - ele_fix_lh) / 100;
 					}
-					cardfix = cardfix * (100 - (tsd->subdefele[s_defele] + tsd->subdefele[ELE_ALL])) / 100;
 				}
 				cardfix = cardfix * (100 - (tsd->subsize[sstatus->size] + tsd->subsize[SZ_ALL])) / 100;
 				cardfix = cardfix * (100 - tsd->subrace2[s_race2]) / 100;
@@ -6102,6 +6111,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case NPC_HELLBURNING:
 						skillratio += 900;
 						break;
+					case NPC_FIRESTORM:
+						skillratio += 200;
+						break;
 #ifdef RENEWAL
 					case WZ_HEAVENDRIVE:
 					case WZ_METEOR:
@@ -6677,6 +6689,9 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			break;
 		case NPC_MAXPAIN_ATK:
 			md.damage = battle_damage_temp[0] * skill_lv * 10 / 100;
+			break;
+		case NPC_WIDESUCK:
+			md.damage = tstatus->max_hp * 15 / 100;
 			break;
 #ifdef RENEWAL
 		case HW_MAGICCRASHER: {

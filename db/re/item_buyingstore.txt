@@ -1197,9 +1197,9 @@
 12377	// Mysterious_PET_Bottle2
 12379	// Pope's_Cookie
 12383	// Vulcan_Bullet_Magazine
-12392	// Repair_A
-12393	// Repair_B
-12394	// Repair_C
+12392	// RepairA
+12393	// RepairB
+12394	// RepairC
 12395	// Tantanmen
 12414	// Guarana_Candy
 12717	// Poison_Paralysis

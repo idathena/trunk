@@ -1425,6 +1425,9 @@
 	export_constant(SC_DAILYSENDMAILCNT);
 	export_constant(SC_DORAM_BUF_01);
 	export_constant(SC_DORAM_BUF_02);
+	export_constant(SC_WIDEWEB);
+	export_constant(SC_CHILL);
+	export_constant(SC_BURNT);
 
 	/* Status icons */
 	export_constant(SI_BLANK);
@@ -2800,6 +2803,14 @@
 	/* Item Random Option Group */
 	export_constant(RDMOPTG_None);
 	export_constant(RDMOPTG_Crimson_Weapon);
+
+	/* Unit stop walking flag */
+	export_constant(USW_NONE);
+	export_constant(USW_FIXPOS);
+	export_constant(USW_MOVE_ONCE);
+	export_constant(USW_MOVE_FULL_CELL);
+	export_constant(USW_FORCE_STOP);
+	export_constant(USW_ALL);
 
 	#undef export_constant
 

@@ -4443,7 +4443,7 @@ BUILDIN_FUNC(close)
 		TBL_NPC *nd = map_id2nd(st->oid);
 
 		st->state = END; //Keep backwards compatibility
-		ShowWarning("Incorrect use of 'close' command! (source:%s / path:%s)\n",nd?nd->name:"Unknown",nd?nd->path:"Unknown");
+		ShowWarning("Incorrect use of 'close' command! (source:%s / path:%s)\n",(nd ? nd->name : "Unknown"),(nd ? nd->path : "Unknown"));
 	} else {
 		st->state = CLOSE;
 		st->mes_active = 0;
@@ -4581,7 +4581,7 @@ BUILDIN_FUNC(menu)
 
 			CREATE(menu, char, 2048);
 			safestrncpy(menu, StringBuf_Value(&buf), 2047);
-			ShowWarning("NPC Menu too long! (source:%s / length:%d)\n",nd?nd->name:"Unknown",StringBuf_Length(&buf));
+			ShowWarning("NPC Menu too long! (source:%s / length:%d)\n",(nd ? nd->name : "Unknown"),StringBuf_Length(&buf));
 			clif_scriptmenu(sd, st->oid, menu);
 			aFree(menu);
 		} else
@@ -4680,7 +4680,7 @@ BUILDIN_FUNC(select)
 			char *menu;
 			CREATE(menu, char, 2048);
 			safestrncpy(menu, StringBuf_Value(&buf), 2047);
-			ShowWarning("NPC Menu too long! (source:%s / length:%d)\n",nd?nd->name:"Unknown",StringBuf_Length(&buf));
+			ShowWarning("NPC Menu too long! (source:%s / length:%d)\n",(nd ? nd->name : "Unknown"),StringBuf_Length(&buf));
 			clif_scriptmenu(sd, st->oid, menu);
 			aFree(menu);
 		} else
@@ -4758,7 +4758,7 @@ BUILDIN_FUNC(prompt)
 
 			CREATE(menu, char, 2048);
 			safestrncpy(menu, StringBuf_Value(&buf), 2047);
-			ShowWarning("NPC Menu too long! (source:%s / length:%d)\n",nd?nd->name:"Unknown",StringBuf_Length(&buf));
+			ShowWarning("NPC Menu too long! (source:%s / length:%d)\n",(nd ? nd->name : "Unknown"),StringBuf_Length(&buf));
 			clif_scriptmenu(sd, st->oid, menu);
 			aFree(menu);
 		} else
@@ -6096,11 +6096,11 @@ static int script_getitem_randomoption(struct script_state *st, struct item *it,
 	}
 
 	for( i = 0; i < opt_id_n && i < MAX_ITEM_RDM_OPT; i++ ) {
-		it->option[i].id = (short)__64BPRTSIZE(get_val2(st, reference_uid(opt_id_id, opt_id_idx + i), reference_getref(opt_id)));
+		it->option[i].id = (int32)__64BPRTSIZE(get_val2(st, reference_uid(opt_id_id, opt_id_idx + i), reference_getref(opt_id)));
 		script_removetop(st,-1,0);
-		it->option[i].value = (short)__64BPRTSIZE(get_val2(st, reference_uid(opt_val_id, opt_val_idx + i), reference_getref(opt_val)));
+		it->option[i].value = (int32)__64BPRTSIZE(get_val2(st, reference_uid(opt_val_id, opt_val_idx + i), reference_getref(opt_val)));
 		script_removetop(st,-1,0);
-		it->option[i].param = (char)__64BPRTSIZE(get_val2(st, reference_uid(opt_param_id, opt_param_idx + i), reference_getref(opt_param)));
+		it->option[i].param = (int32)__64BPRTSIZE(get_val2(st, reference_uid(opt_param_id, opt_param_idx + i), reference_getref(opt_param)));
 		script_removetop(st,-1,0);
 	}
 	return SCRIPT_CMD_SUCCESS;
@@ -7555,6 +7555,31 @@ BUILDIN_FUNC(getpartyname)
 		script_pushstrcopy(st,p->party.name);
 	else
 		script_pushconststr(st,"null");
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/*==========================================
+ * Return the number of the party member id
+ * -1 if not found
+ *------------------------------------------*/
+BUILDIN_FUNC(getpartymemberid)
+{
+	struct party_data *p;
+	TBL_PC *sd;
+	int count;
+
+	if( !script_charid2sd(2,sd) ) {
+		script_pushint(st,0);
+		return 0;
+	}
+
+	p = party_search(sd->status.party_id);
+	count = party_getmemberid(p,sd) + 1;
+
+	if( !count )
+		script_pushint(st,0);
+	else
+		script_pushint(st,count);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -9806,7 +9831,7 @@ BUILDIN_FUNC(donpcevent)
 	if( !npc_event_do(event) ) {
 		struct npc_data *nd = map_id2nd(st->oid);
 
-		ShowDebug("NPCEvent '%s' not found! (source: %s)\n",event,nd?nd->name:"Unknown");
+		ShowDebug("NPCEvent '%s' not found! (source: %s)\n",event,(nd ? nd->name : "Unknown"));
 		script_pushint(st,0);
 	} else
 		script_pushint(st,1);
@@ -14298,7 +14323,7 @@ BUILDIN_FUNC(npcstop)
 	struct npc_data *nd = (struct npc_data *)map_id2bl(st->oid);
 
 	if( nd )
-		unit_stop_walking(&nd->bl,1|4);
+		unit_stop_walking(&nd->bl,USW_FIXPOS|USW_MOVE_FULL_CELL);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -15042,25 +15067,55 @@ BUILDIN_FUNC(equip2)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * Set the value of a given battle config
+ * setbattleflag "<battle flag>",<value>{,<reload>};
+ */
 BUILDIN_FUNC(setbattleflag)
 {
 	const char *flag, *value;
 
 	flag = script_getstr(st,2);
-	value = script_getstr(st,3);  // HACK: Retrieve number as string (auto-converted) for battle_set_value
-	
-	if (battle_set_value(flag, value) == 0)
+	value = script_getstr(st,3); //HACK: Retrieve number as string (auto-converted) for battle_set_value
+
+	if (!battle_set_value(flag,value))
 		ShowWarning("buildin_setbattleflag: unknown battle_config flag '%s'\n",flag);
-	else
+	else {	
 		ShowInfo("buildin_setbattleflag: battle_config flag '%s' is now set to '%s'.\n",flag,value);
+		if (script_hasdata(st,4) && script_getnum(st,4)) { //Only attempt to reload monster data if told to
+			const char *expdrop_flags[] = { //Only certain flags require a reload, check for those types
+				"base_exp_rate", "job_exp_rate", "mvp_exp_rate", "quest_exp_rate", "heal_exp", "resurrection_exp",
+				"item_rate_common", "item_rate_common_boss", "item_rate_common_mvp", "item_drop_common_min", "item_drop_common_max",
+				"item_rate_heal", "item_rate_heal_boss", "item_rate_heal_mvp", "item_rate_heal_min", "item_rate_heal_max",
+				"item_rate_use", "item_rate_use_boss", "item_rate_use_mvp", "item_rate_use_min", "item_rate_use_max",
+				"item_rate_equip", "item_rate_equip_boss", "item_rate_equip_mvp", "item_rate_equip_min", "item_rate_equip_max",
+				"item_rate_card", "item_rate_card_boss", "item_rate_card_mvp", "item_rate_card_min", "item_rate_card_max",
+				"item_rate_mvp", "item_rate_mvp_min", "item_rate_mvp_max", "item_rate_mvp_mode",
+				"item_rate_treasure", "item_rate_treasure_min", "item_rate_treasure_max",
+				"item_logarithmic_drops", "drop_rate0item", "drop_rateincrease",
+			};
+			uint8 i;
+
+			for (i = 0; i < ARRAYLENGTH(expdrop_flags); i++) {
+				if (!strcmpi(flag,expdrop_flags[i])) {
+					mob_reload();
+					break;
+				}
+			}
+		}
+	}
 
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * Get the value of a given battle config
+ * getbattleflag("<battle flag>")
+ */
 BUILDIN_FUNC(getbattleflag)
 {
-	const char *flag;
-	flag = script_getstr(st,2);
+	const char *flag = script_getstr(st,2);
+
 	script_pushint(st,battle_get_value(flag));
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -17703,17 +17758,21 @@ BUILDIN_FUNC(unitstopattack)
 
 /// Makes the unit stop walking
 ///
-/// unitstopwalk <unit_id>;
+/// unitstopwalk <unit_id>{,<flag>};
 BUILDIN_FUNC(unitstopwalk)
 {
 	int unit_id;
 	struct block_list *bl;
+	int flag = USW_NONE;
 
 	unit_id = script_getnum(st,2);
 	bl = map_id2bl(unit_id);
 
+	if( script_hasdata(st,3) )
+		flag = script_getnum(st,3);
+
 	if( bl != NULL )
-		unit_stop_walking(bl,4);
+		unit_stop_walking(bl,flag);
 
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -17796,7 +17855,7 @@ BUILDIN_FUNC(unitskilluseid)
 	get_val(st,data); //Convert into value in case of a variable
 	skill_id = (data_isstring(data) ? skill_name2id(script_getstr(st,3)) : script_getnum(st,3));
 	skill_lv = script_getnum(st,4);
-	target_id = (script_hasdata(st,5) ? script_getnum(st,5) : unit_id);
+	target_id = (script_hasdata(st,5) ? script_getnum(st,5) : 0);
 	casttime = (script_hasdata(st,6) ? script_getnum(st,6) : 0);
 	bl = map_id2bl(unit_id);
 
@@ -17807,7 +17866,13 @@ BUILDIN_FUNC(unitskilluseid)
 			else
 				status_calc_npc(((TBL_NPC *)bl), SCO_NONE);
 		}
-		unit_skilluse_id2(bl, target_id, skill_id, skill_lv, (casttime * 1000) + skill_castfix(bl, skill_id, skill_lv), skill_get_castcancel(skill_id));
+		if( bl->type == BL_MOB ) {
+			struct mob_data *md = (struct mob_data *)bl;
+
+			if( target_id == -1 )
+				target_id = md->target_id;
+		}
+		unit_skilluse_id2(bl, (target_id ? target_id : unit_id), skill_id, skill_lv, casttime * 1000 + skill_castfix(bl, skill_id, skill_lv), skill_get_castcancel(skill_id));
 	}
 
 	return SCRIPT_CMD_SUCCESS;
@@ -17815,8 +17880,8 @@ BUILDIN_FUNC(unitskilluseid)
 
 /// Makes the unit cast the skill on the target position
 ///
-/// unitskillusepos <unit_id>,<skill_id>,<skill_lv>,<target_x>,<target_y>{,<casttime>};
-/// unitskillusepos <unit_id>,"<skill name>",<skill_lv>,<target_x>,<target_y>{,<casttime>};
+/// unitskillusepos <unit_id>,<skill_id>,<skill_lv>{,<target_x>,<target_y>,<casttime>};
+/// unitskillusepos <unit_id>,"<skill name>",<skill_lv>{,<target_x>,<target_y>,<casttime>};
 BUILDIN_FUNC(unitskillusepos)
 {
 	int unit_id, skill_x, skill_y, casttime;
@@ -17829,8 +17894,8 @@ BUILDIN_FUNC(unitskillusepos)
 	get_val(st,data); //Convert into value in case of a variable
 	skill_id = (data_isstring(data) ? skill_name2id(script_getstr(st,3)) : script_getnum(st,3));
 	skill_lv = script_getnum(st,4);
-	skill_x  = script_getnum(st,5);
-	skill_y  = script_getnum(st,6);
+	skill_x  = (script_hasdata(st,5) ? script_getnum(st,5) : 0);
+	skill_y  = (script_hasdata(st,6) ? script_getnum(st,6) : 0);
 	casttime = (script_hasdata(st,7) ? script_getnum(st,7) : 0);
 	bl = map_id2bl(unit_id);
 
@@ -17841,7 +17906,11 @@ BUILDIN_FUNC(unitskillusepos)
 			else
 				status_calc_npc(((TBL_NPC *)bl), false);
 		}
-		unit_skilluse_pos2(bl, skill_x, skill_y, skill_id, skill_lv, (casttime * 1000) + skill_castfix(bl, skill_id, skill_lv), skill_get_castcancel(skill_id));
+		if( !skill_x )
+			skill_x = bl->x;
+		if( !skill_y )
+			skill_y = bl->y;
+		unit_skilluse_pos2(bl, skill_x, skill_y, skill_id, skill_lv, casttime * 1000 + skill_castfix(bl, skill_id, skill_lv), skill_get_castcancel(skill_id));
 	}
 
 	return SCRIPT_CMD_SUCCESS;
@@ -17854,12 +17923,11 @@ BUILDIN_FUNC(unitexist)
 {
 	struct block_list *bl;
 
-	if( !(bl = map_id2bl(script_getnum(st,2))) || status_isdead(bl) ) {
+	if( !(bl = map_id2bl(script_getnum(st,2))) )
 		script_pushint(st,0);
-		return 1;
-	}
+	else
+		script_pushint(st,1);
 
-	script_pushint(st,1);
 	return SCRIPT_CMD_SUCCESS;
 }
 // <--- [zBuffer] List of unit control commands
@@ -18783,7 +18851,7 @@ BUILDIN_FUNC(bg_monster_set_team)
 	md->bg_id = bg_id;
 
 	mob_stop_attack(md);
-	mob_stop_walking(md, 0);
+	mob_stop_walking(md, USW_NONE);
 	md->target_id = md->attacked_id = 0;
 	clif_name_area(&md->bl);
 
@@ -19332,6 +19400,10 @@ BUILDIN_FUNC(areamobuseskill)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * Display a progress bar above a character
+ * progressbar "<color>",<seconds>;
+ */
 BUILDIN_FUNC(progressbar)
 {
 	struct map_session_data *sd = script_rid2sd(st);
@@ -19353,29 +19425,49 @@ BUILDIN_FUNC(progressbar)
     return SCRIPT_CMD_SUCCESS;
 }
 
+/**
+ * Display a progress bar above an NPC
+ * npcprogressbar "<color>",<seconds>{,<"NPC Name">};
+ */
 BUILDIN_FUNC(npcprogressbar)
 {
-	struct block_list *bl = map_id2bl(st->oid);
-	const char *color;
-	unsigned int second;
+	struct npc_data *nd = NULL;
 
-	color = script_getstr(st,2);
-	second = script_getnum(st,3);
+	if( script_hasdata(st,4) ) {
+		const char *name = script_getstr(st,4);
 
-	if( !st->sleep.tick ) {
+		nd = npc_name2id(name);
+		if( !nd ) {
+			ShowError("buildin_npcprogressbar: NPC \"%s\" was not found.\n", name);
+			return 1;
+		}
+	} else
+		nd = map_id2nd(st->oid);
+
+	if( !nd->progressbar.timeout ) { //First call(by function call)
+		const char *color;
+		int second;
+
+		color = script_getstr(st,2);
+		second = script_getnum(st,3);
+		if( second < 0 ) {
+			ShowError("buildin_npcprogressbar: negative amount('%d') of seconds is not supported\n", second);
+			return 1;
+		}
+		//Detach the player
+		script_detach_rid(st);
+		//Sleep for the target amount of time
 		st->state = RERUNLINE;
 		st->sleep.tick = second * 1000;
-		if( script_hasdata(st,4) ) {
-			struct npc_data *nd = npc_name2id(script_getstr(st,4));
-
-			if( nd )
-				bl = &nd->bl;
-		}
-		clif_progressbar2(bl, strtol(color, (char **)NULL, 0), second);
-	} else {
+		nd->progressbar.timeout = gettick() + second * 1000;
+		nd->progressbar.color = strtol(color, (char **)NULL, 0);
+		clif_progressbar_npc_area(nd);
+	} else { //Second call(by timer after sleeping time is over)
+		//Continue the script
 		st->state = RUN;
 		st->sleep.tick = 0;
-    }
+		nd->progressbar.timeout = nd->progressbar.color = 0;
+	}
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -21678,6 +21770,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getcharid,"i?"),
 	BUILDIN_DEF(getnpcid,"i?"),
 	BUILDIN_DEF(getpartyname,"i"),
+	BUILDIN_DEF(getpartymemberid,"?"),
 	BUILDIN_DEF(getpartymember,"i?"),
 	BUILDIN_DEF(getpartyleader,"i?"),
 	BUILDIN_DEF(getguildname,"i"),
@@ -21958,7 +22051,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(equip,"i?"),
 	BUILDIN_DEF(autoequip,"ii"),
 	BUILDIN_DEF(equip2,"iiiiiii"),
-	BUILDIN_DEF(setbattleflag,"si"),
+	BUILDIN_DEF(setbattleflag,"si?"),
 	BUILDIN_DEF(getbattleflag,"s"),
 	BUILDIN_DEF(setitemscript,"is?"), //Set NEW item bonus script. Lupus
 	BUILDIN_DEF(disguise,"i?"), //Disguise player. Lupus
@@ -21990,12 +22083,12 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(unitwarp,"isii?"),
 	BUILDIN_DEF(unitattack,"iv?"),
 	BUILDIN_DEF(unitstopattack,"i"),
-	BUILDIN_DEF(unitstopwalk,"i"),
+	BUILDIN_DEF(unitstopwalk,"i?"),
 	BUILDIN_DEF2(pcblockmove,"unitblockmove","ii"),
 	BUILDIN_DEF(unittalk,"is?"),
 	BUILDIN_DEF(unitemote,"ii"),
 	BUILDIN_DEF(unitskilluseid,"ivi??"), //Originally by Qamera [Celest]
-	BUILDIN_DEF(unitskillusepos,"iviii?"), //[Celest]
+	BUILDIN_DEF(unitskillusepos,"ivi???"), //[Celest]
 	BUILDIN_DEF(unitexist,"i"),
 	// <--- [zBuffer] List of unit control commands
 	BUILDIN_DEF(sleep,"i"),

@@ -1068,7 +1068,7 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 
 #if PACKETVER < 20091103
 	if( type && spawn ) { //End of packet 0x7c
-		WBUFB(buf,34) = (sd && sd->status.karma) ? 1 : 0; //Karma
+		WBUFB(buf,34) = (sd && sd->status.karma ? 1 : 0); //Karma
 		WBUFB(buf,35) = vd->sex;
 		WBUFPOS(buf,36,bl->x,bl->y,unit_getdir(bl));
 		WBUFB(buf,39) = 0;
@@ -1124,7 +1124,7 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 #endif
 
 #if PACKETVER >= 20120221
-	if( battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && (status_get_hp(bl) < status_get_max_hp(bl)) ) {
+	if( battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && status_get_hp(bl) < status_get_max_hp(bl) ) {
 		WBUFL(buf,55) = status_get_max_hp(bl); //maxHP
 		WBUFL(buf,59) = status_get_hp(bl); //HP
 	} else {
@@ -1503,6 +1503,7 @@ int clif_spawn(struct block_list *bl)
 				else if (nd->size == SZ_MEDIUM)
 					clif_specialeffect(bl,421,AREA);
 				clif_efst_set_enter(bl,bl,AREA);
+				clif_progressbar_npc_area(nd);
 			}
 			break;
 		case BL_PET:
@@ -4640,6 +4641,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 				else if (nd->size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
 				clif_efst_set_enter(&sd->bl,bl,SELF);
+				clif_progressbar_npc(nd,sd);
 			}
 			break;
 		case BL_MOB: {
@@ -11091,7 +11093,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 		return;
 
 	if( action_type != 0x00 && action_type != 0x07 )
-		pc_stop_walking(sd, 1);
+		pc_stop_walking(sd, USW_FIXPOS);
 
 	pc_stop_attack(sd);
 
@@ -11539,8 +11541,13 @@ void clif_parse_NpcClicked(int fd,struct map_session_data *sd)
 			clif_parse_ActionRequest_sub(sd,0x07,bl->id,gettick());
 			break;
 		case BL_NPC:
-			if (bl->m != -1) //The user can't click floating npcs directly (hack attempt)
-				npc_click(sd,(TBL_NPC *)bl);
+			if (bl->m != -1) { //The user can't click floating npcs directly (hack attempt)
+				struct npc_data *nd = (struct npc_data *)bl;
+
+				if (nd->progressbar.timeout > 0)
+					return; //Progressbar is stil running
+				npc_click(sd,nd);
+			}
 			break;
 	}
 }
@@ -12496,7 +12503,8 @@ void clif_parse_NpcSelectMenu(int fd,struct map_session_data *sd)
 		if( sd->npc_idle_timer != INVALID_TIMER ) {
 #endif
 			TBL_NPC *nd = map_id2nd(npc_id);
-			ShowWarning("Invalid menu selection on npc %d:'%s' - got %d, valid range is [%d..%d] (player AID:%d, CID:%d, name:'%s')!\n", npc_id, (nd)?nd->name:"invalid npc id", select, 1, sd->npc_menu, sd->bl.id, sd->status.char_id, sd->status.name);
+
+			ShowWarning("Invalid menu selection on npc %d:'%s' - got %d, valid range is [%d..%d] (player AID:%d, CID:%d, name:'%s')!\n", npc_id, (nd ? nd->name : "invalid npc id"), select, 1, sd->npc_menu, sd->bl.id, sd->status.char_id, sd->status.name);
 			clif_GM_kick(NULL,sd);
 #ifdef SECURE_NPCTIMEOUT
 		}
@@ -19929,18 +19937,21 @@ void clif_parse_sale_remove(int fd, struct map_session_data *sd) {
 
 
 /// Displays cast-like progress bar on an NPC.
-/// 09d1 <id>.L <color>.L <time>.L
-void clif_progressbar2(struct block_list *bl, unsigned long color, unsigned int second) {
-#if PACKETVER >= 20131223
-    unsigned char buf[14];
+/// 09d1 <id>.L <color>.L <time>.L (ZC_PROGRESS_ACTOR)
+void clif_progressbar_npc(struct npc_data *nd, struct map_session_data *sd) {
+#if PACKETVER >= 20130821
+	unsigned char buf[14];
 
-	nullpo_retv(bl);
-
-    WBUFW(buf,0) = 0x9d1;
-    WBUFL(buf,2) = bl->id;
-    WBUFL(buf,6) = color;
-    WBUFL(buf,10) = second;
-    clif_send(buf, packet_len(0x9d1), bl, AREA);
+	if( nd->progressbar.timeout > 0 ) {
+		WBUFW(buf,0) = 0x9d1;
+		WBUFL(buf,2) = nd->bl.id;
+		WBUFL(buf,6) = nd->progressbar.color;
+		WBUFL(buf,10) = (nd->progressbar.timeout - gettick()) / 1000;
+		if( sd )
+			clif_send(buf, packet_len(0x9d1), &sd->bl, SELF);
+		else
+			clif_send(buf, packet_len(0x9d1), &nd->bl, AREA);
+	}
 #endif
 }
 

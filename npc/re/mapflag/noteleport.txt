@@ -105,6 +105,22 @@ iz_ac02_d	mapflag	noteleport
 1@sara	mapflag	monster_noteleport
 1@gef_in	mapflag	noteleport
 1@gef_in	mapflag	monster_noteleport
+1@ge_st	mapflag	noteleport
+1@ge_st	mapflag	monster_noteleport
+1@spa	mapflag	noteleport
+1@spa	mapflag	monster_noteleport
+1@tnm1	mapflag	noteleport
+1@tnm1	mapflag	monster_noteleport
+1@tnm2	mapflag	noteleport
+1@tnm2	mapflag	monster_noteleport
+1@tnm3	mapflag	noteleport
+1@tnm3	mapflag	monster_noteleport
+1@air1	mapflag	noteleport
+1@air1	mapflag	monster_noteleport
+1@air2	mapflag	noteleport
+1@air2	mapflag	monster_noteleport
+1@glast	mapflag	noteleport
+1@glast	mapflag	monster_noteleport
 dali	mapflag	noteleport
 dali02	mapflag	noteleport
 
@@ -115,6 +131,18 @@ dali02	mapflag	noteleport
 1@def02	mapflag	monster_noteleport
 1@def03	mapflag	noteleport
 1@def03	mapflag	monster_noteleport
+
+// Episode 14.3 Memorial Dungeon =
+1@dth1	mapflag	noteleport
+1@dth1	mapflag	monster_noteleport
+1@dth2	mapflag	noteleport
+1@dth2	mapflag	monster_noteleport
+1@dth3	mapflag	noteleport
+1@dth3	mapflag	monster_noteleport
+1@eom	mapflag	noteleport
+1@eom	mapflag	monster_noteleport
+1@rev	mapflag	noteleport
+1@rev	mapflag	monster_noteleport
 
 // Nightmarish Jitterbug =========
 1@jtb	mapflag	noteleport

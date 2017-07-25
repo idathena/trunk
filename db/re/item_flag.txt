@@ -403,7 +403,7 @@
 17588,2 //Amora_Lucky_Egg
 17598,2 //Sograt_Lucky_Scroll
 22514,2 //Candy_Holder
-22537,2 //Prize_Of_Hero
+22537,2 //PrizeOfHero
 22558,2 //Lucky_Bag
 22669,2 //HALLOWEEN_G_BOX
 22685,2 //Solo_Christmas_Gift

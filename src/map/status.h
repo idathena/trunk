@@ -792,6 +792,9 @@ typedef enum sc_type {
 	SC_DAILYSENDMAILCNT,
 	SC_DORAM_BUF_01,
 	SC_DORAM_BUF_02,
+	SC_WIDEWEB,
+	SC_CHILL,
+	SC_BURNT,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

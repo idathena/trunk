@@ -2273,7 +2273,7 @@ int intif_parse_Mail_delete(int fd)
 	bool failed = RFIFOB(fd,10);
 	struct map_session_data *sd = map_charid2sd(char_id);
 
-	if (sd == NULL) {
+	if (!sd) {
 		ShowError("intif_parse_Mail_delete: char not found %d\n", char_id);
 		return 0;
 	}

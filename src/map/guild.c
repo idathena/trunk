@@ -180,7 +180,7 @@ static bool guild_read_castledb(char *str[], int columns, int current)
 /// lookup: guild id -> guild*
 struct guild *guild_search(int guild_id)
 {
-	return (struct guild*)idb_get(guild_db,guild_id);
+	return (struct guild *)idb_get(guild_db,guild_id);
 }
 
 /// lookup: guild name -> guild*
@@ -1357,8 +1357,7 @@ int guild_skillupack(int guild_id,uint16 skill_id,int account_id)
 		int range = skill_get_range(skill_id,lv);
 
 		clif_skillup(sd,skill_id,lv,range,1);
-		/* Guild Aura handling */
-		switch( skill_id ) {
+		switch( skill_id ) { //Guild Aura handling
 			case GD_LEADERSHIP:
 			case GD_GLORYWOUNDS:
 			case GD_SOULCOLD:
@@ -1377,21 +1376,24 @@ int guild_skillupack(int guild_id,uint16 skill_id,int account_id)
 }
 
 void guild_guildaura_refresh(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv) {
+	struct unit_data *ud = NULL;
 	struct skill_unit_group *group = NULL;
 	enum sc_type type = status_skill2sc(skill_id);
 
-	if( !(battle_config.guild_aura&(is_agit_start() ? 2 : 1)) &&
-		!(battle_config.guild_aura&(map_flag_gvg2(sd->bl.m) ? 8 : 4)) )
+	if( !(battle_config.guild_aura&(is_agit_start() ? 2 : 1)) && !(battle_config.guild_aura&(map_flag_gvg2(sd->bl.m) ? 8 : 4)) )
 		return;
 	if( !skill_lv )
 		return;
-	if( sd->sc.data[type] && (group = skill_id2group(sd->sc.data[type]->val4)) ) {
-		skill_delunitgroup(group);
-		status_change_end(&sd->bl,type,INVALID_TIMER);
+	if( (ud = unit_bl2ud(&sd->bl)) ) {
+		uint8 i;
+
+		ARR_FIND(0, MAX_SKILLUNITGROUP, i, (ud->skillunit[i] && ud->skillunit[i]->skill_id == skill_id));
+		if( i < MAX_SKILLUNITGROUP )
+			skill_delunitgroup(ud->skillunit[i]);
 	}
-	group = skill_unitsetting(&sd->bl,skill_id,skill_lv,sd->bl.x,sd->bl.y,0);
-	if( group ) //Duration doesn't matter these status never end with val4
-		sc_start4(NULL,&sd->bl,type,100,(battle_config.guild_aura&16) ? 0 : skill_lv,0,0,group->group_id,600000);
+	//Duration doesn't matter these status never end with val4
+	if( (group = skill_unitsetting(&sd->bl,skill_id,skill_lv,sd->bl.x,sd->bl.y,0)) )
+		sc_start4(NULL, &sd->bl, type, 100, (battle_config.guild_aura&16) ? 0 : skill_lv, 0, 0, group->group_id, 600000);
 	return;
 }
 
@@ -1407,11 +1409,10 @@ int guild_get_alliance_count(struct guild *g,int flag)
 
 	nullpo_ret(g);
 
-	for( i = c = 0; i < MAX_GUILDALLIANCE; i++ ) {
-		if(	g->alliance[i].guild_id > 0 &&
-			g->alliance[i].opposition == flag )
+	for( i = c = 0; i < MAX_GUILDALLIANCE; i++ )
+		if(	g->alliance[i].guild_id > 0 && g->alliance[i].opposition == flag )
 			c++;
-	}
+
 	return c;
 }
 
@@ -1434,16 +1435,14 @@ void guild_block_skill(struct map_session_data *sd, int time)
  *---------------------------------------------------*/
 int guild_check_alliance(int guild_id1, int guild_id2, int flag)
 {
-	struct guild *g;
+	struct guild *g = guild_search(guild_id1);
 	int i;
 
-	g = guild_search(guild_id1);
-
-	if (g == NULL)
+	if( g == NULL )
 		return 0;
 
-	ARR_FIND(0, MAX_GUILDALLIANCE, i, g->alliance[i].guild_id == guild_id2 && g->alliance[i].opposition == flag);
-	return(i < MAX_GUILDALLIANCE) ? 1 : 0;
+	ARR_FIND(0, MAX_GUILDALLIANCE, i, (g->alliance[i].guild_id == guild_id2 && g->alliance[i].opposition == flag));
+	return(i < MAX_GUILDALLIANCE ? 1 : 0);
 }
 
 /*====================================================

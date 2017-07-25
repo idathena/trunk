@@ -1085,7 +1085,7 @@ moc_ruins,107,94,4	script	Repairman#moc	99,{
 	end;
 }
 
-payon,143,165,4	script	Repairman#pay	88,{
+payon,143,165,0	script	Repairman#pay	88,{
 	callfunc "repairmain","Repairman";
 	end;
 }

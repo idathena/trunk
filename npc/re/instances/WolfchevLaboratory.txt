@@ -1698,8 +1698,10 @@ lhz_dun04,151,276,3	script	Researcher#memo	4_LGTSCIENCE,{
 		next;
 		erasequest 5111;
 		lght_duk01 = 7;
-		for(.@i = 5113; .@i <= 5125; .@i++)
-			setquest .@i;
+		for(.@i = 5113; .@i <= 5125; .@i++) {
+			if(!isbegin_quest(.@i))
+				setquest .@i;
+		}
 		mes "[Wolfchev]";
 		mes "But still, it is really dangerous since we don't know when they will escape from there.";
 		mes "So, please prepare your party members, and take care of those boss creatures. I'm not sure how long this place can hold.";
@@ -1763,7 +1765,8 @@ lhz_dun04,151,276,3	script	Researcher#memo	4_LGTSCIENCE,{
 								next;
 							} else {
 								for(.@i = 5113; .@i <= 5125; .@i++) {
-									setquest .@i;
+									if(!isbegin_quest(.@i))
+										setquest .@i;
 								}
 								lght_duk01 = 10;
 								mes "[Wolfchev]";
@@ -1784,7 +1787,8 @@ lhz_dun04,151,276,3	script	Researcher#memo	4_LGTSCIENCE,{
 								next;
 							} else {
 								for(.@i = 5113; .@i <= 5125; .@i++) {
-									setquest .@i;
+									if(!isbegin_quest(.@i))
+										setquest .@i;
 								}
 								lght_duk01 = 10;
 								mes "[Wolfchev]";

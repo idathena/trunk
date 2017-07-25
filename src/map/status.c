@@ -825,6 +825,8 @@ void initChangeTables(void) {
 	add_sc( NPC_COMET            , SC_BURNING            );
 	set_sc_with_vfx( NPC_MAXPAIN , SC_MAXPAIN            , SI_MAXPAIN               , SCB_NONE );
 	add_sc( NPC_JACKFROST        , SC_FREEZE             );
+	set_sc( NPC_WIDEWEB          , SC_WIDEWEB            , SI_WIDEWEB               , SCB_FLEE );
+	set_sc( NPC_FIRESTORM        , SC_BURNT              , SI_BURNT                 , SCB_ALL );
 
 	add_sc( RL_MASS_SPIRAL      , SC_BLEEDING           );
 	add_sc( RL_HAMMER_OF_GOD    , SC_STUN               );
@@ -836,7 +838,7 @@ void initChangeTables(void) {
 	set_sc( RL_P_ALTER          , SC_P_ALTER            , SI_P_ALTER              , SCB_NONE          );
 	set_sc( RL_FALLEN_ANGEL     , SC_FALLEN_ANGEL       , SI_FALLEN_ANGEL         , SCB_NONE          );
 	set_sc( RL_SLUGSHOT         , SC_STUN               , SI_SLUGSHOT             , SCB_NONE          );
-	set_sc_with_vfx( RL_AM_BLAST, SC_ANTI_M_BLAST       , SI_ANTI_M_BLAST         , SCB_NONE          );
+	set_sc_with_vfx( RL_AM_BLAST, SC_ANTI_M_BLAST       , SI_ANTI_M_BLAST         , SCB_ALL           );
 	set_sc( RL_HEAT_BARREL      , SC_HEAT_BARREL        , SI_HEAT_BARREL          , SCB_HIT|SCB_ASPD  );
 
 	set_sc( SU_HIDE                 , SC_SUHIDE       , SI_SUHIDE          , SCB_NONE  );
@@ -1088,6 +1090,7 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_DAILYSENDMAILCNT] = SI_DAILYSENDMAILCNT;
 	StatusIconChangeTable[SC_DORAM_BUF_01] = SI_DORAM_BUF_01;
 	StatusIconChangeTable[SC_DORAM_BUF_02] = SI_DORAM_BUF_02;
+	StatusIconChangeTable[SC_CHILL] = SI_CHILL;
 
 	//Other SC which are not necessarily associated to skills
 	StatusChangeFlagTable[SC_ASPDPOTION0] |= SCB_ASPD;
@@ -1181,7 +1184,10 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_PUSH_CART] |= SCB_SPEED;
 	StatusChangeFlagTable[SC_MTF_ASPD] |= SCB_ASPD;
 	StatusChangeFlagTable[SC_MTF_MATK] |= SCB_MATK;
+	StatusChangeFlagTable[SC_MTF_RANGEATK] |= SCB_ALL;
+	StatusChangeFlagTable[SC_MTF_RANGEATK2] |= SCB_ALL;
 	StatusChangeFlagTable[SC_MTF_MLEATKED] |= SCB_ALL;
+	StatusChangeFlagTable[SC_MTF_CRIDAMAGE] |= SCB_ALL;
 	StatusChangeFlagTable[SC_QUEST_BUFF1] |= SCB_MATK;
 	StatusChangeFlagTable[SC_QUEST_BUFF2] |= SCB_MATK;
 	StatusChangeFlagTable[SC_QUEST_BUFF3] |= SCB_MATK;
@@ -1196,7 +1202,16 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_GEFFEN_MAGIC1] |= SCB_ALL;
 	StatusChangeFlagTable[SC_GEFFEN_MAGIC2] |= SCB_ALL;
 	StatusChangeFlagTable[SC_GEFFEN_MAGIC3] |= SCB_ALL;
-	StatusChangeFlagTable[SC_FENRIR_CARD] |= SCB_MATK|SCB_ALL;
+	StatusChangeFlagTable[SC_GVG_GIANT] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GVG_GOLEM] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GVG_STUN] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GVG_STONE] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GVG_FREEZ] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GVG_SLEEP] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GVG_CURSE] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GVG_SILENCE] |= SCB_ALL;
+	StatusChangeFlagTable[SC_GVG_BLIND] |= SCB_ALL;
+	StatusChangeFlagTable[SC_FENRIR_CARD] |= SCB_MATK;
 	StatusChangeFlagTable[SC_SWORDCLAN] |= SCB_STR|SCB_VIT|SCB_MAXHP|SCB_MAXSP;
 	StatusChangeFlagTable[SC_ARCWANDCLAN] |= SCB_INT|SCB_DEX|SCB_MAXHP|SCB_MAXSP;
 	StatusChangeFlagTable[SC_GOLDENMACECLAN] |= SCB_LUK|SCB_INT|SCB_MAXHP|SCB_MAXSP;
@@ -1281,6 +1296,8 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_BLADESTOP_WAIT]       |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_GOSPEL]               |= SCS_NOMOVE|SCS_NOMOVECOND;
 	StatusChangeStateTable[SC_BASILICA]             |= SCS_NOMOVE|SCS_NOMOVECOND;
+	StatusChangeStateTable[SC_SPIDERWEB]            |= SCS_NOMOVE;
+	StatusChangeStateTable[SC_WIDEWEB]              |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_STOP]                 |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CLOSECONFINE]         |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_CLOSECONFINE2]        |= SCS_NOMOVE;
@@ -1565,10 +1582,10 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 				src && src->type != BL_PC && !map_flag_gvg2(target->m) && !map[target->m].flag.battleground && --(sce->val2) < 0)
 				status_change_end(target, SC_ENDURE, INVALID_TIMER);
 			if ((sce = sc->data[SC_GRAVITATION]) && sce->val3 == BCT_SELF) {
-				struct skill_unit_group *sg = skill_id2group(sce->val4);
+				struct skill_unit_group *group = skill_id2group(sce->val4);
 
-				if (sg) {
-					skill_delunitgroup(sg);
+				if (group) {
+					skill_delunitgroup(group);
 					sce->val4 = 0;
 					status_change_end(target, SC_GRAVITATION, INVALID_TIMER);
 				}
@@ -1612,7 +1629,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 
 	//Stop walking when attacked in disguise to prevent walk-delay bug
 	if (src && target->type == BL_PC && ((TBL_PC *)target)->disguise)
-		unit_stop_walking(target, 1);
+		unit_stop_walking(target, USW_FIXPOS);
 
 	if (status->hp || (flag&8)) { //Still lives or has been dead before this damage
 		if (walkdelay)
@@ -1641,8 +1658,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 		return (int)(hp + sp);
 
 	//Normal death
-	if (battle_config.clear_unit_ondeath &&
-		battle_config.clear_unit_ondeath&target->type)
+	if (battle_config.clear_unit_ondeath && battle_config.clear_unit_ondeath&target->type)
 		skill_clear_unitgroup(target);
 
 	if (target->type&BL_REGEN) { //Reset regen ticks
@@ -1689,7 +1705,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 		unit_remove_map(target,CLR_DEAD);
 	else { //Some death states that would normally be handled by unit_remove_map
 		unit_stop_attack(target);
-		unit_stop_walking(target,1);
+		unit_stop_walking(target,USW_FIXPOS);
 		unit_skillcastcancel(target,0);
 		clif_clearunit_area(target,CLR_DEAD);
 		skill_unit_move(target,gettick(),4);
@@ -4081,6 +4097,10 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			sd->reseff[SC_BLIND] = 10000;
 		if (sc->data[SC_ANTI_M_BLAST])
 			sd->subrace[RC_DEMIHUMAN] -= sc->data[SC_ANTI_M_BLAST]->val2;
+		if (sc->data[SC_BURNT]) {
+			sd->subdefele[ELE_FIRE] -= 400;
+			sd->subele[ELE_FIRE] -= 400;
+		}
 	}
 	status_cpy(&sd->battle_status,status);
 
@@ -4817,7 +4837,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 		if( !(status->mode&MD_CANATTACK) )
 			unit_stop_attack(bl);
 		if( !(status->mode&MD_CANMOVE) )
-			unit_stop_walking(bl,1);
+			unit_stop_walking(bl,USW_FIXPOS);
 	}
 
 	//No status changes alter these yet
@@ -5915,7 +5935,7 @@ short status_calc_flee(struct block_list *bl, struct status_change *sc, int flee
 		flee -= sc->data[SC_ANGRIFFS_MODUS]->val3;
 	if(sc->data[SC_C_MARKER])
 		flee -= 10;
-	if(sc->data[SC_SPIDERWEB])
+	if(sc->data[SC_SPIDERWEB] || sc->data[SC_WIDEWEB])
 		flee -= flee * 50 / 100;
 #ifndef RENEWAL
 	if(sc->data[SC_BERSERK])
@@ -8382,6 +8402,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			if( sc->data[SC_WHITEIMPRISON] )
 				return 0;
 			break;
+		case SC_BURNT:
+			if( sc->data[SC_CHILL] )
+				return 0;
+			break;
 		case SC_WEDDING:
 		case SC_XMAS:
 		case SC_SUMMER:
@@ -8804,6 +8828,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_CRYSTALIZE,INVALID_TIMER);
 			status_change_end(bl,SC_FREEZING,INVALID_TIMER);
 			break;
+		case SC_CHILL:
+			status_change_end(bl,SC_BURNT,INVALID_TIMER);
+			break;
 	}
 
 	if( (sce = sc->data[type]) ) { //Check for overlapping fails
@@ -9158,7 +9185,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val3 = 50; //Walk speed penalty
 				//Suiton is a special case, stop effect is forced and only happens when target enters it
 				if( !unit_blown_immune(bl,0x1) )
-					unit_stop_walking(bl,9);
+					unit_stop_walking(bl,USW_FIXPOS|USW_FORCE_STOP);
 				break;
 			case SC_ONEHAND:
 			case SC_TWOHANDQUICKEN:
@@ -10477,6 +10504,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val1 = MOBID_PORING;
 				break;
 			case SC_C_MARKER:
+			case SC_BURNT:
 				tick_time = 1000;
 				val4 = tick / tick_time;
 				break;
@@ -10775,7 +10803,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_FREEZE:
 		case SC_STUN:
 			if (sc->data[SC_DANCING])
-				unit_stop_walking(bl,1);
+				unit_stop_walking(bl,USW_FIXPOS);
 		//Fall through
 		case SC_TRICKDEAD:
 			status_change_end(bl,SC_DANCING,INVALID_TIMER);
@@ -10800,7 +10828,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_PARALYSIS:
 		case SC_MEIKYOUSISUI:
 		case SC_KAGEHUMI:
-			unit_stop_walking(bl,1);
+			unit_stop_walking(bl,USW_FIXPOS);
 			break;
 		case SC_CURSEDCIRCLE_TARGET:
 			unit_stop_attack(bl);
@@ -10812,13 +10840,14 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_TINDER_BREAKER:
 		case SC_SV_ROOTTWIST:
 			if (!unit_blown_immune(bl,0x1))
-				unit_stop_walking(bl,1);
+				unit_stop_walking(bl,USW_FIXPOS);
 			break;
 		case SC_ANKLE:
 		case SC_SPIDERWEB:
+		case SC_WIDEWEB:
 		case SC_ELECTRICSHOCKER:
 			if (!unit_blown_immune(bl,0x9))
-				unit_stop_walking(bl,1);
+				unit_stop_walking(bl,USW_FIXPOS);
 			break;
 		case SC_WEIGHT90:
 		case SC_HIDING:
@@ -11531,7 +11560,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		case SC_GRANITIC_ARMOR: {
 				int damage = status->max_hp * sce->val3 / 100;
 
-				if (status->hp < damage) //Don't kill
+				if (damage >= status->hp) //Don't kill
 					damage = status->hp - 1;
 				status_damage(NULL,bl,damage,0,0,1);
 			}
@@ -11556,7 +11585,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 						begin_strup = false;
 					ud->state.running = 0;
 					if (ud->walktimer != INVALID_TIMER)
-						unit_stop_walking(bl,1);
+						unit_stop_walking(bl,USW_FIXPOS);
 				}
 				if (begin_strup && sce->val1 >= 7 && DIFF_TICK(gettick(),sce->val4) <= 1000 && (!sd || (!sd->weapontype1 && !sd->weapontype2)))
 					sc_start(bl,bl,SC_STRUP,100,sce->val1,skill_get_time2(status_sc2skill(type),sce->val1));
@@ -11821,7 +11850,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 				if (ud) {
 					ud->state.running = 0;
 					if (ud->walktimer != INVALID_TIMER)
-						unit_stop_walking(bl,1);
+						unit_stop_walking(bl,USW_FIXPOS);
 				}
 			}
 			break;
@@ -12344,7 +12373,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				sce->val3 = 0; //Incubation time used up
 				unit_stop_attack(bl);
 				if( sc->data[SC_DANCING] ) {
-					unit_stop_walking(bl,1);
+					unit_stop_walking(bl,USW_FIXPOS);
 					status_change_end(bl,SC_DANCING,INVALID_TIMER);
 				}
 				status_change_end(bl,SC_AETERNA,INVALID_TIMER);
@@ -12414,7 +12443,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			if( sce->val4 >= 0 ) {
 				int64 damage = 3 * status->max_hp / 100;
 
-				if( status->hp <= damage )
+				if( damage >= status->hp )
 					damage = status->hp - 1; //Cannot kill
 				if( damage > 0 ) { //3% damage each 4 seconds
 					map_freeblock_lock();
@@ -13296,6 +13325,22 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				if( status->sp < status->max_sp )
 					status_heal(bl,0,5,2);
 				sc_timer_next(10000 + tick,status_change_timer,bl->id,data);
+				return 0;
+			}
+			break;
+
+		case SC_BURNT:
+			if( --(sce->val4) >= 0 ) {
+				int damage = 2000;
+
+				if( damage >= status->hp )
+					damage = status->hp - 1;
+				map_freeblock_lock();
+				status_zap(bl,damage,0);
+				if( sc->data[type] ) {
+					sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
+				}
+				map_freeblock_unlock();
 				return 0;
 			}
 			break;

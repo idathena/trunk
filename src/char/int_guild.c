@@ -329,7 +329,7 @@ struct guild *inter_guild_fromsql(int guild_id)
 	if( guild_id <= 0 )
 		return NULL;
 
-	g = (struct guild*)idb_get(guild_db_, guild_id);
+	g = (struct guild *)idb_get(guild_db_, guild_id);
 	if( g )
 		return g;
 
@@ -402,7 +402,7 @@ struct guild *inter_guild_fromsql(int guild_id)
 	}
 	for( i = 0; i < g->max_member && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i )
 	{
-		struct guild_member* m = &g->member[i];
+		struct guild_member *m = &g->member[i];
 
 		Sql_GetData(sql_handle,  0, &data, NULL); m->account_id = atoi(data);
 		Sql_GetData(sql_handle,  1, &data, NULL); m->char_id = atoi(data);

@@ -6567,18 +6567,21 @@ This command works almost like sleep2, but displays a progress bar
 above the head of the currently attached character (like cast bar).
 Once the given amount of seconds passes, the script resumes. If the
 character moves while the progress bar progresses, it is aborted and
-the script ends. The color format is in RGB (0xRRGGBB). The color is
+the script ends. The color format is in RGB (RRGGBB). The color is
 currently ignored by the client and appears always green.
 
 ---------------------------------------
 
 *npcprogressbar "<color>",<seconds>{,"<NPC Name>"}};
 
-This command behaves identically to 'progressbar', but will display
-a progress bar above of the currently attached NPC.
+This command works like progressbar, but displays a progress bar
+above the head of the currently attached (or given) NPC. Once the
+given amount of seconds passes, the script resumes. The color format
+is in RGB (RRGGBB). The color is currently ignored by the client and
+appears always green.
 
-<NPC name> parameter will display the progress bar on another NPC. If the NPC
-specified does not exist, the command will do nothing.
+Note: If a player is attached to the NPC, they are detached from the NPC
+as soon as the progress bar activates.
 
 ---------------------------------------
 //
@@ -6980,19 +6983,25 @@ The optional parameter 'type' is used in the 'skill_damage' mapflag:
 
 ---------------------------------------
 
-*setbattleflag "<battle flag>",<value>;
+*setbattleflag "<battle flag>",<value>{,<reload>};
 *getbattleflag("<battle flag>")
 
 Sets or gets the value of the given battle flag.
 Battle flags are the flags found in the battle/*.conf files and is also used in Lupus' variable rates script.
+If the reload value is given then the server will attempt to reload monster data
+to properly apply the new rates. This applies to EXP/Drop type configs. The server
+will only attempt to reload specific configs.
 
 Examples:
 
-// Will set the base experience rate to 20x (2000%)
-	setBattleFlag "base_exp_rate",2000;
+// Will set the base experience rate to 20x (2000%)  - Monster data will continue to use previous rates at server start
+	setbattleflag "base_exp_rate",2000;
+
+// Will set the base experience rate to 20x (2000%) - Monster data will be reloaded to new value
+	setbattleflag "base_exp_rate",2000,true;
 	
 // Will return the value of the base experience rate (when used after the above example, it would print 2000).
-	mes getBattleFlag("base_exp_rate");
+	mes getbattleflag("base_exp_rate");
 
 ---------------------------------------
 
@@ -7551,13 +7560,22 @@ This command will make a <GID> stop attacking.
 
 ---------------------------------------
 
-*unitstopwalk <GID>;
+*unitstopwalk <GID>{,<flag>};
 
 This command will make a <GID> stop moving.
 
 NOTE: If this is called from OnTouch, then the walktimer attached to the unit is
 removed from OnTouch which causes this command to not stop the unit from walking.
 Suggest to use 'unitblockmove' to forcefully stop the unit with OnTouch.
+
+The <flag> value affects how the unit is stopped. The following flags are bitwise
+values (can be combined using the pipe operator):
+	USW_NONE = Unit will keep walking to their original destination.
+	USW_FIXPOS = Issue a fixpos packet afterwards.
+	USW_MOVE_ONCE = Force the unit to move one cell if it hasn't yet.
+	USW_MOVE_FULL_CELL = Enable moving to the next cell when unit was already half-way there
+		(may cause on-touch/place side-effects, such as a scripted map change).
+	USW_FORCE_STOP = Force stop moving.
 
 ---------------------------------------
 
@@ -7580,16 +7598,23 @@ For a full list of emotion numbers, see 'db/const.txt' under 'e_'.
 
 *unitskilluseid <GID>,<skill id>,<skill lvl>{,<target id>,<casttime>};
 *unitskilluseid <GID>,"<skill name>",<skill lvl>{,<target id>,<casttime>};
-*unitskillusepos <GID>,<skill id>,<skill lvl>,<x>,<y>{,<casttime>};
-*unitskillusepos <GID>,"<skill name>",<skill lvl>,<x>,<y>{,<casttime>};
+*unitskillusepos <GID>,<skill id>,<skill lvl>{,<x>,<y>,<casttime>};
+*unitskillusepos <GID>,"<skill name>",<skill lvl>{,<x>,<y>,<casttime>};
 
 This is the replacement of the older commands, these use the same values for
 GID as the other unit* commands (See 'GID').
 
+If target id is set to 0 or no value, the 'unitskilluseid' command will use current
+attached <GID> as target/self-skill.
+If target id is set to -1 and the attached unit is monster type, this
+command will use the current monster target as the skill target.
+
+For the position of the 'unitskillusepos', if there's no x or y value is set, the command will
+use the current <GID> coordinate as the skill position.
+
 Skill ID is the ID of the skill, skill level is the level of the skill.
 Cast time is the amount of seconds to add or remove from the skill. Use a positive value to
 add and negative value to subtract. Using 0 or no value will use the default skill cast time.
-For the position, the x and y are given in the UnitSkillUsePos.
 
 ---------------------------------------
 
@@ -9163,6 +9188,14 @@ Lets say the ID of a party was saved as a global variable:
 
     // This would return the name of the party from the ID stored in a variable
     mes "You're in the '"+getpartyname($@var)+"' party, I know!";
+
+---------------------------------------
+
+*getpartymemberid({<char_id>})
+
+This function will return the party member id of the attached/specified character.
+If the character doesn't have a party or the given 'char_id' cannot be found,
+this function will return 0.
 
 ---------------------------------------
 

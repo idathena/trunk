@@ -3960,15 +3960,43 @@ IG_Blessing_Midgard_Lucky_Egg,6439,1,3 // 3x Blessed_Armor_Ore
 IG_Blessing_Midgard_Lucky_Egg,12902,1,1 // 1x Bubble Gum Box
 IG_Blessing_Midgard_Lucky_Egg,12901,1,1 // Insurance Package
 
-IG_Closed_Mind_Box,732,1,10 // 10x Crystal_Jewel__
-IG_Closed_Mind_Box,719,1,10 // 10x Violet_Jewel
-IG_Closed_Mind_Box,7642,1,5 // 5x Bloody_Coin
-IG_Closed_Mind_Box,969,1,2 // 2x Gold
-IG_Closed_Mind_Box,1098,1,10 // 10x Manacles
-IG_Closed_Mind_Box,616,1,1 // 1x Old_Card_Album
-IG_Closed_Mind_Box,617,1,3 // 3x Old_Violet_Box
-IG_Closed_Mind_Box,11564,1,5 // 5x Sweet_Canape
-IG_Closed_Mind_Box,11563,1,5 // 5x Hot_Tee
-IG_Closed_Mind_Box,2977,1,1 // 1x Hurt_Mind
-IG_Closed_Mind_Box,2978,1,1 // 1x KindHeart
-IG_Closed_Mind_Box,18848,1,1 // 1x Lush_Rose
+IG_Closed_Mind_Box,Hurt_Mind,1,1,1
+IG_Closed_Mind_Box,KindHeart,1,1,1
+IG_Closed_Mind_Box,Lush_Rose,1,1,1
+IG_Closed_Mind_Box,Old_Card_Album,500,1,1
+IG_Closed_Mind_Box,Magic_Card_Album,80,1,1
+IG_Closed_Mind_Box,Hot_Tee,1500,5,1
+IG_Closed_Mind_Box,Bloody_Dead_Branch,100,1,1
+IG_Closed_Mind_Box,Old_Violet_Box,808,3,1
+IG_Closed_Mind_Box,Manacles,100,10,1
+IG_Closed_Mind_Box,Bloody_Page,110,10,1
+IG_Closed_Mind_Box,Sweet_Canape,1800,5,1
+IG_Closed_Mind_Box,Bloody_Coin,1200,5,1
+IG_Closed_Mind_Box,Gold,1400,2,1
+IG_Closed_Mind_Box,Violet_Jewel,1200,10,1
+IG_Closed_Mind_Box,Crystal_Jewel__,1200,10,1
+
+IG_Squad_Prize,Force1,1167,1,1
+IG_Squad_Prize,Intellect1,1167,1,1
+IG_Squad_Prize,Swiftness1,1167,1,1
+IG_Squad_Prize,Tough1,1167,1,1
+IG_Squad_Prize,Artful1,1167,1,1
+IG_Squad_Prize,Fortune1,1167,1,1
+IG_Squad_Prize,Force2,416,1,1
+IG_Squad_Prize,Intellect2,416,1,1
+IG_Squad_Prize,Swiftness2,416,1,1
+IG_Squad_Prize,Tough2,416,1,1
+IG_Squad_Prize,Artful2,416,1,1
+IG_Squad_Prize,Fortune2,416,1,1
+IG_Squad_Prize,Force3,83,1,1
+IG_Squad_Prize,Intellect3,83,1,1
+IG_Squad_Prize,Swiftness3,83,1,1
+IG_Squad_Prize,Tough3,83,1,1
+IG_Squad_Prize,Artful3,83,1,1
+IG_Squad_Prize,Fortune3,83,1,1
+IG_Squad_Prize,Frost_Crystal,400,1,2
+IG_Squad_Prize,Treasure_Box,100,1,2
+IG_Squad_Prize,White_Slim_Potion,3500,10,2
+IG_Squad_Prize,Blue_Potion,4000,10,2
+IG_Squad_Prize,Seed_Of_Yggdrasil,1000,5,2
+IG_Squad_Prize,Yggdrasilberry,1000,3,2
