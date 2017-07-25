@@ -942,6 +942,8 @@ void clif_party_show_picker(struct map_session_data *sd, struct item * item_data
 // Progress Bar [Inkfish]
 void clif_progressbar(struct map_session_data *sd, unsigned long color, unsigned int second);
 void clif_progressbar_abort(struct map_session_data *sd);
+void clif_progressbar_npc(struct npc_data *nd, struct map_session_data *sd);
+#define clif_progressbar_npc_area(nd) clif_progressbar_npc((nd), NULL)
 
 void clif_PartyLeaderChanged(struct map_session_data *sd, int prev_leader_aid, int new_leader_aid);
 void clif_PartyBookingRegisterAck(struct map_session_data *sd, int flag);
@@ -1060,6 +1062,5 @@ void clif_parse_RouletteRecvItem(int fd, struct map_session_data *sd);
 void clif_dressing_room(struct map_session_data *sd, int flag);
 void clif_navigateTo(struct map_session_data *sd, const char *map, uint16 x, uint16 y, uint8 flag, bool hideWindow, uint16 mob_id);
 void clif_SelectCart(struct map_session_data *sd);
-void clif_progressbar2(struct block_list *bl, unsigned long color, unsigned int second);
 
 #endif /* _CLIF_H_ */

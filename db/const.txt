@@ -466,9 +466,10 @@ IG_Miracle_Lucky_Egg	449
 IG_Legend_Hero_Lucky_Egg	450
 IG_Blessing_Midgard_Lucky_Egg	451
 IG_Old_Equipment_Box	452
-IG_Prize_Of_Hero	453
+IG_PrizeOfHero	453
 IG_Closed_Mind_Box	454
 IG_God_Material_Box	455
+IG_Squad_Prize	456
 
 EF_NONE	-1
 EF_HIT1	0

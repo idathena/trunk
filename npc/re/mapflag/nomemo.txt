@@ -149,6 +149,22 @@ dali02	mapflag	nomemo
 1@def02	mapflag	nomemo
 1@def03	mapflag	nomemo
 
+// Heroes' Trails - Part 2 =======
+1@ge_st	mapflag	nomemo
+1@spa	mapflag	nomemo
+1@tnm1	mapflag	nomemo
+1@tnm2	mapflag	nomemo
+1@tnm3	mapflag	nomemo
+
+// Episode 14.3 ==================
+1@dth1	mapflag	nomemo
+1@dth2	mapflag	nomemo
+1@dth3	mapflag	nomemo
+1@eom	mapflag	nomemo
+1@rev	mapflag	nomemo
+moro_cav	mapflag	nomemo
+moro_vol	mapflag	nomemo
+
 // Nightmarish Jitterbug =========
 1@jtb	mapflag	nomemo
 
@@ -158,6 +174,11 @@ dali02	mapflag	nomemo
 // Nightmare Clock Tower =========
 c_tower2_	mapflag	nomemo
 c_tower3_	mapflag	nomemo
+
+// Heroes' Trails - Part 3 =======
+1@air1	mapflag	nomemo
+1@air2	mapflag	nomemo
+1@glast	mapflag	nomemo
 
 // WOE:TE Maps ===================
 te_prtcas01	mapflag	nomemo

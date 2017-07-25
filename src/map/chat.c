@@ -88,7 +88,7 @@ int chat_createpcchat(struct map_session_data *sd, const char *title, const char
 		return 0;
 	}
 
-	pc_stop_walking(sd,1);
+	pc_stop_walking(sd,USW_FIXPOS);
 
 	cd = chat_createchat(&sd->bl, title, pass, limit, pub, 0, "", 0, 1, MAX_LEVEL);
 	if( cd ) {
@@ -145,7 +145,7 @@ int chat_joinchat(struct map_session_data *sd, int chatid, const char *pass)
 		return 0;
 	}
 
-	pc_stop_walking(sd,1);
+	pc_stop_walking(sd,USW_FIXPOS);
 	cd->usersd[cd->users] = sd;
 	cd->users++;
 

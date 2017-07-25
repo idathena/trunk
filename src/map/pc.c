@@ -1971,7 +1971,7 @@ int pc_disguise(struct map_session_data *sd, int class_)
 		return 2;
 	}
 	if (sd->bl.prev != NULL) {
-		pc_stop_walking(sd, 0);
+		pc_stop_walking(sd, USW_NONE);
 		clif_clearunit_area(&sd->bl, CLR_OUTSIGHT);
 	}
 	if (!class_) {
@@ -4899,11 +4899,8 @@ int pc_useitem(struct map_session_data *sd, int n)
 	amount = item.amount;
 	script = id->script;
 
-	if( item.card[0] == CARD0_CREATE && pc_famerank(MakeDWord(item.card[2],item.card[3]), MAPID_ALCHEMIST) ) {
+	if( item.card[0] == CARD0_CREATE && pc_famerank(MakeDWord(item.card[2],item.card[3]), MAPID_ALCHEMIST) )
 		potion_flag = 2; //Famous player's potions have 50% more efficiency
-		if( sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_ROGUE )
-			potion_flag = 4; //Even more effective potions
-	}
 
 	//Update item use time
 	sd->canuseitem_tick = tick + battle_config.item_use_interval;
@@ -6264,7 +6261,7 @@ int pc_stop_following(struct map_session_data *sd)
 	sd->followtarget = -1;
 	sd->ud.target_to = 0;
 
-	unit_stop_walking(&sd->bl, 1);
+	unit_stop_walking(&sd->bl, USW_FIXPOS);
 
 	return 0;
 }
@@ -8149,11 +8146,15 @@ void pc_heal(struct map_session_data *sd, unsigned int hp, unsigned int sp, int 
 	}
 }
 
-/*==========================================
- * HP/SP Recovery
- * Heal player hp and/or sp linearly.
- * Calculate bonus by status.
- *------------------------------------------*/
+/**
+ * Heal player HP and/or SP linearly. Calculate any bonus based on active statuses.
+ * @param sd: Player data
+ * @param itemid: Item ID
+ * @param hp: HP to heal
+ * @param sp: SP to heal
+ * @param fixed
+ * @return Amount healed to an object
+ */
 int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fixed)
 {
 	int bonus, tmp, penalty = 0;
@@ -8164,8 +8165,11 @@ int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fi
 
 			bonus = 100 + (sd->battle_status.vit<<1) + pc_checkskill(sd,SM_RECOVERY) * 10 + pc_checkskill(sd,AM_LEARNINGPOTION) * 5;
 			//A potion produced by an Alchemist in the Fame Top 10 gets +50% effect [DracoRPG]
-			if(potion_flag > 1)
-				bonus += (potion_flag - 1) * 50;
+			if(potion_flag == 2) {
+				bonus += 50;
+				if(sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_ROGUE)
+					bonus += 100; //Receive an additional +100% effect from ranked potions to HP only
+			}
 			//All item bonuses
 			bonus += sd->bonus.itemhealrate2;
 			//Item Group bonuses
@@ -8190,7 +8194,7 @@ int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fi
 		}
 		if(sp) {
 			bonus = 100 + (sd->battle_status.int_<<1) + pc_checkskill(sd,MG_SRECOVERY) * 10 + pc_checkskill(sd,AM_LEARNINGPOTION) * 5;
-			if(potion_flag > 1)
+			if(potion_flag == 2)
 				bonus += 50;
 			tmp = sp * bonus / 100;
 			if(bonus != 100 && tmp > sp)
@@ -8213,7 +8217,7 @@ int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fi
 	if(sd->sc.data[SC_NORECOVER_STATE])
 		penalty = 100;
 	//Apply a penalty to recovery if there is one
-	if(penalty) {
+	if(penalty > 0) {
 		hp -= hp * penalty / 100;
 		sp -= sp * penalty / 100;
 	}

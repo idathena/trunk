@@ -1301,7 +1301,7 @@ static int mob_ai_sub_hard_lootsearch(struct block_list *bl,va_list ap)
 		md->target_id = bl->id;
 		md->min_chase = md->db->range3;
 	} else if(!battle_config.monster_loot_search_type)
-		mob_stop_walking(md,1); //Stop walking immediately if item is no longer on the ground
+		mob_stop_walking(md,USW_FIXPOS); //Stop walking immediately if item is no longer on the ground
 	return 0;
 }
 
@@ -1433,7 +1433,7 @@ int mob_unlocktarget(struct mob_data *md, unsigned int tick)
 			break;
 		default:
 			mob_stop_attack(md);
-			mob_stop_walking(md,1); //Immediately stop chasing
+			mob_stop_walking(md,USW_FIXPOS); //Immediately stop chasing
 			if((md->status.mode&MD_ANGRY) && !md->state.aggressive)
 				md->state.aggressive = 1; //Restore angry state when switching to idle
 			md->state.skillstate = MSS_IDLE;
@@ -2930,7 +2930,7 @@ int mob_class_change(struct mob_data *md, int mob_id)
 		memcpy(md->name,md->db->jname,NAME_LENGTH);
 
 	mob_stop_attack(md);
-	mob_stop_walking(md,0);
+	mob_stop_walking(md,USW_NONE);
 	unit_skillcastcancel(&md->bl,0);
 	status_set_viewdata(&md->bl,mob_id);
 	clif_mob_class_change(md,md->vd->class_);

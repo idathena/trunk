@@ -39,7 +39,7 @@ alde_alche,24,188,3	script	Guild Dealer	740,{
 		mes "[Gever Al Sharp]";
 		mes "What would you like?";
 		next;
-		if (select("Medicine Bowl - 8 Zeny:Cancel.") == 1) {
+		if (select("Medicine Bowl - "+(checkre(0)?"250":"8")+" Zeny:Cancel.") == 1) {
 			mes "[Gever Al Sharp]";
 			mes "How many do you want?";
 			mes "Enter '0' if you want to quit.";
@@ -62,7 +62,7 @@ alde_alche,24,188,3	script	Guild Dealer	740,{
 					break;
 				}
 			}
-			set .@sell,.@input * 8;
+			set .@sell,.@input * (checkre(0)?250:8);
 			set .@item_weight,.@input * 10;
 			if (Zeny < .@sell) {
 				mes "[Gever Al Sharp]";

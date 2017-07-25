@@ -1,0 +1,17 @@
+//===== rAthena Script ======================================= 
+//= BattleGround System - Common NPCs
+//===== By: ================================================== 
+//= exneval
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= [Official Conversion]
+//= Battleground NPC:
+//= - Battleground Warper
+//===== Additional Comments: ================================= 
+//= 1.0 First version, Renewal duplicates.
+//============================================================
+
+morocc,145,82,3	duplicate(BatRecruit)	Maroll Battle Recruiter::BatRecruit8	728

@@ -21,7 +21,7 @@
 //= 1.6 Rescripted to official 10.3 standards. [L0ne_W0lf]
 //============================================================
 
-payon,162,67,4	script	Guide#pay	708,{
+payon,160,67,4	script	Guide#pay	708,{
 	cutin "pay_soldier",2;
 	mes "[Payon Guide]";
 	mes "Welcome to the";
