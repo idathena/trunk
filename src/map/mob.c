@@ -568,7 +568,7 @@ struct mob_data *mob_once_spawn_sub(struct block_list *bl, int16 m, int16 x, int
 	data.num = 1;
 	data.id = mob_id;
 	data.state.size = size;
-	data.state.ai = ai;
+	data.state.ai = (enum mob_ai)ai;
 
 	if (mobname)
 		safestrncpy(data.name, mobname, sizeof(data.name));
@@ -579,15 +579,15 @@ struct mob_data *mob_once_spawn_sub(struct block_list *bl, int16 m, int16 x, int
 
 	if (event)
 		safestrncpy(data.eventname, event, sizeof(data.eventname));
-	
+
 	// Locate spot next to player
 	if (bl && (x < 0 || y < 0))
 		map_search_freecell(bl, m, &x, &y, 1, 1, 0);
 
-	// if none found, pick random position on map
+	// If none found, pick random position on map
 	if (x <= 0 || x >= map[m].xs || y <= 0 || y >= map[m].ys)
 		map_search_freecell(NULL, m, &x, &y, -1, -1, 1);
-	
+
 	data.x = x;
 	data.y = y;
 
@@ -614,20 +614,20 @@ int mob_once_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, const
 	if (m < 0 || amount <= 0)
 		return 0; //Invalid input
 
-	lv = (sd) ? sd->status.base_level : 255;
+	lv = (sd ? sd->status.base_level : 255);
 
 	for (count = 0; count < amount; count++) {
 		int c = (mob_id >= 0) ? mob_id : (mob_id == -5) ? mob_get_random_id(MOBG_Branch_Of_Dead_Tree, 0x21, 0) :
 			mob_get_random_id(-mob_id - 1, (battle_config.random_monster_checklv) ? 0x03 : 0x01, lv);
 
-		md = mob_once_spawn_sub((sd) ? &sd->bl : NULL, m, x, y, mobname, c, event, size, ai);
+		md = mob_once_spawn_sub((sd ? &sd->bl : NULL), m, x, y, mobname, c, event, size, ai);
 
 		if (!md)
 			continue;
 
 		if (mob_id == MOBID_EMPERIUM && !no_guardian_data) {
 			struct guild_castle *gc = guild_mapindex2gc(map_id2index(m));
-			struct guild *g = (gc) ? guild_search(gc->guild_id) : NULL;
+			struct guild *g = (gc ? guild_search(gc->guild_id) : NULL);
 
 			if (gc) {
 				md->guardian_data = (struct guardian_data *)aCalloc(1, sizeof(struct guardian_data));
@@ -648,7 +648,7 @@ int mob_once_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, const
 			sc_start4(NULL, &md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE|MD_CANATTACK|MD_CANMOVE|MD_ANGRY, 0, 60000);
 	}
 
-	return (md) ? md->bl.id : 0; //Id of last spawned mob
+	return (md ? md->bl.id : 0); //Id of last spawned mob
 }
 
 /*==========================================
@@ -2281,7 +2281,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 	struct status_data *status;
 	struct map_session_data *sd = NULL, *tmpsd[DAMAGELOG_SIZE];
 	struct map_session_data *mvp_sd = NULL, *second_sd = NULL, *third_sd = NULL;
-	
+
 	struct {
 		struct party_data *p;
 		int id, zeny;
@@ -2769,15 +2769,21 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			if(sd && battle_config.mob_npc_event_type) {
 				pc_setparam(sd, SP_KILLERRID, sd->bl.id);
 				pc_setparam(sd, SP_KILLEDRID, md->mob_id);
+				pc_setparam(sd, SP_KILLEDRID_X, md->bl.x);
+				pc_setparam(sd, SP_KILLEDRID_Y, md->bl.y);
 				npc_event(sd, md->npc_event, 0);
 			} else if(mvp_sd) {
 				pc_setparam(mvp_sd, SP_KILLERRID, (sd ? sd->bl.id : 0));
 				pc_setparam(mvp_sd, SP_KILLEDRID, md->mob_id);
+				pc_setparam(mvp_sd, SP_KILLEDRID_X, md->bl.x);
+				pc_setparam(mvp_sd, SP_KILLEDRID_Y, md->bl.y);
 				npc_event(mvp_sd, md->npc_event, 0);
 			} else
 				npc_event_do(md->npc_event);
 		} else if(mvp_sd && !md->state.npc_killmonster) {
 			pc_setparam(mvp_sd, SP_KILLEDRID, md->mob_id);
+			pc_setparam(mvp_sd, SP_KILLEDRID_X, md->bl.x);
+			pc_setparam(mvp_sd, SP_KILLEDRID_Y, md->bl.y);
 			npc_script_event(mvp_sd, NPCE_KILLNPC); //PCKillNPC [Lance]
 		}
 	}

@@ -5768,6 +5768,10 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_BABY_ACOLYTE:          return MAPID_BABY_ACOLYTE;
 		case JOB_BABY_MERCHANT:         return MAPID_BABY_MERCHANT;
 		case JOB_BABY_THIEF:            return MAPID_BABY_THIEF;
+		case JOB_BABY_TAEKWON:          return MAPID_BABY_TAEKWON;
+		case JOB_BABY_GUNSLINGER:       return MAPID_BABY_GUNSLINGER;
+		case JOB_BABY_NINJA:            return MAPID_BABY_NINJA;
+		case JOB_BABY_SUMMONER:         return MAPID_BABY_SUMMONER;
 		//Baby 2-1 Jobs
 		case JOB_SUPER_BABY:            return MAPID_SUPER_BABY;
 		case JOB_BABY_KNIGHT:           return MAPID_BABY_KNIGHT;
@@ -5776,6 +5780,10 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_BABY_PRIEST:           return MAPID_BABY_PRIEST;
 		case JOB_BABY_BLACKSMITH:       return MAPID_BABY_BLACKSMITH;
 		case JOB_BABY_ASSASSIN:         return MAPID_BABY_ASSASSIN;
+		case JOB_BABY_STAR_GLADIATOR:   return MAPID_BABY_STAR_GLADIATOR;
+		case JOB_BABY_REBELLION:        return MAPID_BABY_REBELLION;
+		case JOB_BABY_KAGEROU:
+		case JOB_BABY_OBORO:            return MAPID_BABY_KAGEROUOBORO;
 		//Baby 2-2 Jobs
 		case JOB_BABY_CRUSADER:         return MAPID_BABY_CRUSADER;
 		case JOB_BABY_SAGE:             return MAPID_BABY_SAGE;
@@ -5784,6 +5792,7 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_BABY_MONK:             return MAPID_BABY_MONK;
 		case JOB_BABY_ALCHEMIST:        return MAPID_BABY_ALCHEMIST;
 		case JOB_BABY_ROGUE:            return MAPID_BABY_ROGUE;
+		case JOB_BABY_SOUL_LINKER:      return MAPID_BABY_SOUL_LINKER;
 		//3-1 Jobs
 		case JOB_SUPER_NOVICE_E:        return MAPID_SUPER_NOVICE_E;
 		case JOB_RUNE_KNIGHT:           return MAPID_RUNE_KNIGHT;
@@ -5910,6 +5919,10 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_BABY_ACOLYTE:          return JOB_BABY_ACOLYTE;
 		case MAPID_BABY_MERCHANT:         return JOB_BABY_MERCHANT;
 		case MAPID_BABY_THIEF:            return JOB_BABY_THIEF;
+		case MAPID_BABY_TAEKWON:          return JOB_BABY_TAEKWON;
+		case MAPID_BABY_GUNSLINGER:       return JOB_BABY_GUNSLINGER;
+		case MAPID_BABY_NINJA:            return JOB_BABY_NINJA;
+		case MAPID_BABY_SUMMONER:         return JOB_BABY_SUMMONER;
 		//Baby 2-1 Jobs
 		case MAPID_SUPER_BABY:            return JOB_SUPER_BABY;
 		case MAPID_BABY_KNIGHT:           return JOB_BABY_KNIGHT;
@@ -5918,6 +5931,9 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_BABY_PRIEST:           return JOB_BABY_PRIEST;
 		case MAPID_BABY_BLACKSMITH:       return JOB_BABY_BLACKSMITH;
 		case MAPID_BABY_ASSASSIN:         return JOB_BABY_ASSASSIN;
+		case MAPID_BABY_STAR_GLADIATOR:   return JOB_BABY_STAR_GLADIATOR;
+		case MAPID_BABY_REBELLION:        return JOB_BABY_REBELLION;
+		case MAPID_BABY_KAGEROUOBORO:     return (sex ? JOB_BABY_KAGEROU : JOB_BABY_OBORO);
 		//Baby 2-2 Jobs
 		case MAPID_BABY_CRUSADER:         return JOB_BABY_CRUSADER;
 		case MAPID_BABY_SAGE:             return JOB_BABY_SAGE;
@@ -5925,6 +5941,7 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_BABY_MONK:             return JOB_BABY_MONK;
 		case MAPID_BABY_ALCHEMIST:        return JOB_BABY_ALCHEMIST;
 		case MAPID_BABY_ROGUE:            return JOB_BABY_ROGUE;
+		case MAPID_BABY_SOUL_LINKER:      return JOB_BABY_SOUL_LINKER;
 		//3-1 Jobs
 		case MAPID_SUPER_NOVICE_E:        return JOB_SUPER_NOVICE_E;
 		case MAPID_RUNE_KNIGHT:           return JOB_RUNE_KNIGHT;
@@ -6200,6 +6217,22 @@ const char *job_name(int class_)
 
 		case JOB_SUMMONER:
 			return msg_txt(697);
+
+		case JOB_BABY_SUMMONER:
+			return msg_txt(698);
+
+		case JOB_BABY_NINJA:
+		case JOB_BABY_KAGEROU:
+		case JOB_BABY_OBORO:
+		case JOB_BABY_TAEKWON:
+		case JOB_BABY_STAR_GLADIATOR:
+		case JOB_BABY_SOUL_LINKER:
+		case JOB_BABY_GUNSLINGER:
+		case JOB_BABY_REBELLION:
+			return msg_txt(745 - JOB_BABY_NINJA + class_);
+
+		case JOB_BABY_STAR_GLADIATOR2:
+			return msg_txt(749);
 
 		default:
 			return msg_txt(655);
@@ -7537,6 +7570,8 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 					struct map_session_data *ssd = (struct map_session_data *)src;
 
 					pc_setparam(ssd,SP_KILLEDRID,sd->bl.id);
+					pc_setparam(ssd,SP_KILLEDRID_X,sd->bl.x);
+					pc_setparam(ssd,SP_KILLEDRID_Y,sd->bl.y);
 					npc_script_event(ssd,NPCE_KILLPC);
 
 					if( battle_config.pk_mode&2 ) {
@@ -7845,6 +7880,8 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_ROULETTE_BRONZE:	val = sd->roulette_point.bronze; break;
 		case SP_ROULETTE_SILVER:	val = sd->roulette_point.silver; break;
 		case SP_ROULETTE_GOLD:		val = sd->roulette_point.gold; break;
+		case SP_KILLEDRID_X:	val = sd->killedrid_x; break;
+		case SP_KILLEDRID_Y:	val = sd->killedrid_y; break;
 		case SP_CRITICAL:	val = sd->battle_status.cri / 10; break;
 		case SP_ASPD:		val = (2000 - sd->battle_status.amotion) / 10; break;
 		case SP_BASE_ATK:	val = sd->battle_status.batk; break;
@@ -8118,6 +8155,12 @@ bool pc_setparam(struct map_session_data *sd,int type,int val) {
 		case SP_ROULETTE_GOLD:
 			sd->roulette_point.gold = val;
 			pc_setreg2(sd, ROULETTE_GOLD_VAR, sd->roulette_point.gold);
+			return true;
+		case SP_KILLEDRID_X:
+			sd->killedrid_x = val;
+			return true;
+		case SP_KILLEDRID_Y:
+			sd->killedrid_y = val;
 			return true;
 		default:
 			ShowError("pc_setparam: Attempted to set unknown parameter '%d'.\n", type);

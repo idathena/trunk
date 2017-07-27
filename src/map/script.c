@@ -9514,21 +9514,21 @@ BUILDIN_FUNC(monster)
 	int16 m;
 	int i;
 
-	if (script_hasdata(st, 8)) {
-		event = script_getstr(st, 8);
+	if (script_hasdata(st,8)) {
+		event = script_getstr(st,8);
 		check_event(st, event);
 	}
 
-	if (script_hasdata(st, 9)) {
-		size = script_getnum(st, 9);
+	if (script_hasdata(st,9)) {
+		size = script_getnum(st,9);
 		if (!CHK_MOBSIZE(size)) {
 			ShowWarning("buildin_monster: Attempted to spawn non-existing size %d for monster class %d\n", size, class_);
 			return 1;
 		}
 	}
 
-	if (script_hasdata(st, 10)) {
-		ai = script_getnum(st, 10);
+	if (script_hasdata(st,10)) {
+		ai = script_getnum(st,10);
 		if (ai >= AI_MAX) {
 			ShowWarning("buildin_monster: Attempted to spawn non-existing ai %d for monster class %d\n", ai, class_);
 			return 1;
@@ -9542,7 +9542,7 @@ BUILDIN_FUNC(monster)
 
 	sd = map_id2sd(st->rid);
 
-	if (sd && strcmp(mapn, "this") == 0)
+	if (sd && !strcmp(mapn, "this"))
 		m = sd->bl.m;
 	else
 		m = map_mapname2mapid(mapn);
@@ -14495,7 +14495,7 @@ BUILDIN_FUNC(getmapxy)
 	int num;
 	const char *name;
 	char prefix;
-	int x,y,type;
+	int x, y, type;
 	char mapname[MAP_NAME_LENGTH];
 
 	if( !data_isreference(script_getdata(st,2)) ) {
@@ -18161,23 +18161,6 @@ BUILDIN_FUNC(openauction)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/// Retrieves the value of the specified flag of the specified cell.
-///
-/// checkcell("<map name>",<x>,<y>,<type>) -> <bool>
-///
-/// @see cell_chk* constants in const.txt for the types
-BUILDIN_FUNC(checkcell)
-{
-	int16 m = map_mapname2mapid(script_getstr(st,2));
-	int16 x = script_getnum(st,3);
-	int16 y = script_getnum(st,4);
-	cell_chk type = (cell_chk)script_getnum(st,5);
-
-	script_pushint(st,map_getcell(m,x,y,type));
-
-	return SCRIPT_CMD_SUCCESS;
-}
-
 /// Modifies flags of cells in the specified area.
 ///
 /// setcell "<map name>",<x1>,<y1>,<x2>,<y2>,<type>,<flag>;
@@ -18200,6 +18183,111 @@ BUILDIN_FUNC(setcell)
 	for( y = y1; y <= y2; ++y )
 		for( x = x1; x <= x2; ++x )
 			map_setcell(m,x,y,type,flag);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/// Retrieves the value of the specified flag of the specified cell.
+///
+/// checkcell("<map name>",<x>,<y>,<type>) -> <bool>
+///
+/// @see cell_chk* constants in const.txt for the types
+BUILDIN_FUNC(checkcell)
+{
+	int16 m = map_mapname2mapid(script_getstr(st,2));
+	int16 x = script_getnum(st,3);
+	int16 y = script_getnum(st,4);
+	cell_chk type = (cell_chk)script_getnum(st,5);
+
+	script_pushint(st,map_getcell(m,x,y,type));
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Gets a free cell in the specified area.
+ * getfreecell "<map name>",<rX>,<rY>{,<x>,<y>,<rangeX>,<rangeY>,<flag>};
+ */
+BUILDIN_FUNC(getfreecell)
+{
+	const char *mapn = script_getstr(st,2), *name;
+	char prefix;
+	struct map_session_data *sd;
+	int num;
+	int16 m, x = 0, y = 0;
+	int rx = -1, ry = -1, flag = 1;
+
+	sd = map_id2sd(st->rid);
+
+	if( !data_isreference(script_getdata(st,3)) ) {
+		ShowWarning("script: buildin_getfreecell: rX is not a variable.\n");
+		script_pushint(st,-1);
+		return 1;
+	}
+
+	if( !data_isreference(script_getdata(st,4)) ) {
+		ShowWarning("script: buildin_getfreecell: rY is not a variable.\n");
+		script_pushint(st,-1);
+		return 1;
+	}
+
+	if( is_string_variable(reference_getname(script_getdata(st,3))) ) {
+		ShowWarning("script: buildin_getfreecell: rX is a string, must be an INT.\n");
+		script_pushint(st,-1);
+		return 1;
+	}
+
+	if( is_string_variable(reference_getname(script_getdata(st,4))) ) {
+		ShowWarning("script: buildin_getfreecell: rY is a string, must be an INT.\n");
+		script_pushint(st,-1);
+		return 1;
+	}
+
+	if( script_hasdata(st,5) )
+		x = script_getnum(st,5);
+
+	if( script_hasdata(st,6) )
+		y = script_getnum(st,6);
+
+	if( script_hasdata(st,7) )
+		rx = script_getnum(st,7);
+
+	if( script_hasdata(st,8) )
+		ry = script_getnum(st,8);
+
+	if( script_hasdata(st,9) )
+		flag = script_getnum(st,9);
+
+	if( sd && strcmp(mapn,"this") == 0 )
+		m = sd->bl.m;
+	else
+		m = map_mapname2mapid(mapn);
+
+	map_search_freecell(NULL, m, &x, &y, rx, ry, flag);
+
+	//Set MapX
+	num = st->stack->stack_data[st->start + 3].u.num;
+	name = get_str(num&0x00ffffff);
+	prefix = *name;
+
+	if( not_server_variable(prefix) )
+		sd = script_rid2sd(st);
+	else
+		sd = NULL;
+
+	set_reg(st, sd, num, name, (void *)__64BPRTSIZE((int)x), script_getref(st,3));
+
+	//Set MapY
+	num = st->stack->stack_data[st->start + 4].u.num;
+	name = get_str(num&0x00ffffff);
+	prefix = *name;
+
+	if( not_server_variable(prefix) )
+		sd = script_rid2sd(st);
+	else
+		sd = NULL;
+
+	set_reg(st, sd, num, name, (void *)__64BPRTSIZE((int)y), script_getref(st,4));
 
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -22109,8 +22197,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(checkidle,"?"),
 	BUILDIN_DEF(openmail,"?"),
 	BUILDIN_DEF(openauction,"?"),
-	BUILDIN_DEF(checkcell,"siii"),
 	BUILDIN_DEF(setcell,"siiiiii"),
+	BUILDIN_DEF(checkcell,"siii"),
+	BUILDIN_DEF(getfreecell,"srr?????"),
 	BUILDIN_DEF(setwall,"siiiiis"),
 	BUILDIN_DEF(delwall,"s"),
 	BUILDIN_DEF(searchitem,"rs"),

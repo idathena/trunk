@@ -2423,6 +2423,8 @@ void loginif_parse_changesex(int sex, int acc, int char_id, int class_, int guil
 		class_ = (sex == SEX_MALE ? JOB_BABY_MINSTREL : JOB_BABY_WANDERER);
 	else if( class_ == JOB_KAGEROU || class_ == JOB_OBORO )
 		class_ = (sex == SEX_MALE ? JOB_KAGEROU : JOB_OBORO);
+	else if( class_ == JOB_BABY_KAGEROU || class_ == JOB_BABY_OBORO )
+		class_ = (sex == SEX_MALE ? JOB_BABY_KAGEROU : JOB_BABY_OBORO);
 
 	if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `equip` = '0' WHERE `char_id` = '%d'", inventory_db, char_id) )
 		Sql_ShowDebug(sql_handle);
@@ -2965,7 +2967,7 @@ void char_read_fame_list(void)
 		memcpy(chemist_fame_list[i].name, data, zmin(len, NAME_LENGTH));
 	}
 	// Build Taekwon ranking list
-	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `char_id`,`fame`,`name` FROM `%s` WHERE `fame`>0 AND (`class`='%d') ORDER BY `fame` DESC LIMIT 0,%d", char_db, JOB_TAEKWON, fame_list_size_taekwon) )
+	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `char_id`,`fame`,`name` FROM `%s` WHERE `fame`>0 AND (`class`='%d' OR `class`='%d') ORDER BY `fame` DESC LIMIT 0,%d", char_db, JOB_TAEKWON, JOB_BABY_TAEKWON, fame_list_size_taekwon) )
 		Sql_ShowDebug(sql_handle);
 	for( i = 0; i < fame_list_size_taekwon && SQL_SUCCESS == Sql_NextRow(sql_handle); ++i )
 	{

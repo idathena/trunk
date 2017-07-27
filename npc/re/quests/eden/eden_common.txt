@@ -48,10 +48,10 @@ moc_para01,27,35,5	script	Secretary Lime Evenor	952,{
 			mes "What possible reason would you have... to not exchange?";
 			close;
 		}
-		delitem 6219,1; //Para_Team_Mark
-		getitem 22508,1; //Para_Team_Mark_
 		mes "[Lime Evenor]";
 		mes "There you go. Come back again~";
+		delitem 6219,1; //Para_Team_Mark
+		getitem 22508,1; //Para_Team_Mark_
 		close;
 	}
 	mes "[Lime Evenor]";
@@ -139,7 +139,7 @@ moc_para01,27,35,5	script	Secretary Lime Evenor	952,{
 					next;
 					mes "[Lime Evenor]";
 					mes "Hopefully you can do great work as an Eden's member.";
-					getitem 6219,1; //Para_Team_Mark
+					getitem 22508,1; //Para_Team_Mark_
 					next;
 					break;
 				case 2:
