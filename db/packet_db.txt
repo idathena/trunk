@@ -2826,8 +2826,8 @@ packet_keys: 0x09366971,0x005672F1,0x6F3712AE
 0x0ABD,10
 
 //2017-02-28aRagexeRE
-0x0AC0,26,mailrefresh,0
-0x0AC1,26,mailrefresh,0
+0x0AC0,26,mailrefresh,2:10
+0x0AC1,26,mailrefresh,2:10
 0x0AC2,-1
 0x0AC3,2
 0x0AC4,-1
