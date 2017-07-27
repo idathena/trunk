@@ -570,7 +570,7 @@ struct map_session_data {
 	int duel_group; //Duel vars [LuzZza]
 	int duel_invite;
 
-	int killerrid, killedrid;
+	int killerrid, killedrid, killedrid_x, killedrid_y;
 
 	int cashPoints, kafraPoints;
 	int rental_timer;
@@ -875,7 +875,11 @@ short pc_maxaspd(struct map_session_data *sd);
 ||	( (class_) >= JOB_BABY_RUNE      && (class_) <= JOB_BABY_MECHANIC2 ) \
 ||	( (class_) >= JOB_SUPER_NOVICE_E && (class_) <= JOB_SUPER_BABY_E   ) \
 ||	( (class_) >= JOB_KAGEROU        && (class_) <= JOB_OBORO          ) \
-||	  (class_) == JOB_REBELLION      || (class_) == JOB_SUMMONER         \
+||	  (class_) == JOB_REBELLION                                          \
+||	  (class_) == JOB_SUMMONER                                           \
+||	  (class_) == JOB_BABY_SUMMONER                                      \
+||	( (class_) >= JOB_BABY_NINJA     && (class_) <= JOB_BABY_REBELLION ) \
+||	  (class_) == JOB_BABY_STAR_GLADIATOR2                               \
 )
 #define pcdb_checkid(class_) pcdb_checkid_sub((unsigned int)class_)
 

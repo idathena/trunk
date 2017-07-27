@@ -353,7 +353,7 @@
 2220,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Wanderer Job Change Quest"
 2221,600,1718,50,0,0,0,0,0,0,0,0,0,0,0,0,0,"Wanderer Job Change Quest"
 2222,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Wanderer Job Change Quest"
-2223,0,1428,100,0,0,0,0,0,0,0,0,0,0,0,0,0,"Generic Job Change Quest"
+2223,0,1428,100,0,0,0,0,0,0,0,0,0,0,0,0,0,"Genetic Job Change Quest"
 
 // Secret in the Woods
 2271,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Secret in the Woods"

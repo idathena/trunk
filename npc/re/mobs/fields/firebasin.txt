@@ -33,9 +33,11 @@ moro_vol,0,0,0,0	monster	Angry Mimic	3061,5,5000,0,0
 moro_vol,0,0,0	script	#143_firepit	-1,{
 OnNPCKillEvent:
 	if (killedrid == 3026) {
-		monster "this",-1,-1,"Fire Bug",3027,1,"#143_firepit"+"::OnMyMobDead";
-		monster "this",-1,-1,"Fire Bug",3027,1,"#143_firepit"+"::OnMyMobDead";
-		monster "this",-1,-1,"Fire Bug",3027,1,"#143_firepit"+"::OnMyMobDead";
+		set .@x,killedrid_x;
+		set .@y,killedrid_y;
+		monster "this",.@x,.@y,"Fire Bug",3027,1,"#143_firepit"+"::OnMyMobDead";
+		monster "this",.@x,.@y,"Fire Bug",3027,1,"#143_firepit"+"::OnMyMobDead";
+		monster "this",.@x,.@y,"Fire Bug",3027,1,"#143_firepit"+"::OnMyMobDead";
 	}
 	end;
 OnMyMobDead:
