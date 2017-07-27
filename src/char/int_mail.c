@@ -479,11 +479,7 @@ static void mapif_Mail_return(int fd, uint32 char_id, int mail_id)
 			safestrncpy(msg.title, temp_, MAIL_TITLE_LENGTH);
 
 			msg.status = MAIL_NEW;
-#if PACKETVER < 20170228
 			msg.type = MAIL_INBOX_RETURNED;
-#else
-			msg.type = MAIL_INBOX_NORMAL;
-#endif
 			msg.timestamp = time(NULL);
 
 			new_mail = mail_savemessage(&msg);
