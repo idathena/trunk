@@ -480,8 +480,8 @@ alberta_in,55,142,7	script	Hair Dresser	91,{
 				delitem 1020,100;	// Long_Hair
 				delitem 1060,100;	// Golden_Hair
 				delitem 7152,100;	// Glossy_Hair
-				setlook 1,.@style;
-				setlook 6,.@pallete;
+				setlook LOOK_HAIR,.@style;
+				setlook LOOK_HAIR_COLOR,.@pallete;
 				cutin "",255;
 				mes "[Veronica]";
 				mes "Alright, it's done~";
@@ -489,8 +489,8 @@ alberta_in,55,142,7	script	Hair Dresser	91,{
 				mes "this style no.(" + .@style + ").";
 				mes "Feel free to come back anytime";
 				mes "when you want a new hairstyle. Hohohohohoho~";
-				setlook 1,.@style;
-				setlook 6,.@pallete;
+				setlook LOOK_HAIR,.@style;
+				setlook LOOK_HAIR_COLOR,.@pallete;
 				close;
 			}
 			mes "[Veronica]";
@@ -659,8 +659,8 @@ alberta,33,141,7	script	Roving Hair Dresser	87,{
 			mes "It's such a unique and talented";
 			mes "style! Yes, I am the best! Wooohahahahahaha!";
 			set Zeny, Zeny-199800;
-			setlook 1,rand(1,19);
-			setlook 6,rand(1,8);
+			setlook LOOK_HAIR,rand(1,19);
+			setlook LOOK_HAIR_COLOR,rand(1,8);
 			close;
 		}
 		mes "[Rui Vishop]";
@@ -1052,8 +1052,8 @@ lhz_in02,100,143,3	script	Hair Dresser#li	122,{
 				delitem 1020,100; //Long_Hair
 				delitem 1060,100; //Golden_Hair
 				delitem 7152,100; //Glossy_Hair
-				setlook VAR_HEAD,.@input;
-				setlook VAR_HEADPALETTE,.@headpalette;
+				setlook LOOK_HAIR,.@input;
+				setlook LOOK_HAIR_COLOR,.@headpalette;
 				mes "[Prince Shammi]";
 				mes "Well, we're all finished!";
 				mes "And my, oh my, you look even";
@@ -1252,8 +1252,8 @@ lhz_in02,91,155,5	script	Assistant Beautician#li	862,{
 				mes "^333333*Pant Pant Pant*^000000";
 				next;
 				set Zeny, Zeny-250000;
-				setlook VAR_HEAD,.@style_r;
-				setlook VAR_HEADPALETTE,.@color_r;
+				setlook LOOK_HAIR,.@style_r;
+				setlook LOOK_HAIR_COLOR,.@color_r;
 				mes "[Assistant Beautician]";
 				mes "Bwahahaha! Success!";
 				if (.@input == .@style_r) {

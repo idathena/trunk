@@ -84,18 +84,18 @@ itemmall,19,74,5	script	Stylist#cash	91,{
 			if (Sex == 1) {
 				if(select("Emergency Heal Perm:Aura Blade Cut") == 1) {
 					delitem 7622,1;	// New_Style_Coupon
-					setlook 1,24;
+					setlook LOOK_HAIR,24;
 				}else{
 					delitem 7622,1;	// New_Style_Coupon
-					setlook 1,25;
+					setlook LOOK_HAIR,25;
 				}
 			}else{
 				if(select("Assumptio Perm:Soul Changer Cut") == 1) {
 					delitem 7622,1;	// New_Style_Coupon
-					setlook 1,24;
+					setlook LOOK_HAIR,24;
 				}else{
 					delitem 7622,1;	// New_Style_Coupon
-					setlook 1,25;
+					setlook LOOK_HAIR,25;
 				}
 			}
 			mes "[Kaniki]";
