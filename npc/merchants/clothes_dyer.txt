@@ -152,7 +152,7 @@ function Dyes {
 		switch(select("Yes:No")) {
 		case 1:
 			mes .n$;
-			setlook 7,0;
+			setlook LOOK_CLOTHES_COLOR,0;
 			mes "Your clothes have been dyed "+.@DyeName$[0]+".";
 			close;
 		case 2:
@@ -169,7 +169,7 @@ function Dyes {
 	}
 	delitem .@DyeItems[getarg((.@s-1)*2)],1;
 	set Zeny, Zeny-10000;
-	setlook 7, ((.@s)?(getarg((.@s-1)*2+1)):0);
+	setlook LOOK_CLOTHES_COLOR,((.@s)?(getarg((.@s-1)*2+1)):0);
 	mes "Your clothes have been dyed "+((.@s)?.@DyeName$[getarg((.@s-1)*2)]:.@DyeName$[0])+".";
 	close;
 }

@@ -3666,7 +3666,7 @@ job3_guil01,148,53,3	script	Bercasell#3rdgc16	467,{
 								next;
 								mes "[Bercasell]";
 								mes "A sword of the shadow...";
-								setlook 7,0;
+								setlook LOOK_CLOTHES_COLOR,0;
 								jobchange roclass(eaclass()|EAJL_THIRD);
 								if (checkquest(7096) == 1) {
 									set job_3rd_gc, 25;
