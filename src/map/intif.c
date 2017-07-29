@@ -2279,18 +2279,18 @@ int intif_parse_Mail_delete(int fd)
 	}
 
 	if (!failed) {
-		enum mail_inbox_type type = MAIL_INBOX_NORMAL;
 		int i;
 
 		ARR_FIND(0, MAIL_MAX_INBOX, i, sd->mail.inbox.msg[i].id == mail_id);
 		if (i < MAIL_MAX_INBOX) {
+			enum mail_inbox_type type = sd->mail.inbox.msg[i].type;
+
 			clif_mail_delete(sd, &sd->mail.inbox.msg[i], !failed);
-			type = sd->mail.inbox.msg[i].type;
 			memset(&sd->mail.inbox.msg[i], 0, sizeof(struct mail_message));
 			sd->mail.inbox.amount--;
+			if (sd->mail.inbox.full)
+				intif_Mail_requestinbox(sd->status.char_id, 1, type); //Free space is available for new mails
 		}
-		if (sd->mail.inbox.full)
-			intif_Mail_requestinbox(sd->status.char_id, 1, type); //Free space is available for new mails
 	}
 	return 1;
 }
@@ -2336,17 +2336,17 @@ int intif_parse_Mail_return(int fd)
 	}
 
 	if (!fail) {
-		enum mail_inbox_type type = MAIL_INBOX_NORMAL;
 		int i;
 
 		ARR_FIND(0, MAIL_MAX_INBOX, i, sd->mail.inbox.msg[i].id == mail_id);
 		if (i < MAIL_MAX_INBOX) {
-			type = sd->mail.inbox.msg[i].type;
+			enum mail_inbox_type type = sd->mail.inbox.msg[i].type;
+
 			memset(&sd->mail.inbox.msg[i], 0, sizeof(struct mail_message));
 			sd->mail.inbox.amount--;
+			if (sd->mail.inbox.full)
+				intif_Mail_requestinbox(sd->status.char_id, 1, type); //Free space is available for new mails
 		}
-		if (sd->mail.inbox.full)
-			intif_Mail_requestinbox(sd->status.char_id, 1, type); //Free space is available for new mails
 	}
 
 	clif_Mail_return(sd->fd, mail_id, fail);

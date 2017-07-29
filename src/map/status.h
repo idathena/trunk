@@ -2046,13 +2046,15 @@ struct status_data {
 		batk,
 #ifdef RENEWAL
 		watk, watk2,
-		eatk,
 #endif
 		matk_min, matk_max,
 		speed,
 		amotion, adelay, dmotion;
 	enum e_mode mode;
 	short
+#ifdef RENEWAL
+		eatk,
+#endif
 		hit, flee, cri, flee2,
 		def2, mdef2,
 #ifdef RENEWAL_ASPD

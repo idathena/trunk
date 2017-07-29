@@ -1347,13 +1347,13 @@ void clif_class_change_target(struct block_list *bl, int class_, int type, enum 
 
 /// Notifies the client of an object's spirits.
 /// 01d0 <id>.L <amount>.W (ZC_SPIRITS)
-/// 01e1 <id>.L <amount>.W (ZC_SPIRITS2)
+/// 01e1 <id>.L <amount>.W (ZC_SPIRITS2, Unused) 
 static void clif_spiritball_single(int fd, struct map_session_data *sd) {
-	WFIFOHEAD(fd,packet_len(0x1e1));
-	WFIFOW(fd,0) = 0x1e1;
+	WFIFOHEAD(fd,packet_len(0x1d0));
+	WFIFOW(fd,0) = 0x1d0;
 	WFIFOL(fd,2) = sd->bl.id;
 	WFIFOW(fd,6) = sd->spiritball;
-	WFIFOSET(fd,packet_len(0x1e1));
+	WFIFOSET(fd,packet_len(0x1d0));
 }
 
 
@@ -1362,12 +1362,12 @@ static void clif_spiritball_single(int fd, struct map_session_data *sd) {
  *------------------------------------------*/
 static void clif_spiritcharm_single(int fd, struct map_session_data *sd)
 {
-	WFIFOHEAD(fd,packet_len(0x08cf));
-	WFIFOW(fd,0) = 0x08cf;
+	WFIFOHEAD(fd,packet_len(0x8cf));
+	WFIFOW(fd,0) = 0x8cf;
 	WFIFOL(fd,2) = sd->bl.id;
 	WFIFOW(fd,6) = sd->spiritcharm_type;
 	WFIFOW(fd,8) = sd->spiritcharm;
-	WFIFOSET(fd,packet_len(0x08cf));
+	WFIFOSET(fd,packet_len(0x8cf));
 }
 
 
@@ -8138,7 +8138,7 @@ void clif_devotion(struct block_list *src, struct map_session_data *tsd)
  * Server tells clients nearby 'sd' (and himself) to display 'sd->spiritball' number of spiritballs on 'sd'
  * Notifies clients in an area of an object's spirits.
  * 01d0 <id>.L <amount>.W (ZC_SPIRITS)
- * 01e1 <id>.L <amount>.W (ZC_SPIRITS2)
+ * 01e1 <id>.L <amount>.W (ZC_SPIRITS2, Unused)
  *------------------------------------------*/
 void clif_spiritball(struct block_list *bl) {
     unsigned char buf[16];
@@ -8149,7 +8149,7 @@ void clif_spiritball(struct block_list *bl) {
 
 	WBUFW(buf,0) = 0x1d0;
 	WBUFL(buf,2) = bl->id;
-	WBUFW(buf,6) = 0; //init to 0
+	WBUFW(buf,6) = 0; //Init to 0
 	switch(bl->type) {
 		case BL_PC: WBUFW(buf,6) = sd->spiritball; break;
 		case BL_HOM: WBUFW(buf,6) = hd->homunculus.spiritball; break;
@@ -17442,9 +17442,7 @@ void clif_parse_LessEffect(int fd, struct map_session_data *sd)
 	sd->state.lesseffect = ( isLess != 0 );
 }
 
-/// S 07e4 <length>.w <option>.l <val>.l {<index>.w <amount>.w).4b* (CZ_ITEMLISTWIN_RES)
-/// S 0945 <length>.w <option>.l <val>.l {<index>.w <amount>.w).4b* (CZ_* RagexeRE 2012-04-10a)
-/// S 0281 <length>.w <option>.l <val>.l {<index>.w <amount>.w).4b* (CZ_* Ragexe 2013-08-07)
+/// 07e4 <length>.w <option>.l <val>.l {<index>.w <amount>.w).4b* (CZ_ITEMLISTWIN_RES)
 void clif_parse_ItemListWindowSelected(int fd, struct map_session_data *sd) {
 	struct s_packet_db *info = &packet_db[sd->packet_ver][RFIFOW(fd,0)];
 	int n = (RFIFOW(fd,info->pos[0]) - 12) / 4;

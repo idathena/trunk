@@ -2367,7 +2367,7 @@ packet_keys: 0x2DFF467C,0x444B37EE,0x2C1B634F // [YomRawr]
 0x0815,-1,reqopenbuyingstore,2:4:8:9:89
 0x0365,18,bookingregreq,2:4
 //0x0363,8 //CZ_JOIN_BATTLE_FIELD
-0x0281,-1,itemlistwindowselected,2:4:8
+0x0281,-1,itemlistwindowselected,2:4:8:12
 0x086E,19,wanttoconnection,2:6:10:14:18
 0x0802,26,partyinvite,2
 //0x0922,4 //CZ_GANGSI_RANK
@@ -2790,7 +2790,7 @@ packet_keys: 0x09366971,0x005672F1,0x6F3712AE
 0x086A,-1,reqopenbuyingstore,2:4:8:9:89
 0x08A5,18,bookingregreq,2:4
 //0x0935,8 //CZ_JOIN_BATTLE_FIELD
-0x0889,-1,itemlistwindowselected,2:4:8
+0x0889,-1,itemlistwindowselected,2:4:8:12
 0x086D,19,wanttoconnection,2:6:10:14:18
 0x0934,26,partyinvite2,2
 //0x0938,4 //CZ_GANGSI_RANK
@@ -2886,7 +2886,7 @@ packet_keys: 0x2CC4749A,0x1FA954DC,0x72276857 //[4144]
 0x0367,-1,reqopenbuyingstore,2:4:8:9:89
 0x0802,18,bookingregreq,2:4
 //0x0364,8 //CZ_JOIN_BATTLE_FIELD
-0x0945,-1,itemlistwindowselected,2:4:8
+0x0945,-1,itemlistwindowselected,2:4:8:12
 0x0923,19,wanttoconnection,2:6:10:14:18
 0x0899,26,partyinvite2,2
 //0x089E,4 //CZ_GANGSI_RANK

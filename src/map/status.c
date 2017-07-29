@@ -1979,7 +1979,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 
 	switch (skill_id) {
 		case AL_TELEPORT:
-		case ALL_ODINS_POWER:
+		case ALL_ODINS_RECALL:
 			if (src && map_getcell(src->m, src->x, src->y, CELL_CHKLANDPROTECTOR) &&
 				!(status->mode&MD_BOSS) && (src->type != BL_PC || ((TBL_PC *)src)->skillitem != skill_id))
 				return false; //Should fail when used on top of Land Protector [Skotlex]
@@ -3779,7 +3779,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 #else
 	status->watk = status_weapon_atk(&status->rhw);
 	status->watk2 = status_weapon_atk(&status->lhw);
-	status->eatk = max(sd->bonus.eatk,0);
+	status->eatk = sd->bonus.eatk;
 #endif
 
 	//----- MAX HP CALCULATION -----
