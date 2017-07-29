@@ -1005,6 +1005,10 @@ bool pc_adoption(struct map_session_data *p1_sd, struct map_session_data *p2_sd,
 		pc_skill(p1_sd, WE_CALLBABY, 1, 0);
 		pc_skill(p2_sd, WE_CALLBABY, 1, 0);
 
+		chrif_save(p1_sd, CSAVE_NORMAL);
+		chrif_save(p2_sd, CSAVE_NORMAL);
+		chrif_save(b_sd, CSAVE_NORMAL);
+
 		return true;
 	}
 
@@ -2479,7 +2483,8 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 		case SP_BASE_ATK:
 			if(sd->state.lr_flag != 2) {
 #ifdef RENEWAL
-				sd->bonus.eatk += val;
+				bonus = sd->bonus.eatk + val;
+				sd->bonus.eatk = cap_value(bonus, SHRT_MIN, SHRT_MAX);
 #else
 				bonus = status->batk + val;
 				status->batk = cap_value(bonus, 0, USHRT_MAX);
@@ -9386,6 +9391,7 @@ static int pc_checkcombo(struct map_session_data *sd, struct item_data *data) {
 	for( i = 0; i < data->combos_count; i++ ) {
 		struct itemchk {
 			int idx;
+			unsigned short nameid;
 			short card[MAX_SLOTS];
 		} *combo_idx;
 		int idx, j;
@@ -9408,6 +9414,7 @@ static int pc_checkcombo(struct map_session_data *sd, struct item_data *data) {
 		CREATE(combo_idx, struct itemchk, nb_itemCombo);
 		for( j = 0; j < nb_itemCombo; j++ ) {
 			combo_idx[j].idx = -1;
+			combo_idx[j].nameid = -1;
 			memset(combo_idx[j].card, -1, MAX_SLOTS);
 		}
 
@@ -9432,22 +9439,23 @@ static int pc_checkcombo(struct map_session_data *sd, struct item_data *data) {
 						uint8 z;
 
 						for( z = 0; z < nb_itemCombo - 1; z++ ) {
-							if( combo_idx[z].idx == index ) //We already have that index recorded
-								do_continue = true;
+							if( combo_idx[z].idx == index && combo_idx[z].nameid == id )
+								do_continue = true; //We already have that index recorded
 						}
 						if( do_continue )
 							continue;
 					}
 					combo_idx[j].idx = index;
+					combo_idx[j].nameid = id;
 					pos |= sd->inventory.u.items_inventory[index].equip;
 					found = true;
 					break;
-				} else { //Cards
+				} else { //Cards and enchants
 					uint16 z;
 
-					if( !sd->inventory_data[index]->slot || itemdb_isspecial(sd->inventory.u.items_inventory[index].card[0]) )
+					if( itemdb_isspecial(sd->inventory.u.items_inventory[index].card[0]) )
 						continue;
-					for( z = 0; z < sd->inventory_data[index]->slot; z++ ) {
+					for( z = 0; z < MAX_SLOTS; z++ ) {
 						bool do_continue = false;
 
 						if( sd->inventory.u.items_inventory[index].card[z] != id )
@@ -9456,10 +9464,10 @@ static int pc_checkcombo(struct map_session_data *sd, struct item_data *data) {
 							int c1, c2;
 
 							for( c1 = 0; c1 < nb_itemCombo - 1; c1++ ) {
-								if( combo_idx[c1].idx == index ) {
-									for( c2 = 0; c2 < sd->inventory_data[index]->slot; c2++ ) {
-										if( combo_idx[c1].card[c2] == id ) { //We already have that card recorded (at this same idx)
-											do_continue = true;
+								if( combo_idx[c1].idx == index && combo_idx[c1].nameid == id ) {
+									for( c2 = 0; c2 < MAX_SLOTS; c2++ ) {
+										if( combo_idx[c1].card[c2] == id ) {
+											do_continue = true; //We already have that card recorded (at this same idx)
 											break;
 										}
 									}
@@ -9469,6 +9477,7 @@ static int pc_checkcombo(struct map_session_data *sd, struct item_data *data) {
 						if( do_continue )
 							continue;
 						combo_idx[j].idx = index;
+						combo_idx[j].nameid = id;
 						combo_idx[j].card[z] = id;
 						pos |= sd->inventory.u.items_inventory[index].equip;
 						found = true;

@@ -2227,9 +2227,10 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 			if(sc && sc->data[SC_BANDING] && sc->data[SC_BANDING]->val2 > 6) {
 				char i;
 
-				if(sd && sc->data[SC_FORCEOFVANGUARD])
+				if(sd && sc->data[SC_FORCEOFVANGUARD]) {
 					for(i = 0; i < sc->data[SC_FORCEOFVANGUARD]->val3; i++)
 						pc_addspiritball(sd,skill_get_time(LG_FORCEOFVANGUARD,1),sc->data[SC_FORCEOFVANGUARD]->val3);
+				}
 			}
 			break;
 		case MH_SONIC_CRAW:
@@ -8670,7 +8671,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case GS_GLITTERING:
 			if (sd) {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				if (rnd()%100 < (20 + 10 * skill_lv))
+				if (rnd()%100 < 20 + 10 * skill_lv)
 					pc_addspiritball(sd,skill_get_time(skill_id,skill_lv),10);
 				else if (sd->spiritball > 0 && !pc_checkskill(sd,RL_RICHS_COIN))
 					pc_delspiritball(sd,1,0);
