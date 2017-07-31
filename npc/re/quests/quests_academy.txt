@@ -4004,16 +4004,10 @@ iz_ac01_c,105,36,5	duplicate(Eden Teleport Officer#34)	Eden Teleport Officer#37	
 iz_ac01_d,105,36,5	duplicate(Eden Teleport Officer#34)	Eden Teleport Officer#38	4_F_NOVICE
 
 iz_ac01,100,39,5	script	Academy Receptionist#1	4_F_01,{
-	if(isbegin_quest(7117) == 1) { erasequest 7117; }
-	if(isbegin_quest(7118) == 1) { erasequest 7118; }
-	if(isbegin_quest(7119) == 1) { erasequest 7119; }
-	if(isbegin_quest(7120) == 1) { erasequest 7120; }
-	if(isbegin_quest(7121) == 1) { erasequest 7121; }
-	if(isbegin_quest(7122) == 1) { erasequest 7122; }
-	if(isbegin_quest(7123) == 1) { erasequest 7123; }
-	if(isbegin_quest(7124) == 1) { erasequest 7124; }
-	if(isbegin_quest(7126) == 1) { erasequest 7126; }
-	if(isbegin_quest(7127) == 1) { erasequest 7127; }
+	for (.@i = 7117; .@i < 7128; .@i++) {
+		if (isbegin_quest(.@i))
+			erasequest .@i;
+	}
 	if(isbegin_quest(4269) == 2) {
 		mes "[Receptionist]";
 		mes "Hello, "+strcharinfo(0)+".";
@@ -12886,8 +12880,10 @@ new_1-1,53,114,3	script	Training Instructor#1a	4_F_03,{
 	mes "The training grounds have been revised.";
 	mes "I will send you to Izlude.";
 	close2;
-	for (.@i = 7117; .@i < 7128; .@i++)
-		erasequest .@i;
+	for (.@i = 7117; .@i < 7128; .@i++) {
+		if (isbegin_quest(.@i))
+			erasequest .@i;
+	}
 	if(strnpcinfo(4) == "new_1-1" || strnpcinfo(4) == "new_1-2" || strnpcinfo(4) == "new_1-3" || strnpcinfo(4) == "new_1-4") {
 		.@warp$ = "iz_int";
 	} else if(strnpcinfo(4) == "new_2-1" || strnpcinfo(4) == "new_2-2" || strnpcinfo(4) == "new_2-3" || strnpcinfo(4) == "new_2-4") {

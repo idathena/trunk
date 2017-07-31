@@ -2893,7 +2893,7 @@ spl_in01,97,313,3	script	Laphine Craftsman#ep13	446,{
 	if ((isequipped(2782) == 1) && (ep13_2_rhea > 99)) {
 		if (ep13_mdrama > 5) {
 			set .@alba,checkquest(7082);
-			if (.@alba == 1) {
+			if ((.@alba == 0) || (.@alba == 1)) {
 				set .@time_chek,checkquest(7082,PLAYTIME);
 				if ((.@time_chek == 0) || (.@time_chek == 1)) {
 					mes "[Laphine craftsman]";
@@ -4678,7 +4678,8 @@ man_in01,372,221,5	script	Scientist#lifeguard	449,{
 				close;
 			}
 			else {
-				erasequest 2182;
+				if (.@dayq_chk == 2)
+					erasequest 2182;
 				switch(rand(1,3)) {
 					case 1: setarray .@rand_dayq$[0],"Mt. Mjolnir","10","2"; break;
 					case 2: setarray .@rand_dayq$[0],"Abyss Lake","5","3"; break;
@@ -5423,7 +5424,8 @@ spl_in01,30,324,3	script	High Laphine#grenouille	446,{
 		set .@dayq_chk,checkquest(2186,PLAYTIME);
 		if ((.@dayq_chk == -1) || (.@dayq_chk == 2)) {
 			if ((ep13_2_tre1 < 1) || (ep13_2_tre1 == 6)) {
-				erasequest 2186;
+				if (.@dayq_chk == 2)
+					erasequest 2186;
 				set ep13_2_tre1,0;
 				mes "[Grenouille]";
 				mes "I've heard that some strangers from Rune Midgard are around here, it must be you.";

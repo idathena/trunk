@@ -2546,8 +2546,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 	next;
 	set .@tut_13, rand(1,11);
 	if (.@tut_13 == 1) {
-		setquest 12148;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "Those Tatachos are so quick if we want to catch them which is pretty hard.";
 		next;
@@ -2561,8 +2559,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 2) {
-		setquest 12149;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "The pub owner wants some apple to learn how to cook well.";
 		next;
@@ -2576,8 +2572,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 3) {
-		setquest 12150;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "This is a request from the pub owner. He wants some reddish vegetable in order to have a colorful dish.";
 		next;
@@ -2591,8 +2585,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 4) {
-		setquest 12151;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "It's said that there had been an explosion in the pub. People say it was because of some vegetable named Pumpkin which was being thoroughly roasted on the fire.";
 		next;
@@ -2606,8 +2598,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 5) {
-		setquest 12152;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "The pub owner has requested that.... He misses sweet potato which he used to eat when he was young. He wants 50 sweet potatos.";
 		next;
@@ -2621,8 +2611,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 6) {
-		setquest 12153;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "The pub owner wants to cook something strange. He said it will be Roasted Banana but I reckon he's cooked something similar before... ";
 		next;
@@ -2636,8 +2624,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 7) {
-		setquest 12154;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "This request is from the pub owner. He wants some meat.";
 		next;
@@ -2651,8 +2637,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 8) {
-		setquest 12155;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "I'd like to give a present to the pub owner. This is a personal request so you don't have to get stressed for this. Few days ago, I saw the pub owner frustrated with all broken ladles.";
 		next;
@@ -2666,8 +2650,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 9) {
-		setquest 12156;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "The high minister wanted mirrors made from Midgard crystal. There are many Manukan mirrors but he seems to prefer to Midgard ones.";
 		next;
@@ -2681,8 +2663,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 10) {
-		setquest 12157;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "The pub owner is requesting something this time. He wants 2 Pineapples and wants you to know that...";
 		next;
@@ -2696,8 +2676,6 @@ dicastes01,211,178,2	script	Moltuka#pa0829	453,{
 		end;
 	}
 	else if (.@tut_13 == 11) {
-		setquest 12158;
-		setquest 12164;
 		mes "[Moltuka]";
 		mes "Again....The pub owner's request. He wants 2 Melons and wants you to know that...";
 		next;
@@ -4318,7 +4296,7 @@ dicastes01,207,210,5	script	Walking Knit#ep133_15	449,{
 			mes "Ah, did you see the group of cats in front of the castle?";
 			mes "They are really soft and cuddly unlike us.";
 			next;
-			if (checkquest(7188) >= -1) {
+			if (checkquest(7188) == -1) {
 				mes "[Knit]";
 				mes "And especially their ear and tail!!";
 				next;
@@ -4407,7 +4385,7 @@ dicastes01,112,248,5	script	Resting Piom#ep133_16	491,{
 		mes "Huh? You're... human!";
 		mes "Why are you here?";
 		next;
-		if (checkquest(7189) >= -1) {
+		if (checkquest(7189) == -1) {
 			select("About a human with cat ears..");
 			mes "[Piom]";
 			mes "HAHAHAHA!!!";
@@ -4479,7 +4457,7 @@ dicastes01,249,140,3	script	Training Galten#ep133_17	450,{
 		mes "Hmm? Aren't you the outsider that came here awhile ago?";
 		mes "Have you come to see the training grounds?";
 		next;
-		if (checkquest(7190) >= -1) {
+		if (checkquest(7190) == -1) {
 			select("About a human with cat ears..");
 			mes "[Galten]";
 			mes "Cat ears?";

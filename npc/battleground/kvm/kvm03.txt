@@ -89,7 +89,8 @@ OnDisable:
 	end;
 OnTouch:
 	set Bat_Team,1;
-	setquest 6025;
+	if (!isbegin_quest(6025))
+		setquest 6025;
 	end;
 }
 
@@ -106,7 +107,8 @@ OnDisable:
 	end;
 OnTouch:
 	set Bat_Team,2;
-	setquest 6025;
+	if (!isbegin_quest(6025))
+		setquest 6025;
 	end;
 }
 
