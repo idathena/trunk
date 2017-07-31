@@ -23,7 +23,7 @@
 #include "log.h"
 #include "pc_groups.h"
 
-#define MAX_PC_BONUS 20 //Max bonus, usually used by item bonus
+#define MAX_PC_BONUS 50 //Max bonus, usually used by item bonus
 #define MAX_PC_SKILL_REQUIRE 5 //Max skill tree requirement
 #define MAX_PC_FEELHATE 3 //Max feel hate info
 #define DAMAGELOG_SIZE_PC 100 //Damage log

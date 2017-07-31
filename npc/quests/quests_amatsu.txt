@@ -35,7 +35,6 @@ amatsu,223,236,3	script	Publisher#ama	763,{
 		mes "Our ^009CFFScroll Publishing Company^000000";
 		mes "is professionally publishing";
 		mes "tales.";
-		mes " ";
 		next;
 		mes "[Publisher]";
 		mes "We established";
@@ -70,7 +69,6 @@ amatsu,223,236,3	script	Publisher#ama	763,{
 			next;
 			mes "[Publisher]";
 			mes "That baby grew so fast, like that beanstalk from 'Jack and Beanstalk,' and became a strong boy in only a few days.";
-			mes " ";
 			next;
 			mes "[Publisher]";
 			mes "That boy's name was...";
@@ -130,18 +128,18 @@ amatsu,223,236,3	script	Publisher#ama	763,{
 		mes "How was it? Did you have fun?";
 		mes "I hope you had a good time";
 		mes "during the field trip.";
-		mes " ";
-		mes " ";
 		next;
 		mes "[Publisher]";
 		mes "This is your reward for you.";
 		mes "Please continue to enjoy stories~";
-		mes " ";
-		set .@event_momo, event_momo;
+		set .@event_momo,event_momo;
 		set event_momo,4;
-		completequest 8128;
-		completequest 8129;
-		completequest 8130;
+		if (isbegin_quest(8128))
+			completequest 8128;
+		if (isbegin_quest(8129))
+			completequest 8129;
+		if (isbegin_quest(8130))
+			completequest 8130;
 		if (.@event_momo == 3) {
 			set .@gift_1,rand(1,10);
 			if (.@gift_1 == 1) {
@@ -216,7 +214,6 @@ ama_test,52,44,3	script	Assistant#ama	109,{
 	if (event_momo == 0) {
 		mes "[Satoshi]";
 		mes "Welcome to <Momotaro Field Trip>";
-		mes " ";
 		next;
 		mes "[Satoshi]";
 		mes "I'm Satoshi who is in charge of the waiting room in <Momotaro Field Trip>.";
@@ -234,7 +231,6 @@ ama_test,52,44,3	script	Assistant#ama	109,{
 		mes "[Satoshi]";
 		mes "Well, let me explain";
 		mes "about the rules in the Field Trip.";
-		mes " ";
 		next;
 		mes "[Satoshi]";
 		mes "First of all...Did you hear";
@@ -810,7 +806,6 @@ ama_in01,162,17,1	script	Sushi Master#ama	765,{
 		mes "Training to slice raw fish";
 		mes "daily will make you a master sushi chef.";
 		mes "So don't waste your time in here, and learn what you are good at.";
-		mes " ";
 		close;
 	}
 	else if (fish_r == 1) {
@@ -990,7 +985,6 @@ ama_in01,162,17,1	script	Sushi Master#ama	765,{
 				mes "You are not the first foreigner";
 				mes "I have encountered. Amatsu is getting more and more tourists.";
 				mes "I just wanted to test you.";
-				mes " ";
 				next;
 				mes "[Magumagu]";
 				mes "Your job was just errands but";
@@ -1010,7 +1004,6 @@ ama_in01,162,17,1	script	Sushi Master#ama	765,{
 				next;
 				mes "[Magumagu]";
 				mes "I'm old now. No one knows how long I can hold this knife. You have been chosen to inherit my culinary art...";
-				mes " ";
 				next;
 				delitem 950,100; //Heart_Of_Mermaid
 				set ama_sushi,4;
@@ -1020,8 +1013,6 @@ ama_in01,162,17,1	script	Sushi Master#ama	765,{
 				mes "Here, take my knife.";
 				mes "From now on, make fine cuisine with that knife.";
 				mes "...Learn how to slice a fish.";
-				mes " ";
-				mes " ";
 				next;
 				mes "[Magumagu]";
 				mes "From now on, I will no longer ask you favors and give you fish slices in return....";
@@ -1033,7 +1024,6 @@ ama_in01,162,17,1	script	Sushi Master#ama	765,{
 				mes "Wow...these are real hearts of";
 				mes "mermaid. The legends saying";
 				mes "that these could be found in another continent were true...";
-				mes " ";
 				next;
 				mes "[Magumagu]";
 				mes "Gathering all these must have been hard...Well, then.";
@@ -1105,7 +1095,6 @@ ama_in01,162,17,1	script	Sushi Master#ama	765,{
 	mes "This is horrible...";
 	mes "Some of my customers will not get";
 	mes "the chance to eat fine Amatsu cuisine...";
-	mes " ";
 	next;
 	mes "[Magumagu]";
 	mes "Well, well. Are you a customer?";
@@ -1201,7 +1190,6 @@ ama_in01,162,17,1	script	Sushi Master#ama	765,{
 			mes "Haha~ YOU are the one who needs";
 			mes "assistance! Help others";
 			mes "when you can take care of yourself.";
-			mes " ";
 			close;
 		}
 		else {
@@ -1221,7 +1209,6 @@ ama_in01,162,17,1	script	Sushi Master#ama	765,{
 				mes "a dessert for the customers.";
 				mes "Bring me ^0000FF10 Candy^000000.";
 				mes "It's not hard, right?";
-				mes " ";
 			}
 			else if (.@fish_m1 == 3 || .@fish_m1 == 4) {
 				set fish_r,2;
@@ -1299,7 +1286,6 @@ ama_in01,162,17,1	script	Sushi Master#ama	765,{
 		mes "[Magumagu]";
 		mes "Haha, you won't forget the flavor of my fish slice once you've";
 		mes "tasted it. If you have time, try my fish slices.";
-		mes " ";
 		close;
 	}
 }
@@ -1318,7 +1304,6 @@ amatsu,112,164,4	script	Gate Soldier#ama1	767,{
 	mes "Are you from another continent?";
 	mes "The lord has granted entrance to";
 	mes "tourists, so you can go in.";
-	mes " ";
 	close;
 }
 	
@@ -1328,7 +1313,6 @@ amatsu,119,164,4	script	Gate Soldier#ama2	767,{
 	mes "Welcome to Amatsu.";
 	mes "Visit our lord in Chun-Su-Gak";
 	mes "when you go in.";
-	mes " ";
 	next;
 	mes "[Gate Soldier]";
 	mes "He is really kind.";
@@ -1360,7 +1344,6 @@ ama_in02,207,49,6	script	Gate Soldier#ama4	767,{
 	mes "These days, he seems to have";
 	mes "troubles on his mind.";
 	mes "Lately, he's been looking pretty gloomy.";
-	mes " ";
 	close;
 }
 	
@@ -1380,18 +1363,15 @@ amatsu,164,174,4	script	Gate Soldier#ama5	767,{
 	else if (event_amatsu == 1) {
 		mes "She should regain her health...";
 		mes "But still, my lord is worrying so much.";
-		mes " ";
 	}
 	else if (event_amatsu == 5) {
 		mes "Augh! I was suprised by that loud sound.";
 		mes "What happened? Huh?";
-		mes " ";
 	}
 	else if (event_amatsu == 6) {
 		mes "The mother of our lord hasn't";
 		mes "fully recovered her health.";
 		mes "Still, she is better than before.";
-		mes " ";
 	}
 	else {
 		mes "If you are sent by my lord,";
@@ -1407,9 +1387,9 @@ amatsu,171,174,4	script	Gate Soldier#ama6	767,{
 	if (event_amatsu == 0) {
 		mes "You can't enter here.";
 		mes "The mother of our lord is resting in here.";
-		mes " ";
 		next;
 		set event_amatsu,1;
+		setquest 8131;
 		mes "[Gate Soldier]";
 		mes "She has been sick for months.";
 		mes "That is why she is staying in here.";
@@ -1555,7 +1535,6 @@ ama_in02,40,167,3	script	Soldier#ama5	767,{
 	mes "[Goro]";
 	mes "*Psst*... Please, be quiet.";
 	mes "I will tell you a story, okay?";
-	mes " ";
 	next;
 	mes "[Goro]";
 	mes "There is a rumor in Amatsu.";
@@ -1610,7 +1589,6 @@ ama_in02,42,34,2	script	Soldier#ama7	767,{
 	mes "[Shichiro]";
 	mes "If you have any problems,";
 	mes "please call me. Also, try not to disturb the other guests.";
-	mes " ";
 	next;
 	mes "[Shichiro]";
 	mes "Have a good day.";
@@ -1673,14 +1651,11 @@ ama_in02,115,177,7	script	Soldier#ama10	767,{
 				mes "protected by some kind of magic.";
 				mes "You may get killed by someone";
 				mes "or get lost.";
-				mes " ";
 				next;
 				mes "[Jyuro]";
 				mes "I can't tell you much.";
 				mes "I didn't go far inside and";
 				mes "and just took a quick look.";
-				mes " ";
-				mes " ";
 				next;
 				mes "[Jyuro]";
 				mes "First.....";
@@ -2126,7 +2101,6 @@ ama_in01,169,173,1	script	Shaman#ama	769,{
 	mes "something, ask Takehue-kun.";
 	mes "He knows stuff about";
 	mes "mysticism and the occult that other people don't know about.";
-	mes " ";
 	close;
 }
 	
@@ -2154,7 +2128,6 @@ ama_in01,180,173,3	script	Kitsune Mask#ama	762,{
 		mes "Foxes like to tease people but";
 		mes "it is rare for them to crave";
 		mes "vengeance.";
-		mes " ";
 		next;
 		mes "[Takehue]";
 		mes "If a fox is vengeful, it means that a human caused it harm.";
@@ -2166,7 +2139,6 @@ ama_in01,180,173,3	script	Kitsune Mask#ama	762,{
 		mes "Anyway, a stronger spirit";
 		mes "will expel the fox from a human.";
 		mes "Come on, yell out and show me your spirit!";
-		mes " ";
 		next;
 		select("Taaaaah!!");
 		set event_amatsu,4;
