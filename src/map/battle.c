@@ -964,17 +964,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 	if( sc && sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF] )
 		return 1;
 
-	switch( skill_id ) {
-		case CR_GRANDCROSS:
-		case NPC_GRANDDARKNESS:
-			if( tsd )
-				break;
-			d->dmg_lv = ATK_MISS;
-			return 0;
-		case PA_PRESSURE:
-		case HW_GRAVITATION:
-			return damage; //This skill bypass everything else
-	}
+	if( skill_id == PA_PRESSURE || skill_id == HW_GRAVITATION )
+		return damage; //This skill bypass everything else
 
 	if( d->isvanishdamage )
 		return damage;
@@ -6514,8 +6505,12 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 
 	DAMAGE_DIV_FIX(ad.damage, ad.div_);
 
-	if(flag.infdef && ad.damage > 0)
-		ad.damage = 1;
+	if(flag.infdef && ad.damage > 0) {
+		if(skill_id == NPC_GRANDDARKNESS && target->id == src->id && !sd)
+			ad.damage = 0;
+		else
+			ad.damage = 1;
+	}
 
 	switch(skill_id) {
 #ifdef RENEWAL

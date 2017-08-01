@@ -7788,7 +7788,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 				bonus += rate * sd->sc.data[SC_COMMONSC_RESIST]->val1 / 100;
 			rate -= bonus; //Item resistance (only applies to rate%)
 		}
-		if (rate && rate%10)
+		if (rate > 0 && rate%10)
 			rate += (10 - rate%10); //Aegis accuracy
 	}
 
