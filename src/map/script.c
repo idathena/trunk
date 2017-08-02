@@ -7576,10 +7576,7 @@ BUILDIN_FUNC(getpartymemberid)
 	if( (p = party_search(sd->status.party_id)) )
 		count = party_getmemberid(p,sd) + 1;
 
-	if( !count )
-		script_pushint(st,0);
-	else
-		script_pushint(st,count);
+	script_pushint(st,count);
 	return SCRIPT_CMD_SUCCESS;
 }
 
