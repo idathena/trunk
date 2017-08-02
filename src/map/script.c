@@ -7566,15 +7566,15 @@ BUILDIN_FUNC(getpartymemberid)
 {
 	struct party_data *p;
 	TBL_PC *sd;
-	int count;
+	int count = 0;
 
 	if( !script_charid2sd(2,sd) ) {
 		script_pushint(st,0);
 		return 0;
 	}
 
-	p = party_search(sd->status.party_id);
-	count = party_getmemberid(p,sd) + 1;
+	if( (p = party_search(sd->status.party_id)) )
+		count = party_getmemberid(p,sd) + 1;
 
 	if( !count )
 		script_pushint(st,0);
