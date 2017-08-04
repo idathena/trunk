@@ -2286,7 +2286,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 				}
 			}
 			if(hp || sp) //Updated to force healing to allow healing through berserk
-				status_heal(src,hp,sp,battle_config.show_hp_sp_gain ? 3 : 1);
+				status_heal(src,hp,sp,(battle_config.show_hp_sp_gain ? 3 : 1));
 		}
 	}
 

@@ -3936,18 +3936,18 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		status->aspd_rate -= lv * 5;
 	if ((lv = pc_checkskill(sd,SG_DEVIL)) > 0 && pc_is_maxjoblv(sd))
 		status->aspd_rate -= lv * 30;
-	if ((lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && (sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE))
+	if ((lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE)
 		status->aspd_rate -= ((lv + 1) / 2) * 10;
-	if ((lv = pc_checkskill(sd,KN_CAVALIERMASTERY)) > 0 && pc_isriding(sd))
+	if ((lv = pc_checkskill(sd,KN_CAVALIERMASTERY)) >= 0 && pc_isriding(sd))
 		status->aspd_rate += 500 - lv * 100;
-	else if ((lv = pc_checkskill(sd,RK_DRAGONTRAINING)) > 0 && pc_isridingdragon(sd))
+	else if ((lv = pc_checkskill(sd,RK_DRAGONTRAINING)) >= 0 && pc_isridingdragon(sd))
 		status->aspd_rate += 250 - lv * 50;
 #else //Needs more info
 	if ((lv = pc_checkskill(sd,SG_DEVIL)) > 0 && pc_is_maxjoblv(sd))
 		status->aspd_rate += 10 + lv * 10;
-	if ((lv = pc_checkskill(sd,KN_CAVALIERMASTERY)) > 0 && pc_isriding(sd))
+	if ((lv = pc_checkskill(sd,KN_CAVALIERMASTERY)) >= 0 && pc_isriding(sd))
 		status->aspd_rate -= 500 - lv * 100;
-	else if ((lv = pc_checkskill(sd,RK_DRAGONTRAINING)) > 0 && pc_isridingdragon(sd))
+	else if ((lv = pc_checkskill(sd,RK_DRAGONTRAINING)) >= 0 && pc_isridingdragon(sd))
 		status->aspd_rate -= 250 - lv * 50;
 #endif
 	status->adelay = 2 * status->amotion;
@@ -4946,7 +4946,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			temp = (float)(sqrt(temp) * 0.25f);
 			if( (lv = pc_checkskill(sd,SA_ADVANCEDBOOK)) > 0 && sd->status.weapon == W_BOOK )
 				val += (lv - 1) / 2 + 1;
-			if( (lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && (sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE) )
+			if( (lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE )
 				val += ((lv + 1) / 2);
 			amotion -= (int)(temp + (float)((status_calc_aspd(bl, sc, true) + val) * status->agi) / 200) * 10;
 			//Absolute ASPD % modifier
