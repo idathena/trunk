@@ -10458,6 +10458,11 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = 5 * val1; //Atk/Def reduc %
 				val3 = 2 * val1; //MaxHP reduc %
 				break;
+			case SC_FULL_THROTTLE:
+				val2 = (val1 == 1 ? 6 : 6 - val1);
+				tick_time = 1000;
+				val4 = tick / tick_time;
+				break;
 			case SC_REBOUND:
 				tick_time = 2000;
 				val4 = tick / tick_time;
@@ -10498,7 +10503,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( !mobdb_checkid(val1) )
 					val1 = MOBID_PORING;
 				break;
-			case SC_FULL_THROTTLE:
 			case SC_C_MARKER:
 			case SC_BURNT:
 				tick_time = 1000;
@@ -13226,7 +13230,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_FULL_THROTTLE:
 			if( --(sce->val4) >= 0 ) {
-				if( !status_charge(bl,0,status->max_sp * (6 - sce->val1) / 100) )
+				if( !status_charge(bl,0,status->max_sp * sce->val2 / 100) )
 					break;
 				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				return 0;
