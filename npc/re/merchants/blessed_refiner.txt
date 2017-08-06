@@ -9,8 +9,7 @@
 //===== Description: =========================================
 //= [Official Conversion]
 //= Refiners that use Blessed ores to refine equipment.
-//= Upon failure, the equipment is not destroyed. The success
-//= rate is identical to that for Enriched ores.
+//= Upon failure, the equipment is not destroyed.
 //= - "Blacksmith Dister" only refines from +6~12.
 //= NOTE: This NPC is currently disabled on official servers.
 //===== Additional Comments: =================================
@@ -142,7 +141,7 @@
 	set Zeny, Zeny-.@price;
 	mes "[Blacksmith Dister]";
 	mes "Tac! Tac! Tac!";
-	if (getequippercentrefinery(.@part, true) > rand(100)) {
+	if (getequippercentrefinery(.@part) > rand(100)) {
 		specialeffect EF_BLESSING;
 		successrefitem .@part;
 		next;

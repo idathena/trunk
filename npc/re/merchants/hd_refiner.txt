@@ -10,8 +10,7 @@
 //= [Official Conversion]
 //= Refiners that use HD ores to refine equipment. Upon
 //= failure, the equipment is not destroyed; rather, its
-//= refine level decreases by 1. The success rate is identical
-//= to that for Enriched ores.
+//= refine level decreases by 1.
 //= - "Blacksmith Mighty Hammer" only refines from +7~9.
 //= - "Basta" only refines from +10 and up.
 //===== Additional Comments: =================================
@@ -123,7 +122,7 @@
 	set Zeny, Zeny-.@price;
 	mes "[Blacksmith Mighty Hammer]";
 	mes "Tac! Tac! Tac!";
-	if (getequippercentrefinery(.@part, true) > rand(100)) {
+	if (getequippercentrefinery(.@part) > rand(100)) {
 		successrefitem .@part;
 		next;
 		emotion e_no1;
@@ -272,7 +271,7 @@ lhz_in02,280,19,3	duplicate(MightyHammer)	Mighty Hammer#lhz	826
 	delitem .@material,1;
 	set Zeny, Zeny-.@price;
 	mes "Pow! Pow! Pow! Pow!";
-	if (getequippercentrefinery(.@part, true) > rand(100)) {
+	if (getequippercentrefinery(.@part) > rand(100)) {
 		successrefitem .@part;
 		next;
 		emotion e_no1;
