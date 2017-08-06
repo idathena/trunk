@@ -6153,8 +6153,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					i = rnd() % MAX_SKILL_ABRA_DB;
 					abra_skill_id = skill_abra_db[i].skill_id;
 					abra_skill_lv = min(skill_lv,skill_get_max(abra_skill_id));
-				} while (checked++ < checked_max && (abra_skill_id == 0 ||
-					rnd()%10000 >= skill_abra_db[i].per[max(skill_lv - 1,0)]));
+				} while (checked++ < checked_max && (!abra_skill_id || rnd()%10000 >= skill_abra_db[i].per[max(skill_lv - 1,0)]));
 				if (!skill_get_index(abra_skill_id))
 					break;
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
@@ -15053,14 +15052,13 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	if( pc_isridingwug(sd) && !(inf3&INF3_USABLE_WARG) && sd->skillitem != skill_id )
 		return false; //In official there is no fail message
 
-	if( pc_ismadogear(sd) ) { //Check the skills that can be used while mounted on a mado
-		if( !(skill_id > NC_MADOLICENCE && skill_id <= NC_DISJOINT) &&
-			skill_id != NC_MAGMA_ERUPTION && skill_id != ALL_FULL_THROTTLE &&
-			skill_id != AL_TELEPORT && skill_id != BS_GREED )
-		{
-			clif_skill_fail(sd,skill_id,USESKILL_FAIL_MADOGEAR_RIDE,0,0);
-			return false;
-		}
+	if( pc_ismadogear(sd) && //Check the skills that can be used while mounted on a mado
+		!(skill_id > NC_MADOLICENCE && skill_id <= NC_DISJOINT) &&
+		skill_id != NC_MAGMA_ERUPTION && skill_id != ALL_FULL_THROTTLE &&
+		skill_id != AL_TELEPORT && skill_id != BS_GREED && sd->skillitem != skill_id )
+	{
+		clif_skill_fail(sd,skill_id,USESKILL_FAIL_MADOGEAR_RIDE,0,0);
+		return false;
 	}
 
 	if( skill_lv < 1 || skill_lv > MAX_SKILL_LEVEL )
@@ -17059,7 +17057,7 @@ void skill_weaponrefine(struct map_session_data *sd, int idx)
 				clif_upgrademessage(sd->fd,3,material[ditem->wlv]);
 				return;
 			}
-			per = status_get_refine_chance(ditem->wlv,(int)item->refine);
+			per = status_get_refine_chance(ditem->wlv,(int)item->refine,false);
 			if (sd->class_&JOBL_THIRD)
 				per += 10;
 			else

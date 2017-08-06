@@ -649,6 +649,7 @@ extern struct Battle_Config
 	int guild_leaderchange_woe;
 	int banana_bomb_duration;
 	int guild_alliance_onlygm;
+	int event_refine_chance;
 } battle_config;
 
 void do_init_battle(void);
