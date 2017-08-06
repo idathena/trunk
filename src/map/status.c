@@ -10,6 +10,7 @@
 #include "../common/utils.h"
 #include "../common/ers.h"
 #include "../common/strlib.h"
+#include "../common/conf.h"
 
 #include "map.h"
 #include "path.h"
@@ -13953,13 +13954,19 @@ static int status_natural_heal_timer(int tid, unsigned int tick, int id, intptr_
  * Get the chance to upgrade a piece of equipment.
  * @param wlv The weapon type of the item to refine (see see enum refine_type)
  * @param refine The target refine level
+ * @param enriched Check if the item to refine is using enriched chance
  * @return The chance to refine the item, in percent (0~100)
  */
-int status_get_refine_chance(enum refine_type wlv, int refine)
+int status_get_refine_chance(enum refine_type wlv, int refine, bool enriched)
 {
-	 if (refine < 0 || refine >= MAX_REFINE)
+	int type;
+
+	if (refine < 0 || refine >= MAX_REFINE)
 		return 0;
-	return refine_info[wlv].chance[refine];
+	type = (enriched ? 1 : 0);
+	if (battle_config.event_refine_chance)
+		type |= 2;
+	return refine_info[wlv].chance[type][refine];
 }
 
 /**
@@ -14004,7 +14011,7 @@ void status_change_clear_onChangeMap(struct block_list *bl, struct status_change
 		bool mapIsGVG = map_flag_gvg2_no_te(bl->m);
 		bool mapIsBG = map[bl->m].flag.battleground;
 		bool mapIsTE = map_flag_gvg2_te(bl->m);
-		unsigned int mapZone = map[bl->m].zone << 3;
+		unsigned int mapZone = map[bl->m].zone<<3;
 
 		for (i = 0; i < SC_MAX; i++) {
 			if (!sc->data[i] || !SCDisabled[i])
@@ -14029,7 +14036,7 @@ static bool status_readdb_status_disabled(char **str, int columns, int current)
 	if (ISDIGIT(str[0][0]))
 		type = atoi(str[0]);
 	else {
-		if (!script_get_constant(str[0],&type))
+		if (!script_get_constant(str[0], &type))
 			type = SC_NONE;
 	}
 	if (type <= SC_NONE || type >= SC_MAX) {
@@ -14049,43 +14056,162 @@ static bool status_readdb_sizefix(char *fields[], int columns, int current)
 	return true;
 }
 
-static bool status_readdb_refine(char *fields[], int columns, int current)
+/**
+ * Processes a refine_db.conf entry.
+ *
+ * @param *r	  Libconfig setting entry. It is expected to be valid and it
+ *                won't be freed (it is care of the caller to do so if
+ *                necessary)
+ * @param n       Ordinal number of the entry, to be displayed in case of
+ *                validation errors.
+ * @param *source Source of the entry (file name), to be displayed in case of
+ *                validation errors.
+ * @return # of the validated entry, or 0 in case of failure.
+ */
+int status_readdb_refine_libconfig_sub(config_setting_t *r, const char *name, const char *source)
 {
-	int i, bonus_per_level, random_bonus, random_bonus_start_level;
+	config_setting_t *rate = NULL;
+	int type = REFINE_TYPE_ARMOR, bonus_per_level = 0, rnd_bonus_v = 0, rnd_bonus_lv = 0;
+	char lv[4];
 
-	current = atoi(fields[0]);
+	nullpo_ret(r);
+	nullpo_ret(name);
+	nullpo_ret(source);
 
-	if (current < 0 || current >= REFINE_TYPE_MAX)
-		return false;
-
-	bonus_per_level = atoi(fields[1]);
-	random_bonus_start_level = atoi(fields[2]);
-	random_bonus = atoi(fields[3]);
-
-	for (i = 0; i < MAX_REFINE; i++) {
-		char *delim;
-
-		if (!(delim = strchr(fields[4 + i], ':')))
-			return false;
-
-		*delim = '\0';
-
-		refine_info[current].chance[i] = atoi(fields[4 + i]);
-
-		if (i >= random_bonus_start_level - 1)
-			refine_info[current].randombonus_max[i] = random_bonus * (i - random_bonus_start_level + 2);
-
-		refine_info[current].bonus[i] = bonus_per_level + atoi(delim + 1);
-		if (i > 0)
-			refine_info[current].bonus[i] += refine_info[current].bonus[i - 1];
+	if (!strncmp(name, "Armors", 6)) {
+		type = REFINE_TYPE_ARMOR;
+	} else if (strncmp(name, "WeaponLevel", 11) || !strspn(&name[strlen(name) - 1], "0123456789") || (type = atoi(strncpy(lv, name + 11, 2))) == REFINE_TYPE_ARMOR) {
+		ShowError("status_readdb_refine_libconfig_sub: Invalid key name for entry '%s' in \"%s\", skipping.\n", name, source);
+		return 0;
 	}
-	return true;
+	if (type < REFINE_TYPE_ARMOR || type >= REFINE_TYPE_MAX) {
+		ShowError("status_readdb_refine_libconfig_sub: Out of range level for entry '%s' in \"%s\", skipping.\n", name, source);
+		return 0;
+	}
+	if (!config_setting_lookup_int(r, "StatsPerLevel", &bonus_per_level)) {
+		ShowWarning("status_readdb_refine_libconfig_sub: Missing StatsPerLevel for entry '%s' in \"%s\", skipping.\n", name, source);
+		return 0;
+	}
+	if (!config_setting_lookup_int(r, "RandomBonusStartLevel", &rnd_bonus_lv)) {
+		ShowWarning("status_readdb_refine_libconfig_sub: Missing RandomBonusStartLevel for entry '%s' in \"%s\", skipping.\n", name, source);
+		return 0;
+	}
+	if (!config_setting_lookup_int(r, "RandomBonusValue", &rnd_bonus_v)) {
+		ShowWarning("status_readdb_refine_libconfig_sub: Missing RandomBonusValue for entry '%s' in \"%s\", skipping.\n", name, source);
+		return 0;
+	}
+	if ((rate = config_setting_get_member(r, "Rates")) && config_setting_is_group(rate)) {
+		config_setting_t *t = NULL;
+		bool duplicate[MAX_REFINE];
+		int bonus[MAX_REFINE], rnd_bonus[MAX_REFINE];
+		int chance[REFINE_CHANCE_TYPE_MAX][MAX_REFINE];
+		int i, j;
+
+		memset(&duplicate, 0, sizeof(duplicate));
+		memset(&bonus, 0, sizeof(bonus));
+		memset(&rnd_bonus, 0, sizeof(rnd_bonus));
+
+		for (i = 0; i < REFINE_CHANCE_TYPE_MAX; i++) {
+			for (j = 0; j < MAX_REFINE; j++)
+				chance[i][j] = 100; //Default value for all rates
+		}
+		i = 0;
+		j = 0;
+		while ((t = config_setting_get_elem(rate,i++)) && config_setting_is_group(t)) {
+			int level = 0, i32;
+			char *rlvl = config_setting_name(t);
+
+			memset(&lv, 0, sizeof(lv));
+
+			if (!strspn(&rlvl[strlen(rlvl) - 1], "0123456789") || (level = atoi(strncpy(lv, rlvl + 2, 3))) <= 0) {
+				ShowError("status_readdb_refine_libconfig_sub: Invalid refine level format '%s' for entry %s in \"%s\"... skipping.\n", rlvl, name, source);
+				continue;
+			}
+			if (level <= 0 || level > MAX_REFINE) {
+				ShowError("status_readdb_refine_libconfig_sub: Out of range refine level '%s' for entry %s in \"%s\"... skipping.\n", rlvl, name, source);
+				continue;
+			}
+			level--;
+			if (duplicate[level])
+				ShowWarning("status_readdb_refine_libconfig_sub: duplicate rate '%s' for entry %s in \"%s\", overwriting previous entry...\n", rlvl, name, source);
+			else
+				duplicate[level] = true;
+			if (config_setting_lookup_int(t, "NormalChance", &i32))
+				chance[REFINE_CHANCE_TYPE_NORMAL][level] = i32;
+			else
+				chance[REFINE_CHANCE_TYPE_NORMAL][level] = 100;
+			if (config_setting_lookup_int(t, "EnrichedChance", &i32))
+				chance[REFINE_CHANCE_TYPE_ENRICHED][level] = i32;
+			else
+				chance[REFINE_CHANCE_TYPE_ENRICHED][level] = (level > 10 ? 0 : 100); //Enriched ores up to +10 only
+			if (config_setting_lookup_int(t, "EventNormalChance", &i32))
+				chance[REFINE_CHANCE_TYPE_E_NORMAL][level] = i32;
+			else
+				chance[REFINE_CHANCE_TYPE_E_NORMAL][level] = 100;
+			if (config_setting_lookup_int(t, "EventEnrichedChance", &i32))
+				chance[REFINE_CHANCE_TYPE_E_ENRICHED][level] = i32;
+			else
+				chance[REFINE_CHANCE_TYPE_E_ENRICHED][level] = (level > 10 ? 0 : 100); //Enriched ores up to +10 only
+			if (config_setting_lookup_int(t, "Bonus", &i32))
+				bonus[level] += i32;
+			if (level >= rnd_bonus_lv - 1)
+				rnd_bonus[level] = rnd_bonus_v * (level - rnd_bonus_lv + 2);
+		}
+		for (i = 0; i < MAX_REFINE; i++) {
+			refine_info[type].chance[REFINE_CHANCE_TYPE_NORMAL][i] = chance[REFINE_CHANCE_TYPE_NORMAL][i];
+			refine_info[type].chance[REFINE_CHANCE_TYPE_ENRICHED][i] = chance[REFINE_CHANCE_TYPE_ENRICHED][i];
+			refine_info[type].chance[REFINE_CHANCE_TYPE_E_NORMAL][i] = chance[REFINE_CHANCE_TYPE_E_NORMAL][i];
+			refine_info[type].chance[REFINE_CHANCE_TYPE_E_ENRICHED][i] = chance[REFINE_CHANCE_TYPE_E_ENRICHED][i];
+			refine_info[type].randombonus_max[i] = rnd_bonus[i];
+			bonus[i] += bonus_per_level + (i > 0 ? bonus[i - 1] : 0);
+			refine_info[type].bonus[i] = bonus[i];
+		}
+	} else {
+		ShowWarning("status_readdb_refine_libconfig_sub: Missing refine rates for entry '%s' in \"%s\", skipping.\n", name, source);
+		return 0;
+	}
+	return type + 1;
+}
+
+/**
+ * Reads from a libconfig-formatted refine_db.conf file.
+ *
+ * @param *filename File name, relative to the database path.
+ * @return The number of found entries.
+ */
+int status_readdb_refine_libconfig(const char *filename)
+{
+	bool duplicate[REFINE_TYPE_MAX];
+	config_t refine_db_conf;
+	config_setting_t *r;
+	char filepath[256];
+	int i = 0, count = 0,type = 0;
+
+	memset(&duplicate, 0, sizeof(duplicate));
+
+	sprintf(filepath, "%s/%s", db_path, filename);
+	if (conf_read_file(&refine_db_conf, filepath))
+		return 0;
+	while ((r = config_setting_get_elem(refine_db_conf.root, i++))) {
+		char *name = config_setting_name(r);
+
+		if ((type = status_readdb_refine_libconfig_sub(r, name, filename))) {
+			if (duplicate[type - 1])
+				ShowWarning("status_readdb_refine_libconfig: duplicate entry for %s in \"%s\", overwriting previous entry...\n", name, filename);
+			else
+				duplicate[type - 1] = true;
+			count++;
+		}
+	}
+	config_destroy(&refine_db_conf);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
+	return count;
 }
 
 /*------------------------------------------
  * DB reading.
  * size_fix.txt		- size adjustment table for weapons
- * refine_db.txt	- refining data table
+ * refine_db.conf	- refining data table
  *------------------------------------------*/
 int status_readdb(void)
 {
@@ -14099,20 +14225,12 @@ int status_readdb(void)
 		for(j = 0; j < MAX_WEAPON_TYPE; j++)
 			atkmods[i][j] = 100;
 	}
-	//refine_db.txt
-	for(i = 0; i < ARRAYLENGTH(refine_info); i++) {
-		for(j = 0; j < MAX_REFINE; j++) {
-			refine_info[i].chance[j] = 100;
-			refine_info[i].bonus[j] = 0;
-			refine_info[i].randombonus_max[j] = 0;
-		}
-	}
 
 	//Read databases
 	//path,filename,separator,mincol,maxcol,maxrow,func_parsor
 	sv_readdb(db_path, "status_disabled.txt", ',', 2, 2, -1, &status_readdb_status_disabled);
 	sv_readdb(db_path, DBPATH"size_fix.txt", ',', MAX_WEAPON_TYPE, MAX_WEAPON_TYPE, ARRAYLENGTH(atkmods), &status_readdb_sizefix);
-	sv_readdb(db_path, DBPATH"refine_db.txt", ',', 4 + MAX_REFINE, 4 + MAX_REFINE, ARRAYLENGTH(refine_info), &status_readdb_refine);
+	status_readdb_refine_libconfig(DBPATH"refine_db.conf");
 	return 0;
 }
 

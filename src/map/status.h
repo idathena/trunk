@@ -32,7 +32,7 @@ enum refine_type {
 };
 
 // Get refine chance
-int status_get_refine_chance(enum refine_type wlv, int refine);
+int status_get_refine_chance(enum refine_type wlv, int refine, bool enriched);
 
 // Flags to be used with status_change_start and status_get_sc_def
 // NOTE: When updating this enum, also update the documentation in doc/script_commands.txt and the constants
@@ -2282,8 +2282,16 @@ void status_change_clear_onChangeMap(struct block_list *bl, struct status_change
 #define status_calc_elemental(ed, opt) status_calc_bl_(&(ed)->bl, SCB_ALL, opt)
 #define status_calc_npc(nd, opt) status_calc_bl_(&(nd)->bl, SCB_ALL, opt)
 
+enum e_refine_chance_type { // Enum for refine chance types
+	REFINE_CHANCE_TYPE_NORMAL = 0,
+	REFINE_CHANCE_TYPE_ENRICHED,
+	REFINE_CHANCE_TYPE_E_NORMAL,
+	REFINE_CHANCE_TYPE_E_ENRICHED,
+	REFINE_CHANCE_TYPE_MAX
+};
+
 struct s_refine_info { //Bonus values and upgrade chances for refining equipment
-	int chance[MAX_REFINE]; //Success chance
+	int chance[REFINE_CHANCE_TYPE_MAX][MAX_REFINE]; //Success chance
 	int bonus[MAX_REFINE]; //Cumulative fixed bonus damage
 	int randombonus_max[MAX_REFINE]; //Cumulative maximum random bonus damage
 } refine_info[REFINE_TYPE_MAX];

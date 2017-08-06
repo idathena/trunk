@@ -7445,12 +7445,15 @@ BUILDIN_FUNC(readparam)
 {
 	int value;
 	struct script_data *data = script_getdata(st,2);
-	TBL_PC *sd;
+	TBL_PC *sd = NULL;
 
 	if( script_hasdata(st,3) ) {
-		if( script_isint(st,3) )
+		struct script_data *data2 = script_getdata(st,3);
+
+		get_val(st,data2);
+		if( data_isint(data2) || script_getnum(st,3) )
 			script_charid2sd(3,sd);
-		else
+		else if( data_isstring(data2) )
 			script_nick2sd(3,sd);
 	} else
 		sd = script_rid2sd(st);
@@ -8146,26 +8149,28 @@ BUILDIN_FUNC(getequipweaponlv)
  * Return (npc)
  *	x : refine chance
  *	0 : false (max refine level or unequip..)
- * getequippercentrefinery(<equipment slot>{,<char_id>})
+ * getequippercentrefinery(<equipment slot>{,<enriched>,<char_id>})
  *------------------------------------------*/
 BUILDIN_FUNC(getequippercentrefinery)
 {
 	int i = -1, num;
+	bool enriched = false;
+	int chance = 0;
 	TBL_PC *sd;
 
-	if(!script_charid2sd(3,sd)) {
+	if(!script_charid2sd(4,sd)) {
 		script_pushint(st,0);
 		return 1;
 	}
-
+	if (script_hasdata(st,3))
+		enriched = (script_getnum(st,3) != 0);
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
-		script_pushint(st,status_get_refine_chance((enum refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine));
-	else
-		script_pushint(st,0);
+		chance = status_get_refine_chance((enum refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, enriched);
 
+	script_pushint(st,chance);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -21874,7 +21879,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getequipisenableref,"i?"),
 	BUILDIN_DEF(getequiprefinerycnt,"i?"),
 	BUILDIN_DEF(getequipweaponlv,"i?"),
-	BUILDIN_DEF(getequippercentrefinery,"i?"),
+	BUILDIN_DEF(getequippercentrefinery,"i??"),
 	BUILDIN_DEF(successrefitem,"i??"),
 	BUILDIN_DEF(failedrefitem,"i?"),
 	BUILDIN_DEF(downrefitem,"i??"),

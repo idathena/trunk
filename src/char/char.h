@@ -59,6 +59,16 @@ enum e_char_delete_restriction {
 	CHAR_DEL_RESTRICT_ALL
 };
 
+enum e_char_del_response {
+	CHAR_DELETE_OK = 0,
+	CHAR_DELETE_DATABASE,
+	CHAR_DELETE_NOTFOUND,
+	CHAR_DELETE_BASELEVEL,
+	CHAR_DELETE_GUILD,
+	CHAR_DELETE_PARTY,
+	CHAR_DELETE_TIME,
+};
+
 int memitemdata_to_sql(const struct item items[], int max, int id, enum storage_type tableswitch, uint8 stor_id);
 bool memitemdata_from_sql(struct s_storage *p, int max, int id, enum storage_type tableswitch, uint8 stor_id);
 
