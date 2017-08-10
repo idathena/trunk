@@ -15,6 +15,7 @@
 #include "pc.h"
 #include "skill.h" // ext_skill_unit_onplace()
 #include "chat.h"
+#include "achievement.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -98,6 +99,10 @@ int chat_createpcchat(struct map_session_data *sd, const char *title, const char
 		pc_stop_attack(sd);
 		clif_createchat(sd,0);
 		clif_dispchat(cd,0);
+		if( status_isdead(&sd->bl) )
+			achievement_update_objective(sd, AG_CHAT_DYING, 1, 1);
+		else
+			achievement_update_objective(sd, AG_CHAT_CREATE, 1, 1);
 	} else
 		clif_createchat(sd,1);
 
@@ -156,6 +161,9 @@ int chat_joinchat(struct map_session_data *sd, int chatid, const char *pass)
 	clif_dispchat(cd, 0); //Reported number of changes to the people around
 
 	chat_triggerevent(cd); //Event
+
+	if( cd->owner->type == BL_PC )
+		achievement_update_objective(map_id2sd(cd->owner->id), AG_CHAT_COUNT, 1, cd->users);
 
 	return 0;
 }

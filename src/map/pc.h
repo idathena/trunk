@@ -601,6 +601,21 @@ struct map_session_data {
 	bool *qi_display;
 	unsigned short qi_count;
 
+	//Achievement log system
+	struct s_achievement_data {
+		int total_score;                  //Total achievement points
+		int level;                        //Achievement level
+		bool save;                        //Flag to know if achievements need to be saved
+		uint16 count;                     //Total achievements in log
+		uint16 incompleteCount;           //Total incomplete achievements in log
+		
+		struct achievement *achievements; //Achievement log entries
+	} achievement_data;
+
+	//Title system
+	int *titles;
+	uint8 titleCount;
+
 	//Temporary debug [flaviojs]
 	const char *debug_file;
 	int debug_line;

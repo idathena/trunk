@@ -49,6 +49,8 @@
 #include "mail.h"
 #include "quest.h"
 #include "elemental.h"
+#include "achievement.h"
+
 #include "../config/core.h"
 
 #ifdef PCRE_SUPPORT
@@ -2278,6 +2280,19 @@ static void add_buildin_func(void)
 	}
 }
 
+/// Retrieves the value of a constant parameter.
+bool script_get_parameter(const char *name, int *value)
+{
+	int n = search_str(name);
+
+	if( n == -1 || str_data[n].type != C_PARAM ) //Not found or not a parameter
+		return false;
+
+	value[0] = str_data[n].val;
+
+	return true;
+}
+
 /// Retrieves the value of a constant.
 bool script_get_constant(const char *name, int *value)
 {
@@ -3093,19 +3108,30 @@ void pop_stack(struct script_state *st, int start, int end)
 		}
 		data->type = C_NOP;
 	}
+
 	// Move the rest of the elements
 	if( stack->sp > end ) {
-		memmove(&stack->stack_data[start], &stack->stack_data[end], sizeof(stack->stack_data[0])*(stack->sp - end));
+		memmove(&stack->stack_data[start], &stack->stack_data[end], sizeof(stack->stack_data[0]) * (stack->sp - end));
 		for( i = start + stack->sp - end; i < stack->sp; ++i )
 			stack->stack_data[i].type = C_NOP;
 	}
+
 	// Adjust stack pointers
-	     if( st->start > end )   st->start -= end - start;
-	else if( st->start > start ) st->start = start;
-	     if( st->end > end )   st->end -= end - start;
-	else if( st->end > start ) st->end = start;
-	     if( stack->defsp > end )   stack->defsp -= end - start;
-	else if( stack->defsp > start ) stack->defsp = start;
+	if( st->start > end )
+		st->start -= end - start;
+	else if( st->start > start )
+		st->start = start;
+
+	if( st->end > end )
+		st->end -= end - start;
+	else if( st->end > start )
+		st->end = start;
+
+	if( stack->defsp > end )
+		stack->defsp -= end - start;
+	else if( stack->defsp > start )
+		stack->defsp = start;
+
 	stack->sp -= end - start;
 }
 
@@ -8218,6 +8244,7 @@ BUILDIN_FUNC(successrefitem)
 
 		pc_equipitem(sd,i,ep);
 		clif_misceffect(&sd->bl,3);
+		achievement_update_objective(sd,AG_REFINE_SUCCESS,2,sd->inventory_data[i]->wlv,sd->inventory.u.items_inventory[i].refine);
 		if(sd->inventory.u.items_inventory[i].refine == 10 &&
 			sd->inventory.u.items_inventory[i].card[0] == CARD0_FORGE &&
 		  	sd->status.char_id == (int)MakeDWord(sd->inventory.u.items_inventory[i].card[2],sd->inventory.u.items_inventory[i].card[3])
@@ -8267,6 +8294,7 @@ BUILDIN_FUNC(failedrefitem)
 		clif_refine(sd->fd,1,i,sd->inventory.u.items_inventory[i].refine); //Notify client of failure
 		pc_delitem(sd,i,1,0,2,LOG_TYPE_SCRIPT);
 		clif_misceffect(&sd->bl,2); //Display failure effect
+		achievement_update_objective(sd,AG_REFINE_FAIL,1,1);
 		script_pushint(st,1);
 		return 0;
 	}
@@ -8317,6 +8345,7 @@ BUILDIN_FUNC(downrefitem)
 
 		pc_equipitem(sd,i,ep);
 		clif_misceffect(&sd->bl,2);
+		achievement_update_objective(sd,AG_REFINE_FAIL,1,sd->inventory.u.items_inventory[i].refine);
 		script_pushint(st,sd->inventory.u.items_inventory[i].refine);
 		return 0;
 	}
@@ -10877,9 +10906,8 @@ BUILDIN_FUNC(eaclass)
 	if( script_hasdata(st,2) )
 		class_ = script_getnum(st,2);
 	else {
-		TBL_PC *sd;
+		TBL_PC *sd = script_rid2sd(st);
 
-		sd = script_rid2sd(st);
 		if( !sd )
 			return 0;
 		class_ = sd->status.class_;
@@ -21739,6 +21767,234 @@ BUILDIN_FUNC(unloadnpc) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
+
+/**
+ * Add an achievement to the player's log
+ * achievementadd(<achievement ID>{,<char ID>});
+ */
+BUILDIN_FUNC(achievementadd) {
+	struct map_session_data *sd;
+	int achievement_id = script_getnum(st,2);
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (achievement_search(achievement_id) == &achievement_dummy) {
+		ShowWarning("buildin_achievementadd: Achievement '%d' doesn't exist.\n", achievement_id);
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (!sd->state.pc_loaded) {
+		if (!running_npc_stat_calc_event) {
+			ShowError("buildin_achievementadd: call was too early. Character %s(CID: '%u') was not loaded yet.\n", sd->status.name, sd->status.char_id);
+			return 1;
+		} else //Simply ignore it on the first call, because the status will be recalculated after loading anyway
+			return 0;
+	}
+
+	if (achievement_add(sd, achievement_id))
+		script_pushint(st,true);
+	else
+		script_pushint(st,false);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Removes an achievement on a player.
+ * achievementremove(<achievement ID>{,<char ID>});
+ * Just for Atemo. ;)
+ */
+BUILDIN_FUNC(achievementremove) {
+	struct map_session_data *sd;
+	int achievement_id = script_getnum(st,2);
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (achievement_search(achievement_id) == &achievement_dummy) {
+		ShowWarning("buildin_achievementremove: Achievement '%d' doesn't exist.\n", achievement_id);
+		script_pushint(st,false);
+		return 0;
+	}
+
+	if (!sd->state.pc_loaded) {
+		if (!running_npc_stat_calc_event) {
+			ShowError("buildin_achievementremove: call was too early. Character %s(CID: '%u') was not loaded yet.\n", sd->status.name, sd->status.char_id);
+			return 1;
+		} else //Simply ignore it on the first call, because the status will be recalculated after loading anyway
+			return 0;
+	}
+
+	if (achievement_remove(sd, achievement_id))
+		script_pushint(st,true);
+	else
+		script_pushint(st,false);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Returns achievement progress
+ * achievementinfo(<achievement ID>,<type>{,<char ID>});
+ */
+BUILDIN_FUNC(achievementinfo) {
+	struct map_session_data *sd;
+	int achievement_id = script_getnum(st,2);
+
+	if (!script_charid2sd(4,sd)) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (achievement_search(achievement_id) == &achievement_dummy) {
+		ShowWarning("buildin_achievementinfo: Achievement '%d' doesn't exist.\n", achievement_id);
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (!sd->state.pc_loaded) {
+		script_pushint(st,false);
+		if (!running_npc_stat_calc_event) {
+			ShowError("buildin_achievementinfo: call was too early. Character %s(CID: '%u') was not loaded yet.\n", sd->status.name, sd->status.char_id);
+			return 1;
+		} else //Simply ignore it on the first call, because the status will be recalculated after loading anyway
+			return 0;
+	}
+
+	script_pushint(st, achievement_check_progress(sd, achievement_id, script_getnum(st,3)));
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Award an achievement; Ignores requirements
+ * achievementcomplete(<achievement ID>{,<char ID>});
+ */
+BUILDIN_FUNC(achievementcomplete) {
+	struct map_session_data *sd;
+	int i, achievement_id = script_getnum(st,2);
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (achievement_search(achievement_id) == &achievement_dummy) {
+		ShowWarning("buildin_achievementcomplete: Achievement '%d' doesn't exist.\n", achievement_id);
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (!sd->state.pc_loaded) {
+		if (!running_npc_stat_calc_event) {
+			ShowError("buildin_achievementcomplete: call was too early. Character %s(CID: '%u') was not loaded yet.\n", sd->status.name, sd->status.char_id);
+			return 1;
+		} else //Simply ignore it on the first call, because the status will be recalculated after loading anyway
+			return 0;
+	}
+
+	ARR_FIND(0, sd->achievement_data.count, i, sd->achievement_data.achievements[i].achievement_id == achievement_id);
+	if (i == sd->achievement_data.count)
+		achievement_add(sd, achievement_id);
+	achievement_update_achievement(sd, achievement_id, true);
+	script_pushint(st,true);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Checks if the achievement exists on player.
+ * achievementexist(<achievement ID>{,<char ID>});
+ */
+BUILDIN_FUNC(achievementexist) {
+	struct map_session_data *sd;
+	int i, achievement_id = script_getnum(st,2);
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (achievement_search(achievement_id) == &achievement_dummy) {
+		ShowWarning("buildin_achievementexist: Achievement '%d' doesn't exist.\n", achievement_id);
+		script_pushint(st,false);
+		return 0;
+	}
+
+	if (!sd->state.pc_loaded) {
+		script_pushint(st,false);
+		if (!running_npc_stat_calc_event) {
+			ShowError("buildin_achievementexist: call was too early. Character %s(CID: '%u') was not loaded yet.\n", sd->status.name, sd->status.char_id);
+			return 1;
+		} else //Simply ignore it on the first call, because the status will be recalculated after loading anyway
+			return 0;
+	}
+
+	ARR_FIND(0, sd->achievement_data.count, i, sd->achievement_data.achievements[i].achievement_id == achievement_id);
+	script_pushint(st,(i < sd->achievement_data.count ? true : false));
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Updates an achievement's value.
+ * achievementupdate(<achievement ID>,<type>,<value>{,<char ID>});
+ */
+BUILDIN_FUNC(achievementupdate) {
+	struct map_session_data *sd;
+	int i, achievement_id, type, value;
+
+	achievement_id = script_getnum(st,2);
+	type = script_getnum(st,3);
+	value = script_getnum(st,4);
+
+	if (!script_charid2sd(5,sd)) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (achievement_search(achievement_id) == &achievement_dummy) {
+		ShowWarning("buildin_achievementupdate: Achievement '%d' doesn't exist.\n", achievement_id);
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (!sd->state.pc_loaded) {
+		if (!running_npc_stat_calc_event) {
+			ShowError("buildin_achievementupdate: call was too early. Character %s(CID: '%u') was not loaded yet.\n", sd->status.name, sd->status.char_id);
+			return 1;
+		} else //Simply ignore it on the first call, because the status will be recalculated after loading anyway
+			return 0;
+	}
+
+	ARR_FIND(0, sd->achievement_data.count, i, sd->achievement_data.achievements[i].achievement_id == achievement_id);
+	if (i == sd->achievement_data.count)
+		achievement_add(sd, achievement_id);
+
+	ARR_FIND(0, sd->achievement_data.count, i, sd->achievement_data.achievements[i].achievement_id == achievement_id);
+	if (i == sd->achievement_data.count) {
+		script_pushint(st,false);
+		return 0;
+	}
+
+	if (type >= ACHIEVEINFO_COUNT1 && type <= ACHIEVEINFO_COUNT10)
+		sd->achievement_data.achievements[i].count[type - 1] = value;
+	else if (type == ACHIEVEINFO_COMPLETE || type == ACHIEVEINFO_COMPLETEDATE)
+		sd->achievement_data.achievements[i].completed = value;
+	else if (type == ACHIEVEINFO_GOTREWARD)
+		sd->achievement_data.achievements[i].rewarded = value;
+	else {
+		ShowWarning("buildin_achievementupdate: Unknown type '%d'.\n", type);
+		script_pushint(st,false);
+		return 1;
+	}
+
+	achievement_update_achievement(sd, achievement_id, false);
+	script_pushint(st,true);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -22348,6 +22604,13 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(delitem2,"delitem3","viiiiiiiirrr?"),
 	BUILDIN_DEF2(countitem,"countitem3","viiiiiiirrr?"),
 	BUILDIN_DEF(unloadnpc,"s"),
+	//Achievement System
+	BUILDIN_DEF(achievementinfo,"ii?"),
+	BUILDIN_DEF(achievementadd,"i?"),
+	BUILDIN_DEF(achievementremove,"i?"),
+	BUILDIN_DEF(achievementcomplete,"i?"),
+	BUILDIN_DEF(achievementexist,"i?"),
+	BUILDIN_DEF(achievementupdate,"iii?"),
 
 #include "../custom/script_def.inc"
 

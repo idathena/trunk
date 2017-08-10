@@ -650,6 +650,7 @@ extern struct Battle_Config
 	int banana_bomb_duration;
 	int guild_alliance_onlygm;
 	int event_refine_chance;
+	int feature_achievement;
 } battle_config;
 
 void do_init_battle(void);

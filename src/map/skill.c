@@ -34,6 +34,7 @@
 #include "guild.h"
 #include "date.h"
 #include "unit.h"
+#include "achievement.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -616,7 +617,7 @@ bool skill_isNotOk(uint16 skill_id, struct map_session_data *sd)
 		DIFF_TICK(gettick(), sd->canskill_tick) < sd->battle_status.amotion * battle_config.skill_amotion_leniency / 100)
 		return true;
 
-	if (skill_blockpc_get(sd, skill_id) != -1) {
+	if (skill_blockpc_get(sd, skill_id) != INVALID_TIMER) {
 		clif_skill_fail(sd, skill_id, USESKILL_FAIL_SKILLINTERVAL, 0, 0);
 		return true;
 	}
@@ -1935,8 +1936,10 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			id_ = (sd->autospell[i].id > 0 ? sd->autospell[i].id : -sd->autospell[i].id);
 			sd->state.autocast = 1;
 
-			if( skill_isNotOk(id_,sd) )
+			if( skill_isNotOk(id_,sd) ) {
+				sd->state.autocast = 0;
 				continue;
+			}
 
 			sd->state.autocast = 0;
 			lv_ = (sd->autospell[i].lv ? sd->autospell[i].lv : 1);
@@ -2002,9 +2005,8 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			}
 
 			sd->state.autocast = 0;
-			ud = unit_bl2ud(src);
 
-			if( ud ) {
+			if( (ud = unit_bl2ud(src)) ) {
 				int delay = skill_delayfix(src,id_,lv_);
 
 				if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
@@ -2065,8 +2067,10 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 		id = sd->autospell3[i].id;
 		sd->state.autocast = 1; //Set this to bypass sd->canskill_tick check
 
-		if( skill_isNotOk((id > 0 ? id : id * -1), sd) )
+		if( skill_isNotOk((id > 0 ? id : id * -1), sd) ) {
+			sd->state.autocast = 0;
 			continue;
+		}
 
 		sd->state.autocast = 0;
 
@@ -2306,8 +2310,10 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 				id = (dstsd->autospell2[i].id > 0 ? dstsd->autospell2[i].id : -dstsd->autospell2[i].id);
 				dstsd->state.autocast = 1;
 
-				if(skill_isNotOk(id,dstsd))
+				if(skill_isNotOk(id,dstsd)) {
+					dstsd->state.autocast = 0;
 					continue;
+				}
 
 				dstsd->state.autocast = 0;
 				lv = (dstsd->autospell2[i].lv ? dstsd->autospell2[i].lv : 1);
@@ -2368,9 +2374,8 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 				}
 
 				dstsd->state.autocast = 0;
-				ud = unit_bl2ud(bl);
 
-				if(ud) {
+				if((ud = unit_bl2ud(bl))) {
 					int delay = skill_delayfix(bl,id,lv);
 
 					if(DIFF_TICK(ud->canact_tick, tick + delay) < 0) {
@@ -17080,6 +17085,7 @@ void skill_weaponrefine(struct map_session_data *sd, int idx)
 				if (ep)
 					pc_equipitem(sd,idx,ep);
 				clif_misceffect(&sd->bl,3);
+				achievement_update_objective(sd,AG_REFINE_SUCCESS,2,ditem->wlv,item->refine);
 				if (item->refine == 10 &&
 					item->card[0] == CARD0_FORGE &&
 					(int)MakeDWord(item->card[2],item->card[3]) == sd->status.char_id)
@@ -17104,6 +17110,7 @@ void skill_weaponrefine(struct map_session_data *sd, int idx)
 				clif_refine(sd->fd,1,idx,item->refine);
 				pc_delitem(sd,idx,1,0,2,LOG_TYPE_OTHER);
 				clif_misceffect(&sd->bl,2);
+				achievement_update_objective(sd,AG_REFINE_FAIL,1,1);
 				clif_emotion(&sd->bl,E_OMG);
 			}
 		}

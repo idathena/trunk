@@ -45,6 +45,7 @@
 #include "quest.h"
 #include "cashshop.h"
 #include "channel.h"
+#include "achievement.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2847,7 +2848,7 @@ void clif_equiplist(struct map_session_data *sd)
 	buf = WFIFOP(fd,0);
 
 	for( i = 0, n = 0; i < MAX_INVENTORY; i++ ) {
-		if( sd->inventory.u.items_inventory[i].nameid <= 0 || sd->inventory_data[i] == NULL )
+		if( sd->inventory.u.items_inventory[i].nameid <= 0 || !sd->inventory_data[i] )
 			continue;
 		if( itemdb_isstackable2(sd->inventory_data[i]) )
 			continue;
@@ -9553,7 +9554,7 @@ void clif_name(struct block_list *src, struct block_list *bl, send_target target
 					safestrncpy((char *)WBUFP(buf,6), sd->fakename, NAME_LENGTH);
 					WBUFB(buf,30) = WBUFB(buf,54) = WBUFB(buf,78) = 0;
 #if PACKETVER >= 20150513
-					WBUFL(buf,102) = 0; //Title ID
+					WBUFL(buf,102) = 0;
 #endif
 					break;
 				}
@@ -9578,7 +9579,7 @@ void clif_name(struct block_list *src, struct block_list *bl, send_target target
 					WBUFB(buf,78) = 0;
 				}
 #if PACKETVER >= 20150513
-				WBUFL(buf,102) = 0;
+				WBUFL(buf,102) = sd->status.title_id; //Title ID
 #endif
 			}
 			break;
@@ -9632,7 +9633,7 @@ void clif_name(struct block_list *src, struct block_list *bl, send_target target
 					WBUFB(buf,78) = 0;
 				}
 #if PACKETVER >= 20150513
-				WBUFL(buf,102) = 0;
+				WBUFL(buf,102) = 0; //Title ID
 #endif
 			}
 			break;
@@ -10491,8 +10492,38 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		//Notify everyone that this char logged in [Skotlex]
 		map_foreachpc(clif_friendslist_toggle_sub,sd->status.account_id,sd->status.char_id,1);
 		sd->idletime = last_tick; //Set the initial idle time
-		if(!sd->state.autotrade) //Don't trigger NPC event or opening vending/buyingstore will be failed
+		if(!sd->state.autotrade) { //Don't trigger NPC event or opening vending/buyingstore will be failed
+			int i;
+
 			npc_script_event(sd,NPCE_LOGIN); //Login Event
+			achievement_update_objective(sd,AG_GOAL_LEVEL,1,sd->status.base_level);
+			achievement_update_objective(sd,AG_GOAL_LEVEL,1,sd->status.job_level);
+			achievement_update_objective(sd,AG_JOB_CHANGE,1,sd->status.class_);
+			achievement_update_objective(sd,AG_GOAL_STATUS,1,sd->status.str);
+			achievement_update_objective(sd,AG_GOAL_STATUS,1,sd->status.agi);
+			achievement_update_objective(sd,AG_GOAL_STATUS,1,sd->status.vit);
+			achievement_update_objective(sd,AG_GOAL_STATUS,1,sd->status.int_);
+			achievement_update_objective(sd,AG_GOAL_STATUS,1,sd->status.dex);
+			achievement_update_objective(sd,AG_GOAL_STATUS,1,sd->status.luk);
+			achievement_update_objective(sd,AG_GOAL_STATUS,2,sd->status.base_level,sd->status.class_);
+			ARR_FIND(0,MAX_FRIENDS,i,sd->status.friends[i].char_id == 0);
+			if(i < MAX_FRIENDS)
+				achievement_update_objective(sd,AG_ADD_FRIEND,1,i);
+			if(sd->status.party_id) {
+				struct party_data *p = party_search(sd->status.party_id);
+
+				ARR_FIND(0,MAX_PARTY,i,p->data[i].sd == sd);
+				if(i < MAX_PARTY && p->party.member[i].leader)
+					achievement_update_objective(sd,AG_PARTY,1,1);
+			}
+			if(sd->status.partner_id)
+				achievement_update_objective(sd,AG_MARRY,1,1);
+			if(sd->status.father || sd->status.mother)
+				achievement_update_objective(sd,AG_BABY,1,1);
+			if(sd->status.child)
+				achievement_update_objective(sd,AG_BABY,1,2);
+			achievement_update_objective(sd,AG_GET_ZENY,1,sd->status.zeny);
+		}
 	} else {
 		//For some reason the client "loses" these on warp/map-change
 		clif_updatestatus(sd,SP_STR);
@@ -10951,6 +10982,7 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data *sd)
 
 	//Chat logging type 'O' / Global Chat
 	log_chat(LOG_CHAT_GLOBAL, 0, sd->status.char_id, sd->status.account_id, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y, NULL, message);
+	//achievement_update_objective(sd, AG_CHAT, 1, sd->bl.m); //@TODO: What's the official use of this achievement type?
 }
 
 
@@ -12250,6 +12282,7 @@ static void clif_parse_UseSkillToPosSub(int fd, struct map_session_data *sd, uin
 
 	if( skill_isNotOk(skill_id, sd) )
 		return;
+
 	if( skillmoreinfo != -1 ) {
 		if( pc_issit(sd) ) {
 			clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
@@ -14346,13 +14379,13 @@ void clif_parse_NoviceExplosionSpirits(int fd, struct map_session_data *sd)
 	//Game client is currently broken on this (not sure the packetver range)
 	//It sends the request when the criteria doesn't match (and of course we let it fail)
 	//So restoring the old parse_globalmes method
-	if( (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE ) {
+	if ((sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE) {
 		unsigned int exp = pc_nextbaseexp(sd);
 
-		if( exp ) {
+		if (exp) {
 			int percent = (int)(((float)sd->status.base_exp / (float)exp) * 1000.);
 
-			if( percent && !(percent%100) ) { //10.0%, 20.0%, ..., 90.0%
+			if (percent && !(percent%100)) { //10.0%, 20.0%, ..., 90.0%
 				sc_start(&sd->bl, &sd->bl, status_skill2sc(MO_EXPLOSIONSPIRITS), 100, 17, skill_get_time(MO_EXPLOSIONSPIRITS, 5)); //Lv17-> +50 critical (noted by Poki) [Skotlex]
 				clif_skill_nodamage(&sd->bl, &sd->bl, MO_EXPLOSIONSPIRITS, 5, 1); //Prayer always shows successful Lv5 cast and disregards noskill restrictions
 			}
@@ -14373,27 +14406,28 @@ void clif_friendslist_toggle(struct map_session_data *sd,int account_id, int cha
 {
 	int i, fd = sd->fd;
 
-	//Seek friend.
+	//Seek friend
 	for (i = 0; i < MAX_FRIENDS && sd->status.friends[i].char_id &&
 		(sd->status.friends[i].char_id != char_id || sd->status.friends[i].account_id != account_id); i++);
 
-	if(i == MAX_FRIENDS || sd->status.friends[i].char_id == 0)
+	if (i == MAX_FRIENDS || !sd->status.friends[i].char_id)
 		return; //Not found
 
 	WFIFOHEAD(fd,packet_len(0x206));
-	WFIFOW(fd, 0) = 0x206;
-	WFIFOL(fd, 2) = sd->status.friends[i].account_id;
-	WFIFOL(fd, 6) = sd->status.friends[i].char_id;
-	WFIFOB(fd,10) = !online; //Yeah, a 1 here means "logged off", go figure...
+	WFIFOW(fd,0) = 0x206;
+	WFIFOL(fd,2) = sd->status.friends[i].account_id;
+	WFIFOL(fd,6) = sd->status.friends[i].char_id;
+	WFIFOB(fd,10) = (online == 0); //Yeah, a 1 here means "logged off", go figure...
 	WFIFOSET(fd,packet_len(0x206));
 }
 
 
 //Subfunction called from clif_foreachclient to toggle friends on/off [Skotlex]
-int clif_friendslist_toggle_sub(struct map_session_data *sd,va_list ap)
+int clif_friendslist_toggle_sub(struct map_session_data *sd, va_list ap)
 {
 	int account_id, char_id, online;
 	account_id = va_arg(ap, int);
+
 	char_id = va_arg(ap, int);
 	online = va_arg(ap, int);
 	clif_friendslist_toggle(sd, account_id, char_id, online);
@@ -14406,11 +14440,11 @@ int clif_friendslist_toggle_sub(struct map_session_data *sd,va_list ap)
 void clif_friendslist_send(struct map_session_data *sd)
 {
 	int i = 0, n, fd = sd->fd;
-	
-	// Send friends list
+
+	//Send friends list
 	WFIFOHEAD(fd,MAX_FRIENDS * 32 + 4);
 	WFIFOW(fd,0) = 0x201;
-	for(i = 0; i < MAX_FRIENDS && sd->status.friends[i].char_id; i++) {
+	for (i = 0; i < MAX_FRIENDS && sd->status.friends[i].char_id; i++) {
 		WFIFOL(fd,4 + 32 * i + 0) = sd->status.friends[i].account_id;
 		WFIFOL(fd,4 + 32 * i + 4) = sd->status.friends[i].char_id;
 		memcpy(WFIFOP(fd,4 + 32 * i + 8), &sd->status.friends[i].name, NAME_LENGTH);
@@ -14420,7 +14454,7 @@ void clif_friendslist_send(struct map_session_data *sd)
 		WFIFOW(fd,2) = 4 + 32 * i;
 		WFIFOSET(fd,WFIFOW(fd,2));
 	}
-	
+
 	for (n = 0; n < i; n++) { //Sending the online players
 		if (map_charid2sd(sd->status.friends[n].char_id))
 			clif_friendslist_toggle(sd, sd->status.friends[n].account_id, sd->status.friends[n].char_id, 1);
@@ -14447,7 +14481,7 @@ void clif_friendslist_reqack(struct map_session_data *sd, struct map_session_dat
 	if (f_sd) {
 		WFIFOL(fd,4) = f_sd->status.account_id;
 		WFIFOL(fd,8) = f_sd->status.char_id;
-		memcpy(WFIFOP(fd, 12), f_sd->status.name,NAME_LENGTH);
+		memcpy(WFIFOP(fd,12), f_sd->status.name,NAME_LENGTH);
 	}
 	WFIFOSET(fd,packet_len(0x209));
 }
@@ -14477,32 +14511,28 @@ void clif_parse_FriendsListAdd(int fd, struct map_session_data *sd)
 
 	f_sd = map_nick2sd((char *)RFIFOP(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]));
 
-	// ensure that the request player's friend list is not full
+	//Ensure that the request player's friend list is not full
 	ARR_FIND(0, MAX_FRIENDS, i, sd->status.friends[i].char_id == 0);
 
-	if( i == MAX_FRIENDS ) {
+	if (i == MAX_FRIENDS) {
 		clif_friendslist_reqack(sd, f_sd, 2);
 		return;
 	}
 
-	// Friend doesn't exist (no player with this name)
-	if (f_sd == NULL) {
+	if (!f_sd) { //Friend doesn't exist (no player with this name)
 		clif_displaymessage(fd, msg_txt(3));
 		return;
 	}
 
-	if( sd->bl.id == f_sd->bl.id ) { // adding oneself as friend
+	if (sd->bl.id == f_sd->bl.id) //Adding oneself as friend
 		return;
-	}
 
-	// @noask [LuzZza]
-	if(f_sd->state.noask) {
+	if (f_sd->state.noask) { //@noask [LuzZza]
 		clif_noask_sub(sd, f_sd, 5);
 		return;
 	}
 
-	// Friend already exists
-	for (i = 0; i < MAX_FRIENDS && sd->status.friends[i].char_id != 0; i++) {
+	for (i = 0; i < MAX_FRIENDS && sd->status.friends[i].char_id != 0; i++) { //Friend already exists
 		if (sd->status.friends[i].char_id == f_sd->status.char_id) {
 			clif_displaymessage(fd, msg_txt(671)); // "Friend already exists."
 			return;
@@ -14510,7 +14540,7 @@ void clif_parse_FriendsListAdd(int fd, struct map_session_data *sd)
 	}
 
 	f_sd->friend_req = sd->status.char_id;
-	sd->friend_req   = f_sd->status.char_id;
+	sd->friend_req = f_sd->status.char_id;
 
 	clif_friendlist_req(f_sd, sd->status.account_id, sd->status.char_id, sd->status.name);
 }
@@ -14531,54 +14561,52 @@ void clif_parse_FriendsListReply(int fd, struct map_session_data *sd)
 
 	account_id = RFIFOL(fd,info->pos[0]);
 	//char_id = RFIFOL(fd,info->pos[1]);
-	if(sd->packet_ver < 6)
+	if (sd->packet_ver < 6)
 		reply = RFIFOB(fd,info->pos[2]);
 	else
 		reply = RFIFOL(fd,info->pos[2]);
 
-	if( sd->bl.id == account_id ) { // adding oneself as friend
+	if (sd->bl.id == account_id) //Adding oneself as friend
 		return;
-	}
 
-	f_sd = map_id2sd(account_id); //The account id is the same as the bl.id of players.
-	if (f_sd == NULL)
+	//The account id is the same as the bl.id of players
+	if (!(f_sd = map_id2sd(account_id)))
 		return;
-		
-	if (reply == 0 || !( sd->friend_req == f_sd->status.char_id && f_sd->friend_req == sd->status.char_id ) )
+
+	if (!reply || !(sd->friend_req == f_sd->status.char_id && f_sd->friend_req == sd->status.char_id))
 		clif_friendslist_reqack(f_sd, sd, 1);
 	else {
 		int i;
-		// Find an empty slot
-		for (i = 0; i < MAX_FRIENDS; i++)
-			if (f_sd->status.friends[i].char_id == 0)
+
+		for (i = 0; i < MAX_FRIENDS; i++) { //Find an empty slot
+			if (!f_sd->status.friends[i].char_id)
 				break;
+		}
 		if (i == MAX_FRIENDS) {
 			clif_friendslist_reqack(f_sd, sd, 2);
 			return;
 		}
-
 		f_sd->status.friends[i].account_id = sd->status.account_id;
 		f_sd->status.friends[i].char_id = sd->status.char_id;
 		memcpy(f_sd->status.friends[i].name, sd->status.name, NAME_LENGTH);
 		clif_friendslist_reqack(f_sd, sd, 0);
-
-		if (battle_config.friend_auto_add) {
-			// Also add f_sd to sd's friendlist.
+		achievement_update_objective(f_sd, AG_ADD_FRIEND, 1, i + 1);
+		if (battle_config.friend_auto_add) { //Also add f_sd to sd's friendlist
 			for (i = 0; i < MAX_FRIENDS; i++) {
 				if (sd->status.friends[i].char_id == f_sd->status.char_id)
-					return; //No need to add anything.
-				if (sd->status.friends[i].char_id == 0)
+					return; //No need to add anything
+				if (!sd->status.friends[i].char_id)
 					break;
 			}
 			if (i == MAX_FRIENDS) {
 				clif_friendslist_reqack(sd, f_sd, 2);
 				return;
 			}
-
 			sd->status.friends[i].account_id = f_sd->status.account_id;
 			sd->status.friends[i].char_id = f_sd->status.char_id;
 			memcpy(sd->status.friends[i].name, f_sd->status.name, NAME_LENGTH);
 			clif_friendslist_reqack(sd, f_sd, 0);
+			achievement_update_objective(sd, AG_ADD_FRIEND, 1, i + 1);
 		}
 	}
 }
@@ -14596,7 +14624,7 @@ void clif_parse_FriendsListRemove(int fd, struct map_session_data *sd)
 	account_id = RFIFOL(fd,info->pos[0]);
 	char_id = RFIFOL(fd,info->pos[1]);
 
-	// Search friend
+	//Search friend
 	for (i = 0; i < MAX_FRIENDS &&
 		(sd->status.friends[i].char_id != char_id || sd->status.friends[i].account_id != account_id); i++);
 
@@ -14605,40 +14633,37 @@ void clif_parse_FriendsListRemove(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	//remove from friend's list first
-	if( (f_sd = map_id2sd(account_id)) && f_sd->status.char_id == char_id) {
+	//Remove from friend's list first
+	if ((f_sd = map_id2sd(account_id)) && f_sd->status.char_id == char_id) {
 		for (i = 0; i < MAX_FRIENDS &&
 			(f_sd->status.friends[i].char_id != sd->status.char_id || f_sd->status.friends[i].account_id != sd->status.account_id); i++);
-
 		if (i != MAX_FRIENDS) {
-			// move all chars up
-			for(j = i + 1; j < MAX_FRIENDS; j++)
-				memcpy(&f_sd->status.friends[j-1], &f_sd->status.friends[j], sizeof(f_sd->status.friends[0]));
-
-			memset(&f_sd->status.friends[MAX_FRIENDS-1], 0, sizeof(f_sd->status.friends[MAX_FRIENDS-1]));
+			//Move all chars up
+			for (j = i + 1; j < MAX_FRIENDS; j++)
+				memcpy(&f_sd->status.friends[j - 1], &f_sd->status.friends[j], sizeof(f_sd->status.friends[0]));
+			memset(&f_sd->status.friends[MAX_FRIENDS - 1], 0, sizeof(f_sd->status.friends[MAX_FRIENDS - 1]));
 			//should the guy be notified of some message? we should add it here if so
 			WFIFOHEAD(f_sd->fd,packet_len(0x20a));
 			WFIFOW(f_sd->fd,0) = 0x20a;
 			WFIFOL(f_sd->fd,2) = sd->status.account_id;
 			WFIFOL(f_sd->fd,6) = sd->status.char_id;
-			WFIFOSET(f_sd->fd, packet_len(0x20a));
+			WFIFOSET(f_sd->fd,packet_len(0x20a));
 		}
-
-	} else { //friend not online -- ask char server to delete from his friendlist
-		if(chrif_removefriend(char_id,sd->status.char_id)) { // char-server offline, abort
+	} else { //Friend not online -- ask char server to delete from his friendlist
+		if (chrif_removefriend(char_id, sd->status.char_id)) { //Char-server offline, abort
 			clif_displaymessage(fd, msg_txt(673)); // "This action can't be performed at the moment. Please try again later."
 			return;
 		}
 	}
 
-	// We can now delete from original requester
+	//We can now delete from original requester
 	for (i = 0; i < MAX_FRIENDS &&
 		(sd->status.friends[i].char_id != char_id || sd->status.friends[i].account_id != account_id); i++);
-	// move all chars up
-	for(j = i + 1; j < MAX_FRIENDS; j++)
-		memcpy(&sd->status.friends[j-1], &sd->status.friends[j], sizeof(sd->status.friends[0]));
+	//Move all chars up
+	for (j = i + 1; j < MAX_FRIENDS; j++)
+		memcpy(&sd->status.friends[j - 1], &sd->status.friends[j], sizeof(sd->status.friends[0]));
 
-	memset(&sd->status.friends[MAX_FRIENDS-1], 0, sizeof(sd->status.friends[MAX_FRIENDS-1]));
+	memset(&sd->status.friends[MAX_FRIENDS - 1], 0, sizeof(sd->status.friends[MAX_FRIENDS - 1]));
 	clif_displaymessage(fd, msg_txt(674)); // "Friend removed"
 
 	WFIFOHEAD(fd,packet_len(0x20a));
@@ -19057,9 +19082,9 @@ void clif_clan_onlinecount(struct clan *clan) {
 }
 
 /**
-* Notifies the client that the player has left his clan.
-* 0989 (ZC_ACK_CLAN_LEAVE)
-**/
+ * Notifies the client that the player has left his clan.
+ * 0989 (ZC_ACK_CLAN_LEAVE)
+ */
 void clif_clan_leave(struct map_session_data *sd) {
 #if PACKETVER >= 20131223
 	int fd;
@@ -19075,6 +19100,60 @@ void clif_clan_leave(struct map_session_data *sd) {
 	WFIFOW(fd,0) = 0x989;
 	WFIFOSET(fd,2);
 #endif
+}
+
+
+/**
+ * Acknowledge the client about change title result (ZC_ACK_CHANGE_TITLE).
+ * 0A2F <result>.B <title_id>.L
+ */
+void clif_change_title_ack(struct map_session_data *sd, unsigned char result, unsigned long title_id)
+{
+#if PACKETVER >= 20150513
+	int fd;
+
+	nullpo_retv(sd);
+
+	if( !clif_session_isValid(sd) )
+		return;
+
+	fd = sd->fd;
+
+	WFIFOHEAD(fd,packet_len(0xa2f));
+	WFIFOW(fd,0) = 0xa2f;
+	WFIFOB(fd,2) = result;
+	WFIFOL(fd,3) = title_id;
+	WFIFOSET(fd,packet_len(0xa2f));
+#endif
+}
+
+/**
+ * Parsing a request from the client change title (CZ_REQ_CHANGE_TITLE).
+ * 0A2E <title_id>.L
+ */
+void clif_parse_change_title(int fd, struct map_session_data *sd)
+{
+	int title_id, i;
+
+	nullpo_retv(sd);
+
+	title_id = RFIFOL(fd,2);
+
+	if( title_id == sd->status.title_id ) //It is exactly the same as the old one
+		return;
+	else if( title_id <= 0 )
+		sd->status.title_id = 0;
+	else {
+		ARR_FIND(0, sd->titleCount, i, sd->titles[i] == title_id);
+		if( i == sd->titleCount ) {
+			clif_change_title_ack(sd, 1, title_id);
+			return;
+		}
+		sd->status.title_id = title_id;
+	}
+
+	clif_name_area(&sd->bl);
+	clif_change_title_ack(sd, 0, title_id);
 }
 
 
@@ -19990,6 +20069,107 @@ void clif_progressbar_npc(struct npc_data *nd, struct map_session_data *sd) {
 }
 
 
+/// Achievement System
+/// Author: Luxuri, Aleos
+
+/**
+ * Sends all achievement data to the client (ZC_ALL_AG_LIST).
+ * 0a23 <packetType>.W <packetLength>.W <ACHCount>.L <ACHPoint>.L
+ */
+void clif_achievement_list_all(struct map_session_data *sd)
+{
+	int i, j, len, fd, *info;
+	uint16 count = 0;
+
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	count = sd->achievement_data.count; //All achievements should be sent to the client
+	len = 50 * count + 22;
+
+	if( len <= 22 )
+		return;
+
+	info = achievement_level(sd, true);
+
+	WFIFOHEAD(fd,len);
+	WFIFOW(fd,0) = 0xa23;
+	WFIFOW(fd,2) = len;
+	WFIFOL(fd,4) = count; //Amount of achievements the player has in their list (started/completed)
+	WFIFOL(fd,8) = sd->achievement_data.total_score; //Top number
+	WFIFOW(fd,12) = sd->achievement_data.level; //Achievement Level (gold circle)
+	WFIFOL(fd,14) = info[0]; //Achievement EXP (left number in bar)
+	WFIFOL(fd,18) = info[1]; //Achievement EXP TNL (right number in bar)
+	for( i = 0; i < count; i++ ) {
+		WFIFOL(fd,i * 50 + 22) = (uint32)sd->achievement_data.achievements[i].achievement_id;
+		WFIFOB(fd,i * 50 + 26) = ((uint32)sd->achievement_data.achievements[i].completed > 0);
+		for( j = 0; j < MAX_ACHIEVEMENT_OBJECTIVES; j++ )
+			WFIFOL(fd,i * 50 + 27 + j * 4) = (uint32)sd->achievement_data.achievements[i].count[j];
+		WFIFOL(fd,i * 50 + 67) = (uint32)sd->achievement_data.achievements[i].completed;
+		WFIFOB(fd,i * 50 + 71) = (sd->achievement_data.achievements[i].rewarded > 0);
+	}
+	WFIFOSET(fd,len);
+}
+
+/**
+ * Sends a single achievement's data to the client (ZC_AG_UPDATE).
+ * 0a24 <packetType>.W <ACHPoint>.L
+ */
+void clif_achievement_update(struct map_session_data *sd, struct achievement *ach, int count)
+{
+	int fd, i, *info;
+
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	info = achievement_level(sd, true);
+
+	WFIFOHEAD(fd,packet_len(0xa24));
+	WFIFOW(fd,0) = 0xa24;
+	WFIFOL(fd,2) = sd->achievement_data.total_score; //Total Achievement Points (top of screen)
+	WFIFOW(fd,6) = sd->achievement_data.level; //Achievement Level (gold circle)
+	WFIFOL(fd,8) = info[0]; //Achievement EXP (left number in bar)
+	WFIFOL(fd,12) = info[1]; //Achievement EXP TNL (right number in bar)
+	if( ach ) {
+		WFIFOL(fd,16) = ach->achievement_id; //Achievement ID
+		WFIFOB(fd,20) = (ach->completed > 0); //Is it complete?
+		for( i = 0; i < MAX_ACHIEVEMENT_OBJECTIVES; i++ )
+			WFIFOL(fd,i * 4 + 21) = (uint32)ach->count[i]; //1~10 pre-reqs
+		WFIFOL(fd,61) = (uint32)ach->completed; //Epoch time
+		WFIFOB(fd,65) = (ach->rewarded > 0); //Got reward?
+	} else
+		memset(WFIFOP(fd,16), 0, 40);
+	WFIFOSET(fd,packet_len(0xa24));
+}
+
+/**
+ * Checks if an achievement reward can be rewarded (CZ_REQ_AG_REWARD).
+ * 0a25 <packetType>.W <achievementID>.L
+ */
+void clif_parse_AchievementCheckReward(int fd, struct map_session_data *sd)
+{
+	nullpo_retv(sd);
+
+	if( sd->achievement_data.save )
+		intif_achievement_save(sd);
+
+	achievement_check_reward(sd, RFIFOL(fd,2));
+}
+
+/**
+ * Returns the result of achievement_check_reward (ZC_REQ_AG_REWARD_ACK).
+ * 0a26 <packetType>.W <result>.W <achievementID>.L
+ */
+void clif_achievement_reward_ack(int fd, unsigned char result, int achievement_id)
+{
+	WFIFOHEAD(fd,packet_len(0xa26));
+	WFIFOW(fd,0) = 0xa26;
+	WFIFOB(fd,2) = result;
+	WFIFOL(fd,3) = achievement_id;
+	WFIFOSET(fd,packet_len(0xa26));
+}
+
+
 #ifdef DUMP_UNKNOWN_PACKET
 void DumpUnknow(int fd,TBL_PC *sd,int cmd,int packet_len) {
 	const char *packet_txt = "save/packet.txt";
@@ -20419,7 +20599,7 @@ void packetdb_readdb(bool reload)
 	  269,  0,  0,  2,  6, 48,  6,  9, 26, 45, 47, 47, 56, -1, 14,  0,
 #endif
 	   -1,  0, 27, 26, 10,  0,  0,  0, 14,  2, 23,  2, -1,  2,  3,  2,
-	   21,  3,  5,  0, 66,  0,  0,  8,  3,  0,  0, -1,  0, -1,  0,  0,
+	   21,  3,  5, -1, 66,  6,  7,  8,  3,  0,  0, -1,  0, -1,  6,  7,
 	  106,  0,  0,  0,  0,  4,  0, 59,  0,  0,  0,  0,  0,  0,  0,  0,
 	//#0x0A40
 		0,  0,  0, 85, -1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -20689,6 +20869,10 @@ void packetdb_readdb(bool reload)
 		{clif_parse_sale_open,"saleopen"},
 		{clif_parse_sale_close,"saleclose"},
 		{clif_parse_sale_refresh,"salerefresh"},
+		//Achievement System
+		{clif_parse_AchievementCheckReward,"achievementcheckreward"},
+		//Title System
+		{clif_parse_change_title,"changetitle"},
 		{NULL,NULL}
 	};
 	struct {

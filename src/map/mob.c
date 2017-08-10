@@ -35,6 +35,7 @@
 #include "atcommand.h"
 #include "date.h"
 #include "quest.h"
+#include "achievement.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -2762,6 +2763,9 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			else if(sd->avail_quests)
 				quest_update_objective(sd, md->mob_id);
 
+			if(achievement_mobexists(md->mob_id))
+				achievement_update_objective(sd, AG_BATTLE, 1, md->mob_id);
+
 			if(sd->md && src && src->type == BL_MER && mob_db(md->mob_id)->lv > sd->status.base_level / 2)
 				mercenary_kills(sd->md);
 		}
@@ -5068,21 +5072,22 @@ static void mob_load(void)
 	mob_read_randommonster();
 }
 
-void mob_reload(void) {
-	int i;
-
-	//Mob skills need to be cleared before re-reading them. [Skotlex]
-	for (i = 0; i < MAX_MOB_DB; i++) {
-		if (mob_db_data[i] && !mob_is_clone(i)) {
-			memset(&mob_db_data[i]->skill,0,sizeof(mob_db_data[i]->skill));
-			mob_db_data[i]->maxskill = 0;
-		}
-	}
-
-	mob_item_drop_ratio->clear(mob_item_drop_ratio, mob_item_drop_ratio_free); //Clear item_drop_ratio_db
-	mob_skill_db->clear(mob_skill_db, mob_skill_db_free);
-	mob_summon_db->clear(mob_summon_db, mob_summon_db_free);
+void mob_db_load(void) {
+	memset(mob_db_data, 0, sizeof(mob_db_data)); //Clear the array
+	mob_db_data[0] = (struct mob_db *)aCalloc(1, sizeof (struct mob_db)); //This mob is used for random spawns
+	mob_makedummymobdb(0); //The first time this is invoked, it creates the dummy mob
+	item_drop_ers = ers_new(sizeof(struct item_drop), "mob.c::item_drop_ers", ERS_OPT_NONE);
+	item_drop_list_ers = ers_new(sizeof(struct item_drop_list), "mob.c::item_drop_list_ers", ERS_OPT_NONE);
+	mob_sc_display_ers = ers_new(sizeof(struct sc_display_entry), "mob.c:mob_sc_display_ers", ERS_OPT_NONE);
+	mob_item_drop_ratio = idb_alloc(DB_OPT_BASE);
+	mob_skill_db = idb_alloc(DB_OPT_BASE);
+	mob_summon_db = idb_alloc(DB_OPT_BASE);
 	mob_load();
+}
+
+void mob_reload(void) {
+	do_final_mob();
+	mob_db_load();
 }
 
 void mob_clear_spawninfo() { //Clear spawn related information for a script reload.
@@ -5090,7 +5095,7 @@ void mob_clear_spawninfo() { //Clear spawn related information for a script relo
 
 	for (i = 0; i < MAX_MOB_DB; i++)
 		if (mob_db_data[i])
-			memset(&mob_db_data[i]->spawn,0,sizeof(mob_db_data[i]->spawn));
+			memset(&mob_db_data[i]->spawn, 0, sizeof(mob_db_data[i]->spawn));
 }
 
 /*==========================================
@@ -5098,27 +5103,18 @@ void mob_clear_spawninfo() { //Clear spawn related information for a script relo
  *------------------------------------------*/
 void do_init_mob(void)
 { //Initialize the mob database
-	memset(mob_db_data,0,sizeof(mob_db_data)); //Clear the array
-	mob_db_data[0] = (struct mob_db *)aCalloc(1, sizeof (struct mob_db));	//This mob is used for random spawns
-	mob_makedummymobdb(0); //The first time this is invoked, it creates the dummy mob
-	item_drop_ers = ers_new(sizeof(struct item_drop),"mob.c::item_drop_ers",ERS_OPT_NONE);
-	item_drop_list_ers = ers_new(sizeof(struct item_drop_list),"mob.c::item_drop_list_ers",ERS_OPT_NONE);
-	mob_sc_display_ers = ers_new(sizeof(struct sc_display_entry),"mob.c:mob_sc_display_ers",ERS_OPT_NONE);
-	mob_item_drop_ratio = idb_alloc(DB_OPT_BASE);
-	mob_skill_db = idb_alloc(DB_OPT_BASE);
-	mob_summon_db = idb_alloc(DB_OPT_BASE);
-	mob_load();
+	mob_db_load();
 
-	add_timer_func_list(mob_delayspawn,"mob_delayspawn");
-	add_timer_func_list(mob_delay_item_drop,"mob_delay_item_drop");
-	add_timer_func_list(mob_ai_hard,"mob_ai_hard");
-	add_timer_func_list(mob_ai_lazy,"mob_ai_lazy");
-	add_timer_func_list(mob_timer_delete,"mob_timer_delete");
-	add_timer_func_list(mob_spawn_guardian_sub,"mob_spawn_guardian_sub");
-	add_timer_func_list(mob_respawn,"mob_respawn");
-	add_timer_func_list(mvptomb_delayspawn,"mvptomb_delayspawn");
-	add_timer_interval(gettick() + MIN_MOBTHINKTIME,mob_ai_hard,0,0,MIN_MOBTHINKTIME);
-	add_timer_interval(gettick() + MIN_MOBTHINKTIME * 10,mob_ai_lazy,0,0,MIN_MOBTHINKTIME * 10);
+	add_timer_func_list(mob_delayspawn, "mob_delayspawn");
+	add_timer_func_list(mob_delay_item_drop, "mob_delay_item_drop");
+	add_timer_func_list(mob_ai_hard, "mob_ai_hard");
+	add_timer_func_list(mob_ai_lazy, "mob_ai_lazy");
+	add_timer_func_list(mob_timer_delete, "mob_timer_delete");
+	add_timer_func_list(mob_spawn_guardian_sub, "mob_spawn_guardian_sub");
+	add_timer_func_list(mob_respawn, "mob_respawn");
+	add_timer_func_list(mvptomb_delayspawn, "mvptomb_delayspawn");
+	add_timer_interval(gettick() + MIN_MOBTHINKTIME, mob_ai_hard, 0, 0, MIN_MOBTHINKTIME);
+	add_timer_interval(gettick() + MIN_MOBTHINKTIME * 10, mob_ai_lazy, 0, 0, MIN_MOBTHINKTIME * 10);
 }
 
 /*==========================================
@@ -5144,7 +5140,7 @@ void do_final_mob(void)
 			mob_chat_db[i] = NULL;
 		}
 	}
-	mob_item_drop_ratio->destroy(mob_item_drop_ratio,mob_item_drop_ratio_free);
+	mob_item_drop_ratio->destroy(mob_item_drop_ratio, mob_item_drop_ratio_free);
 	mob_skill_db->destroy(mob_skill_db, mob_skill_db_free);
 	mob_summon_db->destroy(mob_summon_db, mob_summon_db_free);
 	ers_destroy(item_drop_ers);

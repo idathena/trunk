@@ -75,6 +75,7 @@ char skillcooldown_db[DB_NAME_LEN] = "skillcooldown";
 char bonus_script_db[DB_NAME_LEN] = "bonus_script";
 char clan_db[DB_NAME_LEN] = "clan";
 char clan_alliance_db[DB_NAME_LEN] = "clan_alliance";
+char achievement_db[DB_NAME_LEN] = "achievement";
 
 // Show loading/saving messages
 int save_log = 1;
@@ -541,7 +542,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 		(p->rename != cp->rename) || (p->robe != cp->robe) || (p->character_moves != cp->character_moves) ||
 		(p->show_equip != cp->show_equip) || (p->allow_party != cp->allow_party) || (p->font != cp->font) ||
 		(p->uniqueitem_counter != cp->uniqueitem_counter) || (p->hotkey_rowshift != cp->hotkey_rowshift) ||
-		(p->clan_id != cp->clan_id)
+		(p->clan_id != cp->clan_id) || (p->title_id != cp->title_id)
 	) {	//Save status
 		unsigned int opt = 0;
 
@@ -558,7 +559,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 			"`weapon`='%d',`shield`='%d',`head_top`='%d',`head_mid`='%d',`head_bottom`='%d',"
 			"`last_map`='%s',`last_x`='%d',`last_y`='%d',`save_map`='%s',`save_x`='%d',`save_y`='%d',`rename`='%d',"
 			"`delete_date`='%lu',`robe`='%d',`moves`='%d',`char_opt`='%u',`font`='%u',`uniqueitem_counter`='%u',"
-			"`hotkey_rowshift`='%d',`clan_id`='%d'"
+			"`hotkey_rowshift`='%d',`clan_id`='%d',`title_id`='%lu'"
 			" WHERE `account_id`='%d' AND `char_id` = '%d'",
 			char_db, p->base_level, p->job_level,
 			p->base_exp, p->job_exp, p->zeny,
@@ -569,7 +570,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 			mapindex_id2name(p->last_point.map), p->last_point.x, p->last_point.y,
 			mapindex_id2name(p->save_point.map), p->save_point.x, p->save_point.y, p->rename,
 			(unsigned long)p->delete_date, //FIXME: platform-dependent size
-			p->robe,p->character_moves,opt,p->font,p->uniqueitem_counter,p->hotkey_rowshift,p->clan_id,
+			p->robe,p->character_moves,opt,p->font,p->uniqueitem_counter,p->hotkey_rowshift,p->clan_id,p->title_id,
 			p->account_id,p->char_id) )
 		{
 			Sql_ShowDebug(sql_handle);
@@ -1229,7 +1230,7 @@ int mmo_chars_fromsql(struct char_session_data *sd, uint8 *buf)
 		sd->char_moves[p.slot] = p.character_moves;
 	}
 
-	memset(sd->new_name,0,sizeof(sd->new_name));
+	memset(sd->new_name, 0, sizeof(sd->new_name));
 
 	SqlStmt_Free(stmt);
 	return j;
@@ -1273,7 +1274,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus *p, bool load_everything
 		"`status_point`,`skill_point`,`option`,`karma`,`manner`,`party_id`,`guild_id`,`pet_id`,`homun_id`,`elemental_id`,`hair`,"
 		"`hair_color`,`clothes_color`,`body`,`weapon`,`shield`,`head_top`,`head_mid`,`head_bottom`,`last_map`,`last_x`,`last_y`,"
 		"`save_map`,`save_x`,`save_y`,`partner_id`,`father`,`mother`,`child`,`fame`,`rename`,`delete_date`,`robe`,`moves`,"
-		"`char_opt`,`font`,`unban_time`,`uniqueitem_counter`,`sex`,`hotkey_rowshift`,`clan_id`"
+		"`char_opt`,`font`,`unban_time`,`uniqueitem_counter`,`sex`,`hotkey_rowshift`,`clan_id`,`title_id`"
 		" FROM `%s` WHERE `char_id`=? LIMIT 1", char_db)
 	||	SQL_ERROR == SqlStmt_BindParam(stmt, 0, SQLDT_INT, &char_id, 0)
 	||	SQL_ERROR == SqlStmt_Execute(stmt)
@@ -1338,6 +1339,7 @@ int mmo_char_fromsql(int char_id, struct mmo_charstatus *p, bool load_everything
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 58, SQLDT_ENUM,   &sex, sizeof(sex), NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 59, SQLDT_UCHAR,  &p->hotkey_rowshift, 0, NULL, NULL)
 	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 60, SQLDT_INT,    &p->clan_id, 0, NULL, NULL)
+	||	SQL_ERROR == SqlStmt_BindColumn(stmt, 61, SQLDT_ULONG,	&p->title_id, 0, NULL, NULL)
 	)
 	{
 		SqlStmt_ShowDebug(stmt);
@@ -1764,7 +1766,7 @@ enum e_char_del_response char_delete(struct char_session_data *sd, uint32 char_i
 	time_t delete_date;
 	char *data;
 	size_t len;
-	int i, k;
+	int i;
 
 	ARR_FIND(0, MAX_CHARS, i, sd->found_char[i] == char_id);
 	if( i == MAX_CHARS ) { //Such a character does not exist in the account
@@ -1918,6 +1920,10 @@ enum e_char_del_response char_delete(struct char_session_data *sd, uint32 char_i
 	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id` = '%d'", bonus_script_db, char_id) )
 		Sql_ShowDebug(sql_handle);
 
+	/* Achievement Data */
+	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id` = '%d'", achievement_db, char_id) )
+		Sql_ShowDebug(sql_handle);
+
 	/* Delete character */
 	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id`='%d'", char_db, char_id) )
 		Sql_ShowDebug(sql_handle);
@@ -1943,9 +1949,7 @@ enum e_char_del_response char_delete(struct char_session_data *sd, uint32 char_i
 		inter_guild_leave(guild_id, account_id, char_id); //Leave your guild.
 
 	//Refresh character list cache
-	for( k = i; k < MAX_CHARS - 1; k++ )
-		sd->found_char[k] = sd->found_char[k + 1];
-	sd->found_char[MAX_CHARS - 1] = -1;
+	sd->found_char[i] = -1;
 
 	return CHAR_DELETE_OK;
 }
@@ -4197,7 +4201,7 @@ static void char_delete2_req(int fd, struct char_session_data *sd)
 
 	char_id = RFIFOL(fd,2);
 
-	ARR_FIND( 0, MAX_CHARS, i, sd->found_char[i] == char_id );
+	ARR_FIND(0, MAX_CHARS, i, sd->found_char[i] == char_id);
 	if( i == MAX_CHARS ) { // Character not found
 		char_delete2_ack(fd, char_id, 3, 0);
 		return;
@@ -4323,7 +4327,7 @@ static void char_delete2_cancel(int fd, struct char_session_data *sd)
 
 	char_id = RFIFOL(fd,2);
 
-	ARR_FIND( 0, MAX_CHARS, i, sd->found_char[i] == char_id );
+	ARR_FIND(0, MAX_CHARS, i, sd->found_char[i] == char_id);
 	if( i == MAX_CHARS ) { // Character not found
 		char_delete2_cancel_ack(fd, char_id, 2);
 		return;
@@ -5815,6 +5819,8 @@ void sql_config_read(const char *cfgName)
 			safestrncpy(clan_db, w2, sizeof(clan_db));
 		else if(!strcmpi(w1, "clan_alliance_db"))
 			safestrncpy(clan_alliance_db, w2, sizeof(clan_alliance_db));
+		else if(!strcmpi(w1, "achievement_db"))
+			safestrncpy(achievement_db, w2, sizeof(achievement_db));
 		//Support the import command, just like any other config
 		else if(!strcmpi(w1, "import"))
 			sql_config_read(w2);

@@ -28,6 +28,7 @@
 #include "unit.h"
 #include "atcommand.h" // msg_txt()
 #include "log.h"
+#include "achievement.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -539,6 +540,7 @@ int pet_catch_process2(struct map_session_data *sd, int target_id)
 		pet_catch_rate = (pet_catch_rate*battle_config.pet_catch_rate)/100;
 
 	if(rnd()%10000 < pet_catch_rate) {
+		achievement_update_objective(sd,AG_TAMING,1,md->mob_id);
 		unit_remove_map(&md->bl,CLR_OUTSIGHT);
 		status_kill(&md->bl);
 		clif_pet_roulette(sd,1);

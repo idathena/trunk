@@ -1412,7 +1412,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 	if( tsc && tsc->count ) {
 		if( tsc->data[SC_INVINCIBLE] && !tsc->data[SC_INVINCIBLEOFF] )
 			damage += damage * 75 / 100;
-
 		if( damage > 0 ) {
 			if( flag&BF_WEAPON ) {
 				if( (sce = tsc->data[SC_POISONINGWEAPON]) && skill_id != GC_VENOMPRESSURE && rnd()%100 < sce->val3 )
@@ -8652,6 +8651,7 @@ static const struct _battle_data {
 	{ "banana_bomb_duration",               &battle_config.banana_bomb_duration,            0,      0,      UINT16_MAX,     },
 	{ "guild_alliance_onlygm",              &battle_config.guild_alliance_onlygm,           0,      0,      1,              },
 	{ "event_refine_chance",                &battle_config.event_refine_chance,             0,      0,      1,              },
+	{ "feature.achievement",                &battle_config.feature_achievement,             1,      0,      1,              },
 };
 
 /*==========================
@@ -8776,6 +8776,13 @@ void battle_adjust_conf()
 	if (battle_config.feature_roulette) {
 		ShowWarning("conf/battle/feature.conf roulette is enabled but it is not available for clients from 2015-04-01 on, disabling...\n");
 		battle_config.feature_roulette = 0;
+	}
+#endif
+
+#if PACKETVER < 20150513
+	if (battle_config.feature_achievement) {
+		ShowWarning("conf/battle/feature.conf achievement is enabled but it requires PACKETVER 2015-05-13 or newer, disabling...\n");
+		battle_config.feature_achievement = 0;
 	}
 #endif
 

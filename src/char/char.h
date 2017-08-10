@@ -137,6 +137,7 @@ extern char skillcooldown_db[DB_NAME_LEN];
 extern char bonus_script_db[DB_NAME_LEN];
 extern char clan_db[DB_NAME_LEN];
 extern char clan_alliance_db[DB_NAME_LEN];
+extern char achievement_db[DB_NAME_LEN];
 
 extern int db_use_sqldbs; //Added for sql item_db read for char server [Valaris]
 
