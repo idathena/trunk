@@ -1045,7 +1045,7 @@
 2481,11,6,1,-1,0xB,1:2:3:4:5,5,1,yes,0,0,0,weapon,0,0,	GN_SPORE_EXPLOSION,Spore Explosion
 2482,11,6,16,0,0x8,0,5,1,yes,0,0,1,weapon,1,0,	GN_WALLOFTHORN,Wall of Thorns
 2483,11,6,2,0,0x3,4,10,1,yes,0,0,0,none,0,0x1,	GN_CRAZYWEED,Crazy Weed
-2484,1,6,2,2,0,0,10,1,no,0,0x10000,0,weapon,0,0x1,	GN_CRAZYWEED_ATK,Crazy Weed Attack
+2484,1,6,2,2,0,0,10,1,no,0,0x10000,0,weapon,0,0x3,	GN_CRAZYWEED_ATK,Crazy Weed Attack
 2485,9,6,2,3,0,0,5,1,yes,0,0,1,magic,0,0,	GN_DEMONIC_FIRE,Demonic Fire
 2486,9,6,2,0,0,0,5,1,yes,0,0,0,none,0,0,	GN_FIRE_EXPANSION,Fire Expansion
 2487,1,6,2,0,0,0,1,1,no,0,0,0,none,0,0,	GN_FIRE_EXPANSION_SMOKE_POWDER,Fire Expansion Smoke Powder

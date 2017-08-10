@@ -19,6 +19,7 @@
 #include "battle.h"
 #include "log.h"
 #include "buyingstore.h" // struct s_autotrade_entry, struct s_autotrader
+#include "achievement.h"
 
 #include <stdio.h>
 #include <stdlib.h> //atoi
@@ -190,6 +191,7 @@ void vending_purchasereq(struct map_session_data *sd, int aid, int uid, const ui
 	}
 
 	pc_payzeny(sd, (int)z, LOG_TYPE_VENDING, vsd);
+	achievement_update_objective(sd, AG_SPEND_ZENY, 1, (int)z);
 	if( battle_config.vending_tax )
 		z -= z * (battle_config.vending_tax / 10000.);
 	pc_getzeny(vsd, (int)z, LOG_TYPE_VENDING, sd);

@@ -9,6 +9,7 @@
 #include "../common/random.h"
 #include "../common/socket.h"
 
+#include "achievement.h"
 #include "map.h"
 #include "path.h"
 #include "pc.h"
@@ -3044,6 +3045,8 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 					sd->hatEffectIDs = NULL;
 					sd->hatEffectCount = 0;
 				}
+				if( sd->achievement_data.achievements )
+					achievement_free(sd);
 				//Clearing
 				if( sd->bonus_script.head )
 					pc_bonus_script_clear(sd, BSF_REM_ALL);

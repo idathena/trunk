@@ -44,6 +44,7 @@
 #include "pc.h"
 #include "pc_groups.h"
 #include "quest.h"
+#include "achievement.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1005,6 +1006,10 @@ bool pc_adoption(struct map_session_data *p1_sd, struct map_session_data *p2_sd,
 		pc_skill(p1_sd, WE_CALLBABY, 1, 0);
 		pc_skill(p2_sd, WE_CALLBABY, 1, 0);
 
+		achievement_update_objective(b_sd, AG_BABY, 1, 1);
+		achievement_update_objective(p1_sd, AG_BABY, 1, 2);
+		achievement_update_objective(p2_sd, AG_BABY, 1, 2);
+
 		chrif_save(p1_sd, CSAVE_NORMAL);
 		chrif_save(p2_sd, CSAVE_NORMAL);
 		chrif_save(b_sd, CSAVE_NORMAL);
@@ -1542,6 +1547,16 @@ void pc_reg_received(struct map_session_data *sd)
 #endif
 	intif_Mail_requestinbox(sd->status.char_id, 0, MAIL_INBOX_NORMAL); //MAIL SYSTEM - Request Mail Inbox
 	intif_request_questlog(sd);
+
+	if (battle_config.feature_achievement) {
+		sd->achievement_data.total_score = 0;
+		sd->achievement_data.level = 0;
+		sd->achievement_data.save = false;
+		sd->achievement_data.count = 0;
+		sd->achievement_data.incompleteCount = 0;
+		sd->achievement_data.achievements = NULL;
+		intif_request_achievements(sd->status.char_id);
+	}
 
 	if (!sd->state.connect_new && sd->fd) { //Character already loaded map! Gotta trigger LoadEndAck manually
 		sd->state.connect_new = 1;
@@ -4248,6 +4263,8 @@ char pc_getzeny(struct map_session_data *sd, int zeny, enum e_log_pick_type type
 		clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 	}
 
+	achievement_update_objective(sd, AG_GET_ZENY, 1, sd->status.zeny);
+
 	return 0;
 }
 
@@ -4476,6 +4493,8 @@ char pc_additem(struct map_session_data *sd,struct item *item,int amount,e_log_p
 			pc_inventory_rental_add(sd, (int)seconds);
 		}
 	}
+
+	achievement_update_objective(sd, AG_GET_ITEM, 1, id->value_sell);
 
 	return ADDITEM_SUCCESS;
 }
@@ -6349,6 +6368,8 @@ int pc_checkbaselevelup(struct map_session_data *sd) {
 		party_send_levelup(sd);
 
 	pc_baselevelchanged(sd);
+	achievement_update_objective(sd, AG_GOAL_LEVEL, 1, sd->status.base_level);
+	achievement_update_objective(sd, AG_GOAL_STATUS, 2, sd->status.base_level, sd->status.class_);
 	return 1;
 }
 
@@ -6395,6 +6416,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 		clif_status_change(&sd->bl, SI_DEVIL1, 1, 0, 0, 0, 1); //Permanent blind effect from SG_DEVIL
 
 	npc_script_event(sd, NPCE_JOBLVUP);
+	achievement_update_objective(sd, AG_GOAL_LEVEL, 1, sd->status.job_level);
 	return 1;
 }
 
@@ -6850,6 +6872,8 @@ bool pc_statusup(struct map_session_data *sd, int type, int increase)
 	//Update stat value
 	clif_statusupack(sd,type,1,final_value); //Required
 	clif_updatestatus(sd,type);
+
+	achievement_update_objective(sd,AG_GOAL_STATUS,1,final_value);
 
 	return true;
 }
@@ -8451,7 +8475,7 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	if (sd->disguise)
 		pc_disguise(sd,0);
 
-	status_set_viewdata(&sd->bl, job);
+	status_set_viewdata(&sd->bl,job);
 	clif_changelook(&sd->bl,LOOK_BASE,sd->vd.class_); //Move sprite update to prevent client crashes with incompatible equipment [Valaris]
 #if PACKETVER >= 20151104
 	clif_changelook(&sd->bl,LOOK_HAIR,sd->vd.hair_style); //Update player's head (only matters when switching to or from Doram)
@@ -8472,7 +8496,7 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	if (sd->state.buyingstore)
 		buyingstore_close(sd);
 
-	map_foreachinmap(jobchange_killclone, sd->bl.m, BL_MOB, sd->bl.id);
+	map_foreachinmap(jobchange_killclone,sd->bl.m,BL_MOB,sd->bl.id);
 
 	//Remove peco/cart/falcon
 	i = sd->sc.option;
@@ -8514,6 +8538,7 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	pc_equiplookall(sd);
 	pc_show_questinfo(sd);
 	pc_update_job_and_level(sd);
+	achievement_update_objective(sd,AG_JOB_CHANGE,1,job);
 	chrif_save(sd,CSAVE_NORMAL);
 
 	//If you were previously famous, not anymore.
@@ -10097,8 +10122,12 @@ bool pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd)
 {
 	if( !sd || !dstsd || sd->status.partner_id || dstsd->status.partner_id || (sd->class_&JOBL_BABY) || (dstsd->class_&JOBL_BABY) )
 		return false;
+
 	sd->status.partner_id = dstsd->status.char_id;
 	dstsd->status.partner_id = sd->status.char_id;
+	achievement_update_objective(sd, AG_MARRY, 1, 1);
+	achievement_update_objective(dstsd, AG_MARRY, 1, 1);
+
 	return true;
 }
 
