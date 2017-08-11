@@ -40,8 +40,8 @@ alberta,118,157,3	script	Magazine Dealer Kenny::mdk	4_M_01,{
 		case 4: callsub S_Casing,(checkre(0)?13230:13207),(checkre(0)?23125:12147);
 		case 5: callsub S_Casing,(checkre(0)?13228:13203),(checkre(0)?23123:12148);
 		case 6: callsub S_Casing,13200,12149;
-		case 7: callsub S_Casing,13202,12150;
-		case 8: callsub S_Casing,13201,12151;
+		case 7: callsub S_Casing,(checkre(0)?13222:13202),(checkre(0)?22737:12150);
+		case 8: callsub S_Casing,(checkre(0)?13221:13201),(checkre(0)?22738:12151);
 		case 9: callsub S_Casing,13215,22744;
 		case 10: callsub S_Casing,13216,22745;
 		case 11: callsub S_Casing,13217,22746;
