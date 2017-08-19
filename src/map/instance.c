@@ -384,6 +384,7 @@ int instance_mapname2mapid(const char *name, short instance_id)
 	for(i = 0; i < MAX_MAP_PER_INSTANCE; i++)
 		if(im->map[i].src_m == m) {
 			char alt_name[MAP_NAME_LENGTH];
+
 			if((strchr(iname,'@') == NULL) && strlen(iname) > 8) {
 				memmove(iname, iname + (strlen(iname) - 9), strlen(iname));
 				snprintf(alt_name, sizeof(alt_name),"%d#%s", instance_id, iname);
@@ -614,7 +615,7 @@ int instance_delusers(short instance_id)
 		return 1;
 
 	// If no one is in the instance, start the idle timer
-	for(i = 0; im->map[i].m && i < MAX_MAP_PER_INSTANCE; i++)
+	for(i = 0; i < im->cnt_map && im->map[i].m; i++)
 		users += max(map[im->map[i].m].users, 0);
 
 	// We check the actual map.users before being updated, hence the 1

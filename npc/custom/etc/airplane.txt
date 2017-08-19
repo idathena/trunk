@@ -9,8 +9,8 @@
 //===== Description: =========================================
 //= It's the elRO airship. XD
 //===== Additional Comments: =================================
-//= ALWAYS HAVE AT LEAST TWELVE (12) LOCATIONS AS THE MINIMUM.  This is unless you modify to OnMinutes and change the schedule around.
-//= If you have "airplane,103,72,0	warp	airs02a	1,1,airplane,102,200" as a warp, remove it.  Where it's supposed to go, I have no clue.
+//= ALWAYS HAVE AT LEAST TWELVE (12) LOCATIONS AS THE MINIMUM. This is unless you modify to OnMinutes and change the schedule around.
+//= If you have "airplane,103,72,0	warp	airs02a	1,1,airplane,102,200" as a warp, remove it. Where it's supposed to go, I have no clue.
 //= 2.1 Removed Duplicates [Silent]
 //= 2.2 Added missing next;'s [Evera]
 //============================================================
@@ -239,7 +239,7 @@ function	script	F_Porter	{
 
 Board:
 	mes "^FF0000[Porter]^000000";
-	mes "The plane is currently ported.  Would you like to board?";
+	mes "The plane is currently ported. Would you like to board?";
 	next;
 	menu "Yes.",L_Yes,"No.",L_Nope,"View Hourly Itinerary.",Itin;
 
@@ -249,13 +249,12 @@ L_Yes:
 	specialeffect2 EF_CASTSPIN;
 L_Nope:
 	mes "^FF0000[Porter]^000000";
-	mes "Have a good day.  Thank you for traveling with Airship.";
+	mes "Have a good day. Thank you for traveling with Airship.";
 	close;
 
 Notime:
 	mes "^FF0000[Porter]^000000";
-	if(Sex==0) mes "Sorry, ma'am, but the plane currently isn't ported.  However, you can view the airplane's hourly itinerary.";
-	if(Sex==1) mes "Sorry, sir, but the plane currently isn't ported.  However, you can view the airplane's hourly itinerary.";
+	mes "Sorry, "+callfunc("F_Sex","ma'am","sir")+", but the plane currently isn't ported. However, you can view the airplane's hourly itinerary.";
 	next;
 	menu "Yes, please.",Itin,"No thanks.",L_Nope;
 	close;
@@ -348,7 +347,7 @@ airplane,102,68,5	script	Docker	852,{
 	mes "^FF0000[Airplane Attendant]^000000";
 	if($destination == 250)goto Notime;
 	set @dockky, $destination;
-	if($destination != 250)mes "We are currently docked at "+$locationsname$[$destination]+".  Would you like to exit?";
+	if($destination != 250)mes "We are currently docked at "+$locationsname$[$destination]+". Would you like to exit?";
 	next;
 	menu "Yes.",Lyes,"No.",Lnope;
 
@@ -360,13 +359,12 @@ Lyes:
 
 Lnope:
 	mes "^FF0000[Airplane Attendant]^000000";
-	mes "Have a good day.  Thank you for traveling with us.";
+	mes "Have a good day. Thank you for traveling with us.";
 	close;
 
 Notime:
 	mes "^FF0000[Airplane Attendant]^000000";
-	if(Sex==0) mes "Sorry, ma'am, but the plane currently isn't docked.  Please wait.";
-	if(Sex==1) mes "Sorry, sir, but the plane currently isn't docked.  Please wait.";
+	mes "Sorry, "+callfunc("F_Sex","ma'am","sir")+", but the plane currently isn't docked. Please wait.";
 	close;
 
 Nowhere:
@@ -376,8 +374,8 @@ Nowhere:
 }
 
 function	script	F_Itin	{
-	//This is the itinerary's function.  It should work well enough.
-	if($@currenttime==0)mes "Try again later.  A recent server reboot or rehash has messed the itinerary up for a bit.";
+	//This is the itinerary's function. It should work well enough.
+	if($@currenttime==0)mes "Try again later. A recent server reboot or rehash has messed the itinerary up for a bit.";
 	if($@currenttime==0)close;
 	if($@currenttime==0)end;
 	set @tempo, 0;
@@ -437,6 +435,6 @@ sest:
 	if($alreadygoneto[$locationn[getarg(0)]]==1)goto sest;
 	setarray $alreadygoneto[$locationn[getarg(0)]], 1;
 	set $destination,$locationn[$@currenttime];
-	announce "Pilot: The plane has arrived at "+$locationsname$[$locationn[getarg(1)]]+".  Departure to "+ $locationsname$[$locationn[getarg(2)]] + " is in 3 minutes.",16;
+	announce "Pilot: The plane has arrived at "+$locationsname$[$locationn[getarg(1)]]+". Departure to "+ $locationsname$[$locationn[getarg(2)]] + " is in 3 minutes.",16;
 	end;
 }

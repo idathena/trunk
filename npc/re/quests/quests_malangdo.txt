@@ -4187,7 +4187,7 @@ malangdo,133,134,0	script	Strange Pile of Sand#7	557,{
 				setquest .@quest;
 				if (!rand(3)) {
 					emotion e_omg;
-					getmapxy(.@map$,.@x,.@y,1);
+					getmapxy(.@map$,.@x,.@y,UNITTYPE_NPC);
 					monster .@map$,.@x,.@y,"Quick Dark Shadow",2209,1;
 				} else
 					getitem 11536,1; //Cat_Hard_Biscuit
@@ -6629,7 +6629,7 @@ mal_in01,31,210,2	script	Cat Gamers Director	549,{
 		mes "I should remember it and";
 		mes "tell it to my kids. Heh~";
 		next;
-		if (Sex == 0)
+		if (Sex == SEX_MALE)
 			setarray .@sex$[0],"Mr.","boy";
 		else
 			setarray .@sex$[0],"Miss","girl";

@@ -193,8 +193,10 @@ prt_castle,45,169,5	script	Senior Crusader	752,{
 			close;
 		}
 		mes "[Michael Halig]";
-		if (Sex) mes "If you, too, are a man of the sword, constantly train and prepare yourself. No one knows when the Holy War may begin.";
-		else mes "As a woman of the sword, you must train diligently and constantly. Prepare yourself, for no one knows when the Holy War may be coming.";
+		if (Sex == SEX_MALE)
+			mes "If you, too, are a man of the sword, constantly train and prepare yourself. No one knows when the Holy War may begin.";
+		else
+			mes "As a woman of the sword, you must train diligently and constantly. Prepare yourself, for no one knows when the Holy War may be coming.";
 		close;
 	}
 	else if(CRUS_Q >= 1 && CRUS_Q <= 3) {
@@ -305,11 +307,15 @@ prt_castle,45,169,5	script	Senior Crusader	752,{
 		mes "[Michael Halig]";
 		mes "Now you are";
 		mes "one of us!";
-		if (Sex) mes "...Brother.";
-		else mes "...Comrade.";
+		if (Sex == SEX_MALE)
+			mes "...Brother.";
+		else
+			mes "...Comrade.";
 		next;
-		if(.@JobLevel != 50) getitem 504, 6;
-		else getitem 504, 12;
+		if(.@JobLevel != 50)
+			getitem 504, 6;
+		else
+			getitem 504, 12;
 		mes "[Michael Halig]";
 		mes "And use this in times of dire peril. It will give you strength when your wounds are most grievous.";
 		next;
@@ -357,8 +363,10 @@ prt_castle,164,32,1	script	Man in Anguish	733,{
 	else if(CRUS_Q == 4) {
 		mes "What is it...?";
 		mes "Do you have business";
-		if (Sex) mes "with me, man of the sword?";
-		else mes "with me, woman of the sword?";
+		if (Sex == SEX_MALE)
+			mes "with me, man of the sword?";
+		else
+			mes "with me, woman of the sword?";
 		next;
 		if (select("I'd like to take the Crusader test.:Nothing.") == 1) {
 			mes "[Murnak Mijoul]";

@@ -3,7 +3,7 @@
 //===== By: ================================================== 
 //= Lupus, kobra_k88
 //===== Current Version: ===================================== 
-//= 2.26
+//= 2.28
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -50,6 +50,7 @@
 //= 2.25 Improved 'F_InsertComma' function. [Emistry]
 //= 2.26 Added "F_CanOpenStorage" and "F_CanChangeJob". [secretdataz]
 //= 2.27 Added "F_getpositionname". [Capuche]
+//= 2.28 Renamed 'F_SexMes' to 'F_Sex'. [exneval]
 //============================================================ 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +171,7 @@ function	script	F_Rand	{
 // Example:
 //     mes callfunc("F_Sex","What a beautiful lady!","What a handsome man!");
 //////////////////////////////////////////////////////////////////////////////////
-function	script	F_SexMes	{
+function	script	F_Sex	{
 	return getarg(Sex);
 }
 

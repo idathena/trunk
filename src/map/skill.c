@@ -16698,8 +16698,8 @@ int skill_castfix_sc(struct block_list *bl, double time, uint8 flag)
 	if( time < 0 )
 		return 0;
 
-	if( bl->type == BL_MOB ) //Mobs cast-time is fixed nothing to alter
-		return (int)time;
+	if( bl->type == BL_MOB || bl->type == BL_NPC )
+		return (int)time; //Cast time is fixed nothing to alter
 
 	if( sc && sc->count ) {
 		if( !(flag&2) ) {
@@ -16741,8 +16741,8 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 	if( time < 0 )
 		return 0;
 
-	if( bl->type == BL_MOB ) //Mobs casttime is fixed nothing to alter
-		return (int)time;
+	if( bl->type == BL_MOB || bl->type == BL_NPC )
+		return (int)time; //Cast time is fixed nothing to alter
 
 	if( fixed < 0 || !battle_config.default_fixed_castrate ) //No fixed cast time
 		fixed = 0;

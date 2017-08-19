@@ -18,11 +18,11 @@
 	close;
 
 OnInit:
-	getmapxy(.map$, .x, .y, 1);
+	getmapxy(.map$, .x, .y, UNITTYPE_NPC);
 	end;
 
 OnTouch:
-	getmapxy(.map$, .x, .y, 1);
+	getmapxy(.map$, .x, .y, UNITTYPE_NPC);
 	emotion e_scissors;
 	end;
 }

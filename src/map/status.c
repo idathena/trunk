@@ -1433,7 +1433,6 @@ int status_set_maxhp(struct block_list *bl, unsigned int maxhp, int flag)
 		status_heal(bl, maxhp - status->max_hp, 0, 1|flag);
 	else
 		status_zap(bl, status->max_hp - maxhp, 0);
-
 	status->max_hp = maxhp;
 	return maxhp;
 }
@@ -1480,7 +1479,6 @@ int status_set_maxsp(struct block_list *bl, unsigned int maxsp, int flag)
 		status_heal(bl, maxsp - status->max_sp, 0, 1|flag);
 	} else
 		status_zap(bl, status->max_sp - maxsp, 0);
-
 	status->max_sp = maxsp;
 	return maxsp;
 }
@@ -7356,9 +7354,13 @@ void status_set_viewdata(struct block_list *bl, int class_)
 		case BL_MOB: {
 				TBL_MOB *md = (TBL_MOB *)bl;
 
-				if (vd)
+				if (vd) {
+					mob_free_dynamic_viewdata(md);
 					md->vd = vd;
-				else
+				} else if (pcdb_checkid(class_)) {
+					mob_set_dynamic_viewdata(md);
+					md->vd->class_ = class_;
+				} else
 					ShowError("status_set_viewdata (MOB): No view data for class %d\n ",class_);
 			}
 			break;

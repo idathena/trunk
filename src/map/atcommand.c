@@ -2553,6 +2553,7 @@ ACMD_FUNC(param)
 		clif_updatestatus(sd, SP_USTR + i);
 		status_calc_pc(sd, SCO_FORCE);
 		clif_displaymessage(fd, msg_txt(42)); // Stat changed.
+		achievement_update_objective(sd, AG_GOAL_STATUS, 1, new_value);
 	} else {
 		if (value < 0)
 			clif_displaymessage(fd, msg_txt(41)); // Unable to decrease the number/value.
@@ -2618,6 +2619,7 @@ ACMD_FUNC(stat_all)
 			*status[i] = new_value;
 			clif_updatestatus(sd, SP_STR + i);
 			clif_updatestatus(sd, SP_USTR + i);
+			achievement_update_objective(sd, AG_GOAL_STATUS, 1, new_value);
 			count++;
 		}
 	}

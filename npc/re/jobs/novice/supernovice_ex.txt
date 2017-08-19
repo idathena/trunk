@@ -656,16 +656,22 @@ airplane,33,47,5	script	Nudor#sp2	729,{
 		mes "I can't believe it...";
 		changequest 5099,5100;
 		set Zeny, Zeny - .@n;
-		if (.@i < 5) set EXSUPNOV_Q_, .@i;
+		if (.@i < 5)
+			set EXSUPNOV_Q_, .@i;
 		else {
-			if (.@n > 1000000) set EXSUPNOV_Q_,4;
-			else if (.@n > 300000) set EX_SUPNOV_Q_,3;
-			else set EXSUPNOV_Q_,2;
+			if (.@n > 1000000)
+				set EXSUPNOV_Q_,4;
+			else if (.@n > 300000)
+				set EX_SUPNOV_Q_,3;
+			else
+				set EXSUPNOV_Q_,2;
 		}
 		next;
 		mes "[Nudor]";
-		if (Sex) mes "Did you know? You're really handsome~";
-		else mes "I need to tell you, you are really... really~ beautiful.";
+		if (Sex == SEX_MALE)
+			mes "Did you know? You're really handsome~";
+		else
+			mes "I need to tell you, you are really... really~ beautiful.";
 		next;
 		mes "[Nudor]";
 		mes "- You feel like you're being -";
