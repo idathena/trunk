@@ -18,7 +18,7 @@
 xmas,237,303,3	script	Catherine Jet Johnson	4_F_SKULL06GIRL,{
 	if (BaseLevel < 140) {
 		mes "[Catherine Jet Johnson]";
-		mes "Ah, wait! Please wait. This is not a good place for a promising young "+(Sex?"man":"woman")+" like you!";
+		mes "Ah, wait! Please wait. This is not a good place for a promising young "+callfunc("F_Sex","woman","man")+" like you!";
 		next;
 		mes "[Catherine Jet Johnson]";
 		mes "If you must, come back later after you become far stronger. Hmmm.. I would say.. Lv.140?";
@@ -1369,7 +1369,7 @@ OnAlert:
 	unittalk getnpcid(0),"Worker: Guard, Guard! Where are you?! Humans are here!!";
 	sleep 3000;
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-	getmapxy(.@map$,.@x,.@y,1);
+	getmapxy(.@map$,.@x,.@y,UNITTYPE_NPC);
 	areamonster .@map$,.@x-4,.@y-4,.@x+4,.@y+4,"Guard",2990,20,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnStart";
 	initnpctimer;
@@ -1927,8 +1927,8 @@ OnStart:
 	donpcevent instance_npcname("#finalbs2")+"::OnTalk";
 	while (1) {
 		getunitdata 'CelineKimi,.@ber;
-		set .@ber_x,.@ber[6];
-		set .@ber_y,.@ber[7];
+		set .@ber_x,.@ber[UMOB_X];
+		set .@ber_y,.@ber[UMOB_Y];
 		set .@x_rand,rand(1,20);
 		set .@y_rand,rand(1,20);
 		set .@ber_x2,.@ber_x+.@x_rand-10;
@@ -1980,8 +1980,8 @@ OnDisable:
 OnStart:
 	set .@map$,instance_mapname("1@xm_d");
 	getunitdata 'CelineKimi,.@ber;
-	set .@ber_x,.@ber[6];
-	set .@ber_y,.@ber[7];
+	set .@ber_x,.@ber[UMOB_X];
+	set .@ber_y,.@ber[UMOB_Y];
 	while (1) {
 		set .@ber_r,rand(0,2);
 		switch (atoi(charat(strnpcinfo(2),5))) {
@@ -2126,8 +2126,8 @@ OnStart:
 	set 'CelineKimi,$@mobid[0];
 	monster .@map$,226,190,"Kimi's Phantom",2997,1,instance_npcname("#finalbs2")+"::OnMyMobDead";
 	set 'CelineKimi_,$@mobid[0];
-	setunitdata 'CelineKimi,2,20000000;
-	setunitdata 'CelineKimi_,2,20000000;
+	setunitdata 'CelineKimi,UMOB_HP,20000000;
+	setunitdata 'CelineKimi_,UMOB_HP,20000000;
 	unittalk 'CelineKimi,"I don't want to be deserted. I don't want to be abandoned.";
 	initnpctimer;
 	end;
@@ -2151,8 +2151,8 @@ OnMyMobDead:
 OnTimer1000:
 	set .@map$,instance_mapname("1@xm_d");
 	getunitdata 'CelineKimi,.@ber;
-	set .@ber_x,.@ber[6];
-	set .@ber_y,.@ber[7];
+	set .@ber_x,.@ber[UMOB_X];
+	set .@ber_y,.@ber[UMOB_Y];
 	if ((.@ber_x < 211 || .@ber_x > 241 || .@ber_y < 166 || .@ber_y > 201) && (.@ber_x || .@ber_y)) {
 		mapannounce .@map$,"Celine Kimi: No! I should keep my place!",bc_map,"0xff6666",FW_NORMAL,15;
 		donpcevent instance_npcname("#finalbs2")+"::OnFail";
@@ -2167,8 +2167,8 @@ OnTimer10000:
 	if (.@mob_dead_num > 1) {
 		getunitdata 'CelineKimi,.@MOB;
 		getunitdata 'CelineKimi_,.@MOB2;
-		set .@MOB_HP1,.@MOB[2];
-		set .@MOB_HP2,.@MOB2[2];
+		set .@MOB_HP1,.@MOB[UMOB_HP];
+		set .@MOB_HP2,.@MOB2[UMOB_HP];
 		if (.@MOB_HP1 > .@MOB_HP2) {
 			set .@gp_hp,.@MOB_HP1-.@MOB_HP2;
 			if (.@gp_hp > 100000) {
@@ -2176,8 +2176,8 @@ OnTimer10000:
 				set .@MOB_HP3,.@MOB_HP1+.@set_bs_hp;
 				if (.@MOB_HP3 > 66666666)
 					set .@MOB_HP3,66666666;
-				setunitdata 'CelineKimi,2,.@MOB_HP3;
-				setunitdata 'CelineKimi_,2,.@MOB_HP3;
+				setunitdata 'CelineKimi,UMOB_HP,.@MOB_HP3;
+				setunitdata 'CelineKimi_,UMOB_HP,.@MOB_HP3;
 				donpcevent instance_npcname("#eff_f01")+"::OnStart";
 				unittalk 'CelineKimi,"You and I are the one! I will recover you!";
 				sleep 1000;
@@ -2191,8 +2191,8 @@ OnTimer10000:
 				set .@MOB_HP3,.@MOB_HP2+.@set_bs_hp;
 				if (.@MOB_HP3 > 66666666)
 					set .@MOB_HP3,66666666;
-				setunitdata 'CelineKimi,2,.@MOB_HP3;
-				setunitdata 'CelineKimi_,2,.@MOB_HP3;
+				setunitdata 'CelineKimi,UMOB_HP,.@MOB_HP3;
+				setunitdata 'CelineKimi_,UMOB_HP,.@MOB_HP3;
 				donpcevent instance_npcname("#eff_f01")+"::OnStart";
 				unittalk 'CelineKimi_,"I will restore you!!";
 				sleep 1000;
@@ -2407,7 +2407,7 @@ OnTimer1000:
 	setarray .@min[0],4,3,2,4,3,2,4,3,2,4;
 	setarray .@max[0],8,7,6,8,7,6,8,7,6,8;
 	set .@idnum,rand(.@min[.@val-1],.@max[.@val-1]);
-	getmapxy(.@map$,.@x,.@y,1);
+	getmapxy(.@map$,.@x,.@y,UNITTYPE_NPC);
 	for (set .@i,0; .@i<.@idnum; set .@i,.@i+1) {
 		set .@idx,rand(.@x-2,.@x+2);
 		set .@idy,rand(.@y-2,.@y+2);
@@ -2445,7 +2445,7 @@ OnTouch_:
 		specialeffect EF_VENOMDUST;
 		donpcevent instance_npcname("#alert1")+"::OnStart";
 		donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
-		getmapxy(.@map$,.@x,.@y,1);
+		getmapxy(.@map$,.@x,.@y,UNITTYPE_NPC);
 		set .@mon_num,.@num[atoi(strnpcinfo(2))-61];
 		areamonster .@map$,.@x-10,.@y-10,.@x+10,.@y+10,"Toy Factory Guard",2990,.@mon_num,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 		initnpctimer;
@@ -2560,8 +2560,8 @@ OnTimer45000:
 	if (callfunc("F_GM_NPC",1854,0) == 1) {
 		set .@map$,instance_mapname("1@xm_d");
 		getunitdata 'Antonio,.@mob;
-		set .@mobx,.@mob[6];
-		set .@moby,.@mob[7];
+		set .@mobx,.@mob[UMOB_X];
+		set .@moby,.@mob[UMOB_Y];
 		mapannounce .@map$,"Factory announcement: Exist in "+.@mobx+" - "+.@moby+".",bc_map,"0x00ff44";
 	}
 	end;

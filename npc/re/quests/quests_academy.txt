@@ -4460,7 +4460,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 				mes "[Otter Samssoon]";
 				switch(.@style) {
 				case 1:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Play Dead' cut?";
 						mes "This looks neat and relaxed.. So popular style.";
 					} else {
@@ -4472,7 +4472,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 2:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Two Handed Sword Mastery' cut?";
 						mes "You... You know the famous D..? He has exactly the same style!";
 					} else {
@@ -4483,7 +4483,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 3:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Napalm Beat' cut?";
 						mes "It has well arranges hair line that makes feel charisma.";
 					} else {
@@ -4494,7 +4494,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 4:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Double Strafe' cut?";
 						mes "Natural hair is shaking by wind.. Clean and good feeling.";
 					} else {
@@ -4505,7 +4505,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 5:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Angelus' cut?";
 						mes "Calm and piety feeling.. Not boring style.";
 					} else {
@@ -4516,7 +4516,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 6:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Push Cart' cut?";
 						mes "Big Kar is motivated for this style with a romance of a man.";
 					} else {
@@ -4527,7 +4527,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 7:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Envenom' cut?";
 						mes "Tough style makes addicted.";
 					} else {
@@ -4539,7 +4539,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 8:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Bowling Bash' cut?";
 						mes "This style makes a nice guy to challenge.";
 						mes "Just a giving a glance can steal the heart.";
@@ -4551,7 +4551,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 9:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Venom Dust' cut?";
 						mes "This style has special ending line that looks fatal.";
 					} else {
@@ -4562,7 +4562,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 10:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Turn Undead' cut?";
 						mes "This style is like a cold city man who is strong enough to kill a monster.";
 					} else {
@@ -4573,7 +4573,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 11:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Dragonology' cut?";
 						mes "This style is intelligent style of mysterious dragon.";
 					} else {
@@ -4584,7 +4584,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 12:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Mace Mastery' cut?";
 						mes "Look fresh and look neat with wax treatment.";
 					} else {
@@ -4595,7 +4595,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 13:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Thunder Storm' cut?";
 						mes "This style has natural attractive perm which is like hitting by thunder storm.";
 					} else {
@@ -4606,7 +4606,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 14:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Encore' cut?";
 						mes "Rocker's favorite style.. Even the name itself..";
 					} else {
@@ -4617,7 +4617,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 15:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Grimtooth' cut?";
 						mes "The style with edge.";
 					} else {
@@ -4629,7 +4629,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 16:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Blitz Beat' cut?";
 						mes "It is the style my senior invented after he broke up with his girlfriends 5 times.";
 					} else {
@@ -4640,7 +4640,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 17:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Find Ore' cut?";
 						mes "This style seems to bring encounter or find unexpected things while walking on the street.";
 					} else {
@@ -4651,7 +4651,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 18:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Fire Pillar' cut?";
 						mes "Everyone used to have this hair style.. Which means that was a trend of an era.";
 					} else {
@@ -4662,7 +4662,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 					cutin "",255;
 					end;
 				case 19:
-					if(Sex) {
+					if(Sex == SEX_MALE) {
 						mes "Oh my!!? 'Guillotine Fist'";
 						mes "It is like one-shot style.. Like a real man. Right?";
 					} else {
@@ -4802,7 +4802,7 @@ iz_ac01,69,36,3	script	Otter Samssoon#ac	4W_SAILOR,{
 	}
 
 L_cutin:
-	if(Sex) {
+	if(Sex == SEX_MALE) {
 		if(getarg(0) < 10)
 			cutin "hair_m_0"+getarg(0),4;
 		else
@@ -7348,11 +7348,11 @@ new_1-3,99,169,3	script	Friendly Poring#new	4_PORING,{
 			close;
 		}
 		mes "[Poring]";
-		mes "Now that you mention it "+(Sex?"sir":"miss")+", I could use some help.";
+		mes "Now that you mention it "+callfunc("F_Sex","miss","sir")+", I could use some help.";
 		next;
 		mes "[Unskilled Poring]";
 		mes "Wot's Dat? Onna them Poring's talkin' to a huumie.";
-		mes "Shall we beat "+(Sex?"him":"her")+" up?";
+		mes "Shall we beat "+callfunc("F_Sex","her","him")+" up?";
 		emotion e_paper,0,"Cowardly Poring#pet_1";
 		emotion e_paper,0,"Unskilled Poring#pet_2";
 		emotion e_paper,0,"Foolish Poring#pet_3";
@@ -8859,7 +8859,7 @@ iz_ac02,70,85,5	script	Arang#1	4_F_TAEKWON,{
 			if(JobLevel == 10) {
 				cutin "arang01",0;
 				mes "[Arang]";
-				mes "It's time to choose your job? How about Taekwon "+(Sex?"boy? You may be a nice adult":"girl? You can be an attractive lady")+" like me.";
+				mes "It's time to choose your job? How about Taekwon "+callfunc("F_Sex","girl? You can be an attractive lady","boy? You may be a nice adult")+" like me.";
 				next;
 			}
 			if(ac_taekwon) {
@@ -9092,7 +9092,7 @@ iz_ac02,142,85,5	script	Lusa#2ac	4_F_GUNSLINGER,{
 					emotion e_lv;
 					next;
 					mes "[Lusa]";
-					mes "Ya, know you remind me of my little "+(Sex?"brother":"sister")+", that scamp couldn't shoot the broadside of barn.. At least not until I taught "+(Sex?"him":"her")+".";
+					mes "Ya, know you remind me of my little "+callfunc("F_Sex","sister","brother")+", that scamp couldn't shoot the broadside of barn.. At least not until I taught "+callfunc("F_Sex","her","him")+".";
 					next;
 					mes "[Lusa]";
 					mes "Now y'all need to understand, guns aren't some little thing that you just swing at an animal, you don't wiggle those there fingers and shock them to death.";
@@ -10106,9 +10106,9 @@ OnRespawn:
 		monster "iz_ac02",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10137,9 +10137,9 @@ OnRespawn:
 		monster "iz_ac02_a",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac_a::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10168,9 +10168,9 @@ OnRespawn:
 		monster "iz_ac02_b",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac_b::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10199,9 +10199,9 @@ OnRespawn:
 		monster "iz_ac02_c",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac_c::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10230,9 +10230,9 @@ OnRespawn:
 		monster "iz_ac02_d",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac_d::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10261,9 +10261,9 @@ OnRespawn:
 		monster "iz_ac02",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10292,9 +10292,9 @@ OnRespawn:
 		monster "iz_ac02_a",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac_a::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10323,9 +10323,9 @@ OnRespawn:
 		monster "iz_ac02_b",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac_b::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10354,9 +10354,9 @@ OnRespawn:
 		monster "iz_ac02_c",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac_c::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10386,9 +10386,9 @@ OnRespawn:
 		monster "iz_ac02_d",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac_d::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10417,9 +10417,9 @@ OnRespawn:
 		monster "iz_ac02",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10448,9 +10448,9 @@ OnRespawn:
 		monster "iz_ac02_a",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac_a::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10479,9 +10479,9 @@ OnRespawn:
 		monster "iz_ac02_b",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac_b::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10510,9 +10510,9 @@ OnRespawn:
 		monster "iz_ac02_c",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac_c::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:
@@ -10541,9 +10541,9 @@ OnRespawn:
 		monster "iz_ac02_d",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac_d::OnMyMobDead";
 		.GID = $@mobid[0];
 		getunitdata .GID,.@temp;
-		set .@temp[9],.@temp[9]^((MD_CANMOVE|MD_CANATTACK)&.@temp[9]);
-		setunitdata .GID,9,.@temp[9];
-		setunitdata .GID,31,1;
+		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
+		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
+		setunitdata .GID,49,1;
 	}
 	end;
 OnInit:

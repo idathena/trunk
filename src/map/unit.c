@@ -465,7 +465,7 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 			break;
 	}
 
-	if(tid == INVALID_TIMER) //A directly invoked timer is from battle_stop_walking, therefore the rest is irrelevant.
+	if(tid == INVALID_TIMER) //A directly invoked timer is from battle_stop_walking, therefore the rest is irrelevant
 		return 0;
 
 	//If stepaction is set then we remembered a client request that should be executed on the next step
@@ -1759,8 +1759,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	casttime = skill_vfcastfix(src, casttime, skill_id, skill_lv);
 #endif
 
-	if( src->type == BL_NPC || //NPC-objects do not have cast time
-		(sd && sd->skillitem == skill_id && (sd->skilliteminf&INF_SELF_SKILL)) )
+	if( sd && sd->skillitem == skill_id && (sd->skilliteminf&INF_SELF_SKILL) )
 		casttime = 0;
 
 	if( sc ) { //Why the if else chain: These 3 status do not stack, so its efficient that way
@@ -1952,9 +1951,6 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 #else
 	casttime = skill_vfcastfix(src, casttime, skill_id, skill_lv);
 #endif
-
-	if( src->type == BL_NPC ) //NPC-objects do not have cast time
-		casttime = 0;
 
 	ud->state.skillcastcancel = (castcancel && casttime > 0 ? 1 : 0);
 	if( !sd || sd->skillitem != skill_id || skill_get_cast(skill_id,skill_lv) )
@@ -3106,6 +3102,7 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 		case BL_MOB: {
 				struct mob_data *md = (struct mob_data *)bl;
 
+				mob_free_dynamic_viewdata(md);
 				if( md->spawn_timer != INVALID_TIMER ) {
 					delete_timer(md->spawn_timer,mob_delayspawn);
 					md->spawn_timer = INVALID_TIMER;

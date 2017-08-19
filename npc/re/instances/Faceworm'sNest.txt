@@ -592,52 +592,52 @@ OnHeal04:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '1BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,(.@mapcount+1)*150000;
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '1BOSS,2,.@dfacehp;
+	setunitdata '1BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"Dark faceworm absorbs the energy of 4 unbroken eggs recovering "+.@r_hpp+" energy.",bc_map,"0xff00ee";
 	end;
 OnHeal03:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '1BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,(.@mapcount+1)*55000;
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '1BOSS,2,.@dfacehp;
+	setunitdata '1BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"Dark faceworm absorbs the energy of 3 unbroken eggs recovering "+.@r_hpp+" energy.",bc_map,"0xff00ee";
 	end;
 OnHeal02:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '1BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,(.@mapcount+1)*20000;
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '1BOSS,2,.@dfacehp;
+	setunitdata '1BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"Dark faceworm absorbs the energy of 2 unbroken eggs recovering "+.@r_hpp+" energy.",bc_map,"0xff00ee";
 	end;
 OnHeal01:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '1BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,(.@mapcount+1)*7200;
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '1BOSS,2,.@dfacehp;
+	setunitdata '1BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"Dark faceworm absorbs the energy of 1 unbroken egg recovering "+.@r_hpp+" energy.",bc_map,"0xff00ee";
 	end;
 OnStart:
@@ -649,7 +649,7 @@ OnStart:
 	set .@MOB_HP,5200000-.@dfacehp;
 	if (.@MOB_HP < 1500000)
 		set .@MOB_HP,1500000;
-	setunitdata '1BOSS,2,.@MOB_HP;
+	setunitdata '1BOSS,UMOB_HP,.@MOB_HP;
 	initnpctimer;
 	end;
 OnInstanceInit:
@@ -681,19 +681,19 @@ OnTimer1111:
 	if (.@mapcount) {
 		if (rand(1,22-.@mapcount) < 17) {
 			getunitdata '1BOSS,.@arr;
-			set .@MOB_HP,.@arr[2];
+			set .@MOB_HP,.@arr[UMOB_HP];
 			if (.@MOB_HP > 3000000 && .@MOB_HP < 4900000)
 				donpcevent instance_npcname("#fwormboss12")+"::OnStart1";
 			else if (.@MOB_HP > 10000 && .@MOB_HP < 2500001)
 				donpcevent instance_npcname("#fwormboss12")+"::OnStart2";
 		}
 	} else
-		setunitdata '1BOSS,2,5000000;
+		setunitdata '1BOSS,UMOB_HP,5000000;
 	end;
 OnTimer14000:
 	stopnpctimer;
 	getunitdata '1BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	if (.@MOB_HP > 10000)
 		initnpctimer;
 	end;
@@ -714,8 +714,8 @@ OnStart1:
 	if (.@mob_dead_num > 3)
 		killmonster .@map$,instance_npcname("#fwormboss12")+"::OnMyMobDead";
 	getunitdata '1BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
 	monster .@map$,.@mobx+4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
 	end;
@@ -727,8 +727,8 @@ OnStart2:
 	if (.@mob_dead_num > 6)
 		killmonster .@map$,instance_npcname("#fwormboss12")+"::OnMyMobDead";
 	getunitdata '1BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
 	monster .@map$,.@mobx+4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
 	monster .@map$,.@mobx,.@moby+4,"Faceworm Egg",2540,1,instance_npcname("#fwormboss12")+"::OnMyMobDead";
@@ -942,7 +942,7 @@ OnStart:
 	set .@MOB_HP,5200000-.@dfacehp;
 	if (.@MOB_HP < 1500000)
 		set .@MOB_HP,1500000;
-	setunitdata '2BOSS,2,.@MOB_HP;
+	setunitdata '2BOSS,UMOB_HP,.@MOB_HP;
 	initnpctimer;
 	end;
 OnInstanceInit:
@@ -974,19 +974,19 @@ OnTimer1111:
 	if (.@mapcount) {
 		if (rand(1,22-.@mapcount) < 17) {
 			getunitdata '2BOSS,.@arr;
-			set .@MOB_HP,.@arr[2];
+			set .@MOB_HP,.@arr[UMOB_HP];
 			if (.@MOB_HP > 2000000 && .@MOB_HP < 5000000)
 				donpcevent instance_npcname("#fwormboss22")+"::OnStart1";
 			else if (.@MOB_HP > 10000 && .@MOB_HP < 2000000)
 				donpcevent instance_npcname("#fwormboss22")+"::OnStart2";
 		}
 	} else
-		setunitdata '2BOSS,2,5000000;
+		setunitdata '2BOSS,UMOB_HP,5000000;
 	end;
 OnTimer12000:
 	stopnpctimer;
 	getunitdata '2BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	if (.@MOB_HP > 10000)
 		initnpctimer;
 	end;
@@ -1007,8 +1007,8 @@ OnStart1:
 	if (.@mob_dead_num > 6)
 		killmonster .@map$,instance_npcname("#fwormboss22")+"::OnMyMobDead";
 	getunitdata '2BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
 	monster .@map$,.@mobx+4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
 	end;
@@ -1020,8 +1020,8 @@ OnStart2:
 	if (.@mob_dead_num > 12)
 		killmonster .@map$,instance_npcname("#fwormboss22")+"::OnMyMobDead";
 	getunitdata '2BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
 	monster .@map$,.@mobx,.@moby+4,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
 	monster .@map$,.@mobx+4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss22")+"::OnMyMobDead";
@@ -1191,13 +1191,13 @@ OnHeal01:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '3BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,((.@mapcount+1)*5000)*rand(1,10);
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,5200000-((13-.@mapcount)*200000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '3BOSS,2,.@dfacehp;
+	setunitdata '3BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"Dark faceworm has dropped a sack of fatal poison and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x66ff00";
 	end;
 OnStart:
@@ -1209,7 +1209,7 @@ OnStart:
 	set .@MOB_HP,5200000-.@dfacehp;
 	if (.@MOB_HP < 1500000)
 		set .@MOB_HP,1500000;
-	setunitdata '3BOSS,2,.@MOB_HP;
+	setunitdata '3BOSS,UMOB_HP,.@MOB_HP;
 	initnpctimer;
 	end;
 OnInstanceInit:
@@ -1240,7 +1240,7 @@ OnTimer1111:
 	if (.@mapcount) {
 		if (rand(1,22-.@mapcount) < 17) {
 			getunitdata '3BOSS,.@arr;
-			set .@MOB_HP,.@arr[2];
+			set .@MOB_HP,.@arr[UMOB_HP];
 			if (.@MOB_HP > 4200000 && .@MOB_HP < 5000000)
 				donpcevent instance_npcname("#fwormboss32")+"::OnStart1";
 			else if (.@MOB_HP > 3200000 && .@MOB_HP < 4000000)
@@ -1253,12 +1253,12 @@ OnTimer1111:
 				donpcevent instance_npcname("#fwormboss32")+"::OnStart2";
 		}
 	} else
-		setunitdata '3BOSS,2,5000000;
+		setunitdata '3BOSS,UMOB_HP,5000000;
 	end;
 OnTimer7000:
 	stopnpctimer;
 	getunitdata '3BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	if (.@MOB_HP > 10000)
 		initnpctimer;
 	end;
@@ -1273,8 +1273,8 @@ OnEnd:
 OnStart1:
 	set .@map$,instance_mapname("1@face");
 	getunitdata '3BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	set .@vmobx,.@mobx-3;
 	while (1) {
 		set .@vmoby,.@moby+3;
@@ -1293,8 +1293,8 @@ OnStart1:
 OnStart2:
 	set .@map$,instance_mapname("1@face");
 	getunitdata '3BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	set .@vmobx,.@mobx-5;
 	while (1) {
 		set .@vmoby,.@moby+5;
@@ -1471,7 +1471,7 @@ OnStart:
 	set .@MOB_HP,5200000-.@dfacehp;
 	if (.@MOB_HP < 1500000)
 		set .@MOB_HP,1500000;
-	setunitdata '4BOSS,2,.@MOB_HP;
+	setunitdata '4BOSS,UMOB_HP,.@MOB_HP;
 	initnpctimer;
 	end;
 OnInstanceInit:
@@ -1505,7 +1505,7 @@ OnTimer1111:
 	if (.@mapcount) {
 		if (rand(1,22-.@mapcount) < 17) {
 			getunitdata '4BOSS,.@arr;
-			set .@MOB_HP,.@arr[2];
+			set .@MOB_HP,.@arr[UMOB_HP];
 			if (.@MOB_HP > 4300000 && .@MOB_HP < 5000000)
 				donpcevent instance_npcname("#fwormboss42")+"::OnStart1";
 			else if (.@MOB_HP > 3300000 && .@MOB_HP < 4000000)
@@ -1518,12 +1518,12 @@ OnTimer1111:
 				donpcevent instance_npcname("#fwormboss42")+"::OnStart2";
 		}
 	} else
-		setunitdata '4BOSS,2,5000000;
+		setunitdata '4BOSS,UMOB_HP,5000000;
 	end;
 OnTimer10000:
 	stopnpctimer;
 	getunitdata '4BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	if (.@MOB_HP > 10000)
 		initnpctimer;
 	else
@@ -1546,8 +1546,8 @@ OnStart1:
 	if (.@mob_dead_num > 12)
 		killmonster .@map$,instance_npcname("#fwormboss42")+"::OnMyMobDead";
 	getunitdata '4BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-3,.@moby+3,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
 	monster .@map$,.@mobx+3,.@moby+3,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
 	monster .@map$,.@mobx-3,.@moby-3,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
@@ -1561,8 +1561,8 @@ OnStart2:
 	if (.@mob_dead_num > 27)
 		killmonster .@map$,instance_npcname("#fwormboss42")+"::OnMyMobDead";
 	getunitdata '4BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-5,.@moby+5,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
 	monster .@map$,.@mobx,.@moby+5,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
 	monster .@map$,.@mobx+5,.@moby+5,"#venomfog",2536,1,instance_npcname("#fwormboss42")+"::OnMyMobDead";
@@ -1761,137 +1761,137 @@ OnHeal05:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,((.@mapcount+1)*20000)*rand(1,10);
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '5BOSS,2,.@dfacehp;
+	setunitdata '5BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"The Faceworm Queen has dropped a sack of fatal poison and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x66ff00",FW_NORMAL,14;
 	end;
 OnHeal04:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,.@mapcount*1000000;
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '5BOSS,2,.@dfacehp;
+	setunitdata '5BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"The Faceworm Queen absorbs the energy of 4 unbroken eggs and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x66ff00",FW_NORMAL,14;
 	end;
 OnHeal03:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,.@mapcount*250000;
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '5BOSS,2,.@dfacehp;
+	setunitdata '5BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"The Faceworm Queen absorbs the energy of 3 unbroken eggs and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x00ff00",FW_NORMAL,14;
 	end;
 OnHeal02:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,.@mapcount*100000;
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '5BOSS,2,.@dfacehp;
+	setunitdata '5BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"The Faceworm Queen absorbs the energy of 2 unbroken eggs and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x00ff00",FW_NORMAL,14;
 	end;
 OnHeal01:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp,.@mapcount*50000;
 	set .@dfacehp,.@MOB_HP+.@r_hpp;
 	set .@r_hpp2,52000000-((13-.@mapcount)*2000000);
 	if (.@dfacehp > .@r_hpp2)
 		set .@dfacehp,.@r_hpp2;
-	setunitdata '5BOSS,2,.@dfacehp;
+	setunitdata '5BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"The Faceworm Queen absorbs the energy of 1 unbroken egg and recovers "+.@r_hpp+" amount of energy.",bc_map,"0x00ff00",FW_NORMAL,14;
 	end;
 OnDamage:
 	set .@map$,instance_mapname("1@face");
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@r_hpp_1,(.@mapcount+7)*25;
 	set .@dr_hpp,rand(20,.@r_hpp_1)*10000;
 	set .@dfacehp,.@MOB_HP-.@dr_hpp;
 	if (.@dfacehp < 5000000)
 		set .@dfacehp,5000000;
-	setunitdata '5BOSS,2,.@dfacehp;
+	setunitdata '5BOSS,UMOB_HP,.@dfacehp;
 	mapannounce .@map$,"Chaos deals "+.@dr_hpp+" deadly damage hit points!!",bc_map,"0xffff33",FW_NORMAL,17;
 	end;
 OnBerserk2:
 	set .@map$,instance_mapname("1@face");
 	getunitdata '5BOSS,.@arr;
-	set .@ber_x,.@arr[6];
-	set .@ber_y,.@arr[7];
-	set .@MOB_HP1,.@arr[2];
+	set .@ber_x,.@arr[UMOB_X];
+	set .@ber_y,.@arr[UMOB_Y];
+	set .@MOB_HP1,.@arr[UMOB_HP];
 	getunitdata '5BOSS_HP,.@arr;
-	set .@MOB_HP2,.@arr[2];
+	set .@MOB_HP2,.@arr[UMOB_HP];
 	set .@MOB_HP3,(((.@MOB_HP2-.@MOB_HP1)*8)/1000)*100;
 	set .@MOB_HP4,.@MOB_HP1+.@MOB_HP3;
 	killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 	monster .@map$,.@ber_x,.@ber_y,"Faceworm Queen",2532,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 	set '5BOSS,$@mobid[0];
-	setunitdata '5BOSS,2,.@MOB_HP4;
+	setunitdata '5BOSS,UMOB_HP,.@MOB_HP4;
 	monster .@map$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 	set '5BOSS_HP,$@mobid[0];
-	setunitdata '5BOSS_HP,2,.@MOB_HP4;
+	setunitdata '5BOSS_HP,UMOB_HP,.@MOB_HP4;
 	mapannounce .@map$,"The faceworm rages recovering "+.@MOB_HP3+" and its attack power is increased.",bc_map,"0xff8888",FW_NORMAL,13;
 	end;
 OnBerserk:
 	set .@map$,instance_mapname("1@face");
 	getunitdata '5BOSS,.@arr;
-	set .@ber_x,.@arr[6];
-	set .@ber_y,.@arr[7];
+	set .@ber_x,.@arr[UMOB_X];
+	set .@ber_y,.@arr[UMOB_Y];
 	if (.@ber_x < 190 || .@ber_x > 230 || .@ber_y < 135 || .@ber_y > 175) {
-		set .@MOB_HP,.@arr[2];
+		set .@MOB_HP,.@arr[UMOB_HP];
 		killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 		monster .@map$,.@ber_x,.@ber_y,"Faceworm Queen",2532,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 		set '5BOSS,$@mobid[0];
-		setunitdata '5BOSS,2,.@MOB_HP;
+		setunitdata '5BOSS,UMOB_HP,.@MOB_HP;
 		monster .@map$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 		set '5BOSS_HP,$@mobid[0];
-		setunitdata '5BOSS_HP,2,.@MOB_HP;
+		setunitdata '5BOSS_HP,UMOB_HP,.@MOB_HP;
 		donpcevent instance_npcname("#fwormboss50")+"::OnCalm";
 		mapannounce .@map$,"It is too far away from the nest. The Faceworm Queen begins raging.",bc_map,"0xff3333",FW_NORMAL,15;
 	}
 	end;
 OnCalm:
 	getunitdata '5BOSS,.@arr;
-	set .@cal_x,.@arr[6];
-	set .@cal_y,.@arr[7];
-	set .@MOB_HP,.@arr[2];
+	set .@cal_x,.@arr[UMOB_X];
+	set .@cal_y,.@arr[UMOB_Y];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@map$,instance_mapname("1@face");
 	killmonster .@map$,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 	monster .@map$,.@cal_x,.@cal_y,"Faceworm Queen",2529,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 	set '5BOSS,$@mobid[0];
-	setunitdata '5BOSS,2,.@MOB_HP;
+	setunitdata '5BOSS,UMOB_HP,.@MOB_HP;
 	monster .@map$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 	set '5BOSS_HP,$@mobid[0];
-	setunitdata '5BOSS_HP,2,.@MOB_HP;
+	setunitdata '5BOSS_HP,UMOB_HP,.@MOB_HP;
 	end;
 OnChange:
 	set .@map$,instance_mapname("1@face");
 	getunitdata '5BOSS,.@arr;
-	set .@mobx2,.@arr[6];
-	set .@moby2,.@arr[7];
-	set .@MOB_HP,.@arr[2];
+	set .@mobx2,.@arr[UMOB_X];
+	set .@moby2,.@arr[UMOB_Y];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	set .@chan_f,rand(1,14);
 	if (.@chan_f > 0 && .@chan_f < 3) {
 		mapannounce .@map$,"Faceworm Queen is trying to shed its skin to wind attribute.",bc_map,"0xffff00";
@@ -1919,16 +1919,16 @@ OnChange:
 		set '5BOSS,$@mobid[0];
 	} else
 		end;
-	setunitdata '5BOSS,2,.@MOB_HP;
+	setunitdata '5BOSS,UMOB_HP,.@MOB_HP;
 	monster .@map$,1,6,"Faceworm Queen's Life",2915,1,instance_npcname("#fwormboss5")+"::OnMyMobDead";
 	set '5BOSS_HP,$@mobid[0];
-	setunitdata '5BOSS_HP,2,.@MOB_HP;
+	setunitdata '5BOSS_HP,UMOB_HP,.@MOB_HP;
 	end;
 OnWarning:
 	set .@map$,instance_mapname("1@face");
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	if (.@mobx < 190 || .@mobx > 230 || .@moby < 135 || .@moby > 175)
 		mapannounce .@map$,"Please do not go farther from the nest. The Faceworm Queen can be violent.",bc_map,"0xff5555",FW_NORMAL,15;
 	end;
@@ -1951,13 +1951,13 @@ OnStart:
 	set '5BOSS_HP,$@mobid[0];
 	set .@mapcount,getmapusers(.@map$);
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP1,.@arr[2];
+	set .@MOB_HP1,.@arr[UMOB_HP];
 	set .@dfacehp,(13-.@mapcount)*2000000;
 	set .@MOB_HP2,52000000-.@dfacehp;
 	if (.@MOB_HP2 < 15000000)
 		set .@MOB_HP2,15000000;
-	setunitdata '5BOSS,2,.@MOB_HP2;
-	setunitdata '5BOSS_HP,2,.@MOB_HP1;
+	setunitdata '5BOSS,UMOB_HP,.@MOB_HP2;
+	setunitdata '5BOSS_HP,UMOB_HP,.@MOB_HP1;
 	initnpctimer;
 	end;
 OnInstanceInit:
@@ -1990,8 +1990,8 @@ OnTimer1000:
 		end;
 	}
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
-	setunitdata '5BOSS_HP,2,.@MOB_HP;
+	set .@MOB_HP,.@arr[UMOB_HP];
+	setunitdata '5BOSS_HP,UMOB_HP,.@MOB_HP;
 	end;
 OnTimer5555:
 	set .@map$,instance_mapname("1@face");
@@ -1999,7 +1999,7 @@ OnTimer5555:
 	if (.@mapcount) {
 		if (rand(1,22-.@mapcount) < 17) {
 			getunitdata '5BOSS,.@arr;
-			set .@MOB_HP,.@arr[2];
+			set .@MOB_HP,.@arr[UMOB_HP];
 			if (.@MOB_HP > 45000000 && .@MOB_HP < 48000000)
 				donpcevent instance_npcname("#fwormboss51")+"::OnStart1";
 			else if (.@MOB_HP > 40000000 && .@MOB_HP < 45000000)
@@ -2031,7 +2031,7 @@ OnTimer5555:
 			}
 		}
 	} else {
-		setunitdata '5BOSS,2,50000000;
+		setunitdata '5BOSS,UMOB_HP,50000000;
 		for (set .@i,1; .@i<=4; set .@i,.@i+1)
 			donpcevent instance_npcname("#fwormboss5"+.@i)+"::OnEnd";
 		stopnpctimer;
@@ -2045,7 +2045,7 @@ OnTimer12000:
 	end;
 OnTimer13000:
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	if (.@MOB_HP > 7000000)
 		donpcevent instance_npcname("#support")+"::OnSupport_2";
 	end;
@@ -2054,9 +2054,9 @@ OnTimer14000:
 	end;
 OnTimer19000:
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP1,.@arr[2];
+	set .@MOB_HP1,.@arr[UMOB_HP];
 	getunitdata '5BOSS_HP,.@arr;
-	set .@MOB_HP2,.@arr[2];
+	set .@MOB_HP2,.@arr[UMOB_HP];
 	if (.@MOB_HP2 > .@MOB_HP1) {
 		set .@MOB_HP3,.@MOB_HP2-.@MOB_HP1;
 		set .@map$,instance_mapname("1@face");
@@ -2071,7 +2071,7 @@ OnTimer19000:
 OnTimer25000:
 	stopnpctimer;
 	getunitdata '5BOSS,.@arr;
-	set .@MOB_HP,.@arr[2];
+	set .@MOB_HP,.@arr[UMOB_HP];
 	if (.@MOB_HP > 200000)
 		initnpctimer;
 	else {
@@ -2119,8 +2119,8 @@ OnDisable:
 	end;
 OnTouch_:
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	if (.@mobx > 205 && .@mobx < 223 && .@moby > 163 && .@moby < 181) {
 		specialeffect EF_MAGNUMBREAK,AREA,instance_npcname("Chaos#north");
 		specialeffect EF_LORD,AREA,instance_npcname("Chaos#north");
@@ -2155,8 +2155,8 @@ OnTimer15000:
 	end;
 OnTouch_:
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	if (.@mobx > 205 && .@mobx < 223 && .@moby > 134 && .@moby < 152) {
 		specialeffect EF_MAGNUMBREAK,AREA,instance_npcname("Chaos#south");
 		specialeffect EF_LORD,AREA,instance_npcname("Chaos#south");
@@ -2191,8 +2191,8 @@ OnTimer15000:
 	end;
 OnTouch_:
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	if (.@mobx > 217 && .@mobx < 235 && .@moby > 149 && .@moby < 167) {
 		specialeffect EF_MAGNUMBREAK,AREA,instance_npcname("Chaos#east");
 		specialeffect EF_LORD,AREA,instance_npcname("Chaos#east");
@@ -2227,8 +2227,8 @@ OnTimer15000:
 	end;
 OnTouch_:
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	if (.@mobx > 191 && .@mobx < 209 && .@moby > 149 && .@moby < 167) {
 		specialeffect EF_MAGNUMBREAK,AREA,instance_npcname("Chaos#west");
 		specialeffect EF_LORD,AREA,instance_npcname("Chaos#west");
@@ -2319,8 +2319,8 @@ OnStart1:
 	if (.@mob_dead_num > 3)
 		killmonster .@map$,instance_npcname("#fwormboss51")+"::OnMyMobDead";
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
 	monster .@map$,.@mobx+4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
 	end;
@@ -2332,8 +2332,8 @@ OnStart2:
 	if (.@mob_dead_num > 6)
 		killmonster .@map$,instance_npcname("#fwormboss51")+"::OnMyMobDead";
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
 	monster .@map$,.@mobx,.@moby+4,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
 	monster .@map$,.@mobx+4,.@moby,"Faceworm Egg",2540,1,instance_npcname("#fwormboss51")+"::OnMyMobDead";
@@ -2380,8 +2380,8 @@ OnStart1:
 	if (.@mob_dead_num > 6)
 		killmonster .@map$,instance_npcname("#fwormboss52")+"::OnMyMobDead";
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
 	monster .@map$,.@mobx,.@moby+4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
 	monster .@map$,.@mobx+4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
@@ -2395,8 +2395,8 @@ OnStart2:
 	if (.@mob_dead_num > 12)
 		killmonster .@map$,instance_npcname("#fwormboss52")+"::OnMyMobDead";
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
 	monster .@map$,.@mobx,.@moby+4,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
 	monster .@map$,.@mobx+4,.@moby,"#waterball",2539,1,instance_npcname("#fwormboss52")+"::OnMyMobDead";
@@ -2431,8 +2431,8 @@ OnEnd:
 OnStart1:
 	set .@map$,instance_mapname("1@face");
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	set .@vmobx,.@mobx-5;
 	while (1) {
 		set .@vmoby,.@moby+5;
@@ -2451,8 +2451,8 @@ OnStart1:
 OnStart2:
 	set .@map$,instance_mapname("1@face");
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	set .@vmobx,.@mobx-7;
 	while (1) {
 		set .@vmoby,.@moby+7;
@@ -2496,8 +2496,8 @@ OnStart1:
 	if (.@mob_dead_num > 20)
 		killmonster .@map$,instance_npcname("#fwormboss54")+"::OnMyMobDead";
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-3,.@moby+3,"#venomfog",2536,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
 	monster .@map$,.@mobx+3,.@moby+3,"#venomfog",2536,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
 	monster .@map$,.@mobx-3,.@moby-3,"#venomfog",2536,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
@@ -2511,8 +2511,8 @@ OnStart2:
 	if (.@mob_dead_num > 45)
 		killmonster .@map$,instance_npcname("#fwormboss54")+"::OnMyMobDead";
 	getunitdata '5BOSS,.@arr;
-	set .@mobx,.@arr[6];
-	set .@moby,.@arr[7];
+	set .@mobx,.@arr[UMOB_X];
+	set .@moby,.@arr[UMOB_Y];
 	monster .@map$,.@mobx-5,.@moby+5,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
 	monster .@map$,.@mobx,.@moby+5,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
 	monster .@map$,.@mobx+5,.@moby+5,"#venomfog",2537,1,instance_npcname("#fwormboss54")+"::OnMyMobDead";
@@ -2658,7 +2658,7 @@ OnTouch_:
 	specialeffect EF_VENOMDUST;
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnDisable";
 	killmonster .@map$,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
-	getmapxy(.@map$,.@x,.@y,1);
+	getmapxy(.@map$,.@x,.@y,UNITTYPE_NPC);
 	set .@mon_num,.@num[atoi(strnpcinfo(2))-1];
 	areamonster .@map$,.@x-1,.@y-1,.@x+1,.@y+1,"Faceworm Larva",2541,.@mon_num,instance_npcname(strnpcinfo(0))+"::OnMyMobDead";
 	initnpctimer;
@@ -2998,7 +2998,7 @@ OnTimer3600000:
 		set .@d_item,20718; //FaceWorm_Skin_
 	else
 		set .@d_item,20717; //FaceWorm_Skin
-	getmapxy(.@map$,.@x,.@y,1);
+	getmapxy(.@map$,.@x,.@y,UNITTYPE_NPC);
 	makeitem2 .@d_item,1,.@map$,.@x,.@y,0,.@ppt,0,0,.@en_name_2,.@en_name_3,.@en_name_4;
 	end;
 OnStart:

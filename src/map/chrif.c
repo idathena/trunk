@@ -902,7 +902,7 @@ int chrif_changesex(struct map_session_data *sd, bool change_account) {
 	safestrncpy((char *)WFIFOP(char_fd,6), sd->status.name, NAME_LENGTH);
 	WFIFOW(char_fd,30) = (change_account ? CHRIF_OP_LOGIN_CHANGESEX : CHRIF_OP_CHANGECHARSEX);
 	if (!change_account)
-		WFIFOB(char_fd,32) = (sd->status.sex == SEX_MALE ? SEX_FEMALE : SEX_MALE);
+		WFIFOB(char_fd,32) = (sd->status.sex ? SEX_FEMALE : SEX_MALE);
 	WFIFOSET(char_fd,40);
 	clif_displaymessage(sd->fd, msg_txt(408)); // "Need disconnection to perform change-sex request..."
 	if (sd->fd)

@@ -354,9 +354,38 @@ int mobdb_checkid(const int id)
 struct view_data *mob_get_viewdata(int mob_id)
 {
 	if (mob_db(mob_id) == mob_dummy)
-		return 0;
+		return NULL;
 	return &mob_db(mob_id)->vd;
 }
+
+/**
+ * Create unique view data associated to a spawned monster.
+ * @param md: Mob to adjust
+ */
+void mob_set_dynamic_viewdata(struct mob_data *md)
+{
+	if (md && !md->vd_changed) { //If it is a valid monster and it has not already been created
+		struct view_data *vd = (struct view_data *)aMalloc(sizeof(struct view_data)); //Allocate a dynamic entry
+
+		memcpy(vd, md->vd, sizeof(struct view_data)); //Copy the current values
+		md->vd = vd; //Update the pointer to the new entry
+		md->vd_changed = true; //Flag it as changed so it is freed later on
+	}
+}
+
+/**
+ * Free any view data associated to a spawned monster.
+ * @param md: Mob to free
+ */
+void mob_free_dynamic_viewdata(struct mob_data *md)
+{
+	if (md && md->vd_changed) { //If it is a valid monster and it has already been allocated
+		aFree(md->vd); //Free it
+		md->vd = NULL; //Remove the reference
+		md->vd_changed = false; //Unflag it as changed
+	}
+}
+
 /*==========================================
  * Cleans up mob-spawn data to make it "valid"
  *------------------------------------------*/
@@ -2909,10 +2938,7 @@ int mob_class_change(struct mob_data *md, int mob_id)
 
 	nullpo_ret(md);
 
-	if( md->bl.prev == NULL )
-		return 0;
-
-	if( !mob_id || !mobdb_checkid(mob_id) )
+	if( !md->bl.prev || !mob_id || !mobdb_checkid(mob_id) )
 		return 0;
 
 	//Disable class changing for some targets
@@ -5072,6 +5098,9 @@ static void mob_load(void)
 	mob_read_randommonster();
 }
 
+/**
+ * Initialize monster data
+ */
 void mob_db_load(void) {
 	memset(mob_db_data, 0, sizeof(mob_db_data)); //Clear the array
 	mob_db_data[0] = (struct mob_db *)aCalloc(1, sizeof (struct mob_db)); //This mob is used for random spawns
@@ -5085,12 +5114,57 @@ void mob_db_load(void) {
 	mob_load();
 }
 
+/**
+ * Apply the proper view data on monsters during mob_db reload.
+ * @param md: Mob to adjust
+ * @param args: va_list of arguments
+ * @return 0
+ */
+static int mob_reload_sub(struct mob_data *md, va_list args) {
+	md->db = mob_db(md->mob_id); //Relink the mob to the new database entry
+	if (!md->vd_changed) { //If the view data was not overwritten manually
+		md->vd = mob_get_viewdata(md->mob_id); //Get the new view data from the mob database
+		if (md->bl.prev) { //If they are spawned right now
+			//Respawn all mobs on client side so that they are displayed correctly(if their view id changed)
+			clif_clearunit_area(&md->bl, CLR_OUTSIGHT);
+			clif_spawn(&md->bl);
+		}
+	}
+	return 0;
+}
+
+/**
+ * Apply the proper view data on NPCs during mob_db reload.
+ * @param md: NPC to adjust
+ * @param args: va_list of arguments
+ * @return 0
+ */
+static int mob_reload_sub_npc(struct npc_data *nd, va_list args) {
+	if (mobdb_checkid(nd->class_)) { //If the view data points to a mob
+		nd->vd = mob_get_viewdata(nd->class_); //Get the new view data from the mob database
+		if (nd->bl.prev) { //If they are spawned right now
+			//Respawn all NPCs on client side so that they are displayed correctly(if their view id changed)
+			clif_clearunit_area(&nd->bl, CLR_OUTSIGHT);
+			clif_spawn(&nd->bl);
+		}
+	}
+	return 0;
+}
+
+/**
+ * Reload monster data
+ */
 void mob_reload(void) {
 	do_final_mob();
 	mob_db_load();
+	map_foreachmob(mob_reload_sub);
+	map_foreachnpc(mob_reload_sub_npc);
 }
 
-void mob_clear_spawninfo() { //Clear spawn related information for a script reload.
+/**
+ * Clear spawn data for all monsters
+ */
+void mob_clear_spawninfo() {
 	int i;
 
 	for (i = 0; i < MAX_MOB_DB; i++)

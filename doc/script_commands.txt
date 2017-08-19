@@ -534,7 +534,7 @@ NextBaseExp - Amount of base experience points needed to reach the next level.
 NextJobExp  - Amount of job experience points needed to reach the next level.
 Weight      - Amount of weight the character currently carries.
 MaxWeight   - Maximum weight the character can carry.
-Sex         - 0 if female, 1 if male.
+Sex         - SEX_FEMALE or SEX_MALE.
 Class       - Character's job.
 Upper       - 0 if the character is a normal class, 1 if advanced, 2 if baby.
 BaseClass   - The character's 1-1 'normal' job, regardless of Upper value.
@@ -875,11 +875,14 @@ following:
  ?: - Conditional operator
 	Very useful e.g. to replace
 
-		if(Sex) mes "..."; else mes "...";
+		if(Sex == SEX_MALE)
+			mes "...";
+		else
+			mes "...";
 
 	clauses with simple
 
-		mes "Welcome, " + (Sex?"Mr.":"Mrs.") + " " + strcharinfo(0);
+		mes "Welcome, " + (Sex == SEX_MALE ? "Mr." : "Mrs.") + " " + strcharinfo(0);
 
 	or to replace any other simple if-else clauses. It might be worth
 	mentioning that ?: has low priority and has to be enclosed with
@@ -3072,24 +3075,25 @@ not variables or the search was not successful.
 
 Type is the type of object to search for:
 
-  0 - Character object
-  1 - NPC object
-  2 - Pet object
-  3 - Monster object -- See 'getunitdata' for monster
-  4 - Homunculus object
-  5 - Mercenary object
-  6 - Elemental object
-  
-While 3 is meant to look for a monster object, no searching will be done if you 
-specify type 3, and the function will always return -1.
+	UNITTYPE_PC   - Character object
+	UNITTYPE_NPC  - NPC object
+	UNITTYPE_PET  - Pet object
+	UNITTYPE_HOM  - Homunculus object
+	UNITTYPE_MER  - Mercenary object
+	UNITTYPE_ELEM - Elemental object
+
+By default this function will always return -1.
 
 The search string is optional. If it is not specified, the location of the 
-invoking character will always be returned for types 0 and 2, the location of 
-the NPC running this function for type 1.
-If a search string is specified, for types 0 and 1, the character or NPC with 
-the specified name will be located. If type is 3, the search will locate the 
-current pet of the character who's name is given in the search string, it will 
-NOT locate a pet by name.
+invoking character will always be returned for types UNITTYPE_PC and UNITTYPE_PET,
+the location of the NPC running this function for type 1.
+
+If a search string is specified, for types UNITTYPE_PC and UNITTYPE_NPC, the
+character or NPC with the specified name will be located.
+
+If type is UNITTYPE_PET/UNITTYPE_HOM/UNITTYPE_MER/UNITTYPE_ELEM, the search
+will locate the current object of the character who's name is given in the
+search string, it will NOT locate the object by name.
 
 Example:
 
@@ -3101,7 +3105,7 @@ Example:
     prontera,164,299,3%TAB%script%TAB%Nyah%TAB%730,{
         mes "My name is Nyah.";
         mes "I will now search for Meh all across the world!";
-        if (getmapxy(@mapname$,@mapx,@mapy,1,"Meh")) {
+        if (getmapxy(@mapname$,@mapx,@mapy,UNITTYPE_NPC,"Meh")) {
             mes "I can't seem to find Meh anywhere!";
             close;
         }
@@ -3169,10 +3173,10 @@ It will only return numbers.
 
 ---------------------------------------
 
-*gettimestr(<format string>,<max length>)
+*gettimestr(<"time format">,<max length>{,<time_tick>})
 
 This function will return a string containing time data as specified by the 
-format string.
+time format.
 
 This uses the C function 'strfmtime', which obeys special format characters. For 
 a full description see, for example, the description of 'strfmtime' at 
@@ -3184,7 +3188,11 @@ The example given in rAthena sample scripts works like this:
 
   mes gettimestr("%Y-%m/%d %H:%M:%S",21);
   
-This will print a full date and time like 'YYYY-MM/DD HH:MM:SS'.
+The example above will print the current date and time like 'YYYY-MM/DD HH:MM:SS'.
+The following example will print the date and time when the player's VIP status
+expires by the given <time_tick>:
+
+  mes gettimestr("%Y-%m/%d %H:%M:%S",21,vip_status(VIP_STATUS_EXPIRE));
 
 ---------------------------------------
 
@@ -7536,11 +7544,16 @@ Examples:
 *unitattack <GID>,<Target ID>{,<action type>};
 *unitattack <GID>,"<Target Name>"{,<action type>};
 
-This command will make a <GID> attack the specified target. It returns 1 upon
-success and 0 for all failures.
+This command will make a <GID> attack the specified target. It returns true upon
+success and false for all failures.
 
 If <GID> is a player and a non-zero <action type> is given, the unit will perform a
 continuous attack instead of a single attack.
+
+Note:
+Using unitattack with <GID> 0 means that it will use the currently attached unit.
+For players any attack requests will fail, because talking to an NPC prevents attacking a monster.
+Therefore you need to detach the player from the NPC before using this command.
 
 ---------------------------------------
 
@@ -7636,14 +7649,16 @@ Check if the given Game ID exists. Returns 0 if unit is not found.
 
 *getunittype <GID>;
 
-Returns the type of object from the given Game ID.
+Returns the type of object from the given Game ID. Returns -1 if the given <GID> does not
+exist.
 
- 0 - Monster
- 1 - Homunculus
- 2 - Pet
- 3 - Mercenary
- 4 - Elemental
- 5 - NPC
+	UNITTYPE_PC     0
+	UNITTYPE_NPC    1
+	UNITTYPE_PET    2
+	UNITTYPE_MOB    3
+	UNITTYPE_HOM    4
+	UNITTYPE_MER    5
+	UNITTYPE_ELEM   6
 
 ---------------------------------------
 
@@ -7671,71 +7686,289 @@ Changing a homunculus or pet name will be permanent.
 
 This is used to get and set special data related to the unit.
 With getunitdata, the array given will be filled with the current data. In setunitdata
-the indexes in the array would be used to set that data on the unit. 
+the indexes in the array would be used to set that data on the unit.
 
-Parameter (indexes) for monsters are:
+Both getunitdata and setunitdata will return -1 if the given GID does not exist.
 
-	0 - size (big, small, normal)	7  - y				14 - hair style		21 - weapon		28 - LUK
-	1 - level			8  - speed			15 - hair color		22 - looking dir	29 - for slave to copy master's mode
-	2 - HP				9  - mode 			16 - head gear bottom	23 - STR		30 - immune to attacks state
-	3 - max HP			10 - special AI state	 	17 - head gear middle	24 - AGI		31 - immune to normal melee attacks
-	4 - master AID			11 - SC option			18 - head gear top	25 - VIT
-	5 - map ID			12 - sex			19 - cloth color	26 - INT
-	6 - x				13 - class (Monster ID, Job ID)	20 - shield		27 - DEX
+Note: When adjusting a unit's stat (STR, AGI, etc) the unit's respective statuses are
+      recalculated (HIT, FLEE, etc) automatically. Keep in mind that some stats don't
+	  affect a unit's status and will have to directly be modified.
 
-Parameter (indexes) for homunculus are:
+Parameters (indexes) for monsters are:
+	UMOB_SIZE
+	UMOB_LEVEL
+	UMOB_HP
+	UMOB_MAXHP
+	UMOB_MASTERAID
+	UMOB_MAPID
+	UMOB_X
+	UMOB_Y
+	UMOB_SPEED
+	UMOB_MODE
+	UMOB_AI
+	UMOB_SCOPTION
+	UMOB_SEX
+	UMOB_CLASS
+	UMOB_HAIRSTYLE
+	UMOB_HAIRCOLOR
+	UMOB_HEADBOTTOM
+	UMOB_HEADMIDDLE
+	UMOB_HEADTOP
+	UMOB_CLOTHCOLOR
+	UMOB_SHIELD
+	UMOB_WEAPON
+	UMOB_LOOKDIR
+	UMOB_CANMOVETICK
+	UMOB_STR
+	UMOB_AGI
+	UMOB_VIT
+	UMOB_INT
+	UMOB_DEX
+	UMOB_LUK
+	UMOB_SLAVECPYMSTRMD
+	UMOB_DMGIMMUNE
+	UMOB_ATKRANGE
+	UMOB_ATK1
+	UMOB_ATK2
+	UMOB_MATKMIN
+	UMOB_MATKMAX
+	UMOB_DEF
+	UMOB_MDEF
+	UMOB_HIT
+	UMOB_FLEE
+	UMOB_PDODGE
+	UMOB_CRIT
+	UMOB_RACE
+	UMOB_ELETYPE
+	UMOB_ELELEVEL
+	UMOB_AMOTION
+	UMOB_ADELAY
+	UMOB_DMOTION
 
-	0 - size (big, small, normal)	7  - map ID		14 - canmove_tick	21 - immune to attacks state
-	1 - level			8  - x			15 - STR
-	2 - HP				9  - y			16 - AGI
-	3 - max HP			10 - hunger		17 - VIT
-	4 - SP				11 - intimacy		18 - INT
-	5 - max SP			12 - speed		19 - DEX
-	6 - master Character ID		13 - looking dir	20 - LUK
+-----
+
+Parameter (indexes) for homunculi are:
+	UHOM_SIZE
+	UHOM_LEVEL
+	UHOM_HP
+	UHOM_MAXHP
+	UHOM_SP
+	UHOM_MAXSP
+	UHOM_MASTERCID
+	UHOM_MAPID
+	UHOM_X
+	UHOM_Y
+	UHOM_HUNGER
+	UHOM_INTIMACY
+	UHOM_SPEED
+	UHOM_LOOKDIR
+	UHOM_CANMOVETICK
+	UHOM_STR
+	UHOM_AGI
+	UHOM_VIT
+	UHOM_INT
+	UHOM_DEX
+	UHOM_LUK
+	UHOM_DMGIMMUNE
+	UHOM_ATKRANGE
+	UHOM_ATK1
+	UHOM_ATK2
+	UHOM_MATKMIN
+	UHOM_MATKMAX
+	UHOM_DEF
+	UHOM_MDEF
+	UHOM_HIT
+	UHOM_FLEE
+	UHOM_PDODGE
+	UHOM_CRIT
+	UHOM_RACE
+	UHOM_ELETYPE
+	UHOM_ELELEVEL
+	UHOM_AMOTION
+	UHOM_ADELAY
+	UHOM_DMOTION
+
+-----
 
 Parameter (indexes) for pets are:
+	UPET_SIZE
+	UPET_LEVEL
+	UPET_HP
+	UPET_MAXHP
+	UPET_MASTERAID
+	UPET_MAPID
+	UPET_X
+	UPET_Y
+	UPET_HUNGER
+	UPET_INTIMACY
+	UPET_SPEED
+	UPET_LOOKDIR
+	UPET_CANMOVETICK
+	UPET_STR
+	UPET_AGI
+	UPET_VIT
+	UPET_INT
+	UPET_DEX
+	UPET_LUK
+	UPET_DMGIMMUNE
+	UPET_ATKRANGE
+	UPET_ATK1
+	UPET_ATK2
+	UPET_MATKMIN
+	UPET_MATKMAX
+	UPET_DEF
+	UPET_MDEF
+	UPET_HIT
+	UPET_FLEE
+	UPET_PDODGE
+	UPET_CRIT
+	UPET_RACE
+	UPET_ELETYPE
+	UPET_ELELEVEL
+	UPET_AMOTION
+	UPET_ADELAY
+	UPET_DMOTION
 
-	0 - size (big, small, normal)	7  - y			14 - AGI
-	1 - level			8  - hunger		15 - VIT
-	2 - HP				9  - intimacy		16 - INT
-	3 - max HP			10 - speed		17 - DEX
-	4 - master AID			11 - looking dir	18 - LUK
-	5 - map ID			12 - canmove_tick	19 - immune to attacks state
-	6 - x				13 - STR
+-----
 
 Parameter (indexes) for mercenaries are:
+	UMER_SIZE
+	UMER_HP
+	UMER_MAXHP
+	UMER_MASTERCID
+	UMER_MAPID
+	UMER_X
+	UMER_Y
+	UMER_KILLCOUNT
+	UMER_LIFETIME
+	UMER_SPEED
+	UMER_LOOKDIR
+	UMER_CANMOVETICK
+	UMER_STR
+	UMER_AGI
+	UMER_VIT
+	UMER_INT
+	UMER_DEX
+	UMER_LUK
+	UMER_DMGIMMUNE
+	UMER_ATKRANGE
+	UMER_ATK1
+	UMER_ATK2
+	UMER_MATKMIN
+	UMER_MATKMAX
+	UMER_DEF
+	UMER_MDEF
+	UMER_HIT
+	UMER_FLEE
+	UMER_PDODGE
+	UMER_CRIT
+	UMER_RACE
+	UMER_ELETYPE
+	UMER_ELELEVEL
+	UMER_AMOTION
+	UMER_ADELAY
+	UMER_DMOTION
 
-	0 - size (big, small, normal)	7  - kill count		14 - VIT
-	1 - HP				8  - life time		15 - INT
-	2 - max HP			9  - speed 		16 - DEX
-	3 - master Character ID		10 - looking dir	17 - LUK
-	4 - map ID			11 - canmove_tick	18 - immune to attacks state
-	5 - x				12 - STR
-	6 - y				13 - AGI
+-----
 
 Parameter (indexes) for elementals are:
+	UELE_SIZE
+	UELE_HP
+	UELE_MAXHP
+	UELE_SP
+	UELE_MAXSP
+	UELE_MASTERCID
+	UELE_MAPID
+	UELE_X
+	UELE_Y
+	UELE_LIFETIME
+	UELE_MODE
+	UELE_SPEED
+	UELE_LOOKDIR
+	UELE_CANMOVETICK
+	UELE_STR
+	UELE_AGI
+	UELE_VIT
+	UELE_INT
+	UELE_DEX
+	UELE_LUK
+	UELE_DMGIMMUNE
+	UELE_ATKRANGE
+	UELE_ATK1
+	UELE_ATK2
+	UELE_MATKMIN
+	UELE_MATKMAX
+	UELE_DEF
+	UELE_MDEF
+	UELE_HIT
+	UELE_FLEE
+	UELE_PDODGE
+	UELE_CRIT
+	UELE_RACE
+	UELE_ELETYPE
+	UELE_ELELEVEL
+	UELE_AMOTION
+	UELE_ADELAY
+	UELE_DMOTION
 
-	0 - size (big, small, normal)	7  - x			14 - STR
-	1 - HP				8  - y			15 - AGI
-	2 - max HP			9  - life time		16 - VIT
-	3 - SP				10 - mode		17 - INT
-	4 - max SP			11 - speed		18 - DEX
-	5 - master Character ID		12 - looking dir	19 - LUK
-	6 - map ID			13 - canmove_tick	20 - immune to attacks state
+-----
 
 Parameter (indexes) for NPCs are:
+	UNPC_DISPLAY
+	UNPC_LEVEL
+	UNPC_HP
+	UNPC_MAXHP
+	UNPC_MAPID
+	UNPC_X
+	UNPC_Y
+	UNPC_LOOKDIR
+	UNPC_STR
+	UNPC_AGI
+	UNPC_VIT
+	UNPC_INT
+	UNPC_DEX
+	UNPC_LUK
+	UNPC_PLUSALLSTAT
+	UNPC_DMGIMMUNE
+	UNPC_ATKRANGE
+	UNPC_ATK1
+	UNPC_ATK2
+	UNPC_MATKMIN
+	UNPC_MATKMAX
+	UNPC_DEF
+	UNPC_MDEF
+	UNPC_HIT
+	UNPC_FLEE
+	UNPC_PDODGE
+	UNPC_CRIT
+	UNPC_RACE
+	UNPC_ELETYPE
+	UNPC_ELELEVEL
+	UNPC_AMOTION
+	UNPC_ADELAY
+	UNPC_DMOTION
 
-	0 - display	7  - looking dir
-	1 - level	8  - STR
-	2 - HP		9  - AGI
-	3 - max HP	10 - VIT
-	4 - map ID	11 - INT
-	5 - x		12 - DEX
-	6 - y		13 - LUK
+*Notes:
+		- *_SIZE: small (0); medium (1); large (2)
+		- *_MAPID: this refers to the map_data index (from src/map/map.c), not the mapindex_db index (from src/common/mapindex.c)
+			-- For 'setunitdata', map name can also be passed in as a valid value instead of map ID
+		- *_SPEED: 20 - 1000
+		- *_MODE: see doc/mob_db_mode_list.txt
+		- *_LOOKDIR: north (0), northwest (1), west (2), etc
+		- *_CANMOVETICK: seconds * 1000 the unit will be unable to move
+		- *_DMGIMMUNE: unit will be immune to damage (1), or will receive damage (0)
+		- *_HUNGER: 0 - 100
+		- *_INTIMACY: 0 - 1000
+		- *_LIFETIME: seconds * 1000 the unit will be 'alive' for
+		- *_AMOTION: see doc/mob_db.txt
+		- *_ADELAY: see doc/mob_db.txt
+		- *_DMOTION: see doc/mob_db.txt
 
-*Notes: For mode, see doc/mob_db_mode_list.txt
-		For map ID, this refers to the map_data index (from src/map/map.c), not the mapindex_db index (from src/common/mapindex.c)
-		For 'setunitdata', map name can also be passed in as a valid value instead of map ID
+		- UMOB_AI: none (0); attack (1); marine sphere (2); flora (3); zanzou (4); legion (5); faw (6)
+		- UMOB_SCOPTION: see the 'Variables' section at the top of this document
+		- UMOB_SLAVECPYMSTRMD: make the slave copy the master's mode (1), or not (0)
+
+		- UNPC_PLUSALLSTAT: same as 'bAllStats'; increases/decreses all stats by given amount
 
 Example:
 	// Spawn some Porings and save the Game ID.
@@ -7750,7 +7983,7 @@ Example:
 	getunitdata .GID,@por_arr;
 
 	// Set the max HP of the Poring to 1000 (current HP will also get updated to 1000).
-	setunitdata .GID,3,1000;
+	setunitdata .GID,UMOB_MAXHP,1000;
 
 ---------------------------------------
 \\

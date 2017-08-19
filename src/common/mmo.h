@@ -912,10 +912,11 @@ enum e_job {
 	JOB_MAX,
 };
 
-enum {
+enum e_sex {
 	SEX_FEMALE = 0,
 	SEX_MALE,
-	SEX_SERVER
+	SEX_SERVER,
+	SEX_ACCOUNT = 99
 };
 
 enum e_char_server_type {

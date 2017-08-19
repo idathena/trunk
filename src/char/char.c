@@ -1076,7 +1076,7 @@ bool memitemdata_from_sql(struct s_storage *p, int max, int id, enum storage_typ
  *
  * @retval SEX_MALE if the per-character sex is male
  * @retval SEX_FEMALE if the per-character sex is female
- * @retval 99 if the per-character sex is not defined or the current PACKETVER doesn't support it.
+ * @retval SEX_ACCOUNT if the per-character sex is not defined or the current PACKETVER doesn't support it.
  */
 int mmo_gender(const struct char_session_data *sd, const struct mmo_charstatus *p, char sex)
 {
@@ -1123,7 +1123,7 @@ int mmo_gender(const struct char_session_data *sd, const struct mmo_charstatus *
 	if( sex == 'M' || sex == 'F' ) {
 		if( !sd ) { // sd is not available, there isn't much we can do. Just return and print a warning.
 			ShowWarning("Character '%s' (CID: %d, AID: %d) has sex '%c', but PACKETVER does not support per-character sex. Defaulting to 'U'.\n", p->name, p->char_id, p->account_id, sex);
-			return 99;
+			return SEX_ACCOUNT;
 		}
 		if( (sex == 'M' && sd->sex == SEX_FEMALE) || (sex == 'F' && sd->sex == SEX_MALE) ) {
 			ShowWarning("Changing sex of character '%s' (CID: %d, AID: %d) to 'U' due to incompatible PACKETVER.\n", p->name, p->char_id, p->account_id);
@@ -1134,7 +1134,7 @@ int mmo_gender(const struct char_session_data *sd, const struct mmo_charstatus *
 			Sql_ShowDebug(sql_handle);
 	}
 #endif
-	return 99;
+	return SEX_ACCOUNT;
 }
 
 int mmo_char_tobuf(uint8 *buf, struct mmo_charstatus *p);
@@ -3984,7 +3984,7 @@ int parse_frommap(int fd)
 					if( runflag == CHARSERVER_ST_RUNNING && autotrade && cd ) {
 						uint32 mmo_charstatus_len = sizeof(struct mmo_charstatus) + 25;
 
-						if( cd->sex == 99 )
+						if( cd->sex == SEX_ACCOUNT )
 							cd->sex = sex;
 						WFIFOHEAD(fd,mmo_charstatus_len);
 						WFIFOW(fd,0) = 0x2afd;
@@ -4012,7 +4012,7 @@ int parse_frommap(int fd)
 					{ //Auth ok
 						uint32 mmo_charstatus_len = sizeof(struct mmo_charstatus) + 25;
 
-						if( cd->sex == 99 )
+						if( cd->sex == SEX_ACCOUNT )
 							cd->sex = sex;
 						WFIFOHEAD(fd,mmo_charstatus_len);
 						WFIFOW(fd,0) = 0x2afd;
@@ -4517,7 +4517,7 @@ int parse_char(int fd)
 
 					//Have to switch over to the DB instance otherwise data won't propagate [Kevin]
 					cd = (struct mmo_charstatus *)idb_get(char_db_,char_id);
-					if( cd->sex == 99 )
+					if( cd->sex == SEX_ACCOUNT )
 						cd->sex = sd->sex;
 
 					if( log_char ) {
