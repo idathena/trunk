@@ -1786,7 +1786,7 @@ lasagna,134,113,3	script	Hair Designer#dr	4_DR_F_02,{
 		mes "[Lonza]";
 		mes "I've lined up the attractive hairstyles that never go out of style. Will you take a look?";
 		next;
-		.@gender$ = Sex ? "m" : "f";
+		.@gender$ = (Sex == SEX_MALE) ? "m" : "f";
 		while( true ) {
 			.@i++;
 			.@i = .@i > 6 ? 1 : .@i;

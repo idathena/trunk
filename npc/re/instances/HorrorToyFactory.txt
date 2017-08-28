@@ -1924,6 +1924,8 @@ OnDisable:
 	end;
 OnStart:
 	set .@map$,instance_mapname("1@xm_d");
+	if (!unitexist('CelineKimi))
+		end;
 	donpcevent instance_npcname("#finalbs2")+"::OnTalk";
 	while (1) {
 		getunitdata 'CelineKimi,.@ber;
@@ -1979,6 +1981,8 @@ OnDisable:
 	end;
 OnStart:
 	set .@map$,instance_mapname("1@xm_d");
+	if (!unitexist('CelineKimi))
+		end;
 	getunitdata 'CelineKimi,.@ber;
 	set .@ber_x,.@ber[UMOB_X];
 	set .@ber_y,.@ber[UMOB_Y];
@@ -2559,6 +2563,8 @@ OnTimer45000:
 	callfunc "F_GM_NPC";
 	if (callfunc("F_GM_NPC",1854,0) == 1) {
 		set .@map$,instance_mapname("1@xm_d");
+		if (!unitexist('Antonio))
+			end;
 		getunitdata 'Antonio,.@mob;
 		set .@mobx,.@mob[UMOB_X];
 		set .@moby,.@mob[UMOB_Y];

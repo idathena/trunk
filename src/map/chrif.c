@@ -304,23 +304,21 @@ int chrif_save(struct map_session_data *sd, enum e_chrif_save_opt flag) {
 
 	chrif_bsdata_save(sd, ((flag&CSAVE_QUITTING) && !(flag&CSAVE_AUTOTRADE)));
 
+	//For data sync
 	if (&sd->storage && sd->storage.dirty)
 		storage_storagesave(sd);
+	if (&sd->premiumStorage && sd->premiumStorage.dirty)
+		storage_premiumStorage_save(sd);
+	if (sd->state.storage_flag == 2)
+		storage_guild_storagesave(sd->status.account_id, sd->status.guild_id, flag);
 	if (flag&CSAVE_INVENTORY)
 		intif_storage_save(sd, &sd->inventory);
 	if (flag&CSAVE_CART)
 		intif_storage_save(sd, &sd->cart);
-
-	//For data sync
-	if (sd->state.storage_flag == 2)
-		storage_guild_storagesave(sd->status.account_id, sd->status.guild_id, flag);
-	if (&sd->premiumStorage && sd->premiumStorage.dirty)
-		storage_premiumStorage_save(sd);
-
 	if (flag&CSAVE_QUITTING)
 		sd->state.storage_flag = 0; //Force close it
 
-	//Saving of registry values.
+	//Saving of registry values
 	if (sd->state.reg_dirty&4)
 		intif_saveregistry(sd, 3); //Save char regs
 	if (sd->state.reg_dirty&2)
@@ -334,7 +332,7 @@ int chrif_save(struct map_session_data *sd, enum e_chrif_save_opt flag) {
 	WFIFOW(char_fd,2) = mmo_charstatus_len;
 	WFIFOL(char_fd,4) = sd->status.account_id;
 	WFIFOL(char_fd,8) = sd->status.char_id;
-	WFIFOB(char_fd,12) = (flag&CSAVE_QUIT) ? 1 : 0; //Flag to tell char-server this character is quitting.
+	WFIFOB(char_fd,12) = (flag&CSAVE_QUIT) ? 1 : 0; //Flag to tell char-server this character is quitting
 
 	//If the user is on a instance map, we have to fake his current position
 	if (map[sd->bl.m].instance_id) {

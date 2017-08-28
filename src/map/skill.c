@@ -945,7 +945,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 				if( skill_id != sd->addeff3[i].skill_id || !sd->addeff3[i].rate )
 					continue;
 				type = sd->addeff3[i].sc;
-				time = sd->addeff[i].duration;
+				time = sd->addeff3[i].duration;
 				if( time )
 					sc_flag = SCFLAG_FIXEDTICK;
 				if( sd->addeff3[i].target&ATF_TARGET )

@@ -950,7 +950,7 @@ int memitemdata_to_sql(const struct item items[], int max, int id, enum storage_
 		errors++;
 	}
 
-	ShowInfo("Saved %s (%d) data to table %s for %s: %d\n", printname, stor_id, tablename, selectoption, id);
+	ShowInfo("Saved %s data to table %s for %s: %d\n", printname, tablename, selectoption, id);
 	StringBuf_Destroy(&buf);
 	aFree(flag);
 
