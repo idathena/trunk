@@ -18235,7 +18235,7 @@ BUILDIN_FUNC(sleep)
 
 		ticks = script_getnum(st,2);
 		if( ticks <= 0 ) {
-			ShowError("buildin_sleep2: negative amount('%d') of milli seconds is not supported\n", ticks);
+			ShowError("buildin_sleep: negative amount('%d') of milli seconds is not supported\n", ticks);
 			return 1;
 		}
 		//Detach the player

@@ -72,7 +72,9 @@ lhz_dun03,138,138,36,34	monster	High Priest Margaretha	1643,1,3300000,3000000,1
 lhz_dun03,0,0,0	script	mvp_lhz_dun03	-1,{
 OnTimer6000000: // delay1 = 6000000 ms (100 min)
 	stopnpctimer;
-	sleep rand(0,30)*60000; // 0 to 30 minutes
+	set .@time,rand(0,30); // 0 to 30 minutes
+	if(.@time > 0)
+		sleep .@time*60000;
 OnInit:
 	// Select Coordinates to summon a random MVP on
 	switch(rand(1,6)) {
@@ -127,7 +129,9 @@ lhz_dun04,0,0,0,0	monster	Gypsy Trentini	2234,1,3300000,3000000,1
 lhz_dun04,0,0,0	script	mvp_lhz_dun04	-1,{
 OnTimer6000000: // delay1 = 6000000 ms (100 min)
 	stopnpctimer;
-	sleep rand(0,30)*60000; // 0 to 30 minutes
+	set .@time,rand(0,30); // 0 to 30 minutes
+	if(.@time > 0)
+		sleep .@time*60000;
 OnInit:
 	// Select Coordinates to summon a random MVP on
 	switch(rand(1,7)) {
