@@ -2021,14 +2021,8 @@ void clif_selllist(struct map_session_data *sd)
 	WFIFOW(fd,0) = 0xc7;
 	for( i = 0; i < MAX_INVENTORY; i++ ) {
 		if( sd->inventory.u.items_inventory[i].nameid > 0 && sd->inventory_data[i] ) {
-			if( !itemdb_cansell(&sd->inventory.u.items_inventory[i], pc_get_group_level(sd)) )
+			if( !pc_can_sell_item(sd, &sd->inventory.u.items_inventory[i]) )
 				continue;
-			if( battle_config.hide_fav_sell && sd->inventory.u.items_inventory[i].favorite )
-				continue; //Cannot sell favs [Jey]
-			if( sd->inventory.u.items_inventory[i].expire_time || (sd->inventory.u.items_inventory[i].bound && !pc_can_give_bounded_items(sd)) )
-				continue; //Cannot Sell Rental Items or Account Bounded Items
-			if( sd->inventory.u.items_inventory[i].bound && !pc_can_give_bounded_items(sd))
-				continue; //Don't allow sale of bound items
 			val = sd->inventory_data[i]->value_sell;
 			if( val < 0 )
 				continue;
@@ -17379,7 +17373,7 @@ void clif_instance_changestatus(struct map_session_data *sd, int type, unsigned 
 
 /// Notifies clients about item picked up by a party member (ZC_ITEM_PICKUP_PARTY).
 /// 02b8 <account id>.L <name id>.W <identified>.B <damaged>.B <refine>.B <card1>.W <card2>.W <card3>.W <card4>.W <equip location>.W <item type>.B
-void clif_party_show_picker(struct map_session_data *sd, struct item * item_data)
+void clif_party_show_picker(struct map_session_data *sd, struct item *item_data)
 {
 #if PACKETVER >= 20071002
 	unsigned char buf[22];
@@ -17426,7 +17420,7 @@ void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, b
 	WFIFOL(fd,2) = sd->bl.id;
 	WFIFOL(fd,6) = (int)umin(exp, INT_MAX) * (lost ? -1 : 1);
 	WFIFOW(fd,10) = type;
-	WFIFOW(fd,12) = (quest && type == SP_BASEEXP ? 1 : 0); //Normal exp and quest job exp is shown in yellow, quest base exp is shown in purple
+	WFIFOW(fd,12) = (quest && (type == SP_BASEEXP ? 1 : 0)); //Normal exp and quest job exp is shown in yellow, quest base exp is shown in purple
 	WFIFOSET(fd,packet_len(0x7f6));
 }
 
@@ -17464,7 +17458,8 @@ void clif_showdigit(struct map_session_data *sd, unsigned char type, int value)
 void clif_parse_LessEffect(int fd, struct map_session_data *sd)
 {
 	int isLess = RFIFOL(fd,packet_db[sd->packet_ver][RFIFOW(fd,0)].pos[0]);
-	sd->state.lesseffect = ( isLess != 0 );
+
+	sd->state.lesseffect = (isLess != 0);
 }
 
 /// 07e4 <length>.w <option>.l <val>.l {<index>.w <amount>.w).4b* (CZ_ITEMLISTWIN_RES)
