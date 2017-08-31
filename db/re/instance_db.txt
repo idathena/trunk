@@ -20,3 +20,4 @@
 15,Nightmarish Jitterbug,3300,1@jtb,16,18,1@jtb
 16,Horror Toy Factory,3600,1@xm_d,111,22,1@xm_d
 17,Faceworm's Nest,3600,1@face,112,374,1@face
+18,Ghost Palace,3600,1@spa,42,196,1@spa

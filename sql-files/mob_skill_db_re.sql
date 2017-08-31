@@ -10651,6 +10651,54 @@ REPLACE INTO `mob_skill_db_re` VALUES (2923,'Owl Marquees@NPC_EMOTION','chase',1
 REPLACE INTO `mob_skill_db_re` VALUES (2923,'Owl Marquees@NPC_EMOTION','idle',197,1,2000,0,5000,'yes','self','always','0',6,0x37B5,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2923,'Owl Marquees@NPC_SUMMONSLAVE','idle',196,2,10000,2000,60000,'no','self','slavele','0',2921,NULL,NULL,NULL,NULL,NULL,NULL);
 
+#Ghost Palace
+REPLACE INTO `mob_skill_db_re` VALUES (2948,'Cursed Soldier@NPC_BLINDATTACK','attack',177,5,500,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2948,'Cursed Soldier@AC_DOUBLE','attack',46,5,500,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2948,'Cursed Soldier@NPC_MAGICALATTACK','attack',192,1,500,800,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2948,'Cursed Soldier@AC_SHOWER','attack',47,3,500,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2949,'Cursed Sentinel@AS_SONICBLOW','attack',136,7,500,800,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'29',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2949,'Cursed Sentinel@NPC_CURSEATTACK','attack',181,5,500,800,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'29',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2950,'Broken Mind@NPC_BLINDATTACK','attack',177,3,1500,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'1',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2950,'Broken Mind@NPC_BLINDATTACK','chase',177,3,1500,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'1',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2950,'Broken Mind@NPC_BLOODDRAIN','attack',199,1,500,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'26',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2950,'Broken Mind@NPC_CURSEATTACK','attack',181,3,500,800,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'0',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2950,'Broken Mind@NPC_CURSEATTACK','chase',181,3,500,800,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'0',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2950,'Broken Mind@CR_REFLECTSHIELD','attack',252,2,500,0,300000,'yes','self','always','0',NULL,NULL,NULL,NULL,NULL,'7',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2950,'Broken Mind@NPC_PETRIFYATTACK','attack',180,3,500,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'2',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2950,'Broken Mind@NPC_PETRIFYATTACK','chase',180,3,500,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'2',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2951,'Floating Word@NPC_BLOODDRAIN','attack',199,1,500,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'2',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2951,'Floating Word@NPC_EMOTION','idle',197,1,2000,0,5000,'no','self','always','0',29,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2951,'Floating Word@MG_FIREBALL','chase',17,5,1500,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2951,'Floating Word@MO_BODYRELOCATION','chase',264,1,2000,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2952,'Like Love@HT_SHOCKWAVE','idle',118,5,500,0,300000,'no','around2','always','0',NULL,NULL,NULL,NULL,NULL,'29',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2952,'Like Love@MG_LIGHTNINGBOLT','attack',20,5,500,1500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2952,'Like Love@MG_LIGHTNINGBOLT','chase',20,5,500,1500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2952,'Like Love@NPC_EMOTION','idle',197,1,2000,0,5000,'no','self','always','0',29,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2952,'Like Love@NPC_MAGICALATTACK','attack',192,1,500,1000,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'9',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2952,'Like Love@NPC_UNDEADATTACK','attack',347,2,2000,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2952,'Like Love@WZ_JUPITEL','attack',84,3,500,1500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2952,'Like Love@WZ_JUPITEL','chase',84,3,500,1500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2953,'Cursed Memory@NPC_POISON','attack',176,3,500,800,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2953,'Cursed Memory@NPC_POISONATTACK','attack',188,3,500,800,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2953,'Cursed Memory@NPC_UNDEADATTACK','attack',347,2,500,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2954,'Colorless Vow@NPC_CRITICALSLASH','attack',170,1,500,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2954,'Colorless Vow@NPC_SPLASHATTACK','attack',174,1,2000,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2955,'Old Friendship@NPC_POISON','attack',176,3,500,800,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2955,'Old Friendship@NPC_POISON','angry',176,3,500,800,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2956,'Sweet Slaughter@AS_GRIMTOOTH','chase',137,5,2000,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2956,'Sweet Slaughter@BS_MAXIMIZE','attack',114,5,500,1000,5000,'yes','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2956,'Sweet Slaughter@BS_MAXIMIZE','chase',114,5,500,1000,5000,'yes','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2956,'Sweet Slaughter@NPC_SPLASHATTACK','attack',174,1,2000,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'9',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2956,'Sweet Slaughter@NPC_STUNATTACK','attack',179,3,500,1500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2957,'Forgotten Name@NPC_CRITICALSLASH','attack',170,1,1000,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2957,'Forgotten Name@NPC_DARKNESSATTACK','attack',190,3,500,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2958,'Fatal Days@MG_SOULSTRIKE','chase',13,5,2000,0,3000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2958,'Fatal Days@AS_GRIMTOOTH','attack',137,5,10000,0,700,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2959,'Torturous Redeemer@SM_MAGNUM','attack',7,5,500,0,10000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2959,'Torturous Redeemer@NPC_FIREATTACK','attack',186,3,1000,1000,200000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2959,'Torturous Redeemer@WZ_FIREPILLAR','attack',80,5,500,0,10000,'no','around2','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2959,'Torturous Redeemer@SM_BASH','attack',5,5,500,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
 #Devil's Tower
 REPLACE INTO `mob_skill_db_re` VALUES (2939,'Evil Shadow@NPC_PIERCINGATT','chase',158,1,4000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2939,'Evil Shadow@NPC_CURSEATTACK','attack',181,5,3500,0,20000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
