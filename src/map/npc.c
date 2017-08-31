@@ -1417,19 +1417,23 @@ static enum e_CASHSHOP_ACK npc_cashshop_process_payment(struct npc_data *nd, int
 		case NPCTYPE_ITEMSHOP: {
 				struct item_data *id = itemdb_exists(nd->u.shop.itemshop_nameid);
 
+				if( !id ) { //Item Data is checked at script parsing but in case of item_db reload, check again
+					ShowWarning("Failed to find sellitem %hu for itemshop NPC '%s' (%s, %d, %d)!\n", nd->u.shop.itemshop_nameid, nd->exname, map[nd->bl.m].name, nd->bl.x, nd->bl.y);
+					return ERROR_TYPE_PURCHASE_FAIL;
+				}
 				if( cost[0] < (price - points) ) {
 					char output[CHAT_SIZE_MAX];
 
 					memset(output, '\0', sizeof(output));
 
-					sprintf(output, msg_txt(712), (id ? id->jname : "NULL"), (id ? id->nameid : 0)); // You do not have enough %s (ID: %hu).
+					sprintf(output, msg_txt(712), id->jname, id->nameid); // You do not have enough %s (ID: %hu).
 					clif_messagecolor(&sd->bl, color_table[COLOR_RED], output, false, SELF);
 					return ERROR_TYPE_PURCHASE_FAIL;
 				}
-				if( id )
-					pc_delitem(sd, pc_search_inventory(sd, nd->u.shop.itemshop_nameid), price - points, 0, 0, LOG_TYPE_NPC);
-				else
-					ShowWarning("Failed to delete item %hu from itemshop NPC '%s' (%s, %d, %d)!\n", nd->u.shop.itemshop_nameid, nd->exname, map[nd->bl.m].name, nd->bl.x, nd->bl.y);
+				if( pc_delitem(sd, pc_search_inventory(sd, nd->u.shop.itemshop_nameid), price - points, 0, 0, LOG_TYPE_NPC) ) {
+					ShowWarning("Failed to delete item %hu from '%s' at itemshop NPC '%s' (%s, %d, %d)!\n", nd->u.shop.itemshop_nameid, sd->status.name, nd->exname, map[nd->bl.m].name, nd->bl.x, nd->bl.y);
+					return ERROR_TYPE_PURCHASE_FAIL;
+				}
 			}
 			break;
 		case NPCTYPE_POINTSHOP: {
@@ -1573,7 +1577,7 @@ void npc_shop_currency_type(struct map_session_data *sd, struct npc_data *nd, in
 						clif_broadcast(&sd->bl, output, strlen(output) + 1, BC_BLUE, SELF);
 					}
 					for( i = 0; i < MAX_INVENTORY; i++ )
-						if (sd->inventory.u.items_inventory[i].nameid == id->nameid)
+						if( sd->inventory.u.items_inventory[i].nameid == id->nameid && pc_can_sell_item(sd, &sd->inventory.u.items_inventory[i]) )
 							total += sd->inventory.u.items_inventory[i].amount;
 				}
 				cost[0] = total;

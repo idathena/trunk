@@ -619,6 +619,31 @@ void pc_inventory_rental_add(struct map_session_data *sd, unsigned int seconds)
 }
 
 /**
+ * Check if the player can sell the current item
+ * @param sd map_session_data of the player
+ * @param item struct of the checking item.
+ * @return bool 'true' is sellable, 'false' otherwise
+ */
+bool pc_can_sell_item(struct map_session_data *sd, struct item *item)
+{
+	if(!sd || !item)
+		return false;
+
+	if(!itemdb_cansell(item, pc_get_group_level(sd)))
+		return false;
+
+	if(battle_config.hide_fav_sell && item->favorite)
+		return false; //Cannot sell favs (optional config)
+
+	if(item->expire_time)
+		return false; //Cannot Sell Rental Items
+
+	if(item->bound && !pc_can_give_bounded_items(sd))
+		return false; //Don't allow sale of bound items
+	return true;
+}
+
+/**
  * Determines if player can give / drop / trade / vend items
  */
 bool pc_can_give_items(struct map_session_data *sd)
@@ -4639,11 +4664,12 @@ bool pc_takeitem(struct map_session_data *sd, struct flooritem_data *fitem)
 	//Display pickup animation
 	pc_stop_attack(sd);
 	clif_takeitem(&sd->bl,&fitem->bl);
-	map_clearflooritem(&fitem->bl);
 
 	//Somehow, if party's pickup distribution is 'Even Share', no announcement
 	if(fitem->mob_id && (itemdb_search(fitem->item.nameid))->flag.broadcast && (!p || !(p->party.item&2)))
 		intif_broadcast_obtain_special_item(sd, fitem->item.nameid, fitem->mob_id, ITEMOBTAIN_TYPE_MONSTER_ITEM);
+
+	map_clearflooritem(&fitem->bl);
 	return true;
 }
 
