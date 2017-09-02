@@ -10466,7 +10466,7 @@ bool pc_isautolooting(struct map_session_data *sd, unsigned short nameid)
 	if( sd->state.autolootingtype && sd->state.autoloottype&(1<<itemdb_type(nameid)) )
 		j = true;
 
-	return (sd->state.autolooting ? i != AUTOLOOTITEM_SIZE : sd->state.autolootingtype ? j : false);
+	return (sd->state.autolooting ? (i != AUTOLOOTITEM_SIZE) : (sd->state.autolootingtype ? j : false));
 }
 
 /**
@@ -12388,6 +12388,6 @@ void do_init_pc(void) {
 
 	do_init_pc_groups();
 
-	pc_sc_display_ers = ers_new(sizeof(struct sc_display_entry), "pc.c:pc_sc_display_ers", ERS_OPT_NONE);
-	pc_itemgrouphealrate_ers = ers_new(sizeof(struct s_pc_itemgrouphealrate), "pc.c:pc_itemgrouphealrate_ers", ERS_OPT_NONE);
+	pc_sc_display_ers = ers_new(sizeof(struct sc_display_entry), "pc.c::pc_sc_display_ers", ERS_OPT_NONE);
+	pc_itemgrouphealrate_ers = ers_new(sizeof(struct s_pc_itemgrouphealrate), "pc.c::pc_itemgrouphealrate_ers", ERS_OPT_NONE);
 }

@@ -7152,8 +7152,10 @@ ACMD_FUNC(mobinfo)
 					droprate = 1;
 			}
 #endif
-			if (pc_isvip(sd)) // Display item rate increase for VIP.
+			if (pc_isvip(sd)) { // Display item rate increase for VIP.
 				droprate += droprate * battle_config.vip_drop_increase / 100;
+				droprate = min(droprate, 10000); // Cap it to 100%
+			}
 			if (item_data->slot)
 				sprintf(atcmd_output2, " - %s[%d]  %02.02f%%", item_data->jname, item_data->slot, droprate / 100);
 			else
