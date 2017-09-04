@@ -21744,13 +21744,13 @@ void do_init_skill(void)
 	skillusave_db = idb_alloc(DB_OPT_RELEASE_DATA);
 	bowling_db = idb_alloc(DB_OPT_BASE);
 	skill_unit_ers = ers_new(sizeof(struct skill_unit_group),"skill.c::skill_unit_ers",ERS_OPT_NONE);
-	skill_timer_ers  = ers_new(sizeof(struct skill_timerskill),"skill.c::skill_timer_ers",ERS_OPT_NONE);
+	skill_timer_ers = ers_new(sizeof(struct skill_timerskill),"skill.c::skill_timer_ers",ERS_OPT_NONE);
 
 	add_timer_func_list(skill_unit_timer,"skill_unit_timer");
 	add_timer_func_list(skill_castend_id,"skill_castend_id");
 	add_timer_func_list(skill_castend_pos,"skill_castend_pos");
 	add_timer_func_list(skill_timerskill,"skill_timerskill");
-	add_timer_func_list(skill_blockpc_end, "skill_blockpc_end");
+	add_timer_func_list(skill_blockpc_end,"skill_blockpc_end");
 
 	add_timer_interval(gettick() + SKILLUNITTIMER_INTERVAL,skill_unit_timer,0,0,SKILLUNITTIMER_INTERVAL);
 }

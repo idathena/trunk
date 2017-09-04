@@ -494,7 +494,6 @@ struct item_data *itemdb_exists(unsigned short nameid);
 #define itemdb_traderight(n) (itemdb_search(n)->flag.trade_restriction)
 #define itemdb_viewid(n) (itemdb_search(n)->view_id)
 #define itemdb_autoequip(n) (itemdb_search(n)->flag.autoequip)
-#define itemdb_is_rune(n) (((n) >= ITEMID_NAUTHIZ && (n) <= ITEMID_HAGALAZ) || (n) == ITEMID_LUX_ANIMA)
 #define itemdb_is_elementpoint(n) ((n) >= ITEMID_SCARLET_PTS && (n) <= ITEMID_LIME_GREEN_PTS)
 #define itemdb_is_spellbook(n) ((n) >= ITEMID_MAGIC_BOOK_FB && (n) <= ITEMID_MAGIC_BOOK_DL)
 #define itemdb_is_guillotinepoison(n) ((n) >= ITEMID_PARALYSE && (n) <= ITEMID_VENOMBLEED)
