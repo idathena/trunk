@@ -4794,11 +4794,6 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 	if( nameid >= ITEMID_BOW_MERCENARY_SCROLL1 && nameid <= ITEMID_SPEARMERCENARY_SCROLL10 && sd->md )
 		return false;
 
-	if( itemdb_is_rune(nameid) && (sd->class_&MAPID_THIRDMASK) != MAPID_RUNE_KNIGHT )
-		return false; //Only Rune Knight may use runes
-	else if( itemdb_is_guillotinepoison(nameid) && (sd->class_&MAPID_THIRDMASK) != MAPID_GUILLOTINE_CROSS )
-		return false; //Only Guillotine Cross may use poisons
-
 	if( item->flag.group || item->type == IT_CASH ) { //Safe check type cash disappear when overweight [Napster]
 		if( pc_is90overweight(sd) ) {
 			clif_msg(sd,ITEM_CANT_OBTAIN_WEIGHT);
