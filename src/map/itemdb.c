@@ -1939,27 +1939,21 @@ void itemdb_reload_itemmob_data(void) {
 	int i;
 
 	for( i = 0; i < MAX_MOB_DROP_TOTAL; i++ ) {
-		struct mob_db *entry;
+		struct mob_db *entry = mob_db(i);
 		int d, k;
 
-		if( !((i < MOBID_TREAS01 || i > MOBID_TREAS40) && (i < MOBID_TREAS41 || i > MOBID_TREAS49)) )
-			continue;
-		entry = mob_db(i);
 		for( d = 0; d < MAX_MOB_DROP; d++ ) {
 			struct item_data *id;
 
 			if( !entry->dropitem[d].nameid )
 				continue;
 			id = itemdb_search(entry->dropitem[d].nameid);
-
 			for( k = 0; k < MAX_SEARCH; k++ ) {
 				if( id->mob[k].chance <= entry->dropitem[d].p )
 					break;
 			}
-
 			if( k == MAX_SEARCH )
 				continue;
-
 			if( id->mob[k].id != i )
 				memmove(&id->mob[k + 1], &id->mob[k], (MAX_SEARCH - k - 1) * sizeof(id->mob[0]));
 			id->mob[k].chance = entry->dropitem[d].p;

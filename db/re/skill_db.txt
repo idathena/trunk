@@ -783,7 +783,7 @@
 // AB Arch Bishop
 2038,11,8,1,6,0x2,1,5,-3,yes,0,0,0,magic,0,0,	AB_JUDEX,Judex
 2039,1,6,4,0,0x1,0,1,1,yes,0,0,0,magic,0,0,	AB_ANCILLA,Ancilla
-2040,11,8,1,6,0x2,1,10,-10,yes,0,0,0,magic,0,0,	AB_ADORAMUS,Adoramus
+2040,11,8,1,6,0,0,10,-10,yes,0,0,0,magic,0,0,	AB_ADORAMUS,Adoramus
 2041,1,6,4,0,0x3,3:7:15,3,1,yes,0,0,0,magic,0,0,	AB_CLEMENTIA,Crementia
 2042,1,6,4,0,0x3,3:7:15,3,1,yes,0,0,0,magic,0,0,	AB_CANTO,Canto Candidus
 2043,1,6,4,6,0x3,3:7:15,3,1,yes,0,0,0,magic,0,0,	AB_CHEAL,Coluceo Heal
@@ -1092,7 +1092,7 @@
 //2551,1,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	RL_GLITTERING_GREED,Flip The Coin Greed
 2552,1,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	RL_RICHS_COIN,Rich's Coin
 2553,-9,6,1,0,0x60,0,5,1,yes,0,0,0,weapon,0,0,	RL_MASS_SPIRAL,Mass Spiral
-2554,-9,6,1,-1,0,0,5,1,yes,0,0,0,weapon,0,0,	RL_BANISHING_BUSTER,Banishing Buster
+2554,-9,6,1,-1,0,0,5,1,yes,0,0,0,weapon,0,0x2,	RL_BANISHING_BUSTER,Banishing Buster
 2555,1,6,4,0,0x41,0,5,1,yes,0,0,0,misc,0,0,	RL_B_TRAP,Bind Trap
 2556,1,6,4,0,0x3,-1,1,1,no,0,0,0,none,0,0,	RL_FLICKER,Flicker
 2557,-9,6,1,-1,0x2,2:2:2:2:5,5,1,yes,0,0,0,weapon,0,0,	RL_S_STORM,Shatter Storm

@@ -391,9 +391,14 @@ int map_delblock(struct block_list *bl)
  */
 int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 {
-	int x0 = bl->x, y0 = bl->y;
 	struct status_change *sc = NULL;
-	int moveblock = (x0 / BLOCK_SIZE != x1 / BLOCK_SIZE || y0 / BLOCK_SIZE != y1 / BLOCK_SIZE);
+	int x0, y0, moveblock;
+
+	nullpo_ret(bl);
+
+	x0 = bl->x;
+	y0 = bl->y;
+	moveblock = (x0 / BLOCK_SIZE != x1 / BLOCK_SIZE || y0 / BLOCK_SIZE != y1 / BLOCK_SIZE);
 
 	if (!bl->prev) { //Block not in map, just update coordinates, but do naught else
 		bl->x = x1;
@@ -428,6 +433,7 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 	else
 		map_delblcell(bl);
 #endif
+
 	bl->x = x1;
 	bl->y = y1;
 
@@ -2037,6 +2043,7 @@ int map_quit(struct map_session_data *sd) {
 		status_change_end(&sd->bl,SC_DECORATION_OF_MUSIC,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_SPRITEMABLE,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_SV_ROOTTWIST,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_SOULATTACK,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_HAT_EFFECT,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_QSCARABA,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_LJOSALFAR,INVALID_TIMER);

@@ -1731,9 +1731,8 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 						case SC_KAGEHUMI:			case SC_JYUMONJIKIRI:		case SC_MEIKYOUSISUI:
 						case SC_KYOUGAKU:			case SC_IZAYOI:
 						//RL
-						case SC_HEAT_BARREL:			case SC_FALLEN_ANGEL:		case SC_P_ALTER:
-						case SC_E_CHAIN:			case SC_C_MARKER:		case SC_B_TRAP:
-						case SC_H_MINE:
+						case SC_B_TRAP:				case SC_C_MARKER:		case SC_H_MINE:
+						case SC_ANTI_M_BLAST:			case SC_FALLEN_ANGEL:
 						//Doram
 						case SC_SPRITEMABLE:			case SC_SUHIDE:			case SC_SU_STOOP:
 						case SC_CATNIPPOWDER:			case SC_SV_ROOTTWIST:		case SC_BITESCAR:
@@ -1742,6 +1741,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 						case SC_GROOMING:			case SC_SHRIMPBLESSING:		case SC_CHATTERING:
 						case SC_DORAM_WALKSPEED:		case SC_DORAM_MATK:		case SC_DORAM_FLEE2:
 						case SC_DORAM_SVSP:			case SC_DORAM_BUF_01:		case SC_DORAM_BUF_02:
+						case SC_SOULATTACK:
 						//Misc
 						case SC_SITDOWN_FORCE:			case SC_ALL_RIDING:		case SC_MONSTER_TRANSFORM:
 						case SC_PUSH_CART:			case SC_FULL_THROTTLE:		case SC_REBOUND:
@@ -2037,7 +2037,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 
 	//Polymorph
 	if( sd && sd->bonus.classchange && attack_type&BF_WEAPON && dstmd &&
-		!(tstatus->mode&MD_BOSS) && (rnd()%10000 < sd->bonus.classchange) ) {
+		!status_has_mode(tstatus,MD_STATUS_IMMUNE) && (rnd()%10000 < sd->bonus.classchange) ) {
 		int class_ = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,0x01,0);
 
 		if( class_ && mobdb_checkid(class_) )
@@ -2460,7 +2460,7 @@ int skill_break_equip(struct block_list *src, struct block_list *bl, unsigned sh
 				pos &= ~pos_list[i];
 			else if (rnd()%10000 >= rate)
 				pos &= ~pos_list[i];
-			else if (!sd && !(status_get_mode(bl)&MD_BOSS)) //Cause strip effect
+			else if (!sd) //Cause strip effect
 				sc_start(src,bl,sc_atk[i],100,0,skill_get_time(status_sc2skill(sc_atk[i]),1));
 		}
 	}
@@ -2550,7 +2550,7 @@ int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned sh
  *  0x02 - ignores players' special_state.no_knockback
  *  These flags "return 'count' instead of 0 if target is can't be knocked back"
  *  0x04 - at WOE/BG map
- *  0x08 - if target is MD_KNOCKBACK_IMMUNE|MD_BOSS
+ *  0x08 - if target is MD_KNOCKBACK_IMMUNE
  *  0x10 - if target has 'special_state.no_knockback'
  *  0x20 - if target is in Basilica area
  * @return Number of knocked back cells done
@@ -2572,7 +2572,7 @@ short skill_blown(struct block_list *src, struct block_list *target, char count,
 		checkflag |= 0x1; //Offensive
 	if( !(flag&0x02) )
 		checkflag |= 0x2; //Knockback type
-	if( is_boss(src) )
+	if( status_get_class_(src) == CLASS_BOSS )
 		checkflag |= 0x4; //Boss attack
 
 	//Get reason and check for flags
@@ -2620,7 +2620,7 @@ static int skill_magic_reflect(struct block_list *src, struct block_list *bl, in
 	if( sc->data[SC_MAGICMIRROR] && rnd()%100 < sc->data[SC_MAGICMIRROR]->val2 )
 		return 1; //Magic Mirror reflection (Bypasses Boss check)
 
-	if( is_boss(src) )
+	if( status_get_class_(src) == CLASS_BOSS )
 		return 0;
 
 	//Kyomu doesn't disable Kaite, but the "skill fail chance" part of Kyomu applies to it
@@ -2996,6 +2996,9 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	nullpo_ret(dsrc); //dsrc is the actual originator of the damage, can be the same as src, or a skill casted by src
 	nullpo_ret(bl); //Target to be attacked
 
+	if (status_bl_has_mode(bl, MD_SKILL_IMMUNE) || (status_get_class(bl) == MOBID_EMPERIUM && !(skill_get_inf3(skill_id)&INF3_HIT_EMP)))
+		return 0;
+
 	if (src != dsrc) {
 		if (!status_check_skilluse((battle_config.skill_caster_check ? src : NULL), bl, skill_id, 2))
 			return 0; //When caster is not the src of attack, this is a ground skill, and as such, do the relevant target checking [Skotlex]
@@ -3039,7 +3042,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		struct pet_data *pd = (TBL_PET *)src;
 
 		if (pd->a_skill && pd->a_skill->div_ && pd->a_skill->id == skill_id) { //petskillattack2
-			if (battle_config.pet_ignore_infinite_def || !target_has_infinite_defense(bl, skill_id, dmg.flag)) {
+			if (battle_config.pet_ignore_infinite_def || !is_infinite_defense(bl, dmg.flag)) {
 				int element = skill_get_ele(skill_id, skill_lv);
 
 				//if (skill_id == -1) Does it ever worked?
@@ -3467,12 +3470,12 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 					int rate = 50 + skill_lv * 5;
 
 					rate = rate + status_get_lv(src) - status_get_lv(bl);
-					if (rnd()%100 < rate && !is_boss(bl))
+					if (rnd()%100 < rate && !status_has_mode(tstatus, MD_STATUS_IMMUNE))
 						skill_addtimerskill(src, tick + 800, bl->id, 0, 0, skill_id, skill_lv, 0, flag);
 				}
 				break;
 			case SC_FATALMENACE:
-				if (!is_boss(bl))
+				if (!status_has_mode(tstatus, MD_STATUS_IMMUNE))
 					skill_addtimerskill(src, tick + 800, bl->id, skill_area_temp[4], skill_area_temp[5], skill_id, skill_lv, 0, flag);
 				skill_addtimerskill(src, tick + 810, src->id, skill_area_temp[4], skill_area_temp[5], skill_id, skill_lv, 0, flag);
 				break;
@@ -4762,6 +4765,8 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					skill_get_splash(skill_id,skill_lv),skill_get_maxcount(skill_id,skill_lv),splash_target(src),
 					skill_get_type(skill_id),src,src,skill_id,skill_lv,tick,flag,BCT_ENEMY);
 			}
+			if (skill_id == SN_SHARPSHOOTING)
+				status_change_end(src,SC_CAMOUFLAGE,INVALID_TIMER);
 			break;
 
 		case MO_INVESTIGATE:
@@ -5042,6 +5047,8 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					skill_area_temp[0] = map_foreachinallrange(skill_area_sub,bl,(skill_id == AS_SPLASHER ? 1 : skill_get_splash(skill_id,skill_lv)),BL_CHAR,src,skill_id,skill_lv,tick,BCT_ENEMY,skill_area_sub_count);
 				//Recursive invocation of skill_castend_damage_id() with flag|1
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),starget,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
+				if (skill_id == RA_ARROWSTORM)
+					status_change_end(src,SC_CAMOUFLAGE,INVALID_TIMER);
 				if (skill_id == AS_SPLASHER) {
 					map_freeblock_unlock();
 					return 1; //Already consume the requirement item, so end it
@@ -5332,7 +5339,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case NJ_BAKUENRYU:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			skill_castend_pos2(src,bl->x,bl->y,skill_id,skill_lv,tick,0); //Place units around target
-			break;
+			return 0;
 
 		case GC_DARKILLUSION:
 		case SR_KNUCKLEARROW:
@@ -5707,7 +5714,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case MH_EQC: {
 				TBL_HOM *hd = BL_CAST(BL_HOM,src);
 
-				if (is_boss(bl)) {
+				if (status_bl_has_mode(bl,MD_STATUS_IMMUNE)) {
 					if (hd && hd->master)
 						clif_skill_fail(hd->master,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 					break;
@@ -6009,11 +6016,11 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 				heal = skill_calc_heal(src,bl,skill_id,skill_lv,true);
 
-				if(status_isimmune(bl) || (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd))))
+				if(status_isimmune(bl) || (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD)))
 					heal = 0;
 
 				if(tsc && tsc->count) {
-					if(tsc->data[SC_KAITE] && !(sstatus->mode&MD_BOSS)) { //Bounce back heal
+					if(tsc->data[SC_KAITE] && !status_has_mode(sstatus,MD_STATUS_IMMUNE)) { //Bounce back heal
 						if(--tsc->data[SC_KAITE]->val2 <= 0)
 							status_change_end(bl,SC_KAITE,INVALID_TIMER);
 						heal = 0; //When you try to heal under Kaite, the heal is voided
@@ -6262,13 +6269,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if (dstmd) {
 				int mob_id = (skill_id == SA_MONOCELL ? MOBID_PORING : mob_get_random_id(MOBG_ClassChange,0x01,0));
 
-				if (sd && dstmd->status.mode&MD_BOSS) {
+				if (sd && status_has_mode(&dstmd->status,MD_STATUS_IMMUNE)) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				mob_class_change(dstmd,mob_id);
-				if (tsc && dstmd->status.mode&MD_BOSS) {
+				if (tsc && status_has_mode(&dstmd->status,MD_STATUS_IMMUNE)) {
 					const enum sc_type scs[] = { SC_QUAGMIRE,SC_PROVOKE,SC_ROKISWEIL,SC_GRAVITATION,SC_SUITON,
 						SC_STRIPWEAPON,SC_STRIPSHIELD,SC_STRIPARMOR,SC_STRIPHELM,SC_BLADESTOP };
 	
@@ -6283,7 +6290,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case SA_DEATH:
-			if (sd && dstmd && dstmd->status.mode&MD_BOSS) {
+			if (sd && dstmd && status_has_mode(&dstmd->status,MD_STATUS_IMMUNE)) {
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				break;
 			}
@@ -6818,7 +6825,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					i += dstsd->spiritcharm * 7;
 					pc_delspiritcharm(dstsd,dstsd->spiritcharm,dstsd->spiritcharm_type);
 				}
-			} else if (dstmd && !is_boss(bl) && rnd()%100 < 20) {
+			} else if (dstmd && !status_has_mode(tstatus,MD_STATUS_IMMUNE) && rnd()%100 < 20) {
 				//Check if target is a monster and not a Boss, for the 20% chance to absorb 2 SP per monster's level [Reddozen]
 				i = 2 * dstmd->level;
 				mob_target(dstmd,src,0);
@@ -7118,7 +7125,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			else if (dstmd) {
 				if (status_get_lv(src) > status_get_lv(bl) &&
 					(tstatus->race == RC_DEMON || tstatus->race == RC_DEMIHUMAN || tstatus->race == RC_ANGEL) &&
-					!(tstatus->mode&MD_BOSS))
+					!status_has_mode(tstatus,MD_STATUS_IMMUNE))
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start2(src,bl,type,70,skill_lv,src->id,skill_get_time(skill_id,skill_lv)));
 				else {
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,0);
@@ -7265,7 +7272,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				break;
 			}
 			if( dstmd && dstmd->mob_id == MOBID_EMPERIUM )
-				break; //Cannot be Used on Emperium
+				break; //Cannot be used on Emperium
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			clif_skill_estimation(sd,bl);
 			if( skill_id == MER_ESTIMATION )
@@ -7794,9 +7801,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_KAGEHUMI:			case SC_JYUMONJIKIRI:		case SC_MEIKYOUSISUI:
 							case SC_KYOUGAKU:			case SC_IZAYOI:
 							//RL
-							case SC_HEAT_BARREL:			case SC_FALLEN_ANGEL:		case SC_P_ALTER:
-							case SC_E_CHAIN:			case SC_C_MARKER:		case SC_B_TRAP:
-							case SC_H_MINE:
+							case SC_B_TRAP:				case SC_C_MARKER:		case SC_H_MINE:
+							case SC_ANTI_M_BLAST:			case SC_FALLEN_ANGEL:
 							//Doram
 							case SC_SPRITEMABLE:			case SC_SUHIDE:			case SC_SU_STOOP:
 							case SC_CATNIPPOWDER:			case SC_SV_ROOTTWIST:		case SC_BITESCAR:
@@ -7805,6 +7811,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_GROOMING:			case SC_SHRIMPBLESSING:		case SC_CHATTERING:
 							case SC_DORAM_WALKSPEED:		case SC_DORAM_MATK:		case SC_DORAM_FLEE2:
 							case SC_DORAM_SVSP:			case SC_DORAM_BUF_01:		case SC_DORAM_BUF_02:
+							case SC_SOULATTACK:
 							//Misc
 							case SC_SITDOWN_FORCE:			case SC_ALL_RIDING:		case SC_MONSTER_TRANSFORM:
 							case SC_PUSH_CART:			case SC_FULL_THROTTLE:		case SC_REBOUND:
@@ -7921,7 +7928,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						break; //Nothing to cancel
 					bl_skill_id = ud->skill_id;
 					bl_skill_lv = ud->skill_lv;
-					if (tstatus->mode&MD_BOSS) { //Only 10% success chance against bosses [Skotlex]
+					if (status_has_mode(tstatus,MD_STATUS_IMMUNE)) { //Only 10% success chance against bosses [Skotlex]
 						if (rnd()%100 < 90) {
 							if (sd)
 								clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -7997,9 +8004,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SA_ELEMENTFIRE:
 		case SA_ELEMENTGROUND:
 		case SA_ELEMENTWIND:
-			if (sd && !dstmd) //Only works on monsters
-				break;
-			if (tstatus->mode&MD_BOSS)
+			if (sd && (!dstmd || status_has_mode(tstatus,MD_STATUS_IMMUNE))) //Only works on monsters (Except status immune monsters)
 				break;
 		//Fall through
 		case NPC_ATTRICHANGE:
@@ -8147,7 +8152,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						md->db->skill[md->skill_idx].val[3],
 						skill_get_time(skill_id,skill_lv));
 				//Reset aggressive state depending on resulting mode
-				md->state.aggressive = (md->status.mode&MD_ANGRY ? 1 : 0);
+				md->state.aggressive = (status_has_mode(&md->status,MD_ANGRY) ? 1 : 0);
 			}
 			break;
 
@@ -8334,7 +8339,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case AS_SPLASHER:
-			if (is_boss(bl)
+			if (status_has_mode(tstatus,MD_STATUS_IMMUNE)
 #ifndef RENEWAL //Dropped the 3/4 hp requirement
 				|| tstatus-> hp > tstatus->max_hp * 3 / 4
 #endif
@@ -8413,7 +8418,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case CR_SLIMPITCHER:
-			if (dstmd && mob_is_gvg(dstmd))
+			if (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD))
 				break; //Updated to block Slim Pitcher from working on gvg monsters
 			if (potion_hp || potion_sp) {
 				int hp = potion_hp, sp = potion_sp;
@@ -8485,7 +8490,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				int card = -1;
 
 				if ((tsc && (tsc->data[SC_BASILICA] || tsc->data[SC_TAROTCARD])) ||
-					(dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd)))) {
+					(dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD))) {
 					map_freeblock_unlock();
 					return 1;
 				}
@@ -8561,7 +8566,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		//Fall through
 		case SL_SKA: //[marquis007]
 		case SL_SKE:
-			if (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd))) {
+			if (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD)) {
 				map_freeblock_unlock();
 				return 1;
 			}
@@ -8875,7 +8880,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case RK_PHANTOMTHRUST:
-			if( (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd))) ||
+			if( (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD)) ||
 				(dstsd && battle_check_target(src,bl,BCT_PARTY) <= 0) ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -9147,7 +9152,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case AB_RENOVATIO:
-			if( dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd)) ) {
+			if( dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD) ) {
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				map_freeblock_unlock();
 				return 1;
@@ -9157,7 +9162,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case AB_CLEARANCE:
-				if( (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd))) ||
+				if( (dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD)) ||
 					(dstsd && battle_check_target(src,bl,BCT_PARTY) <= 0) ) {
 					if( sd )
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -9282,9 +9287,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_KAGEHUMI:			case SC_JYUMONJIKIRI:		case SC_MEIKYOUSISUI:
 						case SC_KYOUGAKU:			case SC_IZAYOI:			case SC_ZENKAI:
 						//RL
-						case SC_HEAT_BARREL:			case SC_FALLEN_ANGEL:		case SC_P_ALTER:
-						case SC_E_CHAIN:			case SC_C_MARKER:		case SC_B_TRAP:
-						case SC_H_MINE:
+						case SC_B_TRAP:				case SC_H_MINE:			case SC_FALLEN_ANGEL:
 						//Doram
 						case SC_SPRITEMABLE:			case SC_SUHIDE:			case SC_SU_STOOP:
 						case SC_CATNIPPOWDER:			case SC_SV_ROOTTWIST:		case SC_ARCLOUSEDASH:
@@ -9292,7 +9295,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case SC_HISS:				case SC_NYANGGRASS:		case SC_GROOMING:
 						case SC_SHRIMPBLESSING:			case SC_CHATTERING:		case SC_DORAM_WALKSPEED:
 						case SC_DORAM_MATK:			case SC_DORAM_FLEE2:		case SC_DORAM_SVSP:
-						case SC_DORAM_BUF_01:			case SC_DORAM_BUF_02:
+						case SC_DORAM_BUF_01:			case SC_DORAM_BUF_02:		case SC_SOULATTACK:
 						//Misc
 						case SC_SITDOWN_FORCE:			case SC_ALL_RIDING:		case SC_MONSTER_TRANSFORM:
 						case SC_PUSH_CART:			case SC_FULL_THROTTLE:		case SC_REBOUND:
@@ -9932,7 +9935,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case SR_GENTLETOUCH_CURE:
-			if( dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd)) )
+			if( dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD) )
 				break;
 			if( rnd()%100 < skill_lv * 5 + (status_get_dex(src) + status_get_lv(src)) / 4 - rnd_value(1,10) ) {
 				int heal = 120 * skill_lv + status_get_max_hp(bl) * skill_lv / 100;
@@ -10732,7 +10735,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case KO_GENWAKU:
-			if( !map_flag_gvg2(src->m) && (dstsd || dstmd) && !(tstatus->mode&MD_PLANT) && battle_check_target(src,bl,BCT_ENEMY) > 0 ) {
+			if( (dstsd || dstmd) && !status_has_mode(tstatus,MD_IGNOREMELEE|MD_IGNOREMAGIC|MD_IGNORERANGED|MD_IGNOREMISC) && battle_check_target(src,bl,BCT_ENEMY) > 0 ) {
 				int rate = max(5,(45 + skill_lv * 5 - status_get_int(bl) / 10));
 				int x = src->x, y = src->y;
 
@@ -10741,11 +10744,11 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
-				if( unit_movepos(src,bl->x,bl->y,0,false) ) {
+				if( !unit_blown_immune(src,0x1) && unit_movepos(src,bl->x,bl->y,0,false) ) {
 					clif_skill_nodamage(src,src,skill_id,skill_lv,1);
 					clif_blown(src,bl);
 					sc_start(src,src,SC_CONFUSION,25,skill_lv,skill_get_time(skill_id,skill_lv));
-					if( !is_boss(bl) && unit_movepos(bl,x,y,0,false) ) {
+					if( unit_movepos(bl,x,y,0,false) ) {
 						if( dstsd && pc_issit(dstsd) )
 							pc_setstand(dstsd);
 						clif_blown(bl,bl);
@@ -10819,7 +10822,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if( hd ) {
 				int heal;
 
-				if( dstmd && (dstmd->mob_id == MOBID_EMPERIUM || mob_is_battleground(dstmd)) )
+				if( dstmd && (dstmd->mob_id == MOBID_EMPERIUM || status_get_class_(bl) == CLASS_BATTLEFIELD) )
 					break;
 				if( tsc ) {
 					const enum sc_type scs[] = {
@@ -10841,7 +10844,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				clif_skill_nodamage(src,src,skill_id,skill_lv,
 					clif_skill_nodamage(src,bl,AL_HEAL,heal,1));
 				status_change_start(src,src,type,10000,skill_lv,0,0,1,skill_get_time(skill_id,skill_lv),SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
-				if( battle_check_target(src,bl,BCT_ENEMY) > 0 && !is_boss(bl) )
+				if( battle_check_target(src,bl,BCT_ENEMY) > 0 && !status_has_mode(tstatus,MD_STATUS_IMMUNE) )
 					status_change_start(src,bl,type,10000,skill_lv,0,0,1,skill_get_time(skill_id,skill_lv),SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
 			}
 			break;
@@ -11192,6 +11195,9 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 				ud->skilltimer = tid;
 				return skill_castend_pos(tid,tick,id,data);
 		}
+		if( target->id != src->id && (status_bl_has_mode(target,MD_SKILL_IMMUNE) || (status_get_class(target) == MOBID_EMPERIUM &&
+			!(skill_get_inf3(ud->skill_id)&INF3_HIT_EMP))) && skill_get_casttype(ud->skill_id) == CAST_NODAMAGE )
+			break;
 		//Check target validity
 		inf = skill_get_inf(ud->skill_id);
 		inf2 = skill_get_inf2(ud->skill_id);
@@ -11313,8 +11319,14 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			if( sd ) {
 				if( (inf = skill_get_cooldown(sd,ud->skill_id,ud->skill_lv)) > 0 )
 					skill_blockpc_start(sd,ud->skill_id,inf);
-				if( ud->skill_id != HP_BASILICA )
+				if( ud->skill_id != HP_BASILICA ) {
 					skill_consume_requirement(sd,ud->skill_id,ud->skill_lv,1);
+					if( target->id != src->id && (status_bl_has_mode(target,MD_SKILL_IMMUNE) || (status_get_class(target) == MOBID_EMPERIUM &&
+						!(skill_get_inf3(ud->skill_id)&INF3_HIT_EMP))) && skill_get_casttype(ud->skill_id) == CAST_DAMAGE ) {
+						clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0,0);
+						break;
+					}
+				}
 			}
 			if( hd && (inf = skill_get_cooldown(NULL,ud->skill_id,ud->skill_lv)) > 0 )
 				skill_blockhomun_start(hd,ud->skill_id,inf);
@@ -11995,6 +12007,8 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			clif_skill_damage(src,src,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 		//Fall through
 		case AC_SHOWER:
+			if( skill_id == AC_SHOWER )
+				status_change_end(src,SC_CAMOUFLAGE,INVALID_TIMER);
 		case MA_SHOWER:
 		case RK_DRAGONBREATH:
 		case RK_DRAGONBREATH_WATER:
@@ -13522,7 +13536,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 			break;
 
 		case UNT_CATNIPPOWDER:
-			if( bl->id == src->id || (status_get_mode(bl)&MD_BOSS) )
+			if( bl->id == src->id )
 				break; //Does not affect the caster or boss
 			if( !sce && battle_check_target(&unit->bl,bl,BCT_ENEMY) > 0 )
 				sc_start(src,bl,type,100,skill_lv,group->limit);
@@ -13747,7 +13761,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 					if (md->mob_id == MOBID_EMPERIUM)
 						break;
 #endif
-					if (mob_is_battleground(md))
+					if (status_get_class_(bl) == CLASS_BATTLEFIELD)
 						break;
 				}
 				if (tstatus->hp >= tstatus->max_hp)
@@ -14074,7 +14088,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 		case UNT_BASILICA: {
 				int i = battle_check_target(&unit->bl,bl,BCT_ENEMY);
 
-				if (i > 0 && !is_boss(bl)) { //Knock-back any enemy except Boss
+				if (i > 0) {
 					skill_blown(&unit->bl,bl,skill_get_blewcount(skill_id,skill_lv),unit_getdir(bl),0);
 					break;
 				}
@@ -14161,7 +14175,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 		case UNT_WALLOFTHORN: {
 				struct map_session_data *tsd = map_id2sd(bl->id);
 
-				if (is_boss(bl))
+				if (status_bl_has_mode(bl,MD_STATUS_IMMUNE))
 					break;
 				if ((map_flag_vs(bl->m) && tsd && (!tsd->status.party_id ||
 					battle_check_target(src,bl,BCT_PARTY) <= 0)) ||
@@ -14622,7 +14636,9 @@ int skill_check_condition_char_sub(struct block_list *bl, va_list ap)
 		return 0;
 
 	if( inf2&INF2_CHORUS_SKILL ) {
-		if( tsd->status.party_id == sd->status.party_id && (tsd->class_&MAPID_THIRDMASK) == MAPID_MINSTRELWANDERER )
+		if( tsd->status.party_id && sd->status.party_id &&
+			tsd->status.party_id == sd->status.party_id &&
+			(tsd->class_&MAPID_THIRDMASK) == MAPID_MINSTRELWANDERER )
 			p_sd[(*c)++] = tsd->bl.id;
 		return 1;
 	} else {
@@ -14641,7 +14657,9 @@ int skill_check_condition_char_sub(struct block_list *bl, va_list ap)
 					p_sd[(*c)++] = tsd->bl.id;
 				return 1;
 			case WL_COMET:
-				if( tsd->status.party_id == sd->status.party_id && (tsd->class_&MAPID_THIRDMASK) == MAPID_WARLOCK &&
+				if( tsd->status.party_id && sd->status.party_id &&
+					tsd->status.party_id == sd->status.party_id &&
+					(tsd->class_&MAPID_THIRDMASK) == MAPID_WARLOCK &&
 					pc_checkskill(tsd, skill_id) > 0 )
 					p_sd[(*c)++] = tsd->bl.id;
 				return 1;
@@ -14722,14 +14740,7 @@ int skill_check_pc_partner(struct map_session_data *sd, uint16 skill_id, uint16 
 	//Else: New search for partners
 	c = 0;
 	memset(p_sd, 0, sizeof(p_sd));
-	if (skill_id == WL_COMET)
-		party_foreachsamemap(skill_check_condition_char_sub, sd, range, &sd->bl, &c, &p_sd, skill_id);
-	else {
-		if (is_chorus)
-			i = party_foreachsamemap(skill_check_condition_char_sub, sd, AREA_SIZE, &sd->bl, &c, &p_sd, skill_id);
-		else
-			i = map_foreachinallrange(skill_check_condition_char_sub, &sd->bl, range, BL_PC, &sd->bl, &c, &p_sd, skill_id);
-	}
+	i = map_foreachinallrange(skill_check_condition_char_sub, &sd->bl, range, BL_PC, &sd->bl, &c, &p_sd, skill_id);
 
 	//Apply the average lv to encore skills
 	//I know c should be one, but this shows how it could be used for the average of n partners
@@ -14864,7 +14875,7 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			}
 			break;
 		case PF_MINDBREAKER:
-			if( is_boss(bl) || battle_check_undead(status_get_race(bl),status_get_element(bl)) ) {
+			if( status_bl_has_mode(bl,MD_STATUS_IMMUNE) || battle_check_undead(status_get_race(bl),status_get_element(bl)) ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				return false;
@@ -14877,7 +14888,7 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			}
 			break;
 		case WL_WHITEIMPRISON:
-			if( (bl->id != src->id && battle_check_target(src,bl,BCT_ENEMY) <= 0) || is_boss(bl) ) {
+			if( (bl->id != src->id && battle_check_target(src,bl,BCT_ENEMY) <= 0) || status_get_class_(bl) == CLASS_BOSS ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				return false;
@@ -14915,7 +14926,7 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			}
 			break;
 		case SU_SV_ROOTTWIST:
-			if( is_boss(bl) ) {
+			if( status_bl_has_mode(bl,MD_STATUS_IMMUNE) ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				return false;
@@ -15081,7 +15092,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		return false;
 	}
 
-	if( (inf2&INF2_CHORUS_SKILL) && !skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),0) ) {
+	if( (inf2&INF2_CHORUS_SKILL) && !skill_check_pc_partner(sd,skill_id,&skill_lv,AREA_SIZE,0) ) {
 		clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_HELPER,0,0);
 		return false;
 	}
@@ -16041,6 +16052,8 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 	//Perform skill-specific checks (and actions)
 	switch( skill_id ) {
 		case PR_BENEDICTIO:
+		case AB_ADORAMUS:
+		case WL_COMET:
 			skill_check_pc_partner(sd,skill_id,&skill_lv,1,1);
 			break;
 		case AM_CANNIBALIZE:
@@ -16071,10 +16084,6 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				return false;
 			}
-			break;
-		case AB_ADORAMUS:
-		case WL_COMET:
-			skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),1);
 			break;
 		case KO_ZANZOU: {
 				int c = 0;
@@ -16436,7 +16445,7 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 							break;
 						case AB_ADORAMUS:
 						case WL_COMET:
-							if( skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),0) )
+							if( skill_check_pc_partner(sd,skill_id,&skill_lv,1,0) )
 								continue;
 							break;
 					}
@@ -17782,7 +17791,7 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 		case UNT_COBALTTRAP:
 		case UNT_MAIZETRAP:
 		case UNT_VERDURETRAP:
-			if( bl->type == BL_MOB && !is_boss(bl) ) {
+			if( bl->type == BL_MOB && status_get_class_(bl) != CLASS_BOSS ) {
 				struct status_data *status = status_get_status_data(bl);
 
 				status->def_ele = skill_get_ele(skill_id,skill_lv);

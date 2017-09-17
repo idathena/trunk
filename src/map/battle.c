@@ -559,7 +559,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 	s_class = (enum e_classAE)status_get_class(src);
 	sstatus = status_get_status_data(src);
 	tstatus = status_get_status_data(target);
-	s_race2 = (enum e_race2)status_get_race2(src);
+	s_race2 = status_get_race2(src);
 	s_defele = (tsd ? (enum e_element)status_get_element(src) : ELE_NONE);
 
 //Official servers apply the cardfix value on a base of 1000 and round down the reduction/increase
@@ -567,7 +567,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 
 	switch( attack_type ) {
 		case BF_MAGIC:
-			t_race2 = (enum e_race2)status_get_race2(target);
+			t_race2 = status_get_race2(target);
 			if( sd && !(nk&NK_NO_CARDFIX_ATK) ) { //Affected by attacker ATK bonuses
 				cardfix = cardfix * (100 + sd->magic_addrace[tstatus->race] + sd->magic_addrace[RC_ALL]) / 100;
 				if( !(nk&NK_NO_ELEFIX) ) { //Affected by element modifier bonuses
@@ -624,7 +624,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 			}
 			break;
 		case BF_WEAPON:
-			t_race2 = (enum e_race2)status_get_race2(target);
+			t_race2 = status_get_race2(target);
 			if( sd && !(nk&NK_NO_CARDFIX_ATK) && (left&2) ) { //Affected by attacker ATK bonuses
 				short cardfix_ = 1000;
 
@@ -971,7 +971,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		return damage;
 
 	if( sc && sc->count ) { //SC_* that reduce damage to 0
-		if( sc->data[SC_BASILICA] && !is_boss(src) ) {
+		if( sc->data[SC_BASILICA] && !status_bl_has_mode(src,MD_STATUS_IMMUNE) ) {
 			d->dmg_lv = ATK_BLOCK;
 			return 0;
 		}
@@ -1474,32 +1474,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			pc_overheat(sd,(element == ELE_FIRE ? 1 : -1));
 	}
 
-	if( damage && status->mode&MD_PLANT && battle_config.skill_min_damage ) {
-		if( (flag&BF_WEAPON && battle_config.skill_min_damage&1) ||
-			(flag&BF_MAGIC && battle_config.skill_min_damage&2) ||
-			(flag&BF_MISC && battle_config.skill_min_damage&4) )
-		{
-			int div_ = (skill_id ? skill_get_num(skill_id,skill_lv) : div);
-
-			switch( skill_id ) {
-				case SU_CN_METEOR:
-				case SU_CN_METEOR2:
-				case SU_LUNATICCARROTBEAT:
-				case SU_LUNATICCARROTBEAT2:
-					damage = div_ * -1;
-					break;
-				default:
-					damage = max(div_,0);
-					//Damage that just look like multiple hits but are actually one will show "miss" but still do 1 damage to plants
-					if( damage > 1 && d->miscflag&1 ) {
-						damage = 1;
-						d->dmg_lv = ATK_FLEE;
-					}
-					break;
-			}
-		}
-	}
-
 	return damage;
 }
 
@@ -1515,13 +1489,6 @@ int64 battle_calc_bg_damage(struct block_list *src, struct block_list *bl, int64
 {
 	if( !damage )
 		return 0;
-
-	if( bl->type == BL_MOB ) {
-		struct mob_data *md = BL_CAST(BL_MOB, bl);
-
-		if( map[bl->m].flag.battleground && (md->mob_id == MOBID_BLUE_CRYST || md->mob_id == MOBID_PINK_CRYST) && flag&BF_SKILL )
-			return 0; //Crystal cannot receive skill damage on battlegrounds
-	}
 
 	if( skill_get_inf2(skill_id)&INF2_NO_BG_GVG_DMG )
 		return damage; //Skill that ignore bg map reduction
@@ -1550,7 +1517,7 @@ bool battle_can_hit_gvg_target(struct block_list *src, struct block_list *bl, ui
 	short mob_id = ((TBL_MOB *)bl)->mob_id;
 
 	if( md && md->guardian_data ) {
-		if( mob_id == MOBID_EMPERIUM && flag&BF_SKILL && !(skill_get_inf3(skill_id)&INF3_HIT_EMP) )
+		if( (status_bl_has_mode(bl, MD_SKILL_IMMUNE) || (mob_id == MOBID_EMPERIUM && !(skill_get_inf3(skill_id)&INF3_HIT_EMP))) && flag&BF_SKILL )
 			return false; //Skill immunity
 		if( src->type != BL_MOB || mob_is_clone(((struct mob_data *)src)->mob_id) ) {
 			struct guild *g = (src->type == BL_PC ? ((TBL_PC *)src)->guild : guild_search(status_get_guild_id(src)));
@@ -2086,7 +2053,7 @@ static int battle_skill_damage_skill(struct block_list *src, struct block_list *
 			case BL_PC:
 				return damage->pc;
 			case BL_MOB:
-				if(is_boss(target))
+				if(status_get_class_(target) == CLASS_BOSS)
 					return damage->boss;
 				else
 					return damage->mob;
@@ -2119,7 +2086,7 @@ static int battle_skill_damage_map(struct block_list *src, struct block_list *ta
 				rate = mapd->adjust.damage.pc;
 				break;
 			case BL_MOB:
-				if(is_boss(target))
+				if(status_get_class_(target) == CLASS_BOSS)
 					rate = mapd->adjust.damage.boss;
 				else
 					rate = mapd->adjust.damage.mob;
@@ -2142,7 +2109,7 @@ static int battle_skill_damage_map(struct block_list *src, struct block_list *ta
 					rate += mapd->skill_damage.entries[i]->pc;
 					break;
 				case BL_MOB:
-					if(is_boss(target))
+					if(status_get_class_(target) == CLASS_BOSS)
 						rate += mapd->skill_damage.entries[i]->boss;
 					else
 						rate += mapd->skill_damage.entries[i]->mob;
@@ -2183,8 +2150,9 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
  *	Original coder Skotlex
  *	Initial refactoring by Baalberith
  *	Refined and optimized by helvetica
+ *	flag - see e_battle_flag
  */
-bool target_has_infinite_defense(struct block_list *target, uint16 skill_id, int flag)
+bool is_infinite_defense(struct block_list *target, int flag)
 {
 	struct status_data *tstatus = status_get_status_data(target);
 
@@ -2194,15 +2162,15 @@ bool target_has_infinite_defense(struct block_list *target, uint16 skill_id, int
 		if(su && su->group && su->group->skill_id == WM_REVERBERATION)
 			return true;
 	}
-	if(tstatus->mode&MD_IGNOREMELEE && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON))
+	if(status_has_mode(tstatus, MD_IGNOREMELEE) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON))
 		return true;
-	if(tstatus->mode&MD_IGNORERANGED && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG)
+	if(status_has_mode(tstatus, MD_IGNORERANGED) && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG)
 		return true;
-	return (tstatus->mode&MD_PLANT && skill_id != RA_CLUSTERBOMB
-#ifdef RENEWAL
-		&& skill_id != HT_BLASTMINE && skill_id != HT_CLAYMORETRAP
-#endif
-	);
+	if(status_has_mode(tstatus, MD_IGNOREMAGIC) && (flag&BF_MAGIC))
+		return true;
+	if(status_has_mode(tstatus, MD_IGNOREMISC) && (flag&BF_MISC))
+		return true;
+	return false;
 }
 
 /*========================
@@ -3264,8 +3232,29 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 }
 
 //For quick div adjustment
-#define DAMAGE_DIV_FIX(dmg, div) { if(div > 1) (dmg) *= div; else if(div < 0) (div) *= -1; }
+#define DAMAGE_DIV_FIX(dmg, div) { if(div < 0) { (div) *= -1; (dmg) /= div; } (dmg) *= div; }
 #define DAMAGE_DIV_FIX2(dmg, div) { if(div > 1) (dmg) *= div; }
+
+/**
+ * Applies DAMAGE_DIV_FIX and checks for min damage
+ * @author [Playtester]
+ * @param d: Damage struct to apply DAMAGE_DIV_FIX to
+ * @param skill_id: ID of the skill that deals damage
+ * @return Modified damage struct
+ */
+static struct Damage battle_apply_div_fix(struct Damage d, uint16 skill_id)
+{
+	if(d.damage) {
+		DAMAGE_DIV_FIX(d.damage, d.div_);
+		//Min damage
+		if(d.damage < d.div_ && (skill_id == SU_CN_METEOR || skill_id == SU_CN_METEOR2 ||
+			skill_id == SU_LUNATICCARROTBEAT || skill_id == SU_LUNATICCARROTBEAT2 || (battle_config.skill_min_damage&d.flag)))
+			d.damage = d.div_;
+	} else if(d.div_ < 0)
+		d.div_ *= -1;
+
+	return d;
+}
 
 /*=======================================
  * Check for and calculate multi attacks
@@ -3669,8 +3658,8 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case GS_TRIPLEACTION:
 			skillratio += 50 * skill_lv;
 			break;
-		case GS_BULLSEYE: //Only works well against non boss brute/demi human monster
-			if(!(tstatus->mode&MD_BOSS) && (tstatus->race == RC_BRUTE || tstatus->race == RC_DEMIHUMAN))
+		case GS_BULLSEYE: //Only works well against non boss brute/demihuman monster
+			if((tstatus->race == RC_BRUTE || tstatus->race == RC_DEMIHUMAN) && !status_has_mode(tstatus,MD_STATUS_IMMUNE))
 				skillratio += 400;
 			break;
 		case GS_TRACKING:
@@ -4320,7 +4309,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			skillratio += -100 + 100 * skill_lv;
 			if(sd && pc_checkskill(sd,SU_SPIRITOFLIFE) > 0)
 				skillratio += (skillratio + skillratio * 20 / 100) * status_get_hp(src) / status_get_max_hp(src);
-			if(is_boss(target))
+			if(status_get_class_(target) == CLASS_BOSS)
 				skillratio <<= 1;
 			break;
 		case SU_PICKYPECK:
@@ -4922,6 +4911,46 @@ struct Damage battle_calc_attack_post_defense(struct Damage wd, struct block_lis
 	return wd;
 }
 
+/**
+ * Calculate weapon damage from status and mapflag modifiers
+ * @param wd: Weapon data
+ * @param src: Source object
+ * @param target: Target object
+ * @param skill_id: Skill used
+ * @param skill_lv: Skill level used
+ * @return weapon data
+ */
+struct Damage battle_calc_damage_modifiers(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv)
+{
+	if( !wd.damage2 ) {
+		wd.damage = battle_calc_damage(src, target, &wd, wd.damage, skill_id, skill_lv);
+		if( map_flag_gvg2(target->m) )
+			wd.damage = battle_calc_gvg_damage(src, target, wd.damage, skill_id, wd.flag);
+		else if( map[target->m].flag.battleground )
+			wd.damage = battle_calc_bg_damage(src, target, wd.damage, skill_id, wd.flag);
+	} else if( !wd.damage ) {
+		wd.damage2 = battle_calc_damage(src, target, &wd, wd.damage2, skill_id, skill_lv);
+		if( map_flag_gvg2(target->m) )
+			wd.damage2 = battle_calc_gvg_damage(src, target, wd.damage2, skill_id, wd.flag);
+		else if( map[target->m].flag.battleground )
+			wd.damage2 = battle_calc_bg_damage(src, target, wd.damage2, skill_id, wd.flag);
+	} else {
+		int64 d1 = wd.damage + wd.damage2, d2 = wd.damage2;
+
+		wd.damage = battle_calc_damage(src, target, &wd, d1, skill_id, skill_lv);
+		if( map_flag_gvg2(target->m) )
+			wd.damage = battle_calc_gvg_damage(src, target, wd.damage, skill_id, wd.flag);
+		else if( map[target->m].flag.battleground )
+			wd.damage = battle_calc_bg_damage(src, target, wd.damage, skill_id, wd.flag);
+		wd.damage2 = d2 * 100 / d1 * wd.damage / 100;
+		if( wd.damage > 1 && wd.damage2 < 1 )
+			wd.damage2 = 1;
+		wd.damage -= wd.damage2;
+	}
+
+	return wd;
+}
+
 /*=================================================================================
  * "Plant"-type (mobs that only take 1 damage from all sources) damage calculation
  *---------------------------------------------------------------------------------
@@ -4936,25 +4965,25 @@ struct Damage battle_calc_attack_plant(struct Damage wd, struct block_list *src,
 	struct status_change *sc = status_get_sc(src);
 	bool attack_hits = is_attack_hitting(wd, src, target, skill_id, skill_lv, false);
 
-	//Plants receive 1 damage when hit
-	if(attack_hits || wd.damage > 0) //In some cases, right hand no need to have a weapon to deal a damage
-		wd.damage = 1;
-	if((attack_hits || wd.damage2 > 0) && is_attack_left_handed(src, skill_id)) {
-		wd.damage2 = 0; //No back hand damage on plant unless dual wielding
-		if(is_attack_right_handed(src, skill_id) && sd->status.weapon != W_KATAR) {
-			wd.damage2 = 1; //Give a damage on left hand while dual wielding, katar weapon type not included
-			wd.miscflag |= 1;
-		}
-	}
-	wd.damage = battle_calc_damage(src, target, &wd, wd.damage, skill_id, skill_lv);
-	if(map_flag_gvg2(target->m))
-		wd.damage = battle_calc_gvg_damage(src, target, wd.damage, skill_id, wd.flag);
-#ifndef RENEWAL
-	if(skill_id == NJ_ISSEN)
-		wd.dmg_lv = ATK_FLEE;
-#endif
-	if(sc && sc->data[SC_CAMOUFLAGE] && !skill_id)
+	if(sc && sc->data[SC_CAMOUFLAGE] && skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
 		status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
+	//Plants receive 1 damage when hit
+	if(attack_hits || wd.damage > 0)
+		wd.damage = 1; //In some cases, right hand no need to have a weapon to deal a damage
+	if((attack_hits || wd.damage2 > 0) && is_attack_left_handed(src, skill_id)) {
+		if(sd->status.weapon == W_KATAR)
+			wd.damage2 = 0; //No backhand damage against plants
+		else
+			wd.damage2 = 1; //Deal 1 HP damage as long as there is a weapon in the left hand
+	}
+	//For plants we don't continue with the weapon attack code, so we have to apply DAMAGE_DIV_FIX here
+	wd = battle_apply_div_fix(wd, skill_id);
+	//If there is left hand damage, total damage can never exceed 2, even on multiple hits
+	if(wd.damage > 1 && wd.damage2 > 0) {
+		wd.damage = 1;
+		wd.damage2 = 1;
+	}
+	wd = battle_calc_damage_modifiers(wd, src, target, skill_id, skill_lv);
 
 	return wd;
 }
@@ -5062,31 +5091,7 @@ struct Damage battle_calc_attack_gvg_bg(struct Damage wd, struct block_list *src
 					skill_additional_effect(target, (!d_bl ? src : d_bl), CR_REFLECTSHIELD, 1, BF_WEAPON|BF_SHORT|BF_NORMAL, ATK_DEF, tick);
 				}
 		}
-		if( !wd.damage2 ) {
-			wd.damage = battle_calc_damage(src, target, &wd, wd.damage, skill_id, skill_lv);
-			if( map_flag_gvg2(target->m) )
-				wd.damage = battle_calc_gvg_damage(src, target, wd.damage, skill_id, wd.flag);
-			else if( map[target->m].flag.battleground )
-				wd.damage = battle_calc_bg_damage(src, target, wd.damage, skill_id, wd.flag);
-		} else if( !wd.damage ) {
-			wd.damage2 = battle_calc_damage(src, target, &wd, wd.damage2, skill_id, skill_lv);
-			if( map_flag_gvg2(target->m) )
-				wd.damage2 = battle_calc_gvg_damage(src, target, wd.damage2, skill_id, wd.flag);
-			else if( map[target->m].flag.battleground )
-				wd.damage2 = battle_calc_bg_damage(src, target, wd.damage2, skill_id, wd.flag);
-		} else {
-			int64 d1 = wd.damage + wd.damage2, d2 = wd.damage2;
-
-			wd.damage = battle_calc_damage(src, target, &wd, d1, skill_id, skill_lv);
-			if( map_flag_gvg2(target->m) )
-				wd.damage = battle_calc_gvg_damage(src, target, wd.damage, skill_id, wd.flag);
-			else if( map[target->m].flag.battleground )
-				wd.damage = battle_calc_bg_damage(src, target, wd.damage, skill_id, wd.flag);
-			wd.damage2 = d2 * 100 / d1 * wd.damage / 100;
-			if( wd.damage > 1 && wd.damage2 < 1 )
-				wd.damage2 = 1;
-			wd.damage -= wd.damage2;
-		}
+		wd = battle_calc_damage_modifiers(wd, src, target, skill_id, skill_lv);
 	}
 	return wd;
 }
@@ -5123,7 +5128,7 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 				hp = 2 * hp / 100; //2% HP loss per hit
 			status_zap(src, hp, 0);
 		}
-		if(sc->data[SC_CAMOUFLAGE] && !skill_id)
+		if(sc->data[SC_CAMOUFLAGE] && skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
 			status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
 	}
 
@@ -5138,7 +5143,7 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 			if(--(sce->val3) <= 0)
 				status_change_end(target, SC_REJECTSWORD, INVALID_TIMER);
 		}
-		if(wd.flag&BF_SHORT && !is_boss(src)) {
+		if((wd.flag&BF_SHORT) && !status_bl_has_mode(src, MD_STATUS_IMMUNE)) {
 			if((sce = tsc->data[SC_DEATHBOUND])) {
 				uint8 dir = map_calc_dir(target, src->x, src->y), t_dir = unit_getdir(target);
 				int64 rdamage = 0;
@@ -5343,6 +5348,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	struct status_data *tstatus;
 	int right_element, left_element, nk;
 	int i;
+	bool infdef = false;
 
 	memset(&wd, 0, sizeof(wd));
 
@@ -5394,7 +5400,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	//Check if we're landing a hit
 	if(!is_attack_hitting(wd, src, target, skill_id, skill_lv, true))
 		wd.dmg_lv = ATK_FLEE;
-	else if(!target_has_infinite_defense(target, skill_id, wd.flag)) { //No need for math against plants
+	else if(!(infdef = is_infinite_defense(target, wd.flag))) { //No need for math against plants
 		int ratio = 0;
 		int64 const_val = 0;
 
@@ -5498,8 +5504,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		}
 		if(tsd && (i = pc_sub_skillatk_bonus(tsd, skill_id)))
 			ATK_ADDRATE(wd.damage, wd.damage2, -i);
-	} else if(wd.div_ < 0)
-		wd.div_ *= -1;
+	}
 
 #ifdef RENEWAL //Critical hit ignores flee but not perfect dodge nor defense [exneval]
 	if(is_attack_critical(wd, src, target, skill_id, skill_lv, false)) {
@@ -5511,7 +5516,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 #endif
 
 	if(wd.damage + wd.damage2 > 0) { //Check if attack ignores DEF
-		if(!target_has_infinite_defense(target, skill_id, wd.flag))
+		if(!infdef)
 			wd = battle_calc_defense_reduction(wd, src, target, skill_id, skill_lv);
 		if(wd.dmg_lv != ATK_FLEE)
 			wd = battle_calc_attack_post_defense(wd, src, target, skill_id, skill_lv);
@@ -5692,12 +5697,12 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			break;
 	}
 
-	//Perform multihit calculations
-	DAMAGE_DIV_FIX(wd.damage, wd.div_);
-
 	//Only do 1 dmg to plant, no need to calculate rest
-	if(target_has_infinite_defense(target, skill_id, wd.flag))
+	if(infdef)
 		return battle_calc_attack_plant(wd, src, target, skill_id, skill_lv);
+
+	//Apply DAMAGE_DIV_FIX and check for min damage
+	wd = battle_apply_div_fix(wd, skill_id);
 
 	wd = battle_calc_attack_left_right_hands(wd, src, target, skill_id, skill_lv);
 
@@ -5838,14 +5843,9 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 
 	//Skill Range Criteria
 	ad.flag |= battle_range_type(src, target, skill_id, skill_lv);
-	flag.infdef = (tstatus->mode&MD_PLANT ? 1 : 0);
 
-	if(target->type == BL_SKILL) {
-		TBL_SKILL *su = ((TBL_SKILL *)target);
-
-		if(su && su->group && su->group->skill_id == WM_REVERBERATION)
-			flag.infdef = 1;
-	}
+	//Infinite defense (plant mode)
+	flag.infdef = (is_infinite_defense(target, ad.flag) ? 1 : 0);
 
 	switch(skill_id) {
 		case MG_FIREWALL:
@@ -5858,9 +5858,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			ad.dmotion = 1; //No flinch animation
 			break;
 	}
-
-	if(!flag.infdef && (tstatus->mode&MD_IGNOREMAGIC) && (ad.flag&BF_MAGIC)) //Magic
-		flag.infdef = 1;
 
 	if(!flag.infdef) { //No need to do the math for plants
 		unsigned int skillratio = 100; //Skill dmg modifiers
@@ -5895,9 +5892,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				i = 20 * skill_lv + sstatus->luk + sstatus->int_ + status_get_lv(src) +
 					200 - 200 * tstatus->hp / tstatus->max_hp;
 #endif
-				if(i > 700)
-					i = 700;
-				if(rnd()%1000 < i && !(tstatus->mode&MD_BOSS))
+				i = min(i, 700);
+				if(rnd()%1000 < i && !status_has_mode(tstatus, MD_STATUS_IMMUNE))
 					ad.damage = tstatus->hp;
 				else {
 #ifdef RENEWAL
@@ -6187,7 +6183,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						else
 							skillratio += 900 + 500 * skill_lv; //19 x 19 cell
 						//MATK [{( Skill Level x 400 ) x ( Caster's Base Level / 120 )} + 2500 ] %
-						if(skill_check_pc_partner(sd,skill_id,&skill_lv,skill_get_splash(skill_id,skill_lv),0)) {
+						if(skill_check_pc_partner(sd,skill_id,&skill_lv,1,0)) {
 							skillratio = skill_lv * 400;
 							RE_LVL_DMOD(120);
 							skillratio += 2500;
@@ -6481,12 +6477,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					ad.damage = (wd.damage + ad.damage) * (100 + 40 * skill_lv) / 100;
 #endif
 					ad.damage = battle_attr_fix(src, target, ad.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
-					if(target->id == src->id) {
-						if(sd)
-							ad.damage >>= 1;
-						else
-							ad.damage = 0;
-					}
 				}
 				break;
 			case SO_VARETYR_SPEAR: {
@@ -6500,16 +6490,10 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				}
 				break;
 		}
-	}
+	} //Hint: Against plants damage will still be 1 at this point
 
-	DAMAGE_DIV_FIX(ad.damage, ad.div_);
-
-	if(flag.infdef && ad.damage > 0) {
-		if(skill_id == NPC_GRANDDARKNESS && target->id == src->id && !sd)
-			ad.damage = 0;
-		else
-			ad.damage = 1;
-	}
+	//Apply DAMAGE_DIV_FIX and check for min damage
+	ad = battle_apply_div_fix(ad, skill_id);
 
 	switch(skill_id) {
 #ifdef RENEWAL
@@ -6523,6 +6507,14 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 		case LG_RAYOFGENESIS:
 			return ad; //Do GVG fix later
 		default:
+			if(skill_id == CR_GRANDCROSS || skill_id == NPC_GRANDDARKNESS) {
+				if(target->id == src->id) {
+					if(sd)
+						ad.damage >>= 1;
+					else
+						ad.damage = 0;
+				}
+			}
 			ad.damage = battle_calc_damage(src, target, &ad, ad.damage, skill_id, skill_lv);
 			if(map_flag_gvg2(target->m))
 				ad.damage = battle_calc_gvg_damage(src, target, ad.damage, skill_id, ad.flag);
@@ -6660,7 +6652,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 				totaldef = (short)status_get_def(target) + tstatus->def2;
 				totalmdef = tstatus->mdef + tstatus->mdef2;
 				md.damage -= totaldef + totalmdef;
-				if(skill_id == AM_ACIDTERROR && tstatus->mode&MD_BOSS)
+				if(skill_id == AM_ACIDTERROR && status_has_mode(tstatus, MD_STATUS_IMMUNE))
 					md.damage >>= 1;
 				md.flag |= BF_WEAPON;
 			}
@@ -6792,7 +6784,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 					md.damage * rnd_value(50, 100)) / (skill_id == NJ_ZENYNAGE ? 1 : 100);
 				if(sd && skill_id == KO_MUCHANAGE && !pc_checkskill(sd, NJ_TOBIDOUGU))
 					md.damage = md.damage / 2;
-				if(is_boss(target))
+				if(status_get_class_(target) == CLASS_BOSS) //Specific to Boss Class
 					md.damage = md.damage / (skill_id == NJ_ZENYNAGE ? 3 : 2);
 				else if(tsd && skill_id == NJ_ZENYNAGE)
 					md.damage = md.damage / 2;
@@ -6889,8 +6881,6 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			ShowError("0 enemies targeted by %d:%s, divide per 0 avoided!\n", skill_id, skill_get_name(skill_id));
 	}
 
-	DAMAGE_DIV_FIX(md.damage, md.div_);
-
 	if(!(nk&NK_IGNORE_FLEE)) {
 		struct status_change *sc = status_get_sc(target);
 
@@ -6944,35 +6934,6 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 	if(tsd && (i = pc_sub_skillatk_bonus(tsd, skill_id)))
 		md.damage -= md.damage * i / 100;
 
-	if(md.damage > 0) {
-		if(tstatus->mode&MD_PLANT) {
-			switch(skill_id) {
-#ifdef RENEWAL
-				case NJ_ISSEN: //Final Strike will show "miss" on plants [helvetica]
-					md.damage = 1;
-					md.dmg_lv = ATK_FLEE;
-					break;
-				case HT_BLASTMINE:
-				case HT_CLAYMORETRAP:
-				case RA_CLUSTERBOMB:
-					break; //This trap will do full damage to plants
-#endif
-				default:
-					md.damage = 1;
-					break;
-			}
-		}
-		if(target->type == BL_SKILL) {
-			TBL_SKILL *su = ((TBL_SKILL *)target);
-
-			if(su && su->group && su->group->skill_id == WM_REVERBERATION)
-				md.damage = 1;
-		}
-		if((tstatus->mode&MD_IGNOREMISC) && (md.flag&BF_MISC))
-			md.damage = 1;
-	} else
-		md.damage = 0;
-
 	if(!(nk&NK_NO_ELEFIX) && md.damage > 0) {
 		md.damage = battle_attr_fix(src, target, md.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
 		switch(skill_id) {
@@ -6985,6 +6946,15 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 				break;
 		}
 	}
+
+	//Plant damage
+	if(md.damage < 0)
+		md.damage = 0;
+	else if(md.damage && is_infinite_defense(target, md.flag))
+		md.damage = 1;
+
+	//Apply DAMAGE_DIV_FIX and check for min damage
+	md = battle_apply_div_fix(md, skill_id);
 
 	switch(skill_id) {
 		case NJ_ZENYNAGE:
@@ -7127,7 +7097,7 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 					status_change_end(bl,SC_REFLECTDAMAGE,INVALID_TIMER);
 			}
 			if( ((sce = sc->data[SC_SHIELDSPELL_DEF]) || (sce = battle_check_shadowform(bl,SC_SHIELDSPELL_DEF))) &&
-				sce->val1 == 2 && !is_boss(src) ) {
+				sce->val1 == 2 && !status_bl_has_mode(src,MD_STATUS_IMMUNE) ) {
 				rdamage += damage * sce->val2 / 100;
 				CAP_RDAMAGE(rdamage);
 			}
@@ -7287,7 +7257,7 @@ int battle_damage_area(struct block_list *bl, va_list ap) {
 	dmotion = va_arg(ap, int);
 	damage = va_arg(ap, int);
 
-	if( bl->type == BL_MOB && ((TBL_MOB *)bl)->mob_id == MOBID_EMPERIUM )
+	if( status_bl_has_mode(bl, MD_SKILL_IMMUNE) || status_get_class(bl) == MOBID_EMPERIUM )
 		return 0;
 	if( bl->id != src->id && battle_check_target(src, bl, BCT_ENEMY) > 0 ) {
 		map_freeblock_lock();
@@ -7371,7 +7341,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 				return ATK_BLOCK;
 			}
 		}
-		if (tsc->data[SC_BLADESTOP_WAIT] && !is_boss(src) && (src->type == BL_PC || !tsd ||
+		if (tsc->data[SC_BLADESTOP_WAIT] && !status_bl_has_mode(src, MD_STATUS_IMMUNE) && (src->type == BL_PC || !tsd ||
 			distance_bl(src,target) <= (tsd->status.weapon == W_FIST ? 1 : 2))) {
 			uint16 skill_lv = tsc->data[SC_BLADESTOP_WAIT]->val1;
 			int duration = skill_get_time2(MO_BLADESTOP,skill_lv);
@@ -8213,7 +8183,7 @@ static const struct _battle_data {
 	{ "boss_spawn_delay",                   &battle_config.boss_spawn_delay,                100,    0,      INT_MAX,        },
 	{ "no_spawn_on_player",                 &battle_config.no_spawn_on_player,              0,      0,      100,            },
 	{ "force_random_spawn",                 &battle_config.force_random_spawn,              0,      0,      1,              },
-	{ "slaves_inherit_mode",                &battle_config.slaves_inherit_mode,             2,      0,      3,              },
+	{ "slaves_inherit_mode",                &battle_config.slaves_inherit_mode,             4,      0,      4,              },
 	{ "slaves_inherit_speed",               &battle_config.slaves_inherit_speed,            3,      0,      3,              },
 	{ "summons_trigger_autospells",         &battle_config.summons_trigger_autospells,      1,      0,      1,              },
 	{ "pc_damage_walk_delay_rate",          &battle_config.pc_walk_delay_rate,              20,     0,      INT_MAX,        },
@@ -8373,14 +8343,19 @@ static const struct _battle_data {
 	{ "item_rate_mvp",                      &battle_config.item_rate_mvp,                   100,    0,      1000000,        },
 	{ "item_rate_common",                   &battle_config.item_rate_common,                100,    0,      1000000,        },
 	{ "item_rate_common_boss",              &battle_config.item_rate_common_boss,           100,    0,      1000000,        },
+	{ "item_rate_common_mvp",               &battle_config.item_rate_common_mvp,            100,    0,      1000000,        },
 	{ "item_rate_equip",                    &battle_config.item_rate_equip,                 100,    0,      1000000,        },
 	{ "item_rate_equip_boss",               &battle_config.item_rate_equip_boss,            100,    0,      1000000,        },
+	{ "item_rate_equip_mvp",                &battle_config.item_rate_equip_mvp,             100,    0,      1000000,        },
 	{ "item_rate_card",                     &battle_config.item_rate_card,                  100,    0,      1000000,        },
 	{ "item_rate_card_boss",                &battle_config.item_rate_card_boss,             100,    0,      1000000,        },
+	{ "item_rate_card_mvp",                 &battle_config.item_rate_card_mvp,              100,    0,      1000000,        },
 	{ "item_rate_heal",                     &battle_config.item_rate_heal,                  100,    0,      1000000,        },
 	{ "item_rate_heal_boss",                &battle_config.item_rate_heal_boss,             100,    0,      1000000,        },
+	{ "item_rate_heal_mvp",                 &battle_config.item_rate_heal_mvp,              100,    0,      1000000,        },
 	{ "item_rate_use",                      &battle_config.item_rate_use,                   100,    0,      1000000,        },
 	{ "item_rate_use_boss",                 &battle_config.item_rate_use_boss,              100,    0,      1000000,        },
+	{ "item_rate_use_mvp",                  &battle_config.item_rate_use_mvp,               100,    0,      1000000,        },
 	{ "item_rate_adddrop",                  &battle_config.item_rate_adddrop,               100,    0,      1000000,        },
 	{ "item_rate_treasure",                 &battle_config.item_rate_treasure,              100,    0,      1000000,        },
 	{ "prevent_logout",                     &battle_config.prevent_logout,                  10000,  0,      60000,          },
