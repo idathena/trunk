@@ -4659,8 +4659,8 @@ this really cause.
 Example to get Crimson Weapon with Ghost property:
 	// +9 Crimson Dagger [2]
 	setarray .@OptID[0],RDMOPT_WEAPON_ATTR_TELEKINESIS;
-	setarray .@OptVal[0],0;
-	setarray .@OptParam[0],0;
+	setarray .@OptVal[0],1;
+	setarray .@OptParam[0],1;
 	getitem3 28705,1,1,9,0,0,0,0,0,.@OptID,.@OptVal,.@OptParam;
 
 ---------------------------------------
@@ -4701,8 +4701,8 @@ For a list of bound types see 'getitembound'.
 Example to get Crimson Weapon with Ghost property:
 	// +9 Crimson Dagger [2]
 	setarray .@OptID[0],RDMOPT_WEAPON_ATTR_TELEKINESIS;
-	setarray .@OptVal[0],0;
-	setarray .@OptParam[0],0;
+	setarray .@OptVal[0],1;
+	setarray .@OptParam[0],1;
 	getitembound3 28705,1,1,9,0,0,0,0,0,BOUND_CHAR,.@OptID,.@OptVal,.@OptParam;
 
 ---------------------------------------
@@ -4827,8 +4827,8 @@ See 'getitem2' for an explanation of the expanded parameters.
 Example to get Crimson Weapon with Ghost property:
 	// +9 Crimson Dagger [2]
 	setarray .@OptID[0],RDMOPT_WEAPON_ATTR_TELEKINESIS;
-	setarray .@OptVal[0],0;
-	setarray .@OptParam[0],0;
+	setarray .@OptVal[0],1;
+	setarray .@OptParam[0],1;
 	rentitem3 28705,(24*60*60),1,9,0,0,0,0,0,.@OptID,.@OptVal,.@OptParam;
 
 ---------------------------------------

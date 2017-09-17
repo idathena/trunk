@@ -88,7 +88,7 @@
 1040,GOLEM,Golem,12371,9053,10035,6111,7,60,20,100,250,20,1000,150,0,0,300,300,800,{},{ bonus bMaxHP,(getpetinfo(3)>=910?150:100); }
 1379,NIGHTMARE_TERROR,Nightmare Terror,12372,9054,10036,6112,3,60,10,100,250,20,300,150,0,0,300,300,800,{},{ bonus2 bResEff,Eff_Sleep,10000; if(getpetinfo(3)>=910) bonus bInt,1; }
 1370,SUCCUBUS,Succubus,12373,9055,10037,6113,3,60,10,100,250,20,300,150,0,0,300,300,800,{},{ bonus2 bHPDrainRate,20,5; if(getpetinfo(3)>=910) bonus bMaxHPrate,1; }
-1837,IMP,Fire Imp,12374,9056,10038,6114,3,60,10,100,250,20,300,150,0,0,300,300,800,{},{ bonus2 bSubEle,Ele_Fire,(getpetinfo(3)>=910?3:2); bonus2 bAddEle,Ele_Fire,(getpetinfo(3)>=910?2:1); }
+1837,IMP,Fire Imp,12374,9056,10038,6114,3,60,10,100,250,20,300,150,0,0,300,300,800,{},{ bonus2 bSubEle,Ele_Fire,(getpetinfo(3)>=910?3:2); bonus2 bAddDefEle,Ele_Fire,(getpetinfo(3)>=910?2:1); }
 
 // New pets
 2200,J_TAINI,Tiny,0,9057,0,512,1,60,10,100,250,20,0,150,1,0,300,300,800,{},{}

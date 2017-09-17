@@ -115,8 +115,6 @@ struct block_list *battle_getenemy(struct block_list *target, int type, int rang
 int battle_gettarget(struct block_list *bl);
 uint16 battle_getcurrentskill(struct block_list *bl);
 
-#define	is_boss(bl)	(status_get_class_(bl) == CLASS_BOSS) //Can refine later [Aru]
-
 int battle_check_undead(int race,int element);
 int battle_check_target(struct block_list *src, struct block_list *target, int flag);
 bool battle_check_range(struct block_list *src, struct block_list *bl, int range);
@@ -125,7 +123,7 @@ void battle_consume_ammo(struct map_session_data *sd, uint16 skill_id, uint16 sk
 
 short battle_get_defense(struct block_list *src, struct block_list *target, uint16 skill_id, uint8 flag);
 
-bool target_has_infinite_defense(struct block_list *target, uint16 skill_id, int flag);
+bool is_infinite_defense(struct block_list *target, int flag);
 
 //Settings
 #define MIN_HAIR_STYLE battle_config.min_hair_style
@@ -326,7 +324,8 @@ extern struct Battle_Config
 	int attack_attr_none;
 	int item_rate_mvp, item_rate_common, item_rate_common_boss, item_rate_card, item_rate_card_boss,
 		item_rate_equip, item_rate_equip_boss, item_rate_heal, item_rate_heal_boss, item_rate_use,
-		item_rate_use_boss, item_rate_treasure, item_rate_adddrop;
+		item_rate_use_boss, item_rate_treasure, item_rate_adddrop, item_rate_common_mvp, item_rate_heal_mvp,
+		item_rate_use_mvp, item_rate_equip_mvp, item_rate_card_mvp;
 
 	int logarithmic_drops;
 	int item_drop_common_min,item_drop_common_max; //Added by TyrNemesis^

@@ -787,6 +787,7 @@ typedef enum sc_type {
 	SC_DORAM_MATK,
 	SC_DORAM_FLEE2,
 	SC_DORAM_SVSP,
+	SC_SOULATTACK,
 
 	SC_STEAMPACK,
 	SC_DAILYSENDMAILCNT,
@@ -1738,6 +1739,7 @@ enum si_type {
 	SI_BLAZE_BEAD = 979,
 	SI_FROZEN_BEAD = 980,
 	SI_BREEZE_BEAD = 981,
+	SI_SOULATTACK = 982,
 	SI_AID_PERIOD_RECEIVEITEM_2ND = 983,
 	SI_AID_PERIOD_PLUSEXP_2ND = 984,
 	SI_AID_PERIOD_PLUSJOBEXP_2ND = 985,
@@ -1769,35 +1771,41 @@ extern bool running_npc_stat_calc_event;
 extern short current_equip_opt_index;
 
 //Mode definitions to clear up code reading. [Skotlex]
-enum e_mode
-{
-	MD_CANMOVE		= 0x000001,
-	MD_LOOTER		= 0x000002,
-	MD_AGGRESSIVE		= 0x000004,
-	MD_ASSIST		= 0x000008,
-	MD_CASTSENSOR_IDLE	= 0x000010,
-	MD_BOSS			= 0x000020,
-	MD_PLANT		= 0x000040,
-	MD_CANATTACK		= 0x000080,
-	MD_DETECTOR		= 0x000100,
-	MD_CASTSENSOR_CHASE	= 0x000200,
-	MD_CHANGECHASE		= 0x000400,
-	MD_ANGRY		= 0x000800,
-	MD_CHANGETARGET_MELEE	= 0x001000,
-	MD_CHANGETARGET_CHASE	= 0x002000,
-	MD_TARGETWEAK		= 0x004000,
-	MD_RANDOMTARGET		= 0x008000,
-	MD_IGNOREMELEE		= 0x010000, //Takes 1 HP damage from melee physical attacks
-	MD_IGNOREMAGIC		= 0x020000, //Takes 1 HP damage from magic
-	MD_IGNORERANGED		= 0x040000, //Takes 1 HP damage from ranged physical attacks
-	MD_MVP			= 0x080000, //MVP - instant kill / coma-like skills don't work
-	MD_IGNOREMISC		= 0x100000, //Takes 1 HP damage from "none" attack type
-	MD_KNOCKBACK_IMMUNE	= 0x200000, //Can't be knocked back
-	MD_NORANDOM_WALK	= 0x400000,
-	MD_NOCAST_SKILL		= 0x800000,
+enum e_mode {
+	MD_NONE			= 0x0000000,
+	MD_CANMOVE		= 0x0000001,
+	MD_LOOTER		= 0x0000002,
+	MD_AGGRESSIVE		= 0x0000004,
+	MD_ASSIST		= 0x0000008,
+	MD_CASTSENSOR_IDLE	= 0x0000010,
+	MD_NORANDOM_WALK	= 0x0000020,
+	MD_NOCAST_SKILL		= 0x0000040,
+	MD_CANATTACK		= 0x0000080,
+	//FREE			= 0x0000100,
+	MD_CASTSENSOR_CHASE	= 0x0000200,
+	MD_CHANGECHASE		= 0x0000400,
+	MD_ANGRY		= 0x0000800,
+	MD_CHANGETARGET_MELEE	= 0x0001000,
+	MD_CHANGETARGET_CHASE	= 0x0002000,
+	MD_TARGETWEAK		= 0x0004000,
+	MD_RANDOMTARGET		= 0x0008000,
+	MD_IGNOREMELEE		= 0x0010000,
+	MD_IGNOREMAGIC		= 0x0020000,
+	MD_IGNORERANGED		= 0x0040000,
+	MD_MVP			= 0x0080000,
+	MD_IGNOREMISC		= 0x0100000,
+	MD_KNOCKBACK_IMMUNE	= 0x0200000,
+	MD_TELEPORT_BLOCK	= 0x0400000,
+	//FREE			= 0x0800000,
+	MD_FIXED_ITEMDROP	= 0x1000000,
+	MD_DETECTOR		= 0x2000000,
+	MD_STATUS_IMMUNE	= 0x4000000,
+	MD_SKILL_IMMUNE		= 0x8000000,
 };
-#define MD_MASK 0x00FFFF
-#define ATR_MASK 0xFF0000
+
+#define MD_MASK 0x000FFFF
+#define ATR_MASK 0x0FF0000
+#define CL_MASK 0xF000000
 
 //Status change option definitions (options are what makes status changes visible to chars
 //who were not on your field of sight when it happened)
@@ -2234,6 +2242,8 @@ unsigned char status_calc_attack_element(struct block_list *bl, struct status_ch
 #define status_get_class_(bl) status_get_status_data(bl)->class_
 #define status_get_size(bl) status_get_status_data(bl)->size
 #define status_get_mode(bl) status_get_status_data(bl)->mode
+#define status_has_mode(status,md) (((status)->mode&(md)) == (md))
+#define status_bl_has_mode(bl,md) status_has_mode(status_get_status_data((bl)),(md))
 
 #define status_get_homstr(bl) (status->str + ((TBL_HOM *)bl)->homunculus.str_value)
 #define status_get_homagi(bl) (status->agi + ((TBL_HOM *)bl)->homunculus.agi_value)
@@ -2245,7 +2255,7 @@ unsigned char status_calc_attack_element(struct block_list *bl, struct status_ch
 int status_get_party_id(struct block_list *bl);
 int status_get_guild_id(struct block_list *bl);
 int status_get_emblem_id(struct block_list *bl);
-int status_get_race2(struct block_list *bl);
+enum e_race2 status_get_race2(struct block_list *bl);
 
 struct view_data *status_get_viewdata(struct block_list *bl);
 void status_set_viewdata(struct block_list *bl, int class_);
@@ -2310,6 +2320,8 @@ int status_calc_npc_(struct npc_data *nd, enum e_status_calc_opt opt);
 void status_calc_misc(struct block_list *bl, struct status_data *status, int level);
 void status_calc_regen(struct block_list *bl, struct status_data *status, struct regen_data *regen);
 void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, struct status_change *sc);
+
+void status_calc_slave_mode(struct mob_data *md, struct mob_data *mmd);
 
 unsigned short status_calc_str(struct block_list *bl, struct status_change *sc, int str);
 unsigned short status_calc_agi(struct block_list *bl, struct status_change *sc, int agi);

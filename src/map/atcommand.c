@@ -3556,10 +3556,9 @@ ACMD_FUNC(idsearch)
 	sprintf(atcmd_output, msg_txt(77), item_name); // The reference result of '%s' (name: id):
 	clif_displaymessage(fd, atcmd_output);
 	match = itemdb_searchname_array(item_array, MAX_SEARCH, item_name);
-	if (match > MAX_SEARCH) {
-		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH, match);
+	if (match == MAX_SEARCH) {
+		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH); // Displaying first %d matches
 		clif_displaymessage(fd, atcmd_output);
-		match = MAX_SEARCH;
 	}
 	for(i = 0; i < match; i++) {
 		sprintf(atcmd_output, msg_txt(78), item_array[i]->jname, item_array[i]->nameid); // %s: %d
@@ -3789,14 +3788,19 @@ ACMD_FUNC(reload)
 		if( prev_config.item_rate_mvp          != battle_config.item_rate_mvp
 		||  prev_config.item_rate_common       != battle_config.item_rate_common
 		||  prev_config.item_rate_common_boss  != battle_config.item_rate_common_boss
+		||  prev_config.item_rate_common_mvp   != battle_config.item_rate_common_mvp
 		||  prev_config.item_rate_card         != battle_config.item_rate_card
 		||  prev_config.item_rate_card_boss    != battle_config.item_rate_card_boss
+		||  prev_config.item_rate_card_mvp     != battle_config.item_rate_card_mvp
 		||  prev_config.item_rate_equip        != battle_config.item_rate_equip
 		||  prev_config.item_rate_equip_boss   != battle_config.item_rate_equip_boss
+		||  prev_config.item_rate_equip_mvp    != battle_config.item_rate_equip_mvp
 		||  prev_config.item_rate_heal         != battle_config.item_rate_heal
 		||  prev_config.item_rate_heal_boss    != battle_config.item_rate_heal_boss
+		||  prev_config.item_rate_heal_mvp     != battle_config.item_rate_heal_mvp
 		||  prev_config.item_rate_use          != battle_config.item_rate_use
 		||  prev_config.item_rate_use_boss     != battle_config.item_rate_use_boss
+		||  prev_config.item_rate_use_mvp      != battle_config.item_rate_use_mvp
 		||  prev_config.item_rate_treasure     != battle_config.item_rate_treasure
 		||  prev_config.item_rate_adddrop      != battle_config.item_rate_adddrop
 		||  prev_config.logarithmic_drops      != battle_config.logarithmic_drops
@@ -7083,8 +7087,8 @@ ACMD_FUNC(mobinfo)
 		return -1;
 	}
 
-	if (count > MAX_SEARCH) {
-		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH, count);
+	if (count >= MAX_SEARCH) {
+		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH); // Displaying first %d matches
 		clif_displaymessage(fd, atcmd_output);
 		count = MAX_SEARCH;
 	}
@@ -7103,8 +7107,8 @@ ACMD_FUNC(mobinfo)
 
 #ifdef RENEWAL_EXP
 		if (battle_config.atcommand_mobinfo_type) {
-			base_exp = base_exp * pc_level_penalty_mod(sd, mob->lv, mob->status.class_ , 1) / 100;
-			job_exp = job_exp * pc_level_penalty_mod(sd, mob->lv, mob->status.class_ , 1) / 100;
+			base_exp = base_exp * pc_level_penalty_mod(mob->lv - sd->status.base_level, mob->status.class_, mob->status.mode, 1) / 100;
+			job_exp = job_exp * pc_level_penalty_mod(mob->lv - sd->status.base_level, mob->status.class_, mob->status.mode, 1) / 100;
 		}
 #endif
 
@@ -7146,7 +7150,7 @@ ACMD_FUNC(mobinfo)
 			droprate = (float)mob->dropitem[i].p;
 #ifdef RENEWAL_DROP
 			if (battle_config.atcommand_mobinfo_type) {
-				droprate = droprate * pc_level_penalty_mod(sd, mob->lv, mob->status.class_, 2) / 100;
+				droprate = droprate * pc_level_penalty_mod(mob->lv - sd->status.base_level, mob->status.class_, mob->status.mode, 2) / 100;
 
 				if (droprate <= 0 && !battle_config.drop_rate0item)
 					droprate = 1;
@@ -7247,7 +7251,7 @@ ACMD_FUNC(showmobs)
 	}
 
 	// If player group does not have access to boss mobs.
-	if (mob_db(mob_id)->status.mode&MD_BOSS && !pc_has_permission(sd, PC_PERM_SHOW_BOSS)) {
+	if (status_has_mode(&mob_db(mob_id)->status, MD_STATUS_IMMUNE) && !pc_has_permission(sd, PC_PERM_SHOW_BOSS)) {
 		clif_displaymessage(fd, msg_txt(1251)); // Can't show boss mobs!
 		return -1;
 	}
@@ -7643,10 +7647,9 @@ ACMD_FUNC(iteminfo)
 		clif_displaymessage(fd, msg_txt(19)); // Invalid item ID or name.
 		return -1;
 	}
-	if (count > MAX_SEARCH) {
-		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH, count); // Displaying first %d out of %d matches
+	if (count == MAX_SEARCH) {
+		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH); // Displaying first %d matches
 		clif_displaymessage(fd, atcmd_output);
-		count = MAX_SEARCH;
 	}
 	for (i = 0; i < count; i++) {
 		struct item_data *item_data = item_array[i];
@@ -7696,10 +7699,9 @@ ACMD_FUNC(whodrops)
 		return -1;
 	}
 
-	if (count > MAX_SEARCH) {
-		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH, count); // Displaying first %d out of %d matches
+	if (count == MAX_SEARCH) {
+		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH); // Displaying first %d matches
 		clif_displaymessage(fd, atcmd_output);
-		count = MAX_SEARCH;
 	}
 
 	for (i = 0; i < count; i++) {
@@ -7717,7 +7719,7 @@ ACMD_FUNC(whodrops)
 
 #ifdef RENEWAL_DROP
 				if (battle_config.atcommand_mobinfo_type)
-					dropchance = dropchance * pc_level_penalty_mod(sd, mob_db(item_data->mob[j].id)->lv, mob_db(item_data->mob[j].id)->status.class_, 2) / 100;
+					dropchance = dropchance * pc_level_penalty_mod(mob_db(item_data->mob[j].id)->lv - sd->status.base_level, mob_db(item_data->mob[j].id)->status.class_, mob_db(item_data->mob[j].id)->status.mode, 2) / 100;
 #endif
 				if (pc_isvip(sd)) // Display item rate increase for VIP.
 					dropchance += dropchance * battle_config.vip_drop_increase / 100;
@@ -7752,8 +7754,8 @@ ACMD_FUNC(whereis)
 		return -1;
 	}
 
-	if (count > MAX_SEARCH) {
-		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH, count);
+	if (count >= MAX_SEARCH) {
+		sprintf(atcmd_output, msg_txt(269), MAX_SEARCH); // Displaying first %d matches
 		clif_displaymessage(fd, atcmd_output);
 		count = MAX_SEARCH;
 	}
@@ -7851,6 +7853,13 @@ ACMD_FUNC(rates)
 		(battle_config.item_rate_use_boss + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_use_boss / 100 : 0)) / 100.,
 		(battle_config.item_rate_equip_boss + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_equip_boss / 100 : 0)) / 100.,
 		(battle_config.item_rate_card_boss + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_card_boss / 100 : 0)) / 100.);
+	clif_displaymessage(fd, buf);
+	snprintf(buf, CHAT_SIZE_MAX, msg_txt(381), // MVP Drop Rates: Common %.2fx / Healing %.2fx / Usable %.2fx / Equipment %.2fx / Card %.2fx
+		(battle_config.item_rate_common_mvp + (pc_isvip(sd) ? (battle_config.vip_drop_increase * battle_config.item_rate_common_mvp) / 100 : 0)) / 100.,
+		(battle_config.item_rate_heal_mvp + (pc_isvip(sd) ? (battle_config.vip_drop_increase * battle_config.item_rate_heal_mvp) / 100 : 0)) / 100.,
+		(battle_config.item_rate_use_mvp + (pc_isvip(sd) ? (battle_config.vip_drop_increase * battle_config.item_rate_use_mvp) / 100 : 0)) / 100.,
+		(battle_config.item_rate_equip_mvp + (pc_isvip(sd) ? (battle_config.vip_drop_increase * battle_config.item_rate_equip_mvp) / 100 : 0)) / 100.,
+		(battle_config.item_rate_card_mvp + (pc_isvip(sd) ? (battle_config.vip_drop_increase * battle_config.item_rate_card_mvp) / 100 : 0)) / 100.);
 	clif_displaymessage(fd, buf);
 	snprintf(buf, CHAT_SIZE_MAX, msg_txt(1301), // Other Drop Rates: MvP %.2fx / Card-Based %.2fx / Treasure %.2fx
 		(battle_config.item_rate_mvp + (pc_isvip(sd) ? battle_config.vip_drop_increase * battle_config.item_rate_mvp / 100 : 0)) / 100.,

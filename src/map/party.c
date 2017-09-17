@@ -1065,7 +1065,7 @@ void party_exp_share(struct party_data *p, struct block_list *src, unsigned int 
 		uint32 base_gained = base_exp, job_gained = job_exp;
 
 		if (base_exp || job_exp) {
-			int rate = pc_level_penalty_mod(sd[i],md->db->lv,md->db->status.class_,1);
+			int rate = pc_level_penalty_mod(md->db->lv - sd[i]->status.base_level,md->db->status.class_,md->db->status.mode,1);
 
 			if (rate != 100) {
 				if (base_exp)
@@ -1244,7 +1244,7 @@ int party_calc_chorusbonus(struct map_session_data *sd, uint8 flag) {
 	if (!sd || !sd->status.party_id)
 		return 0;
 
-	members = party_foreachsamemap(party_sub_count_chorus, sd, 0);
+	members = party_foreachsamemap(party_sub_count_chorus, sd, AREA_SIZE);
 
 	if (members < 3 && (!flag || flag == 2 || flag == 3))
 		return 0; //Bonus remains 0 unless 3 or more Minstrels/Wanderers are in the party

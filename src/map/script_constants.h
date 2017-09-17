@@ -1452,6 +1452,7 @@
 	export_constant(SC_DORAM_MATK);
 	export_constant(SC_DORAM_FLEE2);
 	export_constant(SC_DORAM_SVSP);
+	export_constant(SC_SOULATTACK);
 	export_constant(SC_STEAMPACK);
 	export_constant(SC_DAILYSENDMAILCNT);
 	export_constant(SC_DORAM_BUF_01);
@@ -2395,6 +2396,7 @@
 	export_constant(SI_BLAZE_BEAD);
 	export_constant(SI_FROZEN_BEAD);
 	export_constant(SI_BREEZE_BEAD);
+	export_constant(SI_SOULATTACK);
 	export_constant(SI_AID_PERIOD_RECEIVEITEM_2ND);
 	export_constant(SI_AID_PERIOD_PLUSEXP_2ND);
 	export_constant(SI_AID_PERIOD_PLUSJOBEXP_2ND);
@@ -2437,6 +2439,9 @@
 	export_constant(RC2_ORC);
 	export_constant(RC2_GOLEM);
 	export_constant(RC2_GUARDIAN);
+	export_constant(RC2_GVG);
+	export_constant(RC2_BATTLEFIELD);
+	export_constant(RC2_TREASURE);
 	export_constant(RC2_NINJA);
 	export_constant(RC2_PORING);
 	export_constant(RC2_INSECT);
@@ -2455,6 +2460,7 @@
 	export_constant(CLASS_NORMAL);
 	export_constant(CLASS_BOSS);
 	export_constant(CLASS_GUARDIAN);
+	export_constant(CLASS_BATTLEFIELD);
 	export_constant(CLASS_ALL);
 
 	/* Sizes */
@@ -2657,10 +2663,9 @@
 	export_constant(MD_AGGRESSIVE);
 	export_constant(MD_ASSIST);
 	export_constant(MD_CASTSENSOR_IDLE);
-	export_constant(MD_BOSS);
-	export_constant(MD_PLANT);
+	export_constant(MD_NORANDOM_WALK);
+	export_constant(MD_NOCAST_SKILL);
 	export_constant(MD_CANATTACK);
-	export_constant(MD_DETECTOR);
 	export_constant(MD_CASTSENSOR_CHASE);
 	export_constant(MD_CHANGECHASE);
 	export_constant(MD_ANGRY);
@@ -2674,8 +2679,11 @@
 	export_constant(MD_MVP);
 	export_constant(MD_IGNOREMISC);
 	export_constant(MD_KNOCKBACK_IMMUNE);
-	export_constant(MD_NORANDOM_WALK);
-	export_constant(MD_NOCAST_SKILL);
+	export_constant(MD_TELEPORT_BLOCK);
+	export_constant(MD_FIXED_ITEMDROP);
+	export_constant(MD_DETECTOR);
+	export_constant(MD_STATUS_IMMUNE);
+	export_constant(MD_SKILL_IMMUNE);
 
 	/* Petinfo types */
 	export_constant(PETINFO_ID);

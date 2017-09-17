@@ -3099,6 +3099,8 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 		default:
 			if(running_npc_stat_calc_event)
 				ShowWarning("pc_bonus: unknown bonus type %d %d in OnPCStatCalcEvent!\n", type, val);
+			else if(current_equip_pos)
+				ShowWarning("pc_bonus: unknown bonus type %d %d in item #%d\n", type, val, sd->inventory_data[pc_checkequip(sd, current_equip_pos)]->nameid);
 			else
 				ShowWarning("pc_bonus: unknown bonus type %d %d in item #%d\n", type, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
@@ -3713,6 +3715,8 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 		default:
 			if(running_npc_stat_calc_event)
 				ShowWarning("pc_bonus2: unknown bonus type %d %d %d in OnPCStatCalcEvent!\n", type, type2, val);
+			else if(current_equip_pos)
+				ShowWarning("pc_bonus2: unknown bonus type %d %d %d in item #%d\n", type, type2, val, sd->inventory_data[pc_checkequip(sd, current_equip_pos)]->nameid);
 			else
 				ShowWarning("pc_bonus2: unknown bonus type %d %d %d in item #%d\n", type, type2, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
@@ -3818,6 +3822,8 @@ void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int 
 		default:
 			if(running_npc_stat_calc_event)
 				ShowWarning("pc_bonus3: unknown bonus type %d %d %d %d in OnPCStatCalcEvent!\n", type, type2, type3, val);
+			else if(current_equip_pos)
+				ShowWarning("pc_bonus3: unknown bonus type %d %d %d %d in item #%d\n", type, type2, type3, val, sd->inventory_data[pc_checkequip(sd, current_equip_pos)]->nameid);
 			else
 				ShowWarning("pc_bonus3: unknown bonus type %d %d %d %d in item #%d\n", type, type2, type3, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
@@ -3887,6 +3893,8 @@ void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int 
 		default:
 			if(running_npc_stat_calc_event)
 				ShowWarning("pc_bonus4: unknown bonus type %d %d %d %d %d in OnPCStatCalcEvent!\n", type, type2, type3, type4, val);
+			else if(current_equip_pos)
+				ShowWarning("pc_bonus4: unknown bonus type %d %d %d %d %d in item #%d\n", type, type2, type3, type4, val, sd->inventory_data[pc_checkequip(sd, current_equip_pos)]->nameid);
 			else
 				ShowWarning("pc_bonus4: unknown bonus type %d %d %d %d %d in item #%d\n", type, type2, type3, type4, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
@@ -3927,6 +3935,8 @@ void pc_bonus5(struct map_session_data *sd, int type, int type2, int type3, int 
 		default:
 			if(running_npc_stat_calc_event)
 				ShowWarning("pc_bonus5: unknown bonus type %d %d %d %d %d %d in OnPCStatCalcEvent!\n", type, type2, type3, type4, type5, val);
+			else if(current_equip_pos)
+				ShowWarning("pc_bonus5: unknown bonus type %d %d %d %d %d %d in item #%d\n", type, type2, type3, type4, type5, val, sd->inventory_data[pc_checkequip(sd, current_equip_pos)]->nameid);
 			else
 				ShowWarning("pc_bonus5: unknown bonus type %d %d %d %d %d %d in item #%d\n", type, type2, type3, type4, type5, val, (current_equip_card_id ? current_equip_card_id : sd->inventory_data[current_equip_item_index]->nameid));
 			break;
@@ -5196,7 +5206,7 @@ int pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 ski
 	sd_status = status_get_status_data(&sd->bl);
 	md_status = status_get_status_data(bl);
 
-	if( md->master_id || md_status->mode&MD_BOSS || mob_is_treasure(md) ||
+	if( md->master_id || status_has_mode(md_status,MD_STATUS_IMMUNE) || status_get_race2(&md->bl) == RC2_TREASURE ||
 		map[bl->m].flag.nomobloot || //Check noloot map flag [Lorky]
 		(battle_config.skill_steal_max_tries && //Reached limit of steal attempts [Lupus]
 		md->state.steal_flag++ >= battle_config.skill_steal_max_tries) )
@@ -5271,14 +5281,9 @@ int pc_steal_coin(struct map_session_data *sd,struct block_list *target)
 
 	if( !sd || !target || target->type != BL_MOB )
 		return 0;
-
 	md = (TBL_MOB *)target;
-	if( md->state.steal_coin_flag || md->sc.data[SC_STONE] || md->sc.data[SC_FREEZE] || md->status.mode&MD_BOSS )
+	if( md->state.steal_coin_flag || md->sc.data[SC_STONE] || md->sc.data[SC_FREEZE] || status_bl_has_mode(target,MD_STATUS_IMMUNE) || status_get_race2(&md->bl) == RC2_TREASURE )
 		return 0;
-
-	if( mob_is_treasure(md) )
-		return 0;
-
 	lv = pc_checkskill(sd,RG_STEALCOIN);
 	rate = lv * 10 + (sd->status.base_level - md->level) * 2 + sd->battle_status.dex / 2 + sd->battle_status.luk / 2;
 	if( rnd()%1000 < rate ) {
@@ -5677,7 +5682,7 @@ static void pc_checkallowskill(struct map_session_data *sd)
  *	-1  : mean nothing equiped
  *	idx : (this index could be used in inventory to found item_data)
  *------------------------------------------*/
-short pc_checkequip(struct map_session_data *sd,int pos)
+short pc_checkequip(struct map_session_data *sd, int pos)
 {
 	uint8 i;
 
@@ -7241,6 +7246,8 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 			hom_vaporize(sd, HOM_ST_REST);
 		if( sd->sc.data[SC_SPRITEMABLE] && pc_checkskill(sd, SU_SPRITEMABLE) > 0 )
 			status_change_end(&sd->bl, SC_SPRITEMABLE, INVALID_TIMER);
+		if( sd->sc.data[SC_SOULATTACK] && pc_checkskill(sd, SU_SOULATTACK) > 0 )
+			status_change_end(&sd->bl, SC_SOULATTACK, INVALID_TIMER);
 	}
 
 	for( i = 1; i < MAX_SKILL; i++ ) {
@@ -8550,6 +8557,9 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 
 	if (sd->sc.data[SC_SPRITEMABLE] && !pc_checkskill(sd,SU_SPRITEMABLE))
 		status_change_end(&sd->bl,SC_SPRITEMABLE,INVALID_TIMER);
+
+	if (sd->sc.data[SC_SOULATTACK] && !pc_checkskill(sd,SU_SOULATTACK))
+		status_change_end(&sd->bl,SC_SOULATTACK,INVALID_TIMER);
 
 	if (sd->status.manner < 0)
 		clif_changestatus(sd,SP_MANNER,sd->status.manner);
@@ -10620,33 +10630,28 @@ void pc_delspiritcharm(struct map_session_data *sd, int count, int type)
 }
 
 #if defined(RENEWAL_DROP) || defined(RENEWAL_EXP)
-/*==========================================
- * Renewal EXP/Itemdrop rate modifier base on level penalty
- * 1 = exp 2 = itemdrop
- *------------------------------------------*/
-int pc_level_penalty_mod(struct map_session_data *sd, int mob_level, uint32 mob_class, int type)
+/**
+ * Renewal EXP/Item Drop rate modifier based on level penalty
+ * @param level_diff: Monster and Player level difference
+ * @param mob_class: Monster class
+ * @param mode: Monster mode
+ * @param type: 1 - EXP, 2 - Item Drop
+ * @return Penalty rate
+ */
+int pc_level_penalty_mod(int level_diff, uint32 mob_class, enum e_mode mode, int type)
 {
-	int diff, rate = 100, i, tmp;
+	int rate = 100;
 
-	nullpo_ret(sd);
+	if(type == 2 && (mode&MD_FIXED_ITEMDROP))
+		return rate;
 
-	diff = mob_level - sd->status.base_level;
+	if(level_diff < 0)
+		level_diff = MAX_LEVEL + (~level_diff + 1);
 
-	if(diff < 0)
-		diff = MAX_LEVEL + (~diff + 1);
+	if((rate = level_penalty[type][mob_class][level_diff]) > 0) //Monster class found, return rate
+		return rate;
 
-	if((tmp = level_penalty[type][mob_class][diff]) > 0) //Use mob class directly
-		return tmp;
-
-	//WTF is that for? If penalty not found use the 1st one we found? [lighta]
-	for(i = 0; i < CLASS_ALL; i++) {
-		if((tmp = level_penalty[type][i][diff]) > 0) {
-			rate = tmp;
-			break;
-		}
-	}
-
-	return rate;
+	return 100; //Penalty not found, return default
 }
 #endif
 
