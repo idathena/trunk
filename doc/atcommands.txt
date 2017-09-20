@@ -1342,7 +1342,7 @@ Affected files:
 -- questdb: quest_db.txt
 -- script: /npc/*.txt, /npc/*.conf
 -- skilldb: skill_db.txt, const.txt, skill_require_db.txt, skill_cast_db.txt, skill_castnodex_db.txt, skill_nocast_db.txt, skill_copyable_db.txt, skill_improvise_db.txt, skill_changematerial_db.txt, skill_nonearnpc_db.txt, skill_damage_db.txt, skill_unit_db.txt, abra_db.txt, create_arrow_db.txt, produce_db.txt, spellbook_db.txt, magicmushroom_db.txt
--- statusdb: attr_fix.txt, size_fix.txt, refine_db.txt
+-- statusdb: attr_fix.txt, size_fix.txt, refine_db.conf
 -- achievementdb: achievement_db.conf
 
 Restriction:

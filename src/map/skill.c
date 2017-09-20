@@ -11080,8 +11080,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		if( sd->state.arrow_atk ) //Consume arrow on last invocation to this skill
 			battle_consume_ammo(sd,skill_id,skill_lv);
 
-		skill_onskillusage(sd,bl,skill_id,tick);
-
 		//Perform skill requirement consumption
 		skill_consume_requirement(sd,skill_id,skill_lv,2);
 	}
@@ -11273,8 +11271,17 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_POS,0,0);
 			break; //Fail if the targetted skill is near NPC [Cydh]
 		}
-		if( sd && !skill_check_condition_castend(sd,ud->skill_id,ud->skill_lv) )
-			break;
+		if( sd ) {
+			if( !skill_check_condition_castend(sd,ud->skill_id,ud->skill_lv) )
+				break;
+			else if( target->id != src->id && (status_bl_has_mode(target,MD_SKILL_IMMUNE) ||
+				(status_get_class(target) == MOBID_EMPERIUM && !(skill_get_inf3(ud->skill_id)&INF3_HIT_EMP))) &&
+				skill_get_casttype(ud->skill_id) == CAST_DAMAGE )
+			{
+				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0,0);
+				break;
+			}
+		}
 		if( (src->type == BL_MER || src->type == BL_HOM) && !skill_check_condition_mercenary(src,ud->skill_id,ud->skill_lv,1) )
 			break;
 		if( ud->state.running && ud->skill_id == TK_JUMPKICK ) {
@@ -11319,14 +11326,9 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			if( sd ) {
 				if( (inf = skill_get_cooldown(sd,ud->skill_id,ud->skill_lv)) > 0 )
 					skill_blockpc_start(sd,ud->skill_id,inf);
-				if( ud->skill_id != HP_BASILICA ) {
+				if( ud->skill_id != HP_BASILICA )
 					skill_consume_requirement(sd,ud->skill_id,ud->skill_lv,1);
-					if( target->id != src->id && (status_bl_has_mode(target,MD_SKILL_IMMUNE) || (status_get_class(target) == MOBID_EMPERIUM &&
-						!(skill_get_inf3(ud->skill_id)&INF3_HIT_EMP))) && skill_get_casttype(ud->skill_id) == CAST_DAMAGE ) {
-						clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0,0);
-						break;
-					}
-				}
+				skill_onskillusage(sd,target,ud->skill_id,tick);
 			}
 			if( hd && (inf = skill_get_cooldown(NULL,ud->skill_id,ud->skill_lv)) > 0 )
 				skill_blockhomun_start(hd,ud->skill_id,inf);
@@ -11497,6 +11499,7 @@ int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data)
 				if( (inf = skill_get_cooldown(sd,ud->skill_id,ud->skill_lv)) > 0 )
 					skill_blockpc_start(sd,ud->skill_id,inf);
 				skill_consume_requirement(sd,ud->skill_id,ud->skill_lv,1);
+				skill_onskillusage(sd,NULL,ud->skill_id,tick);
 			}
 			if( hd && (inf = skill_get_cooldown(NULL,ud->skill_id,ud->skill_lv)) > 0 )
 				skill_blockhomun_start(hd,ud->skill_id,inf);
@@ -12393,8 +12396,6 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 
 		if( sd->state.arrow_atk && !(flag&1) ) //Consume arrow if this is a ground skill
 			battle_consume_ammo(sd,skill_id,skill_lv);
-
-		skill_onskillusage(sd,NULL,skill_id,tick);
 
 		//Perform skill requirement consumption
 		skill_consume_requirement(sd,skill_id,skill_lv,2);
