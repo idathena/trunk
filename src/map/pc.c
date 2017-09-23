@@ -77,6 +77,8 @@ struct fame_list smith_fame_list[MAX_FAME_LIST];
 struct fame_list chemist_fame_list[MAX_FAME_LIST];
 struct fame_list taekwon_fame_list[MAX_FAME_LIST];
 
+struct s_job_info job_info[CLASS_COUNT];
+
 #define MOTD_LINE_SIZE 128
 static char motd_text[MOTD_LINE_SIZE][CHAT_SIZE_MAX]; //Message of the day buffer [Valaris]
 
@@ -1360,17 +1362,17 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	//Display login notice
 	ShowInfo("'"CL_WHITE"%s"CL_RESET"' logged in."
 	         " (AID/CID: '"CL_WHITE"%d/%d"CL_RESET"',"
-	         " Packet Ver: '"CL_WHITE"%d"CL_RESET"', IP: '"CL_WHITE"%d.%d.%d.%d"CL_RESET"',"
+	         " IP: '"CL_WHITE"%d.%d.%d.%d"CL_RESET"',"
 	         " Group '"CL_WHITE"%d"CL_RESET"').\n",
 	         sd->status.name, sd->status.account_id, sd->status.char_id,
-	         sd->packet_ver, CONVIP(ip), sd->group_id);
+	         CONVIP(ip), sd->group_id);
+
 	//Send friends list
 	clif_friendslist_send(sd);
 
 	if (!changing_mapservers) {
 		if (battle_config.display_version == 1)
 			pc_show_version(sd);
-
 		//Message of the Day [Valaris]
 		for (i = 0; i < MOTD_LINE_SIZE && motd_text[i][0]; i++) {
 			if (battle_config.motd_type)
@@ -1378,10 +1380,8 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 			else
 				clif_displaymessage(sd->fd, motd_text[i]);
 		}
-
-		if (expiration_time != 0)
+		if (expiration_time)
 			sd->expiration_time = expiration_time;
-
 		//Fixes login-without-aura glitch (the screen won't blink at this point, don't worry)
 		clif_changemap(sd,sd->bl.m,sd->bl.x,sd->bl.y);
 	}

@@ -845,34 +845,6 @@ CREATE TABLE IF NOT EXISTS `sql_updates` (
 ) ENGINE=MyISAM;
 
 -- Existent updates to enter
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1360858500);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1360951560);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1362445531);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1362528000);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1362794218);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1366078541);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1366378765);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1366378888);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1381354728);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1381423003);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1382892428);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1383162785);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1383167577);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1383205740);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1383955424);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1384473995);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1384545461);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1384588175);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1384763034);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1387844126);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1388854043);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1389028967);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1392832626);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1395789302);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1396893866);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1398477600);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1400256139);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1409590380);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1414975503);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1435860840);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1436360978);

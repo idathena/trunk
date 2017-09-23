@@ -10364,18 +10364,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SO_EL_CURE:
 			if( sd ) {
 				struct elemental_data *ed = sd->ed;
-				int s_hp = sd->battle_status.hp * 10 / 100, s_sp = sd->battle_status.sp * 10 / 100;
-				int e_hp, e_sp;
+				int hp = status_get_max_hp(src) * 10 / 100,
+					sp = status_get_max_hp(src) * 10 / 100;
 
 				if( !ed )
 					break;
-				if( !status_charge(&sd->bl,s_hp,s_sp) ) {
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					break;
-				}
-				e_hp = ed->battle_status.max_hp * 10 / 100;
-				e_sp = ed->battle_status.max_sp * 10 / 100;
-				status_heal(&ed->bl,e_hp,e_sp,1);
+				status_heal(&ed->bl,hp,sp,1);
 				clif_skill_nodamage(src,&ed->bl,skill_id,skill_lv,1);
 			}
 			break;

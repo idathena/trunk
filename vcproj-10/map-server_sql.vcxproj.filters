@@ -246,6 +246,15 @@
     <ClInclude Include="..\src\map\clif.h">
       <Filter>map_sql</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\map\clif_obfuscation.h">
+      <Filter>map_sql</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\map\clif_packetdb.h">
+      <Filter>map_sql</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\map\clif_shuffle.h">
+      <Filter>map_sql</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\map\date.h">
       <Filter>map_sql</Filter>
     </ClInclude>
@@ -445,6 +454,9 @@
       <Filter>config</Filter>
     </ClInclude>
     <ClInclude Include="..\src\config\core.h">
+      <Filter>config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\config\packets.h">
       <Filter>config</Filter>
     </ClInclude>
     <ClInclude Include="..\src\config\renewal.h">

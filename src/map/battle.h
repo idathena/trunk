@@ -5,7 +5,6 @@
 #define _BATTLE_H_
 
 #include "../common/mmo.h"
-#include "../config/core.h"
 #include "map.h" //ELE_MAX
 
 //State of a single attack attempt; used in flee/def penalty calculations when mobbed
@@ -376,8 +375,6 @@ extern struct Battle_Config
 	int day_duration; //added by [Yor]
 	int night_duration; //added by [Yor]
 	int ban_hack_trade; //added by [Yor]
-	int packet_ver_flag; //added by [Yor]
-	int packet_ver_flag2; //expend of packet_ver_flag
 
 	int min_hair_style; //added by [MouseJstr]
 	int max_hair_style; //added by [MouseJstr]

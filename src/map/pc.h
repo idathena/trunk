@@ -284,7 +284,6 @@ struct map_session_data {
 	unsigned int permissions; //Group permissions
 	int count_rewarp; //Count how many time we being rewarped
 
-	uint32 packet_ver;  //5: old, 6: 7july04, 7: 13july04, 8: 26july04, 9: 9aug04/16aug04/17aug04, 10: 6sept04, 11: 21sept04, 12: 18oct04, 13: 25oct04 ... 18
 	struct mmo_charstatus status;
 	struct registry save_reg;
 
@@ -719,8 +718,8 @@ struct map_session_data {
 #endif
 };
 
-struct eri *pc_sc_display_ers; //Player's SC display table
-struct eri *pc_itemgrouphealrate_ers; //Player's Item Group Heal Rate table
+extern struct eri *pc_sc_display_ers; //Player's SC display table
+extern struct eri *pc_itemgrouphealrate_ers; //Player's Item Group Heal Rate table
 
 extern int pc_expiration_tid; //Global expiration timer id
 
@@ -779,7 +778,7 @@ enum item_check {
 	ITMCHK_ALL       = ITMCHK_INVENTORY|ITMCHK_CART|ITMCHK_STORAGE,
 };
 
-struct {
+extern struct s_job_info {
 	unsigned int base_hp[MAX_LEVEL], base_sp[MAX_LEVEL]; //Storage for the first calculation with hp/sp factor and multiplicator
 	int hp_factor, hp_multiplicator, sp_factor;
 	int max_weight_base;

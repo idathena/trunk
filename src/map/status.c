@@ -67,6 +67,14 @@ unsigned int SCDisabled[SC_MAX]; /// List of disabled SC on map zones [Cydh]
 static bool status_change_isDisabledOnMap_(sc_type type, bool mapIsVS, bool mapIsPVP, bool mapIsGVG, bool mapIsBG, unsigned int mapZone, bool mapIsTE);
 #define status_change_isDisabledOnMap(type, m) ( status_change_isDisabledOnMap_((type), map_flag_vs2((m)), map[(m)].flag.pvp, map_flag_gvg2_no_te((m)), map[(m)].flag.battleground, map[(m)].zone << 3, map_flag_gvg2_te((m))) )
 
+sc_type SkillStatusChangeTable[MAX_SKILL];
+int StatusIconChangeTable[SC_MAX];
+unsigned int StatusChangeFlagTable[SC_MAX];
+int StatusSkillChangeTable[SC_MAX];
+int StatusRelevantBLTypes[SI_MAX];
+unsigned int StatusChangeStateTable[SC_MAX];
+bool StatusDisplayType[SC_MAX];
+
 /**
  * Returns the status change associated with a skill.
  * @param skill The skill to look up
@@ -2067,7 +2075,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 		}
 	}
 
-	if (!target || target->id == src->id)
+	if (!target || target == src)
 		return true; //No further checking needed
 
 	if (tsc && tsc->count) {
