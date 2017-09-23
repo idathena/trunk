@@ -142,7 +142,6 @@ struct char_session_data {
 	uint8 char_slots; // Total number of characters that can be created
 	uint8 chars_vip;
 	uint8 chars_billing;
-	uint32 version;
 	uint8 clienttype;
 	char new_name[NAME_LENGTH];
 	char birthdate[10 + 1];  // YYYY-MM-DD
@@ -2074,7 +2073,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 // Tell client how many pages, kRO sends 17 (Yommy)
 //----------------------------------------
 void char_charlist_notify(int fd, struct char_session_data *sd) {
-#if PACKETVER > 20151104 //2016 RE clients go here
+#if defined(PACKETVER_RE) && PACKETVER >= 20151001
 	WFIFOHEAD(fd,10);
 	WFIFOW(fd,0) = 0x9a0;
 	WFIFOL(fd,2) = (sd->char_slots > 3 ? sd->char_slots / 3 : 1);
@@ -2160,17 +2159,19 @@ void char_parse_req_charlist(int fd, struct char_session_data *sd) {
 // Function to send characters to a player
 //----------------------------------------
 int mmo_char_send006b(int fd, struct char_session_data *sd) {
-	int j, offset = 0;
-	bool newvers = (sd->version >= date2version(20100413));
+	int j, offset;
 
-	if( newvers ) //20100413
-		offset += 3;
+#if PACKETVER >= 20100413
+	offset = 3;
+#else
+	offset = 0;
+#endif
 	if( save_log )
 		ShowInfo("Loading Char Data 6b ("CL_BOLD"%d"CL_RESET")\n",sd->account_id);
 	j = 24 + offset; //Offset
 	WFIFOHEAD(fd,j + MAX_CHARS * MAX_CHAR_BUF);
 	WFIFOW(fd,0) = 0x6b;
-	if( newvers ) { //20100413
+#if PACKETVER >= 20100413
 		WFIFOB(fd,4) = MAX_CHARS; //Max slots
 		WFIFOB(fd,5) = MIN_CHARS; //PremiumStartSlot
 		WFIFOB(fd,6) = MIN_CHARS + sd->chars_vip; //PremiumEndSlot
@@ -2179,7 +2180,7 @@ int mmo_char_send006b(int fd, struct char_session_data *sd) {
 		/* this+0xc  unsigned long time1 */
 		/* this+0x10  unsigned long time2 */
 		/* this+0x14  char dummy2_endbilling[7] */
-	}
+#endif
 	memset(WFIFOP(fd,4 + offset), 0, 20); //Unknown bytes 4-24 7-27
 	j += mmo_chars_fromsql(sd,WFIFOP(fd,j));
 	WFIFOW(fd,2) = j; //Packet len
@@ -2207,14 +2208,16 @@ void mmo_char_send082d(int fd, struct char_session_data *sd) {
 }
 
 void mmo_char_send(int fd, struct char_session_data *sd) {
-	//ShowInfo("sd->version = %d\n",sd->version);
-	if( sd->version > date2version(20130000) ) {
-		mmo_char_send082d(fd,sd);
-		char_charlist_notify(fd,sd);
-	}
-	mmo_char_send006b(fd,sd); //FIXME: dump from kRO doesn't show 6b transmission
-	if( sd->version > date2version(20060819) )
+#if PACKETVER >= 20130000
+	mmo_char_send082d(fd,sd);
+	mmo_char_send006b(fd,sd);
+	char_charlist_notify(fd,sd);
+#else //FIXME: dump from kRO doesn't show 6b transmission
+	mmo_char_send006b(fd,sd);
+#endif
+#if PACKETVER >= 20060819
 		char_block_character(fd,sd);
+#endif
 }
 
 int char_married(int pl1, int pl2)
@@ -2640,31 +2643,25 @@ int parse_fromlogin(int fd) {
 
 			// Acknowledgement of account authentication request
 			case 0x2713:
-				if( RFIFOREST(fd) < 29 )
+				if( RFIFOREST(fd) < 25 )
 					return 0;
 				{
-					int account_id = RFIFOL(fd,2);
+					uint32 account_id = RFIFOL(fd,2);
 					uint32 login_id1 = RFIFOL(fd,6);
 					uint32 login_id2 = RFIFOL(fd,10);
 					uint8 sex = RFIFOB(fd,14);
 					uint8 result = RFIFOB(fd,15);
 					int request_id = RFIFOL(fd,16);
-					uint32 version = RFIFOL(fd,20);
-					uint8 clienttype = RFIFOB(fd,24);
-					int group_id = RFIFOL(fd,25);
+					uint8 clienttype = RFIFOB(fd,20);
+					int group_id = RFIFOL(fd,21);
 
-					RFIFOSKIP(fd,29);
+					RFIFOSKIP(fd,25);
 					if( session_isActive(request_id) && (sd = (struct char_session_data *)session[request_id]->session_data) &&
 						!sd->auth && sd->account_id == account_id && sd->login_id1 == login_id1 && sd->login_id2 == login_id2 && sd->sex == sex )
 					{
 						int client_fd = request_id;
 
-						sd->version = version;
 						sd->clienttype = clienttype;
-						if( sd->version != date2version(PACKETVER) )
-							ShowWarning("s aid=%d has an incorect version=%d in clientinfo. Server compiled for %d\n",
-							sd->account_id,sd->version,date2version(PACKETVER));
-
 						switch( result ) {
 							case 0: // Ok
 								// Restrictions apply
@@ -3589,14 +3586,13 @@ int parse_frommap(int fd)
 				if( RFIFOREST(fd) < 22 )
 					return 0;
 				else {
-					int account_id = RFIFOL(fd,2);
+					uint32 account_id = RFIFOL(fd,2);
 					uint32 login_id1 = RFIFOL(fd,6);
 					uint32 login_id2 = RFIFOL(fd,10);
 					uint32 ip = RFIFOL(fd,14);
-					uint8 version = RFIFOB(fd,18);
-					int32 group_id = RFIFOL(fd,19);
-					RFIFOSKIP(fd,22);
+					int group_id = RFIFOL(fd,18);
 
+					RFIFOSKIP(fd,22);
 					if( runflag != CHARSERVER_ST_RUNNING )
 						char_charselres(fd, account_id, 0);
 					else {
@@ -3611,7 +3607,6 @@ int parse_frommap(int fd)
 						node->group_id = group_id;
 						//node->sex = 0;
 						node->ip = ntohl(ip);
-						node->version = version; //Upd version for mapserv
 						//node->expiration_time = 0; //Unlimited/unknown time by default (not display in map-server)
 						//node->gmlevel = 0;
 						idb_put(auth_db, account_id, node);
@@ -3690,9 +3685,9 @@ int parse_frommap(int fd)
 				if( RFIFOREST(fd) < 10 )
 					return 0;
 				{
-					int char_id, friend_id;
-					char_id = RFIFOL(fd,2);
-					friend_id = RFIFOL(fd,6);
+					int char_id = RFIFOL(fd,2);
+					int friend_id = RFIFOL(fd,6);
+
 					if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `char_id`='%d' AND `friend_id`='%d' LIMIT 1",
 						friend_db, char_id, friend_id) ) {
 						Sql_ShowDebug(sql_handle);
@@ -3705,13 +3700,11 @@ int parse_frommap(int fd)
 			case 0x2b08: //Char name request
 				if( RFIFOREST(fd) < 6 )
 					return 0;
-
 				WFIFOHEAD(fd,30);
 				WFIFOW(fd,0) = 0x2b09;
 				WFIFOL(fd,2) = RFIFOL(fd,2);
 				char_loadName((int)RFIFOL(fd,2), (char *)WFIFOP(fd,6));
 				WFIFOSET(fd,30);
-
 				RFIFOSKIP(fd,6);
 				break;
 
@@ -3719,9 +3712,9 @@ int parse_frommap(int fd)
 				if( RFIFOREST(fd) < 10 )
 					return 0;
 				{
-					int aid, cid;
-					aid = RFIFOL(fd,2);
-					cid = RFIFOL(fd,6);
+					int aid = RFIFOL(fd,2);
+					int cid = RFIFOL(fd,6);
+
 					if( SQL_ERROR == Sql_Query(sql_handle, "SELECT skill, tick, duration FROM `%s` WHERE `account_id` = '%d' AND `char_id`='%d'",
 						skillcooldown_db, aid, cid) )
 					{
@@ -4165,12 +4158,10 @@ void char_delete2_ack(int fd, int char_id, uint32 result, time_t delete_date)
 /// Any (0x718): An unknown error has occurred.
 void char_delete2_accept_ack(int fd, uint32 char_id, uint32 result)
 { // HC: <082a>.W <char id>.L <Msg>.L
-	if( result == 1 ) {
-		struct char_session_data *sd = (struct char_session_data *)session[fd]->session_data;
-
-		if( sd->version >= date2version(20130320) )
-			mmo_char_send(fd,sd);
-	}
+#if PACKETVER >= 20130000
+	if( result == 1 )
+		mmo_char_send(fd,session[fd]->session_data);
+#endif
 	WFIFOHEAD(fd,10);
 	WFIFOW(fd,0) = 0x82a;
 	WFIFOL(fd,2) = char_id;
@@ -4434,7 +4425,6 @@ int parse_char(int fd)
 							char_reject(fd,0);
 							break;
 						}
-						sd->version = node->version;
 						idb_remove(auth_db,account_id);
 						char_auth_ok(fd,sd);
 					} else { //Authentication not found (coming from login server)

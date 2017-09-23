@@ -4,7 +4,6 @@
 #ifndef _CHAR_SQL_H_
 #define _CHAR_SQL_H_
 
-#include "../config/core.h"
 #include "../common/core.h" // CORE_ST_LAST
 #include "../common/msg_conf.h"
 #include "../common/mmo.h"

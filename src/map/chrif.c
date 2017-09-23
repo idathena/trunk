@@ -42,7 +42,7 @@ static bool char_init_done = false; //Server already initialized? Used for Inter
 
 static const int packet_len_table[0x3d] = { // U - used, F - free
 	60, 3,-1,-1,10,-1, 6,-1,	// 2af8-2aff: U->2af8, U->2af9, U->2afa, U->2afb, U->2afc, U->2afd, U->2afe, U->2aff
-	 6,-1,19, 7,-1,39,30, 10,	// 2b00-2b07: U->2b00, U->2b01, U->2b02, U->2b03, U->2b04, U->2b05, U->2b06, U->2b07
+	 6,-1,22, 7,-1,39,30, 10,	// 2b00-2b07: U->2b00, U->2b01, U->2b02, U->2b03, U->2b04, U->2b05, U->2b06, U->2b07
 	 6,30,10,-1,86, 7,40,34,	// 2b08-2b0f: U->2b08, U->2b09, U->2b0a, U->2b0b, U->2b0c, U->2b0d, U->2b0e, U->2b0f
 	11,10,10,-1,11,-1,266,10,	// 2b10-2b17: U->2b10, U->2b11, U->2b12, U->2b13, U->2b14, U->2b15, U->2b16, U->2b17
 	 2,10, 2,-1,-1,-1, 2, 7,	// 2b18-2b1f: U->2b18, U->2b19, U->2b1a, U->2b1b, U->2b1c, U->2b1d, U->2b1e, U->2b1f
@@ -812,8 +812,7 @@ int chrif_charselectreq(struct map_session_data *sd, uint32 s_ip) {
 	WFIFOL(char_fd,6) = sd->login_id1;
 	WFIFOL(char_fd,10) = sd->login_id2;
 	WFIFOL(char_fd,14) = htonl(s_ip);
-	WFIFOB(char_fd,18) = sd->packet_ver;
-	WFIFOL(char_fd,19) = sd->group_id;
+	WFIFOL(char_fd,18) = sd->group_id;
 	WFIFOSET(char_fd,22);
 
 	return 0;

@@ -153,9 +153,6 @@ void signals_init (void) {
 }
 #endif
 
-// GIT path
-#define GIT_ORIGIN "refs/remotes/origin/master"
-
 // Grabs the hash from the last time the user updated their working copy (last pull)
 const char *get_git_hash(void) {
 	static char GitHash[41] = ""; //Sha(40) + 1
@@ -164,7 +161,8 @@ const char *get_git_hash(void) {
 	if (GitHash[0] != '\0')
 		return GitHash;
 
-	if ((fp = fopen(".git/"GIT_ORIGIN, "r")) != NULL) {
+	if ((fp = fopen(".git/refs/remotes/origin/master", "r")) != NULL || //Already pulled once
+		(fp = fopen(".git/refs/heads/master", "r")) != NULL) { //Cloned only
 		char line[64];
 		char *rev = (char *)malloc(sizeof(char) * 50);
 

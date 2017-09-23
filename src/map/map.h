@@ -11,8 +11,6 @@
 #include "../common/db.h"
 #include "../common/msg_conf.h"
 
-#include "../config/core.h"
-
 #include <stdarg.h>
 
 struct npc_data;

@@ -3810,8 +3810,11 @@ void run_script_main(struct script_state *st)
 	int cmdcount = script_config.check_cmdcount;
 	int gotocount = script_config.check_gotocount;
 	TBL_PC *sd;
-	struct script_stack *stack = st->stack;
+	struct script_stack *stack;
 
+	nullpo_retv(st);
+
+	stack = st->stack;
 	script_attach_state(st);
 
 	if (st->state == RERUNLINE) {
@@ -20882,38 +20885,6 @@ BUILDIN_FUNC(party_destroy)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/** Checks if a player's client version meets a required version or date.
- * @param type: 0 - check by version number; 1 - check by date
- * @param data: Input
- * @return val: 1 - true, 0 - false
- */
-BUILDIN_FUNC(is_clientver) {
-	TBL_PC *sd = NULL;
-	int type = script_getnum(st,2);
-	int data = script_getnum(st,3);
-	int ret = 0;
-
-	if( script_hasdata(st,4) )
-		sd = map_charid2sd(script_getnum(st,4));
-	else
-		sd = script_rid2sd(st);
-	if( sd == NULL ) {
-		script_pushint(st,0);
-		return 0;
-	}
-
-	switch( type ) {
-		case 0:
-			ret = (sd->packet_ver >= data) ? 1 : 0;
-			break;
-		case 1:
-			ret = (sd->packet_ver >= date2version(data)) ? 1 : 0;
-			break;
-	}
-	script_pushint(st,ret);
-	return SCRIPT_CMD_SUCCESS;
-}
-
 /**
  * Turns a player into a monster and grants SC attribute effect.
  * transform <monster name/ID>, <duration>, <sc type>, <val1>, <val2>, <val3>, <val4>;
@@ -22815,7 +22786,6 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(getitem2,"getitembound2","viiiiiiiii?"),
 	BUILDIN_DEF(countbound,"??"),
 	BUILDIN_DEF(checkbound,"i???????"),
-	BUILDIN_DEF(is_clientver,"ii?"),
 	//Monster Transform [malufett]
 	BUILDIN_DEF2(montransform,"transform","vi?????"),
 	BUILDIN_DEF2(montransform,"active_transform","vi?????"),

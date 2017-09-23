@@ -240,7 +240,7 @@ struct mob_data {
 	unsigned char sc_display_count;
 };
 
-struct eri *mob_sc_display_ers;
+extern struct eri *mob_sc_display_ers;
 
 enum {
 	MST_TARGET	=	0,

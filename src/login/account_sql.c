@@ -7,7 +7,6 @@
 #include "../common/sql.h"
 #include "../common/strlib.h"
 #include "../common/timer.h"
-#include "../config/core.h"
 #include "account.h"
 #include <stdlib.h>
 #include <string.h>

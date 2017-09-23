@@ -93,13 +93,15 @@ static char atcmd_output[CHAT_SIZE_MAX];
 static char atcmd_player_name[NAME_LENGTH];
 const char *parent_cmd;
 
+struct atcmd_binding_data **atcmd_binding;
+
 static AtCommandInfo *get_atcommandinfo_byname(const char *name); //@help
 static const char *atcommand_checkalias(const char *aliasname); //@help
 static void atcommand_get_suggestions(struct map_session_data *sd, const char *name, bool atcommand); //@help
 static void warp_get_suggestions(struct map_session_data *sd, const char *name); //@rura, @warp, @mapmove
 
 //@commands (script-based)
-struct atcmd_binding_data* get_atcommandbind_byname(const char *name) {
+struct atcmd_binding_data *get_atcommandbind_byname(const char *name) {
 	int i = 0;
 	
 	if( *name == atcommand_symbol || *name == charcommand_symbol )
@@ -191,12 +193,12 @@ ACMD_FUNC(send)
 		int off, end;
 
 		if(len) { // Show packet length
-			sprintf(atcmd_output, msg_txt(904), type, packet_db[sd->packet_ver][type].len); // Packet 0x%x length: %d
+			sprintf(atcmd_output, msg_txt(904), type, packet_db[type].len); // Packet 0x%x length: %d
 			clif_displaymessage(fd, atcmd_output);
 			return 0;
 		}
 
-		len = packet_db[sd->packet_ver][type].len;
+		len = packet_db[type].len;
 		off = 2;
 		if(len == 0) { // Unknown packet - ERROR
 			sprintf(atcmd_output, msg_txt(905), type); // Unknown packet: 0x%x
@@ -336,7 +338,7 @@ ACMD_FUNC(send)
 			SKIP_VALUE(message);
 		}
 
-		if(packet_db[sd->packet_ver][type].len == -1) { // Send dynamic packet
+		if(packet_db[type].len == -1) { // Send dynamic packet
 			WFIFOW(sd->fd,2) = TOW(off);
 			WFIFOSET(sd->fd,off);
 		} else { // Send static packet
@@ -3856,9 +3858,6 @@ ACMD_FUNC(reload)
 	} else if (strstr(command, "questdb") || strncmp(message, "questdb", 3) == 0) {
 		do_reload_quest();
 		clif_displaymessage(fd, msg_txt(1377)); // Quest database has been reloaded.
-	} else if (strstr(command, "packetdb") || strncmp(message, "packetdb", 4) == 0) {
-		packetdb_readdb(true);
-		clif_displaymessage(fd, msg_txt(1478)); // Packet database has been reloaded.
 	} else if (strstr(command, "instancedb") || strncmp(message, "instancedb", 4) == 0) {
 		instance_reload();
 		clif_displaymessage(fd, msg_txt(516)); // Instance database has been reloaded.
@@ -9978,7 +9977,6 @@ void atcommand_basecommands(void) {
 		ACMD_DEF2("reloadpcdb", reload),
 		ACMD_DEF2("reloadmotd", reload),
 		ACMD_DEF2("reloadquestdb", reload),
-		ACMD_DEF2("reloadpacketdb", reload),
 		ACMD_DEF2("reloadinstancedb", reload),
 		ACMD_DEF2("reloadachievementdb", reload),
 		ACMD_DEF(partysharelvl),

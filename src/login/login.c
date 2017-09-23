@@ -14,7 +14,6 @@
 #include "../common/ers.h"
 #include "../common/utils.h"
 #include "../common/mmo.h"
-#include "../config/core.h"
 #include "../common/msg_conf.h"
 #include "account.h"
 #include "ipban.h"
@@ -84,7 +83,6 @@ struct auth_node {
 	uint32 login_id2;
 	uint32 ip;
 	char sex;
-	uint32 version;
 	uint8 clienttype;
 	int group_id;
 };
@@ -616,7 +614,7 @@ int parse_fromchar(int fd) {
 						//ShowStatus("Char-server '%s': authentication of the account %d accepted (ip: %s).\n", server[id].name, account_id, ip);
 
 						//Send ack
-						WFIFOHEAD(fd,29);
+						WFIFOHEAD(fd,25);
 						WFIFOW(fd,0) = 0x2713;
 						WFIFOL(fd,2) = account_id;
 						WFIFOL(fd,6) = login_id1;
@@ -624,16 +622,15 @@ int parse_fromchar(int fd) {
 						WFIFOB(fd,14) = sex;
 						WFIFOB(fd,15) = 0;// ok
 						WFIFOL(fd,16) = request_id;
-						WFIFOL(fd,20) = node->version;
-						WFIFOB(fd,24) = node->clienttype;
-						WFIFOL(fd,25) = node->group_id;
-						WFIFOSET(fd,29);
+						WFIFOB(fd,20) = node->clienttype;
+						WFIFOL(fd,21) = node->group_id;
+						WFIFOSET(fd,25);
 
 						//Each auth entry can only be used once
 						idb_remove(auth_db, account_id);
 					} else { //Authentication not found
 						ShowStatus("Char-server '%s': authentication of the account %d REFUSED (ip: %s).\n", server[id].name, account_id, ip);
-						WFIFOHEAD(fd,29);
+						WFIFOHEAD(fd,25);
 						WFIFOW(fd,0) = 0x2713;
 						WFIFOL(fd,2) = account_id;
 						WFIFOL(fd,6) = login_id1;
@@ -641,10 +638,9 @@ int parse_fromchar(int fd) {
 						WFIFOB(fd,14) = sex;
 						WFIFOB(fd,15) = 1; //Auth failed
 						WFIFOL(fd,16) = request_id;
-						WFIFOL(fd,20) = 0;
-						WFIFOB(fd,24) = 0;
-						WFIFOL(fd,25) = 0;
-						WFIFOSET(fd,29);
+						WFIFOB(fd,20) = 0;
+						WFIFOL(fd,21) = 0;
+						WFIFOSET(fd,25);
 					}
 				}
 				break;
@@ -1160,10 +1156,6 @@ int mmo_auth(struct login_session_data* sd, bool isServer) {
 
 	}
 
-	// Client Version check
-	if( login_config.check_client_version && sd->version != login_config.client_version_to_connect )
-		return 5;
-
 	len = strnlen(sd->userid, NAME_LENGTH);
 
 	// Account creation with _M/_F
@@ -1400,7 +1392,6 @@ void login_auth_ok(struct login_session_data* sd)
 	node->login_id2 = sd->login_id2;
 	node->sex = sd->sex;
 	node->ip = ip;
-	node->version = sd->version;
 	node->clienttype = sd->clienttype;
 	node->group_id = sd->group_id;
 	idb_put(auth_db, sd->account_id, node);
@@ -1466,9 +1457,10 @@ void login_auth_failed(struct login_session_data* sd, int result)
 	WFIFOL(fd,2) = result;
 	if( result != 6 )
 		memset(WFIFOP(fd,6), '\0', 20);
-	else { // 6 = Your are Prohibited to log in until %s
+	else { // 6 = You are prohibited to log in until %s
 		struct mmo_account acc;
 		time_t unban_time = ( accounts->load_str(accounts, &acc, sd->userid) ) ? acc.unban_time : 0;
+
 		timestamp2string((char *)WFIFOP(fd,6), 20, unban_time, login_config.date_format);
 	}
 	WFIFOSET(fd,26);
@@ -1478,9 +1470,10 @@ void login_auth_failed(struct login_session_data* sd, int result)
 	WFIFOB(fd,2) = (uint8)result;
 	if( result != 6 )
 		memset(WFIFOP(fd,3), '\0', 20);
-	else { // 6 = Your are Prohibited to log in until %s
+	else { // 6 = You are prohibited to log in until %s
 		struct mmo_account acc;
 		time_t unban_time = ( accounts->load_str(accounts, &acc, sd->userid) ) ? acc.unban_time : 0;
+
 		timestamp2string((char *)WFIFOP(fd,3), 20, unban_time, login_config.date_format);
 	}
 	WFIFOSET(fd,23);
@@ -1569,7 +1562,6 @@ int parse_login(int fd)
 						return 0;
 				}
 				{
-					uint32 version;
 					char username[NAME_LENGTH];
 					char password[NAME_LENGTH];
 					unsigned char passhash[16];
@@ -1583,18 +1575,14 @@ int parse_login(int fd)
 						size_t uAccLen = strlen(accname);
 						size_t uTokenLen = RFIFOREST(fd) - 0x5C;
 
-						version = RFIFOL(fd,4);
-
 						if(uAccLen > NAME_LENGTH - 1 || uAccLen == 0 || uTokenLen > NAME_LENGTH - 1  || uTokenLen == 0) {
 							login_auth_failed(sd, 3);
 							return 0;
 						}
-
 						safestrncpy(username, accname, uAccLen + 1);
 						safestrncpy(password, token, uTokenLen + 1);
 						clienttype = RFIFOB(fd, 8);
 					} else {
-						version = RFIFOL(fd,2);
 						safestrncpy(username, (const char *)RFIFOP(fd,6), NAME_LENGTH);
 						if( israwpass ) {
 							safestrncpy(password, (const char *)RFIFOP(fd,30), NAME_LENGTH);
@@ -1607,16 +1595,15 @@ int parse_login(int fd)
 					RFIFOSKIP(fd,RFIFOREST(fd)); // Assume no other packet was sent
 
 					sd->clienttype = clienttype;
-					sd->version = version;
 					safestrncpy(sd->userid, username, NAME_LENGTH);
 					if( israwpass ) {
-						ShowStatus("Request for connection of %s (ip: %s) version=%d\n", sd->userid, ip,sd->version);
+						ShowStatus("Request for connection of %s (ip: %s)\n", sd->userid, ip);
 						safestrncpy(sd->passwd, password, NAME_LENGTH);
 						if( login_config.use_md5_passwds )
 							MD5_String(sd->passwd, sd->passwd);
 						sd->passwdenc = 0;
 					} else {
-						ShowStatus("Request for connection (passwdenc mode) of %s (ip: %s) version=%d\n", sd->userid, ip,sd->version);
+						ShowStatus("Request for connection (passwdenc mode) of %s (ip: %s)\n", sd->userid, ip);
 						bin2hex(sd->passwd, passhash, 16); // raw binary data here!
 						sd->passwdenc = PASSWORDENC;
 					}
@@ -1666,7 +1653,6 @@ int parse_login(int fd)
 					if( login_config.use_md5_passwds )
 						MD5_String(sd->passwd, sd->passwd);
 					sd->passwdenc = 0;
-					sd->version = login_config.client_version_to_connect; // hack to skip version check
 					server_ip = ntohl(RFIFOL(fd,54));
 					server_port = ntohs(RFIFOW(fd,58));
 					safestrncpy(server_name, (char *)RFIFOP(fd,60), 20);
@@ -1737,8 +1723,6 @@ void login_set_defaults() {
 	login_config.use_md5_passwds = false;
 	login_config.group_id_to_connect = -1;
 	login_config.min_group_id_to_connect = -1;
-	login_config.check_client_version = false;
-	login_config.client_version_to_connect = 20;
 
 	login_config.ipban = true;
 	login_config.dynamic_pass_failure_ban = true;
@@ -1804,10 +1788,6 @@ int login_config_read(const char *cfgName)
 			login_config.new_acc_length_limit = (bool)config_switch(w2);
 		else if(!strcmpi(w1, "start_limited_time"))
 			login_config.start_limited_time = atoi(w2);
-		else if(!strcmpi(w1, "check_client_version"))
-			login_config.check_client_version = (bool)config_switch(w2);
-		else if(!strcmpi(w1, "client_version_to_connect"))
-			login_config.client_version_to_connect = strtoul(w2, NULL, 10);
 		else if(!strcmpi(w1, "use_MD5_passwords"))
 			login_config.use_md5_passwds = (bool)config_switch(w2);
 		else if(!strcmpi(w1, "group_id_to_connect"))

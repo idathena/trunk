@@ -561,6 +561,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\map\clif_obfuscation.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\map\clif_packetdb.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\map\clif_shuffle.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\config\const.h"
 				>
 			</File>
@@ -698,6 +710,10 @@
 			</File>
 			<File
 				RelativePath="..\src\map\party.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\config\packets.h"
 				>
 			</File>
 			<File
