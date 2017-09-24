@@ -1806,8 +1806,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sc_start(src,bl,SC_STUN,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case RL_AM_BLAST:
-			if( bl->type == BL_PC )
-				sc_start(src,bl,SC_ANTI_M_BLAST,20 + skill_lv * 10,skill_lv,skill_get_time2(skill_id,skill_lv));
+			sc_start(src,bl,SC_ANTI_M_BLAST,20 + skill_lv * 10,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case RL_HAMMER_OF_GOD:
 			sc_start(src,bl,SC_STUN,100,skill_lv,skill_get_time2(skill_id,skill_lv));
