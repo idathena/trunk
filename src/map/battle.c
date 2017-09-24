@@ -453,6 +453,13 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 					damage += (int64)(damage * 50 / 100);
 #endif
 				}
+				if( tsc->data[SC_BURNT] ) {
+#ifdef RENEWAL
+					ratio += 400;
+#else
+					damage += (int64)(damage * 400 / 100);
+#endif
+				}
 				break;
 			case ELE_HOLY:
 				if( tsc->data[SC_ORATIO] ) {
@@ -1306,6 +1313,12 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 		if( (sce = sc->data[SC_DARKCROW]) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) )
 			damage += damage * sce->val2 / 100;
+
+		if( (sce = sc->data[SC_ANTI_M_BLAST]) && src->type == BL_PC )
+			damage += damage * sce->val2 / 100;
+
+		if( sc->data[SC_BURNT] && src->type == BL_MOB && status_get_element(src) == ELE_FIRE )
+			damage += damage * 400 / 100;
 
 		if( (sce = sc->data[SC_MAGMA_FLOW]) && rnd()%100 < sce->val2 )
 			skill_castend_nodamage_id(bl,bl,MH_MAGMA_FLOW,sce->val1,gettick(),flag|2);

@@ -576,7 +576,7 @@ OnTimer7000:
 	callsub OnAnnounce,
 		"You won't attack the one man.",
 		"I got fired from ink manufacturer last week.",
-		"Disgusting Octopus : Arghhhhh, come on!";
+		"Arghhhhh, come on!";
 	end;
 OnTimer14000:
 	callsub OnAnnounce,

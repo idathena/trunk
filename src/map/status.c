@@ -826,17 +826,17 @@ void initChangeTables(void) {
 	add_sc( ALL_REVERSEORCISH  , SC_ORCISH               );
 	set_sc( ALL_ANGEL_PROTECT  , SC_ANGEL_PROTECT        , SI_ANGEL_PROTECT        , SCB_REGEN );
 
-	add_sc( NPC_WIDEHEALTHFEAR   , SC_FEAR               );
-	add_sc( NPC_WIDEBODYBURNNING , SC_BURNING            );
-	add_sc( NPC_WIDEFROSTMISTY   , SC_FREEZING           );
-	add_sc( NPC_WIDECOLD         , SC_CRYSTALIZE         );
-	add_sc( NPC_WIDE_DEEP_SLEEP  , SC_DEEPSLEEP          );
-	add_sc( NPC_WIDESIREN        , SC_VOICEOFSIREN       );
-	add_sc( NPC_COMET            , SC_BURNING            );
-	set_sc_with_vfx( NPC_MAXPAIN , SC_MAXPAIN            , SI_MAXPAIN               , SCB_NONE );
-	add_sc( NPC_JACKFROST        , SC_FREEZE             );
-	set_sc( NPC_WIDEWEB          , SC_WIDEWEB            , SI_WIDEWEB               , SCB_FLEE );
-	set_sc( NPC_FIRESTORM        , SC_BURNT              , SI_BURNT                 , SCB_ALL );
+	add_sc( NPC_WIDEHEALTHFEAR    , SC_FEAR              );
+	add_sc( NPC_WIDEBODYBURNNING  , SC_BURNING           );
+	add_sc( NPC_WIDEFROSTMISTY    , SC_FREEZING          );
+	add_sc( NPC_WIDECOLD          , SC_CRYSTALIZE        );
+	add_sc( NPC_WIDE_DEEP_SLEEP   , SC_DEEPSLEEP         );
+	add_sc( NPC_WIDESIREN         , SC_VOICEOFSIREN      );
+	add_sc( NPC_COMET             , SC_BURNING           );
+	set_sc_with_vfx( NPC_MAXPAIN  , SC_MAXPAIN           , SI_MAXPAIN               , SCB_NONE );
+	add_sc( NPC_JACKFROST         , SC_FREEZE            );
+	set_sc( NPC_WIDEWEB           , SC_WIDEWEB           , SI_WIDEWEB               , SCB_FLEE );
+	set_sc_with_vfx( NPC_FIRESTORM, SC_BURNT             , SI_BURNT                 , SCB_NONE );
 
 	add_sc( RL_MASS_SPIRAL      , SC_BLEEDING           );
 	add_sc( RL_HAMMER_OF_GOD    , SC_STUN               );
@@ -848,7 +848,7 @@ void initChangeTables(void) {
 	set_sc( RL_P_ALTER          , SC_P_ALTER            , SI_P_ALTER              , SCB_NONE          );
 	set_sc( RL_FALLEN_ANGEL     , SC_FALLEN_ANGEL       , SI_FALLEN_ANGEL         , SCB_NONE          );
 	set_sc( RL_SLUGSHOT         , SC_STUN               , SI_SLUGSHOT             , SCB_NONE          );
-	set_sc_with_vfx( RL_AM_BLAST, SC_ANTI_M_BLAST       , SI_ANTI_M_BLAST         , SCB_ALL           );
+	set_sc_with_vfx( RL_AM_BLAST, SC_ANTI_M_BLAST       , SI_ANTI_M_BLAST         , SCB_NONE          );
 	set_sc( RL_HEAT_BARREL      , SC_HEAT_BARREL        , SI_HEAT_BARREL          , SCB_HIT|SCB_ASPD  );
 
 	set_sc( SU_HIDE                 , SC_SUHIDE       , SI_SUHIDE          , SCB_NONE  );
@@ -4112,12 +4112,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			sd->reseff[SC_SILENCE] = 10000;
 		if (sc->data[SC_GVG_BLIND])
 			sd->reseff[SC_BLIND] = 10000;
-		if (sc->data[SC_ANTI_M_BLAST])
-			sd->subrace[RC_DEMIHUMAN] -= sc->data[SC_ANTI_M_BLAST]->val2;
-		if (sc->data[SC_BURNT]) {
-			sd->subdefele[ELE_FIRE] -= 400;
-			sd->subele[ELE_FIRE] -= 400;
-		}
 	}
 	status_cpy(&sd->battle_status,status);
 
