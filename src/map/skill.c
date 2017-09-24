@@ -8718,7 +8718,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				struct block_list *m_bl = battle_get_master(src);
 				int x = src->x, y = src->y;
 
-				if (m_bl && unit_movepos(src,m_bl->x,m_bl->y,0,false)) { //Move source
+				if (m_bl && !unit_blown_immune(src,0x1) && unit_movepos(src,m_bl->x,m_bl->y,0,false)) { //Move source
 					clif_skill_nodamage(src,src,skill_id,skill_lv,1);
 					clif_blown(src,m_bl);
 					if (unit_movepos(m_bl,x,y,0,false)) { //Move target
@@ -10703,51 +10703,41 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case KO_KYOUGAKU: {
 				int rate = max(5,(45 + skill_lv * 5 - status_get_int(bl) / 10));
 
-				if( sd && !map_flag_gvg2(src->m) ) {
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_SIEGE,0,0);
-					break;
-				}
-				if( dstsd && !(tsc && tsc->data[type]) && rnd()%100 < rate )
+				if( rnd()%100 < rate )
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-				else if( sd )
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			}
 			break;
 
 		case KO_JYUSATSU: {
 				int rate = max(5,(45 + skill_lv * 10 - status_get_int(bl) / 2));
 
-				if( dstsd && !(tsc && tsc->data[type]) && rnd()%100 < rate ) {
+				if( rnd()%100 < rate ) {
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,
 						status_change_start(src,bl,type,10000,skill_lv,0,0,0,skill_get_time(skill_id,skill_lv),SCFLAG_NOAVOID));
 					status_zap(bl,tstatus->max_hp * skill_lv * 5 / 100,0);
 					if( status_get_lv(bl) <= status_get_lv(src) )
 						status_change_start(src,bl,SC_COMA,10,skill_lv,0,0,0,0,SCFLAG_NONE);
-				} else if( sd )
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				}
 			}
 			break;
 
 		case KO_GENWAKU:
-			if( (dstsd || dstmd) && !status_has_mode(tstatus,MD_IGNOREMELEE|MD_IGNOREMAGIC|MD_IGNORERANGED|MD_IGNOREMISC) && battle_check_target(src,bl,BCT_ENEMY) > 0 ) {
+			if( battle_check_target(src,bl,BCT_ENEMY) > 0 ) {
 				int rate = max(5,(45 + skill_lv * 5 - status_get_int(bl) / 10));
 				int x = src->x, y = src->y;
 
-				if( rnd()%100 >= rate ) {
-					if( sd )
-						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					break;
-				}
-				if( !unit_blown_immune(src,0x1) && unit_movepos(src,bl->x,bl->y,0,false) ) {
-					clif_skill_nodamage(src,src,skill_id,skill_lv,1);
-					clif_blown(src,bl);
-					sc_start(src,src,SC_CONFUSION,25,skill_lv,skill_get_time(skill_id,skill_lv));
-					if( unit_movepos(bl,x,y,0,false) ) {
+				if( rnd()%100 < rate ) {
+					if( !unit_blown_immune(src,0x1) && unit_movepos(src,bl->x,bl->y,0,false) ) {
+						clif_blown(src,bl);
+						clif_skill_nodamage(src,src,skill_id,skill_lv,
+							sc_start4(src,src,type,25,skill_lv,0,0,1,skill_get_time(skill_id,skill_lv)));
+					}
+					if( !unit_blown_immune(bl,0x1) && unit_movepos(bl,x,y,0,false) ) {
 						if( dstsd && pc_issit(dstsd) )
 							pc_setstand(dstsd);
 						clif_blown(bl,bl);
+						sc_start4(src,bl,type,75,skill_lv,0,0,1,skill_get_time(skill_id,skill_lv));
 						map_foreachinallrange(unit_changetarget,src,AREA_SIZE,BL_CHAR,src,bl);
-						sc_start(src,bl,SC_CONFUSION,75,skill_lv,skill_get_time(skill_id,skill_lv));
 					}
 				}
 			}
@@ -11337,7 +11327,8 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 		}
 		if( ud->skill_id != RA_CAMOUFLAGE )
 			status_change_end(src,SC_CAMOUFLAGE,INVALID_TIMER);
-		if( (ud->skill_id == RL_QD_SHOT || !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL)) && target->id != src->id )
+		if( (ud->skill_id == RL_QD_SHOT || !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL)) &&
+			target->id != src->id && ud->skill_id != KO_GENWAKU )
 			unit_setdir(src,map_calc_dir(src,target->x,target->y));
 		if( sd && ud->skill_id != SA_ABRACADABRA && ud->skill_id != WM_RANDOMIZESPELL )
 			sd->skillitem = sd->skillitemlv = sd->skilliteminf = 0; //They just set the data so leave it as it is [Inkfish]
@@ -14877,8 +14868,9 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			}
 			break;
 		case ALL_ANGEL_PROTECT:
-			if( sd && bl->type != BL_PC ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+			if( bl->type != BL_PC ) {
+				if( sd )
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				return false;
 			}
 			break;
@@ -14891,18 +14883,39 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			break;
 		case LG_PIETY:
 			if( bl->id != src->id && battle_check_target(src,bl,BCT_PARTY) <= 0 ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				if( sd )
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				return false;
 			}
 			break;
 		case SC_SHADOWFORM:
-			if( sd && bl->type != BL_PC ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
+			if( bl->type != BL_PC ) {
+				if( sd )
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				return false;
 			}
 			break;
 		case SR_POWERVELOCITY:
 			if( bl->id == src->id ) {
+				if( sd )
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
+				return false;
+			}
+			break;
+		case KO_KYOUGAKU:
+			if( !map_flag_gvg2(src->m) ) {
+				if( sd )
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_SIEGE,0,0);
+				return false;
+			}
+			if( !tsd || tsd->sc.data[SC_KYOUGAKU] ) {
+				if( sd )
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
+				return false;
+			}
+			break;
+		case KO_JYUSATSU:
+			if( bl->type != BL_PC ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				return false;

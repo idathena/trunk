@@ -812,6 +812,7 @@ void initChangeTables(void) {
 	set_sc( KO_KYOUGAKU        , SC_KYOUGAKU             , SI_KYOUGAKU             , SCB_STR|SCB_AGI|SCB_VIT|SCB_INT|SCB_DEX|SCB_LUK );
 	add_sc( KO_JYUSATSU        , SC_CURSE                );
 	set_sc( KO_ZENKAI          , SC_ZENKAI               , SI_ZENKAI               , SCB_NONE );
+	add_sc( KO_GENWAKU         , SC_CONFUSION            );
 	set_sc( KO_IZAYOI          , SC_IZAYOI               , SI_IZAYOI               , SCB_MATK );
 	set_sc( KG_KYOMU           , SC_KYOMU                , SI_KYOMU                , SCB_NONE );
 	set_sc( KG_KAGEMUSYA       , SC_KAGEMUSYA            , SI_KAGEMUSYA            , SCB_NONE );
