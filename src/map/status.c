@@ -623,7 +623,7 @@ void initChangeTables(void) {
 	set_sc_with_vfx( AB_ORATIO   , SC_ORATIO          , SI_ORATIO          , SCB_NONE );
 	set_sc( AB_LAUDAAGNUS        , SC_LAUDAAGNUS      , SI_LAUDAAGNUS      , SCB_VIT );
 	set_sc( AB_LAUDARAMUS        , SC_LAUDARAMUS      , SI_LAUDARAMUS      , SCB_LUK );
-	set_sc( AB_RENOVATIO         , SC_RENOVATIO       , SI_RENOVATIO       , SCB_REGEN );
+	set_sc( AB_RENOVATIO         , SC_RENOVATIO       , SI_RENOVATIO       , SCB_NONE );
 	set_sc( AB_EXPIATIO          , SC_EXPIATIO        , SI_EXPIATIO        , SCB_NONE );
 	set_sc( AB_DUPLELIGHT        , SC_DUPLELIGHT      , SI_DUPLELIGHT      , SCB_NONE );
 	set_sc( AB_SECRAMENT         , SC_SECRAMENT       , SI_AB_SECRAMENT    , SCB_NONE );
@@ -869,6 +869,8 @@ void initChangeTables(void) {
 	set_sc( SU_SHRIMPARTY           , SC_SHRIMPBLESSING, SI_PROTECTIONOFSHRIMP, SCB_REGEN );
 	add_sc( SU_MEOWMEOW             , SC_CHATTERING   );
 	set_sc( SU_CHATTERING           , SC_CHATTERING   , SI_CHATTERING      , SCB_WATK|SCB_MATK );
+
+	set_sc( WE_CHEERUP              , SC_CHEERUP      , SI_CHEERUP         , SCB_STR|SCB_AGI|SCB_VIT|SCB_INT|SCB_DEX|SCB_LUK );
 
 	//Storing the target job rather than simply SC_SPIRIT simplifies code later on
 	SkillStatusChangeTable[SL_ALCHEMIST]   = (sc_type)MAPID_ALCHEMIST,
@@ -5244,6 +5246,8 @@ unsigned short status_calc_str(struct block_list *bl, struct status_change *sc, 
 		str += 1;
 	if(sc->data[SC_JUMPINGCLAN])
 		str += 1;
+	if(sc->data[SC_CHEERUP])
+		str += 3;
 	if(sc->data[SC_HARMONIZE])
 		str -= sc->data[SC_HARMONIZE]->val2;
 	if(sc->data[SC_STOMACHACHE])
@@ -5297,6 +5301,8 @@ unsigned short status_calc_agi(struct block_list *bl, struct status_change *sc, 
 		agi += 1;
 	if(sc->data[SC_JUMPINGCLAN])
 		agi += 1;
+	if(sc->data[SC_CHEERUP])
+		agi += 3;
 	if(sc->data[SC_HARMONIZE])
 		agi -= sc->data[SC_HARMONIZE]->val2;
 	if(sc->data[SC_DECREASEAGI])
@@ -5358,6 +5364,8 @@ unsigned short status_calc_vit(struct block_list *bl, struct status_change *sc, 
 		vit += 1;
 	if(sc->data[SC_JUMPINGCLAN])
 		vit += 1;
+	if(sc->data[SC_CHEERUP])
+		vit += 3;
 	if(sc->data[SC_STRIPARMOR] && bl->type != BL_PC)
 		vit -= vit * sc->data[SC_STRIPARMOR]->val2 / 100;
 	if(sc->data[SC_HARMONIZE])
@@ -5417,6 +5425,8 @@ unsigned short status_calc_int(struct block_list *bl, struct status_change *sc, 
 		int_ += 1;
 	if(sc->data[SC_JUMPINGCLAN])
 		int_ += 1;
+	if(sc->data[SC_CHEERUP])
+		int_ += 3;
 	if(bl->type != BL_PC) {
 		if(sc->data[SC_STRIPHELM])
 			int_ -= int_ * sc->data[SC_STRIPHELM]->val2 / 100;
@@ -5488,6 +5498,8 @@ unsigned short status_calc_dex(struct block_list *bl, struct status_change *sc, 
 		dex += 1;
 	if(sc->data[SC_JUMPINGCLAN])
 		dex += 1;
+	if(sc->data[SC_CHEERUP])
+		dex += 3;
 	if(sc->data[SC_HARMONIZE])
 		dex -= sc->data[SC_HARMONIZE]->val2;
 	if(sc->data[SC_QUAGMIRE])
@@ -5542,6 +5554,8 @@ unsigned short status_calc_luk(struct block_list *bl, struct status_change *sc, 
 		luk += 1;
 	if(sc->data[SC_JUMPINGCLAN])
 		luk += 1;
+	if(sc->data[SC_CHEERUP])
+		luk += 3;
 	if(sc->data[SC__STRIPACCESSORY] && bl->type != BL_PC)
 		luk -= luk * sc->data[SC__STRIPACCESSORY]->val2 / 100;
 	if(sc->data[SC_BANANA_BOMB])
@@ -7556,9 +7570,13 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 	if (status_isimmune(bl)) {
 		switch (type) { //Status effects that are blocked by Golden Thief Bug card or Wand of Hermod
 			case SC_CONFUSION:
-				if (!val4)
-					break;
-			//Fall through
+				if (val4)
+					return 0;
+				break;
+			case SC_BERSERK:
+				if (val3 == SC__BLOODYLUST)
+					return 0;
+				break;
 			case SC_DECREASEAGI:	case SC_SILENCE:	case SC_COMA:
 			case SC_INCREASEAGI:	case SC_BLESSING:	case SC_SLOWPOISON:
 			case SC_IMPOSITIO:	case SC_AETERNA:	case SC_SUFFRAGIUM:
@@ -7567,7 +7585,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			case SC_GLORIA:		case SC_WINDWALK:	case SC_MAGICROD:
 			case SC_HALLUCINATION:	case SC_STONE:		case SC_QUAGMIRE:
 			case SC_SUITON:		case SC_SECRAMENT:	case SC_ADORAMUS:
-			case SC_WHITEIMPRISON:	case SC__MANHOLE:	case SC__BLOODYLUST:
+			case SC_WHITEIMPRISON:	case SC__MANHOLE:
 				return 0;
 		}
 	}

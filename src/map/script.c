@@ -19342,14 +19342,15 @@ BUILDIN_FUNC(bg_get_data)
 int script_instancegetid(struct script_state *st)
 {
 	short instance_id = 0;
-
 	struct npc_data *nd;
+
 	if( (nd = map_id2nd(st->oid)) && nd->instance_id > 0 )
 		instance_id = nd->instance_id;
 	else {
 		struct map_session_data *sd;
 		struct party_data *p;
-		if( (sd = script_rid2sd(st)) != NULL && sd->status.party_id && (p = party_search(sd->status.party_id)) != NULL && p->instance_id )
+
+		if( (sd = map_id2sd(st->rid)) && sd->status.party_id && (p = party_search(sd->status.party_id)) && p->instance_id )
 			instance_id = p->instance_id;
 	}
 

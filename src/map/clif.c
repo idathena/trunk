@@ -2434,22 +2434,22 @@ static void clif_addcards(unsigned char *buf, struct item *item)
 		i = rnd()%(j-3); //eg: 6 slots, possible i values: 0->3, 1->4, 2->5 => i = rnd()%3;
 
 	//Normal items.
-	if( item->card[i] > 0 && (j=itemdb_viewid(item->card[i])) > 0 )
+	if( item->card[i] > 0 && (j = itemdb_viewid(item->card[i])) > 0 )
 		WBUFW(buf,0) = j;
 	else
 		WBUFW(buf,0) = item->card[i];
 
-	if( item->card[++i] > 0 && (j=itemdb_viewid(item->card[i])) > 0 )
+	if( item->card[++i] > 0 && (j = itemdb_viewid(item->card[i])) > 0 )
 		WBUFW(buf,2) = j;
 	else
 		WBUFW(buf,2) = item->card[i];
 
-	if( item->card[++i] > 0 && (j=itemdb_viewid(item->card[i])) > 0 )
+	if( item->card[++i] > 0 && (j = itemdb_viewid(item->card[i])) > 0 )
 		WBUFW(buf,4) = j;
 	else
 		WBUFW(buf,4) = item->card[i];
 
-	if( item->card[++i] > 0 && (j=itemdb_viewid(item->card[i])) > 0 )
+	if( item->card[++i] > 0 && (j = itemdb_viewid(item->card[i])) > 0 )
 		WBUFW(buf,6) = j;
 	else
 		WBUFW(buf,6) = item->card[i];

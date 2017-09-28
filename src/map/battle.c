@@ -4402,7 +4402,7 @@ static int64 battle_calc_skill_constant_addition(struct Damage wd,struct block_l
 			if(tsd && tsd->weight)
 				atk += tsd->weight / 10 * sstatus->dex / 120;
 			else //Mobs
-				atk += status_get_lv(target) * 50;
+				atk += status_get_lv(target) * 50 * sstatus->dex / 120;
 			break;
 	}
 	return atk;
@@ -8638,6 +8638,7 @@ static const struct _battle_data {
 	{ "guild_alliance_onlygm",              &battle_config.guild_alliance_onlygm,           0,      0,      1,              },
 	{ "event_refine_chance",                &battle_config.event_refine_chance,             0,      0,      1,              },
 	{ "feature.achievement",                &battle_config.feature_achievement,             1,      0,      1,              },
+	{ "allow_bound_sell",                   &battle_config.allow_bound_sell,                1,      0,      1,              },
 };
 
 /*==========================

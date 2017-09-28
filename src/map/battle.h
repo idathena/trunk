@@ -647,6 +647,7 @@ extern struct Battle_Config
 	int guild_alliance_onlygm;
 	int event_refine_chance;
 	int feature_achievement;
+	int allow_bound_sell;
 } battle_config;
 
 void do_init_battle(void);
