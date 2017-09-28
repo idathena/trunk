@@ -622,14 +622,18 @@ void pc_inventory_rental_add(struct map_session_data *sd, unsigned int seconds)
 
 /**
  * Check if the player can sell the current item
- * @param sd map_session_data of the player
- * @param item struct of the checking item.
+ * @param sd: map_session_data of the player
+ * @param item: struct of the checking item
  * @return bool 'true' is sellable, 'false' otherwise
  */
 bool pc_can_sell_item(struct map_session_data *sd, struct item *item)
 {
+	struct npc_data *nd;
+
 	if(!sd || !item)
 		return false;
+
+	nd = map_id2nd(sd->npc_shopid);
 
 	if(!itemdb_cansell(item, pc_get_group_level(sd)))
 		return false;
@@ -639,6 +643,9 @@ bool pc_can_sell_item(struct map_session_data *sd, struct item *item)
 
 	if(item->expire_time)
 		return false; //Cannot Sell Rental Items
+
+	if(nd && nd->subtype == NPCTYPE_ITEMSHOP && item->bound && battle_config.allow_bound_sell)
+		return true; //NPCTYPE_ITEMSHOP and bound item config is sellable
 
 	if(item->bound && !pc_can_give_bounded_items(sd))
 		return false; //Don't allow sale of bound items
@@ -1028,6 +1035,7 @@ bool pc_adoption(struct map_session_data *p1_sd, struct map_session_data *p2_sd,
 		// Baby Skills
 		pc_skill(b_sd, WE_BABY, 1, 0);
 		pc_skill(b_sd, WE_CALLPARENT, 1, 0);
+		pc_skill(b_sd, WE_CHEERUP, 1, 0);
 
 		// Parents Skills
 		pc_skill(p1_sd, WE_CALLBABY, 1, 0);
@@ -6303,7 +6311,7 @@ int pc_follow_timer(int tid, unsigned int tick, int id, intptr_t data)
 	sd->followtimer = INVALID_TIMER;
 	tbl = map_id2bl(sd->followtarget);
 
-	if (tbl == NULL || pc_isdead(sd) || status_isdead(tbl)){
+	if (tbl == NULL || pc_isdead(sd)) {
 		pc_stop_following(sd);
 		return 0;
 	}

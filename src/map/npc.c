@@ -1871,6 +1871,9 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 {
 	char npc_ev[EVENT_NAME_LENGTH];
 	char card_slot[NAME_LENGTH];
+	char opt_id_str[NAME_LENGTH];
+	char opt_val_str[NAME_LENGTH];
+	char opt_param_str[NAME_LENGTH];
 	int i, j;
 	int key_nameid = 0;
 	int key_amount = 0;
@@ -1878,6 +1881,13 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 	int key_attribute = 0;
 	int key_identify = 0;
 	int key_card[MAX_SLOTS];
+	int key_opt_id[MAX_ITEM_RDM_OPT];
+	int key_opt_val[MAX_ITEM_RDM_OPT];
+	int key_opt_param[MAX_ITEM_RDM_OPT];
+
+	nullpo_ret(sd);
+	nullpo_ret(item_list);
+	nullpo_ret(nd);
 
 	//Discard old contents
 	script_cleararray_pc(sd, "@sold_nameid", (void *)0);
@@ -1890,6 +1900,18 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 		key_card[j] = 0;
 		snprintf(card_slot, sizeof(card_slot), "@sold_card%d", j + 1);
 		script_cleararray_pc(sd, card_slot, (void *)0);
+	}
+
+	for( j = 0; j < MAX_ITEM_RDM_OPT; j++ ) { //Clear each item option entry
+		key_opt_id[j] = 0;
+		key_opt_val[j] = 0;
+		key_opt_param[j] = 0;
+		snprintf(opt_id_str, sizeof(opt_id_str), "@sold_opt_id%d", j + 1);
+		script_cleararray_pc(sd, opt_id_str, (void *)0);
+		snprintf(opt_val_str, sizeof(opt_val_str), "@sold_opt_val%d", j + 1);
+		script_cleararray_pc(sd, opt_val_str, (void *)0);
+		snprintf(opt_param_str, sizeof(opt_param_str), "@sold_opt_param%d", j + 1);
+		script_cleararray_pc(sd, opt_param_str, (void *)0);
 	}
 
 	for( i = 0; i < n; i++ ) { //Save list of to be sold items
@@ -1906,6 +1928,15 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 		for( j = 0; j < MAX_SLOTS; j++ ) { //Store each of the cards from the equipment in the array
 			snprintf(card_slot, sizeof(card_slot), "@sold_card%d", j + 1);
 			script_setarray_pc(sd, card_slot, i, (void *)(intptr_t)sd->inventory.u.items_inventory[idx].card[j], &key_card[j]);
+		}
+
+		for( j = 0; j < MAX_ITEM_RDM_OPT; j++ ) {
+			snprintf(opt_id_str, sizeof(opt_id_str), "@sold_opt_id%d", j + 1);
+			script_setarray_pc(sd, opt_id_str, i, (void*)(intptr_t)sd->inventory.u.items_inventory[idx].option[j].id, &key_opt_id[j]);
+			snprintf(opt_val_str, sizeof(opt_val_str), "@sold_opt_val%d", j + 1);
+			script_setarray_pc(sd, opt_val_str, i, (void*)(intptr_t)sd->inventory.u.items_inventory[idx].option[j].value, &key_opt_val[j]);
+			snprintf(opt_param_str, sizeof(opt_param_str), "@sold_opt_param%d", j + 1);
+			script_setarray_pc(sd, opt_param_str, i, (void*)(intptr_t)sd->inventory.u.items_inventory[idx].option[j].param, &key_opt_param[j]);
 		}
 	}
 

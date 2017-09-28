@@ -33,8 +33,8 @@
 #define ROULETTE_SILVER_VAR "RouletteSilver"
 #define ROULETTE_GOLD_VAR "RouletteGold"
 
-//Update this max as necessary. 85 is the value needed for Expanded Super Novice
-#define MAX_SKILL_TREE 85
+//Update this max as necessary, 86 is the value needed for Expanded Super Baby
+#define MAX_SKILL_TREE 86
 //Total number of classes (for data storage)
 #define CLASS_COUNT (JOB_MAX - JOB_NOVICE_HIGH + JOB_MAX_BASIC)
 

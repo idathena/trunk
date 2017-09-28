@@ -1460,6 +1460,7 @@
 	export_constant(SC_WIDEWEB);
 	export_constant(SC_CHILL);
 	export_constant(SC_BURNT);
+	export_constant(SC_CHEERUP);
 
 	/* Status icons */
 	export_constant(SI_BLANK);
