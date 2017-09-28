@@ -898,7 +898,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 
 	//Skill additional effect is about adding effects to the target
 	//So if the target can't be inflicted with statuses, this is pointless
-	if( !tsc )
+	if( !(tsc && tsc->count) )
 		return 0;
 
 	if( sd ) { //These statuses would be applied anyway even if the damage was blocked by some skills [Inkfish]
@@ -1612,6 +1612,10 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
+				if( status_isimmune(bl) ||
+					(dstsd && (dstsd->class_&MAPID_UPPERMASK) == MAPID_SOUL_LINKER) ||
+					(tsc->data[SC_SPIRIT] && tsc->data[SC_SPIRIT]->val2 == SL_ROGUE) )
+					break;
 				if( dstsd )
 					pc_bonus_script_clear(dstsd,BSF_REM_ON_BANISHING_BUSTER);
 				for( i = 0; i < SC_MAX; i++ ) {
