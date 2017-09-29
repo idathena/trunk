@@ -996,8 +996,9 @@ enum adopt_responses pc_try_adopt(struct map_session_data *p1_sd, struct map_ses
 		return ADOPT_MARRIED;
 	}
 
-	if( !((b_sd->status.class_ >= JOB_NOVICE && b_sd->status.class_ <= JOB_THIEF) ||
-		b_sd->status.class_ == JOB_SUPER_NOVICE || b_sd->status.class_ == JOB_SUPER_NOVICE_E) )
+	if( !((b_sd->status.class_ >= JOB_NOVICE && b_sd->status.class_ <= JOB_THIEF) || b_sd->status.class_ == JOB_SUMMONER ||
+		b_sd->status.class_ == JOB_SUPER_NOVICE || b_sd->status.class_ == JOB_NINJA || b_sd->status.class_ == JOB_TAEKWON ||
+		b_sd->status.class_ == JOB_GUNSLINGER) )
 		return ADOPT_NOT_NOVICE;
 
 	return ADOPT_ALLOWED;
