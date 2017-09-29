@@ -2829,7 +2829,7 @@
 15064,499,100	// TE_Woe_Mage_Coat
 //15067,507,100	//
 15116,467,100	// Airship_Armor
-15141,467,100	// Ancient_Armor_Of_The_Goddess
+15141,467,100	// Rift_Ancient_Armor
 16002,507,100	// Stunner_C
 16004,499,100	// P_Mace1
 16005,499,100	// P_Mace2
@@ -3649,7 +3649,7 @@
 18982,475,100	// Old_Circlet_Of_Bone
 18983,475,100	// Old_Protect_Of_Crown
 18984,475,100	// Old_Camo_RabbitHood
-19033,467,100	// Ancient_Decoration_Of_The_Goddess
+19033,467,100	// Rift_Ancient_Decoration
 19051,475,100	// Warrior_Moon_Cat_Hat
 19052,507,100	// Sigrun's_Wings_
 19053,475,100	// Fighter_Moon_Cat_Hat
@@ -3698,11 +3698,13 @@
 20704,499,100	// TE_Woe_Magic_Manteau
 //20709,507,100	//
 20743,467,100	// Airship_Cape
+20779,467,100	// Rift_Manteau
 21005,499,100	// Metal_Two_Hand_Sword
 21006,499,100	// TE_Woe_Two_Hand_Sword
 21014,467,100	// Infinity_Twohand_Sword
 //22012,507,100	//
 22046,467,100	// Airship_Boots
+22075,467,100	// Rift_Shoes
 22508,507,100	// Para_Team_Mark_
 22510,475,100	// King_Wolf_Scroll
 //22511,467,100	//

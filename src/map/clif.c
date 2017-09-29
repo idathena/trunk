@@ -3136,6 +3136,7 @@ static int clif_hpmeter(struct map_session_data *sd)
 /// 0121 <current count>.W <max count>.W <current weight>.L <max weight>.L (ZC_NOTIFY_CARTITEM_COUNTINFO)
 /// 013a <atk range>.W (ZC_ATTACK_RANGE)
 /// 0141 <status id>.L <base status>.L <plus status>.L (ZC_COUPLESTATUS)
+/// 0acb <var id>.W <value>.Q (ZC_LONGPAR_CHANGE2)
 /// @TODO: Extract individual packets.
 /// FIXME: Packet lengths from packet_len(cmd)
 void clif_updatestatus(struct map_session_data *sd,int type)
@@ -3245,6 +3246,28 @@ void clif_updatestatus(struct map_session_data *sd,int type)
 			WFIFOW(fd,0) = 0xb1;
 			WFIFOL(fd,4) = sd->status.zeny;
 			break;
+#if PACKETVER >= 20170830
+		case SP_BASEEXP:
+			WFIFOW(fd,0) = 0xacb;
+			WFIFOQ(fd,4) = sd->status.base_exp;
+			len = packet_len(0xacb);
+			break;
+		case SP_JOBEXP:
+			WFIFOW(fd,0) = 0xacb;
+			WFIFOQ(fd,4) = sd->status.job_exp;
+			len = packet_len(0xacb);
+			break;
+		case SP_NEXTBASEEXP:
+			WFIFOW(fd,0) = 0xacb;
+			WFIFOQ(fd,4) = pc_nextbaseexp(sd);
+			len = packet_len(0xacb);
+			break;
+		case SP_NEXTJOBEXP:
+			WFIFOW(fd,0) = 0xacb;
+			WFIFOQ(fd,4) = pc_nextjobexp(sd);
+			len = packet_len(0xacb);
+			break;
+#else
 		case SP_BASEEXP:
 			WFIFOW(fd,0) = 0xb1;
 			WFIFOL(fd,4) = sd->status.base_exp;
@@ -3261,6 +3284,7 @@ void clif_updatestatus(struct map_session_data *sd,int type)
 			WFIFOW(fd,0) = 0xb1;
 			WFIFOL(fd,4) = pc_nextjobexp(sd);
 			break;
+#endif
 		/**
 		 * SP_U<STAT> are used to update the amount of points necessary to increase that stat
 		 */
@@ -10083,6 +10107,24 @@ bool clif_process_whisper_message(struct map_session_data *sd, char *out_name, c
 	return true;
 }
 
+/**
+ * Displays a message if the player enters a PK Zone (during pk_mode)
+ * @param sd: Player data
+ */
+inline void clif_pk_mode_message(struct map_session_data * sd)
+{
+	if( battle_config.pk_mode && battle_config.pk_mode_mes && sd && map[sd->bl.m].flag.pvp ) {
+		if( (int)sd->status.base_level < battle_config.pk_min_level ) {
+			char output[CHAT_SIZE_MAX];
+
+			safesnprintf(output, CHAT_SIZE_MAX, msg_txt(218), // You've entered a PK Zone (safe until level %d).
+				battle_config.pk_min_level);
+			clif_showscript(&sd->bl, output, SELF);
+		} else
+			clif_showscript(&sd->bl, msg_txt(217), SELF); // You've entered a PK Zone.
+	}
+}
+
 // ---------------------
 // clif_parse_wanttoconnect
 // ---------------------
@@ -10520,6 +10562,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		//Instances do not need their own channels
 		if(channel_config.map_enable && channel_config.map_autojoin && !map[sd->bl.m].flag.nochmautojoin && !map[sd->bl.m].instance_id)
 			channel_mjoin(sd); //Join new map
+		clif_pk_mode_message(sd);
 	}
 
 	mail_clear(sd);
@@ -17332,8 +17375,9 @@ void clif_party_show_picker(struct map_session_data *sd, struct item *item_data)
 }
 
 
-/** Display gained exp (ZC_NOTIFY_EXP).
- * 07f6 <account id>.L <amount>.L <var id>.W <exp type>.W
+/** Display gained exp.
+ * 07f6 <account id>.L <amount>.L <var id>.W <exp type>.W (ZC_NOTIFY_EXP)
+ * 0acc <account id>.L <amount>.Q <var id>.W <exp type>.W (ZC_NOTIFY_EXP2)
  * amount: INT32_MIN ~ INT32_MAX
  * var id:
  *     SP_BASEEXP, SP_JOBEXP
@@ -17349,18 +17393,30 @@ void clif_party_show_picker(struct map_session_data *sd, struct item *item_data)
 void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, bool quest, bool lost)
 {
 	int fd;
+	int offset;
+#if PACKETVER >= 20170830
+	int cmd = 0xacc;
+#else
+	int cmd = 0x7f6;
+#endif
 
 	nullpo_retv(sd);
 
 	fd = sd->fd;
 
-	WFIFOHEAD(fd,packet_len(0x7f6));
-	WFIFOW(fd,0) = 0x7f6;
+	WFIFOHEAD(fd,packet_len(cmd));
+	WFIFOW(fd,0) = cmd;
 	WFIFOL(fd,2) = sd->bl.id;
+#if PACKETVER >= 20170830
+	WFIFOQ(fd,6) = (int64)u64min((uint64)exp, INT_MAX) * (lost ? -1 : 1);
+	offset = 4;
+#else
 	WFIFOL(fd,6) = (int)umin(exp, INT_MAX) * (lost ? -1 : 1);
-	WFIFOW(fd,10) = type;
-	WFIFOW(fd,12) = (quest && (type == SP_BASEEXP ? 1 : 0)); //Normal exp and quest job exp is shown in yellow, quest base exp is shown in purple
-	WFIFOSET(fd,packet_len(0x7f6));
+	offset = 0;
+#endif
+	WFIFOW(fd,10 + offset) = type;
+	WFIFOW(fd,12 + offset) = (quest && (type == SP_BASEEXP ? 1 : 0)); //Normal exp and quest job exp is shown in yellow, quest base exp is shown in purple
+	WFIFOSET(fd,packet_len(cmd));
 }
 
 
@@ -18877,7 +18933,7 @@ void clif_notify_bindOnEquip(struct map_session_data *sd, int n) {
  * [Ind]
  * 08b3 <Length>.W <id>.L <message>.?B (ZC_SHOWSCRIPT)
  */
-void clif_ShowScript(struct block_list *bl, const char *message) {
+void clif_showscript(struct block_list *bl, const char *message, enum send_target flag) {
 	char buf[256];
 	size_t len;
 
@@ -18889,7 +18945,7 @@ void clif_ShowScript(struct block_list *bl, const char *message) {
 	len = strlen(message) + 1;
 
 	if( len > sizeof(buf) - 8 ) {
-		ShowWarning("clif_ShowScript: Truncating too long message '%s' (len=%d).\n", message, len);
+		ShowWarning("clif_showscript: Truncating too long message '%s' (len=%d).\n", message, len);
 		len = sizeof(buf) - 8;
 	}
 
@@ -18897,7 +18953,7 @@ void clif_ShowScript(struct block_list *bl, const char *message) {
 	WBUFW(buf,2) = len + 8;
 	WBUFL(buf,4) = bl->id;
 	safestrncpy((char *)WBUFP(buf,8), message, len);
-	clif_send((unsigned char *)buf, WBUFW(buf,2), bl, AREA);
+	clif_send((unsigned char *)buf, WBUFW(buf,2), bl, flag);
 }
 
 

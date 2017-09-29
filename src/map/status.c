@@ -12034,9 +12034,9 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 				status_change_end(bl,(sc_type)sce->val2,INVALID_TIMER);
 			else {
 				if (sce->val1 == MOBID_DULLAHAN)
-					clif_ShowScript(bl,"Apple's yummy!");
+					clif_showscript(bl,"Apple's yummy!",SELF);
 				if (sce->val1 == MOBID_LOLI_RURI)
-					clif_ShowScript(bl,"I will be with you for ever!!");
+					clif_showscript(bl,"I will be with you for ever!!",SELF);
 			}
 			break;
 		case SC_C_MARKER: {

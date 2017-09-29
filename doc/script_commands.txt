@@ -4013,10 +4013,13 @@ by default green
 
 ---------------------------------------
 
-*showscript "<message>"{,<GID>};
+*showscript "<message>"{,<GID>,"<flag>"};
 
 Makes attached player or <GID> says a message like shouting a skill name, the message
 will be seen to everyone around but not in chat window.
+flag: Specify target
+   bc_area - Message is sent to players in the vicinity of the source (default).
+   bc_self - Message is sent only to player attached.
 
 ---------------------------------------
 
@@ -4647,8 +4650,8 @@ this really cause.
 Example to get Crimson Weapon with Ghost property:
 	// +9 Crimson Dagger [2]
 	setarray .@OptID[0],RDMOPT_WEAPON_ATTR_TELEKINESIS;
-	setarray .@OptVal[0],1;
-	setarray .@OptParam[0],1;
+	setarray .@OptVal[0],0;
+	setarray .@OptParam[0],0;
 	getitem3 28705,1,1,9,0,0,0,0,0,.@OptID,.@OptVal,.@OptParam;
 
 ---------------------------------------
@@ -4689,8 +4692,8 @@ For a list of bound types see 'getitembound'.
 Example to get Crimson Weapon with Ghost property:
 	// +9 Crimson Dagger [2]
 	setarray .@OptID[0],RDMOPT_WEAPON_ATTR_TELEKINESIS;
-	setarray .@OptVal[0],1;
-	setarray .@OptParam[0],1;
+	setarray .@OptVal[0],0;
+	setarray .@OptParam[0],0;
 	getitembound3 28705,1,1,9,0,0,0,0,0,BOUND_CHAR,.@OptID,.@OptVal,.@OptParam;
 
 ---------------------------------------
@@ -4815,8 +4818,8 @@ See 'getitem2' for an explanation of the expanded parameters.
 Example to get Crimson Weapon with Ghost property:
 	// +9 Crimson Dagger [2]
 	setarray .@OptID[0],RDMOPT_WEAPON_ATTR_TELEKINESIS;
-	setarray .@OptVal[0],1;
-	setarray .@OptParam[0],1;
+	setarray .@OptVal[0],0;
+	setarray .@OptParam[0],0;
 	rentitem3 28705,(24*60*60),1,9,0,0,0,0,0,.@OptID,.@OptVal,.@OptParam;
 
 ---------------------------------------
