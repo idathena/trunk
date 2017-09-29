@@ -1997,6 +1997,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 				return false; //Should fail when used on top of Land Protector [Skotlex]
 			break;
 		case ALL_RESURRECTION:
+		case WE_ONEFOREVER:
 			if (target && battle_check_undead(status_get_race(target), status_get_element(target)))
 				break;
 		//Fall through
