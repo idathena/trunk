@@ -9780,10 +9780,16 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case LG_TRAMPLE:
-			clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
-			if( rnd()%100 < 25 + 25 * skill_lv )
-				map_foreachinallrange(skill_destroy_trap,bl,skill_get_splash(skill_id,skill_lv),BL_SKILL,src,tick);
-			status_change_end(bl,SC_SV_ROOTTWIST,INVALID_TIMER);
+			if( flag&1 )
+				status_change_end(bl,SC_SV_ROOTTWIST,INVALID_TIMER);
+			else {
+				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
+				if( rnd()%100 < 25 + 25 * skill_lv ) {
+					map_foreachinallrange(skill_destroy_trap,bl,skill_get_splash(skill_id,skill_lv),BL_SKILL,src,tick);
+					map_foreachinallrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,
+						skill_id,skill_lv,tick,flag|1,skill_castend_nodamage_id);
+				}
+			}
 			break;
 
 		case LG_REFLECTDAMAGE:

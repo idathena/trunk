@@ -6099,7 +6099,7 @@ BUILDIN_FUNC(viewpoint)
  * @param x First position of random option id array from the script
  */
 static int script_getitem_randomoption(struct script_state *st, struct item *it, const char *funcname, int x) {
-	int i, opt_id_n, opt_val_n, opt_param_n;
+	int i, opt_size;
 	struct script_data *opt_id = script_getdata(st,x);
 	struct script_data *opt_val = script_getdata(st,x + 1);
 	struct script_data *opt_param = script_getdata(st,x + 2);
@@ -6133,26 +6133,14 @@ static int script_getitem_randomoption(struct script_state *st, struct item *it,
 	opt_val_idx = reference_getindex(opt_val);
 	opt_param_idx = reference_getindex(opt_param);
 
-	opt_id_n = getarraysize(st, opt_id_id, opt_id_idx, 0, reference_getref(opt_id));
-	opt_val_n = getarraysize(st, opt_val_id, opt_val_idx, 0, reference_getref(opt_val));
-	opt_param_n = getarraysize(st, opt_param_id, opt_param_idx, 0, reference_getref(opt_param));
+	opt_size = getarraysize(st, opt_id_id, opt_id_idx, 0, reference_getref(opt_id));
 
-	if( opt_id_n < 1 ) {
-		ShowError("buildin_%s: No option id listed.\n", funcname);
+	if( opt_size < 1 ) {
+		ShowError("buildin_%s: No option listed.\n", funcname);
 		return 1;
 	}
 
-	if( opt_val_n < 1 ) {
-		ShowError("buildin_%s: No option value listed.\n", funcname);
-		return 1;
-	}
-
-	if( opt_param_n < 1 ) {
-		ShowError("buildin_%s: No option parameter listed.\n", funcname);
-		return 1;
-	}
-
-	for( i = 0; i < opt_id_n && i < MAX_ITEM_RDM_OPT; i++ ) {
+	for( i = 0; i < opt_size && i < MAX_ITEM_RDM_OPT; i++ ) {
 		it->option[i].id = (int32)__64BPRTSIZE(get_val2(st, reference_uid(opt_id_id, opt_id_idx + i), reference_getref(opt_id)));
 		script_removetop(st,-1,0);
 		it->option[i].value = (int32)__64BPRTSIZE(get_val2(st, reference_uid(opt_val_id, opt_val_idx + i), reference_getref(opt_val)));
@@ -21469,12 +21457,13 @@ BUILDIN_FUNC(getvar) {
 
 /**
  * Display script message
- * showscript "<message>"{,<GID>};
+ * showscript "<message>"{,<GID>,"<flag>"};
  */
 BUILDIN_FUNC(showscript) {
 	struct block_list *bl = NULL;
 	const char *msg = script_getstr(st,2);
 	int id = 0;
+	send_target target = AREA;
 
 	if (script_hasdata(st,3)) {
 		id = script_getnum(st,3);
@@ -21488,7 +21477,17 @@ BUILDIN_FUNC(showscript) {
 		return 1;
 	}
 
-	clif_ShowScript(bl, msg);
+	if (script_hasdata(st,4)) {
+		if (script_getnum(st,4) == BC_SELF) {
+			if (!map_id2sd(bl->id)) {
+				ShowWarning("script:showscript: bc_self can't be used for non-players objects.\n");
+				return 1;
+			}
+			target = SELF;
+		}
+	}
+
+	clif_showscript(bl, msg, target);
 	script_pushint(st,1);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -22806,7 +22805,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(npcshopupdate,"sii?"),
 	BUILDIN_DEF(getattachedrid,""),
 	BUILDIN_DEF(getvar,"vi"),
-	BUILDIN_DEF(showscript,"s?"),
+	BUILDIN_DEF(showscript,"s??"),
 	BUILDIN_DEF(ignoretimeout,"i?"),
 	BUILDIN_DEF(opendressroom,"i?"),
 	BUILDIN_DEF(hateffect,"ii"),

@@ -1041,7 +1041,7 @@ void clif_parse_BankClose(int fd, struct map_session_data *sd);
 void clif_crimson_marker(struct map_session_data *sd, struct block_list *bl, uint8 flag);
 void clif_crimson_marker_single(struct map_session_data *sd, struct block_list *bl, uint8 flag);
 
-void clif_ShowScript(struct block_list *bl, const char *message);
+void clif_showscript(struct block_list *bl, const char *message, enum send_target flag);
 void clif_notify_bindOnEquip(struct map_session_data *sd, int n);
 
 void clif_merge_item_open(struct map_session_data *sd);
