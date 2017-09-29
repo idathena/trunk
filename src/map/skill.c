@@ -898,7 +898,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 
 	//Skill additional effect is about adding effects to the target
 	//So if the target can't be inflicted with statuses, this is pointless
-	if( !(tsc && tsc->count) )
+	if( !tsc )
 		return 0;
 
 	if( sd ) { //These statuses would be applied anyway even if the damage was blocked by some skills [Inkfish]
@@ -8278,7 +8278,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					return 1;
 				}
 				//No reviving in WoE grounds!
-				if ((map_flag_gvg2(bl->m) || map[bl->m].flag.battleground)) {
+				if (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
@@ -8287,18 +8287,18 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				{
 					int per = 30, sper = 0;
 
-					if (battle_check_undead(tstatus->race,tstatus->def_ele))
-						break;
 					if (tsc && tsc->data[SC_HELLPOWER])
 						break;
-					if (map[bl->m].flag.pvp && dstsd && dstsd->pvp_point < 0)
-						break;
-					if (dstsd && dstsd->special_state.restart_full_recover)
-						per = sper = 100;
-					//Can only revive family members
-					if (dstsd && (dstsd->status.char_id == sd->status.partner_id ||
-						dstsd->status.char_id == sd->status.child) && status_revive(bl,per,sper))
-						clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+					if (dstsd) {
+						if (map[bl->m].flag.pvp && dstsd->pvp_point < 0)
+							break;
+						if (dstsd->status.char_id != sd->status.partner_id && dstsd->status.char_id != sd->status.child)
+							break; //Can only revive family members
+						if (dstsd->special_state.restart_full_recover)
+							per = sper = 100;
+						if (status_revive(bl,per,sper))
+							clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+					}
 				}
 			}
 			break;
