@@ -2375,7 +2375,6 @@ static bool is_attack_piercing(struct Damage wd, struct block_list *src, struct 
 		case RK_DRAGONBREATH:
 		case RK_DRAGONBREATH_WATER:
 		case NC_SELFDESTRUCTION:
-		case KO_HAPPOKUNAI:
 			return false;
 		case MO_INVESTIGATE:
 		case RL_MASS_SPIRAL:
@@ -2655,7 +2654,6 @@ static bool battle_skill_stacks_masteries_vvs(uint16 skill_id)
 		case RK_DRAGONBREATH:
 		case RK_DRAGONBREATH_WATER:
 		case NC_SELFDESTRUCTION:
-		case KO_HAPPOKUNAI:
 		case RL_MASS_SPIRAL:
 			return false;
 	}
@@ -3145,23 +3143,6 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 				ATK_ADD(wd.weaponAtk, wd.weaponAtk2, damagevalue);
 #endif
 			}
-			break;
-		case KO_HAPPOKUNAI:
-			if(sd) {
-				short index = sd->equip_index[EQI_AMMO];
-				int damagevalue = 3 * (
-#ifdef RENEWAL
-					2 *
-#endif
-					sstatus->batk + sstatus->rhw.atk + (index >= 0 && sd->inventory_data[index] ?
-					sd->inventory_data[index]->atk : 0)) * (skill_lv + 5) / 5;
-
-				ATK_ADD(wd.damage, wd.damage2, damagevalue);
-#ifdef RENEWAL
-				ATK_ADD(wd.weaponAtk, wd.weaponAtk2, damagevalue);
-#endif
-			} else
-				ATK_ADD(wd.damage, wd.damage2, 5000);
 			break;
 		case HFLI_SBR44: //[orn]
 			if(src->type == BL_HOM)
@@ -4217,6 +4198,9 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			RE_LVL_DMOD(120);
 			if(tsc && tsc->data[SC_JYUMONJIKIRI])
 				skillratio += skill_lv * status_get_lv(src);
+			break;
+		case KO_HAPPOKUNAI:
+			skillratio += -100 + 60 * (skill_lv + 5);
 			break;
 		case KO_HUUMARANKA:
 			skillratio += -100 + 150 * skill_lv + sstatus->agi + sstatus->dex + 100 * (sd ? pc_checkskill(sd,NJ_HUUMA) : 5);

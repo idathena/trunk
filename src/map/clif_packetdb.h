@@ -2005,6 +2005,11 @@
 	packet(0x08d2,10);
 #endif
 
+// 2012-06-01aRagexeRE
+#if PACKETVER >= 20120601
+	packet(0x0985,-1); // ZC_SKILL_POSTDELAY_LIST2
+#endif
+
 // 2012-06-18
 #if PACKETVER >= 20120618
 	packet(0x0983,29); // ZC_MSG_STATE_CHANGE3
