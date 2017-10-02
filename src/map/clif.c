@@ -5542,31 +5542,35 @@ void clif_skill_cooldown(struct map_session_data *sd, uint16 skill_id, unsigned 
 
 /// List of skills that have cooldown.
 /// 043e <len>.W <skill ID>.W <tick>.L (ZC_SKILL_POSTDELAY_LIST) (PACKETVER >= 20081112)
-/// 0985 <len>.W <skill ID>.W <max tick>.L <tick>.L (ZC_SKILL_POSTDELAY_LIST2) (PACKETVER >= 20120618)
-void clif_skill_cooldown_list(struct map_session_data *sd, struct skill_cooldown_data *data)
+/// 0985 <len>.W <skill ID>.W <max tick>.L <tick>.L (ZC_SKILL_POSTDELAY_LIST2) (PACKETVER >= 20120601)
+/*
+void clif_skill_cooldown_list(struct map_session_data *sd, uint16 skill_id, unsigned int tick, unsigned int duration)
 {
 #if PACKETVER >= 20081112
-	unsigned char buf[22];
-#if PACKETVER >= 20120618
+#if PACKETVER >= 20120601
 	const int cmd = 0x985;
 #else
 	const int cmd = 0x43e;
 #endif
+	int fd;
 	int offset = 0;
 
 	nullpo_retv(sd);
 
-	WBUFW(buf,offset + 0) = cmd;
-	WBUFW(buf,offset + 2) = packet_len(cmd);
-	WBUFW(buf,offset + 4) = data->skill_id;
+	fd = sd->fd;
+	WFIFOHEAD(fd,packet_len(cmd));
+	WFIFOW(fd,offset + 0) = cmd;
+	WFIFOW(fd,offset + 2) = packet_len(cmd);
+	WFIFOW(fd,offset + 4) = skill_id;
 #if PACKETVER >= 20120618
-	WBUFL(buf,offset + 6) = data->duration; //Set max duration [exneval]
+	WFIFOL(fd,offset + 6) = duration; //Set max duration [exneval]
 	offset += 4;
 #endif
-	WBUFL(buf,offset + 6) = data->tick;
-	clif_send(buf,packet_len(cmd),&sd->bl,SELF);
+	WFIFOL(fd,offset + 6) = tick;
+	WFIFOSET(fd,packet_len(cmd));
 #endif
 }
+*/
 
 
 /// Skill attack effect and damage.
@@ -9024,7 +9028,7 @@ void clif_emotion(struct block_list *bl,int type)
 /// 0191 <id>.L <contents>.80B
 void clif_talkiebox(struct block_list *bl, const char *talkie)
 {
-	unsigned char buf[MESSAGE_SIZE+6];
+	unsigned char buf[MESSAGE_SIZE + 6];
 	nullpo_retv(bl);
 
 	WBUFW(buf,0) = 0x191;

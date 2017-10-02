@@ -3269,7 +3269,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case RK_IGNITIONBREAK:
 		case LG_CANNONSPEAR:
 		case LG_MOONSLASHER:
-		case SR_TIGERCANNON:
 		case GN_SPORE_EXPLOSION:
 		case GN_ILLUSIONDOPING:
 		case MH_HEILIGE_STANGE:
@@ -5003,7 +5002,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 							if (!(flag&32) && sc && sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == SR_FALLENEMPIRE)
 								flag |= 8;
 						}
-					//Fall through
+						break;
 					case GN_SPORE_EXPLOSION:
 						clif_skill_damage(src,bl,tick,status_get_amotion(src),status_get_dmotion(src),-30000,1,skill_id,-1,DMG_SPLASH);
 						break;

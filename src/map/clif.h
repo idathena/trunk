@@ -655,7 +655,7 @@ void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x,
 void clif_skillcastcancel(struct block_list *bl);
 void clif_skill_fail(struct map_session_data *sd,uint16 skill_id,enum useskill_fail_cause cause,int btype,int val);
 void clif_skill_cooldown(struct map_session_data *sd, uint16 skill_id, unsigned int tick);
-void clif_skill_cooldown_list(struct map_session_data *sd, struct skill_cooldown_data *data);
+//void clif_skill_cooldown_list(struct map_session_data *sd, uint16 skill_id, unsigned int tick, unsigned int duration);
 int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 damage,int div,uint16 skill_id,uint16 skill_lv,int type);
 //int clif_skill_damage2(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 damage,int div,uint16 skill_id,uint16 skill_lv,int type);
 int clif_skill_nodamage(struct block_list *src,struct block_list *dst,uint16 skill_id,int heal,int fail);
