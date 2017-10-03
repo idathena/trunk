@@ -2356,7 +2356,7 @@ unsigned int status_calc_maxhp(struct block_list *bl, uint64 maxhp);
 unsigned int status_calc_maxsp(struct block_list *bl, uint64 maxsp);
 unsigned char status_calc_element(struct block_list *bl, struct status_change *sc, int element);
 unsigned char status_calc_element_lv(struct block_list *bl, struct status_change *sc, int lv);
-unsigned short status_calc_mode(struct block_list *bl, struct status_change *sc, int mode);
+enum e_mode status_calc_mode(struct block_list *bl, struct status_change *sc, enum e_mode mode);
 int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type);
 int status_get_spbonus(struct block_list *bl, enum e_status_bonus type);
 unsigned int status_calc_maxhpsp_pc(struct map_session_data *sd, bool isHP);

@@ -648,7 +648,7 @@ int mob_once_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, const
 
 	for (count = 0; count < amount; count++) {
 		int c = (mob_id >= 0) ? mob_id : (mob_id == -5) ? mob_get_random_id(MOBG_Branch_Of_Dead_Tree, 0x21, 0) :
-			mob_get_random_id(-mob_id - 1, (battle_config.random_monster_checklv) ? 0x03 : 0x01, lv);
+			mob_get_random_id(-mob_id - 1, (battle_config.random_monster_checklv ? 0x03 : 0x01), lv);
 
 		md = mob_once_spawn_sub((sd ? &sd->bl : NULL), m, x, y, mobname, c, event, size, ai);
 
@@ -1152,7 +1152,7 @@ int mob_spawn(struct mob_data *md)
 /*==========================================
  * Determines if the mob can change target. [Skotlex]
  *------------------------------------------*/
-static int mob_can_changetarget(struct mob_data *md, struct block_list *target, int mode)
+static int mob_can_changetarget(struct mob_data *md, struct block_list *target, enum e_mode mode)
 {
 	//Special feature that makes monsters always attack the person that provoked them
 	if((battle_config.mob_ai&0x800) && md->state.provoke_flag) {
@@ -1216,14 +1216,14 @@ static int mob_ai_sub_hard_activesearch(struct block_list *bl,va_list ap)
 {
 	struct mob_data *md;
 	struct block_list **target;
-	int mode;
+	enum e_mode mode;
 	int dist;
 
 	nullpo_ret(bl);
 
 	md = va_arg(ap,struct mob_data *);
 	target = va_arg(ap,struct block_list **);
-	mode = va_arg(ap,int);
+	mode = va_arg(ap,enum e_mode);
 
 	//If can't seek yet, not an enemy, or you can't attack it, skip
 	if(md->bl.id == bl->id || (*target) == bl || battle_check_target(&md->bl,bl,BCT_ENEMY) <= 0 ||
@@ -1601,7 +1601,8 @@ int mob_warpchase(struct mob_data *md, struct block_list *target)
 static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 {
 	struct block_list *tbl = NULL, *abl = NULL;
-	int mode, view_range, chase_range, can_move;
+	enum e_mode mode;
+	int view_range, chase_range, can_move;
 
 	if(md->bl.prev == NULL || md->status.hp == 0)
 		return false;
@@ -3591,7 +3592,7 @@ static bool mob_clone_disabled_skills(uint16 skill_id)
 //If mode is not passed, a default aggressive mode is used.
 //If master_id is passed, clone is attached to him.
 //Returns: ID of newly crafted copy.
-int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, const char *event, int master_id, int mode, int flag, unsigned int duration)
+int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, const char *event, int master_id, enum e_mode mode, int flag, unsigned int duration)
 {
 	int mob_id;
 	int i, j, inf, fd;
@@ -3622,7 +3623,7 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 		status->lhw.atk2= status->dex + status->lhw.atk + status->lhw.atk2; //Max ATK
 		status->lhw.atk = status->dex; //Min ATK
 	}
-	if (mode) //User provided mode.
+	if (mode) //User provided mode
 		status->mode = (enum e_mode)mode;
 	else if (flag&1) //Friendly Character, remove looting
 		status->mode &= ~MD_LOOTER;

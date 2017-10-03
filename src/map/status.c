@@ -6958,10 +6958,17 @@ unsigned char status_calc_attack_element(struct block_list *bl, struct status_ch
 	return (unsigned char)cap_value(element,0,UCHAR_MAX);
 }
 
-unsigned short status_calc_mode(struct block_list *bl, struct status_change *sc, int mode)
+/**
+ * Changes the mode of an object
+ * @param bl: Object whose mode to change [PC|MOB|PET|HOM|NPC]
+ * @param sc: Object's status change data
+ * @param mode: Original mode
+ * @return mode with cap_value(mode,0,INT_MAX)
+ */
+enum e_mode status_calc_mode(struct block_list *bl, struct status_change *sc, enum e_mode mode)
 {
 	if(!sc || !sc->count)
-		return (unsigned short)cap_value(mode,0,USHRT_MAX);
+		return cap_value(mode,0,INT_MAX);
 
 	if(sc->data[SC_MODECHANGE]) {
 		if (sc->data[SC_MODECHANGE]->val2)
@@ -6972,7 +6979,7 @@ unsigned short status_calc_mode(struct block_list *bl, struct status_change *sc,
 			mode &= ~sc->data[SC_MODECHANGE]->val4; //Del mode
 	}
 
-	return (unsigned short)cap_value(mode,0,USHRT_MAX);
+	return cap_value(mode,0,INT_MAX);
 }
 
 /**
@@ -8254,7 +8261,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				return 0;
 			break;
 		case SC_MODECHANGE: {
-				int mode;
+				enum e_mode mode;
 				struct status_data *bstatus = status_get_base_status(bl);
 
 				if( !bstatus )
