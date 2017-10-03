@@ -3433,7 +3433,7 @@
 5376,Satanic_Chain_P,Flying Evil Wing,4,20,,100,,6,,1,0xFFFFFFFF,63,2,256,,0,1,382,{ bonus bMaxSP,120; bonus3 bAddEffWhenHit,Eff_Curse,10,ATF_SELF; },{},{}
 5377,Antique_Pipe,Gentleman's Pipe,4,20,,100,,0,,0,0xFFFFFFFF,63,2,1,,0,0,383,{ bonus2 bSubRace,RC_DemiHuman,2; },{},{}
 5378,Rabbit_Ear_Hat,Bunny Top Hat,4,20,,300,,0,,0,0xFFFFFFFF,63,2,256,,0,1,384,{ bonus bAgi,3; bonus3 bAutoSpellWhenHit,"AL_INCAGI",5,10; },{},{}
-5379,Balloon_Hat,Tam,4,0,,800,,3,,1,0xFFFFFFFF,63,2,256,,50,1,385,{ bonus bMdef,2; bonus bMatkRate,2+(getrefine()/2); },{},{}
+5379,Balloon_Hat,Tam,4,0,,800,,3,,1,0xFFFFFFFF,63,2,256,,50,1,385,{ bonus bMdef,2; bonus bMatkRate,2+getrefine()/2; },{},{}
 5380,Fish_Head_Hat,Fish Head Hat,4,20,,400,,1,,0,0xFFFFFFFF,63,2,256,,0,1,386,{ bonus3 bAutoSpell,"SA_FROSTWEAPON",1,5; },{},{}
 5381,Santa_Poring_Hat,Santa Poring Hat,4,20,,100,,2,,1,0xFFFFFFFF,63,2,256,,0,0,387,{ bonus bMdef,2; bonus2 bAddDefEle,Ele_Dark,3; bonus2 bSubEle,Ele_Dark,3; },{},{}
 5382,Bell_Ribbon,Bell Ribbon,4,20,,200,,3,,1,0xFFFFFFFF,63,2,256,,0,1,388,{ bonus bVit,1; skill "AL_ANGELUS",1; },{},{ sc_end SC_ANGELUS; }
@@ -11146,13 +11146,30 @@
 27028,Fire_Frilldora_Card,Fire Frilldora Card,6,20,,10,,,,,,,,2,,,,,{ set .@r,getrefine(); bonus2 bMagicAddDefEle,Ele_Earth,(.@r>=9?7:.@r>=7?5:3); },{},{}
 27029,Fire_Golem_Card,Fire Golem Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Fire,20; bonus2 bAddDefEle,Ele_Fire,5; },{},{}
 27030,Fulbuk_Card,Fire Bug Card,6,20,,10,,,,,,,,769,,,,,{ bonus3 bAddEff,Eff_Burning,700,ATF_WEAPON|ATF_SKILL; },{},{}
+27106,Grand_Pere_Card,Awaken Pere Card,6,20,,10,,,,,,,,16,,,,,{ if(BaseJob==Job_Bard||BaseJob==Job_Dancer) bonus bMatk,15*getrefine(); },{},{}
+27107,Playing_Pere_Card,Playing Pere Card,6,20,,10,,,,,,,,136,,,,,{ bonus2 bAddDefEle,Ele_Neutral,20; },{},{}
+27108,Singing_Pere_Card,Singing Pere Card,6,20,,10,,,,,,,,136,,,,,{ bonus2 bMagicAddDefEle,Ele_Neutral,20; },{},{}
+27109,Jitterbug_Card,Jitterbug Card,6,20,,10,,,,,,,,769,,,,,{ bonus2 bSubDefEle,Ele_Neutral,10; bonus bMaxHP,500; },{},{}
 27120,Iara_Card,Iara Card,6,20,,10,,,,,,,,136,,,,,{ skill "PR_STRECOVERY",1; },{},{}
 27121,Piranha_Card,Piranha Card,6,20,,10,,,,,,,,64,,,,,{ set .@r,getrefine(); bonus2 bAddRace,RC_Fish,(.@r>=9?15:10); bonus2 bMagicAddRace,RC_Fish,(.@r>=9?15:10); },{},{}
-27122,Curupira_Card,Curupira Card,6,20,,10,,,,,,,,2,,,,,{ set .@r,getrefine(); bonus2 bMagicAddDefEle,Ele_Water,(.@r>=9?7:.@r>=7?5:3); },{},{}
+27122,Curupira_Card,Curupira Card,6,20,,10,,,,,,,,2,,,,,{ set .@r,getrefine(); bonus2 bMagicAddDefEle,Ele_Water,(.@r>=9?7:(.@r>=7?5:3)); },{},{}
 27123,Toucan_Card,Toucan Card,6,20,,10,,,,,,,,769,,,,,{ set .@r,getrefine(); bonus2 bMagicAddRace,RC_Insect,(.@r>=9?15:10); },{},{}
 27124,Jaguar_Card,Jaguar Card,6,20,,10,,,,,,,,769,,,,,{ set .@r,getrefine(); bonus2 bMagicAddRace,RC_Brute,(.@r>=9?15:10); },{},{}
 27125,Headless_Mule_Card,Headless Mule Card,6,20,,10,,,,,,,,136,,,,,{ bonus2 bMagicAtkEle,Ele_Water,20; bonus2 bMagicAtkEle,Ele_Holy,20; },{},{}
 27126,Boitata_Card,Boitata Card,6,20,,10,,,,,,,,16,,,,,{ bonus2 bAddRace,RC_Brute,40; bonus2 bAddRace,RC_Insect,40; bonus2 bAddDefEle,Ele_Wind,40; bonus2 bAddDefEle,Ele_Earth,40; },{},{}
+27157,Wood_Goblin_Card,Wood Goblin Card,6,20,,10,,,,,,,,64,,,,,{ set .@r,getrefine(); bonus2 bAddDefEle,Ele_Water,(.@r>=9?10:5); bonus2 bAddDefEle,Ele_Earth,(.@r>=9?10:5); },{},{}
+27158,Les_Card,Les Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Wind,30; },{},{}
+27159,Uzhas_Card,Uzhas Card,6,20,,10,,,,,,,,769,,,,,{ bonus2 bMagicAddRace,RC_Demon,(getrefine()>=9?15:10); },{},{}
+27160,Vavayaga_Card,Vavayaga Card,6,20,,10,,,,,,,,64,,,,,{ bonus bFlee,getrefine()*2; },{},{}
+27161,Mavka_Card,Mavka Card,6,20,,10,,,,,,,,136,,,,,{ bonus2 bMagicAddDefEle,Ele_Fire,20; bonus2 bMagicAddDefEle,Ele_Earth,20; },{},{}
+27162,Gopinich_Card,Gopinich Card,6,20,,10,,,,,,,,769,,,,,{ bonus bSPDrainValue,5; bonus bUseSPrate,50; },{},{}
+27163,Faceworm_Card,Faceworm Card,6,20,,10,,,,,,,,136,,,,,{ bonus bAgi,-1; bonus bDex,-1; bonus bAspdRate,3; },{},{}
+27164,Faceworm_Q_Card,Faceworm Queen Card,6,20,,10,,,,,,,,64,,,,,{ set .@r,getrefine(); bonus bMaxHPrate,-10; bonus bCritical,15+.@r; bonus bCritAtkRate,.@r; },{},{}
+27165,Faceworm_D_Card,Dark Faceworm Card,6,20,,10,,,,,,,,136,,,,,{ bonus bVit,-1; bonus bInt,-1; bonus bDelayrate,-3; },{},{}
+27166,Faceworm_Egg_Card,Faceworm Egg Card,6,20,,10,,,,,,,,64,,,,,{ set .@r,getrefine(); bonus2 bSubDefEle,Ele_Fire,(.@r>=9?5:(.@r>=7?3:2)); },{},{}
+27167,Faceworm_L_Card,Faceworm Larva Card,6,20,,10,,,,,,,,4,,,,,{ bonus2 bSubEle,Ele_Neutral,15; bonus2 bMagicAddDefEle,Ele_Water,getrefine()*3; },{},{}
+27168,Irene_Elder_Card,Irene High Elder Card,6,20,,10,,,,,,,,4,,,,,{ bonus bHit,10+((getrefine()/3)*5); },{},{}
+27169,Payon_Soldier_Card,Payon Soldier Card,6,20,,10,,,,,,,,16,,,,,{ set .@r,getrefine(); set .@i,getiteminfo(getequipid(EQI_HAND_R),11); bonus bBaseAtk,5; bonus bMatk,5; if(.@i==4||.@i==5) { bonus bBaseAtk,(.@r>=14?40:(.@r>=10?20:0)); bonus bMatk,(.@r>=14?40:(.@r>=10?20:0)); } },{},{}
 28000,Thanos_Katar,Thanatos Katar,5,20,,1800,220:80,,1,1,0x00001000,63,2,34,4,120,1,16,{ bonus bInt,6; bonus bVit,6; bonus bLuk,-6; bonus2 bHPDrainRate,50,5; bonus2 bSPDrainRate,10,5; bonus2 bHPLossRate,100,10000; },{},{ heal -1000,0; }
 28001,Katar_Of_Evil_Slayer,Evil Slayer Ripper Katar,5,20,,1200,120,,1,1,0x00001000,63,2,34,3,100,1,16,{ set .@r,getrefine(); bonus2 bAddRace,RC_Demon,10; bonus2 bAddRace,RC_Undead,10; bonus2 bAddClass,Class_All,(.@r>=12?12:(.@r>=9?5:0)); },{},{}
 28002,Half_BF_Katar2,Half BF Katar2,5,20,,0,130,,1,0,0x00001000,63,2,34,3,80,1,16,{ bonus bStr,1; bonus bDex,1; bonus bLuk,1; bonus2 bAddRace,RC_DemiHuman,35; bonus bCritAtkRate,10; bonus bAspdRate,3; bonus bUnbreakableWeapon,0; },{},{}
@@ -11215,7 +11232,7 @@
 28422,Shining_Eggplant_Talisman,Shining Eggplant Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,100,0,0,{ bonus2 bVariableCastrate,"SU_SV_STEMSPEAR",-50; if(getskilllv("SU_SV_STEMSPEAR")) { bonus2 bSkillAtk,"SU_SV_STEMSPEAR",getskilllv("SU_SV_STEMSPEAR")*readparam(bInt)/6; } },{},{}
 28423,Fresh_Tuna_Talisman,Fresh Tuna Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,100,0,0,{ bonus2 bSkillCooldown,"SU_TUNAPARTY",-5000; bonus3 bAutoSpellWhenHit,"SU_TUNAPARTY",(getskilllv("SU_TUNAPARTY")>1?getskilllv("SU_TUNAPARTY"):1),10; },{},{}
 28424,Chubby_Earthworm_Talisman,Chubby Earthworm Talisman,4,0,,100,,1,,1,0x04000000,7,2,136,,100,0,0,{ bonus2 bVariableCastrate,"SU_PICKYPECK",-50; if(getskilllv("SU_PICKYPECK")) { bonus2 bSkillAtk,"SU_PICKYPECK",getskilllv("SU_PICKYPECK")*readparam(bDex)/6; } },{},{}
-28600,Ru_Blue_Book,Blue Book,5,20,,500,200,,1,1,0x00000100,56,2,2,3,100,1,15,{ bonus bVit,5; bonus bInt,5; /* Gold PC Room: bonus bMatkRate,20; bonus bDelayRate,-10; */ },{},{}
+28600,Ru_Blue_Book,Blue Book,5,20,,500,200,,1,1,0x00000100,56,2,2,3,100,1,15,{ bonus bVit,5; bonus bInt,5; /* Gold PC Room: bonus bMatkRate,20; bonus bDelayrate,-10; */ },{},{}
 28601,Ru_Gold_Book,Gold Book,5,20,,500,160,,1,2,0x00000100,56,2,2,3,120,1,15,{ bonus bVit,8; bonus bInt,8; },{},{}
 28602,Demon_Hunting_Bible,Demon Hunting Bible,5,20,,500,30:170,,1,2,0x00000100,56,2,2,3,110,1,15,{ bonus bInt,2; bonus bDex,2; bonus2 bSkillAtk,"PR_MAGNUS",30+(readparam(bInt)>120?120:readparam(bInt)); },{},{}
 28604,Crimson_Bible,Crimson Bible,5,20,,450,45,,1,2,0x00410100,63,2,2,3,70,1,15,{ set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); bonus bMatk,pow((.@r>15?15:.@r),2)/2; if(BaseLevel>70) bonus bBaseAtk,((BaseLevel-70)/10)*5; bonus bUnbreakableWeapon,0; },{},{}
