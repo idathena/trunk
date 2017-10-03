@@ -11161,13 +11161,13 @@
 27158,Les_Card,Les Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Wind,30; },{},{}
 27159,Uzhas_Card,Uzhas Card,6,20,,10,,,,,,,,769,,,,,{ bonus2 bMagicAddRace,RC_Demon,(getrefine()>=9?15:10); },{},{}
 27160,Vavayaga_Card,Vavayaga Card,6,20,,10,,,,,,,,64,,,,,{ bonus bFlee,getrefine()*2; },{},{}
-27161,Mavka_Card,Mavka Card,6,20,,10,,,,,,,,136,,,,,{ bonus2 bMagicAddDefEle,Ele_Fire,20; bonus2 bMagicAddDefEle,Ele_Earth,20; },{},{}
+27161,Mavka_Card,Mavka Card,6,20,,10,,,,,,,,136,,,,,{ bonus2 bMagicAtkEle,Ele_Fire,20; bonus2 bMagicAtkEle,Ele_Earth,20; },{},{}
 27162,Gopinich_Card,Gopinich Card,6,20,,10,,,,,,,,769,,,,,{ bonus bSPDrainValue,5; bonus bUseSPrate,50; },{},{}
 27163,Faceworm_Card,Faceworm Card,6,20,,10,,,,,,,,136,,,,,{ bonus bAgi,-1; bonus bDex,-1; bonus bAspdRate,3; },{},{}
 27164,Faceworm_Q_Card,Faceworm Queen Card,6,20,,10,,,,,,,,64,,,,,{ set .@r,getrefine(); bonus bMaxHPrate,-10; bonus bCritical,15+.@r; bonus bCritAtkRate,.@r; },{},{}
 27165,Faceworm_D_Card,Dark Faceworm Card,6,20,,10,,,,,,,,136,,,,,{ bonus bVit,-1; bonus bInt,-1; bonus bDelayrate,-3; },{},{}
 27166,Faceworm_Egg_Card,Faceworm Egg Card,6,20,,10,,,,,,,,64,,,,,{ set .@r,getrefine(); bonus2 bSubDefEle,Ele_Fire,(.@r>=9?5:(.@r>=7?3:2)); },{},{}
-27167,Faceworm_L_Card,Faceworm Larva Card,6,20,,10,,,,,,,,4,,,,,{ bonus2 bSubEle,Ele_Neutral,15; bonus2 bMagicAddDefEle,Ele_Water,getrefine()*3; },{},{}
+27167,Faceworm_L_Card,Faceworm Larva Card,6,20,,10,,,,,,,,4,,,,,{ bonus2 bSubEle,Ele_Neutral,15; bonus2 bMagicAtkEle,Ele_Water,getrefine()*3; },{},{}
 27168,Irene_Elder_Card,Irene High Elder Card,6,20,,10,,,,,,,,4,,,,,{ bonus bHit,10+((getrefine()/3)*5); },{},{}
 27169,Payon_Soldier_Card,Payon Soldier Card,6,20,,10,,,,,,,,16,,,,,{ set .@r,getrefine(); set .@i,getiteminfo(getequipid(EQI_HAND_R),11); bonus bBaseAtk,5; bonus bMatk,5; if(.@i==4||.@i==5) { bonus bBaseAtk,(.@r>=14?40:(.@r>=10?20:0)); bonus bMatk,(.@r>=14?40:(.@r>=10?20:0)); } },{},{}
 28000,Thanos_Katar,Thanatos Katar,5,20,,1800,220:80,,1,1,0x00001000,63,2,34,4,120,1,16,{ bonus bInt,6; bonus bVit,6; bonus bLuk,-6; bonus2 bHPDrainRate,50,5; bonus2 bSPDrainRate,10,5; bonus2 bHPLossRate,100,10000; },{},{ heal -1000,0; }
