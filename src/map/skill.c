@@ -10401,7 +10401,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case SO_EL_CONTROL:
 			if( sd ) {
-				enum e_mode mode = EL_MODE_PASSIVE;	//Standard mode
+				enum e_mode mode = EL_MODE_PASSIVE; //Standard mode
 
 				if( !sd->ed )
 					break;

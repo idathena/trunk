@@ -10869,6 +10869,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			if (battle_config.sc_castcancel&bl->type)
 				unit_skillcastcancel(bl,0); //Cancel cast when get status [LuzZza]
 		//Fall through
+		case SC__MANHOLE:
 		case SC_CURSEDCIRCLE_ATKER:
 		case SC_FALLENEMPIRE:
 		case SC_KINGS_GRACE:
@@ -10880,7 +10881,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_CONFUSION:
 		case SC_CLOSECONFINE:
 		case SC_CLOSECONFINE2:
-		case SC__MANHOLE:
 		case SC_PARALYSIS:
 		case SC_MEIKYOUSISUI:
 		case SC_KAGEHUMI:
