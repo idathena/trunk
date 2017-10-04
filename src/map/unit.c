@@ -322,7 +322,7 @@ int unit_step_timer(int tid, unsigned int tick, int id, intptr_t data)
  * @return 0 or unit_walktoxy_sub() or unit_walktoxy()
  */
 static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data) {
-	int i, x, y, dx, dy, mob_id;
+	int i, x, y, dx, dy;
 	unsigned char icewall_walk_block;
 	uint8 dir;
 	struct block_list *bl;
@@ -376,7 +376,6 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 			icewall_walk_block = battle_config.boss_icewall_walk_block;
 		else
 			icewall_walk_block = battle_config.mob_icewall_walk_block;
-		mob_id = md->mob_id; //NOTE: Needed for tracking a server crashed, will be removed afterwards
 	} else
 		icewall_walk_block = 0;
 
@@ -2098,6 +2097,22 @@ int unit_unattackable(struct block_list *bl)
 }
 
 /**
+ * Checks if the unit can attack, returns yes if so.
+ */
+bool unit_can_attack(struct block_list *src, int target_id)
+{
+	struct status_change *sc = status_get_sc(src);
+	struct map_session_data *sd = BL_CAST(BL_PC, src);
+
+	if(sc && sc->data[SC__MANHOLE])
+		return false;
+
+	if(sd)
+		return pc_can_attack(sd, target_id);
+	return true;
+}
+
+/**
  * Requests a unit to attack a target
  * @param src: Object initiating attack
  * @param target_id: Target ID (bl->id)
@@ -2120,21 +2135,14 @@ int unit_attack(struct block_list *src,int target_id,int continuous)
 		return 1;
 	}
 
-	if(src->type == BL_PC) {
-		TBL_PC *sd = (TBL_PC *)src;
+	if(src->type == BL_PC && target->type == BL_NPC) { //Monster npcs [Valaris]
+		npc_click((TBL_PC *)src, (TBL_NPC *)target);
+		return 0;
+	}
 
-		if(target->type == BL_NPC) { //Monster npcs [Valaris]
-			npc_click(sd, (TBL_NPC *)target); //Submitted by leinsirk10 [Celest]
-			return 0;
-		}
-		if(pc_is90overweight(sd) || pc_isridingwug(sd)) { //Overweight or mounted on warg - stop attacking
-			unit_stop_attack(src);
-			return 0;
-		}
-		if(!pc_can_attack_sc(sd, target_id)) {
-			unit_stop_attack(src);
-			return 0;
-		}
+	if(!unit_can_attack(src, target_id)) {
+		unit_stop_attack(src);
+		return 0;
 	}
 
 	if(battle_check_target(src, target, BCT_ENEMY) <= 0 || !status_check_skilluse(src, target, 0, 0)) {
@@ -2386,7 +2394,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 #ifdef OFFICIAL_WALKPATH 
 		|| !path_search_long(NULL,src->m,src->x,src->y,target->x,target->y,CELL_CHKWALL)
 #endif
-		|| (sd && !pc_can_attack_sc(sd,ud->target)) )
+		|| unit_can_attack(src,ud->target) )
 		return 0; //Can't attack under these conditions
 
 	if( src->m != target->m ) {

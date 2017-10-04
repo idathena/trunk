@@ -11093,7 +11093,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 		return;
 	}
 
-	//Statuses that don't let the player sit/attack/talk with NPCs(targeted) (not all are included in pc_can_attack_sc)
+	//Statuses that don't let the player sit/attack/talk with NPCs(targeted) (not all are included in pc_can_attack)
 	if( sd->sc.count &&
 		(sd->sc.data[SC_TRICKDEAD] ||
 		(sd->sc.data[SC_AUTOCOUNTER] && action_type != 0x07) ||

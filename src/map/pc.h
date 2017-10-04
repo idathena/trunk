@@ -1136,7 +1136,7 @@ void pc_bleeding(struct map_session_data *sd, unsigned int diff_tick);
 void pc_regen(struct map_session_data *sd, unsigned int diff_tick);
 
 void pc_setstand(struct map_session_data *sd);
-bool pc_can_attack_sc(struct map_session_data *sd, int target_id);
+bool pc_can_attack(struct map_session_data *sd, int target_id);
 bool pc_candrop(struct map_session_data *sd, struct item *item);
 
 int pc_jobid2mapid(unsigned short b_class);	// Skotlex

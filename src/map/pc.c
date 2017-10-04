@@ -8899,15 +8899,17 @@ void pc_setmadogear(struct map_session_data *sd, int flag)
  * Called from unit_attack and unit_attack_timer_sub
  * @return true Can attack
  */
-bool pc_can_attack_sc(struct map_session_data *sd, int target_id)
+bool pc_can_attack(struct map_session_data *sd, int target_id)
 {
 	nullpo_retr(false, sd);
+
+	if( pc_is90overweight(sd) || pc_isridingwug(sd) )
+		return false;
 
 	if( sd->sc.count &&
 		(sd->sc.data[SC_BASILICA] ||
 		(sd->sc.data[SC_GRAVITATION] && sd->sc.data[SC_GRAVITATION]->val3 == BCT_SELF) ||
 		sd->sc.data[SC__SHADOWFORM] ||
-		sd->sc.data[SC__MANHOLE] ||
 		sd->sc.data[SC_FALLENEMPIRE] ||
 		sd->sc.data[SC_CURSEDCIRCLE_ATKER] ||
 		sd->sc.data[SC_CURSEDCIRCLE_TARGET] ||
