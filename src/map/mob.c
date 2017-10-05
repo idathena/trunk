@@ -3198,7 +3198,7 @@ int mob_getfriendhprate_sub(struct block_list *bl,va_list ap)
 	if (md->bl.id == bl->id && !(battle_config.mob_ai&0x10))
 		return 0;
 
-	if ((*fr) != NULL) //A friend was already found.
+	if ((*fr) != NULL) //A friend was already found
 		return 0;
 	
 	if (battle_check_target(&md->bl, bl, BCT_ENEMY) > 0)
@@ -3603,7 +3603,7 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 
 	nullpo_ret(sd);
 	
-	if(pc_isdead(sd) && master_id && flag&1)
+	if(pc_isdead(sd) && master_id && (flag&1))
 		return 0;
 
 	ARR_FIND(MOB_CLONE_START, MOB_CLONE_END, mob_id, mob_db_data[mob_id] == NULL);
@@ -3646,8 +3646,9 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 	//Go Backwards to give better priority to advanced skills
 	for (i = 0, j = MAX_SKILL_TREE - 1; j >= 0 && i < MAX_MOBSKILL; j--) {
 		int skill_id = skill_tree[pc_class2idx(sd->status.class_)][j].id;
+		uint16 sk_idx = 0;
 
-		if (!skill_id || sd->status.skill[skill_id].lv < 1 ||
+		if (!skill_id || !(sk_idx = skill_get_index(skill_id)) || sd->status.skill[sk_idx].lv < 1 ||
 			(skill_get_inf2(skill_id)&(INF2_WEDDING_SKILL|INF2_GUILD_SKILL)) ||
 			mob_clone_disabled_skills(skill_id))
 			continue;
@@ -3659,17 +3660,21 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 			continue;
 
 		//The clone should be able to cast the skill (e.g. have the required weapon) bugreport:5299)
-		if (!skill_check_condition_castbegin(sd,skill_id,sd->status.skill[skill_id].lv))
+		if (!skill_check_condition_castbegin(sd, skill_id, sd->status.skill[sk_idx].lv))
 			continue;
 
 		memset (&ms[i], 0, sizeof(struct mob_skill));
 		ms[i].skill_id = skill_id;
-		ms[i].skill_lv = sd->status.skill[skill_id].lv;
+		ms[i].skill_lv = sd->status.skill[sk_idx].lv;
 		ms[i].state = MSS_ANY;
 		ms[i].permillage = 500 * battle_config.mob_skill_rate / 100; //Default chance of all skills: 5%
 		ms[i].emotion = -1;
 		ms[i].cancel = 0;
-		ms[i].casttime = skill_castfix(&sd->bl, skill_id, ms[i].skill_lv);
+#ifndef RENEWAL_CAST
+		ms[i].casttime = skill_castfix_sc(&sd->bl, skill_castfix(&sd->bl, skill_id, ms[i].skill_lv), skill_get_castnodex(skill_id, ms[i].skill_lv));
+#else
+		ms[i].casttime = skill_vfcastfix(&sd->bl, skill_castfix(&sd->bl, skill_id, ms[i].skill_lv), skill_id, ms[i].skill_lv);
+#endif
 		ms[i].delay = 5000 + skill_delayfix(&sd->bl, skill_id, ms[i].skill_lv);
 		ms[i].msg_id = 0;
 
@@ -3691,8 +3696,8 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 				ms[i].target = MST_TARGET;
 				ms[i].cond1 = MSC_ALWAYS;
 			} else { //Target allies
-				ms[i].target = MST_FRIEND;
-				ms[i].cond1 = MSC_FRIENDHPLTMAXRATE;
+				ms[i].target = (master_id ? MST_MASTER : MST_FRIEND);
+				ms[i].cond1 = (master_id ? MSC_MASTERHPLTMAXRATE : MSC_FRIENDHPLTMAXRATE);
 				ms[i].cond2 = 95;
 			}
 		} else if (inf&INF_SELF_SKILL) {
@@ -3714,8 +3719,8 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 					ms[i].delay = 5000; //With a minimum of 5 secs
 			}
 		} else if (inf&INF_SUPPORT_SKILL) {
-			ms[i].target = MST_FRIEND;
-			ms[i].cond1 = MSC_FRIENDHPLTMAXRATE;
+			ms[i].target = (master_id ? MST_MASTER : MST_FRIEND);
+			ms[i].cond1 = (master_id ? MSC_MASTERHPLTMAXRATE : MSC_FRIENDHPLTMAXRATE);
 			ms[i].cond2 = 90;
 			if (skill_id == AL_HEAL)
 				ms[i].permillage = 5000; //Higher skill rate usage for heal
@@ -3746,7 +3751,7 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 					continue;
 			}
 		}
-		if (battle_config.mob_skill_rate!= 100)
+		if (battle_config.mob_skill_rate != 100)
 			ms[i].permillage = ms[i].permillage * battle_config.mob_skill_rate / 100;
 		if (battle_config.mob_skill_delay != 100)
 			ms[i].delay = ms[i].delay * battle_config.mob_skill_delay / 100;

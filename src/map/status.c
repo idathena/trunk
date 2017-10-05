@@ -3381,7 +3381,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 
 	//FIXME: Most of these stuff should be calculated once, but how do I fix the memset above to do that? [Skotlex]
 	//Give them all modes except these (useful for clones)
-	status->mode = (enum e_mode)(MD_MASK&~(MD_STATUS_IMMUNE|MD_IGNOREMELEE|MD_IGNOREMAGIC|MD_IGNORERANGED|MD_IGNOREMISC|MD_DETECTOR|MD_ANGRY|MD_TARGETWEAK));
+	status->mode = (enum e_mode)(MD_MASK&~(MD_NOCAST_SKILL|MD_ANGRY|MD_TARGETWEAK|MD_RANDOMTARGET|MD_IGNOREMELEE|MD_IGNOREMAGIC|MD_IGNORERANGED|MD_IGNOREMISC|MD_DETECTOR|MD_STATUS_IMMUNE|MD_SKILL_IMMUNE));
 
 	status->size = (sd->class_&JOBL_BABY || (sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER) ? SZ_SMALL : SZ_MEDIUM;
 	if (battle_config.character_size && (pc_isriding(sd) || pc_isridingdragon(sd))) { //[Lupus]
@@ -8215,11 +8215,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 		case SC_AETERNA:
 			if( (sc->data[SC_STONE] && sc->opt1 == OPT1_STONE) || sc->data[SC_FREEZE] )
-				return 0;
-			break;
-		case SC_KYRIE:
-		case SC_TUNAPARTY:
-			if( bl->type == BL_MOB )
 				return 0;
 			break;
 		case SC_OVERTHRUST:

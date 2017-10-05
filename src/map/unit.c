@@ -2394,7 +2394,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 #ifdef OFFICIAL_WALKPATH 
 		|| !path_search_long(NULL,src->m,src->x,src->y,target->x,target->y,CELL_CHKWALL)
 #endif
-		|| unit_can_attack(src,ud->target) )
+		|| !unit_can_attack(src,ud->target) )
 		return 0; //Can't attack under these conditions
 
 	if( src->m != target->m ) {

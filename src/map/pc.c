@@ -4071,7 +4071,7 @@ bool pc_can_insert_card_into(struct map_session_data *sd, int idx_card, int idx_
 	if( sd->inventory.u.items_inventory[idx_equip].equip != 0 )
 		return false; //Item must be unequipped
 
-	if( (sd->inventory_data[idx_equip]->equip & sd->inventory_data[idx_card]->equip) == 0 )
+	if( (sd->inventory_data[idx_equip]->equip&sd->inventory_data[idx_card]->equip) == 0 )
 		return false; //Card cannot be compounded on this item type
 
 	if( sd->inventory_data[idx_equip]->type == IT_WEAPON && sd->inventory_data[idx_card]->equip == EQP_SHIELD )
@@ -4123,7 +4123,7 @@ int pc_insert_card(struct map_session_data *sd, int idx_card, int idx_equip)
 	//Remember the card id to insert
 	nameid = sd->inventory.u.items_inventory[idx_card].nameid;
 
-	if( pc_delitem(sd,idx_card, 1, 1, 0, LOG_TYPE_OTHER) == 1 ) //Failed
+	if( pc_delitem(sd, idx_card, 1, 1, 0, LOG_TYPE_OTHER) == 1 ) //Failed
 		clif_insert_card(sd, idx_equip, idx_card, 1);
 	else { //Success
 		int i;

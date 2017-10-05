@@ -3670,12 +3670,13 @@ static const char *npc_parse_function(char *w1, char *w2, char *w3, char *w4, co
  * Parse Mob 2 - Actually Spawns Mob
  * [Wizputer]
  *------------------------------------------*/
-void npc_parse_mob2(struct spawn_data* mob)
+void npc_parse_mob2(struct spawn_data *mob)
 {
 	int i;
 
 	for( i = mob->active; i < mob->num; ++i ) {
 		struct mob_data *md = mob_spawn_dataset(mob);
+
 		md->spawn = mob;
 		md->spawn->active++;
 		mob_spawn(md);
@@ -3814,7 +3815,7 @@ static const char *npc_parse_mob(char *w1, char *w2, char *w3, char *w4, const c
 		}
 	}
 
-	//Now that all has been validated. We allocate the actual memory that the re-spawn data will use.
+	//Now that all has been validated. We allocate the actual memory that the re-spawn data will use
 	data = (struct spawn_data *)aMalloc(sizeof(struct spawn_data));
 	memcpy(data, &mob, sizeof(struct spawn_data));
 
