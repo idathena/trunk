@@ -3381,7 +3381,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 
 	//FIXME: Most of these stuff should be calculated once, but how do I fix the memset above to do that? [Skotlex]
 	//Give them all modes except these (useful for clones)
-	status->mode = (enum e_mode)(MD_MASK&~(MD_NOCAST_SKILL|MD_ANGRY|MD_TARGETWEAK|MD_RANDOMTARGET|MD_IGNOREMELEE|MD_IGNOREMAGIC|MD_IGNORERANGED|MD_IGNOREMISC|MD_DETECTOR|MD_STATUS_IMMUNE|MD_SKILL_IMMUNE));
+	status->mode = (enum e_mode)(MD_MASK&~(MD_NORANDOM_WALK|MD_NOCAST_SKILL|MD_ANGRY|MD_TARGETWEAK|MD_RANDOMTARGET|MD_IGNOREMELEE|MD_IGNOREMAGIC|MD_IGNORERANGED|MD_IGNOREMISC|MD_DETECTOR|MD_STATUS_IMMUNE|MD_SKILL_IMMUNE));
 
 	status->size = (sd->class_&JOBL_BABY || (sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER) ? SZ_SMALL : SZ_MEDIUM;
 	if (battle_config.character_size && (pc_isriding(sd) || pc_isridingdragon(sd))) { //[Lupus]
@@ -6358,9 +6358,9 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 				//Longing for Freedom cancels song/dance penalty
 				if( sc->data[SC_LONGING] )
 					val = max( val, 50 - 10 * sc->data[SC_LONGING]->val1 );
-				else if( sd && sc->data[SC_DANCING] )
+				else if( sc->data[SC_DANCING] )
 					val = max( val, 500 - (40 + 10 * (sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_BARDDANCER)) *
-						pc_checkskill(sd,(sd->status.sex ? BA_MUSICALLESSON : DC_DANCINGLESSON)) );
+						(sd ? pc_checkskill(sd, (sd->status.sex ? BA_MUSICALLESSON : DC_DANCINGLESSON)) : 10) );
 				if( sc->data[SC_DECREASEAGI] )
 					val = max( val, 25 );
 				if( sc->data[SC_QUAGMIRE] )
