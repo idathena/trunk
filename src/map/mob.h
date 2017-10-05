@@ -204,11 +204,11 @@ struct mob_data {
 		unsigned int flag : 2; //0: Normal. 1: Homunc exp. 2: Pet exp
 	} dmglog[DAMAGELOG_SIZE];
 	uint32 spotted_log[DAMAGELOG_SIZE];
-	struct spawn_data *spawn; //Spawn data.
+	struct spawn_data *spawn; //Spawn data
 	int spawn_timer; //Required for Convex Mirror
 	struct s_mob_lootitem *lootitem;
 	short mob_id;
-	unsigned int tdmg; //Stores total damage given to the mob, for exp calculations. [Skotlex]
+	unsigned int tdmg; //Stores total damage given to the mob, for exp calculations [Skotlex]
 	int level;
 	int target_id,attacked_id,norm_attacked_id;
 	int areanpc_id; //Required in OnTouchNPC (to avoid multiple area touchs)

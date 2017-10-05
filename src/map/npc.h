@@ -159,7 +159,7 @@ struct npc_data *npc_checknear(struct map_session_data *sd, struct block_list *b
 int npc_buysellsel(struct map_session_data *sd, int id, int type);
 uint8 npc_buylist(struct map_session_data *sd, uint16 n, struct s_npc_buy_list *item_list);
 uint8 npc_selllist(struct map_session_data *sd, int n, unsigned short *item_list);
-void npc_parse_mob2(struct spawn_data* mob);
+void npc_parse_mob2(struct spawn_data *mob);
 bool npc_viewisid(const char *viewid);
 struct npc_data *npc_create_npc(int m, int x, int y);
 struct npc_data *npc_add_warp(char *name, short from_mapid, short from_x, short from_y, short xs, short ys, unsigned short to_mapindex, short to_x, short to_y);

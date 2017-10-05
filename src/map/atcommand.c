@@ -7767,7 +7767,8 @@ ACMD_FUNC(whereis)
 		clif_displaymessage(fd, atcmd_output);
 		for (i = 0; i < ARRAYLENGTH(mob->spawn) && mob->spawn[i].qty; i++) {
 			j = map_mapindex2mapid(mob->spawn[i].mapindex);
-			if (j < 0) continue;
+			if (j < 0)
+				continue;
 			snprintf(atcmd_output, sizeof atcmd_output, "%s (%d)", map[j].name, mob->spawn[i].qty);
 			clif_displaymessage(fd, atcmd_output);
 		}
@@ -8467,7 +8468,7 @@ ACMD_FUNC(clone)
 		y = sd->bl.y;
 	}
 
-	if ((x = mob_clone_spawn(pl_sd, sd->bl.m, x, y, "", master, 0, flag ? 1 : 0, 0)) > 0) {
+	if ((x = mob_clone_spawn(pl_sd, sd->bl.m, x, y, "", master, 0, (flag ? 1 : 0), 0)) > 0) {
 		clif_displaymessage(fd, msg_txt(128 + flag * 2)); // Evil Clone spawned. Clone spawned. Slave clone spawned.
 		return 0;
 	}
