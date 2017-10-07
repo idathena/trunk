@@ -29,7 +29,7 @@ struct battleground_data {
 void do_init_battleground(void);
 void do_final_battleground(void);
 
-struct battleground_data* bg_team_search(int bg_id);
+struct battleground_data *bg_team_search(int bg_id);
 int bg_send_dot_remove(struct map_session_data *sd);
 int bg_team_get_id(struct block_list *bl);
 struct map_session_data *bg_getavailablesd(struct battleground_data *bg);

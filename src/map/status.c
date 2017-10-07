@@ -9598,7 +9598,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					struct unit_data *ud = unit_bl2ud(bl);
 
 					if( ud && (!val3 || val3 == 2) ) {
-						tick += 300 * battle_config.combo_delay_rate / 100;
 						ud->attackabletime = gettick() + tick;
 						if( !val3 )
 							unit_set_walkdelay(bl,gettick(),tick,1);
