@@ -2194,21 +2194,20 @@ int unit_attack(struct block_list *src,int target_id,int continuous)
  */
 int unit_cancel_combo(struct block_list *bl)
 {
-	struct unit_data  *ud;
+	struct unit_data *ud = unit_bl2ud(bl);
 
 	if (!status_change_end(bl, SC_COMBO, INVALID_TIMER))
-		return 0; //Combo wasn't active.
+		return 0; //Combo wasn't active
 
-	ud = unit_bl2ud(bl);
 	nullpo_ret(ud);
 
 	ud->attackabletime = gettick() + status_get_amotion(bl);
 
 	if (ud->attacktimer == INVALID_TIMER)
-		return 1; //Nothing more to do.
+		return 1; //Nothing more to do
 	
-	delete_timer(ud->attacktimer,unit_attack_timer);
-	ud->attacktimer = add_timer(ud->attackabletime,unit_attack_timer,bl->id,0);
+	delete_timer(ud->attacktimer, unit_attack_timer);
+	ud->attacktimer = add_timer(ud->attackabletime, unit_attack_timer, bl->id, 0);
 	return 1;
 }
 

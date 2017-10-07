@@ -2724,7 +2724,7 @@ void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_l
 			case TK_STORMKICK:
 			case TK_DOWNKICK:
 			case TK_COUNTER:
-				if (sd && pc_famerank(sd->status.char_id,MAPID_TAEKWON)) { //Extend combo time
+				if (sd && pc_famerank(sd->status.char_id, MAPID_TAEKWON)) { //Extend combo time
 					sce->val1 = skill_id; //Update combo-skill
 					sce->val3 = skill_id;
 					if (sce->timer != INVALID_TIMER)
@@ -2798,8 +2798,7 @@ void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_l
 
 	if (duration) { //Possible to chain
 		if (sd && duration == 1)
-			duration = DIFF_TICK(sd->ud.canact_tick, tick); //Auto calculation duration
-		duration = umax(status_get_amotion(src), duration); //Never less than aMotion
+			duration = 1300 - (4 * status_get_agi(src) + 2 * status_get_dex(src));
 		sc_start4(src, src, SC_COMBO, 100, skill_id, target_id, nodelay, 0, duration);
 		clif_combo_delay(src, duration);
 	}
@@ -17000,40 +16999,6 @@ int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 		time = -time + status_get_amotion(bl); //If set to < 0, add to attack motion
 
 	//Delay reductions
-	switch( skill_id ) {
-		case MO_TRIPLEATTACK:
-		case MO_CHAINCOMBO:
-		case MO_COMBOFINISH:
-		case CH_TIGERFIST:
-		case CH_CHAINCRUSH:
-		case SR_DRAGONCOMBO:
-		case SR_FALLENEMPIRE:
-			//Monk combo skills have their delay reduced by agi/dex
-			//If delay not specified, it will be 1000 - 4 * agi - 2 * dex
-			if( !time )
-				time = 1000;
-			time -= (4 * status_get_agi(bl) + 2 * status_get_dex(bl));
-			break;
-		default:
-			if( battle_config.delay_dependon_dex && !(delaynodex&1) ) { //If skill delay is allowed to be reduced by dex
-				int scale = battle_config.castrate_dex_scale - status_get_dex(bl);
-
-				if( scale > 0 )
-					time = time * scale / battle_config.castrate_dex_scale;
-				else //To be capped later to minimum
-					time = 0;
-			}
-			if( battle_config.delay_dependon_agi && !(delaynodex&1) ) { //If skill delay is allowed to be reduced by agi
-				int scale = battle_config.castrate_dex_scale - status_get_agi(bl);
-
-				if( scale > 0 )
-					time = time * scale / battle_config.castrate_dex_scale;
-				else
-					time = 0;
-			}
-			break;
-	}
-
 	if( sc && sc->data[SC_SPIRIT] ) {
 		switch (skill_id) {
 			case CR_SHIELDBOOMERANG:
@@ -17044,6 +17009,25 @@ int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 				if( !map_flag_gvg2(bl->m) && !map[bl->m].flag.battleground && sc->data[SC_SPIRIT]->val2 == SL_ASSASIN )
 					time /= 2;
 				break;
+		}
+	}
+
+	if( !(delaynodex&1) ) {
+		if( battle_config.delay_dependon_dex ) { //If skill delay is allowed to be reduced by dex
+			int scale = battle_config.castrate_dex_scale - status_get_dex(bl);
+
+			if( scale > 0 )
+				time = time * scale / battle_config.castrate_dex_scale;
+			else //To be capped later to minimum
+				time = 0;
+		}
+		if( battle_config.delay_dependon_agi ) { //If skill delay is allowed to be reduced by agi
+			int scale = battle_config.castrate_dex_scale - status_get_agi(bl);
+
+			if( scale > 0 )
+				time = time * scale / battle_config.castrate_dex_scale;
+			else
+				time = 0;
 		}
 	}
 

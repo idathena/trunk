@@ -246,7 +246,6 @@ extern struct Battle_Config
 	int max_heal; //Mitternacht
 	int resurrection_exp;
 	int shop_exp;
-	int combo_delay_rate;
 	int item_check;
 	int item_use_interval;	//[Skotlex]
 	int cashfood_use_interval;

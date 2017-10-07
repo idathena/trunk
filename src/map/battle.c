@@ -1044,7 +1044,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( (sce = sc->data[SC_WEAPONBLOCKING]) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) &&
 			rnd()%100 < sce->val2 ) {
 			clif_skill_nodamage(bl,src,GC_WEAPONBLOCKING,sce->val1,1);
-			sc_start2(src,bl,SC_COMBO,100,GC_WEAPONBLOCKING,src->id,skill_get_time2(GC_WEAPONBLOCKING,sce->val1));
+			sc_start2(src,bl,SC_COMBO,100,GC_WEAPONBLOCKING,src->id,1500);
 			d->dmg_lv = ATK_BLOCK;
 			return 0;
 		}
@@ -8221,7 +8221,6 @@ static const struct _battle_data {
 	{ "shop_exp",                           &battle_config.shop_exp,                        0,      0,      INT_MAX,        },
 	{ "max_heal_lv",                        &battle_config.max_heal_lv,                     11,     1,      INT_MAX,        },
 	{ "max_heal",                           &battle_config.max_heal,                        9999,   0,      INT_MAX,        },
-	{ "combo_delay_rate",                   &battle_config.combo_delay_rate,                100,    0,      INT_MAX,        },
 	{ "item_check",                         &battle_config.item_check,                      0x0,    0x0,    0x7,            },
 	{ "item_use_interval",                  &battle_config.item_use_interval,               100,    0,      INT_MAX,        },
 	{ "cashfood_use_interval",              &battle_config.cashfood_use_interval,           60000,  0,      INT_MAX,        },

@@ -989,7 +989,7 @@ struct achievement_db *achievement_read_db_sub(struct config_setting_t *cs, int 
 				ShowError("achievement_read_db_sub: Invalid count %d for achievement %d in \"%s\", skipping.\n", count, achievement_id, source);
 				continue;
 			}
-			if (mob_id && group == AG_BATTLE && !idb_exists(achievementmobs_db, mob_id)) {
+			if (mob_id && group == AG_BATTLE && !achievement_mobexists(mob_id)) {
 				struct achievement_mob *entrymob = NULL;
 
 				CREATE(entrymob, struct achievement_mob, 1);
