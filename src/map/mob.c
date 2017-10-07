@@ -4069,11 +4069,8 @@ static bool mob_parse_dbrow(char **str)
 	//Finally insert monster's data into the database
 	if (!mob_db_data[mob_id]) {
 		mob_db_data[mob_id] = (struct mob_db *)aCalloc(1, sizeof(struct mob_db));
-		if (idb_exists(mob_spawn_temp, mob_id)) {
-			struct spawn_info *info = (struct spawn_info *)idb_get(mob_spawn_temp, mob_id);
-
+		if (idb_exists(mob_spawn_temp, mob_id))
 			memcpy(&db->spawn, (struct spawn_info *)idb_get(mob_spawn_temp, mob_id), sizeof(db->spawn));
-		}
 	} else //Copy over spawn data
 		memcpy(&db->spawn, mob_db_data[mob_id]->spawn, sizeof(db->spawn));
 
