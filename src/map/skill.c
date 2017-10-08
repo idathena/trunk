@@ -21437,6 +21437,7 @@ static bool skill_parse_row_unitdb(char *split[], int columns, int current)
 	skill_split_atoi(split[4],skill_db[idx].unit_range);
 	skill_db[idx].unit_interval = atoi(split[5]);
 
+	trim(split[6]);
 	if( !strcmpi(split[6],"noenemy") ) skill_db[idx].unit_target = BCT_NOENEMY;
 	else if( !strcmpi(split[6],"friend") ) skill_db[idx].unit_target = BCT_NOENEMY;
 	else if( !strcmpi(split[6],"party") ) skill_db[idx].unit_target = BCT_PARTY;
