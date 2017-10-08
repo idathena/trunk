@@ -436,7 +436,7 @@ struct mob_data *mob_spawn_dataset(struct spawn_data *data)
 	if (data->eventname[0] && strlen(data->eventname) >= 4)
 		memcpy(md->npc_event, data->eventname, 50);
 	if (status_has_mode(&md->db->status, MD_LOOTER))
-		md->lootitem = (struct s_mob_lootitem *)aCalloc(LOOTITEM_SIZE,sizeof(struct s_mob_lootitem));
+		md->lootitem = (struct s_mob_lootitem *)aCalloc(LOOTITEM_SIZE, sizeof(struct s_mob_lootitem));
 	md->spawn_timer = INVALID_TIMER;
 	md->deletetimer = INVALID_TIMER;
 	md->skill_idx = -1;
@@ -3874,7 +3874,7 @@ static void item_dropratio_adjust(unsigned short nameid, int mob_id, int *rate_a
 {
 	struct s_mob_item_drop_ratio *item_ratio = (struct s_mob_item_drop_ratio *)idb_get(mob_item_drop_ratio, nameid);
 
-	if( item_ratio) {
+	if( item_ratio ) {
 		if( item_ratio->mob_id[0] ) { //Only for listed mobs
 			int i;
 
@@ -4277,7 +4277,7 @@ static void mob_read_randommonster_sub(const char *filename)
 			msummon->random_id = group;
 			idb_put(mob_summon_db, group, msummon);
 		} else {
-			ARR_FIND(0, msummon->count, i, set_default || (i > 0 && msummon->list[i].mob_id == mob_id));
+			ARR_FIND(0, msummon->count, i, (set_default || (i > 0 && msummon->list[i].mob_id == mob_id)));
 			if(i >= msummon->count)
 				RECREATE(msummon->list, struct s_randomsummon_entry, ++msummon->count);
 			msummon->list[i].mob_id = mob_id;
@@ -5204,19 +5204,15 @@ void do_final_mob(bool is_reload)
 {
 	int i;
 
-	if (is_reload) {
-		db_clear(mob_spawn_temp);
-		for (i = 0; i <= MAX_MOB_DB; i++) {
-			if (mob_db_data[i] && mob_db_data[i]->spawn)
-				idb_put(mob_spawn_temp, i, mob_db_data[i]->spawn);
-		}
-	}
 	if (mob_dummy) {
 		aFree(mob_dummy);
 		mob_dummy = NULL;
 	}
+	db_clear(mob_spawn_temp);
 	for (i = 0; i <= MAX_MOB_DB; i++) {
 		if (mob_db_data[i]) {
+			if (is_reload && mob_db_data[i]->spawn)
+				idb_put(mob_spawn_temp, i, mob_db_data[i]->spawn);
 			aFree(mob_db_data[i]);
 			mob_db_data[i] = NULL;
 		}
@@ -5234,7 +5230,6 @@ void do_final_mob(bool is_reload)
 		ers_destroy(item_drop_ers);
 		ers_destroy(item_drop_list_ers);
 		ers_destroy(mob_sc_display_ers);
-		db_clear(mob_spawn_temp);
 		db_destroy(mob_spawn_temp);
 	}
 }
