@@ -71,7 +71,6 @@
 //NOTE: Mob ID is used also as index in mob db
 struct mob_db *mob_db_data[MAX_MOB_DB + 1];
 struct mob_db *mob_dummy = NULL; //Dummy mob to be returned when a non-existant one is requested
-static DBMap *mob_spawn_temp; //int mob_id -> struct spawn_info
 
 struct mob_db *mob_db(int mob_id) { if (mob_id < 0 || mob_id > MAX_MOB_DB || mob_db_data[mob_id] == NULL) return mob_dummy; return mob_db_data[mob_id]; }
 
@@ -3906,6 +3905,7 @@ static bool mob_parse_dbrow(char **str)
 		ShowError("mob_parse_dbrow: Invalid monster ID %d, must be in range %d-%d.\n", mob_id, 1000, MAX_MOB_DB);
 		return false;
 	}
+
 	if (pcdb_checkid(mob_id)) {
 		ShowError("mob_parse_dbrow: Invalid monster ID %d, reserved for player classes.\n", mob_id);
 		return false;
@@ -4067,11 +4067,9 @@ static bool mob_parse_dbrow(char **str)
 	}
 
 	//Finally insert monster's data into the database
-	if (!mob_db_data[mob_id]) {
+	if (!mob_db_data[mob_id])
 		mob_db_data[mob_id] = (struct mob_db *)aCalloc(1, sizeof(struct mob_db));
-		if (idb_exists(mob_spawn_temp, mob_id))
-			memcpy(&db->spawn, (struct spawn_info *)idb_get(mob_spawn_temp, mob_id), sizeof(db->spawn));
-	} else //Copy over spawn data
+	else //Copy over spawn data
 		memcpy(&db->spawn, mob_db_data[mob_id]->spawn, sizeof(db->spawn));
 
 	memcpy(mob_db_data[mob_id], db, sizeof(struct mob_db));
@@ -5182,7 +5180,6 @@ void mob_clear_spawninfo() {
  *------------------------------------------*/
 void do_init_mob(void)
 { //Initialize the mob database
-	mob_spawn_temp = idb_alloc(DB_OPT_BASE);
 	mob_db_load(false);
 
 	add_timer_func_list(mob_delayspawn, "mob_delayspawn");
@@ -5208,11 +5205,8 @@ void do_final_mob(bool is_reload)
 		aFree(mob_dummy);
 		mob_dummy = NULL;
 	}
-	db_clear(mob_spawn_temp);
 	for (i = 0; i <= MAX_MOB_DB; i++) {
 		if (mob_db_data[i]) {
-			if (is_reload && mob_db_data[i]->spawn)
-				idb_put(mob_spawn_temp, i, mob_db_data[i]->spawn);
 			aFree(mob_db_data[i]);
 			mob_db_data[i] = NULL;
 		}
@@ -5230,6 +5224,5 @@ void do_final_mob(bool is_reload)
 		ers_destroy(item_drop_ers);
 		ers_destroy(item_drop_list_ers);
 		ers_destroy(mob_sc_display_ers);
-		db_destroy(mob_spawn_temp);
 	}
 }

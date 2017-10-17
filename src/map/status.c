@@ -9341,8 +9341,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( sd ) {
 					struct mob_data *boss_md = map_getmob_boss(bl->m); //Search for Boss on this Map
 
-					if( boss_md == NULL || boss_md->bl.prev == NULL ) { //No MVP on this map - MVP is dead
-						clif_bossmapinfo(sd->fd,boss_md,1);
+					if( !boss_md ) { //No MVP on this map
+						clif_bossmapinfo(sd,NULL,BOSS_INFO_NOT);
 						return 0; //No need to start SC
 					}
 					val1 = boss_md->bl.id;
@@ -9971,6 +9971,16 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				tick_time = 1000;
 				val4 = tick / tick_time;
 				tick = -1;
+				break;
+			case SC__AUTOSHADOWSPELL:
+				//val1: Auto Shadow Spell LV
+				//val2: Skill ID To Autocast
+				//val3: Skill LV To Autocast
+				//val4: Autocast Chance
+				if( val1 >= 10 )
+					val4 = 15; //Autocast fixed to 15 if LV is 10 or higher
+				else
+					val4 = 30 - 2 * val1;
 				break;
 			case SC__SHADOWFORM: {
 					struct map_session_data *s_sd = map_id2sd(val2);
@@ -11220,7 +11230,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 		case SC_BOSSMAPINFO:
 			if (sd)
-				clif_bossmapinfo(sd->fd,map_id2boss(sce->val1),0); //First Message
+				clif_bossmapinfo(sd,map_id2boss(sce->val1),BOSS_INFO_ALIVE_WITHMSG); //First Message
 			break;
 		case SC_MERC_HPUP:
 		case SC_FULL_THROTTLE:
@@ -12596,13 +12606,19 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			if( --(sce->val4) >= 0 && sd ) {
 				struct mob_data *boss_md = map_id2boss(sce->val1);
 
-				if( boss_md && sd->bl.m == boss_md->bl.m ) {
-					clif_bossmapinfo(sd->fd,boss_md,1); //Update X - Y on minimap
-					if( boss_md->bl.prev ) {
-						sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
+				if( boss_md ) {
+					if( sd->bl.m != boss_md->bl.m ) //Not on same map anymore
 						return 0;
+					else if( boss_md->bl.prev ) { //Boss is alive - Update X, Y on minimap
+						sce->val2 = 0;
+						clif_bossmapinfo(sd,boss_md,BOSS_INFO_ALIVE);
+					} else if( boss_md->spawn_timer != INVALID_TIMER && !sce->val2 ) { //Boss is dead
+						sce->val2 = 1;
+						clif_bossmapinfo(sd,boss_md,BOSS_INFO_DEAD);
 					}
 				}
+				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
+				return 0;
 			}
 			break;
 

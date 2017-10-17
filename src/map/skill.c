@@ -552,7 +552,7 @@ static char skill_isCopyable(struct map_session_data *sd, uint16 skill_id) {
 	uint16 idx = skill_get_index(skill_id);
 
 	//Only copy skill that player doesn't have or the skill is old clone
-	if( sd->status.skill[idx].id != 0 && sd->status.skill[idx].flag != SKILL_FLAG_PLAGIARIZED )
+	if( sd->status.skill[idx].id && sd->status.skill[idx].flag != SKILL_FLAG_PLAGIARIZED )
 		return 0;
 
 	//Check if the skill is copyable by class
@@ -1895,9 +1895,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		}
 	}
 
-	if( sd && sd->ed && sc && !status_isdead(bl) && !skill_id ) {
-		struct unit_data *ud = unit_bl2ud(src);
-
+	if( sd && sc && !status_isdead(bl) && !skill_id && rnd()%100 < status_get_job_lv(src) / 2 ) {
 		if( sc->data[SC_WILD_STORM_OPTION] )
 			id = sc->data[SC_WILD_STORM_OPTION]->val2;
 		else if( sc->data[SC_UPHEAVAL_OPTION] )
@@ -1908,12 +1906,14 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			id = sc->data[SC_CHILLY_AIR_OPTION]->val3;
 		else
 			id = 0;
+		if( id && status_charge(src,0,skill_get_sp(id,5)) ) {
+			struct unit_data *ud = unit_bl2ud(src);
 
-		if( rnd()%100 < status_get_job_lv(src) / 2 && id ) {
+			sd->state.autocast = 1;
 			skill_castend_damage_id(src,bl,id,5,tick,0);
-
+			sd->state.autocast = 0;
 			if( ud ) { //Set can act delay [Skotlex]
-				int delay = skill_delayfix(src,id,skill_lv);
+				int delay = skill_delayfix(src,id,5);
 
 				if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
 					ud->canact_tick = max(tick + delay,ud->canact_tick);
@@ -8269,34 +8269,26 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				struct map_session_data *p_sd = pc_get_partner(sd);
 				struct map_session_data *c_sd = pc_get_child(sd);
 
-				//Fail if no family members are found
-				if (!p_sd && !c_sd) {
+				if (!p_sd && !c_sd && !dstsd) { //Fail if no family members are found
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					map_freeblock_unlock();
 					return 1;
 				}
-				//No reviving in WoE grounds!
-				if (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) {
+				if (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) { //No reviving in WoE grounds!
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
-				if (!status_isdead(bl))
-					break;
-				{
+				if (status_isdead(bl)) {
 					int per = 30, sper = 0;
 
 					if (tsc && tsc->data[SC_HELLPOWER])
 						break;
-					if (dstsd) {
-						if (map[bl->m].flag.pvp && dstsd->pvp_point < 0)
-							break;
-						if (dstsd->status.char_id != sd->status.partner_id && dstsd->status.char_id != sd->status.child)
-							break; //Can only revive family members
-						if (dstsd->special_state.restart_full_recover)
-							per = sper = 100;
-						if (status_revive(bl,per,sper))
-							clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-					}
+					if (map[bl->m].flag.pvp && dstsd->pvp_point < 0)
+						break;
+					if (dstsd->special_state.restart_full_recover)
+						per = sper = 100;
+					if ((dstsd == p_sd || dstsd == c_sd) && status_revive(bl,per,sper)) //Only family members can be revived
+						clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				}
 			}
 			break;
@@ -8306,15 +8298,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				struct map_session_data *f_sd = pc_get_father(sd);
 				struct map_session_data *m_sd = pc_get_mother(sd);
 
-				//Fail if no parents are found
-				if (!f_sd && !m_sd) {
+				if (!f_sd && !m_sd && !dstsd) { //Fail if no parents are found
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					map_freeblock_unlock();
 					return 1;
 				}
-				//Buff can only be given to parents in 7x7 AoE around baby
-				if (flag&1) {
-					if (dstsd && (dstsd->status.char_id == sd->status.father || dstsd->status.char_id == sd->status.mother))
+				if (flag&1) { //Buff can only be given to parents in 7x7 AoE around baby
+					if (dstsd == f_sd || dstsd == m_sd)
 						clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 				} else
 					map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_PC,src,skill_id,skill_lv,tick,flag|BCT_ALL|1,skill_castend_nodamage_id);
@@ -8380,7 +8370,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					skill_delunit(su);
 				} else if (sd)
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-
 			}
 			break;
 		case HT_SPRINGTRAP:
@@ -16052,19 +16041,23 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	}
 
 	if( require.eqItem_count ) {
-		int j = require.eqItem_count;
+		uint8 count = require.eqItem_count;
 
 		for( i = 0; i < require.eqItem_count; i++ ) {
 			uint16 reqeqit = require.eqItem[i];
 
 			if( !reqeqit )
-				break; //No more required item get out of here
+				break; //Skill has no required item(s)
 			switch( skill_id ) {
 				case NC_PILEBUNKER:
+				case RL_P_ALTER:
 					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) ) {
-						j--;
-						if( !j ) {
-							clif_skill_fail(sd,skill_id,USESKILL_FAIL_WRONG_WEAPON,0,0);
+						count--;
+						if( !count ) {
+							if( skill_id == RL_P_ALTER )
+								clif_msg(sd,SKILL_NEED_HOLY_BULLET);
+							else
+								clif_skill_fail(sd,skill_id,USESKILL_FAIL_WRONG_WEAPON,0,0);
 							return false;
 						} else
 							continue;
@@ -16078,19 +16071,9 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				case NC_NEUTRALBARRIER:
 				case NC_STEALTHFIELD:
 					if( pc_search_inventory(sd,reqeqit) == INDEX_NOT_FOUND ) {
-						j--;
-						if( !j ) {
+						count--;
+						if( !count ) {
 							clif_skill_fail(sd,skill_id,USESKILL_FAIL_NEED_EQUIPMENT,0,require.eqItem[0]);
-							return false;
-						} else
-							continue;
-					}
-					break;
-				case RL_P_ALTER:
-					if( !pc_checkequip2(sd,reqeqit,EQI_ACC_L,EQI_MAX) ) {
-						j--;
-						if( !j ) {
-							clif_msg(sd,SKILL_NEED_HOLY_BULLET);
 							return false;
 						} else
 							continue;
@@ -16432,8 +16415,11 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 
 	require.sp = skill_db[idx].require.sp[skill_lv - 1];
 
-	if( (sd->skill_id_old == BD_ENCORE) && skill_id == sd->skill_id_dance )
+	if( sd->skill_id_old == BD_ENCORE && skill_id == sd->skill_id_dance )
 		require.sp /= 2;
+
+	if( skill_id == sd->status.skill[sd->reproduceskill_idx].id )
+		require.sp += require.sp * 30 / 100;
 
 	sp_rate = skill_db[idx].require.sp_rate[skill_lv - 1];
 
@@ -20109,30 +20095,29 @@ void skill_spellbook(struct map_session_data *sd, unsigned short nameid) {
 	}
 }
 
-int skill_select_menu(struct map_session_data *sd, uint16 skill_id) {
-	int id, lv, prob, aslvl = 0;
+void skill_select_menu(struct map_session_data *sd, uint16 skill_id) {
+	uint16 autoshadowlv, autocastid, autocastlv;
 
-	nullpo_ret(sd);
+	nullpo_retv(sd);
 
-	if (sd->sc.data[SC_STOP]) {
-		aslvl = sd->sc.data[SC_STOP]->val1;
+	if( sd->sc.count && sd->sc.data[SC_STOP] ) {
+		autoshadowlv = sd->sc.data[SC_STOP]->val1;
 		status_change_end(&sd->bl, SC_STOP, INVALID_TIMER);
-	}
+	} else
+		autoshadowlv = 10; //Safety
 
-	if( !(skill_get_inf3(sd->status.skill[skill_id].id)&INF3_AUTOSHADOWSPELL) ||
-		(id = sd->status.skill[skill_id].id) == 0 || sd->status.skill[skill_id].flag != SKILL_FLAG_PLAGIARIZED ) {
+	//First check to see if skill is a copied skill to protect against forged packets
+	//Then check to see if its a skill that can be autocasted through auto shadow spell
+	if( (skill_id != sd->status.skill[sd->cloneskill_idx].id && skill_id != sd->status.skill[sd->reproduceskill_idx].id) ||
+		!(skill_get_inf3(sd->status.skill[skill_id].id)&INF3_AUTOSHADOWSPELL) ) {
 		clif_skill_fail(sd, SC_AUTOSHADOWSPELL, USESKILL_FAIL_LEVEL, 0, 0);
-		return 0;
+		return;
 	}
 
-	lv = (aslvl + 1) / 2; //The level the skill will be autocasted
-	lv = min(lv, sd->status.skill[skill_id].lv);
-	if( aslvl >= 10 ) //If level 10 or higher is casted, set to a fixed 15%
-		prob = 15;
-	else
-		prob = 30 - 2 * aslvl; //If below level 10, follow this formula
-	sc_start4(&sd->bl, &sd->bl, SC__AUTOSHADOWSPELL, 100, id, lv, prob, 0, skill_get_time(SC_AUTOSHADOWSPELL, aslvl));
-	return 0;
+	autocastid = skill_id; //The skill that will be autocasted
+	autocastlv = (autoshadowlv + 5) / 2; //The level the skill will be autocasted
+	autocastlv = min(autocastlv, skill_get_max(skill_id)); //Don't allow autocasting level's higher then the max possible for players
+	sc_start4(&sd->bl, &sd->bl, SC__AUTOSHADOWSPELL, 100, autoshadowlv, autocastid, autocastlv, 0, skill_get_time(SC_AUTOSHADOWSPELL, autoshadowlv));
 }
 
 int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv, unsigned short *item_list) {

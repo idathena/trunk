@@ -5267,13 +5267,13 @@ void pincode_decrypt(uint32 userSeed, char *pin) {
 void moveCharSlot(int fd, struct char_session_data *sd, unsigned short from, unsigned short to) {
 	// Have we changed to often or is it disabled?
 	if( !char_move_enabled || ( !char_moves_unlimited && sd->char_moves[from] <= 0 ) ) {
-		moveCharSlotReply( fd, sd, from, 1 );
+		moveCharSlotReply(fd, sd, from, 1);
 		return;
 	}
 
 	// We don't even have a character on the chosen slot?
 	if( sd->found_char[from] <= 0 || to >= sd->char_slots ) {
-		moveCharSlotReply( fd, sd, from, 1 );
+		moveCharSlotReply(fd, sd, from, 1);
 		return;
 	}
 
@@ -5286,19 +5286,19 @@ void moveCharSlot(int fd, struct char_session_data *sd, unsigned short from, uns
 				|| SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `char_num`='%d' WHERE `char_id` = '%d'", char_db, from, sd->found_char[to] )
 				|| SQL_ERROR == Sql_QueryStr(sql_handle, "COMMIT")
 				){
-				moveCharSlotReply( fd, sd, from, 1 );
+				moveCharSlotReply(fd, sd, from, 1);
 				Sql_ShowDebug(sql_handle);
 				Sql_QueryStr(sql_handle,"ROLLBACK");
 				return;
 			}
 		} else {
 			// Admin doesn't allow us to
-			moveCharSlotReply( fd, sd, from, 1 );
+			moveCharSlotReply(fd, sd, from, 1);
 			return;
 		}
 	} else if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `char_num`='%d' WHERE `char_id`='%d'", char_db, to, sd->found_char[from] ) ) {
 		Sql_ShowDebug(sql_handle);
-		moveCharSlotReply( fd, sd, from, 1 );
+		moveCharSlotReply(fd, sd, from, 1);
 		return;
 	}
 
@@ -5308,14 +5308,14 @@ void moveCharSlot(int fd, struct char_session_data *sd, unsigned short from, uns
 	}
 
 	// We successfully moved the char - time to notify the client
-	moveCharSlotReply( fd, sd, from, 0 );
-	mmo_char_send( fd, sd );
+	moveCharSlotReply(fd, sd, from, 0);
+	mmo_char_send(fd, sd);
 }
 
 // Reason
 // 0: Success
 // 1: Failed
-void moveCharSlotReply( int fd, struct char_session_data *sd, unsigned short index, short reason ) {
+void moveCharSlotReply(int fd, struct char_session_data *sd, unsigned short index, short reason) {
 	WFIFOHEAD(fd,8);
 	WFIFOW(fd,0) = 0x8d5;
 	WFIFOW(fd,2) = 8;

@@ -5484,7 +5484,7 @@ void clif_skillcastcancel(struct block_list *bl)
 /// if(result != 0) doesn't display any of the previous messages
 /// NOTE: when this packet is received an unknown flag is always set to 0,
 /// suggesting this is an ACK packet for the UseSkill packets and should be sent on success too [FlavioJS]
-void clif_skill_fail(struct map_session_data *sd,uint16 skill_id,enum useskill_fail_cause cause,int btype,int val)
+void clif_skill_fail(struct map_session_data *sd, uint16 skill_id, enum useskill_fail_cause cause, int btype, int val)
 {
 	int fd;
 
@@ -6145,22 +6145,28 @@ void clif_efst_set_enter(struct block_list *tbl, struct block_list *bl, enum sen
 
 	switch (bl->type) {
 		case BL_PC: {
-				struct map_session_data *sd = map_id2sd(bl->id);
+				struct map_session_data *sd;
 
+				if (!(sd = map_id2sd(bl->id)))
+					return;
 				sc_display = sd->sc_display;
 				sc_display_count = sd->sc_display_count;
 			}
 			break;
 		case BL_NPC: {
-				struct npc_data *nd = map_id2nd(bl->id);
+				struct npc_data *nd;
 
+				if (!(nd = map_id2nd(bl->id)))
+					return;
 				sc_display = nd->sc_display;
 				sc_display_count = nd->sc_display_count;
 			}
 			break;
 		case BL_MOB: {
-				struct mob_data *md = map_id2md(bl->id);
+				struct mob_data *md;
 
+				if (!(md = map_id2md(bl->id)))
+					return;
 				sc_display = md->sc_display;
 				sc_display_count = md->sc_display_count;
 			}
@@ -16523,40 +16529,54 @@ void clif_parse_Adopt_reply(int fd, struct map_session_data *sd)
 /// Convex Mirror (ZC_BOSS_INFO).
 /// 0293 <infoType>.B <x>.L <y>.L <minHours>.W <minMinutes>.W <maxHours>.W <maxMinutes>.W <monster name>.51B
 /// infoType:
-///     0 = No boss on this map (BOSS_INFO_NOT).
-///     1 = Boss is alive (position update) (BOSS_INFO_ALIVE).
-///     2 = Boss is alive (initial announce) (BOSS_INFO_ALIVE_WITHMSG).
-///     3 = Boss is dead (BOSS_INFO_DEAD).
-void clif_bossmapinfo(int fd, struct mob_data *md, short flag)
+///     BOSS_INFO_NOT = No boss on this map
+///     BOSS_INFO_ALIVE = Boss is alive (position update)
+///     BOSS_INFO_ALIVE_WITHMSG = Boss is alive (initial announce)
+///     BOSS_INFO_DEAD = Boss is dead
+void clif_bossmapinfo(struct map_session_data *sd, struct mob_data *md, enum e_bossmap_info flag)
 {
+	int fd = sd->fd;
+
 	WFIFOHEAD(fd,70);
 	memset(WFIFOP(fd,0),0,70);
 	WFIFOW(fd,0) = 0x293;
 
-	if( md ) {
-		if( md->bl.prev ) { //Boss on This Map
-			if( flag ) {
-				WFIFOB(fd,2) = 1;
-				WFIFOL(fd,3) = md->bl.x;
-				WFIFOL(fd,7) = md->bl.y;
-			} else
-				WFIFOB(fd,2) = 2; //First Time
-		} else if( md->spawn_timer != INVALID_TIMER ) { //Boss is Dead
-			const struct TimerData *timer_data = get_timer(md->spawn_timer);
-			unsigned int seconds;
-			int hours, minutes;
+	switch( flag ) {
+		case BOSS_INFO_NOT:
+			WFIFOB(fd,2) = BOSS_INFO_NOT;
+			//No data required
+			break; 
+		case BOSS_INFO_ALIVE:
+			WFIFOB(fd,2) = BOSS_INFO_ALIVE;
+			//Update X/Y
+			WFIFOL(fd,3) = md->bl.x;
+			WFIFOL(fd,7) = md->bl.y;
+			break;
+		case BOSS_INFO_ALIVE_WITHMSG:
+			WFIFOB(fd,2) = BOSS_INFO_ALIVE_WITHMSG;
+			//Current X/Y
+			WFIFOL(fd,3) = md->bl.x;
+			WFIFOL(fd,7) = md->bl.y;
+			break;
+		case BOSS_INFO_DEAD: {
+				const struct TimerData *timer_data = get_timer(md->spawn_timer);
+				unsigned int seconds;
+				int hours, minutes;
 
-			seconds = DIFF_TICK(timer_data->tick, gettick()) / 1000 + 60;
-			hours = seconds / (60 * 60);
-			seconds = seconds - (60 * 60 * hours);
-			minutes = seconds / 60;
+				seconds = DIFF_TICK(timer_data->tick, gettick()) / 1000 + 60;
+				hours = seconds / (60 * 60);
+				seconds = seconds - (60 * 60 * hours);
+				minutes = seconds / 60;
 
-			WFIFOB(fd,2) = 3;
-			WFIFOW(fd,11) = hours; //Hours
-			WFIFOW(fd,13) = minutes; //Minutes
-		}
-		safestrncpy((char *)WFIFOP(fd,19), md->db->jname, NAME_LENGTH);
+				WFIFOB(fd,2) = BOSS_INFO_DEAD;
+				WFIFOW(fd,11) = hours; //Hours
+				WFIFOW(fd,13) = minutes; //Minutes
+			}
+			break;
 	}
+
+	if( md )
+		safestrncpy((char *)WFIFOP(fd,19), md->db->jname, NAME_LENGTH);
 
 	WFIFOSET(fd,70);
 }
@@ -18239,8 +18259,10 @@ int clif_autoshadowspell_list(struct map_session_data *sd) {
 
 	//AEGIS listed the specified skills that available for SC_AUTOSHADOWSPELL
 	for( i = 0, c = 0; i < MAX_SKILL; i++ ) {
-		if( sd->status.skill[i].flag == SKILL_FLAG_PLAGIARIZED && sd->status.skill[i].id > 0 &&
-			(skill_get_inf3(sd->status.skill[i].id)&INF3_AUTOSHADOWSPELL) ) {
+		if( (sd->status.skill[i].id == sd->status.skill[sd->cloneskill_idx].id ||
+			sd->status.skill[i].id == sd->status.skill[sd->reproduceskill_idx].id) &&
+			(skill_get_inf3(sd->status.skill[i].id)&INF3_AUTOSHADOWSPELL) )
+		{
 			WFIFOW(fd,8 + c * 2) = sd->status.skill[i].id;
 			c++;
 		}

@@ -1871,9 +1871,7 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 {
 	char npc_ev[EVENT_NAME_LENGTH];
 	char card_slot[NAME_LENGTH];
-	char opt_id_str[NAME_LENGTH];
-	char opt_val_str[NAME_LENGTH];
-	char opt_param_str[NAME_LENGTH];
+	char option_id[NAME_LENGTH], option_val[NAME_LENGTH], option_param[NAME_LENGTH];
 	int i, j;
 	int key_nameid = 0;
 	int key_amount = 0;
@@ -1881,9 +1879,7 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 	int key_attribute = 0;
 	int key_identify = 0;
 	int key_card[MAX_SLOTS];
-	int key_opt_id[MAX_ITEM_RDM_OPT];
-	int key_opt_val[MAX_ITEM_RDM_OPT];
-	int key_opt_param[MAX_ITEM_RDM_OPT];
+	int key_option_id[MAX_ITEM_RDM_OPT], key_option_val[MAX_ITEM_RDM_OPT], key_option_param[MAX_ITEM_RDM_OPT];
 
 	nullpo_ret(sd);
 	nullpo_ret(item_list);
@@ -1902,16 +1898,14 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 		script_cleararray_pc(sd, card_slot, (void *)0);
 	}
 
-	for( j = 0; j < MAX_ITEM_RDM_OPT; j++ ) { //Clear each item option entry
-		key_opt_id[j] = 0;
-		key_opt_val[j] = 0;
-		key_opt_param[j] = 0;
-		snprintf(opt_id_str, sizeof(opt_id_str), "@sold_opt_id%d", j + 1);
-		script_cleararray_pc(sd, opt_id_str, (void *)0);
-		snprintf(opt_val_str, sizeof(opt_val_str), "@sold_opt_val%d", j + 1);
-		script_cleararray_pc(sd, opt_val_str, (void *)0);
-		snprintf(opt_param_str, sizeof(opt_param_str), "@sold_opt_param%d", j + 1);
-		script_cleararray_pc(sd, opt_param_str, (void *)0);
+	for( j = 0; j < MAX_ITEM_RDM_OPT; j++ ) { // Clear each of the item option entries
+		key_option_id[j] = key_option_val[j] = key_option_param[j] = 0;
+		snprintf(option_id, sizeof(option_id), "@sold_option_id%d", j + 1);
+		script_cleararray_pc(sd, option_id, (void *)0);
+		snprintf(option_val, sizeof(option_val), "@sold_option_val%d", j + 1);
+		script_cleararray_pc(sd, option_val, (void *)0);
+		snprintf(option_param, sizeof(option_param), "@sold_option_param%d", j + 1);
+		script_cleararray_pc(sd, option_param, (void *)0);
 	}
 
 	for( i = 0; i < n; i++ ) { //Save list of to be sold items
@@ -1930,13 +1924,13 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 			script_setarray_pc(sd, card_slot, i, (void *)(intptr_t)sd->inventory.u.items_inventory[idx].card[j], &key_card[j]);
 		}
 
-		for( j = 0; j < MAX_ITEM_RDM_OPT; j++ ) {
-			snprintf(opt_id_str, sizeof(opt_id_str), "@sold_opt_id%d", j + 1);
-			script_setarray_pc(sd, opt_id_str, i, (void*)(intptr_t)sd->inventory.u.items_inventory[idx].option[j].id, &key_opt_id[j]);
-			snprintf(opt_val_str, sizeof(opt_val_str), "@sold_opt_val%d", j + 1);
-			script_setarray_pc(sd, opt_val_str, i, (void*)(intptr_t)sd->inventory.u.items_inventory[idx].option[j].value, &key_opt_val[j]);
-			snprintf(opt_param_str, sizeof(opt_param_str), "@sold_opt_param%d", j + 1);
-			script_setarray_pc(sd, opt_param_str, i, (void*)(intptr_t)sd->inventory.u.items_inventory[idx].option[j].param, &key_opt_param[j]);
+		for( j = 0; j < MAX_ITEM_RDM_OPT; j++ ) { //Store each of the item options in the array
+			snprintf(option_id, sizeof(option_id), "@sold_option_id%d", j + 1);
+			script_setarray_pc(sd, option_id, i, (void *)(intptr_t)sd->inventory.u.items_inventory[idx].option[j].id, &key_option_id[j]);
+			snprintf(option_val, sizeof(option_val), "@sold_option_val%d", j + 1);
+			script_setarray_pc(sd, option_val, i, (void *)(intptr_t)sd->inventory.u.items_inventory[idx].option[j].value, &key_option_val[j]);
+			snprintf(option_param, sizeof(option_param), "@sold_option_param%d", j + 1);
+			script_setarray_pc(sd, option_param, i, (void *)(intptr_t)sd->inventory.u.items_inventory[idx].option[j].param, &key_option_param[j]);
 		}
 	}
 
@@ -2820,15 +2814,15 @@ int npc_convertlabel_db(DBKey key, DBData *data, va_list ap)
 {
 	const char *lname = (const char *)key.str;
 	int lpos = db_data2i(data);
-	struct npc_label_list** label_list;
+	struct npc_label_list **label_list;
 	int *label_list_num;
 	const char *filepath;
-	struct npc_label_list* label;
+	struct npc_label_list *label;
 	const char *p;
 	int len;
 
-	nullpo_ret(label_list = va_arg(ap,struct npc_label_list**));
-	nullpo_ret(label_list_num = va_arg(ap,int*));
+	nullpo_ret(label_list = va_arg(ap,struct npc_label_list **));
+	nullpo_ret(label_list_num = va_arg(ap,int *));
 	nullpo_ret(filepath = va_arg(ap,const char *));
 
 	//In case of labels not terminated with ':', for user defined function support
@@ -2844,11 +2838,11 @@ int npc_convertlabel_db(DBKey key, DBData *data, va_list ap)
 	}
 
 	if( *label_list == NULL ) {
-		*label_list = (struct npc_label_list *) aCalloc (1, sizeof(struct npc_label_list));
+		*label_list = (struct npc_label_list *)aCalloc(1, sizeof(struct npc_label_list));
 		*label_list_num = 0;
 	} else
-		*label_list = (struct npc_label_list *) aRealloc (*label_list, sizeof(struct npc_label_list)*(*label_list_num+1));
-	label = *label_list+*label_list_num;
+		*label_list = (struct npc_label_list *)aRealloc(*label_list, sizeof(struct npc_label_list) * (*label_list_num + 1));
+	label = *label_list + *label_list_num;
 
 	safestrncpy(label->name, lname, sizeof(label->name));
 	label->pos = lpos;
@@ -2923,7 +2917,7 @@ static const char *npc_parse_script(char *w1, char *w2, char *w3, char *w4, cons
 	const char *end;
 	const char *script_start;
 
-	struct npc_label_list* label_list;
+	struct npc_label_list *label_list;
 	int label_list_num;
 	struct npc_data *nd;
 
