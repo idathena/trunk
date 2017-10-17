@@ -6777,13 +6777,13 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 				md.damage = skill_get_zeny(skill_id, skill_lv);
 				if(!md.damage)
 					md.damage = (skill_id == NJ_ZENYNAGE ? 2 : 10);
-				md.damage = (skill_id == NJ_ZENYNAGE ? rnd()%md.damage + md.damage :
-					md.damage * rnd_value(50, 100)) / (skill_id == NJ_ZENYNAGE ? 1 : 100);
-				if(sd && skill_id == KO_MUCHANAGE && !pc_checkskill(sd, NJ_TOBIDOUGU))
+				md.damage = (skill_id == NJ_ZENYNAGE ? rnd()%md.damage + md.damage : md.damage * rnd_value(50, 100)) /
+					(skill_id == NJ_ZENYNAGE ? 1 : 100);
+				if(skill_id == KO_MUCHANAGE && sd && pc_checkskill(sd, NJ_TOBIDOUGU) < 10)
 					md.damage = md.damage / 2;
 				if(status_get_class_(target) == CLASS_BOSS) //Specific to Boss Class
 					md.damage = md.damage / (skill_id == NJ_ZENYNAGE ? 3 : 2);
-				else if(tsd && skill_id == NJ_ZENYNAGE)
+				else if(skill_id == NJ_ZENYNAGE && tsd)
 					md.damage = md.damage / 2;
 			break;
 #ifdef RENEWAL
@@ -7565,58 +7565,66 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 		}
 	}
 
-	if (sd) {
-		if (sc && sc->data[SC__AUTOSHADOWSPELL] && wd.flag&BF_SHORT && rnd()%100 < sc->data[SC__AUTOSHADOWSPELL]->val3 &&
-			sd->status.skill[sc->data[SC__AUTOSHADOWSPELL]->val1].id != 0 &&
-			sd->status.skill[sc->data[SC__AUTOSHADOWSPELL]->val1].flag == SKILL_FLAG_PLAGIARIZED)
-		{
-			int r_skill = sd->status.skill[sc->data[SC__AUTOSHADOWSPELL]->val1].id,
-				r_lv = sc->data[SC__AUTOSHADOWSPELL]->val2, type;
+	if (sd && wd.flag&BF_WEAPON) {
+		if (sc && sc->data[SC__AUTOSHADOWSPELL] && rnd()%100 < sc->data[SC__AUTOSHADOWSPELL]->val4) {
+			uint16 skill_id = sc->data[SC__AUTOSHADOWSPELL]->val2,
+				skill_lv = sc->data[SC__AUTOSHADOWSPELL]->val3;
+			int type = skill_get_casttype(skill_id);
 
-				if ((type = skill_get_casttype(r_skill)) == CAST_GROUND) {
-					int maxcount = 0;
+			if (type == CAST_GROUND) {
+				int maxcount = 0;
 
-					if (!(BL_PC&battle_config.skill_reiteration) &&
-						skill_get_unit_flag(r_skill)&UF_NOREITERATION)
-						type = -1;
-					if (BL_PC&battle_config.skill_nofootset &&
-						skill_get_unit_flag(r_skill)&UF_NOFOOTSET)
-						type = -1;
-					if (BL_PC&battle_config.land_skill_limit &&
-						(maxcount = skill_get_maxcount(r_skill,r_lv)) > 0) {
-						int v;
+				if (!(BL_PC&battle_config.skill_reiteration) &&
+					skill_get_unit_flag(skill_id)&UF_NOREITERATION)
+					type = -1;
+				if (BL_PC&battle_config.skill_nofootset &&
+					skill_get_unit_flag(skill_id)&UF_NOFOOTSET)
+					type = -1;
+				if (BL_PC&battle_config.land_skill_limit &&
+					(maxcount = skill_get_maxcount(skill_id,skill_lv)) > 0) {
+					int v;
 
-						for (v = 0; v < MAX_SKILLUNITGROUP && sd->ud.skillunit[v] && maxcount; v++) {
-							if (sd->ud.skillunit[v]->skill_id == r_skill)
-								maxcount--;
-						}
-						if (maxcount == 0)
-							type = -1;
+					for (v = 0; v < MAX_SKILLUNITGROUP && sd->ud.skillunit[v] && maxcount; v++) {
+						if (sd->ud.skillunit[v]->skill_id == skill_id)
+							maxcount--;
 					}
-					if (type != CAST_GROUND) {
-						clif_skill_fail(sd,r_skill,USESKILL_FAIL_LEVEL,0,0);
-						map_freeblock_unlock();
-						return wd.dmg_lv;
-					}
+					if (!maxcount)
+						type = -1;
 				}
+				if (type != CAST_GROUND) {
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+					map_freeblock_unlock();
+					return wd.dmg_lv;
+				}
+			}
+			if (status_charge(src,0,skill_get_sp(skill_id,skill_lv))) {
+				struct unit_data *ud = unit_bl2ud(src);
+
 				sd->state.autocast = 1;
-				skill_consume_requirement(sd,r_skill,r_lv,1);
 				switch (type) {
 					case CAST_GROUND:
-						skill_castend_pos2(src,target->x,target->y,r_skill,r_lv,tick,flag);
+						skill_castend_pos2(src,target->x,target->y,skill_id,skill_lv,tick,flag);
 						break;
 					case CAST_DAMAGE:
-						skill_castend_damage_id(src,target,r_skill,r_lv,tick,flag);
+						skill_castend_damage_id(src,target,skill_id,skill_lv,tick,flag);
 						break;
 					case CAST_NODAMAGE:
-						skill_castend_nodamage_id(src,target,r_skill,r_lv,tick,flag);
+						skill_castend_nodamage_id(src,target,skill_id,skill_lv,tick,flag);
 						break;
 				}
 				sd->state.autocast = 0;
-				sd->ud.canact_tick = max(tick + skill_delayfix(src,r_skill,r_lv),sd->ud.canact_tick);
-				clif_status_change(src,SI_POSTDELAY,1,skill_delayfix(src,r_skill,r_lv),0,0,1);
+				if (ud) {
+					int delay = skill_delayfix(src,skill_id,skill_lv);
+
+					if (DIFF_TICK(ud->canact_tick,tick + delay) < 0) {
+						ud->canact_tick = max(tick + delay,ud->canact_tick);
+						if (battle_config.display_status_timers)
+							clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
+					}
+				}
+			}
 		}
-		if (wd.flag&BF_WEAPON && target->id != src->id && damage > 0) {
+		if (target->id != src->id && damage > 0) {
 			if (battle_config.left_cardfix_to_right)
 				battle_drain(sd,target,wd.damage,wd.damage,tstatus->race,tstatus->class_);
 			else

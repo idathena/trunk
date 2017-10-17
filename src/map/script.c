@@ -20166,7 +20166,7 @@ BUILDIN_FUNC(freeloop) {
 BUILDIN_FUNC(bindatcmd) {
 	const char *atcmd;
 	const char *eventName;
-	int i, level = 0, level2 = 0;
+	int i, level = 0, level2 = 100;
 	bool create = false;
 
 	atcmd = script_getstr(st,2);
