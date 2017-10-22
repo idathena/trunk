@@ -532,7 +532,7 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 		ud->to_y = bl->y;
 		//Walked on occupied cell, call unit_walktoxy again
 		if(battle_config.official_cell_stack_limit &&
-			map_count_oncell(bl->m,x,y,BL_CHAR|BL_NPC,0x1) > battle_config.official_cell_stack_limit) {
+			map_count_oncell(bl->m,x,y,BL_CHAR|BL_NPC,0x1|0x2) > battle_config.official_cell_stack_limit) {
 			if(ud->steptimer != INVALID_TIMER) { //Execute step timer on next step instead
 				delete_timer(ud->steptimer,unit_step_timer);
 				ud->steptimer = INVALID_TIMER;
@@ -843,11 +843,9 @@ bool unit_run(struct block_list *bl, struct map_session_data *sd, enum sc_type t
 	for( i = 0; i < AREA_SIZE; i++ ) {
 		if( map_getcell(bl->m, to_x + dir_x, to_y + dir_y, CELL_CHKNOPASS) )
 			break;
-
 		//If sprinting and there's a PC/Mob/NPC, block the path [Kevin]
-		if( map_count_oncell(bl->m, to_x + dir_x, to_y + dir_y, BL_PC|BL_MOB|BL_NPC,0x2) )
+		if( map_count_oncell(bl->m, to_x + dir_x, to_y + dir_y, BL_PC|BL_MOB|BL_NPC, 0x2) )
 			break;
-
 		to_x += dir_x;
 		to_y += dir_y;
 	}
@@ -868,7 +866,7 @@ bool unit_run(struct block_list *bl, struct map_session_data *sd, enum sc_type t
 		to_y -= dir_y;
 	} while( --i > 0 && !unit_walktoxy(bl, to_x, to_y, 1) );
 
-	if( i == 0 ) {
+	if( !i ) {
 		unit_run_hit(bl, sc, sd, type);
 		return false;
 	}
@@ -1713,7 +1711,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 			break;
 #endif
 		case GD_EMERGENCYCALL: //Emergency Call double cast when the user has learned Leap [Daegaladh]
-			if( sd && (pc_checkskill(sd,TK_HIGHJUMP) || pc_checkskill(sd,SU_LOPE) >= 3) )
+			if( sd && (pc_checkskill(sd,TK_HIGHJUMP) > 0 || pc_checkskill(sd,SU_LOPE) > 0) )
 				casttime <<= 1;
 			break;
 		case RA_WUGDASH:

@@ -1479,7 +1479,7 @@ int mob_unlocktarget(struct mob_data *md, unsigned int tick)
 	}
 	if(battle_config.official_cell_stack_limit &&
 		(md->min_chase == md->db->range3 || (battle_config.mob_ai&0x8)) &&
-		map_count_oncell(md->bl.m,md->bl.x,md->bl.y,BL_CHAR|BL_NPC,0x1) > battle_config.official_cell_stack_limit)
+		map_count_oncell(md->bl.m,md->bl.x,md->bl.y,BL_CHAR|BL_NPC,0x1|0x2) > battle_config.official_cell_stack_limit)
 		unit_walktoxy(&md->bl,md->bl.x,md->bl.y,8);
 	return 0;
 }

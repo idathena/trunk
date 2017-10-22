@@ -2172,7 +2172,7 @@ bool is_infinite_defense(struct block_list *target, int flag)
 	if(target->type == BL_SKILL) {
 		TBL_SKILL *su = ((TBL_SKILL *)target);
 
-		if(su && su->group && su->group->skill_id == WM_REVERBERATION)
+		if(su && su->group && su->group->unit_id == UNT_REVERBERATION)
 			return true;
 	}
 	if(status_has_mode(tstatus, MD_IGNOREMELEE) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON))
@@ -3522,6 +3522,9 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case NPC_EARTHQUAKE:
 			skillratio += 100 + 100 * skill_lv + 100 * skill_lv / 2;
 			break;
+		case NPC_REVERBERATION_ATK:
+			skillratio += -100 + 200 * (skill_lv + 2);
+			break;
 		case RG_BACKSTAP:
 			if(sd && sd->status.weapon == W_BOW && battle_config.backstab_bow_penalty)
 				skillratio += (200 + 40 * skill_lv) / 2;
@@ -4540,14 +4543,15 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 				//Pre-Renewal only: Soul Breaker ignores EDP 
 				//Renewal only: Grimtooth and Venom Knife ignore EDP
 				//Both: Venom Splasher and Meteor Assault ignore EDP [helvetica]
-#ifndef RENEWAL_EDP
+#ifndef RENEWAL
 				case ASC_BREAKER:
 #else
 				case AS_GRIMTOOTH:
 				case AS_VENOMKNIFE:
 #endif
 					break; //Skills above have no effect with EDP
-#ifdef RENEWAL_EDP
+#ifdef RENEWAL
+				//Renewal EDP mode requires renewal enabled as well
 				//Renewal EDP: damage gets a half modifier on top of EDP bonus for skills [helvetica]
 				//* Sonic Blow
 				//* Soul Breaker
@@ -4558,27 +4562,18 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 				case GC_COUNTERSLASH:
 				case GC_CROSSIMPACT:
 					//Only modifier is halved but still benefit with the damage bonus
-					ATK_RATE(wd.damage, wd.damage2, 50);
-	#ifdef RENEWAL
 					ATK_RATE(wd.weaponAtk, wd.weaponAtk2, 50);
 					ATK_RATE(wd.equipAtk, wd.equipAtk2, 50);
-	#endif
 				//Fall through to apply EDP bonuses
 				default:
 					//Renewal EDP formula [helvetica]
 					//Weapon atk * (1 + (edp level * .8))
 					//Equip atk * (1 + (edp level * .6))
-					ATK_RATE(wd.damage, wd.damage2, 100 + sce->val1 * 80);
-	#ifdef RENEWAL
 					ATK_RATE(wd.weaponAtk, wd.weaponAtk2, 100 + sce->val1 * 80);
 					ATK_RATE(wd.equipAtk, wd.equipAtk2, 100 + sce->val1 * 60);
-	#endif
 #else
 				default:
 					ATK_ADDRATE(wd.damage, wd.damage2, sce->val3);
-	#ifdef RENEWAL
-					ATK_ADDRATE(wd.weaponAtk, wd.weaponAtk2, sce->val3);
-	#endif
 #endif
 					break;
 			}
@@ -8631,6 +8626,8 @@ static const struct _battle_data {
 	{ "event_refine_chance",                &battle_config.event_refine_chance,             0,      0,      1,              },
 	{ "feature.achievement",                &battle_config.feature_achievement,             1,      0,      1,              },
 	{ "allow_bound_sell",                   &battle_config.allow_bound_sell,                1,      0,      1,              },
+
+#include "../custom/battle_config_init.inc"
 };
 
 /*==========================

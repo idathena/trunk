@@ -4577,7 +4577,7 @@ static void clif_getareachar_pc(struct map_session_data *sd,struct map_session_d
 	if( i < MAX_DEVOTION )
 		clif_devotion(&dstsd->bl, sd);
 	//Display link (dstsd - crusader) to sd
-	if( dstsd->sc.data[SC_DEVOTION] && (d_bl = map_id2bl(dstsd->sc.data[SC_DEVOTION]->val1)) != NULL )
+	if( dstsd->sc.data[SC_DEVOTION] && (d_bl = map_id2bl(dstsd->sc.data[SC_DEVOTION]->val1)) )
 		clif_devotion(d_bl, sd);
 }
 
@@ -10809,7 +10809,7 @@ void clif_parse_WalkToXY(int fd, struct map_session_data *sd)
 
 	//A move command one cell west is only valid if the target cell is free
 	if( battle_config.official_cell_stack_limit && sd->bl.x == x + 1 && sd->bl.y == y &&
-		map_count_oncell(sd->bl.m, x, y, BL_CHAR|BL_NPC, 0x1) > battle_config.official_cell_stack_limit )
+		map_count_oncell(sd->bl.m, x, y, BL_CHAR|BL_NPC, 0x1|0x2) > battle_config.official_cell_stack_limit )
 		return;
 
 	//Cloaking wall check is actually updated when you click to process next movement

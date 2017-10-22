@@ -343,11 +343,9 @@ HP/SP gain
 ------------
 bonus bHPGainValue,n;			Heals + n HP when killing an enemy with a physical attack
 bonus bMagicHPGainValue,n;		Heals + n HP when killing an enemy with a magical attack
-bonus2 bHPGainRaceAttack,r,n;		Heals + n HP when attacking enemy race r on every hit
 bonus bSPGainValue,n;			Heals + n SP when killing an enemy with a physical attack
 bonus2 bSPGainRace,r,n;			Heals + n SP when killing an enemy of race r with a physical attack
 bonus bMagicSPGainValue,n;		Heals + n SP when killing an enemy with a magical attack
-bonus2 bSPGainRaceAttack,r,n;		Heals + n SP when attacking enemy race r on every hit
 
 Damage return
 -------------

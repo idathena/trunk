@@ -5034,7 +5034,6 @@ BUILDIN_FUNC(rand)
 		int max = script_getnum(st,3);
 
 		min = script_getnum(st,2);
-
 		if( max < min )
 			swap(min, max);
 		range = max - min + 1;
@@ -19075,8 +19074,8 @@ BUILDIN_FUNC(waitingroom2bg)
 	struct npc_data *nd;
 	struct chat_data *cd;
 	const char *map_name, *ev = "", *dev = "";
-	int x, y, mapindex = 0, bg_id, n;
-	unsigned char i;
+	int x, y, mapindex = 0, bg_id;
+	unsigned char i, c = 0;
 
 	if( script_hasdata(st,7) )
 		nd = npc_name2id(script_getstr(st,7));
@@ -19089,35 +19088,36 @@ BUILDIN_FUNC(waitingroom2bg)
 	}
 
 	map_name = script_getstr(st,2);
-	if( strcmp(map_name,"-") != 0 ) {
-		mapindex = mapindex_name2id(map_name);
-		if( mapindex == 0 ) { //Invalid Map
-			script_pushint(st,0);
-			return 0;
-		}
+	if( strcmp(map_name,"-") != 0 && (mapindex = mapindex_name2id(map_name)) == 0 ) { //Invalid Map
+		script_pushint(st,0);
+		return 0;
 	}
 
 	x = script_getnum(st,3);
 	y = script_getnum(st,4);
-	ev = script_getstr(st,5); //Logout Event
-	dev = script_getstr(st,6); //Die Event
+	if( script_hasdata(st,5) )
+		ev = script_getstr(st,5); //Logout Event
+	if( script_hasdata(st,6) )
+		dev = script_getstr(st,6); //Die Event
+
+	check_event(st,ev);
+	check_event(st,dev);
 
 	if( (bg_id = bg_create(mapindex, x, y, ev, dev)) == 0 ) { //Creation failed
 		script_pushint(st,0);
 		return 0;
 	}
 
-	n = cd->users;
-	for( i = 0; i < n && i < MAX_BG_MEMBERS; i++ ) {
-		struct map_session_data *sd = cd->usersd[i];
+	for( i = 0; i < cd->users; i++ ) { //Only add those who are in the chat room
+		struct map_session_data *sd;
 
-		if( sd && bg_team_join(bg_id, sd) )
-			mapreg_setreg(reference_uid(add_str("$@arenamembers"), i), sd->bl.id);
-		else
-			mapreg_setreg(reference_uid(add_str("$@arenamembers"), i), 0);
+		if( (sd = cd->usersd[i]) != NULL && bg_team_join(bg_id, sd) ) {
+			mapreg_setreg(reference_uid(add_str("$@arenamembers"), c), sd->bl.id);
+			++c;
+		}
 	}
 
-	mapreg_setreg(add_str("$@arenamembersnum"), i);
+	mapreg_setreg(add_str("$@arenamembersnum"), c);
 	script_pushint(st,bg_id);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -19128,30 +19128,115 @@ BUILDIN_FUNC(waitingroom2bg_single)
 	struct npc_data *nd;
 	struct chat_data *cd;
 	struct map_session_data *sd;
+	struct battleground_data *bg;
 	int x, y, mapindex, bg_id;
 
 	bg_id = script_getnum(st,2);
-	map_name = script_getstr(st,3);
-	if( (mapindex = mapindex_name2id(map_name)) == 0 )
-		return 0; // Invalid Map
-
-	x = script_getnum(st,4);
-	y = script_getnum(st,5);
-	nd = npc_name2id(script_getstr(st,6));
-
-	if( nd == NULL || (cd = (struct chat_data *)map_id2bl(nd->chat_id)) == NULL || cd->users <= 0 )
+	if( (bg = bg_team_search(bg_id)) == NULL ) {
+		script_pushint(st,false);
 		return 0;
-
-	if( (sd = cd->usersd[0]) == NULL )
-		return 0;
-
-	if( bg_team_join(bg_id, sd) )
-	{
-		pc_setpos(sd, mapindex, x, y, CLR_TELEPORT);
-		script_pushint(st,1);
 	}
+
+	if( script_hasdata(st,3) ) {
+		map_name = script_getstr(st,3);
+		if( (mapindex = mapindex_name2id(map_name)) == 0 ) {
+			script_pushint(st,false);
+			return 0; //Invalid Map
+		}
+		x = script_getnum(st,4);
+		y = script_getnum(st,5);
+	} else {
+		mapindex = bg->mapindex;
+		x = bg->x;
+		y = bg->y;
+	}
+
+	if( script_hasdata(st,6) )
+		nd = npc_name2id(script_getstr(st,6));
 	else
+		nd = (struct npc_data *)map_id2bl(st->oid);
+
+	if( nd == NULL || (cd = (struct chat_data *)map_id2bl(nd->chat_id)) == NULL ||
+		cd->users <= 0 || (sd = cd->usersd[0]) == NULL ) {
+		script_pushint(st,false);
+		return 0;
+	}
+
+	if( bg_team_join(bg_id, sd) && pc_setpos(sd, mapindex, x, y, CLR_TELEPORT) == SETPOS_OK )
+		script_pushint(st,true);
+	else
+		script_pushint(st,false);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/// Creates an instance of battleground battle group.
+/// *bg_create("<map name>",<x>,<y>{,"<On Quit Event>","<On Death Event>"});
+/// @author [secretdataz]
+BUILDIN_FUNC(bg_create) {
+	const char *map_name, *ev = "", *dev = "";
+	int x, y, mapindex = 0;
+
+	map_name = script_getstr(st,2);
+	if( strcmp(map_name,"-") != 0 && (mapindex = mapindex_name2id(map_name)) == 0 ) { //Invalid Map
 		script_pushint(st,0);
+		return 0;
+	}
+
+	x = script_getnum(st,3);
+	y = script_getnum(st,4);
+	if( script_hasdata(st,5) )
+		ev = script_getstr(st,5); //Logout Event
+	if( script_hasdata(st,6) )
+		dev = script_getstr(st,6); //Die Event
+
+	check_event(st,ev);
+	check_event(st,dev);
+
+	script_pushint(st,bg_create(mapindex, x, y, ev, dev));
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/// Adds attached player or <char id> (if specified) to an existing 
+/// battleground group and warps it to the specified coordinates on
+/// the given map.
+/// bg_join(<battle group>,{"<map name>",<x>,<y>{,<char id>}});
+/// @author [secretdataz]
+BUILDIN_FUNC(bg_join) {
+	const char *map_name;
+	struct map_session_data *sd;
+	struct battleground_data *bg;
+	int x, y, bg_id, mapindex;
+
+	bg_id = script_getnum(st,2);
+	if( (bg = bg_team_search(bg_id)) == NULL ) {
+		script_pushint(st,false);
+		return 0;
+	}
+
+	if( script_hasdata(st,3) ) {
+		map_name = script_getstr(st,3);
+		if( (mapindex = mapindex_name2id(map_name)) == 0 ) {
+			script_pushint(st,false);
+			return 0; //Invalid Map
+		}
+		x = script_getnum(st,4);
+		y = script_getnum(st,5);
+	} else {
+		mapindex = bg->mapindex;
+		x = bg->x;
+		y = bg->y;
+	}
+
+	if( !script_charid2sd(6,sd) ) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if( bg_team_join(bg_id, sd) && pc_setpos(sd, mapindex, x, y, CLR_TELEPORT) == SETPOS_OK )
+		script_pushint(st,true);
+	else
+		script_pushint(st,false);
 
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -19307,7 +19392,7 @@ BUILDIN_FUNC(bg_get_data)
 		case 1:
 			for( i = 0; bg->members[i].sd != NULL; i++ )
 				mapreg_setreg(reference_uid(add_str("$@arenamembers"), i), bg->members[i].sd->bl.id);
-			mapreg_setreg(add_str("$@arenamemberscount"), i);
+			mapreg_setreg(add_str("$@arenamembersnum"), i);
 			script_pushint(st,i);
 			break;
 		default:
@@ -20293,13 +20378,6 @@ BUILDIN_FUNC(checkre)
 #endif
 			break;
 		case 5:
-#ifdef RENEWAL_EDP
-				script_pushint(st,1);
-#else
-				script_pushint(st,0);
-#endif
-			break;
-		case 6:
 #ifdef RENEWAL_ASPD
 				script_pushint(st,1);
 #else
@@ -22709,8 +22787,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(agitend2,""),
 	BUILDIN_DEF(agitcheck2,""),
 	//BattleGround
-	BUILDIN_DEF(waitingroom2bg,"siiss?"),
-	BUILDIN_DEF(waitingroom2bg_single,"isiis"),
+	BUILDIN_DEF(waitingroom2bg,"sii???"),
+	BUILDIN_DEF(waitingroom2bg_single,"i????"),
 	BUILDIN_DEF(bg_team_setxy,"iii"),
 	BUILDIN_DEF(bg_warp,"isii"),
 	BUILDIN_DEF(bg_monster,"isiisi?"),
@@ -22721,6 +22799,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(bg_get_data,"ii"),
 	BUILDIN_DEF(bg_getareausers,"isiiii"),
 	BUILDIN_DEF(bg_updatescore,"sii"),
+	BUILDIN_DEF(bg_create,"sii??"),
+	BUILDIN_DEF(bg_join,"i????"),
 	//Instancing
 	BUILDIN_DEF(instance_create,"s"),
 	BUILDIN_DEF(instance_destroy,"?"),

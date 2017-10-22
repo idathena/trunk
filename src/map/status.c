@@ -1591,7 +1591,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 			status_change_end(target, SC_SUHIDE, INVALID_TIMER);
 			//Endure count is only reduced by non-players on non-gvg maps
 			if ((sce = sc->data[SC_ENDURE]) && !sce->val4 && //val4 signals infinite endure [Skotlex]
-				src && src->type != BL_PC && !map_flag_gvg2(target->m) && !map[target->m].flag.battleground && --(sce->val2) < 0)
+				src && src->type != BL_PC && !map_flag_gvg2(target->m) && !map[target->m].flag.battleground && --(sce->val2) <= 0)
 				status_change_end(target, SC_ENDURE, INVALID_TIMER);
 			if ((sce = sc->data[SC_GRAVITATION]) && sce->val3 == BCT_SELF) {
 				struct skill_unit_group *group = skill_id2group(sce->val4);
@@ -3535,7 +3535,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			if (sd->inventory_data[index]->script && (pc_has_permission(sd,PC_PERM_USE_ALL_EQUIPMENT) ||
 				!itemdb_isNoEquip(sd->inventory_data[index],sd->bl.m))) {
 				if (i == EQI_HAND_L) //Shield
-					sd->state.lr_flag = 3;
+					sd->state.lr_flag = 1;
 				run_script(sd->inventory_data[index]->script,0,sd->bl.id,0);
 				if (i == EQI_HAND_L) //Shield
 					sd->state.lr_flag = 0;
@@ -9096,7 +9096,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_EDP: //[Celest]
 				val2 = val1 + 2; //Chance to Poison enemies
-#ifndef RENEWAL_EDP
+#ifndef RENEWAL
 				val3 = 50 * (val1 + 1); //Damage increase (+50+50*lv%)
 #endif
 				if( sd ) //[Ind] - iROwiki says each level increases its duration by 3 seconds
@@ -10093,8 +10093,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val4 = tick / tick_time;
 				break;
 			case SC_VACUUM_EXTREME:
-				//Suck target at n second, only if the n second is lower than the duration, doesn't apply to BL_PC
-				if( bl->type != BL_PC && val4 < tick && !unit_blown_immune(bl,0x1) && status_has_mode(status,MD_CANMOVE) ) {
+				//Suck target at n second, only if the n second is lower than the duration
+				//Does not suck targets on no-knockback maps
+				if( val4 < tick && !unit_blown_immune(bl,0x1) ) {
 					tick_time = val4;
 					val4 = tick - tick_time;
 				} else
@@ -10642,7 +10643,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 						if( pc_checkskill(ssd,SU_SPIRITOFSEA) > 0 )
 							val2 = val2 * 160 / 100;
 					}
-					status_heal(bl,val2,0,3);
 					val3 = 11000 - 1000 * val1; //Heal interval
 					tick_time = val3;
 					val4 = tick / tick_time;
@@ -11167,9 +11167,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 	if (!(flag&SCFLAG_NOICON) && !(flag&SCFLAG_LOADED && StatusDisplayType[type]))
 		clif_status_change(bl,StatusIconChangeTable[type],1,tick,(val_flag&1) ? val1 : 1,(val_flag&2) ? val2 : 0,(val_flag&4) ? val3 : 0);
 
-	if (tick_time) //Used as temporary storage for scs with interval ticks, so that the actual duration is sent to the client first
-		tick = tick_time;
-
 	//Don't trust the previous sce assignment, in case the SC ended somewhere between there and here
 	if ((sce = sc->data[type])) { //Reuse old sc
 		if (sce->timer != INVALID_TIMER)
@@ -11185,9 +11182,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 	sce->val3 = val3;
 	sce->val4 = val4;
 
-	if (tick >= 0)
-		sce->timer = add_timer(gettick() + tick,status_change_timer,bl->id,type);
-	else
+	if (tick >= 0) {
+		if (tick_time) //Used as temporary storage for scs with interval ticks, so that the actual duration is sent to the client first
+			sce->timer = add_timer(gettick(),status_change_timer,bl->id,type);
+		else
+			sce->timer = add_timer(gettick() + tick,status_change_timer,bl->id,type);
+	} else
 		sce->timer = INVALID_TIMER; //Infinite duration
 
 	if (calc_flag)

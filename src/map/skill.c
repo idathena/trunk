@@ -410,6 +410,8 @@ unsigned short skill_dummy2skill_id(unsigned short skill_id) {
 			return SU_LUNATICCARROTBEAT;
 		case NPC_MAXPAIN_ATK:
 			return NPC_MAXPAIN;
+		case NPC_REVERBERATION_ATK:
+			return NPC_REVERBERATION;
 	}
 	return skill_id;
 }
@@ -862,10 +864,10 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	nullpo_ret(bl);
 
 	if( skill_id && !skill_lv )
-		return 0; //Don't forget auto attacks! - celest
+		return 0; //Don't forget auto attacks! [Celest]
 
-	if( dmg_lv < ATK_BLOCK ) //Don't apply effect if miss
-		return 0;
+	if( dmg_lv < ATK_BLOCK )
+		return 0; //Don't apply effect if miss
 
 	sd = BL_CAST(BL_PC,src);
 	md = BL_CAST(BL_MOB,src);
@@ -2168,7 +2170,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 	nullpo_ret(bl);
 
 	if(skill_id && !skill_lv)
-		return 0; //Don't forget auto attacks! - Celest
+		return 0; //Don't forget auto attacks! [Celest]
 
 	sc = status_get_sc(src);
 	sd = BL_CAST(BL_PC, src);
@@ -4161,6 +4163,7 @@ static int skill_timerskill(int tid, unsigned int tick, int id, intptr_t data)
 						}
 					}
 					break;
+				case NPC_REVERBERATION_ATK:
 				case WM_REVERBERATION_MELEE:
 				case WM_REVERBERATION_MAGIC:
 					skill_castend_damage_id(src,target,skl->skill_id,skl->skill_lv,tick,skl->flag|SD_LEVEL|SD_ANIMATION);
@@ -4341,7 +4344,7 @@ static int skill_active_reverberation(struct block_list *bl, va_list ap) {
 
 	if (bl->type != BL_SKILL)
 		return 0;
-	if (su->alive && (sg = su->group) && sg->skill_id == WM_REVERBERATION) {
+	if (su->alive && (sg = su->group) && sg->unit_id == UNT_REVERBERATION) {
 		map_foreachinallrange(skill_trap_splash, bl, skill_get_splash(sg->skill_id, sg->skill_lv), sg->bl_flag, bl, gettick());
 		su->limit = DIFF_TICK(gettick(), sg->tick);
 		sg->unit_id = UNT_USED_TRAPS;
@@ -4887,6 +4890,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case NPC_VAMPIRE_GIFT:
 		case NPC_MAXPAIN_ATK:
 		case NPC_JACKFROST:
+		case NPC_REVERBERATION_ATK:
 		case RK_WINDCUTTER:
 		case RK_IGNITIONBREAK:
 		case RK_DRAGONBREATH:
@@ -5024,6 +5028,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 							starget = splash_target(src);
 						}
 						break;
+					case NPC_REVERBERATION_ATK:
 					case WM_REVERBERATION_MELEE:
 					case WM_REVERBERATION_MAGIC:
 						skill_area_temp[1] = 0;
@@ -10365,8 +10370,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SO_ARRULLO: { //[(15 + 5 * Skill Level) + (Caster's INT / 5) + (Caster's Job Level / 5) - (Target's INT / 6) - (Target's LUK / 10)]%
 				int rate = (15 + 5 * skill_lv) + status_get_int(src) / 5 + status_get_job_lv(src) / 5 - status_get_int(bl) / 6 - status_get_luk(bl) / 10;
 
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				sc_start(src,bl,type,rate,skill_lv,skill_get_time(skill_id,skill_lv));
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,
+					sc_start(src,bl,type,rate,skill_lv,skill_get_time(skill_id,skill_lv)));
 			}
 			break;
 
@@ -11244,11 +11249,25 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			case PF_SPIDERWEB:
 			case GN_WALLOFTHORN:
 			case RL_B_TRAP:
-			case RL_HAMMER_OF_GOD:
 			case SC_ESCAPE:
 			case SU_CN_POWDERING:
 				ud->skillx = target->x;
 				ud->skilly = target->y;
+				ud->skilltimer = tid;
+				return skill_castend_pos(tid,tick,id,data);
+			case RL_HAMMER_OF_GOD:
+				if( !(sc = status_get_sc(target)) || !sc->data[SC_C_MARKER] ) {
+					inf2 = rnd()%AREA_SIZE + 1;
+					ud->skillx = src->x + inf2;
+					ud->skilly = src->y + inf2;
+					if( !map_random_dir(src,&ud->skillx,&ud->skilly) ) {
+						ud->skillx = target->x;
+						ud->skilly = target->y;
+					}
+				} else {
+					ud->skillx = target->x;
+					ud->skilly = target->y;
+				}
 				ud->skilltimer = tid;
 				return skill_castend_pos(tid,tick,id,data);
 		}
@@ -11689,6 +11708,12 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 				skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
 			break;
 
+		case NPC_LEX_AETERNA:
+			i = skill_get_splash(skill_id,skill_lv);
+			map_foreachinallarea(skill_area_sub,src->m,x-i,y-i,x+i,y+i,BL_CHAR,src,
+				PR_LEXAETERNA,1,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
+			break;
+
 		case SA_VOLCANO:
 		case SA_DELUGE:
 		case SA_VIOLENTGALE:
@@ -11788,6 +11813,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case NPC_FLAMECROSS:
 		case NPC_HELLBURNING:
 		case NPC_WIDESUCK:
+		case NPC_REVERBERATION:
 		case WL_COMET:
 		case RA_ELECTRICSHOCKER:
 		case RA_CLUSTERBOMB:
@@ -12331,7 +12357,8 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 
 		case SO_ARRULLO:
 			i = skill_get_splash(skill_id,skill_lv);
-			map_foreachinallarea(skill_area_sub,src->m,x-i,y-i,x+i,y+i,BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
+			map_foreachinallarea(skill_area_sub,src->m,x-i,y-i,x+i,y+i,BL_CHAR,src,
+				skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
 			break;
 
 		case EL_FIRE_MANTLE:
@@ -12423,24 +12450,15 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			skill_unitsetting(src,skill_id,skill_lv,x,y,0);
 			break;
 
-		case SU_LOPE: {
-				uint8 dir = map_calc_dir(src,x,y);
-
-				//Fails on noteleport maps, except for GvG and BG maps
-				if( map[src->m].flag.noteleport && !(map[src->m].flag.battleground || map_flag_gvg2(src->m)) ) {
-					x = src->x;
-					y = src->y;
-				} else if( dir%2 ) { //Diagonal
-					x += dirx[dir] * (skill_lv * 4) / 3;
-					y += diry[dir] * (skill_lv * 4) / 3;
-				} else {
-					x += dirx[dir] * skill_lv * 2;
-					y += diry[dir] * skill_lv * 2;
-				}
-				if( !map_count_oncell(src->m,x,y,BL_PC|BL_NPC|BL_MOB,0) && map_getcell(src->m,x,y,CELL_CHKREACH) && unit_movepos(src,x,y,1,false) )
-					clif_blown(src,src);
-				clif_skill_nodamage(src,src,skill_id,skill_lv,1);
+		case SU_LOPE:
+			//Fails on noteleport maps, except for GvG and BG maps
+			if( map[src->m].flag.noteleport && !(map[src->m].flag.battleground || map_flag_gvg2(src->m)) ) {
+				x = src->x;
+				y = src->y;
 			}
+			if( !map_count_oncell(src->m,x,y,BL_PC|BL_NPC|BL_MOB,0) && map_getcell(src->m,x,y,CELL_CHKREACH) && unit_movepos(src,x,y,1,false) )
+				clif_blown(src,src);
+			clif_skill_nodamage(src,src,skill_id,skill_lv,1);
 			break;
 
 		default:
@@ -13195,6 +13213,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 					val1 = 1;
 				val2 = 0;
 				break;
+			case NPC_REVERBERATION:
 			case WM_REVERBERATION:
 				val1 = 1 + skill_lv;
 				break;
@@ -17864,9 +17883,11 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 			}
 			break;
 		case UNT_REVERBERATION: //For proper skill delay animation when use with Dominion Impulse
-			if( ss->type == BL_PC ) //Monster skill only deal magic type attack [exneval]
+			if( ss->type == BL_PC ) {
 				skill_addtimerskill(ss,tick + status_get_amotion(ss),bl->id,0,0,WM_REVERBERATION_MELEE,skill_lv,BF_WEAPON,0);
-			skill_addtimerskill(ss,tick + status_get_amotion(ss) * 2,bl->id,0,0,WM_REVERBERATION_MAGIC,skill_lv,BF_MAGIC,0);
+				skill_addtimerskill(ss,tick + status_get_amotion(ss) * 2,bl->id,0,0,WM_REVERBERATION_MAGIC,skill_lv,BF_MAGIC,0);
+			} else
+				skill_addtimerskill(ss,tick + 50,bl->id,0,0,NPC_REVERBERATION_ATK,skill_lv,BF_WEAPON,0);
 			break;
 		case UNT_FIRINGTRAP:
 		case UNT_ICEBOUNDTRAP:
