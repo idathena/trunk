@@ -12,8 +12,8 @@ typedef enum damage_lv {
 	ATK_NONE,    //Not an attack
 	ATK_LUCKY,   //Attack was lucky-dodged
 	ATK_FLEE,    //Attack was dodged
-	ATK_MISS,    //Attack missed because of element/race modifier.
-	ATK_BLOCK,   //Attack was blocked by some skills.
+	ATK_MISS,    //Attack missed because of element/race modifier
+	ATK_BLOCK,   //Attack was blocked by some skills
 	ATK_DEF      //Attack connected
 } damage_lv;
 
@@ -648,6 +648,8 @@ extern struct Battle_Config
 	int event_refine_chance;
 	int feature_achievement;
 	int allow_bound_sell;
+
+#include "../custom/battle_config_struct.inc"
 } battle_config;
 
 void do_init_battle(void);

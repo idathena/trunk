@@ -4,8 +4,7 @@
 #ifndef _MAPINDEX_H_
 #define _MAPINDEX_H_
 
-#include "../common/db.h"
-#include "../config/renewal.h"
+#include "../common/mmo.h"
 
 //File in charge of assigning a numberic ID to each map in existance for space saving when passing map info between servers.
 extern char mapindex_cfgfile[80];

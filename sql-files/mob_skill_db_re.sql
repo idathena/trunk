@@ -10895,8 +10895,8 @@ REPLACE INTO `mob_skill_db_re` VALUES (3069,'Ferre@NPC_GROUNDATTACK','attack',18
 REPLACE INTO `mob_skill_db_re` VALUES (3069,'Ferre@NPC_EMOTION','idle',197,1,2000,0,5000,'yes','self','always',NULL,44,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3070,'Ferre@NPC_EMOTION','idle',197,1,2000,0,5000,'yes','self','always',NULL,44,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3070,'Ferre@NPC_MAGICALATTACK','attack',192,1,500,0,10000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3070,'Ferre@WM_REVERBERATION','idle',2414,3,2000,1000,4000,'no','around2','always',NULL,NULL,NULL,NULL,NULL,NULL,'9',NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3070,'Ferre@WM_REVERBERATION','attack',2414,3,2000,1000,4000,'no','around6','always',NULL,NULL,NULL,NULL,NULL,NULL,'9',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3070,'Ferre@NPC_REVERBERATION','idle',725,3,2000,1000,4000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,'9',NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3070,'Ferre@NPC_REVERBERATION','attack',725,3,2000,1000,4000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3071,'Ferre@SM_BASH','attack',5,5,1000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3071,'Ferre@NPC_EMOTION','idle',197,1,2000,0,5000,'yes','self','always',NULL,44,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3071,'Ferre@SM_ENDURE','attack',8,1,2000,0,10000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -10905,11 +10905,11 @@ REPLACE INTO `mob_skill_db_re` VALUES (3071,'Ferre@BS_HAMMERFALL','chase',110,5,
 REPLACE INTO `mob_skill_db_re` VALUES (3071,'Ferre@BS_HAMMERFALL','attack',110,5,2000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3072,'Ferre@NPC_EMOTION','idle',197,1,2000,0,5000,'yes','self','always',NULL,44,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3072,'Ferre@NPC_ENERGYDRAIN','attack',200,1,1000,100,10000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3072,'Ferre@NPC_WATERATTACK','attack',184,5,1000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3072,'Ferre@NPC_WATERATTACK','attack',184,5,1000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3073,'Awakened Ferre@NPC_WIDESILENCE','attack',663,5,2000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3073,'Awakened Ferre@NPC_WIDECONFUSE','attack',667,5,3000,2000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3073,'Awakened Ferre@NPC_DARKNESSBREATH','attack',658,10,2000,2000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3073,'Awakened Ferre@PR_LEXAETERNA','attack',78,5,5000,2000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3073,'Awakened Ferre@NPC_LEX_AETERNA','attack',727,5,5000,2000,10000,'no','around1','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@NPC_AGIUP','idle',350,1,2000,0,10000,'no','self','always','30',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3074,'Timeholder@AL_INCAGI','chase',29,10,2000,0,10000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -10998,10 +10998,10 @@ REPLACE INTO `mob_skill_db_re` VALUES (3099,'Morocc of Rest@NPC_EVILLAND','attac
 
 REPLACE INTO `mob_skill_db_re` VALUES (3108,'Jitterbug@NPC_WIDESILENCE','attack',663,5,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3108,'Jitterbug@NPC_DARKNESSBREATH','attack',658,5,1000,2000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3108,'Jitterbug@PR_LEXAETERNA','attack',78,3,2000,2000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3108,'Jitterbug@NPC_LEX_AETERNA','attack',727,3,2000,2000,10000,'no','around1','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3109,'Jitterbug@NPC_WIDECONFUSE','attack',667,5,3000,2000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3109,'Jitterbug@PR_LEXAETERNA','attack',78,3,2000,2000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (3109,'Jitterbug@WM_REVERBERATION','attack',2414,3,2000,1000,4000,'no','around6','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3109,'Jitterbug@NPC_LEX_AETERNA','attack',727,3,2000,2000,10000,'no','around1','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3109,'Jitterbug@NPC_REVERBERATION','attack',725,3,2000,1000,4000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 # Airship Assault
 REPLACE INTO `mob_skill_db_re` VALUES (3180,'Wyvern@MG_FIREBALL','attack',17,5,10000,0,30000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);

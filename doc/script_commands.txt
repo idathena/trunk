@@ -3894,8 +3894,7 @@ The renewal feature to check is determined by type.
  2 - RENEWAL_DROP (renewal drop rate algorithms)
  3 - RENEWAL_EXP (renewal exp rate algorithms)
  4 - RENEWAL_LVDMG (renewal level modifier on damage)
- 5 - RENEWAL_EDP (renewal enchant deadly poison algorithm)
- 6 - RENEWAL_ASPD (renewal ASPD)
+ 5 - RENEWAL_ASPD (renewal ASPD)
 
 ---------------------------------------
 \\
@@ -6725,7 +6724,6 @@ The label "OnSellItem" sets the following arrays:
 NOTE: These labels will only be triggered if an npcshop* command is executed because these
 commands set a special data on the shop NPC, named master_nd in the source. The above labels
 are triggered in the NPC whose master_nd is given in the shop.
-For random option, '%' is a value from 1 to 5.
 
 A full example of a dynamic shop can be found in doc/sample/npc_dynamic_shop.txt.
 
@@ -8988,19 +8986,18 @@ Mark Color:
 ============================
 ---------------------------------------
 
-*waitingroom2bg_single(<battle group>,"<map name>",<x>,<y>,"<npc name>");
+*waitingroom2bg_single(<battle group>,{"<map name>",<x>,<y>{,"<NPC name>"}});
 
-Adds the first waiting player from the chat room of the given NPC to an
-existing battleground group and warps it to the specified coordinates on
-the given map.
+Adds the first waiting player from the chat room of the given NPC to an existing battleground group.
+The player will also be warped to the default spawn point of the battle group or to the specified coordinates <x> and <y> on the given <map>.
 
 ---------------------------------------
 
-*waitingroom2bg("<map name>",<x>,<y>,"<On Quit Event>","<On Death Event>"{,"<NPC Name>"});
+*waitingroom2bg("<map name>",<x>,<y>,{"<On Quit Event>","<On Death Event>"{,"<NPC name>"}});
 
 <map name>,<x>,<y> refer to where the "respawn" base is, where the player group will respawn when they die.
-<On Quit Event> refers to an NPC label that attaches to the character and is run when they relog.
-<On Death Event> refers to an NPC label that attaches to the character and is run when they die. Can be "" for empty.
+<On Quit Event> refers to an NPC label that attaches to the character and is run when they relog. (Optional)
+<On Death Event> refers to an NPC label that attaches to the character and is run when they die. (Optional)
 
 Unlike the prior command, the latter will attach a GROUP in a waiting room to the battleground, and 
 sets the array $@arenamembers[0] where 0 holds the IDs of the first group, and 1 holds the IDs of the second.
@@ -9011,6 +9008,27 @@ Example:
 	// Battle Group will be referred to as $@KvM01BG_id1, and when they die, respawn at bat_c01,52,129.
 	set $@KvM01BG_id1, waitingroom2bg("bat_c01",52,129,"KvM01_BG::OnGuillaumeQuit","KvM01_BG::OnGuillaumeDie");
 	end;
+
+---------------------------------------
+
+*bg_create("<map name>",<x>,<y>{,"<On Quit Event>","<On Death Event>"});
+
+Creates an instance of battleground battle group that can be used with other battleground commands.
+
+<map name>,<x>,<y> refer to where the "respawn" base is, where the player group will respawn when they die.
+<On Quit Event> refers to an NPC label that attaches to the character and is run when they relog. (Optional)
+<On Death Event> refers to an NPC label that attaches to the character and is run when they die. (Optional)
+
+Returns battle group ID on success. Returns 0 on failure.
+
+---------------------------------------
+
+*bg_join(<battle group>,{"<map name>",{<x>,<y>{,<char id>}});
+
+Adds an attached player or <char id> if specified to an existing battleground group.
+The player will also be warped to the default spawn point of the battle group or to the specified coordinates <x> and <y> on the given <map>.
+
+Returns true on success. Returns false on failure.
 
 ---------------------------------------
 
@@ -9756,7 +9774,7 @@ This script command is intended for using in random option scripts.
 
 ---------------------------------------
 
-*getequiprandomoption(<equipment index>,<index>,<type>{,<char id>});
+*getequiprandomoption(<equipment slot>,<index>,<type>{,<char id>});
 
 Returns value of an attribute of a random option on an equipped item.
 

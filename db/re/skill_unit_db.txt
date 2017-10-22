@@ -111,6 +111,7 @@
 711,0xff,     , -1, 0,1000,enemy, 0x018	//NPC_FLAMECROSS
 719,0x100,    ,  1, 0,  20,enemy, 0x2018	//NPC_HELLBURNING
 722,0x86,     ,  0,13, 300,enemy, 0x018	//NPC_WIDESUCK
+725,0xda,     ,  0, 0,1000,enemy, 0x000	//NPC_REVERBERATION
 
 2044,0xca,    ,  2, 0,  -1,all,   0x2018 //AB_EPICLESIS
 

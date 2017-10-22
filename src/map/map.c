@@ -526,8 +526,11 @@ int map_count_oncell(int16 m, int16 x, int16 y, int type, int flag)
 			if (bl->x == x && bl->y == y && bl->type&type) {
 				if (flag&0x2) {
 					struct map_session_data *sd = map_id2sd(bl->id);
+					struct npc_data *nd = map_id2nd(bl->id);
 
 					if (sd && pc_isinvisible(sd))
+						continue;
+					if (nd && (nd->class_ == -1 || nd->class_ == HIDDEN_WARP_CLASS))
 						continue;
 				}
 				if (flag&0x1) {
