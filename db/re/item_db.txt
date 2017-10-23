@@ -2786,7 +2786,7 @@
 4653,N_Arclouse_Card,Nightmare Arclouse Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubRace,RC_Brute,20; bonus2 bSubRace,RC_Undead,20; },{},{}
 4654,N_Mimic_Card,Nightmare Mimic Card,6,20,,10,,,,,,,,2,,,,,{ bonus2 bMagicAddRace,RC_Brute,5; bonus2 bMagicAddRace,RC_Undead,5; },{},{}
 4655,N_Minorous_Card,Nightmare Minorous Card,6,20,,10,,,,,,,,2,,,,,{ bonus2 bAddRace,RC_Brute,10; bonus2 bAddRace,RC_Undead,10; },{},{}
-4656,N_Mummy_Card,Nightmare Mummy Card,6,20,,10,,,,,,,,64,,,,,{ bonus5 bAutoSpellWhenHit,"NPC_WIDESLEEP",2,10,BF_WEAPON|BF_MAGIC,0; },{},{}
+4656,N_Mummy_Card,Nightmare Mummy Card,6,20,,10,,,,,,,,64,,,,,{ bonus5 bAutoSpellWhenHit,"NPC_WIDESLEEP",2,20,BF_WEAPON|BF_MAGIC,0; },{},{}
 4657,N_Ancient_Mummy_Card,Nightmare Ancient Mummy Card,6,20,,10,,,,,,,,4,,,,,{ bonus2 bSubEle,Ele_Neutral,15; bonus2 bMagicAtkEle,Ele_Fire,getrefine()*3; },{},{}
 4658,N_Verit_Card,Nightmare Verit Card,6,20,,10,,,,,,,,64,,,,,{ set .@r,getrefine(); bonus bMatkRate,5+(.@r>=9?5:(.@r>=7?3:0)); },{},{}
 4659,Eggring_Card,Eggring Card,6,20,,10,,,,,,,,16,,,,,{ bonus bLuk,2; bonus bMaxHP,50; },{},{}
@@ -8513,7 +8513,7 @@
 15097,Hero_Hidden_Cloth,Hero Hidden Cloth,4,20,,200,,70,,1,0x00021040,63,2,16,,160,1,0,{ bonus bMaxHPrate,5; bonus bMaxSPrate,5; bonus2 bSkillAtk,"SC_FATALMENACE",10; bonus2 bSkillAtk,"SC_TRIANGLESHOT",10; bonus2 bSkillAtk,"GC_CROSSIMPACT",10; bonus2 bSkillAtk,"GC_CROSSRIPPERSLASHER",10; autobonus "{ bonus bCritical,20; bonus bFlee,20; bonus2 bAddClass,Class_All,10; bonus bMatkRate,10; }",getrefine()*3,10000,BF_WEAPON,"{ specialeffect2 EF_ENHANCE; }"; },{},{}
 15098,Hero_Taget_Suits,Hero Target Suit,4,20,,200,,60,,1,0x00080808,63,2,16,,160,1,0,{ set .@r,getrefine(); bonus bMaxHPrate,5; bonus bMaxSPrate,5; bonus bAllStats,1; bonus bLongAtkRate,3; bonus bAspd,1; bonus3 bAutoSpell,"AC_CONCENTRATION",10,(1+.@r)*3; bonus3 bAutoSpell,"AC_DOUBLE",10,(1+.@r)*3; },{},{}
 15100,Frozen_Breastplate,Frozen Breastplate,4,20,,1500,,20,,1,0xFFFFFFFF,63,2,16,,130,1,0,{ bonus bDefEle,Ele_Water; },{},{}
-15101,Harden_Breastplate,Harden Breastplate,4,20,,1500,,20,,1,0xFFFFFFFF,63,2,16,,130,1,0,{},{},{}
+15101,Harden_Breastplate,Harden Breastplate,4,20,,1500,,20,,1,0xFFFFFFFF,63,2,16,,130,1,0,{ bonus bDefEle,Ele_Earth; },{},{}
 15103,Kirin_Armor,Kirin Armor,4,20,,500,,55,,1,0xFFFFFFFF,63,2,16,,70,,0,{ bonus bDefEle,Ele_Holy; },{},{}
 15104,FishingMan_Mail,FishingMan Mail,4,20,,500,,30,,1,0xFFFFFFFF,63,2,16,,50,,0,{ set .@r,getrefine(); bonus2 bAddRace,RC_Fish,10; bonus2 bMagicAddRace,RC_Fish,10; if(.@r>5) { bonus2 bAddRace,RC_All,.@r; bonus2 bMagicAddRace,RC_All,.@r; } },{},{}
 15105,Kaftan,Kaftan,4,20,,400,,13,,1,0xFFFFFFFF,63,2,16,,0,1,0,{ bonus bMdef,3; bonus2 bSubRace,RC_Demon,5; bonus2 bSubRace,RC_Undead,5; },{},{}
