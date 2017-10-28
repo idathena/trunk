@@ -635,17 +635,23 @@ bool pc_can_sell_item(struct map_session_data *sd, struct item *item)
 
 	nd = map_id2nd(sd->npc_shopid);
 
-	if(!itemdb_cansell(item, pc_get_group_level(sd)))
-		return false;
-
 	if(battle_config.hide_fav_sell && item->favorite)
 		return false; //Cannot sell favs (optional config)
 
 	if(item->expire_time)
 		return false; //Cannot Sell Rental Items
 
-	if(nd && nd->subtype == NPCTYPE_ITEMSHOP && item->bound && battle_config.allow_bound_sell)
-		return true; //NPCTYPE_ITEMSHOP and bound item config is sellable
+	if(nd && nd->subtype == NPCTYPE_ITEMSHOP) {
+		struct item_data *itd;
+
+		if(item->bound && (battle_config.allow_bound_sell&ISR_BOUND))
+			return true; //NPCTYPE_ITEMSHOP and bound item config is sellable
+		if((itd = itemdb_search(item->nameid)) && (itd->flag.trade_restriction&ITR_NOSELLTONPC) && (battle_config.allow_bound_sell&ISR_SELLABLE))
+			return true; //NPCTYPE_ITEMSHOP and sell restricted item config is sellable
+	}
+
+	if(!itemdb_cansell(item, pc_get_group_level(sd)))
+		return false;
 
 	if(item->bound && !pc_can_give_bounded_items(sd))
 		return false; //Don't allow sale of bound items
@@ -1577,7 +1583,7 @@ void pc_reg_received(struct map_session_data *sd)
 #ifdef VIP_ENABLE
 	sd->vip.time = 0;
 	sd->vip.enabled = 0;
-	chrif_req_login_operation(sd->status.account_id, sd->status.name, CHRIF_OP_LOGIN_VIP, 0, 1|8); //Request VIP information
+	chrif_req_login_operation(sd->status.account_id, sd->status.name, CHRIF_OP_LOGIN_VIP, 0, 0x1|0x8); //Request VIP information
 #endif
 	intif_Mail_requestinbox(sd->status.char_id, 0, MAIL_INBOX_NORMAL); //MAIL SYSTEM - Request Mail Inbox
 	intif_request_questlog(sd);
@@ -1718,7 +1724,7 @@ void pc_calc_skilltree(struct map_session_data *sd)
 
 	if( pc_has_permission(sd, PC_PERM_ALL_SKILL) ) {
 		for( i = 0; i < MAX_SKILL; i++ ) {
-			switch(i) {
+			switch( i ) {
 				/**
 				 * Dummy skills must be added here otherwise they'll be displayed in the,
 				 * skill tree and since they have no icons they'll give resource errors
@@ -1738,8 +1744,19 @@ void pc_calc_skilltree(struct map_session_data *sd)
 				case NC_MAGMA_ERUPTION_DOTDAMAGE:
 				case LG_OVERBRAND_BRANDISH:
 				case LG_OVERBRAND_PLUSATK:
+				case WM_REVERBERATION_MELEE:
+				case WM_REVERBERATION_MAGIC:
 				case WM_SEVERE_RAINSTORM_MELEE:
+				case GN_CRAZYWEED_ATK:
+				case GN_HELLS_PLANT_ATK:
+				case GN_SLINGITEM_RANGEMELEEATK:
 				case RL_R_TRIP_PLUSATK:
+				case RL_B_FLICKER_ATK:
+				case RL_GLITTERING_GREED_ATK:
+				case SU_SV_ROOTTWIST_ATK:
+				case SU_PICKYPECK_DOUBLE_ATK:
+				case SU_CN_METEOR2:
+				case SU_LUNATICCARROTBEAT2:
 					continue;
 				default:
 					break;
@@ -6476,7 +6493,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
  */
 static void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsigned int *job_exp, struct block_list *src)
 {
-	int bonus = 0, vip_bonus_base = 0, vip_bonus_job = 0;
+	int bonus = 0, bm_bonus = 0, vip_bonus_base = 0, vip_bonus_job = 0;
 
 	if (src) {
 		struct status_data *status = status_get_status_data(src);
@@ -6499,18 +6516,27 @@ static void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsi
 		}
 	}
 
+	//Give EXPBOOST for quests even if src is NULL
+	if (sd->sc.data[SC_EXPBOOST]) {
+		bm_bonus += sd->sc.data[SC_EXPBOOST]->val1;
+		if (battle_config.vip_bm_increase && pc_isvip(sd)) //Increase Battle Manual EXP rate for VIP
+			bm_bonus += (sd->sc.data[SC_EXPBOOST]->val1 / battle_config.vip_bm_increase);
+	}
+
 	if (*base_exp) {
 		unsigned int exp;
 		int base_rate = 100 + vip_bonus_base;
 		int base_bonus = (int)((double)bonus * base_rate / 100.);
 
-		if (sd->sc.data[SC_EXPBOOST]) {
-			base_bonus += sd->sc.data[SC_EXPBOOST]->val1;
-			if (battle_config.vip_bm_increase && pc_isvip(sd)) //Increase Battle Manual EXP rate for VIP
-				base_bonus += (sd->sc.data[SC_EXPBOOST]->val1 / battle_config.vip_bm_increase);
-		}
-		exp = (unsigned int)((double)*base_exp * (base_rate + base_bonus) / 100.);
+		exp = (unsigned int)((double)*base_exp * (base_rate + base_bonus + bm_bonus) / 100.);
 		*base_exp =  cap_value(exp, 1, UINT_MAX);
+	}
+
+	//Give JEXPBOOST for quests even if src is NULL
+	if (sd->sc.data[SC_JEXPBOOST]) {
+		bm_bonus += sd->sc.data[SC_JEXPBOOST]->val1;
+		if (battle_config.vip_bm_increase && pc_isvip(sd)) //Increase Job Manual EXP rate for VIP
+			bm_bonus += (sd->sc.data[SC_JEXPBOOST]->val1 / battle_config.vip_bm_increase);
 	}
 
 	if (*job_exp) {
@@ -6518,12 +6544,7 @@ static void pc_calcexp(struct map_session_data *sd, unsigned int *base_exp, unsi
 		int job_rate = 100 + vip_bonus_job;
 		int job_bonus = (int)((double)bonus * job_rate / 100.);
 
-		if (sd->sc.data[SC_JEXPBOOST]) {
-			job_bonus += sd->sc.data[SC_JEXPBOOST]->val1;
-			if (battle_config.vip_bm_increase && pc_isvip(sd)) //Increase Job Manual EXP rate for VIP
-				job_bonus += (sd->sc.data[SC_JEXPBOOST]->val1 / battle_config.vip_bm_increase);
-		}
-		exp = (unsigned int)((double)*job_exp * (job_rate + job_bonus) / 100.);
+		exp = (unsigned int)((double)*job_exp * (job_rate + job_bonus + bm_bonus) / 100.);
 		*job_exp = cap_value(exp, 1, UINT_MAX);
 	}
 }
@@ -10371,7 +10392,7 @@ static int pc_autosave(int tid, unsigned int tick, int id, intptr_t data)
 		last_save_id = sd->bl.id;
 		save_flag = 2;
 		if (pc_isvip(sd)) //Check if we're still vip
-			chrif_req_login_operation(sd->status.account_id,sd->status.name,CHRIF_OP_LOGIN_VIP,0,1);
+			chrif_req_login_operation(sd->status.account_id,sd->status.name,CHRIF_OP_LOGIN_VIP,0,0x1);
 		chrif_save(sd,CSAVE_INVENTORY|CSAVE_CART);
 		break;
 	}

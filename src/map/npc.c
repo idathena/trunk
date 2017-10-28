@@ -1576,9 +1576,11 @@ void npc_shop_currency_type(struct map_session_data *sd, struct npc_data *nd, in
 						sprintf(output, msg_txt(714), id->jname, id->nameid); // Item Shop List: %s (ID: %hu)
 						clif_broadcast(&sd->bl, output, strlen(output) + 1, BC_BLUE, SELF);
 					}
-					for( i = 0; i < MAX_INVENTORY; i++ )
-						if( sd->inventory.u.items_inventory[i].nameid == id->nameid && pc_can_sell_item(sd, &sd->inventory.u.items_inventory[i]) )
+					for( i = 0; i < MAX_INVENTORY; i++ ) {
+						if( sd->inventory.u.items_inventory[i].amount > 0 && sd->inventory.u.items_inventory[i].nameid == id->nameid &&
+							pc_can_sell_item(sd, &sd->inventory.u.items_inventory[i]) )
 							total += sd->inventory.u.items_inventory[i].amount;
+					}
 				}
 				cost[0] = total;
 			}

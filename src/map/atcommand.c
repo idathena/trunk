@@ -9609,7 +9609,7 @@ ACMD_FUNC(vip) {
 		}
 	}
 
-	chrif_req_login_operation(pl_sd->status.account_id, pl_sd->status.name, CHRIF_OP_LOGIN_VIP, vipdifftime, 7);
+	chrif_req_login_operation(pl_sd->status.account_id, pl_sd->status.name, CHRIF_OP_LOGIN_VIP, vipdifftime, 0x1|0x2|0x4);
 
 	return 0;
 }

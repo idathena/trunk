@@ -320,6 +320,14 @@ enum e_item_ammo {
 	AMMO_THROWABLE_ITEM, //Sling items
 };
 
+//Enum for bound/sell restricted selling
+enum e_itemshop_restrictions {
+	ISR_NONE = 0x0,
+	ISR_BOUND = 0x1,
+	ISR_SELLABLE = 0x2,
+	ISR_ALL = 0x3,
+};
+
 struct item_combo {
 	struct script_code *script;
 	unsigned short *nameid; //nameid array
