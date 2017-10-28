@@ -21183,7 +21183,7 @@ BUILDIN_FUNC(vip_time) {
 	if (!sd)
 		return 0;
 
-	chrif_req_login_operation(sd->status.account_id,sd->status.name,CHRIF_OP_LOGIN_VIP,viptime,7);
+	chrif_req_login_operation(sd->status.account_id,sd->status.name,CHRIF_OP_LOGIN_VIP,viptime,0x1|0x2|0x4);
 #endif
 	return SCRIPT_CMD_SUCCESS;
 }

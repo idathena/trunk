@@ -426,7 +426,7 @@ unsigned short skill_dummy2skill_id(unsigned short skill_id) {
  */
 int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool heal) {
 	uint16 lv;
-	int i, hp = 0;
+	int i, hp = 0, bonus = 100;
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct map_session_data *tsd = BL_CAST(BL_PC, target);
 	struct status_change *sc, *tsc;
@@ -456,33 +456,54 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 		default:
 			if( skill_lv >= battle_config.max_heal_lv )
 				return battle_config.max_heal;
-			if( skill_id == AB_HIGHNESSHEAL )
-				hp = (status_get_lv(src) + status_get_int(src)) / 8 * ((sd ? pc_checkskill(sd, AL_HEAL) : 10) * 8 + 4);
-			else {
 #ifdef RENEWAL
-				/**
-				 * Renewal Heal Formula
-				 * Formula: ( [(Base Level + INT) / 5] x 30 ) x (Heal Level / 10) x (Modifiers) + MATK
-				 */
-				hp = ((status_get_lv(src) + status_get_int(src)) / 5 * 30) * skill_lv / 10;
+			/**
+			 * Renewal Heal Formula
+			 * Formula: ( [(Base Level + INT) / 5] x 30 ) x (Heal Level / 10) x (Modifiers) + MATK
+			 */
+			hp = ((status_get_lv(src) + status_get_int(src)) / 5 * 30) *
+				(skill_id == AB_HIGHNESSHEAL ? (sd ? pc_checkskill(sd, AL_HEAL) : 10) : skill_lv) / 10;
 #else
-				hp = (status_get_lv(src) + status_get_int(src)) / 8 * (skill_lv * 8 + 4);
+			hp = (status_get_lv(src) + status_get_int(src)) / 8 *
+				((skill_id == AB_HIGHNESSHEAL ? (sd ? pc_checkskill(sd, AL_HEAL) : 10) : skill_lv) * 8 + 4);
 #endif
-			}
 			if( sd ) {
-				if( ((lv = pc_checkskill(sd, HP_MEDITATIO)) > 0) )
-					hp += hp * lv * 2 / 100;
+				if( (lv = pc_checkskill(sd, HP_MEDITATIO)) > 0 )
+					bonus += lv * 2;
 				if( pc_checkskill(sd, SU_POWEROFSEA) > 0 ) {
-					hp += hp * 8 / 100;
+					bonus += 8;
 					if( pc_checkskill_summoner(sd, TYPE_SEAFOOD) >= 20 )
-						hp += hp * 16 / 100;
+						bonus += 16;
 				}
 				if( tsd && sd->status.partner_id == tsd->status.char_id && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex )
-					hp <<= 1;
+					bonus += 100;
 			} else if( src->type == BL_HOM && (lv = hom_checkskill(((TBL_HOM *)src), HLIF_BRAIN)) > 0 )
-				hp += hp * lv * 2 / 100;
+				bonus += lv * 2;
 			break;
 	}
+
+	if( sd && (i = pc_skillheal_bonus(sd, skill_id)) )
+		bonus += i;
+
+	if( sc && sc->count ) {
+		if( sc->data[SC_OFFERTORIUM] )
+			bonus += sc->data[SC_OFFERTORIUM]->val2;
+	}
+
+	if( bonus != 100 )
+		hp = hp * bonus / 100;
+
+#ifdef RENEWAL
+	switch( skill_id ) { //MATK part of the RE heal formula [malufett]
+		case BA_APPLEIDUN:
+		case PR_SANCTUARY:
+		case NPC_EVILLAND:
+			break;
+		default:
+			hp += status_get_matk(src, 3);
+			break;
+	}
+#endif
 
 	if( skill_id == AB_HIGHNESSHEAL ) //Highness Heal increases healing by a percentage
 		hp += hp * (70 + 30 * skill_lv) / 100;
@@ -490,16 +511,8 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 	if( (!heal || (target && target->type == BL_MER)) && skill_id != NPC_EVILLAND )
 		hp >>= 1;
 
-	if( sd && (i = pc_skillheal_bonus(sd, skill_id)) )
-		hp += hp * i / 100;
-
 	if( tsd && (i = pc_skillheal2_bonus(tsd, skill_id)) )
 		hp += hp * i / 100;
-
-	if( sc && sc->count ) {
-		if( sc->data[SC_OFFERTORIUM] )
-			hp += hp * sc->data[SC_OFFERTORIUM]->val2 / 100;
-	}
 
 	if( tsc && tsc->count ) {
 		if( skill_id != NPC_EVILLAND && skill_id != BA_APPLEIDUN ) {
@@ -525,20 +538,6 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 				hp -= hp * penalty / 100;
 		}
 	}
-
-#ifdef RENEWAL
-	//MATK part of the RE heal formula [malufett]
-	//NOTE: In this part matk bonuses from items and skills are not applied
-	switch( skill_id ) {
-		case BA_APPLEIDUN:
-		case PR_SANCTUARY:
-		case NPC_EVILLAND:
-			break;
-		default:
-			hp += status_get_matk(src, 3);
-			break;
-	}
-#endif
 
 	return hp;
 }
@@ -1395,9 +1394,6 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				}
 			}
-			break;
-		case GC_DARKCROW:
-			sc_start(src,bl,SC_DARKCROW,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case LG_SHIELDPRESS:
 			status_change_start(src,bl,SC_STUN,(30 + skill_lv * 8 + sstatus->dex / 10 +
@@ -4668,7 +4664,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case WM_GREAT_ECHO:
 		case GN_SLINGITEM_RANGEMELEEATK:
 		case KO_SETSUDAN:
-		case GC_DARKCROW:
 		case NC_MAGMA_ERUPTION_DOTDAMAGE:
 		case RL_AM_BLAST:
 		case RL_SLUGSHOT:
@@ -5384,6 +5379,11 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				if (tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
 					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 			}
+			break;
+
+		case GC_DARKCROW:
+			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+			sc_start(src,bl,status_skill2sc(skill_id),100,skill_lv,skill_get_time(skill_id,skill_lv)); //Should be applied even on miss
 			break;
 
 		case WL_DRAINLIFE: {
@@ -6635,9 +6635,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case NJ_BUNSINJYUTSU:
 			//On official recasting cancels existing mirror image [helvetica]
 			status_change_end(bl,SC_BUNSINJYUTSU,INVALID_TIMER);
+			status_change_end(bl,SC_NEN,INVALID_TIMER);
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-			status_change_end(bl,SC_NEN,INVALID_TIMER);
 			break;
 
 		/* Was modified to only affect targetted char [Skotlex]

@@ -525,7 +525,7 @@ splendide,183,117,4	script	Tired-looking Fairy	438,{
 		mes "- You need something to help you interpret them. -";
 		close;
 	}
-	if (ep14_1_bs < 4) {
+	if (ep14_1_bs < 4 || ep14_1_bs2 < 7) {
 		mes "[Tired-looking Fairy]";
 		mes "I'm tired, don't talk to me.";
 		close;

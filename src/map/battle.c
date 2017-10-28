@@ -5559,11 +5559,8 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		switch(skill_id) {
 			case RK_DRAGONBREATH:
 			case RK_DRAGONBREATH_WATER:
-				if(wd.flag&BF_LONG) { //Add check here, because we want to apply the same behavior in pre-renewal [exneval]
-					wd.damage = wd.damage * (100 + sd->bonus.long_attack_atk_rate) / 100;
-					if(is_attack_left_handed(src, skill_id))
-						wd.damage2 = wd.damage2 * (100 + sd->bonus.long_attack_atk_rate) / 100;
-				}
+				if(wd.flag&BF_LONG) //Add check here, because we want to apply the same behavior in pre-renewal [exneval]
+					ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.long_attack_atk_rate);
 				break;
 			default:
 				if(sc && sc->data[SC_SPELLFIST] && !skill_id)
@@ -8625,7 +8622,7 @@ static const struct _battle_data {
 	{ "guild_alliance_onlygm",              &battle_config.guild_alliance_onlygm,           0,      0,      1,              },
 	{ "event_refine_chance",                &battle_config.event_refine_chance,             0,      0,      1,              },
 	{ "feature.achievement",                &battle_config.feature_achievement,             1,      0,      1,              },
-	{ "allow_bound_sell",                   &battle_config.allow_bound_sell,                1,      0,      1,              },
+	{ "allow_bound_sell",                   &battle_config.allow_bound_sell,                0,      0,      1|2,            },
 
 #include "../custom/battle_config_init.inc"
 };
