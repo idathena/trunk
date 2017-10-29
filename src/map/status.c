@@ -10616,12 +10616,13 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					struct map_session_data *ssd = map_id2sd(src->id);
 					int heal = status_get_matk(src, 3);
 
-					heal += (15 * ((int)((status_get_lv(src) - 4) / 5.0 + 1) + (int)((status_get_int(src) - 4) / 5.0 + 1))); //Heal formula [exneval]
+					//Heal formula [exneval]
+					heal += (15 * ((int)((status_get_lv(src) - 4) / 5.0 + 1) + (int)((status_get_int(src) - 4) / 5.0 + 1)));
 					if( ssd ) {
 						if( pc_checkskill(ssd,SU_POWEROFSEA) > 0 ) {
-							val2 += val2 * 8 / 100;
+							heal += heal * 8 / 100;
 							if( pc_checkskill_summoner(ssd,TYPE_SEAFOOD) >= 20 )
-								val2 += val2 * 16 / 100;
+								heal += heal * 16 / 100;
 						}
 					}
 					status_heal(bl,heal,0,3);

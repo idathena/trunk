@@ -1124,37 +1124,40 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 
 	item = sd->inventory_data[n];
 
-	if(!item)
+	if (!item)
 		return ITEM_EQUIP_ACK_FAIL;
 
-	if(pc_has_permission(sd, PC_PERM_USE_ALL_EQUIPMENT))
+	if (pc_has_permission(sd, PC_PERM_USE_ALL_EQUIPMENT))
 		return ITEM_EQUIP_ACK_OK;
 
-	if((item->elv && sd->status.base_level < (unsigned int)item->elv) ||
+	if ((item->elv && sd->status.base_level < (unsigned int)item->elv) ||
 		(item->elvmax && sd->status.base_level > (unsigned int)item->elvmax)) {
 		clif_msg(sd,ITEM_CANT_EQUIP_NEED_LEVEL); // You cannot equip this item with your current level.
 		return ITEM_EQUIP_ACK_FAILLEVEL;
 	}
 
-	if(item->sex != 2 && sd->status.sex != item->sex)
+	if (item->sex != 2 && sd->status.sex != item->sex)
 		return ITEM_EQUIP_ACK_FAIL;
 
-	if(item->equip&EQP_AMMO) {
-		switch(item->look) {
+	if (!battle_config.allow_equip_restricted_item && itemdb_isNoEquip(item,sd->bl.m))
+		return ITEM_EQUIP_ACK_FAIL; //Fail to equip if item is restricted
+
+	if (item->equip&EQP_AMMO) {
+		switch (item->look) {
 			case AMMO_ARROW:
-				if(battle_config.ammo_check_weapon && sd->status.weapon != W_BOW &&
+				if (battle_config.ammo_check_weapon && sd->status.weapon != W_BOW &&
 					sd->status.weapon != W_MUSICAL && sd->status.weapon != W_WHIP) {
 					clif_msg(sd,ITEM_NEED_BOW);
 					return ITEM_EQUIP_ACK_FAIL;
 				}
 				break;
 			case AMMO_THROWABLE_DAGGER:
-				if(!pc_checkskill(sd,AS_VENOMKNIFE))
+				if (!pc_checkskill(sd,AS_VENOMKNIFE))
 					return ITEM_EQUIP_ACK_FAIL;
 				break;
 			case AMMO_BULLET:
 			case AMMO_SHELL:
-				if(battle_config.ammo_check_weapon && sd->status.weapon != W_REVOLVER && sd->status.weapon != W_RIFLE &&
+				if (battle_config.ammo_check_weapon && sd->status.weapon != W_REVOLVER && sd->status.weapon != W_RIFLE &&
 					sd->status.weapon != W_GATLING && sd->status.weapon != W_SHOTGUN
 #ifdef RENEWAL
 					&& sd->status.weapon != W_GRENADE
@@ -1166,18 +1169,18 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 				break;
 #ifndef RENEWAL
 			case AMMO_GRENADE:
-				if(battle_config.ammo_check_weapon && sd->status.weapon != W_GRENADE) {
+				if (battle_config.ammo_check_weapon && sd->status.weapon != W_GRENADE) {
 					clif_msg(sd,ITEM_BULLET_EQUIP_FAIL);
 					return ITEM_EQUIP_ACK_FAIL;
 				}
 				break;
 #endif
 			case AMMO_CANNONBALL:
-				if(!pc_ismadogear(sd) && (sd->status.class_ == JOB_MECHANIC_T || sd->status.class_ == JOB_MECHANIC)) {
+				if (!pc_ismadogear(sd) && (sd->status.class_ == JOB_MECHANIC_T || sd->status.class_ == JOB_MECHANIC)) {
 					clif_msg(sd,ITEM_NEED_MADOGEAR); // Item can only be used when Mado Gear is mounted.
 					return ITEM_EQUIP_ACK_FAIL;
 				}
-				if(sd->state.active && !pc_iscarton(sd) && //Check if sc data is already loaded
+				if (sd->state.active && !pc_iscarton(sd) && //Check if sc data is already loaded
 					(sd->status.class_ == JOB_GENETIC_T || sd->status.class_ == JOB_GENETIC)) {
 					clif_msg(sd,ITEM_NEED_CART); // Only available when cart is mounted.
 					return ITEM_EQUIP_ACK_FAIL;
@@ -1186,25 +1189,25 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 		}
 	}
 
-	if(sd->sc.count) {
-		if((item->equip&EQP_ARMS) && item->type == IT_WEAPON && sd->sc.data[SC_STRIPWEAPON])
+	if (sd->sc.count) {
+		if ((item->equip&EQP_ARMS) && item->type == IT_WEAPON && sd->sc.data[SC_STRIPWEAPON])
 			return ITEM_EQUIP_ACK_FAIL; //Also works with left-hand weapons [DracoRPG]
-		if((item->equip&EQP_SHIELD) && item->type == IT_ARMOR && sd->sc.data[SC_STRIPSHIELD])
+		if ((item->equip&EQP_SHIELD) && item->type == IT_ARMOR && sd->sc.data[SC_STRIPSHIELD])
 			return ITEM_EQUIP_ACK_FAIL;
-		if((item->equip&EQP_ARMOR) && sd->sc.data[SC_STRIPARMOR])
+		if ((item->equip&EQP_ARMOR) && sd->sc.data[SC_STRIPARMOR])
 			return ITEM_EQUIP_ACK_FAIL;
-		if((item->equip&EQP_HEAD_TOP) && sd->sc.data[SC_STRIPHELM])
+		if ((item->equip&EQP_HEAD_TOP) && sd->sc.data[SC_STRIPHELM])
 			return ITEM_EQUIP_ACK_FAIL;
-		if((item->equip&EQP_ACC) && sd->sc.data[SC__STRIPACCESSORY])
+		if ((item->equip&EQP_ACC) && sd->sc.data[SC__STRIPACCESSORY])
 			return ITEM_EQUIP_ACK_FAIL;
-		if(item->equip && (sd->sc.data[SC_KYOUGAKU] || sd->sc.data[SC_SUHIDE]))
+		if (item->equip && (sd->sc.data[SC_KYOUGAKU] || sd->sc.data[SC_SUHIDE]))
 			return ITEM_EQUIP_ACK_FAIL;
 		//Spirit of Super Novice equip bonuses [Skotlex]
-		if(sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_SUPERNOVICE) {
-			if(sd->status.base_level > 90 && (item->equip&EQP_HELM))
+		if (sd->sc.data[SC_SPIRIT] && sd->sc.data[SC_SPIRIT]->val2 == SL_SUPERNOVICE) {
+			if (sd->status.base_level > 90 && (item->equip&EQP_HELM))
 				return ITEM_EQUIP_ACK_OK; //Can equip all helms
-			if(sd->status.base_level > 96 && (item->equip&EQP_ARMS) && item->type == IT_WEAPON && item->wlv == 4) {
-				switch(item->look) { //In weapons, the look determines type of weapon
+			if (sd->status.base_level > 96 && (item->equip&EQP_ARMS) && item->type == IT_WEAPON && item->wlv == 4) {
+				switch (item->look) { //In weapons, the look determines type of weapon
 					case W_DAGGER: //All level 4 - Daggers
 					case W_1HSWORD: //All level 4 - 1H Swords
 					case W_1HAXE: //All level 4 - 1H Axes
@@ -1217,15 +1220,11 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 		}
 	}
 
-	//Fail to equip if item is restricted
-	if(!battle_config.allow_equip_restricted_item && itemdb_isNoEquip(item,sd->bl.m))
-		return ITEM_EQUIP_ACK_FAIL;
-
 	//Not equipable by class [Skotlex]
-	if(!(1<<(sd->class_&MAPID_BASEMASK)&item->class_base[(sd->class_&JOBL_2_1 ? 1 : (sd->class_&JOBL_2_2 ? 2 : 0))]))
+	if (!(1<<(sd->class_&MAPID_BASEMASK)&item->class_base[(sd->class_&JOBL_2_1 ? 1 : (sd->class_&JOBL_2_2 ? 2 : 0))]))
 		return ITEM_EQUIP_ACK_FAIL;
 
-	if(!pc_isItemClass(sd,item))
+	if (!pc_isItemClass(sd,item))
 		return ITEM_EQUIP_ACK_FAIL;
 
 	return ITEM_EQUIP_ACK_OK;
@@ -1615,6 +1614,8 @@ void pc_reg_received(struct map_session_data *sd)
 		}
 		clif_changeoption(&sd->bl); 
 	}
+
+	channel_autojoin(sd);
 }
 
 static int pc_calc_skillpoint(struct map_session_data *sd)
