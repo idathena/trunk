@@ -498,6 +498,7 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 		case BA_APPLEIDUN:
 		case PR_SANCTUARY:
 		case NPC_EVILLAND:
+		case SU_TUNABELLY:
 			break;
 		default:
 			hp += status_get_matk(src, 3);
@@ -980,8 +981,6 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 						else
 							clif_skill_fail(sd,RG_SNATCHER,USESKILL_FAIL_LEVEL,0,0);
 					}
-					if( sc && sc->data[SC_PYROCLASTIC] && ((rnd()%100) <= sc->data[SC_PYROCLASTIC]->val3) )
-						skill_castend_pos2(src,bl->x,bl->y,BS_HAMMERFALL,sc->data[SC_PYROCLASTIC]->val1,tick,0);
 				}
 				if( sc ) {
 					struct status_change_entry *sce;
@@ -1852,11 +1851,11 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		if( sd && battle_config.equip_self_break_rate ) { //Breaking Equipment
 			rate = battle_config.equip_natural_break_rate;
 			if( sc ) {
-				if( sc->data[SC_GIANTGROWTH] )
-					rate += 10;
 				if( sc->data[SC_OVERTHRUST] )
 					rate += 10;
 				if( sc->data[SC_MAXOVERTHRUST] )
+					rate += 10;
+				if( sc->data[SC_GIANTGROWTH] )
 					rate += 10;
 			}
 			if( rate ) //Self weapon breaking
@@ -1893,30 +1892,52 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		}
 	}
 
-	if( sd && sc && !status_isdead(bl) && !skill_id && rnd()%100 < status_get_job_lv(src) / 2 ) {
-		if( sc->data[SC_WILD_STORM_OPTION] )
-			id = sc->data[SC_WILD_STORM_OPTION]->val2;
-		else if( sc->data[SC_UPHEAVAL_OPTION] )
-			id = sc->data[SC_UPHEAVAL_OPTION]->val2;
-		else if( sc->data[SC_TROPIC_OPTION] )
-			id = sc->data[SC_TROPIC_OPTION]->val3;
-		else if( sc->data[SC_CHILLY_AIR_OPTION] )
-			id = sc->data[SC_CHILLY_AIR_OPTION]->val3;
-		else
-			id = 0;
-		if( id && status_charge(src,0,skill_get_sp(id,5)) ) {
-			struct unit_data *ud = unit_bl2ud(src);
+	if( !skill_id && sd && sc ) {
+		if( !status_isdead(bl) && rnd()%100 < status_get_job_lv(src) / 2 ) {
+			if( sc->data[SC_WILD_STORM_OPTION] )
+				id = sc->data[SC_WILD_STORM_OPTION]->val2;
+			else if( sc->data[SC_UPHEAVAL_OPTION] )
+				id = sc->data[SC_UPHEAVAL_OPTION]->val2;
+			else if( sc->data[SC_TROPIC_OPTION] )
+				id = sc->data[SC_TROPIC_OPTION]->val3;
+			else if( sc->data[SC_CHILLY_AIR_OPTION] )
+				id = sc->data[SC_CHILLY_AIR_OPTION]->val3;
+			else
+				id = 0;
+			if( id && status_charge(src,0,skill_get_sp(id,5)) ) {
+				struct unit_data *ud = unit_bl2ud(src);
 
-			sd->state.autocast = 1;
-			skill_castend_damage_id(src,bl,id,5,tick,0);
-			sd->state.autocast = 0;
-			if( ud ) { //Set can act delay [Skotlex]
-				int delay = skill_delayfix(src,id,5);
+				sd->state.autocast = 1;
+				skill_castend_damage_id(src,bl,id,5,tick,0);
+				sd->state.autocast = 0;
+				if( ud ) { //Set can act delay [Skotlex]
+					int delay = skill_delayfix(src,id,5);
 
-				if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
-					ud->canact_tick = max(tick + delay,ud->canact_tick);
-					if( battle_config.display_status_timers )
-						clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
+					if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
+						ud->canact_tick = max(tick + delay,ud->canact_tick);
+						if( battle_config.display_status_timers )
+							clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
+					}
+				}
+			}
+		}
+		if( sc->data[SC_PYROCLASTIC] && rnd()%100 < sc->data[SC_PYROCLASTIC]->val3 ) {
+			id = BS_HAMMERFALL;
+			lv = sc->data[SC_PYROCLASTIC]->val1;
+			if( status_charge(src,0,skill_get_sp(id,lv)) ) {
+				struct unit_data *ud = unit_bl2ud(src);
+
+				sd->state.autocast = 1;
+				skill_castend_pos2(src,bl->x,bl->y,id,lv,tick,0);
+				sd->state.autocast = 0;
+				if( ud ) {
+					int delay = skill_delayfix(src,id,lv);
+
+					if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
+						ud->canact_tick = max(tick + delay,ud->canact_tick);
+						if( battle_config.display_status_timers )
+							clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
+					}
 				}
 			}
 		}
@@ -6586,7 +6607,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						bonus = (8 + 2 * skill_lv) * dstsd->inventory_data[index]->wlv;
 				}
 				bonus += 5 * (sd ? (pc_checkskill(sd,SA_FLAMELAUNCHER) + pc_checkskill(sd,SA_FROSTWEAPON) + pc_checkskill(sd,SA_LIGHTNINGLOADER) + pc_checkskill(sd,SA_SEISMICWEAPON)) : 1);
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start2(src,bl,type,100,skill_lv,bonus,skill_get_time(skill_id,skill_lv)));
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,
+					sc_start2(src,bl,type,100,skill_lv,bonus,skill_get_time(skill_id,skill_lv)));
 			}
 			break;
 
@@ -6985,7 +7007,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case MER_MAGNIFICAT:
 			if (mer) {
-				clif_skill_nodamage(bl,bl,skill_id,skill_lv,sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
+				clif_skill_nodamage(bl,bl,skill_id,skill_lv,
+					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 				if (mer->master && mer->master->status.party_id != 0 && !(flag&1))
 					party_foreachsamemap(skill_area_sub,mer->master,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 				else if (mer->master && !(flag&1))
@@ -7134,7 +7157,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if (status_get_lv(src) > status_get_lv(bl) &&
 					(tstatus->race == RC_DEMON || tstatus->race == RC_DEMIHUMAN || tstatus->race == RC_ANGEL) &&
 					!status_has_mode(tstatus,MD_STATUS_IMMUNE))
-					clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start2(src,bl,type,70,skill_lv,src->id,skill_get_time(skill_id,skill_lv)));
+					clif_skill_nodamage(src,bl,skill_id,skill_lv,
+						sc_start2(src,bl,type,70,skill_lv,src->id,skill_get_time(skill_id,skill_lv)));
 				else {
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,0);
 					if (sd)
@@ -10832,7 +10856,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,
+					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 			}
 			break;
@@ -11067,7 +11092,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 				if( sd && pc_checkskill(sd,SU_SPIRITOFSEA) > 0 )
 					duration += skill_get_time2(skill_id,skill_lv);
-				clif_skill_nodamage(bl,bl,skill_id,skill_lv,sc_start(src,bl,type,100,skill_lv,duration));
+				clif_skill_nodamage(bl,bl,skill_id,skill_lv,
+					sc_start(src,bl,type,100,skill_lv,duration));
 			} else if( sd )
 				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 			break;
@@ -11088,7 +11114,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					i = SU_CHATTERING;
 				} else
 					i = SU_GROOMING;
-				clif_skill_nodamage(bl,bl,i,-1,sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
+				clif_skill_nodamage(bl,bl,i,-1,
+					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 			} else if( sd )
 				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 			break;
@@ -11097,7 +11124,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			if( !sd || !sd->status.party_id || (flag&1) ) {
 				if( sd && (i = pc_checkskill(sd,SU_FRESHSHRIMP)) > 0 ) {
 					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
-					clif_skill_nodamage(bl,bl,SU_FRESHSHRIMP,-1,sc_start(src,bl,SC_FRESHSHRIMP,100,i,skill_get_time(SU_FRESHSHRIMP,i)));
+					clif_skill_nodamage(bl,bl,SU_FRESHSHRIMP,-1,
+						sc_start(src,bl,SC_FRESHSHRIMP,100,i,skill_get_time(SU_FRESHSHRIMP,i)));
 				}
 			} else if( sd )
 				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);

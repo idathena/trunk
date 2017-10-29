@@ -556,7 +556,7 @@ int guild_recv_info(struct guild *sg)
 		if( sd == NULL )
 			continue;
 		sd->guild = g;
-		if( channel_config.ally_enable && channel_config.ally_autojoin )
+		if( channel_config.ally_tmpl.name && (channel_config.ally_tmpl.opt&CHAN_OPT_AUTOJOIN) )
 			channel_gjoin(sd,3); // Make all member join guild_channel + allies channel
 		if( before.guild_lv != g->guild_lv || bm != m || before.max_member != g->max_member ) {
 			clif_guild_basicinfo(sd); // Submit basic information
@@ -717,7 +717,7 @@ void guild_member_joined(struct map_session_data *sd)
 		g->member[i].sd = sd;
 		sd->guild = g;
 
-		if( channel_config.ally_enable && channel_config.ally_autojoin )
+		if( channel_config.ally_tmpl.name && (channel_config.ally_tmpl.opt&CHAN_OPT_AUTOJOIN) )
 			channel_gjoin(sd,3);
 	}
 }
@@ -1695,7 +1695,8 @@ int guild_allianceack(int guild_id1,int guild_id2,int account_id1,int account_id
 
 				if (sd != NULL) {
 					clif_guild_allianceinfo(sd);
-					channel_gjoin(sd,2); // Join ally channel
+					if (channel_config.ally_tmpl.name && (channel_config.ally_tmpl.opt&CHAN_OPT_AUTOJOIN))
+						channel_gjoin(sd,2); // Join ally channel
 				}
 			}
 		}
@@ -1783,8 +1784,8 @@ int guild_broken(int guild_id,int flag)
 	guild_db->foreach(guild_db,guild_broken_sub,guild_id);
 	castle_db->foreach(castle_db,castle_guild_broken_sub,guild_id);
 	storage_guild_delete(guild_id);
-	if( channel_config.ally_enable )
-		channel_delete(g->channel);
+	if( channel_config.ally_tmpl.name )
+		channel_delete(g->channel,false);
 	idb_remove(guild_db,guild_id);
 	return 0;
 }
@@ -2317,9 +2318,8 @@ void do_final_guild(void) {
 	DBIterator *iter = db_iterator(guild_db);
 	struct guild *g;
 
-	for( g = dbi_first(iter); dbi_exists(iter); g = dbi_next(iter) ) {
-		channel_delete(g->channel);
-	}
+	for( g = dbi_first(iter); dbi_exists(iter); g = dbi_next(iter) )
+		channel_delete(g->channel,false);
 
 	dbi_destroy(iter);
 

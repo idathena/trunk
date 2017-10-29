@@ -1504,6 +1504,9 @@ int check_char_name(char *name, char *esc_name)
 	// Check for reserved names
 	if( strcmpi(name, wisp_server_name) == 0 )
 		return -1; // Nick reserved for internal server messages
+	// Check for the channel symbol
+	if( name[0] == '#' )
+		return -2;
 	// Check authorized letters/symbols in the name of the character
 	if( char_name_option == 1 ) { // Only letters/symbols in char_name_letters are authorized
 		for( i = 0; i < NAME_LENGTH && name[i]; i++ )

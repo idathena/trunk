@@ -3819,10 +3819,10 @@ void clif_unequipitemack(struct map_session_data *sd,int n,int pos,int ok)
 
 #if PACKETVER >= 20130000
 	header = 0x99a;
-	ok = ok ? 0:1;
+	ok = (ok ? 0 : 1);
 #elif PACKETVER >= 20110824
 	header = 0x8d1;
-	ok = ok ? 0:1;
+	ok = (ok ? 0 : 1);
 #else
 	header = 0xac;
 #endif
@@ -6327,32 +6327,35 @@ void clif_broadcast2(struct block_list *bl, const char *mes, int len, unsigned l
 }
 
 
-/*
+/**
  * Display *msg from *sd to all *users in channel
  */
-void clif_channel_msg(struct Channel *channel, struct map_session_data *sd, char *msg, short color) {
+void clif_channel_msg(struct Channel *channel, const char *msg, unsigned long color) {
 	DBIterator *iter;
 	struct map_session_data *user;
-	unsigned short msg_len = strlen(msg) + 1;
+	unsigned short msg_len = 0, len = 0;
+	unsigned char buf[CHAT_SIZE_MAX];
 
-	WFIFOHEAD(sd->fd,msg_len + 12);
-	WFIFOW(sd->fd,0) = 0x2c1;
-	WFIFOW(sd->fd,2) = msg_len + 12;
-	WFIFOL(sd->fd,4) = 0;
-	WFIFOL(sd->fd,8) = channel_config.colors[color];
-	safestrncpy((char *)WFIFOP(sd->fd,12), msg, msg_len);
+	if (!channel || !msg)
+		return;
+
+	msg_len = (unsigned short)(strlen(msg) + 1);
+
+	if (msg_len > sizeof(buf) - 12) {
+		ShowWarning("clif_channel_msg: Truncating too long message '%s' (len=%u).\n", msg, msg_len);
+		msg_len = sizeof(buf) - 12;
+	}
+
+	WBUFW(buf,0) = 0x2C1;
+	WBUFW(buf,2) = (len = msg_len + 12);
+	WBUFL(buf,4) = 0;
+	WBUFL(buf,8) = color;
+	safestrncpy((char *)WBUFP(buf,12), msg, msg_len);
 
 	iter = db_iterator(channel->users);
-	for (user = dbi_first(iter); dbi_exists(iter); user = dbi_next(iter)) {
-		if (user->fd == sd->fd)
-			continue;
-		WFIFOHEAD(user->fd,msg_len + 12);
-		memcpy(WFIFOP(user->fd,0), WFIFOP(sd->fd,0), msg_len + 12);
-		WFIFOSET(user->fd,msg_len + 12);
-	}
+	for (user = (struct map_session_data *)dbi_first(iter); dbi_exists(iter); user = (struct map_session_data *)dbi_next(iter))
+		clif_send(buf, len, &user->bl, SELF);
 	dbi_destroy(iter);
-
-	WFIFOSET(sd->fd,msg_len + 12);
 }
 
 
@@ -10570,7 +10573,8 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		}
 #endif
 		//Instances do not need their own channels
-		if(channel_config.map_enable && channel_config.map_autojoin && !map[sd->bl.m].flag.nochmautojoin && !map[sd->bl.m].instance_id)
+		if(channel_config.map_tmpl.name && (channel_config.map_tmpl.opt&CHAN_OPT_AUTOJOIN) &&
+			!map[sd->bl.m].flag.nochmautojoin && !map[sd->bl.m].instance_id)
 			channel_mjoin(sd); //Join new map
 		clif_pk_mode_message(sd);
 	}
@@ -10925,7 +10929,7 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data *sd)
 
 	pc_check_supernovice_call(sd, message);
 
-	if( sd->gcbind ) {
+	if( sd->gcbind && ((sd->gcbind->opt&CHAN_OPT_CAN_CHAT) || pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN)) ) {
 		channel_send(sd->gcbind, sd, message);
 		return;
 	}
@@ -11278,12 +11282,13 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 		char *chname = target;
 
 		channel = channel_name2channel(chname, sd, 3);
-		if( channel ) {
-			if( channel_pc_haschan(sd, channel) ) //We are in the channel
+		if( channel && (pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN) ||
+			((channel->opt&CHAN_OPT_CAN_CHAT) && channel_pccheckgroup(channel, sd->group_id))) ) {
+			if( channel_pc_haschan(sd, channel) >= 0 ) //We are in the channel
 				channel_send(channel, sd, message);
 			else if( channel->pass[0] == '\0') { //No password needed
 				if( !channel_join(channel, sd) )
-					channel_send(channel, sd,message); //Join success
+					channel_send(channel, sd, message); //Join success
 			} else
 				clif_displaymessage(fd, msg_txt(1402)); //You're not in that channel, type '@join <#channel_name>'
 			return;

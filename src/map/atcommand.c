@@ -6455,7 +6455,7 @@ ACMD_FUNC(mobsearch)
 	for(;;) {
 		TBL_MOB *md = (TBL_MOB *)mapit_next(it);
 		if( md == NULL )
-			break;// no more mobs
+			break; //No more mobs
 
 		if( md->bl.m != sd->bl.m )
 			continue;
@@ -9321,19 +9321,19 @@ ACMD_FUNC(join) {
 
 	return channel_pcjoin(sd, chname, pass);
 }
-/*
+/**
  * Display available option for @channel command
  * @command : the name of used command (for alias case)
  */
 static inline void atcmd_channel_help(struct map_session_data *sd, const char *command) {
 	int fd = sd->fd;
 	bool can_delete = pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN);
-	bool can_create = (can_delete || channel_config.user_chenable);
+	bool can_create = (can_delete || channel_config.private_channel.allow);
 	clif_displaymessage(fd, msg_txt(1414)); // ---- Available options:
 
 	//Option create
 	if( can_create ) {
-		sprintf(atcmd_output, msg_txt(1415),command);// * %s create <#channel_name> <channel_password>
+		sprintf(atcmd_output, msg_txt(1415),command); // * %s create <#channel_name> <channel_password>
 		clif_displaymessage(fd, atcmd_output);
 		clif_displaymessage(fd, msg_txt(1416)); // -- Creates a new channel.
 	}
@@ -9437,6 +9437,8 @@ ACMD_FUNC(channel) {
 		return channel_pcunbind(sd);
 	else if( strcmpi(key, "ban") == 0 )
 		return channel_pcban(sd, sub1, sub2, 0);
+	else if( strcmpi(key, "kick") == 0 )
+		return channel_pckick(sd, sub1, sub2);
 	else if( strcmpi(key, "banlist") == 0 )
 		return channel_pcban(sd, sub1, NULL, 3);
 	else if( strcmpi(key, "unban") == 0 )
@@ -9448,7 +9450,7 @@ ACMD_FUNC(channel) {
 
 		sub3[0] = sub4[0] = '\0';
 		sscanf(sub2, "%19s %19s", sub3, sub4);
-		if( strcmpi(key, "create") == 0 && (channel_config.user_chenable || pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN)) ) {
+		if( strcmpi(key, "create") == 0 && (channel_config.private_channel.allow || pc_has_permission(sd, PC_PERM_CHANNEL_ADMIN)) ) {
 			if( sub4[0] != '\0' ) {
 				clif_displaymessage(fd, msg_txt(1408)); // Channel password may not contain spaces.
 				return -1;
