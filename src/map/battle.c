@@ -5536,6 +5536,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 #ifndef RENEWAL
 	if(sd) {
 		short div_ = max(wd.div_, 1);
+		uint16 lv;
 
 		if((lv = pc_checkskill(sd, BS_WEAPONRESEARCH)) > 0)
 			ATK_ADD(wd.damage, wd.damage2, lv * 2);

@@ -2424,8 +2424,8 @@ void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_m
 			*matk_max = (*matk_max) * sd->matk_rate / 100;
 		}
 		if( pc_checkskill(sd, SU_POWEROFLAND) > 0 && pc_checkskill_summoner(sd, TYPE_PLANT) >= 20 ) {
-			*matk_min += *matk_min * 20 / 100;
-			*matk_max += *matk_max * 20 / 100;
+			*matk_min += (*matk_min) * 20 / 100;
+			*matk_max += (*matk_max) * 20 / 100;
 		}
 	}
 

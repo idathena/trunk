@@ -32,7 +32,7 @@ CREATE TABLE `item_db2_re` (
 # Items Additional Database
 #
 # Structure of Database:
-#REPLACE INTO `item_db2_re` VALUES ( ID,'AegisName','Name',Type,Buy,Sell,Weight,'ATK[:MATK]',DEF,Range,Slots,Job,Class,Gender,Loc,wLV,'eLV',Refineable,View,'Script','OnEquip_Script','OnUnequip_Script');
+#REPLACE INTO `item_db2_re` VALUES ( ID,'Name','Name',Type,Price,Sell,Weight,'ATK',DEF,Range,Slot,Job,Class,Gender,Loc,wLV,'eLV',Refineable,View,'Script','OnEquip_Script','OnUnequip_Script');
 #
 # THQ Quest Items
 #=============================================================
@@ -80,7 +80,7 @@ CREATE TABLE `item_db2_re` (
 #REPLACE INTO `item_db2_re` VALUES (7946,'Gold_Ring_Of_Valentine','Gold Ring Of Valentine',3,10,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 #REPLACE INTO `item_db2_re` VALUES (7947,'Silver_Ring_Of_Valentine','Silver Ring Of Valentine',3,10,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 #REPLACE INTO `item_db2_re` VALUES (7948,'Box','Box',3,10,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-#REPLACE INTO `item_db2_re` VALUES (5817,'Valentine\'s_Emblem','Valentine\'s Emblem',4,10,NULL,0,NULL,3,NULL,0,0xFFFFFFFF,7,2,136,NULL,'0',0,0,'bonus bAtkRate,3; bonus bMatkRate,3; bonus bAllStats,2; bonus bFlee,10; bonus bAspd,1; bonus bMdef,3; bonus2 bSkillAtk,"AL_HEAL",10; bonus2 bSkillHeal,"AL_HEAL",10; bonus2 bSkillHeal,"AM_POTIONPITCHER",10; bonus2 bAddItemHealRate,IG_Potion,10;',NULL,NULL);
+#REPLACE INTO `item_db2_re` VALUES (5817,'Valentine\'s_Emblem','Valentine\'s Emblem',4,10,NULL,0,NULL,3,NULL,0,0xFFFFFFFF,7,2,136,NULL,'0',0,0,'bonus2 bAddClass,Class_All,3; bonus2 bMagicAddRace,RC_All,3; bonus bAllStats,2; bonus bFlee,10; bonus bAspd,1; bonus bMdef,3; bonus2 bSkillAtk,"AL_HEAL",10; bonus2 bSkillHeal,"AL_HEAL",10; bonus2 bSkillHeal,"AM_POTIONPITCHER",10; bonus2 bAddItemHealRate,IG_Potion,10;',NULL,NULL);
 
 # iRO Halloween Event 2009
 #=============================================================

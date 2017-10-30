@@ -16785,7 +16785,7 @@ int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv) {
 			//Skill-specific reductions work regardless of flag
 			for( i = 0; i < ARRAYLENGTH(sd->skillcast) && sd->skillcast[i].id; i++ ) {
 				if( sd->skillcast[i].id == skill_id ) {
-					time += time * sd->skillcastrate[i].val / 100;
+					time += time * sd->skillcast[i].val / 100;
 					break;
 				}
 			}
