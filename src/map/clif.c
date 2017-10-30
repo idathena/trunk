@@ -1256,7 +1256,7 @@ static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, un
 #endif
 
 #if PACKETVER >= 20120221
-	if( battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && (status_get_hp(bl) < status_get_max_hp(bl)) ) {
+	if( battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && status_get_hp(bl) < status_get_max_hp(bl) ) {
 		WBUFL(buf,62) = status_get_max_hp(bl); //maxHP
 		WBUFL(buf,66) = status_get_hp(bl); //HP
 	} else {

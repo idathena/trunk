@@ -437,11 +437,11 @@ struct map_session_data {
 	struct s_bonus {
 		int hp, sp;
 		int atk_rate;
-		int arrow_atk,arrow_ele,arrow_cri,arrow_hit;
-		int nsshealhp,nsshealsp;
-		int critical_def,double_rate;
-		int long_attack_atk_rate; //Long range atk rate, not weapon based [Skotlex]
-		int near_attack_def_rate,long_attack_def_rate,magic_def_rate,misc_def_rate;
+		int arrow_atk, arrow_ele, arrow_cri, arrow_hit;
+		int nsshealhp, nsshealsp;
+		int critical_def, double_rate;
+		int long_attack_atk_rate; //Long range atk rate,  not weapon based [Skotlex]
+		int near_attack_def_rate, long_attack_def_rate, magic_def_rate, misc_def_rate;
 		int ignore_mdef_ele;
 		int ignore_mdef_race;
 		int ignore_mdef_class;
@@ -450,9 +450,9 @@ struct map_session_data {
 		int get_zeny_rate;
 		int get_zeny_num; //Added Get Zeny Rate [Skotlex]
 		int double_add_rate;
-		int short_weapon_damage_return,long_weapon_damage_return;
+		int short_weapon_damage_return, long_weapon_damage_return;
 		int magic_damage_return; //AppleGirl Was Here
-		int break_weapon_rate,break_armor_rate;
+		int break_weapon_rate, break_armor_rate;
 		int crit_atk_rate;
 		int classchange; //[Valaris]
 		int speed_rate, speed_add_rate, aspd_add;
@@ -479,10 +479,10 @@ struct map_session_data {
 	} bonus;
 	//Zeroed vars end here
 
-	int castrate,delayrate,hprate,sprate,dsprate;
-	int hprecov_rate,sprecov_rate;
+	int castrate, delayrate, hprate, sprate, dsprate;
+	int hprecov_rate, sprecov_rate;
 	int matk_rate;
-	int critical_rate,hit_rate,flee_rate,flee2_rate,def_rate,def2_rate,mdef_rate,mdef2_rate;
+	int critical_rate, hit_rate, flee_rate, flee2_rate, def_rate, def2_rate, mdef_rate, mdef2_rate;
 
 	int itemid;
 	short itemindex; //Used item's index in sd->inventory [Skotlex]

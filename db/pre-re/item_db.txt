@@ -820,6 +820,7 @@
 1546,Krieger_Onehand_Mace1,Glorious Morning Star,5,20,,0,130,,1,0,0x0004C5B3,7,2,2,4,80,1,8,{ bonus2 bAddRace,RC_DemiHuman,75; bonus2 bIgnoreDefRaceRate,RC_DemiHuman,20; if(getrefine()>5) { bonus2 bAddRace,RC_DemiHuman,(getrefine()-4)*(getrefine()-4); bonus2 bIgnoreDefRaceRate,RC_DemiHuman,5; bonus bAspdRate,5; } if(getrefine()>8) { bonus2 bAddEff,Eff_Stun,2000; bonus bAspdRate,5; } },{},{}
 1547,Mace_Of_Madness,Mace of Madness,5,20,,0,150,,1,0,0x0004C5B2,7,2,2,3,0,0,8,{ bonus2 bSkillAtk,"MC_CARTREVOLUTION",25; bonus bStr,2; },{},{}
 1548,Veteran_Hammer,Veteran Hammer,5,10000,,1800,160,,1,2,0x00008110,7,2,2,3,80,1,8,{ bonus bHealPower,getskilllv("AL_DP"); bonus bCritical,getskilllv("PR_MACEMASTERY")*2; bonus bInt,1; bonus bLuk,1; },{},{}
+1549,Pilebuncker,Pile Bunker,5,10000,,3500,450,,1,0,0x00000400,8,2,2,3,99,1,8,{},{},{}
 // Books
 //===================================================================
 1550,Book,Book,5,30000,,600,85,,1,3,0x00410100,7,2,2,2,14,1,15,{},{},{}
@@ -1084,7 +1085,7 @@
 2001,Divine_Cross,Divine Cross,5,20,,1500,120,,1,0,0x00008100,7,2,34,4,70,1,23,{ bonus bAtkEle,Ele_Holy; bonus bMatkRate,15; bonus bDex,4; bonus2 bSubRace,RC_Demon,15; bonus2 bSubRace,RC_Undead,15; },{},{}
 2002,Krieger_Twohand_Staff1,Glorious Destruction Staff,5,20,,0,70,,1,0,0x00018314,7,2,34,4,80,1,23,{ bonus bMatkRate,getrefine(); bonus2 bMagicAddRace,RC_DemiHuman,15; bonus2 bIgnoreMdefRaceRate,RC_DemiHuman,25; if(getrefine()>5) { bonus2 bMagicAddRace,RC_DemiHuman,(getrefine()-5)*2; bonus2 bIgnoreMdefRaceRate,RC_DemiHuman,5+(getrefine()-5)*2; } if(getrefine()>8) { bonus5 bAutoSpellOnSkill,"WZ_STORMGUST","MG_SAFETYWALL",10,200,1; bonus5 bAutoSpellOnSkill,"WZ_METEOR","MG_SAFETYWALL",10,200,1; bonus5 bAutoSpellOnSkill,"WZ_VERMILION","MG_SAFETYWALL",10,200,1; } },{},{}
 2003,Destruction_Rod_M,Staff of Destruction,5,20,,2500,130,,1,1,0x00000200,2,2,34,4,80,1,23,{ bonus bMatkRate,25+getrefine()/2; bonus bInt,3; bonus bAgi,10; bonus bUseSPrate,(getrefine()*2); bonus3 bAutoSpellWhenHit,"WZ_JUPITEL",5,(getrefine()*20); bonus2 bCastrate,"HW_MAGICPOWER",-50; },{},{}
-2004,Kronos,Kronos,5,20,,1000,30,,1,0,0x00010204,2,2,34,4,50,1,23,{ bonus bMatkRate,20; bonus bInt,3+(getrefine()/2); bonus bMaxHP,300+(50*getrefine()/2); autobonus "{ bonus bMatkRate,12; bonus buseSPRate,20; }",1,5000,BF_MAGIC,"{ specialeffect2 EF_ENHANCE; }"; },{},{}
+2004,Kronos,Kronos,5,20,,1000,30,,1,0,0x00010204,2,2,34,4,50,1,23,{ bonus bMatkRate,20; bonus bInt,3+(getrefine()/2); bonus bMaxHP,300+(50*getrefine()/2); autobonus "{ bonus bMatkRate,12; bonus bUseSPrate,20; }",1,5000,BF_MAGIC,"{ specialeffect2 EF_ENHANCE; }"; },{},{}
 2005,Dea_Staff,Dea Staff,5,20,,1000,30,,1,1,0x00008110,2,2,34,3,50,1,23,{ bonus bAtkEle,Ele_Holy; bonus bMatkRate,15+getrefine()/2; bonus bInt,6; bonus bVit,2; autobonus3 "{ }",20,1000,"AL_HEAL","{ specialeffect2 EF_MAGICALATTHIT; heal 0,200; }"; },{},{}
 2006,G_Staff_Of_Light,Staff of Light,5,20,,1900,80,,1,0,0x00810204,7,2,34,4,60,1,23,{ bonus bMatk,150; bonus bAtkEle,Ele_Holy; bonus bInt,6; },{},{}
 // Shields
@@ -1127,6 +1128,7 @@
 2136,Cracked_Buckler,Cracked Buckler,4,0,,0,,5,,0,0xFFFFFFFF,7,2,32,,0,0,2,{ bonus bAgi,2; bonus2 bAddDefEle,Ele_Neutral,-10; bonus3 bAutoSpellWhenHit,"PR_KYRIE",1,50; bonus bMdef,1; },{},{}
 2137,Valkyrja's_Shield_C,Neo Valkyrja's Shield,4,0,,0,,5,,0,0xFFFFFFFE,2,2,32,,95,0,4,{ bonus2 bSubEle,Ele_Water,20; bonus2 bSubEle,Ele_Fire,20; bonus2 bSubEle,Ele_Dark,20; bonus2 bSubEle,Ele_Undead,20; bonus bMdef,5; },{},{}
 2138,Bradium_Shield,Bradium Shield,4,20,,1800,,5,,1,0x00CFFF80,2,2,32,,65,1,3,{ bonus2 bSkillAtk,"CR_SHIELDBOOMERANG",60; bonus bAgi,-1; bonus bMaxHP,500; },{},{}
+2139,Flame_Thrower,Flame Thrower,4,20000,,2000,,4,,0,0x00000400,8,2,32,,99,0,1,{},{},{}
 // GM Shield
 //===================================================================
 2199,Ahura_Mazda,Ahura Mazdah,4,1,,10,,100,,0,0xFFFFFFFF,7,2,32,,1,1,0,{ bonus bAllStats,50; bonus bMdef,99; bonus bShortWeaponDamageReturn,100; bonus2 bSubRace,RC_DemiHuman,95; skill "CR_FULLPROTECTION",5; Skill "WZ_ESTIMATION",1; Skill "ST_FULLSTRIP",5; Skill "HW_MAGICPOWER",10; bonus bMaxHPrate,200; bonus bNoGemStone,0; },{ sc_start4 SC_ENDURE,60000,10,0,0,1; sc_start4 SC_SPEEDUP0,60000,25,0,0,1; },{ sc_end SC_ENDURE; sc_end SC_SPEEDUP0; }
@@ -1640,6 +1642,17 @@
 2797,Magical_Stone_,Rocks,4,0,,200,,0,,0,0x00810204,7,2,136,,99,0,0,{ bonus2 bAddMagicDamageClass,2049,10; bonus2 bAddDefMonster,2050,-10; bonus3 bAddMonsterIdDropItem,6151,2049,70; },{},{}
 2798,Will_Of_Exhausted_Angel,Will of Exhausted Angel,4,0,,200,,0,,0,0x00008100,7,2,136,,99,0,0,{ if(strcharinfo(3)=="job3_arch02") { bonus2 bAddDefMonster,1761,50; bonus2 bAddDefMonster,1762,50; } },{},{}
 2799,Ring_Of_Protection,Ring of Protection,4,0,,100,,0,,1,0xFFFFFFFF,7,2,136,,1,0,0,{ bonus bMaxHP,150; bonus bMaxSP,30; if(getskilllv("MO_CALLSPIRITS")==5) { bonus5 bAutoSpellOnSkill,"MO_CALLSPIRITS","AL_BLESSING",10,100,1; } bonus4 bAutoSpellWhenHit,"SM_ENDURE",10,100,0; bonus4 bAutoSpellWhenHit,"AL_ANGELUS",10,100,0; },{},{}
+2800,Accelerator,Accelerator,4,100000,,100,,0,,1,0x00000400,8,2,136,,99,0,0,{ bonus bAgi,2; },{},{}
+2801,Hovering_Booster,Hovering Booster,4,100000,,2000,,0,,1,0x00000400,8,2,136,,99,0,0,{ bonus bAgi,1; },{},{}
+2802,Suicidal_Device,Suicidal Device,4,500000,,1000,,0,,1,0x00000400,8,2,136,,99,0,0,{},{},{}
+2803,Shape_Shifter,Shape Shifter,4,100000,,500,,0,,1,0x00000400,8,2,136,,99,0,0,{ bonus bInt,3; },{},{}
+2804,Cooling_Device,Cooling Device,4,100000,,2500,,0,,1,0x00000400,8,2,136,,99,0,0,{ bonus bDex,1; },{},{}
+2805,Magnetic_Field_Generator,Magnetic Field Generator,4,100000,,6000,,0,,1,0x00000400,8,2,136,,99,0,0,{ bonus bDex,1; },{},{}
+2806,Barrier_Builder,Barrier Builder,4,150000,,8000,,3,,1,0x00000400,8,2,136,,99,0,0,{ bonus bDex,1; },{},{}
+2807,Repair_Kit,Repair Kit,4,200000,,400,,0,,1,0x00000400,8,2,136,,99,0,0,{},{},{}
+2808,Camouflage_Generator,Camouflague Generator,4,250000,,1000,,0,,1,0x00000400,8,2,136,,99,0,0,{ bonus bAgi,3; },{},{}
+2809,High_Quality_Cooler,High Quality Cooler,4,100000,,2500,,0,,1,0x00000400,8,2,136,,99,0,0,{ bonus bDex,1; },{},{}
+2810,Special_Cooler,Special Cooler,4,100000,,2500,,0,,1,0x00000400,8,2,136,,99,0,0,{ bonus bDex,1; },{},{}
 2819,Swordman_Manual,Swordman Manual,4,0,,100,,0,,0,0x00000001,7,2,136,,1,0,0,{ bonus bMaxSP,100; skill "SM_BASH",1; skill "SM_PROVOKE",1; skill "SM_MAGNUM",1; },{},{}
 2820,Thief_Manual,Thief Manual,4,0,,100,,0,,0,0x00000001,7,2,136,,1,0,0,{ bonus bMaxSP,100; skill "TF_DOUBLE",3; bonus bDoubleRate,15; skill "TF_STEAL",1; skill "TF_HIDING",1; skill "TF_POISON",1; },{},{}
 2821,Acolyte_Manual,Acolyte Manual,4,0,,100,,0,,0,0x00000001,7,2,136,,1,0,0,{ bonus bMaxSP,100; skill "AL_HEAL",1; skill "AL_INCAGI",1; skill "AL_BLESSING",1; },{},{}
@@ -4073,6 +4086,9 @@
 7630,Clean_Beach_Brush,Clean Beach Brush,3,0,,0,,,,,,,,,,,,,{},{},{}
 7631,Trash_Debris,Trash Debris,3,0,,0,,,,,,,,,,,,,{},{},{}
 7635,Sachet,Sachet,3,100,,0,,,,,,,,,,,,,{},{},{}
+7663,Full_Metal_Jacket,Full Metal Jacket,3,200,,2,,,,,,,,,,,,,{},{},{}
+7664,Shooting_Mine,Throwing Mine,3,450,,3,,,,,,,,,,,,,{},{},{}
+7665,Dragon_Tail_Missile,Dragon Tail Missile,3,1500,,100,,,,,,,,,,,,,{},{},{}
 //
 7701,Dragon_Spirit,Soul,3,2,,10,,,,,,,,,,,,,{},{},{}
 7702,Special_Cogwheel,Special Cogwheel,3,2,,10,,,,,,,,,,,,,{},{},{}
@@ -5444,6 +5460,8 @@
 13205,Poison_Sphere,Poison Sphere,10,80,,5,50,,,,0x01000000,7,2,32768,,1,,5,{ bonus bAtkEle,Ele_Poison; bonus2 bAddEff,Eff_Poison,500; },{},{}
 13206,Blind_Sphere,Blind Sphere,10,80,,5,50,,,,0x01000000,7,2,32768,,1,,5,{ bonus bAtkEle,Ele_Dark; bonus2 bAddEff,Eff_Blind,500; },{},{}
 13207,Freezing_Sphere,Freezing Sphere,10,80,,5,50,,,,0x01000000,7,2,32768,,1,,5,{ bonus bAtkEle,Ele_Water; },{},{}
+13220,Sanctified_Bullet,Purifying Bullet,10,10,,2,40,,,,0x01000000,7,2,32768,,100,,3,{ bonus bAtkEle,Ele_Holy; },{},{}
+13221,Silver_Bullet_,Silver Bullet,10,5,,2,15,,,,0x01000000,7,2,32768,,1,,3,{ bonus bAtkEle,Ele_Holy; },{},{}
 // Shurikens & Kunais
 //===================================================================
 13250,Shuriken,Shuriken,10,4,,5,10,,,,0x02000000,7,2,32768,,1,,6,{},{},{}
@@ -6468,6 +6486,9 @@
 16000,Erde,Erde,5,20,,500,130,,1,2,0x0004C5B2,2,2,2,4,50,1,8,{ bonus2 bSkillAtk,"AM_ACIDTERROR",20; bonus2 bSkillAtk,"AM_DEMONSTRATION",20; bonus bMaxSP,50; bonus bHealPower,10; },{},{}
 16001,Red_Square_Bag,Red Square Bag,5,20,,500,130,,1,2,0x0004C5B2,2,2,2,3,50,1,8,{ bonus bMaxHP,200; bonus2 bSkillAtk,"AM_ACIDTERROR",20; bonus2 bSkillAtk,"AM_DEMONSTRATION",20; bonus2 bAddMonsterDropItem,501,50; bonus2 bAddMonsterDropItem,502,20; bonus2 bAddMonsterDropItem,503,20; bonus2 bAddMonsterDropItem,504,20; bonus2 bAddMonsterDropItem,505,10; if(readparam(bStr)>=95) bonus2 bAddEff,Eff_Stun,500; },{},{}
 16002,Stunner_C,Stunner,5,0,,0,175,,1,0,0x00008110,7,2,2,3,1,0,8,{ bonus2 bAddEff,Eff_Stun,1000; bonus2 bAddSize,Size_All,40; },{},{}
+16030,Pilebuncker_S,Pile Bunker S,5,30000,,3000,400,,1,1,0x00000400,8,2,2,4,130,1,8,{ bonus bAspdRate,getrefine()/2; },{},{}
+16031,Pilebuncker_P,Pile Bunker P,5,30000,,4000,450,,1,0,0x00000400,8,2,2,4,130,1,8,{ bonus bBaseAtk,getrefine()*5; },{},{}
+16032,Pilebuncker_T,Pile Bunker T,5,30000,,3500,400,,1,1,0x00000400,8,2,2,4,130,1,8,{ bonus bUseSPrate,-getrefine(); },{},{}
 // More Rental Boxes
 //===================================================================
 16134,King_Frog_Hat_Box,Frog King Hat Box,18,20,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ getitem 5528,1; },{},{}

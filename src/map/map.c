@@ -1862,7 +1862,7 @@ void map_delnickdb(int charid, const char *name)
 	struct charid2nick *p;
 	DBData data;
 
-	if (!nick_db->remove(nick_db, db_i2key(charid), &data) || (p = db_data2ptr(&data)) == NULL)
+	if( !nick_db->remove(nick_db, db_i2key(charid), &data) || !(p = db_data2ptr(&data)) )
 		return;
 
 	while( p->requests ) {
@@ -1891,19 +1891,17 @@ void map_reqnickdb(struct map_session_data *sd, int charid)
 	nullpo_retv(sd);
 
 	tsd = map_charid2sd(charid);
-	if( tsd )
-	{
+	if( tsd ) {
 		clif_solved_charname(sd->fd, charid, tsd->status.name);
 		return;
 	}
 
 	p = idb_ensure(nick_db, charid, create_charid2nick);
-	if( *p->nick )
-	{
+	if( *p->nick ) {
 		clif_solved_charname(sd->fd, charid, p->nick);
 		return;
 	}
-	// not in cache, request it
+	//Not in cache, request it
 	CREATE(req, struct charid_request, 1);
 	req->next = p->requests;
 	p->requests = req;
@@ -1917,25 +1915,23 @@ void map_addiddb(struct block_list *bl)
 {
 	nullpo_retv(bl);
 
-	if( bl->type == BL_PC )
-	{
+	if( bl->type == BL_PC ) {
 		TBL_PC *sd = (TBL_PC *)bl;
-		idb_put(pc_db,sd->bl.id,sd);
-		idb_put(charid_db,sd->status.char_id,sd);
-	}
-	else if( bl->type == BL_MOB )
-	{
-		TBL_MOB *md = (TBL_MOB *)bl;
-		idb_put(mobid_db,bl->id,bl);
 
+		idb_put(pc_db, sd->bl.id, sd);
+		idb_put(charid_db, sd->status.char_id, sd);
+	} else if( bl->type == BL_MOB ) {
+		TBL_MOB *md = (TBL_MOB *)bl;
+
+		idb_put(mobid_db, bl->id, bl);
 		if( md->state.boss )
 			idb_put(bossid_db, bl->id, bl);
 	}
 
-	if( bl->type & BL_REGEN )
+	if( bl->type&BL_REGEN )
 		idb_put(regen_db, bl->id, bl);
 
-	idb_put(id_db,bl->id,bl);
+	idb_put(id_db, bl->id, bl);
 }
 
 /*==========================================
@@ -1947,17 +1943,18 @@ void map_deliddb(struct block_list *bl)
 
 	if( bl->type == BL_PC ) {
 		TBL_PC *sd = (TBL_PC *)bl;
-		idb_remove(pc_db,sd->bl.id);
-		idb_remove(charid_db,sd->status.char_id);
+
+		idb_remove(pc_db, sd->bl.id);
+		idb_remove(charid_db, sd->status.char_id);
 	} else if( bl->type == BL_MOB ) {
-		idb_remove(mobid_db,bl->id);
-		idb_remove(bossid_db,bl->id);
+		idb_remove(mobid_db, bl->id);
+		idb_remove(bossid_db, bl->id);
 	}
 
-	if( bl->type & BL_REGEN )
-		idb_remove(regen_db,bl->id);
+	if( bl->type&BL_REGEN )
+		idb_remove(regen_db, bl->id);
 
-	idb_remove(id_db,bl->id);
+	idb_remove(id_db, bl->id);
 }
 
 /*==========================================
