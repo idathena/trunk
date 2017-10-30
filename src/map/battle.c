@@ -5977,8 +5977,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case MG_FIREWALL:
 						skillratio -= 50;
 						break;
-					case MG_THUNDERSTORM:
-						//In renewal, Thunder Storm boost is 100% (in pre-re, 80%)
+					case MG_THUNDERSTORM: //In renewal, Thunder Storm boost is 100% (in pre-re, 80%)
 #ifndef RENEWAL
 						skillratio -= 20;
 #endif
