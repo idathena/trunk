@@ -534,7 +534,11 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
  * @param rh_ele Right-hand weapon element
  * @param lh_ele Left-hand weapon element (BF_MAGIC and BF_MISC ignore this value)
  * @param damage Original damage
- * @param left Left hand flag (BF_MISC and BF_MAGIC ignore flag value)
+ * @param left Left hand flag (BF_MISC ignore flag value)
+ *    For BF_MAGIC
+ *         1: Calculates attacker bonuses.
+ *         0: Calculates target bonuses
+ *    For BF_WEAPON
  *         3: Calculates attacker bonuses in both hands.
  *         2: Calculates attacker bonuses in right-hand only.
  *         0 or 1: Only calculates target bonuses.
@@ -575,7 +579,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 	switch( attack_type ) {
 		case BF_MAGIC:
 			t_race2 = status_get_race2(target);
-			if( sd && !(nk&NK_NO_CARDFIX_ATK) ) { //Affected by attacker ATK bonuses
+			if( sd && !(nk&NK_NO_CARDFIX_ATK) && (left&1) ) { //Affected by attacker ATK bonuses
 				cardfix = cardfix * (100 + sd->magic_addrace[tstatus->race] + sd->magic_addrace[RC_ALL]) / 100;
 				if( !(nk&NK_NO_ELEFIX) ) { //Affected by element modifier bonuses
 					cardfix = cardfix * (100 + sd->magic_adddefele[tstatus->def_ele] + sd->magic_adddefele[ELE_ALL]) / 100;
@@ -590,8 +594,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 					cardfix = cardfix * (100 + sd->add_mdmg[i].rate) / 100;
 				}
 				APPLY_CARDFIX(damage,cardfix);
-			}
-			if( tsd && !(nk&NK_NO_CARDFIX_DEF) ) { //Affected by target DEF bonuses
+			} else if( tsd && !(nk&NK_NO_CARDFIX_DEF) && !(left&1) ) { //Affected by target DEF bonuses
 				cardfix = 1000; //Reset var for target
 				if( !(nk&NK_NO_ELEFIX) ) { //Affected by element modifier bonuses
 					int ele_fix = tsd->subele[rh_ele] + tsd->subele[ELE_ALL];
@@ -5919,18 +5922,22 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				MATK_ADD(status_get_matk(src, 2));
 
 #ifdef RENEWAL
-				switch(skill_id) {
-					case AM_DEMONSTRATION:
-					case AM_ACIDTERROR:
-					case HW_MAGICCRASHER:
-					case ASC_BREAKER:
-					case CR_ACIDDEMONSTRATION:
-					case GN_FIRE_EXPANSION_ACID:
-					case LG_RAYOFGENESIS:
-						break; //Do card fix later
-					default:
-						ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 0, ad.flag);
-						break;
+				if(sd) //Card Fix for attacker (sd), 1 is added to the "left" flag meaning "attacker cards only"
+					ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 1, ad.flag);
+				if(tsd) { //Card Fix for target (tsd), 1 is not added to the "left" flag meaning "target cards only"
+					switch(skill_id) {
+						case AM_DEMONSTRATION:
+						case AM_ACIDTERROR:
+						case HW_MAGICCRASHER:
+						case ASC_BREAKER:
+						case CR_ACIDDEMONSTRATION:
+						case GN_FIRE_EXPANSION_ACID:
+						case LG_RAYOFGENESIS:
+							break; //Do card fix later
+						default:
+							ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 0, ad.flag);
+							break;
+					}
 				}
 #endif
 
@@ -6432,12 +6439,16 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			ad.damage = battle_attr_fix(src, target, ad.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
 
 #ifndef RENEWAL
-		switch(skill_id) {
-			case LG_RAYOFGENESIS:
-				break;
-			default:
-				ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 0, ad.flag);
-				break;
+		if(sd)
+			ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 1, ad.flag);
+		if(tsd) {
+			switch(skill_id) {
+				case LG_RAYOFGENESIS:
+					break;
+				default:
+					ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 0, ad.flag);
+					break;
+			}
 		}
 #endif
 
