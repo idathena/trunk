@@ -10436,7 +10436,7 @@ REPLACE INTO `item_db_re` VALUES (20150,'C_God_Of_Winds_Fan','Costume God of Win
 REPLACE INTO `item_db_re` VALUES (20151,'C_Poison_Spore_Hat','Costume Poison Spore Hat',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,899,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (20152,'C_Straw_Rice_Bag','Costume Straw Rice Bag',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,7168,NULL,'1',0,1273,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (20153,'C_Monochrome_Cap','Costume Monochrome Cap',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,1274,NULL,NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (20154,'C_Maple_Which_Falls','Costume Maple Which Falls',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,4096,NULL,'1',0,1275,NULL,'sc_start SC_MAPLE_FALLS,-1,0;','sc_end SC_MAPLE_FALLS;');
+REPLACE INTO `item_db_re` VALUES (20154,'C_Maple_Which_Falls','Costume Maple Which Falls',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,2048,NULL,'1',0,1275,NULL,'sc_start SC_MAPLE_FALLS,-1,0;','sc_end SC_MAPLE_FALLS;');
 REPLACE INTO `item_db_re` VALUES (20155,'C_Lady_Feather_Hat','Costume Lady Feather Hat',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,1276,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (20156,'C_Fan_in_Mouth','Costume Fan in Mouth',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,4096,NULL,'1',0,857,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (20157,'C_Evolved_Blue_Fish','Costume Evolved Blue Fish',4,20,NULL,0,NULL,0,NULL,0,0xFFFFFFFF,63,2,1024,NULL,'1',0,149,NULL,NULL,NULL);
@@ -11270,9 +11270,9 @@ REPLACE INTO `item_db_re` VALUES (28316,'RCC2013_ARMLET_','RCC2013_ARMLET_',4,20
 REPLACE INTO `item_db_re` VALUES (28317,'RCC2013_RING','RCC2013_RING',4,20,NULL,200,NULL,0,NULL,0,0xFFFFFFFF,63,2,136,NULL,'1',0,0,'bonus2 bAddClass,Class_All,1;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28318,'RCC2013_RING_','RCC2013_RING_',4,20,NULL,200,NULL,0,NULL,1,0xFFFFFFFF,63,2,136,NULL,'1',0,0,'bonus2 bAddClass,Class_All,1;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28319,'Cauda_Daemonica','Cauda Daemonica',4,20,NULL,200,NULL,0,NULL,1,0xFFFFFFFF,63,2,136,NULL,'80',0,0,'autobonus "{ bonus bSPDrainValue,5; }",50,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1370,5000; callfunc \\\"F_28319\\\"; }";',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (28320,'Desperation_Of_Assassin','Desperation of Assassin',4,0,NULL,100,NULL,0,NULL,1,0xFFFFFFFF,63,2,136,NULL,'50',0,1,'bonus bAspd,1;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (28321,'Falconer_Claw','Falconer Claw',4,0,NULL,100,NULL,5,NULL,1,0x00000800,63,2,136,NULL,'80',0,1,'bonus bDex,1; bonus2 bSkillAtk,"HT_BLITZBEAT",getskilllv("HT_STEELCROW")*10;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (28322,'Falconer_Glove','Falconer Glove',4,0,NULL,100,NULL,5,NULL,1,0x00000800,63,2,136,NULL,'80',0,1,'bonus bDex,1; bonus bUseSPrate,-5;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (28320,'Desperation_Of_Assassin','Desperation of Assassin',4,0,NULL,100,NULL,0,NULL,1,0xFFFFFFFF,63,2,136,NULL,'50',0,0,'bonus bAspd,1;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (28321,'Falconer_Claw','Falconer Claw',4,0,NULL,100,NULL,5,NULL,1,0x00000800,63,2,136,NULL,'80',0,0,'bonus bDex,1; bonus2 bSkillAtk,"HT_BLITZBEAT",getskilllv("HT_STEELCROW")*10;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (28322,'Falconer_Glove','Falconer Glove',4,0,NULL,100,NULL,5,NULL,1,0x00000800,63,2,136,NULL,'80',0,0,'bonus bDex,1; bonus bUseSPrate,-5;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (28326,'Broken_Chip_1','Broken Chips 01',4,0,NULL,100,NULL,0,NULL,1,0xFFFFFFFF,63,2,136,NULL,'100',0,0,'bonus bStr,4;','if(isequipped(18997,28327)) sc_start4 SC_SPEEDUP0,60000,25,0,0,1;','if(isequipped(18997,28327)) sc_end SC_SPEEDUP0;');
 REPLACE INTO `item_db_re` VALUES (28327,'Broken_Chip_2','Broken Chips 02',4,0,NULL,100,NULL,0,NULL,1,0xFFFFFFFF,63,2,136,NULL,'100',0,0,'bonus bInt,4;','if(isequipped(18997,28326)) sc_start4 SC_SPEEDUP0,60000,25,0,0,1;','if(isequipped(18997,28326)) sc_end SC_SPEEDUP0;');
 REPLACE INTO `item_db_re` VALUES (28332,'Jewel_Ring','Jewerly Ring',4,20,NULL,100,NULL,0,NULL,0,0xFFFFFFFF,63,2,136,NULL,'1',0,0,'bonus bLuk,20; autobonus "{ bonus bAspd,2; }",50,2000,BF_WEAPON|BF_MAGIC;',NULL,NULL);

@@ -5547,21 +5547,23 @@ BUILDIN_FUNC(input)
 	sd->npc_idle_type = NPCT_WAIT;
 #endif
 
-	if( !sd->state.menu_or_input ) { // first invocation, display npc input box
+	if( !sd->state.menu_or_input ) { // First invocation, display npc input box
 		sd->state.menu_or_input = 1;
 		st->state = RERUNLINE;
 		if( is_string_variable(name) )
 			clif_scriptinputstr(sd,st->oid);
 		else
 			clif_scriptinput(sd,st->oid);
-	} else { // take received text/value and store it in the designated variable
+	} else { // Take received text/value and store it in the designated variable
 		sd->state.menu_or_input = 0;
 		if( is_string_variable(name) ) {
 			int len = (int)strlen(sd->npc_str);
+
 			set_reg(st, sd, uid, name, (void *)sd->npc_str, script_getref(st,2));
 			script_pushint(st, (len > max ? 1 : len < min ? -1 : 0));
 		} else {
 			int amount = sd->npc_amount;
+
 			set_reg(st, sd, uid, name, (void *)__64BPRTSIZE(cap_value(amount,min,max)), script_getref(st,2));
 			script_pushint(st, (amount > max ? 1 : amount < min ? -1 : 0));
 		}
