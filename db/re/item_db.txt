@@ -10405,7 +10405,7 @@
 20151,C_Poison_Spore_Hat,Costume Poison Spore Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,899,{},{},{}
 20152,C_Straw_Rice_Bag,Costume Straw Rice Bag,4,20,,0,,0,,0,0xFFFFFFFF,63,2,7168,,1,0,1273,{},{},{}
 20153,C_Monochrome_Cap,Costume Monochrome Cap,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1274,{},{},{}
-20154,C_Maple_Which_Falls,Costume Maple Which Falls,4,20,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,1275,{},{ sc_start SC_MAPLE_FALLS,-1,0; },{ sc_end SC_MAPLE_FALLS; }
+20154,C_Maple_Which_Falls,Costume Maple Which Falls,4,20,,0,,0,,0,0xFFFFFFFF,63,2,2048,,1,0,1275,{},{ sc_start SC_MAPLE_FALLS,-1,0; },{ sc_end SC_MAPLE_FALLS; }
 20155,C_Lady_Feather_Hat,Costume Lady Feather Hat,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,1276,{},{},{}
 20156,C_Fan_in_Mouth,Costume Fan in Mouth,4,20,,0,,0,,0,0xFFFFFFFF,63,2,4096,,1,0,857,{},{},{}
 20157,C_Evolved_Blue_Fish,Costume Evolved Blue Fish,4,20,,0,,0,,0,0xFFFFFFFF,63,2,1024,,1,0,149,{},{},{}
@@ -11239,9 +11239,9 @@
 28317,RCC2013_RING,RCC2013_RING,4,20,,200,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus2 bAddClass,Class_All,1; },{},{}
 28318,RCC2013_RING_,RCC2013_RING_,4,20,,200,,0,,1,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus2 bAddClass,Class_All,1; },{},{}
 28319,Cauda_Daemonica,Cauda Daemonica,4,20,,200,,0,,1,0xFFFFFFFF,63,2,136,,80,0,0,{ autobonus "{ bonus bSPDrainValue,5; }",50,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1370,5000; callfunc \"F_28319\"; }"; },{},{}
-28320,Desperation_Of_Assassin,Desperation of Assassin,4,0,,100,,0,,1,0xFFFFFFFF,63,2,136,,50,0,1,{ bonus bAspd,1; },{},{}
-28321,Falconer_Claw,Falconer Claw,4,0,,100,,5,,1,0x00000800,63,2,136,,80,0,1,{ bonus bDex,1; bonus2 bSkillAtk,"HT_BLITZBEAT",getskilllv("HT_STEELCROW")*10; },{},{}
-28322,Falconer_Glove,Falconer Glove,4,0,,100,,5,,1,0x00000800,63,2,136,,80,0,1,{ bonus bDex,1; bonus bUseSPrate,-5; },{},{}
+28320,Desperation_Of_Assassin,Desperation of Assassin,4,0,,100,,0,,1,0xFFFFFFFF,63,2,136,,50,0,0,{ bonus bAspd,1; },{},{}
+28321,Falconer_Claw,Falconer Claw,4,0,,100,,5,,1,0x00000800,63,2,136,,80,0,0,{ bonus bDex,1; bonus2 bSkillAtk,"HT_BLITZBEAT",getskilllv("HT_STEELCROW")*10; },{},{}
+28322,Falconer_Glove,Falconer Glove,4,0,,100,,5,,1,0x00000800,63,2,136,,80,0,0,{ bonus bDex,1; bonus bUseSPrate,-5; },{},{}
 28326,Broken_Chip_1,Broken Chips 01,4,0,,100,,0,,1,0xFFFFFFFF,63,2,136,,100,0,0,{ bonus bStr,4; },{ if(isequipped(18997,28327)) sc_start4 SC_SPEEDUP0,60000,25,0,0,1; },{ if(isequipped(18997,28327)) sc_end SC_SPEEDUP0; }
 28327,Broken_Chip_2,Broken Chips 02,4,0,,100,,0,,1,0xFFFFFFFF,63,2,136,,100,0,0,{ bonus bInt,4; },{ if(isequipped(18997,28326)) sc_start4 SC_SPEEDUP0,60000,25,0,0,1; },{ if(isequipped(18997,28326)) sc_end SC_SPEEDUP0; }
 28332,Jewel_Ring,Jewerly Ring,4,20,,100,,0,,0,0xFFFFFFFF,63,2,136,,1,0,0,{ bonus bLuk,20; autobonus "{ bonus bAspd,2; }",50,2000,BF_WEAPON|BF_MAGIC; },{},{}
