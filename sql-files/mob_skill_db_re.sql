@@ -8457,7 +8457,7 @@ REPLACE INTO `mob_skill_db_re` VALUES (2449,'Nasarin@RG_INTIMIDATE','attack',219
 REPLACE INTO `mob_skill_db_re` VALUES (2449,'Nasarin@RG_CLOSECONFINE','attack',1005,1,1000,0,30000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2449,'Nasarin@NPC_POISONATTACK','attack',188,5,1000,0,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
-# Old Glast Heim Memorial
+# Old Glast Heim
 REPLACE INTO `mob_skill_db_re` VALUES (2464,'Zombie (Memorial)@NPC_UNDEADATTACK','chase',347,3,5000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'26',NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2464,'Zombie (Memorial)@NPC_UNDEADATTACK','attack',347,3,5000,500,3000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'26',NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2464,'Zombie (Memorial)@AL_HEAL','idle',28,1,5000,1000,3000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,'26',NULL);
@@ -8708,6 +8708,63 @@ REPLACE INTO `mob_skill_db_re` VALUES (2540,'Faceworm Egg@NPC_SUMMONMONSTER','id
 REPLACE INTO `mob_skill_db_re` VALUES (2541,'Faceworm Larva@NPC_BLEEDING','attack',660,5,2000,1000,1000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2541,'Faceworm Larva@NPC_POISON','attack',176,5,500,800,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2541,'Faceworm Larva@NPC_POISONATTACK','attack',188,10,2000,2000,2000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
+# Geffen Magic Tournament
+REPLACE INTO `mob_skill_db_re` VALUES (2549,'Geffen Mage 1@MG_FIREBOLT','attack',19,5,3000,1000,3000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2549,'Geffen Mage 1@MG_FIREWALL','attack',18,1,3000,2000,3000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2550,'Geffen Mage 2@MG_FROSTDIVER','attack',15,5,3000,1000,3000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2550,'Geffen Mage 2@MG_THUNDERSTORM','attack',21,3,3000,2000,3000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2551,'Geffen Mage 3_1@NPC_COMBOATTACK','attack',171,2,5000,0,3000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2551,'Geffen Mage 3_1@TF_POISON','attack',52,3,3000,0,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2551,'Geffen Mage 3_1@MG_STONECURSE','attack',16,5,5000,1000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2552,'Geffen Mage 3_2@BS_HAMMERFALL','attack',110,5,5000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2552,'Geffen Mage 3_2@NPC_POWERUP','attack',349,5,5000,1000,25000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2553,'Geffen Mage 3_3@ASC_BREAKER','attack',379,1,3000,1000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2553,'Geffen Mage 3_3@AS_VENOMDUST','attack',140,10,3000,1000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2554,'Geffen Mage 4@NPC_COMBOATTACK','attack',171,3,5000,0,3000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2554,'Geffen Mage 4@AL_DECAGI','attack',30,10,3000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2554,'Geffen Mage 4@AL_INCAGI','idle',29,10,10000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2554,'Geffen Mage 4@AL_INCAGI','attack',29,10,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2555,'Geffen Mage 5@MG_COLDBOLT','attack',14,5,3000,1000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2555,'Geffen Mage 5@WZ_FROSTNOVA','attack',88,5,3000,1000,5000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2555,'Geffen Mage 5@WZ_STORMGUST','attack',89,1,3000,3000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2556,'Geffen Mage 6@CR_GRANDCROSS','attack',254,5,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2556,'Geffen Mage 6@CR_AUTOGUARD','attack',249,5,3000,500,5000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2557,'Geffen Mage 7@NPC_BLEEDING','attack',660,5,5000,0,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2557,'Geffen Mage 7@NPC_COMBOATTACK','attack',171,10,3000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2557,'Geffen Mage 7@NPC_INVISIBLE','attack',353,1,2000,1000,60000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2557,'Geffen Mage 7@NPC_WIDESOULDRAIN','attack',680,3,3000,500,10000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@RK_MILLENNIUMSHIELD','attack',2011,1,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@LK_SPIRALPIERCE','attack',397,5,3000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@SM_ENDURE','attack',8,10,3000,0,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@SM_MAGNUM','attack',7,10,3000,500,5000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2559,'Geffen Mage 9@AL_HEAL','attack',28,8,3000,0,5000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2559,'Geffen Mage 9@NPC_HOLYATTACK','attack',189,10,3000,500,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2559,'Geffen Mage 9@AL_PNEUMA','attack',25,1,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2560,'Geffen Mage 10@HT_ANKLESNARE','attack',117,1,2000,1000,10000,'no','around2','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2560,'Geffen Mage 10@AC_DOUBLE','attack',46,5,3000,500,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2560,'Geffen Mage 10@HT_FLASHER','attack',120,1,2000,1000,10000,'no','around2','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2560,'Geffen Mage 10@NPC_MENTALBREAKER','attack',159,4,2000,1000,10000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2561,'Geffen Mage 11@MG_COLDBOLT','attack',14,5,1000,500,15000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2561,'Geffen Mage 11@RG_STRIPSHIELD','attack',216,5,3000,1000,30000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2561,'Geffen Mage 11@WZ_EARTHSPIKE','attack',90,5,1000,500,15000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2561,'Geffen Mage 11@PF_SPIDERWEB','attack',405,1,1000,1000,15000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2561,'Geffen Mage 11@MG_FIREBOLT','attack',19,5,1000,500,15000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2561,'Geffen Mage 11@MG_LIGHTNINGBOLT','attack',20,5,1000,500,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2562,'Geffen Mage 12@WZ_FIREPILLAR','attack',80,5,3000,500,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2562,'Geffen Mage 12@WZ_VERMILION','attack',85,5,1000,2000,15000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2562,'Geffen Mage 12@NPC_SLOWCAST','attack',672,5,1000,1000,15000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2562,'Geffen Mage 12@MG_SOULSTRIKE','attack',13,10,1000,500,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2563,'Fei Kanabian@AM_ACIDTERROR','chase',230,5,2000,1000,15000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2563,'Fei Kanabian@AM_POTIONPITCHER','attack',231,4,3000,1000,10000,'no','friend','friendhpltmaxrate','90',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2563,'Fei Kanabian@AM_DEMONSTRATION','attack',229,5,2000,500,15000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2564,'Fenrir@NPC_COMET','attack',708,5,2000,5000,30000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2564,'Fenrir@NPC_SHIELDBRAKE','attack',346,10,3000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2564,'Fenrir@WL_EARTHSTRAIN','attack',2216,5,3000,3000,30000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2564,'Fenrir@WL_TETRAVORTEX','attack',2217,5,1000,5000,30000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2565,'Alphonse@SM_BASH','attack',5,5,1000,500,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2566,'Alphonse Jr@PR_LEXAETERNA','attack',78,1,1000,500,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2566,'Alphonse Jr@PR_LEXDIVINA','attack',76,1,1000,2000,60000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 # Champion Monsters
 REPLACE INTO `mob_skill_db_re` VALUES (2603,'Swift Zombie Slaughter@AL_TELEPORT','attack',26,1,500,0,5000,'yes','self','myhpltmaxrate','50',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -10727,7 +10784,7 @@ REPLACE INTO `mob_skill_db_re` VALUES (2960,'Flame Cross@NPC_FLAMECROSS','idle',
 
 REPLACE INTO `mob_skill_db_re` VALUES (2985,'Mysterious Bug@NPC_AGIUP','loot',350,1,1000,0,10000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
-#Horror Toy Factory
+# Horror Toy Factory
 REPLACE INTO `mob_skill_db_re` VALUES (2987,'Decorated Evil Tree@AS_GRIMTOOTH','chase',137,5,2000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2987,'Decorated Evil Tree@NPC_CURSEATTACK','attack',181,3,1000,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2987,'Decorated Evil Tree@NPC_UNDEADATTACK','attack',347,3,500,0,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);

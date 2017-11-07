@@ -999,7 +999,7 @@ ACMD_FUNC(hide)
 		map_foreachinmovearea(clif_insight, &sd->bl, AREA_SIZE, sd->bl.x, sd->bl.y, BL_ALL, &sd->bl);
 	} else {
 		sd->sc.option |= OPTION_INVISIBLE;
-		sd->vd.class_ = INVISIBLE_CLASS;
+		sd->vd.class_ = JT_INVISIBLE;
 		clif_displaymessage(fd, msg_txt(11)); // Invisible: On
 
 		// Decrement the number of pvp players on the map
@@ -3066,7 +3066,7 @@ ACMD_FUNC(doom)
 	for( pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter) ) {
 		if (pl_sd->fd != fd && pc_get_group_level(sd) >= pc_get_group_level(pl_sd)) {
 			status_kill(&pl_sd->bl);
-			clif_specialeffect(&pl_sd->bl,450,AREA);
+			clif_specialeffect(&pl_sd->bl,EF_GRANDCROSS2,AREA);
 			clif_displaymessage(pl_sd->fd, msg_txt(61)); // The holy messenger has given judgement.
 		}
 	}
@@ -3091,7 +3091,7 @@ ACMD_FUNC(doommap)
 	for( pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter) ) {
 		if (pl_sd->fd != fd && sd->bl.m == pl_sd->bl.m && pc_get_group_level(sd) >= pc_get_group_level(pl_sd)) {
 			status_kill(&pl_sd->bl);
-			clif_specialeffect(&pl_sd->bl,450,AREA);
+			clif_specialeffect(&pl_sd->bl,EF_GRANDCROSS2,AREA);
 			clif_displaymessage(pl_sd->fd, msg_txt(61)); // The holy messenger has given judgement.
 		}
 	}
@@ -5203,7 +5203,7 @@ ACMD_FUNC(email)
  *------------------------------------------*/
 ACMD_FUNC(effect)
 {
-	int type = 0, flag = 0;
+	int type = EF_NONE;
 	nullpo_retr(-1, sd);
 
 	if (!message || !*message || sscanf(message, "%d", &type) < 1) {
@@ -5211,7 +5211,13 @@ ACMD_FUNC(effect)
 		return -1;
 	}
 
-	clif_specialeffect(&sd->bl, type, (send_target)flag);
+	if (type <= EF_NONE || type >= EF_MAX) {
+		sprintf(atcmd_output, msg_txt(699), EF_NONE + 1, EF_MAX - 1); // Please enter a valid effect id in the range from %d to %d.
+		clif_displaymessage(fd, atcmd_output);
+		return -1;
+	}
+
+	clif_specialeffect(&sd->bl, type, ALL_CLIENT);
 	clif_displaymessage(fd, msg_txt(229)); // Your effect has changed.
 	return 0;
 }
@@ -6707,7 +6713,7 @@ ACMD_FUNC(summon)
 	md->master_id = sd->bl.id;
 	md->special_state.ai = AI_ATTACK;
 	md->deletetimer = add_timer(tick + duration * 60000, mob_timer_delete, md->bl.id, 0);
-	clif_specialeffect(&md->bl, 344, AREA);
+	clif_specialeffect(&md->bl, EF_ENTRY2, AREA);
 	mob_spawn(md);
 	sc_start4(NULL, &md->bl, SC_MODECHANGE, 100, 1, 0, MD_AGGRESSIVE, 0, 60000);
 	clif_skill_poseffect(&sd->bl, AM_CALLHOMUN, 1, md->bl.x, md->bl.y, tick);
@@ -7322,7 +7328,7 @@ ACMD_FUNC(homlevel)
 
 	status_calc_homunculus(hd, SCO_NONE);
 	status_percent_heal(&hd->bl, 100, 100);
-	clif_specialeffect(&hd->bl, 568, AREA);
+	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
 
 	return 0;
 }
@@ -7916,9 +7922,9 @@ ACMD_FUNC(size)
 
 	sd->state.size = size;
 	if( size == SZ_MEDIUM )
-		clif_specialeffect(&sd->bl,420,AREA);
+		clif_specialeffect(&sd->bl,EF_BABYBODY,AREA);
 	else if( size == SZ_BIG )
-		clif_specialeffect(&sd->bl,422,AREA);
+		clif_specialeffect(&sd->bl,EF_GIANTBODY,AREA);
 
 	clif_displaymessage(fd, msg_txt(1303)); // Size change applied.
 	return 0;
@@ -7943,9 +7949,9 @@ ACMD_FUNC(sizeall)
 
 			pl_sd->state.size = size;
 			if( size == SZ_MEDIUM )
-				clif_specialeffect(&pl_sd->bl,420,AREA);
+				clif_specialeffect(&pl_sd->bl,EF_BABYBODY,AREA);
 			else if( size == SZ_BIG )
-				clif_specialeffect(&pl_sd->bl,422,AREA);
+				clif_specialeffect(&pl_sd->bl,EF_GIANTBODY,AREA);
 		}
 	}
 	mapit_free(iter);
@@ -7985,9 +7991,9 @@ ACMD_FUNC(sizeguild)
 
 			pl_sd->state.size = size;
 			if( size == SZ_MEDIUM )
-				clif_specialeffect(&pl_sd->bl,420,AREA);
+				clif_specialeffect(&pl_sd->bl,EF_BABYBODY,AREA);
 			else if( size == SZ_BIG )
-				clif_specialeffect(&pl_sd->bl,422,AREA);
+				clif_specialeffect(&pl_sd->bl,EF_GIANTBODY,AREA);
 		}
 	}
 

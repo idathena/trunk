@@ -4613,7 +4613,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 	struct status_data *status = status_get_status_data(bl);
 	struct status_change *sc = status_get_sc(bl);
 	TBL_PC *sd = BL_CAST(BL_PC,bl);
-	int temp;
+	int temp = 0;
 
 	if( !b_status || !status )
 		return;
@@ -4937,8 +4937,10 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->adelay = status->amotion;
 		} else if( bl->type&BL_PC ) {
 			uint16 lv;
-			int val = 0;
-			float temp = 0;
+#ifdef RENEWAL_ASPD
+			uint8 val = 0;
+#endif
+			float temp_ = 0;
 
 			amotion = status_base_amotion_pc(sd, status);
 #ifndef RENEWAL_ASPD
@@ -4953,25 +4955,25 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 				case W_WHIP:	case W_REVOLVER:
 				case W_RIFLE:	case W_GATLING:
 				case W_SHOTGUN:	case W_GRENADE:
-					temp = status->dex * status->dex / 7.0f + status->agi * status->agi * 0.5f;
+					temp_ = status->dex * status->dex / 7.0f + status->agi * status->agi * 0.5f;
 					break;
 				default:
-					temp = status->dex * status->dex / 5.0f + status->agi * status->agi * 0.5f;
+					temp_ = status->dex * status->dex / 5.0f + status->agi * status->agi * 0.5f;
 					break;
 			}
-			temp = (float)(sqrt(temp) * 0.25f);
+			temp_ = (float)(sqrt(temp_) * 0.25f);
 			if( (lv = pc_checkskill(sd,SA_ADVANCEDBOOK)) > 0 && sd->status.weapon == W_BOOK )
 				val += (lv - 1) / 2 + 1;
 			if( (lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE )
 				val += ((lv + 1) / 2);
-			amotion -= (int)(temp + (float)((status_calc_aspd(bl, sc, true) + val) * status->agi) / 200) * 10;
+			amotion -= (int)(temp_ + (float)((status_calc_aspd(bl, sc, true) + val) * status->agi) / 200) * 10;
 			//Absolute ASPD % modifier
 			if( status->aspd_rate != 1000 )
 				amotion = (200 - (200 - amotion / 10) * status->aspd_rate / 1000) * 10;
 			if( sd->ud.skilltimer != INVALID_TIMER && (lv = pc_checkskill(sd, SA_FREECAST)) > 0 )
 				amotion = (200 - (200 - amotion / 10) * (lv + 10) * 5 / 100) * 10;
 			//RE ASPD % modifier
-			if( (status_calc_aspd(bl, sc, false) + status->aspd_rate2) != 0 )
+			if( (status_calc_aspd(bl, sc, false) + status->aspd_rate2) )
 				amotion -= (amotion - pc_maxaspd(sd)) * (status_calc_aspd(bl, sc, false) + status->aspd_rate2) / 100 + 5; //Don't have round()
 			amotion += sd->bonus.aspd_add;
 #endif
@@ -7298,29 +7300,30 @@ enum e_race2 status_get_race2(struct block_list *bl)
 {
 	nullpo_retr(RC2_NONE,bl);
 
-	if(bl->type == BL_MOB)
+	if (bl->type == BL_MOB)
 		return ((struct mob_data *)bl)->db->race2;
-	if(bl->type == BL_PET)
+	if (bl->type == BL_PET)
 		return ((struct pet_data *)bl)->db->race2;
 	return RC2_NONE;
 }
 
-int status_isdead(struct block_list *bl)
+bool status_isdead(struct block_list *bl)
 {
 	nullpo_ret(bl);
 
 	return !status_get_status_data(bl)->hp;
 }
 
-int status_isimmune(struct block_list *bl)
+bool status_isimmune(struct block_list *bl)
 {
 	struct status_change *sc = status_get_sc(bl);
+	struct map_session_data *sd = map_id2sd(bl->id);
 
 	if (sc && sc->data[SC_HERMODE])
-		return 100;
-	if (bl->type == BL_PC && ((TBL_PC *)bl)->special_state.no_magic_damage >= battle_config.gtb_sc_immunity)
-		return ((TBL_PC *)bl)->special_state.no_magic_damage;
-	return 0;
+		return true;
+	if (sd && rnd()%100 < sd->special_state.no_magic_damage)
+		return true;
+	return false;
 }
 
 struct view_data *status_get_viewdata(struct block_list *bl)
@@ -7347,7 +7350,7 @@ void status_set_viewdata(struct block_list *bl, int class_)
 
 	if (mobdb_checkid(class_) || mob_is_clone(class_))
 		vd = mob_get_viewdata(class_);
-	else if (npcdb_checkid(class_) || (bl->type == BL_NPC && class_ == WARP_CLASS))
+	else if (npcdb_checkid(class_))
 		vd = npc_get_viewdata(class_);
 	else if (homdb_checkid(class_))
 		vd = hom_get_viewdata(class_);
@@ -9840,6 +9843,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_FEAR:
 				status_change_start(src,bl,SC_ANKLE,10000,val1,0,0,0,2000,SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
 				break;
+			case SC_ENCHANTBLADE:
+				val2 = (100 + 20 * val1) * status_get_lv(src) / 150 + status_get_int(src);
+				break;
 			case SC_DEATHBOUND:
 				val2 = 500 + 100 * val1;
 				break;
@@ -11244,7 +11250,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				struct unit_data *ud = unit_bl2ud(bl);
 
 				if (ud)
-					ud->state.running = unit_run(bl, sd, SC_WUGDASH);
+					ud->state.running = unit_run(bl,sd,SC_WUGDASH);
 			}
 			break;
 		case SC_COMBO:
@@ -11277,9 +11283,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_RAISINGDRAGON:
 			sce->val2 = status->max_hp / 100; //Officially tested its 1% HP drain [Jobbie]
 			break;
-		case SC_C_MARKER:
-			if (src && src->type == BL_PC && (sd = map_id2sd(src->id)))
-				clif_crimson_marker(sd,bl,0); //Send mini-map, don't wait for first timer triggered
+		case SC_C_MARKER: {
+				struct map_session_data *ssd = map_id2sd(src->id);
+
+				if (ssd)
+					clif_crimson_marker(ssd,bl,0); //Send mini-map, don't wait for first timer triggered
+			}
 			break;
 		case SC_GVG_GIANT:
 		case SC_GVG_GOLEM:

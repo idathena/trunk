@@ -92,7 +92,7 @@
 1646:2161,{ set .@r,getequiprefinerycnt(EQI_HAND_L)*4; bonus2 bVariableCastrate,"WZ_STORMGUST",-.@r; bonus2 bVariableCastrate,"WL_FROSTMISTY",-.@r; bonus2 bVariableCastrate,"WL_JACKFROST",-.@r; }
 1649:2198,{ set .@r,getequiprefinerycnt(EQI_HAND_R); if(getequiprefinerycnt(EQI_HAND_L)>=9) bonus bMatk,.@r*15; if(.@r>=10) { bonus bMatk,50; bonus bVariableCastrate,-10; } }
 1657:2471:2569:15029,{ bonus bHealPower,25; bonus2 bSkillUseSP,"AL_HEAL",20; bonus2 bSkillCooldown,"AB_CLEARANCE",-2000; bonus2 bSkillCooldown,"AB_LAUDAAGNUS",-2000; bonus2 bSkillCooldown,"AB_LAUDARAMUS",-2000; }
-1659:5920,{ set .@r,getequiprefinerycnt(EQI_HAND_R); bonus2 bSkillUseSP,"AL_HEAL",-.@r*6; bonus2 bSkillUseSP,"AB_CHEAL",-.@r*10; bonus2 bSkillUseSP,"AB_HIGHNESSHEAL",-.@r*14; }
+1659:5920,{ set .@r,getequiprefinerycnt(EQI_HAND_R); bonus2 bSkillUseSP,"AL_HEAL",-(.@r*6); bonus2 bSkillUseSP,"AB_CHEAL",-(.@r*10); bonus2 bSkillUseSP,"AB_HIGHNESSHEAL",-(.@r*14); }
 1660:2471:2569:15029,{ bonus bHealPower,45; bonus2 bSkillUseSP,"AL_HEAL",50; bonus3 bAutoSpellWhenHit,"AB_SILENTIUM",1,100; bonus2 bSkillCooldown,"AB_CLEARANCE",-3000; bonus2 bSkillCooldown,"AB_LAUDAAGNUS",-3000; bonus2 bSkillCooldown,"AB_LAUDARAMUS",-3000; }
 1662:18539,{ set .@r,getequiprefinerycnt(EQI_HAND_R); bonus bMatk,.@r*10; if(.@r>=10) bonus bVariableCastrate,-10; }
 1664:18804,{ bonus bMatk,getequiprefinerycnt(EQI_HAND_R)*10; }
@@ -258,7 +258,7 @@
 2479:2580:2890:15042,{ bonus bAspd,2; bonus2 bSkillAtk,"RA_ARROWSTORM",50; bonus bLongAtkRate,30; bonus3 bAutoSpell,"AC_DOUBLE",max(getskilllv("AC_DOUBLE"),3),20; }
 2480:2581:2891:15043,{ bonus bMaxHPrate,15; bonus bFlee2,20; bonus2 bSkillAtk,"RA_CLUSTERBOMB",20; bonus bLongAtkRate,-30; bonus bAspd,-7; }
 2481:2730,{ bonus bBaseAtk,getequiprefinerycnt(EQI_SHOES); }
-2481:2731,{ set .@r,getequiprefinerycnt(EQI_SHOES); bonus2 bMagicAddRace,RC_All,.@r/2; bonus bVariableCastrate,-.@r/2; }
+2481:2731,{ set .@r,getequiprefinerycnt(EQI_SHOES); bonus2 bMagicAddRace,RC_All,.@r/2; bonus bVariableCastrate,-(.@r/2); }
 2481:10031,{ bonus bCritical,(getequiprefinerycnt(EQI_SHOES)/2)*10; }
 2482:2585:2895:2896:15045:18578,{ bonus bMaxHP,500; bonus bMaxSP,300; bonus bBaseAtk,10; bonus bDef,10; }
 2483:2586:15046,{ bonus bVit,5; bonus2 bSubRace,RC_DemiHuman,15; bonus2 bSubRace,RC_Brute,15; }

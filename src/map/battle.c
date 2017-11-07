@@ -958,14 +958,14 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 	tstatus = status_get_status_data(src);
 
 	if( sd ) {
-		if( flag&BF_WEAPON && sd->special_state.no_weapon_damage )
-			damage -= damage * sd->special_state.no_weapon_damage / 100;
+		if( flag&BF_WEAPON && rnd()%100 < sd->special_state.no_weapon_damage )
+			damage = 0;
 
-		if( flag&BF_MAGIC && sd->special_state.no_magic_damage )
-			damage -= damage * sd->special_state.no_magic_damage / 100;
+		if( flag&BF_MAGIC && rnd()%100 < sd->special_state.no_magic_damage )
+			damage = 0;
 
-		if( flag&BF_MISC && sd->special_state.no_misc_damage )
-			damage -= damage * sd->special_state.no_misc_damage / 100;
+		if( flag&BF_MISC && rnd()%100 < sd->special_state.no_misc_damage )
+			damage = 0;
 
 		if( !damage )
 			return 0;
@@ -1148,7 +1148,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 		//Kaupe blocks damage (skill or otherwise) from players, mobs, homuns, mercenaries
 		if( (sce = sc->data[SC_KAUPE]) && rnd()%100 < sce->val2 ) {
-			clif_specialeffect(bl,462,AREA);
+			clif_specialeffect(bl,EF_STORMKICK4,AREA);
 #ifndef RENEWAL //Shouldn't end until Breaker's non-weapon part connects
 			if( skill_id != ASC_BREAKER || !(flag&BF_WEAPON) )
 #endif
@@ -1163,7 +1163,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 #endif
 
 		if( (sce = sc->data[SC_PRESTIGE]) && flag&BF_MAGIC && rnd()%100 < sce->val2 ) {
-			clif_specialeffect(bl,462,AREA); //Still need confirm it
+			clif_specialeffect(bl,EF_STORMKICK4,AREA); //Still need confirm it
 			return 0;
 		}
 
@@ -1178,7 +1178,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			if( !status_isdead(src) )
 				skill_counter_additional_effect(src,bl,skill_id,skill_lv,flag,gettick());
 			if( sce ) {
-				clif_specialeffect(bl,462,AREA);
+				clif_specialeffect(bl,EF_STORMKICK4,AREA);
 				skill_blown(src,bl,sce->val3,-1,0);
 			}
 			//Both need to be consumed if they are active
@@ -1326,7 +1326,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( (sce = sc->data[SC_MAGMA_FLOW]) && rnd()%100 < sce->val2 )
 			skill_castend_nodamage_id(bl,bl,MH_MAGMA_FLOW,sce->val1,gettick(),flag|2);
 
-		if( damage > 0 && (sce = sc->data[SC_STONEHARDSKIN]) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) ) {
+		if( (sce = sc->data[SC_STONEHARDSKIN]) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) ) {
 			if( src->type == BL_MOB ) //Using explicit call instead break_equip for duration
 				sc_start(src,src,SC_STRIPWEAPON,30,0,skill_get_time2(RK_STONEHARDSKIN,sce->val1));
 			else
@@ -1365,7 +1365,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 					status_change_end(bl,SC_KYRIE,INVALID_TIMER);
 			}
 			if( (sce = sc->data[SC_P_ALTER]) ) {
-				clif_specialeffect(bl,336,SELF);
+				clif_specialeffect(bl,EF_GUARD,SELF);
 				sce->val3 -= (int)cap_value(damage,INT_MIN,INT_MAX);
 				if( flag&BF_WEAPON ) {
 					if( sce->val3 >= 0 )
@@ -2328,7 +2328,7 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 			case 0:
 				if(!(sc && sc->data[SC_AUTOCOUNTER]))
 					break;
-				clif_specialeffect(src, 131, AREA);
+				clif_specialeffect(src, EF_AUTOCOUNTER, AREA);
 				status_change_end(src, SC_AUTOCOUNTER, INVALID_TIMER);
 			//Fall through
 			case KN_AUTOCOUNTER:
@@ -2410,7 +2410,7 @@ static bool is_attack_piercing(struct Damage wd, struct block_list *src, struct 
 	return false;
 }
 
-static bool battle_skill_get_damage_properties(uint16 skill_id, int is_splash)
+static int battle_skill_get_damage_properties(uint16 skill_id, int is_splash)
 {
 	int nk = skill_get_nk(skill_id);
 
@@ -3281,8 +3281,8 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 		if(sd->weapontype1 != W_FIST) {
 			if(sd->bonus.double_rate > 0)
 				dachance = sd->bonus.double_rate;
-			if(sc && sc->data[SC_KAGEMUSYA] && sc->data[SC_KAGEMUSYA]->val3 > dachance)
-				dachance = sc->data[SC_KAGEMUSYA]->val3;
+			if(sc && sc->data[SC_KAGEMUSYA] && 10 * sc->data[SC_KAGEMUSYA]->val1 > dachance)
+				dachance = 10 * sc->data[SC_KAGEMUSYA]->val1;
 			if(sc && sc->data[SC_E_CHAIN] && 5 * sc->data[SC_E_CHAIN]->val1 > dachance) {
 				dachance = 5 * sc->data[SC_E_CHAIN]->val1;
 				if(pc_checkskill(sd,RL_QD_SHOT))
@@ -3471,8 +3471,8 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 					skillratio += ratio / 4;
 				if(skill_lv > 9 && wd.miscflag == 2)
 					skillratio += ratio / 2;
-				break;
 			}
+			break;
 		case KN_BOWLINGBASH:
 		case MS_BOWLINGBASH:
 			skillratio+= 40 * skill_lv;
@@ -5045,7 +5045,7 @@ struct Damage battle_calc_attack_left_right_hands(struct Damage wd, struct block
 struct block_list *battle_check_devotion(struct block_list *bl) {
 	struct block_list *d_bl = NULL;
 
-	if(battle_config.devotion_rdamage && battle_config.devotion_rdamage > rnd()%100) {
+	if(battle_config.devotion_rdamage && rnd()%100 < battle_config.devotion_rdamage) {
 		struct status_change *sc = status_get_sc(bl);
 
 		if(sc && sc->data[SC_DEVOTION])
@@ -8168,7 +8168,6 @@ static const struct _battle_data {
 	{ "monster_max_aspd",                   &battle_config.monster_max_aspd,                199,    100,    199,            },
 	{ "view_range_rate",                    &battle_config.view_range_rate,                 100,    0,      INT_MAX,        },
 	{ "chase_range_rate",                   &battle_config.chase_range_rate,                100,    0,      INT_MAX,        },
-	{ "gtb_sc_immunity",                    &battle_config.gtb_sc_immunity,                 50,     0,      INT_MAX,        },
 	{ "guild_max_castles",                  &battle_config.guild_max_castles,               0,      0,      INT_MAX,        },
 	{ "guild_skill_relog_delay",            &battle_config.guild_skill_relog_delay,         300000, 0,      INT_MAX,        },
 	{ "emergency_call",                     &battle_config.emergency_call,                  11,     0,      31,             },

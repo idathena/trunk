@@ -680,7 +680,7 @@ int hom_evolution(struct homun_data *hd)
 
 	clif_spawn(&hd->bl);
 	clif_emotion(&sd->bl, E_NO1);
-	clif_specialeffect(&hd->bl, 568, AREA);
+	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
 
 	//status_Calc flag&1 will make current HP/SP be reloaded from hom structure
 	hom->hp = hd->battle_status.hp;
@@ -784,7 +784,7 @@ int hom_mutate(struct homun_data *hd, int homun_id)
 
 	clif_spawn(&hd->bl);
 	clif_emotion(&sd->bl, E_NO1);
-	clif_specialeffect(&hd->bl, 568, AREA);
+	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
 
 	//status_calc flag&1 will make current HP/SP be reloaded from hom structure
 	hom->hp = hd->battle_status.hp;
@@ -837,7 +837,7 @@ void hom_gainexp(struct homun_data *hd, int exp)
 	if (hd->exp_next == 0)
 		hd->homunculus.exp = 0 ;
 
-	clif_specialeffect(&hd->bl, 568, AREA);
+	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
 	status_calc_homunculus(hd, SCO_NONE);
 	status_percent_heal(&hd->bl, 100, 100);
 }
@@ -1492,7 +1492,7 @@ int hom_shuffle(struct homun_data *hd)
 	clif_homskillinfoblock(sd);
 	status_calc_homunculus(hd, SCO_NONE);
 	status_percent_heal(&hd->bl, 100, 100);
-	clif_specialeffect(&hd->bl, 568, AREA);
+	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
 	return 1;
 }
 
@@ -1560,7 +1560,7 @@ int hom_max(struct homun_data *hd)
 	status_calc_homunculus(hd, SCO_NONE);
 	//clif_hominfo(hd->master, hd, 0);
 	status_percent_heal(&hd->bl, 100, 100);
-	clif_specialeffect(&hd->bl, 568, AREA);
+	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
 	return 1;
 }
 

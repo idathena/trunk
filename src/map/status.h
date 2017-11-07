@@ -2264,8 +2264,8 @@ void status_set_viewdata(struct block_list *bl, int class_);
 void status_change_init(struct block_list *bl);
 struct status_change *status_get_sc(struct block_list *bl);
 
-int status_isdead(struct block_list *bl);
-int status_isimmune(struct block_list *bl);
+bool status_isdead(struct block_list *bl);
+bool status_isimmune(struct block_list *bl);
 
 int status_get_sc_interval(enum sc_type type);
 int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, unsigned char flag);

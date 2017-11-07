@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Last Updated: ========================================
-//= 20150615
+//= 20171105
 //===== Description: =========================================
 //= A reference manual for the rAthena scripting language.
 //= Commands are sorted depending on their functionality.
@@ -5391,7 +5391,7 @@ Values for <mode> are:
 	STOR_MODE_PUT  : Player can put items in the storage.
 
 Example:
-	if (vip_status(1)) {
+	if (vip_status(VIP_STATUS_ACTIVE)) {
 		mes "I will open your Premium storage.";
 		mes "Thank you for using our service.";
 		close2;
@@ -9727,7 +9727,8 @@ Valid flag are:
 
 This will set a Hat Effect onto the player. The state field allows you to
 enable (true) or disable (false) the effect on the player.
-The Hat Effect constants can be found in db/const.txt starting with HAT_EF_*.
+The Hat Effect constants can be found in 'src/map/script_constants.h' starting
+with HAT_EF_*.
 
 Requires client 2015-05-13aRagEXE or newer. 
 

@@ -177,9 +177,9 @@ bonus bNearAtkDef,n;			Adds n% damage reduction against melee physical attacks
 bonus bLongAtkDef,n;			Adds n% damage reduction against ranged physical attacks
 bonus bMagicAtkDef,n;			Adds n% damage reduction against magical attacks
 bonus bMiscAtkDef,n;			Adds n% damage reduction against MISC attacks (traps, falcon, ...)
-bonus bNoWeaponDamage,n;		Adds n% reduction to received physical damage
-bonus bNoMagicDamage,n;			Adds n% reduction to received magical effect (Attack, Healing, Support spells are all blocked)
-bonus bNoMiscDamage,n;			Adds n% reduction to received misc damage.
+bonus bNoWeaponDamage,n;		Blocks received physical damage at n%
+bonus bNoMagicDamage,n;			Blocks received magical effect (attack, healing or support spells) at n%
+bonus bNoMiscDamage,n;			Blocks received misc damage at n%
 
 Healing
 -------

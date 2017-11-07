@@ -268,7 +268,7 @@ void mvptomb_create(struct mob_data *md, char *killer, time_t time)
 
 	safestrncpy(nd->name, msg_txt(656), sizeof(nd->name));
 
-	nd->class_ = TOMB_CLASS;
+	nd->class_ = JT_MOB_TOMB;
 	nd->speed = 200;
 	nd->subtype = NPCTYPE_TOMB;
 

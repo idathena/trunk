@@ -787,7 +787,7 @@
 6655,499,100	// Firm_Pumpkin
 6656,499,100	// Goast_Free_Charm
 6657,499,100	// Memory_Of_Jack
-6671,467,100	// Geffen_Coin_Magic_Tournament
+6671,467,100	// Geffen_Magic_Coin
 6672,467,100	// Gray_Piece
 6673,507,100	// Bossnia_Tickets
 6674,507,100	// GM_Coin
@@ -3707,7 +3707,7 @@
 22075,467,100	// Rift_Shoes
 22508,507,100	// Para_Team_Mark_
 22510,475,100	// King_Wolf_Scroll
-//22511,467,100	//
+22511,467,100	// Fenrir_Card__
 22513,499,100	// King_Of_Gift_Box
 22517,507,100	// Loki_Summon_Scroll
 22521,507,100	// Level_Up_Box_

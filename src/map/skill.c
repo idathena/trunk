@@ -975,7 +975,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 					if( pc_iswug(sd) && (lv = pc_checkskill(sd,RA_WUGSTRIKE)) > 0 && rnd()%1000 < sstatus->luk * 10 / 3 + 1 )
 						skill_castend_damage_id(src,bl,RA_WUGSTRIKE,lv,tick,0); //Automatic trigger of Warg Strike [Jobbie]
 					if( dstmd && sd->status.weapon != W_BOW && (lv = pc_checkskill(sd,RG_SNATCHER)) > 0 &&
-						55 + lv * 15 + pc_checkskill(sd,TF_STEAL) * 10 > rnd()%1000 ) { //Gank
+						rnd()%1000 < 55 + lv * 15 + pc_checkskill(sd,TF_STEAL) * 10 ) { //Gank
 						if( pc_steal_item(sd,bl,pc_checkskill(sd,TF_STEAL)) )
 							clif_skill_nodamage(src,bl,TF_STEAL,lv,1);
 						else
@@ -2653,7 +2653,7 @@ static int skill_magic_reflect(struct block_list *src, struct block_list *bl, in
 		if( sc->data[SC_KAITE]->val3 && !(type && rnd()%100 < 50) )
 			return 0;
 #endif
-		clif_specialeffect(bl, 438, AREA);
+		clif_specialeffect(bl, EF_ATTACKENERGY2, AREA);
 		if( --sc->data[SC_KAITE]->val2 <= 0 )
 			status_change_end(bl, SC_KAITE, INVALID_TIMER);
 		return 2; //Kaite reflection (Doessn't bypass Boss check)
@@ -3448,7 +3448,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				} else {
 					bool isDevotRdamage = false;
 
-					if (battle_config.devotion_rdamage && battle_config.devotion_rdamage > rnd()%100)
+					if (battle_config.devotion_rdamage && rnd()%100 < battle_config.devotion_rdamage)
 						isDevotRdamage = true;
 					//If !isDevotRdamage, reflected magics are done directly on the target not on paladin
 					//This check is only for magical skill
@@ -5946,57 +5946,26 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case RK_STORMBLAST:
 		case RK_FIGHTINGSPIRIT:
 		case RK_ABUNDANCE:
-			if(sd && 85 + pc_checkskill(sd,RK_RUNEMASTERY) + ((sstatus->dex + sstatus->luk) / 20) < rnd()%100) { //If Fail
-				struct item_data *i_data;
-				int nameid = 0;
-				int rate = rnd()%20 + 1;
+			if(sd) {
+				uint16 rune_level = pc_checkskill(sd,RK_RUNEMASTERY);
 
-				switch(skill_id) {
-					case RK_MILLENNIUMSHIELD:
-						nameid = ITEMID_BERKANA;
-						break;
-					case RK_CRUSHSTRIKE:
-						nameid = ITEMID_RAIDO;
-						break;
-					case RK_REFRESH:
-						nameid = ITEMID_NAUTHIZ;
-						break;
-					case RK_GIANTGROWTH:
-						nameid = ITEMID_THURISAZ;
-						break;
-					case RK_STONEHARDSKIN:
-						nameid = ITEMID_HAGALAZ;
-						break;
-					case RK_VITALITYACTIVATION:
-						nameid = ITEMID_ISA;
-						break;
-					case RK_STORMBLAST:
-						nameid = ITEMID_PERTHRO;
-						break;
-					case RK_FIGHTINGSPIRIT:
-						nameid = ITEMID_EIHWAZ;
-						break;
-					case RK_ABUNDANCE:
-						nameid = ITEMID_URUZ;
-						break;
-				}
-				i_data = itemdb_exists(nameid);
-				if(rate >= 1 && rate <= 10)
-					status_change_start(src,&sd->bl,(sc_type)(rnd()%SC_CONFUSION),10000,0,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDRATE);
-				else if(rate >= 11 && rate <= 13) {
-					clif_skill_nodamage(src,src,NPC_SELFDESTRUCTION,10,1); //Show only animation
-					status_damage(src,src,i_data->weight / 10 * 1000,0,0,1); //@TODO: How to make this magic type damage?
-				} else if(rate >= 14 && rate <= 16)
-					status_heal(src,i_data->weight / 10 * 1000,0,2);
-				else if(rate >= 17 && rate <= 18) {
-					if(!map[src->m].flag.noteleport)
+				if(!rune_level || rnd()%100 >= 85 + rune_level + (sstatus->dex + sstatus->luk) / 20) { //Activation failed
+					uint8 rate = rnd()%100;
+
+					if(rate < 1 && sd->status.party_id)
+						party_foreachsamemap(skill_area_sub,sd,skill_get_splash(ALL_RESURRECTION,1),src,ALL_RESURRECTION,1,tick,flag|BCT_PARTY,skill_castend_nodamage_id);
+					else if(rate < 2)
+						status_percent_heal(src,100,100);
+					else if(rate < 4 && !map[src->m].flag.noteleport)
 						pc_randomwarp(sd,CLR_TELEPORT);
-				} else if(rate == 19)
-					status_percent_heal(src,100,100);
-				else if(rate == 20 && sd->status.party_id)
-					party_foreachsamemap(skill_area_sub,sd,skill_get_splash(ALL_RESURRECTION,1),src,ALL_RESURRECTION,1,tick,flag|BCT_PARTY,skill_castend_nodamage_id);
-				skill_consume_requirement(sd,skill_id,skill_lv,2);
-				return 0;
+					else if(rate < 7)
+						status_heal(src,10000,0,2);
+					else if(rate < 10)
+						status_fix_damage(NULL,src,10000,0);
+					else if(rate < 20)
+						status_change_start(src,src,(sc_type)(rnd()%SC_CONFUSION),10000,0,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDRATE);
+					return 0;
+				}
 			}
 			break;
 		case MH_STEINWAND: {
@@ -6545,6 +6514,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case NPC_MAXPAIN:
 		case ALL_ANGEL_PROTECT:
 		case ALL_RAY_OF_PROTECTION:
+		case RK_ENCHANTBLADE:
 		case RK_CRUSHSTRIKE:
 		case RA_FEARBREEZE:
 		case AB_EXPIATIO:
@@ -7109,7 +7079,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			else {
 				i = sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 				if (skill_id == SC_REPRODUCE)
-					clif_specialeffect(bl,808,AREA);
+					clif_specialeffect(bl,EF_RECOGNIZED2,AREA);
 			}
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,i);
 			break;
@@ -8251,12 +8221,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 				if (f_sd && check_distance_bl(bl,&f_sd->bl,AREA_SIZE)) {
 					sc_start(src,&f_sd->bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
-					clif_specialeffect(&f_sd->bl,408,AREA);
+					clif_specialeffect(&f_sd->bl,EF_BABY,AREA);
 					we_baby_parents = true;
 				}
 				if (m_sd && check_distance_bl(bl,&m_sd->bl,AREA_SIZE)) {
 					sc_start(src,&m_sd->bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
-					clif_specialeffect(&m_sd->bl,408,AREA);
+					clif_specialeffect(&m_sd->bl,EF_BABY,AREA);
 					we_baby_parents = true;
 				}
 				if (!we_baby_parents ||
@@ -8603,7 +8573,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					status_zap(src,0,req.sp); //Consume sp only if succeeded [Inkfish]
 				}
 				card = skill_tarotcard(src,bl,skill_id,skill_lv,tick); //Actual effect is executed here
-				clif_specialeffect((card == 6 ? src : bl),522 + card,AREA);
+				clif_specialeffect((card == 6 ? src : bl),EF_TAROTCARD1 + card - 1,AREA);
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			}
 			break;
@@ -8635,7 +8605,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if (skill_id == SL_SUPERNOVICE && dstsd->die_counter && !(rnd()%100)) { //Erase death count 1% of the casts
 					dstsd->die_counter = 0;
 					pc_setglobalreg(dstsd,"PC_DIE_COUNTER",0);
-					clif_specialeffect(bl,0x152,AREA);
+					clif_specialeffect(bl,EF_ANGEL2,AREA);
 					//SC_SPIRIT invokes status_calc_pc for us
 				}
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,
@@ -8956,11 +8926,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,buyingstore_setup(sd,MAX_BUYINGSTORE_SLOTS) ? 0 : 1);
 			break;
 
-		case RK_ENCHANTBLADE:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,
-				sc_start2(src,bl,type,100,skill_lv,((100 + 20 * skill_lv) * status_get_lv(src)) / 150 + sstatus->int_,skill_get_time(skill_id,skill_lv)));
-			break;
-
 		case RK_DEATHBOUND:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
@@ -8993,16 +8958,15 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case RK_MILLENNIUMSHIELD: {
-				int8 generate = 0;
-				int16 shieldnumber = 0;
+				uint8 generate = rnd()%100; //Generates a random number, which is then used to determine how many shields will generate
+				uint8 shieldnumber = 0;
 
-				generate = rnd()%100 + 1; //Generates a random number between 1 - 100 which is then used to determine how many shields will generate
-				if( generate >= 1 && generate <= 20 ) //20% chance for 4 shields
-					shieldnumber = 4;
-				else if( generate >= 21 && generate <= 50 ) //30% chance for 3 shields
-					shieldnumber = 3;
-				else if( generate >= 51 && generate <= 100 ) //50% chance for 2 shields
-					shieldnumber = 2;
+				if( generate < 20 )
+					shieldnumber = 4; //20% chance for 4 shields
+				else if( generate < 50 )
+					shieldnumber = 3; //30% chance for 3 shields
+				else if( generate < 100 )
+					shieldnumber = 2; //50% chance for 2 shields
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,
 					sc_start4(src,bl,type,100,skill_lv,shieldnumber,1000,0,skill_get_time(skill_id,skill_lv)));
 				sc_start2(src,bl,SC_LUXANIMA,100,skill_lv,status_skill2sc(skill_id),skill_get_time(skill_id,skill_lv));
@@ -9035,14 +8999,14 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					sc_start2(src,bl,type,100,skill_area_temp[5],(sd ? pc_checkskill(sd,RK_RUNEMASTERY) : 10) * 4,skill_get_time(skill_id,skill_lv));
 				else
 					sc_start(src,bl,type,100,skill_area_temp[5] / 2,skill_get_time(skill_id,skill_lv));
-			} else if( sd ) {
+			} else {
 				skill_area_temp[5] = 0;
-				if( sd->status.party_id ) {
+				if( sd && sd->status.party_id ) {
 					i = party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,BCT_PARTY,skill_area_sub_count);
 					skill_area_temp[5] = 70 + 7 * i; //Attack Bonus
 					party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 				} else
-					sc_start2(src,bl,type,100,77,pc_checkskill(sd,RK_RUNEMASTERY) * 4,skill_get_time(skill_id,skill_lv));
+					sc_start2(src,bl,type,100,77,(sd ? pc_checkskill(sd,RK_RUNEMASTERY) : 10) * 4,skill_get_time(skill_id,skill_lv));
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			}
 			break;
@@ -9052,12 +9016,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if( bl->id == src->id )
 					break;
 				if( skill_area_temp[5]&0x10 ) {
-					i = rnd()%100 + 1;
-					if( i >= 1 && i <= 20 )
+					i = rnd()%100;
+					if( i < 20 )
 						i = 4;
-					else if( i >= 21 && i <= 50 )
+					else if( i < 50 )
 						i = 3;
-					else if( i >= 51 && i <= 100 )
+					else if( i < 100 )
 						i = 2;
 					sc_start4(src,bl,SC_MILLENNIUMSHIELD,100,skill_lv,i,1000,0,skill_get_time(skill_id,skill_lv));
 				}
@@ -11693,6 +11657,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case SC_CHAOSPANIC:
 		case SC_FEINTBOMB:
 		case LG_EARTHDRIVE:
+		case RL_FALLEN_ANGEL:
 		case SU_CN_METEOR:
 		case SU_LOPE:
 		case EL_FIRE_MANTLE:
@@ -17189,7 +17154,7 @@ void skill_weaponrefine(struct map_session_data *sd, int idx)
 			else
 				per += (((signed int)sd->status.job_level) - 50) / 2; //Updated per the new kro descriptions [Skotlex]
 			pc_delitem(sd,i,1,0,0,LOG_TYPE_OTHER);
-			if (per > rnd()%100) {
+			if (rnd()%100 < per) {
 				int ep = 0;
 
 				log_pick_pc(sd,LOG_TYPE_OTHER,-1,item);
@@ -19798,7 +19763,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 				default: //Cooking items
 					if( skill_produce_db[idx].itemlv > 10 && skill_produce_db[idx].itemlv <= 20 && sd->cook_mastery < 1999 )
 						pc_setglobalreg(sd,"COOK_MASTERY",sd->cook_mastery + (1<<((skill_produce_db[idx].itemlv - 11) / 2)) * 5);
-					clif_specialeffect(&sd->bl,608,AREA);
+					clif_specialeffect(&sd->bl,EF_COOKING_OK,AREA);
 					break;
 			}
 		}
@@ -19913,7 +19878,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 			default: //Cooking items
 				if( skill_produce_db[idx].itemlv > 10 && skill_produce_db[idx].itemlv <= 20 && sd->cook_mastery > 0 )
 					pc_setglobalreg(sd,"COOK_MASTERY",sd->cook_mastery - (1<<((skill_produce_db[idx].itemlv - 11) / 2)) - (((1<<((skill_produce_db[idx].itemlv - 11) / 2))>>1) * 3));
-				clif_specialeffect(&sd->bl,609,AREA);
+				clif_specialeffect(&sd->bl,EF_COOKING_FAIL,AREA);
 				break;
 		}
 	}
