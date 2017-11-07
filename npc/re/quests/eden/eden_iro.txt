@@ -870,6 +870,83 @@ moc_para01,21,185,4	duplicate(Alora)	Alora#headgear_dye2	862
 // Dyes clothing for an Omni Clothing Dye, currently a placeholder.
 moc_para01,33,185,4	script	Dinorah Lacostt#ed	862,{ end; }
 
+// Platinum Skill MC_CARTDECORATE
+moc_para01,33,33,6	script	Cart Tuner Gaijo#ed	851,{
+	mes "[Gaijo]";
+	mes "Cart, the original cart without decorations, look how beautiful it is.";
+	next;
+	mes "[Gaijo]";
+	mes "Sharp and simple gray iron plate, ugly blunt handlebars, this pure beauty is just like a cocoon waiting to become a butterfly.";
+	next;
+	mes "[Gaijo]";
+	mes "Every tuning must be done by my hand. No need for others!";
+	next;
+	switch(select("What is Change Cart 2?:Learn Change Cart 2:End of conversation")) {
+	case 1:
+		mes "[Gaijo]";
+		mes "I love to re-make old and rusty carts into brand new styles and colors.";
+		next;
+		mes "[Gaijo]";
+		mes "Cart Change is not enough for me, don't you think?";
+		next;
+		mes "[Gaijo]";
+		mes "For these people, I proudly represent a new design for carts.";
+		next;
+		mes "[Gaijo]";
+		mes "With this Change Cart 2, our cart will become my Gaijo-style of beautiful cart.";
+		close;
+	case 2:
+		if (BaseClass != Job_Merchant) {
+			mes "[Gaijo]";
+			mes "You know nothing about Carts! Go away. Don't waste your time looking for useless things to do.";
+			close;
+		}
+		mes "[Gaijo]";
+		mes "Okay, good. Do you want to see the world of Gaijo-designed style?";
+		if (!vip_status(VIP_STATUS_ACTIVE))
+			mes "As you are not a VIP Member I need at least 50 Eden Merit Badges.";
+		next;
+		if (select("O...Okay:No, wait.") == 2) {
+			mes "[Gaijo]";
+			mes "Well, visit me anytime you want.";
+			close;
+		}
+		mes "[Gaijo]";
+		mes "Cool, follow me and look.";
+		next;
+		mes "[Gaijo]";
+		mes "This design, hold the cart like this...";
+		next;
+		mes "[Gaijo]";
+		mes "And this design hold this way, and put this one over here....";
+		mes "......";
+		next;
+		mes "[Gaijo]";
+		mes "Quite good. You learn quick. Well, not perfect, but it's okay.";
+		next;
+		mes "[Gaijo]";
+		mes "Here, you can try it out yourself.";
+		mes "Press Alt+S and change your cart.";
+		mes "Okay?";
+		next;
+		if (!vip_status(VIP_STATUS_ACTIVE)) {
+			if (countitem(6495) < 50) {
+				mes "[Gaijo]";
+				mes "You don't have enough badges!";
+				close;
+			} else
+				delitem 6495,50; //Para_Logro_Badge
+		}
+		mes "[Gaijo]";
+		mes "Gorgeous Cart, Wonderful Cart, that is our motto of Gaijo-designed style. You are now my family too!";
+		if (PACKETVER >= 20150826)
+			skill "MC_CARTDECORATE",1,0;
+		close;
+	case 3:
+		close;
+	}
+}
+
 // Commonly Updated NPCs
 //============================================================
 /* These scripts change on a regular basis, so they're mostly just placeholders for now. */

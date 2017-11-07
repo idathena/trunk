@@ -172,8 +172,7 @@ extern struct Battle_Config
 	int drop_rate0item;
 	int death_penalty_type;
 	int death_penalty_base,death_penalty_job;
-	int pvp_exp;  //[MouseJstr]
-	int gtb_sc_immunity;
+	int pvp_exp; //[MouseJstr]
 	int zeny_penalty;
 	int restart_hp_rate;
 	int restart_sp_rate;

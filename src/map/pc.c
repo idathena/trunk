@@ -1603,7 +1603,7 @@ void pc_reg_received(struct map_session_data *sd)
 	}
 
 	if (pc_isinvisible(sd)) {
-		sd->vd.class_ = INVISIBLE_CLASS;
+		sd->vd.class_ = JT_INVISIBLE;
 		clif_displaymessage(sd->fd, msg_txt(11)); // Invisible: On
 		//Decrement the number of pvp players on the map
 		map[sd->bl.m].users_pvp--;
@@ -1689,7 +1689,6 @@ void pc_calc_skilltree(struct map_session_data *sd)
 			sd->status.skill[i].lv = (sd->status.skill[i].flag == SKILL_FLAG_TEMPORARY) ? 0 : sd->status.skill[i].flag - SKILL_FLAG_REPLACED_LV_0;
 			sd->status.skill[i].flag = SKILL_FLAG_PERMANENT;
 		}
-
 		if( sd->sc.count && sd->sc.data[SC_SPIRIT] &&
 			sd->sc.data[SC_SPIRIT]->val2 == SL_BARDDANCER && i >= DC_HUMMING && i<= DC_SERVICEFORYOU ) { //Enable Bard/Dancer spirit linked skills
 			if( sd->status.sex ) { //Link dancer skills to bard
@@ -2876,22 +2875,16 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 				sd->special_state.no_sizefix = 1;
 			break;
 		case SP_NO_MAGIC_DAMAGE:
-			if(sd->state.lr_flag == 2)
-				break;
-			val += sd->special_state.no_magic_damage;
-			sd->special_state.no_magic_damage = cap_value(val,0,100);
+			if(sd->state.lr_flag != 2)
+				sd->special_state.no_magic_damage = max(sd->special_state.no_magic_damage,val);
 			break;
 		case SP_NO_WEAPON_DAMAGE:
-			if(sd->state.lr_flag == 2)
-				break;
-			val += sd->special_state.no_weapon_damage;
-			sd->special_state.no_weapon_damage = cap_value(val,0,100);
+			if(sd->state.lr_flag != 2)
+				sd->special_state.no_weapon_damage = max(sd->special_state.no_weapon_damage,val);
 			break;
 		case SP_NO_MISC_DAMAGE:
-			if(sd->state.lr_flag == 2)
-				break;
-			val += sd->special_state.no_misc_damage;
-			sd->special_state.no_misc_damage = cap_value(val,0,100);
+			if(sd->state.lr_flag != 2)
+				sd->special_state.no_misc_damage = max(sd->special_state.no_misc_damage,val);
 			break;
 		case SP_NO_GEMSTONE:
 			if(sd->state.lr_flag != 2 && sd->special_state.no_gemstone != 2)

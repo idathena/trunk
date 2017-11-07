@@ -188,7 +188,7 @@ static uint16 map_port = 5121;
 static bool ally_only = false;
 int map_fd;
 
-static int clif_parse (int fd);
+static int clif_parse(int fd);
 
 /*==========================================
  * Ip setting of map-server
@@ -1032,7 +1032,7 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 
 	WBUFW(buf,24) = vd->head_top;
 	WBUFW(buf,26) = vd->head_mid;
-	if( bl->type == BL_NPC && vd->class_ == FLAG_CLASS ) { //The hell, why flags work like this?
+	if( bl->type == BL_NPC && vd->class_ == JT_GUILD_FLAG ) { //The hell, why flags work like this?
 		WBUFW(buf,22) = status_get_emblem_id(bl);
 		WBUFW(buf,24) = GetWord(status_get_guild_id(bl),1);
 		WBUFW(buf,26) = GetWord(status_get_guild_id(bl),0);
@@ -1364,22 +1364,22 @@ static void clif_weather_check(struct map_session_data *sd)
 		map[m].flag.clouds2)
 	{
 		if (map[m].flag.snow)
-			clif_specialeffect_single(&sd->bl, 162, fd);
+			clif_specialeffect_single(&sd->bl, EF_SNOW, fd);
 		if (map[m].flag.clouds)
-			clif_specialeffect_single(&sd->bl, 233, fd);
+			clif_specialeffect_single(&sd->bl, EF_CLOUD3, fd);
 		if (map[m].flag.clouds2)
-			clif_specialeffect_single(&sd->bl, 516, fd);
+			clif_specialeffect_single(&sd->bl, EF_CLOUD5, fd);
 		if (map[m].flag.fog)
-			clif_specialeffect_single(&sd->bl, 515, fd);
+			clif_specialeffect_single(&sd->bl, EF_CLOUD4, fd);
 		if (map[m].flag.fireworks) {
-			clif_specialeffect_single(&sd->bl, 297, fd);
-			clif_specialeffect_single(&sd->bl, 299, fd);
-			clif_specialeffect_single(&sd->bl, 301, fd);
+			clif_specialeffect_single(&sd->bl, EF_POKJUK, fd);
+			clif_specialeffect_single(&sd->bl, EF_THROWITEM2, fd);
+			clif_specialeffect_single(&sd->bl, EF_POKJUK_SOUND, fd);
 		}
 		if (map[m].flag.sakura)
-			clif_specialeffect_single(&sd->bl, 163, fd);
+			clif_specialeffect_single(&sd->bl, EF_SAKURA, fd);
 		if (map[m].flag.leaves)
-			clif_specialeffect_single(&sd->bl, 333, fd);
+			clif_specialeffect_single(&sd->bl, EF_MAPLE, fd);
 	}
 }
 
@@ -1410,7 +1410,7 @@ int clif_spawn(struct block_list *bl)
 	struct view_data *vd = status_get_viewdata(bl);
 	int len;
 
-	if (!vd || vd->class_ == INVISIBLE_CLASS)
+	if (!vd || vd->class_ == JT_INVISIBLE)
 		return 0;
 
 	if (bl->type == BL_NPC && !((TBL_NPC *)bl)->chat_id && (((TBL_NPC *)bl)->sc.option&OPTION_INVISIBLE))
@@ -1434,9 +1434,9 @@ int clif_spawn(struct block_list *bl)
 				TBL_PC *sd = ((TBL_PC *)bl);
 
 				if (sd->state.size == SZ_BIG) //Tiny/Big players [Valaris]
-					clif_specialeffect(bl,423,AREA);
+					clif_specialeffect(bl,EF_GIANTBODY2,AREA);
 				else if (sd->state.size == SZ_MEDIUM)
-					clif_specialeffect(bl,421,AREA);
+					clif_specialeffect(bl,EF_BABYBODY2,AREA);
 				if (sd->bg_id && map[bl->m].flag.battleground)
 					clif_sendbgemblem_area(sd);
 				if (sd->spiritball > 0)
@@ -1455,9 +1455,9 @@ int clif_spawn(struct block_list *bl)
 
 				effect_id = 0;
 				if (md->special_state.size == SZ_BIG) //Tiny/Big mobs [Valaris]
-					clif_specialeffect(bl,423,AREA);
+					clif_specialeffect(bl,EF_GIANTBODY2,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
-					clif_specialeffect(bl,421,AREA);
+					clif_specialeffect(bl,EF_BABYBODY2,AREA);
 				clif_efst_set_enter(bl,bl,AREA);
 #if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
@@ -1474,9 +1474,9 @@ int clif_spawn(struct block_list *bl)
 				TBL_NPC *nd = ((TBL_NPC *)bl);
 
 				if (nd->size == SZ_BIG)
-					clif_specialeffect(bl,423,AREA);
+					clif_specialeffect(bl,EF_GIANTBODY2,AREA);
 				else if (nd->size == SZ_MEDIUM)
-					clif_specialeffect(bl,421,AREA);
+					clif_specialeffect(bl,EF_BABYBODY2,AREA);
 				clif_efst_set_enter(bl,bl,AREA);
 				clif_progressbar_npc_area(nd);
 			}
@@ -1759,18 +1759,18 @@ static void clif_move2(struct block_list *bl, struct view_data *vd, struct unit_
 
 				//clif_movepc(sd);
 				if (sd->state.size == SZ_BIG) //Tiny/big players [Valaris]
-					clif_specialeffect(&sd->bl,423,AREA);
+					clif_specialeffect(&sd->bl,EF_GIANTBODY2,AREA);
 				else if (sd->state.size == SZ_MEDIUM)
-					clif_specialeffect(&sd->bl,421,AREA);
+					clif_specialeffect(&sd->bl,EF_BABYBODY2,AREA);
 			}
 			break;
 		case BL_MOB: {
 				TBL_MOB *md = ((TBL_MOB *)bl);
 
 				if (md->special_state.size == SZ_BIG) //Tiny/big mobs [Valaris]
-					clif_specialeffect(&md->bl,423,AREA);
+					clif_specialeffect(&md->bl,EF_GIANTBODY2,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
-					clif_specialeffect(&md->bl,421,AREA);
+					clif_specialeffect(&md->bl,EF_BABYBODY2,AREA);
 			}
 			break;
 		case BL_PET:
@@ -1797,7 +1797,7 @@ void clif_move(struct unit_data *ud)
 	if (!vd )
 		return;
 	//This performance check is needed to keep GM-hidden objects from being notified to bots
-	else if (vd->class_ == INVISIBLE_CLASS) {
+	else if (vd->class_ == JT_INVISIBLE) {
 		//If the player was disguised we still need to update the disguised unit, since the main unit will be updated through clif_walkok
 		if (disguised(bl)) {
 			WBUFW(buf,0) = 0x86;
@@ -3456,7 +3456,7 @@ void clif_changelook(struct block_list *bl,int type,int val)
 			case LOOK_BASE:
 				if(!sd)
 					break;
-				if(val == INVISIBLE_CLASS)
+				if(val == JT_INVISIBLE)
 					return;
 				if(sd->sc.option&OPTION_COSTUME)
 					vd->weapon = vd->shield = 0;
@@ -4589,7 +4589,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 	int len;
 
 	vd = status_get_viewdata(bl);
-	if (!vd || vd->class_ == INVISIBLE_CLASS)
+	if (!vd || vd->class_ == JT_INVISIBLE)
 		return;
 
 	if (bl->type == BL_NPC && !((TBL_NPC *)bl)->chat_id && (((TBL_NPC *)bl)->sc.option&OPTION_INVISIBLE))
@@ -5185,7 +5185,7 @@ int clif_outsight(struct block_list *bl,va_list ap)
 	if (tsd && tsd->fd) { //tsd has lost sight of the bl object
 		switch (bl->type) {
 			case BL_PC:
-				if (sd->vd.class_ != INVISIBLE_CLASS)
+				if (sd->vd.class_ != JT_INVISIBLE)
 					clif_clearunit_single(bl->id,CLR_OUTSIGHT,tsd->fd);
 				if (sd->chatID) {
 					struct chat_data *cd = (struct chat_data *)map_id2bl(sd->chatID);
@@ -5209,7 +5209,7 @@ int clif_outsight(struct block_list *bl,va_list ap)
 					clif_clearunit_single(bl->id,CLR_OUTSIGHT,tsd->fd);
 				break;
 			default:
-				if ((vd = status_get_viewdata(bl)) && vd->class_ != INVISIBLE_CLASS)
+				if ((vd = status_get_viewdata(bl)) && vd->class_ != JT_INVISIBLE)
 					clif_clearunit_single(bl->id,CLR_OUTSIGHT,tsd->fd);
 				break;
 		}
@@ -5217,7 +5217,7 @@ int clif_outsight(struct block_list *bl,va_list ap)
 	if (sd && sd->fd) { //sd is watching tbl go out of view
 		if (tbl->type == BL_SKILL) //Trap knocked out of sight
 			clif_clearchar_skillunit((struct skill_unit *)tbl,sd->fd);
-		else if (((vd = status_get_viewdata(tbl)) && vd->class_ != INVISIBLE_CLASS) &&
+		else if (((vd = status_get_viewdata(tbl)) && vd->class_ != JT_INVISIBLE) &&
 			!(tbl->type == BL_NPC && (((TBL_NPC *)tbl)->sc.option&OPTION_INVISIBLE)))
 			clif_clearunit_single(tbl->id,CLR_OUTSIGHT,sd->fd);
 	}
@@ -5276,7 +5276,7 @@ void clif_skillinfoblock(struct map_session_data *sd)
 	WFIFOHEAD(fd,MAX_SKILL * 37 + 4);
 	WFIFOW(fd,0) = 0x10f;
 	for( i = 0, len = 4; i < MAX_SKILL; i++) {
-		if( (id = sd->status.skill[i].id) != 0 ) {
+		if( (id = sd->status.skill[i].id) ) {
 			//Workaround for bugreport:5348
 			if( len + 37 > 8192 )
 				break;
@@ -5298,7 +5298,7 @@ void clif_skillinfoblock(struct map_session_data *sd)
 
 	//Workaround for bugreport:5348, send the remaining skills one by one to bypass packet size limit
 	for( ; i < MAX_SKILL; i++) {
-		if( (id = sd->status.skill[i].id) != 0 ) {
+		if( (id = sd->status.skill[i].id) ) {
 			clif_addskill(sd, id);
 			clif_skillinfo(sd, id, 0);
 		}
@@ -20212,7 +20212,7 @@ static int clif_parse(int fd)
 	TBL_PC *sd;
 	int pnum;
 #ifdef PACKET_OBFUSCATION
-	int cmd2;
+	int cmd2 = 0;
 #endif
 
 	//@TODO: Apply delays or disconnect based on packet throughput [FlavioJS]

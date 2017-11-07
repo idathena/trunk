@@ -667,7 +667,6 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 		//Insert here.
 		for( i = 0, count = 0; i < MAX_SKILL; ++i ) {
 			if( p->skill[i].id != 0 && p->skill[i].flag != SKILL_FLAG_TEMPORARY ) {
-
 				if( p->skill[i].lv == 0 && ( p->skill[i].flag == SKILL_FLAG_PERM_GRANTED || p->skill[i].flag == SKILL_FLAG_PERMANENT ) )
 					continue;
 				if( p->skill[i].flag != SKILL_FLAG_PERMANENT && p->skill[i].flag != SKILL_FLAG_PERM_GRANTED && (p->skill[i].flag - SKILL_FLAG_REPLACED_LV_0) == 0 )
@@ -2057,7 +2056,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 	offset += 4;
 #endif
 #if PACKETVER >= 20110111
-	WBUFL(buf,128) = (p->class_ != JOB_SUMMONER ? p->robe : 0);
+	WBUFL(buf,128) = (p->class_ != JOB_SUMMONER && p->class_ != JOB_BABY_SUMMONER ? p->robe : 0);
 	offset += 4;
 #endif
 #if PACKETVER != 20111116 //2011-11-16 wants 136, ask gravity

@@ -100,7 +100,7 @@ malangdo,213,167,4	script	Mayomayo#mal	555,{
 	case 16: // Katars
 		switch(@mal_equip_id) {
 			case 1271: callsub L_Socket,1,2; //Blood_Tears
-			case 1295: callsub L_Socket,1,2; //Blood_Tears_
+			case 1295: callsub L_Socket,1,3; //Blood_Tears_
 			case 1263: callsub L_Socket,1,2; //Unholy_Touch
 			case 1270: callsub L_Socket,1,2; //Drill_Katar
 			case 1284: callsub L_Socket,1,2; //Krishna
@@ -152,8 +152,8 @@ malangdo,213,167,4	script	Mayomayo#mal	555,{
 			case 1137: callsub L_Socket,2,2; //Excalibur
 			case 1130: callsub L_Socket,2,2; //Nagan
 			case 1132: callsub L_Socket,4,2; //Edge
-			case 13412: callsub L_Socket,5,2; //Twin_Edge_B
-			case 13413: callsub L_Socket,5,2; //Twin_Edge_R
+			case 13412: callsub L_Socket,5,3; //Twin_Edge_B
+			case 13413: callsub L_Socket,5,3; //Twin_Edge_R
 		}
 		break;
 	case 3: // 2-H Swords
@@ -652,7 +652,7 @@ L_Socket:
 
 //		GetNonSlotItemSock2 .@equip_refine .@equip_id .@equip_card[0] .@equip_card[1] .@equip_card[2] .@equip_card[3]
 		for(set .@i,0; .@i<4; set .@i,.@i+1) {
-			if (.@equip_card[.@i] >= 4700 && .@equip_card[.@i] <= 5001) // Armor Enchant System
+			if (.@equip_card[.@i] >= 4700 && .@equip_card[.@i] < 5001) // Armor Enchant System
 				set .@equip_card[.@i],0;
 		}
 		getitem2 .@equip_id,1,1,.@equip_refine,0,.@equip_card[0],.@equip_card[1],.@equip_card[2],.@equip_card[3];

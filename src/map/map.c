@@ -531,7 +531,7 @@ int map_count_oncell(int16 m, int16 x, int16 y, int type, int flag)
 
 					if (sd && pc_isinvisible(sd))
 						continue;
-					if (nd && (nd->class_ == -1 || nd->class_ == HIDDEN_WARP_CLASS))
+					if (nd && (nd->class_ == JT_FAKENPC || nd->class_ == JT_HIDDEN_WARP_NPC))
 						continue;
 				}
 				if (flag&0x1) {
