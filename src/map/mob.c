@@ -4438,7 +4438,7 @@ static bool mob_parse_row_mobskilldb(char **str, int columns, int current)
 	if (!(skill = (struct s_mob_skill *)idb_get(mob_skill_db, mob_id)))
 		CREATE(skill, struct s_mob_skill, 1);
 
-	if (strcmp(str[1],"clear") == 0 && skill->mob_id != 0) {
+	if (!strcmp(str[1],"clear") && skill->mob_id) {
 		idb_remove(mob_skill_db, skill->mob_id);
 		aFree(skill);
 		ShowInfo("Cleared skill for mob id '%d'\n", mob_id);

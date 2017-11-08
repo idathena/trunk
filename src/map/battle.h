@@ -91,7 +91,7 @@ void battle_do_reflect(int attack_type, struct Damage *wd, struct block_list *sr
 
 int battle_attr_ratio(int atk_elem, int def_type, int def_lv);
 int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 damage,int atk_elem,int def_type, int def_lv);
-int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_list *target, int nk, int s_ele, int s_ele_, int64 damage, int left, int flag);
+int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_list *target, int nk, int s_ele, int s_ele_, int64 damage, int left, int flag, uint16 skill_id);
 
 struct Damage battle_calc_attack_plant(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
 struct Damage battle_calc_attack_gvg_bg(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);

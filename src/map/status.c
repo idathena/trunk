@@ -4939,8 +4939,8 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			uint16 lv;
 #ifdef RENEWAL_ASPD
 			uint8 val = 0;
+			float temp_val = 0;
 #endif
-			float temp_ = 0;
 
 			amotion = status_base_amotion_pc(sd, status);
 #ifndef RENEWAL_ASPD
@@ -4955,18 +4955,18 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 				case W_WHIP:	case W_REVOLVER:
 				case W_RIFLE:	case W_GATLING:
 				case W_SHOTGUN:	case W_GRENADE:
-					temp_ = status->dex * status->dex / 7.0f + status->agi * status->agi * 0.5f;
+					temp_val = status->dex * status->dex / 7.0f + status->agi * status->agi * 0.5f;
 					break;
 				default:
-					temp_ = status->dex * status->dex / 5.0f + status->agi * status->agi * 0.5f;
+					temp_val = status->dex * status->dex / 5.0f + status->agi * status->agi * 0.5f;
 					break;
 			}
-			temp_ = (float)(sqrt(temp_) * 0.25f);
+			temp_val = (float)(sqrt(temp_val) * 0.25f);
 			if( (lv = pc_checkskill(sd,SA_ADVANCEDBOOK)) > 0 && sd->status.weapon == W_BOOK )
 				val += (lv - 1) / 2 + 1;
 			if( (lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE )
 				val += ((lv + 1) / 2);
-			amotion -= (int)(temp_ + (float)((status_calc_aspd(bl, sc, true) + val) * status->agi) / 200) * 10;
+			amotion -= (int)(temp_val + (float)((status_calc_aspd(bl, sc, true) + val) * status->agi) / 200) * 10;
 			//Absolute ASPD % modifier
 			if( status->aspd_rate != 1000 )
 				amotion = (200 - (200 - amotion / 10) * status->aspd_rate / 1000) * 10;
