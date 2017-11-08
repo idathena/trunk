@@ -2766,8 +2766,8 @@
 4630,Time_Keeper_Card,Time Keeper Card,6,20,,10,,,,,,,,64,,,,,{ bonus3 bAutoSpell,"NPC_WIDECURSE",2,20; },{},{}
 4631,Owl_Viscount_Card,Owl Viscount Card,6,20,,10,,,,,,,,136,,,,,{ bonus bAspdRate,3; },{},{}
 4632,Owl_Marquees_Card,Owl Marquees Card,6,20,,10,,,,,,,,136,,,,,{ bonus5 bAutoSpell,"SA_VIOLENTGALE",(getskilllv("SA_VIOLENTGALE")==5?5:1),20,BF_WEAPON,0; },{},{}
-4633,Powerful_Archer_Skeleton_Card,Powerful Archer Skeleton Card,6,20,,10,,,,,,,,2,,,,,{ bonus bLongAtkRate,10+(BaseLevel>99?2:0); },{},{}
-4634,Powerful_Soldier_Skeleton_Card,Powerful Soldier Skeleton Card,6,20,,10,,,,,,,,2,,,,,{ bonus bCritical,9+(BaseLevel>99?1:0); },{},{}
+4633,Powerful_Archer_Skeleton_Card,Powerful Archer Skeleton Card,6,20,,10,,,,,,,,2,,,,,{ bonus bLongAtkRate,(BaseLevel>99?12:10); },{},{}
+4634,Powerful_Soldier_Skeleton_Card,Powerful Soldier Skeleton Card,6,20,,10,,,,,,,,2,,,,,{ bonus bCritical,(BaseLevel>99?10:9); },{},{}
 4635,Powerful_Amdarais_Card,Powerful Amdarais Card,6,20,,10,,,,,,,,16,,,,,{ set .@r,getrefine(); bonus bDef,.@r*10; bonus bFlee,-(.@r*2); if(BaseLevel>99) bonus bMaxHP,500; },{},{}
 4636,Bijou_Card,Bijou Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bResEff,Eff_Freeze,10000; bonus2 bAddClass,Class_All,10; bonus2 bMagicAddRace,RC_All,10; },{},{}
 4637,Immortal_Corps_Card,Immortal Corps Card,6,20,,10,,,,,,,,4,,,,,{ bonus bHPGainValue,50; bonus bSPGainValue,5; bonus bHPrecovRate,-100; bonus bSPrecovRate,-100; },{},{ heal -1000,100; }
