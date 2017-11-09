@@ -1000,9 +1000,6 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case MER_CRASH:
 			sc_start(src,bl,SC_STUN,6 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
-		case AL_HOLYLIGHT:
-			status_change_end(bl,SC_P_ALTER,INVALID_TIMER);
-			break;
 		case AS_VENOMKNIFE:
 			if( sd ) //Poison chance must be that of Envenom [Skotlex]
 				skill_lv = pc_checkskill(sd,TF_POISON);

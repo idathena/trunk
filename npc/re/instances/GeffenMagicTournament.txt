@@ -1365,6 +1365,7 @@ OnDisable:
 OnTouch_:
 	if ('GMT_1QUE < 11) {
 		.@n$ = "[Geffen Academy Master]";
+		donpcevent instance_npcname("#GeffenAcademyMasterS")+"::OnDisable";
 		cutin "acamaster_a",2;
 		mes .@n$;
 		mes "Ladies and gentlemen!";
@@ -1388,7 +1389,7 @@ OnTouch_:
 		mes .@n$;
 		mes "Ahem...";
 		close2;
-		cutin "acamaster_a",255;
+		cutin "",255;
 		'GMT_1QUE = 11;
 		changequest 9294,9295;
 		donpcevent instance_npcname("Geffen Academy Master")+"::OnStart";
@@ -1514,7 +1515,6 @@ OnDisable:
 			warp instance_mapname("1@ge_st"),104,50;
 			'GMT_1QUE++;
 			donpcevent instance_npcname("Tournament Guide#gefMT")+"::OnDisable";
-			donpcevent instance_npcname("Geffen Academy Master")+"::OnEnable";
 			donpcevent instance_npcname("Geffen Academy Master")+"::OnStart";
 			end;
 		case 2:
@@ -1539,261 +1539,272 @@ OnEnable:
 1@ge_st,109,57,4	script	Geffen Academy Master	ACADEMY_MASTER,{
 	end;
 OnStart:
-	if ('GMT_1QUE != 11) {
-		attachrid('gmt_account_id);
+	attachrid('gmt_account_id);
+	if ('GMT_1QUE != 11)
 		changequest 9283+'GMT_1QUE,9284+'GMT_1QUE;
-		detachrid;
-	}
+	sleep2 100;
 	switch ('GMT_1QUE) {
 		case 11:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			npctalk "Geffen Academy Master: Ladies and Gentlemen!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: I do my best to be as loud as I can!";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			donpcevent instance_npcname("Arhi#1")+"::OnEnable";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The Geffen Magic Tournament will now commence!";
-			sleep 1000;
+			sleep2 1000;
 			npctalk "Tournament Spectator: Wow~!!! Looks fun~~!! Yahoo~!",instance_npcname("Tournament Spectator#"+rand(70,257));
-			sleep 1000;
+			sleep2 1000;
 			npctalk "Tournament Spectator: This is getting exciting~!",instance_npcname("Tournament Spectator#"+rand(70,257));
-			sleep 1000;
+			sleep2 1000;
 			npctalk "Tournament Spectator: When is the game going to start~!",instance_npcname("Tournament Spectator#"+rand(70,257));
-			sleep 500;
+			sleep2 500;
 			donpcevent instance_npcname("Arhi#1")+"::OnActivate";
-			sleep 500;
+			sleep2 500;
 			npctalk "Geffen Academy Master: We are starting the 1st match for Group A";
-			sleep 2000;
+			sleep2 2000;
 			npctalk "Geffen Academy Master: On this corner, "+('sex ? "he" : "she")+" looks weak enough to lose in the 1st match!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Give a big welcome to the unknown competitor! "+'charname$+"~!";
-			sleep 2000;
+			sleep2 2000;
 			npctalk "Geffen Academy Master: And on the other corner, Arhi the Novice! Give it your best shot!";
+			sleep2 12500;
 			break;
 		case 12:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: The 2nd match of Group A is about to begin!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: On this corner, the competitor who exceeded our expectations by getting past the first round!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The extremely weak looking competitor, "+'charname$+"!";
-			sleep 3000;
+			sleep2 3000;
 			donpcevent instance_npcname("Dio Anemos#1")+"::OnActivate";
-			sleep 500;
+			sleep2 500;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent...";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Despite his skipping classes at the Magic Academy...";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: A crowd favorite! A big round of applause to the Magician Apprentice, Dio Anemos!";
+			sleep2 13500;
 			break;
 		case 13:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: The 3rd match of Group A is about to begin!";
-			sleep 2000;
+			sleep2 2000;
 			npctalk "Geffen Academy Master: Welcome back our unlikely competitor, "+'charname$+"!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent...";
-			sleep 2000;
+			sleep2 2000;
 			if ('GMTQuest == 1) {
 				donpcevent instance_npcname("Geffen Gangster#n1")+"::OnActivate";
-				sleep 500;
+				sleep2 500;
 				npctalk "Geffen Academy Master: Whose looks give off a creepy air about him...";
-				sleep 3000;
+				sleep2 3000;
 				npctalk "Geffen Academy Master: A member of the Curvy Woman Loving club~!! Geffen Gangster!";
 			} else if ('GMTQuest == 2) {
 				donpcevent instance_npcname("Geffen Bully#n1")+"::OnActivate";
-				sleep 500;
+				sleep2 500;
 				npctalk "Geffen Academy Master: With a face only a mother can love!";
-				sleep 3000;
+				sleep2 3000;
 				npctalk "Geffen Academy Master: The ruthless Geffen Bully!";
 			} else {
 				donpcevent instance_npcname("Geffen Shoplifter#n1")+"::OnActivate";
-				sleep 500;
+				sleep2 500;
 				npctalk "Geffen Academy Master: With a mischievous grin on her face!";
-				sleep 3000;
+				sleep2 3000;
 				npctalk "Geffen Academy Master: The Geffen Thief Guild's Guildmaster! Geffen Shoplifter!";
 			}
+			sleep2 16500;
 			break;
 		case 14:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: The surprise of this year's Tournament~!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The unrivaled warrior! "+'charname$+"!";
-			sleep 3000;
+			sleep2 3000;
 			donpcevent instance_npcname("Faymont#1")+"::OnActivate";
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent~!!!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Entering the ring with pomp and circumstance.";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Prontera's pride and style,Faymont!";
 			npctalk "Prontera Spectator: Oh~ A player from Prontera ah!",instance_npcname("Prontera Spectator#a1");
-			sleep 2000;
+			sleep2 2000;
 			npctalk "Prontera Spectator: Do not give Prontera a bad name!!",instance_npcname("Prontera Spectator#a2");
+			sleep2 12000;
 			break;
 		case 15:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: This isn't just a fluke ladies and gents!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The remarkable rookie! "+'charname$+"!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent~!!!";
-			sleep 500;
+			sleep2 500;
 			donpcevent instance_npcname("Ordre#1")+"::OnActivate";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: One who promises to fight with honor!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The self-proclaimed master of battle, Ordre!";
+			sleep2 16000;
 			break;
 		case 16:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: Suddenly, the incredibly powerful!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Super rookie of this year's tournament~! "+'charname$+"!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent~!!!";
-			sleep 500;
+			sleep2 500;
 			donpcevent instance_npcname("Blut Hase#1")+"::OnActivate";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Cute on the outside, but cruely destroys enemies!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Bloody Rabbit Ears~!! Blut Hase!";
+			sleep2 14000;
 			break;
 		case 17:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: Onwards to the 7th Round!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Welcome back "+'charname$+"!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent~!!!";
-			sleep 2000;
+			sleep2 2000;
 			donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
 			npctalk "Geffen Academy Master: A competitor more evil than any we've seen before!";
-			sleep 500;
+			sleep2 500;
 			donpcevent instance_npcname("Kuro Akuma#1")+"::OnActivate";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The Devil's Tooth, Kuro Akuma!";
 			donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
+			sleep2 17000;
 			break;
 		case 18:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: Starting up Round 8 for Group A!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The darling of this year's tournament!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Rune-Midgard newest star, "+'charname$+"!";
-			sleep 2000;
+			sleep2 2000;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent~!!!";
-			sleep 2000;
+			sleep2 2000;
 			npctalk "Payon Spectator: They look very strong!",instance_npcname("Payon Spectator#a1");
-			sleep 250;
+			sleep2 250;
 			donpcevent instance_npcname("Ifodes#1")+"::OnActivate";
-			sleep 250;
+			sleep2 250;
 			npctalk "Veins Spectator: Looks good and strong ah!",instance_npcname("Veins Spectator#a1");
-			sleep 1000;
+			sleep2 1000;
 			npctalk "Geffen Academy Master: Slow as a turtle, fast as a hare!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The maniac of Rune Midgard! Ifodes!";
 			donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
+			sleep2 15750;
 			break;
 		case 19:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: We have now entered the 9th Round of this competition!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Nobody can stop "+('sex ? "him" : "her")+"!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: "+('sex ? "His" : "Her")+" strength has been recognized by the people! "+'charname$;
-			sleep 2000;
+			sleep2 2000;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent~!!!";
-			sleep 500;
+			sleep2 500;
 			donpcevent instance_npcname("Licheniyes#1")+"::OnActivate";
-			sleep 500;
+			sleep2 500;
 			donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
-			sleep 1000;
+			sleep2 1000;
 			npctalk "Geffen Academy Master: She might look like a nice lady, but you better watch out!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: She'll attack you with the swiftness of a snake!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The Lady of Death! Licheniyes!";
 			donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
+			sleep2 12500;
 			break;
 		case 20:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: Let us begin the 10th Round of Group A!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: In this corner, back to entertain us again!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: None other than the incredible "+'charname$+"!";
-			sleep 1000;
+			sleep2 1000;
 			donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
-			sleep 1000;
+			sleep2 1000;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent~!!!";
-			sleep 1000;
+			sleep2 1000;
 			npctalk "Geffen Academy Master: Seductress of Rune Midgard...";
-			sleep 500;
+			sleep2 500;
 			donpcevent instance_npcname("Odoric#1")+"::OnActivate";
-			sleep 500;
+			sleep2 500;
 			npctalk "Geffen Academy Master: You can't look away from her curves!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The Songstress of Death! Odoric!";
 			donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
+			sleep2 16500;
 			break;
 		case 21:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: We're getting closer to the end, next up is Quarter-Finals!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The winning never ends with "+'charname$+"!";
-			sleep 2000;
+			sleep2 2000;
 			donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
-			sleep 1000;
+			sleep2 1000;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent~!!!";
-			sleep 500;
+			sleep2 500;
 			donpcevent instance_npcname("Ju#1")+"::OnActivate";
-			sleep 250;
+			sleep2 250;
 			npctalk "Loki: I can smell blood...",instance_npcname("Loki#a2");
-			sleep 1000;
+			sleep2 1000;
 			npctalk "Iris: Oh... A fierce competitor, is not it?",instance_npcname("Iris#a2");
-			sleep 500;
+			sleep2 500;
 			npctalk "Geffen Academy Master: Hidden behind a shroud of mystery...";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Master of power and speed! Ju!";
 			donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
+			sleep2 15250;
 			break;
 		case 22:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: We are now at the Semi-Finals of this competition, this match will decide the winner for Group A!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Winning against all odds, Group A's Dark Horse, "+'charname$+"!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: And "+('sex ? "his" : "her")+" opponent~!!!";
 			if ('half) {
-				sleep 500;
+				sleep2 500;
 				donpcevent instance_npcname("Dwigh#1")+"::OnActivate";
-				sleep 1500;
+				sleep2 1500;
 				npctalk "Geffen Academy Master: Chief Professor of the Mage Academy, loved by her many disciples!";
-				sleep 1000;
+				sleep2 1000;
 				donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
-				sleep 2000;
+				sleep2 2000;
 				npctalk "Geffen Academy Master: Commander of battle and wits! Dwigh!";
+				sleep2 21500;
 			} else {
-				sleep 2000;
+				sleep2 2000;
 				npctalk "Geffen Academy Master: An Alchemist from Aldebaran, the city of science!";
-				sleep 500;
+				sleep2 500;
 				donpcevent instance_npcname("Fay Kanavian#1")+"::OnActivate";
-				sleep 500;
+				sleep2 500;
 				donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
-				sleep 2000;
+				sleep2 2000;
 				npctalk "Geffen Academy Master: Fay Kanavian and her homunculus, Alphonse!";
 			}
 			break;
@@ -1801,27 +1812,27 @@ OnStart:
 			donpcevent instance_npcname("#Talkcontrol")+"::OnStart";
 			donpcevent instance_npcname("#FireworksControl")+"::OnStart";
 			npctalk "Geffen Academy Master: A previously anonymous fighter";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: Despite this, unmatched in Group A!";
-			sleep 2000;
+			sleep2 2000;
 			npctalk "Geffen Academy Master: The most talked about competitor this year!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The unrivaled! "+'charname$+"!";
-			sleep 3000;
-			npctalk "Geffen Academy Master: Aha, this match looks like it will be interesting.",instance_npcname("Loki#a2");
-			sleep 3000;
+			sleep2 3000;
+			npctalk "Loki: Aha, this match looks like it will be interesting.",instance_npcname("Loki#a2");
+			sleep2 3000;
 			npctalk "Geffen Academy Master: And the champion of Group B~!!!";
-			sleep 1500;
+			sleep2 1500;
 			donpcevent instance_npcname("Fenrir#f")+"::OnActivate";
-			sleep 1500;
+			sleep2 1500;
 			npctalk "Geffen Academy Master: A Warlock with incredible powers!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: A competitor who swept through Group B like a hurricane!";
-			sleep 1000;
-			npctalk "Geffen Academy Master: Oh! This match is going to be exciting!",instance_npcname("Chaos#a2");
-			sleep 2000;
+			sleep2 1000;
+			npctalk "Chaos: Oh! This match is going to be exciting!",instance_npcname("Chaos#a2");
+			sleep2 2000;
 			npctalk "Geffen Academy Master: Is there any Wizard stronger in all of Rune-Midgard?!";
-			sleep 3000;
+			sleep2 3000;
 			npctalk "Geffen Academy Master: The Blue Wizard! Fenris Fenrir~!!";
 			break;
 	}
@@ -1912,8 +1923,10 @@ OnStart:
 	'timeout = 180;
 	if ('GMT_1QUE == 23)
 		'timeout = 300;
-	mapannounce .@map$,"<Magic Tournament Broadcast>: Time limit is "+('timeout/60)+" minutes.",bc_blue; sleep 2000;
-	mapannounce .@map$,"<Magic Tournament Broadcast>: Ready... Set...",bc_blue; sleep 2000;
+	mapannounce .@map$,"<Magic Tournament Broadcast>: Time limit is "+('timeout/60)+" minutes.",bc_blue;
+	sleep 2000;
+	mapannounce .@map$,"<Magic Tournament Broadcast>: Ready... Set...",bc_blue;
+	sleep 2000;
 	mapannounce .@map$,"<Magic Tournament Broadcast>: Fight!",bc_blue;
 	donpcevent instance_npcname("#FireworksControl")+"::OnTurn";
 	initnpctimer;
@@ -2059,14 +2072,28 @@ OnTimeout2:
 	if (unitexist('HomID))
 		donpcevent instance_npcname("#GMTHomun")+"::OnReset";
 	sleep 3000;
-	donpcevent instance_npcname("Geffen Academy Master")+"::OnEnable";
 //	npctalk "Geffen Academy Master: The votes are in... And the winner is...",instance_npcname("Geffen Academy Master");
 //	sleep 1500;
-	npctalk "Geffen Academy Master: 1st judge's score! "+rand(1,50)+" - "+rand(51,100)+"",instance_npcname("Geffen Academy Master");
+	.@i = rand(100); .@j = rand(100);
+	if (.@j < .@i) {
+		.@k = .@j;
+		.@j = .@i; .@i = .@k;
+	}
+	npctalk "Geffen Academy Master: 1st judge's score! "+.@i+" - "+.@j+"",instance_npcname("Geffen Academy Master");
 	sleep 1500;
-	npctalk "Geffen Academy Master: 2nd judge's score! "+rand(1,50)+" - "+rand(51,100)+"",instance_npcname("Geffen Academy Master");
+	.@i = rand(100); .@j = rand(100);
+	if (.@j < .@i) {
+		.@k = .@j;
+		.@j = .@i; .@i = .@k;
+	}
+	npctalk "Geffen Academy Master: 2nd judge's score! "+.@i+" - "+.@j+"",instance_npcname("Geffen Academy Master");
 	sleep 1500;
-	npctalk "Geffen Academy Master: 3rd judge's score! "+rand(1,50)+" - "+rand(51,100)+"",instance_npcname("Geffen Academy Master");
+	.@i = rand(100); .@j = rand(100);
+	if (.@j < .@i) {
+		.@k = .@j;
+		.@j = .@i; .@i = .@k;
+	}
+	npctalk "Geffen Academy Master: 3rd judge's score! "+.@i+" - "+.@j+"",instance_npcname("Geffen Academy Master");
 	sleep 1500;
 	switch ('GMT_1QUE) {
 		case 11:
@@ -2523,7 +2550,7 @@ OnEnable:
 	end;
 OnActivate:
 	npctalk "Geffen Gangster: Hmmm, you're that kid from before...";
-	sleep 3000;
+	sleep 2000;
 	npctalk "Geffen Gangster: I've got a lesson to teach you!";
 	sleep 3000;
 	npctalk "Geffen Gangster: It's my turn to beat you!";
@@ -2579,7 +2606,7 @@ OnEnable:
 	end;
 OnActivate:
 	npctalk "Geffen Bully: Just you wait, you'll be immediately disabled!";
-	sleep 3000;
+	sleep 2000;
 	npctalk "Geffen Bully: I will beat you down today!";
 	sleep 3000;
 	npctalk "Geffen Bully: Give me your zeny!";
@@ -2633,15 +2660,15 @@ OnEnable:
 	end;
 OnActivate:
 	npctalk "Geffen Shoplifter: There are so many people gathered here.";
-	sleep 3000;
+	sleep 2000;
 	npctalk "Geffen Shoplifter: I thought there'd be something good to steal here";
 	sleep 3000;
 	npctalk "Geffen Shoplifter: But I can't steal anything because of all the attention it'll cause.";
 	sleep 3000;
 	npctalk "Geffen Shoplifter: Ah... This is no good...";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Geffen Shoplifter: I guess I'll just participate in the tournament...";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Geffen Shoplifter: Well~! Let's win anyway!";
 	sleep 2000;
 	donpcevent instance_npcname("#GMTcontroller")+"::OnStart";
@@ -2805,7 +2832,6 @@ OnEnable:
 	end;
 }
 
-
 1@ge_st,114,50,4	script	Blut Hase#1	4_GEFFEN_06,{
 	end;
 OnActivate:
@@ -2930,15 +2956,15 @@ OnEnable:
 	end;
 OnActivate:
 	npctalk "Ifodes: At long last, the 8th game has started.";
-	sleep 3000;
+	sleep 2000;
 	npctalk "Ifodes: No one can pierce my defenses!";
 	sleep 3000;
 	npctalk "Ifodes: But I can surely get past yours.";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Ifodes: Therefore, you stand no chance!";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Ifodes: Once the match has started, your laughter will turn into tears!";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Ifodes: Shall we start?";
 	sleep 1000;
 	donpcevent instance_npcname("#Talkcontrol")+"::OnRndtalk";
@@ -2986,15 +3012,15 @@ OnEnable:
 	end;
 OnActivate:
 	npctalk "Licheniyes: Ho ho ho~!!";
-	sleep 3000;
+	sleep 2000;
 	npctalk "Licheniyes: The competitor of the 9th match looks scary~!";
 	sleep 3000;
 	npctalk "Licheniyes: You don't scare me though~!";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Licheniyes: I'm a lady~!";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Licheniyes: But once this match starts...!";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Licheniyes: *Giggling*... I will bite you!";
 	sleep 1000;
 	npctalk "Payon Spectator: Good horror players ...",instance_npcname("Payon Spectator#a1");
@@ -3045,15 +3071,15 @@ OnEnable:
 	end;
 OnActivate:
 	npctalk "Odoric: Lu lu~ What a fun tournament!";
-	sleep 3000;
+	sleep 2000;
 	npctalk "Odoric: Dance~ Dance~ Bewitching dance~!";
 	sleep 3000;
 	npctalk "Odoric: Everyone is mesmerized by my magical dance!";
 	sleep 3000;
 	npctalk "Odoric: You will be captured by my charm~!";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Odoric: Now,feast on my magical dance!";
-	sleep 2000;
+	sleep 3000;
 	npctalk "Odoric: Lah, Lah, Lah, Lah~~!";
 	sleep 1000;
 	npctalk "Veins Spectator: How beautiful!",instance_npcname("Veins Spectator#a1");
@@ -3105,7 +3131,7 @@ OnEnable:
 	end;
 OnActivate:
 	npctalk "Ju: Another match has started...";
-	sleep 3000;
+	sleep 2000;
 	npctalk "Ju: A real battle is a serious matter...";
 	sleep 3000;
 	npctalk "Ju: It is something to be feared!";
@@ -3115,7 +3141,7 @@ OnActivate:
 	npctalk "Ju: They will never know the true meaning of battle!";
 	sleep 3000;
 	npctalk "Ju: I will make sure to handle them as fast as possible.";
-	sleep 3000;
+	sleep 2000;
 	npctalk "Lydia: My heart is beating so fast! I'm so nervous!",instance_npcname("Lydia#a2");
 	donpcevent instance_npcname("#GMTcontroller")+"::OnStart";
 	end;
@@ -3234,6 +3260,7 @@ OnEnable:
 1@ge_st,114,50,4	script	Fay Kanavian#1	4_F_GEFFEN_FAY,{
 	end;
 OnActivate:
+	sleep 2500;
 	donpcevent instance_npcname("#paycanatalk")+"::OnEnable";
 	end;
 OnDefeat:
@@ -3243,6 +3270,7 @@ OnDefeat:
 	end;
 OnTalk1:
 	attachrid('gmt_account_id);
+	sleep2 100;
 	cutin "paycana_a",2;
 	npctalk "Fay Kanavian: You~ I've never heard about you before~!";
 	sleep2 4000;
@@ -3260,9 +3288,11 @@ OnTalk1:
 	sleep2 2000;
 	cutin "",255;
 	donpcevent instance_npcname("#GMTcontroller")+"::OnStart";
+	sleep2 4000;
 	end;
 OnTalk2:
 	attachrid('gmt_account_id);
+	sleep2 100;
 	cutin "paycana_b ",2;
 	npctalk "Fay Kanavian: I actually lost...";
 	sleep2 3000;
@@ -3303,7 +3333,7 @@ OnEnable:
 
 1@ge_st,108,50,0	script	#paycanatalk	HIDDEN_WARP_NPC,25,25,{
 	end;
-OnTouch:
+OnTouch_:
     donpcevent instance_npcname("Fay Kanavian#1")+"::OnTalk1";
     donpcevent instance_npcname("#paycanatalk")+"::OnDisable";
     end;
@@ -3320,7 +3350,7 @@ OnEnable:
 
 1@ge_st,108,50,0	script	#paycanatalk2	HIDDEN_WARP_NPC,25,25,{
 	end;
-OnTouch:
+OnTouch_:
     donpcevent instance_npcname("Fay Kanavian#1")+"::OnTalk2";
     donpcevent instance_npcname("#paycanatalk2")+"::OnDisable";
     end;
@@ -3338,6 +3368,7 @@ OnEnable:
 1@ge_st,114,50,4	script	Fenrir#f	4_F_FENRIR,{
     end;
 OnActivate:
+	sleep 10500;
     donpcevent instance_npcname("#fenrirtalk")+"::OnEnable";
     end;
 OnDefeat:
@@ -3346,6 +3377,7 @@ OnDefeat:
     end;
 OnTalk1:
 	attachrid('gmt_account_id);
+	sleep2 100;
 	cutin "fenrir_b",1;
 	npctalk "Fenrir: The final match...";
 	sleep2 1000;
@@ -3365,11 +3397,14 @@ OnTalk1:
 	npctalk "Fenrir: I will do my best to fight you fairly.";
 	sleep2 2000;
 	npctalk "Fenrir: Then, should we start the final match?";
+	sleep2 2000;
 	cutin "",255;
 	donpcevent instance_npcname("#GMTcontroller")+"::OnStart";
+	sleep2 4000;
 	end;
 OnTalk2:
 	attachrid('gmt_account_id);
+	sleep2 100;
 	cutin "fenrir_a",1;
 	npctalk "Fenrir: Uh... I am defeated.";
 	sleep2 2000;
@@ -3413,7 +3448,7 @@ OnEnable:
 
 1@ge_st,108,50,0	script	#fenrirtalk	HIDDEN_WARP_NPC,25,25,{
 	end;
-OnTouch:
+OnTouch_:
 	donpcevent instance_npcname("Fenrir#f")+"::OnTalk1";
 	donpcevent instance_npcname("#fenrirtalk")+"::OnDisable";
 	end;
@@ -3430,7 +3465,7 @@ OnEnable:
 
 1@ge_st,108,50,0	script	#fenrirtalk2	HIDDEN_WARP_NPC,25,25,{
 	end;
-OnTouch:
+OnTouch_:
     donpcevent instance_npcname("Fenrir#f")+"::OnTalk2";
 	donpcevent instance_npcname("#fenrirtalk2")+"::OnDisable";
     end;
@@ -3463,7 +3498,6 @@ OnEnable:
 	movenpc instance_npcname("Fay Kanavian#q1"),107,48;
 	movenpc instance_npcname("Fenrir#q1"),112,50;
 	donpcevent instance_npcname("Tournament Guide#gefMT")+"::OnEnable";
-	donpcevent instance_npcname("Geffen Academy Master")+"::OnEnable";
 	sleep 1000;
 	npctalk "Fenrir: The other contestants want to congratulate you on winning as well!",instance_npcname("Fenrir#q1");
 	end;
@@ -4165,7 +4199,7 @@ OnTimer1000:
 			next;
 			mes "[Chaos]";
 			mes "This is my favorite magic buff scroll, so take it as a token of our appreciation.";
-			sc_start4 SC_GEFFEN_MAGIC3,3600000,5,0,0,0,10000,SCFLAG_NONE;
+			sc_start SC_GEFFEN_MAGIC3,3600000,10;
 			specialeffect2 EF_POTION_BERSERK;
 			next;
 			mes "[Chaos]";
@@ -4453,7 +4487,7 @@ OnMobKilled:
 					mes "[Loki]";
 					mes "I have a spare magic buff scroll.";
 					mes "I will give it to you as a present.";
-					sc_start4 SC_GEFFEN_MAGIC2,3600000,5,0,0,0,10000,SCFLAG_NONE;
+					sc_start SC_GEFFEN_MAGIC2,3600000,10;
 					specialeffect2 EF_POTION_BERSERK;
 					next;
 					mes "[Loki]";
@@ -4843,7 +4877,7 @@ OnTimer1000:
 			next;
 			mes "[Lydia]";
 			mes "I stole this magic scroll from another thief, so don't worry about taking it.";
-			sc_start4 SC_GEFFEN_MAGIC1,3600000,5,0,0,0,10000,SCFLAG_NONE;
+			sc_start SC_GEFFEN_MAGIC1,3600000,10;
 			specialeffect2 EF_POTION_BERSERK;
 			next;
 			mes "[Lydia]";
