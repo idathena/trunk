@@ -19497,7 +19497,7 @@ void clif_parse_RouletteClose(int fd, struct map_session_data *sd)
 }
 
 /**
- *
+ * ZC_RECV_ROULETTE_ITEM
  */
 static void clif_roulette_recvitem_ack(struct map_session_data *sd, enum RECV_ROULETTE_ITEM_REQ type) 
 {
@@ -19587,15 +19587,12 @@ void clif_parse_RouletteGenerate(int fd, struct map_session_data *sd)
 		}
 		sd->roulette.prizeStage = stage;
 		sd->roulette.prizeIdx = rnd()%rd.items[stage];
+		sd->roulette.claimPrize = true;
 		if( rd.flag[stage][sd->roulette.prizeIdx]&1 ) {
-			clif_roulette_generate_ack(sd, GENERATE_ROULETTE_LOSING, stage, sd->roulette.prizeIdx, 0);
-			clif_roulette_getitem(sd);
-			clif_roulette_recvitem_ack(sd, RECV_ITEM_SUCCESS);
-			return;
-		} else {
-			sd->roulette.claimPrize = true;
+			result = GENERATE_ROULETTE_LOSING;
+			sd->roulette.stage = 0;
+		} else
 			sd->roulette.stage++;
-		}
 	}
 
 	clif_roulette_generate_ack(sd, result, stage, (sd->roulette.prizeIdx == -1 ? 0 : sd->roulette.prizeIdx), 0);

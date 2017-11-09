@@ -1131,7 +1131,7 @@
 2139,Flame_Thrower,Flame Thrower,4,20000,,2000,,4,,0,0x00000400,8,2,32,,99,0,1,{},{},{}
 // GM Shield
 //===================================================================
-2199,Ahura_Mazda,Ahura Mazdah,4,1,,10,,100,,0,0xFFFFFFFF,7,2,32,,1,1,0,{ bonus bAllStats,50; bonus bMdef,99; bonus bShortWeaponDamageReturn,100; bonus2 bSubRace,RC_DemiHuman,95; skill "CR_FULLPROTECTION",5; Skill "WZ_ESTIMATION",1; Skill "ST_FULLSTRIP",5; Skill "HW_MAGICPOWER",10; bonus bMaxHPrate,200; bonus bNoGemStone,0; },{ sc_start4 SC_ENDURE,60000,10,0,0,1; sc_start4 SC_SPEEDUP0,60000,25,0,0,1; },{ sc_end SC_ENDURE; sc_end SC_SPEEDUP0; }
+2199,Ahura_Mazda,Ahura Mazdah,4,1,,10,,100,,0,0xFFFFFFFF,7,2,32,,1,1,1,{ bonus bAllStats,50; bonus bMdef,99; bonus bShortWeaponDamageReturn,100; bonus2 bSubRace,RC_DemiHuman,95; skill "CR_FULLPROTECTION",5; Skill "WZ_ESTIMATION",1; Skill "ST_FULLSTRIP",5; Skill "HW_MAGICPOWER",10; bonus bMaxHPrate,200; bonus bNoGemStone,0; },{ sc_start4 SC_ENDURE,60000,10,0,0,1; sc_start4 SC_SPEEDUP0,60000,25,0,0,1; },{ sc_end SC_ENDURE; sc_end SC_SPEEDUP0; }
 // Headgears
 //===================================================================
 2201,Sunglasses,Sunglasses,4,5000,,100,,0,,0,0xFFFFFFFF,7,2,512,,0,0,12,{ bonus2 bResEff,Eff_Blind,500; },{},{}
