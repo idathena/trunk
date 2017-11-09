@@ -256,11 +256,13 @@ static bool script_rid2bl_(struct script_state *st, uint8 loc, struct block_list
 		unit_id = st->rid;
 
 	*bl = map_id2bl(unit_id);
-
 	if (*bl)
 		return true;
 	else {
-		ShowError("%s: Unit with ID '%d' is not found.\n", func, unit_id);
+		const char *cmd = script_getfuncname(st);
+
+		if (strcmp(cmd,"unitexist"))
+			ShowError("%s: Unit with ID '%d' is not found.\n", func, unit_id);
 		return false;
 	}
 }

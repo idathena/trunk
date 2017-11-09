@@ -1162,7 +1162,7 @@ REPLACE INTO `item_db` VALUES (2138,'Bradium_Shield','Bradium Shield',4,20,NULL,
 REPLACE INTO `item_db` VALUES (2139,'Flame_Thrower','Flame Thrower',4,20000,NULL,2000,NULL,4,NULL,0,0x00000400,8,2,32,NULL,99,0,1,NULL,NULL,NULL);
 # GM Shield
 #===================================================================
-REPLACE INTO `item_db` VALUES (2199,'Ahura_Mazda','Ahura Mazdah',4,1,NULL,10,NULL,100,NULL,0,0xFFFFFFFF,7,2,32,NULL,1,1,0,'bonus bAllStats,50; bonus bMdef,99; bonus bShortWeaponDamageReturn,100; bonus2 bSubRace,RC_DemiHuman,95; skill "CR_FULLPROTECTION",5; Skill "WZ_ESTIMATION",1; Skill "ST_FULLSTRIP",5; Skill "HW_MAGICPOWER",10; bonus bMaxHPrate,200; bonus bNoGemStone,0;','sc_start4 SC_ENDURE,60000,10,0,0,1; sc_start4 SC_SPEEDUP0,60000,25,0,0,1;','sc_end SC_ENDURE; sc_end SC_SPEEDUP0;');
+REPLACE INTO `item_db` VALUES (2199,'Ahura_Mazda','Ahura Mazdah',4,1,NULL,10,NULL,100,NULL,0,0xFFFFFFFF,7,2,32,NULL,1,1,1,'bonus bAllStats,50; bonus bMdef,99; bonus bShortWeaponDamageReturn,100; bonus2 bSubRace,RC_DemiHuman,95; skill "CR_FULLPROTECTION",5; Skill "WZ_ESTIMATION",1; Skill "ST_FULLSTRIP",5; Skill "HW_MAGICPOWER",10; bonus bMaxHPrate,200; bonus bNoGemStone,0;','sc_start4 SC_ENDURE,60000,10,0,0,1; sc_start4 SC_SPEEDUP0,60000,25,0,0,1;','sc_end SC_ENDURE; sc_end SC_SPEEDUP0;');
 # Headgears
 #===================================================================
 REPLACE INTO `item_db` VALUES (2201,'Sunglasses','Sunglasses',4,5000,NULL,100,NULL,0,NULL,0,0xFFFFFFFF,7,2,512,NULL,0,0,12,'bonus2 bResEff,Eff_Blind,500;',NULL,NULL);

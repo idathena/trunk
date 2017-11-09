@@ -2617,7 +2617,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			}
 			//Announce first, or else ditem will be freed [Lance]
 			//By popular demand, use base drop rate for autoloot code [Skotlex]
-			mob_item_drop(md, dlist, ditem, 0, md->db->dropitem[i].p, homkillonly);
+			mob_item_drop(md, dlist, ditem, 0, (battle_config.autoloot_adjust ? drop_rate : md->db->dropitem[i].p), homkillonly);
 		}
 		if(sd == mvp_sd && pc_checkskill(sd,BS_FINDINGORE) > 0 && rnd()%10000 < battle_config.finding_ore_rate / 10) { //Ore Discovery [Celest]
 			struct s_mob_drop mobdrop;

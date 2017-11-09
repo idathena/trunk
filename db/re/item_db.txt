@@ -1365,7 +1365,7 @@
 2196,White_Gold_Shield,White Gold Shield,4,20,,1800,,140,,1,0xFFFFFFFF,63,2,32,,100,1,3,{ autobonus2 "{ bonus bMagicDamageReturn,20; }",20,2000,BF_MAGIC; },{},{}
 2198,Lapine_Shield,Lapine Shield,4,20,,1000,,25,,1,0xFFFFFFFF,63,2,32,,100,1,3,{ bonus bMdef,10; if(getrefine()>=7) bonus bMatk,20; },{},{}
 // GM Shield
-2199,Ahura_Mazda,Ahura Mazdah,4,1,,10,,10000,,0,0xFFFFFFFF,63,2,32,,1,1,0,{ bonus bAllStats,50; bonus bMdef,99; bonus bShortWeaponDamageReturn,100; bonus2 bSubRace,RC_DemiHuman,95; skill "CR_FULLPROTECTION",5; skill "WZ_ESTIMATION",1; skill "ST_FULLSTRIP",5; skill "HW_MAGICPOWER",10; skill "ECL_SNOWFLIP",1; skill "ECL_PEONYMAMY",1; skill "ECL_SADAGUI",1; skill "ECL_SEQUOIADUST",1; bonus bMaxHPrate,200; bonus bNoKnockback,0; bonus bDelayrate,-20; bonus bIntravision,0; },{ sc_start4 SC_ENDURE,60000,10,0,0,1; sc_start4 SC_SPEEDUP0,60000,25,0,0,1; },{ sc_end SC_ENDURE; sc_end SC_SPEEDUP0; }
+2199,Ahura_Mazda,Ahura Mazdah,4,1,,10,,10000,,0,0xFFFFFFFF,63,2,32,,1,1,1,{ bonus bAllStats,50; bonus bMdef,99; bonus bShortWeaponDamageReturn,100; bonus2 bSubRace,RC_DemiHuman,95; skill "CR_FULLPROTECTION",5; skill "WZ_ESTIMATION",1; skill "ST_FULLSTRIP",5; skill "HW_MAGICPOWER",10; skill "ECL_SNOWFLIP",1; skill "ECL_PEONYMAMY",1; skill "ECL_SADAGUI",1; skill "ECL_SEQUOIADUST",1; bonus bMaxHPrate,200; bonus bNoKnockback,0; bonus bDelayrate,-20; bonus bIntravision,0; },{ sc_start4 SC_ENDURE,60000,10,0,0,1; sc_start4 SC_SPEEDUP0,60000,25,0,0,1; },{ sc_end SC_ENDURE; sc_end SC_SPEEDUP0; }
 // Headgears
 //===================================================================
 2201,Sunglasses,Sunglasses,4,5000,,100,,0,,0,0xFFFFFFFF,63,2,512,,0,0,12,{ bonus2 bResEff,Eff_Blind,500; },{},{}
