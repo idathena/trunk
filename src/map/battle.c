@@ -1360,18 +1360,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 				if( --sce->val3 <= 0 || sce->val2 <= 0 || skill_id == AL_HOLYLIGHT )
 					status_change_end(bl,SC_KYRIE,INVALID_TIMER);
 			}
-			if( (sce = sc->data[SC_P_ALTER]) ) {
-				clif_specialeffect(bl,EF_GUARD,SELF);
-				sce->val3 -= (int)cap_value(damage,INT_MIN,INT_MAX);
-				if( flag&BF_WEAPON ) {
-					if( sce->val3 >= 0 )
-						damage = 0;
-					else
-						damage = -sce->val3;
-				}
-				if( --sce->val4 <= 0 || sce->val3 <= 0 )
-					status_change_end(bl,SC_P_ALTER,INVALID_TIMER);
-			}
 			if( (sce = sc->data[SC_TUNAPARTY]) ) {
 				sce->val2 -= (int)cap_value(damage,INT_MIN,INT_MAX);
 				if( flag&BF_WEAPON ) {
