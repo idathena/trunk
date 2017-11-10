@@ -1204,7 +1204,7 @@ OnEnable:
 						mes .@n$;
 						mes "You can participate in the Magic Tournament after passing the test.";
 						mes "Then, let us begin!";
-						npctalk "Time limit is 60 seconds ! Ready! Set! Go!";
+						npctalk "Receptionist: Time limit is 60 seconds ! Ready! Set! Go!";
 						changequest 9292,9293;
 						addtimer 60000,instance_npcname("Receptionist#1_0et")+"::OnFail";
 						monster instance_mapname("1@gef"),120,62,"--en--",1106,1,instance_npcname("Receptionist#1_0et")+"::OnTest";
@@ -1299,7 +1299,7 @@ L_Menu:
 						mes .@n$;
 						mes "You can participate in the Magic Tournament after passing the test.";
 						mes "Then, let us begin!";
-						npctalk "Time limit is 60 seconds ! Ready! Set! Go!";
+						npctalk "Receptionist: Time limit is 60 seconds ! Ready! Set! Go!";
 						changequest 9292,9293;
 						addtimer 60000,instance_npcname("Receptionist#1_0et")+"::OnFail";
 						monster instance_mapname("1@gef"),120,62,"--en--",1106,1,instance_npcname("Receptionist#1_0et")+"::OnTest";
@@ -1341,13 +1341,13 @@ OnTest:
 	deltimer instance_npcname("Receptionist#1_0et")+"::OnFail";
 	'passtest = 1;
 	donpcevent instance_npcname("Receptionist#1_0et")+"::OnEnable";
-	npctalk "You passed the test! Shall we finish your registration?",instance_npcname("Receptionist#1_0et");
+	npctalk "Receptionist: You passed the test! Shall we finish your registration?",instance_npcname("Receptionist#1_0et");
 	end;
 OnFail:
 	killmonster instance_mapname("1@gef"),instance_npcname("Receptionist#1_0et")+"::OnTest";
 	'passtest = 2;
 	donpcevent instance_npcname("Receptionist#1_0et")+"::OnEnable";
-	npctalk "You failed the test. Talk to me if you wish to try again.",instance_npcname("Receptionist#1_0et");
+	npctalk "Receptionist: You failed the test. Talk to me if you wish to try again.",instance_npcname("Receptionist#1_0et");
 	end;
 OnInstanceInit:
 	donpcevent instance_npcname(strnpcinfo(0))+"::OnEnable";

@@ -10161,7 +10161,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 						pc_setoption(sd,sd->sc.option&~OPTION_DRAGON);
 				} 
 				break;
-			case SC_GLOOMYDAY_SK: 
+			case SC_GLOOMYDAY_SK:
 				//Random number between [15 ~ (Voice Lesson Skill Level x 5) + (Skill Level x 10)] %
 				val2 = rnd_value(15,(sd ? pc_checkskill(sd,WM_LESSON) : 10) * 5 + val1 * 10);
 				break;
@@ -10621,41 +10621,17 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val4 = 10; //Ranged Atk increase
 				break;
 			case SC_SHRIMP: {
-					struct map_session_data *ssd = map_id2sd(src->id);
-					int heal = status_get_matk(src, 3);
+					int heal = skill_calc_heal(src,bl,status_sc2skill(type),val1,true);
 
-					//Heal formula [exneval]
-					heal += (15 * ((int)((status_get_lv(src) - 4) / 5.0 + 1) + (int)((status_get_int(src) - 4) / 5.0 + 1)));
-					if( ssd ) {
-						if( pc_checkskill(ssd,SU_POWEROFSEA) > 0 ) {
-							heal += heal * 8 / 100;
-							if( pc_checkskill_summoner(ssd,TYPE_SEAFOOD) >= 20 )
-								heal += heal * 16 / 100;
-						}
-					}
 					status_heal(bl,heal,0,3);
 					val2 = 10; //Atk%, Matk%
 				}
 				break;
-			case SC_FRESHSHRIMP: {
-					struct map_session_data *ssd = map_id2sd(src->id);
-
-					//Heal formula [exneval]
-					val2 = 8 * ((int)((status_get_lv(src) - 2) / 5.0 + 1) + (int)((status_get_int(src) - 4) / 5.0 + 1));
-					val2 += status_get_int(src) - ((status_get_int(src) - 1) / 3 + 1);
-					if( ssd ) {
-						if( pc_checkskill(ssd,SU_POWEROFSEA) > 0 ) {
-							val2 += val2 * 8 / 100;
-							if( pc_checkskill_summoner(ssd,TYPE_SEAFOOD) >= 20 )
-								val2 += val2 * 16 / 100;
-						}
-						if( pc_checkskill(ssd,SU_SPIRITOFSEA) > 0 )
-							val2 = val2 * 160 / 100;
-					}
-					val3 = 11000 - 1000 * val1; //Heal interval
-					tick_time = val3;
-					val4 = tick / tick_time;
-				}
+			case SC_FRESHSHRIMP:
+				val2 = skill_calc_heal(src,bl,status_sc2skill(type),val1,true);
+				val3 = 11000 - 1000 * val1; //Heal interval
+				tick_time = val3;
+				val4 = tick / tick_time;
 				break;
 			case SC_TUNAPARTY: {
 					struct map_session_data *ssd = map_id2sd(src->id);

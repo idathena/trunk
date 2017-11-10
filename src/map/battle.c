@@ -815,7 +815,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				}
 				if( flag&BF_SHORT )
 					cardfix = cardfix * (100 - tsd->bonus.near_attack_def_rate) / 100;
-				else if( skill_id != RA_WUGSTRIKE && skill_id != RA_WUGBITE && skill_id != SR_GATEOFHELL )
+				else if( skill_id != SR_GATEOFHELL )
 					cardfix = cardfix * (100 - tsd->bonus.long_attack_def_rate) / 100;
 				if( tsd->sc.data[SC_DEF_RATE] )
 					cardfix = cardfix * (100 - tsd->sc.data[SC_DEF_RATE]->val1) / 100;
@@ -4485,6 +4485,12 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, sce->val2);
 #endif
 		}
+		if((sce = sc->data[SC_DANCEWITHWUG])) {
+			ATK_ADD(wd.damage, wd.damage2, 2 * sce->val1 * party_calc_chorusbonus(sd,1));
+#ifdef RENEWAL
+			ATK_ADD(wd.equipAtk, wd.equipAtk2, 2 * sce->val1 * party_calc_chorusbonus(sd,1));
+#endif
+		}
 		if((sce = sc->data[SC_SATURDAYNIGHTFEVER])) {
 			ATK_ADD(wd.damage, wd.damage2, 100 * sce->val1);
 #ifdef RENEWAL
@@ -4600,15 +4606,9 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADDRATE(wd.damage, wd.damage2, sce->val2);
 			RE_ALLATK_ADDRATE(wd, sce->val2);
 		}
-		if((sce = sc->data[SC_DANCEWITHWUG])) {
-			if(inf3&INF3_SC_DANCEWITHWUG) {
-				ATK_ADDRATE(wd.damage, wd.damage2, sce->val1 * 10 * party_calc_chorusbonus(sd,1));
-				RE_ALLATK_ADDRATE(wd, sce->val1 * 10 * party_calc_chorusbonus(sd,1));
-			}
-			ATK_ADDRATE(wd.damage, wd.damage2, sce->val1 * 2 * party_calc_chorusbonus(sd,1));
-#ifdef RENEWAL
-			ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, sce->val1 * 2 * party_calc_chorusbonus(sd,1));
-#endif
+		if((sce = sc->data[SC_DANCEWITHWUG]) && (inf3&INF3_SC_DANCEWITHWUG)) {
+			ATK_ADDRATE(wd.damage, wd.damage2, 10 * sce->val1 * party_calc_chorusbonus(sd,1));
+			RE_ALLATK_ADDRATE(wd, 10 * sce->val1 * party_calc_chorusbonus(sd,1));
 		}
 		if((sce = sc->data[SC_EQC])) {
 			ATK_ADDRATE(wd.damage, wd.damage2, -sce->val2);
