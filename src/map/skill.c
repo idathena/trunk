@@ -456,17 +456,24 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 		default:
 			if( skill_lv >= battle_config.max_heal_lv )
 				return battle_config.max_heal;
+			if( skill_id == SU_BUNCHOFSHRIMP )
+				hp = (status_get_lv(src) + status_get_int(src)) / 5 * 15;
+			else if( skill_id == SU_FRESHSHRIMP ) {
+				hp = (status_get_lv(src) + status_get_int(src)) / 5 * 8 + status_get_lv(src) / 80 * 2;
+				hp += status_get_int(src) - (status_get_int(src) - 1) / 3 + 1;
+			} else {
 #ifdef RENEWAL
-			/**
-			 * Renewal Heal Formula
-			 * Formula: ( [(Base Level + INT) / 5] x 30 ) x (Heal Level / 10) x (Modifiers) + MATK
-			 */
-			hp = ((status_get_lv(src) + status_get_int(src)) / 5 * 30) *
-				(skill_id == AB_HIGHNESSHEAL ? (sd ? pc_checkskill(sd, AL_HEAL) : 10) : skill_lv) / 10;
+				/**
+				* Renewal Heal Formula
+				* Formula: ( [(Base Level + INT) / 5] x 30 ) x (Heal Level / 10) x (Modifiers) + MATK
+				*/
+				hp = ((status_get_lv(src) + status_get_int(src)) / 5 * 30) *
+					(skill_id == AB_HIGHNESSHEAL ? (sd ? pc_checkskill(sd, AL_HEAL) : 10) : skill_lv) / 10;
 #else
-			hp = (status_get_lv(src) + status_get_int(src)) / 8 *
-				((skill_id == AB_HIGHNESSHEAL ? (sd ? pc_checkskill(sd, AL_HEAL) : 10) : skill_lv) * 8 + 4);
+				hp = (status_get_lv(src) + status_get_int(src)) / 8 *
+					((skill_id == AB_HIGHNESSHEAL ? (sd ? pc_checkskill(sd, AL_HEAL) : 10) : skill_lv) * 8 + 4);
 #endif
+			}
 			if( sd ) {
 				if( (lv = pc_checkskill(sd, HP_MEDITATIO)) > 0 )
 					bonus += lv * 2;
@@ -475,6 +482,8 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 					if( pc_checkskill_summoner(sd, TYPE_SEAFOOD) >= 20 )
 						bonus += 16;
 				}
+				if( skill_id == SU_FRESHSHRIMP && pc_checkskill(sd, SU_SPIRITOFSEA) > 0 )
+					bonus += 16;
 				if( tsd && sd->status.partner_id == tsd->status.char_id && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex )
 					bonus += 100;
 			} else if( src->type == BL_HOM && (lv = hom_checkskill(((TBL_HOM *)src), HLIF_BRAIN)) > 0 )
@@ -499,6 +508,7 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 		case PR_SANCTUARY:
 		case NPC_EVILLAND:
 		case SU_TUNABELLY:
+		case SU_FRESHSHRIMP:
 			break;
 		default:
 			hp += status_get_matk(src, 3);
@@ -10110,16 +10120,14 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case WM_GLOOMYDAY:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1); 
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			if( dstsd &&(pc_checkskill(dstsd,KN_BRANDISHSPEAR) || pc_checkskill(dstsd,CR_SHIELDCHARGE) || 
 				pc_checkskill(dstsd,CR_SHIELDBOOMERANG) || pc_checkskill(dstsd,LK_SPIRALPIERCE) || 
 				pc_checkskill(dstsd,PA_SHIELDCHAIN) || pc_checkskill(dstsd,RK_HUNDREDSPEAR) || 
 				pc_checkskill(dstsd,LG_SHIELDPRESS)) )
-			{
 				sc_start(src,bl,SC_GLOOMYDAY_SK,100,skill_lv,skill_get_time(skill_id,skill_lv));
-				break;
-			}
-			sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
+			else
+				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 
 		case WM_SONG_OF_MANA:
