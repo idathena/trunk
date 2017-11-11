@@ -933,7 +933,7 @@ static int pet_ai_sub_hard(struct pet_data *pd, struct map_session_data *sd, uns
 		(pd->ud.attacktimer != INVALID_TIMER || pd->ud.walktimer != INVALID_TIMER))
 		return 0; //Target already locked
 
-	if(target->type != BL_ITEM) { //enemy targetted
+	if(target->type != BL_ITEM) { //enemy targeted
 		if(!battle_check_range(&pd->bl,target,pd->status.rhw.range)) { //Chase
 			if(!unit_walktobl(&pd->bl,target,pd->status.rhw.range,2))
 				pet_unlocktarget(pd); //Unreachable target.

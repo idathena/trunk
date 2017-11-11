@@ -20128,6 +20128,7 @@ BUILDIN_FUNC(setdragon) {
 		script_pushint(st,1);
 	} else { //Not mounted; Mount now
 		unsigned int option = OPTION_DRAGON1;
+
 		if( color ) {
 			option = ( color == 1 ? OPTION_DRAGON1 :
 					   color == 2 ? OPTION_DRAGON2 :

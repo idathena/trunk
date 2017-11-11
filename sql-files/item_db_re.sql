@@ -7198,8 +7198,8 @@ REPLACE INTO `item_db_re` VALUES (13117,'TE_Woe_Pistol','TE Woe Pistol',5,0,NULL
 REPLACE INTO `item_db_re` VALUES (13118,'Tiny_Flame','Fading Flame',5,1,NULL,100,'0',NULL,7,0,0x01000000,63,2,34,1,'1',1,17,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (13119,'Freedom_Flame','Freedom Flame',5,1,NULL,100,'100',NULL,7,2,0x01000000,63,2,34,3,'99',1,17,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (13120,'H_FEATHER_H_FIRE','Heaven\'s Feather & Hell\'s Fire',5,1200000,NULL,800,'150',NULL,7,1,0x01000000,63,2,34,3,'99',1,17,'bonus2 bSkillAtk,"GS_DESPERADO",20; bonus2 bAddEff,Eff_Burning,200;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (13122,'ALTAIR_ARES','Altair & Ares',5,1450000,NULL,1000,'200',NULL,7,0,0x01000000,63,2,34,3,'140',1,17,'bonus bHit,5; bonus bDelayrate,10; bonus bLongAtkRate,30;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (13124,'ALTAIR_ARES_','Altair & Ares',5,10,NULL,1000,'200',NULL,7,1,0x01000000,63,2,34,3,'140',1,17,'bonus bHit,5; bonus bDelayrate,10; bonus bLongAtkRate,30;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (13122,'ALTAIR_ARES','Altair & Ares',5,1450000,NULL,1000,'200',NULL,7,0,0x01000000,63,2,34,3,'140',1,17,'bonus bHit,5; bonus bAspdRate,10; bonus bLongAtkRate,30;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (13124,'ALTAIR_ARES_','Altair & Ares',5,10,NULL,1000,'200',NULL,7,1,0x01000000,63,2,34,3,'140',1,17,'bonus bHit,5; bonus bAspdRate,10; bonus bLongAtkRate,30;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (13125,'Metal_Revolver','Metal Revolver',5,0,NULL,0,'30',NULL,7,1,0x01000000,63,2,34,3,'1',0,17,'bonus bBaseAtk,getrefine(); bonus bLongAtkRate,1; if(BaseLevel>=20&&BaseLevel<=120) bonus bBaseAtk,3*(BaseLevel/10);',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (13126,'Infinity_Revolver','Infinity Revolver',5,20,NULL,500,'175',NULL,7,1,0x01000000,63,2,34,4,'100',0,17,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (13127,'Crimson_Revolver','Crimson Revolver',5,20,NULL,1000,'100',NULL,7,2,0x01000000,63,2,34,3,'70',1,17,'set .@r,getrefine(); bonus bBaseAtk,pow((.@r>15?15:.@r),2); if(BaseLevel>70) bonus bBaseAtk,((BaseLevel-70)/10)*5;',NULL,NULL);

@@ -2204,7 +2204,7 @@ OnStop:
 	end;
 OnSummon:
 	initnpctimer;
-	areamonster instance_mapname("1@ge_st"),113,49,115,51,"--en--",2565,1,instance_npcname("#GMTHomun")+"::OnMyMobDead";
+	monster instance_mapname("1@ge_st"),111,50,"--en--",2565,1,instance_npcname("#GMTHomun")+"::OnMyMobDead";
 	'HomID = $@mobid[0];
 	end;
 OnTimer10000:
@@ -3378,7 +3378,7 @@ OnDefeat:
 OnTalk1:
 	attachrid('gmt_account_id);
 	sleep2 100;
-	cutin "fenrir_b",1;
+	cutin "fenrir_b",2;
 	npctalk "Fenrir: The final match...";
 	sleep2 1000;
 	npctalk "Payon Spectator: Fenrir is going to win without a doubt~!",instance_npcname("Payon Spectator#a1");
@@ -3405,7 +3405,7 @@ OnTalk1:
 OnTalk2:
 	attachrid('gmt_account_id);
 	sleep2 100;
-	cutin "fenrir_a",1;
+	cutin "fenrir_a",2;
 	npctalk "Fenrir: Uh... I am defeated.";
 	sleep2 2000;
 	npctalk "Fenrir: How did you get to be so strong?";

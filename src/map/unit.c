@@ -1782,7 +1782,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	if( sd && target->type == BL_MOB ) {
 		TBL_MOB *md = ((TBL_MOB *)target);
 
-		mobskill_event(md, src, tick, -1); //Cast targetted skill event
+		mobskill_event(md, src, tick, -1); //Cast targeted skill event
 		if( (status_has_mode(tstatus, MD_CASTSENSOR_IDLE) || status_has_mode(tstatus, MD_CASTSENSOR_CHASE)) &&
 			battle_check_target(target, src, BCT_ENEMY) > 0 ) {
 			switch( md->state.skillstate ) {
