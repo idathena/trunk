@@ -12897,18 +12897,18 @@ void clif_storagepassword_result(struct map_session_data *sd, short result, shor
 void clif_parse_CreateParty(int fd, struct map_session_data *sd)
 {
 	char *name = (char *)RFIFOP(fd,packet_db[RFIFOW(fd,0)].pos[0]);
-	name[NAME_LENGTH-1] = '\0';
+	name[NAME_LENGTH - 1] = '\0';
 
-	if( map[sd->bl.m].flag.partylock ) { // Party locked.
+	if( map[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
-	if( battle_config.basic_skill_check && pc_checkskill(sd,NV_BASIC) < 7 && pc_checkskill(sd, SU_BASIC_SKILL) < 1 ) {
-		clif_skill_fail(sd,1,USESKILL_FAIL_LEVEL,4,0);
+	if( battle_config.basic_skill_check && pc_checkskill(sd, NV_BASIC) < 7 && pc_checkskill(sd, SU_BASIC_SKILL) < 1 ) {
+		clif_skill_fail(sd, 1, USESKILL_FAIL_LEVEL, 4, 0);
 		return;
 	}
 
-	party_create(sd,name,0,0);
+	party_create(sd, name, 0, 0);
 }
 
 /// 01e8 <party name>.24B <item pickup rule>.B <item share rule>.B (CZ_MAKE_GROUP2)
@@ -12918,18 +12918,18 @@ void clif_parse_CreateParty2(int fd, struct map_session_data *sd)
 	char *name = (char *)RFIFOP(fd,info->pos[0]);
 	int item1 = RFIFOB(fd,info->pos[1]);
 	int item2 = RFIFOB(fd,info->pos[2]);
-	name[NAME_LENGTH-1] = '\0';
+	name[NAME_LENGTH - 1] = '\0';
 
-	if( map[sd->bl.m].flag.partylock ) { // Party locked.
+	if( map[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
-	if( battle_config.basic_skill_check && pc_checkskill(sd,NV_BASIC) < 7 && pc_checkskill(sd, SU_BASIC_SKILL) < 1 ) {
-		clif_skill_fail(sd,1,USESKILL_FAIL_LEVEL,4,0);
+	if( battle_config.basic_skill_check && pc_checkskill(sd, NV_BASIC) < 7 && pc_checkskill(sd, SU_BASIC_SKILL) < 1 ) {
+		clif_skill_fail(sd, 1, USESKILL_FAIL_LEVEL, 4, 0);
 		return;
 	}
 
-	party_create(sd,name,item1,item2);
+	party_create(sd, name, item1, item2);
 }
 
 
@@ -12938,19 +12938,19 @@ void clif_parse_CreateParty2(int fd, struct map_session_data *sd)
 void clif_parse_PartyInvite(int fd, struct map_session_data *sd)
 {
 	struct map_session_data *t_sd;
-	
-	if(map[sd->bl.m].flag.partylock) { // Party locked.
+
+	if( map[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
 
 	t_sd = map_id2sd(RFIFOL(fd,packet_db[RFIFOW(fd,0)].pos[0]));
 
-	if(t_sd && t_sd->state.noask) { // @noask [LuzZza]
+	if( t_sd && t_sd->state.noask ) { //@noask [LuzZza]
 		clif_noask_sub(sd, t_sd, 1);
 		return;
 	}
-	
+
 	party_invite(sd, t_sd);
 }
 
@@ -12959,20 +12959,20 @@ void clif_parse_PartyInvite2(int fd, struct map_session_data *sd)
 {
 	struct map_session_data *t_sd;
 	char *name = (char *)RFIFOP(fd,packet_db[RFIFOW(fd,0)].pos[0]);
-	name[NAME_LENGTH-1] = '\0';
+	name[NAME_LENGTH - 1] = '\0';
 
-	if(map[sd->bl.m].flag.partylock) { // Party locked.
+	if( map[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
 
 	t_sd = map_nick2sd(name);
 
-	if(t_sd && t_sd->state.noask) { // @noask [LuzZza]
+	if( t_sd && t_sd->state.noask ) { //@noask [LuzZza]
 		clif_noask_sub(sd, t_sd, 1);
 		return;
 	}
-	
+
 	party_invite(sd, t_sd);
 }
 
@@ -12983,18 +12983,18 @@ void clif_parse_PartyInvite2(int fd, struct map_session_data *sd)
 /// flag:
 ///     0 = reject
 ///     1 = accept
-void clif_parse_ReplyPartyInvite(int fd,struct map_session_data *sd)
+void clif_parse_ReplyPartyInvite(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
-	party_reply_invite(sd,RFIFOL(fd,info->pos[0]),
-	    RFIFOL(fd,info->pos[1]));
+
+	party_reply_invite(sd, RFIFOL(fd,info->pos[0]), RFIFOL(fd,info->pos[1]));
 }
 //(CZ_PARTY_JOIN_REQ_ACK)
-void clif_parse_ReplyPartyInvite2(int fd,struct map_session_data *sd)
+void clif_parse_ReplyPartyInvite2(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
-	party_reply_invite(sd,RFIFOL(fd,info->pos[0]),
-	    RFIFOB(fd,info->pos[1]));
+
+	party_reply_invite(sd, RFIFOL(fd,info->pos[0]), RFIFOB(fd,info->pos[1]));
 }
 
 
@@ -13002,10 +13002,11 @@ void clif_parse_ReplyPartyInvite2(int fd,struct map_session_data *sd)
 /// 0100
 void clif_parse_LeaveParty(int fd, struct map_session_data *sd)
 {
-	if(map[sd->bl.m].flag.partylock) { //Party locked.
+	if( map[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
+
 	party_leave(sd);
 }
 
@@ -13015,12 +13016,13 @@ void clif_parse_LeaveParty(int fd, struct map_session_data *sd)
 void clif_parse_RemovePartyMember(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
-	if(map[sd->bl.m].flag.partylock) { //Party locked.
+
+	if( map[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
-	party_removemember(sd,RFIFOL(fd,info->pos[0]),
-	    (char *)RFIFOP(fd,info->pos[1]));
+
+	party_removemember(sd,RFIFOL(fd,info->pos[0]),(char *)RFIFOP(fd,info->pos[1]));
 }
 
 
@@ -13047,10 +13049,11 @@ void clif_parse_PartyChangeOption(int fd, struct map_session_data *sd)
 		return;
 
 	expflag = RFIFOL(fd,info->pos[0]);
-	if(cmd == 0x0102) { //Client can't change the item-field
+	if( cmd == 0x0102 ) //Client can't change the item-field
 		party_changeoption(sd, expflag, p->party.item);
-	} else {
-		int itemflag = (RFIFOB(fd,info->pos[1])?1:0)|(RFIFOB(fd,info->pos[2])?2:0);
+	else {
+		int itemflag = (RFIFOB(fd,info->pos[1]) ? 1 : 0)|(RFIFOB(fd,info->pos[2]) ? 2 : 0);
+
 		party_changeoption(sd, expflag, itemflag);
 	}
 }

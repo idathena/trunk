@@ -100,7 +100,7 @@ struct block_list *battle_gettargeted(struct block_list *target) {
 	return bl_list[rnd()%c];
 }
 
-//Returns the id of the current targetted character of the passed bl. [Skotlex]
+//Returns the id of the current targeted character of the passed bl. [Skotlex]
 int battle_gettarget(struct block_list *bl) {
 
 	switch (bl->type) {
@@ -319,9 +319,8 @@ int battle_delay_damage(unsigned int tick, int amotion, struct block_list *src, 
 		damage > 0 && skill_id != PA_PRESSURE && skill_id != CR_REFLECTSHIELD )
 		damage = 0;
 
-	if( !battle_config.delay_battle_damage || amotion <= 1 ) {
+	if( !battle_config.delay_battle_damage || amotion <= 1 ) { //Deal damage
 		map_freeblock_lock();
-		//Deal damage
 		battle_damage(src, target, damage, ddelay, skill_lv, skill_id, dmg_lv, attack_type, additional_effects, gettick(), isspdamage);
 		map_freeblock_unlock();
 		return 0;
@@ -916,13 +915,32 @@ struct status_change_entry *battle_check_shadowform(struct block_list *bl, enum 
 	struct map_session_data *s_sd = NULL; //Shadow target
 
 	//Check if shadow target have the status type [exneval]
-	if(sc && sc->data[SC__SHADOWFORM] && (s_sd = map_id2sd(sc->data[SC__SHADOWFORM]->val2)) && s_sd->shadowform_id == bl->id) {
+	if( sc && sc->data[SC__SHADOWFORM] && (s_sd = map_id2sd(sc->data[SC__SHADOWFORM]->val2)) && s_sd->shadowform_id == bl->id ) {
 		struct status_change *s_sc;
 
-		if((s_sc = &s_sd->sc) && s_sc->data[type])
+		if( (s_sc = &s_sd->sc) && s_sc->data[type] )
 			return s_sc->data[type];
 	}
 	return NULL;
+}
+
+/**
+ * Check if skill has NK_NO_CARDFIX_ATK property
+ * @param skill_id
+ */
+static bool battle_skill_check_no_cardfix_atk(uint16 skill_id) {
+	switch( skill_id ) {
+#ifdef RENEWAL
+		case AS_SPLASHER:
+		case WS_CARTTERMINATION:
+		case GN_SPORE_EXPLOSION:
+			return true;
+#endif
+		case RK_DRAGONBREATH:
+		case RK_DRAGONBREATH_WATER:
+			return false;
+	}
+	return (skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK);
 }
 
 /*==========================================
@@ -1042,19 +1060,14 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 		if( (sce = sc->data[SC_WEAPONBLOCKING]) && (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) &&
 			rnd()%100 < sce->val2 ) {
-			clif_skill_nodamage(bl,src,GC_WEAPONBLOCKING,sce->val1,1);
-			sc_start2(src,bl,SC_COMBO,100,GC_WEAPONBLOCKING,src->id,1500);
+			clif_skill_nodamage(bl,bl,GC_WEAPONBLOCKING,sce->val1,
+				sc_start2(src,bl,SC_COMBO,100,GC_WEAPONBLOCKING,src->id,2000));
 			d->dmg_lv = ATK_BLOCK;
 			return 0;
 		}
 
-		if( ((sce = sc->data[SC_AUTOGUARD]) || (sce = battle_check_shadowform(bl,SC_AUTOGUARD))) && flag&BF_WEAPON &&
-#ifdef RENEWAL
-			skill_id != AS_SPLASHER && skill_id != WS_CARTTERMINATION && skill_id != GN_SPORE_EXPLOSION &&
-#endif
-			(skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
-			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK)) && rnd()%100 < sce->val2 )
-		{
+		if( ((sce = sc->data[SC_AUTOGUARD]) || (sce = battle_check_shadowform(bl,SC_AUTOGUARD))) &&
+			flag&BF_WEAPON && !battle_skill_check_no_cardfix_atk(skill_id) && rnd()%100 < sce->val2 ) {
 			int delay;
 			struct status_change_entry *sce_d = sc->data[SC_DEVOTION];
 			struct status_change_entry *sce_s = sc->data[SC__SHADOWFORM];
@@ -1111,13 +1124,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			return 0;
 		}
 
-		if( (sce = sc->data[SC_PARRYING]) && flag&BF_WEAPON &&
-#ifdef RENEWAL
-			skill_id != AS_SPLASHER && skill_id != WS_CARTTERMINATION && skill_id != GN_SPORE_EXPLOSION &&
-#endif
-			(skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
-			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK)) && rnd()%100 < sce->val2 )
-		{
+		if( (sce = sc->data[SC_PARRYING]) && flag&BF_WEAPON && !battle_skill_check_no_cardfix_atk(skill_id) && rnd()%100 < sce->val2 ) {
 			clif_skill_nodamage(bl,bl,LK_PARRYING,sce->val1,1);
 			return 0; //Attack blocked by Parrying
 		}
@@ -1125,8 +1132,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( (sce = sc->data[SC_DODGE]) && ((flag&BF_LONG) || sc->data[SC_STRUP]) && rnd()%100 < 20 ) {
 			if( sd && pc_issit(sd) )
 				pc_setstand(sd); //Stand it to dodge
-			clif_skill_nodamage(bl,bl,TK_DODGE,sce->val1,1);
-			sc_start4(src,bl,SC_COMBO,100,TK_JUMPKICK,src->id,1,0,2000);
+			clif_skill_nodamage(bl,bl,TK_DODGE,sce->val1,
+				sc_start4(src,bl,SC_COMBO,100,TK_JUMPKICK,src->id,1,0,2000));
 			return 0;
 		}
 
@@ -1163,13 +1170,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			return 0;
 		}
 
-		if( ((sce = sc->data[SC_UTSUSEMI]) || sc->data[SC_BUNSINJYUTSU]) && flag&BF_WEAPON &&
-#ifdef RENEWAL
-			skill_id != WS_CARTTERMINATION &&
-#endif
-			(skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
-			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK)) )
-		{
+		if( ((sce = sc->data[SC_UTSUSEMI]) || sc->data[SC_BUNSINJYUTSU]) &&
+			flag&BF_WEAPON && !battle_skill_check_no_cardfix_atk(skill_id) ) {
 			skill_additional_effect(src,bl,skill_id,skill_lv,flag,ATK_BLOCK,gettick());
 			if( !status_isdead(src) )
 				skill_counter_additional_effect(src,bl,skill_id,skill_lv,flag,gettick());
@@ -1281,16 +1283,15 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( sc->data[SC_SU_STOOP] )
 			damage -= damage * 90 / 100;
 
-		if( (sce = sc->data[SC_ARMOR]) && //NPC_DEFENDER
-			sce->val3&flag && sce->val4&flag )
+		if( (sce = sc->data[SC_ARMOR]) && sce->val3&flag && sce->val4&flag ) //NPC_DEFENDER
 			damage -= damage * sce->val2 / 100;
 
 		if( sc->data[SC_ENERGYCOAT]
 #ifndef RENEWAL
-			&& flag&BF_WEAPON && (skill_id == RK_DRAGONBREATH || skill_id == RK_DRAGONBREATH_WATER ||
-			!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK))
+			&& flag&BF_WEAPON
 #endif
-		) {
+			&& !battle_skill_check_no_cardfix_atk(skill_id) )
+		{
 			int per = 100 * status->sp / status->max_sp - 1; //100% should be counted as the 80~99% interval
 
 			per /= 20; //Uses 20% SP intervals
@@ -3376,8 +3377,9 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 #else
 					skillratio += 100;
 #endif
-				if(sc->data[SC_GIANTGROWTH])
-					skillratio += 250 / (map_flag_vs(src->m) ? 2 : 1);
+				//Increase is 125% in PvP/GvG, 250% otherwise, and only applies to Rune Knights
+				if(sc->data[SC_GIANTGROWTH] && sd && (sd->class_&MAPID_THIRDMASK) == MAPID_RUNE_KNIGHT)
+					skillratio += (map_flag_vs(src->m) ? 125 : 250);
 			}
 		}
 		if(sc->data[SC_HEAT_BARREL])
@@ -4174,7 +4176,6 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			skillratio += 600;
 			break;
 		case EL_TYPOON_MIS:
-		case EL_WATER_SCREW_ATK:
 			skillratio += 900;
 			break;
 		case EL_STONE_HAMMER:
@@ -5136,29 +5137,13 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 			if(--(sce->val3) <= 0)
 				status_change_end(target, SC_REJECTSWORD, INVALID_TIMER);
 		}
-		if((wd.flag&BF_SHORT) && !status_bl_has_mode(src, MD_STATUS_IMMUNE)) {
-			if((sce = tsc->data[SC_DEATHBOUND])) {
-				uint8 dir = map_calc_dir(target, src->x, src->y), t_dir = unit_getdir(target);
-				int64 rdamage = 0;
-
-				if(distance_bl(src, target) <= 0 || !map_check_dir(dir, t_dir)) {
-					rdamage = i64min(wd.damage, status_get_max_hp(target)) * sce->val2 / 100; //Amplify damage
-					wd.damage = rdamage * 30 / 100; //Player receives 30% of the amplified damage
-					rdamage = rdamage * 70 / 100; //Target receives 70% of the amplified damage [Rytech]
-					clif_skill_damage(target, src, gettick(), status_get_amotion(src), 0, -30000, 1, RK_DEATHBOUND, -1, DMG_SKILL);
-					skill_blown(target, src, skill_get_blewcount(RK_DEATHBOUND, sce->val1), unit_getdir(src), 0);
-					status_fix_damage(target, src, rdamage, clif_damage(target, src, gettick(), 0, 0, rdamage, 0, DMG_NORMAL, 0, false));
-					status_change_end(target, SC_DEATHBOUND, INVALID_TIMER);
-					status_change_end(target, SC_TELEPORT_FIXEDCASTINGDELAY, INVALID_TIMER);
-				}
-			}
-			if((sce = tsc->data[SC_CRESCENTELBOW]) && rnd()%100 < sce->val2) {
-				battle_damage_temp[0] = wd.damage; //Will be used for bonus part formula [exneval]
-				clif_skill_nodamage(target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, 1);
-				skill_attack(BF_WEAPON, target, target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, gettick(), 0);
-				ATK_ADD(wd.damage, wd.damage2, battle_damage_temp[1] / 10);
-				status_change_end(target, SC_CRESCENTELBOW, INVALID_TIMER);
-			}
+		if((sce = tsc->data[SC_CRESCENTELBOW]) && (wd.flag&BF_SHORT) &&
+			!status_bl_has_mode(src, MD_STATUS_IMMUNE) && rnd()%100 < sce->val2) {
+			battle_damage_temp[0] = wd.damage; //Will be used for bonus part formula [exneval]
+			clif_skill_nodamage(target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, 1);
+			skill_attack(BF_WEAPON, target, target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, gettick(), 0);
+			ATK_ADD(wd.damage, wd.damage2, battle_damage_temp[1] / 10);
+			status_change_end(target, SC_CRESCENTELBOW, INVALID_TIMER);
 		}
 	}
 
@@ -5896,9 +5881,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case AB_RENOVATIO:
 				ad.damage = status_get_lv(src) * 10 + sstatus->int_;
 				break;
-			case GN_HELLS_PLANT_ATK:
-				ad.damage = 10 * skill_lv * status_get_lv(target) + 7 * sstatus->int_ / 2 * (18 + status_get_job_lv(src) / 4) * 5 / (10 - (sd ? pc_checkskill(sd, AM_CANNIBALIZE) : 5));
-				break;
 			case OB_OBOROGENSOU_TRANSITION_ATK:
 				ad.damage = battle_damage_temp[0]; //Recieved magic damage * skill_lv / 10
 				break;
@@ -6291,6 +6273,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					//Magical Elemental Spirits Attack Skills
 					case EL_FIRE_MANTLE:
 					case EL_WATER_SCREW:
+					case EL_WATER_SCREW_ATK:
 						skillratio += 900;
 						break;
 					case EL_FIRE_ARROW:
@@ -6828,6 +6811,10 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		case GN_BLOOD_SUCKER:
 			md.damage = 200 + 100 * skill_lv + sstatus->int_;
 			break;
+		case GN_HELLS_PLANT_ATK:
+			md.damage = 10 * skill_lv * status_get_lv(target) + 7 * sstatus->int_ / 2 * (18 + status_get_job_lv(src) / 4) * 5 / (10 - (sd ? pc_checkskill(sd, AM_CANNIBALIZE) : 5));
+			md.flag |= BF_MAGIC;
+			break;
 		case RL_B_TRAP:
 			md.damage = 3 * skill_lv * tstatus->hp / 100 + 10 * sstatus->dex;
 			break;
@@ -7006,7 +6993,7 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 	#define CAP_RDAMAGE(d) ( (d) = i64max((d),1) )
 #endif
 
-	if( (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT ) { //Bounces back part of the damage
+	if( flag&BF_SHORT ) { //Bounces back part of the damage
 		if( !status_reflect && sd && sd->bonus.short_weapon_damage_return ) {
 			rdamage += damage * sd->bonus.short_weapon_damage_return / 100;
 			CAP_RDAMAGE(rdamage);
@@ -7029,7 +7016,7 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 				} else if( sce_s && (s_sd = map_id2sd(sce_s->val2)) && s_sd->shadowform_id == bl->id && !skill_id )
 					return 0;
 #ifndef RENEWAL
-				if( !(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK) )
+				if( !battle_skill_check_no_cardfix_atk(skill_id) )
 					return 0;
 				switch( skill_id ) {
 					case KN_PIERCE:
@@ -7046,13 +7033,8 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 				rdamage += damage * sce->val2 / 100;
 				CAP_RDAMAGE(rdamage);
 			}
-			if( (sce = sc->data[SC_REFLECTDAMAGE]) && rnd()%100 < 30 + 10 * sce->val1 &&
-#ifdef RENEWAL
-				skill_id != WS_CARTTERMINATION &&
-#endif
-				!(skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK) &&
-				!(skill_get_inf2(skill_id)&INF2_TRAP) )
-			{
+			if( (sce = sc->data[SC_REFLECTDAMAGE]) && !battle_skill_check_no_cardfix_atk(skill_id) &&
+				!(skill_get_inf2(skill_id)&INF2_TRAP) && rnd()%100 < 30 + 10 * sce->val1 ) {
 				rdamage += damage * sce->val2 / 100;
 #ifdef RENEWAL
 				max_rdamage = max_rdamage * status_get_lv(bl) / 100;
@@ -7061,10 +7043,25 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 				if( --(sce->val3) <= 0 )
 					status_change_end(bl,SC_REFLECTDAMAGE,INVALID_TIMER);
 			}
-			if( ((sce = sc->data[SC_SHIELDSPELL_DEF]) || (sce = battle_check_shadowform(bl,SC_SHIELDSPELL_DEF))) &&
-				sce->val1 == 2 && !status_bl_has_mode(src,MD_STATUS_IMMUNE) ) {
-				rdamage += damage * sce->val2 / 100;
-				CAP_RDAMAGE(rdamage);
+			if( !status_bl_has_mode(src,MD_STATUS_IMMUNE) ) {
+				if( (sce = sc->data[SC_DEATHBOUND]) && !battle_skill_check_no_cardfix_atk(skill_id) ) {
+					uint8 dir = map_calc_dir(bl,src->x,src->y), t_dir = unit_getdir(bl);
+					int64 rd1 = 0;
+
+					if( distance_bl(src,bl) <= 0 || !map_check_dir(dir,t_dir) ) {
+						rd1 = i64min(damage,status_get_max_hp(bl)) * sce->val2 / 100; //Amplify damage
+						*dmg = rd1 * 30 / 100; //Player receives 30% of the amplified damage
+						clif_skill_damage(src,bl,gettick(),status_get_amotion(src),0,-30000,1,RK_DEATHBOUND,-1,DMG_SKILL);
+						skill_blown(bl,src,skill_get_blewcount(RK_DEATHBOUND,sce->val1),unit_getdir(src),0);
+						status_change_end(bl,SC_DEATHBOUND,INVALID_TIMER);
+						status_change_end(bl,SC_TELEPORT_FIXEDCASTINGDELAY,INVALID_TIMER);
+						rdamage += rd1 * 70 / 100; //bl receives 70% of the amplified damage [Rytech]
+					}
+				}
+				if( ((sce = sc->data[SC_SHIELDSPELL_DEF]) || (sce = battle_check_shadowform(bl,SC_SHIELDSPELL_DEF))) && sce->val1 == 2 ) {
+					rdamage += damage * sce->val2 / 100;
+					CAP_RDAMAGE(rdamage);
+				}
 			}
 		}
 	} else {

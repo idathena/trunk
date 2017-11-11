@@ -3452,7 +3452,7 @@ int mobskill_use(struct mob_data *md, unsigned int tick, int event)
 				map_freeblock_unlock();
 				continue;
 			}
-		} else { //Targetted skill
+		} else { //targeted skill
 			switch (skill_target) {
 				case MST_RANDOM: //Pick a random enemy within skill range
 					if (skill_get_inf(ms[i].skill_id)&INF_SELF_SKILL) {

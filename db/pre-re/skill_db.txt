@@ -989,7 +989,7 @@
 2418,9,6,2,0,0x1,0,5,1,yes,0,0,0,none,0,0,	WM_SEVERE_RAINSTORM,Severe Rainstorm
 2419,9,6,2,0,0x3,1,5,1,yes,0,0x8000,5,none,0,0,	WM_POEMOFNETHERWORLD,Poem of The Netherworld
 2420,1,6,4,0,0x2,2:3:4:5:6,5,1,yes,0,0,0,none,0,0,	WM_VOICEOFSIREN,Voice of Siren
-2421,7,6,1,0,0x1,0,5,1,yes,0,0,0,none,0,0,	WM_DEADHILLHERE,Valley of Death
+2421,7,6,1,0,0x1,0,5,1,yes,0,0,0,magic,0,0,	WM_DEADHILLHERE,Valley of Death
 2422,1,6,4,0,0x3,5:6:7:8:9,5,1,yes,0,0,0,none,0,0,	WM_LULLABY_DEEPSLEEP,Deep Sleep Lullaby
 2423,1,6,4,0,0x3,3:4:5:6:7,5,1,yes,0,0,0,none,0,0,	WM_SIRCLEOFNATURE,Circle of Nature's Sound
 2424,1,6,4,0,0x1,0,5,1,yes,0,0,0,magic,0,0,	WM_RANDOMIZESPELL,Improvised Song
@@ -997,7 +997,7 @@
 2426,9,6,2,0,0x2,2:3:3:4:4,5,1,yes,0,0x2000,0,weapon,0,0,	WM_GREAT_ECHO,Great Echo
 2427,1,6,4,0,0x3,5:6:7:8:9,5,1,yes,0,0x2000,0,none,0,0,	WM_SONG_OF_MANA,Song of Mana
 2428,1,6,4,0,0x3,5:6:7:8:9,5,1,yes,0,0x2000,0,none,0,0,	WM_DANCE_WITH_WUG,Dance With A Warg
-2429,9,6,2,0,0x42,4:4:5:5:6,5,1,yes,0,0x2000,0,none,0,0,	WM_SOUND_OF_DESTRUCTION,Sound of Destruction
+2429,9,6,2,0,0x42,4:4:5:5:6,5,1,yes,0,0x2000,0,magic,0,0,	WM_SOUND_OF_DESTRUCTION,Sound of Destruction
 2430,1,6,4,0,0x3,3:4:5:6:7,5,1,yes,0,0x2000,0,none,0,0,	WM_SATURDAY_NIGHT_FEVER,Saturday Night Fever
 2431,1,6,4,0,0x3,5:5:6:6:7,5,1,yes,0,0x2000,0,none,0,0,	WM_LERADS_DEW,Lerad's Dew
 2432,1,6,4,0,0x3,5:5:6:6:7,5,1,yes,0,0x2000,0,none,0,0,	WM_MELODYOFSINK,Melody of Sink
@@ -1052,7 +1052,7 @@
 2488,1,6,2,0,0,0,1,1,no,0,0,0,none,0,0,	GN_FIRE_EXPANSION_TEAR_GAS,Fire Expansion Tear Gas
 2489,11,8,1,0,0x40,0,10,1:2:3:4:5:6:7:8:9:10,no,0,0x4000,0,misc,0,0,	GN_FIRE_EXPANSION_ACID,Fire Expansion Acid
 2490,9,6,2,0,0x3,1,5,1,yes,0,0x80,2:3:4:5:6,none,0,0,	GN_HELLS_PLANT,Hell's Plant
-2491,1,6,1,0,0x88,0,5,1,no,0,0,0,magic,0,0,	GN_HELLS_PLANT_ATK,Hell's Plant Attack
+2491,1,6,1,0,0xC0,0,5,1,no,0,0,0,misc,0,0,	GN_HELLS_PLANT_ATK,Hell's Plant Attack
 2492,1,6,4,0,0x3,5:6:6:7:7,5,1,yes,0,0,0,none,0,0,	GN_MANDRAGORA,Howling of Mandragora
 2493,11,6,16,0,0x1,0,1,1,no,0,0x200,0,none,0,0,	GN_SLINGITEM,Sling Item
 2494,1,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	GN_CHANGEMATERIAL,Change Material
@@ -1248,7 +1248,7 @@
 //
 8018,1,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0,	MH_SUMMON_LEGION,Summon Legion
 8019,5,6,1,5,0,0,5,1,no,0,0,0,weapon,0,0,	MH_NEEDLE_OF_PARALYZE,Needle of Paralyze
-8020,5,6,2,5,0,0,5,1,no,0,0,1,weapon,0,0,	MH_POISON_MIST,Poison Mist
+8020,5,6,2,5,0,0,5,1,no,0,0,1,magic,0,0,	MH_POISON_MIST,Poison Mist
 8021,1,6,16,0,0x1,0,5,1,no,0,0,0,none,0,0,	MH_PAIN_KILLER,Pain Killer
 8022,1,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0,	MH_LIGHT_OF_REGENE,Light of Regene
 8023,1,6,4,0,0x1,0,5,1,no,0,0,0,none,0,0,	MH_OVERED_BOOST,Overed Boost
@@ -1348,7 +1348,7 @@
 8429,6,6,1,3,0x2,1,1,1,no,0,0,0,weapon,0,0,	EL_FIRE_WAVE_ATK,Fire Wave Attack
 8430,9,6,1,1,0,0,1,1,no,0,0,0,magic,0,0,	EL_ICE_NEEDLE,Ice Needle
 8431,9,6,1,1,0x1,0,1,1,no,0,0,0,magic,0,0,	EL_WATER_SCREW,Water Screw
-8432,9,6,1,1,0x2,1,1,1,no,0,0,0,weapon,0,0,	EL_WATER_SCREW_ATK,Water Screw Attack
+8432,9,6,1,1,0x2,1,1,1,no,0,0,0,magic,0,0,	EL_WATER_SCREW_ATK,Water Screw Attack
 8433,9,6,1,1,0,0,1,1,no,0,0,0,weapon,0,0,	EL_TIDAL_WEAPON,Tidal Weapon
 8434,11,6,1,4,0,0,1,1,no,0,0,0,weapon,0,0,	EL_WIND_SLASH,Wind Slasher
 8435,11,6,1,4,0x1,0,1,1,no,0,0,0,weapon,0,0,	EL_HURRICANE,Hurricane Rage

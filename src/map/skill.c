@@ -2293,7 +2293,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 		if((sd->class_&MAPID_UPPERMASK) == MAPID_STAR_GLADIATOR && !map[sd->bl.m].flag.nosumstarmiracle) //SG_MIRACLE [Komurka]
 			status_change_start(src,src,SC_MIRACLE,battle_config.sg_miracle_skill_ratio,1,0,0,0,battle_config.sg_miracle_skill_duration,SCFLAG_NONE);
 		if(skill_id && attack_type&BF_MAGIC && status_isdead(bl) && !(skill_get_inf(skill_id)&(INF_GROUND_SKILL|INF_SELF_SKILL)) &&
-			(rate = pc_checkskill(sd,HW_SOULDRAIN)) > 0) { //Soul Drain should only work on targetted spells [Skotlex]
+			(rate = pc_checkskill(sd,HW_SOULDRAIN)) > 0) { //Soul Drain should only work on targeted spells [Skotlex]
 			if(pc_issit(sd))
 				pc_setstand(sd); //Character stuck in attacking animation while 'sitting' fix [Skotlex]
 			if( !((skill_get_nk(skill_id)&NK_SPLASH) && skill_area_temp[1] != bl->id) ) {
@@ -2629,35 +2629,38 @@ short skill_blown(struct block_list *src, struct block_list *target, char count,
 	return unit_blown(target, dx, dy, count, flag); //Send over the proper flag
 }
 
-/** Checks if 'bl' should reflect back a spell cast by 'src'.
- * type is the type of magic attack: 0: indirect (aoe), 1: direct (targetted)
+/**
+ * Checks if 'bl' should reflect back a spell cast by 'src'.
  * In case of success returns type of reflection, otherwise 0
  *	1 - Regular reflection (Maya)
  *	2 - SL_KAITE reflection
  */
-static int skill_magic_reflect(struct block_list *src, struct block_list *bl, int type)
+static int skill_magic_reflect(struct block_list *src, struct block_list *bl, bool ground_skill)
 {
 	struct status_change *sc = status_get_sc(bl);
 	struct map_session_data *sd = BL_CAST(BL_PC, bl);
 
-	if( !sc || !sc->count )
-		return 0; //Status-based reflection
+	//Item-based reflection (Bypasses Boss check)
+	if( !sc || !sc->data[SC_KYOMU] ) { //Kyomu doesn't reflect
+		if( sd && sd->bonus.magic_damage_return && !ground_skill && rnd()%100 < sd->bonus.magic_damage_return )
+			return 1;
+	}
 
-	if( !sc->data[SC_KYOMU] && //Kyomu doesn't reflect
-		sd && sd->bonus.magic_damage_return && type && rnd()%100 < sd->bonus.magic_damage_return )
-		return 1; //Item-based reflection (Bypasses Boss check)
-
-	if( sc->data[SC_MAGICMIRROR] && rnd()%100 < sc->data[SC_MAGICMIRROR]->val2 )
-		return 1; //Magic Mirror reflection (Bypasses Boss check)
+	//Magic Mirror reflection (Bypasses Boss check)
+	if( sc && sc->data[SC_MAGICMIRROR] && rnd()%100 < sc->data[SC_MAGICMIRROR]->val2 )
+		return 1;
 
 	if( status_get_class_(src) == CLASS_BOSS )
 		return 0;
 
+	//Status-based reflection
+	if( !sc || !sc->count )
+		return 0;
+
 	//Kyomu doesn't disable Kaite, but the "skill fail chance" part of Kyomu applies to it
-	if( sc->data[SC_KAITE] &&
-		(src->type == BL_PC || status_get_lv(src) <= 80) ) { //Kaite only works against non-players if they are low-level
+	if( sc->data[SC_KAITE] && (src->type == BL_PC || status_get_lv(src) <= 80) ) { //Kaite only works against non-players if they are low-level
 #ifdef RENEWAL //Renewal: 50% chance to reflect targeted magic, and does not reflect area of effect magic [exneval]
-		if( sc->data[SC_KAITE]->val3 && !(type && rnd()%100 < 50) )
+		if( sc->data[SC_KAITE]->val3 && (ground_skill || rnd()%100 < 50) )
 			return 0;
 #endif
 		clif_specialeffect(bl, EF_ATTACKENERGY2, AREA);
@@ -3015,8 +3018,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	struct map_session_data *sd, *tsd;
 	int64 damage;
 	int type;
-	bool rmdamage = false; //Magic reflected
-	bool additional_effects = true, shadow_flag = false;
+	bool rmdamage = false, //Magic reflected
+		additional_effects = true,
+		shadow_flag = false,
+		ground_skill = false;
 
 	if (skill_id > 0 && !skill_lv)
 		return 0;
@@ -3031,8 +3036,9 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	if (src != dsrc) {
 		if (!status_check_skilluse((battle_config.skill_caster_check ? src : NULL), bl, skill_id, 2))
 			return 0; //When caster is not the src of attack, this is a ground skill, and as such, do the relevant target checking [Skotlex]
+		ground_skill = true;
 	} else if ((flag&SD_ANIMATION) && (skill_get_nk(skill_id)&NK_SPLASH)) {
-		//Note that splash attacks often only check versus the targetted mob,
+		//Note that splash attacks often only check versus the targeted mob,
 		//those around the splash area normally don't get checked for being hidden/cloaked/etc [Skotlex]
 		if (!status_check_skilluse(src, bl, skill_id, 2))
 			return 0;
@@ -3062,7 +3068,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 
 	dmg = battle_calc_attack(attack_type, src, bl, skill_id, skill_lv, flag&0xFFF);
 
-	if (src != dsrc && skill_id != GS_GROUNDDRIFT)
+	if (ground_skill && skill_id != GS_GROUNDDRIFT)
 		dmg.amotion = 0;
 
 	//NOTE: This check maybe breaks the battle_calc_attack, and maybe need better calculation
@@ -3087,15 +3093,27 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		}
 	}
 
-	if ((dmg.flag&BF_MAGIC) && (skill_id != NPC_EARTHQUAKE || //Earthquake on multiple targets is not counted as a target skill [Inkfish]
-		(battle_config.eq_single_target_reflectable && (flag&0xFFF) == 1))) {
-		if ((dmg.damage || dmg.damage2) && (type = skill_magic_reflect(src, bl, (src == dsrc)))) { //Magic reflection, switch caster/target
+	//Earthquake on multiple targets is not counted as a target skill [Inkfish]
+	if ((dmg.damage > 0 || dmg.damage2 > 0) && (dmg.flag&BF_MAGIC) &&
+		(skill_id != NPC_EARTHQUAKE || (battle_config.eq_single_target_reflectable && (flag&0xFFF) == 1))) {
+		type = skill_magic_reflect(src, bl, ground_skill);
+		if (tsc && tsc->data[SC_DEVOTION]) {
+			struct status_change_entry *sce_d = tsc->data[SC_DEVOTION];
+			struct block_list *d_bl = map_id2bl(sce_d->val1);
+
+			if (d_bl &&
+				((d_bl->type == BL_MER && ((TBL_MER *)d_bl)->master && ((TBL_MER *)d_bl)->master->bl.id == bl->id) ||
+				(d_bl->type == BL_PC && ((TBL_PC *)d_bl)->devotion[sce_d->val2] == bl->id)) &&
+				check_distance_bl(bl, d_bl, sce_d->val3) && (type = skill_magic_reflect(src, d_bl, ground_skill)))
+				bl = d_bl;
+		}
+		if (type) { //Magic reflection, switch caster/target
 			struct block_list *tbl = bl;
 
 			rmdamage = true;
 			bl = src;
 			src = tbl;
-			dsrc = tbl;
+			dsrc = (ground_skill ? dsrc : tbl);
 			sd = BL_CAST(BL_PC, src);
 			tsd = BL_CAST(BL_PC, bl);
 			tsc = status_get_sc(bl);
@@ -3104,10 +3122,11 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			flag |= 2; //bugreport:2564 flag&2 disables double casting trigger
 			dmg.blewcount = 0; //bugreport:7859 magical reflect'd zeroes blewcount
 			if (type == 2 && tsc && tsc->data[SC_SPIRIT] && tsc->data[SC_SPIRIT]->val2 == SL_WIZARD) { //Spirit of Wizard blocks Kaite's reflection
-				type = (tsd ? pc_search_inventory(tsd, ITEMID_FRAGMENT_OF_CRYSTAL) : INDEX_NOT_FOUND);
-				if (type != INDEX_NOT_FOUND) {
-					if (tsd) //Consume one Fragment per hit of the casted skill? [Skotlex]
-						pc_delitem(tsd, type, 1, 0, 1, LOG_TYPE_CONSUME);
+				short i = (tsd ? pc_search_inventory(tsd, ITEMID_FRAGMENT_OF_CRYSTAL) : INDEX_NOT_FOUND);;
+
+				if (i != INDEX_NOT_FOUND) { //Consume one fragment per hit of the casted skill? [Skotlex]
+					if (tsd)
+						pc_delitem(tsd, i, 1, 0, 1, LOG_TYPE_CONSUME);
 					dmg.damage = dmg.damage2 = 0;
 					dmg.dmg_lv = ATK_MISS;
 					tsc->data[SC_SPIRIT]->val3 = skill_id;
@@ -3115,11 +3134,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				}
 			} else if (type != 2) //Kaite bypasses
 				additional_effects = false;
-#if MAGIC_REFLECTION_TYPE
-	#ifndef RENEWAL
-			if (type != 2) { //In pre-renewal Kaite's reflection will do a full damage
+#if MAGIC_REFLECTION_TYPE //Official Magic Reflection Behavior : Reflected damage also affected by caster's gears
+	#ifndef RENEWAL //In pre-renewal Kaite's reflection will do a full damage
+			if (type != 2) {
 	#endif
-				//Official Magic Reflection Behavior : Reflected damage also affected by caster's gears
 				if (dmg.dmg_lv != ATK_MISS) { //Wiz SL cancelled and consumed fragment
 					int s_ele = skill_get_ele(skill_id, skill_lv);
 
@@ -3145,10 +3163,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	#ifndef RENEWAL
 			}
 	#endif
-#endif
 		}
+#endif
 		if (tsc) {
-			if (tsc->data[SC_MAGICROD] && src == dsrc) {
+			if (tsc->data[SC_MAGICROD] && !ground_skill) {
 				int sp = skill_get_sp(skill_id, skill_lv);
 
 				dmg.damage = dmg.damage2 = 0;
@@ -3161,7 +3179,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				clif_skill_nodamage(bl, bl, SA_MAGICROD, skill_lv, 1);
 #endif
 			}
-			if ((dmg.damage || dmg.damage2) && tsc->data[SC_HALLUCINATIONWALK] && rnd()%100 < tsc->data[SC_HALLUCINATIONWALK]->val3) {
+			if (tsc->data[SC_HALLUCINATIONWALK] && rnd()%100 < tsc->data[SC_HALLUCINATIONWALK]->val3) {
 				dmg.damage = dmg.damage2 = 0;
 				dmg.dmg_lv = ATK_MISS;
 			}
@@ -3343,7 +3361,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, WL_TETRAVORTEX_WIND, -1, DMG_SPLASH);
 			break;
 		case MG_FIREBALL:
-		case NC_ARMSCANNON:
 		case GN_CARTCANNON:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SKILL);
 			break;
@@ -3374,8 +3391,8 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case RA_FIRINGTRAP:
 		case RA_ICEBOUNDTRAP:
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, (flag&SD_LEVEL) ? -1 : skill_lv, DMG_SPLASH);
-			if (dsrc != src) //Avoid damage display redundancy
-				break;
+			if (ground_skill)
+				break; //Avoid damage display redundancy
 		//Fall through
 		case HT_LANDMINE:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, type);
@@ -3439,47 +3456,33 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			battle_delay_damage(tick, dmg.amotion, src, bl, dmg.flag, skill_id, skill_lv, damage, dmg.dmg_lv, dmg.dmotion, additional_effects, false);
 	}
 
-	if (tsc && skill_id != PA_PRESSURE && skill_id != HW_GRAVITATION && skill_id != NPC_EVILLAND) {
-		if (tsc->data[SC_DEVOTION]) {
-			struct status_change_entry *sce_d = tsc->data[SC_DEVOTION];
-			struct block_list *d_bl = map_id2bl(sce_d->val1);
+	if (tsc) {
+		if (skill_id != PA_PRESSURE && skill_id != HW_GRAVITATION && skill_id != NPC_EVILLAND) {
+			if (tsc->data[SC_DEVOTION]) {
+				struct status_change_entry *sce_d = tsc->data[SC_DEVOTION];
+				struct block_list *d_bl = map_id2bl(sce_d->val1);
 
-			if (d_bl &&
-				((d_bl->type == BL_MER && ((TBL_MER *)d_bl)->master && ((TBL_MER *)d_bl)->master->bl.id == bl->id) ||
-				(d_bl->type == BL_PC && ((TBL_PC *)d_bl)->devotion[sce_d->val2] == bl->id)) &&
-				check_distance_bl(bl, d_bl, sce_d->val3))
-			{
-				if (!rmdamage) {
+				if (d_bl &&
+					((d_bl->type == BL_MER && ((TBL_MER *)d_bl)->master && ((TBL_MER *)d_bl)->master->bl.id == bl->id) ||
+					(d_bl->type == BL_PC && ((TBL_PC *)d_bl)->devotion[sce_d->val2] == bl->id)) &&
+					check_distance_bl(bl, d_bl, sce_d->val3))
+				{
 					clif_damage(d_bl, d_bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0, false);
 					status_fix_damage(NULL, d_bl, damage, 0);
+					skill_counter_additional_effect(src, d_bl, skill_id, skill_lv, dmg.flag, tick);
 				} else {
-					bool isDevotRdamage = false;
-
-					if (battle_config.devotion_rdamage && rnd()%100 < battle_config.devotion_rdamage)
-						isDevotRdamage = true;
-					//If !isDevotRdamage, reflected magics are done directly on the target not on paladin
-					//This check is only for magical skill
-					//For BF_WEAPON skills types track var rdamage and function battle_calc_return_damage
-					clif_damage(bl, (!isDevotRdamage) ? bl : d_bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0, false);
-					status_fix_damage(bl, (!isDevotRdamage) ? bl : d_bl, damage, 0);
+					status_change_end(bl, SC_DEVOTION, INVALID_TIMER);
+					if (!dmg.amotion)
+						status_fix_damage(src, bl, damage, dmg.dmotion);
 				}
-			} else {
-				status_change_end(bl, SC_DEVOTION, INVALID_TIMER);
-				if (!dmg.amotion)
-					status_fix_damage(src, bl, damage, dmg.dmotion);
 			}
-		}
-		if (tsc->data[SC_WATER_SCREEN_OPTION]) {
-			struct status_change_entry *sce_e = tsc->data[SC_WATER_SCREEN_OPTION];
-			struct block_list *e_bl = map_id2bl(sce_e->val1);
+			if (tsc->data[SC_WATER_SCREEN_OPTION]) {
+				struct status_change_entry *sce_e = tsc->data[SC_WATER_SCREEN_OPTION];
+				struct block_list *e_bl = map_id2bl(sce_e->val1);
 
-			if (e_bl) {
-				if (!rmdamage) {
+				if (e_bl) {
 					clif_damage(e_bl, e_bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0, false);
 					status_fix_damage(NULL, e_bl, damage, 0);
-				} else {
-					clif_damage(bl, bl, tick, 0, 0, damage, 0, DMG_NORMAL, 0, false);
-					status_fix_damage(bl, bl, damage, 0);
 				}
 			}
 		}
@@ -4544,7 +4547,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 	if (!bl->prev || status_isdead(bl))
 		return 1;
 
-	//GTB makes all targetted magic display miss with a single bolt
+	//GTB makes all targeted magic display miss with a single bolt
 	if (skill_id && skill_get_type(skill_id) == BF_MAGIC && status_isimmune(bl) == 100) {
 		sc_type sct = status_skill2sc(skill_id);
 
@@ -5034,6 +5037,9 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 						break;
 #ifdef RENEWAL
 					case MG_FIREBALL:
+						skill_area_temp[4] = bl->x;
+						skill_area_temp[5] = bl->y;
+						break;
 #endif
 					case WL_CRIMSONROCK:
 						if (!battle_config.crimsonrock_knockback) {
@@ -5054,9 +5060,8 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					case NPC_REVERBERATION_ATK:
 					case WM_REVERBERATION_MELEE:
 					case WM_REVERBERATION_MAGIC:
-						skill_area_temp[1] = 0;
-					//Fall through
 					case NC_ARMSCANNON:
+						skill_area_temp[1] = 0;
 						starget = splash_target(src);
 						break;
 					case SO_POISON_BUSTER:
@@ -6639,7 +6644,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 			break;
 
-		/* Was modified to only affect targetted char [Skotlex]
+		/* Was modified to only affect targeted char [Skotlex]
 		case HP_ASSUMPTIO:
 			if (flag&1)
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -11190,10 +11195,8 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			return 0;
 		}
 		//Restore original walk speed
-		if( sd && ud->skilltimer != INVALID_TIMER && (pc_checkskill(sd,SA_FREECAST) > 0 || ud->skill_id == LG_EXEEDBREAK) ) {
-			ud->skilltimer = INVALID_TIMER;
+		if( sd && ud->skilltimer != INVALID_TIMER && (pc_checkskill(sd,SA_FREECAST) > 0 || ud->skill_id == LG_EXEEDBREAK) )
 			status_calc_bl(&sd->bl,SCB_SPEED|SCB_ASPD);
-		}
 		ud->skilltimer = INVALID_TIMER;
 	}
 
@@ -11310,7 +11313,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 			}
 		}
 		if( (inf&BCT_ENEMY) && tsc && tsc->data[SC_FOGWALL] && rnd()%100 < 75 )
-			break; //Fogwall makes all offensive-type targetted skills fail at 75%
+			break; //Fogwall makes all offensive-type targeted skills fail at 75%
 		if( sc && ((sc->data[SC_ASH] && rnd()%100 < 50) || (sc->data[SC_KYOMU] && rnd()%100 < 5 * sc->data[SC_KYOMU]->val1)) ) {
 			if( sd )
 				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -11344,7 +11347,7 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 		if( (inf2&INF2_NO_NEARNPC) && skill_isNotOk_npcRange(src,ud->skill_id,ud->skill_lv,target->x,target->y) ) {
 			if( sd )
 				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_POS,0,0);
-			break; //Fail if the targetted skill is near NPC [Cydh]
+			break; //Fail if the targeted skill is near NPC [Cydh]
 		}
 		if( sd ) {
 			if( !skill_check_condition_castend(sd,ud->skill_id,ud->skill_lv) )
@@ -11480,10 +11483,8 @@ int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data)
 	}
 
 	//Restore original walk speed
-	if( sd && ud->skilltimer != INVALID_TIMER && (pc_checkskill(sd,SA_FREECAST) > 0 || ud->skill_id == LG_EXEEDBREAK) ) {
-		ud->skilltimer = INVALID_TIMER;
+	if( sd && ud->skilltimer != INVALID_TIMER && (pc_checkskill(sd,SA_FREECAST) > 0 || ud->skill_id == LG_EXEEDBREAK) )
 		status_calc_bl(&sd->bl,SCB_SPEED|SCB_ASPD);
-	}
 
 	ud->skilltimer = INVALID_TIMER;
 
@@ -11537,7 +11538,7 @@ int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data)
 		if( skill_get_inf2(ud->skill_id)&INF2_NO_NEARNPC && skill_isNotOk_npcRange(src,ud->skill_id,ud->skill_lv,ud->skillx,ud->skilly) ) {
 			if( sd )
 				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_POS,0,0);
-			break; //Fail if the targetted skill is near NPC [Cydh]
+			break; //Fail if the targeted skill is near NPC [Cydh]
 		}
 		if( ud->skill_id == SA_LANDPROTECTOR )
 			clif_skill_poseffect(src,ud->skill_id,ud->skill_lv,ud->skillx,ud->skilly,tick);
