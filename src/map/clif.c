@@ -19455,7 +19455,7 @@ void clif_parse_RouletteOpen(int fd, struct map_session_data *sd)
 void clif_parse_RouletteInfo(int fd, struct map_session_data *sd)
 {
 	unsigned short i, j, count = 0;
-	int len = 8 + (42 * 8);
+	int len = 8 + 42 * 8;
 
 	nullpo_retv(sd);
 
@@ -19574,6 +19574,9 @@ void clif_parse_RouletteGenerate(int fd, struct map_session_data *sd)
 		result = GENERATE_ROULETTE_NO_ENOUGH_POINT;
 
 	if( result == GENERATE_ROULETTE_SUCCESS ) {
+		int8 loseIdx = -1;
+		uint8 i;
+
 		if( !stage ) {
 			if( sd->roulette_point.bronze ) {
 				sd->roulette_point.bronze -= 1;
@@ -19589,13 +19592,25 @@ void clif_parse_RouletteGenerate(int fd, struct map_session_data *sd)
 			}
 		}
 		sd->roulette.prizeStage = stage;
-		sd->roulette.prizeIdx = rnd()%rd.items[stage];
 		sd->roulette.claimPrize = true;
-		if( rd.flag[stage][sd->roulette.prizeIdx]&1 ) {
+		for( i = 0; i < rd.items[stage]; i++ ) {
+			if( !(rd.flag[stage][i]&1) )
+				continue;
+			loseIdx = i;
+		}
+		if( rnd()%100 < rd.chance[stage][loseIdx] ) { //Chance to lose
 			result = GENERATE_ROULETTE_LOSING;
+			sd->roulette.prizeIdx = loseIdx;
 			sd->roulette.stage = 0;
-		} else
+		} else {
+			int8 winIdx = -1;
+
+			winIdx = rnd()%rd.items[stage];
+			while( winIdx == loseIdx )
+				winIdx = rnd()%rd.items[stage];
+			sd->roulette.prizeIdx = winIdx;
 			sd->roulette.stage++;
+		}
 	}
 
 	clif_roulette_generate_ack(sd, result, stage, (sd->roulette.prizeIdx == -1 ? 0 : sd->roulette.prizeIdx), 0);

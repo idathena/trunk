@@ -4665,6 +4665,7 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			if((sce = sc->data[SC_GIANTGROWTH]) && rnd()%100 < sce->val2) {
 				ATK_ADDRATE(wd.damage, wd.damage2, 100);
 				RE_ALLATK_ADDRATE(wd, 100);
+				skill_break_equip(src, src, EQP_WEAPON, 10, BCT_SELF); //Break chance happens on successful damage increase
 			}
 			if((sce = sc->data[SC_EXEEDBREAK])) {
 				ATK_ADDRATE(wd.damage, wd.damage2, sce->val2);
@@ -8379,7 +8380,6 @@ static const struct _battle_data {
 	{ "use_statpoint_table",                &battle_config.use_statpoint_table,             1,      0,      1,              },
 	{ "ignore_items_gender",                &battle_config.ignore_items_gender,             1,      0,      1,              },
 	{ "berserk_cancels_buffs",              &battle_config.berserk_cancels_buffs,           0,      0,      1,              },
-	{ "debuff_on_logout",                   &battle_config.debuff_on_logout,                1|2,    0,      1|2,            },
 	{ "monster_ai",                         &battle_config.mob_ai,                          0x000,  0x000,  0xFFF,          },
 	{ "hom_setting",                        &battle_config.hom_setting,                     0xFFFF, 0x0000, 0xFFFF,         },
 	{ "dynamic_mobs",                       &battle_config.dynamic_mobs,                    1,      0,      1,              },
@@ -8484,7 +8484,6 @@ static const struct _battle_data {
 	{ "drop_rateincrease",                  &battle_config.drop_rateincrease,               0,      0,      1,              },
 	{ "feature.auction",                    &battle_config.feature_auction,                 0,      0,      2,              },
 	{ "mon_trans_disable_in_gvg",           &battle_config.mon_trans_disable_in_gvg,        0,      0,      1,              },
-	{ "transform_end_on_death",             &battle_config.transform_end_on_death,          1,      0,      1,              },
 	{ "feature.banking",                    &battle_config.feature_banking,                 1,      0,      1,              },
 	{ "homunculus_S_growth_level",          &battle_config.hom_S_growth_level,             99,      0,      MAX_LEVEL,      },
 	{ "emblem_woe_change",                  &battle_config.emblem_woe_change,               0,      0,      1,              },

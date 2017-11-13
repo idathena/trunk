@@ -74,6 +74,7 @@ int StatusSkillChangeTable[SC_MAX];
 int StatusRelevantBLTypes[SI_MAX];
 unsigned int StatusChangeStateTable[SC_MAX];
 bool StatusDisplayType[SC_MAX];
+sc_conf_type StatusConfig[SC_MAX];
 
 /**
  * Returns the status change associated with a skill.
@@ -132,6 +133,20 @@ int status_type2relevant_bl_types(int type)
 		return SI_BLANK;
 	}
 	return StatusRelevantBLTypes[type];
+}
+
+/**
+ * Returns the status configuration flag associated with a given status change.
+ * @param sc The status to look up
+ * @return The flag registered for this status
+ */
+sc_conf_type status_get_sc_type(sc_type sc)
+{
+	if( sc < 0 || sc >= SC_MAX ) {
+		ShowError("status_get_sc_type: Unsupported status change id %d\n", sc);
+		return 0;
+	}
+	return StatusConfig[sc];
 }
 
 #define add_sc(skill,sc) set_sc(skill,sc,SI_BLANK,SCB_NONE)
@@ -392,9 +407,9 @@ void initChangeTables(void) {
 		SI_ASSUMPTIO2            ,
 #endif
 		SCB_NONE );
-	add_sc( HP_BASILICA          , SC_BASILICA        );
+	set_sc( HP_BASILICA          , SC_BASILICA        , SI_BASILICA        , SCB_NONE );
 	set_sc( HW_MAGICPOWER        , SC_MAGICPOWER      , SI_MAGICPOWER      , SCB_MATK );
-	add_sc( PA_SACRIFICE         , SC_SACRIFICE       );
+	set_sc( PA_SACRIFICE         , SC_SACRIFICE       , SI_SACRIFICE       , SCB_NONE );
 	set_sc( PA_GOSPEL            , SC_GOSPEL          , SI_GOSPEL          , SCB_SPEED|SCB_ASPD );
 	add_sc( PA_GOSPEL            , SC_SCRESIST        );
 	add_sc( CH_TIGERFIST         , SC_STOP            );
@@ -526,7 +541,7 @@ void initChangeTables(void) {
 #endif
 		SCB_NONE );
 
-	set_sc( ALL_PARTYFLEE        , SC_INCFLEE         , SI_PARTYFLEE       , SCB_FLEE );
+	set_sc( ALL_PARTYFLEE        , SC_PARTYFLEE       , SI_PARTYFLEE       , SCB_FLEE );
 	set_sc( ALL_ODINS_POWER      , SC_ODINS_POWER     , SI_ODINS_POWER     , SCB_WATK|SCB_MATK|SCB_DEF|SCB_MDEF );
 
 	set_sc( CR_SHRINK            , SC_SHRINK          , SI_CR_SHRINK       , SCB_NONE );
@@ -657,7 +672,7 @@ void initChangeTables(void) {
 	set_sc( NC_ANALYZE           , SC_ANALYZE         , SI_ANALYZE         , SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2 );
 	set_sc( NC_MAGNETICFIELD     , SC_MAGNETICFIELD   , SI_MAGNETICFIELD   , SCB_NONE );
 	set_sc( NC_NEUTRALBARRIER    , SC_NEUTRALBARRIER  , SI_NEUTRALBARRIER  , SCB_NONE );
-	set_sc( NC_STEALTHFIELD      , SC_STEALTHFIELD    , SI_STEALTHFIELD    , SCB_SPEED );
+	set_sc_with_vfx( NC_STEALTHFIELD , SC_STEALTHFIELD, SI_STEALTHFIELD    , SCB_SPEED );
 
 	set_sc( LG_REFLECTDAMAGE     , SC_REFLECTDAMAGE   , SI_LG_REFLECTDAMAGE, SCB_NONE );
 	set_sc( LG_FORCEOFVANGUARD   , SC_FORCEOFVANGUARD , SI_FORCEOFVANGUARD , SCB_MAXHP );
@@ -11295,16 +11310,14 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
  * 0 - PC killed -> Place here statuses that do not dispel on death.
  * 1 - If for some reason status_change_end decides to still keep the status when quitting.
  * 2 - Do clif.
- * 3 - Do not remove some permanent/time-independent effects.
+ * 3 - Do not remove some permanent/time-independent effects and also do clif.
  *------------------------------------------*/
-int status_change_clear(struct block_list *bl,int type)
+int status_change_clear(struct block_list *bl, int type)
 {
-	struct status_change *sc;
+	struct status_change *sc = status_get_sc(bl);
 	int i;
 
-	sc = status_get_sc(bl);
-
-	if(!sc)
+	if (!sc)
 		return 0;
 
 	//Cleaning all extras vars
@@ -11315,180 +11328,31 @@ int status_change_clear(struct block_list *bl,int type)
 #endif
 	sc->bs_counter = 0;
 
-	if(!sc->count)
+	if (!sc->count)
 		return 0;
 
-	for(i = 0; i < SC_MAX; i++) {
-		if(!sc->data[i])
+	for (i = 0; i < SC_MAX; i++) {
+		if (!sc->data[i])
 			continue;
-		if(!type) {
-			switch(i) { //Type 0: PC killed -> Place here statuses that do not dispel on death
-				case SC_ELEMENTALCHANGE: //Only when its Holy or Dark that it doesn't dispell on death
-					if(sc->data[i]->val2 != ELE_HOLY && sc->data[i]->val2 != ELE_DARK)
-						break;
-				case SC_WEIGHT50:
-				case SC_WEIGHT90:
-				case SC_EDP:
-				case SC_MELTDOWN:
-				case SC_WEDDING:
-				case SC_XMAS:
-				case SC_SUMMER:
-				case SC_HANBOK:
-				case SC_OKTOBERFEST:
-				case SC_NOCHAT:
-				case SC_FUSION:
-				case SC_EARTHSCROLL:
-				case SC_READYSTORM:
-				case SC_READYDOWN:
-				case SC_READYCOUNTER:
-				case SC_READYTURN:
-				case SC_DODGE:
-				case SC_MIRACLE:
-				case SC_JAILED:
-				case SC_EXPBOOST:
-				case SC_ITEMBOOST:
-				case SC_HELLPOWER:
-				case SC_JEXPBOOST:
-				case SC_AUTOTRADE:
-				case SC_WHISTLE:
-				case SC_ASSNCROS:
-				case SC_POEMBRAGI:
-				case SC_APPLEIDUN:
-				case SC_HUMMING:
-				case SC_DONTFORGETME:
-				case SC_FORTUNE:
-				case SC_SERVICE4U:
-				case SC_FOOD_STR_CASH:
-				case SC_FOOD_AGI_CASH:
-				case SC_FOOD_VIT_CASH:
-				case SC_FOOD_DEX_CASH:
-				case SC_FOOD_INT_CASH:
-				case SC_FOOD_LUK_CASH:
-				case SC_SAVAGE_STEAK:
-				case SC_COCKTAIL_WARG_BLOOD:
-				case SC_MINOR_BBQ:
-				case SC_SIROMA_ICE_TEA:
-				case SC_DROCERA_HERB_STEAMED:
-				case SC_PUTTI_TAILS_NOODLES:
-				case SC_DEF_RATE:
-				case SC_MDEF_RATE:
-				case SC_DEFSET_PER:
-				case SC_MDEFSET_PER:
-				case SC_INCHEALRATE:
-				case SC_INCFLEE2:
-				case SC_INCHIT:
-				case SC_S_LIFEPOTION:
-				case SC_L_LIFEPOTION:
-				case SC_PUSH_CART:
-				case SC_LIGHT_OF_REGENE:
-				case SC_STYLE_CHANGE:
-				case SC_MOONSTAR:
-				case SC_SUPER_STAR:
-				case SC_STRANGELIGHTS:
-				case SC_DECORATION_OF_MUSIC:
-				case SC_QUEST_BUFF1:
-				case SC_QUEST_BUFF2:
-				case SC_QUEST_BUFF3:
-				case SC_ALMIGHTY:
-				case SC_JP_EVENT04:
-				case SC_ATTHASTE_CASH:
-				case SC_REUSE_LIMIT_A:
-				case SC_REUSE_LIMIT_B:
-				case SC_REUSE_LIMIT_C:
-				case SC_REUSE_LIMIT_D:
-				case SC_REUSE_LIMIT_E:
-				case SC_REUSE_LIMIT_F:
-				case SC_REUSE_LIMIT_G:
-				case SC_REUSE_LIMIT_H:
-				case SC_REUSE_MILLENNIUMSHIELD:
-				case SC_REUSE_CRUSHSTRIKE:
-				case SC_REUSE_REFRESH:
-				case SC_REUSE_STORMBLAST:
-				case SC_ALL_RIDING_REUSE_LIMIT:
-				case SC_REUSE_LIMIT_MTF:
-				case SC_REUSE_LIMIT_ECL:
-				case SC_REUSE_LIMIT_RECALL:
-				case SC_REUSE_LIMIT_ASPD_POTION:
-				case SC_SPRITEMABLE:
-				case SC_SOULATTACK:
-				case SC_HAT_EFFECT:
-				case SC_QSCARABA:
-				case SC_LJOSALFAR:
-				case SC_MAPLE_FALLS:
-				case SC_MERMAID_LONGING:
-				case SC_TIME_ACCESSORY:
-				case SC_GEFFEN_MAGIC1:
-				case SC_GEFFEN_MAGIC2:
-				case SC_GEFFEN_MAGIC3:
-				case SC_CLAN_INFO:
-				case SC_SWORDCLAN:
-				case SC_ARCWANDCLAN:
-				case SC_GOLDENMACECLAN:
-				case SC_CROSSBOWCLAN:
-				case SC_JUMPINGCLAN:
-				case SC_DAILYSENDMAILCNT:
-				case SC_DORAM_BUF_01:
-				case SC_DORAM_BUF_02:
-					continue;
+		if (!type) {
+			if (status_get_sc_type(i)&SC_NO_REM_DEATH) {
+				switch (i) { //Type 0: PC killed -> Place here statuses that do not dispel on death
+					case SC_ELEMENTALCHANGE: //Only when its Holy or Dark that it doesn't dispell on death
+						if (sc->data[i]->val2 != ELE_HOLY && sc->data[i]->val2 != ELE_DARK)
+							break;
+					//Fall through
+					default:
+						continue;
+				}
 			}
 		}
-
-		//Config if the monster transform status should end on death [Rytech]
-		if(!type && !battle_config.transform_end_on_death) {
-			switch(i) {
-				case SC_MONSTER_TRANSFORM:
-				case SC_ACTIVE_MONSTER_TRANSFORM:
-				case SC_MTF_ASPD:
-				case SC_MTF_RANGEATK:
-				case SC_MTF_MATK:
-				case SC_MTF_MLEATKED:
-				case SC_MTF_CRIDAMAGE:
-				case SC_MTF_ASPD2:
-				case SC_MTF_RANGEATK2:
-				case SC_MTF_MATK2:
-				case SC_MTF_MHP:
-				case SC_MTF_MSP:
-				case SC_MTF_PUMPKIN:
-				case SC_MTF_HITFLEE:
-					continue;
-			}
-		}
-
-		if(type == 3) {
-			switch(i) { //@TODO: This list may be incomplete
-				case SC_WEIGHT50:
-				case SC_WEIGHT90:
-				case SC_NOCHAT:
-				case SC_PUSH_CART:
-				case SC_ALL_RIDING:
-				case SC_STYLE_CHANGE:
-				case SC_MOONSTAR:
-				case SC_SUPER_STAR:
-				case SC_STRANGELIGHTS:
-				case SC_DECORATION_OF_MUSIC:
-				case SC_HAT_EFFECT:
-				case SC_QSCARABA:
-				case SC_LJOSALFAR:
-				case SC_MAPLE_FALLS:
-				case SC_MERMAID_LONGING:
-				case SC_TIME_ACCESSORY:
-				case SC_CLAN_INFO:
-				case SC_SWORDCLAN:
-				case SC_ARCWANDCLAN:
-				case SC_GOLDENMACECLAN:
-				case SC_CROSSBOWCLAN:
-				case SC_JUMPINGCLAN:
-				case SC_DAILYSENDMAILCNT:
-					continue;
-			}
-		}
-
+		if (type == 3 && status_get_sc_type(i)&SC_NO_CLEAR)
+			continue;
 		status_change_end(bl,(sc_type)i,INVALID_TIMER);
-
 		//If for some reason status_change_end decides to still keep the status when quitting [Skotlex]
-		if(type == 1 && sc->data[i]) {
+		if (type == 1 && sc->data[i]) {
 			sc->count--;
-			if(sc->data[i]->timer != INVALID_TIMER)
+			if (sc->data[i]->timer != INVALID_TIMER)
 				delete_timer(sc->data[i]->timer,status_change_timer);
 			ers_free(sc_data_ers,sc->data[i]);
 			sc->data[i] = NULL;
@@ -11499,7 +11363,7 @@ int status_change_clear(struct block_list *bl,int type)
 	sc->opt2 = 0;
 	sc->opt3 = 0;
 
-	if(!type || type == 2)
+	if (!type || type == 2 || type == 3)
 		clif_changeoption(bl);
 
 	return 1;
@@ -13528,138 +13392,16 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 	for( i = SC_COMMON_MAX + 1; i < SC_MAX; i++ ) {
 		if( !sc->data[i] )
 			continue;
+		if( status_get_sc_type(i)&(SC_NO_REM_DEATH|SC_NO_CLEAR) )
+			continue; //Stuff that cannot be removed
 		switch( i ) {
-			//Stuff that cannot be removed
-			case SC_WEIGHT50:
-			case SC_WEIGHT90:
-			case SC_COMBO:
-			case SC_SMA:
-			case SC_DANCING:
-			case SC_LEADERSHIP:
-			case SC_GLORYWOUNDS:
-			case SC_SOULCOLD:
-			case SC_HAWKEYES:
-			case SC_REGENERATION:
-			case SC_SAFETYWALL:
-			case SC_PNEUMA:
-			case SC_NOCHAT:
-			case SC_JAILED:
-			case SC_ANKLE:
-			case SC_BLADESTOP:
-			case SC_STRFOOD:
-			case SC_AGIFOOD:
-			case SC_VITFOOD:
-			case SC_INTFOOD:
-			case SC_DEXFOOD:
-			case SC_LUKFOOD:
-			case SC_FLEEFOOD:
-			case SC_HITFOOD:
-			case SC_CRIFOOD:
-			case SC_BATKFOOD:
-			case SC_WATKFOOD:
-			case SC_MATKFOOD:
-			case SC_FOOD_STR_CASH:
-			case SC_FOOD_AGI_CASH:
-			case SC_FOOD_VIT_CASH:
-			case SC_FOOD_DEX_CASH:
-			case SC_FOOD_INT_CASH:
-			case SC_FOOD_LUK_CASH:
-			case SC_EXPBOOST:
-			case SC_JEXPBOOST:
-			case SC_ITEMBOOST:
-			case SC_ELECTRICSHOCKER:
-			case SC__MANHOLE:
-			case SC_MILLENNIUMSHIELD:
-			case SC_REFRESH:
-			case SC_GIANTGROWTH:
-			case SC_STONEHARDSKIN:
-			case SC_VITALITYACTIVATION:
-			case SC_FIGHTINGSPIRIT:
-			case SC_ABUNDANCE:
-			//Extra large skills cooldowns
-			case SC_SAVAGE_STEAK:
-			case SC_COCKTAIL_WARG_BLOOD:
-			case SC_MINOR_BBQ:
-			case SC_SIROMA_ICE_TEA:
-			case SC_DROCERA_HERB_STEAMED:
-			case SC_PUTTI_TAILS_NOODLES:
-			case SC_CURSEDCIRCLE_ATKER:
-			case SC_CURSEDCIRCLE_TARGET:
-			case SC_PUSH_CART:
-			case SC_ALL_RIDING:
-			case SC_STYLE_CHANGE:
-			case SC_MONSTER_TRANSFORM:
-			case SC_ACTIVE_MONSTER_TRANSFORM:
-			case SC_MOONSTAR:
-			case SC_SUPER_STAR:
-			case SC_MTF_ASPD:
-			case SC_MTF_RANGEATK:
-			case SC_MTF_MATK:
-			case SC_MTF_MLEATKED:
-			case SC_MTF_CRIDAMAGE:
-			case SC_STRANGELIGHTS:
-			case SC_DECORATION_OF_MUSIC:
-			case SC_QUEST_BUFF1:
-			case SC_QUEST_BUFF2:
-			case SC_QUEST_BUFF3:
-			case SC_MTF_ASPD2:
-			case SC_MTF_RANGEATK2:
-			case SC_MTF_MATK2:
-			case SC_ALMIGHTY:
-			case SC_JP_EVENT04:
-			case SC_MTF_MHP:
-			case SC_MTF_MSP:
-			case SC_MTF_PUMPKIN:
-			case SC_MTF_HITFLEE:
-			case SC_ATTHASTE_CASH:
-			case SC_REUSE_LIMIT_A:
-			case SC_REUSE_LIMIT_B:
-			case SC_REUSE_LIMIT_C:
-			case SC_REUSE_LIMIT_D:
-			case SC_REUSE_LIMIT_E:
-			case SC_REUSE_LIMIT_F:
-			case SC_REUSE_LIMIT_G:
-			case SC_REUSE_LIMIT_H:
-			case SC_REUSE_MILLENNIUMSHIELD:
-			case SC_REUSE_CRUSHSTRIKE:
-			case SC_REUSE_REFRESH:
-			case SC_REUSE_STORMBLAST:
-			case SC_ALL_RIDING_REUSE_LIMIT:
-			case SC_REUSE_LIMIT_MTF:
-			case SC_REUSE_LIMIT_ECL:
-			case SC_REUSE_LIMIT_RECALL:
-			case SC_REUSE_LIMIT_ASPD_POTION:
-			case SC_SPRITEMABLE:
-			case SC_SOULATTACK:
-			case SC_BITESCAR:
-			case SC_HAT_EFFECT:
-			case SC_QSCARABA:
-			case SC_LJOSALFAR:
-			case SC_MAPLE_FALLS:
-			case SC_MERMAID_LONGING:
-			case SC_TIME_ACCESSORY:
-			case SC_GEFFEN_MAGIC1:
-			case SC_GEFFEN_MAGIC2:
-			case SC_GEFFEN_MAGIC3:
-			case SC_CLAN_INFO:
-			case SC_SWORDCLAN:
-			case SC_ARCWANDCLAN:
-			case SC_GOLDENMACECLAN:
-			case SC_CROSSBOWCLAN:
-			case SC_JUMPINGCLAN:
-			case SC_DAILYSENDMAILCNT:
-			case SC_DORAM_BUF_01:
-			case SC_DORAM_BUF_02:
-				continue;
-			//Chemical Protection is only removed by some skills
 			case SC_CP_WEAPON:
 			case SC_CP_SHIELD:
 			case SC_CP_ARMOR:
 			case SC_CP_HELM:
 				if( !(type&SCCB_CHEM_PROTECT) )
-					continue;
+					continue; //Chemical Protection is only removed by some skills
 				break;
-			//Debuffs that can be removed
 			case SC_FEAR:
 			case SC_BURNING:
 			case SC_FREEZING:
@@ -13677,39 +13419,17 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 			case SC_CRYSTALIZE:
 			case SC_MANDRAGORA:
 				if( !(type&SCCB_REFRESH) )
-					continue;
-				break;
-			case SC_QUAGMIRE:
-			case SC_SIGNUMCRUCIS:
-			case SC_DECREASEAGI:
-			case SC_HALLUCINATION:
-			case SC_SLOWDOWN:
-			case SC_MINDBREAKER:
-			case SC_ORCISH:
-			case SC_WINKCHARM:
-			case SC_STOP:
-			case SC_STRIPWEAPON:
-			case SC_STRIPSHIELD:
-			case SC_STRIPARMOR:
-			case SC_STRIPHELM:
-			case SC_BITE:
-			case SC_ADORAMUS:
-			case SC_MAGNETICFIELD:
-			case SC_VACUUM_EXTREME:
-			case SC_NETHERWORLD:
-				if( !(type&SCCB_DEBUFFS) )
-					continue;
-				break;
-			//The rest are buffs that can be removed
-			case SC_BERSERK:
-			case SC_SATURDAYNIGHTFEVER:
-				if( !(type&(SCCB_BUFFS)) )
-					continue;
-				sc->data[i]->val2 = 0;
+					continue; //RK_REFRESH specific debuffs
 				break;
 			default:
+				//Debuffs that can be removed
+				if( (type&SCCB_DEBUFFS) && !(status_get_sc_type(i)&SC_DEBUFF) )
+					continue;
+				//The rest are buffs that can be removed
 				if( !(type&(SCCB_BUFFS)) )
 					continue;
+				if( i == SC_BERSERK || i == SC_SATURDAYNIGHTFEVER )
+					sc->data[i]->val2 = 0;
 				break;
 		}
 		status_change_end(bl, (sc_type)i, INVALID_TIMER);
@@ -14269,6 +13989,31 @@ int status_readdb_refine_libconfig(const char *filename)
 	return count;
 }
 
+/**
+ * Read status_config.txt file
+ * @param fields: Fields passed from sv_readdb
+ * @param columns: Columns passed from sv_readdb function call
+ * @param current: Current row being read into sc_conf array
+ * @return True - Successfully stored, False - Invalid SC
+ */
+static bool status_readdb_status_config(char **str, int columns, int current)
+{
+	int type = SC_NONE;
+
+	if (ISDIGIT(str[0][0]))
+		type = atoi(str[0]);
+	else {
+		if (!script_get_constant(str[0], &type))
+			type = SC_NONE;
+	}
+	if (type <= SC_NONE || type >= SC_MAX) {
+		ShowError("status_readdb_status_config: Invalid SC with type %s.\n", str[0]);
+		return false;
+	}
+	StatusConfig[type] = (unsigned int)atol(str[1]);
+	return true;
+}
+
 /*------------------------------------------
  * DB reading.
  * size_fix.txt		- size adjustment table for weapons
@@ -14282,14 +14027,15 @@ int status_readdb(void)
 	memset(SCDisabled, 0, sizeof(SCDisabled));
 
 	//size_fix.txt
-	for(i = 0; i < ARRAYLENGTH(atkmods); i++) {
-		for(j = 0; j < MAX_WEAPON_TYPE; j++)
+	for (i = 0; i < ARRAYLENGTH(atkmods); i++) {
+		for (j = 0; j < MAX_WEAPON_TYPE; j++)
 			atkmods[i][j] = 100;
 	}
 
 	//Read databases
 	//path,filename,separator,mincol,maxcol,maxrow,func_parsor
 	sv_readdb(db_path, "status_disabled.txt", ',', 2, 2, -1, &status_readdb_status_disabled);
+	sv_readdb(db_path, "status_config.txt", ',', 2, 2, -1, &status_readdb_status_config);
 	sv_readdb(db_path, DBPATH"size_fix.txt", ',', MAX_WEAPON_TYPE, MAX_WEAPON_TYPE, ARRAYLENGTH(atkmods), &status_readdb_sizefix);
 	status_readdb_refine_libconfig(DBPATH"refine_db.conf");
 	return 0;

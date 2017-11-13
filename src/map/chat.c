@@ -442,7 +442,7 @@ int chat_npckickall(struct chat_data *cd)
 	nullpo_ret(cd);
 
 	while( cd->users > 0 )
-		chat_leavechat(cd->usersd[cd->users-1],0);
+		chat_leavechat(cd->usersd[cd->users - 1],0);
 
 	return 0;
 }

@@ -88,7 +88,6 @@ char mob_db2_db[32] = "mob_db2";
 char mob_skill_db_db[32] = "mob_skill_db";
 char mob_skill_db_re_db[32] = "mob_skill_db_re";
 char mob_skill_db2_db[32] = "mob_skill_db2";
-char roulette_db[32] = "roulette";
 char sales_db[32] = "sales";
 char vendings_db[32] = "vendings";
 char vending_items_db[32] = "vending_items";
@@ -2005,96 +2004,33 @@ int map_quit(struct map_session_data *sd) {
 	//'unit_free' handles clearing the player related data,
 	//'map_quit' handles extra specific data which is related to quitting normally
 	//(changing map-servers invokes unit_free but bypasses map_quit)
-	if (sd->sc.count) { //Statuses that are removed on logout
-		status_change_end(&sd->bl,SC_TRICKDEAD,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_BOSSMAPINFO,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_AUTOTRADE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_STRUP,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_READYSTORM,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_READYDOWN,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_READYTURN,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_READYCOUNTER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_DODGE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MIRACLE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_BERSERK,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_LEADERSHIP,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_GLORYWOUNDS,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SOULCOLD,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_HAWKEYES,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_CHASEWALK2,INVALID_TIMER);
-		if (sd->sc.data[SC_ENDURE] && sd->sc.data[SC_ENDURE]->val4) {
-			sd->sc.data[SC_ENDURE]->val4 = 0; //No need to save infinite endure
-			status_change_end(&sd->bl,SC_ENDURE,INVALID_TIMER);
-		}
-		if (sd->sc.data[SC_SPEEDUP0] && sd->sc.data[SC_SPEEDUP0]->val4) {
-			sd->sc.data[SC_SPEEDUP0]->val4 = 0;
-			status_change_end(&sd->bl,SC_SPEEDUP0,INVALID_TIMER);
-		}
-		if (sd->sc.data[SC_PROVOKE] && sd->sc.data[SC_PROVOKE]->timer == INVALID_TIMER)
-			status_change_end(&sd->bl,SC_PROVOKE,INVALID_TIMER); //Infinite provoke ends on logout
-		status_change_end(&sd->bl,SC_WEIGHT50,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_WEIGHT90,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SATURDAYNIGHTFEVER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_ALL_RIDING,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_DEFSET_PER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MDEFSET_PER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MOONSTAR,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SUPER_STAR,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_STRANGELIGHTS,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_DECORATION_OF_MUSIC,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SPRITEMABLE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SV_ROOTTWIST,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SOULATTACK,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_HAT_EFFECT,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_QSCARABA,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_LJOSALFAR,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MAPLE_FALLS,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MERMAID_LONGING,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_TIME_ACCESSORY,INVALID_TIMER);
-		if (battle_config.debuff_on_logout&1) { //Remove negative buffs
-			status_change_end(&sd->bl,SC_ORCISH,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STRIPWEAPON,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STRIPARMOR,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STRIPSHIELD,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STRIPHELM,INVALID_TIMER);
-#ifndef RENEWAL
-			status_change_end(&sd->bl,SC_EXTREMITYFIST,INVALID_TIMER);
+	if (sd->sc.count) {
+		for (i = 0; i < SC_MAX; i++) { //Statuses that are removed on logout
+			if (status_get_sc_type(i)&SC_REM_ON_LOGOUT) {
+				if (!sd->sc.data[i])
+					continue;
+				switch (i) {
+					case SC_ENDURE:
+					case SC_REGENERATION:
+					case SC_SPEEDUP0:
+						if (!sd->sc.data[i]->val4)
+							break;
+					//Fall through
+					case SC_PROVOKE:
+					case SC_EXTREMITYFIST:
+					case SC_PRESERVE: //Infinite provoke ends on logout
+						if (i == SC_PROVOKE && sd->sc.data[i]->timer != INVALID_TIMER)
+							break;
+#ifdef RENEWAL
+						if (i == SC_EXTREMITYFIST || i == SC_PRESERVE)
+							break;
 #endif
-			status_change_end(&sd->bl,SC_EXPLOSIONSPIRITS,INVALID_TIMER);
-			if (sd->sc.data[SC_REGENERATION] && sd->sc.data[SC_REGENERATION]->val4)
-				status_change_end(&sd->bl,SC_REGENERATION,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_TAROTCARD,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_RAISINGDRAGON,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_KYOUGAKU,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_CBC,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_EQC,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_B_TRAP,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_H_MINE,INVALID_TIMER);
-			//@TODO: Probably there are way more NPC_type negative status that are removed
-			status_change_end(&sd->bl,SC_CHANGEUNDEAD,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_SLOWCAST,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_CRITICALWOUND,INVALID_TIMER);
-		}
-		if (battle_config.debuff_on_logout&2) { //Remove positive buffs
-			status_change_end(&sd->bl,SC_SIGHTBLASTER,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_MAGNIFICAT,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STEELBODY,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_KAAHI,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_SPIRIT,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_PARRYING,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_WINDWALK,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_CARTBOOST,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_MELTDOWN,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_MAXOVERTHRUST,INVALID_TIMER);
-#ifndef RENEWAL
-			status_change_end(&sd->bl,SC_PRESERVE,INVALID_TIMER);
-#endif
-			status_change_end(&sd->bl,SC_REFLECTDAMAGE,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_P_ALTER,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_GEFFEN_MAGIC1,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_GEFFEN_MAGIC2,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_GEFFEN_MAGIC3,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_ARCLOUSEDASH,INVALID_TIMER);
+					//Fall through
+					default:
+						status_change_end(&sd->bl,(sc_type)i,INVALID_TIMER);
+						break;
+				}
+			}
 		}
 	}
 
@@ -4064,8 +4000,6 @@ int inter_config_read(char *cfgName)
 			strcpy(mob_skill_db_re_db, w2);
 		else if( strcmpi(w1, "mob_skill_db2_db") == 0 )
 			strcpy(mob_skill_db2_db, w2);
-		else if( strcmpi(w1, "roulette_db") == 0 )
-			strcpy(roulette_db, w2);
 		else if( strcmpi(w1, "sales_db") == 0 )
 			strcpy(sales_db, w2);
 		else if( strcmpi(w1, "vendings_db") == 0 )

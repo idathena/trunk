@@ -417,7 +417,6 @@ extern struct Battle_Config
 	int ignore_items_gender; //[Lupus]
 
 	int berserk_cancels_buffs; //[Aru]
-	int debuff_on_logout; //Removes a few "official" negative Scs on logout [Skotlex]
 	int mob_ai; //Configures various mob_ai settings to make them smarter or dumber (Official) [Skotlex]
 	int hom_setting; //Configures various homunc settings which make them behave unlike normal characters [Skotlex]
 	int dynamic_mobs; //Dynamic Mobs [Wizputer] - battle_athena flag implemented by [random]
@@ -537,7 +536,6 @@ extern struct Battle_Config
 	int drop_rateincrease;
 	int feature_auction;
 	int mon_trans_disable_in_gvg;
-	int transform_end_on_death;
 	int feature_banking;
 	int emblem_woe_change;
 	int emblem_transparency_limit;
