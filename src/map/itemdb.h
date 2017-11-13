@@ -380,8 +380,9 @@ enum ItemTradeRestrictions {
 //Struct of Roulette db
 extern struct s_roulette_db {
 	unsigned short *nameid[MAX_ROULETTE_LEVEL], //Item ID
-		           *qty[MAX_ROULETTE_LEVEL]; //Amount of Item ID
+				   *qty[MAX_ROULETTE_LEVEL]; //Amount of Item ID
 	int *flag[MAX_ROULETTE_LEVEL]; //Whether the item is for loss or win
+	int *chance[MAX_ROULETTE_LEVEL]; //Chance to lose the game
 	int items[MAX_ROULETTE_LEVEL]; //Number of items in the list for each
 } rd;
 
@@ -553,8 +554,6 @@ struct item_combo *itemdb_combo_exists(unsigned short combo_id);
 struct s_item_group_db *itemdb_group_exists(unsigned short group_id);
 char itemdb_pc_get_itemgroup(uint16 group_id, struct map_session_data *sd);
 uint16 itemdb_get_randgroupitem_count(uint16 group_id, uint8 sub_group, unsigned short nameid);
-
-bool itemdb_parse_roulette_db(void);
 
 struct s_random_opt_data *itemdb_randomopt_exists(short id);
 struct s_random_opt_group *itemdb_randomopt_group_exists(int id);

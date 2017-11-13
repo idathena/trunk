@@ -1140,59 +1140,65 @@ static void itemdb_read_combos() {
 }
 
 /**
- * Process Roulette items
+ * Reads Roulette database
+ * Structure: Level,ItemID,Amount{,Flag,Chance}
  */
-bool itemdb_parse_roulette_db(void)
+static bool itemdb_roulette_parse_dbrow(char *str[], int columns, int current)
 {
-	int i, j;
-	uint32 count = 0;
+	unsigned short item_id, amount;
+	int level, column, flag = 0, chance = 0;
 
-	// Retrieve all rows from the item database
-	if (SQL_ERROR == Sql_Query(mmysql_handle, "SELECT * FROM `%s`", roulette_db)) {
-		Sql_ShowDebug(mmysql_handle);
+	level = atoi(str[0]);
+	trim(str[1]);
+	if (ISDIGIT(str[1][0]) && ISDIGIT(str[1][1]))
+		item_id = atoi(str[1]);
+	else {
+		struct item_data *id = itemdb_searchname(str[1]);
+
+		if (id)
+			item_id = id->nameid;
+	}
+	if (!itemdb_exists(item_id)) {
+		ShowWarning("itemdb_parse_roulette_db: Unknown item ID '%hu' in level '%d'\n", item_id, level);
 		return false;
 	}
+	amount = atoi(str[2]);
+	if (amount < 1) {
+		ShowWarning("itemdb_parse_roulette_db: Unsupported amount '%hu' for item ID '%hu' in level '%d'\n", amount, item_id, level);
+		return false;
+	}
+	if (columns > 3) {
+		flag = atoi(str[3]);
+		if (flag < 0 || flag > 1) {
+			ShowWarning("itemdb_parse_roulette_db: Unsupported flag '%d' for item ID '%hu' in level '%d'\n", flag, item_id, level);
+			return false;
+		}
+		chance = min(atoi(str[4]), 100);
+		chance = max(0, chance);
+	}
+	level--;
+	column = rd.items[level];
+	RECREATE(rd.nameid[level], unsigned short, ++rd.items[level]);
+	RECREATE(rd.qty[level], unsigned short, rd.items[level]);
+	RECREATE(rd.flag[level], int, rd.items[level]);
+	RECREATE(rd.chance[level], int, rd.items[level]);
+	rd.nameid[level][column] = item_id;
+	rd.qty[level][column] = amount;
+	rd.flag[level][column] = flag;
+	rd.chance[level][column] = chance;
+	return true;
+}
+
+/**
+ * Process Roulette items
+ */
+static void itemdb_roulette_read(void) {
+	int i, j;
 
 	for (i = 0; i < MAX_ROULETTE_LEVEL; i++)
 		rd.items[i] = 0;
 
-	for (i = 0; i < MAX_ROULETTE_LEVEL; i++) {
-		int k, limit = MAX_ROULETTE_COLUMNS - i;
-
-		for (k = 0; k < limit && SQL_SUCCESS == Sql_NextRow(mmysql_handle); k++) {
-			char *data;
-			unsigned short item_id, amount;
-			int level, flag;
-
-			Sql_GetData(mmysql_handle, 1, &data, NULL); level = atoi(data);
-			Sql_GetData(mmysql_handle, 2, &data, NULL); item_id = atoi(data);
-			Sql_GetData(mmysql_handle, 3, &data, NULL); amount = atoi(data);
-			Sql_GetData(mmysql_handle, 4, &data, NULL); flag = atoi(data);
-			if (!itemdb_exists(item_id)) {
-				ShowWarning("itemdb_parse_roulette_db: Unknown item ID '%hu' in level '%d'\n", item_id, level);
-				continue;
-			}
-			if (amount < 1) {
-				ShowWarning("itemdb_parse_roulette_db: Unsupported amount '%hu' for item ID '%hu' in level '%d'\n", amount, item_id, level);
-				continue;
-			}
-			if (flag < 0 || flag > 1) {
-				ShowWarning("itemdb_parse_roulette_db: Unsupported flag '%d' for item ID '%hu' in level '%d'\n", flag, item_id, level);
-				continue;
-			}
-			j = rd.items[i];
-			RECREATE(rd.nameid[i], unsigned short, ++rd.items[i]);
-			RECREATE(rd.qty[i], unsigned short, rd.items[i]);
-			RECREATE(rd.flag[i], int, rd.items[i]);
-			rd.nameid[i][j] = item_id;
-			rd.qty[i][j] = amount;
-			rd.flag[i][j] = flag;
-			++count;
-		}
-	}
-
-	// Free the query result
-	Sql_FreeResult(mmysql_handle);
+	sv_readdb(db_path, "roulette_db.txt",    ',', 3, 5, -1, &itemdb_roulette_parse_dbrow);
 
 	for (i = 0; i < MAX_ROULETTE_LEVEL; i++) {
 		int limit = MAX_ROULETTE_COLUMNS - i;
@@ -1218,10 +1224,6 @@ bool itemdb_parse_roulette_db(void)
 			rd.flag[i][j] = 0;
 		}
 	}
-
-	ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, roulette_db);
-
-	return true;
 }
 
 /**
@@ -1237,9 +1239,12 @@ static void itemdb_roulette_free(void) {
 			aFree(rd.qty[i]);
 		if (rd.flag[i])
 			aFree(rd.flag[i]);
+		if (rd.chance[i])
+			aFree(rd.chance[i]);
 		rd.nameid[i] = NULL;
 		rd.qty[i] = NULL;
 		rd.flag[i] = NULL;
+		rd.chance[i] = NULL;
 		rd.items[i] = 0;
 	}
 }
@@ -1985,7 +1990,7 @@ void itemdb_reload(void) {
 	cashshop_reloaddb();
 
 	if( battle_config.feature_roulette )
-		itemdb_parse_roulette_db();
+		itemdb_roulette_read();
 
 	itemdb_reload_itemmob_data();
 
@@ -2038,5 +2043,5 @@ void do_init_itemdb(void) {
 	itemdb_create_dummy();
 	itemdb_read();
 	if( battle_config.feature_roulette )
-		itemdb_parse_roulette_db();
+		itemdb_roulette_read();
 }

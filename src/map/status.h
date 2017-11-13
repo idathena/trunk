@@ -34,6 +34,15 @@ enum refine_type {
 // Get refine chance
 int status_get_refine_chance(enum refine_type wlv, int refine, bool enriched);
 
+typedef enum sc_conf_type {
+	SC_NO_REM_DEATH  = 0x01,
+	SC_REM_ON_LOGOUT = 0x02,
+	SC_REM_DISPELL   = 0x04,
+	SC_REM_CLEARANCE = 0x08,
+	SC_DEBUFF        = 0x10,
+	SC_NO_CLEAR      = 0x20,
+} sc_conf_type;
+
 // Flags to be used with status_change_start and status_get_sc_def
 // NOTE: When updating this enum, also update the documentation in doc/script_commands.txt and the constants
 enum scstart_flag {
@@ -1986,21 +1995,20 @@ enum e_bonus_script_flags {
 	BSF_REM_ON_DISPELL          = 0x002,  //Removed by Dispell
 	BSF_REM_ON_CLEARANCE        = 0x004,  //Removed by Clearance
 	BSF_REM_ON_LOGOUT           = 0x008,  //Removed when player logged out
-	BSF_REM_ON_BANISHING_BUSTER = 0x010,  //Removed by Banishing Buster
-	BSF_REM_ON_REFRESH          = 0x020,  //Removed by Refresh
-	BSF_REM_ON_LUXANIMA         = 0x040,  //Removed by Luxanima
-	BSF_REM_ON_MADOGEAR         = 0x080,  //Removed when Madogear is activated or deactivated
-	BSF_REM_ON_DAMAGED          = 0x100,  //Removed when receive damage
-	BSF_PERMANENT               = 0x200,  //Cannot be removed by sc_end SC_ALL
+	BSF_REM_ON_REFRESH          = 0x010,  //Removed by Refresh
+	BSF_REM_ON_LUXANIMA         = 0x020,  //Removed by Luxanima
+	BSF_REM_ON_MADOGEAR         = 0x040,  //Removed when Madogear is activated or deactivated
+	BSF_REM_ON_DAMAGED          = 0x080,  //Removed when receive damage
+	BSF_PERMANENT               = 0x100,  //Cannot be removed by sc_end SC_ALL
 
 	//These flags cannot be stacked, BSF_FORCE_REPLACE has highest priority to check if YOU force to add both
-	BSF_FORCE_REPLACE           = 0x400,  //Force to replace duplicated script by expanding the duration
-	BSF_FORCE_DUPLICATE         = 0x800,  //Force to add duplicated script
+	BSF_FORCE_REPLACE           = 0x200,  //Force to replace duplicated script by expanding the duration
+	BSF_FORCE_DUPLICATE         = 0x400,  //Force to add duplicated script
 
 	//These flags aren't part of 'bonus_script' scripting flags
 	BSF_REM_ALL                 = 0x0,    //Remove all bonus script
-	BSF_REM_BUFF                = 0x4000, //Remove positive buff if battle_config.debuff_on_logout&1
-	BSF_REM_DEBUFF              = 0x8000, //Remove negative buff if battle_config.debuff_on_logout&2
+	BSF_REM_BUFF                = 0x2000, //Remove positive buff
+	BSF_REM_DEBUFF              = 0x4000, //Remove negative buff
 };
 
 //Enum for status_get_hpbonus and status_get_spbonus
@@ -2045,6 +2053,7 @@ extern int StatusSkillChangeTable[SC_MAX];          // status -> skill
 extern int StatusRelevantBLTypes[SI_MAX];           // "icon" -> enum bl_type (for clif_status_change to identify for which bl types to send packets)
 extern unsigned int StatusChangeStateTable[SC_MAX]; // status -> flags
 extern bool StatusDisplayType[SC_MAX];
+extern sc_conf_type StatusConfig[SC_MAX];
 
 //For holding basic status (which can be modified by status changes)
 struct status_data {
@@ -2171,6 +2180,7 @@ sc_type status_skill2sc(uint16 skill_id);
 int status_sc2skill(sc_type sc);
 unsigned int status_sc2scb_flag(sc_type sc);
 int status_type2relevant_bl_types(int type);
+sc_conf_type status_get_sc_type(sc_type sc);
 
 int status_damage(struct block_list *src,struct block_list *target,int64 hp,int64 sp, int walkdelay, int flag);
 //Define for standard HP damage attacks

@@ -5799,18 +5799,17 @@ Flags (bitmask):
 	2   : Removable by Dispell.
 	4   : Removable by Clearance.
 	8   : Remove when player logs out.
-	16  : Removeable by Banishing Buster.
-	32  : Removable by Refresh.
-	64  : Removable by Lux Anima.
-	128 : Remove when Madogear is activated or deactivated.
-	256 : Remove when receive damage.
-	512 : Script is permanent, cannot be cleared by bonus_script_clear.
-	1024: Force to replace duplicated script by expanding the duration.
-	2048: Force to add duplicated script. This flag cannot be stacked with 1024,
+	16  : Removable by Refresh.
+	32  : Removable by Lux Anima.
+	64  : Remove when Madogear is activated or deactivated.
+	128 : Remove when receive damage.
+	256 : Script is permanent, cannot be cleared by bonus_script_clear.
+	512 : Force to replace duplicated script by expanding the duration.
+	1024: Force to add duplicated script. This flag cannot be stacked with 1024,
 	      if both are defined, 1024 will be checked first and ignore this flag.
 
 Types:
-	This will be used to decide negative or positive buff for 'debuff_on_logout'.
+	This will be used to decide negative or positive buff
 	0: Ignore the buff type and won't be removed if the flag is not &8 (Default)
 	1: Buff
 	2: Debuff

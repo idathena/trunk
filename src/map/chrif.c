@@ -1615,16 +1615,8 @@ int chrif_bsdata_save(struct map_session_data *sd, bool quit) {
 	if (!sd)
 		return 0;
 
-	//Removing
-	if (quit && sd->bonus_script.head) {
-		uint16 flag = BSF_REM_ON_LOGOUT; //Remove bonus when logout
-
-		if (battle_config.debuff_on_logout&1) //Remove negative buffs
-			flag |= BSF_REM_DEBUFF;
-		if (battle_config.debuff_on_logout&2) //Remove positive buffs
-			flag |= BSF_REM_BUFF;
-		pc_bonus_script_clear(sd, flag);
-	}
+	if (quit && sd->bonus_script.head) //Removing
+		pc_bonus_script_clear(sd, BSF_REM_ON_LOGOUT|BSF_REM_BUFF|BSF_REM_DEBUFF);
 
 	//ShowInfo("Saving %d bonus script for CID=%d\n", sd->bonus_script.count, sd->status.char_id);
 

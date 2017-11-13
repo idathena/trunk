@@ -1211,6 +1211,8 @@
 	export_constant(SC_GN_CARTBOOST);
 	export_constant(SC_THORNSTRAP);
 	export_constant(SC_BLOODSUCKER);
+	export_constant(SC_SPORE_EXPLOSION);
+	export_constant(SC_DEMONIC_FIRE);
 	export_constant(SC_SMOKEPOWDER);
 	export_constant(SC_TEARGAS);
 	export_constant(SC_TEARGAS_SOB);
@@ -2792,7 +2794,6 @@
 	export_constant(BSF_REM_ON_DISPELL);
 	export_constant(BSF_REM_ON_CLEARANCE);
 	export_constant(BSF_REM_ON_LOGOUT);
-	export_constant(BSF_REM_ON_BANISHING_BUSTER);
 	export_constant(BSF_REM_ON_REFRESH);
 	export_constant(BSF_REM_ON_LUXANIMA);
 	export_constant(BSF_REM_ON_MADOGEAR);
