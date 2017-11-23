@@ -612,6 +612,7 @@
 	export_constant2("bHealPower2",SP_ADD_HEAL2_RATE);
 	export_constant2("bAbsorbDmgMaxHP",SP_ABSORB_DMG_MAXHP);
 	export_constant2("bCriticalLong",SP_CRITICAL_RANGEATK);
+	export_constant2("bNoWalkDelay",SP_NO_WALKDELAY);
 
 	export_constant2("bRestartFullRecover",SP_RESTART_FULL_RECOVER);
 	export_constant2("bNoCastCancel",SP_NO_CASTCANCEL);
@@ -1458,7 +1459,6 @@
 	export_constant(SC_DORAM_FLEE2);
 	export_constant(SC_DORAM_SVSP);
 	export_constant(SC_SOULATTACK);
-	export_constant(SC_STEAMPACK);
 	export_constant(SC_DAILYSENDMAILCNT);
 	export_constant(SC_DORAM_BUF_01);
 	export_constant(SC_DORAM_BUF_02);

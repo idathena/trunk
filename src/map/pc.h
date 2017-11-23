@@ -277,6 +277,7 @@ struct map_session_data {
 		unsigned int no_knockback : 1;
 		unsigned int bonus_coma : 1;
 		unsigned int no_magic_gear_fuel : 1;
+		unsigned int no_walkdelay : 1;
 	} special_state;
 	int login_id1, login_id2;
 	unsigned short class_; //This is the internal job ID used by the map server to simplify comparisons/queries/etc [Skotlex]
@@ -879,6 +880,7 @@ short pc_maxaspd(struct map_session_data *sd);
 // Weapon check considering dual wielding
 #define pc_check_weapontype(sd, type) ((type)&((sd)->status.weapon < MAX_WEAPON_TYPE ? \
 	1<<(sd)->status.weapon : (1<<(sd)->weapontype1)|(1<<(sd)->weapontype2)|(1<<(sd)->status.weapon)))
+
 // Checks if the given class value corresponds to a player class [Skotlex]
 // JOB_NOVICE isn't checked for class_ is supposed to be unsigned
 #define pcdb_checkid_sub(class_) \
@@ -1017,7 +1019,7 @@ void pc_updateweightstatus(struct map_session_data *sd);
 bool pc_addautobonus(struct s_autobonus *bonus,char max,const char *script,short rate,unsigned int dur,short atk_type,const char *o_script,unsigned int pos,bool onskill);
 void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus);
 int pc_endautobonus(int tid, unsigned int tick,int id,intptr_t data);
-void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *bonus, char max, bool restore);
+void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, char max, bool restore);
 
 void pc_bonus(struct map_session_data *sd, int type, int val);
 void pc_bonus2(struct map_session_data *sd, int type, int type2, int val);

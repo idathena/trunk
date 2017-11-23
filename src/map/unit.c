@@ -1777,7 +1777,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 	skill_toggle_magicpower(src, skill_id); //SC_MAGICPOWER needs to switch states at start of cast
 
 	//In official this is triggered even if no cast time
-	clif_skillcasting(src, src->id, target_id, 0, 0, skill_id, skill_get_ele(skill_id, skill_lv), casttime);
+	clif_skillcasting(src, src->id, target_id, 0, 0, skill_id, skill_lv, casttime);
 
 	if( sd && target->type == BL_MOB ) {
 		TBL_MOB *md = ((TBL_MOB *)target);
@@ -1982,7 +1982,7 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	skill_toggle_magicpower(src, skill_id); //SC_MAGICPOWER needs to switch states at start of cast
 
 	//In official this is triggered even if no cast time
-	clif_skillcasting(src, src->id, 0, skill_x, skill_y, skill_id, skill_get_ele(skill_id, skill_lv), casttime);
+	clif_skillcasting(src, src->id, 0, skill_x, skill_y, skill_id, skill_lv, casttime);
 
 	if( casttime > 0 ) {
 		unit_setdir(src, map_calc_dir(src, skill_x, skill_y));
@@ -2700,8 +2700,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 		status_change_end(bl,SC_CLOSECONFINE,INVALID_TIMER);
 		status_change_end(bl,SC_CLOSECONFINE2,INVALID_TIMER);
 		status_change_end(bl,SC_HIDING,INVALID_TIMER);
-		//Ensure the bl is a PC. If so, we'll handle the removal of cloaking and cloaking exceed later
-		if (bl->type != BL_PC) {
+		if (bl->type != BL_PC) { //Ensure the bl is a PC. If so, we'll handle the removal of cloaking and cloaking exceed later
 			status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 			status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
 		}
@@ -2723,9 +2722,11 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 		status_change_end(bl,SC__MANHOLE,INVALID_TIMER);
 		status_change_end(bl,SC_CURSEDCIRCLE_ATKER,INVALID_TIMER);
 		status_change_end(bl,SC_NETHERWORLD,INVALID_TIMER);
-		status_change_end(bl,SC_CRYSTALIZE,INVALID_TIMER);
 		status_change_end(bl,SC_VACUUM_EXTREME,INVALID_TIMER);
 		status_change_end(bl,SC_TINDER_BREAKER,INVALID_TIMER);
+		status_change_end(bl,SC_C_MARKER,INVALID_TIMER);
+		status_change_end(bl,SC_H_MINE,INVALID_TIMER);
+		status_change_end(bl,SC_KINGS_GRACE,INVALID_TIMER);
 		status_change_end(bl,SC_SUHIDE,INVALID_TIMER);
 	}
 

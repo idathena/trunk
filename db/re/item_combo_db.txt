@@ -63,6 +63,7 @@
 1598:4117,{ bonus bAspdRate,5; }
 1598:4037:4117,{ bonus bAspd,1; }
 1615:18539,{ set .@r,getequiprefinerycnt(EQI_HAND_R); bonus bMatk,.@r*10; if(.@r>=10) bonus bVariableCastrate,-10; }
+1616:2515,{ bonus bSpeedRate,25; }
 1618:2509,{ bonus bMaxHP,300; bonus2 bMagicAddRace,RC_All,getequiprefinerycnt(EQI_HAND_R)-5; bonus2 bSubEle,Ele_Neutral,getequiprefinerycnt(EQI_GARMENT)*3; }
 1618:2509:19139,{ set .@r,getequiprefinerycnt(EQI_HAND_R); bonus2 bMagicAddRace,RC_All,(.@r>=7?5:(.@r>=5?3:1)); }
 1618:2535,{ bonus2 bMagicAddRace,RC_All,5; bonus2 bSubEle,Ele_Neutral,25; }
@@ -341,6 +342,7 @@
 2826:2827:5577,{ autobonus "{ bonus bAspdRate,2; }",50,10000,0,"{ specialeffect2 EF_POTION_BERSERK; }"; bonus bMaxHP,BaseLevel*15; bonus bMaxSP,BaseLevel*12/10; bonus2 bAddClass,Class_All,3; }
 2855:5360,{ bonus bCritAtkRate,10; if(getequiprefinerycnt(EQI_HEAD_TOP)>5) bonus bCritical,5; }
 2855:5986,{ bonus bCritAtkRate,10; if(getequiprefinerycnt(EQI_HEAD_TOP)>5) bonus bCritical,5; }
+2855:19134,{ bonus bCritAtkRate,10; if(getequiprefinerycnt(EQI_HEAD_TOP)>5) bonus bCritical,5; }
 2913:5104,{ bonus bBaseAtk,10; }
 2913:15040,{ bonus bBaseAtk,getequiprefinerycnt(EQI_ARMOR)*2; }
 2913:22105,{ bonus bBaseAtk,getequiprefinerycnt(EQI_SHOES); }
@@ -411,8 +413,8 @@
 4161:5932,{ bonus3 bAutoSpell,"PR_GLORIA",5,20; }
 4163:5967,{ bonus bAspdRate,3; bonus bAspd,1; bonus2 bAddClass,Class_All,-5; if(getiteminfo(getequipid(EQI_HAND_R),11)==11&&getequiprefinerycnt(EQI_HAND_R)>=10) bonus bAspd,1; }
 4168:4169,{ bonus bMaxHPrate,20; bonus bMaxSPrate,20; bonus bVariableCastrate,-10; }
-4169:4488,{ if(getequiprefinerycnt(EQI_SHOES)>=15) { bonus bMaxHPrate,15; bonus bMaxSPrate,15; } else { bonus bMaxHPrate,10; bonus bMaxSPrate,10; } }
-4172:4210:4230:4257:4272,{ bonus bAgi,5; bonus bStr,5; bonus bAspdRate,5; bonus bSPDrainValue,1; if(BaseClass==Job_Thief) bonus bNoGemStone,0; }
+4169:4488,{ set .@r,getequiprefinerycnt(EQI_SHOES); bonus bMaxHPrate,(.@r>=15?15:10); bonus bMaxSPrate,(.@r>=15?15:10); }
+4172:4210:4230:4257:4272,{ bonus bAgi,5; bonus bStr,5; bonus bAspdRate,5; bonus bSPDrainValue,1; bonus bSpeedRate,25; if(BaseClass==Job_Thief) bonus bNoGemStone,0; }
 4178:4199:4234:4252:4297,{ bonus bAgi,5; bonus bDex,3; bonus bLongAtkRate,20; bonus bPerfectHitAddRate,20; if(BaseClass==Job_Archer) { bonus2 bExpAddRace,RC_Brute,5; bonus2 bWeaponComaRace,RC_Brute,100; } }
 4178:4234:4252:4297:4381,{ bonus bDex,5; bonus2 bSkillAtk,"CG_ARROWVULCAN",5; bonus2 bSkillAtk,"DC_THROWARROW",10; bonus2 bSkillAtk,"BA_MUSICALSTRIKE",10; if(BaseJob==Job_Bard||BaseJob==Job_Dancer) bonus3 bAutoSpellWhenHit,"CG_TAROTCARD",2,50; }
 4185:4217:4280:4293:4312,{ bonus bVit,10; bonus bVariableCastrate,-10; bonus bUseSPrate,-10; if(BaseClass==Job_Acolyte) { bonus2 bExpAddRace,RC_Undead,5; bonus2 bExpAddRace,RC_Demon,5; bonus2 bSubRace,RC_Undead,30; bonus2 bSubRace,RC_Demon,30; } }
@@ -511,8 +513,8 @@
 15091:18820:20721:22033,{ bonus2 bSubEle,Ele_Neutral,15; bonus bMaxHPrate,25; bonus bMaxSPrate,25; bonus2 bMagicAddRace,RC_All,10; }
 15110:20732,{ bonus2 bSkillAtk,"NC_AXETORNADO",25; }
 15110:22043,{ bonus bBaseAtk,30; }
-15116:20743:22046,{ bonus bMaxHPrate,25; bonus bMaxSPrate,25; }
-15117:20744:22047,{ set .@r,getequiprefinerycnt(EQI_ARMOR)+getequiprefinerycnt(EQI_GARMENT)+getequiprefinerycnt(EQI_SHOES); bonus bMaxHPrate,(.@r>=30?30:25); bonus bMaxSPrate,(.@r>=30?30:25); }
+15116:20743:22046,{ bonus bMaxHPrate,25; bonus bMaxSPrate,25; bonus bSpeedRate,25; }
+15117:20744:22047,{ set .@r,getequiprefinerycnt(EQI_ARMOR)+getequiprefinerycnt(EQI_GARMENT)+getequiprefinerycnt(EQI_SHOES); bonus bMaxHPrate,(.@r>=30?30:25); bonus bMaxSPrate,(.@r>=30?30:25); bonus bSpeedRate,25; }
 15126:20788:22083,{ bonus bMaxHP,2000; bonus bNoCastCancel,0; bonus bFixedCastrate,-15-(getequiprefinerycnt(EQI_ARMOR)+getequiprefinerycnt(EQI_GARMENT)+getequiprefinerycnt(EQI_SHOES)); }
 15126:20788:22083:28382:28416,{ bonus bMaxHPrate,10; bonus bMaxSPrate,10; bonus2 bSkillAtk,"SU_CN_METEOR",100; }
 15126:20788:22083:28381:28413,{ bonus bMaxHPrate,15; bonus bMaxSPrate,5; bonus bHealPower,10; skill "AL_HEAL",5,1; }
@@ -577,12 +579,13 @@
 18985:28321,{ bonus2 bSkillAtk,"HT_BLITZBEAT",100; }
 18985:28321:28322,{ bonus2 bSkillAtk,"HT_BLITZBEAT",200; }
 18985:28322,{ bonus2 bSkillAtk,"SN_FALCONASSAULT",50; }
-18997:28326:28327,{ bonus bBaseAtk,50; bonus bMatk,50; if(getequiprefinerycnt(EQI_HEAD_TOP)>=9) { bonus bMaxHPrate,10; bonus bMaxSPrate,50; } }
+18997:28326:28327,{ bonus bBaseAtk,50; bonus bMatk,50; bonus bSpeedRate,25; if(getequiprefinerycnt(EQI_HEAD_TOP)>=9) { bonus bMaxHPrate,10; bonus bMaxSPrate,50; } }
 19020:19139,{ set .@r,getequiprefinerycnt(EQI_HEAD_TOP); bonus bVit,(.@r>=9?12:(.@r>=7?8:4)); bonus2 bSubRace,RC_DemiHuman,(.@r>=9?12:(.@r>=7?8:4)); bonus bVariableCastrate,-(.@r>=9?18:(.@r>=7?12:6)); bonus2 bMagicAtkEle,Ele_Wind,20; bonus2 bMagicAtkEle,Ele_Earth,20; }
 19020:22170,{ set .@r,getequiprefinerycnt(EQI_HEAD_TOP); bonus2 bMagicAddRace,RC_All,10; bonus2 bMagicAtkEle,Ele_Wind,(.@r>=9?20:(.@r>=7?10:0)); bonus2 bMagicAtkEle,Ele_Earth,(.@r>=9?20:(.@r>=7?10:0)); }
 19026:20756,{ set .@r,getequiprefinerycnt(EQI_GARMENT); bonus2 bSPGainRace,RC_Fish,10; bonus bHPrecovRate,.@r*5; bonus3 bAddMonsterDropItem,551,RC_Fish,5+.@r; bonus2 bAddItemHealRate,551,5; }
 19026:22059,{ bonus2 bCriticalAddRace,RC_Fish,10+getequiprefinerycnt(EQI_SHOES); }
 19038:19039,{ set .@r,getequiprefinerycnt(EQI_HEAD_TOP)+getequiprefinerycnt(EQI_HEAD_MID); if(.@r>=7) { bonus bCritical,12; bonus bHit,12; } if(.@r>=9) { bonus bMaxHP,1200; bonus bMaxSP,120; } }
+19134:28351,{ bonus bCritAtkRate,10; if(getequiprefinerycnt(EQI_HEAD_TOP)>5) bonus bCritical,5; }
 19139:20813,{ set .@r,getequiprefinerycnt(EQI_GARMENT); bonus2 bSubRace,RC_DemiHuman,(.@r>=7?5:(.@r>=5?3:1)); bonus bFixedCastrate,-50; }
 19139:22170,{ bonus bVit,5; bonus bInt,5; bonus2 bSubRace,RC_DemiHuman,3; }
 19827:20763,{ bonus2 bSubRace,RC_DemiHuman,4; }
@@ -684,7 +687,7 @@
 24168:24169:24177,{ bonus bMatk,5; if(getequiprefinerycnt(EQI_SHADOW_WEAPON)+getequiprefinerycnt(EQI_SHADOW_ACC_R)+getequiprefinerycnt(EQI_SHADOW_ACC_L)>=25) bonus bIgnoreMdefRace,RC_Formless; }
 24168:24169:24178,{ bonus bMatk,5; if(getequiprefinerycnt(EQI_SHADOW_WEAPON)+getequiprefinerycnt(EQI_SHADOW_ACC_R)+getequiprefinerycnt(EQI_SHADOW_ACC_L)>=25) bonus bIgnoreMdefRace,RC_Undead; }
 24168:24169:24179,{ bonus bMatk,5; if(getequiprefinerycnt(EQI_SHADOW_WEAPON)+getequiprefinerycnt(EQI_SHADOW_ACC_R)+getequiprefinerycnt(EQI_SHADOW_ACC_L)>=25) bonus bIgnoreMdefRace,RC_Plant; }
-24180:24181:24182:24183:24184:24185,{ set s_bearers,getequiprefinerycnt(EQI_SHADOW_ARMOR)+getequiprefinerycnt(EQI_SHADOW_WEAPON)+getequiprefinerycnt(EQI_SHADOW_SHIELD)+getequiprefinerycnt(EQI_SHADOW_SHOES)+getequiprefinerycnt(EQI_SHADOW_ACC_R)+getequiprefinerycnt(EQI_SHADOW_ACC_L); bonus bAllStats,1; if(s_bearers>=45) bonus bMaxHPrate,s_bearers-60; }
+24180:24181:24182:24183:24184:24185,{ set .@r,getequiprefinerycnt(EQI_SHADOW_ARMOR)+getequiprefinerycnt(EQI_SHADOW_WEAPON)+getequiprefinerycnt(EQI_SHADOW_SHIELD)+getequiprefinerycnt(EQI_SHADOW_SHOES)+getequiprefinerycnt(EQI_SHADOW_ACC_R)+getequiprefinerycnt(EQI_SHADOW_ACC_L); bonus bAllStats,1; if(.@r>=45) { bonus bMaxHPrate,.@r-60; bonus bNoWalkDelay,0; } }
 24186:24198,{ bonus2 bSubDefEle,Ele_Neutral,2; }
 24187:24199,{ bonus2 bSubDefEle,Ele_Dark,2; }
 24188:24200,{ bonus2 bSubDefEle,Ele_Water,2; }
@@ -695,7 +698,7 @@
 24193:24205,{ bonus2 bSubDefEle,Ele_Holy,2; }
 24194:24206,{ bonus2 bSubDefEle,Ele_Ghost,2; }
 24195:24207,{ bonus2 bSubDefEle,Ele_Undead,2; }
-24196:24197,{ set s_hasty,getequiprefinerycnt(EQI_SHADOW_SHOES)+getequiprefinerycnt(EQI_SHADOW_ARMOR); bonus bFlee,5; }
+24196:24197,{ bonus bFlee,5; if(getequiprefinerycnt(EQI_SHADOW_SHOES)+getequiprefinerycnt(EQI_SHADOW_ARMOR)) bonus bSpeedRate,25; }
 24208:24209,{ bonus2 bExpAddRace,RC_All,(getequiprefinerycnt(EQI_SHADOW_SHOES)+getequiprefinerycnt(EQI_SHADOW_SHIELD)>=15?10:1); }
 24210:24211,{ bonus2 bExpAddRace,RC_All,(getequiprefinerycnt(EQI_SHADOW_SHOES)+getequiprefinerycnt(EQI_SHADOW_SHIELD)>=15?20:10); }
 24212:24213,{ bonus2 bExpAddRace,RC_All,(getequiprefinerycnt(EQI_SHADOW_SHOES)+getequiprefinerycnt(EQI_SHADOW_SHIELD)>=15?10:5); }

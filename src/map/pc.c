@@ -2351,7 +2351,6 @@ void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus,
 				autobonus[i].active = INVALID_TIMER;
 			}
 		}
-
 		if( autobonus[i].bonus_script )
 			aFree(autobonus[i].bonus_script);
 		if( autobonus[i].other_script )
@@ -2697,8 +2696,11 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			}
 			break;
 		case SP_SPEED_RATE:	//Non stackable increase
-			if(sd->state.lr_flag != 2)
+			if(sd->state.lr_flag != 2) {
 				sd->bonus.speed_rate = min(sd->bonus.speed_rate, -val);
+				if(sd->bonus.speed_rate < 0)
+					clif_status_load(&sd->bl, SI_MOVHASTE_INFINITY, 1);
+			}
 			break;
 		case SP_SPEED_ADDRATE: //Stackable increase
 			if(sd->state.lr_flag != 2)
@@ -3118,6 +3120,10 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 		case SP_NO_MAGIC_GEAR_FUEL:
 			if(sd->state.lr_flag != 2)
 				sd->special_state.no_magic_gear_fuel = 1;
+			break;
+		case SP_NO_WALKDELAY:
+			if(sd->state.lr_flag != 2)
+				sd->special_state.no_walkdelay = 1;
 			break;
 		default:
 			if(running_npc_stat_calc_event)
@@ -4591,7 +4597,7 @@ char pc_delitem(struct map_session_data *sd, int n, int amount, int type, short 
 	sd->weight -= sd->inventory_data[n]->weight * amount ;
 	if(sd->inventory.u.items_inventory[n].amount <= 0) {
 		if(sd->inventory.u.items_inventory[n].equip)
-			pc_unequipitem(sd, n, 2|(!(type&4) ? 1 : 0));
+			pc_unequipitem(sd, n, (!(type&4) ? 1 : 0)|2);
 		memset(&sd->inventory.u.items_inventory[n], 0, sizeof(sd->inventory.u.items_inventory[0]));
 		sd->inventory_data[n] = NULL;
 	}
@@ -4860,6 +4866,9 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 	if( !((1<<(sd->class_&MAPID_BASEMASK))&(item->class_base[sd->class_&JOBL_2_1 ? 1 : (sd->class_&JOBL_2_2 ? 2 : 0)])) )
 		return false; //Not equipable by class [Skotlex]
 
+	if( !pc_isItemClass(sd,item) )
+		return false;
+
 	//Statuses that don't let the player use items
 	if( sd->sc.count &&
 		(sd->sc.data[SC_BERSERK] ||
@@ -4870,15 +4879,15 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 		sd->sc.data[SC__SHADOWFORM] ||
 		sd->sc.data[SC__INVISIBILITY] ||
 		sd->sc.data[SC__MANHOLE] ||
-		sd->sc.data[SC_DEEPSLEEP] ||
-		sd->sc.data[SC_CRYSTALIZE] ||
 		sd->sc.data[SC_KAGEHUMI] ||
 		(sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOITEM) ||
 		sd->sc.data[SC_KINGS_GRACE] ||
 		sd->sc.data[SC_SUHIDE]) )
 		return false;
 
-	if( !pc_isItemClass(sd,item) )
+	if( nameid != ITEMID_NAUTHIZ &&
+		((sd->sc.opt1 && sd->sc.opt1 != OPT1_STONEWAIT && sd->sc.opt1 != OPT1_BURNING) ||
+		sd->sc.data[SC_DEEPSLEEP] || sd->sc.data[SC_CRYSTALIZE]) )
 		return false;
 
 	if( item->flag.dead_branch )
@@ -4932,9 +4941,6 @@ int pc_useitem(struct map_session_data *sd, int n)
 
 	//Store information for later use before it is lost (via pc_delitem) [Paradox924X]
 	nameid = id->nameid;
-
-	if( nameid != ITEMID_NAUTHIZ && sd->sc.opt1 && sd->sc.opt1 != OPT1_STONEWAIT && sd->sc.opt1 != OPT1_BURNING )
-		return 0;
 
 	if( id->flag.restricted_consume ) {
 		if( pc_issit(sd) ) {
@@ -5687,12 +5693,12 @@ static void pc_checkallowskill(struct map_session_data *sd)
 	for(i = 0; i < ARRAYLENGTH(scw_list); i++) { //Skills requiring specific weapon types
 		if(scw_list[i] == SC_DANCING && !battle_config.dancing_weaponswitch_fix)
 			continue;
-		if(sd->sc.data[scw_list[i]] && !pc_check_weapontype(sd,skill_get_weapontype(status_sc2skill(scw_list[i]))))
+		if(sd->sc.data[scw_list[i]] && !pc_check_weapontype(sd, skill_get_weapontype(status_sc2skill(scw_list[i]))))
 			status_change_end(&sd->bl, scw_list[i], INVALID_TIMER);
 	}
 
-	//Spurt requires bare hands
-	if(sd->sc.data[SC_STRUP] && sd->status.weapon)
+	//SC_STRUP requires bare hands
+	if(sd->sc.data[SC_STRUP] && sd->status.weapon != W_FIST)
 		status_change_end(&sd->bl, SC_STRUP, INVALID_TIMER);
 
 	if(sd->status.shield <= 0) { //Skills requiring a shield
@@ -6438,7 +6444,7 @@ void pc_baselevelchanged(struct map_session_data *sd) {
 	for (i = 0; i < EQI_MAX; i++) {
 		if (sd->equip_index[i] >= 0 &&
 			sd->inventory_data[sd->equip_index[i]]->elvmax && sd->status.base_level > (unsigned int)sd->inventory_data[sd->equip_index[i]]->elvmax)
-			pc_unequipitem(sd, sd->equip_index[i], 3);
+			pc_unequipitem(sd, sd->equip_index[i], 1|2);
 	}
 	pc_show_questinfo(sd);
 }
@@ -7472,11 +7478,12 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 {
 	if( sp )
 		clif_updatestatus(sd,SP_SP);
+
 	if( hp )
 		clif_updatestatus(sd,SP_HP);
 	else
 		return;
-	
+
 	if( !src )
 		return;
 
@@ -7815,7 +7822,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 					if( rnd()%10000 < per ) {
 						if( sd->inventory.u.items_inventory[n].equip )
-							pc_unequipitem(sd,n,3);
+							pc_unequipitem(sd,n,1|2);
 						pc_dropitem(sd,n,1);
 					}
 				}
@@ -7828,7 +7835,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 						type == 3) )
 					{
 						if( sd->inventory.u.items_inventory[i].equip )
-							pc_unequipitem(sd,i,3);
+							pc_unequipitem(sd,i,1|2);
 						pc_dropitem(sd,i,1);
 						break;
 					}
@@ -8057,6 +8064,7 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_ADD_VARIABLECAST:	val = sd->bonus.add_varcast; break;
 #endif
 		case SP_NO_MAGIC_GEAR_FUEL:	val = (sd->special_state.no_magic_gear_fuel ? 1 : 0); break;
+		case SP_NO_WALKDELAY:		val = (sd->special_state.no_walkdelay ? 1 : 0); break;
 		default:
 			ShowError("pc_readparam: Attempt to read unknown parameter '%d'.\n", type);
 			return -1;
@@ -8851,7 +8859,7 @@ bool pc_setcart(struct map_session_data *sd, int type) {
 				status_calc_cart_weight(sd,CALCWT_ITEM|CALCWT_MAXBONUS|CALCWT_CARTSTATE);
 			}
 			clif_updatestatus(sd,SP_CARTINFO);
-			sc_start(&sd->bl,&sd->bl,SC_PUSH_CART,100,type,-1);
+			sc_start(&sd->bl,&sd->bl,SC_PUSH_CART,100,type,INVALID_TIMER);
 			break;
 	}
 
@@ -9907,12 +9915,13 @@ static void pc_unequipitem_sub(struct map_session_data *sd, int n, int flag) {
  *	0 - only unequip
  *	1 - calculate status after unequipping
  *	2 - force unequip
- *	4 - unequip by skill_break_equip
+ *	4 - unequip by 'breakequip' or 'skill_break_equip'
  *	8 - unequip by switching equipment
  * return: false - fail; true - success
  *------------------------------------------*/
 void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 	int i = 0;
+	int pos;
 
 	nullpo_retv(sd);
 
@@ -9920,7 +9929,7 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 		clif_unequipitemack(sd,0,0,0);
 		return;
 	}
-	if( !sd->inventory.u.items_inventory[n].equip ) {
+	if( !(pos = sd->inventory.u.items_inventory[n].equip) ) {
 		clif_unequipitemack(sd,n,0,0);
 		return; //Nothing to unequip
 	}
@@ -9934,31 +9943,31 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 		return; //Cannot unequip
 	}
 	if( battle_config.battle_log )
-		ShowInfo("Unequip %d %x:%x\n",n,pc_equippoint(sd,n),sd->inventory.u.items_inventory[n].equip);
+		ShowInfo("Unequip %d %x:%x\n",n,pc_equippoint(sd,n),pos);
 	for( i = 0; i < EQI_MAX; i++ ) {
-		if( sd->inventory.u.items_inventory[n].equip&equip_bitmask[i] )
+		if( pos&equip_bitmask[i] )
 			sd->equip_index[i] = -1;
 	}
-	if( sd->inventory.u.items_inventory[n].equip&EQP_HAND_R ) {
+	if( pos&EQP_HAND_R ) {
 		sd->weapontype1 = 0;
 		sd->status.weapon = sd->weapontype2;
 		pc_calcweapontype(sd);
 		clif_changelook(&sd->bl,LOOK_WEAPON,sd->status.weapon);
 	}
-	if( sd->inventory.u.items_inventory[n].equip&EQP_HAND_L ) {
+	if( pos&EQP_HAND_L ) {
 		sd->status.shield = sd->weapontype2 = 0;
 		pc_calcweapontype(sd);
 		clif_changelook(&sd->bl,LOOK_SHIELD,sd->status.shield);
 	}
-	if( sd->inventory.u.items_inventory[n].equip&EQP_SHOES )
+	if( pos&EQP_SHOES )
 		clif_changelook(&sd->bl,LOOK_SHOES,0);
-	clif_unequipitemack(sd,n,sd->inventory.u.items_inventory[n].equip,1);
+	clif_unequipitemack(sd,n,pos,1);
 	pc_set_costume_view(sd);
 	//On equipment change
 	if( !(flag&4) )
 		status_change_end(&sd->bl,SC_CONCENTRATION,INVALID_TIMER);
 	//On weapon change (both hands)
-	if( (sd->inventory.u.items_inventory[n].equip&EQP_ARMS) && sd->inventory_data[n]->type == IT_WEAPON ) {
+	if( (pos&EQP_ARMS) && sd->inventory_data[n]->type == IT_WEAPON ) {
 		if( !(flag&8) && battle_config.ammo_unequip ) {
 			switch( sd->inventory_data[n]->look ) {
 				case W_BOW:
@@ -9981,12 +9990,12 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 					break;
 			}
 		}
-		if( (!sd->sc.data[SC_SEVENWIND] || sd->sc.data[SC_ASPERSIO]) ) //Seven wind need to be checked
+		if( !sd->sc.data[SC_SEVENWIND] || sd->sc.data[SC_ASPERSIO] ) //Check for seven wind (but not level seven!)
 			skill_enchant_elemental_end(&sd->bl,SC_NONE);
 		if( !battle_config.dancing_weaponswitch_fix )
 			status_change_end(&sd->bl,SC_DANCING,INVALID_TIMER); //When unequipping, stop dancing [Skotlex]
 #ifdef RENEWAL
-		if( sd->inventory.u.items_inventory[n].equip&EQP_HAND_R )
+		if( pos&EQP_HAND_R )
 			status_change_end(&sd->bl,SC_EDP,INVALID_TIMER);
 #endif
 		status_change_end(&sd->bl,SC_FEARBREEZE,INVALID_TIMER);
@@ -9995,7 +10004,7 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 		status_change_end(&sd->bl,SC_P_ALTER,INVALID_TIMER);
 	}
 	//On armor change
-	if( sd->inventory.u.items_inventory[n].equip&EQP_ARMOR )
+	if( pos&EQP_ARMOR )
 		status_change_end(&sd->bl,SC_ARMOR_RESIST,INVALID_TIMER);
 	//On ammo change
 	if( sd->inventory_data[n]->type == IT_AMMO )
@@ -10022,7 +10031,7 @@ void pc_checkitem(struct map_session_data *sd) {
 	for( i = 0; i < MAX_INVENTORY; i++ ) {
 		it = sd->inventory.u.items_inventory[i];
 
-		if( it.nameid == 0 )
+		if( !it.nameid )
 			continue;
 		if( !it.equip )
 			continue;
