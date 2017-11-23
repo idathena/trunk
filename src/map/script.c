@@ -8309,7 +8309,7 @@ BUILDIN_FUNC(failedrefitem)
 		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
 		sd->inventory.u.items_inventory[i].refine = 0;
-		pc_unequipitem(sd,i,3); //Recalculate bonus
+		pc_unequipitem(sd,i,1|2); //Recalculate bonus
 		clif_refine(sd->fd,1,i,sd->inventory.u.items_inventory[i].refine); //Notify client of failure
 		pc_delitem(sd,i,1,0,2,LOG_TYPE_SCRIPT);
 		clif_misceffect(&sd->bl,2); //Display failure effect
@@ -8394,7 +8394,7 @@ BUILDIN_FUNC(delequip)
 	if(equip_index_check(pos))
 		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
-		pc_unequipitem(sd,i,3); //Recalculate bonus
+		pc_unequipitem(sd,i,1|2); //Recalculate bonus
 		pc_delitem(sd,i,1,0,2,LOG_TYPE_SCRIPT);
 		return 0;
 	}
@@ -8423,7 +8423,7 @@ BUILDIN_FUNC(breakequip)
 		i = pc_checkequip(sd,equip_bitmask[pos]);
 	if(i >= 0) {
 		sd->inventory.u.items_inventory[i].attribute = 1;
-		pc_unequipitem(sd,i,3);
+		pc_unequipitem(sd,i,1|2|4);
 		clif_equiplist(sd);
 		script_pushint(st,1);
 		return 0;
@@ -11091,7 +11091,7 @@ BUILDIN_FUNC(changesex)
 	//To avoid any problem with equipment and invalid sex, equipment is unequiped
 	for( i = 0; i < EQI_MAX; i++ ) {
 		if( sd->equip_index[i] >= 0 )
-			pc_unequipitem(sd,sd->equip_index[i],3);
+			pc_unequipitem(sd,sd->equip_index[i],1|2);
 	}
 	chrif_changesex(sd,true);
 	return SCRIPT_CMD_SUCCESS;
@@ -11113,7 +11113,7 @@ BUILDIN_FUNC(changecharsex)
 	pc_resetskill(sd,4);
 	for( i = 0; i < EQI_MAX; i++ ) {
 		if( sd->equip_index[i] >= 0 )
-			pc_unequipitem(sd,sd->equip_index[i],3);
+			pc_unequipitem(sd,sd->equip_index[i],1|2);
 	}
 	chrif_changesex(sd,false);
 	return SCRIPT_CMD_SUCCESS;

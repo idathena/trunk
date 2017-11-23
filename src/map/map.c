@@ -2010,9 +2010,7 @@ int map_quit(struct map_session_data *sd) {
 				if (!sd->sc.data[i])
 					continue;
 				switch (i) {
-					case SC_ENDURE:
 					case SC_REGENERATION:
-					case SC_SPEEDUP0:
 						if (!sd->sc.data[i]->val4)
 							break;
 					//Fall through
@@ -2058,7 +2056,6 @@ int map_quit(struct map_session_data *sd) {
 			pt = &map[sd->bl.m].save;
 		else
 			pt = &sd->status.save_point;
-
 		if ((m = map_mapindex2mapid(pt->map)) >= 0) {
 			sd->bl.m = m;
 			sd->bl.x = pt->x;

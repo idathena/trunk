@@ -1617,7 +1617,13 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 
 	//Abnormalities
 	if((md->sc.opt1 && md->sc.opt1 != OPT1_STONEWAIT && md->sc.opt1 != OPT1_BURNING) ||
-		md->sc.data[SC_BLADESTOP] || md->sc.data[SC__MANHOLE] || md->sc.data[SC_CURSEDCIRCLE_TARGET]) { //Should reset targets
+		md->sc.data[SC_BLADESTOP] ||
+		md->sc.data[SC_DEEPSLEEP] ||
+		md->sc.data[SC_CRYSTALIZE] ||
+		md->sc.data[SC__MANHOLE] ||
+		md->sc.data[SC_FALLENEMPIRE] ||
+		md->sc.data[SC_CURSEDCIRCLE_TARGET])
+	{ //Should reset targets
 		md->target_id = md->attacked_id = md->norm_attacked_id = 0;
 		return false;
 	}
@@ -1655,8 +1661,16 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 		if(md->attacked_id == md->target_id) { //Rude attacked check
 			if(!battle_check_range(&md->bl, tbl, md->status.rhw.range)
 			&& ( //Can't attack back and can't reach back
-					(!can_move && DIFF_TICK(tick, md->ud.canmove_tick) > 0 && ((battle_config.mob_ai&0x2) || md->sc.data[SC_SPIDERWEB]
-						|| md->sc.data[SC_ELECTRICSHOCKER] || md->sc.data[SC_BITE] || md->sc.data[SC_MAGNETICFIELD] || md->sc.data[SC_VACUUM_EXTREME] || md->sc.data[SC_THORNSTRAP]
+					(!can_move && DIFF_TICK(tick, md->ud.canmove_tick) > 0 && ((battle_config.mob_ai&0x2)
+						|| md->sc.data[SC_SPIDERWEB]
+						|| md->sc.data[SC_DEEPSLEEP]
+						|| md->sc.data[SC_CRYSTALIZE]
+						|| md->sc.data[SC_ELECTRICSHOCKER]
+						|| md->sc.data[SC_BITE]
+						|| md->sc.data[SC_MAGNETICFIELD]
+						|| md->sc.data[SC__MANHOLE]
+						|| md->sc.data[SC_VACUUM_EXTREME]
+						|| md->sc.data[SC_THORNSTRAP]
 						|| md->walktoxy_fail_count > 0)
 					)
 					|| !mob_can_reach(md, tbl, chase_range, MSS_RUSH)
@@ -1668,8 +1682,7 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 				md->attacked_id = md->norm_attacked_id = 0;
 				return true;
 			}
-		} else if((abl = map_id2bl(md->attacked_id)) && ((!tbl || mob_can_changetarget(md, abl, mode)) ||
-			(md->sc.count && md->sc.data[SC_CONFUSION] && md->sc.data[SC_CONFUSION]->val4))) {
+		} else if((abl = map_id2bl(md->attacked_id)) && (!tbl || mob_can_changetarget(md, abl, mode))) {
 			int dist;
 
 			if(md->bl.m != abl->m || !abl->prev
@@ -1678,8 +1691,16 @@ static bool mob_ai_sub_hard(struct mob_data *md, unsigned int tick)
 				|| (battle_config.mob_ai&0x2 && !status_check_skilluse(&md->bl, abl, 0, 0)) //Cannot normal attack back to attacker
 				|| (!battle_check_range(&md->bl, abl, md->status.rhw.range) //Not on melee range
 				&& ( //Reach check
-						(!can_move && DIFF_TICK(tick, md->ud.canmove_tick) > 0 && ((battle_config.mob_ai&0x2) || md->sc.data[SC_SPIDERWEB]
-							|| md->sc.data[SC_ELECTRICSHOCKER] || md->sc.data[SC_BITE] || md->sc.data[SC_MAGNETICFIELD] || md->sc.data[SC_VACUUM_EXTREME] || md->sc.data[SC_THORNSTRAP]
+						(!can_move && DIFF_TICK(tick, md->ud.canmove_tick) > 0 && ((battle_config.mob_ai&0x2)
+							|| md->sc.data[SC_SPIDERWEB]
+							|| md->sc.data[SC_DEEPSLEEP]
+							|| md->sc.data[SC_CRYSTALIZE]
+							|| md->sc.data[SC_ELECTRICSHOCKER]
+							|| md->sc.data[SC_BITE]
+							|| md->sc.data[SC_MAGNETICFIELD]
+							|| md->sc.data[SC__MANHOLE]
+							|| md->sc.data[SC_VACUUM_EXTREME]
+							|| md->sc.data[SC_THORNSTRAP]
 							|| md->walktoxy_fail_count > 0)
 						)
 						|| !mob_can_reach(md, abl, dist + md->db->range3, MSS_RUSH)
@@ -4388,18 +4409,26 @@ static bool mob_parse_row_mobskilldb(char **str, int columns, int current)
 		{ "alchemist",         MSC_ALCHEMIST         },
 		{ "onspawn",           MSC_SPAWN             },
 	}, cond2[] ={
-		{	"anybad",		-1				},
-		{	"stone",		SC_STONE		},
-		{	"freeze",		SC_FREEZE		},
-		{	"stun",			SC_STUN			},
-		{	"sleep",		SC_SLEEP		},
-		{	"poison",		SC_POISON		},
-		{	"curse",		SC_CURSE		},
-		{	"silence",		SC_SILENCE		},
-		{	"confusion",	SC_CONFUSION	},
-		{	"blind",		SC_BLIND		},
-		{	"hiding",		SC_HIDING		},
-		{	"sight",		SC_SIGHT		},
+		{	"anybad",	-1			},
+		{	"stone",	SC_STONE		},
+		{	"freeze",	SC_FREEZE		},
+		{	"stun",		SC_STUN			},
+		{	"sleep",	SC_SLEEP		},
+		{	"poison",	SC_POISON		},
+		{	"curse",	SC_CURSE		},
+		{	"silence",	SC_SILENCE		},
+		{	"confusion",	SC_CONFUSION		},
+		{	"blind",	SC_BLIND		},
+		{	"bleeding",	SC_BLEEDING		},
+		{	"dpoison",	SC_DPOISON		},
+		{	"fear",		SC_FEAR			},
+		{	"burning",	SC_BURNING		},
+		{	"imprison",	SC_WHITEIMPRISON	},
+		{	"deepsleep",	SC_DEEPSLEEP		},
+		{	"freezing",	SC_FREEZING		},
+		{	"crystalize",	SC_CRYSTALIZE		},
+		{	"hiding",	SC_HIDING		},
+		{	"sight",	SC_SIGHT		},
 	}, target[] = {
 		{	"target",	MST_TARGET	},
 		{	"randomtarget",	MST_RANDOM	},

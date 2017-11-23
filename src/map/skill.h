@@ -54,23 +54,24 @@ enum e_skill_inf {
 //A skill with 3 would be no damage + splash: area of effect.
 //Constants to identify a skill's inf2 value.
 enum e_skill_inf2 {
-	INF2_QUEST_SKILL    = 0x00001,
-	INF2_NPC_SKILL      = 0x00002, //NPC skills are those that players can't have in their skill tree.
-	INF2_WEDDING_SKILL  = 0x00004,
-	INF2_SPIRIT_SKILL   = 0x00008,
-	INF2_GUILD_SKILL    = 0x00010,
-	INF2_SONG_DANCE     = 0x00020,
-	INF2_ENSEMBLE_SKILL = 0x00040,
-	INF2_TRAP           = 0x00080,
-	INF2_TARGET_SELF    = 0x00100, //Refers to ground placed skills that will target the caster as well (like Grandcross)
-	INF2_NO_TARGET_SELF = 0x00200,
-	INF2_PARTY_ONLY     = 0x00400,
-	INF2_GUILD_ONLY     = 0x00800,
-	INF2_NO_ENEMY       = 0x01000,
-	INF2_CHORUS_SKILL   = 0x02000, //Chorus skill
-	INF2_NO_BG_GVG_DMG  = 0x04000, //Skill that ignores bg and gvg reduction
-	INF2_NO_NEARNPC     = 0x08000, //Disable cast skill if near with NPC [Cydh]
-	INF2_HIT_TRAP       = 0x10000, //Can hit trap-type skill (INF2_TRAP) [Cydh]
+	INF2_QUEST_SKILL      = 0x00001,
+	INF2_NPC_SKILL        = 0x00002, //NPC skills are those that players can't have in their skill tree.
+	INF2_WEDDING_SKILL    = 0x00004,
+	INF2_SPIRIT_SKILL     = 0x00008,
+	INF2_GUILD_SKILL      = 0x00010,
+	INF2_SONG_DANCE       = 0x00020,
+	INF2_ENSEMBLE_SKILL   = 0x00040,
+	INF2_TRAP             = 0x00080,
+	INF2_TARGET_SELF      = 0x00100, //Refers to ground placed skills that will target the caster as well (like Grandcross)
+	INF2_NO_TARGET_SELF   = 0x00200,
+	INF2_PARTY_ONLY       = 0x00400,
+	INF2_GUILD_ONLY       = 0x00800,
+	INF2_NO_ENEMY         = 0x01000,
+	INF2_CHORUS_SKILL     = 0x02000, //Chorus skill
+	INF2_NO_BG_GVG_DMG    = 0x04000, //Skill that ignores bg and gvg reduction
+	INF2_NO_NEARNPC       = 0x08000, //Disable cast skill if near with NPC [Cydh]
+	INF2_HIT_TRAP         = 0x10000, //Can hit trap-type skill (INF2_TRAP) [Cydh]
+	INF2_SHOW_SKILL_SCALE = 0x20000,
 };
 
 //Skill info type 3
@@ -2078,7 +2079,6 @@ int skill_poisoningweapon(struct map_session_data *sd, unsigned short nameid);
 
 int skill_maelstrom_suction(struct block_list *bl, va_list ap);
 void skill_select_menu(struct map_session_data *sd, uint16 skill_id);
-bool skill_check_shadowform(struct block_list *bl, uint16 skill_id, int64 damage, int div);
 
 int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv, unsigned short *item_list);
 

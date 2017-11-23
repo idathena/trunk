@@ -37,31 +37,31 @@ iz_ac01_d,47,68,0,0	monster	Lv 10 (Fire)	2413,1,5000,0,0
 //==================================================
 // prt_fild08 - Prontera Field 
 //==================================================
-prt_fild08,0,0,0,0	monster	Poring	1002,120,5000,0,0
-prt_fild08,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
-prt_fild08,0,0,0,0	monster	Pupa	1008,40,5000,0,0
-prt_fild08,0,0,0,0	monster	Fabre	1007,60,5000,0,0
-prt_fild08,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-prt_fild08a,0,0,0,0	monster	Poring	1002,120,5000,0,0
-prt_fild08a,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
-prt_fild08a,0,0,0,0	monster	Pupa	1008,40,5000,0,0
-prt_fild08a,0,0,0,0	monster	Fabre	1007,60,5000,0,0
-prt_fild08a,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-prt_fild08b,0,0,0,0	monster	Poring	1002,120,5000,0,0
-prt_fild08b,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
-prt_fild08b,0,0,0,0	monster	Pupa	1008,40,5000,0,0
-prt_fild08b,0,0,0,0	monster	Fabre	1007,60,5000,0,0
-prt_fild08b,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-prt_fild08c,0,0,0,0	monster	Poring	1002,120,5000,0,0
-prt_fild08c,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
-prt_fild08c,0,0,0,0	monster	Pupa	1008,40,5000,0,0
-prt_fild08c,0,0,0,0	monster	Fabre	1007,60,5000,0,0
-prt_fild08c,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
-prt_fild08d,0,0,0,0	monster	Poring	1002,120,5000,0,0
-prt_fild08d,0,0,0,0	monster	Lunatic	1063,80,5000,0,0
-prt_fild08d,0,0,0,0	monster	Pupa	1008,40,5000,0,0
-prt_fild08d,0,0,0,0	monster	Fabre	1007,60,5000,0,0
-prt_fild08d,0,0,0,0	monster	Little Poring	2398,30,50000,0,0
+prt_fild08,0,0,0,0	monster	Poring	1002,110,5000,0,0
+prt_fild08,0,0,0,0	monster	Lunatic	1063,110,5000,0,0
+prt_fild08,0,0,0,0	monster	Pupa	1008,66,5000,0,0
+prt_fild08,0,0,0,0	monster	Fabre	1007,88,5000,0,0
+prt_fild08,0,0,0,0	monster	Little Poring	2398,33,50000,0,0
+prt_fild08a,0,0,0,0	monster	Poring	1002,110,5000,0,0
+prt_fild08a,0,0,0,0	monster	Lunatic	1063,110,5000,0,0
+prt_fild08a,0,0,0,0	monster	Pupa	1008,66,5000,0,0
+prt_fild08a,0,0,0,0	monster	Fabre	1007,88,5000,0,0
+prt_fild08a,0,0,0,0	monster	Little Poring	2398,33,50000,0,0
+prt_fild08b,0,0,0,0	monster	Poring	1002,110,5000,0,0
+prt_fild08b,0,0,0,0	monster	Lunatic	1063,110,5000,0,0
+prt_fild08b,0,0,0,0	monster	Pupa	1008,66,5000,0,0
+prt_fild08b,0,0,0,0	monster	Fabre	1007,88,5000,0,0
+prt_fild08b,0,0,0,0	monster	Little Poring	2398,33,50000,0,0
+prt_fild08c,0,0,0,0	monster	Poring	1002,110,5000,0,0
+prt_fild08c,0,0,0,0	monster	Lunatic	1063,110,5000,0,0
+prt_fild08c,0,0,0,0	monster	Pupa	1008,66,5000,0,0
+prt_fild08c,0,0,0,0	monster	Fabre	1007,88,5000,0,0
+prt_fild08c,0,0,0,0	monster	Little Poring	2398,33,50000,0,0
+prt_fild08d,0,0,0,0	monster	Poring	1002,110,5000,0,0
+prt_fild08d,0,0,0,0	monster	Lunatic	1063,110,5000,0,0
+prt_fild08d,0,0,0,0	monster	Pupa	1008,66,5000,0,0
+prt_fild08d,0,0,0,0	monster	Fabre	1007,88,5000,0,0
+prt_fild08d,0,0,0,0	monster	Little Poring	2398,33,50000,0,0
 
 //==================================================
 // treasure_n1 - Izlude Sunken Ship 1F

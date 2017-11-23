@@ -2294,6 +2294,11 @@
 	parseable_packet(0x0A3D,18,clif_parse_sale_add,2,6,8,12,16);
 #endif
 
+// 2015-09-09aRagexe
+#if PACKETVER >= 20150909
+	packet(0x0A41,18); // ZC_SKILL_SCALE
+#endif
+
 // 2015-09-16Ragexe
 #if PACKETVER >= 20150916
 	// New Packet

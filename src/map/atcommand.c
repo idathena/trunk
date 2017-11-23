@@ -2228,7 +2228,7 @@ ACMD_FUNC(refine)
 		if (sd->inventory.u.items_inventory[i].refine != final_refine) {
 			sd->inventory.u.items_inventory[i].refine = final_refine;
 			current_position = sd->inventory.u.items_inventory[i].equip;
-			pc_unequipitem(sd, i, 3);
+			pc_unequipitem(sd, i, 1|2);
 			clif_delitem(sd, i, 1, 3);
 			clif_inventorylist(sd);
 			clif_refine(fd, 0, i, sd->inventory.u.items_inventory[i].refine);
@@ -5421,7 +5421,7 @@ ACMD_FUNC(dropall)
 			}
 			if (type == -1 || type == (uint8)item_data->type) {
 				if (sd->inventory.u.items_inventory[i].equip != 0)
-					pc_unequipitem(sd, i, 3);
+					pc_unequipitem(sd, i, 1|2);
 				count += sd->inventory.u.items_inventory[i].amount;
 				if (!pc_dropitem(sd, i, sd->inventory.u.items_inventory[i].amount))
 					count2 += sd->inventory.u.items_inventory[i].amount;
@@ -5453,7 +5453,7 @@ ACMD_FUNC(storeall)
 	for (i = 0; i < MAX_INVENTORY; i++) {
 		if (sd->inventory.u.items_inventory[i].amount) {
 			if(sd->inventory.u.items_inventory[i].equip != 0)
-				pc_unequipitem(sd, i, 3);
+				pc_unequipitem(sd, i, 1|2);
 			storage_storageadd(sd, &sd->storage, i, sd->inventory.u.items_inventory[i].amount);
 		}
 	}
@@ -6870,7 +6870,7 @@ ACMD_FUNC(changesex)
 	// To avoid any problem with equipment and invalid sex, equipment is unequiped.
 	for( i = 0; i < EQI_MAX; i++ ) {
 		if( sd->equip_index[i] >= 0 )
-			pc_unequipitem(sd, sd->equip_index[i], 3);
+			pc_unequipitem(sd, sd->equip_index[i], 1|2);
 	}
 	chrif_changesex(sd, true);
 
@@ -6890,7 +6890,7 @@ ACMD_FUNC(changecharsex)
 	// To avoid any problem with equipment and invalid sex, equipment is unequiped.
 	for( i = 0; i < EQI_MAX; i++ ) {
 		if( sd->equip_index[i] >= 0 )
-			pc_unequipitem(sd, sd->equip_index[i], 3);
+			pc_unequipitem(sd, sd->equip_index[i], 1|2);
 	}
 	chrif_changesex(sd, false);
 

@@ -168,7 +168,7 @@ static inline void RFIFOPOS2(int fd, unsigned short pos, short* x0, short* y0, s
 
 //To idenfity disguised characters.
 static inline bool disguised(struct block_list *bl) {
-	return (bool)( bl->type == BL_PC && ((TBL_PC *)bl)->disguise );
+	return (bool)(bl->type == BL_PC && ((TBL_PC *)bl)->disguise);
 }
 
 //Guarantees that the given string does not exceeds the allowed size, as well as making sure it's null terminated. [Skotlex]
@@ -5417,7 +5417,7 @@ void clif_skillinfo(struct map_session_data *sd, uint16 skill_id, int inf)
 /// is disposable:
 ///     0 = yellow chat text "[src name] will use skill [skill name]."
 ///     1 = no text
-void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x, int dst_y, uint16 skill_id, int property, int casttime)
+void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x, int dst_y, uint16 skill_id, uint16 skill_lv, int casttime)
 {
 #if PACKETVER < 20091124
 	const int cmd = 0x13e;
@@ -5425,6 +5425,7 @@ void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x,
 	const int cmd = 0x7fb;
 #endif
 	unsigned char buf[32];
+	int property = skill_get_ele(skill_id,skill_lv);
 
 	WBUFW(buf,0) = cmd;
 	WBUFL(buf,2) = src_id;
@@ -5432,7 +5433,7 @@ void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x,
 	WBUFW(buf,10) = dst_x;
 	WBUFW(buf,12) = dst_y;
 	WBUFW(buf,14) = skill_id;
-	WBUFL(buf,16) = (property < 0 ? 0 : property); //Avoid sending negatives as element [Skotlex]
+	WBUFL(buf,16) = max(property,0); //Avoid sending negatives as element [Skotlex]
 	WBUFL(buf,20) = casttime;
 #if PACKETVER >= 20091124
 	WBUFB(buf,24) = 0; //isDisposable
@@ -5444,6 +5445,10 @@ void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x,
 		clif_send(buf,packet_len(cmd),bl,SELF);
 	} else
 		clif_send(buf,packet_len(cmd),bl,AREA);
+#if PACKETVER >= 20150909
+	if (battle_config.show_skill_scale && skill_get_inf2(skill_id)&INF2_SHOW_SKILL_SCALE)
+		clif_skill_scale(bl,src_id,bl->x,bl->y,skill_id,skill_lv,casttime);
+#endif
 }
 
 
@@ -5589,7 +5594,7 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int
 	type = clif_calc_delay(type,div,damage,ddelay);
 
 	if((sc = status_get_sc(dst)) && sc->count) {
-		if((sc->data[SC_HALLUCINATION] || sc->data[SC_PYREXIA]) && damage)
+		if((sc->data[SC_HALLUCINATION] || sc->data[SC_PYREXIA]) && damage > 0)
 			damage = clif_hallucination_damage();
 	}
 
@@ -5681,7 +5686,7 @@ int clif_skill_damage2(struct block_list *src,struct block_list *dst,unsigned in
 	type = clif_calc_delay(type,div,damage,ddelay);
 
 	if((sc = status_get_sc(dst)) && sc->count) {
-		if((sc->data[SC_HALLUCINATION] || sc->data[SC_PYREXIA]) && damage)
+		if((sc->data[SC_HALLUCINATION] || sc->data[SC_PYREXIA]) && damage > 0)
 			damage = clif_hallucination_damage();
 	}
 
@@ -16658,7 +16663,7 @@ static void clif_quest_len(int def_len, int info_len, int avail_quests, int *lim
 /// Sends list of all quest states (ZC_ALL_QUEST_LIST).
 /// 02b1 <packet len>.W <num>.L { <quest id>.L <active>.B }*num
 /// 097a <packet len>.W <num>.L { <quest id>.L <active>.B <remaining time>.L <time>.L <count>.W { <mob_id>.L <killed>.W <total>.W <mob name>.24B }*count }*num (ZC_ALL_QUEST_LIST2)
-/// 09f8 <packet len>.W <num>.L { <quest id>.L <active>.B <remaining time>.L <time>.L <count>.W { <mob_id>.L <killed>.W <total>.W <mob name>.24B }*count }*num (ZC_ALL_QUEST_LIST3)
+/// 09f8 <packet len>.W <num>.L { <quest id>.L <active>.B <remaining time>.L <time>.L <count>.W { <hunt identification>.L <mob type>.L <mob_id>.L <min level>.L <max level>.L <killed>.W <total>.W <mob name>.24B }*count }*num (ZC_ALL_QUEST_LIST3)
 void clif_quest_send_list(struct map_session_data *sd)
 {
 	int fd = sd->fd;
@@ -16759,6 +16764,7 @@ void clif_quest_send_mission(struct map_session_data *sd)
 
 /// Notification about a new quest (ZC_ADD_QUEST).
 /// 02b3 <quest id>.L <active>.B <start time>.L <expire time>.L <mobs>.W { <mob id>.L <mob count>.W <mob name>.24B }*3
+/// 09f9 <quest id>.L <active>.B <start time>.L <expire time>.L <mobs>.W { <hunt identification>.L <mob type>.L <mob id>.L <min level>.L <max level>.L <mob count>.W <mob name>.24B }*3
 void clif_quest_add(struct map_session_data *sd, struct quest *qd)
 {
 	int fd = sd->fd;
@@ -16801,6 +16807,7 @@ void clif_quest_delete(struct map_session_data *sd, int quest_id)
 
 /// Notification of an update to the hunting mission counter (ZC_UPDATE_MISSION_HUNT).
 /// 02b5 <packet len>.W <mobs>.W { <quest id>.L <mob id>.L <total count>.W <current count>.W }*3
+/// 09f8 <packet len>.W <mobs>.W { <quest id>.L <hunt identification>.L <total count>.W <current count>.W }*3
 void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd, int mobid)
 {
 	int fd = sd->fd;
@@ -20091,8 +20098,7 @@ void clif_progressbar_npc(struct npc_data *nd, struct map_session_data *sd) {
  * Sends all achievement data to the client (ZC_ALL_AG_LIST).
  * 0a23 <packetType>.W <packetLength>.W <ACHCount>.L <ACHPoint>.L
  */
-void clif_achievement_list_all(struct map_session_data *sd)
-{
+void clif_achievement_list_all(struct map_session_data *sd) {
 	int i, j, len, fd, *info;
 	uint16 count = 0;
 
@@ -20130,8 +20136,7 @@ void clif_achievement_list_all(struct map_session_data *sd)
  * Sends a single achievement's data to the client (ZC_AG_UPDATE).
  * 0a24 <packetType>.W <ACHPoint>.L
  */
-void clif_achievement_update(struct map_session_data *sd, struct achievement *ach, int count)
-{
+void clif_achievement_update(struct map_session_data *sd, struct achievement *ach, int count) {
 	int fd, i, *info;
 
 	nullpo_retv(sd);
@@ -20161,8 +20166,7 @@ void clif_achievement_update(struct map_session_data *sd, struct achievement *ac
  * Checks if an achievement reward can be rewarded (CZ_REQ_AG_REWARD).
  * 0a25 <packetType>.W <achievementID>.L
  */
-void clif_parse_AchievementCheckReward(int fd, struct map_session_data *sd)
-{
+void clif_parse_AchievementCheckReward(int fd, struct map_session_data *sd) {
 	nullpo_retv(sd);
 
 	if( sd->achievement_data.save )
@@ -20175,13 +20179,37 @@ void clif_parse_AchievementCheckReward(int fd, struct map_session_data *sd)
  * Returns the result of achievement_check_reward (ZC_REQ_AG_REWARD_ACK).
  * 0a26 <packetType>.W <result>.W <achievementID>.L
  */
-void clif_achievement_reward_ack(int fd, unsigned char result, int achievement_id)
-{
+void clif_achievement_reward_ack(int fd, unsigned char result, int achievement_id) {
 	WFIFOHEAD(fd,packet_len(0xa26));
 	WFIFOW(fd,0) = 0xa26;
 	WFIFOB(fd,2) = result;
 	WFIFOL(fd,3) = achievement_id;
 	WFIFOSET(fd,packet_len(0xa26));
+}
+
+
+/**
+ * ZC_SKILL_SCALE
+ */
+void clif_skill_scale(struct block_list *bl, int src_id, int x, int y, uint16 skill_id, uint16 skill_lv, int casttime) {
+#if PACKETVER >= 20150909
+	unsigned char buf[20];
+
+	WBUFW(buf,0) = 0xA41;
+	WBUFL(buf,2) = src_id;
+	WBUFW(buf,6) = skill_id;
+	WBUFW(buf,8) = skill_lv;
+	WBUFW(buf,10) = x;
+	WBUFW(buf,12) = y;
+	WBUFL(buf,14) = casttime;
+
+	if( disguised(bl) ) {
+		clif_send(buf, packet_len(0xA41), bl, AREA_WOS);
+		WBUFL(buf,2) = -src_id;
+		clif_send(buf, packet_len(0xA41), bl, SELF);
+	} else
+		clif_send(buf, packet_len(0xA41), bl, AREA);
+#endif
 }
 
 

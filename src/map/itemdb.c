@@ -1145,7 +1145,7 @@ static void itemdb_read_combos() {
  */
 static bool itemdb_roulette_parse_dbrow(char *str[], int columns, int current)
 {
-	unsigned short item_id, amount;
+	unsigned short item_id = 0, amount;
 	int level, column, flag = 0, chance = 0;
 
 	level = atoi(str[0]);

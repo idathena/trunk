@@ -659,7 +659,7 @@ void clif_skillinfo(struct map_session_data *sd, uint16 skill_id, int inf);
 void clif_addskill(struct map_session_data *sd, int id);
 void clif_deleteskill(struct map_session_data *sd, int id);
 
-void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x, int dst_y, uint16 skill_id, int property, int casttime);
+void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x, int dst_y, uint16 skill_id, uint16 skill_lv, int casttime);
 void clif_skillcastcancel(struct block_list *bl);
 void clif_skill_fail(struct map_session_data *sd, uint16 skill_id, enum useskill_fail_cause cause, int btype, int val);
 void clif_skill_cooldown(struct map_session_data *sd, uint16 skill_id, unsigned int tick);
@@ -1073,5 +1073,7 @@ void clif_achievement_list_all(struct map_session_data *sd);
 void clif_achievement_update(struct map_session_data *sd, struct achievement *ach, int count);
 void clif_pAchievementCheckReward(int fd, struct map_session_data *sd);
 void clif_achievement_reward_ack(int fd, unsigned char result, int achievement_id);
+
+void clif_skill_scale(struct block_list *bl, int src_id, int x, int y, uint16 skill_id, uint16 skill_lv, int casttime);
 
 #endif /* _CLIF_H_ */
