@@ -1441,6 +1441,8 @@ int clif_spawn(struct block_list *bl)
 					clif_sendbgemblem_area(sd);
 				if (sd->spiritball > 0)
 					clif_spiritball(bl);
+				if (sd->sc.data[SC_MILLENNIUMSHIELD])
+					clif_millenniumshield(bl,sd->sc.data[SC_MILLENNIUMSHIELD]->val2);
 				if (sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0)
 					clif_spiritcharm(sd);
 				if (sd->status.robe)
@@ -1458,6 +1460,8 @@ int clif_spawn(struct block_list *bl)
 					clif_specialeffect(bl,EF_GIANTBODY2,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect(bl,EF_BABYBODY2,AREA);
+				if (md->sc.data[SC_MILLENNIUMSHIELD])
+					clif_millenniumshield(bl,md->sc.data[SC_MILLENNIUMSHIELD]->val2);
 				clif_efst_set_enter(bl,bl,AREA);
 #if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
@@ -4548,7 +4552,7 @@ void clif_storageclose(struct map_session_data *sd)
  *------------------------------------------*/
 static void clif_getareachar_pc(struct map_session_data *sd,struct map_session_data *dstsd)
 {
-	struct block_list *d_bl;
+	struct block_list *d_bl = NULL;
 	int i;
 
 	if( dstsd->chatID ) {
@@ -4557,11 +4561,13 @@ static void clif_getareachar_pc(struct map_session_data *sd,struct map_session_d
 		if( (cd = (struct chat_data *)map_id2bl(dstsd->chatID)) && cd->usersd[0] == dstsd)
 			clif_dispchat(cd,sd->fd);
 	} else if( dstsd->state.vending )
-		clif_showvendingboard(&dstsd->bl,dstsd->message,sd->fd);
+		clif_showvendingboard(&dstsd->bl, dstsd->message, sd->fd);
 	else if( dstsd->state.buyingstore )
 		clif_buyingstore_entry_single(sd, dstsd);
 	if( dstsd->spiritball > 0 )
 		clif_spiritball_single(sd->fd, dstsd);
+	if( dstsd->sc.data[SC_MILLENNIUMSHIELD] )
+		clif_millenniumshield_single(&dstsd->bl, dstsd->sc.data[SC_MILLENNIUMSHIELD]->val2, sd->fd);
 	if( dstsd->spiritcharm_type != CHARM_TYPE_NONE && dstsd->spiritcharm > 0 )
 		clif_spiritcharm_single(sd->fd, dstsd);
 	if( (sd->status.party_id && dstsd->status.party_id == sd->status.party_id) || //Party-mate, or hp disp setting
@@ -4646,6 +4652,8 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
+				if (md->sc.data[SC_MILLENNIUMSHIELD])
+					clif_millenniumshield_single(bl,md->sc.data[SC_MILLENNIUMSHIELD]->val2,sd->fd);
 				clif_efst_set_enter(&sd->bl,bl,SELF);
 #if PACKETVER < 20151104
 				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
@@ -9486,8 +9494,10 @@ void clif_refresh(struct map_session_data *sd)
 	clif_updatestatus(sd, SP_INT);
 	clif_updatestatus(sd, SP_DEX);
 	clif_updatestatus(sd, SP_LUK);
-	if( sd->spiritball )
+	if( sd->spiritball > 0 )
 		clif_spiritball_single(sd->fd, sd);
+	if( sd->sc.data[SC_MILLENNIUMSHIELD] )
+		clif_millenniumshield_single(&sd->bl, sd->sc.data[SC_MILLENNIUMSHIELD]->val2, sd->fd);
 	if( sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0 )
 		clif_spiritcharm_single(sd->fd, sd);
 	if( sd->vd.cloth_color )
@@ -18153,6 +18163,17 @@ void clif_millenniumshield(struct block_list *bl, short shields) {
 	WBUFW(buf,6) = shields;
 	WBUFW(buf,8) = 0;
 	clif_send(buf,packet_len(0x440),bl,AREA);
+#endif
+}
+
+void clif_millenniumshield_single(struct block_list *bl, short shields, int fd) {
+#if PACKETVER >= 20081217
+	WFIFOHEAD(fd,packet_len(0x440));
+	WFIFOW(fd,0) = 0x440;
+	WFIFOL(fd,2) = bl->id;
+	WFIFOW(fd,6) = shields;
+	WFIFOW(fd,8) = 0;
+	WFIFOSET(fd,packet_len(0x440));
 #endif
 }
 

@@ -9565,8 +9565,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				//If val4 comes set, this blocks regen rather than increase it
 				break;
 			case SC_DEVOTION: {
-					struct block_list *d_bl;
-					struct status_change *d_sc;
+					struct block_list *d_bl = NULL;
+					struct status_change *d_sc = NULL;
 
 					if( (d_bl = map_id2bl(val1)) && (d_sc = status_get_sc(d_bl)) && d_sc->count ) { //Inherits status from source
 						const enum sc_type types[] = { SC_AUTOGUARD,SC_REFLECTSHIELD,SC_DEFENDER,SC_ENDURE };

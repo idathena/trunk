@@ -989,6 +989,7 @@ void clif_display_pinfo(struct map_session_data *sd, int type);
 int clif_elementalconverter_list(struct map_session_data *sd);
 
 void clif_millenniumshield(struct block_list *bl, short shields);
+void clif_millenniumshield_single(struct block_list *bl, short shields, int fd);
 
 int clif_spellbook_list(struct map_session_data *sd);
 
