@@ -286,11 +286,7 @@ void pc_addspiritball(struct map_session_data *sd, int interval, int max)
 
 	sd->spiritball_timer[i] = tid;
 	sd->spiritball++;
-
-	if( (sd->class_&MAPID_THIRDMASK) == MAPID_ROYAL_GUARD )
-		clif_millenniumshield(&sd->bl, sd->spiritball);
-	else
-		clif_spiritball(&sd->bl);
+	clif_spiritball(&sd->bl);
 }
 
 /**
@@ -333,12 +329,8 @@ void pc_delspiritball(struct map_session_data *sd, int count, int type)
 		sd->spiritball_timer[i] = INVALID_TIMER;
 	}
 
-	if( !type ) {
-		if( (sd->class_&MAPID_THIRDMASK) == MAPID_ROYAL_GUARD )
-			clif_millenniumshield(&sd->bl, sd->spiritball);
-		else
-			clif_spiritball(&sd->bl);
-	}
+	if( !type )
+		clif_spiritball(&sd->bl);
 }
 
 static int pc_check_banding(struct block_list *bl, va_list ap) {
@@ -2740,8 +2732,8 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 				sd->bonus.long_attack_def_rate += val;
 			break;
 		case SP_DOUBLE_RATE:
-			if(!sd->state.lr_flag && sd->bonus.double_rate < val)
-				sd->bonus.double_rate = val;
+			if(!sd->state.lr_flag)
+				sd->bonus.double_rate = max(sd->bonus.double_rate, val);
 			break;
 		case SP_DOUBLE_ADD_RATE:
 			if(!sd->state.lr_flag)
@@ -2903,8 +2895,7 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 				sd->special_state.no_knockback = 1;
 			break;
 		case SP_SPLASH_RANGE:
-			if(sd->bonus.splash_range < val)
-				sd->bonus.splash_range = val;
+			sd->bonus.splash_range = max(sd->bonus.splash_range, val);
 			break;
 		case SP_SPLASH_ADD_RANGE:
 			sd->bonus.splash_add_range += val;
@@ -10000,6 +9991,7 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 #endif
 		status_change_end(&sd->bl,SC_FEARBREEZE,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_EXEEDBREAK,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_STRIKING,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_HEAT_BARREL,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_P_ALTER,INVALID_TIMER);
 	}

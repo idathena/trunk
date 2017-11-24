@@ -3320,7 +3320,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		skill_attack_blow(src, dsrc, bl, (uint8)dmg.blewcount, skill_id, skill_lv, damage, tick, flag);
 
 	if (dmg.amotion) //Delayed damage must be dealt after the knockback (it needs to know actual position of target)
-		battle_delay_damage(tick, dmg.amotion, src, bl, dmg.flag, skill_id, skill_lv, damage, dmg.dmg_lv, dmg.dmotion, additional_effects, false);
+		battle_delay_damage(tick, dmg.amotion, src, bl, dmg.flag, skill_id, skill_lv, damage, dmg.dmg_lv, dmg.dmotion, additional_effects, false, false);
 
 	if (tsc) {
 		if (skill_id != PA_PRESSURE && skill_id != HW_GRAVITATION && skill_id != NPC_EVILLAND) {
@@ -5688,7 +5688,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			if (sd) {
 				if (flag&3) {
 					if (skill_area_temp[1] != bl->id)
-						skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag|SD_LEVEL);
+						skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag|SD_LEVEL|16);
 				} else {
 					skill_area_temp[1] = bl->id;
 					map_foreachinallrange(skill_area_sub,bl,sd->bonus.splash_range,BL_CHAR,src,skill_id,skill_lv,

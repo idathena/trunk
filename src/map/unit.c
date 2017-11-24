@@ -1776,6 +1776,9 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 
 	skill_toggle_magicpower(src, skill_id); //SC_MAGICPOWER needs to switch states at start of cast
 
+	if( sc && sc->data[SC_SPELLFIST] )
+		status_change_end(src, SC_SPELLFIST, INVALID_TIMER);
+
 	//In official this is triggered even if no cast time
 	clif_skillcasting(src, src->id, target_id, 0, 0, skill_id, skill_lv, casttime);
 
@@ -1980,6 +1983,9 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 	unit_stop_walking(src, USW_FIXPOS);
 
 	skill_toggle_magicpower(src, skill_id); //SC_MAGICPOWER needs to switch states at start of cast
+
+	if( sc && sc->data[SC_SPELLFIST] )
+		status_change_end(src, SC_SPELLFIST, INVALID_TIMER);
 
 	//In official this is triggered even if no cast time
 	clif_skillcasting(src, src->id, 0, skill_x, skill_y, skill_id, skill_lv, casttime);
