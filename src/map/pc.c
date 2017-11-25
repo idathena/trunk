@@ -1281,7 +1281,6 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 #endif
 
 	sd->canuseitem_tick = tick;
-	sd->canusecashfood_tick = tick;
 	sd->canequip_tick = tick;
 	sd->cantalk_tick = tick;
 	sd->canskill_tick = tick;
@@ -4742,9 +4741,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 	if( map[sd->bl.m].flag.noitemconsumption ) //Consumable but mapflag prevent it
 		return false;
 
-	//Prevent mass item usage [Skotlex]
-	if( DIFF_TICK(sd->canuseitem_tick,gettick()) > 0 ||
-		(itemdb_is_cashfood(nameid) && DIFF_TICK(sd->canusecashfood_tick,gettick()) > 0) )
+	if( DIFF_TICK(sd->canuseitem_tick,gettick()) > 0 ) //Prevent mass item usage [Skotlex]
 		return false;
 
 	if( sd->state.storage_flag && item->type != IT_CASH ) {
@@ -4970,9 +4967,6 @@ int pc_useitem(struct map_session_data *sd, int n)
 
 	//Update item use time
 	sd->canuseitem_tick = tick + battle_config.item_use_interval;
-
-	if( itemdb_is_cashfood(nameid) )
-		sd->canusecashfood_tick = tick + battle_config.cashfood_use_interval;
 
 	run_script(script,0,sd->bl.id,fake_nd->bl.id);
 	potion_flag = 0;
