@@ -7361,7 +7361,7 @@ struct view_data *status_get_viewdata(struct block_list *bl)
 		case BL_PC:  return &((TBL_PC *)bl)->vd;
 		case BL_MOB: return ((TBL_MOB *)bl)->vd;
 		case BL_PET: return &((TBL_PET *)bl)->vd;
-		case BL_NPC: return ((TBL_NPC *)bl)->vd;
+		case BL_NPC: return &((TBL_NPC *)bl)->vd;
 		case BL_HOM: return ((TBL_HOM *)bl)->vd;
 		case BL_MER: return ((TBL_MER *)bl)->vd;
 		case BL_ELEM: return ((TBL_ELEM *)bl)->vd;
@@ -7371,7 +7371,7 @@ struct view_data *status_get_viewdata(struct block_list *bl)
 
 void status_set_viewdata(struct block_list *bl, int class_)
 {
-	struct view_data *vd;
+	struct view_data *vd = NULL;
 
 	nullpo_retv(bl);
 
@@ -7385,8 +7385,6 @@ void status_set_viewdata(struct block_list *bl, int class_)
 		vd = mercenary_get_viewdata(class_);
 	else if (elemental_class(class_))
 		vd = elemental_get_viewdata(class_);
-	else
-		vd = NULL;
 
 	switch (bl->type) {
 		case BL_PC: {
@@ -7420,13 +7418,12 @@ void status_set_viewdata(struct block_list *bl, int class_)
 					sd->vd.head_top = sd->status.head_top;
 					sd->vd.head_mid = sd->status.head_mid;
 					sd->vd.head_bottom = sd->status.head_bottom;
-					sd->vd.hair_style = cap_value(sd->status.hair,0,battle_config.max_hair_style);
-					sd->vd.hair_color = cap_value(sd->status.hair_color,0,battle_config.max_hair_color);
-					sd->vd.cloth_color = cap_value(sd->status.clothes_color,0,battle_config.max_cloth_color);
-					sd->vd.body_style = cap_value(sd->status.body,0,battle_config.max_body_style);
+					sd->vd.hair_style = cap_value(sd->status.hair,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
+					sd->vd.hair_color = cap_value(sd->status.hair_color,MIN_HAIR_COLOR,MAX_HAIR_COLOR);
+					sd->vd.cloth_color = cap_value(sd->status.clothes_color,MIN_CLOTH_COLOR,MAX_CLOTH_COLOR);
+					sd->vd.body_style = cap_value(sd->status.body,MIN_BODY_STYLE,MAX_BODY_STYLE);
 					sd->vd.robe = sd->status.robe;
 					sd->vd.sex = sd->status.sex;
-
 					if (sd->vd.cloth_color) {
 						if (sd->sc.option&OPTION_WEDDING && battle_config.wedding_ignorepalette)
 							sd->vd.cloth_color = 0;
@@ -7459,6 +7456,7 @@ void status_set_viewdata(struct block_list *bl, int class_)
 				} else if (pcdb_checkid(class_)) {
 					mob_set_dynamic_viewdata(md);
 					md->vd->class_ = class_;
+					md->vd->hair_style = cap_value(md->vd->hair_style,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
 				} else
 					ShowError("status_set_viewdata (MOB): No view data for class %d\n ",class_);
 			}
@@ -7484,8 +7482,12 @@ void status_set_viewdata(struct block_list *bl, int class_)
 				TBL_NPC *nd = (TBL_NPC *)bl;
 
 				if (vd)
-					nd->vd = vd;
-				else
+					memcpy(&nd->vd,vd,sizeof(struct view_data));
+				else if (pcdb_checkid(class_)) {
+					memset(&nd->vd,0,sizeof(struct view_data));
+					nd->vd.class_ = class_;
+					nd->vd.hair_style = cap_value(nd->vd.hair_style,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
+				} else
 					ShowError("status_set_viewdata (NPC): No view data for class %d (name=%s)\n ",class_,nd->name);
 			}
 			break;
@@ -9021,8 +9023,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( sce->val1 > val1 )
 					return 1;
 				break;
-			case SC_JAILED:
-				//When a player is already jailed, do not edit the jail data
+			case SC_JAILED: //When a player is already jailed, do not edit the jail data
 				val2 = sce->val2;
 				val3 = sce->val3;
 				val4 = sce->val4;
@@ -10574,8 +10575,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_UNLIMIT:
 				val2 = 50 * val1;
-				status_change_start(bl,bl,SC_DEFSET_NUM,10000,1,0,0,1,tick,SCFLAG_FIXEDTICK);
-				status_change_start(bl,bl,SC_MDEFSET_NUM,10000,1,0,0,1,tick,SCFLAG_FIXEDTICK);
+				status_change_start(src,bl,SC_DEFSET_NUM,10000,1,0,0,1,tick,SCFLAG_FIXEDTICK);
+				status_change_start(src,bl,SC_MDEFSET_NUM,10000,1,0,0,1,tick,SCFLAG_FIXEDTICK);
 				break;
 			case SC_FLASHCOMBO:
 				val2 = 20 + 20 * val1;
@@ -10610,7 +10611,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_DEFSET_NUM:
 			case SC_MDEFSET_NUM:
-				tick_time = tick;
 				if( val4 )
 					tick = -1;
 				break;
@@ -11888,6 +11888,10 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 					status_zap(bl,0,status_get_max_sp(bl) / 2);
 					break;
 			}
+			break;
+		case SC_UNLIMIT:
+			status_change_end(bl,SC_DEFSET_NUM,INVALID_TIMER);
+			status_change_end(bl,SC_MDEFSET_NUM,INVALID_TIMER);
 			break;
 		case SC_FULL_THROTTLE: {
 				int sec = skill_get_time2(status_sc2skill(type),sce->val1);

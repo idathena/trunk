@@ -10108,7 +10108,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10139,7 +10139,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10170,7 +10170,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10201,7 +10201,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10232,7 +10232,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10263,7 +10263,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10294,7 +10294,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10325,7 +10325,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10356,7 +10356,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10388,7 +10388,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10419,7 +10419,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10450,7 +10450,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10481,7 +10481,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10512,7 +10512,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:
@@ -10543,7 +10543,7 @@ OnRespawn:
 		getunitdata .GID,.@temp;
 		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
 		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,49,1;
+		setunitdata .GID,51,1;
 	}
 	end;
 OnInit:

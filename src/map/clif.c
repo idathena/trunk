@@ -260,7 +260,12 @@ static inline unsigned char clif_bl_type(struct block_list *bl) {
 		case BL_SKILL: return 0x3; //SKILL_TYPE
 		case BL_CHAT:  return 0x4; //UNKNOWN_TYPE
 		case BL_MOB:   return (pcdb_checkid(status_get_viewdata(bl)->class_) ? 0x0 : 0x5); //NPC_MOB_TYPE
-		case BL_NPC:   return (pcdb_checkid(status_get_viewdata(bl)->class_) ? 0x0 : 0x6); //NPC_EVT_TYPE
+		case BL_NPC:
+#if PACKETVER >= 20170726
+			return 0x6; //NPC_EVT_TYPE
+#else
+			return (pcdb_checkid(status_get_viewdata(bl)->class_) ? 0x0 : 0x6);
+#endif
 		case BL_PET:   return (pcdb_checkid(status_get_viewdata(bl)->class_) ? 0x0 : 0x7); //NPC_PET_TYPE
 		case BL_HOM:   return 0x8; //NPC_HOM_TYPE
 		case BL_MER:   return 0x9; //NPC_MERSOL_TYPE
@@ -914,7 +919,7 @@ static int clif_setlevel(struct block_list *bl) {
  * Prepares 'unit standing/spawning' packet
  *------------------------------------------*/
 static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool spawn) {
-	struct map_session_data *sd;
+	struct map_session_data *sd = BL_CAST(BL_PC,bl);
 	struct status_change *sc = status_get_sc(bl);
 	struct view_data *vd = status_get_viewdata(bl);
 	unsigned char *buf = WBUFP(buffer,0);
@@ -925,8 +930,6 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 #if PACKETVER >= 20091103
 	const char *name;
 #endif
-
-	sd = BL_CAST(BL_PC,bl);
 
 #if PACKETVER < 20091103
 	if( type )
@@ -1132,7 +1135,7 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
  * Prepares 'unit walking' packet
  *------------------------------------------*/
 static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, unsigned char *buffer) {
-	struct map_session_data *sd;
+	struct map_session_data *sd = BL_CAST(BL_PC,bl);
 	struct status_change *sc = status_get_sc(bl);
 	struct view_data *vd = status_get_viewdata(bl);
 	unsigned char *buf = WBUFP(buffer,0);
@@ -1142,8 +1145,6 @@ static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, un
 #if PACKETVER >= 20091103
 	const char *name;
 #endif
-
-	sd = BL_CAST(BL_PC,bl);
 
 #if PACKETVER < 4
 	WBUFW(buf,0) = 0x7b;
@@ -1416,7 +1417,7 @@ int clif_spawn(struct block_list *bl)
 	if (bl->type == BL_NPC && !((TBL_NPC *)bl)->chat_id && (((TBL_NPC *)bl)->sc.option&OPTION_INVISIBLE))
 		return 0; //Hide NPC from maya purple card
 
-	len = clif_set_unit_idle(bl,buf,true);
+	len = clif_set_unit_idle(bl,buf,(bl->type == BL_NPC && vd->dead_sit ? false : true));
 
 	clif_send(buf,len,bl,AREA_WOS);
 
@@ -3431,8 +3432,8 @@ void clif_sprite_change(struct block_list *bl,int id,int type,int val,int val2,e
 /// Updates sprite/style properties of an object.
 void clif_changelook(struct block_list *bl,int type,int val)
 {
-	struct map_session_data *sd;
-	struct view_data *vd;
+	struct map_session_data *sd = NULL;
+	struct view_data *vd = NULL;
 	enum send_target target = AREA;
 	int val2 = 0;
 
@@ -3559,16 +3560,19 @@ void clif_changelook(struct block_list *bl,int type,int val)
 #if PACKETVER < 4
 	clif_sprite_change(bl,bl->id,type,val,0,target);
 #else
-	if(type == LOOK_WEAPON || type == LOOK_SHIELD) {
-		type = LOOK_WEAPON;
-		val = (vd ? vd->weapon : 0);
-		val2 = (vd ? vd->shield : 0);
-	}
-	if(disguised(bl)) {
-		clif_sprite_change(bl,bl->id,type,val,val2,AREA_WOS);
-		clif_sprite_change(bl,-bl->id,type,val,val2,SELF);
+	if(bl->type != BL_NPC) {
+		if(type == LOOK_WEAPON || type == LOOK_SHIELD) {
+			type = LOOK_WEAPON;
+			val = (vd ? vd->weapon : 0);
+			val2 = (vd ? vd->shield : 0);
+		}
+		if(disguised(bl)) {
+			clif_sprite_change(bl,bl->id,type,val,val2,AREA_WOS);
+			clif_sprite_change(bl,-bl->id,type,val,val2,SELF);
+		} else
+			clif_sprite_change(bl,bl->id,type,val,val2,target);
 	} else
-		clif_sprite_change(bl,bl->id,type,val,val2,target);
+		unit_refresh(bl);
 #endif
 }
 
@@ -9947,7 +9951,7 @@ void clif_viewequip_ack(struct map_session_data *sd, struct map_session_data *ts
 	WBUFB(buf,42) = tsd->vd.sex;
 
 	for (i = 0, n = 0; i < MAX_INVENTORY; i++) {
-		if (tsd->inventory.u.items_inventory[i].nameid <= 0 || tsd->inventory_data[i] == NULL) //Item doesn't exist
+		if (tsd->inventory.u.items_inventory[i].nameid <= 0 || !tsd->inventory_data[i]) //Item doesn't exist
 			continue;
 		if (!itemdb_isequip2(tsd->inventory_data[i])) //Is not equippable
 			continue;

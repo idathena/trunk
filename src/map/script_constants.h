@@ -2945,6 +2945,8 @@
 	export_constant(UMOB_CLOTHCOLOR);
 	export_constant(UMOB_SHIELD);
 	export_constant(UMOB_WEAPON);
+	export_constant(UMOB_ROBE);
+	export_constant(UMOB_BODY2);
 	export_constant(UMOB_LOOKDIR);
 	export_constant(UMOB_CANMOVETICK);
 	export_constant(UMOB_STR);
@@ -3132,7 +3134,6 @@
 	export_constant(UELE_DMOTION);
 
 	/* Unit control - NPC */
-	export_constant(UNPC_DISPLAY);
 	export_constant(UNPC_LEVEL);
 	export_constant(UNPC_HP);
 	export_constant(UNPC_MAXHP);
@@ -3165,6 +3166,19 @@
 	export_constant(UNPC_AMOTION);
 	export_constant(UNPC_ADELAY);
 	export_constant(UNPC_DMOTION);
+	export_constant(UNPC_SEX);
+	export_constant(UNPC_CLASS);
+	export_constant(UNPC_HAIRSTYLE);
+	export_constant(UNPC_HAIRCOLOR);
+	export_constant(UNPC_HEADBOTTOM);
+	export_constant(UNPC_HEADMIDDLE);
+	export_constant(UNPC_HEADTOP);
+	export_constant(UNPC_CLOTHCOLOR);
+	export_constant(UNPC_SHIELD);
+	export_constant(UNPC_WEAPON);
+	export_constant(UNPC_ROBE);
+	export_constant(UNPC_BODY2);
+	export_constant(UNPC_DEADSIT);
 
 	/* NPC view ids */
 	// Special macro to strip the prefix 'JT_'

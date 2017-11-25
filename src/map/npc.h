@@ -39,8 +39,8 @@ struct s_npc_buy_list {
 
 struct npc_data {
 	struct block_list bl;
-	struct unit_data  ud; //Because they need to be able to move
-	struct view_data *vd;
+	struct unit_data ud; //Because they need to be able to move
+	struct view_data vd;
 	struct status_change sc; //They can't have status changes, but they want the visual opt values
 	struct npc_data *master_nd;
 	short class_,speed,instance_id;
@@ -1095,10 +1095,6 @@ enum e_job_types
 #define MAX_NPC_CLASS2_START NPC_RANGE3_START
 #define MAX_NPC_CLASS2_END NPC_RANGE3_END
 
-//Checks if a given id is a valid npc id [Skotlex]
-//Since new npcs are added all the time, the max valid value is the one before the first mob (Scorpion = 1001)
-#define npcdb_checkid(id) ( ( (id) > NPC_RANGE1_START && (id) < NPC_RANGE1_END ) || (id) == JT_HIDDEN_WARP_NPC || ( (id) > NPC_RANGE2_START && (id) < NPC_RANGE2_END ) || (id) == JT_INVISIBLE || ( id > NPC_RANGE3_START && id < NPC_RANGE3_END ) )
-
 #ifdef PCRE_SUPPORT
 void npc_chat_finalize(struct npc_data *nd);
 #endif
@@ -1200,5 +1196,6 @@ int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t dat
 int npc_do_atcmd_event(struct map_session_data *sd, const char *command, const char *message, const char *eventname);
 
 bool npc_unloadfile(const char *path);
+bool npcdb_checkid(int id);
 
 #endif /* _NPC_H_ */
