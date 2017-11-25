@@ -84,6 +84,12 @@ enum e_Random_Monster {
 	MOBG_ClassChange = 4,
 };
 
+enum e_bosstype {
+	BTYPE_NONE = 0,
+	BTYPE_BOSS = 1,
+	BTYPE_MVP = 2,
+};
+
 //Mob skill states
 enum MobSkillState {
 	MSS_ANY = -1,
@@ -190,11 +196,11 @@ struct mob_data {
 		unsigned int alchemist: 1;
 		unsigned int npc_killmonster: 1; //For new killmonster behavior
 		unsigned int rebirth: 1; //NPC_Rebirth used
-		unsigned int boss : 1;
 		unsigned int copy_master_mode : 1; //Whether the spawned monster should copy the master's mode
 		enum MobSkillState skillstate;
 		unsigned char steal_flag; //Number of steal tries (to prevent steal exploit on mobs with few items) [Lupus]
 		unsigned char attacked_count; //For rude attacked.
+		uint8 boss;
 		int provoke_flag; //Celest
 	} state;
 	struct guardian_data* guardian_data;

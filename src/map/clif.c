@@ -1109,7 +1109,7 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 		WBUFL(buf,55) = -1;
 		WBUFL(buf,59) = -1;
 	}
-	WBUFB(buf,63) = (bl->type == BL_MOB && (((TBL_MOB *)bl)->db->mexp ? 1 : 0)); //isBoss
+	WBUFB(buf,63) = (bl->type == BL_MOB && ((TBL_MOB *)bl)->spawn ? ((TBL_MOB *)bl)->spawn->state.boss : BTYPE_NONE); //isBoss
 #endif
 
 #if PACKETVER >= 20150513
@@ -1264,7 +1264,7 @@ static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, un
 		WBUFL(buf,62) = -1;
 		WBUFL(buf,66) = -1;
 	}
-	WBUFB(buf,70) = (bl->type == BL_MOB && (((TBL_MOB *)bl)->db->mexp ? 1 : 0)); //isBoss
+	WBUFB(buf,70) = (bl->type == BL_MOB && ((TBL_MOB *)bl)->spawn ? ((TBL_MOB *)bl)->spawn->state.boss : BTYPE_NONE); //isBoss
 #endif
 
 #if PACKETVER >= 20150513
