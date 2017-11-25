@@ -18844,25 +18844,14 @@ BUILDIN_FUNC(questinfo)
 	quest_id = script_getnum(st,2);
 	icon = script_getnum(st,3);
 
-#if PACKETVER >= 20120410
-	switch( icon ) {
-		case QTYPE_QUEST:
-		case QTYPE_QUEST2:
-		case QTYPE_JOB:
-		case QTYPE_JOB2:
-		case QTYPE_EVENT:
-		case QTYPE_EVENT2:
-		case QTYPE_WARG:
-		case QTYPE_WARG2:
-			break; //Leave everything as it is
-		case QTYPE_NONE:
-		//Fall through
-		default:
-			icon = QTYPE_NONE; //Default to nothing if icon id is invalid
-			break;
-	}
+#if PACKETVER >= 20170315
+	if( icon < QTYPE_QUEST || (icon > QTYPE_JUMPING_PORING && icon != QTYPE_NONE) )
+		icon = QTYPE_NONE; //Default to nothing if icon id is invalid
+#elif PACKETVER >= 20120410
+	if( icon < QTYPE_QUEST || (icon > QTYPE_WARG2 && icon != QTYPE_NONE) || icon == QTYPE_DAILYQUEST )
+		icon = QTYPE_NONE;
 #else
-	if( icon < QTYPE_QUEST || icon > 7 ) //TODO: Check why 7 and not QTYPE_WARG, might be related to icon + 1 below
+	if( icon < QTYPE_QUEST || icon > QTYPE_DAILYQUEST )
 		icon = QTYPE_QUEST;
 	else
 		icon = icon + 1;
@@ -19104,12 +19093,15 @@ BUILDIN_FUNC(showevent)
 
 	icon = script_getnum(st,2);
 
-#if PACKETVER >= 20120410
-	if( icon < 0 || (icon > 8 && icon != 9999) || icon == 7 )
-		icon = 9999; //Default to nothing if icon id is invalid.
+#if PACKETVER >= 20170315
+	if( icon < QTYPE_QUEST || (icon > QTYPE_JUMPING_PORING && icon != QTYPE_NONE) )
+		icon = QTYPE_NONE; //Default to nothing if icon id is invalid
+#elif PACKETVER >= 20120410
+	if( icon < QTYPE_QUEST || (icon > QTYPE_WARG2 && icon != QTYPE_NONE) || icon == QTYPE_DAILYQUEST )
+		icon = QTYPE_NONE;
 #else
-	if( icon < 0 || icon > 7 )
-		icon = 0;
+	if( icon < QTYPE_QUEST || icon > QTYPE_DAILYQUEST )
+		icon = QTYPE_QUEST;
 	else
 		icon = icon + 1;
 #endif

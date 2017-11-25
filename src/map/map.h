@@ -396,7 +396,7 @@ struct spawn_data {
 		unsigned int size : 2; //Holds if mob has to be tiny/large
 		enum mob_ai ai; //Special ai for summoned monsters
 		unsigned int dynamic : 1; //Whether this data is indexed by a map's dynamic mob list
-		unsigned int boss : 1; //0: Non-boss monster | 1: Boss monster
+		uint8 boss; //0: Non-boss monster | 1: Boss monster | 2: MVP
 	} state;
 	char name[NAME_LENGTH], eventname[EVENT_NAME_LENGTH]; //Name/event
 };

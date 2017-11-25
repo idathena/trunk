@@ -2867,11 +2867,11 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 	if(!md->spawn) //Tell status_damage to remove it from memory
 		return 5; //NOTE: Actually, it's 4
 
-	if(battle_config.mvp_tomb_enabled && md->spawn->state.boss && map[md->bl.m].flag.notomb != 1) //MvP tomb [GreenBox]
+	if(battle_config.mvp_tomb_enabled && md->spawn->state.boss == BTYPE_MVP && map[md->bl.m].flag.notomb != 1) //MvP tomb [GreenBox]
 		mvptomb_create(md, mvp_sd ? mvp_sd->status.name : NULL, time(NULL));
 
-	if(!rebirth)
-		mob_setdelayspawn(md); //Set respawning
+	if(!rebirth) //Set respawning
+		mob_setdelayspawn(md);
 	return 3; //Remove from map
 }
 

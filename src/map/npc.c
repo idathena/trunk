@@ -3709,58 +3709,65 @@ static const char *npc_parse_mob(char *w1, char *w2, char *w3, char *w4, const c
 	int mob_lv = -1, ai = -1, size = -1;
 	char mapname[32], mobname[NAME_LENGTH];
 	struct spawn_data mob, *data;
-	struct mob_db *db;
+	struct mob_db *db = NULL;
 
 	memset(&mob, 0, sizeof(struct spawn_data));
 
-	mob.state.boss = !strcmpi(w2,"boss_monster");
+	if (!strcmpi(w2, "boss_monster"))
+		mob.state.boss = BTYPE_MVP;
+	else if (!strcmpi(w2, "miniboss_monster"))
+		mob.state.boss = BTYPE_BOSS;
+	else
+		mob.state.boss = BTYPE_NONE;
 
 	// w1 = <map name>,<x>,<y>,<xs>,<ys>
 	// w3 = <mob name>{,<mob level>}
 	// w4 = <mob id>,<amount>,<delay1>,<delay2>{,<event>,<mob size>,<mob ai>}
-	if( sscanf(w1, "%31[^,],%d,%d,%d,%d", mapname, &x, &y, &xs, &ys) < 5 ||
+	if (sscanf(w1, "%31[^,],%d,%d,%d,%d", mapname, &x, &y, &xs, &ys) < 5 ||
 		sscanf(w3, "%23[^,],%d", mobname, &mob_lv) < 1 ||
-		sscanf(w4, "%d,%d,%u,%u,%127[^,],%d,%d[^\t\r\n]", &mob_id, &num, &mob.delay1, &mob.delay2, mob.eventname, &size, &ai) < 4
-	) {
+		sscanf(w4, "%d,%d,%u,%u,%127[^,],%d,%d[^\t\r\n]", &mob_id, &num, &mob.delay1, &mob.delay2, mob.eventname, &size, &ai) < 4)
+	{
 		ShowError("npc_parse_mob: Invalid mob definition in file '%s', line '%d'.\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n", filepath, strline(buffer, start - buffer), w1, w2, w3, w4);
 		return strchr(start,'\n'); //Skip and continue
 	}
-	if( mapindex_name2id(mapname) == 0 ) {
+
+	if (!mapindex_name2id(mapname)) {
 		ShowError("npc_parse_mob: Unknown map '%s' in file '%s', line '%d'.\n", mapname, filepath, strline(buffer, start - buffer));
 		return strchr(start,'\n'); //Skip and continue
 	}
-	m =  map_mapname2mapid(mapname);
-	if( m < 0 ) //Not loaded on this map-server instance.
+
+	if ((m =  map_mapname2mapid(mapname)) < 0) //Not loaded on this map-server instance
 		return strchr(start,'\n'); //Skip and continue
+
 	mob.m = (unsigned short)m;
 
-	if( x < 0 || x >= map[mob.m].xs || y < 0 || y >= map[mob.m].ys ) {
+	if (x < 0 || x >= map[mob.m].xs || y < 0 || y >= map[mob.m].ys) {
 		ShowError("npc_parse_mob: Spawn coordinates out of range: %s (%d,%d), map size is (%d,%d) - %s %s in file '%s', line '%d'.\n", map[mob.m].name, x, y, (map[mob.m].xs - 1), (map[mob.m].ys - 1), w1, w3, filepath, strline(buffer, start - buffer));
 		return strchr(start,'\n'); //Skip and continue
 	}
 
 	//Check monster ID if exists!
-	if( mobdb_checkid(mob_id) == 0 ) {
+	if (!mobdb_checkid(mob_id)) {
 		ShowError("npc_parse_mob: Unknown mob ID %d in file '%s', line '%d'.\n", mob_id, filepath, strline(buffer, start - buffer));
 		return strchr(start,'\n'); //Skip and continue
 	}
 
-	if( num < 1 || num > 1000 ) {
+	if (num < 1 || num > 1000) {
 		ShowError("npc_parse_mob: Invalid number of monsters %d, must be inside the range [1,1000] in file '%s', line '%d'.\n", num, filepath, strline(buffer, start - buffer));
 		return strchr(start,'\n'); //Skip and continue
 	}
 
-	if( mob.state.size > SZ_BIG && size != -1 ) {
+	if (mob.state.size > SZ_BIG && size != -1) {
 		ShowError("npc_parse_mob: Invalid size number %d for mob ID %d in file '%s', line '%d'.\n", mob.state.size, mob_id, filepath, strline(buffer, start - buffer));
 		return strchr(start, '\n');
 	}
 
-	if( mob.state.ai >= AI_MAX && ai != -1 ) {
+	if (mob.state.ai >= AI_MAX && ai != -1) {
 		ShowError("npc_parse_mob: Invalid ai %d for mob ID %d in file '%s', line '%d'.\n", mob.state.ai, mob_id, filepath, strline(buffer, start - buffer));
 		return strchr(start, '\n');
 	}
 
-	if( (mob_lv == 0 || mob_lv > MAX_LEVEL) && mob_lv != -1 ) {
+	if ((!mob_lv || mob_lv > MAX_LEVEL) && mob_lv != -1) {
 		ShowError("npc_parse_mob: Invalid level %d for mob ID %d in file '%s', line '%d'.\n", mob_lv, mob_id, filepath, strline(buffer, start - buffer));
 		return strchr(start, '\n');
 	}
@@ -4360,7 +4367,7 @@ int npc_parsesrcfile(const char *filepath, bool runOnInit)
 				p = npc_parse_script(w1, w2, w3, w4, p, buffer, filepath, runOnInit);
 		} else if( (i = 0, sscanf(w2, "duplicate%n", &i), (i > 0 && w2[i] == '(')) && count > 3 )
 			p = npc_parse_duplicate(w1, w2, w3, w4, p, buffer, filepath);
-		else if( (strcmpi(w2, "monster") == 0 || strcmpi(w2, "boss_monster") == 0) && count > 3 )
+		else if( (strcmpi(w2, "monster") == 0 || strcmpi(w2, "boss_monster") == 0 || strcmpi(w2, "miniboss_monster") == 0) && count > 3 )
 			p = npc_parse_mob(w1, w2, w3, w4, p, buffer, filepath);
 		else if( strcmpi(w2, "mapflag") == 0 && count >= 3 )
 			p = npc_parse_mapflag(w1, w2, trim(w3), trim(w4), p, buffer, filepath);
