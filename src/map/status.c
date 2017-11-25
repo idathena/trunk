@@ -6353,6 +6353,19 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 	if( !sc || (sd && sd->state.permanent_speed) )
 		return (unsigned short)cap_value(speed,MIN_WALK_SPEED,MAX_WALK_SPEED);
 
+	if( sd && pc_ismadogear(sd) ) { //Recieve fixed speed value
+		int val = 0;
+
+		if( pc_checkskill(sd,NC_MADOLICENCE) < 5 )
+			val += 50 - 10 * pc_checkskill(sd,NC_MADOLICENCE);
+		else
+			val -= 25;
+		if( sc->data[SC_ACCELERATION] )
+			val -= 25;
+		speed += speed * val / 100;
+		return (unsigned short)cap_value(speed,MIN_WALK_SPEED,MAX_WALK_SPEED);
+	}
+
 	if( sd && sd->ud.skilltimer != INVALID_TIMER && (pc_checkskill(sd,SA_FREECAST) > 0 || sd->ud.skill_id == LG_EXEEDBREAK) ) {
 		if( sd->ud.skill_id == LG_EXEEDBREAK )
 			speed_rate = 160 - 10 * sd->ud.skill_lv; //-50% at skill_lv 1 -> -10% at skill_lv 5
@@ -6370,7 +6383,7 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 			if( sc->data[SC_ALL_RIDING] )
 				val = battle_config.rental_mount_speed_boost;
 			else if( sd ) {
-				if( pc_isriding(sd) || pc_isridingdragon(sd) || pc_ismadogear(sd) )
+				if( pc_isriding(sd) || pc_isridingdragon(sd) )
 					val = 25; //Same bonus
 				else if( pc_isridingwug(sd) )
 					val = 15 + 5 * pc_checkskill(sd,RA_WUGRIDER);
@@ -6486,8 +6499,6 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 				val = max( val, 10 * sc->data[SC_AVOID]->val1 );
 			if( sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF] )
 				val = max( val, 75 );
-			if( sc->data[SC_ACCELERATION] )
-				val = max( val, 25 );
 			if( sc->data[SC_CLOAKINGEXCEED] )
 				val = max( val, sc->data[SC_CLOAKINGEXCEED]->val3 );
 			if( sc->data[SC_GN_CARTBOOST] )
@@ -6514,12 +6525,8 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 
 	//GetSpeed()
 	{
-		if( sd ) {
-			if( pc_iscarton(sd) )
-				speed += speed * (50 - 5 * pc_checkskill(sd,MC_PUSHCART)) / 100;
-			if( pc_ismadogear(sd) )
-				speed += speed * (50 - 10 * pc_checkskill(sd,NC_MADOLICENCE)) / 100;
-		}
+		if( sd && pc_iscarton(sd) )
+			speed += speed * (50 - 5 * pc_checkskill(sd,MC_PUSHCART)) / 100;
 		if( sc->data[SC_PARALYSE] )
 			speed += speed * 50 / 100;
 		if( speed_rate != 100 )
@@ -8097,10 +8104,10 @@ void status_display_remove(struct block_list *bl, enum sc_type type) {
 int status_change_start(struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, unsigned char flag)
 {
 	struct map_session_data *sd = NULL;
-	struct status_change *sc;
-	struct status_change_entry *sce;
-	struct status_data *status;
-	struct view_data *vd;
+	struct status_change *sc = NULL;
+	struct status_change_entry *sce = NULL;
+	struct status_data *status = NULL;
+	struct view_data *vd = NULL;
 	int opt_flag, calc_flag, undead_flag, val_flag = 0, icon = SI_BLANK,
 		tick_time = 0; //[GodLesZ] tick time
 	bool sc_isnew = true;
@@ -9971,6 +9978,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val4 = tick / tick_time;
 				break;
 			case SC_OVERHEAT:
+			case SC_OVERHEAT_LIMITPOINT:
 			case SC_STEALTHFIELD:
 				tick_time = tick;
 				tick = -1;
@@ -10748,6 +10756,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_SPHERE_3:
 		case SC_SPHERE_4:
 		case SC_SPHERE_5:
+		case SC_OVERHEAT:
 		case SC_BANDING:
 		case SC_LIGHTNINGWALK:
 		case SC_KYOUGAKU:
@@ -12992,6 +13001,18 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				return 0;
 			}
 			break;
+
+		case SC_OVERHEAT_LIMITPOINT: {
+				int16 limit[] = { 150,200,280,360,450 };
+				uint16 lv = (sd ? pc_checkskill(sd,NC_MAINFRAME) : 0);
+
+				if( sc && sc->data[SC_OVERHEAT] )
+					status_change_end(bl,SC_OVERHEAT,INVALID_TIMER);
+				if( sce->val1 > 0 && --(sce->val1) > limit[lv] )
+					sc_start(bl,bl,SC_OVERHEAT,100,sce->val1,1000);
+				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
+			}
+			return 0;
 
 		case SC_MAGNETICFIELD:
 			if( --(sce->val4) >= 0 ) {

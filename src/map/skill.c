@@ -2410,23 +2410,22 @@ int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned sh
 	const enum sc_type sc_def[5] = { SC_CP_WEAPON,SC_CP_SHIELD,SC_CP_ARMOR,SC_CP_HELM,SC_NONE };
 	struct status_change *sc = status_get_sc(bl);
 	TBL_PC *sd = BL_CAST(BL_PC,bl);
-	bool ismado = false;
 	int i;
 
 	if (!sc)
 		return 0;
 	if (sd) {
+		if (pc_ismadogear(sd))
+			return 0;
 		if (sd->bonus.unstripable_equip)
 			pos &= ~sd->bonus.unstripable_equip;
 		if (sd->bonus.unstripable)
 			rate -= rate * sd->bonus.unstripable / 100;
-		if (pc_ismadogear(sd))
-			ismado = true;
 	}
 	if (rnd()%100 >= rate)
 		return 0;
 	for (i = 0; i < ARRAYLENGTH(pos_list); i++) {
-		if (pos&pos_list[i] && (sc->data[sc_def[i]] || (ismado && i < 4)))
+		if (pos&pos_list[i] && sc->data[sc_def[i]])
 			pos &= ~pos_list[i];
 	}
 	if (!pos)
@@ -3139,14 +3138,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case GS_FULLBUSTER:
 			if (sd) //Can't attack nor use items until skill's delay expires [Skotlex]
 				sd->ud.attackabletime = sd->canuseitem_tick = sd->ud.canact_tick;
-			break;
-		case NC_BOOSTKNUCKLE:
-		case NC_PILEBUNKER:
-		case NC_VULCANARM:
-		case NC_COLDSLOWER:
-		case NC_ARMSCANNON:
-			if (sd)
-				pc_overheat(sd,1);
 			break;
 		case GN_WALLOFTHORN:
 			type = flag;
@@ -4641,9 +4632,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case NC_FLAMELAUNCHER:
-			if (sd)
-				pc_overheat(sd,1);
-		//Fall through
 		case LG_CANNONSPEAR:
 			if (skill_id == LG_CANNONSPEAR)
 				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
@@ -5785,9 +5773,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 	switch(skill_id) {
 		case HLIF_HEAL:	{ //[orn]
-				struct block_list *m_bl = battle_get_master(src);
+				struct block_list *m_bl = NULL;
 
-				if(m_bl) {
+				if((m_bl = battle_get_master(src))) {
 					bl = m_bl;
 					if(bl->type != BL_HOM) {
 						if(sd)
@@ -5879,9 +5867,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				uint8 flag = 0;
 
 				if(skill_id == HLIF_HEAL) {
-					struct block_list *m_bl = battle_get_master(src);
+					struct block_list *m_bl = NULL;
 
-					if(m_bl)
+					if((m_bl = battle_get_master(src)))
 						bl = m_bl;
 				}
 
@@ -9196,8 +9184,20 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case NC_EMERGENCYCOOL:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			status_change_end(src,SC_OVERHEAT,INVALID_TIMER);
-			status_change_end(src,SC_OVERHEAT_LIMITPOINT,INVALID_TIMER);
+			if( sd ) {
+				struct skill_condition req = skill_get_requirement(sd,skill_id,skill_lv);
+				int limit[] = { -45,-75,-105 };
+				uint8 i;
+
+				for( i = 0; i < req.eqItem_count; i++ ) {
+					uint16 reqeqit = req.eqItem[i];
+
+					if( pc_search_inventory(sd,reqeqit) != INDEX_NOT_FOUND )
+						break;
+					continue;
+				}
+				pc_overheat(sd,limit[i]);
+			}
 			break;
 
 		case NC_INFRAREDSCAN:
@@ -9213,16 +9213,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 				map_foreachinallrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),splash_target(src),src,
 					skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_nodamage_id);
-				if( sd )
-					pc_overheat(sd,1);
 			}
 			break;
 
 		case NC_ANALYZE:
 			clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 			sc_start(src,bl,type,30 + 12 * skill_lv,skill_lv,skill_get_time(skill_id,skill_lv));
-			if( sd )
-				pc_overheat(sd,1);
 			break;
 
 		case NC_MAGNETICFIELD:
@@ -9234,8 +9230,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					sc_start2(src,bl,type,100,skill_lv,src->id,skill_get_time(skill_id,skill_lv));
 				map_foreachinallrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),splash_target(src),src,
 					skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_nodamage_id);
-				if( sd )
-					pc_overheat(sd,1);
 			}
 			break;
 
