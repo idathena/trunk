@@ -4663,7 +4663,7 @@
 12072,Str_Dish07,Whole Roast,0,40000,,1000,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_STRFOOD,1200000,7; percentheal 10,4; },{},{}
 12073,Str_Dish08,Bearfoot Special,0,60000,,500,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_STRFOOD,1200000,8; percentheal 15,6; },{},{}
 12074,Str_Dish09,Tendon Satay,0,80000,,1000,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_STRFOOD,1200000,9; percentheal 15,8; },{},{}
-12075,Str_Dish10,Steamed Tongue,0,100000,,1000,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_STRFOOD,1200000,10; percentheal 20,20; },{},{}
+12075,Str_Dish10,Steamed Tongue,0,100000,,1000,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_STRFOOD,1200000,10; percentheal 20,10; },{},{}
 12076,Int_Dish06,Red Mushroom Wine,0,20000,,300,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_INTFOOD,1200000,6; percentheal 2,10; },{},{}
 12077,Int_Dish07,Special Royal Jelly Herbal Tea,0,40000,,800,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_INTFOOD,1200000,7; percentheal 4,10; },{},{}
 12078,Int_Dish08,Royal Family Tea,0,60000,,1000,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_INTFOOD,1200000,8; percentheal 6,10; },{},{}
@@ -4792,12 +4792,12 @@
 12201,Red_Box_C,Commonplace Red Box,2,20,,200,,,,,0xFFFFFFFF,7,2,,,,,,{},{},{}
 // Cash Shop Usable Items
 //===================================================================
-12202,Str_Dish10_,Steamed Tongue,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_STR_CASH,1800000,10; percentheal 15,5; },{},{}
+12202,Str_Dish10_,Steamed Tongue,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_STR_CASH,1800000,10; percentheal 20,10; },{},{}
 12203,Agi_Dish10_,Steamed Scorpion,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_AGI_CASH,1800000,10; percentheal 15,5; },{},{}
-12204,Int_Dish10_,Dragon Breath Cocktail,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_INT_CASH,1800000,10; percentheal 15,5; },{},{}
-12205,Dex_Dish10_,Hwergelmir's Tonic,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_DEX_CASH,1800000,10; percentheal 15,5; },{},{}
-12206,Luk_Dish10_,Cooked Nine Tail's Tails,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_LUK_CASH,1800000,10; percentheal 15,5; },{},{}
-12207,Vit_Dish10_,Stew of Immortality,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_VIT_CASH,1800000,10; percentheal 15,5; },{},{}
+12204,Int_Dish10_,Dragon Breath Cocktail,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_INT_CASH,1800000,10; percentheal 10,20; },{},{}
+12205,Dex_Dish10_,Hwergelmir's Tonic,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_DEX_CASH,1800000,10; percentheal 10,10; },{},{}
+12206,Luk_Dish10_,Cooked Nine Tail's Tails,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_LUK_CASH,1800000,10; percentheal 14,8; },{},{}
+12207,Vit_Dish10_,Stew of Immortality,0,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_FOOD_VIT_CASH,1800000,10; percentheal 25,0; },{},{}
 12208,Battle_Manual,Battle Manual,2,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_EXPBOOST,1800000,50; },{},{}
 12209,Insurance,Life Insurance,2,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_LIFEINSURANCE,1800000,0; },{},{}
 12210,Bubble_Gum,Bubble Gum,2,2,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_ITEMBOOST,1800000,100; },{},{}
@@ -4837,7 +4837,7 @@
 12247,Halohalo,Halo-Halo,2,2,,100,,,,,0xFFFFFFFF,7,2,,,20,,,{ sc_start SC_STRFOOD,600000,3; sc_start SC_DEXFOOD,600000,3; sc_start SC_AGIFOOD,600000,3; sc_start SC_INTFOOD,600000,3; sc_start SC_VITFOOD,600000,3; sc_start SC_LUKFOOD,600000,3; },{},{}
 12248,Masquerade_Ball_Box,Fancy Ball Box,2,20,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ getrandgroupitem(IG_Masquerade,1); },{},{}
 12249,Payroll_Of_Kafra_,Payment Statement for Kafra Employee,2,20,,10,,,,,0xFFFFFFFF,7,2,,,,,,{},{},{}
-12250,Str_Dish10_M,Steamed Tongue,2,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_STRFOOD,3600000,10; percentheal 20,20; },{},{}
+12250,Str_Dish10_M,Steamed Tongue,2,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_STRFOOD,3600000,10; percentheal 20,10; },{},{}
 12251,Agi_Dish10_M,Steamed Desert Scorpions,2,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_AGIFOOD,3600000,10; percentheal 15,5; },{},{}
 12252,Int_Dish10_M,Dragon Breath Cocktail,2,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_INTFOOD,3600000,10; percentheal 10,20; },{},{}
 12253,Dex_Dish10_M,Hwergelmir's Tonic,2,0,,10,,,,,0xFFFFFFFF,7,2,,,,,,{ sc_start SC_DEXFOOD,3600000,10; percentheal 10,10; },{},{}

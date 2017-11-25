@@ -290,15 +290,6 @@ enum spell_book_item_list {
 	ITEMID_MAGIC_BOOK_DL,
 };
 
-enum cash_food_item_list {
-	ITEMID_STR_DISH10_ = 12202,
-	ITEMID_AGI_DISH10_,
-	ITEMID_INT_DISH10_,
-	ITEMID_DEX_DISH10_,
-	ITEMID_LUK_DISH10_,
-	ITEMID_VIT_DISH10_,
-};
-
 enum e_item_job {
 	ITEMJ_NORMAL      = 0x01,
 	ITEMJ_UPPER       = 0x02,
@@ -507,7 +498,6 @@ struct item_data *itemdb_exists(unsigned short nameid);
 #define itemdb_is_spellbook(n) ((n) >= ITEMID_MAGIC_BOOK_FB && (n) <= ITEMID_MAGIC_BOOK_DL)
 #define itemdb_is_guillotinepoison(n) ((n) >= ITEMID_PARALYSE && (n) <= ITEMID_VENOMBLEED)
 #define itemdb_is_gemstone(n) ((n) >= ITEMID_YELLOW_GEMSTONE && (n) <= ITEMID_BLUE_GEMSTONE)
-#define itemdb_is_cashfood(n) ((n) >= ITEMID_STR_DISH10_ && (n) <= ITEMID_VIT_DISH10_)
 #define itemdb_is_slingatk(n) ((n) >= ITEMID_APPLE_BOMB && (n) <= ITEMID_VERY_HARD_LUMP)
 #define itemdb_is_slingbuff(n) ((n) >= ITEMID_MYSTERIOUS_POWDER && (n) <= ITEMID_BLACK_THING_TO_THROW)
 const char *itemdb_typename(enum item_types type);

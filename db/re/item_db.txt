@@ -1142,7 +1142,7 @@
 1829,Fist_C,Fist,5,0,,0,150,,1,0,0x00008100,63,2,2,3,1,0,12,{ bonus2 bAddSize,Size_All,40; },{},{}
 1830,Sura_Rampage,Sura Rampage,5,20,,500,142,,1,1,0x00008100,63,2,2,3,102,1,12,{ set .@r,getrefine(); bonus2 bSkillAtk,"SR_EARTHSHAKER",20; bonus2 bSkillAtk,"SR_SKYNETBLOW",20; bonus bUseSPrate,5; if(.@r>6) bonus bUseSPrate,-1*(.@r-6); },{},{}
 1831,P_Knuckle1,Eden Knuckle I,5,0,,0,120,,1,0,0x00008100,63,2,2,3,60,0,12,{},{},{}
-1832,Velum_Claw,Vellum Claw,5,20,,650,160,,1,0,0x00008100,63,2,2,4,95,1,12,{ set .@r,getrefine(); bonus2 bAddRace,RC_DemiHuman,100+(.@r>=8?20:0); bonus2 bAddRace,RC_Brute,100+(.@r>=8?20:0); if(.@r>=10) { bonus2 bVariableCastrate,"MO_EXTREMITYFIST",-100; bonus2 bFixedCastrate,"MO_EXTREMITYFIST",-100; bonus4 bAutoSpellOnSkill,"MO_EXPLOSIONSPIRITS","CH_SOULCOLLECT",1,10000; bonus2 bHPLossRate,500,3000; } },{},{}
+1832,Velum_Claw,Vellum Claw,5,20,,650,160,,1,0,0x00008100,63,2,2,4,95,1,12,{ set .@r,getrefine(); bonus2 bAddRace,RC_DemiHuman,100+(.@r>=8?20:0); bonus2 bAddRace,RC_Brute,100+(.@r>=8?20:0); if(.@r>=10) { bonus2 bVariableCastrate,"MO_EXTREMITYFIST",-100; bonus2 bFixedCastrate,"MO_EXTREMITYFIST",-100; bonus4 bAutoSpellOnSkill,"MO_EXPLOSIONSPIRITS","CH_SOULCOLLECT",1,1000; bonus2 bHPLossRate,500,3000; } },{},{}
 1833,Claw_Of_Flash,Claw of Flash,5,60000,,400,140,,1,2,0x00008100,63,2,2,4,105,1,12,{},{},{}
 1834,TE_Woe_Fist,TE Woe Fist,5,0,,0,150,,1,0,0x00008100,63,2,2,3,40,0,12,{ bonus2 bAddRace,RC_DemiHuman,40; bonus2 bAddEff,Eff_Freeze,1000; },{},{}
 1835,Spartacus,Spartacus,5,20,,600,100,,1,2,0x00008100,63,2,2,4,50,1,12,{ set .@r,getrefine(); bonus2 bAddClass,Class_All,.@r; if(.@r>9) bonus bNoSizeFix,0; bonus bUnbreakableWeapon,0; },{},{}
@@ -6136,7 +6136,7 @@
 12072,Str_Dish07,Whole Roast,0,40000,,1000,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_STRFOOD,1200000,7; percentheal 10,4; },{},{}
 12073,Str_Dish08,Bearfoot Special,0,60000,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_STRFOOD,1200000,8; percentheal 15,6; },{},{}
 12074,Str_Dish09,Tendon Satay,0,80000,,1000,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_STRFOOD,1200000,9; percentheal 15,8; },{},{}
-12075,Str_Dish10,Steamed Tongue,0,100000,,1000,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_STRFOOD,1200000,10; percentheal 20,20; },{},{}
+12075,Str_Dish10,Steamed Tongue,0,100000,,1000,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_STRFOOD,1200000,10; percentheal 20,10; },{},{}
 12076,Int_Dish06,Red Mushroom Wine,0,20000,,300,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INTFOOD,1200000,6; percentheal 2,10; },{},{}
 12077,Int_Dish07,Special Royal Jelly Herbal Tea,0,40000,,800,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INTFOOD,1200000,7; percentheal 4,10; },{},{}
 12078,Int_Dish08,Royal Family Tea,0,60000,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INTFOOD,1200000,8; percentheal 6,10; },{},{}
@@ -6265,12 +6265,12 @@
 12201,Red_Box_C,Commonplace Red Box,2,20,,200,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 // Cash Shop Usable Items
 //===================================================================
-12202,Str_Dish10_,Steamed Tongue,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_STR_CASH,1800000,10; percentheal 15,5; },{},{}
+12202,Str_Dish10_,Steamed Tongue,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_STR_CASH,1800000,10; percentheal 20,10; },{},{}
 12203,Agi_Dish10_,Steamed Scorpion,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_AGI_CASH,1800000,10; percentheal 15,5; },{},{}
-12204,Int_Dish10_,Dragon Breath Cocktail,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_INT_CASH,1800000,10; percentheal 15,5; },{},{}
-12205,Dex_Dish10_,Hwergelmir's Tonic,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_DEX_CASH,1800000,10; percentheal 15,5; },{},{}
-12206,Luk_Dish10_,Cooked Nine Tail's Tails,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_LUK_CASH,1800000,10; percentheal 15,5; },{},{}
-12207,Vit_Dish10_,Stew of Immortality,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_VIT_CASH,1800000,10; percentheal 15,5; },{},{}
+12204,Int_Dish10_,Dragon Breath Cocktail,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_INT_CASH,1800000,10; percentheal 10,20; },{},{}
+12205,Dex_Dish10_,Hwergelmir's Tonic,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_DEX_CASH,1800000,10; percentheal 10,10; },{},{}
+12206,Luk_Dish10_,Cooked Nine Tail's Tails,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_LUK_CASH,1800000,10; percentheal 14,8; },{},{}
+12207,Vit_Dish10_,Stew of Immortality,0,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_FOOD_VIT_CASH,1800000,10; percentheal 25,0; },{},{}
 12208,Battle_Manual,Battle Manual,2,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_EXPBOOST,1800000,50; },{},{}
 12209,Insurance,Life Insurance,2,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_LIFEINSURANCE,1800000,0; },{},{}
 12210,Bubble_Gum,Bubble Gum,2,2,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_ITEMBOOST,1800000,100; },{},{}
@@ -6310,7 +6310,7 @@
 12247,Halohalo,Halo-Halo,2,2,,100,,,,,0xFFFFFFFF,63,2,,,20,,,{ sc_start SC_STRFOOD,600000,3; sc_start SC_DEXFOOD,600000,3; sc_start SC_AGIFOOD,600000,3; sc_start SC_INTFOOD,600000,3; sc_start SC_VITFOOD,600000,3; sc_start SC_LUKFOOD,600000,3; },{},{}
 12248,Masquerade_Ball_Box,Fancy Ball Box,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_Masquerade,1); },{},{}
 12249,Payroll_Of_Kafra_,Payment Statement for Kafra Employee,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
-12250,Str_Dish10_M,Steamed Tongue,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_STRFOOD,3600000,10; percentheal 20,20; },{},{}
+12250,Str_Dish10_M,Steamed Tongue,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_STRFOOD,3600000,10; percentheal 20,10; },{},{}
 12251,Agi_Dish10_M,Steamed Desert Scorpions,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_AGIFOOD,3600000,10; percentheal 15,5; },{},{}
 12252,Int_Dish10_M,Dragon Breath Cocktail,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_INTFOOD,3600000,10; percentheal 10,20; },{},{}
 12253,Dex_Dish10_M,Hwergelmir's Tonic,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_DEXFOOD,3600000,10; percentheal 10,10; },{},{}
