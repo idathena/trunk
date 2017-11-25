@@ -1403,6 +1403,18 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			if( hd && rnd()%100 < status_get_lv(&hd->bl) / 2 )
 				hom_addspiritball(hd,10);
 		}
+
+		if( sd && pc_ismadogear(sd) ) {
+			int element = skill_get_ele(skill_id,skill_lv);
+
+			if( !skill_id || element == -1 ) //Take weapon's element
+				element = (tsd && tsd->bonus.arrow_ele ? tsd->bonus.arrow_ele : tstatus->rhw.ele);
+			else if( element == -2 ) //Use enchantment's element
+				element = status_get_attack_sc_element(src,status_get_sc(src));
+			else if( element == -3 ) //Use random element
+				element = rnd()%ELE_ALL;
+			pc_overheat(sd,(element == ELE_FIRE ? 3 : 1));
+		}
 	}
 
 	//SC effects from caster's side
@@ -1456,19 +1468,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			mobskill_event((TBL_MOB *)bl,src,gettick(),flag);
 		if( skill_id )
 			mobskill_event((TBL_MOB *)bl,src,gettick(),MSC_SKILLUSED|(skill_id<<16));
-	}
-
-	if( sd && pc_ismadogear(sd) && rnd()%100 < 50 ) {
-		int element = skill_get_ele(skill_id,skill_lv);
-
-		if( !skill_id || element == -1 ) //Take weapon's element
-			element = (tsd && tsd->bonus.arrow_ele ? tsd->bonus.arrow_ele : tstatus->rhw.ele);
-		else if( element == -2 ) //Use enchantment's element
-			element = status_get_attack_sc_element(src,status_get_sc(src));
-		else if( element == -3 ) //Use random element
-			element = rnd()%ELE_ALL;
-		if( element == ELE_FIRE || element == ELE_WATER )
-			pc_overheat(sd,(element == ELE_FIRE ? 1 : -1));
 	}
 
 	return damage;

@@ -8774,8 +8774,8 @@ void pc_setoption(struct map_session_data *sd,int type)
 		status_change_end(&sd->bl,SC_SHAPESHIFT,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_HOVERING,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_ACCELERATION,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_OVERHEAT_LIMITPOINT,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_OVERHEAT,INVALID_TIMER);
+		status_change_end(&sd->bl,SC_OVERHEAT_LIMITPOINT,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_MAGNETICFIELD,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_NEUTRALBARRIER_MASTER,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_STEALTHFIELD_MASTER,INVALID_TIMER);
@@ -10469,23 +10469,23 @@ void pc_setstand(struct map_session_data *sd)
  */
 void pc_overheat(struct map_session_data *sd, int val)
 {
-	int heat = val,
+	int16 heat = val,
 		limit[] = { 150,200,280,360,450 };
-	uint16 skill_lv = pc_checkskill(sd,NC_MAINFRAME);
+	uint16 skill_lv;
+	struct status_change_entry *sce = NULL;
 
-	if( !pc_ismadogear(sd) || sd->sc.data[SC_OVERHEAT] )
-		return; //Already burning
+	nullpo_retv(sd);
 
-	if( sd->sc.data[SC_OVERHEAT_LIMITPOINT] ) {
-		heat += sd->sc.data[SC_OVERHEAT_LIMITPOINT]->val1;
-		status_change_end(&sd->bl,SC_OVERHEAT_LIMITPOINT,INVALID_TIMER);
-	}
-
-	heat = max(heat,0); //Avoid negative heat
-	if( heat >= limit[skill_lv] )
-		sc_start(&sd->bl,&sd->bl,SC_OVERHEAT,100,0,1000);
-	else //Cooling down if reached 30 seconds
-		sc_start(&sd->bl,&sd->bl,SC_OVERHEAT_LIMITPOINT,100,heat,30000);
+	skill_lv = cap_value(pc_checkskill(sd, NC_MAINFRAME), 0, 4);
+	if( (sce = sd->sc.data[SC_OVERHEAT_LIMITPOINT]) ) {
+		sce->val1 += heat;
+		sce->val1 = cap_value(sce->val1, 0, 1000);
+		if( sd->sc.data[SC_OVERHEAT] )
+			status_change_end(&sd->bl, SC_OVERHEAT, INVALID_TIMER);
+		if( sce->val1 > limit[skill_lv] )
+			sc_start(&sd->bl, &sd->bl, SC_OVERHEAT, 100, sce->val1, 1000);
+	} else if( heat > 0 )
+		sc_start(&sd->bl, &sd->bl, SC_OVERHEAT_LIMITPOINT, 100, heat, 1000);
 }
 
 /**
