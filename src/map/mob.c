@@ -5173,12 +5173,12 @@ static int mob_reload_sub(struct mob_data *md, va_list args) {
  */
 static int mob_reload_sub_npc(struct npc_data *nd, va_list args) {
 	if (mobdb_checkid(nd->class_)) { //If the view data points to a mob
-		nd->vd = mob_get_viewdata(nd->class_); //Get the new view data from the mob database
-		if (nd->bl.prev) { //If they are spawned right now
-			//Respawn all NPCs on client side so that they are displayed correctly(if their view id changed)
-			clif_clearunit_area(&nd->bl, CLR_OUTSIGHT);
-			clif_spawn(&nd->bl);
-		}
+		struct view_data *vd = mob_get_viewdata(nd->class_);
+
+		if (vd) //Get the new view data from the mob database
+			memcpy(&nd->vd, vd, sizeof(struct view_data));
+		if (nd->bl.prev) //If they are spawned right now
+			unit_refresh(&nd->bl); //Respawn all NPCs on client side so that they are displayed correctly(if their view id changed)
 	}
 	return 0;
 }

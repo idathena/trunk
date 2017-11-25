@@ -1721,18 +1721,19 @@ ACMD_FUNC(model)
 
 	if (!message || !*message || sscanf(message, "%d %d %d", &hair_style, &hair_color, &cloth_color) < 1) {
 		sprintf(atcmd_output, msg_txt(991), // Please enter at least one value (usage: @model <hair ID: %d-%d> <hair color: %d-%d> <clothes color: %d-%d>).
-		        MIN_HAIR_STYLE, MAX_HAIR_STYLE, MIN_HAIR_COLOR, MAX_HAIR_COLOR, MIN_CLOTH_COLOR, MAX_CLOTH_COLOR);
+			MIN_HAIR_STYLE, MAX_HAIR_STYLE, MIN_HAIR_COLOR, MAX_HAIR_COLOR, MIN_CLOTH_COLOR, MAX_CLOTH_COLOR);
 		clif_displaymessage(fd, atcmd_output);
 		return -1;
 	}
 
 	if (hair_style >= MIN_HAIR_STYLE && hair_style <= MAX_HAIR_STYLE &&
 		hair_color >= MIN_HAIR_COLOR && hair_color <= MAX_HAIR_COLOR &&
-		cloth_color >= MIN_CLOTH_COLOR && cloth_color <= MAX_CLOTH_COLOR) {
-			pc_changelook(sd, LOOK_HAIR, hair_style);
-			pc_changelook(sd, LOOK_HAIR_COLOR, hair_color);
-			pc_changelook(sd, LOOK_CLOTHES_COLOR, cloth_color);
-			clif_displaymessage(fd, msg_txt(36)); // Appearance changed.
+		cloth_color >= MIN_CLOTH_COLOR && cloth_color <= MAX_CLOTH_COLOR)
+	{
+		pc_changelook(sd, LOOK_HAIR, hair_style);
+		pc_changelook(sd, LOOK_HAIR_COLOR, hair_color);
+		pc_changelook(sd, LOOK_CLOTHES_COLOR, cloth_color);
+		clif_displaymessage(fd, msg_txt(36)); // Appearance changed.
 	} else {
 		clif_displaymessage(fd, msg_txt(37)); // An invalid number was specified.
 		return -1;

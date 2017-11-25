@@ -121,7 +121,12 @@ static struct script_event_s { //Holds pointers to the commonly executed scripts
 	uint8 event_count;
 } script_event[NPCE_MAX];
 
-struct view_data *npc_get_viewdata(int class_) { //Returns the viewdata for normal npc classes
+/**
+ * Returns the viewdata for normal npc classes.
+ * @param class_ The NPC class ID.
+ * @return The viewdata, or NULL if the ID is invalid.
+ */
+struct view_data *npc_get_viewdata(int class_) {
 	if( class_ == JT_INVISIBLE )
 		return &npc_viewdb[0];
 	if( npcdb_checkid(class_) ) {
@@ -131,6 +136,28 @@ struct view_data *npc_get_viewdata(int class_) { //Returns the viewdata for norm
 			return &npc_viewdb[class_];
 	}
 	return NULL;
+}
+
+/**
+ * Checks if a given id is a valid npc id.
+ *
+ * Since new npcs are added all the time, the max valid value is the one before the first mob (Scorpion = 1001)
+ *
+ * @param id The NPC ID to validate.
+ * @return Whether the value is a valid ID.
+ */
+bool npcdb_checkid(int id)
+{
+	if( id > NPC_RANGE1_START && id <= NPC_RANGE1_END ) //First subrange
+		return true;
+	if( id == JT_HIDDEN_WARP_NPC || id == JT_INVISIBLE ) //Special IDs not included in the valid ranges
+		return true;
+	if( id > NPC_RANGE2_START && id < NPC_RANGE2_END ) //Second subrange
+		return true;
+	if( id > NPC_RANGE3_START && id < NPC_RANGE3_END ) //Third range
+		return true;
+	//Anything else is invalid
+	return false;
 }
 
 int npc_isnear_sub(struct block_list *bl, va_list args) {
@@ -2400,7 +2427,7 @@ bool npc_viewisid(const char *viewid)
 
 struct npc_data *npc_create_npc(int m, int x, int y)
 {
-	struct npc_data *nd;
+	struct npc_data *nd = NULL;
 
 	CREATE(nd, struct npc_data, 1);
 	nd->bl.id = npc_get_new_npc_id();
@@ -2412,6 +2439,7 @@ struct npc_data *npc_create_npc(int m, int x, int y)
 	nd->sc_display = NULL;
 	nd->sc_display_count = 0;
 	nd->progressbar.timeout = 0;
+	nd->vd.class_ = 0;
 
 	return nd;
 }
@@ -3550,13 +3578,9 @@ void npc_setclass(struct npc_data *nd, short class_)
 
 	if( nd->class_ == class_ )
 		return;
-
-	if( map[nd->bl.m].users )
-		clif_clearunit_area(&nd->bl, CLR_OUTSIGHT); //Fade out
 	nd->class_ = class_;
 	status_set_viewdata(&nd->bl, class_);
-	if( map[nd->bl.m].users )
-		clif_spawn(&nd->bl); //Fade in
+	unit_refresh(&nd->bl);
 }
 
 // @commands (script based)

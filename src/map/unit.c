@@ -2902,6 +2902,18 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 	return 1;
 }
 
+void unit_refresh(struct block_list *bl)
+{
+	nullpo_retv(bl);
+
+	//Using here CLR_TRICKDEAD because other flags show effects
+	//Probably need use other flag or other way to refresh it
+	if (map[bl->m].users) {
+		clif_clearunit_area(bl,CLR_TRICKDEAD); //Fade out
+		clif_spawn(bl); //Fade in
+	}
+}
+
 /**
  * Removes units of a master when the master is removed from map
  * @param sd: Player

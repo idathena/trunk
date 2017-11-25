@@ -15997,11 +15997,11 @@ BUILDIN_FUNC(countstr)
 /// setnpcdisplay("<npc name>", <new class id>) -> <int>
 BUILDIN_FUNC(setnpcdisplay)
 {
-	const char *name;
+	const char *name = NULL;
 	const char *newname = NULL;
 	int class_ = JT_FAKENPC, size = -1;
-	struct script_data *data;
-	struct npc_data *nd;
+	struct script_data *data = NULL;
+	struct npc_data *nd = NULL;
 
 	name = script_getstr(st,2);
 	data = script_getdata(st,3);
@@ -16022,8 +16022,7 @@ BUILDIN_FUNC(setnpcdisplay)
 		return 1;
 	}
 
-	nd = npc_name2id(name);
-	if( !nd ) { //Not found
+	if( !(nd = npc_name2id(name)) ) { //Not found
 		script_pushint(st,1);
 		return 0;
 	}
@@ -16039,10 +16038,8 @@ BUILDIN_FUNC(setnpcdisplay)
 
 	if( class_ != JT_FAKENPC && nd->class_ != class_ )
 		npc_setclass(nd, class_);
-	else if( size != -1 ) { //Required to update the visual size
-		clif_clearunit_area(&nd->bl,CLR_OUTSIGHT);
-		clif_spawn(&nd->bl);
-	}
+	else if( size != -1 )
+		unit_refresh(&nd->bl); //Required to update the visual size
 
 	script_pushint(st,0);
 	return SCRIPT_CMD_SUCCESS;
@@ -17163,6 +17160,8 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UMOB_CLOTHCOLOR, md->vd->cloth_color);
 			getunitdata_sub(UMOB_SHIELD, md->vd->shield);
 			getunitdata_sub(UMOB_WEAPON, md->vd->weapon);
+			getunitdata_sub(UMOB_ROBE, md->vd->robe);
+			getunitdata_sub(UMOB_BODY2, md->vd->body_style);
 			getunitdata_sub(UMOB_LOOKDIR, md->ud.dir);
 			getunitdata_sub(UMOB_CANMOVETICK, md->ud.canmove_tick);
 			getunitdata_sub(UMOB_STR, md->status.str);
@@ -17190,7 +17189,7 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UMOB_AMOTION, md->status.amotion);
 			getunitdata_sub(UMOB_ADELAY, md->status.adelay);
 			getunitdata_sub(UMOB_DMOTION, md->status.dmotion);
-			getunitdata_sub(49, md->ud.immune_attack2);
+			getunitdata_sub(51, md->ud.immune_attack2);
 			break;
 
 		case BL_HOM:
@@ -17376,7 +17375,6 @@ BUILDIN_FUNC(getunitdata)
 				ShowWarning("buildin_getunitdata: Error in finding object BL_NPC!\n");
 				return 1;
 			}
-			getunitdata_sub(UNPC_DISPLAY, nd->class_);
 			getunitdata_sub(UNPC_LEVEL, nd->level);
 			getunitdata_sub(UNPC_HP, nd->status.hp);
 			getunitdata_sub(UNPC_MAXHP, nd->status.max_hp);
@@ -17409,6 +17407,19 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UNPC_AMOTION,  nd->status.amotion);
 			getunitdata_sub(UNPC_ADELAY, nd->status.adelay);
 			getunitdata_sub(UNPC_DMOTION, nd->status.dmotion);
+			getunitdata_sub(UNPC_SEX, nd->vd.sex);
+			getunitdata_sub(UNPC_CLASS, nd->vd.class_);
+			getunitdata_sub(UNPC_HAIRSTYLE, nd->vd.hair_style);
+			getunitdata_sub(UNPC_HAIRCOLOR, nd->vd.hair_color);
+			getunitdata_sub(UNPC_HEADBOTTOM, nd->vd.head_bottom);
+			getunitdata_sub(UNPC_HEADMIDDLE, nd->vd.head_mid);
+			getunitdata_sub(UNPC_HEADTOP, nd->vd.head_top);
+			getunitdata_sub(UNPC_CLOTHCOLOR, nd->vd.cloth_color);
+			getunitdata_sub(UNPC_SHIELD, nd->vd.shield);
+			getunitdata_sub(UNPC_WEAPON, nd->vd.weapon);
+			getunitdata_sub(UNPC_ROBE, nd->vd.robe);
+			getunitdata_sub(UNPC_BODY2, nd->vd.body_style);
+			getunitdata_sub(UNPC_DEADSIT, nd->vd.dead_sit);
 			break;
 
 		default:
@@ -17496,6 +17507,8 @@ BUILDIN_FUNC(setunitdata)
 				case UMOB_CLOTHCOLOR:
 				case UMOB_SHIELD:
 				case UMOB_WEAPON:
+				case UMOB_ROBE:
+				case UMOB_BODY2:
 					mob_set_dynamic_viewdata(md);
 					break;
 			}
@@ -17512,8 +17525,8 @@ BUILDIN_FUNC(setunitdata)
 				case UMOB_MODE: md->base_status->mode = (enum e_mode)value; calc_status = true; break;
 				case UMOB_AI: md->special_state.ai = (enum mob_ai)value; break;
 				case UMOB_SCOPTION: md->sc.option = (unsigned short)value; break;
-				case UMOB_SEX: md->vd->sex = (char)value; clif_clearunit_area(bl, CLR_OUTSIGHT); clif_spawn(bl); break;
-				case UMOB_CLASS: status_set_viewdata(bl, (unsigned short)value); clif_clearunit_area(bl, CLR_OUTSIGHT); clif_spawn(bl); break;
+				case UMOB_SEX: md->vd->sex = (char)value; unit_refresh(bl); break;
+				case UMOB_CLASS: status_set_viewdata(bl, (unsigned short)value); unit_refresh(bl); break;
 				case UMOB_HAIRSTYLE: clif_changelook(bl, LOOK_HAIR, (unsigned short)value); break;
 				case UMOB_HAIRCOLOR: clif_changelook(bl, LOOK_HAIR_COLOR, (unsigned short)value); break;
 				case UMOB_HEADBOTTOM: clif_changelook(bl, LOOK_HEAD_BOTTOM, (unsigned short)value); break;
@@ -17522,6 +17535,8 @@ BUILDIN_FUNC(setunitdata)
 				case UMOB_CLOTHCOLOR: clif_changelook(bl, LOOK_CLOTHES_COLOR, (unsigned short)value); break;
 				case UMOB_SHIELD: clif_changelook(bl, LOOK_SHIELD, (unsigned short)value); break;
 				case UMOB_WEAPON: clif_changelook(bl, LOOK_WEAPON, (unsigned short)value); break;
+				case UMOB_ROBE: clif_changelook(bl, LOOK_ROBE, (unsigned short)value); break;
+				case UMOB_BODY2: clif_changelook(bl, LOOK_BODY2, (unsigned short)value); break;
 				case UMOB_LOOKDIR: unit_setdir(bl, (uint8)value); break;
 				case UMOB_CANMOVETICK: md->ud.canmove_tick = value > 0 ? (unsigned int)value : 0; break;
 				case UMOB_STR: md->base_status->str = (unsigned short)value; status_calc_misc(bl, &md->status, md->level); calc_status = true; break;
@@ -17562,7 +17577,7 @@ BUILDIN_FUNC(setunitdata)
 				case UMOB_AMOTION: md->base_status->amotion = (short)value; calc_status = true; break;
 				case UMOB_ADELAY: md->base_status->adelay = (short)value; calc_status = true; break;
 				case UMOB_DMOTION: md->base_status->dmotion = (short)value; calc_status = true; break;
-				case 49: md->ud.immune_attack2 = (bool)value > 0 ? 1 : 0; break;
+				case 51: md->ud.immune_attack2 = (bool)value > 0 ? 1 : 0; break;
 				default:
 					ShowError("buildin_setunitdata: Unknown data identifier %d for BL_MOB.\n", type);
 					return 1;
@@ -17768,7 +17783,6 @@ BUILDIN_FUNC(setunitdata)
 				return 1;
 			}
 			switch( type ) {
-				case UNPC_DISPLAY: status_set_viewdata(bl, (unsigned short)value); break;
 				case UNPC_LEVEL: nd->level = (unsigned int)value; break;
 				case UNPC_HP: status_set_hp(bl, (unsigned int)value, 0); break;
 				case UNPC_MAXHP: status_set_maxhp(bl, (unsigned int)value, 0); break;
@@ -17800,6 +17814,19 @@ BUILDIN_FUNC(setunitdata)
 				case UNPC_AMOTION: nd->status.amotion = (short)value; break;
 				case UNPC_ADELAY: nd->status.adelay = (short)value; break;
 				case UNPC_DMOTION: nd->status.dmotion = (short)value; break;
+				case UNPC_SEX: nd->vd.sex = (char)value; unit_refresh(bl); break;
+				case UNPC_CLASS: npc_setclass(nd, (short)value); break;
+				case UNPC_HAIRSTYLE: clif_changelook(bl, LOOK_HAIR, (unsigned short)value); break;
+				case UNPC_HAIRCOLOR: clif_changelook(bl, LOOK_HAIR_COLOR, (unsigned short)value); break;
+				case UNPC_HEADBOTTOM: clif_changelook(bl, LOOK_HEAD_BOTTOM, (unsigned short)value); break;
+				case UNPC_HEADMIDDLE: clif_changelook(bl, LOOK_HEAD_MID, (unsigned short)value); break;
+				case UNPC_HEADTOP: clif_changelook(bl, LOOK_HEAD_TOP, (unsigned short)value); break;
+				case UNPC_CLOTHCOLOR: clif_changelook(bl, LOOK_CLOTHES_COLOR, (unsigned short)value); break;
+				case UNPC_SHIELD: clif_changelook(bl, LOOK_SHIELD, (unsigned short)value); break;
+				case UNPC_WEAPON: clif_changelook(bl, LOOK_WEAPON, (unsigned short)value); break;
+				case UNPC_ROBE: clif_changelook(bl, LOOK_ROBE, (unsigned short)value); break;
+				case UNPC_BODY2: clif_changelook(bl, LOOK_BODY2, (unsigned short)value); break;
+				case UNPC_DEADSIT: nd->vd.dead_sit = (char)value; unit_refresh(bl); break;
 				default:
 					ShowError("buildin_setunitdata: Unknown data identifier %d for BL_NPC.\n", type);
 					return 1;

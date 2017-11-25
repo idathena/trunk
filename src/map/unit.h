@@ -78,7 +78,7 @@ struct view_data {
 		cloth_color,
 		body_style;
 	char sex;
-	unsigned dead_sit : 2;
+	unsigned dead_sit : 2; //0: Stand, 1: Dead, 2: Sit
 };
 
 // Enum for unit_stop_walking
@@ -154,6 +154,7 @@ void unit_free_pc(struct map_session_data *sd);
 int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, int line, const char *func);
 int unit_free(struct block_list *bl, clr_type clrtype);
 int unit_changetarget(struct block_list *bl, va_list ap);
+void unit_refresh(struct block_list *bl);
 
 void do_init_unit(void);
 void do_final_unit(void);
