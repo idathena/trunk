@@ -13002,17 +13002,19 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 			}
 			break;
 
-		case SC_OVERHEAT_LIMITPOINT: {
+		case SC_OVERHEAT_LIMITPOINT:
+			if( --(sce->val1) >= 0 ) {
 				int16 limit[] = { 150,200,280,360,450 };
 				uint16 lv = (sd ? pc_checkskill(sd,NC_MAINFRAME) : 0);
 
 				if( sc && sc->data[SC_OVERHEAT] )
 					status_change_end(bl,SC_OVERHEAT,INVALID_TIMER);
-				if( sce->val1 > 0 && --(sce->val1) > limit[lv] )
+				if( sce->val1 > limit[lv] )
 					sc_start(bl,bl,SC_OVERHEAT,100,sce->val1,1000);
 				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
+				return 0;
 			}
-			return 0;
+			break;
 
 		case SC_MAGNETICFIELD:
 			if( --(sce->val4) >= 0 ) {

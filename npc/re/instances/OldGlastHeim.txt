@@ -2228,7 +2228,7 @@ glast_01,210,273,5	script	Hugin's Buttler	69,{
 		mes "You need more Temporal Crystals. Come back when you get some more Temporal Crystals during your travel through Old Glast Heim.";
 		close;
 	case 4:
-		set .modified,1;
+		set .@modified,1;
 	// Fall through
 	case 3:
 		set .@part,EQI_SHOES;
@@ -2259,14 +2259,14 @@ glast_01,210,273,5	script	Hugin's Buttler	69,{
 				case 6:
 				case 7:
 					mes "[Hugin's Buttler]";
-					mes "Are you sure about buying "+(.modified?"Modified":"Temporal")+" ^FF0000"+.@type$[.@select-2]+"^000000 Boots? There's no refunds.";
+					mes "Are you sure about buying "+(.@modified?"Modified":"Temporal")+" ^FF0000"+.@type$[.@select-2]+"^000000 Boots? There's no refunds.";
 					next;
 					if (select("Think again","Yes, I am sure.") == 2) {
 						mes "[Hugin's Buttler]";
 						mes "The boots have been upgraded as you want.";
 						delequip .@part;
 						delitem 6607,5; //Temporal_Crystal
-						if (.modified) //Modified_STR_Boots,Modified_INT_Boots,Modified_AGI_Boots,Modified_VIT_Boots,Modified_DEX_Boots,Modified_LUK_Boots
+						if (.@modified) //Modified_STR_Boots,Modified_INT_Boots,Modified_AGI_Boots,Modified_VIT_Boots,Modified_DEX_Boots,Modified_LUK_Boots
 							getitem .@equip_type2[.@select-2],1;
 						else //Temporal_STR_Boots,Temporal_INT_Boots,Temporal_AGI_Boots,Temporal_VIT_Boots,Temporal_DEX_Boots,Temporal_LUK_Boots
 							getitem .@equip_type[.@select-2],1;
