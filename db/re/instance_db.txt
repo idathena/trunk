@@ -22,3 +22,4 @@
 17,Faceworm's Nest,3600,1@face,112,374,1@face
 18,Ghost Palace,3600,1@spa,42,196,1@spa
 19,Geffen Magic Tournament,7200,1@gef,119,209,1@gef,1@gef_in,1@ge_st
+20,Sarah and Fenrir,3600,1@glast,367,304,1@glast

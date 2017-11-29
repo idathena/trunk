@@ -17,12 +17,6 @@
 //= 1.0 First version.
 //============================================================
 
-function	script	close3	{
-	close2;
-	cutin "",255;
-	end;
-}
-
 lasa_fild01,47,297,0	script	#doint_evt01	HIDDEN_WARP_NPC,1,1,{
 	end;
 OnTouch:
@@ -1355,7 +1349,7 @@ izlude,195,213,5	script	Con-Chliina Crewman#doi	4_M_MERCAT1,{
 		.@cost = 200;
 	else
 		.@cost = 2000;
-	mes "Only ^0000cd" + .@cost + " Zenies^000000 to the port city Lasagna.";
+	mes "Only ^0000cd" + .@cost + " Zeny^000000 to the port city Lasagna.";
 	next;
 	if (select( "To Lasagna - " + .@cost + "z", "Cancel" ) == 2) {
 		mes "[Con-Chliina Crewman]";
@@ -1371,6 +1365,10 @@ izlude,195,213,5	script	Con-Chliina Crewman#doi	4_M_MERCAT1,{
 	warp "lasagna",206,297;
 	end;
 }
+izlude_a,195,213,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#doia	4_M_MERCAT1
+izlude_b,195,213,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#doib	4_M_MERCAT1
+izlude_c,195,213,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#doic	4_M_MERCAT1
+izlude_d,195,213,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#doid	4_M_MERCAT1
 malangdo,218,81,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#dom	4_M_MERCAT1
 
 izlude,138,183,3	script	Vigilante Penne#doect01	4_DR_SOLDIER,{
@@ -1446,6 +1444,10 @@ izlude,138,183,3	script	Vigilante Penne#doect01	4_DR_SOLDIER,{
 		close;
 	}
 }
+izlude_a,138,183,3	duplicate(Vigilante Penne#doect01)	Vigilante Penne#doect01a	4_DR_SOLDIER
+izlude_b,138,183,3	duplicate(Vigilante Penne#doect01)	Vigilante Penne#doect01b	4_DR_SOLDIER
+izlude_c,138,183,3	duplicate(Vigilante Penne#doect01)	Vigilante Penne#doect01c	4_DR_SOLDIER
+izlude_d,138,183,3	duplicate(Vigilante Penne#doect01)	Vigilante Penne#doect01d	4_DR_SOLDIER
 
 lasagna,209,301,3	script	Mustachi#dorcon01	4_DR_KID_01,{
 	mes "[Mustachi]";

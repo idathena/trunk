@@ -2417,10 +2417,11 @@ int npc_parseview(const char *w4, const char *start, const char *buffer, const c
  */
 bool npc_viewisid(const char *viewid)
 {
-	if( atoi(viewid) != JT_FAKENPC )
+	if( atoi(viewid) != JT_FAKENPC ) {
 		while( *viewid ) //Loop through view, looking for non-numeric character
 			if( ISDIGIT(*viewid++) == 0 )
 				return false;
+	}
 
 	return true;
 }
@@ -2439,7 +2440,7 @@ struct npc_data *npc_create_npc(int m, int x, int y)
 	nd->sc_display = NULL;
 	nd->sc_display_count = 0;
 	nd->progressbar.timeout = 0;
-	nd->vd.class_ = 0;
+	nd->vd = npc_viewdb[0];
 
 	return nd;
 }

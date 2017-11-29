@@ -3241,6 +3241,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct status_change *sc = status_get_sc(src);
 	struct status_change *tsc = status_get_sc(target);
+	struct status_data *sstatus = status_get_status_data(src);
 	struct status_data *tstatus = status_get_status_data(target);
 	short i;
 
@@ -3260,7 +3261,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 				dachance = 10 * sc->data[SC_KAGEMUSYA]->val1;
 			if(sc && sc->data[SC_E_CHAIN] && 5 * sc->data[SC_E_CHAIN]->val1 > dachance) {
 				dachance = 5 * sc->data[SC_E_CHAIN]->val1;
-				if(pc_checkskill(sd,RL_QD_SHOT))
+				if(pc_checkskill(sd,RL_QD_SHOT) && sstatus->amotion != pc_maxaspd(sd))
 					is_qds_ready = true;
 			}
 		}
@@ -3270,7 +3271,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 
 		if(5 * pc_checkskill(sd,GS_CHAINACTION) > dachance && sd->status.weapon == W_REVOLVER) {
 			dachance = 5 * pc_checkskill(sd,GS_CHAINACTION);
-			if(pc_checkskill(sd,RL_QD_SHOT))
+			if(pc_checkskill(sd,RL_QD_SHOT) && sstatus->amotion != pc_maxaspd(sd))
 				is_qds_ready = true;
 		}
 
