@@ -2512,7 +2512,7 @@ bool map_addnpc(int16 m,struct npc_data *nd)
 		return false;
 	}
 
-	map[m].npc[map[m].npc_num]=nd;
+	map[m].npc[map[m].npc_num] = nd;
 	map[m].npc_num++;
 	idb_put(id_db,nd->bl.id,nd);
 	return true;

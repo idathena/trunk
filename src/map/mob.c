@@ -2947,7 +2947,7 @@ int mob_random_class(int *value, size_t count)
 			count++;
 		if (count < 1)	//Nothing found
 			return 0;
-	} else if (mobdb_checkid(value[0]) == 0) //Check if at least the first value is valid
+	} else if (!mobdb_checkid(value[0])) //Check if at least the first value is valid
 		return 0;
 	//Pick a random value, hoping it exists [Skotlex]
 	return mobdb_checkid(value[rnd()%count]);

@@ -5310,6 +5310,8 @@
 	export_constant(HAT_EF_RETURN_TW_1ST_HAT);
 	export_constant(HAT_EF_C_FLUTTERBUTTERFLY_BL);
 	export_constant(HAT_EF_QSCARABA);
+	export_constant(HAT_EF_FSTONE);
+	export_constant(HAT_EF_MAGICCIRCLE);
 
 	#undef export_constant
 	#undef export_constant2
