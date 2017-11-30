@@ -3844,7 +3844,7 @@ int skill_area_sub_count(struct block_list *src, struct block_list *target, uint
 			{
 				struct status_change *tsc = status_get_sc(target);
 
-				if (!tsc || !tsc->data[SC_C_MARKER])
+				if (!(tsc && tsc->data[SC_C_MARKER]))
 					return 0; //Only counts marked target with SC_C_MARKER
 			}
 			break;
@@ -4739,7 +4739,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					clif_blown(src,mbl);
 					clif_spiritball(src);
 				}
-				if (battle_check_target(src,bl,BCT_ENEMY) > 0) //For MO_EXTREMITYFIST
+				if (battle_check_target(src,bl,BCT_ENEMY) > 0 && !(tsc && tsc->data[SC_HIDING])) //For MO_EXTREMITYFIST
 					skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
 				if (skill_id == MO_EXTREMITYFIST) {
 					status_set_sp(src,0,0);

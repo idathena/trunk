@@ -334,7 +334,7 @@
 268,1,6,4,0,0x1,0,5,1,no,0,0,0,weapon,0,0,	MO_STEELBODY,Mental Strength
 269,1,6,4,0,0x1,0,5,1,no,0,0,0,weapon,0,0,	MO_BLADESTOP,Root
 270,1,6,4,0,0x1,0,5,0,no,0,0,0,weapon,0,0,	MO_EXPLOSIONSPIRITS,Fury
-271,-2,6,1,0,0x60,0,5,1,yes,0,0x10000,0,weapon,0,0,	MO_EXTREMITYFIST,Asura Strike
+271,-2,6,1,0,0x60,0,5,1,yes,0,0x10000,0,weapon,0,0x2,	MO_EXTREMITYFIST,Asura Strike
 272,2,8,4,-1,0,0,5,-4,no,0,0x200,0,weapon,0,0,	MO_CHAINCOMBO,Raging Quadruple Blow
 273,2,6,4,-1,0x2,2,5,1,no,0,0x10200,0,weapon,0,0,	MO_COMBOFINISH,Raging Thrust
 274,1,0,0,0,0,0,10,0,no,0,0,0,weapon,0,0,	SA_ADVANCEDBOOK,Study

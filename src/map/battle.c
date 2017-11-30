@@ -1510,7 +1510,11 @@ int64 battle_calc_bg_damage(struct block_list *src, struct block_list *bl, int64
 bool battle_can_hit_gvg_target(struct block_list *src, struct block_list *bl, uint16 skill_id, int flag)
 {
 	struct mob_data *md = BL_CAST(BL_MOB, bl);
+	struct unit_data *ud = unit_bl2ud(bl);
 	short mob_id = ((TBL_MOB *)bl)->mob_id;
+
+	if( ud && ud->immune_attack )
+		return false;
 
 	if( md && md->guardian_data ) {
 		if( (status_bl_has_mode(bl, MD_SKILL_IMMUNE) || (mob_id == MOBID_EMPERIUM && !(skill_get_inf3(skill_id)&INF3_HIT_EMP))) && flag&BF_SKILL )
@@ -7210,7 +7214,8 @@ int battle_damage_area(struct block_list *bl, va_list ap) {
 	unsigned int tick;
 	int64 damage;
 	int amotion, dmotion;
-	struct block_list *src;
+	struct block_list *src = NULL;
+	struct unit_data *ud = NULL;
 
 	nullpo_ret(bl);
 
@@ -7220,7 +7225,7 @@ int battle_damage_area(struct block_list *bl, va_list ap) {
 	dmotion = va_arg(ap, int);
 	damage = va_arg(ap, int);
 
-	if( status_bl_has_mode(bl, MD_SKILL_IMMUNE) || status_get_class(bl) == MOBID_EMPERIUM )
+	if( ((ud = unit_bl2ud(bl)) && ud->immune_attack) || status_bl_has_mode(bl, MD_SKILL_IMMUNE) || status_get_class(bl) == MOBID_EMPERIUM )
 		return 0;
 	if( bl->id != src->id && battle_check_target(src, bl, BCT_ENEMY) > 0 ) {
 		map_freeblock_lock();
@@ -7767,12 +7772,8 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 		case BL_MOB: {
 				struct mob_data *md = ((TBL_MOB *)target);
 
-				if( ud ) {
-					if( ud->immune_attack )
-						return 0;
-					if( ud->immune_attack2 && !battle_getcurrentskill(s_bl) && battle_check_range(s_bl, target, 2) )
-						return 0;
-				}
+				if( ud && ud->immune_attack )
+					return 0;
 				if( ((md->special_state.ai == AI_SPHERE || //Marine Sphere
 					(md->special_state.ai == AI_FLORA && battle_config.summon_flora&1) || //Flora
 					(md->special_state.ai == AI_ZANZOU && map_flag_vs(md->bl.m)) || //Zanzou

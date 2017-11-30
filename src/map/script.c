@@ -17189,7 +17189,6 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UMOB_AMOTION, md->status.amotion);
 			getunitdata_sub(UMOB_ADELAY, md->status.adelay);
 			getunitdata_sub(UMOB_DMOTION, md->status.dmotion);
-			getunitdata_sub(51, md->ud.immune_attack2);
 			break;
 
 		case BL_HOM:
@@ -17577,7 +17576,6 @@ BUILDIN_FUNC(setunitdata)
 				case UMOB_AMOTION: md->base_status->amotion = (short)value; calc_status = true; break;
 				case UMOB_ADELAY: md->base_status->adelay = (short)value; calc_status = true; break;
 				case UMOB_DMOTION: md->base_status->dmotion = (short)value; calc_status = true; break;
-				case 51: md->ud.immune_attack2 = (bool)value > 0 ? 1 : 0; break;
 				default:
 					ShowError("buildin_setunitdata: Unknown data identifier %d for BL_MOB.\n", type);
 					return 1;
@@ -18944,7 +18942,7 @@ BUILDIN_FUNC(setquestinfo_req) {
 	for( i = 3; i <= num; i += 2 ) {
 		RECREATE(qi->req, struct questinfo_req, qi->req_count + 1);
 		qi->req[qi->req_count].quest_id = script_getnum(st,i);
-		qi->req[qi->req_count].state = (script_getnum(st,i + 1) >= 2) ? 2 : (script_getnum(st,i + 1) <= 0) ? 0 : 1;
+		qi->req[qi->req_count].state = script_getnum(st,i + 1);
 		qi->req_count++;
 	}
 	return SCRIPT_CMD_SUCCESS;
