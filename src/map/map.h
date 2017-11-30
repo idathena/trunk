@@ -602,8 +602,8 @@ struct mapflag_skill_adjust {
 };
 
 struct questinfo_req {
-	unsigned int quest_id;
-	unsigned state : 1; // 0: Doesn't have, 1: Active/Inactive, 2: Complete
+	int quest_id;
+	unsigned state : 2; // 0: Doesn't have, 1: Active/Inactive, 2: Complete
 };
 
 struct questinfo {

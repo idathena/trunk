@@ -41,7 +41,6 @@ struct unit_data {
 	unsigned int canact_tick;
 	unsigned int canmove_tick;
 	bool immune_attack; //Whether the unit is immune to attacks
-	bool immune_attack2; //Whether the unit is immune to normal melee attacks
 	uint8 dir;
 	unsigned char walk_count;
 	unsigned char target_count;

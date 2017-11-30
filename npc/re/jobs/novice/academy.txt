@@ -10292,471 +10292,98 @@ iz_ac02_b,62,139,3	duplicate(Lumin#2ac)	Lumin#2ac_b	4_M_NOV_RUMIN
 iz_ac02_c,62,139,3	duplicate(Lumin#2ac)	Lumin#2ac_c	4_M_NOV_RUMIN
 iz_ac02_d,62,139,3	duplicate(Lumin#2ac)	Lumin#2ac_d	4_M_NOV_RUMIN
 
--	script	tf_mobct#2ac	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,131,60,131,61,131,62,131;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
+iz_ac02,1,1,0	script	#nbacStone01	CLEAR_NPC,{
 	end;
 OnInit:
-	setcell "iz_ac02",59,131,62,131,cell_walkable,1;
-	donpcevent "tf_mobct#2ac::OnRespawn";
+	donpcevent "#"+strnpcinfo(2)+"::OnSpawn";
+	setcell "iz_ac02",58,142,63,144,cell_icewall,1; //Allow monster to drop in area
+	end;
+OnReset:
+	killmonster strnpcinfo(4),"#"+strnpcinfo(2)+"::OnMyMobDead";
+	donpcevent "#"+strnpcinfo(2)+"::OnSpawn";
+	end;
+OnMyMobDead:
+	.@dead_num = mobcount(""+strnpcinfo(4)+"", "#"+strnpcinfo(2)+"::OnMyMobDead");
+	if (.@dead_num < 1)
+		initnpctimer;
+	end;
+OnTimer10000:
+	stopnpctimer;
+//Fall through
+OnSpawn:
+	monster strnpcinfo(4),59,143,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
+	monster strnpcinfo(4),60,143,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
+	monster strnpcinfo(4),61,143,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
+	monster strnpcinfo(4),62,143,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
 	end;
 }
 
--	script	tf_mobct#2ac_a	-1,{
-	end;
+iz_ac02_a,1,1,0	duplicate(#nbacStone01)	#nbacStone01_a	CLEAR_NPC
+iz_ac02_b,1,1,0	duplicate(#nbacStone01)	#nbacStone01_b	CLEAR_NPC
+iz_ac02_c,1,1,0	duplicate(#nbacStone01)	#nbacStone01_c	CLEAR_NPC
+iz_ac02_d,1,1,0	duplicate(#nbacStone01)	#nbacStone01_d	CLEAR_NPC
 
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,131,60,131,61,131,62,131;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_a",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac_a::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
+iz_ac02,1,1,0	script	#nbacStone02	CLEAR_NPC,{
 	end;
 OnInit:
-	setcell "iz_ac02_a",59,131,62,131,cell_walkable,1;
-	donpcevent "tf_mobct#2ac_a::OnRespawn";
+	donpcevent "#"+strnpcinfo(2)+"::OnSpawn";
+	setcell "iz_ac02",58,136,63,138,cell_icewall,1;
+	end;
+OnReset:
+	killmonster strnpcinfo(4),"#"+strnpcinfo(2)+"::OnMyMobDead";
+	donpcevent "#"+strnpcinfo(2)+"::OnSpawn";
+	end;
+OnMyMobDead:
+	.@dead_num = mobcount(""+strnpcinfo(4)+"", "#"+strnpcinfo(2)+"::OnMyMobDead");
+	if (.@dead_num < 1)
+		initnpctimer;
+	end;
+OnTimer10000:
+	stopnpctimer;
+//Fall through
+OnSpawn:
+	monster strnpcinfo(4),59,137,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
+	monster strnpcinfo(4),60,137,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
+	monster strnpcinfo(4),61,137,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
+	monster strnpcinfo(4),62,137,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
 	end;
 }
 
--	script	tf_mobct#2ac_b	-1,{
-	end;
+iz_ac02_a,1,1,0	duplicate(#nbacStone02)	#nbacStone02_a	CLEAR_NPC
+iz_ac02_b,1,1,0	duplicate(#nbacStone02)	#nbacStone02_b	CLEAR_NPC
+iz_ac02_c,1,1,0	duplicate(#nbacStone02)	#nbacStone02_c	CLEAR_NPC
+iz_ac02_d,1,1,0	duplicate(#nbacStone02)	#nbacStone02_d	CLEAR_NPC
 
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,131,60,131,61,131,62,131;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_b",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac_b::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
+iz_ac02,1,1,0	script	#nbacStone03	CLEAR_NPC,{
 	end;
 OnInit:
-	setcell "iz_ac02_b",59,131,62,131,cell_walkable,1;
-	donpcevent "tf_mobct#2ac_b::OnRespawn";
+	donpcevent "#"+strnpcinfo(2)+"::OnSpawn";
+	setcell "iz_ac02",58,130,63,132,cell_icewall,1;
+	end;
+OnReset:
+	killmonster strnpcinfo(4),"#"+strnpcinfo(2)+"::OnMyMobDead";
+	donpcevent "#"+strnpcinfo(2)+"::OnSpawn";
+	end;
+OnMyMobDead:
+	.@dead_num = mobcount(""+strnpcinfo(4)+"", "#"+strnpcinfo(2)+"::OnMyMobDead");
+	if (.@dead_num < 1)
+		initnpctimer;
+	end;
+OnTimer10000:
+	stopnpctimer;
+//Fall through
+OnSpawn:
+	monster strnpcinfo(4),59,131,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
+	monster strnpcinfo(4),60,131,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
+	monster strnpcinfo(4),61,131,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
+	monster strnpcinfo(4),62,131,"Poring",1725,1,"#"+strnpcinfo(2)+"::OnMyMobDead";
 	end;
 }
 
--	script	tf_mobct#2ac_c	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,131,60,131,61,131,62,131;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_c",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac_c::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_c",59,131,62,131,cell_walkable,1;
-	donpcevent "tf_mobct#2ac_c::OnRespawn";
-	end;
-}
-
--	script	tf_mobct#2ac_d	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,131,60,131,61,131,62,131;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_d",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"tf_mobct#2ac_d::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_d",59,131,62,131,cell_walkable,1;
-	donpcevent "tf_mobct#2ac_d::OnRespawn";
-	end;
-}
-
--	script	2tf_mobct#2ac	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,137,60,137,61,137,62,137;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02",59,137,62,137,cell_walkable,1;
-	donpcevent "2tf_mobct#2ac::OnRespawn";
-	end;
-}
-
--	script	2tf_mobct#2ac_a	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,137,60,137,61,137,62,137;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_a",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac_a::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_a",59,137,62,137,cell_walkable,1;
-	donpcevent "2tf_mobct#2ac_a::OnRespawn";
-	end;
-}
-
--	script	2tf_mobct#2ac_b	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,137,60,137,61,137,62,137;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_b",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac_b::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_b",59,137,62,137,cell_walkable,1;
-	donpcevent "2tf_mobct#2ac_b::OnRespawn";
-	end;
-}
-
--	script	2tf_mobct#2ac_c	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,137,60,137,61,137,62,137;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_c",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac_c::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_c",59,137,62,137,cell_walkable,1;
-	donpcevent "2tf_mobct#2ac_c::OnRespawn";
-	end;
-}
-
-
--	script	2tf_mobct#2ac_d	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,137,60,137,61,137,62,137;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_d",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"2tf_mobct#2ac_d::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_d",59,137,62,137,cell_walkable,1;
-	donpcevent "2tf_mobct#2ac_d::OnRespawn";
-	end;
-}
-
--	script	3tf_mobct#2ac	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,143,60,143,61,143,62,143;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02",59,143,62,143,cell_walkable,1;
-	donpcevent "3tf_mobct#2ac::OnRespawn";
-	end;
-}
-
--	script	3tf_mobct#2ac_a	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,143,60,143,61,143,62,143;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_a",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac_a::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_a",59,143,62,143,cell_walkable,1;
-	donpcevent "3tf_mobct#2ac_a::OnRespawn";
-	end;
-}
-
--	script	3tf_mobct#2ac_b	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,143,60,143,61,143,62,143;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_b",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac_b::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_b",59,143,62,143,cell_walkable,1;
-	donpcevent "3tf_mobct#2ac_b::OnRespawn";
-	end;
-}
-
--	script	3tf_mobct#2ac_c	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,143,60,143,61,143,62,143;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_c",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac_c::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_c",59,143,62,143,cell_walkable,1;
-	donpcevent "3tf_mobct#2ac_c::OnRespawn";
-	end;
-}
-
--	script	3tf_mobct#2ac_d	-1,{
-	end;
-
-OnMyMobDead:
-	set .MyMobs,.MyMobs+1;
-	if(.MyMobs == 4) {
-		set .MyMobs,0;
-		initnpctimer;
-	}
-	end;
-OnTimer10000:
-OnRespawn:
-	setarray .@a[0],
-		59,143,60,143,61,143,62,143;
-
-	stopnpctimer;
-	for(set .@i,0; .@i < getarraysize(.@a); set .@i,.@i+2) {
-		monster "iz_ac02_d",.@a[.@i],.@a[.@i+1],"Poring",1725,1,"3tf_mobct#2ac_d::OnMyMobDead";
-		.GID = $@mobid[0];
-		getunitdata .GID,.@temp;
-		set .@temp[UMOB_MODE],.@temp[UMOB_MODE]^((MD_CANMOVE|MD_CANATTACK)&.@temp[UMOB_MODE]);
-		setunitdata .GID,UMOB_MODE,.@temp[UMOB_MODE];
-		setunitdata .GID,51,1;
-	}
-	end;
-OnInit:
-	setcell "iz_ac02_d",59,143,62,143,cell_walkable,1;
-	donpcevent "3tf_mobct#2ac_d::OnRespawn";
-	end;
-}
+iz_ac02_a,1,1,0	duplicate(#nbacStone03)	#nbacStone03_a	CLEAR_NPC
+iz_ac02_b,1,1,0	duplicate(#nbacStone03)	#nbacStone03_b	CLEAR_NPC
+iz_ac02_c,1,1,0	duplicate(#nbacStone03)	#nbacStone03_c	CLEAR_NPC
+iz_ac02_d,1,1,0	duplicate(#nbacStone03)	#nbacStone03_d	CLEAR_NPC
 
 iz_ac02,52,136,3	script	Guest Lecturer Mayssel#0	4_F_MAYSEL,{
 	if(!checkweight(1201,1) || (MaxWeight - Weight) < 2000) {
@@ -11517,10 +11144,9 @@ iz_ac02,49,134,5	script	Vicente#2ac	4_M_HUMAN_02,{
 							mes "[Vicente]";
 							mes "Hmmm? All porings were stolen of their stones?";
 							mes "I will summon Porings again, and you, try it once again.";
-							atcommand "@killmonster2";
-							donpcevent "tf_mobct#"+strnpcinfo(2)+"::OnRespawn";
-							donpcevent "2tf_mobct#"+strnpcinfo(2)+"::OnRespawn";
-							donpcevent "3tf_mobct#"+strnpcinfo(2)+"::OnRespawn";
+							donpcevent "#nbacStone01"+replacestr(strnpcinfo(2),"2ac","")+"::OnReset";
+							donpcevent "#nbacStone02"+replacestr(strnpcinfo(2),"2ac","")+"::OnReset";
+							donpcevent "#nbacStone03"+replacestr(strnpcinfo(2),"2ac","")+"::OnReset";
 							npcskill "AL_BLESSING",10,99,60;
 							percentheal 0,100;
 							close2;
@@ -13101,8 +12727,8 @@ new_1-1,53,114,3	script	Training Instructor#1a	4_F_03,{
 	} else if(strnpcinfo(4) == "new_5-1" || strnpcinfo(4) == "new_5-2" || strnpcinfo(4) == "new_5-3" || strnpcinfo(4) == "new_5-4") {
 		.@warp$ = "iz_int04";
 	}
-	savepoint .@warp$,98,88,1,1;
-	warp .@warp$,98,88;
+	savepoint .@warp$,18,26,1,1;
+	warp .@warp$,18,26;
 	end;
 }
 
