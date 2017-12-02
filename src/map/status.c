@@ -1598,7 +1598,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 
 	if (hp && !(flag&1)) {
 		if (sc) {
-			struct status_change_entry *sce;
+			struct status_change_entry *sce = NULL;
 
 			if (sc->data[SC_STONE] && sc->opt1 == OPT1_STONE)
 				status_change_end(target, SC_STONE, INVALID_TIMER);
@@ -1612,9 +1612,9 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 			status_change_end(target, SC_CLOAKING, INVALID_TIMER);
 			status_change_end(target, SC_CHASEWALK, INVALID_TIMER);
 			status_change_end(target, SC_CAMOUFLAGE, INVALID_TIMER);
-			status_change_end(target, SC_DEEPSLEEP, INVALID_TIMER);
 			status_change_end(target, SC_SITDOWN_FORCE, INVALID_TIMER);
 			status_change_end(target, SC_BANANA_BOMB_SITDOWN, INVALID_TIMER);
+			status_change_end(target, SC_MEIKYOUSISUI, INVALID_TIMER);
 			status_change_end(target, SC_SUHIDE, INVALID_TIMER);
 			//Endure count is only reduced by non-players on non-gvg maps
 			if ((sce = sc->data[SC_ENDURE]) && !sce->val4 && //val4 signals infinite endure [Skotlex]
@@ -8802,6 +8802,14 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_FREEZE,INVALID_TIMER);
 			status_change_end(bl,SC_FREEZING,INVALID_TIMER);
 			status_change_end(bl,SC_CRYSTALIZE,INVALID_TIMER);
+			break;
+		case SC_MEIKYOUSISUI:
+			status_change_end(bl,SC_POISON,INVALID_TIMER);
+			status_change_end(bl,SC_BLIND,INVALID_TIMER);
+			status_change_end(bl,SC_CURSE,INVALID_TIMER);
+			status_change_end(bl,SC_FEAR,INVALID_TIMER);
+			status_change_end(bl,SC_BURNING,INVALID_TIMER);
+			status_change_end(bl,SC_FREEZING,INVALID_TIMER);
 			break;
 		case SC_INVINCIBLE:
 			status_change_end(bl,SC_INVINCIBLEOFF,INVALID_TIMER);

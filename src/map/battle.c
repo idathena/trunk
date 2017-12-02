@@ -1144,11 +1144,8 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( sc->data[SC_TATAMIGAESHI] && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG )
 			return 0;
 
-		if( sc->data[SC_NEUTRALBARRIER] && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG &&
-			skill_id != NJ_ZENYNAGE && skill_id != KO_MUCHANAGE ) {
-			d->dmg_lv = ATK_MISS;
+		if( sc->data[SC_NEUTRALBARRIER] && (flag&(BF_LONG|BF_MAGIC)) == BF_LONG && skill_id != NJ_ZENYNAGE && skill_id != KO_MUCHANAGE )
 			return 0;
-		}
 
 		//Kaupe blocks damage (skill or otherwise) from players, mobs, homuns, mercenaries
 		if( (sce = sc->data[SC_KAUPE]) && rnd()%100 < sce->val2 ) {
@@ -2779,7 +2776,6 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 			case MC_CARTREVOLUTION:
 			case SR_CRESCENTELBOW_AUTOSPELL:
 			case SR_GATEOFHELL:
-			case KO_BAKURETSU:
 			case NC_MAGMA_ERUPTION:
 				wd.damage = battle_attr_fix(src, target, wd.damage, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 				if(is_attack_left_handed(src, skill_id))
@@ -5594,7 +5590,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			case PA_SHIELDCHAIN:
 			case SR_CRESCENTELBOW_AUTOSPELL:
 			case SR_GATEOFHELL:
-			case KO_BAKURETSU:
 			case NC_MAGMA_ERUPTION:
 				wd.damage = battle_attr_fix(src, target, wd.damage, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 				if(is_attack_left_handed(src, skill_id))
