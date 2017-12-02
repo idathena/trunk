@@ -1014,10 +1014,8 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			if( sd ) //Poison chance must be that of Envenom [Skotlex]
 				skill_lv = pc_checkskill(sd,TF_POISON);
 		//Fall through
-		case TF_POISON:
 		case AS_SPLASHER:
-			if( !sc_start(src,bl,SC_POISON,10 + skill_lv * 4,skill_lv,skill_get_time2(skill_id,skill_lv)) && skill_id == TF_POISON && sd )
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+			sc_start(src,bl,SC_POISON,10 + skill_lv * 4,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case AS_SONICBLOW:
 			sc_start(src,bl,SC_STUN,10 + skill_lv * 2,skill_lv,skill_get_time2(skill_id,skill_lv));
@@ -1755,7 +1753,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			if( rate ) //Target armor breaking
 				skill_break_equip(src,bl,EQP_ARMOR,rate,BCT_ENEMY);
 		}
-		if( sd && !skill_id ) { //This effect does not work with skills
+		if( !skill_id && sd ) { //This effect does not work with skills
 			if( sd->def_set_race[tstatus->race].rate )
 				status_change_start(src,bl,SC_DEFSET_NUM,sd->def_set_race[tstatus->race].rate,
 					sd->def_set_race[tstatus->race].value,0,0,0,sd->def_set_race[tstatus->race].tick,SCFLAG_FIXEDTICK);
@@ -4458,7 +4456,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case KN_PIERCE:
 		case ML_PIERCE:
 		case KN_SPEARBOOMERANG:
-		case TF_POISON:
 		case TF_SPRINKLESAND:
 		case AC_CHARGEARROW:
 		case MA_CHARGEARROW:
@@ -4582,6 +4579,12 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case EL_WIND_SLASH:
 		case MER_INVINCIBLEOFF2:
 			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+			break;
+
+		case TF_POISON:
+			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+			if (!sc_start(src,bl,SC_POISON,10 + skill_lv * 4,skill_lv,skill_get_time2(skill_id,skill_lv)) && sd)
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			break;
 
 		case LK_JOINTBEAT: //Decide the ailment first (affects attack damage and effect)
