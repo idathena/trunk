@@ -3091,16 +3091,8 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	//Skill hit type
 	type = (!skill_id ? DMG_SPLASH : skill_get_hit(skill_id));
 
-	switch (skill_id) {
-		case WL_HELLINFERNO: //Hell Inferno burning status only starts if Fire part hits
-			if (dmg.dmg_lv == ATK_DEF && !(flag&ELE_DARK))
-				sc_start(src, bl, SC_BURNING, 55 + 5 * skill_lv, skill_lv, skill_get_time2(skill_id, skill_lv));
-			break;
-		case SC_TRIANGLESHOT:
-			if (rnd()%100 >= skill_lv + 1)
-				dmg.blewcount = 0;
-			break;
-	}
+	if (skill_id == SC_TRIANGLESHOT && rnd()%100 >= 1 + skill_lv)
+		dmg.blewcount = 0;
 
 	if (damage < dmg.div_ && skill_id != CH_PALMSTRIKE)
 		dmg.blewcount = 0; //Only pushback when it hit for other
@@ -3179,7 +3171,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case RK_IGNITIONBREAK:
 		case LG_CANNONSPEAR:
 		case LG_MOONSLASHER:
-		case GN_SPORE_EXPLOSION:
 		case GN_ILLUSIONDOPING:
 		case MH_HEILIGE_STANGE:
 		case EL_CIRCLE_OF_FIRE:
@@ -3214,7 +3205,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, AL_HEAL, -1, DMG_SKILL);
 			break;
 		case WL_HELLINFERNO:
-			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SKILL);
+			if (flag&ELE_DARK)
+				dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, NV_BASIC, -1, DMG_SPLASH);
+			else
+				dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, skill_lv, DMG_SKILL);
 			break;
 		case NPC_COMET:
 		case WL_COMET:
@@ -3230,6 +3224,12 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case MG_FIREBALL:
 		case GN_CARTCANNON:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SKILL);
+			break;
+		case GN_SPORE_EXPLOSION:
+			if (flag&SD_ANIMATION)
+				dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, NV_BASIC, -1, DMG_SPLASH);
+			else
+				dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, DMG_SPLASH);
 			break;
 		case GN_FIRE_EXPANSION_ACID:
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, CR_ACIDDEMONSTRATION, skill_lv, DMG_MULTI_HIT);
@@ -3260,7 +3260,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				break; //Avoid damage display redundancy
 		//Fall through
 		case HT_LANDMINE:
-			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, type);
+			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SKILL);
 			break;
 		case AB_DUPLELIGHT_MELEE:
 		case AB_DUPLELIGHT_MAGIC:
@@ -3375,6 +3375,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 					if (rnd()%100 < rate && !status_has_mode(tstatus, MD_STATUS_IMMUNE))
 						skill_addtimerskill(src, tick + 800, bl->id, 0, 0, skill_id, skill_lv, 0, flag);
 				}
+				break;
+			case WL_HELLINFERNO: //Hell Inferno has a chance of giving burning status when the fire damage hits
+				if (!status_isdead(bl) && !(flag&ELE_DARK))
+					sc_start(src, bl, SC_BURNING, 55 + 5 * skill_lv, skill_lv, skill_get_time2(skill_id, skill_lv));
 				break;
 			case SC_FATALMENACE:
 				if (!status_has_mode(tstatus, MD_STATUS_IMMUNE))
@@ -4908,9 +4912,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 								flag |= 8;
 						}
 						break;
-					case GN_SPORE_EXPLOSION:
-						clif_skill_damage(src,bl,tick,status_get_amotion(src),status_get_dmotion(src),-30000,1,skill_id,-1,DMG_SPLASH);
-						break;
 #ifdef RENEWAL
 					case MG_FIREBALL:
 						skill_area_temp[4] = bl->x;
@@ -4955,7 +4956,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				//SD_LEVEL -> Forced splash damage for Auto Blitz-Beat -> count targets
 				//Special case: Venom Splasher uses a different range for searching than for splashing
 				if ((flag&SD_LEVEL) || (skill_get_nk(skill_id)&NK_SPLASHSPLIT))
-					skill_area_temp[0] = map_foreachinallrange(skill_area_sub,bl,(skill_id == AS_SPLASHER ? 1 : skill_get_splash(skill_id,skill_lv)),BL_CHAR,src,skill_id,skill_lv,tick,BCT_ENEMY,skill_area_sub_count);
+					skill_area_temp[0] = map_foreachinallrange(skill_area_sub,bl,(skill_id == AS_SPLASHER || skill_id == GN_SPORE_EXPLOSION ? 1 : skill_get_splash(skill_id,skill_lv)),BL_CHAR,src,skill_id,skill_lv,tick,BCT_ENEMY,skill_area_sub_count);
 				//Recursive invocation of skill_castend_damage_id() with flag|1
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),starget,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
 				if (skill_id == RA_ARROWSTORM)

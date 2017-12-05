@@ -7630,7 +7630,9 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			case SC_GLORIA:		case SC_WINDWALK:	case SC_MAGICROD:
 			case SC_HALLUCINATION:	case SC_STONE:		case SC_QUAGMIRE:
 			case SC_SUITON:		case SC_SECRAMENT:	case SC_ADORAMUS:
-			case SC_WHITEIMPRISON:	case SC__MANHOLE:
+			case SC_WHITEIMPRISON:	case SC__MANHOLE:	case SC_FIRE_INSIGNIA:
+			case SC_WATER_INSIGNIA:	case SC_WIND_INSIGNIA:	case SC_EARTH_INSIGNIA:
+			case SC_BLOODSUCKER:
 				return 0;
 		}
 	}
@@ -11616,9 +11618,9 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		case SC_SPLASHER:
 		case SC_SPORE_EXPLOSION:
 			{
-				struct block_list *src = map_id2bl(sce->val2);
+				struct block_list *src = NULL;
 
-				if (src && tid != INVALID_TIMER)
+				if ((src = map_id2bl(sce->val2)) && tid != INVALID_TIMER)
 					skill_castend_damage_id(src,bl,status_sc2skill(type),sce->val1,gettick(),SD_LEVEL);
 			}
 			break;
