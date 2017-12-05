@@ -103,7 +103,7 @@ const char *login_msg_txt(int msg_number);
 void login_do_final_msg(void);
 
 #define MAX_SERVERS 30 // Number of charserv loginserv can handle
-extern struct mmo_char_server server[MAX_SERVERS]; // Array of char-servs data
+extern struct mmo_char_server ch_server[MAX_SERVERS]; // Array of char-servs data
 extern struct Login_Config login_config; // Config of login serv
 
 #endif /* _LOGIN_H_ */
