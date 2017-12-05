@@ -6131,7 +6131,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						skillratio += -100 + 300 * skill_lv;
 						RE_LVL_DMOD(100);
 						//Shadow: MATK [{( Skill Level x 300 ) x ( Caster's Base Level / 100 ) x 4/5 }] %
-						//Fire : MATK [{( Skill Level x 300 ) x ( Caster's Base Level / 100 ) /5 }] %
+						//Fire : MATK [{( Skill Level x 300 ) x ( Caster's Base Level / 100 ) / 5 }] %
 						if(ad.miscflag&ELE_DARK)
 							skillratio *= 4;
 						skillratio /= 5;
