@@ -1120,9 +1120,9 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 
 #if PACKETVER >= 20091103
 #if PACKETVER >= 20120221
-	memcpy((char *)WBUFP(buf,64),name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,64),name,NAME_LENGTH);
 #else
-	memcpy((char *)WBUFP(buf,55),name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,55),name,NAME_LENGTH);
 #endif
 	return WBUFW(buffer,2);
 #else
@@ -1275,9 +1275,9 @@ static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, un
 
 #if PACKETVER >= 20091103
 #if PACKETVER >= 20120221
-	memcpy((char *)WBUFP(buf,71),name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,71),name,NAME_LENGTH);
 #else
-	memcpy((char *)WBUFP(buf,62),name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,62),name,NAME_LENGTH);
 #endif
 	return WBUFW(buffer,2);
 #else
@@ -1520,7 +1520,7 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 
 	memset(buf,0,packet_len(cmd));
 	WBUFW(buf,0) = cmd;
-	memcpy(WBUFP(buf,2),hd->homunculus.name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,2),hd->homunculus.name,NAME_LENGTH);
 	//Bit field, bit 0 : rename_flag (1 = already renamed), bit 1 : homunc vaporized (1 = true), bit 2 : homunc dead (1 = true)
 	WBUFB(buf,26) = (battle_config.hom_rename ? 0 : hd->homunculus.rename_flag)|(hd->homunculus.vaporize<<1)|(hd->homunculus.hp ? 0 : 4);
 	WBUFW(buf,27) = hd->homunculus.level;
@@ -2168,7 +2168,7 @@ void clif_scriptmes(struct map_session_data *sd, int npcid, const char *mes)
 	WFIFOW(fd,0) = 0xb4;
 	WFIFOW(fd,2) = slen;
 	WFIFOL(fd,4) = npcid;
-	memcpy((char *)WFIFOP(fd,8), mes, slen - 8);
+	safestrncpy((char *)WFIFOP(fd,8), mes, slen - 8);
 	WFIFOSET(fd,WFIFOW(fd,2));
 }
 
@@ -2286,7 +2286,7 @@ void clif_scriptmenu(struct map_session_data *sd, int npcid, const char *mes)
 	WFIFOW(fd,0) = 0xb7;
 	WFIFOW(fd,2) = slen;
 	WFIFOL(fd,4) = npcid;
-	memcpy((char *)WFIFOP(fd,8), mes, slen - 8);
+	safestrncpy((char *)WFIFOP(fd,8), mes, slen - 8);
 	WFIFOSET(fd,WFIFOW(fd,2));
 }
 
@@ -4054,7 +4054,7 @@ void clif_dispchat(struct chat_data *cd, int fd)
 	WBUFW(buf,12) = cd->limit;
 	WBUFW(buf,14) = (cd->owner->type == BL_NPC) ? cd->users + 1 : cd->users;
 	WBUFB(buf,16) = type;
-	memcpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // Not zero-terminated
+	safestrncpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // Not zero-terminated
 
 	if( fd ) {
 		WFIFOHEAD(fd,WBUFW(buf,2));
@@ -4091,7 +4091,7 @@ void clif_changechatstatus(struct chat_data *cd)
 	WBUFW(buf,12) = cd->limit;
 	WBUFW(buf,14) = (cd->owner->type == BL_NPC) ? cd->users+1 : cd->users;
 	WBUFB(buf,16) = type;
-	memcpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // not zero-terminated
+	safestrncpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // not zero-terminated
 
 	clif_send(buf,WBUFW(buf,2),cd->owner,CHAT);
 }
@@ -4193,7 +4193,7 @@ void clif_addchat(struct chat_data *cd,struct map_session_data *sd)
 
 	WBUFW(buf,0) = 0xdc;
 	WBUFW(buf,2) = cd->users;
-	memcpy(WBUFP(buf, 4),sd->status.name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf, 4),sd->status.name,NAME_LENGTH);
 	clif_send(buf,packet_len(0xdc),&sd->bl,CHAT_WOS);
 }
 
@@ -4212,11 +4212,11 @@ void clif_changechatowner(struct chat_data *cd, struct map_session_data *sd)
 
 	WBUFW(buf, 0) = 0xe1;
 	WBUFL(buf, 2) = 1;
-	memcpy(WBUFP(buf,6),cd->usersd[0]->status.name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,6),cd->usersd[0]->status.name,NAME_LENGTH);
 
 	WBUFW(buf,30) = 0xe1;
 	WBUFL(buf,32) = 0;
-	memcpy(WBUFP(buf,36),sd->status.name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,36),sd->status.name,NAME_LENGTH);
 
 	clif_send(buf,packet_len(0xe1) * 2,&sd->bl,CHAT);
 }
@@ -4236,7 +4236,7 @@ void clif_leavechat(struct chat_data *cd, struct map_session_data *sd, bool flag
 
 	WBUFW(buf, 0) = 0xdd;
 	WBUFW(buf, 2) = cd->users - 1;
-	memcpy(WBUFP(buf,4),sd->status.name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,4),sd->status.name,NAME_LENGTH);
 	WBUFB(buf,28) = flag;
 
 	clif_send(buf,packet_len(0xdd),&sd->bl,CHAT);
@@ -6287,7 +6287,7 @@ void clif_broadcast(struct block_list *bl, const char *mes, int len, int type, e
 		WBUFL(buf,4) = 0x65756c62; //If there's "blue" at the beginning of the message, game client will display it in blue instead of yellow.
 	else if (type&BC_WOE)
 		WBUFL(buf,4) = 0x73737373; //If there's "ssss", game client will recognize message as 'WoE broadcast'.
-	memcpy(WBUFP(buf,4 + lp),mes,len);
+	safestrncpy((char *)WBUFP(buf,4 + lp),mes,len);
 	clif_send(buf,WBUFW(buf,2),bl,target);
 
 	if (buf)
@@ -6336,7 +6336,7 @@ void clif_broadcast2(struct block_list *bl, const char *mes, int len, unsigned l
 	WBUFW(buf,10) = fontSize;
 	WBUFW(buf,12) = fontAlign;
 	WBUFW(buf,14) = fontY;
-	memcpy(WBUFP(buf,16), mes, len);
+	safestrncpy((char *)WBUFP(buf,16), mes, len);
 	clif_send(buf, WBUFW(buf,2), bl, target);
 
 	if (buf)
@@ -6517,14 +6517,14 @@ void clif_pvpset(struct map_session_data *sd,int pvprank,int pvpnum,int type)
 /*==========================================
  *
  *------------------------------------------*/
-void clif_map_property_mapall(int map, enum map_property property)
+void clif_map_property_mapall(int map_idx, enum map_property property)
 {
 	struct block_list bl;
 	unsigned char buf[16];
 
 	bl.id = 0;
 	bl.type = BL_NUL;
-	bl.m = map;
+	bl.m = map_idx;
 	WBUFW(buf,0) = 0x199;
 	WBUFW(buf,2) = property;
 	clif_send(buf,packet_len(0x199),&bl,ALL_SAMEMAP);
@@ -7534,7 +7534,7 @@ void clif_party_info(struct party_data *p, struct map_session_data *sd)
 	nullpo_retv(p);
 
 	WBUFW(buf,0) = cmd;
-	memcpy(WBUFP(buf,4), p->party.name, NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,4), p->party.name, NAME_LENGTH);
 	for(i = 0, c = 0; i < MAX_PARTY; i++) {
 		struct party_member *m = &p->party.member[i];
 
@@ -7711,7 +7711,7 @@ void clif_party_withdraw(struct map_session_data *sd, uint32 account_id, const c
 
 	WBUFW(buf,0) = 0x0105;
 	WBUFL(buf,2) = account_id;
-	memcpy(WBUFP(buf,6), name, NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,6), name, NAME_LENGTH);
 	WBUFB(buf,6 + NAME_LENGTH) = result;
 	clif_send(buf,2 + 4 + NAME_LENGTH + 1,&sd->bl,target);
 }
@@ -8643,7 +8643,7 @@ void clif_guild_positionchanged(struct guild *g,int idx)
 	WBUFL(buf, 8) = g->position[idx].mode;
 	WBUFL(buf,12) = idx;
 	WBUFL(buf,16) = g->position[idx].exp_mode;
-	memcpy(WBUFP(buf,20),g->position[idx].name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,20),g->position[idx].name,NAME_LENGTH);
 	// }*
 	if( (sd = guild_getavailablesd(g)) )
 		clif_send(buf,WBUFW(buf,2),&sd->bl,GUILD);
@@ -8826,8 +8826,8 @@ void clif_guild_leave(struct map_session_data *sd,const char *name,const char *m
 	nullpo_retv(sd);
 
 	WBUFW(buf,0) = 0x15a;
-	memcpy(WBUFP(buf,2), name, NAME_LENGTH);
-	memcpy(WBUFP(buf,26), mes, 40);
+	safestrncpy((char *)WBUFP(buf,2), name, NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,26), mes, 40);
 	clif_send(buf, packet_len(0x15a), &sd->bl,GUILD_NOBG);
 }
 
@@ -9010,7 +9010,7 @@ void clif_guild_allianceadded(struct guild *g,int idx)
 	WBUFW(buf,0)=0x185;
 	WBUFL(buf,2)=g->alliance[idx].opposition;
 	WBUFL(buf,6)=g->alliance[idx].guild_id;
-	memcpy(WBUFP(buf,10),g->alliance[idx].name,NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,10),g->alliance[idx].name,NAME_LENGTH);
 	clif_send(buf,packet_len(0x185),guild_getavailablesd(g),GUILD);
 }
 */
@@ -9093,7 +9093,7 @@ void clif_callpartner(struct map_session_data *sd)
 		struct map_session_data *p_sd = pc_get_partner(sd);
 
 		if( p && p_sd && !p_sd->state.autotrade )
-			memcpy(WBUFP(buf,2), p, NAME_LENGTH);
+			safestrncpy((char *)WBUFP(buf,2), p, NAME_LENGTH);
 		else
 			WBUFB(buf,2) = 0;
 	} else //Send zero-length name if no partner, to initialize the client buffer
@@ -9444,7 +9444,7 @@ void clif_messagecolor_target(struct block_list *bl, unsigned long color, const 
 	WBUFW(buf,2) = msg_len + 12;
 	WBUFL(buf,4) = bl->id;
 	WBUFL(buf,8) = color;
-	memcpy((char *)WBUFP(buf,12), msg, msg_len);
+	safestrncpy((char *)WBUFP(buf,12), msg, msg_len);
 
 	clif_send(buf, WBUFW(buf,2), (!sd ? bl : &sd->bl), type);
 }
@@ -13254,7 +13254,7 @@ void clif_PartyBookingInsertNotify(struct map_session_data *sd, struct party_boo
 
 	WBUFW(buf,0) = 0x809;
 	WBUFL(buf,2) = pb_ad->index;
-	memcpy(WBUFP(buf,6), pb_ad->charname, NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,6), pb_ad->charname, NAME_LENGTH);
 	WBUFL(buf,30) = pb_ad->starttime; //FIXME: This is expire time
 	WBUFW(buf,34) = pb_ad->p_detail.level;
 	WBUFW(buf,36) = pb_ad->p_detail.mapid;
@@ -17147,7 +17147,7 @@ void clif_bg_hp(struct map_session_data *sd)
 	WBUFW(buf,0) = cmd;
 	WBUFL(buf,2) = sd->status.account_id;
 #if PACKETVER < 20140613
-    memcpy(WBUFP(buf,6), sd->status.name, NAME_LENGTH);
+    safestrncpy((char *)WBUFP(buf,6), sd->status.name, NAME_LENGTH);
     if( sd->battle_status.max_hp > INT16_MAX ) { //To correctly display the %hp bar [Skotlex]
 		WBUFW(buf,30) = sd->battle_status.hp / (sd->battle_status.max_hp / 100);
 		WBUFW(buf,32) = 100;
@@ -17177,7 +17177,7 @@ void clif_bg_xy(struct map_session_data *sd)
 
 	WBUFW(buf,0) = 0x2df;
 	WBUFL(buf,2) = sd->status.account_id;
-	memcpy(WBUFP(buf,6), sd->status.name, NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,6), sd->status.name, NAME_LENGTH);
 	WBUFW(buf,30) = sd->status.class_;
 	WBUFW(buf,32) = sd->bl.x;
 	WBUFW(buf,34) = sd->bl.y;
@@ -17215,8 +17215,8 @@ void clif_bg_message(struct battleground_data *bg, int src_id, const char *name,
 	WBUFW(buf,0) = 0x2dc;
 	WBUFW(buf,2) = len + NAME_LENGTH + 8;
 	WBUFL(buf,4) = src_id;
-	memcpy(WBUFP(buf,8), name, NAME_LENGTH);
-	memcpy(WBUFP(buf,32), mes, len);
+	safestrncpy((char *)WBUFP(buf,8), name, NAME_LENGTH);
+	safestrncpy((char *)WBUFP(buf,32), mes, len);
 	clif_send(buf,WBUFW(buf,2), &sd->bl, BG);
 
 	if( buf )
@@ -17335,7 +17335,7 @@ void clif_instance_create(struct map_session_data *sd, const char *name, int num
 		return;
 
 	WBUFW(buf,0) = 0x2cb;
-	memcpy(WBUFP(buf,2),name,62);
+	safestrncpy((char *)WBUFP(buf,2),name,62);
 	WBUFW(buf,63) = num;
 	if(flag) //A timer has changed or been added
 		clif_send(buf,packet_len(0x2cb),&sd->bl,PARTY);
@@ -17374,7 +17374,7 @@ void clif_instance_status(struct map_session_data *sd, const char *name, unsigne
 		return;
 
 	WBUFW(buf,0) = 0x2cd;
-	memcpy(WBUFP(buf,2),name,62);
+	safestrncpy((char *)WBUFP(buf,2),name,62);
 	WBUFL(buf,63) = limit1;
 	WBUFL(buf,67) = limit2;
 	if(flag) //A timer has changed or been added

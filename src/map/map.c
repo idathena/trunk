@@ -3734,7 +3734,7 @@ static int char_ip_set = 0;
 int parse_console(const char *buf) {
 	char type[64];
 	char command[64];
-	char map[64];
+	char mapname[64];
 	int16 x = 0;
 	int16 y = 0;
 	int16 m;
@@ -3744,7 +3744,7 @@ int parse_console(const char *buf) {
 	memset(&sd, 0, sizeof(struct map_session_data));
 	strcpy(sd.status.name, "console");
 
-	if( (n = sscanf(buf, "%63[^:]:%63[^:]:%63s %hd %hd[^\n]", type, command, map, &x, &y)) < 5 ) {
+	if( (n = sscanf(buf, "%63[^:]:%63[^:]:%63s %hd %hd[^\n]", type, command, mapname, &x, &y)) < 5 ) {
 		if( (n = sscanf(buf, "%63[^:]:%63[^\n]", type, command)) < 2 ) {
 			if( (n = sscanf(buf, "%63[^\n]", type)) < 1 ) return -1; //nothing to do no arg
 		}
@@ -3754,17 +3754,17 @@ int parse_console(const char *buf) {
 		if( n < 2 ) {
 			ShowNotice("Type of command: '%s'\n", type);
 			command[0] = '\0';
-			map[0] = '\0';
+			mapname[0] = '\0';
 		} else {
 			ShowNotice("Type of command: '%s' || Command: '%s'\n", type, command);
-			map[0] = '\0';
+			mapname[0] = '\0';
 		}
 	} else
-		ShowNotice("Type of command: '%s' || Command: '%s' || Map: '%s' Coords: %d %d\n", type, command, map, x, y);
+		ShowNotice("Type of command: '%s' || Command: '%s' || Map: '%s' Coords: %d %d\n", type, command, mapname, x, y);
 
 	if( strcmpi("admin",type) == 0 ) {
 		if( strcmpi("map",command) == 0 ) {
-			m = map_mapname2mapid(map);
+			m = map_mapname2mapid(mapname);
 			if( m < 0 ) {
 				ShowWarning("Console: Unknown map.\n");
 				return 0;
@@ -3775,7 +3775,7 @@ int parse_console(const char *buf) {
 				sd.bl.x = x;
 			if( y > 0 )
 				sd.bl.y = y;
-			ShowNotice("Now at: '%s' Coords: %d %d\n", map, x, y);
+			ShowNotice("Now at: '%s' Coords: %d %d\n", mapname, x, y);
 		} else if( !is_atcommand(sd.fd, &sd, command, 2) )
 			ShowInfo("Console: Invalid atcommand.\n");
 	} else if( n == 2 && strcmpi("server", type) == 0 ) {
@@ -4380,7 +4380,7 @@ void do_final(void)
 	do_final_pet();
 	do_final_homunculus();
 	do_final_mercenary();
-	do_final_mob(false);
+	do_final_mob();
 	do_final_msg();
 	do_final_skill();
 	do_final_status();

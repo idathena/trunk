@@ -9825,9 +9825,9 @@ BUILDIN_FUNC(clone)
 	int16 m;
 	enum e_mode mode = 0;
 	unsigned int duration = 0;
-	const char *map, *event;
+	const char *mapname, *event;
 
-	map = script_getstr(st,2);
+	mapname = script_getstr(st,2);
 	x = script_getnum(st,3);
 	y = script_getnum(st,4);
 	event = script_getstr(st,5);
@@ -9847,8 +9847,9 @@ BUILDIN_FUNC(clone)
 
 	check_event(st, event);
 
-	m = map_mapname2mapid(map);
-	if( m < 0 ) return 0;
+	m = map_mapname2mapid(mapname);
+	if( m < 0 )
+		return 0;
 
 	sd = map_charid2sd(char_id);
 
@@ -12873,10 +12874,10 @@ BUILDIN_FUNC(strmobinfo)
 BUILDIN_FUNC(guardian)
 {
 	int class_ = 0, x = 0, y = 0, guardian = 0;
-	const char *str, *map, *evt = "";
+	const char *str, *mapname, *evt = "";
 	bool has_index = false;
 
-	map = script_getstr(st,2);
+	mapname = script_getstr(st,2);
 	x = script_getnum(st,3);
 	y = script_getnum(st,4);
 	str = script_getstr(st,5);
@@ -12903,7 +12904,7 @@ BUILDIN_FUNC(guardian)
 	}
 
 	check_event(st,evt);
-	script_pushint(st,mob_spawn_guardian(map,x,y,str,class_,evt,guardian,has_index));
+	script_pushint(st,mob_spawn_guardian(mapname,x,y,str,class_,evt,guardian,has_index));
 	return SCRIPT_CMD_SUCCESS;
 }
 /*==========================================
@@ -12911,11 +12912,11 @@ BUILDIN_FUNC(guardian)
  *------------------------------------------*/
 BUILDIN_FUNC(setwall)
 {
-	const char *map, *name;
+	const char *mapname, *name;
 	int x, y, m, size, dir;
 	bool shootable;
-	
-	map = script_getstr(st,2);
+
+	mapname = script_getstr(st,2);
 	x = script_getnum(st,3);
 	y = script_getnum(st,4);
 	size = script_getnum(st,5);
@@ -12923,7 +12924,7 @@ BUILDIN_FUNC(setwall)
 	shootable = script_getnum(st,7);
 	name = script_getstr(st,8);
 
-	if( (m = map_mapname2mapid(map)) < 0 )
+	if( (m = map_mapname2mapid(mapname)) < 0 )
 		return 0; // Invalid Map
 
 	map_iwall_set(m, x, y, size, dir, shootable, name);
@@ -13488,22 +13489,20 @@ static int playBGM_foreachpc_sub(struct map_session_data *sd, va_list args)
  *------------------------------------------*/
 BUILDIN_FUNC(playBGMall)
 {
-	const char *name;
+	const char *name, *mapname;
 
 	name = script_getstr(st,2);
+	mapname = script_getstr(st,3);
 	if( script_hasdata(st,7) ) { // Specified part of map
-		const char *map = script_getstr(st,3);
 		int x0 = script_getnum(st,4);
 		int y0 = script_getnum(st,5);
 		int x1 = script_getnum(st,6);
 		int y1 = script_getnum(st,7);
 
-		map_foreachinallarea(playBGM_sub, map_mapname2mapid(map), x0, y0, x1, y1, BL_PC, name);
-	} else if( script_hasdata(st,3) ) { // Entire map
-		const char *map = script_getstr(st,3);
-
-		map_foreachinmap(playBGM_sub, map_mapname2mapid(map), BL_PC, name);
-	} else // Entire server
+		map_foreachinallarea(playBGM_sub, map_mapname2mapid(mapname), x0, y0, x1, y1, BL_PC, name);
+	} else if( script_hasdata(st,3) ) // Entire map
+		map_foreachinmap(playBGM_sub, map_mapname2mapid(mapname), BL_PC, name);
+	else // Entire server
 		map_foreachpc(&playBGM_foreachpc_sub, name);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -13538,7 +13537,7 @@ int soundeffect_sub(struct block_list *bl,va_list ap)
 BUILDIN_FUNC(soundeffectall)
 {
 	struct block_list *bl;
-	const char *name;
+	const char *name, *mapname;
 	int type;
 
 	bl = (st->rid) ? &(script_rid2sd(st)->bl) : map_id2bl(st->oid);
@@ -13547,22 +13546,20 @@ BUILDIN_FUNC(soundeffectall)
 
 	name = script_getstr(st,2);
 	type = script_getnum(st,3);
+	mapname = script_getstr(st,4);
 
 	//FIXME: Enumerating map squares (map_foreach) is slower than enumerating the list of online players (map_foreachpc?) [ultramage]
 	if( !script_hasdata(st,4) ) // Area around
 		clif_soundeffectall(bl,name,type,AREA);
-	else if( !script_hasdata(st,5) ) { // Entire map
-		const char *map = script_getstr(st,4);
-
-		map_foreachinmap(soundeffect_sub,map_mapname2mapid(map),BL_PC,name,type);
-	} else if( script_hasdata(st,8) ) { // Specified part of map
-		const char *map = script_getstr(st,4);
+	else if( !script_hasdata(st,5) ) // Entire map
+		map_foreachinmap(soundeffect_sub,map_mapname2mapid(mapname),BL_PC,name,type);
+	else if( script_hasdata(st,8) ) { // Specified part of map
 		int x0 = script_getnum(st,5);
 		int y0 = script_getnum(st,6);
 		int x1 = script_getnum(st,7);
 		int y1 = script_getnum(st,8);
 
-		map_foreachinallarea(soundeffect_sub,map_mapname2mapid(map),x0,y0,x1,y1,BL_PC,name,type);
+		map_foreachinallarea(soundeffect_sub,map_mapname2mapid(mapname),x0,y0,x1,y1,BL_PC,name,type);
 	} else
 		ShowError("buildin_soundeffectall: insufficient arguments for specific area broadcast.\n");
 
@@ -13990,7 +13987,7 @@ int recovery_sub(struct map_session_data *sd, int revive)
 BUILDIN_FUNC(recovery)
 {
 	TBL_PC *sd;
-	int map = 0, type = 0, revive = 1;
+	int map_idx = 0, type = 0, revive = 1;
 
 	type = script_getnum(st,2);
 	if( script_hasdata(st,4) )
@@ -14010,8 +14007,8 @@ BUILDIN_FUNC(recovery)
 				int p_id = 0, i;
 
 				if( script_hasdata(st,5) ) { //Bad maps shouldn't cause issues
-					map = map_mapname2mapid(script_getstr(st,5));
-					if( map < 1 ) { //But we'll check anyways
+					map_idx = map_mapname2mapid(script_getstr(st,5));
+					if( map_idx < 1 ) { //But we'll check anyways
 						ShowDebug("recovery: bad map name given (%s)\n",script_getstr(st,5));
 						return 1;
 					}
@@ -14026,7 +14023,7 @@ BUILDIN_FUNC(recovery)
 				for( i = 0; i < MAX_PARTY; i++ ) {
 					struct map_session_data *pl_sd = p->data[i].sd;
 
-					if( !pl_sd || pl_sd->status.party_id != p_id || (map && pl_sd->bl.m != map) )
+					if( !pl_sd || pl_sd->status.party_id != p_id || (map_idx && pl_sd->bl.m != map_idx) )
 						continue;
 					recovery_sub(pl_sd,revive);
 				}
@@ -14038,8 +14035,8 @@ BUILDIN_FUNC(recovery)
 				int g_id = 0, i;
 
 				if( script_hasdata(st,5) ) { //Bad maps shouldn't cause issues
-					map = map_mapname2mapid(script_getstr(st,5));
-					if( map < 1 ) { //But we'll check anyways
+					map_idx = map_mapname2mapid(script_getstr(st,5));
+					if( map_idx < 1 ) { //But we'll check anyways
 						ShowDebug("recovery: bad map name given (%s)\n",script_getstr(st,5));
 						return 1;
 					}
@@ -14054,7 +14051,7 @@ BUILDIN_FUNC(recovery)
 				for( i = 0; i < MAX_GUILD; i++ ) {
 					struct map_session_data *pl_sd = g->member[i].sd;
 
-					if( !pl_sd || pl_sd->status.guild_id != g_id || (map && pl_sd->bl.m != map) )
+					if( !pl_sd || pl_sd->status.guild_id != g_id || (map_idx && pl_sd->bl.m != map_idx) )
 						continue;
 					recovery_sub(pl_sd,revive);
 				}
@@ -14062,10 +14059,10 @@ BUILDIN_FUNC(recovery)
 			break;
 		case 3:
 			if( script_hasdata(st,3) )
-				map = map_mapname2mapid(script_getstr(st,3));
+				map_idx = map_mapname2mapid(script_getstr(st,3));
 			else if( (sd = script_rid2sd(st)) )
-				map = sd->bl.m;
-			if( map < 1 )
+				map_idx = sd->bl.m;
+			if( map_idx < 1 )
 				return 1; //No sd and no map given - return
 		case 4: {
 				struct s_mapiterator *iter;
@@ -14076,7 +14073,7 @@ BUILDIN_FUNC(recovery)
 					revive = script_getnum(st,3); //Recovery 4,<revive_flag>;
 				iter = mapit_getallusers();
 				for( sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter) ) {
-					if( type == 3 && sd->bl.m != map )
+					if( type == 3 && sd->bl.m != map_idx )
 						continue;
 					recovery_sub(sd, revive);
 				}
@@ -17996,7 +17993,7 @@ BUILDIN_FUNC(unitkill)
 /// unitwarp(<unit_id>,"<map name>",<x>,<y>{,<flag>}); -> <bool>
 BUILDIN_FUNC(unitwarp)
 {
-	int map;
+	int map_idx;
 	short x;
 	short y;
 	struct block_list *bl = NULL;
@@ -18016,12 +18013,12 @@ BUILDIN_FUNC(unitwarp)
 	}
 
 	if( !strcmp(mapname, "this") )
-		map = (bl ? bl->m : -1);
+		map_idx = (bl ? bl->m : -1);
 	else
-		map = map_mapname2mapid(mapname);
+		map_idx = map_mapname2mapid(mapname);
 
-	if( map >= 0 && bl )
-		script_pushint(st,unit_warp(bl, map, x, y, (flag ? CLR_TELEPORT : CLR_OUTSIGHT)));
+	if( map_idx >= 0 && bl )
+		script_pushint(st,unit_warp(bl, map_idx, x, y, (flag ? CLR_TELEPORT : CLR_OUTSIGHT)));
 	else
 		script_pushint(st,0);
 
@@ -19324,18 +19321,18 @@ BUILDIN_FUNC(bg_warp)
 BUILDIN_FUNC(bg_monster)
 {
 	int class_ = 0, x = 0, y = 0, bg_id = 0;
-	const char *str, *map, *evt = "";
+	const char *str, *map_name, *evt = "";
 
-	bg_id  = script_getnum(st,2);
-	map    = script_getstr(st,3);
-	x      = script_getnum(st,4);
-	y      = script_getnum(st,5);
-	str    = script_getstr(st,6);
-	class_ = script_getnum(st,7);
+	bg_id    = script_getnum(st,2);
+	map_name = script_getstr(st,3);
+	x        = script_getnum(st,4);
+	y        = script_getnum(st,5);
+	str      = script_getstr(st,6);
+	class_   = script_getnum(st,7);
 	if( script_hasdata(st,8) )
 		evt = script_getstr(st,8);
 	check_event(st,evt);
-	script_pushint(st,mob_spawn_bg(map,x,y,str,class_,evt,bg_id));
+	script_pushint(st,mob_spawn_bg(map_name,x,y,str,class_,evt,bg_id));
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -20531,12 +20528,12 @@ static int atcommand_cleanfloor_sub(struct block_list *bl, va_list ap)
 
 BUILDIN_FUNC(cleanmap)
 {
-	const char *map;
+	const char *mapname;
 	int16 m;
 	int16 x0 = 0, y0 = 0, x1 = 0, y1 = 0;
 
-	map = script_getstr(st,2);
-	m = map_mapname2mapid(map);
+	mapname = script_getstr(st,2);
+	m = map_mapname2mapid(mapname);
 	if( !m )
 		return 1;
 

@@ -148,7 +148,7 @@ struct view_data *npc_get_viewdata(int class_) {
  */
 bool npcdb_checkid(int id)
 {
-	if( id > NPC_RANGE1_START && id <= NPC_RANGE1_END ) //First subrange
+	if( id > NPC_RANGE1_START && id < NPC_RANGE1_END ) //First subrange
 		return true;
 	if( id == JT_HIDDEN_WARP_NPC || id == JT_INVISIBLE ) //Special IDs not included in the valid ranges
 		return true;
@@ -569,17 +569,19 @@ int npc_timerevent_export(struct npc_data *nd, int i)
 	int t = 0, k = 0;
 	char *lname = nd->u.scr.label_list[i].name;
 	int pos = nd->u.scr.label_list[i].pos;
+
 	if (sscanf(lname, "OnTimer%d%n", &t, &k) == 1 && lname[k] == '\0') {
 		// Timer event
 		struct npc_timerevent_list *te = nd->u.scr.timer_event;
-		int j, k = nd->u.scr.timeramount;
+		int j, k2 = nd->u.scr.timeramount;
+
 		if (te == NULL)
 			te = (struct npc_timerevent_list *)aMalloc(sizeof(struct npc_timerevent_list));
 		else
-			te = (struct npc_timerevent_list *)aRealloc( te, sizeof(struct npc_timerevent_list) * (k+1) );
-		for (j = 0; j < k; j++) {
+			te = (struct npc_timerevent_list *)aRealloc(te, sizeof(struct npc_timerevent_list) * (k2 + 1));
+		for (j = 0; j < k2; j++) {
 			if (te[j].timer > t) {
-				memmove(te+j+1, te+j, sizeof(struct npc_timerevent_list)*(k-j));
+				memmove(te+j+1, te+j, sizeof(struct npc_timerevent_list) * (k2 - j));
 				break;
 			}
 		}
@@ -2388,7 +2390,7 @@ static void npc_parsename(struct npc_data *nd, const char *name, const char *sta
  */
 int npc_parseview(const char *w4, const char *start, const char *buffer, const char *filepath) {
 	int val = JT_FAKENPC, i = 0;
-	char viewid[1024];	//Max size of name from const.txt, see read_constdb.
+	char viewid[1024]; //Max size of name from const.txt, see read_constdb.
 
 	//Extract view ID / constant
 	while( w4[i] != '\0' ) {
@@ -2399,10 +2401,8 @@ int npc_parseview(const char *w4, const char *start, const char *buffer, const c
 
 	safestrncpy(viewid, w4, i += 1);
 
-	//Check if view id is not an ID (only numbers).
-	if( !npc_viewisid(viewid) ) {
-		//Check if constant exists and get its value.
-		if( !script_get_constant(viewid, &val) ) {
+	if( !npc_viewisid(viewid) ) { //Check if view id is not an ID (only numbers)
+		if( !script_get_constant(viewid, &val) ) { //Check if constant exists and get its value
 			ShowWarning("npc_parseview: Invalid NPC constant '%s' specified in file '%s', line'%d'. Defaulting to JT_INVISIBLE. \n", viewid, filepath, strline(buffer, start - buffer));
 			val = JT_INVISIBLE;
 		}
@@ -2688,7 +2688,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 	nd = npc_create_npc(m, x, y);
 	nd->u.shop.count = 0;
 	while( p ) {
-		unsigned short nameid, qty = 0;
+		unsigned short nameid2, qty = 0;
 		int value;
 		struct item_data *id;
 		bool skip = false;
@@ -2699,14 +2699,14 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 		switch( type ) {
 			case NPCTYPE_MARKETSHOP:
 #if PACKETVER >= 20131223
-				if( sscanf(p, ",%hu:%d:%hu", &nameid, &value, &qty) != 3 ) {
+				if( sscanf(p, ",%hu:%d:%hu", &nameid2, &value, &qty) != 3 ) {
 					ShowError("npc_parse_shop: (MARKETSHOP) Invalid item definition in file '%s', line '%d'. Ignoring the rest of the line...\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n", filepath, strline(buffer, start - buffer), w1, w2, w3, w4);
 					skip = true;
 				}
 #endif
 				break;
 			default:
-				if( sscanf(p, ",%hu:%d", &nameid, &value) != 2 ) {
+				if( sscanf(p, ",%hu:%d", &nameid2, &value) != 2 ) {
 					ShowError("npc_parse_shop: Invalid item definition in file '%s', line '%d'. Ignoring the rest of the line...\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n", filepath, strline(buffer, start - buffer), w1, w2, w3, w4);
 					skip = true;
 				}
@@ -2716,8 +2716,8 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 		if( skip )
 			break;
 
-		if( !(id = itemdb_exists(nameid)) ) {
-			ShowWarning("npc_parse_shop: Invalid sell item in file '%s', line '%d' (id '%hu').\n", filepath, strline(buffer, start - buffer), nameid);
+		if( !(id = itemdb_exists(nameid2)) ) {
+			ShowWarning("npc_parse_shop: Invalid sell item in file '%s', line '%d' (id '%hu').\n", filepath, strline(buffer, start - buffer), nameid2);
 			p = strchr(p + 1,',');
 			continue;
 		}
@@ -2731,16 +2731,16 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 
 		if( !value && (type == NPCTYPE_SHOP || type == NPCTYPE_MARKETSHOP) ) { //NPC selling items for free!
 			ShowWarning("npc_parse_shop: Item %s [%hu] is being sold for FREE in file '%s', line '%d'.\n",
-				id->name, nameid, filepath, strline(buffer, start - buffer));
+				id->name, nameid2, filepath, strline(buffer, start - buffer));
 		}
 
 		if( type == NPCTYPE_SHOP && value * 0.75 < id->value_sell * 1.24 ) //Exploit possible: you can buy and sell back with profit
 			ShowWarning("npc_parse_shop: Item %s [%hu] discounted buying price (%d->%d) is less than overcharged selling price (%d->%d) in file '%s', line '%d'.\n",
-				id->name, nameid, value, (int)(value * 0.75), id->value_sell, (int)(id->value_sell * 1.24), filepath, strline(buffer, start - buffer));
+				id->name, nameid2, value, (int)(value * 0.75), id->value_sell, (int)(id->value_sell * 1.24), filepath, strline(buffer, start - buffer));
 
 		if( type == NPCTYPE_MARKETSHOP && !qty ) {
 			ShowWarning("npc_parse_shop: Item %s [%hu] is stocked with invalid value %hu, changed to 1. File '%s', line '%d'.\n",
-				id->name, nameid, qty, filepath, strline(buffer, start - buffer));
+				id->name, nameid2, qty, filepath, strline(buffer, start - buffer));
 			qty = 1;
 		}
 
@@ -2752,7 +2752,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 		if( nd->u.shop.count && type == NPCTYPE_MARKETSHOP ) {
 			uint16 i;
 
-			ARR_FIND(0, nd->u.shop.count, i, nd->u.shop.shop_item[i].nameid == nameid); //Duplicate entry? Replace the value
+			ARR_FIND(0, nd->u.shop.count, i, nd->u.shop.shop_item[i].nameid == nameid2); //Duplicate entry? Replace the value
 			if( i != nd->u.shop.count ) {
 				nd->u.shop.shop_item[i].qty = qty;
 				nd->u.shop.shop_item[i].value = value;
@@ -2764,7 +2764,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 
 		RECREATE(nd->u.shop.shop_item, struct npc_item_list, nd->u.shop.count + 1);
 
-		nd->u.shop.shop_item[nd->u.shop.count].nameid = nameid;
+		nd->u.shop.shop_item[nd->u.shop.count].nameid = nameid2;
 		nd->u.shop.shop_item[nd->u.shop.count].value = value;
 #if PACKETVER >= 20131223
 		nd->u.shop.shop_item[nd->u.shop.count].flag = 0;
@@ -2775,7 +2775,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 		p = strchr(p + 1,',');
 	}
 
-	if( nd->u.shop.count == 0 ) {
+	if( !nd->u.shop.count ) {
 		ShowWarning("npc_parse_shop: Ignoring empty shop in file '%s', line '%d'.\n", filepath, strline(buffer, start - buffer));
 		aFree(nd);
 		return strchr(start,'\n'); //Continue
@@ -2808,12 +2808,14 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 		map_addnpc(m,nd);
 		if( map_addblock(&nd->bl) )
 			return strchr(start,'\n');
-		status_set_viewdata(&nd->bl, nd->class_);
 		status_change_init(&nd->bl);
 		unit_dataset(&nd->bl);
 		nd->ud.dir = dir;
-		if( map[nd->bl.m].users )
-			clif_spawn(&nd->bl);
+		if( nd->class_ != JT_FAKENPC ) {
+			status_set_viewdata(&nd->bl, nd->class_);
+			if( map[nd->bl.m].users )
+				clif_spawn(&nd->bl);
+		}
 	} else //'Floating' shop?
 		map_addiddb(&nd->bl);
 	strdb_put(npcname_db, nd->exname, nd);
@@ -3019,7 +3021,7 @@ static const char *npc_parse_script(char *w1, char *w2, char *w3, char *w4, cons
 		npc_setcells(nd);
 		if( map_addblock(&nd->bl) )
 			return NULL;
-		if( nd->class_ >= 0 ) {
+		if( nd->class_ != JT_FAKENPC  ) {
 			status_set_viewdata(&nd->bl, nd->class_);
 			if( map[nd->bl.m].users )
 				clif_spawn(&nd->bl);
@@ -3176,7 +3178,7 @@ const char *npc_parse_duplicate(char *w1, char *w2, char *w3, char *w4, const ch
 		npc_setcells(nd);
 		if( map_addblock(&nd->bl) )
 			return end;
-		if( nd->class_ >= 0 ) {
+		if( nd->class_ != JT_FAKENPC ) {
 			status_set_viewdata(&nd->bl, nd->class_);
 			if( map[nd->bl.m].users )
 				clif_spawn(&nd->bl);
@@ -3209,7 +3211,7 @@ const char *npc_parse_duplicate(char *w1, char *w2, char *w3, char *w4, const ch
 int npc_duplicate4instance(struct npc_data *snd, int16 m) {
 	char newname[NAME_LENGTH];
 
-	if( m < 0 || map[m].instance_id == 0 )
+	if( m < 0 || !map[m].instance_id )
 		return 1;
 
 	snprintf(newname, ARRAYLENGTH(newname), "dup_%d_%d", map[m].instance_id, snd->bl.id);
@@ -3601,11 +3603,11 @@ int npc_do_atcmd_event(struct map_session_data *sd, const char *command, const c
 	}
 
 	if( sd->npc_id ) { //Enqueue the event trigger
-		int i;
+		int l;
 
-		ARR_FIND(0, MAX_EVENTQUEUE, i, sd->eventqueue[i][0] == '\0');
-		if( i < MAX_EVENTQUEUE ) {
-			safestrncpy(sd->eventqueue[i],eventname,50); //Event enqueued
+		ARR_FIND(0, MAX_EVENTQUEUE, l, sd->eventqueue[l][0] == '\0');
+		if( l < MAX_EVENTQUEUE ) {
+			safestrncpy(sd->eventqueue[l], eventname, 50); //Event enqueued
 			return 0;
 		}
 		ShowWarning("npc_event: player's event queue is full, can't add event '%s' !\n", eventname);
