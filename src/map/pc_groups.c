@@ -155,6 +155,7 @@ static void read_config(void)
 			for (i = 0; i < count; ++i) {
 				config_setting_t *command = config_setting_get_elem(commands, i);
 				const char *name = config_setting_name(command);
+
 				if (!atcommand_exists(name)) {
 					ShowConfigWarning(command, "pc_groups:read_config: non-existent command name '%s', removing...", name);
 					config_setting_remove(commands, name);
@@ -185,7 +186,7 @@ static void read_config(void)
 		dbi_destroy(iter);
 
 		// Apply inheritance
-		i = 0; // counter for processed groups
+		i = 0; // Counter for processed groups
 		while (i < group_count) {
 			iter = db_iterator(pc_group_db);
 			for (group_settings = dbi_first(iter); dbi_exists(iter); group_settings = dbi_next(iter)) {
@@ -194,11 +195,11 @@ static void read_config(void)
 					             *permissions = group_settings->permissions;
 				int j, inherit_count = 0, done = 0;
 				
-				if (group_settings->inheritance_done) // group already processed
+				if (group_settings->inheritance_done) // Group already processed
 					continue; 
 
 				if ((inherit = group_settings->inherit) == NULL ||
-				    (inherit_count = config_setting_length(inherit)) <= 0) { // this group does not inherit from others
+				    (inherit_count = config_setting_length(inherit)) <= 0) { // This group does not inherit from others
 					++i;
 					group_settings->inheritance_done = true;
 					continue;
@@ -219,27 +220,29 @@ static void read_config(void)
 						continue;
 					}
 					if (!inherited_group->inheritance_done)
-						continue; // we need to do that group first
+						continue; // We need to do that group first
 
 					// Copy settings (commands/permissions) that are not defined yet
 					if (inherited_group->commands != NULL) {
 						int i = 0, commands_count = config_setting_length(inherited_group->commands);
+
 						for (i = 0; i < commands_count; ++i)
 							config_setting_copy(commands, config_setting_get_elem(inherited_group->commands, i));
 					}
 
 					if (inherited_group->permissions != NULL) {
 						int i = 0, permissions_count = config_setting_length(inherited_group->permissions);
+
 						for (i = 0; i < permissions_count; ++i)
 							config_setting_copy(permissions, config_setting_get_elem(inherited_group->permissions, i));
 					}
 
-					++done; // copied commands and permissions from one of inherited groups
+					++done; // Copied commands and permissions from one of inherited groups
 				}
-				
-				if (done == inherit_count) { // copied commands from all of inherited groups
+
+				if (done == inherit_count) { // Copied commands from all of inherited groups
 					++i;
-					group_settings->inheritance_done = true; // we're done with this group
+					group_settings->inheritance_done = true; // We're done with this group
 				}
 			}
 			dbi_destroy(iter);
@@ -274,20 +277,16 @@ static void read_config(void)
 
 	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' groups in '"CL_WHITE"%s"CL_RESET"'.\n", group_count, config_filename);
 
-	
-	if( ( pc_group_max = group_count ) ) {
+	if ((pc_group_max = group_count)) {
 		DBIterator *iter = db_iterator(pc_group_db);
 		GroupSettings *group_settings = NULL;
 		int *group_ids = aMalloc( pc_group_max * sizeof(int) );
 		int i = 0;
-		for (group_settings = dbi_first(iter); dbi_exists(iter); group_settings = dbi_next(iter)) {
+
+		for (group_settings = dbi_first(iter); dbi_exists(iter); group_settings = dbi_next(iter))
 			group_ids[i++] = group_settings->id;
-		}
-		
 		atcommand_db_load_groups(group_ids);
-		
 		aFree(group_ids);
-		
 		dbi_destroy(iter);
 	}
 }

@@ -9424,7 +9424,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 						val2 += (t < 0) ? 1 : t;
 					}
 					if( bl->type&(BL_PC|BL_MER) ) {
-						struct map_session_data *tsd;
+						struct map_session_data *tsd = NULL;
 
 						if( sd ) {
 							for( i = 0; i < MAX_DEVOTION; i++ )
@@ -9441,7 +9441,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val3 = 0; //Unused, previously speed adjustment
 					val4 = 250 - 50 * val1; //Aspd adjustment
 					if( sd ) {
-						struct map_session_data *tsd;
+						struct map_session_data *tsd = NULL;
 						int i;
 
 						for( i = 0; i < MAX_DEVOTION; i++ ) //See if there are devoted characters, and pass the status to them [Skotlex]
@@ -9581,17 +9581,17 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				status_zap(bl,status->hp - 1,(val2 ? 0 : status->sp));
 				return 1;
 			case SC_CLOSECONFINE2: {
-					struct block_list *src = (val2 ? map_id2bl(val2) : NULL);
-					struct status_change *sc2 = (src ? status_get_sc(src) : NULL);
+					struct block_list *src2 = (val2 ? map_id2bl(val2) : NULL);
+					struct status_change *sc2 = (src2 ? status_get_sc(src2) : NULL);
 					struct status_change_entry *sce2 = (sc2 ? sc2->data[SC_CLOSECONFINE] : NULL);
 
-					if( src && sc2 ) {
+					if( src2 && sc2 ) {
 						if( !sce2 ) //Start lock on caster
-							sc_start4(src,src,SC_CLOSECONFINE,100,val1,1,0,0,tick + 1000);
+							sc_start4(src2,src2,SC_CLOSECONFINE,100,val1,1,0,0,tick + 1000);
 						else { //Increase count of locked enemies and refresh time
 							sce2->val2++;
 							delete_timer(sce2->timer,status_change_timer);
-							sce2->timer = add_timer(gettick() + tick + 1000,status_change_timer,src->id,SC_CLOSECONFINE);
+							sce2->timer = add_timer(gettick() + tick + 1000,status_change_timer,src2->id,SC_CLOSECONFINE);
 						}
 					} else //Status failed
 						return 0;
@@ -9772,12 +9772,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( sd ) {
 					if( sd->mapindex != val2 ) {
 						int pos = (bl->x&0xFFFF)|(bl->y<<16), //Current coordinates
+							map_idx = sd->mapindex; //Current map
 
-						map = sd->mapindex; //Current map
 						//1. Place in jail (val2 -> Jail Map, val3 -> x, val4 -> y)
 						pc_setpos(sd,(unsigned short)val2,val3,val4,CLR_TELEPORT);
 						//2. Set restore point (val3 -> return map, val4 return coords)
-						val3 = map;
+						val3 = map_idx;
 						val4 = pos;
 					} else if( !val3 || val3 == sd->mapindex ||
 						!sd->sc.data[SC_JAILED] ) //If player is being jailed and is already in jail (issue: 8206)
@@ -11552,8 +11552,8 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			break;
 		case SC_BLADESTOP:
 			if (sce->val4) {
-				int tid = sce->val4; //Stop the status for the other guy of bladestop as well
-				struct block_list *tbl = map_id2bl(tid);
+				int target_id = sce->val4; //Stop the status for the other guy of bladestop as well
+				struct block_list *tbl = map_id2bl(target_id);
 				struct status_change *tsc = status_get_sc(tbl);
 
 				sce->val4 = 0;
@@ -11561,7 +11561,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 					tsc->data[SC_BLADESTOP]->val4 = 0;
 					status_change_end(tbl,SC_BLADESTOP,INVALID_TIMER);
 				}
-				clif_bladestop(bl,tid,0);
+				clif_bladestop(bl,target_id,0);
 			}
 			break;
 		case SC_DANCING: {
@@ -11809,9 +11809,9 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			break;
 		case SC_CURSEDCIRCLE_TARGET: {
 				struct block_list *src = map_id2bl(sce->val2);
-				struct status_change *sc = status_get_sc(src);
+				struct status_change *ssc = status_get_sc(src);
 
-				if (sc && sc->data[SC_CURSEDCIRCLE_ATKER] && --(sc->data[SC_CURSEDCIRCLE_ATKER]->val2) == 0)
+				if (ssc && ssc->data[SC_CURSEDCIRCLE_ATKER] && --(ssc->data[SC_CURSEDCIRCLE_ATKER]->val2) == 0)
 					status_change_end(src,SC_CURSEDCIRCLE_ATKER,INVALID_TIMER);
 			}
 			break;
@@ -11847,10 +11847,10 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 				struct block_list *src = map_id2bl(sce->val2);
 
 				if (src && !status_isdead(src)) {
-					struct status_change *sc = status_get_sc(src);
+					struct status_change *ssc = status_get_sc(src);
 
-					if (sc)
-						sc->bs_counter--;
+					if (ssc)
+						ssc->bs_counter--;
 				}
 			}
 			break;
@@ -11911,23 +11911,23 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			}
 			break;
 		case SC_C_MARKER: {
-				struct map_session_data *sd = NULL;
+				struct map_session_data *tsd = NULL;
 				uint8 i = 0;
 
-				if (!(sd = map_id2sd(sce->val2)))
+				if (!(tsd = map_id2sd(sce->val2)))
 					break;
-				ARR_FIND(0,MAX_SKILL_CRIMSON_MARKER,i,sd->c_marker[i] == bl->id);
+				ARR_FIND(0,MAX_SKILL_CRIMSON_MARKER,i,tsd->c_marker[i] == bl->id);
 				if (i < MAX_SKILL_CRIMSON_MARKER) { //Remove mark data from caster
-					clif_crimson_marker(sd,bl,1);
-					sd->c_marker[i] = 0;
+					clif_crimson_marker(tsd,bl,1);
+					tsd->c_marker[i] = 0;
 				}
 			}
 			break;
 		case SC_H_MINE: { //Drop the material from target if expired
 				struct item it;
-				struct map_session_data *sd = NULL;
+				struct map_session_data *tsd = NULL;
 
-				if (sce->val3 || status_isdead(bl) || !(sd = map_id2sd(sce->val2)))
+				if (sce->val3 || status_isdead(bl) || !(tsd = map_id2sd(sce->val2)))
 					break;
 				if (!itemdb_exists(skill_get_itemid(RL_H_MINE,0)))
 					break;
@@ -11935,7 +11935,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 				it.nameid = skill_get_itemid(RL_H_MINE,0);
 				it.amount = max(skill_get_itemqty(RL_H_MINE,0),1);
 				it.identify = 1;
-				map_addflooritem(&it,it.amount,bl->m,bl->x,bl->y,sd->status.char_id,0,0,4,0);
+				map_addflooritem(&it,it.amount,bl->m,bl->x,bl->y,tsd->status.char_id,0,0,4,0);
 			}
 			break;
 		case SC_ALL_RIDING:
@@ -13215,11 +13215,11 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_C_MARKER:
 			if( --(sce->val4) >= 0 ) {
-				struct map_session_data *sd = map_id2sd(sce->val2);
+				struct map_session_data *tsd = map_id2sd(sce->val2);
 
-				if( !sd || sd->bl.m != bl->m ) //End status if caster isn't in same map
+				if( !tsd || tsd->bl.m != bl->m ) //End status if caster isn't in same map
 					break;
-				clif_crimson_marker(sd,bl,0); //Update target position
+				clif_crimson_marker(tsd,bl,0); //Update target position
 				sc_timer_next(1000 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}

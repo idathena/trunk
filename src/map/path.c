@@ -299,8 +299,8 @@ bool path_search(struct walkpath_data *wpd, int16 m, int16 x0, int16 y0, int16 x
 		// Direct path goes diagonally first, then in straight line.
 
 		// calculate (sgn(x1-x0), sgn(y1-y0))
-		dx = ((dx = x1-x0)) ? ((dx<0) ? -1 : 1) : 0;
-		dy = ((dy = y1-y0)) ? ((dy<0) ? -1 : 1) : 0;
+		dx = ((dx = x1 - x0)) ? ((dx < 0) ? -1 : 1) : 0;
+		dy = ((dy = y1 - y0)) ? ((dy < 0) ? -1 : 1) : 0;
 
 		x = x0; // Current position = starting cell
 		y = y0;

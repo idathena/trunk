@@ -1703,10 +1703,13 @@ void pc_calc_skilltree(struct map_session_data *sd)
 		uint16 c_ = pc_class2idx(JOB_TAEKWON);
 
 		for( i = 0; i < MAX_SKILL_TREE; i++ ) {
-			uint16 x = skill_get_index(skill_tree[c_][i].id), id = sd->status.skill[x].id;
+			uint16 x = skill_get_index(skill_tree[c_][i].id), skill_id;
 
-			if( id && x > 0 && sd->status.skill[x].flag != SKILL_FLAG_PLAGIARIZED && sd->status.skill[x].flag != SKILL_FLAG_PERM_GRANTED ) {
-				if( id == NV_BASIC || id == NV_FIRSTAID || id == WE_CALLBABY )
+			if( (skill_id = sd->status.skill[x].id) && x > 0 &&
+				sd->status.skill[x].flag != SKILL_FLAG_PLAGIARIZED &&
+				sd->status.skill[x].flag != SKILL_FLAG_PERM_GRANTED )
+			{
+				if( skill_id == NV_BASIC || skill_id == NV_FIRSTAID || skill_id == WE_CALLBABY )
 					continue;
 				sd->status.skill[x].id = 0;
 			}
@@ -1778,7 +1781,7 @@ void pc_calc_skilltree(struct map_session_data *sd)
 					int k;
 
 					if( (k = skill_tree[c][i].need[j].id) ) {
-						if( sd->status.skill[k].id == 0 || sd->status.skill[k].flag == SKILL_FLAG_TEMPORARY || sd->status.skill[k].flag == SKILL_FLAG_PLAGIARIZED )
+						if( !sd->status.skill[k].id || sd->status.skill[k].flag == SKILL_FLAG_TEMPORARY || sd->status.skill[k].flag == SKILL_FLAG_PLAGIARIZED )
 							k = 0; //Not learned
 						else if( sd->status.skill[k].flag >= SKILL_FLAG_REPLACED_LV_0 ) //Real learned level
 							k = sd->status.skill[skill_tree[c][i].need[j].id].flag - SKILL_FLAG_REPLACED_LV_0;
@@ -7793,12 +7796,11 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 						(type == 2 && sd->inventory.u.items_inventory[i].equip) ||
 						type == 3 )
 					{
-						int k;
+						int l;
 
-						ARR_FIND(0,MAX_INVENTORY,k,eq_n[k] <= 0);
-						if( k < MAX_INVENTORY )
-							eq_n[k] = i;
-
+						ARR_FIND(0,MAX_INVENTORY,l,eq_n[l] <= 0);
+						if( l < MAX_INVENTORY )
+							eq_n[l] = i;
 						eq_num++;
 					}
 				}

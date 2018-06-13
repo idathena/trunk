@@ -5129,24 +5129,6 @@ static void mob_load(void)
 }
 
 /**
- * Initialize monster data
- */
-void mob_db_load(bool is_reload) {
-	memset(mob_db_data, 0, sizeof(mob_db_data)); //Clear the array
-	mob_db_data[0] = (struct mob_db *)aCalloc(1, sizeof (struct mob_db)); //This mob is used for random spawns
-	mob_makedummymobdb(0); //The first time this is invoked, it creates the dummy mob
-	if (!is_reload) { //On mobdbreload it's not neccessary to execute this ers needs to be allocated only once
-		item_drop_ers = ers_new(sizeof(struct item_drop), "mob.c::item_drop_ers", ERS_OPT_NONE);
-		item_drop_list_ers = ers_new(sizeof(struct item_drop_list), "mob.c::item_drop_list_ers", ERS_OPT_NONE);
-		mob_sc_display_ers = ers_new(sizeof(struct sc_display_entry), "mob.c::mob_sc_display_ers", ERS_OPT_NONE);
-	}
-	mob_item_drop_ratio = idb_alloc(DB_OPT_BASE);
-	mob_skill_db = idb_alloc(DB_OPT_BASE);
-	mob_summon_db = idb_alloc(DB_OPT_BASE);
-	mob_load();
-}
-
-/**
  * Apply the proper view data on monsters during mob_db reload.
  * @param md: Mob to adjust
  * @param args: va_list of arguments
@@ -5187,8 +5169,21 @@ static int mob_reload_sub_npc(struct npc_data *nd, va_list args) {
  * Reload monster data
  */
 void mob_reload(void) {
-	do_final_mob(true);
-	mob_db_load(true);
+	int i;
+
+	//Mob skills need to be cleared before re-reading them [Skotlex]
+	//Also clear mob drops to reload db/../mob_drop.txt
+	for (i = 0; i < MAX_MOB_DB; i++) {
+		if (mob_db_data[i] && !mob_is_clone(i)) {
+			memset(&mob_db_data[i]->skill, 0, sizeof(mob_db_data[i]->skill));
+			mob_db_data[i]->maxskill = 0;
+			memset(&mob_db_data[i]->dropitem, 0, sizeof(mob_db_data[i]->dropitem));
+		}
+	}
+	mob_item_drop_ratio->clear(mob_item_drop_ratio, mob_item_drop_ratio_free); //Clear item_drop_ratio_db
+	mob_skill_db->clear(mob_skill_db, mob_skill_db_free);
+	mob_summon_db->clear(mob_summon_db, mob_summon_db_free);
+	mob_load();
 	map_foreachmob(mob_reload_sub);
 	map_foreachnpc(mob_reload_sub_npc);
 }
@@ -5209,7 +5204,16 @@ void mob_clear_spawninfo() {
  *------------------------------------------*/
 void do_init_mob(void)
 { //Initialize the mob database
-	mob_db_load(false);
+	memset(mob_db_data, 0, sizeof(mob_db_data)); //Clear the array
+	mob_db_data[0] = (struct mob_db *)aCalloc(1, sizeof(struct mob_db)); //This mob is used for random spawns
+	mob_makedummymobdb(0); //The first time this is invoked, it creates the dummy mob
+	item_drop_ers = ers_new(sizeof(struct item_drop), "mob.c::item_drop_ers", ERS_OPT_NONE);
+	item_drop_list_ers = ers_new(sizeof(struct item_drop_list), "mob.c::item_drop_list_ers", ERS_OPT_NONE);
+	mob_sc_display_ers = ers_new(sizeof(struct sc_display_entry), "mob.c::mob_sc_display_ers", ERS_OPT_NONE);
+	mob_item_drop_ratio = idb_alloc(DB_OPT_BASE);
+	mob_skill_db = idb_alloc(DB_OPT_BASE);
+	mob_summon_db = idb_alloc(DB_OPT_BASE);
+	mob_load();
 
 	add_timer_func_list(mob_delayspawn, "mob_delayspawn");
 	add_timer_func_list(mob_delay_item_drop, "mob_delay_item_drop");
@@ -5226,7 +5230,7 @@ void do_init_mob(void)
 /*==========================================
  * Clean memory usage.
  *------------------------------------------*/
-void do_final_mob(bool is_reload)
+void do_final_mob(void)
 {
 	int i;
 
@@ -5249,9 +5253,7 @@ void do_final_mob(bool is_reload)
 	mob_item_drop_ratio->destroy(mob_item_drop_ratio, mob_item_drop_ratio_free);
 	mob_skill_db->destroy(mob_skill_db, mob_skill_db_free);
 	mob_summon_db->destroy(mob_summon_db, mob_summon_db_free);
-	if (!is_reload) {
-		ers_destroy(item_drop_ers);
-		ers_destroy(item_drop_list_ers);
-		ers_destroy(mob_sc_display_ers);
-	}
+	ers_destroy(item_drop_ers);
+	ers_destroy(item_drop_list_ers);
+	ers_destroy(mob_sc_display_ers);
 }

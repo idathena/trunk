@@ -591,7 +591,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				cardfix = cardfix * (100 + sd->magic_addsize[tstatus->size] + sd->magic_addsize[SZ_ALL]) / 100;
 				cardfix = cardfix * (100 + sd->magic_addrace2[t_race2]) / 100;
 				cardfix = cardfix * (100 + sd->magic_addclass[tstatus->class_] + sd->magic_addclass[CLASS_ALL]) / 100;
-				for( i = 0; i < ARRAYLENGTH(sd->add_mdmg) && sd->add_mdmg[i].rate;i++ ) {
+				for( i = 0; i < ARRAYLENGTH(sd->add_mdmg) && sd->add_mdmg[i].rate; i++ ) {
 					if( sd->add_mdmg[i].class_ != t_class )
 						continue;
 					cardfix = cardfix * (100 + sd->add_mdmg[i].rate) / 100;
@@ -648,7 +648,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 						int ele_fix = sd->right_weapon.adddefele[tstatus->def_ele] + sd->arrow_adddefele[tstatus->def_ele] +
 							sd->right_weapon.adddefele[ELE_ALL] + sd->arrow_adddefele[ELE_ALL];
 
-						for( i = 0; ARRAYLENGTH(sd->right_weapon.adddefele2) > i && sd->right_weapon.adddefele2[i].rate != 0; i++ ) {
+						for( i = 0; ARRAYLENGTH(sd->right_weapon.adddefele2) > i && sd->right_weapon.adddefele2[i].rate; i++ ) {
 							if( sd->right_weapon.adddefele2[i].ele != tstatus->def_ele )
 								continue;
 							if( !(((sd->right_weapon.adddefele2[i].flag)&flag)&BF_WEAPONMASK &&
@@ -673,7 +673,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 						if( !(nk&NK_NO_ELEFIX) ) { //Affected by element modifier bonuses
 							int ele_fix = sd->right_weapon.adddefele[tstatus->def_ele] + sd->right_weapon.adddefele[ELE_ALL];
 
-							for( i = 0; ARRAYLENGTH(sd->right_weapon.adddefele2) > i && sd->right_weapon.adddefele2[i].rate != 0; i++ ) {
+							for( i = 0; ARRAYLENGTH(sd->right_weapon.adddefele2) > i && sd->right_weapon.adddefele2[i].rate; i++ ) {
 								if( sd->right_weapon.adddefele2[i].ele != tstatus->def_ele )
 									continue;
 								if( !(((sd->right_weapon.adddefele2[i].flag)&flag)&BF_WEAPONMASK &&
@@ -697,7 +697,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 							if( !(nk&NK_NO_ELEFIX) ) { //Affected by Element modifier bonuses
 								int ele_fix_lh = sd->left_weapon.adddefele[tstatus->def_ele] + sd->left_weapon.adddefele[ELE_ALL];
 
-								for( i = 0; ARRAYLENGTH(sd->left_weapon.adddefele2) > i && sd->left_weapon.adddefele2[i].rate != 0; i++ ) {
+								for( i = 0; ARRAYLENGTH(sd->left_weapon.adddefele2) > i && sd->left_weapon.adddefele2[i].rate; i++ ) {
 									if( sd->left_weapon.adddefele2[i].ele != tstatus->def_ele )
 										continue;
 									if( !(((sd->left_weapon.adddefele2[i].flag)&flag)&BF_WEAPONMASK &&
@@ -726,7 +726,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 							int ele_fix = sd->right_weapon.adddefele[tstatus->def_ele] + sd->left_weapon.adddefele[tstatus->def_ele] +
 								sd->right_weapon.adddefele[ELE_ALL] + sd->left_weapon.adddefele[ELE_ALL];
 
-							for( i = 0; ARRAYLENGTH(sd->right_weapon.adddefele2) > i && sd->right_weapon.adddefele2[i].rate != 0; i++ ) {
+							for( i = 0; ARRAYLENGTH(sd->right_weapon.adddefele2) > i && sd->right_weapon.adddefele2[i].rate; i++ ) {
 								if( sd->right_weapon.adddefele2[i].ele != tstatus->def_ele )
 									continue;
 								if( !(((sd->right_weapon.adddefele2[i].flag)&flag)&BF_WEAPONMASK &&
@@ -735,7 +735,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 									continue;
 								ele_fix += sd->right_weapon.adddefele2[i].rate;
 							}
-							for( i = 0; ARRAYLENGTH(sd->left_weapon.adddefele2) > i && sd->left_weapon.adddefele2[i].rate != 0; i++ ) {
+							for( i = 0; ARRAYLENGTH(sd->left_weapon.adddefele2) > i && sd->left_weapon.adddefele2[i].rate; i++ ) {
 								if( sd->left_weapon.adddefele2[i].ele != tstatus->def_ele )
 									continue;
 								if( !(((sd->left_weapon.adddefele2[i].flag)&flag)&BF_WEAPONMASK &&
@@ -1024,11 +1024,10 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 		if( (sce = sc->data[SC_SAFETYWALL]) && (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT ) {
 			struct skill_unit_group *group = skill_id2group(sce->val3);
-			uint16 skill_id = sce->val2;
 
 			if( group ) {
 				d->dmg_lv = ATK_BLOCK;
-				switch( skill_id ) {
+				switch( sce->val2 ) {
 					case MG_SAFETYWALL:
 						if( --group->val2 <= 0 )
 							skill_delunitgroup(group);
@@ -2292,7 +2291,7 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 
 		if(sd) {
 			if(!battle_config.show_status_katar_crit && sd->status.weapon == W_KATAR)
-				cri <<= 1; //On official double critical bonus from katar won't showed in status display
+				cri <<= 1; //On official double critical bonus from katar won't be showed in status display
 			cri += sd->critaddrace[tstatus->race] + sd->critaddrace[RC_ALL];
 			if(is_skill_using_arrow(src, skill_id)) {
 				cri += sd->bonus.arrow_cri;
@@ -7154,7 +7153,7 @@ void battle_drain(struct map_session_data *sd, struct block_list *tbl, int64 rda
 		hp = 0, sp = 0;
 	uint8 i = 0;
 
-	if( !CHK_RACE(race) && !CHK_CLASS(class_) )
+	if( !CHK_RACE(race) || !CHK_CLASS(class_) )
 		return;
 
 	memset(&d, 0, sizeof(d));
