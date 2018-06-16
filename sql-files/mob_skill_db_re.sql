@@ -74,7 +74,9 @@ CREATE TABLE IF NOT EXISTS `mob_skill_db_re` (
 #
 #	Status abnormalities specified through the statuson/statusoff system:
 #	    anybad (any type of state change) / stone / freeze / stun / sleep /
-#	    poison / curse / silence / confusion / blind / hiding / sight (unhidden)
+#	    poison / curse / silence / confusion / blind / bleeding / dposion /
+#	    fear / burning / imprison / deepsleep / freezing / crystalize /
+#	    hiding / sight (unhidden)
 #
 # Note: if a negative MobID is provided, the skill will be treated as 'global':
 #	-1: added for all boss types.

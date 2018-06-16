@@ -10709,7 +10709,7 @@ BUILDIN_FUNC(getstatus)
 		return 0;
 	}
 
-	if( sd->sc.count == 0 || !sd->sc.data[id] ) { //No status is active
+	if( !sd->sc.count || !sd->sc.data[id] ) { //No status is active
 		script_pushint(st, 0);
 		return 0;
 	}

@@ -6065,6 +6065,10 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 			def += def * 2 * sc->data[SC_FORCEOFVANGUARD]->val1 / 100;
 		if(sc->data[SC_ECHOSONG])
 			def += def * sc->data[SC_ECHOSONG]->val4 / 100;
+		if(sc->data[SC_STONE] && sc->opt1 == OPT1_STONE)
+			def -= def * 50 / 100;
+		if(sc->data[SC_FREEZE])
+			def -= def * 50 / 100;
 		if(sc->data[SC_CAMOUFLAGE])
 			def -= def * 5 * sc->data[SC_CAMOUFLAGE]->val3 / 100;
 		if(sc->data[SC_OVERED_BOOST] && bl->type == BL_PC)
@@ -6109,24 +6113,18 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 	if(sc->data[SC_BANDING] && sc->data[SC_BANDING]->val2 > 1)
 		def += (5 + sc->data[SC_BANDING]->val1) * sc->data[SC_BANDING]->val2 / 10;
 #endif
-	if(sc->data[SC_SOLID_SKIN_OPTION])
-		def <<= 1;
 	if(sc->data[SC_POWER_OF_GAIA])
 		def += 100;
+	if(sc->data[SC_SOLID_SKIN_OPTION])
+		def <<= 1;
 	if(sc->data[SC_DEFSET_PER])
 		def += def * sc->data[SC_DEFSET_PER]->val1 / 100;
 	if(sc->data[SC_ODINS_POWER])
 		def -= 20 * sc->data[SC_ODINS_POWER]->val1;
 	if(sc->data[SC_ANGRIFFS_MODUS])
 		def -= 30 + 20 * sc->data[SC_ANGRIFFS_MODUS]->val1;
-	if(sc->data[SC_STONE] && sc->opt1 == OPT1_STONE)
-		def >>= 1;
-	if(sc->data[SC_FREEZE])
-		def >>= 1;
 	if(sc->data[SC_SKE])
-		def >>= 1;
-	if(sc->data[SC_NYANGGRASS] && bl->type != BL_PC)
-		def >>= 1;
+		def -= def * 50 / 100;
 	if(sc->data[SC_SIGNUMCRUCIS])
 		def -= def * sc->data[SC_SIGNUMCRUCIS]->val2 / 100;
 	if(sc->data[SC_CONCENTRATION])
@@ -6153,6 +6151,8 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 		def -= def * sc->data[SC_ASH]->val3 / 100;
 	if(sc->data[SC_OVERED_BOOST] && bl->type == BL_HOM)
 		def -= def * sc->data[SC_OVERED_BOOST]->val4 / 100;
+	if(sc->data[SC_NYANGGRASS] && bl->type != BL_PC)
+		def -= def * 50 / 100;
 
 	return (defType)cap_value(def,DEFTYPE_MIN,DEFTYPE_MAX);
 }
@@ -6249,6 +6249,10 @@ defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int md
 		if(sc->data[SC_ASSUMPTIO])
 			mdef <<= 1; //Only eMDEF is doubled
 #endif
+		if(sc->data[SC_STONE] && sc->opt1 == OPT1_STONE)
+			mdef += mdef * 25 / 100;
+		if(sc->data[SC_FREEZE])
+			mdef += mdef * 25 / 100;
 		if(sc->data[SC_NEUTRALBARRIER])
 			mdef += mdef * sc->data[SC_NEUTRALBARRIER]->val2 / 100;
 		return (defType)cap_value(mdef,DEFTYPE_MIN,DEFTYPE_MAX);
@@ -6279,10 +6283,6 @@ defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int md
 		mdef += (!sc->data[SC_ENDURE]->val4 ? sc->data[SC_ENDURE]->val1 : 1); //Eddga card only grants 1 MDEF
 	if(sc->data[SC_STONEHARDSKIN])
 		mdef += sc->data[SC_STONEHARDSKIN]->val2;
-	if(sc->data[SC_STONE] && sc->opt1 == OPT1_STONE)
-		mdef += mdef * 25 / 100;
-	if(sc->data[SC_FREEZE])
-		mdef += mdef * 25 / 100;
 	if(sc->data[SC_SYMPHONYOFLOVER])
 		mdef += mdef * sc->data[SC_SYMPHONYOFLOVER]->val4 / 100;
 	if(sc->data[SC_MDEFSET_PER])
@@ -12195,23 +12195,20 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	enum sc_type type = (sc_type)data;
-	struct block_list *bl;
-	struct map_session_data *sd;
-	struct status_data *status;
-	struct status_change *sc;
-	struct status_change_entry *sce;
+	struct block_list *bl = NULL;
+	struct map_session_data *sd = NULL;
+	struct status_data *status = NULL;
+	struct status_change *sc = NULL;
+	struct status_change_entry *sce = NULL;
 	int interval = status_get_sc_interval(type);
 	bool dounlock = false;
 
-	bl = map_id2bl(id);
-	if( !bl ) {
+	if( !(bl = map_id2bl(id)) ) {
 		ShowDebug("status_change_timer: Null pointer id: %d data: %d\n",id,data);
 		return 0;
 	}
-	sc = status_get_sc(bl);
-	status = status_get_status_data(bl);
 
-	if( !(sc && (sce = sc->data[type])) ) {
+	if( !(sc = status_get_sc(bl)) || !(sce = sc->data[type]) ) {
 		ShowDebug("status_change_timer: Null pointer id: %d data: %d bl-type: %d\n",id,data,bl->type);
 		return 0;
 	}
@@ -12222,8 +12219,8 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 	}
 
 	sce->timer = INVALID_TIMER;
-
 	sd = BL_CAST(BL_PC,bl);
+	status = status_get_status_data(bl);
 
 //Set the next timer of the sce (don't assume the status still exists)
 #define sc_timer_next(t,f,i,d) \

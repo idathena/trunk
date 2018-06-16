@@ -5096,7 +5096,7 @@ static void mob_skill_db_set(void) {
 	DBIterator *iter = db_iterator(mob_skill_db);
 	struct s_mob_skill *skill = NULL;
 
-	for (skill = (struct s_mob_skill *)dbi_first(iter);  dbi_exists(iter); skill = (struct s_mob_skill *)dbi_next(iter))
+	for (skill = (struct s_mob_skill *)dbi_first(iter); dbi_exists(iter); skill = (struct s_mob_skill *)dbi_next(iter))
 		mob_skill_db_set_single(skill);
 
 	dbi_destroy(iter);
@@ -5178,6 +5178,7 @@ void mob_reload(void) {
 			memset(&mob_db_data[i]->skill, 0, sizeof(mob_db_data[i]->skill));
 			mob_db_data[i]->maxskill = 0;
 			memset(&mob_db_data[i]->dropitem, 0, sizeof(mob_db_data[i]->dropitem));
+			memset(&mob_db_data[i]->mvpitem, 0, sizeof(mob_db_data[i]->mvpitem));
 		}
 	}
 	mob_item_drop_ratio->clear(mob_item_drop_ratio, mob_item_drop_ratio_free); //Clear item_drop_ratio_db

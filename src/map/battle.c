@@ -4826,7 +4826,7 @@ struct Damage battle_calc_defense_reduction(struct Damage wd, struct block_list 
 			 * Damage = Attack * (4000 + eDEF) / (4000 + eDEF * 10) - sDEF
 			 */
 			if(def1 < -399) //It stops at -399
-				def1 = 399; //In aegis it set to 1 but in our case it may lead to exploitation so limit it to 399
+				def1 = 399; //In Aegis it set to 1 but in our case it may lead to exploitation so limit it to 399
 			wd.damage = wd.damage * (4000 + def1) / (4000 + 10 * def1) - vit_def;
 			if(is_attack_left_handed(src, skill_id))
 				wd.damage2 = wd.damage2 * (4000 + def1) / (4000 + 10 * def1) - vit_def;
@@ -6360,8 +6360,11 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			 * RE MDEF Reduction
 			 * Damage = Magic Attack * (1000 + eMDEF) / (1000 + eMDEF * 10) - sMDEF
 			 */
-			if(mdef < -99) //It stops at -99
-				mdef = 99; //In aegis it set to 1 but in our case it may lead to exploitation so limit it to 99
+			if(tsc && (tsc->data[SC_FREEZE] || (tsc->data[SC_STONE] && tsc->opt1 == OPT1_STONE))) {
+				if(mdef < -99) //It stops at -99
+					mdef = 99; //In Aegis it set to 1 but in our case it may lead to exploitation so limit it to 99
+			} else //If you have negative eMDEF in normal state, you will take damage as same as 0 eMDEF [exneval]
+				mdef = max(mdef, 0);
 			ad.damage = ad.damage * (1000 + mdef) / (1000 + mdef * 10) - mdef2;
 #else
 			if(battle_config.magic_defense_type)
@@ -6425,7 +6428,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case MG_LIGHTNINGBOLT:
 				if(sc && sc->data[SC_SPELLFIST] && ad.miscflag&BF_SHORT) { //val1 = used spellfist level, val4 = used bolt level [Rytech]
 					ad.damage = ad.damage * (50 * sc->data[SC_SPELLFIST]->val1 + sc->data[SC_SPELLFIST]->val4 * 100) / 100;
-					return ad;
+					return ad; //The rest will be calculated later
 				}
 				break;
 			case CR_GRANDCROSS:
