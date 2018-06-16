@@ -1406,6 +1406,8 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	sd->hatEffectIDs = NULL;
 	sd->hatEffectCount = 0;
 
+	sd->catch_target_class = PET_CATCH_FAIL;
+
 	//Check EXP overflow, since in previous revision EXP on Max Level can be more than 'official' Max EXP
 	if (pc_is_maxbaselv(sd) && sd->status.base_exp > MAX_LEVEL_BASE_EXP) {
 		sd->status.base_exp = MAX_LEVEL_BASE_EXP;
@@ -4959,8 +4961,8 @@ int pc_useitem(struct map_session_data *sd, int n)
 	sd->itemid = item.nameid;
 	sd->itemindex = n;
 
-	if( sd->catch_target_class != -1 ) //Abort pet catching
-		sd->catch_target_class = -1;
+	if( sd->catch_target_class != PET_CATCH_FAIL ) //Abort pet catching
+		sd->catch_target_class = PET_CATCH_FAIL;
 
 	amount = item.amount;
 	script = id->script;
@@ -10467,14 +10469,15 @@ void pc_setstand(struct map_session_data *sd)
 }
 
 /**
- * Mechanic (MADO GEAR)
+ * Calculate Overheat value
+ * @param sd: Player data
+ * @param heat: Amount of Heat to adjust
  */
-void pc_overheat(struct map_session_data *sd, int val)
+void pc_overheat(struct map_session_data *sd, int16 heat)
 {
-	int16 heat = val,
-		limit[] = { 150,200,280,360,450 };
-	uint16 skill_lv;
 	struct status_change_entry *sce = NULL;
+	int16 limit[] = { 150,200,280,360,450 };
+	uint16 skill_lv;
 
 	nullpo_retv(sd);
 
@@ -12101,9 +12104,11 @@ void pc_show_questinfo(struct map_session_data *sd) {
 	if (!map[sd->bl.m].qi_count || !map[sd->bl.m].qi_data)
 		return;
 
-	for(i = 0; i < map[sd->bl.m].qi_count; i++) {
-		qi = &map[sd->bl.m].qi_data[i];
+	if (map[sd->bl.m].qi_count != sd->qi_count)
+		return; //Init was not called yet
 
+	for (i = 0; i < map[sd->bl.m].qi_count; i++) {
+		qi = &map[sd->bl.m].qi_data[i];
 		if (!qi)
 			continue;
 		if (quest_check(sd, qi->quest_id, HAVEQUEST) != -1) { //Check if quest is not started

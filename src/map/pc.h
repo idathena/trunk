@@ -487,7 +487,7 @@ struct map_session_data {
 	int itemid;
 	short itemindex; //Used item's index in sd->inventory [Skotlex]
 
-	short catch_target_class; //Pet catching, stores a pet class to catch (short now) [zzo]
+	uint16 catch_target_class; //Pet catching, stores a pet class to catch [zzo]
 
 	short spiritball,spiritball_old;
 	int spiritball_timer[MAX_SPIRITBALL];
@@ -1212,7 +1212,7 @@ int pc_read_motd(void); // [Valaris]
 int pc_disguise(struct map_session_data *sd, int class_);
 bool pc_isautolooting(struct map_session_data *sd, unsigned short nameid);
 
-void pc_overheat(struct map_session_data *sd, int val);
+void pc_overheat(struct map_session_data *sd, int16 heat);
 
 int pc_banding(struct map_session_data *sd, uint16 skill_lv);
 

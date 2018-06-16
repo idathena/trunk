@@ -35,11 +35,16 @@ struct s_pet_db {
 };
 extern struct s_pet_db pet_db[MAX_PET_DB];
 
-enum {
+enum e_pet_itemtype {
 	PET_CLASS,
 	PET_CATCH,
 	PET_EGG,PET_EQUIP,
 	PET_FOOD
+};
+
+enum e_pet_catch {
+	PET_CATCH_FAIL = 0, //A catch attempt failed
+	PET_CATCH_UNIVERSAL = 1, //The catch attempt is universal (ignoring MD_STATUS_IMMUNE/Boss)
 };
 
 struct pet_recovery { //Stat recovery

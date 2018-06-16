@@ -6442,33 +6442,33 @@ ACMD_FUNC(mobsearch)
 		return -1;
 	}
 
-	if ((mob_id = atoi(mob_name)) == 0)
-		 mob_id = mobdb_searchname(mob_name);
-	if(mob_id > 0 && mobdb_checkid(mob_id) == 0) {
+	if (!(mob_id = atoi(mob_name)))
+		mob_id = mobdb_searchname(mob_name);
+
+	if (!mobdb_checkid(mob_id)) {
 		snprintf(atcmd_output, sizeof atcmd_output, msg_txt(1219),mob_name); // Invalid mob ID %s!
 		clif_displaymessage(fd, atcmd_output);
 		return -1;
 	}
-	if(mob_id == atoi(mob_name) && mob_db(mob_id)->jname)
-				strcpy(mob_name,mob_db(mob_id)->jname);	// --ja--
-//				strcpy(mob_name,mob_db(mob_id)->name);	// --en--
+
+	strcpy(mob_name,mob_db(mob_id)->jname);	// --ja--
+//	strcpy(mob_name,mob_db(mob_id)->name);	// --en--
 
 	snprintf(atcmd_output, sizeof atcmd_output, msg_txt(1220), mob_name, mapindex_id2name(sd->mapindex)); // Mob Search... %s %s
 	clif_displaymessage(fd, atcmd_output);
 
 	it = mapit_geteachmob();
-	for(;;) {
+	for (;;) {
 		TBL_MOB *md = (TBL_MOB *)mapit_next(it);
-		if( md == NULL )
+
+		if (!md)
 			break; //No more mobs
-
-		if( md->bl.m != sd->bl.m )
+		if (md->bl.m != sd->bl.m)
 			continue;
-		if( mob_id != -1 && md->mob_id != mob_id )
+		if (md->mob_id != mob_id)
 			continue;
-
 		++number;
-		if( md->spawn_timer == INVALID_TIMER )
+		if (md->spawn_timer == INVALID_TIMER)
 			snprintf(atcmd_output, sizeof(atcmd_output), "%2d[%3d:%3d] %s", number, md->bl.x, md->bl.y, md->name);
 		else
 			snprintf(atcmd_output, sizeof(atcmd_output), "%2d[%s] %s", number, "dead", md->name);

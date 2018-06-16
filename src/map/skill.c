@@ -9181,7 +9181,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			if( sd ) {
 				struct skill_condition req = skill_get_requirement(sd,skill_id,skill_lv);
-				int limit[] = { -45,-75,-105 };
+				int16 limit[] = { -45,-75,-105 };
 
 				for( i = 0; i < req.eqItem_count; i++ ) {
 					uint16 reqeqit = req.eqItem[i];
@@ -10992,9 +10992,9 @@ int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data)
 				sc->data[SC_SPIRIT]->val3 = 0; //Clear bounced spell check
 			if( sc->data[SC_DANCING] && (skill_get_inf2(ud->skill_id)&INF2_SONG_DANCE) && sd )
 				skill_blockpc_start(sd,BD_ADAPTATION,3000);
+			if( ud->skill_id != RA_CAMOUFLAGE )
+				status_change_end(src,SC_CAMOUFLAGE,INVALID_TIMER);
 		}
-		if( ud->skill_id != RA_CAMOUFLAGE )
-			status_change_end(src,SC_CAMOUFLAGE,INVALID_TIMER);
 		if( (ud->skill_id == RL_QD_SHOT || !(skill_get_inf(ud->skill_id)&INF_SELF_SKILL)) &&
 			target->id != src->id && ud->skill_id != KO_GENWAKU )
 			unit_setdir(src,map_calc_dir(src,target->x,target->y));
