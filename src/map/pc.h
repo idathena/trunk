@@ -28,10 +28,14 @@
 #define MAX_PC_FEELHATE 3 //Max feel hate info
 #define DAMAGELOG_SIZE_PC 100 //Damage log
 #define MAX_DEVOTION 5 //Max Devotion slots
+#define CASHPOINT_VAR "#CASHPOINTS"
+#define KAFRAPOINT_VAR "#KAFRAPOINTS"
 #define BANK_VAULT_VAR "#BANKVAULT"
 #define ROULETTE_BRONZE_VAR "RouletteBronze"
 #define ROULETTE_SILVER_VAR "RouletteSilver"
 #define ROULETTE_GOLD_VAR "RouletteGold"
+#define COOKMASTERY_VAR "COOK_MASTERY"
+#define PCDIECOUNTER_VAR "PC_DIE_COUNTER"
 
 //Update this max as necessary, 86 is the value needed for Expanded Super Baby
 #define MAX_SKILL_TREE 86
@@ -678,8 +682,8 @@ struct map_session_data {
 
 	uint16 dmglog[DAMAGELOG_SIZE_PC]; //Target ids
 
-	int c_marker[MAX_SKILL_CRIMSON_MARKER]; //Store target that marked by Crimson Marker [Cydh]
-	bool flicker; //Check RL_FLICKER usage status [Cydh]
+	int c_marker[MAX_SKILL_CRIMSON_MARKER]; //Stores target that marked by Crimson Marker [Cydh]
+	int h_mine[MAX_SKILL_HOWLING_MINE]; //Stores target that tagged by with a Howling Mine
 
 	//Bonus Script [Cydh]
 	struct s_bonus_script_list {

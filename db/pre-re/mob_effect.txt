@@ -1,4 +1,0 @@
-// Monster Effect Database
-//
-// Structure of Database:
-// MobID,EffectID

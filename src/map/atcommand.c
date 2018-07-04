@@ -1752,20 +1752,7 @@ ACMD_FUNC(bodystyle)
 
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
-	if (!(
-		(sd->class_&MAPID_THIRDMASK) == MAPID_WARLOCK ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_RANGER ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_ARCH_BISHOP ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_GUILLOTINE_CROSS ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_ROYAL_GUARD ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_MINSTRELWANDERER ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_GENETIC ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_SHADOW_CHASER ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_SORCERER ||
-		(sd->class_&MAPID_THIRDMASK) == MAPID_SURA
-		))
-	{
+	if (!(sd->class_&JOBL_THIRD)) {
 		clif_displaymessage(fd, msg_txt(727)); // This job has no alternate body styles.
 		return -1;
 	}
@@ -8411,7 +8398,7 @@ ACMD_FUNC(cash)
 		} else {
 			if( -value > sd->kafraPoints ) //By command, if point < value, force it to remove all
 				value = -sd->kafraPoints;
-			if( (ret = pc_paycash(sd, -value, -value, LOG_TYPE_COMMAND)) >= 0 ) {
+			if( (ret = pc_paycash(sd, 0, -value, LOG_TYPE_COMMAND)) >= 0 ) {
 				sprintf(output, msg_txt(411), ret, sd->kafraPoints); // Removed %d kafra points. Total %d points.
 				clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 			} else

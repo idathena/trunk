@@ -4848,20 +4848,6 @@ static int mob_item_drop_ratio_free(DBKey key, DBData *data, va_list ap) {
 	return 0;
 }
 
-static bool mob_readdb_effect(char *str[], int columns, int current)
-{
-	int mob_id = atoi(str[0]),
-		effect_id = atoi(str[1]);
-
-	if (mob_db(mob_id) == mob_dummy) {
-		ShowWarning("mob_readdb_effect: Unknown mob id %d.\n", mob_id);
-		return false;
-	}
-
-	mob_db_data[mob_id]->effect_id = effect_id;
-	return true;
-}
-
 /**
  * Adjust drop ratio for each monster
  */
@@ -5121,7 +5107,6 @@ static void mob_load(void)
 	sv_readdb(db_path, "mob_avail.txt", ',', 2, 12, -1, &mob_readdb_mobavail);
 	sv_readdb(db_path, DBPATH"mob_race2_db.txt", ',', 2, MAX_RACE2_MOBS, -1, &mob_readdb_race2);
 	sv_readdb(db_path, "mob_item_ratio.txt", ',', 2, 2 + MAX_ITEMRATIO_MOBS, -1, &mob_readdb_itemratio);
-	sv_readdb(db_path, DBPATH"mob_effect.txt",   ',', 2, 2, -1, &mob_readdb_effect);
 	sv_readdb(db_path, DBPATH"mob_drop.txt", ',', 3, 5, -1, &mob_readdb_drop);
 	mob_drop_ratio_adjust();
 	mob_skill_db_set();
