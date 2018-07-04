@@ -13774,7 +13774,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_VACUUM_EXTREME:
-			if (tsc && (tsc->data[SC_HALLUCINATIONWALK]) || tsc->data[type])
+			if (tsc && (tsc->data[SC_HALLUCINATIONWALK] || tsc->data[type]))
 				break;
 			//Apply effect and suck targets one-by-one each n seconds
 			sc_start4(src,bl,type,100,skill_lv,group->group_id,(group->val1<<16)|(group->val2),++group->val3 * 500,group->limit - DIFF_TICK(tick,group->tick));
