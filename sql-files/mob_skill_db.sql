@@ -71,6 +71,9 @@ CREATE TABLE IF NOT EXISTS `mob_skill_db` (
 #	afterskill		After mob casts the specified skill.
 #	casttargeted		When a target is in cast range (no condition value).
 #	rudeattacked		When mob is rude attacked (no condition value).
+#	masterhpltmaxrate	When the mob's master's hp drops to a certain %
+#	masterattacked		When the mob's master's is attacked.
+#	alchemist		Unknown.
 #
 #	Status abnormalities specified through the statuson/statusoff system:
 #	    anybad (any type of state change) / stone / freeze / stun / sleep /
@@ -5802,8 +5805,24 @@ REPLACE INTO `mob_skill_db` VALUES (2082,'Piranha@NPC_BLOODDRAIN','attack',199,1
 #****
 # NC Mechanic Summons
 REPLACE INTO `mob_skill_db` VALUES (2042,'Silver Sniper@NPC_REVENGE','idle',333,1,10000,0,0,'yes','self','masterattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db` VALUES (2043,'Magic Decoy@MG_FIREBOLT','idle',19,10,10000,500,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db` VALUES (2044,'Magic Decoy@MG_COLDBOLT','idle',14,10,10000,500,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db` VALUES (2045,'Magic Decoy@WZ_EARTHSPIKE','idle',90,10,10000,500,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db` VALUES (2046,'Magic Decoy@MG_LIGHTNINGBOLT','idle',20,10,10000,500,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2043,'Magic Decoy Fire@MG_FIREBOLT','attack',19,10,10000,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2044,'Magic Decoy Water@MG_COLDBOLT','attack',14,10,10000,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2045,'Magic Decoy Earth@WZ_EARTHSPIKE','attack',90,10,10000,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2046,'Magic Decoy Wind@MG_LIGHTNINGBOLT','attack',20,10,10000,500,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
+# Sera's Legion Insects
+REPLACE INTO `mob_skill_db` VALUES (2158,'Hornet@NPC_PIERCINGATT','attack',158,3,500,0,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db` VALUES (2158,'Hornet@NPC_POISONATTACK','attack',188,1,2000,500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2158,'Hornet@NPC_WINDATTACK','attack',187,1,2000,0,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2159,'Giant Hornet@NPC_PIERCINGATT','attack',158,4,500,0,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db` VALUES (2159,'Giant Hornet@NPC_POISONATTACK','attack',188,2,2000,500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2159,'Giant Hornet@NPC_SILENCEATTACK','chase',178,3,500,700,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2159,'Giant Hornet@NPC_STUNATTACK','attack',179,3,500,1500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db` VALUES (2159,'Giant Hornet@NPC_WINDATTACK','attack',187,2,500,500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db` VALUES (2159,'Giant Hornet@NPC_BLEEDING','attack',660,2,200,0,3000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'32',NULL);
+REPLACE INTO `mob_skill_db` VALUES (2160,'Luciola Vespa@NPC_PIERCINGATT','attack',158,5,500,0,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
+REPLACE INTO `mob_skill_db` VALUES (2160,'Luciola Vespa@NPC_POISONATTACK','attack',188,3,2000,500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2160,'Luciola Vespa@NPC_PULSESTRIKE','attack',661,1,1000,0,30000,'yes','self','always','0',NULL,NULL,NULL,NULL,NULL,'32',NULL);
+REPLACE INTO `mob_skill_db` VALUES (2160,'Luciola Vespa@NPC_COMBOATTACK','attack',171,1,3000,0,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2160,'Luciola Vespa@NPC_BLEEDING','attack',660,3,200,0,3000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,'32',NULL);
 

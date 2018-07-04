@@ -1102,7 +1102,7 @@ int unit_blown_immune(struct block_list *bl, int flag)
 		case BL_PC: {
 				struct map_session_data *sd = BL_CAST(BL_PC, bl);
 
-				if ((flag&(0x1|0x2)) && !(flag&8) && sd->special_state.no_knockback)
+				if ((flag&(0x1|0x2)) && !(flag&0x8) && sd->special_state.no_knockback)
 					return 3; //Target has special_state.no_knockback (equip)
 				if (!(flag&0x4) && sd->sc.data[SC_BASILICA] && sd->sc.data[SC_BASILICA]->val4 == sd->bl.id)
 					return 4; //Basilica caster can't be knocked back by normal monsters
@@ -1587,7 +1587,20 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 					ARR_FIND(0, MAX_SKILL_CRIMSON_MARKER, i, sd->c_marker[i] == target_id);
 					if( i == MAX_SKILL_CRIMSON_MARKER ) {
 						ARR_FIND(0, MAX_SKILL_CRIMSON_MARKER, i, sd->c_marker[i] == 0);
-						if( i == MAX_SKILL_CRIMSON_MARKER ) { //No free slots, skill Fail
+						if( i == MAX_SKILL_CRIMSON_MARKER ) { //No free slots, skill fail
+							clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+							return 0;
+						}
+					}
+				}
+				break;
+			case RL_H_MINE: {
+					uint8 i = 0;
+
+					ARR_FIND(0, MAX_SKILL_HOWLING_MINE, i, sd->h_mine[i] == target_id);
+					if( i == MAX_SKILL_HOWLING_MINE ) {
+						ARR_FIND(0, MAX_SKILL_HOWLING_MINE, i, sd->h_mine[i] == 0);
+						if( i == MAX_SKILL_HOWLING_MINE ) {
 							clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 							return 0;
 						}
@@ -2718,6 +2731,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 			status_change_end(bl,SC_PROVOKE,INVALID_TIMER); //End infinite provoke to prevent exploit
 		status_change_end(bl,SC_CHANGE,INVALID_TIMER);
 		status_change_end(bl,SC_STOP,INVALID_TIMER);
+		status_change_end(bl,SC_MILLENNIUMSHIELD,INVALID_TIMER);
 		status_change_end(bl,SC_ELECTRICSHOCKER,INVALID_TIMER);
 		status_change_end(bl,SC_WUGDASH,INVALID_TIMER);
 		status_change_end(bl,SC_BITE,INVALID_TIMER);
@@ -2763,7 +2777,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 				if (sd->guild_alliance > 0)
 					guild_reply_reqalliance(sd,sd->guild_alliance_account,0);
 				if (sd->menuskill_id)
-					sd->menuskill_id = sd->menuskill_val = 0;
+					sd->menuskill_id = sd->menuskill_val = sd->menuskill_val2 = 0;
 				if (sd->touching_id)
 					npc_touchnext_areanpc(sd,true);
 				if (sd->state.warping && !sd->state.changemap) { //Check if warping and not changing the map

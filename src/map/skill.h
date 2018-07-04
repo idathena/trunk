@@ -22,6 +22,7 @@ struct status_change_entry;
 #define MAX_SKILL_IMPROVISE_DB 20 //Max Skill for Improvise
 #define MAX_SKILL_LEVEL 100 //Max Skill Level
 #define MAX_SKILL_CRIMSON_MARKER 3 //Max Crimson Marker targets (RL_C_MARKER)
+#define MAX_SKILL_HOWLING_MINE 5 //Max Howling Mine targets (RL_H_MINE)
 #define SKILL_NAME_LENGTH 31 //Max Skill Name length
 #define SKILL_DESC_LENGTH 31 //Max Skill Desc length
 
@@ -90,7 +91,7 @@ enum e_skill_inf3 {
 	INF3_EFF_RESEARCHTRAP   = 0x00800, //Skill range affected by RA_RESEARCHTRAP
 	INF3_USABLE_MANHOLE     = 0x01000, //Skill that can be used even under SC__MANHOLE
 	INF3_USABLE_WARG        = 0x02000, //Skill that can be use while riding warg
-	INF3_SC_GLOOMYDAY_SK    = 0x04000, //Skill that affected by SC_GLOOMYDAY_SK
+	INF3_SC_GLOOMYDAY       = 0x04000, //Skill that affected by SC_GLOOMYDAY
 	INF3_SC_DANCEWITHWUG    = 0x08000, //Skill that affected by SC_DANCEWITHWUG
 	INF3_BITE_BLOCK         = 0x10000, //Skill blocked by RA_WUGBITE
 };
@@ -346,6 +347,7 @@ int skill_get_castnodex(uint16 skill_id, uint16 skill_lv);
 int skill_get_castdef(uint16 skill_id);
 int skill_get_nocast(uint16 skill_id);
 int skill_get_unit_id(uint16 skill_id, int flag);
+int skill_get_unit_range(uint16 skill_id, uint16 skill_lv);
 int skill_get_inf2(uint16 skill_id);
 int skill_get_castcancel(uint16 skill_id);
 int skill_get_maxcount(uint16 skill_id, uint16 skill_lv);

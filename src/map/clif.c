@@ -1464,15 +1464,6 @@ int clif_spawn(struct block_list *bl)
 				if (md->sc.data[SC_MILLENNIUMSHIELD])
 					clif_millenniumshield(bl,md->sc.data[SC_MILLENNIUMSHIELD]->val2);
 				clif_efst_set_enter(bl,bl,AREA);
-#if PACKETVER < 20151104
-				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
-	#if PACKETVER >= 20130000
-					if (effect_id == 979)
-						effect_id = 880;
-	#endif
-					clif_specialeffect(bl,effect_id,AREA);
-				}
-#endif
 			}
 			break;
 		case BL_NPC: {
@@ -4659,15 +4650,6 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 				if (md->sc.data[SC_MILLENNIUMSHIELD])
 					clif_millenniumshield_single(bl,md->sc.data[SC_MILLENNIUMSHIELD]->val2,sd->fd);
 				clif_efst_set_enter(&sd->bl,bl,SELF);
-#if PACKETVER < 20151104
-				if ((effect_id = mob_db(md->mob_id)->effect_id) > 0) {
-	#if PACKETVER >= 20130000
-					if (effect_id == 979)
-						effect_id = 880;
-	#endif
-					clif_specialeffect_single(bl,effect_id,sd->fd);
-				}
-#endif
 #if PACKETVER >= 20120404
 				if (battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar) {
 					int i;
@@ -18210,6 +18192,7 @@ int clif_spellbook_list(struct map_session_data *sd)
 	} else {
 		status_change_end(&sd->bl,SC_STOP,INVALID_TIMER);
 		clif_skill_fail(sd,WL_READING_SB,USESKILL_FAIL_SPELLBOOK,0,0);
+		return 0;
 	}
 
 	return 1;
@@ -18226,7 +18209,7 @@ int clif_magicdecoy_list(struct map_session_data *sd, uint16 skill_lv, short x, 
 	nullpo_ret(sd);
 
 	fd = sd->fd;
-	WFIFOHEAD(fd,8 * 8 + 8);
+	WFIFOHEAD(fd,4 * 2 + 4); //Were only listing the 4 elemental points
 	WFIFOW(fd,0) = 0x1ad; //This is the official packet [pakpil]
 
 	for( i = 0, c = 0; i < MAX_INVENTORY; i++ ) {
@@ -18236,12 +18219,12 @@ int clif_magicdecoy_list(struct map_session_data *sd, uint16 skill_lv, short x, 
 		}
 	}
 	if( c > 0 ) {
+		WFIFOW(fd,2) = c * 2 + 4;
+		WFIFOSET(fd,WFIFOW(fd,2));
 		sd->menuskill_id = NC_MAGICDECOY;
 		sd->menuskill_val = skill_lv;
 		sd->sc.pos_x = x;
 		sd->sc.pos_y = y;
-		WFIFOW(fd,2) = c * 2 + 4;
-		WFIFOSET(fd,WFIFOW(fd,2));
 	} else
 		return 0;
 
@@ -18269,10 +18252,10 @@ int clif_poison_list(struct map_session_data *sd, uint16 skill_lv) {
 		}
 	}
 	if( c > 0 ) {
-		sd->menuskill_id = GC_POISONINGWEAPON;
-		sd->menuskill_val = skill_lv;
 		WFIFOW(fd,2) = c * 2 + 4;
 		WFIFOSET(fd,WFIFOW(fd,2));
+		sd->menuskill_id = GC_POISONINGWEAPON;
+		sd->menuskill_val = skill_lv;
 	} else {
 		clif_skill_fail(sd,GC_POISONINGWEAPON,USESKILL_FAIL_GUILLONTINE_POISON,0,0);
 		return 0;
@@ -18317,6 +18300,7 @@ int clif_autoshadowspell_list(struct map_session_data *sd) {
 	} else {
 		status_change_end(&sd->bl,SC_STOP,INVALID_TIMER);
 		clif_skill_fail(sd,SC_AUTOSHADOWSPELL,USESKILL_FAIL_IMITATION_SKILL_NONE,0,0);
+		return 0;
 	}
 
 	return 1;
@@ -18347,7 +18331,6 @@ int clif_skill_itemlistwindow(struct map_session_data *sd, uint16 skill_id, uint
 	WFIFOL(fd,2) = skill_lv;
 	WFIFOL(fd,4) = 0;
 	WFIFOSET(fd,packet_len(0x7e3));
-
 #endif
 
 	return 1;
@@ -18372,7 +18355,6 @@ void clif_parse_SkillSelectMenu(int fd, struct map_session_data *sd) {
 	}
 
 	skill_select_menu(sd,RFIFOW(fd,info->pos[1]));
-
 	clif_menuskill_clear(sd);
 }
 

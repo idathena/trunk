@@ -731,7 +731,7 @@ static bool itemdb_noequip_parse_dbrow(char *str[], int columns, int current)
 
 	nameid = atoi(str[0]);
 
-	if( (id = itemdb_exists(nameid)) == NULL ) {
+	if( !(id = itemdb_exists(nameid)) ) {
 		ShowWarning("itemdb_noequip_parse_dbrow: Invalid item id %hu.\n", nameid);
 		return false;
 	}
@@ -770,7 +770,7 @@ static bool itemdb_itemtrade_parse_dbrow(char *str[], int columns, int current) 
 
 	nameid = atoi(str[0]);
 
-	if( (id = itemdb_exists(nameid)) == NULL ) {
+	if( !(id = itemdb_exists(nameid)) ) {
 		//ShowWarning("itemdb_itemtrade_parse_dbrow: Invalid item id %d.\n", nameid);
 		//return false;
 		//FIXME: item_trade.txt contains items, which are commented in item database.
@@ -828,7 +828,7 @@ static bool itemdb_read_itemdelay(char *str[], int columns, int current)
 
 	nameid = atoi(str[0]);
 
-	if( (id = itemdb_exists(nameid)) == NULL ) {
+	if( !(id = itemdb_exists(nameid)) ) {
 		ShowWarning("itemdb_read_itemdelay: Invalid item id %hu.\n", nameid);
 		return false;
 	}
@@ -868,7 +868,7 @@ static bool itemdb_read_stack(char *fields[], int columns, int current)
 
 	nameid = (unsigned short)strtoul(fields[0], NULL, 10);
 
-	if( (id = itemdb_exists(nameid)) == NULL ) {
+	if( !(id = itemdb_exists(nameid)) ) {
 		ShowWarning("itemdb_read_stack: Unknown item id '%hu'.\n", nameid);
 		return false;
 	}

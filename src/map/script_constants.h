@@ -490,12 +490,16 @@
 	export_parameter("CharMoves",SP_CHARMOVE);
 	export_parameter("CharRename",SP_CHARRENAME);
 	export_parameter("Font",SP_CHARFONT);
-	export_parameter("BankVault",SP_BANK_VAULT);
+	export_parameter(BANK_VAULT_VAR,SP_BANK_VAULT);
 	export_parameter(ROULETTE_BRONZE_VAR,SP_ROULETTE_BRONZE);
 	export_parameter(ROULETTE_SILVER_VAR,SP_ROULETTE_SILVER);
 	export_parameter(ROULETTE_GOLD_VAR,SP_ROULETTE_GOLD);
 	export_parameter("killedrid_x",SP_KILLEDRID_X);
 	export_parameter("killedrid_y",SP_KILLEDRID_Y);
+	export_parameter(CASHPOINT_VAR,SP_CASHPOINTS);
+	export_parameter(KAFRAPOINT_VAR,SP_KAFRAPOINTS);
+	export_parameter(PCDIECOUNTER_VAR,SP_PCDIECOUNTER);
+	export_parameter(COOKMASTERY_VAR,SP_COOKMASTERY);
 
 	export_constant2("bMaxHP",SP_MAXHP);
 	export_constant2("bMaxSP",SP_MAXSP);
@@ -1174,7 +1178,6 @@
 	export_constant(SC_STRIKING);
 	export_constant(SC_WARMER);
 	export_constant(SC_VACUUM_EXTREME);
-	export_constant(SC_VACUUM_EXTREME_POSTDELAY);
 	export_constant(SC_PROPERTYWALK);
 	export_constant(SC_FIRE_INSIGNIA);
 	export_constant(SC_WATER_INSIGNIA);
@@ -1189,7 +1192,6 @@
 	export_constant(SC_VOICEOFSIREN);
 	export_constant(SC_SIRCLEOFNATURE);
 	export_constant(SC_GLOOMYDAY);
-	export_constant(SC_GLOOMYDAY_SK);
 	export_constant(SC_SONGOFMANA);
 	export_constant(SC_DANCEWITHWUG);
 	export_constant(SC_SATURDAYNIGHTFEVER);
@@ -1272,6 +1274,7 @@
 	export_constant(SC_ANTI_M_BLAST);
 	export_constant(SC_B_TRAP);
 	export_constant(SC_H_MINE);
+	export_constant(SC_H_MINE_EXPLOSION);
 	export_constant(SC_QD_SHOT_READY);
 	export_constant(SC_SUHIDE);
 	export_constant(SC_SU_STOOP);
@@ -2318,8 +2321,10 @@
 	export_constant(SI_MTF_LUDE);
 	export_constant(SI_MTF_CRUISER);
 	export_constant(SI_MERMAID_LONGING);
+	export_constant(SI_MAGICAL_FEATHER);
 	export_constant(SI_DRACULA_CARD);
 	export_constant(SI_LIMIT_POWER_BOOSTER);
+	export_constant(SI_GIFT_OF_SNOW);
 	export_constant(SI_TIME_ACCESSORY);
 	export_constant(SI_EP16_DEF);
 	export_constant(SI_NORMAL_ATKED_SP);
@@ -2343,6 +2348,7 @@
 	export_constant(SI_CHERRY_BLOSSOM_CAKE);
 	export_constant(SI_SU_STOOP);
 	export_constant(SI_CATNIPPOWDER);
+	export_constant(SI_HEAD_EQUIPMENT_EFFECT);
 	export_constant(SI_SV_ROOTTWIST);
 	export_constant(SI_ATTACK_PROPERTY_NOTHING);
 	export_constant(SI_ATTACK_PROPERTY_WATER);
