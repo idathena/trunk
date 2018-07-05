@@ -1010,7 +1010,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 	if( sc && sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF] )
 		return 1;
 
-	if( skill_id == PA_PRESSURE || skill_id == HW_GRAVITATION || d->isvanishdamage )
+	if( skill_id == PA_PRESSURE || skill_id == HW_GRAVITATION || skill_id == NPC_MAXPAIN_ATK || d->isvanishdamage )
 		return damage; //Bypass everything
 
 	if( sc && sc->count ) { //SC_* that reduce damage to 0
@@ -1128,6 +1128,14 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 		if( (sce = sc->data[SC_PARRYING]) && flag&BF_WEAPON && !battle_skill_check_no_cardfix_atk(skill_id) && rnd()%100 < sce->val2 ) {
 			clif_skill_nodamage(bl,bl,LK_PARRYING,sce->val1,1);
 			return 0; //Attack blocked by Parrying
+		}
+
+		if( (sce = sc->data[SC_MAXPAIN]) ) {
+			clif_skill_nodamage(bl,bl,NPC_MAXPAIN_ATK,sce->val1,1);
+			battle_damage_temp[0] = damage;
+			skill_castend_damage_id(bl,src,NPC_MAXPAIN_ATK,sce->val1,gettick(),0);
+			d->dmg_lv = ATK_MISS;
+			return 0;
 		}
 
 		if( (sce = sc->data[SC_DODGE]) && ((flag&BF_LONG) || sc->data[SC_STRUP]) && rnd()%100 < 20 ) {
@@ -5324,20 +5332,18 @@ void battle_do_reflect(int attack_type, struct Damage *wd, struct block_list *sr
 			}
 		}
 		rdamage = battle_calc_return_damage(target, src, &damage, wd->flag, skill_id, true);
-		if(rdamage > 0) {
-			if(attack_type == BF_WEAPON || attack_type == BF_MISC) {
-				if(reflectdamage)
-					map_foreachinshootrange(battle_damage_area, target, skill_get_splash(LG_REFLECTDAMAGE, 1), BL_CHAR, tick, target, wd->amotion, sstatus->dmotion, rdamage, tstatus->race);
-				else {
-					struct block_list *d_bl = battle_check_devotion(src);
+		if(rdamage > 0 && (attack_type == BF_WEAPON || attack_type == BF_MISC)) {
+			if(reflectdamage)
+				map_foreachinshootrange(battle_damage_area, target, skill_get_splash(LG_REFLECTDAMAGE, 1), BL_CHAR, tick, target, wd->amotion, sstatus->dmotion, rdamage, tstatus->race);
+			else {
+				struct block_list *d_bl = battle_check_devotion(src);
 
-					rdelay = clif_damage(src, (!d_bl ? src : d_bl), tick, wd->amotion, sstatus->dmotion, rdamage, 1, DMG_ENDURE, 0, false);
-					if(tsd)
-						battle_drain(tsd, src, rdamage, rdamage, sstatus->race, sstatus->class_);
-					//It appears that official servers give skill reflect damage a longer delay
-					battle_delay_damage(tick, wd->amotion, target, (!d_bl ? src : d_bl), 0, CR_REFLECTSHIELD, 0, rdamage, ATK_DEF, rdelay, true, false, false);
-					skill_additional_effect(target, (!d_bl ? src : d_bl), CR_REFLECTSHIELD, 1, BF_WEAPON|BF_SHORT|BF_NORMAL, ATK_DEF, tick);
-				}
+				rdelay = clif_damage(src, (!d_bl ? src : d_bl), tick, wd->amotion, sstatus->dmotion, rdamage, 1, DMG_ENDURE, 0, false);
+				if(tsd)
+					battle_drain(tsd, src, rdamage, rdamage, sstatus->race, sstatus->class_);
+				//It appears that official servers give skill reflect damage a longer delay
+				battle_delay_damage(tick, wd->amotion, target, (!d_bl ? src : d_bl), 0, CR_REFLECTSHIELD, 0, rdamage, ATK_DEF, rdelay, true, false, false);
+				skill_additional_effect(target, (!d_bl ? src : d_bl), CR_REFLECTSHIELD, 1, BF_WEAPON|BF_SHORT|BF_NORMAL, ATK_DEF, tick);
 			}
 		}
 	}
@@ -6651,13 +6657,13 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			md.damage = 3;
 			break;
 		case NPC_DARKBREATH:
-			md.damage = tstatus->max_hp * skill_lv * 10 / 100;
+			md.damage = tstatus->max_hp * skill_lv / 10;
 			break;
 		case NPC_EVILLAND:
 			md.damage = skill_calc_heal(src, target, skill_id, skill_lv, false);
 			break;
 		case NPC_MAXPAIN_ATK:
-			md.damage = battle_damage_temp[0] * skill_lv * 10 / 100;
+			md.damage = battle_damage_temp[0] * skill_lv / 10;
 			break;
 		case NPC_WIDESUCK:
 			md.damage = tstatus->max_hp * 15 / 100;
@@ -7016,7 +7022,7 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 			rdamage += damage * sd->bonus.short_weapon_damage_return / 100;
 			CAP_RDAMAGE(rdamage);
 		} else if( status_reflect && sc && sc->count ) {
-			struct status_change_entry *sce;
+			struct status_change_entry *sce = NULL;
 
 			if( (sce = sc->data[SC_REFLECTSHIELD]) || (sce = battle_check_shadowform(bl,SC_REFLECTSHIELD)) ) {
 				struct status_change_entry *sce_d = sc->data[SC_DEVOTION];
@@ -7066,10 +7072,10 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 					uint8 dir = map_calc_dir(bl,src->x,src->y), t_dir = unit_getdir(bl);
 					int64 rd1 = 0;
 
-					if( distance_bl(src,bl) <= 0 || !map_check_dir(dir,t_dir) ) {
+					if( distance_bl(bl,src) <= 0 || !map_check_dir(dir,t_dir) ) {
 						rd1 = i64min(damage,status_get_max_hp(bl)) * sce->val2 / 100; //Amplify damage
 						*dmg = rd1 * 30 / 100; //Player receives 30% of the amplified damage
-						clif_skill_damage(src,bl,gettick(),status_get_amotion(src),0,-30000,1,RK_DEATHBOUND,-1,DMG_SKILL);
+						clif_skill_damage(bl,src,gettick(),status_get_amotion(bl),0,-30000,1,RK_DEATHBOUND,-1,DMG_SKILL);
 						skill_blown(bl,src,skill_get_blewcount(RK_DEATHBOUND,sce->val1),unit_getdir(src),0);
 						status_change_end(bl,SC_DEATHBOUND,INVALID_TIMER);
 						status_change_end(bl,SC_TELEPORT_FIXEDCASTINGDELAY,INVALID_TIMER);
@@ -7089,13 +7095,14 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 		}
 	}
 
-	if( ssc && ssc->data[SC_INSPIRATION] ) {
-		rdamage += damage / 100;
-		CAP_RDAMAGE(rdamage);
+	if( status_reflect ) {
+		if( ssc && ssc->data[SC_INSPIRATION] ) {
+			rdamage += damage / 100;
+			CAP_RDAMAGE(rdamage);
+		}
+		if( sc && sc->data[SC_KYOMU] && !sc->data[SC_SHIELDSPELL_DEF] )
+			return 0; //Nullify reflecting ability except for Shield Spell DEF
 	}
-
-	if( sc && sc->data[SC_KYOMU] && !sc->data[SC_SHIELDSPELL_DEF] )
-		return 0; //Nullify reflecting ability except for Shield Spell DEF
 
 	return rdamage;
 #undef CAP_RDAMAGE
@@ -7514,10 +7521,6 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 				clif_skill_damage(&ed->bl,target,tick,status_get_amotion(src),0,-30000,1,EL_CIRCLE_OF_FIRE,sce_e->val1,DMG_SKILL);
 				skill_attack(BF_WEAPON,&ed->bl,&ed->bl,src,EL_CIRCLE_OF_FIRE,sce_e->val1,tick,flag);
 			}
-		}
-		if (tsc->data[SC_MAXPAIN]) {
-			battle_damage_temp[0] = damage;
-			skill_castend_damage_id(target,src,NPC_MAXPAIN_ATK,tsc->data[SC_MAXPAIN]->val1,tick,flag);
 		}
 	}
 

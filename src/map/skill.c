@@ -3366,10 +3366,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				}
 			}
 		}
-		if (tsc->data[SC_MAXPAIN]) {
-			battle_damage_temp[0] = damage;
-			skill_castend_damage_id(bl, src, NPC_MAXPAIN_ATK, tsc->data[SC_MAXPAIN]->val1, tick, flag);
-		}
 	}
 
 	if (skill_id == CR_GRANDCROSS || skill_id == NPC_GRANDDARKNESS)
