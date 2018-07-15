@@ -567,7 +567,7 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 	struct map_session_data *sd, //Attacker session data if BL_PC
 		*tsd; //Target session data if BL_PC
 	short cardfix = 1000;
-	enum e_classAE s_class, //Attacker class
+	int s_class, //Attacker class
 		t_class; //Target class
 	enum e_race2 s_race2, //Attacker Race2
 		t_race2; //Target Race2
@@ -585,11 +585,12 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 
 	sd = BL_CAST(BL_PC, src);
 	tsd = BL_CAST(BL_PC, target);
-	t_class = (enum e_classAE)status_get_class(target);
-	s_class = (enum e_classAE)status_get_class(src);
+	s_class = status_get_class(src);
+	t_class = status_get_class(target);
 	sstatus = status_get_status_data(src);
 	tstatus = status_get_status_data(target);
 	s_race2 = status_get_race2(src);
+	t_race2 = status_get_race2(target);
 	s_defele = (tsd ? (enum e_element)status_get_element(src) : ELE_NONE);
 	skill_id = battle_getcurrentskill(src);
 
@@ -598,7 +599,6 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 
 	switch( attack_type ) {
 		case BF_MAGIC:
-			t_race2 = status_get_race2(target);
 			if( sd && !(nk&NK_NO_CARDFIX_ATK) && (left&1) ) { //Affected by attacker ATK bonuses
 				cardfix = cardfix * (100 + sd->magic_addrace[tstatus->race] + sd->magic_addrace[RC_ALL]) / 100;
 				if( !(nk&NK_NO_ELEFIX) ) { //Affected by element modifier bonuses
@@ -654,7 +654,6 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 			}
 			break;
 		case BF_WEAPON:
-			t_race2 = status_get_race2(target);
 			if( sd && !(nk&NK_NO_CARDFIX_ATK) && (left&2) ) { //Affected by attacker ATK bonuses
 				short cardfix_ = 1000;
 
@@ -1508,7 +1507,7 @@ int64 battle_calc_bg_damage(struct block_list *src, struct block_list *bl, int64
 	if( skill_get_inf2(skill_id)&INF2_NO_BG_GVG_DMG )
 		return damage; //Skill that ignore bg map reduction
 
-	if( flag&BF_SKILL ) { //Skills get a different reduction than non-skills. [Skotlex]
+	if( flag&BF_SKILL ) { //Skills get a different reduction than non-skills [Skotlex]
 		if( flag&BF_WEAPON )
 			damage = damage * battle_config.bg_weapon_damage_rate / 100;
 		if( flag&BF_MAGIC )
@@ -1664,10 +1663,6 @@ int64 battle_addmastery(struct map_session_data *sd, struct block_list *target, 
 				damage += lv * 10;
 			break;
 		case W_2HSWORD:
-#ifdef RENEWAL
-			if((lv = pc_checkskill(sd,AM_AXEMASTERY)) > 0)
-				damage += lv * 3;
-#endif
 			if((lv = pc_checkskill(sd,SM_TWOHAND)) > 0)
 				damage += lv * 4;
 			break;
@@ -4108,7 +4103,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 				if(sd && sd->cart_weight) {
 					short strbonus = sd->status.str; //Only using base STR
 
-					skillratio += sd->cart_weight / 10 / (150 - min(strbonus,130));
+					skillratio += sd->cart_weight / 10 / (150 - min(strbonus,120));
 				}
 				skillratio += 50 * (sd ? pc_checkskill(sd,GN_REMODELING_CART) : 5);
 			}
@@ -4403,6 +4398,24 @@ static int64 battle_calc_skill_constant_addition(struct Damage wd,struct block_l
 	return atk;
 }
 
+/**
+ * Cannon ball attack calculation
+ */
+struct Damage battle_attack_cannonball(struct Damage wd, struct block_list *src, uint16 skill_id)
+{
+	struct map_session_data *sd = BL_CAST(BL_PC, src);
+	short index = -1;
+
+	if(sd && (index = sd->equip_index[EQI_AMMO]) >= 0 && sd->inventory_data[index] &&
+		sd->inventory_data[index]->look == AMMO_CANNONBALL && is_skill_using_arrow(src, skill_id)) {
+		ATK_ADD(wd.damage, wd.damage2, sd->inventory_data[index]->atk);
+#ifdef RENEWAL
+		ATK_ADD(wd.equipAtk, wd.equipAtk2, sd->inventory_data[index]->atk);
+#endif
+	}
+	return wd;
+}
+
 /*==============================================================
  * Stackable SC bonuses added on top of calculated skill damage
  *--------------------------------------------------------------
@@ -4417,7 +4430,7 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 	struct status_change *sc = status_get_sc(src);
 	struct status_data *sstatus = status_get_status_data(src);
 	struct status_data *tstatus = status_get_status_data(target);
-	struct status_change_entry *sce;
+	struct status_change_entry *sce = NULL;
 	int inf3 = skill_get_inf3(skill_id);
 
 	if(sc && sc->count) { //The following are applied on top of current damage and are stackable
@@ -5438,6 +5451,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		}
 
 		//Final attack bonuses that aren't affected by cards
+		wd = battle_attack_cannonball(wd, src, skill_id);
 		wd = battle_attack_sc_bonus(wd, src, target, skill_id, skill_lv);
 
 		//Card Fix for target (tsd), 2 is not added to the "left" flag meaning "target cards only"
@@ -5480,6 +5494,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			wd.damage2 = wd.statusAtk2 + wd.weaponAtk2 + wd.equipAtk2 + wd.masteryAtk2;
 		}
 #else
+		wd = battle_attack_cannonball(wd, src, skill_id);
 		wd = battle_attack_sc_bonus(wd, src, target, skill_id, skill_lv);
 #endif
 

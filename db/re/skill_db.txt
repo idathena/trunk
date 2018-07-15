@@ -683,7 +683,7 @@
 715,3,6,1,0,0x2,2,1,1,no,0,0x2,14,weapon,0,0,	NPC_DARKPIERCING,Dark Piercing
 716,1,6,4,0,0x1,0,10,0,no,0,0x2,0,none,0,0,	NPC_MAXPAIN,Max Pain
 717,0,6,1,0,0xD2,14,10,1,no,0,0x2,0,misc,0,0,	NPC_MAXPAIN_ATK,Max Pain Attack
-//718,1,0,0,0,0,0,??,0,no,0,0,0,none,0,0,	NPC_DEATHSUMMON,Death Summon
+718,1,0,4,0,0x1,0,10,1,no,0,0x2,0,magic,0,0,	NPC_DEATHSUMMON,Death Summon
 719,1,6,4,3,0,0,1,1,no,0,0x2,0,magic,0,0x1,	NPC_HELLBURNING,Hell Burning
 720,1,8,4,1,0x2,5:6:7:8:9,5,-5,no,0,0x20002,0,magic,0,0,	NPC_JACKFROST,Jack Frost 2
 721,1,6,4,0,0x3,7,1,1,no,0,0x20002,0,none,0,0,	NPC_WIDEWEB,Wide Web

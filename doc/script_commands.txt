@@ -3520,7 +3520,7 @@ Example:
 
 	// get a Mob ID from the user
 	input .@mob_id;
-	
+
 	if (getmobdrops(.@mob_id)) {	// 'getmobdrops' returns 1 on success
 		// immediately copy global temporary variables into scope variables, 
 		// since we don't know when 'getmobdrops' will get called again for 

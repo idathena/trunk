@@ -3577,10 +3577,12 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 
 	if ((index = sd->equip_index[EQI_AMMO]) >= 0) {
 		if (sd->inventory_data[index]) { //Arrows
-			sd->bonus.arrow_atk += sd->inventory_data[index]->atk;
+			struct item_data *id = sd->inventory_data[index];
+
+			sd->bonus.arrow_atk += (id->look != AMMO_CANNONBALL ? id->atk : 0);
 			sd->state.lr_flag = 2;
-			if (sd->inventory_data[index]->look != AMMO_THROWABLE_ITEM)
-				run_script(sd->inventory_data[index]->script, 0, sd->bl.id, 0);
+			if (id->look != AMMO_THROWABLE_ITEM)
+				run_script(id->script, 0, sd->bl.id, 0);
 			sd->state.lr_flag = 0;
 			if (!calculating)
 				return 1;
@@ -4858,6 +4860,8 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 		status->speed = status_calc_speed(bl, sc, b_status->speed);
 		if( bl->type&BL_PC && !(sd && sd->state.permanent_speed) && status->speed < battle_config.max_walk_speed )
 			status->speed = battle_config.max_walk_speed;
+		if( bl->type&BL_PET && ((TBL_PET *)bl)->master)
+			status->speed = status_get_speed(&((TBL_PET *)bl)->master->bl);
 		if( bl->type&BL_HOM && (battle_config.hom_setting&HOMSET_COPY_SPEED) && ((TBL_HOM *)bl)->master)
 			status->speed = status_get_speed(&((TBL_HOM *)bl)->master->bl);
 		if( bl->type&BL_MER && ((TBL_MER *)bl)->master)
@@ -7940,7 +7944,7 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 			break;
 	}
 
-	return tick;
+	return max(tick,0);
 #undef SCDEF_LVL_CAP
 #undef SCDEF_LVL_DIFF
 #undef SCDEF_JOBLVL_CAP
@@ -8177,12 +8181,11 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 	if( sc->data[SC_RAY_OF_PROTECTION] && type >= SC_COMMON_MIN && type <= SC_COMMON_MAX )
 		return 0;
 
-	sd = BL_CAST(BL_PC,bl);
-
 	//Adjust tick according to status resistances
-	if( !(flag&(SCFLAG_NOAVOID|SCFLAG_LOADED)) && (tick = status_get_sc_def(src,bl,type,rate,val1,val2,val3,val4,tick,flag)) <= 0 )
+	if( !(flag&(SCFLAG_NOAVOID|SCFLAG_LOADED)) && !(tick = status_get_sc_def(src,bl,type,rate,val1,val2,val3,val4,tick,flag)) )
 		return 0; //Don't bother trying to start the status
 
+	sd = BL_CAST(BL_PC,bl);
 	vd = status_get_viewdata(bl);
 	undead_flag = battle_check_undead(status->race,status->def_ele);
 

@@ -3280,7 +3280,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 			}
 			sd->add_mdmg[i].class_ = type2;
 			sd->add_mdmg[i].rate += val;
-			if(!sd->add_mdmg[i].rate) //Shift the rest of elements up.
+			if(!sd->add_mdmg[i].rate) //Shift the rest of elements up
 				memmove(&sd->add_mdmg[i], &sd->add_mdmg[i + 1], sizeof(sd->add_mdmg) - (i + 1) * sizeof(sd->add_mdmg[0]));
 			break;
 		case SP_ADD_DEF_MONSTER:
@@ -9975,6 +9975,8 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 		clif_changelook(&sd->bl,LOOK_WEAPON,sd->status.weapon);
 	}
 	if( pos&EQP_HAND_L ) {
+		if( sd->status.shield && battle_getcurrentskill(&sd->bl) == LG_SHIELDSPELL )
+			unit_skillcastcancel(&sd->bl,0); //Cancel Shield Spell if player swaps shields
 		sd->status.shield = sd->weapontype2 = 0;
 		pc_calcweapontype(sd);
 		clif_changelook(&sd->bl,LOOK_SHIELD,sd->status.shield);
