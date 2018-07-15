@@ -3136,8 +3136,7 @@ int mob_summonslave(struct mob_data *md2, int *value, int amount, uint16 skill_i
 		amount += k; //Increase final value by same amount to preserve total number to summon
 	}
 
-	if (!battle_config.monster_class_change_recover &&
-		(skill_id == NPC_TRANSFORMATION || skill_id == NPC_METAMORPHOSIS))
+	if (!battle_config.monster_class_change_recover && (skill_id == NPC_TRANSFORMATION || skill_id == NPC_METAMORPHOSIS))
 		hp_rate = get_percentage(md2->status.hp, md2->status.max_hp);
 
 	for (; k < amount; k++) {
@@ -3147,7 +3146,7 @@ int mob_summonslave(struct mob_data *md2, int *value, int amount, uint16 skill_i
 		if (!mobdb_checkid(data.id))
 			continue;
 
-		if (map_search_freecell(&md2->bl, 0, &x, &y, MOB_SLAVEDISTANCE, MOB_SLAVEDISTANCE, 0)) {
+		if (skill_id != NPC_DEATHSUMMON && map_search_freecell(&md2->bl, 0, &x, &y, MOB_SLAVEDISTANCE, MOB_SLAVEDISTANCE, 0)) {
 			data.x = x;
 			data.y = y;
 		} else {
@@ -3180,7 +3179,7 @@ int mob_summonslave(struct mob_data *md2, int *value, int amount, uint16 skill_i
 		if (md2->state.copy_master_mode)
 			md->status.mode = md2->status.mode;
 
-		clif_skill_nodamage(&md->bl, &md->bl, skill_id, amount, 1);
+		clif_skill_nodamage(&md->bl, &md->bl, skill_id, -1, 1);
 	}
 
 	return 0;

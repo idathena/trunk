@@ -7813,6 +7813,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case NPC_SUMMONSLAVE:
 		case NPC_SUMMONMONSTER:
+		case NPC_DEATHSUMMON:
 			if (md && md->skill_idx >= 0)
 				mob_summonslave(md,md->db->skill[md->skill_idx].val,skill_lv,skill_id);
 			break;
@@ -9742,16 +9743,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case WM_MELODYOFSINK:
-			if( flag&1 )
-				sc_start4(src,bl,type,100,skill_lv,party_calc_chorusbonus(sd,3),party_calc_chorusbonus(sd,1),0,skill_get_time(skill_id,skill_lv));
-			else if( sd ) {
-				if( rnd()%100 < 15 + 5 * skill_lv + min(5 * party_calc_chorusbonus(sd,3),65) ) {
-					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-					map_foreachinallrange(skill_area_sub,src,skill_get_splash(skill_id,skill_lv),BL_PC,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
-				}
-			}
-			break;
-
 		case WM_BEYOND_OF_WARCRY:
 			if( flag&1 )
 				sc_start4(src,bl,type,100,skill_lv,party_calc_chorusbonus(sd,3),party_calc_chorusbonus(sd,1),0,skill_get_time(skill_id,skill_lv));

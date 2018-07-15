@@ -1232,7 +1232,7 @@ bool hom_call(struct map_session_data *sd)
 		clif_hominfo(sd, hd, 1);
 		clif_hominfo(sd, hd, 0); //Send this x2, dunno why, but kRO does that [blackhole89]
 		clif_homskillinfoblock(sd);
-		if (battle_config.slaves_inherit_speed&1)
+		if (battle_config.hom_setting&HOMSET_COPY_SPEED)
 			status_calc_bl(&hd->bl, SCB_SPEED);
 		if (hd->homunculus.class_ == 6052) { //Eleanor
 			struct status_change_entry *sce = hd->sc.data[SC_STYLE_CHANGE];

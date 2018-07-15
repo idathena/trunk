@@ -862,9 +862,7 @@ void clif_get_weapon_view(struct map_session_data *sd, unsigned short *rhand, un
 	*rhand = sd->status.weapon;
 	*lhand = sd->status.shield;
 #else
-	if (sd->equip_index[EQI_HAND_R] >= 0 &&
-		sd->inventory_data[sd->equip_index[EQI_HAND_R]])
-	{
+	if (sd->equip_index[EQI_HAND_R] >= 0 && sd->inventory_data[sd->equip_index[EQI_HAND_R]]) {
 		struct item_data *id = sd->inventory_data[sd->equip_index[EQI_HAND_R]];
 
 		if (id->view_id > 0)
@@ -874,10 +872,8 @@ void clif_get_weapon_view(struct map_session_data *sd, unsigned short *rhand, un
 	} else
 		*rhand = 0;
 
-	if (sd->equip_index[EQI_HAND_L] >= 0 &&
-		sd->equip_index[EQI_HAND_L] != sd->equip_index[EQI_HAND_R] &&
-		sd->inventory_data[sd->equip_index[EQI_HAND_L]])
-	{
+	if (sd->equip_index[EQI_HAND_L] >= 0 && sd->equip_index[EQI_HAND_L] != sd->equip_index[EQI_HAND_R] &&
+		sd->inventory_data[sd->equip_index[EQI_HAND_L]]) {
 		struct item_data *id = sd->inventory_data[sd->equip_index[EQI_HAND_L]];
 
 		if (id->view_id > 0)

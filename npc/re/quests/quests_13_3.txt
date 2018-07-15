@@ -8,7 +8,7 @@
 //= rAthena SVN
 //===== Description: =========================================
 //= [Official Conversion]
-//= Quest NPCs related to Dewata:
+//= Quest NPCs related to El Dicastes:
 //== Sapha's Visit, Doha's Secrect Order, Frede's Request,
 //== Department Quests, Document Quests,
 //== Cheshire's Call, Cat Hands Enchantment

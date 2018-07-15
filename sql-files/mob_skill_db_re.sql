@@ -10940,6 +10940,8 @@ REPLACE INTO `mob_skill_db_re` VALUES (3006,'Morocc\'s Lude@NPC_BLEEDING','attac
 REPLACE INTO `mob_skill_db_re` VALUES (3008,'Morocc Hidden@AL_HEAL','attack',28,9,10000,500,5000,'yes','friend','friendhpltmaxrate','60',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3008,'Morocc Hidden@AL_HEAL','idle',28,9,10000,500,5000,'yes','friend','friendhpltmaxrate','60',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
+REPLACE INTO `mob_skill_db_re` VALUES (3026,'Fire Pit@NPC_DEATHSUMMON','dead',718,3,10000,0,10000,'no','self','always','0',3027,3027,3027,NULL,NULL,NULL,NULL);
+
 REPLACE INTO `mob_skill_db_re` VALUES (3029,'Reaper Yanku@NPC_COMET','attack',708,3,1000,10000,75000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3029,'Reaper Yanku@NPC_DARKCROSS','attack',338,10,500,2000,12000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3029,'Reaper Yanku@NPC_DRAGONFEAR','attack',659,5,1000,3000,30000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
