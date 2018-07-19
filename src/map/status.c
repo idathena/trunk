@@ -2728,14 +2728,12 @@ int status_calc_mob_(struct mob_data *md, enum e_status_calc_opt opt)
 		mbl = map_id2bl(md->master_id);
 
 	if (flag&8 && mbl) {
-		struct status_data *status;
+		struct status_data *mstatus = status_get_base_status(mbl);
 
-		if ((status = status_get_base_status(mbl))) {
-			if (battle_config.slaves_inherit_speed&(status_has_mode(status, MD_CANMOVE) ? 1 : 2))
-				status->speed = status->speed;
-			if (status->speed < 2) //Minimum for the unit to function properly
-				status->speed = 2;
-		}
+		if (mstatus && (battle_config.slaves_inherit_speed&(status_has_mode(mstatus, MD_CANMOVE) ? 1 : 2)))
+			status->speed = mstatus->speed;
+		if (status->speed < 2) //Minimum for the unit to function properly
+			status->speed = 2;
 	}
 
 	if (flag&32)

@@ -913,17 +913,17 @@ int npc_touchnext_areanpc_sub(struct block_list *bl, va_list ap)
 {
 	struct map_session_data *sd;
 	struct npc_data *nd;
-	int pc_id, npc_id;
+	int pc_id, nid;
 	char *name;
 
 	nullpo_ret(bl);
 	nullpo_ret((sd = map_id2sd(bl->id)));
 
 	pc_id = va_arg(ap,int);
-	npc_id = va_arg(ap,int);
+	nid = va_arg(ap,int);
 	name = va_arg(ap,char *);
 
-	if( (nd = map_id2nd(npc_id)) && (nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE)) )
+	if( (nd = map_id2nd(nid)) && (nd->sc.option&(OPTION_HIDE|OPTION_INVISIBLE)) )
 		return 0;
 	if( sd->state.warping )
 		return 0;
@@ -4547,10 +4547,10 @@ int npc_reload(void) {
 					delete_timer(map[m].mob_delete_timer, map_removemobs_timer);
 					map[m].mob_delete_timer = INVALID_TIMER;
 				}
+				if( map[m].npc_num > 0 )
+					ShowWarning("npc_reload: %d npcs weren't removed at map %s!\n", map[m].npc_num, map[m].name);
 			}
 		}
-		if( map[m].npc_num > 0 )
-			ShowWarning("npc_reload: %d npcs weren't removed at map %s!\n", map[m].npc_num, map[m].name);
 	}
 
 	//Clear mob spawn lookup index
