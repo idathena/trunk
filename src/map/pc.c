@@ -270,7 +270,8 @@ void pc_addspiritball(struct map_session_data *sd, int interval, int max)
 	if( max > MAX_SPIRITBALL )
 		max = MAX_SPIRITBALL;
 
-	sd->spiritball = max(sd->spiritball, 0);
+	if( sd->spiritball < 0 )
+		sd->spiritball = 0;
 
 	if( sd->spiritball && sd->spiritball >= max ) {
 		if( sd->spiritball_timer[0] != INVALID_TIMER )
@@ -388,7 +389,8 @@ void pc_addrageball(struct map_session_data *sd, int interval, int max)
 	if( max > MAX_RAGEBALL )
 		max = MAX_RAGEBALL;
 
-	sd->rageball = max(sd->rageball, 0);
+	if( sd->rageball < 0 )
+		sd->rageball = 0;
 
 	if( sd->rageball && sd->rageball >= max ) {
 		if( sd->rageball_timer[0] != INVALID_TIMER )
