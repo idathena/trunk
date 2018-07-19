@@ -2826,7 +2826,6 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 	struct status_change *sc = status_get_sc(src);
 	struct status_data *sstatus = status_get_status_data(src);
 	int t_class = status_get_class(target);
-	short div_ = max(wd.div_, 1);
 	uint8 lv = 0;
 
 	//Add mastery damage
@@ -2844,6 +2843,8 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 		//General skill masteries
 #ifdef RENEWAL
 		if(sd) {
+			short div_ = max(wd.div_, 1);
+
 			if(skill_id != MC_CARTREVOLUTION && pc_checkskill(sd, BS_HILTBINDING) > 0)
 				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 4);
 			if(skill_id != CR_SHIELDBOOMERANG)
@@ -4333,9 +4334,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 static int64 battle_calc_skill_constant_addition(struct Damage wd,struct block_list *src,struct block_list *target,uint16 skill_id,uint16 skill_lv)
 {
 	struct map_session_data *sd = BL_CAST(BL_PC,src);
-	struct map_session_data *tsd = BL_CAST(BL_PC,target);
 	struct status_data *sstatus = status_get_status_data(src);
-	struct status_data *tstatus = status_get_status_data(target);
 	int64 atk = 0;
 
 	switch(skill_id) {
@@ -4880,10 +4879,9 @@ struct Damage battle_calc_defense_reduction(struct Damage wd, struct block_list 
  */
 struct Damage battle_calc_attack_post_defense(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv)
 {
-	struct map_session_data *sd = BL_CAST(BL_PC, src);
+#ifndef RENEWAL
 	struct status_data *sstatus = status_get_status_data(src);
 
-#ifndef RENEWAL
 	wd = battle_calc_attack_masteries(wd, src, target, skill_id, skill_lv);
 	if(battle_skill_stacks_masteries_vvs(skill_id)) { //Refine bonus
 		if(skill_id == MO_FINGEROFFENSIVE) { //Counts refine bonus multiple times

@@ -12804,7 +12804,6 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 	TBL_PC *sd;
 	struct status_change *sc;
 	struct status_change_entry *sce;
-	struct status_data *tstatus;
 	enum sc_type type;
 	uint16 skill_id, skill_lv;
 
@@ -12819,8 +12818,6 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 	group = unit->group;
 
 	nullpo_ret(src = map_id2bl(group->src_id));
-
-	tstatus = status_get_status_data(bl);
 
 	skill_id = group->skill_id; //In case the group is deleted, we need to return the correct skill id, still
 	skill_lv = group->skill_lv;
