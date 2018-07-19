@@ -153,7 +153,7 @@ inline int pc_get_group_id(struct map_session_data *sd) {
  * @param sd
  * @return Group Level
  */
-int inline pc_get_group_level(struct map_session_data *sd) {
+inline int pc_get_group_level(struct map_session_data *sd) {
 	return sd->group_level;	
 }
 
@@ -194,12 +194,16 @@ void pc_delinvincibletimer(struct map_session_data *sd)
 	}
 }
 
+/**
+ * Spirit ball expiration timer.
+ * @see TimerFunc
+ */
 static int pc_spiritball_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct map_session_data *sd;
 	int i;
 
-	if( (sd = (struct map_session_data *)map_id2sd(id)) == NULL || sd->bl.type != BL_PC )
+	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
 		return 1;
 
 	if( sd->spiritball <= 0 ) {
@@ -266,14 +270,13 @@ void pc_addspiritball(struct map_session_data *sd, int interval, int max)
 	if( max > MAX_SPIRITBALL )
 		max = MAX_SPIRITBALL;
 
-	if( sd->spiritball < 0 )
-		sd->spiritball = 0;
+	sd->spiritball = max(sd->spiritball, 0);
 
 	if( sd->spiritball && sd->spiritball >= max ) {
 		if( sd->spiritball_timer[0] != INVALID_TIMER )
 			delete_timer(sd->spiritball_timer[0], pc_spiritball_timer);
 		sd->spiritball--;
-		if( sd->spiritball != 0 )
+		if( sd->spiritball )
 			memmove(sd->spiritball_timer + 0, sd->spiritball_timer + 1, sd->spiritball * sizeof(int));
 		sd->spiritball_timer[sd->spiritball] = INVALID_TIMER;
 	}
@@ -331,6 +334,258 @@ void pc_delspiritball(struct map_session_data *sd, int count, int type)
 
 	if( !type )
 		clif_spiritball(&sd->bl);
+}
+
+/**
+ * Rage ball expiration timer.
+ * @see TimerFunc
+ */
+static int pc_rageball_timer(int tid, unsigned int tick, int id, intptr_t data)
+{
+	struct map_session_data *sd;
+	int i;
+
+	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
+		return 1;
+
+	if( sd->rageball <= 0 ) { 
+		ShowError("pc_rageball_timer: %d rageball's available. (aid=%d cid=%d tid=%d)\n", sd->rageball, sd->status.account_id, sd->status.char_id, tid);
+		sd->rageball = 0;
+		return 0;
+	}
+
+	ARR_FIND(0, sd->rageball, i, sd->rageball_timer[i] == tid);
+
+	if( i == sd->rageball ) {
+		ShowError("pc_rageball_timer: timer not found (aid=%d cid=%d tid=%d)\n", sd->status.account_id, sd->status.char_id, tid);
+		return 0;
+	}
+
+	sd->rageball--;
+
+	if( i != sd->rageball )
+		memmove(sd->rageball_timer + i, sd->rageball_timer + i + 1, (sd->rageball - i) * sizeof(int));
+
+	sd->rageball_timer[sd->rageball] = INVALID_TIMER;
+	clif_millenniumshield(&sd->bl, sd->rageball);
+
+	return 0;
+}
+
+/**
+ * Adds a rageball to player for 'interval' ms
+ * @param sd
+ * @param interval
+ * @param max
+ */
+void pc_addrageball(struct map_session_data *sd, int interval, int max)
+{
+	int tid;
+	uint8 i;
+
+	nullpo_retv(sd);
+
+	if( max > MAX_RAGEBALL )
+		max = MAX_RAGEBALL;
+
+	sd->rageball = max(sd->rageball, 0);
+
+	if( sd->rageball && sd->rageball >= max ) {
+		if( sd->rageball_timer[0] != INVALID_TIMER )
+			delete_timer(sd->rageball_timer[0], pc_rageball_timer);
+		sd->rageball--;
+		if( sd->rageball )
+			memmove(sd->rageball_timer + 0, sd->rageball_timer + 1, sd->rageball * sizeof(int));
+		sd->rageball_timer[sd->rageball] = INVALID_TIMER;
+	}
+
+	tid = add_timer(gettick() + interval, pc_rageball_timer, sd->bl.id, 0);
+	ARR_FIND(0, sd->rageball, i, (sd->rageball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->rageball_timer[i])->tick) < 0));
+
+	if( i != sd->rageball )
+		memmove(sd->rageball_timer + i + 1, sd->rageball_timer + i, (sd->rageball - i) * sizeof(int));
+
+	sd->rageball_timer[i] = tid;
+	sd->rageball++;
+	clif_millenniumshield(&sd->bl, sd->rageball);
+}
+
+/**
+ * Removes number of rageball from player
+ * @param sd
+ * @param count
+ * @param type 1 = doesn't give client effect
+ */
+void pc_delrageball(struct map_session_data *sd, int count, int type)
+{
+	uint8 i;
+
+	nullpo_retv(sd);
+
+	if( sd->rageball <= 0 ) {
+		sd->rageball = 0;
+		return;
+	}
+
+	if( !count )
+		return;
+
+	if( count > sd->rageball )
+		count = sd->rageball;
+
+	sd->rageball -= count;
+
+	if( count > MAX_RAGEBALL )
+		count = MAX_RAGEBALL;
+
+	for( i = 0; i < count; i++ ) {
+		if( sd->rageball_timer[i] != INVALID_TIMER ) {
+			delete_timer(sd->rageball_timer[i], pc_rageball_timer);
+			sd->rageball_timer[i] = INVALID_TIMER;
+		}
+	}
+
+	for( i = count; i < MAX_RAGEBALL; i++ ) {
+		sd->rageball_timer[i - count] = sd->rageball_timer[i];
+		sd->rageball_timer[i] = INVALID_TIMER;
+	}
+
+	if( !type )
+		clif_millenniumshield(&sd->bl, sd->rageball);
+}
+
+/**
+ * Spirit Charm expiration timer.
+ * @see TimerFunc
+ */
+static int pc_spiritcharm_timer(int tid, unsigned int tick, int id, intptr_t data)
+{
+	struct map_session_data *sd;
+	int i;
+
+	if( (sd = (struct map_session_data *)map_id2sd(id)) == NULL || sd->bl.type != BL_PC )
+		return 1;
+
+	if( sd->spiritcharm <= 0 ) {
+		ShowError("pc_spiritcharm_timer: %d spiritcharm's available. (aid=%d cid=%d tid=%d)\n", sd->spiritcharm, sd->status.account_id, sd->status.char_id, tid);
+		sd->spiritcharm = 0;
+		sd->spiritcharm_type = CHARM_TYPE_NONE;
+		return 0;
+	}
+
+	ARR_FIND(0, sd->spiritcharm, i, sd->spiritcharm_timer[i] == tid);
+
+	if( i == sd->spiritcharm ) {
+		ShowError("pc_spiritcharm_timer: timer not found (aid=%d cid=%d tid=%d)\n", sd->status.account_id, sd->status.char_id, tid);
+		return 0;
+	}
+
+	sd->spiritcharm--;
+
+	if( i != sd->spiritcharm )
+		memmove(sd->spiritcharm_timer + i, sd->spiritcharm_timer + i + 1, (sd->spiritcharm - i) * sizeof(int));
+
+	sd->spiritcharm_timer[sd->spiritcharm] = INVALID_TIMER;
+
+	if( sd->spiritcharm <= 0 )
+		sd->spiritcharm_type = CHARM_TYPE_NONE;
+
+	clif_spiritcharm(sd);
+
+	return 0;
+}
+
+/**
+ * Adds a spirit charm.
+ * @param sd       Target character.
+ * @param interval Duration.
+ * @param max      Maximum amount of charms to add.
+ * @param type     Charm type (@see spirit_charm_types)
+ */
+void pc_addspiritcharm(struct map_session_data *sd, int interval, int max, int type)
+{
+	int tid, i;
+
+	nullpo_retv(sd);
+
+	if( sd->spiritcharm_type != CHARM_TYPE_NONE && type != sd->spiritcharm_type )
+		pc_delspiritcharm(sd, sd->spiritcharm, sd->spiritcharm_type);
+
+	if( max > MAX_SPIRITCHARM )
+		max = MAX_SPIRITCHARM;
+
+	if( sd->spiritcharm < 0 )
+		sd->spiritcharm = 0;
+
+	if( sd->spiritcharm && sd->spiritcharm >= max ) {
+		if( sd->spiritcharm_timer[0] != INVALID_TIMER )
+			delete_timer(sd->spiritcharm_timer[0], pc_spiritcharm_timer);
+		sd->spiritcharm--;
+		if( sd->spiritcharm != 0 )
+			memmove(sd->spiritcharm_timer + 0, sd->spiritcharm_timer + 1, (sd->spiritcharm) * sizeof(int));
+		sd->spiritcharm_timer[sd->spiritcharm] = INVALID_TIMER;
+	}
+
+	tid = add_timer(gettick() + interval, pc_spiritcharm_timer, sd->bl.id, 0);
+	ARR_FIND(0, sd->spiritcharm, i, sd->spiritcharm_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->spiritcharm_timer[i])->tick) < 0);
+
+	if( i != sd->spiritcharm )
+		memmove(sd->spiritcharm_timer + i + 1, sd->spiritcharm_timer + i, (sd->spiritcharm - i) * sizeof(int));
+
+	sd->spiritcharm_timer[i] = tid;
+	sd->spiritcharm++;
+	sd->spiritcharm_type = type;
+
+	clif_spiritcharm(sd);
+}
+
+/**
+ * Removes one or more spirit charms.
+ * @param sd    The target character.
+ * @param count Amount of charms to remove.
+ * @param type  Type of charm to remove.
+ */
+void pc_delspiritcharm(struct map_session_data *sd, int count, int type)
+{
+	int i;
+
+	nullpo_retv(sd);
+
+	if( sd->spiritcharm_type != type )
+		return;
+
+	if( sd->spiritcharm <= 0 ) {
+		sd->spiritcharm = 0;
+		return;
+	}
+
+	if( count <= 0 )
+		return;
+
+	if( count > sd->spiritcharm )
+		count = sd->spiritcharm;
+
+	sd->spiritcharm -= count;
+
+	if( count > MAX_SPIRITCHARM )
+		count = MAX_SPIRITCHARM;
+
+	for( i = 0; i < count; i++ ) {
+		if( sd->spiritcharm_timer[i] != INVALID_TIMER ) {
+			delete_timer(sd->spiritcharm_timer[i], pc_spiritcharm_timer);
+			sd->spiritcharm_timer[i] = INVALID_TIMER;
+		}
+	}
+
+	for( i = count; i < MAX_SPIRITCHARM; i++ ) {
+		sd->spiritcharm_timer[i - count] = sd->spiritcharm_timer[i];
+		sd->spiritcharm_timer[i] = INVALID_TIMER;
+	}
+
+	if( sd->spiritcharm <= 0 )
+		sd->spiritcharm_type = CHARM_TYPE_NONE;
+
+	clif_spiritcharm(sd);
 }
 
 static int pc_check_banding(struct block_list *bl, va_list ap) {
@@ -1288,6 +1543,8 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 
 	for (i = 0; i < MAX_SPIRITBALL; i++)
 		sd->spiritball_timer[i] = INVALID_TIMER;
+	for (i = 0; i < MAX_RAGEBALL; i++)
+		sd->rageball_timer[i] = INVALID_TIMER;
 	for (i = 0; i < ARRAYLENGTH(sd->autobonus); i++)
 		sd->autobonus[i].active = INVALID_TIMER;
 	for (i = 0; i < ARRAYLENGTH(sd->autobonus2); i++)
@@ -7641,6 +7898,9 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 	if( sd->spiritball > 0 )
 		pc_delspiritball(sd,sd->spiritball,0);
 
+	if( sd->rageball > 0 )
+		pc_delrageball(sd,sd->rageball,0);
+
 	if( sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0 )
 		pc_delspiritcharm(sd,sd->spiritcharm,sd->spiritcharm_type);
 
@@ -10567,140 +10827,6 @@ bool pc_should_log_commands(struct map_session_data *sd)
 	return pc_group_should_log_commands(pc_get_group_id(sd));
 }
 
-/**
- * Spirit Charm expiration timer.
- * @see TimerFunc
- */
-static int pc_spiritcharm_timer(int tid, unsigned int tick, int id, intptr_t data)
-{
-	struct map_session_data *sd;
-	int i;
-
-	if( (sd = (struct map_session_data *)map_id2sd(id)) == NULL || sd->bl.type != BL_PC )
-		return 1;
-
-	if( sd->spiritcharm <= 0 ) {
-		ShowError("pc_spiritcharm_timer: %d spiritcharm's available. (aid=%d cid=%d tid=%d)\n", sd->spiritcharm, sd->status.account_id, sd->status.char_id, tid);
-		sd->spiritcharm = 0;
-		sd->spiritcharm_type = CHARM_TYPE_NONE;
-		return 0;
-	}
-
-	ARR_FIND(0, sd->spiritcharm, i, sd->spiritcharm_timer[i] == tid);
-
-	if( i == sd->spiritcharm ) {
-		ShowError("pc_spiritcharm_timer: timer not found (aid=%d cid=%d tid=%d)\n", sd->status.account_id, sd->status.char_id, tid);
-		return 0;
-	}
-
-	sd->spiritcharm--;
-
-	if( i != sd->spiritcharm )
-		memmove(sd->spiritcharm_timer + i, sd->spiritcharm_timer + i + 1, (sd->spiritcharm - i) * sizeof(int));
-
-	sd->spiritcharm_timer[sd->spiritcharm] = INVALID_TIMER;
-
-	if( sd->spiritcharm <= 0 )
-		sd->spiritcharm_type = CHARM_TYPE_NONE;
-
-	clif_spiritcharm(sd);
-
-	return 0;
-}
-
-/**
- * Adds a spirit charm.
- * @param sd       Target character.
- * @param interval Duration.
- * @param max      Maximum amount of charms to add.
- * @param type     Charm type (@see spirit_charm_types)
- */
-void pc_addspiritcharm(struct map_session_data *sd, int interval, int max, int type)
-{
-	int tid, i;
-
-	nullpo_retv(sd);
-
-	if( sd->spiritcharm_type != CHARM_TYPE_NONE && type != sd->spiritcharm_type )
-		pc_delspiritcharm(sd, sd->spiritcharm, sd->spiritcharm_type);
-
-	if( max > MAX_SPIRITCHARM )
-		max = MAX_SPIRITCHARM;
-
-	if( sd->spiritcharm < 0 )
-		sd->spiritcharm = 0;
-
-	if( sd->spiritcharm && sd->spiritcharm >= max ) {
-		if( sd->spiritcharm_timer[0] != INVALID_TIMER )
-			delete_timer(sd->spiritcharm_timer[0], pc_spiritcharm_timer);
-		sd->spiritcharm--;
-		if( sd->spiritcharm != 0 )
-			memmove(sd->spiritcharm_timer + 0, sd->spiritcharm_timer + 1, (sd->spiritcharm) * sizeof(int));
-		sd->spiritcharm_timer[sd->spiritcharm] = INVALID_TIMER;
-	}
-
-	tid = add_timer(gettick() + interval, pc_spiritcharm_timer, sd->bl.id, 0);
-	ARR_FIND(0, sd->spiritcharm, i, sd->spiritcharm_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->spiritcharm_timer[i])->tick) < 0);
-
-	if( i != sd->spiritcharm )
-		memmove(sd->spiritcharm_timer + i + 1, sd->spiritcharm_timer + i, (sd->spiritcharm - i) * sizeof(int));
-
-	sd->spiritcharm_timer[i] = tid;
-	sd->spiritcharm++;
-	sd->spiritcharm_type = type;
-
-	clif_spiritcharm(sd);
-}
-
-/**
- * Removes one or more spirit charms.
- * @param sd    The target character.
- * @param count Amount of charms to remove.
- * @param type  Type of charm to remove.
- */
-void pc_delspiritcharm(struct map_session_data *sd, int count, int type)
-{
-	int i;
-
-	nullpo_retv(sd);
-
-	if( sd->spiritcharm_type != type )
-		return;
-
-	if( sd->spiritcharm <= 0 ) {
-		sd->spiritcharm = 0;
-		return;
-	}
-
-	if( count <= 0 )
-		return;
-
-	if( count > sd->spiritcharm )
-		count = sd->spiritcharm;
-
-	sd->spiritcharm -= count;
-
-	if( count > MAX_SPIRITCHARM )
-		count = MAX_SPIRITCHARM;
-
-	for( i = 0; i < count; i++ ) {
-		if( sd->spiritcharm_timer[i] != INVALID_TIMER ) {
-			delete_timer(sd->spiritcharm_timer[i], pc_spiritcharm_timer);
-			sd->spiritcharm_timer[i] = INVALID_TIMER;
-		}
-	}
-
-	for( i = count; i < MAX_SPIRITCHARM; i++ ) {
-		sd->spiritcharm_timer[i - count] = sd->spiritcharm_timer[i];
-		sd->spiritcharm_timer[i] = INVALID_TIMER;
-	}
-
-	if( sd->spiritcharm <= 0 )
-		sd->spiritcharm_type = CHARM_TYPE_NONE;
-
-	clif_spiritcharm(sd);
-}
-
 #if defined(RENEWAL_DROP) || defined(RENEWAL_EXP)
 /**
  * Renewal EXP/Item Drop rate modifier based on level penalty
@@ -11879,7 +12005,7 @@ void pc_bonus_script_free_entry(struct map_session_data *sd, struct s_bonus_scri
  * Do final process if no entry left
  * @param sd
  */
-static void inline pc_bonus_script_check_final(struct map_session_data *sd) {
+static inline void pc_bonus_script_check_final(struct map_session_data *sd) {
 	if (sd->bonus_script.count == 0) {
 		if (sd->bonus_script.head && sd->bonus_script.head->data)
 			pc_bonus_script_free_entry(sd,(struct s_bonus_script_entry *)sd->bonus_script.head->data);
@@ -12436,9 +12562,10 @@ void do_init_pc(void) {
 	add_timer_func_list(pc_calc_pvprank_timer, "pc_calc_pvprank_timer");
 	add_timer_func_list(pc_autosave, "pc_autosave");
 	add_timer_func_list(pc_spiritball_timer, "pc_spiritball_timer");
+	add_timer_func_list(pc_rageball_timer, "pc_rageball_timer");
+	add_timer_func_list(pc_spiritcharm_timer, "pc_spiritcharm_timer");
 	add_timer_func_list(pc_follow_timer, "pc_follow_timer");
 	add_timer_func_list(pc_endautobonus, "pc_endautobonus");
-	add_timer_func_list(pc_spiritcharm_timer, "pc_spiritcharm_timer");
 	add_timer_func_list(pc_global_expiration_timer, "pc_global_expiration_timer");
 	add_timer_func_list(pc_expiration_timer, "pc_expiration_timer");
 	add_timer_func_list(pc_autotrade_timer, "pc_autotrade_timer");

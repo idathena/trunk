@@ -1221,7 +1221,7 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_WEDDING] |= SCB_SPEED;
 	StatusChangeFlagTable[SC_ALL_RIDING] |= SCB_SPEED;
 	StatusChangeFlagTable[SC_PUSH_CART] |= SCB_SPEED;
-	StatusChangeFlagTable[SC_MTF_ASPD] |= SCB_ASPD;
+	StatusChangeFlagTable[SC_MTF_ASPD] |= SCB_HIT|SCB_ASPD;
 	StatusChangeFlagTable[SC_MTF_MATK] |= SCB_MATK;
 	StatusChangeFlagTable[SC_MTF_RANGEATK] |= SCB_ALL;
 	StatusChangeFlagTable[SC_MTF_RANGEATK2] |= SCB_ALL;
@@ -1231,7 +1231,7 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_QUEST_BUFF2] |= SCB_MATK;
 	StatusChangeFlagTable[SC_QUEST_BUFF3] |= SCB_MATK;
 	StatusChangeFlagTable[SC_CHASEWALK2] |= SCB_STR;
-	StatusChangeFlagTable[SC_MTF_ASPD2] |= SCB_ASPD;
+	StatusChangeFlagTable[SC_MTF_ASPD2] |= SCB_HIT|SCB_ASPD;
 	StatusChangeFlagTable[SC_MTF_MATK2] |= SCB_MATK;
 	StatusChangeFlagTable[SC_ALMIGHTY] |= SCB_MATK|SCB_STR|SCB_AGI|SCB_VIT|SCB_INT|SCB_DEX|SCB_LUK;
 	StatusChangeFlagTable[SC_MTF_HITFLEE] |= SCB_HIT|SCB_FLEE;
@@ -5912,6 +5912,10 @@ short status_calc_hit(struct block_list *bl, struct status_change *sc, int hit)
 		hit += sc->data[SC_MERC_HITUP]->val2;
 	if(sc->data[SC_MTF_HITFLEE])
 		hit += sc->data[SC_MTF_HITFLEE]->val1;
+	if(sc->data[SC_MTF_ASPD])
+		hit += sc->data[SC_MTF_ASPD]->val2;
+	if(sc->data[SC_MTF_ASPD2])
+		hit += sc->data[SC_MTF_ASPD2]->val2;
 	if(sc->data[SC_ADJUSTMENT])
 		hit -= 30;
 	if(sc->data[SC_ILLUSIONDOPING])
@@ -10246,7 +10250,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val3 = 25 + 5 * val1; //Number of Reflects
 				tick_time = 1000;
 				val4 = tick / tick_time;
-				tick = -1;
 				break;
 			case SC_FORCEOFVANGUARD:
 				val2 = 8 + 12 * val1; //Chance Of Getting A Rage Counter
@@ -10758,7 +10761,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				icon = SI_ATTACK_PROPERTY_NOTHING + val2;
 				break;
 			case SC_BANDING: {
-					struct skill_unit_group *group;
+					struct skill_unit_group *group = NULL;
 
 					if( (group = skill_unitsetting(bl,LG_BANDING,val1,bl->x,bl->y,0)) )
 						val4 = group->group_id;
@@ -10814,10 +10817,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC__ENERVATION:
 		case SC__WEAKNESS:
 		case SC_PROPERTYWALK:
-		case SC_PRESTIGE:
 		case SC_SHIELDSPELL_DEF:
 		case SC_SHIELDSPELL_MDEF:
 		case SC_SHIELDSPELL_REF:
+		case SC_PRESTIGE:
 		case SC_CRESCENTELBOW:
 		case SC_CHILLY_AIR_OPTION:
 		case SC_GUST_OPTION:

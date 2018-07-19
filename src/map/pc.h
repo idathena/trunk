@@ -495,6 +495,8 @@ struct map_session_data {
 
 	short spiritball,spiritball_old;
 	int spiritball_timer[MAX_SPIRITBALL];
+	short rageball,rageball_old;
+	int rageball_timer[MAX_RAGEBALL];
 	short spiritcharm; //No. of spirit
 	int spiritcharm_type; //Spirit type
 	int spiritcharm_timer[MAX_SPIRITCHARM];
@@ -1171,9 +1173,13 @@ extern const struct sg_data sg_info[MAX_PC_FEELHATE];
 void pc_setinvincibletimer(struct map_session_data *sd, int val);
 void pc_delinvincibletimer(struct map_session_data *sd);
 
+int pc_getmaxspiritball(struct map_session_data *sd, int min);
 void pc_addspiritball(struct map_session_data *sd, int interval, int max);
 void pc_delspiritball(struct map_session_data *sd, int count, int type);
-int pc_getmaxspiritball(struct map_session_data *sd, int min);
+void pc_addrageball(struct map_session_data *sd, int interval, int max);
+void pc_delrageball(struct map_session_data *sd, int count, int type);
+void pc_addspiritcharm(struct map_session_data *sd, int interval, int max, int type);
+void pc_delspiritcharm(struct map_session_data *sd, int count, int type);
 void pc_addfame(struct map_session_data *sd, int count);
 unsigned char pc_famerank(int char_id, int job);
 bool pc_set_hate_mob(struct map_session_data *sd, int pos, struct block_list *bl);
@@ -1225,9 +1231,6 @@ uint8 pc_itemcd_add(struct map_session_data *sd, struct item_data *id, unsigned 
 uint8 pc_itemcd_check(struct map_session_data *sd, struct item_data *id, unsigned int tick, unsigned short n);
 
 int pc_load_combo(struct map_session_data *sd);
-
-void pc_addspiritcharm(struct map_session_data *sd, int interval, int max, int type);
-void pc_delspiritcharm(struct map_session_data *sd, int count, int type);
 
 void pc_baselevelchanged(struct map_session_data *sd);
 

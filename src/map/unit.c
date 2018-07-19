@@ -1766,7 +1766,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 
 	//Moved here to prevent Suffragium from ending if skill fails
 #ifndef RENEWAL_CAST
-	casttime = skill_castfix_sc(src, casttime, skill_get_castnodex(skill_id, skill_lv));
+	casttime = skill_castfix_sc(src, casttime, skill_id, skill_lv);
 #else
 	casttime = skill_vfcastfix(src, casttime, skill_id, skill_lv);
 #endif
@@ -1963,7 +1963,7 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 
 	//Moved here to prevent Suffragium from ending if skill fails
 #ifndef RENEWAL_CAST
-	casttime = skill_castfix_sc(src, casttime, skill_get_castnodex(skill_id, skill_lv));
+	casttime = skill_castfix_sc(src, casttime, skill_id, skill_lv);
 #else
 	casttime = skill_vfcastfix(src, casttime, skill_id, skill_lv);
 #endif
@@ -3011,6 +3011,7 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 				pc_cleareventtimer(sd);
 				pc_inventory_rental_clear(sd);
 				pc_delspiritball(sd, sd->spiritball, 1);
+				pc_delrageball(sd, sd->rageball, 1);
 				pc_delspiritcharm(sd, sd->spiritcharm, sd->spiritcharm_type);
 				if( sd->reg ) { //Double logout already freed pointer fix [Skotlex]
 					aFree(sd->reg);
