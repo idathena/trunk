@@ -4652,9 +4652,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 			break;
 		case BL_MOB: {
 				TBL_MOB *md = ((TBL_MOB *)bl);
-				int effect_id;
 
-				effect_id = 0;
 				if (md->special_state.size == SZ_BIG) //Tiny/big mobs [Valaris]
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if (md->special_state.size == SZ_MEDIUM)
@@ -8247,11 +8245,8 @@ void clif_mvp_item(struct map_session_data *sd, unsigned short nameid)
 /// 010b <exp>.L
 void clif_mvp_exp(struct map_session_data *sd, unsigned int exp)
 {
-	int fd;
-
 	nullpo_retv(sd);
 
-	fd = sd->fd;
 #if PACKETVER >= 20131223 //kRO remove this packet [Napster]
 	if(battle_config.mvp_exp_reward_message) {
 		char e_msg[CHAT_SIZE_MAX];
@@ -8260,10 +8255,14 @@ void clif_mvp_exp(struct map_session_data *sd, unsigned int exp)
 		clif_messagecolor(&sd->bl, color_table[COLOR_CYAN], e_msg, false, SELF); // Congratulations! You are the MVP! Your reward EXP Points are %u !!
 	}
 #else
-	WFIFOHEAD(fd,packet_len(0x10b));
-	WFIFOW(fd,0) = 0x10b;
-	WFIFOL(fd,2) = umin(exp, INT32_MAX);
-	WFIFOSET(fd,packet_len(0x10b));
+	{
+		int fd = sd->fd;
+
+		WFIFOHEAD(fd,packet_len(0x10b));
+		WFIFOW(fd,0) = 0x10b;
+		WFIFOL(fd,2) = umin(exp, INT32_MAX);
+		WFIFOSET(fd,packet_len(0x10b));
+	}
 #endif
 }
 

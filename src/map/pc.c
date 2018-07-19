@@ -11870,11 +11870,11 @@ void pc_show_version(struct map_session_data *sd) {
 	const char *git = get_git_hash();
 	char buf[CHAT_SIZE_MAX];
 
-	if( git[0] != UNKNOWN_VERSION )
+	if( git[0] != UNKNOWN_VERSION ) {
 		sprintf(buf,msg_txt(1295),"GIT Hash: ",git); // idAthena Git Hash: %s
-	else
-		sprintf(buf,msg_txt(1296)); // Can't find current Git version.
-	clif_displaymessage(sd->fd,buf);
+		clif_displaymessage(sd->fd,buf);
+	} else
+		clif_displaymessage(sd->fd,msg_txt(1296)); // Can't find current Git version.
 }
 
 /**

@@ -2370,7 +2370,7 @@ static inline unsigned short status_base_matk_max(const struct status_data *stat
 void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_max, unsigned short *matk_min)
 {
 	struct status_data *status;
-	struct status_data *b_status;
+	
 	struct status_change *sc;
 	struct map_session_data *sd;
 
@@ -2382,7 +2382,6 @@ void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_m
 	}
 
 	status = status_get_status_data(bl);
-	b_status = status_get_base_status(bl);
 	sc = status_get_sc(bl);
 	sd = BL_CAST(BL_PC, bl);
 
@@ -2398,6 +2397,8 @@ void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_m
 		if( sd && sd->bonus.ematk > 0 )
 			*matk_min += sd->bonus.ematk;
 		if( flag != 1 ) {
+			struct status_data *b_status = status_get_base_status(bl);
+
 			*matk_min = status_calc_ematk(bl, sc, *matk_min, false);
 			status->rhw.matk = status_calc_ematk(bl, sc, b_status->rhw.matk, true);
 		}
