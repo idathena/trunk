@@ -1329,6 +1329,20 @@ static void clif_spiritball_single(int fd, struct map_session_data *sd) {
 }
 
 
+/// Notifies the client of ab object's millenium shields.
+/// 0440 <id>.L <amount>.W <state>.W (ZC_MILLENNIUMSHIELD)
+static void clif_millenniumshield_single(int fd, struct block_list *bl, short shield_count) {
+#if PACKETVER >= 20081217
+	WFIFOHEAD(fd,packet_len(0x440));
+	WFIFOW(fd,0) = 0x440;
+	WFIFOL(fd,2) = bl->id;
+	WFIFOW(fd,6) = shield_count;
+	WFIFOW(fd,8) = 0;
+	WFIFOSET(fd,packet_len(0x440));
+#endif
+}
+
+
 /*==========================================
  * Kagerou/Oboro amulet spirit
  *------------------------------------------*/
@@ -1438,6 +1452,8 @@ int clif_spawn(struct block_list *bl)
 					clif_sendbgemblem_area(sd);
 				if (sd->spiritball > 0)
 					clif_spiritball(bl);
+				if (sd->rageball > 0)
+					clif_millenniumshield(bl,sd->rageball);
 				if (sd->sc.data[SC_MILLENNIUMSHIELD])
 					clif_millenniumshield(bl,sd->sc.data[SC_MILLENNIUMSHIELD]->val2);
 				if (sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0)
@@ -1450,9 +1466,7 @@ int clif_spawn(struct block_list *bl)
 			break;
 		case BL_MOB: {
 				TBL_MOB *md = ((TBL_MOB *)bl);
-				int effect_id;
 
-				effect_id = 0;
 				if (md->special_state.size == SZ_BIG) //Tiny/Big mobs [Valaris]
 					clif_specialeffect(bl,EF_GIANTBODY2,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
@@ -4557,12 +4571,14 @@ static void clif_getareachar_pc(struct map_session_data *sd,struct map_session_d
 		clif_buyingstore_entry_single(sd, dstsd);
 	if( dstsd->spiritball > 0 )
 		clif_spiritball_single(sd->fd, dstsd);
+	if( dstsd->rageball > 0 )
+		clif_millenniumshield_single(sd->fd, &dstsd->bl, dstsd->rageball);
 	if( dstsd->sc.data[SC_MILLENNIUMSHIELD] )
-		clif_millenniumshield_single(&dstsd->bl, dstsd->sc.data[SC_MILLENNIUMSHIELD]->val2, sd->fd);
+		clif_millenniumshield_single(sd->fd, &dstsd->bl, dstsd->sc.data[SC_MILLENNIUMSHIELD]->val2);
 	if( dstsd->spiritcharm_type != CHARM_TYPE_NONE && dstsd->spiritcharm > 0 )
 		clif_spiritcharm_single(sd->fd, dstsd);
 	if( (sd->status.party_id && dstsd->status.party_id == sd->status.party_id) || //Party-mate, or hp disp setting
-		(sd->bg_id && sd->bg_id == dstsd->bg_id) || //BattleGround
+		(sd->bg_id && sd->bg_id == dstsd->bg_id) || //Battle Ground
 		pc_has_permission(sd, PC_PERM_VIEW_HPMETER) )
 		clif_hpmeter_single(sd->fd, dstsd->bl.id, dstsd->battle_status.hp, dstsd->battle_status.max_hp);
 	//Display link (sd - dstsd) to sd
@@ -4644,7 +4660,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
 				if (md->sc.data[SC_MILLENNIUMSHIELD])
-					clif_millenniumshield_single(bl,md->sc.data[SC_MILLENNIUMSHIELD]->val2,sd->fd);
+					clif_millenniumshield_single(sd->fd,bl,md->sc.data[SC_MILLENNIUMSHIELD]->val2);
 				clif_efst_set_enter(&sd->bl,bl,SELF);
 #if PACKETVER >= 20120404
 				if (battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar) {
@@ -9478,8 +9494,10 @@ void clif_refresh(struct map_session_data *sd)
 	clif_updatestatus(sd, SP_LUK);
 	if( sd->spiritball > 0 )
 		clif_spiritball_single(sd->fd, sd);
+	if( sd->rageball > 0 )
+		clif_millenniumshield_single(sd->fd, &sd->bl, sd->rageball);
 	if( sd->sc.data[SC_MILLENNIUMSHIELD] )
-		clif_millenniumshield_single(&sd->bl, sd->sc.data[SC_MILLENNIUMSHIELD]->val2, sd->fd);
+		clif_millenniumshield_single(sd->fd, &sd->bl, sd->sc.data[SC_MILLENNIUMSHIELD]->val2);
 	if( sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0 )
 		clif_spiritcharm_single(sd->fd, sd);
 	if( sd->vd.cloth_color )
@@ -10121,7 +10139,7 @@ bool clif_process_whisper_message(struct map_session_data *sd, char *out_name, c
  * Displays a message if the player enters a PK Zone (during pk_mode)
  * @param sd: Player data
  */
-inline void clif_pk_mode_message(struct map_session_data * sd)
+static inline void clif_pk_mode_message(struct map_session_data *sd)
 {
 	if( battle_config.pk_mode && battle_config.pk_mode_mes && sd && map[sd->bl.m].flag.pvp ) {
 		if( (int)sd->status.base_level < battle_config.pk_min_level ) {
@@ -18136,30 +18154,6 @@ int clif_elementalconverter_list(struct map_session_data *sd) {
 }
 
 
-void clif_millenniumshield(struct block_list *bl, short shields) {
-#if PACKETVER >= 20081217
-	unsigned char buf[10];
-
-	WBUFW(buf,0) = 0x440;
-	WBUFL(buf,2) = bl->id;
-	WBUFW(buf,6) = shields;
-	WBUFW(buf,8) = 0;
-	clif_send(buf,packet_len(0x440),bl,AREA);
-#endif
-}
-
-void clif_millenniumshield_single(struct block_list *bl, short shields, int fd) {
-#if PACKETVER >= 20081217
-	WFIFOHEAD(fd,packet_len(0x440));
-	WFIFOW(fd,0) = 0x440;
-	WFIFOL(fd,2) = bl->id;
-	WFIFOW(fd,6) = shields;
-	WFIFOW(fd,8) = 0;
-	WFIFOSET(fd,packet_len(0x440));
-#endif
-}
-
-
 /*==========================================
  * Spellbook list [LimitLine]
  *------------------------------------------*/
@@ -18355,8 +18349,23 @@ void clif_parse_SkillSelectMenu(int fd, struct map_session_data *sd) {
 }
 
 
-/// Kagerou/Oboro amulet spirit (ZC_SPIRITS_ATTRIBUTE).
-/// 08cf <id>.L <type>.W <num>.W
+/// Millenium shields.
+/// 0440 <id>.L <amount>.W <state>.W (ZC_MILLENNIUMSHIELD)
+void clif_millenniumshield(struct block_list *bl, short shield_count) {
+#if PACKETVER >= 20081217
+	unsigned char buf[10];
+
+	WBUFW(buf,0) = 0x440;
+	WBUFL(buf,2) = bl->id;
+	WBUFW(buf,6) = shield_count;
+	WBUFW(buf,8) = 0;
+	clif_send(buf,packet_len(0x440),bl,AREA);
+#endif
+}
+
+
+/// Kagerou/Oboro amulet spirit
+/// 08cf <id>.L <type>.W <num>.W (ZC_SPIRITS_ATTRIBUTE).
 void clif_spiritcharm(struct map_session_data *sd) {
 	unsigned char buf[10];
 

@@ -8758,7 +8758,7 @@
 16509,Cooked_Nine_Tail_Box_10,Cooked Nine Tail Box (10),18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 12505,10; },{},{}
 16510,Immortal_Stew_Box_10,Immortal Stew Box (10),18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 12506,10; },{},{}
 16514,Blessing_Scroll_Box_10,Blessing Scroll Box (10),18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 12522,10; },{},{}
-16515,Increase_Agility_Scroll_Box_10,Increase Agility Scroll Box (10),18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 12522,10; },{},{}
+16515,Increase_Agility_Scroll_Box_10,Increase Agility Scroll Box (10),18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 12523,10; },{},{}
 16542,Xmas_Bless,Xmas Bless,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_Xmas_Bless); },{},{}
 16543,Snowman_Hat_Box,Snowman Hat Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 5738,1; },{},{}
 16544,FSnowman_Hat_Box,FSnowman Hat Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 5738,1; },{},{}

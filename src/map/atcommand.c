@@ -3307,7 +3307,7 @@ ACMD_FUNC(spiritball)
 	if( !message || !*message || (number = atoi(message)) < 0 || number > max_spiritballs ) {
 		char msg[CHAT_SIZE_MAX];
 
-		safesnprintf(msg, sizeof(msg), msg_txt(1028), max_spiritballs); // Please enter a party name (usage: @party <party_name>).
+		safesnprintf(msg, sizeof(msg), msg_txt(1028), max_spiritballs); // Please enter a number (usage: @spiritball <number: 0-%d>).
 		clif_displaymessage(fd, msg);
 		return -1;
 	}
@@ -3316,6 +3316,34 @@ ACMD_FUNC(spiritball)
 		pc_delspiritball(sd, sd->spiritball, 1);
 	sd->spiritball = number;
 	clif_spiritball(&sd->bl);
+	// No message, player can look the difference
+
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------*/
+ACMD_FUNC(rageball)
+{
+	uint32 max_rageballs;
+	int number;
+	nullpo_retr(-1, sd);
+
+	max_rageballs = zmin(ARRAYLENGTH(sd->rageball_timer), 0x7FFF);
+
+	if( !message || !*message || (number = atoi(message)) < 0 || number > max_rageballs ) {
+		char msg[CHAT_SIZE_MAX];
+
+		safesnprintf(msg, sizeof(msg), msg_txt(1025), max_rageballs); // Please enter a number (usage: @rageball <number: 0-%d>).
+		clif_displaymessage(fd, msg);
+		return -1;
+	}
+
+	if( sd->rageball > 0 )
+		pc_delrageball(sd, sd->rageball, 1);
+	sd->rageball = number;
+	clif_millenniumshield(&sd->bl, sd->rageball);
 	// No message, player can look the difference
 
 	return 0;
@@ -9951,6 +9979,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(questskill),
 		ACMD_DEF(lostskill),
 		ACMD_DEF(spiritball),
+		ACMD_DEF(rageball),
 		ACMD_DEF(party),
 		ACMD_DEF(guild),
 		ACMD_DEF(breakguild),

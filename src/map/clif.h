@@ -988,9 +988,6 @@ void clif_display_pinfo(struct map_session_data *sd, int type);
 
 int clif_elementalconverter_list(struct map_session_data *sd);
 
-void clif_millenniumshield(struct block_list *bl, short shields);
-void clif_millenniumshield_single(struct block_list *bl, short shields, int fd);
-
 int clif_spellbook_list(struct map_session_data *sd);
 
 int clif_magicdecoy_list(struct map_session_data *sd, uint16 skill_lv, short x, short y);
@@ -1003,6 +1000,7 @@ int clif_skill_itemlistwindow(struct map_session_data *sd, uint16 skill_id, uint
 void clif_elemental_info(struct map_session_data *sd);
 void clif_elemental_updatestatus(struct map_session_data *sd, int type);
 
+void clif_millenniumshield(struct block_list *bl, short shield_count);
 void clif_spiritcharm(struct map_session_data *sd);
 
 void clif_snap(struct block_list *bl, short x, short y);

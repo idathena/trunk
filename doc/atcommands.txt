@@ -952,6 +952,12 @@ Summons the specified amount of spirit spheres around you.
 
 ---------------------------------------
 
+@rageball <0-100>
+
+Summons the specified amount of rage spheres around you.
+
+---------------------------------------
+
 @mount {<dragon color 1-5>}
 @mount2
 

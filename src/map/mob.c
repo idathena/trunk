@@ -3691,7 +3691,7 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 		ms[i].emotion = -1;
 		ms[i].cancel = 0;
 #ifndef RENEWAL_CAST
-		ms[i].casttime = skill_castfix_sc(&sd->bl, skill_castfix(&sd->bl, skill_id, ms[i].skill_lv), skill_get_castnodex(skill_id, ms[i].skill_lv));
+		ms[i].casttime = skill_castfix_sc(&sd->bl, skill_castfix(&sd->bl, skill_id, ms[i].skill_lv), skill_id, ms[i].skill_lv);
 #else
 		ms[i].casttime = skill_vfcastfix(&sd->bl, skill_castfix(&sd->bl, skill_id, ms[i].skill_lv), skill_id, ms[i].skill_lv);
 #endif

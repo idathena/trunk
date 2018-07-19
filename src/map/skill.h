@@ -407,7 +407,7 @@ void skill_getareachar_skillunit_visibilty(struct skill_unit *su, enum send_targ
 void skill_getareachar_skillunit_visibilty_single(struct skill_unit *su, struct block_list *bl);
 
 int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
-int skill_castfix_sc(struct block_list *bl, double time, uint8 flag);
+int skill_castfix_sc(struct block_list *bl, double time, uint16 skill_id, uint16 skill_lv);
 #ifdef RENEWAL_CAST
 int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 skill_lv);
 #endif
