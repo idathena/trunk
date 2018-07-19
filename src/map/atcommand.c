@@ -778,7 +778,7 @@ ACMD_FUNC(whogm)
 		g = pl_sd->guild;
 
 		sprintf(atcmd_output,msg_txt(916),	// Party: '%s' | Guild: '%s'
-			p?p->party.name:msg_txt(917), g?g->name:msg_txt(917));	// None.
+			(p ? p->party.name : msg_txt(917)), (g ? g->name : msg_txt(917)));	// None.
 
 		clif_displaymessage(fd, atcmd_output);
 		count++;
@@ -2141,9 +2141,9 @@ ACMD_FUNC(killmonster)
 	}
 
 	if (char_id) {
-		TBL_PC *sd = map_charid2sd(char_id);
+		struct map_session_data *c_sd = map_charid2sd(char_id);
 
-		src = &sd->bl;
+		src = &c_sd->bl;
 	} else
 		src = NULL;
 

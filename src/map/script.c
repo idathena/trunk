@@ -940,17 +940,17 @@ static void add_scriptl(int l)
 /*==========================================
  * Resolve the label
  *------------------------------------------*/
-void set_label(int l,int pos, const char *script_pos)
+void set_label(int l,int pos, const char *script_pos_cur)
 {
 	int i;
 
 	//Prevent overwriting constants values, parameters and built-in functions [Skotlex]
 	if(str_data[l].type == C_INT || str_data[l].type == C_PARAM || str_data[l].type == C_FUNC) {
-		disp_error_message("set_label: invalid label name",script_pos);
+		disp_error_message("set_label: invalid label name",script_pos_cur);
 		return;
 	}
 	if(str_data[l].label != -1) {
-		disp_error_message("set_label: dup label ",script_pos);
+		disp_error_message("set_label: dup label ",script_pos_cur);
 		return;
 	}
 	str_data[l].type = (str_data[l].type == C_USERFUNC ? C_USERFUNC_POS : C_POS);
@@ -2158,15 +2158,15 @@ const char *parse_syntax_close_sub(const char *p,int *flag)
 		}
 		return p;
 	} else if(syntax.curly[pos].type == TYPE_DO) {
-		int l;
-		char label[256];
+		int l2;
+		char label2[256];
 		const char *p2;
 
 		if(syntax.curly[pos].flag) {
 			// (Come here continue) to form the label here
-			sprintf(label,"__DO%x_NXT",syntax.curly[pos].index);
-			l=add_str(label);
-			set_label(l,script_pos,p);
+			sprintf(label2,"__DO%x_NXT",syntax.curly[pos].index);
+			l2=add_str(label2);
+			set_label(l2,script_pos,p);
 		}
 
 		// èSkip to the end point if the condition is false
@@ -2183,24 +2183,24 @@ const char *parse_syntax_close_sub(const char *p,int *flag)
 		// do-block end is a new line
 		parse_nextline(false, p);
 
-		sprintf(label,"__DO%x_FIN",syntax.curly[pos].index);
+		sprintf(label2,"__DO%x_FIN",syntax.curly[pos].index);
 		add_scriptl(add_str("jump_zero"));
 		add_scriptc(C_ARG);
 		p=parse_expr(p);
 		p=skip_space(p);
-		add_scriptl(add_str(label));
+		add_scriptl(add_str(label2));
 		add_scriptc(C_FUNC);
 
 		// Skip to the starting point
-		sprintf(label,"goto __DO%x_BGN;",syntax.curly[pos].index);
+		sprintf(label2,"goto __DO%x_BGN;",syntax.curly[pos].index);
 		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
-		parse_line(label);
+		parse_line(label2);
 		syntax.curly_count--;
 
 		// èForm label of the end point conditions
-		sprintf(label,"__DO%x_FIN",syntax.curly[pos].index);
-		l=add_str(label);
-		set_label(l,script_pos,p);
+		sprintf(label2,"__DO%x_FIN",syntax.curly[pos].index);
+		l2=add_str(label2);
+		set_label(l2,script_pos,p);
 		p = skip_space(p);
 		if(*p != ';') {
 			disp_error_message("parse_syntax: expected ';'",p);
@@ -2242,19 +2242,19 @@ const char *parse_syntax_close_sub(const char *p,int *flag)
 		syntax.curly_count--;
 		return p;
 	} else if(syntax.curly[syntax.curly_count-1].type == TYPE_USERFUNC) {
-		int pos = syntax.curly_count-1;
-		char label[256];
-		int l;
+		int pos2 = syntax.curly_count-1;
+		char label2[256];
+		int l2;
 		// Back
-		sprintf(label,"return;");
+		sprintf(label2,"return;");
 		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
-		parse_line(label);
+		parse_line(label2);
 		syntax.curly_count--;
 
 		// Put the label of the location
-		sprintf(label,"__FN%x_FIN",syntax.curly[pos].index);
-		l=add_str(label);
-		set_label(l,script_pos,p);
+		sprintf(label2,"__FN%x_FIN",syntax.curly[pos2].index);
+		l2=add_str(label2);
+		set_label(l2,script_pos,p);
 		syntax.curly_count--;
 		return p;
 	} else {
@@ -2411,7 +2411,7 @@ static const char *script_print_line(StringBuf* buf, const char *p, const char *
 	return p + i + (p[i] == '\n' ? 1 : 0);
 }
 
-void script_errorwarning_sub(StringBuf *buf, const char *src, const char *file, int start_line, const char *error_msg, const char *error_pos)
+void script_errorwarning_sub(StringBuf *buf, const char *src, const char *file, int start_line, const char *error_msg_cur, const char *error_pos_cur)
 {
 	//Find the line where the error occurred
 	int j;
@@ -2421,7 +2421,7 @@ void script_errorwarning_sub(StringBuf *buf, const char *src, const char *file, 
 
 	for(p = src; p && *p; line++) {
 		const char *lineend = strchr(p,'\n');
-		if(lineend == NULL || error_pos < lineend) {
+		if(lineend == NULL || error_pos_cur < lineend) {
 			break;
 		}
 		for(j = 0; j < 4; j++) {
@@ -2432,34 +2432,34 @@ void script_errorwarning_sub(StringBuf *buf, const char *src, const char *file, 
 	}
 
 	StringBuf_Printf(buf, "script error in file '%s' line %d\n", file, line);
-	StringBuf_Printf(buf, "    %s\n", error_msg);
+	StringBuf_Printf(buf, "    %s\n", error_msg_cur);
 	for(j = 0; j < 5; j++ ) {
 		script_print_line(buf, linestart[j], NULL, line + j - 5);
 	}
-	p = script_print_line(buf, p, error_pos, -line);
+	p = script_print_line(buf, p, error_pos_cur, -line);
 	for(j = 0; j < 5; j++) {
 		p = script_print_line(buf, p, NULL, line + j + 1 );
 	}
 }
 
-void script_error(const char *src, const char *file, int start_line, const char *error_msg, const char *error_pos) {
+void script_error(const char *src, const char *file, int start_line, const char *error_msg_cur, const char *error_pos_cur) {
 	StringBuf buf;
 
 	StringBuf_Init(&buf);
 	StringBuf_AppendStr(&buf, "\a\n");
 
-	script_errorwarning_sub(&buf, src, file, start_line, error_msg, error_pos);
+	script_errorwarning_sub(&buf, src, file, start_line, error_msg_cur, error_pos_cur);
 
 	ShowError("%s", StringBuf_Value(&buf));
 	StringBuf_Destroy(&buf);
 }
 
-void script_warning(const char *src, const char *file, int start_line, const char *error_msg, const char *error_pos) {
+void script_warning(const char *src, const char *file, int start_line, const char *error_msg_cur, const char *error_pos_cur) {
 	StringBuf buf;
 
 	StringBuf_Init(&buf);
 
-	script_errorwarning_sub(&buf, src, file, start_line, error_msg, error_pos);
+	script_errorwarning_sub(&buf, src, file, start_line, error_msg_cur, error_pos_cur);
 
 	ShowWarning("%s", StringBuf_Value(&buf));
 	StringBuf_Destroy(&buf);
@@ -2504,7 +2504,7 @@ struct script_code *parse_script(const char *src,const char *file,int line,int o
 
 	if( setjmp( error_jump ) != 0 ) {
 		//Restore program state when script has problems. [from jA]
-		int i;
+		int j;
 		const int size = ARRAYLENGTH(syntax.curly);
 		if( error_report )
 			script_error(src,file,line,error_msg,error_pos);
@@ -2513,10 +2513,10 @@ struct script_code *parse_script(const char *src,const char *file,int line,int o
 		script_pos  = 0;
 		script_size = 0;
 		script_buf  = NULL;
-		for( i = LABEL_START; i < str_num; i++ )
-			if(str_data[i].type == C_NOP) str_data[i].type = C_NAME;
-		for( i = 0; i < size; i++ )
-			linkdb_final(&syntax.curly[i].case_label);
+		for( j = LABEL_START; j < str_num; j++ )
+			if(str_data[j].type == C_NOP) str_data[j].type = C_NAME;
+		for( j = 0; j < size; j++ )
+			linkdb_final(&syntax.curly[j].case_label);
 		return NULL;
 	}
 

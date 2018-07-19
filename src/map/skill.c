@@ -1293,13 +1293,10 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case RK_DRAGONBREATH_WATER:
 			sc_start(src,bl,SC_FREEZING,15,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
-		case AB_ADORAMUS: {
-				uint8 rate = status_get_job_lv(src) / 2 + skill_lv * 4;
-				int dur = skill_get_time2(skill_id,skill_lv);
-
-				if (sc_start(src,bl,SC_ADORAMUS,rate,skill_lv,dur))
-					sc_start(src,bl,SC_BLIND,100,skill_lv,skill_get_time(skill_id,skill_lv));
-			}
+		case AB_ADORAMUS:
+			rate = status_get_job_lv(src) / 2 + skill_lv * 4;
+			if (sc_start(src,bl,SC_ADORAMUS,rate,skill_lv,skill_get_time2(skill_id,skill_lv)))
+				sc_start(src,bl,SC_BLIND,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case WL_CRIMSONROCK:
 			sc_start(src,bl,SC_STUN,40,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -2199,7 +2196,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 		if(dstsd->autospell2[0].id) { //Trigger counter-spells to retaliate against damage causing skills
 			struct block_list *tbl;
 			struct unit_data *ud;
-			int i, rate, type;
+			int i, type;
 			short id, lv;
 
 			for(i = 0; i < ARRAYLENGTH(dstsd->autospell2) && dstsd->autospell2[i].id; i++) {
@@ -5846,7 +5843,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					else if(rate < 20) {
 						const enum sc_type scs[] = { SC_FREEZE,SC_STUN,SC_SLEEP,SC_POISON,SC_SILENCE,SC_BLIND };
 						const int time[] = { 30,5,18,18,18,18 };
-						uint8 i;
 
 						for(i = 0; i < ARRAYLENGTH(scs); i++)
 							status_change_start(src,src,scs[i],10000,0,0,0,0,1000 * time[i],SCFLAG_FIXEDRATE);
@@ -5876,7 +5872,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 	type = status_skill2sc(skill_id);
 	tsc = status_get_sc(bl);
 	tsce = (tsc && type != SC_NONE) ? tsc->data[type] : NULL;
-
 	if(bl->id != src->id && type > SC_NONE && (i = skill_get_ele(skill_id,skill_lv)) > ELE_NEUTRAL &&
 		skill_get_inf(skill_id) != INF_SUPPORT_SKILL && battle_attr_fix(NULL,NULL,100,i,tstatus->def_ele,tstatus->ele_lv) <= 0)
 		return 1; //Skills that cause an status should be blocked if the target element blocks its element
@@ -6047,7 +6042,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				int abra_skill_id = 0, abra_skill_lv, checked = 0, checked_max = MAX_SKILL_ABRA_DB * 3;
 
 				do {
-					i = rnd() % MAX_SKILL_ABRA_DB;
+					i = rnd()%MAX_SKILL_ABRA_DB;
 					abra_skill_id = skill_abra_db[i].skill_id;
 					abra_skill_lv = min(skill_lv,skill_get_max(abra_skill_id));
 				} while (checked++ < checked_max && (!abra_skill_id || rnd()%10000 >= skill_abra_db[i].per[max(skill_lv - 1,0)]));

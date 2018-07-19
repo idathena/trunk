@@ -430,15 +430,16 @@ void set_char_offline(int char_id, int account_id)
 static int char_db_setoffline(DBKey key, DBData *data, va_list ap)
 {
 	struct online_char_data *character = (struct online_char_data *)db_data2ptr(data);
-	int server = va_arg(ap, int);
-	if( server == -1 ) {
+	int server_id = va_arg(ap, int);
+
+	if( server_id == -1 ) {
 		character->char_id = -1;
 		character->server = -1;
 		if( character->waiting_disconnect != INVALID_TIMER ) {
 			delete_timer(character->waiting_disconnect, chardb_waiting_disconnect);
 			character->waiting_disconnect = INVALID_TIMER;
 		}
-	} else if( character->server == server )
+	} else if( character->server == server_id )
 		character->server = -2; //In some map server that we aren't connected to.
 	return 0;
 }
@@ -1089,7 +1090,7 @@ int mmo_gender(const struct char_session_data *sd, const struct mmo_charstatus *
 #if PACKETVER > 20151104
 			{
 				uint32 account_id;
-				char *data, *sex;
+				char *data, *a_sex;
 
 				if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `account_id` FROM `%s` WHERE `char_id` = '%d'", char_db, p->char_id) )
 					Sql_ShowDebug(sql_handle);
@@ -1110,9 +1111,9 @@ int mmo_gender(const struct char_session_data *sd, const struct mmo_charstatus *
 					break;
 				}
 
-				Sql_GetData(sql_handle, 0, &data, NULL); sex = data;
+				Sql_GetData(sql_handle, 0, &data, NULL); a_sex = data;
 				Sql_FreeResult(sql_handle);
-				return (sex[0] == 'M' ? SEX_MALE : SEX_FEMALE);
+				return (a_sex[0] == 'M' ? SEX_MALE : SEX_FEMALE);
 			}
 #endif
 			break;
@@ -2837,15 +2838,15 @@ int parse_fromlogin(int fd) {
 								character->waiting_disconnect = add_timer(gettick()+AUTH_TIMEOUT, chardb_waiting_disconnect, character->account_id, 0);
 						} else { // Manual kick from char server.
 							struct char_session_data *tsd;
-							int i;
+							int j;
 
-							ARR_FIND( 0, fd_max, i, session[i] && (tsd = (struct char_session_data *)session[i]->session_data) && tsd->account_id == aid );
-							if( i < fd_max ) {
-								WFIFOHEAD(i,3);
-								WFIFOW(i,0) = 0x81;
-								WFIFOB(i,2) = 2; // "Someone has already logged in with this id"
-								WFIFOSET(i,3);
-								set_eof(i);
+							ARR_FIND( 0, fd_max, j, session[j] && (tsd = (struct char_session_data *)session[j]->session_data) && tsd->account_id == aid );
+							if( j < fd_max ) {
+								WFIFOHEAD(j,3);
+								WFIFOW(j,0) = 0x81;
+								WFIFOB(j,2) = 2; // "Someone has already logged in with this id"
+								WFIFOSET(j,3);
+								set_eof(j);
 							} else // Still moving to the map-server
 								set_char_offline(-1, aid);
 						}
@@ -3855,7 +3856,6 @@ int parse_frommap(int fd)
 					if( count > 0 ) {
 						struct skill_cooldown_data data;
 						StringBuf buf;
-						int i;
 
 						StringBuf_Init(&buf);
 						StringBuf_Printf(&buf, "INSERT INTO `%s` (`account_id`, `char_id`, `skill`, `tick`, `duration`) VALUES ", skillcooldown_db);
@@ -3932,7 +3932,6 @@ int parse_frommap(int fd)
 					else if( count > 0 ) {
 						struct status_change_data data;
 						StringBuf buf;
-						int i;
 
 						StringBuf_Init(&buf);
 						StringBuf_Printf(&buf, "INSERT INTO `%s` (`account_id`, `char_id`, `type`, `tick`, `val1`, `val2`, `val3`, `val4`) VALUES ", scdata_db);
@@ -5837,10 +5836,10 @@ void sql_config_read(const char *cfgName)
  * Split start_point configuration values.
  * @param w1_value: Value from w1
  * @param w2_value: Value from w2
- * @param start: Start point reference
+ * @param start_point_cur: Start point reference
  * @param count: Start point count reference
  */
-static void char_config_split_startpoint(char *w1_value, char *w2_value, struct point start_point[MAX_STARTPOINT], short *count)
+static void char_config_split_startpoint(char *w1_value, char *w2_value, struct point start_point_cur[MAX_STARTPOINT], short *count)
 {
 	char *lineitem, **fields;
 	int i = 0, fields_length = 3 + 1;
@@ -5860,15 +5859,15 @@ static void char_config_split_startpoint(char *w1_value, char *w2_value, struct 
 			lineitem = strtok(NULL, ":"); //Next lineitem
 			continue;
 		}
-		start_point[i].map = mapindex_name2id(fields[1]);
-		if(!start_point[i].map) {
-			ShowError("Start point %s not found in map-index cache. Setting to default location.\n", start_point[i].map);
-			start_point[i].map = mapindex_name2id(MAP_DEFAULT_NAME);
-			start_point[i].x = MAP_DEFAULT_X;
-			start_point[i].y = MAP_DEFAULT_Y;
+		start_point_cur[i].map = mapindex_name2id(fields[1]);
+		if(!start_point_cur[i].map) {
+			ShowError("Start point %s not found in map-index cache. Setting to default location.\n", start_point_cur[i].map);
+			start_point_cur[i].map = mapindex_name2id(MAP_DEFAULT_NAME);
+			start_point_cur[i].x = MAP_DEFAULT_X;
+			start_point_cur[i].y = MAP_DEFAULT_Y;
 		} else {
-			start_point[i].x = max(0, atoi(fields[2]));
-			start_point[i].y = max(0, atoi(fields[3]));
+			start_point_cur[i].x = max(0, atoi(fields[2]));
+			start_point_cur[i].y = max(0, atoi(fields[3]));
 		}
 		(*count)++;
 		lineitem = strtok(NULL, ":"); //Next lineitem
@@ -5881,9 +5880,9 @@ static void char_config_split_startpoint(char *w1_value, char *w2_value, struct 
  * Split start_items configuration values.
  * @param w1_value: Value from w1
  * @param w2_value: Value from w2
- * @param start: Start item reference
+ * @param start_items_cur: Start item reference
  */
-static void char_config_split_startitem(char *w1_value, char *w2_value, struct startitem start_items[MAX_STARTITEM])
+static void char_config_split_startitem(char *w1_value, char *w2_value, struct startitem start_items_cur[MAX_STARTITEM])
 {
 	char *lineitem, **fields;
 	int i = 0, fields_length = 3 + 1;
@@ -5902,9 +5901,9 @@ static void char_config_split_startitem(char *w1_value, char *w2_value, struct s
 			continue;
 		}
 		//TODO: Item ID verification
-		start_items[i].nameid = max(0, atoi(fields[1]));
-		start_items[i].amount = max(0, atoi(fields[2]));
-		start_items[i].pos = max(0, atoi(fields[3]));
+		start_items_cur[i].nameid = max(0, atoi(fields[1]));
+		start_items_cur[i].amount = max(0, atoi(fields[2]));
+		start_items_cur[i].pos = max(0, atoi(fields[3]));
 		lineitem = strtok(NULL, ":"); //Next lineitem
 		i++;
 	}
