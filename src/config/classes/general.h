@@ -15,14 +15,8 @@
  */
 #define MAGIC_REFLECTION_TYPE 1
 
-/**
- * Spirit Sphere Limitation
- */
 #define MAX_SPIRITBALL 15
-
-/**
- * Spirit Charm Limitation
- */
+#define MAX_RAGEBALL 15
 #define MAX_SPIRITCHARM 10
 
 /**

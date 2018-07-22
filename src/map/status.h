@@ -34,6 +34,15 @@ enum refine_type {
 // Get refine chance
 int status_get_refine_chance(enum refine_type wlv, int refine, bool enriched);
 
+typedef enum sc_conf_type {
+	SC_NO_REM_DEATH  = 0x01,
+	SC_REM_ON_LOGOUT = 0x02,
+	SC_REM_DISPELL   = 0x04,
+	SC_REM_CLEARANCE = 0x08,
+	SC_DEBUFF        = 0x10,
+	SC_NO_CLEAR      = 0x20,
+} sc_conf_type;
+
 // Flags to be used with status_change_start and status_get_sc_def
 // NOTE: When updating this enum, also update the documentation in doc/script_commands.txt and the constants
 enum scstart_flag {
@@ -465,7 +474,6 @@ typedef enum sc_type {
 	SC_STRIKING,
 	SC_WARMER,
 	SC_VACUUM_EXTREME,
-	SC_VACUUM_EXTREME_POSTDELAY,
 	SC_PROPERTYWALK,
 	SC_FIRE_INSIGNIA,
 	SC_WATER_INSIGNIA,
@@ -482,7 +490,6 @@ typedef enum sc_type {
 	SC_VOICEOFSIREN,
 	SC_SIRCLEOFNATURE,
 	SC_GLOOMYDAY,
-	SC_GLOOMYDAY_SK,
 	SC_SONGOFMANA,
 	SC_DANCEWITHWUG,
 	SC_SATURDAYNIGHTFEVER,
@@ -575,6 +582,7 @@ typedef enum sc_type {
 	SC_ANTI_M_BLAST,
 	SC_B_TRAP,
 	SC_H_MINE,
+	SC_H_MINE_EXPLOSION,
 	SC_QD_SHOT_READY,
 
 	//Summoner
@@ -787,14 +795,15 @@ typedef enum sc_type {
 	SC_DORAM_MATK,
 	SC_DORAM_FLEE2,
 	SC_DORAM_SVSP,
+	SC_SOULATTACK,
 
-	SC_STEAMPACK,
 	SC_DAILYSENDMAILCNT,
 	SC_DORAM_BUF_01,
 	SC_DORAM_BUF_02,
 	SC_WIDEWEB,
 	SC_CHILL,
 	SC_BURNT,
+	SC_CHEERUP,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 
@@ -1654,8 +1663,10 @@ enum si_type {
 	SI_MTF_LUDE = 861,
 	SI_MTF_CRUISER = 862,
 	SI_MERMAID_LONGING = 863,
+	SI_MAGICAL_FEATHER = 864,
 	SI_DRACULA_CARD = 865,
 	SI_LIMIT_POWER_BOOSTER = 867,
+	SI_GIFT_OF_SNOW = 868,
 	SI_TIME_ACCESSORY = 872,
 	SI_EP16_DEF = 873,
 	SI_NORMAL_ATKED_SP = 874,
@@ -1679,6 +1690,7 @@ enum si_type {
 	SI_CHERRY_BLOSSOM_CAKE = 892,
 	SI_SU_STOOP = 893,
 	SI_CATNIPPOWDER = 894,
+	SI_HEAD_EQUIPMENT_EFFECT = 895,
 	SI_SV_ROOTTWIST = 896,
 	SI_ATTACK_PROPERTY_NOTHING = 897,
 	SI_ATTACK_PROPERTY_WATER = 898,
@@ -1738,6 +1750,7 @@ enum si_type {
 	SI_BLAZE_BEAD = 979,
 	SI_FROZEN_BEAD = 980,
 	SI_BREEZE_BEAD = 981,
+	SI_SOULATTACK = 982,
 	SI_AID_PERIOD_RECEIVEITEM_2ND = 983,
 	SI_AID_PERIOD_PLUSEXP_2ND = 984,
 	SI_AID_PERIOD_PLUSJOBEXP_2ND = 985,
@@ -1745,6 +1758,7 @@ enum si_type {
 	SI_GLOOM_CARD = 988,
 	SI_PHARAOH_CARD = 989,
 	SI_KIEL_CARD = 990,
+	SI_CHEERUP = 992,
 	SI_S_MANAPOTION = 995,
 	SI_M_DEFSCROLL = 996,
 	SI_MAX,
@@ -1769,35 +1783,41 @@ extern bool running_npc_stat_calc_event;
 extern short current_equip_opt_index;
 
 //Mode definitions to clear up code reading. [Skotlex]
-enum e_mode
-{
-	MD_CANMOVE		= 0x000001,
-	MD_LOOTER		= 0x000002,
-	MD_AGGRESSIVE		= 0x000004,
-	MD_ASSIST		= 0x000008,
-	MD_CASTSENSOR_IDLE	= 0x000010,
-	MD_BOSS			= 0x000020,
-	MD_PLANT		= 0x000040,
-	MD_CANATTACK		= 0x000080,
-	MD_DETECTOR		= 0x000100,
-	MD_CASTSENSOR_CHASE	= 0x000200,
-	MD_CHANGECHASE		= 0x000400,
-	MD_ANGRY		= 0x000800,
-	MD_CHANGETARGET_MELEE	= 0x001000,
-	MD_CHANGETARGET_CHASE	= 0x002000,
-	MD_TARGETWEAK		= 0x004000,
-	MD_RANDOMTARGET		= 0x008000,
-	MD_IGNOREMELEE		= 0x010000, //Takes 1 HP damage from melee physical attacks
-	MD_IGNOREMAGIC		= 0x020000, //Takes 1 HP damage from magic
-	MD_IGNORERANGED		= 0x040000, //Takes 1 HP damage from ranged physical attacks
-	MD_MVP			= 0x080000, //MVP - instant kill / coma-like skills don't work
-	MD_IGNOREMISC		= 0x100000, //Takes 1 HP damage from "none" attack type
-	MD_KNOCKBACK_IMMUNE	= 0x200000, //Can't be knocked back
-	MD_NORANDOM_WALK	= 0x400000,
-	MD_NOCAST_SKILL		= 0x800000,
+enum e_mode {
+	MD_NONE			= 0x0000000,
+	MD_CANMOVE		= 0x0000001,
+	MD_LOOTER		= 0x0000002,
+	MD_AGGRESSIVE		= 0x0000004,
+	MD_ASSIST		= 0x0000008,
+	MD_CASTSENSOR_IDLE	= 0x0000010,
+	MD_NORANDOM_WALK	= 0x0000020,
+	MD_NOCAST_SKILL		= 0x0000040,
+	MD_CANATTACK		= 0x0000080,
+	//FREE			= 0x0000100,
+	MD_CASTSENSOR_CHASE	= 0x0000200,
+	MD_CHANGECHASE		= 0x0000400,
+	MD_ANGRY		= 0x0000800,
+	MD_CHANGETARGET_MELEE	= 0x0001000,
+	MD_CHANGETARGET_CHASE	= 0x0002000,
+	MD_TARGETWEAK		= 0x0004000,
+	MD_RANDOMTARGET		= 0x0008000,
+	MD_IGNOREMELEE		= 0x0010000,
+	MD_IGNOREMAGIC		= 0x0020000,
+	MD_IGNORERANGED		= 0x0040000,
+	MD_MVP			= 0x0080000,
+	MD_IGNOREMISC		= 0x0100000,
+	MD_KNOCKBACK_IMMUNE	= 0x0200000,
+	MD_TELEPORT_BLOCK	= 0x0400000,
+	//FREE			= 0x0800000,
+	MD_FIXED_ITEMDROP	= 0x1000000,
+	MD_DETECTOR		= 0x2000000,
+	MD_STATUS_IMMUNE	= 0x4000000,
+	MD_SKILL_IMMUNE		= 0x8000000,
 };
-#define MD_MASK 0x00FFFF
-#define ATR_MASK 0xFF0000
+
+#define MD_MASK 0x000FFFF
+#define ATR_MASK 0x0FF0000
+#define CL_MASK 0xF000000
 
 //Status change option definitions (options are what makes status changes visible to chars
 //who were not on your field of sight when it happened)
@@ -1976,21 +1996,20 @@ enum e_bonus_script_flags {
 	BSF_REM_ON_DISPELL          = 0x002,  //Removed by Dispell
 	BSF_REM_ON_CLEARANCE        = 0x004,  //Removed by Clearance
 	BSF_REM_ON_LOGOUT           = 0x008,  //Removed when player logged out
-	BSF_REM_ON_BANISHING_BUSTER = 0x010,  //Removed by Banishing Buster
-	BSF_REM_ON_REFRESH          = 0x020,  //Removed by Refresh
-	BSF_REM_ON_LUXANIMA         = 0x040,  //Removed by Luxanima
-	BSF_REM_ON_MADOGEAR         = 0x080,  //Removed when Madogear is activated or deactivated
-	BSF_REM_ON_DAMAGED          = 0x100,  //Removed when receive damage
-	BSF_PERMANENT               = 0x200,  //Cannot be removed by sc_end SC_ALL
+	BSF_REM_ON_REFRESH          = 0x010,  //Removed by Refresh
+	BSF_REM_ON_LUXANIMA         = 0x020,  //Removed by Luxanima
+	BSF_REM_ON_MADOGEAR         = 0x040,  //Removed when Madogear is activated or deactivated
+	BSF_REM_ON_DAMAGED          = 0x080,  //Removed when receive damage
+	BSF_PERMANENT               = 0x100,  //Cannot be removed by sc_end SC_ALL
 
 	//These flags cannot be stacked, BSF_FORCE_REPLACE has highest priority to check if YOU force to add both
-	BSF_FORCE_REPLACE           = 0x400,  //Force to replace duplicated script by expanding the duration
-	BSF_FORCE_DUPLICATE         = 0x800,  //Force to add duplicated script
+	BSF_FORCE_REPLACE           = 0x200,  //Force to replace duplicated script by expanding the duration
+	BSF_FORCE_DUPLICATE         = 0x400,  //Force to add duplicated script
 
 	//These flags aren't part of 'bonus_script' scripting flags
 	BSF_REM_ALL                 = 0x0,    //Remove all bonus script
-	BSF_REM_BUFF                = 0x4000, //Remove positive buff if battle_config.debuff_on_logout&1
-	BSF_REM_DEBUFF              = 0x8000, //Remove negative buff if battle_config.debuff_on_logout&2
+	BSF_REM_BUFF                = 0x2000, //Remove positive buff
+	BSF_REM_DEBUFF              = 0x4000, //Remove negative buff
 };
 
 //Enum for status_get_hpbonus and status_get_spbonus
@@ -2028,13 +2047,14 @@ struct weapon_atk {
 #endif
 };
 
-sc_type SkillStatusChangeTable[MAX_SKILL];   // skill  -> status
-int StatusIconChangeTable[SC_MAX];           // status -> "icon" (icon is a bit of a misnomer, since there exist values with no icon associated)
-unsigned int StatusChangeFlagTable[SC_MAX];  // status -> flags
-int StatusSkillChangeTable[SC_MAX];          // status -> skill
-int StatusRelevantBLTypes[SI_MAX];           // "icon" -> enum bl_type (for clif_status_change to identify for which bl types to send packets)
-unsigned int StatusChangeStateTable[SC_MAX]; // status -> flags
-bool StatusDisplayType[SC_MAX];
+extern sc_type SkillStatusChangeTable[MAX_SKILL];   // skill  -> status
+extern int StatusIconChangeTable[SC_MAX];           // status -> "icon" (icon is a bit of a misnomer, since there exist values with no icon associated)
+extern unsigned int StatusChangeFlagTable[SC_MAX];  // status -> flags
+extern int StatusSkillChangeTable[SC_MAX];          // status -> skill
+extern int StatusRelevantBLTypes[SI_MAX];           // "icon" -> enum bl_type (for clif_status_change to identify for which bl types to send packets)
+extern unsigned int StatusChangeStateTable[SC_MAX]; // status -> flags
+extern bool StatusDisplayType[SC_MAX];
+extern sc_conf_type StatusConfig[SC_MAX];
 
 //For holding basic status (which can be modified by status changes)
 struct status_data {
@@ -2161,6 +2181,7 @@ sc_type status_skill2sc(uint16 skill_id);
 int status_sc2skill(sc_type sc);
 unsigned int status_sc2scb_flag(sc_type sc);
 int status_type2relevant_bl_types(int type);
+sc_conf_type status_get_sc_type(sc_type sc);
 
 int status_damage(struct block_list *src,struct block_list *target,int64 hp,int64 sp, int walkdelay, int flag);
 //Define for standard HP damage attacks
@@ -2234,6 +2255,8 @@ unsigned char status_calc_attack_element(struct block_list *bl, struct status_ch
 #define status_get_class_(bl) status_get_status_data(bl)->class_
 #define status_get_size(bl) status_get_status_data(bl)->size
 #define status_get_mode(bl) status_get_status_data(bl)->mode
+#define status_has_mode(status,md) (((status)->mode&(md)) == (md))
+#define status_bl_has_mode(bl,md) status_has_mode(status_get_status_data((bl)),(md))
 
 #define status_get_homstr(bl) (status->str + ((TBL_HOM *)bl)->homunculus.str_value)
 #define status_get_homagi(bl) (status->agi + ((TBL_HOM *)bl)->homunculus.agi_value)
@@ -2245,15 +2268,15 @@ unsigned char status_calc_attack_element(struct block_list *bl, struct status_ch
 int status_get_party_id(struct block_list *bl);
 int status_get_guild_id(struct block_list *bl);
 int status_get_emblem_id(struct block_list *bl);
-int status_get_race2(struct block_list *bl);
+enum e_race2 status_get_race2(struct block_list *bl);
 
 struct view_data *status_get_viewdata(struct block_list *bl);
 void status_set_viewdata(struct block_list *bl, int class_);
 void status_change_init(struct block_list *bl);
 struct status_change *status_get_sc(struct block_list *bl);
 
-int status_isdead(struct block_list *bl);
-int status_isimmune(struct block_list *bl);
+bool status_isdead(struct block_list *bl);
+bool status_isimmune(struct block_list *bl);
 
 int status_get_sc_interval(enum sc_type type);
 int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, unsigned char flag);
@@ -2311,6 +2334,8 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 void status_calc_regen(struct block_list *bl, struct status_data *status, struct regen_data *regen);
 void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, struct status_change *sc);
 
+void status_calc_slave_mode(struct mob_data *md, struct mob_data *mmd);
+
 unsigned short status_calc_str(struct block_list *bl, struct status_change *sc, int str);
 unsigned short status_calc_agi(struct block_list *bl, struct status_change *sc, int agi);
 unsigned short status_calc_vit(struct block_list *bl, struct status_change *sc, int vit);
@@ -2342,7 +2367,7 @@ unsigned int status_calc_maxhp(struct block_list *bl, uint64 maxhp);
 unsigned int status_calc_maxsp(struct block_list *bl, uint64 maxsp);
 unsigned char status_calc_element(struct block_list *bl, struct status_change *sc, int element);
 unsigned char status_calc_element_lv(struct block_list *bl, struct status_change *sc, int lv);
-unsigned short status_calc_mode(struct block_list *bl, struct status_change *sc, int mode);
+enum e_mode status_calc_mode(struct block_list *bl, struct status_change *sc, enum e_mode mode);
 int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type);
 int status_get_spbonus(struct block_list *bl, enum e_status_bonus type);
 unsigned int status_calc_maxhpsp_pc(struct map_session_data *sd, bool isHP);

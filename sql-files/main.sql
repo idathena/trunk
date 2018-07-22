@@ -44,21 +44,21 @@ CREATE TABLE IF NOT EXISTS `auction` (
   `card1` smallint(5) unsigned NOT NULL default '0',
   `card2` smallint(5) unsigned NOT NULL default '0',
   `card3` smallint(5) unsigned NOT NULL default '0',
-  `option_id0` smallint(5) unsigned NOT NULL default '0',
-  `option_val0` smallint(5) unsigned NOT NULL default '0',
-  `option_parm0` tinyint(3) unsigned NOT NULL default '0',
-  `option_id1` smallint(5) unsigned NOT NULL default '0',
-  `option_val1` smallint(5) unsigned NOT NULL default '0',
-  `option_parm1` tinyint(3) unsigned NOT NULL default '0',
-  `option_id2` smallint(5) unsigned NOT NULL default '0',
-  `option_val2` smallint(5) unsigned NOT NULL default '0',
-  `option_parm2` tinyint(3) unsigned NOT NULL default '0',
-  `option_id3` smallint(5) unsigned NOT NULL default '0',
-  `option_val3` smallint(5) unsigned NOT NULL default '0',
-  `option_parm3` tinyint(3) unsigned NOT NULL default '0',
-  `option_id4` smallint(5) unsigned NOT NULL default '0',
-  `option_val4` smallint(5) unsigned NOT NULL default '0',
-  `option_parm4` tinyint(3) unsigned NOT NULL default '0',
+  `option_id0` smallint(5) NOT NULL default '0',
+  `option_val0` smallint(5) NOT NULL default '0',
+  `option_parm0` tinyint(3) NOT NULL default '0',
+  `option_id1` smallint(5) NOT NULL default '0',
+  `option_val1` smallint(5) NOT NULL default '0',
+  `option_parm1` tinyint(3) NOT NULL default '0',
+  `option_id2` smallint(5) NOT NULL default '0',
+  `option_val2` smallint(5) NOT NULL default '0',
+  `option_parm2` tinyint(3) NOT NULL default '0',
+  `option_id3` smallint(5) NOT NULL default '0',
+  `option_val3` smallint(5) NOT NULL default '0',
+  `option_parm3` tinyint(3) NOT NULL default '0',
+  `option_id4` smallint(5) NOT NULL default '0',
+  `option_val4` smallint(5) NOT NULL default '0',
+  `option_parm4` tinyint(3) NOT NULL default '0',
   `unique_id` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`auction_id`)
 ) ENGINE=MyISAM;
@@ -80,21 +80,21 @@ CREATE TABLE IF NOT EXISTS `cart_inventory` (
   `card1` smallint(5) unsigned NOT NULL default '0',
   `card2` smallint(5) unsigned NOT NULL default '0',
   `card3` smallint(5) unsigned NOT NULL default '0',
-  `option_id0` smallint(5) unsigned NOT NULL default '0',
-  `option_val0` smallint(5) unsigned NOT NULL default '0',
-  `option_parm0` tinyint(3) unsigned NOT NULL default '0',
-  `option_id1` smallint(5) unsigned NOT NULL default '0',
-  `option_val1` smallint(5) unsigned NOT NULL default '0',
-  `option_parm1` tinyint(3) unsigned NOT NULL default '0',
-  `option_id2` smallint(5) unsigned NOT NULL default '0',
-  `option_val2` smallint(5) unsigned NOT NULL default '0',
-  `option_parm2` tinyint(3) unsigned NOT NULL default '0',
-  `option_id3` smallint(5) unsigned NOT NULL default '0',
-  `option_val3` smallint(5) unsigned NOT NULL default '0',
-  `option_parm3` tinyint(3) unsigned NOT NULL default '0',
-  `option_id4` smallint(5) unsigned NOT NULL default '0',
-  `option_val4` smallint(5) unsigned NOT NULL default '0',
-  `option_parm4` tinyint(3) unsigned NOT NULL default '0',
+  `option_id0` smallint(5) NOT NULL default '0',
+  `option_val0` smallint(5) NOT NULL default '0',
+  `option_parm0` tinyint(3) NOT NULL default '0',
+  `option_id1` smallint(5) NOT NULL default '0',
+  `option_val1` smallint(5) NOT NULL default '0',
+  `option_parm1` tinyint(3) NOT NULL default '0',
+  `option_id2` smallint(5) NOT NULL default '0',
+  `option_val2` smallint(5) NOT NULL default '0',
+  `option_parm2` tinyint(3) NOT NULL default '0',
+  `option_id3` smallint(5) NOT NULL default '0',
+  `option_val3` smallint(5) NOT NULL default '0',
+  `option_parm3` tinyint(3) NOT NULL default '0',
+  `option_id4` smallint(5) NOT NULL default '0',
+  `option_val4` smallint(5) NOT NULL default '0',
+  `option_parm4` tinyint(3) NOT NULL default '0',
   `expire_time` int(11) unsigned NOT NULL default '0',
   `bound` tinyint(3) unsigned NOT NULL default '0',
   `unique_id` bigint(20) unsigned NOT NULL default '0',
@@ -123,10 +123,10 @@ CREATE TABLE IF NOT EXISTS `char` (
   `int` smallint(4) unsigned NOT NULL default '0',
   `dex` smallint(4) unsigned NOT NULL default '0',
   `luk` smallint(4) unsigned NOT NULL default '0',
-  `max_hp` mediumint(8) unsigned NOT NULL default '0',
-  `hp` mediumint(8) unsigned NOT NULL default '0',
-  `max_sp` mediumint(6) unsigned NOT NULL default '0',
-  `sp` mediumint(6) unsigned NOT NULL default '0',
+  `max_hp` int(11) unsigned NOT NULL default '0',
+  `hp` int(11) unsigned NOT NULL default '0',
+  `max_sp` int(11) unsigned NOT NULL default '0',
+  `sp` int(11) unsigned NOT NULL default '0',
   `status_point` int(11) unsigned NOT NULL default '0',
   `skill_point` int(11) unsigned NOT NULL default '0',
   `option` int(11) NOT NULL default '0',
@@ -253,13 +253,13 @@ CREATE TABLE IF NOT EXISTS `elemental` (
   `char_id` int(11) NOT NULL,
   `class` mediumint(9) unsigned NOT NULL default '0',
   `mode` int(11) unsigned NOT NULL default '1',
-  `hp` int(12) NOT NULL default '1',
-  `sp` int(12) NOT NULL default '1',
-  `max_hp` mediumint(8) unsigned NOT NULL default '0',
-  `max_sp` mediumint(6) unsigned NOT NULL default '0',
-  `atk1` MEDIUMINT(6) unsigned NOT NULL default '0',
-  `atk2` MEDIUMINT(6) unsigned NOT NULL default '0',
-  `matk` MEDIUMINT(6) unsigned NOT NULL default '0',
+  `hp` int(11) unsigned NOT NULL default '0',
+  `sp` int(11) unsigned NOT NULL default '0',
+  `max_hp` int(11) unsigned NOT NULL default '0',
+  `max_sp` int(11) unsigned NOT NULL default '0',
+  `atk1` mediumint(6) unsigned NOT NULL default '0',
+  `atk2` mediumint(6) unsigned NOT NULL default '0',
+  `matk` mediumint(6) unsigned NOT NULL default '0',
   `aspd` smallint(4) unsigned NOT NULL default '0',
   `def` smallint(4) unsigned NOT NULL default '0',
   `mdef` smallint(4) unsigned NOT NULL default '0',
@@ -449,21 +449,21 @@ CREATE TABLE IF NOT EXISTS `guild_storage` (
   `card1` smallint(5) unsigned NOT NULL default '0',
   `card2` smallint(5) unsigned NOT NULL default '0',
   `card3` smallint(5) unsigned NOT NULL default '0',
-  `option_id0` smallint(5) unsigned NOT NULL default '0',
-  `option_val0` smallint(5) unsigned NOT NULL default '0',
-  `option_parm0` tinyint(3) unsigned NOT NULL default '0',
-  `option_id1` smallint(5) unsigned NOT NULL default '0',
-  `option_val1` smallint(5) unsigned NOT NULL default '0',
-  `option_parm1` tinyint(3) unsigned NOT NULL default '0',
-  `option_id2` smallint(5) unsigned NOT NULL default '0',
-  `option_val2` smallint(5) unsigned NOT NULL default '0',
-  `option_parm2` tinyint(3) unsigned NOT NULL default '0',
-  `option_id3` smallint(5) unsigned NOT NULL default '0',
-  `option_val3` smallint(5) unsigned NOT NULL default '0',
-  `option_parm3` tinyint(3) unsigned NOT NULL default '0',
-  `option_id4` smallint(5) unsigned NOT NULL default '0',
-  `option_val4` smallint(5) unsigned NOT NULL default '0',
-  `option_parm4` tinyint(3) unsigned NOT NULL default '0',
+  `option_id0` smallint(5) NOT NULL default '0',
+  `option_val0` smallint(5) NOT NULL default '0',
+  `option_parm0` tinyint(3) NOT NULL default '0',
+  `option_id1` smallint(5) NOT NULL default '0',
+  `option_val1` smallint(5) NOT NULL default '0',
+  `option_parm1` tinyint(3) NOT NULL default '0',
+  `option_id2` smallint(5) NOT NULL default '0',
+  `option_val2` smallint(5) NOT NULL default '0',
+  `option_parm2` tinyint(3) NOT NULL default '0',
+  `option_id3` smallint(5) NOT NULL default '0',
+  `option_val3` smallint(5) NOT NULL default '0',
+  `option_parm3` tinyint(3) NOT NULL default '0',
+  `option_id4` smallint(5) NOT NULL default '0',
+  `option_val4` smallint(5) NOT NULL default '0',
+  `option_parm4` tinyint(3) NOT NULL default '0',
   `expire_time` int(11) unsigned NOT NULL default '0',
   `bound` tinyint(3) unsigned NOT NULL default '0',
   `unique_id` bigint(20) unsigned NOT NULL default '0',
@@ -491,10 +491,10 @@ CREATE TABLE IF NOT EXISTS `homunculus` (
   `int` smallint(4) unsigned NOT NULL default '0',
   `dex` smallint(4) unsigned NOT NULL default '0',
   `luk` smallint(4) unsigned NOT NULL default '0',
-  `hp` int(12) NOT NULL default '1',
-  `max_hp` int(12) NOT NULL default '1',
-  `sp` int(12) NOT NULL default '1',
-  `max_sp` int(12) NOT NULL default '1',
+  `hp` int(11) unsigned NOT NULL default '0',
+  `max_hp` int(11) unsigned NOT NULL default '0',
+  `sp` int(11) unsigned NOT NULL default '0',
+  `max_sp` int(11) unsigned NOT NULL default '0',
   `skill_point` smallint(4) unsigned NOT NULL default '0',
   `alive` tinyint(2) NOT NULL default '1',
   `rename_flag` tinyint(2) NOT NULL default '0',
@@ -528,21 +528,21 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `card1` smallint(5) unsigned NOT NULL default '0',
   `card2` smallint(5) unsigned NOT NULL default '0',
   `card3` smallint(5) unsigned NOT NULL default '0',
-  `option_id0` smallint(5) unsigned NOT NULL default '0',
-  `option_val0` smallint(5) unsigned NOT NULL default '0',
-  `option_parm0` tinyint(3) unsigned NOT NULL default '0',
-  `option_id1` smallint(5) unsigned NOT NULL default '0',
-  `option_val1` smallint(5) unsigned NOT NULL default '0',
-  `option_parm1` tinyint(3) unsigned NOT NULL default '0',
-  `option_id2` smallint(5) unsigned NOT NULL default '0',
-  `option_val2` smallint(5) unsigned NOT NULL default '0',
-  `option_parm2` tinyint(3) unsigned NOT NULL default '0',
-  `option_id3` smallint(5) unsigned NOT NULL default '0',
-  `option_val3` smallint(5) unsigned NOT NULL default '0',
-  `option_parm3` tinyint(3) unsigned NOT NULL default '0',
-  `option_id4` smallint(5) unsigned NOT NULL default '0',
-  `option_val4` smallint(5) unsigned NOT NULL default '0',
-  `option_parm4` tinyint(3) unsigned NOT NULL default '0',
+  `option_id0` smallint(5) NOT NULL default '0',
+  `option_val0` smallint(5) NOT NULL default '0',
+  `option_parm0` tinyint(3) NOT NULL default '0',
+  `option_id1` smallint(5) NOT NULL default '0',
+  `option_val1` smallint(5) NOT NULL default '0',
+  `option_parm1` tinyint(3) NOT NULL default '0',
+  `option_id2` smallint(5) NOT NULL default '0',
+  `option_val2` smallint(5) NOT NULL default '0',
+  `option_parm2` tinyint(3) NOT NULL default '0',
+  `option_id3` smallint(5) NOT NULL default '0',
+  `option_val3` smallint(5) NOT NULL default '0',
+  `option_parm3` tinyint(3) NOT NULL default '0',
+  `option_id4` smallint(5) NOT NULL default '0',
+  `option_val4` smallint(5) NOT NULL default '0',
+  `option_parm4` tinyint(3) NOT NULL default '0',
   `expire_time` int(11) unsigned NOT NULL default '0',
   `bound` tinyint(3) unsigned NOT NULL default '0',
   `favorite` tinyint(3) unsigned NOT NULL default '0',
@@ -671,21 +671,21 @@ CREATE TABLE IF NOT EXISTS `mail_attachments` (
   `card1` smallint(5) unsigned NOT NULL default '0',
   `card2` smallint(5) unsigned NOT NULL default '0',
   `card3` smallint(5) unsigned NOT NULL default '0',
-  `option_id0` smallint(5) unsigned NOT NULL default '0',
-  `option_val0` smallint(5) unsigned NOT NULL default '0',
-  `option_parm0` tinyint(3) unsigned NOT NULL default '0',
-  `option_id1` smallint(5) unsigned NOT NULL default '0',
-  `option_val1` smallint(5) unsigned NOT NULL default '0',
-  `option_parm1` tinyint(3) unsigned NOT NULL default '0',
-  `option_id2` smallint(5) unsigned NOT NULL default '0',
-  `option_val2` smallint(5) unsigned NOT NULL default '0',
-  `option_parm2` tinyint(3) unsigned NOT NULL default '0',
-  `option_id3` smallint(5) unsigned NOT NULL default '0',
-  `option_val3` smallint(5) unsigned NOT NULL default '0',
-  `option_parm3` tinyint(3) unsigned NOT NULL default '0',
-  `option_id4` smallint(5) unsigned NOT NULL default '0',
-  `option_val4` smallint(5) unsigned NOT NULL default '0',
-  `option_parm4` tinyint(3) unsigned NOT NULL default '0',
+  `option_id0` smallint(5) NOT NULL default '0',
+  `option_val0` smallint(5) NOT NULL default '0',
+  `option_parm0` tinyint(3) NOT NULL default '0',
+  `option_id1` smallint(5) NOT NULL default '0',
+  `option_val1` smallint(5) NOT NULL default '0',
+  `option_parm1` tinyint(3) NOT NULL default '0',
+  `option_id2` smallint(5) NOT NULL default '0',
+  `option_val2` smallint(5) NOT NULL default '0',
+  `option_parm2` tinyint(3) NOT NULL default '0',
+  `option_id3` smallint(5) NOT NULL default '0',
+  `option_val3` smallint(5) NOT NULL default '0',
+  `option_parm3` tinyint(3) NOT NULL default '0',
+  `option_id4` smallint(5) NOT NULL default '0',
+  `option_val4` smallint(5) NOT NULL default '0',
+  `option_parm4` tinyint(3) NOT NULL default '0',
   `unique_id` bigint(20) unsigned NOT NULL default '0',
   `bound` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY (`id`,`index`)
@@ -713,8 +713,8 @@ CREATE TABLE IF NOT EXISTS `mercenary` (
   `mer_id` int(11) unsigned NOT NULL auto_increment,
   `char_id` int(11) NOT NULL,
   `class` mediumint(9) unsigned NOT NULL default '0',
-  `hp` int(12) NOT NULL default '1',
-  `sp` int(12) NOT NULL default '1',
+  `hp` int(11) unsigned NOT NULL default '0',
+  `sp` int(11) unsigned NOT NULL default '0',
   `kill_counter` int(11) NOT NULL,
   `life_time` int(11) NOT NULL default '0',
   PRIMARY KEY  (`mer_id`)
@@ -845,34 +845,6 @@ CREATE TABLE IF NOT EXISTS `sql_updates` (
 ) ENGINE=MyISAM;
 
 -- Existent updates to enter
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1360858500);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1360951560);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1362445531);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1362528000);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1362794218);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1366078541);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1366378765);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1366378888);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1381354728);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1381423003);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1382892428);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1383162785);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1383167577);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1383205740);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1383955424);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1384473995);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1384545461);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1384588175);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1384763034);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1387844126);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1388854043);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1389028967);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1392832626);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1395789302);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1396893866);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1398477600);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1400256139);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1409590380);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1414975503);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1435860840);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1436360978);
@@ -885,6 +857,9 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1467935469);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1475526420);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1477434595);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1488454834);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1488744559);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1489588190);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1510499460);
 
 --
 -- Table structure for table `sstatus`
@@ -913,21 +888,21 @@ CREATE TABLE IF NOT EXISTS `storage` (
   `card1` smallint(5) unsigned NOT NULL default '0',
   `card2` smallint(5) unsigned NOT NULL default '0',
   `card3` smallint(5) unsigned NOT NULL default '0',
-  `option_id0` smallint(5) unsigned NOT NULL default '0',
-  `option_val0` smallint(5) unsigned NOT NULL default '0',
-  `option_parm0` tinyint(3) unsigned NOT NULL default '0',
-  `option_id1` smallint(5) unsigned NOT NULL default '0',
-  `option_val1` smallint(5) unsigned NOT NULL default '0',
-  `option_parm1` tinyint(3) unsigned NOT NULL default '0',
-  `option_id2` smallint(5) unsigned NOT NULL default '0',
-  `option_val2` smallint(5) unsigned NOT NULL default '0',
-  `option_parm2` tinyint(3) unsigned NOT NULL default '0',
-  `option_id3` smallint(5) unsigned NOT NULL default '0',
-  `option_val3` smallint(5) unsigned NOT NULL default '0',
-  `option_parm3` tinyint(3) unsigned NOT NULL default '0',
-  `option_id4` smallint(5) unsigned NOT NULL default '0',
-  `option_val4` smallint(5) unsigned NOT NULL default '0',
-  `option_parm4` tinyint(3) unsigned NOT NULL default '0',
+  `option_id0` smallint(5) NOT NULL default '0',
+  `option_val0` smallint(5) NOT NULL default '0',
+  `option_parm0` tinyint(3) NOT NULL default '0',
+  `option_id1` smallint(5) NOT NULL default '0',
+  `option_val1` smallint(5) NOT NULL default '0',
+  `option_parm1` tinyint(3) NOT NULL default '0',
+  `option_id2` smallint(5) NOT NULL default '0',
+  `option_val2` smallint(5) NOT NULL default '0',
+  `option_parm2` tinyint(3) NOT NULL default '0',
+  `option_id3` smallint(5) NOT NULL default '0',
+  `option_val3` smallint(5) NOT NULL default '0',
+  `option_parm3` tinyint(3) NOT NULL default '0',
+  `option_id4` smallint(5) NOT NULL default '0',
+  `option_val4` smallint(5) NOT NULL default '0',
+  `option_parm4` tinyint(3) NOT NULL default '0',
   `expire_time` int(11) unsigned NOT NULL default '0',
   `bound` tinyint(3) unsigned NOT NULL default '0',
   `unique_id` bigint(20) unsigned NOT NULL default '0',
@@ -952,21 +927,21 @@ CREATE TABLE IF NOT EXISTS `storage_1` (
   `card1` smallint(5) unsigned NOT NULL default '0',
   `card2` smallint(5) unsigned NOT NULL default '0',
   `card3` smallint(5) unsigned NOT NULL default '0',
-  `option_id0` smallint(5) unsigned NOT NULL default '0',
-  `option_val0` smallint(5) unsigned NOT NULL default '0',
-  `option_parm0` tinyint(3) unsigned NOT NULL default '0',
-  `option_id1` smallint(5) unsigned NOT NULL default '0',
-  `option_val1` smallint(5) unsigned NOT NULL default '0',
-  `option_parm1` tinyint(3) unsigned NOT NULL default '0',
-  `option_id2` smallint(5) unsigned NOT NULL default '0',
-  `option_val2` smallint(5) unsigned NOT NULL default '0',
-  `option_parm2` tinyint(3) unsigned NOT NULL default '0',
-  `option_id3` smallint(5) unsigned NOT NULL default '0',
-  `option_val3` smallint(5) unsigned NOT NULL default '0',
-  `option_parm3` tinyint(3) unsigned NOT NULL default '0',
-  `option_id4` smallint(5) unsigned NOT NULL default '0',
-  `option_val4` smallint(5) unsigned NOT NULL default '0',
-  `option_parm4` tinyint(3) unsigned NOT NULL default '0',
+  `option_id0` smallint(5) NOT NULL default '0',
+  `option_val0` smallint(5) NOT NULL default '0',
+  `option_parm0` tinyint(3) NOT NULL default '0',
+  `option_id1` smallint(5) NOT NULL default '0',
+  `option_val1` smallint(5) NOT NULL default '0',
+  `option_parm1` tinyint(3) NOT NULL default '0',
+  `option_id2` smallint(5) NOT NULL default '0',
+  `option_val2` smallint(5) NOT NULL default '0',
+  `option_parm2` tinyint(3) NOT NULL default '0',
+  `option_id3` smallint(5) NOT NULL default '0',
+  `option_val3` smallint(5) NOT NULL default '0',
+  `option_parm3` tinyint(3) NOT NULL default '0',
+  `option_id4` smallint(5) NOT NULL default '0',
+  `option_val4` smallint(5) NOT NULL default '0',
+  `option_parm4` tinyint(3) NOT NULL default '0',
   `expire_time` int(11) unsigned NOT NULL default '0',
   `bound` tinyint(3) unsigned NOT NULL default '0',
   `unique_id` bigint(20) unsigned NOT NULL default '0',
@@ -1074,69 +1049,3 @@ CREATE TABLE IF NOT EXISTS `markets` (
   `flag` tinyint(2) unsigned NOT NULL default '0',
   PRIMARY KEY (`name`,`nameid`)
 ) ENGINE=MyISAM default CHARSET=latin1;
-
---
--- Table structure for `roulette`
---
-CREATE TABLE IF NOT EXISTS `roulette` (
-  `index` int(11) NOT NULL default '0',
-  `level` smallint(5) unsigned NOT NULL,
-  `item_id` smallint(5) unsigned NOT NULL,
-  `amount` smallint(5) unsigned NOT NULL default '1',
-  `flag` smallint(5) unsigned NOT NULL default '1',
-  PRIMARY KEY (`index`)
-) ENGINE=MyISAM default CHARSET=latin1;
-
--- ----------------------------
--- Records of roulette
--- ----------------------------
--- Info: http://ro.gnjoy.com/news/update/View.asp?seq=157&curpage=1
-
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (0,1,675,1,1); -- Silver_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (1,1,671,1,0); -- Gold_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (2,1,678,1,0); -- Poison_Bottle
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (3,1,604,1,0); -- Branch_Of_Dead_Tree
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (4,1,522,1,0); -- Fruit_Of_Mastela
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (5,1,12609,1,0); -- Old_Ore_Box
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (6,1,12523,1,0); -- E_Inc_Agi_10_Scroll
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (7,1,985,1,0); -- Elunium
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (8,1,984,1,0); -- Oridecon
-
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (9,2,675,1,1); -- Silver_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (10,2,671,1,0); -- Gold_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (11,2,603,1,0); -- Old_Blue_Box
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (12,2,608,1,0); -- Seed_Of_Yggdrasil
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (13,2,607,1,0); -- Yggdrasilberry
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (14,2,12522,1,0); -- E_Blessing_10_Scroll
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (15,2,6223,1,0); -- Carnium
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (16,2,6224,1,0); -- Bradium
-
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (17,3,675,1,1); -- Silver_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (18,3,671,1,0); -- Gold_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (19,3,12108,1,0); -- Bundle_Of_Magic_Scroll
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (20,3,617,1,0); -- Old_Violet_Box
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (21,3,12514,1,0); -- E_Abrasive
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (22,3,7444,1,0); -- Treasure_Box
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (23,3,969,1,0); -- Gold
-
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (24,4,675,1,1); -- Silver_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (25,4,671,1,0); -- Gold_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (26,4,616,1,0); -- Old_Card_Album
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (27,4,12516,1,0); -- E_Small_Life_Potion
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (28,4,22777,1,0); -- Gift_Buff_Set
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (29,4,6231,1,0); -- Guarantee_Weapon_6Up
-
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (30,5,671,1,1); -- Gold_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (31,5,12246,1,0); -- Magic_Card_Album
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (32,5,12263,1,0); -- Comp_Battle_Manual
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (33,5,12831,1,0); -- Potion_Box
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (34,5,6235,1,0); -- Guarantee_Armor_6Up
-
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (35,6,671,1,1); -- Gold_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (36,6,12766,1,0); -- Reward_Job_BM25
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (37,6,6234,1,0); -- Guarantee_Armor_7Up
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (38,6,6233,1,0); -- Guarantee_Armor_8Up
-
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (39,7,671,1,1); -- Gold_Coin
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (40,7,6233,1,0); -- Guarantee_Armor_8Up
-INSERT INTO `roulette`(`index`,`level`,`item_id`,`amount`,`flag`) VALUES (41,7,6233,1,0); -- Guarantee_Armor_8Up //KRO lists this twice

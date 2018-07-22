@@ -88,7 +88,7 @@ comodo,219,158,6	script	Kachua	4_F_02,{
 		cutin "katsua01.bmp",255;
 		close;
 	}
-	delitem 732,1;
+	delitem 732,1; // Crystal_Jewel__
 	mes "[Kachua]";
 	mes "So what would";
 	mes "you like to have?";
@@ -399,7 +399,7 @@ comodo,204,148,7	script	Devellin	4_F_01,{
 }
 
 comodo,210,154,2	script	Suspicious Guy#cmd	2_M_THIEFMASTER,{
-	if (BaseClass == Job_Thief){
+	if (BaseClass == Job_Thief) {
 		mes "[Cain]";
 		mes "Heeeey...";
 		mes "It seems we share the same line of work, you and me. Heh heh, lemme give you a hot tip.";
@@ -418,7 +418,7 @@ comodo,210,154,2	script	Suspicious Guy#cmd	2_M_THIEFMASTER,{
 		mes "[Cain]";
 		mes "The buzz that's been going around is that she's got a cache of rare equipment and weapons too! So whaddya say? Wanna be partners in crime and rob her house?";
 		next;
-		switch(select("No, thanks.:Sweet, I'm in!")){
+		switch (select("No, thanks.:Sweet, I'm in!")) {
 		case 1:
 			mes "[Cain]";
 			mes "Wha...?";
@@ -446,9 +446,9 @@ comodo,210,154,2	script	Suspicious Guy#cmd	2_M_THIEFMASTER,{
 	mes "and trust me, it's worth it.";
 	mes "So whaddya say...?";
 	next;
-	switch(select("Alright.:No, thanks.")){
+	switch (select("Alright.:No, thanks.")) {
 	case 1:
-		if (Zeny > 499){
+		if (Zeny > 499) {
 			mes "[Cain]";
 			mes "You see that lady over there? She's just totally in love with diamonds. And from what my sources tell me, she's loaded. Tons and tons of valuables.";
 			next;
@@ -496,7 +496,7 @@ mjolnir_02,85,362,3	script	Blacksmith Miner	4_F_JOB_BLACKSMITH,{
 	mes "I'm rich!";
 	emotion e_heh;
 	next;
-	switch(select("I want to buy some.:Congratulations.")){
+	switch (select("I want to buy some.:Congratulations.")) {
 	case 1:
 		mes "[Dwayne]";
 		mes "Ah, you have an";
@@ -513,13 +513,13 @@ mjolnir_02,85,362,3	script	Blacksmith Miner	4_F_JOB_BLACKSMITH,{
 		mes "please enter '0' to cancel.";
 		next;
 		input .@amount;
-		if (.@amount == 0){
+		if (.@amount == 0) {
 			mes "[Dwayne]";
 			mes "Alright, you've";
 			mes "canceled the trade.";
 			mes "Take care!";
 			close;
-		}else if (.@amount < 1 || .@amount > 500){
+		} else if (.@amount < 1 || .@amount > 500) {
 			mes "[Dwayne]";
 			mes "The maximum";
 			mes "amount is 500.";
@@ -528,7 +528,7 @@ mjolnir_02,85,362,3	script	Blacksmith Miner	4_F_JOB_BLACKSMITH,{
 		}
 		.@cost = .@amount * 55000;
 		.@weight = .@amount * 100;
-		if (Zeny < .@cost){
+		if (Zeny < .@cost) {
 			mes "[Dwayne]";
 			mes "Errr...";
 			mes "I'm sorry, but you";
@@ -537,7 +537,7 @@ mjolnir_02,85,362,3	script	Blacksmith Miner	4_F_JOB_BLACKSMITH,{
 			mes "I sell them at that price.";
 			close;
 		}
-		if ((MaxWeight - Weight) < .@weight){
+		if ((MaxWeight - Weight) < .@weight) {
 			mes "[Dwayne]";
 			mes "Errr...";
 			mes "You're carrying too many items.";
@@ -545,7 +545,7 @@ mjolnir_02,85,362,3	script	Blacksmith Miner	4_F_JOB_BLACKSMITH,{
 			close;
 		}
 		Zeny = Zeny - .@cost;
-		getitem 732,.@amount;
+		getitem 732,.@amount; // Crystal_Jewel__
 		mes "[Dwayne]";
 		mes "Thank you for";
 		mes "buying my diamonds!";

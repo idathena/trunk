@@ -672,23 +672,23 @@
 4639	// Tappy_Card
 4640	// Frozen_Wolf_Card
 4641	// Zombie_Guard_Card
-//4642
-//4643
-//4644
-//4645
-//4646
-//4647
-//4648
-//4649
-//4650
-//4651
-4652	// Nightmare_Amon_Ra_Card
-4653	// Nightmare_Arclouse_Card
-4654	// Nightmare_Mimic_Card
-4655	// Nightmare_Minorous_Card
-4656	// Nightmare_Mummy_Card
-4657	// Nightmare_Ancient_Mummy_Card
-4658	// Nightmare_Verit_Card
+4642	// Min_Toad_Card
+4643	// Min_Vagabond_Wolf_Card
+4644	// Min_Vocal_Card
+4645	// Min_Eclipse_Card
+4646	// Min_Chimera_Card
+4647	// Min_Osiris_Card
+4648	// Min_Eddga_Card
+4649	// Min_Phreeoni_Card
+4650	// Min_Orc_Hero_Card
+4651	// Min_Tao_Gunka_Card
+4652	// N_Amon_Ra_Card
+4653	// N_Arclouse_Card
+4654	// N_Mimic_Card
+4655	// N_Minorous_Card
+4656	// N_Mummy_Card
+4657	// N_Ancient_Mummy_Card
+4658	// N_Verit_Card
 //--- 2015 / 7 / 9
 11600	// Shining_Holy_Water
 22847	// Prontera_Medal

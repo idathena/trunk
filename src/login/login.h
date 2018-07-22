@@ -4,9 +4,8 @@
 #ifndef _LOGIN_H_
 #define _LOGIN_H_
 
-#include "../common/mmo.h" // NAME_LENGTH,SEX_*
+#include "../common/mmo.h" // NAME_LENGTH, SEX_*
 #include "../common/core.h" // CORE_ST_LAST
-#include "../config/core.h"
 
 enum E_LOGINSERVER_ST
 {
@@ -34,7 +33,6 @@ struct login_session_data {
 	char lastlogin[24]; // Date when last logged, Y-M-D HH:MM:SS
 	uint8 group_id; // Groupid of account
 	uint8 clienttype; // ???
-	uint32 version; // Version contained in clientinfo
 
 	uint8 client_hash[16]; // Hash of client
 	int has_client_hash; // Client has sent an hash
@@ -71,8 +69,6 @@ struct Login_Config {
 	bool use_md5_passwds;                           // Work with password hashes instead of plaintext passwords?
 	int group_id_to_connect;                        // Required group id to connect
 	int min_group_id_to_connect;                    // Minimum group id to connect
-	bool check_client_version;                      // Check the clientversion set in the clientinfo ?
-	uint32 client_version_to_connect;               // The client version needed to connect (if checking is enabled)
 
 	bool ipban;                                     // Perform IP blocking (via contents of `ipbanlist`) ?
 	bool dynamic_pass_failure_ban;                  // Automatic IP blocking due to failed login attemps ?
@@ -107,7 +103,7 @@ const char *login_msg_txt(int msg_number);
 void login_do_final_msg(void);
 
 #define MAX_SERVERS 30 // Number of charserv loginserv can handle
-extern struct mmo_char_server server[MAX_SERVERS]; // Array of char-servs data
+extern struct mmo_char_server ch_server[MAX_SERVERS]; // Array of char-servs data
 extern struct Login_Config login_config; // Config of login serv
 
 #endif /* _LOGIN_H_ */

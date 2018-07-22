@@ -3,7 +3,7 @@
 //===== By: ================================================== 
 //= Muad_Dib
 //===== Current Version: ===================================== 
-//= 1.1
+//= 2.0
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -12,8 +12,167 @@
 //===== Additional Comments: ================================= 
 //= 1.0 First Version. [Euphy]
 //= 1.1 Added "Richard" NPC. [Euphy]
+//= 2.0 Updated New Card Separation System. [exneval]
 //============================================================ 
 
+malangdo,220,160,6	script	Richard#pa0829	4_CAT_ADV1,{
+	disable_items;
+	if (!checkweight(1201,1)) {
+		mes "You have too many kinds of objects. Let's try to continue after reducing those objects.";
+		close;
+	}
+	if (MaxWeight - Weight < 1000) {
+		mes "Can't continue because you have too many heavy objects. Let's try to continue after reducing the weight.";
+		close;
+	}
+	mes "[Richard]";
+	mes "Jeremy, who was responsible for seperating cards from the Armor went away for a long trip!! I will help you instead.";
+	next;
+	mes "[Richard]";
+	mes "The rules for using a special item to increase the card seperation success rate is still the same. When you use a special item, you don't need to pay a fee.";
+	next;
+	mes "[Richard]";
+	mes "It doesn't matter what kind of method you use for seperating, your card or equipment will not be destroyed. The only difference is the success rate.";
+	next;
+	setarray .@equip_name$[0],"Left hand","Right hand","Armor","Shoes","Garment","Upper Hat","Accessory","Accessory","Middle Hat";
+	setarray .@equip_slot[0],EQI_HAND_L,EQI_HAND_R,EQI_ARMOR,EQI_SHOES,EQI_GARMENT,EQI_HEAD_TOP,EQI_ACC_L,EQI_ACC_R,EQI_HEAD_MID;
+	for (set .@i,0; .@i<getarraysize(.@equip_slot); set .@i,.@i+1) {
+		if (getequipisequiped(.@equip_slot[.@i]))
+			set .@menu$,.@menu$+getequipname(.@equip_slot[.@i])+":";
+		else
+			set .@menu$,.@menu$+"^999999"+.@equip_name$[.@i]+" (empty)^000000:";
+	}
+	set .@i,select("Stop the work:"+.@menu$);
+	switch (.@i) {
+		case 1:
+			mes "[Richard]";
+			mes "Whenever you need the work, visit me here.";
+			close;
+		default:
+			set @equip_num,.@equip_slot[.@i-2];
+			if (!getequipisequiped(@equip_num)) {
+				mes "[Richard]";
+				mes "There is nothing on that part?";
+				close;
+			}
+			break;
+	}
+	mes "[Richard]";
+	mes "Which number socket do you want to separate the card? From the left socket, they are sorted 1,2,3,4.";
+	next;
+	setarray @equip_card[0],getequipcardid(@equip_num,0),getequipcardid(@equip_num,1),getequipcardid(@equip_num,2),getequipcardid(@equip_num,3);
+	set .@menu$,"";
+	for (set .@i,0; .@i<4; set .@i,.@i+1) {
+		if (@equip_card[.@i] && @equip_card[.@i] < 4700) // Armor Enchant System
+			set .@menu$,.@menu$+"Socket "+(.@i+1)+" - "+getitemname(@equip_card[.@i])+":";
+		else
+			set .@menu$,.@menu$+"^777777Socket "+(.@i+1)+" - No card^000000:";
+	}
+	set .@i,select("Stop the work:"+.@menu$);
+	switch (.@i) {
+		case 1:
+			mes "[Richard]";
+			mes "Whenever you need to work, please come to me.";
+			close;
+		default:
+			set @slot,.@i-2;
+			if (!@equip_card[@slot] || @equip_card[@slot] >= 4700) {
+				mes "[Richard]";
+				mes "This socket is not equipped with any card. Why don't you check again?";
+				close;
+			}
+			break;
+	}
+	mes "[Richard]";
+	mes "Please choose the working fee.";
+	next;
+	set .@menu$,
+		"Next time...:"+
+		((Zeny >= 1000000)?"Use 1,000,000z (Do not use special item):":"^999999Use 1,000,000z (Insufficient)^000000:")+
+		((countitem(6441))?"Use Premium Lubricant:":"^999999Premium Lubricant (Insufficient)^000000:")+
+		((countitem(6440))?"Use Ordinary Lubricant:":"^999999Ordinary Lubricant (Insufficient)^000000:")+
+		((countitem(6443))?"Use Sillit Pong":"^999999Sillit Pong (Insufficient)^000000");
+	switch (select(.@menu$)) {
+		case 1:
+			mes "[Richard]";
+			mes "Whenever you need the work, visit me here.";
+			close;
+		case 2:
+			callsub L_Socket,1000000,0,5;
+		case 3:
+			callsub L_Socket,0,6441,80; //High_RankLubricant
+		case 4:
+			callsub L_Socket,0,6440,40; //General_Lubricant
+		case 5:
+			callsub L_Socket,0,6443,100; //Sillit_Pong_Bottle
+	}
+
+L_Socket:
+	set .@cost,getarg(0);
+	set .@itemid,getarg(1);
+	set .@rate,getarg(2);
+	if (.@cost) {
+		if (Zeny < .@cost) {
+			mes "[Richard]";
+			mes "You don't have enough zeny. Please come back with enough fees.";
+			close;
+		}
+		mes "[Richard]";
+		mes "Card removal success rate when using Zeny is "+.@rate+"%. Even if the removal fails, your equipment and cards will not be destroyed.";
+		next;
+		if (select("Next time...:Continue") == 1) {
+			mes "[Richard]";
+			mes "Whenever you need the work, visit me here.";
+			close;
+		}
+		set Zeny,Zeny-.@cost;
+	} else {
+		if (!countitem(.@itemid)) {
+			mes "[Richard]";
+			mes "You don't have "+getitemname(.@itemid)+".";
+			close;
+		}
+		mes "[Richard]";
+		mes "Card removal success rate when using the "+getitemname(.@itemid)+" is "+.@rate+"%. Even if the removal fails, your equipment and cards will not be destroyed.";
+		next;
+		if (select("Next time...:Continue") == 1) {
+			mes "[Richard]";
+			mes "Whenever you need the work, visit me here.";
+			close;
+		}
+		delitem .@itemid,1;
+	}
+	// anti-hack
+	if (callfunc("F_IsEquipCardHack",@equip_num,@equip_card[0],@equip_card[1],@equip_card[2],@equip_card[3]))
+		close;
+	if (rand(100) >= .@rate) {
+		mes "[Richard]";
+		mes "The card seperation has failed but there isn't any damage. The card and the equipment are still the same.";
+		specialeffect2 EF_SUI_EXPLOSION;
+		next;
+		mes "[Richard]";
+		mes "Whenever you need the work, visit me here.";
+		close;
+	}
+	mes "[Richard]";
+	mes "The card seperation has succeeded. The cards and the equipment were not damaged. The items have been moved to your inventory.";
+	specialeffect2 EF_MAXPOWER;
+	set .@equip_id,getequipid(@equip_num);
+	set .@equip_refine,getequiprefinerycnt(@equip_num);
+	set .@card,@equip_card[@slot];
+	set @equip_card[@slot],0;
+	delequip @equip_num;
+	getitem2 .@equip_id,1,1,.@equip_refine,0,@equip_card[0],@equip_card[1],@equip_card[2],@equip_card[3];
+	getitem .@card,1;
+	next;
+	mes "[Richard]";
+	mes "Whenever you need the work, visit me here.";
+	close;
+}
+
+// Outdate script (no longer used)
+//============================================================
+/*
 -	script	::CardSeparation_mal	-1,{
 	disable_items;
 	if (checkweight(1201,1) == 0) {
@@ -136,7 +295,7 @@
 		// Official "Richard" script uses a hardcoded list including every possible item.
 		//if (!getequipisequiped(.@equip_num)) {
 		//	mes "[Richard]";
-		//	mes "I'm sorry. We don't provide that equipmnet yet.";
+		//	mes "I'm sorry. We don't provide that equipment yet.";
 		//	close;
 		//}
 
@@ -361,5 +520,6 @@
 	mes "That is all for the results of the card separation. Please come again.";
 	close;
 }
-malangdo,215,166,4	duplicate(CardSeparation_mal)	Jeremy#pa0829	553	// Armors :: mal_yong
-malangdo,208,166,6	duplicate(CardSeparation_mal)	Richard#pa0829	559	// Weapons :: soc_weapon
+malangdo,215,166,4	duplicate(CardSeparation_mal)	Jeremy#pa0829	4_CAT_DOWN	// Armors :: mal_yong
+malangdo,208,166,6	duplicate(CardSeparation_mal)	Richard#pa0829	4_CAT_ADV1	// Weapons :: soc_weapon
+*/

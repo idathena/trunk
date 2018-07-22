@@ -290,15 +290,6 @@ enum spell_book_item_list {
 	ITEMID_MAGIC_BOOK_DL,
 };
 
-enum cash_food_item_list {
-	ITEMID_STR_DISH10_ = 12202,
-	ITEMID_AGI_DISH10_,
-	ITEMID_INT_DISH10_,
-	ITEMID_DEX_DISH10_,
-	ITEMID_LUK_DISH10_,
-	ITEMID_VIT_DISH10_,
-};
-
 enum e_item_job {
 	ITEMJ_NORMAL      = 0x01,
 	ITEMJ_UPPER       = 0x02,
@@ -318,6 +309,14 @@ enum e_item_ammo {
 	AMMO_KUNAI,
 	AMMO_CANNONBALL,
 	AMMO_THROWABLE_ITEM, //Sling items
+};
+
+//Enum for bound/sell restricted selling
+enum e_itemshop_restrictions {
+	ISR_NONE = 0x0,
+	ISR_BOUND = 0x1,
+	ISR_SELLABLE = 0x2,
+	ISR_ALL = 0x3,
 };
 
 struct item_combo {
@@ -370,10 +369,11 @@ enum ItemTradeRestrictions {
 };
 
 //Struct of Roulette db
-struct s_roulette_db {
+extern struct s_roulette_db {
 	unsigned short *nameid[MAX_ROULETTE_LEVEL], //Item ID
-		           *qty[MAX_ROULETTE_LEVEL]; //Amount of Item ID
+				   *qty[MAX_ROULETTE_LEVEL]; //Amount of Item ID
 	int *flag[MAX_ROULETTE_LEVEL]; //Whether the item is for loss or win
+	int *chance[MAX_ROULETTE_LEVEL]; //Chance to lose the game
 	int items[MAX_ROULETTE_LEVEL]; //Number of items in the list for each
 } rd;
 
@@ -494,12 +494,10 @@ struct item_data *itemdb_exists(unsigned short nameid);
 #define itemdb_traderight(n) (itemdb_search(n)->flag.trade_restriction)
 #define itemdb_viewid(n) (itemdb_search(n)->view_id)
 #define itemdb_autoequip(n) (itemdb_search(n)->flag.autoequip)
-#define itemdb_is_rune(n) (((n) >= ITEMID_NAUTHIZ && (n) <= ITEMID_HAGALAZ) || (n) == ITEMID_LUX_ANIMA)
 #define itemdb_is_elementpoint(n) ((n) >= ITEMID_SCARLET_PTS && (n) <= ITEMID_LIME_GREEN_PTS)
 #define itemdb_is_spellbook(n) ((n) >= ITEMID_MAGIC_BOOK_FB && (n) <= ITEMID_MAGIC_BOOK_DL)
 #define itemdb_is_guillotinepoison(n) ((n) >= ITEMID_PARALYSE && (n) <= ITEMID_VENOMBLEED)
 #define itemdb_is_gemstone(n) ((n) >= ITEMID_YELLOW_GEMSTONE && (n) <= ITEMID_BLUE_GEMSTONE)
-#define itemdb_is_cashfood(n) ((n) >= ITEMID_STR_DISH10_ && (n) <= ITEMID_VIT_DISH10_)
 #define itemdb_is_slingatk(n) ((n) >= ITEMID_APPLE_BOMB && (n) <= ITEMID_VERY_HARD_LUMP)
 #define itemdb_is_slingbuff(n) ((n) >= ITEMID_MYSTERIOUS_POWDER && (n) <= ITEMID_BLACK_THING_TO_THROW)
 const char *itemdb_typename(enum item_types type);
@@ -546,8 +544,6 @@ struct item_combo *itemdb_combo_exists(unsigned short combo_id);
 struct s_item_group_db *itemdb_group_exists(unsigned short group_id);
 char itemdb_pc_get_itemgroup(uint16 group_id, struct map_session_data *sd);
 uint16 itemdb_get_randgroupitem_count(uint16 group_id, uint8 sub_group, unsigned short nameid);
-
-bool itemdb_parse_roulette_db(void);
 
 struct s_random_opt_data *itemdb_randomopt_exists(short id);
 struct s_random_opt_group *itemdb_randomopt_group_exists(int id);

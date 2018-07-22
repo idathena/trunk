@@ -42,7 +42,7 @@ static bool char_init_done = false; //Server already initialized? Used for Inter
 
 static const int packet_len_table[0x3d] = { // U - used, F - free
 	60, 3,-1,-1,10,-1, 6,-1,	// 2af8-2aff: U->2af8, U->2af9, U->2afa, U->2afb, U->2afc, U->2afd, U->2afe, U->2aff
-	 6,-1,19, 7,-1,39,30, 10,	// 2b00-2b07: U->2b00, U->2b01, U->2b02, U->2b03, U->2b04, U->2b05, U->2b06, U->2b07
+	 6,-1,22, 7,-1,39,30, 10,	// 2b00-2b07: U->2b00, U->2b01, U->2b02, U->2b03, U->2b04, U->2b05, U->2b06, U->2b07
 	 6,30,10,-1,86, 7,40,34,	// 2b08-2b0f: U->2b08, U->2b09, U->2b0a, U->2b0b, U->2b0c, U->2b0d, U->2b0e, U->2b0f
 	11,10,10,-1,11,-1,266,10,	// 2b10-2b17: U->2b10, U->2b11, U->2b12, U->2b13, U->2b14, U->2b15, U->2b16, U->2b17
 	 2,10, 2,-1,-1,-1, 2, 7,	// 2b18-2b1f: U->2b18, U->2b19, U->2b1a, U->2b1b, U->2b1c, U->2b1d, U->2b1e, U->2b1f
@@ -304,23 +304,21 @@ int chrif_save(struct map_session_data *sd, enum e_chrif_save_opt flag) {
 
 	chrif_bsdata_save(sd, ((flag&CSAVE_QUITTING) && !(flag&CSAVE_AUTOTRADE)));
 
+	//For data sync
 	if (&sd->storage && sd->storage.dirty)
 		storage_storagesave(sd);
+	if (&sd->premiumStorage && sd->premiumStorage.dirty)
+		storage_premiumStorage_save(sd);
+	if (sd->state.storage_flag == 2)
+		storage_guild_storagesave(sd->status.account_id, sd->status.guild_id, flag);
 	if (flag&CSAVE_INVENTORY)
 		intif_storage_save(sd, &sd->inventory);
 	if (flag&CSAVE_CART)
 		intif_storage_save(sd, &sd->cart);
-
-	//For data sync
-	if (sd->state.storage_flag == 2)
-		storage_guild_storagesave(sd->status.account_id, sd->status.guild_id, flag);
-	if (&sd->premiumStorage && sd->premiumStorage.dirty)
-		storage_premiumStorage_save(sd);
-
 	if (flag&CSAVE_QUITTING)
 		sd->state.storage_flag = 0; //Force close it
 
-	//Saving of registry values.
+	//Saving of registry values
 	if (sd->state.reg_dirty&4)
 		intif_saveregistry(sd, 3); //Save char regs
 	if (sd->state.reg_dirty&2)
@@ -334,7 +332,7 @@ int chrif_save(struct map_session_data *sd, enum e_chrif_save_opt flag) {
 	WFIFOW(char_fd,2) = mmo_charstatus_len;
 	WFIFOL(char_fd,4) = sd->status.account_id;
 	WFIFOL(char_fd,8) = sd->status.char_id;
-	WFIFOB(char_fd,12) = (flag&CSAVE_QUIT) ? 1 : 0; //Flag to tell char-server this character is quitting.
+	WFIFOB(char_fd,12) = (flag&CSAVE_QUIT) ? 1 : 0; //Flag to tell char-server this character is quitting
 
 	//If the user is on a instance map, we have to fake his current position
 	if (map[sd->bl.m].instance_id) {
@@ -814,8 +812,7 @@ int chrif_charselectreq(struct map_session_data *sd, uint32 s_ip) {
 	WFIFOL(char_fd,6) = sd->login_id1;
 	WFIFOL(char_fd,10) = sd->login_id2;
 	WFIFOL(char_fd,14) = htonl(s_ip);
-	WFIFOB(char_fd,18) = sd->packet_ver;
-	WFIFOL(char_fd,19) = sd->group_id;
+	WFIFOL(char_fd,18) = sd->group_id;
 	WFIFOSET(char_fd,22);
 
 	return 0;
@@ -1403,8 +1400,8 @@ int chrif_skillcooldown_load(int fd) {
 	for (i = 0; i < count; i++) {
 		struct skill_cooldown_data *data = (struct skill_cooldown_data *)RFIFOP(fd,14 + i * sizeof(struct skill_cooldown_data));
 
-		if (skill_blockpc_start(sd, data->skill_id, data->tick))
-			clif_skill_cooldown_list(sd, data);
+		skill_blockpc_start(sd, data->skill_id, data->tick);
+		//clif_skill_cooldown_list(sd, data->skill_id, data->duration, data->tick);
 	}
 
 	return 0;
@@ -1618,16 +1615,8 @@ int chrif_bsdata_save(struct map_session_data *sd, bool quit) {
 	if (!sd)
 		return 0;
 
-	//Removing
-	if (quit && sd->bonus_script.head) {
-		uint16 flag = BSF_REM_ON_LOGOUT; //Remove bonus when logout
-
-		if (battle_config.debuff_on_logout&1) //Remove negative buffs
-			flag |= BSF_REM_DEBUFF;
-		if (battle_config.debuff_on_logout&2) //Remove positive buffs
-			flag |= BSF_REM_BUFF;
-		pc_bonus_script_clear(sd, flag);
-	}
+	if (quit && sd->bonus_script.head) //Removing
+		pc_bonus_script_clear(sd, BSF_REM_ON_LOGOUT|BSF_REM_BUFF|BSF_REM_DEBUFF);
 
 	//ShowInfo("Saving %d bonus script for CID=%d\n", sd->bonus_script.count, sd->status.char_id);
 

@@ -22,6 +22,7 @@ struct status_change_entry;
 #define MAX_SKILL_IMPROVISE_DB 20 //Max Skill for Improvise
 #define MAX_SKILL_LEVEL 100 //Max Skill Level
 #define MAX_SKILL_CRIMSON_MARKER 3 //Max Crimson Marker targets (RL_C_MARKER)
+#define MAX_SKILL_HOWLING_MINE 5 //Max Howling Mine targets (RL_H_MINE)
 #define SKILL_NAME_LENGTH 31 //Max Skill Name length
 #define SKILL_DESC_LENGTH 31 //Max Skill Desc length
 
@@ -54,23 +55,24 @@ enum e_skill_inf {
 //A skill with 3 would be no damage + splash: area of effect.
 //Constants to identify a skill's inf2 value.
 enum e_skill_inf2 {
-	INF2_QUEST_SKILL    = 0x00001,
-	INF2_NPC_SKILL      = 0x00002, //NPC skills are those that players can't have in their skill tree.
-	INF2_WEDDING_SKILL  = 0x00004,
-	INF2_SPIRIT_SKILL   = 0x00008,
-	INF2_GUILD_SKILL    = 0x00010,
-	INF2_SONG_DANCE     = 0x00020,
-	INF2_ENSEMBLE_SKILL = 0x00040,
-	INF2_TRAP           = 0x00080,
-	INF2_TARGET_SELF    = 0x00100, //Refers to ground placed skills that will target the caster as well (like Grandcross)
-	INF2_NO_TARGET_SELF = 0x00200,
-	INF2_PARTY_ONLY     = 0x00400,
-	INF2_GUILD_ONLY     = 0x00800,
-	INF2_NO_ENEMY       = 0x01000,
-	INF2_CHORUS_SKILL   = 0x02000, //Chorus skill
-	INF2_NO_BG_GVG_DMG  = 0x04000, //Skill that ignores bg and gvg reduction
-	INF2_NO_NEARNPC     = 0x08000, //Disable cast skill if near with NPC [Cydh]
-	INF2_HIT_TRAP       = 0x10000, //Can hit trap-type skill (INF2_TRAP) [Cydh]
+	INF2_QUEST_SKILL      = 0x00001,
+	INF2_NPC_SKILL        = 0x00002, //NPC skills are those that players can't have in their skill tree.
+	INF2_WEDDING_SKILL    = 0x00004,
+	INF2_SPIRIT_SKILL     = 0x00008,
+	INF2_GUILD_SKILL      = 0x00010,
+	INF2_SONG_DANCE       = 0x00020,
+	INF2_ENSEMBLE_SKILL   = 0x00040,
+	INF2_TRAP             = 0x00080,
+	INF2_TARGET_SELF      = 0x00100, //Refers to ground placed skills that will target the caster as well (like Grandcross)
+	INF2_NO_TARGET_SELF   = 0x00200,
+	INF2_PARTY_ONLY       = 0x00400,
+	INF2_GUILD_ONLY       = 0x00800,
+	INF2_NO_ENEMY         = 0x01000,
+	INF2_CHORUS_SKILL     = 0x02000, //Chorus skill
+	INF2_NO_BG_GVG_DMG    = 0x04000, //Skill that ignores bg and gvg reduction
+	INF2_NO_NEARNPC       = 0x08000, //Disable cast skill if near with NPC [Cydh]
+	INF2_HIT_TRAP         = 0x10000, //Can hit trap-type skill (INF2_TRAP) [Cydh]
+	INF2_SHOW_SKILL_SCALE = 0x20000,
 };
 
 //Skill info type 3
@@ -89,7 +91,7 @@ enum e_skill_inf3 {
 	INF3_EFF_RESEARCHTRAP   = 0x00800, //Skill range affected by RA_RESEARCHTRAP
 	INF3_USABLE_MANHOLE     = 0x01000, //Skill that can be used even under SC__MANHOLE
 	INF3_USABLE_WARG        = 0x02000, //Skill that can be use while riding warg
-	INF3_SC_GLOOMYDAY_SK    = 0x04000, //Skill that affected by SC_GLOOMYDAY_SK
+	INF3_SC_GLOOMYDAY       = 0x04000, //Skill that affected by SC_GLOOMYDAY
 	INF3_SC_DANCEWITHWUG    = 0x08000, //Skill that affected by SC_DANCEWITHWUG
 	INF3_BITE_BLOCK         = 0x10000, //Skill blocked by RA_WUGBITE
 };
@@ -345,6 +347,7 @@ int skill_get_castnodex(uint16 skill_id, uint16 skill_lv);
 int skill_get_castdef(uint16 skill_id);
 int skill_get_nocast(uint16 skill_id);
 int skill_get_unit_id(uint16 skill_id, int flag);
+int skill_get_unit_range(uint16 skill_id, uint16 skill_lv);
 int skill_get_inf2(uint16 skill_id);
 int skill_get_castcancel(uint16 skill_id);
 int skill_get_maxcount(uint16 skill_id, uint16 skill_lv);
@@ -404,7 +407,7 @@ void skill_getareachar_skillunit_visibilty(struct skill_unit *su, enum send_targ
 void skill_getareachar_skillunit_visibilty_single(struct skill_unit *su, struct block_list *bl);
 
 int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
-int skill_castfix_sc(struct block_list *bl, double time, uint8 flag);
+int skill_castfix_sc(struct block_list *bl, double time, uint16 skill_id, uint16 skill_lv);
 #ifdef RENEWAL_CAST
 int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 skill_lv);
 #endif
@@ -1757,6 +1760,10 @@ enum e_skill {
 	SU_CHATTERING,
 	SU_SPIRITOFSEA,
 
+	WE_CALLALLFAMILY = 5063,
+	WE_ONEFOREVER,
+	WE_CHEERUP,
+
 	HLIF_HEAL = 8001,
 	HLIF_AVOID,
 	HLIF_BRAIN,
@@ -2073,8 +2080,7 @@ int skill_magicdecoy(struct map_session_data *sd, unsigned short nameid);
 int skill_poisoningweapon(struct map_session_data *sd, unsigned short nameid);
 
 int skill_maelstrom_suction(struct block_list *bl, va_list ap);
-int skill_select_menu(struct map_session_data *sd, uint16 skill_id);
-bool skill_check_shadowform(struct block_list *bl, uint16 skill_id, int64 damage, int div);
+void skill_select_menu(struct map_session_data *sd, uint16 skill_id);
 
 int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv, unsigned short *item_list);
 

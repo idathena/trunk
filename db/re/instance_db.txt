@@ -10,13 +10,16 @@
 5,Mistwood Maze,7200,1@mist,89,29,1@mist
 6,Culvert,3600,1@pump,63,98,1@pump,2@pump
 7,Octopus Cave,3600,1@cash,199,99,1@cash
-8,Bangungot Hospital 2F,3600,1@ma_h,40,157,1@ma_h
-9,Buwaya Cave,3600,1@ma_c,35,57,1@ma_c
-10,Bakonawa Lake,7200,1@ma_b,64,51,1@ma_b
-11,Wolfchev's Laboratory,14400,1@lhz,45,148,1@lhz
-12,Old Glast Heim,5400,1@gl_k,150,20,1@gl_k,2@gl_k
-13,Eclage Interior,1200,1@ecl,60,50,1@ecl
+8,Wolfchev's Laboratory,14400,1@lhz,45,148,1@lhz
+9,Bangungot Hospital 2F,3600,1@ma_h,40,157,1@ma_h
+10,Buwaya Cave,3600,1@ma_c,35,57,1@ma_c
+11,Bakonawa Lake,7200,1@ma_b,64,51,1@ma_b
+12,Eclage Interior,1200,1@ecl,60,50,1@ecl
+13,Old Glast Heim,5400,1@gl_k,150,20,1@gl_k,2@gl_k
 14,Sara's Memory,3600,1@sara,250,155,1@sara
-15,Nightmarish Jitterbug,3300,1@jtb,16,18,1@jtb
-16,Horror Toy Factory,3600,1@xm_d,111,22,1@xm_d
-17,Faceworm's Nest,3600,1@face,112,374,1@face
+15,Faceworm's Nest,3600,1@face,112,374,1@face
+16,Ghost Palace,3600,1@spa,42,196,1@spa
+17,Geffen Magic Tournament,7200,1@gef,119,209,1@gef,1@gef_in,1@ge_st
+18,Horror Toy Factory,3600,1@xm_d,111,22,1@xm_d
+19,Nightmarish Jitterbug,3600,1@jtb,16,18,1@jtb
+20,Sarah and Fenrir,3600,1@glast,367,304,1@glast

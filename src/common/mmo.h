@@ -5,32 +5,16 @@
 #define	_MMO_H_
 
 #include "../common/cbasetypes.h"
+#include "../config/core.h"
 #include "../common/db.h"
 #include <time.h>
 #include "../common/strlib.h" // StringBuf
 
-// server->client protocol version
-//        0 - pre-?
-//        1 - ?                    - 0x196
-//        2 - ?                    - 0x78, 0x79
-//        3 - ?                    - 0x1c8, 0x1c9, 0x1de
-//        4 - ?                    - 0x1d7, 0x1d8, 0x1d9, 0x1da
-//        5 - 2003-12-18aSakexe+   - 0x1ee, 0x1ef, 0x1f0, ?0x1c4, 0x1c5?
-//        6 - 2004-03-02aSakexe+   - 0x1f4, 0x1f5
-//        7 - 2005-04-11aSakexe+   - 0x229, 0x22a, 0x22b, 0x22c
-// See conf/battle/client.conf for other version
-
 #ifndef PACKETVER
-	#define PACKETVER 20170517
+	#error Please define PACKETVER in src/config/packets.h
 #endif
 
-//Check if the specified packetversion supports the pincode system
-#define PACKETVER_SUPPORTS_PINCODE PACKETVER >= 20110309
-//Check if the client needs delete_date as remaining time and not the actual delete_date (actually it was tested for clients since 2013)
-#define PACKETVER_CHAR_DELETEDATE (PACKETVER >= 20130320 && PACKETVER <= 20141022) || PACKETVER >= 20150513
-// Check if the specified packetvresion supports the cashshop sale system
-#define PACKETVER_SUPPORTS_SALES PACKETVER >= 20131223
-//Remove/Comment this line to disable sc_data saving. [Skotlex]
+//Remove/Comment this line to disable sc_data saving [Skotlex]
 #define ENABLE_SC_SAVING
 //Remove/Comment this line to disable server-side hot-key saving support [Skotlex]
 //Note that newer clients no longer save hotkeys in the registry!
@@ -69,7 +53,7 @@
 #define MAX_BANK_ZENY SINT32_MAX //Max zeny in Bank
 #define MAX_FAME 1000000000 //Max fame points
 #define MAX_CART 100 //Maximum item in cart
-#define MAX_SKILL 5057 //Maximum skill data
+#define MAX_SKILL 5066 //Maximum skill data
 #define GLOBAL_REG_NUM 256 //Max permanent character variables per char
 #define ACCOUNT_REG_NUM 64 //Max permanent local account variables per account
 #define ACCOUNT_REG2_NUM 16 //Max permanent global account variables per account
@@ -428,7 +412,7 @@ struct s_elemental {
 	int elemental_id;
 	int char_id;
 	short class_;
-	int mode;
+	int mode; //Modes @see enum e_mode
 	int hp, sp, max_hp, max_sp, matk, atk, atk2;
 	short hit, flee, amotion, def, mdef;
 	int life_time;

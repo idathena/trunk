@@ -208,12 +208,33 @@ void log_pick(int id, int16 m, e_log_pick_type type, int amount, struct item *it
 			log_config.log_pick, id, log_picktype2char(type), itm->nameid, amount, itm->refine, itm->card[0], itm->card[1], itm->card[2], itm->card[3], (map[m].name ? map[m].name : ""), itm->unique_id, itm->bound);
 		queryThread_log(entry,e_length);
 #else
-		if( SQL_ERROR == Sql_Query(logmysql_handle, LOG_QUERY " INTO `%s` (`time`, `char_id`, `type`, `nameid`, `amount`, `refine`, `card0`, `card1`, `card2`, `card3`, `map`, `unique_id`, `bound`) VALUES (NOW(), '%d', '%c', '%hu', '%d', '%d', '%hu', '%hu', '%hu', '%hu', '%s', '%"PRIu64"', '%d')",
-			log_config.log_pick, id, log_picktype2char(type), itm->nameid, amount, itm->refine, itm->card[0], itm->card[1], itm->card[2], itm->card[3], (map[m].name ? map[m].name : ""), itm->unique_id, itm->bound) )
-		{
-			Sql_ShowDebug(logmysql_handle);
-			return;
+		int i;
+		SqlStmt *stmt = SqlStmt_Malloc(logmysql_handle);
+		StringBuf buf;
+		StringBuf_Init(&buf);
+
+		StringBuf_Printf(&buf, "%s INTO `%s` (`time`, `char_id`, `type`, `nameid`, `amount`, `refine`, `map`, `unique_id`, `bound`", LOG_QUERY, log_config.log_pick);
+		for( i = 0; i < MAX_SLOTS; ++i )
+			StringBuf_Printf(&buf, ", `card%d`", i);
+		for( i = 0; i < MAX_ITEM_RDM_OPT; ++i ) {
+			StringBuf_Printf(&buf, ", `option_id%d`", i);
+			StringBuf_Printf(&buf, ", `option_val%d`", i);
+			StringBuf_Printf(&buf, ", `option_parm%d`", i);
 		}
+		StringBuf_Printf(&buf, ") VALUES(NOW(), '%u', '%c', '%d', '%d', '%d', '%s', '%"PRIu64"', '%d'",
+			id, log_picktype2char(type), itm->nameid, amount, itm->refine, (map[m].name ? map[m].name : ""), itm->unique_id, itm->bound);
+
+		for( i = 0; i < MAX_SLOTS; i++ )
+			StringBuf_Printf(&buf, ", '%d'", itm->card[i]);
+		for( i = 0; i < MAX_ITEM_RDM_OPT; i++ )
+			StringBuf_Printf(&buf, ", '%d', '%d', '%d'", itm->option[i].id, itm->option[i].value, itm->option[i].param);
+		StringBuf_Printf(&buf, ")");
+
+		if( SQL_SUCCESS != SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) || SQL_SUCCESS != SqlStmt_Execute(stmt) )
+			SqlStmt_ShowDebug(stmt);
+
+		SqlStmt_Free(stmt);
+		StringBuf_Destroy(&buf);
 #endif
 	} else {
 		char timestring[255];
@@ -409,7 +430,7 @@ void log_npc(struct map_session_data *sd, const char *message)
 
 
 /// logs chat
-void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, const char *map, int x, int y, const char *dst_charname, const char *message)
+void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, const char *mapname, int x, int y, const char *dst_charname, const char *message)
 {
 	if( ( log_config.chat&type ) == 0 ) // Disabled
 		return;
@@ -421,13 +442,13 @@ void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, 
 #ifdef BETA_THREAD_TEST
 		char entry[512];
 		int e_length = 0;
-		e_length = sprintf(entry, LOG_QUERY " INTO `%s` (`time`, `type`, `type_id`, `src_charid`, `src_accountid`, `src_map`, `src_map_x`, `src_map_y`, `dst_charname`, `message`) VALUES (NOW(), '%c', '%d', '%d', '%d', '%s', '%d', '%d', '%s', '%s')", log_config.log_chat, log_chattype2char(type), type_id, src_charid, src_accid, map, x, y, dst_charname, message );
+		e_length = sprintf(entry, LOG_QUERY " INTO `%s` (`time`, `type`, `type_id`, `src_charid`, `src_accountid`, `src_map`, `src_map_x`, `src_map_y`, `dst_charname`, `message`) VALUES (NOW(), '%c', '%d', '%d', '%d', '%s', '%d', '%d', '%s', '%s')", log_config.log_chat, log_chattype2char(type), type_id, src_charid, src_accid, mapname, x, y, dst_charname, message );
 		queryThread_log(entry,e_length);
 #else
 		SqlStmt *stmt;
 
 		stmt = SqlStmt_Malloc(logmysql_handle);
-		if( SQL_SUCCESS != SqlStmt_Prepare(stmt, LOG_QUERY " INTO `%s` (`time`, `type`, `type_id`, `src_charid`, `src_accountid`, `src_map`, `src_map_x`, `src_map_y`, `dst_charname`, `message`) VALUES (NOW(), '%c', '%d', '%d', '%d', '%s', '%d', '%d', ?, ?)", log_config.log_chat, log_chattype2char(type), type_id, src_charid, src_accid, map, x, y)
+		if( SQL_SUCCESS != SqlStmt_Prepare(stmt, LOG_QUERY " INTO `%s` (`time`, `type`, `type_id`, `src_charid`, `src_accountid`, `src_map`, `src_map_x`, `src_map_y`, `dst_charname`, `message`) VALUES (NOW(), '%c', '%d', '%d', '%d', '%s', '%d', '%d', ?, ?)", log_config.log_chat, log_chattype2char(type), type_id, src_charid, src_accid, mapname, x, y)
 		||  SQL_SUCCESS != SqlStmt_BindParam(stmt, 0, SQLDT_STRING, (char *)dst_charname, safestrnlen(dst_charname, NAME_LENGTH))
 		||  SQL_SUCCESS != SqlStmt_BindParam(stmt, 1, SQLDT_STRING, (char *)message, safestrnlen(message, CHAT_SIZE_MAX))
 		||  SQL_SUCCESS != SqlStmt_Execute(stmt) )
@@ -447,7 +468,7 @@ void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, 
 			return;
 		time(&curtime);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", localtime(&curtime));
-		fprintf(logfp, "%s - %c,%d,%d,%d,%s,%d,%d,%s,%s\n", timestring, log_chattype2char(type), type_id, src_charid, src_accid, map, x, y, dst_charname, message);
+		fprintf(logfp, "%s - %c,%d,%d,%d,%s,%d,%d,%s,%s\n", timestring, log_chattype2char(type), type_id, src_charid, src_accid, mapname, x, y, dst_charname, message);
 		fclose(logfp);
 	}
 }

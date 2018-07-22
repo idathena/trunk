@@ -88,7 +88,6 @@ char mob_db2_db[32] = "mob_db2";
 char mob_skill_db_db[32] = "mob_skill_db";
 char mob_skill_db_re_db[32] = "mob_skill_db_re";
 char mob_skill_db2_db[32] = "mob_skill_db2";
-char roulette_db[32] = "roulette";
 char sales_db[32] = "sales";
 char vendings_db[32] = "vendings";
 char vending_items_db[32] = "vending_items";
@@ -169,6 +168,7 @@ char motd_txt[256] = "conf/motd.txt";
 char help_txt[256] = "conf/help.txt";
 char help2_txt[256] = "conf/help2.txt";
 char charhelp_txt[256] = "conf/charhelp.txt";
+char channel_conf[256] = "conf/channels.conf";
 
 char wisp_server_name[NAME_LENGTH] = "Server"; // can be modified in char-server configuration file
 
@@ -391,9 +391,14 @@ int map_delblock(struct block_list *bl)
  */
 int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 {
-	int x0 = bl->x, y0 = bl->y;
 	struct status_change *sc = NULL;
-	int moveblock = (x0 / BLOCK_SIZE != x1 / BLOCK_SIZE || y0 / BLOCK_SIZE != y1 / BLOCK_SIZE);
+	int x0, y0, moveblock;
+
+	nullpo_ret(bl);
+
+	x0 = bl->x;
+	y0 = bl->y;
+	moveblock = (x0 / BLOCK_SIZE != x1 / BLOCK_SIZE || y0 / BLOCK_SIZE != y1 / BLOCK_SIZE);
 
 	if (!bl->prev) { //Block not in map, just update coordinates, but do naught else
 		bl->x = x1;
@@ -402,21 +407,21 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 	}
 
 	if (bl->type&BL_CHAR) { //@TODO: Perhaps some outs of bounds checking should be placed here?
-		sc = status_get_sc(bl);
 		skill_unit_move(bl, tick, 2);
-		status_change_end(bl, SC_CLOSECONFINE, INVALID_TIMER);
-		status_change_end(bl, SC_CLOSECONFINE2, INVALID_TIMER);
-		//status_change_end(bl, SC_BLADESTOP, INVALID_TIMER); //Won't stop when you are knocked away, go figure
-		status_change_end(bl, SC_MAGICROD, INVALID_TIMER);
-		status_change_end(bl, SC_TINDER_BREAKER, INVALID_TIMER);
-		status_change_end(bl, SC_SU_STOOP, INVALID_TIMER);
-		if (sc) {
+		if ((sc = status_get_sc(bl)) && sc->count) { //At least one to cancel
+			status_change_end(bl, SC_CLOSECONFINE, INVALID_TIMER);
+			status_change_end(bl, SC_CLOSECONFINE2, INVALID_TIMER);
+			status_change_end(bl, SC_TINDER_BREAKER, INVALID_TIMER);
+			//status_change_end(bl, SC_BLADESTOP, INVALID_TIMER); //Won't stop when you are knocked away, go figure
+			status_change_end(bl, SC_MAGICROD, INVALID_TIMER);
+			status_change_end(bl, SC_MEIKYOUSISUI, INVALID_TIMER);
+			status_change_end(bl, SC_SU_STOOP, INVALID_TIMER);
 #ifdef RENEWAL //3x3 AoE ranged damage protection
-			if (sc->data[SC_TATAMIGAESHI] && sc->data[SC_TATAMIGAESHI]->val2 >= 1)
+			if (sc->data[SC_TATAMIGAESHI] && sc->data[SC_TATAMIGAESHI]->val2 > 0)
 #endif
 				status_change_end(bl, SC_TATAMIGAESHI, INVALID_TIMER);
 			if (sc->data[SC_PROPERTYWALK] &&
-				sc->data[SC_PROPERTYWALK]->val3 >= skill_get_maxcount(sc->data[SC_PROPERTYWALK]->val1, sc->data[SC_PROPERTYWALK]->val2) )
+				sc->data[SC_PROPERTYWALK]->val3 >= skill_get_maxcount(sc->data[SC_PROPERTYWALK]->val1, sc->data[SC_PROPERTYWALK]->val2))
 				status_change_end(bl, SC_PROPERTYWALK, INVALID_TIMER);
 		}
 	} else if (bl->type == BL_NPC)
@@ -428,6 +433,7 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 	else
 		map_delblcell(bl);
 #endif
+
 	bl->x = x1;
 	bl->y = y1;
 
@@ -520,8 +526,11 @@ int map_count_oncell(int16 m, int16 x, int16 y, int type, int flag)
 			if (bl->x == x && bl->y == y && bl->type&type) {
 				if (flag&0x2) {
 					struct map_session_data *sd = map_id2sd(bl->id);
+					struct npc_data *nd = map_id2nd(bl->id);
 
 					if (sd && pc_isinvisible(sd))
+						continue;
+					if (nd && (nd->class_ == JT_FAKENPC || nd->class_ == JT_HIDDEN_WARP_NPC))
 						continue;
 				}
 				if (flag&0x1) {
@@ -1852,7 +1861,7 @@ void map_delnickdb(int charid, const char *name)
 	struct charid2nick *p;
 	DBData data;
 
-	if (!nick_db->remove(nick_db, db_i2key(charid), &data) || (p = db_data2ptr(&data)) == NULL)
+	if( !nick_db->remove(nick_db, db_i2key(charid), &data) || !(p = db_data2ptr(&data)) )
 		return;
 
 	while( p->requests ) {
@@ -1881,19 +1890,17 @@ void map_reqnickdb(struct map_session_data *sd, int charid)
 	nullpo_retv(sd);
 
 	tsd = map_charid2sd(charid);
-	if( tsd )
-	{
+	if( tsd ) {
 		clif_solved_charname(sd->fd, charid, tsd->status.name);
 		return;
 	}
 
 	p = idb_ensure(nick_db, charid, create_charid2nick);
-	if( *p->nick )
-	{
+	if( *p->nick ) {
 		clif_solved_charname(sd->fd, charid, p->nick);
 		return;
 	}
-	// not in cache, request it
+	//Not in cache, request it
 	CREATE(req, struct charid_request, 1);
 	req->next = p->requests;
 	p->requests = req;
@@ -1907,25 +1914,23 @@ void map_addiddb(struct block_list *bl)
 {
 	nullpo_retv(bl);
 
-	if( bl->type == BL_PC )
-	{
+	if( bl->type == BL_PC ) {
 		TBL_PC *sd = (TBL_PC *)bl;
-		idb_put(pc_db,sd->bl.id,sd);
-		idb_put(charid_db,sd->status.char_id,sd);
-	}
-	else if( bl->type == BL_MOB )
-	{
-		TBL_MOB *md = (TBL_MOB *)bl;
-		idb_put(mobid_db,bl->id,bl);
 
-		if( md->state.boss )
+		idb_put(pc_db, sd->bl.id, sd);
+		idb_put(charid_db, sd->status.char_id, sd);
+	} else if( bl->type == BL_MOB ) {
+		TBL_MOB *md = (TBL_MOB *)bl;
+
+		idb_put(mobid_db, bl->id, bl);
+		if( md->state.boss == BTYPE_MVP )
 			idb_put(bossid_db, bl->id, bl);
 	}
 
-	if( bl->type & BL_REGEN )
+	if( bl->type&BL_REGEN )
 		idb_put(regen_db, bl->id, bl);
 
-	idb_put(id_db,bl->id,bl);
+	idb_put(id_db, bl->id, bl);
 }
 
 /*==========================================
@@ -1937,17 +1942,18 @@ void map_deliddb(struct block_list *bl)
 
 	if( bl->type == BL_PC ) {
 		TBL_PC *sd = (TBL_PC *)bl;
-		idb_remove(pc_db,sd->bl.id);
-		idb_remove(charid_db,sd->status.char_id);
+
+		idb_remove(pc_db, sd->bl.id);
+		idb_remove(charid_db, sd->status.char_id);
 	} else if( bl->type == BL_MOB ) {
-		idb_remove(mobid_db,bl->id);
-		idb_remove(bossid_db,bl->id);
+		idb_remove(mobid_db, bl->id);
+		idb_remove(bossid_db, bl->id);
 	}
 
-	if( bl->type & BL_REGEN )
-		idb_remove(regen_db,bl->id);
+	if( bl->type&BL_REGEN )
+		idb_remove(regen_db, bl->id);
 
-	idb_remove(id_db,bl->id);
+	idb_remove(id_db, bl->id);
 }
 
 /*==========================================
@@ -1998,93 +2004,31 @@ int map_quit(struct map_session_data *sd) {
 	//'unit_free' handles clearing the player related data,
 	//'map_quit' handles extra specific data which is related to quitting normally
 	//(changing map-servers invokes unit_free but bypasses map_quit)
-	if (sd->sc.count) { //Statuses that are removed on logout
-		status_change_end(&sd->bl,SC_TRICKDEAD,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_BOSSMAPINFO,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_AUTOTRADE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_STRUP,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_READYSTORM,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_READYDOWN,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_READYTURN,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_READYCOUNTER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_DODGE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MIRACLE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_BERSERK,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_LEADERSHIP,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_GLORYWOUNDS,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SOULCOLD,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_HAWKEYES,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_CHASEWALK2,INVALID_TIMER);
-		if (sd->sc.data[SC_ENDURE] && sd->sc.data[SC_ENDURE]->val4) {
-			sd->sc.data[SC_ENDURE]->val4 = 0; //No need to save infinite endure
-			status_change_end(&sd->bl,SC_ENDURE,INVALID_TIMER);
-		}
-		if (sd->sc.data[SC_SPEEDUP0] && sd->sc.data[SC_SPEEDUP0]->val4) {
-			sd->sc.data[SC_SPEEDUP0]->val4 = 0;
-			status_change_end(&sd->bl,SC_SPEEDUP0,INVALID_TIMER);
-		}
-		if (sd->sc.data[SC_PROVOKE] && sd->sc.data[SC_PROVOKE]->timer == INVALID_TIMER)
-			status_change_end(&sd->bl,SC_PROVOKE,INVALID_TIMER); //Infinite provoke ends on logout
-		status_change_end(&sd->bl,SC_WEIGHT50,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_WEIGHT90,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SATURDAYNIGHTFEVER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_ALL_RIDING,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_DEFSET_PER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MDEFSET_PER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MOONSTAR,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SUPER_STAR,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_STRANGELIGHTS,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_DECORATION_OF_MUSIC,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SPRITEMABLE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_SV_ROOTTWIST,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_HAT_EFFECT,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_QSCARABA,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_LJOSALFAR,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MAPLE_FALLS,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MERMAID_LONGING,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_TIME_ACCESSORY,INVALID_TIMER);
-		if (battle_config.debuff_on_logout&1) { //Remove negative buffs
-			status_change_end(&sd->bl,SC_ORCISH,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STRIPWEAPON,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STRIPARMOR,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STRIPSHIELD,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STRIPHELM,INVALID_TIMER);
-#ifndef RENEWAL
-			status_change_end(&sd->bl,SC_EXTREMITYFIST,INVALID_TIMER);
+	if (sd->sc.count) {
+		for (i = 0; i < SC_MAX; i++) { //Statuses that are removed on logout
+			if (status_get_sc_type(i)&SC_REM_ON_LOGOUT) {
+				if (!sd->sc.data[i])
+					continue;
+				switch (i) {
+					case SC_REGENERATION:
+						if (!sd->sc.data[i]->val4)
+							break;
+					//Fall through
+					case SC_PROVOKE:
+					case SC_EXTREMITYFIST:
+					case SC_PRESERVE: //Infinite provoke ends on logout
+						if (i == SC_PROVOKE && sd->sc.data[i]->timer != INVALID_TIMER)
+							break;
+#ifdef RENEWAL
+						if (i == SC_EXTREMITYFIST || i == SC_PRESERVE)
+							break;
 #endif
-			status_change_end(&sd->bl,SC_EXPLOSIONSPIRITS,INVALID_TIMER);
-			if (sd->sc.data[SC_REGENERATION] && sd->sc.data[SC_REGENERATION]->val4)
-				status_change_end(&sd->bl,SC_REGENERATION,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_TAROTCARD,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_RAISINGDRAGON,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_KYOUGAKU,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_CBC,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_EQC,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_B_TRAP,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_H_MINE,INVALID_TIMER);
-			//@TODO: Probably there are way more NPC_type negative status that are removed
-			status_change_end(&sd->bl,SC_CHANGEUNDEAD,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_SLOWCAST,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_CRITICALWOUND,INVALID_TIMER);
-		}
-		if (battle_config.debuff_on_logout&2) { //Remove positive buffs
-			status_change_end(&sd->bl,SC_SIGHTBLASTER,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_MAGNIFICAT,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_STEELBODY,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_KAAHI,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_SPIRIT,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_PARRYING,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_WINDWALK,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_CARTBOOST,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_MELTDOWN,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_MAXOVERTHRUST,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_PRESERVE,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_REFLECTDAMAGE,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_P_ALTER,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_GEFFEN_MAGIC1,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_GEFFEN_MAGIC2,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_GEFFEN_MAGIC3,INVALID_TIMER);
-			status_change_end(&sd->bl,SC_ARCLOUSEDASH,INVALID_TIMER);
+					//Fall through
+					default:
+						status_change_end(&sd->bl,(sc_type)i,INVALID_TIMER);
+						break;
+				}
+			}
 		}
 	}
 
@@ -2112,7 +2056,6 @@ int map_quit(struct map_session_data *sd) {
 			pt = &map[sd->bl.m].save;
 		else
 			pt = &sd->status.save_point;
-
 		if ((m = map_mapindex2mapid(pt->map)) >= 0) {
 			sd->bl.m = m;
 			sd->bl.x = pt->x;
@@ -2569,7 +2512,7 @@ bool map_addnpc(int16 m,struct npc_data *nd)
 		return false;
 	}
 
-	map[m].npc[map[m].npc_num]=nd;
+	map[m].npc[map[m].npc_num] = nd;
 	map[m].npc_num++;
 	idb_put(id_db,nd->bl.id,nd);
 	return true;
@@ -3007,7 +2950,7 @@ int map_random_dir(struct block_list *bl, int16 *x, int16 *y)
 }
 
 // gat system
-inline static struct mapcell map_gat2cell(int gat) {
+static inline struct mapcell map_gat2cell(int gat) {
 	struct mapcell cell;
 
 	memset(&cell,0,sizeof(struct mapcell));
@@ -3790,7 +3733,7 @@ static int char_ip_set = 0;
 int parse_console(const char *buf) {
 	char type[64];
 	char command[64];
-	char map[64];
+	char mapname[64];
 	int16 x = 0;
 	int16 y = 0;
 	int16 m;
@@ -3800,7 +3743,7 @@ int parse_console(const char *buf) {
 	memset(&sd, 0, sizeof(struct map_session_data));
 	strcpy(sd.status.name, "console");
 
-	if( (n = sscanf(buf, "%63[^:]:%63[^:]:%63s %hd %hd[^\n]", type, command, map, &x, &y)) < 5 ) {
+	if( (n = sscanf(buf, "%63[^:]:%63[^:]:%63s %hd %hd[^\n]", type, command, mapname, &x, &y)) < 5 ) {
 		if( (n = sscanf(buf, "%63[^:]:%63[^\n]", type, command)) < 2 ) {
 			if( (n = sscanf(buf, "%63[^\n]", type)) < 1 ) return -1; //nothing to do no arg
 		}
@@ -3810,17 +3753,17 @@ int parse_console(const char *buf) {
 		if( n < 2 ) {
 			ShowNotice("Type of command: '%s'\n", type);
 			command[0] = '\0';
-			map[0] = '\0';
+			mapname[0] = '\0';
 		} else {
 			ShowNotice("Type of command: '%s' || Command: '%s'\n", type, command);
-			map[0] = '\0';
+			mapname[0] = '\0';
 		}
 	} else
-		ShowNotice("Type of command: '%s' || Command: '%s' || Map: '%s' Coords: %d %d\n", type, command, map, x, y);
+		ShowNotice("Type of command: '%s' || Command: '%s' || Map: '%s' Coords: %d %d\n", type, command, mapname, x, y);
 
 	if( strcmpi("admin",type) == 0 ) {
 		if( strcmpi("map",command) == 0 ) {
-			m = map_mapname2mapid(map);
+			m = map_mapname2mapid(mapname);
 			if( m < 0 ) {
 				ShowWarning("Console: Unknown map.\n");
 				return 0;
@@ -3831,7 +3774,7 @@ int parse_console(const char *buf) {
 				sd.bl.x = x;
 			if( y > 0 )
 				sd.bl.y = y;
-			ShowNotice("Now at: '%s' Coords: %d %d\n", map, x, y);
+			ShowNotice("Now at: '%s' Coords: %d %d\n", mapname, x, y);
 		} else if( !is_atcommand(sd.fd, &sd, command, 2) )
 			ShowInfo("Console: Invalid atcommand.\n");
 	} else if( n == 2 && strcmpi("server", type) == 0 ) {
@@ -3932,8 +3875,10 @@ int map_config_read(char *cfgName)
 			strcpy(help2_txt, w2);
 		else if (strcmpi(w1, "charhelp_txt") == 0)
 			strcpy(charhelp_txt, w2);
+		else if (strcmpi(w1, "channel_conf") == 0)
+			safestrncpy(channel_conf, w2, sizeof(channel_conf));
 		else if(strcmpi(w1,"db_path") == 0)
-			safestrncpy(db_path,w2,255);
+			safestrncpy(db_path, w2, 255);
 		else if (strcmpi(w1, "console") == 0) {
 			console = config_switch(w2);
 			if (console)
@@ -4052,8 +3997,6 @@ int inter_config_read(char *cfgName)
 			strcpy(mob_skill_db_re_db, w2);
 		else if( strcmpi(w1, "mob_skill_db2_db") == 0 )
 			strcpy(mob_skill_db2_db, w2);
-		else if( strcmpi(w1, "roulette_db") == 0 )
-			strcpy(roulette_db, w2);
 		else if( strcmpi(w1, "sales_db") == 0 )
 			strcpy(sales_db, w2);
 		else if( strcmpi(w1, "vendings_db") == 0 )
@@ -4409,7 +4352,7 @@ void do_final(void)
 		ShowStatus("Cleaning up maps [%d/%d]: %s..."CL_CLL"\r", i + 1, map_num, map[i].name);
 		if( map[i].m >= 0 ) {
 			map_foreachinmap(cleanup_sub, i, BL_ALL);
-			channel_delete(map[i].channel);
+			channel_delete(map[i].channel, false);
 		}
 	}
 	ShowStatus("Cleaned up %d maps."CL_CLL"\n", map_num);
@@ -4629,7 +4572,7 @@ int do_init(int argc, char *argv[])
 	iwall_db = strdb_alloc(DB_OPT_RELEASE_DATA, 2 * NAME_LENGTH + 2 + 1); // [Zephyrus] Invisible Walls
 
 #ifdef ADJUST_SKILL_DAMAGE
-	map_skill_damage_ers = ers_new(sizeof(struct s_skill_damage), "map.c:map_skill_damage_ers", ERS_OPT_NONE);
+	map_skill_damage_ers = ers_new(sizeof(struct s_skill_damage), "map.c::map_skill_damage_ers", ERS_OPT_NONE);
 #endif
 
 	map_sql_init();
@@ -4651,12 +4594,12 @@ int do_init(int argc, char *argv[])
 	do_init_atcommand();
 	do_init_battle();
 	do_init_instance();
-	do_init_channel();
 	do_init_chrif();
 	do_init_clan();
 	do_init_clif();
 	do_init_script();
 	do_init_itemdb();
+	do_init_channel();
 	do_init_cashshop();
 	do_init_skill();
 	do_init_mob();

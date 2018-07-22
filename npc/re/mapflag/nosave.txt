@@ -133,3 +133,9 @@ te_aldecas4	mapflag	nosave	SavePoint
 te_aldecas5	mapflag	nosave	SavePoint
 teg_dun01	mapflag	nosave	SavePoint
 teg_dun02	mapflag	nosave	SavePoint
+
+// Episode 15 - Phantasmagorica ===============
+1@lab	mapflag	nosave	SavePoint
+1@uns	mapflag	nosave	SavePoint
+un_myst	mapflag	nosave	SavePoint
+1@mcd	mapflag	nosave	SavePoint

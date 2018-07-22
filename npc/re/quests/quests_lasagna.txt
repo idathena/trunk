@@ -17,12 +17,6 @@
 //= 1.0 First version.
 //============================================================
 
-function	script	close3	{
-	close2;
-	cutin "",255;
-	end;
-}
-
 lasa_fild01,47,297,0	script	#doint_evt01	HIDDEN_WARP_NPC,1,1,{
 	end;
 OnTouch:
@@ -55,7 +49,7 @@ lasa_fild01,49,304,3	script	Vigilante Ajegna#doram0	4_DR_SOLDIER,{
 		mes "!- Notice -!";
 		mes "^4d4dffBasically, you talk by left-clicking the mouse button while hovering the cursor over an NPC.";
 		mes "Left-click the mouse button to talk with an NPC, move about and attack a target.^000000";
-		cutin "tutorial01.bmp",4;
+		cutin "tutorial01",4;
 		next;
 		cutin "",255;
 		mes "[Vigilante Ajegna]";
@@ -285,7 +279,7 @@ lasa_fild01,60,322,3	script	Vigilante Aglio#doram02	4_DR_AGLIO,{
 		mes "You don't want to fight with bare hands, now do you?";
 		mes "^4d4dffYou should equip your weapons.^000000";
 		next;
-		cutin "tutorial03.BMP",4;
+		cutin "tutorial03",4;
 		mes "!- Notice -!";
 		mes "^4d4dffYou can use or equip an item by double-clicking it.";
 		mes "Open or close the item window with the shortcut key [Alt+E].";
@@ -311,7 +305,7 @@ lasa_fild01,60,322,3	script	Vigilante Aglio#doram02	4_DR_AGLIO,{
 		setquest 7713;// First Battle!
 		lasagna_quest_1 = 1;
 		next;
-		cutin "tutorial02.BMP",4;
+		cutin "tutorial02",4;
 		mes "^4d4dff!- Notice -!^000000";
 		mes "You have accepted a quest from an NPC.";
 		mes "^4d4dffCheck out the quest details by pressing the shortcut key [Alt+U],^000000 or through the Quest icon found in the menu tray.^000000";
@@ -327,7 +321,7 @@ lasa_fild01,60,322,3	script	Vigilante Aglio#doram02	4_DR_AGLIO,{
 				mes "What do they look like? You'll see just by glancing at them right away. You can't miss them!";
 				mes "They abound around here. Go get them, tiger!";
 				next;
-				cutin "tutorial02.BMP",4;
+				cutin "tutorial02",4;
 				mes "^4d4dff!- Notice -!^000000";
 				mes "^4d4dffCheck out the quest details by pressing the shortcut key [Alt+U],^000000 or through the Quest icon found in the menu tray.^000000";
 				close;
@@ -363,7 +357,7 @@ lasa_fild01,60,322,3	script	Vigilante Aglio#doram02	4_DR_AGLIO,{
 				mes "To use or equip an item, ^4d4dffdouble-click that item^000000, or";
 				mes "^4d4dffdrag it to the Equipment window^000000 to use.";
 				next;
-				cutin "tutorial03.BMP",4;
+				cutin "tutorial03",4;
 				mes "!- Notice -!";
 				mes "^4d4dffYou can use or equip an item by double-clicking it.";
 				mes "Open or close the item window with the shortcut key [Alt+E].";
@@ -377,7 +371,7 @@ lasa_fild01,60,322,3	script	Vigilante Aglio#doram02	4_DR_AGLIO,{
 				mes "If you want to ^4d4dffsee a detailed description for each item, right-click that item.^000000";
 				mes "This shows the detailed description of the selected item.";
 				next;
-				cutin "tutorial04.BMP",4;
+				cutin "tutorial04",4;
 				mes "!- Notice -!";
 				mes "^4d4dffRight-click an item to view its detailed description.^000000";
 				next;
@@ -510,13 +504,13 @@ lasa_fild01,60,322,3	script	Vigilante Aglio#doram02	4_DR_AGLIO,{
 		mes "!- Notice -!";
 		mes "^4d4dffSometimes NPCs will help you find your destination through the Navigation tool.";
 		mes "Links can be created if there is a need for it. If you see the [Target], click it for pathfinding.^000000";
-		cutin "navi01.bmp",4;
+		cutin "navi01",4;
 		next;
 		mes "!- Notice -!";
 		mes "^4d4dffCall up the Navigation panel by clicking the appropriate menu icon.";
 		mes "Search for the target, set the goal, and click Pathfinding.";
 		mes "Arrows will be generated pointing toward the location of the target.^000000";
-		cutin "navi02.bmp",4;
+		cutin "navi02",4;
 		navigateto "lasagna",168,124;
 		close3;
 	}
@@ -1081,7 +1075,7 @@ lasagna,224,126,5	script	Healer Haru#doram07t	4_DR_M_02,{
 		mes "It's easy to use. ^4d4dffEach slot corresponds to the keys from F1 through F9.^000000";
 		mes "Drag your skill or item to use in the slot and press the corresponding key to activate it instantly.";
 		next;
-		cutin "tutorial05.BMP",4;
+		cutin "tutorial05",4;
 		mes "!- Notice -!";
 		mes "^4d4dffTo place an item or skill icon to use, drag it to the shortcut key slot.^000000";
 		next;
@@ -1355,7 +1349,7 @@ izlude,195,213,5	script	Con-Chliina Crewman#doi	4_M_MERCAT1,{
 		.@cost = 200;
 	else
 		.@cost = 2000;
-	mes "Only ^0000cd" + .@cost + " Zenies^000000 to the port city Lasagna.";
+	mes "Only ^0000cd" + .@cost + " Zeny^000000 to the port city Lasagna.";
 	next;
 	if (select( "To Lasagna - " + .@cost + "z", "Cancel" ) == 2) {
 		mes "[Con-Chliina Crewman]";
@@ -1371,6 +1365,10 @@ izlude,195,213,5	script	Con-Chliina Crewman#doi	4_M_MERCAT1,{
 	warp "lasagna",206,297;
 	end;
 }
+izlude_a,195,213,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#doia	4_M_MERCAT1
+izlude_b,195,213,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#doib	4_M_MERCAT1
+izlude_c,195,213,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#doic	4_M_MERCAT1
+izlude_d,195,213,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#doid	4_M_MERCAT1
 malangdo,218,81,5	duplicate(Con-Chliina Crewman#doi)	Con-Chliina Crewman#dom	4_M_MERCAT1
 
 izlude,138,183,3	script	Vigilante Penne#doect01	4_DR_SOLDIER,{
@@ -1446,6 +1444,10 @@ izlude,138,183,3	script	Vigilante Penne#doect01	4_DR_SOLDIER,{
 		close;
 	}
 }
+izlude_a,138,183,3	duplicate(Vigilante Penne#doect01)	Vigilante Penne#doect01a	4_DR_SOLDIER
+izlude_b,138,183,3	duplicate(Vigilante Penne#doect01)	Vigilante Penne#doect01b	4_DR_SOLDIER
+izlude_c,138,183,3	duplicate(Vigilante Penne#doect01)	Vigilante Penne#doect01c	4_DR_SOLDIER
+izlude_d,138,183,3	duplicate(Vigilante Penne#doect01)	Vigilante Penne#doect01d	4_DR_SOLDIER
 
 lasagna,209,301,3	script	Mustachi#dorcon01	4_DR_KID_01,{
 	mes "[Mustachi]";
@@ -1755,7 +1757,7 @@ lasagna,217,192,5	script	Kittie#do_hint01	4_CAT_SAILOR1,{
 	mes "[Kittie]";
 	mes "^4d4dffPress the F12 key and it will bring up the shortcut key slots.^000000";
 	next;
-	cutin "tutorial05.BMP",4;
+	cutin "tutorial05",4;
 	mes "!- Notice -!";
 	mes "^4d4dffTo prepare an item or skill icon to use, drag it to the shortcut key slot.";
 	next;
@@ -1786,11 +1788,11 @@ lasagna,134,113,3	script	Hair Designer#dr	4_DR_F_02,{
 		mes "[Lonza]";
 		mes "I've lined up the attractive hairstyles that never go out of style. Will you take a look?";
 		next;
-		.@gender$ = Sex ? "m" : "f";
+		.@gender$ = (Sex == SEX_MALE) ? "m" : "f";
 		while( true ) {
 			.@i++;
 			.@i = .@i > 6 ? 1 : .@i;
-			cutin "hair_dr_" + .@gender$ + "_0" + .@i + ".bmp",4;
+			cutin "hair_dr_" + .@gender$ + "_0" + .@i,4;
 			mes "[Lonza]";
 			mes "This is the " + callfunc("F_GetNumSuffix",.@i) + " hairdo. How do you like it?";
 			next;
@@ -3939,7 +3941,7 @@ lasagna,85,93,5	script	Shaman meow#dorcon	4_DR_KID_01,{
 			mes "[Shaman meow]";
 			mes "I'll tell you today's talisman. It is...";
 			next;
-			specialeffect 330;
+			specialeffect EF_HITLINE;
 			mes "[Shaman meow]";
 			.@quest_id = rand(14560,14562);
 			switch( .@quest_id ) {
@@ -6915,7 +6917,7 @@ conch_in,181,61,5	script	Boatswain#dorcon	4_M_BOSSCAT,{
 		next;
 		mes "[Boatswain]";
 		mes "This... This is...";
-		specialeffect 66;
+		specialeffect EF_CURE;
 		next;
 		mes "[" + strcharinfo(0) + "]";
 		mes "What do you think?";
@@ -6996,7 +6998,7 @@ conch_in,181,61,5	script	Boatswain#dorcon	4_M_BOSSCAT,{
 			mes "This is the amulet for today! Give me all the Basilrocks you have.";
 			next;
 			mes "[Boatswain]";
-			specialeffect 66;
+			specialeffect EF_CURE;
 			if (isbegin_quest(14560) == 1) {
 				mes "It feels like watching the blue horizon on a clear and windless day. It is refreshing.";
 				next;
@@ -7428,11 +7430,11 @@ conch_in,186,57,3	script	Sous Chef#dorcon	4_CAT_CHEF,{
 				mes "[Sous Chef]";
 				mes "The ingredients are ^0000cd1 Clover, 1 Green Herb and 1 Red Herb^000000.";
 				next;
-				cutin "루나틱카드.bmp",3;
+				cutin "루나틱카드",3;
 				mes "[Sous Chef]";
 				mes "You can get Clovers and Red Herbs from Leaf Lunatic or Grass Fabre in the field outside.";
 				next;
-				cutin "파브르카드.bmp",3;
+				cutin "파브르카드",3;
 				mes "[Sous Chef]";
 				mes "You can get Green Herbs from Grass Fabre.";
 				next;
@@ -7451,11 +7453,11 @@ conch_in,186,57,3	script	Sous Chef#dorcon	4_CAT_CHEF,{
 				mes "[Sous Chef]";
 				mes "The ingredients are ^0000cd1 Apple and 2 Carrots^000000.";
 				next;
-				cutin "에그링카드.bmp",3;
+				cutin "에그링카드",3;
 				mes "[Sous Chef]";
 				mes "You can get Apples from the Eggring jumping in the outer field of Izlude.";
 				next;
-				cutin "리프루나틱카드.bmp",3;
+				cutin "리프루나틱카드",3;
 				mes "[Sous Chef]";
 				mes "You can get the Carrots from Leaf Lunatic.";
 				next;
@@ -7471,15 +7473,15 @@ conch_in,186,57,3	script	Sous Chef#dorcon	4_CAT_CHEF,{
 				mes "[Sous Chef]";
 				mes "The ingredients are ^0000cd1 Jellopy , 1 Fluff, and 1 Feather^000000.";
 				next;
-				cutin "에그링카드.bmp",3;
+				cutin "에그링카드",3;
 				mes "[Sous Chef]";
 				mes "You can get Jellopies from the Eggring jumping in the outer field.";
 				next;
-				cutin "그래스파브르카드.bmp",3;
+				cutin "그래스파브르카드",3;
 				mes "[Sous Chef]";
 				mes "You can get Fluffs from Grass Fabre or Leaf Lunatic.";
 				next;
-				cutin "리프루나틱카드.bmp",3;
+				cutin "리프루나틱카드",3;
 				mes "[Sous Chef]";
 				mes "You can get Feathers from Grass Fabre or Leaf Lunatic.";
 				next;
@@ -7498,11 +7500,11 @@ conch_in,186,57,3	script	Sous Chef#dorcon	4_CAT_CHEF,{
 				mes "[Sous Chef]";
 				mes "The ingredients are ^0000cd1 Apple and 1 Clover^000000.";
 				next;
-				cutin "에그링카드.bmp",3;
+				cutin "에그링카드",3;
 				mes "[Sous Chef]";
 				mes "You can get Apples from the Eggring in the outer field.";
 				next;
-				cutin "그래스파브르카드.bmp",3;
+				cutin "그래스파브르카드",3;
 				mes "[Sous Chef]";
 				mes "You can get Clovers from Grass Fabre or Leaf Lunatic.";
 				next;
@@ -8233,7 +8235,7 @@ lasa_dun03,161,292,5	script	Lord Imuk#dorcon	4_NFWISP,{
 		next;
 		mes "[???]";
 		mes "How dare you treat me like a ghost! I have lived for ^0000cd2,500 years^000000!";
-		specialeffect2 29;
+		specialeffect2 EF_LIGHTBOLT;
 		next;
 		mes "[" + strcharinfo(0) + "]";
 		mes "Oww...that hurts. I'm sorry if I've offended you, but are you Imoogi, the chief of the Basilisk?";

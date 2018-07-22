@@ -123,7 +123,7 @@ enum homun_type {
 
 //Homunculus battle_config setting
 enum homun_setting {
-	HOMSET_NO_SUPPORT_SKILL            = 0x01, //Cannot be targetted by support skills, except for their master
+	HOMSET_NO_SUPPORT_SKILL            = 0x01, //Cannot be targeted by support skills, except for their master
 	HOMSET_NO_INSTANT_LAND_SKILL       = 0x02, //Unit/land skill doesn't applied immediately
 	HOMSET_FIRST_TARGET                = 0x04, //Mobs will always go after them instead of players until attacked
 	HOMSET_COPY_SPEED                  = 0x08, //Copy their master's speed on spawn/map-change

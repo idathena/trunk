@@ -3,7 +3,7 @@
 //===== By: ================================================== 
 //= Lupus, kobra_k88
 //===== Current Version: ===================================== 
-//= 2.28
+//= 2.30
 //===== Compatible With: ===================================== 
 //= rAthena SVN
 //===== Description: ========================================= 
@@ -51,6 +51,8 @@
 //= 2.26 Added "F_CanOpenStorage" and "F_CanChangeJob". [secretdataz]
 //= 2.27 Added "F_getpositionname". [Capuche]
 //= 2.28 Renamed 'F_SexMes' to 'F_Sex'. [exneval]
+//= 2.29 Added "F_GetPlatinumSkills". [mazvi]
+//= 2.30 Added "close3". [Capuche]
 //============================================================ 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -647,7 +649,7 @@ function	script	F_CanChangeJob	{
 // Return the position name of the EQI_* equipment slot.
 //////////////////////////////////////////////////////////////////////////////////
 function	script	F_getpositionname	{
-	switch( getarg(0,999) ) {
+	switch (getarg(0,999)) {
 		case EQI_ACC_L:		return "Accessory 1";
 		case EQI_ACC_R:		return "Accessory 2";
 		case EQI_SHOES:		return "Shoes";
@@ -672,4 +674,107 @@ function	script	F_getpositionname	{
 		default:
 			return "Unknown";
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// Gives attached player their Platinum Skill based on their class.
+//////////////////////////////////////////////////////////////////////////////////
+function	script	F_GetPlatinumSkills	{
+	skill "NV_FIRSTAID",1,0;
+	switch (BaseClass) {
+		case Job_Novice:
+			if (Class != Job_Super_Novice)
+				skill "NV_TRICKDEAD",1,0;
+			break;
+		case Job_Swordman:
+			skill "SM_MOVINGRECOVERY",1,0;
+			skill "SM_FATALBLOW",1,0;
+			skill "SM_AUTOBERSERK",1,0;
+			break;
+		case Job_Mage:
+			skill "MG_ENERGYCOAT",1,0;
+			break;
+		case Job_Archer:
+			skill "AC_MAKINGARROW",1,0;
+			skill "AC_CHARGEARROW",1,0;
+			break;
+		case Job_Acolyte:
+			skill "AL_HOLYLIGHT",1,0;
+			break;
+		case Job_Merchant:
+			skill "MC_CARTREVOLUTION",1,0;
+			skill "MC_CHANGECART",1,0;
+			skill "MC_LOUD",1,0;
+			if(PACKETVER >= 20150826)
+				skill "MC_CARTDECORATE",1,0;
+			break;
+		case Job_Thief:
+			skill "TF_SPRINKLESAND",1,0;
+			skill "TF_BACKSLIDING",1,0;
+			skill "TF_PICKSTONE",1,0;
+			skill "TF_THROWSTONE",1,0;
+			break;
+		default:
+			break;
+	}
+	switch (BaseJob) {
+		case Job_Knight:
+			skill "KN_CHARGEATK",1,0;
+			break;
+		case Job_Priest:
+			skill "PR_REDEMPTIO",1,0;
+			break;
+		case Job_Wizard:
+			skill "WZ_SIGHTBLASTER",1,0;
+			break;
+		case Job_Blacksmith:
+			skill "BS_UNFAIRLYTRICK",1,0;
+			skill "BS_GREED",1,0;
+			break;
+		case Job_Hunter:
+			skill "HT_PHANTASMIC",1,0;
+			break;
+		case Job_Assassin:
+			skill "AS_SONICACCEL",1,0;
+			skill "AS_VENOMKNIFE",1,0;
+			break;
+		case Job_Crusader:
+			skill "CR_SHRINK",1,0;
+			break;
+		case Job_Monk:
+			skill "MO_KITRANSLATION",1,0;
+			skill "MO_BALKYOUNG",1,0;
+			break;
+		case Job_Sage:
+			skill "SA_CREATECON",1,0;
+			skill "SA_ELEMENTWATER",1,0;
+			skill "SA_ELEMENTGROUND",1,0;
+			skill "SA_ELEMENTFIRE",1,0;
+			skill "SA_ELEMENTWIND",1,0;
+			break;
+		case Job_Rogue:
+			skill "RG_CLOSECONFINE",1,0;
+			break;
+		case Job_Alchemist:
+			skill "AM_BIOETHICS",1,0;
+			break;
+		case Job_Bard:
+			skill "BA_PANGVOICE",1,0;
+			break;
+		case Job_Dancer:
+			skill "DC_WINKCHARM",1,0;
+			break;
+		default:
+			break;
+	}
+	return;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+// Shortcut : close button and clear cutin.
+//////////////////////////////////////////////////////////////////////////////////
+function	script	close3	{
+	close2;
+	cutin "",255;
+	end;
 }

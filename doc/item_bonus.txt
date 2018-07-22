@@ -177,9 +177,9 @@ bonus bNearAtkDef,n;			Adds n% damage reduction against melee physical attacks
 bonus bLongAtkDef,n;			Adds n% damage reduction against ranged physical attacks
 bonus bMagicAtkDef,n;			Adds n% damage reduction against magical attacks
 bonus bMiscAtkDef,n;			Adds n% damage reduction against MISC attacks (traps, falcon, ...)
-bonus bNoWeaponDamage,n;		Adds n% reduction to received physical damage
-bonus bNoMagicDamage,n;			Adds n% reduction to received magical effect (Attack, Healing, Support spells are all blocked)
-bonus bNoMiscDamage,n;			Adds n% reduction to received misc damage.
+bonus bNoWeaponDamage,n;		Blocks received physical damage at n%
+bonus bNoMagicDamage,n;			Blocks received magical effect (attack, healing or support spells) at n%
+bonus bNoMiscDamage,n;			Blocks received misc damage at n%
 
 Healing
 -------
@@ -343,11 +343,9 @@ HP/SP gain
 ------------
 bonus bHPGainValue,n;			Heals + n HP when killing an enemy with a physical attack
 bonus bMagicHPGainValue,n;		Heals + n HP when killing an enemy with a magical attack
-bonus2 bHPGainRaceAttack,r,n;		Heals + n HP when attacking enemy race r on every hit
 bonus bSPGainValue,n;			Heals + n SP when killing an enemy with a physical attack
 bonus2 bSPGainRace,r,n;			Heals + n SP when killing an enemy of race r with a physical attack
 bonus bMagicSPGainValue,n;		Heals + n SP when killing an enemy with a magical attack
-bonus2 bSPGainRaceAttack,r,n;		Heals + n SP when attacking enemy race r on every hit
 
 Damage return
 -------------
@@ -407,3 +405,4 @@ bonus bRestartFullRecover,n;		When reviving, HP and SP are fully healed (n is me
 bonus bClassChange,n;			Gives n/100% chance to change the attacked monster's class with normal attack
 bonus bAddStealRate,n;			Increases success rate of Steal skill by n/100%
 bonus bNoMagicGearFuel,n;		Skills requiring Magic Gear Fuel do not require them (n is meaningless)
+bonus bNoWalkDelay,n;			Recieve infinite Endure status (n is meaningless)

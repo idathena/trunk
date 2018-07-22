@@ -8,6 +8,8 @@
  * For detailed guidance on these check http://rathena.org/wiki/SRC/config/
  */
 
+#include "../custom/defines_pre.h"
+
 /// Max number of items on @autolootid list
 #define AUTOLOOTITEM_SIZE 10
 
@@ -80,16 +82,10 @@
 	#define MAX_CHAR_BILLING 0
 #endif
 
-/// Uncomment to enable official Packet Obfuscation support.
-/// When enabled, make sure there is value for 'packet_keys' of used packet version or
-/// defined 'packet_keys_use' in db/packet_db.txt.
-/// Also make sure the client isn't diffed with 'Disable Packet Encryption'
-/// This requires PACKETVER 2011-08-17 or newer.
-//#define PACKET_OBFUSCATION
-
 /**
  * No settings past this point
  */
+#include "./packets.h"
 #include "./renewal.h"
 #include "./secure.h"
 #include "./classes/general.h"
@@ -98,5 +94,7 @@
  * Constants come last; so they process anything that could've been modified in early includes
  */
 #include "./const.h"
+
+#include "../custom/defines_post.h"
 
 #endif // _CONFIG_CORE_H_

@@ -69,7 +69,7 @@ prt_are_in,103,11,3	script	Arena Point Manager	732,{
 				mes "this service.";
 				close;
 			}
-			else if (.@input > 20) {
+			else if (.@input < 0 || .@input > 20) {
 				mes "[Arena Point Manager]";
 				mes "Your request exceeds";
 				mes "the maximum limit. Please";
@@ -113,8 +113,8 @@ prt_are_in,103,11,3	script	Arena Point Manager	732,{
 					mes "into 5 Arena Points " + .@input + " times.";
 					mes "A total of " + .@want_point1 + " Turbo Track Points were converted into";
 					mes "" + .@want_point +" Arena Points.";
-					set tt_point,tt_point - .@want_point1;
-					set arena_point,arena_point+.@want_point;
+					set tt_point,.@my_turbo_all;
+					set arena_point,.@my_arena_all;
 					next;
 					mes "[Arena Point Manager]";
 					mes "" + strcharinfo(0) + ",";

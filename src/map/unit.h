@@ -41,7 +41,6 @@ struct unit_data {
 	unsigned int canact_tick;
 	unsigned int canmove_tick;
 	bool immune_attack; //Whether the unit is immune to attacks
-	bool immune_attack2; //Whether the unit is immune to normal melee attacks
 	uint8 dir;
 	unsigned char walk_count;
 	unsigned char target_count;
@@ -78,7 +77,7 @@ struct view_data {
 		cloth_color,
 		body_style;
 	char sex;
-	unsigned dead_sit : 2;
+	unsigned dead_sit : 2; //0: Stand, 1: Dead, 2: Sit
 };
 
 // Enum for unit_stop_walking
@@ -153,8 +152,8 @@ void unit_free_pc(struct map_session_data *sd);
 #define unit_remove_map(bl,clrtype) unit_remove_map_(bl,clrtype,__FILE__,__LINE__,__FUNCTION__)
 int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, int line, const char *func);
 int unit_free(struct block_list *bl, clr_type clrtype);
-int unit_changeviewsize(struct block_list *bl, short size);
 int unit_changetarget(struct block_list *bl, va_list ap);
+void unit_refresh(struct block_list *bl);
 
 void do_init_unit(void);
 void do_final_unit(void);

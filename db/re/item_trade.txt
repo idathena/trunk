@@ -508,6 +508,14 @@
 5823,467,100	// Love_Arrow
 5855,499,100	// Fishing_Rod
 5864,475,100	// Shadow_Booster
+5900,467,100	// Divine_Guard_Hat
+5901,467,100	// Focus_Beret
+5902,467,100	// Harvester_Hat
+5903,467,100	// Deadman_Bandana
+5904,467,100	// Inconspicuous_Hat
+5905,467,100	// Lyrica_Hat
+5906,467,100	// Oni_Horns
+5907,467,100	// Sea_Captain_Hat
 6000,475,100	// Dark_Ashes
 6005,467,100	// New_Year_Rice_Cake
 6006,499,100	// Rice_Cake_Delivery_Box
@@ -787,7 +795,7 @@
 6655,499,100	// Firm_Pumpkin
 6656,499,100	// Goast_Free_Charm
 6657,499,100	// Memory_Of_Jack
-6671,467,100	// Geffen_Coin_Magic_Tournament
+6671,467,100	// Geffen_Magic_Coin
 6672,467,100	// Gray_Piece
 6673,507,100	// Bossnia_Tickets
 6674,507,100	// GM_Coin
@@ -2829,7 +2837,7 @@
 15064,499,100	// TE_Woe_Mage_Coat
 //15067,507,100	//
 15116,467,100	// Airship_Armor
-15141,467,100	// Ancient_Armor_Of_The_Goddess
+15141,467,100	// Rift_Ancient_Armor
 16002,507,100	// Stunner_C
 16004,499,100	// P_Mace1
 16005,499,100	// P_Mace2
@@ -3649,7 +3657,7 @@
 18982,475,100	// Old_Circlet_Of_Bone
 18983,475,100	// Old_Protect_Of_Crown
 18984,475,100	// Old_Camo_RabbitHood
-19033,467,100	// Ancient_Decoration_Of_The_Goddess
+19033,467,100	// Rift_Ancient_Decoration
 19051,475,100	// Warrior_Moon_Cat_Hat
 19052,507,100	// Sigrun's_Wings_
 19053,475,100	// Fighter_Moon_Cat_Hat
@@ -3698,14 +3706,16 @@
 20704,499,100	// TE_Woe_Magic_Manteau
 //20709,507,100	//
 20743,467,100	// Airship_Cape
+20779,467,100	// Rift_Manteau
 21005,499,100	// Metal_Two_Hand_Sword
 21006,499,100	// TE_Woe_Two_Hand_Sword
 21014,467,100	// Infinity_Twohand_Sword
 //22012,507,100	//
 22046,467,100	// Airship_Boots
+22075,467,100	// Rift_Shoes
 22508,507,100	// Para_Team_Mark_
 22510,475,100	// King_Wolf_Scroll
-//22511,467,100	//
+22511,467,100	// Fenrir_Card__
 22513,499,100	// King_Of_Gift_Box
 22517,507,100	// Loki_Summon_Scroll
 22521,507,100	// Level_Up_Box_

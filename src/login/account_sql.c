@@ -7,7 +7,6 @@
 #include "../common/sql.h"
 #include "../common/strlib.h"
 #include "../common/timer.h"
-#include "../config/core.h"
 #include "account.h"
 #include <stdlib.h>
 #include <string.h>
@@ -571,9 +570,10 @@ static bool mmo_auth_fromsql(AccountDB_SQL *db, struct mmo_account *acc, int acc
 	acc->account_reg2_num = (int)Sql_NumRows(sql_handle);
 
 	while( SQL_SUCCESS == Sql_NextRow(sql_handle) ) {
-		char *data;
-		Sql_GetData(sql_handle, 0, &data, NULL); safestrncpy(acc->account_reg2[i].str, data, sizeof(acc->account_reg2[i].str));
-		Sql_GetData(sql_handle, 1, &data, NULL); safestrncpy(acc->account_reg2[i].value, data, sizeof(acc->account_reg2[i].value));
+		char *data_tmp;
+
+		Sql_GetData(sql_handle, 0, &data_tmp, NULL); safestrncpy(acc->account_reg2[i].str, data_tmp, sizeof(acc->account_reg2[i].str));
+		Sql_GetData(sql_handle, 1, &data_tmp, NULL); safestrncpy(acc->account_reg2[i].value, data_tmp, sizeof(acc->account_reg2[i].value));
 		++i;
 	}
 	Sql_FreeResult(sql_handle);

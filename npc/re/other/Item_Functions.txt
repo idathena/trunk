@@ -52,57 +52,68 @@ function	script	F_5497	{ //King_Tiger_Doll_Hat
 	return;
 }
 
-function	script	F_11592	{ //Trans_Candy_Red
+function	script	F_11592	{ //Trance_Candy_R
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Bloody Murderer form!!";
 	return;
 }
 
-function	script	F_11593	{ //Trans_Candy_Blue
+function	script	F_11593	{ //Trance_Candy_B
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Bathory form!!";
 	return;
 }
 
-function	script	F_11594	{ //Trans_Candy_Yellow
+function	script	F_11594	{ //Trance_Candy_Y
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Jakk form!!";
 	return;
 }
 
-function	script	F_11595	{ //Trans_Candy_Green
+function	script	F_11595	{ //Trance_Candy_G
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Quve form!!";
 	return;
 }
 
 function	script	F_12658	{ //Trans_Scroll_Devi
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Deviruchi form!!";
 	return;
 }
 
 function	script	F_12659	{ //Trans_Scroll_Ray_Arch
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Raydric Archer form!!";
 	return;
 }
 
 function	script	F_12660	{ //Trans_Scroll_Mavka
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Mavka form!!";
 	return;
 }
 
 function	script	F_12661	{ //Trans_Scroll_Marduk
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Marduk form!!";
 	return;
 }
 
 function	script	F_12662	{ //Trans_Scroll_Banshee
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Banshee form!!";
 	return;
 }
 
 function	script	F_12663	{ //Trans_Scroll_Poring
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Poring form!!";
 	return;
 }
 
 function	script	F_12664	{ //Trans_Scroll_Golem
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Golem form!!";
 	return;
 }
@@ -186,31 +197,37 @@ function	script	F_22507	{ //ShabbyOldScroll
 }
 
 function	script	F_22750	{ //Trans_Scroll_Horn_Scaraba
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Horn Scaraba form!!";
 	return;
 }
 
 function	script	F_22751	{ //Trans_Scroll_Wanderer
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Wanderer form!!";
 	return;
 }
 
 function	script	F_22752	{ //Trans_Scroll_Gazeti
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Gazeti form!!";
 	return;
 }
 
 function	script	F_22753	{ //Trans_Scroll_Kobold_Archer
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Kobold Archer form!!";
 	return;
 }
 
 function	script	F_22754	{ //Trans_Scroll_Necromancer
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Necromancer form!!";
 	return;
 }
 
 function	script	F_22755	{ //Trans_Scroll_Wind_Ghost
+	specialeffect2 EF_CLOAKING;
 	showscript "Traaaansformation-!! Wind Ghost form!!";
 	return;
 }

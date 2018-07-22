@@ -4497,7 +4497,7 @@ turbo_room,106,117,3	script	Point Manager#tt	833,{
 				mes "your request.";
 				close;
 			}
-			else if (.@input > 20) {
+			else if (.@input < 0 || .@input > 20) {
 				mes "[Turbo Track Point Manager]";
 				mes "Your request exceeds";
 				mes "the maximum limit. Please";

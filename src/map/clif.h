@@ -43,12 +43,12 @@ struct achievement;
 enum { // packet_db
 	MIN_PACKET_DB = 0x064,
 	MAX_PACKET_DB = 0xAFF,
-	MAX_PACKET_VER = 53,
 	MAX_PACKET_POS = 20,
 };
 
 enum e_packet_ack {
 	ZC_ACK_OPEN_BANKING = 0,
+	ZC_ACK_CLOSE_BANKING,
 	ZC_ACK_BANKING_DEPOSIT,
 	ZC_ACK_BANKING_WITHDRAW,
 	ZC_BANKING_CHECK,
@@ -72,8 +72,7 @@ struct s_packet_db {
 };
 
 #ifdef PACKET_OBFUSCATION
-	// Keys based on packet versions
-	struct s_packet_keys {
+	struct s_packet_keys { // Keys based on packet versions
 		unsigned int keys[3]; // 3-Keys
 	};
 #endif
@@ -109,11 +108,17 @@ enum e_party_invite_reply {
 	PARTY_REPLY_INVALID_MAPPROPERTY_ME, //return = 9 : @TODO: "Cannot join a party in this map" -> MsgStringTable[1871] (since 20110205)
 };
 
-// packet_db[SERVER] is reserved for server use
-#define SERVER 0
-#define packet_len(cmd) packet_db[SERVER][cmd].len
-extern struct s_packet_db packet_db[MAX_PACKET_VER + 1][MAX_PACKET_DB + 1];
-extern int packet_db_ack[MAX_PACKET_VER + 1][MAX_ACK_FUNC + 1];
+// Enum for Convex Mirror (SC_BOSSMAPINFO)
+enum e_bossmap_info {
+	BOSS_INFO_NOT = 0,
+	BOSS_INFO_ALIVE,
+	BOSS_INFO_ALIVE_WITHMSG,
+	BOSS_INFO_DEAD,
+};
+
+#define packet_len(cmd) packet_db[cmd].len
+extern struct s_packet_db packet_db[MAX_PACKET_DB + 1];
+extern int packet_db_ack[MAX_ACK_FUNC + 1];
 
 // Local define
 typedef enum send_target {
@@ -538,7 +543,6 @@ void clif_setport(uint16 port);
 uint32 clif_getip(void);
 uint32 clif_refresh_ip(void);
 uint16 clif_getport(void);
-void packetdb_readdb(bool reload);
 
 void clif_authok(struct map_session_data *sd);
 void clif_authrefuse(int fd, uint8 error_code);
@@ -655,11 +659,11 @@ void clif_skillinfo(struct map_session_data *sd, uint16 skill_id, int inf);
 void clif_addskill(struct map_session_data *sd, int id);
 void clif_deleteskill(struct map_session_data *sd, int id);
 
-void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x, int dst_y, uint16 skill_id, int property, int casttime);
+void clif_skillcasting(struct block_list *bl, int src_id, int dst_id, int dst_x, int dst_y, uint16 skill_id, uint16 skill_lv, int casttime);
 void clif_skillcastcancel(struct block_list *bl);
-void clif_skill_fail(struct map_session_data *sd,uint16 skill_id,enum useskill_fail_cause cause,int btype,int val);
+void clif_skill_fail(struct map_session_data *sd, uint16 skill_id, enum useskill_fail_cause cause, int btype, int val);
 void clif_skill_cooldown(struct map_session_data *sd, uint16 skill_id, unsigned int tick);
-void clif_skill_cooldown_list(struct map_session_data *sd, struct skill_cooldown_data *data);
+//void clif_skill_cooldown_list(struct map_session_data *sd, uint16 skill_id, unsigned int tick, unsigned int duration);
 int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 damage,int div,uint16 skill_id,uint16 skill_lv,int type);
 //int clif_skill_damage2(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 damage,int div,uint16 skill_id,uint16 skill_lv,int type);
 int clif_skill_nodamage(struct block_list *src,struct block_list *dst,uint16 skill_id,int heal,int fail);
@@ -917,7 +921,7 @@ void clif_Auction_message(int fd, unsigned char flag);
 void clif_Auction_close(int fd, unsigned char flag);
 void clif_parse_Auction_cancelreg(int fd, struct map_session_data *sd);
 
-void clif_bossmapinfo(int fd, struct mob_data *md, short flag);
+void clif_bossmapinfo(struct map_session_data *sd, struct mob_data *md, enum e_bossmap_info flag);
 void clif_cashshop_show(struct map_session_data *sd, struct npc_data *nd);
 
 // ADOPTION
@@ -984,8 +988,6 @@ void clif_display_pinfo(struct map_session_data *sd, int type);
 
 int clif_elementalconverter_list(struct map_session_data *sd);
 
-void clif_millenniumshield(struct block_list *bl, short shields);
-
 int clif_spellbook_list(struct map_session_data *sd);
 
 int clif_magicdecoy_list(struct map_session_data *sd, uint16 skill_lv, short x, short y);
@@ -998,6 +1000,7 @@ int clif_skill_itemlistwindow(struct map_session_data *sd, uint16 skill_id, uint
 void clif_elemental_info(struct map_session_data *sd);
 void clif_elemental_updatestatus(struct map_session_data *sd, int type);
 
+void clif_millenniumshield(struct block_list *bl, short shield_count);
 void clif_spiritcharm(struct map_session_data *sd);
 
 void clif_snap(struct block_list *bl, short x, short y);
@@ -1024,9 +1027,9 @@ enum clif_colors {
 	COLOR_LIGHT_GREEN,
 	COLOR_MAX
 };
-unsigned long color_table[COLOR_MAX];
+extern unsigned long color_table[COLOR_MAX];
 
-void clif_channel_msg(struct Channel *channel, struct map_session_data *sd, char *msg, short color);
+void clif_channel_msg(struct Channel *channel, const char *msg, unsigned long color);
 
 #define clif_menuskill_clear(sd) (sd)->menuskill_id = (sd)->menuskill_val = (sd)->menuskill_val2 = 0;
 
@@ -1045,7 +1048,7 @@ void clif_parse_BankClose(int fd, struct map_session_data *sd);
 void clif_crimson_marker(struct map_session_data *sd, struct block_list *bl, uint8 flag);
 void clif_crimson_marker_single(struct map_session_data *sd, struct block_list *bl, uint8 flag);
 
-void clif_ShowScript(struct block_list *bl, const char *message);
+void clif_showscript(struct block_list *bl, const char *message, enum send_target flag);
 void clif_notify_bindOnEquip(struct map_session_data *sd, int n);
 
 void clif_merge_item_open(struct map_session_data *sd);
@@ -1069,5 +1072,7 @@ void clif_achievement_list_all(struct map_session_data *sd);
 void clif_achievement_update(struct map_session_data *sd, struct achievement *ach, int count);
 void clif_pAchievementCheckReward(int fd, struct map_session_data *sd);
 void clif_achievement_reward_ack(int fd, unsigned char result, int achievement_id);
+
+void clif_skill_scale(struct block_list *bl, int src_id, int x, int y, uint16 skill_id, uint16 skill_lv, int casttime);
 
 #endif /* _CLIF_H_ */

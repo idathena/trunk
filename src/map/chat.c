@@ -119,24 +119,22 @@ int chat_joinchat(struct map_session_data *sd, int chatid, const char *pass)
 	nullpo_ret(sd);
 	cd = (struct chat_data *)map_id2bl(chatid);
 
-	if( cd == NULL || cd->bl.type != BL_CHAT || cd->bl.m != sd->bl.m || sd->state.vending || sd->state.buyingstore || sd->chatID || ((cd->owner->type == BL_NPC) ? cd->users+1 : cd->users) >= cd->limit )
-	{
+	if( cd == NULL || cd->bl.type != BL_CHAT || cd->bl.m != sd->bl.m || sd->state.vending || sd->state.buyingstore ||
+		sd->chatID || ((cd->owner->type == BL_NPC) ? cd->users + 1 : cd->users) >= cd->limit ) {
 		clif_joinchatfail(sd,0);
 		return 0;
 	}
 
-	if( !cd->pub && strncmp(pass, cd->pass, sizeof(cd->pass)) != 0 && !pc_has_permission(sd, PC_PERM_JOIN_ALL_CHAT) )
-	{
+	if( !cd->pub && strncmp(pass, cd->pass, sizeof(cd->pass)) != 0 && !pc_has_permission(sd, PC_PERM_JOIN_ALL_CHAT) ) {
 		clif_joinchatfail(sd,1);
 		return 0;
 	}
 
 	if( sd->status.base_level < cd->minLvl || sd->status.base_level > cd->maxLvl ) {
-		if(sd->status.base_level < cd->minLvl)
+		if( sd->status.base_level < cd->minLvl )
 			clif_joinchatfail(sd,5);
 		else
 			clif_joinchatfail(sd,6);
-
 		return 0;
 	}
 
@@ -160,10 +158,10 @@ int chat_joinchat(struct map_session_data *sd, int chatid, const char *pass)
 	clif_addchat(cd, sd); //Reports To the person who already in the chat
 	clif_dispchat(cd, 0); //Reported number of changes to the people around
 
-	chat_triggerevent(cd); //Event
-
 	if( cd->owner->type == BL_PC )
 		achievement_update_objective(map_id2sd(cd->owner->id), AG_CHAT_COUNT, 1, cd->users);
+
+	chat_triggerevent(cd); //Event
 
 	return 0;
 }
@@ -444,7 +442,7 @@ int chat_npckickall(struct chat_data *cd)
 	nullpo_ret(cd);
 
 	while( cd->users > 0 )
-		chat_leavechat(cd->usersd[cd->users-1],0);
+		chat_leavechat(cd->usersd[cd->users - 1],0);
 
 	return 0;
 }

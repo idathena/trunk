@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Last Updated: ========================================
-//= 20150615
+//= 20171105
 //===== Description: =========================================
 //= A reference manual for the rAthena scripting language.
 //= Commands are sorted depending on their functionality.
@@ -1163,7 +1163,8 @@ From here on, we will have the commands sorted as follow:
 11.- Homunculus commands.
 12.- Mercenary commands.
 13.- Party commands.
-14.- Achievement commands.
+14.- Channel commands.
+15.- Achievement commands.
 
 =====================
 |1.- Basic commands.|
@@ -1405,8 +1406,8 @@ getvariableofnpc will not work on them.
 *getvar <variable>,<char_id>;
 
 Get variable value from the specified player. Only player/account variables
-are allowed to be used (temporary character variable "@", permanent
-character "", permanent local account "#", and permanent global account "##").
+are allowed to be used (temporary character variable "@", permanent character "",
+permanent local account "#", and permanent global account "##").
 
 ---------------------------------------
 
@@ -3519,7 +3520,7 @@ Example:
 
 	// get a Mob ID from the user
 	input .@mob_id;
-	
+
 	if (getmobdrops(.@mob_id)) {	// 'getmobdrops' returns 1 on success
 		// immediately copy global temporary variables into scope variables, 
 		// since we don't know when 'getmobdrops' will get called again for 
@@ -3894,20 +3895,7 @@ The renewal feature to check is determined by type.
  2 - RENEWAL_DROP (renewal drop rate algorithms)
  3 - RENEWAL_EXP (renewal exp rate algorithms)
  4 - RENEWAL_LVDMG (renewal level modifier on damage)
- 5 - RENEWAL_EDP (renewal enchant deadly poison algorithm)
- 6 - RENEWAL_ASPD (renewal ASPD)
-
----------------------------------------
-
-*is_clientver(<type>,<value>{,<char id>})
-
-Checks a character's client version against a specified value. If no char id is
-given, the command will run for the invoking character. The function will return
-1 if the player's version is greater than or equal to the value, and 0 otherwise.
-
-Available types are:
- 0 - version number (packet_db_ver)
- 1 - client date (YYYYMMDD)
+ 5 - RENEWAL_ASPD (renewal ASPD)
 
 ---------------------------------------
 \\
@@ -4025,10 +4013,13 @@ by default green
 
 ---------------------------------------
 
-*showscript "<message>"{,<GID>};
+*showscript "<message>"{,<GID>,"<flag>"};
 
 Makes attached player or <GID> says a message like shouting a skill name, the message
 will be seen to everyone around but not in chat window.
+flag: Specify target
+   bc_area - Message is sent to players in the vicinity of the source (default).
+   bc_self - Message is sent only to player attached.
 
 ---------------------------------------
 
@@ -4869,7 +4860,7 @@ Example to get Crimson Weapon with Ghost property:
 	// when Valkyrie Randgris killed
 	OnNPCKillEvent:
 		if (killedrid == 1751 && rand(0,1000) > 950) { // Valkyrie Randgris
-			getmapxy(.@map$,.@x,.@y,0);
+			getmapxy(.@map$,.@x,.@y,UNITTYPE_PC);
 			setarray .@OptID[0],RDMOPT_ATTR_TOLERACE_NOTHING,RDMOPT_RACE_TOLERACE_HUMAN;
 			setarray .@OptVal[0],10,5;
 			setarray .@OptParam[0],0;
@@ -5400,7 +5391,7 @@ Values for <mode> are:
 	STOR_MODE_PUT  : Player can put items in the storage.
 
 Example:
-	if (vip_status(1)) {
+	if (vip_status(VIP_STATUS_ACTIVE)) {
 		mes "I will open your Premium storage.";
 		mes "Thank you for using our service.";
 		close2;
@@ -5808,18 +5799,17 @@ Flags (bitmask):
 	2   : Removable by Dispell.
 	4   : Removable by Clearance.
 	8   : Remove when player logs out.
-	16  : Removeable by Banishing Buster.
-	32  : Removable by Refresh.
-	64  : Removable by Lux Anima.
-	128 : Remove when Madogear is activated or deactivated.
-	256 : Remove when receive damage.
-	512 : Script is permanent, cannot be cleared by bonus_script_clear.
-	1024: Force to replace duplicated script by expanding the duration.
-	2048: Force to add duplicated script. This flag cannot be stacked with 1024,
+	16  : Removable by Refresh.
+	32  : Removable by Lux Anima.
+	64  : Remove when Madogear is activated or deactivated.
+	128 : Remove when receive damage.
+	256 : Script is permanent, cannot be cleared by bonus_script_clear.
+	512 : Force to replace duplicated script by expanding the duration.
+	1024: Force to add duplicated script. This flag cannot be stacked with 1024,
 	      if both are defined, 1024 will be checked first and ignore this flag.
 
 Types:
-	This will be used to decide negative or positive buff for 'debuff_on_logout'.
+	This will be used to decide negative or positive buff
 	0: Ignore the buff type and won't be removed if the flag is not &8 (Default)
 	1: Buff
 	2: Debuff
@@ -6392,6 +6382,18 @@ Target for <flag>:
 
 ---------------------------------------
 
+*chatmes "<message>"{,"<NPC name>"};
+
+This command will display a message in the waitingroom (chat) of the NPC.
+If the <NPC name> option is given, then that NPC will display the message, else
+the attached NPC will display the message.
+If the NPC is not in a waitingroom, nothing happens.
+
+    // Everyone in the waitingroom will see this message:
+    chatmes "Waiting 5 minutes until the next match will start";
+
+---------------------------------------
+
 *setnpcdisplay("<npc name>", "<display name>", <class id>, <size>)
 *setnpcdisplay("<npc name>", "<display name>", <class id>)
 *setnpcdisplay("<npc name>", "<display name>")
@@ -6694,6 +6696,8 @@ The options are:
 	1 = The buy window
 	2 = The sell window
 
+Note: The <option> parameter only works on the 'shop' type NPC.
+
 A shop called with this command will trigger the labels "OnBuyItem" and "OnSellItem"
 (as long as an npcshop* command is executed from that NPC, see note below). These
 labels, if used, will replace how the shop handles the buying and selling of items,
@@ -6704,15 +6708,30 @@ The label "OnBuyItem" sets the following arrays:
 	@bought_quantity - amount bought
 
 The label "OnSellItem" sets the following arrays:
-	@sold_nameid     - item ID sold
-	@sold_quantity   - amount sold
-	@sold_refine     - refine count
-	@sold_attribute  - if the item is broken (1) or not (0)
-	@sold_identify   - if the item is identified (1) or not (0)
-	@sold_card1      - card slot 1
-	@sold_card2      - card slot 2
-	@sold_card3      - card slot 3
-	@sold_card4      - card slot 4
+	@sold_nameid        - item ID sold
+	@sold_quantity      - amount sold
+	@sold_refine        - refine count
+	@sold_attribute     - if the item is broken (1) or not (0)
+	@sold_identify      - if the item is identified (1) or not (0)
+	@sold_card1         - card slot 1
+	@sold_card2         - card slot 2
+	@sold_card3         - card slot 3
+	@sold_card4         - card slot 4
+	@sold_option_id1    - random option ID 1
+	@sold_option_val1   - random option value 1
+	@sold_option_param1 - random option param 1
+	@sold_option_id2    - random option ID 2
+	@sold_option_val2   - random option value 2
+	@sold_option_param2 - random option param 2
+	@sold_option_id3    - random option ID 3
+	@sold_option_val3   - random option value 3
+	@sold_option_param3 - random option param 3
+	@sold_option_id4    - random option ID 4
+	@sold_option_val4   - random option value 4
+	@sold_option_param4 - random option param 4
+	@sold_option_id5    - random option ID 5
+	@sold_option_val5   - random option value 5
+	@sold_option_param5 - random option param 5
 
 NOTE: These labels will only be triggered if an npcshop* command is executed because these
 commands set a special data on the shop NPC, named master_nd in the source. The above labels
@@ -7465,6 +7484,7 @@ The commands can also run without an attached rid.
 This command will bind a NPC event label to an atcommand. Upon execution of the
 atcommand, the user will invoke the NPC event label. Each atcommand is only allowed
 one binding. If you rebind, it will override the original binding.
+Note: The default level for atcommand is 0 while the default level for charcommand is 100.
 
 The following variables are set upon execution:
 	.@atcmd_command$       =  The name of the @command used.
@@ -7717,6 +7737,8 @@ Parameters (indexes) for monsters are:
 	UMOB_CLOTHCOLOR
 	UMOB_SHIELD
 	UMOB_WEAPON
+	UMOB_ROBE
+	UMOB_BODY2
 	UMOB_LOOKDIR
 	UMOB_CANMOVETICK
 	UMOB_STR
@@ -7914,7 +7936,6 @@ Parameter (indexes) for elementals are:
 -----
 
 Parameter (indexes) for NPCs are:
-	UNPC_DISPLAY
 	UNPC_LEVEL
 	UNPC_HP
 	UNPC_MAXHP
@@ -7947,6 +7968,19 @@ Parameter (indexes) for NPCs are:
 	UNPC_AMOTION
 	UNPC_ADELAY
 	UNPC_DMOTION
+	UNPC_SEX
+	UNPC_CLASS
+	UNPC_HAIRSTYLE
+	UNPC_HAIRCOLOR
+	UNPC_HEADBOTTOM
+	UNPC_HEADMIDDLE
+	UNPC_HEADTOP
+	UNPC_CLOTHCOLOR
+	UNPC_SHIELD
+	UNPC_WEAPON
+	UNPC_ROBE
+	UNPC_BODY2
+	UNPC_DEADSIT
 
 *Notes:
 		- *_SIZE: small (0); medium (1); large (2)
@@ -7963,12 +7997,14 @@ Parameter (indexes) for NPCs are:
 		- *_AMOTION: see doc/mob_db.txt
 		- *_ADELAY: see doc/mob_db.txt
 		- *_DMOTION: see doc/mob_db.txt
+		- *_BODY2: set alternate outfit enabled (1), or disabled (0)
 
 		- UMOB_AI: none (0); attack (1); marine sphere (2); flora (3); zanzou (4); legion (5); faw (6)
 		- UMOB_SCOPTION: see the 'Variables' section at the top of this document
 		- UMOB_SLAVECPYMSTRMD: make the slave copy the master's mode (1), or not (0)
 
 		- UNPC_PLUSALLSTAT: same as 'bAllStats'; increases/decreses all stats by given amount
+		- UNPC_DEADSIT: stand (0); dead (1); sit (2)
 
 Example:
 	// Spawn some Porings and save the Game ID.
@@ -8002,6 +8038,11 @@ The "stat point" parameter temporarily sets all NPC stats to the given value,
 and "NPC level" is the temporary level of the NPC (used in some skills).
 Neither value can be greater than the max level defined in config, and will
 not work properly if the NPC has a mob sprite.
+
+Before using skills, NPCs must have basic stats applied to them depending on the
+skill being used: UNPC_ATK1, UNPC_ATK2, UNPC_MATKMIN, UNPC_MATKMAX, UNPC_STR,
+UNPC_AGI, UNPC_VIT, UNPC_INT, UNPC_DEX, UNPC_LUK.
+See 'setunitdata' for more information on usage.
 
     // Casts Level 10 Heal on the attached player, calculated with
     // all stats 99 and base level 60.
@@ -8806,15 +8847,22 @@ checked if it has been started yet.
 
 For Icon, use one of the following:
 
-No Icon			: QTYPE_NONE
-! Quest Icon	: QTYPE_QUEST
-? Quest Icon	: QTYPE_QUEST2
-! Job Icon		: QTYPE_JOB
-? Job Icon		: QTYPE_JOB2
-! Event Icon	: QTYPE_EVENT
-? Event Icon	: QTYPE_EVENT2
-Warg			: QTYPE_WARG
-Warg Face		: QTYPE_WARG2 (Only for packetver >= 20120410)
+Remove Icon  : QTYPE_NONE
+! Quest Icon : QTYPE_QUEST
+? Quest Icon : QTYPE_QUEST2
+! Job Icon   : QTYPE_JOB
+? Job Icon   : QTYPE_JOB2
+! Event Icon : QTYPE_EVENT
+? Event Icon : QTYPE_EVENT2
+Warg         : QTYPE_WARG
+Warg Face    : QTYPE_WARG2 (Only for PACKETVER >= 20120410 && PACKETVER < 20170315)
+
+- Only for PACKETVER >= 20170315
+Click Me Icon      : QTYPE_CLICKME
+! Daily Quest Icon : QTYPE_DAILYQUEST
+! Green Event Icon : QTYPE_EVENT3
+! Job Quest Icon   : QTYPE_JOBQUEST
+Jumping Poring     : QTYPE_JUMPING_PORING
 
 Map Mark Color, when used, creates a mark in the user's mini map on the position of the NPC,
 the available color values are:
@@ -8955,15 +9003,22 @@ a certain player.
 
 Available Icons:
 
-Remove Icon	: QTYPE_NONE
-! Quest Icon	: QTYPE_QUEST
-? Quest Icon	: QTYPE_QUEST2
-! Job Icon	: QTYPE_JOB
-? Job Icon	: QTYPE_JOB2
-! Event Icon	: QTYPE_EVENT
-? Event Icon	: QTYPE_EVENT2
-Warg		: QTYPE_WARG
-Warg Face	: QTYPE_WARG2 (Only for packetver >= 20120410)
+Remove Icon  : QTYPE_NONE
+! Quest Icon : QTYPE_QUEST
+? Quest Icon : QTYPE_QUEST2
+! Job Icon   : QTYPE_JOB
+? Job Icon   : QTYPE_JOB2
+! Event Icon : QTYPE_EVENT
+? Event Icon : QTYPE_EVENT2
+Warg         : QTYPE_WARG
+Warg Face    : QTYPE_WARG2 (Only for PACKETVER >= 20120410 && PACKETVER < 20170315)
+
+- Only for PACKETVER >= 20170315
+Click Me Icon      : QTYPE_CLICKME
+! Daily Quest Icon : QTYPE_DAILYQUEST
+! Green Event Icon : QTYPE_EVENT3
+! Job Quest Icon   : QTYPE_JOBQUEST
+Jumping Poring     : QTYPE_JUMPING_PORING
 
 Mark Color:
 0 - No Mark
@@ -8978,19 +9033,18 @@ Mark Color:
 ============================
 ---------------------------------------
 
-*waitingroom2bg_single(<battle group>,"<map name>",<x>,<y>,"<npc name>");
+*waitingroom2bg_single(<battle group>,{"<map name>",<x>,<y>{,"<NPC name>"}});
 
-Adds the first waiting player from the chat room of the given NPC to an
-existing battleground group and warps it to the specified coordinates on
-the given map.
+Adds the first waiting player from the chat room of the given NPC to an existing battleground group.
+The player will also be warped to the default spawn point of the battle group or to the specified coordinates <x> and <y> on the given <map>.
 
 ---------------------------------------
 
-*waitingroom2bg("<map name>",<x>,<y>,"<On Quit Event>","<On Death Event>"{,"<NPC Name>"});
+*waitingroom2bg("<map name>",<x>,<y>,{"<On Quit Event>","<On Death Event>"{,"<NPC name>"}});
 
 <map name>,<x>,<y> refer to where the "respawn" base is, where the player group will respawn when they die.
-<On Quit Event> refers to an NPC label that attaches to the character and is run when they relog.
-<On Death Event> refers to an NPC label that attaches to the character and is run when they die. Can be "" for empty.
+<On Quit Event> refers to an NPC label that attaches to the character and is run when they relog. (Optional)
+<On Death Event> refers to an NPC label that attaches to the character and is run when they die. (Optional)
 
 Unlike the prior command, the latter will attach a GROUP in a waiting room to the battleground, and 
 sets the array $@arenamembers[0] where 0 holds the IDs of the first group, and 1 holds the IDs of the second.
@@ -9001,6 +9055,27 @@ Example:
 	// Battle Group will be referred to as $@KvM01BG_id1, and when they die, respawn at bat_c01,52,129.
 	set $@KvM01BG_id1, waitingroom2bg("bat_c01",52,129,"KvM01_BG::OnGuillaumeQuit","KvM01_BG::OnGuillaumeDie");
 	end;
+
+---------------------------------------
+
+*bg_create("<map name>",<x>,<y>{,"<On Quit Event>","<On Death Event>"});
+
+Creates an instance of battleground battle group that can be used with other battleground commands.
+
+<map name>,<x>,<y> refer to where the "respawn" base is, where the player group will respawn when they die.
+<On Quit Event> refers to an NPC label that attaches to the character and is run when they relog. (Optional)
+<On Death Event> refers to an NPC label that attaches to the character and is run when they die. (Optional)
+
+Returns battle group ID on success. Returns 0 on failure.
+
+---------------------------------------
+
+*bg_join(<battle group>,{"<map name>",{<x>,<y>{,<char id>}});
+
+Adds an attached player or <char id> if specified to an existing battleground group.
+The player will also be warped to the default spawn point of the battle group or to the specified coordinates <x> and <y> on the given <map>.
+
+Returns true on success. Returns false on failure.
 
 ---------------------------------------
 
@@ -9686,7 +9761,8 @@ Valid flag are:
 
 This will set a Hat Effect onto the player. The state field allows you to
 enable (true) or disable (false) the effect on the player.
-The Hat Effect constants can be found in db/const.txt starting with HAT_EF_*.
+The Hat Effect constants can be found in 'src/map/script_constants.h' starting
+with HAT_EF_*.
 
 Requires client 2015-05-13aRagEXE or newer. 
 
@@ -9746,7 +9822,7 @@ This script command is intended for using in random option scripts.
 
 ---------------------------------------
 
-*getequiprandomoption(<equipment index>,<index>,<type>{,<char id>});
+*getequiprandomoption(<equipment slot>,<index>,<type>{,<char id>});
 
 Returns value of an attribute of a random option on an equipped item.
 
@@ -9770,6 +9846,162 @@ index parameter can be 0 to MAX_ITEM_RDM_OPT-1 (default 0-4).
 ID - ID of random option. See db/const.txt for constants.
 Value - Value of random option
 Param - Parameter of random option
+
+---------------------------------------
+
+========================
+|14.- Channel commands.|
+========================
+---------------------------------------
+
+*channel_create "<chname>","<alias>"{,"<password>"{<option>{,<delay>{,<color>{,<char_id>}}}}};
+
+Creates a public channel with <chname> as the channel name. To protect the
+channel, use <password> or write "null" to create it without a password.
+Channel name must start with '#' and cannot be the same as the map or ally
+channel names.
+
+<alias> will be used to change the channel name when the channel message
+is displayed.
+
+<option> values are:
+	CHAN_OPT_BASE		- Default option including CHAN_OPT_ANNOUNCE_SELF|CHAN_OPT_MSG_DELAY|CHAN_OPT_CAN_CHAT|CHAN_OPT_CAN_LEAVE
+	CHAN_OPT_ANNOUNCE_SELF  - Show info for player itself if player has joined/leaves the channel
+	CHAN_OPT_ANNOUNCE_JOIN  - Display message when player is joining the channel
+	CHAN_OPT_ANNOUNCE_LEAVE - Display message when player is leaving the channel
+	CHAN_OPT_MSG_DELAY	- Enable chat delay for the channel
+	CHAN_OPT_COLOR_OVERRIDE - Player's unique font color will override channel's color
+	CHAN_OPT_CAN_CHAT	- Player can chat in the channel
+	CHAN_OPT_CAN_LEAVE	- Player can leave the channel
+	CHAN_OPT_AUTOJOIN	- Players will auto join the channel at login
+
+The <delay> is the minimum chat delay in millisecond for a single player before
+the player can chat again in the same channel.
+
+Use <color> hex code to set the color for this channel, if not defined, default
+channel color will be used.
+
+If <char_id> is defined, the channel will be a private channel and the player
+will be the the channel owner.
+
+Returns 1 on success.
+
+	/**
+	 * This example will shows the message on this channel as
+	 * [rAthena] Admin : Hello world!
+	 * instead of
+	 * #rathena Admin : Hello world!
+	 **/
+	channel_create("#rathena","[rAthena]");
+	channel_create("#vip","[VIP]","vipmemberonly");
+
+---------------------------------------
+
+*channel_setopt "<chname>",<option>,<value>;
+
+Set option for the channel. Use 1 in <value> to set it, or 0 to unset.
+The <option> values are the same as the 'channel_create' options.
+
+For CHAN_OPT_MSG_DELAY, the delay in millisecond must be sent or use 0
+to remove the delay at <value>.
+
+Returns 1 on success.
+
+	// Example to set delay
+	channel_setopt("#global",CHAN_OPT_MSG_DELAY,5000);
+
+Only for public and private channel.
+
+---------------------------------------
+
+*channel_setcolor "<chname>",<color>;
+
+To change channel color.
+<color> uses hex RGB values.
+
+Returns 1 on success.
+
+---------------------------------------
+
+*channel_setpass "<chname>","<password>";
+
+To set, unset, or change password of a channel.
+Use "null" to remove the password.
+
+Returns 1 on success.
+Only for public and private channel.
+
+---------------------------------------
+
+*channel_setgroup "<chname>",<group_id>{,...,<group_id>};
+*channel_setgroup2 "<chname>",<array_of_groups>;
+
+Set group restriction for a channel. Only player with matching <group_id>
+are allowed to to join the channel.
+
+By using 0 in the first group channel, the group restriction will be
+removed from the channel config.
+
+'channel_setgroup2' receives input for group list as an array.
+
+Returns 0 on failure, and 1 (or n groups count) on success.
+
+	// Example 1: Remove groups
+	channel_setgroup("#event",0);
+
+	// Example 2: Multiple values
+	channel_setgroup("#vip",2,5);
+
+	// Example 3: Using array
+	setarray .@staffs[0],2,3,4,10,99;
+	channel_setgroup("#staff",.@staffs);
+
+Only for public and private channel.
+
+---------------------------------------
+
+*channel_chat "<chname>","<message>"{,<color>};
+
+Sends message to the channel.
+Returns 1 on success.
+
+	// Example if channel doesn't have alias
+	channel_chat(#rathena,"Hello World!"); // #rathena Hello World!
+
+	// Example if channel has alias
+	channel_chat(#rathena,"Hello World!"); // [rAthena] Hello World!
+
+---------------------------------------
+
+*channel_ban "<chname>",<char_id>;
+
+Ban player from a public or private channel.
+Channel's owner or group with PC_PERM_CHANNEL_ADMIN cannot be banned.
+Returns 1 on success.
+
+---------------------------------------
+
+*channel_unban "<chname>",<char_id>;
+
+Unban player from a public or private channel.
+Returns 1 on success.
+
+---------------------------------------
+
+*channel_kick "<chname>",<char_id>;
+*channel_kick "<chname>","<char_name>";
+
+Kick player from a public or private channel.
+Channel's owner or group with PC_PERM_CHANNEL_ADMIN cannot be kicked.
+Returns 1 on success.
+
+---------------------------------------
+
+*channel_delete "<chname>";
+
+Delete an existing public or private channel. Cannot delete ally or
+local map channel.
+Returns 0 on success.
 
 ---------------------------------------
 

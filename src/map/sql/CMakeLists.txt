@@ -5,6 +5,7 @@
 if( BUILD_SQL_SERVERS )
 message( STATUS "Creating target map-server_sql" )
 set( SQL_MAP_HEADERS
+	"${SQL_MAP_SOURCE_DIR}/achievement.h"
 	"${SQL_MAP_SOURCE_DIR}/atcommand.h"
 	"${SQL_MAP_SOURCE_DIR}/battle.h"
 	"${SQL_MAP_SOURCE_DIR}/battleground.h"
@@ -15,6 +16,9 @@ set( SQL_MAP_HEADERS
 	"${SQL_MAP_SOURCE_DIR}/chrif.h"
 	"${SQL_MAP_SOURCE_DIR}/clan.h"
 	"${SQL_MAP_SOURCE_DIR}/clif.h"
+	"${SQL_MAP_SOURCE_DIR}/clif_obfuscation.h"
+	"${SQL_MAP_SOURCE_DIR}/clif_packetdb.h"
+	"${SQL_MAP_SOURCE_DIR}/clif_shuffle.h"
 	"${SQL_MAP_SOURCE_DIR}/date.h"
 	"${SQL_MAP_SOURCE_DIR}/duel.h"
 	"${SQL_MAP_SOURCE_DIR}/elemental.h"
@@ -47,6 +51,7 @@ set( SQL_MAP_HEADERS
 	"${SQL_MAP_SOURCE_DIR}/vending.h"
 	)
 set( SQL_MAP_SOURCES
+	"${SQL_MAP_SOURCE_DIR}/achievement.c"
 	"${SQL_MAP_SOURCE_DIR}/atcommand.c"
 	"${SQL_MAP_SOURCE_DIR}/battle.c"
 	"${SQL_MAP_SOURCE_DIR}/battleground.c"

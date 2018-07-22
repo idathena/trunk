@@ -5,7 +5,6 @@
 #include "../common/showmsg.h"
 #include "../common/malloc.h"
 #include "../common/strlib.h"
-#include "../common/db.h"
 #include "mapindex.h"
 
 #include <string.h>

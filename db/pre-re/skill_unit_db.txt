@@ -110,6 +110,7 @@
 711,0xff,     , -1, 0,1000,enemy, 0x018	//NPC_FLAMECROSS
 719,0x100,    ,  1, 0,  20,enemy, 0x2018	//NPC_HELLBURNING
 722,0x86,     ,  0,13, 300,enemy, 0x018	//NPC_WIDESUCK
+725,0xda,     ,  0, 0,1000,enemy, 0x000	//NPC_REVERBERATION
 
 2044,0xca,    ,  2, 0,  -1,all,   0x2018	//AB_EPICLESIS
 
@@ -145,8 +146,6 @@
 
 2443,0xdc,    ,  0, 0,1000,enemy, 0x00A	//SO_FIREWALK
 2444,0xdd,    ,  0, 0,1000,enemy, 0x00A	//SO_ELECTRICWALK
-2446,0x86,    ,  0, 3:3:3:4:4,1000,enemy, 0x018	//SO_EARTHGRAVE
-2447,0x86,    ,  0, 3:3:3:4:4,1000,enemy, 0x018	//SO_DIAMONDDUST
 2449,0xdf,    ,  0, 3:3:4:4:5,500,enemy,  0x018	//SO_PSYCHIC_WAVE
 2450,0xe0,    ,  3, 0,  -1,enemy, 0x2018 //SO_CLOUD_KILL
 2452,0xe4,    ,  3, 0,  -1,all,   0x2018	//SO_WARMER
@@ -164,7 +163,7 @@
 2488,0xe9,    ,  2, 0,  -1,enemy, 0x2000	//GN_FIRE_EXPANSION_TEAR_GAS
 2490,0xea,    ,  0, 1,1000,all,   0x006	//GN_HELLS_PLANT
 
-2555,0x104,   ,  0, 1:2:2:3:3,500,enemy,0x000	//RL_B_TRAP
+2555,0x104,   ,  0, 1:2:2:3:3,500,enemy,0x002	//RL_B_TRAP
 2567,0x105,   , -1, 0, 100,enemy, 0x098	//RL_FIRE_RAIN
 
 3010,0xfc,    ,  0, 1,5000,enemy, 0x018 //KO_MAKIBISHI

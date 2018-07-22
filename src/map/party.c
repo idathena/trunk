@@ -120,7 +120,7 @@ void do_init_party(void)
 	party_db = idb_alloc(DB_OPT_RELEASE_DATA);
 	party_booking_db = idb_alloc(DB_OPT_RELEASE_DATA); // Party Booking [Spiria]
 	add_timer_func_list(party_send_xy_timer, "party_send_xy_timer");
-	add_timer_interval(gettick()+battle_config.party_update_interval, party_send_xy_timer, 0, 0, battle_config.party_update_interval);
+	add_timer_interval(gettick() + battle_config.party_update_interval, party_send_xy_timer, 0, 0, battle_config.party_update_interval);
 }
 
 /// Party data lookup using party id.
@@ -798,7 +798,7 @@ int party_changeleader(struct map_session_data *sd, struct map_session_data *tsd
 /// - changes maps
 /// - logs in or out
 /// - gains a level (disabled)
-int party_recv_movemap(int party_id, int account_id, int char_id, unsigned short map, int online, int lv)
+int party_recv_movemap(int party_id, int account_id, int char_id, unsigned short map_idx, int online, int lv)
 {
 	struct party_member *m;
 	struct party_data *p;
@@ -815,12 +815,12 @@ int party_recv_movemap(int party_id, int account_id, int char_id, unsigned short
 	}
 
 	m = &p->party.member[i];
-	m->map = map;
+	m->map = map_idx;
 	m->online = online;
 	m->lv = lv;
 	//Check if they still exist on this map server
 	p->data[i].sd = party_sd_check(party_id,account_id,char_id);
-	
+
 	clif_party_info(p,NULL);
 	return 0;
 }
@@ -1065,7 +1065,7 @@ void party_exp_share(struct party_data *p, struct block_list *src, unsigned int 
 		uint32 base_gained = base_exp, job_gained = job_exp;
 
 		if (base_exp || job_exp) {
-			int rate = pc_level_penalty_mod(sd[i],md->db->lv,md->db->status.class_,1);
+			int rate = pc_level_penalty_mod(md->db->lv - sd[i]->status.base_level,md->db->status.class_,md->db->status.mode,1);
 
 			if (rate != 100) {
 				if (base_exp)
@@ -1244,7 +1244,7 @@ int party_calc_chorusbonus(struct map_session_data *sd, uint8 flag) {
 	if (!sd || !sd->status.party_id)
 		return 0;
 
-	members = party_foreachsamemap(party_sub_count_chorus, sd, 0);
+	members = party_foreachsamemap(party_sub_count_chorus, sd, AREA_SIZE);
 
 	if (members < 3 && (!flag || flag == 2 || flag == 3))
 		return 0; //Bonus remains 0 unless 3 or more Minstrels/Wanderers are in the party

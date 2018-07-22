@@ -396,7 +396,7 @@ int quest_check(TBL_PC *sd, int quest_id, enum quest_check_type type) {
 		case HAVEQUEST:
 			return sd->quest_log[i].state;
 		case PLAYTIME:
-			return (sd->quest_log[i].time < (unsigned int)time(NULL) ? 2 : sd->quest_log[i].state == Q_COMPLETE ? 1 : 0);
+			return (sd->quest_log[i].time < (unsigned int)time(NULL) ? 2 : (sd->quest_log[i].state == Q_COMPLETE ? 1 : 0));
 		case HUNTING:
 			if( sd->quest_log[i].state == Q_INACTIVE || sd->quest_log[i].state == Q_ACTIVE ) {
 				int j;

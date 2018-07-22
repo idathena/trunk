@@ -5,7 +5,6 @@
 #define _BATTLE_H_
 
 #include "../common/mmo.h"
-#include "../config/core.h"
 #include "map.h" //ELE_MAX
 
 //State of a single attack attempt; used in flee/def penalty calculations when mobbed
@@ -13,8 +12,8 @@ typedef enum damage_lv {
 	ATK_NONE,    //Not an attack
 	ATK_LUCKY,   //Attack was lucky-dodged
 	ATK_FLEE,    //Attack was dodged
-	ATK_MISS,    //Attack missed because of element/race modifier.
-	ATK_BLOCK,   //Attack was blocked by some skills.
+	ATK_MISS,    //Attack missed because of element/race modifier
+	ATK_BLOCK,   //Attack was blocked by some skills
 	ATK_DEF      //Attack connected
 } damage_lv;
 
@@ -103,7 +102,7 @@ int64 battle_calc_gvg_damage(struct block_list *src, struct block_list *bl, int6
 int64 battle_calc_bg_damage(struct block_list *src, struct block_list *bl, int64 damage, uint16 skill_id, int flag);
 
 void battle_damage(struct block_list *src, struct block_list *target, int64 damage, int delay, uint16 skill_lv, uint16 skill_id, enum damage_lv dmg_lv, unsigned short attack_type, bool additional_effects, unsigned int tick, bool isspdamage);
-int battle_delay_damage(unsigned int tick, int amotion, struct block_list *src, struct block_list *target, int attack_type, uint16 skill_id, uint16 skill_lv, int64 damage, enum damage_lv dmg_lv, int ddelay, bool additional_effects, bool isspdamage);
+int battle_delay_damage(unsigned int tick, int amotion, struct block_list *src, struct block_list *target, int attack_type, uint16 skill_id, uint16 skill_lv, int64 damage, enum damage_lv dmg_lv, int ddelay, bool additional_effects, bool isvanishdamage, bool isspdamage);
 
 //Summary normal attack treatment (basic attack)
 enum damage_lv battle_weapon_attack(struct block_list *bl, struct block_list *target, unsigned int tick, int flag);
@@ -115,8 +114,6 @@ struct block_list *battle_getenemy(struct block_list *target, int type, int rang
 int battle_gettarget(struct block_list *bl);
 uint16 battle_getcurrentskill(struct block_list *bl);
 
-#define	is_boss(bl)	(status_get_class_(bl) == CLASS_BOSS) //Can refine later [Aru]
-
 int battle_check_undead(int race,int element);
 int battle_check_target(struct block_list *src, struct block_list *target, int flag);
 bool battle_check_range(struct block_list *src, struct block_list *bl, int range);
@@ -125,7 +122,7 @@ void battle_consume_ammo(struct map_session_data *sd, uint16 skill_id, uint16 sk
 
 short battle_get_defense(struct block_list *src, struct block_list *target, uint16 skill_id, uint8 flag);
 
-bool target_has_infinite_defense(struct block_list *target, uint16 skill_id, int flag);
+bool is_infinite_defense(struct block_list *target, int flag);
 
 //êSettings
 #define MIN_HAIR_STYLE battle_config.min_hair_style
@@ -175,8 +172,7 @@ extern struct Battle_Config
 	int drop_rate0item;
 	int death_penalty_type;
 	int death_penalty_base,death_penalty_job;
-	int pvp_exp;  //[MouseJstr]
-	int gtb_sc_immunity;
+	int pvp_exp; //[MouseJstr]
 	int zeny_penalty;
 	int restart_hp_rate;
 	int restart_sp_rate;
@@ -249,10 +245,8 @@ extern struct Battle_Config
 	int max_heal; //Mitternacht
 	int resurrection_exp;
 	int shop_exp;
-	int combo_delay_rate;
 	int item_check;
 	int item_use_interval;	//[Skotlex]
-	int cashfood_use_interval;
 	int wedding_modifydisplay;
 	int wedding_ignorepalette;	//[Skotlex]
 	int xmas_ignorepalette;	//[Valaris]
@@ -318,6 +312,7 @@ extern struct Battle_Config
 	int vending_max_value;
 	int vending_over_max;
 	int vending_tax;
+	int vending_tax_min;
 	int show_steal_in_same_party;
 	int party_share_type;
 	int party_hp_mode;
@@ -326,7 +321,8 @@ extern struct Battle_Config
 	int attack_attr_none;
 	int item_rate_mvp, item_rate_common, item_rate_common_boss, item_rate_card, item_rate_card_boss,
 		item_rate_equip, item_rate_equip_boss, item_rate_heal, item_rate_heal_boss, item_rate_use,
-		item_rate_use_boss, item_rate_treasure, item_rate_adddrop;
+		item_rate_use_boss, item_rate_treasure, item_rate_adddrop, item_rate_common_mvp, item_rate_heal_mvp,
+		item_rate_use_mvp, item_rate_equip_mvp, item_rate_card_mvp;
 
 	int logarithmic_drops;
 	int item_drop_common_min,item_drop_common_max; //Added by TyrNemesis^
@@ -351,6 +347,7 @@ extern struct Battle_Config
 	int multi_level_up;
 	int max_exp_gain_rate; //Max amount of exp bar % you can get in one go.
 	int pk_mode;
+	int pk_mode_mes;
 	int pk_level_range;
 
 	int manner_system; //End additions [Valaris]
@@ -377,8 +374,6 @@ extern struct Battle_Config
 	int day_duration; //added by [Yor]
 	int night_duration; //added by [Yor]
 	int ban_hack_trade; //added by [Yor]
-	int packet_ver_flag; //added by [Yor]
-	int packet_ver_flag2; //expend of packet_ver_flag
 
 	int min_hair_style; //added by [MouseJstr]
 	int max_hair_style; //added by [MouseJstr]
@@ -422,7 +417,6 @@ extern struct Battle_Config
 	int ignore_items_gender; //[Lupus]
 
 	int berserk_cancels_buffs; //[Aru]
-	int debuff_on_logout; //Removes a few "official" negative Scs on logout [Skotlex]
 	int mob_ai; //Configures various mob_ai settings to make them smarter or dumber (Official) [Skotlex]
 	int hom_setting; //Configures various homunc settings which make them behave unlike normal characters [Skotlex]
 	int dynamic_mobs; //Dynamic Mobs [Wizputer] - battle_athena flag implemented by [random]
@@ -542,7 +536,6 @@ extern struct Battle_Config
 	int drop_rateincrease;
 	int feature_auction;
 	int mon_trans_disable_in_gvg;
-	int transform_end_on_death;
 	int feature_banking;
 	int emblem_woe_change;
 	int emblem_transparency_limit;
@@ -651,6 +644,11 @@ extern struct Battle_Config
 	int guild_alliance_onlygm;
 	int event_refine_chance;
 	int feature_achievement;
+	int allow_bound_sell;
+	int autoloot_adjust;
+	int show_skill_scale;
+
+#include "../custom/battle_config_struct.inc"
 } battle_config;
 
 void do_init_battle(void);

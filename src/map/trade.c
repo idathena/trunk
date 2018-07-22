@@ -539,7 +539,7 @@ void trade_tradecommit(struct map_session_data *sd)
 	if (!sd->state.trading || !sd->state.deal_locked) //Locked should be 1 (pressed ok) before you can press trade.
 		return;
 
-	if ((tsd = map_id2sd(sd->trade_partner)) == NULL) {
+	if (!(tsd = map_id2sd(sd->trade_partner))) {
 		trade_tradecancel(sd);
 		return;
 	}

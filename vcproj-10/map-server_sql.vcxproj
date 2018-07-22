@@ -171,6 +171,9 @@
     <ClInclude Include="..\src\map\chrif.h" />
     <ClInclude Include="..\src\map\clan.h" />
     <ClInclude Include="..\src\map\clif.h" />
+    <ClInclude Include="..\src\map\clif_obfuscation.h" />
+    <ClInclude Include="..\src\map\clif_packetdb.h" />
+    <ClInclude Include="..\src\map\clif_shuffle.h" />
     <ClInclude Include="..\src\map\date.h" />
     <ClInclude Include="..\src\map\duel.h" />
     <ClInclude Include="..\src\map\elemental.h" />
@@ -194,6 +197,7 @@
     <ClInclude Include="..\src\map\quest.h" />
     <ClInclude Include="..\src\config\const.h" />
     <ClInclude Include="..\src\config\core.h" />
+    <ClInclude Include="..\src\config\packets.h" />
     <ClInclude Include="..\src\config\renewal.h" />
     <ClInclude Include="..\src\config\secure.h" />
     <ClInclude Include="..\src\config\classes\general.h" />
@@ -290,8 +294,8 @@
     <Copy SourceFiles="..\conf\import-tmpl\log_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\log_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\login_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\login_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\map_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\map_conf.txt')" />
-    <Copy SourceFiles="..\conf\import-tmpl\msg_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\msg_conf.txt')" />
-	<Copy SourceFiles="..\conf\import-tmpl\packet_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\packet_conf.txt')" />
+    <Copy SourceFiles="..\conf\import-tmpl\packet_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\packet_conf.txt')" />
     <Copy SourceFiles="..\conf\import-tmpl\script_conf.txt" DestinationFolder="..\conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\script_conf.txt')" />
+    <Copy SourceFiles="..\conf\msg_conf\import-tmpl\map_msg_conf.txt" DestinationFolder="..\conf\msg_conf\import\" ContinueOnError="true" Condition="!Exists('..\conf\import\map_msg_conf.txt')" />
   </Target>
 </Project>

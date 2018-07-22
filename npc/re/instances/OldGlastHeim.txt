@@ -170,40 +170,40 @@ glast_01,204,273,6	script	Hugin#ghinstance	755,{
 		cutin "gl_barmund1",2;
 		mes "[Varmundt]";
 		mes "Are you the one ^0000ffHerico^000000 sent to help me?";
-		npctalk "Varmundt : Are you the one Herico sent to help me?";
+		npctalk "Varmundt: Are you the one Herico sent to help me?";
 		next;
 		select("Oh. Well I...");
 		mes "["+strcharinfo(0)+"]";
 		mes "Ah yes, I am. Herico told me to meet you.";
-		unittalk getcharid(3),strcharinfo(0)+" : Ah yes, I am. Herico told me to meet you.";
+		unittalk getcharid(3),strcharinfo(0)+": Ah yes, I am. Herico told me to meet you.";
 		next;
 		cutin "gl_barmund2",2;
 		mes "[Varmundt]";
 		mes "We don't have much time. We must report to Sir. Heinrich about Himelmez's invasion.";
-		npctalk "Varmundt : We don't have much time. We must report to Sir. Heinrich about Himelmez's invasion.";
+		npctalk "Varmundt: We don't have much time. We must report to Sir. Heinrich about Himelmez's invasion.";
 		next;
 		select("Himelmez...");
 		mes "["+strcharinfo(0)+"]";
 		mes "Who is Himelmez?";
-		unittalk getcharid(3),strcharinfo(0)+" : Who is Himelmez?";
+		unittalk getcharid(3),strcharinfo(0)+": Who is Himelmez?";
 		next;
 		cutin "gl_barmund3",2;
 		mes "[Varmundt]";
 		mes "Herico didn't tell you?";
-		npctalk "Varmundt : Herico didn't tell you?";
+		npctalk "Varmundt: Herico didn't tell you?";
 		next;
 		cutin "gl_barmund2",2;
 		mes "[Varmundt]";
 		mes "She is the Ruler of Death, Dead man's Valkyrie. Himelmez is looking to take the hart of Ymir from us.";
-		npctalk "Varmundt : She is the Ruler of Death, Dead man's Valkyrie. Himelmez is looking to take the hart of Ymir from us.";
+		npctalk "Varmundt: She is the Ruler of Death, Dead man's Valkyrie. Himelmez is looking to take the hart of Ymir from us.";
 		next;
 		mes "[Varmundt]";
 		mes "She might even destroy this whole castle if she wanted to.";
-		npctalk "Varmundt : She might even destroy this whole castle if she wanted to.";
+		npctalk "Varmundt: She might even destroy this whole castle if she wanted to.";
 		next;
 		mes "[Varmundt]";
 		mes "Hurry! Report to Sir. Heinrich about Himelmez. I must check the defense barrier here!";
-		npctalk "Varmundt : Hurry! Report to Sir. Heinrich about Himelmez. I must check the defense barrier here!";
+		npctalk "Varmundt: Hurry! Report to Sir. Heinrich about Himelmez. I must check the defense barrier here!";
 		close2;
 		cutin "gl_barmund2",255;
 		donpcevent instance_npcname("Varmundt#ghinstance1")+"::OnDisable";
@@ -280,25 +280,25 @@ OnEnable:
 		select("Sir. Heinrich. Varmundt...");
 		mes "["+strcharinfo(0)+"]";
 		mes "Sir. Heinrich. Do you know what is happening in the castle now?";
-		unittalk getcharid(3),strcharinfo(0)+" : Sir. Heinrich. Do you know what is happening in the castle now?";
+		unittalk getcharid(3),strcharinfo(0)+": Sir. Heinrich. Do you know what is happening in the castle now?";
 		next;
 		mes "[Heinrich]";
 		mes "Aren't you the adventurer that came along with Varmundt?";
-		npctalk "Heinrich : Aren't you the adventurer that came along with Varmundt?";
+		npctalk "Heinrich: Aren't you the adventurer that came along with Varmundt?";
 		next;
 		mes "[Heinrich]";
 		mes "What is it? Something wrong with the castle?";
-		npctalk "Heinrich : What is it? Something wrong with the castle?";
+		npctalk "Heinrich: What is it? Something wrong with the castle?";
 		next;
 		select("Himelmez's invasion...");
 		mes "["+strcharinfo(0)+"]";
 		mes "Dead man's Valkyrie, Himelmez is coming to take the Ymir's Heart piece hidden inside this castle!";
-		unittalk getcharid(3),strcharinfo(0)+" : Dead man's Valkyrie, Himelmez is coming to take the Ymir's Heart piece hidden inside this castle!";
+		unittalk getcharid(3),strcharinfo(0)+": Dead man's Valkyrie, Himelmez is coming to take the Ymir's Heart piece hidden inside this castle!";
 		next;
 		cutin "gl_heinrich1",2;
 		mes "[Heinrich]";
 		mes "Haha. Funny. Do you really think that is possible?";
-		npctalk "Heinrich : Haha. Funny. Do you really think that is possible?";
+		npctalk "Heinrich: Haha. Funny. Do you really think that is possible?";
 		next;
 		cutin "gl_barmund2",2;
 		mes "[Varmundt]";
@@ -312,17 +312,17 @@ OnEnable:
 		select("Even if you don't believe me...");
 		mes "["+strcharinfo(0)+"]";
 		mes "I can't make you believe me, but there's no time to argue!";
-		unittalk getcharid(3),strcharinfo(0)+" : I can't make you believe me, but there's no time to argue!";
+		unittalk getcharid(3),strcharinfo(0)+": I can't make you believe me, but there's no time to argue!";
 		cutin "gl_barmund2",255;
 		next;
 		cutin "gl_heinrich1",2;
 		mes "[Heinrich]";
 		mes "Thank you for the help. But, we don't even have our king with us right now.";
-		npctalk "Heinrich : Thank you for the help. But, we don't even have our king with us right now.";
+		npctalk "Heinrich: Thank you for the help. But, we don't even have our king with us right now.";
 		next;
 		mes "[Heinrich]";
 		mes "We cannot risk moving the heart just because some stranger says so.";
-		npctalk "Heinrich : We cannot risk moving the heart just because some stranger says so.";
+		npctalk "Heinrich: We cannot risk moving the heart just because some stranger says so.";
 		close2;
 		donpcevent instance_npcname("Heinrich#ghinstance1")+"::OnDisable";
 		donpcevent instance_npcname("Heinrich#ghinstance2")+"::OnEnable";
@@ -358,22 +358,22 @@ OnEnable:
 	hideoffnpc instance_npcname("Varmundt#ghinstance2");
 	end;
 OnTalk1:
-	npctalk "Varmundt : I'm not kidding, Sir. Heinrich. If I'm correct, then she will be here very soon.";
+	npctalk "Varmundt: I'm not kidding, Sir. Heinrich. If I'm correct, then she will be here very soon.";
 	end;
 OnTalk2:
-	npctalk "Varmundt : We must hide the heart piece to a safe place before Himelmez's attack starts!";
+	npctalk "Varmundt: We must hide the heart piece to a safe place before Himelmez's attack starts!";
 	end;
 OnTalk3:
-	npctalk "Varmundt : Himelmez!! Already!";
+	npctalk "Varmundt: Himelmez!! Already!";
 	end;
 OnTalk4:
-	npctalk "Varmundt : Sir. Heinrich, they're all monsters. You need to give them rest!";
+	npctalk "Varmundt: Sir. Heinrich, they're all monsters. You need to give them rest!";
 	end;
 OnTalk5:
-	npctalk "Varmundt : Sir. Heinrich! We don't have much time!";
+	npctalk "Varmundt: Sir. Heinrich! We don't have much time!";
 	end;
 OnTalk6:
-	npctalk "Varmundt : If you hurry now, there's a chance!";
+	npctalk "Varmundt: If you hurry now, there's a chance!";
 	end;
 }
 
@@ -387,34 +387,34 @@ OnEnable:
 	hideoffnpc instance_npcname("Heinrich#ghinstance2");
 	end;
 OnTalk1:
-	npctalk "Heinrich : Who are you?";
+	npctalk "Heinrich: Who are you?";
 	end;
 OnTalk2:
-	npctalk "Heinrich : Aren't you a little too feminine to be the Ruler of death? We are not afraid of you...";
+	npctalk "Heinrich: Aren't you a little too feminine to be the Ruler of death? We are not afraid of you...";
 	end;
 OnTalk3:
-	npctalk "Heinrich : What?";
+	npctalk "Heinrich: What?";
 	end;
 OnTalk4:
-	npctalk "Heinrich : My king is visiting the Rune-Midgarts royal family. He's not back yet.";
+	npctalk "Heinrich: My king is visiting the Rune-Midgarts royal family. He's not back yet.";
 	end;
 OnTalk5:
-	npctalk "Heinrich : And now you are trying to trick me, what has happened to him?!";
+	npctalk "Heinrich: And now you are trying to trick me, what has happened to him?!";
 	end;
 OnTalk6:
-	npctalk "Heinrich : She probably already knows where the Ymir's heart piece is.";
+	npctalk "Heinrich: She probably already knows where the Ymir's heart piece is.";
 	end;
 OnTalk7:
-	npctalk "Heinrich : All Khalitzburg and White Knights should follow me now...";
+	npctalk "Heinrich: All Khalitzburg and White Knights should follow me now...";
 	end;
 OnTalk8:
-	npctalk "Heinrich : My men... This can't be happening!";
+	npctalk "Heinrich: My men... This can't be happening!";
 	end;
 OnTalk9:
-	npctalk "Heinrich : I'm so sorry...";
+	npctalk "Heinrich: I'm so sorry...";
 	end;
 OnTalk10:
-	npctalk "Heinrich : I am sorry, my knights! Forgive me!";
+	npctalk "Heinrich: I am sorry, my knights! Forgive me!";
 	end;
 }
 
@@ -428,28 +428,28 @@ OnEnable:
 	hideoffnpc instance_npcname("Heinrich#ghinstance3");
 	end;
 OnTalk1:
-	npctalk "Heinrich : I killed my own men...";
+	npctalk "Heinrich: I killed my own men...";
 	end;
 OnTalk2:
-	npctalk "Heinrich : Varmundt is right. Now is not the time for mourning.";
+	npctalk "Heinrich: Varmundt is right. Now is not the time for mourning.";
 	end;
 OnTalk3:
-	npctalk "Heinrich : I have a request to you followers.";
+	npctalk "Heinrich: I have a request to you followers.";
 	end;
 OnTalk4:
-	npctalk "Heinrich : Himelmez can turn living beings into monsters.";
+	npctalk "Heinrich: Himelmez can turn living beings into monsters.";
 	end;
 OnTalk5:
-	npctalk "Heinrich : But, there might still be survivors here.";
+	npctalk "Heinrich: But, there might still be survivors here.";
 	end;
 OnTalk6:
-	npctalk "Heinrich : Destroy the monsters and find any survivors.";
+	npctalk "Heinrich: Destroy the monsters and find any survivors.";
 	end;
 OnTalk7:
-	npctalk "Heinrich : Varmundt and I will chase Himelmez.";
+	npctalk "Heinrich: Varmundt and I will chase Himelmez.";
 	end;
 OnTalk8:
-	npctalk "Heinrich : Very well, Varmundt. Let's find Himelmez.";
+	npctalk "Heinrich: Very well, Varmundt. Let's find Himelmez.";
 	end;
 }
 
@@ -463,25 +463,25 @@ OnEnable:
 	hideoffnpc instance_npcname("Himelmez#ghinstance1");
 	end;
 OnTalk1:
-	npctalk "Himelmez : Well well~ Am I interrupting you? Weren't you expecting me?";
+	npctalk "Himelmez: Well well~ Am I interrupting you? Weren't you expecting me?";
 	end;
 OnTalk2:
-	npctalk "Himelmez : My name is Lisa Kahn Himelmez. Master of Dullahan, Dead man's Valkyrie, that's what they call me.";
+	npctalk "Himelmez: My name is Lisa Kahn Himelmez. Master of Dullahan, Dead man's Valkyrie, that's what they call me.";
 	end;
 OnTalk3:
-	npctalk "Himelmez : Let's see if you can relax like that after you find out where your king is.";
+	npctalk "Himelmez: Let's see if you can relax like that after you find out where your king is.";
 	end;
 OnTalk4:
-	npctalk "Himelmez : Hmm, now I have your attention do I not?";
+	npctalk "Himelmez: Hmm, now I have your attention do I not?";
 	end;
 OnTalk5:
-	npctalk "Himelmez : It's a pity to meet you in a situation like this.";
+	npctalk "Himelmez: It's a pity to meet you in a situation like this.";
 	end;
 Ontalk6:
-	npctalk "Himelmez : Well~ I would love to sit down and explain for you, but I'm kind of busy today~";
+	npctalk "Himelmez: Well~ I would love to sit down and explain for you, but I'm kind of busy today~";
 	end;
 Ontalk7:
-	npctalk "Himelmez : I have business to take care of. My minions will treat you well enough for me~";
+	npctalk "Himelmez: I have business to take care of. My minions will treat you well enough for me~";
 	end;
 }
 
@@ -838,33 +838,33 @@ OnMyMobDead:
 		select("Hold on! Are you the only survivor?");
 		mes "["+strcharinfo(0)+"]";
 		mes "Hold on! Are you the only survivor?";
-		unittalk getcharid(3),strcharinfo(0)+" : Hold on! Are you the only survivor?";
+		unittalk getcharid(3),strcharinfo(0)+": Hold on! Are you the only survivor?";
 		next;
 		mes "[Altar boy Domun]";
 		mes "Chamberlains... monks... They all turned into monsters. I couldn't do anything.";
-		npctalk "Altar boy Domun : Chamberlains... monks... They all turned into monsters. I couldn't do anything.";
+		npctalk "Altar boy Domun: Chamberlains... monks... They all turned into monsters. I couldn't do anything.";
 		next;
 		mes "[Altar boy Domun]";
 		mes "All I could do was... Just hide in here... Nothing, nothing I could do...";
-		npctalk "Altar boy Domun : All I could do was... Just hide in here... Nothing, nothing I could do...";
+		npctalk "Altar boy Domun: All I could do was... Just hide in here... Nothing, nothing I could do...";
 		next;
 		select("Pull it together!");
 		mes "["+strcharinfo(0)+"]";
 		mes "Wake up kid! Go east and find the middle passage to the outside! That is safe!";
-		unittalk getcharid(3),strcharinfo(0)+" : Wake up kid! Go east and find the middle passage to the outside! That is safe!";
+		unittalk getcharid(3),strcharinfo(0)+": Wake up kid! Go east and find the middle passage to the outside! That is safe!";
 		next;
 		mes "[Altar boy Domun]";
 		mes "To the east passage? Alone? How?";
-		npctalk "Altar boy Domun : To the east passage? Alone? How?";
+		npctalk "Altar boy Domun: To the east passage? Alone? How?";
 		next;
 		select("I will give you a weapon.");
 		mes "["+strcharinfo(0)+"]";
 		mes "Here's a weapon. Just close your eye and swing for those monsters.";
-		unittalk getcharid(3),strcharinfo(0)+" : Here's a weapon. Just close your eye and swing for those monsters.";
+		unittalk getcharid(3),strcharinfo(0)+": Here's a weapon. Just close your eye and swing for those monsters.";
 		next;
 		mes "[Altar boy Domun]";
 		mes "Ok, I... I'l try.";
-		npctalk "Altar boy Domun : Ok, I... I'l try.";
+		npctalk "Altar boy Domun: Ok, I... I'l try.";
 		close2;
 		donpcevent instance_npcname("Altar boy Domun#clearGH")+"::OnDisable";
 		donpcevent instance_npcname("#ghmemorialmob02")+"::OnEnable";
@@ -919,35 +919,35 @@ OnMyMobDead:
 	if (getcharid(0) == getpartyleader(getcharid(1),2)) {
 		mes "[Holgren the Destroyer]";
 		mes "Die!! You shall die!!!";
-		npctalk "Holgren the Destroyer : Die!! You shall die!!!";
+		npctalk "Holgren the Destroyer: Die!! You shall die!!!";
 		specialeffect EF_CRASHEARTH;
 		next;
 		select("Relax! I'm not a monster!");
 		mes "["+strcharinfo(0)+"]";
 		mes "Relax! I am Human. Are you alone? Anyone else here?";
-		unittalk getcharid(3),strcharinfo(0)+" : Relax! I am Human. Are you alone? Anyone else here?";
+		unittalk getcharid(3),strcharinfo(0)+": Relax! I am Human. Are you alone? Anyone else here?";
 		next;
 		mes "[Holgren the Destroyer]";
 		mes "It's only me alive.";
-		npctalk "Holgren the Destroyer : It's only me alive.";
+		npctalk "Holgren the Destroyer: It's only me alive.";
 		next;
 		select("It's dangerous here...");
 		mes "["+strcharinfo(0)+"]";
 		mes "It's dangerous here. You know the way to the middle passage? Can you move?";
-		unittalk getcharid(3),strcharinfo(0)+" : It's dangerous here. You know the way to the middle passage? Can you move?";
+		unittalk getcharid(3),strcharinfo(0)+": It's dangerous here. You know the way to the middle passage? Can you move?";
 		next;
 		mes "[Holgren the Destroyer]";
 		mes "Yes, I can move. I need to get out of here.";
-		npctalk "Holgren the Destroyer : Yes, I can move. I need to get out of here.";
+		npctalk "Holgren the Destroyer: Yes, I can move. I need to get out of here.";
 		next;
 		select("Be safe...");
 		mes "["+strcharinfo(0)+"]";
 		mes "Sorry, I can't go with you.";
-		unittalk getcharid(3),strcharinfo(0)+" : Sorry, I can't go with you.";
+		unittalk getcharid(3),strcharinfo(0)+": Sorry, I can't go with you.";
 		next;
 		mes "[Holgren the Destroyer]";
 		mes "It's ok. You've already done enough. I can help myself. Good luck to you too.";
-		npctalk "Holgren the Destroyer : It's ok. You've already done enough. I can help myself. Good luck to you too.";
+		npctalk "Holgren the Destroyer: It's ok. You've already done enough. I can help myself. Good luck to you too.";
 		close2;
 		donpcevent instance_npcname("Holgren the Destroyer")+"::OnDisable";
 		donpcevent instance_npcname("#ghmemorialmob03")+"::OnEnable";
@@ -1187,13 +1187,13 @@ OnEnable:
 	hideoffnpc instance_npcname("Heinrich#ghinstance4");
 	end;
 OnTalk1:
-	npctalk "Heinrich : Himelmez! We will not let you get away from us!";
+	npctalk "Heinrich: Himelmez! We will not let you get away from us!";
 	end;
 OnTalk2:
-	npctalk "Heinrich : What... These are!";
+	npctalk "Heinrich: What... These are!";
 	end;
 OnTalk3:
-	npctalk "Heinrich : Sir. Varmundt! Help those adventurers. I will go after Himelmez!";
+	npctalk "Heinrich: Sir. Varmundt! Help those adventurers. I will go after Himelmez!";
 	end;
 }
 
@@ -1213,22 +1213,22 @@ OnEnable:
 	hideoffnpc instance_npcname("Himelmez#ghinstance2");
 	end;
 OnTalk1:
-	npctalk "Himelmez : Guess you are either lucky or powerful, to make it this far.";
+	npctalk "Himelmez: Guess you are either lucky or powerful, to make it this far.";
 	end;
 OnTalk2:
-	npctalk "Himelmez : But, it doesn't matter.";
+	npctalk "Himelmez: But, it doesn't matter.";
 	end;
 OnTalk3:
-	npctalk "Himelmez : You will all die here.";
+	npctalk "Himelmez: You will all die here.";
 	end;
 OnTalk4:
-	npctalk "Himelmez : Ha ha ha, worry about yourself. You think I am alone here?";
+	npctalk "Himelmez: Ha ha ha, worry about yourself. You think I am alone here?";
 	end;
 OnTalk5:
-	npctalk "Himelmez : I will go on my way while my new toy entertains you.";
+	npctalk "Himelmez: I will go on my way while my new toy entertains you.";
 	end;
 OnTalk6:
-	npctalk "Himelmez : Fare well~, hope to see you again sometime, Heinrich.";
+	npctalk "Himelmez: Fare well~, hope to see you again sometime, Heinrich.";
 	end;
 }
 
@@ -1263,10 +1263,10 @@ OnEnable:
 	hideoffnpc instance_npcname("Varmundt#ghinstance3");
 	end;
 OnTalk1:
-	npctalk "Varmundt : Sir. Heinrich! I sense something strange and strong coming!";
+	npctalk "Varmundt: Sir. Heinrich! I sense something strange and strong coming!";
 	end;
 OnTalk2:
-	npctalk "Varmundt : I collected some items dropped from its body. You can take it from me.";
+	npctalk "Varmundt: I collected some items dropped from its body. You can take it from me.";
 	end;
 }
 
@@ -1287,19 +1287,19 @@ OnEnable:
 	hideoffnpc instance_npcname("Heinrich#ghinstance5");
 	end;
 OnTalk1:
-	npctalk "Heinrich : This structure was not in the castle before!";
+	npctalk "Heinrich: This structure was not in the castle before!";
 	end;
 OnTalk2:
-	npctalk "Heinrich : We tried to break it down but it's really strong.";
+	npctalk "Heinrich: We tried to break it down but it's really strong.";
 	end;
 OnTalk3:
-	npctalk "Heinrich : It is inexcusable behavior.";
+	npctalk "Heinrich: It is inexcusable behavior.";
 	end;
 OnTalk4:
-	npctalk "Heinrich : I already exterminated all my soldiers and maybe more...";
+	npctalk "Heinrich: I already exterminated all my soldiers and maybe more...";
 	end;
 OnTalk5:
-	npctalk "Heinrich : ...";
+	npctalk "Heinrich: ...";
 	end;
 }
 
@@ -1318,52 +1318,52 @@ OnEnable:
 	hideoffnpc instance_npcname("Varmundt#ghinstance4");
 	end;
 OnTalk1:
-	npctalk "Varmundt : This is Himelmez's closed space. We blocked each area and aisle.";
+	npctalk "Varmundt: This is Himelmez's closed space. We blocked each area and aisle.";
 	end;
 OnTalk2:
-	npctalk "Varmundt : Step back. Let me try to dispel the magic.";
+	npctalk "Varmundt: Step back. Let me try to dispel the magic.";
 	end;
 OnTalk3:
-	npctalk "Varmundt : I think that part of closed space is broke down.";
+	npctalk "Varmundt: I think that part of closed space is broke down.";
 	end;
 OnTalk4:
-	npctalk "Varmundt : I have never seen this closed space.";
+	npctalk "Varmundt: I have never seen this closed space.";
 	end;
 OnTalk5:
-	npctalk "Varmundt : Himelmez hides stone chains in undead people's body.";
+	npctalk "Varmundt: Himelmez hides stone chains in undead people's body.";
 	end;
 OnTalk6:
-	npctalk "Varmundt : Maybe this closed space is maintained with these stone chains.";
+	npctalk "Varmundt: Maybe this closed space is maintained with these stone chains.";
 	end;
 OnTalk7:
-	npctalk "Varmundt : If you want to break it, you have to kill one of those who have a stone chain.";
+	npctalk "Varmundt: If you want to break it, you have to kill one of those who have a stone chain.";
 	end;
 OnTalk8:
-	npctalk "Varmundt : But, we can't recognize who has a stone chain so, we have to purify everything.";
+	npctalk "Varmundt: But, we can't recognize who has a stone chain so, we have to purify everything.";
 	end;
 OnTalk9:
-	npctalk "Varmundt : Commander...";
+	npctalk "Varmundt: Commander...";
 	end;
 OnTalk10:
-	npctalk "Varmundt : Commander! You need to be strong.";
+	npctalk "Varmundt: Commander! You need to be strong.";
 	end;
 OnTalk11:
-	npctalk "Varmundt : Our enemy is not human.";
+	npctalk "Varmundt: Our enemy is not human.";
 	end;
 OnTalk12:
-	npctalk "Varmundt : Even though you deny it, they'll never turn back to human.";
+	npctalk "Varmundt: Even though you deny it, they'll never turn back to human.";
 	end;
 OnTalk13:
-	npctalk "Varmundt : Well, let's go then.";
+	npctalk "Varmundt: Well, let's go then.";
 	end;
 OnTalk14:
-	npctalk "Varmundt : And you guys, just take a break and follow us.";
+	npctalk "Varmundt: And you guys, just take a break and follow us.";
 	end;
 OnTalk15:
-	npctalk "Varmundt : It could be hard fighting so, stay strong.";
+	npctalk "Varmundt: It could be hard fighting so, stay strong.";
 	end;
 OnTalk16:
-	npctalk "Varmundt : Ok, it's time to begin Heinrich.";
+	npctalk "Varmundt: Ok, it's time to begin Heinrich.";
 	end;
 }
 
@@ -1711,22 +1711,22 @@ OnEnable:
 	hideoffnpc instance_npcname("Heinrich#ghinstance6");
 	end;
 OnTalk1:
-	npctalk "Heinrich : Gerhalt!";
+	npctalk "Heinrich: Gerhalt!";
 	end;
 OnTalk2:
-	npctalk "Heinrich : What are you doing to my soldier Himelmez!";
+	npctalk "Heinrich: What are you doing to my soldier Himelmez!";
 	end;
 OnTalk3:
-	npctalk "Heinrich : Himelmez! You already made what you want so there is no more need for a sacrifice!";
+	npctalk "Heinrich: Himelmez! You already made what you want so there is no more need for a sacrifice!";
 	end;
 OnTalk4:
-	npctalk "Heinrich : Let him go! I don't need to see anyone else suffer!";
+	npctalk "Heinrich: Let him go! I don't need to see anyone else suffer!";
 	end;
 OnTalk5:
-	npctalk "Heinrich : I'll never forgive you.";
+	npctalk "Heinrich: I'll never forgive you.";
 	end;
 OnTalk6:
-	npctalk "Heinrich : I'll never let you get away Himelmez!!";
+	npctalk "Heinrich: I'll never let you get away Himelmez!!";
 	end;
 }
 
@@ -1745,7 +1745,7 @@ OnEnable:
 	hideoffnpc instance_npcname("Varmundt#ghinstance5");
 	end;
 OnTalk1:
-	npctalk "Varmundt : We have no choice. We have to fight against Amdarais!";
+	npctalk "Varmundt: We have no choice. We have to fight against Amdarais!";
 	end;
 }
 
@@ -1764,37 +1764,37 @@ OnEnable:
 	hideoffnpc instance_npcname("Himelmez#ghinstance4");
 	end;
 OnTalk1:
-	npctalk "Himelmez : Amazing~ I thought that you were not even close to getting here...";
+	npctalk "Himelmez: Amazing~ I thought that you were not even close to getting here...";
 	end;
 OnTalk2:
-	npctalk "Himelmez : Hoo hoo, I already found a piece of Ymir's heart Heinrich.";
+	npctalk "Himelmez: Hoo hoo, I already found a piece of Ymir's heart Heinrich.";
 	end;
 OnTalk3:
-	npctalk "Himelmez : If he did not bother me, it would have been faster.";
+	npctalk "Himelmez: If he did not bother me, it would have been faster.";
 	end;
 OnTalk4:
-	npctalk "Himelmez : Really? What makes you think so?";
+	npctalk "Himelmez: Really? What makes you think so?";
 	end;
 OnTalk5:
-	npctalk "Himelmez : Let him go? I think... No...";
+	npctalk "Himelmez: Let him go? I think... No...";
 	end;
 OnTalk6:
-	npctalk "Himelmez : Besides, this is your last surviving soldier Heinrich.";
+	npctalk "Himelmez: Besides, this is your last surviving soldier Heinrich.";
 	end;
 OnTalk7:
-	npctalk "Himelmez : He made life difficult for me.";
+	npctalk "Himelmez: He made life difficult for me.";
 	end;
 OnTalk8:
-	npctalk "Himelmez : He is perfectly fit for my new creation Amdarais.";
+	npctalk "Himelmez: He is perfectly fit for my new creation Amdarais.";
 	end;
 OnTalk9:
-	npctalk "Himelmez : Uh uh~ I'm so scared.";
+	npctalk "Himelmez: Uh uh~ I'm so scared.";
 	end;
 OnTalk10:
-	npctalk "Himelmez : Anyway, we will have a chance to see because we need to talk more.";
+	npctalk "Himelmez: Anyway, we will have a chance to see because we need to talk more.";
 	end;
 OnTalk11:
-	npctalk "Himelmez : So long boys.";
+	npctalk "Himelmez: So long boys.";
 	end;
 }
 
@@ -1847,13 +1847,13 @@ OnEnable:
 	hideoffnpc instance_npcname("Gerhalt#ghinstance1");
 	end;
 OnTalk1:
-	npctalk "Gerhalt : Kkkkah! Run away! I can't endure anymore!";
+	npctalk "Gerhalt: Kkkkah! Run away! I can't endure anymore!";
 	end;
 OnTalk2:
-	npctalk "Gerhalt : Commandant... Come on, you need to run away from here... Ugh.";
+	npctalk "Gerhalt: Commandant... Come on, you need to run away from here... Ugh.";
 	end;
 OnTalk3:
-	npctalk "Gerhalt : You can make my body but you can't take my soul Himelmez!";
+	npctalk "Gerhalt: You can make my body but you can't take my soul Himelmez!";
 	end;
 OnEffect1:
 	specialeffect EF_BARRIER;
@@ -2211,7 +2211,7 @@ glast_01,210,273,5	script	Hugin's Buttler	69,{
 	mes "[Hugin's Buttler]";
 	mes "Bring Temporal Crystal items for various Temporal boots items. Pick something you want.";
 	next;
-	switch (select("Cancel","Buy Temporal Boots (Need 1 Temporal Crystal)","Upgrade Temporal Boots (Need 5 Temporal Crystals)")) {
+	switch (select("Cancel","Buy Temporal Boots (Need 1 Temporal Crystal)","Upgrade Temporal Boots (Need 5 Temporal Crystals)","Upgrade Modified Boots (Need 5 Temporal Crystals)")) {
 	case 1:
 		mes "[Hugin's Buttler]";
 		mes "Come back whenever you want.";
@@ -2227,6 +2227,9 @@ glast_01,210,273,5	script	Hugin's Buttler	69,{
 		mes "[Hugin's Buttler]";
 		mes "You need more Temporal Crystals. Come back when you get some more Temporal Crystals during your travel through Old Glast Heim.";
 		close;
+	case 4:
+		set .@modified,1;
+	// Fall through
 	case 3:
 		set .@part,EQI_SHOES;
 		if (!getequipisequiped(.@part)) {
@@ -2242,6 +2245,7 @@ glast_01,210,273,5	script	Hugin's Buttler	69,{
 				next;
 				setarray .@type$[0],"Strength","Intelligence","Agility","Vitality","Dexterity","Lucky";
 				setarray .@equip_type[0],22000,22001,22002,22003,22004,22005;
+				setarray .@equip_type2[0],22107,22108,22109,22110,22111,22112;
 				set .@select,select("Cancel","Str Boots","Int Boots","Agi Boots","Vit Boots","Dex Boots","Luk Boots");
 				switch (.@select) {
 				case 1:
@@ -2255,14 +2259,17 @@ glast_01,210,273,5	script	Hugin's Buttler	69,{
 				case 6:
 				case 7:
 					mes "[Hugin's Buttler]";
-					mes "Are you sure about buying Temporal ^FF0000"+.@type$[.@select-2]+"^000000 Boots? There's no refunds.";
+					mes "Are you sure about buying "+(.@modified?"Modified":"Temporal")+" ^FF0000"+.@type$[.@select-2]+"^000000 Boots? There's no refunds.";
 					next;
 					if (select("Think again","Yes, I am sure.") == 2) {
 						mes "[Hugin's Buttler]";
 						mes "The boots have been upgraded as you want.";
 						delequip .@part;
 						delitem 6607,5; //Temporal_Crystal
-						getitem .@equip_type[.@select-2],1; //Temporal_STR_Boots,Temporal_INT_Boots,Temporal_AGI_Boots,Temporal_VIT_Boots,Temporal_DEX_Boots,Temporal_LUK_Boots
+						if (.@modified) //Modified_STR_Boots,Modified_INT_Boots,Modified_AGI_Boots,Modified_VIT_Boots,Modified_DEX_Boots,Modified_LUK_Boots
+							getitem .@equip_type2[.@select-2],1;
+						else //Temporal_STR_Boots,Temporal_INT_Boots,Temporal_AGI_Boots,Temporal_VIT_Boots,Temporal_DEX_Boots,Temporal_LUK_Boots
+							getitem .@equip_type[.@select-2],1;
 						close;
 					}
 					mes "[Hugin's Buttler]";
@@ -2342,6 +2349,12 @@ glast_01,212,273,4	script	Hugin's Magic Master	66,{
 	case 22003: //Temporal_VIT_Boots
 	case 22004: //Temporal_DEX_Boots
 	case 22005: //Temporal_LUK_Boots
+	case 22107: //Modified_STR_Boots
+	case 22108: //Modified_INT_Boots
+	case 22109: //Modified_AGI_Boots
+	case 22110: //Modified_VIT_Boots
+	case 22111: //Modified_DEX_Boots
+	case 22112: //Modified_LUK_Boots
 		if (!.@card3) { //4th slot 1st try enchanting
 			set .@cost,.@enchant_cost[0];
 			set .@number,1;
@@ -2356,20 +2369,10 @@ glast_01,212,273,4	script	Hugin's Magic Master	66,{
 				mes "Ok, come back when you are ready.";
 				close;
 			case 2:
-				set .@enchant,.@enchant1st[.@select-2];
-				break;
 			case 3:
-				set .@enchant,.@enchant1st[.@select-2];
-				break;
 			case 4:
-				set .@enchant,.@enchant1st[.@select-2];
-				break;
 			case 5:
-				set .@enchant,.@enchant1st[.@select-2];
-				break;
 			case 6:
-				set .@enchant,.@enchant1st[.@select-2];
-				break;
 			case 7:
 				set .@enchant,.@enchant1st[.@select-2];
 				break;
@@ -2428,52 +2431,32 @@ glast_01,212,273,4	script	Hugin's Magic Master	66,{
 						delitem 6608,.@cost; //Coagulated_Spell
 						delequip .@part;
 						mes "[Hugin's Magic Master]";
-						mes "This is it! This special stone is now yours.";
-						mes "Hahaha... I am really the only master of these things.";
-						mes "Thank you for believing in me.";
+						mes "Trying for ^630000Bonus effect^000000 upgrade.";
 						getitem2 .@equip_id,1,1,.@equip_refine,0,0,0,.@enchant,.@card3;
 						close;
 				}
 			}
 			//4th slot 2nd try enchanting
-			if (.@card3 == .@enchant1st[0])
-				set .@enchant,.@enchant2nd[0];
-			else if (.@card3 == .@enchant1st[1])
-				set .@enchant,.@enchant2nd[1];
-			else if (.@card3 == .@enchant1st[2])
-				set .@enchant,.@enchant2nd[2];
-			else if (.@card3 == .@enchant1st[3])
-				set .@enchant,.@enchant2nd[3];
-			else if (.@card3 == .@enchant1st[4])
-				set .@enchant,.@enchant2nd[4];
-			else if (.@card3 == .@enchant1st[5])
-				set .@enchant,.@enchant2nd[5];
+			     if (.@card3 == .@enchant1st[0]) set .@enchant,.@enchant2nd[0];
+			else if (.@card3 == .@enchant1st[1]) set .@enchant,.@enchant2nd[1];
+			else if (.@card3 == .@enchant1st[2]) set .@enchant,.@enchant2nd[2];
+			else if (.@card3 == .@enchant1st[3]) set .@enchant,.@enchant2nd[3];
+			else if (.@card3 == .@enchant1st[4]) set .@enchant,.@enchant2nd[4];
+			else if (.@card3 == .@enchant1st[5]) set .@enchant,.@enchant2nd[5];
 			//4th slot 3rd try enchanting
-			if (.@card3 == .@enchant2nd[0])
-				set .@enchant,.@enchant3rd[0];
-			else if (.@card3 == .@enchant2nd[1])
-				set .@enchant,.@enchant3rd[1];
-			else if (.@card3 == .@enchant2nd[2])
-				set .@enchant,.@enchant3rd[2];
-			else if (.@card3 == .@enchant2nd[3])
-				set .@enchant,.@enchant3rd[3];
-			else if (.@card3 == .@enchant2nd[4])
-				set .@enchant,.@enchant3rd[4];
-			else if (.@card3 == .@enchant2nd[5])
-				set .@enchant,.@enchant3rd[5];
+			     if (.@card3 == .@enchant2nd[0]) set .@enchant,.@enchant3rd[0];
+			else if (.@card3 == .@enchant2nd[1]) set .@enchant,.@enchant3rd[1];
+			else if (.@card3 == .@enchant2nd[2]) set .@enchant,.@enchant3rd[2];
+			else if (.@card3 == .@enchant2nd[3]) set .@enchant,.@enchant3rd[3];
+			else if (.@card3 == .@enchant2nd[4]) set .@enchant,.@enchant3rd[4];
+			else if (.@card3 == .@enchant2nd[5]) set .@enchant,.@enchant3rd[5];
 			//4th slot 4th try enchanting
-			if (.@card3 == .@enchant3rd[0])
-				set .@enchant,.@enchant4th[0];
-			else if (.@card3 == .@enchant3rd[1])
-				set .@enchant,.@enchant4th[1];
-			else if (.@card3 == .@enchant3rd[2])
-				set .@enchant,.@enchant4th[2];
-			else if (.@card3 == .@enchant3rd[3])
-				set .@enchant,.@enchant4th[3];
-			else if (.@card3 == .@enchant3rd[4])
-				set .@enchant,.@enchant4th[4];
-			else if (.@card3 == .@enchant3rd[5])
-				set .@enchant,.@enchant4th[5];
+			     if (.@card3 == .@enchant3rd[0]) set .@enchant,.@enchant4th[0];
+			else if (.@card3 == .@enchant3rd[1]) set .@enchant,.@enchant4th[1];
+			else if (.@card3 == .@enchant3rd[2]) set .@enchant,.@enchant4th[2];
+			else if (.@card3 == .@enchant3rd[3]) set .@enchant,.@enchant4th[3];
+			else if (.@card3 == .@enchant3rd[4]) set .@enchant,.@enchant4th[4];
+			else if (.@card3 == .@enchant3rd[5]) set .@enchant,.@enchant4th[5];
 			mes "[Hugin's Magic Master]";
 			mes "Enchanting ^0000FF"+.@equip_name$+"^000000's 4th slot as ^0000FF"+.@number+"^000000 level effect. Requires ^0000FF"+.@cost+"^000000 Coagulated Spell items.";
 			next;
@@ -2539,6 +2522,12 @@ glast_01,210,270,0	script	Hugin's Craftsman	726,{
 	case 22003: //Temporal_VIT_Boots
 	case 22004: //Temporal_DEX_Boots
 	case 22005: //Temporal_LUK_Boots
+	case 22107: //Modified_STR_Boots
+	case 22108: //Modified_INT_Boots
+	case 22109: //Modified_AGI_Boots
+	case 22110: //Modified_VIT_Boots
+	case 22111: //Modified_DEX_Boots
+	case 22112: //Modified_LUK_Boots
 		mes "[Hugin's Craftsman]";
 		mes "And ^FF0000all enchant or refine rates will be lost if you fail this.^000000";
 		mes "Still want to risk it?";
@@ -2562,8 +2551,7 @@ glast_01,210,270,0	script	Hugin's Craftsman	726,{
 			mes "You must bring ^0000FF5 Temporal Crystal items^000000. Nothing is free you know...";
 			close;
 		}
-		set .@random,rand(1,100);
-		if (.@random <= 80) { //Custom rates
+		if (rand(1,100) < 50) {
 			mes "[Hugin's Craftsman]";
 			mes "Arrggg, we failed. Better luck next time.";
 			specialeffect2 EF_PHARMACY_FAIL;
@@ -2571,26 +2559,23 @@ glast_01,210,270,0	script	Hugin's Craftsman	726,{
 			delequip .@part;
 			close;
 		}
-		mes "[Hugin's Craftsman]"; //Custom text
-		mes "Yuhuu~ we succeed. Here you are...";
-		mes "A slot has been added to your advanced Temporal Boots.";
-		mes "Thank you for believing in me.";
-		specialeffect2 EF_PHARMACY_OK;
+		mes "[Hugin's Craftsman]";
+		mes "Successful! Here you go.";
+		specialeffect2 EF_MAXPOWER;
 		delitem 6607,5; //Temporal_Crystal
 		delequip .@part;
-		if (.@equip_id == 22000) {
-			getitem 22006,1; //Temporal_STR_Boots_
-		} else if (.@equip_id == 22001) {
-			getitem 22009,1; //Temporal_INT_Boots_
-		} else if (.@equip_id == 22002) {
-			getitem 22010,1; //Temporal_AGI_Boots_
-		} else if (.@equip_id == 22003) {
-			getitem 22007,1; //Temporal_VIT_Boots_
-		} else if (.@equip_id == 22004) {
-			getitem 22008,1; //Temporal_DEX_Boots_
-		} else if (.@equip_id == 22005) {
-			getitem 22011,1; //Temporal_LUK_Boots_
-		}
+		     if (.@equip_id == 22000) getitem 22006,1; //Temporal_STR_Boots_
+		else if (.@equip_id == 22001) getitem 22009,1; //Temporal_INT_Boots_
+		else if (.@equip_id == 22002) getitem 22010,1; //Temporal_AGI_Boots_
+		else if (.@equip_id == 22003) getitem 22007,1; //Temporal_VIT_Boots_
+		else if (.@equip_id == 22004) getitem 22008,1; //Temporal_DEX_Boots_
+		else if (.@equip_id == 22005) getitem 22011,1; //Temporal_LUK_Boots_
+		else if (.@equip_id == 22107) getitem 22113,1; //Modified_STR_Boots_
+		else if (.@equip_id == 22108) getitem 22114,1; //Modified_INT_Boots_
+		else if (.@equip_id == 22109) getitem 22115,1; //Modified_AGI_Boots_
+		else if (.@equip_id == 22110) getitem 22116,1; //Modified_VIT_Boots_
+		else if (.@equip_id == 22111) getitem 22117,1; //Modified_DEX_Boots_
+		else if (.@equip_id == 22112) getitem 22118,1; //Modified_LUK_Boots_
 		close;
 	default:
 		mes "[Hugin's Craftsman]";

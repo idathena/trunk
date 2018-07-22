@@ -88,6 +88,20 @@ void vending_vendinglistreq(struct map_session_data *sd, int id)
 }
 
 /**
+ * Calculates taxes for vending
+ * @param sd: Vender
+ * @param zeny: Total amount to tax
+ * @return Total amount after taxes
+ */
+static double vending_calc_tax(struct map_session_data *sd, double zeny)
+{
+	if( battle_config.vending_tax && zeny >= battle_config.vending_tax_min )
+		zeny -= zeny * (battle_config.vending_tax / 10000.);
+
+	return zeny;
+}
+
+/**
  * Purchase item(s) from a shop
  * @param sd : buyer player session
  * @param aid : account id of vender
@@ -192,8 +206,7 @@ void vending_purchasereq(struct map_session_data *sd, int aid, int uid, const ui
 
 	pc_payzeny(sd, (int)z, LOG_TYPE_VENDING, vsd);
 	achievement_update_objective(sd, AG_SPEND_ZENY, 1, (int)z);
-	if( battle_config.vending_tax )
-		z -= z * (battle_config.vending_tax / 10000.);
+	z = vending_calc_tax(sd, z);
 	pc_getzeny(vsd, (int)z, LOG_TYPE_VENDING, sd);
 
 	for( i = 0; i < count; i++ ) {
@@ -218,8 +231,7 @@ void vending_purchasereq(struct map_session_data *sd, int aid, int uid, const ui
 		}
 
 		pc_cart_delitem(vsd, idx, amount, 0, LOG_TYPE_VENDING);
-		if( battle_config.vending_tax )
-			z -= z * (battle_config.vending_tax / 10000.);
+		z = vending_calc_tax(sd, z);
 		clif_vendingreport(vsd, idx, amount, sd->status.char_id, (int)z);
 
 		//Print buyer's name
@@ -404,7 +416,7 @@ bool vending_searchall(struct map_session_data *sd, const struct s_search_store_
 		return true;
 
 	for( idx = 0; idx < s->item_count; idx++ ) {
-		ARR_FIND(0, sd->vend_num, i, sd->cart.u.items_cart[sd->vending[i].index].nameid == (short)s->itemlist[idx]);
+		ARR_FIND(0, sd->vend_num, i, sd->cart.u.items_cart[sd->vending[i].index].nameid == s->itemlist[idx]);
 		if( i == sd->vend_num ) //Not found
 			continue;
 

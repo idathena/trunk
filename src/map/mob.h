@@ -44,22 +44,16 @@
 //Used to determine default enemy type of mobs (for use in eachinrange calls)
 #define DEFAULT_ENEMY_TYPE(md) (md->special_state.ai ? BL_CHAR : BL_MOB|BL_PC|BL_HOM|BL_MER)
 
+/**
+ * Mob constants
+ * Added definitions for WoE:SE objects and other [L0ne_W0lf], [aleos]
+ */
 enum mob_mobid {
 	MOBID_PORING = 1002,
 	MOBID_RED_PLANT = 1078,
 	MOBID_BLACK_MUSHROOM = 1084,
-	MOBID_GOBLIN_1 = 1122,
-	MOBID_GOBLIN_2,
-	MOBID_GOBLIN_3,
-	MOBID_GOBLIN_4,
-	MOBID_GOBLIN_5,
 	MOBID_MARINE_SPHERE = 1142,
-	MOBID_A_GUARDIAN = 1285,
-	MOBID_K_GUARDIAN,
-	MOBID_S_GUARDIAN,
-	MOBID_EMPERIUM,
-	MOBID_TREAS01 = 1324,
-	MOBID_TREAS40 = 1363,
+	MOBID_EMPERIUM = 1288,
 	MOBID_DULLAHAN = 1504,
 	MOBID_LOLI_RURI,
 	MOBID_G_PARASITE = 1555,
@@ -67,17 +61,8 @@ enum mob_mobid {
 	MOBID_G_HYDRA = 1579,
 	MOBID_G_MANDRAGORA = 1589,
 	MOBID_G_GEOGRAPHER,
-	MOBID_S_GUARDIAN_ = 1899,
-	MOBID_A_GUARDIAN_,
-	MOBID_BARRICADE1 = 1905,
-	MOBID_BARRICADE2,
-	MOBID_GUARDIAN_STONE1,
+	MOBID_GUARDIAN_STONE1 = 1907,
 	MOBID_GUARDIAN_STONE2,
-	MOBID_FOOD_STOR,
-	MOBID_BLUE_CRYST = 1914,
-	MOBID_PINK_CRYST,
-	MOBID_TREAS41 = 1938,
-	MOBID_TREAS49 = 1946,
 	MOBID_SILVERSNIPER = 2042,
 	MOBID_MAGICDECOY_FIRE,
 	MOBID_MAGICDECOY_WATER,
@@ -97,6 +82,12 @@ enum e_Random_Monster {
 	MOBG_Bloody_Dead_Branch = 2,
 	MOBG_Red_Pouch_Of_Surprise = 3,
 	MOBG_ClassChange = 4,
+};
+
+enum e_bosstype {
+	BTYPE_NONE = 0,
+	BTYPE_BOSS = 1,
+	BTYPE_MVP = 2,
 };
 
 //Mob skill states
@@ -172,7 +163,7 @@ struct mob_db {
 	unsigned int base_exp,job_exp;
 	unsigned int mexp;
 	short range2,range3;
-	short race2; //Celest
+	enum e_race2 race2; //Celest
 	unsigned short lv;
 	struct s_mob_drop dropitem[MAX_MOB_DROP_TOTAL], mvpitem[MAX_MVP_DROP_TOTAL];
 	struct status_data status;
@@ -205,11 +196,11 @@ struct mob_data {
 		unsigned int alchemist: 1;
 		unsigned int npc_killmonster: 1; //For new killmonster behavior
 		unsigned int rebirth: 1; //NPC_Rebirth used
-		unsigned int boss : 1;
 		unsigned int copy_master_mode : 1; //Whether the spawned monster should copy the master's mode
 		enum MobSkillState skillstate;
 		unsigned char steal_flag; //Number of steal tries (to prevent steal exploit on mobs with few items) [Lupus]
 		unsigned char attacked_count; //For rude attacked.
+		uint8 boss;
 		int provoke_flag; //Celest
 	} state;
 	struct guardian_data* guardian_data;
@@ -219,11 +210,11 @@ struct mob_data {
 		unsigned int flag : 2; //0: Normal. 1: Homunc exp. 2: Pet exp
 	} dmglog[DAMAGELOG_SIZE];
 	uint32 spotted_log[DAMAGELOG_SIZE];
-	struct spawn_data *spawn; //Spawn data.
+	struct spawn_data *spawn; //Spawn data
 	int spawn_timer; //Required for Convex Mirror
 	struct s_mob_lootitem *lootitem;
 	short mob_id;
-	unsigned int tdmg; //Stores total damage given to the mob, for exp calculations. [Skotlex]
+	unsigned int tdmg; //Stores total damage given to the mob, for exp calculations [Skotlex]
 	int level;
 	int target_id,attacked_id,norm_attacked_id;
 	int areanpc_id; //Required in OnTouchNPC (to avoid multiple area touchs)
@@ -255,7 +246,7 @@ struct mob_data {
 	unsigned char sc_display_count;
 };
 
-struct eri *mob_sc_display_ers;
+extern struct eri *mob_sc_display_ers;
 
 enum {
 	MST_TARGET	=	0,
@@ -353,11 +344,6 @@ void mob_heal(struct mob_data *md, unsigned int heal);
 
 #define mob_stop_walking(md, type) unit_stop_walking(&(md)->bl, type)
 #define mob_stop_attack(md) unit_stop_attack(&(md)->bl)
-#define mob_is_battleground(md) ((md)->mob_id == MOBID_BARRICADE2 || ((md)->mob_id >= MOBID_FOOD_STOR && (md)->mob_id <= MOBID_PINK_CRYST))
-#define mob_is_gvg(md) ((md)->mob_id == MOBID_EMPERIUM || (md)->mob_id == MOBID_BARRICADE1 || (md)->mob_id == MOBID_GUARDIAN_STONE1 || (md)->mob_id == MOBID_GUARDIAN_STONE2)
-#define mob_is_treasure(md) (((md)->mob_id >= MOBID_TREAS01 && (md)->mob_id <= MOBID_TREAS40) || ((md)->mob_id >= MOBID_TREAS41 && (md)->mob_id <= MOBID_TREAS49))
-#define mob_is_guardian(mob_id) ((mob_id >= MOBID_A_GUARDIAN && mob_id <= MOBID_S_GUARDIAN) || mob_id == MOBID_S_GUARDIAN_ || mob_id == MOBID_A_GUARDIAN_)
-#define mob_is_goblin(md, mid) (((md)->mob_id >= MOBID_GOBLIN_1 && (md)->mob_id <= MOBID_GOBLIN_5) && (mid >= MOBID_GOBLIN_1 && mid <= MOBID_GOBLIN_5))
 #define mob_is_samename(md, mid) (strcmp(mob_db((md)->mob_id)->jname, mob_db(mid)->jname) == 0)
 
 void mob_clear_spawninfo();
@@ -383,7 +369,7 @@ int mob_count_sub(struct block_list *bl, va_list ap);
 
 int mob_is_clone(int mob_id);
 
-int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, const char *event, int master_id, int mode, int flag, unsigned int duration);
+int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, const char *event, int master_id, enum e_mode mode, int flag, unsigned int duration);
 int mob_clone_delete(struct mob_data *md);
 
 void mob_reload(void);
