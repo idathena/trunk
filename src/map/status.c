@@ -9141,11 +9141,11 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( !val4 ) { //Kyrie Eleison
 					val2 = status->max_hp * (val1 * 2 + 10) / 100; //% MaxHP to absorb
 					val3 = val1 / 2 + 5; //Hits
-				} else if( val4 == SC_P_ALTER ) { //Platinum Alter
+				} else if( val4 == RL_P_ALTER ) { //Platinum Alter
 					val2 = status->max_hp * val1 * 5 / 100;
 					val3 = 3 + val1;
 				} else { //Praefatio
-					val2 = status->max_hp * (val1 * 2 + 10) / 100 + val4 * 2;
+					val2 = status->max_hp * (val1 * 2 + 10 + val4 * 2) / 100;
 					val3 = 6 + val1;
 				}
 				break;
@@ -10623,7 +10623,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					uint8 coin = (uint8)(sd ? sd->spiritball_old : 10);
 
 					val2 = 10 * (val1 + coin); //+Atk
-					sc_start4(src,bl,SC_KYRIE,100,val1,0,0,SC_P_ALTER,tick);
+					sc_start4(src,bl,SC_KYRIE,100,val1,0,0,status_sc2skill(type),tick);
 				}
 				break;
 			case SC_ANTI_M_BLAST:

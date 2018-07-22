@@ -378,8 +378,8 @@ unsigned short skill_dummy2skill_id(unsigned short skill_id) {
 			return WL_SUMMONWB;
 		case WL_SUMMON_ATK_GROUND:
 			return WL_SUMMONSTONE;
-		case NC_MAGMA_ERUPTION_DOTDAMAGE:
-			return NC_MAGMA_ERUPTION;
+		//case NC_MAGMA_ERUPTION_DOTDAMAGE:
+			//return NC_MAGMA_ERUPTION;
 		case LG_OVERBRAND_BRANDISH:
 		case LG_OVERBRAND_PLUSATK:
 			return LG_OVERBRAND;
@@ -1010,6 +1010,9 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case MER_CRASH:
 			sc_start(src,bl,SC_STUN,6 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
+		case AL_HOLYLIGHT:
+			status_change_end(bl,SC_KYRIE,INVALID_TIMER);
+			break;
 		case AS_VENOMKNIFE:
 			if( sd ) //Poison chance must be that of Envenom [Skotlex]
 				skill_lv = pc_checkskill(sd,TF_POISON);
@@ -1092,7 +1095,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		//Fall through
 		case NPC_GRANDDARKNESS:
 			sc_start(src,bl,SC_BLIND,100,skill_lv,skill_get_time2(skill_id,skill_lv));
-			attack_type |= BF_WEAPON;
+			attack_type |= BF_WEAPON|BF_LONG|BF_NORMAL;
 			break;
 		case AM_DEMONSTRATION:
 			skill_break_equip(src,bl,EQP_WEAPON,100 * skill_lv,BCT_ENEMY);
@@ -1336,17 +1339,22 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 				sc_start(src,bl,SC_BITE,rate,skill_lv,skill_get_time(skill_id,skill_lv) + pc_checkskill(sd,RA_TOOTHOFWUG) * 500);
 			}
 			break;
+		case RA_AIMEDBOLT:
+			status_change_end(bl,SC_ANKLE,INVALID_TIMER);
+			status_change_end(bl,SC_ELECTRICSHOCKER,INVALID_TIMER);
+			status_change_end(bl,SC_BITE,INVALID_TIMER);
+			break;
 		case RA_SENSITIVEKEEN:
 			if( sd && rnd()%100 < 8 * skill_lv )
 				skill_castend_damage_id(src,bl,RA_WUGBITE,pc_checkskill(sd,RA_WUGBITE),tick,SD_ANIMATION);
 			break;
 		case RA_FIRINGTRAP:
 			sc_start(src,bl,SC_BURNING,50 + skill_lv * 10,skill_lv,skill_get_time2(skill_id,skill_lv));
-			attack_type |= BF_WEAPON;
+			attack_type |= BF_WEAPON|BF_SHORT|BF_NORMAL;
 			break;
 		case RA_ICEBOUNDTRAP:
 			sc_start(src,bl,SC_FREEZING,50 + skill_lv * 10,skill_lv,skill_get_time2(skill_id,skill_lv));
-			attack_type |= BF_WEAPON;
+			attack_type |= BF_WEAPON|BF_SHORT|BF_NORMAL;
 			break;
 		case NC_PILEBUNKER:
 			if( rnd()%100 < 25 + skill_lv * 15 ) {
@@ -2121,10 +2129,6 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 				}
 			}
 			break;
-		case CR_GRANDCROSS:
-		case NPC_GRANDDARKNESS:
-			attack_type |= BF_WEAPON;
-			break;
 		case LG_HESPERUSLIT:
 			if(sc && sc->data[SC_BANDING] && sc->data[SC_BANDING]->val2 > 6) {
 				char i;
@@ -2180,12 +2184,10 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 			if(attack_type&BF_MAGIC) {
 				sp += sd->bonus.magic_sp_gain_value;
 				hp += sd->bonus.magic_hp_gain_value;
-				if(skill_id == WZ_WATERBALL) { //(bugreport:5303)
-					if(sc && sc->data[SC_SPIRIT] &&
-						sc->data[SC_SPIRIT]->val2 == SL_WIZARD &&
-						sc->data[SC_SPIRIT]->val3 == WZ_WATERBALL)
-						sc->data[SC_SPIRIT]->val3 = 0; //Clear bounced spell check
-				}
+				if(skill_id == WZ_WATERBALL && sc && sc->data[SC_SPIRIT] &&
+					sc->data[SC_SPIRIT]->val2 == SL_WIZARD &&
+					sc->data[SC_SPIRIT]->val3 == WZ_WATERBALL) //(bugreport:5303)
+					sc->data[SC_SPIRIT]->val3 = 0; //Clear bounced spell check
 			}
 			if(hp || sp) //Updated to force healing to allow healing through berserk
 				status_heal(src,hp,sp,(battle_config.show_hp_sp_gain ? 3 : 1));
@@ -3184,7 +3186,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.amotion = 0;
 			break;
 		case AB_HIGHNESSHEAL:
-			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, AL_HEAL, -1, DMG_SKILL);
+			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, AL_HEAL, -1, DMG_SKILL);
 			break;
 		case WL_HELLINFERNO:
 			if (flag&ELE_DARK)
@@ -3228,7 +3230,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, status_get_amotion(src), dmg.dmotion, damage, dmg.div_, skill_id, -1, DMG_SPLASH);
 			break;
 		case WZ_SIGHTBLASTER:
-			dmg.dmotion = clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, (flag&SD_LEVEL) ? -1 : skill_lv, DMG_SPLASH);
+			dmg.dmotion = clif_skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, (flag&SD_LEVEL) ? -1 : skill_lv, DMG_SPLASH);
 			break;
 		case HT_CLAYMORETRAP:
 		case HT_BLASTMINE:
@@ -3367,9 +3369,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		}
 	}
 
-	if (skill_id == CR_GRANDCROSS || skill_id == NPC_GRANDDARKNESS)
-		dmg.flag |= BF_WEAPON;
-
 	if (damage > 0) { //Post-damage effects
 		switch (skill_id) {
 			case RG_INTIMIDATE: {
@@ -3399,9 +3398,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				status_heal(src, damage * (5 + 5 * skill_lv) / 100, 0, 0); //5 + 5% per level
 				break;
 		}
-		if (sd && bl->id != src->id && skill_id != AM_DEMONSTRATION && (dmg.flag&BF_WEAPON || (dmg.flag&BF_MISC &&
-			(skill_id == RA_CLUSTERBOMB || skill_id == RA_FIRINGTRAP || skill_id == RA_ICEBOUNDTRAP ||
-			skill_id == NC_MAGMA_ERUPTION_DOTDAMAGE))))
+		if (sd && skill_id != AM_DEMONSTRATION && (dmg.flag&BF_WEAPON || (dmg.flag&BF_MISC &&
+			(skill_id == NPC_GRANDDARKNESS || skill_id == CR_GRANDCROSS ||
+			skill_id == RA_CLUSTERBOMB || skill_id == RA_FIRINGTRAP ||
+			skill_id == RA_ICEBOUNDTRAP || skill_id == NC_MAGMA_ERUPTION_DOTDAMAGE))))
 		{
 			if (battle_config.left_cardfix_to_right)
 				battle_drain(sd, bl, dmg.damage, dmg.damage, tstatus->race, tstatus->class_);
@@ -4451,7 +4451,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		return 1;
 
 	//GTB makes all targeted magic display miss with a single bolt
-	if (skill_id && skill_get_type(skill_id) == BF_MAGIC && status_isimmune(bl) == 100) {
+	if (skill_id && skill_get_type(skill_id) == BF_MAGIC && status_isimmune(bl)) {
 		sc_type sct = status_skill2sc(skill_id);
 
 		if(sct != SC_NONE)
@@ -4533,9 +4533,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case ML_SPIRALPIERCE:
 		case LK_HEADCRUSH:
 		case CG_ARROWVULCAN:
-#ifndef RENEWAL
 		case HW_MAGICCRASHER:
-#endif
 		case ITM_TOMAHAWK:
 		case CH_CHAINCRUSH:
 		case CH_TIGERFIST:
@@ -5229,7 +5227,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case TF_THROWSTONE:
 #ifdef RENEWAL
 		case AM_ACIDTERROR:
-		case HW_MAGICCRASHER:
 		case ASC_BREAKER:
 #endif
 		case NPC_SMOKING:
@@ -5771,9 +5768,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 	if(!bl->prev || status_isdead(src))
 		return 1;
 
-	if(sd && sd->status.party_id && party_foreachsamemap(party_sub_count,sd,0) > 1)
-		partybonus = party_foreachsamemap(party_sub_count,sd,0);
-
 	if(bl->id != src->id && status_isdead(bl)) { //Skills that may be cast on dead targets
 		switch(skill_id) {
 			case NPC_WIDESOULDRAIN:
@@ -5789,6 +5783,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 	sstatus = status_get_status_data(src);
 	tstatus = status_get_status_data(bl);
+
+	if(sd)
+		partybonus = (sd->status.party_id ? party_foreachsamemap(party_sub_count,sd,0) : 1);
 
 	switch(skill_id) {
 		case HLIF_HEAL:	{ //[orn]
@@ -7617,8 +7614,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case TF_BACKSLIDING: //This is the correct implementation as per packet logging information [Skotlex]
-			if (skill_blown(src,bl,skill_get_blewcount(skill_id,skill_lv),unit_getdir(bl),2))
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			skill_blown(src,bl,skill_get_blewcount(skill_id,skill_lv),unit_getdir(bl),3);
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			clif_blown(src,src); //Always blow, otherwise it shows a casting animation [Lemongrass]
 			break;
 
 		case TK_HIGHJUMP: {
@@ -12267,11 +12265,9 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 
 	switch( skill_id ) {
 		case MG_SAFETYWALL:
-#ifdef RENEWAL
-			val2 = skill_lv + 2;
-			val3 = 300 * skill_lv + 65 * (status->int_ + status_get_lv(src)) + status->max_sp;
-#else
 			val2 = skill_lv + 1;
+#ifdef RENEWAL
+			val3 = 300 * skill_lv + 65 * (status->int_ + status_get_lv(src)) + status->max_sp;
 #endif
 			if( flag ) //Hit bonus from each elemental class [exneval]
 				val2 += flag;
@@ -13847,7 +13843,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_MAGMA_ERUPTION:
-			skill_attack(skill_get_type(NC_MAGMA_ERUPTION_DOTDAMAGE),src,&unit->bl,bl,NC_MAGMA_ERUPTION_DOTDAMAGE,skill_lv,tick,0);
+			skill_attack(BF_MISC,src,&unit->bl,bl,NC_MAGMA_ERUPTION_DOTDAMAGE,skill_lv,tick,0);
 			break;
 	}
 
@@ -14738,6 +14734,12 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 						return false;
 					}
 				}
+			}
+			break;
+		case CR_GRANDCROSS:
+			if( status_isimmune(&sd->bl) ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false;
 			}
 			break;
 		case MO_CALLSPIRITS:

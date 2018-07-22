@@ -317,7 +317,7 @@
 251,3:5:7:9:11,6,1,0,0,0,5,1,no,0,0,0,weapon,0,0x4000,	CR_SHIELDBOOMERANG,Shield Boomerang
 252,1,6,4,0,0x1,0,10,1,no,0,0,0,weapon,0,0,	CR_REFLECTSHIELD,Shield Reflect
 253,-2,8,1,6,0,0,10,-2,no,0,0x10000,0,weapon,0,0,	CR_HOLYCROSS,Holy Cross
-254,9,6,4,6,0x48,0,10,1,no,33,0x100,0,magic,0,0,	CR_GRANDCROSS,Grand Cross
+254,9,6,4,6,0x48,0,10,1,no,33,0x100,0,misc,0,0,	CR_GRANDCROSS,Grand Cross
 255,7:8:9:10:11,6,16,0,0x1,0,5,1,yes,0,0x600,0,none,0,0,	CR_DEVOTION,Sacrifice
 256,9,6,16,0,0x1,0,5,1,yes,0,0x200,0,none,0,0,	CR_PROVIDENCE,Resistant Souls
 257,1,6,4,0,0x1,0,5,1,no,0,0,0,weapon,0,0,	CR_DEFENDER,Defending Aura
@@ -402,7 +402,7 @@
 336,1,6,4,0,0x3,1,1,1,yes,0,0x4,1,none,0,0,	WE_CALLPARTNER,I miss You
 337,9,6,1,-1,0,0,1,1,no,0,0x2,0,weapon,0,0,	ITM_TOMAHAWK,Throw Tomahawk
 338,-1,8,1,7,0,0,10,-2,no,0,0x2,0,weapon,0,0,	NPC_DARKCROSS,Cross of Darkness
-339,9,6,4,7,0x48,0,10,1,no,0,0x102,0,magic,0,0,	NPC_GRANDDARKNESS,Grand Cross of Darkness
+339,9,6,4,7,0x48,0,10,1,no,0,0x102,0,misc,0,0,	NPC_GRANDDARKNESS,Grand Cross of Darkness
 340,9,8,1,7,0,0,10,1:1:2:2:3:3:4:4:5:5,yes,0,0x2,0,magic,0,0,	NPC_DARKSTRIKE,Soul Strike of Darkness
 341,9,8,1,7,0,0,10,3:4:5:6:7:8:9:10:11:12,yes,0,0x2,0,magic,2:3:3:4:4:5:5:6:6:7,0,	NPC_DARKTHUNDER,Darkness Jupitel
 342,9,6,1,0,0x1,0,1,0,no,0,0x2,0,none,0,0,	NPC_STOP,Stop
