@@ -84,7 +84,7 @@
 576,Prickly_Fruit,Prickly Fruit,0,540,,60,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(150,300),rand(20,30); },{},{}
 577,Grain,Bag of Grain,0,200,,20,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(60,70),0; },{},{}
 578,Strawberry,Strawberry,0,200,,20,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal 0,rand(16,28); },{},{}
-579,Delicious_Fish,Fresh Fish,0,250,,20,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(100,150),0; },{},{}
+579,Delicious_Fish,Fresh Fish,0,700,,20,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(100,150),0; },{},{}
 580,Bread,Bread,0,150,,20,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(50,90),0; },{},{}
 581,Mushroom,Edible Mushroom,0,40,,20,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(20,30),0; },{},{}
 582,Orange,Orange,0,300,,20,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(10,20),rand(10,20); },{},{}
@@ -107,8 +107,8 @@
 599,Light_Orange_Pot,Light Orange Potion,0,200,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(105,145),0; },{},{}
 // Usable Items
 //===================================================================
-601,Wing_Of_Fly,Fly Wing,11,60,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "AL_TELEPORT",1; },{},{}
-602,Wing_Of_Butterfly,Butterfly Wing,11,300,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "AL_TELEPORT",3; },{},{}
+601,Wing_Of_Fly,Fly Wing,11,250,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "AL_TELEPORT",1; },{},{}
+602,Wing_Of_Butterfly,Butterfly Wing,11,1000,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "AL_TELEPORT",3; },{},{}
 603,Old_Blue_Box,Old Blue Box,2,10000,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_BlueBox,1); },{},{}
 604,Branch_Of_Dead_Tree,Dead Branch,2,50,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ monster "this",-1,-1,"--ja--",-1-MOBG_Branch_Of_Dead_Tree,1,""; },{},{}
 605,Anodyne,Anodyne,11,2000,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "SM_ENDURE",1; },{},{}
@@ -116,8 +116,8 @@
 607,Yggdrasilberry,Yggdrasil Berry,0,5000,,300,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 100,100; },{},{}
 608,Seed_Of_Yggdrasil,Yggdrasil Seed,0,5000,,300,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 50,50; },{},{}
 609,Amulet,Amulet,2,100,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ monster "this",-1,-1,"--ja--",-5,1,""; },{},{}
-610,Leaf_Of_Yggdrasil,Yggdrasil Leaf,11,4000,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "ALL_RESURRECTION",1; },{},{}
-611,Spectacles,Magnifier,11,40,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "MC_IDENTIFY",1; },{},{}
+610,Leaf_Of_Yggdrasil,Yggdrasil Leaf,11,12000,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "ALL_RESURRECTION",1; },{},{}
+611,Spectacles,Magnifier,11,200,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "MC_IDENTIFY",1; },{},{}
 612,Portable_Furnace,Mini Furnace,2,150,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ produce 21; },{},{}
 613,Iron_Hammer,Iron Hammer,2,1000,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ produce 1; },{},{}
 614,Golden_Hammer,Golden Hammer,2,3000,,300,,,,,0xFFFFFFFF,63,2,,,,,,{ produce 2; },{},{}
@@ -151,9 +151,9 @@
 642,Book_Of_Devil,Book of the Devil,11,1800,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ pet 1101; },{},{}
 643,Pet_Incubator,Pet Incubator,2,3000,,30,,,,,0xFFFFFFFF,63,2,,,,,,{ bpet; },{},{}
 644,Gift_Box,Gift Box,2,1000,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_GiftBox,1); },{},{}
-645,Center_Potion,Concentration Potion,2,800,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_ASPDPOTION0,1800000,4; },{},{}
-656,Awakening_Potion,Awakening Potion,2,1500,,150,,,,,0xFFF7FEEF,63,2,,,40,,,{ sc_start SC_ASPDPOTION1,1800000,6; },{},{}
-657,Berserk_Potion,Berserk Potion,2,3000,,200,,,,,0x01E646A6,63,2,,,85,,,{ sc_start SC_ASPDPOTION2,1800000,9; },{},{}
+645,Center_Potion,Concentration Potion,2,1200,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_ASPDPOTION0,1800000,4; },{},{}
+656,Awakening_Potion,Awakening Potion,2,2200,,150,,,,,0xFFF7FEEF,63,2,,,40,,,{ sc_start SC_ASPDPOTION1,1800000,6; },{},{}
+657,Berserk_Potion,Berserk Potion,2,4500,,200,,,,,0x01E646A6,63,2,,,85,,,{ sc_start SC_ASPDPOTION2,1800000,9; },{},{}
 658,Union_Of_Tribe,Union of Tribe,2,2,,500,,,,,0xFFFFFFFF,63,2,,,,,,{ guildgetexp rand(600000,1200000); },{},{}
 659,Heart_Of_Her,Her Heart,11,500,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ pet 1188; },{},{}
 660,Prohibition_Red_Candle,Forbidden Red Candle,11,20000,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ pet 1200; },{},{}
@@ -215,7 +215,7 @@
 714,Emperium,Emperium,3,2,,1000,,,,,,,,,,,,,{},{},{}
 715,Yellow_Gemstone,Yellow Gemstone,3,600,,30,,,,,,,,,,,,,{},{},{}
 716,Red_Gemstone,Red Gemstone,3,600,,30,,,,,,,,,,,,,{},{},{}
-717,Blue_Gemstone,Blue Gemstone,3,600,,30,,,,,,,,,,,,,{},{},{}
+717,Blue_Gemstone,Blue Gemstone,3,1500,,30,,,,,,,,,,,,,{},{},{}
 718,Dark_Red_Jewel,Garnet,3,6000,,100,,,,,,,,,,,,,{},{},{}
 719,Violet_Jewel,Amethyst,3,6000,,100,,,,,,,,,,,,,{},{},{}
 720,Skyblue_Jewel,Aquamarine,3,6000,,100,,,,,,,,,,,,,{},{},{}
@@ -416,7 +416,7 @@
 1062,Pumpkin_Head,Jack o' Pumpkin,3,374,,10,,,,,,,,,,,,,{},{},{}
 1063,Sharpened_Cuspid,Fang,3,680,,10,,,,,,,,,,,,,{},{},{}
 1064,Reins,Reins,3,802,,10,,,,,,,,,,,,,{},{},{}
-1065,Booby_Trap,Trap,3,100,,10,,,,,,,,,,,,,{},{},{}
+1065,Booby_Trap,Trap,3,75,,10,,,,,,,,,,,,,{},{},{}
 1066,Tree_Of_Archer_1,Fine-grained Trunk,3,2,,10,,,,,,,,,,,,,{},{},{}
 1067,Tree_Of_Archer_2,Solid Trunk,3,2,,10,,,,,,,,,,,,,{},{},{}
 1068,Tree_Of_Archer_3,Barren Trunk,3,2,,10,,,,,,,,,,,,,{},{},{}
@@ -5265,12 +5265,12 @@
 7449,Bloody_Page,Bloody Page,3,681,,10,,,,,,,,,,,,,{},{},{}
 7450,Piece_Of_Bone_Armor,Skeletal Armor Piece,3,2050,,10,,,,,,,,,,,,,{},{},{}
 7451,Scale_Of_Red_Dragon,Fire Dragon Scale,3,1852,,10,,,,,,,,,,,,,{},{},{}
-7452,Yellow_Spice,Yellow Spice,3,1000,,10,,,,,,,,,,,,,{},{},{}
-7453,Sweet_Sauce,Sweet Sauce,3,700,,10,,,,,,,,,,,,,{},{},{}
-7454,Plain_Sauce,Savory Sauce,3,700,,10,,,,,,,,,,,,,{},{},{}
-7455,Hot_Sauce,Spicy Sauce,3,700,,10,,,,,,,,,,,,,{},{},{}
-7456,Red_Spice,Red Spice,3,1000,,10,,,,,,,,,,,,,{},{},{}
-7457,Cooking_Oil,Cooking Oil,3,500,,10,,,,,,,,,,,,,{},{},{}
+7452,Yellow_Spice,Yellow Spice,3,750,,10,,,,,,,,,,,,,{},{},{}
+7453,Sweet_Sauce,Sweet Sauce,3,525,,10,,,,,,,,,,,,,{},{},{}
+7454,Plain_Sauce,Savory Sauce,3,525,,10,,,,,,,,,,,,,{},{},{}
+7455,Hot_Sauce,Spicy Sauce,3,525,,10,,,,,,,,,,,,,{},{},{}
+7456,Red_Spice,Red Spice,3,750,,10,,,,,,,,,,,,,{},{},{}
+7457,Cooking_Oil,Cooking Oil,3,375,,10,,,,,,,,,,,,,{},{},{}
 7458,Baphomet's_Horn,Fortune Horn,3,2,,10,,,,,,,,,,,,,{},{},{}
 7459,RAMADAN_,Idul Fitri Card,3,2,,10,,,,,,,,,,,,,{},{},{}
 7460,Niflheim_Ticket,Niflheim Express Ticket,3,2,,10,,,,,,,,,,,,,{},{},{}
@@ -5295,7 +5295,7 @@
 7479,Cookbook08,Level 8 Cookbook,3,1000,,10,,,,,,,,,,,,,{},{},{}
 7480,Cookbook09,Level 9 Cookbook,3,1000,,10,,,,,,,,,,,,,{},{},{}
 7481,Cookbook10,Level 10 Cookbook,3,1000,,10,,,,,,,,,,,,,{},{},{}
-7482,Pot,Pot,3,200,,10,,,,,,,,,,,,,{},{},{}
+7482,Pot,Pot,3,150,,10,,,,,,,,,,,,,{},{},{}
 7483,Key_Of_Seal,Key of the Seal,3,0,,0,,,,,,,,,,,,,{},{},{}
 7484,Warrior_Symbol,Symbol of a Brave Warrior,3,0,,10,,,,,,,,,,,,,{},{},{}
 7485,2nd_Floor_Pass,Cloud General,3,0,,10,,,,,,,,,,,,,{},{},{}
