@@ -679,6 +679,8 @@ bool skill_isNotOk(uint16 skill_id, struct map_session_data *sd)
 		case RETURN_TO_ELDICASTES:
 		case ALL_GUARDIAN_RECALL:
 		case ECLAGE_RECALL:
+		case ALL_NIFLHEIM_RECALL:
+		case ALL_PRONTERA_RECALL:
 			if (map[m].flag.nowarp) {
 				clif_skill_teleportmessage(sd, 0);
 				return true;
@@ -1463,8 +1465,6 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			break;
 		case LG_HESPERUSLIT:
 			if( sc && sc->data[SC_BANDING] ) {
-				uint8 lv;
-
 				if( (battle_config.hesperuslit_bonus_stack && sc->data[SC_BANDING]->val2 >= 4) || sc->data[SC_BANDING]->val2 == 4 )
 					status_change_start(src,bl,SC_STUN,10000,skill_lv,0,0,0,rnd_value(4000,8000),SCFLAG_FIXEDTICK);
 				if( ((battle_config.hesperuslit_bonus_stack && sc->data[SC_BANDING]->val2 >= 6) || sc->data[SC_BANDING]->val2 == 6) &&
@@ -9819,6 +9819,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case RETURN_TO_ELDICASTES:
 		case ALL_GUARDIAN_RECALL:
 		case ECLAGE_RECALL:
+		case ALL_NIFLHEIM_RECALL:
+		case ALL_PRONTERA_RECALL:
 			if( sd ) {
 				short x = 0, y = 0; //Destiny position
 				unsigned short mapindex = 0;
@@ -9839,6 +9841,16 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						x = 47;
 						y = 31;
 						mapindex  = mapindex_name2id(MAP_ECLAGE_IN);
+						break;
+					case ALL_NIFLHEIM_RECALL:
+						x = 193;
+						y = 186;
+						mapindex  = mapindex_name2id(MAP_NIFLHEIM);
+						break;
+					case ALL_PRONTERA_RECALL:
+						x = 159;
+						y = 152;
+						mapindex  = mapindex_name2id(MAP_PRONTERA);
 						break;
 				}
 				if( !mapindex ) { //Given map not found?
@@ -10283,10 +10295,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case KO_KAZEHU_SEIRAN:
 		case KO_DOHU_KOUKAI:
 			if( sd ) {
-				int type = skill_get_ele(skill_id,skill_lv);
+				int ele_type = skill_get_ele(skill_id,skill_lv);
 
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				pc_addcharmball(sd,skill_get_time(skill_id,skill_lv),MAX_CHARMBALL,type);
+				pc_addcharmball(sd,skill_get_time(skill_id,skill_lv),MAX_CHARMBALL,ele_type);
 			}
 			break;
 
@@ -20632,13 +20644,11 @@ void skill_init_nounit_layout (void)
 }
 
 int skill_block_check(struct block_list *bl, sc_type type , uint16 skill_id) {
-	int inf = 0, inf3 = 0;
+	int inf = 0;
 	struct status_change *sc = status_get_sc(bl);
 
 	if( !sc || !bl || !skill_id )
 		return 0; //Can do it
-
-	inf3 = skill_get_inf3(skill_id);
 
 	switch( type ) {
 		case SC_ANKLE:
