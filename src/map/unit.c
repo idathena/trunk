@@ -1727,7 +1727,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 #endif
 		case GD_EMERGENCYCALL: //Emergency Call double cast when the user has learned Leap [Daegaladh]
 			if( sd && (pc_checkskill(sd,TK_HIGHJUMP) > 0 || pc_checkskill(sd,SU_LOPE) > 0) )
-				casttime <<= 1;
+				casttime *= 2;
 			break;
 		case RA_WUGDASH:
 			if( sc && sc->data[SC_WUGDASH] )
@@ -1756,10 +1756,10 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 			break;
 		case NC_DISJOINT:
 			if( target->type == BL_PC ) {
-				struct mob_data *md;
+				struct mob_data *md = NULL;
 
 				if( (md = map_id2md(target->id)) && md->master_id != src->id )
-					casttime <<= 1;
+					casttime *= 2;
 			}
 			break;
 	}
@@ -2732,7 +2732,6 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 			status_change_end(bl,SC_PROVOKE,INVALID_TIMER); //End infinite provoke to prevent exploit
 		status_change_end(bl,SC_CHANGE,INVALID_TIMER);
 		status_change_end(bl,SC_STOP,INVALID_TIMER);
-		status_change_end(bl,SC_MILLENNIUMSHIELD,INVALID_TIMER);
 		status_change_end(bl,SC_ELECTRICSHOCKER,INVALID_TIMER);
 		status_change_end(bl,SC_WUGDASH,INVALID_TIMER);
 		status_change_end(bl,SC_BITE,INVALID_TIMER);
@@ -3011,8 +3010,9 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 				pc_cleareventtimer(sd);
 				pc_inventory_rental_clear(sd);
 				pc_delspiritball(sd, sd->spiritball, 1);
+				pc_delshieldball(sd, sd->shieldball, 1);
 				pc_delrageball(sd, sd->rageball, 1);
-				pc_delspiritcharm(sd, sd->spiritcharm, sd->spiritcharm_type);
+				pc_delcharmball(sd, sd->charmball, sd->charmball_type);
 				if( sd->reg ) { //Double logout already freed pointer fix [Skotlex]
 					aFree(sd->reg);
 					sd->reg = NULL;

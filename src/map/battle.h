@@ -85,18 +85,20 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 
 int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, int64 *, int flag, uint16 skill_id, bool status_reflect);
 
-void battle_drain(struct map_session_data *sd, struct block_list *tbl, int64 rdamage, int64 ldamage, int race, int class_);
+void battle_drain(struct map_session_data *sd, struct block_list *tbl, int64 rdamage, int64 ldamage, int race, int class_, bool isdraindamage);
 void battle_vanish(struct map_session_data *sd, struct block_list *target, struct Damage *wd);
-void battle_do_reflect(int attack_type, struct Damage *wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
+void battle_do_reflect(struct Damage *d, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
 
 int battle_attr_ratio(int atk_elem, int def_type, int def_lv);
 int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 damage,int atk_elem,int def_type, int def_lv);
 int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_list *target, int nk, int s_ele, int s_ele_, int64 damage, int left, int flag);
+int battle_get_weapon_element(struct Damage *d, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, short weapon_position);
 
 struct Damage battle_calc_attack_plant(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
 struct Damage battle_calc_attack_gvg_bg(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
 
 //Final calculation Damage
+int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, struct Damage *d, int64 damage, uint16 skill_id, uint16 skill_lv);
 int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct Damage *d, int64 damage, uint16 skill_id, uint16 skill_lv);
 int64 battle_calc_gvg_damage(struct block_list *src, struct block_list *bl, int64 damage, uint16 skill_id, int flag);
 int64 battle_calc_bg_damage(struct block_list *src, struct block_list *bl, int64 damage, uint16 skill_id, int flag);
@@ -123,6 +125,8 @@ void battle_consume_ammo(struct map_session_data *sd, uint16 skill_id, uint16 sk
 short battle_get_defense(struct block_list *src, struct block_list *target, uint16 skill_id, uint8 flag);
 
 bool is_infinite_defense(struct block_list *target, int flag);
+
+bool battle_skill_check_no_cardfix_atk(uint16 skill_id);
 
 //Settings
 #define MIN_HAIR_STYLE battle_config.min_hair_style
@@ -256,6 +260,7 @@ extern struct Battle_Config
 	int natural_healsp_interval;
 	int natural_heal_skill_interval;
 	int natural_heal_weight_rate;
+	int natural_heal_weight_rate_renewal;
 	int ammo_decrement;
 	int ammo_unequip;
 	int ammo_check_weapon;
@@ -647,6 +652,9 @@ extern struct Battle_Config
 	int allow_bound_sell;
 	int autoloot_adjust;
 	int show_skill_scale;
+	int millennium_shield_health;
+	int hesperuslit_bonus_stack;
+	int load_custom_exp_tables;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

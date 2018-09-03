@@ -193,8 +193,8 @@
 2270:5891,{ bonus bAllStats,1; }
 2278:18527,{ bonus2 bAddMonsterDropItem,12192,300; autobonus "{ bonus2 bAddMonsterDropItem,12192,1000; }",10,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; autobonus "{ bonus2 bAddMonsterDropItem,12192,1000; }",5,5000,BF_MAGIC,"{ specialeffect2 EF_ENERGYCOAT; }"; }
 2278:18656,{ bonus2 bAddMonsterDropItem,12192,300; autobonus "{ bonus2 bAddMonsterDropItem,12192,1000; }",10,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; autobonus "{ bonus2 bAddMonsterDropItem,12192,1000; }",5,5000,BF_MAGIC,"{ specialeffect2 EF_ENERGYCOAT; }"; }
-2281:18527,{ bonus bFlee,10; autobonus "{ bonus2 bAddEff,Eff_Stun,5000; }",10,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; autobonus "{ bonus3 bAddEff,Eff_Stun,5000,ATF_SKILL; }",5,5000,BF_MAGIC,"{ specialeffect2 EF_ENERGYCOAT; }"; }
-2281:18656,{ bonus bFlee,10; autobonus "{ bonus2 bAddEff,Eff_Stun,5000; }",10,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; autobonus "{ bonus3 bAddEff,Eff_Stun,5000,ATF_SKILL; }",5,5000,BF_MAGIC,"{ specialeffect2 EF_ENERGYCOAT; }"; }
+2281:18527,{ bonus bFlee,10; autobonus "{ bonus2 bAddEff,Eff_Stun,5000; }",10,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; autobonus "{ bonus3 bAddEff,Eff_Stun,5000,ATF_MAGIC; }",5,5000,BF_MAGIC,"{ specialeffect2 EF_ENERGYCOAT; }"; }
+2281:18656,{ bonus bFlee,10; autobonus "{ bonus2 bAddEff,Eff_Stun,5000; }",10,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; autobonus "{ bonus3 bAddEff,Eff_Stun,5000,ATF_MAGIC; }",5,5000,BF_MAGIC,"{ specialeffect2 EF_ENERGYCOAT; }"; }
 2286:18539,{ bonus bUseSPrate,-3; }
 2312:2656,{ bonus bDef,5; bonus bMaxHP,150; }
 2313:2656,{ bonus bDef,5; bonus bMaxHP,150; }

@@ -94,6 +94,8 @@ enum e_skill_inf3 {
 	INF3_SC_GLOOMYDAY       = 0x04000, //Skill that affected by SC_GLOOMYDAY
 	INF3_SC_DANCEWITHWUG    = 0x08000, //Skill that affected by SC_DANCEWITHWUG
 	INF3_BITE_BLOCK         = 0x10000, //Skill blocked by RA_WUGBITE
+	INF3_SC_UNLIMIT         = 0x20000, //Skill that affected by SC_UNLIMIT
+	INF3_BOOST_PASSIVE      = 0x40000, //Boost passive skill (active skill that boosts the effects of passive skills)
 };
 
 //Walk intervals at which chase-skills are attempted to be triggered
@@ -2032,7 +2034,7 @@ enum {
 	UNT_GLITTERING_GREED,
 	UNT_B_TRAP,
 	UNT_FIRE_RAIN,
-	UNT_CATNIPPOWDER,
+	UNT_CN_POWDERING,
 	UNT_NYANGGRASS,
 	UNT_GROUNDDRIFT_NEUTRAL,
 
@@ -2096,6 +2098,9 @@ void skill_toggle_magicpower(struct block_list *bl, uint16 skill_id);
 
 bool skill_check_condition_target(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv);
 void skill_reveal_trap_inarea(struct block_list *src, int range, int x, int y);
+int skill_banding_count(struct map_session_data *sd);
+int skill_chorus_count(struct map_session_data *sd, uint8 flag);
+void skill_generate_millenniumshield(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 
 //Skill Damage target
 #ifdef ADJUST_SKILL_DAMAGE

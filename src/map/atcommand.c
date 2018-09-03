@@ -3324,6 +3324,38 @@ ACMD_FUNC(spiritball)
 /*==========================================
  *
  *------------------------------------------*/
+ACMD_FUNC(shieldball)
+{
+	uint32 max_shieldballs;
+	int number, health;
+	nullpo_retr(-1, sd);
+
+	max_shieldballs = zmin(ARRAYLENGTH(sd->shieldball_timer), 0x7FFF);
+
+	if( !message || !*message || sscanf(message, "%d %d", &number, &health) < 1 ||
+		number > max_shieldballs || health < 1 || health > 1000000000 ) {
+		char msg[CHAT_SIZE_MAX];
+
+		safesnprintf(msg, sizeof(msg), msg_txt(1057), max_shieldballs); // Please enter a number (usage: @shieldball <number: 0-%d> <health: 1-1000000000>).
+		clif_displaymessage(fd, msg);
+		return -1;
+	}
+
+	if( sd->shieldball > 0 )
+		pc_delshieldball(sd, sd->shieldball, 1);
+	sd->shieldball = number;
+	sd->shieldball_health = sd->shieldball_set_health = health;
+	if( sd->shieldball > 0 )
+		sc_start(&sd->bl, &sd->bl, SC_MILLENNIUMSHIELD, 100, 0, -1);
+	clif_millenniumshield(&sd->bl, sd->shieldball);
+	// No message, player can look the difference
+
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------*/
 ACMD_FUNC(rageball)
 {
 	uint32 max_rageballs;
@@ -3344,6 +3376,37 @@ ACMD_FUNC(rageball)
 		pc_delrageball(sd, sd->rageball, 1);
 	sd->rageball = number;
 	clif_millenniumshield(&sd->bl, sd->rageball);
+	// No message, player can look the difference
+
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------*/
+ACMD_FUNC(charmball)
+{
+	uint32 max_charmballs;
+	int number, type;
+	nullpo_retr(-1, sd);
+
+	max_charmballs = zmin(ARRAYLENGTH(sd->charmball_timer), 0x7FFF);
+
+	if( !message || !*message || sscanf(message, "%d %d", &number, &type) < 1 ||
+		number > max_charmballs || type < CHARM_TYPE_WATER || type > CHARM_TYPE_WIND ) {
+		char msg[CHAT_SIZE_MAX];
+
+		safesnprintf(msg, sizeof(msg), msg_txt(1055), max_charmballs); // Please enter a number (usage: @charmball <number: 0-%d> <charm type>).
+		clif_displaymessage(fd, msg);
+		clif_displaymessage(fd, msg_txt(1056)); // Charm Types: 1: Water, 2: Earth, 3: Fire, 4: Wind
+		return -1;
+	}
+
+	if( sd->charmball > 0 )
+		pc_delcharmball(sd, sd->charmball, sd->charmball_type);
+	sd->charmball = number;
+	sd->charmball_type = type;
+	clif_charmball(sd);
 	// No message, player can look the difference
 
 	return 0;
@@ -9979,7 +10042,9 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(questskill),
 		ACMD_DEF(lostskill),
 		ACMD_DEF(spiritball),
+		ACMD_DEF(shieldball),
 		ACMD_DEF(rageball),
+		ACMD_DEF(charmball),
 		ACMD_DEF(party),
 		ACMD_DEF(guild),
 		ACMD_DEF(breakguild),

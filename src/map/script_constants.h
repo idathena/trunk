@@ -494,8 +494,7 @@
 	export_parameter(ROULETTE_BRONZE_VAR,SP_ROULETTE_BRONZE);
 	export_parameter(ROULETTE_SILVER_VAR,SP_ROULETTE_SILVER);
 	export_parameter(ROULETTE_GOLD_VAR,SP_ROULETTE_GOLD);
-	export_parameter("killedrid_x",SP_KILLEDRID_X);
-	export_parameter("killedrid_y",SP_KILLEDRID_Y);
+	export_parameter("killedgid",SP_KILLEDGID);
 	export_parameter(CASHPOINT_VAR,SP_CASHPOINTS);
 	export_parameter(KAFRAPOINT_VAR,SP_KAFRAPOINTS);
 	export_parameter(PCDIECOUNTER_VAR,SP_PCDIECOUNTER);
@@ -2498,7 +2497,6 @@
 	export_constant(ATF_WEAPON);
 	export_constant(ATF_MAGIC);
 	export_constant(ATF_MISC);
-	export_constant(ATF_SKILL);
 
 	/* Emoticons */
 	export_constant(E_GASP);
