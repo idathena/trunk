@@ -30,7 +30,6 @@
 2423,1	//WM_SIRCLEOFNATURE
 2430,1	//WM_SATURDAY_NIGHT_FEVER
 2455,1	//SO_ARRULLO
-3023,1	//KG_KAGEHUMI
 3029,1	//OB_AKAITSUKI
 
 //----------------------------------------------------------------------------

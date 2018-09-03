@@ -343,7 +343,7 @@ enum e_element {
  * Types of spirit charms
  * NOTE: Code assumes that this matches the first entries in enum elements
  */
-enum spirit_charm_types {
+enum charmball_types {
 	CHARM_TYPE_NONE = 0,
 	CHARM_TYPE_WATER,
 	CHARM_TYPE_LAND,
@@ -370,8 +370,6 @@ enum auto_trigger_flag {
 	ATF_WEAPON = 0x10,
 	ATF_MAGIC  = 0x20,
 	ATF_MISC   = 0x40,
-
-	ATF_SKILL  = ATF_MAGIC|ATF_MISC,
 };
 
 struct block_list {
@@ -434,10 +432,8 @@ enum _sp {
 	SP_ROULETTE_BRONZE = 128,
 	SP_ROULETTE_SILVER = 129,
 	SP_ROULETTE_GOLD = 130,
-	SP_KILLEDRID_X = 131,
-	SP_KILLEDRID_Y = 132,
-	SP_CASHPOINTS,SP_KAFRAPOINTS,
-	SP_PCDIECOUNTER,SP_COOKMASTERY,
+	SP_KILLEDGID = 131,
+	SP_CASHPOINTS,SP_KAFRAPOINTS,SP_PCDIECOUNTER,SP_COOKMASTERY,
 
 	// Mercenaries
 	SP_MERCFLEE = 165,SP_MERCKILLS = 189,SP_MERCFAITH = 190,

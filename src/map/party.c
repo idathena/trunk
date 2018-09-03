@@ -1215,6 +1215,39 @@ int party_sub_count(struct block_list *bl, va_list ap)
 	return 1;
 }
 
+// Special check for Royal Guard's Banding skill.
+int party_sub_count_banding(struct block_list *bl, va_list ap)
+{
+	struct map_session_data *sd = (TBL_PC *)bl;
+	int check_type = va_arg(ap, int); //0 = Banding Count, 1 = HP Check, 2 = Max Rage Spheres On All
+
+	if (sd->state.autotrade)
+		return 0;
+
+	if (battle_config.idle_no_share && pc_isidle(sd))
+		return 0;
+
+	if ((sd->class_&MAPID_THIRDMASK) != MAPID_ROYAL_GUARD)
+		return 0;
+
+	if (!sd->sc.data[SC_BANDING])
+		return 0;
+
+	if (check_type == 1)
+		return status_get_hp(bl);
+
+	//Max out the rage sphere's for all Royal Guard's in banding if the banding count is 7 or more when Hesperuslit is used
+	if (check_type == 2 && sd->sc.data[SC_FORCEOFVANGUARD]) {
+		uint8 i;
+
+		for (i = 0; i < sd->sc.data[SC_FORCEOFVANGUARD]->val3; i++)
+			pc_addrageball(sd, skill_get_time(LG_FORCEOFVANGUARD, 1), sd->sc.data[SC_FORCEOFVANGUARD]->val3);
+		return 0;
+	}
+
+	return 1;
+}
+
 // Speial check for Minstrel's and Wanderer's chorus skills.
 int party_sub_count_chorus(struct block_list *bl, va_list ap)
 {
@@ -1230,28 +1263,6 @@ int party_sub_count_chorus(struct block_list *bl, va_list ap)
 		return 0;
 
 	return 1;
-}
-
-/**
- * Calculates Minstrel/Wanderer bonus for Chorus skills.
- * @param sd Player who has Chorus skill active
- * @param flag
- * @return Bonus value based on party count
- */
-int party_calc_chorusbonus(struct map_session_data *sd, uint8 flag) {
-	int members = 0;
-
-	if (!sd || !sd->status.party_id)
-		return 0;
-
-	members = party_foreachsamemap(party_sub_count_chorus, sd, AREA_SIZE);
-
-	if (members < 3 && (!flag || flag == 2 || flag == 3))
-		return 0; //Bonus remains 0 unless 3 or more Minstrels/Wanderers are in the party
-
-	if (members > 7 && flag != 3)
-		return (flag ? 7 : 5); //Maximum effect possible from 7 or more Minstrels/Wanderers
-	return (flag == 1 || flag == 2 ? members : members - 2); //Effect bonus from additional Minstrels/Wanderers if not above the max possible
 }
 
 /*==========================================

@@ -495,11 +495,14 @@ struct map_session_data {
 
 	short spiritball,spiritball_old;
 	int spiritball_timer[MAX_SPIRITBALL];
+	short shieldball;
+	int shieldball_timer[MAX_SHIELDBALL];
+	int shieldball_health,shieldball_set_health;
 	short rageball,rageball_old;
 	int rageball_timer[MAX_RAGEBALL];
-	short spiritcharm; //No. of spirit
-	int spiritcharm_type; //Spirit type
-	int spiritcharm_timer[MAX_SPIRITCHARM];
+	short charmball,charmball_old;
+	int charmball_type;
+	int charmball_timer[MAX_CHARMBALL];
 
 	unsigned char potion_success_counter; //Potion successes in row counter
 	unsigned char mission_count; //Stores the bounty kill count for TK_MISSION
@@ -575,7 +578,7 @@ struct map_session_data {
 	int duel_group; //Duel vars [LuzZza]
 	int duel_invite;
 
-	int killerrid, killedrid, killedrid_x, killedrid_y;
+	int killerrid, killedrid, killedgid;
 
 	int cashPoints, kafraPoints;
 	int rental_timer;
@@ -856,6 +859,7 @@ extern struct s_job_info {
 #define pc_isriding(sd)       ( (sd)->sc.option&OPTION_RIDING )
 #define pc_isinvisible(sd)    ( (sd)->sc.option&OPTION_INVISIBLE )
 #define pc_is50overweight(sd) ( (sd)->weight * 100 >= (sd)->max_weight * battle_config.natural_heal_weight_rate )
+#define pc_is70overweight(sd) ( (sd)->weight * 100 >= (sd)->max_weight * battle_config.natural_heal_weight_rate_renewal )
 #define pc_is90overweight(sd) ( (sd)->weight * 10 >= (sd)->max_weight * 9 )
 
 /// Enum of Player's Parameter
@@ -1176,10 +1180,12 @@ void pc_delinvincibletimer(struct map_session_data *sd);
 int pc_getmaxspiritball(struct map_session_data *sd, int min);
 void pc_addspiritball(struct map_session_data *sd, int interval, int max);
 void pc_delspiritball(struct map_session_data *sd, int count, int type);
+void pc_addshieldball(struct map_session_data *sd, int interval, int max, int shield_health);
+void pc_delshieldball(struct map_session_data *sd, int count, int type);
 void pc_addrageball(struct map_session_data *sd, int interval, int max);
 void pc_delrageball(struct map_session_data *sd, int count, int type);
-void pc_addspiritcharm(struct map_session_data *sd, int interval, int max, int type);
-void pc_delspiritcharm(struct map_session_data *sd, int count, int type);
+void pc_addcharmball(struct map_session_data *sd, int interval, int max, int type);
+void pc_delcharmball(struct map_session_data *sd, int count, int type);
 void pc_addfame(struct map_session_data *sd, int count);
 unsigned char pc_famerank(int char_id, int job);
 bool pc_set_hate_mob(struct map_session_data *sd, int pos, struct block_list *bl);
@@ -1223,8 +1229,6 @@ int pc_disguise(struct map_session_data *sd, int class_);
 bool pc_isautolooting(struct map_session_data *sd, unsigned short nameid);
 
 void pc_overheat(struct map_session_data *sd, int16 heat);
-
-int pc_banding(struct map_session_data *sd, uint16 skill_lv);
 
 void pc_itemcd_do(struct map_session_data *sd, bool load);
 uint8 pc_itemcd_add(struct map_session_data *sd, struct item_data *id, unsigned int tick, unsigned short n);

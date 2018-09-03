@@ -16,8 +16,9 @@
 #define MAGIC_REFLECTION_TYPE 1
 
 #define MAX_SPIRITBALL 15
+#define MAX_SHIELDBALL 4
 #define MAX_RAGEBALL 15
-#define MAX_SPIRITCHARM 10
+#define MAX_CHARMBALL 10
 
 /**
  * No settings past this point

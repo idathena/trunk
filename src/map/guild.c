@@ -704,7 +704,7 @@ void guild_member_joined(struct map_session_data *sd)
 		guild_request_info(sd->status.guild_id);
 		return;
 	}
-	if( strcmp(sd->status.name,g->master) == 0 ) { // Set the Guild Master flag
+	if( !strcmp(sd->status.name,g->master) ) { // Set the Guild Master flag
 		sd->state.gmaster_flag = 1;
 		// Prevent Guild Skills from being used directly after relog
 		if( battle_config.guild_skill_relog_delay )

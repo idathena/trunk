@@ -201,7 +201,7 @@ void pc_delinvincibletimer(struct map_session_data *sd)
 static int pc_spiritball_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct map_session_data *sd;
-	int i;
+	uint8 i;
 
 	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
 		return 1;
@@ -338,13 +338,147 @@ void pc_delspiritball(struct map_session_data *sd, int count, int type)
 }
 
 /**
- * Rage ball expiration timer.
+ * Shieldball expiration timer.
+ * @see TimerFunc
+ */
+static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data)
+{
+	struct map_session_data *sd;
+	uint8 i;
+
+ 	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
+		return 1;
+
+ 	if( sd->shieldball <= 0 ) {
+		ShowError("pc_shieldball_timer: %d shieldball's available. (aid=%d cid=%d tid=%d)\n", sd->shieldball, sd->status.account_id, sd->status.char_id, tid);
+		sd->shieldball = 0;
+		return 0;
+	}
+
+ 	ARR_FIND(0, sd->shieldball, i, sd->shieldball_timer[i] == tid);
+
+	if( i == sd->shieldball ) {
+		ShowError("pc_shieldball_timer: timer not found (aid=%d cid=%d tid=%d)\n", sd->status.account_id, sd->status.char_id, tid);
+		return 0;
+	}
+
+ 	sd->shieldball--;
+
+	if( sd->shieldball <= 0 )
+		status_change_end(&sd->bl, SC_MILLENNIUMSHIELD, INVALID_TIMER);
+
+	if( i != sd->shieldball )
+		memmove(sd->shieldball_timer + i, sd->shieldball_timer + i + 1, (sd->shieldball - i) * sizeof(int));
+
+	sd->shieldball_timer[sd->shieldball] = INVALID_TIMER;
+ 	clif_millenniumshield(&sd->bl, sd->shieldball);
+
+ 	return 0;
+}
+
+/**
+ * Adds a shieldball to player for 'interval' ms
+ * @param sd
+ * @param interval
+ * @param max
+ * @param shield_health
+ */
+ void pc_addshieldball(struct map_session_data *sd, int interval, int max, int shield_health)
+{
+	int tid;
+	uint8 i;
+
+ 	nullpo_ret(sd);
+
+ 	if( max > MAX_SHIELDBALL )
+		max = MAX_SHIELDBALL;
+
+	if( sd->shieldball < 0 )
+		sd->shieldball = 0;
+
+ 	if( sd->shieldball_set_health != shield_health && shield_health > 0 )
+		sd->shieldball_set_health = shield_health;
+
+ 	if( sd->shieldball && sd->shieldball >= max ) {
+		if( sd->shieldball_timer[0] != INVALID_TIMER )
+			delete_timer(sd->shieldball_timer[0], pc_shieldball_timer);
+		sd->shieldball--;
+		if( sd->shieldball != 0 )
+			memmove(sd->shieldball_timer + 0, sd->shieldball_timer + 1, sd->shieldball * sizeof(int));
+		sd->shieldball_timer[sd->shieldball] = INVALID_TIMER;
+	}
+
+ 	tid = add_timer(gettick() + interval, pc_shieldball_timer, sd->bl.id, 0);
+	ARR_FIND(0, sd->shieldball, i, (sd->shieldball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->shieldball_timer[i])->tick) < 0));
+
+	if( i != sd->shieldball )
+		memmove(sd->shieldball_timer + i + 1, sd->shieldball_timer + i, (sd->shieldball - i) * sizeof(int));
+
+	sd->shieldball_timer[i] = tid;
+	sd->shieldball++;
+	sd->shieldball_health = sd->shieldball_set_health;
+	sc_start(&sd->bl, &sd->bl, SC_MILLENNIUMSHIELD, 100, 0, -1);
+	clif_millenniumshield(&sd->bl, sd->shieldball);
+}
+
+/**
+ * Removes number of shieldball from player
+ * @param sd
+ * @param count
+ * @param type 1 = doesn't give client effect
+ */
+ void pc_delshieldball(struct map_session_data *sd, int count, int type)
+{
+	uint8 i;
+
+ 	nullpo_ret(sd);
+
+ 	if( sd->shieldball <= 0 ) {
+		sd->shieldball = 0;
+		return;
+	}
+
+ 	if( !count )
+		return;
+
+	if( count > sd->shieldball )
+		count = sd->shieldball;
+
+	sd->shieldball -= count;
+
+ 	if( sd->shieldball <= 0 )
+		status_change_end(&sd->bl, SC_MILLENNIUMSHIELD, INVALID_TIMER);
+
+ 	if( sd->shieldball > 0 )
+		sd->shieldball_health = sd->shieldball_set_health;
+
+ 	if( count > MAX_SHIELDBALL )
+		count = MAX_SHIELDBALL;
+
+ 	for( i = 0; i < count; i++ ) {
+		if( sd->shieldball_timer[i] != INVALID_TIMER ) {
+			delete_timer(sd->shieldball_timer[i], pc_shieldball_timer);
+			sd->shieldball_timer[i] = INVALID_TIMER;
+		}
+	}
+
+	for( i = count; i < MAX_SHIELDBALL; i++ ) {
+		sd->shieldball_timer[i - count] = sd->shieldball_timer[i];
+		sd->shieldball_timer[i] = INVALID_TIMER;
+	}
+
+ 	if( !type )
+		clif_millenniumshield(&sd->bl, sd->shieldball);
+}
+
+/**
+ * Rageball expiration timer.
  * @see TimerFunc
  */
 static int pc_rageball_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct map_session_data *sd;
-	int i;
+	uint8 i;
 
 	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
 		return 1;
@@ -457,233 +591,137 @@ void pc_delrageball(struct map_session_data *sd, int count, int type)
 }
 
 /**
- * Spirit Charm expiration timer.
+ * Charmball expiration timer.
  * @see TimerFunc
  */
-static int pc_spiritcharm_timer(int tid, unsigned int tick, int id, intptr_t data)
+static int pc_charmball_timer(int tid, unsigned int tick, int id, intptr_t data)
 {
 	struct map_session_data *sd;
 	int i;
 
-	if( (sd = (struct map_session_data *)map_id2sd(id)) == NULL || sd->bl.type != BL_PC )
+	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
 		return 1;
 
-	if( sd->spiritcharm <= 0 ) {
-		ShowError("pc_spiritcharm_timer: %d spiritcharm's available. (aid=%d cid=%d tid=%d)\n", sd->spiritcharm, sd->status.account_id, sd->status.char_id, tid);
-		sd->spiritcharm = 0;
-		sd->spiritcharm_type = CHARM_TYPE_NONE;
+	if( sd->charmball <= 0 ) {
+		ShowError("pc_charmball_timer: %d charmball's available. (aid=%d cid=%d tid=%d)\n", sd->charmball, sd->status.account_id, sd->status.char_id, tid);
+		sd->charmball = 0;
+		sd->charmball_type = CHARM_TYPE_NONE;
 		return 0;
 	}
 
-	ARR_FIND(0, sd->spiritcharm, i, sd->spiritcharm_timer[i] == tid);
+	ARR_FIND(0, sd->charmball, i, sd->charmball_timer[i] == tid);
 
-	if( i == sd->spiritcharm ) {
-		ShowError("pc_spiritcharm_timer: timer not found (aid=%d cid=%d tid=%d)\n", sd->status.account_id, sd->status.char_id, tid);
+	if( i == sd->charmball ) {
+		ShowError("pc_charmball_timer: timer not found (aid=%d cid=%d tid=%d)\n", sd->status.account_id, sd->status.char_id, tid);
 		return 0;
 	}
 
-	sd->spiritcharm--;
+	sd->charmball--;
 
-	if( i != sd->spiritcharm )
-		memmove(sd->spiritcharm_timer + i, sd->spiritcharm_timer + i + 1, (sd->spiritcharm - i) * sizeof(int));
+	if( i != sd->charmball )
+		memmove(sd->charmball_timer + i, sd->charmball_timer + i + 1, (sd->charmball - i) * sizeof(int));
 
-	sd->spiritcharm_timer[sd->spiritcharm] = INVALID_TIMER;
+	sd->charmball_timer[sd->charmball] = INVALID_TIMER;
 
-	if( sd->spiritcharm <= 0 )
-		sd->spiritcharm_type = CHARM_TYPE_NONE;
+	if( sd->charmball <= 0 )
+		sd->charmball_type = CHARM_TYPE_NONE;
 
-	clif_spiritcharm(sd);
+	clif_charmball(sd);
 
 	return 0;
 }
 
 /**
- * Adds a spirit charm.
+ * Adds a charmball.
  * @param sd       Target character.
  * @param interval Duration.
  * @param max      Maximum amount of charms to add.
- * @param type     Charm type (@see spirit_charm_types)
+ * @param type     Charm type (@see charmball_types)
  */
-void pc_addspiritcharm(struct map_session_data *sd, int interval, int max, int type)
+void pc_addcharmball(struct map_session_data *sd, int interval, int max, int type)
 {
 	int tid, i;
 
 	nullpo_retv(sd);
 
-	if( sd->spiritcharm_type != CHARM_TYPE_NONE && type != sd->spiritcharm_type )
-		pc_delspiritcharm(sd, sd->spiritcharm, sd->spiritcharm_type);
+	if( sd->charmball_type != CHARM_TYPE_NONE && sd->charmball_type != type )
+		pc_delcharmball(sd, sd->charmball, sd->charmball_type);
 
-	if( max > MAX_SPIRITCHARM )
-		max = MAX_SPIRITCHARM;
+	if( max > MAX_CHARMBALL )
+		max = MAX_CHARMBALL;
 
-	if( sd->spiritcharm < 0 )
-		sd->spiritcharm = 0;
+	if( sd->charmball < 0 )
+		sd->charmball = 0;
 
-	if( sd->spiritcharm && sd->spiritcharm >= max ) {
-		if( sd->spiritcharm_timer[0] != INVALID_TIMER )
-			delete_timer(sd->spiritcharm_timer[0], pc_spiritcharm_timer);
-		sd->spiritcharm--;
-		if( sd->spiritcharm != 0 )
-			memmove(sd->spiritcharm_timer + 0, sd->spiritcharm_timer + 1, (sd->spiritcharm) * sizeof(int));
-		sd->spiritcharm_timer[sd->spiritcharm] = INVALID_TIMER;
+	if( sd->charmball && sd->charmball >= max ) {
+		if( sd->charmball_timer[0] != INVALID_TIMER )
+			delete_timer(sd->charmball_timer[0], pc_charmball_timer);
+		sd->charmball--;
+		if( sd->charmball != 0 )
+			memmove(sd->charmball_timer + 0, sd->charmball_timer + 1, sd->charmball * sizeof(int));
+		sd->charmball_timer[sd->charmball] = INVALID_TIMER;
 	}
 
-	tid = add_timer(gettick() + interval, pc_spiritcharm_timer, sd->bl.id, 0);
-	ARR_FIND(0, sd->spiritcharm, i, sd->spiritcharm_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->spiritcharm_timer[i])->tick) < 0);
+	tid = add_timer(gettick() + interval, pc_charmball_timer, sd->bl.id, 0);
+	ARR_FIND(0, sd->charmball, i, sd->charmball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->charmball_timer[i])->tick) < 0);
 
-	if( i != sd->spiritcharm )
-		memmove(sd->spiritcharm_timer + i + 1, sd->spiritcharm_timer + i, (sd->spiritcharm - i) * sizeof(int));
+	if( i != sd->charmball )
+		memmove(sd->charmball_timer + i + 1, sd->charmball_timer + i, (sd->charmball - i) * sizeof(int));
 
-	sd->spiritcharm_timer[i] = tid;
-	sd->spiritcharm++;
-	sd->spiritcharm_type = type;
+	sd->charmball_timer[i] = tid;
+	sd->charmball++;
+	sd->charmball_type = type;
 
-	clif_spiritcharm(sd);
+	clif_charmball(sd);
 }
 
 /**
- * Removes one or more spirit charms.
+ * Removes one or more charmballs.
  * @param sd    The target character.
  * @param count Amount of charms to remove.
  * @param type  Type of charm to remove.
  */
-void pc_delspiritcharm(struct map_session_data *sd, int count, int type)
+void pc_delcharmball(struct map_session_data *sd, int count, int type)
 {
 	int i;
 
 	nullpo_retv(sd);
 
-	if( sd->spiritcharm_type != type )
+	if( sd->charmball_type != type )
 		return;
 
-	if( sd->spiritcharm <= 0 ) {
-		sd->spiritcharm = 0;
+	if( sd->charmball <= 0 ) {
+		sd->charmball = 0;
 		return;
 	}
 
 	if( count <= 0 )
 		return;
 
-	if( count > sd->spiritcharm )
-		count = sd->spiritcharm;
+	if( count > sd->charmball )
+		count = sd->charmball;
 
-	sd->spiritcharm -= count;
+	sd->charmball -= count;
 
-	if( count > MAX_SPIRITCHARM )
-		count = MAX_SPIRITCHARM;
+	if( count > MAX_CHARMBALL )
+		count = MAX_CHARMBALL;
 
 	for( i = 0; i < count; i++ ) {
-		if( sd->spiritcharm_timer[i] != INVALID_TIMER ) {
-			delete_timer(sd->spiritcharm_timer[i], pc_spiritcharm_timer);
-			sd->spiritcharm_timer[i] = INVALID_TIMER;
+		if( sd->charmball_timer[i] != INVALID_TIMER ) {
+			delete_timer(sd->charmball_timer[i], pc_charmball_timer);
+			sd->charmball_timer[i] = INVALID_TIMER;
 		}
 	}
 
-	for( i = count; i < MAX_SPIRITCHARM; i++ ) {
-		sd->spiritcharm_timer[i - count] = sd->spiritcharm_timer[i];
-		sd->spiritcharm_timer[i] = INVALID_TIMER;
+	for( i = count; i < MAX_CHARMBALL; i++ ) {
+		sd->charmball_timer[i - count] = sd->charmball_timer[i];
+		sd->charmball_timer[i] = INVALID_TIMER;
 	}
 
-	if( sd->spiritcharm <= 0 )
-		sd->spiritcharm_type = CHARM_TYPE_NONE;
+	if( sd->charmball <= 0 )
+		sd->charmball_type = CHARM_TYPE_NONE;
 
-	clif_spiritcharm(sd);
-}
-
-static int pc_check_banding(struct block_list *bl, va_list ap) {
-	int *c, *b_sd;
-	struct block_list *src;
-	struct map_session_data *tsd;
-	struct status_change *sc;
-
-	nullpo_ret(bl);
-	nullpo_ret(tsd = (struct map_session_data *)bl);
-	nullpo_ret(src = va_arg(ap,struct block_list *));
-
-	c = va_arg(ap,int *);
-	b_sd = va_arg(ap,int *);
-
-	if( pc_isdead(tsd) )
-		return 0;
-
-	sc = status_get_sc(bl);
-
-	if( sc && sc->data[SC_BANDING] ) {
-		b_sd[(*c)++] = tsd->bl.id;
-		return 1;
-	}
-
-	return 0;
-}
-
-int pc_banding(struct map_session_data *sd, uint16 skill_lv) {
-	int c,
-		b_sd[MAX_PARTY]; //In case of a full Royal Guard party
-	int i, j, hp, extra_hp = 0, tmp_qty = 0;
-	int range = skill_get_splash(LG_BANDING,skill_lv);
-
-	nullpo_ret(sd);
-
-	c = 0;
-	memset(b_sd, 0, sizeof(b_sd));
-
-	i = party_foreachsamemap(pc_check_banding,sd,range,&sd->bl,&c,&b_sd);
-
-	if( c < 1 ) { //Just recalc status no need to recalc hp
-		//No more Royal Guards in Banding found
-		struct status_change *sc;
-
-		if( (sc = status_get_sc(&sd->bl)) && sc->data[SC_BANDING] ) {
-			sc->data[SC_BANDING]->val2 = 0; //Reset the counter
-			status_calc_bl(&sd->bl,status_sc2scb_flag(SC_BANDING));
-		}
-		return 0;
-	}
-
-	//Add yourself
-	hp = status_get_hp(&sd->bl);
-	i++;
-
-	//Get total HP of all Royal Guards in party
-	for( j = 0; j < i; j++ ) {
-		struct map_session_data *bsd = map_id2sd(b_sd[j]);
-
-		if( bsd )
-			hp += status_get_hp(&bsd->bl);
-	}
-
-	//Set average HP
-	hp = hp / i;
-
-	//If a Royal Guard have full HP, give more HP to others that haven't full HP
-	for( j = 0; j < i; j++ ) {
-		int tmp_hp = 0;
-		struct map_session_data *bsd = map_id2sd(b_sd[j]);
-
-		if( bsd && (tmp_hp = hp - status_get_max_hp(&bsd->bl)) > 0 ) {
-			extra_hp += tmp_hp;
-			tmp_qty++;
-		}
-	}
-
-	if( extra_hp > 0 && tmp_qty > 0 )
-		hp += extra_hp / tmp_qty;
-
-	for( j = 0; j < i; j++ ) {
-		struct map_session_data *bsd = map_id2sd(b_sd[j]);
-
-		if( bsd ) {
-			struct status_change *sc;
-
-			status_set_hp(&bsd->bl,hp,0); //Set HP
-			if( (sc = status_get_sc(&bsd->bl)) && sc->data[SC_BANDING] ) {
-				sc->data[SC_BANDING]->val2 = c; //Set the counter
-				status_calc_bl(&bsd->bl,status_sc2scb_flag(SC_BANDING)); //Set ATK and DEF
-			}
-		}
-	}
-
-	return c;
+	clif_charmball(sd);
 }
 
 /**
@@ -1545,8 +1583,12 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 
 	for (i = 0; i < MAX_SPIRITBALL; i++)
 		sd->spiritball_timer[i] = INVALID_TIMER;
+	for (i = 0; i < MAX_SHIELDBALL; i++)
+		sd->shieldball_timer[i] = INVALID_TIMER;
 	for (i = 0; i < MAX_RAGEBALL; i++)
 		sd->rageball_timer[i] = INVALID_TIMER;
+	for (i = 0; i < MAX_CHARMBALL; i++)
+		sd->charmball_timer[i] = INVALID_TIMER;
 	for (i = 0; i < ARRAYLENGTH(sd->autobonus); i++)
 		sd->autobonus[i].active = INVALID_TIMER;
 	for (i = 0; i < ARRAYLENGTH(sd->autobonus2); i++)
@@ -2005,6 +2047,7 @@ void pc_calc_skilltree(struct map_session_data *sd)
 				case GN_CRAZYWEED_ATK:
 				case GN_HELLS_PLANT_ATK:
 				case GN_SLINGITEM_RANGEMELEEATK:
+				case OB_OBOROGENSOU_TRANSITION_ATK:
 				case RL_R_TRIP_PLUSATK:
 				case RL_B_FLICKER_ATK:
 				case RL_GLITTERING_GREED_ATK:
@@ -2252,7 +2295,7 @@ int pc_calc_skilltree_normalize_job(struct map_session_data *sd)
 /*==========================================
  * Updates the weight status
  *------------------------------------------
- * 1: overweight 50%
+ * 1: overweight 50% for pre-renewal and 70% for renewal
  * 2: overweight 90%
  * It's assumed that SC_WEIGHT50 and SC_WEIGHT90 are only started/stopped here.
  */
@@ -2263,8 +2306,12 @@ void pc_updateweightstatus(struct map_session_data *sd)
 
 	nullpo_retv(sd);
 
-	old_overweight = (sd->sc.data[SC_WEIGHT90]) ? 2 : (sd->sc.data[SC_WEIGHT50]) ? 1 : 0;
-	new_overweight = (pc_is90overweight(sd)) ? 2 : (pc_is50overweight(sd)) ? 1 : 0;
+	old_overweight = (sd->sc.data[SC_WEIGHT90] ? 2 : (sd->sc.data[SC_WEIGHT50] ? 1 : 0));
+#ifdef RENEWAL
+	new_overweight = (pc_is90overweight(sd) ? 2 : (pc_is70overweight(sd) ? 1 : 0));
+#else
+	new_overweight = (pc_is90overweight(sd) ? 2 : (pc_is50overweight(sd) ? 1 : 0));
+#endif
 
 	if( old_overweight == new_overweight )
 		return; //No change
@@ -4268,13 +4315,13 @@ int pc_skill(TBL_PC *sd, int id, int level, int flag)
 			sd->status.skill[id].id   = id;
 			sd->status.skill[id].lv   = level;
 			sd->status.skill[id].flag = SKILL_FLAG_PERMANENT;
-			if( level == 0 ) { //Remove skill
+			if( !level ) { //Remove skill
 				sd->status.skill[id].id = 0;
 				clif_deleteskill(sd,id);
 			} else
 				clif_addskill(sd,id);
-			if( !skill_get_inf(id) ) //Only recalculate for passive skills
-				status_calc_pc(sd, SCO_NONE);
+			if( !skill_get_inf(id) || (skill_get_inf3(id)&INF3_BOOST_PASSIVE && (pc_checkskill(sd, SU_POWEROFLAND) > 0 || pc_checkskill(sd, SU_POWEROFSEA) > 0)) )
+				status_calc_pc(sd, SCO_NONE); //Only recalculate for passive skills and active skills that boost the effects of passive skills
 			break;
 		case 1: //Item bonus skill
 			if( sd->status.skill[id].id == id ) {
@@ -4302,7 +4349,7 @@ int pc_skill(TBL_PC *sd, int id, int level, int flag)
 			sd->status.skill[id].id   = id;
 			sd->status.skill[id].lv   = level;
 			sd->status.skill[id].flag = SKILL_FLAG_PERM_GRANTED;
-			if( level == 0 ) { //Remove skill
+			if( !level ) { //Remove skill
 				sd->status.skill[id].id = 0;
 				clif_deleteskill(sd,id);
 			} else
@@ -5876,13 +5923,13 @@ bool pc_memo(struct map_session_data *sd, int pos)
  *------------------------------------------*/
 uint8 pc_checkskill(struct map_session_data *sd, uint16 skill_id)
 {
-	if( sd == NULL )
+	if( !sd )
 		return 0;
 
 	if( skill_id >= GD_SKILLBASE && skill_id < GD_MAX ) {
-		struct guild *g;
+		struct guild *g = NULL;
 
-		if( sd->status.guild_id > 0 && (g = sd->guild) != NULL )
+		if( sd->status.guild_id > 0 && (g = sd->guild) )
 			return guild_checkskill(g,skill_id);
 		return 0;
 	} else if( skill_id >= ARRAYLENGTH(sd->status.skill) ) {
@@ -5900,7 +5947,7 @@ uint8 pc_checkskill_summoner(struct map_session_data *sd, enum e_summoner_type t
 {
 	uint8 count = 0;
 
-	if( sd == NULL )
+	if( !sd )
 		return 0;
 
 	switch( type ) {
@@ -7274,8 +7321,8 @@ int pc_skillup(struct map_session_data *sd,uint16 skill_id)
 
 		sd->status.skill[skill_id].lv++;
 		sd->status.skill_point--;
-		if( !skill_get_inf(skill_id) || (skill_id >= SU_TUNABELLY && skill_id <= SU_FRESHSHRIMP) || (skill_id >= SU_GROOMING && skill_id <= SU_SHRIMPARTY) )
-			status_calc_pc(sd,SCO_NONE); //Only recalculate for passive skills, and also recalculate on Summoner's Sea skills for SU_POWEROFSEA's bonuses
+		if( !skill_get_inf(skill_id) || (skill_get_inf3(skill_id)&INF3_BOOST_PASSIVE && (pc_checkskill(sd,SU_POWEROFLAND) > 0 || pc_checkskill(sd,SU_POWEROFSEA) > 0)) )
+			status_calc_pc(sd,SCO_NONE); //Only recalculate for passive skills and active skills that boost the effects of passive skills
 		else if( !sd->status.skill_point && pc_is_taekwon_ranker(sd) )
 			pc_calc_skilltree(sd); //Required to grant all TK Ranker skills
 		else
@@ -7696,7 +7743,7 @@ int pc_skillheal2_bonus(struct map_session_data *sd, uint16 skill_id) {
 	int i, bonus = sd->bonus.add_heal2_rate;
 
 	ARR_FIND(0, ARRAYLENGTH(sd->skillheal2), i, sd->skillheal2[i].id == skill_id);
-	
+
 	if( i < ARRAYLENGTH(sd->skillheal2) )
 		bonus += sd->skillheal2[i].val;
 
@@ -7900,11 +7947,14 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 	if( sd->spiritball > 0 )
 		pc_delspiritball(sd,sd->spiritball,0);
 
+	if( sd->shieldball > 0 )
+		pc_delshieldball(sd,sd->shieldball,0);
+
 	if( sd->rageball > 0 )
 		pc_delrageball(sd,sd->rageball,0);
 
-	if( sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0 )
-		pc_delspiritcharm(sd,sd->spiritcharm,sd->spiritcharm_type);
+	if( sd->charmball_type != CHARM_TYPE_NONE && sd->charmball > 0 )
+		pc_delcharmball(sd,sd->charmball,sd->charmball_type);
 
 	if( src ) {
 		switch( src->type ) {
@@ -7912,8 +7962,6 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 					struct map_session_data *ssd = (struct map_session_data *)src;
 
 					pc_setparam(ssd,SP_KILLEDRID,sd->bl.id);
-					pc_setparam(ssd,SP_KILLEDRID_X,sd->bl.x);
-					pc_setparam(ssd,SP_KILLEDRID_Y,sd->bl.y);
 					npc_script_event(ssd,NPCE_KILLPC);
 
 					if( battle_config.pk_mode&2 ) {
@@ -8018,7 +8066,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			}
 			if( base_penalty ) { //Recheck after altering to speedup
 				if( battle_config.pk_mode && src && src->type == BL_PC )
-					base_penalty <<= 1;
+					base_penalty *= 2;
 				base_penalty = u32min(sd->status.base_exp,base_penalty);
 			}
 		} else
@@ -8031,7 +8079,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 			}
 			if( job_penalty ) {
 				if( battle_config.pk_mode && src && src->type == BL_PC )
-					job_penalty <<= 1;
+					job_penalty *= 2;
 				job_penalty = u32min(sd->status.job_exp,job_penalty);
 			}
 		} else
@@ -8223,8 +8271,7 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_ROULETTE_BRONZE:	val = sd->roulette_point.bronze; break;
 		case SP_ROULETTE_SILVER:	val = sd->roulette_point.silver; break;
 		case SP_ROULETTE_GOLD:		val = sd->roulette_point.gold; break;
-		case SP_KILLEDRID_X:	val = sd->killedrid_x; break;
-		case SP_KILLEDRID_Y:	val = sd->killedrid_y; break;
+		case SP_KILLEDGID:	val = sd->killedgid; break;
 		case SP_PCDIECOUNTER:	val = sd->die_counter; break;
 		case SP_COOKMASTERY:	val = sd->cook_mastery; break;
 		case SP_CRITICAL:	val = sd->battle_status.cri / 10; break;
@@ -8502,11 +8549,8 @@ bool pc_setparam(struct map_session_data *sd,int type,int val) {
 			sd->roulette_point.gold = val;
 			pc_setreg2(sd, ROULETTE_GOLD_VAR, sd->roulette_point.gold);
 			return true;
-		case SP_KILLEDRID_X:
-			sd->killedrid_x = val;
-			return true;
-		case SP_KILLEDRID_Y:
-			sd->killedrid_y = val;
+		case SP_KILLEDGID:
+			sd->killedgid = val;
 			return true;
 		case SP_CASHPOINTS:
 			if( val < 0 )
@@ -9157,7 +9201,7 @@ bool pc_setcart(struct map_session_data *sd, int type) {
 				status_calc_cart_weight(sd,CALCWT_ITEM|CALCWT_MAXBONUS|CALCWT_CARTSTATE);
 			}
 			clif_updatestatus(sd,SP_CARTINFO);
-			sc_start(&sd->bl,&sd->bl,SC_PUSH_CART,100,type,INVALID_TIMER);
+			sc_start(&sd->bl,&sd->bl,SC_PUSH_CART,100,type,-1);
 			break;
 	}
 
@@ -10071,7 +10115,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 		pc_calcweapontype(sd);
 		clif_changelook(&sd->bl,LOOK_SHIELD,sd->status.shield);
 	}
-	if( (pos&EQP_ARMS) && id->type == IT_WEAPON && battle_config.ammo_unequip ) {
+	if( battle_config.ammo_unequip && (pos&EQP_ARMS) && id->type == IT_WEAPON ) {
 		short idx = sd->equip_index[EQI_AMMO];
 
 		if( idx >= 0 ) {
@@ -10252,7 +10296,7 @@ void pc_unequipitem(struct map_session_data *sd, int n, int flag) {
 		status_change_end(&sd->bl,SC_CONCENTRATION,INVALID_TIMER);
 	//On weapon change (both hands)
 	if( (pos&EQP_ARMS) && sd->inventory_data[n]->type == IT_WEAPON ) {
-		if( !(flag&8) && battle_config.ammo_unequip ) {
+		if( battle_config.ammo_unequip && !(flag&8) ) {
 			switch( sd->inventory_data[n]->look ) {
 				case W_BOW:
 				case W_MUSICAL:
@@ -10750,6 +10794,7 @@ void pc_setstand(struct map_session_data *sd)
 	nullpo_retv(sd);
 
 	status_change_end(&sd->bl, SC_TENSIONRELAX, INVALID_TIMER);
+	status_change_end(&sd->bl, SC_MEIKYOUSISUI, INVALID_TIMER);
 
 	if (sd->sc.data[SC_SITDOWN_FORCE] || sd->sc.data[SC_BANANA_BOMB_SITDOWN])
 		return;
@@ -10893,7 +10938,8 @@ int pc_split_atoui(char *str, unsigned int *val, char sep, int max)
 	for(i = 0; i < max; i++) {
 		double f;
 
-		if(!str) break;
+		if(!str)
+			break;
 		f = atof(str);
 		if(f < 0)
 			val[i] = 0;
@@ -10901,7 +10947,10 @@ int pc_split_atoui(char *str, unsigned int *val, char sep, int max)
 			val[i] = UINT_MAX;
 			if(!warning) {
 				warning = 1;
-				ShowWarning("pc_readdb (job_exp.txt): Required exp per level is capped to %u\n",UINT_MAX);
+				if(battle_config.load_custom_exp_tables)
+					ShowWarning("pc_readdb (job_exp2.txt): Required exp per level is capped to %u\n",UINT_MAX);
+				else
+					ShowWarning("pc_readdb (job_exp.txt): Required exp per level is capped to %u\n",UINT_MAX);
 			}
 		} else
 			val[i] = (unsigned int)f;
@@ -10909,7 +10958,7 @@ int pc_split_atoui(char *str, unsigned int *val, char sep, int max)
 		if(str)
 			*str++ = 0;
 	}
-	//Zero up the remaining.
+	//Zero up the remaining
 	for(j = i; j < max; j++)
 		val[j] = 0;
 	return i;
@@ -11456,7 +11505,10 @@ void pc_readdb(void)
 	sv_readdb(db_path, "pre-re/job_db1.txt" , ',', 5 + MAX_WEAPON_TYPE, 5 + MAX_WEAPON_TYPE,CLASS_COUNT, &pc_readdb_job1);
 #endif
 	sv_readdb(db_path, "job_db2.txt", ',', 1, 1 + MAX_LEVEL, CLASS_COUNT, &pc_readdb_job2);
-	sv_readdb(db_path, DBPATH"job_exp.txt", ',', 4, 1000 + 3, CLASS_COUNT * 2, &pc_readdb_job_exp); //Support till 1000lvl
+	if( battle_config.load_custom_exp_tables )
+		sv_readdb(db_path, DBPATH"job_exp2.txt", ',', 4, 1000 + 3, CLASS_COUNT * 2, &pc_readdb_job_exp); //Support till 1000lvl
+	else
+		sv_readdb(db_path, DBPATH"job_exp.txt", ',', 4, MAX_LEVEL + 3, CLASS_COUNT * 2, &pc_readdb_job_exp);
 #ifdef HP_SP_TABLES
 	sv_readdb(db_path, DBPATH"job_basehpsp_db.txt", ',', 4, 4 + 500, CLASS_COUNT * 2, &pc_readdb_job_basehpsp); //Make it support until lvl 500!
 #endif
@@ -11711,6 +11763,7 @@ void pc_damage_log_clear(struct map_session_data *sd, int id) {
 void pc_scdata_received(struct map_session_data *sd) {
 	pc_inventory_rentals(sd); //Needed here to remove rentals that have status changes after chrif_load_scdata has finished
 
+	clif_weight_limit(sd);
 	sd->state.pc_loaded = true;
 
 	if( !sd->state.connect_new && sd->fd ) { //Character already loaded map! Gotta trigger LoadEndAck manually
@@ -12564,8 +12617,9 @@ void do_init_pc(void) {
 	add_timer_func_list(pc_calc_pvprank_timer, "pc_calc_pvprank_timer");
 	add_timer_func_list(pc_autosave, "pc_autosave");
 	add_timer_func_list(pc_spiritball_timer, "pc_spiritball_timer");
+	add_timer_func_list(pc_shieldball_timer, "pc_shieldball_timer");
 	add_timer_func_list(pc_rageball_timer, "pc_rageball_timer");
-	add_timer_func_list(pc_spiritcharm_timer, "pc_spiritcharm_timer");
+	add_timer_func_list(pc_charmball_timer, "pc_charmball_timer");
 	add_timer_func_list(pc_follow_timer, "pc_follow_timer");
 	add_timer_func_list(pc_endautobonus, "pc_endautobonus");
 	add_timer_func_list(pc_global_expiration_timer, "pc_global_expiration_timer");

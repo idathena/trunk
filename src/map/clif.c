@@ -407,7 +407,7 @@ int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target
 				uint8 size = CHAT_AREA_SIZE;
 
 				if (bl->type == BL_NPC)
-					size <<= 1; //In official, NPC has chat area size two times wider than player [exneval]
+					size *= 2; //In official, NPC has chat area size two times wider than player [exneval]
 				map_foreachinallarea(clif_send_sub, bl->m, bl->x - size, bl->y - size, bl->x + size, bl->y + size, BL_PC, buf, len, bl, AREA_WOC);
 			}
 			break;
@@ -1346,13 +1346,13 @@ static void clif_millenniumshield_single(int fd, struct block_list *bl, short sh
 /*==========================================
  * Kagerou/Oboro amulet spirit
  *------------------------------------------*/
-static void clif_spiritcharm_single(int fd, struct map_session_data *sd)
+static void clif_charmball_single(int fd, struct map_session_data *sd)
 {
 	WFIFOHEAD(fd,packet_len(0x8cf));
 	WFIFOW(fd,0) = 0x8cf;
 	WFIFOL(fd,2) = sd->bl.id;
-	WFIFOW(fd,6) = sd->spiritcharm_type;
-	WFIFOW(fd,8) = sd->spiritcharm;
+	WFIFOW(fd,6) = sd->charmball_type;
+	WFIFOW(fd,8) = sd->charmball;
 	WFIFOSET(fd,packet_len(0x8cf));
 }
 
@@ -1452,12 +1452,12 @@ int clif_spawn(struct block_list *bl)
 					clif_sendbgemblem_area(sd);
 				if (sd->spiritball > 0)
 					clif_spiritball(bl);
+				if (sd->shieldball > 0)
+					clif_millenniumshield(bl,sd->shieldball);
 				if (sd->rageball > 0)
 					clif_millenniumshield(bl,sd->rageball);
-				if (sd->sc.data[SC_MILLENNIUMSHIELD])
-					clif_millenniumshield(bl,sd->sc.data[SC_MILLENNIUMSHIELD]->val2);
-				if (sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0)
-					clif_spiritcharm(sd);
+				if (sd->charmball_type != CHARM_TYPE_NONE && sd->charmball > 0)
+					clif_charmball(sd);
 				if (sd->status.robe)
 					clif_refreshlook(bl,bl->id,LOOK_ROBE,sd->status.robe,AREA);
 				clif_efst_set_enter(bl,bl,AREA);
@@ -1471,8 +1471,6 @@ int clif_spawn(struct block_list *bl)
 					clif_specialeffect(bl,EF_GIANTBODY2,AREA);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect(bl,EF_BABYBODY2,AREA);
-				if (md->sc.data[SC_MILLENNIUMSHIELD])
-					clif_millenniumshield(bl,md->sc.data[SC_MILLENNIUMSHIELD]->val2);
 				clif_efst_set_enter(bl,bl,AREA);
 			}
 			break;
@@ -4571,12 +4569,12 @@ static void clif_getareachar_pc(struct map_session_data *sd,struct map_session_d
 		clif_buyingstore_entry_single(sd, dstsd);
 	if( dstsd->spiritball > 0 )
 		clif_spiritball_single(sd->fd, dstsd);
+	if( dstsd->shieldball > 0 )
+		clif_millenniumshield_single(sd->fd, &dstsd->bl, dstsd->shieldball);
 	if( dstsd->rageball > 0 )
 		clif_millenniumshield_single(sd->fd, &dstsd->bl, dstsd->rageball);
-	if( dstsd->sc.data[SC_MILLENNIUMSHIELD] )
-		clif_millenniumshield_single(sd->fd, &dstsd->bl, dstsd->sc.data[SC_MILLENNIUMSHIELD]->val2);
-	if( dstsd->spiritcharm_type != CHARM_TYPE_NONE && dstsd->spiritcharm > 0 )
-		clif_spiritcharm_single(sd->fd, dstsd);
+	if( dstsd->charmball_type != CHARM_TYPE_NONE && dstsd->charmball > 0 )
+		clif_charmball_single(sd->fd, dstsd);
 	if( (sd->status.party_id && dstsd->status.party_id == sd->status.party_id) || //Party-mate, or hp disp setting
 		(sd->bg_id && sd->bg_id == dstsd->bg_id) || //Battle Ground
 		pc_has_permission(sd, PC_PERM_VIEW_HPMETER) )
@@ -4657,8 +4655,6 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if (md->special_state.size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
-				if (md->sc.data[SC_MILLENNIUMSHIELD])
-					clif_millenniumshield_single(sd->fd,bl,md->sc.data[SC_MILLENNIUMSHIELD]->val2);
 				clif_efst_set_enter(&sd->bl,bl,SELF);
 #if PACKETVER >= 20120404
 				if (battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar) {
@@ -9493,12 +9489,12 @@ void clif_refresh(struct map_session_data *sd)
 	clif_updatestatus(sd, SP_LUK);
 	if( sd->spiritball > 0 )
 		clif_spiritball_single(sd->fd, sd);
+	if( sd->shieldball > 0 )
+		clif_millenniumshield_single(sd->fd, &sd->bl, sd->shieldball);
 	if( sd->rageball > 0 )
 		clif_millenniumshield_single(sd->fd, &sd->bl, sd->rageball);
-	if( sd->sc.data[SC_MILLENNIUMSHIELD] )
-		clif_millenniumshield_single(sd->fd, &sd->bl, sd->sc.data[SC_MILLENNIUMSHIELD]->val2);
-	if( sd->spiritcharm_type != CHARM_TYPE_NONE && sd->spiritcharm > 0 )
-		clif_spiritcharm_single(sd->fd, sd);
+	if( sd->charmball_type != CHARM_TYPE_NONE && sd->charmball > 0 )
+		clif_charmball_single(sd->fd, sd);
 	if( sd->vd.cloth_color )
 		clif_refreshlook(&sd->bl, sd->bl.id, LOOK_CLOTHES_COLOR, sd->vd.cloth_color, SELF);
 	if( sd->vd.body_style )
@@ -15449,7 +15445,7 @@ void clif_Mail_read(struct map_session_data *sd, int mail_id)
 #else
 		ARR_FIND(0, MAIL_MAX_ITEM, count, msg->item[count].nameid == 0); //Count the attached items
 		msg_len += 1; //Zero Termination
-		itemsize = 24 + 5 * MAX_ITEM_RDM_OPT;
+		itemsize = 24 + 5 * 5;
 		len = 24 + msg_len + 1 + itemsize * count;
 
 		WFIFOHEAD(fd,len);
@@ -17939,7 +17935,7 @@ static void clif_parse_SearchStoreInfo(int fd, struct map_session_data *sd)
 	item_count = RFIFOB(fd,info->pos[4]);
 	card_count = RFIFOB(fd,info->pos[5]);
 	itemlist   = RFIFOP(fd,info->pos[6]);
-	cardlist   = RFIFOP(fd,info->pos[6]+blocksize*item_count);
+	cardlist   = RFIFOP(fd,info->pos[6] + blocksize * item_count);
 
 	// check, if there is enough data for the claimed count of items
 	packet_len-= info->pos[6];
@@ -17948,7 +17944,7 @@ static void clif_parse_SearchStoreInfo(int fd, struct map_session_data *sd)
 		ShowError("clif_parse_SearchStoreInfo: Unexpected item list size %u (account_id=%d, block size=%u)\n", packet_len, sd->bl.id, blocksize);
 		return;
 	}
-	count = packet_len/blocksize;
+	count = packet_len / blocksize;
 
 	if( count < item_count+card_count ) {
 		ShowError("clif_parse_SearchStoreInfo: Malformed packet (expected count=%u, count=%u, account_id=%d).\n", item_count+card_count, count, sd->bl.id);
@@ -17969,7 +17965,11 @@ static void clif_parse_SearchStoreInfo(int fd, struct map_session_data *sd)
 ///     1 = "next" label to retrieve more results
 void clif_search_store_info_ack(struct map_session_data *sd)
 {
+#if PACKETVER >= 20150225
+	const unsigned int blocksize = MESSAGE_SIZE + 26 + 5 * 5;
+#else
 	const unsigned int blocksize = MESSAGE_SIZE + 26;
+#endif
 	int fd = sd->fd;
 	unsigned int i, start, end;
 
@@ -18003,6 +18003,7 @@ void clif_search_store_info_ack(struct map_session_data *sd)
 		it.amount = ssitem->amount;
 
 		clif_addcards(WFIFOP(fd,i * blocksize + 25 + MESSAGE_SIZE), &it);
+		clif_add_random_options(WFIFOP(fd,i * blocksize + 31 + MESSAGE_SIZE), &it);
 	}
 
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -18365,15 +18366,15 @@ void clif_millenniumshield(struct block_list *bl, short shield_count) {
 
 /// Kagerou/Oboro amulet spirit
 /// 08cf <id>.L <type>.W <num>.W (ZC_SPIRITS_ATTRIBUTE).
-void clif_spiritcharm(struct map_session_data *sd) {
+void clif_charmball(struct map_session_data *sd) {
 	unsigned char buf[10];
 
 	nullpo_retv(sd);
 
 	WBUFW(buf,0) = 0x8cf;
 	WBUFL(buf,2) = sd->bl.id;
-	WBUFW(buf,6) = sd->spiritcharm_type;
-	WBUFW(buf,8) = sd->spiritcharm;
+	WBUFW(buf,6) = sd->charmball_type;
+	WBUFW(buf,8) = sd->charmball;
 	clif_send(buf,packet_len(0x8cf),&sd->bl,AREA);
 }
 
@@ -20224,8 +20225,29 @@ void clif_skill_scale(struct block_list *bl, int src_id, int x, int y, uint16 sk
 }
 
 
+/// Send out the percentage of weight that causes it to be displayed in red.
+/// 0ADE <percentage>.L
+void clif_weight_limit(struct map_session_data *sd) {
+#if PACKETVER >= 20171025
+	int fd;
+
+	nullpo_retv(sd);
+
+ 	fd = sd->fd;
+ 	WFIFOHEAD(fd,packet_len(0xADE));
+	WFIFOW(fd,0) = 0xADE;
+#ifdef RENEWAL
+	WFIFOL(fd,2) = battle_config.natural_heal_weight_rate_renewal;
+#else
+	WFIFOL(fd,2) = battle_config.natural_heal_weight_rate;
+#endif
+	WFIFOSET(fd,packet_len(0xADE));
+#endif
+}
+
+
 #ifdef DUMP_UNKNOWN_PACKET
-void DumpUnknow(int fd,TBL_PC *sd,int cmd,int packet_len) {
+void DumpUnknow(int fd, TBL_PC *sd, int cmd, int packet_len) {
 	const char *packet_txt = "save/packet.txt";
 	FILE *fp;
 	time_t time_server;

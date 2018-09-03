@@ -1001,7 +1001,7 @@ void clif_elemental_info(struct map_session_data *sd);
 void clif_elemental_updatestatus(struct map_session_data *sd, int type);
 
 void clif_millenniumshield(struct block_list *bl, short shield_count);
-void clif_spiritcharm(struct map_session_data *sd);
+void clif_charmball(struct map_session_data *sd);
 
 void clif_snap(struct block_list *bl, short x, short y);
 void clif_monster_hp_bar(struct mob_data *md, int fd);
@@ -1074,5 +1074,6 @@ void clif_pAchievementCheckReward(int fd, struct map_session_data *sd);
 void clif_achievement_reward_ack(int fd, unsigned char result, int achievement_id);
 
 void clif_skill_scale(struct block_list *bl, int src_id, int x, int y, uint16 skill_id, uint16 skill_lv, int casttime);
+void clif_weight_limit(struct map_session_data *sd);
 
 #endif /* _CLIF_H_ */

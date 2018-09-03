@@ -1060,17 +1060,14 @@ set to the ID of the killer.
 
 OnPCKillEvent:
 
-This special label triggers when a player kills another player. The variable
-'killedrid' is set to the ID of the player killed.
-'killedrid_x' is set to the current x of the player killed.
-'killedrid_y' is set to the current y of the player killed.
+This special label triggers when a player kills another player.
+The variable 'killedrid' is set to the ID of the player killed.
 
 OnNPCKillEvent:
 
-This special label triggers when a player kills a monster without label. The variable
-'killedrid' is set to the Class (mob ID) of the monster killed.
-'killedrid_x' is set to the current x of the monster killed.
-'killedrid_y' is set to the current y of the monster killed.
+This special label triggers when a player kills a monster without label.
+The variable 'killedrid' is set to the Class (mob ID) of the monster killed.
+The variable 'killedgid' is set to the ID (unique mob game ID) of the monster killed.
 
 OnPCLoadMapEvent:
 
@@ -5857,9 +5854,8 @@ previously, they will now at 0+the level given.
 Flag 4 is the same as flag 1 in that it saves to the database.  However, these skills
 are ignored when any action is taken that adjusts the skill tree (reset/job change).
 
-// This will permanently give the character Stone Throw (TF_THROWSTONE,152), at 
-// level 1.
-    skill 152,1,0;
+// This will permanently give the character Stone Throw (TF_THROWSTONE,152), at level 1.
+    skill "TF_THROWSTONE",1,0;
 
 ---------------------------------------
 
@@ -6026,11 +6022,10 @@ monster spawns.
 The only very special thing about this command is an event label, which is an 
 optional parameter. This label is written like '<NPC object name>::<label name>' 
 and upon the monster being killed, it will execute the script inside of the 
-specified NPC object starting from the label given.
-'killerrid' is set to the ID of the killing character.
-'killedrid' is set to the Class (mob ID) of the monster killed.
-'killedrid_x' is set to the current x coordinate of the monster killed.
-'killedrid_y' is set to the current y coordinate of the monster killed.
+specified NPC object starting from the label given. The RID of the player
+attached at this execution will be the RID of the killing character.
+The variable 'killedrid' is set to the Class (mob ID) of the monster killed.
+The variable 'killedgid' is set to the ID (unique mob game ID) of the monster killed.
 
 <size> can be:
 	0 = medium (default)

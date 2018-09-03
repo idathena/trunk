@@ -414,7 +414,6 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 			status_change_end(bl, SC_TINDER_BREAKER, INVALID_TIMER);
 			//status_change_end(bl, SC_BLADESTOP, INVALID_TIMER); //Won't stop when you are knocked away, go figure
 			status_change_end(bl, SC_MAGICROD, INVALID_TIMER);
-			status_change_end(bl, SC_MEIKYOUSISUI, INVALID_TIMER);
 			status_change_end(bl, SC_SU_STOOP, INVALID_TIMER);
 #ifdef RENEWAL //3x3 AoE ranged damage protection
 			if (sc->data[SC_TATAMIGAESHI] && sc->data[SC_TATAMIGAESHI]->val2 > 0)

@@ -8714,6 +8714,11 @@ REPLACE INTO `mob_skill_db_re` VALUES (2541,'Faceworm Larva@NPC_BLEEDING','attac
 REPLACE INTO `mob_skill_db_re` VALUES (2541,'Faceworm Larva@NPC_POISON','attack',176,5,500,800,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2541,'Faceworm Larva@NPC_POISONATTACK','attack',188,10,2000,2000,2000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
+# Sara's Memory
+#REPLACE INTO `mob_skill_db_re` VALUES (2542,'Irene Elder@NPC_MILLENNIUMSHIELD','idle',707,1,5000,1000,30000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+#REPLACE INTO `mob_skill_db_re` VALUES (2542,'Irene Elder@NPC_MILLENNIUMSHIELD','chase',707,1,5000,1000,30000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+#REPLACE INTO `mob_skill_db_re` VALUES (2542,'Irene Elder@NPC_MILLENNIUMSHIELD','attack',707,1,5000,1000,30000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
 # Geffen Magic Tournament
 REPLACE INTO `mob_skill_db_re` VALUES (2549,'Geffen Mage 1@MG_FIREBOLT','attack',19,5,3000,1000,3000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2549,'Geffen Mage 1@MG_FIREWALL','attack',18,1,3000,2000,3000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -8739,7 +8744,7 @@ REPLACE INTO `mob_skill_db_re` VALUES (2557,'Geffen Mage 7@NPC_BLEEDING','attack
 REPLACE INTO `mob_skill_db_re` VALUES (2557,'Geffen Mage 7@NPC_COMBOATTACK','attack',171,10,3000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2557,'Geffen Mage 7@NPC_INVISIBLE','attack',353,1,2000,1000,60000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2557,'Geffen Mage 7@NPC_WIDESOULDRAIN','attack',680,3,3000,500,10000,'yes','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@RK_MILLENNIUMSHIELD','attack',2011,1,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+#REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@NPC_MILLENNIUMSHIELD','attack',707,1,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@LK_SPIRALPIERCE','attack',397,5,3000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@SM_ENDURE','attack',8,10,3000,0,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@SM_MAGNUM','attack',7,10,3000,500,5000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);

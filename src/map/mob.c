@@ -2408,7 +2408,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		//@TODO: Determine if this should go before calculating the MVP player instead of after
 		if (UINT_MAX - md->dmglog[0].dmg > md->tdmg) {
 			md->tdmg += md->dmglog[0].dmg;
-			md->dmglog[0].dmg <<= 1;
+			md->dmglog[0].dmg *= 2;
 		} else {
 			md->dmglog[0].dmg += UINT_MAX - md->tdmg;
 			md->tdmg = UINT_MAX;
@@ -2589,7 +2589,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 					if(md->special_state.size == SZ_MEDIUM && drop_rate >= 2)
 						drop_rate /= 2;
 					else if(md->special_state.size == SZ_BIG)
-						drop_rate <<= 1;
+						drop_rate *= 2;
 				}
 				if(src) {
 					if(battle_config.drops_by_luk) //Drops affected by luk as a fixed increase [Valaris]
@@ -2827,21 +2827,18 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			if(sd && battle_config.mob_npc_event_type) {
 				pc_setparam(sd, SP_KILLERRID, sd->bl.id);
 				pc_setparam(sd, SP_KILLEDRID, md->mob_id);
-				pc_setparam(sd, SP_KILLEDRID_X, md->bl.x);
-				pc_setparam(sd, SP_KILLEDRID_Y, md->bl.y);
+				pc_setparam(sd, SP_KILLEDGID, md->bl.id);
 				npc_event(sd, md->npc_event, 0);
 			} else if(mvp_sd) {
 				pc_setparam(mvp_sd, SP_KILLERRID, (sd ? sd->bl.id : 0));
 				pc_setparam(mvp_sd, SP_KILLEDRID, md->mob_id);
-				pc_setparam(mvp_sd, SP_KILLEDRID_X, md->bl.x);
-				pc_setparam(mvp_sd, SP_KILLEDRID_Y, md->bl.y);
+				pc_setparam(mvp_sd, SP_KILLEDGID, md->bl.id);
 				npc_event(mvp_sd, md->npc_event, 0);
 			} else
 				npc_event_do(md->npc_event);
 		} else if(mvp_sd && !md->state.npc_killmonster) {
 			pc_setparam(mvp_sd, SP_KILLEDRID, md->mob_id);
-			pc_setparam(mvp_sd, SP_KILLEDRID_X, md->bl.x);
-			pc_setparam(mvp_sd, SP_KILLEDRID_Y, md->bl.y);
+			pc_setparam(mvp_sd, SP_KILLEDGID, md->bl.id);
 			npc_script_event(mvp_sd, NPCE_KILLNPC); //PCKillNPC [Lance]
 		}
 	}
