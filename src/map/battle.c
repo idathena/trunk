@@ -1004,10 +1004,9 @@ static bool battle_skill_check_bypass_modifiers(struct block_list *src, struct b
 int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, struct Damage *d, int64 damage, uint16 skill_id, uint16 skill_lv)
 {
 	struct map_session_data *tsd = NULL;
-	struct status_change *sc, *tsc;
-	struct status_data *status;
-	struct status_change_entry *sce;
-	int div_ = d->div_, flag = d->flag;
+	struct status_change *sc = NULL;
+	struct status_change_entry *sce = NULL;
+	int flag = d->flag;
 
 	nullpo_ret(bl);
 
@@ -1015,9 +1014,7 @@ int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, stru
 		return 0;
 
 	sc = status_get_sc(bl);
-	status = status_get_status_data(bl);
 	tsd = BL_CAST(BL_PC,src);
-	tsc = status_get_sc(src);
 
 	if( sc && sc->count ) {
 		if( flag&BF_WEAPON ) {
@@ -1042,10 +1039,10 @@ int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, stru
 				damage -= damage * sce->val2 / 100;
 #else
 			if( sc->data[SC_ENERGYCOAT] && !battle_skill_check_no_cardfix_atk(skill_id) ) {
-				int per = 100 * status->sp / status->max_sp - 1;
+				int per = 100 * status_get_sp(bl) / status_get_max_sp(bl) - 1;
 
 				per /= 20;
-				if( !status_charge(bl,0,(10 + 5 * per) * status->max_sp / 1000) )
+				if( !status_charge(bl,0,(10 + 5 * per) * status_get_max_sp(bl) / 1000) )
 					status_change_end(bl,SC_ENERGYCOAT,INVALID_TIMER);
 				damage -= damage * 6 * (1 + per) / 100;
 			}
@@ -1086,9 +1083,9 @@ int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, stru
 int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct Damage *d, int64 damage, uint16 skill_id, uint16 skill_lv)
 {
 	struct map_session_data *sd = NULL, *tsd = NULL;
-	struct status_change *sc, *tsc;
-	struct status_data *status, *tstatus;
-	struct status_change_entry *sce;
+	struct status_change *sc = NULL, *tsc = NULL;
+	struct status_data *tstatus = NULL;
+	struct status_change_entry *sce = NULL;
 	int div_ = d->div_, flag = d->flag;
 
 	nullpo_ret(bl);
@@ -1101,7 +1098,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 	sd = BL_CAST(BL_PC,bl);
 	sc = status_get_sc(bl);
-	status = status_get_status_data(bl);
 	tsd = BL_CAST(BL_PC,src);
 	tsc = status_get_sc(src);
 	tstatus = status_get_status_data(src);
@@ -1347,11 +1343,11 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 #ifdef RENEWAL
 		if( sc->data[SC_ENERGYCOAT] ) {
-			int per = 100 * status->sp / status->max_sp - 1; //100% should be counted as the 80~99% interval
+			int per = 100 * status_get_sp(bl) / status_get_max_sp(bl) - 1; //100% should be counted as the 80~99% interval
 
 			per /= 20; //Uses 20% SP intervals
 			//SP Cost: 1% + 0.5% per every 20% SP
-			if( !status_charge(bl,0,(10 + 5 * per) * status->max_sp / 1000) )
+			if( !status_charge(bl,0,(10 + 5 * per) * status_get_max_sp(bl) / 1000) )
 				status_change_end(bl,SC_ENERGYCOAT,INVALID_TIMER);
 			damage -= damage * 6 * (1 + per) / 100; //Reduction: 6% + 6% every 20%
 		}
@@ -4473,7 +4469,6 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 {
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct status_change *sc = status_get_sc(src);
-	struct status_data *sstatus = status_get_status_data(src);
 	struct status_data *tstatus = status_get_status_data(target);
 	struct status_change_entry *sce = NULL;
 	int inf3 = skill_get_inf3(skill_id);
@@ -5593,6 +5588,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			ATK_ADD(wd.damage, wd.damage2, div_ * sd->spiritball_old * 3);
 		} else
 			ATK_ADD(wd.damage, wd.damage2, div_ * sd->spiritball * 3);
+	}
 #endif
 
 	//Check for element attribute modifiers

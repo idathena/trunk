@@ -880,8 +880,8 @@
 //3038,0,0,1,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//ITEM_OPTION_SPLASH_ATTACK#Option Splash Attack#
 //3039,0,0,1,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//GM_FORCE_TRANSFER#Force Transfer#
 //3040,0,0,1,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//GM_WIDE_RESURRECTION#Wide Resurrection#
-//3041,0,0,1,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//ALL_NIFLHEIM_RECALL#Return To Niflheim#
-//3042,0,0,1,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//ALL_PRONTERA_RECALL#Return To Prontera#
+3041,0,0,1,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//ALL_NIFLHEIM_RECALL#Return To Niflheim#
+3042,0,0,1,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//ALL_PRONTERA_RECALL#Return To Prontera#
 //3043,0,0,1,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//ALL_GLASTHEIM_RECALL#Return To Glastheim#
 //3044,0,0,1,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//ALL_THANATOS_RECALL#Return To Thanatos#
 
