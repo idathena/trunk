@@ -9830,27 +9830,27 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					case RETURN_TO_ELDICASTES:
 						x = 198;
 						y = 187;
-						mapindex  = mapindex_name2id(MAP_DICASTES);
+						mapindex = mapindex_name2id(MAP_DICASTES);
 						break;
 					case ALL_GUARDIAN_RECALL:
 						x = 44;
 						y = 151;
-						mapindex  = mapindex_name2id(MAP_MORA);
+						mapindex = mapindex_name2id(MAP_MORA);
 						break;
 					case ECLAGE_RECALL:
 						x = 47;
 						y = 31;
-						mapindex  = mapindex_name2id(MAP_ECLAGE_IN);
+						mapindex = mapindex_name2id(MAP_ECLAGE_IN);
 						break;
 					case ALL_NIFLHEIM_RECALL:
 						x = 193;
 						y = 186;
-						mapindex  = mapindex_name2id(MAP_NIFLHEIM);
+						mapindex = mapindex_name2id(MAP_NIFLHEIM);
 						break;
 					case ALL_PRONTERA_RECALL:
 						x = 159;
 						y = 152;
-						mapindex  = mapindex_name2id(MAP_PRONTERA);
+						mapindex = mapindex_name2id(MAP_PRONTERA);
 						break;
 				}
 				if( !mapindex ) { //Given map not found?

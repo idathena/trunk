@@ -2712,8 +2712,17 @@ int battle_get_weapon_element(struct Damage *d, struct block_list *src, struct b
 			element = sd->charmball_type; //Summoning 10 charmball will endow your weapon
 		else
 			element = (weapon_position == EQI_HAND_L ? sstatus->lhw.ele : sstatus->rhw.ele);
-		if(is_skill_using_arrow(src, skill_id) && weapon_position == EQI_HAND_R)
-			element = (sd && sd->bonus.arrow_ele ? sd->bonus.arrow_ele : ELE_NEUTRAL);
+		if(is_skill_using_arrow(src, skill_id) && weapon_position == EQI_HAND_R && sd) {
+			switch(sd->status.weapon) {
+				case W_BOW:	case W_REVOLVER:
+				case W_RIFLE:	case W_GATLING:
+				case W_SHOTGUN:	case W_GRENADE:
+					break; //Already used weapon element
+				default:
+					element = (sd->bonus.arrow_ele ? sd->bonus.arrow_ele : ELE_NEUTRAL);
+					break;
+			}
+		}
 	} else if(element == -2) //Use enchantment's element
 		element = status_get_attack_sc_element(src, sc);
 	else if(element == -3) //Use random element
