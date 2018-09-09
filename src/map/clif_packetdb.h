@@ -1123,7 +1123,7 @@
 	packet(0x02d5,2);
 	parseable_packet(0x02d6,6,clif_parse_ViewPlayerEquip,2);
 	packet(0x02d7,-1);
-	parseable_packet(0x02d8,10,clif_parse_EquipTick,2,6);
+	parseable_packet(0x02d8,10,clif_parse_configuration,2,6);
 	packet(0x02d9,10);
 	packet(0x02da,3);
 	parseable_packet(0x02db,-1,clif_parse_BattleChat,2,4);
@@ -2285,7 +2285,7 @@
 	packet(0x0A2F,7); // ZC_ACK_CHANGE_TITLE
 	packet(0x0A30,106); // ZC_ACK_REQNAMEALL2
 	// Pet Evolution System
-	parseable_packet(0x09FB,-1,clif_parse_dull,0); // CZ_PET_EVOLUTION
+	parseable_packet(0x09FB,-1,clif_parse_pet_evolution,2,4); // CZ_PET_EVOLUTION
 	packet(0x09FC,6); // ZC_PET_EVOLUTION_RESULT
 #endif
 

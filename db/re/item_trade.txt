@@ -3855,6 +3855,7 @@
 25047,499,100	// Kahlunac
 25048,499,100	// Hearty_Lunchbox
 25049,499,100	// Basilac_Clam
+25408,435,100	// Memories_Of_Gyoll
 26100,435,100	// P_Foxtail_Staff2
 26101,435,100	// P_Foxtail_Staff3
 28105,467,100	// Infinity_Twohand_Axe

@@ -499,6 +499,7 @@ CREATE TABLE IF NOT EXISTS `homunculus` (
   `alive` tinyint(2) NOT NULL default '1',
   `rename_flag` tinyint(2) NOT NULL default '0',
   `vaporize` tinyint(2) NOT NULL default '0',
+  `autofeed` tinyint(2) NOT NULL default '0',
   PRIMARY KEY  (`homun_id`)
 ) ENGINE=MyISAM;
 
@@ -767,6 +768,7 @@ CREATE TABLE IF NOT EXISTS `pet` (
   `hungry` smallint(9) unsigned NOT NULL default '0',
   `rename_flag` tinyint(4) unsigned NOT NULL default '0',
   `incubate` int(11) unsigned NOT NULL default '0',
+  `autofeed` tinyint(2) NOT NULL default '0',
   PRIMARY KEY  (`pet_id`)
 ) ENGINE=MyISAM;
 
@@ -860,6 +862,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1488454834);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1488744559);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1489588190);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1510499460);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1536064380);
 
 --
 -- Table structure for table `sstatus`

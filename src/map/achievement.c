@@ -934,7 +934,7 @@ struct av_condition *parse_condition(const char *p, const char *file, int line)
  * @param source: The source configuration file.
  * @return The parsed achievement entry or NULL in case of error.
  */
-struct achievement_db *achievement_read_db_sub(struct config_setting_t *cs, int n, const char *source)
+struct achievement_db *achievement_readdb_sub(struct config_setting_t *cs, int n, const char *source)
 {
 	struct achievement_db *entry = NULL;
 	struct config_setting_t *t = NULL;
@@ -943,24 +943,24 @@ struct achievement_db *achievement_read_db_sub(struct config_setting_t *cs, int 
 	const char *group_char = NULL, *name = NULL, *condition = NULL, *mapname = NULL;
 
 	if (!config_setting_lookup_int(cs, "id", &achievement_id)) {
-		ShowWarning("achievement_read_db_sub: Missing ID in \"%s\", entry #%d, skipping.\n", source, n);
+		ShowWarning("achievement_readdb_sub: Missing ID in \"%s\", entry #%d, skipping.\n", source, n);
 		return NULL;
 	}
 	if (achievement_id < 1 || achievement_id >= INT_MAX) {
-		ShowWarning("achievement_read_db_sub: Invalid achievement ID %d in \"%s\", entry #%d (min: 1, max: %d), skipping.\n", achievement_id, source, n, INT_MAX);
+		ShowWarning("achievement_readdb_sub: Invalid achievement ID %d in \"%s\", entry #%d (min: 1, max: %d), skipping.\n", achievement_id, source, n, INT_MAX);
 		return NULL;
 	}
 	if (!config_setting_lookup_string(cs, "group", &group_char) || !*group_char) {
-		ShowWarning("achievement_read_db_sub: Missing group for achievement %d in \"%s\", skipping.\n", achievement_id, source);
+		ShowWarning("achievement_readdb_sub: Missing group for achievement %d in \"%s\", skipping.\n", achievement_id, source);
 		return NULL;
 	}
 	if (!script_get_constant(group_char, (int *)&group)) {
-		ShowWarning("achievement_read_db_sub: Invalid group %s for achievement %d in \"%s\", skipping.\n", group_char, achievement_id, source);
+		ShowWarning("achievement_readdb_sub: Invalid group %s for achievement %d in \"%s\", skipping.\n", group_char, achievement_id, source);
 		return NULL;
 	}
 
 	if (!config_setting_lookup_string(cs, "name", &name) || !*name) {
-		ShowWarning("achievement_read_db_sub: Missing achievement name for achievement %d in \"%s\", skipping.\n", name, achievement_id, source);
+		ShowWarning("achievement_readdb_sub: Missing achievement name for achievement %d in \"%s\", skipping.\n", name, achievement_id, source);
 		return NULL;
 	}
 
@@ -982,11 +982,11 @@ struct achievement_db *achievement_read_db_sub(struct config_setting_t *cs, int 
 			if (!config_setting_is_group(tt))
 				continue;
 			if (config_setting_lookup_int(tt, "mobid", &mob_id) && !mobdb_exists(mob_id)) { //The mob ID field is not required
-				ShowError("achievement_read_db_sub: Invalid mob ID %d for achievement %d in \"%s\", skipping.\n", mob_id, achievement_id, source);
+				ShowError("achievement_readdb_sub: Invalid mob ID %d for achievement %d in \"%s\", skipping.\n", mob_id, achievement_id, source);
 				continue;
 			}
 			if (!config_setting_lookup_int(tt, "count", &count) || count <= 0) {
-				ShowError("achievement_read_db_sub: Invalid count %d for achievement %d in \"%s\", skipping.\n", count, achievement_id, source);
+				ShowError("achievement_readdb_sub: Invalid count %d for achievement %d in \"%s\", skipping.\n", count, achievement_id, source);
 				continue;
 			}
 			if (mob_id && group == AG_BATTLE && !achievement_mobexists(mob_id)) {
@@ -1008,12 +1008,12 @@ struct achievement_db *achievement_read_db_sub(struct config_setting_t *cs, int 
 
 	if (config_setting_lookup_string(cs, "map", &mapname)) {
 		if (group != AG_CHAT)
-			ShowWarning("achievement_read_db_sub: The map argument can only be used with the group AG_CHATTING (achievement %d in \"%s\"), skipping.\n", achievement_id, source);
+			ShowWarning("achievement_readdb_sub: The map argument can only be used with the group AG_CHATTING (achievement %d in \"%s\"), skipping.\n", achievement_id, source);
 		else {
 			entry->mapindex = map_mapname2mapid(mapname);
 
 			if (entry->mapindex == -1)
-				ShowWarning("achievement_read_db_sub: Invalid map name %s for achievement %d in \"%s\".\n", mapname, achievement_id, source);
+				ShowWarning("achievement_readdb_sub: Invalid map name %s for achievement %d in \"%s\".\n", mapname, achievement_id, source);
 		}
 	}
 
@@ -1027,7 +1027,7 @@ struct achievement_db *achievement_read_db_sub(struct config_setting_t *cs, int 
 				entry->dependent_count++;
 			}
 		} else
-			ShowWarning("achievement_read_db_sub: Invalid dependent format for achievement %d in \"%s\".\n", achievement_id, source);
+			ShowWarning("achievement_readdb_sub: Invalid dependent format for achievement %d in \"%s\".\n", achievement_id, source);
 	}
 
 	if ((t = config_setting_get_member(cs, "reward"))) {
@@ -1039,7 +1039,7 @@ struct achievement_db *achievement_read_db_sub(struct config_setting_t *cs, int 
 					entry->rewards.nameid = nameid;
 					entry->rewards.amount = 1; //Default the amount to 1
 				} else if (nameid && !itemdb_exists(nameid)) {
-					ShowWarning("achievement_read_db_sub: Invalid reward item ID %hu for achievement %d in \"%s\". Setting to 0.\n", nameid, achievement_id, source);
+					ShowWarning("achievement_readdb_sub: Invalid reward item ID %hu for achievement %d in \"%s\". Setting to 0.\n", nameid, achievement_id, source);
 					entry->rewards.nameid = nameid = 0;
 				}
 				if (config_setting_get_member(t, "amount")) {
@@ -1073,13 +1073,13 @@ struct achievement_db *achievement_read_db_sub(struct config_setting_t *cs, int 
 /**
  * Loads achievements from the achievement db.
  */
-void achievement_read_db(void)
+void achievement_readdb(void)
 {
 	struct config_setting_t *adb = NULL, *a = NULL;
 	char filepath[256];
 	int count = 0;
 
-	sprintf(filepath, "%s/%s", db_path, DBPATH"achievement_db.conf");
+	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, DBPATH"achievement_db.conf");
 
 	if (config_read_file(&achievement_db_conf, filepath))
 		return;
@@ -1088,14 +1088,14 @@ void achievement_read_db(void)
 		return;
 
 	while ((a = config_setting_get_elem(adb, count))) {
-		struct achievement_db *entry = achievement_read_db_sub(a, count, filepath);
+		struct achievement_db *entry = achievement_readdb_sub(a, count, filepath);
 
 		if (!entry) {
-			ShowWarning("achievement_read_db: Failed to parse achievement entry %d.\n", count);
+			ShowWarning("achievement_readdb: Failed to parse achievement entry %d.\n", count);
 			continue;
 		}
 		if (achievement_search(entry->achievement_id) != &achievement_dummy) {
-			ShowWarning("achievement_read_db: Duplicate achievement %d.\n", entry->achievement_id);
+			ShowWarning("achievement_readdb: Duplicate achievement %d.\n", entry->achievement_id);
 			achievement_db_free_sub(entry, false);
 			continue;
 		}
@@ -1186,7 +1186,7 @@ void achievement_db_reload(void)
 		return;
 	achievementmobs_db->clear(achievementmobs_db, achievementmobs_db_free);
 	achievement_db->clear(achievement_db, achievement_db_free);
-	achievement_read_db();
+	achievement_readdb();
 }
 
 void do_init_achievement(void)
@@ -1196,7 +1196,7 @@ void do_init_achievement(void)
 	memset(&achievement_dummy, 0, sizeof(achievement_dummy));
 	achievement_db = idb_alloc(DB_OPT_BASE);
 	achievementmobs_db = idb_alloc(DB_OPT_BASE);
-	achievement_read_db();
+	achievement_readdb();
 }
 
 void do_final_achievement(void)

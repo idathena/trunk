@@ -4,10 +4,21 @@
 #ifndef _PET_H_
 #define _PET_H_
 
-#define MAX_PET_DB	300
-#define MAX_PETLOOT_SIZE	30
+#define MAX_PET_DB 300
+#define MAX_PETLOOT_SIZE 30
 
 //Pet DB
+struct s_pet_evo_itemlist {
+	unsigned short nameid;
+	unsigned short quantity;
+};
+
+struct s_pet_evo_datalist {
+	unsigned short EggID;
+	struct s_pet_evo_itemlist *ev_items;
+	uint8 ev_item_count;
+};
+
 struct s_pet_db {
 	short class_; //Monster ID
 	char name[NAME_LENGTH], //AEGIS name
@@ -16,7 +27,7 @@ struct s_pet_db {
 	unsigned short EggID; //Egg ID
 	unsigned short AcceID; //Accessory ID
 	unsigned short FoodID; //Food ID
-	int fullness; //Amount of hunger decresed each hungry_delay interval
+	int hunger_pts; //Amount of hunger decresed each hungry_delay interval
 	int hungry_delay; //Hunger value decrease each x seconds
 	int r_hungry; //Intimacy increased after feeding
 	int r_full; //Intimacy reduced when over-fed
@@ -32,6 +43,8 @@ struct s_pet_db {
 	struct script_code
 		*pet_script, //Script since pet hatched
 		*pet_friendly_script; //Script when pet is loyal
+	struct s_pet_evo_datalist *ev_datas; //Pet Evolution
+	uint8 ev_data_count;
 };
 extern struct s_pet_db pet_db[MAX_PET_DB];
 
@@ -45,6 +58,7 @@ enum e_pet_itemtype {
 enum e_pet_catch {
 	PET_CATCH_FAIL = 0, //A catch attempt failed
 	PET_CATCH_UNIVERSAL = 1, //The catch attempt is universal (ignoring MD_STATUS_IMMUNE/Boss)
+	PET_CATCH_UNIVERSAL_ITEM = 2,
 };
 
 struct pet_recovery { //Stat recovery
@@ -128,6 +142,7 @@ int pet_select_egg(struct map_session_data *sd,short egg_index);
 int pet_catch_process1(struct map_session_data *sd,int target_class);
 int pet_catch_process2(struct map_session_data *sd,int target_id);
 bool pet_get_egg(int account_id,short pet_class,int pet_id);
+int pet_return_egg(struct map_session_data *sd, struct pet_data *pd);
 int pet_menu(struct map_session_data *sd,int menunum);
 int pet_change_name(struct map_session_data *sd,char *name);
 int pet_change_name_ack(struct map_session_data *sd, char *name, int flag);
@@ -142,7 +157,7 @@ int pet_heal_timer(int tid, unsigned int tick, int id, intptr_t data); // [Valar
 #define pet_stop_walking(pd, type) unit_stop_walking(&(pd)->bl, type)
 #define pet_stop_attack(pd) unit_stop_attack(&(pd)->bl)
 
-void read_petdb(void);
+void pet_readdb(void);
 void do_init_pet(void);
 void do_final_pet(void);
 

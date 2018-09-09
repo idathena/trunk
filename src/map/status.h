@@ -2388,8 +2388,8 @@ unsigned short status_get_rand_matk(unsigned short matk_max, unsigned short matk
 void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_max, unsigned short *matk_min);
 int status_get_matk(struct block_list *bl, int flag);
 
-int status_readdb(void);
-int do_init_status(void);
+void status_readdb(void);
+void do_init_status(void);
 void do_final_status(void);
 
 #endif /* _STATUS_H_ */

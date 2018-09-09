@@ -456,7 +456,6 @@ bool itemdb_isstackable2(struct item_data *id)
 	}
 }
 
-
 /*==========================================
  * Trade Restriction functions [Skotlex]
  *------------------------------------------*/
@@ -1206,12 +1205,12 @@ static void itemdb_roulette_read(void) {
 		if (rd.items[i] == limit)
 			continue;
 		if (rd.items[i] > limit) {
-			ShowWarning("itemdb_parse_roulette_db: Level %d has %d items, only %d supported, capping...\n", i + 1, rd.items[i], limit);
+			ShowWarning("itemdb_roulette_read: Level %d has %d items, only %d supported, capping...\n", i + 1, rd.items[i], limit);
 			rd.items[i] = limit;
 			continue;
 		}
 		// This scenario = rd.items[i] < limit
-		ShowWarning("itemdb_parse_roulette_db: Level %d has %d items, %d are required. Filling with Apples...\n", i + 1, rd.items[i], limit);
+		ShowWarning("itemdb_roulette_read: Level %d has %d items, %d are required. Filling with Apples...\n", i + 1, rd.items[i], limit);
 		rd.items[i] = limit;
 		RECREATE(rd.nameid[i], unsigned short, rd.items[i]);
 		RECREATE(rd.qty[i], unsigned short, rd.items[i]);

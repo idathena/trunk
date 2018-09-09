@@ -951,7 +951,7 @@ int unit_movepos(struct block_list *bl, short dst_x, short dst_y, int easy, bool
 		} else
 			npc_untouch_areanpc(sd, bl->m, bl->x, bl->y);
 
-		if( sd->status.pet_id > 0 && sd->pd && sd->pd->pet.intimate > 0 ) { //Check if pet needs to be teleported [Skotlex]
+		if( sd->status.pet_id > 0 && sd->pd && sd->pd->pet.intimate >= PETINTIMATE_AWKWARD ) { //Check if pet needs to be teleported [Skotlex]
 			int flag = 0;
 			struct block_list *pbl = &sd->pd->bl;
 
@@ -2850,7 +2850,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 				struct pet_data *pd = (struct pet_data *)bl;
 
 				//If logging out, this is deleted on unit_free
-				if (pd->pet.intimate <= 0 && !(pd->master && !pd->master->state.active)) {
+				if (pd->pet.intimate < PETINTIMATE_AWKWARD && !(pd->master && !pd->master->state.active)) {
 					clif_clearunit_area(bl,clrtype);
 					map_delblock(bl);
 					unit_free(bl,CLR_OUTSIGHT);
@@ -3106,7 +3106,7 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 					aFree (pd->loot);
 					pd->loot = NULL;
 				}
-				if( pd->pet.intimate > 0 )
+				if( pd->pet.intimate >= PETINTIMATE_AWKWARD )
 					intif_save_petdata(pd->pet.account_id,&pd->pet);
 				else { //Remove pet
 					intif_delete_petdata(pd->pet.pet_id);

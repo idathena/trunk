@@ -2468,7 +2468,7 @@ void script_warning(const char *src, const char *file, int start_line, const cha
 /*==========================================
  * Analysis of the script
  *------------------------------------------*/
-struct script_code *parse_script(const char *src,const char *file,int line,int options)
+struct script_code *parse_script(const char *src, const char *file, int line, int options)
 {
 	const char *p, *tmpp;
 	int i;
@@ -2492,7 +2492,7 @@ struct script_code *parse_script(const char *src,const char *file,int line,int o
 		first = 0;
 	}
 
-	script_buf = (unsigned char *)aMalloc(SCRIPT_BLOCK_SIZE*sizeof(unsigned char));
+	script_buf = (unsigned char *)aMalloc(SCRIPT_BLOCK_SIZE * sizeof(unsigned char));
 	script_pos = 0;
 	script_size = SCRIPT_BLOCK_SIZE;
 	parse_nextline(true, NULL);
@@ -2506,6 +2506,7 @@ struct script_code *parse_script(const char *src,const char *file,int line,int o
 		//Restore program state when script has problems. [from jA]
 		int j;
 		const int size = ARRAYLENGTH(syntax.curly);
+
 		if( error_report )
 			script_error(src,file,line,error_msg,error_pos);
 		aFree( error_msg );
@@ -2620,6 +2621,7 @@ struct script_code *parse_script(const char *src,const char *file,int line,int o
 #ifdef DEBUG_DISASM
 	{
 		int i = 0,j;
+
 		while( i < script_pos ) {
 			c_op op = get_com(script_buf,&i);
 
@@ -6098,7 +6100,7 @@ BUILDIN_FUNC(viewpoint)
  * @param funcname Function name
  * @param x First position of random option id array from the script
  */
-static int script_getitem_randomoption(struct script_state *st, struct item *it, const char *funcname, int x) {
+static int script_getitem_randomoption(struct script_state *st, struct map_session_data *sd, struct item *it, const char *funcname, int x) {
 	int i, opt_size;
 	struct script_data *opt_id = script_getdata(st,x);
 	struct script_data *opt_val = script_getdata(st,x + 1);
@@ -6110,13 +6112,43 @@ static int script_getitem_randomoption(struct script_state *st, struct item *it,
 	int32 opt_val_id, opt_val_idx;
 	int32 opt_param_id, opt_param_idx;
 
+	if( not_server_variable(opt_id_var[0]) && !sd ) {
+		ShowError("buildin_%s: variable \"%s\" was not a server variable, but no player was attached.\n", funcname, opt_id_var);
+		return 1;
+	}
+
+ 	if( !data_isreference(opt_id) || not_array_variable(*opt_id_var) ) {
+		ShowError("buildin_%s: The option id parameter is not an array.\n", funcname);
+		return 1;
+	}
+
 	if( is_string_variable(opt_id_var) ) {
 		ShowError("buildin_%s: The array %s is not numeric type.\n", funcname, opt_id_var);
 		return 1;
 	}
 
+	if( not_server_variable(opt_val_var[0]) && !sd ) {
+		ShowError("buildin_%s: variable \"%s\" was not a server variable, but no player was attached.\n", funcname, opt_val_var);
+		return 1;
+	}
+
+	if( !data_isreference(opt_val) || not_array_variable(*opt_val_var) ) {
+		ShowError("buildin_%s: The option value parameter is not an array.\n", funcname);
+		return 1;
+	}
+
 	if( is_string_variable(opt_val_var) ) {
 		ShowError("buildin_%s: The array %s is not numeric type.\n", funcname, opt_val_var);
+		return 1;
+	}
+
+	if( not_server_variable(opt_param_var[0]) && !sd ) {
+		ShowError("buildin_%s: variable \"%s\" was not a server variable, but no player was attached.\n", funcname, opt_param_var);
+		return 1;
+	}
+
+	if( !data_isreference(opt_param) || not_array_variable(*opt_param_var) ) {
+		ShowError("buildin_%s: The option param parameter is not an array.\n", funcname);
 		return 1;
 	}
 
@@ -6260,7 +6292,7 @@ BUILDIN_FUNC(countitem)
 		it.card[3] = script_getnum(st,9);
 
 		if( command[strlen(command) - 1] == '3' ) {
-			int res = script_getitem_randomoption(st, &it, command, 10);
+			int res = script_getitem_randomoption(st, sd, &it, command, 10);
 
 			if( res != SCRIPT_CMD_SUCCESS )
 				return 1;
@@ -6669,7 +6701,7 @@ BUILDIN_FUNC(getitem2)
 		item_tmp.bound = bound;
 
 		if( offset ) {
-			int res = script_getitem_randomoption(st, &item_tmp, command, offset);
+			int res = script_getitem_randomoption(st, sd, &item_tmp, command, offset);
 
 			if( res != SCRIPT_CMD_SUCCESS )
 				return 1;
@@ -6830,7 +6862,7 @@ BUILDIN_FUNC(rentitem2) {
 	it.expire_time = (unsigned int)(time(NULL) + seconds);
 
 	if( funcname[strlen(funcname) - 1] == '3' ) {
-		int res = script_getitem_randomoption(st, &it, funcname, 11);
+		int res = script_getitem_randomoption(st, sd, &it, funcname, 11);
 
 		if( res != SCRIPT_CMD_SUCCESS )
 			return 1;
@@ -7051,7 +7083,7 @@ BUILDIN_FUNC(makeitem2) {
 		item_tmp.card[3] = script_getnum(st,13);
 
 		if( funcname[strlen(funcname) - 1] == '3' ) {
-			int res = script_getitem_randomoption(st, &item_tmp, funcname, 14);
+			int res = script_getitem_randomoption(st, NULL, &item_tmp, funcname, 14);
 
 			if( res != SCRIPT_CMD_SUCCESS )
 				return 1;
@@ -7439,7 +7471,7 @@ BUILDIN_FUNC(delitem2)
 	it.card[3] = (short)script_getnum(st,10);
 
 	if( command[strlen(command) - 1] == '3' ) {
-		int res = script_getitem_randomoption(st, &it, command, 11);
+		int res = script_getitem_randomoption(st, sd, &it, command, 11);
 
 		if( res != SCRIPT_CMD_SUCCESS )
 			return 1;
@@ -8004,6 +8036,8 @@ BUILDIN_FUNC(getbrokenid)
 
 	num = script_getnum(st,2);
 	for(i = 0; i < MAX_INVENTORY; i++) {
+		if(sd->inventory.u.items_inventory[i].card[0] == CARD0_PET)
+			continue;
 		if(sd->inventory.u.items_inventory[i].attribute) {
 			brokencounter++;
 			if(num == brokencounter) {
@@ -8032,6 +8066,8 @@ BUILDIN_FUNC(repair)
 
 	num = script_getnum(st,2);
 	for(i = 0; i < MAX_INVENTORY; i++) {
+		if(sd->inventory.u.items_inventory[i].card[0] == CARD0_PET)
+			continue;
 		if(sd->inventory.u.items_inventory[i].attribute) {
 				repaircounter++;
 				if(num == repaircounter) {
@@ -8059,6 +8095,8 @@ BUILDIN_FUNC(repairall)
 		return 1;
 
 	for(i = 0; i < MAX_INVENTORY; i++) {
+		if(sd->inventory.u.items_inventory[i].card[0] == CARD0_PET)
+			continue;
 		if(sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].attribute) {
 			sd->inventory.u.items_inventory[i].attribute = 0;
 			clif_produceeffect(sd,0,sd->inventory.u.items_inventory[i].nameid);
@@ -13597,43 +13635,6 @@ BUILDIN_FUNC(petrecovery)
 }
 
 /*==========================================
- * pet healing [Valaris] //Rewritten by [Skotlex]
- *------------------------------------------*/
-BUILDIN_FUNC(petheal)
-{
-	struct pet_data *pd;
-	TBL_PC *sd = script_rid2sd(st);
-
-	if( !sd || !sd->pd )
-		return 0;
-
-	pd = sd->pd;
-	if( pd->s_skill ) { //Clear previous skill
-		if( pd->s_skill->timer != INVALID_TIMER ) {
-			if( pd->s_skill->id )
-				delete_timer(pd->s_skill->timer,pet_skill_support_timer);
-			else
-				delete_timer(pd->s_skill->timer,pet_heal_timer);
-		}
-	} else //Init memory
-		pd->s_skill = (struct pet_skill_support *)aMalloc(sizeof(struct pet_skill_support));
-	
-	pd->s_skill->id = 0; //This id identifies that it IS petheal rather than pet_skillsupport
-	//Use the lv as the amount to heal
-	pd->s_skill->lv = script_getnum(st,2);
-	pd->s_skill->delay = script_getnum(st,3);
-	pd->s_skill->hp = script_getnum(st,4);
-	pd->s_skill->sp = script_getnum(st,5);
-
-	//Use delay as initial offset to avoid skill/heal exploits
-	if( battle_config.pet_equip_required && !pd->pet.equip )
-		pd->s_skill->timer = INVALID_TIMER;
-	else
-		pd->s_skill->timer = add_timer(gettick() + pd->s_skill->delay * 1000,pet_heal_timer,sd->bl.id,0);
-	return SCRIPT_CMD_SUCCESS;
-}
-
-/*==========================================
  * pet attack skills [Valaris] //Rewritten by [Skotlex]
  *------------------------------------------*/
 /// petskillattack <skill id>,<level>,<rate>,<bonusrate>
@@ -14090,9 +14091,7 @@ BUILDIN_FUNC(recovery)
 }
 
 /*==========================================
- * Get your pet info: getpetinfo(n)
- * n -> 0:pet_id 1:pet_class 2:pet_name
- * 3:friendly 4:hungry, 5: rename flag, 6:level
+ * Get your pet info
  *------------------------------------------*/
 BUILDIN_FUNC(getpetinfo)
 {
@@ -14117,6 +14116,8 @@ BUILDIN_FUNC(getpetinfo)
 		case PETINFO_RENAMED:  script_pushint(st,pd->pet.rename_flag); break;
 		case PETINFO_LEVEL:    script_pushint(st,(int)pd->pet.level); break;
 		case PETINFO_BLOCKID:  script_pushint(st,pd->bl.id); break;
+		case PETINFO_EGGID:    script_pushint(st,pd->pet.egg_id); break;
+		case PETINFO_FOODID:   script_pushint(st,pd->petDB->FoodID); break;
 		default:
 			script_pushint(st,0);
 			break;
@@ -15874,7 +15875,7 @@ BUILDIN_FUNC(replacestr)
 
 		get_val(st,data); //Convert into value in case of a variable
 		if( !data_isstring(data) )
-			usecase = script_getnum(st,5) != 0;
+			usecase = (script_getnum(st,5) != 0);
 		else {
 			ShowError("script:replacestr: Invalid usecase value. Expected int got string\n");
 			st->state = END;
@@ -23026,7 +23027,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getstatus, "i??"),
 	BUILDIN_DEF(getscrate,"ii?"),
 	BUILDIN_DEF(debugmes,"s"),
+	BUILDIN_DEF(catchpet,"i"),
 	BUILDIN_DEF2(catchpet,"pet","i"),
+	BUILDIN_DEF(birthpet,""),
 	BUILDIN_DEF2(birthpet,"bpet",""),
 	BUILDIN_DEF(resetlvl,"i?"),
 	BUILDIN_DEF(resetstatus,"?"),
@@ -23102,7 +23105,6 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(petskillbonus,"petskillbonus2","iiiii"),
 	BUILDIN_DEF(petrecovery,"ii"), // [Valaris]
 	BUILDIN_DEF(petloot,"i"), // [Valaris]
-	BUILDIN_DEF(petheal,"iiii"), // [Valaris]
 	BUILDIN_DEF(petskillattack,"viii"), // [Skotlex]
 	BUILDIN_DEF(petskillattack2,"viiii"), // [Valaris]
 	BUILDIN_DEF(petskillsupport,"viiii"), // [Skotlex]

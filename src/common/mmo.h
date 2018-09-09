@@ -366,6 +366,7 @@ struct s_pet {
 	char name[NAME_LENGTH];
 	char rename_flag;
 	char incubate;
+	bool autofeed;
 };
 
 struct s_homunculus {	//[orn]
@@ -396,7 +397,8 @@ struct s_homunculus {	//[orn]
 	int dex_value;
 	int luk_value;
 
-	char spiritball; //for homun S [lighta]
+	char spiritball; //For homun S [lighta]
+	bool autofeed;
 };
 
 struct s_mercenary {

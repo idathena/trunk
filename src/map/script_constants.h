@@ -2704,6 +2704,15 @@
 	export_constant(PETINFO_RENAMED);
 	export_constant(PETINFO_LEVEL);
 	export_constant(PETINFO_BLOCKID);
+	export_constant(PETINFO_EGGID);
+	export_constant(PETINFO_FOODID);
+
+	/* Pet intimate types */
+	export_constant(PETINTIMATE_AWKWARD);
+	export_constant(PETINTIMATE_SHY);
+	export_constant(PETINTIMATE_NEUTRAL);
+	export_constant(PETINTIMATE_CORDIAL);
+	export_constant(PETINTIMATE_LOYAL);
 
 	/* Quest check types */
 	export_constant(HAVEQUEST);
@@ -2845,6 +2854,7 @@
 	export_constant(ROA_VALUE);
 	export_constant(ROA_PARAM);
 
+	/* Special card flags */
 	export_constant(CARD0_FORGE);
 	export_constant(CARD0_CREATE);
 	export_constant(CARD0_PET);
@@ -5319,6 +5329,7 @@
 
 	/* Pet catch */
 	export_constant(PET_CATCH_UNIVERSAL);
+	export_constant(PET_CATCH_UNIVERSAL_ITEM);
 
 	#undef export_constant
 	#undef export_constant2

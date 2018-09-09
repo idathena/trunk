@@ -3347,6 +3347,10 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->arrow_addrace)
 		+ sizeof(sd->arrow_addclass)
 		+ sizeof(sd->arrow_addsize)
+		+ sizeof(sd->shield_adddefele)
+		+ sizeof(sd->shield_addrace)
+		+ sizeof(sd->shield_addclass)
+		+ sizeof(sd->shield_addsize)
 		+ sizeof(sd->magic_adddefele)
 		+ sizeof(sd->magic_addrace)
 		+ sizeof(sd->magic_addclass)
@@ -3547,10 +3551,10 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 				refinedef += refine_info[REFINE_TYPE_ARMOR].bonus[r - 1];
 			if (sd->inventory_data[index]->script && (pc_has_permission(sd, PC_PERM_USE_ALL_EQUIPMENT) ||
 				!itemdb_isNoEquip(sd->inventory_data[index], sd->bl.m))) {
-				if (i == EQI_HAND_L) //Shield
-					sd->state.lr_flag = 1;
+				if (i == EQI_HAND_L)
+					sd->state.lr_flag = 3;  //Shield
 				run_script(sd->inventory_data[index]->script, 0, sd->bl.id, 0);
-				if (i == EQI_HAND_L) //Shield
+				if (i == EQI_HAND_L)
 					sd->state.lr_flag = 0;
 				if (!calculating)
 					return 1;
@@ -3692,7 +3696,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 					continue;
 				if (!pc_has_permission(sd, PC_PERM_USE_ALL_EQUIPMENT) && itemdb_isNoEquip(sd->inventory_data[index], sd->bl.m))
 					continue;
-				if (i == EQI_HAND_L && sd->inventory.u.items_inventory[index].equip == EQP_HAND_L) { //Left hand status
+				if (i == EQI_HAND_L && sd->inventory.u.items_inventory[index].equip == EQP_HAND_L) {
 					sd->state.lr_flag = 1;
 					run_script(data->script, 0, sd->bl.id, 0);
 					sd->state.lr_flag = 0;
@@ -3718,7 +3722,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 				if (!calculating)
 					return 1;
 			}
-			if (pd->pet.intimate > 0 && (!battle_config.pet_equip_required || pd->pet.equip > 0) && pd->state.skillbonus == 1 && pd->bonus) {
+			if (pd->pet.intimate >= PETINTIMATE_AWKWARD && (!battle_config.pet_equip_required || pd->pet.equip > 0) && pd->state.skillbonus == 1 && pd->bonus) {
 				if (pd->bonus->val2)
 					pc_bonus2(sd, pd->bonus->type, pd->bonus->val1, pd->bonus->val2);
 				else
@@ -5686,7 +5690,7 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 			watk += sc->data[SC_NIBELUNGEN]->val2;
 		else {
 			TBL_PC *sd = (TBL_PC *)bl;
-			short index = sd->equip_index[sd->state.lr_flag ? EQI_HAND_L : EQI_HAND_R];
+			short index = sd->equip_index[sd->state.lr_flag == 1 ? EQI_HAND_L : EQI_HAND_R];
 
 			if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->wlv == 4)
 				watk += sc->data[SC_NIBELUNGEN]->val2;
@@ -13888,9 +13892,9 @@ static bool status_readdb_sizefix(char *fields[], int columns, int current)
  *                validation errors.
  * @return # of the validated entry, or 0 in case of failure.
  */
-int status_readdb_refine_libconfig_sub(config_setting_t *r, const char *name, const char *source)
+static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const char *name, const char *source)
 {
-	config_setting_t *rate = NULL;
+	struct config_setting_t *rate = NULL;
 	int type = REFINE_TYPE_ARMOR, bonus_per_level = 0, rnd_bonus_v = 0, rnd_bonus_lv = 0;
 	char lv[4];
 
@@ -13921,7 +13925,7 @@ int status_readdb_refine_libconfig_sub(config_setting_t *r, const char *name, co
 		return 0;
 	}
 	if ((rate = config_setting_get_member(r, "Rates")) && config_setting_is_group(rate)) {
-		config_setting_t *t = NULL;
+		struct config_setting_t *t = NULL;
 		bool duplicate[MAX_REFINE];
 		int bonus[MAX_REFINE], rnd_bonus[MAX_REFINE];
 		int chance[REFINE_CHANCE_TYPE_MAX][MAX_REFINE];
@@ -13937,7 +13941,7 @@ int status_readdb_refine_libconfig_sub(config_setting_t *r, const char *name, co
 		}
 		i = 0;
 		j = 0;
-		while ((t = config_setting_get_elem(rate,i++)) && config_setting_is_group(t)) {
+		while ((t = config_setting_get_elem(rate, i++)) && config_setting_is_group(t)) {
 			int level = 0, i32;
 			char *rlvl = config_setting_name(t);
 
@@ -13999,19 +14003,19 @@ int status_readdb_refine_libconfig_sub(config_setting_t *r, const char *name, co
  * @param *filename File name, relative to the database path.
  * @return The number of found entries.
  */
-int status_readdb_refine_libconfig(const char *filename)
+static void status_readdb_refine_libconfig(const char *filename)
 {
 	bool duplicate[REFINE_TYPE_MAX];
-	config_t refine_db_conf;
-	config_setting_t *r;
+	struct config_t refine_db_conf;
+	struct config_setting_t *r;
 	char filepath[256];
-	int i = 0, count = 0,type = 0;
+	int i = 0, count = 0, type = 0;
 
 	memset(&duplicate, 0, sizeof(duplicate));
 
-	sprintf(filepath, "%s/%s", db_path, filename);
+	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, filename);
 	if (conf_read_file(&refine_db_conf, filepath))
-		return 0;
+		return;
 	while ((r = config_setting_get_elem(refine_db_conf.root, i++))) {
 		char *name = config_setting_name(r);
 
@@ -14025,7 +14029,6 @@ int status_readdb_refine_libconfig(const char *filename)
 	}
 	config_destroy(&refine_db_conf);
 	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
-	return count;
 }
 
 /**
@@ -14058,7 +14061,7 @@ static bool status_readdb_status_config(char **str, int columns, int current)
  * size_fix.txt		- size adjustment table for weapons
  * refine_db.conf	- refining data table
  *------------------------------------------*/
-int status_readdb(void)
+void status_readdb(void)
 {
 	int i, j;
 
@@ -14077,13 +14080,12 @@ int status_readdb(void)
 	sv_readdb(db_path, "status_config.txt", ',', 2, 2, -1, &status_readdb_status_config);
 	sv_readdb(db_path, DBPATH"size_fix.txt", ',', MAX_WEAPON_TYPE, MAX_WEAPON_TYPE, ARRAYLENGTH(atkmods), &status_readdb_sizefix);
 	status_readdb_refine_libconfig(DBPATH"refine_db.conf");
-	return 0;
 }
 
 /*==========================================
  * Status db init and destroy.
  *------------------------------------------*/
-int do_init_status(void)
+void do_init_status(void)
 {
 	add_timer_func_list(status_change_timer,"status_change_timer");
 	add_timer_func_list(status_natural_heal_timer,"status_natural_heal_timer");
@@ -14093,7 +14095,6 @@ int do_init_status(void)
 	natural_heal_prev_tick = gettick();
 	sc_data_ers = ers_new(sizeof(struct status_change_entry),"status.c::sc_data_ers",ERS_OPT_NONE);
 	add_timer_interval(natural_heal_prev_tick + NATURAL_HEAL_INTERVAL,status_natural_heal_timer,0,0,NATURAL_HEAL_INTERVAL);
-	return 0;
 }
 
 void do_final_status(void)

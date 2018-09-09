@@ -670,14 +670,21 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 					cardfix = cardfix * (100 + sd->right_weapon.addrace2[t_race2]) / 100;
 					cardfix = cardfix * (100 + sd->right_weapon.addclass[tstatus->class_] + sd->arrow_addclass[tstatus->class_] +
 						sd->right_weapon.addclass[CLASS_ALL] + sd->arrow_addclass[CLASS_ALL]) / 100;
+					for( i = 0; i < ARRAYLENGTH(sd->right_weapon.add_dmg) && sd->right_weapon.add_dmg[i].rate; i++ ) {
+						if( sd->right_weapon.add_dmg[i].class_ != t_class )
+							continue;
+						cardfix = cardfix * (100 + sd->right_weapon.add_dmg[i].rate) / 100;
+					}
 				} else { //Melee attack
 					uint16 lv;
 
 					if( !battle_config.left_cardfix_to_right ) { //Calculates each right & left hand weapon bonuses separatedly
 						//Right-handed weapon
-						cardfix = cardfix * (100 + sd->right_weapon.addrace[tstatus->race] + sd->right_weapon.addrace[RC_ALL]) / 100;
+						cardfix = cardfix * (100 + sd->right_weapon.addrace[tstatus->race] + sd->shield_addrace[tstatus->race] +
+							sd->right_weapon.addrace[RC_ALL] + sd->shield_addrace[RC_ALL]) / 100;
 						if( !(nk&NK_NO_ELEFIX) ) { //Affected by element modifier bonuses
-							int ele_fix = sd->right_weapon.adddefele[tstatus->def_ele] + sd->right_weapon.adddefele[ELE_ALL];
+							int ele_fix = sd->right_weapon.adddefele[tstatus->def_ele] + sd->shield_adddefele[tstatus->def_ele] +
+								sd->right_weapon.adddefele[ELE_ALL] + sd->shield_adddefele[ELE_ALL];
 
 							for( i = 0; ARRAYLENGTH(sd->right_weapon.adddefele2) > i && sd->right_weapon.adddefele2[i].rate; i++ ) {
 								if( sd->right_weapon.adddefele2[i].ele != tstatus->def_ele )
@@ -690,9 +697,11 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 							}
 							cardfix = cardfix * (100 + ele_fix) / 100;
 						}
-						cardfix = cardfix * (100 + sd->right_weapon.addsize[tstatus->size] + sd->right_weapon.addsize[SZ_ALL]) / 100;
+						cardfix = cardfix * (100 + sd->right_weapon.addsize[tstatus->size] + sd->shield_addsize[tstatus->size] +
+							sd->right_weapon.addsize[SZ_ALL] + sd->shield_addsize[SZ_ALL]) / 100;
 						cardfix = cardfix * (100 + sd->right_weapon.addrace2[t_race2]) / 100;
-						cardfix = cardfix * (100 + sd->right_weapon.addclass[tstatus->class_] + sd->right_weapon.addclass[CLASS_ALL]) / 100;
+						cardfix = cardfix * (100 + sd->right_weapon.addclass[tstatus->class_] + sd->shield_addclass[tstatus->class_] +
+							sd->right_weapon.addclass[CLASS_ALL] + sd->shield_addclass[CLASS_ALL]) / 100;
 						for( i = 0; i < ARRAYLENGTH(sd->right_weapon.add_dmg) && sd->right_weapon.add_dmg[i].rate; i++ ) {
 							if( sd->right_weapon.add_dmg[i].class_ != t_class )
 								continue;
@@ -726,11 +735,11 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 					} else { //Calculates right & left hand weapon as unity
 						int add_dmg = 0;
 
-						cardfix = cardfix * (100 + sd->right_weapon.addrace[tstatus->race] + sd->left_weapon.addrace[tstatus->race] +
-							sd->right_weapon.addrace[RC_ALL] + sd->left_weapon.addrace[RC_ALL]) / 100;
+						cardfix = cardfix * (100 + sd->right_weapon.addrace[tstatus->race] + sd->shield_addrace[tstatus->race] + sd->left_weapon.addrace[tstatus->race] +
+							sd->right_weapon.addrace[RC_ALL] + sd->shield_addrace[RC_ALL] + sd->left_weapon.addrace[RC_ALL]) / 100;
 						if( !(nk&NK_NO_ELEFIX) ) {
-							int ele_fix = sd->right_weapon.adddefele[tstatus->def_ele] + sd->left_weapon.adddefele[tstatus->def_ele] +
-								sd->right_weapon.adddefele[ELE_ALL] + sd->left_weapon.adddefele[ELE_ALL];
+							int ele_fix = sd->right_weapon.adddefele[tstatus->def_ele] + sd->shield_adddefele[tstatus->def_ele] + sd->left_weapon.adddefele[tstatus->def_ele] +
+								sd->right_weapon.adddefele[ELE_ALL] + sd->shield_adddefele[ELE_ALL] + sd->left_weapon.adddefele[ELE_ALL];
 
 							for( i = 0; ARRAYLENGTH(sd->right_weapon.adddefele2) > i && sd->right_weapon.adddefele2[i].rate; i++ ) {
 								if( sd->right_weapon.adddefele2[i].ele != tstatus->def_ele )
@@ -752,11 +761,11 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 							}
 							cardfix = cardfix * (100 + ele_fix) / 100;
 						}
-						cardfix = cardfix * (100 + sd->right_weapon.addsize[tstatus->size] + sd->left_weapon.addsize[tstatus->size] +
-							sd->right_weapon.addsize[SZ_ALL] + sd->left_weapon.addsize[SZ_ALL]) / 100;
+						cardfix = cardfix * (100 + sd->right_weapon.addsize[tstatus->size] + sd->shield_addsize[tstatus->size] + sd->left_weapon.addsize[tstatus->size] +
+							sd->right_weapon.addsize[SZ_ALL] + sd->shield_addsize[SZ_ALL] + sd->left_weapon.addsize[SZ_ALL]) / 100;
 						cardfix = cardfix * (100 + sd->right_weapon.addrace2[t_race2] + sd->left_weapon.addrace2[t_race2]) / 100;
-						cardfix = cardfix * (100 + sd->right_weapon.addclass[tstatus->class_] + sd->left_weapon.addclass[tstatus->class_] +
-							sd->right_weapon.addclass[CLASS_ALL] + sd->left_weapon.addclass[CLASS_ALL]) / 100;
+						cardfix = cardfix * (100 + sd->right_weapon.addclass[tstatus->class_] + sd->shield_addclass[tstatus->class_] + sd->left_weapon.addclass[tstatus->class_] +
+							sd->right_weapon.addclass[CLASS_ALL] + sd->shield_addclass[CLASS_ALL] + sd->left_weapon.addclass[CLASS_ALL]) / 100;
 						for( i = 0; i < ARRAYLENGTH(sd->right_weapon.add_dmg) && sd->right_weapon.add_dmg[i].rate; i++ ) {
 							if( sd->right_weapon.add_dmg[i].class_ != t_class )
 								continue;
@@ -2308,7 +2317,6 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 		case SN_SHARPSHOOTING:
 		case MA_SHARPSHOOTING:
 		case NJ_KIRIKAGE:
-		case GC_COUNTERSLASH:
 			allow_cri = true;
 			break;
 		case MO_TRIPLEATTACK:
@@ -2496,7 +2504,7 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 
 	hitrate += sstatus->hit - flee;
 
-	if(tsc && tsc->data[SC_FOGWALL] && !skill_id && (wd.flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON))
+	if(tsc && tsc->data[SC_FOGWALL] && !skill_id && (wd.flag&BF_LONG))
 		hitrate -= 50; //Fogwall's hit penalty is only for normal ranged attacks
 
 	if(sd) {
@@ -2713,14 +2721,18 @@ int battle_get_weapon_element(struct Damage *d, struct block_list *src, struct b
 		else
 			element = (weapon_position == EQI_HAND_L ? sstatus->lhw.ele : sstatus->rhw.ele);
 		if(is_skill_using_arrow(src, skill_id) && weapon_position == EQI_HAND_R && sd) {
-			switch(sd->status.weapon) {
-				case W_BOW:	case W_REVOLVER:
-				case W_RIFLE:	case W_GATLING:
-				case W_SHOTGUN:	case W_GRENADE:
-					break; //Already used weapon element
-				default:
-					element = (sd->bonus.arrow_ele ? sd->bonus.arrow_ele : ELE_NEUTRAL);
-					break;
+			if(sd->bonus.arrow_ele)
+				element = sd->bonus.arrow_ele;
+			else {
+				switch(sd->status.weapon) {
+					case W_BOW:	case W_REVOLVER:
+					case W_RIFLE:	case W_GATLING:
+					case W_SHOTGUN:	case W_GRENADE:
+						break; //Used weapon element
+					default:
+						element = ELE_NEUTRAL;
+						break;
+				}
 			}
 		}
 	} else if(element == -2) //Use enchantment's element
@@ -3026,10 +3038,10 @@ struct Damage battle_calc_damage_parts(struct Damage wd, struct block_list *src,
 	wd.statusAtk += battle_calc_status_attack(sstatus, EQI_HAND_R);
 	wd.statusAtk2 += battle_calc_status_attack(sstatus, EQI_HAND_L);
 
-	if(sd->sc.data[SC_SEVENWIND]) { //Mild Wind applies element to status ATK as well as weapon ATK [helvetica]
+	if(sd->sc.data[SC_SEVENWIND]) { //Status ATK can only be endowed by Mild Wind
 		wd.statusAtk = battle_attr_fix(src, target, wd.statusAtk, right_element, tstatus->def_ele, tstatus->ele_lv);
 		wd.statusAtk2 = battle_attr_fix(src, target, wd.statusAtk, left_element, tstatus->def_ele, tstatus->ele_lv);
-	} else { //Status ATK is considered neutral on normal attacks [helvetica]
+	} else { //Without Mild Wind status status ATK should always be neutral
 		wd.statusAtk = battle_attr_fix(src, target, wd.statusAtk, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 		wd.statusAtk2 = battle_attr_fix(src, target, wd.statusAtk, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 	}
@@ -8200,8 +8212,12 @@ static const struct _battle_data {
 	{ "pet_status_support",                 &battle_config.pet_status_support,              0,      0,      1,              },
 	{ "pet_attack_support",                 &battle_config.pet_attack_support,              0,      0,      1,              },
 	{ "pet_damage_support",                 &battle_config.pet_damage_support,              0,      0,      1,              },
-	{ "pet_support_min_friendly",           &battle_config.pet_support_min_friendly,        900,    0,      950,            },
-	{ "pet_bonus_min_friendly",             &battle_config.pet_bonus_min_friendly,          750,    0,      950,            },
+	{ "pet_support_min_friendly",           &battle_config.pet_support_min_friendly,        901,    0,      1000,           },
+#ifdef RENEWAL
+	{ "pet_bonus_min_friendly_re",          &battle_config.pet_bonus_min_friendly,          0,      0,      1000,           },
+#else
+	{ "pet_bonus_min_friendly",             &battle_config.pet_bonus_min_friendly,          751,    0,      1000,           },
+#endif
 	{ "pet_support_rate",                   &battle_config.pet_support_rate,                100,    0,      INT_MAX,        },
 	{ "pet_attack_exp_to_master",           &battle_config.pet_attack_exp_to_master,        0,      0,      1,              },
 	{ "pet_attack_exp_rate",                &battle_config.pet_attack_exp_rate,             100,    0,      INT_MAX,        },
@@ -8626,6 +8642,10 @@ static const struct _battle_data {
 	{ "millennium_shield_health",           &battle_config.millennium_shield_health,        1000,   1,      INT_MAX,        },
 	{ "hesperuslit_bonus_stack",            &battle_config.hesperuslit_bonus_stack,         0,      0,      1,              },
 	{ "load_custom_exp_tables",             &battle_config.load_custom_exp_tables,          0,      0,      1,              },
+	{ "feature.pet_autofeed",               &battle_config.feature_pet_autofeed,            1,      0,      1,              },
+	{ "pet_autofeed_always",                &battle_config.pet_autofeed_always,             1,      0,      1,              },
+	{ "feature.homunculus_autofeed",        &battle_config.feature_homunculus_autofeed,     1,      0,      1,              },
+	{ "homunculus_autofeed_always",         &battle_config.homunculus_autofeed_always,      1,      0,      1,              },
 
 #include "../custom/battle_config_init.inc"
 };
@@ -8755,6 +8775,20 @@ void battle_adjust_conf()
 	if (battle_config.feature_achievement) {
 		ShowWarning("conf/battle/feature.conf achievement is enabled but it requires PACKETVER 2015-05-13 or newer, disabling...\n");
 		battle_config.feature_achievement = 0;
+	}
+#endif
+
+#if PACKETVER < 20170920
+	if (battle_config.feature_homunculus_autofeed) {
+		ShowWarning("conf/battle/feature.conf homunculus autofeeding is enabled but it requires PACKETVER 2017-09-20 or newer, disabling...\n");
+		battle_config.feature_homunculus_autofeed = 0;
+	}
+#endif
+
+#if PACKETVER < 20150513
+	if (battle_config.feature_pet_autofeed) {
+		ShowWarning("conf/battle/feature.conf pet autofeeding is enabled but it requires PACKETVER 2015-05-13 or newer, disabling...\n");
+		battle_config.feature_pet_autofeed = 0;
 	}
 #endif
 
