@@ -7117,7 +7117,7 @@ void clif_parse_BankDeposit(int fd, struct map_session_data *sd) {
  * Acknowledge of withdrawing some money from bank
  * 09AA <Reason>W <Money>Q <balance>L (PACKET_ZC_ACK_BANKING_WITHDRAW)
  */
-void clif_bank_withdraw(struct map_session_data *sd,enum e_BANKING_WITHDRAW_ACK reason) {
+void clif_bank_withdraw(struct map_session_data *sd, enum e_BANKING_WITHDRAW_ACK reason) {
 	unsigned char buf[17];
 	struct s_packet_db *info;
 	int16 len;
@@ -14022,7 +14022,7 @@ void clif_parse_pet_evolution(int fd, struct map_session_data *sd)
  * Result of Pet Evolution (ZC_PET_EVOLUTION_RESULT)
  * 0x9fc <Result>.L
  */
-void clif_pet_evolution_result(int fd, enum pet_evolution_result result) {
+void clif_pet_evolution_result(int fd, enum e_pet_evolution_result result) {
 #if PACKETVER >= 20140122
 	WFIFOHEAD(fd,packet_len(0x9fc));
 	WFIFOW(fd,0) = 0x9fc;

@@ -6133,7 +6133,7 @@ static int script_getitem_randomoption(struct script_state *st, struct map_sessi
 	}
 
 	if( !data_isreference(opt_val) || not_array_variable(*opt_val_var) ) {
-		ShowError("buildin_%s: The option id parameter is not an array.\n", funcname);
+		ShowError("buildin_%s: The option value parameter is not an array.\n", funcname);
 		return 1;
 	}
 
@@ -6148,7 +6148,7 @@ static int script_getitem_randomoption(struct script_state *st, struct map_sessi
 	}
 
 	if( !data_isreference(opt_param) || not_array_variable(*opt_param_var) ) {
-		ShowError("buildin_%s: The option id parameter is not an array.\n", funcname);
+		ShowError("buildin_%s: The option param parameter is not an array.\n", funcname);
 		return 1;
 	}
 
