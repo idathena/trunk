@@ -1295,35 +1295,42 @@ static bool pet_get_const(const struct config_setting_t *it, int *value)
 }
 
 /**
- * Search and replace a string with another string , in a string
+ * Search and replace a string with another string, in a string
  */
-static char *pet_replacestr(char *search, char *replace, char *subject)
+static char *pet_replacestr(char *input, char *find, char *replace)
 {
-	char *p = NULL, *old = NULL, *new_subject = NULL;
-	int c = 0, search_size;
+	size_t inputlen = strlen(input);
+	size_t findlen = strlen(find);
+	struct StringBuf output;
+	int count = 0;
+	int numFinds = 0;
+	int i = 0, f = 0;
+	char *string = NULL;
 
-	search_size = strlen(search);
+	StringBuf_Init(&output);
 
-	//Count how many occurences
-	for (p = strstr(subject, search); p != NULL; p = strstr(p + search_size, search))
-		c++;
-
-	c = (strlen(replace) - search_size) * c + strlen(subject); //Final size
-	new_subject = aMalloc(c); //New subject with new size
-	strcpy(new_subject, ""); //Set it to blank
-	old = subject; //The start position
-
-    for (p = strstr(subject, search); p != NULL; p = strstr(p + search_size, search)) {
-		//Move ahead and copy some text from original subject, from a certain position
-		safestrncpy(new_subject + strlen(new_subject), old, p - old);
-		//Move ahead and copy the replacement text
-		strcpy(new_subject + strlen(new_subject) , replace);
-		//The new start position after this search match
-		old = p + search_size;
+	for (; i < inputlen; i++) {
+		if (count && count == numFinds)
+			break;
+		for (f = 0; f <= findlen; f++) {
+			if (f == findlen) {
+				numFinds++;
+				StringBuf_AppendStr(&output, replace);
+				i += findlen - 1;
+				break;
+			} else if ((i + f) > inputlen || input[i + f] != find[f]) {
+				StringBuf_Printf(&output, "%c", input[i]);
+				break;
+			}
+		}
 	}
 
-    strcpy(new_subject + strlen(new_subject), old); //Copy the part after the last search match
-    return new_subject;
+	if (i < inputlen)
+		StringBuf_AppendStr(&output, &(input[i]));
+
+	string = StringBuf_Value(&output);
+	StringBuf_Destroy(&output);
+	return string;
 }
 
 static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int idx)
@@ -1343,7 +1350,7 @@ static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int i
 			int j = 0, i32 = 0;
 
 			str = config_setting_name(pett);
-			str = pet_replacestr("EggID_", "", str);
+			str = pet_replacestr(str, "EggID_", "");
 			i32 = atoi(str);
 			if (!(id = itemdb_exists(i32))) {
 				ShowWarning("pet_readdb_libconfig_sub_evolution: Invalid Egg ID %d in Pet #%d, skipping.\n", i32, pet_db[idx].class_);
@@ -1359,7 +1366,7 @@ static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int i
 				int quantity;
 
 				str = config_setting_name(item);
-				str = pet_replacestr("ItemID_", "", str);
+				str = pet_replacestr(str, "ItemID_", "");
 				i32 = atoi(str);
 				if (!(id2 = itemdb_exists(i32))) {
 					ShowWarning("pet_readdb_libconfig_sub_evolution: required item ID %d not found in egg %d\n", i32, pet_db[idx].ev_datas[i].EggID);

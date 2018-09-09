@@ -15875,7 +15875,7 @@ BUILDIN_FUNC(replacestr)
 
 		get_val(st,data); //Convert into value in case of a variable
 		if( !data_isstring(data) )
-			usecase = script_getnum(st,5) != 0;
+			usecase = (script_getnum(st,5) != 0);
 		else {
 			ShowError("script:replacestr: Invalid usecase value. Expected int got string\n");
 			st->state = END;

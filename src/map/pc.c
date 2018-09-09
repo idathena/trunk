@@ -2879,8 +2879,6 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			break;
 		case SP_MDEF1:
 			if(sd->state.lr_flag != 2) {
-				short index = -1;
-
 				bonus = status->mdef + val;
 #ifdef RENEWAL
 				status->mdef = cap_value(bonus, SHRT_MIN, SHRT_MAX);
