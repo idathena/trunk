@@ -32,7 +32,7 @@
 
 
 static DBMap *guild_db; // int guild_id -> struct guild*
-static DBMap *castle_db; // int castle_id -> struct guild_castle*
+static DBMap *castle_db; // int castle_id -> struct guild_castle *
 static DBMap *guild_expcache_db; // int char_id -> struct guild_expcache*
 static DBMap *guild_infoevent_db; // int guild_id -> struct eventlist*
 
@@ -201,7 +201,7 @@ struct guild *guild_searchname(char *str)
 /// lookup: castle id -> castle*
 struct guild_castle *guild_castle_search(int gcid)
 {
-	return (struct guild_castle*)idb_get(castle_db,gcid);
+	return (struct guild_castle *)idb_get(castle_db,gcid);
 }
 
 /// lookup: map index -> castle*
@@ -1215,7 +1215,7 @@ int guild_emblem_changed(int len,int guild_id,int emblem_id,const char *data)
 		DBIterator *iter = db_iterator(castle_db);
 		struct guild_castle *gc;
 
-		for(gc = (struct guild_castle*)dbi_first(iter); dbi_exists(iter); gc = (struct guild_castle*)dbi_next(iter)) {
+		for(gc = (struct guild_castle *)dbi_first(iter); dbi_exists(iter); gc = (struct guild_castle *)dbi_next(iter)) {
 			if(gc->guild_id != guild_id)
 				continue;
 			// Update permanent guardians

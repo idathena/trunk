@@ -655,6 +655,10 @@ extern struct Battle_Config
 	int millennium_shield_health;
 	int hesperuslit_bonus_stack;
 	int load_custom_exp_tables;
+	int feature_pet_autofeed;
+	int pet_autofeed_always;
+	int feature_homunculus_autofeed;
+	int homunculus_autofeed_always;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

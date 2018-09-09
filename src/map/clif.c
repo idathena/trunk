@@ -73,10 +73,10 @@ enum mail_type {
 };
 #endif
 
-/** Converts item type to display it on client if necessary.
+/**
+ * Converts item type to display it on client if necessary.
  * @param nameid: Item ID
  * @return item type.
- *	For IT_PETEGG will be displayed as IT_WEAPON. If Shadow Weapon of IT_SHADOWGEAR as IT_WEAPON and else as IT_ARMOR
  */
 static inline int itemtype(unsigned short nameid) {
 	//Use itemdb_search, so non-existance item will use dummy data and won't crash the server. bugreport:8468
@@ -1607,7 +1607,7 @@ void clif_send_homdata(struct map_session_data *sd, int state, int param)
 { //[orn]
 	int fd = sd->fd;
 
-	if ((state == SP_INTIMATE) && (param >= 910) && (sd->hd->homunculus.class_ == sd->hd->homunculusDB->evo_class))
+	if (state == SP_INTIMATE && param >= 910 && sd->hd->homunculus.class_ == sd->hd->homunculusDB->evo_class)
 		hom_calc_skilltree(sd->hd,0);
 
 	WFIFOHEAD(fd,packet_len(0x230));
@@ -2652,7 +2652,7 @@ void clif_item_sub_v5(unsigned char *buf, int n, int idx, struct item *it, struc
 		WBUFB(buf,n + 13) = it->refine; //Refine lvl
 		clif_addcards(WBUFP(buf,n + 14), it); //EQUIPSLOTINFO 8B
 		WBUFL(buf,n + 22) = it->expire_time;
-		WBUFW(buf,n + 26) = (it->bound) ? BOUND_DISPYELLOW : id->flag.bindOnEquip ? BOUND_ONEQUIP : 0; //BindOnEquipType
+		WBUFW(buf,n + 26) = (it->bound ? BOUND_DISPYELLOW : (id->flag.bindOnEquip ? BOUND_ONEQUIP : 0)); //BindOnEquipType
 		WBUFW(buf,n + 28) = (id->equip&EQP_VISIBLE) ? id->look : 0;
 #if PACKETVER >= 20150225
 		//V6_ITEM_Option
@@ -4505,7 +4505,7 @@ void clif_storageitemadded(struct map_session_data *sd, struct item *i, int inde
 	WFIFOL(fd,4) = amount; //Amount
 	WFIFOW(fd,8) = (view > 0 ? view : i->nameid); //ID
 #if PACKETVER >= 5
-	WFIFOB(fd,10) = itemdb_type(i->nameid); //Type
+	WFIFOB(fd,10) = itemtype(i->nameid); //Type
 	offset += 1;
 #endif
 	WFIFOB(fd,10 + offset) = i->identify; //Identify flag
@@ -6307,7 +6307,6 @@ void clif_GlobalMessage(struct block_list *bl, const char *message, enum send_ta
 	WBUFL(buf,4) = bl->id;
 	safestrncpy((char *)WBUFP(buf,8),message,len);
 	clif_send((unsigned char *)buf,WBUFW(buf,2),bl,target);
-
 }
 
 
@@ -6739,7 +6738,7 @@ void clif_item_repair_list(struct map_session_data *sd, struct map_session_data 
 	for (i = c = 0; i < MAX_INVENTORY; i++) {
 		unsigned short nameid;
 
-		if ((nameid = dstsd->inventory.u.items_inventory[i].nameid) > 0 && dstsd->inventory.u.items_inventory[i].attribute != 0) { //&& skill_can_repair(sd,nameid)) {
+		if ((nameid = dstsd->inventory.u.items_inventory[i].nameid) > 0 && dstsd->inventory.u.items_inventory[i].attribute) { //&& skill_can_repair(sd,nameid)) {
 			WFIFOW(fd,c * 13 + 4) = i;
 			WFIFOW(fd,c * 13 + 6) = nameid;
 			WFIFOB(fd,c * 13 + 8) = dstsd->inventory.u.items_inventory[i].refine;
@@ -7997,18 +7996,18 @@ void clif_send_petstatus(struct map_session_data *sd)
 	nullpo_retv(sd);
 	nullpo_retv(sd->pd);
 
-	fd=sd->fd;
+	fd = sd->fd;
 	pet = &sd->pd->pet;
 	WFIFOHEAD(fd,packet_len(0x1a2));
-	WFIFOW(fd,0)=0x1a2;
+	WFIFOW(fd,0) = 0x1a2;
 	memcpy(WFIFOP(fd,2),pet->name,NAME_LENGTH);
-	WFIFOB(fd,26)=battle_config.pet_rename?0:pet->rename_flag;
-	WFIFOW(fd,27)=pet->level;
-	WFIFOW(fd,29)=pet->hungry;
-	WFIFOW(fd,31)=pet->intimate;
-	WFIFOW(fd,33)=pet->equip;
+	WFIFOB(fd,26) = (battle_config.pet_rename ? 0 : pet->rename_flag);
+	WFIFOW(fd,27) = pet->level;
+	WFIFOW(fd,29) = pet->hungry;
+	WFIFOW(fd,31) = pet->intimate;
+	WFIFOW(fd,33) = pet->equip;
 #if PACKETVER >= 20081126
-	WFIFOW(fd,35)=pet->class_;
+	WFIFOW(fd,35) = pet->class_;
 #endif
 	WFIFOSET(fd,packet_len(0x1a2));
 }
@@ -9851,23 +9850,23 @@ void clif_feel_hate_reset(struct map_session_data *sd)
 }
 
 
-/// Equip window (un)tick ack (ZC_CONFIG).
-/// 02d9 <type>.L <value>.L
-/// type:
-///	 0 = open equip window
+/// Send out reply to configuration change
+/// 02d9 <type>.L <value>.L (ZC_CONFIG)
+/// type: see enum e_config_type
 /// value:
-///	 0 = disabled
-///	 1 = enabled
-void clif_equiptickack(struct map_session_data *sd, int flag)
+///		false = disabled
+///		true = enabled
+void clif_configuration(struct map_session_data *sd, enum e_config_type type, bool enabled)
 {
 	int fd;
-	nullpo_retv(sd);
-	fd = sd->fd;
 
+	nullpo_retv(sd);
+
+	fd = sd->fd;
 	WFIFOHEAD(fd,packet_len(0x2d9));
 	WFIFOW(fd,0) = 0x2d9;
-	WFIFOL(fd,2) = 0;
-	WFIFOL(fd,6) = flag;
+	WFIFOL(fd,2) = type;
+	WFIFOL(fd,6) = enabled;
 	WFIFOSET(fd,packet_len(0x2d9));
 }
 
@@ -9880,9 +9879,10 @@ void clif_equiptickack(struct map_session_data *sd, int flag)
 void clif_equipcheckbox(struct map_session_data *sd)
 {
 	int fd;
-	nullpo_retv(sd);
-	fd = sd->fd;
 
+	nullpo_retv(sd);
+
+	fd = sd->fd;
 	WFIFOHEAD(fd,packet_len(0x2da));
 	WFIFOW(fd,0) = 0x2da;
 	WFIFOB(fd,2) = (sd->status.show_equip ? 1 : 0);
@@ -10478,7 +10478,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 				sd->bl.m == sd->feel_map[2].m)
 				sc_start(&sd->bl,&sd->bl,SC_KNOWLEDGE,100,lv,skill_get_time(SG_KNOWLEDGE,lv));
 		}
-		if(sd->pd && sd->pd->pet.intimate > 900)
+		if(sd->pd && sd->pd->pet.intimate >= PETINTIMATE_LOYAL)
 			clif_pet_emotion(sd->pd,(sd->pd->pet.class_ - 100) * 100 + 50 + pet_hungry_val(sd->pd));
 		if(hom_is_active(sd->hd))
 			hom_init_timers(sd->hd);
@@ -10545,6 +10545,34 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 #if PACKETVER >= 20070918
 		clif_partyinvitationstate(sd);
 		clif_equipcheckbox(sd);
+	#if PACKETVER >= 20170920
+		if(battle_config.homunculus_autofeed_always) {
+			//Always send ON or OFF
+			if(sd->hd) {
+				if(battle_config.feature_homunculus_autofeed)
+					clif_configuration(sd, CONFIG_HOMUNCULUS_AUTOFEED, sd->hd->homunculus.autofeed);
+				else
+					clif_configuration(sd, CONFIG_HOMUNCULUS_AUTOFEED, false);
+			}
+		} else {
+			//Only send when enabled
+			if(sd->hd && battle_config.feature_homunculus_autofeed && sd->hd->homunculus.autofeed)
+				clif_configuration(sd, CONFIG_HOMUNCULUS_AUTOFEED, true);
+		}
+	#endif
+	#if PACKETVER >= 20150513
+		if(battle_config.pet_autofeed_always) {
+			if(sd->pd) {
+				if(battle_config.feature_pet_autofeed)
+					clif_configuration(sd, CONFIG_PET_AUTOFEED, sd->pd->pet.autofeed);
+				else
+					clif_configuration(sd, CONFIG_PET_AUTOFEED, false);
+			}
+		} else {
+			if(sd->pd && battle_config.feature_pet_autofeed && sd->pd->pet.autofeed)
+				clif_configuration(sd, CONFIG_PET_AUTOFEED, true);
+		}
+	#endif
 #endif
 		if((battle_config.bg_flee_penalty != 100 || battle_config.gvg_flee_penalty != 100) &&
 			(map_flag_gvg2(sd->state.pmap) || map_flag_gvg2(sd->bl.m) || map[sd->state.pmap].flag.battleground || map[sd->bl.m].flag.battleground))
@@ -12148,7 +12176,7 @@ static void clif_parse_UseSkillToPos_mercenary(struct mercenary_data *md, struct
 void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 {
 	uint16 skill_id, skill_lv;
-	int tmp, target_id;
+	int inf, target_id;
 	unsigned int tick = gettick();
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
 
@@ -12159,8 +12187,8 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 	if( skill_lv < 1 )
 		skill_lv = 1; //No clue, I have seen the client do this with guild skills [Skotlex]
 
-	tmp = skill_get_inf(skill_id);
-	if( tmp&INF_GROUND_SKILL || !tmp )
+	inf = skill_get_inf(skill_id);
+	if( (inf&INF_GROUND_SKILL) || !inf )
 		return; //Using a ground/passive skill on a target? WRONG
 
 	if( skill_id >= HM_SKILLBASE && skill_id < HM_SKILLBASE + MAX_HOMUNSKILL ) {
@@ -12181,7 +12209,7 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 		clif_msg(sd, WORK_IN_PROGRESS);
 		return;
 #else
-		if( !sd->npc_item_flag || !(tmp&INF_SELF_SKILL) )
+		if( !sd->npc_item_flag || !(inf&INF_SELF_SKILL) )
 			return;
 #endif
 	}
@@ -12189,9 +12217,10 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 	if( sd->npc_shopid )
 		return;
 
-	if( (pc_cant_act2(sd) || sd->chatID) && skill_id != RK_REFRESH && !(skill_id == SR_GENTLETOUCH_CURE &&
-		(sd->sc.opt1 == OPT1_STONE || sd->sc.opt1 == OPT1_FREEZE || sd->sc.opt1 == OPT1_STUN)) &&
-		sd->state.storage_flag && !(tmp&INF_SELF_SKILL) ) //SELF skills can be used with the storage open, bugreport:8027
+	if( (pc_cant_act2(sd) || sd->chatID) &&
+		skill_id != RK_REFRESH &&
+		!(skill_id == SR_GENTLETOUCH_CURE && (sd->sc.opt1 == OPT1_STONE || sd->sc.opt1 == OPT1_FREEZE || sd->sc.opt1 == OPT1_STUN)) &&
+		!(sd->state.storage_flag && (inf&INF_SELF_SKILL)) ) //SELF skills can be used with the storage open, bugreport:8027
 		return;
 
 	if( pc_issit(sd) )
@@ -12200,7 +12229,7 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 	if( skill_isNotOk(skill_id, sd) )
 		return;
 
-	if( sd->bl.id != target_id && (tmp&INF_SELF_SKILL) )
+	if( sd->bl.id != target_id && (inf&INF_SELF_SKILL) )
 		target_id = sd->bl.id; //Never trust the client
 
 	if( target_id < 0 && -target_id == sd->bl.id ) //For disguises [Valaris]
@@ -12232,7 +12261,7 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 	if( sd->skillitem == skill_id ) {
 		if( skill_lv != sd->skillitemlv )
 			skill_lv = sd->skillitemlv;
-		if( !(tmp&INF_SELF_SKILL) )
+		if( !(inf&INF_SELF_SKILL) )
 			pc_delinvincibletimer(sd); //Target skills through items cancel invincibility [Inkfish]
 		unit_skilluse_id(&sd->bl, target_id, skill_id, skill_lv);
 		return;
@@ -12246,9 +12275,11 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 		else
 			skill_lv = 0;
 	} else {
-		tmp = pc_checkskill(sd, skill_id);
-		if( skill_lv > tmp )
-			skill_lv = tmp;
+		uint8 lv;
+
+		lv = pc_checkskill(sd, skill_id);
+		if( skill_lv > lv )
+			skill_lv = lv;
 	}
 
 	pc_delinvincibletimer(sd);
@@ -13900,6 +13931,104 @@ void clif_parse_SendEmotion(int fd, struct map_session_data *sd)
 void clif_parse_ChangePetName(int fd, struct map_session_data *sd)
 {
 	pet_change_name(sd,(char *)RFIFOP(fd,packet_db[RFIFOW(fd,0)].pos[0]));
+}
+
+
+/// Request to Evolve the pet (CZ_PET_EVOLUTION) [Dastgir]
+/// 09fb <Length>.W <EvolvedPetEggID>.W {<index>.W <amount>.W}*items
+void clif_parse_pet_evolution(int fd, struct map_session_data *sd)
+{
+	struct s_packet_db *info;
+	int i = 0, idx, petIndex;
+
+	nullpo_retv(sd);
+
+	info = &packet_db[RFIFOW(fd,0)];
+	if (!info || !info->len)
+		return;
+
+	if (!sd->status.pet_id) {
+		clif_pet_evolution_result(fd, PET_EVOL_NO_CALLPET);
+		return;
+	}
+
+	ARR_FIND(0, MAX_INVENTORY, idx, (sd->inventory.u.items_inventory[idx].card[0] == CARD0_PET &&
+		sd->status.pet_id == MakeDWord(sd->inventory.u.items_inventory[idx].card[1], sd->inventory.u.items_inventory[idx].card[2])));
+	if (idx == MAX_INVENTORY) {
+		clif_pet_evolution_result(fd, PET_EVOL_NO_PETEGG);
+		return;
+	}
+
+	if (!sd->pd || sd->pd->pet.intimate < PETINTIMATE_LOYAL) {
+		clif_pet_evolution_result(fd, PET_EVOL_RG_FAMILIAR);
+		return;
+	}
+
+	ARR_FIND(0, MAX_PET_DB, petIndex, pet_db[petIndex].class_ == sd->pd->pet.class_);
+	if (petIndex == MAX_PET_DB) {
+		clif_pet_evolution_result(fd, PET_EVOL_UNKNOWN);
+		return;
+	}
+
+	//Client side validation is not done as it is insecure
+	for (i = 0; i < pet_db[petIndex].ev_data_count; i++) {
+		struct s_pet_evo_datalist *ped = &pet_db[petIndex].ev_datas[i];
+
+		if (ped->EggID == RFIFOW(fd,info->pos[1])) {
+			int j;
+			int pet_id;
+
+			if (!ped->ev_item_count) {
+				clif_pet_evolution_result(fd, PET_EVOL_NO_RECIPE);
+				return;
+			}
+			for (j = 0; j < ped->ev_item_count; j++) {
+				struct s_pet_evo_itemlist *list = &ped->ev_items[j];
+				short n = pc_search_inventory(sd, list->nameid);
+
+				if (n == INDEX_NOT_FOUND) {
+					clif_pet_evolution_result(fd, PET_EVOL_NO_MATERIAL);
+					return;
+				}
+			}
+			for (j = 0; j < ped->ev_item_count; j++) {
+				struct s_pet_evo_itemlist *list = &ped->ev_items[j];
+				short n = pc_search_inventory(sd, list->nameid);
+
+				if (pc_delitem(sd, n, list->quantity, 0, 0, LOG_TYPE_OTHER)) {
+					clif_pet_evolution_result(fd, PET_EVOL_NO_MATERIAL);
+					return;
+				}
+			}
+			pet_return_egg(sd, sd->pd);
+			if (pc_delitem(sd, idx, 1, 0, 0, LOG_TYPE_OTHER)) {
+				clif_pet_evolution_result(fd, PET_EVOL_NO_PETEGG);
+				return;
+			}
+			pet_id = search_petDB_index(ped->EggID, PET_EGG);
+			if (pet_id >= 0) {
+				sd->catch_target_class = pet_db[pet_id].class_;
+				intif_create_pet(sd->status.account_id, sd->status.char_id, pet_db[pet_id].class_, mob_db(pet_db[pet_id].class_)->lv,
+					pet_db[pet_id].EggID, 0, pet_db[pet_id].intimate, 100, 0, 1, pet_db[pet_id].jname);
+				clif_pet_evolution_result(fd, PET_EVOL_SUCCESS);
+				return;
+			}
+		}
+	}
+	clif_pet_evolution_result(fd, PET_EVOL_UNKNOWN);
+}
+
+/**
+ * Result of Pet Evolution (ZC_PET_EVOLUTION_RESULT)
+ * 0x9fc <Result>.L
+ */
+void clif_pet_evolution_result(int fd, enum pet_evolution_result result) {
+#if PACKETVER >= 20140122
+	WFIFOHEAD(fd,packet_len(0x9fc));
+	WFIFOW(fd,0) = 0x9fc;
+	WFIFOL(fd,2) = result;
+	WFIFOSET(fd,packet_len(0x9fc));
+#endif
 }
 
 
@@ -16618,21 +16747,38 @@ void clif_parse_ViewPlayerEquip(int fd, struct map_session_data *sd)
 }
 
 
-/// Request to change equip window tick (CZ_CONFIG).
-/// 02d8 <type>.L <flag>.L
-/// type:
-///	 0 = open equip window
+/// Request to a configuration.
+/// 02d8 <type>.L <flag>.L (CZ_CONFIG)
+/// type: see enum e_config_type
 /// flag:
-///     0 = disabled
-///     1 = enabled
-void clif_parse_EquipTick(int fd, struct map_session_data *sd)
-{
-	//int type = RFIFOL(fd,packet_db[cmd].pos[0]);
-	bool flag = (bool)RFIFOL(fd,packet_db[RFIFOW(fd,0)].pos[1]);
+///     false = disabled
+///     true = enabled
+void clif_parse_configuration(int fd, struct map_session_data *sd) {
+	int cmd = RFIFOW(fd,0);
+	int type = RFIFOL(fd,packet_db[cmd].pos[0]);
+	bool flag = (RFIFOL(fd,packet_db[cmd].pos[1]) != 0);
 
-	sd->status.show_equip = flag;
-	clif_equiptickack(sd, flag);
+ 	switch( type ) {
+		case CONFIG_OPEN_EQUIPMENT_WINDOW:
+			sd->status.show_equip = flag;
+			break;
+		case CONFIG_PET_AUTOFEED:
+			if( !sd->pd || sd->pd->pet.incubate || !battle_config.feature_pet_autofeed )
+				return;
+			sd->pd->pet.autofeed = flag;
+			break;
+		case CONFIG_HOMUNCULUS_AUTOFEED:
+			if( !sd->hd || sd->hd->homunculus.vaporize || !battle_config.feature_homunculus_autofeed )
+				return; //Player can not click this if he does not have a homunculus or it is vaporized
+ 			sd->hd->homunculus.autofeed = flag;
+			break;
+		default:
+			ShowWarning("clif_parse_configuration: received unknown configuration type '%d'...\n", type);
+			return;
+	}
+ 	clif_configuration(sd, (enum e_config_type)type, flag);
 }
+
 
 /// Request to change party invitation tick.
 /// value:

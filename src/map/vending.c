@@ -327,7 +327,7 @@ int8 vending_openvending(struct map_session_data *sd, const char *message, const
 			pc_cartitem_amount(sd, index, amount) < 0 || //Invalid item or insufficient quantity
 			//NOTE: Official server does not do any of the following checks!
 			!sd->cart.u.items_cart[index].identify || //Unidentified item
-			sd->cart.u.items_cart[index].attribute == 1 || //Broken item
+			sd->cart.u.items_cart[index].attribute || //Broken item
 			sd->cart.u.items_cart[index].expire_time || //It should not be in the cart but just in case
 			(sd->cart.u.items_cart[index].bound && !pc_can_give_bounded_items(sd)) || //Can't trade account bound items and has no permission
 			!itemdb_cantrade(&sd->cart.u.items_cart[index], pc_get_group_level(sd), pc_get_group_level(sd)) ) //Untradeable item

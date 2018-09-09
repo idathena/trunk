@@ -388,7 +388,7 @@ static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data
 	int tid;
 	uint8 i;
 
- 	nullpo_ret(sd);
+ 	nullpo_retv(sd);
 
  	if( max > MAX_SHIELDBALL )
 		max = MAX_SHIELDBALL;
@@ -431,7 +431,7 @@ static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data
 {
 	uint8 i;
 
- 	nullpo_ret(sd);
+ 	nullpo_retv(sd);
 
  	if( sd->shieldball <= 0 ) {
 		sd->shieldball = 0;
@@ -2710,7 +2710,7 @@ static void pc_bonus_adddefele(struct map_session_data *sd, unsigned char ele, s
 	uint8 i;
 	struct weapon_data *wd;
 
-	wd = (sd->state.lr_flag ? &sd->left_weapon : &sd->right_weapon);
+	wd = (sd->state.lr_flag == 1 ? &sd->left_weapon : &sd->right_weapon);
 	ARR_FIND(0, MAX_PC_BONUS, i, wd->adddefele2[i].rate == 0);
 	if (i == MAX_PC_BONUS) {
 		ShowWarning("pc_bonus_adddefele: Reached max (%d) possible bonuses for this player.\n", MAX_PC_BONUS);
@@ -2887,9 +2887,8 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 #else
 				status->mdef = cap_value(bonus, CHAR_MIN, CHAR_MAX);
 #endif
-				if(sd->state.lr_flag == 1 && (index = sd->equip_index[EQI_HAND_L]) >= 0 &&
-					sd->inventory_data[index] && sd->inventory_data[index]->type == IT_ARMOR) //Shield, used for Royal Guard
-					sd->bonus.shieldmdef += bonus;
+				if(sd->state.lr_flag == 3)
+					sd->bonus.shieldmdef += bonus;  //For Royal Guard
 			}
 			break;
 		case SP_MDEF2:
@@ -2953,14 +2952,12 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 				status->def_ele = val;
 			break;
 		case SP_MAXHP:
-			if(sd->state.lr_flag == 2)
-				break;
-			sd->bonus.hp += val;
+			if(sd->state.lr_flag != 2)
+				sd->bonus.hp += val;
 			break;
 		case SP_MAXSP:
-			if(sd->state.lr_flag == 2)
-				break;
-			sd->bonus.sp += val;
+			if(sd->state.lr_flag != 2)
+				sd->bonus.sp += val;
 			break;
 #ifndef RENEWAL_CAST
 		case SP_VARCASTRATE:
@@ -3465,6 +3462,8 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->left_weapon.adddefele[type2] += val;
 			else if(sd->state.lr_flag == 2)
 				sd->arrow_adddefele[type2] += val;
+			else if(sd->state.lr_flag == 3)
+				sd->shield_adddefele[type2] += val;
 			break;
 		case SP_ADDRACE:
 			PC_BONUS_CHK_RACE(type2, SP_ADDRACE);
@@ -3474,6 +3473,8 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->left_weapon.addrace[type2] += val;
 			else if(sd->state.lr_flag == 2)
 				sd->arrow_addrace[type2] += val;
+			else if(sd->state.lr_flag == 3)
+				sd->shield_addrace[type2] += val;
 			break;
 		case SP_ADDCLASS:
 			PC_BONUS_CHK_CLASS(type2, SP_ADDCLASS);
@@ -3483,6 +3484,8 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->left_weapon.addclass[type2] += val;
 			else if(sd->state.lr_flag == 2)
 				sd->arrow_addclass[type2] += val;
+			else if(sd->state.lr_flag == 3)
+				sd->shield_addclass[type2] += val;
 			break;
 		case SP_ADDSIZE:
 			PC_BONUS_CHK_SIZE(type2, SP_ADDSIZE);
@@ -3492,6 +3495,8 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->left_weapon.addsize[type2] += val;
 			else if(sd->state.lr_flag == 2)
 				sd->arrow_addsize[type2] += val;
+			else if(sd->state.lr_flag == 3)
+				sd->shield_addsize[type2] += val;
 			break;
 		case SP_SUBELE:
 			PC_BONUS_CHK_ELEMENT(type2, SP_SUBELE);
@@ -3520,10 +3525,10 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 			break;
 		case SP_RESEFF:
 			PC_BONUS_CHK_SC(type2, SP_RESEFF);
-			if(sd->state.lr_flag == 2)
-				break;
-			i = sd->reseff[type2] + val;
-			sd->reseff[type2] = cap_value(i, -10000, 10000);
+			if(sd->state.lr_flag != 2) {
+				i = sd->reseff[type2] + val;
+				sd->reseff[type2] = cap_value(i, -10000, 10000);
+			}
 			break;
 		case SP_MAGIC_ADDDEF_ELE:
 			PC_BONUS_CHK_ELEMENT(type2, SP_MAGIC_ADDDEF_ELE);
@@ -3659,24 +3664,24 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 			break;
 		case SP_WEAPON_COMA_ELE:
 			PC_BONUS_CHK_ELEMENT(type2, SP_WEAPON_COMA_ELE);
-			if(sd->state.lr_flag == 2)
-				break;
-			sd->weapon_coma_ele[type2] += val;
-			sd->special_state.bonus_coma = 1;
+			if(sd->state.lr_flag != 2) {
+				sd->weapon_coma_ele[type2] += val;
+				sd->special_state.bonus_coma = 1;
+			}
 			break;
 		case SP_WEAPON_COMA_RACE:
 			PC_BONUS_CHK_RACE(type2, SP_WEAPON_COMA_RACE);
-			if(sd->state.lr_flag == 2)
-				break;
-			sd->weapon_coma_race[type2] += val;
-			sd->special_state.bonus_coma = 1;
+			if(sd->state.lr_flag != 2) {
+				sd->weapon_coma_race[type2] += val;
+				sd->special_state.bonus_coma = 1;
+			}
 			break;
 		case SP_WEAPON_COMA_CLASS:
 			PC_BONUS_CHK_CLASS(type2, SP_WEAPON_COMA_CLASS);
-			if(sd->state.lr_flag == 2)
-				break;
-			sd->weapon_coma_class[type2] += val;
-			sd->special_state.bonus_coma = 1;
+			if(sd->state.lr_flag != 2) {
+				sd->weapon_coma_class[type2] += val;
+				sd->special_state.bonus_coma = 1;
+			}
 			break;
 		case SP_CRITICAL_ADDRACE:
 			PC_BONUS_CHK_RACE(type2, SP_CRITICAL_ADDRACE);
@@ -4137,10 +4142,10 @@ void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int 
 			break;
 		case SP_STATE_NORECOVER_RACE:
 			PC_BONUS_CHK_RACE(type2, SP_STATE_NORECOVER_RACE);
-			if(sd->state.lr_flag == 2)
-				break;
-			sd->norecover_state_race[type2].rate = type3;
-			sd->norecover_state_race[type2].tick = val;
+			if(sd->state.lr_flag != 2) {
+				sd->norecover_state_race[type2].rate = type3;
+				sd->norecover_state_race[type2].tick = val;
+			}
 			break;
 		case SP_SP_VANISH_RACE_RATE:
 			PC_BONUS_CHK_RACE(type2, SP_SP_VANISH_RACE_RATE);
@@ -4215,19 +4220,19 @@ void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int 
 			break;
 		case SP_SET_DEF_RACE:
 			PC_BONUS_CHK_RACE(type2, SP_SET_DEF_RACE);
-			if(sd->state.lr_flag == 2)
-				break;
-			sd->def_set_race[type2].rate = type3;
-			sd->def_set_race[type2].tick = type4;
-			sd->def_set_race[type2].value = val;
+			if(sd->state.lr_flag != 2) {
+				sd->def_set_race[type2].rate = type3;
+				sd->def_set_race[type2].tick = type4;
+				sd->def_set_race[type2].value = val;
+			}
 			break;
 		case SP_SET_MDEF_RACE:
 			PC_BONUS_CHK_RACE(type2, SP_SET_MDEF_RACE);
-			if(sd->state.lr_flag == 2)
-				break;
-			sd->mdef_set_race[type2].rate = type3;
-			sd->mdef_set_race[type2].tick = type4;
-			sd->mdef_set_race[type2].value = val;
+			if(sd->state.lr_flag != 2) {
+				sd->mdef_set_race[type2].rate = type3;
+				sd->mdef_set_race[type2].tick = type4;
+				sd->mdef_set_race[type2].value = val;
+			}
 			break;
 		default:
 			if(running_npc_stat_calc_event)
@@ -5792,7 +5797,7 @@ enum e_setpos pc_setpos(struct map_session_data *sd, unsigned short mapindex, in
 			sd->regen.state.gc = 1;
 	}
 
-	if( sd->status.pet_id > 0 && sd->pd && sd->pd->pet.intimate > 0 ) {
+	if( sd->status.pet_id > 0 && sd->pd && sd->pd->pet.intimate >= PETINTIMATE_AWKWARD ) {
 		sd->pd->bl.m = m;
 		sd->pd->bl.x = sd->pd->ud.to_x = x;
 		sd->pd->bl.y = sd->pd->ud.to_y = y;
@@ -7901,7 +7906,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 		if( !map[sd->bl.m].flag.noexppenalty ) {
 			pet_set_intimate(pd,pd->pet.intimate - pd->petDB->die);
-			if( pd->pet.intimate < 0 )
+			if( pd->pet.intimate < PETINTIMATE_AWKWARD )
 				pd->pet.intimate = 0;
 			clif_send_petdata(sd,sd->pd,1,pd->pet.intimate);
 		}
@@ -9905,12 +9910,12 @@ static int pc_checkcombo(struct map_session_data *sd, struct item_data *data) {
 		//We got here, means all items in the combo are matching
 		idx = sd->combos.count;
 		if( sd->combos.bonus == NULL ) {
-			CREATE(sd->combos.bonus, struct script_code*, 1);
+			CREATE(sd->combos.bonus, struct script_code *, 1);
 			CREATE(sd->combos.id, unsigned short, 1);
 			CREATE(sd->combos.pos, unsigned int, 1);
 			sd->combos.count = 1;
 		} else {
-			RECREATE(sd->combos.bonus, struct script_code*, ++sd->combos.count);
+			RECREATE(sd->combos.bonus, struct script_code *, ++sd->combos.count);
 			RECREATE(sd->combos.id, unsigned short, sd->combos.count);
 			RECREATE(sd->combos.pos, unsigned int, sd->combos.count);
 		}
@@ -10039,7 +10044,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 		clif_equipitemack(sd,n,0,res);
 		return false;
 	}
-	if( !(pos&req_pos) || sd->inventory.u.items_inventory[n].equip || sd->inventory.u.items_inventory[n].attribute == 1 ) { //[Valaris]
+	if( !(pos&req_pos) || sd->inventory.u.items_inventory[n].equip || sd->inventory.u.items_inventory[n].attribute ) { //[Valaris]
 		clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
 	}

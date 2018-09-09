@@ -61,33 +61,39 @@ typedef enum e_log_cash_type {
 } e_log_cash_type;
 
 
-/// new logs
+typedef enum e_log_feeding_type {
+	LOG_FEED_HOMUNCULUS = 0x1,
+	LOG_FEED_PET        = 0x2,
+} e_log_feeding_type;
+
+
+// New logs
 void log_pick_pc(struct map_session_data *sd, e_log_pick_type type, int amount, struct item *itm);
 void log_pick_mob(struct mob_data *md, e_log_pick_type type, int amount, struct item *itm);
 void log_zeny(struct map_session_data *sd, e_log_pick_type type, struct map_session_data *src_sd, int amount);
-void log_cash( struct map_session_data *sd, e_log_pick_type type, e_log_cash_type cash_type, int amount );
+void log_cash(struct map_session_data *sd, e_log_pick_type type, e_log_cash_type cash_type, int amount);
 void log_npc(struct map_session_data *sd, const char *message);
 void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, const char *map, int x, int y, const char *dst_charname, const char *message);
 void log_atcommand(struct map_session_data *sd, const char *message);
+void log_feeding(struct map_session_data *sd, e_log_feeding_type type, unsigned short nameid);
 
-/// old, but useful logs
+// Old, but useful logs
 void log_branch(struct map_session_data *sd);
 void log_mvpdrop(struct map_session_data *sd, int monster_id, unsigned int *log_mvp);
 
 int log_config_read(const char *cfgName);
 
-extern struct Log_Config
-{
+extern struct Log_Config {
 	e_log_pick_type enable_logs;
 	int filter;
 	bool sql_logs;
 	bool log_chat_woe_disable;
 	bool cash;
-	int rare_items_log,refine_items_log,price_items_log,amount_items_log; //for filter
+	int rare_items_log,refine_items_log,price_items_log,amount_items_log; //For filter
 	int branch, mvpdrop, zeny, commands, npc, chat;
-	char log_branch[64], log_pick[64], log_zeny[64], log_mvpdrop[64], log_gm[64], log_npc[64], log_chat[64], log_cash[64];
-}
-log_config;
+	unsigned feeding : 2;
+	char log_branch[64], log_pick[64], log_zeny[64], log_mvpdrop[64], log_gm[64], log_npc[64], log_chat[64], log_cash[64], log_feeding[64];
+} log_config;
 
 #ifdef BETA_THREAD_TEST
 	struct {

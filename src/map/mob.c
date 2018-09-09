@@ -3637,7 +3637,7 @@ int mob_clone_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, cons
 	status->rhw.atk2 = status->dex + status->rhw.atk + status->rhw.atk2; //Max ATK
 	status->rhw.atk = status->dex; //Min ATK
 	if (status->lhw.atk) {
-		status->lhw.atk2= status->dex + status->lhw.atk + status->lhw.atk2; //Max ATK
+		status->lhw.atk2 = status->dex + status->lhw.atk + status->lhw.atk2; //Max ATK
 		status->lhw.atk = status->dex; //Min ATK
 	}
 	if (mode) //User provided mode

@@ -9193,6 +9193,7 @@ mapflag	<map name>	battleground	2
 ====================
 ---------------------------------------
 
+*birthpet;
 *bpet;
 
 This command opens up a pet hatching window on the client connected to the 
@@ -9203,14 +9204,22 @@ This is still usable outside item scripts.
 
 ---------------------------------------
 
+*catchpet <pet id>;
 *pet <pet id>;
 
 This command is used in all the item scripts for taming items. Running this 
 command will make the pet catching cursor appear on the client connected to the 
 invoking character, usable on the monsters with the specified pet ID number. It 
 will still work outside an item script.
+If the <pet id> is PET_CATCH_UNIVERSAL the item will attempt to catch the targeted
+monster as long as it is in the pet database and does not have the MD_STATUS_IMMUNE
+monster mode.
+If the <pet id> is PET_CATCH_UNIVERSAL_ITEM the item will attempt to catch the targeted
+monster as long as it is in the pet database and the targeted monster requires the lure
+item used.
+See 'doc/mob_db_mode_list.txt' for more information about monster modes.
 
-A full list of pet IDs can be found inside 'pet_db.txt'.
+A full list of pet IDs can be found inside 'db/(pre-)re/pet_db.txt'.
 
 ---------------------------------------
 
@@ -9218,7 +9227,7 @@ A full list of pet IDs can be found inside 'pet_db.txt'.
 
 This command will create a pet egg and put it in the invoking character's 
 inventory. The kind of pet is specified by pet ID numbers listed in 
-'pet_db.txt'. The egg is created exactly as if the character just successfully 
+'db/(pre-)re/pet_db.txt'. The egg is created exactly as if the character just successfully 
 caught a pet in the normal way.
 
     // This will make you a poring:
@@ -9236,13 +9245,15 @@ This function will return pet information for the pet the invoking character
 currently has active. Valid types are:
 
  PETINFO_ID - Pet ID.
- PETINFO_CLASS - Pet class number as per 'pet_db.txt' - will tell you what kind of a pet it is.
+ PETINFO_CLASS - Pet class number as per 'db/(pre-)re/pet_db.txt' - will tell you what kind of a pet it is.
  PETINFO_NAME - Pet name. Will return "null" if there's no pet. 
  PETINFO_INTIMATE - Pet friendly level (intimacy score). 1000 is full loyalty.
  PETINFO_HUNGRY - Pet hungry level. 100 is completely full.
  PETINFO_RENAMED - Pet rename flag. 0 means this pet has not been named yet.
  PETINFO_LEVEL - Pet level
  PETINFO_BLOCKID - Pet Game ID
+ PETINFO_EGGID - Pet egg item id
+ PETINFO_FOODID - Pet food item id
 
 ---------------------------------------
 
@@ -9256,9 +9267,7 @@ to be executed from pet scripts. They will modify the pet AI decision-making for
 the current pet of the invoking character, and will NOT have any independent 
 effect by themselves, which is why only one of them each may be in effect at any 
 time for a specific pet. A pet may have 'petloot', 'petskillbonus', 
-'petskillattack' OR 'petpetskillattack2' and 'petskillsupport' OR 'petheal' at 
-the same time. 'petheal' is deprecated and is no longer used in the default pet 
-scripts.
+'petskillattack' OR 'petpetskillattack2' and 'petskillsupport'.
 
 All commands with delays and durations will only make the behavior active for 
 the specified duration of seconds, with a delay of the specified number of 
@@ -9315,13 +9324,11 @@ when pet performance is activated.
 
 *petskillsupport <skill id>,<skill level>,<delay>,<percent hp>,<percent sp>;
 *petskillsupport "<skill name>",<skill level>,<delay>,<percent hp>,<percent sp>;
-*petheal <level>,<delay>,<percent hp>,<percent sp>;
 
 This will make the pet use a specified support skill on the owner whenever the 
 HP and SP are below the given percent values, with a specified delay time 
 between activations. The skill numbers are as per 'db/(pre-)re/skill_db.txt'.
-'petheal' works the same as 'petskillsupport' but has the skill ID hard-coded to 
-AL_HEAL (ID:28). This command is deprecated.
+
 It's not quite certain who's stats will be used for the skills cast, the 
 character's or the pets. Probably, Skotlex can answer that question.
 

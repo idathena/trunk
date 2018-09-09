@@ -2371,7 +2371,7 @@ int skill_break_equip(struct block_list *src, struct block_list *bl, unsigned sh
 		for (i = 0; i < EQI_MAX; i++) {
 			short j = sd->equip_index[i];
 
-			if (j < 0 || sd->inventory.u.items_inventory[j].attribute == 1 || !sd->inventory_data[j])
+			if (j < 0 || sd->inventory.u.items_inventory[j].attribute || !sd->inventory_data[j])
 				continue;
 			switch(i) {
 				case EQI_HEAD_TOP: //Upper Head
@@ -16630,7 +16630,7 @@ void skill_repairweapon(struct map_session_data *sd, int idx) {
 		return; //Invalid index??
 
 	item = &target_sd->inventory.u.items_inventory[idx];
-	if( !(item->nameid) || !item->attribute )
+	if( !item->nameid || item->card[0] == CARD0_PET || !item->attribute )
 		return; //Again invalid item
 
 	if( sd != target_sd && !battle_check_range(&sd->bl,&target_sd->bl,skill_get_range2(&sd->bl,sd->menuskill_id,sd->menuskill_val2,true)) ) {
@@ -16650,7 +16650,7 @@ void skill_repairweapon(struct map_session_data *sd, int idx) {
 
 	clif_skill_nodamage(&sd->bl,&target_sd->bl,sd->menuskill_id,1,1);
 
-	item->attribute = 0; /* Clear broken state */
+	item->attribute = 0; //Clear broken state
 
 	clif_equiplist(target_sd);
 

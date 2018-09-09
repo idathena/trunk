@@ -116,6 +116,16 @@ enum e_bossmap_info {
 	BOSS_INFO_DEAD,
 };
 
+enum e_pet_evolution_result {
+	PET_EVOL_UNKNOWN = 0,
+	PET_EVOL_NO_CALLPET,
+	PET_EVOL_NO_PETEGG,
+	PET_EVOL_NO_RECIPE,
+	PET_EVOL_NO_MATERIAL,
+	PET_EVOL_RG_FAMILIAR,
+	PET_EVOL_SUCCESS,
+};
+
 #define packet_len(cmd) packet_db[cmd].len
 extern struct s_packet_db packet_db[MAX_PACKET_DB + 1];
 extern int packet_db_ack[MAX_ACK_FUNC + 1];
@@ -536,6 +546,13 @@ enum e_damage_type {
 	DMG_MULTI_HIT_CRITICAL, //Multi-hit damage (Critical)
 };
 
+enum e_config_type {
+	CONFIG_OPEN_EQUIPMENT_WINDOW = 0,
+	//Unknown
+	CONFIG_PET_AUTOFEED = 2,
+	CONFIG_HOMUNCULUS_AUTOFEED
+};
+
 int clif_setip(const char *ip);
 void clif_setbindip(const char *ip);
 void clif_setport(uint16 port);
@@ -870,7 +887,7 @@ void clif_homskillup(struct map_session_data *sd, uint16 skill_id); //[orn]
 int clif_hom_food(struct map_session_data *sd, int foodid, int fail); //[orn]
 void clif_send_homdata(struct map_session_data *sd, int state, int param); //[orn]
 
-void clif_equiptickack(struct map_session_data *sd, int flag);
+void clif_configuration(struct map_session_data *sd, enum e_config_type type, bool enabled);
 void clif_partytickack(struct map_session_data *sd, bool flag);
 void clif_viewequip_ack(struct map_session_data *sd, struct map_session_data *tsd);
 void clif_equipcheckbox(struct map_session_data *sd);
@@ -1075,5 +1092,8 @@ void clif_achievement_reward_ack(int fd, unsigned char result, int achievement_i
 
 void clif_skill_scale(struct block_list *bl, int src_id, int x, int y, uint16 skill_id, uint16 skill_lv, int casttime);
 void clif_weight_limit(struct map_session_data *sd);
+
+//Pet Evolution System
+void clif_pet_evolution_result(int fd, enum e_pet_evolution_result result);
 
 #endif /* _CLIF_H_ */

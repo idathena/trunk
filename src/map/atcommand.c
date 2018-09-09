@@ -3827,7 +3827,7 @@ ACMD_FUNC(reload)
 		clif_displaymessage(fd, msg_txt(97)); // Item database has been reloaded.
 	} else if (strstr(command, "mobdb") || strncmp(message, "mobdb", 3) == 0) {
 		mob_reload();
-		read_petdb();
+		pet_readdb();
 		hom_reload();
 		mercenary_readdb();
 		mercenary_read_skilldb();
@@ -4508,7 +4508,9 @@ ACMD_FUNC(repairall)
 
 	count = 0;
 	for (i = 0; i < MAX_INVENTORY; i++) {
-		if (sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].attribute == 1) {
+		if (sd->inventory.u.items_inventory[i].card[0] == CARD0_PET)
+			continue;
+		if (sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].attribute) {
 			sd->inventory.u.items_inventory[i].attribute = 0;
 			clif_produceeffect(sd, 0, sd->inventory.u.items_inventory[i].nameid);
 			count++;
@@ -6647,7 +6649,7 @@ ACMD_FUNC(pettalk)
 		sd->cantalk_tick = gettick() + battle_config.min_chat_delay;
 	}
 
-	if(!sd->status.pet_id || !(pd=sd->pd)) {
+	if(!sd->status.pet_id || !(pd = sd->pd)) {
 		clif_displaymessage(fd, msg_txt(184)); // Sorry, but you have no pet.
 		return -1;
 	}

@@ -978,9 +978,8 @@ int hom_food(struct map_session_data *sd, struct homun_data *hd)
 	}
 
 	hd->homunculus.hunger += 10; //Dunno increase value for each food
-	if (hd->homunculus.hunger > 100)
-		hd->homunculus.hunger = 100;
-
+	hd->homunculus.hunger = min(hd->homunculus.hunger,100);
+	log_feeding(sd, LOG_FEED_HOMUNCULUS, foodID);
 	clif_emotion(&hd->bl, emotion);
 	clif_send_homdata(sd, SP_HUNGRY, hd->homunculus.hunger);
 	clif_send_homdata(sd, SP_INTIMATE, hd->homunculus.intimacy / 100);
@@ -1022,6 +1021,9 @@ static int hom_hungry(int tid, unsigned int tick, int id, intptr_t data)
 		clif_emotion(&hd->bl, E_HMM);
 	else if (hd->homunculus.hunger == 75)
 		clif_emotion(&hd->bl, E_OK);
+
+	if (battle_config.feature_homunculus_autofeed && hd->homunculus.autofeed && hd->homunculus.hunger <= 30)
+		hom_food(sd, hd);
 
 	if (hd->homunculus.hunger < 0) {
 		hd->homunculus.hunger = 0;
@@ -1142,7 +1144,7 @@ void hom_alloc(struct map_session_data *sd, struct s_homunculus *hom)
 
 	nullpo_retv(sd);
 
-	Assert((sd->status.hom_id == 0 || sd->hd == NULL) || sd->hd->master == sd);
+	Assert(!sd->status.hom_id || !sd->hd || sd->hd->master == sd);
 
 	i = hom_search(hom->class_, HOMUNCULUS_CLASS);
 	if (i < 0) {
@@ -1567,7 +1569,7 @@ int hom_max(struct homun_data *hd)
 /**
  * Read homunculus db
  */
-static bool read_homunculusdb_sub(char *str[], int columns, int current)
+static bool homunculus_readdb_sub(char *str[], int columns, int current)
 {
 	int classid;
 	struct s_homunculus_db *db;
@@ -1575,7 +1577,7 @@ static bool read_homunculusdb_sub(char *str[], int columns, int current)
 	//Base Class, Evo Class
 	classid = atoi(str[0]);
 	if (classid < HM_CLASS_BASE || classid > HM_CLASS_MAX) {
-		ShowError("read_homunculusdb : Invalid class %d\n", classid);
+		ShowError("homunculus_readdb : Invalid class %d\n", classid);
 		return false;
 	}
 
@@ -1584,7 +1586,7 @@ static bool read_homunculusdb_sub(char *str[], int columns, int current)
 	classid = atoi(str[1]);
 	if (classid < HM_CLASS_BASE || classid > HM_CLASS_MAX) {
 		db->base_class = 0;
-		ShowError("read_homunculusdb : Invalid class %d\n", classid);
+		ShowError("homunculus_readdb : Invalid class %d\n", classid);
 		return false;
 	}
 
@@ -1696,7 +1698,7 @@ static bool read_homunculusdb_sub(char *str[], int columns, int current)
 /**
  * Read homunculus db (check the files)
  */
-void read_homunculusdb(void)
+void homunculus_readdb(void)
 {
 	uint8 i;
 	const char *filename[] = {
@@ -1704,17 +1706,17 @@ void read_homunculusdb(void)
 		"homunculus_db2.txt"
 	};
 
-	memset(homunculus_db,0,sizeof(homunculus_db));
+	memset(homunculus_db, 0, sizeof(homunculus_db));
 
 	for (i = 0; i < ARRAYLENGTH(filename); i++) {
 		if (i > 0) {
-			char path[256];
+			char filepath[256];
 
-			sprintf(path, "%s/%s", db_path, filename[i]);
-			if (!exists(path))
+			safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, filename[i]);
+			if (!exists(filepath))
 				continue;
 		}
-		sv_readdb(db_path, filename[i], ',', 50, 50, MAX_HOMUNCULUS_CLASS, &read_homunculusdb_sub);
+		sv_readdb(db_path, filename[i], ',', 50, 50, MAX_HOMUNCULUS_CLASS, &homunculus_readdb_sub);
 	}
 }
 
@@ -1815,7 +1817,7 @@ void read_homunculus_expdb(void)
 
 void hom_reload(void)
 {
-	read_homunculusdb();
+	homunculus_readdb();
 	read_homunculus_expdb();
 }
 
@@ -1827,7 +1829,7 @@ void hom_reload_skill(void)
 void do_init_homunculus(void)
 {
 	int class_;
-	read_homunculusdb();
+	homunculus_readdb();
 	read_homunculus_expdb();
 	read_homunculus_skilldb();
 	// Add homunc timer function to timer func list [Toms]

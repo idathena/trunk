@@ -16,11 +16,12 @@
 #include <string.h>
 
 struct s_pet *pet_pt;
+int mapif_load_pet(int fd, uint32 account_id, uint32 char_id, int pet_id);
 
 //---------------------------------------------------------
 int inter_pet_tosql(int pet_id, struct s_pet* p)
 {
-	//`pet` (`pet_id`, `class`,`name`,`account_id`,`char_id`,`level`,`egg_id`,`equip`,`intimate`,`hungry`,`rename_flag`,`incubate`)
+	//`pet` (`pet_id`, `class`,`name`,`account_id`,`char_id`,`level`,`egg_id`,`equip`,`intimate`,`hungry`,`rename_flag`,`incubate`,`autofeed`)
 	char esc_name[NAME_LENGTH*2+1];// escaped pet name
 
 	Sql_EscapeStringLen(sql_handle, esc_name, p->name, strnlen(p->name, NAME_LENGTH));
@@ -30,10 +31,10 @@ int inter_pet_tosql(int pet_id, struct s_pet* p)
 	if( pet_id == -1 )
 	{// New pet.
 		if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` "
-			"(`class`,`name`,`account_id`,`char_id`,`level`,`egg_id`,`equip`,`intimate`,`hungry`,`rename_flag`,`incubate`) "
-			"VALUES ('%d', '%s', '%d', '%d', '%d', '%hu', '%hu', '%d', '%d', '%d', '%d')",
+			"(`class`,`name`,`account_id`,`char_id`,`level`,`egg_id`,`equip`,`intimate`,`hungry`,`rename_flag`,`incubate`,`autofeed`) "
+			"VALUES ('%d', '%s', '%d', '%d', '%d', '%hu', '%hu', '%d', '%d', '%d', '%d', '%d')",
 			pet_db, p->class_, esc_name, p->account_id, p->char_id, p->level, p->egg_id,
-			p->equip, p->intimate, p->hungry, p->rename_flag, p->incubate) )
+			p->equip, p->intimate, p->hungry, p->rename_flag, p->incubate, p->autofeed) )
 		{
 			Sql_ShowDebug(sql_handle);
 			return 0;
@@ -42,9 +43,9 @@ int inter_pet_tosql(int pet_id, struct s_pet* p)
 	}
 	else
 	{// Update pet.
-		if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `class`='%d',`name`='%s',`account_id`='%d',`char_id`='%d',`level`='%d',`egg_id`='%hu',`equip`='%hu',`intimate`='%d',`hungry`='%d',`rename_flag`='%d',`incubate`='%d' WHERE `pet_id`='%d'",
+		if( SQL_ERROR == Sql_Query(sql_handle, "UPDATE `%s` SET `class`='%d',`name`='%s',`account_id`='%d',`char_id`='%d',`level`='%d',`egg_id`='%hu',`equip`='%hu',`intimate`='%d',`hungry`='%d',`rename_flag`='%d',`incubate`='%d',`autofeed`='%d' WHERE `pet_id`='%d'",
 			pet_db, p->class_, esc_name, p->account_id, p->char_id, p->level, p->egg_id,
-			p->equip, p->intimate, p->hungry, p->rename_flag, p->incubate, p->pet_id) )
+			p->equip, p->intimate, p->hungry, p->rename_flag, p->incubate, p->autofeed, p->pet_id) )
 		{
 			Sql_ShowDebug(sql_handle);
 			return 0;
@@ -66,9 +67,9 @@ int inter_pet_fromsql(int pet_id, struct s_pet* p)
 #endif
 	memset(p, 0, sizeof(struct s_pet));
 
-	//`pet` (`pet_id`, `class`,`name`,`account_id`,`char_id`,`level`,`egg_id`,`equip`,`intimate`,`hungry`,`rename_flag`,`incubate`)
+	//`pet` (`pet_id`, `class`,`name`,`account_id`,`char_id`,`level`,`egg_id`,`equip`,`intimate`,`hungry`,`rename_flag`,`incubate`,`autofeed`)
 
-	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `pet_id`, `class`,`name`,`account_id`,`char_id`,`level`,`egg_id`,`equip`,`intimate`,`hungry`,`rename_flag`,`incubate` FROM `%s` WHERE `pet_id`='%d'", pet_db, pet_id) )
+	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `pet_id`, `class`,`name`,`account_id`,`char_id`,`level`,`egg_id`,`equip`,`intimate`,`hungry`,`rename_flag`,`incubate`,`autofeed` FROM `%s` WHERE `pet_id`='%d'", pet_db, pet_id) )
 	{
 		Sql_ShowDebug(sql_handle);
 		return 0;
@@ -88,6 +89,7 @@ int inter_pet_fromsql(int pet_id, struct s_pet* p)
 		Sql_GetData(sql_handle,  9, &data, NULL); p->hungry = atoi(data);
 		Sql_GetData(sql_handle, 10, &data, NULL); p->rename_flag = atoi(data);
 		Sql_GetData(sql_handle, 11, &data, NULL); p->incubate = atoi(data);
+		Sql_GetData(sql_handle, 12, &data, NULL); p->autofeed = atoi(data);
 
 		Sql_FreeResult(sql_handle);
 
@@ -205,45 +207,45 @@ int mapif_create_pet(int fd, uint32 account_id, uint32 char_id, short pet_class,
 		pet_pt->intimate = 1000;
 
 	pet_pt->pet_id = -1; //Signal NEW pet.
-	if (inter_pet_tosql(pet_pt->pet_id,pet_pt))
-		mapif_pet_created(fd, account_id, pet_pt);
-	else //Failed.
+	if(inter_pet_tosql(pet_pt->pet_id, pet_pt)) {
+		if(pet_pt->incubate)
+			mapif_pet_created(fd, account_id, pet_pt);
+		else
+			mapif_load_pet(fd, account_id, char_id, pet_pt->pet_id);
+	} else //Failed.
 		mapif_pet_created(fd, account_id, NULL);
 
 	return 0;
 }
 
-int mapif_load_pet(int fd, int account_id, int char_id, int pet_id){
+int mapif_load_pet(int fd, uint32 account_id, uint32 char_id, int pet_id) {
 	memset(pet_pt, 0, sizeof(struct s_pet));
 
 	inter_pet_fromsql(pet_id, pet_pt);
 
-	if(pet_pt!=NULL) {
+	if(pet_pt != NULL) {
 		if(pet_pt->incubate == 1) {
 			pet_pt->account_id = pet_pt->char_id = 0;
 			mapif_pet_info(fd, account_id, pet_pt);
-		}
-		else if(account_id == pet_pt->account_id && char_id == pet_pt->char_id)
+		} else if(account_id == pet_pt->account_id && char_id == pet_pt->char_id)
 			mapif_pet_info(fd, account_id, pet_pt);
 		else
 			mapif_pet_noinfo(fd, account_id);
-	}
-	else
+	} else
 		mapif_pet_noinfo(fd, account_id);
 
 	return 0;
 }
 
 int mapif_save_pet(int fd, int account_id, struct s_pet *data) {
-	//here process pet save request.
+	//Here process pet save request.
 	int len;
-	RFIFOHEAD(fd);
-	len=RFIFOW(fd, 2);
-	if(sizeof(struct s_pet)!=len-8) {
-		ShowError("inter pet: data size error %d %d\n", sizeof(struct s_pet), len-8);
-	}
 
-	else{
+	RFIFOHEAD(fd);
+	len = RFIFOW(fd, 2);
+	if(sizeof(struct s_pet) != len - 8)
+		ShowError("inter pet: data size error %d %d\n", sizeof(struct s_pet), len - 8);
+	else {
 		if(data->hungry < 0)
 			data->hungry = 0;
 		else if(data->hungry > 100)
@@ -252,7 +254,7 @@ int mapif_save_pet(int fd, int account_id, struct s_pet *data) {
 			data->intimate = 0;
 		else if(data->intimate > 1000)
 			data->intimate = 1000;
-		inter_pet_tosql(data->pet_id,data);
+		inter_pet_tosql(data->pet_id, data);
 		mapif_save_pet_ack(fd, account_id, 0);
 	}
 

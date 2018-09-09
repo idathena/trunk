@@ -9,9 +9,11 @@
 #include "map.h"
 #include "battle.h"
 #include "itemdb.h"
+#include "homunculus.h"
 #include "log.h"
 #include "mob.h"
 #include "pc.h"
+#include "pet.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -115,6 +117,19 @@ static char log_cashtype2char(e_log_cash_type type)
 	}
 
 	ShowDebug("log_chattype2char: Unknown chat type %d.\n", type);
+	return 'O';
+}
+
+
+static char log_feedingtype2char(e_log_feeding_type type)
+{
+	switch( type ) {
+		case LOG_FEED_HOMUNCULUS:
+			return 'H';
+		case LOG_FEED_PET:
+			return 'P';
+	}
+ 	ShowDebug("log_feedingtype2char: Unknown feeding type %d.\n", type);
 	return 'O';
 }
 
@@ -432,7 +447,7 @@ void log_npc(struct map_session_data *sd, const char *message)
 /// logs chat
 void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, const char *mapname, int x, int y, const char *dst_charname, const char *message)
 {
-	if( ( log_config.chat&type ) == 0 ) // Disabled
+	if( !(log_config.chat&type) ) // Disabled
 		return;
 
 	if( log_config.log_chat_woe_disable && is_agit_start() ) // No chat logging during woe
@@ -475,8 +490,8 @@ void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, 
 
 
 /// logs cash transactions
-void log_cash( struct map_session_data *sd, e_log_pick_type type, e_log_cash_type cash_type, int amount ) {
-	nullpo_retv( sd );
+void log_cash(struct map_session_data *sd, e_log_pick_type type, e_log_cash_type cash_type, int amount) {
+	nullpo_retv(sd);
 
 	if( !log_config.cash )
 		return;
@@ -485,14 +500,14 @@ void log_cash( struct map_session_data *sd, e_log_pick_type type, e_log_cash_typ
 #ifdef BETA_THREAD_TEST
 		char entry[512];
 		int e_length = 0;
-		e_length = sprintf( entry,  LOG_QUERY " INTO `%s` ( `time`, `char_id`, `type`, `cash_type`, `amount`, `map` ) VALUES ( NOW(), '%d', '%c', '%c', '%d', '%s' )",
-			log_config.log_cash, sd->status.char_id, log_picktype2char( type ), log_cashtype2char( cash_type ), amount, mapindex_id2name( sd->mapindex ) );
-		queryThread_log( entry, e_length );
+		e_length = sprintf(entry,  LOG_QUERY " INTO `%s` (`time`, `char_id`, `type`, `cash_type`, `amount`, `map`) VALUES (NOW(), '%d', '%c', '%c', '%d', '%s')",
+			log_config.log_cash, sd->status.char_id, log_picktype2char(type), log_cashtype2char(cash_type), amount, mapindex_id2name(sd->mapindex));
+		queryThread_log(entry, e_length);
 #else
-		if( SQL_ERROR == Sql_Query( logmysql_handle, LOG_QUERY " INTO `%s` ( `time`, `char_id`, `type`, `cash_type`, `amount`, `map` ) VALUES ( NOW(), '%d', '%c', '%c', '%d', '%s' )",
-			log_config.log_cash, sd->status.char_id, log_picktype2char( type ), log_cashtype2char( cash_type ), amount, mapindex_id2name( sd->mapindex ) ) )
+		if( SQL_ERROR == Sql_Query(logmysql_handle, LOG_QUERY " INTO `%s` (`time`, `char_id`, `type`, `cash_type`, `amount`, `map`) VALUES (NOW(), '%d', '%c', '%c', '%d', '%s')",
+			log_config.log_cash, sd->status.char_id, log_picktype2char(type), log_cashtype2char(cash_type), amount, mapindex_id2name(sd->mapindex)) )
 		{
-			Sql_ShowDebug( logmysql_handle );
+			Sql_ShowDebug(logmysql_handle);
 			return;
 		}
 #endif
@@ -501,12 +516,73 @@ void log_cash( struct map_session_data *sd, e_log_pick_type type, e_log_cash_typ
 		time_t curtime;
 		FILE *logfp;
 
-		if( ( logfp = fopen( log_config.log_cash, "a" ) ) == NULL )
+		if( (logfp = fopen(log_config.log_cash, "a")) == NULL )
 			return;
-		time( &curtime );
-		strftime( timestring, sizeof( timestring ), "%m/%d/%Y %H:%M:%S", localtime( &curtime ) );
-		fprintf( logfp, "%s - %s[%d]\t%d(%c)\t\n", timestring, sd->status.name, sd->status.account_id, amount, log_cashtype2char( cash_type ) );
-		fclose( logfp );
+		time(&curtime);
+		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", localtime(&curtime));
+		fprintf(logfp, "%s - %s[%d]\t%d(%c)\t\n", timestring, sd->status.name, sd->status.account_id, amount, log_cashtype2char(cash_type));
+		fclose(logfp);
+	}
+}
+
+
+/**
+ * Log feeding activity
+ * @param sd Player, feeder
+ * @param type Log type, @see e_log_feeding_type
+ * @param nameid Item used as food
+ */
+void log_feeding(struct map_session_data *sd, e_log_feeding_type type, unsigned short nameid) {
+	unsigned int target_id = 0, intimacy = 0;
+	unsigned short target_class = 0;
+
+ 	nullpo_retv(sd);
+
+ 	if( !(log_config.feeding&type) )
+		return;
+
+ 	switch( type ) {
+		case LOG_FEED_HOMUNCULUS:
+			if( sd->hd ) {
+				target_id = sd->hd->homunculus.hom_id;
+				target_class = sd->hd->homunculus.class_;
+				intimacy = sd->hd->homunculus.intimacy;
+			}
+			break;
+		case LOG_FEED_PET:
+			if( sd->pd ) {
+				target_id = sd->pd->pet.pet_id;
+				target_class = sd->pd->pet.class_;
+				intimacy = sd->pd->pet.intimate;
+			}
+			break;
+	}
+ 	if( log_config.sql_logs ) {
+#ifdef BETA_THREAD_TEST
+		char entry[512];
+		int e_length = 0;
+		e_length = sprintf(entry, LOG_QUERY " INTO `%s` (`time`, `char_id`, `target_id`, `target_class`, `type`, `intimacy`, `item_id`, `map`, `x`, `y`) VALUES ( NOW(), '%"PRIu32"', '%"PRIu32"', '%hu', '%c', '%"PRIu32"', '%hu', '%s', '%hu', '%hu' )",
+			log_config.log_feeding, sd->status.char_id, target_id, target_class, log_feedingtype2char(type), intimacy, nameid, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y);
+		queryThread_log(entry, e_length);
+#else
+		if( SQL_ERROR == Sql_Query(logmysql_handle, LOG_QUERY " INTO `%s` (`time`, `char_id`, `target_id`, `target_class`, `type`, `intimacy`, `item_id`, `map`, `x`, `y`) VALUES ( NOW(), '%"PRIu32"', '%"PRIu32"', '%hu', '%c', '%"PRIu32"', '%hu', '%s', '%hu', '%hu' )",
+			log_config.log_feeding, sd->status.char_id, target_id, target_class, log_feedingtype2char(type), intimacy, nameid, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y) )
+		{
+			Sql_ShowDebug(logmysql_handle);
+			return;
+		}
+#endif
+	} else {
+		char timestring[255];
+		time_t curtime;
+		FILE *logfp;
+
+ 		if( (logfp = fopen(log_config.log_feeding, "a")) == NULL )
+			return;
+		time(&curtime);
+		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", localtime(&curtime));
+		fprintf(logfp, "%s - %s[%d]\t%d\t%d(%c)\t%d\t%hu\t%s\t%hu,%hu\n", timestring, sd->status.name, sd->status.char_id, target_id, target_class, log_feedingtype2char(type), intimacy, nameid, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y);
+		fclose(logfp);
 	}
 }
 
@@ -572,6 +648,8 @@ int log_config_read(const char *cfgName)
 				log_config.chat = config_switch(w2);
 			else if( strcmpi(w1, "log_mvpdrop") == 0 )
 				log_config.mvpdrop = config_switch(w2);
+			else if( strcmpi(w1, "log_feeding") == 0 )
+				log_config.feeding = config_switch(w2);
 			else if( strcmpi(w1, "log_chat_woe_disable") == 0 )
 				log_config.log_chat_woe_disable = (bool)config_switch(w2);
 			else if( strcmpi(w1, "log_branch_db") == 0 )
@@ -588,9 +666,11 @@ int log_config_read(const char *cfgName)
 				safestrncpy(log_config.log_npc, w2, sizeof(log_config.log_npc));
 			else if( strcmpi(w1, "log_chat_db") == 0 )
 				safestrncpy(log_config.log_chat, w2, sizeof(log_config.log_chat));
-			else if( strcmpi( w1, "log_cash_db" ) == 0 )
-				safestrncpy( log_config.log_cash, w2, sizeof( log_config.log_cash ) );
-			//support the import command, just like any other config
+			else if( strcmpi(w1, "log_cash_db") == 0 )
+				safestrncpy(log_config.log_cash, w2, sizeof(log_config.log_cash));
+			else if( strcmpi(w1, "log_feeding_db") == 0 )
+				safestrncpy(log_config.log_feeding, w2, sizeof(log_config.log_feeding));
+			//Support the import command, just like any other config
 			else if( strcmpi(w1,"import") == 0 )
 				log_config_read(w2);
 			else
@@ -626,6 +706,9 @@ int log_config_read(const char *cfgName)
 		}
 		if( log_config.cash ) {
 			ShowInfo("Logging Cash transactions to %s '%s'.\n", target, log_config.log_cash);
+		}
+		if( log_config.feeding ) {
+			ShowInfo("Logging Feeding items to %s '%s'.\n", target, log_config.log_feeding);
 		}
 	}
 

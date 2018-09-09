@@ -373,6 +373,10 @@ struct map_session_data {
 	int arrow_addrace[RC_MAX];
 	int arrow_addclass[CLASS_MAX];
 	int arrow_addsize[SZ_MAX];
+	int shield_adddefele[ELE_MAX];
+	int shield_addrace[RC_MAX];
+	int shield_addclass[CLASS_MAX];
+	int shield_addsize[SZ_MAX];
 	int magic_adddefele[ELE_MAX];
 	int magic_addrace[RC_MAX];
 	int magic_addclass[CLASS_MAX];
