@@ -12275,9 +12275,8 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 		else
 			skill_lv = 0;
 	} else {
-		uint8 lv;
+		uint8 lv = pc_checkskill(sd, skill_id);
 
-		lv = pc_checkskill(sd, skill_id);
 		if( skill_lv > lv )
 			skill_lv = lv;
 	}

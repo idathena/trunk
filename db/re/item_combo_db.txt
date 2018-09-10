@@ -463,6 +463,8 @@
 4653:4654,{ bonus2 bSubRace,RC_Brute,5; bonus2 bSubRace,RC_Undead,5; bonus2 bIgnoreMdefRaceRate,RC_Brute,50; bonus2 bIgnoreMdefRaceRate,RC_Undead,50; }
 4653:4655,{ bonus2 bSubRace,RC_Brute,5; bonus2 bSubRace,RC_Undead,5; bonus2 bIgnoreDefRaceRate,RC_Brute,50; bonus2 bIgnoreDefRaceRate,RC_Undead,50; }
 4656:4657,{ bonus5 bAutoSpellWhenHit,"NPC_WIDESLEEP",2,30,BF_WEAPON|BF_MAGIC,0; bonus2 bSubEle,Ele_Neutral,5; }
+4697:27012,{ bonus bNoMagicGearFuel,0; }
+4699:27012,{ bonus bNoMagicGearFuel,0; }
 5007:18913,{ bonus2 bExpAddRace,RC_All,5; }
 5040:5442,{ bonus bAspdRate,3; bonus bVariableCastrate,3; }
 5040:18672,{ bonus bSPrecovRate,3; }
@@ -714,6 +716,9 @@
 24238:24239,{ set .@r,getequiprefinerycnt(EQI_SHADOW_ACC_R)+getequiprefinerycnt(EQI_SHADOW_ACC_L); bonus bBaseAtk,5; bonus2 bAddSize,Size_Small,(.@r>=15?2:0); bonus2 bMagicAddSize,Size_Small,(.@r>=15?2:0); }
 24240:24241:24242,{ set .@r,getequiprefinerycnt(EQI_SHADOW_SHOES)+getequiprefinerycnt(EQI_SHADOW_SHIELD)+getequiprefinerycnt(EQI_SHADOW_ARMOR); bonus bUseSPrate,-1-(.@r>=25?1:0); bonus bVariableCastrate,.@r/5; }
 24243:24244:24245,{ bonus bDelayrate,-1-(getequiprefinerycnt(EQI_SHADOW_SHOES)+getequiprefinerycnt(EQI_SHADOW_SHIELD)+getequiprefinerycnt(EQI_SHADOW_ARMOR)>=25?5:0); }
+27012:27013,{ bonus bNoMagicGearFuel,0; }
+27015:27016,{ bonus bCritAtkRate,10; }
+27018:27019,{ autobonus "{ bonus bAspd,5; }",30,5000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK }"; }
 27107:27108,{ bonus2 bSkillAtk,"WM_METALICSOUND",50; bonus2 bSkillAtk,"WM_REVERBERATION",50; }
 27107:27108:27109,{ autobonus "{ heal 2000,0; bonus2 bAddDefEle,Ele_Neutral,200; bonus2 bMagicAddDefEle,Ele_Neutral,200; }",30,6000,BF_WEAPON|BF_MAGIC,"{ specialeffect2 EF_POTION_BERSERK; active_transform 3073,6000; }"; }
 27163:27165,{ bonus bVit,2; bonus bInt,2; bonus bAgi,2; bonus bDex,2; bonus bDelayrate,-3; }
@@ -722,3 +727,5 @@
 28316:28318,{ bonus2 bAddClass,Class_All,4; bonus2 bMagicAddRace,RC_All,4; }
 28321:28322,{ bonus bUseSPrate,-(getskilllv("HT_BEASTBANE")*2); }
 28326:28327,{ bonus bStr,8; bonus bInt,8; }
+31024:31026,{ bonus bAspd,1; }
+31025:31026,{ bonus bVariableCastrate,-10; }

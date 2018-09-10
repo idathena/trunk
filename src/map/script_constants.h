@@ -2465,6 +2465,8 @@
 	export_constant(RC2_MALAYA_BOSS);
 	export_constant(RC2_HIDDEN);
 	export_constant(RC2_FACEWORM);
+	export_constant(RC2_THANATOS);
+	export_constant(RC2_PRTINV);
 	export_constant(RC2_MAX);
 
 	/* Classes */
