@@ -7460,13 +7460,13 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 					if (--(unit->val2) <= 0)
 						skill_delunit(unit); //Max hits reached
 					if (element == ELE_FIRE) {
-						struct block_list *ssrc = map_id2bl(group->src_id);
+						struct block_list *src2 = map_id2bl(group->src_id);
 
-						if(ssrc) {
+						if(src2) {
 							group->unit_id = UNT_USED_TRAPS;
 							group->limit = 0;
-							ssrc->val1 = skill_get_time(group->skill_id,group->skill_lv) - DIFF_TICK(tick,group->tick); //Fire Wall duration [exneval]
-							skill_unitsetting(ssrc,group->skill_id,group->skill_lv,group->val3>>16,group->val3&0xffff,1);
+							src2->val1 = skill_get_time(group->skill_id,group->skill_lv) - DIFF_TICK(tick,group->tick); //Fire Wall duration [exneval]
+							skill_unitsetting(src2,group->skill_id,group->skill_lv,group->val3>>16,group->val3&0xffff,1);
 						}
 					}
 				}

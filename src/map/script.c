@@ -3797,10 +3797,10 @@ static void script_attach_state(struct script_state *st)
 		sd->st = st;
 		sd->npc_id = st->oid;
 		sd->npc_item_flag = st->npc_item_flag; //Load default
-		sd->state.disable_atcommand_on_npc = (!pc_has_permission(sd, PC_PERM_ENABLE_COMMAND));
+		sd->state.disable_atcommand_on_npc = (pc_has_permission(sd, PC_PERM_ENABLE_COMMAND) == false);
 #ifdef SECURE_NPCTIMEOUT
 		if(sd->npc_idle_timer == INVALID_TIMER)
-			sd->npc_idle_timer = add_timer(gettick() + (SECURE_NPCTIMEOUT_INTERVAL * 1000), npc_secure_timeout_timer, sd->bl.id, 0);
+			sd->npc_idle_timer = add_timer(gettick() + SECURE_NPCTIMEOUT_INTERVAL * 1000, npc_secure_timeout_timer, sd->bl.id, 0);
 		sd->npc_idle_tick = gettick();
 #endif
 	}
