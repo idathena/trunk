@@ -6091,6 +6091,7 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_HANBOK:                return MAPID_HANBOK;
 		case JOB_GANGSI:                return MAPID_GANGSI;
 		case JOB_OKTOBERFEST:           return MAPID_OKTOBERFEST;
+		case JOB_SUMMER2:               return MAPID_SUMMER2;
 		//2-1 Jobs
 		case JOB_SUPER_NOVICE:          return MAPID_SUPER_NOVICE;
 		case JOB_KNIGHT:                return MAPID_KNIGHT;
@@ -6245,6 +6246,7 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_HANBOK:                return JOB_HANBOK;
 		case MAPID_GANGSI:                return JOB_GANGSI;
 		case MAPID_OKTOBERFEST:           return JOB_OKTOBERFEST;
+		case MAPID_SUMMER2:               return JOB_SUMMER2;
 		//2-1 Jobs
 		case MAPID_SUPER_NOVICE:          return JOB_SUPER_NOVICE;
 		case MAPID_KNIGHT:                return JOB_KNIGHT;
@@ -6416,6 +6418,7 @@ const char *job_name(int class_)
 			return msg_txt(570 - JOB_WEDDING + class_);
 
 		case JOB_SUMMER:
+		case JOB_SUMMER2:
 			return msg_txt(621);
 
 		case JOB_HANBOK:
@@ -7845,17 +7848,20 @@ void pc_close_npc(struct map_session_data *sd, int flag) {
 		sd->state.menu_or_input = 0;
 		sd->npc_menu = 0;
 		sd->npc_shopid = 0;
-		if (sd->st && sd->st->state == CLOSE) {
-			clif_scriptclose(sd,sd->npc_id);
-			clif_scriptclear(sd,sd->npc_id);
-		}
 #ifdef SECURE_NPCTIMEOUT
 		sd->npc_idle_timer = INVALID_TIMER;
 #endif
-		if (sd->st && sd->st->state == END) { //Free attached scripts that are waiting
-			script_free_state(sd->st);
-			sd->st = NULL;
-			sd->npc_id = 0;
+		if (sd->st) {
+			if (sd->st->state == CLOSE) {
+				clif_scriptclose(sd,sd->npc_id);
+				clif_scriptclear(sd,sd->npc_id);
+				sd->st->state = END; //Force to end now
+			}
+			if (sd->st->state == END) { //Free attached scripts that are waiting
+				script_free_state(sd->st);
+				sd->st = NULL;
+				sd->npc_id = 0;
+			}
 		}
 	}
 }
@@ -7936,6 +7942,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		clif_status_load(&sd->bl,SI_SIT,0);
 
 	pc_setdead(sd);
+	clif_party_dead(sd);
 	pc_setglobalreg(sd,"PC_DIE_COUNTER",sd->die_counter + 1);
 	pc_setparam(sd,SP_KILLERRID,src ? src->id : 0);
 
@@ -10102,12 +10109,12 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos)
 	} else
 		clif_equipitemack(sd,n,pos,ITEM_EQUIP_ACK_OK);
 	sd->inventory.u.items_inventory[n].equip = pos;
-	if( pos&(EQP_HAND_R|EQP_SHADOW_WEAPON) ) {
+	if( pos&EQP_HAND_R ) {
 		sd->weapontype1 = id->look;
 		pc_calcweapontype(sd);
 		clif_changelook(&sd->bl,LOOK_WEAPON,sd->status.weapon);
 	}
-	if( pos&(EQP_HAND_L|EQP_SHADOW_SHIELD) ) {
+	if( pos&EQP_HAND_L ) {
 		if( id->type == IT_WEAPON ) {
 			sd->status.shield = 0;
 			sd->weapontype2 = id->look;
@@ -10809,6 +10816,8 @@ void pc_setstand(struct map_session_data *sd)
 	sd->ssregen.tick.hp = sd->ssregen.tick.sp = 0;
 
 	sd->state.dead_sit = sd->vd.dead_sit = 0;
+	if (pc_isdead(sd))
+		clif_party_dead(sd);
 }
 
 /**
@@ -11528,7 +11537,7 @@ void pc_readdb(void)
 
 		if( !pcdb_checkid(i) )
 			continue;
-		if( i == JOB_WEDDING || i == JOB_XMAS || i == JOB_SUMMER || i == JOB_HANBOK || i == JOB_OKTOBERFEST )
+		if( i == JOB_WEDDING || i == JOB_XMAS || i == JOB_SUMMER || i == JOB_HANBOK || i == JOB_OKTOBERFEST || i == JOB_SUMMER2 )
 			continue; //Classes that do not need exp tables
 		idx = pc_class2idx(i);
 		if( !job_info[idx].max_level[0] )

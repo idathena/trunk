@@ -583,8 +583,6 @@ void clif_npcbuysell(struct map_session_data *sd, int id); //Self
 void clif_buylist(struct map_session_data *sd, struct npc_data *nd); //Self
 void clif_selllist(struct map_session_data *sd); //Self
 void clif_npc_market_open(struct map_session_data *sd, struct npc_data *nd);
-void clif_parse_NPCMarketClosed(int fd, struct map_session_data *sd);
-void clif_parse_NPCMarketPurchase(int fd, struct map_session_data *sd);
 void clif_scriptmes(struct map_session_data *sd, int npcid, const char *mes); //Self
 void clif_scriptnext(struct map_session_data *sd,int npcid); //Self
 void clif_scriptclose(struct map_session_data *sd, int npcid); //Self
@@ -770,6 +768,7 @@ void clif_party_message(struct party_data *p, int account_id, const char *mes, i
 void clif_party_xy(struct map_session_data *sd);
 void clif_party_xy_single(int fd, struct map_session_data *sd);
 void clif_party_hp(struct map_session_data *sd);
+void clif_party_dead(struct map_session_data *sd);
 void clif_party_job_and_level(struct map_session_data *sd);
 void clif_hpmeter_single(int fd, int id, unsigned int hp, unsigned int maxhp);
 
@@ -1033,6 +1032,7 @@ void clif_clan_leave(struct map_session_data *sd);
 void clif_sale_start(struct sale_item_data *sale_item, struct block_list *bl, enum send_target target);
 void clif_sale_end(struct sale_item_data *sale_item, struct block_list *bl, enum send_target target);
 void clif_sale_amount(struct sale_item_data *sale_item, struct block_list *bl, enum send_target target);
+void clif_sale_open(struct map_session_data *sd);
 
 // Color Table
 enum clif_colors {
@@ -1056,11 +1056,6 @@ void clif_update_rankingpoint(struct map_session_data *sd, enum e_rank rankingty
 //Bank System [Yommy]
 void clif_bank_deposit(struct map_session_data *sd, enum e_BANKING_DEPOSIT_ACK reason);
 void clif_bank_withdraw(struct map_session_data *sd, enum e_BANKING_WITHDRAW_ACK reason);
-void clif_parse_BankDeposit(int fd, struct map_session_data *sd);
-void clif_parse_BankWithdraw(int fd, struct map_session_data *sd);
-void clif_parse_BankCheck(int fd, struct map_session_data *sd);
-void clif_parse_BankOpen(int fd, struct map_session_data *sd);
-void clif_parse_BankClose(int fd, struct map_session_data *sd);
 
 void clif_crimson_marker(struct map_session_data *sd, struct block_list *bl, uint8 flag);
 void clif_crimson_marker_single(struct map_session_data *sd, struct block_list *bl, uint8 flag);
@@ -1073,12 +1068,7 @@ void clif_merge_item_open(struct map_session_data *sd);
 void clif_broadcast_obtain_special_item(const char *char_name, unsigned short nameid, unsigned short container, enum BROADCASTING_SPECIAL_ITEM_OBTAIN type, const char *srcname);
 
 //Roulette [Yommy]
-void clif_roulette_generate_ack(struct map_session_data *sd, unsigned char result, short stage, short prizeIdx, short bonusItemID);
-void clif_parse_RouletteOpen(int fd, struct map_session_data *sd);
-void clif_parse_RouletteInfo(int fd, struct map_session_data *sd);
-void clif_parse_RouletteClose(int fd, struct map_session_data *sd);
-void clif_parse_RouletteGenerate(int fd, struct map_session_data *sd);
-void clif_parse_RouletteRecvItem(int fd, struct map_session_data *sd);
+void clif_roulette_open(struct map_session_data *sd);
 
 void clif_dressing_room(struct map_session_data *sd, int flag);
 void clif_navigateTo(struct map_session_data *sd, const char *map, uint16 x, uint16 y, uint8 flag, bool hideWindow, uint16 mob_id);

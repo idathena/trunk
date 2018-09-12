@@ -15,7 +15,8 @@
 /**
  * "Sane Checks" to save you from compiling with cool bugs 
  */
-/*#if SECURE_NPCTIMEOUT_INTERVAL <= 0
+/*
+#if SECURE_NPCTIMEOUT_INTERVAL <= 0
 	#error SECURE_NPCTIMEOUT_INTERVAL should be at least 1 (1s)
 #endif
 #if NPC_SECURE_TIMEOUT_INPUT < 0
@@ -26,7 +27,8 @@
 #endif
 #if NPC_SECURE_TIMEOUT_NEXT < 0
 	#error NPC_SECURE_TIMEOUT_NEXT cannot be lower than 0
-#endif*/
+#endif
+*/
 
 /**
  * Path within the /db folder to (non-)renewal specific db files

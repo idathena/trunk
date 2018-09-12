@@ -35,12 +35,12 @@
 #define MAX_INVENTORY 100
 //Max number of characters per account. (Max value tested was 265)
 //Note: Changing this setting alone is not enough if the client is not hexed to support more characters as well.
-#if PACKETVER >= 20100413
-	#ifndef MAX_CHARS
+#ifndef MAX_CHARS
+	#if PACKETVER >= 20180124
+		#define MAX_CHARS 15
+	#elif PACKETVER >= 20100413
 		#define MAX_CHARS 12
-	#endif
-#else
-	#ifndef MAX_CHARS
+	#else
 		#define MAX_CHARS 9
 	#endif
 #endif
@@ -756,6 +756,7 @@ enum e_job {
 	JOB_SUMMER,
 	JOB_HANBOK,
 	JOB_OKTOBERFEST,
+	JOB_SUMMER2,
 	JOB_MAX_BASIC,
 
 	JOB_NOVICE_HIGH = 4001,

@@ -306,8 +306,16 @@ static const char *npc_id2name(int id)
 	return (nd ? nd->name : "Unknown");
 }
 
+/**
+ * For the Secure NPC Timeout option (check src/config/secure.hpp)
+ * @author RR
+ */
 #ifdef SECURE_NPCTIMEOUT
-int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t data) {
+
+/**
+ * Timer to check for idle time and timeout the dialog if necessary
+ */
+int npc_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t data) {
 	struct map_session_data *sd = NULL;
 	unsigned int timeout = NPC_SECURE_TIMEOUT_NEXT;
 	int cur_tick = gettick(); //Ensure we are on last tick
@@ -328,12 +336,12 @@ int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t dat
 		//case NPCT_WAIT: var starts with this value
 	}
 
-	if( DIFF_TICK(cur_tick,sd->npc_idle_tick) > (timeout * 1000) )
+	if( DIFF_TICK(cur_tick,sd->npc_idle_tick) > timeout * 1000 )
 		pc_close_npc(sd,1);
 	else if( sd->st && (sd->st->state == END || sd->st->state == CLOSE) )
 		sd->npc_idle_timer = INVALID_TIMER; //Stop timer the script is already ending
 	else //Create a new instance of ourselves to continue
-		sd->npc_idle_timer = add_timer(cur_tick + (SECURE_NPCTIMEOUT_INTERVAL * 1000),npc_rr_secure_timeout_timer,sd->bl.id,0);
+		sd->npc_idle_timer = add_timer(cur_tick + SECURE_NPCTIMEOUT_INTERVAL * 1000,npc_secure_timeout_timer,sd->bl.id,0);
 
 	return 0;
 }

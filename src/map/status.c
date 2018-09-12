@@ -1124,6 +1124,7 @@ void initChangeTables(void) {
 	StatusIconChangeTable[SC_DORAM_BUF_01] = SI_DORAM_BUF_01;
 	StatusIconChangeTable[SC_DORAM_BUF_02] = SI_DORAM_BUF_02;
 	StatusIconChangeTable[SC_CHILL] = SI_CHILL;
+	StatusIconChangeTable[SC_DRESSUP] = SI_DRESS_UP;
 
 	//Other SC which are not necessarily associated to skills
 	StatusChangeFlagTable[SC_ASPDPOTION0] |= SCB_ASPD;
@@ -1320,6 +1321,7 @@ void initChangeTables(void) {
 	StatusDisplayType[SC_TIME_ACCESSORY]  = true;
 	StatusDisplayType[SC_CLAN_INFO]		  = true;
 	StatusDisplayType[SC_MAXPAIN]		  = true;
+	StatusDisplayType[SC_DRESSUP]		  = true;
 
 	//StatusChangeState (SCS_) NOMOVE
 	StatusChangeStateTable[SC_ANKLE]                |= SCS_NOMOVE;
@@ -4096,7 +4098,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			sd->subele[ELE_FIRE] += sc->data[SC_ARMOR_RESIST]->val3;
 			sd->subele[ELE_WIND] += sc->data[SC_ARMOR_RESIST]->val4;
 		}
-		//Sorcerer Elemental statuses
+		//Sorcerer's Elemental statuses
 		if (sc->data[SC_FIRE_CLOAK_OPTION] && (i = sc->data[SC_FIRE_CLOAK_OPTION]->val2)) {
 			sd->subele[ELE_FIRE] += i;
 			sd->subele[ELE_WATER] -= i;
@@ -6122,7 +6124,7 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 	if(sc->data[SC_SHIELDSPELL_REF] && sc->data[SC_SHIELDSPELL_REF]->val1 == 2)
 		def += sc->data[SC_SHIELDSPELL_REF]->val2;
 	if(sc->data[SC_PRESTIGE])
-		def += sc->data[SC_PRESTIGE]->val3;
+		def += sc->data[SC_PRESTIGE]->val2;
 	if(sc->data[SC_BANDING] && sc->data[SC_BANDING]->val2 > 1) {
 		def += sc->data[SC_BANDING]->val2 * (5 + sc->data[SC_BANDING]->val1)
 #ifndef RENEWAL
@@ -7449,16 +7451,13 @@ void status_set_viewdata(struct block_list *bl, int class_)
 							sd->vd.cloth_color = 0;
 						if (sd->sc.option&OPTION_XMAS && battle_config.xmas_ignorepalette)
 							sd->vd.cloth_color = 0;
-						if (sd->sc.option&OPTION_SUMMER && battle_config.summer_ignorepalette)
+						if (sd->sc.option&(OPTION_SUMMER|OPTION_SUMMER2) && battle_config.summer_ignorepalette)
 							sd->vd.cloth_color = 0;
 						if (sd->sc.option&OPTION_HANBOK && battle_config.hanbok_ignorepalette)
 							sd->vd.cloth_color = 0;
 						if (sd->sc.option&OPTION_OKTOBERFEST && battle_config.oktoberfest_ignorepalette)
 							sd->vd.cloth_color = 0;
-						if (sd->vd.body_style && (
-							sd->sc.option&OPTION_WEDDING || sd->sc.option&OPTION_XMAS ||
-							sd->sc.option&OPTION_SUMMER || sd->sc.option&OPTION_HANBOK ||
-							sd->sc.option&OPTION_OKTOBERFEST))
+						if (sd->vd.body_style && sd->sc.option&OPTION_COSTUME)
 							sd->vd.body_style = 0;
 					}
 				} else if (vd)
@@ -8495,6 +8494,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_SUMMER:
 		case SC_HANBOK:
 		case SC_OKTOBERFEST:
+		case SC_DRESSUP:
 			if( !vd )
 				return 0;
 			break;
@@ -10199,12 +10199,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val2 += 750;
 				break;
 			case SC_PRESTIGE:
-				val2 = (status->int_ + status->luk) * val1 / 20 * status_get_lv(bl) / 200 + val1; //Chance to evade magic damage
-				val3 = 15 * val1 + (sd ? 10 * pc_checkskill(sd,CR_DEFENDER) : 50) * status_get_lv(bl) / 100
+				val2 = 15 * val1 + (sd ? 10 * pc_checkskill(sd,CR_DEFENDER) : 50) * status_get_lv(bl) / 100
 #ifndef RENEWAL
 					/ 10
 #endif
 					; //DEF increase
+				val3 = (status->int_ + status->luk) * val1 / 20 * status_get_lv(bl) / 200 + val1; //Chance to evade magic damage
 				break;
 			case SC_BANDING:
 				val2 = (sd ? skill_banding_count(sd) : 1);
@@ -10671,6 +10671,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_SUMMER:
 			case SC_HANBOK:
 			case SC_OKTOBERFEST:
+			case SC_DRESSUP:
 				if( !vd )
 					break;
 				clif_changelook(bl,LOOK_BASE,vd->class_);
@@ -10742,6 +10743,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_GOLDENMACECLAN:
 		case SC_CROSSBOWCLAN:
 		case SC_JUMPINGCLAN:
+		case SC_DRESSUP:
 			val_flag |= 1;
 			break;
 		case SC_ENCHANTBLADE:
@@ -10757,7 +10759,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_SHIELDSPELL_DEF:
 		case SC_SHIELDSPELL_MDEF:
 		case SC_SHIELDSPELL_REF:
-		case SC_PRESTIGE:
 		case SC_CRESCENTELBOW:
 		case SC_CHILLY_AIR_OPTION:
 		case SC_GUST_OPTION:
@@ -10929,6 +10930,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_SUMMER:
 		case SC_HANBOK:
 		case SC_OKTOBERFEST:
+		case SC_DRESSUP:
 		case SC_SUHIDE:
 			unit_stop_attack(bl);
 			break;
@@ -11126,6 +11128,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 		case SC_OKTOBERFEST:
 			sc->option |= OPTION_OKTOBERFEST;
+			opt_flag |= 0x4;
+			break;
+		case SC_DRESSUP:
+			sc->option |= OPTION_SUMMER2;
 			opt_flag |= 0x4;
 			break;
 		case SC_ORCISH:
@@ -12151,6 +12157,10 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			break;
 		case SC_OKTOBERFEST:
 			sc->option &= ~OPTION_OKTOBERFEST;
+			opt_flag |= 0x4;
+			break;
+		case SC_DRESSUP:
+			sc->option &= ~OPTION_SUMMER2;
 			opt_flag |= 0x4;
 			break;
 		case SC_ORCISH:

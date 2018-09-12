@@ -66,6 +66,7 @@
 	export_constant(JOB_SUMMER);
 	export_constant(JOB_HANBOK);
 	export_constant(JOB_OKTOBERFEST);
+	export_constant(JOB_SUMMER2);
 
 	export_constant(JOB_NOVICE_HIGH);
 	export_constant(JOB_SWORDMAN_HIGH);
@@ -1468,6 +1469,7 @@
 	export_constant(SC_CHILL);
 	export_constant(SC_BURNT);
 	export_constant(SC_CHEERUP);
+	export_constant(SC_DRESSUP);
 
 	/* Status icons */
 	export_constant(SI_BLANK);

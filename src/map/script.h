@@ -129,6 +129,7 @@ struct script_state {
 	struct script_code *script, *scriptroot;
 	struct sleep_data {
 		int tick, timer, charid;
+		bool npc_no_attach;
 	} sleep;
 	//For backing up purposes
 	struct script_state *bk_st;
