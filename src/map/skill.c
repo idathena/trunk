@@ -11260,19 +11260,15 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case SA_VOLCANO:
 		case SA_DELUGE:
 		case SA_VIOLENTGALE:
-			{ //Does not consumes if the skill is already active [Skotlex]
-				struct skill_unit_group *sg;
-
-				if( (sg = skill_locate_element_field(src)) != NULL &&
-					(sg->skill_id == SA_VOLCANO || sg->skill_id == SA_DELUGE || sg->skill_id == SA_VIOLENTGALE) ) {
-					if( sg->limit - DIFF_TICK(tick,sg->tick) > 0 ) {
-						skill_unitsetting(src,skill_id,skill_lv,x,y,0);
-						return 0; //Not to consume items
-					} else
-						sg->limit = 0; //Disable it
-				}
-				skill_unitsetting(src,skill_id,skill_lv,x,y,0);
+			if( (group = skill_locate_element_field(src)) && (group->skill_id == SA_VOLCANO ||
+				group->skill_id == SA_DELUGE || group->skill_id == SA_VIOLENTGALE) ) {
+				if( group->limit - DIFF_TICK(tick,group->tick) > 0 ) {
+					skill_unitsetting(src,skill_id,skill_lv,x,y,0);
+					return 0; //Does not consumes if the skill is already active [Skotlex]
+				} else
+					group->limit = 0; //Disable it
 			}
+			skill_unitsetting(src,skill_id,skill_lv,x,y,0);
 			break;
 
 		//Skill Unit Setting
@@ -11753,19 +11749,16 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			clif_skill_poseffect(src,skill_id,skill_lv,x,y,tick);
 			break;
 
-		case SC_FEINTBOMB: {
-				struct skill_unit_group *group = NULL;
-
-				if( (group = skill_unitsetting(src,skill_id,skill_lv,x,y,0)) ) { //Set bomb on current position
-					skill_blown(src,src,3 * skill_lv,unit_getdir(src),2);
-					map_foreachinallrange(unit_changetarget,src,AREA_SIZE,BL_MOB,src,&group->unit->bl);
-					clif_skill_nodamage(src,src,skill_id,skill_lv,
-						sc_start(src,src,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-				} else {
-					if( sd )
-						skill_consume_requirement(sd,skill_id,skill_lv,3);
-					return 1;
-				}
+		case SC_FEINTBOMB:
+			if( (group = skill_unitsetting(src,skill_id,skill_lv,x,y,0)) ) { //Set bomb on current position
+				skill_blown(src,src,3 * skill_lv,unit_getdir(src),2);
+				map_foreachinallrange(unit_changetarget,src,AREA_SIZE,BL_MOB,src,&group->unit->bl);
+				clif_skill_nodamage(src,src,skill_id,skill_lv,
+					sc_start(src,src,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
+			} else {
+				if( sd )
+					skill_consume_requirement(sd,skill_id,skill_lv,3);
+				return 1;
 			}
 			break;
 
@@ -11839,7 +11832,6 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			break;
 
 		case GN_FIRE_EXPANSION: {
-				struct skill_unit_group *group = NULL;
 				uint8 lv = 0;
 
 				if( (group = skill_locate_element_field(src)) ) {
