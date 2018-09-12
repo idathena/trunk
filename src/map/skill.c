@@ -3267,9 +3267,10 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 			if ((flag&SD_ANIMATION) && dmg.div_ < 2) //Disabling skill animation doesn't works on multi-hit
 				type = DMG_SPLASH;
 			if (src->type == BL_SKILL) {
-				TBL_SKILL *su = (TBL_SKILL *)src;
+				TBL_SKILL *unit = (TBL_SKILL *)src;
+				struct skill_unit_group *group = NULL;
 
-				if (su && su->group && (skill_get_inf2(su->group->skill_id)&INF2_TRAP)) { //Show damage on trap targets
+				if (unit && (group = unit->group) && (skill_get_inf2(group->skill_id)&INF2_TRAP)) { //Show damage on trap targets
 					clif_skill_damage(src, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, (flag&SD_LEVEL) ? -1 : skill_lv, DMG_SPLASH);
 					break;
 				}
@@ -3388,14 +3389,14 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		if (skill_id && bl->type == BL_SKILL) { //Wall of Thorn damaged by Fire element skill
 			struct skill_unit *unit = (struct skill_unit *)bl;
 			struct skill_unit_group *group = NULL;
-			struct block_list *ssrc = NULL;
+			struct block_list *src2 = NULL;
 			int element = battle_get_weapon_element(&dmg, src, bl, skill_id, skill_lv, EQI_HAND_R);
 
-			if (unit && (group = unit->group) && group->skill_id == GN_WALLOFTHORN && element == ELE_FIRE && (ssrc = map_id2bl(group->src_id))) {
+			if (unit && (group = unit->group) && group->skill_id == GN_WALLOFTHORN && element == ELE_FIRE && (src2 = map_id2bl(group->src_id))) {
 				group->unit_id = UNT_USED_TRAPS;
 				group->limit = 0;
-				ssrc->val1 = skill_get_time(group->skill_id, group->skill_lv) - DIFF_TICK(tick, group->tick); //Fire Wall duration [exneval]
-				skill_unitsetting(ssrc, group->skill_id, group->skill_lv, group->val3>>16, group->val3&0xffff, 1);
+				src2->val1 = skill_get_time(group->skill_id, group->skill_lv) - DIFF_TICK(tick, group->tick); //Fire Wall duration [exneval]
+				skill_unitsetting(src2, group->skill_id, group->skill_lv, group->val3>>16, group->val3&0xffff, 1);
 			}
 		}
 		if (tsc && tsc->data[SC_GENSOU]) {
@@ -4249,17 +4250,17 @@ int skill_cleartimerskill(struct block_list *src)
 }
 
 static int skill_active_reverberation(struct block_list *bl, va_list ap) {
-	struct skill_unit *su = (TBL_SKILL *)bl;
-	struct skill_unit_group *sg = NULL;
+	struct skill_unit *unit = (TBL_SKILL *)bl;
+	struct skill_unit_group *group = NULL;
 
-	nullpo_ret(su);
+	nullpo_ret(unit);
 
 	if (bl->type != BL_SKILL)
 		return 0;
-	if (su->alive && (sg = su->group) && sg->unit_id == UNT_REVERBERATION) {
-		map_foreachinallrange(skill_trap_splash, bl, skill_get_splash(sg->skill_id, sg->skill_lv), sg->bl_flag, bl, gettick());
-		su->limit = DIFF_TICK(gettick(), sg->tick);
-		sg->unit_id = UNT_USED_TRAPS;
+	if (unit->alive && (group = unit->group) && group->unit_id == UNT_REVERBERATION) {
+		map_foreachinallrange(skill_trap_splash, bl, skill_get_splash(group->skill_id, group->skill_lv), group->bl_flag, bl, gettick());
+		unit->limit = DIFF_TICK(gettick(), group->tick);
+		group->unit_id = UNT_USED_TRAPS;
 	}
 	return 1;
 }
@@ -4269,13 +4270,14 @@ static int skill_active_reverberation(struct block_list *bl, va_list ap) {
  */
 static int skill_reveal_trap(struct block_list *bl, va_list ap)
 {
-	TBL_SKILL *su = (TBL_SKILL *)bl;
+	TBL_SKILL *unit = (TBL_SKILL *)bl;
+	struct skill_unit_group *group = NULL;
 
-	if (su->alive && su->group && su->hidden && skill_get_inf2(su->group->skill_id)&INF2_TRAP) {
+	if (unit->alive && (group = unit->group) && unit->hidden && skill_get_inf2(group->skill_id)&INF2_TRAP) {
 		//Change look is not good enough, the client ignores it as an actual trap still [Skotlex]
-		//clif_changetraplook(bl, su->group->unit_id);
-		su->hidden = false;
-		skill_getareachar_skillunit_visibilty(su, AREA);
+		//clif_changetraplook(bl, group->unit_id);
+		unit->hidden = false;
+		skill_getareachar_skillunit_visibilty(unit, AREA);
 		return 1;
 	}
 	return 0;
@@ -5456,21 +5458,21 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 				}
 			} else {
-				struct skill_unit *su = BL_CAST(BL_SKILL,bl);
-				struct skill_unit_group *sg = NULL;
+				struct skill_unit *unit = BL_CAST(BL_SKILL,bl);
+				struct skill_unit_group *group = NULL;
 
-				if (su && (sg = su->group) && (skill_get_inf2(sg->skill_id)&INF2_TRAP) &&
-					(sg->item_id == ITEMID_TRAP || sg->item_id == ITEMID_SPECIAL_ALLOY_TRAP)) {
-					if (!(sg->unit_id == UNT_USED_TRAPS || (sg->unit_id == UNT_ANKLESNARE && sg->val2))) {
+				if (unit && (group = unit->group) && (skill_get_inf2(group->skill_id)&INF2_TRAP) &&
+					(group->item_id == ITEMID_TRAP || group->item_id == ITEMID_SPECIAL_ALLOY_TRAP)) {
+					if (!(group->unit_id == UNT_USED_TRAPS || (group->unit_id == UNT_ANKLESNARE && group->val2))) {
 						struct item item_tmp;
 
 						memset(&item_tmp,0,sizeof(item_tmp));
-						item_tmp.nameid = sg->item_id;
+						item_tmp.nameid = group->item_id;
 						item_tmp.identify = 1;
 						if (item_tmp.nameid)
 							map_addflooritem(&item_tmp,1,bl->m,bl->x,bl->y,0,0,0,4,0);
 					}
-					skill_delunit(su);
+					skill_delunit(unit);
 				}
 			}
 			break;
@@ -11722,9 +11724,8 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			break;
 
 		case NC_SILVERSNIPER: {
-				struct mob_data *md;
+				struct mob_data *md = mob_once_spawn_sub(src,src->m,x,y,status_get_name(src),MOBID_SILVERSNIPER,"",SZ_SMALL,AI_NONE);
 
-				md = mob_once_spawn_sub(src,src->m,x,y,status_get_name(src),MOBID_SILVERSNIPER,"",SZ_SMALL,AI_NONE);
 				if( md ) {
 					md->master_id = src->id;
 					md->special_state.ai = AI_FAW;
@@ -11752,15 +11753,19 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			clif_skill_poseffect(src,skill_id,skill_lv,x,y,tick);
 			break;
 
-		case SC_FEINTBOMB:
-			if( skill_unitsetting(src,skill_id,skill_lv,x,y,0) ) { //Set bomb on current position
-				skill_blown(src,src,3 * skill_lv,unit_getdir(src),2);
-				clif_skill_nodamage(src,src,skill_id,skill_lv,
-					sc_start(src,src,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-			} else {
-				if( sd )
-					skill_consume_requirement(sd,skill_id,skill_lv,3);
-				return 1;
+		case SC_FEINTBOMB: {
+				struct skill_unit_group *group = NULL;
+
+				if( (group = skill_unitsetting(src,skill_id,skill_lv,x,y,0)) ) { //Set bomb on current position
+					skill_blown(src,src,3 * skill_lv,unit_getdir(src),2);
+					map_foreachinallrange(unit_changetarget,src,AREA_SIZE,BL_MOB,src,&group->unit->bl);
+					clif_skill_nodamage(src,src,skill_id,skill_lv,
+						sc_start(src,src,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
+				} else {
+					if( sd )
+						skill_consume_requirement(sd,skill_id,skill_lv,3);
+					return 1;
+				}
 			}
 			break;
 
@@ -11834,30 +11839,30 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 			break;
 
 		case GN_FIRE_EXPANSION: {
-				struct skill_unit_group *sg = NULL;
+				struct skill_unit_group *group = NULL;
 				uint8 lv = 0;
 
-				if( (sg = skill_locate_element_field(src)) ) {
-					int ux = sg->val3>>16, uy = sg->val3&0xffff;
+				if( (group = skill_locate_element_field(src)) ) {
+					int ux = group->val3>>16, uy = group->val3&0xffff;
 
-					if( sg->skill_id == GN_DEMONIC_FIRE && distance_xy(x,y,ux,uy) < 3 ) {
+					if( group->skill_id == GN_DEMONIC_FIRE && distance_xy(x,y,ux,uy) < 3 ) {
 						switch( skill_lv ) {
 							case 1:
-								src->val1 = sg->limit - DIFF_TICK(tick,sg->tick);
-								skill_delunitgroup(sg);
-								skill_unitsetting(src,sg->skill_id,sg->skill_lv,ux,uy,1);
+								src->val1 = group->limit - DIFF_TICK(tick,group->tick);
+								skill_delunitgroup(group);
+								skill_unitsetting(src,group->skill_id,group->skill_lv,ux,uy,1);
 								break;
 							case 2:
 								map_foreachinallarea(skill_area_sub,src->m,ux - 2,uy - 2,ux + 2,uy + 2,BL_CHAR,src,
 									GN_DEMONIC_FIRE,skill_lv + 20,tick,flag|BCT_ENEMY|SD_LEVEL|1,skill_castend_damage_id);
-								skill_delunitgroup(sg);
+								skill_delunitgroup(group);
 								break;
 							case 3:
-								skill_delunitgroup(sg);
+								skill_delunitgroup(group);
 								skill_unitsetting(src,GN_FIRE_EXPANSION_SMOKE_POWDER,1,ux,uy,0);
 								break;
 							case 4:
-								skill_delunitgroup(sg);
+								skill_delunitgroup(group);
 								skill_unitsetting(src,GN_FIRE_EXPANSION_TEAR_GAS,1,ux,uy,0);
 								break;
 							case 5: //If player knows a level of Acid Demonstration greater then 5, that level will be casted
@@ -11865,7 +11870,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 									lv = max(lv,5);
 								map_foreachinallarea(skill_area_sub,src->m,ux - 2,uy - 2,ux + 2,uy + 2,BL_CHAR,src,
 									GN_FIRE_EXPANSION_ACID,lv,tick,flag|BCT_ENEMY|SD_LEVEL|1,skill_castend_damage_id);
-								skill_delunitgroup(sg);
+								skill_delunitgroup(group);
 								break;
 						}
 					}
@@ -11989,7 +11994,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 		case MH_SUMMON_LEGION: {
 				short summons[5] = { MOBID_S_HORNET,MOBID_S_GIANT_HORNET,MOBID_S_GIANT_HORNET,MOBID_S_LUCIOLA_VESPA,MOBID_S_LUCIOLA_VESPA };
 				uint8 summon_count = (5 + skill_lv) / 2;
-				struct mob_data *sum_md;
+				struct mob_data *sum_md = NULL;
 
 				for( i = 0; i < summon_count; i++ ) {
 					sum_md = mob_once_spawn_sub(src,src->m,x,y,status_get_name(src),summons[skill_lv - 1],"",SZ_SMALL,AI_NONE);
@@ -12393,15 +12398,15 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 		case SA_VIOLENTGALE:
 		case SA_LANDPROTECTOR:
 			{
-				struct skill_unit_group *old_sg = NULL;
+				struct skill_unit_group *old_group = NULL;
 
 				//HelloKitty confirmed that these are interchangeable
 				//So you can change element and not consume gemstones
-				if( (old_sg = skill_locate_element_field(src)) ) {
-					if( (old_sg->skill_id == SA_VOLCANO || old_sg->skill_id == SA_DELUGE ||
-						old_sg->skill_id == SA_VIOLENTGALE) && old_sg->limit > 0 ) {
+				if( (old_group = skill_locate_element_field(src)) ) {
+					if( (old_group->skill_id == SA_VOLCANO || old_group->skill_id == SA_DELUGE ||
+						old_group->skill_id == SA_VIOLENTGALE) && old_group->limit > 0 ) {
 						//Use the previous limit (minus the elapsed time) [Skotlex]
-						limit = old_sg->limit - DIFF_TICK(gettick(),old_sg->tick);
+						limit = old_group->limit - DIFF_TICK(gettick(),old_group->tick);
 						if( limit < 0 ) //This can happen
 							limit = skill_get_time(skill_id,skill_lv);
 					}
@@ -13242,17 +13247,17 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 	//Wall of Thorn damaged by Fire element unit [Cydh]
 	//NOTE: This check doesn't matter the location, as long as one of units touched, this check will be executed
 	if (bl->type == BL_SKILL && (skill_get_ele(skill_id,skill_lv) == ELE_FIRE || (skill_id == GN_WALLOFTHORN && group->unit_id == UNT_FIREWALL))) {
-		struct skill_unit *su = (struct skill_unit *)bl;
-		struct skill_unit_group *sg;
-		struct block_list *ssrc;
+		struct skill_unit *unit2 = (struct skill_unit *)bl;
+		struct skill_unit_group *group2 = NULL;
+		struct block_list *src2 = NULL;
 
-		if (su && (sg = su->group) && sg->unit_id == UNT_WALLOFTHORN && (ssrc = map_id2bl(sg->src_id))) {
-			sg->unit_id = UNT_USED_TRAPS;
-			sg->limit = 0;
-			if (!ssrc->val1)
-				ssrc->val1 = skill_get_time(sg->skill_id,sg->skill_lv) - DIFF_TICK(tick,sg->tick);
+		if (unit2 && (group2 = unit2->group) && group2->unit_id == UNT_WALLOFTHORN && (src2 = map_id2bl(group2->src_id))) {
+			group2->unit_id = UNT_USED_TRAPS;
+			group2->limit = 0;
+			if (!src2->val1)
+				src2->val1 = skill_get_time(group2->skill_id,group2->skill_lv) - DIFF_TICK(tick,group2->tick);
 			//Set delay for each Thorn when turning to Fire Wall [exneval]
-			skill_addtimerskill(ssrc,tick + 500,0,sg->val3>>16,sg->val3&0xffff,sg->skill_id,sg->skill_lv,0,1);
+			skill_addtimerskill(src2,tick + 500,0,group2->val3>>16,group2->val3&0xffff,group2->skill_id,group2->skill_lv,0,1);
 		}
 		return skill_id;
 	}
@@ -18407,7 +18412,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 					struct block_list *src =  map_id2bl(group->src_id);
 
 					if( src )
-						map_foreachinallrange(skill_area_sub,&unit->bl,unit->range,BL_CHAR|BL_SKILL,src,SC_FEINTBOMB,group->skill_lv,tick,BCT_ENEMY|SD_LEVEL|SD_ANIMATION|1,skill_castend_damage_id);
+						map_foreachinallrange(skill_area_sub,&unit->bl,unit->range,BL_CHAR|BL_SKILL,src,group->skill_id,group->skill_lv,tick,BCT_ENEMY|SD_LEVEL|SD_ANIMATION|1,skill_castend_damage_id);
 					skill_delunit(unit);
 				}
 				break;

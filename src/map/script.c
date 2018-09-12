@@ -3739,8 +3739,11 @@ int run_script_timer(int tid, unsigned int tick, int id, intptr_t data)
 		}
 		node = node->next;
 	}
-	if(st->state != RERUNLINE)
+	if(st->state != RERUNLINE) {
 		st->sleep.tick = 0;
+		if(st->sleep.npc_no_attach)
+			st->sleep.npc_no_attach = false;
+	}
 	run_script_main(st);
 	return 0;
 }
@@ -3763,7 +3766,7 @@ static void script_detach_state(struct script_state *st, bool dequeue_event)
 		} else if(dequeue_event) {
 #ifdef SECURE_NPCTIMEOUT
 			if(sd->npc_idle_timer != INVALID_TIMER) { //We're done with this NPC session, so we cancel the timer (if existent) and move on
-				delete_timer(sd->npc_idle_timer, npc_rr_secure_timeout_timer);
+				delete_timer(sd->npc_idle_timer, npc_secure_timeout_timer);
 				sd->npc_idle_timer = INVALID_TIMER;
 			}
 #endif
@@ -3797,7 +3800,7 @@ static void script_attach_state(struct script_state *st)
 		sd->state.disable_atcommand_on_npc = (!pc_has_permission(sd, PC_PERM_ENABLE_COMMAND));
 #ifdef SECURE_NPCTIMEOUT
 		if(sd->npc_idle_timer == INVALID_TIMER)
-			sd->npc_idle_timer = add_timer(gettick() + (SECURE_NPCTIMEOUT_INTERVAL * 1000), npc_rr_secure_timeout_timer, sd->bl.id, 0);
+			sd->npc_idle_timer = add_timer(gettick() + (SECURE_NPCTIMEOUT_INTERVAL * 1000), npc_secure_timeout_timer, sd->bl.id, 0);
 		sd->npc_idle_tick = gettick();
 #endif
 	}
@@ -3909,7 +3912,8 @@ void run_script_main(struct script_state *st)
 
 	if (st->sleep.tick > 0) {
 		script_detach_state(st, false); //Restore previous script
-		if ((sd = map_id2sd(st->rid))) //Get sd since script might have attached someone while running [Inkfish]
+		if ((sd = map_id2sd(st->rid)) && //Get sd since script might have attached someone while running [Inkfish]
+			!st->sleep.npc_no_attach)
 			sd->npc_id = st->oid;
 		st->sleep.charid = (sd ? sd->status.char_id : 0);
 		//Delay execution
@@ -18283,7 +18287,7 @@ BUILDIN_FUNC(sleep)
 		//Sleep for the target amount of time
 		st->state = RERUNLINE;
 		st->sleep.tick = ticks;
-	} else { //Second call(by timer after sleeping time is over)
+	} else { //Second call (by timer after sleeping time is over)
 		//Continue the script
 		st->state = RUN;
 		st->sleep.tick = 0;
@@ -18295,17 +18299,20 @@ BUILDIN_FUNC(sleep)
 /// Pauses the execution of the script, keeping the unit attached
 /// Stops the script if no unit is attached
 ///
-/// sleep2(<milli seconds>)
+/// sleep2 <milli seconds>{,<flag>}
 BUILDIN_FUNC(sleep2)
 {
 	if( !st->sleep.tick ) { //First call(by function call)
 		int ticks;
+		bool flag = false;
 
 		ticks = script_getnum(st,2);
 		if( ticks <= 0 ) {
 			ShowError("buildin_sleep2: negative amount('%d') of milli seconds is not supported\n", ticks);
 			return 1;
 		}
+		if( script_hasdata(st,3) )
+			flag = script_getnum(st,3);
 		if( !map_id2bl(st->rid) ) {
 			ShowError("buildin_sleep2: no unit is attached\n");
 			return 1;
@@ -18313,7 +18320,9 @@ BUILDIN_FUNC(sleep2)
 		//Sleep for the target amount of time
 		st->state = RERUNLINE;
 		st->sleep.tick = ticks;
-	} else { //Second call(by timer after sleeping time is over)
+		if( flag )
+			st->sleep.npc_no_attach = flag;
+	} else { //Second call (by timer after sleeping time is over)
 		//Check if the unit is still attached
 		//NOTE: This should never happen, since run_script_timer already checks this
 		if( !map_id2bl(st->rid) ) { //The unit is not attached anymore - terminate the script
@@ -18322,6 +18331,8 @@ BUILDIN_FUNC(sleep2)
 		} else { //The unit is still attached - continue the script
 			st->state = RUN;
 			st->sleep.tick = 0;
+			if( st->sleep.npc_no_attach )
+				st->sleep.npc_no_attach = false;
 		}
 	}
 
@@ -22804,6 +22815,26 @@ BUILDIN_FUNC(achievementupdate) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(open_roulette) {
+#if PACKETVER >= 20141022
+	struct map_session_data *sd = NULL;
+
+ 	if (!battle_config.feature_roulette) {
+		ShowError("buildin_open_roulette: Roulette system is disabled.\n");
+		return 1;
+	}
+
+ 	if (!script_charid2sd(2,sd))
+		return 1;
+
+ 	clif_roulette_open(sd);
+ 	return SCRIPT_CMD_SUCCESS;
+#else
+	ShowError("buildin_open_roulette: This command requires PACKETVER 2014-10-22 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#endif
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -23249,7 +23280,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(unitexist,"i"),
 	// <--- [zBuffer] List of unit control commands
 	BUILDIN_DEF(sleep,"i"),
-	BUILDIN_DEF(sleep2,"i"),
+	BUILDIN_DEF(sleep2,"i?"),
 	BUILDIN_DEF(awake,"s"),
 	BUILDIN_DEF(getvariableofnpc,"rs"),
 	BUILDIN_DEF(warpportal,"iisii"),
@@ -23435,6 +23466,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(achievementcomplete,"i?"),
 	BUILDIN_DEF(achievementexist,"i?"),
 	BUILDIN_DEF(achievementupdate,"iii?"),
+	//Roulette System
+	BUILDIN_DEF(open_roulette,"?"),
 
 #include "../custom/script_def.inc"
 

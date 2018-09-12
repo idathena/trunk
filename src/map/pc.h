@@ -268,6 +268,7 @@ struct map_session_data {
 		bool pc_loaded; //Ensure inventory data and status data is loaded before we calculate player stats
 		bool mail_writing; //Whether the player is currently writing a mail in RODEX or not
 		bool cashshop_open;
+		bool sale_open;
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -721,6 +722,7 @@ struct map_session_data {
 		int8 prizeIdx;
 		short prizeStage;
 		bool claimPrize;
+		unsigned int tick;
 	} roulette;
 
 	short setlook_head_top, setlook_head_mid, setlook_head_bottom, setlook_robe; //Stores 'setlook' script command values

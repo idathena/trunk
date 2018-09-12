@@ -2088,7 +2088,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 // Tell client how many pages, kRO sends 17 (Yommy)
 //----------------------------------------
 void char_charlist_notify(int fd, struct char_session_data *sd) {
-#if defined(PACKETVER_RE) && PACKETVER >= 20151001
+#if defined(PACKETVER_RE) && PACKETVER >= 20151001 && PACKETVER < 20180103
 	WFIFOHEAD(fd,10);
 	WFIFOW(fd,0) = 0x9a0;
 	WFIFOL(fd,2) = (sd->char_slots > 3 ? sd->char_slots / 3 : 1);
@@ -2159,7 +2159,7 @@ void char_block_character(int fd, struct char_session_data *sd) {
 }
 
 void mmo_char_send099d(int fd, struct char_session_data *sd) {
-	WFIFOHEAD(fd,4 + (MAX_CHARS * MAX_CHAR_BUF));
+	WFIFOHEAD(fd,4 + MAX_CHARS * MAX_CHAR_BUF);
 	WFIFOW(fd,0) = 0x99d;
 	WFIFOW(fd,2) = mmo_chars_fromsql(sd,WFIFOP(fd,4)) + 4;
 	WFIFOSET(fd,WFIFOW(fd,2));
@@ -2231,7 +2231,7 @@ void mmo_char_send(int fd, struct char_session_data *sd) {
 	mmo_char_send006b(fd,sd);
 #endif
 #if PACKETVER >= 20060819
-		char_block_character(fd,sd);
+	char_block_character(fd,sd);
 #endif
 }
 
@@ -3153,8 +3153,13 @@ int char_loadName(int char_id, char *name)
 		Sql_GetData(sql_handle, 0, &data, &len);
 		safestrncpy(name, data, NAME_LENGTH);
 		return 1;
-	} else
+	}
+#if PACKETVER < 20180221
+	else
 		safestrncpy(name, unknown_char_name, NAME_LENGTH);
+#else
+	name[0] = '\0';
+#endif
 	return 0;
 }
 
@@ -4465,7 +4470,6 @@ int parse_char(int fd)
 					struct mmo_charstatus *cd;
 					char *data;
 					int char_id;
-					uint32 subnet_map_ip;
 					struct auth_node *node;
 					int server_id = 0;
 					int slot = RFIFOB(fd,2);
@@ -4596,8 +4600,7 @@ int parse_char(int fd)
 						break;
 					}
 
-					subnet_map_ip = lan_subnetcheck(ipl); //Advanced subnet check [LuzZza]
-					char_send_map_info(fd,i,subnet_map_ip,cd); //Send player to map
+					char_send_map_data(fd,cd,ipl,i); //Send player to map
 
 					//Create temporary auth entry
 					CREATE(node,struct auth_node,1);
@@ -5616,23 +5619,28 @@ void char_changemapserv_ack(int fd, bool nok) {
 	WFIFOSET(fd,30);
 }
 
-void char_send_map_info(int fd, int i, uint32 subnet_map_ip, struct mmo_charstatus *cd)
+void char_send_map_data(int fd, struct mmo_charstatus *cd, uint32 ipl, int map_server_index)
 {
-#if PACKETVER < 20170329
-	const int cmd = 0x71;
-	const int len = 28;
+#if PACKETVER >= 20170315
+	int cmd = 0xac5;
+	int size = 156;
 #else
-	const int cmd = 0xac5;
-	const int len = 156;
+	int cmd = 0x71;
+	int size = 28;
 #endif
+	uint32 subnet_map_ip;
 
-	WFIFOHEAD(fd,len);
+	WFIFOHEAD(fd,size);
 	WFIFOW(fd,0) = cmd;
 	WFIFOL(fd,2) = cd->char_id;
 	mapindex_getmapname_ext(mapindex_id2name(cd->last_point.map),(char *)WFIFOP(fd,6));
-	WFIFOL(fd,22) = htonl((subnet_map_ip) ? subnet_map_ip : server[i].ip);
-	WFIFOW(fd,26) = ntows(htons(server[i].port)); //[!] LE byte order here [!]
-	WFIFOSET(fd,len);
+	subnet_map_ip = lan_subnetcheck(ipl); //Advanced subnet check [LuzZza]
+	WFIFOL(fd,22) = htonl((subnet_map_ip ? subnet_map_ip : server[map_server_index].ip));
+	WFIFOW(fd,26) = ntows(htons(server[map_server_index].port)); //[!] LE byte order here [!]
+#if PACKETVER >= 20170315
+	memset(WFIFOP(fd,28),0,128); //Unknown
+#endif
+	WFIFOSET(fd,size);
 }
 
 //------------------------------------------------
