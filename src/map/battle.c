@@ -1271,7 +1271,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 				return 0;
 			if( (sce = sc->data[SC_HALLUCINATIONWALK]) && rnd()%100 < sce->val3 )
 				return 0;
-			if( (sce = sc->data[SC_PRESTIGE]) && rnd()%100 < sce->val2 )
+			if( (sce = sc->data[SC_PRESTIGE]) && rnd()%100 < sce->val3 )
 				return 0;
 		}
 
@@ -3041,7 +3041,7 @@ struct Damage battle_calc_damage_parts(struct Damage wd, struct block_list *src,
 	if(sd->sc.data[SC_SEVENWIND]) { //Status ATK can only be endowed by Mild Wind
 		wd.statusAtk = battle_attr_fix(src, target, wd.statusAtk, right_element, tstatus->def_ele, tstatus->ele_lv);
 		wd.statusAtk2 = battle_attr_fix(src, target, wd.statusAtk, left_element, tstatus->def_ele, tstatus->ele_lv);
-	} else { //Without Mild Wind status status ATK should always be neutral
+	} else { //Without Mild Wind status, status ATK should always be neutral
 		wd.statusAtk = battle_attr_fix(src, target, wd.statusAtk, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 		wd.statusAtk2 = battle_attr_fix(src, target, wd.statusAtk, ELE_NEUTRAL, tstatus->def_ele, tstatus->ele_lv);
 	}
@@ -3369,7 +3369,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 		}
 		//If the generated value is higher then Fear Breeze's success chance range,
 		//but not higher then the player's double attack success chance, then allow a double attack to happen
-		else if(generate < dachance)
+		else if(generate - 1 < dachance)
 			hitnumber = 2;
 
 		if(hitnumber > 1) { //Needed to allow critical attacks to hit when not hitting more then once
@@ -7460,13 +7460,13 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 					if (--(unit->val2) <= 0)
 						skill_delunit(unit); //Max hits reached
 					if (element == ELE_FIRE) {
-						struct block_list *ssrc = map_id2bl(group->src_id);
+						struct block_list *src2 = map_id2bl(group->src_id);
 
-						if(ssrc) {
+						if(src2) {
 							group->unit_id = UNT_USED_TRAPS;
 							group->limit = 0;
-							ssrc->val1 = skill_get_time(group->skill_id,group->skill_lv) - DIFF_TICK(tick,group->tick); //Fire Wall duration [exneval]
-							skill_unitsetting(ssrc,group->skill_id,group->skill_lv,group->val3>>16,group->val3&0xffff,1);
+							src2->val1 = skill_get_time(group->skill_id,group->skill_lv) - DIFF_TICK(tick,group->tick); //Fire Wall duration [exneval]
+							skill_unitsetting(src2,group->skill_id,group->skill_lv,group->val3>>16,group->val3&0xffff,1);
 						}
 					}
 				}

@@ -10885,7 +10885,7 @@
 22658,Cow_Steamed_Ribs,Cow Steamed Ribs,0,20,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bVariableCastrate,-5; bonus bUseSPrate,-3; }",180,1,1; },{},{}
 22659,Pig_Steamed_Ribs,Pig Steamed Ribs,0,20,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bAspdRate,5; bonus bUseSPrate,-2; }",180,1,1; },{},{}
 22669,HALLOWEEN_G_BOX,Halloween Box,2,0,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_HALLOWEEN_G_BOX); },{},{}
-22670,DARK_INVITATION,Invitation of Darkness,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ set .@i,rand(1,3); if(.@i==1) { specialeffect2 EF_DEVIL; sleep2 2000; warp "niflheim",193,186; } else if(.@i==2) { heal -500,-1000; sc_start SC_STUN,3000,0,10000,SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE; } else { specialeffect2 EF_DEVIL; sleep2 2000; warp "niflheim",347,255; } },{},{}
+22670,DARK_INVITATION,Invitation of Darkness,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ set .@i,rand(1,3); specialeffect2 EF_DEVIL; warp "niflheim",(.@i==3?347:(.@i==2?106:193)),(.@i==3?255:(.@i==2?254:186)); },{},{}
 22671,March_Gift_Box,March Gift Box,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ /* 2 Lucky Eggs */ },{},{}
 22672,April_Gift_Box,April Gift Box,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ rentitem callfunc("F_Rand",2566,2856,2857,15023),1209600; },{},{}
 22673,May_Gift_Box,May Gift Box,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 22777,2; },{},{}
@@ -10956,6 +10956,7 @@
 22812,Sealed_Dracula_Scroll,Sealed Dracula Scroll,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem callfunc("F_Rand",6228,6232,22813,19937,17314,6635),1; },{},{}
 22813,Bearer's_Shadow_Box,Bearer's Shadow Box,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem callfunc("F_Rand",24180,24181,24182,24183,24184,24185),1; },{},{}
 22814,Cat_Hand_Ticket,Cat Hand Ticket,3,10,,0,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
+22822,Summer_Vacation_Costumes,Summer Vacation Costumes,2,,,100,,,,0,0xFFFFFFFF,63,2,,,1,,,{ sc_start SC_DRESSUP,600000,1; },{},{}
 22823,Sealed_Sniper_Scroll,Sealed Sniper Scroll,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ /* getitem callfunc("F_Rand",4491,6228,6232,24196,24197,19882,17474,6635),1; */ },{},{}
 22826,Costume_Enchantment_Stone_Box_4,Costume Enchantment Stone Box 4,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22827,Shadow_Cube,Shadow Cube,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ /* No Info */ },{},{}

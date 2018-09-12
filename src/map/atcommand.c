@@ -1058,7 +1058,7 @@ ACMD_FUNC(jobchange)
 		}
 	}
 
-	if (job == JOB_KNIGHT2 || job == JOB_CRUSADER2 || job == JOB_WEDDING || job == JOB_XMAS || job == JOB_SUMMER || job == JOB_HANBOK || job == JOB_OKTOBERFEST ||
+	if (job == JOB_KNIGHT2 || job == JOB_CRUSADER2 || job == JOB_WEDDING || job == JOB_XMAS || job == JOB_SUMMER || job == JOB_HANBOK || job == JOB_OKTOBERFEST || job == JOB_SUMMER2 ||
 		job == JOB_LORD_KNIGHT2 || job == JOB_PALADIN2 || job == JOB_BABY_KNIGHT2 || job == JOB_BABY_CRUSADER2 || job == JOB_STAR_GLADIATOR2 ||
 		(job >= JOB_RUNE_KNIGHT2 && job <= JOB_MECHANIC_T2) || (job >= JOB_BABY_RUNE2 && job <= JOB_BABY_MECHANIC2) || job == JOB_BABY_STAR_GLADIATOR2)
 	{ // Deny direct transformation into dummy jobs
@@ -9581,6 +9581,7 @@ ACMD_FUNC(costume) {
 		"Wedding",
 		"Xmas",
 		"Summer",
+		"Summer2",
 		"Hanbok",
 		"Oktoberfest",
 	};
@@ -9588,6 +9589,7 @@ ACMD_FUNC(costume) {
 		SC_WEDDING,
 		SC_XMAS,
 		SC_SUMMER,
+		SC_DRESSUP,
 		SC_HANBOK,
 		SC_OKTOBERFEST
 	};
@@ -9629,7 +9631,7 @@ ACMD_FUNC(costume) {
 		return -1;
 	}
 
-	sc_start(&sd->bl, &sd->bl, (sc_type)name2id[k], 100, 0, -1);
+	sc_start(&sd->bl, &sd->bl, (sc_type)name2id[k], 100, (name2id[k] == SC_DRESSUP ? 1 : 0), -1);
 
 	return 0;
 }
@@ -9745,6 +9747,28 @@ ACMD_FUNC(fullstrip) {
 	}
 
 	return 0;
+}
+
+ACMD_FUNC(changedress) {
+	enum sc_type name2id[] = {
+		SC_WEDDING,
+		SC_XMAS,
+		SC_SUMMER,
+		SC_DRESSUP,
+		SC_HANBOK,
+		SC_OKTOBERFEST
+	};
+	uint8 i;
+
+ 	for( i = 0; i < ARRAYLENGTH(name2id); i++ ) {
+		if( sd->sc.data[name2id[i]] ) {
+			status_change_end(&sd->bl, name2id[i], INVALID_TIMER);
+			// You should only be able to have one - so we cancel here
+			return 0;
+		}
+	}
+
+ 	return -1;
 }
 
 /**
@@ -9944,6 +9968,17 @@ ACMD_FUNC(adopt)
 	if (response < ADOPT_MORE_CHILDREN) // No displaymessage for client-type responses
 		clif_displaymessage(fd, msg_txt(728 + response - 1));
 	return -1;
+}
+
+/**
+ * Opens the limited sale window.
+ * Usage: @limitedsale or client command /limitedsale on supported clients
+ */
+ACMD_FUNC(limitedsale) {
+	nullpo_retr(-1, sd);
+
+ 	clif_sale_open(sd);
+ 	return 0;
 }
 
 #include "../custom/atcommand.inc"
@@ -10245,6 +10280,8 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(adopt),
 		ACMD_DEF(agitstart3),
 		ACMD_DEF(agitend3),
+		ACMD_DEFR(limitedsale, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
+		ACMD_DEFR(changedress, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 	};
 	AtCommandInfo *atcommand;
 	int i;

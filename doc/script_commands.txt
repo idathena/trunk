@@ -6557,9 +6557,9 @@ Example 4:
     end;
  
 ---------------------------------------
- 
-*sleep {<milliseconds>};
-*sleep2 {<milliseconds>};
+
+*sleep <milliseconds>;
+*sleep2 <milliseconds>{,<flag>};
 *awake "<NPC name>";
 
 These commands are used to control the pause of a NPC.
@@ -6568,11 +6568,15 @@ Awake is used to cancel a sleep. When awake is called on a NPC it will run as
 if the sleep timer ran out, and thus making the script continue. Sleep and sleep2
 basically do the same, but the main difference is that sleep will not keep the rid,
 while sleep2 does. Also sleep2 will stop the script if there is no unit attached.
+For sleep2 'flag' means:
+	0 or not given: Will attach the RID to the given npc (default).
+	1: Will ditch the RID from the given npc (old behavior).
 
 Examples:
-	sleep 10000; //pause the script for 10 seconds and ditch the RID (so no player is attached anymore)
-	sleep2 5000; //pause the script for 5 seconds, and continue with the RID attached.
-	awake "NPC"; //Cancels any running sleep timers on the NPC 'NPC'.
+	sleep 10000;   //Pause the script for 10 seconds and ditch the RID (so no player is attached anymore)
+	sleep2 5000;   //Pause the script for 5 seconds, attach the RID to NPC, and continue with the RID attached.
+	sleep2 3000,1; //Pause the script for 3 seconds, ditch the RID from NPC, and continue with the RID attached.
+	awake "NPC";   //Cancels any running sleep timers on the NPC 'NPC'.
 
 ---------------------------------------
 
@@ -8694,6 +8698,13 @@ same as NPC sprite facing directions: 0=north, 1=northwest, 2=west, etc.
 *readbook <book id>,<page>;
 
 This command will open a book item at the specified page.
+
+---------------------------------------
+
+*open_roulette(<char_id>)
+
+Opens the roulette window for the currently attached character or the character
+with the given character id.
 
 ---------------------------------------
 
