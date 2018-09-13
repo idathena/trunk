@@ -294,17 +294,17 @@ int skill_tree_get_max(uint16 skill_id, int b_class)
 		return skill_get_max(skill_id);
 }
 
-int skill_frostjoke_scream(struct block_list *bl,va_list ap);
-int skill_attack_area(struct block_list *bl,va_list ap);
+int skill_frostjoke_scream(struct block_list *bl, va_list ap);
+int skill_attack_area(struct block_list *bl, va_list ap);
 struct skill_unit_group *skill_locate_element_field(struct block_list *bl); //[Skotlex]
 int skill_graffitiremover(struct block_list *bl, va_list ap); //[Valaris]
 int skill_greed(struct block_list *bl, va_list ap);
 static int skill_cell_overlap(struct block_list *bl, va_list ap);
 static int skill_trap_splash(struct block_list *bl, va_list ap);
-struct skill_unit_group_tickset *skill_unitgrouptickset_search(struct block_list *bl,struct skill_unit_group *sg,int tick);
-static int skill_unit_onplace(struct skill_unit *unit,struct block_list *bl,unsigned int tick);
-int skill_unit_onleft(uint16 skill_id, struct block_list *bl,unsigned int tick);
-static int skill_unit_effect(struct block_list *bl,va_list ap);
+struct skill_unit_group_tickset *skill_unitgrouptickset_search(struct block_list *bl, struct skill_unit_group *group, int tick);
+static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, unsigned int tick);
+int skill_unit_onleft(uint16 skill_id, struct block_list *bl, unsigned int tick);
+static int skill_unit_effect(struct block_list *bl, va_list ap);
 static int skill_flicker_bind_trap(struct block_list *bl, va_list ap);
 
 int skill_get_casttype(uint16 skill_id)
@@ -5796,7 +5796,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				}
 			}
 		//Fall through
- 		case AL_HEAL:
+		case AL_HEAL:
 		case AB_HIGHNESSHEAL:
 		case AL_INCAGI:
 		case ALL_RESURRECTION:
@@ -8063,27 +8063,27 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case MA_REMOVETRAP:
 		case HT_REMOVETRAP:
 			{
-				struct skill_unit *su = BL_CAST(BL_SKILL,bl);
-				struct skill_unit_group *sg = NULL;
+				struct skill_unit *unit = BL_CAST(BL_SKILL,bl);
+				struct skill_unit_group *group = NULL;
 
 				//Mercenaries can remove any trap
 				//Players can only remove their own traps or traps on vs-maps
-				if (su && (sg = su->group) && (src->type == BL_MER || sg->src_id == src->id || map_flag_vs(bl->m)) &&
-					(skill_get_inf2(sg->skill_id)&INF2_TRAP) && (sg->item_id == ITEMID_TRAP || sg->item_id == ITEMID_SPECIAL_ALLOY_TRAP)) {
+				if (unit && (group = unit->group) && (src->type == BL_MER || group->src_id == src->id || map_flag_vs(bl->m)) &&
+					(skill_get_inf2(group->skill_id)&INF2_TRAP) && (group->item_id == ITEMID_TRAP || group->item_id == ITEMID_SPECIAL_ALLOY_TRAP)) {
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 					//Prevent picking up expired traps
-					if (sd && !(sg->unit_id == UNT_USED_TRAPS || (sg->unit_id == UNT_ANKLESNARE && sg->val2))) {
+					if (sd && !(group->unit_id == UNT_USED_TRAPS || (group->unit_id == UNT_ANKLESNARE && group->val2))) {
 						uint8 flag2;
 
 						if (battle_config.skill_removetrap_type) {
 							for (i = 0; i < 10; i++) { //Get back all items used to deploy the trap
-								if (skill_get_itemid(sg->skill_id,i + 1) > 0) {
+								if (skill_get_itemid(group->skill_id,i + 1) > 0) {
 									struct item item_tmp;
 
 									memset(&item_tmp,0,sizeof(item_tmp));
-									item_tmp.nameid = skill_get_itemid(sg->skill_id,i + 1);
+									item_tmp.nameid = skill_get_itemid(group->skill_id,i + 1);
 									item_tmp.identify = 1;
-									item_tmp.amount = skill_get_itemqty(sg->skill_id,i + 1);
+									item_tmp.amount = skill_get_itemqty(group->skill_id,i + 1);
 									if (item_tmp.nameid && (flag2 = pc_additem(sd,&item_tmp,item_tmp.amount,LOG_TYPE_OTHER))) {
 										clif_additem(sd,0,0,flag2);
 										map_addflooritem(&item_tmp,item_tmp.amount,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,4,0);
@@ -8094,7 +8094,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							struct item item_tmp;
 
 							memset(&item_tmp,0,sizeof(item_tmp));
-							item_tmp.nameid = sg->item_id;
+							item_tmp.nameid = group->item_id;
 							item_tmp.identify = 1;
 							if (item_tmp.nameid && (flag2 = pc_additem(sd,&item_tmp,1,LOG_TYPE_OTHER))) {
 								clif_additem(sd,0,0,flag2);
@@ -8102,7 +8102,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							}
 						}
 					}
-					skill_delunit(su);
+					skill_delunit(unit);
 				} else if (sd)
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			}
@@ -8110,12 +8110,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case HT_SPRINGTRAP:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			{
-				struct skill_unit *su = (struct skill_unit *)bl;
+				struct skill_unit *unit = (struct skill_unit *)bl;
+				struct skill_unit_group *group = NULL;
 
-				if (bl->type == BL_SKILL && su && su->group) {
-					switch (su->group->unit_id) {
+				if (bl->type == BL_SKILL && unit && (group = unit->group)) {
+					switch (group->unit_id) {
 						case UNT_ANKLESNARE:
-							if (su->group->val2)
+							if (group->val2)
 								break; //If it is already trapping something don't spring it, remove trap should be used instead
 						//Fall through
 						case UNT_BLASTMINE:
@@ -8127,10 +8128,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case UNT_FREEZINGTRAP:
 						case UNT_CLAYMORETRAP:
 						case UNT_TALKIEBOX:
-							su->group->unit_id = UNT_USED_TRAPS;
+							group->unit_id = UNT_USED_TRAPS;
 							clif_changetraplook(bl,UNT_USED_TRAPS);
-							su->group->limit = DIFF_TICK(tick + 1500,su->group->tick);
-							su->limit = DIFF_TICK(tick + 1500,su->group->tick);
+							group->limit = DIFF_TICK(tick + 1500,group->tick);
+							unit->limit = DIFF_TICK(tick + 1500,group->tick);
 							break;
 					}
 				}
@@ -12648,7 +12649,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 	group->state.ammo_consume = (sd && sd->state.arrow_atk && skill_id != GS_GROUNDDRIFT && skill_id != WM_SEVERE_RAINSTORM && skill_id != GN_WALLOFTHORN); //Store if this skill needs to consume ammo
 	group->state.song_dance = (unit_flag&(UF_DANCE|UF_SONG) ? 1 : 0)|(unit_flag&UF_ENSEMBLE ? 2 : 0); //Signals if this is a song/dance/duet
 	group->state.guildaura = (skill_id >= GD_LEADERSHIP && skill_id <= GD_HAWKEYES ? 1 : 0);
-  	group->item_id = req_item;
+	group->item_id = req_item;
 
 	//If tick is greater than current, do not invoke onplace function just yet [Skotlex]
 	if( DIFF_TICK(group->tick,gettick()) > SKILLUNITTIMER_INTERVAL )
@@ -15959,7 +15960,7 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 		sc = NULL;
 
 	if( !idx ) //Invalid skill id
-  		return require;
+		return require;
 
 	if( skill_lv < 1 || skill_lv > MAX_SKILL_LEVEL )
 		return require;
@@ -17200,19 +17201,19 @@ int skill_banding_count(struct map_session_data *sd)
 	uint8 count = party_foreachsamemap(party_sub_count_banding,sd,range,0);
 	unsigned int group_hp = party_foreachsamemap(party_sub_count_banding,sd,range,1);
 
- 	nullpo_ret(sd);
+	nullpo_ret(sd);
 
- 	//HP is set to the average HP of the banding group
+	//HP is set to the average HP of the banding group
 	if (count > 1)
 		status_set_hp(&sd->bl,group_hp / count,0);
- 	//Royal Guard count check for banding
+	//Royal Guard count check for banding
 	if (sd && sd->status.party_id) {
 		if (count > MAX_PARTY)
 			return MAX_PARTY;
 		else if (count > 1)
 			return count; //Effect bonus from additional Royal Guards if not above the max possiable
 	}
- 	return 0;
+	return 0;
 }
 
 /**
@@ -17513,11 +17514,12 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 			if( bl->id == src->id )
 				break;
 			if( bl->type == BL_SKILL ) {
-				struct skill_unit *su = (struct skill_unit *)bl;
+				struct skill_unit *unit2 = (struct skill_unit *)bl;
+				struct skill_unit_group *group2 = NULL;
 
-				if( !su || !su->group )
+				if( !unit2 || !(group2 = unit2->group) )
 					return 0;
-				if( su->group->unit_id == UNT_USED_TRAPS )
+				if( group2->unit_id == UNT_USED_TRAPS )
 					break;
 			}
 		//Fall through
@@ -17529,13 +17531,13 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 			if( bl->id == src->id )
 				break;
 			if( bl->type == BL_SKILL ) {
-				struct skill_unit *su = (struct skill_unit *)bl;
-				struct skill_unit_group *sg = NULL;
+				struct skill_unit *unit2 = (struct skill_unit *)bl;
+				struct skill_unit_group *group2 = NULL;
 				int unit_id;
 
-				if( !su || !(sg = su->group) )
+				if( !unit2 || !(group2 = unit2->group) )
 					return 0;
-				unit_id = sg->unit_id;
+				unit_id = group2->unit_id;
 				switch( unit_id ) {
 					case UNT_CLAYMORETRAP:
 					case UNT_LANDMINE:
@@ -17546,14 +17548,14 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 					case UNT_FREEZINGTRAP:
 					case UNT_FIRINGTRAP:
 					case UNT_ICEBOUNDTRAP:
-						sg->unit_id = UNT_USED_TRAPS;
+						group2->unit_id = UNT_USED_TRAPS;
 						clif_changetraplook(bl, UNT_USED_TRAPS);
 						if( unit_id == UNT_FIRINGTRAP )
-							sg->limit = DIFF_TICK(gettick(),sg->tick);
+							group2->limit = DIFF_TICK(gettick(),group2->tick);
 						else if( unit_id == UNT_ICEBOUNDTRAP )
-							sg->limit = DIFF_TICK(gettick(),sg->tick) + 1000;
+							group2->limit = DIFF_TICK(gettick(),group2->tick) + 1000;
 						else
-							sg->limit = DIFF_TICK(gettick(),sg->tick) + 1500;
+							group2->limit = DIFF_TICK(gettick(),group2->tick) + 1500;
 						break;
 				}
 			}
@@ -17571,7 +17573,8 @@ static int skill_trap_splash(struct block_list *bl, va_list ap)
 int skill_maelstrom_suction(struct block_list *bl, va_list ap)
 {
 	uint16 skill_id, skill_lv;
-	struct skill_unit *unit;
+	struct skill_unit *unit = NULL;
+	struct skill_unit_group *group = NULL;
 
 	nullpo_ret(bl);
 
@@ -17579,14 +17582,14 @@ int skill_maelstrom_suction(struct block_list *bl, va_list ap)
 	skill_lv = va_arg(ap,int);
 	unit = (struct skill_unit *)bl;
 
-	if( !unit || !unit->group || (skill_get_inf2(skill_id)&INF2_TRAP) )
+	if( !unit || !(group = unit->group) || (skill_get_inf2(skill_id)&INF2_TRAP) )
 		return 0;
 
-	if( unit->group->skill_id == SC_MAELSTROM ) {
-		struct block_list *src = map_id2bl(unit->group->src_id);
+	if( group->skill_id == SC_MAELSTROM ) {
+		struct block_list *src = map_id2bl(group->src_id);
 
 		if( src ) {
-			int sp = unit->group->skill_lv * skill_lv + status_get_job_lv(src) / 5;
+			int sp = group->skill_lv * skill_lv + status_get_job_lv(src) / 5;
 
 			status_heal(src, 0, sp / 2, 1);
 		}
@@ -18488,7 +18491,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 		else if( group->unit_id == UNT_TATAMIGAESHI ) {
 			unit->range = -1; //Disable processed cell
 			if( --group->val1 <= 0 ) { //Number of live cells
-	  			//All tiles were processed, disable skill
+				//All tiles were processed, disable skill
 				group->target_flag = BCT_NOONE;
 				group->bl_flag = BL_NUL;
 			}

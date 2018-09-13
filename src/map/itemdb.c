@@ -245,7 +245,8 @@ char itemdb_pc_get_itemgroup(uint16 group_id, struct map_session_data *sd) {
 	return 0;
 }
 
-/** Searches for the item_data. Use this to check if item exists or not.
+/**
+ * Searches for the item_data. Use this to check if item exists or not.
  * @param nameid
  * @return *item_data if item is exist, or NULL if not
  */

@@ -1775,7 +1775,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		casttime = 0;
 
 	if( sc ) { //Why the if else chain: These 3 status do not stack, so its efficient that way
- 		if( sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4) && skill_id != AS_CLOAKING ) {
+		if( sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4) && skill_id != AS_CLOAKING ) {
 			status_change_end(src, SC_CLOAKING, INVALID_TIMER);
 			if( !src->prev )
 				return 0; //Warped away!

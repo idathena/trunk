@@ -6,14 +6,14 @@
 //= 1.0
 //===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= Disables warping from a map.
 //= Script commands 'warpparty' and 'warpguild' will not warp
 //=   players.
 //= Atcommands @warp, @go, @load, @jump, @partyrecall,
 //=   @guildrecall, and @recallall will not warp players.
 //= GD_EMERGENCYCALL and UNT_CALLFAMILY will not warp players.
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 Added WoE TE maps. [Capuche]
 //============================================================
 
@@ -28,3 +28,22 @@ te_aldecas2	mapflag	nowarp
 te_aldecas3	mapflag	nowarp
 te_aldecas4	mapflag	nowarp
 te_aldecas5	mapflag	nowarp
+
+// Episode 15
+1@lab	mapflag	nowarp
+1@uns	mapflag	nowarp
+un_bk_q	mapflag	nowarp
+un_myst	mapflag	nowarp
+
+job_gun	mapflag	nowarp
+
+// Nightmare Biolab
+lhz_dun_n	mapflag	nowarp
+lhz_d_n2	mapflag	nowarp
+
+// Ep 16
+que_swat	mapflag	nowarp
+
+// Rockridge
+un_myst	mapflag	nowarp
+rockmi2	mapflag	nowarp

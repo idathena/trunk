@@ -3358,7 +3358,7 @@ int mobskill_use(struct mob_data *md, unsigned int tick, int event)
 				case MSC_MYHPLTMAXRATE: //HP < maxhp %
 					flag = get_percentage(md->status.hp, md->status.max_hp);
 					flag = (flag <= c2);
-				  	break;
+					break;
 				case MSC_MYHPINRATE:
 					flag = get_percentage(md->status.hp, md->status.max_hp);
 					flag = (flag >= c2 && flag <= ms[i].val[0]);
@@ -3454,7 +3454,7 @@ int mobskill_use(struct mob_data *md, unsigned int tick, int event)
 			if (!bl)
 				continue;
 			x = bl->x;
-		  	y = bl->y;
+			y = bl->y;
 			//Look for an area to cast the spell around
 			if (skill_target >= MST_AROUND5) {
 				j = (skill_target >= MST_AROUND1) ?

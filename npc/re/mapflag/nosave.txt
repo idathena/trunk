@@ -6,12 +6,12 @@
 //= 1.1
 //===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= Characters logging out on the specified map will be warped
 //= to the map specified in the last field, or "SavePoint".
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 Renewal split. [Euphy]
-//= 1.1 Added GVG TE Maps. [Capuche]
+//= 1.1 Added GVG TE Guild Dungeons. [Capuche]
 //============================================================
 
 // Job Quests =================================
@@ -45,6 +45,20 @@ gld2_ald	mapflag	nosave	SavePoint
 gld2_gef	mapflag	nosave	SavePoint
 gld2_pay	mapflag	nosave	SavePoint
 gld2_prt	mapflag	nosave	SavePoint
+teg_dun01	mapflag	nosave	SavePoint
+teg_dun02	mapflag	nosave	SavePoint
+
+// WOE:Training Edition Castles ===============
+te_prtcas01	mapflag	nosave	SavePoint
+te_prtcas02	mapflag	nosave	SavePoint
+te_prtcas03	mapflag	nosave	SavePoint
+te_prtcas04	mapflag	nosave	SavePoint
+te_prtcas05	mapflag	nosave	SavePoint
+te_aldecas1	mapflag	nosave	SavePoint
+te_aldecas2	mapflag	nosave	SavePoint
+te_aldecas3	mapflag	nosave	SavePoint
+te_aldecas4	mapflag	nosave	SavePoint
+te_aldecas5	mapflag	nosave	SavePoint
 
 // Misty Forest Labyrinth =====================
 1@mist	mapflag	nosave	SavePoint
@@ -52,7 +66,7 @@ gld2_prt	mapflag	nosave	SavePoint
 // Octopus Cave ===============================
 1@cash	mapflag	nosave	SavePoint
 
-// Malangdo Culvert ===========================
+// Drain ======================================
 1@pump	mapflag	nosave	SavePoint
 2@pump	mapflag	nosave	SavePoint
 
@@ -88,54 +102,79 @@ que_avan01	mapflag	nosave	SavePoint
 1@gl_k	mapflag	nosave	SavePoint
 2@gl_k	mapflag	nosave	SavePoint
 
-// Heroes' Trails =============================
-1@gef	mapflag	nosave	SavePoint
-1@face	mapflag	nosave	SavePoint
-1@sara	mapflag	nosave	SavePoint
-1@gef_in	mapflag	nosave	SavePoint
-1@ge_st	mapflag	nosave	SavePoint
-1@spa	mapflag	nosave	SavePoint
-1@tnm1	mapflag	nosave	SavePoint
-1@tnm2	mapflag	nosave	SavePoint
-1@tnm3	mapflag	nosave	SavePoint
-1@air1	mapflag	nosave	SavePoint
-1@air2	mapflag	nosave	SavePoint
-1@glast	mapflag	nosave	SavePoint
-
 // Wave Mode Memorial Dungeon =================
 1@def01	mapflag	nosave	SavePoint
 1@def02	mapflag	nosave	SavePoint
 1@def03	mapflag	nosave	SavePoint
 
-// Episode 14.3 Memorial Dungeon ==============
+// Heroes' Trail - Part 1 =====================
+1@face	mapflag	nosave	SavePoint
+1@sara	mapflag	nosave	SavePoint
+
+// Heroes' Trail - Part 2 =====================
+1@ge_st	mapflag	nosave	SavePoint
+1@gef	mapflag	nosave	SavePoint
+1@gef_in	mapflag	nosave	SavePoint
+1@spa	mapflag	nosave	SavePoint
+1@tnm1	mapflag	nosave	SavePoint
+1@tnm2	mapflag	nosave	SavePoint
+1@tnm3	mapflag	nosave	SavePoint
+
+// Horror Toy Factory Memorial Dungeon
+1@xm_d	mapflag	nosave	SavePoint
+
+// Heroes' Trail - Part 3 =====================
+1@glast	mapflag	nosave	SavePoint
+1@air1	mapflag	nosave	SavePoint
+1@air2	mapflag	nosave	SavePoint
+
+// Decisive Battle - Part 1 ===================
 1@dth1	mapflag	nosave	SavePoint
 1@dth2	mapflag	nosave	SavePoint
 1@dth3	mapflag	nosave	SavePoint
-1@eom	mapflag	nosave	SavePoint
 1@rev	mapflag	nosave	SavePoint
 
-// Nightmarish Jitterbug ======================
+// Decisive Battle - Part 2 ===================
+1@eom	mapflag	nosave	SavePoint
 1@jtb	mapflag	nosave	SavePoint
 
-// Horror Toy Factory =========================
-1@xm_d	mapflag	nosave	SavePoint
-
-// WOE:TE Castles =============================
-te_prtcas01	mapflag	nosave	SavePoint
-te_prtcas02	mapflag	nosave	SavePoint
-te_prtcas03	mapflag	nosave	SavePoint
-te_prtcas04	mapflag	nosave	SavePoint
-te_prtcas05	mapflag	nosave	SavePoint
-te_aldecas1	mapflag	nosave	SavePoint
-te_aldecas2	mapflag	nosave	SavePoint
-te_aldecas3	mapflag	nosave	SavePoint
-te_aldecas4	mapflag	nosave	SavePoint
-te_aldecas5	mapflag	nosave	SavePoint
-teg_dun01	mapflag	nosave	SavePoint
-teg_dun02	mapflag	nosave	SavePoint
-
-// Episode 15 - Phantasmagorica ===============
+// Episode 15 - Phantasmagorica
 1@lab	mapflag	nosave	SavePoint
 1@uns	mapflag	nosave	SavePoint
 un_myst	mapflag	nosave	SavePoint
 1@mcd	mapflag	nosave	SavePoint
+
+// Ep 16
+que_swat	mapflag	nosave	SavePoint
+1@mir	mapflag	nosave	SavePoint
+2@mir	mapflag	nosave	SavePoint
+1@sthb	mapflag	nosave	SavePoint
+1@sthc	mapflag	nosave	SavePoint
+1@sthd	mapflag	nosave	SavePoint
+1@slw	mapflag	nosave	SavePoint
+1@swat	mapflag	nosave	SavePoint
+
+// Rockridge
+rockmi2	mapflag	nosave	SavePoint
+
+// Chicken Mode Nightmare Glastheim
+1@gl_k2	mapflag	nosave	SavePoint
+2@gl_k2	mapflag	nosave	SavePoint
+
+// Chicken Mode Horror Toy Factory
+1@xm_d2	mapflag	nosave	SavePoint
+
+// Suspicious shipwreck
+1@tre	mapflag	nosave	SavePoint
+
+// Poring Town
+1@begi	mapflag	nosave	SavePoint
+
+// Volcanic island Korodo
+1@crd	mapflag	nosave	SavePoint
+
+// Noodles Festival July
+1@drdo	mapflag	nosave	SavePoint
+
+// Soul Reaper Job Change
+1@soul	mapflag	nosave	SavePoint

@@ -765,7 +765,7 @@ int mapif_parse_PartyLeaderChange(int fd,int party_id,int account_id,int char_id
 			p->party.member[i].leader = 0;
 		if(p->party.member[i].account_id == account_id &&
 			p->party.member[i].char_id == char_id)
-	  	{
+		{
 			p->party.member[i].leader = 1;
 			inter_party_tosql(&p->party,PS_LEADER, i);
 		}

@@ -1977,9 +1977,9 @@ int status_fixed_revive(struct block_list *bl, unsigned int per_hp, unsigned int
  * Checks whether the src can use the skill on the target,
  * taking into account status/option of both source/target. [Skotlex]
  * flag:
- * 	0 - Trying to use skill on target.
- * 	1 - Cast bar is done.
- * 	2 - Skill already pulled off, check is due to ground-based skills or splash-damage ones.
+ *	0 - Trying to use skill on target.
+ *	1 - Cast bar is done.
+ *	2 - Skill already pulled off, check is due to ground-based skills or splash-damage ones.
  * src MAY be null to indicate we shouldn't check it, this is a ground-based skill attack.
  * target MAY be null, in which case the checks are only to see
  * whether the source can cast or not the skill on the ground.
@@ -2270,7 +2270,7 @@ int status_base_amotion_pc(struct map_session_data *sd, struct status_data *stat
 	if( sd->equip_index[EQI_HAND_R] >= 0 && sd->inventory.u.items_inventory[sd->equip_index[EQI_HAND_R]].nameid == ITEMID_ANGRA_MANYU )
 		return 0;
 
- 	return amotion;
+	return amotion;
 }
 
 static unsigned short status_base_atk(const struct block_list *bl, const struct status_data *status)
@@ -4072,11 +4072,11 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	if (pc_checkskill(sd, SU_POWEROFLIFE) > 0 && pc_checkskill_summoner(sd, TYPE_ANIMAL) >= 20)
 		sd->bonus.long_attack_atk_rate += 20;
 	if (sc->count) {
-     	if (sc->data[SC_CONCENTRATE]) { //Update the card-bonus data
+   	if (sc->data[SC_CONCENTRATE]) { //Update the card-bonus data
 			sc->data[SC_CONCENTRATE]->val3 = sd->param_bonus[1]; //Agi
 			sc->data[SC_CONCENTRATE]->val4 = sd->param_bonus[4]; //Dex
 		}
-     	if (sc->data[SC_SIEGFRIED] && (i = sc->data[SC_SIEGFRIED]->val2)) {
+   	if (sc->data[SC_SIEGFRIED] && (i = sc->data[SC_SIEGFRIED]->val2)) {
 			sd->subele[ELE_WATER] += i;
 			sd->subele[ELE_EARTH] += i;
 			sd->subele[ELE_FIRE] += i;
@@ -11751,7 +11751,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			break;
 		case SC_CHANGE:
 			if (tid == INVALID_TIMER)
-		 		break;
+				break;
 			//"Lose almost all their HP and SP" on natural expiration
 			status_set_hp(bl,10,0);
 			status_set_sp(bl,10,0);

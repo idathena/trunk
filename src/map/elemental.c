@@ -599,7 +599,7 @@ struct skill_condition elemental_skill_get_requirements(uint16 skill_id, uint16 
 	memset(&req,0,sizeof(req));
 
 	if( !idx ) //Invalid skill id
-  		return req;
+		return req;
 
 	if( skill_lv < 1 || skill_lv > MAX_SKILL_LEVEL )
 		return req;

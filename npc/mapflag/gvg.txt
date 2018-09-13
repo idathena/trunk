@@ -10,7 +10,6 @@
 //= Players can attack other guilds, and will have their guild
 //= icons shown. WoE damage reductions will also take place.
 //= gvg: Turns on GvG mode.
-//= gvg_noparty: Ignores party alliances on GVG-enabled maps.
 //= gvg_castle: Describes castle maps for WoE.
 //= gvg_dungeon: Describes dungeon maps for WoE.
 //= gvg_te: Turns on GvG mode for WoE:TE.
@@ -27,12 +26,6 @@ guild_vs2	mapflag	gvg
 guild_vs3	mapflag	gvg
 guild_vs4	mapflag	gvg
 guild_vs5	mapflag	gvg
-
-guild_vs1	mapflag	gvg_noparty
-guild_vs2	mapflag	gvg_noparty
-guild_vs3	mapflag	gvg_noparty
-guild_vs4	mapflag	gvg_noparty
-guild_vs5	mapflag	gvg_noparty
 
 // Guild Castles ==========
 aldeg_cas01	mapflag	gvg_castle
@@ -65,37 +58,6 @@ arug_cas02	mapflag	gvg_castle
 arug_cas03	mapflag	gvg_castle
 arug_cas04	mapflag	gvg_castle
 arug_cas05	mapflag	gvg_castle
-
-aldeg_cas01	mapflag	gvg_noparty
-aldeg_cas02	mapflag	gvg_noparty
-aldeg_cas03	mapflag	gvg_noparty
-aldeg_cas04	mapflag	gvg_noparty
-aldeg_cas05	mapflag	gvg_noparty
-gefg_cas01	mapflag	gvg_noparty
-gefg_cas02	mapflag	gvg_noparty
-gefg_cas03	mapflag	gvg_noparty
-gefg_cas04	mapflag	gvg_noparty
-gefg_cas05	mapflag	gvg_noparty
-payg_cas01	mapflag	gvg_noparty
-payg_cas02	mapflag	gvg_noparty
-payg_cas03	mapflag	gvg_noparty
-payg_cas04	mapflag	gvg_noparty
-payg_cas05	mapflag	gvg_noparty
-prtg_cas01	mapflag	gvg_noparty
-prtg_cas02	mapflag	gvg_noparty
-prtg_cas03	mapflag	gvg_noparty
-prtg_cas04	mapflag	gvg_noparty
-prtg_cas05	mapflag	gvg_noparty
-schg_cas01	mapflag	gvg_noparty
-schg_cas02	mapflag	gvg_noparty
-schg_cas03	mapflag	gvg_noparty
-schg_cas04	mapflag	gvg_noparty
-schg_cas05	mapflag	gvg_noparty
-arug_cas01	mapflag	gvg_noparty
-arug_cas02	mapflag	gvg_noparty
-arug_cas03	mapflag	gvg_noparty
-arug_cas04	mapflag	gvg_noparty
-arug_cas05	mapflag	gvg_noparty
 
 //Uncomment to disable monsters teleporting (prevents them from "escaping" when rude attacked)
 //aldeg_cas01	mapflag	monster_noteleport
@@ -136,12 +98,6 @@ nguild_gef	mapflag	gvg_castle
 nguild_pay	mapflag	gvg_castle
 nguild_prt	mapflag	gvg_castle
 
-//n_castle	mapflag	gvg_noparty
-nguild_alde	mapflag	gvg_noparty
-nguild_gef	mapflag	gvg_noparty
-nguild_pay	mapflag	gvg_noparty
-nguild_prt	mapflag	gvg_noparty
-
 //nguild_alde	mapflag	monster_noteleport
 //nguild_gef	mapflag	monster_noteleport
 //nguild_pay	mapflag	monster_noteleport
@@ -150,3 +106,22 @@ nguild_prt	mapflag	gvg_noparty
 // Guild Dungeons =========
 arug_dun01	mapflag	gvg_dungeon
 schg_dun01	mapflag	gvg_dungeon
+
+// RWC Maps ===============
+2009rwc_01	mapflag	gvg
+2009rwc_02	mapflag	gvg
+2009rwc_03	mapflag	gvg
+2009rwc_04	mapflag	gvg
+2009rwc_05	mapflag	gvg
+2009rwc_06	mapflag	gvg
+2009rwc_07	mapflag	gvg
+2009rwc_08	mapflag	gvg
+2009rwc_f01	mapflag	gvg
+2012rwc_01	mapflag	gvg
+2012rwc_02	mapflag	gvg
+2012rwc_03	mapflag	gvg
+2012rwc_04	mapflag	gvg
+2012rwc_05	mapflag	gvg
+2012rwc_06	mapflag	gvg
+2012rwc_07	mapflag	gvg
+2012rwc_08	mapflag	gvg

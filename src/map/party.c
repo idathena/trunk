@@ -45,7 +45,7 @@ int party_create_byscript;
  *------------------------------------------*/
 static void party_fill_member(struct party_member *member, struct map_session_data *sd, unsigned int leader)
 {
-  	member->account_id = sd->status.account_id;
+	member->account_id = sd->status.account_id;
 	member->char_id    = sd->status.char_id;
 	safestrncpy(member->name, sd->status.name, NAME_LENGTH);
 	member->class_     = sd->status.class_;

@@ -1204,7 +1204,7 @@ int chrif_recvfamelist(int fd) {
 
 	for (num = 0; len < size && num < MAX_FAME_LIST; num++) {
 		memcpy(&smith_fame_list[num], RFIFOP(fd,len), sizeof(struct fame_list));
- 		len += sizeof(struct fame_list);
+		len += sizeof(struct fame_list);
 	}
 
 	total += num;
@@ -1213,7 +1213,7 @@ int chrif_recvfamelist(int fd) {
 
 	for (num = 0; len < size && num < MAX_FAME_LIST; num++) {
 		memcpy(&chemist_fame_list[num], RFIFOP(fd,len), sizeof(struct fame_list));
- 		len += sizeof(struct fame_list);
+		len += sizeof(struct fame_list);
 	}
 
 	total += num;
@@ -1222,7 +1222,7 @@ int chrif_recvfamelist(int fd) {
 
 	for (num = 0; len < size && num < MAX_FAME_LIST; num++) {
 		memcpy(&taekwon_fame_list[num], RFIFOP(fd,len), sizeof(struct fame_list));
- 		len += sizeof(struct fame_list);
+		len += sizeof(struct fame_list);
 	}
 
 	total += num;

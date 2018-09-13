@@ -346,23 +346,23 @@ static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data
 	struct map_session_data *sd;
 	uint8 i;
 
- 	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
+	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
 		return 1;
 
- 	if( sd->shieldball <= 0 ) {
+	if( sd->shieldball <= 0 ) {
 		ShowError("pc_shieldball_timer: %d shieldball's available. (aid=%d cid=%d tid=%d)\n", sd->shieldball, sd->status.account_id, sd->status.char_id, tid);
 		sd->shieldball = 0;
 		return 0;
 	}
 
- 	ARR_FIND(0, sd->shieldball, i, sd->shieldball_timer[i] == tid);
+	ARR_FIND(0, sd->shieldball, i, sd->shieldball_timer[i] == tid);
 
 	if( i == sd->shieldball ) {
 		ShowError("pc_shieldball_timer: timer not found (aid=%d cid=%d tid=%d)\n", sd->status.account_id, sd->status.char_id, tid);
 		return 0;
 	}
 
- 	sd->shieldball--;
+	sd->shieldball--;
 
 	if( sd->shieldball <= 0 )
 		status_change_end(&sd->bl, SC_MILLENNIUMSHIELD, INVALID_TIMER);
@@ -371,9 +371,9 @@ static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data
 		memmove(sd->shieldball_timer + i, sd->shieldball_timer + i + 1, (sd->shieldball - i) * sizeof(int));
 
 	sd->shieldball_timer[sd->shieldball] = INVALID_TIMER;
- 	clif_millenniumshield(&sd->bl, sd->shieldball);
+	clif_millenniumshield(&sd->bl, sd->shieldball);
 
- 	return 0;
+	return 0;
 }
 
 /**
@@ -388,18 +388,18 @@ static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data
 	int tid;
 	uint8 i;
 
- 	nullpo_retv(sd);
+	nullpo_retv(sd);
 
- 	if( max > MAX_SHIELDBALL )
+	if( max > MAX_SHIELDBALL )
 		max = MAX_SHIELDBALL;
 
 	if( sd->shieldball < 0 )
 		sd->shieldball = 0;
 
- 	if( sd->shieldball_set_health != shield_health && shield_health > 0 )
+	if( sd->shieldball_set_health != shield_health && shield_health > 0 )
 		sd->shieldball_set_health = shield_health;
 
- 	if( sd->shieldball && sd->shieldball >= max ) {
+	if( sd->shieldball && sd->shieldball >= max ) {
 		if( sd->shieldball_timer[0] != INVALID_TIMER )
 			delete_timer(sd->shieldball_timer[0], pc_shieldball_timer);
 		sd->shieldball--;
@@ -408,7 +408,7 @@ static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data
 		sd->shieldball_timer[sd->shieldball] = INVALID_TIMER;
 	}
 
- 	tid = add_timer(gettick() + interval, pc_shieldball_timer, sd->bl.id, 0);
+	tid = add_timer(gettick() + interval, pc_shieldball_timer, sd->bl.id, 0);
 	ARR_FIND(0, sd->shieldball, i, (sd->shieldball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->shieldball_timer[i])->tick) < 0));
 
 	if( i != sd->shieldball )
@@ -431,14 +431,14 @@ static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data
 {
 	uint8 i;
 
- 	nullpo_retv(sd);
+	nullpo_retv(sd);
 
- 	if( sd->shieldball <= 0 ) {
+	if( sd->shieldball <= 0 ) {
 		sd->shieldball = 0;
 		return;
 	}
 
- 	if( !count )
+	if( !count )
 		return;
 
 	if( count > sd->shieldball )
@@ -446,16 +446,16 @@ static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data
 
 	sd->shieldball -= count;
 
- 	if( sd->shieldball <= 0 )
+	if( sd->shieldball <= 0 )
 		status_change_end(&sd->bl, SC_MILLENNIUMSHIELD, INVALID_TIMER);
 
- 	if( sd->shieldball > 0 )
+	if( sd->shieldball > 0 )
 		sd->shieldball_health = sd->shieldball_set_health;
 
- 	if( count > MAX_SHIELDBALL )
+	if( count > MAX_SHIELDBALL )
 		count = MAX_SHIELDBALL;
 
- 	for( i = 0; i < count; i++ ) {
+	for( i = 0; i < count; i++ ) {
 		if( sd->shieldball_timer[i] != INVALID_TIMER ) {
 			delete_timer(sd->shieldball_timer[i], pc_shieldball_timer);
 			sd->shieldball_timer[i] = INVALID_TIMER;
@@ -467,7 +467,7 @@ static int pc_shieldball_timer(int tid, unsigned int tick, int id, intptr_t data
 		sd->shieldball_timer[i] = INVALID_TIMER;
 	}
 
- 	if( !type )
+	if( !type )
 		clif_millenniumshield(&sd->bl, sd->shieldball);
 }
 
@@ -8973,7 +8973,7 @@ bool pc_jobchange(struct map_session_data *sd, int job, char upper)
 	if (fame_flag)
 		chrif_buildfamelist();
 	else if (sd->status.fame > 0) {
- 		switch (sd->class_&MAPID_UPPERMASK) { //It may be that now they are famous?
+		switch (sd->class_&MAPID_UPPERMASK) { //It may be that now they are famous?
 			case MAPID_BLACKSMITH:
 			case MAPID_ALCHEMIST:
 			case MAPID_TAEKWON:
@@ -10456,7 +10456,7 @@ void pc_check_available_item(struct map_session_data *sd, uint8 type) {
 			}
 			if( !sd->storage.u.items_storage[i].unique_id && !itemdb_isstackable(nameid) )
 				sd->storage.u.items_storage[i].unique_id = pc_generate_unique_id(sd);
- 		}
+		}
 	}
 }
 

@@ -585,7 +585,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 		(p->body != cp->body) || (p->class_ != cp->class_) ||
 		(p->partner_id != cp->partner_id) || (p->father != cp->father) ||
 		(p->mother != cp->mother) || (p->child != cp->child) ||
- 		(p->karma != cp->karma) || (p->manner != cp->manner) ||
+		(p->karma != cp->karma) || (p->manner != cp->manner) ||
 		(p->fame != cp->fame)
 	)
 	{
@@ -959,7 +959,7 @@ int memitemdata_to_sql(const struct item items[], int max, int id, enum storage_
 bool memitemdata_from_sql(struct s_storage *p, int max, int id, enum storage_type tableswitch, uint8 stor_id) {
 	StringBuf buf;
 	SqlStmt *stmt;
-	int i, offset = 0;
+	int i, offset = 0, max2;
 	struct item item, *storage;
 	const char *tablename, *selectoption, *printname;
 
@@ -969,24 +969,28 @@ bool memitemdata_from_sql(struct s_storage *p, int max, int id, enum storage_typ
 			tablename = inventory_db;
 			selectoption = "char_id";
 			storage = p->u.items_inventory;
+			max2 = MAX_INVENTORY;
 			break;
 		case TABLE_CART:
 			printname = "Cart";
 			tablename = cart_db;
 			selectoption = "char_id";
 			storage = p->u.items_cart;
+			max2 = MAX_CART;
 			break;
 		case TABLE_STORAGE:
 			printname = inter_premiumStorage_getPrintableName(stor_id);
 			tablename = inter_premiumStorage_getTableName(stor_id);
 			selectoption = "account_id";
 			storage = p->u.items_storage;
+			max2 = inter_premiumStorage_getMax(p->stor_id);
 			break;
 		case TABLE_GUILD_STORAGE:
 			printname = "Guild Storage";
 			tablename = guild_storage_db;
 			selectoption = "guild_id";
 			storage = p->u.items_guild;
+			max2 = inter_guild_storagemax(id);
 			break;
 		default:
 			ShowError("Invalid table name!\n");
@@ -997,7 +1001,7 @@ bool memitemdata_from_sql(struct s_storage *p, int max, int id, enum storage_typ
 	p->id = id;
 	p->type = tableswitch;
 	p->stor_id = stor_id;
-	p->max_amount = inter_premiumStorage_getMax(p->stor_id);
+	p->max_amount = max2;
 
 	stmt = SqlStmt_Malloc(sql_handle);
 	if( stmt == NULL ) {

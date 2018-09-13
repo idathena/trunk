@@ -1370,7 +1370,7 @@ int npc_scriptcont(struct map_session_data *sd, int id, bool closing)
 
 		ShowDebug("npc_scriptcont: %s (sd->npc_id=%d) is not %s (id=%d).\n",
 			(nd_sd ? (char *)nd_sd->name : "'Unknown NPC'"), (int)sd->npc_id,
-		  	(nd ? (char *)nd->name : "'Unknown NPC'"), (int)id);
+			(nd ? (char *)nd->name : "'Unknown NPC'"), (int)id);
 		return 1;
 	}
 
@@ -2067,7 +2067,7 @@ int npc_remove_map(struct npc_data *nd)
 
 	if(nd->bl.prev == NULL || nd->bl.m < 0)
 		return 1; //Not assigned to a map
-  	m = nd->bl.m;
+	m = nd->bl.m;
 	if(nd->subtype == NPCTYPE_SCRIPT)
 		skill_clear_unitgroup(&nd->bl);
 	clif_clearunit_area(&nd->bl,CLR_RESPAWN);

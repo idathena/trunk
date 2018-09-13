@@ -820,7 +820,7 @@ void hom_gainexp(struct homun_data *hd, int exp)
 	if (hd->exp_next == 0 ||
 		((m_class&HOM_REG) && hd->homunculus.level >= battle_config.hom_max_level) ||
 		((m_class&HOM_S)   && hd->homunculus.level >= battle_config.hom_S_max_level)) {
-	  	hd->homunculus.exp = 0;
+		hd->homunculus.exp = 0;
 		return;
 	}
 
@@ -832,7 +832,7 @@ void hom_gainexp(struct homun_data *hd, int exp)
 	}
 
 	//Level up
- 	while (hd->homunculus.exp > hd->exp_next && hom_levelup(hd));
+	while (hd->homunculus.exp > hd->exp_next && hom_levelup(hd));
 
 	if (hd->exp_next == 0)
 		hd->homunculus.exp = 0 ;

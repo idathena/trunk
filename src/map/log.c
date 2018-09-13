@@ -129,7 +129,7 @@ static char log_feedingtype2char(e_log_feeding_type type)
 		case LOG_FEED_PET:
 			return 'P';
 	}
- 	ShowDebug("log_feedingtype2char: Unknown feeding type %d.\n", type);
+	ShowDebug("log_feedingtype2char: Unknown feeding type %d.\n", type);
 	return 'O';
 }
 
@@ -536,12 +536,12 @@ void log_feeding(struct map_session_data *sd, e_log_feeding_type type, unsigned 
 	unsigned int target_id = 0, intimacy = 0;
 	unsigned short target_class = 0;
 
- 	nullpo_retv(sd);
+	nullpo_retv(sd);
 
- 	if( !(log_config.feeding&type) )
+	if( !(log_config.feeding&type) )
 		return;
 
- 	switch( type ) {
+	switch( type ) {
 		case LOG_FEED_HOMUNCULUS:
 			if( sd->hd ) {
 				target_id = sd->hd->homunculus.hom_id;
@@ -557,7 +557,7 @@ void log_feeding(struct map_session_data *sd, e_log_feeding_type type, unsigned 
 			}
 			break;
 	}
- 	if( log_config.sql_logs ) {
+	if( log_config.sql_logs ) {
 #ifdef BETA_THREAD_TEST
 		char entry[512];
 		int e_length = 0;
@@ -577,7 +577,7 @@ void log_feeding(struct map_session_data *sd, e_log_feeding_type type, unsigned 
 		time_t curtime;
 		FILE *logfp;
 
- 		if( (logfp = fopen(log_config.log_feeding, "a")) == NULL )
+		if( (logfp = fopen(log_config.log_feeding, "a")) == NULL )
 			return;
 		time(&curtime);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", localtime(&curtime));
