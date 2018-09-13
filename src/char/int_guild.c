@@ -1808,7 +1808,7 @@ int mapif_parse_GuildMasterChange(int fd, int guild_id, const char *name, int le
 	// Switch positions
 	g->member[pos].position = g->member[0].position;
 	g->member[pos].modified = GS_MEMBER_MODIFIED;
-	g->member[0].position = 0; // Position 0: guild Master.
+	g->member[0].position = 0; // Position 0: Guild Master
 	g->member[0].modified = GS_MEMBER_MODIFIED;
 
 	// Store changing time
