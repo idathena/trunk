@@ -416,7 +416,7 @@ CREATE TABLE IF NOT EXISTS `guild_position` (
   `guild_id` int(9) unsigned NOT NULL default '0',
   `position` tinyint(6) unsigned NOT NULL default '0',
   `name` varchar(24) NOT NULL default '',
-  `mode` tinyint(11) unsigned NOT NULL default '0',
+  `mode` smallint(11) unsigned NOT NULL default '0',
   `exp_mode` tinyint(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guild_id`,`position`)
 ) ENGINE=MyISAM;
@@ -863,6 +863,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1488744559);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1489588190);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1510499460);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1536064380);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1536825360);
 
 --
 -- Table structure for table `sstatus`

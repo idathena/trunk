@@ -565,7 +565,7 @@ ACMD_FUNC(jumpto)
 
 	pc_setpos(sd, pl_sd->mapindex, pl_sd->bl.x, pl_sd->bl.y, CLR_TELEPORT);
 	sprintf(atcmd_output, msg_txt(4), pl_sd->status.name); // Jumped to %s
- 	clif_displaymessage(fd, atcmd_output);
+	clif_displaymessage(fd, atcmd_output);
 
 	return 0;
 }
@@ -908,35 +908,30 @@ ACMD_FUNC(guildstorage)
 {
 	nullpo_retr(-1, sd);
 
-	if (!sd->status.guild_id) {
-		clif_displaymessage(fd, msg_txt(252)); // You are not in a guild.
-		return -1;
-	}
-
 	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading)
 		return -1;
 
-	if (sd->state.storage_flag == 1) {
-		clif_displaymessage(fd, msg_txt(250)); // You have already opened your storage. Close it first.
-		return -1;
+	switch (storage_guild_storageopen(sd)) {
+		case GSTORAGE_OPEN:
+			clif_displaymessage(fd, msg_txt(920)); // Guild storage opened.
+			break;
+		case GSTORAGE_STORAGE_ALREADY_OPEN:
+			clif_displaymessage(fd, msg_txt(250)); // You have already opened your storage. Close it first.
+			return -1;
+		case GSTORAGE_ALREADY_OPEN:
+			clif_displaymessage(fd, msg_txt(251)); // You have already opened your guild storage. Close it first.
+			return -1;
+		case GSTORAGE_NO_GUILD:
+			clif_displaymessage(fd, msg_txt(252)); // You are not in a guild.
+			return -1;
+		case GSTORAGE_NO_STORAGE:
+			clif_displaymessage(fd, msg_txt(284)); // The guild does not have a guild storage.
+			return -1;
+		case GSTORAGE_NO_PERMISSION:
+			clif_displaymessage(fd, msg_txt(285)); // You do not have permission to use the guild storage.
+			return -1;
 	}
 
-	if (sd->state.storage_flag == 2) {
-		clif_displaymessage(fd, msg_txt(251)); // You have already opened your guild storage. Close it first.
-		return -1;
-	}
-
-	if (sd->state.storage_flag == 3) {
-		clif_displaymessage(fd, msg_txt(250)); // You have already opened your storage. Close it first.
-		return -1;
-	}
-
-	if (storage_guild_storageopen(sd)) {
-		clif_displaymessage(fd, msg_txt(548)); // Your guild's storage has already been opened by another member, try again later.
-		return -1;
-	}
-
-	clif_displaymessage(fd, msg_txt(920)); // Guild storage opened.
 	return 0;
 }
 
@@ -2319,9 +2314,9 @@ ACMD_FUNC(memo)
 			else
 				sprintf(atcmd_output, msg_txt(171), i); // %d - void
 			clif_displaymessage(sd->fd, atcmd_output);
- 		}
+		}
 		return 0;
- 	}
+	}
 
 	if( position < 0 || position >= MAX_MEMOPOINTS ) {
 		sprintf(atcmd_output, msg_txt(1008), 0, MAX_MEMOPOINTS - 1); // Please enter a valid position (usage: @memo <memo_position:%d-%d>).
@@ -2345,11 +2340,11 @@ ACMD_FUNC(gat)
 	for (y = 2; y >= -2; y--) {
 		sprintf(atcmd_output, "%s (x= %d, y= %d) %02X %02X %02X %02X %02X",
 			map[sd->bl.m].name,   sd->bl.x - 2, sd->bl.y + y,
- 			map_getcell(sd->bl.m, sd->bl.x - 2, sd->bl.y + y, CELL_GETTYPE),
- 			map_getcell(sd->bl.m, sd->bl.x - 1, sd->bl.y + y, CELL_GETTYPE),
- 			map_getcell(sd->bl.m, sd->bl.x,     sd->bl.y + y, CELL_GETTYPE),
- 			map_getcell(sd->bl.m, sd->bl.x + 1, sd->bl.y + y, CELL_GETTYPE),
- 			map_getcell(sd->bl.m, sd->bl.x + 2, sd->bl.y + y, CELL_GETTYPE));
+			map_getcell(sd->bl.m, sd->bl.x - 2, sd->bl.y + y, CELL_GETTYPE),
+			map_getcell(sd->bl.m, sd->bl.x - 1, sd->bl.y + y, CELL_GETTYPE),
+			map_getcell(sd->bl.m, sd->bl.x,     sd->bl.y + y, CELL_GETTYPE),
+			map_getcell(sd->bl.m, sd->bl.x + 1, sd->bl.y + y, CELL_GETTYPE),
+			map_getcell(sd->bl.m, sd->bl.x + 2, sd->bl.y + y, CELL_GETTYPE));
 
 		clif_displaymessage(fd, atcmd_output);
 	}
@@ -2496,7 +2491,7 @@ ACMD_FUNC(param)
 	int value = 0;
 	const char *param[] = { "str", "agi", "vit", "int", "dex", "luk" };
 	short new_value, *status[6], max_status[6];
- 	// We don't use direct initialization because it isn't part of the c standard.
+	// We don't use direct initialization because it isn't part of the c standard.
 	nullpo_retr(-1, sd);
 
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
@@ -2564,7 +2559,7 @@ ACMD_FUNC(stat_all)
 	int value = 0;
 	uint8 count, i;
 	short *status[PARAM_MAX], max_status[PARAM_MAX];
- 	// We don't use direct initialization because it isn't part of the c standard.
+	// We don't use direct initialization because it isn't part of the c standard.
 	nullpo_retr(-1, sd);
 
 	status[0] = &sd->status.str;
@@ -5603,9 +5598,8 @@ ACMD_FUNC(cleargstorage)
 
 	j = gstorage->amount;
 	gstorage->lock = true; // Lock @gstorage: do not allow any item to be retrieved or stored from any guild member
-	for (i = 0; i < j; ++i) {
+	for (i = 0; i < j; ++i)
 		storage_guild_delitem(sd, gstorage, i, gstorage->u.items_guild[i].amount);
-	}
 	storage_guild_storageclose(sd);
 	gstorage->lock = false; // Cleaning done, release lock
 
@@ -6506,7 +6500,7 @@ ACMD_FUNC(sound)
 }
 
 /*==========================================
- * 	MOB Search
+ *	MOB Search
  *------------------------------------------*/
 ACMD_FUNC(mobsearch)
 {
@@ -6864,9 +6858,9 @@ ACMD_FUNC(setbattleflag)
 	nullpo_retr(-1, sd);
 
 	if (!message || !*message || sscanf(message, "%127s %127s %11d", flag, value, &reload) != 2) {
-        	clif_displaymessage(fd, msg_txt(1231)); // Usage: @setbattleflag <flag> <value> {<reload>}
-        	return -1;
-    	}
+		clif_displaymessage(fd, msg_txt(1231)); // Usage: @setbattleflag <flag> <value> {<reload>}
+		return -1;
+	}
 
 	if (battle_set_value(flag, value) == 0) {
 		clif_displaymessage(fd, msg_txt(1232)); // Unknown battle_config flag.
@@ -9760,7 +9754,7 @@ ACMD_FUNC(changedress) {
 	};
 	uint8 i;
 
- 	for( i = 0; i < ARRAYLENGTH(name2id); i++ ) {
+	for( i = 0; i < ARRAYLENGTH(name2id); i++ ) {
 		if( sd->sc.data[name2id[i]] ) {
 			status_change_end(&sd->bl, name2id[i], INVALID_TIMER);
 			// You should only be able to have one - so we cancel here
@@ -9768,7 +9762,7 @@ ACMD_FUNC(changedress) {
 		}
 	}
 
- 	return -1;
+	return -1;
 }
 
 /**
@@ -9977,8 +9971,8 @@ ACMD_FUNC(adopt)
 ACMD_FUNC(limitedsale) {
 	nullpo_retr(-1, sd);
 
- 	clif_sale_open(sd);
- 	return 0;
+	clif_sale_open(sd);
+	return 0;
 }
 
 #include "../custom/atcommand.inc"

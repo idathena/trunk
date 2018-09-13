@@ -3486,7 +3486,7 @@ void clif_changelook(struct block_list *bl,int type,int val)
 				if(sd->sc.option&OPTION_OKTOBERFEST && battle_config.oktoberfest_ignorepalette)
 					vd->cloth_color = 0;
 				if(vd->body_style && sd->sc.option&OPTION_COSTUME)
- 					vd->body_style = 0;
+					vd->body_style = 0;
 				break;
 			case LOOK_HAIR:
 				vd->hair_style = val;
@@ -7816,12 +7816,12 @@ void clif_party_dead(struct map_session_data *sd) {
 #if PACKETVER >= 20170502
 	unsigned char buf[7];
 
- 	nullpo_retv(sd);
+	nullpo_retv(sd);
 
- 	WBUFW(buf,0) = 0xab2;
+	WBUFW(buf,0) = 0xab2;
 	WBUFL(buf,2) = sd->status.account_id;
 	WBUFB(buf,6) = pc_isdead(sd);
- 	clif_send(buf, packet_len(0xab2), &sd->bl, PARTY);
+	clif_send(buf, packet_len(0xab2), &sd->bl, PARTY);
 #endif
 }
 
@@ -9935,7 +9935,7 @@ void clif_viewequip_ack(struct map_session_data *sd, struct map_session_data *ts
 #elif PACKETVER < 20120925
 	const int s = 28;
 #elif PACKETVER < 20150225
- 	const int s = 31;
+	const int s = 31;
 #else
 	const int s = 57;
 #endif
@@ -10316,7 +10316,7 @@ void clif_parse_WantToConnection(int fd, struct map_session_data *sd)
 /// Notification from the client, that it has finished map loading and is about to display player's character (CZ_NOTIFY_ACTORINIT).
 /// 007d
 void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
-	bool first_time = false;
+	bool guild_notice = false;
 
 	if(sd->bl.prev)
 		return;
@@ -10481,7 +10481,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	if(sd->state.connect_new) {
 		int lv;
 
-		first_time = true;
+		guild_notice = true;
 		clif_skillinfoblock(sd);
 		clif_hotkeys_send(sd);
 		clif_updatestatus(sd,SP_BASEEXP);
@@ -10566,8 +10566,6 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 				npc_event_dequeue(sd);
 		} else
 			sd->state.warp_clean = 1;
-		if(sd->guild && (battle_config.guild_notice_changemap == 2 || (battle_config.guild_notice_changemap == 1 && sd->state.changemap)))
-			clif_guild_notice(sd);
 	}
 
 	if(sd->state.changemap) { //Restore information that gets lost on map-change
@@ -10603,6 +10601,10 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		}
 	#endif
 #endif
+		if(sd->guild && battle_config.guild_notice_changemap == 1) {
+			clif_guild_notice(sd); //Displays after VIP
+			guild_notice = false; //Do not display it twice
+		}
 		if((battle_config.bg_flee_penalty != 100 || battle_config.gvg_flee_penalty != 100) &&
 			(map_flag_gvg2(sd->state.pmap) || map_flag_gvg2(sd->bl.m) || map[sd->state.pmap].flag.battleground || map[sd->bl.m].flag.battleground))
 			status_calc_bl(&sd->bl,SCB_FLEE); //Refresh flee penalty
@@ -10646,6 +10648,9 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		clif_pk_mode_message(sd);
 	}
 
+	if(sd->guild && (battle_config.guild_notice_changemap == 2 || guild_notice))
+		clif_guild_notice(sd); //Displays at end
+
 	mail_clear(sd);
 	clif_maptypeproperty2(&sd->bl,SELF);
 
@@ -10680,10 +10685,6 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 
 	clif_weather_check(sd);
 
-	//This should be displayed last
-	if(sd->guild && first_time)
-		clif_guild_notice(sd);
-
 	//For automatic triggering of NPCs after map loading (so you don't need to walk 1 step first)
 	if(map_getcell(sd->bl.m,sd->bl.x,sd->bl.y,CELL_CHKNPC))
 		npc_touch_areanpc(sd,sd->bl.m,sd->bl.x,sd->bl.y);
@@ -10712,7 +10713,8 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	pc_show_questinfo(sd);
 
 #if PACKETVER >= 20150513
-	clif_Mail_new(sd,0,NULL,NULL);
+	if(sd->mail.inbox.unread > 0)
+		clif_Mail_new(sd,0,NULL,NULL);
 #endif
 
 	sd->state.connect_new = 0;
@@ -12676,14 +12678,14 @@ void clif_parse_ItemIdentify(int fd, struct map_session_data *sd)
 	if (sd->menuskill_id != MC_IDENTIFY)
 		return;
 	//Ignore the request
- 	//- Invalid item index
- 	//- Invalid item ID or item doesn't exist
- 	//- Item is already identified
- 	if (idx < 0 || idx >= MAX_INVENTORY ||
- 		sd->inventory.u.items_inventory[idx].nameid <= 0 || !sd->inventory_data[idx] ||
- 		sd->inventory.u.items_inventory[idx].identify) { //Cancel pressed
- 			clif_menuskill_clear(sd);
- 			return;
+	//- Invalid item index
+	//- Invalid item ID or item doesn't exist
+	//- Item is already identified
+	if (idx < 0 || idx >= MAX_INVENTORY ||
+		sd->inventory.u.items_inventory[idx].nameid <= 0 || !sd->inventory_data[idx] ||
+		sd->inventory.u.items_inventory[idx].identify) { //Cancel pressed
+			clif_menuskill_clear(sd);
+			return;
 	}
 	skill_identify(sd,idx);
 	clif_menuskill_clear(sd);
@@ -12705,19 +12707,19 @@ void clif_parse_SelectArrow(int fd, struct map_session_data *sd)
 	switch (sd->menuskill_id) {
 		case AC_MAKINGARROW:
 			skill_arrow_create(sd,nameid);
- 			break;
- 		case SA_CREATECON:
+			break;
+		case SA_CREATECON:
 			skill_produce_mix(sd,SA_CREATECON,nameid,0,0,0,0,1);
- 			break;
- 		case WL_READING_SB:
+			break;
+		case WL_READING_SB:
 			skill_spellbook(sd,nameid);
- 			break;
- 		case GC_POISONINGWEAPON:
+			break;
+		case GC_POISONINGWEAPON:
 			skill_poisoningweapon(sd,nameid);
- 			break;
- 		case NC_MAGICDECOY:
+			break;
+		case NC_MAGICDECOY:
 			skill_magicdecoy(sd,nameid);
- 			break;
+			break;
 	}
 
 	clif_menuskill_clear(sd);
@@ -15708,7 +15710,7 @@ void clif_parse_Mail_beginwrite(int fd, struct map_session_data *sd)
 
 	safestrncpy(name, (char *)RFIFOP(fd,2), NAME_LENGTH);
 
-	if( sd->state.storage_flag || sd->state.mail_writing || sd->trade_partner ) {
+	if( sd->npc_id || sd->state.storage_flag || sd->state.mail_writing || sd->trade_partner ) {
 		clif_send_Mail_beginwrite_ack(sd, name, false);
 		return;
 	}
@@ -16184,10 +16186,12 @@ void clif_parse_Auction_setitem(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	if( (item = itemdb_exists(sd->inventory.u.items_inventory[idx].nameid)) != NULL && !(item->type == IT_ARMOR || item->type == IT_PETARMOR || item->type == IT_WEAPON || item->type == IT_CARD || item->type == IT_ETC || item->type == IT_SHADOWGEAR) )
-	{ //Consumable or pets are not allowed
+	if( (item = itemdb_exists(sd->inventory.u.items_inventory[idx].nameid)) &&
+		!(item->type == IT_ARMOR || item->type == IT_PETARMOR || item->type == IT_WEAPON ||
+		item->type == IT_CARD || item->type == IT_ETC || item->type == IT_SHADOWGEAR) )
+	{
 		clif_Auction_setitem(sd->fd, idx, true);
-		return;
+		return; //Consumable or pets are not allowed
 	}
 
 	if( !pc_can_give_items(sd) || sd->inventory.u.items_inventory[idx].expire_time ||
@@ -16802,7 +16806,7 @@ void clif_parse_configuration(int fd, struct map_session_data *sd) {
 	int type = RFIFOL(fd,packet_db[cmd].pos[0]);
 	bool flag = (RFIFOL(fd,packet_db[cmd].pos[1]) != 0);
 
- 	switch( type ) {
+	switch( type ) {
 		case CONFIG_OPEN_EQUIPMENT_WINDOW:
 			sd->status.show_equip = flag;
 			break;
@@ -16814,13 +16818,13 @@ void clif_parse_configuration(int fd, struct map_session_data *sd) {
 		case CONFIG_HOMUNCULUS_AUTOFEED:
 			if( !sd->hd || sd->hd->homunculus.vaporize || !battle_config.feature_homunculus_autofeed )
 				return; //Player can not click this if he does not have a homunculus or it is vaporized
- 			sd->hd->homunculus.autofeed = flag;
+			sd->hd->homunculus.autofeed = flag;
 			break;
 		default:
 			ShowWarning("clif_parse_configuration: received unknown configuration type '%d'...\n", type);
 			return;
 	}
- 	clif_configuration(sd, (enum e_config_type)type, flag);
+	clif_configuration(sd, (enum e_config_type)type, flag);
 }
 
 
@@ -16872,7 +16876,7 @@ void clif_quest_send_list(struct map_session_data *sd)
 	int size = 10 + NAME_LENGTH;
 #endif
 
- 	clif_quest_len(offset, 15 + size * MAX_QUEST_OBJECTIVES, sd->avail_quests, &limit, &i);
+	clif_quest_len(offset, 15 + size * MAX_QUEST_OBJECTIVES, sd->avail_quests, &limit, &i);
 	WFIFOHEAD(fd,i);
 #if PACKETVER >= 20150513
 	WFIFOW(fd,0) = 0x9f8;
@@ -18648,8 +18652,8 @@ void clif_charmball(struct map_session_data *sd) {
 ///
 /// R 0908 <index>.w <type>.b
 /// type:
-/// 	0 = move item to personal tab
-/// 	1 = move item to normal tab
+///	0 = move item to personal tab
+///	1 = move item to normal tab
 void clif_parse_MoveItem(int fd, struct map_session_data *sd) {
 #if PACKETVER >= 20111122
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
@@ -20176,7 +20180,7 @@ void clif_sale_open(struct map_session_data *sd) {
 
 	nullpo_retv(sd);
 
- 	if( sd->state.sale_open )
+	if( sd->state.sale_open )
 		return;
 
 	sd->state.sale_open = true;
@@ -20217,7 +20221,7 @@ void clif_sale_close(struct map_session_data *sd) {
 	if( !sd->state.sale_open )
 		return;
 
- 	sd->state.sale_open = false;
+	sd->state.sale_open = false;
 
 	fd = sd->fd;
 	WFIFOHEAD(fd,2);
@@ -20522,8 +20526,8 @@ void clif_weight_limit(struct map_session_data *sd) {
 
 	nullpo_retv(sd);
 
- 	fd = sd->fd;
- 	WFIFOHEAD(fd,packet_len(0xADE));
+	fd = sd->fd;
+	WFIFOHEAD(fd,packet_len(0xADE));
 	WFIFOW(fd,0) = 0xADE;
 #ifdef RENEWAL
 	WFIFOL(fd,2) = battle_config.natural_heal_weight_rate_renewal;
@@ -20543,7 +20547,7 @@ void clif_parse_changedress(int fd, struct map_session_data *sd) {
 #if PACKETVER >= 20180103
 	char command[CHAT_SIZE_MAX];
 
- 	safesnprintf(command, sizeof(command), "%cchangedress", atcommand_symbol);
+	safesnprintf(command, sizeof(command), "%cchangedress", atcommand_symbol);
 
 	is_atcommand(fd, sd, command, 1);
 #endif

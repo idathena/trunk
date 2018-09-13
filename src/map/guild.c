@@ -603,7 +603,7 @@ int guild_invite(struct map_session_data *sd, struct map_session_data *tsd) {
 	if( tsd == NULL || g == NULL )
 		return 0;
 
-	if( (i = guild_getposition(sd)) < 0 || !(g->position[i].mode&0x0001) )
+	if( (i = guild_getposition(sd)) < 0 || !(g->position[i].mode&GUILD_PERM_INVITE) )
 		return 0; //Invite permission
 
 	if( !battle_config.invite_request_check ) {
@@ -737,7 +737,7 @@ int guild_member_added(int guild_id,int account_id,int char_id,int flag)
 		//Cancel if player not present or invalide guild_id invitation
 		if (flag == 0) {
 			ShowError("guild: member added error %d is not online\n",account_id);
- 			intif_guild_leave(guild_id,account_id,char_id,0,"** Data Error **");
+			intif_guild_leave(guild_id,account_id,char_id,0,"** Data Error **");
 		}
 		return 0;
 	}
@@ -813,7 +813,7 @@ int guild_expulsion(struct map_session_data *sd, int guild_id, int account_id, i
 	if( sd->status.guild_id != guild_id )
 		return 0;
 
-	if( (ps = guild_getposition(sd)) < 0 || !(g->position[ps].mode&0x0010) )
+	if( (ps = guild_getposition(sd)) < 0 || !(g->position[ps].mode&GUILD_PERM_EXPEL) )
 		return 0; //Expulsion permission
 
 	//Can't leave inside guild castles
@@ -1101,16 +1101,13 @@ int guild_memberposition_changed(struct guild *g,int idx,int pos)
 /*====================================================
  * Change guild title or member
  *---------------------------------------------------*/
-int guild_change_position(int guild_id,int idx,
-	int mode,int exp_mode,const char *name)
+int guild_change_position(int guild_id,int idx,int mode,int exp_mode,const char *name)
 {
 	struct guild_position p;
 
 	exp_mode = cap_value(exp_mode, 0, battle_config.guild_exp_limit);
-	//Mode 0x01 <- Invite
-	//Mode 0x10 <- Expel.
-	p.mode=mode&0x11;
-	p.exp_mode=exp_mode;
+	p.mode = (mode&GUILD_PERM_ALL);
+	p.exp_mode = exp_mode;
 	safestrncpy(p.name,name,NAME_LENGTH);
 	return intif_guild_position(guild_id,idx,&p);
 }

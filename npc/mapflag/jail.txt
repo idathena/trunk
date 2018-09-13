@@ -41,7 +41,7 @@ sec_pri	mapflag	pvp
 // No Party ==============================
 sec_pri	mapflag	pvp_noparty
 
-// Nightmare Equipment Drops PVP ==========
+// Nightmare Equipment Drops PVP =========
 sec_pri	mapflag	pvp_nightmaredrop	random,equip,300
 
 // Hide Monster HP bar ===================

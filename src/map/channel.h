@@ -71,7 +71,7 @@ struct Channel_Config {
 		unsigned allow : 1;		// Allow private channel creation?
 		unsigned ban : 1;		// Allow player to ban
 		unsigned kick : 1;		// Allow player to kick
-		unsigned color_override : 1; 	// Owner cannot change the color_override
+		unsigned color_override : 1;	// Owner cannot change the color_override
 		unsigned change_delay : 1;	// Owner cannot change the delay
 	} private_channel;
 

@@ -20,7 +20,7 @@
 //      0x0800(UF_DUALMODE)		Unit has effects both at an interval and when you step in/out
 //      0x1000(UF_HIDDEN_TRAP)		Hidden trap, see 'traps_setting' skill config to enable this flag
 //      0x2000(UF_RANGEDSINGLEUNIT)	Layout hack, use layout range propriety but only display center
-// 	Example: 0x006 = 0x002+0x004 -> Cannot be stacked nor cast near targets
+//      Example: 0x006 = 0x002+0x004 -> Cannot be stacked nor cast near targets
 //
 // Notes:
 //    0x89,0x8a,0x8b without indication

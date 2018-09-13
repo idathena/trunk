@@ -228,10 +228,10 @@ monk_in	mapflag	nomemo
 in_rogue	mapflag	nomemo
 job_sage	mapflag	nomemo
 job_soul	mapflag	nomemo
+que_ba	mapflag	nomemo
 que_ng	mapflag	nomemo
 
 // Special Quests Places =====
-que_ba	mapflag	nomemo
 que_god01	mapflag	nomemo
 que_god02	mapflag	nomemo
 que_bingo	mapflag	nomemo
@@ -694,3 +694,22 @@ bossnia_01	mapflag	nomemo
 bossnia_02	mapflag	nomemo
 bossnia_03	mapflag	nomemo
 bossnia_04	mapflag	nomemo
+
+// RWC Maps ===============
+2009rwc_01	mapflag	nomemo
+2009rwc_02	mapflag	nomemo
+2009rwc_03	mapflag	nomemo
+2009rwc_04	mapflag	nomemo
+2009rwc_05	mapflag	nomemo
+2009rwc_06	mapflag	nomemo
+2009rwc_07	mapflag	nomemo
+2009rwc_08	mapflag	nomemo
+2009rwc_f01	mapflag	nomemo
+2012rwc_01	mapflag	nomemo
+2012rwc_02	mapflag	nomemo
+2012rwc_03	mapflag	nomemo
+2012rwc_04	mapflag	nomemo
+2012rwc_05	mapflag	nomemo
+2012rwc_06	mapflag	nomemo
+2012rwc_07	mapflag	nomemo
+2012rwc_08	mapflag	nomemo

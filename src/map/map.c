@@ -625,7 +625,7 @@ int map_foreachinrangeV(int (*func)(struct block_list *, va_list), struct block_
 						&& check_distance_bl(center, bl, range)
 #endif
 						&& (!wall_check || path_search_long(NULL, center->m, center->x, center->y, bl->x, bl->y, CELL_CHKWALL))
-					  	&& bl_list_count < BL_LIST_MAX )
+						&& bl_list_count < BL_LIST_MAX )
 						bl_list[bl_list_count++] = bl;
 				}
 			}
@@ -641,7 +641,7 @@ int map_foreachinrangeV(int (*func)(struct block_list *, va_list), struct block_
 						&& check_distance_bl(center, bl, range)
 #endif
 						&& (!wall_check || path_search_long(NULL, center->m, center->x, center->y, bl->x, bl->y, CELL_CHKWALL))
-					  	&& bl_list_count < BL_LIST_MAX )
+						&& bl_list_count < BL_LIST_MAX )
 						bl_list[bl_list_count++] = bl;
 				}
 			}
@@ -672,9 +672,9 @@ int map_foreachinrange(int (*func)(struct block_list *, va_list), struct block_l
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinrangeV(func, center, range, type, ap, (battle_config.skill_wall_check > 0));
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -683,9 +683,9 @@ int map_foreachinallrange(int (*func)(struct block_list *, va_list), struct bloc
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinrangeV(func, center, range, type, ap, false);
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -697,9 +697,9 @@ int map_foreachinshootrange(int (*func)(struct block_list *, va_list), struct bl
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinrangeV(func, center, range, type, ap, true);
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -792,9 +792,9 @@ int map_foreachinallarea(int (*func)(struct block_list *, va_list), int16 m, int
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinareaV(func, m, x0, y0, x1, y1, type, ap, false);
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -803,9 +803,9 @@ int map_foreachinshootarea(int (*func)(struct block_list *, va_list), int16 m, i
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinareaV(func, m, x0, y0, x1, y1, type, ap, true);
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -814,9 +814,9 @@ int map_foreachinarea(int (*func)(struct block_list *, va_list), int16 m, int16 
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinareaV(func, m, x0, y0, x1, y1, type, ap, (battle_config.skill_wall_check > 0));
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -847,7 +847,7 @@ int map_forcountinrange(int (*func)(struct block_list *, va_list), struct block_
 #ifdef CIRCULAR_AREA
 						&& check_distance_bl(center, bl, range)
 #endif
-					  	&& bl_list_count < BL_LIST_MAX )
+						&& bl_list_count < BL_LIST_MAX )
 						bl_list[bl_list_count++] = bl;
 				}
 			}
@@ -3550,7 +3550,7 @@ void map_flags_init(void) {
 int map_waterheight(char *mapname)
 {
 	char fn[256];
- 	char *rsw, *found;
+	char *rsw, *found;
 
 	// Look up for the rsw
 	sprintf(fn, "data\\%s.rsw", mapname);

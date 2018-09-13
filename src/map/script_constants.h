@@ -5333,6 +5333,14 @@
 	export_constant(PET_CATCH_UNIVERSAL);
 	export_constant(PET_CATCH_UNIVERSAL_ITEM);
 
+	/* Guild storage flags */
+	export_constant(GSTORAGE_OPEN);
+	export_constant(GSTORAGE_STORAGE_ALREADY_OPEN);
+	export_constant(GSTORAGE_ALREADY_OPEN);
+	export_constant(GSTORAGE_NO_GUILD);
+	export_constant(GSTORAGE_NO_STORAGE);
+	export_constant(GSTORAGE_NO_PERMISSION);
+
 	#undef export_constant
 	#undef export_constant2
 	#undef export_parameter

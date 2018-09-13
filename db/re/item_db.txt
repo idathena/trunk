@@ -5910,6 +5910,7 @@
 10037,Black_Butterfly_Mask,Black Butterfly Mask,8,20,,0,,,,,,,,,,,,,{},{},{}
 10038,Horn_Protector,Horn Barrier,8,20,,0,,,,,,,,,,,,,{},{},{}
 10039,Tw_Backpack,Tw Backpack,8,20,,0,,,,,,,,,,,,,{},{},{}
+10040,Red_Bell_Necklace,Red Bell Necklace,8,20,,0,,,,,,,,,,,,,{},{},{}
 // Misc "Etc" Books
 //===================================================================
 11000,Prontera_Book_01,History book of Prontera,3,8000,,10,,,,,,,,,,,,,{},{},{}
@@ -10914,7 +10915,7 @@
 22860,November_Gift_Box,November Gift Box,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ rentitem callfunc("F_Rand",2566,2856,2857,15023),1209600; },{},{}
 22861,December_Gift_Box,December Gift Box,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 22869,10; },{},{}
 22868,Enchant_Stone_Box5,Costume Enchantment Stone Box 5,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem callfunc("F_Rand",6908,6943,6944,6945,6946,6947,6948,6949,6950,6951),1; },{},{}
-22869,Lucky_Roulette_Tickets,Lucky Roulette Ticket,2,10,,100,,,,,0xFFFFFFFF,63,2,,,50,,,{ RouletteBronze++; },{},{}
+22869,Lucky_Roulette_Tickets,Lucky Roulette Ticket,2,10,,100,,,,,0xFFFFFFFF,63,2,,,50,,,{ set RouletteBronze,RouletteBronze+1; },{},{}
 22870,Christmas_Package,Christmas Package,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22873,Sealed_Beelzebub_Scroll_II,Sealed Beelzebub Scroll II,2,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem callfunc("F_Rand",22875,6238,6239,6228,6232,24231,24232,17474,6635),1; },{},{}
 22874,Sealed_Beelzebub_Card_Album,Sealed Beelzebub Card Album,2,10,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ /* No Info */ },{},{}
@@ -11207,6 +11208,7 @@
 25231,Suspicious_Bottle,Suspicious Bottle,3,20,,0,,,,,,,,,,,,,{},{},{}
 25232,Cheap_Lubricant,Cheap Lubricant,3,20,,0,,,,,,,,,,,,,{},{},{}
 25233,Cotton_Bundle,Cotton Bundle,3,20,,0,,,,,,,,,,,,,{},{},{}
+25245,Small_Pile_Of_Bones,Small Pile of Bones,3,0,,0,,,,,,,,,,,,,{},{},{}
 25375,Mightysoul_Essence,Mightysoul Essence,3,0,,0,,,,,,,,,,,,,{},{},{}
 25377,Luxurious_Pet_Food,Luxurious Pet Food,3,20,,10,,,,,,,,,,,,,{},{},{}
 25408,Memories_Of_Gyoll,Memories of Gyoll,3,0,,0,,,,,,,,,,,,,{},{},{}

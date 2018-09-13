@@ -4074,7 +4074,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case SR_FALLENEMPIRE: //ATK [(Skill Level x 150 + 100) x Caster's Base Level / 150] %
 			skillratio += 150 * skill_lv;
 			RE_LVL_DMOD(150);
- 			break;
+			break;
 		case SR_TIGERCANNON: {
 				int hp = sstatus->max_hp * (10 + 2 * skill_lv) / 100,
 					sp = sstatus->max_sp * (5 + skill_lv) / 100;
@@ -5660,7 +5660,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		case ASC_BREAKER:
 		case RA_CLUSTERBOMB:
 		case RA_FIRINGTRAP:
- 		case RA_ICEBOUNDTRAP:
+		case RA_ICEBOUNDTRAP:
 		case LG_RAYOFGENESIS:
 		case SO_VARETYR_SPEAR:
 			return wd; //Do GVG fix later
@@ -8043,7 +8043,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 			if( (sd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
 				(tsd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
 				(int)sd->status.base_level < battle_config.pk_min_level ||
-			  	(int)tsd->status.base_level < battle_config.pk_min_level ||
+				(int)tsd->status.base_level < battle_config.pk_min_level ||
 				(battle_config.pk_level_range &&
 				abs((int)sd->status.base_level - (int)tsd->status.base_level) > battle_config.pk_level_range) )
 				state &= ~BCT_ENEMY;
