@@ -2258,7 +2258,7 @@ int char_married(int pl1, int pl2)
 
 int char_child(int parent_id, int child_id)
 {
-	if( parent_id == 0 || child_id == 0) //Failsafe, avoild querys and fix EXP bug dividing with lower level chars
+	if( parent_id == 0 || child_id == 0 ) //Failsafe, avoild querys and fix EXP bug dividing with lower level chars
 		return 0;
 	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `child` FROM `%s` WHERE `char_id` = '%d'", char_db, parent_id) )
 		Sql_ShowDebug(sql_handle);

@@ -7,6 +7,7 @@
 //#include "map.h"
 struct block_list;
 struct map_session_data;
+struct npc_data;
 struct mob_data;
 struct item;
 

@@ -796,7 +796,7 @@ enum save_settings_type {
 	CHARSAVE_QUEST       = 0x040, //After successfully get/delete/complete a quest
 	CHARSAVE_BUYINGSTORE = 0x080, //After every buyingstore transaction
 	CHARSAVE_BANK        = 0x100, //After every bank transaction (deposit/withdraw)
-	CHARSAVE_ATTENDANCE	 = 0x200, //After every attendence reward
+	CHARSAVE_ATTENDANCE  = 0x200, //After every attendence reward
 	CHARSAVE_ALL         = 0xFFF,
 };
 

@@ -11416,7 +11416,7 @@ static bool pc_readdb_job_noenter_map(char *str[], int columns, int current) {
 static void pc_readdb_attendance_libconfig_sub(struct config_setting_t *t, const char *name, const char *source)
 {
 	struct config_setting_t *reward = NULL;
-	uint32 start = 0, end = 0;
+	int start = 0, end = 0;
 	char aDay[5];
 
 	nullpo_retv(t);
