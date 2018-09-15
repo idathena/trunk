@@ -4072,11 +4072,11 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	if (pc_checkskill(sd, SU_POWEROFLIFE) > 0 && pc_checkskill_summoner(sd, TYPE_ANIMAL) >= 20)
 		sd->bonus.long_attack_atk_rate += 20;
 	if (sc->count) {
-   	if (sc->data[SC_CONCENTRATE]) { //Update the card-bonus data
+		if (sc->data[SC_CONCENTRATE]) { //Update the card-bonus data
 			sc->data[SC_CONCENTRATE]->val3 = sd->param_bonus[1]; //Agi
 			sc->data[SC_CONCENTRATE]->val4 = sd->param_bonus[4]; //Dex
 		}
-   	if (sc->data[SC_SIEGFRIED] && (i = sc->data[SC_SIEGFRIED]->val2)) {
+		if (sc->data[SC_SIEGFRIED] && (i = sc->data[SC_SIEGFRIED]->val2)) {
 			sd->subele[ELE_WATER] += i;
 			sd->subele[ELE_EARTH] += i;
 			sd->subele[ELE_FIRE] += i;
@@ -11601,21 +11601,9 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			}
 			break;
 		case SC_DANCING: {
-				const char *prevfile = "<unknown>";
-				int prevline = 0;
 				struct map_session_data *dsd;
 				struct status_change_entry *dsc;
 
-				if (sd) {
-					if (sd->delunit_prevfile) { //Initially this is NULL, when a character logs in
-						prevfile = sd->delunit_prevfile;
-						prevline = sd->delunit_prevline;
-					} else
-						prevfile = "<none>";
-
-					sd->delunit_prevfile = file;
-					sd->delunit_prevline = line;
-				}
 				if (sce->val4 && sce->val4 != BCT_SELF && (dsd = map_id2sd(sce->val4))) { //End status on partner as well
 					dsc = dsd->sc.data[SC_DANCING];
 					if (dsc) { //This will prevent recursive loops
@@ -11627,12 +11615,10 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 					struct skill_unit_group *group = skill_id2group(sce->val2);
 
 					if (!group) {
-						ShowDebug("status_change_end: SC_DANCING is missing skill unit group (val1=%d, val2=%d, val3=%d, val4=%d, timer=%d, tid=%d, char_id=%d, map=%s, x=%d, y=%d, prev=%s:%d, from=%s:%d). Please report this! (#3504)\n",
+						ShowDebug("status_change_end: SC_DANCING is missing skill unit group (val1=%d, val2=%d, val3=%d, val4=%d, timer=%d, tid=%d, char_id=%d, map=%s, x=%d, y=%d). Please report this!\n",
 							sce->val1,sce->val2,sce->val3,sce->val4,sce->timer,tid,
 							(sd ? sd->status.char_id : 0),
-							mapindex_id2name(map_id2index(bl->m)),bl->x,bl->y,
-							prevfile,prevline,
-							file,line);
+							mapindex_id2name(map_id2index(bl->m)),bl->x,bl->y);
 					}
 					sce->val2 = 0;
 					if (group)
@@ -13967,7 +13953,7 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 			}
 			level--;
 			if (duplicate[level])
-				ShowWarning("status_readdb_refine_libconfig_sub: duplicate rate '%s' for entry %s in \"%s\", overwriting previous entry...\n", rlvl, name, source);
+				ShowWarning("status_readdb_refine_libconfig_sub: Duplicate rate '%s' for entry %s in \"%s\", overwriting previous entry...\n", rlvl, name, source);
 			else
 				duplicate[level] = true;
 			if (config_setting_lookup_int(t, "NormalChance", &i32))

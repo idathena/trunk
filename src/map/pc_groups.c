@@ -21,14 +21,14 @@ struct GroupSettings {
 	unsigned int id; // groups.[].id
 	int level; // groups.[].level
 	const char *name; // groups.[].name
-	config_setting_t *commands; // groups.[].commands
+	struct config_setting_t *commands; // groups.[].commands
 	unsigned int e_permissions; // packed groups.[].permissions
 	bool log_commands; // groups.[].log_commands
 	/// Following are used only during config reading
-	config_setting_t *permissions; // groups.[].permissions
-	config_setting_t *inherit; // groups.[].inherit
+	struct config_setting_t *permissions; // groups.[].permissions
+	struct config_setting_t *inherit; // groups.[].inherit
 	bool inheritance_done; // have all inheritance rules been evaluated?
-	config_setting_t *root; // groups.[]
+	struct config_setting_t *root; // groups.[]
 	int group_pos;/* pos on load */
 };
 
@@ -62,7 +62,7 @@ static inline GroupSettings* name2group(const char *group_name)
  */
 static void read_config(void)
 {
-	config_setting_t *groups = NULL;
+	struct config_setting_t *groups = NULL;
 	const char *config_filename = "conf/groups.conf"; // FIXME: hardcoded name
 	int group_count = 0;
 	
@@ -81,7 +81,7 @@ static void read_config(void)
 			int id = 0, level = 0;
 			const char *groupname = NULL;
 			int log_commands = 0;
-			config_setting_t *group = config_setting_get_elem(groups, i);
+			struct config_setting_t *group = config_setting_get_elem(groups, i);
 
 			if (!config_setting_lookup_int(group, "id", &id)) {
 				ShowConfigWarning(group, "pc_groups:read_config: \"groups\" list member #%d has undefined id, removing...", i);
@@ -104,7 +104,8 @@ static void read_config(void)
 
 			if (!config_setting_lookup_string(group, "name", &groupname)) {
 				char temp[20];
-				config_setting_t *name = NULL;
+				struct config_setting_t *name = NULL;
+
 				snprintf(temp, sizeof(temp), "Group %d", id);
 				if ((name = config_setting_add(group, "name", CONFIG_TYPE_STRING)) == NULL ||
 				    !config_setting_set_string(name, temp)) {
@@ -144,7 +145,7 @@ static void read_config(void)
 		// Check if all commands and permissions exist
 		iter = db_iterator(pc_group_db);
 		for (group_settings = dbi_first(iter); dbi_exists(iter); group_settings = dbi_next(iter)) {
-			config_setting_t *commands = group_settings->commands, *permissions = group_settings->permissions;
+			struct config_setting_t *commands = group_settings->commands, *permissions = group_settings->permissions;
 			int count = 0, j;
 
 			// Make sure there is "commands" group
@@ -153,7 +154,7 @@ static void read_config(void)
 			count = config_setting_length(commands);
 
 			for (j = 0; j < count; ++j) {
-				config_setting_t *command = config_setting_get_elem(commands, j);
+				struct config_setting_t *command = config_setting_get_elem(commands, j);
 				const char *name = config_setting_name(command);
 
 				if (!atcommand_exists(name)) {
@@ -170,7 +171,7 @@ static void read_config(void)
 			count = config_setting_length(permissions);
 
 			for(j = 0; j < count; ++j) {
-				config_setting_t *permission = config_setting_get_elem(permissions, j);
+				struct config_setting_t *permission = config_setting_get_elem(permissions, j);
 				const char *name = config_setting_name(permission);
 				int p;
 
@@ -190,9 +191,9 @@ static void read_config(void)
 		while (i < group_count) {
 			iter = db_iterator(pc_group_db);
 			for (group_settings = dbi_first(iter); dbi_exists(iter); group_settings = dbi_next(iter)) {
-				config_setting_t *inherit = NULL,
-				                 *commands = group_settings->commands,
-					             *permissions = group_settings->permissions;
+				struct config_setting_t *inherit = NULL,
+					*commands = group_settings->commands,
+					*permissions = group_settings->permissions;
 				int j, inherit_count = 0, done = 0;
 				
 				if (group_settings->inheritance_done) // Group already processed
@@ -257,11 +258,11 @@ static void read_config(void)
 		// Pack permissions into GroupSettings.e_permissions for faster checking
 		iter = db_iterator(pc_group_db);
 		for (group_settings = dbi_first(iter); dbi_exists(iter); group_settings = dbi_next(iter)) {
-			config_setting_t *permissions = group_settings->permissions;
+			struct config_setting_t *permissions = group_settings->permissions;
 			int c, count = config_setting_length(permissions);
 
 			for (c = 0; c < count; ++c) {
-				config_setting_t *perm = config_setting_get_elem(permissions, c);
+				struct config_setting_t *perm = config_setting_get_elem(permissions, c);
 				const char *name = config_setting_name(perm);
 				int val = config_setting_get_bool(perm);
 				int j;
@@ -319,7 +320,7 @@ static inline int AtCommandType2idx(AtCommandType type) { return (type-1); }
 bool pc_group_can_use_command(int group_id, const char *command, AtCommandType type)
 {
 	int result = 0;
-	config_setting_t *commands = NULL;
+	struct config_setting_t *commands = NULL;
 	GroupSettings *group = NULL;
 
 	if (pc_group_has_permission(group_id, PC_PERM_USE_ALL_COMMANDS))
@@ -330,8 +331,8 @@ bool pc_group_can_use_command(int group_id, const char *command, AtCommandType t
 
 	commands = group->commands;
 	if (commands != NULL) {
-		config_setting_t *cmd = NULL;
-		
+		struct config_setting_t *cmd = NULL;
+
 		// <commandname> : <bool> (only atcommand)
 		if (type == COMMAND_ATCOMMAND && config_setting_lookup_bool(commands, command, &result))
 			return (bool)result;

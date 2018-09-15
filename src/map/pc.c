@@ -12,6 +12,7 @@
 #include "../common/timer.h"
 #include "../common/utils.h"
 #include "../common/mmo.h" //NAME_LENGTH
+#include "../common/conf.h"
 
 #include "map.h"
 #include "atcommand.h" // get_atcommand_level()
@@ -52,6 +53,8 @@
 #include <time.h>
 #include <math.h>
 
+static inline bool pc_attendance_rewarded_today(struct map_session_data *sd);
+
 #define PVP_CALCRANK_INTERVAL 1000 //PVP calculation interval
 #define MAX_LEVEL_BASE_EXP 99999999 //Max Base EXP for player on Max Base Level
 #define MAX_LEVEL_JOB_EXP 999999999 //Max Job EXP for player on Max Job Level
@@ -78,6 +81,21 @@ struct fame_list chemist_fame_list[MAX_FAME_LIST];
 struct fame_list taekwon_fame_list[MAX_FAME_LIST];
 
 struct s_job_info job_info[CLASS_COUNT];
+
+struct s_attendance_reward {
+	uint16 itemid;
+	uint16 amount;
+};
+
+struct s_attendance_period {
+	uint32 start;
+	uint32 end;
+	struct s_attendance_reward *rewards;
+	uint8 reward_count;
+};
+
+struct s_attendance_period *attendance_periods;
+uint8 attendance_period_count;
 
 #define MOTD_LINE_SIZE 128
 static char motd_text[MOTD_LINE_SIZE][CHAT_SIZE_MAX]; //Message of the day buffer [Valaris]
@@ -11395,6 +11413,117 @@ static bool pc_readdb_job_noenter_map(char *str[], int columns, int current) {
 	return true;
 }
 
+static void pc_readdb_attendance_libconfig_sub(struct config_setting_t *t, const char *name, const char *source)
+{
+	struct config_setting_t *reward = NULL;
+	uint32 start = 0, end = 0;
+	char aDay[5];
+
+	nullpo_retv(t);
+	nullpo_retv(name);
+	nullpo_retv(source);
+
+	if (!config_setting_lookup_int(t, "Start", &start)) {
+		ShowWarning("pc_readdb_attendance_libconfig_sub: Missing 'Start' for entry '%s' in \"%s\".\n", name, source);
+		return;
+	}
+	if (!config_setting_lookup_int(t, "End", &end)) {
+		ShowWarning("pc_readdb_attendance_libconfig_sub: Missing 'End' for entry '%s' in \"%s\".\n", name, source);
+		return;
+	}
+	if (end < date_get(DT_YYYYMMDD)) {
+		ShowWarning("pc_readdb_attendance_libconfig_sub: Outdate period for entry '%s' in \"%s\".\n", name, source);
+		return;
+	}
+
+	CREATE(attendance_periods, struct s_attendance_period, 1);
+	attendance_periods->start = start;
+	attendance_periods->end = end;
+
+	if ((reward = config_setting_get_member(t, "Rewards")) && config_setting_is_group(reward)) {
+		struct config_setting_t *n = NULL;
+		bool duplicate[MAX_ATTENDANCE_DAY];
+		int j = 0;
+
+		memset(&duplicate, 0, sizeof(duplicate));
+
+		while ((n = config_setting_get_elem(reward, j++)) && config_setting_is_group(n)) {
+			char *nDay = config_setting_name(n);
+			struct item_data *id = NULL;
+			int day = 0, i32 = 0;
+			uint16 at_itemid;
+			uint16 at_amount;
+
+			memset(&aDay, 0, sizeof(aDay));
+
+			if (!strspn(&nDay[strlen(nDay) - 1], "0123456789") || (day = atoi(strncpy(aDay, nDay + 3, 4))) <= 0) {
+				ShowWarning("pc_readdb_attendance_libconfig_sub: Invalid format '%s' for entry %s in \"%s\".\n", nDay, name, source);
+				return;
+			}
+			if (day <= 0 || day > MAX_ATTENDANCE_DAY) {
+				ShowWarning("pc_readdb_attendance_libconfig_sub: Out of range '%s' (maximum: Day%d) for entry %s in \"%s\".\n", nDay, MAX_ATTENDANCE_DAY, name, source);
+				return;
+			}
+			day--;
+			if (duplicate[day])
+				ShowWarning("pc_readdb_attendance_libconfig_sub: Duplicate '%s' reward for entry %s in \"%s\", overwriting previous entry...\n", nDay, name, source);
+			else
+				duplicate[day] = true;
+			if (!config_setting_lookup_int(n, "ItemId", &i32)) {
+				ShowWarning("pc_readdb_attendance_libconfig_sub: No '%s' reward defined for entry %s in \"%s\".\n", nDay, name, source);
+				return;
+			} else {
+				if (!(id = itemdb_exists(i32))) {
+					ShowWarning("pc_readdb_attendance_libconfig_sub: '%s' has non-existance Item ID %d for entry %s in \"%s\".\n", nDay, i32, name, source);
+					return;
+				}
+				at_itemid = id->nameid;
+			}
+			if (!config_setting_lookup_int(n, "Amount", &i32))
+				at_amount = 1;
+			else {
+				if (i32 <= 0) {
+					ShowWarning("pc_readdb_attendance_libconfig_sub: '%s' has invalid reward amount %d in for entry %s in \"%s\".\n", nDay, i32, name, source);
+					return;
+				}
+				at_amount = i32;
+				if (at_amount > MAX_AMOUNT) {
+					ShowWarning("pc_readdb_attendance_libconfig_sub: '%s' has %d reward amount (maximum: %d) for entry %s in \"%s\".\n", nDay, i32, MAX_AMOUNT, name, source);
+					at_amount = MAX_AMOUNT;
+				}
+			}
+			if (!attendance_periods->rewards)
+				CREATE(attendance_periods->rewards, struct s_attendance_reward, 1);
+			else
+				RECREATE(attendance_periods->rewards, struct s_attendance_reward, attendance_periods->reward_count + 1);
+			attendance_periods->rewards[day].itemid = at_itemid;
+			attendance_periods->rewards[day].amount = at_amount;
+			attendance_periods->reward_count++;
+		}
+	}
+	attendance_period_count++;
+}
+
+static void pc_readdb_attendance_libconfig(const char *filename)
+{
+	struct config_t attendance_db_conf;
+	struct config_setting_t *t;
+	char filepath[256];
+	int count = 0;
+
+	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, filename);
+	if (conf_read_file(&attendance_db_conf, filepath))
+		return;
+	if ((t = config_setting_get_elem(attendance_db_conf.root, 0))) {
+		char *name = config_setting_name(t);
+
+		pc_readdb_attendance_libconfig_sub(t, name, filename);
+		count++;
+	}
+	config_destroy(&attendance_db_conf);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
+}
+
 /*==========================================
  * pc DB reading.
  * job_exp.txt		- required experience values
@@ -11552,6 +11681,8 @@ void pc_readdb(void)
 				job_info[idx].base_sp[j] = pc_calc_basesp(j + 1, i);
 		}
 	}
+
+	pc_readdb_attendance_libconfig(DBPATH"attendance_db.conf");
 }
 
 // Read MOTD on startup. [Valaris]
@@ -11774,6 +11905,9 @@ void pc_damage_log_clear(struct map_session_data *sd, int id) {
  */
 void pc_scdata_received(struct map_session_data *sd) {
 	pc_inventory_rentals(sd); //Needed here to remove rentals that have status changes after chrif_load_scdata has finished
+
+	if( pc_has_permission(sd, PC_PERM_ATTENDANCE) && pc_attendance_enabled() && !pc_attendance_rewarded_today(sd) )
+		clif_ui_open(sd, OUT_UI_ATTENDANCE, pc_attendance_counter(sd));
 
 	clif_weight_limit(sd);
 	sd->state.pc_loaded = true;
@@ -12606,6 +12740,103 @@ void pc_update_job_and_level(struct map_session_data *sd) {
 	}
 }
 
+struct s_attendance_period *pc_attendance_period(void) {
+	uint32 date = date_get(DT_YYYYMMDD);
+	int i;
+
+	for (i = 0; i < attendance_period_count; i++) {
+		if (attendance_periods->start <= date && attendance_periods->end >= date)
+			return attendance_periods;
+	}
+
+	return NULL;
+}
+
+bool pc_attendance_enabled(void) {
+	//Check if the attendance feature is disabled
+	if (!battle_config.feature_attendance)
+		return false;
+
+	//Check if there is a running attendance period
+	return (pc_attendance_period() != NULL);
+}
+
+static inline bool pc_attendance_rewarded_today(struct map_session_data *sd) {
+	return pc_readreg2(sd, ATTENDANCE_DATE_VAR) >= date_get(DT_YYYYMMDD);
+}
+
+int32 pc_attendance_counter(struct map_session_data *sd) {
+	struct s_attendance_period *period = NULL;
+	int counter = 0;
+
+	//No running attendance period
+	if (!(period = pc_attendance_period()))
+		return 0;
+
+	//Get the counter for the current period
+	counter = pc_readreg2(sd, ATTENDANCE_COUNT_VAR);
+
+	//Check if we have a remaining counter from a previous period
+	if (counter > 0 && pc_readreg2(sd, ATTENDANCE_DATE_VAR) < period->start) {
+		pc_setreg2(sd, ATTENDANCE_COUNT_VAR, 0); //Reset the counter to zero
+		return 0;
+	}
+
+	return 10 * counter + (pc_attendance_rewarded_today(sd) ? 1 : 0);
+}
+
+void pc_attendance_claim_reward(struct map_session_data *sd) {
+	struct s_attendance_period *period = NULL;
+	struct mail_message msg;
+	int32 attendance_counter = 0;
+
+	//If the user's group does not have the permission
+	if (!pc_has_permission(sd, PC_PERM_ATTENDANCE))
+		return;
+
+	//Check if the attendance feature is disabled
+	if (!pc_attendance_enabled())
+		return;
+
+	//Check if the user already got his reward today
+	if (pc_attendance_rewarded_today(sd))
+		return;
+
+	attendance_counter = pc_readreg2(sd, ATTENDANCE_COUNT_VAR);
+	attendance_counter += 1;
+
+	if (!(period = pc_attendance_period()))
+		return;
+
+	if (period->reward_count < attendance_counter)
+		return;
+
+	pc_setreg2(sd, ATTENDANCE_DATE_VAR, date_get(DT_YYYYMMDD));
+	pc_setreg2(sd, ATTENDANCE_COUNT_VAR, attendance_counter);
+
+	if (save_settings&CHARSAVE_ATTENDANCE)
+		chrif_save(sd, CSAVE_NORMAL);
+
+	memset(&msg, 0, sizeof(struct mail_message));
+
+	msg.dest_id = sd->status.char_id;
+	safestrncpy(msg.send_name, msg_txt(764), NAME_LENGTH);
+	safesnprintf(msg.title, MAIL_TITLE_LENGTH, msg_txt(765), attendance_counter);
+	safesnprintf(msg.body, MAIL_BODY_LENGTH, msg_txt(766), attendance_counter);
+
+	msg.item[0].nameid = period->rewards[attendance_counter - 1].itemid;
+	msg.item[0].amount = period->rewards[attendance_counter - 1].amount;
+	msg.item[0].identify = 1;
+
+	msg.status = MAIL_NEW;
+	msg.type = MAIL_INBOX_NORMAL;
+	msg.timestamp = time(NULL);
+
+	intif_Mail_send(0, &msg);
+
+	clif_attendence_response(sd, attendance_counter);
+}
+
 /*==========================================
  * pc Init/Terminate
  *------------------------------------------*/
@@ -12615,6 +12846,15 @@ void do_final_pc(void) {
 
 	ers_destroy(pc_sc_display_ers);
 	ers_destroy(pc_itemgrouphealrate_ers);
+
+	if (attendance_periods->rewards) {
+		aFree(attendance_periods->rewards);
+		attendance_periods->rewards = NULL;
+		attendance_periods->reward_count = 0;
+	}
+	aFree(attendance_periods);
+	attendance_periods = NULL;
+	attendance_period_count = 0;
 }
 
 void do_init_pc(void) {

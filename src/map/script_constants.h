@@ -5341,6 +5341,40 @@
 	export_constant(GSTORAGE_NO_STORAGE);
 	export_constant(GSTORAGE_NO_PERMISSION);
 
+	/* Months */
+	export_constant(JANUARY);
+	export_constant(FEBRUARY);
+	export_constant(MARCH);
+	export_constant(APRIL);
+	export_constant(MAY);
+	export_constant(JUNE);
+	export_constant(JULY);
+	export_constant(AUGUST);
+	export_constant(SEPTEMBER);
+	export_constant(OCTOBER);
+	export_constant(NOVEMBER);
+	export_constant(DECEMBER);
+	
+	/* Days of the week */
+	export_constant(SUNDAY);
+	export_constant(MONDAY);
+	export_constant(TUESDAY);
+	export_constant(WEDNESDAY);
+	export_constant(THURSDAY);
+	export_constant(FRIDAY);
+	export_constant(SATURDAY);
+	
+	/* Date types */
+	export_constant(DT_SECOND);
+	export_constant(DT_MINUTE);
+	export_constant(DT_HOUR);
+	export_constant(DT_DAYOFWEEK);
+	export_constant(DT_DAYOFMONTH);
+	export_constant(DT_MONTH);
+	export_constant(DT_YEAR);
+	export_constant(DT_DAYOFYEAR);
+	export_constant(DT_YYYYMMDD);
+
 	#undef export_constant
 	#undef export_constant2
 	#undef export_parameter

@@ -9,7 +9,7 @@
  */
 
 #ifndef PACKETVER
-	#define PACKETVER 20170517
+	#define PACKETVER 20180620
 #endif
 
 #ifndef PACKETVER_RE
@@ -23,7 +23,7 @@
 	/// Comment to disable the official packet obfuscation support.
 	/// This requires PACKETVER 2011-08-17 or newer.
 	#ifndef PACKET_OBFUSCATION
-		//#define PACKET_OBFUSCATION
+		#define PACKET_OBFUSCATION
 
 		/// Define these inside src/custom/defines_pre.h or src/custom/defines_post.h
 		//#define PACKET_OBFUSCATION_KEY1 <key1>

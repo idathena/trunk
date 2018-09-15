@@ -385,7 +385,7 @@ einbech,97,167,5	script	Cavitar	847,{
 								mes "10 Zargon?";
 								next;
 								switch(select("Sure~!:No, thanks.")) {
-						 		case 1:
+								case 1:
 									set Zeny,Zeny-1000;
 									set $ein_amano,$ein_amano + 1;
 									set ein_gear1,1;
@@ -397,7 +397,7 @@ einbech,97,167,5	script	Cavitar	847,{
 									mes "gather everything I've";
 									mes "asked you to bring.";
 									close;
-						 		case 2:
+								case 2:
 									mes "[Cavitar]";
 									mes "I see.";
 									mes "Well, I understand";
@@ -416,7 +416,7 @@ einbech,97,167,5	script	Cavitar	847,{
 									close;
 								}
 							}
-					 	}
+						}
 					case 2:
 						mes "[Cavitar]";
 						mes "I understand.";
@@ -426,7 +426,7 @@ einbech,97,167,5	script	Cavitar	847,{
 						mes "that I'm desperate...";
 						close;
 					}
-		 		case 2:
+				case 2:
 					mes "[Cavitar]";
 					mes "You're...";
 					mes "You're heartless!";
@@ -3439,7 +3439,7 @@ OnTouch:
 		mes "fix this! I gotta hide and find";
 		mes "someplace safe!";
 		close2;
- 		if ($EinPolution > 9 && !$@AlrdEinPoll) {
+		if ($EinPolution > 9 && !$@AlrdEinPoll) {
 			donpcevent "Einbroch Smog Alert::OnEnable";
 			hideonnpc "Liotzburg#ein";
 		}
@@ -5698,7 +5698,7 @@ OnTouch:
 			mes "Failure to do so will result";
 			mes "in lockout. Please wait.";
 			next;
-			set .@startseconds,gettime(3)*60*60+gettime(2)*60+gettime(1);
+			set .@startseconds,gettimetick(1);
 			mes "[Security System]";
 			switch(rand(1,7)) {
 			case 1:
@@ -5767,7 +5767,7 @@ OnTouch:
 			}
 			next;
 			input .@input2$;
-			set .@endtime,gettime(3)*60*60+gettime(2)*60+gettime(1);
+			set .@endtime,gettimetick(1);
 			set .@time,.@endtime-.@startseconds;
 			mes "[Security System]";
 			if ((.@input1$ == .@word1$) && (.@input2$ == .@word2$)) {

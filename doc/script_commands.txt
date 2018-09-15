@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Last Updated: ========================================
-//= 20171105
+//= 20180913
 //===== Description: =========================================
 //= A reference manual for the rAthena scripting language.
 //= Commands are sorted depending on their functionality.
@@ -1083,6 +1083,23 @@ This special label triggers when a player's stats are recalculated, such as when
 changing stats, equipment, or maps, as well as when logging in, leveling up, and
 mounting a job mount. This can be used to grant additional item bonuses to certain
 player groups, for instance.
+
+How to use:
+
+-	script	EventPCStatCalc	-1,{
+	end;
+OnPCStatCalcEvent:
+	if(BaseLevel >= 90) {
+		bonus bMaxHP,1000;
+		bonus bAspd,3;
+		bonus bIntravision,0;
+	}
+	// Never use 'end' or 'close' in this label, so that if by any chance a player
+	// triggers this event while still attached to a NPC (for example: Buffer NPC),
+	// the NPC script will continue to run properly without getting 'end' or 'close'
+	// by the event label script. That's why it's recommended to use the label
+	// specifically to one NPC.
+}
 
 OnWhisperGlobal:
 
@@ -3156,18 +3173,19 @@ This function will return a tick depending on <tick type>:
 
 This function will return specified information about the current system time.
 
-1 - Seconds (of a minute)
-2 - Minutes (of an hour)
-3 - Hour (of a day)
-4 - Week day (0 for Sunday, 6 is Saturday)
-5 - Day of the month.
-6 - Number of the month.
-7 - Year.
-8 - Day of the year.
+DT_SECOND - Seconds (of the current minute)
+DT_MINUTE - Minutes (of the current hour)
+DT_HOUR - Hour (of the current day)
+DT_DAYOFWEEK - Week day (constants for MONDAY to SUNDAY are available)
+DT_DAYOFMONTH - Day of the current month
+DT_MONTH - Month (constants for JANUARY to DECEMBER are available)
+DT_YEAR - Year
+DT_DAYOFYEAR - Day of the year
+DT_YYYYMMDD - current date in the form YYYYMMDD
 
-It will only return numbers.
+It will only return numbers. If another type is supplied -1 will be returned.
 
-    if (gettime(4)==6) mes "It's a Saturday. I don't work on Saturdays.";
+	if (gettime(DT_DAYOFWEEK)==SATURDAY) mes "It's a Saturday. I don't work on Saturdays.";
 
 ---------------------------------------
 
@@ -3947,7 +3965,7 @@ not.
 ==============================
 -------------------------
 
-*attachrid(<account ID>)
+*attachrid(<account ID>{,force})
 *detachrid;
 
 These commands allow the manipulation of the script's currently attached player.
@@ -3955,8 +3973,13 @@ While 'attachrid' allows attaching of a different player by using its account id
 for the parameter RID, 'detachrid' makes the following commands run as if the
 script was never invoked by a player. 
 
-The command returns 0 if the player cannot be attached (if the account is offline
-or does not exist), and 1 upon success.
+The command returns false if the player cannot be attached (if the account is offline
+or does not exist), and true upon success.
+
+By default the command is executed with force, which causes to attach the player
+even if he is currently attached to another script. Since this is not always the
+desired behavior you can also specify false to the command and it will only return 
+true if the player is online and was not attached to another script.
 
 -------------------------
 
@@ -5807,7 +5830,7 @@ executed on attack (or when attacked in the case of autobonus2).
 
 Rate is the trigger rate of the script (1000 = 100%). 
 
-Duration is the time that the bonus will last for since the script has triggered.
+Duration is the time in milliseconds that the bonus will last for since the script has triggered.
 
 Skill ID/skill name the skill which will be used as trigger to start the bonus. (autobonus3)
 
@@ -8166,8 +8189,10 @@ OnClock0600:
 	day;
 	end;
 OnInit:
-	// setting correct mode upon server start-up
-	if(gettime(3)>=6 && gettime(3)<18) end;
+	// Setting correct mode upon server start-up
+	if(gettime(DT_HOUR)>=6 && gettime(DT_HOUR)<18)
+		end;
+// Fall through
 OnClock1800:
 	night;
 	end;
@@ -8755,6 +8780,12 @@ Creates an invisible wall, an array of "setcell" starting from x,y and doing a
 line of the given size in the given direction. The difference with setcell is
 this one update client part too to avoid the glitch problem. Directions are the 
 same as NPC sprite facing directions: 0=north, 1=northwest, 2=west, etc.
+
+---------------------------------------
+
+*checkwall "<name>";
+
+This command will return true if the wall with the given name exists, false otherwise.
 
 ---------------------------------------
 

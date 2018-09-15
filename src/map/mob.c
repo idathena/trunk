@@ -1562,7 +1562,7 @@ int mob_randomwalk(struct mob_data *md, unsigned int tick)
 	}
 	speed = status_get_speed(&md->bl);
 	for(i = c = 0; i < md->ud.walkpath.path_len; i++) { //The next walk start time is calculated
-		if(md->ud.walkpath.path[i]&1)
+		if(direction_diagonal(md->ud.walkpath.path[i]))
 			c += speed * MOVE_DIAGONAL_COST / MOVE_COST;
 		else
 			c += speed;
@@ -3915,9 +3915,9 @@ static bool mob_parse_dbrow(char **str)
 	int mob_id, i;
 	double exp, maxhp;
 	struct mob_data data;
-	
+
 	mob_id = atoi(str[0]);
-	
+
 	if (mob_id <= 1000 || mob_id > MAX_MOB_DB) {
 		ShowError("mob_parse_dbrow: Invalid monster ID %d, must be in range %d-%d.\n", mob_id, 1000, MAX_MOB_DB);
 		return false;
@@ -3927,7 +3927,7 @@ static bool mob_parse_dbrow(char **str)
 		ShowError("mob_parse_dbrow: Invalid monster ID %d, reserved for player classes.\n", mob_id);
 		return false;
 	}
-	
+
 	if (mob_id >= MOB_CLONE_START && mob_id < MOB_CLONE_END) {
 		ShowError("mob_parse_dbrow: Invalid monster ID %d. Range %d-%d is reserved for player clones. Please increase MAX_MOB_DB (%d).\n", mob_id, MOB_CLONE_START, MOB_CLONE_END-1, MAX_MOB_DB);
 		return false;
@@ -4774,13 +4774,13 @@ static bool mob_readdb_drop(char *str[], int columns, int current)
 
 	mobid = atoi(str[0]);
 	if ((mob = mob_db(mobid)) == mob_dummy) {
-		ShowError("mob_readdb_drop: Invalid monster with ID %s.\n", str[0]);
+		ShowError("mob_readdb_drop: Invalid monster ID %s.\n", str[0]);
 		return false;
 	}
 
 	nameid = atoi(str[1]);
 	if (!itemdb_exists(nameid)) {
-		ShowWarning("mob_readdb_drop: Invalid item id %s.\n", str[1]);
+		ShowWarning("mob_readdb_drop: Invalid item ID %s.\n", str[1]);
 		return false;
 	}
 
@@ -4802,13 +4802,13 @@ static bool mob_readdb_drop(char *str[], int columns, int current)
 			}
 		}
 	} else {
-		for (i = 0; i < size; i++) {
-			if (!drop[i].nameid)
-				break;
-		}
-		if (i == size) {
-			ShowError("mob_readdb_drop: Cannot add item '%hu' to monster '%hu'. Max drop reached '%d'.\n", nameid, mobid, size);
-			return true;
+		ARR_FIND(0, size, i, drop[i].nameid == nameid);
+		if (i == size) { //Item is not dropped at all (search all item slots)
+			ARR_FIND(0, size, i, drop[i].nameid == 0);
+			if (i == size) { //No empty slots
+				ShowError("mob_readdb_drop: Cannot add item '%hu' to monster '%hu'. Max drop reached (%d).\n", nameid, mobid, size);
+				return true;
+			}
 		}
 		drop[i].nameid = nameid;
 		drop[i].p = rate;

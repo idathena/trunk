@@ -2041,7 +2041,8 @@ static int battle_blewcount_bonus(struct map_session_data *sd, uint16 skill_id)
 }
 
 #ifdef ADJUST_SKILL_DAMAGE
-/** Damage calculation for adjusting skill damage
+/**
+ * Damage calculation for adjusting skill damage
  * @param caster Applied caster type for damage skill
  * @param type BL_Type of attacker
  */
@@ -2061,7 +2062,8 @@ static bool battle_skill_damage_iscaster(uint8 caster, enum bl_type src_type)
 	return false;
 }
 
-/** Gets skill damage rate from a skill (based on skill_damage_db.txt)
+/**
+ * Gets skill damage rate from a skill (based on skill_damage_db.txt)
  * @param src
  * @param target
  * @param skill_id
@@ -2104,7 +2106,8 @@ static int battle_skill_damage_skill(struct block_list *src, struct block_list *
 	return 0;
 }
 
-/** Gets skill damage rate from a skill (based on 'skill_damage' mapflag)
+/**
+ * Gets skill damage rate from a skill (based on 'skill_damage' mapflag)
  * @param src
  * @param target
  * @param skill_id
@@ -2163,7 +2166,8 @@ static int battle_skill_damage_map(struct block_list *src, struct block_list *ta
 	return rate;
 }
 
-/** Check skill damage adjustment based on mapflags and skill_damage_db.txt for specified skill
+/**
+ * Check skill damage adjustment based on mapflags and skill_damage_db.txt for specified skill
  * @param src
  * @param target
  * @param skill_id
@@ -3031,7 +3035,6 @@ struct Damage battle_calc_damage_parts(struct Damage wd, struct block_list *src,
 	struct status_data *sstatus = status_get_status_data(src);
 	struct status_data *tstatus = status_get_status_data(target);
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
-
 	int right_element = battle_get_weapon_element(&wd, src, target, skill_id, skill_lv, EQI_HAND_R);
 	int left_element = battle_get_weapon_element(&wd, src, target, skill_id, skill_lv, EQI_HAND_L);
 
@@ -8646,6 +8649,7 @@ static const struct _battle_data {
 	{ "pet_autofeed_always",                &battle_config.pet_autofeed_always,             1,      0,      1,              },
 	{ "feature.homunculus_autofeed",        &battle_config.feature_homunculus_autofeed,     1,      0,      1,              },
 	{ "homunculus_autofeed_always",         &battle_config.homunculus_autofeed_always,      1,      0,      1,              },
+	{ "feature.attendance",                 &battle_config.feature_attendance,              1,      0,      1,              },
 
 #include "../custom/battle_config_init.inc"
 };
@@ -8656,8 +8660,8 @@ static const struct _battle_data {
 int battle_set_value(const char *w1, const char *w2)
 {
 	int val = config_switch(w2);
-
 	int i;
+
 	ARR_FIND(0, ARRAYLENGTH(battle_data), i, strcmpi(w1, battle_data[i].str) == 0);
 	if (i == ARRAYLENGTH(battle_data))
 		return 0; //Not found
@@ -8677,6 +8681,7 @@ int battle_set_value(const char *w1, const char *w2)
 int battle_get_value(const char *w1)
 {
 	int i;
+
 	ARR_FIND(0, ARRAYLENGTH(battle_data), i, strcmpi(w1, battle_data[i].str) == 0);
 	if (i == ARRAYLENGTH(battle_data))
 		return 0; //Not found
@@ -8690,6 +8695,7 @@ int battle_get_value(const char *w1)
 void battle_set_defaults()
 {
 	int i;
+
 	for (i = 0; i < ARRAYLENGTH(battle_data); i++)
 		*battle_data[i].val = battle_data[i].defval;
 }
@@ -8789,6 +8795,13 @@ void battle_adjust_conf()
 	if (battle_config.feature_pet_autofeed) {
 		ShowWarning("conf/battle/feature.conf pet autofeeding is enabled but it requires PACKETVER 2015-05-13 or newer, disabling...\n");
 		battle_config.feature_pet_autofeed = 0;
+	}
+#endif
+
+#if PACKETVER < 20180307
+	if (battle_config.feature_attendance) {
+		ShowWarning("conf/battle/feature.conf attendance system is enabled but it requires PACKETVER 2018-03-07 or newer, disabling...\n");
+		battle_config.feature_attendance = 0;
 	}
 #endif
 

@@ -853,7 +853,7 @@ static int pet_randomwalk(struct pet_data *pd,unsigned int tick)
 			}
 		}
 		for(i = c = 0; i < pd->ud.walkpath.path_len; i++) {
-			if(pd->ud.walkpath.path[i]&1)
+			if(direction_diagonal(pd->ud.walkpath.path[i]))
 				c += pd->status.speed * MOVE_DIAGONAL_COST / MOVE_COST;
 			else
 				c += pd->status.speed;
@@ -1294,50 +1294,10 @@ static bool pet_get_const(const struct config_setting_t *it, int *value)
 	return true;
 }
 
-/**
- * Search and replace a string with another string, in a string
- */
-static char *pet_replacestr(char *input, char *find, char *replace)
-{
-	size_t inputlen = strlen(input);
-	size_t findlen = strlen(find);
-	struct StringBuf output;
-	int count = 0;
-	int numFinds = 0;
-	int i = 0, f = 0;
-	char *string = NULL;
-
-	StringBuf_Init(&output);
-
-	for (; i < inputlen; i++) {
-		if (count && count == numFinds)
-			break;
-		for (f = 0; f <= findlen; f++) {
-			if (f == findlen) {
-				numFinds++;
-				StringBuf_AppendStr(&output, replace);
-				i += findlen - 1;
-				break;
-			} else if ((i + f) > inputlen || input[i + f] != find[f]) {
-				StringBuf_Printf(&output, "%c", input[i]);
-				break;
-			}
-		}
-	}
-
-	if (i < inputlen)
-		StringBuf_AppendStr(&output, &(input[i]));
-
-	string = StringBuf_Value(&output);
-	StringBuf_Destroy(&output);
-	return string;
-}
-
 static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int idx)
 {
 	struct config_setting_t *pett = NULL;
 	int i = 0;
-	char *str = NULL;
 
 	nullpo_retv(t);
 
@@ -1347,13 +1307,16 @@ static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int i
 		if (config_setting_is_group(pett)) {
 			struct item_data *id = NULL;
 			struct config_setting_t *item = NULL;
-			int j = 0, i32 = 0;
+			int j = 0, eggID = 0;
+			char *str = config_setting_name(pett);
+			char string[] = "EggID_";
 
-			str = config_setting_name(pett);
-			str = pet_replacestr(str, "EggID_", "");
-			i32 = atoi(str);
-			if (!(id = itemdb_exists(i32))) {
-				ShowWarning("pet_readdb_libconfig_sub_evolution: Invalid Egg ID %d in Pet #%d, skipping.\n", i32, pet_db[idx].class_);
+			if ((str = strstr(str, string))) {
+				strcpy(str, str + strlen(string));
+				eggID = atoi(str);
+			}
+			if (!(id = itemdb_exists(eggID))) {
+				ShowWarning("pet_readdb_libconfig_sub_evolution: Invalid Egg ID %d in Pet #%d.\n", eggID, pet_db[idx].class_);
 				return;
 			}
 			if (!pet_db[idx].ev_datas)
@@ -1363,17 +1326,20 @@ static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int i
 			pet_db[idx].ev_datas[i].EggID = id->nameid;
 			while ((item = config_setting_get_elem(pett, j))) {
 				struct item_data *id2 = NULL;
-				int quantity;
+				int quantity, itemID = 0, count = 0;
+				char *str2 = config_setting_name(item);
+				char string2[] = "ItemID_";
 
-				str = config_setting_name(item);
-				str = pet_replacestr(str, "ItemID_", "");
-				i32 = atoi(str);
-				if (!(id2 = itemdb_exists(i32))) {
-					ShowWarning("pet_readdb_libconfig_sub_evolution: required item ID %d not found in egg %d\n", i32, pet_db[idx].ev_datas[i].EggID);
+				if ((str2 = strstr(str2, string2))) {
+					strcpy(str2, str2 + strlen(string2));
+					itemID = atoi(str2);
+				}
+				if (!(id2 = itemdb_exists(itemID))) {
+					ShowWarning("pet_readdb_libconfig_sub_evolution: required item ID %d not found in egg %d\n", itemID, pet_db[idx].ev_datas[i].EggID);
 					return;
 				}
-				if (pet_get_const(item, &i32) && i32 >= 0)
-					quantity = i32;
+				if (pet_get_const(item, &count) && count >= 0)
+					quantity = count;
 				if (quantity <= 0) {
 					ShowWarning("pet_readdb_libconfig_sub_evolution: invalid quantity %d for egg %d\n", quantity, pet_db[idx].ev_datas[i].EggID);
 					return;

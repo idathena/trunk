@@ -10005,8 +10005,11 @@ void clif_msg(struct map_session_data *sd, unsigned short id)
 /// 0x7e2 <message>.W <value>.L
 void clif_msg_value(struct map_session_data *sd, unsigned short id, int value)
 {
-	int fd = sd->fd;
+	int fd;
 
+	nullpo_retv(sd);
+
+	fd = sd->fd;
 	WFIFOHEAD(fd,packet_len(0x7e2));
 	WFIFOW(fd,0) = 0x7e2;
 	WFIFOW(fd,2) = id;
@@ -10022,13 +10025,32 @@ void clif_msg_value(struct map_session_data *sd, unsigned short id, int value)
 ///       "[SkillName] Message"
 void clif_msg_skill(struct map_session_data *sd, uint16 skill_id, int msg_id)
 {
-	int fd = sd->fd;
+	int fd;
 
+	nullpo_retv(sd);
+
+	fd = sd->fd;
 	WFIFOHEAD(fd,packet_len(0x7e6));
 	WFIFOW(fd,0) = 0x7e6;
 	WFIFOW(fd,2) = skill_id;
 	WFIFOL(fd,4) = msg_id;
 	WFIFOSET(fd,packet_len(0x7e6));
+}
+
+
+/// Displays msgstringtable.txt string in a color. (ZC_MSG_COLOR).
+/// 09cd <msg id>.W <color>.L
+void clif_msg_color(struct map_session_data *sd, uint16 msg_id, uint32 color) {
+	int fd;
+
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,packet_len(0x9cd));
+	WFIFOW(fd,0) = 0x9cd;
+	WFIFOW(fd,2) = msg_id;
+	WFIFOL(fd,4) = color;
+	WFIFOSET(fd,packet_len(0x9cd));
 }
 
 
@@ -11320,7 +11342,7 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 		if( (npc = npc_name2id(str)) ) {
 			char split_data[NUM_WHISPER_VAR][CHAT_SIZE_MAX];
 			char *split;
-			char output[256];
+			char event[EVENT_NAME_LENGTH];
 
 			str = message;
 			//Skip codepage indicator, if detected
@@ -11339,11 +11361,13 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 				str = split + 1;
 			}
 			for( i = 0; i < NUM_WHISPER_VAR; ++i ) {
-				safesnprintf(output, sizeof(output), "@whispervar%d$", i);
-				set_var(sd, output, (char *)split_data[i]);
+				char variablename[CHAT_SIZE_MAX];
+
+				safesnprintf(variablename, sizeof(variablename), "@whispervar%d$", i);
+				set_var(sd, variablename, (char *)split_data[i]);
 			}
-			safesnprintf(output, sizeof(output), "%s::OnWhisperGlobal", npc->exname);
-			npc_event(sd, output, 0); //Calls the NPC label
+			safesnprintf(event, sizeof(event), "%s::%s", npc->exname, script_config.onwhisper_event_name);
+			npc_event(sd, event, 0); //Calls the NPC label
 			return;
 		}
 	} else if( target[0] == '#' ) {
@@ -11388,7 +11412,7 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 
 	//If player is autotrading
 	if( dstsd->state.autotrade ) {
-		char output[256];
+		char output[CHAT_SIZE_MAX];
 
 		safesnprintf(output, sizeof(output), "%s is in autotrade mode and cannot receive whispered messages.", dstsd->status.name);
 		clif_wis_message(fd, wisp_server_name, output, strlen(output));
@@ -18987,7 +19011,7 @@ void clif_display_pinfo(struct map_session_data *sd, int cmdtype) {
 
 		//1:Premium
 		if(pc_isvip(sd)) {
-			details_bexp[1] = battle_config.vip_base_exp_increase;
+			details_bexp[1] = battle_config.vip_base_exp_increase * battle_config.base_exp_rate / 100;
 			if(details_bexp[1] < 0)
 				details_bexp[1] = 0 - details_bexp[1];
 		} else
@@ -19016,8 +19040,8 @@ void clif_display_pinfo(struct map_session_data *sd, int cmdtype) {
 		details_drop[0] = 0;
 
 		//1:Premium
-		details_drop[1] = battle_config.vip_drop_increase * battle_config.item_rate_common / 100;
 		if(pc_isvip(sd)) {
+			details_drop[1] = battle_config.vip_drop_increase * battle_config.item_rate_common / 100;
 			if(details_drop[1] < 0)
 				details_drop[1] = 0 - details_drop[1];
 		} else
@@ -20551,6 +20575,61 @@ void clif_parse_changedress(int fd, struct map_session_data *sd) {
 
 	is_atcommand(fd, sd, command, 1);
 #endif
+}
+
+
+/// Opens an UI window of the given type and initializes it with the given data
+/// 0AE2 <type>.B <data>.L
+void clif_ui_open(struct map_session_data *sd, enum out_ui_type ui_type, int32 data) {
+	int fd;
+
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,packet_len(0xae2));
+	WFIFOW(fd,0) = 0xae2;
+	WFIFOB(fd,2) = ui_type;
+	WFIFOL(fd,3) = data;
+	WFIFOSET(fd,packet_len(0xae2));
+}
+
+
+/// Request to open an UI window of the given type
+/// 0A68 <type>.B
+void clif_parse_open_ui(int fd, struct map_session_data *sd) {
+	switch( RFIFOB(fd,2) ) {
+		case IN_UI_ATTENDANCE:
+			if( !pc_has_permission(sd, PC_PERM_ATTENDANCE) )
+				clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(767),false,SELF); // You are not allowed to use the attendance system.
+			else if( pc_attendance_enabled() )
+				clif_ui_open(sd, OUT_UI_ATTENDANCE, pc_attendance_counter(sd));
+			else
+				clif_msg_color(sd, MSG_ATTENDANCE_DISABLED, color_table[COLOR_RED]);
+			break;
+	}
+}
+
+
+/// Response for attedance request
+/// 0AF0 <unknown>.L <data>.L
+void clif_attendence_response(struct map_session_data *sd, int32 data) {
+	int fd;
+
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,packet_len(0xAF0));
+	WFIFOW(fd,0) = 0xAF0;
+	WFIFOL(fd,2) = 0;
+	WFIFOL(fd,6) = data;
+	WFIFOSET(fd,packet_len(0xAF0));
+}
+
+
+/// Request from the client to retrieve today's attendance reward
+/// 0AEF
+void clif_parse_attendance_request(int fd, struct map_session_data *sd) {
+	pc_attendance_claim_reward(sd);
 }
 
 

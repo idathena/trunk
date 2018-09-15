@@ -130,7 +130,7 @@ int map_port = 0;
 
 int autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
 int minsave_interval = 100;
-int save_settings = 0xFFFF;
+int16 save_settings = CHARSAVE_ALL;
 bool agit_flag = false;
 bool agit2_flag = false;
 bool agit3_flag = false;
@@ -3118,6 +3118,11 @@ void map_setgatcell(int16 m, int16 x, int16 y, int gat)
  *------------------------------------------*/
 static DBMap *iwall_db;
 
+bool map_iwall_exist(const char *wall_name)
+{
+	return strdb_exists(iwall_db, wall_name);
+}
+
 void map_iwall_nextxy(int16 x, int16 y, int8 dir, int pos, int16 *x1, int16 *y1)
 {
 	if( dir == 0 || dir == 4 )
@@ -3202,13 +3207,13 @@ void map_iwall_get(struct map_session_data *sd)
 	dbi_destroy(iter);
 }
 
-void map_iwall_remove(const char *wall_name)
+bool map_iwall_remove(const char *wall_name)
 {
 	struct iwall_data *iwall;
 	int16 i, x1, y1;
 
 	if( (iwall = (struct iwall_data *)strdb_get(iwall_db, wall_name)) == NULL )
-		return; // Nothing to do
+		return false; // Nothing to do
 
 	for( i = 0; i < iwall->size; i++ ) {
 		map_iwall_nextxy(iwall->x, iwall->y, iwall->dir, i, &x1, &y1);
@@ -3221,6 +3226,7 @@ void map_iwall_remove(const char *wall_name)
 
 	map[iwall->m].iwall_num--;
 	strdb_remove(iwall_db, iwall->wall_name);
+	return true;
 }
 
 /**
@@ -3556,7 +3562,8 @@ int map_waterheight(char *mapname)
 	sprintf(fn, "data\\%s.rsw", mapname);
 
 	found = grfio_find_file(fn);
-	if (found) strcpy(fn, found); // Replace with real name
+	if (found)
+		strcpy(fn, found); // Replace with real name
 
 	// Read & convert fn
 	rsw = (char *)grfio_read (fn);

@@ -39,8 +39,8 @@ force_4-1,99,20,4	script	Octus#arena	124,{
 
 OnStart:
 	initnpctimer;
-	set $arena_min80st,gettime(2);
-	set $arena_sec80st,gettime(1);
+	set $arena_min80st,gettime(DT_MINUTE);
+	set $arena_sec80st,gettime(DT_SECOND);
 	end;
 
 OnTimer3000:
@@ -732,8 +732,8 @@ OnMyMobDead:
 		donpcevent "Octus#arena::On09_End";
 		donpcevent "arena#80::OnReset_09";
 		donpcevent "arena#80::OnReset_All";
-		set $arena_min80end,gettime(2);
-		set $arena_sec80end,gettime(1);
+		set $arena_min80end,gettime(DT_MINUTE);
+		set $arena_sec80end,gettime(DT_SECOND);
 	}
 	end;
 }
@@ -821,7 +821,7 @@ prt_are_in,77,187,3	script	Staff#80-2	67,{
 			close2;
 		}
 		specialeffect2 EF_EXIT;
- 		donpcevent "cast#80::OnNomal1";
+		donpcevent "cast#80::OnNomal1";
 		warp "arena_room",100,75;
 		donpcevent "#arn_timer_80::OnStop";
 		donpcevent "alloff#80::OnEnable";
@@ -868,7 +868,7 @@ prt_are_in,77,187,3	script	Staff#80-2	67,{
 			close2;
 		}
 		specialeffect2 EF_HIT5;
- 		donpcevent "cast#80::OnNomal2";
+		donpcevent "cast#80::OnNomal2";
 		warp "arena_room",100,75;
 		donpcevent "#arn_timer_80::OnStop";
 		donpcevent "alloff#80::OnEnable";
@@ -895,7 +895,7 @@ OnTimer4000:
 	end;
 
 OnTimer60000:
- 	donpcevent "cast#80::OnTimeOver2";
+	donpcevent "cast#80::OnTimeOver2";
 	donpcevent "arn_warp_80::OnOut";
 	donpcevent "#arn_timer_80::OnStop";
 	donpcevent "alloff#80::OnEnable";

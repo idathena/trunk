@@ -220,6 +220,20 @@ static int instance_npcinit(struct block_list *bl, va_list ap)
 }
 
 /*==========================================
+ * Run the OnInstanceDestroy events for duplicated NPCs
+ *------------------------------------------*/
+static int instance_npcdestroy(struct block_list *bl, va_list ap)
+{
+	struct npc_data *nd;
+
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, nd = (struct npc_data *)bl);
+
+	return npc_instancedestroy(nd);
+}
+
+/*==========================================
  * Add an NPC to an instance
  *------------------------------------------*/
 static int instance_addnpc_sub(struct block_list *bl, va_list ap)
@@ -294,6 +308,9 @@ int instance_create(int party_id, const char *name)
 	instance_subscription_timer(0, 0, 0, 0);
 
 	ShowInfo("[Instance] Created: %s.\n", name);
+
+	// Start the instance timer on instance creation
+	instance_startkeeptimer(&instance_data[i], i);
 
 	return i;
 }
@@ -442,6 +459,9 @@ int instance_destroy(short instance_id)
 			type = 2;
 		else
 			type = 3;
+
+		for(i = 0; i < im->cnt_map; i++) //Run OnInstanceDestroy on all NPCs in the instance
+			map_foreachinallarea(instance_npcdestroy, im->map[i].m, 0, 0, map[im->map[i].m].xs, map[im->map[i].m].ys, BL_NPC, im->map[i].m);
 
 		for(i = 0; i < im->cnt_map; i++)
 			map_delinstancemap(im->map[i].m);

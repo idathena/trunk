@@ -465,6 +465,7 @@ enum clif_messages {
 	SKILL_REBEL_GUN_FAIL = 0xa02,
 	GUILD_MASTER_WOE = 0xb93,
 	GUILD_MASTER_DELAY = 0xb94,
+	MSG_ATTENDANCE_DISABLED = 0xd92,
 };
 
 enum e_CASHSHOP_ACK {
@@ -1085,5 +1086,17 @@ void clif_weight_limit(struct map_session_data *sd);
 
 //Pet Evolution System
 void clif_pet_evolution_result(int fd, enum e_pet_evolution_result result);
+
+//Attendance System
+enum in_ui_type {
+	IN_UI_ATTENDANCE = 5
+};
+
+enum out_ui_type {
+	OUT_UI_ATTENDANCE = 7
+};
+
+void clif_ui_open(struct map_session_data *sd, enum out_ui_type ui_type, int32 data);
+void clif_attendence_response(struct map_session_data *sd, int32 data);
 
 #endif /* _CLIF_H_ */

@@ -396,16 +396,16 @@ OnTouch:
 			if (checkweight(1201,1) == 0) {
 				mes " - Hang on there !! -";
 				mes " - You are carrying too many kinds of items - ";
-		   		mes " - to receive any more items. - ";
+				mes " - to receive any more items. - ";
 				mes " - Please lighten your load - ";
-		   		mes " - and try again. - ";
+				mes " - and try again. - ";
 				close;
 			}
 			if (MaxWeight - Weight < 1000) {
 				mes " - Hang on there !! -";
-			 	mes " - You are carrying too much weight - ";
+				mes " - You are carrying too much weight - ";
 				mes " - Please lighten your load - ";
-		   		mes " - and try again. - ";
+				mes " - and try again. - ";
 				close;
 			}
 			mes "- Jumble Fumble -";
@@ -2519,7 +2519,7 @@ mora,31,138,6	script	Raffle Researcher#ep14	522,{
 		close;
 	}
 	// NPC disabled from 12am ~ 5am.
-	if (gettime(3) >= 0 && gettime(3) < 5) {
+	if (gettime(DT_HOUR) >= 0 && gettime(DT_HOUR) < 5) {
 		if (ep14_1_muk > 0) {
 			mes "[Raffle Researcher]";
 			mes "Don't humans sleep?";

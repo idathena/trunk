@@ -22,6 +22,7 @@
 #include "intif.h"
 #include "clif.h"
 #include "channel.h"
+#include "script.h" // script_config
 #include "skill.h"
 #include "log.h"
 #include "trade.h"
@@ -422,7 +423,7 @@ int guild_npc_request_info(int guild_id,const char *event)
 {
 	if( guild_search(guild_id) ) {
 		if( event && *event )
-			npc_event_do(event);
+			npc_event_doall(event);
 		return 0;
 	}
 
@@ -431,7 +432,7 @@ int guild_npc_request_info(int guild_id,const char *event)
 		DBData prev;
 
 		ev = (struct eventlist *)aCalloc(sizeof(struct eventlist),1);
-		memcpy(ev->name,event,strlen(event));
+		safestrncpy(ev->name,event,EVENT_NAME_LENGTH);
 		// The one in the db (if present) becomes the next event from this.
 		if( guild_infoevent_db->put(guild_infoevent_db, db_i2key(guild_id), db_ptr2data(ev), &prev) )
 			ev->next = db_data2ptr(&prev);
@@ -1740,10 +1741,11 @@ int castle_guild_broken_sub(DBKey key, DBData *data, va_list ap)
 
 	if (gc->guild_id == guild_id) {
 		char name[EVENT_NAME_LENGTH];
+
 		// We call castle_event::OnGuildBreak of all castles of the guild
 		// You can set all castle_events in the 'db/castle_db.txt'
-		safestrncpy(name, gc->castle_event, sizeof(name));
-		npc_event_do(strcat(name, "::OnGuildBreak"));
+		safesnprintf(name, EVENT_NAME_LENGTH, "%s::%s", gc->castle_event, script_config.guild_break_event_name);
+		npc_event_do(name);
 
 		// Save the new 'owner', this should invoke guardian clean up and other such things.
 		guild_castledatasave(gc->castle_id, 1, 0);
@@ -2093,9 +2095,9 @@ int guild_castledataloadack(int len, struct guild_castle *gc)
 	ev = i; // offset of castle or -1
 
 	if( ev < 0 ) { //No castles owned, invoke OnAgitInit as it is
-		npc_event_doall("OnAgitInit");
-		npc_event_doall("OnAgitInit2");
-		npc_event_doall("OnAgitInit3");
+		npc_event_doall(script_config.agit_init_event_name);
+		npc_event_doall(script_config.agit_init2_event_name);
+		npc_event_doall(script_config.agit_init3_event_name);
 	} else { //Load received castles into memory, one by one
 		for( i = 0; i < n; i++, gc++ ) {
 			struct guild_castle *c = guild_castle_search(gc->castle_id);
@@ -2112,9 +2114,9 @@ int guild_castledataloadack(int len, struct guild_castle *gc)
 				if( i != ev )
 					guild_request_info(c->guild_id);
 				else { //Last owned one
-					guild_npc_request_info(c->guild_id, "::OnAgitInit");
-					guild_npc_request_info(c->guild_id, "::OnAgitInit2");
-					guild_npc_request_info(c->guild_id, "::OnAgitInit3");
+					guild_npc_request_info(c->guild_id, script_config.agit_init_event_name);
+					guild_npc_request_info(c->guild_id, script_config.agit_init2_event_name);
+					guild_npc_request_info(c->guild_id, script_config.agit_init3_event_name);
 				}
 			}
 		}
@@ -2126,61 +2128,67 @@ int guild_castledataloadack(int len, struct guild_castle *gc)
 /**
  * Start WoE:FE and triggers all npc OnAgitStart
  */
-void guild_agit_start(void)
-{
-	int c = npc_event_doall("OnAgitStart");
-
-	ShowStatus("NPC_Event:[OnAgitStart] Run (%d) Events by @AgitStart.\n",c);
+bool guild_agit_start(void) {
+	if( agit_flag )
+		return false;
+	agit_flag = true;
+	npc_event_runall(script_config.agit_start_event_name);
+	return true;
 }
 
 /**
  * End WoE:FE and triggers all npc OnAgitEnd
  */
-void guild_agit_end(void)
-{
-	int c = npc_event_doall("OnAgitEnd");
-
-	ShowStatus("NPC_Event:[OnAgitEnd] Run (%d) Events by @AgitEnd.\n",c);
+bool guild_agit_end(void) {
+	if( !agit_flag )
+		return false;
+	agit_flag = false;
+	npc_event_runall(script_config.agit_end_event_name);
+	return true;
 }
 
 /**
  * Start WoE:SE and triggers all npc OnAgitStart2
  */
-void guild_agit2_start(void)
-{
-	int c = npc_event_doall("OnAgitStart2");
-
-	ShowStatus("NPC_Event:[OnAgitStart2] Run (%d) Events by @AgitStart2.\n",c);
+bool guild_agit2_start(void) {
+	if( agit2_flag )
+		return false;
+	agit2_flag = true;
+	npc_event_runall(script_config.agit_start2_event_name);
+	return true;
 }
 
 /**
  * End WoE:SE and triggers all npc OnAgitEnd2
  */
-void guild_agit2_end(void)
-{
-	int c = npc_event_doall("OnAgitEnd2");
-
-	ShowStatus("NPC_Event:[OnAgitEnd2] Run (%d) Events by @AgitEnd2.\n",c);
+bool guild_agit2_end(void) {
+	if( !agit2_flag )
+		return false;
+	agit2_flag = false;
+	npc_event_runall(script_config.agit_end2_event_name);
+	return true;
 }
 
 /**
  * Start WoE:TE and triggers all npc OnAgitStart3
  */
-void guild_agit3_start(void)
-{
-	int c = npc_event_doall("OnAgitStart3");
-
-	ShowStatus("NPC_Event:[OnAgitStart3] Run (%d) Events by @AgitStart3.\n",c);
+bool guild_agit3_start(void) {
+	if( agit3_flag )
+		return false;
+	agit3_flag = true;
+	npc_event_runall(script_config.agit_start3_event_name);
+	return true;
 }
 
 /**
  * End WoE:TE and triggers all npc OnAgitEnd3
  */
-void guild_agit3_end(void)
-{
-	int c = npc_event_doall("OnAgitEnd3");
-
-	ShowStatus("NPC_Event:[OnAgitEnd3] Run (%d) Events by @AgitEnd3.\n",c);
+bool guild_agit3_end(void) {
+	if( !agit3_flag )
+		return false;
+	agit3_flag = false;
+	npc_event_runall(script_config.agit_end3_event_name);
+	return true;
 }
 
 //How many castles does this guild have?
@@ -2190,9 +2198,10 @@ int guild_checkcastles(struct guild *g)
 	struct guild_castle *gc = NULL;
 	DBIterator *iter = db_iterator(castle_db);
 
-	for (gc = dbi_first(iter); dbi_exists(iter); gc = dbi_next(iter))
+	for (gc = dbi_first(iter); dbi_exists(iter); gc = dbi_next(iter)) {
 		if (gc->guild_id == g->guild_id)
 			nb_cas++;
+	}
 
 	dbi_destroy(iter);
 	return nb_cas;

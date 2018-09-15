@@ -659,6 +659,7 @@ extern struct Battle_Config
 	int pet_autofeed_always;
 	int feature_homunculus_autofeed;
 	int homunculus_autofeed_always;
+	int feature_attendance;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;
