@@ -121,7 +121,7 @@ struct atcmd_binding_data *get_atcommandbind_byname(const char *name) {
 static const char *atcommand_help_string(const char *command)
 {
 	const char *str = NULL;
-	config_setting_t *info;
+	struct config_setting_t *info;
 
 	if( *command == atcommand_symbol || *command == charcommand_symbol ) {
 		// Remove the prefix symbol for the raw name of the command
@@ -1498,7 +1498,7 @@ ACMD_FUNC(joblevelup)
 	clif_updatestatus(sd, SP_SKILLPOINT);
 	status_calc_pc(sd, SCO_FORCE);
 	if(level > 0 && battle_config.atcommand_levelup_events)
-		npc_script_event(sd,NPCE_JOBLVUP);
+		npc_script_event(sd, NPCE_JOBLVUP);
 
 	return 0;
 }
@@ -1508,7 +1508,7 @@ ACMD_FUNC(joblevelup)
  *------------------------------------------*/
 ACMD_FUNC(help)
 {
-	config_setting_t *help;
+	struct config_setting_t *help;
 	const char *text = NULL;
 	const char *command_name = NULL;
 	char *default_command = "help";
@@ -1516,7 +1516,7 @@ ACMD_FUNC(help)
 	nullpo_retr(-1, sd);
 
 	help = config_lookup(&atcommand_config, "help");
-	if (help == NULL) {
+	if (!help) {
 		clif_displaymessage(fd, msg_txt(27)); // "Commands help is not available."
 		return -1;
 	}
@@ -3492,16 +3492,13 @@ ACMD_FUNC(agitstart)
 {
 	nullpo_retr(-1, sd);
 
-	if (agit_flag) {
+	if (guild_agit_start()) {
+		clif_displaymessage(fd, msg_txt(72)); // War of Emperium has been initiated.
+		return 0;
+	} else {
 		clif_displaymessage(fd, msg_txt(73)); // War of Emperium is currently in progress.
 		return -1;
 	}
-
-	agit_flag = true;
-	guild_agit_start();
-	clif_displaymessage(fd, msg_txt(72)); // War of Emperium has been initiated.
-
-	return 0;
 }
 
 /**
@@ -3511,16 +3508,13 @@ ACMD_FUNC(agitstart2)
 {
 	nullpo_retr(-1, sd);
 
-	if (agit2_flag) {
-		clif_displaymessage(fd, msg_txt(404)); // "War of Emperium SE is currently in progress."
+	if (guild_agit2_start()) {
+		clif_displaymessage(fd, msg_txt(403)); // War of Emperium SE has been initiated.
+		return 0;
+	} else {
+		clif_displaymessage(fd, msg_txt(404)); // War of Emperium SE is currently in progress.
 		return -1;
 	}
-
-	agit2_flag = true;
-	guild_agit2_start();
-	clif_displaymessage(fd, msg_txt(403)); // "War of Emperium SE has been initiated."
-
-	return 0;
 }
 
 /**
@@ -3530,16 +3524,13 @@ ACMD_FUNC(agitstart3)
 {
 	nullpo_retr(-1, sd);
 
-	if (agit3_flag) {
-		clif_displaymessage(fd, msg_txt(742)); // "War of Emperium TE is currently in progress."
+	if (guild_agit3_start()) {
+		clif_displaymessage(fd, msg_txt(741)); // War of Emperium TE has been initiated.
+		return 0;
+	} else {
+		clif_displaymessage(fd, msg_txt(742)); // War of Emperium TE is currently in progress.
 		return -1;
 	}
-
-	agit3_flag = true;
-	guild_agit3_start();
-	clif_displaymessage(fd, msg_txt(741)); // "War of Emperium TE has been initiated."
-
-	return 0;
 }
 
 /**
@@ -3549,16 +3540,13 @@ ACMD_FUNC(agitend)
 {
 	nullpo_retr(-1, sd);
 
-	if (!agit_flag) {
+	if (guild_agit_end()) {
+		clif_displaymessage(fd, msg_txt(74)); // War of Emperium has been ended.
+		return 0;
+	} else {
 		clif_displaymessage(fd, msg_txt(75)); // War of Emperium is currently not in progress.
 		return -1;
 	}
-
-	agit_flag = false;
-	guild_agit_end();
-	clif_displaymessage(fd, msg_txt(74)); // War of Emperium has been ended.
-
-	return 0;
 }
 
 /**
@@ -3568,16 +3556,13 @@ ACMD_FUNC(agitend2)
 {
 	nullpo_retr(-1, sd);
 
-	if (!agit2_flag) {
-		clif_displaymessage(fd, msg_txt(406)); // "War of Emperium SE is currently not in progress."
+	if (guild_agit2_end()) {
+		clif_displaymessage(fd, msg_txt(405)); // War of Emperium SE has been ended.
+		return 0;
+	} else {
+		clif_displaymessage(fd, msg_txt(406)); // War of Emperium SE is currently not in progress.
 		return -1;
 	}
-
-	agit2_flag = false;
-	guild_agit2_end();
-	clif_displaymessage(fd, msg_txt(405)); // "War of Emperium SE has been ended."
-
-	return 0;
 }
 
 /**
@@ -3587,16 +3572,13 @@ ACMD_FUNC(agitend3)
 {
 	nullpo_retr(-1, sd);
 
-	if (!agit3_flag) {
+	if (guild_agit3_end()) {
+		clif_displaymessage(fd, msg_txt(743)); // War of Emperium TE has been ended.
+		return 0;
+	} else {
 		clif_displaymessage(fd, msg_txt(744)); // War of Emperium TE is currently not in progress.
 		return -1;
 	}
-
-	agit3_flag = false;
-	guild_agit3_end();
-	clif_displaymessage(fd, msg_txt(743)); // War of Emperium TE has been ended.
-
-	return 0;
 }
 
 /*==========================================
@@ -3835,7 +3817,7 @@ ACMD_FUNC(reload)
 		mercenary_read_skilldb();
 		clif_displaymessage(fd, msg_txt(99)); // Skill database has been reloaded.
 	} else if (strstr(command, "atcommand") || strncmp(message, "atcommand", 4) == 0) {
-		config_t run_test;
+		struct config_t run_test;
 
 		if (conf_read_file(&run_test, "conf/groups.conf")) {
 			clif_displaymessage(fd, msg_txt(1036)); // Error reading groups.conf, reload failed.
@@ -10553,7 +10535,7 @@ bool is_atcommand(const int fd, struct map_session_data *sd, const char *message
  *------------------------------------------*/
 static void atcommand_config_read(const char *config_filename)
 {
-	config_setting_t *aliases = NULL, *help = NULL;
+	struct config_setting_t *aliases = NULL, *help = NULL;
 	const char *symbol = NULL;
 	int num_aliases = 0;
 
@@ -10586,7 +10568,7 @@ static void atcommand_config_read(const char *config_filename)
 		int count = config_setting_length(aliases);
 
 		for (i = 0; i < count; ++i) {
-			config_setting_t *command;
+			struct config_setting_t *command;
 			const char *commandname = NULL;
 			int j = 0, alias_count = 0;
 			AtCommandInfo *commandinfo = NULL;
@@ -10627,7 +10609,7 @@ static void atcommand_config_read(const char *config_filename)
 		int i;
 
 		for (i = 0; i < count; ++i) {
-			config_setting_t *command;
+			struct config_setting_t *command;
 			const char *commandname;
 
 			command = config_setting_get_elem(help, i);

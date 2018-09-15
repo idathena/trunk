@@ -15,11 +15,12 @@
 #include "mapreg.h"
 #include "log.h"
 #include "clif.h"
+#include "date.h" // days of week enum
 #include "intif.h"
 #include "pc.h"
 #include "status.h"
 #include "itemdb.h"
-#include "script.h"
+#include "script.h" // script_config
 #include "mob.h"
 #include "pet.h"
 #include "instance.h"
@@ -201,7 +202,7 @@ int npc_ontouch_event(struct map_session_data *sd, struct npc_data *nd) {
 	if( pc_ishiding(sd) )
 		return 1; //Can't trigger 'OnTouch_', use 'OnTouch' instead
 
-	snprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.ontouch_name);
+	safesnprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.ontouch_event_name);
 	return npc_event(sd, name, 1);
 }
 
@@ -211,7 +212,7 @@ int npc_ontouch2_event(struct map_session_data *sd, struct npc_data *nd) {
 	if( sd->areanpc_id == nd->bl.id )
 		return 0;
 
-	snprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.ontouch2_name);
+	safesnprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.ontouch2_event_name);
 	return npc_event(sd, name, 2);
 }
 
@@ -221,7 +222,7 @@ int npc_onuntouch_event(struct map_session_data *sd, struct npc_data *nd) {
 	if( sd->areanpc_id != nd->bl.id )
 		return 0;
 
-	snprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.onuntouch_name);
+	safesnprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.onuntouch_event_name);
 	return npc_event(sd, name, 2);
 }
 
@@ -491,6 +492,11 @@ int npc_event_doall(const char *name)
 	return npc_event_doall_id(name,0);
 }
 
+// Runs the specified event(global only) and reports call count
+void npc_event_runall(const char *eventname) {
+	ShowStatus("Event '"CL_WHITE"%s"CL_RESET"' executed with '"CL_WHITE"%d"CL_RESET"' NPCs.\n", eventname, npc_event_doall(eventname));
+}
+
 // Runs the specified event, with a RID attached (global only)
 int npc_event_doall_id(const char *name, int rid)
 {
@@ -518,36 +524,37 @@ int npc_event_do_clock(int tid, unsigned int tick, int id, intptr_t data)
 	t = localtime(&timer);
 
 	if (t->tm_min != ev_tm_b.tm_min ) {
-		char *day;
+		const char *day = NULL;
+
+		safesnprintf(buf,EVENT_NAME_LENGTH,"%s%02d",script_config.timer_minute_event_name,t->tm_min);
+		c += npc_event_doall(buf);
+
+		safesnprintf(buf,EVENT_NAME_LENGTH,"%s%02d%02d",script_config.timer_clock_event_name,t->tm_hour,t->tm_min);
+		c += npc_event_doall(buf);
 
 		switch (t->tm_wday) {
-			case 0: day = "Sun"; break;
-			case 1: day = "Mon"; break;
-			case 2: day = "Tue"; break;
-			case 3: day = "Wed"; break;
-			case 4: day = "Thu"; break;
-			case 5: day = "Fri"; break;
-			case 6: day = "Sat"; break;
-			default:day = ""; break;
+			case SUNDAY:	day = script_config.timer_sunday_event_name; break;
+			case MONDAY:	day = script_config.timer_monday_event_name; break;
+			case TUESDAY:	day = script_config.timer_tuesday_event_name; break;
+			case WEDNESDAY:	day = script_config.timer_wednesday_event_name; break;
+			case THURSDAY:	day = script_config.timer_thursday_event_name; break;
+			case FRIDAY:	day = script_config.timer_friday_event_name; break;
+			case SATURDAY:	day = script_config.timer_saturday_event_name; break;
 		}
-		
-		sprintf(buf,"OnMinute%02d",t->tm_min);
-		c += npc_event_doall(buf);
-		
-		sprintf(buf,"OnClock%02d%02d",t->tm_hour,t->tm_min);
-		c += npc_event_doall(buf);
-		
-		sprintf(buf,"On%s%02d%02d",day,t->tm_hour,t->tm_min);
-		c += npc_event_doall(buf);
+
+		if (day) {
+			sprintf(buf,"%s%02d%02d",day,t->tm_hour,t->tm_min);
+			c += npc_event_doall(buf);
+		}
 	}
-	
+
 	if (t->tm_hour != ev_tm_b.tm_hour) {
-		sprintf(buf,"OnHour%02d",t->tm_hour);
+		safesnprintf(buf,EVENT_NAME_LENGTH,"%s%02d",script_config.timer_hour_event_name,t->tm_hour);
 		c += npc_event_doall(buf);
 	}
-	
+
 	if (t->tm_mday != ev_tm_b.tm_mday) {
-		sprintf(buf,"OnDay%02d%02d",t->tm_mon+1,t->tm_mday);
+		safesnprintf(buf,EVENT_NAME_LENGTH,"%s%02d%02d",script_config.timer_day_event_name,t->tm_mon + 1,t->tm_mday);
 		c += npc_event_doall(buf);
 	}
 
@@ -561,10 +568,10 @@ int npc_event_do_clock(int tid, unsigned int tick, int id, intptr_t data)
  */
 void npc_event_do_oninit(bool reload)
 {
-	ShowStatus("Event '"CL_WHITE"OnInit"CL_RESET"' executed with '"CL_WHITE"%d"CL_RESET"' NPCs."CL_CLL"\n", npc_event_doall("OnInit"));
+	npc_event_runall(script_config.init_event_name);
 
 	// This interval has already been added on startup
-	if( !reload )
+	if (!reload)
 		add_timer_interval(gettick() + 100,npc_event_do_clock,0,0,1000);
 }
 
@@ -577,8 +584,10 @@ int npc_timerevent_export(struct npc_data *nd, int i)
 	int t = 0, k = 0;
 	char *lname = nd->u.scr.label_list[i].name;
 	int pos = nd->u.scr.label_list[i].pos;
+	size_t len = strlen(script_config.timer_event_name);
 
-	if (sscanf(lname, "OnTimer%d%n", &t, &k) == 1 && lname[k] == '\0') {
+	// Check if the label name starts with OnTimer(default) and then parse the seconds right after it
+	if (!strncmp(lname,script_config.timer_event_name,len) && sscanf((lname += len), "%11d%n", &t, &k) == 1 && lname[k] == '\0') {
 		// Timer event
 		struct npc_timerevent_list *te = nd->u.scr.timer_event;
 		int j, k2 = nd->u.scr.timeramount;
@@ -589,7 +598,7 @@ int npc_timerevent_export(struct npc_data *nd, int i)
 			te = (struct npc_timerevent_list *)aRealloc(te, sizeof(struct npc_timerevent_list) * (k2 + 1));
 		for (j = 0; j < k2; j++) {
 			if (te[j].timer > t) {
-				memmove(te+j+1, te+j, sizeof(struct npc_timerevent_list) * (k2 - j));
+				memmove(te + j + 1, te + j, sizeof(struct npc_timerevent_list) * (k2 - j));
 				break;
 			}
 		}
@@ -867,12 +876,12 @@ int npc_settimerevent_tick(struct npc_data *nd, int newtimer)
 
 int npc_event_sub(struct map_session_data *sd, struct event_data *ev, const char *eventname)
 {
-	if( sd->npc_id ) { //Enqueue the event trigger
+	if( sd->npc_id && !running_npc_stat_calc_event ) { //Enqueue the event trigger
 		int i;
 
 		ARR_FIND(0, MAX_EVENTQUEUE, i, sd->eventqueue[i][0] == '\0');
 		if( i < MAX_EVENTQUEUE ) {
-			safestrncpy(sd->eventqueue[i],eventname,50); //Event enqueued
+			safestrncpy(sd->eventqueue[i], eventname, 50); //Event enqueued
 			return 0;
 		}
 		ShowWarning("npc_event: player's event queue is full, can't add event '%s' !\n", eventname);
@@ -882,7 +891,7 @@ int npc_event_sub(struct map_session_data *sd, struct event_data *ev, const char
 		npc_event_dequeue(sd);
 		return 2;
 	}
-	run_script(ev->nd->u.scr.script,ev->pos,sd->bl.id,ev->nd->bl.id);
+	run_script(ev->nd->u.scr.script, ev->pos, sd->bl.id, ev->nd->bl.id);
 	return 0;
 }
 
@@ -968,7 +977,7 @@ int npc_touchnext_areanpc(struct map_session_data *sd, bool leavemap)
 		char name[EVENT_NAME_LENGTH];
 
 		nd->touching_id = sd->touching_id = 0;
-		snprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.ontouch_name);
+		safesnprintf(name, ARRAYLENGTH(name), "%s::%s", nd->exname, script_config.ontouch_event_name);
 		map_forcountinarea(npc_touchnext_areanpc_sub,nd->bl.m,nd->bl.x - xs,nd->bl.y - ys,nd->bl.x + xs,nd->bl.y + ys,1,BL_PC,sd->bl.id,nd->bl.id,name);
 	}
 	return 0;
@@ -1130,7 +1139,7 @@ int npc_touch_areanpc2(struct mob_data *md)
 				case NPCTYPE_SCRIPT:
 					if( map[m].npc[i]->bl.id == md->areanpc_id )
 						break; //Already touch this NPC
-					snprintf(eventname, ARRAYLENGTH(eventname), "%s::OnTouchNPC", map[m].npc[i]->exname);
+					safesnprintf(eventname, ARRAYLENGTH(eventname), "%s::%s", map[m].npc[i]->exname, script_config.ontouchnpc_event_name);
 					if( (ev = (struct event_data *)strdb_get(ev_db, eventname)) == NULL || ev->nd == NULL )
 						break; //No OnTouchNPC Event
 					md->areanpc_id = map[m].npc[i]->bl.id;
@@ -3299,8 +3308,18 @@ int npc_instanceinit(struct npc_data *nd)
 	struct event_data *ev;
 	char evname[EVENT_NAME_LENGTH];
 
-	snprintf(evname, ARRAYLENGTH(evname), "%s::OnInstanceInit", nd->exname);
+	safesnprintf(evname, ARRAYLENGTH(evname), "%s::%s", nd->exname, script_config.instance_init_event_name);
+	if( (ev = (struct event_data *)strdb_get(ev_db, evname)) )
+		run_script(nd->u.scr.script,ev->pos,0,nd->bl.id);
+	return 0;
+}
 
+ int npc_instancedestroy(struct npc_data* nd)
+{
+	struct event_data *ev;
+	char evname[EVENT_NAME_LENGTH];
+
+	safesnprintf(evname, ARRAYLENGTH(evname), "%s::%s", nd->exname, script_config.instance_destroy_event_name);
 	if( (ev = (struct event_data *)strdb_get(ev_db, evname)) )
 		run_script(nd->u.scr.script,ev->pos,0,nd->bl.id);
 
@@ -4056,7 +4075,7 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 	else if (!strcmpi(w3,"nozenypenalty"))
 		map[m].flag.nozenypenalty = state;
 	else if (!strcmpi(w3,"notrade"))
-		map[m].flag.notrade=state;
+		map[m].flag.notrade = state;
 	else if (!strcmpi(w3,"novending"))
 		map[m].flag.novending = state;
 	else if (!strcmpi(w3,"nodrop"))
@@ -4115,12 +4134,14 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 			map[m].zone = 0;
 		}
 	} else if (!strcmpi(w3,"jexp")) {
-		map[m].adjust.jexp = (state) ? atoi(w4) : 100;
-		if( map[m].adjust.jexp < 0 ) map[m].adjust.jexp = 100;
+		map[m].adjust.jexp = (state ? atoi(w4) : 100);
+		if (map[m].adjust.jexp < 0)
+			map[m].adjust.jexp = 100;
 		map[m].flag.nojobexp = (!map[m].adjust.jexp ? 1 : 0);
 	} else if (!strcmpi(w3,"bexp")) {
-		map[m].adjust.bexp = (state) ? atoi(w4) : 100;
-		if( map[m].adjust.bexp < 0 ) map[m].adjust.bexp = 100;
+		map[m].adjust.bexp = (state ? atoi(w4) : 100);
+		if (map[m].adjust.bexp < 0)
+			map[m].adjust.bexp = 100;
 		 map[m].flag.nobaseexp = (!map[m].adjust.bexp ? 1 : 0);
 	} else if (!strcmpi(w3,"loadevent"))
 		map[m].flag.loadevent = state;
@@ -4403,8 +4424,8 @@ int npc_script_event(struct map_session_data *sd, enum npce_event type)
 		ShowError("npc_script_event: NULL sd. Event Type %d\n", type);
 		return 0;
 	}
-	for (i = 0; i<script_event[type].event_count; i++)
-		npc_event_sub(sd,script_event[type].event[i],script_event[type].event_name[i]);
+	for (i = 0; i < script_event[type].event_count; i++)
+		npc_event_sub(sd, script_event[type].event[i], script_event[type].event_name[i]);
 	return i;
 }
 
@@ -4585,13 +4606,13 @@ int npc_reload(void) {
 
 	//Execute rest of the startup events if connected to char-server [Lance]
 	if( !CheckForCharServer() )
-		ShowStatus("Event '"CL_WHITE"OnInterIfInit"CL_RESET"' executed with '"CL_WHITE"%d"CL_RESET"' NPCs.\n", npc_event_doall("OnInterIfInit"));
+		npc_event_runall(script_config.inter_init_event_name);
 
 	//Refresh guild castle flags on both woe setups
 	//These events are only executed after receiving castle information from char-server
-	npc_event_doall("OnAgitInit");
-	npc_event_doall("OnAgitInit2");
-	npc_event_doall("OnAgitInit3");
+	npc_event_doall(script_config.agit_init_event_name);
+	npc_event_doall(script_config.agit_init2_event_name);
+	npc_event_doall(script_config.agit_init3_event_name);
 
 #if PACKETVER >= 20131223
 	npc_market_checkall();

@@ -363,7 +363,7 @@ OnTouch:
 		break;
 	case 4: 
 		emotion e_ho;
-		emotion e_ho,0,"Wandering Minstrel#mal";
+		emotion e_ho,0,"Minstrel#mal";
 		break;
 	}
 	end;

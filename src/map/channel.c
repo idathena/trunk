@@ -1322,8 +1322,8 @@ unsigned long channel_getColor(const char *color_str) {
  * @param i: Index
  * @return True on success or false on failure
  */
-bool channel_read_sub(config_setting_t *chan, struct Channel *tmp_chan, uint8 i) {
-	config_setting_t  *group_list = NULL;
+bool channel_read_sub(struct config_setting_t *chan, struct Channel *tmp_chan, uint8 i) {
+	struct config_setting_t *group_list = NULL;
 	int delay = 1000, autojoin = 0, leave = 1, chat = 1, color_override = 0,
 		self_notif = 1, join_notif = 0, leave_notif = 0;
 	int type = CHAN_TYPE_PUBLIC, group_count = 0;
@@ -1390,8 +1390,8 @@ bool channel_read_sub(config_setting_t *chan, struct Channel *tmp_chan, uint8 i)
  * Assign table value with value
  */
 void channel_read_config(void) {
-	config_t channels_conf;
-	config_setting_t *chan_setting = NULL;
+	struct config_t channels_conf;
+	struct config_setting_t *chan_setting = NULL;
 
 	if (conf_read_file(&channels_conf, channel_conf)) {
 		ShowError("Cannot read file '%s' for channel connfig.\n", channel_conf);
@@ -1400,7 +1400,7 @@ void channel_read_config(void) {
 
 	chan_setting = config_lookup(&channels_conf, "channel_config");
 	if (chan_setting) {
-		config_setting_t *colors, *private_channel = NULL, *channels = NULL;
+		struct config_setting_t *colors, *private_channel = NULL, *channels = NULL;
 		int count = 0, channel_count = 0;
 
 		colors = config_setting_get_member(chan_setting, "colors");
@@ -1410,7 +1410,7 @@ void channel_read_config(void) {
 			CREATE(channel_config.colors, unsigned long, color_count);
 			CREATE(channel_config.colors_name, char *, color_count);
 			for (i = 0; i < color_count; i++) {
-				config_setting_t *color = config_setting_get_elem(colors, i);
+				struct config_setting_t *color = config_setting_get_elem(colors, i);
 				CREATE(channel_config.colors_name[i], char, CHAN_NAME_LENGTH);
 
 				safestrncpy(channel_config.colors_name[i], config_setting_name(color), CHAN_NAME_LENGTH);
@@ -1470,7 +1470,7 @@ void channel_read_config(void) {
 			int i;
 
 			for (i = 0; i < count; i++) {
-				config_setting_t *chan = config_setting_get_elem(channels, i);
+				struct config_setting_t *chan = config_setting_get_elem(channels, i);
 				struct Channel *channel = NULL, tmp_chan;
 
 				memset(&tmp_chan, 0, sizeof(struct Channel));

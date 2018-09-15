@@ -7,6 +7,7 @@
 //#include "map.h"
 struct block_list;
 struct map_session_data;
+struct npc_data;
 struct mob_data;
 struct item;
 
@@ -73,6 +74,7 @@ void log_pick_mob(struct mob_data *md, e_log_pick_type type, int amount, struct 
 void log_zeny(struct map_session_data *sd, e_log_pick_type type, struct map_session_data *src_sd, int amount);
 void log_cash(struct map_session_data *sd, e_log_pick_type type, e_log_cash_type cash_type, int amount);
 void log_npc(struct map_session_data *sd, const char *message);
+void log_npc2(struct npc_data *nd, const char *message);
 void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, const char *map, int x, int y, const char *dst_charname, const char *message);
 void log_atcommand(struct map_session_data *sd, const char *message);
 void log_feeding(struct map_session_data *sd, e_log_feeding_type type, unsigned short nameid);

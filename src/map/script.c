@@ -23,6 +23,7 @@
 #include "clan.h"
 #include "clif.h"
 #include "chrif.h"
+#include "date.h" // date type enum, date_get()
 #include "itemdb.h"
 #include "pc.h"
 #include "status.h"
@@ -336,6 +337,8 @@ struct Script_Config script_config = {
 	1, //warn_func_mismatch_argtypes
 	1, 65535, 2048, //warn_func_mismatch_paramnum/check_cmdcount/check_gotocount
 	0, INT_MAX, //input_min_value/input_max_value
+	// NOTE: None of these event labels should be longer than <EVENT_NAME_LENGTH> characters
+	// PC related
 	"OnPCDieEvent", //die_event_name
 	"OnPCKillEvent", //kill_pc_event_name
 	"OnNPCKillEvent", //kill_mob_event_name
@@ -345,9 +348,44 @@ struct Script_Config script_config = {
 	"OnPCBaseLvUpEvent", //baselvup_event_name
 	"OnPCJobLvUpEvent", //joblvup_event_name
 	"OnPCStatCalcEvent", //stat_calc_event_name
-	"OnTouch_", //ontouch_name (runs on first visible char to enter area, picks another char if the first char leaves)
-	"OnTouch", //ontouch2_name (run whenever a char walks into the OnTouch area)
-	"OnUnTouch", //onuntouch_name (run whenever a char walks from the OnTouch area)
+	// NPC related
+	"OnTouch_", //ontouch_event_name (runs on first visible char to enter area, picks another char if the first char leaves)
+	"OnTouch", //ontouch2_event_name (run whenever a char walks into the OnTouch area)
+	"OnTouchNPC", //ontouchnpc_event_name (run whenever a monster walks into the OnTouch area)
+	"OnUnTouch", //onuntouch_event_name (run whenever a char walks from the OnTouch area)
+	"OnWhisperGlobal", //onwhisper_event_name (is executed when a player sends a whisper message to the NPC)
+	"OnCommand", //oncommand_event_name (is executed by script command cmdothernpc)
+	// Init related
+	"OnInit", //init_event_name (is executed on all npcs when all npcs were loaded)
+	"OnInterIfInit", //inter_init_event_name (is executed on inter server connection)
+	"OnInterIfInitOnce", //inter_init_once_event_name (is only executed on the first inter server connection)
+	// Guild related
+	"OnGuildBreak", //guild_break_event_name (is executed on all castles of the guild that is broken)
+	"OnAgitStart", //agit_start_event_name (is executed when WoE FE is started)
+	"OnAgitInit", //agit_init_event_name (is executed after all castle owning guilds have been loaded)
+	"OnAgitEnd", //agit_end_event_name (is executed when WoE FE has ended)
+	"OnAgitStart2", //agit_start2_event_name (is executed when WoE SE is started)
+	"OnAgitInit2", //agit_init2_event_name (is executed after all castle owning guilds have been loaded)
+	"OnAgitEnd2", //agit_end2_event_name (is executed when WoE SE has ended)
+	"OnAgitStart3", //agit_start3_event_name (is executed when WoE TE is started)
+	"OnAgitInit3", //agit_init3_event_name (is executed after all castle owning guilds have been loaded)
+	"OnAgitEnd3", //agit_end3_event_name (is executed when WoE TE has ended)
+	// Timer related
+	"OnTimer", //timer_event_name (is executed by a timer at the specific second)
+	"OnMinute", //timer_minute_event_name (is executed by a timer at the specific minute)
+	"OnHour", //timer_hour_event_name (is executed by a timer at the specific hour)
+	"OnClock", //timer_clock_event_name (is executed by a timer at the specific hour and minute)
+	"OnDay", //timer_day_event_name (is executed by a timer at the specific month and day)
+	"OnSun", //timer_sunday_event_name (is executed by a timer on sunday at the specific hour and minute)
+	"OnMon", //timer_monday_event_name (is executed by a timer on monday at the specific hour and minute)
+	"OnTue", //timer_tuesday_event_name (is executed by a timer on tuesday at the specific hour and minute)
+	"OnWed", //timer_wednesday_event_name (is executed by a timer on wednesday at the specific hour and minute)
+	"OnThu", //timer_thursday_event_name (is executed by a timer on thursday at the specific hour and minute)
+	"OnFri", //timer_friday_event_name (is executed by a timer on friday at the specific hour and minute)
+	"OnSat", //timer_saturday_event_name (is executed by a timer on saturday at the specific hour and minute)
+	// Instance related
+	"OnInstanceInit", //instance_init_event_name (is executed right after instance creation)
+	"OnInstanceDestroy", //instance_destroy_event_name (is executed right before instance destruction)
 };
 
 static jmp_buf     error_jump;
@@ -2396,11 +2434,13 @@ void script_hardcoded_constants(void)
 static const char *script_print_line(StringBuf* buf, const char *p, const char *mark, int line)
 {
 	int i;
-	if( p == NULL || !p[0] ) return NULL;
+
+	if( p == NULL || !p[0] )
+		return NULL;
 	if( line < 0 )
-		StringBuf_Printf(buf, "*% 5d : ", -line);
+		StringBuf_Printf(buf, "*%5d : ", -line);
 	else
-		StringBuf_Printf(buf, " % 5d : ", line);
+		StringBuf_Printf(buf, " %5d : ", line);
 	for( i = 0; p[i] && p[i] != '\n'; i++) {
 		if( p + i != mark )
 			StringBuf_Printf(buf, "%c", p[i]);
@@ -4235,7 +4275,7 @@ static void *queryThread_main(void *x) {
 		LeaveSpinLock(&queryThreadLock);
 		
 		ramutex_lock( queryThreadMutex );
-		racond_wait( queryThreadCond,	queryThreadMutex,  -1 );
+		racond_wait( queryThreadCond, queryThreadMutex, -1 );
 		ramutex_unlock( queryThreadMutex );
 
 	}
@@ -9272,7 +9312,7 @@ BUILDIN_FUNC(savepoint)
 }
 
 /*==========================================
- * GetTimeTick(0: System Tick, 1: Time Second Tick)
+ * GetTimeTick(0: System Tick, 1: Time Second Tick, 2: Unix epoch)
  *------------------------------------------*/
 BUILDIN_FUNC(gettimetick) /* Asgard Version */
 {
@@ -9303,52 +9343,36 @@ BUILDIN_FUNC(gettimetick) /* Asgard Version */
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/*==========================================
- * GetTime(Type);
- * 1: Sec     2: Min      3: Hour
- * 4: WeekDay 5: MonthDay 6: Month
- * 7: Year
- *------------------------------------------*/
-BUILDIN_FUNC(gettime) /* Asgard Version */
+/**
+ * GetTime(Type)
+ *
+ * Returns the current value of a certain date type.
+ * Possible types are:
+ * - DT_SECOND Current seconds
+ * - DT_MINUTE Current minute
+ * - DT_HOUR Current hour
+ * - DT_DAYOFWEEK Day of current week
+ * - DT_DAYOFMONTH Day of current month
+ * - DT_MONTH Current month
+ * - DT_YEAR Current year
+ * - DT_DAYOFYEAR Day of current year
+ *
+ * If none of the above types is supplied -1 will be returned to the script
+ * and the script source will be reported into the mapserver console.
+ */
+BUILDIN_FUNC(gettime)
 {
 	int type;
-	time_t timer;
-	struct tm *t;
 
 	type = script_getnum(st,2);
 
-	time(&timer);
-	t = localtime(&timer);
+	if( type <= DT_MIN || type >= DT_MAX ) {
+		ShowError("buildin_gettime: Invalid date type %d\n", type);
+		script_reportsrc(st);
+		script_pushint(st,-1);
+	} else
+		script_pushint(st,date_get((enum e_date_type)type));
 
-	switch(type) {
-		case 1: //Sec(0~59)
-			script_pushint(st,t->tm_sec);
-			break;
-		case 2: //Min(0~59)
-			script_pushint(st,t->tm_min);
-			break;
-		case 3: //Hour(0~23)
-			script_pushint(st,t->tm_hour);
-			break;
-		case 4: //WeekDay(0~6)
-			script_pushint(st,t->tm_wday);
-			break;
-		case 5: //MonthDay(01~31)
-			script_pushint(st,t->tm_mday);
-			break;
-		case 6: //Month(01~12)
-			script_pushint(st,t->tm_mon + 1);
-			break;
-		case 7: //Year(20xx)
-			script_pushint(st,t->tm_year + 1900);
-			break;
-		case 8: //Year Day(01~366)
-			script_pushint(st,t->tm_yday + 1);
-			break;
-		default: //(format error)
-			script_pushint(st,-1);
-			break;
-	}
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -9949,9 +9973,15 @@ BUILDIN_FUNC(cmdothernpc) //Added by RoVeRT
 	const char *command = script_getstr(st,3);
 	char event[EVENT_NAME_LENGTH];
 
-	snprintf(event,sizeof(event),"%s::OnCommand%s",npc,command);
+	safesnprintf(event,EVENT_NAME_LENGTH,"%s::%s%s",npc,script_config.oncommand_event_name,command);
 	check_event(st,event);
-	npc_event_do(event);
+	if( !npc_event_do(event) ) {
+		struct npc_data *nd = map_id2nd(st->oid);
+
+		ShowDebug("NPCEvent '%s' not found! (source: %s)\n",event,(nd ? nd->name : "Unknown"));
+		script_pushint(st,0);
+	} else
+		script_pushint(st,1);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -10625,11 +10655,11 @@ BUILDIN_FUNC(sc_start)
 
 	//If from NPC we make default flag SCFLAG_NOAVOID to be unavoidable
 	if(nd && nd->bl.id == fake_nd->bl.id)
-		flag = script_hasdata(st,5 + start_type) ? script_getnum(st,5 + start_type) : SCFLAG_FIXEDTICK;
+		flag = (script_hasdata(st,5 + start_type) ? script_getnum(st,5 + start_type) : SCFLAG_FIXEDTICK);
 	else
-		flag = script_hasdata(st,5 + start_type) ? script_getnum(st,5 + start_type) : SCFLAG_NOAVOID;
+		flag = (script_hasdata(st,5 + start_type) ? script_getnum(st,5 + start_type) : SCFLAG_NOAVOID);
 
-	rate = script_hasdata(st,4 + start_type) ? min(script_getnum(st,4 + start_type),10000) : 10000;
+	rate = (script_hasdata(st,4 + start_type) ? min(script_getnum(st,4 + start_type),10000) : 10000);
 
 	if(script_hasdata(st,(6 + start_type)))
 		bl = map_id2bl(script_getnum(st,(6 + start_type)));
@@ -11569,16 +11599,21 @@ BUILDIN_FUNC(addrid)
 BUILDIN_FUNC(attachrid)
 {
 	int rid = script_getnum(st,2);
+	struct map_session_data *sd = NULL;
+	bool force = true;
 
-	if (map_id2sd(rid)) {
+	if(script_hasdata(st,3))
+		force = (script_getnum(st,3) != 0);
+	if((sd = map_id2sd(rid)) && (!sd->npc_id || force)) {
 		script_detach_rid(st);
 		st->rid = rid;
 		script_attach_state(st);
-		script_pushint(st,1);
+		script_pushint(st,true);
 	} else
-		script_pushint(st,0);
+		script_pushint(st,false);
 	return SCRIPT_CMD_SUCCESS;
 }
+
 /*==========================================
  * Detach script to rid
  *------------------------------------------*/
@@ -11587,19 +11622,19 @@ BUILDIN_FUNC(detachrid)
 	script_detach_rid(st);
 	return SCRIPT_CMD_SUCCESS;
 }
+
 /*==========================================
  * Chk if account connected, (and charid from account if specified)
  *------------------------------------------*/
 BUILDIN_FUNC(isloggedin)
 {
 	TBL_PC *sd = map_id2sd(script_getnum(st,2));
-	if (script_hasdata(st,3) && sd &&
-		sd->status.char_id != script_getnum(st,3))
+
+	if (script_hasdata(st,3) && sd && sd->status.char_id != script_getnum(st,3))
 		sd = NULL;
-	push_val(st->stack,C_INT,sd!=NULL);
+	push_val(st->stack,C_INT,(sd != NULL));
 	return SCRIPT_CMD_SUCCESS;
 }
-
 
 /*==========================================
  *
@@ -12224,9 +12259,6 @@ BUILDIN_FUNC(maprespawnguildid)
  */
 BUILDIN_FUNC(agitstart)
 {
-	if(agit_flag)
-		return 0; // Agit already Start
-	agit_flag = true;
 	guild_agit_start();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12237,9 +12269,6 @@ BUILDIN_FUNC(agitstart)
  */
 BUILDIN_FUNC(agitend)
 {
-	if(!agit_flag)
-		return 0; // Agit already End
-	agit_flag = false;
 	guild_agit_end();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12250,9 +12279,6 @@ BUILDIN_FUNC(agitend)
  */
 BUILDIN_FUNC(agitstart2)
 {
-	if(agit2_flag)
-		return 0; // Agit2 already Start
-	agit2_flag = true;
 	guild_agit2_start();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12263,9 +12289,6 @@ BUILDIN_FUNC(agitstart2)
  */
 BUILDIN_FUNC(agitend2)
 {
-	if(!agit2_flag)
-		return 0; // Agit2 already End
-	agit2_flag = false;
 	guild_agit2_end();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12276,9 +12299,6 @@ BUILDIN_FUNC(agitend2)
  */
 BUILDIN_FUNC(agitstart3)
 {
-	if(agit3_flag)
-		return 0; // Agit3 already Start
-	agit3_flag = true;
 	guild_agit3_start();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12289,9 +12309,6 @@ BUILDIN_FUNC(agitstart3)
  */
 BUILDIN_FUNC(agitend3)
 {
-	if(!agit3_flag)
-		return 0; // Agit3 already End
-	agit3_flag = false;
 	guild_agit3_end();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12976,7 +12993,20 @@ BUILDIN_FUNC(setwall)
 BUILDIN_FUNC(delwall)
 {
 	const char *name = script_getstr(st,2);
-	map_iwall_remove(name);
+
+	if( !map_iwall_remove(name) ) {
+		ShowError("buildin_delwall: wall \"%s\" does not exist.\n", name);
+		return 1;
+	}
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(checkwall)
+{
+	const char *wall_name = script_getstr(st,2);
+
+	script_pushint(st,map_iwall_exist(wall_name));
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -14723,15 +14753,20 @@ BUILDIN_FUNC(mapid2name)
  *------------------------------------------*/
 BUILDIN_FUNC(logmes)
 {
-	const char *str;
-	TBL_PC *sd;
+	const char *str = script_getstr(st,2);
+	struct map_session_data *sd = map_id2sd(st->rid);
 
-	sd = script_rid2sd(st);
-	if( !sd )
-		return 1;
+	if( sd )
+		log_npc(sd,str);
+	else {
+		struct npc_data *nd = map_id2nd(st->oid);
 
-	str = script_getstr(st,2);
-	log_npc(sd,str);
+		if( !nd ) {
+			ShowError("buildin_logmes: Invalid usage without player or npc.\n");
+			return 1;
+		}
+		log_npc2(nd,str);
+	}
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -23326,7 +23361,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(disablewaitingroomevent,"disablearena",""), // Added by RoVeRT
 	BUILDIN_DEF(getwaitingroomstate,"i?"),
 	BUILDIN_DEF(warpwaitingpc,"sii?"),
-	BUILDIN_DEF(attachrid,"i"),
+	BUILDIN_DEF(attachrid,"i?"),
 	BUILDIN_DEF(addrid,"i?????"),
 	BUILDIN_DEF(detachrid,""),
 	BUILDIN_DEF(isloggedin,"i?"),
@@ -23548,6 +23583,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getfreecell,"srr?????"),
 	BUILDIN_DEF(setwall,"siiiiis"),
 	BUILDIN_DEF(delwall,"s"),
+	BUILDIN_DEF(checkwall,"s"),
 	BUILDIN_DEF(searchitem,"rs"),
 	BUILDIN_DEF(mercenary_create,"ii"),
 	BUILDIN_DEF(mercenary_heal,"ii"),

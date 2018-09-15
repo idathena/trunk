@@ -536,13 +536,13 @@ static void mapif_parse_Mail_send(int fd)
 		}
 		msg.dest_id = 0;
 		msg.dest_name[0] = '\0';
- 		if( SQL_SUCCESS == Sql_NextRow(sql_handle) ) {
+		if( SQL_SUCCESS == Sql_NextRow(sql_handle) ) {
 			Sql_GetData(sql_handle, 0, &data, NULL);
 			msg.dest_id = atoi(data);
 			Sql_GetData(sql_handle, 1, &data, &len);
 			safestrncpy(msg.dest_name, data, NAME_LENGTH);
 		}
- 		Sql_FreeResult(sql_handle);
+		Sql_FreeResult(sql_handle);
 	}
 
 	// Try to find the Dest Char by Name

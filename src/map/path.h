@@ -11,17 +11,6 @@
 
 #define MAX_WALKPATH 32
 
-struct walkpath_data {
-	unsigned char path_len,path_pos;
-	unsigned char path[MAX_WALKPATH];
-};
-
-struct shootpath_data {
-	int rx,ry,len;
-	int x[MAX_WALKPATH];
-	int y[MAX_WALKPATH];
-};
-
 enum directions {
 	DIR_CENTER = -1,
 	DIR_NORTH = 0,
@@ -33,6 +22,17 @@ enum directions {
 	DIR_EAST = 6,
 	DIR_NORTHEAST = 7,
 	DIR_MAX
+};
+
+struct walkpath_data {
+	unsigned char path_len,path_pos;
+	unsigned char path[MAX_WALKPATH];
+};
+
+struct shootpath_data {
+	int rx,ry,len;
+	int x[MAX_WALKPATH];
+	int y[MAX_WALKPATH];
 };
 
 #define check_distance_bl(bl1, bl2, distance) check_distance((bl1)->x - (bl2)->x, (bl1)->y - (bl2)->y, distance)
@@ -65,6 +65,8 @@ bool check_distance(int dx, int dy, int distance);
 unsigned int distance(int dx, int dy);
 bool check_distance_client(int dx, int dy, int distance);
 int distance_client(int dx, int dy);
+
+bool direction_diagonal(enum directions direction);
 
 void do_init_path();
 void do_final_path();

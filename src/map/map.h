@@ -765,7 +765,7 @@ extern int map_num;
 
 extern int autosave_interval;
 extern int minsave_interval;
-extern int save_settings;
+extern int16 save_settings;
 extern int night_flag; // 0 = day, 1 = night [Yor]
 extern int enable_spy; // Determines if @spy commands are active.
 extern char db_path[256];
@@ -796,7 +796,8 @@ enum save_settings_type {
 	CHARSAVE_QUEST       = 0x040, //After successfully get/delete/complete a quest
 	CHARSAVE_BUYINGSTORE = 0x080, //After every buyingstore transaction
 	CHARSAVE_BANK        = 0x100, //After every bank transaction (deposit/withdraw)
-	CHARSAVE_ALL         = 0x1FF,
+	CHARSAVE_ATTENDANCE  = 0x200, //After every attendence reward
+	CHARSAVE_ALL         = 0xFFF,
 };
 
 struct s_map_default {
@@ -925,9 +926,10 @@ int cleanup_sub(struct block_list *bl, va_list ap);
 int map_delmap(char *mapname);
 void map_flags_init(void);
 
+bool map_iwall_exist(const char *wall_name);
 bool map_iwall_set(int16 m, int16 x, int16 y, int size, int8 dir, bool shootable, const char *wall_name); 
 void map_iwall_get(struct map_session_data *sd);
-void map_iwall_remove(const char *wall_name);
+bool map_iwall_remove(const char *wall_name);
 
 int map_addmobtolist(unsigned short m, struct spawn_data *spawn); // [Wizputer]
 void map_spawnmobs(int16 m); // [Wizputer]

@@ -3463,14 +3463,14 @@ malangdo,125,147,3	script	Patrol Leader#ml	545,{
 			mes "[Crime Prevention Staff]";
 			mes "Captain, we have work again, right?";
 			emotion e_sob;
-			emotion e_sob,0,"Crime Prevention Staff#ml";
+			emotion e_sob,0,"Crime Prevention Staff#m";
 			next;
 			mes "[Patrol Leader]";
 			mes "Hide your tears and save your tears!";
 			mes "You should cry when having a clue for bad activity";
 			mes "at crime spot!";
 			emotion e_sob;
-			emotion e_sob,0,"Crime Prevention Staff#ml";
+			emotion e_sob,0,"Crime Prevention Staff#m";
 			next;
 			mes "[Patrol Leader]";
 			mes "I will scold you once the investigation is over!";
@@ -3494,7 +3494,7 @@ malangdo,125,147,3	script	Patrol Leader#ml	545,{
 	close;
 }
 
-malangdo,129,146,3	script	Crime Prevention Staff	545,{
+malangdo,129,146,3	script	Crime Prevention Staff#m	545,{
 	if (malang_bad_guys > 11) {
 		mes "[Crime Prevention Staff]";
 		mes "A work to do means happy things!";
