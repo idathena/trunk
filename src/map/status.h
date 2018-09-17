@@ -22,7 +22,7 @@ struct status_change;
 #endif
 
 // Refine type
-enum refine_type {
+enum e_refine_type {
 	REFINE_TYPE_ARMOR	= 0,
 	REFINE_TYPE_WEAPON1	= 1,
 	REFINE_TYPE_WEAPON2	= 2,
@@ -32,7 +32,7 @@ enum refine_type {
 };
 
 // Get refine chance
-int status_get_refine_chance(enum refine_type wlv, int refine, bool enriched);
+int status_get_refine_chance(enum e_refine_type wlv, int refine, bool enriched);
 
 typedef enum sc_conf_type {
 	SC_NO_REM_DEATH  = 0x01,
@@ -2307,7 +2307,8 @@ void status_change_clear_onChangeMap(struct block_list *bl, struct status_change
 #define status_calc_elemental(ed, opt) status_calc_bl_(&(ed)->bl, SCB_ALL, opt)
 #define status_calc_npc(nd, opt) status_calc_bl_(&(nd)->bl, SCB_ALL, opt)
 
-enum e_refine_chance_type { // Enum for refine chance types
+// Enum for refine chance types
+enum e_refine_chance_type {
 	REFINE_CHANCE_TYPE_NORMAL = 0,
 	REFINE_CHANCE_TYPE_ENRICHED,
 	REFINE_CHANCE_TYPE_E_NORMAL,
@@ -2315,11 +2316,39 @@ enum e_refine_chance_type { // Enum for refine chance types
 	REFINE_CHANCE_TYPE_MAX
 };
 
+// Enum for refine cost types
+enum e_refine_cost_type {
+	REFINE_COST_TYPE_NORMAL = 0,
+	REFINE_COST_TYPE_OVER10,
+	REFINE_COST_TYPE_HD,
+	REFINE_COST_TYPE_ENRICHED,
+	REFINE_COST_TYPE_OVER10_HD,
+	REFINE_COST_TYPE_CLINK,
+	REFINE_COST_TYPE_HOLINK,
+	REFINE_COST_TYPE_WAGJAK,
+	REFINE_COST_TYPE_MAX
+};
+
+// Enum for refine informations
+enum e_refine_info {
+	REFINE_INFO_MATERIAL_ID = 0,
+	REFINE_INFO_ZENY
+};
+
+struct s_refine_cost {
+	uint16 nameid;
+	int zeny;
+};
+
 struct s_refine_info { //Bonus values and upgrade chances for refining equipment
 	int chance[REFINE_CHANCE_TYPE_MAX][MAX_REFINE]; //Success chance
 	int bonus[MAX_REFINE]; //Cumulative fixed bonus damage
 	int randombonus_max[MAX_REFINE]; //Cumulative maximum random bonus damage
+	struct s_refine_cost cost[REFINE_COST_TYPE_MAX];
 } refine_info[REFINE_TYPE_MAX];
+
+// Get refine cost
+int status_get_refine_cost(enum e_refine_type wlv, enum e_refine_cost_type type, enum e_refine_info info);
 
 bool status_calc_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);
 bool status_calc_cart_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);

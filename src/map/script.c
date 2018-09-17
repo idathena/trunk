@@ -8283,26 +8283,49 @@ BUILDIN_FUNC(getequipweaponlv)
  *------------------------------------------*/
 BUILDIN_FUNC(getequippercentrefinery)
 {
-	int i = -1, num;
+	int i = -1, num, chance = 0;
 	bool enriched = false;
-	int chance = 0;
-	TBL_PC *sd;
+	TBL_PC *sd = NULL;
 
 	if(!script_charid2sd(4,sd)) {
 		script_pushint(st,0);
 		return 1;
 	}
-	if (script_hasdata(st,3))
+	if(script_hasdata(st,3))
 		enriched = (script_getnum(st,3) != 0);
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
-		chance = status_get_refine_chance((enum refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, enriched);
+		chance = status_get_refine_chance((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, enriched);
 
 	script_pushint(st,chance);
 	return SCRIPT_CMD_SUCCESS;
 }
+
+/**
+ * Get an equipment's refine cost
+ * getequiprefinecost(<equipment slot>,<type>,<information>{,<char id>})
+ */
+BUILDIN_FUNC(getequiprefinecost) {
+	int i = -1, slot, type, info, value = 0;
+	struct map_session_data *sd = NULL;
+
+	slot = script_getnum(st,2);
+	type = script_getnum(st,3);
+	info = script_getnum(st,4);
+	if(!script_charid2sd(5,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+	if(equip_index_check(slot))
+		i = pc_checkequip(sd,equip_bitmask[slot]);
+	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
+		value = status_get_refine_cost((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (enum e_refine_cost_type)type, (enum e_refine_indo)info);
+
+	script_pushint(st,value);
+	return SCRIPT_CMD_SUCCESS;
+}	
 
 /*==========================================
  * Refine +1 item at pos and log and display refine
@@ -23307,6 +23330,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getequiprefinerycnt,"i?"),
 	BUILDIN_DEF(getequipweaponlv,"i?"),
 	BUILDIN_DEF(getequippercentrefinery,"i??"),
+	BUILDIN_DEF(getequiprefinecost,"iii?"),
 	BUILDIN_DEF(successrefitem,"i??"),
 	BUILDIN_DEF(failedrefitem,"i?"),
 	BUILDIN_DEF(downrefitem,"i??"),

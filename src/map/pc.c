@@ -11702,7 +11702,8 @@ void pc_readdb(void)
 		}
 	}
 
-	pc_readdb_attendance_libconfig(DBPATH"attendance_db.conf");
+	if( battle_config.feature_attendance )
+		pc_readdb_attendance_libconfig(DBPATH"attendance_db.conf");
 }
 
 // Read MOTD on startup. [Valaris]
@@ -12867,14 +12868,16 @@ void do_final_pc(void) {
 	ers_destroy(pc_sc_display_ers);
 	ers_destroy(pc_itemgrouphealrate_ers);
 
-	if (attendance_periods->rewards) {
-		aFree(attendance_periods->rewards);
-		attendance_periods->rewards = NULL;
-		attendance_periods->reward_count = 0;
+	if (battle_config.feature_attendance) {
+		if (attendance_periods->rewards) {
+			aFree(attendance_periods->rewards);
+			attendance_periods->rewards = NULL;
+			attendance_periods->reward_count = 0;
+		}
+		aFree(attendance_periods);
+		attendance_periods = NULL;
+		attendance_period_count = 0;
 	}
-	aFree(attendance_periods);
-	attendance_periods = NULL;
-	attendance_period_count = 0;
 }
 
 void do_init_pc(void) {

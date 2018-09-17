@@ -85,15 +85,13 @@
 		if (countitem(.@s_ore2[.@index])) {
 			.@mate$[1] = getitemname(.@s_ore2[.@index]);
 			.@miss[1] = 0;
-			.@enrch_ore = 0;
 		} else {
 			.@mate$[1] = "^8C8C8C" + getitemname(.@s_ore2[.@index]) + "^000000";
 			.@miss[1] = 1;
 		}
-		if (countitem(.@s_ore3[.@index])) {
+		if (.@equip_refine > 6 && countitem(.@s_ore3[.@index])) {
 			.@mate$[2] = getitemname(.@s_ore3[.@index]);
 			.@miss[2] = 0;
-			.@hd_ore = 0;
 		} else {
 			.@mate$[2] = "^8C8C8C" + getitemname(.@s_ore3[.@index]) + "^000000";
 			.@miss[2] = 1;
@@ -101,10 +99,18 @@
 		//-----------------------------------------------------------------------------
 		.@option = select(.@mate$[0], .@mate$[1], .@mate$[2], "Cancel");
 		.@option -= 1;
+		.@enrch_ore = 0;
+		.@hd_ore = 0;
 		if (.@option == 1) //Enriched
 			.@enrch_ore = 1;
-		if (.@option == 2) //HD
+		if (.@option == 2) { //HD
+			if (.@equip_refine < 7) {
+				mes "[Shadow Blacksmith]";
+				mes "HD Ore can only used for +7 or higher refine level items.";
+				close;
+			}
 			.@hd_ore = 1;
+		}
 		if (.@option == 3) {
 			mes "[Shadow Blacksmith]";
 			mes "You've cancelled refining.";
@@ -128,11 +134,6 @@
 		if (.@equip_refine > 9) {
 			mes "[Shadow Blacksmith]";
 			mes "Shadow item refining is only possible until +10 level.";
-			close;
-		}
-		if (.@hd_ore && .@equip_refine < 7) {
-			mes "[Shadow Blacksmith]";
-			mes "HD Ore can only used for +7 or higher refine level items.";
 			close;
 		}
 		if (!getequipisenableref(.@part)) {
@@ -165,7 +166,14 @@
 		if (callfunc("F_IsEquipIDHack", .@part, .@equip_id) ||
 			callfunc("F_IsEquipRefineHack", .@part, .@equip_refine) ||
 			callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]))
+		{
+			mes "[Shadow Blacksmith]";
+			emotion e_an;
+			mes "Wait a second...";
+			mes "Do you think I'm stupid?!";
+			mes "You switched the item while I wasn't looking! Get out of here!";
 			close;
+		}
 		if (getequippercentrefinery(.@part, .@enrch_ore) > rand(100)) {
 			successrefitem .@part;
 			mes "[Shadow Blacksmith]";

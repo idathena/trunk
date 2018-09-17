@@ -13782,12 +13782,12 @@ static int status_natural_heal_timer(int tid, unsigned int tick, int id, intptr_
 
 /**
  * Get the chance to upgrade a piece of equipment.
- * @param wlv The weapon type of the item to refine (see see enum refine_type)
+ * @param wlv The weapon type of the item to refine (see see enum e_refine_type)
  * @param refine The target refine level
  * @param enriched Check if the item to refine is using enriched chance
  * @return The chance to refine the item, in percent (0~100)
  */
-int status_get_refine_chance(enum refine_type wlv, int refine, bool enriched)
+int status_get_refine_chance(enum e_refine_type wlv, int refine, bool enriched)
 {
 	int type;
 
@@ -13797,6 +13797,17 @@ int status_get_refine_chance(enum refine_type wlv, int refine, bool enriched)
 	if (battle_config.event_refine_chance)
 		type |= 2;
 	return refine_info[wlv].chance[type][refine];
+}
+
+/**
+ * Returns refine cost (zeny or item) for a weapon level.
+ * @param wlv The weapon type of the item to refine (see enum e_refine_type)
+ * @param type Refine type (see enum e_refine_cost_type)
+ * @param info Refine cost info (see enum e_refine_info)
+ * @return Refine cost for refining item
+ */
+int status_get_refine_cost(enum e_refine_type wlv, enum e_refine_cost_type type, enum e_refine_info info) {
+	return (info == REFINE_INFO_ZENY ? refine_info[wlv].cost[type].zeny : refine_info[wlv].cost[type].nameid);
 }
 
 /**
@@ -13900,7 +13911,7 @@ static bool status_readdb_sizefix(char *fields[], int columns, int current)
  */
 static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const char *name, const char *source)
 {
-	struct config_setting_t *rate = NULL;
+	struct config_setting_t *rate = NULL, *cost = NULL;
 	int type = REFINE_TYPE_ARMOR, bonus_per_level = 0, rnd_bonus_v = 0, rnd_bonus_lv = 0, refine_v = 0;
 	char lv[4];
 
@@ -13911,24 +13922,71 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 	if (!strncmp(name, "Armors", 6)) {
 		type = REFINE_TYPE_ARMOR;
 	} else if (strncmp(name, "WeaponLevel", 11) || !strspn(&name[strlen(name) - 1], "0123456789") || (type = atoi(strncpy(lv, name + 11, 2))) == REFINE_TYPE_ARMOR) {
-		ShowError("status_readdb_refine_libconfig_sub: Invalid key name for entry '%s' in \"%s\", skipping.\n", name, source);
+		ShowError("status_readdb_refine_libconfig_sub: Invalid key name for entry '%s' in \"%s\".\n", name, source);
 		return 0;
 	}
 	if (type < REFINE_TYPE_ARMOR || type >= REFINE_TYPE_MAX) {
-		ShowError("status_readdb_refine_libconfig_sub: Out of range level for entry '%s' in \"%s\", skipping.\n", name, source);
+		ShowError("status_readdb_refine_libconfig_sub: Out of range refine type for entry '%s' in \"%s\".\n", name, source);
 		return 0;
 	}
 	if (!config_setting_lookup_int(r, "StatsPerLevel", &bonus_per_level)) {
-		ShowWarning("status_readdb_refine_libconfig_sub: Missing StatsPerLevel for entry '%s' in \"%s\", skipping.\n", name, source);
+		ShowWarning("status_readdb_refine_libconfig_sub: Missing StatsPerLevel for entry '%s' in \"%s\".\n", name, source);
 		return 0;
 	}
 	if (!config_setting_lookup_int(r, "RandomBonusStartLevel", &rnd_bonus_lv)) {
-		ShowWarning("status_readdb_refine_libconfig_sub: Missing RandomBonusStartLevel for entry '%s' in \"%s\", skipping.\n", name, source);
+		ShowWarning("status_readdb_refine_libconfig_sub: Missing RandomBonusStartLevel for entry '%s' in \"%s\".\n", name, source);
 		return 0;
 	}
 	if (!config_setting_lookup_int(r, "RandomBonusValue", &rnd_bonus_v)) {
-		ShowWarning("status_readdb_refine_libconfig_sub: Missing RandomBonusValue for entry '%s' in \"%s\", skipping.\n", name, source);
+		ShowWarning("status_readdb_refine_libconfig_sub: Missing RandomBonusValue for entry '%s' in \"%s\".\n", name, source);
 		return 0;
+	}
+	if ((cost = config_setting_get_member(r, "Costs")) && config_setting_is_group(cost)) {
+		struct config_setting_t *t = NULL;
+		bool duplicate[REFINE_COST_TYPE_MAX];
+		int i = 0;
+
+		memset(refine_info[type].cost, 0, sizeof(struct s_refine_cost));
+		memset(&duplicate, 0, sizeof(duplicate));
+
+		while ((t = config_setting_get_elem(cost, i++)) && config_setting_is_group(t)) {
+			int idx = REFINE_COST_TYPE_NORMAL, material = 0, price = 0, i32;
+			char *refine_cost_const = config_setting_name(t);
+			struct item_data *id = NULL;
+
+			if (!script_get_constant(refine_cost_const, &idx)) {
+				ShowError("status_readdb_refine_libconfig_sub: Unknown refine cost type '%s' for entry %s in \"%s\".\n", refine_cost_const, name, source);
+				return 0;
+			}
+			if (idx < REFINE_COST_TYPE_NORMAL || idx >= REFINE_COST_TYPE_MAX) {
+				ShowError("status_readdb_refine_libconfig_sub: Out of range refine cost type '%s' for entry %s in \"%s\".\n", refine_cost_const, name, source);
+				return 0;
+			}
+			if (duplicate[idx])
+				ShowWarning("status_readdb_refine_libconfig_sub: Duplicate refine cost type '%s' for entry %s in \"%s\", overwriting previous entry...\n", refine_cost_const, name, source);
+			else
+				duplicate[idx] = true;
+			if (!config_setting_lookup_int(t, "Material", &i32)) {
+				ShowWarning("status_readdb_refine_libconfig_sub: Missing Material for entry '%s' in \"%s\".\n", name, source);
+				return 0;
+			}
+			material = i32;
+			if (!(id = itemdb_exists(material))) {
+				ShowWarning("status_readdb_refine_libconfig_sub: Required Material %d is not found for entry '%s' in \"%s\".\n", material, name, source);
+				return 0;
+			}
+			if (!config_setting_lookup_int(t, "Price", &i32)) {
+				ShowWarning("status_readdb_refine_libconfig_sub: Missing Price for entry '%s' in \"%s\".\n", name, source);
+				return 0;
+			}
+			if (i32 <= 0) {
+				ShowWarning("status_readdb_refine_libconfig_sub: Invalid Price for entry '%s' in \"%s\".\n", name, source);
+				return 0;
+			}
+			price = i32;
+			refine_info[type].cost[idx].nameid = material;
+			refine_info[type].cost[idx].zeny = price;
+		}
 	}
 	if ((rate = config_setting_get_member(r, "Rates")) && config_setting_is_group(rate)) {
 		struct config_setting_t *t = NULL;
@@ -13953,12 +14011,12 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 			memset(&lv, 0, sizeof(lv));
 
 			if (!strspn(&rlvl[strlen(rlvl) - 1], "0123456789") || (level = atoi(strncpy(lv, rlvl + 2, 3))) <= 0) {
-				ShowError("status_readdb_refine_libconfig_sub: Invalid refine level format '%s' for entry %s in \"%s\"... skipping.\n", rlvl, name, source);
-				continue;
+				ShowError("status_readdb_refine_libconfig_sub: Invalid refine level format '%s' for entry %s in \"%s\".\n", rlvl, name, source);
+				return 0;
 			}
 			if (level <= 0 || level > MAX_REFINE) {
-				ShowError("status_readdb_refine_libconfig_sub: Out of range refine level '%s' for entry %s in \"%s\"... skipping.\n", rlvl, name, source);
-				continue;
+				ShowError("status_readdb_refine_libconfig_sub: Out of range refine level '%s' for entry %s in \"%s\".\n", rlvl, name, source);
+				return 0;
 			}
 			level--;
 			if (duplicate[level])
@@ -13991,7 +14049,7 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 			refine_info[type].bonus[j] = refine_v;
 		}
 	} else {
-		ShowWarning("status_readdb_refine_libconfig_sub: Missing refine rates for entry '%s' in \"%s\", skipping.\n", name, source);
+		ShowWarning("status_readdb_refine_libconfig_sub: Missing refine rates for entry '%s' in \"%s\".\n", name, source);
 		return 0;
 	}
 	return type + 1;

@@ -5386,6 +5386,21 @@
 	export_constant(PRIVATEAIRSHIP_SOURCE_MAP_INVALID);
 	export_constant(PRIVATEAIRSHIP_ITEM_UNAVAILABLE);
 
+	/* Refine cost types */
+	export_constant(REFINE_COST_TYPE_NORMAL);
+	export_constant(REFINE_COST_TYPE_OVER10);
+	export_constant(REFINE_COST_TYPE_HD);
+	export_constant(REFINE_COST_TYPE_ENRICHED);
+	export_constant(REFINE_COST_TYPE_OVER10_HD);
+	export_constant(REFINE_COST_TYPE_CLINK);
+	export_constant(REFINE_COST_TYPE_HOLINK);
+	export_constant(REFINE_COST_TYPE_WAGJAK);
+	export_constant(REFINE_COST_TYPE_MAX);
+
+	/* Refine information types */
+	export_constant(REFINE_INFO_MATERIAL_ID);
+	export_constant(REFINE_INFO_ZENY);
+
 	#undef export_constant
 	#undef export_constant2
 	#undef export_parameter

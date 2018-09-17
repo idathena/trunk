@@ -1281,19 +1281,6 @@ static void pet_readdb_libconfig_sub_intimacy(struct config_setting_t *t, int id
 		pet_db[idx].die = i32;
 }
 
-static bool pet_get_const(const struct config_setting_t *it, int *value)
-{
-	const char *str = config_setting_get_string(it);
-
-	nullpo_retr(false, value);
-
-	if (str && *str && script_get_constant(str, value))
-		return true;
-
-	*value = config_setting_get_int(it);
-	return true;
-}
-
 static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int idx)
 {
 	struct config_setting_t *pett = NULL;
@@ -1326,7 +1313,7 @@ static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int i
 			pet_db[idx].ev_datas[i].EggID = id->nameid;
 			while ((item = config_setting_get_elem(pett, j))) {
 				struct item_data *id2 = NULL;
-				int quantity, itemID = 0, count = 0;
+				int itemID = 0, quantity = 0;
 				char *str2 = config_setting_name(item);
 				char string2[] = "ItemID_";
 
@@ -1335,11 +1322,10 @@ static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int i
 					itemID = atoi(str2);
 				}
 				if (!(id2 = itemdb_exists(itemID))) {
-					ShowWarning("pet_readdb_libconfig_sub_evolution: required item ID %d not found in egg %d\n", itemID, pet_db[idx].ev_datas[i].EggID);
+					ShowWarning("pet_readdb_libconfig_sub_evolution: required item ID %d is not found in egg %d\n", itemID, pet_db[idx].ev_datas[i].EggID);
 					return;
 				}
-				if (pet_get_const(item, &count) && count >= 0)
-					quantity = count;
+				quantity = config_setting_get_int(item);
 				if (quantity <= 0) {
 					ShowWarning("pet_readdb_libconfig_sub_evolution: invalid quantity %d for egg %d\n", quantity, pet_db[idx].ev_datas[i].EggID);
 					return;

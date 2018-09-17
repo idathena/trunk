@@ -3019,45 +3019,13 @@ izlude_d,153,126,1	duplicate(Refinery Owner Han#iz)	Refinery Owner Han#iz_d	4_M_
 	}
 	set .@refineitemid, getequipid(.@part);
 	set .@refinerycnt, getequiprefinerycnt(.@part);
-	switch(getequipweaponlv(.@part)) {
-		case 0: //Armor
-			set .@type$,"Armor";
-			set .@material,985; //Elunium
-			set .@price,2000;
-			set .@safe,4;
-			break;
-		case 1: //Level 1 weapon
-			set .@type$,"Level 1 weapon";
-			set .@material,1010; //Phracon
-			set .@price,50;
-			set .@safe,7;
-			break;
-		case 2: //Level 2 weapon
-			set .@type$,"Level 2 weapon";
-			set .@material,1011; //Emveretarcon
-			set .@price,200;
-			set .@safe,6;
-			break;
-		case 3: //Level 3 weapon
-			set .@type$,"Level 3 weapon";
-			set .@material,984; //Oridecon
-			set .@price,5000;
-			set .@safe,5;
-			break;
-		case 4: //Level 4 weapon
-			set .@type$,"Level 4 weapon";
-			set .@material,984; //Oridecon
-			set .@price,20000;
-			set .@safe,4;
-			break;
-		case 5: //Other
-			set .@type$,"Other";
-			set .@material,985; //Elunium
-			set .@price,2000;
-			set .@safe,4;
-			break;
-	}
-	set .@count,1;
+	setarray .@equip_card[0], getequipcardid(.@part, 0), getequipcardid(.@part, 1), getequipcardid(.@part, 2), getequipcardid(.@part, 3);
+	set .@material, getequiprefinecost(.@part, REFINE_COST_TYPE_WAGJAK, REFINE_INFO_MATERIAL_ID);
+	set .@price, getequiprefinecost(.@part, REFINE_COST_TYPE_WAGJAK, REFINE_INFO_ZENY);
+	if(getequipweaponlv(.@part) >= 1 && getequipweaponlv(.@part) <= 4)
+		set .@type$,"Level "+getequipweaponlv(.@part)+" weapon";
+	else
+		set .@type$,"Armor";
 	if(VIP_SCRIPT && !vip_status(1)) {
 		switch(getequipweaponlv(.@part)) {
 			case 0: set .@price,.@price * 10; break;
@@ -3068,6 +3036,7 @@ izlude_d,153,126,1	duplicate(Refinery Owner Han#iz)	Refinery Owner Han#iz_d	4_M_
 			case 5: set .@price,.@price * 10; break;
 		}
 	}
+	set .@count,1;
 	mes "[Refining Machine Wagjak]";
 	mes "Type : "+.@type$;
 	mes "Charge : "+getitemname(.@material)+", "+(.@price>=10000?callfunc("F_InsertComma",.@price,3):.@price)+" zeny.";
@@ -3106,7 +3075,9 @@ izlude_d,153,126,1	duplicate(Refinery Owner Han#iz)	Refinery Owner Han#iz_d	4_M_
 	delitem .@material,.@count;
 	//anti-hack
 	if(callfunc("F_IsEquipIDHack",.@part,.@refineitemid) ||
-		callfunc("F_IsEquipRefineHack",.@part,.@refinerycnt)) {
+		callfunc("F_IsEquipRefineHack",.@part,.@refinerycnt) ||
+		callfunc("F_IsEquipCardHack",.@part,.@equip_card[0],.@equip_card[1],.@equip_card[2],.@equip_card[3]))
+	{
 		mes "[Refining Machine Wagjak]";
 		mes "^ff0000- Error number 666 -^000000";
 		mes "The equipment has been switched.";
