@@ -2348,7 +2348,7 @@ struct s_refine_info { //Bonus values and upgrade chances for refining equipment
 } refine_info[REFINE_TYPE_MAX];
 
 // Get refine cost
-int status_get_refine_cost(enum e_refine_type wlv, enum e_refine_cost_type type, enum e_refine_info info);
+int status_get_refine_cost(enum e_refine_type wlv, int type, int info);
 
 bool status_calc_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);
 bool status_calc_cart_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);

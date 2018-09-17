@@ -8321,11 +8321,11 @@ BUILDIN_FUNC(getequiprefinecost) {
 	if(equip_index_check(slot))
 		i = pc_checkequip(sd,equip_bitmask[slot]);
 	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
-		value = status_get_refine_cost((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (enum e_refine_cost_type)type, (enum e_refine_indo)info);
+		value = status_get_refine_cost((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), type, info);
 
 	script_pushint(st,value);
 	return SCRIPT_CMD_SUCCESS;
-}	
+}
 
 /*==========================================
  * Refine +1 item at pos and log and display refine

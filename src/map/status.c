@@ -13806,7 +13806,7 @@ int status_get_refine_chance(enum e_refine_type wlv, int refine, bool enriched)
  * @param info Refine cost info (see enum e_refine_info)
  * @return Refine cost for refining item
  */
-int status_get_refine_cost(enum e_refine_type wlv, enum e_refine_cost_type type, enum e_refine_info info) {
+int status_get_refine_cost(enum e_refine_type wlv, int type, int info) {
 	return (info == REFINE_INFO_ZENY ? refine_info[wlv].cost[type].zeny : refine_info[wlv].cost[type].nameid);
 }
 

@@ -11253,6 +11253,7 @@ REPLACE INTO `item_db_re` VALUES (25245,'Small_Pile_Of_Bones','Small Pile of Bon
 REPLACE INTO `item_db_re` VALUES (25375,'Mightysoul_Essence','Mightysoul Essence',3,0,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (25377,'Luxurious_Pet_Food','Luxurious Pet Food',3,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (25408,'Memories_Of_Gyoll','Memories of Gyoll',3,0,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (25464,'World_Tour_Ticket','World Tour Ticket',3,20,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 # New Items
 #===================================================================
 REPLACE INTO `item_db_re` VALUES (26100,'P_Foxtail_Staff2','Eden Foxtail Staff II',5,20,NULL,0,'135:165',NULL,1,0,0x04000000,7,2,2,2,'40',0,10,'bonus bDex,4; bonus bInt,4; bonus bLongAtkRate,6;',NULL,NULL);
