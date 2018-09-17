@@ -693,6 +693,8 @@ struct map_data {
 		unsigned gvg_te_castle : 1; // GVG WOE:TE Castle
 		unsigned nocostume : 1; // Disable costume sprites [Cydh]
 		unsigned hidemobhpbar : 1;
+		unsigned privateairship_source : 1;
+		unsigned privateairship_destination : 1;
 #ifdef ADJUST_SKILL_DAMAGE
 		unsigned skill_damage : 1;
 #endif

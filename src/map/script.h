@@ -38,6 +38,7 @@ extern struct Script_Config {
 	const char *onuntouch_event_name;
 	const char *onwhisper_event_name;
 	const char *oncommand_event_name;
+	const char *onairshiprequest_event_name;
 
 	// Init related
 	const char *init_event_name;

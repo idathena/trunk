@@ -88,7 +88,7 @@ static inline int itemtype(unsigned short nameid) {
 		case IT_PETARMOR:
 			return IT_ARMOR;
 		case IT_SHADOWGEAR:
-			if( id->equip&EQP_SHADOW_WEAPON )
+			if( id->equip == EQP_SHADOW_WEAPON )
 				return IT_WEAPON;
 			else
 				return IT_ARMOR;
@@ -20630,6 +20630,42 @@ void clif_attendence_response(struct map_session_data *sd, int32 data) {
 /// 0AEF
 void clif_parse_attendance_request(int fd, struct map_session_data *sd) {
 	pc_attendance_claim_reward(sd);
+}
+
+
+/// Send out the response to a private airship request
+/// 0A4A <response>.L
+void clif_private_airship_response(struct map_session_data *sd, enum e_private_airship_response response) {
+#if PACKETVER >= 20180321
+	int fd;
+
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,packet_len(0xA4A));
+	WFIFOW(fd,0) = 0xA4A;
+	WFIFOL(fd,2) = response;
+	WFIFOSET(fd,packet_len(0xA4A));
+#endif
+}
+
+
+/// Parses a request for a private airship
+/// 0A49 <mapname>.16B <itemid>.W
+void clif_parse_private_airship_request(int fd, struct map_session_data *sd) {
+#if PACKETVER >= 20180321
+	char mapname[MAP_NAME_LENGTH_EXT];
+	uint16 item_id;
+
+	// Check if the feature is enabled
+	if( !battle_config.feature_privateairship ) {
+		clif_messagecolor(&sd->bl, color_table[COLOR_RED], msg_txt(768), false, SELF); // The private airship system is disabled.
+		return;
+	}
+	safestrncpy(mapname, (char *)RFIFOP(fd,2), MAP_NAME_LENGTH_EXT);
+	item_id = RFIFOW(fd,2 + MAP_NAME_LENGTH_EXT);
+	npc_private_airship(sd, mapname, item_id);
+#endif
 }
 
 

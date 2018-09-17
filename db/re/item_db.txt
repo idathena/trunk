@@ -11222,6 +11222,7 @@
 25375,Mightysoul_Essence,Mightysoul Essence,3,0,,0,,,,,,,,,,,,,{},{},{}
 25377,Luxurious_Pet_Food,Luxurious Pet Food,3,20,,10,,,,,,,,,,,,,{},{},{}
 25408,Memories_Of_Gyoll,Memories of Gyoll,3,0,,0,,,,,,,,,,,,,{},{},{}
+25464,World_Tour_Ticket,World Tour Ticket,3,20,,0,,,,,,,,,,,,,{},{},{}
 // New Items
 //===================================================================
 26100,P_Foxtail_Staff2,Eden Foxtail Staff II,5,20,,0,135:165,,1,0,0x04000000,7,2,2,2,40,0,10,{ bonus bDex,4; bonus bInt,4; bonus bLongAtkRate,6; },{},{}

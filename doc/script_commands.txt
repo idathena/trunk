@@ -3076,6 +3076,14 @@ Merge all stackable items that separated by GUID flags
 If no item ID/name given, all possible items in player's inventory will be merged.
 
 ---------------------------------------
+
+*identifyall({<type>{,<account_id>}});
+
+Returns the count of unidentified items in the player inventory.
+If <type> is true the command will identify all the unidentified items as well (default).
+If <type> is false the command only returns the count of unidentified items.
+
+---------------------------------------
 //
 2,1.- End of item-related commands.
 //
@@ -5426,8 +5434,6 @@ Example:
 
 ---------------------------------------
 
----------------------------------------
-
 *openmail({<char_id>});
 
 This will open a character's Mail window on the client connected to the 
@@ -6483,6 +6489,20 @@ If the NPC is not in a waitingroom, nothing happens.
 Changes the display name and/or display class of the target NPC.
 Returns 0 is successful, 1 if the NPC does not exist.
 Size is 0 = normal 1 = small 2 = big.
+
+---------------------------------------
+
+*airship_respond(<response>)
+
+Send client respond to different private airship status.
+
+The available responses are:
+	PRIVATEAIRSHIP_OK
+	PRIVATEAIRSHIP_RETRY
+	PRIVATEAIRSHIP_ITEM_NOT_ENOUGH
+	PRIVATEAIRSHIP_DESTINATION_MAP_INVALID
+	PRIVATEAIRSHIP_SOURCE_MAP_INVALID
+	PRIVATEAIRSHIP_ITEM_UNAVAILABLE
 
 ---------------------------------------
 \\

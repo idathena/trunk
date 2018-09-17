@@ -2417,8 +2417,6 @@ int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned sh
 	if (!sc)
 		return 0;
 	if (sd) {
-		if (pc_ismadogear(sd))
-			return 0;
 		if (sd->bonus.unstripable_equip)
 			pos &= ~sd->bonus.unstripable_equip;
 		if (sd->bonus.unstripable)
@@ -2432,9 +2430,10 @@ int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned sh
 	}
 	if (!pos)
 		return 0;
-	for (i = 0; i < ARRAYLENGTH(pos_list); i++)
+	for (i = 0; i < ARRAYLENGTH(pos_list); i++) {
 		if (pos&pos_list[i] && !sc_start(src,bl,sc_atk[i],100,skill_lv,time))
 			pos &= ~pos_list[i];
+	}
 
 	return (pos ? 1 : 0);
 }
@@ -7338,9 +7337,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						break;
 				}
 
-				//Special message when trying to use Full Strip on FCP [Jobbie]
-				if(sd && skill_id == ST_FULLSTRIP && tsc && tsc->data[SC_CP_WEAPON] && tsc->data[SC_CP_HELM] &&
-					tsc->data[SC_CP_ARMOR] && tsc->data[SC_CP_SHIELD]) {
+				if(skill_id == ST_FULLSTRIP && tsc &&
+					tsc->data[SC_CP_WEAPON] && tsc->data[SC_CP_HELM] &&
+					tsc->data[SC_CP_ARMOR] && tsc->data[SC_CP_SHIELD] && sd)
+				{ //Special message when trying to use Full Strip on FCP [Jobbie]
 					clif_gospel_info(sd,0x28);
 					break;
 				}
@@ -7349,7 +7349,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if((i = skill_strip_equip(src,bl,pos,i,skill_lv,dur)) || (skill_id != ST_FULLSTRIP && skill_id != GC_WEAPONCRUSH))
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,i);
 
-				if(sd && !i) //Nothing stripped
+				if(!i && sd) //Nothing stripped
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			}
 			break;
@@ -14638,7 +14638,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	struct status_change *sc;
 	struct skill_condition require;
 	int i;
-	uint32 inf2, inf3;
+	uint32 inf2;
 
 	nullpo_retr(false,sd);
 
@@ -14682,24 +14682,20 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	if( sc && !sc->count )
 		sc = NULL;
 
-	if( pc_is90overweight(sd) && sd->skillitem != skill_id ) {
-		clif_skill_fail(sd,skill_id,USESKILL_FAIL_WEIGHTOVER,0,0);
-		return false;
-	}
+	if( sd->skillitem != skill_id ) {
+		uint32 inf3;
 
-	inf3 = skill_get_inf3(skill_id);
-
-	//Check the skills that can be used while mounted on a warg
-	if( pc_isridingwug(sd) && !(inf3&INF3_USABLE_WARG) && sd->skillitem != skill_id )
-		return false; //In official there is no fail message
-
-	if( pc_ismadogear(sd) && //Check the skills that can be used while mounted on a mado
-		!(skill_id > NC_MADOLICENCE && skill_id <= NC_DISJOINT) &&
-		skill_id != NC_MAGMA_ERUPTION && skill_id != ALL_FULL_THROTTLE &&
-		skill_id != AL_TELEPORT && skill_id != BS_GREED && sd->skillitem != skill_id )
-	{
-		clif_skill_fail(sd,skill_id,USESKILL_FAIL_MADOGEAR_RIDE,0,0);
-		return false;
+		if( pc_is90overweight(sd) ) {
+			clif_skill_fail(sd,skill_id,USESKILL_FAIL_WEIGHTOVER,0,0);
+			return false;
+		}
+		inf3 = skill_get_inf3(skill_id);
+		if( pc_isridingwug(sd) && !(inf3&INF3_USABLE_WARG) ) //Check the skills that can be used while mounted on a warg
+			return false; //In official there is no fail message
+		if( pc_ismadogear(sd) && !(inf3&INF3_USABLE_MADO) ) { //Check the skills that can be used while mounted on a mado
+			clif_skill_fail(sd,skill_id,USESKILL_FAIL_MADOGEAR_RIDE,0,0);
+			return false;
+		}
 	}
 
 	if( skill_lv < 1 || skill_lv > MAX_SKILL_LEVEL )

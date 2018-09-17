@@ -3314,7 +3314,7 @@ int npc_instanceinit(struct npc_data *nd)
 	return 0;
 }
 
- int npc_instancedestroy(struct npc_data* nd)
+ int npc_instancedestroy(struct npc_data *nd)
 {
 	struct event_data *ev;
 	char evname[EVENT_NAME_LENGTH];
@@ -3473,10 +3473,10 @@ static void npc_market_fromsql(void) {
 
 		Sql_GetData(mmysql_handle, 0, &data, NULL);
 
-		if( !(market = (struct s_npc_market *)strdb_get(NPCMarketDB,data)) ) {
+		if( !(market = (struct s_npc_market *)strdb_get(NPCMarketDB, data)) ) {
 			CREATE(market, struct s_npc_market, 1);
 			market->count = 0;
-			safestrncpy(market->exname, data, strlen(data)+1);
+			safestrncpy(market->exname, data, strlen(data) + 1);
 			strdb_put(NPCMarketDB, market->exname, market);
 		}
 
@@ -3492,6 +3492,24 @@ static void npc_market_fromsql(void) {
 	Sql_FreeResult(mmysql_handle);
 
 	ShowStatus("Done loading '"CL_WHITE"%d"CL_RESET"' entries for '"CL_WHITE"%d"CL_RESET"' NPC Markets from '"CL_WHITE"%s"CL_RESET"' table.\n", count, db_size(NPCMarketDB), markets_db);
+}
+#endif
+
+#if PACKETVER >= 20180321
+void npc_private_airship(struct map_session_data *sd, const char *mapname, uint16 item_id) {
+	struct event_data *ev = NULL;
+	char evname[EVENT_NAME_LENGTH];
+
+	if( !sd )
+		return;
+
+	safesnprintf(evname, ARRAYLENGTH(evname), "private_airship::%s", script_config.onairshiprequest_event_name);
+	if( (ev = (struct event_data *)strdb_get(ev_db, evname)) ) {
+		pc_setregstr(sd, add_str("@p_airship_mapname$"), mapname);
+		pc_setreg(sd, add_str("@p_airship_itemid"), item_id);
+		run_script(ev->nd->u.scr.script, ev->pos, sd->bl.id, ev->nd->bl.id);
+	} else
+		ShowError("npc_private_airship: Event '%s' not found, operation failed\n", evname);
 }
 #endif
 
@@ -4175,6 +4193,10 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 		map[m].flag.nocostume = state;
 	else if (!strcmpi(w3,"hidemobhpbar"))
 		map[m].flag.hidemobhpbar = state;
+	else if (!strcmpi(w3,"privateairship_source"))
+		map[m].flag.privateairship_source = state;
+	else if (!strcmpi(w3,"privateairship_destination"))
+		map[m].flag.privateairship_destination = state;
 	else if (!strcmpi(w3,"skill_damage")) {
 #ifdef ADJUST_SKILL_DAMAGE
 		char skill[SKILL_NAME_LENGTH];

@@ -2362,7 +2362,6 @@ static inline unsigned short status_base_matk_max(const struct status_data *stat
 void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_max, unsigned short *matk_min)
 {
 	struct status_data *status;
-	
 	struct status_change *sc;
 	struct map_session_data *sd;
 
@@ -2447,16 +2446,11 @@ void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_m
 		*matk_min = *matk_max;
 
 #ifdef RENEWAL
-	if( sd && !(flag&2) ) {
-		short index, refine;
+	if( !(flag&2) && sd ) {
+		int overrefine = sd->right_weapon.overrefine + 1;
 
-		if( (index = sd->equip_index[EQI_HAND_R]) >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON &&
-			(refine = sd->inventory.u.items_inventory[index].refine) < 16 && refine ) {
-			int r = refine_info[sd->inventory_data[index]->wlv].randombonus_max[refine + (4 - sd->inventory_data[index]->wlv)] / 100;
-
-			if( r )
-				*matk_max += (rnd()%100)%r + 1;
-		}
+		//Over refine matk bonus is not affected by Recognized Spell status
+		*matk_max += rnd()%overrefine;
 	}
 #endif
 
@@ -3522,7 +3516,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			watk->matk = sd->inventory_data[index]->matk;
 			if (sd->bonus.weapon_matk_rate)
 				watk->matk += watk->matk * sd->bonus.weapon_matk_rate / 100;
-			watk->wlv = wlv;
 			switch (sd->status.weapon) {
 				case W_BOW:	case W_REVOLVER:
 				case W_RIFLE:	case W_GATLING:
@@ -3533,6 +3526,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 						watk->matk += refine_info[wlv].bonus[r - 1] / 100;
 					break;
 			}
+			watk->wlv = wlv;
 #endif
 			if (r) //Overrefine bonus
 				wd->overrefine = refine_info[wlv].randombonus_max[r - 1] / 100;
@@ -3562,6 +3556,19 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 					return 1;
 			}
 		} else if (sd->inventory_data[index]->type == IT_SHADOWGEAR) { //Shadow System
+			int r = sd->inventory.u.items_inventory[index].refine;
+
+			if (sd->inventory_data[index]->equip == EQP_SHADOW_WEAPON) {
+				if (r) { //ATK, MATK + 1 for each refine
+#ifndef RENEWAL
+					status->batk += r;
+#else
+					sd->bonus.eatk += r;
+					sd->bonus.ematk += r;
+#endif
+				}
+			} else if (r) //Max HP + 10 for each refine
+				sd->bonus.hp += 10 * r;
 			if (sd->inventory_data[index]->script && (pc_has_permission(sd, PC_PERM_USE_ALL_EQUIPMENT) ||
 				!itemdb_isNoEquip(sd->inventory_data[index], sd->bl.m))) {
 				run_script(sd->inventory_data[index]->script, 0, sd->bl.id, 0);
@@ -8439,6 +8446,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			if( sd ) {
 				short i;
 
+				if( pc_ismadogear(sd) )
+					return 0;
 				if( (i = sd->equip_index[EQI_ACC_L]) >= 0 && sd->inventory_data[i] && sd->inventory_data[i]->type == IT_ARMOR )
 					pc_unequipitem(sd,i,1|2); //L-Accessory
 				if( (i = sd->equip_index[EQI_ACC_R]) >= 0 && sd->inventory_data[i] && sd->inventory_data[i]->type == IT_ARMOR )
@@ -8540,6 +8549,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC__LAZINESS:
 			case SC__UNLUCKY:
 			case SC__WEAKNESS:
+			case SC__STRIPACCESSORY:
 			case SC_CURSEDCIRCLE_TARGET:
 			case SC_NETHERWORLD:
 			case SC_TEARGAS:
@@ -13891,7 +13901,7 @@ static bool status_readdb_sizefix(char *fields[], int columns, int current)
 static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const char *name, const char *source)
 {
 	struct config_setting_t *rate = NULL;
-	int type = REFINE_TYPE_ARMOR, bonus_per_level = 0, rnd_bonus_v = 0, rnd_bonus_lv = 0;
+	int type = REFINE_TYPE_ARMOR, bonus_per_level = 0, rnd_bonus_v = 0, rnd_bonus_lv = 0, refine_v = 0;
 	char lv[4];
 
 	nullpo_ret(r);
@@ -13936,7 +13946,6 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 				chance[i][j] = 100; //Default value for all rates
 		}
 		i = 0;
-		j = 0;
 		while ((t = config_setting_get_elem(rate, i++)) && config_setting_is_group(t)) {
 			int level = 0, i32;
 			char *rlvl = config_setting_name(t);
@@ -13958,33 +13967,28 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 				duplicate[level] = true;
 			if (config_setting_lookup_int(t, "NormalChance", &i32))
 				chance[REFINE_CHANCE_TYPE_NORMAL][level] = i32;
-			else
-				chance[REFINE_CHANCE_TYPE_NORMAL][level] = 100;
 			if (config_setting_lookup_int(t, "EnrichedChance", &i32))
 				chance[REFINE_CHANCE_TYPE_ENRICHED][level] = i32;
-			else
-				chance[REFINE_CHANCE_TYPE_ENRICHED][level] = (level > 10 ? 0 : 100); //Enriched ores up to +10 only
 			if (config_setting_lookup_int(t, "EventNormalChance", &i32))
 				chance[REFINE_CHANCE_TYPE_E_NORMAL][level] = i32;
-			else
-				chance[REFINE_CHANCE_TYPE_E_NORMAL][level] = 100;
 			if (config_setting_lookup_int(t, "EventEnrichedChance", &i32))
 				chance[REFINE_CHANCE_TYPE_E_ENRICHED][level] = i32;
-			else
-				chance[REFINE_CHANCE_TYPE_E_ENRICHED][level] = (level > 10 ? 0 : 100); //Enriched ores up to +10 only
 			if (config_setting_lookup_int(t, "Bonus", &i32))
-				bonus[level] += i32;
-			if (level >= rnd_bonus_lv - 1)
-				rnd_bonus[level] = rnd_bonus_v * (level - rnd_bonus_lv + 2);
+				bonus[level] = i32;
+			else
+				bonus[level] = 0;
 		}
-		for (i = 0; i < MAX_REFINE; i++) {
-			refine_info[type].chance[REFINE_CHANCE_TYPE_NORMAL][i] = chance[REFINE_CHANCE_TYPE_NORMAL][i];
-			refine_info[type].chance[REFINE_CHANCE_TYPE_ENRICHED][i] = chance[REFINE_CHANCE_TYPE_ENRICHED][i];
-			refine_info[type].chance[REFINE_CHANCE_TYPE_E_NORMAL][i] = chance[REFINE_CHANCE_TYPE_E_NORMAL][i];
-			refine_info[type].chance[REFINE_CHANCE_TYPE_E_ENRICHED][i] = chance[REFINE_CHANCE_TYPE_E_ENRICHED][i];
-			refine_info[type].randombonus_max[i] = rnd_bonus[i];
-			bonus[i] += bonus_per_level + (i > 0 ? bonus[i - 1] : 0);
-			refine_info[type].bonus[i] = bonus[i];
+		for (j = 0; j < MAX_REFINE; j++) {
+			refine_info[type].chance[REFINE_CHANCE_TYPE_NORMAL][j] = chance[REFINE_CHANCE_TYPE_NORMAL][j];
+			refine_info[type].chance[REFINE_CHANCE_TYPE_ENRICHED][j] = chance[REFINE_CHANCE_TYPE_ENRICHED][j];
+			refine_info[type].chance[REFINE_CHANCE_TYPE_E_NORMAL][j] = chance[REFINE_CHANCE_TYPE_E_NORMAL][j];
+			refine_info[type].chance[REFINE_CHANCE_TYPE_E_ENRICHED][j] = chance[REFINE_CHANCE_TYPE_E_ENRICHED][j];
+			if (rnd_bonus_lv > 0 && j >= rnd_bonus_lv - 1) {
+				rnd_bonus[j] = rnd_bonus_v * (j - rnd_bonus_lv + 2);
+				refine_info[type].randombonus_max[j] = rnd_bonus[j];
+			}
+			refine_v += bonus_per_level + bonus[j];
+			refine_info[type].bonus[j] = refine_v;
 		}
 	} else {
 		ShowWarning("status_readdb_refine_libconfig_sub: Missing refine rates for entry '%s' in \"%s\", skipping.\n", name, source);

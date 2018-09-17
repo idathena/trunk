@@ -990,10 +990,6 @@ void pc_makesavestatus(struct map_session_data *sd)
 	if(!battle_config.save_clothcolor)
 		sd->status.clothes_color = 0;
 
-	//Since this is currently not officially released, its best to have a forced option to not save body styles
-	if(!battle_config.save_body_style)
-		sd->status.body = 0;
-
 #ifdef NEW_CARTS //Only copy the Cart/Peco/Falcon options, the rest are handled via status change load/saving [Skotlex]
 	sd->status.option = sd->sc.option&(OPTION_INVISIBLE|OPTION_FALCON|OPTION_RIDING|OPTION_DRAGON|OPTION_WUG|OPTION_WUGRIDER|OPTION_MADOGEAR);
 #else
@@ -4482,6 +4478,30 @@ int pc_insert_card(struct map_session_data *sd, int idx_card, int idx_equip)
 		clif_insert_card(sd, idx_equip, idx_card, 0);
 	}
 	return 0;
+}
+
+/**
+ * Returns the count of unidentified items with the option to identify too.
+ * @param sd: Player data
+ * @param identify_item: Whether or not to identify any unidentified items
+ * @return Unidentified items count
+ */
+int pc_identifyall(struct map_session_data *sd, bool identify_item)
+{
+	int unidentified_count = 0;
+	int i;
+
+	for( i = 0; i < MAX_INVENTORY; i++ ) {
+		if( sd->inventory.u.items_inventory[i].nameid > 0 && sd->inventory.u.items_inventory[i].identify != 1 ) {
+			if( identify_item ) {
+				sd->inventory.u.items_inventory[i].identify = 1;
+				clif_item_identified(sd, i, 0);
+			}
+			unidentified_count++;
+		}
+	}
+
+	return unidentified_count;
 }
 
 //

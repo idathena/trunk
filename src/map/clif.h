@@ -554,6 +554,16 @@ enum e_config_type {
 	CONFIG_HOMUNCULUS_AUTOFEED
 };
 
+enum in_ui_type {
+	IN_UI_ATTENDANCE = 5
+};
+
+enum out_ui_type {
+	OUT_UI_ATTENDANCE = 7
+};
+
+void clif_ui_open(struct map_session_data *sd, enum out_ui_type ui_type, int32 data);
+
 int clif_setip(const char *ip);
 void clif_setbindip(const char *ip);
 void clif_setport(uint16 port);
@@ -1088,15 +1098,18 @@ void clif_weight_limit(struct map_session_data *sd);
 void clif_pet_evolution_result(int fd, enum e_pet_evolution_result result);
 
 //Attendance System
-enum in_ui_type {
-	IN_UI_ATTENDANCE = 5
-};
-
-enum out_ui_type {
-	OUT_UI_ATTENDANCE = 7
-};
-
-void clif_ui_open(struct map_session_data *sd, enum out_ui_type ui_type, int32 data);
 void clif_attendence_response(struct map_session_data *sd, int32 data);
+
+//Private Airship System
+enum e_private_airship_response {
+	PRIVATEAIRSHIP_OK,
+	PRIVATEAIRSHIP_RETRY,
+	PRIVATEAIRSHIP_ITEM_NOT_ENOUGH,
+	PRIVATEAIRSHIP_DESTINATION_MAP_INVALID,
+	PRIVATEAIRSHIP_SOURCE_MAP_INVALID,
+	PRIVATEAIRSHIP_ITEM_UNAVAILABLE
+};
+
+void clif_private_airship_response(struct map_session_data *sd, enum e_private_airship_response response);
 
 #endif /* _CLIF_H_ */

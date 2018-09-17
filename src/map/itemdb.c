@@ -1386,7 +1386,7 @@ static bool itemdb_parse_dbrow(char **str, const char *source, int line, int scr
 	}
 
 	if (id->type != IT_SHADOWGEAR && (id->equip&EQP_SHADOW_GEAR)) {
-		ShowWarning("Item %hu (%s) have invalid equipment slot! Making it an etc item.\n", nameid, id->jname);
+		ShowWarning("Item %hu (%s) has invalid equipment slot! Making it an etc item.\n", nameid, id->jname);
 		id->type = IT_ETC;
 	}
 

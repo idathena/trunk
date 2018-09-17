@@ -4155,6 +4155,10 @@ ACMD_FUNC(mapinfo)
 		strcat(atcmd_output, " Reset |");
 	if (map[m_id].flag.hidemobhpbar)
 		strcat(atcmd_output, " HideMobHPBar |");
+	if (map[m_id].flag.privateairship_source)
+		strcat(atcmd_output, " PrivateAirshipSource |");
+	if (map[m_id].flag.privateairship_destination)
+		strcat(atcmd_output, " PrivateAirshipDestination |");
 	clif_displaymessage(fd, atcmd_output);
 
 	strcpy(atcmd_output,msg_txt(1051)); // Other Flags:
@@ -7044,16 +7048,9 @@ ACMD_FUNC(identify)
  *-----------------------------------------------*/
 ACMD_FUNC(identifyall)
 {
-	int i;
-
 	nullpo_retr(-1, sd);
 
-	for (i = 0; i < MAX_INVENTORY; i++) {
-		if (sd->inventory.u.items_inventory[i].nameid > 0 && sd->inventory.u.items_inventory[i].identify != 1) {
-			sd->inventory.u.items_inventory[i].identify = 1;
-			clif_item_identified(sd, i, 0);
-		}
-	}
+	pc_identifyall(sd, true);
 	return 0;
 }
 
@@ -8149,6 +8146,8 @@ ACMD_FUNC(mapflag) {
 		checkflag(nomineeffect);	checkflag(nolockon);		checkflag(notomb);		checkflag(nocashshop);
 		checkflag(nobanking);		checkflag(gvg_te);		checkflag(gvg_te_castle);	checkflag(nocostume);
 		checkflag(hidemobhpbar);
+		checkflag(privateairship_source);
+		checkflag(privateairship_destination);
 #ifdef ADJUST_SKILL_DAMAGE
 		checkflag(skill_damage);
 #endif
@@ -8177,6 +8176,8 @@ ACMD_FUNC(mapflag) {
 	setflag(nomineeffect);		setflag(nolockon);		setflag(notomb);		setflag(nocashshop);
 	setflag(nobanking);		setflag(gvg_te);		setflag(gvg_te_castle);		setflag(nocostume);
 	setflag(hidemobhpbar);
+	setflag(privateairship_source);
+	setflag(privateairship_destination)
 #ifdef ADJUST_SKILL_DAMAGE
 	setflag(skill_damage);
 #endif
@@ -8192,7 +8193,8 @@ ACMD_FUNC(mapflag) {
 	clif_displaymessage(sd->fd,"fog, fireworks, sakura, leaves, nogo, nobaseexp, nojobexp, nomobloot, nomvploot,");
 	clif_displaymessage(sd->fd,"nightenabled, restricted, nodrop, novending, loadevent, nochat, partylock, guildlock,");
 	clif_displaymessage(sd->fd,"reset, nochmautojoin, nousecart, noitemconsumption, nosumstarmiracle, nolockon, notomb,");
-	clif_displaymessage(sd->fd,"nocashshop, nobanking, gvg_te, gvg_te_castle, nocostume, hidemobhpbar");
+	clif_displaymessage(sd->fd,"nocashshop, nobanking, gvg_te, gvg_te_castle, nocostume, hidemobhpbar, privateairship_source,");
+	clif_displaymessage(sd->fd,"privateairship_destination,");
 #ifdef ADJUST_SKILL_DAMAGE
 	clif_displaymessage(sd->fd,"skill_damage");
 #endif

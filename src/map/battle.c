@@ -1739,6 +1739,28 @@ int64 battle_addmastery(struct map_session_data *sd, struct block_list *target, 
 	return damage;
 }
 
+/**
+ * Calculates over refine damage bonus
+ * @param sd Player
+ * @param damage Current damage
+ * @param type EQI_HAND_L:left-hand weapon, EQI_HAND_R:right-hand weapon
+ */
+static void battle_add_weapon_damage(struct map_session_data *sd, int64 *damage, uint8 type) {
+	int overrefine;
+
+	if(!sd)
+		return;
+	switch(type) { //Rodatazone says that Over refine bonus is part of base weapon attack
+		case EQI_HAND_L:
+			overrefine = sd->left_weapon.overrefine + 1;
+			break;
+		case EQI_HAND_R:
+			overrefine = sd->right_weapon.overrefine + 1;
+			break;
+	}
+	(*damage) += rnd()%overrefine;
+}
+
 #ifdef RENEWAL
 static int battle_calc_sizefix(int64 damage, struct map_session_data *sd, short t_size, unsigned char weapon_type, bool weapon_perfection)
 {
@@ -1755,11 +1777,20 @@ static int battle_calc_status_attack(struct status_data *status, short hand)
 		return status->batk * 2;
 }
 
+/**
+ * Calculates renewal Variance, OverRefineBonus, and SizePenaltyMultiplier of weapon damage parts for player
+ * @param src Block list of attacker
+ * @param tstatus Target's status data
+ * @param watk Weapon attack data
+ * @param sd Player
+ * @param skill_id Id of skill
+ * @return Base weapon damage
+ */
 static int battle_calc_base_weapon_attack(struct block_list *src, struct status_data *tstatus, struct weapon_atk *watk, struct map_session_data *sd, uint16 skill_id)
 {
 	struct status_data *status = status_get_status_data(src);
 	struct status_change *sc = status_get_sc(src);
-	uint8 type = (watk == &status->lhw ? EQI_HAND_L : EQI_HAND_R), refine;
+	uint8 type = (watk == &status->lhw ? EQI_HAND_L : EQI_HAND_R);
 	uint16 atkmin = (type == EQI_HAND_L ? status->watk2 : status->watk);
 	uint16 atkmax = atkmin;
 	int64 damage;
@@ -1795,18 +1826,12 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 			atkmax = atkmin;
 	}
 
-	if(type == EQI_HAND_R && index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON &&
-		watk->range <= 3 && (refine = sd->inventory.u.items_inventory[index].refine) < 16 && refine) {
-		int r = refine_info[watk->wlv].randombonus_max[refine + (4 - watk->wlv)] / 100;
-
-		if(r)
-			atkmax += (rnd()%100)%r + 1;
-	}
+	damage = atkmax;
 
 	if(sd->charmball_type == CHARM_TYPE_LAND && sd->charmball > 0)
-		atkmax += atkmax * sd->charmball / 10;
+		damage += damage * sd->charmball / 10;
 
-	damage = atkmax;
+	battle_add_weapon_damage(sd, &damage, type); //Over refine atk bonus is not affected by Maximize Power status
 
 	switch(skill_id) { //Ignore size fix
 		case MO_EXTREMITYFIST:
@@ -1847,7 +1872,7 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 static int64 battle_calc_base_damage(struct block_list *src, struct status_data *status, struct weapon_atk *watk, struct status_change *sc, unsigned short t_size, struct map_session_data *sd, int flag)
 {
 	unsigned int atkmin = 0, atkmax = 0;
-	short type = 0;
+	uint8 type = 0;
 	int64 damage = 0;
 
 	if(!sd) { //Mobs/Pets
@@ -1941,19 +1966,8 @@ static int64 battle_calc_base_damage(struct block_list *src, struct status_data 
 	else
 		damage += status->batk;
 
-	//Rodatazone says that overrefine bonuses are part of base atk
-	if(sd) {
-		switch(type) {
-			case EQI_HAND_L:
-				if(sd->left_weapon.overrefine)
-					damage += rnd()%sd->left_weapon.overrefine + 1;
-				break;
-			case EQI_HAND_R:
-				if(sd->right_weapon.overrefine)
-					damage += rnd()%sd->right_weapon.overrefine + 1;
-				break;
-		}
-	}
+	battle_add_weapon_damage(sd, &damage, type);
+
 	return damage;
 }
 
@@ -8608,7 +8622,6 @@ static const struct _battle_data {
 	{ "monster_hp_bars_info",               &battle_config.monster_hp_bars_info,            1,      0,      1,              },
 	{ "min_body_style",                     &battle_config.min_body_style,                  0,      0,      SHRT_MAX,       },
 	{ "max_body_style",                     &battle_config.max_body_style,                  1,      0,      SHRT_MAX,       },
-	{ "save_body_style",                    &battle_config.save_body_style,                 0,      0,      1,              },
 	{ "mvp_exp_reward_message",             &battle_config.mvp_exp_reward_message,          0,      0,      1,              },
 	{ "max_summoner_parameter",             &battle_config.max_summoner_parameter,          120,    10,     SHRT_MAX,       },
 	{ "monster_eye_range_bonus",            &battle_config.mob_eye_range_bonus,             0,      0,      10,             },
@@ -8650,6 +8663,7 @@ static const struct _battle_data {
 	{ "feature.homunculus_autofeed",        &battle_config.feature_homunculus_autofeed,     1,      0,      1,              },
 	{ "homunculus_autofeed_always",         &battle_config.homunculus_autofeed_always,      1,      0,      1,              },
 	{ "feature.attendance",                 &battle_config.feature_attendance,              1,      0,      1,              },
+	{ "feature.privateairship",             &battle_config.feature_privateairship,          1,      0,      1,              },
 
 #include "../custom/battle_config_init.inc"
 };
@@ -8802,6 +8816,13 @@ void battle_adjust_conf()
 	if (battle_config.feature_attendance) {
 		ShowWarning("conf/battle/feature.conf attendance system is enabled but it requires PACKETVER 2018-03-07 or newer, disabling...\n");
 		battle_config.feature_attendance = 0;
+	}
+#endif
+
+#if PACKETVER < 20180321
+	if (battle_config.feature_privateairship) {
+		ShowWarning("conf/battle/feature.conf private airship system is enabled but it requires PACKETVER 2018-03-21 or newer, disabling...\n");
+		battle_config.feature_privateairship = 0;
 	}
 #endif
 

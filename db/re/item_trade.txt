@@ -3866,6 +3866,7 @@
 25049,499,100	// Basilac_Clam
 25245,499,100	// Small_Pile_Of_Bones
 25408,435,100	// Memories_Of_Gyoll
+25464,475,100	// World_Tour_Ticket
 26100,435,100	// P_Foxtail_Staff2
 26101,435,100	// P_Foxtail_Staff3
 28105,467,100	// Infinity_Twohand_Axe

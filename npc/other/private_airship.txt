@@ -1,0 +1,49 @@
+//===== rAthena Script =======================================
+//= Private Airship
+//===== By: ==================================================
+//= Asheraf
+//===== Current Version: =====================================
+//= 1.0
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: ========================================= 
+//= Private Airship script controller
+//===== Additional Comments: =================================
+//= 1.0 First version. [exneval]
+//============================================================
+
+-	script	private_airship	-1,{
+	end;
+
+OnAirShipRequest:
+	.@proceed = 0;
+	for (.@i = 0; .@i < getarraysize(.needitem); ++.@i) {
+		if (@p_airship_itemid == .needitem[.@i]) {
+			.@proceed = 1;
+			break;
+		}
+	}
+	if (!.@proceed) {
+		airship_respond(PRIVATEAIRSHIP_ITEM_UNAVAILABLE);
+		end;
+	}
+	if (!countitem(@p_airship_itemid)) {
+		airship_respond(PRIVATEAIRSHIP_ITEM_NOT_ENOUGH);
+		end;
+	}
+	if (!getmapflag(strcharinfo(3),MF_PRIVATEAIRSHIP_SOURCE)) {
+		airship_respond(PRIVATEAIRSHIP_SOURCE_MAP_INVALID);
+		end;
+	}
+	if (!getmapflag(@p_airship_mapname$,MF_PRIVATEAIRSHIP_DESTINATION)) {
+		airship_respond(PRIVATEAIRSHIP_DESTINATION_MAP_INVALID);
+		end;
+	}
+	delitem @p_airship_itemid,1;
+	warp @p_airship_mapname$,0,0;
+	end;
+
+OnInit:
+	setarray .needitem[0],6909,25464; //Actinidia_Cat_Fruit, World_Tour_Ticket
+	end;
+}

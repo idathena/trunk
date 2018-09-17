@@ -355,6 +355,7 @@ struct Script_Config script_config = {
 	"OnUnTouch", //onuntouch_event_name (run whenever a char walks from the OnTouch area)
 	"OnWhisperGlobal", //onwhisper_event_name (is executed when a player sends a whisper message to the NPC)
 	"OnCommand", //oncommand_event_name (is executed by script command cmdothernpc)
+	"OnAirShipRequest", //onairshiprequest_event_name (run whenever a char using private airship system)
 	// Init related
 	"OnInit", //init_event_name (is executed on all npcs when all npcs were loaded)
 	"OnInterIfInit", //inter_init_event_name (is executed on inter server connection)
@@ -558,6 +559,8 @@ enum {
 	MF_GVG_TE,
 	MF_NOCOSTUME,
 	MF_HIDEMOBHPBAR,
+	MF_PRIVATEAIRSHIP_SOURCE,
+	MF_PRIVATEAIRSHIP_DESTINATION,
 };
 
 const char *script_op2name(int op)
@@ -11736,6 +11739,8 @@ BUILDIN_FUNC(getmapflag)
 			case MF_GVG_TE:			script_pushint(st,map[m].flag.gvg_te); break;
 			case MF_NOCOSTUME:		script_pushint(st,map[m].flag.nocostume); break;
 			case MF_HIDEMOBHPBAR:		script_pushint(st,map[m].flag.hidemobhpbar); break;
+			case MF_PRIVATEAIRSHIP_SOURCE:	script_pushint(st,map[m].flag.privateairship_source); break;
+			case MF_PRIVATEAIRSHIP_DESTINATION:	script_pushint(st,map[m].flag.privateairship_destination); break;
 #ifdef ADJUST_SKILL_DAMAGE
 			case MF_SKILL_DAMAGE: {
 					int ret_val = 0, type = 0;
@@ -11875,6 +11880,8 @@ BUILDIN_FUNC(setmapflag)
 				break;
 			case MF_NOCOSTUME:		map[m].flag.nocostume = 1; break;
 			case MF_HIDEMOBHPBAR:		map[m].flag.hidemobhpbar = 1; break;
+			case MF_PRIVATEAIRSHIP_SOURCE:	map[m].flag.privateairship_source = 1; break;
+			case MF_PRIVATEAIRSHIP_DESTINATION:	map[m].flag.privateairship_destination = 1; break;
 #ifdef ADJUST_SKILL_DAMAGE
 			case MF_SKILL_DAMAGE: {
 					int type = 0;
@@ -12003,6 +12010,8 @@ BUILDIN_FUNC(removemapflag)
 				break;
 			case MF_NOCOSTUME:		map[m].flag.nocostume = 0; break;
 			case MF_HIDEMOBHPBAR:		map[m].flag.hidemobhpbar = 0; break;
+			case MF_PRIVATEAIRSHIP_SOURCE:	map[m].flag.privateairship_source = 0; break;
+			case MF_PRIVATEAIRSHIP_DESTINATION:	map[m].flag.privateairship_destination = 0; break;
 #ifdef ADJUST_SKILL_DAMAGE
 			case MF_SKILL_DAMAGE:
 				map[m].flag.skill_damage = 0;
@@ -19529,7 +19538,7 @@ BUILDIN_FUNC(instance_create)
 {
 	struct map_session_data *sd;
 
-	if((sd = script_rid2sd(st)) == NULL)
+	if( !(sd = script_rid2sd(st)) )
 		return -1;
 
 	script_pushint(st,instance_create(sd->status.party_id, script_getstr(st, 2)));
@@ -21065,7 +21074,7 @@ BUILDIN_FUNC(montransform) {
 	struct script_data *data;
 	const char *cmd = script_getfuncname(st);
 
-	if( (sd = script_rid2sd(st)) == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	data = script_getdata(st,2);
@@ -23116,6 +23125,47 @@ BUILDIN_FUNC(mail) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/*==========================================
+ * identifyall({<type>{,<account_id>}})
+ * <type>:
+ *	true: identify the items and returns the count of unidentified items (default)
+ *	false: returns the count of unidentified items only
+ *------------------------------------------*/
+BUILDIN_FUNC(identifyall) {
+	TBL_PC *sd;
+	bool identify_item = true;
+
+	if (script_hasdata(st,2))
+		identify_item = (script_getnum(st,2) != 0);
+
+	if (!script_hasdata(st,3))
+		sd = script_rid2sd(st);
+	else
+		sd = map_id2sd(script_getnum(st,3));
+
+	if (!sd) {
+		script_pushint(st,-1);
+		return 0;
+	}
+	script_pushint(st,pc_identifyall(sd,identify_item));
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(airship_respond) {
+	struct map_session_data *sd = script_rid2sd(st);
+	uint32 response = script_getnum(st,2);
+
+	if (!(sd = script_rid2sd(st)))
+		return 1;
+	if (response < PRIVATEAIRSHIP_OK || response > PRIVATEAIRSHIP_ITEM_UNAVAILABLE) {
+		ShowWarning("buildin_airship_respond: Invalid response %d has been given.", response);
+		return 1;
+	}
+	clif_private_airship_response(sd, (enum e_private_airship_response)response);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -23752,6 +23802,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(open_roulette,"?"),
 	//Mail System
 	BUILDIN_DEF(mail,"isss*"),
+	BUILDIN_DEF(identifyall,"??"),
+	BUILDIN_DEF(airship_respond,"i"),
 
 #include "../custom/script_def.inc"
 
