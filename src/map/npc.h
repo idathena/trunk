@@ -11,7 +11,6 @@ struct block_list;
 struct npc_data;
 struct view_data;
 
-
 struct npc_timerevent_list {
 	int timer,pos;
 };
@@ -1199,5 +1198,9 @@ int npc_do_atcmd_event(struct map_session_data *sd, const char *command, const c
 
 bool npc_unloadfile(const char *path);
 bool npcdb_checkid(int id);
+
+#if PACKETVER >= 20180321
+void npc_private_airship(struct map_session_data *sd, const char *mapname, uint16 item_id);
+#endif
 
 #endif /* _NPC_H_ */

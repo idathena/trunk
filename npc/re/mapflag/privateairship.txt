@@ -1,0 +1,110 @@
+//===== rAthena Script =======================================
+//= Mapflag:
+//= privateairship_source, privateairship_destination
+//===== By: ==================================================
+//= Lemongrass
+//===== Current Version: =====================================
+//= 1.0
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: =========================================
+//= Private Airship available sources and destinations
+//===== Additional Comments: =================================
+//= 1.0 First Version.
+//============================================================
+
+//=======================================
+// Available source maps
+//=======================================
+bif_fild01	mapflag	privateairship_source
+bif_fild02	mapflag	privateairship_source
+bra_dun01	mapflag	privateairship_source
+bra_dun02	mapflag	privateairship_source
+bra_fild01	mapflag	privateairship_source
+brasilis	mapflag	privateairship_source
+dali	mapflag	privateairship_source
+dali02	mapflag	privateairship_source
+dew_dun01	mapflag	privateairship_source
+dew_dun02	mapflag	privateairship_source
+dew_fild01	mapflag	privateairship_source
+dewata	mapflag	privateairship_source
+dic_dun01	mapflag	privateairship_source
+dic_dun02	mapflag	privateairship_source
+dic_dun03	mapflag	privateairship_source
+dic_fild01	mapflag	privateairship_source
+dic_fild02	mapflag	privateairship_source
+dicastes01	mapflag	privateairship_source
+dicastes02	mapflag	privateairship_source
+ecl_fild01	mapflag	privateairship_source
+ecl_tdun01	mapflag	privateairship_source
+ecl_tdun02	mapflag	privateairship_source
+ecl_tdun03	mapflag	privateairship_source
+eclage	mapflag	privateairship_source
+lasa_dun01	mapflag	privateairship_source
+lasa_dun02	mapflag	privateairship_source
+lasa_dun03	mapflag	privateairship_source
+lasa_fild01	mapflag	privateairship_source
+lasa_fild02	mapflag	privateairship_source
+lasagna	mapflag	privateairship_source
+ma_dun01	mapflag	privateairship_source
+ma_fild01	mapflag	privateairship_source
+ma_fild02	mapflag	privateairship_source
+ma_scene01	mapflag	privateairship_source
+mal_dun01	mapflag	privateairship_source
+malangdo	mapflag	privateairship_source
+malaya	mapflag	privateairship_source
+mora	mapflag	privateairship_source
+moro_cav	mapflag	privateairship_source
+moro_vol	mapflag	privateairship_source
+ver_eju	mapflag	privateairship_source
+ver_tunn	mapflag	privateairship_source
+verus03	mapflag	privateairship_source
+verus04	mapflag	privateairship_source
+
+//=======================================
+// Available destination maps
+//=======================================
+bif_fild01	mapflag	privateairship_destination
+bif_fild02	mapflag	privateairship_destination
+bra_dun01	mapflag	privateairship_destination
+bra_dun02	mapflag	privateairship_destination
+bra_fild01	mapflag	privateairship_destination
+brasilis	mapflag	privateairship_destination
+dali	mapflag	privateairship_destination
+dali02	mapflag	privateairship_destination
+dew_dun01	mapflag	privateairship_destination
+dew_dun02	mapflag	privateairship_destination
+dew_fild01	mapflag	privateairship_destination
+dewata	mapflag	privateairship_destination
+dic_dun01	mapflag	privateairship_destination
+dic_dun02	mapflag	privateairship_destination
+dic_dun03	mapflag	privateairship_destination
+dic_fild01	mapflag	privateairship_destination
+dic_fild02	mapflag	privateairship_destination
+dicastes01	mapflag	privateairship_destination
+dicastes02	mapflag	privateairship_destination
+ecl_fild01	mapflag	privateairship_destination
+ecl_tdun01	mapflag	privateairship_destination
+ecl_tdun02	mapflag	privateairship_destination
+ecl_tdun03	mapflag	privateairship_destination
+eclage	mapflag	privateairship_destination
+lasa_dun01	mapflag	privateairship_destination
+lasa_dun02	mapflag	privateairship_destination
+lasa_dun03	mapflag	privateairship_destination
+lasa_fild01	mapflag	privateairship_destination
+lasa_fild02	mapflag	privateairship_destination
+lasagna	mapflag	privateairship_destination
+ma_dun01	mapflag	privateairship_destination
+ma_fild01	mapflag	privateairship_destination
+ma_fild02	mapflag	privateairship_destination
+ma_scene01	mapflag	privateairship_destination
+mal_dun01	mapflag	privateairship_destination
+malangdo	mapflag	privateairship_destination
+malaya	mapflag	privateairship_destination
+mora	mapflag	privateairship_destination
+moro_cav	mapflag	privateairship_destination
+moro_vol	mapflag	privateairship_destination
+ver_eju	mapflag	privateairship_destination
+ver_tunn	mapflag	privateairship_destination
+verus03	mapflag	privateairship_destination
+verus04	mapflag	privateairship_destination

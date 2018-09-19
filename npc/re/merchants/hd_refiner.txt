@@ -78,22 +78,13 @@
 		mes "I only handle items with refine levels from +7 to +9.";
 		close;
 	}
-	switch (getequipweaponlv(.@part)) {
-	default:
-	case 0:
-		set .@price,20000;
-		set .@material,6241; //HD_Elunium
-		break;
-	case 1:
-	case 2:
-	case 3:
-	case 4:
-		set .@price,20000;
-		set .@material,6240; //HD_Oridecon
-		break;
-	}
+	set .@refineitemid, getequipid(.@part); // save id of the item
+	set .@refinerycnt, getequiprefinerycnt(.@part); // save refinery count
+	setarray .@equip_card[0], getequipcardid(.@part, 0), getequipcardid(.@part, 1), getequipcardid(.@part, 2), getequipcardid(.@part, 3);
+	set .@material, getequiprefinecost(.@part, REFINE_COST_TYPE_HD, REFINE_INFO_MATERIAL_ID);
+	set .@price, getequiprefinecost(.@part, REFINE_COST_TYPE_HD, REFINE_INFO_ZENY);
 	mes "[Blacksmith Mighty Hammer]";
-	mes "In order to refine the gear you selected you need ^ff9999"+getitemname(.@material)+"^000000 and 20,000 zeny as a fee.";
+	mes "In order to refine the gear you selected you need ^ff9999"+getitemname(.@material)+"^000000 and "+callfunc("F_InsertComma", .@price)+" zeny as a fee.";
 	mes "Do you have them ready?";
 	next;
 	if (select("Yes:No") == 2) {
@@ -113,16 +104,28 @@
 			close;
 		}
 	}
-	if (countitem(.@material) == 0 || Zeny < .@price) {
+	if (!countitem(.@material) || Zeny < .@price) {
 		mes "[Blacksmith Mighty Hammer]";
 		mes "Didn't you just say you had everything ready?";
 		close;
 	}
 	delitem .@material,1;
 	set Zeny, Zeny-.@price;
+	// anti-hack
+	if (callfunc("F_IsEquipIDHack", .@part, .@refineitemid) ||
+		callfunc("F_IsEquipRefineHack", .@part, .@refinerycnt) ||
+		callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]))
+	{
+		mes "[Blacksmith Mighty Hammer]";
+		emotion e_an;
+		mes "Wait a second...";
+		mes "Do you think I'm stupid?!";
+		mes "You switched the item while I wasn't looking! Get out of here!";
+		close;
+	}
 	mes "[Blacksmith Mighty Hammer]";
 	mes "Tac! Tac! Tac!";
-	if (getequippercentrefinery(.@part) > rand(100)) {
+	if (getequippercentrefinery(.@part, true) > rand(100)) {
 		successrefitem .@part;
 		next;
 		emotion e_no1;
@@ -215,25 +218,18 @@ lhz_in02,280,19,3	duplicate(MightyHammer)	Mighty Hammer#lhz	826
 		mes "This weapon is perfect, no need to refine it anymore~";
 		close;
 	}
-	switch (getequipweaponlv(.@part)) {
-	default:
-	case 0:
-		set .@price,100000;
-		set .@material,6225; //HD_Carnium
-		set .@type$,"armor";
-		break;
-	case 1:
-	case 2:
-	case 3:
-	case 4:
-		set .@price,100000;
-		set .@material,6226; //HD_Bradium
+	set .@refineitemid, getequipid(.@part); // save id of the item
+	set .@refinerycnt, getequiprefinerycnt(.@part); // save refinery count
+	setarray .@equip_card[0], getequipcardid(.@part, 0), getequipcardid(.@part, 1), getequipcardid(.@part, 2), getequipcardid(.@part, 3);
+	set .@material, getequiprefinecost(.@part, REFINE_COST_TYPE_OVER10_HD, REFINE_INFO_MATERIAL_ID);
+	set .@price, getequiprefinecost(.@part, REFINE_COST_TYPE_OVER10_HD, REFINE_INFO_ZENY);
+	if (getequipweaponlv(.@part) >= 1 && getequipweaponlv(.@part) <= 4)
 		set .@type$,"weapon";
-		break;
-	}
+	else
+		set .@type$,"armor";
 	mes "[Basta]";
 	mes "Hmm... is this the one you want to refine?";
-	mes "To refine this equipment, I need 1 ^ff9999"+getitemname(.@material)+"^000000 and 100,000 zeny as a fee.";
+	mes "To refine this equipment, I need 1 ^ff9999"+getitemname(.@material)+"^000000 and "+callfunc("F_InsertComma", .@price)+" zeny as a fee.";
 	mes "Do you really want to refine this?";
 	next;
 	if (select("Yes:No") == 2) {
@@ -262,7 +258,7 @@ lhz_in02,280,19,3	duplicate(MightyHammer)	Mighty Hammer#lhz	826
 			close;
 		}
 	}
-	if (countitem(.@material) == 0 || Zeny < .@price) {
+	if (!countitem(.@material) || Zeny < .@price) {
 		mes "[Basta]";
 		mes "Hmm... You didn't bring all the materials needed.";
 		mes "Come back when you have them all.";
@@ -270,6 +266,18 @@ lhz_in02,280,19,3	duplicate(MightyHammer)	Mighty Hammer#lhz	826
 	}
 	delitem .@material,1;
 	set Zeny, Zeny-.@price;
+	// anti-hack
+	if (callfunc("F_IsEquipIDHack", .@part, .@refineitemid) ||
+		callfunc("F_IsEquipRefineHack", .@part, .@refinerycnt) ||
+		callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]))
+	{
+		mes "[Basta]";
+		emotion e_an;
+		mes "Wait a second...";
+		mes "Do you think I'm stupid?!";
+		mes "You switched the item while I wasn't looking! Get out of here!";
+		close;
+	}
 	mes "Pow! Pow! Pow! Pow!";
 	if (getequippercentrefinery(.@part) > rand(100)) {
 		successrefitem .@part;

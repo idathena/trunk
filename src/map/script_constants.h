@@ -431,6 +431,8 @@
 	export_constant(MF_GVG_TE);
 	export_constant(MF_NOCOSTUME);
 	export_constant(MF_HIDEMOBHPBAR);
+	export_constant(MF_PRIVATEAIRSHIP_SOURCE);
+	export_constant(MF_PRIVATEAIRSHIP_DESTINATION);
 
 	/* Setcell types */
 	export_constant(CELL_WALKABLE);
@@ -725,6 +727,7 @@
 	export_constant(EQI_SHADOW_SHOES);
 	export_constant(EQI_SHADOW_ACC_R);
 	export_constant(EQI_SHADOW_ACC_L);
+	export_constant(EQI_MAX);
 
 	/* Equip positions */
 	export_constant(EQP_ACC_L);
@@ -5354,7 +5357,7 @@
 	export_constant(OCTOBER);
 	export_constant(NOVEMBER);
 	export_constant(DECEMBER);
-	
+
 	/* Days of the week */
 	export_constant(SUNDAY);
 	export_constant(MONDAY);
@@ -5363,7 +5366,7 @@
 	export_constant(THURSDAY);
 	export_constant(FRIDAY);
 	export_constant(SATURDAY);
-	
+
 	/* Date types */
 	export_constant(DT_SECOND);
 	export_constant(DT_MINUTE);
@@ -5374,6 +5377,32 @@
 	export_constant(DT_YEAR);
 	export_constant(DT_DAYOFYEAR);
 	export_constant(DT_YYYYMMDD);
+
+	/* Private Airship */
+	export_constant(PRIVATEAIRSHIP_OK);
+	export_constant(PRIVATEAIRSHIP_RETRY);
+	export_constant(PRIVATEAIRSHIP_ITEM_NOT_ENOUGH);
+	export_constant(PRIVATEAIRSHIP_DESTINATION_MAP_INVALID);
+	export_constant(PRIVATEAIRSHIP_SOURCE_MAP_INVALID);
+	export_constant(PRIVATEAIRSHIP_ITEM_UNAVAILABLE);
+
+	/* Refine cost types */
+	export_constant(REFINE_COST_TYPE_NORMAL);
+	export_constant(REFINE_COST_TYPE_OVER10);
+	export_constant(REFINE_COST_TYPE_HD);
+	export_constant(REFINE_COST_TYPE_ENRICHED);
+	export_constant(REFINE_COST_TYPE_OVER10_HD);
+	export_constant(REFINE_COST_TYPE_CLINK);
+	export_constant(REFINE_COST_TYPE_HOLINK);
+	export_constant(REFINE_COST_TYPE_WAGJAK);
+	export_constant(REFINE_COST_TYPE_LIMITED_HD);
+	export_constant(REFINE_COST_TYPE_MAX);
+
+	/* Refine information types */
+	export_constant(REFINE_INFO_MATERIAL_ID);
+	export_constant(REFINE_INFO_ZENY);
+	export_constant(REFINE_INFO_DOWN_REFINE_CHANCE);
+	export_constant(REFINE_INFO_DOWN_REFINE_NUM);
 
 	#undef export_constant
 	#undef export_constant2

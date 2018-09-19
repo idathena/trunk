@@ -73,35 +73,30 @@ malangdo,221,174,6	script	Holink#mal_cash	559,{
 		close;
 	}
 	mes "[Holink]";
+	set .@refineitemid, getequipid(.@part); // save id of the item
+	set .@refinerycnt, getequiprefinerycnt(.@part); // save refinery count
+	setarray .@equip_card[0], getequipcardid(.@part, 0), getequipcardid(.@part, 1), getequipcardid(.@part, 2), getequipcardid(.@part, 3);
+	set .@material, getequiprefinecost(.@part, REFINE_COST_TYPE_HOLINK, REFINE_INFO_MATERIAL_ID);
+	set .@price, getequiprefinecost(.@part, REFINE_COST_TYPE_HOLINK, REFINE_INFO_ZENY);
 	switch (getequipweaponlv(.@part)) {
 	default:
 	case 0: // Armor
-		set .@price,15000;
-		set .@material,7619; //Enriched_Elunium
 		set .@type$,"armor";
 		mes "You have chosen an armor, meow~";
 		break;
 	case 1: // Level 1 Weapon
-		set .@price,500;
-		set .@material,7620; //Enriched_Oridecon
 		set .@type$,"weapon";
 		mes "A level 1 weapon...?";
 		break;
 	case 2: // Level 2 Weapon
-		set .@price,2000;
-		set .@material,7620; //Enriched_Oridecon
 		set .@type$,"weapon";
 		mes "Meow, a level 2 weapon...?";
 		break;
 	case 3: // Level 3 Weapon
-		set .@price,20000;
-		set .@material,7620; //Enriched_Oridecon
 		set .@type$,"weapon";
 		mes "Meow Meow~~ A level 3 weapon~~";
 		break;
 	case 4: // Level 4 Weapon
-		set .@price,50000;
-		set .@material,7620; //Enriched_Oridecon
 		set .@type$,"weapon";
 		mes "Me-Meow!... A level 4 weapon...!";
 		mes "I've only seen it twice while";
@@ -114,7 +109,7 @@ malangdo,221,174,6	script	Holink#mal_cash	559,{
 	if (select("Yes!!:No!!") == 2) {
 		mes "[Holink]";
 		mes "Kyack!!";
-		mes "You don't belive in refine master Holink, meow?~";
+		mes "You don't believe in refine master Holink, meow?~";
 		close;
 	}
 	if (getequippercentrefinery(.@part) < 100) {
@@ -154,6 +149,18 @@ malangdo,221,174,6	script	Holink#mal_cash	559,{
 	}
 	delitem .@material,1;
 	set Zeny, Zeny-.@price;
+	// anti-hack
+	if (callfunc("F_IsEquipIDHack", .@part, .@refineitemid) ||
+		callfunc("F_IsEquipRefineHack", .@part, .@refinerycnt) ||
+		callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]))
+	{
+		mes "[Holink]";
+		emotion e_an;
+		mes "Wait a second...";
+		mes "Do you think I'm stupid?!";
+		mes "You switched the item while I wasn't looking! Get out of here!";
+		close;
+	}
 	if (getequippercentrefinery(.@part, true) > rand(100)) {
 		successrefitem .@part;
 		mes "[Holink]";

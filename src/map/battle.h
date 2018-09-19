@@ -618,7 +618,6 @@ extern struct Battle_Config
 	int monster_hp_bars_info;
 	int min_body_style;
 	int max_body_style;
-	int save_body_style;
 	int mvp_exp_reward_message;
 	int max_summoner_parameter;
 	int mob_eye_range_bonus; //Vulture's Eye and Snake's Eye range bonus
@@ -660,6 +659,8 @@ extern struct Battle_Config
 	int feature_homunculus_autofeed;
 	int homunculus_autofeed_always;
 	int feature_attendance;
+	int feature_privateairship;
+	int feature_refineui;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

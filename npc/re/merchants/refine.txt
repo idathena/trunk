@@ -98,26 +98,22 @@ function	script	refinenew	{
 		close;
 	}
 	set .@refineitemid, getequipid(.@part); // save id of the item
-	set .@refinerycnt, getequiprefinerycnt(.@part); //save refinery count
-	if ((getequipweaponlv(.@part) >= 1) && (getequipweaponlv(.@part) <= 4)) {
+	set .@refinerycnt, getequiprefinerycnt(.@part); // save refinery count
+	setarray .@equip_card[0], getequipcardid(.@part, 0), getequipcardid(.@part, 1), getequipcardid(.@part, 2), getequipcardid(.@part, 3);
+	set .@material, getequiprefinecost(.@part, REFINE_COST_TYPE_OVER10, REFINE_INFO_MATERIAL_ID);
+	set .@price, getequiprefinecost(.@part, REFINE_COST_TYPE_OVER10, REFINE_INFO_ZENY);
+	set .@safe,10;
+	if (getequipweaponlv(.@part) >= 1 && getequipweaponlv(.@part) <= 4) {
+		set .@article$,"a";
 		set .@type$,"weapon";
-		set .@material,6224; //Bradium
-		set .@price,100000;
-		set .@safe,10;
-		mes "["+ getarg(0) +"]";
-		mes "Hmm a weapon, is that ok?";
-		mes "If you want to refine this weapon,";
-		mes "I will need 1 ^003366Bradium^000000 and 100,000 zeny.";
 	} else {
+		set .@article$,"an";
 		set .@type$,"armor";
-		set .@material,6223; //Carnium
-		set .@price,100000;
-		set .@safe,10;
-		mes "["+ getarg(0) +"]";
-		mes "Hmm an armor, is that ok?";
-		mes "If you want to refine this armor,";
-		mes "I will need 1 ^003366Carnium^000000 and 100,000 zeny.";
 	}
+	mes "["+ getarg(0) +"]";
+	mes "Hmm "+.@article$+" "+.@type$+", is that ok?";
+	mes "If you want to refine this "+.@type$+",";
+	mes "I will need 1 ^003366"+getitemname(.@material)+"^000000 and "+callfunc("F_InsertComma", .@price)+" zeny.";
 	mes "Are you sure you want to continue?";
 	next;
 	if (select("Yes:No") == 2) {
@@ -147,7 +143,7 @@ function	script	refinenew	{
 				close;
 			}
 		}
-		if (countitem(.@material) == 0 || Zeny < .@price) {
+		if (!countitem(.@material) || Zeny < .@price) {
 			mes "["+ getarg(0) +"]";
 			mes "Hm. You don't seem to have enough money or "+getitemname(.@material)+".";
 			mes "Please come back when you have them.";
@@ -155,10 +151,11 @@ function	script	refinenew	{
 		}
 		set Zeny,Zeny - .@price;
 		delitem .@material,1;
-
 		// anti-hack
 		if (callfunc("F_IsEquipIDHack", .@part, .@refineitemid) ||
-		    callfunc("F_IsEquipRefineHack", .@part, .@refinerycnt)) {
+		    callfunc("F_IsEquipRefineHack", .@part, .@refinerycnt) ||
+			callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]))
+		{
 			mes "[" + getarg(0) + "]";
 			emotion e_an;
 			mes "Wait a second...";
@@ -166,7 +163,6 @@ function	script	refinenew	{
 			mes "You switched the item while I wasn't looking! Get out of here!";
 			close;
 		}
-
 		if (getequippercentrefinery(.@part) > rand(100)) {
 			mes "Clang! Clang! Clang! Clang!";
 			successrefitem .@part;
@@ -441,41 +437,36 @@ malangdo,224,172,6	script	Clink#mal_normal	544,{
 		close;
 	}
 	mes "[Clink]";
+	set .@refineitemid, getequipid(.@part); // save id of the item
+	set .@refinerycnt, getequiprefinerycnt(.@part); // save refinery count
+	setarray .@equip_card[0], getequipcardid(.@part, 0), getequipcardid(.@part, 1), getequipcardid(.@part, 2), getequipcardid(.@part, 3);
+	set .@material, getequiprefinecost(.@part, REFINE_COST_TYPE_CLINK, REFINE_INFO_MATERIAL_ID);
+	set .@price, getequiprefinecost(.@part, REFINE_COST_TYPE_CLINK, REFINE_INFO_ZENY);
 	switch (getequipweaponlv(.@part)) {
 	default:
 	case 0: // Armor
-		set .@price,2000;
-		set .@material,985; //Elunium
 		set .@type$,"armor";
 		mes "Hmm, an armor refine? Someone like you?";
 		break;
 	case 1: // Level 1 Weapon
-		set .@price,50;
-		set .@material,1010; //Phracon
 		set .@type$,"weapon";
 		mes "A level 1 weapon?";
 		mes "Urr... Annoying... Okay, let's try...";
 		break;
 	case 2: // Level 2 Weapon
-		set .@price,200;
-		set .@material,1011; //Emveretarcon
 		set .@type$,"weapon";
 		mes "A level 2 weapon?";
 		break;
 	case 3: // Level 3 Weapon
-		set .@price,20000;
-		set .@material,984; //Oridecon
 		set .@type$,"weapon";
 		mes "Woot!! A level 3 weapon? Impressive~";
 		break;
 	case 4: // Level 4 Weapon
-		set .@price,50000;
-		set .@material,984; //Oridecon
 		set .@type$,"weapon";
 		mes "Wow!... A level 4 weapon~!!";
 		break;
 	}
-	mes "You need ^ff9999"+getitemname(.@material)+"^000000 and ^ff9999"+.@price+"^000000 Zeny. Do you have them?";
+	mes "You need ^ff9999"+getitemname(.@material)+"^000000 and ^ff9999"+callfunc("F_InsertComma", .@price)+"^000000 Zeny. Do you have them?";
 	next;
 	if (select("Yes, I do!!:Forget about it!!") == 2) {
 		mes "[Clink]";
@@ -502,7 +493,7 @@ malangdo,224,172,6	script	Clink#mal_normal	544,{
 			close;
 		}
 	}
-	if (countitem(.@material) == 0 || Zeny < .@price) {
+	if (!countitem(.@material) || Zeny < .@price) {
 		mes "[Clink]";
 		mes "Hey you!! Didn't I tell you";
 		mes "that you need ^ff9999"+getitemname(.@material)+"^000000 and ^ff9999"+.@price+"^000000 Zeny??!!";
@@ -510,6 +501,18 @@ malangdo,224,172,6	script	Clink#mal_normal	544,{
 	}
 	delitem .@material,1;
 	set Zeny, Zeny-.@price;
+	// anti-hack
+	if (callfunc("F_IsEquipIDHack", .@part, .@refineitemid) ||
+		callfunc("F_IsEquipRefineHack", .@part, .@refinerycnt) ||
+		callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]))
+	{
+		mes "[Clink]";
+		emotion e_an;
+		mes "Wait a second...";
+		mes "Do you think I'm stupid?!";
+		mes "You switched the item while I wasn't looking! Get out of here!";
+		close;
+	}
 	if (getequippercentrefinery(.@part) <= rand(100)) {
 		failedrefitem .@part;
 		mes "[Clink]";

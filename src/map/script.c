@@ -355,6 +355,7 @@ struct Script_Config script_config = {
 	"OnUnTouch", //onuntouch_event_name (run whenever a char walks from the OnTouch area)
 	"OnWhisperGlobal", //onwhisper_event_name (is executed when a player sends a whisper message to the NPC)
 	"OnCommand", //oncommand_event_name (is executed by script command cmdothernpc)
+	"OnAirShipRequest", //onairshiprequest_event_name (run whenever a char using private airship system)
 	// Init related
 	"OnInit", //init_event_name (is executed on all npcs when all npcs were loaded)
 	"OnInterIfInit", //inter_init_event_name (is executed on inter server connection)
@@ -558,6 +559,8 @@ enum {
 	MF_GVG_TE,
 	MF_NOCOSTUME,
 	MF_HIDEMOBHPBAR,
+	MF_PRIVATEAIRSHIP_SOURCE,
+	MF_PRIVATEAIRSHIP_DESTINATION,
 };
 
 const char *script_op2name(int op)
@@ -4531,6 +4534,19 @@ BUILDIN_FUNC(next)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/// Clears the dialog and continues the script without a next button.
+///
+/// clear;
+BUILDIN_FUNC(clear)
+{
+	TBL_PC *sd = script_rid2sd(st);
+
+	if( !sd )
+		return 0;
+	clif_scriptclear(sd, st->oid);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 /// Ends the script and displays the button 'close' on the npc dialog.
 /// The dialog is closed when the button is pressed.
 ///
@@ -8280,24 +8296,52 @@ BUILDIN_FUNC(getequipweaponlv)
  *------------------------------------------*/
 BUILDIN_FUNC(getequippercentrefinery)
 {
-	int i = -1, num;
-	bool enriched = false;
-	int chance = 0;
-	TBL_PC *sd;
+	int i = -1, num, chance = 0;
+	bool is_enriched = false;
+	TBL_PC *sd = NULL;
 
 	if(!script_charid2sd(4,sd)) {
 		script_pushint(st,0);
 		return 1;
 	}
-	if (script_hasdata(st,3))
-		enriched = (script_getnum(st,3) != 0);
+	if(script_hasdata(st,3))
+		is_enriched = (script_getnum(st,3) != 0);
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
-		chance = status_get_refine_chance((enum refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, enriched);
+		chance = status_get_refine_chance((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, is_enriched);
 
 	script_pushint(st,chance);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Get an equipment's refine cost
+ * getequiprefinecost(<equipment slot>,<type>,<information>{,<char id>})
+ * returns -1 on fail
+ */
+BUILDIN_FUNC(getequiprefinecost) {
+	int i = -1, slot, type, info, value = -1;
+	struct map_session_data *sd = NULL;
+
+	slot = script_getnum(st,2);
+	type = script_getnum(st,3);
+	info = script_getnum(st,4);
+	if(!script_charid2sd(5,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+	if(type < 0 || type >= REFINE_COST_TYPE_MAX) {
+		script_pushint(st,-1);
+		return 0;
+	}
+	if(equip_index_check(slot))
+		i = pc_checkequip(sd,equip_bitmask[slot]);
+	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
+		value = status_get_refine_cost((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), type, (enum e_refine_info)info);
+
+	script_pushint(st,value);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -11736,6 +11780,8 @@ BUILDIN_FUNC(getmapflag)
 			case MF_GVG_TE:			script_pushint(st,map[m].flag.gvg_te); break;
 			case MF_NOCOSTUME:		script_pushint(st,map[m].flag.nocostume); break;
 			case MF_HIDEMOBHPBAR:		script_pushint(st,map[m].flag.hidemobhpbar); break;
+			case MF_PRIVATEAIRSHIP_SOURCE:	script_pushint(st,map[m].flag.privateairship_source); break;
+			case MF_PRIVATEAIRSHIP_DESTINATION:	script_pushint(st,map[m].flag.privateairship_destination); break;
 #ifdef ADJUST_SKILL_DAMAGE
 			case MF_SKILL_DAMAGE: {
 					int ret_val = 0, type = 0;
@@ -11875,6 +11921,8 @@ BUILDIN_FUNC(setmapflag)
 				break;
 			case MF_NOCOSTUME:		map[m].flag.nocostume = 1; break;
 			case MF_HIDEMOBHPBAR:		map[m].flag.hidemobhpbar = 1; break;
+			case MF_PRIVATEAIRSHIP_SOURCE:	map[m].flag.privateairship_source = 1; break;
+			case MF_PRIVATEAIRSHIP_DESTINATION:	map[m].flag.privateairship_destination = 1; break;
 #ifdef ADJUST_SKILL_DAMAGE
 			case MF_SKILL_DAMAGE: {
 					int type = 0;
@@ -12003,6 +12051,8 @@ BUILDIN_FUNC(removemapflag)
 				break;
 			case MF_NOCOSTUME:		map[m].flag.nocostume = 0; break;
 			case MF_HIDEMOBHPBAR:		map[m].flag.hidemobhpbar = 0; break;
+			case MF_PRIVATEAIRSHIP_SOURCE:	map[m].flag.privateairship_source = 0; break;
+			case MF_PRIVATEAIRSHIP_DESTINATION:	map[m].flag.privateairship_destination = 0; break;
 #ifdef ADJUST_SKILL_DAMAGE
 			case MF_SKILL_DAMAGE:
 				map[m].flag.skill_damage = 0;
@@ -19529,7 +19579,7 @@ BUILDIN_FUNC(instance_create)
 {
 	struct map_session_data *sd;
 
-	if((sd = script_rid2sd(st)) == NULL)
+	if( !(sd = script_rid2sd(st)) )
 		return -1;
 
 	script_pushint(st,instance_create(sd->status.party_id, script_getstr(st, 2)));
@@ -21065,7 +21115,7 @@ BUILDIN_FUNC(montransform) {
 	struct script_data *data;
 	const char *cmd = script_getfuncname(st);
 
-	if( (sd = script_rid2sd(st)) == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	data = script_getdata(st,2);
@@ -23116,6 +23166,69 @@ BUILDIN_FUNC(mail) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/*==========================================
+ * identifyall({<type>{,<account_id>}})
+ * <type>:
+ *	true: identify the items and returns the count of unidentified items (default)
+ *	false: returns the count of unidentified items only
+ *------------------------------------------*/
+BUILDIN_FUNC(identifyall) {
+	TBL_PC *sd;
+	bool identify_item = true;
+
+	if (script_hasdata(st,2))
+		identify_item = (script_getnum(st,2) != 0);
+
+	if (!script_hasdata(st,3))
+		sd = script_rid2sd(st);
+	else
+		sd = map_id2sd(script_getnum(st,3));
+
+	if (!sd) {
+		script_pushint(st,-1);
+		return 0;
+	}
+	script_pushint(st,pc_identifyall(sd,identify_item));
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(airship_respond) {
+	struct map_session_data *sd = script_rid2sd(st);
+	uint32 response = script_getnum(st,2);
+
+	if (!(sd = script_rid2sd(st)))
+		return 1;
+	if (response < PRIVATEAIRSHIP_OK || response > PRIVATEAIRSHIP_ITEM_UNAVAILABLE) {
+		ShowWarning("buildin_airship_respond: Invalid response %d has been given.", response);
+		return 1;
+	}
+	clif_private_airship_response(sd, (enum e_private_airship_response)response);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(refineui) {
+#if PACKETVER < 20161012
+	ShowError("buildin_refineui: This command requires packet version 2016-10-12 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if (!script_charid2sd(2,sd))
+		return 1;
+
+	if (!battle_config.feature_refineui) {
+		ShowError("buildin_refineui: This command is disabled via configuration.\n");
+		return 1;
+	}
+
+	if (!sd->state.refineui_open)
+		clif_refineui_open(sd);
+
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -23170,6 +23283,7 @@ struct script_function buildin_func[] = {
 	// NPC interaction
 	BUILDIN_DEF(mes,"s*"),
 	BUILDIN_DEF(next,""),
+	BUILDIN_DEF(clear,""),
 	BUILDIN_DEF(close,""),
 	BUILDIN_DEF(close2,""),
 	BUILDIN_DEF(menu,"sl*"),
@@ -23257,6 +23371,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getequiprefinerycnt,"i?"),
 	BUILDIN_DEF(getequipweaponlv,"i?"),
 	BUILDIN_DEF(getequippercentrefinery,"i??"),
+	BUILDIN_DEF(getequiprefinecost,"iii?"),
 	BUILDIN_DEF(successrefitem,"i??"),
 	BUILDIN_DEF(failedrefitem,"i?"),
 	BUILDIN_DEF(downrefitem,"i??"),
@@ -23752,6 +23867,11 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(open_roulette,"?"),
 	//Mail System
 	BUILDIN_DEF(mail,"isss*"),
+	BUILDIN_DEF(identifyall,"??"),
+	//Private Airship System
+	BUILDIN_DEF(airship_respond,"i"),
+	//Refine UI
+	BUILDIN_DEF(refineui,"?"),
 
 #include "../custom/script_def.inc"
 

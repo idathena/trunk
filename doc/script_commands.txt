@@ -1271,6 +1271,22 @@ will terminate.
 
 ---------------------------------------
 
+*clear;
+
+This command will clear the dialog text and continue the script without player interaction.
+
+Example:
+	mes "This is how the 'clear' script command works.";
+	sleep2 3000;
+	clear; // This will clear the dialog and continue to the next one.
+	mes "I will show you again.";
+	sleep2 3000;
+	clear;
+	mes "Bye!";
+	close;
+
+---------------------------------------
+
 *close;
 
 This command will create a 'close' button in the message window for the invoking 
@@ -2870,6 +2886,44 @@ random change of a refine succeeding or failing and then going through with it
 
 ---------------------------------------
 
+*getequiprefinecost(<equipment slot>,<type>,<information>{,<char id>})
+
+This function returns refine cost for equipment in <equipment slot> based on
+passed arguments <type> and <information>.
+
+Valid cost types are:
+
+REFINE_COST_TYPE_NORMAL     - For normal refining
+REFINE_COST_TYPE_OVER10     - For refining over +10
+REFINE_COST_TYPE_HD         - For refining with HD ores
+REFINE_COST_TYPE_ENRICHED   - For refining with enriched ores
+REFINE_COST_TYPE_OVER10_HD  - For refining over +10 with HD ores
+REFINE_COST_TYPE_CLINK      - For refining by Clink in Malangdo
+REFINE_COST_TYPE_HOLINK     - For refining by Holink in Malangdo
+REFINE_COST_TYPE_WAGJAK     - For refining by Refining Machine Wagjak in Izlude
+REFINE_COST_TYPE_LIMITED_HD - For refining with Limited HD ores
+
+This function will return required cost for refining based on <information> argument
+on success and will return -1 on failure. Also the function fails if the cost type
+is invalid or if there is no item in the equipment slot.
+
+Valid information types are:
+
+REFINE_INFO_MATERIAL_ID        - Material Item ID
+REFINE_INFO_ZENY               - Zeny
+REFINE_INFO_DOWN_REFINE_CHANCE - Chance of down refine level instead of breaking the item on refine failure
+REFINE_INFO_DOWN_REFINE_NUM    - Number of down refine level
+
+---------------------------------------
+
+*open_refineui({<char id>})
+
+Opens the refine UI for the attached player or the given character id.
+
+This feature requires 2016-10-12aRagexeRE or newer.
+
+---------------------------------------
+
 *getareadropitem("<map name>",<x1>,<y1>,<x2>,<y2>,<item>)
 
 This function will count all the items with the specified ID number lying on the 
@@ -3074,6 +3128,14 @@ Examples
 Merge all stackable items that separated by GUID flags
 (either by flag 4 item_flag.txt or GUID  in item_group).
 If no item ID/name given, all possible items in player's inventory will be merged.
+
+---------------------------------------
+
+*identifyall({<type>{,<account_id>}});
+
+Returns the count of unidentified items in the player inventory.
+If <type> is true the command will identify all the unidentified items as well (default).
+If <type> is false the command only returns the count of unidentified items.
 
 ---------------------------------------
 //
@@ -5426,8 +5488,6 @@ Example:
 
 ---------------------------------------
 
----------------------------------------
-
 *openmail({<char_id>});
 
 This will open a character's Mail window on the client connected to the 
@@ -6483,6 +6543,20 @@ If the NPC is not in a waitingroom, nothing happens.
 Changes the display name and/or display class of the target NPC.
 Returns 0 is successful, 1 if the NPC does not exist.
 Size is 0 = normal 1 = small 2 = big.
+
+---------------------------------------
+
+*airship_respond(<response>)
+
+Send client respond to different private airship status.
+
+The available responses are:
+	PRIVATEAIRSHIP_OK
+	PRIVATEAIRSHIP_RETRY
+	PRIVATEAIRSHIP_ITEM_NOT_ENOUGH
+	PRIVATEAIRSHIP_DESTINATION_MAP_INVALID
+	PRIVATEAIRSHIP_SOURCE_MAP_INVALID
+	PRIVATEAIRSHIP_ITEM_UNAVAILABLE
 
 ---------------------------------------
 \\

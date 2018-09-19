@@ -915,8 +915,8 @@
 6906,475,100	// (Limited)HD_Carnium
 6907,499,100	// Piece_Of_Soul_Horse
 6909,475,100	// Actinidia_Cat_Fruit
-6910,475,100	// (Limited)Purified_Oridecon
-6911,475,100	// (Limited)Purified_Elunium
+6910,475,100	// (Limited)HD_Oridecon
+6911,475,100	// (Limited)HD_Elunium
 6912,499,100	// Piece_Of_Soul_Sheep
 6913,507,100	// Holy_Rosary
 6914,499,100	// Black_Horn
@@ -3589,8 +3589,8 @@
 17509,475,100	// Actinidia_Cat_Fruit_Box(40)
 17510,475,100	// Smelting_Ore_Box_VIII
 17511,475,100	// Smelting_Ore_Box_VIII(10)
-17512,475,100	// (Limited)Purified_Elunium_Box(30)
-17513,475,100	// (Limited)Purified_Oridecon_Box(30)
+17512,475,100	// (Limited)HD_Elunium_Box(30)
+17513,475,100	// (Limited)HD_Oridecon_Box(30)
 17515,475,100	// Unlimited_Box_III
 17516,475,100	// Unlimited_Box_III(10)
 17520,475,100	// Limited_Edition_Manual_Box
@@ -3866,6 +3866,7 @@
 25049,499,100	// Basilac_Clam
 25245,499,100	// Small_Pile_Of_Bones
 25408,435,100	// Memories_Of_Gyoll
+25464,475,100	// World_Tour_Ticket
 26100,435,100	// P_Foxtail_Staff2
 26101,435,100	// P_Foxtail_Staff3
 28105,467,100	// Infinity_Twohand_Axe
