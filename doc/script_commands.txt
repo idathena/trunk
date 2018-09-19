@@ -1271,6 +1271,22 @@ will terminate.
 
 ---------------------------------------
 
+*clear;
+
+This command will clear the dialog text and continue the script without player interaction.
+
+Example:
+	mes "This is how the 'clear' script command works.";
+	sleep2 3000;
+	clear; // This will clear the dialog and continue to the next one.
+	mes "I will show you again.";
+	sleep2 3000;
+	clear;
+	mes "Bye!";
+	close;
+
+---------------------------------------
+
 *close;
 
 This command will create a 'close' button in the message window for the invoking 
@@ -2885,13 +2901,26 @@ REFINE_COST_TYPE_OVER10_HD  - For refining over +10 with HD ores
 REFINE_COST_TYPE_CLINK      - For refining by Clink in Malangdo
 REFINE_COST_TYPE_HOLINK     - For refining by Holink in Malangdo
 REFINE_COST_TYPE_WAGJAK     - For refining by Refining Machine Wagjak in Izlude
+REFINE_COST_TYPE_LIMITED_HD - For refining with Limited HD ores
 
-This function will return required cost for refining based on <information> argument.
+This function will return required cost for refining based on <information> argument
+on success and will return -1 on failure. Also the function fails if the cost type
+is invalid or if there is no item in the equipment slot.
 
 Valid information types are:
 
-REFINE_INFO_MATERIAL_ID     - Material Item ID
-REFINE_INFO_ZENY            - Zeny
+REFINE_INFO_MATERIAL_ID        - Material Item ID
+REFINE_INFO_ZENY               - Zeny
+REFINE_INFO_DOWN_REFINE_CHANCE - Chance of down refine level instead of breaking the item on refine failure
+REFINE_INFO_DOWN_REFINE_NUM    - Number of down refine level
+
+---------------------------------------
+
+*open_refineui({<char id>})
+
+Opens the refine UI for the attached player or the given character id.
+
+This feature requires 2016-10-12aRagexeRE or newer.
 
 ---------------------------------------
 

@@ -13784,30 +13784,70 @@ static int status_natural_heal_timer(int tid, unsigned int tick, int id, intptr_
  * Get the chance to upgrade a piece of equipment.
  * @param wlv The weapon type of the item to refine (see see enum e_refine_type)
  * @param refine The target refine level
- * @param enriched Check if the item to refine is using enriched chance
+ * @param is_enriched Check if the item to refine is using enriched chance
  * @return The chance to refine the item, in percent (0~100)
  */
-int status_get_refine_chance(enum e_refine_type wlv, int refine, bool enriched)
+int status_get_refine_chance(enum e_refine_type wlv, int refine, bool is_enriched)
 {
-	int type;
+	enum e_refine_chance_type type;
 
 	if (refine < 0 || refine >= MAX_REFINE)
 		return 0;
-	type = (enriched ? 1 : 0);
+
 	if (battle_config.event_refine_chance)
-		type |= 2;
+		type = (is_enriched ? REFINE_CHANCE_TYPE_E_ENRICHED : REFINE_CHANCE_TYPE_E_NORMAL);
+	else
+		type = (is_enriched ? REFINE_CHANCE_TYPE_ENRICHED : REFINE_CHANCE_TYPE_NORMAL);
+
 	return refine_info[wlv].chance[type][refine];
+}
+
+/**
+ * Get Blacksmith Blessing requirement for refining
+ * @param bs Pointer to store the value
+ * @param wlv Armor or weapon level (see enum e_refine_type)
+ * @param refine Current refine level
+ * @return True if has valid value, false otherwise.
+ */
+bool status_get_refine_blacksmithBlessing(struct s_refine_bs_blessing *bs, enum e_refine_type wlv, int refine)
+{
+	if (refine < 0 || refine >= MAX_REFINE)
+		return false;
+
+ 	if (wlv < REFINE_TYPE_ARMOR || wlv >= REFINE_TYPE_MAX)
+		return false;
+
+ 	memcpy(bs, &refine_info[wlv].bs_blessing[refine], sizeof(struct s_refine_bs_blessing));
+	return true;
 }
 
 /**
  * Returns refine cost (zeny or item) for a weapon level.
  * @param wlv The weapon type of the item to refine (see enum e_refine_type)
- * @param type Refine type (see enum e_refine_cost_type)
+ * @param type Refine cost type (see enum e_refine_cost_type)
  * @param info Refine cost info (see enum e_refine_info)
  * @return Refine cost for refining item
  */
-int status_get_refine_cost(enum e_refine_type wlv, int type, int info) {
-	return (info == REFINE_INFO_ZENY ? refine_info[wlv].cost[type].zeny : refine_info[wlv].cost[type].nameid);
+int status_get_refine_cost(enum e_refine_type wlv, int type, enum e_refine_info info) {
+	switch (info) {
+		case REFINE_INFO_MATERIAL_ID:
+			return refine_info[wlv].cost[type].nameid;
+		case REFINE_INFO_ZENY:
+			return refine_info[wlv].cost[type].zeny;
+		case REFINE_INFO_DOWN_REFINE_CHANCE:
+			return refine_info[wlv].cost[type].downrefine_chance;
+		case REFINE_INFO_DOWN_REFINE_NUM:
+			return refine_info[wlv].cost[type].downrefine_num;
+	}
+	return 0;
+}
+
+struct s_refine_cost *status_refine_cost(enum e_refine_type wlv, int type) {
+	if (wlv < REFINE_TYPE_ARMOR || wlv >= REFINE_TYPE_MAX)
+		return NULL;
+	if (type < REFINE_COST_TYPE_NORMAL || type >= REFINE_COST_TYPE_MAX)
+		return NULL;
+	return &refine_info[wlv].cost[type];
 }
 
 /**
@@ -13946,11 +13986,11 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 		bool duplicate[REFINE_COST_TYPE_MAX];
 		int i = 0;
 
-		memset(refine_info[type].cost, 0, sizeof(struct s_refine_cost));
+		memset(&refine_info[type].cost, 0, sizeof(struct s_refine_cost) * REFINE_COST_TYPE_MAX);
 		memset(&duplicate, 0, sizeof(duplicate));
 
 		while ((t = config_setting_get_elem(cost, i++)) && config_setting_is_group(t)) {
-			int idx = REFINE_COST_TYPE_NORMAL, material = 0, price = 0, i32;
+			int idx = REFINE_COST_TYPE_NORMAL, material = 0, price = 0, downrefine_chance = 0, downrefine_num = 0, i32;
 			char *refine_cost_const = config_setting_name(t);
 			struct item_data *id = NULL;
 
@@ -13984,17 +14024,24 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 				return 0;
 			}
 			price = i32;
+			if (config_setting_lookup_int(t, "DownRefineChance", &i32))
+				downrefine_chance = i32;
+			if (config_setting_lookup_int(t, "DownRefineNum", &i32) && downrefine_chance)
+				downrefine_num = i32;
 			refine_info[type].cost[idx].nameid = material;
 			refine_info[type].cost[idx].zeny = price;
+			refine_info[type].cost[idx].downrefine_chance = downrefine_chance;
+			refine_info[type].cost[idx].downrefine_num = downrefine_num;
 		}
 	}
 	if ((rate = config_setting_get_member(r, "Rates")) && config_setting_is_group(rate)) {
 		struct config_setting_t *t = NULL;
 		bool duplicate[MAX_REFINE];
-		int bonus[MAX_REFINE], rnd_bonus[MAX_REFINE];
+		int bonus[MAX_REFINE], rnd_bonus[MAX_REFINE], bsItemID[MAX_REFINE], bsCount[MAX_REFINE];
 		int chance[REFINE_CHANCE_TYPE_MAX][MAX_REFINE];
 		int i, j;
 
+		memset(&refine_info[type].bs_blessing, 0, sizeof(struct s_refine_bs_blessing) * MAX_REFINE);
 		memset(&duplicate, 0, sizeof(duplicate));
 		memset(&bonus, 0, sizeof(bonus));
 		memset(&rnd_bonus, 0, sizeof(rnd_bonus));
@@ -14035,6 +14082,14 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 				bonus[level] = i32;
 			else
 				bonus[level] = 0;
+			if (config_setting_lookup_int(t, "BSItemID", &i32))
+				bsItemID[level] = i32;
+			else
+				bsItemID[level] = 0;
+			if (config_setting_lookup_int(t, "BSCount", &i32))
+				bsCount[level] = i32;
+			else
+				bsCount[level] = 0;
 		}
 		for (j = 0; j < MAX_REFINE; j++) {
 			refine_info[type].chance[REFINE_CHANCE_TYPE_NORMAL][j] = chance[REFINE_CHANCE_TYPE_NORMAL][j];
@@ -14047,6 +14102,8 @@ static int status_readdb_refine_libconfig_sub(struct config_setting_t *r, const 
 			}
 			refine_v += bonus_per_level + bonus[j];
 			refine_info[type].bonus[j] = refine_v;
+			refine_info[type].bs_blessing[j].nameid = bsItemID[j];
+			refine_info[type].bs_blessing[j].count = bsCount[j];
 		}
 	} else {
 		ShowWarning("status_readdb_refine_libconfig_sub: Missing refine rates for entry '%s' in \"%s\".\n", name, source);

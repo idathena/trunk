@@ -8664,6 +8664,7 @@ static const struct _battle_data {
 	{ "homunculus_autofeed_always",         &battle_config.homunculus_autofeed_always,      1,      0,      1,              },
 	{ "feature.attendance",                 &battle_config.feature_attendance,              1,      0,      1,              },
 	{ "feature.privateairship",             &battle_config.feature_privateairship,          1,      0,      1,              },
+	{ "feature.refineui",                   &battle_config.feature_refineui,                1,      0,      1,              },
 
 #include "../custom/battle_config_init.inc"
 };
@@ -8823,6 +8824,13 @@ void battle_adjust_conf()
 	if (battle_config.feature_privateairship) {
 		ShowWarning("conf/battle/feature.conf private airship system is enabled but it requires PACKETVER 2018-03-21 or newer, disabling...\n");
 		battle_config.feature_privateairship = 0;
+	}
+#endif
+
+#if PACKETVER < 20161012
+	if (battle_config.feature_refineui) {
+		ShowWarning("conf/battle/feature.conf refine UI is enabled but it requires PACKETVER 2016-10-12 or newer, disabling...\n");
+		battle_config.feature_refineui = 0;
 	}
 #endif
 

@@ -1181,6 +1181,14 @@ Sends a message to all connected GMs (via the GM whisper system).
 
 ---------------------------------------
 
+@refineui
+
+Opens the refine user interface.
+
+Note: This command requires packet version 2016-10-12 or newer.
+
+---------------------------------------
+
 @gmotd
 
 Displays the motd file to all players.

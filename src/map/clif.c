@@ -74,6 +74,15 @@ enum mail_type {
 #endif
 
 /**
+ * Structure to store all required data about refine requirements
+ */
+struct s_refine_materials {
+	struct s_refine_cost cost;
+	uint8 chance;
+	struct s_refine_bs_blessing bs_blessing;
+};
+
+/**
  * Converts item type to display it on client if necessary.
  * @param nameid: Item ID
  * @return item type.
@@ -6527,6 +6536,7 @@ void clif_map_property_mapall(int map_idx, enum map_property property)
 ///     0 = success
 ///     1 = failure
 ///     2 = downgrade
+///     3 = failure without breaking nor downgrade
 void clif_refine(int fd, int fail, int index, int val)
 {
 	WFIFOHEAD(fd,packet_len(0x188));
@@ -20425,7 +20435,7 @@ void clif_progressbar_npc(struct npc_data *nd, struct map_session_data *sd) {
 
 /**
  * Sends all achievement data to the client (ZC_ALL_AG_LIST).
- * 0a23 <packetType>.W <packetLength>.W <ACHCount>.L <ACHPoint>.L
+ * 0a23 <packetLength>.W <ACHCount>.L <ACHPoint>.L
  */
 void clif_achievement_list_all(struct map_session_data *sd) {
 	int i, j, len, fd, *info;
@@ -20463,7 +20473,7 @@ void clif_achievement_list_all(struct map_session_data *sd) {
 
 /**
  * Sends a single achievement's data to the client (ZC_AG_UPDATE).
- * 0a24 <packetType>.W <ACHPoint>.L
+ * 0a24 <ACHPoint>.L
  */
 void clif_achievement_update(struct map_session_data *sd, struct achievement *ach, int count) {
 	int fd, i, *info;
@@ -20493,7 +20503,7 @@ void clif_achievement_update(struct map_session_data *sd, struct achievement *ac
 
 /**
  * Checks if an achievement reward can be rewarded (CZ_REQ_AG_REWARD).
- * 0a25 <packetType>.W <achievementID>.L
+ * 0a25 <achievementID>.L
  */
 void clif_parse_AchievementCheckReward(int fd, struct map_session_data *sd) {
 	nullpo_retv(sd);
@@ -20506,7 +20516,7 @@ void clif_parse_AchievementCheckReward(int fd, struct map_session_data *sd) {
 
 /**
  * Returns the result of achievement_check_reward (ZC_REQ_AG_REWARD_ACK).
- * 0a26 <packetType>.W <result>.W <achievementID>.L
+ * 0a26 <result>.W <achievementID>.L
  */
 void clif_achievement_reward_ack(int fd, unsigned char result, int achievement_id) {
 	WFIFOHEAD(fd,packet_len(0xa26));
@@ -20665,6 +20675,353 @@ void clif_parse_private_airship_request(int fd, struct map_session_data *sd) {
 	safestrncpy(mapname, (char *)RFIFOP(fd,2), MAP_NAME_LENGTH_EXT);
 	item_id = RFIFOW(fd,2 + MAP_NAME_LENGTH_EXT);
 	npc_private_airship(sd, mapname, item_id);
+#endif
+}
+
+
+/**
+ * Opens the refine UI on the designated client.
+ * 0aa0
+ */
+void clif_refineui_open(struct map_session_data *sd) {
+#if PACKETVER >= 20161012
+	int fd = sd->fd;
+
+	WFIFOHEAD(fd,packet_len(0x0AA0));
+	WFIFOW(fd,0) = 0x0AA0;
+	WFIFOSET(fd,packet_len(0x0AA0));
+
+	sd->state.refineui_open = true;
+#endif
+}
+
+
+/**
+ * Parses cancel/close of the refine UI on client side.
+ * 0aa4
+ */
+void clif_parse_refineui_close(int fd, struct map_session_data *sd) {
+#if PACKETVER >= 20161012
+	sd->state.refineui_open = false;
+#endif
+}
+
+/**
+ * Fills the given index with the requested data for that item and
+ * returns true on success or false on failure.
+ */
+static inline bool clif_refineui_materials_sub(struct item *item, struct item_data *id, struct s_refine_materials materials[REFINEUI_MAT_MAX], int index, enum e_refine_cost_type type) {
+	//In official kRO, HD materials have same success chance like Enriched materials for refining items till +10
+	bool is_enriched = false;
+	struct s_refine_cost *cost = NULL;
+
+	if( index < 0 || index >= REFINEUI_MAT_MAX )
+		return false;
+
+	if( !(cost = status_refine_cost((enum e_refine_type)id->wlv, type)) )
+		return false;
+
+	memcpy(&materials[index].cost, cost, sizeof(struct s_refine_cost));
+
+	switch( type ) {
+		case REFINE_COST_TYPE_HD:
+		case REFINE_COST_TYPE_ENRICHED:
+		case REFINE_COST_TYPE_LIMITED_HD:
+			is_enriched = true;
+			break;
+	}
+	materials[index].chance = status_get_refine_chance((enum e_refine_type)id->wlv, item->refine, is_enriched);
+
+	//Either of the values was not set
+	if( !materials[index].cost.nameid || !materials[index].cost.zeny || !materials[index].chance ) {
+		//Reset all entries properly
+		materials[index].cost.nameid = materials[index].cost.zeny = materials[index].chance = 0;
+		return false;
+	} else //Everything was set properly
+		return true;
+}
+
+
+/**
+ * Calculates all possible materials for the given item.
+ * Returns the count of materials that were filled in the materials array.
+ */
+static inline uint8 clif_refineui_materials(struct item *item, struct item_data *id, struct s_refine_materials materials[REFINEUI_MAT_MAX]) {
+	//Initialize the counter
+	uint8 count = 0;
+
+	//Zero the memory
+	memset(materials, 0, sizeof(struct s_refine_materials) * REFINEUI_MAT_MAX);
+
+	if( item->refine >= 10 ) {
+		//Normal refine requirements for +10 and above
+		if( clif_refineui_materials_sub(item, id, materials, count, REFINE_COST_TYPE_OVER10) )
+			count++;
+		//HD refine requirements for +10 and above
+		if( clif_refineui_materials_sub(item, id, materials, count, REFINE_COST_TYPE_OVER10_HD) )
+			count++;
+	} else {
+		//Normal refine requirements
+		if( clif_refineui_materials_sub(item, id, materials, count, REFINE_COST_TYPE_NORMAL) )
+			count++;
+		//HD refine requirements
+		if( item->refine >= 7 ) {
+			if( clif_refineui_materials_sub(item, id, materials, count, REFINE_COST_TYPE_HD) )
+				count++;
+			if( clif_refineui_materials_sub(item, id, materials, count, REFINE_COST_TYPE_LIMITED_HD) )
+				count++;
+		}
+		//Enriched refine requirements
+		if( clif_refineui_materials_sub(item, id, materials, count, REFINE_COST_TYPE_ENRICHED) )
+			count++;
+	}
+
+	//Blacksmith Blessing requirements if any
+	status_get_refine_blacksmithBlessing(&materials[REFINEUI_MAT_BS_BLESSING].bs_blessing, (enum e_refine_type)id->wlv, item->refine);
+
+	//Return the amount of found materials
+	return count;
+}
+
+
+void clif_refineui_notrefineable(struct map_session_data *sd, uint16 index) {
+	int fd = sd->fd;
+
+	WFIFOHEAD(fd,7);
+	WFIFOW(fd,0) = 0x0AA2;
+	WFIFOW(fd,2) = 7;
+	WFIFOW(fd,4) = index + 2;
+	WFIFOB(fd,6) = 0;
+	WFIFOSET(fd,7);
+}
+
+
+/**
+ * Adds the selected item into the refine UI and sends the possible materials
+ * to the client.
+ * 0aa2 <length>.W <index>.W <catalyst count>.B { <material>.W <chance>.B <price>.L }*
+ */
+void clif_refineui_info(struct map_session_data *sd, uint16 index) {
+	int fd = sd->fd;
+	struct item *item;
+	struct item_data *id;
+	uint16 length;
+	struct s_refine_materials materials[REFINEUI_MAT_MAX];
+	uint8 i, material_count;
+
+	//Get the item db reference
+	id = sd->inventory_data[index];
+
+	//No item data was found
+	if( !id )
+		return;
+
+	//Check if the item can be refined
+	if( id->flag.no_refine ) {
+		clif_refineui_notrefineable(sd, index);
+		return;
+	}
+
+	//Only weapons and armors can be refined in the refine UI
+	if( itemtype(id->nameid) != IT_WEAPON && itemtype(id->nameid) != IT_ARMOR )
+		return;
+
+	//Check the inventory
+	item = &sd->inventory.u.items_inventory[index];
+
+	//No item was found at the given index
+	if( !item )
+		return;
+
+	//Check if the item is identified
+	if( !item->identify ) {
+		clif_refineui_notrefineable(sd, index);
+		return;
+	}
+
+	//Check if the item is broken
+	if( item->attribute ) {
+		clif_refineui_notrefineable(sd, index);
+		return;
+	}
+
+	//Check the current refine level
+	if( item->refine < 0 || item->refine >= MAX_REFINE ) {
+		clif_refineui_notrefineable(sd, index);
+		return;
+	}
+
+	//Calculate the possible materials
+	material_count = clif_refineui_materials(item, id, materials);
+
+	//No possibilities were found
+	if( !material_count ) {
+		clif_refineui_notrefineable(sd, index);
+		return;
+	}
+
+	length = 7 + material_count * 7;
+
+	WFIFOHEAD(fd,length);
+	WFIFOW(fd,0) = 0x0AA2;
+	WFIFOW(fd,2) = length;
+	WFIFOW(fd,4) = index + 2;
+	WFIFOB(fd,6) = (uint8)materials[REFINEUI_MAT_BS_BLESSING].bs_blessing.count;
+
+	for( i = 0; i < material_count; i++ ) {
+		WFIFOW(fd,7 + i * 7) = materials[i].cost.nameid;
+		WFIFOB(fd,7 + i * 7 + 2) = materials[i].chance;
+		WFIFOL(fd,7 + i * 7 + 3) = materials[i].cost.zeny;
+	}
+
+	WFIFOSET(fd,length);
+}
+
+
+/**
+ * Client request to add an item to the refine UI.
+ * 0aa1 <index>.W
+ */
+void clif_parse_refineui_add(int fd, struct map_session_data *sd) {
+#if PACKETVER >= 20161012
+	uint16 index = RFIFOW(fd,2) - 2;
+
+	//Check if the refine UI is open
+	if( !sd->state.refineui_open )
+		return;
+
+	//Check if the index is valid
+	if( index < 0 || index >= MAX_INVENTORY )
+		return;
+
+	//Send out the requirements for the refine process
+	clif_refineui_info(sd, index);
+#endif
+}
+
+
+/**
+ * Client requests to try to refine an item.
+ * 0aa3 <index>.W <material>.W <catalyst>.B
+ */
+void clif_parse_refineui_refine(int fd, struct map_session_data *sd) {
+#if PACKETVER >= 20161012
+	uint16 index = RFIFOW(fd,2) - 2;
+	uint16 material = RFIFOW(fd,4);
+	bool use_bs_blessing = (RFIFOB(fd,6) != 0);
+	struct s_refine_materials materials[REFINEUI_MAT_MAX];
+	uint8 i, material_count;
+	uint16 j;
+	struct item *item;
+	struct item_data *id;
+
+	//Check if the refine UI is open
+	if( !sd->state.refineui_open )
+		return;
+
+	//Check if the index is valid
+	if( index < 0 || index >= MAX_INVENTORY )
+		return;
+
+	//Get the item db reference
+	id = sd->inventory_data[index];
+
+	//No item data was found
+	if( !id )
+		return;
+
+	//Check if the item can be refined
+	if( id->flag.no_refine )
+		return;
+
+	//Only weapons and armors can be refined in the refine UI
+	if( itemtype(id->nameid) != IT_WEAPON && itemtype(id->nameid) != IT_ARMOR )
+		return;
+
+	//Check the inventory
+	item = &sd->inventory.u.items_inventory[index];
+
+	//No item was found at the given index
+	if( !item )
+		return;
+
+	//Check if the item is identified
+	if( !item->identify )
+		return;
+
+	//Check if the item is broken
+	if( item->attribute )
+		return;
+
+	//Check the current refine level
+	if( item->refine < 0 || item->refine >= MAX_REFINE )
+		return;
+
+	// Check if the player has the selected material
+	if( (j = pc_search_inventory(sd, material)) < 0 )
+		return;
+
+	//Calculate the possible materials
+	material_count = clif_refineui_materials(item, id, materials);
+
+	//No possibilities were found
+	if( !material_count )
+		return;
+
+	//Find the selected material
+	ARR_FIND(0, REFINEUI_MAT_MAX, i, materials[i].cost.nameid == material);
+
+	//The material was not in the list of possible materials
+	if( i >= REFINEUI_MAT_MAX || i < 0 )
+		return;
+
+	//Try to pay for the refine. By default, client checked if player has enough zeny or not
+	if( pc_payzeny(sd, materials[i].cost.zeny, LOG_TYPE_CONSUME, NULL) ) {
+		clif_npc_buy_result(sd, 1); // "You do not have enough zeny."
+		return;
+	}
+
+	//Delete the required material
+	if( pc_delitem(sd, j, 1, 0, 0, LOG_TYPE_CONSUME) )
+		return;
+
+	if( use_bs_blessing && materials[REFINEUI_MAT_BS_BLESSING].bs_blessing.count ) {
+		if( (j = pc_search_inventory(sd, materials[REFINEUI_MAT_BS_BLESSING].bs_blessing.nameid)) < 0 )
+			return;
+ 		if( pc_delitem(sd, j, materials[REFINEUI_MAT_BS_BLESSING].bs_blessing.count, 0, 0, LOG_TYPE_CONSUME) )
+			return;
+	}
+
+	//Try to refine the item
+	if( materials[i].chance >= rnd()%100 ) {
+		//Success
+		item->refine = cap_value(item->refine + 1, 0, MAX_REFINE);
+		clif_misceffect(&sd->bl, 3);
+		clif_refine(fd, 0, index, item->refine);
+		achievement_update_objective(sd, AG_REFINE_SUCCESS, 2, id->wlv, item->refine);
+		clif_refineui_info(sd, index);
+	} else {
+		//Failure
+		do {
+			if( !use_bs_blessing ) {
+				if( materials[i].cost.downrefine_chance < rnd()%100 ) {
+					clif_refine(fd, 1, index, item->refine);
+					pc_delitem(sd, index, 1, 0, 0, LOG_TYPE_CONSUME);
+					break;
+				} else {
+					item->refine = cap_value(item->refine - materials[i].cost.downrefine_num, 0, MAX_REFINE);
+					clif_refine(fd, 2, index, item->refine);
+					clif_refineui_info(sd, index);
+					break;
+				}
+			}
+			//Blacksmith Blessing were used, no break & no down refine
+			clif_refine(fd, 3, index, item->refine);
+			clif_refineui_info(sd, index);
+		} while( 0 );
+		clif_misceffect(&sd->bl, 2);
+		achievement_update_objective(sd, AG_REFINE_FAIL, 1, 1);
+	}
 #endif
 }
 

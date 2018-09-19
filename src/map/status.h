@@ -32,7 +32,7 @@ enum e_refine_type {
 };
 
 // Get refine chance
-int status_get_refine_chance(enum e_refine_type wlv, int refine, bool enriched);
+int status_get_refine_chance(enum e_refine_type wlv, int refine, bool is_enriched);
 
 typedef enum sc_conf_type {
 	SC_NO_REM_DEATH  = 0x01,
@@ -2326,18 +2326,31 @@ enum e_refine_cost_type {
 	REFINE_COST_TYPE_CLINK,
 	REFINE_COST_TYPE_HOLINK,
 	REFINE_COST_TYPE_WAGJAK,
+	REFINE_COST_TYPE_LIMITED_HD,
 	REFINE_COST_TYPE_MAX
 };
 
 // Enum for refine informations
 enum e_refine_info {
 	REFINE_INFO_MATERIAL_ID = 0,
-	REFINE_INFO_ZENY
+	REFINE_INFO_ZENY,
+	REFINE_INFO_DOWN_REFINE_CHANCE,
+	REFINE_INFO_DOWN_REFINE_NUM
 };
 
 struct s_refine_cost {
 	uint16 nameid;
 	int zeny;
+	uint16 downrefine_chance;
+	uint16 downrefine_num;
+};
+
+#define REFINEUI_MAT_BS_BLESSING 4
+#define REFINEUI_MAT_MAX (REFINEUI_MAT_BS_BLESSING + 1)
+
+struct s_refine_bs_blessing {
+	uint16 nameid;
+	uint16 count;
 };
 
 struct s_refine_info { //Bonus values and upgrade chances for refining equipment
@@ -2345,10 +2358,13 @@ struct s_refine_info { //Bonus values and upgrade chances for refining equipment
 	int bonus[MAX_REFINE]; //Cumulative fixed bonus damage
 	int randombonus_max[MAX_REFINE]; //Cumulative maximum random bonus damage
 	struct s_refine_cost cost[REFINE_COST_TYPE_MAX];
+	struct s_refine_bs_blessing bs_blessing[MAX_REFINE];
 } refine_info[REFINE_TYPE_MAX];
 
 // Get refine cost
-int status_get_refine_cost(enum e_refine_type wlv, int type, int info);
+int status_get_refine_cost(enum e_refine_type wlv, int type, enum e_refine_info info);
+struct s_refine_cost *status_refine_cost(enum e_refine_type wlv, int type);
+bool status_get_refine_blacksmithBlessing(struct s_refine_bs_blessing *bs, enum e_refine_type wlv, int refine);
 
 bool status_calc_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);
 bool status_calc_cart_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);

@@ -660,6 +660,7 @@ extern struct Battle_Config
 	int homunculus_autofeed_always;
 	int feature_attendance;
 	int feature_privateairship;
+	int feature_refineui;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

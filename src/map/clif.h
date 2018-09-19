@@ -1112,4 +1112,7 @@ enum e_private_airship_response {
 
 void clif_private_airship_response(struct map_session_data *sd, enum e_private_airship_response response);
 
+//Refine UI
+void clif_refineui_open(struct map_session_data *sd);
+
 #endif /* _CLIF_H_ */

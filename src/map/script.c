@@ -4534,6 +4534,19 @@ BUILDIN_FUNC(next)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+/// Clears the dialog and continues the script without a next button.
+///
+/// clear;
+BUILDIN_FUNC(clear)
+{
+	TBL_PC *sd = script_rid2sd(st);
+
+	if( !sd )
+		return 0;
+	clif_scriptclear(sd, st->oid);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 /// Ends the script and displays the button 'close' on the npc dialog.
 /// The dialog is closed when the button is pressed.
 ///
@@ -8284,7 +8297,7 @@ BUILDIN_FUNC(getequipweaponlv)
 BUILDIN_FUNC(getequippercentrefinery)
 {
 	int i = -1, num, chance = 0;
-	bool enriched = false;
+	bool is_enriched = false;
 	TBL_PC *sd = NULL;
 
 	if(!script_charid2sd(4,sd)) {
@@ -8292,12 +8305,12 @@ BUILDIN_FUNC(getequippercentrefinery)
 		return 1;
 	}
 	if(script_hasdata(st,3))
-		enriched = (script_getnum(st,3) != 0);
+		is_enriched = (script_getnum(st,3) != 0);
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
-		chance = status_get_refine_chance((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, enriched);
+		chance = status_get_refine_chance((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, is_enriched);
 
 	script_pushint(st,chance);
 	return SCRIPT_CMD_SUCCESS;
@@ -8306,9 +8319,10 @@ BUILDIN_FUNC(getequippercentrefinery)
 /**
  * Get an equipment's refine cost
  * getequiprefinecost(<equipment slot>,<type>,<information>{,<char id>})
+ * returns -1 on fail
  */
 BUILDIN_FUNC(getequiprefinecost) {
-	int i = -1, slot, type, info, value = 0;
+	int i = -1, slot, type, info, value = -1;
 	struct map_session_data *sd = NULL;
 
 	slot = script_getnum(st,2);
@@ -8318,10 +8332,14 @@ BUILDIN_FUNC(getequiprefinecost) {
 		script_pushint(st,0);
 		return 1;
 	}
+	if(type < 0 || type >= REFINE_COST_TYPE_MAX) {
+		script_pushint(st,-1);
+		return 0;
+	}
 	if(equip_index_check(slot))
 		i = pc_checkequip(sd,equip_bitmask[slot]);
 	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
-		value = status_get_refine_cost((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), type, info);
+		value = status_get_refine_cost((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), type, (enum e_refine_info)info);
 
 	script_pushint(st,value);
 	return SCRIPT_CMD_SUCCESS;
@@ -23189,6 +23207,28 @@ BUILDIN_FUNC(airship_respond) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(refineui) {
+#if PACKETVER < 20161012
+	ShowError("buildin_refineui: This command requires packet version 2016-10-12 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if (!script_charid2sd(2,sd))
+		return 1;
+
+	if (!battle_config.feature_refineui) {
+		ShowError("buildin_refineui: This command is disabled via configuration.\n");
+		return 1;
+	}
+
+	if (!sd->state.refineui_open)
+		clif_refineui_open(sd);
+
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -23243,6 +23283,7 @@ struct script_function buildin_func[] = {
 	// NPC interaction
 	BUILDIN_DEF(mes,"s*"),
 	BUILDIN_DEF(next,""),
+	BUILDIN_DEF(clear,""),
 	BUILDIN_DEF(close,""),
 	BUILDIN_DEF(close2,""),
 	BUILDIN_DEF(menu,"sl*"),
@@ -23827,7 +23868,10 @@ struct script_function buildin_func[] = {
 	//Mail System
 	BUILDIN_DEF(mail,"isss*"),
 	BUILDIN_DEF(identifyall,"??"),
+	//Private Airship System
 	BUILDIN_DEF(airship_respond,"i"),
+	//Refine UI
+	BUILDIN_DEF(refineui,"?"),
 
 #include "../custom/script_def.inc"
 
