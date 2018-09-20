@@ -8665,6 +8665,7 @@ static const struct _battle_data {
 	{ "feature.attendance",                 &battle_config.feature_attendance,              1,      0,      1,              },
 	{ "feature.privateairship",             &battle_config.feature_privateairship,          1,      0,      1,              },
 	{ "feature.refineui",                   &battle_config.feature_refineui,                1,      0,      1,              },
+	{ "feature.stylistui",                  &battle_config.feature_stylistui,               1,      0,      1,              },
 
 #include "../custom/battle_config_init.inc"
 };

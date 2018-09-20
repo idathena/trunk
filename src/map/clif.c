@@ -65,13 +65,19 @@ unsigned long color_table[COLOR_MAX];
 static bool clif_session_isValid(struct map_session_data *sd);
 
 #if PACKETVER >= 20150513
-enum mail_type {
+enum e_mail_type {
 	MAIL_TYPE_TEXT = 0x0,
 	MAIL_TYPE_ZENY = 0x2,
 	MAIL_TYPE_ITEM = 0x4,
 	MAIL_TYPE_NPC = 0x8
 };
 #endif
+
+// Stylist Shop Responds
+enum e_stylist_shop {
+	STYLIST_SHOP_SUCCESS,
+	STYLIST_SHOP_FAILURE
+};
 
 /**
  * Structure to store all required data about refine requirements
@@ -20608,6 +20614,9 @@ void clif_ui_open(struct map_session_data *sd, enum out_ui_type ui_type, int32 d
 /// 0A68 <type>.B
 void clif_parse_open_ui(int fd, struct map_session_data *sd) {
 	switch( RFIFOB(fd,2) ) {
+		case IN_UI_STYLIST:
+			clif_ui_open(sd, OUT_UI_STYLIST, 0);
+			break;
 		case IN_UI_ATTENDANCE:
 			if( !pc_has_permission(sd, PC_PERM_ATTENDANCE) )
 				clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(767),false,SELF); // You are not allowed to use the attendance system.
@@ -20884,7 +20893,8 @@ void clif_refineui_info(struct map_session_data *sd, uint16 index) {
  */
 void clif_parse_refineui_add(int fd, struct map_session_data *sd) {
 #if PACKETVER >= 20161012
-	uint16 index = RFIFOW(fd,2) - 2;
+	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
+	uint16 index = RFIFOW(fd,info->pos[0]) - 2;
 
 	//Check if the refine UI is open
 	if( !sd->state.refineui_open )
@@ -20906,9 +20916,11 @@ void clif_parse_refineui_add(int fd, struct map_session_data *sd) {
  */
 void clif_parse_refineui_refine(int fd, struct map_session_data *sd) {
 #if PACKETVER >= 20161012
-	uint16 index = RFIFOW(fd,2) - 2;
-	uint16 material = RFIFOW(fd,4);
-	bool use_bs_blessing = (RFIFOB(fd,6) != 0);
+	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
+
+	uint16 index = RFIFOW(fd,info->pos[0]) - 2;
+	uint16 material = RFIFOW(fd,info->pos[1]);
+	bool use_bs_blessing = (RFIFOB(fd,info->pos[2]) != 0);
 	struct s_refine_materials materials[REFINEUI_MAT_MAX];
 	uint8 i, material_count;
 	uint16 j;
@@ -21023,6 +21035,47 @@ void clif_parse_refineui_refine(int fd, struct map_session_data *sd) {
 		achievement_update_objective(sd, AG_REFINE_FAIL, 1, 1);
 	}
 #endif
+}
+
+
+static void clif_style_change_response(struct map_session_data *sd, enum e_stylist_shop flag) {
+#if PACKETVER >= 20151104
+	int fd;
+
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,3);
+	WFIFOW(fd,0) = 0x0A47;
+	WFIFOB(fd,2) = flag;
+	WFIFOSET(fd,3);
+#endif
+}
+
+
+void clif_parse_req_style_change(int fd, struct map_session_data *sd) {
+	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
+	int16 hair_color = RFIFOW(fd,info->pos[0]);
+	int16 hair_style = RFIFOW(fd,info->pos[1]);
+	int16 cloth_color = RFIFOW(fd,info->pos[2]);
+	int16 head_top = RFIFOW(fd,info->pos[3]);
+	int16 head_mid = RFIFOW(fd,info->pos[4]);
+	int16 head_bottom = RFIFOW(fd,info->pos[5]);
+
+	if( hair_style > 0 )
+		pc_stylist_process(sd, LOOK_HAIR, hair_style, false);
+	if( hair_color > 0 )
+		pc_stylist_process(sd, LOOK_HAIR_COLOR, hair_color, false);
+	if( cloth_color > 0 )
+		pc_stylist_process(sd, LOOK_CLOTHES_COLOR, cloth_color, false);
+	if( head_top > 0 )
+		pc_stylist_process(sd, LOOK_HEAD_TOP, head_top, true);
+	if( head_mid > 0 )
+		pc_stylist_process(sd, LOOK_HEAD_MID, head_mid, true);
+	if( head_bottom > 0 )
+		pc_stylist_process(sd, LOOK_HEAD_BOTTOM, head_bottom, true);
+
+	clif_style_change_response(sd, STYLIST_SHOP_SUCCESS);
 }
 
 

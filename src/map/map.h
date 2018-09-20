@@ -506,6 +506,7 @@ enum _look {
 	LOOK_RESET_COSTUMES, //Reset Costumes - Makes all headgear sprites on player vanish when activated
 	LOOK_ROBE,           //Robe
 	LOOK_BODY2,          //Body2 - Changes body appearance
+	LOOK_MAX
 };
 
 // Used by map_setcell()

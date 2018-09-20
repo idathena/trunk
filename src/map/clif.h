@@ -555,10 +555,12 @@ enum e_config_type {
 };
 
 enum in_ui_type {
+	IN_UI_STYLIST = 1,
 	IN_UI_ATTENDANCE = 5
 };
 
 enum out_ui_type {
+	OUT_UI_STYLIST = 1,
 	OUT_UI_ATTENDANCE = 7
 };
 

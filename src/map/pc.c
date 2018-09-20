@@ -53,6 +53,7 @@
 #include <time.h>
 #include <math.h>
 
+struct config_t stylist_db_conf;
 static inline bool pc_attendance_rewarded_today(struct map_session_data *sd);
 
 #define PVP_CALCRANK_INTERVAL 1000 //PVP calculation interval
@@ -96,6 +97,18 @@ struct s_attendance_period {
 
 struct s_attendance_period *attendance_periods;
 uint8 attendance_period_count;
+
+struct s_stylist_data {
+	int16 id;
+	int zeny;
+	int16 itemid;
+	int16 boxid;
+	bool allow_doram;
+};
+
+#define MAX_STYLIST_TYPE LOOK_MAX
+struct s_stylist_data *stylist_datas[MAX_STYLIST_TYPE];
+uint8 stylist_data_count;
 
 #define MOTD_LINE_SIZE 128
 static char motd_text[MOTD_LINE_SIZE][CHAT_SIZE_MAX]; //Message of the day buffer [Valaris]
@@ -11544,6 +11557,76 @@ static void pc_readdb_attendance_libconfig(const char *filename)
 	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
 }
 
+static void pc_readdb_stylist_libconfig_sub(struct config_setting_t *it, int16 count, const char *source)
+{
+	int i32, type = 0, style = 0, zeny = 0, itemID = 0, boxItemID = 0;
+	bool allow_doram = false;
+	const char *name;
+	int16 idx;
+
+	nullpo_retv(it);
+	nullpo_retv(source);
+
+	if (!config_setting_lookup_string(it, "Type", &name)) {
+		ShowWarning("pc_readdb_stylist_libconfig_sub: Missing Type in \"%s\", entry #%d.\n", source, count);
+		return;
+	}
+	if (!script_get_constant(name, &type)) {
+		ShowWarning("pc_readdb_stylist_libconfig_sub: Invalid Type '%s' in \"%s\", entry #%d.\n", name, source, count);
+		return;
+	}
+	if (type < 0 || type >= MAX_STYLIST_TYPE) {
+		ShowWarning("pc_readdb_stylist_libconfig_sub: Out of range Type '%s' in \"%s\", entry #%d.\n", name, source, count);
+		return;
+	}
+	if (!config_setting_lookup_int(it, "Style", &i32) || i32 < 0) {
+		ShowWarning("pc_readdb_stylist_libconfig_sub: Missing or invalid Id %d in \"%s\", entry #%d.\n", i32, source, count);
+		return;
+	}
+	style = i32;
+	if (config_setting_lookup_int(it, "Index", &i32))
+		idx = i32;
+	else
+		idx = style;
+	if (config_setting_lookup_int(it, "Zeny", &i32))
+		zeny = i32;
+	if (config_setting_lookup_int(it, "ItemID", &i32))
+		itemID = i32;
+	if (config_setting_lookup_int(it, "BoxItemID", &i32))
+		boxItemID = i32;
+	if (config_setting_lookup_bool(it, "AllowDoram", &i32))
+		allow_doram = (i32 != 0);
+	if (!stylist_datas[type])
+		CREATE(stylist_datas[type], struct s_stylist_data, 1);
+	else
+		RECREATE(stylist_datas[type], struct s_stylist_data, stylist_data_count + 1);
+	stylist_datas[type][idx - 1].id = style;
+	stylist_datas[type][idx - 1].zeny = zeny;
+	stylist_datas[type][idx - 1].itemid = itemID;
+	stylist_datas[type][idx - 1].boxid = boxItemID;
+	stylist_datas[type][idx - 1].allow_doram = allow_doram;
+	stylist_data_count++;
+}
+
+static void pc_readdb_stylist_libconfig(const char *filename)
+{
+	struct config_setting_t *sdb = NULL, *t = NULL;
+	char filepath[256];
+	int count = 0;
+
+	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, filename);
+	if (config_read_file(&stylist_db_conf, filepath))
+		return;
+	if (!(sdb = config_lookup(&stylist_db_conf, "stylist_db")))
+		return;
+	while ((t = config_setting_get_elem(sdb, count))) {
+		pc_readdb_stylist_libconfig_sub(t, count, filename);
+		count++;
+	}
+	config_destroy(&stylist_db_conf);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
+}
+
 /*==========================================
  * pc DB reading.
  * job_exp.txt		- required experience values
@@ -11704,6 +11787,8 @@ void pc_readdb(void)
 
 	if( battle_config.feature_attendance )
 		pc_readdb_attendance_libconfig(DBPATH"attendance_db.conf");
+
+	pc_readdb_stylist_libconfig("stylist_db.conf");
 }
 
 // Read MOTD on startup. [Valaris]
@@ -12858,16 +12943,7 @@ void pc_attendance_claim_reward(struct map_session_data *sd) {
 	clif_attendence_response(sd, attendance_counter);
 }
 
-/*==========================================
- * pc Init/Terminate
- *------------------------------------------*/
-void do_final_pc(void) {
-	db_destroy(itemcd_db);
-	do_final_pc_groups();
-
-	ers_destroy(pc_sc_display_ers);
-	ers_destroy(pc_itemgrouphealrate_ers);
-
+static void pc_attendance_clear(void) {
 	if (battle_config.feature_attendance) {
 		if (attendance_periods->rewards) {
 			aFree(attendance_periods->rewards);
@@ -12878,6 +12954,118 @@ void do_final_pc(void) {
 		attendance_periods = NULL;
 		attendance_period_count = 0;
 	}
+}
+
+bool pc_has_second_costume(struct map_session_data *sd) {
+	nullpo_retr(false, sd);
+
+	if (sd->class_&JOBL_THIRD)
+		return true;
+
+	return false;
+}
+
+struct s_stylist_data *pc_stylist_data(int type, int16 idx) {
+	if (type < 0 || type >= MAX_STYLIST_TYPE)
+		return NULL;
+
+	if (idx < 0 || idx >= stylist_data_count)
+		return NULL;
+
+	return &stylist_datas[type][idx];
+}
+
+static bool pc_stylist_validate_requirements(struct map_session_data *sd, int type, int16 idx) {
+	struct s_stylist_data *entry = pc_stylist_data(type, idx);
+	struct item it;
+
+	nullpo_retr(false, sd);
+
+	if (sd->status.class_ == JOB_SUMMONER && !entry->allow_doram)
+		return false;
+
+	if (entry->id >= 0) {
+		if (entry->zeny && pc_payzeny(sd, entry->zeny, LOG_TYPE_CONSUME, NULL))
+			return false;
+		else if (entry->itemid) {
+			it.nameid = entry->itemid;
+			it.amount = 1;
+			if (pc_delitem(sd, pc_search_inventory(sd, it.nameid), it.amount, 0, 0, LOG_TYPE_OTHER))
+				return false;
+		} else if (entry->boxid) {
+			it.nameid = entry->boxid;
+			it.amount = 1;
+			if (pc_delitem(sd, pc_search_inventory(sd, it.nameid), it.amount, 0, 0, LOG_TYPE_OTHER))
+				return false;
+		}
+		return true;
+	}
+	return false;
+}
+
+static void pc_stylist_recieve_item(struct map_session_data *sd, uint16 nameid) {
+	struct mail_message msg;
+
+	nullpo_retv(sd);
+
+	memset(&msg, 0, sizeof(struct mail_message));
+
+	msg.dest_id = sd->status.char_id;
+	safestrncpy(msg.send_name, msg_txt(782), NAME_LENGTH);
+	safestrncpy(msg.title, msg_txt(783), MAIL_TITLE_LENGTH);
+	safestrncpy(msg.body, msg_txt(784), MAIL_BODY_LENGTH);
+
+	msg.item[0].nameid = nameid;
+	msg.item[0].amount = 1;
+	msg.item[0].identify = 1;
+
+	msg.status = MAIL_NEW;
+	msg.type = MAIL_INBOX_NORMAL;
+	msg.timestamp = time(NULL);
+
+	intif_Mail_send(0, &msg);
+}
+
+void pc_stylist_process(struct map_session_data *sd, int type, int16 idx, bool isItem) {
+	struct s_stylist_data *entry = NULL;
+
+	nullpo_retv(sd);
+
+	if (type == LOOK_BODY2 && !pc_has_second_costume(sd))
+		return;
+
+	idx -= 1;
+
+	if ((entry = pc_stylist_data(type, idx)) && pc_stylist_validate_requirements(sd, type, idx)) {
+		if (!isItem)
+			pc_changelook(sd, type, entry->id);
+		else
+			pc_stylist_recieve_item(sd, entry->id);
+	}
+}
+
+static void pc_stylist_clear(void) {
+	int i;
+
+	for (i = 0; i < MAX_STYLIST_TYPE; i++) {
+		aFree(stylist_datas[i]);
+		stylist_datas[i] = NULL;
+		stylist_data_count = 0;
+	}
+}
+
+/*==========================================
+ * pc Init/Terminate
+ *------------------------------------------*/
+void do_final_pc(void) {
+	db_destroy(itemcd_db);
+	do_final_pc_groups();
+
+	ers_destroy(pc_sc_display_ers);
+	ers_destroy(pc_itemgrouphealrate_ers);
+
+	pc_attendance_clear();
+	pc_stylist_clear();
 }
 
 void do_init_pc(void) {

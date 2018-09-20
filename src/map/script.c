@@ -23207,9 +23207,9 @@ BUILDIN_FUNC(airship_respond) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
-BUILDIN_FUNC(refineui) {
+BUILDIN_FUNC(open_refineui) {
 #if PACKETVER < 20161012
-	ShowError("buildin_refineui: This command requires packet version 2016-10-12 or newer.\n");
+	ShowError("buildin_open_refineui: This command requires packet version 2016-10-12 or newer.\n");
 	return SCRIPT_CMD_FAILURE;
 #else
 	struct map_session_data *sd = NULL;
@@ -23218,13 +23218,33 @@ BUILDIN_FUNC(refineui) {
 		return 1;
 
 	if (!battle_config.feature_refineui) {
-		ShowError("buildin_refineui: This command is disabled via configuration.\n");
+		ShowError("buildin_open_refineui: This command is disabled via configuration.\n");
 		return 1;
 	}
 
 	if (!sd->state.refineui_open)
 		clif_refineui_open(sd);
 
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
+BUILDIN_FUNC(open_stylistui) {
+#if PACKETVER < 20151104
+	ShowError("buildin_open_stylistui: This command requires packet version 2015-11-04 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if (!script_charid2sd(2,sd))
+		return 1;
+
+	if (!battle_config.feature_stylistui) {
+		ShowError("buildin_open_stylistui: This command is disabled via configuration.\n");
+		return 1;
+	}
+
+	clif_ui_open(sd, OUT_UI_STYLIST, 0);
 	return SCRIPT_CMD_SUCCESS;
 #endif
 }
@@ -23871,7 +23891,9 @@ struct script_function buildin_func[] = {
 	//Private Airship System
 	BUILDIN_DEF(airship_respond,"i"),
 	//Refine UI
-	BUILDIN_DEF(refineui,"?"),
+	BUILDIN_DEF(open_refineui,"?"),
+	//Stylist UI
+	BUILDIN_DEF(open_stylistui,"?"),
 
 #include "../custom/script_def.inc"
 
