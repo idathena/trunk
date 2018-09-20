@@ -769,6 +769,7 @@
 	export_constant(LOOK_RESET_COSTUMES);
 	export_constant(LOOK_ROBE);
 	export_constant(LOOK_BODY2);
+	export_constant(LOOK_MAX);
 
 	/* Status changes */
 	export_constant2("Eff_Stone",SC_STONE);

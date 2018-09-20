@@ -3154,7 +3154,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case MA_SHARPSHOOTING:
 		case NJ_KAMAITACHI:
 		case NPC_DARKPIERCING:
-		case RK_IGNITIONBREAK:
 		case LG_CANNONSPEAR:
 		case LG_MOONSLASHER:
 		case GN_ILLUSIONDOPING:
@@ -6761,6 +6760,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		//List of self skills that give damage around caster
 		case ASC_METEORASSAULT:
+		case RK_IGNITIONBREAK:
 		case RK_STORMBLAST:
 		case GC_COUNTERSLASH:
 		case WL_FROSTMISTY:
@@ -6786,7 +6786,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case GS_SPREADATTACK:
-		case RK_IGNITIONBREAK:
 		case GC_PHANTOMMENACE:
 		case NC_AXETORNADO:
 		case LG_MOONSLASHER:

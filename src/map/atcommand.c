@@ -1747,7 +1747,7 @@ ACMD_FUNC(bodystyle)
 
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
-	if (!(sd->class_&JOBL_THIRD)) {
+	if (!pc_has_second_costume(sd)) {
 		clif_displaymessage(fd, msg_txt(727)); // This job has no alternate body styles.
 		return -1;
 	}

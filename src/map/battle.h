@@ -661,6 +661,7 @@ extern struct Battle_Config
 	int feature_attendance;
 	int feature_privateairship;
 	int feature_refineui;
+	int feature_stylistui;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;
