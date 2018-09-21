@@ -1010,6 +1010,7 @@ extern Sql *logmysql_handle;
 
 extern char buyingstores_db[32];
 extern char buyingstore_items_db[32];
+extern char guild_storage_log_db[32];
 extern char item_db_db[32];
 extern char item_db2_db[32];
 extern char item_db_re_db[32];

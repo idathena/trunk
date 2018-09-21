@@ -5405,6 +5405,17 @@
 	export_constant(REFINE_INFO_DOWN_REFINE_CHANCE);
 	export_constant(REFINE_INFO_DOWN_REFINE_NUM);
 
+	/* Guild permissions */
+	export_constant(GUILD_PERM_INVITE);
+	export_constant(GUILD_PERM_EXPEL);
+	export_constant(GUILD_PERM_STORAGE);
+	export_constant(GUILD_PERM_ALL);
+
+	/* Guild storage log */
+	export_constant(GUILDSTORAGE_LOG_FINAL_SUCCESS);
+	export_constant(GUILDSTORAGE_LOG_EMPTY);
+	export_constant(GUILDSTORAGE_LOG_FAILED);
+
 	#undef export_constant
 	#undef export_constant2
 	#undef export_parameter

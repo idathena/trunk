@@ -96,7 +96,6 @@ struct s_attendance_period {
 };
 
 struct s_attendance_period *attendance_periods;
-uint8 attendance_period_count;
 
 struct s_stylist_data {
 	int16 id;
@@ -11531,7 +11530,6 @@ static void pc_readdb_attendance_libconfig_sub(struct config_setting_t *t, const
 			attendance_periods->reward_count++;
 		}
 	}
-	attendance_period_count++;
 }
 
 static void pc_readdb_attendance_libconfig(const char *filename)
@@ -12846,12 +12844,9 @@ void pc_update_job_and_level(struct map_session_data *sd) {
 
 struct s_attendance_period *pc_attendance_period(void) {
 	uint32 date = date_get(DT_YYYYMMDD);
-	int i;
 
-	for (i = 0; i < attendance_period_count; i++) {
-		if (attendance_periods->start <= date && attendance_periods->end >= date)
-			return attendance_periods;
-	}
+	if (attendance_periods->start <= date && attendance_periods->end >= date)
+		return attendance_periods;
 
 	return NULL;
 }
@@ -12949,7 +12944,6 @@ static void pc_attendance_clear(void) {
 	}
 	aFree(attendance_periods);
 	attendance_periods = NULL;
-	attendance_period_count = 0;
 }
 
 bool pc_has_second_costume(struct map_session_data *sd) {

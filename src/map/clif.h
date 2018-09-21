@@ -38,6 +38,7 @@ enum mail_inbox_type;
 struct mail_message;
 enum mail_attachment_type;
 struct achievement;
+enum e_guild_storage_log;
 #include <stdarg.h>
 
 enum { // packet_db
@@ -1115,5 +1116,7 @@ void clif_private_airship_response(struct map_session_data *sd, enum e_private_a
 
 //Refine UI
 void clif_refineui_open(struct map_session_data *sd);
+
+void clif_guild_storage_log(struct map_session_data *sd, enum e_guild_storage_log result);
 
 #endif /* _CLIF_H_ */

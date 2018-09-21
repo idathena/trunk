@@ -76,6 +76,7 @@ Sql *qsmysql_handle; // For query_sql
 int db_use_sqldbs = 0;
 char buyingstores_db[32] = "buyingstores";
 char buyingstore_items_db[32] = "buyingstore_items";
+char guild_storage_log_db[32] = "guild_storage_log";
 char item_db_db[32] = "item_db";
 char item_db2_db[32] = "item_db2";
 char item_db_re_db[32] = "item_db_re";
@@ -3977,6 +3978,8 @@ int inter_config_read(char *cfgName)
 			strcpy(buyingstores_db, w2);
 		else if( strcmpi(w1, "buyingstore_items_db") == 0 )
 			strcpy(buyingstore_items_db, w2);
+		else if( strcmpi(w1, "guild_storage_log") == 0 )
+			strcpy(guild_storage_log_db, w2);
 		else if( strcmpi(w1, "item_cash_db_db") == 0 )
 			strcpy(item_cash_db_db, w2);
 		else if( strcmpi(w1, "item_cash_db2_db") == 0 )
@@ -4332,7 +4335,7 @@ int map_mapflag_pvp_start(struct block_list *bl, va_list ap)
 {
 	struct map_session_data *sd = map_id2sd(bl->id);
 
-	nullpo_retv(sd);
+	nullpo_retr(0, sd);
 
 	if( sd->pvp_timer == INVALID_TIMER ) {
 		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
@@ -4356,7 +4359,7 @@ int map_mapflag_pvp_stop(struct block_list *bl, va_list ap)
 {
 	struct map_session_data *sd = map_id2sd(bl->id);
 
-	nullpo_retv(sd);
+	nullpo_retr(0, sd);
 
 	clif_pvpset(sd, 0, 0, 2);
 	if( sd->pvp_timer != INVALID_TIMER ) {

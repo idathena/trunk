@@ -9480,6 +9480,57 @@ BUILDIN_FUNC(guildopenstorage)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(guildopenstorage_log)
+{
+#if PACKETVER < 20140205
+	ShowError("buildin_guildopenstorage_log: This command requires PACKETVER 2014-02-05 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if( !script_charid2sd(2,sd) )
+		return 1;
+
+	script_pushint(st,storage_guild_log_read(sd));
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
+BUILDIN_FUNC(guild_has_permission)
+{
+	struct map_session_data *sd = NULL;
+	int permission = script_getnum(st,2);
+	int position;
+
+	if( !script_charid2sd(3,sd) )
+		return 1;
+
+	if( !permission ) {
+		ShowError("buildin_guild_has_permission: No permission given.\n");
+		return 1;
+	}
+
+	if( !(permission&GUILD_PERM_ALL) ) {
+		ShowError("buildin_guild_has_permission: Invalid permission '%d'.\n", permission);
+		return 1;
+	}
+
+	if( !sd->guild ) {
+		script_pushint(st,false);
+		return 0;
+	}
+
+	position = guild_getposition(sd);
+
+	if( position < 0 || (sd->guild->position[position].mode&permission) != permission ) {
+		script_pushint(st,false);
+		return 0;
+	}
+
+	script_pushint(st,true);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 /*==========================================
  * Make player use a skill trought item usage
  *------------------------------------------*/
@@ -23306,6 +23357,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(gettimestr,"si?"),
 	BUILDIN_DEF(openstorage,""),
 	BUILDIN_DEF(guildopenstorage,""),
+	BUILDIN_DEF(guildopenstorage_log,"?"),
+	BUILDIN_DEF(guild_has_permission,"i?"),
 	BUILDIN_DEF(itemskill,"vi?"),
 	BUILDIN_DEF(produce,"i"),
 	BUILDIN_DEF(cooking,"i"),

@@ -862,7 +862,7 @@ void clif_clearunit_delayed(struct block_list *bl, clr_type type, unsigned int t
 {
 	struct block_list *tbl = ers_alloc(delay_clearunit_ers, struct block_list);
 
-	memcpy (tbl, bl, sizeof (struct block_list));
+	memcpy(tbl, bl, sizeof (struct block_list));
 	add_timer(tick, clif_clearunit_delayed_sub, (int)type, (intptr_t)tbl);
 }
 
@@ -21065,6 +21065,54 @@ void clif_parse_req_style_change(int fd, struct map_session_data *sd) {
 		pc_stylist_process(sd, LOOK_HEAD_BOTTOM, head_bottom, true);
 
 	clif_style_change_response(sd, STYLIST_SHOP_SUCCESS);
+}
+
+
+/// Sends out the usage history of the guild storage
+/// 09DA <size>.W <result>.W <count>.W { <id>.L <item id>.W <amount>.L <action>.B <refine>.L <unique id>.Q <identify>.B <item type>.W
+///      { <card item id>.W }*4 <name>.24B <time>.24B <attribute>.B }*count (ZC_ACK_GUILDSTORAGE_LOG)
+void clif_guild_storage_log(struct map_session_data *sd, enum e_guild_storage_log result) {
+#if PACKETVER >= 20140205
+	int fd, offset, i;
+	int size = 8;
+	int sub = 83;
+
+	nullpo_retv(sd);
+
+	if( result == GUILDSTORAGE_LOG_FINAL_SUCCESS )
+		size += gstorage_log_count * sub;
+	else
+		storage_guild_log_clear();
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,size);
+	WFIFOW(fd,0) = 0x9DA;
+	WFIFOW(fd,2) = size;
+	WFIFOW(fd,4) = result;
+	WFIFOW(fd,6) = (uint16)gstorage_log_count;
+
+	if( result == GUILDSTORAGE_LOG_FINAL_SUCCESS ) {
+		for( offset = 8, i = 0; i < gstorage_log_count; i++, offset += sub ) {
+			struct s_guild_log_entry entry = gstorage_logs[i];
+			uint16 viewid = itemdb_viewid(entry.item.nameid);
+
+			WFIFOL(fd,offset) = entry.id;
+			WFIFOW(fd,offset + 4) = (viewid > 0 ? viewid : entry.item.nameid);
+			WFIFOL(fd,offset + 6) = (uint16)(entry.amount > 0 ? entry.amount : (entry.amount * -1));
+			WFIFOB(fd,offset + 10) = (entry.amount > 0); // action = true(put), false(get)
+			WFIFOL(fd,offset + 11) = entry.item.refine;
+			WFIFOQ(fd,offset + 15) = entry.item.unique_id;
+			WFIFOB(fd,offset + 23) = entry.item.identify;
+			WFIFOW(fd,offset + 24) = itemtype(entry.item.nameid);
+			clif_addcards(WFIFOP(fd,offset + 26), &entry.item);
+			safestrncpy((char *)WFIFOP(fd,offset + 34), entry.name, NAME_LENGTH);
+			safestrncpy((char *)WFIFOP(fd,offset + 34 + NAME_LENGTH), entry.time, NAME_LENGTH);
+			WFIFOB(fd, offset + 34 + 2 * NAME_LENGTH) = entry.item.attribute;
+		}
+	}
+
+	WFIFOSET(fd,size);
+#endif
 }
 
 
