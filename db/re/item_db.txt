@@ -2697,7 +2697,7 @@
 4547,Upd_Byorgue_Card,Upgrade Byorgue Card,6,20,,10,,,,,,,,16,,,,,{ if(BaseJob==Job_Rogue) { bonus2 bAddClass,Class_All,10; bonus2 bMagicAddRace,RC_All,10; } bonus bMaxHPrate,getrefine()/2; bonus3 bAddEffOnSkill,"SC_BODYPAINT",Eff_Confusion,100; },{},{}
 4548,Upd_Salamander_Card,Upgrade Salamander Card,6,20,,10,,,,,,,,4,,,,,{ bonus2 bSkillAtk,"WZ_FIREPILLAR",40; bonus2 bSkillAtk,"WZ_METEOR",40; },{},{}
 4549,Upd_Maya_Puple_Card,Upgrade Maya Puple Card,6,20,,10,,,,,,,,769,,,,,{ bonus bIntravision,0; bonus bAllStats,1; skill "AL_RUWACH",1; },{},{}
-4550,Upd_Bow_Guardian_Card,Upgrade Bow Guardian Card,6,20,,10,,,,,,,,2,,,,,{ if(getiteminfo(getequipid(EQI_HAND_R),11)==11) { bonus2 bSkillAtk,"RA_ARROWSTORM",50;  bonus bCriticalLong,25+(getequiprefinerycnt(EQI_HAND_R)/4)*10; bonus bHit,5; bonus3 bAutoSpell,"HT_PHANTASMIC",1,100; } },{},{}
+4550,Upd_Bow_Guardian_Card,Upgrade Bow Guardian Card,6,20,,10,,,,,,,,2,,,,,{ if(getiteminfo(getequipid(EQI_HAND_R),11)==11) { bonus2 bSkillAtk,"RA_ARROWSTORM",50; bonus bCritical,5; bonus bHit,5; bonus bCriticalLong,20+(getequiprefinerycnt(EQI_HAND_R)/4); bonus3 bAutoSpell,"HT_PHANTASMIC",1,100; } },{},{}
 4551,Upd_Necromancer_Card,Upgrade Necromancer Card,6,20,,10,,,,,,,,2,,,,,{ set .@r,getrefine(); if(getiteminfo(getequipid(EQI_HAND_R),11)==10) { bonus bInt,1; bonus2 bIgnoreMdefClassRate,Class_Normal,2+.@r/4; bonus2 bIgnoreMdefClassRate,Class_Boss,2+.@r/4; } },{},{}
 4552,Manny_Card,Manny Card,6,20,,10,,,,,,,,136,,,,,{ bonus bMaxHP,10; },{},{}
 4553,Sid_Card,Sid Card,6,20,,10,,,,,,,,16,,,,,{ bonus bMaxHP,100; },{},{}

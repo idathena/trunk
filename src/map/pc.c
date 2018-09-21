@@ -3429,11 +3429,8 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 		case SP_ABSORB_DMG_MAXHP:
 			sd->bonus.absorb_dmg_maxhp = u8max(sd->bonus.absorb_dmg_maxhp, val);
 			break;
-		case SP_CRITICAL_RANGEATK:
-			if(sd->state.lr_flag != 2)
-				sd->bonus.critical_rangeatk += val * 10;
-			else
-				sd->bonus.arrow_cri += val * 10;
+		case SP_CRITICAL_LONG:
+			sd->bonus.critical_long += val * 10;
 			break;
 		case SP_WEAPON_ATK_RATE:
 			if(sd->state.lr_flag != 2)
@@ -11788,7 +11785,8 @@ void pc_readdb(void)
 	if( battle_config.feature_attendance )
 		pc_readdb_attendance_libconfig(DBPATH"attendance_db.conf");
 
-	pc_readdb_stylist_libconfig("stylist_db.conf");
+	if( battle_config.feature_stylistui )
+		pc_readdb_stylist_libconfig("stylist_db.conf");
 }
 
 // Read MOTD on startup. [Valaris]
@@ -12944,16 +12942,14 @@ void pc_attendance_claim_reward(struct map_session_data *sd) {
 }
 
 static void pc_attendance_clear(void) {
-	if (battle_config.feature_attendance) {
-		if (attendance_periods->rewards) {
-			aFree(attendance_periods->rewards);
-			attendance_periods->rewards = NULL;
-			attendance_periods->reward_count = 0;
-		}
-		aFree(attendance_periods);
-		attendance_periods = NULL;
-		attendance_period_count = 0;
+	if (attendance_periods->rewards) {
+		aFree(attendance_periods->rewards);
+		attendance_periods->rewards = NULL;
+		attendance_periods->reward_count = 0;
 	}
+	aFree(attendance_periods);
+	attendance_periods = NULL;
+	attendance_period_count = 0;
 }
 
 bool pc_has_second_costume(struct map_session_data *sd) {
@@ -13064,8 +13060,10 @@ void do_final_pc(void) {
 	ers_destroy(pc_sc_display_ers);
 	ers_destroy(pc_itemgrouphealrate_ers);
 
-	pc_attendance_clear();
-	pc_stylist_clear();
+	if (battle_config.feature_attendance)
+		pc_attendance_clear();
+	if (battle_config.feature_stylistui)
+		pc_stylist_clear();
 }
 
 void do_init_pc(void) {

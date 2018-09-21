@@ -2088,7 +2088,7 @@
 4425,Atroce_Card,Atroce Card,6,20,,10,,,,,,,,2,,,,,{ bonus bBaseAtk,25; autobonus "{ bonus bAspdRate,100; }",5,10000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; }"; },{},{}
 4426,Byorgue_Card,Byorgue Card,6,20,,10,,,,,,,,16,,,,,{ if(BaseJob==Job_Rogue) { bonus2 bAddClass,Class_All,10; bonus bMatkRate,10; } },{},{}
 4427,Sword_Guardian_Card,Sword Guardian Card,6,20,,10,,,,,,,,2,,,,,{ if(getiteminfo(getequipid(EQI_HAND_R),11)==2||getiteminfo(getequipid(EQI_HAND_R),11)==3) { bonus bHit,5; bonus bCritical,5; bonus2 bSkillAtk,62,25; } },{},{}
-4428,Bow_Guardian_Card,Bow Guardian Card,6,20,,10,,,,,,,,2,,,,,{ if(getiteminfo(getequipid(EQI_HAND_R),11)==11) { bonus bHit,5; bonus bCritical,5; bonus2 bSkillAtk,47,50; } },{},{}
+4428,Bow_Guardian_Card,Bow Guardian Card,6,20,,10,,,,,,,,2,,,,,{ if(getiteminfo(getequipid(EQI_HAND_R),11)==11) { bonus bHit,5; bonus bCritical,5; bonus2 bSkillAtk,"AC_SHOWER",50; } },{},{}
 4429,Salamander_Card,Salamander Card,6,20,,10,,,,,,,,4,,,,,{ bonus2 bSkillAtk,"WZ_FIREPILLAR",40; bonus2 bSkillAtk,"WZ_METEOR",40; },{},{}
 4430,Ifrit_Card,Ifrit Card,6,20,,10,,,,,,,,136,,,,,{ bonus bBaseAtk,(JobLevel/10); bonus bCritical,(JobLevel/10); bonus bHit,(JobLevel/10); bonus3 bAutoSpellWhenHit,"NPC_EARTHQUAKE",2,10; },{},{}
 4431,Kasa_Card,Kasa Card,6,20,,10,,,,,,,,4,,,,,{ bonus3 bAutoSpell,"MG_FIREBALL",5,20; bonus3 bAutoSpell,"MG_FIREBOLT",5,20; },{},{}

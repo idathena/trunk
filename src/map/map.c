@@ -2733,13 +2733,11 @@ int map_removemobs_timer(int tid, unsigned int tick, int id, intptr_t data)
 	int count;
 	const int16 m = id;
 
-	if (m < 0 || m >= MAX_MAP_PER_SERVER)
-	{	//Incorrect map id!
+	if (m < 0 || m >= MAX_MAP_PER_SERVER) { //Incorrect map id!
 		ShowError("map_removemobs_timer error: timer %d points to invalid map %d\n",tid, m);
 		return 0;
 	}
-	if (map[m].mob_delete_timer != tid)
-	{	//Incorrect timer call!
+	if (map[m].mob_delete_timer != tid) { //Incorrect timer call!
 		ShowError("map_removemobs_timer mismatch: %d != %d (map %s)\n",map[m].mob_delete_timer, tid, map[m].name);
 		return 0;
 	}
@@ -2751,7 +2749,7 @@ int map_removemobs_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 	if (battle_config.etc_log && count > 0)
 		ShowStatus("Map %s: Removed '"CL_WHITE"%d"CL_RESET"' mobs.\n",map[m].name, count);
-	
+
 	return 1;
 }
 

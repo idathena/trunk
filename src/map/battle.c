@@ -1746,7 +1746,7 @@ int64 battle_addmastery(struct map_session_data *sd, struct block_list *target, 
  * @param type EQI_HAND_L:left-hand weapon, EQI_HAND_R:right-hand weapon
  */
 static void battle_add_weapon_damage(struct map_session_data *sd, int64 *damage, uint8 type) {
-	int overrefine;
+	int overrefine = 0;
 
 	if(!sd)
 		return;
@@ -2350,11 +2350,10 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 			if(!battle_config.show_status_katar_crit && sd->status.weapon == W_KATAR)
 				cri *= 2; //On official double critical bonus from katar won't be showed in status display
 			cri += sd->critaddrace[tstatus->race] + sd->critaddrace[RC_ALL];
-			if(is_skill_using_arrow(src, skill_id)) {
+			if(is_skill_using_arrow(src, skill_id))
 				cri += sd->bonus.arrow_cri;
-				if(!skill_id)
-					cri += sd->bonus.critical_rangeatk;
-			}
+			if(!skill_id && (wd.flag&BF_LONG))
+				cri += sd->bonus.critical_long;
 		}
 
 		if(sc && sc->data[SC_CAMOUFLAGE])
@@ -3273,7 +3272,7 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 					ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.atk_rate);
 #ifndef RENEWAL
 				//Add +crit damage bonuses here in pre-renewal mode [helvetica]
-				if(is_attack_critical(wd, src, target, skill_id, skill_lv, false))
+				if(!skill_id && is_attack_critical(wd, src, target, skill_id, skill_lv, false))
 					ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.crit_atk_rate);
 				if(sd->status.party_id && pc_checkskill(sd, TK_POWER) > 0 &&
 					(i = party_foreachsamemap(party_sub_count, sd, 0)) > 1) //Exclude the player himself [Inkfish]
@@ -5178,14 +5177,14 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 
 	if(sc) {
 		if(sc->data[SC_FUSION]) { //SC_FUSION HP penalty [Komurka]
-			int hp = sstatus->max_hp;
+			unsigned int hp = sstatus->max_hp;
 
 			if(sd && tsd) {
-				hp = 8 * hp / 100;
+				hp /= 13;
 				if(sstatus->hp * 100 <= sstatus->max_hp * 20)
 					hp = sstatus->hp;
 			} else
-				hp = 2 * hp / 100; //2% HP loss per hit
+				hp = hp * 2 / 100; //2% HP loss per hit
 			status_zap(src, hp, 0);
 		}
 		if(sc->data[SC_CAMOUFLAGE] && skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
@@ -5235,7 +5234,7 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 
 	if(sd) {
 #ifdef RENEWAL
-		if(is_attack_critical(wd, src, target, skill_id, skill_lv, false))
+		if(!skill_id && is_attack_critical(wd, src, target, skill_id, skill_lv, false))
 			ATK_ADDRATE(wd.damage, wd.damage2, 40 + sd->bonus.crit_atk_rate);
 #endif
 		if((bonus_damage = pc_skillatk_bonus(sd, skill_id)))

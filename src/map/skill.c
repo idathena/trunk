@@ -1277,11 +1277,8 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sc_start(src,bl,SC_FLING,100,(sd ? sd->spiritball_old : 5),skill_get_time(skill_id,skill_lv));
 			break;
 		case GS_DISARM:
-			rate = 3 * skill_lv;
-			if( sstatus->dex > tstatus->dex )
-				rate += (sstatus->dex - tstatus->dex) / 5; //@TODO: Made up formula
-			skill_strip_equip(src,bl,EQP_WEAPON,rate,skill_lv,skill_get_time(skill_id,skill_lv));
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			if( skill_strip_equip(src,bl,skill_id,skill_lv) )
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
 		case NPC_EVILLAND:
 			sc_start(src,bl,SC_BLIND,5 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
@@ -1326,21 +1323,8 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case WL_COMET:
 			sc_start(src,bl,SC_BURNING,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
-		case WL_EARTHSTRAIN: {
-				int dur;
-				uint8 i;
-				const int pos[5] = { EQP_WEAPON,EQP_HELM,EQP_ARMOR,EQP_SHIELD,EQP_ACC };
-
-				rate = max(5,(sstatus->dex - tstatus->dex) / 5) + skill_lv * (5 + skill_lv);
-				dur = max(0,(sstatus->dex - tstatus->dex) * 500) + skill_get_time2(skill_id,skill_lv);
-				if( !tsc->data[SC_WHITEIMPRISON] ) {
-					for( i = 0; i < skill_lv; i++ ) {
-						skill_strip_equip(src,bl,pos[i],rate,skill_lv,dur);
-						if( skill_lv == 1 )
-							skill_strip_equip(src,bl,pos[skill_lv],rate,skill_lv,dur);
-					}
-				}
-			}
+		case WL_EARTHSTRAIN:
+			skill_strip_equip(src,bl,skill_id,skill_lv);
 			break;
 		case WL_FROSTMISTY: //FIXME: Should be able to give the status even the damage is missed
 			rate = 2 + (skill_lv - 1) * status_get_job_lv(src) / 7; //Job level bonus [exneval]
@@ -2405,37 +2389,146 @@ int skill_break_equip(struct block_list *src, struct block_list *bl, unsigned sh
 	return pos; //Return list of pieces broken
 }
 
-int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned short pos, int rate, uint16 skill_lv, int time)
+/**
+ * Strip equipment from a target
+ * @param src: Source of call
+ * @param bl: Target to strip
+ * @param skill_id: Skill used
+ * @param skill_lv: Skill level used
+ * @return True on successful strip or false otherwise
+ */
+bool skill_strip_equip(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 {
-	const int pos_list[5]        = { EQP_WEAPON,EQP_SHIELD,EQP_ARMOR,EQP_HELM,EQP_ACC };
+	const int pos[5]             = { EQP_WEAPON,EQP_SHIELD,EQP_ARMOR,EQP_HELM,EQP_ACC };
 	const enum sc_type sc_atk[5] = { SC_STRIPWEAPON,SC_STRIPSHIELD,SC_STRIPARMOR,SC_STRIPHELM,SC__STRIPACCESSORY };
 	const enum sc_type sc_def[5] = { SC_CP_WEAPON,SC_CP_SHIELD,SC_CP_ARMOR,SC_CP_HELM,SC_NONE };
-	struct status_change *sc = status_get_sc(bl);
-	TBL_PC *sd = BL_CAST(BL_PC,bl);
-	int i;
+	struct status_data *sstatus = NULL;
+	struct status_data *tstatus = NULL;
+	struct map_session_data *tsd = NULL;
+	struct status_change *tsc = NULL;
+	int rate, time, location;
+	uint8 i;
 
-	if (!sc)
-		return 0;
-	if (sd) {
-		if (sd->bonus.unstripable_equip)
-			pos &= ~sd->bonus.unstripable_equip;
-		if (sd->bonus.unstripable)
-			rate -= rate * sd->bonus.unstripable / 100;
+	nullpo_retr(false,src);
+	nullpo_retr(false,bl);
+
+	sstatus = status_get_status_data(src);
+	tstatus = status_get_status_data(bl);
+	tsd = BL_CAST(BL_PC,bl);
+	tsc = status_get_sc(bl);
+
+	if (!tsc)
+		return false;
+
+	switch (skill_id) { //Success chance
+		case RG_STRIPWEAPON:
+		case RG_STRIPARMOR:
+		case RG_STRIPSHIELD:
+		case RG_STRIPHELM:
+		case GC_WEAPONCRUSH:
+			rate = 50 * (skill_lv + 1) + 2 * (sstatus->dex - tstatus->dex);
+			break;
+		case ST_FULLSTRIP: {
+				int min_rate = 50 + 20 * skill_lv;
+
+				rate = min_rate + 2 * (sstatus->dex - tstatus->dex);
+				rate = max(min_rate,rate);
+			}
+			break;
+		case GS_DISARM:
+			rate = sstatus->dex / (4 * (7 - skill_lv)) + sstatus->luk / (4 * (6 - skill_lv));
+			rate = rate + status_get_lv(src) - (tstatus->agi * rate / 100) - tstatus->luk - status_get_lv(bl);
+			break;
+		case WL_EARTHSTRAIN:
+			rate = 6 * skill_lv + status_get_job_lv(src) / 4 + sstatus->dex / 10;
+			break;
+		case SC_STRIPACCESSARY:
+			rate = 12 + 2 * skill_lv;
+			break;
+		default:
+			return false;
 	}
+
+	if (tsd && tsd->bonus.unstripable)
+		rate -= tsd->bonus.unstripable;
+
+	rate = max(rate,0);
+
 	if (rnd()%100 >= rate)
-		return 0;
-	for (i = 0; i < ARRAYLENGTH(pos_list); i++) {
-		if (pos&pos_list[i] && sc->data[sc_def[i]])
-			pos &= ~pos_list[i];
-	}
-	if (!pos)
-		return 0;
-	for (i = 0; i < ARRAYLENGTH(pos_list); i++) {
-		if (pos&pos_list[i] && !sc_start(src,bl,sc_atk[i],100,skill_lv,time))
-			pos &= ~pos_list[i];
+		return false;
+
+	switch (skill_id) { //Status duration
+		case SC_STRIPACCESSARY:
+		case GS_DISARM:
+			time = skill_get_time(skill_id,skill_lv);
+			break;
+		case WL_EARTHSTRAIN:
+		case RG_STRIPWEAPON:
+		case RG_STRIPARMOR:
+		case RG_STRIPSHIELD:
+		case RG_STRIPHELM:
+		case GC_WEAPONCRUSH:
+		case ST_FULLSTRIP:
+			if (skill_id == WL_EARTHSTRAIN)
+				time = skill_get_time2(skill_id,skill_lv);
+			else
+				time = skill_get_time(skill_id,skill_lv);
+ 			if (tsd)
+				time += skill_lv + 500 * (sstatus->dex - tstatus->dex);
+			else {
+				time += 15000;
+				time += skill_lv + 500 * (sstatus->dex - tstatus->dex);
+			}
+			break;
 	}
 
-	return (pos ? 1 : 0);
+	switch (skill_id) { //Location
+		case GC_WEAPONCRUSH:
+		case RG_STRIPWEAPON:
+		case GS_DISARM:
+			location = EQP_WEAPON;
+			break;
+		case RG_STRIPARMOR:
+			location = EQP_ARMOR;
+			break;
+		case RG_STRIPSHIELD:
+			location = EQP_SHIELD;
+			break;
+		case RG_STRIPHELM:
+			location = EQP_HELM;
+			break;
+		case ST_FULLSTRIP:
+			location = EQP_WEAPON|EQP_SHIELD|EQP_ARMOR|EQP_HELM;
+			break;
+		case SC_STRIPACCESSARY:
+			location = EQP_ACC;
+			break;
+		case WL_EARTHSTRAIN:
+			location = EQP_SHIELD|EQP_ARMOR|EQP_HELM;
+			if (skill_lv >= 4)
+				location |= EQP_WEAPON;
+			if (skill_lv >= 5)
+				location |= EQP_ACC;
+			break;
+	}
+
+	if (tsd && tsd->bonus.unstripable_equip)
+		location &= ~tsd->bonus.unstripable_equip;
+
+	for (i = 0; i < ARRAYLENGTH(pos); i++) {
+		if (location&pos[i] && tsc->data[sc_def[i]])
+			location &= ~pos[i];
+	}
+
+	if (!location)
+		return false;
+
+	for (i = 0; i < ARRAYLENGTH(pos); i++) {
+		if (location&pos[i] && !sc_start(src,bl,sc_atk[i],100,skill_lv,time))
+			location &= ~pos[i];
+	}
+
+	return (location ? true : false);
 }
 
 /**
@@ -6563,17 +6656,20 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case TK_MISSION:
 			if (sd) {
 				int id;
+				struct mob_data *tk_md;
 
 				if (sd->mission_mobid && (sd->mission_count || rnd()%100)) { //Cannot change target when already have one
 					clif_mission_info(sd,sd->mission_mobid,sd->mission_count);
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
-				id = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,0x0F,sd->status.base_level);
-				if (!id) {
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					break;
-				}
+				do {
+					id = rnd_value(MOBID_PORING, MOBID_GREEN_IGUANA);
+					tk_md = map_id2md(id);
+				} while ((id >= MOBID_DESERT_WOLF_2 && id <= MOBID_ANTONIO) || id == MOBID_SWITCH || //These mobs automatically fail
+					!tk_md || tk_md->status.class_ != CLASS_NORMAL || //Must be a Normal mob
+					tk_md->status.hp >= 30000 || //Must be less than 30k HP
+					tk_md->db->base_exp <= 0); //Must give Base EXP
 				sd->mission_mobid = id;
 				sd->mission_count = 0;
 				pc_setglobalreg(sd,"TK_MISSION_ID",id);
@@ -7288,67 +7384,22 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case GC_WEAPONCRUSH:
 		case SC_STRIPACCESSARY:
 			{
-				unsigned short pos = 0;
-				int dur = 0;
+				bool strip = false;
 
-				//Rate in percent
-				if(skill_id == ST_FULLSTRIP)
-					i = 5 + 2 * skill_lv + (sstatus->dex - tstatus->dex) / 5;
-				else if(skill_id == SC_STRIPACCESSARY)
-					i = 12 + 2 * skill_lv + (sstatus->dex - tstatus->dex) / 5;
-				else
-					i = 5 + 5 * skill_lv + (sstatus->dex - tstatus->dex) / 5;
-
-				if(i < 5)
-					i = 5; //Minimum rate 5%
-
-				//Duration in ms
-				if(skill_id == GC_WEAPONCRUSH) {
-					dur = skill_get_time(skill_id,skill_lv);
-					if(bl->type == BL_PC)
-						dur += skill_lv * 15 + (sstatus->dex - tstatus->dex) * 1000;
-					else
-						dur += skill_lv * 30 + (sstatus->dex - tstatus->dex) * 500;
-				} else
-					dur = skill_get_time(skill_id,skill_lv) + (sstatus->dex - tstatus->dex) * 500;
-
-				dur = max(dur,0); //Minimum duration 0ms
-
-				switch(skill_id) {
-					case RG_STRIPWEAPON:
-					case GC_WEAPONCRUSH:
-						pos = EQP_WEAPON;
-						break;
-					case RG_STRIPSHIELD:
-						pos = EQP_SHIELD;
-						break;
-					case RG_STRIPARMOR:
-						pos = EQP_ARMOR;
-						break;
-					case RG_STRIPHELM:
-						pos = EQP_HELM;
-						break;
-					case ST_FULLSTRIP:
-						pos = EQP_WEAPON|EQP_SHIELD|EQP_ARMOR|EQP_HELM;
-						break;
-					case SC_STRIPACCESSARY:
-						pos = EQP_ACC;
-						break;
-				}
-
-				if(skill_id == ST_FULLSTRIP && tsc &&
+				if( skill_id == ST_FULLSTRIP && tsc &&
 					tsc->data[SC_CP_WEAPON] && tsc->data[SC_CP_HELM] &&
-					tsc->data[SC_CP_ARMOR] && tsc->data[SC_CP_SHIELD] && sd)
-				{ //Special message when trying to use Full Strip on FCP [Jobbie]
-					clif_gospel_info(sd,0x28);
+					tsc->data[SC_CP_ARMOR] && tsc->data[SC_CP_SHIELD] )
+				{
+					if( sd )
+						clif_gospel_info(sd,0x28); //Special message when trying to use Full Strip on FCP [Jobbie]
 					break;
 				}
 
-				//Attempts to strip at rate i and duration dur
-				if((i = skill_strip_equip(src,bl,pos,i,skill_lv,dur)) || (skill_id != ST_FULLSTRIP && skill_id != GC_WEAPONCRUSH))
+				//Attempts to strip
+				if( (strip = skill_strip_equip(src,bl,skill_id,skill_lv)) || (skill_id != ST_FULLSTRIP && skill_id != GC_WEAPONCRUSH) )
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,i);
 
-				if(!i && sd) //Nothing stripped
+				if( !strip && sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			}
 			break;

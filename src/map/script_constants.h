@@ -617,7 +617,7 @@
 	export_constant2("bHealPower",SP_ADD_HEAL_RATE);
 	export_constant2("bHealPower2",SP_ADD_HEAL2_RATE);
 	export_constant2("bAbsorbDmgMaxHP",SP_ABSORB_DMG_MAXHP);
-	export_constant2("bCriticalLong",SP_CRITICAL_RANGEATK);
+	export_constant2("bCriticalLong",SP_CRITICAL_LONG);
 	export_constant2("bNoWalkDelay",SP_NO_WALKDELAY);
 
 	export_constant2("bRestartFullRecover",SP_RESTART_FULL_RECOVER);
