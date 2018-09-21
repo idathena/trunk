@@ -3895,7 +3895,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			skillratio += 100 * (skill_lv - 1);
 			break;
 		case AB_DUPLELIGHT_MELEE:
-			skillratio += 10 * skill_lv;
+			skillratio += 50 + 15 * skill_lv;
 			break;
 		case RA_ARROWSTORM:
 			skillratio += 900 + 80 * skill_lv;
@@ -5884,9 +5884,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case NPC_EARTHQUAKE: //Earthquake calculates damage to self first then spread it to others [exneval]
 				ad.damage = battle_calc_weapon_attack(src, src, skill_id, skill_lv, ad.miscflag).damage;
 				break;
-			case AB_RENOVATIO:
-				ad.damage = status_get_lv(src) * 10 + sstatus->int_;
-				break;
 			case NPC_ICEMINE:
 			case NPC_FLAMECROSS:
 				ad.damage = sstatus->rhw.atk * 20 * skill_lv;
@@ -6082,14 +6079,16 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 #endif
 					case AB_JUDEX:
 						skillratio += 200 + 20 * skill_lv;
+						if(skill_lv == 5)
+							skillratio += 170;
 						RE_LVL_DMOD(100);
 						break;
 					case AB_ADORAMUS:
-						skillratio += 400 + 100 * skill_lv;
+						skillratio += 230 + 70 * skill_lv;
 						RE_LVL_DMOD(100);
 						break;
 					case AB_DUPLELIGHT_MAGIC:
-						skillratio += 100 + 20 * skill_lv;
+						skillratio += 300 + 40 * skill_lv;
 						break;
 					case WL_SOULEXPANSION:
 						skillratio += -100 + (skill_lv + 4) * 100 + sstatus->int_;
@@ -6326,6 +6325,12 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			mdef = status_calc_mdef(target, tsc, mdef, false);
 			mdef2 = status_calc_mdef2(target, tsc, mdef2, false);
 
+			if(sc && sc->data[SC_EXPIATIO]) {
+				i = 5 * sc->data[SC_EXPIATIO]->val1; //5% per level
+ 				i = min(i, 100); //Cap it to 100 for 5 mdef min
+				mdef -= mdef * i / 100;
+				//mdef2 -= mdef2 * i / 100;
+			}
 			if(sd) {
 				i = sd->ignore_mdef_by_race[tstatus->race] + sd->ignore_mdef_by_race[RC_ALL];
 				i += sd->ignore_mdef_by_class[tstatus->class_] + sd->ignore_mdef_by_class[CLASS_ALL];
@@ -6335,7 +6340,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					//mdef2 -= mdef2 * i / 100;
 				}
 			}
-
 #ifdef RENEWAL
 			/**
 			 * RE MDEF Reduction

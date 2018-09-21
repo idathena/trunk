@@ -907,6 +907,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1536064380);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1536825360);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1537110930);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1537536180);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1537575360);
 
 --
 -- Table structure for table `sstatus`

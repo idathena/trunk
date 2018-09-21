@@ -99,7 +99,7 @@
 29,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	AL_INCAGI,Increase AGI
 30,9,6,1,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	AL_DECAGI,Decrease AGI
 31,1,6,4,0,0x1,0,1,1,yes,0,0,0,magic,0,0,	AL_HOLYWATER,Aqua Benedicta
-32,1,6,4,0,0x3,15,10,1,yes,0,0,0,magic,0,0,	AL_CRUCIS,Signum Crucis
+32,1,6,4,0,0x3,-1,10,1,yes,0,0,0,magic,0,0,	AL_CRUCIS,Signum Crucis
 33,1,6,4,0,0x3,-1,10,1,yes,0,0,0,magic,0,0,	AL_ANGELUS,Angelus
 34,9,6,16,0,0x1,0,10,1,yes,0,0,0,magic,0,0,	AL_BLESSING,Blessing
 35,9,6,16,0,0x1,0,1,1,yes,0,0,0,magic,0,0,	AL_CURE,Cure
@@ -149,7 +149,7 @@
 79,9,8,2,6,0,0,10,1:2:3:4:5:6:7:8:9:10,yes,0,0,0,magic,0,0,	PR_MAGNUS,Magnus Exorcismus
 80,9,8,2,3,0x20,1:1:1:1:1:2:2:2:2:2,10,3:4:5:6:7:8:9:10:11:12,yes,0,0,5,magic,0,0x20,	WZ_FIREPILLAR,Fire Pillar
 81,1,6,4,3,0x2,7,10,1,yes,0,0x10000,0,magic,5,0x20,	WZ_SIGHTRASHER,Sightrasher
-83,9,8,2,3,0,3:3:3:3:3:3:3:3:3:3:14,10,1:1:2:2:3:3:4:4:5:5:15,yes,0,0,0,magic,0,0x20,	WZ_METEOR,Meteor Storm
+83,9,8,2,3,0,3:3:3:3:3:3:3:3:3:3:14,10,1:1:2:2:3:3:4:4:5:5:-1,yes,0,0,0,magic,0,0x20,	WZ_METEOR,Meteor Storm
 84,9,8,1,4,0,0,10,3:4:5:6:7:8:9:10:11:12,yes,0,0,0,magic,2:3:3:4:4:5:5:6:6:7,0x20,	WZ_JUPITEL,Jupitel Thunder
 85,9,8,2,4,0,0,10,-10,yes,0,0,0,magic,0,0x20,	WZ_VERMILION,Lord of Vermilion
 86,9,8,1,1,0,0,5,1,yes,0,0,0,magic,0,0x20,	WZ_WATERBALL,Water Ball
@@ -786,21 +786,21 @@
 //****
 // AB Arch Bishop
 2038,11,8,1,6,0x2,1,5,-3,yes,0,0,0,magic,0,0,	AB_JUDEX,Judex
-2039,1,6,4,0,0x1,0,1,1,yes,0,0,0,magic,0,0,	AB_ANCILLA,Ancilla
-2040,11,8,1,6,0,0,10,-10,yes,0,0,0,magic,0,0,	AB_ADORAMUS,Adoramus
-2041,1,6,4,0,0x3,3:7:15,3,1,yes,0,0,0,magic,0,0,	AB_CLEMENTIA,Crementia
-2042,1,6,4,0,0x3,3:7:15,3,1,yes,0,0,0,magic,0,0,	AB_CANTO,Canto Candidus
-2043,1,6,4,6,0x3,3:7:15,3,1,yes,0,0,0,magic,0,0,	AB_CHEAL,Coluceo Heal
-2044,11,6,2,6,0x3,2,5,1,yes,0,0,1,magic,0,0,	AB_EPICLESIS,Epiclesis
-2045,1,6,4,0,0x3,15,10,1,yes,0,0,0,magic,0,0,	AB_PRAEFATIO,Praefatio
-2046,1,6,4,0,0x3,15,10,1,yes,0,0,0,magic,0,0,	AB_ORATIO,Oratio
-2047,1,6,4,0,0x3,15,4,1,yes,0,0,0,magic,0,0,	AB_LAUDAAGNUS,Lauda Agnus
-2048,1,6,4,0,0x3,15,4,1,yes,0,0,0,magic,0,0,	AB_LAUDARAMUS,Lauda Ramus
+2039,1,6,4,0,0x1,0,1,1,yes,0,0,0,none,0,0,	AB_ANCILLA,Ancilla
+2040,11,8,1,6,0x2,1:1:1:1:1:1:2:2:2:2,10,-10,yes,0,0,0,magic,0,0,	AB_ADORAMUS,Adoramus
+2041,1,6,4,0,0x3,3:7:-1,3,1,yes,0,0,0,none,0,0,	AB_CLEMENTIA,Crementia
+2042,1,6,4,0,0x3,3:7:-1,3,1,yes,0,0,0,none,0,0,	AB_CANTO,Canto Candidus
+2043,1,6,4,6,0x3,3:7:-1,3,1,yes,0,0,0,none,0,0,	AB_CHEAL,Coluceo Heal
+2044,11,6,2,6,0x3,2,5,1,yes,0,0,1,none,0,0,	AB_EPICLESIS,Epiclesis
+2045,1,6,4,0,0x3,-1,10,1,yes,0,0,0,none,0,0,	AB_PRAEFATIO,Praefatio
+2046,1,6,4,0,0x3,-1,10,1,yes,0,0,0,none,0,0,	AB_ORATIO,Oratio
+2047,1,6,4,0,0x3,-1,4,1,yes,0,0,0,none,0,0,	AB_LAUDAAGNUS,Lauda Agnus
+2048,1,6,4,0,0x3,-1,4,1,yes,0,0,0,none,0,0,	AB_LAUDARAMUS,Lauda Ramus
 2049,1,0,0,0,0,0,10,0,no,0,0,0,none,0,0,	AB_EUCHARISTICA,Eucharistica
-2050,11,6,16,6,0x21,0,1,1,yes,0,0,0,magic,0,0,	AB_RENOVATIO,Renovatio
+2050,11,6,4,6,0x3,-1,1,1,yes,0,0,0,none,0,0,	AB_RENOVATIO,Renovatio
 2051,11,6,16,6,0x21,0,5,1,yes,0,0,0,magic,0,0,	AB_HIGHNESSHEAL,Highness Heal
 2052,11,6,16,0,0x1,0,5,1,yes,0,0,0,magic,0,0x2,	AB_CLEARANCE,Clearance
-2053,11,6,16,0,0x1,0,5,1,yes,0,0,0,magic,0,0,	AB_EXPIATIO,Expiatio
+2053,11,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,	AB_EXPIATIO,Expiatio
 2054,1,6,4,0,0x1,0,10,1,yes,0,0,0,none,0,0,	AB_DUPLELIGHT,Duple Light
 2055,11,6,1,-1,0,0,10,1,no,0,0,0,weapon,0,0,	AB_DUPLELIGHT_MELEE,Duple Light Melee
 2056,11,6,1,0,0,0,10,1,no,0,0,0,magic,0,0,	AB_DUPLELIGHT_MAGIC,Duple Light Magic
@@ -1065,7 +1065,7 @@
 2497,1,6,4,0,0x1,0,10,1,no,0,0,0,none,0,0,	GN_S_PHARMACY,Special Pharmacy
 2498,11,6,1,0,0,0,1,1,no,0,0,0,weapon,0,0,	GN_SLINGITEM_RANGEMELEEATK,Sling Item Attack
 
-2515,11,6,16,0,0x1,0,5,1,yes,0,0,0,magic,0,0,	AB_SECRAMENT,Secrament
+2515,11,6,16,0,0x1,0,5,1,yes,0,0,0,none,0,0,	AB_SECRAMENT,Secrament
 2516,9,6,1,-1,0x2,5,5,1,no,0,0,0,weapon,0,0x20000,	WM_SEVERE_RAINSTORM_MELEE,Severe Rainstorm Melee
 2517,1,6,4,-1,0x3,3:4:5:6:7,5,1,no,0,0,0,weapon,0,0,	SR_HOWLINGOFLION,Howling of Lion
 2518,11,6,2,-1,0x2,1:1:2:2:3,5,1,yes,0,0,0,weapon,0,0,	SR_RIDEINLIGHTNING,Ride In Lightening
@@ -1233,6 +1233,10 @@
 5064,3,6,16,0,0x1,0,1,1,yes,0,0x4,0,none,0,0,	WE_ONEFOREVER,One Forever
 5065,1,6,4,0,0x3,3,1,1,yes,0,0x4,0,none,0,0,	WE_CHEERUP,Cheer Up
 
+// New Arch Bishop Skills
+5072,9,6,1,0,0x3,1:1:1:2:2,5,0,yes,0,0,0,magic,0,0,	AB_VITUPERATUM,Vituperatum
+5073,0,6,4,0,0x1,0,1,0,yes,0,0,0,none,0,0,	AB_CONVENIO,Convenio
+
 8001,1,6,4,0,0x1,0,5,1,no,0,0,0,magic,0,0,	HLIF_HEAL,Healing Touch
 8002,1,6,4,0,0x3,-1,5,1,no,0,0,0,none,0,0,	HLIF_AVOID,Avoid
 8003,0,0,0,0,0x1,0,5,0,no,0,0,0,none,0,0,	HLIF_BRAIN,Brain Surgery
@@ -1375,9 +1379,9 @@
 10007,0,0,0,0,0,2,1,0,no,0,0x10,0,none,0,0,	GD_GLORYWOUNDS,Glorious Wounds
 10008,0,0,0,0,0,2,1,0,no,0,0x10,0,none,0,0,	GD_SOULCOLD,Cold Heart
 10009,0,0,0,0,0,2,1,0,no,0,0x10,0,none,0,0,	GD_HAWKEYES,Sharp Gaze
-10010,1,0,4,0,0x3,15,1,0,yes,0,0x10,0,none,0,0,	GD_BATTLEORDER,Battle Orders
-10011,1,0,4,0,0x3,15,3,0,yes,0,0x10,0,none,0,0,	GD_REGENERATION,Regeneration
-10012,1,0,4,0,0x3,15,1,0,yes,0,0x10,0,none,0,0,	GD_RESTORE,Restoration
+10010,1,0,4,0,0x3,-1,1,0,yes,0,0x10,0,none,0,0,	GD_BATTLEORDER,Battle Orders
+10011,1,0,4,0,0x3,-1,3,0,yes,0,0x10,0,none,0,0,	GD_REGENERATION,Regeneration
+10012,1,0,4,0,0x3,-1,1,0,yes,0,0x10,0,none,0,0,	GD_RESTORE,Restoration
 10013,1,0,4,0,0x3,0,1,0,yes,0,0x10,0,none,0,0x40,	GD_EMERGENCYCALL,Urgent Call
 10014,1,0,0,0,0,0,1,0,no,0,0x10,0,none,0,0,	GD_DEVELOPMENT,Permanent Development
 10015,1,0,4,0,0x3,0,3,0,yes,0,0x10,0,none,0,0x40,	GD_ITEMEMERGENCYCALL,Item Emergency Call

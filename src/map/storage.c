@@ -747,7 +747,6 @@ enum e_guild_storage_log storage_guild_log_read(struct map_session_data *sd) {
 	enum e_guild_storage_log ret;
 
 	storage_guild_log_clear();
-
 	ret = storage_guild_log_read_sub(sd);
 	clif_guild_storage_log(sd, ret);
 

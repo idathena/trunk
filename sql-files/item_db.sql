@@ -4953,7 +4953,7 @@ REPLACE INTO `item_db` VALUES (12329,'Recall_MaleGM','Summon Male GameMaster Scr
 REPLACE INTO `item_db` VALUES (12330,'Recall_FemaleGM','Summon Female GameMaster Scroll',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'mercenary_create 2001,1800000;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12331,'Ginseng','Ginseng',0,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'percentheal 6,0;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12332,'Fruit_Juice','Fruit Juice',0,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'percentheal 0,6;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (12333,'Ansila','Ancilla',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'percentheal 0,15;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (12333,'Ansila','Ancilla',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'percentheal 0,15; bonus_script "{ bonus bHealPower2,15; bonus bAddItemHealRate,15; bonus bSPrecovRate,30; }",60,1,1,SI_ANCILLA;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12334,'Cherish_Box','Treasure Edition Helm Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getrandgroupitem(IG_Cherish_Box,1);',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12335,'Yummy_Skewered_Dish','Grilled Delicious Skewer',0,1000,NULL,350,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'percentheal 60,60;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (12336,'Baked_Mushroom','Grilled Mushroom',0,500,NULL,300,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'percentheal 30,30;',NULL,NULL);
