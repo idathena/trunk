@@ -19,7 +19,7 @@ struct s_pet *pet_pt;
 int mapif_load_pet(int fd, uint32 account_id, uint32 char_id, int pet_id);
 
 //---------------------------------------------------------
-int inter_pet_tosql(int pet_id, struct s_pet* p)
+int inter_pet_tosql(int pet_id, struct s_pet *p)
 {
 	//`pet` (`pet_id`, `class`,`name`,`account_id`,`char_id`,`level`,`egg_id`,`equip`,`intimate`,`hungry`,`rename_flag`,`incubate`,`autofeed`)
 	char esc_name[NAME_LENGTH*2+1];// escaped pet name
@@ -57,7 +57,7 @@ int inter_pet_tosql(int pet_id, struct s_pet* p)
 	return 1;
 }
 
-int inter_pet_fromsql(int pet_id, struct s_pet* p)
+int inter_pet_fromsql(int pet_id, struct s_pet *p)
 {
 	char *data;
 	size_t len;
@@ -105,7 +105,7 @@ int inter_pet_fromsql(int pet_id, struct s_pet* p)
 
 int inter_pet_sql_init(void){
 	//memory alloc
-	pet_pt = (struct s_pet*)aCalloc(sizeof(struct s_pet), 1);
+	pet_pt = (struct s_pet *)aCalloc(sizeof(struct s_pet), 1);
 	return 0;
 }
 void inter_pet_sql_final(void){

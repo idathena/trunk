@@ -465,7 +465,7 @@ enum _sp {
 	SP_WEAPON_ATK_RATE,SP_WEAPON_MATK_RATE, // 1081-1082
 	SP_DELAYRATE,SP_HP_DRAIN_VALUE_RACE,SP_SP_DRAIN_VALUE_RACE, // 1083-1085
 	SP_IGNORE_MDEF_RACE_RATE,SP_IGNORE_DEF_RACE_RATE,SP_SKILL_HEAL2,SP_ADDEFF_ONSKILL, //1086-1089
-	SP_ADD_HEAL_RATE,SP_ADD_HEAL2_RATE,SP_ABSORB_DMG_MAXHP,SP_CRITICAL_RANGEATK,SP_NO_WALKDELAY, //1090-1094
+	SP_ADD_HEAL_RATE,SP_ADD_HEAL2_RATE,SP_ABSORB_DMG_MAXHP,SP_CRITICAL_LONG,SP_NO_WALKDELAY, //1090-1094
 
 	SP_RESTART_FULL_RECOVER = 2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
 	SP_NO_CASTCANCEL2,SP_NO_MISC_DAMAGE,SP_UNBREAKABLE_WEAPON,SP_UNBREAKABLE_ARMOR,SP_UNBREAKABLE_HELM, // 2006-2010
@@ -956,6 +956,9 @@ struct questinfo *map_add_questinfo(int m, struct questinfo *qi);
 bool map_remove_questinfo(int m, struct npc_data *nd);
 struct questinfo *map_has_questinfo(int m, struct npc_data *nd, int quest_id);
 
+int map_mapflag_pvp_start(struct block_list *bl, va_list ap);
+int map_mapflag_pvp_stop(struct block_list *bl, va_list ap);
+
 extern char *INTER_CONF_NAME;
 extern char *LOG_CONF_NAME;
 extern char *MAP_CONF_NAME;
@@ -1007,6 +1010,7 @@ extern Sql *logmysql_handle;
 
 extern char buyingstores_db[32];
 extern char buyingstore_items_db[32];
+extern char guild_storage_log_db[32];
 extern char item_db_db[32];
 extern char item_db2_db[32];
 extern char item_db_re_db[32];

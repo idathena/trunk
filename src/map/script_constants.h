@@ -617,7 +617,7 @@
 	export_constant2("bHealPower",SP_ADD_HEAL_RATE);
 	export_constant2("bHealPower2",SP_ADD_HEAL2_RATE);
 	export_constant2("bAbsorbDmgMaxHP",SP_ABSORB_DMG_MAXHP);
-	export_constant2("bCriticalLong",SP_CRITICAL_RANGEATK);
+	export_constant2("bCriticalLong",SP_CRITICAL_LONG);
 	export_constant2("bNoWalkDelay",SP_NO_WALKDELAY);
 
 	export_constant2("bRestartFullRecover",SP_RESTART_FULL_RECOVER);
@@ -5404,6 +5404,17 @@
 	export_constant(REFINE_INFO_ZENY);
 	export_constant(REFINE_INFO_DOWN_REFINE_CHANCE);
 	export_constant(REFINE_INFO_DOWN_REFINE_NUM);
+
+	/* Guild permissions */
+	export_constant(GUILD_PERM_INVITE);
+	export_constant(GUILD_PERM_EXPEL);
+	export_constant(GUILD_PERM_STORAGE);
+	export_constant(GUILD_PERM_ALL);
+
+	/* Guild storage log */
+	export_constant(GUILDSTORAGE_LOG_FINAL_SUCCESS);
+	export_constant(GUILDSTORAGE_LOG_EMPTY);
+	export_constant(GUILDSTORAGE_LOG_FAILED);
 
 	#undef export_constant
 	#undef export_constant2

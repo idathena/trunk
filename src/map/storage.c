@@ -117,6 +117,7 @@ void do_init_storage(void)
  */
 void do_final_storage(void)
 {
+	storage_guild_log_clear();
 	guild_storage_db->destroy(guild_storage_db, NULL);
 	if (storage_db)
 		aFree(storage_db);
@@ -642,6 +643,124 @@ char storage_guild_storageopen(struct map_session_data *sd)
 	return GSTORAGE_OPEN;
 }
 
+static void storage_guild_log(struct map_session_data *sd, struct item *item, int16 amount)
+{
+	int i;
+	SqlStmt *stmt = SqlStmt_Malloc(mmysql_handle);
+	StringBuf buf;
+
+	StringBuf_Init(&buf);
+
+	StringBuf_Printf(&buf, "INSERT INTO `%s` (`time`, `guild_id`, `char_id`, `name`, `nameid`, `amount`, `identify`, `refine`, `attribute`, `unique_id`, `bound`", guild_storage_log_db);
+	for (i = 0; i < MAX_SLOTS; ++i)
+		StringBuf_Printf(&buf, ", `card%d`", i);
+	for (i = 0; i < MAX_ITEM_RDM_OPT; ++i) {
+		StringBuf_Printf(&buf, ", `option_id%d`", i);
+		StringBuf_Printf(&buf, ", `option_val%d`", i);
+		StringBuf_Printf(&buf, ", `option_parm%d`", i);
+	}
+	StringBuf_Printf(&buf, ") VALUES(NOW(),'%u','%u', '%s', '%d', '%d','%d','%d','%d','%" PRIu64 "','%d'",
+		sd->status.guild_id, sd->status.char_id, sd->status.name, item->nameid, amount, item->identify, item->refine, item->attribute, item->unique_id, item->bound);
+
+	for (i = 0; i < MAX_SLOTS; i++)
+		StringBuf_Printf(&buf, ",'%d'", item->card[i]);
+	for (i = 0; i < MAX_ITEM_RDM_OPT; i++)
+		StringBuf_Printf(&buf, ",'%d','%d','%d'", item->option[i].id, item->option[i].value, item->option[i].param);
+	StringBuf_Printf(&buf, ")");
+
+	if (SQL_SUCCESS != SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) || SQL_SUCCESS != SqlStmt_Execute(stmt))
+		SqlStmt_ShowDebug(stmt);
+
+	SqlStmt_Free(stmt);
+	StringBuf_Destroy(&buf);
+}
+
+static enum e_guild_storage_log storage_guild_log_read_sub(struct map_session_data *sd)
+{
+	struct s_guild_log_entry entry;
+	SqlStmt *stmt = SqlStmt_Malloc(mmysql_handle);
+	StringBuf buf;
+	int j;
+	uint16 count = 0;
+
+	StringBuf_Init(&buf);
+
+	StringBuf_AppendStr(&buf, "SELECT `id`, `time`, `name`, `amount`");
+	StringBuf_AppendStr(&buf, " , `nameid`, `identify`, `refine`, `attribute`, `expire_time`, `bound`, `unique_id`");
+	for (j = 0; j < MAX_SLOTS; ++j)
+		StringBuf_Printf(&buf, ", `card%d`", j);
+	for (j = 0; j < MAX_ITEM_RDM_OPT; ++j) {
+		StringBuf_Printf(&buf, ", `option_id%d`", j);
+		StringBuf_Printf(&buf, ", `option_val%d`", j);
+		StringBuf_Printf(&buf, ", `option_parm%d`", j);
+	}
+	StringBuf_Printf(&buf, " FROM `%s` WHERE `guild_id`='%u'", guild_storage_log_db, sd->status.guild_id);
+	StringBuf_Printf(&buf, " ORDER BY `time` DESC LIMIT %u", MAX_GUILD_STORAGE_LOG);
+
+	if (SQL_ERROR == SqlStmt_PrepareStr(stmt, StringBuf_Value(&buf)) || SQL_ERROR == SqlStmt_Execute(stmt)) {
+		SqlStmt_ShowDebug(stmt);
+		SqlStmt_Free(stmt);
+		StringBuf_Destroy(&buf);
+		return GUILDSTORAGE_LOG_FAILED;
+	}
+
+	//General data
+	SqlStmt_BindColumn(stmt, 0,  SQLDT_UINT,      &entry.id,               0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 1,  SQLDT_STRING,    &entry.time, sizeof(entry.time), NULL, NULL);
+	SqlStmt_BindColumn(stmt, 2,  SQLDT_STRING,    &entry.name, sizeof(entry.name), NULL, NULL);
+	SqlStmt_BindColumn(stmt, 3,  SQLDT_SHORT,     &entry.amount,           0, NULL, NULL);
+
+	//Item data
+	SqlStmt_BindColumn(stmt, 4,  SQLDT_USHORT,    &entry.item.nameid,      0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 5,  SQLDT_CHAR,      &entry.item.identify,    0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 6,  SQLDT_CHAR,      &entry.item.refine,      0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 7,  SQLDT_CHAR,      &entry.item.attribute,   0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 8,  SQLDT_UINT,      &entry.item.expire_time, 0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 9,  SQLDT_UINT,      &entry.item.bound,       0, NULL, NULL);
+	SqlStmt_BindColumn(stmt, 10, SQLDT_UINT64,    &entry.item.unique_id,   0, NULL, NULL);
+	for (j = 0; j < MAX_SLOTS; ++j)
+		SqlStmt_BindColumn(stmt, 11 + j, SQLDT_USHORT, &entry.item.card[j],0, NULL, NULL);
+	for (j = 0; j < MAX_ITEM_RDM_OPT; ++j) {
+		SqlStmt_BindColumn(stmt, 11 + MAX_SLOTS + j * 3, SQLDT_SHORT, &entry.item.option[j].id, 0, NULL, NULL);
+		SqlStmt_BindColumn(stmt, 11 + MAX_SLOTS + j * 3 + 1, SQLDT_SHORT, &entry.item.option[j].value, 0, NULL, NULL);
+		SqlStmt_BindColumn(stmt, 11 + MAX_SLOTS + j * 3 + 2, SQLDT_CHAR, &entry.item.option[j].param, 0, NULL, NULL);
+	}
+
+	CREATE(gstorage_logs, struct s_guild_log_entry, MAX_GUILD_STORAGE_LOG);
+
+	while (SQL_SUCCESS == SqlStmt_NextRow(stmt))
+		memcpy(&gstorage_logs[count++], &entry, sizeof(entry));
+
+	gstorage_log_count = count;
+
+	Sql_FreeResult(mmysql_handle);
+	StringBuf_Destroy(&buf);
+	SqlStmt_Free(stmt);
+
+	if (!gstorage_log_count)
+		return GUILDSTORAGE_LOG_EMPTY;
+
+	return GUILDSTORAGE_LOG_FINAL_SUCCESS;
+}
+
+enum e_guild_storage_log storage_guild_log_read(struct map_session_data *sd) {
+	enum e_guild_storage_log ret;
+
+	storage_guild_log_clear();
+
+	ret = storage_guild_log_read_sub(sd);
+	clif_guild_storage_log(sd, ret);
+
+	return ret;
+}
+
+void storage_guild_log_clear(void) {
+	if (gstorage_logs)
+		aFree(gstorage_logs);
+	gstorage_logs = NULL;
+	gstorage_log_count = 0;
+}
+
 /**
  * Attempt to add an item in guild storage, then refresh it
  * @param sd : player attempting to open the guild_storage
@@ -686,6 +805,7 @@ bool storage_guild_additem(struct map_session_data *sd, struct s_storage *stor, 
 				stor->u.items_guild[i].amount += amount;
 				clif_storageitemadded(sd, &stor->u.items_guild[i], i, amount);
 				stor->dirty = true;
+				storage_guild_log(sd, &stor->u.items_guild[i], amount);
 				return true;
 			}
 		}
@@ -701,6 +821,7 @@ bool storage_guild_additem(struct map_session_data *sd, struct s_storage *stor, 
 	clif_storageitemadded(sd, &stor->u.items_guild[i], i, amount);
 	clif_updatestorageamount(sd, stor->amount, stor->max_amount);
 	stor->dirty = true;
+	storage_guild_log(sd, &stor->u.items_guild[i], amount);
 	return true;
 }
 
@@ -767,6 +888,9 @@ bool storage_guild_delitem(struct map_session_data *sd, struct s_storage *stor, 
 
 	if (!stor->u.items_guild[index].nameid || stor->u.items_guild[index].amount < amount)
 		return false;
+
+	//Log before removing it
+	storage_guild_log(sd, &stor->u.items_guild[index], -amount);
 
 	stor->u.items_guild[index].amount -= amount;
 

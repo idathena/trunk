@@ -18,7 +18,7 @@
 struct duel duel_list[MAX_DUEL]; //list of current duel
 int duel_count = 0; //number of duel active
 
-/*
+/**
  * Save the current time of the duel in PC_LAST_DUEL_TIME
  */
 void duel_savetime(struct map_session_data *sd)
@@ -32,7 +32,7 @@ void duel_savetime(struct map_session_data *sd)
 	pc_setglobalreg(sd, "PC_LAST_DUEL_TIME", t->tm_mday*24*60 + t->tm_hour*60 + t->tm_min);
 }
 
-/*
+/**
  * Check if the time elapsed between last duel is enough to launch another.
  */
 int duel_checktime(struct map_session_data *sd)
@@ -49,7 +49,7 @@ int duel_checktime(struct map_session_data *sd)
 	return !(diff >= 0 && diff < battle_config.duel_time_interval);
 }
 
-/*
+/**
  * Display opponents name of sd
  */
 static int duel_showinfo_sub(struct map_session_data *sd, va_list va)
@@ -65,7 +65,7 @@ static int duel_showinfo_sub(struct map_session_data *sd, va_list va)
 	return 1;
 }
 
-/*
+/**
  * Display duel infos,
  * Number of duely...
  */
@@ -90,7 +90,7 @@ void duel_showinfo(const unsigned int did, struct map_session_data *sd)
 	map_foreachpc(duel_showinfo_sub, sd, &p);
 }
 
-/*
+/**
  * Create a new duel for sd
  */
 int duel_create(struct map_session_data *sd, const unsigned int maxpl)
@@ -111,13 +111,12 @@ int duel_create(struct map_session_data *sd, const unsigned int maxpl)
 	strcpy(output, msg_txt(372)); // " -- Duel has been created (@invite/@leave) --"
 	clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 
-	clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
-	clif_maptypeproperty2(&sd->bl, SELF);
+	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
 	//clif_misceffect2(&sd->bl, 159);
 	return i;
 }
 
-/*
+/**
  * Invite opponent into the duel.
  * @did = duel id
  * @sd = inviting player
@@ -139,7 +138,7 @@ void duel_invite(const unsigned int did, struct map_session_data *sd, struct map
 	clif_broadcast((struct block_list *)target_sd, output, strlen(output) + 1, BC_BLUE, SELF);
 }
 
-/*
+/**
  * Sub function to loop trough all duely to remove invite for sd
  * @sd = leaving player
  * @va = list(only contain duel_id atm)
@@ -152,7 +151,7 @@ static int duel_leave_sub(struct map_session_data *sd, va_list va)
 	return 0;
 }
 
-/*
+/**
  * Make a player leave a duel
  * @did = duel id
  * @sd = leaving player
@@ -174,11 +173,10 @@ void duel_leave(const unsigned int did, struct map_session_data *sd)
 
 	sd->duel_group = 0;
 	duel_savetime(sd);
-	clif_map_property(sd, MAPPROPERTY_NOTHING);
-	clif_maptypeproperty2(&sd->bl, SELF);
+	clif_map_property(&sd->bl, MAPPROPERTY_NOTHING, SELF);
 }
 
-/*
+/**
  * Make a player accept a duel
  * @did = duel id
  * @sd = player accepting duel
@@ -196,12 +194,11 @@ void duel_accept(const unsigned int did, struct map_session_data *sd)
 	sprintf(output, msg_txt(376), sd->status.name);
 	clif_disp_message(&sd->bl, output, strlen(output), DUEL_WOS);
 
-	clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
-	clif_maptypeproperty2(&sd->bl, SELF);
+	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
 	//clif_misceffect2(&sd->bl, 159);
 }
 
-/*
+/**
  * Make a player decline a duel
  * @did = duel id
  * @sd = player refusing duel
@@ -218,7 +215,7 @@ void duel_reject(const unsigned int did, struct map_session_data *sd)
 	sd->duel_invite = 0;
 }
 
-/*
+/**
  * Destructor of duel module
  * Put cleanup code here before server end
  */
@@ -226,7 +223,7 @@ void do_final_duel(void)
 {
 }
 
-/*
+/**
  * Initialisator of duel module
  */
 void do_init_duel(void) {

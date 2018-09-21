@@ -38,6 +38,7 @@ enum mail_inbox_type;
 struct mail_message;
 enum mail_attachment_type;
 struct achievement;
+enum e_guild_storage_log;
 #include <stdarg.h>
 
 enum { // packet_db
@@ -839,11 +840,10 @@ void clif_displaymessage(const int fd, const char *mes);
 void clif_disp_message(struct block_list *src, const char *mes, int len, enum send_target target);
 void clif_broadcast(struct block_list *bl, const char *mes, int len, int type, enum send_target target);
 void clif_broadcast2(struct block_list *bl, const char *mes, int len, unsigned long fontColor, short fontType, short fontSize, short fontAlign, short fontY, enum send_target target);
-void clif_heal(int fd,int type,int val);
-void clif_resurrection(struct block_list *bl,int type);
-void clif_map_property(struct map_session_data *sd, enum map_property property);
-void clif_maptypeproperty2(struct block_list *bl,enum send_target t);
-void clif_pvpset(struct map_session_data *sd, int pvprank, int pvpnum,int type);
+void clif_heal(int fd, int type, int val);
+void clif_resurrection(struct block_list *bl, int type);
+void clif_map_property(struct block_list *bl, enum map_property property, enum send_target target);
+void clif_pvpset(struct map_session_data *sd, int pvprank, int pvpnum, int type);
 void clif_map_property_mapall(int map, enum map_property property);
 void clif_refine(int fd, int fail, int index, int val);
 void clif_upgrademessage(int fd, int result, unsigned short item_id);
@@ -1116,5 +1116,7 @@ void clif_private_airship_response(struct map_session_data *sd, enum e_private_a
 
 //Refine UI
 void clif_refineui_open(struct map_session_data *sd);
+
+void clif_guild_storage_log(struct map_session_data *sd, enum e_guild_storage_log result);
 
 #endif /* _CLIF_H_ */

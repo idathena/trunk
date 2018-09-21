@@ -9480,6 +9480,57 @@ BUILDIN_FUNC(guildopenstorage)
 	return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(guildopenstorage_log)
+{
+#if PACKETVER < 20140205
+	ShowError("buildin_guildopenstorage_log: This command requires PACKETVER 2014-02-05 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if( !script_charid2sd(2,sd) )
+		return 1;
+
+	script_pushint(st,storage_guild_log_read(sd));
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
+BUILDIN_FUNC(guild_has_permission)
+{
+	struct map_session_data *sd = NULL;
+	int permission = script_getnum(st,2);
+	int position;
+
+	if( !script_charid2sd(3,sd) )
+		return 1;
+
+	if( !permission ) {
+		ShowError("buildin_guild_has_permission: No permission given.\n");
+		return 1;
+	}
+
+	if( !(permission&GUILD_PERM_ALL) ) {
+		ShowError("buildin_guild_has_permission: Invalid permission '%d'.\n", permission);
+		return 1;
+	}
+
+	if( !sd->guild ) {
+		script_pushint(st,false);
+		return 0;
+	}
+
+	position = guild_getposition(sd);
+
+	if( position < 0 || (sd->guild->position[position].mode&permission) != permission ) {
+		script_pushint(st,false);
+		return 0;
+	}
+
+	script_pushint(st,true);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 /*==========================================
  * Make player use a skill trought item usage
  *------------------------------------------*/
@@ -11550,9 +11601,8 @@ static int buildin_addrid_sub(struct block_list *bl,va_list ap)
 
 	st = va_arg(ap,struct script_state *);
 	forceflag = va_arg(ap,int);
-	if(!forceflag || !sd->st)
-		if(sd->status.account_id != st->rid)
-			run_script(st->script,st->pos,sd->status.account_id,st->oid);
+	if((!forceflag || !sd->st) && sd->status.account_id != st->rid)
+		run_script(st->script,st->pos,sd->status.account_id,st->oid);
 	return 0;
 }
 
@@ -11674,7 +11724,7 @@ BUILDIN_FUNC(isloggedin)
 {
 	TBL_PC *sd = map_id2sd(script_getnum(st,2));
 
-	if (script_hasdata(st,3) && sd && sd->status.char_id != script_getnum(st,3))
+	if(script_hasdata(st,3) && sd && sd->status.char_id != script_getnum(st,3))
 		sd = NULL;
 	push_val(st->stack,C_INT,(sd != NULL));
 	return SCRIPT_CMD_SUCCESS;
@@ -11685,17 +11735,17 @@ BUILDIN_FUNC(isloggedin)
  *------------------------------------------*/
 BUILDIN_FUNC(setmapflagnosave)
 {
-	int16 m,x,y;
+	int16 m, x, y;
 	unsigned short mapindex;
-	const char *str,*str2;
+	const char *str, *str2;
 
-	str=script_getstr(st,2);
-	str2=script_getstr(st,3);
-	x=script_getnum(st,4);
-	y=script_getnum(st,5);
+	str = script_getstr(st,2);
+	str2 = script_getstr(st,3);
+	x = script_getnum(st,4);
+	y = script_getnum(st,5);
 	m = map_mapname2mapid(str);
 	mapindex = mapindex_name2id(str2);
-	
+
 	if(m >= 0 && mapindex) {
 		map[m].flag.nosave = 1;
 		map[m].save.map = mapindex;
@@ -11707,7 +11757,7 @@ BUILDIN_FUNC(setmapflagnosave)
 
 BUILDIN_FUNC(getmapflag)
 {
-	int16 m,i;
+	int16 m, i;
 	const char *str;
 
 	str = script_getstr(st,2);
@@ -11804,25 +11854,9 @@ BUILDIN_FUNC(getmapflag)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/* PVP timer handling */
-static int script_mapflag_pvp_sub(struct block_list *bl,va_list ap) {
-	TBL_PC *sd = (TBL_PC *)bl;
-	if (sd->pvp_timer == INVALID_TIMER) {
-		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
-		sd->pvp_rank = 0;
-		sd->pvp_lastusers = 0;
-		sd->pvp_point = 5;
-		sd->pvp_won = 0;
-		sd->pvp_lost = 0;
-	}
-	clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
-	clif_maptypeproperty2(&sd->bl, SELF);
-	return 0;
-}
-
 BUILDIN_FUNC(setmapflag)
 {
-	int16 m,i;
+	int16 m, i;
 	const char *str;
 	int val = 0;
 
@@ -11841,19 +11875,13 @@ BUILDIN_FUNC(setmapflag)
 			case MF_PVP:
 				map[m].flag.pvp = 1;
 				if(!battle_config.pk_mode)
-					map_foreachinmap(script_mapflag_pvp_sub,m,BL_PC);
+					map_foreachinmap(map_mapflag_pvp_start, m, BL_PC);
 				break;
 			case MF_PVP_NOPARTY:		map[m].flag.pvp_noparty = 1; break;
 			case MF_PVP_NOGUILD:		map[m].flag.pvp_noguild = 1; break;
-			case MF_GVG: {
-					struct block_list bl;
-
-					map[m].flag.gvg = 1;
-					clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
-					bl.type = BL_NUL;
-					bl.m = m;
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_GVG:
+				map[m].flag.gvg = 1;
+				clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 				break;
 			case MF_GVG_NOPARTY:		map[m].flag.gvg_noparty = 1; break;
 			case MF_NOTRADE:		map[m].flag.notrade = 1; break;
@@ -11909,15 +11937,9 @@ BUILDIN_FUNC(setmapflag)
 			case MF_NOCASHSHOP:		map[m].flag.nocashshop = 1; break;
 			case MF_NOBANKING:		map[m].flag.nobanking = 1; break;
 			case MF_GVG_TE_CASTLE:		map[m].flag.gvg_te_castle = 1; break;
-			case MF_GVG_TE: {
-					struct block_list bl;
-
-					map[m].flag.gvg_te = 1;
-					clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
-					bl.type = BL_NUL;
-					bl.m = m;
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_GVG_TE:
+				map[m].flag.gvg_te = 1;
+				clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 				break;
 			case MF_NOCOSTUME:		map[m].flag.nocostume = 1; break;
 			case MF_HIDEMOBHPBAR:		map[m].flag.hidemobhpbar = 1; break;
@@ -11928,7 +11950,7 @@ BUILDIN_FUNC(setmapflag)
 					int type = 0;
 
 					FETCH(5,type);
-					switch (type) {
+					switch(type) {
 						case 1: map[m].adjust.damage.pc = val; break;
 						case 2: map[m].adjust.damage.mob = val; break;
 						case 3: map[m].adjust.damage.boss = val; break;
@@ -11946,7 +11968,7 @@ BUILDIN_FUNC(setmapflag)
 
 BUILDIN_FUNC(removemapflag)
 {
-	int16 m,i;
+	int16 m, i;
 	const char *str;
 	int val = 0;
 
@@ -11962,27 +11984,15 @@ BUILDIN_FUNC(removemapflag)
 			case MF_NOBRANCH:		map[m].flag.nobranch = 0; break;
 			case MF_NOPENALTY:		map[m].flag.noexppenalty = 0; map[m].flag.nozenypenalty = 0; break;
 			case MF_NOZENYPENALTY:		map[m].flag.nozenypenalty = 0; break;
-			case MF_PVP: {
-					struct block_list bl;
-
-					bl.type = BL_NUL;
-					bl.m = m;
-					map[m].flag.pvp = 0;
-					clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_PVP:
+				map[m].flag.pvp = 0;
+				clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 				break;
 			case MF_PVP_NOPARTY:		map[m].flag.pvp_noparty = 0; break;
 			case MF_PVP_NOGUILD:		map[m].flag.pvp_noguild = 0; break;
-			case MF_GVG: {
-					struct block_list bl;
-
-					bl.type = BL_NUL;
-					bl.m = m;
-					map[m].flag.gvg = 0;
-					clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_GVG:
+				map[m].flag.gvg = 0;
+				clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 				break;
 			case MF_GVG_NOPARTY:		map[m].flag.gvg_noparty = 0; break;
 			case MF_NOTRADE:		map[m].flag.notrade = 0; break;
@@ -12010,7 +12020,7 @@ BUILDIN_FUNC(removemapflag)
 			case MF_NIGHTMAREDROP:		map[m].flag.pvp_nightmaredrop = 0; break;
 			case MF_RESTRICTED:
 				map[m].zone ^= 1<<(val + 1);
-				if(map[m].zone == 0)
+				if(!map[m].zone)
 					map[m].flag.restricted = 0;
 				break;
 			case MF_NOCOMMAND:		map[m].nocommand = 0; break;
@@ -12039,15 +12049,9 @@ BUILDIN_FUNC(removemapflag)
 			case MF_NOCASHSHOP:		map[m].flag.nocashshop = 0; break;
 			case MF_NOBANKING:		map[m].flag.nobanking = 0; break;
 			case MF_GVG_TE_CASTLE:		map[m].flag.gvg_te_castle = 0; break;
-			case MF_GVG_TE: {
-					struct block_list bl;
-
-					bl.type = BL_NUL;
-					bl.m = m;
-					map[m].flag.gvg_te = 0;
-					clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_GVG_TE:
+				map[m].flag.gvg_te = 0;
+				clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 				break;
 			case MF_NOCOSTUME:		map[m].flag.nocostume = 0; break;
 			case MF_HIDEMOBHPBAR:		map[m].flag.hidemobhpbar = 0; break;
@@ -12069,146 +12073,94 @@ BUILDIN_FUNC(removemapflag)
 BUILDIN_FUNC(pvpon)
 {
 	int16 m;
-	const char *str;
-	TBL_PC *sd = NULL;
-	struct s_mapiterator *iter;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st, 2);
 	m = map_mapname2mapid(str);
-	if( m < 0 || map[m].flag.pvp )
-		return 0; // Nothing to do
+	if(m < 0 || map[m].flag.pvp)
+		return 1;
 
 	map[m].flag.pvp = 1;
-	clif_map_property_mapall(m, MAPPROPERTY_FREEPVPZONE);
-	bl.type = BL_NUL;
-	bl.m = m;
-	clif_maptypeproperty2(&bl, ALL_SAMEMAP);
 
-	if(battle_config.pk_mode) // Disable ranking functions if pk_mode is on [Valaris]
+	if(battle_config.pk_mode) //Disable ranking functions if pk_mode is on [Valaris]
 		return 0;
 
-	iter = mapit_getallusers();
-	for( sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter) ) {
-		if( sd->bl.m != m || sd->pvp_timer != INVALID_TIMER )
-			continue; // Not applicable
-
-		sd->pvp_timer = add_timer(gettick() + 200,pc_calc_pvprank_timer,sd->bl.id,0);
-		sd->pvp_rank = 0;
-		sd->pvp_lastusers = 0;
-		sd->pvp_point = 5;
-		sd->pvp_won = 0;
-		sd->pvp_lost = 0;
-	}
-	mapit_free(iter);
+	map_foreachinmap(map_mapflag_pvp_start, m, BL_PC);
 	return SCRIPT_CMD_SUCCESS;
-}
-
-static int buildin_pvpoff_sub(struct block_list *bl,va_list ap)
-{
-	TBL_PC *sd = (TBL_PC *)bl;
-
-	clif_pvpset(sd, 0, 0, 2);
-	if (sd->pvp_timer != INVALID_TIMER) {
-		delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
-		sd->pvp_timer = INVALID_TIMER;
-	}
-	return 0;
 }
 
 BUILDIN_FUNC(pvpoff)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st, 2);
 	m = map_mapname2mapid(str);
 	if(m < 0 || !map[m].flag.pvp)
-		return 0; // Fixed Lupus
+		return 1;
 
 	map[m].flag.pvp = 0;
-	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-	bl.type = BL_NUL;
-	bl.m = m;
-	clif_maptypeproperty2(&bl, ALL_SAMEMAP);
 
-	if(battle_config.pk_mode) // Disable ranking options if pk_mode is on [Valaris]
+	if(battle_config.pk_mode) //Disable ranking options if pk_mode is on [Valaris]
 		return 0;
-	
-	map_foreachinmap(buildin_pvpoff_sub, m, BL_PC);
+
+	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
+	map_foreachinmap(map_mapflag_pvp_stop, m, BL_PC);
+	map_foreachinmap(unit_stopattack, m, BL_CHAR, 0);
 	return SCRIPT_CMD_SUCCESS;
 }
 
 BUILDIN_FUNC(gvgon)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st, 2);
 	m = map_mapname2mapid(str);
-	if(m >= 0 && !map[m].flag.gvg) {
-		map[m].flag.gvg = 1;
-		clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
-		bl.type = BL_NUL;
-		bl.m = m;
-		clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-	}
+	if(m < 0 || map[m].flag.gvg)
+		return 1;
+
+	map[m].flag.gvg = 1;
+	clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 	return SCRIPT_CMD_SUCCESS;
 }
 
 BUILDIN_FUNC(gvgoff)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st, 2);
 	m = map_mapname2mapid(str);
-	if(m >= 0 && map[m].flag.gvg) {
-		map[m].flag.gvg = 0;
-		clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-		bl.type = BL_NUL;
-		bl.m = m;
-		clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-	}
+	if(m < 0 || !map[m].flag.gvg)
+		return 1;
+
+	map[m].flag.gvg = 0;
+	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 	return SCRIPT_CMD_SUCCESS;
 }
 
 BUILDIN_FUNC(gvgon3)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st,2);
 	m = map_mapname2mapid(str);
-	if(m >= 0 && !map[m].flag.gvg_te) {
-		map[m].flag.gvg_te = 1;
-		clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
-		bl.type = BL_NUL;
-		bl.m = m;
-		clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-	}
+	if(m < 0 || map[m].flag.gvg_te)
+		return 1;
+
+	map[m].flag.gvg_te = 1;
+	clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 	return SCRIPT_CMD_SUCCESS;
 }
 
 BUILDIN_FUNC(gvgoff3)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st,2);
 	m = map_mapname2mapid(str);
-	if(m >= 0 && map[m].flag.gvg_te) {
-		map[m].flag.gvg_te = 0;
-		clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-		bl.type = BL_NUL;
-		bl.m = m;
-		clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-	}
+	if(m < 0 || !map[m].flag.gvg_te)
+		return 1;
+
+	map[m].flag.gvg_te = 0;
+	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -13551,33 +13503,6 @@ BUILDIN_FUNC(classchange)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/*==========================================
- * Display an effect
- *------------------------------------------*/
-BUILDIN_FUNC(misceffect)
-{
-	int type;
-
-	type = script_getnum(st,2);
-
-	if (type <= EF_NONE || type >= EF_MAX) {
-		ShowError("buildin_misceffect: unsupported effect id %d\n", type);
-		return 1;
-	}
-
-	if (st->oid && st->oid != fake_nd->bl.id) {
-		struct block_list *bl = map_id2bl(st->oid);
-
-		if (bl)
-			clif_specialeffect(bl,type,AREA);
-	} else{
-		TBL_PC *sd = script_rid2sd(st);
-
-		if (sd)
-			clif_specialeffect(&sd->bl,type,AREA);
-	}
-	return SCRIPT_CMD_SUCCESS;
-}
 /*==========================================
  * Play a BGM on a single client [Rikter/Yommy]
  *------------------------------------------*/
@@ -23432,6 +23357,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(gettimestr,"si?"),
 	BUILDIN_DEF(openstorage,""),
 	BUILDIN_DEF(guildopenstorage,""),
+	BUILDIN_DEF(guildopenstorage_log,"?"),
+	BUILDIN_DEF(guild_has_permission,"i?"),
 	BUILDIN_DEF(itemskill,"vi?"),
 	BUILDIN_DEF(produce,"i"),
 	BUILDIN_DEF(cooking,"i"),
@@ -23540,7 +23467,6 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getskilllist,"?"),
 	BUILDIN_DEF(clearitem,"?"),
 	BUILDIN_DEF(classchange,"i??"),
-	BUILDIN_DEF(misceffect,"i"),
 	BUILDIN_DEF(playBGM,"s"),
 	BUILDIN_DEF(playBGMall,"s?????"),
 	BUILDIN_DEF(soundeffect,"si"),
@@ -23558,7 +23484,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(skilleffect,"vi"), // Skill effect [Celest]
 	BUILDIN_DEF(npcskilleffect,"viii"), // Npc skill effect [Valaris]
 	BUILDIN_DEF(specialeffect,"i??"), // Npc skill effect [Valaris]
-	BUILDIN_DEF(specialeffect2,"i??"), // Skill effect on players[Valaris]
+	BUILDIN_DEF(specialeffect2,"i??"), // Skill effect on players [Valaris]
 	BUILDIN_DEF(nude,"?"), // Nude command [Valaris]
 	BUILDIN_DEF(mapwarp,"ssii??"), // Added by RoVeRT
 	BUILDIN_DEF(atcommand,"s"), // [MouseJstr]

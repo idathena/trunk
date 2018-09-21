@@ -76,6 +76,7 @@ Sql *qsmysql_handle; // For query_sql
 int db_use_sqldbs = 0;
 char buyingstores_db[32] = "buyingstores";
 char buyingstore_items_db[32] = "buyingstore_items";
+char guild_storage_log_db[32] = "guild_storage_log";
 char item_db_db[32] = "item_db";
 char item_db2_db[32] = "item_db2";
 char item_db_re_db[32] = "item_db_re";
@@ -2733,13 +2734,11 @@ int map_removemobs_timer(int tid, unsigned int tick, int id, intptr_t data)
 	int count;
 	const int16 m = id;
 
-	if (m < 0 || m >= MAX_MAP_PER_SERVER)
-	{	//Incorrect map id!
+	if (m < 0 || m >= MAX_MAP_PER_SERVER) { //Incorrect map id!
 		ShowError("map_removemobs_timer error: timer %d points to invalid map %d\n",tid, m);
 		return 0;
 	}
-	if (map[m].mob_delete_timer != tid)
-	{	//Incorrect timer call!
+	if (map[m].mob_delete_timer != tid) { //Incorrect timer call!
 		ShowError("map_removemobs_timer mismatch: %d != %d (map %s)\n",map[m].mob_delete_timer, tid, map[m].name);
 		return 0;
 	}
@@ -2751,7 +2750,7 @@ int map_removemobs_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 	if (battle_config.etc_log && count > 0)
 		ShowStatus("Map %s: Removed '"CL_WHITE"%d"CL_RESET"' mobs.\n",map[m].name, count);
-	
+
 	return 1;
 }
 
@@ -3979,6 +3978,8 @@ int inter_config_read(char *cfgName)
 			strcpy(buyingstores_db, w2);
 		else if( strcmpi(w1, "buyingstore_items_db") == 0 )
 			strcpy(buyingstore_items_db, w2);
+		else if( strcmpi(w1, "guild_storage_log") == 0 )
+			strcpy(guild_storage_log_db, w2);
 		else if( strcmpi(w1, "item_cash_db_db") == 0 )
 			strcpy(item_cash_db_db, w2);
 		else if( strcmpi(w1, "item_cash_db2_db") == 0 )
@@ -4323,6 +4324,50 @@ void map_skill_damage_add(struct map_data *m, uint16 skill_id, int pc, int mob, 
 	m->skill_damage.entries[m->skill_damage.count++] = entry;
 }
 #endif
+
+/**
+ * PvP timer handling (starting)
+ * @param bl: Player block object
+ * @param ap: func* with va_list values
+ * @return 0
+ */
+int map_mapflag_pvp_start(struct block_list *bl, va_list ap)
+{
+	struct map_session_data *sd = map_id2sd(bl->id);
+
+	nullpo_retr(0, sd);
+
+	if( sd->pvp_timer == INVALID_TIMER ) {
+		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
+		sd->pvp_rank = 0;
+		sd->pvp_lastusers = 0;
+		sd->pvp_point = 5;
+		sd->pvp_won = 0;
+		sd->pvp_lost = 0;
+	}
+	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
+	return 0;
+}
+
+/**
+ * PvP timer handling (stopping)
+ * @param bl: Player block object
+ * @param ap: func* with va_list values
+ * @return 0
+ */
+int map_mapflag_pvp_stop(struct block_list *bl, va_list ap)
+{
+	struct map_session_data *sd = map_id2sd(bl->id);
+
+	nullpo_retr(0, sd);
+
+	clif_pvpset(sd, 0, 0, 2);
+	if( sd->pvp_timer != INVALID_TIMER ) {
+		delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
+		sd->pvp_timer = INVALID_TIMER;
+	}
+	return 0;
+}
 
 /**
  * @see DBApply

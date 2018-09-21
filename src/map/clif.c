@@ -862,7 +862,7 @@ void clif_clearunit_delayed(struct block_list *bl, clr_type type, unsigned int t
 {
 	struct block_list *tbl = ers_alloc(delay_clearunit_ers, struct block_list);
 
-	memcpy (tbl, bl, sizeof (struct block_list));
+	memcpy(tbl, bl, sizeof (struct block_list));
 	add_timer(tick, clif_clearunit_delayed_sub, (int)type, (intptr_t)tbl);
 }
 
@@ -4802,10 +4802,10 @@ int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tic
 	WBUFL(buf,18) = ddelay;
 	if(battle_config.hide_woe_damage && map_flag_gvg2(src->m)) {
 #if PACKETVER < 20071113
-		WBUFW(buf,22) = (damage ? div : 0);
+		WBUFW(buf,22) = (damage > 0 ? div : 0);
 		WBUFW(buf,27 + offset) = (damage2 ? div : 0);
 #else
-		WBUFL(buf,22) = (damage ? div : 0);
+		WBUFL(buf,22) = (damage > 0 ? div : 0);
 		WBUFL(buf,27 + offset) = (damage2 ? div : 0);
 #endif
 	} else {
@@ -6428,30 +6428,27 @@ void clif_resurrection(struct block_list *bl,int type)
 }
 
 
-/// Sets the map property (ZC_NOTIFY_MAPPROPERTY).
-/// 0199 <type>.W
-void clif_map_property(struct map_session_data *sd, enum map_property property) {
-	int fd;
-
-	nullpo_retv(sd);
-
-	fd = sd->fd;
-	WFIFOHEAD(fd,packet_len(0x199));
-	WFIFOW(fd,0) = 0x199;
-	WFIFOW(fd,2) = property;
-	WFIFOSET(fd,packet_len(0x199));
-}
-
-
-void clif_maptypeproperty2(struct block_list *bl, enum send_target t) {
+/// Sets the map property
+/// 0199 <type>.W (ZC_NOTIFY_MAPPROPERTY)
+/// 099b <type>.W <flags>.L (ZC_MAPPROPERTY_R2)
+void clif_map_property(struct block_list *bl, enum map_property property, enum send_target target)
+{
 #if PACKETVER >= 20121010
+	int cmd = 0x99b;
 	unsigned char buf[8];
-	unsigned int NotifyProperty =
-		((map[bl->m].flag.pvp ? 1 : 0)<<0)| //PARTY - Show attack cursor on non-party members (PvP)
+#else
+	int cmd = 0x199;
+	unsigned char buf[4];
+#endif
+
+	WBUFW(buf,0) = cmd;
+	WBUFW(buf,2) = property;
+#if PACKETVER >= 20121010
+	WBUFL(buf,4) = ((map[bl->m].flag.pvp ? 1 : 0)<<0)| //PARTY - Show attack cursor on non-party members (PvP)
 		(((map[bl->m].flag.battleground || map_flag_gvg2(bl->m)) ? 1 : 0)<<1)| //GUILD - Show attack cursor on non-guild members (GvG)
 		(((map[bl->m].flag.battleground || map_flag_gvg2(bl->m)) ? 1 : 0)<<2)| //SIEGE - Show emblem over characters heads
 		(((map[bl->m].flag.nomineeffect || !map_flag_gvg2(bl->m)) ? 0 : 1)<<3)| //USE_SIMPLE_EFFECT - Automatically enable /mineffect
-		((map[bl->m].flag.nolockon ? 1 : 0)<<4)| //DISABLE_LOCKON - Unknown (By the name it might disable cursor lock-on)
+		((map[bl->m].flag.nolockon || map_flag_vs(bl->m) ? 1 : 0)<<4)| //DISABLE_LOCKON - Only allow attacks on other players with shift key or /ns active
 		((map[bl->m].flag.pvp ? 1 : 0)<<5)| //COUNT_PK - Show the PvP counter
 		((map[bl->m].flag.partylock ? 1 : 0)<<6)| //NO_PARTY_FORMATION - Prevents party creation/modification (Might be used for instance dungeons)
 		((map[bl->m].flag.battleground ? 1 : 0)<<7)| //BATTLEFIELD - Unknown (Does something for battlegrounds areas)
@@ -6459,14 +6456,9 @@ void clif_maptypeproperty2(struct block_list *bl, enum send_target t) {
 		((map[bl->m].flag.nousecart ? 0 : 1)<<9)| //USECART - Allow opening cart inventory (Well force it to always allow it)
 		((map[bl->m].flag.nosumstarmiracle ? 0 : 1)<<10); //SUNMOONSTAR_MIRACLE - Unknown - (Guessing it blocks Star Gladiator's Miracle from activating)
 		//(1<<11); //Unused bits. 1 - 10 is 0x1 length and 11 is 0x15 length. May be used for future settings
-
-	WBUFW(buf,0) = 0x99b;
-	WBUFW(buf,2) = 0x28; //Type - What is it asking for? MAPPROPERTY? MAPTYPE? I don't know. Do we even need it? [Rytech]
-	WBUFL(buf,4) = NotifyProperty;
-	WBUFW(buf,6) = 0; //Sparebit [5-15], + extra[4]
-
-	clif_send(buf,packet_len(0x99b),bl,t);
 #endif
+
+	clif_send(buf,packet_len(cmd),bl,target);
 }
 
 
@@ -6525,14 +6517,12 @@ void clif_pvpset(struct map_session_data *sd,int pvprank,int pvpnum,int type)
 void clif_map_property_mapall(int map_idx, enum map_property property)
 {
 	struct block_list bl;
-	unsigned char buf[16];
 
 	bl.id = 0;
 	bl.type = BL_NUL;
 	bl.m = map_idx;
-	WBUFW(buf,0) = 0x199;
-	WBUFW(buf,2) = property;
-	clif_send(buf,packet_len(0x199),&bl,ALL_SAMEMAP);
+
+	clif_map_property(&bl,property,ALL_SAMEMAP);
 }
 
 
@@ -10452,15 +10442,15 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			sd->pvp_won = 0;
 			sd->pvp_lost = 0;
 		}
-		clif_map_property(sd,MAPPROPERTY_FREEPVPZONE);
+		clif_map_property(&sd->bl,MAPPROPERTY_FREEPVPZONE,SELF);
 	} else if(sd->duel_group) //Set flag, if it's a duel [LuzZza]
-		clif_map_property(sd,MAPPROPERTY_FREEPVPZONE);
-
-	if(map[sd->bl.m].flag.gvg_dungeon)
-		clif_map_property(sd,MAPPROPERTY_FREEPVPZONE); //@TODO: Figure out the real packet to send here
-
-	if(map_flag_gvg2(sd->bl.m))
-		clif_map_property(sd,MAPPROPERTY_AGITZONE);
+		clif_map_property(&sd->bl,MAPPROPERTY_FREEPVPZONE,SELF);
+	else if(map[sd->bl.m].flag.gvg_dungeon)
+		clif_map_property(&sd->bl,MAPPROPERTY_FREEPVPZONE,SELF); //@TODO: Figure out the real packet to send here
+	else if(map_flag_gvg2(sd->bl.m))
+		clif_map_property(&sd->bl,MAPPROPERTY_AGITZONE,SELF);
+	else
+		clif_map_property(&sd->bl,MAPPROPERTY_NOTHING,SELF);
 
 	//Info about nearby objects
 	//Must use foreachinarea (CIRCULAR_AREA interferes with foreachinrange)
@@ -10690,7 +10680,6 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		clif_guild_notice(sd); //Displays at end
 
 	mail_clear(sd);
-	clif_maptypeproperty2(&sd->bl,SELF);
 
 	if(sd->state.gmaster_flag) { //Guild Aura Init
 		guild_guildaura_refresh(sd,GD_LEADERSHIP,guild_checkskill(sd->guild,GD_LEADERSHIP));
@@ -19861,7 +19850,7 @@ static void clif_roulette_recvitem_ack(struct map_session_data *sd, enum RECV_RO
 	WFIFOHEAD(fd,packet_len(0xa22));
 	WFIFOW(fd,0) = 0xa22;
 	WFIFOB(fd,2) = type;
-	WFIFOW(fd,3) = 0; //! TODO: Additional item
+	WFIFOW(fd,3) = 0; //@TODO: Additional item
 	WFIFOSET(fd,packet_len(0xa22));
 #endif
 }
@@ -21076,6 +21065,54 @@ void clif_parse_req_style_change(int fd, struct map_session_data *sd) {
 		pc_stylist_process(sd, LOOK_HEAD_BOTTOM, head_bottom, true);
 
 	clif_style_change_response(sd, STYLIST_SHOP_SUCCESS);
+}
+
+
+/// Sends out the usage history of the guild storage
+/// 09DA <size>.W <result>.W <count>.W { <id>.L <item id>.W <amount>.L <action>.B <refine>.L <unique id>.Q <identify>.B <item type>.W
+///      { <card item id>.W }*4 <name>.24B <time>.24B <attribute>.B }*count (ZC_ACK_GUILDSTORAGE_LOG)
+void clif_guild_storage_log(struct map_session_data *sd, enum e_guild_storage_log result) {
+#if PACKETVER >= 20140205
+	int fd, offset, i;
+	int size = 8;
+	int sub = 83;
+
+	nullpo_retv(sd);
+
+	if( result == GUILDSTORAGE_LOG_FINAL_SUCCESS )
+		size += gstorage_log_count * sub;
+	else
+		storage_guild_log_clear();
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,size);
+	WFIFOW(fd,0) = 0x9DA;
+	WFIFOW(fd,2) = size;
+	WFIFOW(fd,4) = result;
+	WFIFOW(fd,6) = (uint16)gstorage_log_count;
+
+	if( result == GUILDSTORAGE_LOG_FINAL_SUCCESS ) {
+		for( offset = 8, i = 0; i < gstorage_log_count; i++, offset += sub ) {
+			struct s_guild_log_entry entry = gstorage_logs[i];
+			uint16 viewid = itemdb_viewid(entry.item.nameid);
+
+			WFIFOL(fd,offset) = entry.id;
+			WFIFOW(fd,offset + 4) = (viewid > 0 ? viewid : entry.item.nameid);
+			WFIFOL(fd,offset + 6) = (uint16)(entry.amount > 0 ? entry.amount : (entry.amount * -1));
+			WFIFOB(fd,offset + 10) = (entry.amount > 0); // action = true(put), false(get)
+			WFIFOL(fd,offset + 11) = entry.item.refine;
+			WFIFOQ(fd,offset + 15) = entry.item.unique_id;
+			WFIFOB(fd,offset + 23) = entry.item.identify;
+			WFIFOW(fd,offset + 24) = itemtype(entry.item.nameid);
+			clif_addcards(WFIFOP(fd,offset + 26), &entry.item);
+			safestrncpy((char *)WFIFOP(fd,offset + 34), entry.name, NAME_LENGTH);
+			safestrncpy((char *)WFIFOP(fd,offset + 34 + NAME_LENGTH), entry.time, NAME_LENGTH);
+			WFIFOB(fd, offset + 34 + 2 * NAME_LENGTH) = entry.item.attribute;
+		}
+	}
+
+	WFIFOSET(fd,size);
+#endif
 }
 
 

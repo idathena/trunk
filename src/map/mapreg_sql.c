@@ -169,7 +169,7 @@ static void script_load_mapreg(void) {
 		int s = add_str(varname);
 		int i = index;
 
-		if( varname[length-1] == '$' ) {
+		if( varname[length - 1] == '$' ) {
 			if( idb_exists(mapregstr_db, (i<<24)|s) ) {
 				ShowWarning("load_mapreg: duplicate! '%s' => '%s' skipping...\n",varname,value);
 				continue;
@@ -180,11 +180,11 @@ static void script_load_mapreg(void) {
 				continue;
 			}
 		}
-		
+
 		m = ers_alloc(mapreg_ers, struct mapreg_save);
 		m->uid = (i<<24)|s;
 		m->save = false;
-		if( varname[length-1] == '$' ) {
+		if( varname[length - 1] == '$' ) {
 			m->u.str = aStrdup(value);
 			idb_put(mapregstr_db, m->uid, m);
 		} else {

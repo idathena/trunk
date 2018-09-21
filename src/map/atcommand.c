@@ -500,7 +500,7 @@ ACMD_FUNC(where)
 	struct map_session_data *pl_sd;
 
 	nullpo_retr(-1, sd);
-	memset(atcmd_player_name, '\0', sizeof atcmd_player_name);
+	memset(atcmd_player_name, '\0', sizeof(atcmd_player_name));
 
 	if (!message || !*message || sscanf(message, "%23[^\n]", atcmd_player_name) < 1) {
 		clif_displaymessage(fd, msg_txt(910)); // Please enter a player name (usage: @where <char name>).
@@ -1574,34 +1574,9 @@ ACMD_FUNC(help)
 	return 0;
 }
 
-// Helper function, used in foreach calls to stop auto-attack timers
-// parameter: '0' - everyone, 'id' - only those attacking someone with that id
-static int atcommand_stopattack(struct block_list *bl,va_list ap)
-{
-	struct unit_data *ud = unit_bl2ud(bl);
-	int id = va_arg(ap, int);
-
-	if (ud && ud->attacktimer != INVALID_TIMER && (!id || id == ud->target)) {
-		unit_stop_attack(bl);
-		return 1;
-	}
-	return 0;
-}
 /*==========================================
  *
  *------------------------------------------*/
-static int atcommand_pvpoff_sub(struct block_list *bl,va_list ap)
-{
-	TBL_PC *sd = (TBL_PC *)bl;
-
-	clif_pvpset(sd, 0, 0, 2);
-	if (sd->pvp_timer != INVALID_TIMER) {
-		delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
-		sd->pvp_timer = INVALID_TIMER;
-	}
-	return 0;
-}
-
 ACMD_FUNC(pvpoff)
 {
 	nullpo_retr(-1, sd);
@@ -1612,13 +1587,10 @@ ACMD_FUNC(pvpoff)
 	}
 
 	map[sd->bl.m].flag.pvp = 0;
-
-	if (!battle_config.pk_mode) {
+	if (!battle_config.pk_mode)
 		clif_map_property_mapall(sd->bl.m, MAPPROPERTY_NOTHING);
-		clif_maptypeproperty2(&sd->bl, ALL_SAMEMAP);
-	}
-	map_foreachinmap(atcommand_pvpoff_sub,sd->bl.m, BL_PC);
-	map_foreachinmap(atcommand_stopattack,sd->bl.m, BL_CHAR, 0);
+	map_foreachinmap(map_mapflag_pvp_stop, sd->bl.m, BL_PC);
+	map_foreachinmap(unit_stopattack, sd->bl.m, BL_CHAR, 0);
 	clif_displaymessage(fd, msg_txt(31)); // PvP: Off.
 	return 0;
 }
@@ -1626,21 +1598,6 @@ ACMD_FUNC(pvpoff)
 /*==========================================
  *
  *------------------------------------------*/
-static int atcommand_pvpon_sub(struct block_list *bl,va_list ap)
-{
-	TBL_PC *sd = (TBL_PC *)bl;
-
-	if (sd->pvp_timer == INVALID_TIMER) {
-		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
-		sd->pvp_rank = 0;
-		sd->pvp_lastusers = 0;
-		sd->pvp_point = 5;
-		sd->pvp_won = 0;
-		sd->pvp_lost = 0;
-	}
-	return 0;
-}
-
 ACMD_FUNC(pvpon)
 {
 	nullpo_retr(-1, sd);
@@ -1652,14 +1609,10 @@ ACMD_FUNC(pvpon)
 
 	map[sd->bl.m].flag.pvp = 1;
 
-	if (!battle_config.pk_mode) { // Display pvp circle and rank
-		clif_map_property_mapall(sd->bl.m, MAPPROPERTY_FREEPVPZONE);
-		clif_maptypeproperty2(&sd->bl, ALL_SAMEMAP);
-		map_foreachinmap(atcommand_pvpon_sub, sd->bl.m, BL_PC);
-	}
+	if (!battle_config.pk_mode) //Display pvp circle and rank
+		map_foreachinmap(map_mapflag_pvp_start, sd->bl.m, BL_PC);
 
 	clif_displaymessage(fd, msg_txt(32)); // PvP: On.
-
 	return 0;
 }
 
@@ -1674,11 +1627,10 @@ ACMD_FUNC(gvgoff)
 		clif_displaymessage(fd, msg_txt(162)); // GvG is already Off.
 		return -1;
 	}
-		
+
 	map[sd->bl.m].flag.gvg = 0;
 	clif_map_property_mapall(sd->bl.m, MAPPROPERTY_NOTHING);
-	clif_maptypeproperty2(&sd->bl, ALL_SAMEMAP);
-	map_foreachinmap(atcommand_stopattack,sd->bl.m, BL_CHAR, 0);
+	map_foreachinmap(unit_stopattack, sd->bl.m, BL_CHAR, 0);
 	clif_displaymessage(fd, msg_txt(33)); // GvG: Off.
 
 	return 0;
@@ -1698,7 +1650,6 @@ ACMD_FUNC(gvgon)
 
 	map[sd->bl.m].flag.gvg = 1;
 	clif_map_property_mapall(sd->bl.m, MAPPROPERTY_AGITZONE);
-	clif_maptypeproperty2(&sd->bl, ALL_SAMEMAP);
 	clif_displaymessage(fd, msg_txt(34)); // GvG: On.
 
 	return 0;
@@ -5313,7 +5264,7 @@ ACMD_FUNC(killable)
 		clif_displaymessage(fd, msg_txt(242)); // You can now be attacked and killed by players.
 	else {
 		clif_displaymessage(fd, msg_txt(288)); // You are no longer killable.
-		map_foreachinallrange(atcommand_stopattack,&sd->bl, AREA_SIZE, BL_CHAR, sd->bl.id);
+		map_foreachinallrange(unit_stopattack, &sd->bl, AREA_SIZE, BL_CHAR, sd->bl.id);
 	}
 	return 0;
 }

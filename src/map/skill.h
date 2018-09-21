@@ -392,7 +392,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl,uint16
 int skill_counter_additional_effect(struct block_list *src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,int attack_type,unsigned int tick);
 short skill_blown(struct block_list *src, struct block_list *target, char count, int8 dir, unsigned char flag);
 int skill_break_equip(struct block_list *src, struct block_list *bl, unsigned short pos, int rate, int flag);
-int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned short pos, int rate, uint16 skill_lv, int time);
+bool skill_strip_equip(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv);
 //Skills unit
 struct skill_unit_group *skill_id2group(int group_id);
 struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_id, uint16 skill_lv, short x, short y, int flag);
