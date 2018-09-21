@@ -11803,25 +11803,6 @@ BUILDIN_FUNC(getmapflag)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/**
- * PVP timer handling
- */
-static void script_mapflag_pvp_start_sub(struct block_list *bl, va_list ap) {
-	map_session_data *sd = map_id2sd(bl->id);
-
-	nullpo_retv(sd);
-
-	if(sd->pvp_timer == INVALID_TIMER) {
-		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
-		sd->pvp_rank = 0;
-		sd->pvp_lastusers = 0;
-		sd->pvp_point = 5;
-		sd->pvp_won = 0;
-		sd->pvp_lost = 0;
-	}
-	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
-}
-
 BUILDIN_FUNC(setmapflag)
 {
 	int16 m, i;
@@ -11843,7 +11824,7 @@ BUILDIN_FUNC(setmapflag)
 			case MF_PVP:
 				map[m].flag.pvp = 1;
 				if(!battle_config.pk_mode)
-					map_foreachinmap(script_mapflag_pvp_start_sub, m, BL_PC);
+					map_foreachinmap(map_mapflag_pvp_start, m, BL_PC);
 				break;
 			case MF_PVP_NOPARTY:		map[m].flag.pvp_noparty = 1; break;
 			case MF_PVP_NOGUILD:		map[m].flag.pvp_noguild = 1; break;
@@ -12052,20 +12033,8 @@ BUILDIN_FUNC(pvpon)
 	if(battle_config.pk_mode) //Disable ranking functions if pk_mode is on [Valaris]
 		return 0;
 
-	map_foreachinmap(script_mapflag_pvp_start_sub, m, BL_PC);
+	map_foreachinmap(map_mapflag_pvp_start, m, BL_PC);
 	return SCRIPT_CMD_SUCCESS;
-}
-
-static int script_mapflag_pvp_stop_sub(struct block_list *bl, va_list ap)
-{
-	struct map_session_data *sd = map_id2sd(bl->id);
-
-	clif_pvpset(sd, 0, 0, 2);
-	if(sd->pvp_timer != INVALID_TIMER) {
-		delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
-		sd->pvp_timer = INVALID_TIMER;
-	}
-	return 0;
 }
 
 BUILDIN_FUNC(pvpoff)
@@ -12083,7 +12052,7 @@ BUILDIN_FUNC(pvpoff)
 		return 0;
 
 	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-	map_foreachinmap(script_mapflag_pvp_stop_sub, m, BL_PC);
+	map_foreachinmap(map_mapflag_pvp_stop, m, BL_PC);
 	map_foreachinmap(unit_stopattack, m, BL_CHAR, 0);
 	return SCRIPT_CMD_SUCCESS;
 }

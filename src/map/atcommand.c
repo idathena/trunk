@@ -1574,24 +1574,6 @@ ACMD_FUNC(help)
 	return 0;
 }
 
-/**
- * PvP timer handling (stopping)
- * @param bl: Player block object
- * @param ap: func* with va_list values
- * @return 0
- */
-static int atcomamnd_mapflag_pvp_stop_sub(struct block_list *bl, va_list ap)
-{
-	struct map_session_data *sd = map_id2sd(bl->id);
-
-	clif_pvpset(sd, 0, 0, 2);
-	if (sd->pvp_timer != INVALID_TIMER) {
-		delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
-		sd->pvp_timer = INVALID_TIMER;
-	}
-	return 0;
-}
-
 /*==========================================
  *
  *------------------------------------------*/
@@ -1607,34 +1589,10 @@ ACMD_FUNC(pvpoff)
 	map[sd->bl.m].flag.pvp = 0;
 	if (!battle_config.pk_mode)
 		clif_map_property_mapall(sd->bl.m, MAPPROPERTY_NOTHING);
-	map_foreachinmap(atcomamnd_mapflag_pvp_stop_sub, sd->bl.m, BL_PC);
+	map_foreachinmap(map_mapflag_pvp_stop, sd->bl.m, BL_PC);
 	map_foreachinmap(unit_stopattack, sd->bl.m, BL_CHAR, 0);
 	clif_displaymessage(fd, msg_txt(31)); // PvP: Off.
 	return 0;
-}
-
-/**
- * PvP timer handling (starting)
- * @param bl: Player block object
- * @param ap: func* with va_list values
- * @return 0
- */
-static void atcommand_mapflag_pvp_start_sub(struct block_list *bl, va_list ap)
-{
-	struct map_session_data *sd = map_id2sd(bl->id);
-
-	nullpo_retv(sd);
-
-	if (sd->pvp_timer == INVALID_TIMER) {
-		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
-		sd->pvp_rank = 0;
-		sd->pvp_lastusers = 0;
-		sd->pvp_point = 5;
-		sd->pvp_won = 0;
-		sd->pvp_lost = 0;
-	}
-
-	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
 }
 
 /*==========================================
@@ -1652,7 +1610,7 @@ ACMD_FUNC(pvpon)
 	map[sd->bl.m].flag.pvp = 1;
 
 	if (!battle_config.pk_mode) //Display pvp circle and rank
-		map_foreachinmap(atcommand_mapflag_pvp_start_sub, sd->bl.m, BL_PC);
+		map_foreachinmap(map_mapflag_pvp_start, sd->bl.m, BL_PC);
 
 	clif_displaymessage(fd, msg_txt(32)); // PvP: On.
 	return 0;

@@ -956,6 +956,9 @@ struct questinfo *map_add_questinfo(int m, struct questinfo *qi);
 bool map_remove_questinfo(int m, struct npc_data *nd);
 struct questinfo *map_has_questinfo(int m, struct npc_data *nd, int quest_id);
 
+int map_mapflag_pvp_start(struct block_list *bl, va_list ap);
+int map_mapflag_pvp_stop(struct block_list *bl, va_list ap);
+
 extern char *INTER_CONF_NAME;
 extern char *LOG_CONF_NAME;
 extern char *MAP_CONF_NAME;

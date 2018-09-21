@@ -4323,6 +4323,50 @@ void map_skill_damage_add(struct map_data *m, uint16 skill_id, int pc, int mob, 
 #endif
 
 /**
+ * PvP timer handling (starting)
+ * @param bl: Player block object
+ * @param ap: func* with va_list values
+ * @return 0
+ */
+int map_mapflag_pvp_start(struct block_list *bl, va_list ap)
+{
+	struct map_session_data *sd = map_id2sd(bl->id);
+
+	nullpo_retv(sd);
+
+	if( sd->pvp_timer == INVALID_TIMER ) {
+		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
+		sd->pvp_rank = 0;
+		sd->pvp_lastusers = 0;
+		sd->pvp_point = 5;
+		sd->pvp_won = 0;
+		sd->pvp_lost = 0;
+	}
+	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
+	return 0;
+}
+
+/**
+ * PvP timer handling (stopping)
+ * @param bl: Player block object
+ * @param ap: func* with va_list values
+ * @return 0
+ */
+int map_mapflag_pvp_stop(struct block_list *bl, va_list ap)
+{
+	struct map_session_data *sd = map_id2sd(bl->id);
+
+	nullpo_retv(sd);
+
+	clif_pvpset(sd, 0, 0, 2);
+	if( sd->pvp_timer != INVALID_TIMER ) {
+		delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
+		sd->pvp_timer = INVALID_TIMER;
+	}
+	return 0;
+}
+
+/**
  * @see DBApply
  */
 static int cleanup_db_sub(DBKey key, DBData *data, va_list va)
