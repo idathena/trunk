@@ -6656,20 +6656,17 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case TK_MISSION:
 			if (sd) {
 				int id;
-				struct mob_data *tk_md;
 
 				if (sd->mission_mobid && (sd->mission_count || rnd()%100)) { //Cannot change target when already have one
 					clif_mission_info(sd,sd->mission_mobid,sd->mission_count);
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
-				do {
-					id = rnd_value(MOBID_PORING, MOBID_GREEN_IGUANA);
-					tk_md = map_id2md(id);
-				} while ((id >= MOBID_DESERT_WOLF_2 && id <= MOBID_ANTONIO) || id == MOBID_SWITCH || //These mobs automatically fail
-					!tk_md || tk_md->status.class_ != CLASS_NORMAL || //Must be a Normal mob
-					tk_md->status.hp >= 30000 || //Must be less than 30k HP
-					tk_md->db->base_exp <= 0); //Must give Base EXP
+				id = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,0x0F,sd->status.base_level);
+				if (!id) {
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+					break;
+				}
 				sd->mission_mobid = id;
 				sd->mission_count = 0;
 				pc_setglobalreg(sd,"TK_MISSION_ID",id);
