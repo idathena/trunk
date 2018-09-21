@@ -643,13 +643,14 @@ void initChangeTables(void) {
 	set_sc( AB_EPICLESIS         , SC_EPICLESIS       , SI_EPICLESIS       , SCB_MAXHP );
 	set_sc( AB_PRAEFATIO         , SC_KYRIE           , SI_KYRIE           , SCB_NONE );
 	set_sc_with_vfx( AB_ORATIO   , SC_ORATIO          , SI_ORATIO          , SCB_NONE );
-	set_sc( AB_LAUDAAGNUS        , SC_LAUDAAGNUS      , SI_LAUDAAGNUS      , SCB_VIT );
-	set_sc( AB_LAUDARAMUS        , SC_LAUDARAMUS      , SI_LAUDARAMUS      , SCB_LUK );
+	set_sc( AB_LAUDAAGNUS        , SC_LAUDAAGNUS      , SI_LAUDAAGNUS      , SCB_MAXHP );
+	set_sc( AB_LAUDARAMUS        , SC_LAUDARAMUS      , SI_LAUDARAMUS      , SCB_ALL  );
 	set_sc( AB_RENOVATIO         , SC_RENOVATIO       , SI_RENOVATIO       , SCB_NONE );
 	set_sc( AB_EXPIATIO          , SC_EXPIATIO        , SI_EXPIATIO        , SCB_NONE );
 	set_sc( AB_DUPLELIGHT        , SC_DUPLELIGHT      , SI_DUPLELIGHT      , SCB_NONE );
 	set_sc( AB_SECRAMENT         , SC_SECRAMENT       , SI_AB_SECRAMENT    , SCB_NONE );
 	set_sc( AB_OFFERTORIUM       , SC_OFFERTORIUM     , SI_OFFERTORIUM     , SCB_NONE );
+	add_sc( AB_VITUPERATUM       , SC_AETERNA         );
 
 	add_sc( WL_WHITEIMPRISON      , SC_WHITEIMPRISON  );
 	add_sc( WL_FROSTMISTY         , SC_FREEZING       );
@@ -3026,6 +3027,8 @@ int status_get_hpbonus(struct block_list *bl, enum e_status_bonus type) {
 				bonus += 200; //+200%
 			if (sc->data[SC_MERC_HPUP])
 				bonus += sc->data[SC_MERC_HPUP]->val2;
+			if (sc->data[SC_LAUDAAGNUS])
+				bonus += 2 + 2 * sc->data[SC_LAUDAAGNUS]->val1;
 			if (sc->data[SC_EPICLESIS])
 				bonus += sc->data[SC_EPICLESIS]->val2;
 			if (sc->data[SC_FORCEOFVANGUARD])
@@ -4066,6 +4069,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		sd->magic_addrace[RC_DRAGON] += lv;
 		sd->subrace[RC_DRAGON] += lv;
 	}
+	/*
 	if ((lv = pc_checkskill(sd, AB_EUCHARISTICA)) > 0) {
 		sd->right_weapon.addrace[RC_DEMON] += lv;
 		sd->right_weapon.adddefele[ELE_DARK] += lv;
@@ -4076,6 +4080,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		sd->subrace[RC_DEMON] += lv;
 		sd->subdefele[ELE_DARK] += lv;
 	}
+	*/
 	if (pc_checkskill(sd, SU_POWEROFLIFE) > 0 && pc_checkskill_summoner(sd, TYPE_ANIMAL) >= 20)
 		sd->bonus.long_attack_atk_rate += 20;
 	if (sc->count) {
@@ -4105,6 +4110,9 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			sd->subele[ELE_FIRE] += sc->data[SC_ARMOR_RESIST]->val3;
 			sd->subele[ELE_WIND] += sc->data[SC_ARMOR_RESIST]->val4;
 		}
+		//Arch Bishop
+		if (sc->data[SC_LAUDARAMUS])
+			sd->bonus.crit_atk_rate += 5 * sc->data[SC_LAUDARAMUS]->val1;
 		//Sorcerer's Elemental statuses
 		if (sc->data[SC_FIRE_CLOAK_OPTION] && (i = sc->data[SC_FIRE_CLOAK_OPTION]->val2)) {
 			sd->subele[ELE_FIRE] += i;
@@ -5401,8 +5409,6 @@ unsigned short status_calc_vit(struct block_list *bl, struct status_change *sc, 
 		vit += sc->data[SC_GLORYWOUNDS]->val1;
 	if(sc->data[SC_TRUESIGHT])
 		vit += 5;
-	if(sc->data[SC_LAUDAAGNUS])
-		vit += 4 + sc->data[SC_LAUDAAGNUS]->val1;
 	if(sc->data[SC_MINOR_BBQ])
 		vit += sc->data[SC_MINOR_BBQ]->val1;
 	if(sc->data[SC_INSPIRATION])
@@ -5599,8 +5605,6 @@ unsigned short status_calc_luk(struct block_list *bl, struct status_change *sc, 
 		luk += sc->data[SC_PUTTI_TAILS_NOODLES]->val1;
 	if(sc->data[SC_INSPIRATION])
 		luk += sc->data[SC_INSPIRATION]->val3;
-	if(sc->data[SC_LAUDARAMUS])
-		luk += 4 + sc->data[SC_LAUDARAMUS]->val1;
 	if(sc->data[SC_ALMIGHTY])
 		luk += sc->data[SC_ALMIGHTY]->val1;
 	if(sc->data[SC_MARIONETTE2])
@@ -12673,24 +12677,13 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 		case SC_RENOVATIO:
 			if( --(sce->val4) >= 0 ) {
-				struct block_list *src = map_id2bl(sce->val2);
-				int heal = status->max_hp * 3 / 100;
+				int heal = status->max_hp * 5 / 100;
 
-				map_freeblock_lock();
-				if( battle_check_undead(status->race,status->def_ele) ) {
-					if( !src || status_isdead(src) || src->m != bl->m )
-						break;
-					skill_attack(BF_MAGIC,src,src,bl,status_sc2skill(type),sce->val1,tick,SD_LEVEL|SD_ANIMATION);
-				} else {
-					if( sc->data[SC_AKAITSUKI] && heal )
-						skill_akaitsuki_damage(bl,bl,heal,status_sc2skill(type),sce->val1,tick);
-					else
-						status_heal(bl,heal,0,3);
-				}
-				if( sc->data[type] ) {
-					sc_timer_next(5000 + tick,status_change_timer,bl->id,data);
-				}
-				map_freeblock_unlock();
+				if( sc->data[SC_AKAITSUKI] && heal )
+					skill_akaitsuki_damage(bl,bl,heal,status_sc2skill(type),sce->val1,tick);
+				else
+					status_heal(bl,heal,0,3);
+				sc_timer_next(5000 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
 			break;
