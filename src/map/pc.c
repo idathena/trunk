@@ -1578,9 +1578,15 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	//Checks and fixes to character status data, that are required
 	//in case of configuration change or stuff, which cannot be
 	//checked on char-server
-	sd->status.hair = cap_value(sd->status.hair,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
-	sd->status.hair_color = cap_value(sd->status.hair_color,MIN_HAIR_COLOR,MAX_HAIR_COLOR);
-	sd->status.clothes_color = cap_value(sd->status.clothes_color,MIN_CLOTH_COLOR,MAX_CLOTH_COLOR);
+	if ((sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER) {
+		sd->status.hair = cap_value(sd->status.hair,MIN_DORAM_HAIR_STYLE,MAX_DORAM_HAIR_STYLE);
+		sd->status.hair_color = cap_value(sd->status.hair_color,MIN_DORAM_HAIR_COLOR,MAX_DORAM_HAIR_COLOR);
+		sd->status.clothes_color = cap_value(sd->status.clothes_color,MIN_DORAM_CLOTH_COLOR,MAX_DORAM_CLOTH_COLOR);
+	} else {
+		sd->status.hair = cap_value(sd->status.hair,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
+		sd->status.hair_color = cap_value(sd->status.hair_color,MIN_HAIR_COLOR,MAX_HAIR_COLOR);
+		sd->status.clothes_color = cap_value(sd->status.clothes_color,MIN_CLOTH_COLOR,MAX_CLOTH_COLOR);
+	}
 	sd->status.body = cap_value(sd->status.body,MIN_BODY_STYLE,MAX_BODY_STYLE);
 
 	//Initializations to null/0 unneeded since map_session_data was filled with 0 upon allocation
@@ -1944,18 +1950,17 @@ static int pc_calc_skillpoint(struct map_session_data *sd)
 
 	nullpo_ret(sd);
 
-	for(i = 1; i < MAX_SKILL; i++) {
-		uint8 skill_lv;
+	for (i = 1; i < MAX_SKILL; i++) {
+		uint8 lv;
 
-		if((skill_lv = pc_checkskill(sd,i)) > 0) {
+		if ((lv = pc_checkskill(sd,i)) > 0) {
 			uint16 inf2 = skill_get_inf2(i);
 
-			if((!(inf2&INF2_QUEST_SKILL) || battle_config.quest_skill_learn) &&
-				!(inf2&(INF2_WEDDING_SKILL|INF2_SPIRIT_SKILL)) //Do not count wedding/link skills [Skotlex]
-				) {
-				if(sd->status.skill[i].flag == SKILL_FLAG_PERMANENT)
-					skill_point += skill_lv;
-				else if(sd->status.skill[i].flag == SKILL_FLAG_REPLACED_LV_0)
+			if ((!(inf2&INF2_QUEST_SKILL) || battle_config.quest_skill_learn) &&
+				!(inf2&(INF2_WEDDING_SKILL|INF2_SPIRIT_SKILL))) { //Do not count wedding/link skills [Skotlex]
+				if (sd->status.skill[i].flag == SKILL_FLAG_PERMANENT)
+					skill_point += lv;
+				else if (sd->status.skill[i].flag == SKILL_FLAG_REPLACED_LV_0)
 					skill_point += (sd->status.skill[i].flag - SKILL_FLAG_REPLACED_LV_0);
 			}
 		}
@@ -1963,7 +1968,6 @@ static int pc_calc_skillpoint(struct map_session_data *sd)
 
 	return skill_point;
 }
-
 
 /**
  * Calculation of skill level.
@@ -2127,7 +2131,7 @@ void pc_calc_skilltree(struct map_session_data *sd)
 					int class_ = pc_mapid2jobid(sd->class_, sd->status.sex);
 
 					class_ = pc_class2idx(class_);
-					if (class_ == c || (class_ != c && sd->status.base_level < skill_tree[class_][i].baselv))
+					if( class_ == c || (class_ != c && sd->status.base_level < skill_tree[class_][i].baselv) )
 						f = 0; //Base level requirement wasn't satisfied
 				}
 				if( sd->status.job_level < skill_tree[c][i].joblv ) { //We need to get the actual class in this case
@@ -2158,7 +2162,7 @@ void pc_calc_skilltree(struct map_session_data *sd)
 				flag = 1; //Skill list has changed, perform another pass
 			}
 		}
-	} while(flag);
+	} while( flag );
 
 	if( c > 0 && !sd->status.skill_point && pc_is_taekwon_ranker(sd) ) {
 		short id = 0;
@@ -2189,10 +2193,10 @@ static void pc_check_skilltree(struct map_session_data *sd, int skill)
 
 	if( battle_config.skillfree )
 		return; //Function serves no purpose if this is set
-	
+
 	i = pc_calc_skilltree_normalize_job(sd);
 	c = pc_mapid2jobid(i, sd->status.sex);
-	if (c == -1) { //Unable to normalize job??
+	if( c == -1 ) { //Unable to normalize job??
 		ShowError("pc_check_skilltree: Unable to normalize job %d for character %s (%d:%d)\n", i, sd->status.name, sd->status.account_id, sd->status.char_id);
 		return;
 	}
@@ -2235,7 +2239,7 @@ static void pc_check_skilltree(struct map_session_data *sd, int skill)
 			sd->status.skill[id].id = id;
 			flag = 1;
 		}
-	} while(flag);
+	} while( flag );
 }
 
 // Make sure all the skills are in the correct condition
@@ -2260,23 +2264,22 @@ int pc_calc_skilltree_normalize_job(struct map_session_data *sd)
 {
 	int skill_point, novice_skills;
 	int c = sd->class_;
-	
+
 	if (!battle_config.skillup_limit || pc_has_permission(sd, PC_PERM_ALL_SKILL))
 		return c;
-	
-	skill_point = pc_calc_skillpoint(sd);
 
+	skill_point = pc_calc_skillpoint(sd);
 	novice_skills = job_info[pc_class2idx(JOB_NOVICE)].max_level[1] - 1;
 
-	// Limit 1st class and above to novice job levels
+	//Limit 1st class and above to novice job levels
 	if (skill_point < novice_skills && (sd->class_&MAPID_BASEMASK) != MAPID_SUMMONER)
 		c = MAPID_NOVICE;
-	// Limit 2nd class and above to first class job levels (super novices are exempt)
+	//Limit 2nd class and above to first class job levels (super novices are exempt)
 	else if ((sd->class_&JOBL_2) && (sd->class_&MAPID_UPPERMASK) != MAPID_SUPER_NOVICE) {
-		// Regenerate change_level_2nd
+		//Regenerate change_level_2nd
 		if (!sd->change_level_2nd) {
 			if (sd->class_&JOBL_THIRD) {
-				// If neither 2nd nor 3rd jobchange levels are known, we have to assume a default for 2nd
+				//If neither 2nd nor 3rd jobchange levels are known, we have to assume a default for 2nd
 				if (!sd->change_level_3rd)
 					sd->change_level_2nd = job_info[pc_class2idx(pc_mapid2jobid(sd->class_&MAPID_UPPERMASK, sd->status.sex))].max_level[1];
 				else
@@ -2288,17 +2291,14 @@ int pc_calc_skilltree_normalize_job(struct map_session_data *sd)
 				sd->change_level_2nd = 1 + skill_point + sd->status.skill_point
 						- (sd->status.job_level - 1)
 						- novice_skills;
-
 			}
-
 			pc_setglobalreg (sd, "jobchange_level", sd->change_level_2nd);
 		}
-
 		if (skill_point < novice_skills + (sd->change_level_2nd - 1))
 			c &= MAPID_BASEMASK;
-		// Limit 3rd class to 2nd class/trans job levels
+		//Limit 3rd class to 2nd class/trans job levels
 		else if (sd->class_&JOBL_THIRD) {
-			// Regenerate change_level_3rd
+			//Regenerate change_level_3rd
 			if (!sd->change_level_3rd) {
 					sd->change_level_3rd = 1 + skill_point + sd->status.skill_point
 						- (sd->status.job_level - 1)
@@ -2306,13 +2306,12 @@ int pc_calc_skilltree_normalize_job(struct map_session_data *sd)
 						- novice_skills;
 					pc_setglobalreg (sd, "jobchange_level_3rd", sd->change_level_3rd);
 			}
-
 			if (skill_point < novice_skills + (sd->change_level_2nd - 1) + (sd->change_level_3rd - 1))
 				c &= MAPID_UPPERMASK;
 		}
 	}
 
-	// Restore non-limiting flags
+	//Restore non-limiting flags
 	c |= sd->class_&(JOBL_UPPER|JOBL_BABY);
 
 	return c;
@@ -7344,50 +7343,97 @@ int pc_statusup2(struct map_session_data *sd, int type, int val)
 	return val;
 }
 
+// Checks to see if a skill exist's on a job's skill tree.
+static bool pc_search_job_skilltree(int b_class, int id)
+{
+	int i;
+
+	b_class = pc_class2idx(b_class);
+	ARR_FIND(0, MAX_SKILL_TREE, i, (skill_tree[b_class][i].id == 0 || skill_tree[b_class][i].id == id));
+	if( i < MAX_SKILL_TREE && skill_tree[b_class][i].id == id )
+		return true;
+	else
+		return false;
+}
+
 /*==========================================
  * Update skill_lv for player sd
  * Skill point allocation
  *------------------------------------------*/
-int pc_skillup(struct map_session_data *sd,uint16 skill_id)
+int pc_skillup(struct map_session_data *sd, uint16 skill_id)
 {
+	short used_skill_points, check_1st_job, check_2nd_job;
+	int i, c = 0;
+
 	nullpo_ret(sd);
 
+	i = pc_calc_skilltree_normalize_job(sd);
+	c = pc_mapid2jobid(i, sd->status.sex);
+
+	if( c == -1 ) { //Unable to normalize job??
+		ShowError("pc_skillup: Unable to normalize job %d for character %s (%d:%d)\n", i, sd->status.name, sd->status.account_id, sd->status.char_id);
+		return 0;
+	}
+
+	c = pc_class2idx(c);
+
 	if( skill_id >= GD_SKILLBASE && skill_id < GD_SKILLBASE + MAX_GUILDSKILL ) {
-		guild_skillup(sd,skill_id);
+		guild_skillup(sd, skill_id);
 		return 0;
 	}
 
 	if( skill_id >= HM_SKILLBASE && skill_id < HM_SKILLBASE + MAX_HOMUNSKILL && sd->hd ) {
-		hom_skillup(sd->hd,skill_id);
+		hom_skillup(sd->hd, skill_id);
 		return 0;
 	}
 
 	if( skill_id >= MAX_SKILL )
 		return 0;
 
+	if( !pc_search_job_skilltree(c, skill_id) ) {
+		used_skill_points = pc_calc_skillpoint(sd);
+		if( (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE ) {
+			//Super Novice is the 2nd job of the Novice, but well treat it as 1st for the upcoming check and message
+			check_1st_job = 9 + (sd->change_level_3rd - 1);
+			check_2nd_job = 0;
+		} else {
+			check_1st_job = 9 + (sd->change_level_2nd - 1);
+			check_2nd_job = 9 + (sd->change_level_3rd - 1) + (sd->change_level_2nd - 1);
+		}
+		if( used_skill_points < check_1st_job ) {
+			clif_msg_value(sd, NEED_MORE_FIRSTJOBSKILL, (check_1st_job - used_skill_points));
+			return 0;
+		}
+		if( used_skill_points < check_2nd_job ) {
+			clif_msg_value(sd, NEED_MORE_SECONDJOBSKILL, (check_2nd_job - used_skill_points));
+			return 0;
+		}
+	}
+
 	if( sd->status.skill_point > 0 &&
 		sd->status.skill[skill_id].id &&
 		sd->status.skill[skill_id].flag == SKILL_FLAG_PERMANENT && //Don't allow raising while you have granted skills [Skotlex]
-		sd->status.skill[skill_id].lv < skill_tree_get_max(skill_id,sd->status.class_) )
+		sd->status.skill[skill_id].lv < skill_tree_get_max(skill_id, sd->status.class_) )
 	{
-		int lv, range, upgradable;
+		uint16 skill_lv;
+		int range, upgradable;
 
 		sd->status.skill[skill_id].lv++;
 		sd->status.skill_point--;
-		if( !skill_get_inf(skill_id) || (skill_get_inf3(skill_id)&INF3_BOOST_PASSIVE && (pc_checkskill(sd,SU_POWEROFLAND) > 0 || pc_checkskill(sd,SU_POWEROFSEA) > 0)) )
-			status_calc_pc(sd,SCO_NONE); //Only recalculate for passive skills and active skills that boost the effects of passive skills
+		if( !skill_get_inf(skill_id) || (skill_get_inf3(skill_id)&INF3_BOOST_PASSIVE && (pc_checkskill(sd, SU_POWEROFLAND) > 0 || pc_checkskill(sd, SU_POWEROFSEA) > 0)) )
+			status_calc_pc(sd, SCO_NONE); //Only recalculate for passive skills and active skills that boost the effects of passive skills
 		else if( !sd->status.skill_point && pc_is_taekwon_ranker(sd) )
 			pc_calc_skilltree(sd); //Required to grant all TK Ranker skills
 		else
-			pc_check_skilltree(sd,skill_id); //Check if a new skill can Lvlup
-		lv = sd->status.skill[skill_id].lv;
-		range = skill_get_range2(&sd->bl,skill_id,lv,false);
-		upgradable = (lv < skill_tree_get_max(sd->status.skill[skill_id].id, sd->status.class_)) ? 1 : 0;
-		clif_skillup(sd,skill_id,lv,range,upgradable);
-		clif_updatestatus(sd,SP_SKILLPOINT);
+			pc_check_skilltree(sd, skill_id); //Check if a new skill can Lvlup
+		skill_lv = sd->status.skill[skill_id].lv;
+		range = skill_get_range2(&sd->bl, skill_id, skill_lv, false);
+		upgradable = (skill_lv < skill_tree_get_max(sd->status.skill[skill_id].id, sd->status.class_) ? 1 : 0);
+		clif_skillup(sd, skill_id, skill_lv, range, upgradable);
+		clif_updatestatus(sd, SP_SKILLPOINT);
 		if( skill_id == GN_REMODELING_CART ) //Cart weight info was updated by status_calc_pc
-			clif_updatestatus(sd,SP_CARTINFO);
-		if( !pc_has_permission(sd,PC_PERM_ALL_SKILL) ) //May skill everything at any time anyways, and this would cause a huge slowdown
+			clif_updatestatus(sd, SP_CARTINFO);
+		if( !pc_has_permission(sd, PC_PERM_ALL_SKILL) ) //May skill everything at any time anyways, and this would cause a huge slowdown
 			clif_skillinfoblock(sd);
 	}
 
@@ -9064,7 +9110,10 @@ void pc_changelook(struct map_session_data *sd, int type, int val)
 			clif_skillinfoblock(sd);
 			return;
 		case LOOK_HAIR: //Use the battle_config limits! [Skotlex]
-			val = cap_value(val,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
+			if ((sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER)
+				val = cap_value(val,MIN_DORAM_HAIR_STYLE,MAX_DORAM_HAIR_STYLE);
+			else
+				val = cap_value(val,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
 			if (sd->status.hair != val) {
 				sd->status.hair = val;
 				if (sd->status.guild_id) //Update Guild Window [Skotlex]
@@ -9088,7 +9137,10 @@ void pc_changelook(struct map_session_data *sd, int type, int val)
 			sd->setlook_head_mid = val;
 			break;
 		case LOOK_HAIR_COLOR: //Use the battle_config limits! [Skotlex]
-			val = cap_value(val,MIN_HAIR_COLOR,MAX_HAIR_COLOR);
+			if ((sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER)
+				val = cap_value(val,MIN_DORAM_HAIR_COLOR,MAX_DORAM_HAIR_COLOR);
+			else
+				val = cap_value(val,MIN_HAIR_COLOR,MAX_HAIR_COLOR);
 			if (sd->status.hair_color != val) {
 				sd->status.hair_color = val;
 				if (sd->status.guild_id) //Update Guild Window. [Skotlex]
@@ -9097,7 +9149,10 @@ void pc_changelook(struct map_session_data *sd, int type, int val)
 			}
 			break;
 		case LOOK_CLOTHES_COLOR: //Use the battle_config limits! [Skotlex]
-			val = cap_value(val,MIN_CLOTH_COLOR,MAX_CLOTH_COLOR);
+			if ((sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER)
+				val = cap_value(val,MIN_DORAM_CLOTH_COLOR,MAX_DORAM_CLOTH_COLOR);
+			else
+				val = cap_value(val,MIN_CLOTH_COLOR,MAX_CLOTH_COLOR);
 			sd->status.clothes_color = val;
 			break;
 		case LOOK_SHIELD:
@@ -12844,6 +12899,9 @@ void pc_update_job_and_level(struct map_session_data *sd) {
 
 struct s_attendance_period *pc_attendance_period(void) {
 	uint32 date = date_get(DT_YYYYMMDD);
+
+	if (!attendance_periods)
+		return NULL;
 
 	if (attendance_periods->start <= date && attendance_periods->end >= date)
 		return attendance_periods;
