@@ -128,7 +128,7 @@ bool is_infinite_defense(struct block_list *target, int flag);
 
 bool battle_skill_check_no_cardfix_atk(uint16 skill_id);
 
-//êSettings
+//Human Styles and Colors
 #define MIN_HAIR_STYLE battle_config.min_hair_style
 #define MAX_HAIR_STYLE battle_config.max_hair_style
 #define MIN_HAIR_COLOR battle_config.min_hair_color
@@ -137,6 +137,14 @@ bool battle_skill_check_no_cardfix_atk(uint16 skill_id);
 #define MAX_CLOTH_COLOR battle_config.max_cloth_color
 #define MIN_BODY_STYLE battle_config.min_body_style
 #define MAX_BODY_STYLE battle_config.max_body_style
+
+//Doram Styles and Colors
+#define MIN_DORAM_HAIR_STYLE battle_config.min_doram_hair_style
+#define MAX_DORAM_HAIR_STYLE battle_config.max_doram_hair_style
+#define MIN_DORAM_HAIR_COLOR battle_config.min_doram_hair_color
+#define MAX_DORAM_HAIR_COLOR battle_config.max_doram_hair_color
+#define MIN_DORAM_CLOTH_COLOR battle_config.min_doram_cloth_color
+#define MAX_DORAM_CLOTH_COLOR battle_config.max_doram_cloth_color
 
 extern struct Battle_Config
 {
@@ -386,6 +394,14 @@ extern struct Battle_Config
 	int max_hair_color; //added by [MouseJstr]
 	int min_cloth_color; //added by [MouseJstr]
 	int max_cloth_color; //added by [MouseJstr]
+	int min_body_style;
+	int max_body_style;
+	int min_doram_hair_style;
+	int max_doram_hair_style;
+	int min_doram_hair_color;
+	int max_doram_hair_color;
+	int min_doram_cloth_color;
+	int max_doram_cloth_color;
 	int pet_hair_style; //added by [Skotlex]
 
 	int castrate_dex_scale; //added by [MouseJstr]
@@ -616,8 +632,6 @@ extern struct Battle_Config
 	int max_homunculus_parameter;
 	int feature_roulette;
 	int monster_hp_bars_info;
-	int min_body_style;
-	int max_body_style;
 	int mvp_exp_reward_message;
 	int max_summoner_parameter;
 	int mob_eye_range_bonus; //Vulture's Eye and Snake's Eye range bonus
