@@ -3581,50 +3581,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		}
 	}
 
-	if ((index = sd->equip_index[EQI_AMMO]) >= 0) {
-		if (sd->inventory_data[index]) { //Arrows
-			struct item_data *id = sd->inventory_data[index];
-
-			sd->bonus.arrow_atk += (id->look != AMMO_CANNONBALL ? id->atk : 0);
-			sd->state.lr_flag = 2;
-			if (id->look != AMMO_THROWABLE_ITEM)
-				run_script(id->script, 0, sd->bl.id, 0);
-			sd->state.lr_flag = 0;
-			if (!calculating)
-				return 1;
-		}
-	}
-
-	//We've got combos to process and check
-	if (sd->combos.count) {
-		for (i = 0; i < sd->combos.count; i++) {
-			uint8 j = 0;
-			bool no_run = false;
-			struct item_combo *combo = NULL;
-
-			current_equip_item_index = -1;
-			current_equip_pos = sd->combos.pos[i];
-			if (!sd->combos.bonus[i] || !(combo = itemdb_combo_exists(sd->combos.id[i])))
-				continue;
-			//Check combo items
-			while (j < combo->count) {
-				struct item_data *id = itemdb_exists(combo->nameid[j]);
-
-				//Don't run the script if at least one of combo's pair has restriction
-				if (id && !pc_has_permission(sd, PC_PERM_USE_ALL_EQUIPMENT) && itemdb_isNoEquip(id, sd->bl.m)) {
-					no_run = true;
-					break;
-				}
-				j++;
-			}
-			if (no_run)
-				continue;
-			run_script(sd->combos.bonus[i], 0, sd->bl.id, 0);
-			if (!calculating)
-				return 1;
-		}
-	}
-
 	//Store equipment script bonuses
 	memcpy(sd->param_equip, sd->param_bonus, sizeof(sd->param_equip));
 	memset(sd->param_bonus, 0, sizeof(sd->param_bonus));
@@ -3719,6 +3675,50 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			}
 		}
 		current_equip_opt_index = -1;
+	}
+
+	if ((index = sd->equip_index[EQI_AMMO]) >= 0) {
+		if (sd->inventory_data[index]) { //Arrows
+			struct item_data *id = sd->inventory_data[index];
+
+			sd->bonus.arrow_atk += (id->look != AMMO_CANNONBALL ? id->atk : 0);
+			sd->state.lr_flag = 2;
+			if (id->look != AMMO_THROWABLE_ITEM)
+				run_script(id->script, 0, sd->bl.id, 0);
+			sd->state.lr_flag = 0;
+			if (!calculating)
+				return 1;
+		}
+	}
+
+	//We've got combos to process and check
+	if (sd->combos.count) {
+		for (i = 0; i < sd->combos.count; i++) {
+			uint8 j = 0;
+			bool no_run = false;
+			struct item_combo *combo = NULL;
+
+			current_equip_item_index = -1;
+			current_equip_pos = sd->combos.pos[i];
+			if (!sd->combos.bonus[i] || !(combo = itemdb_combo_exists(sd->combos.id[i])))
+				continue;
+			//Check combo items
+			while (j < combo->count) {
+				struct item_data *id = itemdb_exists(combo->nameid[j]);
+
+				//Don't run the script if at least one of combo's pair has restriction
+				if (id && !pc_has_permission(sd, PC_PERM_USE_ALL_EQUIPMENT) && itemdb_isNoEquip(id, sd->bl.m)) {
+					no_run = true;
+					break;
+				}
+				j++;
+			}
+			if (no_run)
+				continue;
+			run_script(sd->combos.bonus[i], 0, sd->bl.id, 0);
+			if (!calculating)
+				return 1;
+		}
 	}
 
 	pc_bonus_script(sd);
