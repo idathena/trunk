@@ -7360,7 +7360,7 @@ static bool pc_search_job_skilltree(int b_class, int id)
  * Update skill_lv for player sd
  * Skill point allocation
  *------------------------------------------*/
-int pc_skillup(struct map_session_data *sd,uint16 skill_id)
+int pc_skillup(struct map_session_data *sd, uint16 skill_id)
 {
 	short used_skill_points, check_1st_job, check_2nd_job;
 	int i, c = 0;
@@ -7387,7 +7387,7 @@ int pc_skillup(struct map_session_data *sd,uint16 skill_id)
 		return 0;
 	}
 
-	if( skill_id < 0 || skill_id >= MAX_SKILL )
+	if( skill_id >= MAX_SKILL )
 		return 0;
 
 	if( !pc_search_job_skilltree(c, skill_id) ) {
