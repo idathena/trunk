@@ -13005,10 +13005,8 @@ static void pc_attendance_clear(void) {
 	attendance_periods = NULL;
 }
 
-bool pc_has_second_costume(struct map_session_data *sd) {
-	nullpo_retr(false, sd);
-
-	if (sd->class_&JOBL_THIRD)
+bool pc_has_second_costume(int class_) {
+	if (class_&JOBL_THIRD)
 		return true;
 
 	return false;
@@ -13079,9 +13077,6 @@ void pc_stylist_process(struct map_session_data *sd, int type, int16 idx, bool i
 	struct s_stylist_data *entry = NULL;
 
 	nullpo_retv(sd);
-
-	if (type == LOOK_BODY2 && !pc_has_second_costume(sd))
-		return;
 
 	idx -= 1;
 

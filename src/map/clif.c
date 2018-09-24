@@ -21116,6 +21116,16 @@ void clif_guild_storage_log(struct map_session_data *sd, enum e_guild_storage_lo
 }
 
 
+void clif_parse_memorial_dungeon_command(int fd, struct map_session_data *sd)
+{
+	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
+	int command = RFIFOL(fd,info->pos[0]);
+
+ 	if( command == COMMAND_MEMORIALDUNGEON_DESTROY_FORCE )
+		instance_force_destroy(sd);
+}
+
+
 #ifdef DUMP_UNKNOWN_PACKET
 void DumpUnknow(int fd, TBL_PC *sd, int cmd, int packet_len) {
 	const char *packet_txt = "save/packet.txt";

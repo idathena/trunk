@@ -1,0 +1,21 @@
+//===== rAthena Script =======================================
+//= Refiner configuration
+//===== By: ==================================================
+//= exneval
+//===== Current Version: =====================================
+//= 1.0
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: =========================================
+//= Refiner configuration.
+//===== Additional Comments: =================================
+//= 1.0 First verison.
+//============================================================
+
+-	script	RefinerUIConfig	-1,{
+	end;
+OnInit:
+	if (getbattleflag("feature.refineui"))
+		unloadnpc "Suhnbi#cash";
+	end;
+}

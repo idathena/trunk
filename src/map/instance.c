@@ -479,7 +479,6 @@ int instance_destroy(short instance_id)
 
 	if((p = party_search(im->party_id))) {
 		p->instance_id = 0;
-
 		if(type)
 			clif_instance_changestatus(party_getavailablesd(p), type, 0, 1);
 		else
@@ -644,6 +643,30 @@ int instance_delusers(short instance_id)
 		instance_startidletimer(im, instance_id);
 
 	return 0;
+}
+
+/**
+ * Look up existing memorial dungeon of the player and destroy it
+ * @param sd session data.
+ */
+void instance_force_destroy(struct map_session_data *sd)
+{
+	struct party_data *p = NULL;
+	int party_id, i;
+
+	nullpo_retv(sd);
+
+	if(!(party_id = sd->status.party_id))
+		return;
+
+	if(!(p = party_search(party_id)))
+		return;
+
+	if(p->instance_id) {
+		ARR_FIND(0, MAX_PARTY, i, p->party.member[i].leader);
+		if(i < MAX_PARTY)
+			instance_destroy(p->instance_id);
+	}
 }
 
 static bool instance_db_free_sub(struct instance_db *db);

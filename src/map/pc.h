@@ -1304,6 +1304,6 @@ int32 pc_attendance_counter(struct map_session_data *sd);
 void pc_attendance_claim_reward(struct map_session_data *sd);
 
 void pc_stylist_process(struct map_session_data *sd, int type, int16 idx, bool isItem);
-bool pc_has_second_costume(struct map_session_data *sd);
+bool pc_has_second_costume(int class_);
 
 #endif /* _PC_H_ */

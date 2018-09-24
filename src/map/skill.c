@@ -3466,11 +3466,19 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 					skill_addtimerskill(src, tick + 800, bl->id, skill_area_temp[4], skill_area_temp[5], skill_id, skill_lv, 0, flag);
 				skill_addtimerskill(src, tick + 810, src->id, skill_area_temp[4], skill_area_temp[5], skill_id, skill_lv, 0, flag);
 				break;
-			case SR_TIGERCANNON:
-				status_zap(bl, 0, damage / 10); //10% of damage dealt
+			case SR_TIGERCANNON: {
+					int64 sp_damage = damage / 10; //10% of damage dealt
+
+					clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, sp_damage, 1, DMG_NORMAL, 0, true);
+					status_zap(bl, 0, sp_damage);
+				}
 				break;
-			case WM_METALICSOUND:
-				status_zap(bl, 0, damage * 100 / (100 * (110 - (sd ? pc_checkskill(sd,WM_LESSON) : 10) * 10)));
+			case WM_METALICSOUND: {
+					int64 sp_damage = damage * 100 / (100 * (110 - (sd ? pc_checkskill(sd,WM_LESSON) : 10) * 10));
+
+					clif_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, sp_damage, 1, DMG_NORMAL, 0, true);
+					status_zap(bl, 0, sp_damage);
+				}
 				break;
 			case GN_BLOOD_SUCKER:
 				status_heal(src, damage * (5 + 5 * skill_lv) / 100, 0, 0); //5 + 5% per level
