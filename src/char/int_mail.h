@@ -4,8 +4,10 @@
 #ifndef _INT_MAIL_SQL_H_
 #define _INT_MAIL_SQL_H_
 
-int mail_return_timer(int tid, unsigned int tick, int id, intptr_t data);
-int mail_delete_timer(int tid, unsigned int tick, int id, intptr_t data);
+#include "../common/timer.h"
+
+TIMER_FUNC(mail_return_timer);
+TIMER_FUNC(mail_delete_timer);
 
 int inter_mail_parse_frommap(int fd);
 bool mail_sendmail(int send_id, const char *send_name, int dest_id, const char *dest_name, const char *title, const char *body, int zeny, struct item *item, int amount);

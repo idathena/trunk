@@ -12227,7 +12227,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
  * For recusive status, like for each 5s we drop sp etc.
  * Reseting the end timer.
  *------------------------------------------*/
-int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(status_change_timer)
 {
 	enum sc_type type = (sc_type)data;
 	struct block_list *bl = NULL;
@@ -13765,7 +13765,7 @@ static int status_natural_heal(struct block_list *bl, va_list args)
 }
 
 //Natural heal main timer
-static int status_natural_heal_timer(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(status_natural_heal_timer)
 {
 	natural_heal_diff_tick = DIFF_TICK(tick,natural_heal_prev_tick);
 	map_foreachregen(status_natural_heal);

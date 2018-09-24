@@ -286,7 +286,7 @@ static DBMap *auth_db; // int account_id -> struct auth_node*
 // Online User Database
 //-----------------------------------------------------
 
-static int chardb_waiting_disconnect(int tid, unsigned int tick, int id, intptr_t data);
+static TIMER_FUNC(chardb_waiting_disconnect);
 enum e_char_del_response char_delete(struct char_session_data *sd, uint32 char_id);
 
 int loginif_isconnected();
@@ -2108,7 +2108,7 @@ void char_charlist_notify(int fd, struct char_session_data *sd) {
 }
 
 void char_block_character(int fd, struct char_session_data *sd);
-int charblock_timer(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(charblock_timer) {
 	struct char_session_data *sd = NULL;
 	int i = 0;
 
@@ -2381,7 +2381,7 @@ static void char_auth_ok(int fd, struct char_session_data *sd)
 	//Continues when account data is received...
 }
 
-int send_accounts_tologin(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(send_accounts_tologin);
 void mapif_server_reset(int id);
 
 /**
@@ -2923,8 +2923,8 @@ int parse_fromlogin(int fd) {
 	return 0;
 }
 
-int check_connect_login_server(int tid, unsigned int tick, int id, intptr_t data);
-int send_accounts_tologin(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(check_connect_login_server);
+TIMER_FUNC(send_accounts_tologin);
 
 void do_init_loginif(void)
 {
@@ -4985,7 +4985,7 @@ int mapif_send(int fd, unsigned char *buf, unsigned int len)
 	return 0;
 }
 
-int broadcast_user_count(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(broadcast_user_count)
 {
 	uint8 buf[6];
 	int users = count_users();
@@ -5037,7 +5037,7 @@ static int send_accounts_tologin_sub(DBKey key, DBData *data, va_list ap)
  * @param data : data transmited for delayed function
  * @return 
  */
-int send_accounts_tologin(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(send_accounts_tologin)
 {
 	if( loginif_isconnected() ) {
 		//Send account list to login server
@@ -5054,7 +5054,7 @@ int send_accounts_tologin(int tid, unsigned int tick, int id, intptr_t data)
 	return 0;
 }
 
-int check_connect_login_server(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(check_connect_login_server)
 {
 	if( login_fd > 0 && session[login_fd] != NULL )
 		return 0;
@@ -5655,7 +5655,7 @@ void char_send_map_data(int fd, struct mmo_charstatus *cd, uint32 ipl, int map_s
 //Invoked 15 seconds after mapif_disconnectplayer in case the map server doesn't
 //replies/disconnect the player we tried to kick [Skotlex]
 //------------------------------------------------
-static int chardb_waiting_disconnect(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(chardb_waiting_disconnect)
 {
 	struct online_char_data *character;
 
@@ -5683,13 +5683,13 @@ static int online_data_cleanup_sub(DBKey key, DBData *data, va_list ap)
 	return 0;
 }
 
-static int online_data_cleanup(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(online_data_cleanup)
 {
 	online_char_db->foreach(online_char_db, online_data_cleanup_sub);
 	return 0;
 }
 
-static int clan_member_cleanup(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(clan_member_cleanup)
 {
 	if(clan_remove_inactive_days <= 0) //Auto removal is disabled
 		return 0;

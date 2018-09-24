@@ -51,8 +51,8 @@ const short dirx[DIR_MAX] = { 0,-1,-1,-1,0,1,1,1 }; //Lookup to know where will 
 const short diry[DIR_MAX] = { 1,1,0,-1,-1,-1,0,1 }; //Lookup to know where will move to y according dir
 
 //Early declaration
-static int unit_attack_timer(int tid, unsigned int tick, int id, intptr_t data);
-static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data);
+static TIMER_FUNC(unit_attack_timer);
+static TIMER_FUNC(unit_walktoxy_timer);
 int unit_unattackable(struct block_list *bl);
 
 /**
@@ -110,9 +110,10 @@ int unit_walktoxy_sub(struct block_list *bl)
 		//Trim the last part of the path to account for range,
 		//but always move at least one cell when requested to move
 		for( i = ud->chaserange * 10 - 10; i > 0 && ud->walkpath.path_len > 1; ) {
-			enum directions dir = ud->walkpath.path[ud->walkpath.path_len];
+			enum directions dir;
 
 			ud->walkpath.path_len--;
+			dir = ud->walkpath.path[ud->walkpath.path_len];
 			if( direction_diagonal(dir) )
 				i -= MOVE_COST * 20; //When chasing, units will target a diamond-shaped area in range [Playtester]
 			else
@@ -182,7 +183,7 @@ int *unit_get_masterteleport_timer(struct block_list *bl) {
  * @param data: Data transferred from timer call
  * @return 0
  */
-int unit_teleport_timer(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(unit_teleport_timer) {
 	struct block_list *bl = map_id2bl(id);
 	int *mast_tid = unit_get_masterteleport_timer(bl);
 
@@ -256,7 +257,7 @@ int unit_check_start_teleport_timer(struct block_list *sbl) {
  * @param data: Not used
  * @return 1: Success 0: Fail (No valid bl)
  */
-int unit_step_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(unit_step_timer)
 {
 	struct block_list *bl;
 	struct unit_data *ud;
@@ -320,7 +321,7 @@ int unit_step_timer(int tid, unsigned int tick, int id, intptr_t data)
  * @param data: Data used in timer calls
  * @return 0 or unit_walktoxy_sub() or unit_walktoxy()
  */
-static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data) {
+static TIMER_FUNC(unit_walktoxy_timer) {
 	int i, x, y, dx, dy;
 	unsigned char icewall_walk_block;
 	enum directions dir;
@@ -553,7 +554,7 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
  * @param data: Data used in timer calls
  * @return 1: Success 0: Fail (No valid bl)
  */
-int unit_delay_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(unit_delay_walktoxy_timer)
 {
 	struct block_list *bl = map_id2bl(id);
 
@@ -572,7 +573,7 @@ int unit_delay_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data)
  * @param data: Data used in timer calls (target bl)
  * @return 1: Success 0: Fail (No valid bl or target)
  */
-int unit_delay_walktobl_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(unit_delay_walktobl_timer)
 {
 	struct block_list *bl = map_id2bl(id);
 
@@ -699,7 +700,7 @@ static inline void set_mobstate(struct block_list *bl, int flag)
  * @param data: Data passed through timer function (target)
  * @return 0
  */
-static int unit_walktobl_sub(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(unit_walktobl_sub)
 {
 	struct block_list *bl = map_id2bl(id);
 	struct unit_data *ud = (bl ? unit_bl2ud(bl) : NULL);
@@ -1358,7 +1359,7 @@ int unit_can_move(struct block_list *bl) {
  * @param data: Data passed through timer function (unit_data)
  * @return 0
  */
-int unit_resume_running(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(unit_resume_running)
 {
 	struct unit_data *ud = (struct unit_data *)data;
 	TBL_PC *sd = map_id2sd(id);
@@ -2546,7 +2547,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
  * @param data: Data passed from timer call
  * @return 0
  */
-static int unit_attack_timer(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(unit_attack_timer)
 {
 	struct block_list *bl;
 

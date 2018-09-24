@@ -1141,7 +1141,7 @@ void pc_cleareventtimer(struct map_session_data *sd);
 void pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick);
 
 int pc_calc_pvprank(struct map_session_data *sd);
-int pc_calc_pvprank_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(pc_calc_pvprank_timer);
 
 int pc_ismarried(struct map_session_data *sd);
 bool pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd);
@@ -1224,8 +1224,8 @@ enum e_additem_result {
 // Timer for night/day
 extern int day_timer_tid;
 extern int night_timer_tid;
-int map_day_timer(int tid, unsigned int tick, int id, intptr_t data); // By [yor]
-int map_night_timer(int tid, unsigned int tick, int id, intptr_t data); // By [yor]
+TIMER_FUNC(map_day_timer); // By [yor]
+TIMER_FUNC(map_night_timer); // By [yor]
 
 // Rental System
 void pc_inventory_rentals(struct map_session_data *sd);
@@ -1253,7 +1253,7 @@ void pc_show_version(struct map_session_data *sd);
 
 void pc_crimson_marker_clear(struct map_session_data *sd);
 
-int pc_bonus_script_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(pc_bonus_script_timer);
 void pc_bonus_script(struct map_session_data *sd);
 struct s_bonus_script_entry *pc_bonus_script_add(struct map_session_data *sd, const char *script_str, uint32 dur, enum si_type icon, uint16 flag, uint8 type);
 void pc_bonus_script_clear(struct map_session_data *sd, uint16 flag);
@@ -1279,10 +1279,10 @@ int pc_level_penalty_mod(int level_diff, uint32 mob_class, enum e_mode mode, int
 
 void pc_scdata_received(struct map_session_data *sd);
 void pc_check_expiration(struct map_session_data *sd);
-int pc_expiration_timer(int tid, unsigned int tick, int id, intptr_t data);
-int pc_global_expiration_timer(int tid, unsigned tick, int id, intptr_t data);
+TIMER_FUNC(pc_expiration_timer);
+TIMER_FUNC(pc_global_expiration_timer);
 void pc_expire_check(struct map_session_data *sd);
-int pc_autotrade_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(pc_autotrade_timer);
 
 enum e_BANKING_DEPOSIT_ACK pc_bank_deposit(struct map_session_data *sd, int money);
 enum e_BANKING_WITHDRAW_ACK pc_bank_withdraw(struct map_session_data *sd, int money);

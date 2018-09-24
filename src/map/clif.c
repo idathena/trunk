@@ -849,7 +849,7 @@ void clif_clearunit_area(struct block_list *bl, clr_type type)
 /// Used to make monsters with player-sprites disappear after dying
 /// like normal monsters, because the client does not remove those
 /// automatically.
-static int clif_clearunit_delayed_sub(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(clif_clearunit_delayed_sub)
 {
 	struct block_list *bl = (struct block_list *)data;
 
@@ -1857,7 +1857,7 @@ void clif_move(struct unit_data *ud)
 /*==========================================
  * Delays the map_quit of a player after they are disconnected. [Skotlex]
  *------------------------------------------*/
-static int clif_delayquit(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(clif_delayquit)
 {
 	struct map_session_data *sd = NULL;
 
@@ -10670,7 +10670,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		}
 #endif
 		//Instances do not need their own channels
-		if(channel_config.map_tmpl.name && (channel_config.map_tmpl.opt&CHAN_OPT_AUTOJOIN) &&
+		if(channel_config.map_tmpl.name[0] && (channel_config.map_tmpl.opt&CHAN_OPT_AUTOJOIN) &&
 			!map[sd->bl.m].flag.nochmautojoin && !map[sd->bl.m].instance_id)
 			channel_mjoin(sd); //Join new map
 		clif_pk_mode_message(sd);

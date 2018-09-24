@@ -3756,7 +3756,7 @@ struct linkdb_node *script_erase_sleepdb(struct linkdb_node *n)
 /*==========================================
  * Timer function for sleep
  *------------------------------------------*/
-int run_script_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(run_script_timer)
 {
 	struct script_state *st = (struct script_state *)data;
 	struct linkdb_node *node = (struct linkdb_node *)sleep_db;
@@ -4127,7 +4127,7 @@ void script_setarray_pc(struct map_session_data *sd, const char *varname, uint8 
 int buildin_query_sql_sub(struct script_state *st, Sql *handle);
 
 //Used to receive items the queryThread has already processed */
-int queryThread_timer(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(queryThread_timer) {
 	int i, cursor = 0;
 	bool allOk = true;
 	

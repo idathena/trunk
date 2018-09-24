@@ -64,8 +64,8 @@ struct{
 	}need[MAX_GUILD_SKILL_REQUIRE];
 } guild_skill_tree[MAX_GUILDSKILL];
 
-int guild_payexp_timer(int tid, unsigned int tick, int id, intptr_t data);
-static int guild_send_xy_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(guild_payexp_timer);
+static TIMER_FUNC(guild_send_xy_timer);
 
 /* guild flags cache */
 struct npc_data **guild_flags;
@@ -312,7 +312,7 @@ int guild_payexp_timer_sub(DBKey key, DBData *data, va_list ap) {
 	return 0;
 }
 
-int guild_payexp_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(guild_payexp_timer)
 {
 	guild_expcache_db->clear(guild_expcache_db,guild_payexp_timer_sub);
 	return 0;
@@ -345,7 +345,7 @@ int guild_send_xy_timer_sub(DBKey key, DBData *data, va_list ap)
 }
 
 //Code from party_send_xy_timer [Skotlex]
-static int guild_send_xy_timer(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(guild_send_xy_timer)
 {
 	guild_db->foreach(guild_db,guild_send_xy_timer_sub,tick);
 	return 0;
@@ -557,7 +557,7 @@ int guild_recv_info(struct guild *sg)
 		if( sd == NULL )
 			continue;
 		sd->guild = g;
-		if( channel_config.ally_tmpl.name && (channel_config.ally_tmpl.opt&CHAN_OPT_AUTOJOIN) )
+		if( channel_config.ally_tmpl.name[0] && (channel_config.ally_tmpl.opt&CHAN_OPT_AUTOJOIN) )
 			channel_gjoin(sd,3); // Make all member join guild_channel + allies channel
 		if( before.guild_lv != g->guild_lv || bm != m || before.max_member != g->max_member ) {
 			clif_guild_basicinfo(sd); // Submit basic information
@@ -718,7 +718,7 @@ void guild_member_joined(struct map_session_data *sd)
 		g->member[i].sd = sd;
 		sd->guild = g;
 
-		if( channel_config.ally_tmpl.name && (channel_config.ally_tmpl.opt&CHAN_OPT_AUTOJOIN) )
+		if( channel_config.ally_tmpl.name[0] && (channel_config.ally_tmpl.opt&CHAN_OPT_AUTOJOIN) )
 			channel_gjoin(sd,3);
 	}
 }
@@ -1693,7 +1693,7 @@ int guild_allianceack(int guild_id1,int guild_id2,int account_id1,int account_id
 
 				if (sd_mem != NULL) {
 					clif_guild_allianceinfo(sd_mem);
-					if (channel_config.ally_tmpl.name && (channel_config.ally_tmpl.opt&CHAN_OPT_AUTOJOIN))
+					if (channel_config.ally_tmpl.name[0] && (channel_config.ally_tmpl.opt&CHAN_OPT_AUTOJOIN))
 						channel_gjoin(sd_mem,2); // Join ally channel
 				}
 			}
@@ -1783,7 +1783,7 @@ int guild_broken(int guild_id,int flag)
 	guild_db->foreach(guild_db,guild_broken_sub,guild_id);
 	castle_db->foreach(castle_db,castle_guild_broken_sub,guild_id);
 	storage_guild_delete(guild_id);
-	if( channel_config.ally_tmpl.name )
+	if( channel_config.ally_tmpl.name[0] )
 		channel_delete(g->channel,false);
 	idb_remove(guild_db,guild_id);
 	return 0;

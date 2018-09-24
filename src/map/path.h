@@ -30,7 +30,7 @@ struct walkpath_data {
 };
 
 struct shootpath_data {
-	int rx,ry,len;
+	int rx, ry, len;
 	int x[MAX_WALKPATH];
 	int y[MAX_WALKPATH];
 };

@@ -3956,10 +3956,10 @@ ACMD_FUNC(mapinfo)
 	struct map_session_data *pl_sd;
 	struct s_mapiterator *iter;
 	struct chat_data *cd = NULL;
-	char direction[12];
+	char direction[DIR_MAX];
 	int i, m_id, chat_num = 0, list = 0, vend_num = 0;
 	unsigned short m_index;
-	char mapname[24];
+	char mapname[MAP_NAME_LENGTH];
 
 	nullpo_retr(-1, sd);
 
@@ -3967,7 +3967,7 @@ ACMD_FUNC(mapinfo)
 	memset(mapname, '\0', sizeof(mapname));
 	memset(direction, '\0', sizeof(direction));
 
-	sscanf(message, "%d %23[^\n]", &list, mapname);
+	sscanf(message, "%11d %11[^\n]", &list, mapname);
 
 	if (list < 0 || list > 3) {
 		clif_displaymessage(fd, msg_txt(1038)); // Please enter at least one valid list number (usage: @mapinfo <0-3> <map>).
@@ -7310,7 +7310,7 @@ ACMD_FUNC(showmobs)
 		return -1;
 	}
 
-	if (mob_id == atoi(mob_name))
+	if (mob_id == atoi(mob_name) && mob_db(mob_id)->jname[0])
 		strcpy(mob_name, mob_db(mob_id)->jname); // --ja--
 	//strcpy(mob_name, mob_db(mob_id)->name); // --en--
 

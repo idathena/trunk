@@ -10,6 +10,7 @@
 #include "../common/mapindex.h"
 #include "../common/db.h"
 #include "../common/msg_conf.h"
+#include "../common/timer.h"
 
 #include <stdarg.h>
 
@@ -849,8 +850,8 @@ int map_quit(struct map_session_data *);
 bool map_addnpc(int16 m,struct npc_data *);
 
 // Map item
-int map_clearflooritem_timer(int tid, unsigned int tick, int id, intptr_t data);
-int map_removemobs_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(map_clearflooritem_timer);
+TIMER_FUNC(map_removemobs_timer);
 void map_clearflooritem(struct block_list *bl);
 int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, int first_charid, int second_charid, int third_charid, int flags, unsigned short mob_id);
 
