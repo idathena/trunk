@@ -44,6 +44,7 @@ int instance_addusers(short instance_id);
 int instance_delusers(short instance_id);
 int instance_mapname2mapid(const char *name, short instance_id);
 int instance_addmap(short instance_id);
+void instance_force_destroy(struct map_session_data *sd);
 
 void instance_addnpc(struct instance_data *im);
 void instance_readdb(void);

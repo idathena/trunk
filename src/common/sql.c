@@ -50,10 +50,10 @@ typedef struct s_column_length s_column_length;
 struct SqlStmt
 {
 	StringBuf buf;
-	MYSQL_STMT* stmt;
+	MYSQL_STMT *stmt;
 	MYSQL_BIND *params;
 	MYSQL_BIND *columns;
-	s_column_length* column_lengths;
+	s_column_length *column_lengths;
 	size_t max_params;
 	size_t max_columns;
 	bool bind_params;
@@ -605,7 +605,7 @@ static void SqlStmt_P_ShowDebugTruncatedColumn(SqlStmt *self, size_t i)
 SqlStmt *SqlStmt_Malloc(Sql *sql)
 {
 	SqlStmt *self;
-	MYSQL_STMT* stmt;
+	MYSQL_STMT *stmt;
 
 	if( sql == NULL )
 		return NULL;

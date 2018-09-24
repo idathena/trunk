@@ -660,16 +660,14 @@ int party_member_withdraw(int party_id, uint32 account_id, uint32 char_id, char 
 /// Invoked (from char-server) when a party is disbanded.
 int party_broken(int party_id)
 {
-	struct party_data *p;
+	struct party_data *p = NULL;
 	int i;
 
 	if( !(p = party_search(party_id)) )
 		return 0;
 
-	if( p->instance_id ) {
-		instance_data[p->instance_id].party_id = 0;
+	if( p->instance_id )
 		instance_destroy(p->instance_id);
-	}
 
 	for( i = 0; i < MAX_PARTY; i++ ) {
 		if( p->data[i].sd ) {

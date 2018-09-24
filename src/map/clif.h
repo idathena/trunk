@@ -127,6 +127,10 @@ enum e_pet_evolution_result {
 	PET_EVOL_SUCCESS,
 };
 
+enum e_memorial_dungeon_command {
+	COMMAND_MEMORIALDUNGEON_DESTROY_FORCE = 0x3,
+};
+
 #define packet_len(cmd) packet_db[cmd].len
 extern struct s_packet_db packet_db[MAX_PACKET_DB + 1];
 extern int packet_db_ack[MAX_ACK_FUNC + 1];

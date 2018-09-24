@@ -1715,7 +1715,7 @@ ACMD_FUNC(bodystyle)
 
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
-	if (!pc_has_second_costume(sd)) {
+	if (!pc_has_second_costume(sd->class_)) {
 		clif_displaymessage(fd, msg_txt(727)); // This job has no alternate body styles.
 		return -1;
 	}
@@ -5364,8 +5364,8 @@ ACMD_FUNC(npcmove)
 		return -1;	//Not on a map.
 	}
 
-	x = cap_value(x, 0, map[m].xs-1);
-	y = cap_value(y, 0, map[m].ys-1);
+	x = cap_value(x, 0, map[m].xs - 1);
+	y = cap_value(y, 0, map[m].ys - 1);
 	map_foreachinallrange(clif_outsight, &nd->bl, AREA_SIZE, BL_PC, &nd->bl);
 	map_moveblock(&nd->bl, x, y, gettick());
 	map_foreachinallrange(clif_insight, &nd->bl, AREA_SIZE, BL_PC, &nd->bl);
@@ -7961,7 +7961,7 @@ ACMD_FUNC(size)
 	int size = 0;
 	nullpo_retr(-1, sd);
 
-	size = cap_value(atoi(message),SZ_SMALL,SZ_BIG);
+	size = cap_value(atoi(message), SZ_SMALL, SZ_BIG);
 
 	if(sd->state.size) {
 		sd->state.size = SZ_SMALL;
@@ -7985,7 +7985,7 @@ ACMD_FUNC(sizeall)
 	struct s_mapiterator *iter;
 
 	size = atoi(message);
-	size = cap_value(size,0,2);
+	size = cap_value(size, SZ_SMALL, SZ_BIG);
 
 	iter = mapit_getallusers();
 	for( pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter) ) {
@@ -8015,9 +8015,9 @@ ACMD_FUNC(sizeguild)
 	struct map_session_data *pl_sd;
 	struct guild *g;
 	nullpo_retr(-1, sd);
-	
+
 	memset(guild, '\0', sizeof(guild));
-	
+
 	if( !message || !*message || sscanf(message, "%d %23[^\n]", &size, guild) < 2 ) {
 		clif_displaymessage(fd, msg_txt(1304)); // Please enter guild name/ID (usage: @sizeguild <size> <guild name/ID>).
 		return -1;
@@ -8027,16 +8027,15 @@ ACMD_FUNC(sizeguild)
 		clif_displaymessage(fd, msg_txt(94)); // Incorrect name/ID, or no one from the guild is online.
 		return -1;
 	}
-	
-	size = cap_value(size,SZ_SMALL,SZ_BIG);
-	
+
+	size = cap_value(size, SZ_SMALL, SZ_BIG);
+
 	for( i = 0; i < g->max_member; i++ ) {
 		if( (pl_sd = g->member[i].sd) && pl_sd->state.size != size ) {
 			if( pl_sd->state.size ) {
 				pl_sd->state.size = SZ_SMALL;
 				pc_setpos(pl_sd, pl_sd->mapindex, pl_sd->bl.x, pl_sd->bl.y, CLR_TELEPORT);
 			}
-
 			pl_sd->state.size = size;
 			if( size == SZ_MEDIUM )
 				clif_specialeffect(&pl_sd->bl,EF_BABYBODY,AREA);

@@ -566,6 +566,11 @@ function	script	refinemain	{
 	mes "I'm the Armsmith.";
 	mes "I can refine all kinds of weapons, armor and equipment, so let me";
 	mes "know what you want me to refine.";
+	if (getbattleflag("feature.refineui")) {
+		close2;
+		open_refineui();
+		end;
+	}
 	next;
 
 	setarray .@indices[1], EQI_HEAD_TOP, EQI_ARMOR, EQI_HAND_L, EQI_HAND_R, EQI_GARMENT, EQI_SHOES, EQI_ACC_L, EQI_ACC_R, EQI_HEAD_MID, EQI_HEAD_LOW;
