@@ -375,7 +375,7 @@ int Sql_NextRow(Sql *self)
 
 
 /// Gets the data of a column.
-int Sql_GetData(Sql *self, size_t col, char **out_buf, size_t* out_len)
+int Sql_GetData(Sql *self, size_t col, char **out_buf, size_t *out_len)
 {
 	if( self && self->row )
 	{

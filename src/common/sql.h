@@ -188,7 +188,7 @@ int Sql_NextRow(Sql *self);
 /// The data remains valid until the next row is fetched or the result is freed.
 ///
 /// @return SQL_SUCCESS or SQL_ERROR
-int Sql_GetData(Sql *self, size_t col, char** out_buf, size_t* out_len);
+int Sql_GetData(Sql *self, size_t col, char **out_buf, size_t *out_len);
 
 
 
