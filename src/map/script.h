@@ -4,6 +4,8 @@
 #ifndef _SCRIPT_H_
 #define _SCRIPT_H_
 
+#include "../common/timer.h"
+
 #define NUM_WHISPER_VAR 10
 
 struct map_session_data;
@@ -1751,7 +1753,7 @@ void run_script(struct script_code *rootscript, int pos, int rid, int oid);
 int set_var(struct map_session_data *sd, char *name, void *val);
 int conv_num(struct script_state *st,struct script_data *data);
 const char *conv_str(struct script_state *st,struct script_data *data);
-int run_script_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(run_script_timer);
 void run_script_main(struct script_state *st);
 
 void script_stop_sleeptimers(int id);

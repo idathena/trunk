@@ -82,7 +82,7 @@ static struct instance_db *instance_searchname_db(const char *instance_name)
 /*==========================================
  * Deletes an instance timer (Destroys instance)
  *------------------------------------------*/
-static int instance_delete_timer(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(instance_delete_timer)
 {
 	instance_destroy(id);
 
@@ -92,7 +92,7 @@ static int instance_delete_timer(int tid, unsigned int tick, int id, intptr_t da
 /*==========================================
  * Create subscription timer for party
  *------------------------------------------*/
-static int instance_subscription_timer(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(instance_subscription_timer)
 {
 	int i, ret;
 	int instance_id = instance_wait.id[0];

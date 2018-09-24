@@ -316,7 +316,7 @@ static const char *npc_id2name(int id)
 /**
  * Timer to check for idle time and timeout the dialog if necessary
  */
-int npc_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(npc_secure_timeout_timer) {
 	struct map_session_data *sd = NULL;
 	unsigned int timeout = NPC_SECURE_TIMEOUT_NEXT;
 	int cur_tick = gettick(); //Ensure we are on last tick
@@ -512,7 +512,7 @@ int npc_event_doall_id(const char *name, int rid)
  * Clock event execution
  * OnMinute/OnClock/OnHour/OnDay/OnDDHHMM
  *------------------------------------------*/
-int npc_event_do_clock(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(npc_event_do_clock)
 {
 	static struct tm ev_tm_b; // tracks previous execution time
 	time_t timer;
@@ -619,7 +619,7 @@ struct timer_event_data {
 /*==========================================
  * triger 'OnTimerXXXX' events
  *------------------------------------------*/
-int npc_timerevent(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(npc_timerevent)
 {
 	int old_rid, old_timer;
 	unsigned int old_tick;
@@ -2357,8 +2357,8 @@ static void npc_parsename(struct npc_data *nd, const char *name, const char *sta
 	}
 
 	if( (dnd = npc_name2id(nd->exname)) != NULL ) { //Duplicate unique name, generate new one
-		char this_mapname[32];
-		char other_mapname[32];
+		char this_mapname[MAP_NAME_LENGTH_EXT];
+		char other_mapname[MAP_NAME_LENGTH_EXT];
 		int i = 0;
 
 		do {
@@ -3923,11 +3923,11 @@ static const char *npc_parse_mob(char *w1, char *w2, char *w3, char *w4, const c
 static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, const char *start, const char *buffer, const char *filepath)
 {
 	int16 m;
-	char mapname[32];
+	char mapname[MAP_NAME_LENGTH_EXT];
 	int state = 1;
 
 	//w1 = <mapname>
-	if (sscanf(w1,"%31[^,]",mapname) != 1) {
+	if (sscanf(w1,"%15[^,]",mapname) != 1) {
 		ShowError("npc_parse_mapflag: Invalid mapflag definition in file '%s', line '%d'.\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n",filepath,strline(buffer,start - buffer),w1,w2,w3,w4);
 		return strchr(start,'\n'); //Skip and continue
 	}
@@ -4379,10 +4379,10 @@ int npc_parsesrcfile(const char *filepath, bool runOnInit)
 		}
 
 		if( strcmp(w1, "-") != 0 && strcasecmp(w1, "function") != 0 ) { //w1 = <map name>,<x>,<y>,<facing>
-			char mapname[MAP_NAME_LENGTH * 2];
+			char mapname[MAP_NAME_LENGTH_EXT];
 
 			x = y = 0;
-			sscanf(w1, "%23[^,],%hd,%hd[^,]", mapname, &x, &y);
+			sscanf(w1, "%15[^,],%6hd,%6hd[^,]", mapname, &x, &y);
 			if( !mapindex_name2id(mapname) ) { //Incorrect map, we must skip the script info...
 				ShowError("npc_parsesrcfile: Unknown map '%s' in file '%s', line '%d'. Skipping line...\n", mapname, filepath, strline(buffer, p - buffer));
 				if( strcasecmp(w2, "script") == 0 && count > 3 )

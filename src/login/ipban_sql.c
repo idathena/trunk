@@ -35,8 +35,7 @@ static Sql *sql_handle = NULL;
 static int cleanup_timer_id = INVALID_TIMER;
 static bool ipban_inited = false;
 
-int ipban_cleanup(int tid, unsigned int tick, int id, intptr_t data);
-
+TIMER_FUNC(ipban_cleanup);
 
 // Initialize
 void ipban_init(void)
@@ -223,7 +222,7 @@ void ipban_log(uint32 ip)
 }
 
 // Remove expired bans
-int ipban_cleanup(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(ipban_cleanup)
 {
 	if( !login_config.ipban )
 		return 0; // Ipban disabled

@@ -187,7 +187,7 @@ int Sql_Ping(Sql *self)
 /// Wrapper function for Sql_Ping.
 ///
 /// @private
-static int Sql_P_KeepaliveTimer(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(Sql_P_KeepaliveTimer)
 {
 	Sql *self = (Sql*)data;
 	ShowInfo("Pinging SQL server to keep connection alive...\n");
@@ -580,7 +580,7 @@ static void Sql_P_ShowDebugMysqlFieldInfo(const char *prefix, enum enum_field_ty
 /// Reports debug information about a truncated column.
 ///
 /// @private
-static void SqlStmt_P_ShowDebugTruncatedColumn(SqlStmt* self, size_t i)
+static void SqlStmt_P_ShowDebugTruncatedColumn(SqlStmt *self, size_t i)
 {
 	MYSQL_RES *meta;
 	MYSQL_FIELD* field;
@@ -602,9 +602,9 @@ static void SqlStmt_P_ShowDebugTruncatedColumn(SqlStmt* self, size_t i)
 
 
 /// Allocates and initializes a new SqlStmt handle.
-SqlStmt* SqlStmt_Malloc(Sql *sql)
+SqlStmt *SqlStmt_Malloc(Sql *sql)
 {
-	SqlStmt* self;
+	SqlStmt *self;
 	MYSQL_STMT* stmt;
 
 	if( sql == NULL )
@@ -633,7 +633,7 @@ SqlStmt* SqlStmt_Malloc(Sql *sql)
 
 
 /// Prepares the statement.
-int SqlStmt_Prepare(SqlStmt* self, const char *query, ...)
+int SqlStmt_Prepare(SqlStmt *self, const char *query, ...)
 {
 	int res;
 	va_list args;
@@ -648,7 +648,7 @@ int SqlStmt_Prepare(SqlStmt* self, const char *query, ...)
 
 
 /// Prepares the statement.
-int SqlStmt_PrepareV(SqlStmt* self, const char *query, va_list args)
+int SqlStmt_PrepareV(SqlStmt *self, const char *query, va_list args)
 {
 	if( self == NULL )
 		return SQL_ERROR;
@@ -670,7 +670,7 @@ int SqlStmt_PrepareV(SqlStmt* self, const char *query, va_list args)
 
 
 /// Prepares the statement.
-int SqlStmt_PrepareStr(SqlStmt* self, const char *query)
+int SqlStmt_PrepareStr(SqlStmt *self, const char *query)
 {
 	if( self == NULL )
 		return SQL_ERROR;
@@ -692,7 +692,7 @@ int SqlStmt_PrepareStr(SqlStmt* self, const char *query)
 
 
 /// Returns the number of parameters in the prepared statement.
-size_t SqlStmt_NumParams(SqlStmt* self)
+size_t SqlStmt_NumParams(SqlStmt *self)
 {
 	if( self )
 		return (size_t)mysql_stmt_param_count(self->stmt);
@@ -703,7 +703,7 @@ size_t SqlStmt_NumParams(SqlStmt* self)
 
 
 /// Binds a parameter to a buffer.
-int SqlStmt_BindParam(SqlStmt* self, size_t idx, enum SqlDataType buffer_type, void *buffer, size_t buffer_len)
+int SqlStmt_BindParam(SqlStmt *self, size_t idx, enum SqlDataType buffer_type, void *buffer, size_t buffer_len)
 {
 	if( self == NULL )
 		return SQL_ERROR;
@@ -733,7 +733,7 @@ int SqlStmt_BindParam(SqlStmt* self, size_t idx, enum SqlDataType buffer_type, v
 
 
 /// Executes the prepared statement.
-int SqlStmt_Execute(SqlStmt* self)
+int SqlStmt_Execute(SqlStmt *self)
 {
 	if( self == NULL )
 		return SQL_ERROR;
@@ -760,7 +760,7 @@ int SqlStmt_Execute(SqlStmt* self)
 
 
 /// Returns the number of the AUTO_INCREMENT column of the last INSERT/UPDATE statement.
-uint64 SqlStmt_LastInsertId(SqlStmt* self)
+uint64 SqlStmt_LastInsertId(SqlStmt *self)
 {
 	if( self )
 		return (uint64)mysql_stmt_insert_id(self->stmt);
@@ -771,7 +771,7 @@ uint64 SqlStmt_LastInsertId(SqlStmt* self)
 
 
 /// Returns the number of columns in each row of the result.
-size_t SqlStmt_NumColumns(SqlStmt* self)
+size_t SqlStmt_NumColumns(SqlStmt *self)
 {
 	if( self )
 		return (size_t)mysql_stmt_field_count(self->stmt);
@@ -782,7 +782,7 @@ size_t SqlStmt_NumColumns(SqlStmt* self)
 
 
 /// Binds the result of a column to a buffer.
-int SqlStmt_BindColumn(SqlStmt* self, size_t idx, enum SqlDataType buffer_type, void *buffer, size_t buffer_len, uint32 *out_length, int8 *out_is_null)
+int SqlStmt_BindColumn(SqlStmt *self, size_t idx, enum SqlDataType buffer_type, void *buffer, size_t buffer_len, uint32 *out_length, int8 *out_is_null)
 {
 	if( self == NULL )
 		return SQL_ERROR;
@@ -828,7 +828,7 @@ int SqlStmt_BindColumn(SqlStmt* self, size_t idx, enum SqlDataType buffer_type, 
 
 
 /// Returns the number of rows in the result.
-uint64 SqlStmt_NumRows(SqlStmt* self)
+uint64 SqlStmt_NumRows(SqlStmt *self)
 {
 	if( self )
 		return (uint64)mysql_stmt_num_rows(self->stmt);
@@ -839,7 +839,7 @@ uint64 SqlStmt_NumRows(SqlStmt* self)
 
 
 /// Fetches the next row.
-int SqlStmt_NextRow(SqlStmt* self)
+int SqlStmt_NextRow(SqlStmt *self)
 {
 	int err;
 	size_t i;
@@ -932,7 +932,7 @@ int SqlStmt_NextRow(SqlStmt* self)
 
 
 /// Frees the result of the statement execution.
-void SqlStmt_FreeResult(SqlStmt* self)
+void SqlStmt_FreeResult(SqlStmt *self)
 {
 	if( self )
 		mysql_stmt_free_result(self->stmt);
@@ -941,7 +941,7 @@ void SqlStmt_FreeResult(SqlStmt* self)
 
 
 /// Shows debug information (with statement).
-void SqlStmt_ShowDebug_(SqlStmt* self, const char *debug_file, const unsigned long debug_line)
+void SqlStmt_ShowDebug_(SqlStmt *self, const char *debug_file, const unsigned long debug_line)
 {
 	if( self == NULL )
 		ShowDebug("at %s:%lu -  self is NULL\n", debug_file, debug_line);
@@ -954,7 +954,7 @@ void SqlStmt_ShowDebug_(SqlStmt* self, const char *debug_file, const unsigned lo
 
 
 /// Frees a SqlStmt returned by SqlStmt_Malloc.
-void SqlStmt_Free(SqlStmt* self)
+void SqlStmt_Free(SqlStmt *self)
 {
 	if( self )
 	{

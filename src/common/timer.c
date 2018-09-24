@@ -34,7 +34,7 @@ static int timer_data_max = 0;
 static int timer_data_num = 0;
 
 // free timers (array)
-static int* free_timer_list = NULL;
+static int *free_timer_list = NULL;
 static int free_timer_list_max = 0;
 static int free_timer_list_pos = 0;
 
@@ -59,15 +59,15 @@ time_t start_time;
  * 	Timer debugging
  *----------------------------*/
 struct timer_func_list {
-	struct timer_func_list* next;
+	struct timer_func_list *next;
 	TimerFunc func;
-	char* name;
+	char *name;
 } *tfl_root = NULL;
 
 /// Sets the name of a timer function.
-int add_timer_func_list(TimerFunc func, char* name)
+int add_timer_func_list(TimerFunc func, char *name)
 {
-	struct timer_func_list* tfl;
+	struct timer_func_list *tfl;
 
 	if (name) {
 		for( tfl=tfl_root; tfl != NULL; tfl=tfl->next )
@@ -87,9 +87,9 @@ int add_timer_func_list(TimerFunc func, char* name)
 }
 
 /// Returns the name of the timer function.
-char* search_timer_func_list(TimerFunc func)
+char *search_timer_func_list(TimerFunc func)
 {
-	struct timer_func_list* tfl;
+	struct timer_func_list *tfl;
 
 	for( tfl = tfl_root; tfl != NULL; tfl = tfl->next )
 		if( func == tfl->func )
@@ -415,7 +415,7 @@ unsigned long get_uptime(void)
  * @param format, format to convert timestamp on, see strftime format
  * @return the string of timestamp
  */
-const char* timestamp2string(char* str, size_t size, time_t timestamp, const char* format)
+const char *timestamp2string(char *str, size_t size, time_t timestamp, const char *format)
 {
 	size_t len = strftime(str, size, format, localtime(&timestamp));
 	memset(str + len, '\0', size - len);
@@ -425,7 +425,7 @@ const char* timestamp2string(char* str, size_t size, time_t timestamp, const cha
 /*
  * Split given timein into year, month, day, hour, minute, second
  */
-void split_time(int timein, int* year, int* month, int* day, int* hour, int* minute, int* second)
+void split_time(int timein, int *year, int *month, int *day, int *hour, int *minute, int *second)
 {
 	const int factor_min = 60;
 	const int factor_hour = factor_min * 60;
@@ -456,7 +456,7 @@ void split_time(int timein, int* year, int* month, int* day, int* hour, int* min
 /*
  * Create a "timestamp" with the given argument
  */
-double solve_time(char* modif_p)
+double solve_time(char *modif_p)
 {
 	double totaltime = 0;
 	struct tm then_tm;

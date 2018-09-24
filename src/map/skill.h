@@ -6,6 +6,7 @@
 
 #include "../common/mmo.h" // MAX_SKILL, struct square
 #include "../common/db.h"
+#include "../common/timer.h"
 #include "map.h" // struct block_list
 struct map_session_data;
 struct homun_data;
@@ -380,8 +381,8 @@ unsigned short skill_dummy2skill_id(unsigned short skill_id);
 int skill_name2id(const char *name);
 
 int skill_isammotype(struct map_session_data *sd, uint16 skill_id);
-int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data);
-int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(skill_castend_id);
+TIMER_FUNC(skill_castend_pos);
 int skill_castend_map(struct map_session_data *sd,uint16 skill_id, const char *map);
 
 int skill_cleartimerskill(struct block_list *src);
@@ -470,7 +471,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 int skill_blockpc_start(struct map_session_data *sd, uint16 skill_id, int tick);
 int skill_blockpc_get(struct map_session_data *sd, uint16 skill_id);
 int skill_blockpc_clear(struct map_session_data *sd);
-int skill_blockpc_end(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(skill_blockpc_end);
 int skill_blockhomun_start(struct homun_data*, uint16 skill_id, int tick);
 int skill_blockmerc_start(struct mercenary_data*, uint16 skill_id, int tick);
 
