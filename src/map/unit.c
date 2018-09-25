@@ -51,8 +51,8 @@ const short dirx[DIR_MAX] = { 0,-1,-1,-1,0,1,1,1 }; //Lookup to know where will 
 const short diry[DIR_MAX] = { 1,1,0,-1,-1,-1,0,1 }; //Lookup to know where will move to y according dir
 
 //Early declaration
-static int unit_attack_timer(int tid, unsigned int tick, int id, intptr_t data);
-static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data);
+static TIMER_FUNC(unit_attack_timer);
+static TIMER_FUNC(unit_walktoxy_timer);
 int unit_unattackable(struct block_list *bl);
 
 /**
@@ -107,14 +107,14 @@ int unit_walktoxy_sub(struct block_list *bl)
 
 	//Generally speaking, the walk path is already to an adjacent tile so we only need to shorten the path if the range is greater than 1
 	if( ud->target_to && ud->chaserange > 1 ) {
-		uint8 dir;
-
 		//Trim the last part of the path to account for range,
 		//but always move at least one cell when requested to move
 		for( i = ud->chaserange * 10 - 10; i > 0 && ud->walkpath.path_len > 1; ) {
+			enum directions dir;
+
 			ud->walkpath.path_len--;
 			dir = ud->walkpath.path[ud->walkpath.path_len];
-			if( dir&1 )
+			if( direction_diagonal(dir) )
 				i -= MOVE_COST * 20; //When chasing, units will target a diamond-shaped area in range [Playtester]
 			else
 				i -= MOVE_COST;
@@ -133,7 +133,7 @@ int unit_walktoxy_sub(struct block_list *bl)
 
 	if( ud->walkpath.path_pos >= ud->walkpath.path_len )
 		i = -1;
-	else if( ud->walkpath.path[ud->walkpath.path_pos]&1 )
+	else if( direction_diagonal(ud->walkpath.path[ud->walkpath.path_pos]) )
 		i = status_get_speed(bl) * MOVE_DIAGONAL_COST / MOVE_COST;
 	else
 		i = status_get_speed(bl);
@@ -183,7 +183,7 @@ int *unit_get_masterteleport_timer(struct block_list *bl) {
  * @param data: Data transferred from timer call
  * @return 0
  */
-int unit_teleport_timer(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(unit_teleport_timer) {
 	struct block_list *bl = map_id2bl(id);
 	int *mast_tid = unit_get_masterteleport_timer(bl);
 
@@ -257,7 +257,7 @@ int unit_check_start_teleport_timer(struct block_list *sbl) {
  * @param data: Not used
  * @return 1: Success 0: Fail (No valid bl)
  */
-int unit_step_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(unit_step_timer)
 {
 	struct block_list *bl;
 	struct unit_data *ud;
@@ -321,10 +321,10 @@ int unit_step_timer(int tid, unsigned int tick, int id, intptr_t data)
  * @param data: Data used in timer calls
  * @return 0 or unit_walktoxy_sub() or unit_walktoxy()
  */
-static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data) {
+static TIMER_FUNC(unit_walktoxy_timer) {
 	int i, x, y, dx, dy;
 	unsigned char icewall_walk_block;
-	uint8 dir;
+	enum directions dir;
 	struct block_list *bl = NULL;
 	struct unit_data *ud = NULL;
 	struct status_change *sc = NULL;
@@ -359,7 +359,7 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 	if(ud->walkpath.path_pos >= ud->walkpath.path_len)
 		return 0;
 
-	if(ud->walkpath.path[ud->walkpath.path_pos] >= 8)
+	if(ud->walkpath.path[ud->walkpath.path_pos] >= DIR_MAX)
 		return 1;
 
 	x = bl->x;
@@ -368,8 +368,8 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 	dir = ud->walkpath.path[ud->walkpath.path_pos];
 	ud->dir = dir;
 
-	dx = dirx[(int)dir];
-	dy = diry[(int)dir];
+	dx = dirx[dir];
+	dy = diry[dir];
 
 	//Get 'icewall_walk_block' depending on status immune mode (players can't be trapped)
 	if(md) {
@@ -477,8 +477,8 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 			ud->steptimer = INVALID_TIMER;
 		}
 		//Delay stepactions by half a step (so they are executed at full step)
-		if(ud->walkpath.path[ud->walkpath.path_pos]&1)
-			i = status_get_speed(bl) * 14 / 20;
+		if(direction_diagonal(ud->walkpath.path[ud->walkpath.path_pos]))
+			i = status_get_speed(bl) * MOVE_DIAGONAL_COST / MOVE_COST / 2;
 		else
 			i = status_get_speed(bl) / 2;
 		ud->steptimer = add_timer(tick + i,unit_step_timer,bl->id,0);
@@ -496,8 +496,8 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
 	ud->walkpath.path_pos++;
 	if(ud->walkpath.path_pos >= ud->walkpath.path_len)
 		i = -1;
-	else if(ud->walkpath.path[ud->walkpath.path_pos]&1)
-		i = status_get_speed(bl) * 14 / 10;
+	else if(direction_diagonal(ud->walkpath.path[ud->walkpath.path_pos]))
+		i = status_get_speed(bl) * MOVE_DIAGONAL_COST / MOVE_COST;
 	else
 		i = status_get_speed(bl);
 
@@ -554,7 +554,7 @@ static int unit_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data
  * @param data: Data used in timer calls
  * @return 1: Success 0: Fail (No valid bl)
  */
-int unit_delay_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(unit_delay_walktoxy_timer)
 {
 	struct block_list *bl = map_id2bl(id);
 
@@ -573,7 +573,7 @@ int unit_delay_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data)
  * @param data: Data used in timer calls (target bl)
  * @return 1: Success 0: Fail (No valid bl or target)
  */
-int unit_delay_walktobl_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(unit_delay_walktobl_timer)
 {
 	struct block_list *bl = map_id2bl(id);
 
@@ -700,7 +700,7 @@ static inline void set_mobstate(struct block_list *bl, int flag)
  * @param data: Data passed through timer function (target)
  * @return 0
  */
-static int unit_walktobl_sub(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(unit_walktobl_sub)
 {
 	struct block_list *bl = map_id2bl(id);
 	struct unit_data *ud = (bl ? unit_bl2ud(bl) : NULL);
@@ -1359,7 +1359,7 @@ int unit_can_move(struct block_list *bl) {
  * @param data: Data passed through timer function (unit_data)
  * @return 0
  */
-int unit_resume_running(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(unit_resume_running)
 {
 	struct unit_data *ud = (struct unit_data *)data;
 	TBL_PC *sd = map_id2sd(id);
@@ -1775,7 +1775,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 		casttime = 0;
 
 	if( sc ) { //Why the if else chain: These 3 status do not stack, so its efficient that way
- 		if( sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4) && skill_id != AS_CLOAKING ) {
+		if( sc->data[SC_CLOAKING] && !(sc->data[SC_CLOAKING]->val4&4) && skill_id != AS_CLOAKING ) {
 			status_change_end(src, SC_CLOAKING, INVALID_TIMER);
 			if( !src->prev )
 				return 0; //Warped away!
@@ -2042,6 +2042,26 @@ int unit_set_target(struct unit_data *ud, int target_id)
 	}
 
 	ud->target = target_id;
+	return 0;
+}
+
+/**
+ * Helper function used in foreach calls to stop auto-attack timers
+ * @param bl: Block object
+ * @param ap: func* with va_list values
+ *   Parameter: '0' - everyone, 'id' - only those attacking someone with that id
+ * @return 1 on success or 0 otherwise
+ */
+int unit_stopattack(struct block_list *bl, va_list ap)
+{
+	struct unit_data *ud = unit_bl2ud(bl);
+	int id = va_arg(ap, int);
+
+	if(ud && ud->attacktimer != INVALID_TIMER && (!id || id == ud->target)) {
+		unit_stop_attack(bl);
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -2527,7 +2547,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
  * @param data: Data passed from timer call
  * @return 0
  */
-static int unit_attack_timer(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(unit_attack_timer)
 {
 	struct block_list *bl;
 

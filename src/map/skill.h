@@ -6,6 +6,7 @@
 
 #include "../common/mmo.h" // MAX_SKILL, struct square
 #include "../common/db.h"
+#include "../common/timer.h"
 #include "map.h" // struct block_list
 struct map_session_data;
 struct homun_data;
@@ -79,8 +80,8 @@ enum e_skill_inf2 {
 enum e_skill_inf3 {
 	INF3_NOLP               = 0x00001, //Skill that can ignore SA_LANDPROTECTOR
 	INF3_HIT_HIDING         = 0x00002, //Skill that having an affect to hiding target
-	INF3_USABLE_HIDING      = 0x00004, //Skill that can be use while in SC_HIDING
-	INF3_USABLE_DANCE       = 0x00008, //Skill that can be use while in SC_DANCING
+	INF3_USABLE_HIDING      = 0x00004, //Skill that can be used while in SC_HIDING
+	INF3_USABLE_DANCE       = 0x00008, //Skill that can be used while in SC_DANCING
 	INF3_HIT_EMP            = 0x00010, //Skill that could hit emperium
 	INF3_AUTOSHADOWSPELL    = 0x00020, //Skill that can be auto casted by SC_AUTOSHADOWSPELL
 	INF3_KAGEHUMI_BL        = 0x00040, //Skill blocked by KG_KAGEHUMI
@@ -90,12 +91,13 @@ enum e_skill_inf3 {
 	INF3_EFF_RADIUS         = 0x00400, //Skill range affected by WL_RADIUS
 	INF3_EFF_RESEARCHTRAP   = 0x00800, //Skill range affected by RA_RESEARCHTRAP
 	INF3_USABLE_MANHOLE     = 0x01000, //Skill that can be used even under SC__MANHOLE
-	INF3_USABLE_WARG        = 0x02000, //Skill that can be use while riding warg
+	INF3_USABLE_WARG        = 0x02000, //Skill that can be used while riding warg
 	INF3_SC_GLOOMYDAY       = 0x04000, //Skill that affected by SC_GLOOMYDAY
 	INF3_SC_DANCEWITHWUG    = 0x08000, //Skill that affected by SC_DANCEWITHWUG
 	INF3_BITE_BLOCK         = 0x10000, //Skill blocked by RA_WUGBITE
 	INF3_SC_UNLIMIT         = 0x20000, //Skill that affected by SC_UNLIMIT
 	INF3_BOOST_PASSIVE      = 0x40000, //Boost passive skill (active skill that boosts the effects of passive skills)
+	INF3_USABLE_MADO        = 0x80000, //Skill that can be used while on madogear
 };
 
 //Walk intervals at which chase-skills are attempted to be triggered
@@ -379,8 +381,8 @@ unsigned short skill_dummy2skill_id(unsigned short skill_id);
 int skill_name2id(const char *name);
 
 int skill_isammotype(struct map_session_data *sd, uint16 skill_id);
-int skill_castend_id(int tid, unsigned int tick, int id, intptr_t data);
-int skill_castend_pos(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(skill_castend_id);
+TIMER_FUNC(skill_castend_pos);
 int skill_castend_map(struct map_session_data *sd,uint16 skill_id, const char *map);
 
 int skill_cleartimerskill(struct block_list *src);
@@ -391,7 +393,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl,uint16
 int skill_counter_additional_effect(struct block_list *src, struct block_list *bl,uint16 skill_id,uint16 skill_lv,int attack_type,unsigned int tick);
 short skill_blown(struct block_list *src, struct block_list *target, char count, int8 dir, unsigned char flag);
 int skill_break_equip(struct block_list *src, struct block_list *bl, unsigned short pos, int rate, int flag);
-int skill_strip_equip(struct block_list *src, struct block_list *bl, unsigned short pos, int rate, uint16 skill_lv, int time);
+bool skill_strip_equip(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv);
 //Skills unit
 struct skill_unit_group *skill_id2group(int group_id);
 struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_id, uint16 skill_lv, short x, short y, int flag);
@@ -469,7 +471,7 @@ int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill_id, ui
 int skill_blockpc_start(struct map_session_data *sd, uint16 skill_id, int tick);
 int skill_blockpc_get(struct map_session_data *sd, uint16 skill_id);
 int skill_blockpc_clear(struct map_session_data *sd);
-int skill_blockpc_end(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(skill_blockpc_end);
 int skill_blockhomun_start(struct homun_data*, uint16 skill_id, int tick);
 int skill_blockmerc_start(struct mercenary_data*, uint16 skill_id, int tick);
 
@@ -1765,6 +1767,9 @@ enum e_skill {
 	WE_CALLALLFAMILY = 5063,
 	WE_ONEFOREVER,
 	WE_CHEERUP,
+
+	AB_VITUPERATUM = 5072,
+	AB_CONVENIO,
 
 	HLIF_HEAL = 8001,
 	HLIF_AVOID,

@@ -523,7 +523,7 @@ void quest_read_txtdb(void) {
 			quest->dropitem[quest->dropitem_count].count = 1;
 			quest->dropitem[quest->dropitem_count].rate = atoi(str[3 * i + (2 * MAX_QUEST_OBJECTIVES + 4)]);
 			quest->dropitem_count++;
- 		}
+		}
 
 		//StringBuf_Init(&quest->name);
 		//StringBuf_Printf(&quest->name, "%s", str[17]);

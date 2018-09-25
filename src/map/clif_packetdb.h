@@ -1114,7 +1114,7 @@
 	packet(0x02cc,4);
 	packet(0x02cd,26);
 	packet(0x02ce,10);
-	packet(0x02cf,6);
+	parseable_packet(0x02cf,6,clif_parse_memorial_dungeon_command,2);
 	packet(0x02d0,-1);
 	packet(0x02d1,-1);
 	packet(0x02d2,-1);
@@ -2148,6 +2148,7 @@
 	parseable_packet(0x096E,-1,clif_parse_merge_item_req,2,4); // CZ_REQ_MERGE_ITEM
 	ack_packet(ZC_ACK_MERGE_ITEM,0x096F,7,2,4,6,7); // ZC_ACK_MERGE_ITEM
 	parseable_packet(0x0974,2,clif_parse_merge_item_cancel,0); // CZ_CANCEL_MERGE_ITEM
+	packet(0x9CD,8); // ZC_MSG_COLOR
 #endif
 
 // 2013-08-21bRagexe
@@ -2190,6 +2191,11 @@
 	packet(0x09DC,-1); // ZC_NOTIFY_NEWENTRY10
 	packet(0x09DD,-1); // ZC_NOTIFY_STANDENTRY10
 	packet(0x09DF,7); // ZC_ACK_WHISPER02
+#endif
+
+// 2014-02-05bRagexeRE
+#if PACKETVER >= 20140205
+	packet(0x09DA,-1);
 #endif
 
 // 2014-10-16Ragexe
@@ -2310,6 +2316,14 @@
 	parseable_packet(0x0980,7,clif_parse_SelectCart,2,6); // CZ_SELECTCART
 #endif
 
+// 2015-11-04aRagexeRE
+#if PACKETVER >= 20151104
+	// New packet
+	parseable_packet(0x0A46,14,clif_parse_req_style_change,2,4,6,8,10,12);
+	packet(0x0A47,3);
+	parseable_packet(0x0A48,2,clif_parse_dull,0);
+#endif
+
 // 2016-03-02bRagexe
 #if PACKETVER >= 20160302
 	packet(0x0A51,34);
@@ -2340,6 +2354,15 @@
 	parseable_packet(0x0A97,8,clif_parse_dull,0);
 	parseable_packet(0x0A99,4,clif_parse_dull,0);
 	parseable_packet(0x0A9C,2,clif_parse_dull,0);
+#endif
+
+// 2016-10-12aRagexeRE
+#if PACKETVER >= 20161012
+	packet(0x0AA0,2);
+	parseable_packet(0x0AA1,4,clif_parse_refineui_add,2);
+	packet(0x0AA2,-1);
+	parseable_packet(0x0AA3,7,clif_parse_refineui_refine,2,4,6);
+	parseable_packet(0x0AA4,2,clif_parse_refineui_close,0);
 #endif
 
 // 2016-10-26bRagexeRE
@@ -2396,15 +2419,15 @@
 
  // 2018-03-07bRagexeRE
 #if PACKETVER >= 20180307
-	parseable_packet(0x0A68,3,clif_parse_dull,0);
+	parseable_packet(0x0A68,3,clif_parse_open_ui,2);
 	packet(0x0AE2,7);
-	parseable_packet(0x0AEF,2,clif_parse_dull,0);
+	parseable_packet(0x0AEF,2,clif_parse_attendance_request,0);
 	packet(0x0AF0,10);
 #endif
 
 // 2018-03-21aRagexeRE
 #if PACKETVER >= 20180321
-	parseable_packet(0x0A49,20,clif_parse_dull,0);
+	parseable_packet(0x0A49,20,clif_parse_private_airship_request,0);
 	packet(0x0A4A,6);
 	packet(0x0A4B,22);
 	packet(0x0A4C,28);

@@ -42,7 +42,7 @@
 struct s_homunculus_db homunculus_db[MAX_HOMUNCULUS_CLASS];	//[orn]
 struct homun_skill_tree_entry hskill_tree[MAX_HOMUNCULUS_CLASS][MAX_HOM_SKILL_TREE];
 
-static int hom_hungry(int tid, unsigned int tick, int id, intptr_t data);
+static TIMER_FUNC(hom_hungry);
 
 static unsigned int hexptbl[MAX_LEVEL];
 
@@ -413,7 +413,7 @@ short hom_checkskill(struct homun_data *hd, uint16 skill_id)
 	if (idx < 0) //Invalid skill
 		return 0;
 
-	if (!hd || !&hd->homunculus)
+	if (!hd)
 		return 0;
 
 	if (hd->homunculus.hskill[idx].id == skill_id)
@@ -820,7 +820,7 @@ void hom_gainexp(struct homun_data *hd, int exp)
 	if (hd->exp_next == 0 ||
 		((m_class&HOM_REG) && hd->homunculus.level >= battle_config.hom_max_level) ||
 		((m_class&HOM_S)   && hd->homunculus.level >= battle_config.hom_S_max_level)) {
-	  	hd->homunculus.exp = 0;
+		hd->homunculus.exp = 0;
 		return;
 	}
 
@@ -832,7 +832,7 @@ void hom_gainexp(struct homun_data *hd, int exp)
 	}
 
 	//Level up
- 	while (hd->homunculus.exp > hd->exp_next && hom_levelup(hd));
+	while (hd->homunculus.exp > hd->exp_next && hom_levelup(hd));
 
 	if (hd->exp_next == 0)
 		hd->homunculus.exp = 0 ;
@@ -995,7 +995,7 @@ int hom_food(struct map_session_data *sd, struct homun_data *hd)
 /**
  * Timer to reduce hunger level
  */
-static int hom_hungry(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(hom_hungry)
 {
 	struct map_session_data *sd;
 	struct homun_data *hd;

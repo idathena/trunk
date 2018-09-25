@@ -1,0 +1,25 @@
+//===== rAthena Script =======================================
+//= Renewal refiner configuration
+//===== By: ==================================================
+//= exneval
+//===== Current Version: =====================================
+//= 1.0
+//===== Compatible With: =====================================
+//= rAthena SVN
+//===== Description: =========================================
+//= Renewal refiner configuration.
+//===== Additional Comments: =================================
+//= 1.0 First verison.
+//============================================================
+
+-	script	RERefinerUIConfig	-1,{
+	end;
+OnInit:
+	if (getbattleflag("feature.refineui")) {
+		unloadnpc "Holink#mal_cash";
+		unloadnpc "Basta";
+		unloadnpc "MightyHammer";
+		unloadnpc "ShadowBlacksmith";
+	}
+	end;
+}

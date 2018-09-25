@@ -4,13 +4,14 @@
 #ifndef _NPC_H_
 #define _NPC_H_
 
+#include "../common/timer.h"
+
 #include "map.h" // struct block_list
 #include "status.h" // struct status_change
 #include "unit.h" // struct unit_data
 struct block_list;
 struct npc_data;
 struct view_data;
-
 
 struct npc_timerevent_list {
 	int timer,pos;
@@ -1158,6 +1159,7 @@ int npc_do_ontimer(int npc_id, int option);
 int npc_event_do(const char *name);
 int npc_event_do_id(const char *name, int rid);
 int npc_event_doall(const char *name);
+void npc_event_runall(const char *eventname);
 int npc_event_doall_id(const char *name, int rid);
 
 int npc_timerevent_start(struct npc_data *nd, int rid);
@@ -1174,6 +1176,7 @@ int npc_script_event(struct map_session_data *sd, enum npce_event type);
 
 int npc_duplicate4instance(struct npc_data *snd, int16 m);
 int npc_instanceinit(struct npc_data *nd);
+int npc_instancedestroy(struct npc_data *nd);
 int npc_cashshop_buy(struct map_session_data *sd, unsigned short nameid, int amount, int points);
 
 void npc_shop_currency_type(struct map_session_data *sd, struct npc_data *nd, int cost[2], bool display);
@@ -1189,7 +1192,7 @@ void npc_market_delfromsql_(const char *exname, unsigned short nameid, bool clea
 #endif
 
 #ifdef SECURE_NPCTIMEOUT
-int npc_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(npc_secure_timeout_timer);
 #endif
 
 // @commands (script-based)
@@ -1197,5 +1200,9 @@ int npc_do_atcmd_event(struct map_session_data *sd, const char *command, const c
 
 bool npc_unloadfile(const char *path);
 bool npcdb_checkid(int id);
+
+#if PACKETVER >= 20180321
+void npc_private_airship(struct map_session_data *sd, const char *mapname, uint16 item_id);
+#endif
 
 #endif /* _NPC_H_ */

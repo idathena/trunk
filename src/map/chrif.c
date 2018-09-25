@@ -25,6 +25,7 @@
 #include "mercenary.h"
 #include "elemental.h"
 #include "chrif.h"
+#include "script.h" // script_config
 #include "quest.h"
 #include "storage.h"
 
@@ -34,7 +35,7 @@
 #include <sys/types.h>
 #include <time.h>
 
-static int check_connect_char_server(int tid, unsigned int tick, int id, intptr_t data);
+static TIMER_FUNC(check_connect_char_server);
 
 static struct eri *auth_db_ers; //For reutilizing player login structures.
 static DBMap *auth_db; //int id -> struct auth_node*
@@ -305,9 +306,9 @@ int chrif_save(struct map_session_data *sd, enum e_chrif_save_opt flag) {
 	chrif_bsdata_save(sd, ((flag&CSAVE_QUITTING) && !(flag&CSAVE_AUTOTRADE)));
 
 	//For data sync
-	if (&sd->storage && sd->storage.dirty)
+	if (sd->storage.dirty)
 		storage_storagesave(sd);
-	if (&sd->premiumStorage && sd->premiumStorage.dirty)
+	if (sd->premiumStorage.dirty)
 		storage_premiumStorage_save(sd);
 	if (sd->state.storage_flag == 2)
 		storage_guild_storagesave(sd->status.account_id, sd->status.guild_id, flag);
@@ -513,9 +514,9 @@ int chrif_connectack(int fd) {
 
 	chrif_sendmap(fd);
 
-	ShowStatus("Event '"CL_WHITE"OnInterIfInit"CL_RESET"' executed with '"CL_WHITE"%d"CL_RESET"' NPCs.\n", npc_event_doall("OnInterIfInit"));
+	npc_event_runall(script_config.inter_init_event_name);
 	if( !char_init_done ) {
-		ShowStatus("Event '"CL_WHITE"OnInterIfInitOnce"CL_RESET"' executed with '"CL_WHITE"%d"CL_RESET"' NPCs.\n", npc_event_doall("OnInterIfInitOnce"));
+		npc_event_runall(script_config.inter_init_once_event_name);
 		guild_castle_map_init();
 		intif_clan_requestclans();
 	}
@@ -789,7 +790,7 @@ int auth_db_cleanup_sub(DBKey key, DBData *data, va_list ap) {
 	return 0;
 }
 
-int auth_db_cleanup(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(auth_db_cleanup) {
 	chrif_check(0);
 	auth_db->foreach(auth_db, auth_db_cleanup_sub);
 	return 0;
@@ -1204,7 +1205,7 @@ int chrif_recvfamelist(int fd) {
 
 	for (num = 0; len < size && num < MAX_FAME_LIST; num++) {
 		memcpy(&smith_fame_list[num], RFIFOP(fd,len), sizeof(struct fame_list));
- 		len += sizeof(struct fame_list);
+		len += sizeof(struct fame_list);
 	}
 
 	total += num;
@@ -1213,7 +1214,7 @@ int chrif_recvfamelist(int fd) {
 
 	for (num = 0; len < size && num < MAX_FAME_LIST; num++) {
 		memcpy(&chemist_fame_list[num], RFIFOP(fd,len), sizeof(struct fame_list));
- 		len += sizeof(struct fame_list);
+		len += sizeof(struct fame_list);
 	}
 
 	total += num;
@@ -1222,7 +1223,7 @@ int chrif_recvfamelist(int fd) {
 
 	for (num = 0; len < size && num < MAX_FAME_LIST; num++) {
 		memcpy(&taekwon_fame_list[num], RFIFOP(fd,len), sizeof(struct fame_list));
- 		len += sizeof(struct fame_list);
+		len += sizeof(struct fame_list);
 	}
 
 	total += num;
@@ -1792,7 +1793,7 @@ int chrif_parse(int fd) {
 }
 
 // Unused
-int send_usercount_tochar(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(send_usercount_tochar) {
 	chrif_check(-1);
 
 	WFIFOHEAD(char_fd,4);
@@ -1839,7 +1840,7 @@ int send_users_tochar(void) {
  * timerFunction
  * Chk the connection to char server, (if it down)
  *------------------------------------------*/
-static int check_connect_char_server(int tid, unsigned int tick, int id, intptr_t data) {
+static TIMER_FUNC(check_connect_char_server) {
 	static int displayed = 0;
 
 	if (char_fd <= 0 || session[char_fd] == NULL) {

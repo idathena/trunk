@@ -38,6 +38,7 @@ enum mail_inbox_type;
 struct mail_message;
 enum mail_attachment_type;
 struct achievement;
+enum e_guild_storage_log;
 #include <stdarg.h>
 
 enum { // packet_db
@@ -124,6 +125,10 @@ enum e_pet_evolution_result {
 	PET_EVOL_NO_MATERIAL,
 	PET_EVOL_RG_FAMILIAR,
 	PET_EVOL_SUCCESS,
+};
+
+enum e_memorial_dungeon_command {
+	COMMAND_MEMORIALDUNGEON_DESTROY_FORCE = 0x3,
 };
 
 #define packet_len(cmd) packet_db[cmd].len
@@ -442,6 +447,8 @@ enum clif_messages {
 	ITEM_NEED_MADOGEAR = 0x59b,
 	ITEM_NEED_CART = 0x5ef,
 	RUNE_CANT_CREATE = 0x61b,
+	NEED_MORE_FIRSTJOBSKILL = 0x61e,
+	NEED_MORE_SECONDJOBSKILL = 0x61f,
 	ITEM_CANT_COMBINE = 0x623,
 	INVENTORY_SPACE_FULL = 0x625,
 	ITEM_PRODUCE_SUCCESS = 0x627,
@@ -465,6 +472,7 @@ enum clif_messages {
 	SKILL_REBEL_GUN_FAIL = 0xa02,
 	GUILD_MASTER_WOE = 0xb93,
 	GUILD_MASTER_DELAY = 0xb94,
+	MSG_ATTENDANCE_DISABLED = 0xd92,
 };
 
 enum e_CASHSHOP_ACK {
@@ -552,6 +560,18 @@ enum e_config_type {
 	CONFIG_PET_AUTOFEED = 2,
 	CONFIG_HOMUNCULUS_AUTOFEED
 };
+
+enum in_ui_type {
+	IN_UI_STYLIST = 1,
+	IN_UI_ATTENDANCE = 5
+};
+
+enum out_ui_type {
+	OUT_UI_STYLIST = 1,
+	OUT_UI_ATTENDANCE = 7
+};
+
+void clif_ui_open(struct map_session_data *sd, enum out_ui_type ui_type, int32 data);
 
 int clif_setip(const char *ip);
 void clif_setbindip(const char *ip);
@@ -826,11 +846,10 @@ void clif_displaymessage(const int fd, const char *mes);
 void clif_disp_message(struct block_list *src, const char *mes, int len, enum send_target target);
 void clif_broadcast(struct block_list *bl, const char *mes, int len, int type, enum send_target target);
 void clif_broadcast2(struct block_list *bl, const char *mes, int len, unsigned long fontColor, short fontType, short fontSize, short fontAlign, short fontY, enum send_target target);
-void clif_heal(int fd,int type,int val);
-void clif_resurrection(struct block_list *bl,int type);
-void clif_map_property(struct map_session_data *sd, enum map_property property);
-void clif_maptypeproperty2(struct block_list *bl,enum send_target t);
-void clif_pvpset(struct map_session_data *sd, int pvprank, int pvpnum,int type);
+void clif_heal(int fd, int type, int val);
+void clif_resurrection(struct block_list *bl, int type);
+void clif_map_property(struct block_list *bl, enum map_property property, enum send_target target);
+void clif_pvpset(struct map_session_data *sd, int pvprank, int pvpnum, int type);
 void clif_map_property_mapall(int map, enum map_property property);
 void clif_refine(int fd, int fail, int index, int val);
 void clif_upgrademessage(int fd, int result, unsigned short item_id);
@@ -1085,5 +1104,25 @@ void clif_weight_limit(struct map_session_data *sd);
 
 //Pet Evolution System
 void clif_pet_evolution_result(int fd, enum e_pet_evolution_result result);
+
+//Attendance System
+void clif_attendence_response(struct map_session_data *sd, int32 data);
+
+//Private Airship System
+enum e_private_airship_response {
+	PRIVATEAIRSHIP_OK,
+	PRIVATEAIRSHIP_RETRY,
+	PRIVATEAIRSHIP_ITEM_NOT_ENOUGH,
+	PRIVATEAIRSHIP_DESTINATION_MAP_INVALID,
+	PRIVATEAIRSHIP_SOURCE_MAP_INVALID,
+	PRIVATEAIRSHIP_ITEM_UNAVAILABLE
+};
+
+void clif_private_airship_response(struct map_session_data *sd, enum e_private_airship_response response);
+
+//Refine UI
+void clif_refineui_open(struct map_session_data *sd);
+
+void clif_guild_storage_log(struct map_session_data *sd, enum e_guild_storage_log result);
 
 #endif /* _CLIF_H_ */

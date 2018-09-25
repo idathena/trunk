@@ -286,7 +286,7 @@ static DBMap *auth_db; // int account_id -> struct auth_node*
 // Online User Database
 //-----------------------------------------------------
 
-static int chardb_waiting_disconnect(int tid, unsigned int tick, int id, intptr_t data);
+static TIMER_FUNC(chardb_waiting_disconnect);
 enum e_char_del_response char_delete(struct char_session_data *sd, uint32 char_id);
 
 int loginif_isconnected();
@@ -585,7 +585,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 		(p->body != cp->body) || (p->class_ != cp->class_) ||
 		(p->partner_id != cp->partner_id) || (p->father != cp->father) ||
 		(p->mother != cp->mother) || (p->child != cp->child) ||
- 		(p->karma != cp->karma) || (p->manner != cp->manner) ||
+		(p->karma != cp->karma) || (p->manner != cp->manner) ||
 		(p->fame != cp->fame)
 	)
 	{
@@ -959,7 +959,7 @@ int memitemdata_to_sql(const struct item items[], int max, int id, enum storage_
 bool memitemdata_from_sql(struct s_storage *p, int max, int id, enum storage_type tableswitch, uint8 stor_id) {
 	StringBuf buf;
 	SqlStmt *stmt;
-	int i, offset = 0;
+	int i, offset = 0, max2;
 	struct item item, *storage;
 	const char *tablename, *selectoption, *printname;
 
@@ -969,24 +969,28 @@ bool memitemdata_from_sql(struct s_storage *p, int max, int id, enum storage_typ
 			tablename = inventory_db;
 			selectoption = "char_id";
 			storage = p->u.items_inventory;
+			max2 = MAX_INVENTORY;
 			break;
 		case TABLE_CART:
 			printname = "Cart";
 			tablename = cart_db;
 			selectoption = "char_id";
 			storage = p->u.items_cart;
+			max2 = MAX_CART;
 			break;
 		case TABLE_STORAGE:
 			printname = inter_premiumStorage_getPrintableName(stor_id);
 			tablename = inter_premiumStorage_getTableName(stor_id);
 			selectoption = "account_id";
 			storage = p->u.items_storage;
+			max2 = inter_premiumStorage_getMax(p->stor_id);
 			break;
 		case TABLE_GUILD_STORAGE:
 			printname = "Guild Storage";
 			tablename = guild_storage_db;
 			selectoption = "guild_id";
 			storage = p->u.items_guild;
+			max2 = inter_guild_storagemax(id);
 			break;
 		default:
 			ShowError("Invalid table name!\n");
@@ -997,7 +1001,7 @@ bool memitemdata_from_sql(struct s_storage *p, int max, int id, enum storage_typ
 	p->id = id;
 	p->type = tableswitch;
 	p->stor_id = stor_id;
-	p->max_amount = inter_premiumStorage_getMax(p->stor_id);
+	p->max_amount = max2;
 
 	stmt = SqlStmt_Malloc(sql_handle);
 	if( stmt == NULL ) {
@@ -2104,7 +2108,7 @@ void char_charlist_notify(int fd, struct char_session_data *sd) {
 }
 
 void char_block_character(int fd, struct char_session_data *sd);
-int charblock_timer(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(charblock_timer) {
 	struct char_session_data *sd = NULL;
 	int i = 0;
 
@@ -2254,6 +2258,8 @@ int char_married(int pl1, int pl2)
 
 int char_child(int parent_id, int child_id)
 {
+	if( parent_id == 0 || child_id == 0 ) //Failsafe, avoild querys and fix EXP bug dividing with lower level chars
+		return 0;
 	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `child` FROM `%s` WHERE `char_id` = '%d'", char_db, parent_id) )
 		Sql_ShowDebug(sql_handle);
 	else if( SQL_SUCCESS == Sql_NextRow(sql_handle) ) {
@@ -2271,6 +2277,8 @@ int char_child(int parent_id, int child_id)
 
 int char_family(int cid1, int cid2, int cid3)
 {
+	if( cid1 == 0 || cid2 == 0 || cid3 == 0 ) //Failsafe, and avoid querys where there is no sense to keep executing if any of the inputs are 0
+		return 0;
 	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `char_id`,`partner_id`,`child` FROM `%s` WHERE `char_id` IN ('%d','%d','%d')", char_db, cid1, cid2, cid3) )
 		Sql_ShowDebug(sql_handle);
 	else while( SQL_SUCCESS == Sql_NextRow(sql_handle) ) {
@@ -2373,7 +2381,7 @@ static void char_auth_ok(int fd, struct char_session_data *sd)
 	//Continues when account data is received...
 }
 
-int send_accounts_tologin(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(send_accounts_tologin);
 void mapif_server_reset(int id);
 
 /**
@@ -2915,8 +2923,8 @@ int parse_fromlogin(int fd) {
 	return 0;
 }
 
-int check_connect_login_server(int tid, unsigned int tick, int id, intptr_t data);
-int send_accounts_tologin(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(check_connect_login_server);
+TIMER_FUNC(send_accounts_tologin);
 
 void do_init_loginif(void)
 {
@@ -4977,7 +4985,7 @@ int mapif_send(int fd, unsigned char *buf, unsigned int len)
 	return 0;
 }
 
-int broadcast_user_count(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(broadcast_user_count)
 {
 	uint8 buf[6];
 	int users = count_users();
@@ -5029,7 +5037,7 @@ static int send_accounts_tologin_sub(DBKey key, DBData *data, va_list ap)
  * @param data : data transmited for delayed function
  * @return 
  */
-int send_accounts_tologin(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(send_accounts_tologin)
 {
 	if( loginif_isconnected() ) {
 		//Send account list to login server
@@ -5046,7 +5054,7 @@ int send_accounts_tologin(int tid, unsigned int tick, int id, intptr_t data)
 	return 0;
 }
 
-int check_connect_login_server(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(check_connect_login_server)
 {
 	if( login_fd > 0 && session[login_fd] != NULL )
 		return 0;
@@ -5647,7 +5655,7 @@ void char_send_map_data(int fd, struct mmo_charstatus *cd, uint32 ipl, int map_s
 //Invoked 15 seconds after mapif_disconnectplayer in case the map server doesn't
 //replies/disconnect the player we tried to kick [Skotlex]
 //------------------------------------------------
-static int chardb_waiting_disconnect(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(chardb_waiting_disconnect)
 {
 	struct online_char_data *character;
 
@@ -5675,13 +5683,13 @@ static int online_data_cleanup_sub(DBKey key, DBData *data, va_list ap)
 	return 0;
 }
 
-static int online_data_cleanup(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(online_data_cleanup)
 {
 	online_char_db->foreach(online_char_db, online_data_cleanup_sub);
 	return 0;
 }
 
-static int clan_member_cleanup(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(clan_member_cleanup)
 {
 	if(clan_remove_inactive_days <= 0) //Auto removal is disabled
 		return 0;

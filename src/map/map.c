@@ -76,6 +76,7 @@ Sql *qsmysql_handle; // For query_sql
 int db_use_sqldbs = 0;
 char buyingstores_db[32] = "buyingstores";
 char buyingstore_items_db[32] = "buyingstore_items";
+char guild_storage_log_db[32] = "guild_storage_log";
 char item_db_db[32] = "item_db";
 char item_db2_db[32] = "item_db2";
 char item_db_re_db[32] = "item_db_re";
@@ -130,7 +131,7 @@ int map_port = 0;
 
 int autosave_interval = DEFAULT_AUTOSAVE_INTERVAL;
 int minsave_interval = 100;
-int save_settings = 0xFFFF;
+int16 save_settings = CHARSAVE_ALL;
 bool agit_flag = false;
 bool agit2_flag = false;
 bool agit3_flag = false;
@@ -250,7 +251,7 @@ int map_freeblock_unlock (void)
 
 // Timer function to check if there some remaining lock and remove them if so.
 // Called each 1s
-int map_freeblock_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(map_freeblock_timer)
 {
 	if (block_free_lock > 0) {
 		ShowError("map_freeblock_timer: block_free_lock(%d) is invalid.\n", block_free_lock);
@@ -625,7 +626,7 @@ int map_foreachinrangeV(int (*func)(struct block_list *, va_list), struct block_
 						&& check_distance_bl(center, bl, range)
 #endif
 						&& (!wall_check || path_search_long(NULL, center->m, center->x, center->y, bl->x, bl->y, CELL_CHKWALL))
-					  	&& bl_list_count < BL_LIST_MAX )
+						&& bl_list_count < BL_LIST_MAX )
 						bl_list[bl_list_count++] = bl;
 				}
 			}
@@ -641,7 +642,7 @@ int map_foreachinrangeV(int (*func)(struct block_list *, va_list), struct block_
 						&& check_distance_bl(center, bl, range)
 #endif
 						&& (!wall_check || path_search_long(NULL, center->m, center->x, center->y, bl->x, bl->y, CELL_CHKWALL))
-					  	&& bl_list_count < BL_LIST_MAX )
+						&& bl_list_count < BL_LIST_MAX )
 						bl_list[bl_list_count++] = bl;
 				}
 			}
@@ -672,9 +673,9 @@ int map_foreachinrange(int (*func)(struct block_list *, va_list), struct block_l
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinrangeV(func, center, range, type, ap, (battle_config.skill_wall_check > 0));
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -683,9 +684,9 @@ int map_foreachinallrange(int (*func)(struct block_list *, va_list), struct bloc
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinrangeV(func, center, range, type, ap, false);
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -697,9 +698,9 @@ int map_foreachinshootrange(int (*func)(struct block_list *, va_list), struct bl
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinrangeV(func, center, range, type, ap, true);
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -792,9 +793,9 @@ int map_foreachinallarea(int (*func)(struct block_list *, va_list), int16 m, int
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinareaV(func, m, x0, y0, x1, y1, type, ap, false);
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -803,9 +804,9 @@ int map_foreachinshootarea(int (*func)(struct block_list *, va_list), int16 m, i
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinareaV(func, m, x0, y0, x1, y1, type, ap, true);
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -814,9 +815,9 @@ int map_foreachinarea(int (*func)(struct block_list *, va_list), int16 m, int16 
 	int returnCount = 0;
 	va_list ap;
 
- 	va_start(ap, type);
+	va_start(ap, type);
 	returnCount = map_foreachinareaV(func, m, x0, y0, x1, y1, type, ap, (battle_config.skill_wall_check > 0));
- 	va_end(ap);
+	va_end(ap);
 	return returnCount;
 }
 
@@ -847,7 +848,7 @@ int map_forcountinrange(int (*func)(struct block_list *, va_list), struct block_
 #ifdef CIRCULAR_AREA
 						&& check_distance_bl(center, bl, range)
 #endif
-					  	&& bl_list_count < BL_LIST_MAX )
+						&& bl_list_count < BL_LIST_MAX )
 						bl_list[bl_list_count++] = bl;
 				}
 			}
@@ -1534,7 +1535,7 @@ int map_get_new_object_id(void)
  * Timered fonction to clear the floor (remove remaining item)
  * Called each flooritem_lifetime ms
  *------------------------------------------*/
-int map_clearflooritem_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(map_clearflooritem_timer)
 {
 	struct flooritem_data *fitem = (struct flooritem_data *)idb_get(id_db, id);
 	
@@ -2728,18 +2729,16 @@ int map_removemobs_sub(struct block_list *bl, va_list ap)
 	return 1;
 }
 
-int map_removemobs_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(map_removemobs_timer)
 {
 	int count;
 	const int16 m = id;
 
-	if (m < 0 || m >= MAX_MAP_PER_SERVER)
-	{	//Incorrect map id!
+	if (m < 0 || m >= MAX_MAP_PER_SERVER) { //Incorrect map id!
 		ShowError("map_removemobs_timer error: timer %d points to invalid map %d\n",tid, m);
 		return 0;
 	}
-	if (map[m].mob_delete_timer != tid)
-	{	//Incorrect timer call!
+	if (map[m].mob_delete_timer != tid) { //Incorrect timer call!
 		ShowError("map_removemobs_timer mismatch: %d != %d (map %s)\n",map[m].mob_delete_timer, tid, map[m].name);
 		return 0;
 	}
@@ -2751,7 +2750,7 @@ int map_removemobs_timer(int tid, unsigned int tick, int id, intptr_t data)
 
 	if (battle_config.etc_log && count > 0)
 		ShowStatus("Map %s: Removed '"CL_WHITE"%d"CL_RESET"' mobs.\n",map[m].name, count);
-	
+
 	return 1;
 }
 
@@ -3118,6 +3117,11 @@ void map_setgatcell(int16 m, int16 x, int16 y, int gat)
  *------------------------------------------*/
 static DBMap *iwall_db;
 
+bool map_iwall_exist(const char *wall_name)
+{
+	return strdb_exists(iwall_db, wall_name);
+}
+
 void map_iwall_nextxy(int16 x, int16 y, int8 dir, int pos, int16 *x1, int16 *y1)
 {
 	if( dir == 0 || dir == 4 )
@@ -3202,13 +3206,13 @@ void map_iwall_get(struct map_session_data *sd)
 	dbi_destroy(iter);
 }
 
-void map_iwall_remove(const char *wall_name)
+bool map_iwall_remove(const char *wall_name)
 {
 	struct iwall_data *iwall;
 	int16 i, x1, y1;
 
 	if( (iwall = (struct iwall_data *)strdb_get(iwall_db, wall_name)) == NULL )
-		return; // Nothing to do
+		return false; // Nothing to do
 
 	for( i = 0; i < iwall->size; i++ ) {
 		map_iwall_nextxy(iwall->x, iwall->y, iwall->dir, i, &x1, &y1);
@@ -3221,6 +3225,7 @@ void map_iwall_remove(const char *wall_name)
 
 	map[iwall->m].iwall_num--;
 	strdb_remove(iwall_db, iwall->wall_name);
+	return true;
 }
 
 /**
@@ -3550,13 +3555,14 @@ void map_flags_init(void) {
 int map_waterheight(char *mapname)
 {
 	char fn[256];
- 	char *rsw, *found;
+	char *rsw, *found;
 
 	// Look up for the rsw
 	sprintf(fn, "data\\%s.rsw", mapname);
 
 	found = grfio_find_file(fn);
-	if (found) strcpy(fn, found); // Replace with real name
+	if (found)
+		strcpy(fn, found); // Replace with real name
 
 	// Read & convert fn
 	rsw = (char *)grfio_read (fn);
@@ -3732,7 +3738,7 @@ static int char_ip_set = 0;
 int parse_console(const char *buf) {
 	char type[64];
 	char command[64];
-	char mapname[64];
+	char mapname[MAP_NAME_LENGTH];
 	int16 x = 0;
 	int16 y = 0;
 	int16 m;
@@ -3742,7 +3748,7 @@ int parse_console(const char *buf) {
 	memset(&sd, 0, sizeof(struct map_session_data));
 	strcpy(sd.status.name, "console");
 
-	if( (n = sscanf(buf, "%63[^:]:%63[^:]:%63s %hd %hd[^\n]", type, command, mapname, &x, &y)) < 5 ) {
+	if( (n = sscanf(buf, "%63[^:]:%63[^:]:%11s %6hd %6hd[^\n]", type, command, mapname, &x, &y)) < 5 ) {
 		if( (n = sscanf(buf, "%63[^:]:%63[^\n]", type, command)) < 2 ) {
 			if( (n = sscanf(buf, "%63[^\n]", type)) < 1 ) return -1; //nothing to do no arg
 		}
@@ -3972,6 +3978,8 @@ int inter_config_read(char *cfgName)
 			strcpy(buyingstores_db, w2);
 		else if( strcmpi(w1, "buyingstore_items_db") == 0 )
 			strcpy(buyingstore_items_db, w2);
+		else if( strcmpi(w1, "guild_storage_log") == 0 )
+			strcpy(guild_storage_log_db, w2);
 		else if( strcmpi(w1, "item_cash_db_db") == 0 )
 			strcpy(item_cash_db_db, w2);
 		else if( strcmpi(w1, "item_cash_db2_db") == 0 )
@@ -4316,6 +4324,50 @@ void map_skill_damage_add(struct map_data *m, uint16 skill_id, int pc, int mob, 
 	m->skill_damage.entries[m->skill_damage.count++] = entry;
 }
 #endif
+
+/**
+ * PvP timer handling (starting)
+ * @param bl: Player block object
+ * @param ap: func* with va_list values
+ * @return 0
+ */
+int map_mapflag_pvp_start(struct block_list *bl, va_list ap)
+{
+	struct map_session_data *sd = map_id2sd(bl->id);
+
+	nullpo_retr(0, sd);
+
+	if( sd->pvp_timer == INVALID_TIMER ) {
+		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
+		sd->pvp_rank = 0;
+		sd->pvp_lastusers = 0;
+		sd->pvp_point = 5;
+		sd->pvp_won = 0;
+		sd->pvp_lost = 0;
+	}
+	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
+	return 0;
+}
+
+/**
+ * PvP timer handling (stopping)
+ * @param bl: Player block object
+ * @param ap: func* with va_list values
+ * @return 0
+ */
+int map_mapflag_pvp_stop(struct block_list *bl, va_list ap)
+{
+	struct map_session_data *sd = map_id2sd(bl->id);
+
+	nullpo_retr(0, sd);
+
+	clif_pvpset(sd, 0, 0, 2);
+	if( sd->pvp_timer != INVALID_TIMER ) {
+		delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
+		sd->pvp_timer = INVALID_TIMER;
+	}
+	return 0;
+}
 
 /**
  * @see DBApply

@@ -4,6 +4,8 @@
 #ifndef _SCRIPT_H_
 #define _SCRIPT_H_
 
+#include "../common/timer.h"
+
 #define NUM_WHISPER_VAR 10
 
 struct map_session_data;
@@ -20,6 +22,7 @@ extern struct Script_Config {
 	int input_min_value;
 	int input_max_value;
 
+	//PC related
 	const char *die_event_name;
 	const char *kill_pc_event_name;
 	const char *kill_mob_event_name;
@@ -30,9 +33,49 @@ extern struct Script_Config {
 	const char *joblvup_event_name;
 	const char *stat_calc_event_name;
 
-	const char *ontouch_name;
-	const char *ontouch2_name;
-	const char *onuntouch_name;
+	// NPC related
+	const char *ontouch_event_name;
+	const char *ontouch2_event_name;
+	const char *ontouchnpc_event_name;
+	const char *onuntouch_event_name;
+	const char *onwhisper_event_name;
+	const char *oncommand_event_name;
+	const char *onairshiprequest_event_name;
+
+	// Init related
+	const char *init_event_name;
+	const char *inter_init_event_name;
+	const char *inter_init_once_event_name;
+
+	// Guild related
+	const char *guild_break_event_name;
+	const char *agit_start_event_name;
+	const char *agit_init_event_name;
+	const char *agit_end_event_name;
+	const char *agit_start2_event_name;
+	const char *agit_init2_event_name;
+	const char *agit_end2_event_name;
+	const char *agit_start3_event_name;
+	const char *agit_init3_event_name;
+	const char *agit_end3_event_name;
+
+	// Timer related
+	const char *timer_event_name;
+	const char *timer_minute_event_name;
+	const char *timer_hour_event_name;
+	const char *timer_clock_event_name;
+	const char *timer_day_event_name;
+	const char *timer_sunday_event_name;
+	const char *timer_monday_event_name;
+	const char *timer_tuesday_event_name;
+	const char *timer_wednesday_event_name;
+	const char *timer_thursday_event_name;
+	const char *timer_friday_event_name;
+	const char *timer_saturday_event_name;
+
+	// Instance related
+	const char *instance_init_event_name;
+	const char *instance_destroy_event_name;
 } script_config;
 
 typedef enum c_op {
@@ -1710,7 +1753,7 @@ void run_script(struct script_code *rootscript, int pos, int rid, int oid);
 int set_var(struct map_session_data *sd, char *name, void *val);
 int conv_num(struct script_state *st,struct script_data *data);
 const char *conv_str(struct script_state *st,struct script_data *data);
-int run_script_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(run_script_timer);
 void run_script_main(struct script_state *st);
 
 void script_stop_sleeptimers(int id);

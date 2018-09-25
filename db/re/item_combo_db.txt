@@ -498,7 +498,7 @@
 5670:18874,{ bonus3 bAutoSpell,"TF_STEAL",1,10; }
 5672:18720,{ set .@r,getequiprefinerycnt(EQI_HEAD_TOP); bonus2 bMagicAddClass,Class_Boss,2+(.@r>=7?4:(.@r>=5?3:0)); if(.@r>=5) bonus2 bSubClass,Class_Normal,-5; }
 5690:13428,{ bonus bHit,10; bonus2 bAddRace,RC_DemiHuman,10; }
-5890:28306,{ bonus2 bAddRace,RC_All,3; }
+5890:28306,{ bonus2 bAddClass,Class_All,3; }
 5920:18542,{ bonus bHealPower,(getequiprefinerycnt(EQI_HEAD_TOP)/2)*3; }
 5967:28321,{ bonus2 bSubSkill,"HT_BLITZBEAT",200; }
 5986:28351,{ bonus bCritAtkRate,10; if(getequiprefinerycnt(EQI_HEAD_TOP)>5) bonus bCritical,5; }
@@ -642,7 +642,7 @@
 24046:24051,{ bonus2 bSubEle,Ele_Neutral,1; if(getequiprefinerycnt(EQI_SHADOW_ACC_R)+getequiprefinerycnt(EQI_SHADOW_ACC_L)>=15) bonus2 bSubEle,Ele_Neutral,1; }
 24048:24109:24110,{ bonus bNoCastCancel2,1; bonus bVariableCastrate,40-getequiprefinerycnt(EQI_SHADOW_ACC_R)-getequiprefinerycnt(EQI_SHADOW_ACC_L); }
 24052:24062,{ bonus2 bExpAddRace,RC_DemiHuman,3; }
-24053:24063,{ bonus2 bAddRace,RC_All,5; bonus2 bMagicAddRace,RC_All,5; }
+24053:24063,{ bonus2 bAddClass,Class_All,5; bonus2 bMagicAddRace,RC_All,5; }
 24054:24065,{ bonus2 bExpAddRace,RC_Brute,3; }
 24055:24066,{ bonus2 bExpAddRace,RC_Insect,3; }
 24056:24067,{ bonus2 bExpAddRace,RC_Fish,3; }

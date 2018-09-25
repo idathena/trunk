@@ -1783,7 +1783,12 @@ lasagna,134,113,3	script	Hair Designer#dr	4_DR_F_02,{
 		mes "They're allowed only for the Doram.";
 		close;
 	}
-	switch( select( "Change hairstyle.", "Dye hair.", "Cancel" ) ) {
+	set .@bflag,getbattleflag("feature.stylistui");
+	if (!.@bflag)
+		set .@menu,select( "Change hairstyle.:Dye hair.:Cancel" );
+	else
+		set .@menu,select( ":Newly style change.:Cancel" );
+	switch( .@menu ) {
 	case 1:
 		mes "[Lonza]";
 		mes "I've lined up the attractive hairstyles that never go out of style. Will you take a look?";
@@ -1852,6 +1857,10 @@ lasagna,134,113,3	script	Hair Designer#dr	4_DR_F_02,{
 			}
 		}
 	case 2:
+		if (.@bflag) {
+			open_stylistui();
+			close;
+		}
 		mes "[Lonza]";
 		mes "Trendsetters know the right color for their hair, too!";
 		next;
@@ -2420,7 +2429,7 @@ lasagna,140,250,3	script	The skittish fourth#wea	4_DR_F_01,{
 	close;
 }
 
-lasagna,140,245,3	script	The sensitive-minded el	4_CAT_SAILOR3,{
+lasagna,140,245,3	script	The sensitive-minded ela	4_CAT_SAILOR3,{
 	if (checkweight(1001,1) == 0) {
 		mes "- Hold on a second here!! -";
 		mes "- You have too many items. -";

@@ -815,7 +815,7 @@ int inter_log(char *fmt, ...)
 static void inter_config_readConf(void)
 {
 	int count = 0;
-	config_setting_t *config = NULL;
+	struct config_setting_t *config = NULL;
 
 	if( conf_read_file(&interserv_config.cfg, interserv_config.cfgFile) )
 		return;
@@ -829,7 +829,7 @@ static void inter_config_readConf(void)
 			int id, max_num;
 			const char *name, *tablename;
 			struct s_storage_table table;
-			config_setting_t *entry = config_setting_get_elem(config, i);
+			struct config_setting_t *entry = config_setting_get_elem(config, i);
 
 			if( !config_setting_lookup_int(entry, "id", &id) ) {
 				ShowConfigWarning(entry, "inter_config_readConf: Cannot find storage \"id\" in member %d", i);

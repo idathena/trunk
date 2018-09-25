@@ -134,7 +134,7 @@ OnEnter:
 	end;
 
 OnStop:
-// 	broadcastinmap "toout turns off the timer."
+//	broadcastinmap "toout turns off the timer."
 	stopnpctimer;
 	end;
 }
@@ -149,8 +149,8 @@ OnTouch:
 force_1-2,99,31,4	script	Slipslowrun#party	124,{
 OnStart:
 	initnpctimer;
-	set $arena_minptst,gettime(2);
-	set $arena_secptst,gettime(1);
+	set $arena_minptst,gettime(DT_MINUTE);
+	set $arena_secptst,gettime(DT_SECOND);
 	end;
 
 OnTimer2000:
@@ -414,8 +414,8 @@ OnReset:
 
 force_1-2,95,187,0	script	force_09_exit	45,1,1,{
 OnTouch:
-	set $arena_minptend,gettime(2);
-	set $arena_secptend,gettime(1);
+	set $arena_minptend,gettime(DT_MINUTE);
+	set $arena_secptend,gettime(DT_SECOND);
 	warp "prt_are_in",73,139;
 	donpcevent "#arn_timer_pt::OnEnter";
 	donpcevent "arena_p::OnReset";
@@ -1040,7 +1040,7 @@ prt_are_in,77,135,3	script	Staff#party-2	67,{
 			donpcevent "Ponox::OnStart";
 		}
 		specialeffect2 EH_HIT5;
- 		donpcevent "cast#pt::OnNomal1";
+		donpcevent "cast#pt::OnNomal1";
 		warp "arena_room",100,75;
 		end;
 	} else {
@@ -1141,7 +1141,7 @@ OnTimer4000:
 	end;
 
 OnTimer60000:
- 	donpcevent "cast#pt::OnTimeOver2";
+	donpcevent "cast#pt::OnTimeOver2";
 	donpcevent "arn_warp_pt::OnOut";
 	donpcevent "#arn_timer_pt::OnStop";
 	donpcevent "alloff#pt::OnEnable";

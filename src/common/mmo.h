@@ -53,7 +53,7 @@
 #define MAX_BANK_ZENY SINT32_MAX //Max zeny in Bank
 #define MAX_FAME 1000000000 //Max fame points
 #define MAX_CART 100 //Maximum item in cart
-#define MAX_SKILL 5066 //Maximum skill data
+#define MAX_SKILL 5074 //Maximum skill data
 #define GLOBAL_REG_NUM 256 //Max permanent character variables per char
 #define ACCOUNT_REG_NUM 64 //Max permanent local account variables per account
 #define ACCOUNT_REG2_NUM 16 //Max permanent global account variables per account
@@ -69,12 +69,12 @@
 #define MAX_GUILDPOSITION 20 //Increased max guild positions to accomodate for all members [Valaris] (removed) [PoW]
 #define MAX_GUILDEXPULSION 32 //Max Guild expulsion
 #define MAX_GUILDALLIANCE 16 //Max Guild alliance
-#define MAX_GUILDSKILL 17 //Increased max guild skills because of new skills [Sara-chan]
+#define MAX_GUILDSKILL 17 //Max Guild skills
 #define MAX_GUILDLEVEL 50 //Max Guild level
 #define MAX_GUARDIANS 8 //Local max per castle. [Skotlex]
 #define MAX_QUEST_OBJECTIVES 3 //Max quest objectives for a quest
 #define MAX_QUEST_DROPS 3 //Max quest drops for a quest
-#define MAX_PC_BONUS_SCRIPT 50 //Max bonus script can be fetched from `bonus_script` table on player load [Cydh]
+#define MAX_PC_BONUS_SCRIPT 50 //Max bonus script that can be fetched from `bonus_script` table on player load [Cydh]
 #define MAX_CLAN 500
 #define MAX_CLANALLIANCE 6
 #define MAX_ITEM_RDM_OPT 5 //Max item random option [Napster]
@@ -172,7 +172,7 @@ enum item_types {
 	IT_UNKNOWN2,//9
 	IT_AMMO,    //10
 	IT_RESTRICTEDCONSUME,//11
-	IT_SHADOWGEAR,  //12
+	IT_SHADOWGEAR,//12
 	IT_CASH = 18,
 	IT_MAX
 };
@@ -332,7 +332,7 @@ struct s_storage {
 	bool lock; //If locked, can't use storage when item bound retrieval
 	uint32 id; //Account ID / Character ID / Guild ID (owner of storage)
 	enum storage_type type; //Type of storage (inventory, cart, storage, guild storage)
-	uint16 max_amount;
+	uint16 max_amount; //Maximum amount of items in storage
 	uint8 stor_id; //Storage ID
 	struct {
 		unsigned get : 1;
@@ -670,6 +670,19 @@ struct guild_castle {
 	} guardian[MAX_GUARDIANS];
 	int *temp_guardians; // ids of temporary guardians (mobs)
 	int temp_guardians_max;
+};
+
+// Guild Permissions
+enum e_guild_permission {
+	GUILD_PERM_INVITE	= 0x001,
+	GUILD_PERM_EXPEL	= 0x010,
+	GUILD_PERM_STORAGE	= 0x100,
+#if PACKETVER >= 20140205
+	GUILD_PERM_ALL		= GUILD_PERM_INVITE|GUILD_PERM_EXPEL|GUILD_PERM_STORAGE,
+#else
+	GUILD_PERM_ALL		= GUILD_PERM_INVITE|GUILD_PERM_EXPEL,
+#endif
+	GUILD_PERM_DEFAULT	= GUILD_PERM_ALL,
 };
 
 struct fame_list {

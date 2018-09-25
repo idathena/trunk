@@ -470,6 +470,7 @@ IG_PrizeOfHero	453
 IG_Closed_Mind_Box	454
 IG_God_Material_Box	455
 IG_Squad_Prize	456
+IG_Shining_Egg	457
 
 RDMOPT_VAR_MAXHPAMOUNT	1
 RDMOPT_VAR_MAXSPAMOUNT	2

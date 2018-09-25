@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= rAthena Dev Team
 //===== Last Updated: ========================================
-//= 20171105
+//= 20180913
 //===== Description: =========================================
 //= A reference manual for the rAthena scripting language.
 //= Commands are sorted depending on their functionality.
@@ -1084,6 +1084,23 @@ changing stats, equipment, or maps, as well as when logging in, leveling up, and
 mounting a job mount. This can be used to grant additional item bonuses to certain
 player groups, for instance.
 
+How to use:
+
+-	script	EventPCStatCalc	-1,{
+	end;
+OnPCStatCalcEvent:
+	if(BaseLevel >= 90) {
+		bonus bMaxHP,1000;
+		bonus bAspd,3;
+		bonus bIntravision,0;
+	}
+	// Never use 'end' or 'close' in this label, so that if by any chance a player
+	// triggers this event while still attached to a NPC (for example: Buffer NPC),
+	// the NPC script will continue to run properly without getting 'end' or 'close'
+	// by the event label script. That's why it's recommended to use the label
+	// specifically to one NPC.
+}
+
 OnWhisperGlobal:
 
 This special label triggers when a player whispers the NPC, and will run with the
@@ -1251,6 +1268,22 @@ will terminate.
     // This is needed since it is a new page and the top will now be blank
     mes "[Woman]";
     mes "This would appear on the 2nd page";
+
+---------------------------------------
+
+*clear;
+
+This command will clear the dialog text and continue the script without player interaction.
+
+Example:
+	mes "This is how the 'clear' script command works.";
+	sleep2 3000;
+	clear; // This will clear the dialog and continue to the next one.
+	mes "I will show you again.";
+	sleep2 3000;
+	clear;
+	mes "Bye!";
+	close;
 
 ---------------------------------------
 
@@ -2853,6 +2886,52 @@ random change of a refine succeeding or failing and then going through with it
 
 ---------------------------------------
 
+*getequiprefinecost(<equipment slot>,<type>,<information>{,<char id>})
+
+This function returns refine cost for equipment in <equipment slot> based on
+passed arguments <type> and <information>.
+
+Valid cost types are:
+
+REFINE_COST_TYPE_NORMAL     - For normal refining
+REFINE_COST_TYPE_OVER10     - For refining over +10
+REFINE_COST_TYPE_HD         - For refining with HD ores
+REFINE_COST_TYPE_ENRICHED   - For refining with enriched ores
+REFINE_COST_TYPE_OVER10_HD  - For refining over +10 with HD ores
+REFINE_COST_TYPE_CLINK      - For refining by Clink in Malangdo
+REFINE_COST_TYPE_HOLINK     - For refining by Holink in Malangdo
+REFINE_COST_TYPE_WAGJAK     - For refining by Refining Machine Wagjak in Izlude
+REFINE_COST_TYPE_LIMITED_HD - For refining with Limited HD ores
+
+This function will return required cost for refining based on <information> argument
+on success and will return -1 on failure. Also the function fails if the cost type
+is invalid or if there is no item in the equipment slot.
+
+Valid information types are:
+
+REFINE_INFO_MATERIAL_ID        - Material Item ID
+REFINE_INFO_ZENY               - Zeny
+REFINE_INFO_DOWN_REFINE_CHANCE - Chance of down refine level instead of breaking the item on refine failure
+REFINE_INFO_DOWN_REFINE_NUM    - Number of down refine level
+
+---------------------------------------
+
+*open_refineui({<char id>})
+
+Opens the refine UI for the attached player or the given character id.
+
+This feature requires 2016-10-12aRagexeRE or newer.
+
+---------------------------------------
+
+*open_stylistui({<char id>})
+
+Opens the stylist UI for the attached player or the given character id.
+
+This feature requires 2015-11-04aRagexeRE or newer.
+
+---------------------------------------
+
 *getareadropitem("<map name>",<x1>,<y1>,<x2>,<y2>,<item>)
 
 This function will count all the items with the specified ID number lying on the 
@@ -3059,6 +3138,14 @@ Merge all stackable items that separated by GUID flags
 If no item ID/name given, all possible items in player's inventory will be merged.
 
 ---------------------------------------
+
+*identifyall({<type>{,<account_id>}});
+
+Returns the count of unidentified items in the player inventory.
+If <type> is true the command will identify all the unidentified items as well (default).
+If <type> is false the command only returns the count of unidentified items.
+
+---------------------------------------
 //
 2,1.- End of item-related commands.
 //
@@ -3156,18 +3243,19 @@ This function will return a tick depending on <tick type>:
 
 This function will return specified information about the current system time.
 
-1 - Seconds (of a minute)
-2 - Minutes (of an hour)
-3 - Hour (of a day)
-4 - Week day (0 for Sunday, 6 is Saturday)
-5 - Day of the month.
-6 - Number of the month.
-7 - Year.
-8 - Day of the year.
+DT_SECOND - Seconds (of the current minute)
+DT_MINUTE - Minutes (of the current hour)
+DT_HOUR - Hour (of the current day)
+DT_DAYOFWEEK - Week day (constants for MONDAY to SUNDAY are available)
+DT_DAYOFMONTH - Day of the current month
+DT_MONTH - Month (constants for JANUARY to DECEMBER are available)
+DT_YEAR - Year
+DT_DAYOFYEAR - Day of the year
+DT_YYYYMMDD - current date in the form YYYYMMDD
 
-It will only return numbers.
+It will only return numbers. If another type is supplied -1 will be returned.
 
-    if (gettime(4)==6) mes "It's a Saturday. I don't work on Saturdays.";
+	if (gettime(DT_DAYOFWEEK)==SATURDAY) mes "It's a Saturday. I don't work on Saturdays.";
 
 ---------------------------------------
 
@@ -3947,7 +4035,7 @@ not.
 ==============================
 -------------------------
 
-*attachrid(<account ID>)
+*attachrid(<account ID>{,force})
 *detachrid;
 
 These commands allow the manipulation of the script's currently attached player.
@@ -3955,8 +4043,13 @@ While 'attachrid' allows attaching of a different player by using its account id
 for the parameter RID, 'detachrid' makes the following commands run as if the
 script was never invoked by a player. 
 
-The command returns 0 if the player cannot be attached (if the account is offline
-or does not exist), and 1 upon success.
+The command returns false if the player cannot be attached (if the account is offline
+or does not exist), and true upon success.
+
+By default the command is executed with force, which causes to attach the player
+even if he is currently attached to another script. Since this is not always the
+desired behavior you can also specify false to the command and it will only return 
+true if the player is online and was not attached to another script.
 
 -------------------------
 
@@ -5403,8 +5496,6 @@ Example:
 
 ---------------------------------------
 
----------------------------------------
-
 *openmail({<char_id>});
 
 This will open a character's Mail window on the client connected to the 
@@ -5414,6 +5505,66 @@ invoking character.
     close2;
     openmail;
     end;
+
+---------------------------------------
+
+*mail <destination id>,"<sender name>","<title>","<body>"{,<zeny>{,<item id array>,<item amount array>{,<item card0 array>{,<item card1 array>{,<item card2 array>{,<item card3 array>
+		{,<random option id0 array>, <random option value0 array>, <random option paramter0 array>{,<random option id1 array>, <random option value1 array>, <random option paramter1 array>
+		{,<random option id2 array>, <random option value2 array>, <random option paramter2 array>{,<random option id3 array>, <random option value3 array>, <random option paramter3 array>
+		{,<random option id4 array>, <random option value4 array>, <random option paramter4 array>}}}}}}};
+
+This command will send mail to the <destination id> which is a character ID.
+A <sender name> can be specified but does not have to be from the direct creator
+of the mail and is limited to NAME_LENGTH (24) characters. Mail <title> is limited
+to MAIL_TITLE_LENGTH (40) characters. Mail <body> is limited to MAIL_BODY_LENGTH
+(200) characters for PACKETVER < 20150513 or 500 characters for later clients.
+
+Optional <zeny> and item data can be added to the mail as well. PACKETVER < 20150513
+is limited to 1 item while later clients are limited to MAIL_MAX_ITEM (5).
+
+The <item id array>, <item amount array>, <item card0 array>, <item card1 array>,
+<item card2 array>, and <item card3 array> should all be integer arrays.
+
+For random options there can be 5 arrays in pairs of 3 (ids, values, parameters) right after the cards.
+All of these arrays shall be integer arrays as well.
+
+Example of sending mail with zeny:
+	.@charid = getcharid(0);
+	.@sender$ = "Poring";
+	.@title$ = "Welcome";
+	.@body$ = "Hi! I'm a simple Poring from the Prontera fields! Welcome to Ragnarok!";
+	.@zeny = 5000;
+	mail .@charid, .@sender$, .@title$, .@body$, .@zeny;
+
+Example of sending mail with items:
+	.@charid = getcharid(0);
+	.@sender$ = "Angeling";
+	.@title$ = "Welcome";
+	.@body$ = "Hi! I'm a simple Angeling from the Prontera fields! Welcome to Ragnarok!";
+	.@zeny = 0;
+	setarray .@mailitem[0], 504, 505, 2220, 1214; // White Potion, Blue Potion, Hat, Dagger
+	setarray .@mailamount[0], 10, 5, 1, 1; // 10 White Potions, 5 Blue Potions, 1 Hat, 1 Dagger
+	setarray .@mailcard0[0], 0, 0, 4198, 4092; // Attach Maya Purple Card to the Hat, Attach Skeleton Worker Card to Dagger
+	setarray .@mailcard1[0], 0, 0, 0, 4092; // Attach Skeleton Worker Card to Dagger
+	setarray .@mailcard2[0], 0, 0, 0, 4092; // Attach Skeleton Worker Card to Dagger
+	mail .@charid, .@sender$, .@title$, .@body$, .@zeny, .@mailitem, .@mailamount, .@mailcard0, .@mailcard1, .@mailcard2;
+
+Example of sending mail with items and random options:
+	.@charid = getcharid(0);
+	.@sender$ = "Angeling";
+	.@title$ = "Welcome";
+	.@body$ = "Hi! I'm a simple Angeling from the Prontera fields! Welcome to Ragnarok!";
+	.@zeny = 0;
+	setarray .@mailitem[0], 504, 505, 2220, 1214; // White Potion, Blue Potion, Hat, Dagger
+	setarray .@mailamount[0], 10, 5, 1, 1; // 10 White Potions, 5 Blue Potions, 1 Hat, 1 Dagger
+	setarray .@mailcard0[0], 0, 0, 4198, 4092; // Attach Maya Purple Card to the Hat, Attach Skeleton Worker Card to Dagger
+	setarray .@mailcard1[0], 0, 0, 0, 4092; // Attach Skeleton Worker Card to Dagger
+	setarray .@mailcard2[0], 0, 0, 0, 4092; // Attach Skeleton Worker Card to Dagger
+	setarray .@mailcard3[0], 0, 0, 0, 0; // Empty last slot
+	setarray .@mailrndopt_id0[0], 0, 0, 0, RDMOPT_VAR_MAXHPAMOUNT; // Enchant the Dagger with increased HP option
+	setarray .@mailrndopt_val0[0], 0, 0, 0, 1000; // Enchant the Dagger with increased HP option by 1000 points
+	setarray .@mailrndopt_prm0[0], 0, 0, 0, 0; // Enchant the Dagger with increased HP option - does not need any parameter
+	mail .@charid, .@sender$, .@title$, .@body$, .@zeny, .@mailitem, .@mailamount, .@mailcard0, .@mailcard1, .@mailcard2, .@mailcard3, .@mailrndopt_id0, .@mailrndopt_val0, .@mailrndopt_prm0;
 
 ---------------------------------------
 
@@ -5436,12 +5587,41 @@ This will open the Auction window on the client connected to the invoking charac
 
 This function works the same as 'openstorage' but will open a guild storage 
 window instead for the guild storage of the guild the invoking character belongs 
-to. This is a function because it returns a value - 0 if the guild storage was 
-opened successfully and 1 if it wasn't. (Notice, it's a ZERO upon success.) 
-Since guild storage is only accessible to one character at one time, it may fail 
-if another character is accessing the guild storage at the same time.
+to.
 
-This will also fail and return 2 if the character does not belong to any guild.
+Return values:
+ GSTORAGE_OPEN - Successfully opened.
+ GSTORAGE_STORAGE_ALREADY_OPEN - Player storage is already open.
+ GSTORAGE_ALREADY_OPEN - Guild storage is already open.
+ GSTORAGE_NO_GUILD - Player is not in a guild.
+ GSTORAGE_NO_STORAGE - Guild hasn't invested in the Guild Storage Expansion skill (only if OFFICIAL_GUILD_STORAGE is enabled).
+ GSTORAGE_NO_PERMISSION - Player doesn't have permission to use the guild storage.
+
+---------------------------------------
+
+*guildopenstorage_log({<char id>})
+
+Opens the guild storage log window for the attached character or the given character id.
+
+Possible return values:
+ GUILDSTORAGE_LOG_FINAL_SUCCESS	Window was opened successfully.
+ GUILDSTORAGE_LOG_EMPTY		Window was not opened, because no entries exist.
+ GUILDSTORAGE_LOG_FAILED	Some database error occurred.
+
+---------------------------------------
+
+*guild_has_permission(<permission>{,<char id>})
+
+Checks if the attached player or the player with the given character id has the given permission(s).
+Permission can be a bitmask and allows to use multiple values at the same time.
+Returns true if the player has all of the given permissions or false if the player does at least
+miss one of the given permissions or is not in a guild at all.
+
+Available permissions are:
+ GUILD_PERM_INVITE	If a player is allowed to invite other players.
+ GUILD_PERM_EXPEL	If a player is allowed to expel other guild members.
+ GUILD_PERM_STORAGE	If a player is allowed to access the guild storage.
+ GUILD_PERM_ALL		A combination of all permissions above.
 
 ---------------------------------------
 
@@ -5535,10 +5715,10 @@ Used in reset NPC's (duh!)
 
 ---------------------------------------
 
-*sc_start 	<effect type>,<ticks>,<value 1>{,<rate>,<flag>{,<GID>}};
-*sc_start2 	<effect type>,<ticks>,<value 1>,<value 2>{,<rate>,<flag>{,<GID>}};
-*sc_start4 	<effect type>,<ticks>,<value 1>,<value 2>,<value 3>,<value 4>{,<rate>,<flag>{,<GID>}};
-*sc_end 	<effect type>{,<GID>};
+*sc_start	<effect type>,<ticks>,<value 1>{,<rate>,<flag>{,<GID>}};
+*sc_start2	<effect type>,<ticks>,<value 1>,<value 2>{,<rate>,<flag>{,<GID>}};
+*sc_start4	<effect type>,<ticks>,<value 1>,<value 2>,<value 3>,<value 4>{,<rate>,<flag>{,<GID>}};
+*sc_end	<effect type>{,<GID>};
 
 These commands will bestow a status effect on a character.
 
@@ -5744,7 +5924,7 @@ executed on attack (or when attacked in the case of autobonus2).
 
 Rate is the trigger rate of the script (1000 = 100%). 
 
-Duration is the time that the bonus will last for since the script has triggered.
+Duration is the time in milliseconds that the bonus will last for since the script has triggered.
 
 Skill ID/skill name the skill which will be used as trigger to start the bonus. (autobonus3)
 
@@ -6397,6 +6577,20 @@ If the NPC is not in a waitingroom, nothing happens.
 Changes the display name and/or display class of the target NPC.
 Returns 0 is successful, 1 if the NPC does not exist.
 Size is 0 = normal 1 = small 2 = big.
+
+---------------------------------------
+
+*airship_respond(<response>)
+
+Send client respond to different private airship status.
+
+The available responses are:
+	PRIVATEAIRSHIP_OK
+	PRIVATEAIRSHIP_RETRY
+	PRIVATEAIRSHIP_ITEM_NOT_ENOUGH
+	PRIVATEAIRSHIP_DESTINATION_MAP_INVALID
+	PRIVATEAIRSHIP_SOURCE_MAP_INVALID
+	PRIVATEAIRSHIP_ITEM_UNAVAILABLE
 
 ---------------------------------------
 \\
@@ -7383,20 +7577,6 @@ event labels. If specified name is not found, command does nothing.
 
 ---------------------------------------
 
-*misceffect <effect number>;
-
-This command, if run from an NPC object that has a sprite, will call up a 
-specified effect number, centered on the NPC sprite. If the running code does 
-not have an object ID (a 'floating' NPC) or is not running from an NPC object at 
-all (an item script) the effect will be centered on the character who's RID got 
-attached to the script, if any. For usable item scripts, this command will 
-create an effect centered on the player using the item.
-
-A full list of known effects is found in 'doc/effect_list.txt'. The list of 
-those that actually work may differ greatly between client versions.
-
----------------------------------------
-
 *soundeffect "<effect filename>",<type>;
 *soundeffectall "<effect filename>",<type>{,"<map name>"}{,<x0>,<y0>,<x1>,<y1>};
 
@@ -8103,8 +8283,10 @@ OnClock0600:
 	day;
 	end;
 OnInit:
-	// setting correct mode upon server start-up
-	if(gettime(3)>=6 && gettime(3)<18) end;
+	// Setting correct mode upon server start-up
+	if(gettime(DT_HOUR)>=6 && gettime(DT_HOUR)<18)
+		end;
+// Fall through
 OnClock1800:
 	night;
 	end;
@@ -8235,8 +8417,8 @@ Returns the md5 checksum of a number or string.
 
 Example:
 	mes md5(12345);
-	mes md5("12345"); 	// Will both display 827ccb0eea8a706c4c34a16891f84e7b
-	mes md5("qwerty"); 	// Will display d8578edf8458ce06fbc5bb76a58c5ca4
+	mes md5("12345");	// Will both display 827ccb0eea8a706c4c34a16891f84e7b
+	mes md5("qwerty");	// Will display d8578edf8458ce06fbc5bb76a58c5ca4
 
 ---------------------------------------
 
@@ -8692,6 +8874,12 @@ Creates an invisible wall, an array of "setcell" starting from x,y and doing a
 line of the given size in the given direction. The difference with setcell is
 this one update client part too to avoid the glitch problem. Directions are the 
 same as NPC sprite facing directions: 0=north, 1=northwest, 2=west, etc.
+
+---------------------------------------
+
+*checkwall "<name>";
+
+This command will return true if the wall with the given name exists, false otherwise.
 
 ---------------------------------------
 

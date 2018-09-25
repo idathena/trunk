@@ -20,7 +20,7 @@
 //      0x0800(UF_DUALMODE)		Unit has effects both at an interval and when you step in/out
 //      0x1000(UF_HIDDEN_TRAP)		Hidden trap, see 'traps_setting' skill config to enable this flag
 //      0x2000(UF_RANGEDSINGLEUNIT)	Layout hack, use layout range propriety but only display center
-// 	Example: 0x006 = 0x002+0x004 -> Cannot be stacked nor cast near targets
+//      Example: 0x006 = 0x002+0x004 -> Cannot be stacked nor cast near targets
 //
 // Notes:
 //    0x89,0x8a,0x8b without indication
@@ -182,7 +182,7 @@
 8020,0xf5,    ,  3, 0,2300:2100:1900:1700:1500,enemy, 0x018	//MH_POISON_MIST
 8033,0x7e,    ,  0, 0,  -1,all, 0x003	//MH_STEINWAND
 8041,0xf6,    ,  1:1:2:2:3, 0,2000,enemy, 0x01A	//MH_LAVA_SLIDE
-8043,0xf7,    ,  1, 0,  -1,enemy, 0x2018 	//MH_VOLCANIC_ASH
+8043,0xf7,    ,  1, 0,  -1,enemy, 0x2018	//MH_VOLCANIC_ASH
 
 8209,0x90,    ,  0, 1,1000,enemy, 0x1006	//MA_SKIDTRAP
 8210,0x93,    ,  0, 1,1000,enemy, 0x006	//MA_LANDMINE

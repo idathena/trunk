@@ -213,7 +213,7 @@ int pet_sc_check(struct map_session_data *sd, int type)
 	return 0;
 }
 
-static int pet_hungry(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(pet_hungry)
 {
 	struct map_session_data *sd;
 	struct pet_data *pd;
@@ -853,7 +853,7 @@ static int pet_randomwalk(struct pet_data *pd,unsigned int tick)
 			}
 		}
 		for(i = c = 0; i < pd->ud.walkpath.path_len; i++) {
-			if(pd->ud.walkpath.path[i]&1)
+			if(direction_diagonal(pd->ud.walkpath.path[i]))
 				c += pd->status.speed * MOVE_DIAGONAL_COST / MOVE_COST;
 			else
 				c += pd->status.speed;
@@ -977,7 +977,7 @@ static int pet_ai_sub_foreachclient(struct map_session_data *sd,va_list ap)
 	return 0;
 }
 
-static int pet_ai_hard(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(pet_ai_hard)
 {
 	map_foreachpc(pet_ai_sub_foreachclient,tick);
 
@@ -1008,7 +1008,7 @@ static int pet_ai_sub_hard_lootsearch(struct block_list *bl,va_list ap)
 	return 0;
 }
 
-static int pet_delay_item_drop(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(pet_delay_item_drop)
 {
 	struct item_drop_list *list = (struct item_drop_list *)data;
 	struct item_drop *ditem = list->item;
@@ -1080,7 +1080,7 @@ int pet_lootitem_drop(struct pet_data *pd,struct map_session_data *sd)
 /*==========================================
  * pet bonus giving skills [Valaris] / Rewritten by [Skotlex]
  *------------------------------------------*/
-int pet_skill_bonus_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(pet_skill_bonus_timer)
 {
 	struct map_session_data *sd = map_id2sd(id);
 	struct pet_data *pd;
@@ -1122,7 +1122,7 @@ int pet_skill_bonus_timer(int tid, unsigned int tick, int id, intptr_t data)
 /*==========================================
  * pet recovery skills [Valaris] / Rewritten by [Skotlex]
  *------------------------------------------*/
-int pet_recovery_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(pet_recovery_timer)
 {
 	struct map_session_data *sd = map_id2sd(id);
 	struct pet_data *pd;
@@ -1147,7 +1147,7 @@ int pet_recovery_timer(int tid, unsigned int tick, int id, intptr_t data)
 	return 0;
 }
 
-int pet_heal_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(pet_heal_timer)
 {
 	struct map_session_data *sd = map_id2sd(id);
 	struct status_data *status;
@@ -1185,7 +1185,7 @@ int pet_heal_timer(int tid, unsigned int tick, int id, intptr_t data)
 /*==========================================
  * pet support skills [Skotlex]
  *------------------------------------------*/
-int pet_skill_support_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(pet_skill_support_timer)
 {
 	struct map_session_data *sd = map_id2sd(id);
 	struct pet_data *pd;
@@ -1281,63 +1281,10 @@ static void pet_readdb_libconfig_sub_intimacy(struct config_setting_t *t, int id
 		pet_db[idx].die = i32;
 }
 
-static bool pet_get_const(const struct config_setting_t *it, int *value)
-{
-	const char *str = config_setting_get_string(it);
-
-	nullpo_retr(false, value);
-
-	if (str && *str && script_get_constant(str, value))
-		return true;
-
-	*value = config_setting_get_int(it);
-	return true;
-}
-
-/**
- * Search and replace a string with another string, in a string
- */
-static char *pet_replacestr(char *input, char *find, char *replace)
-{
-	size_t inputlen = strlen(input);
-	size_t findlen = strlen(find);
-	struct StringBuf output;
-	int count = 0;
-	int numFinds = 0;
-	int i = 0, f = 0;
-	char *string = NULL;
-
-	StringBuf_Init(&output);
-
-	for (; i < inputlen; i++) {
-		if (count && count == numFinds)
-			break;
-		for (f = 0; f <= findlen; f++) {
-			if (f == findlen) {
-				numFinds++;
-				StringBuf_AppendStr(&output, replace);
-				i += findlen - 1;
-				break;
-			} else if ((i + f) > inputlen || input[i + f] != find[f]) {
-				StringBuf_Printf(&output, "%c", input[i]);
-				break;
-			}
-		}
-	}
-
-	if (i < inputlen)
-		StringBuf_AppendStr(&output, &(input[i]));
-
-	string = StringBuf_Value(&output);
-	StringBuf_Destroy(&output);
-	return string;
-}
-
 static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int idx)
 {
 	struct config_setting_t *pett = NULL;
 	int i = 0;
-	char *str = NULL;
 
 	nullpo_retv(t);
 
@@ -1347,13 +1294,16 @@ static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int i
 		if (config_setting_is_group(pett)) {
 			struct item_data *id = NULL;
 			struct config_setting_t *item = NULL;
-			int j = 0, i32 = 0;
+			int j = 0, eggID = 0;
+			char *str = config_setting_name(pett);
+			char string[] = "EggID_";
 
-			str = config_setting_name(pett);
-			str = pet_replacestr(str, "EggID_", "");
-			i32 = atoi(str);
-			if (!(id = itemdb_exists(i32))) {
-				ShowWarning("pet_readdb_libconfig_sub_evolution: Invalid Egg ID %d in Pet #%d, skipping.\n", i32, pet_db[idx].class_);
+			if ((str = strstr(str, string))) {
+				strcpy(str, str + strlen(string));
+				eggID = atoi(str);
+			}
+			if (!(id = itemdb_exists(eggID))) {
+				ShowWarning("pet_readdb_libconfig_sub_evolution: Invalid Egg ID %d in Pet #%d.\n", eggID, pet_db[idx].class_);
 				return;
 			}
 			if (!pet_db[idx].ev_datas)
@@ -1363,17 +1313,19 @@ static void pet_readdb_libconfig_sub_evolution(struct config_setting_t *t, int i
 			pet_db[idx].ev_datas[i].EggID = id->nameid;
 			while ((item = config_setting_get_elem(pett, j))) {
 				struct item_data *id2 = NULL;
-				int quantity;
+				int itemID = 0, quantity = 0;
+				char *str2 = config_setting_name(item);
+				char string2[] = "ItemID_";
 
-				str = config_setting_name(item);
-				str = pet_replacestr(str, "ItemID_", "");
-				i32 = atoi(str);
-				if (!(id2 = itemdb_exists(i32))) {
-					ShowWarning("pet_readdb_libconfig_sub_evolution: required item ID %d not found in egg %d\n", i32, pet_db[idx].ev_datas[i].EggID);
+				if ((str2 = strstr(str2, string2))) {
+					strcpy(str2, str2 + strlen(string2));
+					itemID = atoi(str2);
+				}
+				if (!(id2 = itemdb_exists(itemID))) {
+					ShowWarning("pet_readdb_libconfig_sub_evolution: required item ID %d is not found in egg %d\n", itemID, pet_db[idx].ev_datas[i].EggID);
 					return;
 				}
-				if (pet_get_const(item, &i32) && i32 >= 0)
-					quantity = i32;
+				quantity = config_setting_get_int(item);
 				if (quantity <= 0) {
 					ShowWarning("pet_readdb_libconfig_sub_evolution: invalid quantity %d for egg %d\n", quantity, pet_db[idx].ev_datas[i].EggID);
 					return;
@@ -1495,8 +1447,8 @@ static int pet_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 
 static int pet_readdb_libconfig(const char *filename, bool ignore_missing, int count)
 {
-	bool duplicate[MAX_MOB_DB];
 	struct config_setting_t *pdb = NULL, *t = NULL;
+	bool duplicate[MAX_MOB_DB];
 	char filepath[256];
 
 	memset(&duplicate, 0, sizeof(duplicate));

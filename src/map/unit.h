@@ -4,15 +4,15 @@
 #ifndef _UNIT_H_
 #define _UNIT_H_
 
-//#include "map.h"
-struct block_list;
-struct unit_data;
-struct map_session_data;
-
+#include "../common/timer.h"
 #include "clif.h"  // clr_type
 #include "map.h" // struct block_list
 #include "path.h" // struct walkpath_data
 #include "skill.h" // struct skill_timerskill, struct skill_unit_group, struct skill_unit_group_tickset
+
+struct block_list;
+struct unit_data;
+struct map_session_data;
 
 extern const short dirx[8]; // Lookup to know where will move to x according dir
 extern const short diry[8]; // Lookup to know where will move to y according dir
@@ -97,8 +97,8 @@ int unit_walktobl(struct block_list *bl, struct block_list *tbl, int range, unsi
 void unit_run_hit(struct block_list *bl, struct status_change *sc, struct map_session_data *sd, enum sc_type type);
 bool unit_run(struct block_list *bl, struct map_session_data *sd, enum sc_type type);
 int unit_calc_pos(struct block_list *bl, int tx, int ty, uint8 dir);
-int unit_delay_walktoxy_timer(int tid, unsigned int tick, int id, intptr_t data);
-int unit_delay_walktobl_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(unit_delay_walktoxy_timer);
+TIMER_FUNC(unit_delay_walktobl_timer);
 
 // Causes the target object to stop moving.
 int unit_stop_walking(struct block_list *bl,int type);
@@ -121,6 +121,7 @@ bool unit_can_reach_pos(struct block_list *bl,int x,int y,int easy);
 bool unit_can_reach_bl(struct block_list *bl,struct block_list *tbl, int range, int easy, short *x, short *y);
 
 // Unit attack functions
+int unit_stopattack(struct block_list *bl, va_list ap);
 void unit_stop_attack(struct block_list *bl);
 int unit_attack(struct block_list *src,int target_id,int continuous);
 int unit_cancel_combo(struct block_list *bl);
@@ -132,7 +133,7 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uint16 skill_id, uint16 skill_lv, int casttime, int castcancel);
 
 // Step timer used for delayed attack and skill use
-int unit_step_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(unit_step_timer);
 void unit_stop_stepaction(struct block_list *bl);
 
 // Cancel unit cast

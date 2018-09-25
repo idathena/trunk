@@ -566,6 +566,11 @@ function	script	refinemain	{
 	mes "I'm the Armsmith.";
 	mes "I can refine all kinds of weapons, armor and equipment, so let me";
 	mes "know what you want me to refine.";
+	if (getbattleflag("feature.refineui")) {
+		close2;
+		open_refineui();
+		end;
+	}
 	next;
 
 	setarray .@indices[1], EQI_HEAD_TOP, EQI_ARMOR, EQI_HAND_L, EQI_HAND_R, EQI_GARMENT, EQI_SHOES, EQI_ACC_L, EQI_ACC_R, EQI_HEAD_MID, EQI_HEAD_LOW;
@@ -608,37 +613,15 @@ function	script	refinemain	{
 	}
 	set .@refineitemid, getequipid(.@part); // save id of the item
 	set .@refinerycnt, getequiprefinerycnt(.@part); //save refinery count
+	setarray .@equip_card[0], getequipcardid(.@part, 0), getequipcardid(.@part, 1), getequipcardid(.@part, 2), getequipcardid(.@part, 3);
+	set .@material, getequiprefinecost(.@part, REFINE_COST_TYPE_NORMAL, REFINE_INFO_MATERIAL_ID);
+	set .@price, getequiprefinecost(.@part, REFINE_COST_TYPE_NORMAL, REFINE_INFO_ZENY);
+
 	switch (getequipweaponlv(.@part)) {
-	case 0: //Refine Armor
-		set .@price,2000;
-		set .@material,985; //Elunium
-		set .@safe,4;
-		break;
-	case 1: //Refine Level 1 Weapon
-		set .@price,50;
-		set .@material,1010; //Phracon
-		set .@safe,7;
-		break;
-	case 2: //Refine Level 2 Weapon
-		set .@price,200;
-		set .@material,1011; //Emveretarcon
-		set .@safe,6;
-		break;
-	case 3: //Refine Level 3 Weapon
-		set .@price,5000;
-		set .@material,984; //Oridecon
-		set .@safe,5;
-		break;
-	case 4: //Refine Level 4 Weapon
-		set .@price,20000;
-		set .@material,984; //Oridecon
-		set .@safe,4;
-		break;
-	case 5: //Refine other stuff?
-		set .@price,2000;
-		set .@material,985; //Elunium
-		set .@safe,4;
-		break;
+		case 1: set .@safe, 7; break;
+		case 2: set .@safe, 6; break;
+		case 3: set .@safe, 5; break;
+		case 4: default: set .@safe, 4; break;
 	}
 
 	// If the VIP system is enabled, the prices for non-VIP players are considerably higher.
@@ -709,7 +692,9 @@ function	script	refinemain	{
 
 		// anti-hack
 		if (callfunc("F_IsEquipIDHack", .@part, .@refineitemid) ||
-		    callfunc("F_IsEquipRefineHack", .@part, .@refinerycnt)) {
+		    callfunc("F_IsEquipRefineHack", .@part, .@refinerycnt) ||
+			callfunc("F_IsEquipCardHack", .@part, .@equip_card[0], .@equip_card[1], .@equip_card[2], .@equip_card[3]))
+		{
 			mes "[" + getarg(0) + "]";
 			emotion e_an;
 			mes "Wait a second...";
@@ -766,7 +751,7 @@ function	script	refinemain	{
 	}
 
 // New Refining Functions ========================
-	if (getequiprefinerycnt(.@part) < .@safe) {
+	if (.@refinerycnt < .@safe) {
 		mes "[" + getarg(0) + "]";
 		mes "I can refine this to the safe limit or a desired number of times. It's your choice.";
 		next;
@@ -775,7 +760,7 @@ function	script	refinemain	{
 		set .@menu2,2;
 	switch (.@menu2) {
 	case 1: 
-		set .@refinecnt,.@safe - getequiprefinerycnt(.@part);
+		set .@refinecnt,.@safe - .@refinerycnt;
 		break;
 	case 2:
 		next;
@@ -783,7 +768,7 @@ function	script	refinemain	{
 		mes "How many times would you like me to refine your item?";
 		next;
 		input .@refinecnt;
-		set .@refinecheck,.@refinecnt + getequiprefinerycnt(.@part);
+		set .@refinecheck,.@refinecnt + .@refinerycnt;
 		if (.@refinecnt < 1 || .@refinecheck > 10) {
 			mes "[" + getarg(0) + "]";
 			mes "I can't refine this item that many times.";

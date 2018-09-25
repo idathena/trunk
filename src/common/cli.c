@@ -11,6 +11,7 @@
 #include "showmsg.h"
 #include "core.h"
 #include "cli.h"
+#include "timer.h"
 
 //map confs
 char *MAP_CONF_NAME;
@@ -169,7 +170,7 @@ int cli_hasevent() {
 #endif
 }
 
-int parse_console_timer(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(parse_console_timer) {
 	char buf[MAX_CONSOLE_IN]; //max cmd atm is 63+63+63+3+3
 
 	memset(buf,0,MAX_CONSOLE_IN); //clear out buf

@@ -95,7 +95,7 @@ xmas_in,89,92,5	script	Louise Kim#designer	714,{
 					mes "~With the number one designer, Louise Kim,~";
 					mes "~you are the most blessed soul.~";
 					emotion e_ho;
-					misceffect EF_BLESSING;
+					specialeffect EF_BLESSING;
 					next;
 					mes "-Immediately, she puts Rosary in an-";
 					mes "-unknown liquid and dissolves it.-";
@@ -107,7 +107,7 @@ xmas_in,89,92,5	script	Louise Kim#designer	714,{
 					mes "~With the number one designer, Louise Kim,~";
 					mes "~you are the luckiest soul.~";
 					emotion e_ho;
-					misceffect EF_GLORIA;
+					specialeffect EF_GLORIA;
 					next;
 					mes "-She starts sewing the hat with -";
 					mes "-a Cactus Needle and a thread.-";
@@ -118,7 +118,7 @@ xmas_in,89,92,5	script	Louise Kim#designer	714,{
 					mes "~The most talented disigner,~";
 					mes "~L_O_U_I_S_E K_I_M~";
 					emotion e_lv;
-					misceffect EF_BENEDICTIO;
+					specialeffect EF_BENEDICTIO;
 					next;
 					mes "[Designer Louise Kim]";
 					mes "Here!! All done~~";
@@ -390,7 +390,7 @@ prontera,155,285,3	script	Enjoy#enjoy	753,{
 			donpcevent "Christ#christ02::OnCommandEmotion";
 			donpcevent "Mas#mas02::OnCommandEmotion";
 			donpcevent "Event#event02::OnCommandEmotion";
-			misceffect EF_HITLINE2;
+			specialeffect EF_HITLINE2;
 			delitem 604,5; //Branch_of_Dead_Tree
 			set christ_solo05,6;
 			donpcevent "Happymerry#happymerry02::OnCommandOff";

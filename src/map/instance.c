@@ -82,7 +82,7 @@ static struct instance_db *instance_searchname_db(const char *instance_name)
 /*==========================================
  * Deletes an instance timer (Destroys instance)
  *------------------------------------------*/
-static int instance_delete_timer(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(instance_delete_timer)
 {
 	instance_destroy(id);
 
@@ -92,7 +92,7 @@ static int instance_delete_timer(int tid, unsigned int tick, int id, intptr_t da
 /*==========================================
  * Create subscription timer for party
  *------------------------------------------*/
-static int instance_subscription_timer(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(instance_subscription_timer)
 {
 	int i, ret;
 	int instance_id = instance_wait.id[0];
@@ -220,6 +220,20 @@ static int instance_npcinit(struct block_list *bl, va_list ap)
 }
 
 /*==========================================
+ * Run the OnInstanceDestroy events for duplicated NPCs
+ *------------------------------------------*/
+static int instance_npcdestroy(struct block_list *bl, va_list ap)
+{
+	struct npc_data *nd;
+
+	nullpo_retr(0, bl);
+	nullpo_retr(0, ap);
+	nullpo_retr(0, nd = (struct npc_data *)bl);
+
+	return npc_instancedestroy(nd);
+}
+
+/*==========================================
  * Add an NPC to an instance
  *------------------------------------------*/
 static int instance_addnpc_sub(struct block_list *bl, va_list ap)
@@ -294,6 +308,9 @@ int instance_create(int party_id, const char *name)
 	instance_subscription_timer(0, 0, 0, 0);
 
 	ShowInfo("[Instance] Created: %s.\n", name);
+
+	// Start the instance timer on instance creation
+	instance_startkeeptimer(&instance_data[i], i);
 
 	return i;
 }
@@ -443,6 +460,9 @@ int instance_destroy(short instance_id)
 		else
 			type = 3;
 
+		for(i = 0; i < im->cnt_map; i++) //Run OnInstanceDestroy on all NPCs in the instance
+			map_foreachinallarea(instance_npcdestroy, im->map[i].m, 0, 0, map[im->map[i].m].xs, map[im->map[i].m].ys, BL_NPC, im->map[i].m);
+
 		for(i = 0; i < im->cnt_map; i++)
 			map_delinstancemap(im->map[i].m);
 	}
@@ -459,7 +479,6 @@ int instance_destroy(short instance_id)
 
 	if((p = party_search(im->party_id))) {
 		p->instance_id = 0;
-
 		if(type)
 			clif_instance_changestatus(party_getavailablesd(p), type, 0, 1);
 		else
@@ -624,6 +643,30 @@ int instance_delusers(short instance_id)
 		instance_startidletimer(im, instance_id);
 
 	return 0;
+}
+
+/**
+ * Look up existing memorial dungeon of the player and destroy it
+ * @param sd session data.
+ */
+void instance_force_destroy(struct map_session_data *sd)
+{
+	struct party_data *p = NULL;
+	int party_id, i;
+
+	nullpo_retv(sd);
+
+	if(!(party_id = sd->status.party_id))
+		return;
+
+	if(!(p = party_search(party_id)))
+		return;
+
+	if(p->instance_id) {
+		ARR_FIND(0, MAX_PARTY, i, p->party.member[i].leader);
+		if(i < MAX_PARTY)
+			instance_destroy(p->instance_id);
+	}
 }
 
 static bool instance_db_free_sub(struct instance_db *db);

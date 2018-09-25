@@ -4,6 +4,8 @@
 #ifndef _STATUS_H_
 #define _STATUS_H_
 
+#include "../common/timer.h"
+
 struct block_list;
 struct mob_data;
 struct pet_data;
@@ -22,7 +24,7 @@ struct status_change;
 #endif
 
 // Refine type
-enum refine_type {
+enum e_refine_type {
 	REFINE_TYPE_ARMOR	= 0,
 	REFINE_TYPE_WEAPON1	= 1,
 	REFINE_TYPE_WEAPON2	= 2,
@@ -32,7 +34,7 @@ enum refine_type {
 };
 
 // Get refine chance
-int status_get_refine_chance(enum refine_type wlv, int refine, bool enriched);
+int status_get_refine_chance(enum e_refine_type wlv, int refine, bool is_enriched);
 
 typedef enum sc_conf_type {
 	SC_NO_REM_DEATH  = 0x01,
@@ -1762,6 +1764,75 @@ enum si_type {
 	SI_CHEERUP = 992,
 	SI_S_MANAPOTION = 995,
 	SI_M_DEFSCROLL = 996,
+	SI_AS_RAGGED_GOLEM_CARD = 1000,
+	SI_LHZ_DUN_N1 = 1001,
+	SI_LHZ_DUN_N2 = 1002,
+	SI_LHZ_DUN_N3 = 1003,
+	SI_LHZ_DUN_N4 = 1004,
+	SI_ALL_STAT_DOWN = 1013,
+	SI_GRADUAL_GRAVITY = 1014,
+	SI_DAMAGE_HEAL = 1015,
+	SI_IMMUNE_PROPERTY_NOTHING = 1016,
+	SI_IMMUNE_PROPERTY_WATER = 1017,
+	SI_IMMUNE_PROPERTY_GROUND = 1018,
+	SI_IMMUNE_PROPERTY_FIRE = 1019,
+	SI_IMMUNE_PROPERTY_WIND = 1020,
+	SI_IMMUNE_PROPERTY_POISON = 1021,
+	SI_IMMUNE_PROPERTY_SAINT = 1022,
+	SI_IMMUNE_PROPERTY_DARKNESS = 1023,
+	SI_IMMUNE_PROPERTY_TELEKINESIS = 1024,
+	SI_IMMUNE_PROPERTY_UNDEAD = 1025,
+	SI_REUSE_LIMIT_NP = 1026,
+	SI_SPECIALCOOKIE = 1027,
+	SI_GLORY_OF_RETURN = 1030,
+	SI_ATK_POPCORN = 1031,
+	SI_MATK_POPCORN = 1032,
+	SI_ASPD_POPCORN = 1033,
+	SI_LIGHTOFMOON = 1035,
+	SI_LIGHTOFSUN = 1036,
+	SI_LIGHTOFSTAR = 1037,
+	SI_LUNARSTANCE = 1038,
+	SI_UNIVERSESTANCE = 1039,
+	SI_SUNSTANCE = 1040,
+	SI_FLASHKICK = 1041,
+	SI_NEWMOON = 1042,
+	SI_STARSTANCE = 1043,
+	SI_DIMENSION = 1044,
+	SI_DIMENSION1 = 1045,
+	SI_DIMENSION2 = 1046,
+	SI_CREATINGSTAR = 1047,
+	SI_FALLINGSTAR = 1048,
+	SI_NOVAEXPLOSING = 1049,
+	SI_GRAVITYCONTROL = 1050,
+	SI_SOULCOLLECT = 1053,
+	SI_SOULREAPER = 1054,
+	SI_SOULUNITY = 1055,
+	SI_SOULSHADOW = 1056,
+	SI_SOULFAIRY = 1057,
+	SI_SOULFALCON = 1058,
+	SI_SOULGOLEM = 1059,
+	SI_SOULDIVISION = 1060,
+	SI_SOULENERGY = 1061,
+	SI_USE_SKILL_SP_SPA = 1062,
+	SI_USE_SKILL_SP_SHA = 1063,
+	SI_SP_SHA = 1064,
+	SI_INFINITY_DRINK = 1065,
+	SI_ABYSS_001 = 1066,
+	SI_ABYSS_002 = 1067,
+	SI_ABYSS_003 = 1068,
+	SI_ABYSS_004 = 1069,
+	SI_ABYSS_005 = 1070,
+	SI_ABYSS_006 = 1071,
+	SI_ABYSS_007 = 1072,
+	SI_ABYSS_008 = 1073,
+	SI_YGGDRASIL_BLESS = 1081,
+	SI_HUNTING_EVENT = 1083,
+	SI_PERIOD_RECEIVEITEM_2ND = 1084,
+	SI_PERIOD_PLUSEXP_2ND = 1085,
+	SI_EXPDROPUP = 1086,
+	SI_TW_NEWYEAR_EVENT = 1087,
+	SI_ANCILLA = 1095,
+	SI_WEAPONBLOCK_ON = 1107,
 	SI_MAX,
 };
 
@@ -2291,8 +2362,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 
 int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const char *file, int line);
 #define status_change_end(bl,type,tid) status_change_end_(bl,type,tid,__FILE__,__LINE__)
-int kaahi_heal_timer(int tid, unsigned int tick, int id, intptr_t data);
-int status_change_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(status_change_timer);
 int status_change_timer_sub(struct block_list *bl, va_list ap);
 int status_change_clear(struct block_list *bl, int type);
 void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1);
@@ -2307,7 +2377,8 @@ void status_change_clear_onChangeMap(struct block_list *bl, struct status_change
 #define status_calc_elemental(ed, opt) status_calc_bl_(&(ed)->bl, SCB_ALL, opt)
 #define status_calc_npc(nd, opt) status_calc_bl_(&(nd)->bl, SCB_ALL, opt)
 
-enum e_refine_chance_type { // Enum for refine chance types
+// Enum for refine chance types
+enum e_refine_chance_type {
 	REFINE_CHANCE_TYPE_NORMAL = 0,
 	REFINE_CHANCE_TYPE_ENRICHED,
 	REFINE_CHANCE_TYPE_E_NORMAL,
@@ -2315,11 +2386,55 @@ enum e_refine_chance_type { // Enum for refine chance types
 	REFINE_CHANCE_TYPE_MAX
 };
 
+// Enum for refine cost types
+enum e_refine_cost_type {
+	REFINE_COST_TYPE_NORMAL = 0,
+	REFINE_COST_TYPE_OVER10,
+	REFINE_COST_TYPE_HD,
+	REFINE_COST_TYPE_ENRICHED,
+	REFINE_COST_TYPE_OVER10_HD,
+	REFINE_COST_TYPE_CLINK,
+	REFINE_COST_TYPE_HOLINK,
+	REFINE_COST_TYPE_WAGJAK,
+	REFINE_COST_TYPE_LIMITED_HD,
+	REFINE_COST_TYPE_MAX
+};
+
+// Enum for refine informations
+enum e_refine_info {
+	REFINE_INFO_MATERIAL_ID = 0,
+	REFINE_INFO_ZENY,
+	REFINE_INFO_DOWN_REFINE_CHANCE,
+	REFINE_INFO_DOWN_REFINE_NUM
+};
+
+struct s_refine_cost {
+	uint16 nameid;
+	int zeny;
+	uint16 downrefine_chance;
+	uint16 downrefine_num;
+};
+
+#define REFINEUI_MAT_BS_BLESSING 4
+#define REFINEUI_MAT_MAX (REFINEUI_MAT_BS_BLESSING + 1)
+
+struct s_refine_bs_blessing {
+	uint16 nameid;
+	uint16 count;
+};
+
 struct s_refine_info { //Bonus values and upgrade chances for refining equipment
 	int chance[REFINE_CHANCE_TYPE_MAX][MAX_REFINE]; //Success chance
 	int bonus[MAX_REFINE]; //Cumulative fixed bonus damage
 	int randombonus_max[MAX_REFINE]; //Cumulative maximum random bonus damage
+	struct s_refine_cost cost[REFINE_COST_TYPE_MAX];
+	struct s_refine_bs_blessing bs_blessing[MAX_REFINE];
 } refine_info[REFINE_TYPE_MAX];
+
+// Get refine cost
+int status_get_refine_cost(enum e_refine_type wlv, int type, enum e_refine_info info);
+struct s_refine_cost *status_refine_cost(enum e_refine_type wlv, int type);
+bool status_get_refine_blacksmithBlessing(struct s_refine_bs_blessing *bs, enum e_refine_type wlv, int refine);
 
 bool status_calc_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);
 bool status_calc_cart_weight(struct map_session_data *sd, enum e_status_calc_weight_opt flag);

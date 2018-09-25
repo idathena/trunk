@@ -10,6 +10,7 @@
 #include "../common/sql.h"
 #include "char.h"
 #include "inter.h"
+#include "int_guild.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -20,8 +21,8 @@
 
 /**
  * Check if sotrage ID is valid
- * @param id Storage ID
- * @return True:Valid, False:Invalid
+ * @param id: Storage ID
+ * @return True if success or false on failure
  */
 bool inter_premiumStorage_exists(uint8 id)
 {
@@ -38,7 +39,7 @@ bool inter_premiumStorage_exists(uint8 id)
 
 /**
  * Get max storage amount
- * @param id Storage ID
+ * @param id: Storage ID
  * @return Max amount
  */
 int inter_premiumStorage_getMax(uint8 id)
@@ -56,7 +57,7 @@ int inter_premiumStorage_getMax(uint8 id)
 
 /**
  * Get table name of storage
- * @param id Storage ID
+ * @param id: Storage ID
  * @return Table name
  */
 const char *inter_premiumStorage_getTableName(uint8 id)
@@ -74,7 +75,7 @@ const char *inter_premiumStorage_getTableName(uint8 id)
 
 /**
  * Get printable name of storage
- * @param id Storage ID
+ * @param id: Storage ID
  * @return printable name
  */
 const char *inter_premiumStorage_getPrintableName(uint8 id)
@@ -125,20 +126,20 @@ static int storage_tosql(uint32 account_id, struct s_storage *p)
 
 /**
  * Save guild_storage data to sql
- * @param guild_id: Character ID to save
- * @param p: Guild Storage list to save the entries
+ * @param guild_id: Guild ID to save
+ * @param p: Guild Storage entries
  * @return 0 if success, or error count
  */
 static int guild_storage_tosql(int guild_id, struct s_storage *p)
 {
 	//ShowInfo("Guild Storage has been saved (GID: %d)\n", guild_id);
-	return memitemdata_to_sql(p->u.items_guild, MAX_GUILD_STORAGE, guild_id, TABLE_GUILD_STORAGE, p->stor_id);
+	return memitemdata_to_sql(p->u.items_guild, inter_guild_storagemax(guild_id), guild_id, TABLE_GUILD_STORAGE, p->stor_id);
 }
 
 /**
  * Fetch inventory entries from table
  * @param char_id: Character ID to fetch
- * @param p: Inventory list to save the entries
+ * @param p: Inventory entries
  * @return True if success, False if failed
  */
 static bool inventory_fromsql(uint32 char_id, struct s_storage *p)
@@ -149,7 +150,7 @@ static bool inventory_fromsql(uint32 char_id, struct s_storage *p)
 /**
  * Fetch cart entries from table
  * @param char_id: Character ID to fetch
- * @param p: Cart list to save the entries
+ * @param p: Cart entries
  * @return True if success, False if failed
  */
 static bool cart_fromsql(uint32 char_id, struct s_storage *p)
@@ -159,9 +160,8 @@ static bool cart_fromsql(uint32 char_id, struct s_storage *p)
 
 /**
  * Fetch storage entries from table
- * @param char_id: Character ID to fetch
- * @param p: Storage list to save the entries
- * @param stor_id: Storage ID
+ * @param account_id: Account ID to fetch
+ * @param p: Storage entries
  * @return True if success, False if failed
  */
 static bool storage_fromsql(uint32 account_id, struct s_storage *p)
@@ -171,13 +171,13 @@ static bool storage_fromsql(uint32 account_id, struct s_storage *p)
 
 /**
  * Fetch guild_storage entries from table
- * @param char_id: Character ID to fetch
- * @param p: Storage list to save the entries
+ * @param guild_id: Guild ID to fetch
+ * @param p: Guild Storage entries
  * @return True if success, False if failed
  */
 static bool guild_storage_fromsql(int guild_id, struct s_storage *p)
 {
-	return memitemdata_from_sql(p, MAX_GUILD_STORAGE, guild_id, TABLE_GUILD_STORAGE, p->stor_id);
+	return memitemdata_from_sql(p, inter_guild_storagemax(guild_id), guild_id, TABLE_GUILD_STORAGE, p->stor_id);
 }
 
 /// Checking storage tables
@@ -217,6 +217,14 @@ void inter_storage_sql_final(void)
 //---------------------------------------------------------
 // Packet from map server
 
+/**
+ * Send guild storage data to the map server
+ * @param fd: Map server's fd
+ * @param account_id: Account ID requesting
+ * @param guild_id: Guild ID requesting
+ * @param flag: Additional parameters
+ * @return True on success or false on failure
+ */
 bool mapif_load_guild_storage(int fd, uint32 account_id, int guild_id, char flag)
 {
 	if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `guild_id` FROM `%s` WHERE `guild_id`='%d'", guild_db, guild_id) )
@@ -262,6 +270,11 @@ void mapif_parse_LoadGuildStorage(int fd)
 	mapif_load_guild_storage(fd, RFIFOL(fd,2), RFIFOL(fd,6), 1);
 }
 
+/**
+ * Save guild storage data from map server
+ * @param fd: Map server's fd
+ * @return True on success or false on failure
+ */
 bool mapif_parse_SaveGuildStorage(int fd)
 {
 	int guild_id;

@@ -431,6 +431,8 @@
 	export_constant(MF_GVG_TE);
 	export_constant(MF_NOCOSTUME);
 	export_constant(MF_HIDEMOBHPBAR);
+	export_constant(MF_PRIVATEAIRSHIP_SOURCE);
+	export_constant(MF_PRIVATEAIRSHIP_DESTINATION);
 
 	/* Setcell types */
 	export_constant(CELL_WALKABLE);
@@ -615,7 +617,7 @@
 	export_constant2("bHealPower",SP_ADD_HEAL_RATE);
 	export_constant2("bHealPower2",SP_ADD_HEAL2_RATE);
 	export_constant2("bAbsorbDmgMaxHP",SP_ABSORB_DMG_MAXHP);
-	export_constant2("bCriticalLong",SP_CRITICAL_RANGEATK);
+	export_constant2("bCriticalLong",SP_CRITICAL_LONG);
 	export_constant2("bNoWalkDelay",SP_NO_WALKDELAY);
 
 	export_constant2("bRestartFullRecover",SP_RESTART_FULL_RECOVER);
@@ -725,6 +727,7 @@
 	export_constant(EQI_SHADOW_SHOES);
 	export_constant(EQI_SHADOW_ACC_R);
 	export_constant(EQI_SHADOW_ACC_L);
+	export_constant(EQI_MAX);
 
 	/* Equip positions */
 	export_constant(EQP_ACC_L);
@@ -766,6 +769,7 @@
 	export_constant(LOOK_RESET_COSTUMES);
 	export_constant(LOOK_ROBE);
 	export_constant(LOOK_BODY2);
+	export_constant(LOOK_MAX);
 
 	/* Status changes */
 	export_constant2("Eff_Stone",SC_STONE);
@@ -2419,6 +2423,75 @@
 	export_constant(SI_KIEL_CARD);
 	export_constant(SI_S_MANAPOTION);
 	export_constant(SI_M_DEFSCROLL);
+	export_constant(SI_AS_RAGGED_GOLEM_CARD);
+	export_constant(SI_LHZ_DUN_N1);
+	export_constant(SI_LHZ_DUN_N2);
+	export_constant(SI_LHZ_DUN_N3);
+	export_constant(SI_LHZ_DUN_N4);
+	export_constant(SI_ALL_STAT_DOWN);
+	export_constant(SI_GRADUAL_GRAVITY);
+	export_constant(SI_DAMAGE_HEAL);
+	export_constant(SI_IMMUNE_PROPERTY_NOTHING);
+	export_constant(SI_IMMUNE_PROPERTY_WATER);
+	export_constant(SI_IMMUNE_PROPERTY_GROUND);
+	export_constant(SI_IMMUNE_PROPERTY_FIRE);
+	export_constant(SI_IMMUNE_PROPERTY_WIND);
+	export_constant(SI_IMMUNE_PROPERTY_POISON);
+	export_constant(SI_IMMUNE_PROPERTY_SAINT);
+	export_constant(SI_IMMUNE_PROPERTY_DARKNESS);
+	export_constant(SI_IMMUNE_PROPERTY_TELEKINESIS);
+	export_constant(SI_IMMUNE_PROPERTY_UNDEAD);
+	export_constant(SI_REUSE_LIMIT_NP);
+	export_constant(SI_SPECIALCOOKIE);
+	export_constant(SI_GLORY_OF_RETURN);
+	export_constant(SI_ATK_POPCORN);
+	export_constant(SI_MATK_POPCORN);
+	export_constant(SI_ASPD_POPCORN);
+	export_constant(SI_LIGHTOFMOON);
+	export_constant(SI_LIGHTOFSUN);
+	export_constant(SI_LIGHTOFSTAR);
+	export_constant(SI_LUNARSTANCE);
+	export_constant(SI_UNIVERSESTANCE);
+	export_constant(SI_SUNSTANCE);
+	export_constant(SI_FLASHKICK);
+	export_constant(SI_NEWMOON);
+	export_constant(SI_STARSTANCE);
+	export_constant(SI_DIMENSION);
+	export_constant(SI_DIMENSION1);
+	export_constant(SI_DIMENSION2);
+	export_constant(SI_CREATINGSTAR);
+	export_constant(SI_FALLINGSTAR);
+	export_constant(SI_NOVAEXPLOSING);
+	export_constant(SI_GRAVITYCONTROL);
+	export_constant(SI_SOULCOLLECT);
+	export_constant(SI_SOULREAPER);
+	export_constant(SI_SOULUNITY);
+	export_constant(SI_SOULSHADOW);
+	export_constant(SI_SOULFAIRY);
+	export_constant(SI_SOULFALCON);
+	export_constant(SI_SOULGOLEM);
+	export_constant(SI_SOULDIVISION);
+	export_constant(SI_SOULENERGY);
+	export_constant(SI_USE_SKILL_SP_SPA);
+	export_constant(SI_USE_SKILL_SP_SHA);
+	export_constant(SI_SP_SHA);
+	export_constant(SI_INFINITY_DRINK);
+	export_constant(SI_ABYSS_001);
+	export_constant(SI_ABYSS_002);
+	export_constant(SI_ABYSS_003);
+	export_constant(SI_ABYSS_004);
+	export_constant(SI_ABYSS_005);
+	export_constant(SI_ABYSS_006);
+	export_constant(SI_ABYSS_007);
+	export_constant(SI_ABYSS_008);
+	export_constant(SI_YGGDRASIL_BLESS);
+	export_constant(SI_HUNTING_EVENT);
+	export_constant(SI_PERIOD_RECEIVEITEM_2ND);
+	export_constant(SI_PERIOD_PLUSEXP_2ND);
+	export_constant(SI_EXPDROPUP);
+	export_constant(SI_TW_NEWYEAR_EVENT);
+	export_constant(SI_ANCILLA);
+	export_constant(SI_WEAPONBLOCK_ON);
 
 	/* Elements */
 	export_constant(ELE_NEUTRAL);
@@ -5334,6 +5407,85 @@
 	/* Pet catch */
 	export_constant(PET_CATCH_UNIVERSAL);
 	export_constant(PET_CATCH_UNIVERSAL_ITEM);
+
+	/* Guild storage flags */
+	export_constant(GSTORAGE_OPEN);
+	export_constant(GSTORAGE_STORAGE_ALREADY_OPEN);
+	export_constant(GSTORAGE_ALREADY_OPEN);
+	export_constant(GSTORAGE_NO_GUILD);
+	export_constant(GSTORAGE_NO_STORAGE);
+	export_constant(GSTORAGE_NO_PERMISSION);
+
+	/* Months */
+	export_constant(JANUARY);
+	export_constant(FEBRUARY);
+	export_constant(MARCH);
+	export_constant(APRIL);
+	export_constant(MAY);
+	export_constant(JUNE);
+	export_constant(JULY);
+	export_constant(AUGUST);
+	export_constant(SEPTEMBER);
+	export_constant(OCTOBER);
+	export_constant(NOVEMBER);
+	export_constant(DECEMBER);
+
+	/* Days of the week */
+	export_constant(SUNDAY);
+	export_constant(MONDAY);
+	export_constant(TUESDAY);
+	export_constant(WEDNESDAY);
+	export_constant(THURSDAY);
+	export_constant(FRIDAY);
+	export_constant(SATURDAY);
+
+	/* Date types */
+	export_constant(DT_SECOND);
+	export_constant(DT_MINUTE);
+	export_constant(DT_HOUR);
+	export_constant(DT_DAYOFWEEK);
+	export_constant(DT_DAYOFMONTH);
+	export_constant(DT_MONTH);
+	export_constant(DT_YEAR);
+	export_constant(DT_DAYOFYEAR);
+	export_constant(DT_YYYYMMDD);
+
+	/* Private Airship */
+	export_constant(PRIVATEAIRSHIP_OK);
+	export_constant(PRIVATEAIRSHIP_RETRY);
+	export_constant(PRIVATEAIRSHIP_ITEM_NOT_ENOUGH);
+	export_constant(PRIVATEAIRSHIP_DESTINATION_MAP_INVALID);
+	export_constant(PRIVATEAIRSHIP_SOURCE_MAP_INVALID);
+	export_constant(PRIVATEAIRSHIP_ITEM_UNAVAILABLE);
+
+	/* Refine cost types */
+	export_constant(REFINE_COST_TYPE_NORMAL);
+	export_constant(REFINE_COST_TYPE_OVER10);
+	export_constant(REFINE_COST_TYPE_HD);
+	export_constant(REFINE_COST_TYPE_ENRICHED);
+	export_constant(REFINE_COST_TYPE_OVER10_HD);
+	export_constant(REFINE_COST_TYPE_CLINK);
+	export_constant(REFINE_COST_TYPE_HOLINK);
+	export_constant(REFINE_COST_TYPE_WAGJAK);
+	export_constant(REFINE_COST_TYPE_LIMITED_HD);
+	export_constant(REFINE_COST_TYPE_MAX);
+
+	/* Refine information types */
+	export_constant(REFINE_INFO_MATERIAL_ID);
+	export_constant(REFINE_INFO_ZENY);
+	export_constant(REFINE_INFO_DOWN_REFINE_CHANCE);
+	export_constant(REFINE_INFO_DOWN_REFINE_NUM);
+
+	/* Guild permissions */
+	export_constant(GUILD_PERM_INVITE);
+	export_constant(GUILD_PERM_EXPEL);
+	export_constant(GUILD_PERM_STORAGE);
+	export_constant(GUILD_PERM_ALL);
+
+	/* Guild storage log */
+	export_constant(GUILDSTORAGE_LOG_FINAL_SUCCESS);
+	export_constant(GUILDSTORAGE_LOG_EMPTY);
+	export_constant(GUILDSTORAGE_LOG_FAILED);
 
 	#undef export_constant
 	#undef export_constant2

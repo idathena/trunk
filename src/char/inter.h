@@ -10,10 +10,10 @@ struct accreg;
 #include "../common/sql.h"
 
 struct Inter_Config {
-	char cfgFile[128];				  // Inter-Config file
-	config_t cfg;					  // Config
+	char cfgFile[128];                // Inter-Config file
+	struct config_t cfg;              // Config
 	struct s_storage_table *storages; // Storage name & table information
-	uint8 storage_count;			  // Number of available storage
+	uint8 storage_count;              // Number of available storage
 };
 
 extern struct Inter_Config interserv_config;

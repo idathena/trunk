@@ -6,10 +6,10 @@
 /**
  * rAthena configuration file (http://rathena.org)
  * For detailed guidance on these check http://rathena.org/wiki/SRC/config/
- **/
+ */
 
 #ifndef PACKETVER
-	#define PACKETVER 20170517
+	#define PACKETVER 20180620
 #endif
 
 #ifndef PACKETVER_RE
@@ -23,7 +23,7 @@
 	/// Comment to disable the official packet obfuscation support.
 	/// This requires PACKETVER 2011-08-17 or newer.
 	#ifndef PACKET_OBFUSCATION
-		//#define PACKET_OBFUSCATION
+		#define PACKET_OBFUSCATION
 
 		/// Define these inside src/custom/defines_pre.h or src/custom/defines_post.h
 		//#define PACKET_OBFUSCATION_KEY1 <key1>
@@ -39,6 +39,12 @@
 	#endif
 #endif
 
+/// Comment to disable the official Guild Storage skill.
+/// When enabled, this will set the guild storage size to the level of the skill * 100.
+#if PACKETVER >= 20131223
+	#define OFFICIAL_GUILD_STORAGE
+#endif
+
 #ifndef DUMP_UNKNOWN_PACKET
 	//#define DUMP_UNKNOWN_PACKET
 #endif
@@ -49,7 +55,7 @@
 
 /**
  * No settings past this point
- **/
+ */
 
 /// Check if the specified packetversion supports the pincode system
 #define PACKETVER_SUPPORTS_PINCODE PACKETVER >= 20110309

@@ -539,7 +539,7 @@
 6044,499,100	// Letter_From_Otto
 6045,499,100	// Supply_Box
 6046,475,100	// Clothing_Dye_Coupon
-6047,475,100	// Clothing_Dye_Coupon_II
+6047,475,100	// Clothing_Dye_Coupon2
 6048,499,100	// Unidentified_Mineral
 6049,499,100	// Marlin
 6050,475,100	// Mercenary_Contract
@@ -915,8 +915,8 @@
 6906,475,100	// (Limited)HD_Carnium
 6907,499,100	// Piece_Of_Soul_Horse
 6909,475,100	// Actinidia_Cat_Fruit
-6910,475,100	// (Limited)Purified_Oridecon
-6911,475,100	// (Limited)Purified_Elunium
+6910,475,100	// (Limited)HD_Oridecon
+6911,475,100	// (Limited)HD_Elunium
 6912,499,100	// Piece_Of_Soul_Sheep
 6913,507,100	// Holy_Rosary
 6914,499,100	// Black_Horn
@@ -1439,7 +1439,7 @@
 12596,475,100	// Magic_Candy
 12600,507,100	// Treasure_Box_Scroll
 12607,507,100	// Lolli_Pop_Box
-//12610,475,100	//
+12610,475,100	// Mysterious_Egg
 12622,507,100	// Boarding_Halter
 12625,475,100	// Sapa_Feat_Cert_Pack
 12633,475,100	// Malang_Cat_Can
@@ -3280,7 +3280,7 @@
 //16839,475,100	//
 //16840,475,100	//
 //16841,475,100	//
-//16843,475,100	//
+16843,475,100	// Beauty_Gift_Coupon_Box
 //16844,475,100	//
 //16845,475,100	//
 //16846,475,100	//
@@ -3291,8 +3291,8 @@
 //16851,475,100	//
 //16852,475,100	//
 //16853,475,100	//
-//16854,475,100	//
-//16855,475,100	//
+16854,475,100	// Clothing_Dye_Coupon_Box
+16855,475,100	// Clothing_Dye_Orig_Coupon_Box
 //16856,475,100	//
 //16857,475,100	//
 //16858,475,100	//
@@ -3589,8 +3589,8 @@
 17509,475,100	// Actinidia_Cat_Fruit_Box(40)
 17510,475,100	// Smelting_Ore_Box_VIII
 17511,475,100	// Smelting_Ore_Box_VIII(10)
-17512,475,100	// (Limited)Purified_Elunium_Box(30)
-17513,475,100	// (Limited)Purified_Oridecon_Box(30)
+17512,475,100	// (Limited)HD_Elunium_Box(30)
+17513,475,100	// (Limited)HD_Oridecon_Box(30)
 17515,475,100	// Unlimited_Box_III
 17516,475,100	// Unlimited_Box_III(10)
 17520,475,100	// Limited_Edition_Manual_Box
@@ -3849,13 +3849,24 @@
 //22950,475,100	//
 //22951,475,100	//
 //22952,475,100	//
+22979,475,100	// C_Battle_Gum_2
+23012,475,100	// S_Small_Mana_Potion
+23038,475,100	// S_Slim_White_Box
+23043,475,100	// S_Seed_Of_Yggdrasil_Box
+23046,475,100	// S_Mystic_Powder
+23047,475,100	// S_Blessing_Tyr
+23048,475,100	// S_Resilience_Potion
+23307,475,100	// S_Shining_Def_Scroll
+23340,475,100	// S_Megaphone
 25043,499,100	// Thorny_Vine_Flute
 25045,499,100	// Luxurious_Cloth
 25046,499,100	// Boarding_Pass
 25047,499,100	// Kahlunac
 25048,499,100	// Hearty_Lunchbox
 25049,499,100	// Basilac_Clam
+25245,499,100	// Small_Pile_Of_Bones
 25408,435,100	// Memories_Of_Gyoll
+25464,475,100	// World_Tour_Ticket
 26100,435,100	// P_Foxtail_Staff2
 26101,435,100	// P_Foxtail_Staff3
 28105,467,100	// Infinity_Twohand_Axe

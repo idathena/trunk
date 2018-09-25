@@ -26,6 +26,7 @@
 #define MAX_PC_BONUS 50 //Max bonus, usually used by item bonus
 #define MAX_PC_SKILL_REQUIRE 5 //Max skill tree requirement
 #define MAX_PC_FEELHATE 3 //Max feel hate info
+#define MAX_ATTENDANCE_DAY 20 //Max attendance day
 #define DAMAGELOG_SIZE_PC 100 //Damage log
 #define MAX_DEVOTION 5 //Max Devotion slots
 #define CASHPOINT_VAR "#CASHPOINTS"
@@ -36,6 +37,8 @@
 #define ROULETTE_GOLD_VAR "RouletteGold"
 #define COOKMASTERY_VAR "COOK_MASTERY"
 #define PCDIECOUNTER_VAR "PC_DIE_COUNTER"
+#define ATTENDANCE_DATE_VAR "#AttendanceDate"
+#define ATTENDANCE_COUNT_VAR "#AttendanceCounter"
 
 //Update this max as necessary, 86 is the value needed for Expanded Super Baby
 #define MAX_SKILL_TREE 86
@@ -269,6 +272,7 @@ struct map_session_data {
 		bool mail_writing; //Whether the player is currently writing a mail in RODEX or not
 		bool cashshop_open;
 		bool sale_open;
+		bool refineui_open;
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -449,7 +453,7 @@ struct map_session_data {
 		int arrow_atk, arrow_ele, arrow_cri, arrow_hit;
 		int nsshealhp, nsshealsp;
 		int critical_def, double_rate;
-		int long_attack_atk_rate; //Long range atk rate,  not weapon based [Skotlex]
+		int long_attack_atk_rate; //Long range atk rate, not weapon based [Skotlex]
 		int near_attack_def_rate, long_attack_def_rate, magic_def_rate, misc_def_rate;
 		int ignore_mdef_ele;
 		int ignore_mdef_race;
@@ -484,7 +488,7 @@ struct map_session_data {
 		short eatk; //Atk bonus from equipment
 		uint8 absorb_dmg_maxhp; //[Cydh]
 		short weapon_atk_rate, weapon_matk_rate;
-		short critical_rangeatk;
+		short critical_long;
 	} bonus;
 	//Zeroed vars end here
 
@@ -682,10 +686,6 @@ struct map_session_data {
 
 	unsigned char delayed_damage; //[Ind]
 
-	//Temporary debugging of bug #3504
-	const char *delunit_prevfile;
-	int delunit_prevline;
-
 	//Expiration_time timer id
 	int expiration_tid;
 	time_t expiration_time;
@@ -838,7 +838,7 @@ extern struct s_job_info {
 #define pc_issit(sd)          ( (sd)->vd.dead_sit == 2 )
 #define pc_isidle(sd)         ( (sd)->chatID || (sd)->state.vending || (sd)->state.buyingstore || DIFF_TICK(last_tick, (sd)->idletime) >= battle_config.idle_no_share )
 #define pc_istrading(sd)      ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->state.trading )
-#define pc_cant_act(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->chatID || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend )
+#define pc_cant_act(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->chatID || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend || (sd)->state.refineui_open )
 
 //Equals pc_cant_act except it doesn't check for chat rooms or npcs
 #define pc_cant_act2(sd)      ( (sd)->state.vending || (sd)->state.buyingstore || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend )
@@ -1047,6 +1047,8 @@ bool pc_can_insert_card_into(struct map_session_data *sd, int idx_card, int idx_
 bool pc_can_insert_card(struct map_session_data *sd, int idx_card);
 int pc_insert_card(struct map_session_data *sd, int idx_card, int idx_equip);
 
+int pc_identifyall(struct map_session_data *sd, bool identify_item);
+
 int pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 skill_lv);
 int pc_steal_coin(struct map_session_data *sd, struct block_list *bl);
 
@@ -1139,7 +1141,7 @@ void pc_cleareventtimer(struct map_session_data *sd);
 void pc_addeventtimercount(struct map_session_data *sd,const char *name,int tick);
 
 int pc_calc_pvprank(struct map_session_data *sd);
-int pc_calc_pvprank_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(pc_calc_pvprank_timer);
 
 int pc_ismarried(struct map_session_data *sd);
 bool pc_marriage(struct map_session_data *sd,struct map_session_data *dstsd);
@@ -1176,7 +1178,7 @@ struct sg_data {
 	short comfort_id;
 	char feel_var[NAME_LENGTH];
 	char hate_var[NAME_LENGTH];
-	int (*day_func)(void);
+	bool (*day_func)(void);
 };
 extern const struct sg_data sg_info[MAX_PC_FEELHATE];
 
@@ -1222,8 +1224,8 @@ enum e_additem_result {
 // Timer for night/day
 extern int day_timer_tid;
 extern int night_timer_tid;
-int map_day_timer(int tid, unsigned int tick, int id, intptr_t data); // By [yor]
-int map_night_timer(int tid, unsigned int tick, int id, intptr_t data); // By [yor]
+TIMER_FUNC(map_day_timer); // By [yor]
+TIMER_FUNC(map_night_timer); // By [yor]
 
 // Rental System
 void pc_inventory_rentals(struct map_session_data *sd);
@@ -1251,7 +1253,7 @@ void pc_show_version(struct map_session_data *sd);
 
 void pc_crimson_marker_clear(struct map_session_data *sd);
 
-int pc_bonus_script_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(pc_bonus_script_timer);
 void pc_bonus_script(struct map_session_data *sd);
 struct s_bonus_script_entry *pc_bonus_script_add(struct map_session_data *sd, const char *script_str, uint32 dur, enum si_type icon, uint16 flag, uint8 type);
 void pc_bonus_script_clear(struct map_session_data *sd, uint16 flag);
@@ -1277,10 +1279,10 @@ int pc_level_penalty_mod(int level_diff, uint32 mob_class, enum e_mode mode, int
 
 void pc_scdata_received(struct map_session_data *sd);
 void pc_check_expiration(struct map_session_data *sd);
-int pc_expiration_timer(int tid, unsigned int tick, int id, intptr_t data);
-int pc_global_expiration_timer(int tid, unsigned tick, int id, intptr_t data);
+TIMER_FUNC(pc_expiration_timer);
+TIMER_FUNC(pc_global_expiration_timer);
 void pc_expire_check(struct map_session_data *sd);
-int pc_autotrade_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(pc_autotrade_timer);
 
 enum e_BANKING_DEPOSIT_ACK pc_bank_deposit(struct map_session_data *sd, int money);
 enum e_BANKING_WITHDRAW_ACK pc_bank_withdraw(struct map_session_data *sd, int money);
@@ -1296,5 +1298,12 @@ enum e_summoner_type {
 };
 
 uint8 pc_checkskill_summoner(struct map_session_data *sd, enum e_summoner_type type);
+
+bool pc_attendance_enabled(void);
+int32 pc_attendance_counter(struct map_session_data *sd);
+void pc_attendance_claim_reward(struct map_session_data *sd);
+
+void pc_stylist_process(struct map_session_data *sd, int type, int16 idx, bool isItem);
+bool pc_has_second_costume(int class_);
 
 #endif /* _PC_H_ */

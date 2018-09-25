@@ -10,6 +10,7 @@
 #include "../common/mapindex.h"
 #include "../common/db.h"
 #include "../common/msg_conf.h"
+#include "../common/timer.h"
 
 #include <stdarg.h>
 
@@ -467,7 +468,7 @@ enum _sp {
 	SP_WEAPON_ATK_RATE,SP_WEAPON_MATK_RATE, // 1081-1082
 	SP_DELAYRATE,SP_HP_DRAIN_VALUE_RACE,SP_SP_DRAIN_VALUE_RACE, // 1083-1085
 	SP_IGNORE_MDEF_RACE_RATE,SP_IGNORE_DEF_RACE_RATE,SP_SKILL_HEAL2,SP_ADDEFF_ONSKILL, //1086-1089
-	SP_ADD_HEAL_RATE,SP_ADD_HEAL2_RATE,SP_ABSORB_DMG_MAXHP,SP_CRITICAL_RANGEATK,SP_NO_WALKDELAY, //1090-1094
+	SP_ADD_HEAL_RATE,SP_ADD_HEAL2_RATE,SP_ABSORB_DMG_MAXHP,SP_CRITICAL_LONG,SP_NO_WALKDELAY, //1090-1094
 
 	SP_RESTART_FULL_RECOVER = 2000,SP_NO_CASTCANCEL,SP_NO_SIZEFIX,SP_NO_MAGIC_DAMAGE,SP_NO_WEAPON_DAMAGE,SP_NO_GEMSTONE, // 2000-2005
 	SP_NO_CASTCANCEL2,SP_NO_MISC_DAMAGE,SP_UNBREAKABLE_WEAPON,SP_UNBREAKABLE_ARMOR,SP_UNBREAKABLE_HELM, // 2006-2010
@@ -508,6 +509,7 @@ enum _look {
 	LOOK_RESET_COSTUMES, //Reset Costumes - Makes all headgear sprites on player vanish when activated
 	LOOK_ROBE,           //Robe
 	LOOK_BODY2,          //Body2 - Changes body appearance
+	LOOK_MAX
 };
 
 // Used by map_setcell()
@@ -695,6 +697,8 @@ struct map_data {
 		unsigned gvg_te_castle : 1; // GVG WOE:TE Castle
 		unsigned nocostume : 1; // Disable costume sprites [Cydh]
 		unsigned hidemobhpbar : 1;
+		unsigned privateairship_source : 1;
+		unsigned privateairship_destination : 1;
 #ifdef ADJUST_SKILL_DAMAGE
 		unsigned skill_damage : 1;
 #endif
@@ -767,7 +771,7 @@ extern int map_num;
 
 extern int autosave_interval;
 extern int minsave_interval;
-extern int save_settings;
+extern int16 save_settings;
 extern int night_flag; // 0 = day, 1 = night [Yor]
 extern int enable_spy; // Determines if @spy commands are active.
 extern char db_path[256];
@@ -798,7 +802,8 @@ enum save_settings_type {
 	CHARSAVE_QUEST       = 0x040, //After successfully get/delete/complete a quest
 	CHARSAVE_BUYINGSTORE = 0x080, //After every buyingstore transaction
 	CHARSAVE_BANK        = 0x100, //After every bank transaction (deposit/withdraw)
-	CHARSAVE_ALL         = 0x1FF,
+	CHARSAVE_ATTENDANCE  = 0x200, //After every attendence reward
+	CHARSAVE_ALL         = 0xFFF,
 };
 
 struct s_map_default {
@@ -847,8 +852,8 @@ int map_quit(struct map_session_data *);
 bool map_addnpc(int16 m,struct npc_data *);
 
 // Map item
-int map_clearflooritem_timer(int tid, unsigned int tick, int id, intptr_t data);
-int map_removemobs_timer(int tid, unsigned int tick, int id, intptr_t data);
+TIMER_FUNC(map_clearflooritem_timer);
+TIMER_FUNC(map_removemobs_timer);
 void map_clearflooritem(struct block_list *bl);
 int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, int first_charid, int second_charid, int third_charid, int flags, unsigned short mob_id);
 
@@ -927,9 +932,10 @@ int cleanup_sub(struct block_list *bl, va_list ap);
 int map_delmap(char *mapname);
 void map_flags_init(void);
 
+bool map_iwall_exist(const char *wall_name);
 bool map_iwall_set(int16 m, int16 x, int16 y, int size, int8 dir, bool shootable, const char *wall_name); 
 void map_iwall_get(struct map_session_data *sd);
-void map_iwall_remove(const char *wall_name);
+bool map_iwall_remove(const char *wall_name);
 
 int map_addmobtolist(unsigned short m, struct spawn_data *spawn); // [Wizputer]
 void map_spawnmobs(int16 m); // [Wizputer]
@@ -952,6 +958,9 @@ void map_skill_damage_add(struct map_data *m, uint16 skill_id, int pc, int mob, 
 struct questinfo *map_add_questinfo(int m, struct questinfo *qi);
 bool map_remove_questinfo(int m, struct npc_data *nd);
 struct questinfo *map_has_questinfo(int m, struct npc_data *nd, int quest_id);
+
+int map_mapflag_pvp_start(struct block_list *bl, va_list ap);
+int map_mapflag_pvp_stop(struct block_list *bl, va_list ap);
 
 extern char *INTER_CONF_NAME;
 extern char *LOG_CONF_NAME;
@@ -1004,6 +1013,7 @@ extern Sql *logmysql_handle;
 
 extern char buyingstores_db[32];
 extern char buyingstore_items_db[32];
+extern char guild_storage_log_db[32];
 extern char item_db_db[32];
 extern char item_db2_db[32];
 extern char item_db_re_db[32];

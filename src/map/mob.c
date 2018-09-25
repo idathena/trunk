@@ -125,7 +125,7 @@ struct eri *mob_sc_display_ers = NULL;
  * Local prototype declaration (only required thing)
  *------------------------------------------*/
 static int mob_makedummymobdb(int);
-static int mob_spawn_guardian_sub(int tid, unsigned int tick, int id, intptr_t data);
+static TIMER_FUNC(mob_spawn_guardian_sub);
 int mob_skill_id2skill_idx(int mob_id, uint16 skill_id);
 
 /*==========================================
@@ -233,7 +233,7 @@ int mvptomb_setdelayspawn(struct npc_data *nd) {
  * @param id: Block list ID
  * @param data: Used for add_timer_func_list
  */
-int mvptomb_delayspawn(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(mvptomb_delayspawn) {
 	struct npc_data *nd = BL_CAST(BL_NPC, map_id2bl(id));
 
 	if(nd) {
@@ -740,7 +740,7 @@ int mob_once_spawn_area(struct map_session_data *sd, int16 m, int16 x0, int16 y0
  * @return Always 0
  * @author Skotlex
  */
-static int mob_spawn_guardian_sub(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(mob_spawn_guardian_sub)
 { //Needed because the guild data may not be available at guardian spawn time.
 	struct block_list *bl = map_id2bl(id);
 	struct mob_data *md;
@@ -983,7 +983,7 @@ int mob_linksearch(struct block_list *bl, va_list ap)
 /*==========================================
  * mob spawn with delay (timer function)
  *------------------------------------------*/
-int mob_delayspawn(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(mob_delayspawn)
 {
 	struct block_list *bl = map_id2bl(id);
 	struct mob_data *md = BL_CAST(BL_MOB, bl);
@@ -1562,7 +1562,7 @@ int mob_randomwalk(struct mob_data *md, unsigned int tick)
 	}
 	speed = status_get_speed(&md->bl);
 	for(i = c = 0; i < md->ud.walkpath.path_len; i++) { //The next walk start time is calculated
-		if(md->ud.walkpath.path[i]&1)
+		if(direction_diagonal(md->ud.walkpath.path[i]))
 			c += speed * MOVE_DIAGONAL_COST / MOVE_COST;
 		else
 			c += speed;
@@ -1968,7 +1968,7 @@ static int mob_ai_sub_lazy(struct mob_data *md, va_list args)
 /*==========================================
  * Negligent processing for mob outside PC field of view   (interval timer function)
  *------------------------------------------*/
-static int mob_ai_lazy(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(mob_ai_lazy)
 {
 	map_foreachmob(mob_ai_sub_lazy,tick);
 	return 0;
@@ -1977,7 +1977,7 @@ static int mob_ai_lazy(int tid, unsigned int tick, int id, intptr_t data)
 /*==========================================
  * Serious processing for mob in PC field of view (interval timer function)
  *------------------------------------------*/
-static int mob_ai_hard(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(mob_ai_hard)
 {
 	if (battle_config.mob_ai&0x20)
 		map_foreachmob(mob_ai_sub_lazy,tick);
@@ -2048,7 +2048,7 @@ static struct item_drop *mob_setlootitem(struct s_mob_lootitem *item, unsigned s
 /*==========================================
  * item drop with delay (timer function)
  *------------------------------------------*/
-static int mob_delay_item_drop(int tid, unsigned int tick, int id, intptr_t data)
+static TIMER_FUNC(mob_delay_item_drop)
 {
 	struct item_drop_list *list;
 	struct item_drop *ditem;
@@ -2110,7 +2110,7 @@ static void mob_item_drop(struct mob_data *md, struct item_drop_list *dlist, str
 	dlist->item = ditem;
 }
 
-int mob_timer_delete(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(mob_timer_delete)
 {
 	struct block_list *bl = map_id2bl(id);
 	struct mob_data *md = BL_CAST(BL_MOB, bl);
@@ -2154,8 +2154,9 @@ int mob_deleteslave(struct mob_data *md)
 	map_foreachinmap(mob_deleteslave_sub, md->bl.m, BL_MOB,md->bl.id);
 	return 0;
 }
+
 // Mob respawning through KAIZEL or NPC_REBIRTH [Skotlex]
-int mob_respawn(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(mob_respawn)
 {
 	struct block_list *bl = map_id2bl(id);
 
@@ -3358,7 +3359,7 @@ int mobskill_use(struct mob_data *md, unsigned int tick, int event)
 				case MSC_MYHPLTMAXRATE: //HP < maxhp %
 					flag = get_percentage(md->status.hp, md->status.max_hp);
 					flag = (flag <= c2);
-				  	break;
+					break;
 				case MSC_MYHPINRATE:
 					flag = get_percentage(md->status.hp, md->status.max_hp);
 					flag = (flag >= c2 && flag <= ms[i].val[0]);
@@ -3454,7 +3455,7 @@ int mobskill_use(struct mob_data *md, unsigned int tick, int event)
 			if (!bl)
 				continue;
 			x = bl->x;
-		  	y = bl->y;
+			y = bl->y;
 			//Look for an area to cast the spell around
 			if (skill_target >= MST_AROUND5) {
 				j = (skill_target >= MST_AROUND1) ?
@@ -3915,9 +3916,9 @@ static bool mob_parse_dbrow(char **str)
 	int mob_id, i;
 	double exp, maxhp;
 	struct mob_data data;
-	
+
 	mob_id = atoi(str[0]);
-	
+
 	if (mob_id <= 1000 || mob_id > MAX_MOB_DB) {
 		ShowError("mob_parse_dbrow: Invalid monster ID %d, must be in range %d-%d.\n", mob_id, 1000, MAX_MOB_DB);
 		return false;
@@ -3927,7 +3928,7 @@ static bool mob_parse_dbrow(char **str)
 		ShowError("mob_parse_dbrow: Invalid monster ID %d, reserved for player classes.\n", mob_id);
 		return false;
 	}
-	
+
 	if (mob_id >= MOB_CLONE_START && mob_id < MOB_CLONE_END) {
 		ShowError("mob_parse_dbrow: Invalid monster ID %d. Range %d-%d is reserved for player clones. Please increase MAX_MOB_DB (%d).\n", mob_id, MOB_CLONE_START, MOB_CLONE_END-1, MAX_MOB_DB);
 		return false;
@@ -4197,7 +4198,7 @@ static bool mob_readdb_mobavail(char *str[], int columns, int current)
 	mob_db_data[mob_id]->vd.class_ = sprite_id;
 
 	//Player sprites
-	if(pcdb_checkid(sprite_id) && columns == 12) {
+	if(pcdb_checkid(sprite_id) && columns == 13) {
 		mob_db_data[mob_id]->vd.sex = atoi(str[2]);
 		mob_db_data[mob_id]->vd.hair_style = atoi(str[3]);
 		mob_db_data[mob_id]->vd.hair_color = atoi(str[4]);
@@ -4208,6 +4209,8 @@ static bool mob_readdb_mobavail(char *str[], int columns, int current)
 		mob_db_data[mob_id]->vd.head_bottom = atoi(str[9]);
 		mob_db_data[mob_id]->option = atoi(str[10])&~(OPTION_HIDE|OPTION_CLOAK|OPTION_INVISIBLE);
 		mob_db_data[mob_id]->vd.cloth_color = atoi(str[11]); //Monster player dye option - Valaris
+		if(pc_has_second_costume(sprite_id))
+			mob_db_data[mob_id]->vd.body_style = cap_value(atoi(str[12]), 0, 1);
 #ifdef NEW_CARTS
 		if(mob_db_data[mob_id]->option&OPTION_CART) {
 			ShowWarning("mob_readdb_mobavail: You tried to use a cart for mob id %d. This does not work with setting an option anymore.\n", mob_id);
@@ -4774,13 +4777,13 @@ static bool mob_readdb_drop(char *str[], int columns, int current)
 
 	mobid = atoi(str[0]);
 	if ((mob = mob_db(mobid)) == mob_dummy) {
-		ShowError("mob_readdb_drop: Invalid monster with ID %s.\n", str[0]);
+		ShowError("mob_readdb_drop: Invalid monster ID %s.\n", str[0]);
 		return false;
 	}
 
 	nameid = atoi(str[1]);
 	if (!itemdb_exists(nameid)) {
-		ShowWarning("mob_readdb_drop: Invalid item id %s.\n", str[1]);
+		ShowWarning("mob_readdb_drop: Invalid item ID %s.\n", str[1]);
 		return false;
 	}
 
@@ -4802,13 +4805,13 @@ static bool mob_readdb_drop(char *str[], int columns, int current)
 			}
 		}
 	} else {
-		for (i = 0; i < size; i++) {
-			if (!drop[i].nameid)
-				break;
-		}
-		if (i == size) {
-			ShowError("mob_readdb_drop: Cannot add item '%hu' to monster '%hu'. Max drop reached '%d'.\n", nameid, mobid, size);
-			return true;
+		ARR_FIND(0, size, i, drop[i].nameid == nameid);
+		if (i == size) { //Item is not dropped at all (search all item slots)
+			ARR_FIND(0, size, i, drop[i].nameid == 0);
+			if (i == size) { //No empty slots
+				ShowError("mob_readdb_drop: Cannot add item '%hu' to monster '%hu'. Max drop reached (%d).\n", nameid, mobid, size);
+				return true;
+			}
 		}
 		drop[i].nameid = nameid;
 		drop[i].p = rate;
@@ -5100,7 +5103,7 @@ static void mob_load(void)
 		mob_readdb();
 		mob_readskilldb();
 	}
-	sv_readdb(db_path, "mob_avail.txt", ',', 2, 12, -1, &mob_readdb_mobavail);
+	sv_readdb(db_path, "mob_avail.txt", ',', 2, 13, -1, &mob_readdb_mobavail);
 	sv_readdb(db_path, DBPATH"mob_race2_db.txt", ',', 2, MAX_RACE2_MOBS, -1, &mob_readdb_race2);
 	sv_readdb(db_path, "mob_item_ratio.txt", ',', 2, 2 + MAX_ITEMRATIO_MOBS, -1, &mob_readdb_itemratio);
 	sv_readdb(db_path, DBPATH"mob_drop.txt", ',', 3, 5, -1, &mob_readdb_drop);

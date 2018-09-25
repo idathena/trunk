@@ -40,8 +40,8 @@ force_2-1,99,20,4	script	Minilover#arena	124,{
 
 OnStart:
 	initnpctimer;
-	set $arena_min60st,gettime(2);
-	set $arena_sec60st,gettime(1);
+	set $arena_min60st,gettime(DT_MINUTE);
+	set $arena_sec60st,gettime(DT_SECOND);
 	end;
 
 OnTimer3000:
@@ -118,7 +118,7 @@ OnTimerOff:
 	end;
 
 OnFailClearStage:
- 	donpcevent "cast#60::OnTimeOver1";
+	donpcevent "cast#60::OnTimeOver1";
 	mapwarp "force_2-1","prt_are_in",126,139,0,0;
 	donpcevent "Minilover#arena::OnTimerOff";
 	donpcevent "arena#60::OnReset_All";
@@ -786,8 +786,8 @@ OnMyMobDead:
 		donpcevent "Minilover#arena::On09_End";
 		donpcevent "arena#60::OnReset_09";
 		donpcevent "arena#60::OnReset_All";
-		set $arena_min60end,gettime(2);
-		set $arena_sec60end,gettime(1);
+		set $arena_min60end,gettime(DT_MINUTE);
+		set $arena_sec60end,gettime(DT_SECOND);
 	}
 	end;
 }
@@ -875,7 +875,7 @@ prt_are_in,25,135,3	script	Staff#60-2	67,{
 			close2;
 		}
 		specialeffect2 EF_EXIT;
- 		donpcevent "cast#60::OnNomal1";
+		donpcevent "cast#60::OnNomal1";
 		warp "arena_room",100,75;
 		donpcevent "#arn_timer_60::OnStop";
 		donpcevent "alloff#60::OnEnable";
@@ -922,7 +922,7 @@ prt_are_in,25,135,3	script	Staff#60-2	67,{
 			close2;
 		}
 		specialeffect2 EF_HIT5;
- 		donpcevent "cast#60::OnNomal2";
+		donpcevent "cast#60::OnNomal2";
 		warp "arena_room",100,75;
 		donpcevent "#arn_timer_60::OnStop";
 		donpcevent "alloff#60::OnEnable";
@@ -949,7 +949,7 @@ OnTimer4000:
 	end;
 
 OnTimer60000:
- 	donpcevent "cast#60::OnTimeOver2";
+	donpcevent "cast#60::OnTimeOver2";
 	donpcevent "arn_warp_60::OnOut";
 	donpcevent "#arn_timer_60::OnStop";
 	donpcevent "alloff#60::OnEnable";

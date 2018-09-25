@@ -178,7 +178,7 @@ int elemental_save(struct elemental_data *ed) {
 	return 1;
 }
 
-static int elemental_summon_end(int tid, unsigned int tick, int id, intptr_t data) {
+static TIMER_FUNC(elemental_summon_end) {
 	struct map_session_data *sd;
 	struct elemental_data *ed;
 
@@ -599,7 +599,7 @@ struct skill_condition elemental_skill_get_requirements(uint16 skill_id, uint16 
 	memset(&req,0,sizeof(req));
 
 	if( !idx ) //Invalid skill id
-  		return req;
+		return req;
 
 	if( skill_lv < 1 || skill_lv > MAX_SKILL_LEVEL )
 		return req;
@@ -785,7 +785,7 @@ static int elemental_ai_sub_foreachclient(struct map_session_data *sd, va_list a
 	return 0;
 }
 
-static int elemental_ai_timer(int tid, unsigned int tick, int id, intptr_t data) {
+static TIMER_FUNC(elemental_ai_timer) {
 	map_foreachpc(elemental_ai_sub_foreachclient,tick);
 	return 0;
 }

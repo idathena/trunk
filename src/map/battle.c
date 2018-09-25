@@ -255,7 +255,7 @@ struct delay_damage {
 	bool isspdamage;
 };
 
-int battle_delay_damage_sub(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(battle_delay_damage_sub) {
 	struct delay_damage *dat = (struct delay_damage *)data;
 
 	if( dat ) {
@@ -1739,6 +1739,28 @@ int64 battle_addmastery(struct map_session_data *sd, struct block_list *target, 
 	return damage;
 }
 
+/**
+ * Calculates over refine damage bonus
+ * @param sd Player
+ * @param damage Current damage
+ * @param type EQI_HAND_L:left-hand weapon, EQI_HAND_R:right-hand weapon
+ */
+static void battle_add_weapon_damage(struct map_session_data *sd, int64 *damage, uint8 type) {
+	int overrefine = 0;
+
+	if(!sd)
+		return;
+	switch(type) { //Rodatazone says that Over refine bonus is part of base weapon attack
+		case EQI_HAND_L:
+			overrefine = sd->left_weapon.overrefine + 1;
+			break;
+		case EQI_HAND_R:
+			overrefine = sd->right_weapon.overrefine + 1;
+			break;
+	}
+	(*damage) += rnd()%overrefine;
+}
+
 #ifdef RENEWAL
 static int battle_calc_sizefix(int64 damage, struct map_session_data *sd, short t_size, unsigned char weapon_type, bool weapon_perfection)
 {
@@ -1755,11 +1777,20 @@ static int battle_calc_status_attack(struct status_data *status, short hand)
 		return status->batk * 2;
 }
 
+/**
+ * Calculates renewal Variance, OverRefineBonus, and SizePenaltyMultiplier of weapon damage parts for player
+ * @param src Block list of attacker
+ * @param tstatus Target's status data
+ * @param watk Weapon attack data
+ * @param sd Player
+ * @param skill_id Id of skill
+ * @return Base weapon damage
+ */
 static int battle_calc_base_weapon_attack(struct block_list *src, struct status_data *tstatus, struct weapon_atk *watk, struct map_session_data *sd, uint16 skill_id)
 {
 	struct status_data *status = status_get_status_data(src);
 	struct status_change *sc = status_get_sc(src);
-	uint8 type = (watk == &status->lhw ? EQI_HAND_L : EQI_HAND_R), refine;
+	uint8 type = (watk == &status->lhw ? EQI_HAND_L : EQI_HAND_R);
 	uint16 atkmin = (type == EQI_HAND_L ? status->watk2 : status->watk);
 	uint16 atkmax = atkmin;
 	int64 damage;
@@ -1795,18 +1826,12 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 			atkmax = atkmin;
 	}
 
-	if(type == EQI_HAND_R && index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_WEAPON &&
-		watk->range <= 3 && (refine = sd->inventory.u.items_inventory[index].refine) < 16 && refine) {
-		int r = refine_info[watk->wlv].randombonus_max[refine + (4 - watk->wlv)] / 100;
-
-		if(r)
-			atkmax += (rnd()%100)%r + 1;
-	}
+	damage = atkmax;
 
 	if(sd->charmball_type == CHARM_TYPE_LAND && sd->charmball > 0)
-		atkmax += atkmax * sd->charmball / 10;
+		damage += damage * sd->charmball / 10;
 
-	damage = atkmax;
+	battle_add_weapon_damage(sd, &damage, type); //Over refine atk bonus is not affected by Maximize Power status
 
 	switch(skill_id) { //Ignore size fix
 		case MO_EXTREMITYFIST:
@@ -1847,7 +1872,7 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 static int64 battle_calc_base_damage(struct block_list *src, struct status_data *status, struct weapon_atk *watk, struct status_change *sc, unsigned short t_size, struct map_session_data *sd, int flag)
 {
 	unsigned int atkmin = 0, atkmax = 0;
-	short type = 0;
+	uint8 type = 0;
 	int64 damage = 0;
 
 	if(!sd) { //Mobs/Pets
@@ -1941,19 +1966,8 @@ static int64 battle_calc_base_damage(struct block_list *src, struct status_data 
 	else
 		damage += status->batk;
 
-	//Rodatazone says that overrefine bonuses are part of base atk
-	if(sd) {
-		switch(type) {
-			case EQI_HAND_L:
-				if(sd->left_weapon.overrefine)
-					damage += rnd()%sd->left_weapon.overrefine + 1;
-				break;
-			case EQI_HAND_R:
-				if(sd->right_weapon.overrefine)
-					damage += rnd()%sd->right_weapon.overrefine + 1;
-				break;
-		}
-	}
+	battle_add_weapon_damage(sd, &damage, type);
+
 	return damage;
 }
 
@@ -2041,7 +2055,8 @@ static int battle_blewcount_bonus(struct map_session_data *sd, uint16 skill_id)
 }
 
 #ifdef ADJUST_SKILL_DAMAGE
-/** Damage calculation for adjusting skill damage
+/**
+ * Damage calculation for adjusting skill damage
  * @param caster Applied caster type for damage skill
  * @param type BL_Type of attacker
  */
@@ -2061,7 +2076,8 @@ static bool battle_skill_damage_iscaster(uint8 caster, enum bl_type src_type)
 	return false;
 }
 
-/** Gets skill damage rate from a skill (based on skill_damage_db.txt)
+/**
+ * Gets skill damage rate from a skill (based on skill_damage_db.txt)
  * @param src
  * @param target
  * @param skill_id
@@ -2104,7 +2120,8 @@ static int battle_skill_damage_skill(struct block_list *src, struct block_list *
 	return 0;
 }
 
-/** Gets skill damage rate from a skill (based on 'skill_damage' mapflag)
+/**
+ * Gets skill damage rate from a skill (based on 'skill_damage' mapflag)
  * @param src
  * @param target
  * @param skill_id
@@ -2163,7 +2180,8 @@ static int battle_skill_damage_map(struct block_list *src, struct block_list *ta
 	return rate;
 }
 
-/** Check skill damage adjustment based on mapflags and skill_damage_db.txt for specified skill
+/**
+ * Check skill damage adjustment based on mapflags and skill_damage_db.txt for specified skill
  * @param src
  * @param target
  * @param skill_id
@@ -2332,11 +2350,10 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 			if(!battle_config.show_status_katar_crit && sd->status.weapon == W_KATAR)
 				cri *= 2; //On official double critical bonus from katar won't be showed in status display
 			cri += sd->critaddrace[tstatus->race] + sd->critaddrace[RC_ALL];
-			if(is_skill_using_arrow(src, skill_id)) {
+			if(is_skill_using_arrow(src, skill_id))
 				cri += sd->bonus.arrow_cri;
-				if(!skill_id)
-					cri += sd->bonus.critical_rangeatk;
-			}
+			if(!skill_id && (wd.flag&BF_LONG))
+				cri += sd->bonus.critical_long;
 		}
 
 		if(sc && sc->data[SC_CAMOUFLAGE])
@@ -3031,7 +3048,6 @@ struct Damage battle_calc_damage_parts(struct Damage wd, struct block_list *src,
 	struct status_data *sstatus = status_get_status_data(src);
 	struct status_data *tstatus = status_get_status_data(target);
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
-
 	int right_element = battle_get_weapon_element(&wd, src, target, skill_id, skill_lv, EQI_HAND_R);
 	int left_element = battle_get_weapon_element(&wd, src, target, skill_id, skill_lv, EQI_HAND_L);
 
@@ -3256,7 +3272,7 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 					ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.atk_rate);
 #ifndef RENEWAL
 				//Add +crit damage bonuses here in pre-renewal mode [helvetica]
-				if(is_attack_critical(wd, src, target, skill_id, skill_lv, false))
+				if(!skill_id && is_attack_critical(wd, src, target, skill_id, skill_lv, false))
 					ATK_ADDRATE(wd.damage, wd.damage2, sd->bonus.crit_atk_rate);
 				if(sd->status.party_id && pc_checkskill(sd, TK_POWER) > 0 &&
 					(i = party_foreachsamemap(party_sub_count, sd, 0)) > 1) //Exclude the player himself [Inkfish]
@@ -3879,7 +3895,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 			skillratio += 100 * (skill_lv - 1);
 			break;
 		case AB_DUPLELIGHT_MELEE:
-			skillratio += 10 * skill_lv;
+			skillratio += 50 + 15 * skill_lv;
 			break;
 		case RA_ARROWSTORM:
 			skillratio += 900 + 80 * skill_lv;
@@ -4074,7 +4090,7 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case SR_FALLENEMPIRE: //ATK [(Skill Level x 150 + 100) x Caster's Base Level / 150] %
 			skillratio += 150 * skill_lv;
 			RE_LVL_DMOD(150);
- 			break;
+			break;
 		case SR_TIGERCANNON: {
 				int hp = sstatus->max_hp * (10 + 2 * skill_lv) / 100,
 					sp = sstatus->max_sp * (5 + skill_lv) / 100;
@@ -5161,14 +5177,14 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 
 	if(sc) {
 		if(sc->data[SC_FUSION]) { //SC_FUSION HP penalty [Komurka]
-			int hp = sstatus->max_hp;
+			unsigned int hp = sstatus->max_hp;
 
 			if(sd && tsd) {
-				hp = 8 * hp / 100;
+				hp /= 13;
 				if(sstatus->hp * 100 <= sstatus->max_hp * 20)
 					hp = sstatus->hp;
 			} else
-				hp = 2 * hp / 100; //2% HP loss per hit
+				hp = hp * 2 / 100; //2% HP loss per hit
 			status_zap(src, hp, 0);
 		}
 		if(sc->data[SC_CAMOUFLAGE] && skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
@@ -5218,7 +5234,7 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 
 	if(sd) {
 #ifdef RENEWAL
-		if(is_attack_critical(wd, src, target, skill_id, skill_lv, false))
+		if(!skill_id && is_attack_critical(wd, src, target, skill_id, skill_lv, false))
 			ATK_ADDRATE(wd.damage, wd.damage2, 40 + sd->bonus.crit_atk_rate);
 #endif
 		if((bonus_damage = pc_skillatk_bonus(sd, skill_id)))
@@ -5660,7 +5676,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		case ASC_BREAKER:
 		case RA_CLUSTERBOMB:
 		case RA_FIRINGTRAP:
- 		case RA_ICEBOUNDTRAP:
+		case RA_ICEBOUNDTRAP:
 		case LG_RAYOFGENESIS:
 		case SO_VARETYR_SPEAR:
 			return wd; //Do GVG fix later
@@ -5868,9 +5884,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			case NPC_EARTHQUAKE: //Earthquake calculates damage to self first then spread it to others [exneval]
 				ad.damage = battle_calc_weapon_attack(src, src, skill_id, skill_lv, ad.miscflag).damage;
 				break;
-			case AB_RENOVATIO:
-				ad.damage = status_get_lv(src) * 10 + sstatus->int_;
-				break;
 			case NPC_ICEMINE:
 			case NPC_FLAMECROSS:
 				ad.damage = sstatus->rhw.atk * 20 * skill_lv;
@@ -6066,14 +6079,16 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 #endif
 					case AB_JUDEX:
 						skillratio += 200 + 20 * skill_lv;
+						if(skill_lv == 5)
+							skillratio += 170;
 						RE_LVL_DMOD(100);
 						break;
 					case AB_ADORAMUS:
-						skillratio += 400 + 100 * skill_lv;
+						skillratio += 230 + 70 * skill_lv;
 						RE_LVL_DMOD(100);
 						break;
 					case AB_DUPLELIGHT_MAGIC:
-						skillratio += 100 + 20 * skill_lv;
+						skillratio += 300 + 40 * skill_lv;
 						break;
 					case WL_SOULEXPANSION:
 						skillratio += -100 + (skill_lv + 4) * 100 + sstatus->int_;
@@ -6310,6 +6325,12 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			mdef = status_calc_mdef(target, tsc, mdef, false);
 			mdef2 = status_calc_mdef2(target, tsc, mdef2, false);
 
+			if(sc && sc->data[SC_EXPIATIO]) {
+				i = 5 * sc->data[SC_EXPIATIO]->val1; //5% per level
+ 				i = min(i, 100); //Cap it to 100 for 5 mdef min
+				mdef -= mdef * i / 100;
+				//mdef2 -= mdef2 * i / 100;
+			}
 			if(sd) {
 				i = sd->ignore_mdef_by_race[tstatus->race] + sd->ignore_mdef_by_race[RC_ALL];
 				i += sd->ignore_mdef_by_class[tstatus->class_] + sd->ignore_mdef_by_class[CLASS_ALL];
@@ -6319,7 +6340,6 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					//mdef2 -= mdef2 * i / 100;
 				}
 			}
-
 #ifdef RENEWAL
 			/**
 			 * RE MDEF Reduction
@@ -8043,7 +8063,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 			if( (sd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
 				(tsd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
 				(int)sd->status.base_level < battle_config.pk_min_level ||
-			  	(int)tsd->status.base_level < battle_config.pk_min_level ||
+				(int)tsd->status.base_level < battle_config.pk_min_level ||
 				(battle_config.pk_level_range &&
 				abs((int)sd->status.base_level - (int)tsd->status.base_level) > battle_config.pk_level_range) )
 				state &= ~BCT_ENEMY;
@@ -8387,12 +8407,20 @@ static const struct _battle_data {
 	{ "night_at_start",                     &battle_config.night_at_start,                  0,      0,      1,              },
 	{ "show_mob_info",                      &battle_config.show_mob_info,                   0,      0,      1|2|4,          },
 	{ "ban_hack_trade",                     &battle_config.ban_hack_trade,                  0,      0,      INT_MAX,        },
-	{ "min_hair_style",                     &battle_config.min_hair_style,                  1,      1,      INT_MAX,        },
-	{ "max_hair_style",                     &battle_config.max_hair_style,                  29,     1,      INT_MAX,        },
+	{ "min_hair_style",                     &battle_config.min_hair_style,                  0,      0,      INT_MAX,        },
+	{ "max_hair_style",                     &battle_config.max_hair_style,                  29,     0,      INT_MAX,        },
 	{ "min_hair_color",                     &battle_config.min_hair_color,                  0,      0,      INT_MAX,        },
-	{ "max_hair_color",                     &battle_config.max_hair_color,                  9,      0,      INT_MAX,        },
+	{ "max_hair_color",                     &battle_config.max_hair_color,                  8,      0,      INT_MAX,        },
 	{ "min_cloth_color",                    &battle_config.min_cloth_color,                 0,      0,      INT_MAX,        },
 	{ "max_cloth_color",                    &battle_config.max_cloth_color,                 4,      0,      INT_MAX,        },
+	{ "min_body_style",                     &battle_config.min_body_style,                  0,      0,      SHRT_MAX,       },
+	{ "max_body_style",                     &battle_config.max_body_style,                  1,      0,      SHRT_MAX,       },
+	{ "min_doram_hair_style",               &battle_config.min_doram_hair_style,            0,      0,      SHRT_MAX,       },
+	{ "max_doram_hair_style",               &battle_config.max_doram_hair_style,            6,      0,      SHRT_MAX,       },
+	{ "min_doram_hair_color",               &battle_config.min_doram_hair_color,            0,      0,      SHRT_MAX,       },
+	{ "max_doram_hair_color",               &battle_config.max_doram_hair_color,            8,      0,      SHRT_MAX,       },
+	{ "min_doram_cloth_color",              &battle_config.min_doram_cloth_color,           0,      0,      SHRT_MAX,       },
+	{ "max_doram_cloth_color",              &battle_config.max_doram_cloth_color,           0,      0,      SHRT_MAX,       },
 	{ "pet_hair_style",                     &battle_config.pet_hair_style,                  100,    0,      INT_MAX,        },
 	{ "castrate_dex_scale",                 &battle_config.castrate_dex_scale,              150,    1,      INT_MAX,        },
 	{ "vcast_stat_scale",                   &battle_config.vcast_stat_scale,                530,    1,      INT_MAX,        },
@@ -8603,9 +8631,6 @@ static const struct _battle_data {
 	{ "max_homunculus_parameter",           &battle_config.max_homunculus_parameter,        150,    10,     SHRT_MAX,       },
 	{ "feature.roulette",                   &battle_config.feature_roulette,                1,      0,      1,              },
 	{ "monster_hp_bars_info",               &battle_config.monster_hp_bars_info,            1,      0,      1,              },
-	{ "min_body_style",                     &battle_config.min_body_style,                  0,      0,      SHRT_MAX,       },
-	{ "max_body_style",                     &battle_config.max_body_style,                  1,      0,      SHRT_MAX,       },
-	{ "save_body_style",                    &battle_config.save_body_style,                 0,      0,      1,              },
 	{ "mvp_exp_reward_message",             &battle_config.mvp_exp_reward_message,          0,      0,      1,              },
 	{ "max_summoner_parameter",             &battle_config.max_summoner_parameter,          120,    10,     SHRT_MAX,       },
 	{ "monster_eye_range_bonus",            &battle_config.mob_eye_range_bonus,             0,      0,      10,             },
@@ -8646,6 +8671,10 @@ static const struct _battle_data {
 	{ "pet_autofeed_always",                &battle_config.pet_autofeed_always,             1,      0,      1,              },
 	{ "feature.homunculus_autofeed",        &battle_config.feature_homunculus_autofeed,     1,      0,      1,              },
 	{ "homunculus_autofeed_always",         &battle_config.homunculus_autofeed_always,      1,      0,      1,              },
+	{ "feature.attendance",                 &battle_config.feature_attendance,              1,      0,      1,              },
+	{ "feature.privateairship",             &battle_config.feature_privateairship,          1,      0,      1,              },
+	{ "feature.refineui",                   &battle_config.feature_refineui,                1,      0,      1,              },
+	{ "feature.stylistui",                  &battle_config.feature_stylistui,               1,      0,      1,              },
 
 #include "../custom/battle_config_init.inc"
 };
@@ -8656,8 +8685,8 @@ static const struct _battle_data {
 int battle_set_value(const char *w1, const char *w2)
 {
 	int val = config_switch(w2);
-
 	int i;
+
 	ARR_FIND(0, ARRAYLENGTH(battle_data), i, strcmpi(w1, battle_data[i].str) == 0);
 	if (i == ARRAYLENGTH(battle_data))
 		return 0; //Not found
@@ -8677,6 +8706,7 @@ int battle_set_value(const char *w1, const char *w2)
 int battle_get_value(const char *w1)
 {
 	int i;
+
 	ARR_FIND(0, ARRAYLENGTH(battle_data), i, strcmpi(w1, battle_data[i].str) == 0);
 	if (i == ARRAYLENGTH(battle_data))
 		return 0; //Not found
@@ -8690,6 +8720,7 @@ int battle_get_value(const char *w1)
 void battle_set_defaults()
 {
 	int i;
+
 	for (i = 0; i < ARRAYLENGTH(battle_data); i++)
 		*battle_data[i].val = battle_data[i].defval;
 }
@@ -8789,6 +8820,27 @@ void battle_adjust_conf()
 	if (battle_config.feature_pet_autofeed) {
 		ShowWarning("conf/battle/feature.conf pet autofeeding is enabled but it requires PACKETVER 2015-05-13 or newer, disabling...\n");
 		battle_config.feature_pet_autofeed = 0;
+	}
+#endif
+
+#if PACKETVER < 20180307
+	if (battle_config.feature_attendance) {
+		ShowWarning("conf/battle/feature.conf attendance system is enabled but it requires PACKETVER 2018-03-07 or newer, disabling...\n");
+		battle_config.feature_attendance = 0;
+	}
+#endif
+
+#if PACKETVER < 20180321
+	if (battle_config.feature_privateairship) {
+		ShowWarning("conf/battle/feature.conf private airship system is enabled but it requires PACKETVER 2018-03-21 or newer, disabling...\n");
+		battle_config.feature_privateairship = 0;
+	}
+#endif
+
+#if PACKETVER < 20161012
+	if (battle_config.feature_refineui) {
+		ShowWarning("conf/battle/feature.conf refine UI is enabled but it requires PACKETVER 2016-10-12 or newer, disabling...\n");
+		battle_config.feature_refineui = 0;
 	}
 #endif
 

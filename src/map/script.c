@@ -23,6 +23,7 @@
 #include "clan.h"
 #include "clif.h"
 #include "chrif.h"
+#include "date.h" // date type enum, date_get()
 #include "itemdb.h"
 #include "pc.h"
 #include "status.h"
@@ -336,6 +337,8 @@ struct Script_Config script_config = {
 	1, //warn_func_mismatch_argtypes
 	1, 65535, 2048, //warn_func_mismatch_paramnum/check_cmdcount/check_gotocount
 	0, INT_MAX, //input_min_value/input_max_value
+	// NOTE: None of these event labels should be longer than <EVENT_NAME_LENGTH> characters
+	// PC related
 	"OnPCDieEvent", //die_event_name
 	"OnPCKillEvent", //kill_pc_event_name
 	"OnNPCKillEvent", //kill_mob_event_name
@@ -345,9 +348,45 @@ struct Script_Config script_config = {
 	"OnPCBaseLvUpEvent", //baselvup_event_name
 	"OnPCJobLvUpEvent", //joblvup_event_name
 	"OnPCStatCalcEvent", //stat_calc_event_name
-	"OnTouch_", //ontouch_name (runs on first visible char to enter area, picks another char if the first char leaves)
-	"OnTouch", //ontouch2_name (run whenever a char walks into the OnTouch area)
-	"OnUnTouch", //onuntouch_name (run whenever a char walks from the OnTouch area)
+	// NPC related
+	"OnTouch_", //ontouch_event_name (runs on first visible char to enter area, picks another char if the first char leaves)
+	"OnTouch", //ontouch2_event_name (run whenever a char walks into the OnTouch area)
+	"OnTouchNPC", //ontouchnpc_event_name (run whenever a monster walks into the OnTouch area)
+	"OnUnTouch", //onuntouch_event_name (run whenever a char walks from the OnTouch area)
+	"OnWhisperGlobal", //onwhisper_event_name (is executed when a player sends a whisper message to the NPC)
+	"OnCommand", //oncommand_event_name (is executed by script command cmdothernpc)
+	"OnAirShipRequest", //onairshiprequest_event_name (run whenever a char using private airship system)
+	// Init related
+	"OnInit", //init_event_name (is executed on all npcs when all npcs were loaded)
+	"OnInterIfInit", //inter_init_event_name (is executed on inter server connection)
+	"OnInterIfInitOnce", //inter_init_once_event_name (is only executed on the first inter server connection)
+	// Guild related
+	"OnGuildBreak", //guild_break_event_name (is executed on all castles of the guild that is broken)
+	"OnAgitStart", //agit_start_event_name (is executed when WoE FE is started)
+	"OnAgitInit", //agit_init_event_name (is executed after all castle owning guilds have been loaded)
+	"OnAgitEnd", //agit_end_event_name (is executed when WoE FE has ended)
+	"OnAgitStart2", //agit_start2_event_name (is executed when WoE SE is started)
+	"OnAgitInit2", //agit_init2_event_name (is executed after all castle owning guilds have been loaded)
+	"OnAgitEnd2", //agit_end2_event_name (is executed when WoE SE has ended)
+	"OnAgitStart3", //agit_start3_event_name (is executed when WoE TE is started)
+	"OnAgitInit3", //agit_init3_event_name (is executed after all castle owning guilds have been loaded)
+	"OnAgitEnd3", //agit_end3_event_name (is executed when WoE TE has ended)
+	// Timer related
+	"OnTimer", //timer_event_name (is executed by a timer at the specific second)
+	"OnMinute", //timer_minute_event_name (is executed by a timer at the specific minute)
+	"OnHour", //timer_hour_event_name (is executed by a timer at the specific hour)
+	"OnClock", //timer_clock_event_name (is executed by a timer at the specific hour and minute)
+	"OnDay", //timer_day_event_name (is executed by a timer at the specific month and day)
+	"OnSun", //timer_sunday_event_name (is executed by a timer on sunday at the specific hour and minute)
+	"OnMon", //timer_monday_event_name (is executed by a timer on monday at the specific hour and minute)
+	"OnTue", //timer_tuesday_event_name (is executed by a timer on tuesday at the specific hour and minute)
+	"OnWed", //timer_wednesday_event_name (is executed by a timer on wednesday at the specific hour and minute)
+	"OnThu", //timer_thursday_event_name (is executed by a timer on thursday at the specific hour and minute)
+	"OnFri", //timer_friday_event_name (is executed by a timer on friday at the specific hour and minute)
+	"OnSat", //timer_saturday_event_name (is executed by a timer on saturday at the specific hour and minute)
+	// Instance related
+	"OnInstanceInit", //instance_init_event_name (is executed right after instance creation)
+	"OnInstanceDestroy", //instance_destroy_event_name (is executed right before instance destruction)
 };
 
 static jmp_buf     error_jump;
@@ -520,6 +559,8 @@ enum {
 	MF_GVG_TE,
 	MF_NOCOSTUME,
 	MF_HIDEMOBHPBAR,
+	MF_PRIVATEAIRSHIP_SOURCE,
+	MF_PRIVATEAIRSHIP_DESTINATION,
 };
 
 const char *script_op2name(int op)
@@ -1641,7 +1682,7 @@ const char *parse_curly_close(const char *p)
 	}
 }
 
-// 	Syntax-related processing
+//	Syntax-related processing
 //	break, case, continue, default, do, for, function,
 //	if, switch, while ? will handle this internally.
 const char *parse_syntax(const char *p)
@@ -2396,11 +2437,13 @@ void script_hardcoded_constants(void)
 static const char *script_print_line(StringBuf* buf, const char *p, const char *mark, int line)
 {
 	int i;
-	if( p == NULL || !p[0] ) return NULL;
+
+	if( p == NULL || !p[0] )
+		return NULL;
 	if( line < 0 )
-		StringBuf_Printf(buf, "*% 5d : ", -line);
+		StringBuf_Printf(buf, "*%5d : ", -line);
 	else
-		StringBuf_Printf(buf, " % 5d : ", line);
+		StringBuf_Printf(buf, " %5d : ", line);
 	for( i = 0; p[i] && p[i] != '\n'; i++) {
 		if( p + i != mark )
 			StringBuf_Printf(buf, "%c", p[i]);
@@ -3713,7 +3756,7 @@ struct linkdb_node *script_erase_sleepdb(struct linkdb_node *n)
 /*==========================================
  * Timer function for sleep
  *------------------------------------------*/
-int run_script_timer(int tid, unsigned int tick, int id, intptr_t data)
+TIMER_FUNC(run_script_timer)
 {
 	struct script_state *st = (struct script_state *)data;
 	struct linkdb_node *node = (struct linkdb_node *)sleep_db;
@@ -4084,7 +4127,7 @@ void script_setarray_pc(struct map_session_data *sd, const char *varname, uint8 
 int buildin_query_sql_sub(struct script_state *st, Sql *handle);
 
 //Used to receive items the queryThread has already processed */
-int queryThread_timer(int tid, unsigned int tick, int id, intptr_t data) {
+TIMER_FUNC(queryThread_timer) {
 	int i, cursor = 0;
 	bool allOk = true;
 	
@@ -4235,7 +4278,7 @@ static void *queryThread_main(void *x) {
 		LeaveSpinLock(&queryThreadLock);
 		
 		ramutex_lock( queryThreadMutex );
-		racond_wait( queryThreadCond,	queryThreadMutex,  -1 );
+		racond_wait( queryThreadCond, queryThreadMutex, -1 );
 		ramutex_unlock( queryThreadMutex );
 
 	}
@@ -4488,6 +4531,19 @@ BUILDIN_FUNC(next)
 #endif
 	st->state = STOP;
 	clif_scriptnext(sd, st->oid);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/// Clears the dialog and continues the script without a next button.
+///
+/// clear;
+BUILDIN_FUNC(clear)
+{
+	TBL_PC *sd = script_rid2sd(st);
+
+	if( !sd )
+		return 0;
+	clif_scriptclear(sd, st->oid);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -6121,7 +6177,7 @@ static int script_getitem_randomoption(struct script_state *st, struct map_sessi
 		return 1;
 	}
 
- 	if( !data_isreference(opt_id) || not_array_variable(*opt_id_var) ) {
+	if( !data_isreference(opt_id) || not_array_variable(*opt_id_var) ) {
 		ShowError("buildin_%s: The option id parameter is not an array.\n", funcname);
 		return 1;
 	}
@@ -7714,7 +7770,7 @@ BUILDIN_FUNC(getpartyleader)
 
 	party_id = script_getnum(st,2);
 	if( script_hasdata(st,3) )
- 		type = script_getnum(st,3);
+		type = script_getnum(st,3);
 
 	p = party_search(party_id);
 
@@ -8240,24 +8296,52 @@ BUILDIN_FUNC(getequipweaponlv)
  *------------------------------------------*/
 BUILDIN_FUNC(getequippercentrefinery)
 {
-	int i = -1, num;
-	bool enriched = false;
-	int chance = 0;
-	TBL_PC *sd;
+	int i = -1, num, chance = 0;
+	bool is_enriched = false;
+	TBL_PC *sd = NULL;
 
 	if(!script_charid2sd(4,sd)) {
 		script_pushint(st,0);
 		return 1;
 	}
-	if (script_hasdata(st,3))
-		enriched = (script_getnum(st,3) != 0);
+	if(script_hasdata(st,3))
+		is_enriched = (script_getnum(st,3) != 0);
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
 		i = pc_checkequip(sd,equip_bitmask[num]);
 	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
-		chance = status_get_refine_chance((enum refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, enriched);
+		chance = status_get_refine_chance((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, is_enriched);
 
 	script_pushint(st,chance);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/**
+ * Get an equipment's refine cost
+ * getequiprefinecost(<equipment slot>,<type>,<information>{,<char id>})
+ * returns -1 on fail
+ */
+BUILDIN_FUNC(getequiprefinecost) {
+	int i = -1, slot, type, info, value = -1;
+	struct map_session_data *sd = NULL;
+
+	slot = script_getnum(st,2);
+	type = script_getnum(st,3);
+	info = script_getnum(st,4);
+	if(!script_charid2sd(5,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+	if(type < 0 || type >= REFINE_COST_TYPE_MAX) {
+		script_pushint(st,-1);
+		return 0;
+	}
+	if(equip_index_check(slot))
+		i = pc_checkequip(sd,equip_bitmask[slot]);
+	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
+		value = status_get_refine_cost((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), type, (enum e_refine_info)info);
+
+	script_pushint(st,value);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -8308,9 +8392,9 @@ BUILDIN_FUNC(successrefitem)
 		achievement_update_objective(sd,AG_REFINE_SUCCESS,2,sd->inventory_data[i]->wlv,sd->inventory.u.items_inventory[i].refine);
 		if(sd->inventory.u.items_inventory[i].refine == 10 &&
 			sd->inventory.u.items_inventory[i].card[0] == CARD0_FORGE &&
-		  	sd->status.char_id == (int)MakeDWord(sd->inventory.u.items_inventory[i].card[2],sd->inventory.u.items_inventory[i].card[3])
+			sd->status.char_id == (int)MakeDWord(sd->inventory.u.items_inventory[i].card[2],sd->inventory.u.items_inventory[i].card[3])
 		) { // Fame point system [DracoRPG]
-	 		switch (sd->inventory_data[i]->wlv) {
+			switch (sd->inventory_data[i]->wlv) {
 				case 1:
 					pc_addfame(sd,battle_config.fame_refine_lv1); // Success to refine to +10 a lv1 weapon you forged = +1 fame point
 					break;
@@ -8320,7 +8404,7 @@ BUILDIN_FUNC(successrefitem)
 				case 3:
 					pc_addfame(sd,battle_config.fame_refine_lv3); // Success to refine to +10 a lv3 weapon you forged = +1000 fame point
 					break;
-	 	 	 }
+			}
 		}
 		script_pushint(st,sd->inventory.u.items_inventory[i].refine);
 		return 0;
@@ -9272,7 +9356,7 @@ BUILDIN_FUNC(savepoint)
 }
 
 /*==========================================
- * GetTimeTick(0: System Tick, 1: Time Second Tick)
+ * GetTimeTick(0: System Tick, 1: Time Second Tick, 2: Unix epoch)
  *------------------------------------------*/
 BUILDIN_FUNC(gettimetick) /* Asgard Version */
 {
@@ -9303,52 +9387,36 @@ BUILDIN_FUNC(gettimetick) /* Asgard Version */
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/*==========================================
- * GetTime(Type);
- * 1: Sec     2: Min      3: Hour
- * 4: WeekDay 5: MonthDay 6: Month
- * 7: Year
- *------------------------------------------*/
-BUILDIN_FUNC(gettime) /* Asgard Version */
+/**
+ * GetTime(Type)
+ *
+ * Returns the current value of a certain date type.
+ * Possible types are:
+ * - DT_SECOND Current seconds
+ * - DT_MINUTE Current minute
+ * - DT_HOUR Current hour
+ * - DT_DAYOFWEEK Day of current week
+ * - DT_DAYOFMONTH Day of current month
+ * - DT_MONTH Current month
+ * - DT_YEAR Current year
+ * - DT_DAYOFYEAR Day of current year
+ *
+ * If none of the above types is supplied -1 will be returned to the script
+ * and the script source will be reported into the mapserver console.
+ */
+BUILDIN_FUNC(gettime)
 {
 	int type;
-	time_t timer;
-	struct tm *t;
 
 	type = script_getnum(st,2);
 
-	time(&timer);
-	t = localtime(&timer);
+	if( type <= DT_MIN || type >= DT_MAX ) {
+		ShowError("buildin_gettime: Invalid date type %d\n", type);
+		script_reportsrc(st);
+		script_pushint(st,-1);
+	} else
+		script_pushint(st,date_get((enum e_date_type)type));
 
-	switch(type) {
-		case 1: //Sec(0~59)
-			script_pushint(st,t->tm_sec);
-			break;
-		case 2: //Min(0~59)
-			script_pushint(st,t->tm_min);
-			break;
-		case 3: //Hour(0~23)
-			script_pushint(st,t->tm_hour);
-			break;
-		case 4: //WeekDay(0~6)
-			script_pushint(st,t->tm_wday);
-			break;
-		case 5: //MonthDay(01~31)
-			script_pushint(st,t->tm_mday);
-			break;
-		case 6: //Month(01~12)
-			script_pushint(st,t->tm_mon + 1);
-			break;
-		case 7: //Year(20xx)
-			script_pushint(st,t->tm_year + 1900);
-			break;
-		case 8: //Year Day(01~366)
-			script_pushint(st,t->tm_yday + 1);
-			break;
-		default: //(format error)
-			script_pushint(st,-1);
-			break;
-	}
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -9409,6 +9477,57 @@ BUILDIN_FUNC(guildopenstorage)
 
 	ret = storage_guild_storageopen(sd);
 	script_pushint(st,ret);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(guildopenstorage_log)
+{
+#if PACKETVER < 20140205
+	ShowError("buildin_guildopenstorage_log: This command requires PACKETVER 2014-02-05 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if( !script_charid2sd(2,sd) )
+		return 1;
+
+	script_pushint(st,storage_guild_log_read(sd));
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
+BUILDIN_FUNC(guild_has_permission)
+{
+	struct map_session_data *sd = NULL;
+	int permission = script_getnum(st,2);
+	int position;
+
+	if( !script_charid2sd(3,sd) )
+		return 1;
+
+	if( !permission ) {
+		ShowError("buildin_guild_has_permission: No permission given.\n");
+		return 1;
+	}
+
+	if( !(permission&GUILD_PERM_ALL) ) {
+		ShowError("buildin_guild_has_permission: Invalid permission '%d'.\n", permission);
+		return 1;
+	}
+
+	if( !sd->guild ) {
+		script_pushint(st,false);
+		return 0;
+	}
+
+	position = guild_getposition(sd);
+
+	if( position < 0 || (sd->guild->position[position].mode&permission) != permission ) {
+		script_pushint(st,false);
+		return 0;
+	}
+
+	script_pushint(st,true);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -9949,9 +10068,15 @@ BUILDIN_FUNC(cmdothernpc) //Added by RoVeRT
 	const char *command = script_getstr(st,3);
 	char event[EVENT_NAME_LENGTH];
 
-	snprintf(event,sizeof(event),"%s::OnCommand%s",npc,command);
+	safesnprintf(event,EVENT_NAME_LENGTH,"%s::%s%s",npc,script_config.oncommand_event_name,command);
 	check_event(st,event);
-	npc_event_do(event);
+	if( !npc_event_do(event) ) {
+		struct npc_data *nd = map_id2nd(st->oid);
+
+		ShowDebug("NPCEvent '%s' not found! (source: %s)\n",event,(nd ? nd->name : "Unknown"));
+		script_pushint(st,0);
+	} else
+		script_pushint(st,1);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -10625,11 +10750,11 @@ BUILDIN_FUNC(sc_start)
 
 	//If from NPC we make default flag SCFLAG_NOAVOID to be unavoidable
 	if(nd && nd->bl.id == fake_nd->bl.id)
-		flag = script_hasdata(st,5 + start_type) ? script_getnum(st,5 + start_type) : SCFLAG_FIXEDTICK;
+		flag = (script_hasdata(st,5 + start_type) ? script_getnum(st,5 + start_type) : SCFLAG_FIXEDTICK);
 	else
-		flag = script_hasdata(st,5 + start_type) ? script_getnum(st,5 + start_type) : SCFLAG_NOAVOID;
+		flag = (script_hasdata(st,5 + start_type) ? script_getnum(st,5 + start_type) : SCFLAG_NOAVOID);
 
-	rate = script_hasdata(st,4 + start_type) ? min(script_getnum(st,4 + start_type),10000) : 10000;
+	rate = (script_hasdata(st,4 + start_type) ? min(script_getnum(st,4 + start_type),10000) : 10000);
 
 	if(script_hasdata(st,(6 + start_type)))
 		bl = map_id2bl(script_getnum(st,(6 + start_type)));
@@ -11019,7 +11144,7 @@ BUILDIN_FUNC(birthpet)
  * @param action_type:
  *	1 : make like after rebirth
  *	2 : blvl,jlvl=1, skillpoint=0
- * 	3 : don't reset skill, blvl=1
+ *	3 : don't reset skill, blvl=1
  *	4 : jlvl=0
  * @author AppleGirl
  */
@@ -11476,9 +11601,8 @@ static int buildin_addrid_sub(struct block_list *bl,va_list ap)
 
 	st = va_arg(ap,struct script_state *);
 	forceflag = va_arg(ap,int);
-	if(!forceflag || !sd->st)
-		if(sd->status.account_id != st->rid)
-			run_script(st->script,st->pos,sd->status.account_id,st->oid);
+	if((!forceflag || !sd->st) && sd->status.account_id != st->rid)
+		run_script(st->script,st->pos,sd->status.account_id,st->oid);
 	return 0;
 }
 
@@ -11569,16 +11693,21 @@ BUILDIN_FUNC(addrid)
 BUILDIN_FUNC(attachrid)
 {
 	int rid = script_getnum(st,2);
+	struct map_session_data *sd = NULL;
+	bool force = true;
 
-	if (map_id2sd(rid)) {
+	if(script_hasdata(st,3))
+		force = (script_getnum(st,3) != 0);
+	if((sd = map_id2sd(rid)) && (!sd->npc_id || force)) {
 		script_detach_rid(st);
 		st->rid = rid;
 		script_attach_state(st);
-		script_pushint(st,1);
+		script_pushint(st,true);
 	} else
-		script_pushint(st,0);
+		script_pushint(st,false);
 	return SCRIPT_CMD_SUCCESS;
 }
+
 /*==========================================
  * Detach script to rid
  *------------------------------------------*/
@@ -11587,36 +11716,36 @@ BUILDIN_FUNC(detachrid)
 	script_detach_rid(st);
 	return SCRIPT_CMD_SUCCESS;
 }
+
 /*==========================================
  * Chk if account connected, (and charid from account if specified)
  *------------------------------------------*/
 BUILDIN_FUNC(isloggedin)
 {
 	TBL_PC *sd = map_id2sd(script_getnum(st,2));
-	if (script_hasdata(st,3) && sd &&
-		sd->status.char_id != script_getnum(st,3))
+
+	if(script_hasdata(st,3) && sd && sd->status.char_id != script_getnum(st,3))
 		sd = NULL;
-	push_val(st->stack,C_INT,sd!=NULL);
+	push_val(st->stack,C_INT,(sd != NULL));
 	return SCRIPT_CMD_SUCCESS;
 }
-
 
 /*==========================================
  *
  *------------------------------------------*/
 BUILDIN_FUNC(setmapflagnosave)
 {
-	int16 m,x,y;
+	int16 m, x, y;
 	unsigned short mapindex;
-	const char *str,*str2;
+	const char *str, *str2;
 
-	str=script_getstr(st,2);
-	str2=script_getstr(st,3);
-	x=script_getnum(st,4);
-	y=script_getnum(st,5);
+	str = script_getstr(st,2);
+	str2 = script_getstr(st,3);
+	x = script_getnum(st,4);
+	y = script_getnum(st,5);
 	m = map_mapname2mapid(str);
 	mapindex = mapindex_name2id(str2);
-	
+
 	if(m >= 0 && mapindex) {
 		map[m].flag.nosave = 1;
 		map[m].save.map = mapindex;
@@ -11628,7 +11757,7 @@ BUILDIN_FUNC(setmapflagnosave)
 
 BUILDIN_FUNC(getmapflag)
 {
-	int16 m,i;
+	int16 m, i;
 	const char *str;
 
 	str = script_getstr(st,2);
@@ -11701,6 +11830,8 @@ BUILDIN_FUNC(getmapflag)
 			case MF_GVG_TE:			script_pushint(st,map[m].flag.gvg_te); break;
 			case MF_NOCOSTUME:		script_pushint(st,map[m].flag.nocostume); break;
 			case MF_HIDEMOBHPBAR:		script_pushint(st,map[m].flag.hidemobhpbar); break;
+			case MF_PRIVATEAIRSHIP_SOURCE:	script_pushint(st,map[m].flag.privateairship_source); break;
+			case MF_PRIVATEAIRSHIP_DESTINATION:	script_pushint(st,map[m].flag.privateairship_destination); break;
 #ifdef ADJUST_SKILL_DAMAGE
 			case MF_SKILL_DAMAGE: {
 					int ret_val = 0, type = 0;
@@ -11723,25 +11854,9 @@ BUILDIN_FUNC(getmapflag)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/* PVP timer handling */
-static int script_mapflag_pvp_sub(struct block_list *bl,va_list ap) {
-	TBL_PC *sd = (TBL_PC *)bl;
-	if (sd->pvp_timer == INVALID_TIMER) {
-		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
-		sd->pvp_rank = 0;
-		sd->pvp_lastusers = 0;
-		sd->pvp_point = 5;
-		sd->pvp_won = 0;
-		sd->pvp_lost = 0;
-	}
-	clif_map_property(sd, MAPPROPERTY_FREEPVPZONE);
-	clif_maptypeproperty2(&sd->bl, SELF);
-	return 0;
-}
-
 BUILDIN_FUNC(setmapflag)
 {
-	int16 m,i;
+	int16 m, i;
 	const char *str;
 	int val = 0;
 
@@ -11760,19 +11875,13 @@ BUILDIN_FUNC(setmapflag)
 			case MF_PVP:
 				map[m].flag.pvp = 1;
 				if(!battle_config.pk_mode)
-					map_foreachinmap(script_mapflag_pvp_sub,m,BL_PC);
+					map_foreachinmap(map_mapflag_pvp_start, m, BL_PC);
 				break;
 			case MF_PVP_NOPARTY:		map[m].flag.pvp_noparty = 1; break;
 			case MF_PVP_NOGUILD:		map[m].flag.pvp_noguild = 1; break;
-			case MF_GVG: {
-					struct block_list bl;
-
-					map[m].flag.gvg = 1;
-					clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
-					bl.type = BL_NUL;
-					bl.m = m;
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_GVG:
+				map[m].flag.gvg = 1;
+				clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 				break;
 			case MF_GVG_NOPARTY:		map[m].flag.gvg_noparty = 1; break;
 			case MF_NOTRADE:		map[m].flag.notrade = 1; break;
@@ -11828,24 +11937,20 @@ BUILDIN_FUNC(setmapflag)
 			case MF_NOCASHSHOP:		map[m].flag.nocashshop = 1; break;
 			case MF_NOBANKING:		map[m].flag.nobanking = 1; break;
 			case MF_GVG_TE_CASTLE:		map[m].flag.gvg_te_castle = 1; break;
-			case MF_GVG_TE: {
-					struct block_list bl;
-
-					map[m].flag.gvg_te = 1;
-					clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
-					bl.type = BL_NUL;
-					bl.m = m;
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_GVG_TE:
+				map[m].flag.gvg_te = 1;
+				clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 				break;
 			case MF_NOCOSTUME:		map[m].flag.nocostume = 1; break;
 			case MF_HIDEMOBHPBAR:		map[m].flag.hidemobhpbar = 1; break;
+			case MF_PRIVATEAIRSHIP_SOURCE:	map[m].flag.privateairship_source = 1; break;
+			case MF_PRIVATEAIRSHIP_DESTINATION:	map[m].flag.privateairship_destination = 1; break;
 #ifdef ADJUST_SKILL_DAMAGE
 			case MF_SKILL_DAMAGE: {
 					int type = 0;
 
 					FETCH(5,type);
-					switch (type) {
+					switch(type) {
 						case 1: map[m].adjust.damage.pc = val; break;
 						case 2: map[m].adjust.damage.mob = val; break;
 						case 3: map[m].adjust.damage.boss = val; break;
@@ -11863,7 +11968,7 @@ BUILDIN_FUNC(setmapflag)
 
 BUILDIN_FUNC(removemapflag)
 {
-	int16 m,i;
+	int16 m, i;
 	const char *str;
 	int val = 0;
 
@@ -11879,27 +11984,15 @@ BUILDIN_FUNC(removemapflag)
 			case MF_NOBRANCH:		map[m].flag.nobranch = 0; break;
 			case MF_NOPENALTY:		map[m].flag.noexppenalty = 0; map[m].flag.nozenypenalty = 0; break;
 			case MF_NOZENYPENALTY:		map[m].flag.nozenypenalty = 0; break;
-			case MF_PVP: {
-					struct block_list bl;
-
-					bl.type = BL_NUL;
-					bl.m = m;
-					map[m].flag.pvp = 0;
-					clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_PVP:
+				map[m].flag.pvp = 0;
+				clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 				break;
 			case MF_PVP_NOPARTY:		map[m].flag.pvp_noparty = 0; break;
 			case MF_PVP_NOGUILD:		map[m].flag.pvp_noguild = 0; break;
-			case MF_GVG: {
-					struct block_list bl;
-
-					bl.type = BL_NUL;
-					bl.m = m;
-					map[m].flag.gvg = 0;
-					clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_GVG:
+				map[m].flag.gvg = 0;
+				clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 				break;
 			case MF_GVG_NOPARTY:		map[m].flag.gvg_noparty = 0; break;
 			case MF_NOTRADE:		map[m].flag.notrade = 0; break;
@@ -11927,7 +12020,7 @@ BUILDIN_FUNC(removemapflag)
 			case MF_NIGHTMAREDROP:		map[m].flag.pvp_nightmaredrop = 0; break;
 			case MF_RESTRICTED:
 				map[m].zone ^= 1<<(val + 1);
-				if(map[m].zone == 0)
+				if(!map[m].zone)
 					map[m].flag.restricted = 0;
 				break;
 			case MF_NOCOMMAND:		map[m].nocommand = 0; break;
@@ -11956,18 +12049,14 @@ BUILDIN_FUNC(removemapflag)
 			case MF_NOCASHSHOP:		map[m].flag.nocashshop = 0; break;
 			case MF_NOBANKING:		map[m].flag.nobanking = 0; break;
 			case MF_GVG_TE_CASTLE:		map[m].flag.gvg_te_castle = 0; break;
-			case MF_GVG_TE: {
-					struct block_list bl;
-
-					bl.type = BL_NUL;
-					bl.m = m;
-					map[m].flag.gvg_te = 0;
-					clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-					clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-				}
+			case MF_GVG_TE:
+				map[m].flag.gvg_te = 0;
+				clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 				break;
 			case MF_NOCOSTUME:		map[m].flag.nocostume = 0; break;
 			case MF_HIDEMOBHPBAR:		map[m].flag.hidemobhpbar = 0; break;
+			case MF_PRIVATEAIRSHIP_SOURCE:	map[m].flag.privateairship_source = 0; break;
+			case MF_PRIVATEAIRSHIP_DESTINATION:	map[m].flag.privateairship_destination = 0; break;
 #ifdef ADJUST_SKILL_DAMAGE
 			case MF_SKILL_DAMAGE:
 				map[m].flag.skill_damage = 0;
@@ -11984,146 +12073,94 @@ BUILDIN_FUNC(removemapflag)
 BUILDIN_FUNC(pvpon)
 {
 	int16 m;
-	const char *str;
-	TBL_PC *sd = NULL;
-	struct s_mapiterator *iter;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st, 2);
 	m = map_mapname2mapid(str);
-	if( m < 0 || map[m].flag.pvp )
-		return 0; // Nothing to do
+	if(m < 0 || map[m].flag.pvp)
+		return 1;
 
 	map[m].flag.pvp = 1;
-	clif_map_property_mapall(m, MAPPROPERTY_FREEPVPZONE);
-	bl.type = BL_NUL;
-	bl.m = m;
-	clif_maptypeproperty2(&bl, ALL_SAMEMAP);
 
-	if(battle_config.pk_mode) // Disable ranking functions if pk_mode is on [Valaris]
+	if(battle_config.pk_mode) //Disable ranking functions if pk_mode is on [Valaris]
 		return 0;
 
-	iter = mapit_getallusers();
-	for( sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter) ) {
-		if( sd->bl.m != m || sd->pvp_timer != INVALID_TIMER )
-			continue; // Not applicable
-
-		sd->pvp_timer = add_timer(gettick() + 200,pc_calc_pvprank_timer,sd->bl.id,0);
-		sd->pvp_rank = 0;
-		sd->pvp_lastusers = 0;
-		sd->pvp_point = 5;
-		sd->pvp_won = 0;
-		sd->pvp_lost = 0;
-	}
-	mapit_free(iter);
+	map_foreachinmap(map_mapflag_pvp_start, m, BL_PC);
 	return SCRIPT_CMD_SUCCESS;
-}
-
-static int buildin_pvpoff_sub(struct block_list *bl,va_list ap)
-{
-	TBL_PC *sd = (TBL_PC *)bl;
-
-	clif_pvpset(sd, 0, 0, 2);
-	if (sd->pvp_timer != INVALID_TIMER) {
-		delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
-		sd->pvp_timer = INVALID_TIMER;
-	}
-	return 0;
 }
 
 BUILDIN_FUNC(pvpoff)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st, 2);
 	m = map_mapname2mapid(str);
 	if(m < 0 || !map[m].flag.pvp)
-		return 0; // Fixed Lupus
+		return 1;
 
 	map[m].flag.pvp = 0;
-	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-	bl.type = BL_NUL;
-	bl.m = m;
-	clif_maptypeproperty2(&bl, ALL_SAMEMAP);
 
-	if(battle_config.pk_mode) // Disable ranking options if pk_mode is on [Valaris]
+	if(battle_config.pk_mode) //Disable ranking options if pk_mode is on [Valaris]
 		return 0;
-	
-	map_foreachinmap(buildin_pvpoff_sub, m, BL_PC);
+
+	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
+	map_foreachinmap(map_mapflag_pvp_stop, m, BL_PC);
+	map_foreachinmap(unit_stopattack, m, BL_CHAR, 0);
 	return SCRIPT_CMD_SUCCESS;
 }
 
 BUILDIN_FUNC(gvgon)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st, 2);
 	m = map_mapname2mapid(str);
-	if(m >= 0 && !map[m].flag.gvg) {
-		map[m].flag.gvg = 1;
-		clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
-		bl.type = BL_NUL;
-		bl.m = m;
-		clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-	}
+	if(m < 0 || map[m].flag.gvg)
+		return 1;
+
+	map[m].flag.gvg = 1;
+	clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 	return SCRIPT_CMD_SUCCESS;
 }
 
 BUILDIN_FUNC(gvgoff)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st, 2);
 	m = map_mapname2mapid(str);
-	if(m >= 0 && map[m].flag.gvg) {
-		map[m].flag.gvg = 0;
-		clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-		bl.type = BL_NUL;
-		bl.m = m;
-		clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-	}
+	if(m < 0 || !map[m].flag.gvg)
+		return 1;
+
+	map[m].flag.gvg = 0;
+	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 	return SCRIPT_CMD_SUCCESS;
 }
 
 BUILDIN_FUNC(gvgon3)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st,2);
 	m = map_mapname2mapid(str);
-	if(m >= 0 && !map[m].flag.gvg_te) {
-		map[m].flag.gvg_te = 1;
-		clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
-		bl.type = BL_NUL;
-		bl.m = m;
-		clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-	}
+	if(m < 0 || map[m].flag.gvg_te)
+		return 1;
+
+	map[m].flag.gvg_te = 1;
+	clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 	return SCRIPT_CMD_SUCCESS;
 }
 
 BUILDIN_FUNC(gvgoff3)
 {
 	int16 m;
-	const char *str;
-	struct block_list bl;
+	const char *str = script_getstr(st,2);
 
-	str = script_getstr(st,2);
 	m = map_mapname2mapid(str);
-	if(m >= 0 && map[m].flag.gvg_te) {
-		map[m].flag.gvg_te = 0;
-		clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
-		bl.type = BL_NUL;
-		bl.m = m;
-		clif_maptypeproperty2(&bl, ALL_SAMEMAP);
-	}
+	if(m < 0 || !map[m].flag.gvg_te)
+		return 1;
+
+	map[m].flag.gvg_te = 0;
+	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -12224,9 +12261,6 @@ BUILDIN_FUNC(maprespawnguildid)
  */
 BUILDIN_FUNC(agitstart)
 {
-	if(agit_flag)
-		return 0; // Agit already Start
-	agit_flag = true;
 	guild_agit_start();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12237,9 +12271,6 @@ BUILDIN_FUNC(agitstart)
  */
 BUILDIN_FUNC(agitend)
 {
-	if(!agit_flag)
-		return 0; // Agit already End
-	agit_flag = false;
 	guild_agit_end();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12250,9 +12281,6 @@ BUILDIN_FUNC(agitend)
  */
 BUILDIN_FUNC(agitstart2)
 {
-	if(agit2_flag)
-		return 0; // Agit2 already Start
-	agit2_flag = true;
 	guild_agit2_start();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12263,9 +12291,6 @@ BUILDIN_FUNC(agitstart2)
  */
 BUILDIN_FUNC(agitend2)
 {
-	if(!agit2_flag)
-		return 0; // Agit2 already End
-	agit2_flag = false;
 	guild_agit2_end();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12276,9 +12301,6 @@ BUILDIN_FUNC(agitend2)
  */
 BUILDIN_FUNC(agitstart3)
 {
-	if(agit3_flag)
-		return 0; // Agit3 already Start
-	agit3_flag = true;
 	guild_agit3_start();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12289,9 +12311,6 @@ BUILDIN_FUNC(agitstart3)
  */
 BUILDIN_FUNC(agitend3)
 {
-	if(!agit3_flag)
-		return 0; // Agit3 already End
-	agit3_flag = false;
 	guild_agit3_end();
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12976,7 +12995,20 @@ BUILDIN_FUNC(setwall)
 BUILDIN_FUNC(delwall)
 {
 	const char *name = script_getstr(st,2);
-	map_iwall_remove(name);
+
+	if( !map_iwall_remove(name) ) {
+		ShowError("buildin_delwall: wall \"%s\" does not exist.\n", name);
+		return 1;
+	}
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(checkwall)
+{
+	const char *wall_name = script_getstr(st,2);
+
+	script_pushint(st,map_iwall_exist(wall_name));
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -13471,33 +13503,6 @@ BUILDIN_FUNC(classchange)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/*==========================================
- * Display an effect
- *------------------------------------------*/
-BUILDIN_FUNC(misceffect)
-{
-	int type;
-
-	type = script_getnum(st,2);
-
-	if (type <= EF_NONE || type >= EF_MAX) {
-		ShowError("buildin_misceffect: unsupported effect id %d\n", type);
-		return 1;
-	}
-
-	if (st->oid && st->oid != fake_nd->bl.id) {
-		struct block_list *bl = map_id2bl(st->oid);
-
-		if (bl)
-			clif_specialeffect(bl,type,AREA);
-	} else{
-		TBL_PC *sd = script_rid2sd(st);
-
-		if (sd)
-			clif_specialeffect(&sd->bl,type,AREA);
-	}
-	return SCRIPT_CMD_SUCCESS;
-}
 /*==========================================
  * Play a BGM on a single client [Rikter/Yommy]
  *------------------------------------------*/
@@ -14723,15 +14728,20 @@ BUILDIN_FUNC(mapid2name)
  *------------------------------------------*/
 BUILDIN_FUNC(logmes)
 {
-	const char *str;
-	TBL_PC *sd;
+	const char *str = script_getstr(st,2);
+	struct map_session_data *sd = map_id2sd(st->rid);
 
-	sd = script_rid2sd(st);
-	if( !sd )
-		return 1;
+	if( sd )
+		log_npc(sd,str);
+	else {
+		struct npc_data *nd = map_id2nd(st->oid);
 
-	str = script_getstr(st,2);
-	log_npc(sd,str);
+		if( !nd ) {
+			ShowError("buildin_logmes: Invalid usage without player or npc.\n");
+			return 1;
+		}
+		log_npc2(nd,str);
+	}
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -16015,9 +16025,9 @@ BUILDIN_FUNC(setnpcdisplay)
 
 	get_val(st, data);
 	if( data_isstring(data) )
- 		newname = conv_str(st,data);
+		newname = conv_str(st,data);
 	else if( data_isint(data) )
- 		class_ = conv_num(st,data);
+		class_ = conv_num(st,data);
 	else {
 		ShowError("script:setnpcdisplay: expected string or number\n");
 		script_reportdata(data);
@@ -19494,7 +19504,7 @@ BUILDIN_FUNC(instance_create)
 {
 	struct map_session_data *sd;
 
-	if((sd = script_rid2sd(st)) == NULL)
+	if( !(sd = script_rid2sd(st)) )
 		return -1;
 
 	script_pushint(st,instance_create(sd->status.party_id, script_getstr(st, 2)));
@@ -19571,7 +19581,7 @@ BUILDIN_FUNC(instance_npcname)
 		static char npcname[NAME_LENGTH];
 
 		snprintf(npcname, sizeof(npcname), "dup_%d_%d", instance_id, nd->bl.id);
- 		script_pushconststr(st,npcname);
+		script_pushconststr(st,npcname);
 	} else {
 		ShowError("script:instance_npcname: invalid instance NPC (instance_id: %d, NPC name: \"%s\".)\n", instance_id, str);
 		st->state = END;
@@ -19588,7 +19598,7 @@ BUILDIN_FUNC(instance_npcname)
  *------------------------------------------*/
 BUILDIN_FUNC(instance_mapname)
 {
- 	const char *str;
+	const char *str;
 	int16 m;
 	short instance_id = 0;
 
@@ -21030,7 +21040,7 @@ BUILDIN_FUNC(montransform) {
 	struct script_data *data;
 	const char *cmd = script_getfuncname(st);
 
-	if( (sd = script_rid2sd(st)) == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	data = script_getdata(st,2);
@@ -22819,19 +22829,348 @@ BUILDIN_FUNC(open_roulette) {
 #if PACKETVER >= 20141022
 	struct map_session_data *sd = NULL;
 
- 	if (!battle_config.feature_roulette) {
+	if (!battle_config.feature_roulette) {
 		ShowError("buildin_open_roulette: Roulette system is disabled.\n");
 		return 1;
 	}
 
- 	if (!script_charid2sd(2,sd))
+	if (!script_charid2sd(2,sd))
 		return 1;
 
- 	clif_roulette_open(sd);
- 	return SCRIPT_CMD_SUCCESS;
+	clif_roulette_open(sd);
+	return SCRIPT_CMD_SUCCESS;
 #else
 	ShowError("buildin_open_roulette: This command requires PACKETVER 2014-10-22 or newer.\n");
 	return SCRIPT_CMD_FAILURE;
+#endif
+}
+
+static inline bool mail_sub(struct script_state *st, struct script_data *data, struct map_session_data *sd, int i, const char **out_name, int32 *id, unsigned int *start, unsigned int *end) {
+	const char *name;
+	int32 mail_id, mail_idx;
+
+	//Check if it is a variable
+	if (!data_isreference(data)) {
+		ShowError("buildin_mail: argument %d is not a variable.\n", i);
+		return false;
+	}
+
+	name = reference_getname(data);
+
+	if (is_string_variable(name)) {
+		ShowError("buildin_mail: variable \"%s\" is a string variable.\n", name);
+		return false;
+	}
+
+	//Check if the variable requires a player
+	if (not_server_variable(*name) && !sd) {
+		ShowError("buildin_mail: variable \"%s\" was not a server variable, but no player was attached.\n", name);
+		return false;
+	}
+
+	//Try to find the array's source pointer
+	if (not_array_variable(*name)) {
+		ShowError("buildin_mail: variable \"%s\" is not an array.\n");
+		return false;
+	}
+
+	//Store the name for later usage
+	*out_name = name;
+
+	//For getting the values we need the id of the array
+	mail_id = reference_getid(data);
+	*id = mail_id;
+
+	//Get the start and end indices of the array
+	mail_idx = reference_getindex(data);
+	*start = mail_idx;
+	*end = getarraysize(st, mail_id, mail_idx, 0, reference_getref(data));
+
+	return true;
+}
+
+BUILDIN_FUNC(mail) {
+	const char *sender, *title, *body, *name;
+	struct mail_message msg;
+	struct script_data *data;
+	struct map_session_data *sd = NULL;
+	unsigned int i, j, k, num_items, start, end;
+	int32 id;
+
+	memset(&msg, 0, sizeof(struct mail_message));
+
+	msg.dest_id = script_getnum(st,2);
+
+	sender = script_getstr(st,3);
+
+	if (strlen(sender) > NAME_LENGTH) {
+		ShowError("buildin_mail: sender name can not be longer than %d characters.\n", NAME_LENGTH);
+		return 1;
+	}
+
+	safestrncpy(msg.send_name, sender, NAME_LENGTH);
+
+	title = script_getstr(st,4);
+
+	if (strlen(title) > MAIL_TITLE_LENGTH) {
+		ShowError("buildin_mail: title can not be longer than %d characters.\n", MAIL_TITLE_LENGTH);
+		return 1;
+	}
+
+	safestrncpy(msg.title, title, MAIL_TITLE_LENGTH);
+
+	body = script_getstr(st,5);
+
+	if (strlen(body) > MAIL_BODY_LENGTH) {
+		ShowError("buildin_mail: body can not be longer than %d characters.\n", MAIL_BODY_LENGTH);
+		return 1;
+	}
+
+	safestrncpy(msg.body, body, MAIL_BODY_LENGTH);
+
+	if (script_hasdata(st,6)) {
+		int zeny = script_getnum(st,6);
+
+		if (zeny < 0) {
+			ShowError("buildin_mail: a negative amount of zeny can not be sent.\n" );
+			return 1;
+		} else if (zeny > MAX_ZENY) {
+			ShowError("buildin_mail: amount of zeny %u is exceeding maximum of %u. Capping...\n", zeny, MAX_ZENY);
+			zeny = MAX_ZENY;
+		}
+
+		msg.zeny = zeny;
+	}
+
+	//Items
+	num_items = 0;
+	while (script_hasdata(st,7)) {
+		data = script_getdata(st,7);
+
+		if (!mail_sub(st, data, sd, 7, &name, &id, &start, &end))
+			return 1;
+
+		num_items = end - start;
+
+		if (!num_items) {
+			ShowWarning("buildin_mail: array \"%s\" contained no items.\n", name);
+			break;
+		}
+
+		if (num_items > MAIL_MAX_ITEM) {
+			ShowWarning("buildin_mail: array \"%s\" contained %d items, capping to maximum of %d...\n", name, num_items, MAIL_MAX_ITEM);
+			num_items = MAIL_MAX_ITEM;
+		}
+
+		for (i = 0; i < num_items && start < end; i++, start++) {
+			msg.item[i].nameid = (int32)__64BPRTSIZE(get_val2(st, reference_uid(id, start), reference_getref(data)));
+			msg.item[i].identify = 1;
+
+			script_removetop(st,-1,0);
+
+			if (!itemdb_exists(msg.item[i].nameid)) {
+				ShowError("buildin_mail: invalid item id %hu.\n", msg.item[i].nameid);
+				return 1;
+			}
+		}
+
+		//Amounts
+		if (!script_hasdata(st,8)) {
+			ShowError("buildin_mail: missing item count variable at position %d.\n", 8);
+			return 1;
+		}
+
+		data = script_getdata(st,8);
+
+		if (!mail_sub(st, data, sd, 8, &name, &id, &start, &end))
+			return 1;
+
+		for (i = 0; i < num_items && start < end; i++, start++) {
+			struct item_data *item = itemdb_exists(msg.item[i].nameid);
+
+			msg.item[i].amount = (int32)__64BPRTSIZE(get_val2(st, reference_uid(id, start), reference_getref(data)));
+
+			script_removetop(st,-1,0);
+
+			if (msg.item[i].amount <= 0) {
+				ShowError("buildin_mail: amount %d for item %hu is invalid.\n", msg.item[i].amount, msg.item[i].nameid);
+				return 1;
+			} else if (itemdb_isstackable2(item)) {
+				uint16 max = (item->stack.amount > 0 ? item->stack.amount : MAX_AMOUNT);
+
+				if (msg.item[i].amount > max) {
+					ShowWarning("buildin_mail: amount %d for item %hu is exceeding the maximum of %d. Capping...\n", msg.item[i].amount, msg.item[i].nameid, max);
+					msg.item[i].amount = max;
+				}
+			} else {
+				if (msg.item[i].amount > 1) {
+					ShowWarning("buildin_mail: amount %d is invalid for non-stackable item %hu.\n", msg.item[i].amount, msg.item[i].nameid);
+					msg.item[i].amount = 1;
+				}
+			}
+		}
+
+		//Cards
+		if (!script_hasdata(st,9))
+			break;
+
+		for (i = 0, j = 9; i < MAX_SLOTS && script_hasdata(st,j); i++, j++) {
+			data = script_getdata(st,j);
+
+			if (!mail_sub(st, data, sd, j + 1, &name, &id, &start, &end))
+				return 1;
+
+			for (k = 0; k < num_items && start < end; k++, start++) {
+				msg.item[k].card[i] = (int32)__64BPRTSIZE(get_val2(st, reference_uid(id, start), reference_getref(data)));
+
+				script_removetop(st,-1,0);
+
+				if (msg.item[k].card[i] && !itemdb_exists(msg.item[k].card[i])) {
+					ShowError("buildin_mail: invalid card id %hu.\n", msg.item[k].card[i]);
+					return 1;
+				}
+			}
+		}
+
+		//Random Options
+		if (!script_hasdata(st,9 + MAX_SLOTS))
+			break;
+
+		for (i = 0, j = 9 + MAX_SLOTS; i < MAX_ITEM_RDM_OPT && script_hasdata(st,j) && script_hasdata(st,j + 1) && script_hasdata(st,j + 2); i++, j++) {
+			//Option IDs
+			data = script_getdata(st,j);
+
+			if (!mail_sub(st, data, sd, j + 1, &name, &id, &start, &end))
+				return 1;
+
+			for (k = 0; k < num_items && start < end; k++, start++) {
+				msg.item[k].option[i].id = (int32)__64BPRTSIZE(get_val2(st, reference_uid(id, start), reference_getref(data)));
+
+				script_removetop(st,-1,0);
+			}
+
+			j++;
+
+			//Option values
+			data = script_getdata(st,j);
+
+			if (!mail_sub(st, data, sd, j + 1, &name, &id, &start, &end))
+				return 1;
+
+			for (k = 0; k < num_items && start < end; k++, start++) {
+				msg.item[k].option[i].value = (int32)__64BPRTSIZE(get_val2(st, reference_uid(id, start), reference_getref(data)));
+
+				script_removetop(st,-1,0);
+			}
+
+			j++;
+
+			//Option parameters
+			data = script_getdata(st,j);
+
+			if (!mail_sub(st, data, sd, j + 1, &name, &id, &start, &end))
+				return 1;
+
+			for (k = 0; k < num_items && start < end; k++, start++) {
+				msg.item[k].option[i].param = (int32)__64BPRTSIZE(get_val2(st, reference_uid(id, start), reference_getref(data)));
+
+				script_removetop(st,-1,0);
+			}
+		}
+
+		//Break the pseudo scope
+		break;
+	}
+
+	msg.status = MAIL_NEW;
+	msg.type = MAIL_INBOX_NORMAL;
+	msg.timestamp = time(NULL);
+
+	intif_Mail_send(0, &msg);
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+/*==========================================
+ * identifyall({<type>{,<account_id>}})
+ * <type>:
+ *	true: identify the items and returns the count of unidentified items (default)
+ *	false: returns the count of unidentified items only
+ *------------------------------------------*/
+BUILDIN_FUNC(identifyall) {
+	TBL_PC *sd;
+	bool identify_item = true;
+
+	if (script_hasdata(st,2))
+		identify_item = (script_getnum(st,2) != 0);
+
+	if (!script_hasdata(st,3))
+		sd = script_rid2sd(st);
+	else
+		sd = map_id2sd(script_getnum(st,3));
+
+	if (!sd) {
+		script_pushint(st,-1);
+		return 0;
+	}
+	script_pushint(st,pc_identifyall(sd,identify_item));
+
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(airship_respond) {
+	struct map_session_data *sd = script_rid2sd(st);
+	uint32 response = script_getnum(st,2);
+
+	if (!(sd = script_rid2sd(st)))
+		return 1;
+	if (response < PRIVATEAIRSHIP_OK || response > PRIVATEAIRSHIP_ITEM_UNAVAILABLE) {
+		ShowWarning("buildin_airship_respond: Invalid response %d has been given.", response);
+		return 1;
+	}
+	clif_private_airship_response(sd, (enum e_private_airship_response)response);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(open_refineui) {
+#if PACKETVER < 20161012
+	ShowError("buildin_open_refineui: This command requires packet version 2016-10-12 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if (!script_charid2sd(2,sd))
+		return 1;
+
+	if (!battle_config.feature_refineui) {
+		ShowError("buildin_open_refineui: This command is disabled via configuration.\n");
+		return 1;
+	}
+
+	if (!sd->state.refineui_open)
+		clif_refineui_open(sd);
+
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
+BUILDIN_FUNC(open_stylistui) {
+#if PACKETVER < 20151104
+	ShowError("buildin_open_stylistui: This command requires packet version 2015-11-04 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if (!script_charid2sd(2,sd))
+		return 1;
+
+	if (!battle_config.feature_stylistui) {
+		ShowError("buildin_open_stylistui: This command is disabled via configuration.\n");
+		return 1;
+	}
+
+	clif_ui_open(sd, OUT_UI_STYLIST, 0);
+	return SCRIPT_CMD_SUCCESS;
 #endif
 }
 
@@ -22889,6 +23228,7 @@ struct script_function buildin_func[] = {
 	// NPC interaction
 	BUILDIN_DEF(mes,"s*"),
 	BUILDIN_DEF(next,""),
+	BUILDIN_DEF(clear,""),
 	BUILDIN_DEF(close,""),
 	BUILDIN_DEF(close2,""),
 	BUILDIN_DEF(menu,"sl*"),
@@ -22976,6 +23316,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getequiprefinerycnt,"i?"),
 	BUILDIN_DEF(getequipweaponlv,"i?"),
 	BUILDIN_DEF(getequippercentrefinery,"i??"),
+	BUILDIN_DEF(getequiprefinecost,"iii?"),
 	BUILDIN_DEF(successrefitem,"i??"),
 	BUILDIN_DEF(failedrefitem,"i?"),
 	BUILDIN_DEF(downrefitem,"i??"),
@@ -23016,6 +23357,8 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(gettimestr,"si?"),
 	BUILDIN_DEF(openstorage,""),
 	BUILDIN_DEF(guildopenstorage,""),
+	BUILDIN_DEF(guildopenstorage_log,"?"),
+	BUILDIN_DEF(guild_has_permission,"i?"),
 	BUILDIN_DEF(itemskill,"vi?"),
 	BUILDIN_DEF(produce,"i"),
 	BUILDIN_DEF(cooking,"i"),
@@ -23080,7 +23423,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF2(disablewaitingroomevent,"disablearena",""), // Added by RoVeRT
 	BUILDIN_DEF(getwaitingroomstate,"i?"),
 	BUILDIN_DEF(warpwaitingpc,"sii?"),
-	BUILDIN_DEF(attachrid,"i"),
+	BUILDIN_DEF(attachrid,"i?"),
 	BUILDIN_DEF(addrid,"i?????"),
 	BUILDIN_DEF(detachrid,""),
 	BUILDIN_DEF(isloggedin,"i?"),
@@ -23124,7 +23467,6 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getskilllist,"?"),
 	BUILDIN_DEF(clearitem,"?"),
 	BUILDIN_DEF(classchange,"i??"),
-	BUILDIN_DEF(misceffect,"i"),
 	BUILDIN_DEF(playBGM,"s"),
 	BUILDIN_DEF(playBGMall,"s?????"),
 	BUILDIN_DEF(soundeffect,"si"),
@@ -23142,7 +23484,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(skilleffect,"vi"), // Skill effect [Celest]
 	BUILDIN_DEF(npcskilleffect,"viii"), // Npc skill effect [Valaris]
 	BUILDIN_DEF(specialeffect,"i??"), // Npc skill effect [Valaris]
-	BUILDIN_DEF(specialeffect2,"i??"), // Skill effect on players[Valaris]
+	BUILDIN_DEF(specialeffect2,"i??"), // Skill effect on players [Valaris]
 	BUILDIN_DEF(nude,"?"), // Nude command [Valaris]
 	BUILDIN_DEF(mapwarp,"ssii??"), // Added by RoVeRT
 	BUILDIN_DEF(atcommand,"s"), // [MouseJstr]
@@ -23302,6 +23644,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(getfreecell,"srr?????"),
 	BUILDIN_DEF(setwall,"siiiiis"),
 	BUILDIN_DEF(delwall,"s"),
+	BUILDIN_DEF(checkwall,"s"),
 	BUILDIN_DEF(searchitem,"rs"),
 	BUILDIN_DEF(mercenary_create,"ii"),
 	BUILDIN_DEF(mercenary_heal,"ii"),
@@ -23468,6 +23811,15 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(achievementupdate,"iii?"),
 	//Roulette System
 	BUILDIN_DEF(open_roulette,"?"),
+	//Mail System
+	BUILDIN_DEF(mail,"isss*"),
+	BUILDIN_DEF(identifyall,"??"),
+	//Private Airship System
+	BUILDIN_DEF(airship_respond,"i"),
+	//Refine UI
+	BUILDIN_DEF(open_refineui,"?"),
+	//Stylist UI
+	BUILDIN_DEF(open_stylistui,"?"),
 
 #include "../custom/script_def.inc"
 
