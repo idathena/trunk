@@ -17630,8 +17630,6 @@ void clif_instance_create(struct map_session_data *sd, const char *name, int num
 	else //No notification
 		clif_send(buf,packet_len(0x2cb),&sd->bl,SELF);
 #endif
-
-	return;
 }
 
 void clif_instance_changewait(struct map_session_data *sd, int num, int flag)
@@ -17649,8 +17647,6 @@ void clif_instance_changewait(struct map_session_data *sd, int num, int flag)
 	else //No notification
 		clif_send(buf,packet_len(0x2cc),&sd->bl,SELF);
 #endif
-
-	return;
 }
 
 void clif_instance_status(struct map_session_data *sd, const char *name, unsigned int limit1, unsigned int limit2, int flag)
@@ -17670,8 +17666,6 @@ void clif_instance_status(struct map_session_data *sd, const char *name, unsigne
 	else //No notification
 		clif_send(buf,packet_len(0x2cd),&sd->bl,SELF);
 #endif
-
-	return;
 }
 
 void clif_instance_changestatus(struct map_session_data *sd, int type, unsigned int limit, int flag)
@@ -17690,8 +17684,6 @@ void clif_instance_changestatus(struct map_session_data *sd, int type, unsigned 
 	else //No notification
 		clif_send(buf,packet_len(0x2ce),&sd->bl,SELF);
 #endif
-
-	return;
 }
 
 
