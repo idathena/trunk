@@ -8021,52 +8021,53 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 			sbg_id = bg_team_get_id(s_bl);
 			tbg_id = bg_team_get_id(t_bl);
 		}
-
 		if( (flag&(BCT_PARTY|BCT_ENEMY)) ) {
 			int s_party = status_get_party_id(s_bl);
-			int s_guild = status_get_guild_id(s_bl);
-			int t_guild = status_get_guild_id(t_bl);
 
-			if( s_party && s_party == status_get_party_id(t_bl) ) {
-				if( map_flag_gvg2(m) && map[m].flag.gvg_noparty ) {
-					if( s_guild && t_guild && (s_guild == t_guild || guild_isallied(s_guild, t_guild)) )
-						state |= BCT_PARTY;
-					else
-						state |= (flag&BCT_ENEMY) ? BCT_ENEMY : BCT_PARTY;
-				} else if( !(map[m].flag.pvp && map[m].flag.pvp_noparty) && (!map[m].flag.battleground || sbg_id == tbg_id) )
-					state |= BCT_PARTY;
-				else
-					state |= BCT_ENEMY;
-			} else
+			if( s_party && s_party == status_get_party_id(t_bl) &&
+				!(map[m].flag.pvp && map[m].flag.pvp_noparty) &&
+				!(map_flag_gvg(m) && map[m].flag.gvg_noparty) &&
+				(!map[m].flag.battleground || sbg_id == tbg_id) )
+				state |= BCT_PARTY;
+			else
 				state |= BCT_ENEMY;
 		}
-
 		if( (flag&(BCT_GUILD|BCT_ENEMY)) ) {
 			int s_guild = status_get_guild_id(s_bl);
 			int t_guild = status_get_guild_id(t_bl);
 
-			if( !(map[m].flag.pvp && map[m].flag.pvp_noguild) && s_guild &&
-				t_guild && (s_guild == t_guild || (!(flag&BCT_SAMEGUILD) && guild_isallied(s_guild, t_guild))) &&
+			if( !(map[m].flag.pvp && map[m].flag.pvp_noguild) &&
+				s_guild && t_guild && (s_guild == t_guild || (!(flag&BCT_SAMEGUILD) && guild_isallied(s_guild, t_guild))) &&
 				(!map[m].flag.battleground || sbg_id == tbg_id) )
 				state |= BCT_GUILD;
 			else
 				state |= BCT_ENEMY;
 		}
+		if( state&BCT_PARTY ) {
+			int s_guild = status_get_guild_id(s_bl);
+			int t_guild = status_get_guild_id(t_bl);
 
-		if( state&BCT_ENEMY && map[m].flag.battleground && sbg_id && sbg_id == tbg_id )
-			state &= ~BCT_ENEMY;
-
-		if( state&BCT_ENEMY && battle_config.pk_mode && !map_flag_gvg2(m) && s_bl->type == BL_PC && t_bl->type == BL_PC ) {
-			TBL_PC *sd = (TBL_PC *)s_bl, *tsd = (TBL_PC *)t_bl;
-
-			//Prevent novice engagement on pk_mode (feature by Valaris)
-			if( (sd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
-				(tsd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
-				(int)sd->status.base_level < battle_config.pk_min_level ||
-				(int)tsd->status.base_level < battle_config.pk_min_level ||
-				(battle_config.pk_level_range &&
-				abs((int)sd->status.base_level - (int)tsd->status.base_level) > battle_config.pk_level_range) )
+			if( (map[m].flag.gvg_castle || map[m].flag.gvg_te_castle) &&
+				(!s_guild || !t_guild || (s_guild != t_guild && ((flag&BCT_SAMEGUILD) || !guild_isallied(s_guild, t_guild)))) ) {
+				state |= BCT_ENEMY;
+				strip_enemy = 0;
+			}
+		}
+		if( state&BCT_ENEMY ) {
+			if( map[m].flag.battleground && sbg_id && sbg_id == tbg_id )
 				state &= ~BCT_ENEMY;
+			if( battle_config.pk_mode && !map_flag_gvg2(m) && s_bl->type == BL_PC && t_bl->type == BL_PC ) {
+				TBL_PC *sd = (TBL_PC *)s_bl, *tsd = (TBL_PC *)t_bl;
+
+				//Prevent novice engagement on pk_mode (feature by Valaris)
+				if( (sd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
+					(tsd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
+					(int)sd->status.base_level < battle_config.pk_min_level ||
+					(int)tsd->status.base_level < battle_config.pk_min_level ||
+					(battle_config.pk_level_range &&
+					abs((int)sd->status.base_level - (int)tsd->status.base_level) > battle_config.pk_level_range) )
+					state &= ~BCT_ENEMY;
+			}
 		}
 	} else { //Non pvp/gvg, check party/guild settings
 		if( (flag&BCT_PARTY) || (state&BCT_ENEMY) ) {
@@ -8075,7 +8076,6 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 			if( s_party && s_party == status_get_party_id(t_bl) )
 				state |= BCT_PARTY;
 		}
-
 		if( (flag&BCT_GUILD) || (state&BCT_ENEMY) ) {
 			int s_guild = status_get_guild_id(s_bl);
 			int t_guild = status_get_guild_id(t_bl);

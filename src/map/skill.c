@@ -2425,13 +2425,13 @@ bool skill_strip_equip(struct block_list *src, struct block_list *bl, uint16 ski
 		case RG_STRIPSHIELD:
 		case RG_STRIPHELM:
 		case GC_WEAPONCRUSH:
-			rate = 50 * (skill_lv + 1) + 2 * (sstatus->dex - tstatus->dex);
+			rate = 5 * (skill_lv + 1) + (sstatus->dex - tstatus->dex) / 5;
 			break;
 		case ST_FULLSTRIP: {
-				int min_rate = 50 + 20 * skill_lv;
+				int min_rate = 5 + 2 * skill_lv;
 
-				rate = min_rate + 2 * (sstatus->dex - tstatus->dex);
-				rate = max(min_rate,rate);
+				rate = min_rate + (sstatus->dex - tstatus->dex) / 5;
+				rate = max(rate,min_rate);
 			}
 			break;
 		case GS_DISARM:
@@ -7401,7 +7401,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 				//Attempts to strip
 				if( (strip = skill_strip_equip(src,bl,skill_id,skill_lv)) || (skill_id != ST_FULLSTRIP && skill_id != GC_WEAPONCRUSH) )
-					clif_skill_nodamage(src,bl,skill_id,skill_lv,i);
+					clif_skill_nodamage(src,bl,skill_id,skill_lv,strip);
 
 				if( !strip && sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -14563,7 +14563,7 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			}
 			break;
 		case AB_SECRAMENT:
-			if( bl->id != src->id && battle_check_target(src,bl,BCT_ENEMY) > 0 ) {
+			if( battle_check_target(src,bl,BCT_NOENEMY) <= 0 ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				return false;
