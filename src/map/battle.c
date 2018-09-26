@@ -2814,7 +2814,6 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 	struct status_change *sc = status_get_sc(src);
 	struct status_data *sstatus = status_get_status_data(src);
 	struct status_data *tstatus = status_get_status_data(target);
-	int element = skill_get_ele(skill_id, skill_lv);
 	int left_element = battle_get_weapon_element(&wd, src, target, skill_id, skill_lv, EQI_HAND_L);
 	int right_element = battle_get_weapon_element(&wd, src, target, skill_id, skill_lv, EQI_HAND_R);
 	int nk = battle_skill_get_damage_properties(skill_id, wd.miscflag);
