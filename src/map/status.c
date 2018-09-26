@@ -6659,8 +6659,8 @@ short status_calc_aspd(struct block_list *bl, struct status_change *sc, bool fix
 			bonus -= 25;
 		if(sc->data[SC_DEFENDER])
 			bonus -= sc->data[SC_DEFENDER]->val4 / 10;
-		if(sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_ENEMY) //Needs more info
-			bonus -= 25;
+		if(sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_ENEMY)
+			bonus -= 75;
 		if(sc->data[SC_GRAVITATION] && sc->data[SC_GRAVITATION]->val3 != BCT_SELF)
 			bonus -= sc->data[SC_GRAVITATION]->val2 / 10;
 		if(sc->data[SC_JOINTBEAT]) { //Needs more info
@@ -6829,7 +6829,7 @@ short status_calc_aspd_rate(struct block_list *bl, struct status_change *sc, int
 	if(sc->data[SC_DEFENDER])
 		aspd_rate += sc->data[SC_DEFENDER]->val4;
 	if(sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_ENEMY)
-		aspd_rate += 250;
+		aspd_rate += 750;
 	if(sc->data[SC_GRAVITATION] && sc->data[SC_GRAVITATION]->val3 != BCT_SELF)
 		aspd_rate += sc->data[SC_GRAVITATION]->val2;
 	if(sc->data[SC_JOINTBEAT]) {
