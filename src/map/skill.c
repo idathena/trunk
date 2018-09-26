@@ -13674,7 +13674,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_GOSPEL:
-			if (rnd()%100 >= 50 + skill_lv * 5 || bl->id == src->id)
+			if (bl->id == src->id || rnd()%100 >= 50 + skill_lv * 5)
 				break;
 			if (battle_check_target(src,bl,BCT_PARTY) > 0) { //Support Effect only on party, not guild
 				int heal;
@@ -13775,7 +13775,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 					case 8: //Flee -100%
 						sc_start(src,bl,SC_INCFLEERATE,100,-100,20000);
 						break;
-					case 9: //Speed/ASPD -25%
+					case 9: //Speed/ASPD -75%
 						sc_start4(src,bl,SC_GOSPEL,100,1,0,0,BCT_ENEMY,20000);
 						break;
 				}
