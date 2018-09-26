@@ -2834,7 +2834,7 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 				if(!skill_id && (battle_config.attack_attr_none&src->type))
 					return wd; //Non-pc (mob, pet, homun) basic attacks are non-elemental, they deal 100% against all defense elements
 #ifdef RENEWAL
-				if(!sd) { //Renewal player's elemental damage calculation already done before this point, only calculate for monsters
+				if(!sd) { //Renewal player's elemental damage calculation is already done before this point, only calculate for monsters
 #endif
 					wd.damage = battle_attr_fix(src, target, wd.damage, right_element, tstatus->def_ele, tstatus->ele_lv);
 					if(is_attack_left_handed(src, skill_id))
