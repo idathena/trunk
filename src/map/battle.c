@@ -2820,25 +2820,28 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 	int nk = battle_skill_get_damage_properties(skill_id, wd.miscflag);
 
 	if(!(nk&NK_NO_ELEFIX) && (wd.damage > 0 || wd.damage2 > 0)) { //Elemental attribute fix
-		//Non-pc (mob, pet, homun) physical melee attacks are "no elemental", they deal 100% to all target elements
-		//However the "no elemental" attacks still get reduced by "Neutral resistance"
-		//Also non-pc units have only a defending element, but can inflict elemental attacks using skills [exneval]
-		if((battle_config.attack_attr_none&src->type) && ((!skill_id && right_element == ELE_NEUTRAL) ||
-			(skill_id && (element == -1 || right_element == ELE_NEUTRAL))) && (wd.flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON))
-			return wd;
 		switch(skill_id) {
-#ifdef RENEWAL
 			case PA_SACRIFICE:
 			case RK_DRAGONBREATH:
 			case RK_DRAGONBREATH_WATER:
 			case NC_SELFDESTRUCTION:
 			case HFLI_SBR44:
-#else
-			default:
-#endif
 				wd.damage = battle_attr_fix(src, target, wd.damage, right_element, tstatus->def_ele, tstatus->ele_lv);
 				if(is_attack_left_handed(src, skill_id))
 					wd.damage2 = battle_attr_fix(src, target, wd.damage2, left_element, tstatus->def_ele, tstatus->ele_lv);
+				break;
+			default:
+				if(!skill_id && (battle_config.attack_attr_none&src->type))
+					return wd; //Non-pc (mob, pet, homun) basic attacks are non-elemental, they deal 100% against all defense elements
+#ifdef RENEWAL
+				if(!sd) { //Renewal player's elemental damage calculation is already done before this point, only calculate for monsters
+#endif
+					wd.damage = battle_attr_fix(src, target, wd.damage, right_element, tstatus->def_ele, tstatus->ele_lv);
+					if(is_attack_left_handed(src, skill_id))
+						wd.damage2 = battle_attr_fix(src, target, wd.damage2, left_element, tstatus->def_ele, tstatus->ele_lv);
+#ifdef RENEWAL
+				}
+#endif
 				break;
 		}
 		switch(skill_id) { //Skills force to neutral element
@@ -3078,8 +3081,7 @@ struct Damage battle_calc_damage_parts(struct Damage wd, struct block_list *src,
 		wd.equipAtk2 += battle_get_defense(src, target, skill_id, 0) / 2;
 	wd.equipAtk2 = battle_attr_fix(src, target, wd.equipAtk2, left_element, tstatus->def_ele, tstatus->ele_lv);
 
-	//Mastery ATK is a special kind of ATK that has no elemental properties
-	//Because masteries are not elemental, they are unaffected by Ghost armors or Raydric Card
+	//Mastery ATK is unaffected by elemental attribute fix
 	wd = battle_calc_attack_masteries(wd, src, target, skill_id, skill_lv);
 
 	wd.damage = 0;
@@ -5500,21 +5502,20 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 3, wd.flag);
 				wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 3, wd.flag);
 			}
-		}
-
-		//Card Fix for target (tsd), 2 is not added to the "left" flag meaning "target cards only"
-		if(tsd && sd) {
-			if(skill_id == SO_VARETYR_SPEAR)
-				nk |= NK_NO_CARDFIX_DEF; //Varetyr Spear physical part ignores card reduction [exneval]
-			wd.statusAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk, 0, wd.flag);
-			wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 0, wd.flag);
-			wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 0, wd.flag);
-			wd.masteryAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk, 0, wd.flag);
-			if(is_attack_left_handed(src, skill_id)) {
-				wd.statusAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk2, 1, wd.flag);
-				wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 1, wd.flag);
-				wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 1, wd.flag);
-				wd.masteryAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk2, 1, wd.flag);
+			//Card Fix for target (tsd), 2 is not added to the "left" flag meaning "target cards only"
+			if(tsd) {
+				if(skill_id == SO_VARETYR_SPEAR)
+					nk |= NK_NO_CARDFIX_DEF; //Varetyr Spear physical part ignores card reduction [exneval]
+				wd.statusAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk, 0, wd.flag);
+				wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 0, wd.flag);
+				wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 0, wd.flag);
+				wd.masteryAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk, 0, wd.flag);
+				if(is_attack_left_handed(src, skill_id)) {
+					wd.statusAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk2, 1, wd.flag);
+					wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 1, wd.flag);
+					wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 1, wd.flag);
+					wd.masteryAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk2, 1, wd.flag);
+				}
 			}
 		}
 
@@ -5558,17 +5559,19 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	}
 #endif
 
-	if(tsd
 #ifdef RENEWAL
-		&& !sd
+	if(!sd) { //Renewal calculation for player's cardfix target is already done before this point, only calculate for monsters
 #endif
-	) {
-		if(skill_id == SO_VARETYR_SPEAR)
-			nk |= NK_NO_CARDFIX_DEF;
-		wd.damage += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage, 0, wd.flag);
-		if(is_attack_left_handed(src, skill_id))
-			wd.damage2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage2, 1, wd.flag);
+		if(tsd) {
+			if(skill_id == SO_VARETYR_SPEAR)
+				nk |= NK_NO_CARDFIX_DEF;
+			wd.damage += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage, 0, wd.flag);
+			if(is_attack_left_handed(src, skill_id))
+				wd.damage2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage2, 1, wd.flag);
+		}
+#ifdef RENEWAL
 	}
+#endif
 
 	//Fixed damage but reduced by elemental attribute defense [exneval]
 	switch(skill_id) {
@@ -5631,7 +5634,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	//Check for element attribute modifiers
 	wd = battle_calc_element_damage(wd, src, target, skill_id, skill_lv);
 
-	//Fixed damage and no elemental [exneval]
+	//Fixed damage and non-elemental [exneval]
 	switch(skill_id) {
 		case 0:
 			if(sc && sc->data[SC_SPELLFIST] && !(wd.miscflag&16)) {
@@ -6395,7 +6398,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 
 		if(!(nk&NK_NO_ELEFIX) && ad.damage > 0) {
 			switch(skill_id) {
-				case ASC_BREAKER: //Soul Breaker's magic damage is treated as no elemental
+				case ASC_BREAKER: //Soul Breaker's magic damage is treated as non-elemental
 #ifdef RENEWAL
 				case CR_GRANDCROSS:
 				case CR_ACIDDEMONSTRATION:
