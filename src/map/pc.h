@@ -952,7 +952,7 @@ int pc_class2idx(int class_);
 int pc_get_group_level(struct map_session_data *sd);
 int pc_get_group_id(struct map_session_data *sd);
 int pc_getrefinebonus(int lv,int type);
-bool pc_can_sell_item(struct map_session_data *sd, struct item *item);
+bool pc_can_sell_item(struct map_session_data *sd, struct item *item, enum npc_subtype shoptype);
 bool pc_can_give_items(struct map_session_data *sd);
 bool pc_can_give_bounded_items(struct map_session_data *sd);
 
@@ -1049,7 +1049,7 @@ int pc_insert_card(struct map_session_data *sd, int idx_card, int idx_equip);
 
 int pc_identifyall(struct map_session_data *sd, bool identify_item);
 
-int pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 skill_lv);
+bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 skill_lv);
 int pc_steal_coin(struct map_session_data *sd, struct block_list *bl);
 
 int pc_modifybuyvalue(struct map_session_data *,int);

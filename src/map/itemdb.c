@@ -1360,6 +1360,9 @@ static bool itemdb_parse_dbrow(char **str, const char *source, int line, int scr
 		ShowWarning("itemdb_parse_dbrow: Buying/Selling [%d/%d] price of item %hu (%s) allows Zeny making exploit  through buying/selling at discounted/overcharged prices!\n",
 			id->value_buy, id->value_sell, nameid, id->jname);
 
+	if (!str[6][0])
+		ShowWarning("itemdb_parse_dbrow: No weight defined for item %hu (%s), set it to 0\n", nameid, id->jname);
+
 	id->weight = atoi(str[6]);
 #ifdef RENEWAL
 	itemdb_re_split_atoi(str[7], &id->atk, &id->matk);

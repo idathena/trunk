@@ -860,6 +860,7 @@ void initChangeTables(void) {
 	add_sc( NPC_JACKFROST         , SC_FREEZE            );
 	set_sc( NPC_WIDEWEB           , SC_WIDEWEB           , SI_WIDEWEB               , SCB_FLEE );
 	set_sc_with_vfx( NPC_FIRESTORM, SC_BURNT             , SI_BURNT                 , SCB_NONE );
+	add_sc( NPC_GUIDEDATTACK      , SC_GUIDEDATTACK      );
 
 	add_sc( RL_MASS_SPIRAL      , SC_BLEEDING           );
 	add_sc( RL_HAMMER_OF_GOD    , SC_STUN               );
@@ -2572,7 +2573,7 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 	} else {
 		//Base level + (every 1 dex = +1 hit) + (every 3 luk = +1 hit) + 175
 		stat = status->hit;
-		stat += (int)(level + status->dex + (bl->type == BL_PC ? ((float)status->luk / 3) + 175 : 150));
+		stat += (int)(level + status->dex + (bl->type == BL_PC ? ((float)status->luk / 3) + 175 : 170));
 		status->hit = cap_value(stat, 1, SHRT_MAX);
 		//Base level + (every 1 agi = +1 flee) + (every 5 luk = +1 flee) + 100
 		stat = status->flee;
@@ -9788,12 +9789,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_SWOO:
 				if( status_has_mode(status,MD_STATUS_IMMUNE) )
 					tick /= 5;
-				break;
-			case SC_ARMOR:
-				val2 = 80; //Damage reduction
-				//Attack requirements to be blocked:
-				val3 = BF_LONG; //Range
-				val4 = BF_WEAPON|BF_MISC; //Type
 				break;
 			case SC_ENCHANTARMS:
 				skill_enchant_elemental_end(bl,type); //End previous enchants
