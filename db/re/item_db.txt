@@ -4529,9 +4529,9 @@
 6567,Choco_Drink_Recipe,Choco Drink Recipe,3,0,,0,,,,,,,,,,,,,{},{},{}
 6581,Holy_Amulet,Holy Amulet,3,20,,10,,,,,,,,,,,,,{},{},{}
 6583,3rd_Test_Pass,3rd Test Pass,3,0,,0,,,,,,,,,,,,,{},{},{}
-6584,Guarantee_Weapon_12Up,Safe to 12 Weapon Certificate,3,0,,,,,,,,,,,,,,,{},{},{}
-6585,Guarantee_Armor_12Up,Safe to 12 Armor Certificate,3,0,,,,,,,,,,,,,,,{},{},{}
-6586,Captured_Book,Captured Book,3,0,,,,,,,,,,,,,,,{},{},{}
+6584,Guarantee_Weapon_12Up,Safe to 12 Weapon Certificate,3,0,,0,,,,,,,,,,,,,{},{},{}
+6585,Guarantee_Armor_12Up,Safe to 12 Armor Certificate,3,0,,0,,,,,,,,,,,,,{},{},{}
+6586,Captured_Book,Captured Book,3,0,,0,,,,,,,,,,,,,{},{},{}
 6592,Small_Wooden_Chest,Small Wooden Chest,3,0,,10,,,,,,,,,,,,,{},{},{}
 6593,Criatura_Hair_Coupon,Criatura Hair Coupon,3,0,,0,,,,,,,,,,,,,{},{},{}
 6594,Magic_Bronze_Bullion,Magic Bronze Bullion,3,0,,1000,,,,,,,,,,,,,{},{},{}
@@ -4616,7 +4616,7 @@
 6705,Warrior_Certificate,Warrior Certificate,3,10,,0,,,,,,,,,,,,,{},{},{}
 6706,Guardian_Flowers,Guardian Flowers,3,10,,0,,,,,,,,,,,,,{},{},{}
 6707,Cash_Hair_Coupon,Cash Hair Coupon,3,10,,10,,,,,,,,,,,,,{},{},{}
-6708,Mana_Crystal,Mana Crystal,3,10,,,,,,,,,,,,,,,{},{},{}
+6708,Mana_Crystal,Mana Crystal,3,10,,0,,,,,,,,,,,,,{},{},{}
 6709,Crisp_Silk,Crisp Silk,3,10,,0,,,,,,,,,,,,,{},{},{}
 6710,Tied_Snake,Tied Snake,3,10,,0,,,,,,,,,,,,,{},{},{}
 6697,Costumes_Exchange_Coupons,Costumes Exchange Coupons,3,10,,10,,,,,,,,,,,,,{},{},{}

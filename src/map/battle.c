@@ -1070,6 +1070,8 @@ int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, stru
 			if( sc->data[SC_ADJUSTMENT] )
 				damage -= damage * 20 / 100;
 #endif
+			if( sc->data[SC_ARMOR] ) //NPC_DEFENDER
+				damage -= damage / 8;
 			if( battle_skill_check_defender(skill_id) ) {
 				if( ((sce = sc->data[SC_DEFENDER]) || (sce = battle_check_shadowform(bl,SC_DEFENDER))) )
 					damage -= damage * sce->val2 / 100;
@@ -1346,9 +1348,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			d->dmg_lv = ATK_MISS;
 			return 0;
 		}
-
-		if( (sce = sc->data[SC_ARMOR]) && sce->val3&flag && sce->val4&flag ) //NPC_DEFENDER
-			damage -= damage * sce->val2 / 100;
 
 #ifdef RENEWAL
 		if( sc->data[SC_ENERGYCOAT] ) {
@@ -2476,7 +2475,7 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 	struct status_change *tsc = status_get_sc(target);
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	int nk = battle_skill_get_damage_properties(skill_id, wd.miscflag);
-	short flee, hitrate;
+	short flee, hitrate = 0;
 	uint8 lv = 0;
 
 	if(!first_call)
@@ -2501,10 +2500,8 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 		return false;
 
 	flee = tstatus->flee;
-#ifdef RENEWAL
-	hitrate = 0; //Default hitrate
-#else
-	hitrate = 80; //Default hitrate
+#ifndef RENEWAL
+	hitrate = 80;
 #endif
 
 	if(battle_config.agi_penalty_type && battle_config.agi_penalty_target&target->type) {
@@ -2605,8 +2602,12 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 		hitrate += hitrate * 2 * lv / 100;
 #endif
 
-	if(sc && sc->data[SC_INCHITRATE])
-		hitrate += hitrate * sc->data[SC_INCHITRATE]->val1 / 100;
+	if(sc) {
+		if(sc->data[SC_GUIDEDATTACK])
+			hitrate += hitrate * 20 / 100;
+		if(sc->data[SC_INCHITRATE])
+			hitrate += hitrate * sc->data[SC_INCHITRATE]->val1 / 100;
+	}
 
 	hitrate = cap_value(hitrate, battle_config.min_hitrate, battle_config.max_hitrate);
 	return (rnd()%100 < hitrate);
@@ -8663,7 +8664,7 @@ static const struct _battle_data {
 	{ "guild_alliance_onlygm",              &battle_config.guild_alliance_onlygm,           0,      0,      1,              },
 	{ "event_refine_chance",                &battle_config.event_refine_chance,             0,      0,      1,              },
 	{ "feature.achievement",                &battle_config.feature_achievement,             1,      0,      1,              },
-	{ "allow_bound_sell",                   &battle_config.allow_bound_sell,                0,      0,      1|2,            },
+	{ "allow_bound_sell",                   &battle_config.allow_bound_sell,                0,      0,      0xF,            },
 	{ "autoloot_adjust",                    &battle_config.autoloot_adjust,                 0,      0,      1,              },
 	{ "show_skill_scale",                   &battle_config.show_skill_scale,                1,      0,      1,              },
 	{ "millennium_shield_health",           &battle_config.millennium_shield_health,        1000,   1,      INT_MAX,        },
@@ -8677,6 +8678,7 @@ static const struct _battle_data {
 	{ "feature.privateairship",             &battle_config.feature_privateairship,          1,      0,      1,              },
 	{ "feature.refineui",                   &battle_config.feature_refineui,                1,      0,      1,              },
 	{ "feature.stylistui",                  &battle_config.feature_stylistui,               1,      0,      1,              },
+	{ "rental_transaction",                 &battle_config.rental_transaction,              1,      0,      1,              },
 
 #include "../custom/battle_config_init.inc"
 };

@@ -1474,6 +1474,7 @@
 	export_constant(SC_BURNT);
 	export_constant(SC_CHEERUP);
 	export_constant(SC_DRESSUP);
+	export_constant(SC_GUIDEDATTACK);
 
 	/* Status icons */
 	export_constant(SI_BLANK);
@@ -2850,6 +2851,7 @@
 	export_constant(MOBG_Bloody_Dead_Branch);
 	export_constant(MOBG_Red_Pouch_Of_Surprise);
 	export_constant(MOBG_ClassChange);
+	export_constant(MOBG_Taekwon_Mission);
 
 	/* Status options */
 	export_constant(OPTION_NOTHING);

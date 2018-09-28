@@ -414,7 +414,7 @@ extern struct Battle_Config
 	int mobs_level_up; //[Valaris]
 	int mobs_level_up_exp_rate; //[Valaris]
 	int pk_min_level; //[celest]
-	int skill_steal_max_tries; //max steal skill tries on a mob. if 0, then w/o limit [Lupus]
+	int skill_steal_max_tries; //Max steal skill tries on a mob. if 0, then w/o limit [Lupus]
 	int motd_type; //[celest]
 	int finding_ore_rate; //orn
 	int exp_calc_type;
@@ -676,6 +676,7 @@ extern struct Battle_Config
 	int feature_privateairship;
 	int feature_refineui;
 	int feature_stylistui;
+	int rental_transaction;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

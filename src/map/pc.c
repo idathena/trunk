@@ -941,30 +941,44 @@ void pc_inventory_rental_add(struct map_session_data *sd, unsigned int seconds)
  * Check if the player can sell the current item
  * @param sd: map_session_data of the player
  * @param item: struct of the checking item
+ * @param shoptype: NPC's sub type see enum npc_subtype
  * @return bool 'true' is sellable, 'false' otherwise
  */
-bool pc_can_sell_item(struct map_session_data *sd, struct item *item)
+bool pc_can_sell_item(struct map_session_data *sd, struct item *item, enum npc_subtype shoptype)
 {
-	struct npc_data *nd;
-
 	if(!sd || !item)
 		return false;
 
-	nd = map_id2nd(sd->npc_shopid);
+	if(item->equip > 0 || item->amount < 0)
+		return false;
 
 	if(battle_config.hide_fav_sell && item->favorite)
 		return false; //Cannot sell favs (optional config)
 
-	if(item->expire_time)
+	if(!battle_config.rental_transaction && item->expire_time)
 		return false; //Cannot Sell Rental Items
 
-	if(nd && nd->subtype == NPCTYPE_ITEMSHOP) {
-		struct item_data *itd;
+	switch(shoptype) {
+		case NPCTYPE_SHOP:
+			if(item->bound && (battle_config.allow_bound_sell&ISR_BOUND_SELLABLE) &&
+				(item->bound != BOUND_GUILD ||
+				(sd->guild && sd->status.char_id == sd->guild->member[0].char_id) ||
+				(item->bound == BOUND_GUILD && !(battle_config.allow_bound_sell&ISR_BOUND_GUILDLEADER_ONLY))))
+				return true;
+			break;
+		case NPCTYPE_ITEMSHOP:
+			if(item->bound && (battle_config.allow_bound_sell&ISR_BOUND) &&
+				(item->bound != BOUND_GUILD ||
+				(sd->guild && sd->status.char_id == sd->guild->member[0].char_id) ||
+				(item->bound == BOUND_GUILD && !(battle_config.allow_bound_sell&ISR_BOUND_GUILDLEADER_ONLY))))
+				return true;
+			else if(!item->bound) {
+				struct item_data *itd = itemdb_search(item->nameid);
 
-		if(item->bound && (battle_config.allow_bound_sell&ISR_BOUND))
-			return true; //NPCTYPE_ITEMSHOP and bound item config is sellable
-		if((itd = itemdb_search(item->nameid)) && (itd->flag.trade_restriction&ITR_NOSELLTONPC) && (battle_config.allow_bound_sell&ISR_SELLABLE))
-			return true; //NPCTYPE_ITEMSHOP and sell restricted item config is sellable
+				if(itd && (itd->flag.trade_restriction&ITR_NOSELLTONPC) && (battle_config.allow_bound_sell&ISR_SELLABLE))
+					return true;
+			}
+			break;
 	}
 
 	if(!itemdb_cansell(item, pc_get_group_level(sd)))
@@ -5573,27 +5587,30 @@ int pc_show_steal(struct block_list *bl, va_list ap)
 
 /**
  * Steal an item from bl (mob).
- * @param sd
- * @param bl
- * @param skill_lv
- * @return 0 - Fail; 1 = Success
+ * @param sd: Player data
+ * @param bl: Object to steal from
+ * @param skill_lv: Level of skill used
+ * @return True on success or false otherwise
  */
-int pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 skill_lv)
+bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 skill_lv)
 {
 	int i, itemid;
-	double rate;
+	int stealRate;
+#ifndef RENEWAL
+	double stealBonus;
+#endif
 	unsigned char flag = 0;
 	struct status_data *sd_status, *md_status;
 	struct mob_data *md;
 	struct item tmp_item;
 
 	if( !sd || !bl || bl->type != BL_MOB )
-		return 0;
+		return false;
 
 	md = (TBL_MOB *)bl;
 
 	if( md->state.steal_flag == UCHAR_MAX || (md->sc.opt1 && md->sc.opt1 != OPT1_BURNING) )
-		return 0; //Already stolen from status change check
+		return false; //Already stolen from status change check
 
 	sd_status = status_get_status_data(&sd->bl);
 	md_status = status_get_status_data(bl);
@@ -5604,24 +5621,41 @@ int pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 ski
 		md->state.steal_flag++ >= battle_config.skill_steal_max_tries) )
 	{ //Can't steal from
 		md->state.steal_flag = UCHAR_MAX;
-		return 0;
+		return false;
 	}
 
 	//Base skill success chance (percentual)
-	rate = (sd_status->dex - md_status->dex) / 2 + skill_lv * 6 + 4;
-	rate += sd->bonus.add_steal_rate;
+	stealRate = (sd_status->dex - md_status->dex) / 2 + skill_lv * 6 + 4;
+	stealRate += sd->bonus.add_steal_rate;
+	stealRate = max(stealRate,0);
 
-	if( rate < 1 )
-		return 0;
+	if( !stealRate )
+		return false;
 
-	//Try dropping one item, in the order from first to last possible slot.
-	//Droprate is affected by the skill success rate.
-	for( i = 0; i < MAX_STEAL_DROP; i++ )
-		if( md->db->dropitem[i].nameid > 0 && !md->db->dropitem[i].steal_protected &&
-			itemdb_exists(md->db->dropitem[i].nameid) && rnd() % 10000 < md->db->dropitem[i].p * rate / 100. )
-			break;
+#ifndef RENEWAL
+	stealBonus = stealRate / 100.;
+#else
+	if( rnd()%100 >= stealRate )
+		return false;
+#endif
+
+	//Try dropping one item, in the order from first to last possible slot
+	//Droprate is affected by the skill success rate
+	for( i = 0; i < MAX_STEAL_DROP; i++ ) {
+		int dropRate;
+
+		if( !md->db->dropitem[i].nameid || md->db->dropitem[i].steal_protected || !itemdb_exists(md->db->dropitem[i].nameid) )
+			continue;
+#ifndef RENEWAL
+		dropRate = md->db->dropitem[i].p * stealBonus;
+#else
+		dropRate = md->db->dropitem[i].p;
+#endif
+		if( rnd()%10000 < dropRate )
+			break; //Success
+	}
 	if( i == MAX_STEAL_DROP )
-		return 0;
+		return false;
 
 	itemid = md->db->dropitem[i].nameid;
 	memset(&tmp_item,0,sizeof(tmp_item));
@@ -5631,12 +5665,13 @@ int pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 ski
 	mob_setdropitem_option(&tmp_item,&md->db->dropitem[i]);
 	flag = pc_additem(sd,&tmp_item,1,LOG_TYPE_PICKDROP_PLAYER);
 
-	//@TODO: Should we disable stealing when the item you stole couldn't be added to your inventory? Perhaps players will figure out a way to exploit this behaviour otherwise?
+	//@TODO: Should we disable stealing when the item you stole couldn't be added to your inventory?
+	//       Perhaps players will figure out a way to exploit this behaviour otherwise?
 	md->state.steal_flag = UCHAR_MAX; //You can't steal from this mob any more
 
 	if( flag ) { //Failed to steal due to overweight
 		clif_additem(sd,0,0,flag);
-		return 0;
+		return false;
 	}
 
 	if( battle_config.show_steal_in_same_party )
@@ -5655,32 +5690,30 @@ int pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 ski
 		//MSG: "'%s' stole %s's %s (chance: %0.02f%%)"
 		intif_broadcast(message,strlen(message) + 1,BC_DEFAULT);
 	}
-	return 1;
+	return true;
 }
 
 /**
  * Steals zeny from a monster through the RG_STEALCOIN skill.
- *
- * @param sd     Source character
- * @param target Target monster
- *
+ * @param sd: Source character
+ * @param bl: Target monster
  * @return Amount of stolen zeny (0 in case of failure)
  */
-int pc_steal_coin(struct map_session_data *sd,struct block_list *target)
+int pc_steal_coin(struct map_session_data *sd, struct block_list *bl)
 {
 	int rate;
 	uint16 lv;
 	struct mob_data *md;
 
-	if( !sd || !target || target->type != BL_MOB )
+	if( !sd || !bl || bl->type != BL_MOB )
 		return 0;
-	md = (TBL_MOB *)target;
-	if( md->state.steal_coin_flag || md->sc.data[SC_STONE] || md->sc.data[SC_FREEZE] || status_bl_has_mode(target,MD_STATUS_IMMUNE) || status_get_race2(&md->bl) == RC2_TREASURE )
+	md = (TBL_MOB *)bl;
+	if( md->state.steal_coin_flag || md->sc.data[SC_STONE] || md->sc.data[SC_FREEZE] || status_bl_has_mode(bl,MD_STATUS_IMMUNE) || status_get_race2(&md->bl) == RC2_TREASURE )
 		return 0;
 	lv = pc_checkskill(sd,RG_STEALCOIN);
 	rate = lv * 10 + (sd->status.base_level - md->level) * 2 + sd->battle_status.dex / 2 + sd->battle_status.luk / 2;
 	if( rnd()%1000 < rate ) {
-		//mob_lv * skill_lv / 10 + random [mob_lv * 8; mob_lv * 10]
+		//mob_lv * skill_lv / 10 + random[mob_lv * 8, mob_lv * 10]
 		int amount = md->level * lv / 10 + md->level * 8 + rnd()%(md->level * 2 + 1);
 
 		pc_getzeny(sd,amount,LOG_TYPE_STEAL,NULL);

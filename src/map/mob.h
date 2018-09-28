@@ -76,13 +76,26 @@ enum mob_mobid {
 	MOBID_LITTLE_PORING = 2398,
 };
 
-//Used hardcoded Random Monster group in src
-enum e_Random_Monster {
+//Random Monster Groups
+enum e_random_monster {
 	MOBG_Branch_Of_Dead_Tree = 0,
-	MOBG_Poring_Box = 1,
-	MOBG_Bloody_Dead_Branch = 2,
-	MOBG_Red_Pouch_Of_Surprise = 3,
-	MOBG_ClassChange = 4,
+	MOBG_Poring_Box,
+	MOBG_Bloody_Dead_Branch,
+	MOBG_Red_Pouch_Of_Surprise,
+	MOBG_ClassChange,
+	MOBG_Taekwon_Mission,
+};
+
+//Random Monster Group Flags
+enum e_random_monster_flags {
+	RMF_NONE		= 0x00, //Apply no flags
+	RMF_DB_RATE		= 0x01, //Apply the summon success chance found in the list (otherwise get any monster from the db)
+	RMF_CHECK_MOB_LV	= 0x02, //Apply a monster level check
+	RMF_MOB_NOT_BOSS	= 0x04, //Selected monster should not be a Boss type (except those from MOBG_Bloody_Dead_Branch)
+	RMF_MOB_NOT_SPAWN	= 0x08, //Selected monster must have normal spawn
+	RMF_MOB_NOT_PLANT	= 0x10, //Selected monster should not be a Plant type
+	RMF_MOB_UNDEAD		= 0x20, //Selected monster must be Undead
+	RMF_ALL			= 0xFF, //Apply all flags
 };
 
 enum e_bosstype {
