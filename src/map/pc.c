@@ -5646,10 +5646,9 @@ bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 sk
 
 		if( !md->db->dropitem[i].nameid || md->db->dropitem[i].steal_protected || !itemdb_exists(md->db->dropitem[i].nameid) )
 			continue;
-#ifndef RENEWAL
-		dropRate = md->db->dropitem[i].p * stealBonus;
-#else
 		dropRate = md->db->dropitem[i].p;
+#ifndef RENEWAL
+		dropRate *= stealBonus;
 #endif
 		if( rnd()%10000 < dropRate )
 			break; //Success

@@ -368,7 +368,7 @@ TIMER_FUNC(mob_timer_delete);
 int mob_deleteslave(struct mob_data *md);
 
 int mob_random_class(int *value, size_t count);
-int mob_get_random_id(int type, int flag, int lv);
+int mob_get_random_id(int type, enum e_random_monster_flags flag, int lv);
 int mob_class_change(struct mob_data *md,int mob_id);
 int mob_warpslave(struct block_list *bl, int range);
 int mob_linksearch(struct block_list *bl, va_list ap);
