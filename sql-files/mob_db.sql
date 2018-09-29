@@ -29,7 +29,7 @@ CREATE TABLE `mob_db` (
   `Scale` tinyint(4) unsigned NOT NULL default '0',
   `Race` tinyint(4) unsigned NOT NULL default '0',
   `Element` tinyint(4) unsigned NOT NULL default '0',
-  `Mode` smallint(6) unsigned NOT NULL default '0',
+  `Mode` int(11) unsigned NOT NULL default '0',
   `Speed` smallint(6) unsigned NOT NULL default '0',
   `aDelay` smallint(6) unsigned NOT NULL default '0',
   `aMotion` smallint(6) unsigned NOT NULL default '0',
@@ -661,7 +661,7 @@ REPLACE INTO `mob_db` VALUES (1583,'TAO_GUNKA','Tao Gunka','Tao Gunka',70,193000
 
 # Ayothaya
 REPLACE INTO `mob_db` VALUES (1584,'TAMRUAN','Tamruan','Tamruan',52,10234,0,3812,55,1,489,534,15,35,80,62,38,75,72,15,10,12,2,6,67,0x200308D,140,512,1152,672,0,0,0,0,0,0,0,7301,4850,7069,3000,1117,40,1155,8,2315,3,0,0,0,0,0,0,0,0,4304,1);
-REPLACE INTO `mob_db` VALUES (1585,'MIME_MONKEY','Mime Monkey','Mime Monkey',40,6000,0,200,22,3,300,350,40,40,1,40,40,40,40,30,10,12,1,3,21,0x83,400,1872,672,480,0,0,0,0,0,0,0,909,7000,1202,100,938,400,512,1000,713,1500,741,5,619,20,0,0,0,0,0,0);
+#REPLACE INTO `mob_db` VALUES (1585,'MIME_MONKEY','Mime Monkey','Mime Monkey',40,6000,0,200,22,3,300,350,40,40,1,40,40,40,40,30,10,12,1,3,21,0x83,400,1872,672,480,0,0,0,0,0,0,0,909,7000,1202,100,938,400,512,1000,713,1500,741,5,619,20,0,0,0,0,0,0);
 REPLACE INTO `mob_db` VALUES (1586,'LEAF_CAT','Leaf Cat','Leaf Cat',38,2396,0,165,1212,1,266,307,5,19,25,67,12,45,60,29,10,12,0,2,22,0x83,150,960,864,720,0,0,0,0,0,0,0,7198,4365,520,300,608,5,1023,1100,568,250,567,500,7298,5335,0,0,0,0,4195,1);
 REPLACE INTO `mob_db` VALUES (1587,'KRABEN','Kraben','Kraben',50,5880,0,206,1322,1,125,765,5,42,50,125,1,66,75,50,10,12,1,0,48,0x3095,100,1152,1536,576,0,0,0,0,0,0,0,912,3500,519,3000,521,1000,2102,1,7299,4850,7286,1000,603,10,0,0,0,0,4295,1);
 

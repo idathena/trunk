@@ -16,11 +16,11 @@ CREATE TABLE IF NOT EXISTS `mob_skill_db_re` (
   `TARGET` text NOT NULL,
   `CONDITION` text NOT NULL,
   `CONDITION_VALUE` text,
-  `VAL1` mediumint(9) DEFAULT NULL,
-  `VAL2` mediumint(9) DEFAULT NULL,
-  `VAL3` mediumint(9) DEFAULT NULL,
-  `VAL4` mediumint(9) DEFAULT NULL,
-  `VAL5` mediumint(9) DEFAULT NULL,
+  `VAL1` mediumint(9) default NULL,
+  `VAL2` mediumint(9) default NULL,
+  `VAL3` mediumint(9) default NULL,
+  `VAL4` mediumint(9) default NULL,
+  `VAL5` mediumint(9) default NULL,
   `EMOTION` text,
   `CHAT` text
 ) ENGINE=MyISAM;

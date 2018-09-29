@@ -254,7 +254,7 @@ IG_My_Scroll1	237
 IG_Tw_Nov_Scroll	238
 IG_My_Scroll2	239
 IG_Pr_Reset_Stone_Box	240
-IG_FPr_Reset_Stone_Box	241
+IG_FPremium_Reset_Stone_Box	241
 IG_Majestic_Devil_Scroll	242
 IG_Life_Ribbon_Box	243
 IG_Life_Ribbon_Box2	244
