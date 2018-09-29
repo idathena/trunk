@@ -4,29 +4,30 @@
 
 DROP TABLE IF EXISTS `item_db`;
 CREATE TABLE `item_db` (
-  `id` smallint(5) unsigned NOT NULL default '0',
-  `name_english` varchar(50) NOT NULL default '',
-  `name_japanese` varchar(50) NOT NULL default '',
-  `type` tinyint(2) unsigned NOT NULL default '0',
-  `price_buy` mediumint(10) unsigned default NULL,
-  `price_sell` mediumint(10) unsigned default NULL,
-  `weight` smallint(5) unsigned NOT NULL default '0',
-  `attack` smallint(3) unsigned default NULL,
-  `defence` smallint(5) NULL default NULL,
-  `range` tinyint(2) unsigned default NULL,
-  `slots` tinyint(2) unsigned default NULL,
-  `equip_jobs` int(12) unsigned default NULL,
-  `equip_upper` tinyint(8) unsigned default NULL,
-  `equip_genders` tinyint(2) unsigned default NULL,
-  `equip_locations` mediumint(7) unsigned default NULL,
-  `weapon_level` tinyint(2) unsigned default NULL,
-  `equip_level` tinyint(3) unsigned default NULL,
-  `refineable` tinyint(1) unsigned default NULL,
-  `view` smallint(3) unsigned default NULL,
+  `id` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `name_english` varchar(50) NOT NULL DEFAULT '',
+  `name_japanese` varchar(50) NOT NULL DEFAULT '',
+  `type` tinyint(2) unsigned NOT NULL DEFAULT '0',
+  `price_buy` mediumint(8) unsigned DEFAULT NULL,
+  `price_sell` mediumint(8) unsigned DEFAULT NULL,
+  `weight` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `attack` smallint(5) unsigned DEFAULT NULL,
+  `defence` smallint(5) unsigned DEFAULT NULL,
+  `range` tinyint(2) unsigned DEFAULT NULL,
+  `slots` tinyint(2) unsigned DEFAULT NULL,
+  `equip_jobs` bigint(20) unsigned DEFAULT NULL,
+  `equip_upper` tinyint(2) unsigned DEFAULT NULL,
+  `equip_genders` tinyint(1) unsigned DEFAULT NULL,
+  `equip_locations` mediumint(7) unsigned DEFAULT NULL,
+  `weapon_level` tinyint(1) unsigned DEFAULT NULL,
+  `equip_level` tinyint(3) unsigned DEFAULT NULL,
+  `refineable` tinyint(1) unsigned DEFAULT NULL,
+  `view` smallint(5) unsigned DEFAULT NULL,
   `script` text,
   `equip_script` text,
   `unequip_script` text,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `UniqueAegisName` (`name_english`)
 ) ENGINE=MyISAM;
 
 # Items Database
@@ -4278,7 +4279,7 @@ REPLACE INTO `item_db` VALUES (7852,'Pass_F2','Divx Player Raffle Ticket',3,20,N
 REPLACE INTO `item_db` VALUES (7853,'Pass_F3','iPod nano Raffle Ticket',3,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (7854,'Pass_CF','Comodo Festival Ticket',3,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (7855,'Heart','Heart',3,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `item_db` VALUES (7856,'Girl_Bunch_Of_Flower','Girl\'s Bouquet',3,20,NULL,50,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `item_db` VALUES (7856,'Girl_Bunch_Of_Flower_','Girl\'s Bouquet',3,20,NULL,50,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (7857,'Handmade_Kitty_Doll','Hand-made Kitty Doll',3,20,NULL,30,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (7858,'Dragonball_Yellow_','Dragonball Yellow',3,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `item_db` VALUES (7859,'Game_Ticket','Game Ticket',3,20,NULL,100,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -6545,10 +6546,10 @@ REPLACE INTO `item_db` VALUES (16258,'HD_Bradium_5_Box','HD Bradium 5 Box',2,20,
 REPLACE INTO `item_db` VALUES (16259,'HD_Carnium_5_Box','HD Carnium 5 Box',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 6225,5;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (16260,'HD_Bradium_10_Box','HD Bradium 10 Box',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 6226,10;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (16261,'HD_Carnium_10_Box','HD Carnium 10 Box',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 6225,10;',NULL,NULL);
-#16262,HD_Bradium_5_Box,
-#16263,HD_Carnium_5_Box,
-#16264,HD_Bradium_10_Box,
-#16265,HD_Carnium_10_Box,
+#16262,HD_Bradium_5_Box2,
+#16263,HD_Carnium_5_Box2,
+#16264,HD_Bradium_10_Box2,
+#16265,HD_Carnium_10_Box2,
 #16267,HE_Battle_Manual_Box
 #16268,HE_Bubble_Gum_Box
 #16269,Cancer_Diadem_Box
@@ -6556,8 +6557,8 @@ REPLACE INTO `item_db` VALUES (16261,'HD_Carnium_10_Box','HD Carnium 10 Box',2,2
 REPLACE INTO `item_db` VALUES (16304,'Evil_Incarnation','Evil Incarnation',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 #16343,Leo_Crown_Box
 #16344,Leo_Diadem_Box
-#16345,Leo_Crown_Box
-#16346,Leo_Diadem_Box
+#16345,F_Leo_Crown_Box
+#16346,F_Leo_Diadem_Box
 #16368,Virgo_Crown_Box
 REPLACE INTO `item_db` VALUES (16371,'Tw_Aug_Scroll','Tw Aug Scroll',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 #16381,WoE_Teleport_Scroll_100_Box
@@ -6566,53 +6567,53 @@ REPLACE INTO `item_db` VALUES (16394,'HD_Ori_Box10','HD Oridecon 10 Box',2,20,NU
 REPLACE INTO `item_db` VALUES (16395,'HD_Elu_Box5','HD Elunium 5 Box',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 6241,5;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (16396,'HD_Elu_Box10','HD Elunium 10 Box',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 6241,10;',NULL,NULL);
 #16397,Virgo_Diadem_Box
-#16398,Virgo_Crown_Box
-#16399,Virgo_Diadem_Box
+#16398,F_Virgo_Crown_Box
+#16399,F_Virgo_Diadem_Box
 #16418,Giant_Fly_Wing_Box_500
 #16419,Greed_Scroll_30_Box
 #16420,Adventurer_Pack
 #16421,Written_Oath_Of_Marriage_Box
-#16422,Baphomet_Horns_Box
+#16422,F_Magestic_Goat_Box
 #16423,Episode_13.1_Key_Package
-#16424,Executioner_Box
+#16424,F_Executioner_Box
 #16425,Cutlas_Box
 #16426,Moonlight_Dagger_Box
 #16427,Wrench_Box
-#16428,Solar_Sword_Box
-#16429,Tomahawk_Box
+#16428,F_Solar_Sword_Box
+#16429,F_Tomahawk_Box
 #16430,Rudra_Bow_Box
-#16431,Pole_Axe_Box
+#16431,F_Pole_Axe_Box
 #16436,Libra_Crown_Box
-#16437,Libra_Crown_Box
+#16437,F_Libra_Crown_Box
 #16438,Libra_Diadem_Box
-#16439,Libra_Diadem_Box
+#16439,F_Libra_Diadem_Box
 #16447,Scorpio_Crown_Box
 #16448,Scorpio_Diadem_Box
-#16449,Scorpio_Crown_Box
-#16450,Scorpio_Diadem_Box
+#16449,F_Scorpio_Crown_Box
+#16450,F_Scorpio_Diadem_Box
 REPLACE INTO `item_db` VALUES (16461,'Red_Wing_Hat_Box','Red Wing Hat Box',18,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 5690,1;',NULL,NULL);
 #16462,Red_Wing_Hat_Box
 #16543,Snowman_Hat_Box
 #16544,Snowman_Hat_Box
 #16548,Sagittarius_Crown_Box
 #16549,Sagittarius_Diadem_Box
-#16550,Sagittarius_Crown_Box
-#16551,Sagittarius_Diadem_Box
+#16550,F_Sagittarius_Crown_Box
+#16551,F_Sagittarius_Diadem_Box
 #16554,Elven_Sunglasses_Box
 REPLACE INTO `item_db` VALUES (16555,'Pr_Reset_Stone_Box','Pr Reset Stone Box',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 #16565,Capricorn_Crown_Box
-#16566,Capricorn_Crown_Box
+#16566,F_Capricorn_Crown_Box
 #16567,Capricorn_Diadem_Box
 #16568,Capricorn_Diadem_Box
 #16588,Thoughtful_Hat_Box
-#16589,Thoughtful_Hat_Box
-#16590,Thoughtful_Hat_Box
+#16589,F_Thoughtful_Hat_Box
+#16590,E_Thoughtful_Hat_Box
 REPLACE INTO `item_db` VALUES (16677,'Universal_Catalog_Gold_Box10','Universal Catalog Gold 10 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,10;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (16678,'Universal_Catalog_Gold_Box50','Universal Catalog Gold 50 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,50;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (16679,'Universal_Catalog_Gold_Box10','Universal Catalog Gold 10 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,10;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (16680,'Universal_Catalog_Gold_Box50','Universal Catalog Gold 50 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,50;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (16776,'Universal_Catalog_Gold_Box10','Universal Catalog Gold 10 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,10;',NULL,NULL);
-REPLACE INTO `item_db` VALUES (16777,'Universal_Catalog_Gold_Box50','Universal Catalog Gold 50 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,50;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (16679,'F_Universal_Catalog_Gold_Box10','Universal Catalog Gold 10 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,10;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (16680,'F_Universal_Catalog_Gold_Box50','Universal Catalog Gold 50 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,50;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (16776,'E_Universal_Catalog_Gold_Box10','Universal Catalog Gold 10 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,10;',NULL,NULL);
+REPLACE INTO `item_db` VALUES (16777,'E_Universal_Catalog_Gold_Box50','Universal Catalog Gold 50 Box',2,0,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 12581,50;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (16843,'Beauty_Gift_Coupon_Box','Beauty Gift Coupon Box',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 7622,1;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (16854,'Clothing_Dye_Coupon_Box','Clothing Dye Coupon Box',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 6046,1;',NULL,NULL);
 REPLACE INTO `item_db` VALUES (16855,'Clothing_Dye_Orig_Coupon_Box','Original Clothing Dye Coupon Box',2,20,NULL,10,NULL,NULL,NULL,NULL,0xFFFFFFFF,7,2,NULL,NULL,NULL,NULL,NULL,'getitem 6047,1;',NULL,NULL);

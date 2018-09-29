@@ -3064,9 +3064,9 @@
 //16358,475,100	//
 //16358,475,100	//
 16360,475,100	// Desert_Prince_Box
-16361,475,100	// FDesert_Prince_Box
+16361,475,100	// F_Desert_Prince_Box
 16362,475,100	// Sigrun's_Wing_Box
-16363,475,100	// FSigrun's_Wing_Box
+16363,475,100	// F_Sigrun's_Wing_Box
 16368,475,100	// Virgo_Crown_Box
 //16369,475,100	//
 //16370,475,100	//
@@ -3094,8 +3094,8 @@
 16395,475,100	// HD_Elu_Box5
 16396,475,100	// HD_Elu_Box10
 16397,475,100	// Virgo_Diadem_Box
-16398,475,100	// Virgo_Crown_Box
-16399,475,100	// Virgo_Diadem_Box
+16398,475,100	// F_Virgo_Crown_Box
+16399,475,100	// F_Virgo_Diadem_Box
 //16400,475,100	//
 //16401,475,100	//
 //16402,475,100	//
@@ -3114,8 +3114,8 @@
 //16445,475,100	//
 16447,475,100	// Scorpio_Crown_Box
 16448,475,100	// Scorpio_Diadem_Box
-16449,475,100	// Scorpio_Crown_Box
-16450,475,100	// FScorpio_Diadem_Box
+16449,475,100	// F_Scorpio_Crown_Box
+16450,475,100	// F_Scorpio_Diadem_Box
 //16452,475,100	//
 //16453,475,100	//
 //16454,475,100	//
@@ -3136,7 +3136,7 @@
 16514,475,100	// Blessing_Scroll_Box_10
 16515,475,100	// Increase_Agility_Scroll_Box_10
 16543,475,100	// Snowman_Hat_Box
-16544,475,100	// FSnowman_Hat_Box
+16544,475,100	// F_Snowman_Hat_Box
 16555,475,100	// Pr_Reset_Stone_Box
 //16573,475,100	//
 //16574,475,100	//
@@ -3184,8 +3184,8 @@
 //16672,475,100	//
 16677,475,100	// Universal_Catalog_Gold_Box10
 16678,475,100	// Universal_Catalog_Gold_Box50
-16679,475,100	// Universal_Catalog_Gold_Box10
-16680,475,100	// Universal_Catalog_Gold_Box50
+16679,475,100	// F_Universal_Catalog_Gold_Box10
+16680,475,100	// F_Universal_Catalog_Gold_Box50
 16682,475,100	// Boarding_Halter_Box
 16683,475,100	// B_Halter_Box_30Days
 //16689,475,100	//
@@ -3215,8 +3215,8 @@
 16767,475,100	// Octo_Hstick_Box3
 16770,475,100	// Silvervine_Fruit_Box10
 16771,475,100	// Silvervine_Fruit_Box40
-16776,475,100	// Universal_Catalog_Gold_Box10
-16777,475,100	// Universal_Catalog_Gold_Box50
+16776,475,100	// E_Universal_Catalog_Gold_Box10
+16777,475,100	// E_Universal_Catalog_Gold_Box50
 //16778,475,100	//
 //16779,475,100	//
 //16780,475,100	//
@@ -3545,7 +3545,7 @@
 17316,475,100	// Lucky_Silvervine_Fruit_Box(110)
 17321,475,100	// Three_Master_Package
 17322,475,100	// Three_Master_Package(10)
-17331,475,100	// Event_Almighty_Box
+17331,475,100	// F_Event_Almighty_Box
 17332,475,100	// Event_Almighty_Box(100)
 17338,475,100	// Ore_Box_V
 17339,475,100	// Ore_Box_V(10)
@@ -3605,8 +3605,8 @@
 17548,475,100	// (Limited)2015_Status_Initialization_Volume_Box
 17549,475,100	// (Limited)HD_Bradium_Box(30)
 17550,475,100	// (Limited)HD_Carnium_Box(30)
-17567,475,100	// Event_Almighty_Box
-17568,475,100	// Event_Almighty_Box(100)
+17567,475,100	// E_Event_Almighty_Box
+17568,475,100	// F_Event_Almighty_Box(100)
 //17569,475,100	//
 //17570,475,100	//
 //17573,475,100	//
@@ -3810,7 +3810,7 @@
 22842,475,100	// Sealed_Dracula_Scroll_II
 22844,475,100	// Sealed_Dracula_Card_Album
 22845,475,100	// Sealed_Fortune_Egg
-22846,467,100	// Sealed_Dracula_Card
+22846,467,100	// Sealed_Dracula_Card_
 22850,475,100	// January_Gift_Box_
 22851,475,100	// February_Gift_Box_
 22852,475,100	// March_Gift_Box_
