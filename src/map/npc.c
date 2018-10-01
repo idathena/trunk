@@ -300,13 +300,6 @@ struct npc_data *npc_name2id(const char *name)
 	return (struct npc_data *)strdb_get(npcname_db, name);
 }
 
-static const char *npc_id2name(int id)
-{
-	struct npc_data *nd = map_id2nd(id);
-
-	return (nd ? nd->name : "Unknown");
-}
-
 /**
  * For the Secure NPC Timeout option (check src/config/secure.hpp)
  * @author RR
