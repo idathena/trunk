@@ -187,7 +187,7 @@ int npc_isnear_sub(struct block_list *bl, va_list args) {
 bool npc_isnear(struct block_list *bl) {
 
 	if( battle_config.min_npc_vendchat_distance > 0 &&
-			map_foreachinallrange(npc_isnear_sub, bl, battle_config.min_npc_vendchat_distance, BL_NPC, 0) )
+		map_foreachinallrange(npc_isnear_sub, bl, battle_config.min_npc_vendchat_distance, BL_NPC, 0) )
 		return true;
 
 	return false;
@@ -298,13 +298,6 @@ int npc_enable(const char *name, int flag)
 struct npc_data *npc_name2id(const char *name)
 {
 	return (struct npc_data *)strdb_get(npcname_db, name);
-}
-
-static const char *npc_id2name(int id)
-{
-	struct npc_data *nd = map_id2nd(id);
-
-	return (nd ? nd->name : "Unknown");
 }
 
 /**
@@ -1022,7 +1015,7 @@ int npc_touch_areanpc(struct map_session_data *sd, int16 m, int16 x, int16 y)
 	}
 	if( i == map[m].npc_num ) {
 		if( f == 1 ) //No npc found
-			ShowError("npc_touch_areanpc : stray NPC cell/NPC not found in the block on coordinates '%s',%d,%d\n",map[m].name,x,y);
+			ShowError("npc_touch_areanpc: stray NPC cell/NPC not found in the block on coordinates '%s',%d,%d\n",map[m].name,x,y);
 		return 1;
 	}
 	switch( map[m].npc[i]->subtype ) {
@@ -1307,18 +1300,8 @@ int npc_click(struct map_session_data *sd, struct npc_data *nd)
 {
 	nullpo_retr(1, sd);
 
-	//This usually happens when the player clicked on a NPC that has the view id
-	//of a mob, to activate this kind of NPC it's needed to be in a 2,2 range
-	//from it. If the OnTouch area of a NPC, coincides with the 2,2 range of 
-	//another it's expected that the OnTouch event be put first in stack, because
-	//unit_walktoxy_timer is executed before any other function in this case
-	//so it's best practice to put an 'end;' before OnTouch events in npcs that 
-	//have view ids of mobs to avoid this "issue" [Panikon]
-	if (sd->npc_id) { //The player clicked a NPC after entering an OnTouch area
-		if (sd->npc_id != sd->areanpc_id)
-			ShowError("npc_click: npc_id != 0 and npc_id != areanpc_id, (source: %s, %s)\n", npc_id2name(sd->npc_id), npc_id2name(sd->areanpc_id));
+	if (sd->npc_id)
 		return 1;
-	}
 
 	if (!nd)
 		return 1;
