@@ -20,6 +20,8 @@
 15,Faceworm's Nest,3600,1@face,112,374,1@face
 16,Ghost Palace,3600,1@spa,42,196,1@spa
 17,Geffen Magic Tournament,7200,1@gef,119,209,1@gef,1@gef_in,1@ge_st
-18,Horror Toy Factory,3600,1@xm_d,111,22,1@xm_d
-19,Nightmarish Jitterbug,3600,1@jtb,16,18,1@jtb
-20,Sarah and Fenrir,3600,1@glast,367,304,1@glast
+18,Devil's Tower,3600,1@tnm1,50,104,1@tnm1,1@tnm2,1@tnm3
+19,Horror Toy Factory,3600,1@xm_d,111,22,1@xm_d
+20,Nightmarish Jitterbug,3600,1@jtb,16,18,1@jtb
+21,Airship Assault,3600,1@air1,244,73,1@air1,1@air2
+22,Sarah and Fenrir,3600,1@glast,367,304,1@glast

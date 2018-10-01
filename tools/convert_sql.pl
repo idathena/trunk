@@ -94,12 +94,14 @@ sub Main {
 
 sub ConvertFile { my($sFilein,$sFileout,$sType)=@_;
 	my $sFHout;
+	my %hAEgisName = ();
 	print "Starting ConvertFile with: \n\t filein=$sFilein \n\t fileout=$sFileout \n";
 	open FHIN,"$sFilein" or die "ERROR: Can't read or locate $sFilein.\n";
 	open $sFHout,">$sFileout" or die "ERROR: Can't write $sFileout.\n";
 	
 	printf $sFHout ("%s\n",$create_table);
 	while(my $ligne=<FHIN>) {
+		my $sWasCom = 0;
 		if ($ligne =~ /^\s*$/ ) {
 				print $sFHout "\n";
 				next;
@@ -109,6 +111,7 @@ sub ConvertFile { my($sFilein,$sFileout,$sType)=@_;
 			if ($ligne =~ /^\/\//) {
 				printf $sFHout ("#");
 				$ligne = substr($ligne, 2);
+				$sWasCom = 1;
 			}
 			my @champ = ();
 			if ($sType =~ /mob_skill/i ) {
@@ -122,6 +125,14 @@ sub ConvertFile { my($sFilein,$sFileout,$sType)=@_;
 				printf $sFHout ("%s\n", $ligne);
 			} else {
 				printf $sFHout ("REPLACE INTO `%s` VALUES (", $db);
+				if( $sType =~ /item/i and $sWasCom == 0){ #check if aegis name is duplicate, (only for not com)
+					$hAEgisName{$champ[1]}++;
+					if($hAEgisName{$champ[1]} > 1){
+						print "Warning, aegisName=$champ[1] multiple occurence found, val=$hAEgisName{$champ[1]}, line=$ligne\n" ;
+						$champ[1] = $champ[1]."_"x($hAEgisName{$champ[1]}-1);
+						print "Converted into '$champ[1]'\n" ;
+					}
+				}				 
 				for (my $i=0; $i<$#champ; $i++) {
 					printField($sFHout,$champ[$i],",",$i);
 				}
@@ -209,25 +220,26 @@ CREATE TABLE `$db` (
   `name_english` varchar(50) NOT NULL default '',
   `name_japanese` varchar(50) NOT NULL default '',
   `type` tinyint(2) unsigned NOT NULL default '0',
-  `price_buy` mediumint(10) unsigned default NULL,
-  `price_sell` mediumint(10) unsigned default NULL,
+  `price_buy` mediumint(8) unsigned default NULL,
+  `price_sell` mediumint(8) unsigned default NULL,
   `weight` smallint(5) unsigned NOT NULL default '0',
-  `attack` smallint(3) unsigned default NULL,
-  `defence` smallint(5) NULL default NULL,
+  `attack` smallint(5) unsigned default NULL,
+  `defence` smallint(5) unsigned default NULL,
   `range` tinyint(2) unsigned default NULL,
   `slots` tinyint(2) unsigned default NULL,
-  `equip_jobs` int(12) unsigned default NULL,
-  `equip_upper` tinyint(8) unsigned default NULL,
-  `equip_genders` tinyint(2) unsigned default NULL,
+  `equip_jobs` bigint(20) unsigned default NULL,
+  `equip_upper` tinyint(2) unsigned default NULL,
+  `equip_genders` tinyint(1) unsigned default NULL,
   `equip_locations` mediumint(7) unsigned default NULL,
-  `weapon_level` tinyint(2) unsigned default NULL,
+  `weapon_level` tinyint(1) unsigned default NULL,
   `equip_level` tinyint(3) unsigned default NULL,
   `refineable` tinyint(1) unsigned default NULL,
-  `view` smallint(3) unsigned default NULL,
+  `view` smallint(5) unsigned default NULL,
   `script` text,
   `equip_script` text,
   `unequip_script` text,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `UniqueAegisName` (`name_english`)
 ) ENGINE=MyISAM;
 ";
 		#NOTE: These do not match the table struct defaults.
@@ -247,29 +259,30 @@ CREATE TABLE `$db` (
 
 DROP TABLE IF EXISTS `$db`;
 CREATE TABLE `$db` (
- `id` smallint(5) unsigned NOT NULL default '0',
- `name_english` varchar(50) NOT NULL default '',
- `name_japanese` varchar(50) NOT NULL default '',
- `type` tinyint(2) unsigned NOT NULL default '0',
- `price_buy` mediumint(10) unsigned default NULL,
- `price_sell` mediumint(10) unsigned default NULL,
- `weight` smallint(5) unsigned NOT NULL default '0',
- `atk:matk` varchar(11) default '',
- `defence` smallint(5) NULL default NULL,
- `range` tinyint(2) unsigned default NULL,
- `slots` tinyint(2) unsigned default NULL,
- `equip_jobs` int(12) unsigned default NULL,
- `equip_upper` tinyint(8) unsigned default NULL,
- `equip_genders` tinyint(2) unsigned default NULL,
- `equip_locations` mediumint(7) unsigned default NULL,
- `weapon_level` tinyint(2) unsigned default NULL,
- `equip_level` varchar(10) default '',
- `refineable` tinyint(1) unsigned default NULL,
- `view` smallint(3) unsigned default NULL,
- `script` text,
- `equip_script` text,
- `unequip_script` text,
- PRIMARY KEY (`id`)
+  `id` smallint(5) unsigned NOT NULL default '0',
+  `name_english` varchar(50) NOT NULL default '',
+  `name_japanese` varchar(50) NOT NULL default '',
+  `type` tinyint(2) unsigned NOT NULL default '0',
+  `price_buy` mediumint(8) unsigned default NULL,
+  `price_sell` mediumint(8) unsigned default NULL,
+  `weight` smallint(5) unsigned NOT NULL default '0',
+  `atk:matk` varchar(11) default NULL,
+  `defence` smallint(5) unsigned default NULL,
+  `range` tinyint(2) unsigned default NULL,
+  `slots` tinyint(2) unsigned default NULL,
+  `equip_jobs` bigint(20) unsigned default NULL,
+  `equip_upper` tinyint(2) unsigned default NULL,
+  `equip_genders` tinyint(1) unsigned default NULL,
+  `equip_locations` mediumint(7) unsigned default NULL,
+  `weapon_level` tinyint(1) unsigned default NULL,
+  `equip_level` varchar(10) default NULL,
+  `refineable` tinyint(1) unsigned default NULL,
+  `view` smallint(5) unsigned default NULL,
+  `script` text,
+  `equip_script` text,
+  `unequip_script` text,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `UniqueAegisName` (`name_english`)
 ) ENGINE=MyISAM;
 ";
 		#NOTE: These do not match the table struct defaults.
@@ -305,11 +318,11 @@ CREATE TABLE IF NOT EXISTS `$db` (
   `TARGET` text NOT NULL,
   `CONDITION` text NOT NULL,
   `CONDITION_VALUE` text,
-  `VAL1` mediumint(9) DEFAULT NULL,
-  `VAL2` mediumint(9) DEFAULT NULL,
-  `VAL3` mediumint(9) DEFAULT NULL,
-  `VAL4` mediumint(9) DEFAULT NULL,
-  `VAL5` mediumint(9) DEFAULT NULL,
+  `VAL1` mediumint(9) default NULL,
+  `VAL2` mediumint(9) default NULL,
+  `VAL3` mediumint(9) default NULL,
+  `VAL4` mediumint(9) default NULL,
+  `VAL5` mediumint(9) default NULL,
   `EMOTION` text,
   `CHAT` text
 ) ENGINE=MyISAM;
@@ -357,7 +370,7 @@ CREATE TABLE `$db` (
   `Scale` tinyint(4) unsigned NOT NULL default '0',
   `Race` tinyint(4) unsigned NOT NULL default '0',
   `Element` tinyint(4) unsigned NOT NULL default '0',
-  `Mode` smallint(6) unsigned NOT NULL default '0',
+  `Mode` int(11) unsigned NOT NULL default '0',
   `Speed` smallint(6) unsigned NOT NULL default '0',
   `aDelay` smallint(6) unsigned NOT NULL default '0',
   `aMotion` smallint(6) unsigned NOT NULL default '0',

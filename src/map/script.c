@@ -14769,7 +14769,7 @@ BUILDIN_FUNC(summon)
 	clif_skill_poseffect(&sd->bl,AM_CALLHOMUN,1,sd->bl.x,sd->bl.y,tick);
 
 	lv = sd->status.base_level;
-	class_ = (class_ >= 0 ? class_ : mob_get_random_id(-class_ - 1,(battle_config.random_monster_checklv ? 0x03 : 0x01),lv));
+	class_ = (class_ >= 0 ? class_ : mob_get_random_id(-class_ - 1,(battle_config.random_monster_checklv ? (RMF_DB_RATE|RMF_CHECK_MOB_LV) : RMF_DB_RATE),lv));
 	md = mob_once_spawn_sub(&sd->bl,sd->bl.m,sd->bl.x,sd->bl.y,str,class_,event,SZ_SMALL,AI_NONE);
 	if( md ) {
 		md->master_id = sd->bl.id;

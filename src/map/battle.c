@@ -1070,6 +1070,8 @@ int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, stru
 			if( sc->data[SC_ADJUSTMENT] )
 				damage -= damage * 20 / 100;
 #endif
+			if( sc->data[SC_ARMOR] ) //NPC_DEFENDER
+				damage -= damage / 8;
 			if( battle_skill_check_defender(skill_id) ) {
 				if( ((sce = sc->data[SC_DEFENDER]) || (sce = battle_check_shadowform(bl,SC_DEFENDER))) )
 					damage -= damage * sce->val2 / 100;
@@ -1346,9 +1348,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			d->dmg_lv = ATK_MISS;
 			return 0;
 		}
-
-		if( (sce = sc->data[SC_ARMOR]) && sce->val3&flag && sce->val4&flag ) //NPC_DEFENDER
-			damage -= damage * sce->val2 / 100;
 
 #ifdef RENEWAL
 		if( sc->data[SC_ENERGYCOAT] ) {
@@ -2476,7 +2475,7 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 	struct status_change *tsc = status_get_sc(target);
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	int nk = battle_skill_get_damage_properties(skill_id, wd.miscflag);
-	short flee, hitrate;
+	short flee, hitrate = 0;
 	uint8 lv = 0;
 
 	if(!first_call)
@@ -2501,10 +2500,8 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 		return false;
 
 	flee = tstatus->flee;
-#ifdef RENEWAL
-	hitrate = 0; //Default hitrate
-#else
-	hitrate = 80; //Default hitrate
+#ifndef RENEWAL
+	hitrate = 80;
 #endif
 
 	if(battle_config.agi_penalty_type && battle_config.agi_penalty_target&target->type) {
@@ -2605,8 +2602,12 @@ static bool is_attack_hitting(struct Damage wd, struct block_list *src, struct b
 		hitrate += hitrate * 2 * lv / 100;
 #endif
 
-	if(sc && sc->data[SC_INCHITRATE])
-		hitrate += hitrate * sc->data[SC_INCHITRATE]->val1 / 100;
+	if(sc) {
+		if(sc->data[SC_GUIDEDATTACK])
+			hitrate += hitrate * 20 / 100;
+		if(sc->data[SC_INCHITRATE])
+			hitrate += hitrate * sc->data[SC_INCHITRATE]->val1 / 100;
+	}
 
 	hitrate = cap_value(hitrate, battle_config.min_hitrate, battle_config.max_hitrate);
 	return (rnd()%100 < hitrate);
@@ -2814,31 +2815,33 @@ static struct Damage battle_calc_element_damage(struct Damage wd, struct block_l
 	struct status_change *sc = status_get_sc(src);
 	struct status_data *sstatus = status_get_status_data(src);
 	struct status_data *tstatus = status_get_status_data(target);
-	int element = skill_get_ele(skill_id, skill_lv);
 	int left_element = battle_get_weapon_element(&wd, src, target, skill_id, skill_lv, EQI_HAND_L);
 	int right_element = battle_get_weapon_element(&wd, src, target, skill_id, skill_lv, EQI_HAND_R);
 	int nk = battle_skill_get_damage_properties(skill_id, wd.miscflag);
 
 	if(!(nk&NK_NO_ELEFIX) && (wd.damage > 0 || wd.damage2 > 0)) { //Elemental attribute fix
-		//Non-pc (mob, pet, homun) physical melee attacks are "no elemental", they deal 100% to all target elements
-		//However the "no elemental" attacks still get reduced by "Neutral resistance"
-		//Also non-pc units have only a defending element, but can inflict elemental attacks using skills [exneval]
-		if((battle_config.attack_attr_none&src->type) && ((!skill_id && right_element == ELE_NEUTRAL) ||
-			(skill_id && (element == -1 || right_element == ELE_NEUTRAL))) && (wd.flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON))
-			return wd;
 		switch(skill_id) {
-#ifdef RENEWAL
 			case PA_SACRIFICE:
 			case RK_DRAGONBREATH:
 			case RK_DRAGONBREATH_WATER:
 			case NC_SELFDESTRUCTION:
 			case HFLI_SBR44:
-#else
-			default:
-#endif
 				wd.damage = battle_attr_fix(src, target, wd.damage, right_element, tstatus->def_ele, tstatus->ele_lv);
 				if(is_attack_left_handed(src, skill_id))
 					wd.damage2 = battle_attr_fix(src, target, wd.damage2, left_element, tstatus->def_ele, tstatus->ele_lv);
+				break;
+			default:
+				if(!skill_id && (battle_config.attack_attr_none&src->type))
+					return wd; //Non-pc (mob, pet, homun) basic attacks are non-elemental, they deal 100% against all defense elements
+#ifdef RENEWAL
+				if(!sd) { //Renewal player's elemental damage calculation is already done before this point, only calculate for monsters
+#endif
+					wd.damage = battle_attr_fix(src, target, wd.damage, right_element, tstatus->def_ele, tstatus->ele_lv);
+					if(is_attack_left_handed(src, skill_id))
+						wd.damage2 = battle_attr_fix(src, target, wd.damage2, left_element, tstatus->def_ele, tstatus->ele_lv);
+#ifdef RENEWAL
+				}
+#endif
 				break;
 		}
 		switch(skill_id) { //Skills force to neutral element
@@ -3078,8 +3081,7 @@ struct Damage battle_calc_damage_parts(struct Damage wd, struct block_list *src,
 		wd.equipAtk2 += battle_get_defense(src, target, skill_id, 0) / 2;
 	wd.equipAtk2 = battle_attr_fix(src, target, wd.equipAtk2, left_element, tstatus->def_ele, tstatus->ele_lv);
 
-	//Mastery ATK is a special kind of ATK that has no elemental properties
-	//Because masteries are not elemental, they are unaffected by Ghost armors or Raydric Card
+	//Mastery ATK is unaffected by elemental attribute fix
 	wd = battle_calc_attack_masteries(wd, src, target, skill_id, skill_lv);
 
 	wd.damage = 0;
@@ -5500,21 +5502,20 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 3, wd.flag);
 				wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 3, wd.flag);
 			}
-		}
-
-		//Card Fix for target (tsd), 2 is not added to the "left" flag meaning "target cards only"
-		if(tsd && sd) {
-			if(skill_id == SO_VARETYR_SPEAR)
-				nk |= NK_NO_CARDFIX_DEF; //Varetyr Spear physical part ignores card reduction [exneval]
-			wd.statusAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk, 0, wd.flag);
-			wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 0, wd.flag);
-			wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 0, wd.flag);
-			wd.masteryAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk, 0, wd.flag);
-			if(is_attack_left_handed(src, skill_id)) {
-				wd.statusAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk2, 1, wd.flag);
-				wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 1, wd.flag);
-				wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 1, wd.flag);
-				wd.masteryAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk2, 1, wd.flag);
+			//Card Fix for target (tsd), 2 is not added to the "left" flag meaning "target cards only"
+			if(tsd) {
+				if(skill_id == SO_VARETYR_SPEAR)
+					nk |= NK_NO_CARDFIX_DEF; //Varetyr Spear physical part ignores card reduction [exneval]
+				wd.statusAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk, 0, wd.flag);
+				wd.weaponAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk, 0, wd.flag);
+				wd.equipAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk, 0, wd.flag);
+				wd.masteryAtk += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk, 0, wd.flag);
+				if(is_attack_left_handed(src, skill_id)) {
+					wd.statusAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.statusAtk2, 1, wd.flag);
+					wd.weaponAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.weaponAtk2, 1, wd.flag);
+					wd.equipAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.equipAtk2, 1, wd.flag);
+					wd.masteryAtk2 += battle_calc_cardfix(BF_WEAPON, src, target, nk|NK_NO_ELEFIX, right_element, left_element, wd.masteryAtk2, 1, wd.flag);
+				}
 			}
 		}
 
@@ -5558,17 +5559,19 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	}
 #endif
 
-	if(tsd
 #ifdef RENEWAL
-		&& !sd
+	if(!sd) { //Renewal calculation for player's cardfix target is already done before this point, only calculate for monsters
 #endif
-	) {
-		if(skill_id == SO_VARETYR_SPEAR)
-			nk |= NK_NO_CARDFIX_DEF;
-		wd.damage += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage, 0, wd.flag);
-		if(is_attack_left_handed(src, skill_id))
-			wd.damage2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage2, 1, wd.flag);
+		if(tsd) {
+			if(skill_id == SO_VARETYR_SPEAR)
+				nk |= NK_NO_CARDFIX_DEF;
+			wd.damage += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage, 0, wd.flag);
+			if(is_attack_left_handed(src, skill_id))
+				wd.damage2 += battle_calc_cardfix(BF_WEAPON, src, target, nk, right_element, left_element, wd.damage2, 1, wd.flag);
+		}
+#ifdef RENEWAL
 	}
+#endif
 
 	//Fixed damage but reduced by elemental attribute defense [exneval]
 	switch(skill_id) {
@@ -5631,7 +5634,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 	//Check for element attribute modifiers
 	wd = battle_calc_element_damage(wd, src, target, skill_id, skill_lv);
 
-	//Fixed damage and no elemental [exneval]
+	//Fixed damage and non-elemental [exneval]
 	switch(skill_id) {
 		case 0:
 			if(sc && sc->data[SC_SPELLFIST] && !(wd.miscflag&16)) {
@@ -6395,7 +6398,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 
 		if(!(nk&NK_NO_ELEFIX) && ad.damage > 0) {
 			switch(skill_id) {
-				case ASC_BREAKER: //Soul Breaker's magic damage is treated as no elemental
+				case ASC_BREAKER: //Soul Breaker's magic damage is treated as non-elemental
 #ifdef RENEWAL
 				case CR_GRANDCROSS:
 				case CR_ACIDDEMONSTRATION:
@@ -8021,52 +8024,53 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 			sbg_id = bg_team_get_id(s_bl);
 			tbg_id = bg_team_get_id(t_bl);
 		}
-
 		if( (flag&(BCT_PARTY|BCT_ENEMY)) ) {
 			int s_party = status_get_party_id(s_bl);
-			int s_guild = status_get_guild_id(s_bl);
-			int t_guild = status_get_guild_id(t_bl);
 
-			if( s_party && s_party == status_get_party_id(t_bl) ) {
-				if( map_flag_gvg2(m) && map[m].flag.gvg_noparty ) {
-					if( s_guild && t_guild && (s_guild == t_guild || guild_isallied(s_guild, t_guild)) )
-						state |= BCT_PARTY;
-					else
-						state |= (flag&BCT_ENEMY) ? BCT_ENEMY : BCT_PARTY;
-				} else if( !(map[m].flag.pvp && map[m].flag.pvp_noparty) && (!map[m].flag.battleground || sbg_id == tbg_id) )
-					state |= BCT_PARTY;
-				else
-					state |= BCT_ENEMY;
-			} else
+			if( s_party && s_party == status_get_party_id(t_bl) &&
+				!(map[m].flag.pvp && map[m].flag.pvp_noparty) &&
+				!(map_flag_gvg(m) && map[m].flag.gvg_noparty) &&
+				(!map[m].flag.battleground || sbg_id == tbg_id) )
+				state |= BCT_PARTY;
+			else
 				state |= BCT_ENEMY;
 		}
-
 		if( (flag&(BCT_GUILD|BCT_ENEMY)) ) {
 			int s_guild = status_get_guild_id(s_bl);
 			int t_guild = status_get_guild_id(t_bl);
 
-			if( !(map[m].flag.pvp && map[m].flag.pvp_noguild) && s_guild &&
-				t_guild && (s_guild == t_guild || (!(flag&BCT_SAMEGUILD) && guild_isallied(s_guild, t_guild))) &&
+			if( !(map[m].flag.pvp && map[m].flag.pvp_noguild) &&
+				s_guild && t_guild && (s_guild == t_guild || (!(flag&BCT_SAMEGUILD) && guild_isallied(s_guild, t_guild))) &&
 				(!map[m].flag.battleground || sbg_id == tbg_id) )
 				state |= BCT_GUILD;
 			else
 				state |= BCT_ENEMY;
 		}
+		if( state&BCT_PARTY ) {
+			int s_guild = status_get_guild_id(s_bl);
+			int t_guild = status_get_guild_id(t_bl);
 
-		if( state&BCT_ENEMY && map[m].flag.battleground && sbg_id && sbg_id == tbg_id )
-			state &= ~BCT_ENEMY;
-
-		if( state&BCT_ENEMY && battle_config.pk_mode && !map_flag_gvg2(m) && s_bl->type == BL_PC && t_bl->type == BL_PC ) {
-			TBL_PC *sd = (TBL_PC *)s_bl, *tsd = (TBL_PC *)t_bl;
-
-			//Prevent novice engagement on pk_mode (feature by Valaris)
-			if( (sd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
-				(tsd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
-				(int)sd->status.base_level < battle_config.pk_min_level ||
-				(int)tsd->status.base_level < battle_config.pk_min_level ||
-				(battle_config.pk_level_range &&
-				abs((int)sd->status.base_level - (int)tsd->status.base_level) > battle_config.pk_level_range) )
+			if( (map[m].flag.gvg_castle || map[m].flag.gvg_te_castle) &&
+				(!s_guild || !t_guild || (s_guild != t_guild && ((flag&BCT_SAMEGUILD) || !guild_isallied(s_guild, t_guild)))) ) {
+				state |= BCT_ENEMY;
+				strip_enemy = 0;
+			}
+		}
+		if( state&BCT_ENEMY ) {
+			if( map[m].flag.battleground && sbg_id && sbg_id == tbg_id )
 				state &= ~BCT_ENEMY;
+			if( battle_config.pk_mode && !map_flag_gvg2(m) && s_bl->type == BL_PC && t_bl->type == BL_PC ) {
+				TBL_PC *sd = (TBL_PC *)s_bl, *tsd = (TBL_PC *)t_bl;
+
+				//Prevent novice engagement on pk_mode (feature by Valaris)
+				if( (sd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
+					(tsd->class_&MAPID_UPPERMASK) == MAPID_NOVICE ||
+					(int)sd->status.base_level < battle_config.pk_min_level ||
+					(int)tsd->status.base_level < battle_config.pk_min_level ||
+					(battle_config.pk_level_range &&
+					abs((int)sd->status.base_level - (int)tsd->status.base_level) > battle_config.pk_level_range) )
+					state &= ~BCT_ENEMY;
+			}
 		}
 	} else { //Non pvp/gvg, check party/guild settings
 		if( (flag&BCT_PARTY) || (state&BCT_ENEMY) ) {
@@ -8075,7 +8079,6 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 			if( s_party && s_party == status_get_party_id(t_bl) )
 				state |= BCT_PARTY;
 		}
-
 		if( (flag&BCT_GUILD) || (state&BCT_ENEMY) ) {
 			int s_guild = status_get_guild_id(s_bl);
 			int t_guild = status_get_guild_id(t_bl);
@@ -8661,7 +8664,7 @@ static const struct _battle_data {
 	{ "guild_alliance_onlygm",              &battle_config.guild_alliance_onlygm,           0,      0,      1,              },
 	{ "event_refine_chance",                &battle_config.event_refine_chance,             0,      0,      1,              },
 	{ "feature.achievement",                &battle_config.feature_achievement,             1,      0,      1,              },
-	{ "allow_bound_sell",                   &battle_config.allow_bound_sell,                0,      0,      1|2,            },
+	{ "allow_bound_sell",                   &battle_config.allow_bound_sell,                0,      0,      0xF,            },
 	{ "autoloot_adjust",                    &battle_config.autoloot_adjust,                 0,      0,      1,              },
 	{ "show_skill_scale",                   &battle_config.show_skill_scale,                1,      0,      1,              },
 	{ "millennium_shield_health",           &battle_config.millennium_shield_health,        1000,   1,      INT_MAX,        },
@@ -8675,6 +8678,7 @@ static const struct _battle_data {
 	{ "feature.privateairship",             &battle_config.feature_privateairship,          1,      0,      1,              },
 	{ "feature.refineui",                   &battle_config.feature_refineui,                1,      0,      1,              },
 	{ "feature.stylistui",                  &battle_config.feature_stylistui,               1,      0,      1,              },
+	{ "rental_transaction",                 &battle_config.rental_transaction,              1,      0,      1,              },
 
 #include "../custom/battle_config_init.inc"
 };

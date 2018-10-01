@@ -62,7 +62,7 @@
 // ATCMD_FUNC(mobinfo)
 #ifdef RENEWAL
 	#define MOB_FLEE(mob) ( (mob)->lv + (mob)->status.agi + 100 )
-	#define MOB_HIT(mob)  ( (mob)->lv + (mob)->status.dex + 150 )
+	#define MOB_HIT(mob)  ( (mob)->lv + (mob)->status.dex + 170 )
 	#define MOB_ATK1(mob) ( (mob)->lv + (mob)->status.str + (mob)->status.rhw.atk * 8 / 10 )
 	#define MOB_ATK2(mob) ( (mob)->lv + (mob)->status.str + (mob)->status.rhw.atk * 12 / 10 )
 	#define MOB_MATK1(mob)( (mob)->lv + (mob)->status.int_ + (mob)->status.rhw.atk2 * 7 / 10 )

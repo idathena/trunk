@@ -1474,6 +1474,7 @@
 	export_constant(SC_BURNT);
 	export_constant(SC_CHEERUP);
 	export_constant(SC_DRESSUP);
+	export_constant(SC_GUIDEDATTACK);
 
 	/* Status icons */
 	export_constant(SI_BLANK);
@@ -2852,6 +2853,7 @@
 	export_constant(MOBG_Bloody_Dead_Branch);
 	export_constant(MOBG_Red_Pouch_Of_Surprise);
 	export_constant(MOBG_ClassChange);
+	export_constant(MOBG_Taekwon_Mission);
 
 	/* Status options */
 	export_constant(OPTION_NOTHING);
@@ -2958,6 +2960,30 @@
 	/* Item Random Option Group */
 	export_constant(RDMOPTG_None);
 	export_constant(RDMOPTG_Crimson_Weapon);
+	export_constant(RDMOPTG_Vicious_Weapon_Group_1);
+	export_constant(RDMOPTG_Vicious_Weapon_Group_2);
+	export_constant(RDMOPTG_Vicious_Weapon_Group_3);
+	export_constant(RDMOPTG_Vicious_Weapon_Group_4);
+	export_constant(RDMOPTG_Vicious_Weapon_Group_5);
+
+	/* Item Random Option Subgroup */
+	export_constant(RDMOPTSG_None);
+	export_constant(RDMOPTSG_Crimson_Weapon);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_1_Slot_1);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_1_Slot_2);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_1_Slot_3);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_2_Slot_1);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_2_Slot_2);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_2_Slot_3);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_3_Slot_1);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_3_Slot_2);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_3_Slot_3);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_4_Slot_1);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_4_Slot_2);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_4_Slot_3);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_5_Slot_1);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_5_Slot_2);
+	export_constant(RDMOPTSG_Vicious_Weapon_Group_5_Slot_3);
 
 	/* Unit stop walking flag */
 	export_constant(USW_NONE);

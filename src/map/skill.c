@@ -182,7 +182,8 @@ static void skill_chk2(uint16 *skill_lv)
 	*skill_lv = (*skill_lv < 1) ? 1 : (*skill_lv > MAX_SKILL_LEVEL) ? MAX_SKILL_LEVEL : *skill_lv;
 }
 
-//Checks/adjusts index. make sure we don't use negative index
+//Checks/adjusts index.
+//Make sure we don't use negative index
 static void skill_chk3(int *idx) {
 	*idx = max(*idx, 0);
 }
@@ -1943,7 +1944,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	//Polymorph
 	if( !skill_id && !status_has_mode(tstatus,MD_STATUS_IMMUNE) && dstmd &&
 		sd && sd->bonus.classchange && rnd()%10000 < sd->bonus.classchange ) {
-		int class_ = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,0x01,0);
+		int class_ = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,RMF_DB_RATE,0);
 
 		if( class_ && mobdb_checkid(class_) )
 			mob_class_change(dstmd,class_);
@@ -2425,13 +2426,13 @@ bool skill_strip_equip(struct block_list *src, struct block_list *bl, uint16 ski
 		case RG_STRIPSHIELD:
 		case RG_STRIPHELM:
 		case GC_WEAPONCRUSH:
-			rate = 50 * (skill_lv + 1) + 2 * (sstatus->dex - tstatus->dex);
+			rate = 5 * (skill_lv + 1) + (sstatus->dex - tstatus->dex) / 5;
 			break;
 		case ST_FULLSTRIP: {
-				int min_rate = 50 + 20 * skill_lv;
+				int min_rate = 5 + 2 * skill_lv;
 
-				rate = min_rate + 2 * (sstatus->dex - tstatus->dex);
-				rate = max(min_rate,rate);
+				rate = min_rate + (sstatus->dex - tstatus->dex) / 5;
+				rate = max(rate,min_rate);
 			}
 			break;
 		case GS_DISARM:
@@ -3450,11 +3451,11 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 	if (damage > 0) { //Post-damage effects
 		switch (skill_id) {
 			case RG_INTIMIDATE: {
-					int rate = 50 + skill_lv * 5;
+					int rate = (sd ? 50 + skill_lv * 5 : 90);
 
 					rate = rate + status_get_lv(src) - status_get_lv(bl);
 					if (rnd()%100 < rate && !status_has_mode(tstatus, MD_STATUS_IMMUNE))
-						skill_addtimerskill(src, tick + 800, bl->id, 0, 0, skill_id, skill_lv, 0, flag);
+						skill_addtimerskill(src, tick + status_get_amotion(src) + 500, bl->id, 0, 0, skill_id, skill_lv, 0, flag);
 				}
 				break;
 			case WL_HELLINFERNO: //Hell Inferno has a chance of giving burning status when the fire damage hits
@@ -4589,7 +4590,6 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case NPC_RANGEATTACK:
 		case NPC_CRITICALSLASH:
 		case NPC_COMBOATTACK:
-		case NPC_GUIDEDATTACK:
 		case NPC_POISON:
 		case NPC_RANDOMATTACK:
 		case NPC_WATERATTACK:
@@ -4689,6 +4689,11 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case EL_WIND_SLASH:
 		case MER_INVINCIBLEOFF2:
 			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+			break;
+
+		case NPC_GUIDEDATTACK:
+			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+			sc_start(src,src,status_skill2sc(skill_id),100,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 
 		case TF_POISON:
@@ -6236,7 +6241,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SA_CLASSCHANGE:
 		case SA_MONOCELL:
 			if (dstmd) {
-				int mob_id = (skill_id == SA_MONOCELL ? MOBID_PORING : mob_get_random_id(MOBG_ClassChange,0x01,0));
+				int mob_id = (skill_id == SA_MONOCELL ? MOBID_PORING : mob_get_random_id(MOBG_ClassChange,RMF_DB_RATE,0));
 
 				if (sd && status_has_mode(&dstmd->status,MD_STATUS_IMMUNE)) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -6669,8 +6674,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
-				id = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,0x0F,sd->status.base_level);
-				if (!id) {
+				if (!(id = mob_get_random_id(MOBG_Taekwon_Mission,RMF_NONE,0))) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
@@ -7401,7 +7405,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 				//Attempts to strip
 				if( (strip = skill_strip_equip(src,bl,skill_id,skill_lv)) || (skill_id != ST_FULLSTRIP && skill_id != GC_WEAPONCRUSH) )
-					clif_skill_nodamage(src,bl,skill_id,skill_lv,i);
+					clif_skill_nodamage(src,bl,skill_id,skill_lv,strip);
 
 				if( !strip && sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -13674,7 +13678,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 			break;
 
 		case UNT_GOSPEL:
-			if (rnd()%100 >= 50 + skill_lv * 5 || bl->id == src->id)
+			if (bl->id == src->id || rnd()%100 >= 50 + skill_lv * 5)
 				break;
 			if (battle_check_target(src,bl,BCT_PARTY) > 0) { //Support Effect only on party, not guild
 				int heal;
@@ -13775,7 +13779,7 @@ static int skill_unit_onplace_timer(struct skill_unit *unit, struct block_list *
 					case 8: //Flee -100%
 						sc_start(src,bl,SC_INCFLEERATE,100,-100,20000);
 						break;
-					case 9: //Speed/ASPD -25%
+					case 9: //Speed/ASPD -75%
 						sc_start4(src,bl,SC_GOSPEL,100,1,0,0,BCT_ENEMY,20000);
 						break;
 				}
@@ -14153,7 +14157,7 @@ int skill_unit_onleft(uint16 skill_id, struct block_list *bl, unsigned int tick)
 			if (sce) {
 				status_change_end(bl, type, INVALID_TIMER);
 				if ((sce = sc->data[SC_BLIND])) {
-					if (bl->type == BL_PC) //Players get blind ended inmediately, others have it still for 30 secs [Skotlex]
+					if (bl->type == BL_PC) //Players get blind ended immediately, others have it still for 30 secs [Skotlex]
 						status_change_end(bl, SC_BLIND, INVALID_TIMER);
 					else {
 						delete_timer(sce->timer, status_change_timer);
@@ -14563,7 +14567,7 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 			}
 			break;
 		case AB_SECRAMENT:
-			if( bl->id != src->id && battle_check_target(src,bl,BCT_ENEMY) > 0 ) {
+			if( battle_check_target(src,bl,BCT_NOENEMY) <= 0 ) {
 				if( sd )
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_TOTARGET,0,0);
 				return false;

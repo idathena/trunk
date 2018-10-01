@@ -449,30 +449,19 @@ struct mob_data *mob_spawn_dataset(struct spawn_data *data)
 
 /*==========================================
  * Fetches a random mob_id [Skotlex]
- * type: Where to fetch from:
- * 0: dead branch list
- * 1: poring list
- * 2: bloody branch list
- * 3: red pouch list
- * 4: class change list
- * flag:
- * &0x01: Apply the summon success chance found in the list (otherwise get any monster from the db)
- * &0x02: Apply a monster check level
- * &0x04: Selected monster should not be a boss type (except those from MOBG_Bloody_Dead_Branch)
- * &0x08: Selected monster must have normal spawn
- * &0x10: Selected monster should not be a plant type
- * &0x20: Selected monster must be undead
+ * type: Where to fetch from (see enum e_random_monster)
+ * flag: Type of checks to apply (see enum e_random_monster_flags)
  * lv: Mob level to check against
  *------------------------------------------*/
-int mob_get_random_id(int type, int flag, int lv)
+int mob_get_random_id(int type, enum e_random_monster_flags flag, int lv)
 {
 	struct mob_db *mob;
 	int i = 0, mob_id = 0, rand = 0;
 	struct s_randomsummon_group *msummon = (struct s_randomsummon_group *)idb_get(mob_summon_db, type);
 	struct s_randomsummon_entry *entry = NULL;
 
-	if (type == MOBG_Bloody_Dead_Branch)
-		flag &= ~4;
+	if (type == MOBG_Bloody_Dead_Branch && (flag&RMF_MOB_NOT_BOSS))
+		flag &= ~RMF_MOB_NOT_BOSS;
 
 	if (!msummon) {
 		ShowError("mob_get_random_id: Invalid type (%d) of random monster.\n", type);
@@ -492,12 +481,12 @@ int mob_get_random_id(int type, int flag, int lv)
 	} while ((!rand || //Skip default first
 		mob == mob_dummy ||
 		mob_is_clone(mob_id) ||
-		(flag&0x01 && (entry->rate < 1000000 && rnd()%1000000 >= entry->rate)) ||
-		(flag&0x02 && lv < mob->lv) ||
-		(flag&0x04 && status_has_mode(&mob->status, MD_STATUS_IMMUNE)) ||
-		(flag&0x08 && mob->spawn[0].qty < 1) ||
-		(flag&0x10 && status_has_mode(&mob->status, MD_IGNOREMELEE|MD_IGNOREMAGIC|MD_IGNORERANGED|MD_IGNOREMISC)) ||
-		(flag&0x20 && !battle_check_undead(mob->status.race, mob->status.def_ele))) && (i++) < MAX_MOB_DB);
+		(flag&RMF_DB_RATE && (entry->rate < 1000000 && rnd()%1000000 >= entry->rate)) ||
+		(flag&RMF_CHECK_MOB_LV && lv < mob->lv) ||
+		(flag&RMF_MOB_NOT_BOSS && status_has_mode(&mob->status, MD_STATUS_IMMUNE)) ||
+		(flag&RMF_MOB_NOT_SPAWN && mob->spawn[0].qty < 1) ||
+		(flag&RMF_MOB_NOT_PLANT && status_has_mode(&mob->status, MD_IGNOREMELEE|MD_IGNOREMAGIC|MD_IGNORERANGED|MD_IGNOREMISC)) ||
+		(flag&RMF_MOB_UNDEAD && !battle_check_undead(mob->status.race, mob->status.def_ele))) && (i++) < MAX_MOB_DB);
 
 	if (i >= MAX_MOB_DB && &msummon->list[0])  //No suitable monster found, use fallback for given list
 		mob_id = msummon->list[0].mob_id;
@@ -647,8 +636,8 @@ int mob_once_spawn(struct map_session_data *sd, int16 m, int16 x, int16 y, const
 	lv = (sd ? sd->status.base_level : 255);
 
 	for (count = 0; count < amount; count++) {
-		int c = (mob_id >= 0) ? mob_id : (mob_id == -5) ? mob_get_random_id(MOBG_Branch_Of_Dead_Tree, 0x21, 0) :
-			mob_get_random_id(-mob_id - 1, (battle_config.random_monster_checklv ? 0x03 : 0x01), lv);
+		int c = (mob_id >= 0) ? mob_id : (mob_id == -5) ? mob_get_random_id(MOBG_Branch_Of_Dead_Tree, (RMF_DB_RATE|RMF_MOB_UNDEAD), 0) :
+			mob_get_random_id(-mob_id - 1, (battle_config.random_monster_checklv ? (RMF_DB_RATE|RMF_CHECK_MOB_LV) : RMF_DB_RATE), lv);
 
 		md = mob_once_spawn_sub((sd ? &sd->bl : NULL), m, x, y, mobname, c, event, size, ai);
 
@@ -805,7 +794,7 @@ int mob_spawn_guardian(const char *mapname, short x, short y, const char *mobnam
 	data.num = 1;
 
 	if (mob_id <= 0) {
-		mob_id = mob_get_random_id(-mob_id - 1, 0x01, 99);
+		mob_id = mob_get_random_id(-mob_id - 1, RMF_DB_RATE, 0);
 		if (!mob_id)
 			return 0;
 	}
@@ -899,7 +888,7 @@ int mob_spawn_bg(const char *mapname, short x, short y, const char *mobname, int
 	data.m = m;
 	data.num = 1;
 	if( mob_id <= 0 ) {
-		mob_id = mob_get_random_id(-mob_id - 1, 0x01, 99);
+		mob_id = mob_get_random_id(-mob_id - 1, RMF_DB_RATE, 0);
 		if( !mob_id )
 			return 0;
 	}
@@ -1990,21 +1979,29 @@ static TIMER_FUNC(mob_ai_hard)
  * Set random option for item when dropped from monster
  * @param itm Item data
  * @param mobdrop Drop data
- * @author [Cydh]
  */
 void mob_setdropitem_option(struct item *itm, struct s_mob_drop *mobdrop)
 {
 	struct s_random_opt_group *g = NULL;
+	int i;
 
 	if (!itm || !mobdrop || mobdrop->randomopt_group == RDMOPTG_None)
 		return;
-	if ((g = itemdb_randomopt_group_exists(mobdrop->randomopt_group)) && g->total) {
-		int r = rnd()%g->total;
+	if ((g = itemdb_randomopt_group_exists(mobdrop->randomopt_group))) {
+		for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
+			struct s_random_opt_subgroup *sg = NULL;
 
-		if (&g->entries[r]) {
-			memcpy(&itm->option, &g->entries[r], sizeof(itm->option));
-			return;
+			if (g->subgroup_id[i] == RDMOPTSG_None)
+				continue;
+			if ((sg = itemdb_randomopt_subgroup_exists(g->subgroup_id[i])) && sg->total) {
+				int j = rnd()%sg->total;
+
+				g->option[i].id = sg->entries[j].id;
+				g->option[i].value = rnd_value(sg->entries[j].min_val, sg->entries[j].max_val);
+				g->option[i].param = 0;
+			}
 		}
+		memcpy(&itm->option, &g->option, sizeof(itm->option));
 	}
 }
 
@@ -2804,7 +2801,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				(battle_config.taekwon_mission_mobname == 1 && status_get_race2(&md->bl) == RC2_GOBLIN && status_get_race2(&mission_md->bl) == RC2_GOBLIN && mission_md) ||
 				(battle_config.taekwon_mission_mobname == 2 && mob_is_samename(md, sd->mission_mobid)))
 			{ //TK_MISSION [Skotlex]
-				if(++sd->mission_count >= 100 && (temp = mob_get_random_id(MOBG_Branch_Of_Dead_Tree, 0x0E, sd->status.base_level))) {
+				if(++sd->mission_count >= 100 && (temp = mob_get_random_id(MOBG_Taekwon_Mission, RMF_NONE, 0))) {
 					pc_addfame(sd, battle_config.fame_taekwon_mission);
 					sd->mission_mobid = temp;
 					pc_setglobalreg(sd, "TK_MISSION_ID", temp);
@@ -2817,10 +2814,8 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				map_foreachinallrange(quest_update_objective_sub, &md->bl, AREA_SIZE, BL_PC, sd->status.party_id, md->mob_id);
 			else if(sd->avail_quests)
 				quest_update_objective(sd, md->mob_id);
-
 			if(achievement_mobexists(md->mob_id))
 				achievement_update_objective(sd, AG_BATTLE, 1, md->mob_id);
-
 			if(sd->md && src && src->type == BL_MER && mob_db(md->mob_id)->lv > sd->status.base_level / 2)
 				mercenary_kills(sd->md);
 		}
@@ -4233,7 +4228,7 @@ static void mob_read_randommonster_sub(const char *filename)
 {
 	FILE *fp;
 	char line[1024];
-	unsigned int entries = 0;
+	uint32 ln = 0, entries = 0;
 
 	if(!(fp = fopen(filename, "r"))) {
 		ShowError("mob_read_randommonster: can't read %s\n", filename);
@@ -4247,6 +4242,7 @@ static void mob_read_randommonster_sub(const char *filename)
 		char *str[4], *p;
 		bool set_default = false;
 
+		++ln;
 		if(line[0] == '/' && line[1] == '/')
 			continue;
 		if(strstr(line, "import")) {
@@ -4272,17 +4268,17 @@ static void mob_read_randommonster_sub(const char *filename)
 		if(ISDIGIT(str[0][0]) && ISDIGIT(str[0][1]))
 			group = atoi(str[0]);
 		else if(!script_get_constant(str[0], &group)) {
-			ShowError("mob_read_randommonster_sub: Invalid random monster group '%s' at line '%s'.\n", str[0], line);
+			ShowError("mob_read_randommonster_sub: Invalid random monster group '%s' at line %d.\n", str[0], ln);
 			continue;
 		}
 		mob_id = atoi(str[1]);
 		if(mob_id && mob_db(mob_id) == mob_dummy) {
-			ShowError("mob_read_randommonster_sub: Invalid random monster group '%s' at line '%s'.\n", str[0], line);
+			ShowError("mob_read_randommonster_sub: Invalid random monster group '%s' at line %d.\n", str[0], ln);
 			continue;
 		} else if(!mob_id) {
 			mob_id = atoi(str[3]);
 			if(mob_db(mob_id) == mob_dummy) {
-				ShowError("mob_read_randommonster_sub: Invalid random monster group '%s' at line '%s'.\n", str[0], line);
+				ShowError("mob_read_randommonster_sub: Invalid random monster group '%s' at line %d.\n", str[0], ln);
 				continue;
 			}
 			set_default = true;
@@ -4816,7 +4812,7 @@ static bool mob_readdb_drop(char *str[], int columns, int current)
 		drop[i].nameid = nameid;
 		drop[i].p = rate;
 		drop[i].steal_protected = (flag ? 1 : 0);
-		drop[i].randomopt_group = 0;
+		drop[i].randomopt_group = RDMOPTG_None;
 		if (columns > 3) {
 			int randomopt_group = -1;
 

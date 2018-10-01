@@ -16,11 +16,11 @@ CREATE TABLE IF NOT EXISTS `mob_skill_db_re` (
   `TARGET` text NOT NULL,
   `CONDITION` text NOT NULL,
   `CONDITION_VALUE` text,
-  `VAL1` mediumint(9) DEFAULT NULL,
-  `VAL2` mediumint(9) DEFAULT NULL,
-  `VAL3` mediumint(9) DEFAULT NULL,
-  `VAL4` mediumint(9) DEFAULT NULL,
-  `VAL5` mediumint(9) DEFAULT NULL,
+  `VAL1` mediumint(9) default NULL,
+  `VAL2` mediumint(9) default NULL,
+  `VAL3` mediumint(9) default NULL,
+  `VAL4` mediumint(9) default NULL,
+  `VAL5` mediumint(9) default NULL,
   `EMOTION` text,
   `CHAT` text
 ) ENGINE=MyISAM;
@@ -8732,7 +8732,7 @@ REPLACE INTO `mob_skill_db_re` VALUES (2552,'Geffen Mage 3_2@NPC_POWERUP','attac
 REPLACE INTO `mob_skill_db_re` VALUES (2553,'Geffen Mage 3_3@ASC_BREAKER','attack',379,1,3000,1000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2553,'Geffen Mage 3_3@AS_VENOMDUST','attack',140,10,3000,1000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2554,'Geffen Mage 4@NPC_COMBOATTACK','attack',171,3,5000,0,3000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (2554,'Geffen Mage 4@AL_DECAGI','attack',30,10,3000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2554,'Geffen Mage 4@AL_DECAGI','attack',30,48,3000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2554,'Geffen Mage 4@AL_INCAGI','idle',29,10,10000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2554,'Geffen Mage 4@AL_INCAGI','attack',29,10,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2555,'Geffen Mage 5@MG_COLDBOLT','attack',14,5,3000,1000,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -8747,7 +8747,7 @@ REPLACE INTO `mob_skill_db_re` VALUES (2557,'Geffen Mage 7@NPC_WIDESOULDRAIN','a
 #REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@NPC_MILLENNIUMSHIELD','attack',707,1,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@LK_SPIRALPIERCE','attack',397,5,3000,1000,10000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@SM_ENDURE','attack',8,10,3000,0,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@SM_MAGNUM','attack',7,10,3000,500,5000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (2558,'Geffen Mage 8@SM_MAGNUM','attack',7,25,3000,500,5000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2559,'Geffen Mage 9@AL_HEAL','attack',28,8,3000,0,5000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2559,'Geffen Mage 9@NPC_HOLYATTACK','attack',189,10,3000,500,5000,'no','target','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (2559,'Geffen Mage 9@AL_PNEUMA','attack',25,1,3000,1000,10000,'no','self','always',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);

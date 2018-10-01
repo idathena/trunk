@@ -16,11 +16,11 @@ CREATE TABLE IF NOT EXISTS `mob_skill_db` (
   `TARGET` text NOT NULL,
   `CONDITION` text NOT NULL,
   `CONDITION_VALUE` text,
-  `VAL1` mediumint(9) DEFAULT NULL,
-  `VAL2` mediumint(9) DEFAULT NULL,
-  `VAL3` mediumint(9) DEFAULT NULL,
-  `VAL4` mediumint(9) DEFAULT NULL,
-  `VAL5` mediumint(9) DEFAULT NULL,
+  `VAL1` mediumint(9) default NULL,
+  `VAL2` mediumint(9) default NULL,
+  `VAL3` mediumint(9) default NULL,
+  `VAL4` mediumint(9) default NULL,
+  `VAL5` mediumint(9) default NULL,
   `EMOTION` text,
   `CHAT` text
 ) ENGINE=MyISAM;
@@ -4085,7 +4085,7 @@ REPLACE INTO `mob_skill_db` VALUES (1764,'Skeggiold@NPC_HOLYATTACK','attack',189
 REPLACE INTO `mob_skill_db` VALUES (1764,'Skeggiold@NPC_HOLYATTACK','chase',189,2,500,500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'18',NULL);
 REPLACE INTO `mob_skill_db` VALUES (1764,'Skeggiold@AL_TELEPORT','idle',26,1,10000,0,0,'yes','self','rudeattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db` VALUES (1764,'Skeggiold@AL_TELEPORT','walk',26,1,5000,0,5000,'yes','self','rudeattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db` VALUES (1765,'Valkyrie@AL_HEAL','idle',28,10,10000,500,5000,'yes','friend','friendhpltmaxrate','60',NULL,NULL,NULL,NULL,NULL,'3',NULL);
+REPLACE INTO `mob_skill_db` VALUES (1765,'Valkyrie@AL_HEAL','idle',28,11,10000,500,5000,'yes','friend','friendhpltmaxrate','60',NULL,NULL,NULL,NULL,NULL,'3',NULL);
 REPLACE INTO `mob_skill_db` VALUES (1765,'Valkyrie@AL_HEAL','attack',28,11,10000,500,10000,'yes','friend','friendhpltmaxrate','60',NULL,NULL,NULL,NULL,NULL,'3',NULL);
 REPLACE INTO `mob_skill_db` VALUES (1765,'Valkyrie@AL_TELEPORT','idle',26,1,10000,0,0,'yes','self','rudeattacked',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db` VALUES (1765,'Valkyrie@AS_SONICBLOW','attack',136,10,2000,0,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -5624,7 +5624,7 @@ REPLACE INTO `mob_skill_db` VALUES (2017,'Rata@AS_SONICBLOW','attack',136,5,500,
 REPLACE INTO `mob_skill_db` VALUES (2017,'Rata@NPC_ARMORBRAKE','attack',344,3,2000,0,5000,'yes','target','myhpltmaxrate','60',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db` VALUES (2017,'Rata@WZ_EARTHSPIKE','attack',90,5,3000,1000,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,'6',NULL);
 REPLACE INTO `mob_skill_db` VALUES (2017,'Rata@NPC_PIERCINGATT','attack',158,3,500,0,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-REPLACE INTO `mob_skill_db` VALUES (2017,'Rata@SM_MAGNUM','attack',7,10,500,500,5000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db` VALUES (2017,'Rata@SM_MAGNUM','attack',7,25,500,500,5000,'no','self','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db` VALUES (2017,'Rata@NPC_GROUNDATTACK','attack',185,2,500,500,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db` VALUES (2017,'Rata@NPC_CURSEATTACK','attack',181,3,500,800,5000,'no','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 REPLACE INTO `mob_skill_db` VALUES (2017,'Rata@NPC_POISONATTACK','attack',188,1,2000,0,5000,'yes','target','always','0',NULL,NULL,NULL,NULL,NULL,NULL,NULL);

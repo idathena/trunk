@@ -807,6 +807,7 @@ typedef enum sc_type {
 	SC_BURNT,
 	SC_CHEERUP,
 	SC_DRESSUP,
+	SC_GUIDEDATTACK,
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

@@ -2015,15 +2015,19 @@ void clif_buylist(struct map_session_data *sd, struct npc_data *nd)
 void clif_selllist(struct map_session_data *sd)
 {
 	int fd, i, c = 0, val;
+	struct npc_data *nd;
 
 	nullpo_retv(sd);
+
+	if( !sd->npc_shopid || !(nd = map_id2nd(sd->npc_shopid)) )
+		return;
 
 	fd = sd->fd;
 	WFIFOHEAD(fd,MAX_INVENTORY * 10 + 4);
 	WFIFOW(fd,0) = 0xc7;
 	for( i = 0; i < MAX_INVENTORY; i++ ) {
 		if( sd->inventory.u.items_inventory[i].nameid > 0 && sd->inventory_data[i] ) {
-			if( !pc_can_sell_item(sd, &sd->inventory.u.items_inventory[i]) )
+			if( !pc_can_sell_item(sd, &sd->inventory.u.items_inventory[i], nd->subtype) )
 				continue;
 			val = sd->inventory_data[i]->value_sell;
 			if( val < 0 )
@@ -20985,7 +20989,7 @@ void clif_parse_refineui_refine(int fd, struct map_session_data *sd) {
 	}
 
 	//Try to refine the item
-	if( materials[i].chance >= rnd()%100 ) {
+	if( rnd()%100 < materials[i].chance ) {
 		//Success
 		item->refine = cap_value(item->refine + 1, 0, MAX_REFINE);
 		clif_misceffect(&sd->bl, 3);
