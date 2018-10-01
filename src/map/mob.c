@@ -1979,21 +1979,29 @@ static TIMER_FUNC(mob_ai_hard)
  * Set random option for item when dropped from monster
  * @param itm Item data
  * @param mobdrop Drop data
- * @author [Cydh]
  */
 void mob_setdropitem_option(struct item *itm, struct s_mob_drop *mobdrop)
 {
 	struct s_random_opt_group *g = NULL;
+	int i;
 
 	if (!itm || !mobdrop || mobdrop->randomopt_group == RDMOPTG_None)
 		return;
-	if ((g = itemdb_randomopt_group_exists(mobdrop->randomopt_group)) && g->total) {
-		int r = rnd()%g->total;
+	if ((g = itemdb_randomopt_group_exists(mobdrop->randomopt_group))) {
+		for (i = 0; i < ARRAYLENGTH(g->subgroup_id); i++) {
+			struct s_random_opt_subgroup *sg = NULL;
 
-		if (&g->entries[r]) {
-			memcpy(&itm->option, &g->entries[r], sizeof(itm->option));
-			return;
+			if (g->subgroup_id[i] == RDMOPTSG_None)
+				continue;
+			if ((sg = itemdb_randomopt_subgroup_exists(g->subgroup_id[i])) && sg->total) {
+				int j = rnd()%sg->total;
+
+				g->option[i].id = sg->entries[j].id;
+				g->option[i].value = rnd_value(sg->entries[j].min_val, sg->entries[j].max_val);
+				g->option[i].param = 0;
+			}
 		}
+		memcpy(&itm->option, &g->option, sizeof(itm->option));
 	}
 }
 
@@ -4804,7 +4812,7 @@ static bool mob_readdb_drop(char *str[], int columns, int current)
 		drop[i].nameid = nameid;
 		drop[i].p = rate;
 		drop[i].steal_protected = (flag ? 1 : 0);
-		drop[i].randomopt_group = 0;
+		drop[i].randomopt_group = RDMOPTG_None;
 		if (columns > 3) {
 			int randomopt_group = -1;
 
