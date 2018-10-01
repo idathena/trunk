@@ -1988,7 +1988,7 @@ void mob_setdropitem_option(struct item *itm, struct s_mob_drop *mobdrop)
 	if (!itm || !mobdrop || mobdrop->randomopt_group == RDMOPTG_None)
 		return;
 	if ((g = itemdb_randomopt_group_exists(mobdrop->randomopt_group))) {
-		for (i = 0; i < ARRAYLENGTH(g->subgroup_id); i++) {
+		for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
 			struct s_random_opt_subgroup *sg = NULL;
 
 			if (g->subgroup_id[i] == RDMOPTSG_None)

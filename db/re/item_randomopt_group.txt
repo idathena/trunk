@@ -2,7 +2,6 @@
 
 // Crimson Weapon
 RDMOPTG_Crimson_Weapon,RDMOPTSG_Crimson_Weapon
-
 // Vicious Weapon Groups
 RDMOPTG_Vicious_Weapon_Group_1,RDMOPTSG_Vicious_Weapon_Group_1_Slot_1,RDMOPTSG_Vicious_Weapon_Group_1_Slot_2,RDMOPTSG_Vicious_Weapon_Group_1_Slot_3
 RDMOPTG_Vicious_Weapon_Group_2,RDMOPTSG_Vicious_Weapon_Group_2_Slot_1,RDMOPTSG_Vicious_Weapon_Group_2_Slot_2,RDMOPTSG_Vicious_Weapon_Group_2_Slot_3
