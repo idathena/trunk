@@ -456,22 +456,57 @@ struct s_random_opt_data
 	struct script_code *script;
 };
 
-//Enum for Random Option Groups
-enum Random_Option_Group {
+//Enum for random option subgroups
+enum e_rdmopt_subgroup {
+	RDMOPTSG_None = 0,
+	RDMOPTSG_Crimson_Weapon,
+	RDMOPTSG_Vicious_Weapon_Group_1_Slot_1,
+	RDMOPTSG_Vicious_Weapon_Group_1_Slot_2,
+	RDMOPTSG_Vicious_Weapon_Group_1_Slot_3,
+	RDMOPTSG_Vicious_Weapon_Group_2_Slot_1,
+	RDMOPTSG_Vicious_Weapon_Group_2_Slot_2,
+	RDMOPTSG_Vicious_Weapon_Group_2_Slot_3,
+	RDMOPTSG_Vicious_Weapon_Group_3_Slot_1,
+	RDMOPTSG_Vicious_Weapon_Group_3_Slot_2,
+	RDMOPTSG_Vicious_Weapon_Group_3_Slot_3,
+	RDMOPTSG_Vicious_Weapon_Group_4_Slot_1,
+	RDMOPTSG_Vicious_Weapon_Group_4_Slot_2,
+	RDMOPTSG_Vicious_Weapon_Group_4_Slot_3,
+	RDMOPTSG_Vicious_Weapon_Group_5_Slot_1,
+	RDMOPTSG_Vicious_Weapon_Group_5_Slot_2,
+	RDMOPTSG_Vicious_Weapon_Group_5_Slot_3,
+};
+
+//Struct for random option subgroup entry
+struct s_random_opt_subgroup_entry {
+	short id;
+	short min_val;
+	short max_val;
+};
+
+//Struct for random option subgroup
+struct s_random_opt_subgroup {
+	uint8 id;
+	struct s_random_opt_subgroup_entry *entries;
+	uint16 total;
+};
+
+//Enum for random option groups
+enum e_rdmopt_group {
 	RDMOPTG_None = 0,
 	RDMOPTG_Crimson_Weapon,
+	RDMOPTG_Vicious_Weapon_Group_1,
+	RDMOPTG_Vicious_Weapon_Group_2,
+	RDMOPTG_Vicious_Weapon_Group_3,
+	RDMOPTG_Vicious_Weapon_Group_4,
+	RDMOPTG_Vicious_Weapon_Group_5,
 };
 
-//Struct for random option group entry
-struct s_random_opt_group_entry {
-	struct s_item_randomoption option[MAX_ITEM_RDM_OPT];
-};
-
-//Struct for Random Option Group
+//Struct for random option group
 struct s_random_opt_group {
 	uint8 id;
-	struct s_random_opt_group_entry *entries;
-	uint16 total;
+	uint8 subgroup_id[MAX_ITEM_RDM_OPT];
+	struct s_item_randomoption option[MAX_ITEM_RDM_OPT];
 };
 
 struct item_data *itemdb_searchname(const char *name);
@@ -547,7 +582,8 @@ char itemdb_pc_get_itemgroup(uint16 group_id, struct map_session_data *sd);
 uint16 itemdb_get_randgroupitem_count(uint16 group_id, uint8 sub_group, unsigned short nameid);
 
 struct s_random_opt_data *itemdb_randomopt_exists(short id);
-struct s_random_opt_group *itemdb_randomopt_group_exists(int id);
+struct s_random_opt_subgroup *itemdb_randomopt_subgroup_exists(int subgroup_id);
+struct s_random_opt_group *itemdb_randomopt_group_exists(int group_id);
 
 void itemdb_reload_itemmob_data(void);
 void itemdb_reload(void);
