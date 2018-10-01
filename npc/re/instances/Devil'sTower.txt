@@ -7,7 +7,7 @@
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: =========================================
-//= [Walkthrough Conversion]
+//= [Official Conversion]
 //= Devil's Tower Instance
 //===== Additional Comments: =================================
 //= 1.0 First version.
