@@ -7695,7 +7695,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
  *	Original coder Skotlex
  *  Refactored by Baalberith
  */
-int battle_check_undead(int race,int element)
+int battle_check_undead(int race, int element)
 {
 	if(!battle_config.undead_detect_type) {
 		if(element == ELE_UNDEAD)

@@ -571,6 +571,32 @@ enum out_ui_type {
 	OUT_UI_ATTENDANCE = 7
 };
 
+enum e_mob_type {
+	MOB_TYPE_SIZE_SMALL      = 0x0000010,
+	MOB_TYPE_SIZE_MEDIUM     = 0x0000020,
+	MOB_TYPE_SIZE_BIG        = 0x0000040,
+	MOB_TYPE_RACE_DEMIHUMAN  = 0x0000080,
+	MOB_TYPE_RACE_BRUTE      = 0x0000100,
+	MOB_TYPE_RACE_INSECT     = 0x0000200,
+	MOB_TYPE_RACE_FISH       = 0x0000400,
+	MOB_TYPE_RACE_PLANT      = 0x0000800,
+	MOB_TYPE_RACE_DEMON      = 0x0001000,
+	MOB_TYPE_RACE_ANGEL      = 0x0002000,
+	MOB_TYPE_RACE_UNDEAD     = 0x0004000,
+	MOB_TYPE_RACE_FORMLESS   = 0x0008000,
+	MOB_TYPE_RACE_DRAGON     = 0x0010000,
+	MOB_TYPE_DEF_ELE_WATER   = 0x0020000,
+	MOB_TYPE_DEF_ELE_WIND    = 0x0040000,
+	MOB_TYPE_DEF_ELE_EARTH   = 0x0080000,
+	MOB_TYPE_DEF_ELE_FIRE    = 0x0100000,
+	MOB_TYPE_DEF_ELE_DARK    = 0x0200000,
+	MOB_TYPE_DEF_ELE_HOLY    = 0x0400000,
+	MOB_TYPE_DEF_ELE_POISON  = 0x0800000,
+	MOB_TYPE_DEF_ELE_GHOST   = 0x1000000,
+	MOB_TYPE_DEF_ELE_NEUTRAL = 0x2000000,
+	MOB_TYPE_DEF_ELE_UNDEAD  = 0x4000000,
+};
+
 void clif_ui_open(struct map_session_data *sd, enum out_ui_type ui_type, int32 data);
 
 int clif_setip(const char *ip);
@@ -920,7 +946,7 @@ void clif_quest_send_mission(struct map_session_data *sd);
 void clif_quest_add(struct map_session_data *sd, struct quest *qd);
 void clif_quest_delete(struct map_session_data *sd, int quest_id);
 void clif_quest_update_status(struct map_session_data *sd, int quest_id, bool active);
-void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd, int mobid);
+void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd);
 void clif_quest_show_event(struct map_session_data *sd, struct block_list *bl, short effect, short color);
 void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, bool quest, bool lost);
 

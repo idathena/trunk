@@ -1480,7 +1480,7 @@ static int pet_readdb_libconfig(const char *filename, bool ignore_missing, int c
 	}
 
 	config_destroy(&pet_db_conf);
-	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filepath);
 	return count;
 }
 

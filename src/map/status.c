@@ -14124,14 +14124,14 @@ static void status_readdb_refine_libconfig(const char *filename)
 
 		if ((type = status_readdb_refine_libconfig_sub(r, name, filename))) {
 			if (duplicate[type - 1])
-				ShowWarning("status_readdb_refine_libconfig: duplicate entry for %s in \"%s\", overwriting previous entry...\n", name, filename);
+				ShowWarning("status_readdb_refine_libconfig: duplicate entry for %s in \"%s\", overwriting previous entry...\n", name, filepath);
 			else
 				duplicate[type - 1] = true;
 			count++;
 		}
 	}
 	config_destroy(&refine_db_conf);
-	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filepath);
 }
 
 /**

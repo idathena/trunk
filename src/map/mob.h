@@ -179,14 +179,13 @@ struct mob_db {
 	short range2,range3;
 	enum e_race2 race2; //Celest
 	unsigned short lv;
-	struct s_mob_drop dropitem[MAX_MOB_DROP_TOTAL], mvpitem[MAX_MVP_DROP_TOTAL];
+	struct s_mob_drop dropitem[MAX_MOB_DROP_TOTAL],mvpitem[MAX_MVP_DROP_TOTAL];
 	struct status_data status;
 	struct view_data vd;
 	unsigned int option;
 	int maxskill;
 	struct mob_skill skill[MAX_MOBSKILL];
 	struct spawn_info spawn[10];
-	int effect_id;
 };
 
 struct mob_data {

@@ -1103,10 +1103,9 @@ void achievement_readdb(void)
 		count++;
 	}
 
-	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filepath);
-
 	config_destroy(&achievement_db_conf);
-	return;
+
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filepath);
 }
 
 /**

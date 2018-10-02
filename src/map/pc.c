@@ -11789,7 +11789,7 @@ void pc_readdb(void)
 		entries++;
 	}
 	fclose(fp);
-	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", entries, DBPATH"attr_fix.txt");
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s/"DBPATH"attr_fix.txt"CL_RESET"'.\n", entries, db_path);
 
 	 //Reset then read statspoint
 	memset(statp,0,sizeof(statp));
@@ -11816,7 +11816,7 @@ void pc_readdb(void)
 			entries++;
 		}
 		fclose(fp);
-		ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", entries, DBPATH"statpoint.txt");
+		ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s/"DBPATH"statpoint.txt"CL_RESET"'.\n", entries, db_path);
 	}
 	//Generate the remaining parts of the db if necessary
 	k = battle_config.use_statpoint_table; //Save setting

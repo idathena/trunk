@@ -541,7 +541,7 @@ static int __config_validate_name(const char *name)
 
   for(++p; *p; ++p)
   {
-    if(! (isalpha((int)*p) || isdigit((int)*p) || strchr("*_-", (int)*p)))
+    if(! (isalpha((int)*p) || isdigit((int)*p) || strchr("*_-'", (int)*p)))
       return(CONFIG_FALSE);
   }
 

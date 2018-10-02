@@ -537,7 +537,7 @@ struct item_data *itemdb_exists(unsigned short nameid);
 #define itemdb_is_slingatk(n) ((n) >= ITEMID_APPLE_BOMB && (n) <= ITEMID_VERY_HARD_LUMP)
 #define itemdb_is_slingbuff(n) ((n) >= ITEMID_MYSTERIOUS_POWDER && (n) <= ITEMID_BLACK_THING_TO_THROW)
 const char *itemdb_typename(enum item_types type);
-const char *itemdb_typename_ammo (enum e_item_ammo ammo);
+const char *itemdb_typename_ammo(enum e_item_ammo ammo);
 bool itemdb_is_spellbook2(unsigned short nameid);
 bool itemdb_is_item_usable(struct item_data *item);
 
