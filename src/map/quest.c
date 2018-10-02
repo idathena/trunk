@@ -265,7 +265,7 @@ int quest_update_objective_sub(struct block_list *bl, va_list ap) {
 	mob_size = va_arg(ap,int);
 	mob_race = va_arg(ap,int);
 	mob_element = va_arg(ap,int);
-	mob_level = va_arg(ap,unsigned short);
+	mob_level = va_arg(ap,int);
 
 	if( !sd->avail_quests )
 		return 0;
