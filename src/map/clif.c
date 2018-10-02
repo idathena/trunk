@@ -16928,13 +16928,13 @@ void clif_quest_send_list(struct map_session_data *sd)
 		offset += 4;
 		WFIFOL(fd,offset) = sd->quest_log[i].time;
 		offset += 4;
-		WFIFOW(fd,offset) = qi->objectives_count;
+		WFIFOW(fd,offset) = qi->objective_count;
 		offset += 2;
 
-		if( qi->objectives_count > 0 ) {
+		if( qi->objective_count > 0 ) {
 			int j;
 
-			for( j = 0; j < qi->objectives_count; j++ ) {
+			for( j = 0; j < qi->objective_count; j++ ) {
 				struct mob_db *mob = mob_db(qi->objectives[j].mob);
 
 #if PACKETVER >= 20150513
@@ -17000,9 +17000,9 @@ void clif_quest_send_mission(struct map_session_data *sd)
 		WFIFOL(fd,i * 104 + 8) = sd->quest_log[i].quest_id;
 		WFIFOL(fd,i * 104 + 12) = sd->quest_log[i].time - qi->time;
 		WFIFOL(fd,i * 104 + 16) = sd->quest_log[i].time;
-		WFIFOW(fd,i * 104 + 20) = qi->objectives_count;
+		WFIFOW(fd,i * 104 + 20) = qi->objective_count;
 
-		for( j = 0 ; j < qi->objectives_count; j++ ) {
+		for( j = 0 ; j < qi->objective_count; j++ ) {
 			WFIFOL(fd,i * 104 + 22 + j * 30) = qi->objectives[j].mob;
 			WFIFOW(fd,i * 104 + 26 + j * 30) = sd->quest_log[i].count[j];
 			mob = mob_db(qi->objectives[j].mob);
@@ -17035,9 +17035,9 @@ void clif_quest_add(struct map_session_data *sd, struct quest *qd)
 	WFIFOB(fd,6) = qd->state;
 	WFIFOB(fd,7) = qd->time - qi->time;
 	WFIFOL(fd,11) = qd->time;
-	WFIFOW(fd,15) = qi->objectives_count;
+	WFIFOW(fd,15) = qi->objective_count;
 
-	for( i = 0, offset = 17; i < qi->objectives_count; i++ ) {
+	for( i = 0, offset = 17; i < qi->objective_count; i++ ) {
 		struct mob_db *mob;
 
 #if PACKETVER >= 20150513
@@ -17065,12 +17065,12 @@ void clif_quest_add(struct map_session_data *sd, struct quest *qd)
 
 #if PACKETVER >= 20150513
 	{
-		int len = 4 + qi->objectives_count * 12;
+		int len = 4 + qi->objective_count * 12;
 
 		WFIFOHEAD(fd,len);
 		WFIFOW(fd,0) = 0x8fe;
 		WFIFOW(fd,2) = len;
-		for( i = 0, offset = 4; i < qi->objectives_count; i++, offset += 12 ) {
+		for( i = 0, offset = 4; i < qi->objective_count; i++, offset += 12 ) {
 			WFIFOL(fd,offset) = qd->quest_id * 1000 + i;
 			WFIFOL(fd,offset + 4) = qi->objectives[i].mob;
 			WFIFOW(fd,offset + 10) = qi->objectives[i].count;
@@ -17104,7 +17104,7 @@ void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd, 
 	int fd = sd->fd;
 	int i, offset;
 	struct quest_db *qi = quest_search(qd->quest_id);
-	int len = qi->objectives_count * 12 + 6;
+	int len = qi->objective_count * 12 + 6;
 #if PACKETVER >= 20150513
 	int cmd = 0x9fa;
 #else
@@ -17113,9 +17113,9 @@ void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd, 
 
 	WFIFOHEAD(fd,len);
 	WFIFOW(fd,0) = cmd;
-	WFIFOW(fd,4) = qi->objectives_count;
+	WFIFOW(fd,4) = qi->objective_count;
 
-	for( i = 0, offset = 6; i < qi->objectives_count; i++ ) {
+	for( i = 0, offset = 6; i < qi->objective_count; i++ ) {
 		if( !mobid || mobid == qi->objectives[i].mob ) {
 			WFIFOL(fd,offset) = qd->quest_id;
 			offset += 4;
