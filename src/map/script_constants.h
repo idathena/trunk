@@ -5511,6 +5511,31 @@
 	export_constant(GUILDSTORAGE_LOG_EMPTY);
 	export_constant(GUILDSTORAGE_LOG_FAILED);
 
+	/* Quest monster type */
+	export_constant(MOB_TYPE_SIZE_SMALL);
+	export_constant(MOB_TYPE_SIZE_MEDIUM);
+	export_constant(MOB_TYPE_SIZE_BIG);
+	export_constant(MOB_TYPE_RACE_DEMIHUMAN);
+	export_constant(MOB_TYPE_RACE_BRUTE);
+	export_constant(MOB_TYPE_RACE_INSECT);
+	export_constant(MOB_TYPE_RACE_FISH);
+	export_constant(MOB_TYPE_RACE_PLANT);
+	export_constant(MOB_TYPE_RACE_DEMON);
+	export_constant(MOB_TYPE_RACE_ANGEL);
+	export_constant(MOB_TYPE_RACE_UNDEAD);
+	export_constant(MOB_TYPE_RACE_FORMLESS);
+	export_constant(MOB_TYPE_RACE_DRAGON);
+	export_constant(MOB_TYPE_DEF_ELE_WATER);
+	export_constant(MOB_TYPE_DEF_ELE_WIND);
+	export_constant(MOB_TYPE_DEF_ELE_EARTH);
+	export_constant(MOB_TYPE_DEF_ELE_FIRE);
+	export_constant(MOB_TYPE_DEF_ELE_DARK);
+	export_constant(MOB_TYPE_DEF_ELE_HOLY);
+	export_constant(MOB_TYPE_DEF_ELE_POISON);
+	export_constant(MOB_TYPE_DEF_ELE_GHOST);
+	export_constant(MOB_TYPE_DEF_ELE_NEUTRAL);
+	export_constant(MOB_TYPE_DEF_ELE_UNDEAD);
+
 	#undef export_constant
 	#undef export_constant2
 	#undef export_parameter

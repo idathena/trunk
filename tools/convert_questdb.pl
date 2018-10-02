@@ -63,32 +63,32 @@ sub parse_questdb (@) {
 			print "\t{\n" if $cols{Target1};
 			print "\t\tMobId: $cols{Target1}\n" if $cols{Target1};
 			print "\t\tCount: $cols{Val1}\n" if $cols{Target1};
-			print "\t},\n" if $cols{Target1};
+			print "\t},\n" if $cols{Target2};
 			print "\t{\n" if $cols{Target2};
 			print "\t\tMobId: $cols{Target2}\n" if $cols{Target2};
 			print "\t\tCount: $cols{Val2}\n" if $cols{Target2};
-			print "\t},\n" if $cols{Target2};
+			print "\t},\n" if $cols{Target3};
 			print "\t{\n" if $cols{Target3};
 			print "\t\tMobId: $cols{Target3}\n" if $cols{Target3};
 			print "\t\tCount: $cols{Val3}\n" if $cols{Target3};
-			print "\t},\n" if $cols{Target3};
+			print "\t}\n" if $cols{Target1} || $cols{Target2} || $cols{Target3};
 			print "\t)\n" if $cols{Target1} || $cols{Target2} || $cols{Target3};
 			print "\tDrops: (\n" if $cols{ItemID1} || $cols{ItemID2} || $cols{ItemID3};
 			print "\t{\n" if $cols{ItemID1};
 			print "\t\tItemId: $cols{ItemID1}\n" if $cols{ItemID1};
 			print "\t\tRate: $cols{Rate1}\n" if $cols{ItemID1};
 			print "\t\tMobId: $cols{MobID1}\n" if $cols{ItemID1};
-			print "\t},\n" if $cols{ItemID1};
+			print "\t},\n" if $cols{ItemID2};
 			print "\t{\n" if $cols{ItemID2};
 			print "\t\tItemId: $cols{ItemID2}\n" if $cols{ItemID2};
 			print "\t\tRate: $cols{Rate2}\n" if $cols{ItemID2};
 			print "\t\tMobId: $cols{MobID2}\n" if $cols{ItemID2};
-			print "\t},\n" if $cols{ItemID2};
+			print "\t},\n" if $cols{ItemID3};
 			print "\t{\n" if $cols{ItemID3};
 			print "\t\tItemId: $cols{ItemID3}\n" if $cols{ItemID3};
 			print "\t\tRate: $cols{Rate3}\n" if $cols{ItemID3};
 			print "\t\tMobId: $cols{MobID3}\n" if $cols{ItemID3};
-			print "\t},\n" if $cols{ItemID3};
+			print "\t}\n" if $cols{ItemID1} || $cols{ItemID2} || $cols{ItemID3};
 			print "\t)\n" if $cols{ItemID1} || $cols{ItemID2} || $cols{ItemID3};
 			print "},\n";
 			print "*/\n" if $cols{prefix};
@@ -110,23 +110,26 @@ print <<"EOF";
  ************* Entry structure ********************************************
  **************************************************************************
 {
-	Id: (int)             // Quest ID
-	Name: (string)        // Quest Name
-	TimeLimit: (string)   // (optional)
-	                      // in seconds ; date limit will be at [Current time + TimeLimit]
-	                      // in HH:MM format ; date limit will be at [TimeLimit] of the current day or at [TimeLimit]
-	Targets: ( (array)    // (optional)
+	Id: (int)                 // Quest ID
+	Name: (string)            // Quest Name
+	TimeLimit: (string)       // (optional)
+	                          // in seconds ; date limit will be at [Current time + TimeLimit]
+	                          // in HH:MM format ; date limit will be at [TimeLimit] of the current day or at [TimeLimit]
+	Targets: ( (array)        // (optional)
 	{
-		MobId: (int)  // Mob ID
-		Count: (int)  // Mob Count
+		MobId: (int)      // (optional, defaults to 0) Mob ID
+		MobType: (string) // (optional, defaults to 0) MOB_TYPE_SIZE_X ~ MOB_TYPE_DEF_ELE_UNDEAD
+		MinLevel: (int)   // (optional, defaults to 0) Minimum Level
+		MaxLevel: (int)   // (optional, defaults to 0) Maximum Level
+		Count: (int)      // Mob Count
 	},
 	... (can repeated up to MAX_QUEST_OBJECTIVES times)
 	)
-	Drops: ( (array)      // (optional)
+	Drops: ( (array)          // (optional)
 	{
-		ItemId: (int) // Item ID to drop
-		Rate: (int)   // Drop rate
-		MobId: (int)  // (optional, defaults to 0) Mob ID to match
+		ItemId: (int)     // Item ID to drop
+		Rate: (int)       // Drop rate
+		MobId: (int)      // (optional, defaults to 0) Mob ID to match
 	},
 	... (can be repeated)
 	)

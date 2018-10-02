@@ -71,7 +71,7 @@ int quest_pc_login(TBL_PC *sd) {
 
 	//@TODO[Haru]: Is this necessary? Does quest_send_mission not take care of this?
 	for( i = 0; i < sd->avail_quests; i++ )
-		clif_quest_update_objective(sd, &sd->quest_log[i], 0);
+		clif_quest_update_objective(sd, &sd->quest_log[i]);
 #endif
 
 	return 0;
@@ -86,7 +86,7 @@ int quest_pc_login(TBL_PC *sd) {
  * @param quest_id ID of the quest to add.
  * @return 0 in case of success, nonzero otherwise
  */
-int quest_add(TBL_PC *sd, int quest_id) {
+int quest_add(struct map_session_data *sd, int quest_id) {
 	int n;
 	struct quest_db *qi = quest_search(quest_id);
 
@@ -135,7 +135,7 @@ int quest_add(TBL_PC *sd, int quest_id) {
 	sd->save_quest = true;
 
 	clif_quest_add(sd, &sd->quest_log[n]);
-	clif_quest_update_objective(sd, &sd->quest_log[n], 0);
+	clif_quest_update_objective(sd, &sd->quest_log[n]);
 
 	if( save_settings&CHARSAVE_QUEST )
 		chrif_save(sd,CSAVE_NORMAL);
@@ -151,7 +151,7 @@ int quest_add(TBL_PC *sd, int quest_id) {
  * @param qid2 New quest to add
  * @return 0 in case of success, nonzero otherwise
  */
-int quest_change(TBL_PC *sd, int qid1, int qid2) {
+int quest_change(struct map_session_data *sd, int qid1, int qid2) {
 	int i;
 	struct quest_db *qi = quest_search(qid2);
 
@@ -201,7 +201,7 @@ int quest_change(TBL_PC *sd, int qid1, int qid2) {
 
 	clif_quest_delete(sd, qid1);
 	clif_quest_add(sd, &sd->quest_log[i]);
-	clif_quest_update_objective(sd, &sd->quest_log[i], 0);
+	clif_quest_update_objective(sd, &sd->quest_log[i]);
 
 	if( save_settings&CHARSAVE_QUEST )
 		chrif_save(sd,CSAVE_NORMAL);
@@ -216,7 +216,7 @@ int quest_change(TBL_PC *sd, int qid1, int qid2) {
  * @param quest_id ID of the quest to remove
  * @return 0 in case of success, nonzero otherwise
  */
-int quest_delete(TBL_PC *sd, int quest_id) {
+int quest_delete(struct map_session_data *sd, int quest_id) {
 	int i;
 
 	//Search for quest
@@ -254,13 +254,18 @@ int quest_delete(TBL_PC *sd, int quest_id) {
  */
 int quest_update_objective_sub(struct block_list *bl, va_list ap) {
 	struct map_session_data *sd;
-	int mob_id, party_id;
+	int party_id, mob_id, mob_size, mob_race, mob_element;
+	uint16 mob_level;
 
 	nullpo_ret(bl);
 	nullpo_ret(sd = (struct map_session_data *)bl);
 
 	party_id = va_arg(ap,int);
 	mob_id = va_arg(ap,int);
+	mob_size = va_arg(ap,int);
+	mob_race = va_arg(ap,int);
+	mob_element = va_arg(ap,int);
+	mob_level = va_arg(ap,unsigned short);
 
 	if( !sd->avail_quests )
 		return 0;
@@ -268,7 +273,7 @@ int quest_update_objective_sub(struct block_list *bl, va_list ap) {
 	if( sd->status.party_id != party_id )
 		return 0;
 
-	quest_update_objective(sd, mob_id);
+	quest_update_objective(sd, mob_id, mob_size, mob_race, mob_element, mob_level);
 
 	return 1;
 }
@@ -279,7 +284,7 @@ int quest_update_objective_sub(struct block_list *bl, va_list ap) {
  * @param sd     Character's data
  * @param mob_id Monster ID
  */
-void quest_update_objective(TBL_PC *sd, int mob_id) {
+void quest_update_objective(struct map_session_data *sd, int mob_id, int mob_size, int mob_race, int mob_element, uint16 mob_level) {
 	int i, j;
 
 	for( i = 0; i < sd->avail_quests; i++ ) {
@@ -291,10 +296,113 @@ void quest_update_objective(TBL_PC *sd, int mob_id) {
 		qi = quest_search(sd->quest_log[i].quest_id);
 
 		for( j = 0; j < qi->objective_count; j++ ) {
-			if( qi->objectives[j].mob == mob_id && sd->quest_log[i].count[j] < qi->objectives[j].count )  {
+			bool is_valid = false;
+			bool is_level = (qi->objectives[j].min_level > 0);
+
+			switch( qi->objectives[j].mobtype ) {
+				case MOB_TYPE_SIZE_SMALL:
+					if( mob_size == SZ_SMALL )
+						is_valid = true;
+					break;
+				case MOB_TYPE_SIZE_MEDIUM:
+					if( mob_size == SZ_MEDIUM )
+						is_valid = true;
+					break;
+				case MOB_TYPE_SIZE_BIG:
+					if( mob_size == SZ_BIG )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_DEMIHUMAN:
+					if( mob_race == RC_DEMIHUMAN )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_BRUTE:
+					if( mob_race == RC_BRUTE )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_INSECT:
+					if( mob_race == RC_INSECT )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_FISH:
+					if( mob_race == RC_FISH )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_PLANT:
+					if( mob_race == RC_PLANT )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_DEMON:
+					if( mob_race == RC_DEMON )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_ANGEL:
+					if( mob_race == RC_ANGEL )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_UNDEAD:
+					if( mob_race == RC_UNDEAD )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_FORMLESS:
+					if( mob_race == RC_FORMLESS )
+						is_valid = true;
+					break;
+				case MOB_TYPE_RACE_DRAGON:
+					if( mob_race == RC_DRAGON )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_WATER:
+					if( mob_element == ELE_WATER )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_WIND:
+					if( mob_element == ELE_WIND )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_EARTH:
+					if( mob_element == ELE_EARTH )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_FIRE:
+					if( mob_element == ELE_FIRE )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_DARK:
+					if( mob_element == ELE_DARK )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_HOLY:
+					if( mob_element == ELE_HOLY )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_POISON:
+					if( mob_element == ELE_POISON )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_GHOST:
+					if( mob_element == ELE_GHOST )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_NEUTRAL:
+					if( mob_element == ELE_NEUTRAL )
+						is_valid = true;
+					break;
+				case MOB_TYPE_DEF_ELE_UNDEAD:
+					if( mob_element == ELE_UNDEAD )
+						is_valid = true;
+					break;
+				default:
+					if( qi->objectives[j].mob == mob_id )
+						is_valid = true;
+					break;
+			}
+			if( is_valid && is_level && mob_level < qi->objectives[j].min_level )
+				is_valid = false;
+			if( is_valid && sd->quest_log[i].count[j] < qi->objectives[j].count )  {
 				sd->quest_log[i].count[j]++;
 				sd->save_quest = true;
-				clif_quest_update_objective(sd, &sd->quest_log[i], mob_id);
+				clif_quest_update_objective(sd, &sd->quest_log[i]);
 			}
 		}
 
@@ -339,7 +447,7 @@ void quest_update_objective(TBL_PC *sd, int mob_id) {
  * @param qs       New quest state
  * @return 0 in case of success, nonzero otherwise
  */
-int quest_update_status(TBL_PC *sd, int quest_id, enum quest_state status) {
+int quest_update_status(struct map_session_data *sd, int quest_id, enum quest_state status) {
 	int i;
 
 	ARR_FIND(0, sd->avail_quests, i, sd->quest_log[i].quest_id == quest_id);
@@ -388,7 +496,7 @@ int quest_update_status(TBL_PC *sd, int quest_id, enum quest_state status) {
  *                    1 if the quest's timeout has expired
  *                    0 otherwise
  */
-int quest_check(TBL_PC *sd, int quest_id, enum quest_check_type type) {
+int quest_check(struct map_session_data *sd, int quest_id, enum quest_check_type type) {
 	int i;
 
 	ARR_FIND(0, sd->num_quests, i, sd->quest_log[i].quest_id == quest_id);
@@ -496,18 +604,44 @@ struct quest_db *quest_readdb_sub(struct config_setting_t *cs, int n, const char
 			// Note: We ensure that objective_count < MAX_QUEST_OBJECTIVES because
 			//       quest_log (as well as the client) expect this maximum size.
 			struct config_setting_t *tt = config_setting_get_elem(t, i);
-			int mob_id = 0, count = 0;
+			int mob_id = 0, mob_type = 0, min_level = 0, max_level = 0, count = 0, i32;
+			const char *name;
 
 			if( !tt )
 				break;
 			if( !config_setting_is_group(tt) )
 				continue;
-			if( !config_setting_lookup_int(tt, "MobId", &mob_id) || (mob_id && !mobdb_exists(mob_id)) )
+			if( config_setting_lookup_int(tt, "MobId", &i32) )
+				mob_id = i32;
+			if( mob_id && !mobdb_exists(mob_id) ) {
+				ShowWarning("quest_readdb_sub: Invalid value for 'MobId': %d, defaulting to 0\n", mob_id);
+				mob_id = 0;
+			}
+			if( config_setting_lookup_string(tt, "MobType", &name) && !script_get_constant(name, &mob_type) ) {
+				ShowWarning("quest_readdb_sub: Invalid value for 'MobType': %d, defaulting to 0\n", mob_type);
+				mob_type = 0;
+			}
+			if( config_setting_lookup_int(tt, "MinLevel", &i32) )
+				min_level = max(i32, 0);
+			if( config_setting_lookup_int(tt, "MaxLevel", &i32) )
+				max_level = max(i32, 0);
+			if( !min_level || min_level > max_level )
+				max_level = 0;
+			if( min_level && !max_level )
+				max_level = 999;
+			if( config_setting_lookup_int(tt, "Count", &i32) )
+				count = i32;
+			if( count <= 0 ) {
+				ShowWarning("quest_readdb_sub: Invalid value for 'Count': %d, skipping.\n", mob_id);
 				continue;
-			if( !config_setting_lookup_int(tt, "Count", &count) || count <= 0 )
+			}
+			if( !mob_id && !mob_type )
 				continue;
 			RECREATE(entry->objectives, struct quest_objective, entry->objective_count + 1);
 			entry->objectives[entry->objective_count].mob = mob_id;
+			entry->objectives[entry->objective_count].mobtype = mob_type;
+			entry->objectives[entry->objective_count].min_level = min_level;
+			entry->objectives[entry->objective_count].max_level = max_level;
 			entry->objectives[entry->objective_count].count = count;
 			entry->objective_count++;
 		}
@@ -525,7 +659,7 @@ struct quest_db *quest_readdb_sub(struct config_setting_t *cs, int n, const char
 			if( !config_setting_is_group(tt) )
 				continue;
 			if( !config_setting_lookup_int(tt, "MobId", &mob_id) )
-				mob_id = 0; // Zero = any monster
+				mob_id = 0; //Zero = any monster
 			if( mob_id && !mobdb_exists(mob_id) )
 				continue;
 			if( !config_setting_lookup_int(tt, "ItemId", &nameid) || (nameid && !itemdb_exists(nameid)) )

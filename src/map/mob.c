@@ -2811,9 +2811,9 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				pc_setglobalreg(sd, "TK_MISSION_COUNT", sd->mission_count);
 			}
 			if(sd->status.party_id)
-				map_foreachinallrange(quest_update_objective_sub, &md->bl, AREA_SIZE, BL_PC, sd->status.party_id, md->mob_id);
+				map_foreachinallrange(quest_update_objective_sub, &md->bl, AREA_SIZE, BL_PC, sd->status.party_id, md->mob_id, status->size, status->race, status->def_ele, mob_db(md->mob_id)->lv);
 			else if(sd->avail_quests)
-				quest_update_objective(sd, md->mob_id);
+				quest_update_objective(sd, md->mob_id, status->size, status->race, status->def_ele, mob_db(md->mob_id)->lv);
 			if(achievement_mobexists(md->mob_id))
 				achievement_update_objective(sd, AG_BATTLE, 1, md->mob_id);
 			if(sd->md && src && src->type == BL_MER && mob_db(md->mob_id)->lv > sd->status.base_level / 2)
