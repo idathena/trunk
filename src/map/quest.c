@@ -33,6 +33,7 @@
 #include <stdarg.h>
 #include <time.h>
 
+struct config_t quest_db_conf;
 static DBMap *questdb = NULL; //int quest_id -> struct quest_db*
 static void questdb_free_sub(struct quest_db *quest, bool free);
 
@@ -434,7 +435,7 @@ struct quest_db *quest_readdb_sub(struct config_setting_t *cs, int n, const char
 {
 	struct quest_db *entry = NULL;
 	struct config_setting_t *t = NULL;
-	int i32 = 0, quest_id;
+	int quest_id;
 	const char *quest_name = NULL, *quest_time = NULL;
 
 	nullpo_retr(NULL, cs);
@@ -546,13 +547,11 @@ struct quest_db *quest_readdb_sub(struct config_setting_t *cs, int n, const char
  */
 void quest_readdb(void)
 {
-	char filepath[256];
-	struct config_t quest_db_conf;
 	struct config_setting_t *qdb = NULL, *q = NULL;
+	char filepath[256];
 	int count = 0;
-	const char *filename = "quest_db.conf";
 
-	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, filename);
+	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, "quest_db.conf");
 	if( config_read_file(&quest_db_conf, filepath) )
 		return;
 
@@ -576,7 +575,7 @@ void quest_readdb(void)
 	}
 
 	config_destroy(&quest_db_conf);
-	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filepath);
 }
 
 /**
