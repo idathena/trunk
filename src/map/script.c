@@ -23174,6 +23174,27 @@ BUILDIN_FUNC(open_stylistui) {
 #endif
 }
 
+/**
+ * Returns the number of stat points needed to change the specified stat by val.
+ * If val is negative, returns the number of stat points that would be needed to
+ * raise the specified stat from (current value - val) to current value.
+ * needed_status_point(<type>,<val>{,<char id>});
+ * @author [secretdataz]
+ */
+BUILDIN_FUNC(needed_status_point) {
+	struct map_session_data *sd = NULL;
+	int type, val;
+
+	if (!script_charid2sd(4,sd))
+		return 1;
+
+	type = script_getnum(st,2);
+	val = script_getnum(st,3);
+
+	script_pushint(st,pc_need_status_point(sd, type, val));
+	return SCRIPT_CMD_SUCCESS;
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -23820,6 +23841,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(open_refineui,"?"),
 	//Stylist UI
 	BUILDIN_DEF(open_stylistui,"?"),
+	BUILDIN_DEF(needed_status_point,"ii?"),
 
 #include "../custom/script_def.inc"
 

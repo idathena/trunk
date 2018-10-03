@@ -4590,6 +4590,14 @@ wall), the character is pushed only up to the obstacle.
 
 ---------------------------------------
 
+*needed_status_point(<type>,<val>{,<char id>});
+
+Returns the number of stat points needed to change the specified stat <type> by <val>.
+If <val> is negative, returns the number of stat points that would be needed to
+raise the specified stat from (current value - <val>) to current value.
+
+---------------------------------------
+
 *jobcanentermap("<mapname>"{,<JobID>});
 
 Return true if player (decided by job) can enter the map, false otherwise.
