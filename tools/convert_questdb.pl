@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 # This Script converts quest_db.txt to quest_db.conf format.
-# usage example: perl tools/convert_questdb.pl < db/quest_db.txt > db/quest_db.conf
+# usage example:
+# perl tools/convert_questdb.pl < db/pre-re/quest_db.txt > db/pre-re/quest_db.conf
+# perl tools/convert_questdb.pl < db/re/quest_db.txt > db/re/quest_db.conf
 #
 
 use strict;

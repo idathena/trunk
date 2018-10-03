@@ -297,7 +297,6 @@ void quest_update_objective(struct map_session_data *sd, int mob_id, int mob_siz
 
 		for( j = 0; j < qi->objective_count; j++ ) {
 			bool is_valid = false;
-			bool is_level = (qi->objectives[j].min_level > 0);
 
 			switch( qi->objectives[j].mobtype ) {
 				case MOB_TYPE_SIZE_SMALL:
@@ -397,7 +396,9 @@ void quest_update_objective(struct map_session_data *sd, int mob_id, int mob_siz
 						is_valid = true;
 					break;
 			}
-			if( is_valid && is_level && mob_level < qi->objectives[j].min_level )
+			if( qi->objectives[j].min_level && mob_level < qi->objectives[j].min_level )
+				is_valid = false;
+			if( qi->objectives[j].max_level && mob_level > qi->objectives[j].max_level )
 				is_valid = false;
 			if( is_valid && sd->quest_log[i].count[j] < qi->objectives[j].count )  {
 				sd->quest_log[i].count[j]++;
@@ -685,7 +686,7 @@ void quest_readdb(void)
 	char filepath[256];
 	int count = 0;
 
-	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, "quest_db.conf");
+	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, DBPATH"quest_db.conf");
 	if( config_read_file(&quest_db_conf, filepath) )
 		return;
 
