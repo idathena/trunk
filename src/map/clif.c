@@ -12824,7 +12824,7 @@ void clif_parse_ResetChar(int fd, struct map_session_data *sd) {
 void clif_parse_LocalBroadcast(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
-	char command[CHAT_SIZE_MAX+16];
+	char command[CHAT_SIZE_MAX + 16];
 	unsigned int len = RFIFOW(fd,info->pos[0]) - 4;
 	char *msg = (char *)RFIFOP(fd,info->pos[1]);
 
@@ -16967,6 +16967,7 @@ void clif_quest_send_list(struct map_session_data *sd)
 			for( j = 0; j < qi->objective_count; j++ ) {
 				struct mob_db *mob = mob_db(qi->objectives[j].mob);
 				int mob_type = qi->objectives[j].mobtype;
+				char target[NAME_LENGTH];
 
 #if PACKETVER >= 20150513
 				WFIFOL(fd,offset) = sd->quest_log[i].quest_id * 1000 + j;
@@ -16986,7 +16987,14 @@ void clif_quest_send_list(struct map_session_data *sd)
 				offset += 2;
 				WFIFOW(fd,offset) = qi->objectives[j].count;
 				offset += 2;
-				safestrncpy((char *)WFIFOP(fd,offset), (qi->objectives[i].mob ? mob->jname : clif_mobtype_name((enum e_mob_type)mob_type)), NAME_LENGTH);
+				if( qi->objectives[j].min_level ) {
+					if( mob_type ) // %s Lv.%d~Lv.%d
+						safesnprintf(target, sizeof(target), msg_txt(236), clif_mobtype_name((enum e_mob_type)mob_type), qi->objectives[j].min_level, qi->objectives[j].max_level);
+					else // Lv.%d~Lv.%d
+						safesnprintf(target, sizeof(target), msg_txt(234), qi->objectives[j].min_level, qi->objectives[j].max_level);
+				} else
+					safesnprintf(target, sizeof(target), clif_mobtype_name((enum e_mob_type)mob_type));
+				safestrncpy((char *)WFIFOP(fd,offset), (qi->objectives[j].mob ? mob->jname : target), NAME_LENGTH);
 				offset += NAME_LENGTH;
 			}
 		}
@@ -17071,6 +17079,7 @@ void clif_quest_add(struct map_session_data *sd, struct quest *qd)
 	for( i = 0, offset = 17; i < qi->objective_count; i++ ) {
 		struct mob_db *mob = mob_db(qi->objectives[i].mob);
 		int mob_type = qi->objectives[i].mobtype;
+		char target[NAME_LENGTH];
 
 #if PACKETVER >= 20150513
 		WFIFOL(fd,offset) = qd->quest_id * 1000 + i;
@@ -17088,7 +17097,14 @@ void clif_quest_add(struct map_session_data *sd, struct quest *qd)
 #endif
 		WFIFOW(fd,offset) = qd->count[i];
 		offset += 2;
-		safestrncpy((char *)WFIFOP(fd,offset), (qi->objectives[i].mob ? mob->jname : clif_mobtype_name((enum e_mob_type)mob_type)), NAME_LENGTH);
+		if( qi->objectives[i].min_level ) {
+			if( mob_type ) // %s Lv.%d~Lv.%d
+				safesnprintf(target, sizeof(target), msg_txt(236), clif_mobtype_name((enum e_mob_type)mob_type), qi->objectives[i].min_level, qi->objectives[i].max_level);
+			else // Lv.%d~Lv.%d
+				safesnprintf(target, sizeof(target), msg_txt(234), qi->objectives[i].min_level, qi->objectives[i].max_level);
+		} else
+			safesnprintf(target, sizeof(target), clif_mobtype_name((enum e_mob_type)mob_type));
+		safestrncpy((char *)WFIFOP(fd,offset), (qi->objectives[i].mob ? mob->jname : target), NAME_LENGTH);
 		offset += NAME_LENGTH;
 	}
 
@@ -17527,7 +17543,8 @@ void clif_bg_message(struct battleground_data *bg, int src_id, const char *name,
 {
 	struct map_session_data *sd;
 	unsigned char *buf;
-	if( (sd = bg_getavailablesd(bg)) == NULL )
+
+	if( !(sd = bg_getavailablesd(bg)) )
 		return;
 
 	buf = (unsigned char *)aMalloc((len + NAME_LENGTH + 8) * sizeof(unsigned char));
