@@ -4102,7 +4102,7 @@ void clif_dispchat(struct chat_data *cd, int fd)
 	WBUFW(buf,12) = cd->limit;
 	WBUFW(buf,14) = (cd->owner->type == BL_NPC) ? cd->users + 1 : cd->users;
 	WBUFB(buf,16) = type;
-	memcpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // Not zero-terminated
+	memcpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); //Not zero-terminated
 
 	if( fd ) {
 		WFIFOHEAD(fd,WBUFW(buf,2));
@@ -4139,7 +4139,7 @@ void clif_changechatstatus(struct chat_data *cd)
 	WBUFW(buf,12) = cd->limit;
 	WBUFW(buf,14) = (cd->owner->type == BL_NPC) ? cd->users + 1 : cd->users;
 	WBUFB(buf,16) = type;
-	memcpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // not zero-terminated
+	memcpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); //Not zero-terminated
 
 	clif_send(buf,WBUFW(buf,2),cd->owner,CHAT);
 }
