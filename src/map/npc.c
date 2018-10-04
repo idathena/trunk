@@ -3764,10 +3764,8 @@ static const char *npc_parse_mob(char *w1, char *w2, char *w3, char *w4, const c
 
 	memset(&mob, 0, sizeof(struct spawn_data));
 
-	if (!strcmpi(w2, "boss_monster"))
+	if (!strcmpi(w2, "boss_monster")) //Used by Convex Mirror and for spawning the tomb
 		mob.state.boss = BTYPE_MVP;
-	else if (!strcmpi(w2, "miniboss_monster"))
-		mob.state.boss = BTYPE_BOSS;
 	else
 		mob.state.boss = BTYPE_NONE;
 
@@ -4424,7 +4422,7 @@ int npc_parsesrcfile(const char *filepath, bool runOnInit)
 				p = npc_parse_script(w1, w2, w3, w4, p, buffer, filepath, runOnInit);
 		} else if( (i = 0, sscanf(w2, "duplicate%n", &i), (i > 0 && w2[i] == '(')) && count > 3 )
 			p = npc_parse_duplicate(w1, w2, w3, w4, p, buffer, filepath);
-		else if( (strcmpi(w2, "monster") == 0 || strcmpi(w2, "boss_monster") == 0 || strcmpi(w2, "miniboss_monster") == 0) && count > 3 )
+		else if( (strcmpi(w2, "monster") == 0 || strcmpi(w2, "boss_monster") == 0) && count > 3 )
 			p = npc_parse_mob(w1, w2, w3, w4, p, buffer, filepath);
 		else if( strcmpi(w2, "mapflag") == 0 && count >= 3 )
 			p = npc_parse_mapflag(w1, w2, trim(w3), trim(w4), p, buffer, filepath);

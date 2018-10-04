@@ -409,6 +409,7 @@ struct flooritem_data {
 	unsigned int first_get_tick,second_get_tick,third_get_tick;
 	struct item item;
 	unsigned short mob_id; //ID of monster who dropped it. 0 for non-monster who dropped it
+	bool showdropeffect;
 };
 
 enum _sp {
@@ -853,7 +854,7 @@ bool map_addnpc(int16 m,struct npc_data *);
 TIMER_FUNC(map_clearflooritem_timer);
 TIMER_FUNC(map_removemobs_timer);
 void map_clearflooritem(struct block_list *bl);
-int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, int first_charid, int second_charid, int third_charid, int flags, unsigned short mob_id);
+int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, int first_charid, int second_charid, int third_charid, int flags, unsigned short mob_id, bool showdropeffect);
 
 // Instances
 int map_addinstancemap(const char *,int);

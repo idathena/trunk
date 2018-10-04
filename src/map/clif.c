@@ -747,9 +747,20 @@ void clif_charselectok(int id, uint8 ok)
 /// Makes an item appear on the ground.
 /// 009e <id>.L <name id>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W (ZC_ITEM_FALL_ENTRY)
 /// 084b <id>.L <name id>.W <type>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W (ZC_ITEM_FALL_ENTRY4)
+/// 0add <id>.L <name id>.W <type>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W <show effect>.B <effect mode>.W
+/// Effect mode:
+///      0 - Client based (EffectID field in iteminfo)
+///      1 - White
+///      2 - Blue
+///      3 - Yellow
+///      4 - Purple
+///      5 - Orange
 void clif_dropflooritem(struct flooritem_data *fitem)
 {
-#if PACKETVER >= 20130000
+#if PACKETVER >= 20170913
+	uint8 buf[22];
+	uint32 header = 0xadd;
+#elif PACKETVER >= 20130000
 	uint8 buf[19];
 	uint32 header = 0x84b;
 #else
@@ -776,6 +787,10 @@ void clif_dropflooritem(struct flooritem_data *fitem)
 	WBUFB(buf,offset + 13) = fitem->subx;
 	WBUFB(buf,offset + 14) = fitem->suby;
 	WBUFW(buf,offset + 15) = fitem->item.amount;
+#if PACKETVER >= 20170913
+	WBUFB(buf,offset + 17) = fitem->showdropeffect;
+	WBUFW(buf,offset + 18) = 0;
+#endif
 
 	clif_send(buf, packet_len(header), &fitem->bl, AREA);
 }
@@ -792,7 +807,7 @@ void clif_clearflooritem(struct flooritem_data *fitem, int fd)
 	WBUFW(buf,0) = 0xa1;
 	WBUFL(buf,2) = fitem->bl.id;
 
-	if (fd == 0)
+	if (!fd)
 		clif_send(buf, packet_len(0xa1), &fitem->bl, AREA);
 	else {
 		WFIFOHEAD(fd,packet_len(0xa1));
@@ -1120,7 +1135,13 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 		WBUFL(buf,55) = -1;
 		WBUFL(buf,59) = -1;
 	}
-	WBUFB(buf,63) = (bl->type == BL_MOB && ((TBL_MOB *)bl)->spawn ? ((TBL_MOB *)bl)->spawn->state.boss : BTYPE_NONE); //isBoss
+	WBUFB(buf,63) = BTYPE_NONE;
+	if( bl->type == BL_MOB ) { //isBoss
+		if( status_bl_has_mode(bl,MD_MVP) )
+			WBUFB(buf,63) = BTYPE_MVP;
+		else if( status_bl_has_mode(bl,MD_STATUS_IMMUNE) )
+			WBUFB(buf,63) = BTYPE_BOSS;
+	}
 #endif
 
 #if PACKETVER >= 20150513
@@ -1275,7 +1296,13 @@ static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, un
 		WBUFL(buf,62) = -1;
 		WBUFL(buf,66) = -1;
 	}
-	WBUFB(buf,70) = (bl->type == BL_MOB && ((TBL_MOB *)bl)->spawn ? ((TBL_MOB *)bl)->spawn->state.boss : BTYPE_NONE); //isBoss
+	WBUFB(buf,70) = BTYPE_NONE;
+	if( bl->type == BL_MOB ) { //isBoss
+		if( status_bl_has_mode(bl,MD_MVP) )
+			WBUFB(buf,70) = BTYPE_MVP;
+		else if( status_bl_has_mode(bl,MD_STATUS_IMMUNE) )
+			WBUFB(buf,70) = BTYPE_BOSS;
+	}
 #endif
 
 #if PACKETVER >= 20150513
@@ -4075,7 +4102,7 @@ void clif_dispchat(struct chat_data *cd, int fd)
 	WBUFW(buf,12) = cd->limit;
 	WBUFW(buf,14) = (cd->owner->type == BL_NPC) ? cd->users + 1 : cd->users;
 	WBUFB(buf,16) = type;
-	safestrncpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // Not zero-terminated
+	memcpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // Not zero-terminated
 
 	if( fd ) {
 		WFIFOHEAD(fd,WBUFW(buf,2));
@@ -4110,9 +4137,9 @@ void clif_changechatstatus(struct chat_data *cd)
 	WBUFL(buf, 4) = cd->owner->id;
 	WBUFL(buf, 8) = cd->bl.id;
 	WBUFW(buf,12) = cd->limit;
-	WBUFW(buf,14) = (cd->owner->type == BL_NPC) ? cd->users+1 : cd->users;
+	WBUFW(buf,14) = (cd->owner->type == BL_NPC) ? cd->users + 1 : cd->users;
 	WBUFB(buf,16) = type;
-	safestrncpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // not zero-terminated
+	memcpy((char *)WBUFP(buf,17), cd->title, strlen(cd->title)); // not zero-terminated
 
 	clif_send(buf,WBUFW(buf,2),cd->owner,CHAT);
 }
@@ -4132,9 +4159,8 @@ void clif_clearchat(struct chat_data *cd,int fd)
 		WFIFOHEAD(fd,packet_len(0xd8));
 		memcpy(WFIFOP(fd,0),buf,packet_len(0xd8));
 		WFIFOSET(fd,packet_len(0xd8));
-	} else {
+	} else
 		clif_send(buf,packet_len(0xd8),cd->owner,AREA_WOSC);
-	}
 }
 
 
@@ -8449,7 +8475,7 @@ void clif_guild_masterormember(struct map_session_data *sd)
 	fd = sd->fd;
 	WFIFOHEAD(fd,packet_len(0x14e));
 	WFIFOW(fd,0) = 0x14e;
-	WFIFOL(fd,2) = (sd->state.gmaster_flag) ? 0xd7 : 0x57;
+	WFIFOL(fd,2) = (sd->state.gmaster_flag ? 0xd7 : 0x57);
 	WFIFOSET(fd,packet_len(0x14e));
 }
 
@@ -9753,7 +9779,7 @@ void clif_disp_overhead_(struct block_list *bl, const char *mes, enum send_targe
 	//Send back message to the speaker
 	if( bl->type == BL_PC ) {
 		WBUFW(buf,0) = 0x8e;
-		WBUFW(buf, 2) = len_mes + 4;
+		WBUFW(buf,2) = len_mes + 4;
 		safestrncpy((char *)WBUFP(buf,4), mes, len_mes);
 		clif_send(buf, WBUFW(buf,2), bl, SELF);
 	}

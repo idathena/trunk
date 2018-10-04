@@ -610,7 +610,7 @@ bool pet_get_egg(int account_id, short pet_class, int pet_id)
 	tmp_item.card[3] = 0; //New pets are not named.
 	if((ret = pc_additem(sd,&tmp_item,1,LOG_TYPE_PICKDROP_PLAYER))) {
 		clif_additem(sd,0,0,ret);
-		map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0);
+		map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0,false);
 	}
 
 	return true;
@@ -751,7 +751,7 @@ static int pet_unequipitem(struct map_session_data *sd, struct pet_data *pd)
 	tmp_item.identify = 1;
 	if ((flag = pc_additem(sd,&tmp_item,1,LOG_TYPE_OTHER))) {
 		clif_additem(sd,0,0,flag);
-		map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0);
+		map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0,false);
 	}
 	if (battle_config.pet_equip_required) { //Skotlex: halt support timers if needed
 		if (pd->state.skillbonus) {
@@ -1018,7 +1018,7 @@ static TIMER_FUNC(pet_delay_item_drop)
 
 		map_addflooritem(&ditem->item_data,ditem->item_data.amount,
 			list->m,list->x,list->y,
-			list->first_charid,list->second_charid,list->third_charid,4,0);
+			list->first_charid,list->second_charid,list->third_charid,4,0,false);
 		ditem_prev = ditem;
 		ditem = ditem->next;
 		ers_free(item_drop_ers, ditem_prev);
