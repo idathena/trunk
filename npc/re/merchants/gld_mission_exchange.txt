@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Cydh
 //===== Current Version: =====================================
-//= 1.3
+//= 1.4
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: =========================================
@@ -14,6 +14,7 @@
 //= 1.1 Minified the script. [Secretdataz]
 //= 1.2 Script cleanup. [aleos]
 //= 1.3 Minified Kvasir's ring part. [Lemongrass]
+//= 1.4 Fixed some issues. [exneval]
 //============================================================
 
 // Templates
@@ -26,8 +27,9 @@
 
 	mes "It's a machine that exchanges Commemorative Siege Guild Coins for special items.";
 	mes "Select the desired item and insert as many coins as necessary.";
-	next;
-	while(1) {
+	set .@loop,1;
+	while(.@loop) {
+		next;
 		switch(select("View exchangeable items","Trade for Investment Certificates","Trade for Good Medicines","Trade for Gifts","Kvasir's Ring","Leave")) {
 			case 1:
 				mes "[ClickClick MeowMeow-GX]";
@@ -83,7 +85,6 @@
 						break;
 
 					case 2:
-						mes "[ClickClick MeowMeow-GX]";
 						mes "You've decided to view other items.";
 						break;
 				}
@@ -162,8 +163,8 @@
 								next;
 								switch(select("Yes!","No!")) {
 									case 1:
-										mes "[ClickClick MeowMeow-GX]";
 										if (countitem(6615) > 1499) {
+											mes "[ClickClick MeowMeow-GX]";
 											mes "Thank you for using our service, meow!";
 											delitem 6615,1500; // Siege_Guild_Coin
 											getitem 18755,1; // Feather_Beret_
@@ -174,7 +175,6 @@
 										break;
 
 									case 2:
-										mes "[ClickClick MeowMeow-GX]";
 										mes "You've decided to view other items.";
 										break;
 								}
@@ -187,8 +187,8 @@
 								next;
 								switch(select("Yes!","No!")) {
 									case 1:
-										mes "[ClickClick MeowMeow-GX]";
 										if (countitem(6615) > 799) {
+											mes "[ClickClick MeowMeow-GX]";
 											mes "Thank you for using our service, meow!";
 											delitem 6615,800; // Siege_Guild_Coin
 											getitem 19585,1; // C_Feather_Beret
@@ -199,7 +199,6 @@
 										break;
 
 									case 2:
-										mes "[ClickClick MeowMeow-GX]";
 										mes "You've decided to view other items.";
 										break;
 								}
@@ -213,15 +212,13 @@
 								break;
 
 							case 4:
-								mes "[ClickClick MeowMeow-GX]";
 								mes "You've decided to view other items.";
 								break;
 						}
 						break;
 
 					case 7:
-						mes "[ClickClick MeowMeow-GX]";
-						mes "Do not use the exchange machine.";
+						set .@loop,0;
 						break;
 				}
 				break;
@@ -234,7 +231,7 @@
 				switch(select("Trade for Kvasir's Ring (Blue)", "Trade for Kvasir's Ring (Red)", "Trade for Kvasir's Ring (Green)", "Trade for Kvasir's Ring (Brown)", "Leave")) {
 					case 1:
 						mes "= Kvasir's Ring (Blue) =";
-						mes "A ring that is rumored to be filled with the power of Kvasir, a sage god. ";
+						mes "A ring that is rumored to be filled with the power of Kvasir, a sage god.";
 						mes "^4d4dffMSP + 30. 'Snow Flip' 1Lv available^000000";
 						mes "Accessory. Available to all job classes. Required Level: 1";
 						next;
@@ -245,8 +242,7 @@
 						next;
 						switch(select("Pay with Blood and Core","Pay with Kvasir's Ring (Red)","Pay with Kvasir's Ring (Green)","Pay with Kvasir's Ring (Brown)","Leave")) {
 							case 1:
-								mes "[ClickClick MeowMeow-GX]";
-								if ((countitem(12874) > 19) & (countitem(12875) > 19)) {
+								if (countitem(12874) > 19 && countitem(12875) > 19) {
 									mes "Kvasir's Ring (Blue) has been purchased.";
 									delitem 12874,20; // Frost_Giant_Blood
 									delitem 12875,20; // Golem_Stone
@@ -270,7 +266,6 @@
 								break;
 
 							case 5:
-								mes "[ClickClick MeowMeow-GX]";
 								mes "You've decided to view other items.";
 								break;
 						}
@@ -278,7 +273,7 @@
 
 					case 2:
 						mes "= Kvasir's Ring (Red) =";
-						mes "A ring that is rumored to be filled with the power of Kvasir, a sage god. ";
+						mes "A ring that is rumored to be filled with the power of Kvasir, a sage god.";
 						mes "^4d4dffMSP + 30. 'Peony Mamy' 1Lv available^000000";
 						mes "Accessory. Available to all job classes. Required Level: 1";
 						next;
@@ -300,7 +295,6 @@
 								break;
 
 							case 4:
-								mes "[ClickClick MeowMeow-GX]";
 								mes "You've decided to view other items.";
 								break;
 						}
@@ -308,13 +302,13 @@
 
 					case 3:
 						mes "= Kvasir's Ring (Green) =";
-						mes "A ring that is rumored to be filled with the power of Kvasir, a sage god. ";
+						mes "A ring that is rumored to be filled with the power of Kvasir, a sage god.";
 						mes "^4d4dffMSP + 100. 'Sada Ear' 1Lv available^000000";
 						mes "Accessory. Available to all job classes. Required Level: 1";
 						next;
 						mes "[ClickClick MeowMeow-GX]";
 						mes "Kvasir's Ring (Green) can be purchased with ^4d4dff1Kvasir's Ring and 10 Commemorative Coins.^000000";
-						mes "Which of the followings do you want to trade for Kvasir's Ring (Red)?";
+						mes "Which of the followings do you want to trade for Kvasir's Ring (Green)?";
 						next;
 						switch(select("Kvasir's Ring (Blue)","Kvasir's Ring (Red)","Kvasir's Ring (Brown)","Leave")) {
 							case 1:
@@ -330,21 +324,20 @@
 								break;
 
 							case 4:
-								mes "[ClickClick MeowMeow-GX]";
 								mes "You've decided to view other items.";
 								break;
 						}
 						break;
 
 					case 4:
-						mes "= Kvasir Ring Brown =";
-						mes "A ring that is rumored to be filled with the power of Kvasir, a sage god. ";
+						mes "= Kvasir's Ring (Brown) =";
+						mes "A ring that is rumored to be filled with the power of Kvasir, a sage god.";
 						mes "^4d4dffMSP + 100. 'Dust of Galaxy' 1Lv available^000000";
 						mes "Accessory. Available to all job classes. Required Level: 1";
 						next;
 						mes "[ClickClick MeowMeow-GX]";
 						mes "Kvasir's Ring (Brown) can be purchased with ^4d4dff1Kvasir's Ring and 10 Commemorative Coins.^000000";
-						mes "Which of the followings do you want to trade for Kvasir's Ring (Red)?";
+						mes "Which of the followings do you want to trade for Kvasir's Ring (Brown)?";
 						next;
 						switch(select("Kvasir's Ring (Blue)","Kvasir's Ring (Red)","Kvasir's Ring (Green)","Leave")) {
 							case 1:
@@ -360,25 +353,23 @@
 								break;
 
 							case 4:
-								mes "[ClickClick MeowMeow-GX]";
 								mes "You've decided to view other items.";
 								break;
 						}
 						break;
 
 					case 5:
-						mes "[ClickClick MeowMeow-GX]";
 						mes "You've decided to view other items.";
 						break;
 				}
 				break;
 
 			case 6:
-				mes "[ClickClick MeowMeow-GX]";
-				mes "Do not use the exchange machine.";
+				set .@loop,0;
 				break;
 		}
 	}
+	mes "Do not use the exchange machine.";
 	close;
 
 S_PurchaseMedicine:
@@ -388,8 +379,8 @@ S_PurchaseMedicine:
 	next;
 	switch(select("Yes!","No!")) {
 		case 1:
-			mes "[ClickClick MeowMeow-GX]";
 			if (countitem(6615) > 299) {
+				mes "[ClickClick MeowMeow-GX]";
 				mes "Thank you for using our service, meow!";
 				delitem 6615,300; // Siege_Guild_Coin
 				getitem getarg(1),1;
@@ -398,12 +389,11 @@ S_PurchaseMedicine:
 			break;
 
 		case 2:
-			mes "[ClickClick MeowMeow-GX]";
 			mes "You've decided to view other items.";
 			break;
 	}
 	return;
-	
+
 S_PurchaseGift:
 	.@itemid = getarg(1);
 	.@price = getarg(2);
@@ -413,8 +403,8 @@ S_PurchaseGift:
 	next;
 	switch(select("Yes!","No!")) {
 		case 1:
-			mes "[ClickClick MeowMeow-GX]";
 			if (countitem(6615) >= .@price) {
+				mes "[ClickClick MeowMeow-GX]";
 				mes "Thank you for using our service, meow!";
 				delitem 6615,.@price; // Siege_Guild_Coin
 				getitem .@itemid,1;
@@ -425,29 +415,27 @@ S_PurchaseGift:
 			break;
 
 		case 2:
-			mes "[ClickClick MeowMeow-GX]";
 			mes "You've decided to view other items.";
 			break;
 	}
 	return;
 
 S_Kvasir:
+	.@fromname$ = getarg(0);
 	.@fromid = getarg(1);
-	.@fromname$ = getarg(2);
+	.@toname$ = getarg(2);
 	.@toid = getarg(3);
-	.@toname$ = getarg(4);
-	
-	mes "[ClickClick MeowMeow-GX]";
+
 	// One of Kvasir's Rings and 10 Siege_Guild_Coin
-	if( countitem( .@fromid ) > 0 && countitem( 6615 ) > 9 ){
+	if (countitem(.@fromid) > 0 && countitem(6615) > 9) {
+		mes "[ClickClick MeowMeow-GX]";
 		mes "You have " + .@fromname$ + ".";
 		mes "Do you want to trade this in for " + .@toname$ + "?";
 		next;
-		mes "[ClickClick MeowMeow-GX]";
-		switch( select( "Yes!:Leave" ) ){
+		switch(select("Yes!:Leave")) {
 			case 1:
 				// Recheck the items once more
-				if( countitem( .@fromid ) > 0 && countitem( 6615 ) > 9 ){
+				if (countitem(.@fromid) > 0 && countitem(6615) > 9) {
 					mes "You have traded " + .@fromname$ + " for " + .@toname$ + ".";
 					delitem .@fromid, 1;
 					delitem 6615, 10; // Siege_Guild_Coin
