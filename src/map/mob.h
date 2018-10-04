@@ -306,6 +306,7 @@ enum {
 struct item_drop {
 	struct item item_data;
 	unsigned short mob_id;
+	bool showdropeffect;
 	enum bl_type src_type;
 	struct item_drop *next;
 };

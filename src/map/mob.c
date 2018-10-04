@@ -2018,6 +2018,7 @@ static struct item_drop *mob_setdropitem(struct s_mob_drop *mobdrop, int qty, un
 	drop->item_data.identify = itemdb_isidentified(mobdrop->nameid);
 	mob_setdropitem_option(&drop->item_data, mobdrop);
 	drop->mob_id = mob_id;
+	drop->showdropeffect = true;
 	drop->next = NULL;
 	return drop;
 }
@@ -2030,14 +2031,11 @@ static struct item_drop *mob_setlootitem(struct s_mob_lootitem *item, unsigned s
 	struct item_drop *drop = ers_alloc(item_drop_ers, struct item_drop);
 
 	memcpy(&drop->item_data, item, sizeof(struct item));
-
-	/**
-	 * Conditions for lotted item, so it can be announced when player pick it up
-	 * 1. Not-dropped other than monster. (This will be done later on pc_takeitem/party_share_loot)
-	 * 2. The mob_id is become the last lootter, instead of the real monster who drop it.
-	 */
+	//Conditions for lotted item, so it can be announced when player pick it up
+	//1. Not-dropped other than monster. (This will be done later on pc_takeitem/party_share_loot)
+	//2. The mob_id is become the last lootter, instead of the real monster who drop it.
 	drop->mob_id = item->mob_id;
-
+	drop->showdropeffect = false;
 	drop->next = NULL;
 	return drop;
 }
@@ -2058,7 +2056,7 @@ static TIMER_FUNC(mob_delay_item_drop)
 
 		map_addflooritem(&ditem->item_data,ditem->item_data.amount,
 			list->m,list->x,list->y,
-			list->first_charid,list->second_charid,list->third_charid,4,ditem->mob_id);
+			list->first_charid,list->second_charid,list->third_charid,4,ditem->mob_id,ditem->showdropeffect);
 		ditem_prev = ditem;
 		ditem = ditem->next;
 		ers_free(item_drop_ers, ditem_prev);
@@ -2766,7 +2764,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				mob_setdropitem_option(&item, &mdrop[i]);
 				if((temp = pc_additem(mvp_sd, &item, 1, LOG_TYPE_PICKDROP_PLAYER))) {
 					clif_additem(mvp_sd, 0, 0, temp);
-					map_addflooritem(&item, 1, mvp_sd->bl.m, mvp_sd->bl.x, mvp_sd->bl.y, mvp_sd->status.char_id, (second_sd ? second_sd->status.char_id : 0), (third_sd ? third_sd->status.char_id : 0), 1, 0);
+					map_addflooritem(&item, 1, mvp_sd->bl.m, mvp_sd->bl.x, mvp_sd->bl.y, mvp_sd->status.char_id, (second_sd ? second_sd->status.char_id : 0), (third_sd ? third_sd->status.char_id : 0), 1, 0, true);
 				}
 				if(i_data->flag.broadcast)
 					intif_broadcast_obtain_special_item(mvp_sd, item.nameid, md->mob_id, ITEMOBTAIN_TYPE_MONSTER_ITEM);

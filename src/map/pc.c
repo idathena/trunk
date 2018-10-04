@@ -5015,7 +5015,7 @@ bool pc_dropitem(struct map_session_data *sd, int n, int amount)
 		return false;
 	}
 
-	if(!map_addflooritem(&sd->inventory.u.items_inventory[n], amount, sd->bl.m, sd->bl.x, sd->bl.y, 0, 0, 0, 2, 0))
+	if(!map_addflooritem(&sd->inventory.u.items_inventory[n], amount, sd->bl.m, sd->bl.x, sd->bl.y, 0, 0, 0, 2, 0, false))
 		return false;
 
 	pc_delitem(sd, n, amount, 1, 0, LOG_TYPE_PICKDROP_PLAYER);
@@ -8165,7 +8165,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		item_tmp.card[1] = 0;
 		item_tmp.card[2] = GetWord(sd->status.char_id,0); //CharId
 		item_tmp.card[3] = GetWord(sd->status.char_id,1);
-		map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0);
+		map_addflooritem(&item_tmp,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0,false);
 	}
 
 	//Remove bonus_script when dead

@@ -1769,7 +1769,7 @@ bool map_closest_freecell(int16 m, int16 *x, int16 *y, int type, int flag)
  * @param mob_id: Monster ID if dropped by monster
  * @return 0:failure, x:item_gid [MIN_FLOORITEM;MAX_FLOORITEM]==[2;START_ACCOUNT_NUM]
  */
-int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, int first_charid, int second_charid, int third_charid, int flags, unsigned short mob_id)
+int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, int first_charid, int second_charid, int third_charid, int flags, unsigned short mob_id, bool showdropeffect)
 {
 	int r;
 	struct flooritem_data *fitem = NULL;
@@ -1791,7 +1791,7 @@ int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, i
 	fitem->bl.x = x;
 	fitem->bl.y = y;
 	fitem->bl.id = map_get_new_object_id();
-	if(fitem->bl.id == 0) {
+	if(!fitem->bl.id) {
 		aFree(fitem);
 		return 0;
 	}
@@ -1803,6 +1803,7 @@ int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, i
 	fitem->third_get_charid = third_charid;
 	fitem->third_get_tick = fitem->second_get_tick + (flags&1 ? battle_config.mvp_item_third_get_time : battle_config.item_third_get_time);
 	fitem->mob_id = mob_id;
+	fitem->showdropeffect = showdropeffect;
 
 	memcpy(&fitem->item, item, sizeof(*item));
 	fitem->item.amount = amount;

@@ -2054,7 +2054,7 @@
 	packet(0x0849,16); //clif_cashshop_result
 	parseable_packet(0x0848,-1,clif_parse_cashshop_buy,2,6,4,10);
 	parseable_packet(0x084a,2,clif_parse_cashshop_close,0);
-	packet(0x084b,19); //fallitem4
+	packet(0x084b,19); //ZC_ITEM_FALL_ENTRY4
 	parseable_packet(0x085a,90,clif_parse_UseSkillToPosMoreInfo,2,4,6,8,10);
 	parseable_packet(0x085d,18,clif_parse_PartyBookingRegisterReq,2,4,6);
 	parseable_packet(0x0868,-1,clif_parse_ItemListWindowSelected,2,4,8,12);
@@ -2098,8 +2098,8 @@
 	packet(0x0996,-1); //store itemlist equip
 	packet(0x0997,-1); //ZC_EQUIPWIN_MICROSCOPE_V5
 	parseable_packet(0x0998,8,clif_parse_EquipItem,2,4); // CZ_REQ_WEAR_EQUIP_V5
-	ack_packet(ZC_WEAR_EQUIP_ACK,0x0999,11,2,4,8,10); // cz_wear_equipv5
-	packet(0x099a,9); // take_off_equipv5
+	ack_packet(ZC_WEAR_EQUIP_ACK,0x0999,11,2,4,8,10); // CZ_WEAR_EQUIP_V5
+	packet(0x099a,9); // ZC_ACK_TAKEOFF_EQUIP_V5
 	packet(0x099b,8); //maptypeproperty2
 	// New Packets
 	packet(0x08C8,34); // ZC_NOTIFY_ACT3
@@ -2394,6 +2394,12 @@
 #if PACKETVER >= 20170830
 	packet(0x0ACB,12);
 	packet(0x0ACC,18);
+#endif
+
+// 2017-09-13bRagexeRE
+#if PACKETVER >= 20170913
+	// New Packet
+	packet(0x0add,22);
 #endif
 
 // 2017-10-25eRagexeRE
