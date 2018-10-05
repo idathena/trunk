@@ -13028,13 +13028,15 @@ void pc_attendance_claim_reward(struct map_session_data *sd) {
 }
 
 static void pc_attendance_clear(void) {
-	if (attendance_periods->rewards) {
-		aFree(attendance_periods->rewards);
-		attendance_periods->rewards = NULL;
-		attendance_periods->reward_count = 0;
+	if (attendance_periods) {
+		if (attendance_periods->rewards) {
+			aFree(attendance_periods->rewards);
+			attendance_periods->rewards = NULL;
+			attendance_periods->reward_count = 0;
+		}
+		aFree(attendance_periods);
+		attendance_periods = NULL;
 	}
-	aFree(attendance_periods);
-	attendance_periods = NULL;
 }
 
 bool pc_has_second_costume(int class_) {
@@ -13124,9 +13126,11 @@ static void pc_stylist_clear(void) {
 	int i;
 
 	for (i = 0; i < MAX_STYLIST_TYPE; i++) {
-		aFree(stylist_datas[i]);
-		stylist_datas[i] = NULL;
-		stylist_data_count = 0;
+		if (stylist_datas[i]) {
+			aFree(stylist_datas[i]);
+			stylist_datas[i] = NULL;
+			stylist_data_count = 0;
+		}
 	}
 }
 
