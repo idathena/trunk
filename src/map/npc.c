@@ -2015,7 +2015,7 @@ uint8 npc_selllist(struct map_session_data *sd, int n, unsigned short *item_list
 		idx = item_list[i * 2] - 2;
 		amount = item_list[i * 2 + 1];
 
-		if( idx >= MAX_INVENTORY || idx < 0 || amount < 0 )
+		if( idx < 0 || idx >= MAX_INVENTORY || amount < 0 )
 			return 1;
 
 		nameid = sd->inventory.u.items_inventory[idx].nameid;
@@ -2038,13 +2038,21 @@ uint8 npc_selllist(struct map_session_data *sd, int n, unsigned short *item_list
 		return npc_selllist_sub(sd, n, item_list, nd->master_nd);
 
 	for( i = 0; i < n; i++ ) { //Delete items
+		unsigned short nameid;
 		int amount, idx;
 
 		idx = item_list[i * 2] - 2;
 		amount = item_list[i * 2 + 1];
 
-		if( sd->inventory_data[idx]->type == IT_PETEGG && sd->inventory.u.items_inventory[idx].card[0] == CARD0_PET &&
-			search_petDB_index(sd->inventory.u.items_inventory[idx].nameid, PET_EGG) >= 0 )
+		if( idx < 0 || idx >= MAX_INVENTORY || amount < 0 )
+			return 1;
+
+		nameid = sd->inventory.u.items_inventory[idx].nameid;
+
+		if( !nameid || !sd->inventory_data[idx] || sd->inventory.u.items_inventory[idx].amount < amount )
+			return 1;
+
+		if( sd->inventory_data[idx]->type == IT_PETEGG && sd->inventory.u.items_inventory[idx].card[0] == CARD0_PET && search_petDB_index(nameid, PET_EGG) >= 0 )
 			intif_delete_petdata(MakeDWord(sd->inventory.u.items_inventory[idx].card[1], sd->inventory.u.items_inventory[idx].card[2]));
 
 		pc_delitem(sd, idx, amount, 0, 6, LOG_TYPE_NPC);
@@ -2056,7 +2064,7 @@ uint8 npc_selllist(struct map_session_data *sd, int n, unsigned short *item_list
 	pc_getzeny(sd, (int)z, LOG_TYPE_NPC, NULL);
 
 	//Custom merchant shop exp bonus
-	if( battle_config.shop_exp > 0 && z > 0 && (lv = pc_checkskill(sd,MC_OVERCHARGE)) > 0 ) {
+	if( battle_config.shop_exp > 0 && z > 0 && (lv = pc_checkskill(sd, MC_OVERCHARGE)) > 0 ) {
 		if( sd->status.skill[MC_OVERCHARGE].flag >= SKILL_FLAG_REPLACED_LV_0 )
 			lv = sd->status.skill[MC_OVERCHARGE].flag - SKILL_FLAG_REPLACED_LV_0;
 		if( lv > 0 ) {

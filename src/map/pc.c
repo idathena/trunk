@@ -4959,8 +4959,8 @@ char pc_delitem(struct map_session_data *sd, int n, int amount, int type, short 
 {
 	nullpo_retr(1, sd);
 
-	if(n < 0 || sd->inventory.u.items_inventory[n].nameid == 0 || amount <= 0 || sd->inventory.u.items_inventory[n].amount < amount ||
-		sd->inventory_data[n] == NULL)
+	if(n < 0 || !sd->inventory.u.items_inventory[n].nameid || amount <= 0 || sd->inventory.u.items_inventory[n].amount < amount ||
+		!sd->inventory_data[n])
 		return 1;
 
 	log_pick_pc(sd, log_type, -amount, &sd->inventory.u.items_inventory[n]);
