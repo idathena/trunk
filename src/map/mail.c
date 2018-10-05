@@ -136,7 +136,7 @@ enum mail_attach_result mail_setitem(struct map_session_data *sd, short idx, uin
 
 		idx -= 2;
 
-		if( idx < 0 || idx >= MAX_INVENTORY )
+		if( idx < 0 || idx >= MAX_INVENTORY || !sd->inventory_data[idx] )
 			return MAIL_ATTACH_ERROR;
 
 #if PACKETVER < 20150513
@@ -144,7 +144,7 @@ enum mail_attach_result mail_setitem(struct map_session_data *sd, short idx, uin
 		mail_removeitem(sd, 0, sd->mail.item[i].index + 2, sd->mail.item[i].amount); //Remove existing item
 #else
 		ARR_FIND(0, MAIL_MAX_ITEM, i, (sd->mail.item[i].index == idx && sd->mail.item[i].nameid > 0));
-	
+
 		if( i < MAIL_MAX_ITEM ) { //The same item had already been added to the mail
 			if( !itemdb_isstackable(sd->mail.item[i].nameid) ) //Check if it is stackable
 				return MAIL_ATTACH_ERROR;
