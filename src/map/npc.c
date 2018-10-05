@@ -2374,7 +2374,7 @@ static void npc_parsename(struct npc_data *nd, const char *name, const char *sta
 
 		do {
 			++i;
-			snprintf(newname, ARRAYLENGTH(newname), "%d_%d_%d_%d", i, nd->bl.m, nd->bl.x, nd->bl.y);
+			safesnprintf(newname, ARRAYLENGTH(newname), "%d_%d_%d_%d", i, nd->bl.m, nd->bl.x, nd->bl.y);
 		} while( npc_name2id(newname) != NULL );
 
 		strcpy(this_mapname, (nd->bl.m == -1 ? "(not on a map)" : mapindex_id2name(map_id2index(nd->bl.m))));

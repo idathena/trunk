@@ -1228,12 +1228,11 @@ TIMER_FUNC(pet_skill_support_timer)
 	return 0;
 }
 
-static void pet_readdb_clear(void)
+static void pet_readdb_clear(bool destroy)
 {
 	int i;
 
-	// Remove any previous scripts in case reloaddb was invoked.
-	for (i = 0; i < MAX_PET_DB; i++) {
+	for (i = 0; i < MAX_PET_DB; i++) { //Remove any previous scripts in case reloaddb was invoked
 		int j;
 
 		if (pet_db[i].pet_script) {
@@ -1244,20 +1243,22 @@ static void pet_readdb_clear(void)
 			script_free_code(pet_db[i].pet_friendly_script);
 			pet_db[i].pet_friendly_script = NULL;
 		}
-		for (j = 0; j < pet_db[i].ev_data_count; j++) {
-			if (pet_db[i].ev_datas[j].ev_items) {
-				aFree(pet_db[i].ev_datas[j].ev_items);
-				pet_db[i].ev_datas[j].ev_items = NULL;
-				pet_db[i].ev_datas->ev_item_count = 0;
+		if (pet_db[i].ev_datas) {
+			for (j = 0; j < pet_db[i].ev_data_count; j++) {
+				if (pet_db[i].ev_datas[j].ev_items) {
+					aFree(pet_db[i].ev_datas[j].ev_items);
+					pet_db[i].ev_datas[j].ev_items = NULL;
+					pet_db[i].ev_datas->ev_item_count = 0;
+				}
 			}
+			aFree(pet_db[i].ev_datas);
+			pet_db[i].ev_datas = NULL;
+			pet_db[i].ev_data_count = 0;
 		}
-		aFree(pet_db[i].ev_datas);
-		pet_db[i].ev_datas = NULL;
-		pet_db[i].ev_data_count = 0;
 	}
 
-	// Clear database
-	memset(pet_db,0,sizeof(pet_db));
+	if (!destroy) //Clear database
+		memset(pet_db,0,sizeof(pet_db));
 }
 
 static void pet_readdb_libconfig_sub_intimacy(struct config_setting_t *t, int idx)
@@ -1492,7 +1493,7 @@ void pet_readdb(void)
 	};
 	int i, count = 0;
 
-	pet_readdb_clear();
+	pet_readdb_clear(false);
 	for (i = 0; i < ARRAYLENGTH(filename); ++i)
 		count = pet_readdb_libconfig(filename[i], (i > 0 ? true : false), count);
 }
@@ -1519,30 +1520,7 @@ void do_init_pet(void)
 
 void do_final_pet(void)
 {
-	int i;
-
-	for( i = 0; i < MAX_PET_DB; i++ ) {
-		int j;
-
-		if( pet_db[i].pet_script ) {
-			script_free_code(pet_db[i].pet_script);
-			pet_db[i].pet_script = NULL;
-		}
-		if( pet_db[i].pet_friendly_script ) {
-			script_free_code(pet_db[i].pet_friendly_script);
-			pet_db[i].pet_friendly_script = NULL;
-		}
-		for (j = 0; j < pet_db[i].ev_data_count; j++) {
-			if (pet_db[i].ev_datas[j].ev_items) {
-				aFree(pet_db[i].ev_datas[j].ev_items);
-				pet_db[i].ev_datas[j].ev_items = NULL;
-				pet_db[i].ev_datas->ev_item_count = 0;
-			}
-		}
-		aFree(pet_db[i].ev_datas);
-		pet_db[i].ev_datas = NULL;
-		pet_db[i].ev_data_count = 0;
-	}
+	pet_readdb_clear(true);
 	ers_destroy(item_drop_ers);
 	ers_destroy(item_drop_list_ers);
 }

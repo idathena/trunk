@@ -10660,7 +10660,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 						case SC_KSPROTECTED:
 						case SC_HANBOK:
 						case SC_OKTOBERFEST:
-						case SC_INCATKRATE:
 						case SC_INCMATKRATE:
 						case SC_INCDEFRATE:
 						case SC_NETHERWORLD_POSTDELAY:
