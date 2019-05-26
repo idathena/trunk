@@ -47,7 +47,7 @@ const char *storage_getName(uint8 id)
 }
 
 /**
- * Check if sotrage ID is valid
+ * Check if storage ID is valid
  * @param id Storage ID
  * @return True:Valid, False:Invalid
  */
@@ -1159,7 +1159,7 @@ bool storage_premiumStorage_load(struct map_session_data *sd, uint8 num, uint8 m
 	if (sd->state.banking || sd->state.callshop)
 		return false;
 
-	if (!pc_can_give_items(sd)) { //Check is this GM level is allowed to put items to storage
+	if (!pc_can_give_items(sd)) { //Check if this GM level is allowed to put items to storage
 		clif_displaymessage(sd->fd, msg_txt(246));
 		return false;
 	}

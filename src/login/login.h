@@ -80,8 +80,12 @@ struct Login_Config {
 
 	char account_engine[256];                       // Name of the engine to use (defaults to auto, for the first available engine)
 
-	int client_hash_check;							// Flags for checking client md5
-	struct client_hash_node *client_hash_nodes;		// Linked list containg md5 hash for each gm group
+	int client_hash_check;                          // Flags for checking client md5
+	struct client_hash_node *client_hash_nodes;     // Linked list containg md5 hash for each gm group
+	bool usercount_disable;                         // Disable colorization and description in general?
+	int usercount_low;                              // Amount of users that will display in green
+	int usercount_medium;                           // Amount of users that will display in yellow
+	int usercount_high;                             // Amount of users that will display in red
 	int char_per_account;                           // Number of characters an account can have
 #ifdef VIP_ENABLE
 	struct {

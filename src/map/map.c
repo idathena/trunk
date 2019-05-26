@@ -66,7 +66,7 @@
 char default_codepage[32] = "";
 
 int map_server_port = 3306;
-char map_server_ip[32] = "127.0.0.1";
+char map_server_ip[64] = "127.0.0.1";
 char map_server_id[32] = "ragnarok";
 char map_server_pw[32] = "";
 char map_server_db[32] = "ragnarok";
@@ -94,7 +94,7 @@ char vendings_db[32] = "vendings";
 char vending_items_db[32] = "vending_items";
 
 // log database
-char log_db_ip[32] = "127.0.0.1";
+char log_db_ip[64] = "127.0.0.1";
 int log_db_port = 3306;
 char log_db_id[32] = "ragnarok";
 char log_db_pw[32] = "ragnarok";
@@ -199,10 +199,6 @@ int map_usercount(void)
 {
 	return pc_db->size(pc_db);
 }
-
-//
-// blockíœ‚ÌˆÀ‘S«Šm•Û?—
-//
 
 /*==========================================
  * Attempt to free a map blocklist
@@ -361,7 +357,7 @@ int map_delblock(struct block_list *bl)
 #ifdef CELL_NOSTACK
 	map_delblcell(bl);
 #endif
-	
+
 	pos = bl->x / BLOCK_SIZE + (bl->y / BLOCK_SIZE) * map[bl->m].bxs;
 
 	if (bl->next)
@@ -502,7 +498,7 @@ int map_moveblock(struct block_list *bl, int x1, int y1, unsigned int tick)
 
 	return 0;
 }
-	
+
 /*==========================================
  * Counts specified number of objects on given cell.
  * flag:
@@ -1538,15 +1534,15 @@ int map_get_new_object_id(void)
 TIMER_FUNC(map_clearflooritem_timer)
 {
 	struct flooritem_data *fitem = (struct flooritem_data *)idb_get(id_db, id);
-	
+
 	if (fitem == NULL || fitem->bl.type != BL_ITEM || (fitem->cleartimer != tid)) {
 		ShowError("map_clearflooritem_timer : error\n");
 		return 1;
 	}
-	
+
 	if (search_petDB_index(fitem->item.nameid, PET_EGG) >= 0)
 		intif_delete_petdata(MakeDWord(fitem->item.card[1], fitem->item.card[2]));
-		
+
 	clif_clearflooritem(fitem, 0);
 	map_deliddb(&fitem->bl);
 	map_delblock(&fitem->bl);
@@ -1644,7 +1640,7 @@ int map_search_freecell(struct block_list *src, int16 m, int16 *x, int16 *y, int
 		*y = by;
 		return map_getcell(m,*x,*y,CELL_CHKREACH);
 	}
-	
+
 	if (rx >= 0 && ry >= 0) {
 		tries = rx2 * ry2;
 		if (tries > 100)
@@ -1654,7 +1650,7 @@ int map_search_freecell(struct block_list *src, int16 m, int16 *x, int16 *y, int
 		if (tries > 500)
 			tries = 500;
 	}
-	
+
 	while (tries--) {
 		*x = (rx >= 0) ? (rnd()%rx2 - rx + bx) : (rnd()%(map[m].xs - 2) + 1);
 		*y = (ry >= 0) ? (rnd()%ry2 - ry + by) : (rnd()%(map[m].ys - 2) + 1);
@@ -1685,7 +1681,7 @@ int map_search_freecell(struct block_list *src, int16 m, int16 *x, int16 *y, int
  * Returns true on success and sets x and y to cell found.
  * Otherwise returns false and x and y are not changed.
  * type: Types of block to count
- * flag: 
+ * flag:
  *  0x1 - only count standing units
  */
 bool map_closest_freecell(int16 m, int16 *x, int16 *y, int type, int flag)
@@ -2724,7 +2720,7 @@ int map_removemobs_sub(struct block_list *bl, va_list ap)
 	// is a mvp
 	if( md->db->mexp > 0 )
 		return 0;
-	
+
 	unit_free(&md->bl,CLR_OUTSIGHT);
 
 	return 1;
@@ -2808,10 +2804,10 @@ int16 map_mapname2mapid(const char *name)
 int16 map_mapindex2mapid(unsigned short mapindex)
 {
 	struct map_data *md = NULL;
-	
+
 	if (!mapindex)
 		return -1;
-	
+
 	md = (struct map_data*)uidb_get(map_db,(unsigned int)mapindex);
 	if (md == NULL || md->cell == NULL)
 		return -1;
@@ -3250,7 +3246,7 @@ int map_setipport(unsigned short mapindex, uint32 ip, uint16 port)
 	struct map_data_other_server *mdos;
 
 	mdos= uidb_ensure(map_db,(unsigned int)mapindex, create_map_data_other_server);
-	
+
 	if(mdos->cell) //Local map,Do nothing. Give priority to our own local maps over ones from another server. [Skotlex]
 		return 0;
 	if(ip == clif_getip() && port == clif_getport()) {
@@ -3615,7 +3611,7 @@ int map_readgat (struct map_data *m)
 
 		m->cell[xy] = map_gat2cell(type);
 	}
-	
+
 	aFree(gat);
 
 	return 1;
@@ -3933,7 +3929,7 @@ void map_reloadnpc_sub(char *cfgName)
 		while (--ptr >= w2 && *ptr == ' ');
 		ptr++;
 		*ptr = '\0';
-			
+
 		if (strcmpi(w1, "npc") == 0)
 			npc_addsrcfile(w2, false);
 		else if (strcmpi(w1, "delnpc") == 0)

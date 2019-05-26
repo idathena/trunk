@@ -1129,7 +1129,7 @@ void clif_skill_scale(struct block_list *bl, int src_id, int x, int y, uint16 sk
 void clif_weight_limit(struct map_session_data *sd);
 
 //Pet Evolution System
-void clif_pet_evolution_result(int fd, enum e_pet_evolution_result result);
+void clif_pet_evolution_result(struct map_session_data *sd, enum e_pet_evolution_result result);
 
 //Attendance System
 void clif_attendence_response(struct map_session_data *sd, int32 data);

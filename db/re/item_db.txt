@@ -11223,6 +11223,7 @@
 25232,Cheap_Lubricant,Cheap Lubricant,3,20,,0,,,,,,,,,,,,,{},{},{}
 25233,Cotton_Bundle,Cotton Bundle,3,20,,0,,,,,,,,,,,,,{},{},{}
 25245,Small_Pile_Of_Bones,Small Pile of Bones,3,0,,0,,,,,,,,,,,,,{},{},{}
+25290,Sweets_Festival_Coin,Sweets Festival Coin,3,0,,0,,,,,,,,,,,,,{},{},{}
 25375,Mightysoul_Essence,Mightysoul Essence,3,0,,0,,,,,,,,,,,,,{},{},{}
 25377,Luxurious_Pet_Food,Luxurious Pet Food,3,20,,10,,,,,,,,,,,,,{},{},{}
 25408,Memories_Of_Gyoll,Memories of Gyoll,3,0,,0,,,,,,,,,,,,,{},{},{}

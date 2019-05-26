@@ -5934,7 +5934,7 @@ ACMD_FUNC(autotrade)
 	if( battle_config.at_timeout ) {
 		int timeout = atoi(message);
 
-		sc_start(NULL, &sd->bl, SC_AUTOTRADE, 100, 0, (timeout > 0 ? min(timeout,battle_config.at_timeout) : battle_config.at_timeout) * 60000);
+		sc_start(NULL, &sd->bl, SC_AUTOTRADE, 100, 0, (timeout > 0 ? min(timeout, battle_config.at_timeout) : battle_config.at_timeout) * 60000);
 	}
 
 	channel_pcquit(sd, 0xF); // Leave all channels.
@@ -6502,7 +6502,7 @@ ACMD_FUNC(mobsearch)
 		mob_id = mobdb_searchname(mob_name);
 
 	if (!mobdb_checkid(mob_id)) {
-		snprintf(atcmd_output, sizeof atcmd_output, msg_txt(1219),mob_name); // Invalid mob ID %s!
+		snprintf(atcmd_output, sizeof atcmd_output, msg_txt(1219), mob_name); // Invalid mob ID %s!
 		clif_displaymessage(fd, atcmd_output);
 		return -1;
 	}
@@ -9798,7 +9798,7 @@ ACMD_FUNC(cloneequip) {
 			tmp_item = pl_sd->inventory.u.items_inventory[idx];
 			if (itemdb_isspecial(tmp_item.card[0]))
 				memset(tmp_item.card, 0, sizeof(tmp_item.card));
-			tmp_item.bound = 0;
+			tmp_item.bound = BOUND_NONE;
 			tmp_item.expire_time = 0;
 			tmp_item.unique_id = 0;
 			tmp_item.favorite = 0;

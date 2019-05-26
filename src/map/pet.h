@@ -16,7 +16,7 @@ struct s_pet_evo_itemlist {
 };
 
 struct s_pet_evo_datalist {
-	unsigned short EggID;
+	short class_;
 	struct s_pet_evo_itemlist *ev_items;
 	uint8 ev_item_count;
 };
@@ -151,6 +151,8 @@ int pet_change_name_ack(struct map_session_data *sd, char *name, int flag);
 int pet_equipitem(struct map_session_data *sd,int index);
 int pet_lootitem_drop(struct pet_data *pd,struct map_session_data *sd);
 int pet_attackskill(struct pet_data *pd, int target_id);
+void pet_evolution(struct map_session_data *sd, unsigned short pet_idx);
+int pet_get_walk_speed(struct map_session_data *sd);
 TIMER_FUNC(pet_skill_support_timer); // [Skotlex]
 TIMER_FUNC(pet_skill_bonus_timer); // [Valaris]
 TIMER_FUNC(pet_recovery_timer); // [Valaris]

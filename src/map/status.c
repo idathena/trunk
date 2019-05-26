@@ -1473,7 +1473,7 @@ int status_set_maxhp(struct block_list *bl, unsigned int maxhp, int flag)
 }
 
 //Sets SP to given value. Flag is the flag passed to status_heal in case
-//final value is higher than current (use 2 to make a healing effect display 
+//final value is higher than current (use 2 to make a healing effect display
 //on players)
 int status_set_sp(struct block_list *bl, unsigned int sp, int flag)
 {
@@ -1538,7 +1538,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 
 	nullpo_ret(target);
 
-	//Here onwards we consider it a 32-type, the client does not support higher and from here onwards the value doesn't get thru percentage modifiers 
+	//Here onwards we consider it a 32-type, the client does not support higher and from here onwards the value doesn't get thru percentage modifiers
 	hp = (int)cap_value(in_hp, INT_MIN, INT_MAX);
 	sp = (int)cap_value(in_sp, INT_MIN, INT_MAX);
 
@@ -1666,7 +1666,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 	if (status->hp || (flag&8)) { //Still lives or has been dead before this damage
 		if (walkdelay)
 			unit_set_walkdelay(target, gettick(), walkdelay, 0);
-		return (int)(hp + sp); 
+		return (int)(hp + sp);
 	}
 
 	status->hp = 0;
@@ -1704,7 +1704,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 				memset(&regen->ssregen->tick,0,sizeof(regen->ssregen->tick));
 		}
 	}
-   
+
 	if (sc && sc->data[SC_KAIZEL] && !map_flag_gvg2(target->m)) { //flag&8 = disable Kaizel
 		int time = skill_get_time2(SL_KAIZEL,sc->data[SC_KAIZEL]->val1);
 
@@ -1776,7 +1776,7 @@ int status_heal(struct block_list *bl, int64 in_hp, int64 in_sp, int flag)
 		return 0;
 
 	//Here onwards we consider it a 32-type, the client does not support higher and,
-	//from here onwards the value doesn't get thru percentage modifiers 
+	//from here onwards the value doesn't get thru percentage modifiers
 	hp = (int)cap_value(in_hp, INT_MIN, INT_MAX);
 	sp = (int)cap_value(in_sp, INT_MIN, INT_MAX);
 
@@ -1917,7 +1917,7 @@ int status_revive(struct block_list *bl, unsigned char per_hp, unsigned char per
 		hp = status->max_hp - status->hp;
 	else if (per_hp && !hp)
 		hp = 1;
-		
+
 	if(sp > status->max_sp - status->sp)
 		sp = status->max_sp - status->sp;
 	else if (per_sp && !sp)
@@ -2898,7 +2898,7 @@ void status_calc_pet_(struct pet_data *pd, enum e_status_calc_opt opt)
 		memcpy(&pd->status, &pd->db->status, sizeof(struct status_data));
 		pd->status.mode = MD_CANMOVE; //Pets discard all modes, except walking
 		pd->status.class_ = CLASS_NORMAL;
-		pd->status.speed = pd->petDB->speed;
+		pd->status.speed = pet_get_walk_speed(pd->master);
 
 		//Attack support requires the pet to be able to attack
 		if (battle_config.pet_attack_support || battle_config.pet_damage_support)
@@ -3434,7 +3434,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->add_drop)
 		+ sizeof(sd->itemhealrate)
 		+ sizeof(sd->subele2)
-		+ sizeof(sd->cooldown)
+		+ sizeof(sd->skillcooldown)
 		+ sizeof(sd->skillfixcast)
 		+ sizeof(sd->skillvarcast)
 		+ sizeof(sd->skillfixcastrate)
@@ -3444,6 +3444,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->hp_vanish_race)
 		+ sizeof(sd->sp_vanish_race)
 		+ sizeof(sd->subskill)
+		+ sizeof(sd->skilldelay)
 	);
 
 	if (sd->bonus.speed_rate < 0)
@@ -4320,7 +4321,7 @@ int status_calc_elemental_(struct elemental_data *ed, enum e_status_calc_opt opt
 	struct status_data *status = &ed->base_status;
 	struct s_elemental *ele = &ed->elemental;
 	struct map_session_data *sd = ed->master;
-	
+
 	if( !sd )
 		return 0;
 
@@ -4355,7 +4356,7 @@ int status_calc_elemental_(struct elemental_data *ed, enum e_status_calc_opt opt
 		status_calc_misc(&ed->bl, status, 0);
 		status_cpy(&ed->battle_status, status);
 	}
-	
+
 	return 0;
 }
 
@@ -4448,7 +4449,7 @@ void status_calc_regen(struct block_list *bl, struct status_data *status, struct
 		if( (lv = pc_checkskill(sd, WM_LESSON)) > 0 )
 			val += lv * 3 + lv * status->max_sp / 500;
 		if( sc && sc->count && sc->data[SC_SHRIMPBLESSING] )
-			val = val * 150 / 100;
+			val *= 150 / 100;
 		sregen->sp = cap_value(val, 0, SHRT_MAX);
 
 		//Sitting skill regeneration
@@ -4598,25 +4599,25 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 			case ELEMENTALID_AGNI_S:
 			case ELEMENTALID_AGNI_M:
 			case ELEMENTALID_AGNI_L:
-				if(sc->data[SC_FIRE_INSIGNIA] && sc->data[SC_FIRE_INSIGNIA]->val1 == 1)
+				if( sc->data[SC_FIRE_INSIGNIA] && sc->data[SC_FIRE_INSIGNIA]->val1 == 1 )
 					regen->rate.hp += 100;
 				break;
 			case ELEMENTALID_AQUA_S:
 			case ELEMENTALID_AQUA_M:
 			case ELEMENTALID_AQUA_L:
-				if(sc->data[SC_WATER_INSIGNIA] && sc->data[SC_WATER_INSIGNIA]->val1 == 1)
+				if( sc->data[SC_WATER_INSIGNIA] && sc->data[SC_WATER_INSIGNIA]->val1 == 1 )
 					regen->rate.hp += 100;
 				break;
 			case ELEMENTALID_VENTUS_S:
 			case ELEMENTALID_VENTUS_M:
 			case ELEMENTALID_VENTUS_L:
-				if(sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 1)
+				if( sc->data[SC_WIND_INSIGNIA] && sc->data[SC_WIND_INSIGNIA]->val1 == 1 )
 					regen->rate.hp += 100;
 				break;
 			case ELEMENTALID_TERA_S:
 			case ELEMENTALID_TERA_M:
 			case ELEMENTALID_TERA_L:
-				if(sc->data[SC_EARTH_INSIGNIA] && sc->data[SC_EARTH_INSIGNIA]->val1 == 1)
+				if( sc->data[SC_EARTH_INSIGNIA] && sc->data[SC_EARTH_INSIGNIA]->val1 == 1 )
 					regen->rate.hp += 100;
 				break;
 		}
@@ -4625,7 +4626,7 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 
 void status_calc_state(struct block_list *bl, struct status_change *sc, enum scs_flag flag, bool start)
 {
-	if( !sc || !sc->count ) { //No sc at all, we can zero without any extra weight over our conciousness 
+	if( !sc || !sc->count ) { //No sc at all, we can zero without any extra weight over our conciousness
 		memset(&sc->cant, 0, sizeof (sc->cant));
 		return;
 	}
@@ -6267,7 +6268,7 @@ short status_calc_def2(struct block_list *bl, struct status_change *sc, int def2
 }
 
 defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int mdef, bool viewable)
-{	
+{
 	if(!sc || !sc->count)
 		return (defType)cap_value(mdef,DEFTYPE_MIN,DEFTYPE_MAX);
 
@@ -6305,7 +6306,7 @@ defType status_calc_mdef(struct block_list *bl, struct status_change *sc, int md
 		mdef += sc->data[SC_ARMORCHANGE]->val3;
 #endif
 	if(sc->data[SC_EARTH_INSIGNIA] && sc->data[SC_EARTH_INSIGNIA]->val1 == 3)
-		mdef += 50;	
+		mdef += 50;
 	if(sc->data[SC_ENDURE] && !sc->data[SC_ENDURE]->val3)
 		mdef += (!sc->data[SC_ENDURE]->val4 ? sc->data[SC_ENDURE]->val1 : 1); //Eddga card only grants 1 MDEF
 	if(sc->data[SC_STONEHARDSKIN])
@@ -7140,7 +7141,7 @@ int status_get_job_lv(struct block_list *bl) {
 	nullpo_ret(bl);
 
 	switch (bl->type) {
-		case BL_PC: 
+		case BL_PC:
 			return ((TBL_PC *)bl)->status.job_level;
 		case BL_MOB:
 		case BL_PET:
@@ -10252,7 +10253,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val4 = 200 / casterint * val1; //MDEF decrease: MDEF [(200 / Caster's INT) x Skill Level]
 				}
 				break;
-			case SC_GT_REVITALIZE: 
+			case SC_GT_REVITALIZE:
 				val2 = status_get_vit(src) / 4 * val1; //Stat DEF increase: [(Caster's VIT / 4) x Skill Level]
 				val3 = val1 * 30 + 50; //Natural HP recovery increase: [(Skill Level x 30) + 50] %
 				break;
@@ -11312,7 +11313,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_SATURDAYNIGHTFEVER:
 			if (!sce->val2)
 				status_heal(bl,status->max_hp,0,1);
-			sce->val2 = status->max_hp / 100; 
+			sce->val2 = status->max_hp / 100;
 			break;
 		case SC_C_MARKER: {
 				struct map_session_data *ssd = NULL;

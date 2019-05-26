@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS `char` (
 --
 
 CREATE TABLE IF NOT EXISTS `charlog` (
-  `time` datetime NOT NULL default '0000-00-00 00:00:00',
+  `time` datetime NOT NULL,
   `char_msg` varchar(255) NOT NULL default 'char select',
   `account_id` int(11) NOT NULL default '0',
   `char_id` int(11) unsigned NOT NULL default '0',
@@ -544,14 +544,14 @@ CREATE TABLE IF NOT EXISTS `homunculus` (
   PRIMARY KEY  (`homun_id`)
 ) ENGINE=MyISAM;
 
--- 
+--
 -- Table structure for table `interlog`
 --
 
 CREATE TABLE IF NOT EXISTS `interlog` (
-  `time` datetime NOT NULL default '0000-00-00 00:00:00',
+  `time` datetime NOT NULL,
   `log` varchar(255) NOT NULL default ''
-) ENGINE=MyISAM; 
+) ENGINE=MyISAM;
 
 --
 -- Table structure for table `inventory`
@@ -599,8 +599,8 @@ CREATE TABLE IF NOT EXISTS `inventory` (
 
 CREATE TABLE IF NOT EXISTS `ipbanlist` (
   `list` varchar(255) NOT NULL default '',
-  `btime` datetime NOT NULL default '0000-00-00 00:00:00',
-  `rtime` datetime NOT NULL default '0000-00-00 00:00:00',
+  `btime` datetime NOT NULL,
+  `rtime` datetime NOT NULL,
   `reason` varchar(255) NOT NULL default '',
   KEY (`list`)
 ) ENGINE=MyISAM;
@@ -620,9 +620,9 @@ CREATE TABLE IF NOT EXISTS `login` (
   `unban_time` int(11) unsigned NOT NULL default '0',
   `expiration_time` int(11) unsigned NOT NULL default '0',
   `logincount` mediumint(9) unsigned NOT NULL default '0',
-  `lastlogin` datetime NOT NULL default '0000-00-00 00:00:00',
+  `lastlogin` datetime,
   `last_ip` varchar(100) NOT NULL default '',
-  `birthdate` DATE NOT NULL default '0000-00-00',
+  `birthdate` DATE,
   `character_slots` tinyint(3) unsigned NOT NULL default '0',
   `pincode` varchar(4) NOT NULL default '',
   `pincode_change` int(11) unsigned NOT NULL default '0',
@@ -630,7 +630,7 @@ CREATE TABLE IF NOT EXISTS `login` (
   `old_group` tinyint(3) NOT NULL default '0',
   PRIMARY KEY  (`account_id`),
   KEY `name` (`userid`)
-) ENGINE=MyISAM AUTO_INCREMENT=2000000; 
+) ENGINE=MyISAM AUTO_INCREMENT=2000000;
 
 -- added standard accounts for servers, VERY INSECURE!!!
 -- inserted into the table called login which is above
@@ -888,26 +888,12 @@ CREATE TABLE IF NOT EXISTS `sql_updates` (
 ) ENGINE=MyISAM;
 
 -- Existent updates to enter
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1414975503);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1435860840);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1436360978);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1440688342);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1450241859);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1450367880);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1457638175);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1467934919);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1467935469);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1475526420);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1477434595);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1488454834);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1488744559);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1489588190);
-INSERT INTO `sql_updates` (`timestamp`) VALUES (1510499460);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1536064380);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1536825360);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1537110930);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1537536180);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1537575360);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1558911240);
 
 --
 -- Table structure for table `sstatus`

@@ -16,9 +16,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
-#define STORAGE_MEMINC	16
-
 /**
  * Check if sotrage ID is valid
  * @param id: Storage ID
@@ -194,11 +191,10 @@ static void inter_storage_checkDB(void)
 			"`option_id2`,`option_val2`,`option_parm2`,`option_id3`,`option_val3`,`option_parm3`,`option_id4`,`option_val4`,`option_parm4`,"
 			"`expire_time`,`bound`,`unique_id`"
 			" FROM `%s` LIMIT 1;", interserv_config.storages[i].table) )
-		{
 			Sql_ShowDebug(sql_handle);
-		}
+		else
+			Sql_FreeResult(sql_handle);
 	}
-	Sql_FreeResult(sql_handle);
 }
 
 //---------------------------------------------------------
