@@ -15,14 +15,14 @@
 #include <string.h>
 
 // Global sql settings
-static char   global_db_hostname[32] = "127.0.0.1";
+static char   global_db_hostname[64] = "127.0.0.1";
 static uint16 global_db_port = 3306;
 static char   global_db_username[32] = "ragnarok";
 static char   global_db_password[32] = "ragnarok";
 static char   global_db_database[32] = "ragnarok";
 static char   global_codepage[32] = "";
 // Local sql settings
-static char   ipban_db_hostname[32] = "";
+static char   ipban_db_hostname[64] = "";
 static uint16 ipban_db_port = 0;
 static char   ipban_db_username[32] = "";
 static char   ipban_db_password[32] = "";

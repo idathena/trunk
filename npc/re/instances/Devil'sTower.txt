@@ -866,10 +866,11 @@ OnMobDead:
 		mes "I can hear mechanical sounds all of a sudden.";
 		specialeffect EF_LEVEL99_3;
 		progressbar "000000",40;
-		if (isbegin_quest(7572) == 0)
+		if (isbegin_quest(7572) == 0) {
 			setquest 7572;// Lucile...?
+			'devil_tower = 6;
+		}
 		mes "System is restored.";
-		'devil_tower = 6;
 		next;
 		mes "[Lucile]";
 		mes "Wow! You fixed it faster than I thought.";

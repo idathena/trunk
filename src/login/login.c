@@ -158,7 +158,7 @@ void remove_online_user(int account_id)
  * @param tick
  * @param id
  * @param data
- * @return 
+ * @return
  */
 static TIMER_FUNC(waiting_disconnect_timer)
 {
@@ -305,6 +305,24 @@ bool check_password(const char *md5key, int passwdenc, const char *passwd, const
 		       ((passwdenc&0x02) && check_encrypted(refpass, md5key, passwd));
 	}
 }
+
+int get_usercount(int users) {
+#if PACKETVER >= 20170726
+	if(login_config.usercount_disable)
+		return 4; // Removes count and colorization completely
+	else if(users <= login_config.usercount_low)
+		return 0; // Green => Smooth
+	else if(users <= login_config.usercount_medium)
+		return 1; // Yellow => Normal
+	else if(users <= login_config.usercount_high)
+		return 2; // Red => Busy
+	else
+		return 3; // Purple => Crowded
+#else
+	return users;
+#endif
+}
+
 
 //--------------------------------------------
 // Test to know if an IP come from LAN or WAN.
@@ -1101,9 +1119,9 @@ int mmo_auth_new(const char *userid, const char *pass, const char sex, const cha
 	acc.sex = sex;
 	safestrncpy(acc.email, "a@a.com", sizeof(acc.email));
 	acc.expiration_time = ( login_config.start_limited_time != -1 ) ? time(NULL) + login_config.start_limited_time : 0;
-	safestrncpy(acc.lastlogin, "0000-00-00 00:00:00", sizeof(acc.lastlogin));
+	safestrncpy(acc.lastlogin, "", sizeof(acc.lastlogin));
 	safestrncpy(acc.last_ip, last_ip, sizeof(acc.last_ip));
-	safestrncpy(acc.birthdate, "0000-00-00", sizeof(acc.birthdate));
+	safestrncpy(acc.birthdate, "", sizeof(acc.birthdate));
 	safestrncpy(acc.pincode, "", sizeof(acc.pincode));
 	acc.pincode_change = 0;
 	acc.char_slots = MIN_CHARS;
@@ -1374,7 +1392,7 @@ void login_auth_ok(struct login_session_data* sd)
 		WFIFOL(fd,header + n * size) = htonl((subnet_char_ip) ? subnet_char_ip : ch_server[i].ip);
 		WFIFOW(fd,header + n * size + 4) = ntows(htons(ch_server[i].port)); // [!] LE byte order here [!]
 		memcpy(WFIFOP(fd,header + n * size + 6), ch_server[i].name, 20);
-		WFIFOW(fd,header + n * size + 26) = ch_server[i].users;
+		WFIFOW(fd,header + n * size + 26) = get_usercount(ch_server[i].users);
 		WFIFOW(fd,header + n * size + 28) = ch_server[i].type;
 		WFIFOW(fd,header + n * size + 30) = ch_server[i].new_;
 #if PACKETVER >= 20170315
@@ -1734,6 +1752,10 @@ void login_set_defaults() {
 
 	login_config.client_hash_check = 0;
 	login_config.client_hash_nodes = NULL;
+	login_config.usercount_disable = false;
+	login_config.usercount_low = 200;
+	login_config.usercount_medium = 500;
+	login_config.usercount_high = 1000;
 	login_config.char_per_account = MAX_CHARS - MAX_CHAR_VIP - MAX_CHAR_BILLING;
 #ifdef VIP_ENABLE
 	login_config.vip_sys.char_increase = MAX_CHAR_VIP;
@@ -1838,7 +1860,15 @@ int login_config_read(const char *cfgName)
 				nnode->next = login_config.client_hash_nodes;
 				login_config.client_hash_nodes = nnode;
 			}
-		} else if(!strcmpi(w1, "chars_per_account")) { //Max chars per account [Sirius]
+		} else if(!strcmpi(w1, "usercount_disable"))
+			login_config.usercount_disable = config_switch(w2);
+		else if(!strcmpi(w1, "usercount_low"))
+			login_config.usercount_low = atoi(w2);
+		else if(!strcmpi(w1, "usercount_medium"))
+			login_config.usercount_medium = atoi(w2);
+		else if(!strcmpi(w1, "usercount_high"))
+			login_config.usercount_high = atoi(w2);
+		else if(!strcmpi(w1, "chars_per_account")) { //Max chars per account [Sirius]
 			login_config.char_per_account = atoi(w2);
 			if(login_config.char_per_account <= 0 || login_config.char_per_account > MAX_CHARS) {
 				if(login_config.char_per_account > MAX_CHARS) {

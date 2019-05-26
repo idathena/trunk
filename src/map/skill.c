@@ -252,9 +252,9 @@ int skill_get_cooldown(struct map_session_data *sd, uint16 skill_id, uint16 skil
 	if (sd) {
 		if (skill_id == SU_TUNABELLY && pc_checkskill(sd,SU_SPIRITOFSEA) > 0)
 			cooldown -= skill_get_time(skill_id,skill_lv);
-		for (i = 0; i < ARRAYLENGTH(sd->cooldown) && sd->cooldown[i].id; i++) {
-			if (sd->cooldown[i].id == skill_id) {
-				cooldown += sd->cooldown[i].val;
+		for (i = 0; i < ARRAYLENGTH(sd->skillcooldown) && sd->skillcooldown[i].id; i++) {
+			if (sd->skillcooldown[i].id == skill_id) {
+				cooldown += sd->skillcooldown[i].val;
 				cooldown = max(cooldown, 0);
 				break;
 			}
@@ -5967,9 +5967,12 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 	type = status_skill2sc(skill_id);
 	tsc = status_get_sc(bl);
 	tsce = (tsc && type != SC_NONE) ? tsc->data[type] : NULL;
+
+#if 0
 	if(bl->id != src->id && type > SC_NONE && (i = skill_get_ele(skill_id,skill_lv)) > ELE_NEUTRAL &&
 		skill_get_inf(skill_id) != INF_SUPPORT_SKILL && battle_attr_fix(NULL,NULL,100,i,tstatus->def_ele,tstatus->ele_lv) <= 0)
 		return 1; //Skills that cause an status should be blocked if the target element blocks its element
+#endif
 
 	map_freeblock_lock();
 
@@ -6618,18 +6621,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 			break;
 
-		/* Was modified to only affect targeted char [Skotlex]
-		case HP_ASSUMPTIO:
-			if (flag&1)
-				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
-			else {
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				map_foreachinallrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_PC,src,
-					skill_id,skill_lv,tick,flag|BCT_ALL|1,skill_castend_nodamage_id);
-			}
-			break;
-		*/
-
 		case AS_ENCHANTPOISON: //Prevent spamming [Valaris]
 			if (dstsd && dstsd->sc.count && (
 				dstsd->sc.data[SC_FIREWEAPON] ||
@@ -7215,24 +7206,29 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			status_change_end(bl,SC_BLIND,INVALID_TIMER);
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
+
 		case MER_COMPRESS:
 			status_change_end(bl,SC_BLEEDING,INVALID_TIMER);
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
+
 		case MER_MENTALCURE:
 			status_change_end(bl,SC_CONFUSION,INVALID_TIMER);
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
+
 		case MER_RECUPERATE:
 			status_change_end(bl,SC_POISON,INVALID_TIMER);
 			status_change_end(bl,SC_SILENCE,INVALID_TIMER);
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
+
 		case MER_REGAIN:
 			status_change_end(bl,SC_SLEEP,INVALID_TIMER);
 			status_change_end(bl,SC_STUN,INVALID_TIMER);
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
+
 		case MER_TENDER:
 			status_change_end(bl,SC_FREEZE,INVALID_TIMER);
 			status_change_end(bl,SC_STONE,INVALID_TIMER);
@@ -7377,6 +7373,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				}
 			}
 			break;
+
 		case ASC_CDP:
 			if(sd) {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
@@ -10733,8 +10730,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case SU_SHRIMPARTY:
 			if( !sd || !sd->status.party_id || (flag&1) ) {
+				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 				if( sd && (i = pc_checkskill(sd,SU_FRESHSHRIMP)) > 0 ) {
-					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 					clif_skill_nodamage(bl,bl,SU_FRESHSHRIMP,-1,
 						sc_start(src,bl,SC_FRESHSHRIMP,100,i,skill_get_time(SU_FRESHSHRIMP,i)));
 				}

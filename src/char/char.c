@@ -547,7 +547,7 @@ int mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 		unsigned int opt = 0;
 
 		if( p->allow_party )
-			opt |= OPT_ALLOW_PARTY; 
+			opt |= OPT_ALLOW_PARTY;
 		if( p->show_equip )
 			opt |= OPT_SHOW_EQUIP;
 
@@ -2597,7 +2597,7 @@ void loginif_parse_reqpincode(int fd, struct char_session_data *sd) {
 			if( !pincode_changetime || (sd->pincode_change + pincode_changetime) > time(NULL) ) {
 				struct online_char_data *node = (struct online_char_data *)idb_get(online_char_db, sd->account_id);
 
-				if( node != NULL && node->pincode_success ) // User has already passed the check                    
+				if( node != NULL && node->pincode_success ) // User has already passed the check
 					pincode_sendstate(fd, sd, PINCODE_PASSED);
 				else // Ask user for his PIN code
 					pincode_sendstate(fd, sd, PINCODE_ASK);
@@ -3309,7 +3309,7 @@ int mapif_parse_reqcharunban(int fd) {
 }
 
 
-/** 
+/**
  * Request from map-server to change an account's status (will just be forwarded to login server)
  * ZH 2b0e <aid>L <charname>24B <opetype>W <timediff>L
  * @param fd: link to mapserv
@@ -4284,7 +4284,7 @@ static bool char_check_delchar(struct char_session_data *sd, char *delcode, uint
 	// Birthdate (YYMMDD)
 	if( (flag&CHAR_DEL_BIRTHDATE) &&
 		(!strcmp(sd->birthdate + 2, delcode) || // +2 to cut off the century
-		(!strcmp("0000-00-00", sd->birthdate) && // It is default birthdate and
+		(!strcmp("", sd->birthdate) && // It is default birthdate and
 		!strcmp("", delcode))) ) // User sent an empty birthdate
 	{
 		ShowInfo(""CL_RED"Char Deleted"CL_RESET" "CL_GREEN"(Birthdate)"CL_RESET".\n");
@@ -5035,7 +5035,7 @@ static int send_accounts_tologin_sub(DBKey key, DBData *data, va_list ap)
  * @param tick : Scheduled tick
  * @param id : GID linked to that timered call
  * @param data : data transmited for delayed function
- * @return 
+ * @return
  */
 TIMER_FUNC(send_accounts_tologin)
 {

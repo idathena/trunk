@@ -703,6 +703,7 @@
 	export_constant2("bDropAddClass",SP_DROP_ADDCLASS);
 	export_constant2("bMagicAddRace2",SP_MAGIC_ADDRACE2);
 	export_constant2("bNoMagicGearFuel",SP_NO_MAGIC_GEAR_FUEL);
+	export_constant2("bSkillDelay",SP_SKILL_DELAY);
 
 	/* Equip index */
 	export_constant(EQI_COMPOUND_ON);

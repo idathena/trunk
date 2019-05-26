@@ -208,7 +208,7 @@ static int achievement_check_groups(DBKey key, DBData *data, va_list ap)
 	if (ad->group != AG_BATTLE && ad->group != AG_TAMING && ad->group != AG_ADVENTURE)
 		return 0;
 
-	if (ad->dependent_count == 0 || ad->condition)
+	if (!ad->dependent_count || ad->condition)
 		return 0;
 
 	ARR_FIND(0, sd->achievement_data.count, i, sd->achievement_data.achievements[i].achievement_id == ad->achievement_id);

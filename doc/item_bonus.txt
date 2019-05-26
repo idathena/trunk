@@ -164,8 +164,8 @@ bonus2 bSPRegenRate,n,t;		Gain n SP every t milliseconds
 bonus2 bSPLossRate,n,t;			Lose n SP every t milliseconds
 bonus bNoRegen,x;			Stops HP or SP regeneration (x: 1=HP, 2=SP)
 bonus bUseSPrate,n;			SP consumption + n%
-bonus2 bSkillUseSP,sk,n;		Decreases SP consumption of skill sk by n
-bonus2 bSkillUseSPrate,sk,n;		Decreases SP consumption of skill sk by n%
+bonus2 bSkillUseSP,sk,n;		SP consumption of skill sk + n
+bonus2 bSkillUseSPrate,sk,n;		SP consumption of skill sk + n%
 
 Atk/Def
 -------
@@ -206,6 +206,7 @@ bonus2 bSkillVariableCast,sk,t;		Increases variable cast time of skill sk by t m
 bonus bNoCastCancel,n;			Prevents casting from being interrupted when hit (does not work in GvG | n is meaningless)
 bonus bNoCastCancel2,n;			Prevents casting from being interrupted when hit (works even in GvG | n is meaningless)
 bonus bDelayrate,n;			Increases skill delay by n%
+bonus2 bSkillDelay,sk,t;		Increases delay of skill sk by t milliseconds
 bonus2 bSkillCooldown,sk,t;		Increases cooldown of skill sk by t milliseconds
 
 =============================

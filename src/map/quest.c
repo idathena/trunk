@@ -301,100 +301,31 @@ void quest_update_objective(struct map_session_data *sd, int mob_id, int mob_siz
 			if( qi->objectives[j].mob == mob_id )
 				is_valid = true;
 			else {
-				switch( qi->objectives[j].mobtype ) {
-					case MOB_TYPE_SIZE_SMALL:
-						if( mob_size == SZ_SMALL )
-							is_valid = true;
-						break;
-					case MOB_TYPE_SIZE_MEDIUM:
-						if( mob_size == SZ_MEDIUM )
-							is_valid = true;
-						break;
-					case MOB_TYPE_SIZE_BIG:
-						if( mob_size == SZ_BIG )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_DEMIHUMAN:
-						if( mob_race == RC_DEMIHUMAN )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_BRUTE:
-						if( mob_race == RC_BRUTE )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_INSECT:
-						if( mob_race == RC_INSECT )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_FISH:
-						if( mob_race == RC_FISH )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_PLANT:
-						if( mob_race == RC_PLANT )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_DEMON:
-						if( mob_race == RC_DEMON )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_ANGEL:
-						if( mob_race == RC_ANGEL )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_UNDEAD:
-						if( mob_race == RC_UNDEAD )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_FORMLESS:
-						if( mob_race == RC_FORMLESS )
-							is_valid = true;
-						break;
-					case MOB_TYPE_RACE_DRAGON:
-						if( mob_race == RC_DRAGON )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_WATER:
-						if( mob_element == ELE_WATER )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_WIND:
-						if( mob_element == ELE_WIND )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_EARTH:
-						if( mob_element == ELE_EARTH )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_FIRE:
-						if( mob_element == ELE_FIRE )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_DARK:
-						if( mob_element == ELE_DARK )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_HOLY:
-						if( mob_element == ELE_HOLY )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_POISON:
-						if( mob_element == ELE_POISON )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_GHOST:
-						if( mob_element == ELE_GHOST )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_NEUTRAL:
-						if( mob_element == ELE_NEUTRAL )
-							is_valid = true;
-						break;
-					case MOB_TYPE_DEF_ELE_UNDEAD:
-						if( mob_element == ELE_UNDEAD )
-							is_valid = true;
-						break;
-				}
+				if( qi->objectives[j].mobtype &&
+					((qi->objectives[j].mobtype == MOB_TYPE_SIZE_SMALL && mob_size == SZ_SMALL) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_SIZE_MEDIUM && mob_size == SZ_MEDIUM) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_SIZE_BIG && mob_size == SZ_BIG) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_DEMIHUMAN && mob_race == RC_DEMIHUMAN) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_BRUTE && mob_race == RC_BRUTE) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_INSECT && mob_race == RC_INSECT) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_FISH && mob_race == RC_FISH) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_PLANT && mob_race == RC_PLANT) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_DEMON && mob_race == RC_DEMON) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_ANGEL && mob_race == RC_ANGEL) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_UNDEAD && mob_race == RC_UNDEAD) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_FORMLESS && mob_race == RC_FORMLESS) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_RACE_DRAGON && mob_race == RC_DRAGON) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_WATER && mob_element == ELE_WATER) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_WIND && mob_element == ELE_WIND) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_EARTH && mob_element == ELE_EARTH) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_FIRE && mob_element == ELE_FIRE) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_DARK && mob_element == ELE_DARK) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_HOLY && mob_element == ELE_HOLY) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_POISON && mob_element == ELE_POISON) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_GHOST && mob_element == ELE_GHOST) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_NEUTRAL && mob_element == ELE_NEUTRAL) ||
+					(qi->objectives[j].mobtype == MOB_TYPE_DEF_ELE_UNDEAD && mob_element == ELE_UNDEAD)) )
+					is_valid = true;
 				if( qi->objectives[j].min_level && qi->objectives[j].min_level <= mob_level )
 					is_valid = true;
 				if( qi->objectives[j].max_level && qi->objectives[j].max_level >= mob_level )

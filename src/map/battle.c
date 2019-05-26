@@ -4643,7 +4643,7 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			switch(skill_id) {
 				case AS_SPLASHER:
 				case ASC_METEORASSAULT:
-				//Pre-Renewal only: Soul Breaker ignores EDP 
+				//Pre-Renewal only: Soul Breaker ignores EDP
 				//Renewal only: Grimtooth and Venom Knife ignore EDP
 				//Both: Venom Splasher and Meteor Assault ignore EDP [helvetica]
 #ifndef RENEWAL
@@ -5282,8 +5282,8 @@ static struct Damage initialize_weapon_data(struct block_list *src, struct block
 	wd.flag |= (skill_id || wd.miscflag) ? BF_SKILL : BF_NORMAL; //Baphomet card's splash damage is counted as a skill [Inkfish]
 	wd.isvanishdamage = false;
 	wd.isspdamage = false;
-	wd.damage = wd.damage2 = 
-#ifdef RENEWAL	
+	wd.damage = wd.damage2 =
+#ifdef RENEWAL
 	wd.statusAtk = wd.statusAtk2 = wd.equipAtk = wd.equipAtk2 = wd.weaponAtk = wd.weaponAtk2 = wd.masteryAtk = wd.masteryAtk2 =
 #endif
 	0;
@@ -6041,7 +6041,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 						else if(i <= 7)
 							skillratio += 1400 + 500 * skill_lv;
 						else
-							skillratio += 900 + 500 * skill_lv; 
+							skillratio += 900 + 500 * skill_lv;
 						break;
 					case NPC_VENOMFOG:
 						skillratio += 600 + 100 * skill_lv;
@@ -6597,7 +6597,8 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 				matk = battle_calc_magic_attack(src, target, skill_id, skill_lv, md.miscflag);
 				md.damage = atk.damage + matk.damage;
 				md.damage -= totaldef + totalmdef;
-				md.damage += md.damage * (sd ? sd->bonus.long_attack_atk_rate : 0) / 100;
+				if(sd && sd->bonus.long_attack_atk_rate)
+					md.damage += md.damage * sd->bonus.long_attack_atk_rate / 100;
 				if(skill_id == AM_ACIDTERROR && status_has_mode(tstatus, MD_STATUS_IMMUNE))
 					md.damage /= 2;
 				nk |= NK_NO_ELEFIX|NK_NO_CARDFIX_DEF;
@@ -6648,7 +6649,8 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 				md.damage -= totaldef + totalmdef;
 				if(target->id != src->id) {
 					md.damage = battle_attr_fix(src, target, md.damage, s_ele, tstatus->def_ele, tstatus->ele_lv);
-					md.damage += md.damage * (sd ? sd->bonus.long_attack_atk_rate : 0) / 100;
+					if(sd && sd->bonus.long_attack_atk_rate)
+						md.damage += md.damage * sd->bonus.long_attack_atk_rate / 100;
 				}
 #else
 				md.damage = (atk.damage + matk.damage) * skillratio;
@@ -6674,7 +6676,8 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 #ifdef RENEWAL
 				md.damage = (atk.damage + matk.damage) * (30 + 5 * skill_lv) / 10;
 				md.damage -= totaldef + totalmdef;
-				md.damage += md.damage * (sd ? sd->bonus.long_attack_atk_rate : 0) / 100;
+				if(sd && sd->bonus.long_attack_atk_rate)
+					md.damage += md.damage * sd->bonus.long_attack_atk_rate / 100;
 #else
 				md.damage = atk.damage + matk.damage;
 				nk |= NK_IGNORE_FLEE;
@@ -6728,7 +6731,8 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 				if(tsd)
 					md.damage /= 2;
 				md.damage -= (totaldef + totalmdef) / 2;
-				md.damage += md.damage * (sd ? sd->bonus.long_attack_atk_rate : 0) / 100;
+				if(sd && sd->bonus.long_attack_atk_rate)
+					md.damage += md.damage * sd->bonus.long_attack_atk_rate / 100;
 				nk |= NK_NO_CARDFIX_DEF;
 				is_hybrid_dmg = true;
 			}
@@ -7809,7 +7813,7 @@ int battle_check_target(struct block_list *src, struct block_list *target, int f
 		case BL_PC: {
 				struct status_change *sc = status_get_sc(src);
 
-				if( (((TBL_PC *)target)->invincible_timer != INVALID_TIMER || pc_isinvisible((TBL_PC *)target)) && 
+				if( (((TBL_PC *)target)->invincible_timer != INVALID_TIMER || pc_isinvisible((TBL_PC *)target)) &&
 					!(flag&BCT_NOENEMY) )
 					return -1; //Cannot be targeted yet
 				if( sc && sc->count && sc->data[SC_VOICEOFSIREN] && sc->data[SC_VOICEOFSIREN]->val2 == target->id )
@@ -8354,7 +8358,7 @@ static const struct _battle_data {
 	{ "custom_cell_stack_limit",            &battle_config.custom_cell_stack_limit,         1,      1,      255,            },
 	{ "dancing_weaponswitch_fix",           &battle_config.dancing_weaponswitch_fix,        1,      0,      1,              },
 	{ "check_occupied_cells",               &battle_config.check_occupied_cells,            1,      0,      1,              },
-	
+
 	//eAthena additions
 	{ "item_logarithmic_drops",             &battle_config.logarithmic_drops,               0,      0,      1,              },
 	{ "item_drop_common_min",               &battle_config.item_drop_common_min,            1,      0,      10000,          },
@@ -8563,9 +8567,9 @@ static const struct _battle_data {
 	{ "emblem_woe_change",                  &battle_config.emblem_woe_change,               0,      0,      1,              },
 	{ "emblem_transparency_limit",          &battle_config.emblem_transparency_limit,      80,      0,    100,              },
 #ifdef VIP_ENABLE
-	{ "vip_storage_increase",               &battle_config.vip_storage_increase,           300,      0,      MAX_STORAGE - MIN_STORAGE, },
+	{ "vip_storage_increase",               &battle_config.vip_storage_increase,           300,     0,      MAX_STORAGE - MIN_STORAGE, },
 #else
-	{ "vip_storage_increase",               &battle_config.vip_storage_increase,           300,      0,      MAX_STORAGE, },
+	{ "vip_storage_increase",               &battle_config.vip_storage_increase,           300,     0,      MAX_STORAGE,    },
 #endif
 	{ "vip_base_exp_increase",              &battle_config.vip_base_exp_increase,          50,      0,      INT_MAX,        },
 	{ "vip_job_exp_increase",               &battle_config.vip_job_exp_increase,           50,      0,      INT_MAX,        },
@@ -8679,6 +8683,7 @@ static const struct _battle_data {
 	{ "feature.refineui",                   &battle_config.feature_refineui,                1,      0,      1,              },
 	{ "feature.stylistui",                  &battle_config.feature_stylistui,               1,      0,      1,              },
 	{ "rental_transaction",                 &battle_config.rental_transaction,              1,      0,      1,              },
+	{ "pet_walk_speed",                     &battle_config.pet_walk_speed,                  1,      1,      3,              },
 
 #include "../custom/battle_config_init.inc"
 };

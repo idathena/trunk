@@ -6859,7 +6859,7 @@ void clif_item_refine_list(struct map_session_data *sd)
 
 	fd = sd->fd;
 
-	refine_item[0] = -1;
+	refine_item[0] = INDEX_NOT_FOUND;
 	refine_item[1] = pc_search_inventory(sd,ITEMID_PHRACON);
 	refine_item[2] = pc_search_inventory(sd,ITEMID_EMVERETARCON);
 	refine_item[3] = refine_item[4] = pc_search_inventory(sd,ITEMID_ORIDECON);
@@ -6871,7 +6871,7 @@ void clif_item_refine_list(struct map_session_data *sd)
 
 		if (sd->inventory.u.items_inventory[i].nameid > 0 && sd->inventory.u.items_inventory[i].refine < skill_lv &&
 			sd->inventory.u.items_inventory[i].identify && (wlv = itemdb_wlv(sd->inventory.u.items_inventory[i].nameid)) >=1 &&
-			refine_item[wlv] != -1 && !(sd->inventory.u.items_inventory[i].equip&EQP_ARMS)) {
+			refine_item[wlv] != INDEX_NOT_FOUND && !(sd->inventory.u.items_inventory[i].equip&EQP_ARMS)) {
 			WFIFOW(fd,c * 13 + 4) = i + 2;
 			WFIFOW(fd,c * 13 + 6) = sd->inventory.u.items_inventory[i].nameid;
 			WFIFOB(fd,c * 13 + 8) = sd->inventory.u.items_inventory[i].refine;
@@ -14013,7 +14013,7 @@ void clif_parse_SelectEgg(int fd, struct map_session_data *sd)
 ///         4 = full (so_full)
 void clif_parse_SendEmotion(int fd, struct map_session_data *sd)
 {
-	if(sd->pd)
+	if (sd->pd)
 		clif_pet_emotion(sd->pd,RFIFOL(fd,packet_db[RFIFOW(fd,0)].pos[0]));
 }
 
@@ -14031,91 +14031,29 @@ void clif_parse_ChangePetName(int fd, struct map_session_data *sd)
 void clif_parse_pet_evolution(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info;
-	int i = 0, idx, petIndex;
+	uint16 petIndex;
 
 	nullpo_retv(sd);
 
 	info = &packet_db[RFIFOW(fd,0)];
 	if (!info || !info->len)
 		return;
-
-	if (!sd->status.pet_id) {
-		clif_pet_evolution_result(fd, PET_EVOL_NO_CALLPET);
+	petIndex = search_petDB_index(RFIFOW(fd,info->pos[1]), PET_EGG);
+	if (petIndex < 0) {
+		clif_pet_evolution_result(sd, PET_EVOL_NO_PETEGG);
 		return;
 	}
-
-	ARR_FIND(0, MAX_INVENTORY, idx, (sd->inventory.u.items_inventory[idx].card[0] == CARD0_PET &&
-		sd->status.pet_id == MakeDWord(sd->inventory.u.items_inventory[idx].card[1], sd->inventory.u.items_inventory[idx].card[2])));
-	if (idx == MAX_INVENTORY) {
-		clif_pet_evolution_result(fd, PET_EVOL_NO_PETEGG);
-		return;
-	}
-
-	if (!sd->pd || sd->pd->pet.intimate < PETINTIMATE_LOYAL) {
-		clif_pet_evolution_result(fd, PET_EVOL_RG_FAMILIAR);
-		return;
-	}
-
-	ARR_FIND(0, MAX_PET_DB, petIndex, pet_db[petIndex].class_ == sd->pd->pet.class_);
-	if (petIndex == MAX_PET_DB) {
-		clif_pet_evolution_result(fd, PET_EVOL_UNKNOWN);
-		return;
-	}
-
-	//Client side validation is not done as it is insecure
-	for (i = 0; i < pet_db[petIndex].ev_data_count; i++) {
-		struct s_pet_evo_datalist *ped = &pet_db[petIndex].ev_datas[i];
-
-		if (ped->EggID == RFIFOW(fd,info->pos[1])) {
-			int j;
-			int pet_id;
-
-			if (!ped->ev_item_count) {
-				clif_pet_evolution_result(fd, PET_EVOL_NO_RECIPE);
-				return;
-			}
-			for (j = 0; j < ped->ev_item_count; j++) {
-				struct s_pet_evo_itemlist *list = &ped->ev_items[j];
-				short n = pc_search_inventory(sd, list->nameid);
-
-				if (n == INDEX_NOT_FOUND) {
-					clif_pet_evolution_result(fd, PET_EVOL_NO_MATERIAL);
-					return;
-				}
-			}
-			for (j = 0; j < ped->ev_item_count; j++) {
-				struct s_pet_evo_itemlist *list = &ped->ev_items[j];
-				short n = pc_search_inventory(sd, list->nameid);
-
-				if (pc_delitem(sd, n, list->quantity, 0, 0, LOG_TYPE_OTHER)) {
-					clif_pet_evolution_result(fd, PET_EVOL_NO_MATERIAL);
-					return;
-				}
-			}
-			pet_return_egg(sd, sd->pd);
-			if (pc_delitem(sd, idx, 1, 0, 0, LOG_TYPE_OTHER)) {
-				clif_pet_evolution_result(fd, PET_EVOL_NO_PETEGG);
-				return;
-			}
-			pet_id = search_petDB_index(ped->EggID, PET_EGG);
-			if (pet_id >= 0) {
-				sd->catch_target_class = pet_db[pet_id].class_;
-				intif_create_pet(sd->status.account_id, sd->status.char_id, pet_db[pet_id].class_, mob_db(pet_db[pet_id].class_)->lv,
-					pet_db[pet_id].EggID, 0, pet_db[pet_id].intimate, 100, 0, 1, pet_db[pet_id].jname);
-				clif_pet_evolution_result(fd, PET_EVOL_SUCCESS);
-				return;
-			}
-		}
-	}
-	clif_pet_evolution_result(fd, PET_EVOL_UNKNOWN);
+	pet_evolution(sd, petIndex);
 }
 
 /**
  * Result of Pet Evolution (ZC_PET_EVOLUTION_RESULT)
  * 0x9fc <Result>.L
  */
-void clif_pet_evolution_result(int fd, enum e_pet_evolution_result result) {
+void clif_pet_evolution_result(struct map_session_data *sd, enum e_pet_evolution_result result) {
 #if PACKETVER >= 20140122
+	int fd = sd->fd;
+
 	WFIFOHEAD(fd,packet_len(0x9fc));
 	WFIFOW(fd,0) = 0x9fc;
 	WFIFOL(fd,2) = result;
@@ -14879,7 +14817,7 @@ void clif_parse_FriendsListRemove(int fd, struct map_session_data *sd)
 			for (j = i + 1; j < MAX_FRIENDS; j++)
 				memcpy(&f_sd->status.friends[j - 1], &f_sd->status.friends[j], sizeof(f_sd->status.friends[0]));
 			memset(&f_sd->status.friends[MAX_FRIENDS - 1], 0, sizeof(f_sd->status.friends[MAX_FRIENDS - 1]));
-			//should the guy be notified of some message? we should add it here if so
+			//Should the guy be notified of some message? we should add it here if so
 			WFIFOHEAD(f_sd->fd,packet_len(0x20a));
 			WFIFOW(f_sd->fd,0) = 0x20a;
 			WFIFOL(f_sd->fd,2) = sd->status.account_id;
@@ -15994,7 +15932,7 @@ void clif_parse_Mail_setattach(int fd, struct map_session_data *sd)
 	if( !chrif_isconnected() )
 		return;
 
-	if( idx < 0 || amount < 0 )
+	if( idx < 0 || idx >= MAX_INVENTORY || amount < 0 )
 		return;
 
 	flag = mail_setitem(sd, idx, amount);
@@ -21026,7 +20964,7 @@ void clif_parse_refineui_refine(int fd, struct map_session_data *sd) {
 		return;
 
 	// Check if the player has the selected material
-	if( (j = pc_search_inventory(sd, material)) < 0 )
+	if( (j = pc_search_inventory(sd, material)) == INDEX_NOT_FOUND )
 		return;
 
 	//Calculate the possible materials
@@ -21054,7 +20992,7 @@ void clif_parse_refineui_refine(int fd, struct map_session_data *sd) {
 		return;
 
 	if( use_bs_blessing && materials[REFINEUI_MAT_BS_BLESSING].bs_blessing.count ) {
-		if( (j = pc_search_inventory(sd, materials[REFINEUI_MAT_BS_BLESSING].bs_blessing.nameid)) < 0 )
+		if( (j = pc_search_inventory(sd, materials[REFINEUI_MAT_BS_BLESSING].bs_blessing.nameid)) == INDEX_NOT_FOUND )
 			return;
  		if( pc_delitem(sd, j, materials[REFINEUI_MAT_BS_BLESSING].bs_blessing.count, 0, 0, LOG_TYPE_CONSUME) )
 			return;

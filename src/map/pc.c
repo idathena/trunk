@@ -3994,19 +3994,34 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->skillusesprate[i].val = val;
 			}
 			break;
+		case SP_SKILL_DELAY:
+			if(sd->state.lr_flag == 2)
+				break;
+			ARR_FIND(0, ARRAYLENGTH(sd->skilldelay), i, (!sd->skilldelay[i].id || sd->skilldelay[i].id == type2));
+			if(i == ARRAYLENGTH(sd->skilldelay)) {
+				ShowError("pc_bonus2: SP_SKILL_DELAY: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skilldelay), type2, val);
+				break;
+			}
+			if(sd->skilldelay[i].id == type2)
+				sd->skilldelay[i].val += val;
+			else {
+				sd->skilldelay[i].id = type2;
+				sd->skilldelay[i].val = val;
+			}
+			break;
 		case SP_SKILL_COOLDOWN:
 			if(sd->state.lr_flag == 2)
 				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->cooldown), i, (!sd->cooldown[i].id || sd->cooldown[i].id == type2));
-			if(i == ARRAYLENGTH(sd->cooldown)) {
-				ShowError("pc_bonus2: SP_SKILL_COOLDOWN: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->cooldown), type2, val);
+			ARR_FIND(0, ARRAYLENGTH(sd->skillcooldown), i, (!sd->skillcooldown[i].id || sd->skillcooldown[i].id == type2));
+			if(i == ARRAYLENGTH(sd->skillcooldown)) {
+				ShowError("pc_bonus2: SP_SKILL_COOLDOWN: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillcooldown), type2, val);
 				break;
 			}
-			if(sd->cooldown[i].id == type2)
-				sd->cooldown[i].val += val;
+			if(sd->skillcooldown[i].id == type2)
+				sd->skillcooldown[i].val += val;
 			else {
-				sd->cooldown[i].id = type2;
-				sd->cooldown[i].val = val;
+				sd->skillcooldown[i].id = type2;
+				sd->skillcooldown[i].val = val;
 			}
 			break;
 		case SP_SKILL_FIXEDCAST:
@@ -4959,14 +4974,14 @@ char pc_delitem(struct map_session_data *sd, int n, int amount, int type, short 
 {
 	nullpo_retr(1, sd);
 
-	if(n < 0 || !sd->inventory.u.items_inventory[n].nameid || amount <= 0 || sd->inventory.u.items_inventory[n].amount < amount ||
-		!sd->inventory_data[n])
+	if(n < 0 || !sd->inventory_data[n] || !sd->inventory.u.items_inventory[n].nameid || amount <= 0 ||
+		sd->inventory.u.items_inventory[n].amount < amount)
 		return 1;
 
 	log_pick_pc(sd, log_type, -amount, &sd->inventory.u.items_inventory[n]);
 
 	sd->inventory.u.items_inventory[n].amount -= amount;
-	sd->weight -= sd->inventory_data[n]->weight * amount ;
+	sd->weight -= sd->inventory_data[n]->weight * amount;
 	if(sd->inventory.u.items_inventory[n].amount <= 0) {
 		if(sd->inventory.u.items_inventory[n].equip)
 			pc_unequipitem(sd, n, (!(type&4) ? 1 : 0)|2);
@@ -10144,10 +10159,8 @@ int pc_load_combo(struct map_session_data *sd) {
 			for( j = 0; j < id->slot; j++ ) {
 				if( !sd->inventory.u.items_inventory[idx].card[j] )
 					continue;
-				if( (data = itemdb_exists(sd->inventory.u.items_inventory[idx].card[j])) != NULL ) {
-					if( data->combos_count )
-						ret += pc_checkcombo(sd,data);
-				}
+				if( (data = itemdb_exists(sd->inventory.u.items_inventory[idx].card[j])) && data->combos_count )
+					ret += pc_checkcombo(sd,data);
 			}
 		}
 	}
