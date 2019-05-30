@@ -3993,7 +3993,7 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 {
 	struct mob_db *entry = NULL, tmpEntry;
 	config_setting_t *t = NULL;
-	int i32 = 0, mob_id = 0;
+	int i32 = 0, mob_id = 0, mob_size = 0, mob_race = 0, mob_ele = 0;
 	struct status_data *status;
 	struct mob_data data;
 	const char *str = NULL;
@@ -4110,24 +4110,24 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 		entry->range3 = entry->range2;
 	entry->range3 += 2; //Tests showed that chase range is effectively 2 cells larger than expected [Playtester]
 
-	if (config_setting_lookup_string(it, "Size", &str) && !script_get_constant(str, &i32)) {
-		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Size': %d in mob %d, defaulting to 'SZ_SMALL'\n", i32, mob_id);
-		i32 = 0;
+	if (config_setting_lookup_string(it, "Size", &str) && !script_get_constant(str, &mob_size)) {
+		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Size': %d in mob %d, defaulting to 'SZ_SMALL'\n", mob_size, mob_id);
+		mob_size = 0;
 	}
-	status->size = i32;
+	status->size = mob_size;
 
-	if (config_setting_lookup_string(it, "Race", &str) && !script_get_constant(str, &i32)) {
-		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Race': %d in mob %d, defaulting to 'RC_FORMLESS'\n", i32, mob_id);
-		i32 = 0;
+	if (config_setting_lookup_string(it, "Race", &str) && !script_get_constant(str, &mob_race)) {
+		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Race': %d in mob %d, defaulting to 'RC_FORMLESS'\n", mob_race, mob_id);
+		mob_race = 0;
 	}
-	status->race = i32;
+	status->race = mob_race;
 
 	if ((t = config_setting_get_member(it, "Element")) && config_setting_is_group(t)) {
-		if (config_setting_lookup_string(t, "Type", &str) && !script_get_constant(str, &i32)) {
-			ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Type': %d in group 'Element' of mob %d, defaulting to 'ELE_NEUTRAL'\n", i32, mob_id);
-			i32 = 0;
+		if (config_setting_lookup_string(t, "Type", &str) && !script_get_constant(str, &mob_ele)) {
+			ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Type': %d in group 'Element' of mob %d, defaulting to 'ELE_NEUTRAL'\n", mob_ele, mob_id);
+			mob_ele = 0;
 		}
-		status->def_ele = i32;
+		status->def_ele = mob_ele;
 		if (config_setting_lookup_int(t, "Level", &i32) && i32 >= 0)
 			status->ele_lv = i32;
 		if (!CHK_ELEMENT_LEVEL(status->ele_lv)) {
