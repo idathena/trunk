@@ -120,9 +120,6 @@ Race: Race of the monster
 	7  = Demi-Human
 	8  = Angel
 	9  = Dragon.
-	10 = Player (default race for player)
-
-Demi-Human is not same nor includes Player.
 
 ---------------------------------------
 
@@ -153,8 +150,8 @@ Mode: Behaviour of the monster. Full explanation can be found on 'doc/mob_db_mod
 
 Speed: Walk speed of the monster
 
-	1		= Fastest
-	100		= Normal
+	1	= Fastest
+	100	= Normal
 	1000	= Slowest
 
 ---------------------------------------
