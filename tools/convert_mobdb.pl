@@ -103,57 +103,57 @@ sub parse_mobdb (@) {
 			print "\tRange3: $cols{Range3}\n";
 			my $size = int($cols{Size});
 			if( $size == 0 ) {
-				print "\tSize: \"SZ_SMALL\"\n";
+				print "\tSize: \"Size_Small\"\n";
 			} elsif( $size == 1 ) {
-				print "\tSize: \"SZ_MEDIUM\"\n";
+				print "\tSize: \"Size_Medium\"\n";
 			} elsif( $size == 2 ) {
-				print "\tSize: \"SZ_BIG\"\n";
+				print "\tSize: \"Size_Large\"\n";
 			}
 			my $race = int($cols{Race});
 			if( $race == 0 ) {
-				print "\tRace: \"RC_FORMLESS\"\n";
+				print "\tRace: \"RC_Formless\"\n";
 			} elsif( $race == 1 ) {
-				print "\tRace: \"RC_UNDEAD\"\n";
+				print "\tRace: \"RC_Undead\"\n";
 			} elsif( $race == 2 ) {
-				print "\tRace: \"RC_BRUTE\"\n";
+				print "\tRace: \"RC_Brute\"\n";
 			} elsif( $race == 3 ) {
-				print "\tRace: \"RC_PLANT\"\n";
+				print "\tRace: \"RC_Plant\"\n";
 			} elsif( $race == 4 ) {
-				print "\tRace: \"RC_INSECT\"\n";
+				print "\tRace: \"RC_Insect\"\n";
 			} elsif( $race == 5 ) {
-				print "\tRace: \"RC_FISH\"\n";
+				print "\tRace: \"RC_Fish\"\n";
 			} elsif( $race == 6 ) {
-				print "\tRace: \"RC_DEMON\"\n";
+				print "\tRace: \"RC_Demon\"\n";
 			} elsif( $race == 7 ) {
-				print "\tRace: \"RC_DEMIHUMAN\"\n";
+				print "\tRace: \"RC_DemiHuman\"\n";
 			} elsif( $race == 8 ) {
-				print "\tRace: \"RC_ANGEL\"\n";
+				print "\tRace: \"RC_Angel\"\n";
 			} elsif( $race == 9 ) {
-				print "\tRace: \"RC_DRAGON\"\n";
+				print "\tRace: \"RC_Dragon\"\n";
 			}
 			print "\tElement: {\n";
 			my $element = int($cols{Element});
 			my $etype = $element%20;
 			if( $etype == 0 ) {
-				print "\t\tType: \"ELE_NEUTRAL\"\n";
+				print "\t\tType: \"Ele_Neutral\"\n";
 			} elsif( $etype == 1 ) {
-				print "\t\tType: \"ELE_WATER\"\n";
+				print "\t\tType: \"Ele_Water\"\n";
 			} elsif( $etype == 2 ) {
-				print "\t\tType: \"ELE_EARTH\"\n";
+				print "\t\tType: \"Ele_Earth\"\n";
 			} elsif( $etype == 3 ) {
-				print "\t\tType: \"ELE_FIRE\"\n";
+				print "\t\tType: \"Ele_Fire\"\n";
 			} elsif( $etype == 4 ) {
-				print "\t\tType: \"ELE_WIND\"\n";
+				print "\t\tType: \"Ele_Wind\"\n";
 			} elsif( $etype == 5 ) {
-				print "\t\tType: \"ELE_POISON\"\n";
+				print "\t\tType: \"Ele_Poison\"\n";
 			} elsif( $etype == 6 ) {
-				print "\t\tType: \"ELE_HOLY\"\n";
+				print "\t\tType: \"Ele_Holy\"\n";
 			} elsif( $etype == 7 ) {
-				print "\t\tType: \"ELE_DARK\"\n";
+				print "\t\tType: \"Ele_Dark\"\n";
 			} elsif( $etype == 8 ) {
-				print "\t\tType: \"ELE_GHOST\"\n";
+				print "\t\tType: \"Ele_Ghost\"\n";
 			} elsif( $etype == 9 ) {
-				print "\t\tType: \"ELE_UNDEAD\"\n";
+				print "\t\tType: \"Ele_Undead\"\n";
 			}
 			my $elevel = int($element/20);
 			print "\t\tLevel: $elevel\n";
