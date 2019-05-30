@@ -4081,6 +4081,7 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 	if ((t = config_setting_get_member(it, "Stats")) && config_setting_is_group(t))
 		mob_readdb_libconfig_sub_stats(t, status);
 
+#ifndef RENEWAL
 	//All status should be min 1 to prevent divisions by zero from some skills [Skotlex]
 	if (status->str < 1) status->str = 1;
 	if (status->agi < 1) status->agi = 1;
@@ -4088,6 +4089,7 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 	if (status->int_< 1) status->int_= 1;
 	if (status->dex < 1) status->dex = 1;
 	if (status->luk < 1) status->luk = 1;
+#endif
 
 	if (config_setting_lookup_int(it, "Range2", &i32) && i32 >= 0)
 		entry->range2 = i32;
@@ -4109,20 +4111,20 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 	entry->range3 += 2; //Tests showed that chase range is effectively 2 cells larger than expected [Playtester]
 
 	if (config_setting_lookup_string(it, "Size", &str) && !script_get_constant(str, &i32)) {
-		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Size': %d, defaulting to 'SZ_SMALL'\n", i32);
+		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Size': %d in mob %d, defaulting to 'SZ_SMALL'\n", i32, mob_id);
 		i32 = 0;
 	}
 	status->size = i32;
 
 	if (config_setting_lookup_string(it, "Race", &str) && !script_get_constant(str, &i32)) {
-		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Race': %d, defaulting to 'RC_FORMLESS'\n", i32);
+		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Race': %d in mob %d, defaulting to 'RC_FORMLESS'\n", i32, mob_id);
 		i32 = 0;
 	}
 	status->race = i32;
 
 	if ((t = config_setting_get_member(it, "Element")) && config_setting_is_group(t)) {
 		if (config_setting_lookup_string(t, "Type", &str) && !script_get_constant(str, &i32)) {
-			ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Type': %d in group 'Element', defaulting to 'ELE_NEUTRAL'\n", i32);
+			ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Type': %d in group 'Element' of mob %d, defaulting to 'ELE_NEUTRAL'\n", i32, mob_id);
 			i32 = 0;
 		}
 		status->def_ele = i32;
