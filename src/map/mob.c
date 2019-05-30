@@ -4111,20 +4111,20 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 	entry->range3 += 2; //Tests showed that chase range is effectively 2 cells larger than expected [Playtester]
 
 	if (config_setting_lookup_string(it, "Size", &str) && !script_get_constant(str, &i32)) {
-		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Size': %d, defaulting to 'Size_Small'\n", i32);
+		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Size': '%s' of mob %d, defaulting to 'Size_Small'\n", str, mob_id);
 		i32 = 0;
 	}
 	status->size = i32;
 
 	if (config_setting_lookup_string(it, "Race", &str) && !script_get_constant(str, &i32)) {
-		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Race': %d, defaulting to 'RC_FORMLESS'\n", i32);
+		ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Race': '%s' of mob %d, defaulting to 'RC_Formless'\n", str, mob_id);
 		i32 = 0;
 	}
 	status->race = i32;
 
 	if ((t = config_setting_get_member(it, "Element")) && config_setting_is_group(t)) {
 		if (config_setting_lookup_string(t, "Type", &str) && !script_get_constant(str, &i32)) {
-			ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Type': %d in group 'Element', defaulting to 'ELE_NEUTRAL'\n", i32);
+			ShowWarning("mob_readdb_libconfig_sub: Invalid value for 'Type': '%s' in group 'Element' of mob %d, defaulting to 'Ele_Neutral'\n", str, mob_id);
 			i32 = 0;
 		}
 		status->def_ele = i32;
