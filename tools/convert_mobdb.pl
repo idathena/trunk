@@ -91,7 +91,7 @@ sub parse_mobdb (@) {
 			print "\tATK2: $cols{ATK2}\n";
 			print "\tDEF: $cols{DEF}\n";
 			print "\tMDEF: $cols{MDEF}\n";
-			print "\tStatus: {\n";
+			print "\tStats: {\n";
 			print "\t\tSTR: $cols{STR}\n";
 			print "\t\tAGI: $cols{AGI}\n";
 			print "\t\tVIT: $cols{VIT}\n";
@@ -218,6 +218,7 @@ sub parse_mobdb (@) {
 			print "\t{\n" if $cols{DropCardid};
 			print "\t\tItemId: $cols{DropCardid}\n" if $cols{DropCardid};
 			print "\t\tRate: $cols{DropCardper}\n" if $cols{DropCardper};
+			print "\t\tStealProtected: true\n" if $cols{DropCardid};
 			print "\t}\n" if $cols{Dropid1} || $cols{Dropid2} || $cols{Dropid3} || $cols{Dropid4} || $cols{Dropid5} || $cols{Dropid6} || $cols{Dropid7} || $cols{Dropid8} || $cols{Dropid9} || $cols{DropCardid};
 			print "\t)\n" if $cols{Dropid1} || $cols{Dropid2} || $cols{Dropid3} || $cols{Dropid4} || $cols{Dropid5} || $cols{Dropid6} || $cols{Dropid7} || $cols{Dropid8} || $cols{Dropid9} || $cols{DropCardid};
 			print "},\n";
@@ -279,7 +280,7 @@ print <<"EOF";
 	{
 		ItemId: (int)
 		Rate: (int)
-		StealProtected: (bool)
+		RandomOptionGroup: (string)
 	},
 	... (can be repeated)
 	)
@@ -287,6 +288,8 @@ print <<"EOF";
 	{
 		ItemId: (int)
 		Rate: (int)
+		StealProtected: (bool)
+		RandomOptionGroup: (string)
 	},
 	... (can be repeated)
 	)

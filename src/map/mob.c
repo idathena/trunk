@@ -1987,13 +1987,13 @@ void mob_setdropitem_option(struct item *itm, struct s_mob_drop *mobdrop)
 	struct s_random_opt_group *g = NULL;
 	int i;
 
-	if (!itm || !mobdrop || mobdrop->randomopt_group == RDMOPTG_None)
+	if (!itm || !mobdrop || !mobdrop->randomopt_group)
 		return;
 	if ((g = itemdb_randomopt_group_exists(mobdrop->randomopt_group))) {
 		for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
 			struct s_random_opt_subgroup *sg = NULL;
 
-			if (g->subgroup_id[i] == RDMOPTSG_None)
+			if (!g->subgroup_id[i])
 				continue;
 			if ((sg = itemdb_randomopt_subgroup_exists(g->subgroup_id[i])) && sg->total) {
 				int j = rnd()%sg->total;
@@ -2571,7 +2571,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		dlist->third_charid = (third_sd ? third_sd->status.char_id : 0);
 		dlist->item = NULL;
 
-		for(i = 0; i < MAX_MOB_DROP_TOTAL; i++) {
+		for(i = 0; i < MAX_MOB_DROP; i++) {
 			if(md->db->dropitem[i].nameid <= 0)
 				continue;
 			if(!(it = itemdb_exists(md->db->dropitem[i].nameid)))
@@ -2719,14 +2719,14 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			log_mvp[1] = mexp;
 		}
 		if(!(map[m].flag.nomvploot || type&1)) { //Order might be random depending on item_drop_mvp_mode config setting
-			struct s_mob_drop mdrop[MAX_MVP_DROP_TOTAL];
+			struct s_mob_drop mdrop[MAX_MVP_DROP];
 			struct item item;
 
 			memset(&mdrop,0,sizeof(mdrop));
 			if(battle_config.item_drop_mvp_mode == 1) { //Random order
-				for(i = 0; i < MAX_MVP_DROP_TOTAL; i++) {
+				for(i = 0; i < MAX_MVP_DROP; i++) {
 					while(1) {
-						uint8 va = rnd()%MAX_MVP_DROP_TOTAL;
+						uint8 va = rnd()%MAX_MVP_DROP;
 
 						if(!mdrop[va].nameid) {
 							if(md->db->mvpitem[i].nameid > 0)
@@ -2736,12 +2736,12 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 					}
 				}
 			} else { //Normal order
-				for(i = 0; i < MAX_MVP_DROP_TOTAL; i++) {
+				for(i = 0; i < MAX_MVP_DROP; i++) {
 					if(md->db->mvpitem[i].nameid > 0)
 						memcpy(&mdrop[i], &md->db->mvpitem[i], sizeof(mdrop[i]));
 				}
 			}
-			for(i = 0; i < MAX_MVP_DROP_TOTAL; i++) {
+			for(i = 0; i < MAX_MVP_DROP; i++) {
 				struct item_data *i_data;
 
 				if(mdrop[i].nameid <= 0 || !(i_data = itemdb_exists(mdrop[i].nameid)))
@@ -3884,12 +3884,12 @@ static void item_dropratio_adjust(unsigned short nameid, int mob_id, int *rate_a
 {
 	struct s_mob_item_drop_ratio *item_ratio = (struct s_mob_item_drop_ratio *)idb_get(mob_item_drop_ratio, nameid);
 
-	if( item_ratio ) {
-		if( item_ratio->mob_id[0] ) { //Only for listed mobs
+	if (item_ratio) {
+		if (item_ratio->mob_id[0]) { //Only for listed mobs
 			int i;
 
 			ARR_FIND(0, MAX_ITEMRATIO_MOBS, i, item_ratio->mob_id[i] == mob_id);
-			if( i < MAX_ITEMRATIO_MOBS ) //Found
+			if (i < MAX_ITEMRATIO_MOBS) //Found
 				*rate_adjust = item_ratio->drop_ratio;
 		} else //For all mobs
 			*rate_adjust = item_ratio->drop_ratio;
@@ -3935,7 +3935,9 @@ static void mob_readdb_libconfig_sub_mvpdrops(config_setting_t *t, struct mob_db
 
 	for (i = 0; i < MAX_MVP_DROP; i++) {
 		struct config_setting_t *tt = config_setting_get_elem(t, i);
-		int nameid = 0, rate = 0;
+		struct config_setting_t *s;
+		int nameid = 0, rate = 0, randomopt_group = 0;
+		const char *str = NULL;
 
 		if (!tt)
 			break;
@@ -3947,12 +3949,22 @@ static void mob_readdb_libconfig_sub_mvpdrops(config_setting_t *t, struct mob_db
 			ShowWarning("Monster \"%s\"(id: %d) is dropping an unknown item \"%s\"(MVP-Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
 			entry->mvpitem[i].nameid = 0;
 			entry->mvpitem[i].p = 0;
+			entry->mvpitem[i].steal_protected = 0;
+			entry->mvpitem[i].randomopt_group = 0;
 			continue;
 		}
 		if (!config_setting_lookup_int(tt, "Rate", &rate) || rate <= 0)
 			continue;
 		entry->mvpitem[i].nameid = nameid;
 		entry->mvpitem[i].p = rate;
+		if ((s = config_setting_get_member(tt, "StealProtected")))
+			entry->mvpitem[i].steal_protected = (config_setting_get_bool(s) ? 1 : 0);
+		if (config_setting_lookup_string(tt, "RandomOptionGroup", &str)) {
+			if (script_get_constant(str, &randomopt_group) && itemdb_randomopt_group_exists(randomopt_group))
+				entry->mvpitem[i].randomopt_group = randomopt_group;
+			else
+				entry->mvpitem[i].randomopt_group = 0;
+		}
 	}
 	if (i == MAX_MVP_DROP && config_setting_get_elem(t, i))
 		ShowWarning("mob_readdb_libconfig_sub_mvpdrops: Too many mvp drops in mob %d\n", mob_id);
@@ -3966,7 +3978,9 @@ static void mob_readdb_libconfig_sub_drops(config_setting_t *t, struct mob_db *e
 
 	for (i = 0; i < MAX_MOB_DROP; i++) {
 		struct config_setting_t *tt = config_setting_get_elem(t, i);
-		int nameid = 0, rate = 0;
+		struct config_setting_t *s;
+		int nameid = 0, rate = 0, randomopt_group = 0;
+		const char *str = NULL;
 
 		if (!tt)
 			break;
@@ -3978,12 +3992,22 @@ static void mob_readdb_libconfig_sub_drops(config_setting_t *t, struct mob_db *e
 			ShowWarning("Monster \"%s\"(id: %d) is dropping an unknown item \"%s\"(Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
 			entry->dropitem[i].nameid = 0;
 			entry->dropitem[i].p = 0;
+			entry->dropitem[i].steal_protected = 0;
+			entry->dropitem[i].randomopt_group = 0;
 			continue;
 		}
 		if (!config_setting_lookup_int(tt, "Rate", &rate) || rate <= 0)
 			continue;
 		entry->dropitem[i].nameid = nameid;
 		entry->dropitem[i].p = rate;
+		if ((s = config_setting_get_member(tt, "StealProtected")))
+			entry->dropitem[i].steal_protected = (config_setting_get_bool(s) ? 1 : 0);
+		if (config_setting_lookup_string(tt, "RandomOptionGroup", &str)) {
+			if (script_get_constant(str, &randomopt_group) && itemdb_randomopt_group_exists(randomopt_group))
+				entry->dropitem[i].randomopt_group = randomopt_group;
+			else
+				entry->dropitem[i].randomopt_group = 0;
+		}
 	}
 	if (i == MAX_MOB_DROP && config_setting_get_elem(t, i))
 		ShowWarning("mob_readdb_libconfig_sub_drops: Too many drops in mob %d\n", mob_id);
@@ -4179,9 +4203,10 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 
 	//MVP EXP Bonus: MEXP
 	//Some new MVP's MEXP multipled by high exp-rate cause overflow [LuzZza]
-	if (config_setting_lookup_int(it, "MEXP", &i32) && i32 >= 0)
+	if (config_setting_lookup_int(it, "MEXP", &i32) && i32 >= 0) {
 		exp = (double)i32 * (double)battle_config.mvp_exp_rate / 100.;
-	entry->mexp = (unsigned int)cap_value(exp, 0, UINT_MAX);
+		entry->mexp = (unsigned int)cap_value(exp, 0, UINT_MAX);
+	}
 
 	//Now that we know if it is an mvp or not, apply battle_config modifiers [Skotlex]
 	maxhp = (double)status->max_hp;
@@ -4856,79 +4881,6 @@ static bool mob_readdb_itemratio(char *str[], int columns, int current)
 }
 
 /**
- * Read additional monster drop from db file
- * @author [Cydh]
- */
-static bool mob_readdb_drop(char *str[], int columns, int current)
-{
-	unsigned short mobid, nameid;
-	int rate, i, size, flag = 0;
-	struct mob_db *mob;
-	struct s_mob_drop *drop;
-
-	mobid = atoi(str[0]);
-	if ((mob = mob_db(mobid)) == mob_dummy) {
-		ShowError("mob_readdb_drop: Invalid monster ID %s.\n", str[0]);
-		return false;
-	}
-
-	nameid = atoi(str[1]);
-	if (!itemdb_exists(nameid)) {
-		ShowWarning("mob_readdb_drop: Invalid item ID %s.\n", str[1]);
-		return false;
-	}
-
-	rate = atoi(str[2]);
-	if (columns > 4 && (flag = atoi(str[4])) == 2) {
-		drop = mob->mvpitem;
-		size = ARRAYLENGTH(mob->mvpitem);
-	} else {
-		drop = mob->dropitem;
-		size = ARRAYLENGTH(mob->dropitem);
-	}
-
-	if (!rate) {
-		for (i = 0; i < size; i++) {
-			if (drop[i].nameid == nameid) {
-				memset(&drop[i], 0, sizeof(struct s_mob_drop));
-				ShowInfo("mob_readdb_drop: Removed item '%hu' from monster '%hu'.\n", nameid, mobid);
-				return true;
-			}
-		}
-	} else {
-		ARR_FIND(0, size, i, drop[i].nameid == nameid);
-		if (i == size) { //Item is not dropped at all (search all item slots)
-			ARR_FIND(0, size, i, drop[i].nameid == 0);
-			if (i == size) { //No empty slots
-				ShowError("mob_readdb_drop: Cannot add item '%hu' to monster '%hu'. Max drop reached (%d).\n", nameid, mobid, size);
-				return true;
-			}
-		}
-		drop[i].nameid = nameid;
-		drop[i].p = rate;
-		drop[i].steal_protected = (flag ? 1 : 0);
-		drop[i].randomopt_group = RDMOPTG_None;
-		if (columns > 3) {
-			int randomopt_group = -1;
-
-			if (!script_get_constant(trim(str[3]), &randomopt_group)) {
-				ShowError("mob_readdb_drop: Invalid 'randopt_groupid' '%s' for monster '%hu'.\n", str[3], mobid);
-				return false;
-			}
-			if (randomopt_group == RDMOPTG_None)
-				return true;
-			if (!itemdb_randomopt_group_exists(randomopt_group)) {
-				ShowError("mob_readdb_drop: 'randopt_groupid' '%s' cannot be found in DB for monster '%hu'.\n", str[3], mobid);
-				return false;
-			}
-			drop[i].randomopt_group = randomopt_group;
-		}
-	}
-
-	return true;
-}
-
-/**
  * Free drop ratio data
  */
 static int mob_item_drop_ratio_free(DBKey key, DBData *data, va_list ap) {
@@ -4957,7 +4909,7 @@ static void mob_drop_ratio_adjust(void) {
 
 		mob_id = i;
 
-		for (j = 0; j < MAX_MVP_DROP_TOTAL; j++) {
+		for (j = 0; j < MAX_MVP_DROP; j++) {
 			nameid = mob->mvpitem[j].nameid;
 			rate = mob->mvpitem[j].p;
 
@@ -4989,7 +4941,7 @@ static void mob_drop_ratio_adjust(void) {
 			mob->mvpitem[j].p = rate;
 		}
 
-		for (j = 0; j < MAX_MOB_DROP_TOTAL; j++) {
+		for (j = 0; j < MAX_MOB_DROP; j++) {
 			unsigned short ratemin, ratemax;
 			bool is_treasurechest;
 
@@ -5195,7 +5147,6 @@ static void mob_load(void)
 	sv_readdb(db_path, "mob_avail.txt", ',', 2, 13, -1, &mob_readdb_mobavail);
 	sv_readdb(db_path, DBPATH"mob_race2_db.txt", ',', 2, MAX_RACE2_MOBS, -1, &mob_readdb_race2);
 	sv_readdb(db_path, "mob_item_ratio.txt", ',', 2, 2 + MAX_ITEMRATIO_MOBS, -1, &mob_readdb_itemratio);
-	sv_readdb(db_path, DBPATH"mob_drop.txt", ',', 3, 5, -1, &mob_readdb_drop);
 	mob_drop_ratio_adjust();
 	mob_skill_db_set();
 	mob_read_randommonster();
@@ -5245,7 +5196,6 @@ void mob_reload(void) {
 	int i;
 
 	//Mob skills need to be cleared before re-reading them [Skotlex]
-	//Also clear mob drops to reload db/../mob_drop.txt
 	for (i = 0; i < MAX_MOB_DB; i++) {
 		if (mob_db_data[i] && !mob_is_clone(i)) {
 			memset(&mob_db_data[i]->skill, 0, sizeof(mob_db_data[i]->skill));

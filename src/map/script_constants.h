@@ -1297,7 +1297,7 @@
 	export_constant(SC_EQC);
 	export_constant(SC_GOLDENE_FERSE);
 	export_constant(SC_ANGRIFFS_MODUS);
-	export_constant(SC_OVERED_BOOST);        
+	export_constant(SC_OVERED_BOOST);
 	export_constant(SC_LIGHT_OF_REGENE);
 	export_constant(SC_ASH);
 	export_constant(SC_GRANITIC_ARMOR);
@@ -2957,7 +2957,6 @@
 	export_constant(STOR_MODE_PUT);
 
 	/* Item Random Option Group */
-	export_constant(RDMOPTG_None);
 	export_constant(RDMOPTG_Crimson_Weapon);
 	export_constant(RDMOPTG_Vicious_Weapon_Group_1);
 	export_constant(RDMOPTG_Vicious_Weapon_Group_2);
@@ -2966,7 +2965,6 @@
 	export_constant(RDMOPTG_Vicious_Weapon_Group_5);
 
 	/* Item Random Option Subgroup */
-	export_constant(RDMOPTSG_None);
 	export_constant(RDMOPTSG_Crimson_Weapon);
 	export_constant(RDMOPTSG_Vicious_Weapon_Group_1_Slot_1);
 	export_constant(RDMOPTSG_Vicious_Weapon_Group_1_Slot_2);

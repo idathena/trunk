@@ -103,7 +103,7 @@ static void warp_get_suggestions(struct map_session_data *sd, const char *name);
 //@commands (script-based)
 struct atcmd_binding_data *get_atcommandbind_byname(const char *name) {
 	int i = 0;
-	
+
 	if( *name == atcommand_symbol || *name == charcommand_symbol )
 		name++; //For backwards compatibility
 
@@ -552,7 +552,7 @@ ACMD_FUNC(jumpto)
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
 	}
-	
+
 	if (pl_sd->bl.m >= 0 && map[pl_sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(247));	// You are not authorized to warp to this map.
 		return -1;
@@ -962,7 +962,7 @@ ACMD_FUNC(option)
 	sd->sc.opt1 = param1;
 	sd->sc.opt2 = param2;
 	pc_setoption(sd, param3);
-	
+
 	clif_displaymessage(fd, msg_txt(9)); // Options changed.
 
 	return 0;
@@ -1535,7 +1535,7 @@ ACMD_FUNC(help)
 		atcommand_get_suggestions(sd, command_name, true);
 		return -1;
 	}
-	
+
 	if (!config_setting_lookup_string(help, command_name, &text)) {
 		sprintf(atcmd_output, msg_txt(988), atcommand_symbol, command_name); // There is no help for %c%s.
 		clif_displaymessage(fd, atcmd_output);
@@ -1853,7 +1853,7 @@ ACMD_FUNC(go)
 	int i;
 	int town = INT_MAX; // Initialized to INT_MAX instead of -1 to avoid conflicts with those who map [-3:-1] to @memo locations.
 	char map_name[MAP_NAME_LENGTH];
- 
+
 	const struct {
 		char map[MAP_NAME_LENGTH];
 		int x, y;
@@ -1905,17 +1905,17 @@ ACMD_FUNC(go)
 		{ MAP_ECLAGE,      110,  39, 3 }, // 35 = Eclage
 		{ MAP_LASAGNA,     193, 182, 2 }, // 36 = Lasagna
 	};
- 
+
 	nullpo_retr(-1, sd);
- 
+
 	if (map[sd->bl.m].flag.nogo && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(sd->fd,msg_txt(995)); // You cannot use @go on this map.
 		return 0;
 	}
- 
+
 	memset(map_name, '\0', sizeof(map_name));
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
- 
+
 	if (!message || !*message || sscanf(message, "%11s", map_name) < 1) { // No value matched so send the list of locations
 		const char *text;
 
@@ -2354,7 +2354,7 @@ ACMD_FUNC(displaystatus)
 {
 	int i, type, flag, tick, val1 = 0, val2 = 0, val3 = 0;
 	nullpo_retr(-1, sd);
-	
+
 	if (!message || !*message || (i = sscanf(message, "%d %d %d %d %d %d", &type, &flag, &tick, &val1, &val2, &val3)) < 1) {
 		clif_displaymessage(fd, msg_txt(1009)); // Please enter a status type/flag (usage: @displaystatus <status type> <flag> <tick> {<val1> {<val2> {<val3>}}}).
 		return -1;
@@ -2726,12 +2726,12 @@ ACMD_FUNC(petfriendly) {
 		clif_displaymessage(fd, msg_txt(184)); // Sorry, but you have no pet.
 		return -1;
 	}
-	
+
 	if (friendly < 0 || friendly > 1000) {
 		clif_displaymessage(fd, msg_txt(37)); // An invalid number was specified.
 		return -1;
 	}
-	
+
 	if (friendly == pd->pet.intimate) {
 		clif_displaymessage(fd, msg_txt(183)); // Pet intimacy is already at maximum.
 		return -1;
@@ -3082,7 +3082,7 @@ ACMD_FUNC(doommap)
  *
  *------------------------------------------*/
 static void atcommand_raise_sub(struct map_session_data *sd) {
-	
+
 	status_revive(&sd->bl, 100, 100);
 
 	clif_skill_nodamage(&sd->bl,&sd->bl,ALL_RESURRECTION,4,1);
@@ -3096,7 +3096,7 @@ ACMD_FUNC(raise)
 {
 	struct map_session_data *pl_sd;
 	struct s_mapiterator *iter;
-		
+
 	nullpo_retr(-1, sd);
 
 	iter = mapit_getallusers();
@@ -3254,7 +3254,7 @@ ACMD_FUNC(lostskill)
 
 		// Attempt to find the text corresponding to this command
 		text = atcommand_help_string(command);
-		
+
 		// Send the error message as always
 		clif_displaymessage(fd, msg_txt(1027)); // Please enter a quest skill number.
 
@@ -3985,7 +3985,7 @@ ACMD_FUNC(mapinfo)
 		return -1;
 	}
 	m_index = mapindex_name2id(mapname); // This one shouldn't fail since the previous seek did not.
-	
+
 	clif_displaymessage(fd, msg_txt(1039)); // ------ Map Info ------
 
 	// Count chats (for initial message)
@@ -5387,7 +5387,7 @@ ACMD_FUNC(addwarp)
 
 	nullpo_retr(-1, sd);
 	memset(warpname, '\0', sizeof(warpname));
-	
+
 	if (!message || !*message || sscanf(message, "%31s %d %d %23[^\n]", mapname, &x, &y, warpname) < 4) {
 		clif_displaymessage(fd, msg_txt(1156)); // Usage: @addwarp <mapname> <X> <Y> <npc name>
 		return -1;
@@ -5428,7 +5428,7 @@ ACMD_FUNC(follow)
 		clif_displaymessage(fd, msg_txt(1159)); // Follow mode OFF.
 		return 0;
 	}
-	
+
 	if ((pl_sd = map_nick2sd(atcmd_player_name)) == NULL) {
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
@@ -5441,7 +5441,7 @@ ACMD_FUNC(follow)
 		pc_follow(sd, pl_sd->bl.id);
 		clif_displaymessage(fd, msg_txt(1160)); // Follow mode ON.
 	}
-	
+
 	return 0;
 }
 
@@ -5486,7 +5486,7 @@ ACMD_FUNC(dropall)
 	}
 	count -= count2;
 	sprintf(atcmd_output, msg_txt(1508), count, count2); // %d items are dropped (%d skipped)!
-	clif_displaymessage(fd, atcmd_output); 
+	clif_displaymessage(fd, atcmd_output);
 	return 0;
 }
 
@@ -5829,7 +5829,7 @@ ACMD_FUNC(marry)
 	struct map_session_data *pl_sd = NULL;
 
 	nullpo_retr(-1, sd);
-	
+
 	memset(atcmd_player_name, '\0', sizeof(atcmd_player_name));
 
 	if (!message || !*message || sscanf(message, "%23[^\n]", atcmd_player_name) < 1) {
@@ -5869,7 +5869,7 @@ ACMD_FUNC(divorce)
 		clif_displaymessage(fd, atcmd_output);
 		return -1;
 	}
-	
+
 	sprintf(atcmd_output, msg_txt(1176), sd->status.name); // '%s' and his/her partner are now divorced.
 	clif_displaymessage(fd, atcmd_output);
 	return 0;
@@ -6028,7 +6028,7 @@ ACMD_FUNC(partyoption)
 		clif_displaymessage(fd, msg_txt(1186)); // Usage: @partyoption <pickup share: yes/no> <item distribution: yes/no>
 		return -1;
 	}
-	
+
 	option = (config_switch(w1) ? 1 : 0)|(config_switch(w2) ? 2 : 0);
 
 	//Change item share type.
@@ -6557,7 +6557,7 @@ ACMD_FUNC(cleanmap)
 ACMD_FUNC(cleanarea)
 {
 	int x0 = 0, y0 = 0, x1 = 0, y1 = 0;
-	
+
 	if (!message || !*message || sscanf(message, "%d %d %d %d", &x0, &y0, &x1, &y1) < 1) {
 		map_foreachinallarea(atcommand_cleanfloor_sub, sd->bl.m, sd->bl.x - (AREA_SIZE * 2), sd->bl.y - (AREA_SIZE * 2), sd->bl.x + (AREA_SIZE * 2), sd->bl.y + (AREA_SIZE * 2), BL_ITEM);
 	}
@@ -6567,7 +6567,7 @@ ACMD_FUNC(cleanarea)
 	else if (sscanf(message, "%d %d %d %d", &x0, &y0, &x1, &y1) == 4) {
 		map_foreachinallarea(atcommand_cleanfloor_sub, sd->bl.m, x0, y0, x1, y1, BL_ITEM);
 	}
-	
+
 	clif_displaymessage(fd, msg_txt(1221)); // All dropped items have been cleaned up.
 	return 0;
 }
@@ -6661,7 +6661,7 @@ ACMD_FUNC(pettalk)
 					return 0;
 			}
 			sd->emotionlasttime = time(NULL);
-			
+
 			clif_emotion(&pd->bl, i);
 			return 0;
 		}
@@ -6885,7 +6885,7 @@ ACMD_FUNC(unmute)
 	pl_sd->status.manner = 0;
 	status_change_end(&pl_sd->bl, SC_NOCHAT, INVALID_TIMER);
 	clif_displaymessage(sd->fd,msg_txt(1236)); // Player unmuted.
-	
+
 	return 0;
 }
 
@@ -7196,7 +7196,7 @@ ACMD_FUNC(mobinfo)
 		clif_displaymessage(fd, msg_txt(1245)); // Drops:
 		strcpy(atcmd_output, " ");
 		j = 0;
-		for (i = 0; i < MAX_MOB_DROP_TOTAL; i++) {
+		for (i = 0; i < MAX_MOB_DROP; i++) {
 			float droprate;
 
 			if (mob->dropitem[i].nameid <= 0 || mob->dropitem[i].p < 1 || !(item_data = itemdb_exists(mob->dropitem[i].nameid)))
@@ -7239,7 +7239,7 @@ ACMD_FUNC(mobinfo)
 			strcpy(atcmd_output, msg_txt(1248)); // MVP Items:
 			mvpremain = 100.0; // Remaining drop chance for official mvp drop mode
 			j = 0;
-			for (i = 0; i < MAX_MVP_DROP_TOTAL; i++) {
+			for (i = 0; i < MAX_MVP_DROP; i++) {
 				if (mob->mvpitem[i].nameid <= 0 || !(item_data = itemdb_exists(mob->mvpitem[i].nameid)))
 					continue;
 				// Because if there are 3 MVP drops at 50%, the first has a chance of 50%, the second 25% and the third 12.5%
@@ -7843,7 +7843,7 @@ ACMD_FUNC(version)
  * @mutearea by MouseJstr
  *------------------------------------------*/
 static int atcommand_mutearea_sub(struct block_list *bl,va_list ap)
-{	
+{
 	int time, id;
 	struct map_session_data *pl_sd = (struct map_session_data *)bl;
 
@@ -7944,12 +7944,12 @@ ACMD_FUNC(me)
 		clif_displaymessage(fd, msg_txt(1302)); // Please enter a message (usage: @me <message>).
 		return -1;
 	}
-	
+
 	sprintf(atcmd_output, msg_txt(270), sd->status.name, tempmes);	// *%s %s*
 	clif_disp_overhead(&sd->bl, atcmd_output);
-	
+
 	return 0;
-	
+
 }
 
 /*==========================================
@@ -8236,7 +8236,7 @@ ACMD_FUNC(showdelay)
 		clif_displaymessage(fd, msg_txt(1320)); // Skill delay failures will not be shown.
 		return 0;
 	}
-	
+
 	sd->state.showdelay = 1;
 	clif_displaymessage(fd, msg_txt(1321)); // Skill delay failures are now shown.
 	return 0;
@@ -8547,7 +8547,7 @@ ACMD_FUNC(noask)
 		clif_displaymessage(fd, msg_txt(390)); // Autorejecting is activated.
 		sd->state.noask = 1;
 	}
-	
+
 	return 0;
 }
 
@@ -8642,7 +8642,7 @@ ACMD_FUNC(allowks)
 ACMD_FUNC(resetstat)
 {
 	nullpo_retr(-1, sd);
-	
+
 	pc_resetstate(sd);
 	sprintf(atcmd_output, msg_txt(207), sd->status.name); // '%s' stats points reset.
 	clif_displaymessage(fd, atcmd_output);
@@ -8652,7 +8652,7 @@ ACMD_FUNC(resetstat)
 ACMD_FUNC(resetskill)
 {
 	nullpo_retr(-1,sd);
-	
+
 	pc_resetskill(sd,1);
 	sprintf(atcmd_output, msg_txt(206), sd->status.name); // '%s' skill points reset.
 	clif_displaymessage(fd, atcmd_output);
@@ -8891,7 +8891,7 @@ ACMD_FUNC(stats)
 	sprintf(output, msg_txt(53), sd->status.name); // '%s' stats:
 
 	clif_displaymessage(fd, output);
-	
+
 	for (i = 0; output_table[i].format != NULL; i++) {
 		sprintf(output, output_table[i].format, output_table[i].value);
 		clif_displaymessage(fd, output);
@@ -9061,7 +9061,7 @@ static void atcommand_commands_sub(struct map_session_data *sd, const int fd, At
 		if( count_bind )
 			clif_displaymessage(fd, line_buff); // Last one
 		count += count_bind;
-		
+
 	}
 
 	sprintf(atcmd_output, msg_txt(274), count); // "%d commands found."
@@ -9275,7 +9275,7 @@ ACMD_FUNC(addperm) {
 				clif_displaymessage(fd, atcmd_output);
 			}
 		}
-		
+
 		return -1;
 	}
 
@@ -10651,7 +10651,7 @@ void atcommand_db_load_groups(int *group_ids) {
 	DBIterator *iter = db_iterator(atcommand_db);
 	AtCommandInfo *cmd;
 	int i;
-	
+
 	for (cmd = dbi_first(iter); dbi_exists(iter); cmd = dbi_next(iter)) {
 		cmd->at_groups = aMalloc( pc_group_max * sizeof(char) );
 		cmd->char_groups = aMalloc( pc_group_max * sizeof(char) );
@@ -10666,29 +10666,29 @@ void atcommand_db_load_groups(int *group_ids) {
 			  cmd->char_groups[i] = 0;
 		}
 	}
-	
+
 	dbi_destroy(iter);
-	
+
 	return;
 }
 void atcommand_db_clear(void) {
-	
+
 	if (atcommand_db != NULL) {
 		DBIterator *iter = db_iterator(atcommand_db);
 		AtCommandInfo *cmd;
-		
+
 		for (cmd = dbi_first(iter); dbi_exists(iter); cmd = dbi_next(iter)) {
 			aFree(cmd->at_groups);
 			aFree(cmd->char_groups);
 		}
-		
+
 		dbi_destroy(iter);
 
 		db_destroy(atcommand_db);
 	}
 	if (atcommand_alias_db != NULL)
 		db_destroy(atcommand_alias_db);
-	
+
 	config_destroy(&atcommand_config);
 }
 
