@@ -932,7 +932,7 @@ int map_delmap(char *mapname);
 void map_flags_init(void);
 
 bool map_iwall_exist(const char *wall_name);
-bool map_iwall_set(int16 m, int16 x, int16 y, int size, int8 dir, bool shootable, const char *wall_name); 
+bool map_iwall_set(int16 m, int16 x, int16 y, int size, int8 dir, bool shootable, const char *wall_name);
 void map_iwall_get(struct map_session_data *sd);
 bool map_iwall_remove(const char *wall_name);
 
@@ -1017,9 +1017,6 @@ extern char item_db_db[32];
 extern char item_db2_db[32];
 extern char item_db_re_db[32];
 extern char markets_db[32];
-extern char mob_db_db[32];
-extern char mob_db_re_db[32];
-extern char mob_db2_db[32];
 extern char mob_skill_db_db[32];
 extern char mob_skill_db_re_db[32];
 extern char mob_skill_db2_db[32];

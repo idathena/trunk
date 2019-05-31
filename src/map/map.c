@@ -83,9 +83,6 @@ char item_db_re_db[32] = "item_db_re";
 char item_cash_db_db[32] = "item_cash_db";
 char item_cash_db2_db[32] = "item_cash_db2";
 char markets_db[32] = "markets";
-char mob_db_db[32] = "mob_db";
-char mob_db_re_db[32] = "mob_db_re";
-char mob_db2_db[32] = "mob_db2";
 char mob_skill_db_db[32] = "mob_skill_db";
 char mob_skill_db_re_db[32] = "mob_skill_db_re";
 char mob_skill_db2_db[32] = "mob_skill_db2";
@@ -3989,12 +3986,6 @@ int inter_config_read(char *cfgName)
 			strcpy(item_db_re_db, w2);
 		else if( strcmpi(w1, "markets_db") == 0 )
 			strcpy(markets_db, w2);
-		else if( strcmpi(w1, "mob_db_db") == 0 )
-			strcpy(mob_db_db, w2);
-		else if( strcmpi(w1, "mob_db_re_db") == 0 )
-			strcpy(mob_db_re_db, w2);
-		else if( strcmpi(w1, "mob_db2_db") == 0 )
-			strcpy(mob_db2_db, w2);
 		else if( strcmpi(w1, "mob_skill_db_db") == 0 )
 			strcpy(mob_skill_db_db, w2);
 		else if( strcmpi(w1, "mob_skill_db_re_db") == 0 )

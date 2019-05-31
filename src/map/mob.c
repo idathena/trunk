@@ -3935,7 +3935,6 @@ static void mob_readdb_libconfig_sub_mvpdrops(config_setting_t *t, struct mob_db
 
 	for (i = 0; i < MAX_MVP_DROP; i++) {
 		struct config_setting_t *tt = config_setting_get_elem(t, i);
-		struct config_setting_t *s;
 		int nameid = 0, rate = 0, randomopt_group = 0;
 		const char *str = NULL;
 
@@ -3949,7 +3948,6 @@ static void mob_readdb_libconfig_sub_mvpdrops(config_setting_t *t, struct mob_db
 			ShowWarning("Monster \"%s\"(id: %d) is dropping an unknown item \"%s\"(MVP-Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
 			entry->mvpitem[i].nameid = 0;
 			entry->mvpitem[i].p = 0;
-			entry->mvpitem[i].steal_protected = 0;
 			entry->mvpitem[i].randomopt_group = 0;
 			continue;
 		}
@@ -3957,8 +3955,6 @@ static void mob_readdb_libconfig_sub_mvpdrops(config_setting_t *t, struct mob_db
 			continue;
 		entry->mvpitem[i].nameid = nameid;
 		entry->mvpitem[i].p = rate;
-		if ((s = config_setting_get_member(tt, "StealProtected")))
-			entry->mvpitem[i].steal_protected = (config_setting_get_bool(s) ? 1 : 0);
 		if (config_setting_lookup_string(tt, "RandomOptionGroup", &str)) {
 			if (script_get_constant(str, &randomopt_group) && itemdb_randomopt_group_exists(randomopt_group))
 				entry->mvpitem[i].randomopt_group = randomopt_group;
