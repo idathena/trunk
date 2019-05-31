@@ -877,7 +877,7 @@ struct s_skill_nounit_layout* skill_get_nounit_layout(uint16 skill_id, uint16 sk
 static int skill_area_temp[8];
 
 /*==========================================
- * Add effect to skill when hit succesfully target 
+ * Add effect to skill when hit succesfully target
  *------------------------------------------*/
 int skill_additional_effect(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int attack_type, int dmg_lv, unsigned int tick)
 {
@@ -2639,7 +2639,7 @@ static int skill_magic_reflect(struct block_list *src, struct block_list *bl, bo
  * @param skill_id: Target skill
  * @return	0: Skill is not a combo
  *			1: Skill is a normal combo
- *			2: Skill is combo that prioritizes auto-target even if val2 is set 
+ *			2: Skill is combo that prioritizes auto-target even if val2 is set
  * @author Panikon
  */
 int skill_is_combo(uint16 skill_id) {
@@ -3145,7 +3145,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 				if (skill_id == WZ_WATERBALL && skill_lv > 1)
 					sp = sp / ((skill_lv|1) * (skill_lv|1)); //Estimate SP cost of a single water-ball
 				status_heal(bl, 0, sp, 2);
-#ifndef RENEWAL 
+#ifndef RENEWAL
 				clif_skill_nodamage(bl, bl, SA_MAGICROD, skill_lv, 1);
 #endif
 			}
@@ -6255,7 +6255,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if (tsc && status_has_mode(&dstmd->status,MD_STATUS_IMMUNE)) {
 					const enum sc_type scs[] = { SC_QUAGMIRE,SC_PROVOKE,SC_ROKISWEIL,SC_GRAVITATION,SC_SUITON,
 						SC_STRIPWEAPON,SC_STRIPSHIELD,SC_STRIPARMOR,SC_STRIPHELM,SC_BLADESTOP };
-	
+
 					for (i = SC_COMMON_MIN; i <= SC_COMMON_MAX; i++)
 						if (tsc->data[i])
 							status_change_end(bl,(sc_type)i,INVALID_TIMER);
@@ -6413,10 +6413,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
 			//Initiate 20% of your damage becomes fire element
 			sc_start2(src,src,SC_WATK_ELEMENT,100,ELE_FIRE,20,skill_get_time2(skill_id,skill_lv));
-			if( sd )
-				skill_blockpc_start(sd,skill_id,skill_get_time(skill_id,skill_lv));
-			else if( bl->type == BL_MER )
-				skill_blockmerc_start((TBL_MER *)bl,skill_id,skill_get_time(skill_id,skill_lv));
 			break;
 
 		case TK_JUMPKICK:
@@ -7652,7 +7648,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							case SC_SATURDAYNIGHTFEVER:
 								tsc->data[i]->val2 = 0; //Mark a dispelled berserk to avoid setting hp to 100 by setting hp penalty to 0
 								break;
-						}							
+						}
 						status_change_end(bl,(sc_type)i,INVALID_TIMER);
 					}
 					break;
@@ -7689,7 +7685,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case SA_CASTCANCEL:
-		case SO_SPELLFIST:		
+		case SO_SPELLFIST:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			unit_skillcastcancel(src,1);
 			if (sd) {
@@ -8029,7 +8025,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					map_freeblock_unlock();
 					return 1;
 				} else
-					status_change_start(src,bl,SC_STUN,10000,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDRATE); 
+					status_change_start(src,bl,SC_STUN,10000,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDRATE);
 			}
 			break;
 
@@ -8497,7 +8493,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						case 1: calls = 7; break;
 						case 2: calls = 12; break;
 						case 3: calls = 20; break;
-						default: calls = 0; break; 
+						default: calls = 0; break;
 					}
 				}
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
@@ -8750,7 +8746,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if( sd )
 					skill_generate_millenniumshield(sd,skill_id,skill_lv);
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			} else 
+			} else
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
 			sc_start2(src,bl,SC_LUXANIMA,100,skill_lv,status_skill2sc(skill_id),skill_get_time(skill_id,skill_lv));
 			break;
@@ -18433,7 +18429,7 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 					struct block_list *src = map_id2bl(group->src_id);
 
 					if( unit->val1 && src && src->type == BL_PC &&
-						(group->item_id == ITEMID_TRAP || group->item_id == ITEMID_SPECIAL_ALLOY_TRAP) ) { 
+						(group->item_id == ITEMID_TRAP || group->item_id == ITEMID_SPECIAL_ALLOY_TRAP) ) {
 						struct item item_tmp; //Revert unit back into a trap
 
 						memset(&item_tmp,0,sizeof(item_tmp));
@@ -18935,7 +18931,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 
 	status = status_get_status_data(&sd->bl);
 
-	if( sd->skill_id_old == skill_id ) 
+	if( sd->skill_id_old == skill_id )
 		skill_lv = sd->skill_lv_old;
 
 	if( !(idx = skill_can_produce_mix(sd,nameid,unique_id,-1,qty)) )
@@ -19356,7 +19352,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 		} else {
 			int fame = 0;
 
-			tmp_item.amount = 0;			
+			tmp_item.amount = 0;
 			for( i = 0; i < qty; i++ ) { //Apply quantity modifiers
 				if( (skill_id == GN_MIX_COOKING || skill_id == GN_MAKEBOMB || skill_id == GN_S_PHARMACY) && make_per > 1 ) {
 					tmp_item.amount = qty;
@@ -19845,13 +19841,13 @@ int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv,
 		tmp_item.identify = 1;
 		if( tmp_item.amount ) {
 			unsigned char flag = pc_additem(sd,&tmp_item,tmp_item.amount,LOG_TYPE_CONSUME);
- 
+
 			if( flag ) {
 				clif_additem(sd,0,0,flag);
 				map_addflooritem(&tmp_item,tmp_item.amount,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0,false);
 			}
 		}
-		
+
 	}
 	return 0;
 }

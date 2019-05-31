@@ -1309,7 +1309,7 @@ const char *parse_variable(const char *p) {
 
 	// Increment the total curly count for the position in the script
 	++syntax.curly_count;
-	
+
 	// Parse the variable currently being modified
 	word = add_word(var);
 
@@ -1337,10 +1337,10 @@ const char *parse_variable(const char *p) {
 
 	// Decrement the curly count for the position within the script
 	--syntax.curly_count;
-	
+
 	// Close the script by appending the function operator
 	add_scriptc(C_FUNC);
-		
+
 	// Push the buffer from the method
 	return p;
 }
@@ -1570,7 +1570,7 @@ const char *parse_expr(const char *p)
 }
 
 /*==========================================
- * çAnalysis of the line
+ * ÔøΩAnalysis of the line
  *------------------------------------------*/
 const char *parse_line(const char *p)
 {
@@ -1595,8 +1595,8 @@ const char *parse_line(const char *p)
 	} else if(p[0] == '}') {
 		return parse_curly_close(p);
 	}
-		
-	// çSyntax-related processing
+
+	// ÔøΩSyntax-related processing
 	p2 = parse_syntax(p);
 	if(p2 != NULL)
 		return p2;
@@ -1611,7 +1611,7 @@ const char *parse_line(const char *p)
 
 	p = parse_callfunc(p,0,0);
 	p = skip_space(p);
-	
+
 	if(parse_syntax_for_flag) {
 		if( *p != ')' )
 			disp_error_message("parse_line: expected ')'",p);
@@ -1642,7 +1642,7 @@ const char *parse_curly_close(const char *p)
 		int pos = syntax.curly_count-1;
 		char label[256];
 		int l;
-		// Remove temporary variables 
+		// Remove temporary variables
 		sprintf(label,"set $@__SW%x_VAL,0;",syntax.curly[pos].index);
 		syntax.curly[syntax.curly_count++].type = TYPE_NULL;
 		parse_line(label);
@@ -1667,7 +1667,7 @@ const char *parse_curly_close(const char *p)
 			syntax.curly_count--;
 		}
 
-		// èLabel end
+		// ÔøΩLabel end
 		sprintf(label,"__SW%x_FIN",syntax.curly[pos].index);
 		l=add_str(label);
 		set_label(l,script_pos, p);
@@ -1798,7 +1798,7 @@ const char *parse_syntax(const char *p)
 
 					sprintf(label,"set $@__SW%x_VAL,0;",syntax.curly[pos].index);
 					syntax.curly[syntax.curly_count++].type = TYPE_NULL;
-				
+
 					parse_line(label);
 					syntax.curly_count--;
 					syntax.curly[pos].count++;
@@ -1935,7 +1935,7 @@ const char *parse_syntax(const char *p)
 				if(*p != ';')
 					disp_error_message("parse_syntax: expected ';'",p);
 				p++;
-				
+
 				// Skip to the beginning of the loop
 				sprintf(label,"goto __FR%x_BGN;",syntax.curly[pos].index);
 				syntax.curly[syntax.curly_count++].type = TYPE_NULL;
@@ -1946,7 +1946,7 @@ const char *parse_syntax(const char *p)
 				sprintf(label,"__FR%x_NXT",syntax.curly[pos].index);
 				l=add_str(label);
 				set_label(l,script_pos,p);
-				
+
 				// Process the next time you enter the loop
 				// A ')' last for; flag to be treated as'
 				parse_syntax_for_flag = 1;
@@ -2189,7 +2189,7 @@ const char *parse_syntax_close_sub(const char *p,int *flag)
 		}
 		// Close if
 		syntax.curly_count--;
-		// çPut the label of the final location
+		// ÔøΩPut the label of the final location
 		sprintf(label,"__IF%x_FIN",syntax.curly[pos].index);
 		l=add_str(label);
 		set_label(l,script_pos,p);
@@ -2210,7 +2210,7 @@ const char *parse_syntax_close_sub(const char *p,int *flag)
 			set_label(l2,script_pos,p);
 		}
 
-		// èSkip to the end point if the condition is false
+		// ÔøΩSkip to the end point if the condition is false
 		p = skip_space(p);
 		p2 = skip_word(p);
 		if(p2 - p != 5 || strncasecmp(p,"while",5))
@@ -2238,7 +2238,7 @@ const char *parse_syntax_close_sub(const char *p,int *flag)
 		parse_line(label2);
 		syntax.curly_count--;
 
-		// èForm label of the end point conditions
+		// ÔøΩForm label of the end point conditions
 		sprintf(label2,"__DO%x_FIN",syntax.curly[pos].index);
 		l2=add_str(label2);
 		set_label(l2,script_pos,p);
@@ -3296,7 +3296,7 @@ c_op get_com(unsigned char *script,int *pos)
 }
 
 /*==========================================
- * êIncome figures
+ * ÔøΩIncome figures
  *------------------------------------------*/
 int get_num(unsigned char *script,int *pos)
 {
@@ -4130,89 +4130,89 @@ int buildin_query_sql_sub(struct script_state *st, Sql *handle);
 TIMER_FUNC(queryThread_timer) {
 	int i, cursor = 0;
 	bool allOk = true;
-	
+
 	EnterSpinLock(&queryThreadLock);
-	
+
 	for( i = 0; i < queryThreadData.count; i++ ) {
 		struct queryThreadEntry *entry = queryThreadData.entry[i];
-		
+
 		if( !entry->ok ) {
 			allOk = false;
 			continue;
 		}
 
 		run_script_main(entry->st);
-		
+
 		entry->st = NULL; //Empty entries
 		aFree(entry);
 		queryThreadData.entry[i] = NULL;
 	}
 
-	
+
 	if( allOk ) {
 		/* cancel the repeating timer -- it'll re-create itself when necessary, dont need to remain looping */
 		delete_timer(queryThreadData.timer, queryThread_timer);
 		queryThreadData.timer = INVALID_TIMER;
 	}
-	
+
 	/* now lets clear the mess. */
 	for( i = 0; i < queryThreadData.count; i++ ) {
 		struct queryThreadEntry *entry = queryThreadData.entry[i];
 		if( entry == NULL )
 			continue;/* entry on hold */
-		
+
 		/* move */
 		memmove(&queryThreadData.entry[cursor], &queryThreadData.entry[i], sizeof(struct queryThreadEntry*));
-		
+
 		cursor++;
 	}
-	
+
 	queryThreadData.count = cursor;
-	
+
 	LeaveSpinLock(&queryThreadLock);
-	
+
 	return 0;
 }
 
 void queryThread_add(struct script_state *st, bool type) {
 	int idx = 0;
 	struct queryThreadEntry* entry = NULL;
-	
+
 	EnterSpinLock(&queryThreadLock);
-	
+
 	if( queryThreadData.count++ != 0 )
 		RECREATE(queryThreadData.entry, struct queryThreadEntry* , queryThreadData.count);
-	
+
 	idx = queryThreadData.count-1;
-	
+
 	CREATE(queryThreadData.entry[idx],struct queryThreadEntry,1);
-	
+
 	entry = queryThreadData.entry[idx];
-	
+
 	entry->st = st;
 	entry->ok = false;
 	entry->type = type;
 	if( queryThreadData.timer == INVALID_TIMER ) { /* start the receiver timer */
 		queryThreadData.timer = add_timer_interval(gettick() + 100, queryThread_timer, 0, 0, 100);
 	}
-	
+
 	LeaveSpinLock(&queryThreadLock);
-	
+
 	/* unlock the queryThread */
 	racond_signal(queryThreadCond);
 }
 /* adds a new log to the queue */
 void queryThread_log(char *entry, int length) {
 	int idx = logThreadData.count;
-	
+
 	EnterSpinLock(&queryThreadLock);
-	
+
 	if( logThreadData.count++ != 0 )
 		RECREATE(logThreadData.entry, char *, logThreadData.count);
-	
+
 	CREATE(logThreadData.entry[idx], char, length + 1 );
 	safestrncpy(logThreadData.entry[idx], entry, length + 1 );
-	
+
 	LeaveSpinLock(&queryThreadLock);
 
 	/* unlock the queryThread */
@@ -4223,48 +4223,48 @@ void queryThread_log(char *entry, int length) {
 static void *queryThread_main(void *x) {
 	Sql *queryThread_handle = Sql_Malloc();
 	int i;
-	
+
 	if ( SQL_ERROR == Sql_Connect(queryThread_handle, map_server_id, map_server_pw, map_server_ip, map_server_port, map_server_db) )
 		exit(EXIT_FAILURE);
-	
+
 	if( strlen(default_codepage) > 0 )
 		if ( SQL_ERROR == Sql_SetEncoding(queryThread_handle, default_codepage) )
 			Sql_ShowDebug(queryThread_handle);
 
 	if( log_config.sql_logs ) {
 		logmysql_handle = Sql_Malloc();
-		
+
 		if ( SQL_ERROR == Sql_Connect(logmysql_handle, log_db_id, log_db_pw, log_db_ip, log_db_port, log_db_db) )
 			exit(EXIT_FAILURE);
-		
+
 		if( strlen(default_codepage) > 0 )
 			if ( SQL_ERROR == Sql_SetEncoding(logmysql_handle, default_codepage) )
 				Sql_ShowDebug(logmysql_handle);
 	}
-	
+
 	while( 1 ) {
-		
+
 		if(queryThreadTerminate > 0)
 			break;
-				
+
 		EnterSpinLock(&queryThreadLock);
-		
+
 		/* mess with queryThreadData within the lock */
 		for( i = 0; i < queryThreadData.count; i++ ) {
 			struct queryThreadEntry *entry = queryThreadData.entry[i];
-			
+
 			if( entry->ok )
 				continue;
 			else if ( !entry->st || !entry->st->stack ) {
 				entry->ok = true;/* dispose */
 				continue;
 			}
-						
+
 			buildin_query_sql_sub(entry->st, entry->type ? logmysql_handle : queryThread_handle);
-			
+
 			entry->ok = true;/* we're done with this */
 		}
-		
+
 		/* also check for any logs in need to be sent */
 		if( log_config.sql_logs ) {
 			for( i = 0; i < logThreadData.count; i++ ) {
@@ -4274,21 +4274,21 @@ static void *queryThread_main(void *x) {
 			}
 			logThreadData.count = 0;
 		}
-		
+
 		LeaveSpinLock(&queryThreadLock);
-		
+
 		ramutex_lock( queryThreadMutex );
 		racond_wait( queryThreadCond, queryThreadMutex, -1 );
 		ramutex_unlock( queryThreadMutex );
 
 	}
-		
+
 	Sql_Free(queryThread_handle);
-	
+
 	if( log_config.sql_logs ) {
 		Sql_Free(logmysql_handle);
 	}
-	
+
 	return NULL;
 }
 #endif
@@ -4415,16 +4415,16 @@ void do_init_script(void) {
 	CREATE(logThreadData.entry, char *, 1);
 	logThreadData.count = 0;
 	/* QueryThread Start */
-	
+
 	InitializeSpinLock(&queryThreadLock);
-	
+
 	queryThreadData.timer = INVALID_TIMER;
 	queryThreadTerminate = 0;
 	queryThreadMutex = ramutex_create();
 	queryThreadCond = racond_create();
-	
+
 	queryThread = rathread_create(queryThread_main, NULL);
-	
+
 	if(queryThread == NULL) {
 		ShowFatalError("do_init_script: cannot spawn Query Thread.\n");
 		exit(EXIT_FAILURE);
@@ -4453,7 +4453,7 @@ void script_reload(void) {
 
 	LeaveSpinLock(&queryThreadLock);
 #endif
-	
+
 	userfunc_db->clear(userfunc_db, db_script_free_code_sub);
 	db_clear(scriptlabel_db);
 
@@ -4704,7 +4704,7 @@ BUILDIN_FUNC(menu)
 			aFree(menu);
 		} else
 			clif_scriptmenu(sd, st->oid, StringBuf_Value(&buf));
-		
+
 		StringBuf_Destroy(&buf);
 
 		if( sd->npc_menu >= 0xff ) {
@@ -4779,7 +4779,7 @@ BUILDIN_FUNC(select)
 		sd->npc_menu = 0;
 		for( i = 2; i <= script_lastdata(st); ++i ) {
 			text = script_getstr(st, i);
-			
+
 			if( sd->npc_menu > 0 )
 				StringBuf_AppendStr(&buf, ":");
 
@@ -4789,7 +4789,7 @@ BUILDIN_FUNC(select)
 
 		st->state = RERUNLINE;
 		sd->state.menu_or_input = 1;
-		
+
 		/**
 		 * menus beyond this length crash the client (see bugreport:6402)
 		 */
@@ -4866,7 +4866,7 @@ BUILDIN_FUNC(prompt)
 
 		st->state = RERUNLINE;
 		sd->state.menu_or_input = 1;
-		
+
 		/**
 		 * Menus beyond this length crash the client (see bugreport:6402)
 		 */
@@ -6143,7 +6143,7 @@ BUILDIN_FUNC(viewpoint)
 	y = script_getnum(st,4);
 	id = script_getnum(st,5);
 	color = script_getnum(st,6);
-	
+
 	sd = script_rid2sd(st);
 	if( sd == NULL )
 		return 0;
@@ -6979,7 +6979,7 @@ BUILDIN_FUNC(getnameditem)
 		tsd = map_nick2sd(conv_str(st,data));
 	else //Char Id was given
 		tsd = map_charid2sd(conv_num(st,data));
-	
+
 	if( tsd == NULL ) { //Failed
 		script_pushint(st,0);
 		return 0;
@@ -7121,7 +7121,7 @@ BUILDIN_FUNC(makeitem2) {
 
 		iden = (char)script_getnum(st,7);
 		ref = (char)script_getnum(st,8);
-		attr = (char)script_getnum(st,9);		
+		attr = (char)script_getnum(st,9);
 
 		if( id->type == IT_WEAPON || id->type == IT_ARMOR || id->type == IT_SHADOWGEAR ) {
 			if( ref > MAX_REFINE )
@@ -9794,7 +9794,7 @@ BUILDIN_FUNC(getmobdrops)
 
 	mob = mob_db(class_);
 
-	for( i = 0; i < MAX_MOB_DROP_TOTAL; i++ ) {
+	for( i = 0; i < MAX_MOB_DROP; i++ ) {
 		if( mob->dropitem[i].nameid < 1 )
 			continue;
 		if( !itemdb_exists(mob->dropitem[i].nameid) )
@@ -10003,7 +10003,7 @@ BUILDIN_FUNC(clone)
 
 	if( script_hasdata(st,9) )
 		flag = script_getnum(st,9);
-	
+
 	if( script_hasdata(st,10) )
 		duration = script_getnum(st,10);
 
@@ -10261,7 +10261,7 @@ BUILDIN_FUNC(getnpctimer)
 		nd = npc_name2id(script_getstr(st,3));
 	else
 		nd = (struct npc_data *)map_id2bl(st->oid);
-	
+
 	if( !nd || nd->bl.type != BL_NPC ) {
 		script_pushint(st,0);
 		ShowError("getnpctimer: Invalid NPC.\n");
@@ -10390,7 +10390,7 @@ BUILDIN_FUNC(announce)
 	int         fontSize  = script_hasdata(st,6) ? script_getnum(st,6) : 12; // Default fontSize
 	int         fontAlign = script_hasdata(st,7) ? script_getnum(st,7) : 0; // Default fontAlign
 	int         fontY     = script_hasdata(st,8) ? script_getnum(st,8) : 0; // Default fontY
-	
+
 	if (flag&(BC_TARGET_MASK|BC_SOURCE_MASK)) { // Broadcast source or broadcast region defined
 		send_target target;
 		// If bc_npc flag is set, use NPC as broadcast source
@@ -10881,7 +10881,7 @@ BUILDIN_FUNC(getstatus)
 		script_pushint(st, 0);
 		return 0;
 	}
-	
+
 	switch( type ) {
 		case 1:	 script_pushint(st, sd->sc.data[id]->val1);	break;
 		case 2:  script_pushint(st, sd->sc.data[id]->val2);	break;
@@ -10979,7 +10979,7 @@ BUILDIN_FUNC(homunculus_mutate)
 			pc_delitem(sd, i, 1, 0, 0, LOG_TYPE_SCRIPT);
 			script_pushint(st,1);
 			return 0;
-			
+
 		} else
 			clif_emotion(&sd->hd->bl, E_SWT);
 	} else
@@ -13939,7 +13939,7 @@ BUILDIN_FUNC(atcommand)
 
 /** Displays a message for the player only (like system messages like "you got an apple" )
  * dispbottom("<message>"{,<color>{,<char_id>}})
- * @param message 
+ * @param message
  * @param color Hex color default (Green)
  * @author [Lupus]
  */
@@ -14870,7 +14870,7 @@ BUILDIN_FUNC(isequipped)
 	unsigned int setitem_hash = 0, setitem_hash2 = 0;
 
 	sd = script_rid2sd(st);
-	
+
 	if (sd == NULL)
 		return 1;
 
@@ -14971,7 +14971,7 @@ BUILDIN_FUNC(cardscnt)
 		index = current_equip_item_index; // We get CURRENT WEAPON inventory index from status.c [Lupus]
 		if (index < 0)
 			continue;
-			
+
 		if (!sd->inventory_data[index])
 			continue;
 
@@ -15168,7 +15168,7 @@ BUILDIN_FUNC(setbattleflag)
 
 	if (!battle_set_value(flag,value))
 		ShowWarning("buildin_setbattleflag: unknown battle_config flag '%s'\n",flag);
-	else {	
+	else {
 		ShowInfo("buildin_setbattleflag: battle_config flag '%s' is now set to '%s'.\n",flag,value);
 		if (script_hasdata(st,4) && script_getnum(st,4)) { //Only attempt to reload monster data if told to
 			const char *expdrop_flags[] = { //Only certain flags require a reload, check for those types
@@ -15269,7 +15269,7 @@ BUILDIN_FUNC(charislower)
 BUILDIN_FUNC(charat) {
 	const char *str = script_getstr(st,2);
 	int pos = script_getnum(st,3);
-	
+
 	if( pos >= 0 && (unsigned int)pos < strlen(str) ) {
 		char output[2];
 		output[0] = str[pos];
@@ -16286,7 +16286,7 @@ BUILDIN_FUNC(setd)
 		setd_sub(st,sd,varname,elem,(void *)script_getstr(st,3),NULL);
 	else
 		setd_sub(st,sd,varname,elem,(void *)__64BPRTSIZE(script_getnum(st,3)),NULL);
-	
+
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -16733,14 +16733,14 @@ BUILDIN_FUNC(addmonsterdrop)
 	rate = script_getnum(st,4);
 
 	if( !itemdb_exists(item_id) ) {
-		ShowError("addmonsterdrop: Nonexistant item %hu requested.\n", item_id );
+		ShowError("addmonsterdrop: Nonexistant item %hu requested.\n", item_id);
 		return 1;
 	}
 
 	if( mob ) { //We got a valid monster, check for available drop slot
 		unsigned char i, c = 0;
 
-		for( i = 0; i < MAX_MOB_DROP_TOTAL; i++ ) {
+		for( i = 0; i < MAX_MOB_DROP; i++ ) {
 			if( mob->dropitem[i].nameid ) {
 				if( mob->dropitem[i].nameid == item_id ) { //If it equals item_id we update that drop
 					c = i;
@@ -16795,7 +16795,7 @@ BUILDIN_FUNC(delmonsterdrop)
 	if( mob ) { //We got a valid monster, check for item drop on monster
 		unsigned char i;
 
-		for( i = 0; i < MAX_MOB_DROP_TOTAL; i++ ) {
+		for( i = 0; i < MAX_MOB_DROP; i++ ) {
 			if( mob->dropitem[i].nameid == item_id ) {
 				mob->dropitem[i].nameid = 0;
 				mob->dropitem[i].p = 0;
@@ -19268,7 +19268,7 @@ BUILDIN_FUNC(bg_create) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/// Adds attached player or <char id> (if specified) to an existing 
+/// Adds attached player or <char id> (if specified) to an existing
 /// battleground group and warps it to the specified coordinates on
 /// the given map.
 /// bg_join(<battle group>,{"<map name>",<x>,<y>{,<char id>}});
@@ -19384,7 +19384,7 @@ BUILDIN_FUNC(bg_leave)
 	struct map_session_data *sd = script_rid2sd(st);
 	if( sd == NULL || !sd->bg_id )
 		return 0;
-	
+
 	bg_team_leave(sd,0);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -20331,7 +20331,7 @@ BUILDIN_FUNC(bindatcmd) {
 
 	if( *atcmd == atcommand_symbol || *atcmd == charcommand_symbol )
 		atcmd++;
-	
+
 	if( script_hasdata(st,4) )
 		level = script_getnum(st,4);
 	if( script_hasdata(st,5) )
@@ -20339,7 +20339,7 @@ BUILDIN_FUNC(bindatcmd) {
 
 	if( atcmd_binding_count == 0 ) {
 		CREATE(atcmd_binding,struct atcmd_binding_data*,1);
-		
+
 		create = true;
 	} else {
 		ARR_FIND(0, atcmd_binding_count, i, strcmp(atcmd_binding[i]->command,atcmd) == 0);
@@ -21064,7 +21064,7 @@ BUILDIN_FUNC(montransform) {
 		if( data_isstring(data) )
 			ShowWarning("buildin_montransform: Attempted to use non-existing monster '%s'.\n", script_getstr(st,2));
 		else
-			ShowWarning("buildin_montransform: Attempted to use non-existing monster of ID '%d'.\n", script_getnum(st,2)); 
+			ShowWarning("buildin_montransform: Attempted to use non-existing monster of ID '%d'.\n", script_getnum(st,2));
 		return 0;
 	}
 

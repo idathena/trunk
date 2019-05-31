@@ -1351,7 +1351,7 @@ static bool itemdb_parse_dbrow(char **str, const char *source, int line, int scr
 	else
 		id->value_sell = id->value_buy / 2;
 	/*
-	if (!str[4][0] && !str[5][0]) { 
+	if (!str[4][0] && !str[5][0]) {
 		ShowWarning("itemdb_parse_dbrow: No buying/selling price defined for item %hu (%s), using 20/10z\n", nameid, id->jname);
 		id->value_buy = 20;
 		id->value_sell = 10;
@@ -1987,7 +1987,7 @@ static int itemdb_randomopt_free(DBKey key, DBData *data, va_list ap) {
 void itemdb_reload_itemmob_data(void) {
 	int i;
 
-	for( i = 0; i < MAX_MOB_DROP_TOTAL; i++ ) {
+	for( i = 0; i < MAX_MOB_DB; i++ ) {
 		struct mob_db *entry = mob_db(i);
 		int d, k;
 

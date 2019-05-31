@@ -31,7 +31,7 @@
 
 //Client-defined value
 #define MAX_ROULETTE_LEVEL 7
-#define MAX_ROULETTE_COLUMNS 9 
+#define MAX_ROULETTE_COLUMNS 9
 
 #define CARD0_FORGE 0x00FF
 #define CARD0_CREATE 0x00FE
@@ -458,8 +458,7 @@ struct s_random_opt_data
 
 //Enum for random option subgroups
 enum e_rdmopt_subgroup {
-	RDMOPTSG_None = 0,
-	RDMOPTSG_Crimson_Weapon,
+	RDMOPTSG_Crimson_Weapon = 1,
 	RDMOPTSG_Vicious_Weapon_Group_1_Slot_1,
 	RDMOPTSG_Vicious_Weapon_Group_1_Slot_2,
 	RDMOPTSG_Vicious_Weapon_Group_1_Slot_3,
@@ -493,8 +492,7 @@ struct s_random_opt_subgroup {
 
 //Enum for random option groups
 enum e_rdmopt_group {
-	RDMOPTG_None = 0,
-	RDMOPTG_Crimson_Weapon,
+	RDMOPTG_Crimson_Weapon = 1,
 	RDMOPTG_Vicious_Weapon_Group_1,
 	RDMOPTG_Vicious_Weapon_Group_2,
 	RDMOPTG_Vicious_Weapon_Group_3,

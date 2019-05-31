@@ -184,7 +184,7 @@ inline int pc_get_group_id(struct map_session_data *sd) {
  * @return Group Level
  */
 inline int pc_get_group_level(struct map_session_data *sd) {
-	return sd->group_level;	
+	return sd->group_level;
 }
 
 static TIMER_FUNC(pc_invincible_timer)
@@ -513,7 +513,7 @@ static TIMER_FUNC(pc_rageball_timer)
 	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
 		return 1;
 
-	if( sd->rageball <= 0 ) { 
+	if( sd->rageball <= 0 ) {
 		ShowError("pc_rageball_timer: %d rageball's available. (aid=%d cid=%d tid=%d)\n", sd->rageball, sd->status.account_id, sd->status.char_id, tid);
 		sd->rageball = 0;
 		return 0;
@@ -1057,7 +1057,7 @@ void pc_makesavestatus(struct map_session_data *sd)
 }
 
 /*==========================================
- * Off init ? Connection ?
+ * Off init ? Connection ?
  *------------------------------------------*/
 void pc_setnewpc(struct map_session_data *sd, int account_id, int char_id, int login_id1, unsigned int client_tick, int sex, int fd)
 {
@@ -1388,7 +1388,7 @@ bool pc_adoption(struct map_session_data *p1_sd, struct map_session_data *p2_sd,
 
 	return false; // Job Change Fail
 }
- 
+
 /*==========================================
  * Check if player can use/equip selected item. Used by pc_isUseitem and pc_isequip
    Returns:
@@ -1569,10 +1569,10 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 
 	sd->login_id2 = login_id2;
 	sd->group_id = group_id;
-	
+
 	//Load user permissions
 	pc_group_pc_load(sd);
-	
+
 	memcpy(&sd->status, st, sizeof(*st));
 
 	if (st->sex != sd->status.sex) {
@@ -1952,7 +1952,7 @@ void pc_reg_received(struct map_session_data *sd)
 			delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
 			sd->pvp_timer = INVALID_TIMER;
 		}
-		clif_changeoption(&sd->bl); 
+		clif_changeoption(&sd->bl);
 	}
 
 	channel_autojoin(sd);
@@ -4838,10 +4838,10 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 
 /**
  * Searches for the specified item ID in inventory and return its inventory index.
- * 
+ *
  * If the item is found, the returned value is guaranteed to be a valid index
  * (non-negative, smaller than MAX_INVENTORY).
- * 
+ *
  * @param sd      Character to search on.
  * @param nameid  The item ID to search.
  * @return the inventory index of the first instance of the requested item.
@@ -5656,7 +5656,7 @@ bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 sk
 
 	//Try dropping one item, in the order from first to last possible slot
 	//Droprate is affected by the skill success rate
-	for( i = 0; i < MAX_STEAL_DROP; i++ ) {
+	for( i = 0; i < MAX_MOB_DROP; i++ ) {
 		int dropRate;
 
 		if( !md->db->dropitem[i].nameid || md->db->dropitem[i].steal_protected || !itemdb_exists(md->db->dropitem[i].nameid) )
@@ -5668,7 +5668,7 @@ bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 sk
 		if( rnd()%10000 < dropRate )
 			break; //Success
 	}
-	if( i == MAX_STEAL_DROP )
+	if( i == MAX_MOB_DROP )
 		return false;
 
 	itemid = md->db->dropitem[i].nameid;
@@ -6480,7 +6480,7 @@ const char *job_name(int class_)
 		case JOB_MERCHANT:
 		case JOB_THIEF:
 			return msg_txt(550 - JOB_NOVICE + class_);
-			
+
 		case JOB_KNIGHT:
 		case JOB_PRIEST:
 		case JOB_WIZARD:
@@ -6488,10 +6488,10 @@ const char *job_name(int class_)
 		case JOB_HUNTER:
 		case JOB_ASSASSIN:
 			return msg_txt(557 - JOB_KNIGHT + class_);
-			
+
 		case JOB_KNIGHT2:
 			return msg_txt(557);
-			
+
 		case JOB_CRUSADER:
 		case JOB_MONK:
 		case JOB_SAGE:
@@ -6500,10 +6500,10 @@ const char *job_name(int class_)
 		case JOB_BARD:
 		case JOB_DANCER:
 			return msg_txt(563 - JOB_CRUSADER + class_);
-				
+
 		case JOB_CRUSADER2:
 			return msg_txt(563);
-			
+
 		case JOB_WEDDING:
 		case JOB_SUPER_NOVICE:
 		case JOB_GUNSLINGER:
@@ -6537,10 +6537,10 @@ const char *job_name(int class_)
 		case JOB_SNIPER:
 		case JOB_ASSASSIN_CROSS:
 			return msg_txt(582 - JOB_LORD_KNIGHT + class_);
-			
+
 		case JOB_LORD_KNIGHT2:
 			return msg_txt(582);
-			
+
 		case JOB_PALADIN:
 		case JOB_CHAMPION:
 		case JOB_PROFESSOR:
@@ -6549,7 +6549,7 @@ const char *job_name(int class_)
 		case JOB_CLOWN:
 		case JOB_GYPSY:
 			return msg_txt(588 - JOB_PALADIN + class_);
-			
+
 		case JOB_PALADIN2:
 			return msg_txt(588);
 
@@ -6561,7 +6561,7 @@ const char *job_name(int class_)
 		case JOB_BABY_MERCHANT:
 		case JOB_BABY_THIEF:
 			return msg_txt(595 - JOB_BABY + class_);
-			
+
 		case JOB_BABY_KNIGHT:
 		case JOB_BABY_PRIEST:
 		case JOB_BABY_WIZARD:
@@ -6569,10 +6569,10 @@ const char *job_name(int class_)
 		case JOB_BABY_HUNTER:
 		case JOB_BABY_ASSASSIN:
 			return msg_txt(602 - JOB_BABY_KNIGHT + class_);
-			
+
 		case JOB_BABY_KNIGHT2:
 			return msg_txt(602);
-			
+
 		case JOB_BABY_CRUSADER:
 		case JOB_BABY_MONK:
 		case JOB_BABY_SAGE:
@@ -6581,13 +6581,13 @@ const char *job_name(int class_)
 		case JOB_BABY_BARD:
 		case JOB_BABY_DANCER:
 			return msg_txt(608 - JOB_BABY_CRUSADER + class_);
-			
+
 		case JOB_BABY_CRUSADER2:
 			return msg_txt(608);
-			
+
 		case JOB_SUPER_BABY:
 			return msg_txt(615);
-			
+
 		case JOB_TAEKWON:
 			return msg_txt(616);
 		case JOB_STAR_GLADIATOR:
@@ -7827,7 +7827,7 @@ int pc_resetfeel(struct map_session_data *sd)
 int pc_resethate(struct map_session_data *sd)
 {
 	int i;
-	
+
 	nullpo_ret(sd);
 
 	for( i = 0; i < 3; i++ ) {
@@ -8067,7 +8067,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 	if( sd->ed )
 		elemental_delete(sd->ed,0);
-	
+
 	//Leave duel if you die [LuzZza]
 	if( battle_config.duel_autoleave_when_die ) {
 		if( sd->duel_group > 0 )
@@ -8438,7 +8438,7 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_DEFELE:		val = sd->battle_status.def_ele; break;
 #ifndef RENEWAL_CAST
 		case SP_VARCASTRATE:
-#endif	
+#endif
 		case SP_CASTRATE:
 				val = sd->castrate;
 			break;
@@ -8878,7 +8878,7 @@ int pc_percentheal(struct map_session_data *sd,int hp,int sp)
 		else
 			status_percent_damage(NULL, &sd->bl, hp, 0, hp == -100);
 	}
-	
+
 	if(sp) {
 		if(sp > 0)
 			status_percent_heal(&sd->bl, 0, sp);
@@ -8892,11 +8892,11 @@ static int jobchange_killclone(struct block_list *bl, va_list ap)
 {
 	struct mob_data *md;
 	int flag;
-	
+
 	md = (struct mob_data *)bl;
 	nullpo_ret(md);
 	flag = va_arg(ap, int);
-	
+
 	if (md->master_id && md->special_state.clone && md->master_id == flag)
 		status_kill(&md->bl);
 	return 1;
@@ -9594,7 +9594,7 @@ char *pc_readregistry_str(struct map_session_data *sd, const char *reg, int type
 {
 	struct global_reg *sd_reg;
 	int i, max;
-	
+
 	nullpo_ret(sd);
 	switch( type ) {
 		case 3: //Char reg
@@ -9724,7 +9724,7 @@ bool pc_setregistry_str(struct map_session_data *sd, const char *reg, const char
 		ShowError("pc_setregistry_str : refusing to set %s (type %d) until vars are received.\n", reg, type);
 		return false;
 	}
-	
+
 	//Delete reg
 	if (!val || strcmp(val,"") == 0) {
 		ARR_FIND(0, *max, i, strcmp(sd_reg[i].str, reg) == 0);
@@ -10803,7 +10803,7 @@ void pc_bleeding(struct map_session_data *sd, unsigned int diff_tick)
 		if (hp >= sd->battle_status.hp)
 			hp = sd->battle_status.hp - 1; //Script drains cannot kill you
 	}
-	
+
 	if (sd->sp_loss.value) {
 		sd->sp_loss.tick += diff_tick;
 		while (sd->sp_loss.tick >= sd->sp_loss.rate) {
@@ -10830,7 +10830,7 @@ void pc_regen(struct map_session_data *sd, unsigned int diff_tick)
 			sd->hp_regen.tick -= sd->hp_regen.rate;
 		}
 	}
-	
+
 	if (sd->sp_regen.value) {
 		sd->sp_regen.tick += diff_tick;
 		while (sd->sp_regen.tick >= sd->sp_regen.rate) {
@@ -12245,7 +12245,7 @@ enum e_BANKING_DEPOSIT_ACK pc_bank_deposit(struct map_session_data *sd, int mone
  */
 enum e_BANKING_WITHDRAW_ACK pc_bank_withdraw(struct map_session_data *sd, int money) {
 	unsigned int limit_check = money + sd->status.zeny;
-	
+
 	if( money <= 0 )
 		return BWA_UNKNOWN_ERROR;
 	else if( money > sd->bank_vault )
@@ -12522,7 +12522,7 @@ short pc_maxparameter(struct map_session_data *sd, enum e_params param) {
 
 	return (class_&MAPID_BASEMASK) == MAPID_SUMMONER ? battle_config.max_summoner_parameter :
 		((class_&MAPID_UPPERMASK) == MAPID_KAGEROUOBORO || (class_&MAPID_UPPERMASK) == MAPID_REBELLION) ? battle_config.max_extended_parameter :
-		((class_&JOBL_THIRD) ? ((class_&JOBL_UPPER) ? battle_config.max_third_trans_parameter : ((class_&JOBL_BABY) ? battle_config.max_baby_third_parameter : battle_config.max_third_parameter)) : 
+		((class_&JOBL_THIRD) ? ((class_&JOBL_UPPER) ? battle_config.max_third_trans_parameter : ((class_&JOBL_BABY) ? battle_config.max_baby_third_parameter : battle_config.max_third_parameter)) :
 		((class_&JOBL_BABY) ? battle_config.max_baby_parameter :
 		((class_&JOBL_UPPER) ? battle_config.max_trans_parameter : battle_config.max_parameter)));
 }
