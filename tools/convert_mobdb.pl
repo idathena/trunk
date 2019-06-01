@@ -293,6 +293,7 @@ print <<"EOF";
 	},
 	... (can be repeated up to MAX_MOB_DROP times)
 	)
+	DamageTaken: (int)                      // (optional, defaults to 100) Damage taken by monster in percent
 },
 **************************************************************************/
 

@@ -894,6 +894,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1537110930);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1537536180);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1537575360);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1558911240);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1559387580);
 
 --
 -- Table structure for table `sstatus`
@@ -1076,7 +1077,7 @@ CREATE TABLE IF NOT EXISTS `buyingstores` (
 --
 
 CREATE TABLE IF NOT EXISTS `markets` (
-  `name` varchar(32) NOT NULL default '',
+  `name` varchar(50) NOT NULL default '',
   `nameid` smallint(5) unsigned NOT NULL,
   `price` int(11) unsigned NOT NULL,
   `amount` smallint(5) unsigned NOT NULL,

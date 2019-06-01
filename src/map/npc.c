@@ -61,7 +61,7 @@ struct eri *npc_sc_display_ers = NULL;
 #if PACKETVER >= 20131223
 	struct s_npc_market {
 		struct npc_item_list *list;
-		char exname[NAME_LENGTH + 1];
+		char exname[NPC_NAME_LENGTH + 1];
 		uint16 count;
 	};
 	static DBMap *NPCMarketDB; //Stock persistency! Temporary market stocks from `markets` table. struct s_npc_market, key: NPC exname
@@ -397,6 +397,13 @@ static int npc_event_export(struct npc_data *nd, int i)
 			}
 		}
 
+		//NPC:<name> the prefix uses 4 characters
+		if( !strncasecmp(lname,script_config.onwhisper_event_name,NAME_LENGTH) && strlen(nd->exname) > (NAME_LENGTH - 4) ) {
+			//The client only allows that many character so that NPC could not be whispered by unmodified clients
+			ShowWarning("Whisper event in npc '" CL_WHITE "%s" CL_RESET "' was ignored, because it's name is too long.\n",nd->exname);
+			return 0;
+		}
+
 		snprintf(buf,ARRAYLENGTH(buf),"%s::%s",nd->exname,lname);
 		//Generate the data and insert it
 		CREATE(ev,struct event_data,1);
@@ -494,7 +501,7 @@ void npc_event_runall(const char *eventname) {
 int npc_event_doall_id(const char *name, int rid)
 {
 	int c = 0;
-	char buf[64];
+	char buf[EVENT_NAME_LENGTH];
 
 	safesnprintf(buf,sizeof(buf),"::%s",name);
 	ev_db->foreach(ev_db,npc_event_doall_sub,&c,buf,rid);
@@ -510,7 +517,7 @@ TIMER_FUNC(npc_event_do_clock)
 	static struct tm ev_tm_b; // tracks previous execution time
 	time_t timer;
 	struct tm* t;
-	char buf[64];
+	char buf[EVENT_NAME_LENGTH];
 	int c = 0;
 
 	timer = time(NULL);
@@ -683,7 +690,7 @@ int npc_timerevent_start(struct npc_data *nd, int rid)
 	int j;
 	unsigned int tick = gettick();
 	struct map_session_data *sd = NULL; // Player to whom script is attached
-		
+
 	nullpo_ret(nd);
 
 	// Check if there is an OnTimer Event
@@ -700,7 +707,7 @@ int npc_timerevent_start(struct npc_data *nd, int rid)
 			return 0;
 	} else if( nd->u.scr.timerid != INVALID_TIMER || nd->u.scr.timertick )
 		return 0;
-	
+
 	if( j < nd->u.scr.timeramount ) {
 		int next;
 		struct timer_event_data *ted;
@@ -804,7 +811,7 @@ void npc_timerevent_quit(struct map_session_data *sd)
 			nd->u.scr.rid = sd->bl.id;
 			nd->u.scr.timertick = gettick();
 			nd->u.scr.timer = ted->time;
-		
+
 			//Execute label
 			run_script(nd->u.scr.script,ev->pos,sd->bl.id,nd->bl.id);
 
@@ -1283,7 +1290,7 @@ void run_tomb(struct map_session_data *sd, struct npc_data *nd)
 
     snprintf(buffer, sizeof(buffer), msg_txt(659), time);
     clif_scriptmes(sd, nd->bl.id, buffer);
-	
+
     clif_scriptmes(sd, nd->bl.id, msg_txt(660));
 
 	snprintf(buffer, sizeof(buffer), msg_txt(661), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown");
@@ -2278,7 +2285,7 @@ int npc_addsrcfile(const char *name, bool loadscript)
 	}
 
 	if( check_filepath(name) != 2 )
-		return 0; //This is not a file 
+		return 0; //This is not a file
 
 	//Prevent multiple insert of source files
 	file = npc_src_files;
@@ -2336,27 +2343,27 @@ static void npc_parsename(struct npc_data *nd, const char *name, const char *sta
 {
 	const char *p;
 	struct npc_data *dnd; //Duplicate npc
-	char newname[NAME_LENGTH];
+	char newname[NPC_NAME_LENGTH + 1];
 
 	//Parse name
 	p = strstr(name,"::");
 	if( p ) { //<Display name>::<Unique name>
 		size_t len = p-name;
-		if( len > NAME_LENGTH ) {
-			ShowWarning("npc_parsename: Display name of '%s' is too long (len=%u) in file '%s', line '%d'. Truncating to %u characters.\n", name, (unsigned int)len, filepath, strline(buffer,start - buffer), NAME_LENGTH);
+		if( len > NPC_NAME_LENGTH ) {
+			ShowWarning("npc_parsename: Display name of '%s' is too long (len=%u) in file '%s', line '%d'. Truncating to %u characters.\n", name, (unsigned int)len, filepath, strline(buffer,start - buffer), NPC_NAME_LENGTH);
 			safestrncpy(nd->name, name, sizeof(nd->name));
 		} else {
 			memcpy(nd->name, name, len);
 			memset(nd->name + len, 0, sizeof(nd->name)-len);
 		}
 		len = strlen(p + 2);
-		if( len > NAME_LENGTH )
-			ShowWarning("npc_parsename: Unique name of '%s' is too long (len=%u) in file '%s', line '%d'. Truncating to %u characters.\n", name, (unsigned int)len, filepath, strline(buffer,start - buffer), NAME_LENGTH);
+		if( len > NPC_NAME_LENGTH )
+			ShowWarning("npc_parsename: Unique name of '%s' is too long (len=%u) in file '%s', line '%d'. Truncating to %u characters.\n", name, (unsigned int)len, filepath, strline(buffer,start - buffer), NPC_NAME_LENGTH);
 		safestrncpy(nd->exname, p + 2, sizeof(nd->exname));
 	} else { //<Display name>
 		size_t len = strlen(name);
-		if( len > NAME_LENGTH )
-			ShowWarning("npc_parsename: Name '%s' is too long (len=%u) in file '%s', line '%d'. Truncating to %u characters.\n", name, (unsigned int)len, filepath, strline(buffer,start - buffer), NAME_LENGTH);
+		if( len > NPC_NAME_LENGTH )
+			ShowWarning("npc_parsename: Name '%s' is too long (len=%u) in file '%s', line '%d'. Truncating to %u characters.\n", name, (unsigned int)len, filepath, strline(buffer,start - buffer), NPC_NAME_LENGTH);
 		safestrncpy(nd->name, name, sizeof(nd->name));
 		safestrncpy(nd->exname, name, sizeof(nd->exname));
 	}
@@ -2893,8 +2900,8 @@ int npc_convertlabel_db(DBKey key, DBData *data, va_list ap)
 	len = p-lname;
 
 	//Here we check if the label fit into the buffer
-	if( len > 23 ) {
-		ShowError("npc_parse_script: label name longer than 23 chars! (%s) in file '%s'.\n", lname, filepath);
+	if( len > NAME_LENGTH ) {
+		ShowError("npc_parse_script: label name longer than %d chars! (%s) in file '%s'.\n", NAME_LENGTH, lname, filepath);
 		return 0;
 	}
 
@@ -3237,7 +3244,7 @@ const char *npc_parse_duplicate(char *w1, char *w2, char *w3, char *w4, const ch
 }
 
 int npc_duplicate4instance(struct npc_data *snd, int16 m) {
-	char newname[NAME_LENGTH];
+	char newname[NPC_NAME_LENGTH + 1];
 
 	if( m < 0 || !map[m].instance_id )
 		return 1;
@@ -3487,7 +3494,7 @@ static void npc_market_fromsql(void) {
 		if( !(market = (struct s_npc_market *)strdb_get(NPCMarketDB, data)) ) {
 			CREATE(market, struct s_npc_market, 1);
 			market->count = 0;
-			safestrncpy(market->exname, data, strlen(data) + 1);
+			safestrncpy(market->exname, data, NPC_NAME_LENGTH);
 			strdb_put(NPCMarketDB, market->exname, market);
 		}
 
@@ -3663,7 +3670,7 @@ int npc_do_atcmd_event(struct map_session_data *sd, const char *command, const c
 
 		ARR_FIND(0, MAX_EVENTQUEUE, l, sd->eventqueue[l][0] == '\0');
 		if( l < MAX_EVENTQUEUE ) {
-			safestrncpy(sd->eventqueue[l], eventname, 50); //Event enqueued
+			safestrncpy(sd->eventqueue[l], eventname, EVENT_NAME_LENGTH); //Event enqueued
 			return 0;
 		}
 		ShowWarning("npc_event: player's event queue is full, can't add event '%s' !\n", eventname);
@@ -4302,10 +4309,10 @@ int npc_parsesrcfile(const char *filepath, bool runOnInit)
 	char *buffer;
 	const char *p;
 
-	if( check_filepath(filepath) != 2 ) { //This is not a file 
+	if( check_filepath(filepath) != 2 ) { //This is not a file
 		ShowDebug("npc_parsesrcfile: Path doesn't seem to be a file skipping it : '%s'.\n", filepath);
 		return 0;
-	} 
+	}
 
 	//Read whole file to buffer
 	fp = fopen(filepath, "rb");
@@ -4495,9 +4502,9 @@ void npc_read_event_script(void)
 		DBIterator *iter;
 		DBKey key;
 		DBData *data;
+		char name[EVENT_NAME_LENGTH];
 
-		char name[64] = "::";
-		safestrncpy(name + 2, npc_get_script_event_name(i), 62);
+		safesnprintf(name, EVENT_NAME_LENGTH, "::%s", npc_get_script_event_name(i));
 
 		script_event[i].event_count = 0;
 		iter = db_iterator(ev_db);
@@ -4510,7 +4517,7 @@ void npc_read_event_script(void)
 				ShowWarning("npc_read_event_script: too many occurences of event '%s'!\n", npc_get_script_event_name(i));
 				break;
 			}
-			
+
 			if( (p = strchr(p, ':')) && p && strcmpi(name, p) == 0 ) {
 				script_event[i].event[count] = ed;
 				script_event[i].event_name[count] = key.str;
@@ -4529,7 +4536,7 @@ void npc_read_event_script(void)
 void npc_clear_pathlist(void) {
 	struct npc_path_data *npd = NULL;
 	DBIterator *path_list = db_iterator(npc_path_db);
-	
+
 	//Free all npc_path_data filepaths
 	for( npd = dbi_first(path_list); dbi_exists(path_list); npd = dbi_next(path_list) ) {
 		if( npd->path )
@@ -4748,21 +4755,21 @@ void do_init_npc(void)
 	for (i = MAX_NPC_CLASS2_START; i < MAX_NPC_CLASS2_END; i++)
 		npc_viewdb2[i - MAX_NPC_CLASS2_START].class_ = i;
 
-	ev_db = strdb_alloc((DBOptions)(DB_OPT_DUP_KEY|DB_OPT_RELEASE_DATA),2 * NAME_LENGTH + 2 + 1);
-	npcname_db = strdb_alloc(DB_OPT_BASE,NAME_LENGTH);
-	npc_path_db = strdb_alloc(DB_OPT_BASE|DB_OPT_DUP_KEY|DB_OPT_RELEASE_DATA,80);
+	ev_db = strdb_alloc((DBOptions)(DB_OPT_DUP_KEY|DB_OPT_RELEASE_DATA), EVENT_NAME_LENGTH);
+	npcname_db = strdb_alloc(DB_OPT_BASE, NPC_NAME_LENGTH + 1);
+	npc_path_db = strdb_alloc(DB_OPT_BASE|DB_OPT_DUP_KEY|DB_OPT_RELEASE_DATA, 80);
 #if PACKETVER >= 20131223
-	NPCMarketDB = strdb_alloc(DB_OPT_BASE, NAME_LENGTH + 1);
+	NPCMarketDB = strdb_alloc(DB_OPT_BASE, NPC_NAME_LENGTH + 1);
 	npc_market_fromsql();
 #endif
 
-	timer_event_ers = ers_new(sizeof(struct timer_event_data),"npc.c::timer_event_ers",ERS_OPT_NONE);
-	npc_sc_display_ers = ers_new(sizeof(struct sc_display_entry),"npc.c::npc_sc_display_ers",ERS_OPT_NONE);
+	timer_event_ers = ers_new(sizeof(struct timer_event_data), "npc.c::timer_event_ers", ERS_OPT_NONE);
+	npc_sc_display_ers = ers_new(sizeof(struct sc_display_entry), "npc.c::npc_sc_display_ers", ERS_OPT_NONE);
 
 	npc_process_files(START_NPC_NUM);
 
 	//Set up the events cache
-	memset(script_event,0,sizeof(script_event));
+	memset(script_event, 0, sizeof(script_event));
 	npc_read_event_script();
 
 #if PACKETVER >= 20131223
@@ -4773,17 +4780,17 @@ void do_init_npc(void)
 	if (battle_config.warp_point_debug)
 		npc_debug_warps();
 
-	add_timer_func_list(npc_event_do_clock,"npc_event_do_clock");
-	add_timer_func_list(npc_timerevent,"npc_timerevent");
+	add_timer_func_list(npc_event_do_clock, "npc_event_do_clock");
+	add_timer_func_list(npc_timerevent, "npc_timerevent");
 
 	//Init dummy NPC
-	fake_nd = (struct npc_data *)aCalloc(1,sizeof(struct npc_data));
+	fake_nd = (struct npc_data *)aCalloc(1, sizeof(struct npc_data));
 	fake_nd->bl.m = -1;
 	fake_nd->bl.id = npc_get_new_npc_id();
 	fake_nd->class_ = JT_FAKENPC;
 	fake_nd->speed = 200;
-	strcpy(fake_nd->name,"FAKE_NPC");
-	memcpy(fake_nd->exname,fake_nd->name,9);
+	strcpy(fake_nd->name, "FAKE_NPC");
+	memcpy(fake_nd->exname, fake_nd->name, 9);
 
 	npc_script++;
 	fake_nd->bl.type = BL_NPC;

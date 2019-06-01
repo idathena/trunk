@@ -49,7 +49,7 @@
 #define MAX_SLOTS 4
 //Max amount of a single stacked item
 #define MAX_AMOUNT 30000 //Max amount of a single stacked item
-#define MAX_ZENY 1000000000 //Max zeny
+#define MAX_ZENY INT_MAX //Max zeny
 #define MAX_BANK_ZENY SINT32_MAX //Max zeny in Bank
 #define MAX_FAME 1000000000 //Max fame points
 #define MAX_CART 100 //Maximum item in cart
@@ -95,8 +95,10 @@
 //For character names, title names, guilds, maps, etc.
 //Includes null-terminator as it is the length of the array.
 #define NAME_LENGTH (23 + 1)
-//24 for npc name + 24 for label + 2 for a "::" and 1 for EOS
-#define EVENT_NAME_LENGTH (NAME_LENGTH * 2 + 3)
+//NPC names can be longer than it's displayed on client (NAME_LENGTH).
+#define NPC_NAME_LENGTH 50
+//<NPC_NAME_LENGTH> for npc name + 2 for a "::" + <NAME_LENGTH> for label + 1 for EOS
+#define EVENT_NAME_LENGTH (NPC_NAME_LENGTH + 2 + NAME_LENGTH + 1)
 //For item names, which tend to have much longer names.
 #define ITEM_NAME_LENGTH 50
 //For Map Names, which the client considers to be 16 in length including the .gat extension
