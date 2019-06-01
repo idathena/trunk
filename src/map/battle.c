@@ -7454,6 +7454,21 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 			battle_consume_ammo(sd,0,0);
 	}
 
+	if (target->type == BL_MOB) {
+		struct mob_data *md = BL_CAST(BL_MOB, target);
+
+		if (md) {
+			uint16 dmg_mod = md->db->dmg_mod;
+
+			if (dmg_mod != 100) {
+				if (wd.damage > 0)
+					wd.damage = wd.damage * dmg_mod / 100;
+				if (wd.damage2 > 0)
+					wd.damage2 = wd.damage2 * dmg_mod / 100;
+			}
+		}
+	}
+
 	damage = wd.damage + wd.damage2;
 
 	if (damage > 0 && target->id != src->id) {

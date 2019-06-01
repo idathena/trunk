@@ -3154,6 +3154,13 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 
 	damage = dmg.damage + dmg.damage2;
 
+	if (damage > 0 && bl->type == BL_MOB) {
+		struct mob_data *md = BL_CAST(BL_MOB, bl);
+
+		if (md && md->db->dmg_mod != 100)
+			damage = damage * md->db->dmg_mod / 100;
+	}
+
 	switch (skill_id) {
 		case AL_INCAGI:
 		case CASH_INCAGI:
