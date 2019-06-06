@@ -589,6 +589,7 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   `bound` tinyint(3) unsigned NOT NULL default '0',
   `favorite` tinyint(3) unsigned NOT NULL default '0',
   `unique_id` bigint(20) unsigned NOT NULL default '0',
+  `equip_switch` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `char_id` (`char_id`)
 ) ENGINE=MyISAM;
@@ -895,6 +896,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1537536180);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1537575360);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1558911240);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1559387580);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1559824920);
 
 --
 -- Table structure for table `sstatus`

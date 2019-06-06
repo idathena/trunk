@@ -8699,6 +8699,7 @@ static const struct _battle_data {
 	{ "feature.stylistui",                  &battle_config.feature_stylistui,               1,      0,      1,              },
 	{ "rental_transaction",                 &battle_config.rental_transaction,              1,      0,      1,              },
 	{ "pet_walk_speed",                     &battle_config.pet_walk_speed,                  1,      1,      3,              },
+	{ "feature.equipswitch",                &battle_config.feature_equipswitch,             1,      0,      1,              },
 
 #include "../custom/battle_config_init.inc"
 };
@@ -8865,6 +8866,13 @@ void battle_adjust_conf()
 	if (battle_config.feature_refineui) {
 		ShowWarning("conf/battle/feature.conf refine UI is enabled but it requires PACKETVER 2016-10-12 or newer, disabling...\n");
 		battle_config.feature_refineui = 0;
+	}
+#endif
+
+#if PACKETVER < 20170208
+	if (battle_config.feature_equipswitch) {
+		ShowWarning("conf/battle/feature.conf equip switch is enabled but it requires PACKETVER 2017-02-08 or newer, disabling...\n");
+		battle_config.feature_equipswitch = 0;
 	}
 #endif
 

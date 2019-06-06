@@ -9538,6 +9538,7 @@ void clif_refresh(struct map_session_data *sd)
 
 	clif_changemap(sd, sd->bl.m, sd->bl.x, sd->bl.y);
 	clif_inventorylist(sd);
+	clif_equipswitch_list(sd);
 	if( pc_iscarton(sd) ) {
 		clif_cartlist(sd);
 		clif_updatestatus(sd, SP_CARTINFO);
@@ -10409,6 +10410,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	//Item
 	clif_inventorylist(sd); //Inventory list first, otherwise deleted items in pc_checkitem show up as 'unknown item'
 	pc_checkitem(sd);
+	clif_equipswitch_list(sd);
 
 	//Cart
 	if(pc_iscarton(sd)) {
@@ -11617,7 +11619,7 @@ void clif_parse_EquipItem(int fd,struct map_session_data *sd)
 
 	//Client doesn't send the position for ammo
 	if (sd->inventory_data[index]->type == IT_AMMO)
-		pc_equipitem(sd,index,EQP_AMMO);
+		pc_equipitem(sd,index,EQP_AMMO,false);
 	else {
 		int req_pos;
 
@@ -11626,7 +11628,7 @@ void clif_parse_EquipItem(int fd,struct map_session_data *sd)
 #else
 		req_pos = (int)RFIFOW(fd,info->pos[1]);
 #endif
-		pc_equipitem(sd,index,req_pos);
+		pc_equipitem(sd,index,req_pos,false);
 	}
 }
 
@@ -12258,25 +12260,14 @@ static void clif_parse_UseSkillToPos_mercenary(struct mercenary_data *md, struct
 }
 
 
-/// Request to use a targeted skill.
-/// 0113 <skill lv>.W <skill id>.W <target id>.L (CZ_USE_SKILL)
-/// 0438 <skill lv>.W <skill id>.W <target id>.L (CZ_USE_SKILL2)
-/// There are various variants of this packet, some of them have padding between fields.
-void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
+void clif_parse_skill_toid(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv, int target_id)
 {
-	uint16 skill_id, skill_lv;
-	int inf, target_id;
+	int inf = skill_get_inf(skill_id);
 	unsigned int tick = gettick();
-	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
-
-	skill_lv = RFIFOW(fd,info->pos[0]);
-	skill_id = RFIFOW(fd,info->pos[1]);
-	target_id = RFIFOL(fd,info->pos[2]);
 
 	if( skill_lv < 1 )
 		skill_lv = 1; //No clue, I have seen the client do this with guild skills [Skotlex]
 
-	inf = skill_get_inf(skill_id);
 	if( (inf&INF_GROUND_SKILL) || !inf )
 		return; //Using a ground/passive skill on a target? WRONG
 
@@ -12364,10 +12355,8 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 		else
 			skill_lv = 0;
 	} else {
-		uint8 lv = pc_checkskill(sd, skill_id);
-
-		if( skill_lv > lv )
-			skill_lv = lv;
+		if( skill_id != ALL_EQSWITCH )
+			skill_lv = min(pc_checkskill(sd, skill_id), skill_lv); //Never trust client
 	}
 
 	pc_delinvincibletimer(sd);
@@ -12375,6 +12364,19 @@ void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
 	if( skill_lv )
 		unit_skilluse_id(&sd->bl, target_id, skill_id, skill_lv);
 }
+
+
+/// Request to use a targeted skill.
+/// 0113 <skill lv>.W <skill id>.W <target id>.L (CZ_USE_SKILL)
+/// 0438 <skill lv>.W <skill id>.W <target id>.L (CZ_USE_SKILL2)
+/// There are various variants of this packet, some of them have padding between fields.
+void clif_parse_UseSkillToId(int fd, struct map_session_data *sd)
+{
+	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
+
+	clif_parse_skill_toid(sd, RFIFOW(fd,info->pos[1]), RFIFOW(fd,info->pos[0]), RFIFOL(fd,info->pos[2]));
+}
+
 
 /*==========================================
  * Client tells server he'd like to use AoE skill id 'skill_id' of level 'skill_lv' on 'x','y' location
@@ -12877,6 +12879,10 @@ void clif_parse_MoveToKafra(int fd, struct map_session_data *sd)
 	item_amount = RFIFOL(fd,info->pos[1]);
 	if (item_index < 0 || item_index >= MAX_INVENTORY || item_amount < 1)
 		return;
+	if (sd->inventory.u.items_inventory[item_index].equipSwitch) {
+		clif_msg(sd, ITEM_EQUIP_SWITCH);
+		return;
+	}
 
 	if (sd->state.storage_flag == 1)
 		storage_storageadd(sd, &sd->storage, item_index, item_amount);
@@ -12921,6 +12927,13 @@ void clif_parse_MoveToKafraFromCart(int fd, struct map_session_data *sd)
 		return;
 	if (!pc_iscarton(sd))
 		return;
+
+	if (idx < 0 || idx >= MAX_INVENTORY || amount < 1)
+		return;
+	if (sd->inventory.u.items_inventory[idx].equipSwitch) {
+		clif_msg(sd, ITEM_EQUIP_SWITCH);
+		return;
+	}
 
 	if (sd->state.storage_flag == 1)
 		storage_storageaddfromcart(sd, &sd->storage, idx, amount);
@@ -15935,7 +15948,11 @@ void clif_parse_Mail_setattach(int fd, struct map_session_data *sd)
 		return;
 
 	flag = mail_setitem(sd, idx, amount);
-	clif_Mail_setattachment(sd, idx, amount, flag);
+
+	if( flag == MAIL_ATTACH_EQUIPSWITCH )
+		clif_msg(sd, ITEM_EQUIP_SWITCH);
+	else
+		clif_Mail_setattachment(sd, idx, amount, flag);
 }
 
 
@@ -21126,6 +21143,195 @@ void clif_parse_memorial_dungeon_command(int fd, struct map_session_data *sd)
 
  	if( command == COMMAND_MEMORIALDUNGEON_DESTROY_FORCE )
 		instance_force_destroy(sd);
+}
+
+
+/// Send the full list of items in the equip switch window
+/// 0a9b <length>.W { <index>.W <position>.L }*
+void clif_equipswitch_list(struct map_session_data *sd)
+{
+#if PACKETVER >= 20170208
+	int fd = sd->fd;
+	int offset, i, position;
+
+	WFIFOW(fd,0) = 0xa9b;
+	for( i = 0, offset = 4, position = 0; i < EQI_MAX; i++ ) {
+		short index = sd->equip_switch_index[i];
+
+		if( index >= 0 && !(position&equip_bitmask[i]) ) {
+			WFIFOW(fd,offset) = index + 2;
+			WFIFOL(fd,offset + 2) = sd->inventory.u.items_inventory[index].equipSwitch;
+			position |= sd->inventory.u.items_inventory[index].equipSwitch;
+			offset += 6;
+		}
+	}
+	WFIFOW(fd,2) = offset;
+	WFIFOSET(fd,offset);
+#endif
+}
+
+/// Acknowledgement for removing an equip to the equip switch window
+/// 0a9a <index>.W <position.>.L <failure>.W
+void clif_equipswitch_remove(struct map_session_data *sd, uint16 index, uint32 pos, bool failed)
+{
+#if PACKETVER >= 20170208
+	int fd = sd->fd;
+
+	WFIFOHEAD(fd,packet_len(0xa9a));
+	WFIFOW(fd,0) = 0xa9a;
+	WFIFOW(fd,2) = index + 2;
+	WFIFOL(fd,4) = pos;
+	WFIFOW(fd,8) = failed;
+	WFIFOSET(fd,packet_len(0xa9a));
+#endif
+}
+
+/// Request to remove an equip from the equip switch window
+/// 0a99 <index>.W <position>.L <= 20170502
+/// 0a99 <index>.W
+void clif_parse_equipswitch_remove(int fd, struct map_session_data *sd)
+{
+#if PACKETVER >= 20170208
+	uint16 index = RFIFOW(fd,2) - 2;
+
+	if( !battle_config.feature_equipswitch )
+		return;
+
+	//Check if the index is valid
+	if( index < 0 || index >= MAX_INVENTORY )
+		return;
+
+	pc_equipswitch_remove(sd, index);
+#endif
+}
+
+/// Acknowledgement for adding an equip to the equip switch window
+/// 0a98 <index>.W <position.>.L <failure>.L  <= 20170502
+/// 0a98 <index>.W <position.>.L <failure>.W
+void clif_equipswitch_add(struct map_session_data *sd, uint16 index, uint32 pos, bool failed)
+{
+#if PACKETVER >= 20170208
+	int fd = sd->fd;
+
+	WFIFOHEAD(fd,packet_len(0xa98));
+	WFIFOW(fd,0) = 0xa98;
+	WFIFOW(fd,2) = index + 2;
+	WFIFOL(fd,4) = pos;
+#if PACKETVER <= 20170502
+	WFIFOL(fd,8) = failed;
+#else
+	WFIFOW(fd,8) = failed;
+#endif
+	WFIFOSET(fd,packet_len(0xa98));
+#endif
+}
+
+/// Request to add an equip to the equip switch window
+/// 0a97 <index>.W <position>.L
+void clif_parse_equipswitch_add(int fd, struct map_session_data *sd)
+{
+#if PACKETVER >= 20170208
+	uint16 index = RFIFOW(fd,2) - 2;
+	uint32 position = RFIFOL(fd, 4);
+
+	if( !battle_config.feature_equipswitch )
+		return;
+
+	//Check if the index is valid
+	if( index < 0 || index >= MAX_INVENTORY )
+		return;
+
+	if( !sd->inventory_data[index] )
+		return;
+
+	if( sd->state.trading || sd->npc_shopid ) {
+		clif_equipswitch_add(sd, index, position, true);
+		return;
+	}
+
+	if( sd->inventory_data[index]->type == IT_AMMO )
+		position = EQP_AMMO;
+
+	pc_equipitem(sd, index, position, true);
+#endif
+}
+
+/// Acknowledgement packet for the full equip switch
+/// 0a9d <failed>.W
+void clif_equipswitch_reply(struct map_session_data *sd, bool failed)
+{
+#if PACKETVER >= 20170208
+	int fd = sd->fd;
+
+	WFIFOHEAD(fd, packet_len(0xa9d));
+	WFIFOW(fd,0) = 0xa9d;
+	WFIFOW(fd,2) = failed;
+	WFIFOSET(fd,packet_len(0xa9d));
+#endif
+}
+
+/// Request to do a full equip switch
+/// 0a9c
+void clif_parse_equipswitch_request(int fd, struct map_session_data *sd)
+{
+#if PACKETVER >= 20170208
+	int i;
+	unsigned int tick = gettick();
+	uint16 skill_id = ALL_EQSWITCH, skill_lv = 1;
+
+	if( DIFF_TICK(tick, sd->equipswitch_tick) < 0 )
+		return; //Client will not let you send a request
+
+	sd->equipswitch_tick = tick + skill_get_cooldown(sd, skill_id, skill_lv);
+
+	if( !battle_config.feature_equipswitch )
+		return;
+
+	ARR_FIND(0, EQI_MAX, i, sd->equip_switch_index[i] >= 0);
+	if( i == EQI_MAX ) {
+		clif_equipswitch_reply(sd, false); //Client will show: "There is no item to replace." and should not even come here
+		return;
+	}
+
+	if( pc_issit(sd) )
+		return;
+
+	clif_parse_skill_toid(sd, skill_id, skill_lv, sd->bl.id);
+#endif
+}
+
+/// Request to do a single equip switch
+/// 0ace <index>.W
+void clif_parse_equipswitch_request_single(int fd, struct map_session_data *sd)
+{
+#if PACKETVER >= 20170502
+	uint16 index = RFIFOW(fd,2) - 2;
+
+	if( !battle_config.feature_equipswitch )
+		return;
+
+	//Check if the index is valid
+	if( index < 0 || index >= MAX_INVENTORY )
+		return;
+
+	if( !sd->inventory_data[index] )
+		return;
+
+	//Check if the item was already added to equip switch
+	if( sd->inventory.u.items_inventory[index].equipSwitch ) {
+		if( sd->npc_id ) {
+#ifdef RENEWAL
+			clif_msg(sd, WORK_IN_PROGRESS);
+			return;
+#endif
+			if( !sd->npc_item_flag )
+				return;
+		}
+		pc_equipswitch(sd, index);
+		return;
+	}
+	pc_equipitem(sd, index, pc_equippoint(sd, index), true);
+#endif
 }
 
 

@@ -2210,7 +2210,7 @@ ACMD_FUNC(refine)
 			clif_delitem(sd, i, 1, 3);
 			clif_inventorylist(sd);
 			clif_refine(fd, 0, i, sd->inventory.u.items_inventory[i].refine);
-			pc_equipitem(sd, i, current_position);
+			pc_equipitem(sd, i, current_position, false);
 			clif_misceffect(&sd->bl, 3);
 			achievement_update_objective(sd, AG_REFINE_SUCCESS, 2, sd->inventory_data[i]->wlv, sd->inventory.u.items_inventory[i].refine);
 			count++;
@@ -5478,6 +5478,7 @@ ACMD_FUNC(dropall)
 			if (type == -1 || type == (uint8)item_data->type) {
 				if (sd->inventory.u.items_inventory[i].equip != 0)
 					pc_unequipitem(sd, i, 1|2);
+				pc_equipswitch_remove(sd, i);
 				count += sd->inventory.u.items_inventory[i].amount;
 				if (!pc_dropitem(sd, i, sd->inventory.u.items_inventory[i].amount))
 					count2 += sd->inventory.u.items_inventory[i].amount;
@@ -5510,6 +5511,7 @@ ACMD_FUNC(storeall)
 		if (sd->inventory.u.items_inventory[i].amount) {
 			if(sd->inventory.u.items_inventory[i].equip != 0)
 				pc_unequipitem(sd, i, 1|2);
+			pc_equipswitch_remove(sd, i);
 			storage_storageadd(sd, &sd->storage, i, sd->inventory.u.items_inventory[i].amount);
 		}
 	}
@@ -9806,7 +9808,7 @@ ACMD_FUNC(cloneequip) {
 			if ((flag = pc_additem(sd, &tmp_item, 1, LOG_TYPE_COMMAND)))
 				clif_additem(sd, 0, 0, flag);
 			else
-				pc_equipitem(sd, sd->last_addeditem_index, itemdb_equip(tmp_item.nameid));
+				pc_equipitem(sd, sd->last_addeditem_index, itemdb_equip(tmp_item.nameid), false);
 		}
 	}
 	memset(atcmd_output, '\0', sizeof(atcmd_output));

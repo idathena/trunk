@@ -472,6 +472,7 @@ enum clif_messages {
 	SKILL_REBEL_GUN_FAIL = 0xa02,
 	GUILD_MASTER_WOE = 0xb93,
 	GUILD_MASTER_DELAY = 0xb94,
+	ITEM_EQUIP_SWITCH = 0xbc7,
 	MSG_ATTENDANCE_DISABLED = 0xd92,
 };
 
@@ -1150,5 +1151,11 @@ void clif_private_airship_response(struct map_session_data *sd, enum e_private_a
 void clif_refineui_open(struct map_session_data *sd);
 
 void clif_guild_storage_log(struct map_session_data *sd, enum e_guild_storage_log result);
+
+//Equip Switch System
+void clif_equipswitch_list(struct map_session_data *sd);
+void clif_equipswitch_add(struct map_session_data *sd, uint16 index, uint32 pos, bool failed);
+void clif_equipswitch_remove(struct map_session_data *sd, uint16 index, uint32 pos, bool failed);
+void clif_equipswitch_reply(struct map_session_data *sd, bool failed);
 
 #endif /* _CLIF_H_ */

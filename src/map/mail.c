@@ -139,6 +139,9 @@ enum mail_attach_result mail_setitem(struct map_session_data *sd, short idx, uin
 		if( idx < 0 || idx >= MAX_INVENTORY || !sd->inventory_data[idx] )
 			return MAIL_ATTACH_ERROR;
 
+		if( sd->inventory.u.items_inventory[idx].equipSwitch )
+			return MAIL_ATTACH_EQUIPSWITCH;
+
 #if PACKETVER < 20150513
 		i = 0;
 		mail_removeitem(sd, 0, sd->mail.item[i].index + 2, sd->mail.item[i].amount); //Remove existing item
@@ -192,7 +195,7 @@ enum mail_attach_result mail_setitem(struct map_session_data *sd, short idx, uin
 bool mail_setattachment(struct map_session_data *sd, struct mail_message *msg)
 {
 	int i, amount;
-	
+
 	nullpo_retr(false, sd);
 	nullpo_retr(false, msg);
 
@@ -246,7 +249,7 @@ void mail_getattachment(struct map_session_data *sd, struct mail_message *msg, i
 		if( item->nameid > 0 && item->amount > 0 ) {
 			pc_additem(sd, &item[i], item[i].amount, LOG_TYPE_MAIL);
 			item_received = true;
-		}	
+		}
 	}
 
 	if( item_received )

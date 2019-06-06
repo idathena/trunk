@@ -7986,7 +7986,7 @@ BUILDIN_FUNC(getequipid)
 	if( num == EQI_COMPOUND_ON )
 		i = current_equip_item_index;
 	else if( equip_index_check(num) ) //Get inventory position of item
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 	else {
 		ShowError("buildin_getequipid: Unknown equip index '%d'\n",num);
 		script_pushint(st,-1);
@@ -8022,7 +8022,7 @@ BUILDIN_FUNC(getequipuniqueid)
 	}
 
 	// Get inventory position of item
-	i = pc_checkequip(sd,equip_bitmask[num]);
+	i = pc_checkequip(sd,equip_bitmask[num],false);
 	if( i < 0 ) {
 		script_pushconststr(st,"");
 		return 1;
@@ -8065,7 +8065,7 @@ BUILDIN_FUNC(getequipname)
 	}
 
 	// Get inventory position of item
-	i = pc_checkequip(sd,equip_bitmask[num]);
+	i = pc_checkequip(sd,equip_bitmask[num],false);
 	if( i < 0 ) {
 		script_pushconststr(st,"");
 		return 0;
@@ -8186,7 +8186,7 @@ BUILDIN_FUNC(getequipisequiped)
 
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 
 	if(i >= 0)
 		script_pushint(st,1);
@@ -8215,7 +8215,7 @@ BUILDIN_FUNC(getequipisenableref)
 
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 	if(i >= 0 && sd->inventory_data[i] && !sd->inventory_data[i]->flag.no_refine && !sd->inventory.u.items_inventory[i].expire_time)
 		script_pushint(st,1);
 	else
@@ -8243,7 +8243,7 @@ BUILDIN_FUNC(getequiprefinerycnt)
 
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 	if(i >= 0)
 		script_pushint(st,sd->inventory.u.items_inventory[i].refine);
 	else
@@ -8278,7 +8278,7 @@ BUILDIN_FUNC(getequipweaponlv)
 		}
 		i = current_equip_item_index;
 	} else if(equip_index_check(num))
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 	if(i >= 0 && sd->inventory_data[i])
 		script_pushint(st,sd->inventory_data[i]->wlv);
 	else
@@ -8308,7 +8308,7 @@ BUILDIN_FUNC(getequippercentrefinery)
 		is_enriched = (script_getnum(st,3) != 0);
 	num = script_getnum(st,2);
 	if(equip_index_check(num))
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
 		chance = status_get_refine_chance((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), (int)sd->inventory.u.items_inventory[i].refine, is_enriched);
 
@@ -8337,7 +8337,7 @@ BUILDIN_FUNC(getequiprefinecost) {
 		return 0;
 	}
 	if(equip_index_check(slot))
-		i = pc_checkequip(sd,equip_bitmask[slot]);
+		i = pc_checkequip(sd,equip_bitmask[slot],false);
 	if(i >= 0 && sd->inventory.u.items_inventory[i].nameid && sd->inventory.u.items_inventory[i].refine < MAX_REFINE)
 		value = status_get_refine_cost((enum e_refine_type)itemdb_wlv(sd->inventory.u.items_inventory[i].nameid), type, (enum e_refine_info)info);
 
@@ -8364,7 +8364,7 @@ BUILDIN_FUNC(successrefitem)
 		up = script_getnum(st,3);
 	pos = script_getnum(st,2);
 	if(equip_index_check(pos))
-		i = pc_checkequip(sd,equip_bitmask[pos]);
+		i = pc_checkequip(sd,equip_bitmask[pos],false);
 	if(i >= 0) {
 		unsigned int ep = sd->inventory.u.items_inventory[i].equip;
 
@@ -8387,7 +8387,7 @@ BUILDIN_FUNC(successrefitem)
 		//Logs items, got from (N)PC scripts [Lupus]
 		log_pick_pc(sd,LOG_TYPE_SCRIPT,1,&sd->inventory.u.items_inventory[i]);
 
-		pc_equipitem(sd,i,ep);
+		pc_equipitem(sd,i,ep,false);
 		clif_misceffect(&sd->bl,3);
 		achievement_update_objective(sd,AG_REFINE_SUCCESS,2,sd->inventory_data[i]->wlv,sd->inventory.u.items_inventory[i].refine);
 		if(sd->inventory.u.items_inventory[i].refine == 10 &&
@@ -8432,7 +8432,7 @@ BUILDIN_FUNC(failedrefitem)
 
 	pos = script_getnum(st,2);
 	if(equip_index_check(pos))
-		i = pc_checkequip(sd,equip_bitmask[pos]);
+		i = pc_checkequip(sd,equip_bitmask[pos],false);
 	if(i >= 0) {
 		sd->inventory.u.items_inventory[i].refine = 0;
 		pc_unequipitem(sd,i,1|2); //Recalculate bonus
@@ -8470,7 +8470,7 @@ BUILDIN_FUNC(downrefitem)
 	if(script_hasdata(st,3))
 		down = script_getnum(st,3);
 	if(equip_index_check(pos))
-		i = pc_checkequip(sd,equip_bitmask[pos]);
+		i = pc_checkequip(sd,equip_bitmask[pos],false);
 	if(i >= 0) {
 		unsigned int ep = sd->inventory.u.items_inventory[i].equip;
 
@@ -8488,7 +8488,7 @@ BUILDIN_FUNC(downrefitem)
 		//Logs items, got from (N)PC scripts [Lupus]
 		log_pick_pc(sd,LOG_TYPE_SCRIPT,1,&sd->inventory.u.items_inventory[i]);
 
-		pc_equipitem(sd,i,ep);
+		pc_equipitem(sd,i,ep,false);
 		clif_misceffect(&sd->bl,2);
 		achievement_update_objective(sd,AG_REFINE_FAIL,1,sd->inventory.u.items_inventory[i].refine);
 		script_pushint(st,sd->inventory.u.items_inventory[i].refine);
@@ -8518,7 +8518,7 @@ BUILDIN_FUNC(delequip)
 
 	pos = script_getnum(st,2);
 	if(equip_index_check(pos))
-		i = pc_checkequip(sd,equip_bitmask[pos]);
+		i = pc_checkequip(sd,equip_bitmask[pos],false);
 	if(i >= 0) {
 		pc_unequipitem(sd,i,1|2); //Recalculate bonus
 		pc_delitem(sd,i,1,0,2,LOG_TYPE_SCRIPT);
@@ -8546,7 +8546,7 @@ BUILDIN_FUNC(breakequip)
 
 	pos = script_getnum(st,2);
 	if(equip_index_check(pos))
-		i = pc_checkequip(sd,equip_bitmask[pos]);
+		i = pc_checkequip(sd,equip_bitmask[pos],false);
 	if(i >= 0) {
 		sd->inventory.u.items_inventory[i].attribute = 1;
 		pc_unequipitem(sd,i,1|2|4);
@@ -12466,7 +12466,7 @@ BUILDIN_FUNC(getequipcardcnt)
 		return 1;
 
 	if (equip_index_check(num))
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 
 	if (i < 0 || !sd->inventory_data[i]) {
 		script_pushint(st,0);
@@ -12499,7 +12499,7 @@ BUILDIN_FUNC(successremovecards) {
 		return 1;
 
 	if (equip_index_check(num))
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 
 	if (i < 0 || !sd->inventory_data[i])
 		return 0;
@@ -12573,7 +12573,7 @@ BUILDIN_FUNC(failedremovecards) {
 		return 1;
 
 	if (equip_index_check(num))
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 
 	if (i < 0 || !sd->inventory_data[i])
 		return 0;
@@ -13207,7 +13207,7 @@ BUILDIN_FUNC(getequipcardid)
 	if (!sd)
 		return 1;
 	if (equip_index_check(num))
-		i = pc_checkequip(sd,equip_bitmask[num]);
+		i = pc_checkequip(sd,equip_bitmask[num],false);
 	if (i >= 0 && slot >= 0 && slot < 4)
 		script_pushint(st,sd->inventory.u.items_inventory[i].card[slot]);
 	else
@@ -15028,7 +15028,7 @@ BUILDIN_FUNC(unequip)
 
 	pos = script_getnum(st,2);
 	if (equip_index_check(pos)) {
-		short i = pc_checkequip(sd,equip_bitmask[pos]);
+		short i = pc_checkequip(sd,equip_bitmask[pos],false);
 
 		if (i >= 0) {
 			pc_unequipitem(sd,i,1|2);
@@ -15059,7 +15059,7 @@ BUILDIN_FUNC(equip)
 	if ((item_data = itemdb_exists(nameid))) {
 		ARR_FIND(0,MAX_INVENTORY,i,sd->inventory.u.items_inventory[i].nameid == nameid);
 		if (i < MAX_INVENTORY) {
-			pc_equipitem(sd,i,item_data->equip);
+			pc_equipitem(sd,i,item_data->equip,false);
 			script_pushint(st,1);
 			return 0;
 		}
@@ -15133,7 +15133,7 @@ BUILDIN_FUNC(equip2)
 		sd->inventory.u.items_inventory[i].card[3] == c4));
 
 	if( i < MAX_INVENTORY ) {
-		pc_equipitem(sd,i,item_data->equip);
+		pc_equipitem(sd,i,item_data->equip,false);
 		script_pushint(st,1);
 	} else
 		script_pushint(st,0);
@@ -22023,7 +22023,7 @@ BUILDIN_FUNC(getequiprandomoption) {
 		return 1;
 	}
 	if (equip_index_check(pos))
-		i = pc_checkequip(sd, equip_bitmask[pos]);
+		i = pc_checkequip(sd, equip_bitmask[pos], false);
 	if (i < 0) {
 		ShowError("buildin_getequiprandomoption: No item equipped at pos %d (CID=%d/AID=%d).\n", pos, sd->status.char_id, sd->status.account_id);
 		script_pushint(st,-1);
@@ -22079,7 +22079,7 @@ BUILDIN_FUNC(setrandomoption) {
 		return 1;
 	}
 	if (equip_index_check(pos))
-		i = pc_checkequip(sd, equip_bitmask[pos]);
+		i = pc_checkequip(sd, equip_bitmask[pos], false);
 	if (i >= 0) {
 		ep = sd->inventory.u.items_inventory[i].equip;
 		log_pick_pc(sd, LOG_TYPE_SCRIPT, -1, &sd->inventory.u.items_inventory[i]);
@@ -22090,7 +22090,7 @@ BUILDIN_FUNC(setrandomoption) {
 		clif_delitem(sd, i, 1, 3);
 		log_pick_pc(sd, LOG_TYPE_SCRIPT, -1, &sd->inventory.u.items_inventory[i]);
 		clif_additem(sd, i, 1, 0);
-		pc_equipitem(sd, i, ep);
+		pc_equipitem(sd, i, ep, false);
 		script_pushint(st,1);
 		return 0;
 	}
