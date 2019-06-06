@@ -1,15 +1,15 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Cooking Quest
-//===== By: ================================================== 
+//===== By: ==================================================
 //= Reddozen; L0ne_W0lf
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.8a
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Official Cooking Quest (10.3)
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.1 Fixed wrong item ID, added missing ";, optimized [Lupus]
 //= 1.1a minor bugfix, thx 2 Irmin [Lupus]
 //= 1.2 Fixed exploit, some typos [Lupus]
@@ -20,14 +20,14 @@
 //=     fixed bugs. Tested, fully working [Lupus]
 //= 1.5 More fixes [Lupus]
 //= 1.6 Quest is now up to iRO 10.3 standards. [L0ne_W0lf]
-//= - Not sure what the EnableItemMove is for, as there is no 
+//= - Not sure what the EnableItemMove is for, as there is no
 //=   command to disable being able to move items.
 //= 1.6a Corrected a bad cutin, a Typo error ";;" and a bad delitem (bugreport:911) [Samuray22]
 //= 1.6b Corrected a "donpcevent" missing a ":". (bugreport:962) [Samuray22]
 //= 1.7 Replaced effect numerics with constants. [L0ne_W0lf]
 //= 1.8 Renamed the variable cooking to cooking_q [ultramage]
 //= 1.8a Minor cleaning. [Euphy]
-//============================================================ 
+//============================================================
 
 prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 	if (MaxWeight - Weight < 2000) {
@@ -138,7 +138,7 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 		switch(select("......?:She is my sister:Actually, I don't know her.")) {
 		case 1:
 			cutin "nyuang_3",2;
-			emotion e_ho,0,"Child with Cat#cook";
+			emotion e_ho,getnpcid(0,"Child with Cat#cook");
 			mes "[The kid with a cat]";
 			mes "Nyahahaha,";
 			mes "Nyahahaha~";
@@ -153,7 +153,7 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 			break;
 		case 2:
 			cutin "nyuang_1",2;
-			emotion e_what,0,"Child with Cat#cook";
+			emotion e_what,getnpcid(0,"Child with Cat#cook");
 			mes "[Child with Cat]";
 			mes "...Nya?";
 			mes "...Meow?";
@@ -168,7 +168,7 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 			break;
 		case 3:
 			cutin "nyuang_2",2;
-			emotion e_pif,0,"Child with Cat#cook";
+			emotion e_pif,getnpcid(0,"Child with Cat#cook");
 			mes "[Child with Cat]";
 			mes "Nyahahaha,";
 			mes "Nyahahaha~";
@@ -828,7 +828,7 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 		next;
 		switch(select("What's your name, kid?:Do you want to eat something?:Here, kitty~:Get out!")) {
 		case 1:
-			emotion e_ok,0,"Child with Cat#cook";
+			emotion e_ok,getnpcid(0,"Child with Cat#cook");
 			mes "[Child with Cat]";
 			mes "Nyaaa~";
 			mes "nyaaa~";
@@ -842,7 +842,7 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 			goto L_End;
 		case 2:
 			cutin "nyuang_2",2;
-			emotion e_pif,0,"Child with Cat#cook";
+			emotion e_pif,getnpcid(0,"Child with Cat#cook");
 			mes "[Child with Cat]";
 			mes "Nyaaaa~";
 			mes "(Purrrrrr~)";
@@ -858,7 +858,7 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 			goto L_End;
 		case 3:
 			cutin "nyuang_3",2;
-			emotion e_heh,0,"Child with Cat#cook";
+			emotion e_heh,getnpcid(0,"Child with Cat#cook");
 			mes "[Child with Cat]";
 			mes "Nyahahaha~";
 			mes "Nyhhahaha~";
@@ -870,13 +870,13 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 			mes "...Then I don't need you to be here.";
 			goto L_End;
 		case 4:
-			emotion e_dots,0,"Child with Cat#cook";
+			emotion e_dots,getnpcid(0,"Child with Cat#cook");
 			mes "[Child with Cat]";
 			mes "...";
 			mes "(Meow?)";
 			next;
 			cutin "nyuang_4",2;
-			emotion e_an,0,"Child with Cat#cook";
+			emotion e_an,getnpcid(0,"Child with Cat#cook");
 			specialeffect2 EF_HIT2;
 			percentheal -10,0;
 			mes "[Child with Cat]";
@@ -913,14 +913,14 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 		mes "or shed on any of the food!";
 		next;
 		cutin "nyuang_4",2;
-		emotion e_an,0,"Child with Cat#cook";
+		emotion e_an,getnpcid(0,"Child with Cat#cook");
 		mes "[Child with Cat]";
 		mes "Grrrrrrr!";
 		mes "RRRRreow!";
 		next;
 		donpcevent "Wickebine#cook::OnEnable";
 		emotion e_omg;
-		emotion e_ho,0,"Child with Cat#cook";
+		emotion e_ho,getnpcid(0,"Child with Cat#cook");
 		next;
 		cutin "job_black_hucke01",1;
 		mes "[Wickebine]";
@@ -948,7 +948,7 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 		mes "bothering Charles, Nyuyang?";
 		next;
 		cutin "nyuang_3",2;
-		emotion e_heh,0,"Child with Cat#cook";
+		emotion e_heh,getnpcid(0,"Child with Cat#cook");
 		mes "[Child with Cat]";
 		mes "Nyuuuunyuuu~";
 		mes "nyuuuunyuuu~";
@@ -984,7 +984,7 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 		mes "So do not worry, Madam~";
 		next;
 		cutin "job_black_hucke01",1;
-		emotion e_what,0,"Wickebine#cook";
+		emotion e_what,getnpcid(0,"Wickebine#cook");
 		mes "[Wickebine]";
 		mes "Are you sure, Charles?";
 		mes "I know how serious you";
@@ -1001,18 +1001,18 @@ prt_castle,43,30,3	script	Charles Orleans#cook	878,{
 		mes "Well then, take care~";
 		next;
 		cutin "nyuang_3",2;
-		emotion e_heh,0,"Child with Cat#cook";
+		emotion e_heh,getnpcid(0,"Child with Cat#cook");
 		mes "[Child with Cat]";
 		mes "Nyahahaha~";
 		mes "Nyahahaha~";
 		mes "(Meow, meow~)";
 		next;
 		cutin "job_black_hucke02",255;
-		emotion e_ho,0,"Wickebine#cook";
+		emotion e_ho,getnpcid(0,"Wickebine#cook");
 		donpcevent "Wickebine#cook::OnDisable";
 		next;
 		emotion e_dots;
-		emotion e_dots,0,"Child with Cat#cook";
+		emotion e_dots,getnpcid(0,"Child with Cat#cook");
 		mes "[Charles Orleans]";
 		mes "......";
 		next;

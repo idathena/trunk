@@ -1,12 +1,12 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Lighthalzen City
-//===== By: ================================================== 
+//===== By: ==================================================
 //=  erKURITA, Au{R}oN (Translated by Alan), $ephiroth
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 2.3
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= Lighthalzen NPCs (Temporal names for now) [erKURITA]
 //===== Additional Comments: ==================================
 //= 0.1 Placed temporal names, why there weren't on the SVN before? [erKURITA]
@@ -29,7 +29,7 @@
 //= 1.5 Fixed bad NPC header data to comply with rev. 11603. [L0ne_W0lf]
 //= 1.6 Massive NPC clean up, includes corrected dialogs and [L0ne_W0lf]
 //=     added missing dialogs, fixed indentation, corrected some NPC
-//=     facing positions, NPC names are more unique now. Removed 
+//=     facing positions, NPC names are more unique now. Removed
 //=     whitespace (empty lines after header and before end curly)
 //=     reduced usage of the command "goto", grammatical corrections.
 //=     Added additional missing NPCs.
@@ -239,7 +239,7 @@ lighthalzen,66,94,3	script	Elmer Keays#li_03	866,{
 	mes "precious sight to these";
 	mes "old eyes, my dear. I'm";
 	mes "really lucky to be with you.";
-	emotion e_kis,0,"Margie Keays#li_02";
+	emotion e_kis,getnpcid(0,"Margie Keays#li_02");
 	emotion e_kis2;
 	close;
 }
@@ -959,7 +959,7 @@ lighthalzen,296,239,3	script	Berru#lhz_01	706,{
 		mes "[Berru]";
 		mes "Daddy...! Waaaaah~!";
 		mes "I wanna see my Daddy!";
-		emotion e_sob,0,"Berru#lhz_01";
+		emotion e_sob,getnpcid(0,"Berru#lhz_01");
 		next;
 		mes "[Pilia]";
 		mes "Berru, I don't ";
@@ -973,7 +973,7 @@ lighthalzen,296,239,3	script	Berru#lhz_01	706,{
 		mes "home! He said he'll";
 		mes "bring us candy tonight!";
 		mes "You go sleep first, Pilia!";
-		emotion e_ag,0,"Berru#lhz_01";
+		emotion e_ag,getnpcid(0,"Berru#lhz_01");
 		next;
 		mes "[Pilia]";
 		mes "^333333*Sigh...*^000000";
@@ -981,7 +981,7 @@ lighthalzen,296,239,3	script	Berru#lhz_01	706,{
 		mes "He said he found a";
 		mes "good job, but we haven't";
 		mes "heard from him since then...";
-		emotion e_dots,0,"Pilia#lhz_01";
+		emotion e_dots,getnpcid(0,"Pilia#lhz_01");
 		close;
 	case 2:
 		mes "[Pilia]";
@@ -989,7 +989,7 @@ lighthalzen,296,239,3	script	Berru#lhz_01	706,{
 		mes "so long? I hope Daddy";
 		mes "comes back home soon.";
 		mes "Come on, Berru, don't cry.";
-		emotion e_dots,0,"Pilia#lhz_01";
+		emotion e_dots,getnpcid(0,"Pilia#lhz_01");
 		next;
 		mes "[Berru]";
 		mes "^333333*Sob...*^000000";
@@ -1007,7 +1007,7 @@ lighthalzen,296,239,3	script	Berru#lhz_01	706,{
 		mes "but my little brother";
 		mes "just won't stop crying.";
 		mes "I'm sorry if we're loud...";
-		emotion e_what,0,"Pilia#lhz_01";
+		emotion e_what,getnpcid(0,"Pilia#lhz_01");
 		next;
 		mes "[Pilia]";
 		mes "Our daddy goes to work";
@@ -1022,7 +1022,7 @@ lighthalzen,296,239,3	script	Berru#lhz_01	706,{
 		mes "misses him a lot. I don't";
 		mes "know how to make him";
 		mes "stop crying! What do I do?";
-		emotion e_swt2,0,"Pilia#lhz_01";
+		emotion e_swt2,getnpcid(0,"Pilia#lhz_01");
 		close;
 	}
 }
@@ -1089,16 +1089,16 @@ OnTouch:
 			mes "during the day, we'll always have hope, even if we can't see it.";
 			next;
 			mes "[" + strcharinfo(0) + "]";
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes ". . . . . . . . . . . .";
 			next;
 			mes "[" + strcharinfo(0) + "]";
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes ". . . . . . . . . . . .";
 			mes ". . . . . . . . . . . .";
 			next;
 			mes "[" + strcharinfo(0) + "]";
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes ". . . . . . . . . . . .";
 			mes ". . . . . . . . . . . .";
 			mes ". . . . . . . . . . . .";
@@ -1140,16 +1140,16 @@ OnTouch:
 			mes "miracle. Isn't that wonderful?";
 			next;
 			mes "[" + strcharinfo(0) + "]";
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes ". . . . . . . . . . . .";
 			next;
 			mes "[" + strcharinfo(0) + "]";
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes ". . . . . . . . . . . .";
 			mes ". . . . . . . . . . . .";
 			next;
 			mes "[" + strcharinfo(0) + "]";
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes ". . . . . . . . . . . .";
 			mes ". . . . . . . . . . . .";
 			mes ". . . . . . . . . . . .";
@@ -1208,16 +1208,16 @@ OnTouch:
 			mes "born of frustration will make you a bully. Know the difference.";
 			next;
 			mes "[" + strcharinfo(0) + "]";
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes ". . . . . . . . . . . .";
 			next;
 			mes "[" + strcharinfo(0) + "]";
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes ". . . . . . . . . . . .";
 			mes ". . . . . . . . . . . .";
 			next;
 			mes "[" + strcharinfo(0) + "]";
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes ". . . . . . . . . . . .";
 			mes ". . . . . . . . . . . .";
 			mes ". . . . . . . . . . . .";
@@ -2194,7 +2194,7 @@ lhz_in02,147,222,3	script	Officer Guo#06::off_guo	85,{
 
 lhz_in02,142,222,6	duplicate(off_guo)	Suspect#6	870
 
-// New ----------------------------------------------------------------------- 
+// New -----------------------------------------------------------------------
 
 lhz_in01,14,28,3	script	Banquet Staff	109,{
 	mes "[Banquet Staff]";
@@ -2492,7 +2492,7 @@ lighthalzen,162,304,7	script	Rekenber Guard Drew#li	868,{
 	mes "even got the glasses chick";
 	mes "to wear 'em too? That's the";
 	mes "best news I've heard all day!";
-	emotion e_omg,0,"Rekenber Guard Tan#li";
+	emotion e_omg,getnpcid(0,"Rekenber Guard Tan#li");
 	next;
 	mes "[Rekenber Guard Drew]";
 	mes "Okay man, you know these";

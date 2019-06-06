@@ -1,12 +1,12 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Quest NPCs related to Ash-Vacuum
-//===== By: ================================================== 
+//===== By: ==================================================
 //= L0ne_W0lf
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 3.5
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Contains Quests:
 //= Onward to the Other World
@@ -20,7 +20,7 @@
 //= Part Time Work
 //= Report from the New World
 //= Persuing Rayan Moore
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 3.0 Fixed a missing variable check. [Joseph]
 //= 3.1 Updated RE/Pre-RE EXP. [Euphy]
 //= 3.2 Updated ep13_start and dialog to match official script. [Joseph]
@@ -28,10 +28,10 @@
 //= 3.3a Added Izlude RE coordinates. [Euphy]
 //= 3.4 Added GM management function and NPC. [Euphy]
 //= 3.5 Updated turn-in requirements for Tripatriate Union's Feud. [Euphy]
-//============================================================ 
+//============================================================
 
 // Onward to the New World :: ep13_gogo
-//============================================================ 
+//============================================================
 function	script	Promotional_Staff	{
 	mes "[Promotional Staff]";
 	mes "We are looking for adventurers who are super curious and extremely brave.";
@@ -87,7 +87,7 @@ prontera,163,53,3	script	Promotional Staff#prt	100,3,3,{
 	end;
 
 OnTouch:
-	emotion e_what,1;
+	emotion e_what,playerattached();
 	end;
 }
 
@@ -457,7 +457,7 @@ aldebaran,127,138,3	script	Promotional Staff#alde	100,3,3,{
 	end;
 
 OnTouch:
-	emotion e_what,1;
+	emotion e_what,playerattached();
 	end;
 }
 
@@ -577,7 +577,7 @@ geffen,90,67,3	script	Promotional Staff#gef	100,3,3,{
 	end;
 
 OnTouch:
-	emotion e_what,1;
+	emotion e_what,playerattached();
 	end;
 }
 
@@ -714,7 +714,7 @@ OnTouch:
 	end;
 
 OnTouch:
-	emotion e_what,1;
+	emotion e_what,playerattached();
 	end;
 }
 
@@ -1748,8 +1748,8 @@ moc_fild22b,230,197,5	script	Munkenro#2	967,{
 			next;
 			set ep13_ryu,22;
 			if (isbegin_quest(10077) == 1)
-				changequest 10077,10078; 
-			donpcevent "Head of the Alliance#moo::OnEnable"; 
+				changequest 10077,10078;
+			donpcevent "Head of the Alliance#moo::OnEnable";
 			mes "[Munkenro]";
 			mes "If you are too late,";
 			mes "it will be considered as a failure, so come back soon.";
@@ -1978,7 +1978,7 @@ moc_fild22b,370,370,3	script	Allied Manager#gm	100,{
 }
 
 // New Surroundings :: ep13_newbs
-//============================================================ 
+//============================================================
 mid_camp,222,283,4	script	Marian#ep13bs	727,{
 	if (checkweight(1201,1) == 0 || MaxWeight - Weight < 1000) {
 		mes "[Marian]";
@@ -2682,7 +2682,7 @@ mid_camp,261,284,4	script	Instructor#ep13bs	405,{
 			mes "Hehe, don't mention it.";
 			mes "And Otto said that he";
 			mes "would come to see you.";
-			emotion e_shy,1;
+			emotion e_shy,playerattached();
 			next;
 			mes "[Instructor Lugen]";
 			mes "Did he?";
@@ -2976,7 +2976,7 @@ mid_camp,264,263,4	script	Diego#ep13bs	931,{
 			next;
 			mes "["+ strcharinfo(0) +"]";
 			mes "Hah!! How did you know my name?!";
-			emotion e_omg,1;
+			emotion e_omg,playerattached();
 			next;
 			mes "[Diego]";
 			mes "It's on your nameplate.";
@@ -3079,7 +3079,7 @@ mid_camp,264,263,4	script	Diego#ep13bs	931,{
 			mes "No, I just...";
 			mes "I was assigned to stay";
 			mes "in these barracks.";
-			emotion e_swt2,1;
+			emotion e_swt2,playerattached();
 			next;
 			mes "[Diego]";
 			mes "Oh!!!";
@@ -3218,7 +3218,7 @@ mid_camp,160,298,4	script	Jan#ep13bs	865,{
 			next;
 			mes "["+ strcharinfo(0) +"]";
 			mes "Yes...";
-			emotion e_swt,1;
+			emotion e_swt,playerattached();
 			next;
 			mes "[Jan]";
 			mes "Ahhh, it's exciting~";
@@ -3665,7 +3665,7 @@ mid_camp,267,258,0	script	Post#ep13bs2	111,{
 }
 
 // Attitude to the New :: ep13_ecology
-//============================================================ 
+//============================================================
 mid_camp,188,254,3	script	Monster Scholar#ep13	883,{
 	if (ep13_ryu < 100 && ep13_start < 100) {
 		mes "[Monster Scholar]";
@@ -4379,7 +4379,7 @@ mid_camp,240,270,3	script	Botanist#ep13	750,{
 			mes "Everything about this world excites me.";
 			next;
 			emotion e_lv2;
-			emotion e_dots,1;
+			emotion e_dots,playerattached();
 			mes "[Botanist]";
 			mes "Oh, okay... Ah-hah!";
 			mes "This is how it goes...";
@@ -4396,7 +4396,7 @@ mid_camp,240,270,3	script	Botanist#ep13	750,{
 				next;
 				break;
 			case 2:
-				emotion e_lv2,1;
+				emotion e_lv2,playerattached();
 				mes "["+strcharinfo(0)+"]";
 				mes "I agree. There's so much to see around here!";
 				next;
@@ -4416,7 +4416,7 @@ mid_camp,240,270,3	script	Botanist#ep13	750,{
 			mes "[Botanist]";
 			mes "Oh...? Isn't this?!";
 			next;
-			emotion e_omg,1;
+			emotion e_omg,playerattached();
 			mes "[Botanist]";
 			mes "...Well, I've got a ton of samples of this specimen. Sorry.";
 			next;
@@ -4860,7 +4860,7 @@ man_fild01,92,230,3	script	Frozen Tree#evt_lumis	111,1,1,{
 }
 
 // Finding a Fairy & Finding a Giant Tree
-//============================================================ 
+//============================================================
 spl_fild02,34,223,5	script	Small Fairy#spl	442,{
 	if (BaseLevel > 69) {
 		if (checkquest(2158) == -1) {
@@ -4996,7 +4996,7 @@ mid_camp,212,237,5	script	Camp Guard Captain#man1	852,{
 }
 
 // The Tripartite Union's Feud :: ep13_1_rhea
-//============================================================ 
+//============================================================
 mid_campin,376,120,0	script	Research Official#ep131	754,3,3,{
 OnTouch:
 	if (checkweight(1201,1) == 0 || MaxWeight - Weight < 3500) {
@@ -6964,7 +6964,7 @@ OnTimer300000:
 }
 
 // Part Time Work :: ep13_alba
-//============================================================ 
+//============================================================
 mid_camp,1,1,0	script	#timer_alba01	844,{
 	callfunc "F_GM_NPC";
 	mes "Please enter the password";
@@ -7569,7 +7569,7 @@ OnMyMobDead:
 }
 
 // Cat Hand Trading Post :: cat_yong
-//============================================================ 
+//============================================================
 mid_camp,62,125,4	script	Cat Hand Agent	421,{
 function Catwarp;
 	if (ep13_yong1 < 1) {
@@ -8509,7 +8509,7 @@ sec_in02,80,171,0	script	Piece of crack#sec	406,{
 }
 
 // Report from the New World :: ep13_1_edq
-//============================================================ 
+//============================================================
 mid_campin,90,121,5	script	Hibba Agip	459,{
 	cutin "ep13_captin_edq",2;
 	set .@start,(ep13_newbs + ep13_ryu + mao_morocc2 + ep13_1_rhea + ep13_animal + ep13_start);
@@ -9867,7 +9867,7 @@ mid_camp,206,286,3	script	Expedition Messenger	997,{
 		mes "[Expedition Messenger]";
 		mes "You, head to Schwaltzval Republic.";
 		mes "And you, take Arunafeltz. I'll visit Prontera Palace.";
-		emotion e_ok,0,"Expedition Messenger#2";
+		emotion e_ok,getnpcid(0,"Expedition Messenger#2");
 		next;
 		mes "[Expedition Messenger]";
 		mes "I'll see you guys later.";
@@ -9897,7 +9897,7 @@ mid_camp,206,286,3	script	Expedition Messenger	997,{
 			mes "Give it to me, now!";
 			next;
 			donpcevent "Expedition Messenger#2::OnEnable";
-			emotion e_casp,0,"Expedition Messenger#3";
+			emotion e_casp,getnpcid(0,"Expedition Messenger#3");
 			cutin "ep13_shadow_edq",2;
 			mes "[???]";
 			mes "Argh...";
@@ -9951,7 +9951,7 @@ mid_camp,206,286,3	script	Expedition Messenger	997,{
 			mes "Oh, yeah? Then I'll have to use force!";
 			next;
 			donpcevent "Expedition Messenger#2::OnEnable";
-			emotion e_casp,0,"Expedition Messenger#3";
+			emotion e_casp,getnpcid(0,"Expedition Messenger#3");
 			mes "[???]";
 			mes "Argh!";
 			next;
@@ -10452,7 +10452,7 @@ OnMyMobDead:
 }
 
 // Persuing Rayan Moore :: ep13_moc2
-//============================================================ 
+//============================================================
 mid_campin,68,185,3	script	Pursuit Party Leader#1	803,{
 	if (checkweight(714,3) == 0) {
 		mes "- You cannot proceed with the quest when you're carrying too many items with you. -";
@@ -13567,8 +13567,8 @@ OnTouch:
 	next;
 	specialeffect EF_BEGINSPELL2,AREA,"Dandelion Member#moc2_1";
 	specialeffect EF_BEGINSPELL2,AREA,"Dandelion Member#moc2_2";
-	emotion e_gasp,"Rin#moc2_bt_rin01";
-	emotion e_gasp,1;
+	emotion e_gasp,getnpcid(0,"Rin#moc2_bt_rin01");
+	emotion e_gasp,playerattached();
 	mes "[Rin]";
 	mes "You're not alone. So what?";
 	mes "You're still coming with me!";
@@ -13991,7 +13991,7 @@ que_dan02,102,42,3	script	Disfigured Corpse#moc2	457,{
 }
 
 // Ash-Vacuum Warper :: gogoash
-//============================================================ 
+//============================================================
 /*
 // Event NPC, now disabled on official servers.
 prontera,161,192,5	script	Ash-Vacuum Warper	707,{
@@ -14021,9 +14021,9 @@ prontera,161,192,5	script	Ash-Vacuum Warper	707,{
 }
 */
 
-//============================================================ 
+//============================================================
 // Old changelog
-//============================================================ 
+//============================================================
 //= 1.0 First Version. [L0ne_W0lf]
 //= 1.1 I missed an end in one of the lhz guards. [L0ne_W0lf]
 //= 1.2 Fixed missing ends, wrong label and some typos [Gepard]

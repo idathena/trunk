@@ -731,7 +731,7 @@ brasilis,203,64,3	script	Strange Kid#bra	4_M_KID1,{
 		mes "["+strcharinfo(0)+"]";
 		mes "Oops, guarana berry?";
 		mes "Ah! Thank you very much!";
-		emotion e_kis2,1;
+		emotion e_kis2,playerattached();
 		emotion e_heh;
 		next;
 		mes "["+strcharinfo(0)+"]";
@@ -880,7 +880,7 @@ OnTouch_:
 		mes "Somewhere, a human!";
 		mes "I got it. You are!!!";
 		specialeffect EF_HIT1,AREA,"Jaguar#bra";
-		emotion e_omg,1;
+		emotion e_omg,playerattached();
 		next;
 		mes "[Jaguar]";
 		mes "Don't be afraid human.";
@@ -1309,7 +1309,7 @@ brasilis,270,145,5	script	Brasilis Girl#bra	4_F_BRZ_INDIAN,5,5,{
 		mes "[Jasira]";
 		mes "Cuz' Jasi is really gorgeous and the most important thing is he is taking care of the water lily in Brasilis.";
 		next;
-		emotion e_omg,1;
+		emotion e_omg,playerattached();
 		mes "["+strcharinfo(0)+"]";
 		mes "Brasilis water lily??!!";
 		mes "Isn't it the uniqe flower?";
@@ -1667,7 +1667,7 @@ bra_dun02,71,200,3	script	Water lily#bra	HIDDEN_NPC,{
 		mes "[Jasi]";
 		mes "It makes me miss my childhood.";
 		next;
-		emotion e_omg,0,"Recluse#bra";
+		emotion e_omg,getnpcid(0,"Recluse#bra");
 		mes "[Jasi]";
 		mes "Hoho!!!!";
 		mes "I've been here for as long as I can remember...";
@@ -1844,7 +1844,7 @@ brasilis,185,246,5	script	Pedro#bra	1_M_SIZ,{
 		mes "[Pedro]";
 		mes "What else are we supposed to do? If we don't do it someone else will.";
 		next;
-		emotion e_an,0,"Mariana#bra";
+		emotion e_an,getnpcid(0,"Mariana#bra");
 		mes "[Mariana]";
 		mes "Argh~ Boys are so frustrating sometimes.";
 		next;
@@ -2377,7 +2377,7 @@ bra_in01,151,180,3	script	Mirror#bra	CLEAR_NPC,{
 					mes "Behind you...";
 					enablenpc "Ghost#bra";
 					next;
-					emotion e_omg,1;
+					emotion e_omg,playerattached();
 					mes "["+strcharinfo(0)+"]";
 					mes "The stories about the ghost are true~!";
 					next;
@@ -2406,8 +2406,8 @@ bra_in01,151,180,3	script	Mirror#bra	CLEAR_NPC,{
 							.@cpudice = rand(1,6);
 							.@pcdice = rand(1,6);
 							if (.@cpudice != .@pcdice) {
-								emotion (57+.@cpudice),0,"Ghost#bra";
-								emotion (57+.@cpudice),1;
+								emotion (e_otl+.@cpudice),getnpcid(0,"Ghost#bra");
+								emotion (e_otl+.@cpudice),playerattached();
 								break;
 							}
 						}
@@ -2424,7 +2424,7 @@ bra_in01,151,180,3	script	Mirror#bra	CLEAR_NPC,{
 							end;
 						}
 						else {
-							emotion e_bzz,1;
+							emotion e_bzz,playerattached();
 							mes "[Ghost]";
 							mes "^FF0000Ahh!^000000";
 							mes "The Ghost disappeared into the toilet.";

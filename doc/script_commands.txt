@@ -7569,7 +7569,7 @@ must be used.
 
 ---------------------------------------
 
-*emotion <emotion number>{,<target>{,"<target name>"}};
+*emotion <emotion number>{,<target>};
 
 This command makes an object display an emotion sprite above their own as 
 if they were doing that emotion. For a full list of emotion numbers, see
@@ -7577,11 +7577,7 @@ if they were doing that emotion. For a full list of emotion numbers, see
 'e_what' (a question mark) and 'e_gasp' (the exclamation mark).
 
 The optional target parameter specifies who will get the emotion on top of
-their head. If 0 (the default if omitted), the NPC in current use will show
-the emotion, if 1, the player that is running the script will display it.
-
-Target name parameter allows to display emotion on top of other NPC/PC without
-event labels. If specified name is not found, command does nothing.
+their head. Use the target Game ID (GID).
 
 ---------------------------------------
 
@@ -7816,13 +7812,6 @@ The display name of the <GID> won't get appended in front of the message.
 flag: Specify target
    bc_area - Message is sent to players in the vicinity of the source (default).
    bc_self - Message is sent only to player attached.
-
----------------------------------------
-
-*unitemote <GID>,<emotion number>;
-
-This command will make a <GID> display an emotion sprite.
-For a full list of emotion numbers, see 'db/const.txt' under 'e_'.
 
 ---------------------------------------
 

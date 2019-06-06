@@ -1,5 +1,5 @@
 //===== rAthena Script ======================================= 
-//= Guild Warehouse Manager
+//= Storage Keeper
 //===== By: ==================================================
 //= Lemongrass
 //===== Current Version: =====================================
@@ -7,42 +7,42 @@
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: =========================================
-//= [Walkthrough Conversion]
+//= [Official Conversion]
 //= Gives players access to their guild storage and log.
 //===== Additional Comments: =================================
-//= 1.0 First version.
+//= 1.0 First version, edited. [exneval]
 //============================================================
 
--	script	GuildWarehouse	-1,{
-	mes "[Warehouse Manager]";
-	mes "How are you? We are specialized in guild warehouses. This is our ^0000cdstory^000000:";
-	mes "Why can't guild members share a storage? We started off with that simple question.";
+-	script	StorageKeeper	-1,{
+	mes "[Storage Keeper]";
+	mes "Hello! I am a ^0000cdGuild Storage^000000 specialist.";
+	mes "Would you like to use shared storage space between Guild Members?";
 	next;
-	mes "[Warehouse Manager]";
-	mes "You can open the warehouse for 1000 Zeny or look up the usage history of the guild.";
-	mes "How can I help you?";
+	mes "[Storage Keeper]";
+	mes "You can open Guild Storage for 1000z or check the Guild Storage logs.";
+	mes "How may I help you?";
 	next;
 	.@guildid = getcharid(2);
-	if (select("Open guild warehouse:View warehouse usage history") == 1) {
+	if (select("Open storage:Check the storage logs") == 1) {
 		if (!.@guildid) {
-			mes "[Warehouse Manager]";
-			mes "The guild storage is only available for guild members.";
+			mes "[Storage Keeper]";
+			mes "Guild storage is only for players currently in a guild.";
 			close;
 		}
 		if (!getgdskilllv(.@guildid,"GD_GUILD_STORAGE") || !guild_has_permission(GUILD_PERM_STORAGE)) {
-			mes "[Warehouse Manager]";
-			mes "It seems that it is not yet possible for your guild to use the guild warehouse or you do not have access permissions for the warehouse.";
-			mes "Please come back after checking the guild skill and the permission to access the warehouse.";
+			mes "[Storage Keeper]";
+			mes "Your guild does not have the Guild Storage skill.";
+			mes "Please check your guild skill or storage authority.";
 			close;
 		}
 		if (Zeny < 1000) {
-			mes "[Warehouse Manager]";
+			mes "[Storage Keeper]";
 			mes "I am afraid you do not have enough money to settle the fee.";
-			mes "The fee is 1000 Zeny.";
+			mes "The fee is 1000z.";
 			close;
 		}
-		mes "[Warehouse Manager]";
-		mes "I will open the guild storage for you then. Have a memorable time!";
+		mes "[Storage Keeper]";
+		mes "I will open guild storage for you then. Have a great time!";
 		close2;
 		if (Zeny < 1000)
 			end; //Cheat prevention
@@ -50,56 +50,56 @@
 			Zeny -= 1000;
 			end;
 		} else {
-			mes "[Warehouse Manager]";
-			mes "I am afraid someone else is using the warehouse right now.";
+			mes "[Storage Keeper]";
+			mes "I am afraid someone else is using the storage right now.";
 			mes "Please try again after a while.";
 			close;
 		}
 	} else {
 		if (!.@guildid) {
-			mes "[Warehouse Manager]";
-			mes "The guild storage is only available for guild members.";
+			mes "[Storage Keeper]";
+			mes "Guild storage is only for players currently in a guild.";
 			close;
 		}
 		if (!getgdskilllv(.@guildid,"GD_GUILD_STORAGE") || !guild_has_permission(GUILD_PERM_STORAGE)) {
-			mes "[Warehouse Manager]";
-			mes "It seems that it is not yet possible for your guild to use the guild warehouse or you do not have access permissions for the warehouse.";
-			mes "Please come back after checking the guild skill and the permission to access the warehouse.";
+			mes "[Storage Keeper]";
+			mes "Your guild does not have the Guild Storage skill.";
+			mes "Please check your guild skill or storage authority.";
 			close;
 		}
-		mes "[Warehouse Manager]";
-		mes "I will show you the usage history of the warehouse. Usage history will be retained for up to 3 months.";
-		mes "Have a memorable time!";
+		mes "[Storage Keeper]";
+		mes "I will show you guild storage logs. Logs will be retained for up to 3 months.";
+		mes "Have a great time!";
 		close2;
 		guildopenstorage_log();
 		end;
 	}
 }
 
-alberta,114,65,5	duplicate(GuildWarehouse)	Guild Warehouse Manager::alberta	4_M_HUBOY
-aldebaran,146,122,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::aldebaran	4_M_HUBOY
-amatsu,100,156,5	duplicate(GuildWarehouse)	Guild Warehouse Manager::amatsu	4_M_HUBOY
-ayothaya,203,173,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::ayothaya	4_M_HUBOY
-brasilis,204,227,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::brasilis	4_M_HUBOY
-comodo,204,153,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::comodo	4_M_HUBOY
-dewata,196,193,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::dewata	4_M_HUBOY
-einbech,182,124,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::einbech	4_M_HUBOY
-einbroch,238,203,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::einbroch	4_M_HUBOY
-geffen,128,68,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::geffen	4_M_HUBOY
-gonryun,164,127,5	duplicate(GuildWarehouse)	Guild Warehouse Manager::gonryun	4_M_HUBOY
-harboro1,288,212,5	duplicate(GuildWarehouse)	Guild Warehouse Manager::harboro1	4_M_HUBOY
-hugel,91,158,5	duplicate(GuildWarehouse)	Guild Warehouse Manager::hugel	4_M_HUBOY
-izlude,133,149,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::izlude	4_M_HUBOY
-lighthalzen,162,102,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::lighthalzen	4_M_HUBOY
-louyang,210,111,5	duplicate(GuildWarehouse)	Guild Warehouse Manager::louyang	4_M_HUBOY
-malaya,238,206,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::malaya	4_M_HUBOY
-morocc,168,107,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::morocc	4_M_HUBOY
-moscovia,211,200,5	duplicate(GuildWarehouse)	Guild Warehouse Manager::moscovia	4_M_HUBOY
-niflheim,200,184,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::niflheim	4_M_HUBOY
-payon,180,106,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::payon	4_M_HUBOY
-prontera,150,191,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::prontera	4_M_HUBOY
-rachel,123,145,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::rachel	4_M_HUBOY
-umbala,106,160,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::umbala	4_M_HUBOY
-veins,205,130,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::veins	4_M_HUBOY
-xmas,155,140,5	duplicate(GuildWarehouse)	Guild Warehouse Manager::xmas	4_M_HUBOY
-yuno,176,187,3	duplicate(GuildWarehouse)	Guild Warehouse Manager::yuno	4_M_HUBOY
+alberta,114,65,5	duplicate(StorageKeeper)	Storage Keeper#alberta	4_M_HUBOY
+aldebaran,146,122,3	duplicate(StorageKeeper)	Storage Keeper#aldebaran	4_M_HUBOY
+amatsu,100,156,5	duplicate(StorageKeeper)	Storage Keeper#amatsu	4_M_HUBOY
+ayothaya,203,173,3	duplicate(StorageKeeper)	Storage Keeper#ayothaya	4_M_HUBOY
+brasilis,204,227,3	duplicate(StorageKeeper)	Storage Keeper#brasilis	4_M_HUBOY
+comodo,204,153,3	duplicate(StorageKeeper)	Storage Keeper#comodo	4_M_HUBOY
+dewata,196,193,3	duplicate(StorageKeeper)	Storage Keeper#dewata	4_M_HUBOY
+einbech,182,124,3	duplicate(StorageKeeper)	Storage Keeper#einbech	4_M_HUBOY
+einbroch,238,203,3	duplicate(StorageKeeper)	Storage Keeper#einbroch	4_M_HUBOY
+geffen,128,68,3	duplicate(StorageKeeper)	Storage Keeper#geffen	4_M_HUBOY
+gonryun,164,127,5	duplicate(StorageKeeper)	Storage Keeper#gonryun	4_M_HUBOY
+harboro1,288,212,5	duplicate(StorageKeeper)	Storage Keeper#harboro1	4_M_HUBOY
+hugel,91,158,5	duplicate(StorageKeeper)	Storage Keeper#hugel	4_M_HUBOY
+izlude,133,149,3	duplicate(StorageKeeper)	Storage Keeper#izlude	4_M_HUBOY
+lighthalzen,162,102,3	duplicate(StorageKeeper)	Storage Keeper#lighthalzen	4_M_HUBOY
+louyang,210,111,5	duplicate(StorageKeeper)	Storage Keeper#louyang	4_M_HUBOY
+malaya,238,206,3	duplicate(StorageKeeper)	Storage Keeper#malaya	4_M_HUBOY
+morocc,168,107,3	duplicate(StorageKeeper)	Storage Keeper#morocc	4_M_HUBOY
+moscovia,211,200,5	duplicate(StorageKeeper)	Storage Keeper#moscovia	4_M_HUBOY
+niflheim,200,184,3	duplicate(StorageKeeper)	Storage Keeper#niflheim	4_M_HUBOY
+payon,180,106,3	duplicate(StorageKeeper)	Storage Keeper#payon	4_M_HUBOY
+prontera,150,191,3	duplicate(StorageKeeper)	Storage Keeper#prontera	4_M_HUBOY
+rachel,123,145,3	duplicate(StorageKeeper)	Storage Keeper#rachel	4_M_HUBOY
+umbala,106,160,3	duplicate(StorageKeeper)	Storage Keeper#umbala	4_M_HUBOY
+veins,205,130,3	duplicate(StorageKeeper)	Storage Keeper#veins	4_M_HUBOY
+xmas,155,140,5	duplicate(StorageKeeper)	Storage Keeper#xmas	4_M_HUBOY
+yuno,176,187,3	duplicate(StorageKeeper)	Storage Keeper#yuno	4_M_HUBOY

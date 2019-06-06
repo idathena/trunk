@@ -33,7 +33,7 @@
 //= 1.7 Added daily quest 'Dragon Egg collection.'
 //= 1.7a Fixed a translation typo. Tabb -> Taab.
 //= 1.8 Added a missing " in the GM only NPC.
-//= 1.9 Added Monster Suppression, Bradium Collection, and 
+//= 1.9 Added Monster Suppression, Bradium Collection, and
 //=     Laphine Craftsman quests.
 //= 2.0 Added missing global var check in Yggdrasil Dungeon
 //=     floor 2 puzzle. Fixed a typo. Commented out untranslated
@@ -49,10 +49,10 @@
 //= 2.7 Updated RE/Pre-RE EXP. [Euphy]
 //= 2.7a Added Izlude RE coordinates. [Euphy]
 //= 2.8 Added GM management function. [Euphy]
-//============================================================ 
+//============================================================
 
 // Cat Hand Addition :: cat_enhance
-//============================================================ 
+//============================================================
 spl_fild02,25,211,4	script	Cat Hand Agent#spl	421,{
 	function Catwarp;
 	if (ep13_yong1 < 3) {
@@ -3402,7 +3402,7 @@ OnReset:
 	end;
 
 OnTouch:
-	emotion e_gasp,1;
+	emotion e_gasp,playerattached();
 	emotion e_omg;
 	disablenpc "Stranger#ep13_2_dan01";
 	donpcevent "Stranger#ep13_2_dan02::OnCall";
@@ -3430,7 +3430,7 @@ OnReset:
 	end;
 
 OnTouch:
-	emotion e_gasp,1;
+	emotion e_gasp,playerattached();
 	emotion e_omg;
 	disablenpc "Stranger#ep13_2_dan02";
 	donpcevent "Stranger#ep13_2_dan01::OnCall";
@@ -3466,7 +3466,7 @@ OnTimer300000:
 }
 
 // Otherworld language :: ep13_2_rhea
-//============================================================ 
+//============================================================
 mid_camp,197,237,3	script	Schwartzvalt Mechanic#1	869,{
 	if (ep13_1_edq > 2 || ep13_start == 100) {
 		if (ep13_2_rhea < 1) {
@@ -4600,7 +4600,7 @@ mid_camp,7,3,0	script	Translator Preparation#1	708,{
 // Daily Quests :: ep13_2_tre
 // - Midgard Ore
 // - Alfheim Perfume
-//============================================================ 
+//============================================================
 man_in01,372,221,5	script	Scientist#lifeguard	449,{
 	if ((isequipped(2782) == 1) && (ep13_2_rhea == 100)) {
 		mes "[Dr. Lifeguard]";
@@ -4849,7 +4849,7 @@ mjolnir_12,220,37,0	duplicate(mjo_no_find)	#mj12_find_3	-1,5,5
 				}
 				else {
 					mes "- You succeeded to mine minerals. -";
-					emotion e_ic,1;
+					emotion e_ic,playerattached();
 					set .@stst,rand(1,5);
 					if (.@stst == 5) getitem 6077,5; //Rough_Mineral
 					else if (.@stst == 1) getitem 6077,1; //Rough_Mineral
@@ -5200,7 +5200,7 @@ OnTouch:
 				}
 				else {
 					mes "- You succeeded to mine minerals. -";
-					emotion e_ic,1;
+					emotion e_ic,playerattached();
 					set .@stst,rand(1,5);
 					if (.@stst == 5) getitem 6077,5; //Rough_Mineral
 					else if (.@stst == 1) getitem 6077,2; //Rough_Mineral
@@ -5333,7 +5333,7 @@ OnTouch:
 				}
 				else {
 					mes "- You succeeded to mine minerals. -";
-					emotion e_ic,1;
+					emotion e_ic,playerattached();
 					set .@stst,rand(1,5);
 					if (.@stst == 5) getitem 6077,5; //Rough_Mineral
 					else if (.@stst == 1) getitem 6077,2; //Rough_Mineral
@@ -5518,7 +5518,7 @@ spl_in01,30,324,3	script	High Laphine#grenouille	446,{
 			else if (ep13_2_tre1 == 3) {
 				if (countitem(6079) == 1) {
 					emotion e_swt;
-					emotion e_swt,1;
+					emotion e_swt,playerattached();
 					mes "[Grenouille]";
 					mes "Hoo, this is one of the";
 					mes "most common kinds of flowers.";
@@ -5716,7 +5716,7 @@ spl_in02,139,65,3	script	Middle-Ranked Laphine#la	438,{
 			mes "Can you believe that right in front of us is a battle field? Though it's very silent and peaceful at the moment. So do I~";
 			close;
 		}
-		
+
 	}
 	else {
 		mes "[Middle-Ranked Laphine]";
@@ -6178,7 +6178,7 @@ OnTimer60000:
 }
 
 // Secret note of Bazett :: ep13_2_dailybs
-//============================================================ 
+//============================================================
 mid_camp,283,198,5	script	Bazett Teablack#ep13bs	883,{
 	if (checkweight(1201,1) == 0) {
 		mes "- Wait a minute!! -";
@@ -6201,7 +6201,7 @@ mid_camp,283,198,5	script	Bazett Teablack#ep13bs	883,{
 		mes "Hu~~";
 		mes "That's pretty interesting...";
 		mes "I will take note of it in my research papers.";
-		emotion e_ic,"Bazett Teablack#ep13bs";
+		emotion e_ic,getnpcid(0,"Bazett Teablack#ep13bs");
 		next;
 		mes "[Industrious Man]";
 		mes "write...write...";
@@ -6221,7 +6221,7 @@ mid_camp,283,198,5	script	Bazett Teablack#ep13bs	883,{
 			mes "Hu~~";
 			mes "That's pretty interesting...";
 			mes "I will take note of it in my research papers.";
-			emotion e_ic,"Bazett Teablack#ep13bs";
+			emotion e_ic,getnpcid(0,"Bazett Teablack#ep13bs");
 			next;
 			mes "[Industrious Man]";
 			mes "write...write...";
@@ -6238,7 +6238,7 @@ mid_camp,283,198,5	script	Bazett Teablack#ep13bs	883,{
 			mes "Auch!!!";
 			mes "Who...who are you?!";
 			mes "How long have you been standing there?";
-			emotion e_omg,"Bazett Teablack#ep13bs";
+			emotion e_omg,getnpcid(0,"Bazett Teablack#ep13bs");
 			next;
 			mes "["+strcharinfo(0)+"]";
 			mes "Uh, I'm just passing by.";
@@ -6246,7 +6246,7 @@ mid_camp,283,198,5	script	Bazett Teablack#ep13bs	883,{
 			next;
 			mes "["+strcharinfo(0)+"]";
 			mes "See you~!!";
-			emotion e_swt2,1;
+			emotion e_swt2,playerattached();
 			next;
 			mes "[Industrious Man]";
 			mes "Uh!! Wait!!";
@@ -6260,12 +6260,12 @@ mid_camp,283,198,5	script	Bazett Teablack#ep13bs	883,{
 			next;
 			mes "[Industrious Man]";
 			mes "My research is not going so well. The god of fate must have sent you to me. I'm sure of it!!";
-			emotion e_no1,"Bazett Teablack#ep13bs";
+			emotion e_no1,getnpcid(0,"Bazett Teablack#ep13bs");
 			next;
 			mes "["+strcharinfo(0)+"]";
 			mes "......";
 			mes "......What?!";
-			emotion e_omg,1;
+			emotion e_omg,playerattached();
 			next;
 			mes "[Industrious Man]";
 			mes "Would you like to help me with my search?";
@@ -6317,7 +6317,7 @@ mid_camp,283,198,5	script	Bazett Teablack#ep13bs	883,{
 					mes ".............";
 					mes ".............";
 					mes "...........Why!!!!!";
-					emotion e_sob,"Bazett Teablack#ep13bs";
+					emotion e_sob,getnpcid(0,"Bazett Teablack#ep13bs");
 					next;
 					mes "[Industrious Man]";
 					mes "Well if you decide to change your mind, come back to me.";
@@ -6376,7 +6376,7 @@ mid_camp,283,198,5	script	Bazett Teablack#ep13bs	883,{
 				mes ".............";
 				mes ".............";
 				mes "...........Why!!!!!";
-				emotion e_sob,"Bazett Teablack#ep13bs";
+				emotion e_sob,getnpcid(0,"Bazett Teablack#ep13bs");
 				next;
 				mes "[Industrious Man]";
 				mes "Well if you decide to change your mind, come back to me.";
@@ -6463,7 +6463,7 @@ mid_camp,283,198,5	script	Bazett Teablack#ep13bs	883,{
 			mes "[Industrious Man]";
 			mes ".............";
 			mes "Well if you decide to change your mind, come back to me.";
-			emotion e_sob,"Bazett Teablack#ep13bs";
+			emotion e_sob,getnpcid(0,"Bazett Teablack#ep13bs");
 			close;
 		}
 	}
@@ -6602,7 +6602,7 @@ manuk,193,135,0	script	Worker#ep13bs	454,{
 				mes "......";
 				mes ".........";
 				mes "Nothing!!";
-				emotion e_omg,"Worker#ep13bs";
+				emotion e_omg,getnpcid(0,"Worker#ep13bs");
 				next;
 				mes "["+strcharinfo(0)+"]";
 				mes "What's up?";
@@ -6614,7 +6614,7 @@ manuk,193,135,0	script	Worker#ep13bs	454,{
 				next;
 				mes "["+strcharinfo(0)+"]";
 				mes "Yes, sorry to startle you.";
-				emotion e_heh,1;
+				emotion e_heh,playerattached();
 				next;
 				mes "[Worker]";
 				mes "Haha, it's ok.";
@@ -6657,8 +6657,8 @@ manuk,193,135,0	script	Worker#ep13bs	454,{
 				mes "[Worker]";
 				mes "Ugh!!!";
 				mes "**Sigh**";
-				emotion e_sob,"Worker#ep13bs";
-				emotion e_sob,1;
+				emotion e_sob,getnpcid(0,"Worker#ep13bs");
+				emotion e_sob,playerattached();
 				next;
 				mes "[Worker]";
 				mes "Well that's that!";
@@ -6721,7 +6721,7 @@ manuk,193,135,0	script	Worker#ep13bs	454,{
 				mes "......";
 				mes ".........";
 				mes "Nevermind. Nothing.";
-				emotion e_omg,"Worker#ep13bs";
+				emotion e_omg,getnpcid(0,"Worker#ep13bs");
 				next;
 				mes "["+strcharinfo(0)+"]";
 				mes "You don't have to be like this.";
@@ -6733,7 +6733,7 @@ manuk,193,135,0	script	Worker#ep13bs	454,{
 				next;
 				mes "["+strcharinfo(0)+"]";
 				mes "Since I'm travelling here, so I thought I'd need it...";
-				emotion e_heh,1," ET_SMILE";
+				emotion e_heh,playerattached();
 				next;
 				mes "[Worker]";
 				mes "Haha, is that so?";
@@ -6770,23 +6770,23 @@ manuk,193,135,0	script	Worker#ep13bs	454,{
 				mes "No, it's alright. We just met, so I don't want to trouble you.";
 				next;
 				mes "["+strcharinfo(0)+"]";
-				mes "Don't worry about it! Life is all about helping eachother, don't you think so?";
+				mes "Don't worry about it! Life is all about helping each other, don't you think so?";
 				next;
 				mes " - While the disagreement is taking place, - ";
-				mes " - The screw that has held its ground til now - ";
+				mes " - The screw that has held its ground till now - ";
 				mes " - Finally gives in and breaks in half. - ";
 				next;
 				mes "[Worker]";
 				mes "Ah!!!";
-				emotion e_sob,"Worker#ep13bs";
-				emotion e_sob,1;
+				emotion e_sob,getnpcid(0,"Worker#ep13bs");
+				emotion e_sob,playerattached();
 				next;
 				mes "[Worker]";
 				mes "I can't just care about pride now.";
 				mes "Let me introduce myself, I am ^0000FFGill^000000.";
 				next;
 				mes "[Gill]";
-				mes "I need a screw to stablize our tent, and it can be found from the ^0000FFHillslion^000000 monster.";
+				mes "I need a screw to stabilize our tent, and it can be found from the ^0000FFHillslion^000000 monster.";
 				mes "Please help me collect ^0000FF30 Horns of Hillslion^000000, and that should be enough for now.";
 				next;
 				mes "[Gill]";
@@ -6852,7 +6852,7 @@ manuk,193,135,0	script	Worker#ep13bs	454,{
 }
 
 // Yggdrasil Dungeon Floor 2 puzzle :: ny_dun02_puzzle
-//============================================================ 
+//============================================================
 nyd_dun02,178,255,0	script	Strange Device#ep13_out	844,3,3,{
 	mes "There's something strange here.";
 	mes "Maybe that device can be controlled from here.";

@@ -53,7 +53,7 @@ comodo,171,137,1	script	Haith#um	92,{
 	mes "would tell us about such a";
 	mes "great treasure so easily?";
 	emotion e_hmm;
-	emotion e_hmm,0,"La Ed#um";
+	emotion e_hmm,getnpcid(0,"La Ed#um");
 	next;
 	select("Hm? What treasure?");
 	mes "[La Ed]";
@@ -74,7 +74,7 @@ comodo,171,137,1	script	Haith#um	92,{
 	mes "[La Ed, Haith]";
 	mes "If you pay us 1,000 zeny, we will tell you!";
 	emotion e_gg;
-	emotion e_gg,0,"La Ed#um";
+	emotion e_gg,getnpcid(0,"La Ed#um");
 	next;
 	if (select("Pay 1,000 zeny:Refuse to pay") == 1) {
 		if (Zeny > 999) {

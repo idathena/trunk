@@ -12165,40 +12165,26 @@ BUILDIN_FUNC(gvgoff3)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/*==========================================
- *	Shows an emoticon on top of the player/npc
- *	emotion emotion#, <target: 0 - NPC, 1 - PC>, <NPC/PC name>
- *------------------------------------------*/
-//Optional second parameter added by [Skotlex]
+/**
+ * Shows an emotion on top of a NPC by default or the given GID
+ * emotion <emotion ID>{,<target ID>};
+ */
 BUILDIN_FUNC(emotion)
 {
-	int type;
-	int player = 0;
+	struct block_list *bl = NULL;
+	int type = script_getnum(st,2);
 
-	type = script_getnum(st,2);
-	if(type < 0 || type > 100)
-		return 0;
-
-	if(script_hasdata(st,3))
-		player = script_getnum(st,3);
-
-	if(player) {
-		TBL_PC *sd = NULL;
-
-		if(script_hasdata(st,4))
-			sd = map_nick2sd(script_getstr(st,4));
-		else
-			sd = script_rid2sd(st);
-		if(sd)
-			clif_emotion(&sd->bl,type);
-	} else
-		if(script_hasdata(st,4)) {
-			TBL_NPC *nd = npc_name2id(script_getstr(st,4));
-
-			if(nd)
-				clif_emotion(&nd->bl,type);
-		} else
-			clif_emotion(map_id2bl(st->oid),type);
+	if(type < E_GASP || type > E_MAX) {
+		ShowWarning("buildin_emotion: Unknown emotion %d (min=%d, max=%d).\n", type, E_GASP, (E_MAX - 1));
+		return 1;
+	}
+	if(script_hasdata(st,3) && !script_rid2bl(3,bl)) {
+		ShowWarning("buildin_emotion: Unknown game ID supplied %d.\n", script_getnum(st,3));
+		return 1;
+	}
+	if(!bl)
+		bl = map_id2bl(st->oid);
+	clif_emotion(bl,type);
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -18173,24 +18159,6 @@ BUILDIN_FUNC(unittalk)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-/// Makes the unit do an emotion
-///
-/// unitemote <unit_id>,<emotion>;
-///
-/// @see e_* in db/const.txt
-BUILDIN_FUNC(unitemote)
-{
-	int emotion;
-	struct block_list *bl = NULL;
-
-	emotion = script_getnum(st,3);
-
-	if( script_rid2bl(2,bl) )
-		clif_emotion(bl, emotion);
-
-	return SCRIPT_CMD_SUCCESS;
-}
-
 /// Makes the unit cast the skill on the target or self if no target is specified
 ///
 /// unitskilluseid <unit_id>,<skill_id>,<skill_lv>{,<target_id>,<casttime>};
@@ -23457,7 +23425,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(pvpoff,"s"),
 	BUILDIN_DEF(gvgon,"s"),
 	BUILDIN_DEF(gvgoff,"s"),
-	BUILDIN_DEF(emotion,"i??"),
+	BUILDIN_DEF(emotion,"i?"),
 	BUILDIN_DEF(maprespawnguildid,"sii"),
 	BUILDIN_DEF(agitstart,""),	// <Agit>
 	BUILDIN_DEF(agitend,""),
@@ -23638,7 +23606,6 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(unitstopwalk,"i?"),
 	BUILDIN_DEF2(pcblockmove,"unitblockmove","ii"),
 	BUILDIN_DEF(unittalk,"is?"),
-	BUILDIN_DEF(unitemote,"ii"),
 	BUILDIN_DEF(unitskilluseid,"ivi??"), //Originally by Qamera [Celest]
 	BUILDIN_DEF(unitskillusepos,"ivi???"), //[Celest]
 	BUILDIN_DEF(unitexist,"i"),

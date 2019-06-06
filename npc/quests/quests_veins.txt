@@ -1,14 +1,14 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Veins Quests
-//===== By: ================================================== 
+//===== By: ==================================================
 //= L0ne_W0lf
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 2.5
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
-//= Collection of Veins Quests 
+//= Collection of Veins Quests
 //= Stone Quest:
 //= - Help an Old Man with his job.
 //= - Dialog obtained from iRO.
@@ -25,7 +25,7 @@
 //= - Missing addition to High Priest Zhed to start quest.
 //= - Infiltrate Thor Volcano Base. What is Arunafeltz up to?
 //= - Variable in use: rachel_camel (max 27)
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First version, Added Veins Stone quest. [L0ne_W0lf]
 //= 1.1 Added Veins Spy Quest. [L0ne_W0lf]
 //= 1.2 Added Veins Siblings Quest. [L0ne_W0lf]
@@ -49,10 +49,10 @@
 //= 2.3 Fixed incorrect use of 'close'. [Joseph]
 //= 2.4 Updated RE/Pre-RE EXP. [Euphy]
 //= 2.5 Added GM management NPC. [Euphy]
-//============================================================ 
+//============================================================
 
 // Stone Quest :: veins_stone
-//============================================================ 
+//============================================================
 -	script	::WincingOldMan_veins	-1,{
 	if ((MaxWeight - Weight) < 2000 || checkweight(1201,1) == 0) {
 		mes "- Wait a moment! -";
@@ -644,7 +644,7 @@ ve_in02,68,39,7	script	Factory Worker#ve2	943,{
 }
 
 // Spy Quest :: veins_secret
-//============================================================ 
+//============================================================
 prontera,202,122,0	script	Kid#sch	703,{
 	if (que_sch == 0) {
 		mes "[Rooney]";
@@ -2665,7 +2665,7 @@ sec_in02,10,43,4	script	Extra Story Patch	809,{
 }
 
 // Siblings Quest :: veins_camel
-//============================================================ 
+//============================================================
 veins,327,185,3	script	Kid#camelcamel	944,{
 	if (MISC_QUEST & 8192) {
 		if (rachel_camel == 0) {
@@ -5074,7 +5074,7 @@ veins,221,120,5	script	Young Town Native	943,{
 }
 
 // Thor Volcano Base Quest :: veins_camp
-//============================================================ 
+//============================================================
 ra_temin,87,133,1	script	Rachel Guard#vol1	934,5,2,{
 	if (aru_vol == 2) {
 		mes "[Guard Karlum]";
@@ -5626,8 +5626,8 @@ ve_in,233,116,3	script	Drunken Man#vol	901,{
 		mes "Hahahaha! Guess I look";
 		mes "pretty tough, don't I?";
 		next;
-		emotion e_lv,0,"Drunken Lady#1";
-		emotion e_lv,0,"Drunken Lady#2";
+		emotion e_lv,getnpcid(0,"Drunken Lady#1");
+		emotion e_lv,getnpcid(0,"Drunken Lady#2");
 		mes "[Ladies]";
 		mes "Oh, my God!";
 		mes "You're so cool~!";
@@ -5656,8 +5656,8 @@ ve_in,233,116,3	script	Drunken Man#vol	901,{
 		mes "Hahahaha! Guess I look";
 		mes "pretty tough, don't I?";
 		next;
-		emotion e_lv,0,"Drunken Lady#1";
-		emotion e_lv,0,"Drunken Lady#2";
+		emotion e_lv,getnpcid(0,"Drunken Lady#1");
+		emotion e_lv,getnpcid(0,"Drunken Lady#2");
 		mes "[Ladies]";
 		mes "Oh, my God!";
 		mes "You're so cool~!";
@@ -5724,8 +5724,8 @@ ve_in,233,116,3	script	Drunken Man#vol	901,{
 		mes "but duty calls.";
 		mes "Hahahahahahha~";
 		next;
-		emotion e_lv,0,"Drunken Lady#1";
-		emotion e_lv,0,"Drunken Lady#2";
+		emotion e_lv,getnpcid(0,"Drunken Lady#1");
+		emotion e_lv,getnpcid(0,"Drunken Lady#2");
 		mes "[Ladies]";
 		mes "Please don't go~";
 		next;
@@ -5809,8 +5809,8 @@ ve_in,233,116,3	script	Drunken Man#vol	901,{
 		mes "I should stay here and";
 		mes "entreat them to a lecture.";
 		next;
-		emotion e_lv,0,"Drunken Lady#1";
-		emotion e_lv,0,"Drunken Lady#2";
+		emotion e_lv,getnpcid(0,"Drunken Lady#1");
+		emotion e_lv,getnpcid(0,"Drunken Lady#2");
 		mes "[Ladies]";
 		mes "Oh~! You'll really";
 		mes "teach us geology?";
@@ -5982,8 +5982,8 @@ ve_in,233,116,3	script	Drunken Man#vol	901,{
 	mes "Hahahaha! Guess I look";
 	mes "pretty tough, don't I?";
 	next;
-	emotion e_lv,0,"Drunken Lady#1";
-	emotion e_lv,0,"Drunken Lady#2";
+	emotion e_lv,getnpcid(0,"Drunken Lady#1");
+	emotion e_lv,getnpcid(0,"Drunken Lady#2");
 	mes "[Ladies]";
 	mes "Oh, my God!";
 	mes "You're so cool~!";
@@ -6342,7 +6342,7 @@ thor_camp,250,104,3	script	Sahedi#vol	934,{
 		mes "like this in the past, but...";
 		mes "Is this... How bad is this?";
 		next;
-		emotion e_swt2,1;
+		emotion e_swt2,playerattached();
 		mes "["+strcharinfo(0)+"]";
 		mes "Oh... Oh, no!";
 		mes "Yikes! I guess if it's";
@@ -6433,7 +6433,7 @@ thor_camp,250,104,3	script	Sahedi#vol	934,{
 		mes "It'll be a disaster, just";
 		mes "like it happened in the past!";
 		next;
-		emotion e_flash,1;
+		emotion e_flash,playerattached();
 		mes "["+strcharinfo(0)+"]";
 		mes "Yes, I agree. There's";
 		mes "a good chance of an...";
@@ -6445,7 +6445,7 @@ thor_camp,250,104,3	script	Sahedi#vol	934,{
 		mes "How much time do we";
 		mes "have to evacuate?";
 		next;
-		emotion e_flash,1;
+		emotion e_flash,playerattached();
 		mes "["+strcharinfo(0)+"]";
 		mes "Well... Uh...";
 		mes "According to my data...";
@@ -7113,7 +7113,7 @@ thor_camp,150,65,3	script	Dummy#1::VeinsDummy	111,{
 	else if (aru_vol == 20) {
 		mes "^3355FF*THUD*^000000";
 		specialeffect EF_HIT2;
-		emotion e_omg,1;
+		emotion e_omg,playerattached();
 		next;
 		mes "[Colonel Vito]";
 		mes "Soldier...";
@@ -7364,12 +7364,12 @@ ve_in,237,131,1	script	Female Customer#ve1	940,{
 	next;
 	mes "["+strcharinfo(0)+"]";
 	mes "Meee?";
-	emotion e_swt2,1;
+	emotion e_swt2,playerattached();
 	next;
 	mes "[Female Customer]";
 	mes "Mmm...";
 	mes "Not my style.";
-	emotion e_dots,1;
+	emotion e_dots,playerattached();
 	close;
 }
 

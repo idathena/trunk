@@ -1,5 +1,5 @@
 //===== rAthena Script =======================================
-//= Eden Group Quests - Mission [100-111]
+//= Eden Group Quests - Mission [100-110]
 //===== By: ==================================================
 //= Capuche
 //===== Current Version: =====================================
@@ -8,7 +8,7 @@
 //= rAthena SVN
 //===== Description: =========================================
 //= [Official Conversion]
-//= Repeatable quests for players between BaseLevel 100 - 111.
+//= Repeatable quests for players between BaseLevel 100 - 110.
 //===== Additional Comments: =================================
 //= 1.0 First version.
 //= 1.1 Added support to Para_Team_Mark_ in Eden Group. [Ragno]
@@ -117,7 +117,7 @@ moc_para01,37,95,5	script	Gelkah#1	4_F_GELKA,{
 				cutin "rote01",2;
 				mes "[Rohtert]";
 				mes "Hmm...";
-				emotion e_pif,0,"Rohtert#12";
+				emotion e_pif,getnpcid(0,"Rohtert#12");
 				next;
 				cutin "gelca01",2;
 				mes "[Gelkah]";
@@ -825,7 +825,7 @@ moc_para01,37,95,5	script	Gelkah#1	4_F_GELKA,{
 										next;
 										mes "Oh boy the look on his face was priceless!";
 										emotion e_lv2;
-										emotion e_dots,1;
+										emotion e_dots,playerattached();
 										.@exp = 180000;
 										.@jexp = 168000;
 									}
