@@ -383,7 +383,7 @@ OnTimer36000:
 	npctalk "Artie: No volunteers? Come on. Harness your motivational skills and find someone.", "Magic Scholar Artie#tnm";
 	end;
 OnTimer37000:
-	emotion e_gg, 0, "Magic Scholar Artie#tnm";
+	emotion e_gg, getnpcid(0, "Magic Scholar Artie#tnm");
 	end;
 OnTimer39000:
 	npctalk "Shep: Hello!!! Now recruiting new members to exploring the Devil's Tower!", "Historian Shep#tnm01";
@@ -412,17 +412,17 @@ OnTimer5000:
 	npctalk "A tirailleur: Next floor is the highest one... but there are so many demons...", instance_npcname("A tirailleur#tnm01");
 	end;
 OnTimer6000:
-	emotion e_dots, 0, instance_npcname("Officer Heim#heim0");
+	emotion e_dots, getnpcid(0, instance_npcname("Officer Heim#heim0"));
 	end;
 OnTimer8000:
 	npctalk "A tirailleur: It is impossible to break through with the number of our people.", instance_npcname("A tirailleur#tnm01");
-	emotion e_swt2, 0, instance_npcname("A tirailleur#tnm01");
+	emotion e_swt2, getnpcid(0, instance_npcname("A tirailleur#tnm01"));
 	end;
 OnTimer11000:
 	npctalk "Officer Heim: How many soldiers have survived now? When is the support team arriving?", instance_npcname("Officer Heim#heim0");
 	end;
 OnTimer12000:
-	emotion e_dots, 0, instance_npcname("An aide#tnm02");
+	emotion e_dots, getnpcid(0, instance_npcname("An aide#tnm02"));
 	end;
 OnTimer16000:
 	npctalk "An aide: There aren't enough to call in...", instance_npcname("An aide#tnm02");
@@ -663,7 +663,7 @@ OnTouch:
 		sleep2 3000;
 		npctalk "Lucile: Not at all. I really want to know. What's going on upstairs?", .@lucile$;
 		sleep2 2500;
-		emotion e_sigh, 0, .@heim$;
+		emotion e_sigh, getnpcid(0, .@heim$);
 		sleep2 1000;
 		npctalk "Officer Heim: How did you know that? Yes, the demons have stopped their attack from upstairs.", .@heim$;
 		sleep2 3000;
@@ -902,7 +902,7 @@ OnMobDead:
 	}
 	end;
 }
-	
+
 1@tnm1,135,99,5	script	Huey#hui02	4_TOWER_15,{
 	if ('devil_tower < 5)
 		end;
@@ -1071,9 +1071,9 @@ OnTimer1000:
 		if (.@north[.@i] > 0)	// 8 mobs for north
 			monster 'map_tnm2$,.@north[.@i],.@north[.@i+1], "",2960,1, .@label$;
 		monster 'map_tnm2$,.@north_west[.@i],.@north_west[.@i+1], "",2960,1, .@label$;
-		monster 'map_tnm2$,.@south_west[.@i],.@south_west[.@i+1], "",2960,1, .@label$;	
-		monster 'map_tnm2$,.@south_east[.@i],.@south_east[.@i+1], "",2960,1, .@label$;	
-		monster 'map_tnm2$,.@north_east[.@i],.@north_east[.@i+1], "",2960,1, .@label$;	
+		monster 'map_tnm2$,.@south_west[.@i],.@south_west[.@i+1], "",2960,1, .@label$;
+		monster 'map_tnm2$,.@south_east[.@i],.@south_east[.@i+1], "",2960,1, .@label$;
+		monster 'map_tnm2$,.@north_east[.@i],.@north_east[.@i+1], "",2960,1, .@label$;
 		sleep 200;
 	}
 	end;

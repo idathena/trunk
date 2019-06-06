@@ -1,20 +1,20 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Homunculus S Mutation Quest
-//===== By: ================================================== 
+//===== By: ==================================================
 //= Euphy
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.2
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Genetic quest to mutate a level 99 evolved Homunculus
 //= into a Homunculus S.
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First Version, entirely custom. [Masao]
 //= 1.1 Cleaning. [Euphy]
 //= 1.2 Replaced with official script. [Euphy]
-//============================================================ 
+//============================================================
 
 // Main NPCs :: Homun_S
 //============================================================
@@ -640,7 +640,7 @@ que_house_s,80,42,3	script	Jeyna#homun_s	558,{
 		mes "why don't you take a look at that board?";
 		mes "The ^006400Homunculus Mutation System^000000 has ^0000FF5 different types^000000 of new mutations.";
 		next;
-		emotion e_gasp,0,"Magic Board#homun_s";
+		emotion e_gasp,getnpcid(0,"Magic Board#homun_s");
 		mes "[Jeyna]";
 		mes "Your ^FF4800Homunculus^000000 can mutate into any of the 5 different forms.";
 		next;
@@ -656,7 +656,7 @@ que_house_s,80,42,3	script	Jeyna#homun_s	558,{
 		mes "skills such as Caprice will be";
 		mes "^006400retained and usable even after Mutation^000000.";
 		next;
-		emotion e_gasp,0,"Magic Board#homun_s";
+		emotion e_gasp,getnpcid(0,"Magic Board#homun_s");
 		mes "[Jeyna]";
 		mes "Take a look at the Magic Board behind me and decide for yourself.";
 		close2;
@@ -668,7 +668,7 @@ que_house_s,80,42,3	script	Jeyna#homun_s	558,{
 		mes "[Jeyna]";
 		mes "Take a look at the board behind me, on the right.";
 		close2;
-		emotion e_gasp,0,"Magic Board#homun_s";
+		emotion e_gasp,getnpcid(0,"Magic Board#homun_s");
 		end;
 	} else if (checkquest(4158) > -1) {
 		playbgm "28.mp3"; // You're in Ruins
@@ -1317,7 +1317,7 @@ OnTimer6000:
 	emotion e_gasp;
 	end;
 OnTimer7000:
-	emotion e_gasp,0,"#04homun_s";
+	emotion e_gasp,getnpcid(0,"#04homun_s");
 	stopnpctimer;
 	initnpctimer;
 	end;
@@ -1334,7 +1334,7 @@ que_house_s,24,46,3	script	Jonathan#homun_s	6002,{
 }
 
 que_house_s,23,46,3	script	#05homun_s	111,{
-	emotion e_no,0,"Jonathan#homun_s";
+	emotion e_no,getnpcid(0,"Jonathan#homun_s");
 	if (gethominfo(1) < 6048 || gethominfo(1) > 6052) { // Not mutated Homunculus-S
 		mes "[Jonathan]";
 		mes "Hwang~ Hwang!";
@@ -1349,7 +1349,7 @@ que_house_s,23,46,3	script	#05homun_s	111,{
 		mes "[Jonathan]";
 		mes "Hwang~?!";
 		next;
-		emotion e_swt2,0,"Jonathan#homun_s";
+		emotion e_swt2,getnpcid(0,"Jonathan#homun_s");
 		mes "[Jonathan]";
 		mes "*Sniff* ...";
 		next;

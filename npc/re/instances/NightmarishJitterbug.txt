@@ -1,17 +1,17 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Nightmarish Jitterbug
-//===== By: ================================================== 
+//===== By: ==================================================
 //= Tokeiburu, Nova
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.0
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Nightmarish Jitterbug Instance
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First version, edited. [exneval]
-//============================================================ 
+//============================================================
 
 // Instance start
 //============================================================
@@ -279,7 +279,7 @@ OnDisable:
 	close2;
 	cutin "ragi01",255;
 	end;
-	
+
 OnInstanceInit:
 	donpcevent instance_npcname("Ragi#01")+"::OnEnable";
 	end;
@@ -408,7 +408,7 @@ OnDisable:
 		mes "[Rohtert]";
 		mes "I told you, New Oz. We can't just let this go.";
 		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : I told you, New Oz. We can't just let this go.";
-		emotion e_an,0,instance_npcname("Rohtert#01");
+		emotion e_an,getnpcid(0,instance_npcname("Rohtert#01"));
 		next;
 		cutin "min02",0;
 		mes "[Mingmin]";
@@ -475,12 +475,12 @@ OnDisable:
 		mes "[Rohtert]";
 		mes "...That wasn't what I expected. Aren't you upset at all?";
 		unittalk getnpcid(0,instance_npcname("Rohtert#01")),"Rohtert : ...That wasn't what I expected. Aren't you upset at all?";
-		emotion e_dots,0,instance_npcname("Rohtert#01");
+		emotion e_dots,getnpcid(0,instance_npcname("Rohtert#01"));
 		next;
 		mes "[Melody-Jack]";
 		mes "What did you expect? All he thinks about is adventure, monsters, and treasure.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : What did you expect? All he thinks about is adventure, monsters, and treasure.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#01"));
 		cutin "rote01",255;
 		next;
 		cutin "nines01",0;
@@ -491,7 +491,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "...";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : ...";
-		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#01"));
 		cutin "nines01",255;
 		next;
 		cutin "nines01",0;
@@ -502,7 +502,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "This isn't a good time for chit-chat. I'm sensing something from the very floor where you're standing and where I'm hiding.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : This isn't a good time for chit-chat. I'm sensing something from the very floor where you're standing and where I'm hiding.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#01"));
 		cutin "nines01",255;
 		next;
 		cutin "arang03",2;
@@ -513,7 +513,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "It comes natural for veteran thieves like me to hide themselves in potential enemy territories.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : It comes natural for veteran thieves like me to hide themselves in potential enemy territories.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#01"));
 		cutin "arang03",255;
 		next;
 		mes "[Melody-Jack]";
@@ -711,7 +711,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "...";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : ...";
-		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#01"));
 		next;
 		mes "["+strcharinfo(0)+"]";
 		mes "...";
@@ -719,7 +719,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "...";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#01")),"Melody-Jack : ...";
-		emotion e_dots,0,instance_npcname("Melody-Jack#01");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#01"));
 		next;
 		mes "[Melody-Jack]";
 		mes "Let's move before they forget about us.";
@@ -826,7 +826,7 @@ OnDisable:
 		mes "[Aigu]";
 		mes "MONSTER-!...Um, it's just a woman.";
 		unittalk getnpcid(0,instance_npcname("Aigu#02")),"Aigu : MONSTER-!...Um, it's just a woman.";
-		emotion e_omg,0,instance_npcname("Aigu#02");
+		emotion e_omg,getnpcid(0,instance_npcname("Aigu#02"));
 		next;
 		cutin "lunain04",0;
 		mes "[Runane]";
@@ -842,7 +842,7 @@ OnDisable:
 		mes "[???]";
 		mes "Voice of a woman...";
 		unittalk getnpcid(0,instance_npcname("???#2")),"??? : Voice of a woman...";
-		emotion e_what,0,instance_npcname("???#2");
+		emotion e_what,getnpcid(0,instance_npcname("???#2"));
 		next;
 		cutin "igu01",0;
 		mes "[Aigu]";
@@ -863,7 +863,7 @@ OnDisable:
 		mes "[Aigu]";
 		mes "We didn't have to be here if it weren't for someone.";
 		unittalk getnpcid(0,instance_npcname("Aigu#02")),"Aigu : We didn't have to be here if it weren't for someone.";
-		emotion e_swt2,0,instance_npcname("Aigu#02");
+		emotion e_swt2,getnpcid(0,instance_npcname("Aigu#02"));
 		next;
 		cutin "shaloshi01",0;
 		mes "[???]";
@@ -1005,7 +1005,7 @@ OnDisable:
 		mes "[Gelkah]";
 		mes "!!";
 		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : !!";
-		emotion e_gasp,0,instance_npcname("Gelkah#03");
+		emotion e_gasp,getnpcid(0,instance_npcname("Gelkah#03"));
 		next;
 		mes "[Gelkah]";
 		mes "Here we go!";
@@ -1031,7 +1031,7 @@ OnDisable:
 		mes "CROSS!!!";
 		unittalk getnpcid(0,instance_npcname("Gelkah#03")),"Gelkah : CROSS!!!";
 		unittalk getnpcid(0),"Rohtert : CROSS!!!";
-		emotion e_flash,0,instance_npcname("Gelkah#03");
+		emotion e_flash,getnpcid(0,instance_npcname("Gelkah#03"));
 		emotion e_flash;
 		specialeffect EF_GRANDCROSS,AREA,instance_npcname("Gelkah#03");
 		specialeffect EF_GRANDCROSS;
@@ -1593,7 +1593,7 @@ OnDisable:
 		mes "[New Oz]";
 		mes "W-whazza...?! Don't be ridiculous. I just found her now.";
 		unittalk getnpcid(0,instance_npcname("New Oz#07")),"New Oz : W-whazza...?! Don't be ridiculous. I just found her now.";
-		emotion e_omg,0,instance_npcname("New Oz#07");
+		emotion e_omg,getnpcid(0,instance_npcname("New Oz#07"));
 		next;
 		cutin "min02",2;
 		mes "[Mingmin]";
@@ -1617,7 +1617,7 @@ OnDisable:
 		mes "[Shalosh]";
 		mes "Here they come...";
 		unittalk getnpcid(0,instance_npcname("Shalosh#7")),"Shalosh : Here they come...";
-		emotion e_dots,0,instance_npcname("Shalosh#7");
+		emotion e_dots,getnpcid(0,instance_npcname("Shalosh#7"));
 		next;
 		cutin "nines04",0;
 		mes "[New Oz]";
@@ -1749,7 +1749,7 @@ OnDisable:
 		mes "[Ragi]";
 		mes "Waiting for snow~";
 		unittalk getnpcid(0,instance_npcname("Ragi#08")),"Ragi : Waiting for snow~";
-		emotion e_ho,0,instance_npcname("Ragi#08");
+		emotion e_ho,getnpcid(0,instance_npcname("Ragi#08"));
 		next;
 		cutin "nines01",0;
 		mes "[New Oz]";
@@ -1781,7 +1781,7 @@ OnDisable:
 		mes "[Shalosh]";
 		mes "Runane sings. Whistles good, too.";
 		unittalk getnpcid(0,instance_npcname("Shalosh#8")),"Shalosh : Runane sings. Whistles good, too.";
-		emotion e_ho,0,instance_npcname("Shalosh#8");
+		emotion e_ho,getnpcid(0,instance_npcname("Shalosh#8"));
 		next;
 		mes "- Shalosh puckers her lips to whistle, but fails. -";
 		cutin "shaloshi01",255;
@@ -1831,7 +1831,7 @@ OnDisable:
 		mes "[Ragi]";
 		mes "Something else is showing up.";
 		unittalk getnpcid(0,instance_npcname("Ragi#08")),"Ragi : Something else is showing up.";
-		emotion e_gasp,0,instance_npcname("Ragi#08");
+		emotion e_gasp,getnpcid(0,instance_npcname("Ragi#08"));
 		next;
 		cutin "nines04",0;
 		mes "[New Oz]";
@@ -1962,7 +1962,7 @@ OnDisable:
 		mes "[New Oz]";
 		mes "Did you take care of them already? I wanted to take part in it.";
 		unittalk getnpcid(0),"New Oz : Did you take care of them already? I wanted to take part in it.";
-		emotion e_ho,0;
+		emotion e_ho;
 		next;
 		cutin "roel01",0;
 		mes "[Roel]";
@@ -2141,13 +2141,13 @@ OnDisable:
 		mes "[Mingmin]";
 		mes "Push, push~";
 		unittalk getnpcid(0,instance_npcname("Mingmin#10")),"Mingmin : Push, push~";
-		emotion e_ho,0,instance_npcname("Mingmin#10");
+		emotion e_ho,getnpcid(0,instance_npcname("Mingmin#10"));
 		next;
 		cutin "igu01",0;
 		mes "[Aigu]";
 		mes "How long do I have to shimmy my shoulders~";
 		unittalk getnpcid(0,instance_npcname("Aigu#10")),"Aigu : How long do I have to shimmy my shoulders~";
-		emotion e_ho,0,instance_npcname("Aigu#10");
+		emotion e_ho,getnpcid(0,instance_npcname("Aigu#10"));
 		next;
 		cutin "lunain01",0;
 		mes "[Runane]";
@@ -2183,7 +2183,7 @@ OnDisable:
 		mes "[Roel]";
 		mes "What are you trying to feed this child? What's in this green bottle?  ...No...";
 		unittalk getnpcid(0,instance_npcname("Roel#10")),"Roel : What are you trying to feed this child? What's in this green bottle?  ...No...";
-		emotion e_gasp,0,instance_npcname("Roel#10");
+		emotion e_gasp,getnpcid(0,instance_npcname("Roel#10"));
 		next;
 		cutin "min02",0;
 		mes "[Mingmin]";
@@ -2436,7 +2436,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "New Oz.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : New Oz.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#12"));
 		cutin "nines04",255;
 		next;
 		cutin "nines01",2;
@@ -2447,7 +2447,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "And I thought you'd have gotten used to having me around invisible.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : And I thought you'd have gotten used to having me around invisible.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#12"));
 		cutin "nines01",255;
 		next;
 		cutin "nines01",2;
@@ -2458,7 +2458,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "Guess so. We've been circling around the same place, by the way.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : Guess so. We've been circling around the same place, by the way.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#12"));
 		cutin "nines01",255;
 		next;
 		cutin "nines04",2;
@@ -2469,7 +2469,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "I've waited for you because I wanted to talk.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : I've waited for you because I wanted to talk.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#12"));
 		cutin "nines04",255;
 		next;
 		mes "[Melody-Jack]";
@@ -2484,7 +2484,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "But given the situation, my promise to you still stands.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : But given the situation, my promise to you still stands.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#12"));
 		cutin "nines01",255;
 		next;
 		cutin "nines01",2;
@@ -2495,7 +2495,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "Hmpf, just know I'm keeping my promise to you only because you've got what I want.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : Hmpf, just know I'm keeping my promise to you only because you've got what I want.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#12");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#12"));
 		cutin "nines01",255;
 		next;
 		cutin "nines01",2;
@@ -2506,7 +2506,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "You moron, that's worth nothing. Your contract has expired, but a promise is a promise and I intend to keep it.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#12")),"Melody-Jack : You moron, that's worth nothing. Your contract has expired, but a promise is a promise and I intend to keep it.";
-		emotion e_meh,0,instance_npcname("Melody-Jack#12");
+		emotion e_meh,getnpcid(0,instance_npcname("Melody-Jack#12"));
 		cutin "nines01",255;
 		next;
 		cutin "nines01",2;
@@ -2677,7 +2677,7 @@ OnDisable:
 		mes "[Ragi]";
 		mes "She said she did.";
 		unittalk getnpcid(0,instance_npcname("Ragi#13")),"Ragi : She said she did.";
-		emotion e_ho,0,instance_npcname("Ragi#13");
+		emotion e_ho,getnpcid(0,instance_npcname("Ragi#13"));
 		next;
 		cutin "nines03",0;
 		mes "[New Oz]";
@@ -2689,7 +2689,7 @@ OnDisable:
 		mes "!!!";
 		unittalk getnpcid(0,instance_npcname("Ragi#13")),"Ragi : !!!";
 		unittalk getnpcid(0),"New Oz : !!!";
-		emotion e_gasp,0,instance_npcname("Ragi#13");
+		emotion e_gasp,getnpcid(0,instance_npcname("Ragi#13"));
 		emotion e_gasp;
 		next;
 		mes "[Ragi & New Oz]";
@@ -2701,10 +2701,10 @@ OnDisable:
 		cutin "nines03",255;
 		next;
 		mes "- Before the two give each other a high five, Aigu and Mingmin slap them on their backs. -";
-		emotion e_wah,0,instance_npcname("Ragi#13");
+		emotion e_wah,getnpcid(0,instance_npcname("Ragi#13"));
 		emotion e_wah;
-		emotion e_pif,0,instance_npcname("Aigu#13");
-		emotion e_pif,0,instance_npcname("Mingmin#13");
+		emotion e_pif,getnpcid(0,instance_npcname("Aigu#13"));
+		emotion e_pif,getnpcid(0,instance_npcname("Mingmin#13"));
 		specialeffect EF_HIT5,AREA,instance_npcname("Ragi#13");
 		specialeffect EF_HIT5;
 		next;
@@ -3065,7 +3065,7 @@ OnDisable:
 		mes "[Mingmin]";
 		mes "We'll talk again the moment we're out of here.";
 		unittalk getnpcid(0,instance_npcname("Mingmin#14")),"Mingmin : We'll talk again the moment we're out of here.";
-		emotion e_an,0,instance_npcname("Mingmin#14");
+		emotion e_an,getnpcid(0,instance_npcname("Mingmin#14"));
 		close2;
 		cutin "min02",255;
 	}
@@ -3171,7 +3171,7 @@ OnDisable:
 		mes "[Mingmin]";
 		mes "Do you remember when you two fought over that florist girl at the southern gate of Prontera? Or when the doll merchant at the eastern gate whupped you for bickering and driving his customers away?";
 		unittalk getnpcid(0,instance_npcname("Mingmin#15")),"Mingmin : Do you remember when you two fought over that florist girl at the southern gate of Prontera? Or when the doll merchant at the eastern gate whupped you for bickering and driving his customers away?";
-		emotion e_what,0,instance_npcname("Mingmin#15");
+		emotion e_what,getnpcid(0,instance_npcname("Mingmin#15"));
 		next;
 		cutin "rote01",2;
 		mes "[Rohtert]";
@@ -3188,19 +3188,19 @@ OnDisable:
 		mes "[Rohtert]";
 		mes "Am I the only one not happy about this conversation?";
 		unittalk getnpcid(0,instance_npcname("Rohtert#15")),"Rohtert : Am I the only one not happy about this conversation?";
-		emotion e_dots,0,instance_npcname("Rohtert#15");
+		emotion e_dots,getnpcid(0,instance_npcname("Rohtert#15"));
 		next;
 		cutin "min01",0;
 		mes "[Mingmin]";
 		mes "How about when you played with Dead Branch to death? Or when you and your Sorcerer buddies killed yourselves playing Hocus Pocus?";
 		unittalk getnpcid(0,instance_npcname("Mingmin#15")),"Mingmin : How about when you played with Dead Branch to death? Or when you and your Sorcerer buddies killed yourselves playing Hocus Pocus?";
-		emotion e_meh,0,instance_npcname("Mingmin#15");
+		emotion e_meh,getnpcid(0,instance_npcname("Mingmin#15"));
 		next;
 		cutin "rote01",0;
 		mes "[Rohtert]";
 		mes "Can't you think of a nice memory?";
 		unittalk getnpcid(0,instance_npcname("Rohtert#15")),"Rohtert : Can't you think of a nice memory?";
-		emotion e_sigh,0,instance_npcname("Rohtert#15");
+		emotion e_sigh,getnpcid(0,instance_npcname("Rohtert#15"));
 		next;
 		cutin "nines01",0;
 		mes "[New Oz]";
@@ -3212,13 +3212,13 @@ OnDisable:
 		mes "[Mingmin]";
 		mes "Oh, I remember! That was funny!";
 		unittalk getnpcid(0,instance_npcname("Mingmin#15")),"Mingmin : Oh, I remember! That was funny!";
-		emotion e_heh,0,instance_npcname("Mingmin#15");
+		emotion e_heh,getnpcid(0,instance_npcname("Mingmin#15"));
 		next;
 		cutin "rote01",2;
 		mes "[Rohtert]";
 		mes "Arg!";
 		unittalk getnpcid(0,instance_npcname("Rohtert#15")),"Rohtert : Arg!";
-		emotion e_wah,0,instance_npcname("Rohtert#15");
+		emotion e_wah,getnpcid(0,instance_npcname("Rohtert#15"));
 		close2;
 		cutin "rote01",255;
 	}
@@ -3516,7 +3516,7 @@ OnDisable:
 		mes "[Roel]";
 		mes "Sorry. I won't disappoint you again.";
 		unittalk getnpcid(0,instance_npcname("Roel#17")),"Roel : Sorry. I won't disappoint you again.";
-		emotion e_sry,0,instance_npcname("Roel#17");
+		emotion e_sry,getnpcid(0,instance_npcname("Roel#17"));
 		next;
 		cutin "shaloshi01",0;
 		mes "[Shalosh]";
@@ -3527,7 +3527,7 @@ OnDisable:
 		mes "[Roel]";
 		mes "(She's kind.)";
 		unittalk getnpcid(0,instance_npcname("Roel#17")),"Roel : (She's kind.)";
-		emotion e_lv,0,instance_npcname("Roel#17");
+		emotion e_lv,getnpcid(0,instance_npcname("Roel#17"));
 		next;
 		cutin "lunain02",2;
 		mes "[Runane]";
@@ -3581,7 +3581,7 @@ OnDisable:
 		mes "[Runane]";
 		mes "Listen, humans and monsters can't be friends. At least that's what I think.";
 		unittalk getnpcid(0,instance_npcname("Runane#17")),"Runane : Listen, humans and monsters can't be friends. At least that's what I think.";
-		emotion e_pif,0,instance_npcname("Runane#17");
+		emotion e_pif,getnpcid(0,instance_npcname("Runane#17"));
 		next;
 		cutin "shaloshi01",0;
 		mes "[Shalosh]";
@@ -3602,7 +3602,7 @@ OnDisable:
 		mes "[Runane]";
 		mes "Stop making things awkward! We're about the same age, so we're friends already.";
 		unittalk getnpcid(0,instance_npcname("Runane#17")),"Runane : Stop making things awkward! We're about the same age, so we're friends already.";
-		emotion e_hmm,0,instance_npcname("Runane#17");
+		emotion e_hmm,getnpcid(0,instance_npcname("Runane#17"));
 		next;
 		cutin "shaloshi01",0;
 		mes "[Shalosh]";
@@ -3814,7 +3814,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "I'm telling you, we've been circling around the same place.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#18")),"Melody-Jack : I'm telling you, we've been circling around the same place.";
-		emotion e_dum,0,instance_npcname("Melody-Jack#18");
+		emotion e_dum,getnpcid(0,instance_npcname("Melody-Jack#18"));
 		cutin "rote01",255;
 		next;
 		cutin "min02",0;
@@ -3839,7 +3839,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "All the while, the foreign energy I've been sensing is growing stronger. This is bad.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#18")),"Melody-Jack : All the while, the foreign energy I've been sensing is growing stronger. This is bad.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#18");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#18"));
 		cutin "min02",255;
 		next;
 		cutin "min02",0;
@@ -3856,7 +3856,7 @@ OnDisable:
 		mes "[Aigu]";
 		mes "I hope you're wrong.";
 		unittalk getnpcid(0,instance_npcname("Aigu#18")),"Aigu : I hope you're wrong.";
-		emotion e_X,0,instance_npcname("Aigu#18");
+		emotion e_X,getnpcid(0,instance_npcname("Aigu#18"));
 		next;
 		cutin "ragi02",2;
 		mes "[Ragi]";
@@ -3896,7 +3896,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "...";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#18")),"Melody-Jack : ...";
-		emotion e_dots,0,instance_npcname("Melody-Jack#18");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#18"));
 		cutin "min02",255;
 		next;
 		cutin "nines03",0;
@@ -3994,7 +3994,7 @@ OnDisable:
 		mes "[Gelkah]";
 		mes "Gelkah-style Mental Strength! Iron Physique!";
 		unittalk getnpcid(0,instance_npcname("Gelkah#19")),"Gelkah : Gelkah-style Mental Strength! Iron Physique!";
-		emotion e_com,0,instance_npcname("Gelkah#19");
+		emotion e_com,getnpcid(0,instance_npcname("Gelkah#19"));
 		specialeffect EF_GUMGANG,AREA,instance_npcname("Gelkah#19");
 		next;
 		cutin "roel02",0;
@@ -4375,7 +4375,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "...";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#20")),"Melody-Jack : ...";
-		emotion e_dots,0,instance_npcname("Melody-Jack#20");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#20"));
 		cutin "shaloshi01",255;
 		next;
 		cutin "shaloshi01",0;
@@ -4388,13 +4388,13 @@ OnDisable:
 		mes "[Ferre]";
 		mes "Ferre, ferre!";
 		unittalk getnpcid(0,instance_npcname("Ferre#20")),"Ferre : Ferre, ferre!";
-		emotion e_an,0,instance_npcname("Ferre#20");
+		emotion e_an,getnpcid(0,instance_npcname("Ferre#20"));
 		cutin "shaloshi01",255;
 		next;
 		mes "[Ferre]";
 		mes "Ferre, ferre, ferre!";
 		unittalk getnpcid(0,instance_npcname("Ferre#20s")),"Ferre : Ferre, ferre, ferre!";
-		emotion e_an,0,instance_npcname("Ferre#20s");
+		emotion e_an,getnpcid(0,instance_npcname("Ferre#20s"));
 		specialeffect EF_READYPORTAL2,AREA,instance_npcname("Shalosh#20");
 		specialeffect EF_PORTAL2,AREA,instance_npcname("Shalosh#20");
 		next;
@@ -4419,7 +4419,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "New Oz, I've known you're weird in the head, but she's...";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#20")),"Melody-Jack : New Oz, I've known you're weird in the head, but she's...";
-		emotion e_dots,0,instance_npcname("Melody-Jack#20");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#20"));
 		cutin "nines01",255;
 		next;
 		cutin "nines04",0;
@@ -4486,7 +4486,7 @@ OnDisable:
 		mes "[Melody-Jack]";
 		mes "He didn't know because he doesn't think; ever.";
 		unittalk getnpcid(0,instance_npcname("Melody-Jack#20")),"Melody-Jack : He didn't know because he doesn't think; ever.";
-		emotion e_dots,0,instance_npcname("Melody-Jack#20");
+		emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#20"));
 		cutin "roel04",255;
 		next;
 		cutin "arang01",2;
@@ -4878,7 +4878,7 @@ OnTimer30000:
 		"New Oz : What does a nosy pepper do? Gets jalapeno business!",
 		"New Oz : Why do bananas wear suntan lotion? Because they peel!",
 		"New Oz : Um, hold on. One of the ukulele strings snapped. How about I sing instead?");
-	emotion e_ho,0,instance_npcname("New Oz#22s");
+	emotion e_ho,getnpcid(0,instance_npcname("New Oz#22s"));
 	unittalk 'jitBossGID,"FERRE! FERRE!";
 	unitskilluseid 'jitBossGID,"NPC_WIDEFREEZE",5;
 	stopnpctimer;
@@ -4942,7 +4942,7 @@ OnMyMobDead:
 	mes "[Rohtert]";
 	mes "New Oz, you're alive! Good, because I'm going to kill...";
 	unittalk getnpcid(0,instance_npcname("Rohtert#22")),"Rohtert : New Oz, you're alive! Good, because I'm going to kill...";
-	emotion e_an,0,instance_npcname("Rohtert#22");
+	emotion e_an,getnpcid(0,instance_npcname("Rohtert#22"));
 	donpcevent instance_npcname("Gelkah#22")+"::OnEnable";
 	donpcevent instance_npcname("Rohtert#22")+"::OnEnable";
 	next;
@@ -4961,7 +4961,7 @@ OnMyMobDead:
 	mes "[Melody-Jack]";
 	mes "Wow, this place is not going to last long--look how violently the ground is shaking! We really need to get out like yesterday, New Oz.";
 	unittalk getnpcid(0,instance_npcname("Melody-Jack#22")),"Melody-Jack : Wow, this place is not going to last long--look how violently the ground is shaking! We really need to get out like yesterday, New Oz.";
-	emotion e_dots,0,instance_npcname("Melody-Jack#22");
+	emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#22"));
 	donpcevent instance_npcname("Melody-Jack#22")+"::OnEnable";
 	donpcevent instance_npcname("Arang#22")+"::OnEnable";
 	donpcevent instance_npcname("Runane#22")+"::OnEnable";
@@ -4981,7 +4981,7 @@ OnMyMobDead:
 	mes "[Melody-Jack]";
 	mes "Better get rid of him quickly.";
 	unittalk getnpcid(0,instance_npcname("Melody-Jack#22")),"Melody-Jack : Better get rid of him quickly.";
-	emotion e_dots,0,instance_npcname("Melody-Jack#22");
+	emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#22"));
 	cutin "rote01",255;
 	next;
 	cutin "shaloshi01",2;
@@ -5016,7 +5016,7 @@ OnMyMobDead:
 	mes "[Melody-Jack]";
 	mes "You're smart and capable of teleportation. Rohtert, we can't let her go.";
 	unittalk getnpcid(0,instance_npcname("Melody-Jack#22")),"Melody-Jack : You're smart and capable of teleportation. Rohtert, we can't let her go.";
-	emotion e_dots,0,instance_npcname("Melody-Jack#22");
+	emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#22"));
 	cutin "shaloshi01",255;
 	next;
 	cutin "shaloshi01",2;
@@ -5294,7 +5294,7 @@ OnDisable:
 	close2;
 	cutin "ragi01",255;
 	end;
-	
+
 OnInstanceInit:
 	donpcevent instance_npcname("Ragi#23")+"::OnDisable";
 	end;
@@ -5428,7 +5428,7 @@ OnDisable:
 	mes "[Rohtert]";
 	mes "New Oz. Need I remind you this guild is no longer called New Oz's White Wings?";
 	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : New Oz. Need I remind you this guild is no longer called New Oz's White Wings?";
-	emotion e_bzz,0,instance_npcname("Rohtert#23");
+	emotion e_bzz,getnpcid(0,instance_npcname("Rohtert#23"));
 	next;
 	cutin "nines04",2;
 	mes "[New Oz]";
@@ -5439,27 +5439,27 @@ OnDisable:
 	mes "[Rohtert]";
 	mes "Of course! Now it's called... Um...";
 	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : Of course! Now it's called... Um...";
-	emotion e_pif,0,instance_npcname("Rohtert#23");
+	emotion e_pif,getnpcid(0,instance_npcname("Rohtert#23"));
 	next;
 	cutin "min02",0;
 	mes "[Mingmin]";
 	mes "Stop thinking and just keep the old name.";
 	unittalk getnpcid(0,instance_npcname("Mingmin#23")),"Mingmin : Stop thinking and just keep the old name.";
-	emotion e_sigh,0,instance_npcname("Mingmin#23");
-	emotion e_hmm,0,instance_npcname("Mingmin#23");
+	emotion e_sigh,getnpcid(0,instance_npcname("Mingmin#23"));
+	emotion e_hmm,getnpcid(0,instance_npcname("Mingmin#23"));
 	next;
 	cutin "rote01",0;
 	mes "[Rohtert]";
 	mes "Nope, I'm going to caall it Rohtert's Super Critical Guild!";
 	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : Nope, I'm going to caall it Rohtert's Super Critical Guild!";
-	emotion e_flash,0,instance_npcname("Rohtert#23");
-	emotion e_shy,0,instance_npcname("Rohtert#23");
+	emotion e_flash,getnpcid(0,instance_npcname("Rohtert#23"));
+	emotion e_shy,getnpcid(0,instance_npcname("Rohtert#23"));
 	next;
 	cutin "igu04",2;
 	mes "[Aigu]";
 	mes "...";
 	unittalk getnpcid(0,instance_npcname("Aigu#23")),"Aigu : ...";
-	emotion e_otl,0,instance_npcname("Aigu#23");
+	emotion e_otl,getnpcid(0,instance_npcname("Aigu#23"));
 	next;
 	mes "[Aigu]";
 	mes "That sounds lame.";
@@ -5479,7 +5479,7 @@ OnDisable:
 	mes "[Rohtert]";
 	mes "I'm the guild master! I name it whatever I want!";
 	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : I'm the guild master! I name it whatever I want!";
-	emotion e_bzz,0,instance_npcname("Rohtert#23");
+	emotion e_bzz,getnpcid(0,instance_npcname("Rohtert#23"));
 	next;
 	cutin "arang01",2;
 	mes "[Arang]";
@@ -5490,18 +5490,18 @@ OnDisable:
 	mes "[Mingmin]";
 	mes "Keep the name. I'm out.";
 	unittalk getnpcid(0,instance_npcname("Mingmin#23")),"Mingmin : Keep the name. I'm out.";
-	emotion e_gg,0,instance_npcname("Mingmin#23");
+	emotion e_gg,getnpcid(0,instance_npcname("Mingmin#23"));
 	next;
 	cutin "rote01",0;
 	mes "[Rohtert]";
 	mes "You can't do that!";
 	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : You can't do that!";
-	emotion e_omg,0,instance_npcname("Rohtert#23");
+	emotion e_omg,getnpcid(0,instance_npcname("Rohtert#23"));
 	next;
 	mes "[Melody-Jack]";
 	mes "I'm not a member, but if you ask me, that name...";
 	unittalk getnpcid(0,instance_npcname("Melody-Jack#23")),"Melody-Jack : I'm not a member, but if you ask me, that name...";
-	emotion e_dots,0,instance_npcname("Melody-Jack#23");
+	emotion e_dots,getnpcid(0,instance_npcname("Melody-Jack#23"));
 	cutin "rote01",255;
 	next;
 	cutin "ragi03",0;
@@ -5513,7 +5513,7 @@ OnDisable:
 	mes "[Aigu]";
 	mes "I don't care. I'm staying with New Oz.";
 	unittalk getnpcid(0,instance_npcname("Aigu#23")),"Aigu : .I don't care. I'm staying with New Oz.";
-	emotion e_lv2,0,instance_npcname("Aigu#23");
+	emotion e_lv2,getnpcid(0,instance_npcname("Aigu#23"));
 	next;
 	cutin "lunain04",0;
 	mes "[Runane]";
@@ -5523,7 +5523,7 @@ OnDisable:
 	cutin "rote01",0;
 	mes "[Rohtert]";
 	mes "Shush! We've had enough for a day. You all are dismissed! This concludes the adventure of Rohtert's Super Critical Guild!";
-	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : Shush! We've had enough for a day. You all are dismissed! This concludes the adventure of Rohtert's Super Critical Guild!";	
+	unittalk getnpcid(0,instance_npcname("Rohtert#23")),"Rohtert : Shush! We've had enough for a day. You all are dismissed! This concludes the adventure of Rohtert's Super Critical Guild!";
 	if (isbegin_quest(13181) == 1) {
 		completequest 13181;
 		getexp 1500000,500000;
@@ -5904,7 +5904,7 @@ OnTouch:
 	end;
 }
 
-1@jtb,391,30,0	script	#jtwarp23	45,2,2,{ 
+1@jtb,391,30,0	script	#jtwarp23	45,2,2,{
 	end;
 OnInstanceInit:
 	donpcevent instance_npcname("#jtwarp23")+"::OnDisable";
@@ -5915,7 +5915,7 @@ OnDisable:
 OnEnable:
 	enablenpc instance_npcname("#jtwarp23");
 	end;
-OnTouch: 
+OnTouch:
 	if (isbegin_quest(13181) == 1) {
 		completequest 13181;
 		getexp 1500000,500000;

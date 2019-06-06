@@ -1,12 +1,12 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= God Item Quest - Brisingamen Seal
-//===== By: ================================================== 
+//===== By: ==================================================
 //= SinSloth
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.7
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= Quest for breaking the seal of Brisingamen.
 //===== Additional Comments: =================================
 //= 1.0 First version. Thanks to SinSloth for scripting it. [MasterOfMuppets]
@@ -954,7 +954,7 @@ yuno_in04,47,113,1	script	Studying Scholar#1	749,{
 				mes "Of course!";
 				mes "That's a great idea! I'll wait here while you go and ask Alfrik. You're my only hope in completing this research!";
 				next;
-				emotion e_hmm,1;
+				emotion e_hmm,playerattached();
 				mes "[" + strcharinfo(0) + "]";
 				mes "(^333333I shouldn't have said anything...^000000)";
 				next;
@@ -2069,7 +2069,7 @@ prt_church,113,103,1	script	Praying Man	798,{
 				close;
 			}
 		}
-	} 
+	}
 	else {
 		mes "[Sad-looking Man]";
 		mes "...";
@@ -2440,7 +2440,7 @@ prt_castle,84,51,5	script	Librarian#2	105,{
 }
 
 prontera,260,354,4	script	Woman#Rosa Ellenen	101,{
-	if ($God2 < $@god_check1){ 
+	if ($God2 < $@god_check1){
 		mes "[Woman]";
 		mes "Hm?";
 		mes "What brings";
@@ -2591,7 +2591,7 @@ prontera,262,353,0	script	Gravestone	111,{
 		close;
 	}
 }
- 
+
 gef_dun01,89,192,0	script	#lowentrace	111,3,3,{
 	if ($God2 < $@god_check1) {
 		mes "^3355FFIt's just an old,";
@@ -2651,7 +2651,7 @@ gef_dun01,89,192,0	script	#lowentrace	111,3,3,{
 					mes "This place is too dangerous.^000000";
 					close;
 				}
-			} 
+			}
 			else {
 				close;
 			}
@@ -3044,7 +3044,7 @@ OnTimer550500:
 	end;
 
 }
-	
+
 que_god02,1,1,1	script	#brisinsummon	-1,{
 
 OnInit:
@@ -3200,10 +3200,10 @@ OnTouch:
 	mapannounce "que_god02","Everyone, stay calm! Get into your positions!",0,0x9CFF00;
 	mes "^4E2F2F[Crusader Commander]";
 	mes "Everyone, get into your positions! Front line, block its movement! Rear line, support the defense!^000000";
-	emotion e_go,0,"#knight1";
-	emotion e_go,0,"#knight2";
-	emotion e_go,0,"#knight3";
-	emotion e_gasp,0,"#doppelganger1";
+	emotion e_go,getnpcid(0,"#knight1");
+	emotion e_go,getnpcid(0,"#knight2");
+	emotion e_go,getnpcid(0,"#knight3");
+	emotion e_gasp,getnpcid(0,"#doppelganger1");
 	next;
 	mes "[Lowen Ellenen]";
 	mes "N-no!";
@@ -3219,10 +3219,10 @@ OnTouch:
 	mapannounce "que_god02","Mwahaha! Mortals are such fools...",0,0xA8A8A8;
 	donpcevent "#brisinsummon::OnDoppel1Off";
 	donpcevent "#brisinsummon::OnDoppel2On";
-	emotion e_gasp,0,"#knight1";
-	emotion e_gasp,0,"#knight2";
-	emotion e_gasp,0,"#knight3";
-	emotion e_gasp,0,"#lowen";
+	emotion e_gasp,getnpcid(0,"#knight1");
+	emotion e_gasp,getnpcid(0,"#knight2");
+	emotion e_gasp,getnpcid(0,"#knight3");
+	emotion e_gasp,getnpcid(0,"#lowen");
 	mes "[" + strcharinfo(0) + "]";
 	mes " ??!!!";
 	next;
@@ -3241,7 +3241,7 @@ OnTouch:
 }
 
 que_god02,124,59,7	script	#hermite	798,{ end; }
- 
+
 que_god02,120,52,0	script	#monologue	139,0,0,{
 
 OnTouch:
@@ -3663,7 +3663,7 @@ xmas,38,105,0	script	#brisindwarf1	111,3,3,{
 			close;
 		case 3:
 			mes "^3355FFYou use your finger to poke the pile of snow. However, you hurt your finger a little bit after hitting something really solid.^000000";
-			emotion e_ag,1;
+			emotion e_ag,playerattached();
 			percentheal -20,0;
 			close;
 		case 4:
@@ -3679,7 +3679,7 @@ xmas,38,105,0	script	#brisindwarf1	111,3,3,{
 
 OnTouch:
 	if (god_brising > 39) {
-		emotion e_gasp,1;
+		emotion e_gasp,playerattached();
 	}
 	end;
 }
@@ -4001,7 +4001,7 @@ prt_fild02,185,269,0	script	#brisindwarf2	111,3,3,{
 			end;
 		case 2:
 			mes "^3355FFAs you sweep away the moss with your hand, you scratch your palm from the sharp edges of the rock.^000000";
-			emotion e_gasp,1;
+			emotion e_gasp,playerattached();
 			next;
 			mes "[" + strcharinfo(0) + "]";
 			mes "Damn...!";
@@ -4146,7 +4146,7 @@ prt_fild02,185,269,0	script	#brisindwarf2	111,3,3,{
 
 OnTouch:
 	if (god_brising > 41) {
-		emotion e_gasp,1;
+		emotion e_gasp,playerattached();
 	}
 	end;
 }
@@ -4340,7 +4340,7 @@ mjolnir_09,85,129,0	script	#brisindwarf3	111,3,3,{
 
 OnTouch:
 	if (god_brising > 42) {
-		emotion e_gasp,1;
+		emotion e_gasp,playerattached();
 	}
 	end;
 }
@@ -4590,7 +4590,7 @@ OnTouch:
 		close;
 	}
 	if (god_brising == 44) {
-		emotion e_gasp,1;
+		emotion e_gasp,playerattached();
 		mes "[Male Voice]";
 		mes "Don't come any closer!";
 		mes "How the hell do I feel";

@@ -1631,7 +1631,7 @@ niflheim,197,192,3	duplicate(Warpra#0)	Warpra#9	113
 pay_arche,39,135,4	duplicate(Warpra#0)	Warpra#10	113
 prt_fild05,273,215,4	duplicate(Warpra#0)	Warpra#11	113
 tur_dun01,148,239,4	duplicate(Warpra#0)	Warpra#12	113
-valkyrie,48,35,8	duplicate(Warpra#0)	Warpra#13	113
+valkyrie,48,35,0	duplicate(Warpra#0)	Warpra#13	113
 yuno_fild03,37,135,4	duplicate(Warpra#0)	Warpra#14	113
 
 alberta,32,240,4	script	Warpra#15	113,{ callfunc "QWS_Town_Warpra",1,"Alberta Town"; close; }

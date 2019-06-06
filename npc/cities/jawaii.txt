@@ -416,7 +416,7 @@ jawaii,214,168,5	script	Honeymoon Helper#Jawaii	71,{
 		mes "[Helper]";
 		if (Zeny > 49999) {
 			set Zeny, Zeny-50000;
-			getitem 681,1; //Memory_Of_Wedding 
+			getitem 681,1; //Memory_Of_Wedding
 			mes "Thank you very much~!";
 			mes "Please remember, you";
 			mes "should use this with your";
@@ -626,7 +626,7 @@ jawaii_in,30,96,4	script	Employee#jaw6	724,{
 	}
 	mes "I hope you will have a good time.";
 	close;
-	
+
 OnWelcome:
 	emotion e_kis;
 	end;
@@ -716,7 +716,7 @@ OnTouch:
 	donpcevent "Employee#jaw1::OnSolo";
 	end;
 }
-	
+
 jawaii_in,15,104,0	script	Waitress#jawaii	80,{
 	if (checkweight(1201,1) == 0) {
 		mes "^3355FF * Wait a minute! *";
@@ -1115,7 +1115,7 @@ S_KillChar:
 	mes "[Bartender]";
 	return;
 }
-	
+
 jawaii_in,43,115,0	script	Customer#jaw_1	97,{
 	if (!getpartnerid()) {
 		if (Zeny > 99) {
@@ -1243,7 +1243,7 @@ prt_in,173,13,4	script	Customer#SoloHan	86,{
 		next;
 		mes "[Bachewcca]";
 		mes "...!";
-		emotion e_no1,0,"Customer#Bachewcca";
+		emotion e_no1,getnpcid(0,"Customer#Bachewcca");
 		next;
 		mes "[SoloHan]";
 		mes "It's doesn't really matter whether you're married";
@@ -1390,7 +1390,7 @@ prt_in,173,13,4	script	Customer#SoloHan	86,{
 	mes "Is this the third time this week I've gotten plastered? Bachewcca, help me count!";
 	close;
 }
-	
+
 prt_in,170,14,0	script	Customer#Bachewcca	89,{
 	mes "[Bachewcca]";
 	mes "..............";

@@ -1,17 +1,17 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Geffen Magic Tournament
-//===== By: ================================================== 
+//===== By: ==================================================
 //= Tokeiburu, Nova, Diablo, MasterOfMuppets, etc.
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.0
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Geffen Magic Tournament Instance
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First version, edited. [exneval]
-//============================================================ 
+//============================================================
 
 // Instance enter
 //============================================================
@@ -324,27 +324,27 @@ OnTimer1000:
 		case  88: npctalk "Hook up with both of them? Ho ho ho~!",instance_npcname("Young Lady#gef1"); break;
 		case  91:
 			npctalk "Yes! You have finally arrived, my love!",instance_npcname("Handsome Adventurer#gef");
-			emotion e_omg,0,instance_npcname("Young Lady#gef1");
-			emotion e_omg,0,instance_npcname("Young Lady#gef2");
-			emotion e_omg,0,instance_npcname("Young Lady#gef3");
+			emotion e_omg,getnpcid(0,instance_npcname("Young Lady#gef1"));
+			emotion e_omg,getnpcid(0,instance_npcname("Young Lady#gef2"));
+			emotion e_omg,getnpcid(0,instance_npcname("Young Lady#gef3"));
 			break;
 		case  95:
 			npctalk "My love...",instance_npcname("Male Adventurer#gef");
-			emotion e_lv,0,instance_npcname("Male Adventurer#gef");
-			emotion e_lv,0,instance_npcname("Handsome Adventurer#gef");
-			emotion e_lv,0,instance_npcname("Handsome Adventurer#gef");
+			emotion e_lv,getnpcid(0,instance_npcname("Male Adventurer#gef"));
+			emotion e_lv,getnpcid(0,instance_npcname("Handsome Adventurer#gef"));
+			emotion e_lv,getnpcid(0,instance_npcname("Handsome Adventurer#gef"));
 			break;
 		case  99:
 			npctalk "Maybe... There are no good guys left for us...",instance_npcname("Young Lady#gef3");
-			emotion e_lv,0,instance_npcname("Handsome Adventurer#gef");
+			emotion e_lv,getnpcid(0,instance_npcname("Handsome Adventurer#gef"));
 			break;
 		case 103:
 			npctalk "Ahem... Maybe... Just the three of us... will be together forever...",instance_npcname("Young Lady#gef2");
-			emotion e_lv,0,instance_npcname("Male Adventurer#gef");
+			emotion e_lv,getnpcid(0,instance_npcname("Male Adventurer#gef"));
 			break;
 		case 106:
 			npctalk "Our friendship is forever~!!!",instance_npcname("Young Lady#gef3");
-			emotion e_lv,0,instance_npcname("Handsome Adventurer#gef");
+			emotion e_lv,getnpcid(0,instance_npcname("Handsome Adventurer#gef"));
 			sleep 500;
 			npctalk "Our friendship is forever~!!!",instance_npcname("Young Lady#gef1");
 			sleep 500;
@@ -352,14 +352,14 @@ OnTimer1000:
 			'm1_timer++;
 			break;
 		case 109:
-			emotion e_lv,0,instance_npcname("Male Adventurer#gef");
-			emotion e_sob,0,instance_npcname("Young Lady#gef1");
-			emotion e_sob,0,instance_npcname("Young Lady#gef2");
-			emotion e_sob,0,instance_npcname("Young Lady#gef3");
+			emotion e_lv,getnpcid(0,instance_npcname("Male Adventurer#gef"));
+			emotion e_sob,getnpcid(0,instance_npcname("Young Lady#gef1"));
+			emotion e_sob,getnpcid(0,instance_npcname("Young Lady#gef2"));
+			emotion e_sob,getnpcid(0,instance_npcname("Young Lady#gef3"));
 			break;
-		case 111: emotion e_lv,0,instance_npcname("Handsome Adventurer#gef"); break;
-		case 113: emotion e_lv,0,instance_npcname("Male Adventurer#gef"); break;
-		case 115: emotion e_lv,0,instance_npcname("Handsome Adventurer#gef"); break;
+		case 111: emotion e_lv,getnpcid(0,instance_npcname("Handsome Adventurer#gef")); break;
+		case 113: emotion e_lv,getnpcid(0,instance_npcname("Male Adventurer#gef")); break;
+		case 115: emotion e_lv,getnpcid(0,instance_npcname("Handsome Adventurer#gef")); break;
 		case 118:
 			donpcevent instance_npcname("Male Adventurer#gef")+"::OnDisable";
 			donpcevent instance_npcname("Handsome Adventurer#gef")+"::OnDisable";
@@ -531,7 +531,7 @@ L_Ring:
 					mes "Thank you.";
 					delitem 6671,.@cost; //Geffen_Magic_Coin
 					getitem .@item,1;
-					end;					
+					end;
 			}
 			break;
 		case 3:
@@ -2244,7 +2244,7 @@ OnEnd:
 	end;
 }
 
-1@ge_st,111,57,4	script	Tournament Healer#1	4_F_NURSE,{ //83649 (hide) 
+1@ge_st,111,57,4	script	Tournament Healer#1	4_F_NURSE,{ //83649 (hide)
 	mes "[Tournament Healer]";
 	mes "The previous round's winner can receive a heal from me.";
 	next;
@@ -2483,7 +2483,7 @@ OnDisable:
 	end;
 OnEnable:
 	hideoffnpc instance_npcname(strnpcinfo(0));
-	end;	
+	end;
 }
 
 1@ge_st,114,50,4	script	Dio Anemos#1	4_GEFFEN_01,{
@@ -3540,7 +3540,7 @@ OnEnable:
 		case 2:
 			showscript "Ordre: I can only imagine how long you have trained yourself to become this strong.",getnpcid(0);
 			break;
-	}	
+	}
 	end;
 }
 
@@ -3552,7 +3552,7 @@ OnEnable:
 		case 2:
 			showscript "Blut Hase: Well... Congratulations anyway...",getnpcid(0);
 			break;
-	}	
+	}
 	end;
 }
 
@@ -3569,7 +3569,7 @@ OnEnable:
 		case 2:
 			showscript "Ifodes: You were great competition. Congratulations!",getnpcid(0);
 			break;
-	}	
+	}
 	end;
 }
 
@@ -3586,14 +3586,14 @@ OnEnable:
 		case 2:
 			showscript "Odoric: Congratulations on your victory~!",getnpcid(0);
 			break;
-	}	
+	}
 	end;
 }
 
 1@ge_st,1,1,4	script	Ju#q1	4_GEFFEN_11,{
 	switch (rand(1,2)) {
 		case 1:
-			showscript "Ju: You... are... strong... I... won't... forget... you...",getnpcid(0);	
+			showscript "Ju: You... are... strong... I... won't... forget... you...",getnpcid(0);
 			break;
 		case 2:
 			showscript "Ju: I've never lost before. But you are a worthy foe.",getnpcid(0);
@@ -3627,7 +3627,7 @@ OnEnable:
 		case 2:
 			showscript "Fenrir: You defeated me in a fair fight. You are very strong.",getnpcid(0);
 			break;
-	}	
+	}
 	end;
 }
 
@@ -4351,7 +4351,7 @@ OnMobKilled:
 					donpcevent instance_npcname("Geffen Bully#33")+"::OnEnable";
 					break;
 				case 23:
-					emotion e_gasp,0,instance_npcname("Fenrir#1");
+					emotion e_gasp,getnpcid(0,instance_npcname("Fenrir#1"));
 					mapannounce instance_mapname("1@gef"),"Take your dirty hands off of me.",0x00ebff;
 					break;
 				case 25:
@@ -4421,7 +4421,7 @@ OnMobKilled:
 				case 45:
 					specialeffect EF_ENCHANTPOISON,AREA,instance_npcname("Loki#3");
 					sleep 500;
-					emotion e_gg,0,instance_npcname("Loki#3");
+					emotion e_gg,getnpcid(0,instance_npcname("Loki#3"));
 					npctalk "Loki: 3... 2...",instance_npcname("Loki#3");
 					sleep 500;
 					npctalk "Geffen Bully: What?! You went from from 9 to 3 seconds!!",instance_npcname("Geffen Bully#1");
@@ -4585,7 +4585,7 @@ OnTimer1000:
 	switch ('gmt_timer_evt3) {
 		case 1: npctalk "Geffen Resident: A thief...! A thief~!!",instance_npcname("Geffen Resident#1"); break;
 		case 3: npctalk "Geffen Resident: Help me~!! Someone stole my paycheck!",instance_npcname("Geffen Resident#1"); break;
-		case 6: 
+		case 6:
 			donpcevent instance_npcname("Geffen Shoplifter#1")+"::OnEnable";
 			'gmt_chase = 1;
 			break;

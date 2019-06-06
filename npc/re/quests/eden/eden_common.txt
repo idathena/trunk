@@ -1,14 +1,14 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Eden Group Quests - Common NPCs
-//===== By: ================================================== 
+//===== By: ==================================================
 //= L0ne_W0lf
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 2.0
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= Eden Group Headquarter NPC's.
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First Version.
 //= 1.1 Removed showevent use, and use of duplicates.
 //=     Commented out warps that should not be active.
@@ -434,7 +434,7 @@ moc_para01,20,35,5	script	Office Assistant Neede	814,{
 	emotion e_sigh;
 	mes "I don't trust Evenor. She never shows her feelings... she's going to snitch on me to my boss.";
 	next;
-	emotion e_pif,0,"Secretary Lime Evenor";
+	emotion e_pif,getnpcid(0,"Secretary Lime Evenor");
 	mes "[Lime Evenor]";
 	mes "I am not that kind of guy.";
 	next;

@@ -45,4 +45,4 @@ te_aldecas5,2,3,0	duplicate(pop_mission_TE)	#popc_alde05	CLEAR_NPC
 te_aldecas5,2,3,0	duplicate(pop_mission_TE)	#popd_alde05	CLEAR_NPC
 
 
-te_alde_gld,218,182,5	duplicate(Training_Instructor_TE)	Kafragarten Instructor#t	4_M_HUMAN_02
+te_alde_gld,218,182,5	duplicate(Training_Instructor_TE)	Kafragarten Instructor#tem01	4_M_HUMAN_02

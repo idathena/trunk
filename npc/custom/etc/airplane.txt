@@ -292,10 +292,10 @@ glast_01,196,326,1	script	Porter#07	774,{
 umbala,188,98,3	script	Porter#08	774,{
 	callfunc "F_Porter",8;
 }
-comodo,203,75,8	script	Porter#09	774,{
+comodo,203,75,0	script	Porter#09	774,{
 	callfunc "F_Porter",9;
 }
-amatsu,115,78,8	script	Porter#10	774,{
+amatsu,115,78,0	script	Porter#10	774,{
 	callfunc "F_Porter",10;
 }
 niflheim,132,242,5	script	Porter#11	774,{
@@ -304,7 +304,7 @@ niflheim,132,242,5	script	Porter#11	774,{
 xmas,232,309,5	script	Porter#12	774,{
 	callfunc "F_Porter",12;
 }
-louyang,35,279,8	script	Porter#13	774,{
+louyang,35,279,0	script	Porter#13	774,{
 	callfunc "F_Porter",13;
 }
 gonryun,82,95,7	script	Porter#14	774,{
