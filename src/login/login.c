@@ -2132,7 +2132,7 @@ void display_helpscreen(bool do_exit)
 	ShowInfo("  -v [--version]\t\tDisplays the server's version.\n");
 	ShowInfo("  --run-once\t\t\tCloses server after loading (testing).\n");
 	ShowInfo("  --login-config <file>\t\tAlternative login-server configuration.\n");
-	ShowInfo("  --lan-config <file>\t\tAlternative lag configuration.\n");
+	ShowInfo("  --lan-config <file>\t\tAlternative lan configuration.\n");
 	ShowInfo("  --msg-config <file>\t\tAlternative message configuration.\n");
 	if( do_exit )
 		exit(EXIT_SUCCESS);

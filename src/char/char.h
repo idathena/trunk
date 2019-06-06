@@ -18,7 +18,7 @@ enum E_CHARSERVER_ST
 
 struct mmo_charstatus;
 
-#define MAX_MAP_SERVERS 30
+#define MAX_MAP_SERVERS 2
 
 struct mmo_map_server {
 	int fd;

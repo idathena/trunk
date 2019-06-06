@@ -55,7 +55,9 @@
 			mes "If you might haveto make a lot of trips";
 			mes "to the bathroom tonight.";
 			next;
+			continue;
 		}
+		break;
 	}
 	if(Zeny<.@input*100) {
 		mes "[Ice Cream Maker]";
