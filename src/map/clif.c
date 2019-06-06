@@ -21193,7 +21193,6 @@ void clif_parse_equipswitch_remove(int fd, struct map_session_data *sd)
 {
 #if PACKETVER >= 20170208
 	uint16 index = RFIFOW(fd,2) - 2;
-	bool removed = false;
 
 	if( !battle_config.feature_equipswitch )
 		return;
