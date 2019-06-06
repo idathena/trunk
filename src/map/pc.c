@@ -10580,34 +10580,34 @@ int pc_equipswitch(struct map_session_data *sd, int index) {
 		pc_equipitem(sd,index,position,false);
 		return position;
 	} else {
+		int unequipped_index = -1;
 		int unequipped_position = 0;
 		int i, all_position;
 
 		for( i = 0; i < EQI_MAX; i++ ) { //Unequip all items that interfere
-			int unequip_index = sd->equip_index[i];
-
-			if( unequip_index >= 0 && (position&equip_bitmask[i]) ) {
-				struct item *unequip_item = &sd->inventory.u.items_inventory[unequip_index];
+			unequipped_index = sd->equip_index[i];
+			if( unequipped_index >= 0 && (position&equip_bitmask[i]) ) {
+				struct item *unequipped_item = &sd->inventory.u.items_inventory[unequipped_index];
 
 				//Store the unequipped index and position mask for later
 				if( !unequipped )
 					CREATE(unequipped,struct s_unequipped,1);
 				else
 					RECREATE(unequipped,struct s_unequipped,unequipped_count + 1);
-				unequipped[unequipped_count].index = unequip_index;
-				unequipped[unequipped_count].position = unequip_item->equip;
+				unequipped[unequipped_count].index = unequipped_index;
+				unequipped[unequipped_count].position = unequipped_item->equip;
 				unequipped_count++;
 				//Keep the position for later
-				unequipped_position |= unequip_item->equip;
+				unequipped_position |= unequipped_item->equip;
 				//Unequip the item
-				pc_unequipitem(sd,unequip_index,0);
+				pc_unequipitem(sd,unequipped_index,0);
 			}
 		}
 		all_position = position|unequipped_position;
 		for( i = 0; i < EQI_MAX; i++ ) { //Equip everything that is hit by the mask
 			int exchange_index = sd->equip_switch_index[i];
 
-			if( exchange_index >= 0 && all_position & equip_bitmask[i] ) {
+			if( exchange_index >= 0 && (all_position&equip_bitmask[i]) ) {
 				struct item *exchange_item = &sd->inventory.u.items_inventory[exchange_index];
 				int exchange_position = exchange_item->equipSwitch; //Store the target position
 
@@ -10616,10 +10616,10 @@ int pc_equipswitch(struct map_session_data *sd, int index) {
 			}
 		}
 		for( i = 0; i < unequipped_count; i++ ) { //Place all unequipped items into the equip switch window
-			int unequipped_index = unequipped[i].index;
-			int unequipped_position = unequipped[i].position;
 			int j;
 
+			unequipped_index = unequipped[i].index;
+			unequipped_position = unequipped[i].position;
 			for( j = 0; j < EQI_MAX; j++ ) { //Rebuild the index cache
 				if( unequipped_position&equip_bitmask[j] )
 					sd->equip_switch_index[j] = unequipped_index;
@@ -10627,7 +10627,7 @@ int pc_equipswitch(struct map_session_data *sd, int index) {
 			sd->inventory.u.items_inventory[unequipped_index].equipSwitch = unequipped_position; //Set the correct position mask
 			clif_equipswitch_add(sd,unequipped_index,unequipped_position,false); //Notify the client
 		}
-		if (unequipped) {
+		if( unequipped ) {
 			aFree(unequipped);
 			unequipped = NULL;
 			unequipped_count = 0;
