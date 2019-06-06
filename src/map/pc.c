@@ -4884,24 +4884,16 @@ short pc_search_inventory(struct map_session_data *sd, unsigned short nameid)
  * @param item
  * @param amount
  * @param log_type
- * @return
- *   0 = success
- *   1 = invalid itemid not found or negative amount
- *   2 = overweight
- *   3 = ?
- *   4 = no free place found
- *   5 = max amount reached
- *   6 = ?
- *   7 = stack limitation
+ * @return see e_additem_result
  */
-char pc_additem(struct map_session_data *sd,struct item *item,int amount,e_log_pick_type log_type)
+enum e_additem_result pc_additem(struct map_session_data *sd, struct item *item, int amount, e_log_pick_type log_type)
 {
 	struct item_data *id;
 	int16 i;
 	unsigned int w;
 
-	nullpo_retr(1, sd);
-	nullpo_retr(1, item);
+	nullpo_retr(ADDITEM_INVALID, sd);
+	nullpo_retr(ADDITEM_INVALID, item);
 
 	if( !item->nameid || amount <= 0 )
 		return ADDITEM_INVALID;
@@ -5413,31 +5405,31 @@ int pc_useitem(struct map_session_data *sd, int n)
  * @param item
  * @param amount
  * @param log_type
- * @return 0 = success; 1 = fail; 2 = no slot
+ * @return see e_additem_result
  */
-unsigned char pc_cart_additem(struct map_session_data *sd, struct item *item, int amount, e_log_pick_type log_type)
+enum e_additem_result pc_cart_additem(struct map_session_data *sd, struct item *item, int amount, e_log_pick_type log_type)
 {
 	struct item_data *data;
 	int i, w;
 
-	nullpo_retr(1, sd);
-	nullpo_retr(1, item);
+	nullpo_retr(ADDITEM_INVALID, sd);
+	nullpo_retr(ADDITEM_INVALID, item);
 
 	if( !(item->nameid) || amount <= 0 )
-		return 1;
+		return ADDITEM_INVALID;
 
 	data = itemdb_search(item->nameid);
-	if( data->stack.cart && amount > data->stack.amount )
-		return 1; //Item stack limitation
+	if( data->stack.cart && amount > data->stack.amount ) //Item stack limitation
+		return ADDITEM_STACKLIMIT;
 
 	if( !itemdb_cancartstore(item, pc_get_group_level(sd)) ||
 		(item->bound > BOUND_ACCOUNT && !pc_can_give_bounded_items(sd)) ) { //Check item trade restrictions [Skotlex]
 		clif_displaymessage(sd->fd, msg_txt(264));
-		return 1;
+		return ADDITEM_INVALID;
 	}
 
 	if( (w = data->weight * amount) + sd->cart_weight > sd->cart_weight_max )
-		return 1;
+		return ADDITEM_OVERWEIGHT;
 
 	i = MAX_CART;
 	if( itemdb_isstackable2(data) && !item->expire_time ) {
@@ -5453,14 +5445,13 @@ unsigned char pc_cart_additem(struct map_session_data *sd, struct item *item, in
 	if( i < MAX_CART ) { //Item already in cart, stack it
 		if( amount > MAX_AMOUNT - sd->cart.u.items_cart[i].amount ||
 			(data->stack.cart && amount > data->stack.amount - sd->cart.u.items_cart[i].amount) )
-			return 2; //No slot
-
+			return ADDITEM_OVERAMOUNT;
 		sd->cart.u.items_cart[i].amount += amount;
 		clif_cart_additem(sd,i,amount,0);
 	} else { //Item not stackable or not present, add it
 		ARR_FIND(0, MAX_CART, i, sd->cart.u.items_cart[i].nameid == 0);
 		if( i == MAX_CART )
-			return 2; //No slot
+			return ADDITEM_OVERITEM;
 		memcpy(&sd->cart.u.items_cart[i], item, sizeof(sd->cart.u.items_cart[0]));
 		sd->cart.u.items_cart[i].id = 0;
 		sd->cart.u.items_cart[i].amount = amount;
@@ -5474,7 +5465,7 @@ unsigned char pc_cart_additem(struct map_session_data *sd, struct item *item, in
 	sd->cart_weight += w;
 	clif_updatestatus(sd,SP_CARTINFO);
 
-	return 0;
+	return ADDITEM_SUCCESS;
 }
 
 /**
@@ -5516,7 +5507,7 @@ void pc_cart_delitem(struct map_session_data *sd, int n, int amount, int type, e
 void pc_putitemtocart(struct map_session_data *sd, int idx, int amount)
 {
 	struct item *item_data;
-	char flag = 0;
+	enum e_additem_result flag;
 
 	nullpo_retv(sd);
 
@@ -5525,19 +5516,20 @@ void pc_putitemtocart(struct map_session_data *sd, int idx, int amount)
 
 	item_data = &sd->inventory.u.items_inventory[idx];
 
-	if( !item_data->nameid || amount < 1 || item_data->amount < amount || sd->state.vending )
+	if( !item_data->nameid || amount < 1 || item_data->amount < amount || sd->state.vending || sd->state.prevend )
 		return;
 
 	if( item_data->equipSwitch ) {
-		clif_msg(sd, ITEM_EQUIP_SWITCH);
+		clif_msg(sd,ITEM_EQUIP_SWITCH);
 		return;
 	}
 
-	if( (flag = pc_cart_additem(sd,item_data,amount,LOG_TYPE_NONE)) == 0 )
+	if( (flag = pc_cart_additem(sd,item_data,amount,LOG_TYPE_NONE)) == ADDITEM_SUCCESS )
 		pc_delitem(sd,idx,amount,0,5,LOG_TYPE_NONE);
 	else {
-		clif_dropitem(sd,idx,0);
-		clif_cart_additem_ack(sd,(flag == 1) ? ADDITEM_TO_CART_FAIL_WEIGHT : ADDITEM_TO_CART_FAIL_COUNT);
+		clif_cart_additem_ack(sd,(flag == ADDITEM_OVERAMOUNT) ? ADDITEM_TO_CART_FAIL_COUNT : ADDITEM_TO_CART_FAIL_WEIGHT);
+		clif_additem(sd,idx,amount,0);
+		clif_delitem(sd,idx,amount,0);
 	}
 }
 
@@ -5578,14 +5570,15 @@ void pc_getitemfromcart(struct map_session_data *sd, int idx, int amount)
 
 	item_data =& sd->cart.u.items_cart[idx];
 
-	if( !item_data->nameid || amount < 1 || item_data->amount < amount || sd->state.vending )
+	if( !item_data->nameid || amount < 1 || item_data->amount < amount || sd->state.vending || sd->state.prevend )
 		return;
 
 	if( (flag = pc_additem(sd,item_data,amount,LOG_TYPE_NONE)) == ADDITEM_SUCCESS )
 		pc_cart_delitem(sd,idx,amount,0,LOG_TYPE_NONE);
 	else {
-		clif_dropitem(sd,idx,0);
-		clif_additem(sd,0,0,flag);
+		clif_cart_delitem(sd,idx,amount);
+		clif_additem(sd,idx,amount,flag);
+		clif_cart_additem(sd,idx,amount,0);
 	}
 }
 
@@ -5617,18 +5610,17 @@ int pc_show_steal(struct block_list *bl, va_list ap)
 {
 	struct map_session_data *sd;
 	int itemid;
-
 	struct item_data *item = NULL;
 	char output[100];
 
-	sd = va_arg(ap,struct map_session_data *);
-	itemid = va_arg(ap,int);
+	sd = va_arg(ap, struct map_session_data *);
+	itemid = va_arg(ap, int);
 
-	if( (item = itemdb_exists(itemid) ) == NULL)
-		sprintf(output,"%s stole an Unknown Item (id: %i).",sd->status.name, itemid);
+	if( !(item = itemdb_exists(itemid)) )
+		sprintf(output, "%s stole an Unknown Item (id: %i).", sd->status.name, itemid);
 	else
-		sprintf(output,"%s stole %s.",sd->status.name,item->jname);
-	clif_displaymessage( ((struct map_session_data *)bl)->fd, output);
+		sprintf(output, "%s stole %s.", sd->status.name, item->jname);
+	clif_displaymessage(((struct map_session_data *)bl)->fd, output);
 
 	return 0;
 }

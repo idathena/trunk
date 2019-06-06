@@ -409,7 +409,11 @@ void storage_storageget(struct map_session_data *sd, struct s_storage *stor, int
 void storage_storageaddfromcart(struct map_session_data *sd, struct s_storage *stor, int index, int amount)
 {
 	enum e_storage_add result;
+
 	nullpo_retv(sd);
+
+	if (sd->state.prevend)
+		return;
 
 	result = storage_canAddItem(stor, index, sd->cart.u.items_inventory, amount, MAX_CART);
 	if (result == STORAGE_ADD_INVALID)
@@ -440,20 +444,23 @@ void storage_storageaddfromcart(struct map_session_data *sd, struct s_storage *s
  */
 void storage_storagegettocart(struct map_session_data *sd, struct s_storage *stor, int index, int amount)
 {
-	unsigned char flag = 0;
+	enum e_additem_result flag;
 	enum e_storage_add result;
 
 	nullpo_retv(sd);
+
+	if (sd->state.prevend)
+		return;
 
 	result = storage_canGetItem(stor, index, amount);
 	if (result != STORAGE_ADD_OK)
 		return;
 
-	if ((flag = pc_cart_additem(sd, &stor->u.items_storage[index], amount, LOG_TYPE_STORAGE)) == 0)
+	if ((flag = pc_cart_additem(sd, &stor->u.items_storage[index], amount, LOG_TYPE_STORAGE)) == ADDITEM_SUCCESS)
 		storage_delitem(sd, stor, index, amount);
 	else {
 		clif_storageitemremoved(sd, index, 0);
-		clif_cart_additem_ack(sd, (flag == 1) ? ADDITEM_TO_CART_FAIL_WEIGHT : ADDITEM_TO_CART_FAIL_COUNT);
+		clif_cart_additem_ack(sd, (flag == ADDITEM_OVERAMOUNT) ? ADDITEM_TO_CART_FAIL_COUNT : ADDITEM_TO_CART_FAIL_WEIGHT);
 	}
 }
 
@@ -1011,7 +1018,7 @@ void storage_guild_storageaddfromcart(struct map_session_data *sd, int index, in
  */
 void storage_guild_storagegettocart(struct map_session_data *sd, int index, int amount)
 {
-	short flag;
+	enum e_additem_result flag;
 	struct s_storage *stor;
 
 	nullpo_retv(sd);
@@ -1029,11 +1036,11 @@ void storage_guild_storagegettocart(struct map_session_data *sd, int index, int 
 	if (amount < 1 || amount > stor->u.items_guild[index].amount)
 		return;
 
-	if ((flag = pc_cart_additem(sd, &stor->u.items_guild[index], amount, LOG_TYPE_GSTORAGE)) == 0)
+	if ((flag = pc_cart_additem(sd, &stor->u.items_guild[index], amount, LOG_TYPE_GSTORAGE)) == ADDITEM_SUCCESS)
 		storage_guild_delitem(sd, stor, index, amount);
 	else {
 		clif_storageitemremoved(sd, index, 0);
-		clif_cart_additem_ack(sd, (flag == 1) ? ADDITEM_TO_CART_FAIL_WEIGHT : ADDITEM_TO_CART_FAIL_COUNT);
+		clif_cart_additem_ack(sd, (flag == ADDITEM_OVERAMOUNT) ? ADDITEM_TO_CART_FAIL_COUNT : ADDITEM_TO_CART_FAIL_WEIGHT);
 	}
 }
 
