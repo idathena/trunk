@@ -304,6 +304,7 @@ struct map_session_data {
 
 	struct item_data *inventory_data[MAX_INVENTORY]; //Direct pointers to itemdb entries (faster than doing item_id lookups)
 	short equip_index[EQI_MAX];
+	short equip_switch_index[EQI_MAX];
 	unsigned int weight,max_weight,add_max_weight;
 	int cart_weight,cart_num,cart_weight_max;
 	int fd;
@@ -351,6 +352,7 @@ struct map_session_data {
 	unsigned int canskill_tick; //Used to prevent abuse from no-delay ACT files
 	unsigned int cansendmail_tick; //[Mail System Flood Protection]
 	unsigned int ks_floodprotect_tick; //[Kill Steal Protection]
+	unsigned int equipswitch_tick; //Equip switch
 
 	struct s_item_delay {
 		unsigned short nameid;
@@ -625,7 +627,7 @@ struct map_session_data {
 		bool save;                        //Flag to know if achievements need to be saved
 		uint16 count;                     //Total achievements in log
 		uint16 incompleteCount;           //Total incomplete achievements in log
-		
+
 		struct achievement *achievements; //Achievement log entries
 	} achievement_data;
 
@@ -977,7 +979,7 @@ int pc_equippoint(struct map_session_data *sd, int n);
 void pc_setinventorydata(struct map_session_data *sd);
 
 uint8 pc_checkskill(struct map_session_data *sd, uint16 skill_id);
-short pc_checkequip(struct map_session_data *sd, int pos);
+short pc_checkequip(struct map_session_data *sd, int pos, bool checkall);
 bool pc_checkequip2(struct map_session_data *sd, unsigned short nameid, int min, int max);
 
 void pc_calc_skilltree(struct map_session_data *sd);
@@ -1081,8 +1083,10 @@ int pc_resetstate(struct map_session_data *);
 int pc_resetskill(struct map_session_data *, int);
 int pc_resetfeel(struct map_session_data *);
 int pc_resethate(struct map_session_data *);
-bool pc_equipitem(struct map_session_data *sd, short n, int req_pos);
+bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equipswitch);
 void pc_unequipitem(struct map_session_data *sd, int n, int flag);
+int pc_equipswitch(struct map_session_data* sd, int index);
+void pc_equipswitch_remove(struct map_session_data* sd, int index);
 void pc_checkitem(struct map_session_data *);
 void pc_check_available_item(struct map_session_data *sd, uint8 type);
 int pc_useitem(struct map_session_data *,int);

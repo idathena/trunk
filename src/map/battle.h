@@ -678,6 +678,7 @@ extern struct Battle_Config
 	int feature_stylistui;
 	int rental_transaction;
 	int pet_walk_speed;
+	int feature_equipswitch;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

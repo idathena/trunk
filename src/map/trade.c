@@ -52,7 +52,7 @@ void trade_traderequest(struct map_session_data *sd, struct map_session_data *ta
 			return;
 		}
 	}
-	
+
 	if (sd->trade_partner != 0) { //If a character tries to trade to another one then cancel the previous one
 		struct map_session_data *previous_sd = map_id2sd(sd->trade_partner);
 
@@ -106,7 +106,7 @@ void trade_tradeack(struct map_session_data *sd, int type)
 
 	if (sd->state.trading || !sd->trade_partner)
 		return; //Already trading or no partner set.
-	
+
 	if ((tsd = map_id2sd(sd->trade_partner)) == NULL) {
 		clif_tradestart(sd, 1); //Character does not exist
 		sd->trade_partner = 0;
@@ -258,7 +258,7 @@ int trade_check(struct map_session_data *sd, struct map_session_data *tsd)
 			n = sd->deal.item[trade_i].index;
 			if (amount > inventory[n].amount)
 				return 0; //Quantity Exploit?
-			
+
 			data = itemdb_search(inventory[n].nameid);
 			i = MAX_INVENTORY;
 			if (itemdb_isstackable2(data)) { //Stackable item
@@ -377,6 +377,11 @@ void trade_tradeadditem(struct map_session_data *sd, short index, short amount)
 		return;
 	}
 
+	if( item->equipSwitch ) {
+		clif_msg(sd, ITEM_EQUIP_SWITCH);
+		return;
+	}
+
 	if( item->bound )
 		sd->state.isBoundTrading |= (1<<item->bound);
 
@@ -451,7 +456,7 @@ void trade_tradeok(struct map_session_data *sd)
 
 	if(sd->state.deal_locked || !sd->state.trading)
 		return;
-	
+
 	if((target_sd = map_id2sd(sd->trade_partner)) == NULL) {
 		trade_tradecancel(sd);
 		return;
@@ -543,9 +548,9 @@ void trade_tradecommit(struct map_session_data *sd)
 		trade_tradecancel(sd);
 		return;
 	}
-	
+
 	sd->state.deal_locked = 2;
-	
+
 	if (tsd->state.deal_locked < 2)
 		return; //Not yet time for trading.
 
@@ -565,7 +570,7 @@ void trade_tradecommit(struct map_session_data *sd)
 		trade_tradecancel(sd);
 		return;
 	}
-	
+
 	//Trade is accepted and correct.
 	for (trade_i = 0; trade_i < 10; trade_i++) {
 		int n;

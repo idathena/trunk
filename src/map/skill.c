@@ -636,7 +636,7 @@ bool skill_isNotOk(uint16 skill_id, struct map_session_data *sd)
 	if (skill_id == AL_TELEPORT && sd->skillitem == skill_id && sd->skillitemlv > 2)
 		return false; //Teleport lv 3 bypasses this check [Inkfish]
 
-	if (map[m].flag.noskill)
+	if (map[m].flag.noskill && skill_id != ALL_EQSWITCH)
 		return true;
 
 	//Epoque:
@@ -7538,7 +7538,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			{
 				unsigned int equip[] = { EQP_WEAPON,EQP_SHIELD,EQP_ARMOR,EQP_HEAD_TOP };
 
-				if( sd && (bl->type != BL_PC || (dstsd && pc_checkequip(dstsd,equip[skill_id - AM_CP_WEAPON]) < 0)) ) {
+				if( sd && (bl->type != BL_PC || (dstsd && pc_checkequip(dstsd,equip[skill_id - AM_CP_WEAPON],false) < 0)) ) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					map_freeblock_unlock(); //Don't consume item requirements
 					return 1;
@@ -8325,7 +8325,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				int s = 0, skilltime = skill_get_time(skill_id,skill_lv);
 
 				for (i = 0; i < 4; i++) {
-					if (bl->type != BL_PC || (dstsd && pc_checkequip(dstsd,equip[i]) < 0))
+					if (bl->type != BL_PC || (dstsd && pc_checkequip(dstsd,equip[i],false) < 0))
 						continue;
 					sc_start(src,bl,(sc_type)(SC_CP_WEAPON + i),100,skill_lv,skilltime);
 					s++;
@@ -10756,6 +10756,18 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case NPC_PULSESTRIKE2:
 			for( i = 0; i < 3; i++ )
 				skill_addtimerskill(src,tick + i * 1000,bl->id,0,0,skill_id,skill_lv,0,0);
+			break;
+
+		case ALL_EQSWITCH:
+			if( sd ) {
+				int position;
+
+				clif_equipswitch_reply(sd,false);
+				for( i = 0, position = 0; i < EQI_MAX; i++ ) {
+					if( sd->equip_switch_index[i] >= 0 && !(position&equip_bitmask[i]) )
+						position |= pc_equipswitch(sd,sd->equip_switch_index[i]);
+				}
+			}
 			break;
 
 		default:
@@ -16814,7 +16826,7 @@ void skill_weaponrefine(struct map_session_data *sd, int idx)
 				clif_inventorylist(sd);
 				clif_refine(sd->fd,0,idx,item->refine);
 				if (ep)
-					pc_equipitem(sd,idx,ep);
+					pc_equipitem(sd,idx,ep,false);
 				clif_misceffect(&sd->bl,3);
 				achievement_update_objective(sd,AG_REFINE_SUCCESS,2,ditem->wlv,item->refine);
 				if (item->refine == 10 &&
