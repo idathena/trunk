@@ -23,12 +23,13 @@ static DBMap *itemdb; //Item DB
 static DBMap *itemdb_combo; //Item Combo DB
 static DBMap *itemdb_group; //Item Group DB
 static DBMap *itemdb_randomopt; //Random option DB
-static DBMap *itemdb_randomopt_subgroup; //Random option subgroup DB
 static DBMap *itemdb_randomopt_group; //Random option group DB
-
 struct item_data *dummy_item; //This is the default dummy item used for non-existant items [Skotlex]
 
 struct s_roulette_db rd;
+
+struct config_t itemdb_randomopt_group_conf;
+static void itemdb_randomopt_group_free_sub(struct s_random_opt_group *group, bool free);
 
 /**
  * Check if combo exists
@@ -1764,73 +1765,31 @@ static void itemdb_read_randomopt() {
 }
 
 /**
- * Clear Item Random Option Subgroup from memory
+ * Clear Item Random Option Group single entry
  */
-static int itemdb_randomopt_subgroup_free(DBKey key, DBData *data, va_list ap) {
-	struct s_random_opt_subgroup *sg = (struct s_random_opt_subgroup *)db_data2ptr(data);
+static void itemdb_randomopt_group_free_sub(struct s_random_opt_group *entry, bool free) {
+	int i;
 
-	if (!sg)
-		return 0;
-	if (sg->entries)
-		aFree(sg->entries);
-	sg->entries = NULL;
-	aFree(sg);
-	return 1;
-}
-
-/**
- * Get Item Random Option Subgroup from itemdb_randomopt_subgroup MapDB
- * @param subgroup_id Random Option Subgroup
- * @return Random Option Subgroup data or NULL if not found
- */
-struct s_random_opt_subgroup *itemdb_randomopt_subgroup_exists(int subgroup_id) {
-	return (struct s_random_opt_subgroup *)uidb_get(itemdb_randomopt_subgroup, subgroup_id);
-}
-
-/**
- * Read Item Random Option Subgroup from db file
- */
-static bool itemdb_read_randomopt_subgroup(char *str[], int columns, int current) {
-	int subgroup_id = 0, i;
-	unsigned short rate = (unsigned short)strtoul(str[1], NULL, 10);
-	struct s_random_opt_subgroup *sg = NULL;
-
-	if (!script_get_constant(str[0], &subgroup_id)) {
-		ShowError("itemdb_read_randomopt_subgroup: Invalid ID for random option subgroup '%s'.\n", str[0]);
-		return false;
-	}
-	if (!(sg = (struct s_random_opt_subgroup *)uidb_get(itemdb_randomopt_subgroup, subgroup_id))) {
-		CREATE(sg, struct s_random_opt_subgroup, 1);
-		sg->id = subgroup_id;
-		sg->entries = NULL;
-		sg->total = 0;
-		uidb_put(itemdb_randomopt_subgroup, sg->id, sg);
-	}
-	RECREATE(sg->entries, struct s_random_opt_subgroup_entry, sg->total + rate);
-	for (i = sg->total; i < (sg->total + rate); i++) {
-		int rdmopt_id = 0;
-
-		if (!script_get_constant(str[2], &rdmopt_id) || !itemdb_randomopt_exists(rdmopt_id)) {
-			ShowError("itemdb_read_randomopt_subgroup: Invalid random option ID '%s' for subgroup ID '%s' in column 3!\n", str[2], str[0]);
-			continue;
+	for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
+		if (entry->options[i]) {
+			aFree(entry->options[i]);
+			entry->options[i] = NULL;
+			entry->option_count[i] = 0;
 		}
-		sg->entries[i].id = rdmopt_id;
-		sg->entries[i].min_val = (short)strtoul(str[3], NULL, 10);
-		sg->entries[i].max_val = (short)strtoul(str[4], NULL, 10);
 	}
-	sg->total += rate;
-	return true;
+	if (free)
+		aFree(entry);
 }
 
 /**
  * Clear Item Random Option Group from memory
  */
 static int itemdb_randomopt_group_free(DBKey key, DBData *data, va_list ap) {
-	struct s_random_opt_group *g = (struct s_random_opt_group *)db_data2ptr(data);
+	struct s_random_opt_group *entry = (struct s_random_opt_group *)db_data2ptr(data);
 
-	if (!g)
+	if (!entry)
 		return 0;
-	aFree(g);
+	itemdb_randomopt_group_free_sub(entry, true);
 	return 1;
 }
 
@@ -1843,37 +1802,123 @@ struct s_random_opt_group *itemdb_randomopt_group_exists(int group_id) {
 	return (struct s_random_opt_group *)uidb_get(itemdb_randomopt_group, group_id);
 }
 
+static void itemdb_read_randomopt_group_sub_slots(config_setting_t *t, struct s_random_opt_group *entry, const char *str)
+{
+	int i;
+
+	nullpo_retv(t);
+	nullpo_retv(str);
+
+	for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
+		struct config_setting_t *tt = config_setting_get_elem(t, i);
+		struct config_setting_t *s;
+
+		if (!tt)
+			break;
+		if (!config_setting_is_group(tt))
+			continue;
+		if ((s = config_setting_get_member(tt, "Options")) && config_setting_is_list(s)) {
+			int len = config_setting_length(s), j;
+
+			for (j = 0; j < len; j++) {
+				struct config_setting_t *c = config_setting_get_elem(s, j);
+				const char *name = NULL;
+				int option_id = 0, min_val = 0, max_val = 0, i32;
+
+				if (!c)
+					break;
+				if (!config_setting_is_group(c))
+					continue;
+				if (!config_setting_lookup_string(c, "Id", &name) || !*name)
+					continue;
+				if (!script_get_constant(name, &option_id)) {
+					ShowWarning("itemdb_read_randomopt_group_sub_slots: Invalid option Id '%s' in group '%s'\n", name, str);
+					continue;
+				}
+				if (config_setting_lookup_int(c, "MinValue", &i32) && i32 >= 0)
+					min_val = i32;
+				if (config_setting_lookup_int(c, "MaxValue", &i32) && i32 >= 0)
+					max_val = i32;
+				if (!min_val && max_val > 0)
+					min_val = 1;
+				RECREATE(entry->options[i], struct s_random_opt_group_entry, entry->option_count[i] + 1);
+				entry->options[i][j].id = option_id;
+				entry->options[i][j].min_val = min_val;
+				entry->options[i][j].max_val = max_val;
+				entry->option_count[i]++;
+			}
+		}
+	}
+	if (i == MAX_ITEM_RDM_OPT && config_setting_get_elem(t, i))
+		ShowWarning("itemdb_read_randomopt_group_sub_slots: Too many slots in group '%s'\n", str);
+}
+
+struct s_random_opt_group *itemdb_read_randomopt_group_sub(struct config_setting_t *it, int n, const char *source)
+{
+	struct s_random_opt_group *entry = NULL;
+	struct config_setting_t *t = NULL;
+	const char *str = NULL;
+	int i32 = 0, i;
+
+	nullpo_retr(NULL, it);
+	nullpo_retr(NULL, source);
+
+	if (!config_setting_lookup_string(it, "Group", &str) || !*str) {
+		ShowWarning("itemdb_read_randomopt_group_sub: Missing Group in '%s', entry #%d, skipping.\n", source, n);
+		return NULL;
+	}
+
+	if (!script_get_constant(str, &i32)) {
+		ShowError("itemdb_read_randomopt_group_sub: Invalid ID for random option group '%s', skipping.\n", str);
+		return NULL;
+	}
+
+	CREATE(entry, struct s_random_opt_group, 1);
+	entry->id = i32;
+
+	for (i = 0; i < MAX_ITEM_RDM_OPT; i++)
+		memset(&entry->option[i], 0, sizeof(entry->option[i]));
+
+	if ((t = config_setting_get_member(it, "Slots")) && config_setting_is_list(t))
+		itemdb_read_randomopt_group_sub_slots(t, entry, str);
+
+	return entry;
+}
+
 /**
  * Read Item Random Option Group from db file
  */
-static bool itemdb_read_randomopt_group(char *str[], int columns, int current) {
-	int group_id = 0, i, j;
-	struct s_random_opt_group *g = NULL;
+void itemdb_read_randomopt_group(void)
+{
+	struct config_setting_t *rdb = NULL, *t = NULL;
+	char filepath[256];
+	int count = 0;
 
-	if (!script_get_constant(str[0], &group_id)) {
-		ShowError("itemdb_read_randomopt_group: Invalid ID for random option group '%s'.\n", str[0]);
-		return false;
-	}
-	if (!(g = (struct s_random_opt_group *)uidb_get(itemdb_randomopt_group, group_id))) {
-		CREATE(g, struct s_random_opt_group, 1);
-		g->id = group_id;
-		for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
-			memset(&g->subgroup_id[i], 0, sizeof(g->subgroup_id[i]));
-			memset(&g->option[i], 0, sizeof(g->option[i]));
-		}
-		uidb_put(itemdb_randomopt_group, g->id, g);
-	}
-	for (i = 0, j = 1; j < columns && i < MAX_ITEM_RDM_OPT; j++) {
-		int subgroup_id = -1;
+	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, DBPATH"item_randomopt_group.conf");
+	if (config_read_file(&itemdb_randomopt_group_conf, filepath))
+		return;
 
-		if (!script_get_constant(str[j], &subgroup_id)) {
-			ShowError("itemdb_read_randomopt_group: Invalid random subgroup ID '%s' for group ID '%s' in column %d!\n", str[j], str[0], j + 1);
+	if (!(rdb = config_lookup(&itemdb_randomopt_group_conf, "item_randomopt_group")))
+		return;
+
+	while ((t = config_setting_get_elem(rdb, count))) {
+		struct s_random_opt_group *entry = itemdb_read_randomopt_group_sub(t, count, filepath);
+
+		if (!entry) {
+			ShowWarning("itemdb_read_randomopt_group: Failed to parse item random option group entry %d.\n", count);
 			continue;
 		}
-		g->subgroup_id[i] = subgroup_id;
-		i++;
+		if (itemdb_randomopt_group_exists(entry->id)) {
+			ShowWarning("itemdb_read_randomopt_group: Duplicate group id %d.\n", entry->id);
+			itemdb_randomopt_group_free_sub(entry, false);
+			continue;
+		}
+		uidb_put(itemdb_randomopt_group, entry->id, entry);
+		count++;
 	}
-	return true;
+
+	config_destroy(&itemdb_randomopt_group_conf);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filepath);
 }
 
 /**
@@ -1891,12 +1936,11 @@ static void itemdb_read(void) {
 	itemdb_read_noequip();
 	itemdb_read_itemtrade();
 	itemdb_read_randomopt();
+	itemdb_read_randomopt_group();
 	sv_readdb(db_path, "item_avail.txt",         ',', 2, 2, -1, &itemdb_read_itemavail);
 	sv_readdb(db_path, DBPATH"item_delay.txt",   ',', 2, 3, -1, &itemdb_read_itemdelay);
 	sv_readdb(db_path, DBPATH"item_flag.txt",    ',', 2, 2, -1, &itemdb_read_flag);
 	sv_readdb(db_path, "item_stack.txt",         ',', 3, 3, -1, &itemdb_read_stack);
-	sv_readdb(db_path, DBPATH"item_randomopt_subgroup.txt", ',', 5, 5, -1, &itemdb_read_randomopt_subgroup);
-	sv_readdb(db_path, DBPATH"item_randomopt_group.txt", ',', 2, MAX_ITEM_RDM_OPT + 1, -1, &itemdb_read_randomopt_group);
 }
 
 /*==========================================
@@ -2020,7 +2064,6 @@ void itemdb_reload(void) {
 
 	itemdb_group->clear(itemdb_group, itemdb_group_free);
 	itemdb_randomopt->clear(itemdb_randomopt, itemdb_randomopt_free);
-	itemdb_randomopt_subgroup->clear(itemdb_randomopt_subgroup, itemdb_randomopt_subgroup_free);
 	itemdb_randomopt_group->clear(itemdb_randomopt_group, itemdb_randomopt_group_free);
 	itemdb->clear(itemdb, itemdb_final_sub);
 	db_clear(itemdb_combo);
@@ -2067,7 +2110,6 @@ void do_final_itemdb(void) {
 	db_destroy(itemdb_combo);
 	itemdb_group->destroy(itemdb_group, itemdb_group_free);
 	itemdb_randomopt->destroy(itemdb_randomopt, itemdb_randomopt_free);
-	itemdb_randomopt_subgroup->destroy(itemdb_randomopt_subgroup, itemdb_randomopt_subgroup_free);
 	itemdb_randomopt_group->destroy(itemdb_randomopt_group, itemdb_randomopt_group_free);
 	itemdb->destroy(itemdb, itemdb_final_sub);
 	destroy_item_data(dummy_item);
@@ -2083,7 +2125,6 @@ void do_init_itemdb(void) {
 	itemdb_combo = uidb_alloc(DB_OPT_BASE);
 	itemdb_group = uidb_alloc(DB_OPT_BASE);
 	itemdb_randomopt = uidb_alloc(DB_OPT_BASE);
-	itemdb_randomopt_subgroup = uidb_alloc(DB_OPT_BASE);
 	itemdb_randomopt_group = uidb_alloc(DB_OPT_BASE);
 	itemdb_create_dummy();
 	itemdb_read();

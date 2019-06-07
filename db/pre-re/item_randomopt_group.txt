@@ -1,1 +1,0 @@
-// <randopt_groupid>,<randopt_subgroupid_slot1>{,<randopt_subgroupid_slot2>,<randopt_subgroupid_slot3>,<randopt_subgroupid_slot4>,<randopt_subgroupid_slot5>}

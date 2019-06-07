@@ -1984,26 +1984,25 @@ static TIMER_FUNC(mob_ai_hard)
  */
 void mob_setdropitem_option(struct item *itm, struct s_mob_drop *mobdrop)
 {
-	struct s_random_opt_group *g = NULL;
+	struct s_random_opt_group *entry = NULL;
 	int i;
 
 	if (!itm || !mobdrop || !mobdrop->randomopt_group)
 		return;
-	if ((g = itemdb_randomopt_group_exists(mobdrop->randomopt_group))) {
+	if ((entry = itemdb_randomopt_group_exists(mobdrop->randomopt_group))) {
+		int count;
+
 		for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
-			struct s_random_opt_subgroup *sg = NULL;
+			count = entry->option_count[i];
+			if (count > 0) {
+				int j = rnd()%count;
 
-			if (!g->subgroup_id[i])
-				continue;
-			if ((sg = itemdb_randomopt_subgroup_exists(g->subgroup_id[i])) && sg->total) {
-				int j = rnd()%sg->total;
-
-				g->option[i].id = sg->entries[j].id;
-				g->option[i].value = rnd_value(sg->entries[j].min_val, sg->entries[j].max_val);
-				g->option[i].param = 0;
+				entry->option[i].id = entry->options[i][j].id;
+				entry->option[i].value = rnd_value(entry->options[i][j].min_val, entry->options[i][j].max_val);
+				entry->option[i].param = 0;
 			}
 		}
-		memcpy(&itm->option, &g->option, sizeof(itm->option));
+		memcpy(&itm->option, &entry->option, sizeof(itm->option));
 	}
 }
 
@@ -3985,7 +3984,7 @@ static void mob_readdb_libconfig_sub_drops(config_setting_t *t, struct mob_db *e
 		if (!config_setting_lookup_int(tt, "ItemId", &nameid))
 			continue;
 		if (!itemdb_exists(nameid)) {
-			ShowWarning("Monster \"%s\"(id: %d) is dropping an unknown item \"%s\"(Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
+			ShowWarning("mob_readdb_libconfig_sub_drops: Monster \"%s\"(id: %d) is dropping an unknown item \"%s\"(Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
 			entry->dropitem[i].nameid = 0;
 			entry->dropitem[i].p = 0;
 			entry->dropitem[i].steal_protected = 0;

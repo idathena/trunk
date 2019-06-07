@@ -105,7 +105,7 @@ print <<"EOF";
 		MaxLevel: (int)   // (optional, defaults to 0) Maximum Level
 		Count: (int)      // Mob Count
 	},
-	... (can repeated up to MAX_QUEST_OBJECTIVES times)
+	... (can be repeated up to MAX_QUEST_OBJECTIVES times)
 	)
 	Drops: ( (array)          // (optional)
 	{

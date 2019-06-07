@@ -1,1 +1,0 @@
-// <randopt_subgroupid>,<rate>,<randopt_id>,<randopt_min_value>,<randopt_max_value>

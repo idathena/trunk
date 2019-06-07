@@ -2956,32 +2956,6 @@
 	export_constant(STOR_MODE_GET);
 	export_constant(STOR_MODE_PUT);
 
-	/* Item Random Option Group */
-	export_constant(RDMOPTG_Crimson_Weapon);
-	export_constant(RDMOPTG_Vicious_Weapon_Group_1);
-	export_constant(RDMOPTG_Vicious_Weapon_Group_2);
-	export_constant(RDMOPTG_Vicious_Weapon_Group_3);
-	export_constant(RDMOPTG_Vicious_Weapon_Group_4);
-	export_constant(RDMOPTG_Vicious_Weapon_Group_5);
-
-	/* Item Random Option Subgroup */
-	export_constant(RDMOPTSG_Crimson_Weapon);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_1_Slot_1);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_1_Slot_2);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_1_Slot_3);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_2_Slot_1);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_2_Slot_2);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_2_Slot_3);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_3_Slot_1);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_3_Slot_2);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_3_Slot_3);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_4_Slot_1);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_4_Slot_2);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_4_Slot_3);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_5_Slot_1);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_5_Slot_2);
-	export_constant(RDMOPTSG_Vicious_Weapon_Group_5_Slot_3);
-
 	/* Unit stop walking flag */
 	export_constant(USW_NONE);
 	export_constant(USW_FIXPOS);
