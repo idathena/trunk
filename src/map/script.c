@@ -20175,7 +20175,7 @@ BUILDIN_FUNC(setmounting) {
 		sd->sc.data[SC_CLOAKINGEXCEED] || sd->sc.data[SC_CAMOUFLAGE] ||
 		sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__FEINTBOMB] )
 		script_pushint(st,0); //Silent failure
-	} else {
+	else {
 		if( sd->sc.data[SC_ALL_RIDING] )
 			status_change_end(&sd->bl,SC_ALL_RIDING,INVALID_TIMER);
 		else
