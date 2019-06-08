@@ -22,8 +22,7 @@ dali02,43,129,5	script	Unpleasant Royal Guard#	4_M_SAKRAYROYAL,{
 		mes "Come back later when you have done some training and are at least level 120!";
 		close;
 	}
-	.@party_id = getcharid(1);
-	if (getcharid(0) != getpartyleader(.@party_id,2) || .@party_id < 1) {
+	if (!is_party_leader()) {
 		mes "[Unpleasant Royal Guard]";
 		mes "I can only open the secret passage for party leaders. Please have your party leader talk to me.";
 		close;
@@ -103,13 +102,11 @@ dali02,40,134,5	script	Dimensional Device#dk	PORTAL,{
 		erasequest 1261;// Cursed Swordman
 		close;
 	}
-	.@party_id = getcharid(1);
-	if (getcharid(0) != getpartyleader(.@party_id,2) || .@party_id < 1) {
+	if (!is_party_leader()) {
 		mes "[Unpleasant Royal Guard]";
 		mes "I can only open the secret passage for party leaders. Please have your party leader talk to me.";
 		close;
 	}
-
 	.@md_name$ = "Ghost Palace";
 	switch( instance_enter(.@md_name$) ) {
 	case 3:
@@ -122,7 +119,7 @@ dali02,40,134,5	script	Dimensional Device#dk	PORTAL,{
 		mes "Only registered members can enter the " + .@md_name$ + " instance.";
 		close;
 	case 0:
-		mapannounce "dali", "" + strcharinfo(0) + " of the party, " + getpartyname(.@party_id) + ", is entering the Ghost Palace.", bc_map, 0x00ff99;
+		mapannounce "dali", "" + strcharinfo(0) + " of the party, " + getpartyname(getcharid(1)) + ", is entering the Ghost Palace.", bc_map, 0x00ff99;
 		// warp "1@spa",42,196;
 		setquest 1261;// Cursed Swordman
 		end;

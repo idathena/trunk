@@ -215,7 +215,7 @@ OnTreasureDied:
 		mes "to conquer this stronghold?";
 		close;
 	}
-	if (getcharid(2) != .@GID || strcharinfo(0) != getguildmaster(.@GID)) {
+	if (!is_guild_leader(.@GID)) {
 		mes "[ Steward ]";
 		mes "Hmpf. Your threats don't";
 		mes "scare me! Guardians, drive";
@@ -647,186 +647,182 @@ OnStartArena:
 		mes "over this stronghold.";
 		close;
 	}
-	if (getcharid(2) == .@GID) {
-		if (strcharinfo(0) != getguildmaster(.@GID)) {
+	if (getcharid(2) != .@GID) {
+		mes .@n$;
+		mes "Who are you? Scoundrel!";
+		mes "Leave this stronghold now!";
+		close;
+	}
+	if (!is_guild_leader()) {
+		mes .@n$;
+		mes "As guardian of this";
+		mes "stronghold, I answer only";
+		mes "to the master of the guild";
+		mes "that controls this place.";
+		close;
+	}
+	if (!agitcheck2()) {
+		mes .@n$;
+		mes "I am "+.@n$+", guardian of";
+		mes "this stronghold. For now,";
+		mes "all is quiet in this place.";
+		next;
+		switch(select("Converse:Cancel")) {
+		case 1:
 			mes .@n$;
-			mes "As guardian of this";
-			mes "stronghold, I answer only";
-			mes "to the master of the guild";
-			mes "that controls this place.";
+			mes "Do you have any questions";
+			mes "about this stronghold?";
+			next;
+			switch(select("Guardian Stones:Fortress Gates:Link Flags:Battle Strategy:Cancel")) {
+			case 1:
+				mes .@n$;
+				mes "There is one Emperium";
+				mes "and two Guardian Stones in";
+				mes "each fortress. These stones";
+				mes "are the first line of defense,";
+				mes "and must be destroyed before";
+				mes "enemies can even enter.";
+				next;
+				mes .@n$;
+				mes "The stones are located in";
+				mes "^4D4DFFGate Houses^000000 which must be";
+				mes "protected to prevent enemies";
+				mes "from reaching the Emperium.";
+				mes "Guardian Stones can ^4D4DFFrecall";
+				mes "your Guardians^000000 for protection.";
+				next;
+				mes .@n$;
+				mes "Fortresses with higher levels";
+				mes "of defense can summon more";
+				mes "Guardians: this is why it is";
+				mes "so important for guilds to";
+				mes "invest in Defense Growth.";
+				next;
+				mes .@n$;
+				mes "Guardian Stones that have";
+				mes "been destroyed can be revived";
+				mes "after a certain time, but one of the guild members must give";
+				mes "me the order. I can also report the status of the Guardian Stones.";
+				close;
+			case 2:
+				mes .@n$;
+				mes "^4D4DFFFortress Gates^000000 are the second line of guild stronghold defense,";
+				mes "and are protected by extra barricades activated by the Guardian Stones.";
+				mes "These gates are located in three different parts of the fortress.";
+				next;
+				mes .@n$;
+				mes "Barricades are protected by";
+				mes "Guardian Stones, and are";
+				mes "restored when the Guardian";
+				mes "Stones are retrieved. However,";
+				mes "it is not as easy to restore";
+				mes "destroyed Fortress Gates.";
+				next;
+				mes .@n$;
+				mes "Fortress Gates can only be";
+				mes "restored when the ^4D4DFFguild";
+				mes "master of a stronghold";
+				mes "changes^000000, or if ^4D4DFFrestoration";
+				mes "is requested by the guild";
+				mes "master of the stronghold^000000.";
+				close;
+			case 3:
+				mes .@n$;
+				mes "Strongholds have many";
+				mes "Link Flags that allow you";
+				mes "to access vital areas within";
+				mes "restrictions placed by the";
+				mes "Barricades. Usually, ^4D4DFFFlag 1";
+				mes "links to the Gate House^000000.";
+				next;
+				mes .@n$;
+				mes "Many flags link directly to";
+				mes "the flag near the Emperium.";
+				mes "The final numbered flag is";
+				mes "linked to the Convenience";
+				mes "Facility of the stronghold's";
+				mes "owner. Keep this in mind.";
+				close;
+			case 4:
+				mes .@n$;
+				mes "Strategy? It would be better";
+				mes "to develop your battle plan to";
+				mes "exploit your guild's advantages";
+				mes "and your enemies' weaknesses.";
+				mes "Use the Gate Houses and Barricades, and rebuild as quickly as you can!";
+				close;
+			case 5:
+				mes .@n$;
+				mes "You have no questions";
+				mes "to ask of me? Well, I'm";
+				mes "here to serve your needs.";
+				close;
+			}
+		case 2:
+			mes .@n$;
+			mes "I'm always here, so";
+			mes "feel free to request my";
+			mes "assistance whenever";
+			mes "the need arises.";
 			close;
 		}
-		else {
-			if (!agitcheck2()) {
-				mes .@n$;
-				mes "I am "+strnpcinfo(1)+", guardian of";
-				mes "this stronghold. For now,";
-				mes "all is quiet in this place.";
-				next;
-				switch(select("Converse:Cancel")) {
-				case 1:
+	}
+	else {
+		mes .@n$;
+		mes "Greetings, "+strcharinfo(0)+".";
+		mes "What are your orders?";
+		next;
+		switch(select("Increase Stronghold Defense:Situational Briefing:Cancel")) {
+		case 1:
+			if (!getd("$agit_"+strnpcinfo(2)+"[5]")) {
+				if (getgdskilllv(.@GID,10002) == 0) {
 					mes .@n$;
-					mes "Do you have any questions";
-					mes "about this stronghold?";
-					next;
-					switch(select("Guardian Stones:Fortress Gates:Link Flags:Battle Strategy:Cancel")) {
-					case 1:
-						mes .@n$;
-						mes "There is one Emperium";
-						mes "and two Guardian Stones in";
-						mes "each fortress. These stones";
-						mes "are the first line of defense,";
-						mes "and must be destroyed before";
-						mes "enemies can even enter.";
-						next;
-						mes .@n$;
-						mes "The stones are located in";
-						mes "^4D4DFFGate Houses^000000 which must be";
-						mes "protected to prevent enemies";
-						mes "from reaching the Emperium.";
-						mes "Guardian Stones can ^4D4DFFrecall";
-						mes "your Guardians^000000 for protection.";
-						next;
-						mes .@n$;
-						mes "Fortresses with higher levels";
-						mes "of defense can summon more";
-						mes "Guardians: this is why it is";
-						mes "so important for guilds to";
-						mes "invest in Defense Growth.";
-						next;
-						mes .@n$;
-						mes "Guardian Stones that have";
-						mes "been destroyed can be revived";
-						mes "after a certain time, but one of the guild members must give";
-						mes "me the order. I can also report the status of the Guardian Stones.";
-						close;
-					case 2:
-						mes .@n$;
-						mes "^4D4DFFFortress Gates^000000 are the second line of guild stronghold defense,";
-						mes "and are protected by extra barricades activated by the Guardian Stones.";
-						mes "These gates are located in three different parts of the fortress.";
-						next;
-						mes .@n$;
-						mes "Barricades are protected by";
-						mes "Guardian Stones, and are";
-						mes "restored when the Guardian";
-						mes "Stones are retrieved. However,";
-						mes "it is not as easy to restore";
-						mes "destroyed Fortress Gates.";
-						next;
-						mes .@n$;
-						mes "Fortress Gates can only be";
-						mes "restored when the ^4D4DFFguild";
-						mes "master of a stronghold";
-						mes "changes^000000, or if ^4D4DFFrestoration";
-						mes "is requested by the guild";
-						mes "master of the stronghold^000000.";
-						close;
-					case 3:
-						mes .@n$;
-						mes "Strongholds have many";
-						mes "Link Flags that allow you";
-						mes "to access vital areas within";
-						mes "restrictions placed by the";
-						mes "Barricades. Usually, ^4D4DFFFlag 1";
-						mes "links to the Gate House^000000.";
-						next;
-						mes .@n$;
-						mes "Many flags link directly to";
-						mes "the flag near the Emperium.";
-						mes "The final numbered flag is";
-						mes "linked to the Convenience";
-						mes "Facility of the stronghold's";
-						mes "owner. Keep this in mind.";
-						close;
-					case 4:
-						mes .@n$;
-						mes "Strategy? It would be better";
-						mes "to develop your battle plan to";
-						mes "exploit your guild's advantages";
-						mes "and your enemies' weaknesses.";
-						mes "Use the Gate Houses and Barricades, and rebuild as quickly as you can!";
-						close;
-					case 5:
-						mes .@n$;
-						mes "You have no questions";
-						mes "to ask of me? Well, I'm";
-						mes "here to serve your needs.";
-						close;
-					}
-				case 2:
+					mes "I'm sorry, but the Guardian";
+					mes "Stones aren't powerful enough";
+					mes "to summon Guardians yet. We";
+					mes "need to accumulate more";
+					mes "knowledge before they can";
+					mes "summon any Guardians.";
+					close;
+				}
+				else {
 					mes .@n$;
-					mes "I'm always here, so";
-					mes "feel free to request my";
-					mes "assistance whenever";
-					mes "the need arises.";
+					mes "I shall endeavor to summon";
+					mes "a Guardian through a Guardian";
+					mes "Stone. However, keep in mind";
+					mes "that this will not work if the";
+					mes "Guardian Stone is destroyed.";
+					setd "$agit_"+strnpcinfo(2)+"[5]",1;
+					if (!getd("$agit_"+strnpcinfo(2)+"[0]"))
+						donpcevent "gard1#"+strnpcinfo(4)+"::OnEnable";
+					if (!getd("$agit_"+strnpcinfo(2)+"[1]"))
+						donpcevent "gard2#"+strnpcinfo(4)+"::OnEnable";
 					close;
 				}
 			}
 			else {
 				mes .@n$;
-				mes "Greetings, "+strcharinfo(0)+".";
-				mes "What are your orders?";
-				next;
-				switch(select("Increase Stronghold Defense:Situational Briefing:Cancel")) {
-				case 1:
-					if (!getd("$agit_"+strnpcinfo(2)+"[5]")) {
-						if (getgdskilllv(.@GID,10002) == 0) {
-							mes .@n$;
-							mes "I'm sorry, but the Guardian";
-							mes "Stones aren't powerful enough";
-							mes "to summon Guardians yet. We";
-							mes "need to accumulate more";
-							mes "knowledge before they can";
-							mes "summon any Guardians.";
-							close;
-						}
-						else {
-							mes .@n$;
-							mes "I shall endeavor to summon";
-							mes "a Guardian through a Guardian";
-							mes "Stone. However, keep in mind";
-							mes "that this will not work if the";
-							mes "Guardian Stone is destroyed.";
-							setd "$agit_"+strnpcinfo(2)+"[5]",1;
-							if (!getd("$agit_"+strnpcinfo(2)+"[0]"))
-								donpcevent "gard1#"+strnpcinfo(4)+"::OnEnable";
-							if (!getd("$agit_"+strnpcinfo(2)+"[1]"))
-								donpcevent "gard2#"+strnpcinfo(4)+"::OnEnable";
-							close;
-						}
-					}
-					else {
-						mes .@n$;
-						mes "You've already commanded";
-						mes "me to summon a Guardian";
-						mes "to defend the stronghold.";
-						close;
-					}
-				case 2:
-					mes .@n$;
-					mes "Our defense status is...";
-					setarray .@status$[0],"^4D4DFFOperational","^FF0000Destroyed","^008000Repairing";
-					mes "1st Guardian Stone: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[0]")]+"^000000";
-					mes "2nd Guardian Stone: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[1]")]+"^000000";
-					mes "1st Fortress Gate: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[2]")]+"^000000";
-					mes "2nd Fortress Gate: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[3]")]+"^000000";
-					mes "3rd Fortress Gate: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[4]")]+"^000000";
-					close;
-				case 3:
-					mes .@n$;
-					mes "I'll be standing by,";
-					mes "awaiting your orders.";
-					close;
-				}
+				mes "You've already commanded";
+				mes "me to summon a Guardian";
+				mes "to defend the stronghold.";
+				close;
 			}
+		case 2:
+			mes .@n$;
+			mes "Our defense status is...";
+			setarray .@status$[0],"^4D4DFFOperational","^FF0000Destroyed","^008000Repairing";
+			mes "1st Guardian Stone: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[0]")]+"^000000";
+			mes "2nd Guardian Stone: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[1]")]+"^000000";
+			mes "1st Fortress Gate: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[2]")]+"^000000";
+			mes "2nd Fortress Gate: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[3]")]+"^000000";
+			mes "3rd Fortress Gate: "+.@status$[getd("$agit_"+strnpcinfo(2)+"[4]")]+"^000000";
+			close;
+		case 3:
+			mes .@n$;
+			mes "I'll be standing by,";
+			mes "awaiting your orders.";
+			close;
 		}
-	}
-	else {
-		mes .@n$;
-		mes "Who are you? Scoundrel!";
-		mes "Leave this stronghold now!";
-		close;
 	}
 
 OnInit:
@@ -1113,228 +1109,226 @@ OnEnable:
 	set .@GID, getcastledata(strnpcinfo(4),1);
 	set .@num, atoi(charat(strnpcinfo(1),15));
 	set .@var$,"$agit_"+strnpcinfo(2);
-	if (getcharid(2) == .@GID) {
-		if (strcharinfo(0) == getguildmaster(.@GID)) {
-			if (getd(.@var$+"["+(.@num+1)+"]") == 2) {
-				mes "^3355FFDemolished Fortress";
-				mes "Gates can be repaired,";
-				mes "but you will need to gather";
-				mes "the following materials.^000000";
+	if (is_guild_leader(.@GID)) {
+		if (getd(.@var$+"["+(.@num+1)+"]") == 2) {
+			mes "^3355FFDemolished Fortress";
+			mes "Gates can be repaired,";
+			mes "but you will need to gather";
+			mes "the following materials.^000000";
+			next;
+			mes "^4D4DFF10 Steel^000000,";
+			mes "^4D4DFF30 Trunks^000000,";
+			mes "^4D4DFF5 Oridecon^000000, and";
+			mes "^4D4DFF10 Emveretarcon^000000.";
+			next;
+			select("Continue");
+			if ((countitem(1019) > 29) && (countitem(999) > 9) && (countitem(1011) > 9) && (countitem(984) > 4)) {
+				mes "^3355FFYou will need Trunks to";
+				mes "repair the support frame,";
+				mes "Oridecon to enhance the";
+				mes "gate's endurance, and";
+				mes "Emveretarcon to basically";
+				mes "hold everything together.^000000";
 				next;
-				mes "^4D4DFF10 Steel^000000,";
-				mes "^4D4DFF30 Trunks^000000,";
-				mes "^4D4DFF5 Oridecon^000000, and";
-				mes "^4D4DFF10 Emveretarcon^000000.";
-				next;
-				select("Continue");
-				if ((countitem(1019) > 29) && (countitem(999) > 9) && (countitem(1011) > 9) && (countitem(984) > 4)) {
-					mes "^3355FFYou will need Trunks to";
-					mes "repair the support frame,";
-					mes "Oridecon to enhance the";
-					mes "gate's endurance, and";
-					mes "Emveretarcon to basically";
-					mes "hold everything together.^000000";
-					next;
-					set .@ro_of01,rand(10,15);
-					while(1) {
-						if (.@ro_of02 == .@ro_of01) break;
-						else {
-							switch(rand(1,4)) {
+				set .@ro_of01,rand(10,15);
+				while(1) {
+					if (.@ro_of02 == .@ro_of01) break;
+					else {
+						switch(rand(1,4)) {
+						case 1:
+							mes "^3355FFThe support frame";
+							mes "is badly damaged:";
+							mes "fixing this part";
+							mes "is a top priority.^000000";
+							next;
+							switch(select("Trunk:Steel:Emveretarcon:Oridecon")) {
 							case 1:
-								mes "^3355FFThe support frame";
-								mes "is badly damaged:";
-								mes "fixing this part";
-								mes "is a top priority.^000000";
+								mes "^3355FFThe frame has been";
+								mes "reinforced with wood.^000000";
+								set .@rp_temp,.@rp_temp+1;
+								set .@ro_of02,.@ro_of02+1;
+								specialeffect2 EF_REPAIRWEAPON;
 								next;
-								switch(select("Trunk:Steel:Emveretarcon:Oridecon")) {
-								case 1:
-									mes "^3355FFThe frame has been";
-									mes "reinforced with wood.^000000";
-									set .@rp_temp,.@rp_temp+1;
-									set .@ro_of02,.@ro_of02+1;
-									specialeffect2 EF_REPAIRWEAPON;
-									next;
-									break;
-								case 2:
-									mes "^3355FFYou tried using steel,";
-									mes "but it's not working very";
-									mes "well. You'll have to try";
-									mes "something else.^000000";
-									close;
-								case 3:
-									mes "^3355FFYou tried using emveretarcon";
-									mes "to reinforce the gate, but it's";
-									mes "not working well at all.";
-									mes "You'll have to start over.^000000";
-									close;
-								case 4:
-									mes "^3355FFYou tried using oridecon,";
-									mes "but it's not working very";
-									mes "well. You'll have to try";
-									mes "something else.^000000";
-									close;
-								}
 								break;
 							case 2:
-								mes "^3355FFIt looks like the gate's";
-								mes "overall endurance needs to";
-								mes "be reinforced with something.^000000";
+								mes "^3355FFYou tried using steel,";
+								mes "but it's not working very";
+								mes "well. You'll have to try";
+								mes "something else.^000000";
+								close;
+							case 3:
+								mes "^3355FFYou tried using emveretarcon";
+								mes "to reinforce the gate, but it's";
+								mes "not working well at all.";
+								mes "You'll have to start over.^000000";
+								close;
+							case 4:
+								mes "^3355FFYou tried using oridecon,";
+								mes "but it's not working very";
+								mes "well. You'll have to try";
+								mes "something else.^000000";
+								close;
+							}
+							break;
+						case 2:
+							mes "^3355FFIt looks like the gate's";
+							mes "overall endurance needs to";
+							mes "be reinforced with something.^000000";
+							next;
+							switch(select("Trunk:Steel:Emveretarcon:Oridecon")) {
+							case 1:
+								mes "^3355FFYou tried using wood";
+								mes "to reinforce the gate.^000000";
+								set .@ro_of02,.@ro_of02+1;
 								next;
-								switch(select("Trunk:Steel:Emveretarcon:Oridecon")) {
-								case 1:
-									mes "^3355FFYou tried using wood";
-									mes "to reinforce the gate.^000000";
-									set .@ro_of02,.@ro_of02+1;
-									next;
-									break;
-								case 2:
-									mes "^3355FFYou tried using steel";
-									mes "to reinforce the gate, but";
-									mes "it's not working well at all.";
-									mes "You'll have to start over.^000000";
-									close;
-								case 3:
-									mes "^3355FFYou tried using emveretarcon";
-									mes "to reinforce the gate, but it's";
-									mes "not working well at all.";
-									mes "You'll have to start over.^000000";
-									close;
-								case 4:
-									mes "^3355FFYou hammered the";
-									mes "oridecon: it looks";
-									mes "like this will work.^000000";
-									set .@rp_temp,.@rp_temp+1;
-									set .@ro_of02,.@ro_of02+1;
-									specialeffect2 EF_REPAIRWEAPON;
-									next;
-									break;
-								}
+								break;
+							case 2:
+								mes "^3355FFYou tried using steel";
+								mes "to reinforce the gate, but";
+								mes "it's not working well at all.";
+								mes "You'll have to start over.^000000";
+								close;
+							case 3:
+								mes "^3355FFYou tried using emveretarcon";
+								mes "to reinforce the gate, but it's";
+								mes "not working well at all.";
+								mes "You'll have to start over.^000000";
+								close;
+							case 4:
+								mes "^3355FFYou hammered the";
+								mes "oridecon: it looks";
+								mes "like this will work.^000000";
+								set .@rp_temp,.@rp_temp+1;
+								set .@ro_of02,.@ro_of02+1;
+								specialeffect2 EF_REPAIRWEAPON;
+								next;
+								break;
+							}
+							break;
+						case 3:
+							mes "^3355FFThe damage to the gate";
+							mes "has caused all these";
+							mes "cracks. You'll have to";
+							mes "weld them solid somehow.^000000";
+							next;
+							switch(select("Trunk:Steel:Emveretarcon:Oridecon")) {
+							case 1:
+								mes "^3355FFYou tried using wood to fix";
+								mes "this problem, but it seems";
+								mes "to have made it worse.";
+								mes "You'll have to start all over.^000000";
+								close;
+							case 2:
+								mes "^3355FFYou used steel to weld";
+								mes "all the cracks: the gate is";
+								mes "is starting to look more solid.^000000";
+								set .@rp_temp,.@rp_temp+1;
+								set .@ro_of02,.@ro_of02+1;
+								specialeffect2 EF_REPAIRWEAPON;
+								next;
 								break;
 							case 3:
-								mes "^3355FFThe damage to the gate";
-								mes "has caused all these";
-								mes "cracks. You'll have to";
-								mes "weld them solid somehow.^000000";
+								mes "^3355FFYou tried using emveretarcon";
+								mes "to reinforce the gate, but it's";
+								mes "not working well at all.";
+								mes "You'll have to start over.^000000";
+								close;
+							case 4:
+								mes "^3355FFYou tried using oridecon,";
+								mes "but it's not working very";
+								mes "well. You'll have to try";
+								mes "something else.^000000";
+								close;
+							}
+							break;
+						case 4:
+							mes "^3355FFNow you need to make";
+							mes "sure that the gate is held";
+							mes "together pretty solidly.^000000";
+							next;
+							switch(select("Trunk:Steel:Emveretarcon:Oridecon")) {
+							case 1:
+								mes "^3355FFYou tried using wood to fix";
+								mes "this problem, but it seems";
+								mes "to have made it worse.";
+								mes "You'll have to start all over.^000000";
+								close;
+							case 2:
+								mes "^3355FFYou tried using steel,";
+								mes "but it's not working very";
+								mes "well. You'll have to try";
+								mes "something else.^000000";
+								close;
+							case 3:
+								mes "^3355FFYou successfully used";
+								mes "the emveretarcon to repair";
+								mes "much of the gate's damage.^000000";
+								set .@rp_temp,.@rp_temp+1;
+								set .@ro_of02,.@ro_of02+1;
+								specialeffect2 EF_REPAIRWEAPON;
 								next;
-								switch(select("Trunk:Steel:Emveretarcon:Oridecon")) {
-								case 1:
-									mes "^3355FFYou tried using wood to fix";
-									mes "this problem, but it seems";
-									mes "to have made it worse.";
-									mes "You'll have to start all over.^000000";
-									close;
-								case 2:
-									mes "^3355FFYou used steel to weld";
-									mes "all the cracks: the gate is";
-									mes "is starting to look more solid.^000000";
-									set .@rp_temp,.@rp_temp+1;
-									set .@ro_of02,.@ro_of02+1;
-									specialeffect2 EF_REPAIRWEAPON;
-									next;
-									break;
-								case 3:
-									mes "^3355FFYou tried using emveretarcon";
-									mes "to reinforce the gate, but it's";
-									mes "not working well at all.";
-									mes "You'll have to start over.^000000";
-									close;
-								case 4:
-									mes "^3355FFYou tried using oridecon,";
-									mes "but it's not working very";
-									mes "well. You'll have to try";
-									mes "something else.^000000";
-									close;
-								}
 								break;
 							case 4:
-								mes "^3355FFNow you need to make";
-								mes "sure that the gate is held";
-								mes "together pretty solidly.^000000";
-								next;
-								switch(select("Trunk:Steel:Emveretarcon:Oridecon")) {
-								case 1:
-									mes "^3355FFYou tried using wood to fix";
-									mes "this problem, but it seems";
-									mes "to have made it worse.";
-									mes "You'll have to start all over.^000000";
-									close;
-								case 2:
-									mes "^3355FFYou tried using steel,";
-									mes "but it's not working very";
-									mes "well. You'll have to try";
-									mes "something else.^000000";
-									close;
-								case 3:
-									mes "^3355FFYou successfully used";
-									mes "the emveretarcon to repair";
-									mes "much of the gate's damage.^000000";
-									set .@rp_temp,.@rp_temp+1;
-									set .@ro_of02,.@ro_of02+1;
-									specialeffect2 EF_REPAIRWEAPON;
-									next;
-									break;
-								case 4:
-									mes "^3355FFYou tried using oridecon,";
-									mes "but it's not working very";
-									mes "well. You'll have to try";
-									mes "something else.^000000";
-									close;
-								}
+								mes "^3355FFYou tried using oridecon,";
+								mes "but it's not working very";
+								mes "well. You'll have to try";
+								mes "something else.^000000";
+								close;
 							}
-						}
-					}
-					mes "^3355FFWell, it looks like";
-					mes "you're just about done";
-					mes "with repairing the gate.^000000";
-					next;
-					if (!agitcheck2()) {
-						mes "^3355FFUnfortunately, the Fortress";
-						mes "Gate can't be reconstructed:";
-						mes "the Emperium is no longer here.^000000";
-						close;
-					}
-					else {
-						if (.@rp_temp == .@ro_of01) {
-							mes "^3355FFThe Fortress Gate has";
-							mes "been successfully repaired!^000000";
-							delitem 1019,30; //Wooden_Block
-							delitem 999,10; //Steel
-							delitem 1011,10; //Emveretarcon
-							delitem 984,5; //Oridecon
-							close2;
-							donpcevent "RL"+.@num+"#"+strnpcinfo(4)+"::OnEnable";
-							disablenpc strnpcinfo(0);
-							if (.@num == 1) set .@str$,"1st";
-							else if (.@num == 2) set .@str$,"2nd";
-							else if (.@num == 3) set .@str$,"3rd";
-							mapannounce strnpcinfo(4),"The "+.@str$+" Fortress Gate has been reconstructed!",bc_map,"0x00ff00";
-							if (.@num == 1) setd .@var$+"[2]",0;
-							else {
-								setarray getd(.@var$+"["+.@num+"]"),2,0;
-								donpcevent "Control Device0"+(.@num-1)+"#"+strnpcinfo(2)+"::OnEnable";
-							}
-							end;
-						}
-						else {
-							mes "^3355FFThe wall has been breached,";
-							mes "and the attempt to repair the";
-							mes "Fortress Gate has failed.";
-							mes "You lost some of your";
-							mes "repair resources...^000000";
-							delitem 984,2; //Oridecon
-							delitem 999,4; //Steel
-							delitem 1019,14; //Wooden_Block
-							delitem 1011,3; //Emveretarcon
-							close;
 						}
 					}
 				}
-				else {
-					mes "^3355FFYou can't attempt to repair";
-					mes "the Fortress Gate if you don't";
-					mes "have all the needed materials.^000000";
+				mes "^3355FFWell, it looks like";
+				mes "you're just about done";
+				mes "with repairing the gate.^000000";
+				next;
+				if (!agitcheck2()) {
+					mes "^3355FFUnfortunately, the Fortress";
+					mes "Gate can't be reconstructed:";
+					mes "the Emperium is no longer here.^000000";
 					close;
 				}
+				else {
+					if (.@rp_temp == .@ro_of01) {
+						mes "^3355FFThe Fortress Gate has";
+						mes "been successfully repaired!^000000";
+						delitem 1019,30; //Wooden_Block
+						delitem 999,10; //Steel
+						delitem 1011,10; //Emveretarcon
+						delitem 984,5; //Oridecon
+						close2;
+						donpcevent "RL"+.@num+"#"+strnpcinfo(4)+"::OnEnable";
+						disablenpc strnpcinfo(0);
+						if (.@num == 1) set .@str$,"1st";
+						else if (.@num == 2) set .@str$,"2nd";
+						else if (.@num == 3) set .@str$,"3rd";
+						mapannounce strnpcinfo(4),"The "+.@str$+" Fortress Gate has been reconstructed!",bc_map,"0x00ff00";
+						if (.@num == 1) setd .@var$+"[2]",0;
+						else {
+							setarray getd(.@var$+"["+.@num+"]"),2,0;
+							donpcevent "Control Device0"+(.@num-1)+"#"+strnpcinfo(2)+"::OnEnable";
+						}
+						end;
+					}
+					else {
+						mes "^3355FFThe wall has been breached,";
+						mes "and the attempt to repair the";
+						mes "Fortress Gate has failed.";
+						mes "You lost some of your";
+						mes "repair resources...^000000";
+						delitem 984,2; //Oridecon
+						delitem 999,4; //Steel
+						delitem 1019,14; //Wooden_Block
+						delitem 1011,3; //Emveretarcon
+						close;
+					}
+				}
+			}
+			else {
+				mes "^3355FFYou can't attempt to repair";
+				mes "the Fortress Gate if you don't";
+				mes "have all the needed materials.^000000";
+				close;
 			}
 		}
 	}
@@ -1359,35 +1353,35 @@ OnEnable:
 	if (compare(strnpcinfo(2),"arug")) {
 		if (strnpcinfo(2) == "arug_cas01") {
 			setarray .@w[0],195,250,292,188;
-			setarray .x[0],233,252,232,201,224,196,269,252,201,224,222, 294,256,240,246,235,235,246,240,256,254,242;
-			setarray .y[0], 83, 81,108,130,168,137, 89, 81,130,168,129, 210,203,133, 92,132,132, 92,133,203, 95,151;
+			setarray .@x[0],233,252,232,201,224,196,269,252,201,224,222, 294,256,240,246,235,235,246,240,256,254,242;
+			setarray .@y[0], 83, 81,108,130,168,137, 89, 81,130,168,129, 210,203,133, 92,132,132, 92,133,203, 95,151;
 		}
 		else if (strnpcinfo(2) == "arug_cas02") {
 			setarray .@w[0],20,169,268,169;
-			setarray .x[0],104,67,67,113,122,67, 90, 91,122, 20,67, 175,204,211,209,161,186,183,150,161,209,211;
-			setarray .y[0], 32,36,85, 87,112,60,167,119,112,169,85,  31, 32, 63, 88, 91,170,121,110, 91, 88, 63;
+			setarray .@x[0],104,67,67,113,122,67, 90, 91,122, 20,67, 175,204,211,209,161,186,183,150,161,209,211;
+			setarray .@y[0], 32,36,85, 87,112,60,167,119,112,169,85,  31, 32, 63, 88, 91,170,121,110, 91, 88, 63;
 		}
 		else {	// Castles 3,4,5 are identical.
 			setarray .@w[0],66,157,211,159;
-			setarray .x[0],130,128,128,128,110,91,65, 65,110,128,128, 156,172,154,156,155,187,212,211,155,156,172;
-			setarray .y[0], 60, 77, 90,100, 96,53,71,103, 96,100, 77, 101, 95, 90, 77, 60, 54, 67,105, 60, 77, 95;
+			setarray .@x[0],130,128,128,128,110,91,65, 65,110,128,128, 156,172,154,156,155,187,212,211,155,156,172;
+			setarray .@y[0], 60, 77, 90,100, 96,53,71,103, 96,100, 77, 101, 95, 90, 77, 60, 54, 67,105, 60, 77, 95;
 		}
 	}
 	else {
 		if (strnpcinfo(2) == "schg_cas02") {
 			setarray .@w[0],337,95,307,222;
-			setarray .x[0],326,337,334,296,285,236,285,296,334,337,334, 359,300,337,317,307,300,337,317,307,359,236;
-			setarray .y[0], 83, 95,119, 82, 40, 41, 40, 82,119, 95,119,  85,119,154,183,222,119,154,183,222, 85, 41;
+			setarray .@x[0],326,337,334,296,285,236,285,296,334,337,334, 359,300,337,317,307,300,337,317,307,359,236;
+			setarray .@y[0], 83, 95,119, 82, 40, 41, 40, 82,119, 95,119,  85,119,154,183,222,119,154,183,222, 85, 41;
 		}
 		else if (strnpcinfo(2) == "schg_cas03") {
 			setarray .@w[0],306,325,364,305;
-			setarray .x[0],323,273,288,306,323,323,273,288,306,273,273, 338,364,365,317,338,338,364,365,317,364,329;
-			setarray .y[0],308,309,306,326,308,308,309,306,325,309,309, 309,305,261,318,310,309,305,261,318,305,314;
+			setarray .@x[0],323,273,288,306,323,323,273,288,306,273,273, 338,364,365,317,338,338,364,365,317,364,329;
+			setarray .@y[0],308,309,306,326,308,308,309,306,325,309,309, 309,305,261,318,310,309,305,261,318,305,314;
 		}
 		else {	// Castles 1,4,5 are identical.
 			setarray .@w[0],108,32,128,42,187,15;	// Contains an extra pair, for whatever reason.
-			setarray .x[0],111,109,65,110,88,64,47,109,111,112,120, 130,129,151,187,128,152,187,128,130,130,151;
-			setarray .y[0], 18, 44,22, 40,20,40,43, 48, 18, 32, 37,  22, 47, 18, 15, 42, 43, 15, 42, 22, 28, 18;
+			setarray .@x[0],111,109,65,110,88,64,47,109,111,112,120, 130,129,151,187,128,152,187,128,130,130,151;
+			setarray .@y[0], 18, 44,22, 40,20,40,43, 48, 18, 32, 37,  22, 47, 18, 15, 42, 43, 15, 42, 22, 28, 18;
 		}
 	}
 	if (charat(strnpcinfo(1),4) == "2") set .@z,11;

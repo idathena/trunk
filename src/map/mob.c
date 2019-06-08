@@ -5159,6 +5159,7 @@ static void mob_load(void)
  */
 static int mob_reload_sub(struct mob_data *md, va_list args) {
 	md->db = mob_db(md->mob_id); //Relink the mob to the new database entry
+	status_calc_mob(md, SCO_NONE); //Recalculate the monster status based on the new data
 	if (!md->vd_changed) { //If the view data was not overwritten manually
 		md->vd = mob_get_viewdata(md->mob_id); //Get the new view data from the mob database
 		if (md->bl.prev) { //If they are spawned right now

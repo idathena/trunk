@@ -4788,7 +4788,7 @@
 6915,Captured_Soul,Captured Soul,3,10,,0,,,,,,,,,,,,,{},{},{}
 6916,Piece_Of_Soul_Monkey,Piece of Soul Monkey,3,10,,0,,,,,,,,,,,,,{},{},{}
 6917,Piece_Of_Soul_Chicken,Piece of Soul Chicken,3,10,,0,,,,,,,,,,,,,{},{},{}
-6919,Honor_Proof,Honor Proof,3,10,,10,,,,,,,,,,,,,{},{},{}
+6919,Honor_Proof,Honor Token,3,10,,0,,,,,,,,,,,,,{},{},{}
 6921,Dehumidifiers,Dehumidifiers,3,10,,10,,,,,,,,,,,,,{},{},{}
 6922,Sandpaper,Sandpaper,3,10,,10,,,,,,,,,,,,,{},{},{}
 6923,Bright_Fire_Lights,Bright Fire Lights,3,10,,10,,,,,,,,,,,,,{},{},{}
@@ -7463,8 +7463,8 @@
 13538,Meteor_10_Scroll_Box,Meteor Storm Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 14512,10; },{},{}
 13539,Storm_10_Scroll_Box,Storm Gust Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 14513,10; },{},{}
 13540,Vermilion_10_Scroll_Box,Lord of Vermilion Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 14514,10; },{},{}
-13541,Lex_Aeterna_Scroll_Box,Lex Aeterna Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 14515,1; },{},{}
-13542,Magnificat_5_Scroll_Box,Magnificat Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 14516,1; },{},{}
+13541,Lex_Aeterna_Scroll_Box,Lex Aeterna Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 14515,10; },{},{}
+13542,Magnificat_5_Scroll_Box,Magnificat Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 14516,10; },{},{}
 13543,CP_Helm_Scroll_Box,Chemical Protection Helm Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_CP_Helm_Scroll_Box); },{},{}
 13544,CP_Shield_Scroll_Box,Chemical Protection Shield Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_CP_Shield_Scroll_Box); },{},{}
 13545,CP_Armor_Scroll_Box,Chemical Protection Armor Scroll Box,18,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ getgroupitem(IG_CP_Armor_Scroll_Box); },{},{}

@@ -3817,7 +3817,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				break;
 			ARR_FIND(0, ARRAYLENGTH(sd->skillcast), i, (!sd->skillcast[i].id || sd->skillcast[i].id == type2));
 			if(i == ARRAYLENGTH(sd->skillcast)) { //Better mention this so the array length can be updated [Skotlex]
-				ShowError("run_script: %s: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n",
+				ShowError("pc_bonus2: %s: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n",
 #ifndef RENEWAL_CAST
 				"SP_VARCASTRATE",
 #else
@@ -3839,7 +3839,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				break;
 			ARR_FIND(0, ARRAYLENGTH(sd->skillcast), i, (!sd->skillcast[i].id || sd->skillcast[i].id == type2));
 			if(i == ARRAYLENGTH(sd->skillcast)) {
-				ShowError("run_script: SP_VARCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillcast), type2, val);
+				ShowError("pc_bonus2: SP_VARCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillcast), type2, val);
 				break;
 			}
 			if(sd->skillcast[i].id == type2)
@@ -3855,7 +3855,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				break;
 			ARR_FIND(0, ARRAYLENGTH(sd->skillfixcastrate), i, (!sd->skillfixcastrate[i].id || sd->skillfixcastrate[i].id == type2));
 			if(i == ARRAYLENGTH(sd->skillfixcastrate)) {
-				ShowError("run_script: SP_FIXCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillfixcastrate), type2, val);
+				ShowError("pc_bonus2: SP_FIXCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillfixcastrate), type2, val);
 				break;
 			}
 			if(sd->skillfixcastrate[i].id == type2)
@@ -5798,16 +5798,17 @@ enum e_setpos pc_setpos(struct map_session_data *sd, unsigned short mapindex, in
 	sd->state.changemap = (sd->mapindex != mapindex);
 	sd->state.warping = 1;
 
-	if( sd->status.party_id && map[sd->bl.m].instance_id && sd->state.changemap && !map[m].instance_id ) {
-		struct party_data *p;
-
-		if( (p = party_search(sd->status.party_id)) && p->instance_id )
-			instance_delusers(p->instance_id);
-	}
-
 	if( sd->state.changemap ) { // Misc map-changing settings
+		uint16 current_map_instance_id = map[sd->bl.m].instance_id;
+		uint16 new_map_instance_id = map[m].instance_id;
 		int i;
 
+		if( current_map_instance_id != new_map_instance_id ) {
+			if( current_map_instance_id )
+				instance_delusers(current_map_instance_id); // Update instance timer for the map on leave
+			if( new_map_instance_id )
+				instance_addusers(new_map_instance_id); // Update instance timer for the map on enter
+		}
 		sd->state.pmap = sd->bl.m;
 		if( sd->sc.count ) { // Cancel some map related stuff
 			if( sd->sc.data[SC_JAILED] )
@@ -11037,6 +11038,8 @@ static TIMER_FUNC(pc_autosave)
 
 	iter = mapit_getallusers();
 	for (sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter)) {
+		if (!sd->state.pc_loaded) //Player data hasn't fully loaded
+			continue;
 		if (sd->bl.id == last_save_id && save_flag != 1) {
 			save_flag = 1;
 			continue;

@@ -1,20 +1,20 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Port Malaya
-//===== By: ================================================== 
+//===== By: ==================================================
 //= Euphy
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.1
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Port Malaya Town Script
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 0.1 Alberta sailors only. [Euphy]
 //= 0.2 Adapted from Masao's conversion.
 //= 1.0 Added remaining NPCs.
 //= 1.1 Added Jeepney script. [DeadlySilence]
-//============================================================ 
+//============================================================
 
 // Port Malaya Transportation
 //============================================================
@@ -221,7 +221,7 @@ OnBingx2:
 OnTouch:
 	set .@i, atoi(strnpcinfo(2));
 	if (.@i%4 == 2) {
-		if (getcharid(0) == getpartyleader(getcharid(1),2))
+		if (is_party_leader())
 			set .@pass,1;
 	} else if (.@i%4 == 3) {
 		if (checkquest(4229,PLAYTIME) > -1 && checkquest(9223,PLAYTIME) > -1 && checkquest(12278,PLAYTIME) > -1)

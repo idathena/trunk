@@ -186,7 +186,7 @@ dali,139,118,4	script	Dimensional Device#sara	10007,{
 			close;
 		}
 
-		if (getcharid(0) == getpartyleader(.@party_id,2))
+		if (is_party_leader())
 			set .@menu$, "Boot up the dimensional device.:Use the dimensional device.:Cancel.";
 		else
 			set .@menu$, ":Use the dimensional device.:Cancel.";
@@ -235,7 +235,7 @@ dali,139,118,4	script	Dimensional Device#sara	10007,{
 }
 
 1@sara,260,156,6	script	A Girl#01	668,{
-	if(getcharid(0)==getpartyleader(getcharid(1),2)) {
+	if(is_party_leader()) {
 		unittalk getcharid(3),"Where am I?";
 		mes "["+strcharinfo(0)+"]";
 		mes "Where am I?";
@@ -426,7 +426,7 @@ OnEnable:
 }
 
 1@sara,107,325,6	script	Sara Irene#01	668,{
-	if(getcharid(0)==getpartyleader(getcharid(1),2)) {
+	if(is_party_leader()) {
 		cutin "sara_9sara1",2;
 		npctalk "Oh! Hello again! I remember you, what's up?";
 		mes "[Sara Irene]";
@@ -553,7 +553,7 @@ OnEnable:
 }
 
 1@sara,152,233,6	script	Sara Irene#02	668,{
-	if(getcharid(0)==getpartyleader(getcharid(1),2)) {
+	if(is_party_leader()) {
 		cutin "sara_9sara2",2;
 		npctalk "Mommy!";
 		mes "[Sara Irene]";
@@ -624,7 +624,7 @@ OnEnable:
 }
 
 1@sara,156,236,4	script	Doyen Irene#04	684,{
-	if(getcharid(0)==getpartyleader(getcharid(1),2)) {
+	if(is_party_leader()) {
 		cutin "sara_elder_irine4",2;
 		npctalk "You... were too strong for me.";
 		mes "[Doyen Irene]";
@@ -704,7 +704,7 @@ OnEnable:
 }
 
 1@sara,39,142,4	script	Sara Irene#03	668,{
-	if(getcharid(0)==getpartyleader(getcharid(1),2)) {
+	if(is_party_leader()) {
 		mapannounce instance_mapname("1@sara"), "As you are about to call out to Sara, a sudden blow knocks you down from behind.",bc_area,"0xffffff";
 		mes "^FF0000As you are about to call out to Sara, a sudden blow knocks you down from behind.^000000";
 		next;
@@ -791,7 +791,7 @@ OnDisable:
 OnEnable:
 	enablenpc instance_npcname("Sara Irene#talk01");
 	end;
-}	
+}
 
 1@sara,128,296,6	script	Sara Irene#talk02	668,5,5,{
 	end;
@@ -815,7 +815,7 @@ OnDisable:
 OnEnable:
 	enablenpc instance_npcname("Sara Irene#talk02");
 	end;
-}	
+}
 
 1@sara,124,230,6	script	Sara Irene#talk03	668,5,5,{
 	end;
@@ -839,7 +839,7 @@ OnDisable:
 OnEnable:
 	enablenpc instance_npcname("Sara Irene#talk03");
 	end;
-}	
+}
 
 1@sara,174,227,6	script	Sara Irene#talk04	668,5,5,{
 	end;
@@ -863,7 +863,7 @@ OnDisable:
 OnEnable:
 	enablenpc instance_npcname("Sara Irene#talk04");
 	end;
-}	
+}
 
 1@sara,203,259,6	script	Sara Irene#talk05	668,5,5,{
 	end;
@@ -887,7 +887,7 @@ OnDisable:
 OnEnable:
 	enablenpc instance_npcname("Sara Irene#talk05");
 	end;
-}	
+}
 
 1@sara,256,279,4	script	Sara Irene#talk06	668,5,5,{
 	end;
@@ -911,7 +911,7 @@ OnDisable:
 OnEnable:
 	enablenpc instance_npcname("Sara Irene#talk06");
 	end;
-}	
+}
 
 1@sara,228,282,6	script	Sara Irene#talk07	668,5,5,{
 	end;
@@ -1245,8 +1245,8 @@ OnEnable:
 	monster .@map$,254,93,"Guard Dog",2545,1,instance_npcname("#MobsSara03")+"::OnMyMobDead";
 	monster .@map$,254,94,"Guard Dog",2545,1,instance_npcname("#MobsSara03")+"::OnMyMobDead";
 
-	monster .@map$,228,65,"Payon Soldier",2543,1,instance_npcname("#MobsSara03")+"::OnMyMobDead";	
-	monster .@map$,228,64,"Payon Soldier",2543,1,instance_npcname("#MobsSara03")+"::OnMyMobDead";	
+	monster .@map$,228,65,"Payon Soldier",2543,1,instance_npcname("#MobsSara03")+"::OnMyMobDead";
+	monster .@map$,228,64,"Payon Soldier",2543,1,instance_npcname("#MobsSara03")+"::OnMyMobDead";
 	monster .@map$,228,63,"Payon Soldier",2543,1,instance_npcname("#MobsSara03")+"::OnMyMobDead";
 	monster .@map$,228,62,"Payon Soldier",2543,1,instance_npcname("#MobsSara03")+"::OnMyMobDead";
 

@@ -24,6 +24,7 @@ static DBMap *itemdb_combo; //Item Combo DB
 static DBMap *itemdb_group; //Item Group DB
 static DBMap *itemdb_randomopt; //Random option DB
 static DBMap *itemdb_randomopt_group; //Random option group DB
+
 struct item_data *dummy_item; //This is the default dummy item used for non-existant items [Skotlex]
 
 struct s_roulette_db rd;
@@ -955,7 +956,7 @@ static bool itemdb_read_flag(char *fields[], int columns, int current) {
 	struct item_data *id;
 
 	if( !(id = itemdb_exists(nameid)) ) {
-		ShowError("itemdb_read_flag: Invalid item item with id %hu\n", nameid);
+		ShowError("itemdb_read_flag: Invalid item id %hu\n", nameid);
 		return true;
 	}
 

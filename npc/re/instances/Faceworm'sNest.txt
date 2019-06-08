@@ -1,17 +1,17 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Faceworm's Nest
-//===== By: ================================================== 
+//===== By: ==================================================
 //= exneval
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.0
 //===== Compatible With: ===================================== 
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Faceworm Nest Instance
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First version.
-//============================================================ 
+//============================================================
 
 // Timeless Item Quests
 // The Owner Of Old Ring
@@ -324,7 +324,6 @@ dali,80,60,4	script	Magic Scholar	4_M_SAGE_C,{
 		close;
 	}
 	set .@party_id,getcharid(1);
-	set .@ins_mas,getpartyleader(.@party_id,2);
 	set .@p_name$,getpartyname(.@party_id);
 	set .@p_reader$,strcharinfo(0);
 	set .@md_name$,"Faceworm's Nest";
@@ -335,7 +334,7 @@ dali,80,60,4	script	Magic Scholar	4_M_SAGE_C,{
 		close;
 	}
 	if (!.@face_time) {
-		if (getcharid(0) == .@ins_mas) {
+		if (is_party_leader()) {
 			mes "[Magic Scholar]";
 			mes "What can I do for you?";
 			next;
@@ -397,7 +396,6 @@ dali,72,55,4	script	Interdimensional Device	CLEAR_NPC,{
 		close;
 	}
 	set .@party_id,getcharid(1);
-	set .@ins_mas,getpartyleader(.@party_id,2);
 	set .@p_name$,getpartyname(.@party_id);
 	set .@p_reader$,strcharinfo(0);
 	set .@md_name$,"Faceworm's Nest";
@@ -443,7 +441,7 @@ dali,72,55,4	script	Interdimensional Device	CLEAR_NPC,{
 //============================================================
 1@face,110,348,6	script	Chaos#0	4_M_CHAOS,{
 	cutin "h_chaos01",2;
-	if (getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if (!is_party_leader()) {
 		mes "[Chaos]";
 		mes "I do not know what this is about, but I'm talking to your leader so please wait for a while ok?";
 		close2;
@@ -798,7 +796,7 @@ OnDisable:
 //============================================================
 1@face,120,97,6	script	Chaos#1	4_M_CHAOS,{
 	cutin "h_chaos01",2;
-	if (getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if (!is_party_leader()) {
 		mes "[Chaos]";
 		mes "I do not know what this is about, but I'm talking to your leader so please wait for a while ok?";
 		close2;
@@ -1081,7 +1079,7 @@ OnDisable:
 //============================================================
 1@face,153,113,7	script	Chaos#2	4_M_CHAOS,{
 	cutin "h_chaos01",2;
-	if (getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if (!is_party_leader()) {
 		mes "[Chaos]";
 		mes "I do not know what this is about, but I'm talking to your leader so please wait for a while ok?";
 		close2;

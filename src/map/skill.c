@@ -2406,7 +2406,7 @@ bool skill_strip_equip(struct block_list *src, struct block_list *bl, uint16 ski
 	struct status_data *tstatus = NULL;
 	struct map_session_data *tsd = NULL;
 	struct status_change *tsc = NULL;
-	int rate, time = 0, location = 0;
+	int rate, time = 0, location = 0, mod = 100;
 	uint8 i;
 
 	nullpo_retr(false,src);
@@ -2426,13 +2426,15 @@ bool skill_strip_equip(struct block_list *src, struct block_list *bl, uint16 ski
 		case RG_STRIPSHIELD:
 		case RG_STRIPHELM:
 		case GC_WEAPONCRUSH:
-			rate = 5 * (skill_lv + 1) + (sstatus->dex - tstatus->dex) / 5;
+			rate = 50 * (skill_lv + 1) + 2 * (sstatus->dex - tstatus->dex);
+			mod = 1000;
 			break;
 		case ST_FULLSTRIP: {
-				int min_rate = 5 + 2 * skill_lv;
+				int min_rate = 50 + 20 * skill_lv;
 
-				rate = min_rate + (sstatus->dex - tstatus->dex) / 5;
+				rate = min_rate + 2 * (sstatus->dex - tstatus->dex);
 				rate = max(rate,min_rate);
+				mod = 1000;
 			}
 			break;
 		case GS_DISARM:
@@ -2454,7 +2456,7 @@ bool skill_strip_equip(struct block_list *src, struct block_list *bl, uint16 ski
 
 	rate = max(rate,0);
 
-	if (rnd()%100 >= rate)
+	if (rnd()%mod >= rate)
 		return false;
 
 	switch (skill_id) { //Status duration
@@ -3210,10 +3212,6 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		case SL_STUN:
 			if (!(sc && sc->data[SC_SMA]) && skill_lv >= 7)
 				sc_start(src, src, SC_SMA, 100, skill_lv, skill_get_time(SL_SMA, skill_lv));
-			break;
-		case GS_FULLBUSTER:
-			if (sd) //Can't attack nor use items until skill's delay expires [Skotlex]
-				sd->ud.attackabletime = sd->canuseitem_tick = sd->ud.canact_tick;
 			break;
 		case GN_WALLOFTHORN:
 			type = flag;

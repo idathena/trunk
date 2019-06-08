@@ -1,18 +1,18 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Octopus Cave
-//===== By: ================================================== 
+//===== By: ==================================================
 //= Muad_Dib
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.1
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: ========================================= 
 //= [Official Conversion]
 //= Defeat the Disgusting Octopus.
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First version. [Euphy]
 //= 1.1 Instance system rewrite. [Euphy]
-//============================================================ 
+//============================================================
 
 // Instance Creation :: oct
 //============================================================
@@ -28,7 +28,7 @@ mal_dun01,151,235,5	script	Starfish	551,{
 		mes "Make a party, and come back later.";
 		close;
 	}
-	if (getcharid(0) != getpartyleader(.@party_id,2)) {
+	if (!is_party_leader()) {
 		mes "[Starfish]";
 		mes "Where is your leader, hehe.";
 		mes "I don't talk to some random people.";

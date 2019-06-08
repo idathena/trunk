@@ -1448,7 +1448,8 @@ static enum e_CASHSHOP_ACK npc_cashshop_process_payment(struct npc_data *nd, int
 		case NPCTYPE_CASHSHOP:
 			if( cost[1] < points || cost[0] < (price - points) )
 				return ERROR_TYPE_MONEY;
-			pc_paycash(sd, price, points, LOG_TYPE_NPC);
+			if( pc_paycash(sd, price, points, LOG_TYPE_NPC) <= 0 )
+				return ERROR_TYPE_MONEY;
 			break;
 		case NPCTYPE_ITEMSHOP: {
 				struct item_data *id = itemdb_exists(nd->u.shop.itemshop_nameid);

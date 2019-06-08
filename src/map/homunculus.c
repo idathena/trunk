@@ -1783,7 +1783,7 @@ void read_homunculus_expdb(void)
 		DBPATH"exp_homun.txt",
 		"exp_homun2.txt"};
 
-	memset(hexptbl,0,sizeof(hexptbl));
+	memset(hexptbl, 0, sizeof(hexptbl));
 
 	for (i = 0; i < 2; i++) {
 		FILE *fp;

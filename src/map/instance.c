@@ -553,12 +553,6 @@ int instance_enter_position(struct map_session_data *sd, const char *name, short
 	if(pc_setpos(sd, map_id2index(m), x, y, CLR_OUTSIGHT))
 		return 3;
 
-	// If there was an idle timer, let's stop it
-	instance_stopidletimer(im);
-
-	// Now we start the instance timer
-	instance_startkeeptimer(im, p->instance_id);
-
 	return 0;
 }
 

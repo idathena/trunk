@@ -23164,6 +23164,58 @@ BUILDIN_FUNC(needed_status_point) {
 	return SCRIPT_CMD_SUCCESS;
 }
 
+BUILDIN_FUNC(is_guild_leader)
+{
+	struct map_session_data *sd;
+	struct guild *guild_data;
+	int guild_id;
+
+	if (!(sd = script_rid2sd(st))) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (script_hasdata(st,2))
+		guild_id = script_getnum(st,2);
+	else
+		guild_id = sd->status.guild_id;
+
+	guild_data = guild_search(guild_id);
+	if (guild_data)
+		script_pushint(st,(guild_data->member[0].char_id == sd->status.char_id));
+	else
+		script_pushint(st,false);
+	return SCRIPT_CMD_SUCCESS;
+}
+
+BUILDIN_FUNC(is_party_leader)
+{
+	struct map_session_data *sd;
+	struct party_data *p_data;
+	int p_id, i = 0;
+
+	if (!(sd = script_rid2sd(st))) {
+		script_pushint(st,false);
+		return 1;
+	}
+
+	if (script_hasdata(st,2))
+		p_id = script_getnum(st,2);
+	else
+		p_id = sd->status.party_id;
+
+	p_data = party_search(p_id);
+	if (p_data) {
+		ARR_FIND(0, MAX_PARTY, i, p_data->data[i].sd == sd);
+		if (i < MAX_PARTY) {
+			script_pushint(st,p_data->party.member[i].leader);
+			return 0;
+		}
+	}
+	script_pushint(st,false);
+	return SCRIPT_CMD_SUCCESS;
+}
+
 #include "../custom/script.inc"
 
 // Declarations that were supposed to be exported from npc_chat.c
@@ -23810,6 +23862,8 @@ struct script_function buildin_func[] = {
 	//Stylist UI
 	BUILDIN_DEF(open_stylistui,"?"),
 	BUILDIN_DEF(needed_status_point,"ii?"),
+	BUILDIN_DEF(is_guild_leader,"?"),
+	BUILDIN_DEF(is_party_leader,"?"),
 
 #include "../custom/script_def.inc"
 

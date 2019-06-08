@@ -142,7 +142,6 @@ moc_para01,29,95,5	script	Runane#sara	10039,{
 			end;
 		} else {
 			.@party_id = getcharid(1);
-			.@ins_mas = getpartyleader(.@party_id,2);
 			.@p_name$ = getpartyname(.@party_id);
 			.@p_reader$ = strcharinfo(0);
 			.@md_name$ = "Nightmarish Jitterbug";
@@ -153,7 +152,7 @@ moc_para01,29,95,5	script	Runane#sara	10039,{
 				cutin "lunain01",255;
 				end;
 			}
-			if (getcharid(0) == .@ins_mas)
+			if (is_party_leader())
 				.@menu$ = "Open the dimensional portal.:Enter Nightmarish Jitterbug.:Cancel.";
 			else
 				.@menu$ = ":Enter Nightmarish Jitterbug.:Cancel.";
@@ -384,7 +383,7 @@ OnDisable:
 }
 
 1@jtb,28,30,5	script	New Oz#01	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines02",0;
 		mes "[New Oz]";
 		mes "Our adventure hasn't started yet, and I'm already hungry.";
@@ -791,7 +790,7 @@ OnDisable:
 }
 
 1@jtb,123,45,4	script	Runane#02	10039,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "lunain01",2;
 		mes "[Runane]";
 		mes "Please, let there be no more surprises.";
@@ -955,7 +954,7 @@ OnDisable:
 }
 
 1@jtb,198,31,5	script	Rohtert#03	630,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "rote01",0;
 		mes "[Rohtert]";
 		mes "These monsters are boring.";
@@ -1105,7 +1104,7 @@ OnTimer2000:
 // Room 4
 //============================================================
 1@jtb,292,22,4	script	???#4	10041,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "shaloshi01",2;
 		mes "[???]";
 		mes "...";
@@ -1255,7 +1254,7 @@ OnDisable:
 }
 
 1@jtb,20,108,5	script	New Oz#05	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines01",0;
 		mes "[New Oz]";
 		mes "I'll sing again later.";
@@ -1417,7 +1416,7 @@ OnDisable:
 }
 
 1@jtb,111,115,5	script	Roel#06	10040,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "roel01",0;
 		mes "[Roel]";
 		mes "What's wrong with me? My heart won't stop pounding.";
@@ -1559,7 +1558,7 @@ OnDisable:
 }
 
 1@jtb,206,107,5	script	Mingmin#07	643,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "min02",0;
 		mes "[Mingmin]";
 		mes "...";
@@ -1710,7 +1709,7 @@ OnDisable:
 }
 
 1@jtb,285,114,5	script	New Oz#08	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines01",0;
 		mes "[New Oz]";
 		mes "...";
@@ -1944,7 +1943,7 @@ OnDisable:
 }
 
 1@jtb,375,117,4	script	New Oz#09	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines01",2;
 		mes "[New Oz]";
 		mes "These guys are different. They seem to understand music... or maybe not.";
@@ -2117,7 +2116,7 @@ OnDisable:
 }
 
 1@jtb,26,201,5	script	Runane#10	10039,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "lunain04",0;
 		mes "[Runane]";
 		mes "Arang, why aren't you drinking it?";
@@ -2288,7 +2287,7 @@ OnTimer2000:
 // Room 11
 //============================================================
 1@jtb,106,198,5	script	Mingmin#11	643,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "min02",0;
 		mes "[Mingmin]";
 		mes "I'm glad the mushroom is not poisonous.";
@@ -2414,7 +2413,7 @@ OnDisable:
 }
 
 1@jtb,195,206,4	script	New Oz#12	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines01",2;
 		mes "[New Oz]";
 		mes "You made it sound so difficult, when you could just say, 'give and take.'";
@@ -2649,7 +2648,7 @@ OnDisable:
 }
 
 1@jtb,282,194,5	script	New Oz#13	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines01",0;
 		mes "[New Oz]";
 		mes "It's possible someone else might be in here.";
@@ -2968,7 +2967,7 @@ OnDisable:
 }
 
 1@jtb,380,219,5	script	New Oz#14	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines02",0;
 		mes "[New Oz]";
 		mes "Don't worry. Children grow by fighting.";
@@ -3142,7 +3141,7 @@ OnDisable:
 }
 
 1@jtb,26,280,5	script	New Oz#15	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines01",0;
 		mes "[New Oz]";
 		mes "Wait, I've collected some Autumn Leaves and Blue Cards to give to other friends as souvenirs. Where are they?";
@@ -3295,7 +3294,7 @@ OnDisable:
 }
 
 1@jtb,110,281,5	script	Shalosh#16	10041,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "shaloshi01",2;
 		mes "[Shalosh]";
 		mes "Friends... Rivalry... Comrades...";
@@ -3487,7 +3486,7 @@ OnDisable:
 }
 
 1@jtb,198,282,5	script	Shalosh#17	10041,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "shaloshi01",0;
 		mes "[Shalosh]";
 		mes "Ferres don't bite me.";
@@ -3781,7 +3780,7 @@ OnDisable:
 }
 
 1@jtb,28,377,5	script	New Oz#18	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines01",0;
 		mes "[New Oz]";
 		mes "We should find her.";
@@ -3958,7 +3957,7 @@ OnDisable:
 }
 
 1@jtb,105,377,5	script	Roel#19	10040,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "roel01",0;
 		mes "[Roel]";
 		mes "One of my friends once set me up on a blind date in Izlude.";
@@ -4313,7 +4312,7 @@ OnDisable:
 }
 
 1@jtb,198,369,5	script	New Oz#20	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		mes "[New Oz]";
 		mes "...";
 		close;
@@ -4710,7 +4709,7 @@ OnDisable:
 }
 
 1@jtb,320,323,5	script	New Oz#22	625,{
-	if ('jitRoom >= atoi(strnpcinfo(2)) || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= atoi(strnpcinfo(2)) || !is_party_leader()) {
 		cutin "nines01",0;
 		mes "[New Oz]";
 		mes "...";
@@ -4920,7 +4919,7 @@ OnMyMobDead:
 }
 
 1@jtb,320,323,5	script	New Oz#22t	625,{
-	if ('jitRoom >= 100 || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= 100 || !is_party_leader()) {
 		cutin "nines01",0;
 		mes "[New Oz]";
 		mes "...";
@@ -5410,7 +5409,7 @@ OnDisable:
 }
 
 1@jtb,379,31,4	script	New Oz#23	625,{
-	if ('jitRoom >= 101 || getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if ('jitRoom >= 101 || !is_party_leader()) {
 		cutin "nines01",2;
 		mes "[New Oz]";
 		mes "It's been a while since I had so much fun.";

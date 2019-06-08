@@ -8448,8 +8448,7 @@ ACMD_FUNC(cash)
 			if( -value > sd->cashPoints ) //By command, if cash < value, force it to remove all
 				value = -sd->cashPoints;
 			if( (ret = pc_paycash(sd, -value, 0, LOG_TYPE_COMMAND)) >= 0 ) {
-				// If this option is set, the message is already sent by pc function
-				if( !battle_config.cashshop_show_points ) {
+				if( !battle_config.cashshop_show_points ) { // If this option is set, the message is already sent by pc function
 					sprintf(output, msg_txt(410), ret, sd->cashPoints); // Removed %d cash points. Total %d points.
 					clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 				}

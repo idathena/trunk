@@ -5998,11 +5998,13 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case NJ_BAKUENRYU:
 						skillratio += 50 + 150 * skill_lv;
 						if(sd && sd->charmball_type == CHARM_TYPE_FIRE && sd->charmball > 0)
-							skillratio += 45 * sd->charmball;
+							skillratio += 15 * sd->charmball;
 						break;
 					case NJ_HYOUSENSOU:
 #ifdef RENEWAL
 						skillratio -= 30;
+						if(tsc && tsc->data[SC_SUITON])
+							skillratio += 10 + 2 * skill_lv;
 #endif
 						if(sd && sd->charmball_type == CHARM_TYPE_WATER && sd->charmball > 0)
 							skillratio += 5 * sd->charmball;
@@ -7051,6 +7053,9 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 #else
 	#define CAP_RDAMAGE(d) ( (d) = i64max((d),1) )
 #endif
+
+	if( sc && sc->data[SC_WHITEIMPRISON] )
+		return 0; //White Imprison does not reflect any damage
 
 	if( flag&BF_SHORT ) { //Bounces back part of the damage
 		if( !status_reflect && sd && sd->bonus.short_weapon_damage_return ) {

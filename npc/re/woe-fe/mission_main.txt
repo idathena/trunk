@@ -65,7 +65,7 @@ function calcjobexp;
 	switch(select("Conquering " + .region$[.@zoneid], "Guild Dungeon Daily Quests", "About quests", "I don't need it.")){
 		case 1: // Conquering.
 			.@gid = getcharid(2);
-			if(.@gid && getguildmaster(.@gid) == strcharinfo(0)){
+			if(is_guild_leader()){
 				.@time_check1 = checkquest(.conquer_delay_questid[.@zoneid], PLAYTIME);
 				if(.@time_check1 == 0){
 					mes .@npcname$;
@@ -400,23 +400,23 @@ OnInit:
 		}
 		return 0;
 	}
-	
+
 	function calcexp {
 		.@zoneid = getarg(0);
 		.@index = getarg(1);
 		.@maxlevel = .max_level[.@index];
 		.@isboss = (.@zoneid < 4 && !((.@index+1)%3));
-		
+
 		if(!.@isboss && BaseLevel > .@maxlevel){
 			return 1000 * (100 + ((.@maxlevel - 100) * 3));
 		} else {
 			return 1000 * (100 + ((BaseLevel - 100) * 3)) * (1 + .@isboss);
 		}
 	}
-	
+
 	function calcjobexp {
 		.@edition = getarg(0);
-		
+
 		if(.@edition == 3){
 			if(jobcanentermap("te_prtcas01")){
 				if (JobLevel > 50)
