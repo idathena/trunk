@@ -5,6 +5,7 @@
 #include "malloc.h"
 #include "msg_conf.h"
 #include "showmsg.h"
+#include "strlib.h"
 
 /*
  * Return the message string of the specified number by [Yor]
@@ -53,8 +54,9 @@ int _msg_config_read(const char* cfgName, int size, char ** msg_table)
 			if (msg_number >= 0 && msg_number < size) {
 				if (msg_table[msg_number] != NULL)
 					aFree(msg_table[msg_number]);
-				msg_table[msg_number] = (char *) aMalloc((strlen(w2) + 1) * sizeof (char));
-				strcpy(msg_table[msg_number], w2);
+				size_t len = strnlen(w2, sizeof(w2)) + 1;
+				msg_table[msg_number] = (char *)aMalloc(len * sizeof(char));
+				safestrncpy(msg_table[msg_number], w2, len);
 				msg_count++;
 			} else
 				ShowWarning("Invalid message ID '%s' at line %d from '%s' file.\n", w1, line_num, cfgName);

@@ -20171,12 +20171,16 @@ BUILDIN_FUNC(setmounting) {
 	if( sd->sc.option && (sd->sc.option&(OPTION_RIDING|OPTION_DRAGON|OPTION_WUGRIDER|OPTION_MADOGEAR)) ) {
 		clif_msg(sd,ITEM_NEED_REINS_OF_MOUNT);
 		script_pushint(st,0); //Can't mount with one of these
+	} else if( sd->sc.data[SC_CLOAKING] || sd->sc.data[SC_CHASEWALK] ||
+		sd->sc.data[SC_CLOAKINGEXCEED] || sd->sc.data[SC_CAMOUFLAGE] ||
+		sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__FEINTBOMB] )
+		script_pushint(st,0); //Silent failure
 	} else {
 		if( sd->sc.data[SC_ALL_RIDING] )
 			status_change_end(&sd->bl,SC_ALL_RIDING,INVALID_TIMER);
 		else
 			sc_start(&sd->bl,&sd->bl,SC_ALL_RIDING,100,0,-1);
-		script_pushint(st,1); //In both cases, return 1.
+		script_pushint(st,1); //In both cases, return 1
 	}
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -20195,7 +20199,7 @@ BUILDIN_FUNC(getargcount) {
 	}
 	ri = st->stack->stack_data[st->stack->defsp - 1].u.ri;
 
-	script_pushint(st, ri->nargs);
+	script_pushint(st,ri->nargs);
 	return SCRIPT_CMD_SUCCESS;
 }
 

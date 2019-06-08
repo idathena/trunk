@@ -1393,7 +1393,10 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 #ifdef RENEWAL
 		if( (sce = sc->data[SC_RAID]) ) {
-			damage += damage * 20 / 100;
+			if( status_get_class_(bl) == CLASS_BOSS )
+				damage += damage * 10 / 100;
+			else
+				damage += damage * 20 / 100;
 			if( --(sce->val1) <= 0 )
 				status_change_end(bl,SC_RAID,INVALID_TIMER);
 		}
@@ -3609,7 +3612,14 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 				skillratio += 200 + 40 * skill_lv;
 			break;
 		case RG_RAID:
+#ifdef RENEWAL
+			if(status_get_class_(target) == CLASS_BOSS)
+				skillratio += 10 * skill_lv;
+			else
+				skillratio += 20 * skill_lv;
+#else
 			skillratio += 40 * skill_lv;
+#endif
 			break;
 		case RG_INTIMIDATE:
 			skillratio += 30 * skill_lv;
@@ -8429,6 +8439,8 @@ static const struct _battle_data {
 	{ "pk_level_range",                     &battle_config.pk_level_range,                  0,      0,      INT_MAX,        },
 	{ "manner_system",                      &battle_config.manner_system,                   0xFFF,  0,      0xFFF,          },
 	{ "multi_level_up",                     &battle_config.multi_level_up,                  0,      0,      1,              },
+	{ "multi_level_up_base",                &battle_config.multi_level_up_base,             0,      0,      MAX_LEVEL,      },
+	{ "multi_level_up_job",                 &battle_config.multi_level_up_job,              0,      0,      MAX_LEVEL,      },
 	{ "max_exp_gain_rate",                  &battle_config.max_exp_gain_rate,               0,      0,      INT_MAX,        },
 	{ "backstab_bow_penalty",               &battle_config.backstab_bow_penalty,            0,      0,      1,              },
 	{ "night_at_start",                     &battle_config.night_at_start,                  0,      0,      1,              },

@@ -1,4 +1,4 @@
-Ôªø//===== rAthena Documentation ================================
+//===== rAthena Documentation ================================
 //= rAthena Script Commands
 //===== By: ==================================================
 //= rAthena Dev Team
@@ -1452,7 +1452,7 @@ with other command, such as "if", but often used on its own.
 Label:
 	mes "This will be seen";
 
-Note by FlavioJS: goto's are "evil" and should be avoided if possible (√≤_√≥)
+Note by FlavioJS: goto's are "evil" and should be avoided if possible
 
 ---------------------------------------
 
@@ -7545,13 +7545,14 @@ This command will display a picture, usually an NPC illustration, also called
 cutin, for the currently attached client. The position parameter determines the
 placement of the illustration and takes following values:
 
-    0 - bottom left corner 
-    1 - bottom middle 
-    2 - bottom right corner 
-    3 - middle of screen in a movable window with an empty title bar 
-    4 - middle of screen without the window header, but still movable 
+    0   bottom left corner
+    1   bottom middle
+    2   bottom right corner
+    3   middle of screen in a movable window with an empty title bar
+    4   middle of screen without the window header, but still movable
+    255 clear all displayed cutins
 
-The picture is read from data\texture\Ïú†Ï†ÄÏù∏ÌÑ∞ÌéòÏù¥Ïä§\illust, from both the GRF archive
+The picture is read from data\texture\¿Ø¿˙¿Œ≈Õ∆‰¿ÃΩ∫\illust, from both the GRF archive
 and data folder, and is required to be a bitmap. The file extension .bmp can be
 omitted. Magenta color (#ff00ff) is considered transparent. There is no limit
 placed on the size of the illustrations by the client, although loading of large

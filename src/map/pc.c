@@ -6826,9 +6826,8 @@ int pc_checkbaselevelup(struct map_session_data *sd) {
 
 	do {
 		sd->status.base_exp -= next;
-		//Kyoki pointed out that the max overcarry exp is the exp needed for the previous level -1 [Skotlex]
-		if (!battle_config.multi_level_up && sd->status.base_exp > next - 1)
-			sd->status.base_exp = next - 1;
+		if ((!battle_config.multi_level_up || (battle_config.multi_level_up_base > 0 && sd->status.base_level >= battle_config.multi_level_up_base)) && sd->status.base_exp > next - 1)
+			sd->status.base_exp = next - 1; //Kyoki pointed out that the max overcarry exp is the exp needed for the previous level -1 [Skotlex]
 		next = pc_gets_status_point(sd->status.base_level);
 		sd->status.base_level++;
 		sd->status.status_point += next;
@@ -6894,9 +6893,8 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 
 	do {
 		sd->status.job_exp -= next;
-		//Kyoki pointed out that the max overcarry exp is the exp needed for the previous level -1 [Skotlex]
-		if (!battle_config.multi_level_up && sd->status.job_exp > next - 1)
-			sd->status.job_exp = next - 1;
+		if ((!battle_config.multi_level_up || (battle_config.multi_level_up_job > 0 && sd->status.job_level >= battle_config.multi_level_up_job)) && sd->status.job_exp > next - 1)
+			sd->status.job_exp = next - 1; //Kyoki pointed out that the max overcarry exp is the exp needed for the previous level -1 [Skotlex]
 		sd->status.job_level++;
 		sd->status.skill_point++;
 		if (pc_is_maxjoblv(sd)) {
@@ -7995,10 +7993,12 @@ TIMER_FUNC(pc_close_npc_timer)
 	return 0;
 }
 
-/*
- * Method to properly close npc for player and clear anything related
- * @flag == 1 : produce close button
- * @flag == 2 : directly close it
+/**
+ * Method to properly close a NPC for player and clear anything related.
+ * @param sd: Player attached
+ * @param flag: Method of closure
+ *   1: Produce a close button and end the NPC
+ *   2: End the NPC (best for no dialog windows)
  */
 void pc_close_npc(struct map_session_data *sd, int flag) {
 	nullpo_retv(sd);

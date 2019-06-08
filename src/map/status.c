@@ -8491,6 +8491,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_ALL_RIDING:
 			if( sc->option&(OPTION_RIDING|OPTION_DRAGON|OPTION_WUGRIDER|OPTION_MADOGEAR) )
 				return 0;
+			if( sc->data[SC_CLOAKING] || sc->data[SC_CHASEWALK] ||
+				sc->data[SC_CLOAKINGEXCEED] || sc->data[SC_CAMOUFLAGE] ||
+				sc->data[SC_STEALTHFIELD] || sc->data[SC__FEINTBOMB] )
+				return 0;
 			if( sc->data[type] ) { //Already mounted, just dismount
 				status_change_end(bl,type,INVALID_TIMER);
 				return 0;

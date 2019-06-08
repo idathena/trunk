@@ -121,8 +121,8 @@ int char_del_option =
 	;
 int char_del_restriction = CHAR_DEL_RESTRICT_ALL;
 
-int log_char = 1;	// Loggin char or not [devil]
-int log_inter = 1;	// Loggin inter or not [devil]
+int log_char = 1; // Loggin char or not [devil]
+int log_inter = 1; // Loggin inter or not [devil]
 
 // Advanced subnet check [LuzZza]
 struct s_subnet {
@@ -6000,7 +6000,7 @@ int char_config_read(const char *cfgName)
 		else if(strcmpi(w1, "char_server_type") == 0)
 			char_server_type = atoi(w2);
 		else if(strcmpi(w1, "char_new") == 0)
-			char_new = (bool)atoi(w2);
+			char_new = (bool)config_switch(w2);
 		else if(strcmpi(w1, "char_new_display") == 0)
 			char_new_display = atoi(w2);
 		else if(strcmpi(w1, "max_connect_user") == 0) {
@@ -6036,7 +6036,7 @@ int char_config_read(const char *cfgName)
 			char_config_split_startitem(w1, w2, start_items_doram);
 #endif
 		else if(strcmpi(w1,"log_char") == 0) //Log char or not [devil]
-			log_char = atoi(w2);
+			log_char = config_switch(w2);
 		else if(strcmpi(w1, "unknown_char_name") == 0) {
 			safestrncpy(unknown_char_name, w2, sizeof(unknown_char_name));
 			unknown_char_name[NAME_LENGTH-1] = '\0';

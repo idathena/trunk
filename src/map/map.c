@@ -2548,7 +2548,7 @@ int map_addinstancemap(const char *name, int id)
 	// Copy the map
 	memcpy(&map[dst_m], &map[src_m], sizeof(struct map_data));
 
-	strcpy(iname,name);
+	strcpy(iname, name);
 
 	// Alter the name
 	// Due to this being custom we only worry about preserving as many characters as necessary for accurate map distinguishing
@@ -3867,13 +3867,13 @@ int map_config_read(char *cfgName)
 		} else if (strcmpi(w1, "save_settings") == 0)
 			save_settings = atoi(w2);
 		else if (strcmpi(w1, "motd_txt") == 0)
-			strcpy(motd_txt, w2);
+			safestrncpy(motd_txt, w2, sizeof(motd_txt));
 		else if (strcmpi(w1, "help_txt") == 0)
-			strcpy(help_txt, w2);
+			safestrncpy(help_txt, w2, sizeof(help_txt));
 		else if (strcmpi(w1, "help2_txt") == 0)
-			strcpy(help2_txt, w2);
+			safestrncpy(help2_txt, w2, sizeof(help2_txt));
 		else if (strcmpi(w1, "charhelp_txt") == 0)
-			strcpy(charhelp_txt, w2);
+			safestrncpy(charhelp_txt, w2, sizeof(charhelp_txt));
 		else if (strcmpi(w1, "channel_conf") == 0)
 			safestrncpy(channel_conf, w2, sizeof(channel_conf));
 		else if(strcmpi(w1,"db_path") == 0)
@@ -3969,61 +3969,61 @@ int inter_config_read(char *cfgName)
 			continue;
 
 		if( strcmpi(w1, "buyingstores_db") == 0 )
-			strcpy(buyingstores_db, w2);
+			safestrncpy(buyingstores_db, w2, sizeof(buyingstores_db));
 		else if( strcmpi(w1, "buyingstore_items_db") == 0 )
-			strcpy(buyingstore_items_db, w2);
+			safestrncpy(buyingstore_items_db, w2, sizeof(buyingstore_items_db));
 		else if( strcmpi(w1, "guild_storage_log") == 0 )
-			strcpy(guild_storage_log_db, w2);
+			safestrncpy(guild_storage_log_db, w2, sizeof(guild_storage_log_db));
 		else if( strcmpi(w1, "item_cash_db_db") == 0 )
-			strcpy(item_cash_db_db, w2);
+			safestrncpy(item_cash_db_db, w2, sizeof(item_cash_db_db));
 		else if( strcmpi(w1, "item_cash_db2_db") == 0 )
-			strcpy(item_cash_db2_db, w2);
+			safestrncpy(item_cash_db2_db, w2, sizeof(item_cash_db2_db));
 		else if( strcmpi(w1, "item_db_db") == 0 )
-			strcpy(item_db_db, w2);
+			safestrncpy(item_db_db, w2, sizeof(item_db_db));
 		else if( strcmpi(w1, "item_db2_db") == 0 )
-			strcpy(item_db2_db, w2);
+			safestrncpy(item_db2_db, w2, sizeof(item_db2_db));
 		else if( strcmpi(w1, "item_db_re_db") == 0 )
-			strcpy(item_db_re_db, w2);
+			safestrncpy(item_db_re_db, w2, sizeof(item_db_re_db));
 		else if( strcmpi(w1, "markets_db") == 0 )
-			strcpy(markets_db, w2);
+			safestrncpy(markets_db, w2, sizeof(markets_db));
 		else if( strcmpi(w1, "mob_skill_db_db") == 0 )
-			strcpy(mob_skill_db_db, w2);
+			safestrncpy(mob_skill_db_db, w2, sizeof(mob_skill_db_db));
 		else if( strcmpi(w1, "mob_skill_db_re_db") == 0 )
-			strcpy(mob_skill_db_re_db, w2);
+			safestrncpy(mob_skill_db_re_db, w2, sizeof(mob_skill_db_re_db));
 		else if( strcmpi(w1, "mob_skill_db2_db") == 0 )
-			strcpy(mob_skill_db2_db, w2);
+			safestrncpy(mob_skill_db2_db, w2, sizeof(mob_skill_db2_db));
 		else if( strcmpi(w1, "sales_db") == 0 )
-			strcpy(sales_db, w2);
+			safestrncpy(sales_db, w2, sizeof(sales_db));
 		else if( strcmpi(w1, "vendings_db") == 0 )
-			strcpy(vendings_db, w2);
+			safestrncpy(vendings_db, w2, sizeof(vendings_db));
 		else if( strcmpi(w1, "vending_items_db") == 0 )
-			strcpy(vending_items_db, w2);
+			safestrncpy(vending_items_db, w2, sizeof(vending_items_db));
 		//Map Server SQL DB
 		else if( strcmpi(w1, "map_server_ip") == 0 )
-			strcpy(map_server_ip, w2);
+			safestrncpy(map_server_ip, w2, sizeof(map_server_ip));
 		else if( strcmpi(w1, "map_server_port") == 0 )
 			map_server_port = atoi(w2);
 		else if( strcmpi(w1, "map_server_id") == 0 )
-			strcpy(map_server_id, w2);
+			safestrncpy(map_server_id, w2, sizeof(map_server_id));
 		else if( strcmpi(w1, "map_server_pw") == 0 )
-			strcpy(map_server_pw, w2);
+			safestrncpy(map_server_pw, w2, sizeof(map_server_pw));
 		else if( strcmpi(w1, "map_server_db") == 0 )
-			strcpy(map_server_db, w2);
+			safestrncpy(map_server_db, w2, sizeof(map_server_db));
 		else if( strcmpi(w1, "default_codepage") == 0 )
-			strcpy(default_codepage, w2);
+			safestrncpy(default_codepage, w2, sizeof(default_codepage));
 		else if( strcmpi(w1, "use_sql_db") == 0 ) {
 			db_use_sqldbs = config_switch(w2);
 			ShowStatus ("Using SQL dbs: %s\n", w2);
 		} else if( strcmpi(w1, "log_db_ip") == 0 )
-			strcpy(log_db_ip, w2);
+			safestrncpy(log_db_ip, w2, sizeof(log_db_ip));
 		else if( strcmpi(w1, "log_db_id") == 0 )
-			strcpy(log_db_id, w2);
+			safestrncpy(log_db_id, w2, sizeof(log_db_id));
 		else if( strcmpi(w1, "log_db_pw") == 0 )
-			strcpy(log_db_pw, w2);
+			safestrncpy(log_db_pw, w2, sizeof(log_db_pw));
 		else if( strcmpi(w1, "log_db_port") == 0 )
 			log_db_port = atoi(w2);
 		else if( strcmpi(w1, "log_db_db") == 0 )
-			strcpy(log_db_db, w2);
+			safestrncpy(log_db_db, w2, sizeof(log_db_db));
 		else if( mapreg_config_read(w1, w2) )
 			continue;
 		//Support the import command, just like any other config

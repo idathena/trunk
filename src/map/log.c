@@ -694,7 +694,7 @@ int log_config_read(const char *cfgName)
 			else if( strcmpi(w1, "log_zeny") == 0 )
 				log_config.zeny = config_switch(w2);
 			else if( strcmpi( w1, "log_cash" ) == 0 )
-				log_config.cash = config_switch( w2 );
+				log_config.cash = config_switch(w2);
 			else if( strcmpi(w1, "log_commands") == 0 )
 				log_config.commands = config_switch(w2);
 			else if( strcmpi(w1, "log_npc") == 0 )
