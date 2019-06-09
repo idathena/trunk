@@ -734,8 +734,7 @@ void read_elementaldb(void) {
 	if( config_read_file(&ele_db_conf, filepath) )
 		return;
 
-	if( (eledb = config_lookup(&ele_db_conf, "elemental_db")) )
-		return;
+	eledb = config_lookup(&ele_db_conf, "elemental_db");
 
 	if( eledb ) {
 		struct config_setting_t *kinds = config_setting_get_elem(eledb, 0);
@@ -770,7 +769,7 @@ void read_elementaldb(void) {
 				}
 
 				db.db = mob_db(i32);
-				db.elemental.kind = i;
+				db.elemental.kind = (enum elemental_type)i;
 
 				if( config_setting_lookup_int(monster, "Scale", &i32) )
 					db.elemental.scale = i32;

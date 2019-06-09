@@ -2592,8 +2592,11 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 {
 	int stat;
 
-	if( bl->type != BL_PC ) //Non players get the value set, players need to stack with previous bonuses
-		status->batk = status->hit = status->flee = status->def2 = status->mdef2 = status->cri = status->flee2 = 0;
+	if( bl->type != BL_PC ) { //Non players get the value set, players need to stack with previous bonuses
+		status->batk = status->def2 = status->mdef2 = status->cri = status->flee2 = 0;
+		if( bl->type != BL_ELEM )
+			status->hit = status->flee = 0;
+	}
 
 #ifndef RENEWAL
 	//Hit
@@ -2633,7 +2636,7 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 		//Mdef
 		stat = (int)(((float)(status_get_homvit(bl) + level) / 4) + ((float)status_get_homint(bl) / 2));
 		status->mdef = cap_value(stat, 0, SHRT_MAX);
-	} else {
+	} else if( bl->type != BL_ELEM ) {
 		//Base level + (every 1 dex = +1 hit) + (every 3 luk = +1 hit) + 175
 		stat = status->hit;
 		stat += (int)(level + status->dex + (bl->type == BL_PC ? ((float)status->luk / 3) + 175 : 170));
