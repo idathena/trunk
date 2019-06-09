@@ -734,7 +734,7 @@ void read_elementaldb(void) {
 	if( config_read_file(&ele_db_conf, filepath) )
 		return;
 
-	if( eledb = config_lookup(&ele_db_conf, "elemental_db") )
+	if( (eledb = config_lookup(&ele_db_conf, "elemental_db")) )
 		return;
 
 	if( eledb ) {

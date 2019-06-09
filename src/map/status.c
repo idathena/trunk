@@ -4340,7 +4340,7 @@ int status_calc_elemental_(struct elemental_data *ed, enum e_status_calc_opt opt
 		status->sp = ele->sp;
 		status->rhw.atk = ele->atk * 80 / 100;
 		status->rhw.atk2 = ele->atk * 120 / 100;
-		status->rhw.matk = ele->matk;
+		status->matk_min = ele->matk;
 		status->def = ele->def;
 		status->mdef = ele->mdef;
 		status->flee = ele->flee;

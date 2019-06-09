@@ -10009,7 +10009,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if( skill_lv == 4 )
 					elemental_delete(sd->ed,0);
 				else
-					clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start(src,&sd->ed->bl,SC_EL_PASSIVE + (--skill_lv),100,skill_lv,-1));
+					clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start(src,&sd->ed->bl,SC_EL_PASSIVE + (skill_lv - 1),100,skill_lv,-1));
 			}
 			break;
 
