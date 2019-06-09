@@ -59,14 +59,14 @@
 	#define __64BPRTSIZE(y) y
 #endif
 
-// ATCMD_FUNC(mobinfo)
+// ACMD_FUNC(mobinfo)
+#define MOB_ATK1(mob)  ( (mob)->status.batk + (mob)->status.rhw.atk )
+#define MOB_ATK2(mob)  ( (mob)->status.batk + (mob)->status.rhw.atk2 )
+#define MOB_MATK1(mob) ( (mob)->status.matk_min )
+#define MOB_MATK2(mob) ( (mob)->status.matk_max )
 #ifdef RENEWAL
 	#define MOB_FLEE(mob) ( (mob)->lv + (mob)->status.agi + 100 )
 	#define MOB_HIT(mob)  ( (mob)->lv + (mob)->status.dex + 170 )
-	#define MOB_ATK1(mob) ( (mob)->lv + (mob)->status.str + (mob)->status.rhw.atk * 8 / 10 )
-	#define MOB_ATK2(mob) ( (mob)->lv + (mob)->status.str + (mob)->status.rhw.atk * 12 / 10 )
-	#define MOB_MATK1(mob)( (mob)->lv + (mob)->status.int_ + (mob)->status.rhw.atk2 * 7 / 10 )
-	#define MOB_MATK2(mob)( (mob)->lv + (mob)->status.int_ + (mob)->status.rhw.atk2 * 13 / 10 )
 #else
 	#define MOB_FLEE(mob) ( (mob)->lv + (mob)->status.agi )
 	#define MOB_HIT(mob)  ( (mob)->lv + (mob)->status.dex )

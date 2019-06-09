@@ -3822,14 +3822,14 @@ static int mob_makedummymobdb(int mob_id)
 	if (mob_dummy != NULL) {
 		if (mob_db(mob_id) == mob_dummy)
 			return 1; //Using the mob_dummy data already. [Skotlex]
-		if (mob_id > 0 && mob_id <= MAX_MOB_DB) { //Remove the mob data so that it uses the dummy data instead.
+		if (mob_id > 0 && mob_id <= MAX_MOB_DB) { //Remove the mob data so that it uses the dummy data instead
 			aFree(mob_db_data[mob_id]);
 			mob_db_data[mob_id] = NULL;
 		}
 		return 0;
 	}
-	//Initialize dummy data.
-	mob_dummy = (struct mob_db *)aCalloc(1,sizeof(struct mob_db)); //Initializing the dummy mob.
+	//Initialize dummy data
+	mob_dummy = (struct mob_db *)aCalloc(1,sizeof(struct mob_db)); //Initializing the dummy mob
 	sprintf(mob_dummy->sprite,"DUMMY");
 	sprintf(mob_dummy->name,"Dummy");
 	sprintf(mob_dummy->jname,"Dummy");
@@ -4088,8 +4088,13 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 	if (config_setting_lookup_int(it, "ATK1", &i32) && i32 >= 0)
 		status->rhw.atk = i32;
 
-	if (config_setting_lookup_int(it, "ATK2", &i32) && i32 >= 0)
+	if (config_setting_lookup_int(it, "ATK2", &i32) && i32 >= 0) {
+#ifdef RENEWAL
+		status->rhw.matk = i32;
+#else
 		status->rhw.atk2 = i32;
+#endif
+	}
 
 	if (config_setting_lookup_int(it, "DEF", &i32) && i32 >= 0)
 		status->def = i32;

@@ -2279,18 +2279,21 @@ int status_base_amotion_pc(struct map_session_data *sd, struct status_data *stat
 	return amotion;
 }
 
-static unsigned short status_base_atk(const struct block_list *bl, const struct status_data *status)
+/**
+ * Base attack value calculated for units
+ * @param bl: Object to get attack for [BL_CHAR|BL_NPC]
+ * @param status: Object status
+ * @return base attack
+ */
+static unsigned short status_base_atk(const struct block_list *bl, const struct status_data *status, int level)
 {
 	int flag = 0, str, dex, dstr;
 
-#ifdef RENEWAL
-	if (bl->type&(BL_PET|BL_ELEM))
-#else
-	if (!(bl->type&battle_config.enable_baseatk))
-#endif
+	if( !(bl->type&battle_config.enable_baseatk) )
 		return 0;
-	if (bl->type == BL_PC) {
-		switch(((TBL_PC *)bl)->status.weapon) {
+
+	if( bl->type == BL_PC ) {
+		switch( ((TBL_PC *)bl)->status.weapon ) {
 			case W_BOW:	case W_MUSICAL:
 			case W_WHIP:	case W_REVOLVER:
 			case W_RIFLE:	case W_GATLING:
@@ -2299,7 +2302,7 @@ static unsigned short status_base_atk(const struct block_list *bl, const struct 
 				break;
 		}
 	}
-	if (flag) {
+	if( flag ) {
 #ifdef RENEWAL
 		dstr =
 #endif
@@ -2314,90 +2317,144 @@ static unsigned short status_base_atk(const struct block_list *bl, const struct 
 	}
 	//Normally only players have base-atk, but homunc have a different batk
 	//equation, hinting that perhaps non-players should use this for batk [Skotlex]
+	switch( bl->type ) {
+		case BL_HOM:
 #ifdef RENEWAL
-	if (bl->type == BL_HOM)
-		str = 2 * ((((TBL_HOM *)bl)->homunculus.level) + status_get_homstr(bl));
+			str = 2 * (level + status_get_homstr(bl));
 #else
-	dstr = (int)((float)str / 10);
-	str += dstr * dstr;
+			dstr = str / 10;
+			str += dstr * dstr;
 #endif
-	if (bl->type == BL_PC)
+			break;
+		case BL_PC:
 #ifdef RENEWAL
-		str = (int)(dstr + (float)dex / 5 + (float)status->luk / 3 + (float)((TBL_PC *)bl)->status.base_level / 4);
-	else if (bl->type == BL_MOB || bl->type == BL_MER)
-		str = dstr + ((TBL_MOB *)bl)->level;
+			str = (dstr * 10 + dex * 10 / 5 + status->luk * 10 / 3 + level * 10 / 4) / 10;
 #else
-		str += (int)((float)(dex + status->luk) / 5);
+			dstr = str / 10;
+			str += dstr * dstr;
+			str += dex / 5 + status->luk / 5;
 #endif
+			break;
+		default:
+#ifdef RENEWAL
+			str = dstr + level;
+#else
+			dstr = str / 10;
+			str += dstr * dstr;
+			str += dex / 5 + status->luk / 5;
+#endif
+			break;
+	}
 	return cap_value(str, 0, USHRT_MAX);
 }
 
 #ifdef RENEWAL
+/**
+ * Weapon attack value calculated for Players
+ * @param watk: Weapon attack
+ * @return weapon attack
+ */
 unsigned short status_weapon_atk(struct weapon_atk *watk)
 {
 	return watk->atk + watk->atk2;
 }
+#endif
 
+#ifndef RENEWAL
+unsigned short status_base_matk_min(const struct status_data *status) { return status->int_ + (status->int_ / 7) * (status->int_ / 7); }
+unsigned short status_base_matk_max(const struct status_data *status) { return status->int_ + (status->int_ / 5) * (status->int_ / 5); }
+#else
+/**
+ * Calculates minimum attack variance 80% from db's ATK1 for non BL_PC
+ * status->batk (base attack) will be added in battle_calc_base_damage
+ */
+unsigned short status_base_atk_min(struct block_list *bl, const struct status_data *status, int level)
+{
+	switch( bl->type ) {
+		case BL_PET:
+		case BL_MOB:
+		case BL_MER:
+		case BL_ELEM:
+			return status->rhw.atk * 80 / 100;
+		case BL_HOM:
+			return (status_get_homstr(bl) + status_get_homdex(bl)) / 5;
+		default:
+			return status->rhw.atk;
+	}
+}
+
+/**
+ * Calculates maximum attack variance 120% from db's ATK1 for non BL_PC
+ * status->batk (base attack) will be added in battle_calc_base_damage
+ */
+unsigned short status_base_atk_max(struct block_list *bl, const struct status_data *status, int level)
+{
+	switch( bl->type ) {
+		case BL_PET:
+		case BL_MOB:
+		case BL_MER:
+		case BL_ELEM:
+			return status->rhw.atk * 120 / 100;
+		case BL_HOM:
+			return (status_get_homluk(bl) + status_get_homstr(bl) + status_get_homdex(bl)) / 3;
+		default:
+			return status->rhw.atk2;
+	}
+}
+
+/**
+ * Calculates base magic attack
+ */
 unsigned short status_base_matk(struct block_list *bl, const struct status_data *status, int level)
 {
-	switch (bl->type) {
+	switch( bl->type ) {
+		case BL_PET:
 		case BL_MOB:
+		case BL_MER:
+		case BL_ELEM:
 			return status->int_ + level;
 		case BL_HOM:
 			return status_get_homint(bl) + level;
-		case BL_MER:
-			return status->int_ + status->int_ / 5 * status->int_ / 5;
 		case BL_PC:
-		default: //Temporary until all are formulated
+		default:
 			return status->int_ + (status->int_ / 2) + (status->dex / 5) + (status->luk / 3) + (level / 4);
 	}
 }
-#else
-	unsigned short status_base_matk_min(const struct status_data *status) { return status->int_ + (status->int_ / 7) * (status->int_ / 7); }
 #endif
-
-static inline unsigned short status_base_matk_max(const struct status_data *status) { return status->int_ + (status->int_ / 5) * (status->int_ / 5); }
 
 /**
  * Get bl's matk_max and matk_min values depending on flag
  * @param flag:
  *  0 - Get MATK
  *  1 - Get MATK w/o SC bonuses
+ *  2 - Get unmodified MATK
  *  3 - Get MATK w/o eMATK & SC bonuses
  */
-void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_max, unsigned short *matk_min)
+void status_get_matk_sub(struct block_list *bl, unsigned short *matk_max, unsigned short *matk_min, uint8 flag)
 {
 	struct status_data *status;
 	struct status_change *sc;
 	struct map_session_data *sd;
+	bool same_matk = false;
 
 	nullpo_retv(bl);
-
-	if( flag != 0 && flag != 1 && flag != 3 ) {
-		ShowError("status_get_matk_sub: Unknown flag %d!\n", flag);
-		return;
-	}
 
 	status = status_get_status_data(bl);
 	sc = status_get_sc(bl);
 	sd = BL_CAST(BL_PC, bl);
 
 #ifdef RENEWAL
-	/**
-	 * RE MATK Formula (from irowiki:http://irowiki.org/wiki/MATK)
-	 * MATK = (sMATK + wMATK + eMATK) * Multiplicative Modifiers
-	 */
+	//RE MATK Formula
+	//MATK = (sMATK + wMATK + eMATK) * Multiplicative Modifiers
 	*matk_min = status_base_matk(bl, status, status_get_lv(bl));
 
 	//Any +MATK you get from skills and cards, including cards in weapon, is added here
-	if( flag != 3 ) {
+	if( flag < 3 ) {
 		if( sd && sd->bonus.ematk > 0 )
 			*matk_min += sd->bonus.ematk;
-		if( flag != 1 ) {
-			struct status_data *b_status = status_get_base_status(bl);
-
+		if( !flag ) {
 			*matk_min = status_calc_ematk(bl, sc, *matk_min, false);
-			status->rhw.matk = status_calc_ematk(bl, sc, b_status->rhw.matk, true);
+			status->rhw.matk = status_calc_ematk(bl, sc, status->rhw.matk, true);
 		}
 	}
 
@@ -2414,21 +2471,16 @@ void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_m
 				*matk_max += wMatk + variance;
 			}
 			break;
-		case BL_MER:
-			*matk_min += 70 * ((TBL_MER *)bl)->battle_status.rhw.atk2 / 100;
-			*matk_max += 130 * ((TBL_MER *)bl)->battle_status.rhw.atk2 / 100;
-			break;
+		case BL_PET:
 		case BL_MOB:
-			*matk_min += 70 * ((TBL_MOB *)bl)->status.rhw.atk2 / 100;
-			*matk_max += 130 * ((TBL_MOB *)bl)->status.rhw.atk2 / 100;
+		case BL_MER:
+		case BL_ELEM:
+			*matk_min += status->rhw.matk * 70 / 100;
+			*matk_max += status->rhw.matk * 130 / 100;
 			break;
 		case BL_HOM:
 			*matk_min += (status_get_homint(bl) + status_get_homdex(bl)) / 5;
 			*matk_max += (status_get_homluk(bl) + status_get_homint(bl) + status_get_homdex(bl)) / 3;
-			break;
-		case BL_ELEM:
-			*matk_min += 70 * ((TBL_ELEM *)bl)->elemental.matk / 100;
-			*matk_max += 130 * ((TBL_ELEM *)bl)->elemental.matk / 100;
 			break;
 	}
 #else
@@ -2447,16 +2499,22 @@ void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_m
 		}
 	}
 
-	if( ((bl->type&BL_HOM) && (battle_config.hom_setting&HOMSET_SAME_MATK)) || //Hom Min MATK is always the same as Max MATK
-		(sc && sc->data[SC_RECOGNIZEDSPELL]) )
+	if( (bl->type&BL_HOM) && (battle_config.hom_setting&HOMSET_SAME_MATK) )
+		same_matk = true;
+
+	if( sc && sc->count ) {
+		if( sc->data[SC_RECOGNIZEDSPELL] )
+			same_matk = true;
+	}
+
+	if( same_matk )
 		*matk_min = *matk_max;
 
 #ifdef RENEWAL
-	if( !(flag&2) && sd ) {
+	if( sd ) {
 		int overrefine = sd->right_weapon.overrefine + 1;
 
-		//Over refine matk bonus is not affected by Recognized Spell status
-		*matk_max += rnd()%overrefine;
+		*matk_max += rnd()%overrefine; //Over refine matk bonus not affected by Recognized Spell
 	}
 #endif
 
@@ -2477,16 +2535,9 @@ unsigned short status_get_rand_matk(unsigned short matk_max, unsigned short matk
 
 /**
  * Get bl's matk value depending on flag
- * @param flag [malufett]
- *  1 - Get MATK w/o SC bonuses
- *  2 - Get unmodified MATK
- *  3 - Get MATK w/o EMATK & SC bonuses
- * @return 0 failure
- * @return MATK success
- *
- * Shouldn't change _any_ value! [Panikon]
+ * @author [malufett]
  */
-int status_get_matk(struct block_list *bl, int flag)
+int status_get_matk(struct block_list *bl, uint8 flag)
 {
 	struct status_data *status;
 	unsigned short matk_max, matk_min;
@@ -2505,7 +2556,7 @@ int status_get_matk(struct block_list *bl, int flag)
 	if( flag == 2 )
 		return status_get_rand_matk(status->matk_max, status->matk_min);
 
-	status_get_matk_sub(bl, flag, &matk_max, &matk_min);
+	status_get_matk_sub(bl, &matk_max, &matk_min, flag);
 
 	//Get modified from sc MATK
 	return status_get_rand_matk(matk_max, matk_min);
@@ -2528,7 +2579,7 @@ static void status_update_matk(struct block_list *bl)
 	if( !(sc = status_get_sc(bl)) )
 		return;
 
-	status_get_matk_sub(bl, 0, &matk_max, &matk_min);
+	status_get_matk_sub(bl, &matk_max, &matk_min, 0);
 
 	//Update MATK
 	status->matk_min = status_calc_matk(bl, sc, matk_min, true);
@@ -2540,14 +2591,27 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 {
 	int stat;
 
-	//Non players get the value set, players need to stack with previous bonuses.
-	if( bl->type != BL_PC )
-		status->batk =
-		status->hit = status->flee =
-		status->def2 = status->mdef2 =
-		status->cri = status->flee2 = 0;
+	if( bl->type != BL_PC ) //Non players get the value set, players need to stack with previous bonuses
+		status->batk = status->hit = status->flee = status->def2 = status->mdef2 = status->cri = status->flee2 = 0;
 
-#ifdef RENEWAL //Renewal formulas
+#ifndef RENEWAL
+	//Hit
+	stat = status->hit;
+	stat += level + status->dex;
+	status->hit = cap_value(stat, 1, SHRT_MAX);
+	//Flee
+	stat = status->flee;
+	stat += level + status->agi;
+	status->flee = cap_value(stat, 1, SHRT_MAX);
+	//Def2
+	stat = status->def2;
+	stat += status->vit;
+	status->def2 = cap_value(stat, 0, SHRT_MAX);
+	//Mdef2
+	stat = status->mdef2;
+	stat += status->int_ + (status->vit>>1);
+	status->mdef2 = cap_value(stat, 0, SHRT_MAX);
+#else
 	if( bl->type == BL_HOM ) {
 		//Hit
 		stat = level + status->dex + 150;
@@ -2568,12 +2632,6 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 		//Mdef
 		stat = (int)(((float)(status_get_homvit(bl) + level) / 4) + ((float)status_get_homint(bl) / 2));
 		status->mdef = cap_value(stat, 0, SHRT_MAX);
-		//Atk
-		stat = (int)((float)(status_get_homstr(bl) + status_get_homdex(bl)) / 5);
-		status->rhw.atk = cap_value(stat, 0, SHRT_MAX);
-		//Atk2
-		stat = (int)((float)(status_get_homluk(bl) + status_get_homstr(bl) + status_get_homdex(bl)) / 3);
-		status->rhw.atk2 = cap_value(stat, 0, SHRT_MAX);
 	} else {
 		//Base level + (every 1 dex = +1 hit) + (every 3 luk = +1 hit) + 175
 		stat = status->hit;
@@ -2583,10 +2641,9 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 		stat = status->flee;
 		stat += (int)(level + status->agi + (bl->type == BL_MER ? 0 : (bl->type == BL_PC ? ((float)status->luk / 5) : 0)) + 100);
 		status->flee = cap_value(stat, 1, SHRT_MAX);
-		if( bl->type == BL_MER ) {
-			status->matk_min = status->matk_max = status_base_matk_max(status);
+		if( bl->type == BL_MER )
 			stat = (int)(status->vit + ((float)level / 10) + ((float)status->vit / 5));
-		} else { //Base level + (every 2 vit = +1 def) + (every 5 agi = +1 def)
+		else { //Base level + (every 2 vit = +1 def) + (every 5 agi = +1 def)
 			stat = status->def2;
 			stat += (int)(((float)(level + status->vit) / 2) + (bl->type == BL_PC ? ((float)status->agi / 5) : 0));
 		}
@@ -2599,27 +2656,14 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 		}
 		status->mdef2 = cap_value(stat, 0, SHRT_MAX);
 	}
-#else
-	//Matk
-	status->matk_min = status_base_matk_min(status);
-	status->matk_max = status_base_matk_max(status);
-	//Hit
-	stat = status->hit;
-	stat += level + status->dex;
-	status->hit = cap_value(stat, 1, SHRT_MAX);
-	//Flee
-	stat = status->flee;
-	stat += level + status->agi;
-	status->flee = cap_value(stat, 1, SHRT_MAX);
-	//Def2
-	stat = status->def2;
-	stat += status->vit;
-	status->def2 = cap_value(stat, 0, SHRT_MAX);
-	//Mdef2
-	stat = status->mdef2;
-	stat += status->int_ + (status->vit>>1);
-	status->mdef2 = cap_value(stat, 0, SHRT_MAX);
+	//Atk
+	if( bl->type != BL_PC ) {
+		status->rhw.atk2 = status_base_atk_max(bl, status, level);
+		status->rhw.atk = status_base_atk_min(bl, status, level);
+	}
 #endif
+	//Matk
+	status_get_matk_sub(bl, &status->matk_max, &status->matk_min, 0);
 
 	//Critical
 	if( bl->type&battle_config.enable_critical ) {
@@ -2637,11 +2681,11 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 		status->flee2 = 0;
 
 	if( status->batk ) {
-		int temp = status->batk + status_base_atk(bl, status);
+		int temp = status->batk + status_base_atk(bl, status, level);
 
 		status->batk = cap_value(temp, 0, USHRT_MAX);
 	} else
-		status->batk = status_base_atk(bl, status);
+		status->batk = status_base_atk(bl, status, level);
 
 	if( status->cri ) {
 		switch( bl->type ) {
@@ -2903,7 +2947,6 @@ void status_calc_pet_(struct pet_data *pd, enum e_status_calc_opt opt)
 		pd->status.mode = MD_CANMOVE; //Pets discard all modes, except walking
 		pd->status.class_ = CLASS_NORMAL;
 		pd->status.speed = pet_get_walk_speed(pd->master);
-
 		//Attack support requires the pet to be able to attack
 		if (battle_config.pet_attack_support || battle_config.pet_damage_support)
 			pd->status.mode |= MD_CANATTACK;
@@ -2928,7 +2971,6 @@ void status_calc_pet_(struct pet_data *pd, enum e_status_calc_opt opt)
 			status->int_ = (bstat->int_ * lv) / pd->db->lv;
 			status->dex = (bstat->dex * lv) / pd->db->lv;
 			status->luk = (bstat->luk * lv) / pd->db->lv;
-
 			status->rhw.atk = cap_value(status->rhw.atk, 1, battle_config.pet_max_atk1);
 			status->rhw.atk2 = cap_value(status->rhw.atk2, 2, battle_config.pet_max_atk2);
 			status->str = cap_value(status->str, 1, battle_config.pet_max_stats);
@@ -2937,9 +2979,7 @@ void status_calc_pet_(struct pet_data *pd, enum e_status_calc_opt opt)
 			status->int_= cap_value(status->int_, 1, battle_config.pet_max_stats);
 			status->dex = cap_value(status->dex, 1, battle_config.pet_max_stats);
 			status->luk = cap_value(status->luk, 1, battle_config.pet_max_stats);
-
 			status_calc_misc(&pd->bl, &pd->status, lv);
-
 			if (!(opt&SCO_FIRST)) //Not done the first time because the pet is not visible yet
 				clif_send_petstatus(sd);
 		}
@@ -4251,34 +4291,26 @@ int status_calc_homunculus_(struct homun_data *hd, enum e_status_calc_opt opt)
 		status->speed = DEFAULT_WALK_SPEED;
 		if( (battle_config.hom_setting&HOMSET_COPY_SPEED) && hd->master )
 			status->speed = status_get_speed(&hd->master->bl);
-
 		status->hp = 1;
 		status->sp = 1;
 	}
 
 	status->aspd_rate = 1000;
-
 #ifdef RENEWAL
 	status->def = status->mdef = 0;
-
 	amotion = hd->homunculusDB->baseASPD;
 	amotion = amotion - amotion * (status->dex + hom->dex_value) / 1000 - (status->agi + hom->agi_value) * amotion / 250;
 #else
 	skill_lv = hom->level / 10 + status->vit / 5;
 	status->def = cap_value(skill_lv, 0, 99);
-
 	skill_lv = hom->level / 10 + status->int_ / 5;
 	status->mdef = cap_value(skill_lv, 0, 99);
-
 	amotion = (1000 - 4 * status->agi - status->dex) * hd->homunculusDB->baseASPD / 1000;
 #endif
-
 	status->amotion = cap_value(amotion, battle_config.max_aspd, 2000);
 	status->adelay = status->amotion; //It seems adelay = amotion for Homunculus
-
 	status->max_hp = hom->max_hp;
 	status->max_sp = hom->max_sp;
-
 	hom_calc_skilltree(hd, 0);
 
 	if( (skill_lv = hom_checkskill(hd, HAMI_SKIN)) > 0 )
@@ -4314,10 +4346,9 @@ int status_calc_homunculus_(struct homun_data *hd, enum e_status_calc_opt opt)
 	status->rhw.atk = status->dex;
 	status->rhw.atk2 = status->str + hom->level;
 #endif
-
 	status_calc_misc(&hd->bl, status, hom->level);
-
 	status_cpy(&hd->battle_status, status);
+
 	return 1;
 }
 
@@ -4329,33 +4360,30 @@ int status_calc_elemental_(struct elemental_data *ed, enum e_status_calc_opt opt
 	if( !sd )
 		return 0;
 
-	status_calc_misc(&ed->bl, status, 0);
-
 	if( opt&SCO_FIRST ) {
 		memcpy(status, &ed->db->status, sizeof(struct status_data));
-
 		status->max_hp = ele->max_hp;
 		status->max_sp = ele->max_sp;
 		status->hp = ele->hp;
 		status->sp = ele->sp;
-		status->rhw.atk = ele->atk * 80 / 100;
-		status->rhw.atk2 = ele->atk * 120 / 100;
-		status->matk_min = ele->matk;
+		status->rhw.atk = ele->atk;
+		status->rhw.matk = ele->matk;
 		status->def = ele->def;
 		status->mdef = ele->mdef;
 		status->flee = ele->flee;
 		status->hit = ele->hit;
 		status->size = ele->scale - 1;
 		status->amotion = ele->amotion;
-
 		if( sd )
 			status->speed = status_get_speed(&sd->bl);
 		else
 			status->speed = DEFAULT_WALK_SPEED;
-
+		status_calc_misc(&ed->bl, status, 0);
 		memcpy(&ed->battle_status, status, sizeof(struct status_data));
-	} else
+	} else {
+		status_calc_misc(&ed->bl, status, 0);
 		status_cpy(&ed->battle_status, status);
+	}
 
 	return 0;
 }
@@ -4373,7 +4401,6 @@ int status_calc_npc_(struct npc_data *nd, enum e_status_calc_opt opt) {
 		status->sp = 1;
 		status->max_hp = 1;
 		status->max_sp = 1;
-
 		status->def_ele = ELE_NEUTRAL;
 		status->ele_lv = 1;
 		status->race = RC_DEMIHUMAN;
@@ -4702,9 +4729,6 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 
 	if( (!(bl->type&BL_REGEN)) && (!sc || !sc->count) ) { //No difference
 		status_cpy(status, b_status);
-#ifdef RENEWAL
-		status_update_matk(bl);
-#endif
 		return;
 	}
 
@@ -4767,8 +4791,10 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 	}
 
 	if( flag&SCB_BATK && b_status->batk ) {
-		status->batk = status_base_atk(bl, status);
-		temp = b_status->batk - status_base_atk(bl, b_status);
+		int level = status_get_lv(bl);
+
+		status->batk = status_base_atk(bl, status, level);
+		temp = b_status->batk - status_base_atk(bl, b_status, level);
 		if( temp ) {
 			temp += status->batk;
 			status->batk = cap_value(temp, 0, USHRT_MAX);
@@ -5110,12 +5136,8 @@ void status_calc_bl_(struct block_list *bl, enum scb_flag flag, enum e_status_ca
 	if( bl->type == BL_PET )
 		return; //Pets are not affected by statuses
 
-	if( (opt&SCO_FIRST) && bl->type == BL_MOB ) {
-#ifdef RENEWAL
-		status_update_matk(bl); //Otherwise, the mob will spawn with lower MATK values
-#endif
+	if( (opt&SCO_FIRST) && bl->type == BL_MOB )
 		return; //Assume there will be no statuses active
-	}
 
 	status_calc_bl_main(bl, flag);
 
@@ -7110,7 +7132,7 @@ int status_get_class(struct block_list *bl) {
 
 	switch( bl->type ) {
 		case BL_PC:  return ((TBL_PC *)bl)->status.class_;
-		case BL_MOB: return ((TBL_MOB *)bl)->vd->class_; //Class used on all code should be the view class of the mob.
+		case BL_MOB: return ((TBL_MOB *)bl)->vd->class_; //Class used on all code should be the view class of the mob
 		case BL_PET: return ((TBL_PET *)bl)->pet.class_;
 		case BL_HOM: return ((TBL_HOM *)bl)->homunculus.class_;
 		case BL_MER: return ((TBL_MER *)bl)->mercenary.class_;
