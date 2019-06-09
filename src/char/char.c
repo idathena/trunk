@@ -70,6 +70,7 @@ char mercenary_db[DB_NAME_LEN] = "mercenary";
 char mercenary_owner_db[DB_NAME_LEN] = "mercenary_owner";
 char ragsrvinfo_db[DB_NAME_LEN] = "ragsrvinfo";
 char elemental_db[DB_NAME_LEN] = "elemental";
+char elemental_scdata_db[DB_NAME_LEN] = "elemental_sc";
 char interreg_db[32] = "interreg";
 char skillcooldown_db[DB_NAME_LEN] = "skillcooldown";
 char bonus_script_db[DB_NAME_LEN] = "bonus_script";
@@ -5832,6 +5833,8 @@ void sql_config_read(const char *cfgName)
 			safestrncpy(ragsrvinfo_db, w2,sizeof(ragsrvinfo_db));
 		else if(!strcmpi(w1, "elemental_db"))
 			safestrncpy(elemental_db, w2,sizeof(elemental_db));
+		else if(!strcmpi(w1, "elemental_scdata_db"))
+			safestrncpy(elemental_scdata_db, w2,sizeof(elemental_scdata_db));
 		else if(!strcmpi(w1, "interreg_db"))
 			safestrncpy(interreg_db, w2, sizeof(interreg_db));
 		else if(!strcmpi(w1, "skillcooldown_db"))

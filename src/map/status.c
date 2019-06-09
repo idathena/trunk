@@ -1256,6 +1256,10 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_DORAM_WALKSPEED] |= SCB_SPEED;
 	StatusChangeFlagTable[SC_DORAM_MATK] |= SCB_MATK;
 	StatusChangeFlagTable[SC_DORAM_FLEE2] |= SCB_FLEE2;
+	StatusChangeFlagTable[SC_EL_WAIT] |= SCB_REGEN;
+	StatusChangeFlagTable[SC_EL_PASSIVE] |= SCB_REGEN;
+	StatusChangeFlagTable[SC_EL_DEFENSIVE] |= SCB_REGEN;
+	StatusChangeFlagTable[SC_EL_OFFENSIVE] |= SCB_REGEN;
 
 	//StatusDisplayType Table [Ind]
 	StatusDisplayType[SC_ALL_RIDING]	  = true;
@@ -4325,37 +4329,33 @@ int status_calc_elemental_(struct elemental_data *ed, enum e_status_calc_opt opt
 	if( !sd )
 		return 0;
 
+	status_calc_misc(&ed->bl, status, 0);
+
 	if( opt&SCO_FIRST ) {
 		memcpy(status, &ed->db->status, sizeof(struct status_data));
-		if( !ele->mode )
-			status->mode = EL_MODE_PASSIVE;
-		else
-			status->mode = (enum e_mode)ele->mode;
-
-		status->class_ = CLASS_NORMAL;
-		status_calc_misc(&ed->bl, status, 0);
 
 		status->max_hp = ele->max_hp;
 		status->max_sp = ele->max_sp;
 		status->hp = ele->hp;
 		status->sp = ele->sp;
-		status->rhw.atk = ele->atk;
-		status->rhw.atk2 = ele->atk2;
-
-		status->matk_min += ele->matk;
-		status->def += ele->def;
-		status->mdef += ele->mdef;
+		status->rhw.atk = ele->atk * 80 / 100;
+		status->rhw.atk2 = ele->atk * 120 / 100;
+		status->rhw.matk = ele->matk;
+		status->def = ele->def;
+		status->mdef = ele->mdef;
 		status->flee = ele->flee;
 		status->hit = ele->hit;
+		status->size = ele->scale - 1;
+		status->amotion = ele->amotion;
 
-		if( ed->master )
-			status->speed = status_get_speed(&ed->master->bl);
+		if( sd )
+			status->speed = status_get_speed(&sd->bl);
+		else
+			status->speed = DEFAULT_WALK_SPEED;
 
-		memcpy(&ed->battle_status,status,sizeof(struct status_data));
-	} else {
-		status_calc_misc(&ed->bl, status, 0);
+		memcpy(&ed->battle_status, status, sizeof(struct status_data));
+	} else
 		status_cpy(&ed->battle_status, status);
-	}
 
 	return 0;
 }
@@ -4487,10 +4487,10 @@ void status_calc_regen(struct block_list *bl, struct status_data *status, struct
 		regen->hp = cap_value(val, 1, SHRT_MAX);
 		val = (status->max_sp * (status->int_ + 10) / 750) + 1;
 		regen->sp = cap_value(val, 1, SHRT_MAX);
-	} else if( bl->type == BL_ELEM ) {
-		val = (status->max_hp * status->vit / 10000 + 1) * 6;
+	} else if( bl->type == BL_ELEM ) { //Elemental summon recovers 2% of max HP/SP [malufett]
+		val = status->max_hp * 2 / 100;
 		regen->hp = cap_value(val, 1, SHRT_MAX);
-		val = (status->max_sp * (status->int_ + 10) / 750) + 1;
+		val = status->max_sp * 2 / 100;
 		regen->sp = cap_value(val, 1, SHRT_MAX);
 	}
 }
@@ -4530,7 +4530,10 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 		sc->data[SC_TRICKDEAD] ||
 		sc->data[SC_BLEEDING] ||
 		sc->data[SC_SATURDAYNIGHTFEVER] ||
-		sc->data[SC_REBOUND] )
+		sc->data[SC_REBOUND] ||
+		sc->data[SC_EL_PASSIVE] ||
+		sc->data[SC_EL_DEFENSIVE] ||
+		sc->data[SC_EL_OFFENSIVE] )
 		regen->flag = RGN_NONE;
 
 	if( sc->data[SC_DANCING] ||
@@ -4590,6 +4593,11 @@ void status_calc_regen_rate(struct block_list *bl, struct regen_data *regen, str
 	if( sc->data[SC_CATNIPPOWDER] ) {
 		regen->rate.hp += 100;
 		regen->rate.sp += 100;
+	}
+
+	if( sc->data[SC_EL_WAIT] ) { //Regenerates every 3 secs
+		regen->rate.hp += 300;
+		regen->rate.sp += 300;
 	}
 
 	if( bl->type == BL_ELEM ) {
@@ -5044,7 +5052,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			amotion = status_calc_fix_aspd(bl, sc, amotion);
 			status->amotion = cap_value(amotion, pc_maxaspd(sd), 2000);
 			status->adelay = 2 * status->amotion;
-		} else { //Mercenary and mobs
+		} else { //Mercenary, elemental and mobs
 			amotion = b_status->amotion;
 			status->aspd_rate = status_calc_aspd_rate(bl, sc, b_status->aspd_rate);
 			if( status->aspd_rate != 1000 )
@@ -5053,6 +5061,8 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->amotion = cap_value(amotion, battle_config.monster_max_aspd, 2000);
 			temp = b_status->adelay * status->aspd_rate / 1000;
 			status->adelay = cap_value(temp, battle_config.monster_max_aspd * 2, 4000);
+			if( bl->type == BL_ELEM )
+				status->adelay = status->amotion;
 		}
 	}
 
@@ -7105,7 +7115,7 @@ int status_get_class(struct block_list *bl) {
 		case BL_HOM: return ((TBL_HOM *)bl)->homunculus.class_;
 		case BL_MER: return ((TBL_MER *)bl)->mercenary.class_;
 		case BL_NPC: return ((TBL_NPC *)bl)->class_;
-		case BL_ELEM: return ((TBL_ELEM *)bl)->elemental.class_;
+		case BL_ELEM: return ((TBL_ELEM *)bl)->db->vd.class_;
 	}
 	return 0;
 }
@@ -8932,6 +8942,18 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 		case SC_CHILL:
 			status_change_end(bl,SC_BURNT,INVALID_TIMER);
+			break;
+		case SC_EL_OFFENSIVE:
+		case SC_EL_DEFENSIVE:
+		case SC_EL_PASSIVE:
+			if( sc->data[type] ) {
+				status_change_end(bl,type,INVALID_TIMER);
+				return 0;
+			}
+			status_change_end(bl,SC_EL_WAIT,INVALID_TIMER);
+			status_change_end(bl,SC_EL_OFFENSIVE,INVALID_TIMER);
+			status_change_end(bl,SC_EL_DEFENSIVE,INVALID_TIMER);
+			status_change_end(bl,SC_EL_PASSIVE,INVALID_TIMER);
 			break;
 	}
 
@@ -10803,6 +10825,30 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_WATER_BARRIER:
 			val_flag |= 1|2|4;
 			break;
+		case SC_EL_WAIT:
+		case SC_EL_PASSIVE:
+		case SC_EL_DEFENSIVE:
+		case SC_EL_OFFENSIVE:
+			if (bl->type == BL_ELEM) {
+				struct elemental_data *ed = BL_CAST(BL_ELEM,bl);
+
+				elemental_unlocktarget(ed);
+				elemental_clean_effect(ed);
+				switch (type - SC_EL_PASSIVE) {
+					case EL_MODE_DEFENSIVE:
+						ed->battle_status.mode = (MD_CANMOVE|MD_ASSIST);
+						break;
+					case EL_MODE_OFFENSIVE:
+						ed->battle_status.mode = (MD_CANMOVE|MD_AGGRESSIVE|MD_CANATTACK);
+						break;
+					case EL_MODE_WAIT:
+					case EL_MODE_PASSIVE:
+						ed->battle_status.mode = MD_CANMOVE;
+						break;
+				}
+				elemental_change_mode_ack(ed,type - SC_EL_PASSIVE);
+			}
+			break;
 	}
 
 	switch (type) { //Permanent effects
@@ -11987,6 +12033,11 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		case SC_JUMPINGCLAN:
 			status_change_end(bl,SC_CLAN_INFO,INVALID_TIMER);
 			break;
+		case SC_EL_PASSIVE:
+		case SC_EL_DEFENSIVE:
+		case SC_EL_OFFENSIVE:
+			sc_start(bl,bl,SC_EL_WAIT,100,1,-1);
+			break;
 	}
 
 	opt_flag = 1;
@@ -13134,7 +13185,7 @@ TIMER_FUNC(status_change_timer)
 				sc_timer_next(sce->val3 + tick,status_change_timer,bl->id,data);
 				return 0;
 			} else if( bl->type == BL_ELEM )
-				elemental_change_mode(BL_CAST(BL_ELEM,bl),MAX_ELESKILLTREE);
+				sc_start(bl,bl,SC_EL_WAIT,100,EL_MODE_PASSIVE,-1);
 			break;
 
 		case SC_WATER_SCREEN_OPTION:

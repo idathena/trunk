@@ -3809,7 +3809,6 @@ ACMD_FUNC(reload)
 	} else if (strstr(command, "skilldb") || strncmp(message, "skilldb", 4) == 0) {
 		skill_reload();
 		hom_reload_skill();
-		reload_elemental_skilldb();
 		mercenary_read_skilldb();
 		clif_displaymessage(fd, msg_txt(99)); // Skill database has been reloaded.
 	} else if (strstr(command, "atcommand") || strncmp(message, "atcommand", 4) == 0) {

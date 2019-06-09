@@ -12,6 +12,7 @@ struct s_pet;
 struct s_homunculus;
 struct s_mercenary;
 struct s_elemental;
+struct elemental_data;
 struct mail_message;
 struct auction_data;
 enum storage_type;
@@ -111,6 +112,8 @@ int intif_elemental_create(struct s_elemental *ele);
 int intif_elemental_request(int ele_id, int char_id);
 int intif_elemental_delete(int ele_id);
 int intif_elemental_save(struct s_elemental *ele);
+int intif_elemental_sc_load(int char_id, int ele_id);
+int intif_elemental_sc_save(struct elemental_data *ed);
 
 // CLAN SYSTEM
 int intif_clan_requestclans(void);

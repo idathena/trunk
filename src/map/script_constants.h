@@ -3197,7 +3197,6 @@
 	export_constant(UELE_X);
 	export_constant(UELE_Y);
 	export_constant(UELE_LIFETIME);
-	export_constant(UELE_MODE);
 	export_constant(UELE_SPEED);
 	export_constant(UELE_LOOKDIR);
 	export_constant(UELE_CANMOVETICK);

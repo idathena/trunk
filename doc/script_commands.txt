@@ -8088,7 +8088,6 @@ Parameter (indexes) for elementals are:
 	UELE_X
 	UELE_Y
 	UELE_LIFETIME
-	UELE_MODE
 	UELE_SPEED
 	UELE_LOOKDIR
 	UELE_CANMOVETICK

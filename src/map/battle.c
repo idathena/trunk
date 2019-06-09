@@ -7469,8 +7469,15 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 			battle_consume_ammo(sd,0,0);
 	}
 
+	if (src->type == BL_ELEM && sc && sc->data[SC_EL_OFFENSIVE] && rnd_value(0,20000)%100 >= 75) {
+		struct elemental_data *ed = BL_CAST(BL_ELEM,src);
+
+		elemental_action(ed,target,tick);
+		return wd.dmg_lv;
+	}
+
 	if (target->type == BL_MOB) {
-		struct mob_data *md = BL_CAST(BL_MOB, target);
+		struct mob_data *md = BL_CAST(BL_MOB,target);
 
 		if (md) {
 			uint16 dmg_mod = md->db->dmg_mod;

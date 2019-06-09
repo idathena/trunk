@@ -808,6 +808,13 @@ typedef enum sc_type {
 	SC_CHEERUP,
 	SC_DRESSUP,
 	SC_GUIDEDATTACK,
+
+	//Elemental Mode
+	SC_EL_PASSIVE,
+	SC_EL_DEFENSIVE,
+	SC_EL_OFFENSIVE,
+	SC_EL_WAIT,
+
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 

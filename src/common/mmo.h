@@ -151,9 +151,7 @@
 #define EL_SKILLBASE 8401
 #define MAX_ELEMENTALSKILL 42
 #define MAX_ELEMENTAL_CLASS 12
-#define MAX_ELESKILLTREE 3
-#define EL_CLASS_BASE 2114
-#define EL_CLASS_MAX (EL_CLASS_BASE + MAX_ELEMENTAL_CLASS - 1)
+#define MAX_EL_SKILL 3
 
 //Achievement System
 #define MAX_ACHIEVEMENT_RANK 20 //Maximum achievement level
@@ -413,12 +411,20 @@ struct s_mercenary {
 	unsigned int life_time;
 };
 
+enum elemental_type {
+	EL_KIND_AGNI,
+	EL_KIND_AQUA,
+	EL_KIND_VENTUS,
+	EL_KIND_TERA,
+	MAX_EL_KIND
+};
+
 struct s_elemental {
 	int elemental_id;
 	int char_id;
-	short class_;
-	int mode; //Modes @see enum e_mode
-	int hp, sp, max_hp, max_sp, matk, atk, atk2;
+	enum elemental_type kind;
+	int scale;
+	int hp, sp, max_hp, max_sp, atk, matk;
 	short hit, flee, amotion, def, mdef;
 	int life_time;
 };

@@ -17338,7 +17338,6 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UELE_X, ed->bl.x);
 			getunitdata_sub(UELE_Y, ed->bl.y);
 			getunitdata_sub(UELE_LIFETIME, ed->elemental.life_time);
-			getunitdata_sub(UELE_MODE, ed->elemental.mode);
 			getunitdata_sub(UELE_SP, ed->base_status.speed);
 			getunitdata_sub(UELE_LOOKDIR, ed->ud.dir);
 			getunitdata_sub(UELE_CANMOVETICK, ed->ud.canmove_tick);
@@ -17741,7 +17740,6 @@ BUILDIN_FUNC(setunitdata)
 				case UELE_X: if( !unit_walktoxy(bl, (short)value, ed->bl.y, 2) ) unit_movepos(bl, (short)value, ed->bl.y, 0, 0); break;
 				case UELE_Y: if( !unit_walktoxy(bl, ed->bl.x, (short)value, 2) ) unit_movepos(bl, ed->bl.x, (short)value, 0, 0); break;
 				case UELE_LIFETIME: ed->elemental.life_time = (unsigned int)value; break;
-				case UELE_MODE: ed->elemental.mode = (enum e_mode)value; calc_status = true; break;
 				case UELE_SPEED: ed->base_status.speed = (unsigned short)value; status_calc_misc(bl, &ed->base_status, ed->db->lv); calc_status = true; break;
 				case UELE_LOOKDIR: unit_setdir(bl, (uint8)value); break;
 				case UELE_CANMOVETICK: ed->ud.canmove_tick = value > 0 ? (unsigned int)value : 0; break;
