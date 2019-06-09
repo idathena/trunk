@@ -2599,22 +2599,24 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 	}
 
 #ifndef RENEWAL
-	//Hit
-	stat = status->hit;
-	stat += level + status->dex;
-	status->hit = cap_value(stat, 1, SHRT_MAX);
-	//Flee
-	stat = status->flee;
-	stat += level + status->agi;
-	status->flee = cap_value(stat, 1, SHRT_MAX);
-	//Def2
-	stat = status->def2;
-	stat += status->vit;
-	status->def2 = cap_value(stat, 0, SHRT_MAX);
-	//Mdef2
-	stat = status->mdef2;
-	stat += status->int_ + (status->vit>>1);
-	status->mdef2 = cap_value(stat, 0, SHRT_MAX);
+	if( bl->type != BL_ELEM ) {
+		//Hit
+		stat = status->hit;
+		stat += level + status->dex;
+		status->hit = cap_value(stat, 1, SHRT_MAX);
+		//Flee
+		stat = status->flee;
+		stat += level + status->agi;
+		status->flee = cap_value(stat, 1, SHRT_MAX);
+		//Def2
+		stat = status->def2;
+		stat += status->vit;
+		status->def2 = cap_value(stat, 0, SHRT_MAX);
+		//Mdef2
+		stat = status->mdef2;
+		stat += status->int_ + (status->vit>>1);
+		status->mdef2 = cap_value(stat, 0, SHRT_MAX);
+	}
 #else
 	if( bl->type == BL_HOM ) {
 		//Hit
