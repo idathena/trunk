@@ -2504,7 +2504,7 @@ int status_change_spread(struct block_list *src, struct block_list *bl, bool typ
 
 #ifndef RENEWAL
 unsigned short status_base_matk_min(const struct status_data *status);
-unsigned short status_base_matk_max(const struct status_data *status)
+unsigned short status_base_matk_max(const struct status_data *status);
 #else
 unsigned short status_weapon_atk(struct weapon_atk *watk);
 unsigned short status_base_atk_min(struct block_list *bl, const struct status_data* status, int level);

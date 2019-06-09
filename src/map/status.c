@@ -2499,13 +2499,14 @@ void status_get_matk_sub(struct block_list *bl, unsigned short *matk_max, unsign
 		}
 	}
 
-	if( (bl->type&BL_HOM) && (battle_config.hom_setting&HOMSET_SAME_MATK) )
-		same_matk = true;
-
 	if( sc && sc->count ) {
+		/* Another SC modifier goes here */
 		if( sc->data[SC_RECOGNIZEDSPELL] )
 			same_matk = true;
 	}
+
+	if( (bl->type&BL_HOM) && (battle_config.hom_setting&HOMSET_SAME_MATK) )
+		same_matk = true;
 
 	if( same_matk )
 		*matk_min = *matk_max;
