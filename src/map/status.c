@@ -4367,8 +4367,15 @@ int status_calc_elemental_(struct elemental_data *ed, enum e_status_calc_opt opt
 		status->max_sp = ele->max_sp;
 		status->hp = ele->hp;
 		status->sp = ele->sp;
+#ifdef RENEWAL
 		status->rhw.atk = ele->atk;
 		status->rhw.matk = ele->matk;
+#else
+		status->rhw.atk = ele->atk * 80 / 100;
+		status->rhw.atk2 = ele->atk * 120 / 100;
+		if( sd ) //For pre-re elemental matk calculation [exneval]
+			status->int_ = status_get_int(&sd->bl);
+#endif
 		status->def = ele->def;
 		status->mdef = ele->mdef;
 		status->flee = ele->flee;
