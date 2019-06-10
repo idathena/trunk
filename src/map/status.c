@@ -2030,7 +2030,9 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 	if (sc && sc->count) {
 		if (sc->data[SC_ALL_RIDING])
 			return false; //New mounts can't attack nor use skills in the client, this check makes it cheat-safe [Ind]
-		if (sc->opt1 && sc->opt1 != OPT1_BURNING && skill_id != RK_REFRESH && skill_id != SR_GENTLETOUCH_CURE && skill_id != SU_GROOMING) { //Stuned/Frozen/etc
+		if (sc->opt1 && sc->opt1 != OPT1_STONEWAIT && sc->opt1 != OPT1_BURNING &&
+			skill_id != RK_REFRESH && skill_id != SR_GENTLETOUCH_CURE &&
+			skill_id != SU_GROOMING && skill_id != SU_PURRING) { //Check for BODYSTATE effect
 			if (flag != 1)
 				return false; //Can't cast, casted spells can't damage
 			if (skill_get_casttype(skill_id) == CAST_DAMAGE)
@@ -4343,8 +4345,8 @@ int status_calc_homunculus_(struct homun_data *hd, enum e_status_calc_opt opt)
 		hd->battle_status.hp = hom->hp;
 		hd->battle_status.sp = hom->sp;
 		if( hom->class_ == 6052 ) { //Eleanor
-			clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, INVALID_TIMER, 0, 0, 0);
-			sc_start(&hd->bl, &hd->bl, SC_STYLE_CHANGE, 100, MH_MD_FIGHTING, INVALID_TIMER);
+			clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, -1, 0, 0, 0);
+			sc_start(&hd->bl, &hd->bl, SC_STYLE_CHANGE, 100, MH_MD_FIGHTING, -1);
 		}
 	}
 

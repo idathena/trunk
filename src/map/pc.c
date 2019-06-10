@@ -4583,10 +4583,8 @@ int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
 		rate1 = rate2;
 	if(rate1)
 		val = (int)((double)orig_value * (double)(100 - rate1) / 100.);
-	if(val < 0)
-		val = 0;
-	if(orig_value > 0 && val < 1)
-		val = 1;
+	if(val < battle_config.min_shop_buy)
+		val = battle_config.min_shop_buy;
 
 	return val;
 }
@@ -4603,10 +4601,8 @@ int pc_modifysellvalue(struct map_session_data *sd,int orig_value)
 		rate = 5 + lv * 2 - (lv == 10 ? 1 : 0);
 	if(rate)
 		val = (int)((double)orig_value * (double)(100 + rate) / 100.);
-	if(val < 0)
-		val = 0;
-	if(orig_value > 0 && val < 1)
-		val = 1;
+	if(val < battle_config.min_shop_sell)
+		val = battle_config.min_shop_sell;
 
 	return val;
 }
@@ -8457,7 +8453,13 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_COOKMASTERY:	val = sd->cook_mastery; break;
 		case SP_CRITICAL:	val = sd->battle_status.cri / 10; break;
 		case SP_ASPD:		val = (2000 - sd->battle_status.amotion) / 10; break;
-		case SP_BASE_ATK:	val = sd->battle_status.batk; break;
+		case SP_BASE_ATK:
+#ifdef RENEWAL
+			val = sd->bonus.eatk;
+#else
+			val = sd->battle_status.batk;
+#endif
+			break;
 		case SP_DEF1:		val = sd->battle_status.def; break;
 		case SP_DEF2:		val = sd->battle_status.def2; break;
 		case SP_MDEF1:		val = sd->battle_status.mdef; break;
@@ -11038,8 +11040,8 @@ static TIMER_FUNC(pc_autosave)
 
 	iter = mapit_getallusers();
 	for (sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter)) {
-		if (!sd->state.pc_loaded) //Player data hasn't fully loaded
-			continue;
+		if (!sd->state.pc_loaded)
+			continue; //Player data hasn't fully loaded
 		if (sd->bl.id == last_save_id && save_flag != 1) {
 			save_flag = 1;
 			continue;
@@ -12660,7 +12662,7 @@ void pc_cell_basilica(struct map_session_data *sd) {
 		if (sd->sc.data[SC_BASILICA])
 			status_change_end(&sd->bl,SC_BASILICA,INVALID_TIMER);
 	} else if (!sd->sc.data[SC_BASILICA])
-		sc_start(&sd->bl,&sd->bl,SC_BASILICA,100,0,INVALID_TIMER);
+		sc_start(&sd->bl,&sd->bl,SC_BASILICA,100,0,-1);
 }
 
 /** [Cydh]

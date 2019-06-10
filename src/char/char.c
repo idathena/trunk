@@ -1149,7 +1149,7 @@ int mmo_char_tobuf(uint8 *buf, struct mmo_charstatus *p);
 
 //=====================================================================================================
 // Loads the basic character rooster for the given account. Returns total buffer used.
-int mmo_chars_fromsql(struct char_session_data *sd, uint8 *buf)
+int mmo_chars_fromsql(struct char_session_data *sd, uint8 *buf, uint8 *count)
 {
 	SqlStmt *stmt;
 	struct mmo_charstatus p;
@@ -1237,6 +1237,9 @@ int mmo_chars_fromsql(struct char_session_data *sd, uint8 *buf)
 		// Store the required info into the session
 		sd->char_moves[p.slot] = p.character_moves;
 	}
+
+	if( count )
+		*count = i;
 
 	memset(sd->new_name, 0, sizeof(sd->new_name));
 
@@ -2168,10 +2171,20 @@ void char_block_character(int fd, struct char_session_data *sd) {
 }
 
 void mmo_char_send099d(int fd, struct char_session_data *sd) {
+	uint8 count = 0;
+
 	WFIFOHEAD(fd,4 + MAX_CHARS * MAX_CHAR_BUF);
 	WFIFOW(fd,0) = 0x99d;
-	WFIFOW(fd,2) = mmo_chars_fromsql(sd,WFIFOP(fd,4)) + 4;
+	WFIFOW(fd,2) = mmo_chars_fromsql(sd,WFIFOP(fd,4),&count) + 4;
 	WFIFOSET(fd,WFIFOW(fd,2));
+	//This is something special Gravity came up with
+	//The client triggers some finalization code only if count is != 3
+	if( count == 3 ) {
+		WFIFOHEAD(fd,4);
+		WFIFOW(fd,0) = 0x99d;
+		WFIFOW(fd,2) = 4;
+		WFIFOSET(fd,4);
+	}
 }
 
 //struct PACKET_CH_CHARLIST_REQ {0x0 short PacketType}

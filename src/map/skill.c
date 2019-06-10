@@ -9152,7 +9152,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					clif_skill_fail(sd,WL_READING_SB,USESKILL_FAIL_SPELLBOOK_READING,0,0);
 					break;
 				}
-				sc_start(src,bl,SC_STOP,100,skill_lv,INVALID_TIMER); //Can't move while selecting a spellbook
+				sc_start(src,bl,SC_STOP,100,skill_lv,-1); //Can't move while selecting a spellbook
 				clif_spellbook_list(sd);
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			}
@@ -9309,7 +9309,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if( (sd->reproduceskill_idx >= 0 && sd->status.skill[sd->reproduceskill_idx].id) ||
 					(sd->cloneskill_idx >= 0 && sd->status.skill[sd->cloneskill_idx].id) ) {
 					//The skill_lv is stored in val1 used in skill_select_menu to determine the used skill lvl [Xazax]
-					sc_start(src,src,SC_STOP,100,skill_lv,INVALID_TIMER);
+					sc_start(src,src,SC_STOP,100,skill_lv,-1);
 					clif_autoshadowspell_list(sd);
 					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				} else
@@ -9483,14 +9483,14 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							}
 							switch( effect_number ) {
 								case 1: //Splash AoE MATK
-									sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,effect_number,INVALID_TIMER);
+									sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,effect_number,-1);
 									clif_skill_damage(src,bl,tick,status_get_amotion(src),0,-30000,1,skill_id,skill_lv,DMG_SKILL);
 									map_foreachinallrange(skill_area_sub,src,splash_range,BL_CHAR,src,skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_damage_id);
 									status_change_end(bl,SC_SHIELDSPELL_MDEF,INVALID_TIMER);
 									break;
 								case 2: //Splash AoE Lex Divina
 									shield_mdef = min(shield_mdef,10); //Level of Lex Divina to cast
-									sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,effect_number,INVALID_TIMER);
+									sc_start(src,bl,SC_SHIELDSPELL_MDEF,100,effect_number,-1);
 									map_foreachinallrange(skill_area_sub,src,splash_range,BL_CHAR,src,PR_LEXDIVINA,shield_mdef,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
 									status_change_end(bl,SC_SHIELDSPELL_MDEF,INVALID_TIMER);
 									break;
@@ -9516,7 +9516,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 #endif
 								break;
 							case 3: //Recovers HP depending on Shield refine rate
-								sc_start(src,bl,SC_SHIELDSPELL_REF,100,effect_number,INVALID_TIMER); //HP Recovery
+								sc_start(src,bl,SC_SHIELDSPELL_REF,100,effect_number,-1); //HP Recovery
 								status_heal(bl,sstatus->max_hp * ((status_get_lv(src) / 10) + (shield_refine + 1)) / 100,0,2);
 								status_change_end(bl,SC_SHIELDSPELL_REF,INVALID_TIMER);
 								break;
@@ -10538,7 +10538,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						clif_status_load(&hd->master->bl,SI_STYLE_CHANGE,0);
 						sce->val1 = MH_MD_GRAPPLING;
 					} else {
-						clif_status_change(&hd->master->bl,SI_STYLE_CHANGE,1,INVALID_TIMER,0,0,0);
+						clif_status_change(&hd->master->bl,SI_STYLE_CHANGE,1,-1,0,0,0);
 						sce->val1 = MH_MD_FIGHTING;
 					}
 					//if( hd->master && hd->sc.data[type] ) {

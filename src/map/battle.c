@@ -8718,6 +8718,8 @@ static const struct _battle_data {
 	{ "rental_transaction",                 &battle_config.rental_transaction,              1,      0,      1,              },
 	{ "pet_walk_speed",                     &battle_config.pet_walk_speed,                  1,      1,      3,              },
 	{ "feature.equipswitch",                &battle_config.feature_equipswitch,             1,      0,      1,              },
+	{ "min_shop_buy",                       &battle_config.min_shop_buy,                    1,      0,      INT_MAX,        },
+	{ "min_shop_sell",                      &battle_config.min_shop_sell,                   0,      0,      INT_MAX,        },
 
 #include "../custom/battle_config_init.inc"
 };

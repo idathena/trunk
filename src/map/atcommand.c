@@ -9977,6 +9977,33 @@ ACMD_FUNC(refineui)
 #endif
 }
 
+/**
+ * Displays camera information from the client.
+ * Usage: @camerainfo or client command /viewpointvalue or /setcamera on supported clients
+ */
+ACMD_FUNC(camerainfo)
+{
+	float range = 0.0f;
+	float rotation = 0.0f;
+	float latitude = 0.0f;
+
+	nullpo_retr(-1, sd);
+
+	if (!message || !*message) {
+		clif_camerainfo(sd, true, range, rotation, latitude);
+		return 0;
+	}
+
+	if (sscanf(message, "%f %f %f", &range, &rotation, &latitude) < 3) {
+		clif_displaymessage(fd, msg_txt(407)); // Usage: @camerainfo <range> <rotation> <latitude>
+		return -1;
+	}
+
+	clif_camerainfo(sd, false, range, rotation, latitude);
+
+	return 0;
+}
+
 #include "../custom/atcommand.inc"
 
 /**
@@ -10279,6 +10306,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEFR(limitedsale, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 		ACMD_DEFR(changedress, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 		ACMD_DEF(refineui),
+		ACMD_DEFR(camerainfo, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 	};
 	AtCommandInfo *atcommand;
 	int i;

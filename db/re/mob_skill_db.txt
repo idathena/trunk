@@ -11090,3 +11090,7 @@
 3200,Wicked Chimera@NPC_SPLASHATTACK,attack,174,1,2000,0,5000,yes,target,attackpcge,2,,,,,,,
 3200,Wicked Chimera@WZ_HEAVENDRIVE,attack,91,5,500,1200,5000,yes,target,always,,,,,,,6,
 3200,Wicked Chimera@WZ_HEAVENDRIVE,chase,91,5,500,1200,5000,yes,target,always,,,,,,,6,
+
+// Lasagna
+3505,DR_BIG_EGGRING@NPC_SUMMONSLAVE,attack,196,4,10000,2000,10000,no,self,slavele,3,3508,,,,,,
+3505,DR_BIG_EGGRING@NPC_SUMMONSLAVE,idle,196,4,10000,2000,10000,no,self,slavele,3,3508,,,,,,

@@ -1158,4 +1158,6 @@ void clif_equipswitch_add(struct map_session_data *sd, uint16 index, uint32 pos,
 void clif_equipswitch_remove(struct map_session_data *sd, uint16 index, uint32 pos, bool failed);
 void clif_equipswitch_reply(struct map_session_data *sd, bool failed);
 
+void clif_camerainfo(struct map_session_data *sd, bool show, float range, float rotation, float latitude);
+
 #endif /* _CLIF_H_ */

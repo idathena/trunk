@@ -1240,10 +1240,10 @@ bool hom_call(struct map_session_data *sd)
 
 			if (sce) {
 				if (sce->val1 == MH_MD_GRAPPLING) {
-					clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, INVALID_TIMER, 0, 0, 0);
+					clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, -1, 0, 0, 0);
 					sce->val1 = MH_MD_FIGHTING;
 				} else
-					clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, INVALID_TIMER, 0, 0, 0);
+					clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, -1, 0, 0, 0);
 			}
 		}
 		hom_save(hd);
@@ -1417,10 +1417,10 @@ void hom_revive(struct homun_data *hd, unsigned int hp, unsigned int sp)
 
 		if (sce) {
 			if (sce->val1 == MH_MD_GRAPPLING) {
-				clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, INVALID_TIMER, 0, 0, 0);
+				clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, -1, 0, 0, 0);
 				sce->val1 = MH_MD_FIGHTING;
 			} else
-				clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, INVALID_TIMER, 0, 0, 0);
+				clif_status_change(&hd->master->bl, SI_STYLE_CHANGE, 1, -1, 0, 0, 0);
 		}
 	}
 }

@@ -681,6 +681,8 @@ extern struct Battle_Config
 	int rental_transaction;
 	int pet_walk_speed;
 	int feature_equipswitch;
+	int min_shop_buy;
+	int min_shop_sell;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

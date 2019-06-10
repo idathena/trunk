@@ -747,7 +747,7 @@ void clif_charselectok(int id, uint8 ok)
 /// Makes an item appear on the ground.
 /// 009e <id>.L <name id>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W (ZC_ITEM_FALL_ENTRY)
 /// 084b <id>.L <name id>.W <type>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W (ZC_ITEM_FALL_ENTRY4)
-/// 0add <id>.L <name id>.W <type>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W <show effect>.B <effect mode>.W
+/// 0add <id>.L <name id>.W <type>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W <show drop effect>.B <drop effect mode>.W (ZC_ITEM_FALL_ENTRY5)
 /// Effect mode:
 ///      0 - Client based (EffectID field in iteminfo)
 ///      1 - White
@@ -3709,7 +3709,7 @@ void clif_arrowequip(struct map_session_data *sd,int val)
 	nullpo_retv(sd);
 
 #if PACKETVER >= 20121128
-	clif_status_change(&sd->bl,SI_CLIENT_ONLY_EQUIP_ARROW,1,INVALID_TIMER,0,0,0);
+	clif_status_change(&sd->bl,SI_CLIENT_ONLY_EQUIP_ARROW,1,-1,0,0,0);
 #endif
 	fd = sd->fd;
 	WFIFOHEAD(fd,packet_len(0x13c));
@@ -12294,9 +12294,8 @@ void clif_parse_skill_toid(struct map_session_data *sd, uint16 skill_id, uint16 
 	if( sd->npc_shopid )
 		return;
 
-	if( (pc_cant_act2(sd) || sd->chatID) &&
-		skill_id != RK_REFRESH &&
-		!(skill_id == SR_GENTLETOUCH_CURE && (sd->sc.opt1 == OPT1_STONE || sd->sc.opt1 == OPT1_FREEZE || sd->sc.opt1 == OPT1_STUN)) &&
+	if( (pc_cant_act2(sd) || sd->chatID) && sd->sc.opt1 && sd->sc.opt1 != OPT1_STONEWAIT && sd->sc.opt1 != OPT1_BURNING &&
+		skill_id != RK_REFRESH && skill_id != SR_GENTLETOUCH_CURE && skill_id != SU_GROOMING && skill_id != SU_PURRING &&
 		!(sd->state.storage_flag && (inf&INF_SELF_SKILL)) ) //SELF skills can be used with the storage open, bugreport:8027
 		return;
 
@@ -17514,40 +17513,32 @@ void clif_bg_xy_remove(struct map_session_data *sd)
 }
 
 
-/// Notifies clients of a battleground message (ZC_BATTLEFIELD_CHAT).
-/// 02dc <packet len>.W <account id>.L <name>.24B <message>.?B
+/// Notifies clients of a battleground message.
+/// 02DC <packet len>.W <account id>.L <name>.24B <message>.?B (ZC_BATTLEFIELD_CHAT)
 void clif_bg_message(struct battleground_data *bg, int src_id, const char *name, const char *mes, int len)
 {
 	struct map_session_data *sd;
-	unsigned char *buf;
+	unsigned char buf[8 + NAME_LENGTH + CHAT_SIZE_MAX];
 
 	if( !(sd = bg_getavailablesd(bg)) )
 		return;
 
-	buf = (unsigned char *)aMalloc((len + NAME_LENGTH + 8) * sizeof(unsigned char));
+	//Limit length
+	len = min(len + 1, CHAT_SIZE_MAX);
 
 	WBUFW(buf,0) = 0x2dc;
 	WBUFW(buf,2) = len + NAME_LENGTH + 8;
 	WBUFL(buf,4) = src_id;
 	safestrncpy((char *)WBUFP(buf,8), name, NAME_LENGTH);
-	memcpy(WBUFP(buf,32), mes, len);
-	clif_send(buf,WBUFW(buf,2), &sd->bl, BG);
+	safestrncpy((char *)WBUFP(buf,8 + NAME_LENGTH), mes, len);
 
-	if( buf )
-		aFree(buf);
+	clif_send(buf, WBUFW(buf,2), &sd->bl, BG);
 }
 
 
-/**
- * Validates and processes battlechat messages [pakpil] (CZ_BATTLEFIELD_CHAT).
- *
- * @code
- * 0x2db <packet len>.W <text>.?B (<name> : <message>) 00
- * @endcode
- *
- * @param fd The incoming file descriptor.
- * @param sd The related character.
- */
+/// Validates and processes battlechat messages.
+/// All messages that are sent after enabling battleground chat with /battlechat.
+/// 02DB <packet len>.W <text>.?B (CZ_BATTLEFIELD_CHAT)
 void clif_parse_BattleChat(int fd, struct map_session_data *sd)
 {
 	char message[CHAT_SIZE_MAX + NAME_LENGTH + 3 + 1];
@@ -21329,6 +21320,39 @@ void clif_parse_equipswitch_request_single(int fd, struct map_session_data *sd)
 	}
 	pc_equipitem(sd, index, pc_equippoint(sd, index), true);
 #endif
+}
+
+
+/// Activates the client camera info or updates the client camera with the given values.
+/// 0A78 <type>.B <range>.F <rotation>.F <latitude>.F
+void clif_camerainfo(struct map_session_data *sd, bool show, float range, float rotation, float latitude)
+{
+#if PACKETVER >= 20160525
+	int fd = sd->fd;
+
+	WFIFOHEAD(fd,packet_len(0xa78));
+	WFIFOW(fd,0) = 0xa78;
+	WFIFOB(fd,2) = show;
+	WFIFOF(fd,3) = range;
+	WFIFOF(fd,7) = rotation;
+	WFIFOF(fd,11) = latitude;
+	WFIFOSET(fd,packet_len(0xa78));
+#endif
+}
+
+/// Activates or deactives the client camera info or updates the camera settings.
+/// This packet is triggered by /viewpointvalue or /setcamera
+/// 0A77 <type>.B <range>.F <rotation>.F <latitude>.F
+void clif_parse_camerainfo(int fd, struct map_session_data *sd)
+{
+	char command[CHAT_SIZE_MAX];
+
+	if( RFIFOB(fd,2) == 1 ) // /viewpointvalue
+		safesnprintf(command, sizeof(command), "%ccamerainfo", atcommand_symbol);
+	else // /setcamera
+		safesnprintf(command, sizeof(command), "%ccamerainfo %03.03f %03.03f %03.03f", atcommand_symbol, RFIFOF(fd,3), RFIFOF(fd,7), RFIFOF(fd,11));
+
+	is_atcommand(fd, sd, command, 1);
 }
 
 
