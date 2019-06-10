@@ -2219,7 +2219,7 @@ int mmo_char_send006b(int fd, struct char_session_data *sd) {
 		/* this+0x14  char dummy2_endbilling[7] */
 #endif
 	memset(WFIFOP(fd,4 + offset), 0, 20); //Unknown bytes 4-24 7-27
-	j += mmo_chars_fromsql(sd,WFIFOP(fd,j));
+	j += mmo_chars_fromsql(sd,WFIFOP(fd,j),NULL);
 	WFIFOW(fd,2) = j; //Packet len
 	WFIFOSET(fd,j);
 
