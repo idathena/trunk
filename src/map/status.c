@@ -9509,7 +9509,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_TENSIONRELAX:
 				if( sd ) {
 					pc_setsit(sd);
-					skill_sit(sd,1);
+					skill_sit(sd,true);
 					clif_sitting(&sd->bl);
 				}
 				val2 = 12; //SP cost
@@ -10246,7 +10246,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_BANANA_BOMB_SITDOWN:
 				if( sd && !pc_issit(sd) ) {
 					pc_setsit(sd);
-					skill_sit(sd,1);
+					skill_sit(sd,true);
 					clif_sitting(bl);
 				}
 				break;
@@ -10469,7 +10469,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_MEIKYOUSISUI:
 				if( sd ) {
 					pc_setsit(sd);
-					skill_sit(sd,1);
+					skill_sit(sd,true);
 					clif_sitting(&sd->bl);
 				}
 				val2 = val1 * 10; //Chance of nulling the attack
@@ -11972,7 +11972,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		case SC_BANANA_BOMB_SITDOWN:
 			if (sd && pc_issit(sd)) {
 				pc_setstand(sd);
-				skill_sit(sd,0);
+				skill_sit(sd,false);
 			}
 			break;
 		case SC_INTRAVISION:
@@ -13235,7 +13235,7 @@ TIMER_FUNC(status_change_timer)
 				status_charge(bl,0,sce->val2); //Reduce 8 SP every 10 seconds
 				if( sd && !pc_issit(sd) ) { //Force to sit every 10 seconds
 					pc_setsit(sd);
-					skill_sit(sd,1);
+					skill_sit(sd,true);
 					clif_sitting(bl);
 				}
 				sc_timer_next(10000 + tick,status_change_timer,bl->id,data);

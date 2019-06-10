@@ -13770,7 +13770,7 @@ BUILDIN_FUNC(skilleffect)
 	 * which leaves the server thinking it still is sitting. */
 	if( pc_issit(sd) ) {
 		pc_setstand(sd);
-		skill_sit(sd,0);
+		skill_sit(sd,false);
 	}
 
 	clif_skill_nodamage(&sd->bl,&sd->bl,skill_id,skill_lv,1);
@@ -20661,7 +20661,7 @@ BUILDIN_FUNC(sit)
 
 	if( !pc_issit(sd) ) {
 		pc_setsit(sd);
-		skill_sit(sd,1);
+		skill_sit(sd,true);
 		clif_sitting(&sd->bl);
 	}
 	return SCRIPT_CMD_SUCCESS;
@@ -20684,7 +20684,7 @@ BUILDIN_FUNC(stand)
 
 	if( pc_issit(sd) ) {
 		pc_setstand(sd);
-		skill_sit(sd,0);
+		skill_sit(sd,false);
 	}
 
 	return SCRIPT_CMD_SUCCESS;

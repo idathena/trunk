@@ -4208,7 +4208,7 @@ static TIMER_FUNC(skill_timerskill)
 
 						if (tsd && !pc_issit(tsd)) {
 							pc_setsit(tsd);
-							skill_sit(tsd,1);
+							skill_sit(tsd,true);
 							clif_sitting(target);
 						}
 					}
@@ -7340,7 +7340,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case AL_HOLYWATER:
 			if(sd) {
-				if (skill_produce_mix(sd,skill_id,ITEMID_HOLY_WATER,0,0,0,0,1)) {
+				if(skill_produce_mix(sd,skill_id,ITEMID_HOLY_WATER,0,0,0,0,1)) {
 					struct skill_unit *unit;
 
 					if ((unit = map_find_skill_unit_oncell(bl,bl->x,bl->y,NJ_SUITON,NULL,0)))
@@ -7377,8 +7377,10 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case ASC_CDP:
 			if(sd) {
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				skill_produce_mix(sd,skill_id,ITEMID_POISON_BOTTLE,0,0,0,0,1);
+				if(skill_produce_mix(sd,skill_id,ITEMID_POISON_BOTTLE,0,0,0,0,1))
+					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				else
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_STUFF_INSUFFICIENT,0,0);
 			}
 			break;
 
@@ -16855,97 +16857,121 @@ int skill_autospell(struct map_session_data *sd, uint16 skill_id)
 	return 0;
 }
 
-/*==========================================
- * Sitting skills functions.
- *------------------------------------------*/
+/**
+ * Count the number of players with Gangster Paradise, Peaceful Break, or Happy Break.
+ * @param bl: Player object
+ * @param ap: va_arg list
+ * @return 1 if the player has learned Gangster Paradise, Peaceful Break, or Happy Break otherwise 0
+ */
 static int skill_sit_count(struct block_list *bl, va_list ap)
 {
 	struct map_session_data *sd = (struct map_session_data *)bl;
-	int type = va_arg(ap,int);
+	int flag = va_arg(ap,int);
 
 	if(!pc_issit(sd))
 		return 0;
 
-	if(type&1 && pc_checkskill(sd,RG_GANGSTER) > 0)
+	if(flag&1 && pc_checkskill(sd,RG_GANGSTER) > 0)
 		return 1;
 
-	if(type&2 && (pc_checkskill(sd,TK_HPTIME) > 0 || pc_checkskill(sd,TK_SPTIME) > 0))
+	if(flag&2 && (pc_checkskill(sd,TK_HPTIME) > 0 || pc_checkskill(sd,TK_SPTIME) > 0))
 		return 1;
 
 	return 0;
 }
 
+/**
+ * Triggered when a player sits down to activate bonus states.
+ * @param bl: Player object
+ * @param ap: va_arg list
+ * @return 0
+ */
 static int skill_sit_in(struct block_list *bl, va_list ap)
 {
-	struct map_session_data *sd;
-	int type = va_arg(ap,int);
-
-	sd = (struct map_session_data *)bl;
+	struct map_session_data *sd = (struct map_session_data *)bl;
+	int flag = va_arg(ap,int);
 
 	if(!pc_issit(sd))
 		return 0;
 
-	if(type&1 && pc_checkskill(sd,RG_GANGSTER) > 0)
+	if(flag&1 && pc_checkskill(sd,RG_GANGSTER) > 0)
 		sd->state.gangsterparadise = 1;
 
-	if(type&2 && (pc_checkskill(sd,TK_HPTIME) > 0 || pc_checkskill(sd,TK_SPTIME) > 0 )) {
+	if(flag&2 && (pc_checkskill(sd,TK_HPTIME) > 0 || pc_checkskill(sd,TK_SPTIME) > 0)) {
 		sd->state.rest = 1;
-		status_calc_regen(bl, &sd->battle_status, &sd->regen);
-		status_calc_regen_rate(bl, &sd->regen, &sd->sc);
+		status_calc_regen(bl,&sd->battle_status,&sd->regen);
+		status_calc_regen_rate(bl,&sd->regen,&sd->sc);
 	}
 
 	return 0;
 }
 
+/**
+ * Triggered when a player stands up to deactivate bonus states.
+ * @param bl: Player object
+ * @param ap: va_arg list
+ * @return 0
+ */
 static int skill_sit_out(struct block_list *bl, va_list ap)
 {
-	struct map_session_data *sd;
-	int type = va_arg(ap,int);
+	struct map_session_data *sd = (struct map_session_data *)bl;
+	int flag = va_arg(ap,int);
+	int range = va_arg(ap,int);
 
-	sd = (struct map_session_data *)bl;
+	if(map_foreachinallrange(skill_sit_count,&sd->bl,range,BL_PC,flag) > 1)
+		return 0;
 
-	if(sd->state.gangsterparadise && type&1)
+	if(flag&1 && sd->state.gangsterparadise)
 		sd->state.gangsterparadise = 0;
-	if(sd->state.rest && type&2) {
+
+	if(flag&2 && sd->state.rest) {
 		sd->state.rest = 0;
-		status_calc_regen(bl, &sd->battle_status, &sd->regen);
-		status_calc_regen_rate(bl, &sd->regen, &sd->sc);
+		status_calc_regen(bl,&sd->battle_status,&sd->regen);
+		status_calc_regen_rate(bl,&sd->regen,&sd->sc);
 	}
 	return 0;
 }
 
-int skill_sit(struct map_session_data *sd, int type)
+/**
+ * Toggle Sit icon and player bonuses when sitting/standing.
+ * @param sd: Player data
+ * @param sitting: True when sitting or false when standing
+ * @return 0
+ */
+int skill_sit(struct map_session_data *sd, bool sitting)
 {
-	int flag = 0;
-	int range = 0, lv;
-
+	int flag = 0, range = 0;
+	uint16 lv;
+     
 	nullpo_ret(sd);
 
-	if((lv = pc_checkskill(sd, RG_GANGSTER)) > 0) {
+	if((lv = pc_checkskill(sd,RG_GANGSTER)) > 0) {
 		flag |= 1;
-		range = skill_get_splash(RG_GANGSTER, lv);
-	}
-	if((lv = pc_checkskill(sd, TK_HPTIME)) > 0) {
-		flag |= 2;
-		range = skill_get_splash(TK_HPTIME, lv);
-	} else if((lv = pc_checkskill(sd, TK_SPTIME)) > 0) {
-		flag |= 2;
-		range = skill_get_splash(TK_SPTIME, lv);
+		range = skill_get_splash(RG_GANGSTER,lv);
 	}
 
-	if(type)
-		clif_status_load(&sd->bl, SI_SIT, 1);
+	if((lv = pc_checkskill(sd,TK_HPTIME)) > 0) {
+		flag |= 2;
+		range = skill_get_splash(TK_HPTIME,lv);
+	} else if((lv = pc_checkskill(sd,TK_SPTIME)) > 0) {
+		flag |= 2;
+		range = skill_get_splash(TK_SPTIME,lv);
+	}
 
-	if(!flag)
+	if(sitting)
+		clif_status_load(&sd->bl,SI_SIT,1);
+	else
+		clif_status_load(&sd->bl,SI_SIT,0);
+
+	if(!flag) //No need to count area if no skills are learned
 		return 0;
 
-	if(type) {
-		if (map_foreachinallrange(skill_sit_count, &sd->bl, range, BL_PC, flag) > 1)
-			map_foreachinallrange(skill_sit_in, &sd->bl, range, BL_PC, flag);
-	} else {
-		if (map_foreachinallrange(skill_sit_count, &sd->bl, range, BL_PC, flag) < 2)
-			map_foreachinallrange(skill_sit_out, &sd->bl, range, BL_PC, flag);
-	}
+	if(sitting) {
+		if (map_foreachinallrange(skill_sit_count,&sd->bl,range,BL_PC,flag) > 1)
+			map_foreachinallrange(skill_sit_in,&sd->bl,range,BL_PC,flag);
+	} else
+		map_foreachinallrange(skill_sit_out,&sd->bl,range,BL_PC,flag,range);
+
 	return 0;
 }
 
@@ -19436,6 +19462,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 		switch( skill_id ) {
 			case ASC_CDP: //25% Damage yourself, and display same effect as failed potion
 				status_percent_damage(NULL,&sd->bl,-25,0,true);
+			//Fall through
 			case AM_PHARMACY:
 			case AM_TWILIGHT1:
 			case AM_TWILIGHT2:

@@ -4745,10 +4745,10 @@ char pc_getzeny(struct map_session_data *sd, int zeny, enum e_log_pick_type type
 /**
  * Attempts to remove Cash Points from player
  * @param sd: Player
- * @param price: Points player has to pay
- * @param points: Points player has
+ * @param price: Total points (cash + kafra) the player has to pay
+ * @param points: Kafra points the player has to pay
  * @param type: Log type
- * @return -2: Paying negative points, -1: Not enough points, otherwise success (cash+points)
+ * @return -1: Not enough points, otherwise success (cash+points)
  */
 int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_type type)
 {
@@ -4756,16 +4756,7 @@ int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_ty
 
 	nullpo_retr(-1, sd);
 
-	points = cap_value(points, -MAX_ZENY, MAX_ZENY); //Prevent command UB
-	if( price < 0 || points < 0 ) {
-		ShowError("pc_paycash: Paying negative points (price=%d, points=%d, account_id=%d, char_id=%d).\n", price, points, sd->status.account_id, sd->status.char_id);
-		return -2;
-	}
-
-	if( points > price ) {
-		ShowWarning("pc_paycash: More kafra points provided than needed (price=%d, points=%d, account_id=%d, char_id=%d).\n", price, points, sd->status.account_id, sd->status.char_id);
-		points = price;
-	}
+	points = cap_value(points, 0, MAX_ZENY); //Prevent command UB
 
 	cash = price - points;
 	if( sd->cashPoints < cash || sd->kafraPoints < points ) {
@@ -4798,10 +4789,10 @@ int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_ty
 /**
  * Attempts to give Cash Points to player
  * @param sd: Player
- * @param cash: Cash player gets
- * @param points: Points player has
+ * @param cash: Cash points the player gets
+ * @param points: Kafra points the player gets
  * @param type: Log type
- * @return -2: Error, -1: Giving negative cash/points, otherwise success (cash or points)
+ * @return -1: Error, otherwise success (cash or points)
  */
 int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_type type)
 {
@@ -4809,26 +4800,22 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 
 	nullpo_retr(-1, sd);
 
-	cash = cap_value(cash, -MAX_ZENY, MAX_ZENY); //Prevent command UB
-	points = cap_value(points, -MAX_ZENY, MAX_ZENY); //Prevent command UB
+	cash = cap_value(cash, 0, MAX_ZENY); //Prevent command UB
+	points = cap_value(points, 0, MAX_ZENY); //Prevent command UB
+
 	if( cash > 0 ) {
 		if( cash > MAX_ZENY - sd->cashPoints ) {
 			ShowWarning("pc_getcash: Cash point overflow (cash=%d, have cash=%d, account_id=%d, char_id=%d).\n", cash, sd->cashPoints, sd->status.account_id, sd->status.char_id);
 			cash = MAX_ZENY - sd->cashPoints;
 		}
-
 		pc_setaccountreg(sd, CASHPOINT_VAR, sd->cashPoints + cash);
 		sd->cashPoints += cash;
 		log_cash(sd, type, LOG_CASH_TYPE_CASH, cash);
-
 		if( battle_config.cashshop_show_points ) {
 			sprintf(output, msg_txt(505), cash, sd->cashPoints);
 			clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 		}
 		return cash;
-	} else if( cash < 0 ) {
-		ShowError("pc_getcash: Obtaining negative cash points (cash=%d, account_id=%d, char_id=%d).\n", cash, sd->status.account_id, sd->status.char_id);
-		return -1;
 	}
 
 	if( points > 0 ) {
@@ -4836,22 +4823,17 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 			ShowWarning("pc_getcash: Kafra point overflow (points=%d, have points=%d, account_id=%d, char_id=%d).\n", points, sd->kafraPoints, sd->status.account_id, sd->status.char_id);
 			points = MAX_ZENY - sd->kafraPoints;
 		}
-
 		pc_setaccountreg(sd, KAFRAPOINT_VAR, sd->kafraPoints + points);
 		sd->kafraPoints += points;
 		log_cash(sd, type, LOG_CASH_TYPE_KAFRA, points);
-
 		if( battle_config.cashshop_show_points ) {
 			sprintf(output, msg_txt(506), points, sd->kafraPoints);
 			clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 		}
 		return points;
-	} else if( points < 0 ) {
-		ShowError("pc_getcash: Obtaining negative kafra points (points=%d, account_id=%d, char_id=%d).\n", points, sd->status.account_id, sd->status.char_id);
-		return -1;
 	}
 
-	return -2; //Shouldn't happen but just in case
+	return -1; //Shouldn't happen but just in case
 }
 
 /**
@@ -7964,7 +7946,7 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 
 	if( pc_issit(sd) ) {
 		pc_setstand(sd);
-		skill_sit(sd,0);
+		skill_sit(sd,false);
 	}
 
 	if( sd->progressbar.npc_id )
