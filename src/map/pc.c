@@ -9255,7 +9255,7 @@ void pc_changelook(struct map_session_data *sd, int type, int val)
 /*==========================================
  * Give an option (type) to player (sd) and display it to client
  *------------------------------------------*/
-void pc_setoption(struct map_session_data *sd,int type)
+void pc_setoption(struct map_session_data *sd, int type)
 {
 	int p_type, new_look = 0;
 
@@ -9305,20 +9305,19 @@ void pc_setoption(struct map_session_data *sd,int type)
 		status_calc_pc(sd,SCO_NONE);
 	}
 
-	if (type&OPTION_MADOGEAR && !(p_type&OPTION_MADOGEAR)) {
+	if (type&OPTION_MADOGEAR && !(p_type&OPTION_MADOGEAR)) { //Madogear ON
+		static const sc_type scs[] = { SC_MAXIMIZEPOWER,SC_OVERTHRUST,SC_WEAPONPERFECTION,SC_ADRENALINE,SC_CARTBOOST,SC_MELTDOWN,SC_MAXOVERTHRUST };
+		uint8 i;
+
 		status_calc_pc(sd,SCO_NONE);
-		status_change_end(&sd->bl,SC_MAXIMIZEPOWER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_OVERTHRUST,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_WEAPONPERFECTION,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_ADRENALINE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_CARTBOOST,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MELTDOWN,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MAXOVERTHRUST,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_LOUD,INVALID_TIMER);
+		for (i = 0; i < ARRAYLENGTH(scs); i++) {
+			int skill_id = status_sc2skill(scs[i]);
+
+			if (!(skill_get_inf3(skill_id)&INF3_USABLE_MADO))
+				status_change_end(&sd->bl,scs[i],INVALID_TIMER);
+		}
 		pc_bonus_script_clear(sd,BSF_REM_ON_MADOGEAR);
-		if (sd->equip_index[EQI_AMMO] > 0)
-			pc_unequipitem(sd,sd->equip_index[EQI_AMMO],2);
-	} else if (!(type&OPTION_MADOGEAR) && (p_type&OPTION_MADOGEAR)) {
+	} else if (!(type&OPTION_MADOGEAR) && (p_type&OPTION_MADOGEAR)) { //Madogear OFF
 		status_calc_pc(sd,SCO_NONE);
 		status_change_end(&sd->bl,SC_SHAPESHIFT,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_HOVERING,INVALID_TIMER);

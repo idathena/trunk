@@ -9732,12 +9732,11 @@ ACMD_FUNC(changedress) {
 	for( i = 0; i < ARRAYLENGTH(name2id); i++ ) {
 		if( sd->sc.data[name2id[i]] ) {
 			status_change_end(&sd->bl, name2id[i], INVALID_TIMER);
-			// You should only be able to have one - so we cancel here
-			return 0;
+			break; // You should only be able to have one - so we cancel here
 		}
 	}
 
-	return -1;
+	return 0;
 }
 
 /**
