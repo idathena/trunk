@@ -10907,7 +10907,7 @@ void clif_parse_progressbar(int fd, struct map_session_data *sd)
 	if( !sd->progressbar.npc_id )
 		return;
 
-	npc_id = sd->progressbar.npc_id
+	npc_id = sd->progressbar.npc_id;
 
 	//Check if the progress was canceled
 	if( gettick() < sd->progressbar.timeout && sd->st ) { 
