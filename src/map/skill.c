@@ -12766,7 +12766,7 @@ struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16 skill_
 				unit_val2 = group->val2;
 				break;
 			case WZ_ICEWALL:
-				unit_val1 = (skill_lv <= 1 ? 500 : 200 + 200 * skill_lv);
+				unit_val1 = 200 + 200 * skill_lv;
 				unit_val2 = map_getcell(src->m,ux,uy,CELL_GETTYPE);
 				break;
 			case WZ_WATERBALL: //Check if there are cells that can be turned into waterball units
@@ -13102,13 +13102,6 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 			if( !sce )
 				sc_start4(src,bl,type,100,skill_lv,0,BCT_ENEMY,group->group_id,group->limit);
 			break;
-
-		//Officially, icewall has no problems existing on occupied cells [ultramage]
-		//case UNT_ICEWALL: //Destroy the cell [Skotlex]
-			//unit->val1 = 0;
-			//if( unit->limit + group->tick > tick + 700 )
-				//unit->limit = DIFF_TICK(tick + 700,group->tick);
-			//break;
 
 		case UNT_MOONLIT:
 			if( sc && sc->data[SC_DANCING] && (sc->data[SC_DANCING]->val1&0xFFFF) == CG_MOONLIT )
@@ -18374,6 +18367,13 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 	//Check for expiration
 	if( !group->state.guildaura && (DIFF_TICK(tick,group->tick) >= group->limit || DIFF_TICK(tick,group->tick) >= unit->limit) ) {
 		switch( group->unit_id ) { //Skill unit expired (inlined from skill_unit_onlimit())
+			case UNT_ICEWALL:
+				unit->val1 -= 50; //Icewall loses 50 HP every second
+				group->limit = DIFF_TICK(tick + group->interval,group->tick);
+				unit->limit = DIFF_TICK(tick + group->interval,group->tick);
+				if( unit->val1 <= 0 )
+					skill_delunit(unit);
+				break;
 			case UNT_BLASTMINE:
 #ifdef RENEWAL
 			case UNT_CLAYMORETRAP:
@@ -18489,11 +18489,6 @@ static int skill_unit_timer_sub(DBKey key, DBData *data, va_list ap)
 		}
 	} else { //Skill unit is still active
 		switch( group->unit_id ) {
-			case UNT_ICEWALL: //Icewall loses 50 hp every second
-				unit->val1 -= SKILLUNITTIMER_INTERVAL / 20; //Trap's hp
-				if( unit->val1 <= 0 && unit->limit + group->tick > tick + 700 )
-					unit->limit = DIFF_TICK(tick + 700,group->tick);
-				break;
 			case UNT_BLASTMINE:
 			case UNT_SKIDTRAP:
 			case UNT_LANDMINE:

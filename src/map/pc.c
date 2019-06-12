@@ -9322,7 +9322,7 @@ void pc_setoption(struct map_session_data *sd, int type)
 	if (sd->disguise || !new_look)
 		return; //Disguises break sprite changes
 
-	if (new_look < 0) { //Restore normal look.
+	if (new_look < 0) { //Restore normal look
 		status_set_viewdata(&sd->bl, sd->status.class_);
 		new_look = sd->vd.class_;
 	}
@@ -10248,10 +10248,25 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 		sd->inventory.u.items_inventory[n].bound = (char)battle_config.default_bind_on_equip;
 		clif_notify_bindOnEquip(sd,n);
 	}
-	if( pos == EQP_ACC ) { //Accesories should only go in one of the two
+	if( pos == EQP_ACC ) { //Accessories should only go in one of the two
 		pos = (req_pos&EQP_ACC);
 		if( pos == EQP_ACC ) //User specified both slots
 			pos = (equip_index[EQI_ACC_R] >= 0 ? EQP_ACC_L : EQP_ACC_R);
+		//Accessories that have cards that force equip location
+		for( i = 0; i < sd->inventory_data[n]->slot; i++ ) {
+			struct item_data *card_data;
+
+			if( !sd->inventory.u.items_inventory[n].card[i] )
+				continue;
+			if( (card_data = itemdb_exists(sd->inventory.u.items_inventory[n].card[i])) ) {
+				int card_pos = card_data->equip;
+
+				if( card_pos == EQP_ACC_L || card_pos == EQP_ACC_R ) {
+					pos = card_pos; //Use the card's equip position
+					break;
+				}
+			}
+		}
 	}
 	if( pos == EQP_ARMS && id->equip == EQP_HAND_R ) { //Dual wield capable weapon
 		pos = (req_pos&EQP_ARMS);

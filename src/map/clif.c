@@ -3976,8 +3976,11 @@ void clif_changeoption(struct block_list *bl)
 
 	//Whenever we send "changeoption" to the client, the provoke icon is lost
 	//There is probably an option for the provoke icon, but as we don't know it, we have to do this for now
-	if(sc->data[SC_PROVOKE] && sc->data[SC_PROVOKE]->timer == INVALID_TIMER)
-		clif_status_change(bl,StatusIconChangeTable[SC_PROVOKE],1,-1,0,0,0);
+	if(sc->data[SC_PROVOKE]) {
+		const struct TimerData *td = get_timer(sc->data[SC_PROVOKE]->timer);
+
+		clif_status_change(bl,StatusIconChangeTable[SC_PROVOKE],1,(td ? DIFF_TICK(td->tick,gettick()) : -1),0,0,0);
+	}
 }
 
 
@@ -10893,21 +10896,29 @@ void clif_progressbar_abort(struct map_session_data *sd)
 }
 
 
-/// Notification from the client, that the progress bar has reached 100% (CZ_PROGRESS).
-/// 02f1
+/// Notification from the client, that the progress bar has reached 100%.
+/// 02f1 (CZ_PROGRESS)
 void clif_parse_progressbar(int fd, struct map_session_data *sd)
 {
-	int npc_id = sd->progressbar.npc_id;
-	bool fail = false;
+	int npc_id;
+	bool closing = false;
 
-	if( gettick() < sd->progressbar.timeout && sd->st ) {
+	//No progressbar active, ignore it
+	if( !sd->progressbar.npc_id )
+		return;
+
+	npc_id = sd->progressbar.npc_id
+
+	//Check if the progress was canceled
+	if( gettick() < sd->progressbar.timeout && sd->st ) { 
+		closing = true;
 		pc_close_npc(sd, 1);
-		fail = true;
 	}
 
-	sd->progressbar.npc_id = sd->progressbar.timeout = 0;
+	sd->progressbar.npc_id = 0;
+	sd->progressbar.timeout = 0;
 
-	if( !fail ) //Don't continue if it fails
+	if( !closing )
 		npc_scriptcont(sd, npc_id, false);
 }
 
@@ -16015,13 +16026,15 @@ void clif_parse_Mail_send(int fd, struct map_session_data *sd)
 		(char *)RFIFOP(fd,info->pos[4]), RFIFOB(fd,info->pos[3]));
 #else
 	unsigned short length;
-	static char receiver[NAME_LENGTH];
-	static char sender[NAME_LENGTH];
-	char *title;
-	char *text;
+	char receiver[NAME_LENGTH];
+	//char sender[NAME_LENGTH];
+	char title[MAIL_TITLE_LENGTH];
+	char text[MAIL_BODY_LENGTH];
 	uint64 zeny;
 	uint16 titleLength;
 	uint16 textLength;
+	uint16 realTitleLength;
+	uint16 realTextLength;
 
 	length = RFIFOW(fd,2);
 
@@ -16035,21 +16048,20 @@ void clif_parse_Mail_send(int fd, struct map_session_data *sd)
 		return; //Ignore it
 
 	safestrncpy(receiver, (char *)RFIFOP(fd,4), NAME_LENGTH);
-	safestrncpy(sender, (char *)RFIFOP(fd,28), NAME_LENGTH);
+	//safestrncpy(sender, (char *)RFIFOP(fd,28), NAME_LENGTH);
 	zeny = RFIFOQ(fd,52);
 	titleLength = RFIFOW(fd,60);
 	textLength = RFIFOW(fd,62);
-
-	title = (char *)aMalloc(titleLength);
-	text = (char *)aMalloc(textLength);
+	realTitleLength = min(titleLength, MAIL_TITLE_LENGTH);
+	realTextLength = min(textLength, MAIL_BODY_LENGTH);
 
 #if PACKETVER <= 20160330
-	safestrncpy(title, (char *)RFIFOP(fd,64), titleLength);
-	safestrncpy(text, (char *)RFIFOP(fd,64 + titleLength), textLength);
+	safestrncpy(title, (char *)RFIFOP(fd,64), realTitleLength);
+	safestrncpy(text, (char *)RFIFOP(fd,64 + titleLength), realTextLength);
 #else
 	//64 = <char id>.L
-	safestrncpy(title, (char *)RFIFOP(fd,68), titleLength);
-	safestrncpy(text, (char *)RFIFOP(fd,68 + titleLength), textLength);
+	safestrncpy(title, (char *)RFIFOP(fd,68), realTitleLength);
+	safestrncpy(text, (char *)RFIFOP(fd,68 + titleLength), realTextLength);
 #endif
 
 	if( zeny > 0 ) {
@@ -16059,10 +16071,7 @@ void clif_parse_Mail_send(int fd, struct map_session_data *sd)
 		}
 	}
 
-	mail_send(sd, receiver, title, text, textLength);
-
-	aFree(title);
-	aFree(text);
+	mail_send(sd, receiver, title, text, realTextLength);
 #endif
 }
 

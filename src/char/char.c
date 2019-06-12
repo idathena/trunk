@@ -6232,9 +6232,9 @@ int do_init(int argc, char **argv)
 	start_point[0].y = MAP_DEFAULT_Y;
 
 #if PACKETVER >= 20151104
-	start_point_doram[0].map = mapindex_name2id(MAP_DEFAULT_NAME);
-	start_point_doram[0].x = MAP_DEFAULT_X;
-	start_point_doram[0].y = MAP_DEFAULT_Y;
+	start_point_doram[0].map = mapindex_name2id(MAP_DORAM_DEFAULT_NAME);
+	start_point_doram[0].x = MAP_DORAM_DEFAULT_X;
+	start_point_doram[0].y = MAP_DORAM_DEFAULT_Y;
 #endif
 
 	start_items[0].nameid = 1201;

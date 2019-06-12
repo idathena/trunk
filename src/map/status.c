@@ -7474,7 +7474,7 @@ void status_set_viewdata(struct block_list *bl, int class_)
 
 				if (pcdb_checkid(class_)) {
 					if (sd->sc.option&OPTION_RIDING) {
-						switch (class_) { //Adapt class to a Mounted one.
+						switch (class_) { //Adapt class to a Mounted one
 							case JOB_KNIGHT:
 								class_ = JOB_KNIGHT2;
 								break;
@@ -7500,9 +7500,15 @@ void status_set_viewdata(struct block_list *bl, int class_)
 					sd->vd.head_top = sd->status.head_top;
 					sd->vd.head_mid = sd->status.head_mid;
 					sd->vd.head_bottom = sd->status.head_bottom;
-					sd->vd.hair_style = cap_value(sd->status.hair,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
-					sd->vd.hair_color = cap_value(sd->status.hair_color,MIN_HAIR_COLOR,MAX_HAIR_COLOR);
-					sd->vd.cloth_color = cap_value(sd->status.clothes_color,MIN_CLOTH_COLOR,MAX_CLOTH_COLOR);
+					if( (sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER ) {
+						sd->vd.hair_style = cap_value(sd->status.hair,MIN_DORAM_HAIR_STYLE,MAX_DORAM_HAIR_STYLE);
+						sd->vd.hair_color = cap_value(sd->status.hair_color,MIN_DORAM_HAIR_COLOR,MAX_DORAM_HAIR_COLOR);
+						sd->vd.cloth_color = cap_value(sd->status.clothes_color,MIN_DORAM_CLOTH_COLOR,MAX_DORAM_CLOTH_COLOR);
+					} else {
+						sd->vd.hair_style = cap_value(sd->status.hair,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
+						sd->vd.hair_color = cap_value(sd->status.hair_color,MIN_HAIR_COLOR,MAX_HAIR_COLOR);
+						sd->vd.cloth_color = cap_value(sd->status.clothes_color,MIN_CLOTH_COLOR,MAX_CLOTH_COLOR);
+					}
 					sd->vd.body_style = cap_value(sd->status.body,MIN_BODY_STYLE,MAX_BODY_STYLE);
 					sd->vd.robe = sd->status.robe;
 					sd->vd.sex = sd->status.sex;
@@ -7535,7 +7541,10 @@ void status_set_viewdata(struct block_list *bl, int class_)
 				} else if (pcdb_checkid(class_)) {
 					mob_set_dynamic_viewdata(md);
 					md->vd->class_ = class_;
-					md->vd->hair_style = cap_value(md->vd->hair_style,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
+					if (class_ == JOB_SUMMONER || class_ == JOB_BABY_SUMMONER)
+						md->vd->hair_style = cap_value(md->vd->hair_style,MIN_DORAM_HAIR_STYLE,MAX_DORAM_HAIR_STYLE);
+					else
+						md->vd->hair_style = cap_value(md->vd->hair_style,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
 				} else
 					ShowError("status_set_viewdata (MOB): No view data for class %d\n ",class_);
 			}
@@ -7565,7 +7574,10 @@ void status_set_viewdata(struct block_list *bl, int class_)
 				else if (pcdb_checkid(class_)) {
 					memset(&nd->vd,0,sizeof(struct view_data));
 					nd->vd.class_ = class_;
-					nd->vd.hair_style = cap_value(nd->vd.hair_style,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
+					if (class_ == JOB_SUMMONER || class_ == JOB_BABY_SUMMONER)
+						nd->vd.hair_style = cap_value(nd->vd.hair_style,MIN_DORAM_HAIR_STYLE,MAX_DORAM_HAIR_STYLE);
+					else
+						nd->vd.hair_style = cap_value(nd->vd.hair_style,MIN_HAIR_STYLE,MAX_HAIR_STYLE);
 				} else
 					ShowError("status_set_viewdata (NPC): No view data for class %d (name=%s)\n ",class_,nd->name);
 			}

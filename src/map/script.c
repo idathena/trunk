@@ -6083,34 +6083,65 @@ BUILDIN_FUNC(getelementofarray)
  *------------------------------------------*/
 BUILDIN_FUNC(setlook)
 {
-	int type,val;
+	int type, val;
 	TBL_PC *sd;
+
+	if( !(sd = script_rid2sd(st)) )
+		return 0;
 
 	type = script_getnum(st,2);
 	val = script_getnum(st,3);
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
-		return 0;
-
-	pc_changelook(sd,type,val);
+	pc_changelook(sd, type, val);
 
 	return SCRIPT_CMD_SUCCESS;
 }
 
 BUILDIN_FUNC(changelook)
 { // As setlook but only client side
-	int type,val;
+	int type, val, min_hair_style, max_hair_style, min_hair_color, max_hair_color, min_cloth_color, max_cloth_color;
 	TBL_PC *sd;
+
+	if( !(sd = script_rid2sd(st)) )
+		return 0;
 
 	type = script_getnum(st,2);
 	val = script_getnum(st,3);
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
-		return 0;
+	if( (sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER ) {
+		min_hair_style = MIN_DORAM_HAIR_STYLE;
+		max_hair_style = MAX_DORAM_HAIR_STYLE;
+		min_hair_color = MIN_DORAM_HAIR_COLOR;
+		max_hair_color = MAX_DORAM_HAIR_COLOR;
+		min_cloth_color = MIN_DORAM_CLOTH_COLOR;
+		max_cloth_color = MAX_DORAM_CLOTH_COLOR;
+	} else {
+		min_hair_style = MIN_HAIR_STYLE;
+		max_hair_style = MAX_HAIR_STYLE;
+		min_hair_color = MIN_HAIR_COLOR;
+		max_hair_color = MAX_HAIR_COLOR;
+		min_cloth_color = MIN_CLOTH_COLOR;
+		max_cloth_color = MAX_CLOTH_COLOR;
+	}
 
-	clif_changelook(&sd->bl,type,val);
+	switch( type ) {
+		case LOOK_HAIR:
+			val = cap_value(val, min_hair_style, max_hair_style);
+			break;
+		case LOOK_HAIR_COLOR:
+			val = cap_value(val, min_hair_color, max_hair_color);
+			break;
+		case LOOK_CLOTHES_COLOR:
+			val = cap_value(val, min_cloth_color, max_cloth_color);
+			break;
+		case LOOK_BODY2:
+			val = cap_value(val, MIN_BODY_STYLE, MAX_BODY_STYLE);
+			break;
+		default:
+			break;
+	}
+
+	clif_changelook(&sd->bl, type, val);
 
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -6122,11 +6153,10 @@ BUILDIN_FUNC(cutin)
 {
 	TBL_PC *sd;
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
-	clif_cutin(sd,script_getstr(st,2),script_getnum(st,3));
+	clif_cutin(sd, script_getstr(st,2), script_getnum(st,3));
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -6138,17 +6168,16 @@ BUILDIN_FUNC(viewpoint)
 	int type, x, y, id, color;
 	TBL_PC *sd;
 
+	if( !(sd = script_rid2sd(st)) )
+		return 0;
+
 	type = script_getnum(st,2);
 	x = script_getnum(st,3);
 	y = script_getnum(st,4);
 	id = script_getnum(st,5);
 	color = script_getnum(st,6);
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
-		return 0;
-
-	clif_viewpoint(sd,st->oid,type,x,y,id,color);
+	clif_viewpoint(sd, st->oid, type, x, y, id, color);
 
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12076,11 +12105,13 @@ BUILDIN_FUNC(pvpon)
 	int16 m;
 	const char *str = script_getstr(st,2);
 
-	m = map_mapname2mapid(str);
-	if(m < 0 || map[m].flag.pvp)
+	if((m = map_mapname2mapid(str)) < 0) {
+		ShowWarning("buildin_pvpon: Unknown map '%s'.\n", str);
 		return 1;
+	}
 
-	map[m].flag.pvp = 1;
+	if(!map[m].flag.pvp)
+		map[m].flag.pvp = 1;
 
 	if(battle_config.pk_mode) //Disable ranking functions if pk_mode is on [Valaris]
 		return 0;
@@ -12094,11 +12125,13 @@ BUILDIN_FUNC(pvpoff)
 	int16 m;
 	const char *str = script_getstr(st,2);
 
-	m = map_mapname2mapid(str);
-	if(m < 0 || !map[m].flag.pvp)
+	if((m = map_mapname2mapid(str)) < 0) {
+		ShowWarning("buildin_pvpoff: Unknown map '%s'.\n", str);
 		return 1;
+	}
 
-	map[m].flag.pvp = 0;
+	if(map[m].flag.pvp)
+		map[m].flag.pvp = 0;
 
 	if(battle_config.pk_mode) //Disable ranking options if pk_mode is on [Valaris]
 		return 0;
@@ -12114,11 +12147,14 @@ BUILDIN_FUNC(gvgon)
 	int16 m;
 	const char *str = script_getstr(st,2);
 
-	m = map_mapname2mapid(str);
-	if(m < 0 || map[m].flag.gvg)
+	if((m = map_mapname2mapid(str)) < 0) {
+		ShowWarning("buildin_gvgon: Unknown map '%s'.\n", str);
 		return 1;
+	}
 
-	map[m].flag.gvg = 1;
+	if(!map[m].flag.gvg)
+		map[m].flag.gvg = 1;
+
 	clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12128,11 +12164,14 @@ BUILDIN_FUNC(gvgoff)
 	int16 m;
 	const char *str = script_getstr(st,2);
 
-	m = map_mapname2mapid(str);
-	if(m < 0 || !map[m].flag.gvg)
+	if((m = map_mapname2mapid(str)) < 0) {
+		ShowWarning("buildin_gvgoff: Unknown map '%s'.\n", str);
 		return 1;
+	}
 
-	map[m].flag.gvg = 0;
+	if(map[m].flag.gvg)
+		map[m].flag.gvg = 0;
+
 	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12142,11 +12181,14 @@ BUILDIN_FUNC(gvgon3)
 	int16 m;
 	const char *str = script_getstr(st,2);
 
-	m = map_mapname2mapid(str);
-	if(m < 0 || map[m].flag.gvg_te)
+	if((m = map_mapname2mapid(str)) < 0) {
+		ShowWarning("buildin_gvgon3: Unknown map '%s'.\n", str);
 		return 1;
+	}
 
-	map[m].flag.gvg_te = 1;
+	if(!map[m].flag.gvg_te)
+		map[m].flag.gvg_te = 1;
+
 	clif_map_property_mapall(m, MAPPROPERTY_AGITZONE);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -12156,11 +12198,14 @@ BUILDIN_FUNC(gvgoff3)
 	int16 m;
 	const char *str = script_getstr(st,2);
 
-	m = map_mapname2mapid(str);
-	if(m < 0 || !map[m].flag.gvg_te)
+	if((m = map_mapname2mapid(str)) < 0) {
+		ShowWarning("buildin_gvgoff3: Unknown map '%s'.\n", str);
 		return 1;
+	}
 
-	map[m].flag.gvg_te = 0;
+	if(map[m].flag.gvg_te)
+		map[m].flag.gvg_te = 0;
+
 	clif_map_property_mapall(m, MAPPROPERTY_NOTHING);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -19416,21 +19461,24 @@ BUILDIN_FUNC(bg_updatescore)
 BUILDIN_FUNC(bg_get_data)
 {
 	struct battleground_data *bg;
-	int bg_id = script_getnum(st,2),
-		type = script_getnum(st,3), i;
+	int i, j, type = script_getnum(st,3);
 
-	if( (bg = bg_team_search(bg_id)) == NULL ) {
+	if( !(bg = bg_team_search(script_getnum(st,2))) ) {
 		script_pushint(st,0);
 		return 0;
 	}
 
 	switch( type ) {
-		case 0: script_pushint(st, bg->count); break;
+		case 0:
+			script_pushint(st,bg->count);
+			break;
 		case 1:
-			for( i = 0; bg->members[i].sd != NULL; i++ )
-				mapreg_setreg(reference_uid(add_str("$@arenamembers"), i), bg->members[i].sd->bl.id);
-			mapreg_setreg(add_str("$@arenamembersnum"), i);
-			script_pushint(st,i);
+			for( i = 0, j = 0; i < ARRAYLENGTH(bg->members); i++ ) {
+				if( bg->members[i].sd )
+					mapreg_setreg(reference_uid(add_str("$@arenamembers"), j++), bg->members[i].sd->bl.id);
+			}
+			mapreg_setreg(add_str("$@arenamembersnum"), j);
+			script_pushint(st,j);
 			break;
 		default:
 			ShowError("script:bg_get_data: unknown data identifier %d\n", type);
