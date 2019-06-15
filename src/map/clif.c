@@ -10904,10 +10904,8 @@ void clif_parse_progressbar(int fd, struct map_session_data *sd)
 	bool closing = false;
 
 	//No progressbar active, ignore it
-	if( !sd->progressbar.npc_id )
+	if( !(npc_id = sd->progressbar.npc_id) )
 		return;
-
-	npc_id = sd->progressbar.npc_id;
 
 	//Check if the progress was canceled
 	if( gettick() < sd->progressbar.timeout && sd->st ) { 
@@ -15042,8 +15040,18 @@ void clif_parse_HomMenu(int fd, struct map_session_data *sd)
 /// 0292
 void clif_parse_AutoRevive(int fd, struct map_session_data *sd)
 {
-	short item_position = pc_search_inventory(sd, ITEMID_TOKEN_OF_SIEGFRIED);
+	const int token[3] = { ITEMID_F_TOKEN_OF_SIEGFRIED,ITEMID_E_TOKEN_OF_SIEGFRIED,ITEMID_TOKEN_OF_SIEGFRIED };
+	short item_position;
 	uint8 hp = 100, sp = 100;
+	int i;
+
+	if (sd->sc.data[SC_HELLPOWER])
+		return; //Cannot resurrect while under the effect of SC_HELLPOWER
+
+	for (i = 0; i < ARRAYLENGTH(token); i++) {
+		if ((item_position = pc_search_inventory(sd, token[i])) != INDEX_NOT_FOUND)
+			break;
+	}
 
 	if (item_position == INDEX_NOT_FOUND) {
 		if (sd->sc.data[SC_LIGHT_OF_REGENE]) {
@@ -15052,9 +15060,6 @@ void clif_parse_AutoRevive(int fd, struct map_session_data *sd)
 		} else
 			return;
 	}
-
-	if (sd->sc.data[SC_HELLPOWER])
-		return; //Cannot res while under the effect of SC_HELLPOWER
 
 	if (!status_revive(&sd->bl, hp, sp))
 		return;

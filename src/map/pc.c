@@ -7907,20 +7907,22 @@ void pc_respawn(struct map_session_data *sd, clr_type clrtype)
 {
 	if( !pc_isdead(sd) )
 		return; // Not applicable
+
 	if( sd->bg_id && bg_member_respawn(sd) )
 		return; // Member revived by battleground
 
 	pc_setstand(sd);
-	pc_setrestartvalue(sd,3);
+	pc_setrestartvalue(sd, 3);
+
 	if( pc_setpos(sd, sd->status.save_point.map, sd->status.save_point.x, sd->status.save_point.y, clrtype) != SETPOS_OK )
 		clif_resurrection(&sd->bl, 1); //If warping fails, send a normal stand up packet
 }
 
 static TIMER_FUNC(pc_respawn_timer)
 {
-	struct map_session_data *sd = map_id2sd(id);
+	struct map_session_data *sd = NULL;
 
-	if( sd != NULL ) {
+	if( (sd = map_id2sd(id)) ) {
 		sd->pvp_point = 0;
 		pc_respawn(sd,CLR_OUTSIGHT);
 	}
@@ -8344,7 +8346,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		struct battleground_data *bg = bg_team_search(sd->bg_id);
 
 		if( bg && bg->mapindex > 0 ) { //Respawn by BG
-			add_timer(tick + 1000,pc_respawn_timer,sd->bl.id,0);
+			add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
 			return 1|8;
 		}
 	}

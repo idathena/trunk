@@ -3840,7 +3840,7 @@ static void script_attach_state(struct script_state *st)
 		sd->st = st;
 		sd->npc_id = st->oid;
 		sd->npc_item_flag = st->npc_item_flag; //Load default
-		sd->state.disable_atcommand_on_npc = (pc_has_permission(sd, PC_PERM_ENABLE_COMMAND) == false);
+		sd->state.disable_atcommand_on_npc = (battle_config.atcommand_disable_npc && !pc_has_permission(sd, PC_PERM_ENABLE_COMMAND));
 #ifdef SECURE_NPCTIMEOUT
 		if(sd->npc_idle_timer == INVALID_TIMER)
 			sd->npc_idle_timer = add_timer(gettick() + SECURE_NPCTIMEOUT_INTERVAL * 1000, npc_secure_timeout_timer, sd->bl.id, 0);
@@ -4522,10 +4522,14 @@ BUILDIN_FUNC(mes)
 /// next;
 BUILDIN_FUNC(next)
 {
-	TBL_PC *sd = script_rid2sd(st);
+	TBL_PC *sd;
 
-	if( !sd )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
+	if( !st->mes_active ) {
+		ShowWarning("buildin_next: There is no mes active.\n");
+		return 1;
+	}
 #ifdef SECURE_NPCTIMEOUT
 	sd->npc_idle_type = NPCT_WAIT;
 #endif
@@ -4539,10 +4543,14 @@ BUILDIN_FUNC(next)
 /// clear;
 BUILDIN_FUNC(clear)
 {
-	TBL_PC *sd = script_rid2sd(st);
+	TBL_PC *sd;
 
-	if( !sd )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
+	if( !st->mes_active ) {
+		ShowWarning("buildin_next: There is no mes active.\n");
+		return 1;
+	}
 	clif_scriptclear(sd, st->oid);
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -4553,15 +4561,14 @@ BUILDIN_FUNC(clear)
 /// close;
 BUILDIN_FUNC(close)
 {
-	TBL_PC *sd = script_rid2sd(st);
+	TBL_PC *sd;
 
-	if( !sd )
+	if( !(sd = script_rid2sd(st)) )
 		return 0;
 	if( !st->mes_active ) {
-		TBL_NPC *nd = map_id2nd(st->oid);
-
 		st->state = END; //Keep backwards compatibility
-		ShowWarning("Incorrect use of 'close' command! (source:%s / path:%s)\n",(nd ? nd->name : "Unknown"),(nd ? nd->path : "Unknown"));
+		ShowWarning("Incorrect use of 'close' command!\n");
+		script_reportsrc(st);
 	} else {
 		st->state = CLOSE;
 		st->mes_active = 0;
@@ -17518,7 +17525,7 @@ BUILDIN_FUNC(setunitdata)
 	data = script_getdata(st,4);
 	get_val(st,data);
 
-	if( type == 5 && data_isstring(data) )
+	if( (type == UMOB_MAPID || type == UHOM_MAPID || type == UPET_MAPID || type == UMER_MAPID || type == UELE_MAPID || type == UNPC_MAPID) && data_isstring(data) )
 		mapname = conv_str(st,data);
 	else if( data_isint(data) )
 		value = conv_num(st,data);
@@ -17555,10 +17562,10 @@ BUILDIN_FUNC(setunitdata)
 					break;
 			}
 			switch( type ) {
-				case UMOB_SIZE: md->base_status->size = (unsigned char)value; calc_status = true; break;
+				case UMOB_SIZE: md->status.size = md->base_status->size = (unsigned char)value; break;
 				case UMOB_LEVEL: md->level = (unsigned short)value; break;
-				case UMOB_HP: status_set_hp(bl, (unsigned int)value, 0); clif_name_area(bl); break;
-				case UMOB_MAXHP: status_set_hp(bl, (unsigned int)value, 0); status_set_maxhp(bl, (unsigned int)value, 0); clif_name_area(bl); break;
+				case UMOB_HP: md->base_status->hp = (unsigned int)value; status_set_hp(bl, (unsigned int)value, 0); clif_name_area(bl); break;
+				case UMOB_MAXHP: md->base_status->hp = md->base_status->max_hp = (unsigned int)value; status_set_maxhp(bl, (unsigned int)value, 0); clif_name_area(bl); break;
 				case UMOB_MASTERAID: md->master_id = value; break;
 				case UMOB_MAPID: if( mapname ) value = map_mapname2mapid(mapname); unit_warp(bl, (short)value, 0, 0, CLR_TELEPORT); break;
 				case UMOB_X: if( !unit_walktoxy(bl, (short)value, md->bl.y, 2) ) unit_movepos(bl, (short)value, md->bl.y, 0, 0); break;
@@ -17613,7 +17620,7 @@ BUILDIN_FUNC(setunitdata)
 				case UMOB_FLEE: md->base_status->flee = (short)value; calc_status = true; break;
 				case UMOB_PDODGE: md->base_status->flee2 = (short)value; calc_status = true; break;
 				case UMOB_CRIT: md->base_status->cri = (short)value; calc_status = true; break;
-				case UMOB_RACE: md->base_status->race = (unsigned char)value; calc_status = true; break;
+				case UMOB_RACE: md->status.race = md->base_status->race = (unsigned char)value; break;
 				case UMOB_ELETYPE: md->base_status->def_ele = (unsigned char)value; calc_status = true; break;
 				case UMOB_ELELEVEL: md->base_status->ele_lv = (unsigned char)value; calc_status = true; break;
 				case UMOB_AMOTION: md->base_status->amotion = (short)value; calc_status = true; break;
@@ -17630,12 +17637,12 @@ BUILDIN_FUNC(setunitdata)
 				return 1;
 			}
 			switch( type ) {
-				case UHOM_SIZE: hd->base_status.size = (unsigned char)value; calc_status = true; break;
+				case UHOM_SIZE: hd->battle_status.size = hd->base_status.size = (unsigned char)value; break;
 				case UHOM_LEVEL: hd->homunculus.level = (unsigned short)value; break;
-				case UHOM_HP: status_set_hp(bl, (unsigned int)value, 0); break;
-				case UHOM_MAXHP: status_set_hp(bl, (unsigned int)value, 0); status_set_maxhp(bl, (unsigned int)value, 0); break;
-				case UHOM_SP: status_set_sp(bl, (unsigned int)value, 0); break;
-				case UHOM_MAXSP: status_set_sp(bl, (unsigned int)value, 0); status_set_maxsp(bl, (unsigned int)value, 0); break;
+				case UHOM_HP: hd->base_status.hp = (unsigned int)value; status_set_hp(bl, (unsigned int)value, 0); break;
+				case UHOM_MAXHP: hd->base_status.hp = hd->base_status.max_hp = (unsigned int)value; status_set_maxhp(bl, (unsigned int)value, 0); break;
+				case UHOM_SP: hd->base_status.sp = (unsigned int)value; status_set_sp(bl, (unsigned int)value, 0); break;
+				case UHOM_MAXSP: hd->base_status.sp = hd->base_status.max_sp = (unsigned int)value; status_set_maxsp(bl, (unsigned int)value, 0); break;
 				case UHOM_MASTERCID: hd->homunculus.char_id = (uint32)value; break;
 				case UHOM_MAPID: if( mapname ) value = map_mapname2mapid(mapname); unit_warp(bl, (short)value, 0, 0, CLR_TELEPORT); break;
 				case UHOM_X: if( !unit_walktoxy(bl, (short)value, hd->bl.y, 2) ) unit_movepos(bl, (short)value, hd->bl.y, 0, 0); break;
@@ -17663,7 +17670,7 @@ BUILDIN_FUNC(setunitdata)
 				case UHOM_FLEE: hd->base_status.flee = (short)value; calc_status = true; break;
 				case UHOM_PDODGE: hd->base_status.flee2 = (short)value; calc_status = true; break;
 				case UHOM_CRIT: hd->base_status.cri = (short)value; calc_status = true; break;
-				case UHOM_RACE: hd->base_status.race = (unsigned char)value; calc_status = true; break;
+				case UHOM_RACE: hd->battle_status.race = hd->base_status.race = (unsigned char)value; break;
 				case UHOM_ELETYPE: hd->base_status.def_ele = (unsigned char)value; calc_status = true; break;
 				case UHOM_ELELEVEL: hd->base_status.ele_lv = (unsigned char)value; calc_status = true; break;
 				case UHOM_AMOTION: hd->base_status.amotion = (short)value; calc_status = true; break;
@@ -17682,8 +17689,8 @@ BUILDIN_FUNC(setunitdata)
 			switch( type ) {
 				case UPET_SIZE: pd->status.size = (unsigned char)value; break;
 				case UPET_LEVEL: pd->pet.level = (unsigned short)value; break;
-				case UPET_HP: status_set_hp(bl, (unsigned int)value, 0); break;
-				case UPET_MAXHP: status_set_hp(bl, (unsigned int)value, 0); status_set_maxhp(bl, (unsigned int)value, 0); break;
+				case UPET_HP: pd->status.hp = pd->status.max_hp = (unsigned int)value; status_set_hp(bl, (unsigned int)value, 0); break;
+				case UPET_MAXHP: pd->status.hp = pd->status.max_hp = (unsigned int)value; status_set_maxhp(bl, (unsigned int)value, 0); break;
 				case UPET_MASTERAID: pd->pet.account_id = (unsigned int)value; break;
 				case UPET_MAPID: if( mapname ) value = map_mapname2mapid(mapname); unit_warp(bl, (short)value, 0, 0, CLR_TELEPORT); break;
 				case UPET_X: if( !unit_walktoxy(bl, (short)value, pd->bl.y, 2) ) unit_movepos(bl, (short)value, md->bl.y, 0, 0); break;
@@ -17728,9 +17735,9 @@ BUILDIN_FUNC(setunitdata)
 				return 1;
 			}
 			switch( type ) {
-				case UMER_SIZE: mc->base_status.size = (unsigned char)value; calc_status = true; break;
-				case UMER_HP: status_set_hp(bl, (unsigned int)value, 0); break;
-				case UMER_MAXHP: status_set_hp(bl, (unsigned int)value, 0); status_set_maxhp(bl, (unsigned int)value, 0); break;
+				case UMER_SIZE: mc->battle_status.size = mc->base_status.size = (unsigned char)value; break;
+				case UMER_HP: mc->base_status.hp = (unsigned int)value; status_set_hp(bl, (unsigned int)value, 0); break;
+				case UMER_MAXHP: mc->base_status.hp = mc->base_status.max_hp = (unsigned int)value; status_set_maxhp(bl, (unsigned int)value, 0); break;
 				case UMER_MASTERCID: mc->mercenary.char_id = (uint32)value; break;
 				case UMER_MAPID: if( mapname ) value = map_mapname2mapid(mapname); unit_warp(bl, (short)value, 0, 0, CLR_TELEPORT); break;
 				case UMER_X: if( !unit_walktoxy(bl, (short)value, mc->bl.y, 2) ) unit_movepos(bl, (short)value, mc->bl.y, 0, 0); break;
@@ -17758,7 +17765,7 @@ BUILDIN_FUNC(setunitdata)
 				case UMER_FLEE: mc->base_status.flee = (short)value; calc_status = true; break;
 				case UMER_PDODGE: mc->base_status.flee2 = (short)value; calc_status = true; break;
 				case UMER_CRIT: mc->base_status.cri = (short)value; calc_status = true; break;
-				case UMER_RACE: mc->base_status.race = (unsigned char)value; calc_status = true; break;
+				case UMER_RACE: mc->battle_status.race = mc->base_status.race = (unsigned char)value; break;
 				case UMER_ELETYPE: mc->base_status.def_ele = (unsigned char)value; calc_status = true; break;
 				case UMER_ELELEVEL: mc->base_status.ele_lv = (unsigned char)value; calc_status = true; break;
 				case UMER_AMOTION: mc->base_status.amotion = (short)value; calc_status = true; break;
@@ -17775,11 +17782,11 @@ BUILDIN_FUNC(setunitdata)
 				return 1;
 			}
 			switch( type ) {
-				case UELE_SIZE: ed->base_status.size = (unsigned char)value; calc_status = true; break;
-				case UELE_HP: status_set_hp(bl, (unsigned int)value, 0); break;
-				case UELE_MAXHP: status_set_hp(bl, (unsigned int)value, 0); status_set_maxhp(bl, (unsigned int)value, 0); break;
-				case UELE_SP: status_set_sp(bl, (unsigned int)value, 0); break;
-				case UELE_MAXSP: status_set_sp(bl, (unsigned int)value, 0); status_set_maxsp(bl, (unsigned int)value, 0); break;
+				case UELE_SIZE: ed->battle_status.size = ed->base_status.size = (unsigned char)value; break;
+				case UELE_HP: ed->base_status.hp = (unsigned int)value; status_set_hp(bl, (unsigned int)value, 0); break;
+				case UELE_MAXHP: ed->base_status.hp = ed->base_status.max_hp = (unsigned int)value; status_set_maxhp(bl, (unsigned int)value, 0); break;
+				case UELE_SP: ed->base_status.sp = (unsigned int)value; status_set_sp(bl, (unsigned int)value, 0); break;
+				case UELE_MAXSP: ed->base_status.sp = ed->base_status.max_sp = (unsigned int)value; status_set_maxsp(bl, (unsigned int)value, 0); break;
 				case UELE_MASTERCID: ed->elemental.char_id = (uint32)value; break;
 				case UELE_MAPID: if( mapname ) value = map_mapname2mapid(mapname); unit_warp(bl, (short)value, 0, 0, CLR_TELEPORT); break;
 				case UELE_X: if( !unit_walktoxy(bl, (short)value, ed->bl.y, 2) ) unit_movepos(bl, (short)value, ed->bl.y, 0, 0); break;
@@ -17806,7 +17813,7 @@ BUILDIN_FUNC(setunitdata)
 				case UELE_FLEE: ed->base_status.flee = (short)value; calc_status = true; break;
 				case UELE_PDODGE: ed->base_status.flee2 = (short)value; calc_status = true; break;
 				case UELE_CRIT: ed->base_status.cri = (short)value; calc_status = true; break;
-				case UELE_RACE: ed->base_status.race = (unsigned char)value; calc_status = true; break;
+				case UELE_RACE: ed->battle_status.race = ed->base_status.race = (unsigned char)value; break;
 				case UELE_ELETYPE: ed->base_status.def_ele = (unsigned char)value; calc_status = true; break;
 				case UELE_ELELEVEL: ed->base_status.ele_lv = (unsigned char)value; calc_status = true; break;
 				case UELE_AMOTION: ed->base_status.amotion = (short)value; calc_status = true; break;
@@ -17824,8 +17831,8 @@ BUILDIN_FUNC(setunitdata)
 			}
 			switch( type ) {
 				case UNPC_LEVEL: nd->level = (unsigned int)value; break;
-				case UNPC_HP: status_set_hp(bl, (unsigned int)value, 0); break;
-				case UNPC_MAXHP: status_set_hp(bl, (unsigned int)value, 0); status_set_maxhp(bl, (unsigned int)value, 0); break;
+				case UNPC_HP: nd->status.hp = (unsigned int)value; status_set_hp(bl, (unsigned int)value, 0); break;
+				case UNPC_MAXHP: nd->status.hp = nd->status.max_hp = (unsigned int)value; status_set_maxhp(bl, (unsigned int)value, 0); break;
 				case UNPC_MAPID: if( mapname ) value = map_mapname2mapid(mapname); unit_warp(bl, (short)value, 0, 0, CLR_TELEPORT); break;
 				case UNPC_X: if( !unit_walktoxy(bl, (short)value, nd->bl.y, 2) ) unit_movepos(bl, (short)value, nd->bl.x, 0, 0); break;
 				case UNPC_Y: if( !unit_walktoxy(bl, nd->bl.x, (short)value, 2) ) unit_movepos(bl, nd->bl.x, (short)value, 0, 0); break;

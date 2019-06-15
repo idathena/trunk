@@ -646,6 +646,7 @@ extern struct Battle_Config
 	int skill_eightpath_algorithm; //Official path algorithm
 	int can_damage_skill; //Which BL types can damage traps
 	int atcommand_levelup_events;
+	int atcommand_disable_npc;
 	int hide_fav_sell;
 	int death_penalty_maxlv;
 	int exp_cost_redemptio;

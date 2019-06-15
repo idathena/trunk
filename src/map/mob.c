@@ -2795,11 +2795,11 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			}
 		}
 		if(sd) {
-			struct mob_data *mission_md = map_id2md(sd->mission_mobid);
+			struct mob_db *mission_mdb = mob_db(sd->mission_mobid);
 
-			if(sd->mission_mobid == md->mob_id ||
-				(battle_config.taekwon_mission_mobname == 1 && status_get_race2(&md->bl) == RC2_GOBLIN && status_get_race2(&mission_md->bl) == RC2_GOBLIN && mission_md) ||
-				(battle_config.taekwon_mission_mobname == 2 && mob_is_samename(md, sd->mission_mobid)))
+			if(sd->mission_mobid == md->mob_id || (mission_mdb &&
+				((battle_config.taekwon_mission_mobname == 1 && status_get_race2(&md->bl) == RC2_GOBLIN && mission_mdb->race2 == RC2_GOBLIN) ||
+				(battle_config.taekwon_mission_mobname == 2 && !strcmp(mob_db(md->mob_id)->jname, mission_mdb->jname)))))
 			{ //TK_MISSION [Skotlex]
 				if(++sd->mission_count >= 100 && (temp = mob_get_random_id(MOBG_Taekwon_Mission, RMF_NONE, 0))) {
 					pc_addfame(sd, battle_config.fame_taekwon_mission);

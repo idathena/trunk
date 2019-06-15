@@ -435,6 +435,55 @@ unsigned short skill_dummy2skill_id(unsigned short skill_id) {
 	return skill_id;
 }
 
+/**
+ * Check skill unit maxcount
+ * @param src: Caster to check against
+ * @param x: X location of skill
+ * @param y: Y location of skill
+ * @param skill_id: Skill used
+ * @param skill_lv: Skill level used
+ * @param type: Type of unit to check against for battle_config checks
+ * @param display_failure: Display skill failure message
+ * @return True on skill cast success or false on failure
+ */
+bool skill_pos_maxcount_check(struct block_list *src, int16 x, int16 y, uint16 skill_id, uint16 skill_lv, enum bl_type type, bool display_failure) {
+	struct unit_data *ud = NULL;
+	struct map_session_data *sd = NULL;
+	int i, maxcount = 0;
+
+	if( !src )
+		return false;
+
+	ud = unit_bl2ud(src);
+	sd = map_id2sd(src->id);
+
+	if( !(type&battle_config.skill_reiteration) && skill_get_unit_flag(skill_id)&UF_NOREITERATION && skill_check_unit_range(src, x, y, skill_id, skill_lv) ) {
+		if( sd && display_failure )
+			clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+		return false;
+	}
+
+	if( type&battle_config.skill_nofootset && skill_get_unit_flag(skill_id)&UF_NOFOOTSET && skill_check_unit_range2(src, x, y, skill_id, skill_lv, false) ) {
+		if( sd && display_failure )
+			clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+		return false;
+	}
+
+	if( type&battle_config.land_skill_limit && (maxcount = skill_get_maxcount(skill_id, skill_lv)) > 0 ) {
+		for( i = 0; i < MAX_SKILLUNITGROUP && ud->skillunit[i] && maxcount; i++ ) {
+			if( ud->skillunit[i]->skill_id == skill_id )
+				maxcount--;
+		}
+		if( !maxcount ) {
+			if( sd && display_failure )
+				clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+			return false;
+		}
+	}
+
+	return true;
+}
+
 /** Calculates heal value of skill's effect
  * @param src
  * @param target
@@ -461,7 +510,7 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 			hp = 30 + skill_lv * 5 + status_get_vit(src) / 2;
 #endif
 			if( sd )
-				hp += 5 * pc_checkskill(sd,BA_MUSICALLESSON);
+				hp += 5 * pc_checkskill(sd, BA_MUSICALLESSON);
 			break;
 		case PR_SANCTUARY:
 			hp = (skill_lv > 6) ? 777 : skill_lv * 100;
@@ -610,8 +659,9 @@ static char skill_isCopyable(struct map_session_data *sd, uint16 skill_id) {
 	return 0;
 }
 
-/** Check if the skill is ok to cast and when.
- * Done before check_condition_begin, requirement
+/**
+ * Check if the skill is ok to cast and when.
+ * Done before skill_check_condition_castbegin, requirement
  * @param skill_id: Skill ID that casted
  * @param sd: Player who casted
  * @return true: Skill cannot be used, false: otherwise
@@ -1832,7 +1882,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	if( sd && !status_isdead(bl) && sd->autospell[0].id ) {
 		struct block_list *tbl;
 		struct unit_data *ud;
-		short id_, lv_;
+		uint16 as_skill_id, as_skill_lv;
 		int i, type;
 
 		for( i = 0; i < ARRAYLENGTH(sd->autospell) && sd->autospell[i].id; i++ ) {
@@ -1841,19 +1891,19 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 				 ((sd->autospell[i].flag)&attack_type)&BF_SKILLMASK) )
 				continue; //One or more trigger conditions were not fulfilled
 
-			id_ = (sd->autospell[i].id > 0 ? sd->autospell[i].id : -sd->autospell[i].id);
+			as_skill_id = (sd->autospell[i].id > 0 ? sd->autospell[i].id : -sd->autospell[i].id);
 			sd->state.autocast = 1;
 
-			if( skill_isNotOk(id_,sd) ) {
+			if( skill_isNotOk(as_skill_id,sd) ) {
 				sd->state.autocast = 0;
 				continue;
 			}
 
 			sd->state.autocast = 0;
-			lv_ = (sd->autospell[i].lv ? sd->autospell[i].lv : 1);
+			as_skill_lv = (sd->autospell[i].lv ? sd->autospell[i].lv : 1);
 
-			if( lv_ < 0 )
-				lv_ = 1 + rnd()%(-lv_);
+			if( as_skill_lv < 0 )
+				as_skill_lv = 1 + rnd()%(-as_skill_lv);
 
 			rate = sd->autospell[i].rate;
 
@@ -1865,57 +1915,39 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 
 			tbl = (sd->autospell[i].id < 0 ? src : bl);
 
-			if( (type = skill_get_casttype(id_)) == CAST_GROUND ) {
-				int maxcount = 0;
-
-				if( !(BL_PC&battle_config.skill_reiteration) &&
-					skill_get_unit_flag(id_)&UF_NOREITERATION &&
-					skill_check_unit_range(src,tbl->x,tbl->y,id_,lv_) )
-					continue;
-				if( BL_PC&battle_config.skill_nofootset &&
-					skill_get_unit_flag(id_)&UF_NOFOOTSET &&
-					skill_check_unit_range2(src,tbl->x,tbl->y,id_,lv_,false) )
-					continue;
-				if( BL_PC&battle_config.land_skill_limit &&
-					(maxcount = skill_get_maxcount(id_,lv_)) > 0 ) {
-					int v;
-
-					for( v = 0; v < MAX_SKILLUNITGROUP && sd->ud.skillunit[v] && maxcount; v++ )
-						if( sd->ud.skillunit[v]->skill_id == id_ )
-							maxcount--;
-					if( !maxcount )
-						continue;
-				}
-			}
-
-			if( battle_config.autospell_check_range && !battle_check_range(src,tbl,skill_get_range2(src,id_,lv_,true)) )
+			if( (type = skill_get_casttype(as_skill_id)) == CAST_GROUND &&
+				!skill_pos_maxcount_check(src,tbl->x,tbl->y,as_skill_id,as_skill_lv,BL_PC,false) )
 				continue;
 
-			if( id_ == AS_SONICBLOW )
+			if( battle_config.autospell_check_range &&
+				!battle_check_range(src,tbl,skill_get_range2(src,as_skill_id,as_skill_lv,true)) )
+				continue;
+
+			if( as_skill_id == AS_SONICBLOW )
 				pc_stop_attack(sd); //Special case, Sonic Blow autospell should stop the player attacking
-			else if( id_ == PF_SPIDERWEB ) //Special case, due to its nature of coding
+			else if( as_skill_id == PF_SPIDERWEB ) //Special case, due to its nature of coding
 				type = CAST_GROUND;
 
 			sd->state.autocast = 1;
-			skill_consume_requirement(sd,id_,lv_,1);
-			skill_toggle_magicpower(src,id_);
+			skill_consume_requirement(sd,as_skill_id,as_skill_lv,1);
+			skill_toggle_magicpower(src,as_skill_id);
 
 			switch( type ) {
 				case CAST_GROUND:
-					skill_castend_pos2(src,tbl->x,tbl->y,id_,lv_,tick,0);
+					skill_castend_pos2(src,tbl->x,tbl->y,as_skill_id,as_skill_lv,tick,0);
 					break;
 				case CAST_NODAMAGE:
-					skill_castend_nodamage_id(src,tbl,id_,lv_,tick,0);
+					skill_castend_nodamage_id(src,tbl,as_skill_id,as_skill_lv,tick,0);
 					break;
 				case CAST_DAMAGE:
-					skill_castend_damage_id(src,tbl,id_,lv_,tick,0);
+					skill_castend_damage_id(src,tbl,as_skill_id,as_skill_lv,tick,0);
 					break;
 			}
 
 			sd->state.autocast = 0;
 
 			if( (ud = unit_bl2ud(src)) ) {
-				int delay = skill_delayfix(src,id_,lv_);
+				int delay = skill_delayfix(src,as_skill_id,as_skill_lvas_skill_lv);
 
 				if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
 					ud->canact_tick = max(tick + delay,ud->canact_tick);
@@ -1961,7 +1993,7 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 		return 0;
 
 	for( i = 0; i < ARRAYLENGTH(sd->autospell3) && sd->autospell3[i].flag; i++ ) {
-		short id, lv;
+		uint16 as_skill_id, as_skill_lv;
 		int type;
 
 		if( sd->autospell3[i].flag != skill_id )
@@ -1970,66 +2002,47 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 		if( sd->autospell3[i].lock )
 			continue; //Autospell already being executed
 
-		id = sd->autospell3[i].id;
+		as_skill_id = sd->autospell3[i].id;
 		sd->state.autocast = 1; //Set this to bypass sd->canskill_tick check
 
-		if( skill_isNotOk((id > 0 ? id : id * -1), sd) ) {
+		if( skill_isNotOk((as_skill_id > 0 ? as_skill_id : as_skill_id * -1), sd) ) {
 			sd->state.autocast = 0;
 			continue;
 		}
 
 		sd->state.autocast = 0;
 
-		if( id >= 0 && !bl )
+		if( as_skill_id >= 0 && !bl )
 			continue; //No target
 
 		if( rnd()%1000 >= sd->autospell3[i].rate )
 			continue;
 
-		lv = (sd->autospell3[i].lv ? sd->autospell3[i].lv : 1);
+		as_skill_lv = (sd->autospell3[i].lv ? sd->autospell3[i].lv : 1);
 
-		if( id < 0 ) {
+		if( as_skill_id < 0 ) {
 			tbl = &sd->bl;
-			id *= -1;
-			lv = 1 + rnd()%(-lv); //Random skill level
+			as_skill_id *= -1;
+			as_skill_lv = 1 + rnd()%(-as_skill_lv); //Random skill level
 		} else
 			tbl = bl;
 
-		if( (type = skill_get_casttype(id)) == CAST_GROUND ) {
-			int maxcount = 0;
+		if( (type = skill_get_casttype(as_skill_id)) == CAST_GROUND &&
+			!skill_pos_maxcount_check(&sd->bl,tbl->x,tbl->y,as_skill_id,as_skill_lv,BL_PC,false) )
+			continue;
 
-			if( !(BL_PC&battle_config.skill_reiteration) &&
-				skill_get_unit_flag(id)&UF_NOREITERATION &&
-				skill_check_unit_range(&sd->bl,tbl->x,tbl->y,id,lv) )
-				continue;
-			if( BL_PC&battle_config.skill_nofootset &&
-				skill_get_unit_flag(id)&UF_NOFOOTSET &&
-				skill_check_unit_range2(&sd->bl,tbl->x,tbl->y,id,lv,false) )
-				continue;
-			if( BL_PC&battle_config.land_skill_limit &&
-				(maxcount = skill_get_maxcount(id,lv)) > 0 ) {
-				int v;
-
-				for( v = 0; v < MAX_SKILLUNITGROUP && sd->ud.skillunit[v] && maxcount; v++ ) {
-					if( sd->ud.skillunit[v]->skill_id == id )
-						maxcount--;
-				}
-				if( !maxcount )
-					continue;
-			}
-		}
-
-		if( battle_config.autospell_check_range && !battle_check_range(&sd->bl,tbl,skill_get_range2(&sd->bl,id,lv,true)) )
+		if( battle_config.autospell_check_range &&
+			!battle_check_range(&sd->bl,tbl,skill_get_range2(&sd->bl,as_skill_id,as_skill_lv,true)) )
 			continue;
 
 		sd->state.autocast = 1;
 		sd->autospell3[i].lock = true;
-		skill_consume_requirement(sd,id,lv,1);
+		skill_consume_requirement(sd,as_skill_id,as_skill_lv,1);
 
 		switch( type ) {
-			case CAST_GROUND:   skill_castend_pos2(&sd->bl,tbl->x,tbl->y,id,lv,tick,0); break;
-			case CAST_NODAMAGE: skill_castend_nodamage_id(&sd->bl,tbl,id,lv,tick,0); break;
-			case CAST_DAMAGE:   skill_castend_damage_id(&sd->bl,tbl,id,lv,tick,0); break;
+			case CAST_GROUND:   skill_castend_pos2(&sd->bl,tbl->x,tbl->y,as_skill_id,as_skill_lv,tick,0); break;
+			case CAST_NODAMAGE: skill_castend_nodamage_id(&sd->bl,tbl,as_skill_id,as_skill_lv,tick,0); break;
+			case CAST_DAMAGE:   skill_castend_damage_id(&sd->bl,tbl,as_skill_id,as_skill_lv,tick,0); break;
 		}
 
 		sd->autospell3[i].lock = false;
@@ -2186,7 +2199,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 			struct block_list *tbl;
 			struct unit_data *ud;
 			int i, type;
-			short id, lv;
+			uint16 as_skill_id, as_skill_lv;
 
 			for(i = 0; i < ARRAYLENGTH(dstsd->autospell2) && dstsd->autospell2[i].id; i++) {
 				if(!(((dstsd->autospell2[i].flag)&attack_type)&BF_WEAPONMASK &&
@@ -2194,19 +2207,19 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 					 ((dstsd->autospell2[i].flag)&attack_type)&BF_SKILLMASK))
 					continue; //One or more trigger conditions were not fulfilled
 
-				id = (dstsd->autospell2[i].id > 0 ? dstsd->autospell2[i].id : -dstsd->autospell2[i].id);
+				as_skill_id = (dstsd->autospell2[i].id > 0 ? dstsd->autospell2[i].id : -dstsd->autospell2[i].id);
 				dstsd->state.autocast = 1;
 
-				if(skill_isNotOk(id,dstsd)) {
+				if(skill_isNotOk(as_skill_id,dstsd)) {
 					dstsd->state.autocast = 0;
 					continue;
 				}
 
 				dstsd->state.autocast = 0;
-				lv = (dstsd->autospell2[i].lv ? dstsd->autospell2[i].lv : 1);
+				as_skill_lv = (dstsd->autospell2[i].lv ? dstsd->autospell2[i].lv : 1);
 
-				if(lv < 0)
-					lv = 1 + rnd()%(-lv);
+				if(as_skill_lv < 0)
+					as_skill_lv = 1 + rnd()%(-as_skill_lv);
 
 				rate = dstsd->autospell2[i].rate;
 
@@ -2218,52 +2231,33 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 
 				tbl = (dstsd->autospell2[i].id < 0 ? bl : src);
 
-				if((type = skill_get_casttype(id)) == CAST_GROUND) {
-					int maxcount = 0;
+				if((type = skill_get_casttype(as_skill_id)) == CAST_GROUND &&
+					!skill_pos_maxcount_check(bl,tbl->x,tbl->y,as_skill_id,as_skill_lv,BL_PC,false))
+					continue;
 
-					if(!(BL_PC&battle_config.skill_reiteration) &&
-						skill_get_unit_flag(id)&UF_NOREITERATION &&
-						skill_check_unit_range(bl,tbl->x,tbl->y,id,lv))
-						continue;
-					if(BL_PC&battle_config.skill_nofootset &&
-						skill_get_unit_flag(id)&UF_NOFOOTSET &&
-						skill_check_unit_range2(bl,tbl->x,tbl->y,id,lv,false))
-						continue;
-					if(BL_PC&battle_config.land_skill_limit &&
-						(maxcount = skill_get_maxcount(id,lv)) > 0) {
-						int v;
-
-						for(v = 0; v < MAX_SKILLUNITGROUP && dstsd->ud.skillunit[v] && maxcount; v++) {
-							if(dstsd->ud.skillunit[v]->skill_id == id)
-								maxcount--;
-						}
-						if(!maxcount)
-							continue;
-					}
-				}
-
-				if(battle_config.autospell_check_range && !battle_check_range(bl,tbl,skill_get_range2(bl,id,lv,true)))
+				if(battle_config.autospell_check_range &&
+					!battle_check_range(bl,tbl,skill_get_range2(bl,as_skill_id,as_skill_lv,true)))
 					continue;
 
 				dstsd->state.autocast = 1;
-				skill_consume_requirement(dstsd,id,lv,1);
+				skill_consume_requirement(dstsd,as_skill_id,as_skill_lv,1);
 
 				switch(type) {
 					case CAST_GROUND:
-						skill_castend_pos2(bl,tbl->x,tbl->y,id,lv,tick,0);
+						skill_castend_pos2(bl,tbl->x,tbl->y,as_skill_id,as_skill_lv,tick,0);
 						break;
 					case CAST_NODAMAGE:
-						skill_castend_nodamage_id(bl,tbl,id,lv,tick,0);
+						skill_castend_nodamage_id(bl,tbl,as_skill_id,as_skill_lv,tick,0);
 						break;
 					case CAST_DAMAGE:
-						skill_castend_damage_id(bl,tbl,id,lv,tick,0);
+						skill_castend_damage_id(bl,tbl,as_skill_id,as_skill_lv,tick,0);
 						break;
 				}
 
 				dstsd->state.autocast = 0;
 
 				if((ud = unit_bl2ud(bl))) {
-					int delay = skill_delayfix(bl,id,lv);
+					int delay = skill_delayfix(bl,as_skill_id,as_skill_lv);
 
 					if(DIFF_TICK(ud->canact_tick, tick + delay) < 0) {
 						ud->canact_tick = max(tick + delay,ud->canact_tick);
@@ -11091,36 +11085,10 @@ TIMER_FUNC(skill_castend_pos)
 		status_calc_bl(src,SCB_SPEED|SCB_ASPD); //Restore original walk speed
 
 	do {
-		int maxcount = 0;
-
 		if( status_isdead(src) )
 			break;
-		if( !(src->type&battle_config.skill_reiteration) &&
-			skill_get_unit_flag(ud->skill_id)&UF_NOREITERATION &&
-			skill_check_unit_range(src,ud->skillx,ud->skilly,ud->skill_id,ud->skill_lv) )
-		{
-			if( sd )
-				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0,0);
+		if( !skill_pos_maxcount_check(src,ud->skillx,ud->skilly,ud->skill_id,ud->skill_lv,src->type,true) )
 			break;
-		}
-		if( src->type&battle_config.skill_nofootset &&
-			skill_get_unit_flag(ud->skill_id)&UF_NOFOOTSET &&
-			skill_check_unit_range2(src,ud->skillx,ud->skilly,ud->skill_id,ud->skill_lv,false) )
-		{
-			if( sd )
-				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_POS,0,0);
-			break;
-		}
-		if( src->type&battle_config.land_skill_limit && (maxcount = skill_get_maxcount(ud->skill_id,ud->skill_lv)) > 0 ) {
-			for( i = 0; i < MAX_SKILLUNITGROUP && ud->skillunit[i] && maxcount; i++ )
-				if( ud->skillunit[i]->skill_id == ud->skill_id )
-					maxcount--;
-			if( !maxcount ) {
-				if( sd )
-					clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_SUMMON,0,0);
-				break;
-			}
-		}
 		if( sc && ((sc->data[SC_ASH] && rnd()%100 < 50) || (sc->data[SC_KYOMU] && rnd()%100 < 5 * sc->data[SC_KYOMU]->val1)) ) {
 			if( sd )
 				clif_skill_fail(sd,ud->skill_id,USESKILL_FAIL_LEVEL,0,0);

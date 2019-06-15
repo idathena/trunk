@@ -1922,6 +1922,9 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 		//if we cancel it from castend_pos, so it has to be here for it to not display the animation
 		if( skill_id == WZ_ICEWALL && map_getcell(src->m, skill_x, skill_y, CELL_CHKNOICEWALL) )
 			return 0;
+		//Special check for Firewall only
+		if( skill_id == MG_FIREWALL && !skill_pos_maxcount_check(src, skill_x, skill_y, skill_id, skill_lv, BL_PC, true) )
+			return 0;
 	}
 
 	if( !status_check_skilluse(src, NULL, skill_id, 0) )
