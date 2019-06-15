@@ -13,8 +13,10 @@
 //= 1.1 Added Izlude duplicates. [Euphy]
 //============================================================ 
 
-izlude,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz	100,3,3
-izlude_a,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz_a	100,3,3
-izlude_b,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz_b	100,3,3
-izlude_c,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz_c	100,3,3
-izlude_d,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz_d	100,3,3
+izlude,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz	4W_SAILOR,3,3
+izlude_a,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz_a	4W_SAILOR,3,3
+izlude_b,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz_b	4W_SAILOR,3,3
+izlude_c,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz_c	4W_SAILOR,3,3
+izlude_d,99,136,6	duplicate(PromotionalStaff_izlude)	Promotional Staff#iz_d	4W_SAILOR,3,3
+
+mid_camp,266,263,4	duplicate(Diego_ep13bs)	Diego#ep13bs	4_M_RACHMAN1

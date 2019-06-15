@@ -937,7 +937,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	struct status_data *sstatus, *tstatus;
 	struct status_change *sc, *tsc;
 	enum sc_type status;
-	uint16 id = 0, lv = 0;
+	uint8 lv = 0;
 	int rate;
 
 	nullpo_ret(src);
@@ -1800,8 +1800,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			}
 		}
 		//Acid Terror/Cart Termination/Tomahawk won't trigger breaking data
-		if( battle_config.equip_skill_break_rate &&
-			skill_id != AM_ACIDTERROR && skill_id != WS_CARTTERMINATION && skill_id != ITM_TOMAHAWK ) {
+		if( battle_config.equip_skill_break_rate && skill_id != AM_ACIDTERROR && skill_id != WS_CARTTERMINATION && skill_id != ITM_TOMAHAWK ) {
 			rate = 0;
 			if( sd )
 				rate += sd->bonus.break_weapon_rate;
@@ -1827,25 +1826,26 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		if( sd->norecover_state_race[tstatus->race].rate )
 			status_change_start(src,bl,SC_NORECOVER_STATE,sd->norecover_state_race[tstatus->race].rate,0,0,0,0,sd->norecover_state_race[tstatus->race].tick,SCFLAG_NONE);
 		if( sc ) {
+			uint16 as_skill_id;
+			uint16 as_skill_lv;
+
 			if( !status_isdead(bl) && rnd()%100 < status_get_job_lv(src) / 2 ) {
 				if( sc->data[SC_WILD_STORM_OPTION] )
-					id = sc->data[SC_WILD_STORM_OPTION]->val2;
+					as_skill_id = sc->data[SC_WILD_STORM_OPTION]->val2;
 				else if( sc->data[SC_UPHEAVAL_OPTION] )
-					id = sc->data[SC_UPHEAVAL_OPTION]->val2;
+					as_skill_id = sc->data[SC_UPHEAVAL_OPTION]->val2;
 				else if( sc->data[SC_TROPIC_OPTION] )
-					id = sc->data[SC_TROPIC_OPTION]->val3;
+					as_skill_id = sc->data[SC_TROPIC_OPTION]->val3;
 				else if( sc->data[SC_CHILLY_AIR_OPTION] )
-					id = sc->data[SC_CHILLY_AIR_OPTION]->val3;
-				else
-					id = 0;
-				if( id && status_charge(src,0,skill_get_sp(id,5)) ) {
+					as_skill_id = sc->data[SC_CHILLY_AIR_OPTION]->val3;
+				if( as_skill_id && status_charge(src,0,skill_get_sp(as_skill_id,5)) ) {
 					struct unit_data *ud = unit_bl2ud(src);
 
 					sd->state.autocast = 1;
-					skill_castend_damage_id(src,bl,id,5,tick,0);
+					skill_castend_damage_id(src,bl,as_skill_id,5,tick,0);
 					sd->state.autocast = 0;
 					if( ud ) { //Set can act delay [Skotlex]
-						int delay = skill_delayfix(src,id,5);
+						int delay = skill_delayfix(src,as_skill_id,5);
 
 						if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
 							ud->canact_tick = max(tick + delay,ud->canact_tick);
@@ -1856,16 +1856,16 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 				}
 			}
 			if( sc->data[SC_PYROCLASTIC] && rnd()%100 < sc->data[SC_PYROCLASTIC]->val3 ) {
-				id = BS_HAMMERFALL;
-				lv = sc->data[SC_PYROCLASTIC]->val1;
-				if( status_charge(src,0,skill_get_sp(id,lv)) ) {
+				as_skill_id = BS_HAMMERFALL;
+				as_skill_lv = sc->data[SC_PYROCLASTIC]->val1;
+				if( status_charge(src,0,skill_get_sp(as_skill_id,as_skill_lv)) ) {
 					struct unit_data *ud = unit_bl2ud(src);
 
 					sd->state.autocast = 1;
-					skill_castend_pos2(src,bl->x,bl->y,id,lv,tick,0);
+					skill_castend_pos2(src,bl->x,bl->y,as_skill_id,as_skill_lv,tick,0);
 					sd->state.autocast = 0;
 					if( ud ) {
-						int delay = skill_delayfix(src,id,lv);
+						int delay = skill_delayfix(src,as_skill_id,as_skill_lv);
 
 						if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
 							ud->canact_tick = max(tick + delay,ud->canact_tick);
@@ -1882,7 +1882,8 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	if( sd && !status_isdead(bl) && sd->autospell[0].id ) {
 		struct block_list *tbl;
 		struct unit_data *ud;
-		uint16 as_skill_id, as_skill_lv;
+		uint16 as_skill_id;
+		uint16 as_skill_lv;
 		int i, type;
 
 		for( i = 0; i < ARRAYLENGTH(sd->autospell) && sd->autospell[i].id; i++ ) {
@@ -1993,7 +1994,8 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 		return 0;
 
 	for( i = 0; i < ARRAYLENGTH(sd->autospell3) && sd->autospell3[i].flag; i++ ) {
-		uint16 as_skill_id, as_skill_lv;
+		uint16 as_skill_id;
+		uint16 as_skill_lv;
 		int type;
 
 		if( sd->autospell3[i].flag != skill_id )
@@ -2199,7 +2201,8 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 			struct block_list *tbl;
 			struct unit_data *ud;
 			int i, type;
-			uint16 as_skill_id, as_skill_lv;
+			uint16 as_skill_id;
+			uint16 as_skill_lv;
 
 			for(i = 0; i < ARRAYLENGTH(dstsd->autospell2) && dstsd->autospell2[i].id; i++) {
 				if(!(((dstsd->autospell2[i].flag)&attack_type)&BF_WEAPONMASK &&
