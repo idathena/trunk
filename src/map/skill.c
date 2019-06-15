@@ -1947,7 +1947,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			sd->state.autocast = 0;
 
 			if( (ud = unit_bl2ud(src)) ) {
-				int delay = skill_delayfix(src,as_skill_id,as_skill_lvas_skill_lv);
+				int delay = skill_delayfix(src,as_skill_id,as_skill_lv);
 
 				if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
 					ud->canact_tick = max(tick + delay,ud->canact_tick);
