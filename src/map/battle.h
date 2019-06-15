@@ -358,6 +358,8 @@ extern struct Battle_Config
 	int equip_self_break_rate; //Natural & Penalty skills break rate
 	int equip_skill_break_rate; //Offensive skills break rate
 	int multi_level_up;
+	int multi_level_up_base;
+	int multi_level_up_job;
 	int max_exp_gain_rate; //Max amount of exp bar % you can get in one go.
 	int pk_mode;
 	int pk_mode_mes;
@@ -644,6 +646,7 @@ extern struct Battle_Config
 	int skill_eightpath_algorithm; //Official path algorithm
 	int can_damage_skill; //Which BL types can damage traps
 	int atcommand_levelup_events;
+	int atcommand_disable_npc;
 	int hide_fav_sell;
 	int death_penalty_maxlv;
 	int exp_cost_redemptio;
@@ -679,6 +682,8 @@ extern struct Battle_Config
 	int rental_transaction;
 	int pet_walk_speed;
 	int feature_equipswitch;
+	int min_shop_buy;
+	int min_shop_sell;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

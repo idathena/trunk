@@ -3817,7 +3817,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				break;
 			ARR_FIND(0, ARRAYLENGTH(sd->skillcast), i, (!sd->skillcast[i].id || sd->skillcast[i].id == type2));
 			if(i == ARRAYLENGTH(sd->skillcast)) { //Better mention this so the array length can be updated [Skotlex]
-				ShowError("run_script: %s: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n",
+				ShowError("pc_bonus2: %s: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n",
 #ifndef RENEWAL_CAST
 				"SP_VARCASTRATE",
 #else
@@ -3839,7 +3839,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				break;
 			ARR_FIND(0, ARRAYLENGTH(sd->skillcast), i, (!sd->skillcast[i].id || sd->skillcast[i].id == type2));
 			if(i == ARRAYLENGTH(sd->skillcast)) {
-				ShowError("run_script: SP_VARCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillcast), type2, val);
+				ShowError("pc_bonus2: SP_VARCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillcast), type2, val);
 				break;
 			}
 			if(sd->skillcast[i].id == type2)
@@ -3855,7 +3855,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				break;
 			ARR_FIND(0, ARRAYLENGTH(sd->skillfixcastrate), i, (!sd->skillfixcastrate[i].id || sd->skillfixcastrate[i].id == type2));
 			if(i == ARRAYLENGTH(sd->skillfixcastrate)) {
-				ShowError("run_script: SP_FIXCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillfixcastrate), type2, val);
+				ShowError("pc_bonus2: SP_FIXCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillfixcastrate), type2, val);
 				break;
 			}
 			if(sd->skillfixcastrate[i].id == type2)
@@ -4583,10 +4583,8 @@ int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
 		rate1 = rate2;
 	if(rate1)
 		val = (int)((double)orig_value * (double)(100 - rate1) / 100.);
-	if(val < 0)
-		val = 0;
-	if(orig_value > 0 && val < 1)
-		val = 1;
+	if(val < battle_config.min_shop_buy)
+		val = battle_config.min_shop_buy;
 
 	return val;
 }
@@ -4603,10 +4601,8 @@ int pc_modifysellvalue(struct map_session_data *sd,int orig_value)
 		rate = 5 + lv * 2 - (lv == 10 ? 1 : 0);
 	if(rate)
 		val = (int)((double)orig_value * (double)(100 + rate) / 100.);
-	if(val < 0)
-		val = 0;
-	if(orig_value > 0 && val < 1)
-		val = 1;
+	if(val < battle_config.min_shop_sell)
+		val = battle_config.min_shop_sell;
 
 	return val;
 }
@@ -4749,10 +4745,10 @@ char pc_getzeny(struct map_session_data *sd, int zeny, enum e_log_pick_type type
 /**
  * Attempts to remove Cash Points from player
  * @param sd: Player
- * @param price: Points player has to pay
- * @param points: Points player has
+ * @param price: Total points (cash + kafra) the player has to pay
+ * @param points: Kafra points the player has to pay
  * @param type: Log type
- * @return -2: Paying negative points, -1: Not enough points, otherwise success (cash+points)
+ * @return -1: Not enough points, otherwise success (cash+points)
  */
 int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_type type)
 {
@@ -4760,16 +4756,7 @@ int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_ty
 
 	nullpo_retr(-1, sd);
 
-	points = cap_value(points, -MAX_ZENY, MAX_ZENY); //Prevent command UB
-	if( price < 0 || points < 0 ) {
-		ShowError("pc_paycash: Paying negative points (price=%d, points=%d, account_id=%d, char_id=%d).\n", price, points, sd->status.account_id, sd->status.char_id);
-		return -2;
-	}
-
-	if( points > price ) {
-		ShowWarning("pc_paycash: More kafra points provided than needed (price=%d, points=%d, account_id=%d, char_id=%d).\n", price, points, sd->status.account_id, sd->status.char_id);
-		points = price;
-	}
+	points = cap_value(points, 0, MAX_ZENY); //Prevent command UB
 
 	cash = price - points;
 	if( sd->cashPoints < cash || sd->kafraPoints < points ) {
@@ -4802,10 +4789,10 @@ int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_ty
 /**
  * Attempts to give Cash Points to player
  * @param sd: Player
- * @param cash: Cash player gets
- * @param points: Points player has
+ * @param cash: Cash points the player gets
+ * @param points: Kafra points the player gets
  * @param type: Log type
- * @return -2: Error, -1: Giving negative cash/points, otherwise success (cash or points)
+ * @return -1: Error, otherwise success (cash or points)
  */
 int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_type type)
 {
@@ -4813,26 +4800,22 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 
 	nullpo_retr(-1, sd);
 
-	cash = cap_value(cash, -MAX_ZENY, MAX_ZENY); //Prevent command UB
-	points = cap_value(points, -MAX_ZENY, MAX_ZENY); //Prevent command UB
+	cash = cap_value(cash, 0, MAX_ZENY); //Prevent command UB
+	points = cap_value(points, 0, MAX_ZENY); //Prevent command UB
+
 	if( cash > 0 ) {
 		if( cash > MAX_ZENY - sd->cashPoints ) {
 			ShowWarning("pc_getcash: Cash point overflow (cash=%d, have cash=%d, account_id=%d, char_id=%d).\n", cash, sd->cashPoints, sd->status.account_id, sd->status.char_id);
 			cash = MAX_ZENY - sd->cashPoints;
 		}
-
 		pc_setaccountreg(sd, CASHPOINT_VAR, sd->cashPoints + cash);
 		sd->cashPoints += cash;
 		log_cash(sd, type, LOG_CASH_TYPE_CASH, cash);
-
 		if( battle_config.cashshop_show_points ) {
 			sprintf(output, msg_txt(505), cash, sd->cashPoints);
 			clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 		}
 		return cash;
-	} else if( cash < 0 ) {
-		ShowError("pc_getcash: Obtaining negative cash points (cash=%d, account_id=%d, char_id=%d).\n", cash, sd->status.account_id, sd->status.char_id);
-		return -1;
 	}
 
 	if( points > 0 ) {
@@ -4840,22 +4823,17 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 			ShowWarning("pc_getcash: Kafra point overflow (points=%d, have points=%d, account_id=%d, char_id=%d).\n", points, sd->kafraPoints, sd->status.account_id, sd->status.char_id);
 			points = MAX_ZENY - sd->kafraPoints;
 		}
-
 		pc_setaccountreg(sd, KAFRAPOINT_VAR, sd->kafraPoints + points);
 		sd->kafraPoints += points;
 		log_cash(sd, type, LOG_CASH_TYPE_KAFRA, points);
-
 		if( battle_config.cashshop_show_points ) {
 			sprintf(output, msg_txt(506), points, sd->kafraPoints);
 			clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 		}
 		return points;
-	} else if( points < 0 ) {
-		ShowError("pc_getcash: Obtaining negative kafra points (points=%d, account_id=%d, char_id=%d).\n", points, sd->status.account_id, sd->status.char_id);
-		return -1;
 	}
 
-	return -2; //Shouldn't happen but just in case
+	return -1; //Shouldn't happen but just in case
 }
 
 /**
@@ -5798,16 +5776,17 @@ enum e_setpos pc_setpos(struct map_session_data *sd, unsigned short mapindex, in
 	sd->state.changemap = (sd->mapindex != mapindex);
 	sd->state.warping = 1;
 
-	if( sd->status.party_id && map[sd->bl.m].instance_id && sd->state.changemap && !map[m].instance_id ) {
-		struct party_data *p;
-
-		if( (p = party_search(sd->status.party_id)) && p->instance_id )
-			instance_delusers(p->instance_id);
-	}
-
 	if( sd->state.changemap ) { // Misc map-changing settings
+		uint16 current_map_instance_id = map[sd->bl.m].instance_id;
+		uint16 new_map_instance_id = map[m].instance_id;
 		int i;
 
+		if( current_map_instance_id != new_map_instance_id ) {
+			if( current_map_instance_id )
+				instance_delusers(current_map_instance_id); // Update instance timer for the map on leave
+			if( new_map_instance_id )
+				instance_addusers(new_map_instance_id); // Update instance timer for the map on enter
+		}
 		sd->state.pmap = sd->bl.m;
 		if( sd->sc.count ) { // Cancel some map related stuff
 			if( sd->sc.data[SC_JAILED] )
@@ -6825,9 +6804,8 @@ int pc_checkbaselevelup(struct map_session_data *sd) {
 
 	do {
 		sd->status.base_exp -= next;
-		//Kyoki pointed out that the max overcarry exp is the exp needed for the previous level -1 [Skotlex]
-		if (!battle_config.multi_level_up && sd->status.base_exp > next - 1)
-			sd->status.base_exp = next - 1;
+		if ((!battle_config.multi_level_up || (battle_config.multi_level_up_base > 0 && sd->status.base_level >= battle_config.multi_level_up_base)) && sd->status.base_exp > next - 1)
+			sd->status.base_exp = next - 1; //Kyoki pointed out that the max overcarry exp is the exp needed for the previous level -1 [Skotlex]
 		next = pc_gets_status_point(sd->status.base_level);
 		sd->status.base_level++;
 		sd->status.status_point += next;
@@ -6893,9 +6871,8 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 
 	do {
 		sd->status.job_exp -= next;
-		//Kyoki pointed out that the max overcarry exp is the exp needed for the previous level -1 [Skotlex]
-		if (!battle_config.multi_level_up && sd->status.job_exp > next - 1)
-			sd->status.job_exp = next - 1;
+		if ((!battle_config.multi_level_up || (battle_config.multi_level_up_job > 0 && sd->status.job_level >= battle_config.multi_level_up_job)) && sd->status.job_exp > next - 1)
+			sd->status.job_exp = next - 1; //Kyoki pointed out that the max overcarry exp is the exp needed for the previous level -1 [Skotlex]
 		sd->status.job_level++;
 		sd->status.skill_point++;
 		if (pc_is_maxjoblv(sd)) {
@@ -7930,20 +7907,22 @@ void pc_respawn(struct map_session_data *sd, clr_type clrtype)
 {
 	if( !pc_isdead(sd) )
 		return; // Not applicable
+
 	if( sd->bg_id && bg_member_respawn(sd) )
 		return; // Member revived by battleground
 
 	pc_setstand(sd);
-	pc_setrestartvalue(sd,3);
+	pc_setrestartvalue(sd, 3);
+
 	if( pc_setpos(sd, sd->status.save_point.map, sd->status.save_point.x, sd->status.save_point.y, clrtype) != SETPOS_OK )
 		clif_resurrection(&sd->bl, 1); //If warping fails, send a normal stand up packet
 }
 
 static TIMER_FUNC(pc_respawn_timer)
 {
-	struct map_session_data *sd = map_id2sd(id);
+	struct map_session_data *sd = NULL;
 
-	if( sd != NULL ) {
+	if( (sd = map_id2sd(id)) ) {
 		sd->pvp_point = 0;
 		pc_respawn(sd,CLR_OUTSIGHT);
 	}
@@ -7969,7 +7948,7 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 
 	if( pc_issit(sd) ) {
 		pc_setstand(sd);
-		skill_sit(sd,0);
+		skill_sit(sd,false);
 	}
 
 	if( sd->progressbar.npc_id )
@@ -7994,10 +7973,12 @@ TIMER_FUNC(pc_close_npc_timer)
 	return 0;
 }
 
-/*
- * Method to properly close npc for player and clear anything related
- * @flag == 1 : produce close button
- * @flag == 2 : directly close it
+/**
+ * Method to properly close a NPC for player and clear anything related.
+ * @param sd: Player attached
+ * @param flag: Method of closure
+ *   1: Produce a close button and end the NPC
+ *   2: End the NPC (best for no dialog windows)
  */
 void pc_close_npc(struct map_session_data *sd, int flag) {
 	nullpo_retv(sd);
@@ -8365,7 +8346,7 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 		struct battleground_data *bg = bg_team_search(sd->bg_id);
 
 		if( bg && bg->mapindex > 0 ) { //Respawn by BG
-			add_timer(tick + 1000,pc_respawn_timer,sd->bl.id,0);
+			add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
 			return 1|8;
 		}
 	}
@@ -8456,7 +8437,13 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_COOKMASTERY:	val = sd->cook_mastery; break;
 		case SP_CRITICAL:	val = sd->battle_status.cri / 10; break;
 		case SP_ASPD:		val = (2000 - sd->battle_status.amotion) / 10; break;
-		case SP_BASE_ATK:	val = sd->battle_status.batk; break;
+		case SP_BASE_ATK:
+#ifdef RENEWAL
+			val = sd->bonus.eatk;
+#else
+			val = sd->battle_status.batk;
+#endif
+			break;
 		case SP_DEF1:		val = sd->battle_status.def; break;
 		case SP_DEF2:		val = sd->battle_status.def2; break;
 		case SP_MDEF1:		val = sd->battle_status.mdef; break;
@@ -9252,7 +9239,7 @@ void pc_changelook(struct map_session_data *sd, int type, int val)
 /*==========================================
  * Give an option (type) to player (sd) and display it to client
  *------------------------------------------*/
-void pc_setoption(struct map_session_data *sd,int type)
+void pc_setoption(struct map_session_data *sd, int type)
 {
 	int p_type, new_look = 0;
 
@@ -9302,20 +9289,19 @@ void pc_setoption(struct map_session_data *sd,int type)
 		status_calc_pc(sd,SCO_NONE);
 	}
 
-	if (type&OPTION_MADOGEAR && !(p_type&OPTION_MADOGEAR)) {
+	if (type&OPTION_MADOGEAR && !(p_type&OPTION_MADOGEAR)) { //Madogear ON
+		static const sc_type scs[] = { SC_MAXIMIZEPOWER,SC_OVERTHRUST,SC_WEAPONPERFECTION,SC_ADRENALINE,SC_CARTBOOST,SC_MELTDOWN,SC_MAXOVERTHRUST };
+		uint8 i;
+
 		status_calc_pc(sd,SCO_NONE);
-		status_change_end(&sd->bl,SC_MAXIMIZEPOWER,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_OVERTHRUST,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_WEAPONPERFECTION,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_ADRENALINE,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_CARTBOOST,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MELTDOWN,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_MAXOVERTHRUST,INVALID_TIMER);
-		status_change_end(&sd->bl,SC_LOUD,INVALID_TIMER);
+		for (i = 0; i < ARRAYLENGTH(scs); i++) {
+			int skill_id = status_sc2skill(scs[i]);
+
+			if (!(skill_get_inf3(skill_id)&INF3_USABLE_MADO))
+				status_change_end(&sd->bl,scs[i],INVALID_TIMER);
+		}
 		pc_bonus_script_clear(sd,BSF_REM_ON_MADOGEAR);
-		if (sd->equip_index[EQI_AMMO] > 0)
-			pc_unequipitem(sd,sd->equip_index[EQI_AMMO],2);
-	} else if (!(type&OPTION_MADOGEAR) && (p_type&OPTION_MADOGEAR)) {
+	} else if (!(type&OPTION_MADOGEAR) && (p_type&OPTION_MADOGEAR)) { //Madogear OFF
 		status_calc_pc(sd,SCO_NONE);
 		status_change_end(&sd->bl,SC_SHAPESHIFT,INVALID_TIMER);
 		status_change_end(&sd->bl,SC_HOVERING,INVALID_TIMER);
@@ -9338,7 +9324,7 @@ void pc_setoption(struct map_session_data *sd,int type)
 	if (sd->disguise || !new_look)
 		return; //Disguises break sprite changes
 
-	if (new_look < 0) { //Restore normal look.
+	if (new_look < 0) { //Restore normal look
 		status_set_viewdata(&sd->bl, sd->status.class_);
 		new_look = sd->vd.class_;
 	}
@@ -10264,10 +10250,25 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 		sd->inventory.u.items_inventory[n].bound = (char)battle_config.default_bind_on_equip;
 		clif_notify_bindOnEquip(sd,n);
 	}
-	if( pos == EQP_ACC ) { //Accesories should only go in one of the two
+	if( pos == EQP_ACC ) { //Accessories should only go in one of the two
 		pos = (req_pos&EQP_ACC);
 		if( pos == EQP_ACC ) //User specified both slots
 			pos = (equip_index[EQI_ACC_R] >= 0 ? EQP_ACC_L : EQP_ACC_R);
+		//Accessories that have cards that force equip location
+		for( i = 0; i < sd->inventory_data[n]->slot; i++ ) {
+			struct item_data *card_data;
+
+			if( !sd->inventory.u.items_inventory[n].card[i] )
+				continue;
+			if( (card_data = itemdb_exists(sd->inventory.u.items_inventory[n].card[i])) ) {
+				int card_pos = card_data->equip;
+
+				if( card_pos == EQP_ACC_L || card_pos == EQP_ACC_R ) {
+					pos = card_pos; //Use the card's equip position
+					break;
+				}
+			}
+		}
 	}
 	if( pos == EQP_ARMS && id->equip == EQP_HAND_R ) { //Dual wield capable weapon
 		pos = (req_pos&EQP_ARMS);
@@ -11037,6 +11038,8 @@ static TIMER_FUNC(pc_autosave)
 
 	iter = mapit_getallusers();
 	for (sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter)) {
+		if (!sd->state.pc_loaded)
+			continue; //Player data hasn't fully loaded
 		if (sd->bl.id == last_save_id && save_flag != 1) {
 			save_flag = 1;
 			continue;
@@ -12657,7 +12660,7 @@ void pc_cell_basilica(struct map_session_data *sd) {
 		if (sd->sc.data[SC_BASILICA])
 			status_change_end(&sd->bl,SC_BASILICA,INVALID_TIMER);
 	} else if (!sd->sc.data[SC_BASILICA])
-		sc_start(&sd->bl,&sd->bl,SC_BASILICA,100,0,INVALID_TIMER);
+		sc_start(&sd->bl,&sd->bl,SC_BASILICA,100,0,-1);
 }
 
 /** [Cydh]

@@ -221,7 +221,7 @@ dali02,134,119,5	script	Historian Shep#tnm01	4_F_NOVICE,{
 
 dali02,137,121,3	script	Magic Scholar Artie#tnm	4_M_FAIRYKID6,{
 	.@party_id = getcharid(1);
-	if (.@party_id == 0) {
+	if (!.@party_id) {
 		mes "[Artie]";
 		mes "let's have fun since we just left bifrost.";
 		mes "No?";
@@ -232,7 +232,7 @@ dali02,137,121,3	script	Magic Scholar Artie#tnm	4_M_FAIRYKID6,{
 		mes "Don't take any unncessary risks, okay?";
 		close;
 	}
-	if (getpartyleader(.@party_id,2) != getcharid(0)) {
+	if (!is_party_leader()) {
 		mes "[Artie]";
 		mes "Bring the Expedition Chief.";
 		mes "Devil's Tower is not a place to visit alone.";
@@ -447,7 +447,7 @@ OnTimer26000:
 1@tnm1,57,112,5	script	Officer Heim#heim0	4_TOWER_05,{ end; }
 
 1@tnm1,56,110,3	script	Officer Heim#heim	4_TOWER_05,{
-	if (getpartyleader(getcharid(1),2) != getcharid(0)) {
+	if (!is_party_leader()) {
 		mes "[Officer Heim]";
 		mes "Who brought you all here?";
 		mes "I will talk to a representative.";
@@ -639,7 +639,7 @@ OnTouch:
 }
 
 1@tnm1,46,105,5	script	Lucile#tnm01	4_F_LUCILE,{
-	if (getpartyleader(getcharid(1),2) != getcharid(0)) {
+	if (!is_party_leader()) {
 		cutin "tnm_lucile01",2;
 		mes "[Lucile]";
 		mes "Who is in charge of the back-up team?";
@@ -831,7 +831,7 @@ OnMobDead:
 1@tnm1,138,96,3	script	Lucile#tnm02	4_F_LUCILE,{
 	if (isbegin_quest(7571) == 0)
 		end;
-	if (getpartyleader(getcharid(1),2) != getcharid(0)) {
+	if (!is_party_leader()) {
 		mes "You wave your hand in front of her but she doesn't react.";
 		close;
 	}
@@ -991,7 +991,7 @@ OnMobDead:
 1@tnm2,133,139,5	duplicate(Officer Heim#heim0)	Demon Morocc#tnm01	1916
 
 1@tnm2,144,137,3	script	Lucile#tnm03	4_F_LUCILE,{
-	if (getpartyleader(getcharid(1),2) != getcharid(0)) {
+	if (!is_party_leader()) {
 		mes "[Lucile]";
 		mes "I am talking to your party leader now so please step back for a while.";
 		cutin "tnm_lucile01",2;
@@ -1456,7 +1456,7 @@ OnTimer9000:
 		close;
 	}
 	if ('devil_tower == 10) {
-		if (getpartyleader(getcharid(1),2) != getcharid(0)) {
+		if (!is_party_leader()) {
 			mes "[Young Girl]";
 			mes "*weeping* The demons are so scary.";
 			close;
@@ -1813,7 +1813,7 @@ OnTimer55500:
 1@tnm3,137,65,3	script	Loki#tnmloki02	4_M_ROKI2,{
 	if ('devil_tower != 13)
 		end;
-	if (getpartyleader(getcharid(1),2) != getcharid(0)) {
+	if (!is_party_leader()) {
 		mes "[Loki]";
 		mes "I am talking to your boss.";
 		close;

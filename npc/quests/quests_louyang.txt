@@ -4642,8 +4642,8 @@ lou_in02,77,37,7	script	Hermit	824,{
 				mes "Your name is now engraved on this bloody pledge board. We will fight together to the death for Louyang's future!";
 				next;
 				getpartymember(getcharid(1));
-				set @partymember,$@partymembercount;
-				if (getpartyleader(getcharid(1),1) == getcharid(0) || !@partymember) {
+				set .@partymember,$@partymembercount;
+				if (is_party_leader() || !.@partymember) {
 					mes "[Sun Mao]";
 					mes "Now, the most important thing for our cause is to gather more recruits and increase our numbers. Please find others who will join us in our fight.";
 					next;
@@ -4666,7 +4666,7 @@ lou_in02,77,37,7	script	Hermit	824,{
 			mes "If you're a real tourist, you do not want to get involved in our business, one way or another.";
 			close;
 		}
-	} else if (getpartyleader(getcharid(1),2) == getcharid(0)) {
+	} else if (is_party_leader()) {
 		if (QL_REVOL == 9) {
 			mes "[Sun Mao]";
 			mes "Once again,";
@@ -4676,10 +4676,10 @@ lou_in02,77,37,7	script	Hermit	824,{
 			close;
 		}
 		getpartymember(getcharid(1));
-		set @partymember,$@partymembercount;
+		set .@partymember,$@partymembercount;
 		if (QL_REVOL < 8) {
-			if (@partymember == QL_REVOL +1) {
-				if (@partymember != 8) {
+			if (.@partymember == QL_REVOL +1) {
+				if (.@partymember != 8) {
 					set QL_REVOL,QL_REVOL +1;
 					mes "[Sun Mao]";
 					mes "Oh, you brought a new comrade! Welcome. Please help your friend understand our intentions before joining us.";
@@ -4757,7 +4757,7 @@ lou_in02,77,37,7	script	Hermit	824,{
 				mes "[Sun Mao]";
 				mes "There you go. Now, divide these materials equally among the eight of you. The eight of you must fully cooperate with each other, or our plan will fail. Understood?";
 				close;
-			} else if (@partymember < QL_REVOL +1) {
+			} else if (.@partymember < QL_REVOL +1) {
 				mes "[Sun Mao]";
 				switch(QL_REVOL) {
 				case 1:
@@ -4813,7 +4813,7 @@ lou_in02,77,37,7	script	Hermit	824,{
 				}
 			}
 		} else if (QL_REVOL == 8) {
-			if (@partymember == 8) {
+			if (.@partymember == 8) {
 				if (countitem(7204) > 7) {
 					mes "[Sun Mao]";
 					mes "Welcome back! I see that the mission has been successfully accomplished! Great work, men!";
@@ -4868,7 +4868,7 @@ lou_in02,77,37,7	script	Hermit	824,{
 lou_in01,43,147,3	script	Gunpowder Expert	750,{
 	if (ch_make == 0) {
 		getpartymember(getcharid(1));
-		set @partymember,$@partymembercount;
+		set .@partymember,$@partymembercount;
 		if (!QL_REVOL) {
 			mes "[Hao Chenryu]";
 			mes "Who...";
@@ -4877,7 +4877,7 @@ lou_in01,43,147,3	script	Gunpowder Expert	750,{
 			mes "[Hao Chenryu]";
 			mes "I only trust my comrades in the cause for Louyang, so leave me alone. Death before oppression! Freedom for Louyang!";
 			close;
-		} else if (@partymember != 8) {
+		} else if (.@partymember != 8) {
 			mes "[Hao Chenryu]";
 			mes "Mao told me that eight Rune-Midgardians";
 			mes "would be coming.";

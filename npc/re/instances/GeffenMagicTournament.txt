@@ -62,7 +62,7 @@ dali,98,141,3	script	Emmitt White	4_M_KHKYEL,{
 	.@party_id = getcharid(1);
 	getpartymember(.@party_id,0);
 	set .@GPPartySize,$@partymembercount;
-	if (!.@party_id || getcharid(3) != getpartyleader(.@party_id,1) || .@GPPartySize > 1) {
+	if (!is_party_leader() || .@GPPartySize > 1) {
 		mes .@n$;
 		mes "This is a solo instance. Please form a solo party before continuing.";
 		close;
@@ -70,7 +70,7 @@ dali,98,141,3	script	Emmitt White	4_M_KHKYEL,{
 	if (GeffenTournament < gettimetick(2)) { //23 Hour Cooldown
 		.@p_name$ = getpartyname(.@party_id);
 		.@md_name$ = "Geffen Magic Tournament";
-		if (!.@party_id || getcharid(0) != getpartyleader(.@party_id,2)) {
+		if (!is_party_leader()) {
 			mes .@n$;
 			mes "You need to be a party leader in order to continue.";
 			close;
@@ -138,7 +138,7 @@ dali,100,147,3	script	Dimensional Device#gefma	PORTAL,{
 		.@md_name$ = "Geffen Magic Tournament";
 		getpartymember(.@party_id,0);
 		set .@GPPartySize,$@partymembercount;
-		if (!.@party_id || getcharid(3) != getpartyleader(.@party_id,1) || .@GPPartySize > 1) {
+		if (!is_party_leader() || .@GPPartySize > 1) {
 			mes .@n$;
 			mes "This is a solo instance. Please form a solo party before continuing.";
 			close;

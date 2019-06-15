@@ -506,7 +506,7 @@ void vending_reopen(struct map_session_data *sd) {
 
 			if( at->sit ) {
 				pc_setsit(sd);
-				skill_sit(sd,1);
+				skill_sit(sd,true);
 				clif_sitting(&sd->bl);
 			}
 

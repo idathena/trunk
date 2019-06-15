@@ -95,6 +95,8 @@ enum item_itemid {
 	ITEMID_TAO_GUNKA_CARD = 4302,
 	ITEMID_PAINT_BRUSH = 6122,
 	ITEMID_MAGIC_GEAR_FUEL = 6146,
+	ITEMID_F_TOKEN_OF_SIEGFRIED = 6293,
+	ITEMID_E_TOKEN_OF_SIEGFRIED = 6316,
 	ITEMID_SCARLET_PTS = 6360,
 	ITEMID_INDIGO_PTS,
 	ITEMID_YELLOW_WISH_PTS,
@@ -450,60 +452,23 @@ struct item_data {
 };
 
 //Struct for item random option [Secret]
-struct s_random_opt_data
-{
+struct s_random_opt_data {
 	unsigned short id;
 	struct script_code *script;
 };
 
-//Enum for random option subgroups
-enum e_rdmopt_subgroup {
-	RDMOPTSG_Crimson_Weapon = 1,
-	RDMOPTSG_Vicious_Weapon_Group_1_Slot_1,
-	RDMOPTSG_Vicious_Weapon_Group_1_Slot_2,
-	RDMOPTSG_Vicious_Weapon_Group_1_Slot_3,
-	RDMOPTSG_Vicious_Weapon_Group_2_Slot_1,
-	RDMOPTSG_Vicious_Weapon_Group_2_Slot_2,
-	RDMOPTSG_Vicious_Weapon_Group_2_Slot_3,
-	RDMOPTSG_Vicious_Weapon_Group_3_Slot_1,
-	RDMOPTSG_Vicious_Weapon_Group_3_Slot_2,
-	RDMOPTSG_Vicious_Weapon_Group_3_Slot_3,
-	RDMOPTSG_Vicious_Weapon_Group_4_Slot_1,
-	RDMOPTSG_Vicious_Weapon_Group_4_Slot_2,
-	RDMOPTSG_Vicious_Weapon_Group_4_Slot_3,
-	RDMOPTSG_Vicious_Weapon_Group_5_Slot_1,
-	RDMOPTSG_Vicious_Weapon_Group_5_Slot_2,
-	RDMOPTSG_Vicious_Weapon_Group_5_Slot_3,
-};
-
-//Struct for random option subgroup entry
-struct s_random_opt_subgroup_entry {
-	short id;
+//Struct for random option group entry
+struct s_random_opt_group_entry {
+	uint16 id;
 	short min_val;
 	short max_val;
 };
 
-//Struct for random option subgroup
-struct s_random_opt_subgroup {
-	uint8 id;
-	struct s_random_opt_subgroup_entry *entries;
-	uint16 total;
-};
-
-//Enum for random option groups
-enum e_rdmopt_group {
-	RDMOPTG_Crimson_Weapon = 1,
-	RDMOPTG_Vicious_Weapon_Group_1,
-	RDMOPTG_Vicious_Weapon_Group_2,
-	RDMOPTG_Vicious_Weapon_Group_3,
-	RDMOPTG_Vicious_Weapon_Group_4,
-	RDMOPTG_Vicious_Weapon_Group_5,
-};
-
 //Struct for random option group
 struct s_random_opt_group {
-	uint8 id;
-	uint8 subgroup_id[MAX_ITEM_RDM_OPT];
+	uint16 id;
+	uint16 option_count[MAX_ITEM_RDM_OPT];
+	struct s_random_opt_group_entry *options[MAX_ITEM_RDM_OPT];
 	struct s_item_randomoption option[MAX_ITEM_RDM_OPT];
 };
 

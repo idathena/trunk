@@ -477,8 +477,8 @@ struct map_session_data {
 
 		short splash_range, splash_add_range;
 		short add_steal_rate;
-		short add_heal_rate, add_heal2_rate;
-		short sp_gain_value, hp_gain_value, magic_sp_gain_value, magic_hp_gain_value;
+		int add_heal_rate, add_heal2_rate;
+		int sp_gain_value, hp_gain_value, magic_sp_gain_value, magic_hp_gain_value;
 		short sp_vanish_rate, hp_vanish_rate, sp_vanish_per, hp_vanish_per;
 		unsigned short unbreakable;	//Chance to prevent ANY equipment breaking [celest]
 		unsigned short unbreakable_equip; //100% break resistance on certain equipment
@@ -1032,8 +1032,8 @@ uint64 pc_generate_unique_id(struct map_session_data *sd);
 int pc_bound_chk(TBL_PC *sd,enum bound_type type,int *idxlist);
 
 // Special Shop System
-int pc_paycash(struct map_session_data *sd,int price,int points,e_log_pick_type type);
-int pc_getcash(struct map_session_data *sd,int cash,int points,e_log_pick_type type);
+int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_type type);
+int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_type type);
 
 enum e_additem_result pc_cart_additem(struct map_session_data *sd, struct item *item, int amount, e_log_pick_type log_type);
 void pc_cart_delitem(struct map_session_data *sd, int n, int amount, int type, e_log_pick_type log_type);
@@ -1120,7 +1120,7 @@ void pc_heal(struct map_session_data *sd, unsigned int hp, unsigned int sp, int 
 int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fixed);
 int pc_percentheal(struct map_session_data *sd, int, int);
 bool pc_jobchange(struct map_session_data *sd, int job, char upper);
-void pc_setoption(struct map_session_data *, int);
+void pc_setoption(struct map_session_data *sd, int type);
 bool pc_setcart(struct map_session_data *sd, int type);
 void pc_setfalcon(struct map_session_data *sd, int flag);
 void pc_setriding(struct map_session_data *sd, int flag);

@@ -46,7 +46,7 @@ static const int packet_len_table[] = {
 	-1, 7,-1, 7, 14, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, //0x3860  Quests [Kevin] [Inkfish] / Achievements [Aleos]
 	-1, 3, 3, 0,  0, 0, 0, 0,  0, 0, 0, 0, -1, 3,  3, 0, //0x3870  Mercenaries [Zephyrus] / Elemental [pakpil]
 	12,-1, 7, 3,  0, 0, 0, 0,  0, 0,-1, 9, -1, 0,  0, 0, //0x3880  Pet System,  Storages
-	-1,-1, 7, 3,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, //0x3890  Homunculus [albator]
+	-1,-1, 7, 3, -1, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, //0x3890  Homunculus [albator] / Elemental [malufett]
 	-1,-1, 8, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0,  0, 0, //0x38a0  Clans
 };
 
@@ -3038,6 +3038,97 @@ int intif_parse_elemental_received(int fd)
 	return 1;
 }
 
+void intif_parse_elemental_sc_received(int fd)
+{
+#ifdef ENABLE_SC_SAVING
+	struct map_session_data *sd;
+	int ele_id, cid, i, count;
+
+	cid = RFIFOL(fd,4);
+	ele_id = RFIFOL(fd,8);
+
+	sd = map_charid2sd(cid);
+
+	if (!sd || (sd && sd->status.char_id != cid)) {
+		ShowError("intif_parse_elemental_sc_received: Player of CID %d not found!\n", cid);
+		return;
+	}
+
+	if (!sd->ed)
+		return;
+
+	if (sd->ed->elemental.elemental_id != ele_id) {
+		ShowError("intif_parse_elemental_sc_received: Receiving data for CID %d, ele_id does not matches (%d != %d)!\n", cid, sd->ed->elemental.elemental_id, ele_id);
+		return;
+	}
+
+	count = RFIFOW(fd,12); //sc count
+
+	for (i = 0; i < count; i++) {
+		struct status_change_data *data = (struct status_change_data *)RFIFOP(fd,14 + i * sizeof(struct status_change_data));
+
+		status_change_start(NULL, &sd->ed->bl, (sc_type)data->type, 10000,
+			data->val1, data->val2, data->val3, data->val4, data->tick, SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_LOADED|SCFLAG_FIXEDRATE);
+	}
+#endif
+	return;
+}
+
+int intif_elemental_sc_save(struct elemental_data *ed)
+{
+#ifdef ENABLE_SC_SAVING
+	int i, count = 0;
+	unsigned int tick;
+	struct status_change_data data;
+	struct status_change *sc = &ed->sc;
+	const struct TimerData *td;
+
+	if (CheckForCharServer())
+		return 0;
+
+	if (!ed->master)
+		return 0;
+
+	tick = gettick();
+
+	WFIFOHEAD(inter_fd,14 + SC_MAX * sizeof(struct status_change_data));
+	WFIFOW(inter_fd,0) = 0x307a;
+	WFIFOL(inter_fd,4) = ed->elemental.char_id;
+	WFIFOL(inter_fd,8) = ed->elemental.elemental_id;
+
+	for (i = 0; i < SC_MAX; i++) {
+		if (!sc->data[i])
+			continue;
+		if (sc->data[i]->timer != INVALID_TIMER) {
+			td = get_timer(sc->data[i]->timer);
+			if (!td || td->func != status_change_timer)
+				continue;
+			if (DIFF_TICK(td->tick, tick) > 0)
+				data.tick = DIFF_TICK(td->tick, tick);
+			else
+				data.tick = 0;
+		} else
+			data.tick = INVALID_TIMER;
+		data.type = i;
+		data.val1 = sc->data[i]->val1;
+		data.val2 = sc->data[i]->val2;
+		data.val3 = sc->data[i]->val3;
+		data.val4 = sc->data[i]->val4;
+		memcpy(WFIFOP(inter_fd,14 + count * sizeof(struct status_change_data)), &data, sizeof(struct status_change_data));
+		count++;
+	}
+
+	if (!count)
+		return 0;
+
+	WFIFOW(inter_fd,12) = count;
+	WFIFOW(inter_fd,2) = 14 + count * sizeof(struct status_change_data);
+	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
+#endif
+
+	return 0;
+}
+
 /**
  * Request to load elemental from char-serv
  * @param ele_id : elemental identification
@@ -3105,6 +3196,23 @@ int intif_elemental_save(struct s_elemental *ele)
 	memcpy(WFIFOP(inter_fd,4), ele, sizeof(struct s_elemental));
 	WFIFOSET(inter_fd,size);
 	return 1;
+}
+
+int intif_elemental_sc_load(int char_id, int ele_id)
+{
+	if (CheckForCharServer())
+		return 0;
+
+#ifdef ENABLE_SC_SAVING
+	WFIFOHEAD(inter_fd,10);
+	WFIFOW(inter_fd,0) = 0x307b;
+	WFIFOW(inter_fd,2) = 12;
+	WFIFOL(inter_fd,4) = char_id;
+	WFIFOL(inter_fd,8) = ele_id;
+	WFIFOSET(inter_fd,WFIFOW(inter_fd,2));
+#endif
+
+	return 0;
 }
 
 /**
@@ -3781,6 +3889,8 @@ int intif_parse(int fd)
 		case 0x3891:	intif_parse_RecvHomunculusData(fd); break;
 		case 0x3892:	intif_parse_SaveHomunculusOk(fd); break;
 		case 0x3893:	intif_parse_DeleteHomunculusOk(fd); break;
+
+		case 0x3894:	intif_parse_elemental_sc_received(fd); break;
 
 		//Clan system
 		case 0x38a0:	intif_parse_clans(fd); break;

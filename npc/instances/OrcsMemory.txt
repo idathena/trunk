@@ -1,18 +1,18 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Orc's Memory
-//===== By: ================================================== 
+//===== By: ==================================================
 //= L0ne_W0lf
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.7
 //===== Compatible With: ===================================== 
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Relive the memory of an orc.
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First version. [L0ne_W0lf]
 //= 1.1 First round of bugfixes. (bugreport:3928) [L0ne_W0lf]
-//=     Fixed some npcs calling wrong events. 
+//=     Fixed some npcs calling wrong events.
 //=     Fixed Depraved Orc Spirit spawn point
 //=     Fixed an NPC that was never being enabled.
 //= 1.1a Second round from bugreport. (bugreport:3928) [L0ne_W0lf]
@@ -31,7 +31,7 @@
 //= 1.6 Added 'instance_check_party' command to the script for proper checking if
 //=     the invoking party meets the requirements to join the Memorial Dungeon.
 //= 1.7 Instance system rewrite. [Euphy]
-//============================================================ 
+//============================================================
 
 // Entrance
 //============================================================
@@ -41,7 +41,6 @@ gef_fild10,242,202,0	script	Dimensional Gorge Piece	406,{
 		close;
 	}
 	set .@party_id,getcharid(1);
-	set .@ins_mas,getpartyleader(.@party_id,2);
 	set .@p_name$,getpartyname(.@party_id);
 	set .@md_name$,"Orc's Memory";
 	set .@orctime,checkquest(12059,PLAYTIME);
@@ -72,7 +71,7 @@ gef_fild10,242,202,0	script	Dimensional Gorge Piece	406,{
 			erasequest 12059;
 			close;
 		} else if (.@orctime == -1) {
-			if (getcharid(0) == .@ins_mas) {
+			if (is_party_leader()) {
 				mes "Party status confirmed. Would you like to book entrance to the "+.@md_name$+"?";
 				next;
 				set .@menu$,"Reserve the "+.@md_name$+":Enter the Dungeon:Cancel";
@@ -692,7 +691,8 @@ OnTimer23910:
 }
 
 2@orcs,26,164,0	script	Torch#1-1	844,{
-	if(getpartyleader(getcharid(1),2) != getcharid(0)) end;
+	if (!is_party_leader())
+		end;
 	progressbar "ffff00",5;
 	setarray .@id[0], atoi(charat(strnpcinfo(2),0)), atoi(charat(strnpcinfo(2),2));
 	if (.@id[1] == 4)

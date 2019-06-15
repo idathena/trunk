@@ -1,0 +1,15 @@
+//===== rAthena Script ======================================= 
+//= Prontera Town
+//===== By: ================================================== 
+//= exneval
+//===== Current Version: ===================================== 
+//= 1.0
+//===== Compatible With: ===================================== 
+//= rAthena SVN
+//===== Description: ========================================= 
+//= Contains duplicate NPCs from main script.
+//===== Additional Comments: ================================= 
+//= 1.0 Moved a Prontera guard to pre-re/re paths.
+//============================================================ 
+
+prontera,52,344,5	duplicate(prtguard)	Guard#pront	8W_SOLDIER

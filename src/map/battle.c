@@ -1393,7 +1393,10 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 #ifdef RENEWAL
 		if( (sce = sc->data[SC_RAID]) ) {
-			damage += damage * 20 / 100;
+			if( status_get_class_(bl) == CLASS_BOSS )
+				damage += damage * 10 / 100;
+			else
+				damage += damage * 20 / 100;
 			if( --(sce->val1) <= 0 )
 				status_change_end(bl,SC_RAID,INVALID_TIMER);
 		}
@@ -1881,12 +1884,6 @@ static int64 battle_calc_base_damage(struct block_list *src, struct status_data 
 		} else {
 			atkmin = watk->atk;
 			atkmax = watk->atk2;
-#ifdef RENEWAL
-			if(src->type == BL_MOB) {
-				atkmin = watk->atk * 80 / 100;
-				atkmax = watk->atk * 120 / 100;
-			}
-#endif
 		}
 		if(atkmin > atkmax)
 			atkmin = atkmax;
@@ -3609,7 +3606,14 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 				skillratio += 200 + 40 * skill_lv;
 			break;
 		case RG_RAID:
+#ifdef RENEWAL
+			if(status_get_class_(target) == CLASS_BOSS)
+				skillratio += 10 * skill_lv;
+			else
+				skillratio += 20 * skill_lv;
+#else
 			skillratio += 40 * skill_lv;
+#endif
 			break;
 		case RG_INTIMIDATE:
 			skillratio += 30 * skill_lv;
@@ -5998,11 +6002,13 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 					case NJ_BAKUENRYU:
 						skillratio += 50 + 150 * skill_lv;
 						if(sd && sd->charmball_type == CHARM_TYPE_FIRE && sd->charmball > 0)
-							skillratio += 45 * sd->charmball;
+							skillratio += 15 * sd->charmball;
 						break;
 					case NJ_HYOUSENSOU:
 #ifdef RENEWAL
 						skillratio -= 30;
+						if(tsc && tsc->data[SC_SUITON])
+							skillratio += 10 + 2 * skill_lv;
 #endif
 						if(sd && sd->charmball_type == CHARM_TYPE_WATER && sd->charmball > 0)
 							skillratio += 5 * sd->charmball;
@@ -7052,6 +7058,9 @@ int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, i
 	#define CAP_RDAMAGE(d) ( (d) = i64max((d),1) )
 #endif
 
+	if( sc && sc->data[SC_WHITEIMPRISON] )
+		return 0; //White Imprison does not reflect any damage
+
 	if( flag&BF_SHORT ) { //Bounces back part of the damage
 		if( !status_reflect && sd && sd->bonus.short_weapon_damage_return ) {
 			rdamage += damage * sd->bonus.short_weapon_damage_return / 100;
@@ -7454,8 +7463,15 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 			battle_consume_ammo(sd,0,0);
 	}
 
+	if (src->type == BL_ELEM && sc && sc->data[SC_EL_OFFENSIVE] && rnd_value(0,20000)%100 >= 75) {
+		struct elemental_data *ed = BL_CAST(BL_ELEM,src);
+
+		elemental_action(ed,target,tick);
+		return wd.dmg_lv;
+	}
+
 	if (target->type == BL_MOB) {
-		struct mob_data *md = BL_CAST(BL_MOB, target);
+		struct mob_data *md = BL_CAST(BL_MOB,target);
 
 		if (md) {
 			uint16 dmg_mod = md->db->dmg_mod;
@@ -8163,7 +8179,7 @@ static const struct _battle_data {
 	{ "enable_critical",                    &battle_config.enable_critical,                 BL_PC,  BL_NUL, BL_ALL,         },
 	{ "mob_critical_rate",                  &battle_config.mob_critical_rate,               100,    0,      INT_MAX,        },
 	{ "critical_rate",                      &battle_config.critical_rate,                   100,    0,      INT_MAX,        },
-	{ "enable_baseatk",                     &battle_config.enable_baseatk,                  BL_PC|BL_HOM, BL_NUL, BL_ALL,   },
+	{ "enable_baseatk",                     &battle_config.enable_baseatk,                  BL_CHAR|BL_NPC, BL_NUL, BL_ALL, },
 	{ "enable_perfect_flee",                &battle_config.enable_perfect_flee,             BL_PC|BL_PET, BL_NUL, BL_ALL,   },
 	{ "casting_rate",                       &battle_config.cast_rate,                       100,    0,      INT_MAX,        },
 	{ "delay_rate",                         &battle_config.delay_rate,                      100,    0,      INT_MAX,        },
@@ -8424,6 +8440,8 @@ static const struct _battle_data {
 	{ "pk_level_range",                     &battle_config.pk_level_range,                  0,      0,      INT_MAX,        },
 	{ "manner_system",                      &battle_config.manner_system,                   0xFFF,  0,      0xFFF,          },
 	{ "multi_level_up",                     &battle_config.multi_level_up,                  0,      0,      1,              },
+	{ "multi_level_up_base",                &battle_config.multi_level_up_base,             0,      0,      MAX_LEVEL,      },
+	{ "multi_level_up_job",                 &battle_config.multi_level_up_job,              0,      0,      MAX_LEVEL,      },
 	{ "max_exp_gain_rate",                  &battle_config.max_exp_gain_rate,               0,      0,      INT_MAX,        },
 	{ "backstab_bow_penalty",               &battle_config.backstab_bow_penalty,            0,      0,      1,              },
 	{ "night_at_start",                     &battle_config.night_at_start,                  0,      0,      1,              },
@@ -8665,6 +8683,7 @@ static const struct _battle_data {
 	{ "skill_eightpath_algorithm",          &battle_config.skill_eightpath_algorithm,       1,      0,      1,              },
 	{ "can_damage_skill",                   &battle_config.can_damage_skill,                1,      0,      BL_ALL,         },
 	{ "atcommand_levelup_events",           &battle_config.atcommand_levelup_events,        0,      0,      1,              },
+	{ "atcommand_disable_npc",              &battle_config.atcommand_disable_npc,           1,      0,      1,              },
 	{ "hide_fav_sell",                      &battle_config.hide_fav_sell,                   0,      0,      1,              },
 	{ "death_penalty_maxlv",                &battle_config.death_penalty_maxlv,             0,      0,      3,              },
 	{ "exp_cost_redemptio",                 &battle_config.exp_cost_redemptio,              1,      0,      100,            },
@@ -8700,6 +8719,8 @@ static const struct _battle_data {
 	{ "rental_transaction",                 &battle_config.rental_transaction,              1,      0,      1,              },
 	{ "pet_walk_speed",                     &battle_config.pet_walk_speed,                  1,      1,      3,              },
 	{ "feature.equipswitch",                &battle_config.feature_equipswitch,             1,      0,      1,              },
+	{ "min_shop_buy",                       &battle_config.min_shop_buy,                    1,      0,      INT_MAX,        },
+	{ "min_shop_sell",                      &battle_config.min_shop_sell,                   0,      0,      INT_MAX,        },
 
 #include "../custom/battle_config_init.inc"
 };

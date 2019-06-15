@@ -1,17 +1,17 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Horror Toy Factory
-//===== By: ================================================== 
+//===== By: ==================================================
 //= exneval
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.0
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Horror Toy Factory Instance
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First version.
-//============================================================ 
+//============================================================
 
 // Instance Creation :: in_xmas
 //============================================================
@@ -149,7 +149,6 @@ xmas,237,303,3	script	Catherine Jet Johnson	4_F_SKULL06GIRL,{
 		next;
 	}
 	set .@party_id,getcharid(1);
-	set .@ins_mas,getpartyleader(.@party_id,2);
 	set .@p_name$,getpartyname(.@party_id);
 	set .@p_reader$,strcharinfo(0);
 	set .@md_name$,"Horror Toy Factory";
@@ -159,7 +158,7 @@ xmas,237,303,3	script	Catherine Jet Johnson	4_F_SKULL06GIRL,{
 		close;
 	}
 	if (!.@xmas_time) {
-		if (getcharid(0) == .@ins_mas) {
+		if (is_party_leader()) {
 			if (select("Unlock "+.@md_name$+":Cancel") == 2)
 				close;
 			switch (instance_create(.@md_name$)) {
@@ -211,7 +210,6 @@ xmas,233,305,4	script	Factory Dim. Teleporter	PORTAL,{
 		close;
 	}
 	set .@party_id,getcharid(1);
-	set .@ins_mas,getpartyleader(.@party_id,2);
 	set .@p_name$,getpartyname(.@party_id);
 	set .@p_reader$,strcharinfo(0);
 	set .@md_name$,"Horror Toy Factory";
@@ -768,7 +766,7 @@ L_Socket:
 		mes "Please wait until the transformation is over, and don't do anything without wearing proper uniform.";
 		close;
 	}
-	if (getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if (!is_party_leader()) {
 		mes "[Catherine Jet Johnson]";
 		mes "Eh.. Give me a second. I am talking to the person in charge.";
 		mes "Please wait for a while.";
@@ -958,7 +956,7 @@ OnTimer1000:
 }
 
 1@xm_d,71,129,3	script	Coordinator#fac1bs	4_M_COOKIE,{
-	if (getcharid(0) != getpartyleader(getcharid(1),2))
+	if (!is_party_leader())
 		end;
 	if (getstatus(SC_MONSTER_TRANSFORM,1) == 1246) {
 		mes "[Coordinator]";
@@ -1107,7 +1105,7 @@ OnDisable:
 // Factory No.2.
 //============================================================
 1@xm_d,185,100,6	script	Catherine Jet Johnson#2	4_F_SKULL06GIRL,{
-	if (getcharid(0) != getpartyleader(getcharid(1),2)) {
+	if (!is_party_leader()) {
 		mes "[Catherine Jet Johnson]";
 		mes "Eh.. Give me a second. I am talking to the person in charge.";
 		mes "Please wait for a while.";

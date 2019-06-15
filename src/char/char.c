@@ -70,6 +70,7 @@ char mercenary_db[DB_NAME_LEN] = "mercenary";
 char mercenary_owner_db[DB_NAME_LEN] = "mercenary_owner";
 char ragsrvinfo_db[DB_NAME_LEN] = "ragsrvinfo";
 char elemental_db[DB_NAME_LEN] = "elemental";
+char elemental_scdata_db[DB_NAME_LEN] = "elemental_sc";
 char interreg_db[32] = "interreg";
 char skillcooldown_db[DB_NAME_LEN] = "skillcooldown";
 char bonus_script_db[DB_NAME_LEN] = "bonus_script";
@@ -121,8 +122,8 @@ int char_del_option =
 	;
 int char_del_restriction = CHAR_DEL_RESTRICT_ALL;
 
-int log_char = 1;	// Loggin char or not [devil]
-int log_inter = 1;	// Loggin inter or not [devil]
+int log_char = 1; // Loggin char or not [devil]
+int log_inter = 1; // Loggin inter or not [devil]
 
 // Advanced subnet check [LuzZza]
 struct s_subnet {
@@ -1148,7 +1149,7 @@ int mmo_char_tobuf(uint8 *buf, struct mmo_charstatus *p);
 
 //=====================================================================================================
 // Loads the basic character rooster for the given account. Returns total buffer used.
-int mmo_chars_fromsql(struct char_session_data *sd, uint8 *buf)
+int mmo_chars_fromsql(struct char_session_data *sd, uint8 *buf, uint8 *count)
 {
 	SqlStmt *stmt;
 	struct mmo_charstatus p;
@@ -1236,6 +1237,9 @@ int mmo_chars_fromsql(struct char_session_data *sd, uint8 *buf)
 		// Store the required info into the session
 		sd->char_moves[p.slot] = p.character_moves;
 	}
+
+	if( count )
+		*count = i;
 
 	memset(sd->new_name, 0, sizeof(sd->new_name));
 
@@ -2167,10 +2171,20 @@ void char_block_character(int fd, struct char_session_data *sd) {
 }
 
 void mmo_char_send099d(int fd, struct char_session_data *sd) {
+	uint8 count = 0;
+
 	WFIFOHEAD(fd,4 + MAX_CHARS * MAX_CHAR_BUF);
 	WFIFOW(fd,0) = 0x99d;
-	WFIFOW(fd,2) = mmo_chars_fromsql(sd,WFIFOP(fd,4)) + 4;
+	WFIFOW(fd,2) = mmo_chars_fromsql(sd,WFIFOP(fd,4),&count) + 4;
 	WFIFOSET(fd,WFIFOW(fd,2));
+	//This is something special Gravity came up with
+	//The client triggers some finalization code only if count is != 3
+	if( count == 3 ) {
+		WFIFOHEAD(fd,4);
+		WFIFOW(fd,0) = 0x99d;
+		WFIFOW(fd,2) = 4;
+		WFIFOSET(fd,4);
+	}
 }
 
 //struct PACKET_CH_CHARLIST_REQ {0x0 short PacketType}
@@ -2205,7 +2219,7 @@ int mmo_char_send006b(int fd, struct char_session_data *sd) {
 		/* this+0x14  char dummy2_endbilling[7] */
 #endif
 	memset(WFIFOP(fd,4 + offset), 0, 20); //Unknown bytes 4-24 7-27
-	j += mmo_chars_fromsql(sd,WFIFOP(fd,j));
+	j += mmo_chars_fromsql(sd,WFIFOP(fd,j),NULL);
 	WFIFOW(fd,2) = j; //Packet len
 	WFIFOSET(fd,j);
 
@@ -5832,6 +5846,8 @@ void sql_config_read(const char *cfgName)
 			safestrncpy(ragsrvinfo_db, w2,sizeof(ragsrvinfo_db));
 		else if(!strcmpi(w1, "elemental_db"))
 			safestrncpy(elemental_db, w2,sizeof(elemental_db));
+		else if(!strcmpi(w1, "elemental_scdata_db"))
+			safestrncpy(elemental_scdata_db, w2,sizeof(elemental_scdata_db));
 		else if(!strcmpi(w1, "interreg_db"))
 			safestrncpy(interreg_db, w2, sizeof(interreg_db));
 		else if(!strcmpi(w1, "skillcooldown_db"))
@@ -6000,7 +6016,7 @@ int char_config_read(const char *cfgName)
 		else if(strcmpi(w1, "char_server_type") == 0)
 			char_server_type = atoi(w2);
 		else if(strcmpi(w1, "char_new") == 0)
-			char_new = (bool)atoi(w2);
+			char_new = (bool)config_switch(w2);
 		else if(strcmpi(w1, "char_new_display") == 0)
 			char_new_display = atoi(w2);
 		else if(strcmpi(w1, "max_connect_user") == 0) {
@@ -6036,7 +6052,7 @@ int char_config_read(const char *cfgName)
 			char_config_split_startitem(w1, w2, start_items_doram);
 #endif
 		else if(strcmpi(w1,"log_char") == 0) //Log char or not [devil]
-			log_char = atoi(w2);
+			log_char = config_switch(w2);
 		else if(strcmpi(w1, "unknown_char_name") == 0) {
 			safestrncpy(unknown_char_name, w2, sizeof(unknown_char_name));
 			unknown_char_name[NAME_LENGTH-1] = '\0';
@@ -6216,9 +6232,9 @@ int do_init(int argc, char **argv)
 	start_point[0].y = MAP_DEFAULT_Y;
 
 #if PACKETVER >= 20151104
-	start_point_doram[0].map = mapindex_name2id(MAP_DEFAULT_NAME);
-	start_point_doram[0].x = MAP_DEFAULT_X;
-	start_point_doram[0].y = MAP_DEFAULT_Y;
+	start_point_doram[0].map = mapindex_name2id(MAP_DORAM_DEFAULT_NAME);
+	start_point_doram[0].x = MAP_DORAM_DEFAULT_X;
+	start_point_doram[0].y = MAP_DORAM_DEFAULT_Y;
 #endif
 
 	start_items[0].nameid = 1201;

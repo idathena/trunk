@@ -44,16 +44,16 @@ dali02,142,81,3	script	Dimensional Device#air1	PORTAL,{
 		mes "^ff0000Users below level 125 cannot enter this dungeon^000000";
 		close;
 	}
-	if (.@party_id < 1) {
+	if (!.@party_id) {
 		mes "^ff0000To enter, you must create or join a party of 1 or more members.^000000";
 		close;
 	}
-	if (getcharid(0) != getpartyleader(.@party_id,2)) {
+	if (!is_party_leader()) {
 		mes "^ff0000This Memorial Dungeon is only for 1 person. Only the party leader can enter.^000000";
 		close;
 	}
 	.@s = select( "Power Up the Device", "Use the Device", "Cancel" );
-	if (getcharid(0) != getpartyleader(.@party_id,2)) {
+	if (!is_party_leader()) {
 		mes "^ff0000This Memorial Dungeon is only for 1 person. Only the party leader can enter.^000000";
 		close;
 	}
@@ -348,7 +348,7 @@ OnTimer500:
 	disablenpc instance_npcname("Iris#air1");
 	disablenpc instance_npcname("Chaos#air1");
 	mapannounce 'map_air1$, "Enemies have suddenly appeared and are attempting to destroy the Airship.", bc_map,"0xFFFF00";
-	
+
 	enablenpc instance_npcname("warp1#air1");
 	.@label$ = instance_npcname("#airshipputmob1") + "::OnMyMobDead";
 	monster 'map_air1$,113,66, "Beholder",3177,1, .@label$;

@@ -425,6 +425,7 @@ int skill_check_condition_char_sub(struct block_list *bl, va_list ap);
 void skill_consume_requirement(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv, short type);
 struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 int skill_disable_check(struct status_change *sc, uint16 skill_id);
+bool skill_pos_maxcount_check(struct block_list *src, int16 x, int16 y, uint16 skill_id, uint16 skill_lv, enum bl_type type, bool display_failure);
 
 int skill_check_pc_partner(struct map_session_data *sd, uint16 skill_id, uint16 *skill_lv, int range, int cast_flag);
 //Added skill_check_unit_cell
@@ -438,7 +439,7 @@ struct skill_unit_group *skill_check_dancing(struct block_list *src);
 //Cast canceled
 int skill_castcancel(struct block_list *bl,int type);
 
-int skill_sit(struct map_session_data *sd, int type);
+int skill_sit(struct map_session_data *sd, bool sitting);
 void skill_repairweapon(struct map_session_data *sd, int idx);
 void skill_identify(struct map_session_data *sd,int idx);
 void skill_weaponrefine(struct map_session_data *sd,int idx); //[Celest]
@@ -2096,7 +2097,6 @@ int skill_elementalanalysis(struct map_session_data *sd, int n, uint16 skill_lv,
 
 int skill_changematerial(struct map_session_data *sd, int n, unsigned short *item_list);
 int skill_akaitsuki_damage(struct block_list *src, struct block_list *bl, int damage, uint16 skill_id, uint16 skill_lv, unsigned int tick);
-int skill_get_elemental_type(uint16 skill_id, uint16 skill_lv);
 
 int skill_is_combo(uint16 skill_id);
 void skill_combo_toggle_inf(struct block_list *bl, uint16 skill_id, int inf);

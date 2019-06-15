@@ -18,7 +18,7 @@ enum E_CHARSERVER_ST
 
 struct mmo_charstatus;
 
-#define MAX_MAP_SERVERS 30
+#define MAX_MAP_SERVERS 2
 
 struct mmo_map_server {
 	int fd;
@@ -131,6 +131,7 @@ extern char mercenary_db[DB_NAME_LEN];
 extern char mercenary_owner_db[DB_NAME_LEN];
 extern char ragsrvinfo_db[DB_NAME_LEN];
 extern char elemental_db[DB_NAME_LEN];
+extern char elemental_scdata_db[DB_NAME_LEN];
 extern char interreg_db[32];
 extern char skillcooldown_db[DB_NAME_LEN];
 extern char bonus_script_db[DB_NAME_LEN];

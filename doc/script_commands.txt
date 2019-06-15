@@ -1,4 +1,4 @@
-Ôªø//===== rAthena Documentation ================================
+//===== rAthena Documentation ================================
 //= rAthena Script Commands
 //===== By: ==================================================
 //= rAthena Dev Team
@@ -1452,7 +1452,7 @@ with other command, such as "if", but often used on its own.
 Label:
 	mes "This will be seen";
 
-Note by FlavioJS: goto's are "evil" and should be avoided if possible (√≤_√≥)
+Note by FlavioJS: goto's are "evil" and should be avoided if possible
 
 ---------------------------------------
 
@@ -3400,6 +3400,13 @@ Example 2:
 
 This function will return the character ID number of the guild master of the 
 guild specified by the ID. 0 if the character is not a guild master of any guild.
+
+---------------------------------------
+
+*is_guild_leader({<guild ID>})
+
+This command will return true if the player attached to the script is the leader
+of his/her guild, or, if a guild ID is specified, of that guild.
 
 ---------------------------------------
 
@@ -5456,6 +5463,8 @@ Example:
 
 These commands toggle the ability to use atcommand while interacting with an NPC.
 
+The default setting, 'atcommand_disable_npc', is defined in 'conf/battle/gm.conf'.
+
 ---------------------------------------
 //
 4,1.- End of item-related commands
@@ -7349,7 +7358,7 @@ returns a guild id:
 // This will change the emblem on the flag to that of the guild that owns
 // "guildcastle"
 
-    flagemblem GetCastleData("guildcastle",1);
+    flagemblem getcastledata("guildcastle",1);
 
 ---------------------------------------
 
@@ -7538,13 +7547,14 @@ This command will display a picture, usually an NPC illustration, also called
 cutin, for the currently attached client. The position parameter determines the
 placement of the illustration and takes following values:
 
-    0 - bottom left corner 
-    1 - bottom middle 
-    2 - bottom right corner 
-    3 - middle of screen in a movable window with an empty title bar 
-    4 - middle of screen without the window header, but still movable 
+    0   bottom left corner
+    1   bottom middle
+    2   bottom right corner
+    3   middle of screen in a movable window with an empty title bar
+    4   middle of screen without the window header, but still movable
+    255 clear all displayed cutins
 
-The picture is read from data\texture\Ïú†Ï†ÄÏù∏ÌÑ∞ÌéòÏù¥Ïä§\illust, from both the GRF archive
+The picture is read from data\texture\¿Ø¿˙¿Œ≈Õ∆‰¿ÃΩ∫\illust, from both the GRF archive
 and data folder, and is required to be a bitmap. The file extension .bmp can be
 omitted. Magenta color (#ff00ff) is considered transparent. There is no limit
 placed on the size of the illustrations by the client, although loading of large
@@ -7703,6 +7713,28 @@ and attempt to execute a source-defined command.
 
 The three .@atcmd_***** variables will NOT be set when invoking script-bound atcommands
 in this way.
+
+---------------------------------------
+
+*camerainfo <range>,<rotation>,<latitude>{,<char id>};
+
+This command will update the client's camera information with the given values where
+the client can be the attached character or the player given by the char id parameter.
+Note: This requires 2016-05-25aRagexeRE or newer.
+
+The values given will be divided by 100 and transmitted as floating-point number.
+
+	range		The zoomfactor of the camera.
+				Default: 230000 (230.0) when fully zoomed in
+				Maximum: 400000 (400.0) when fully zoomed out
+
+	rotation	The rotation of the camera.
+				Default: 0 (0.0) when no rotation is applied
+				Maximum: 360000 (360.0 degree) when fully rotated
+
+	latitude	The angle of the camera.
+				Default: -50000 (-50.0)
+				Maximum: -75000 (-75.0)
 
 ---------------------------------------
 \\
@@ -8080,7 +8112,6 @@ Parameter (indexes) for elementals are:
 	UELE_X
 	UELE_Y
 	UELE_LIFETIME
-	UELE_MODE
 	UELE_SPEED
 	UELE_LOOKDIR
 	UELE_CANMOVETICK
@@ -9858,6 +9889,13 @@ Possible types are:
 
 If retrieval fails (leader not found or party does not exist), this function
 returns "null" instead of the character name, and -1 for the other types.
+
+---------------------------------------
+
+*is_party_leader({<party ID>})
+
+This command will return true if the player attached to the script is the leader
+of his/her party, or, if a party ID is specified, of that party.
 
 ---------------------------------------
 

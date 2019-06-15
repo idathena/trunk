@@ -3809,7 +3809,6 @@ ACMD_FUNC(reload)
 	} else if (strstr(command, "skilldb") || strncmp(message, "skilldb", 4) == 0) {
 		skill_reload();
 		hom_reload_skill();
-		reload_elemental_skilldb();
 		mercenary_read_skilldb();
 		clif_displaymessage(fd, msg_txt(99)); // Skill database has been reloaded.
 	} else if (strstr(command, "atcommand") || strncmp(message, "atcommand", 4) == 0) {
@@ -3895,8 +3894,10 @@ ACMD_FUNC(reload)
 		//atcommand_broadcast( fd, sd, "@broadcast", "You will feel a bit of lag at this point !" );
 
 		iter = mapit_getallusers();
-		for( pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter) )
-			pc_close_npc(pl_sd,2);
+		for( pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter) ) {
+			pc_close_npc(pl_sd, 1);
+			clif_cutin(pl_sd, "", 255);
+		}
 		mapit_free(iter);
 
 		flush_fifos();
@@ -7183,15 +7184,9 @@ ACMD_FUNC(mobinfo)
 			mob->status.vit, mob->status.int_, mob->status.dex, mob->status.luk);
 		clif_displaymessage(fd, atcmd_output);
 
-#ifdef RENEWAL
-		sprintf(atcmd_output, msg_txt(534), // ATK:%d~%d MATK:%d~%d Range:%d~%d~%d Size:%s Race:%s Class:%s Element:%s (Lv:%d)
-			MOB_ATK1(mob), MOB_ATK2(mob), MOB_MATK1(mob), MOB_MATK2(mob), mob->status.rhw.range,
-#else
-		sprintf(atcmd_output, msg_txt(1244), // ATK:%d~%d Range:%d~%d~%d Size:%s Race:%s Class:%s Element:%s (Lv:%d)
-			mob->status.rhw.atk, mob->status.rhw.atk2, mob->status.rhw.range,
-#endif
-			mob->range2 , mob->range3, msize[mob->status.size],
-			mrace[mob->status.race], mclass[mob->status.class_], melement[mob->status.def_ele], mob->status.ele_lv);
+		sprintf(atcmd_output, msg_txt(1244), // ATK:%d~%d MATK:%d~%d Range:%d~%d~%d Size:%s Race:%s Class:%s Element:%s (Lv:%d)
+			MOB_ATK1(mob), MOB_ATK2(mob), MOB_MATK1(mob), MOB_MATK2(mob), mob->status.rhw.range, mob->range2 , mob->range3,
+			msize[mob->status.size], mrace[mob->status.race], mclass[mob->status.class_], melement[mob->status.def_ele], mob->status.ele_lv);
 		clif_displaymessage(fd, atcmd_output);
 
 		// Drops
@@ -7570,7 +7565,7 @@ ACMD_FUNC(hominfo)
 	clif_displaymessage(fd, atcmd_output);
 
 	snprintf(atcmd_output, sizeof(atcmd_output), msg_txt(1263), // ATK: %d - MATK: %d~%d
-		status->rhw.atk2 + status->batk, status->matk_min, status->matk_max);
+		status->batk + status->rhw.atk2, status->matk_min, status->matk_max);
 	clif_displaymessage(fd, atcmd_output);
 
 	snprintf(atcmd_output, sizeof(atcmd_output), msg_txt(1264), // Hungry: %d - Intimacy: %u
@@ -8448,8 +8443,7 @@ ACMD_FUNC(cash)
 			if( -value > sd->cashPoints ) //By command, if cash < value, force it to remove all
 				value = -sd->cashPoints;
 			if( (ret = pc_paycash(sd, -value, 0, LOG_TYPE_COMMAND)) >= 0 ) {
-				// If this option is set, the message is already sent by pc function
-				if( !battle_config.cashshop_show_points ) {
+				if( !battle_config.cashshop_show_points ) { // If this option is set, the message is already sent by pc function
 					sprintf(output, msg_txt(410), ret, sd->cashPoints); // Removed %d cash points. Total %d points.
 					clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 				}
@@ -9738,12 +9732,11 @@ ACMD_FUNC(changedress) {
 	for( i = 0; i < ARRAYLENGTH(name2id); i++ ) {
 		if( sd->sc.data[name2id[i]] ) {
 			status_change_end(&sd->bl, name2id[i], INVALID_TIMER);
-			// You should only be able to have one - so we cancel here
-			return 0;
+			break; // You should only be able to have one - so we cancel here
 		}
 	}
 
-	return -1;
+	return 0;
 }
 
 /**
@@ -9981,6 +9974,33 @@ ACMD_FUNC(refineui)
 	clif_refineui_open(sd);
 	return 0;
 #endif
+}
+
+/**
+ * Displays camera information from the client.
+ * Usage: @camerainfo or client command /viewpointvalue or /setcamera on supported clients
+ */
+ACMD_FUNC(camerainfo)
+{
+	float range = 0.0f;
+	float rotation = 0.0f;
+	float latitude = 0.0f;
+
+	nullpo_retr(-1, sd);
+
+	if (!message || !*message) {
+		clif_camerainfo(sd, true, range, rotation, latitude);
+		return 0;
+	}
+
+	if (sscanf(message, "%f %f %f", &range, &rotation, &latitude) < 3) {
+		clif_displaymessage(fd, msg_txt(407)); // Usage: @camerainfo <range> <rotation> <latitude>
+		return -1;
+	}
+
+	clif_camerainfo(sd, false, range, rotation, latitude);
+
+	return 0;
 }
 
 #include "../custom/atcommand.inc"
@@ -10285,6 +10305,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEFR(limitedsale, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 		ACMD_DEFR(changedress, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 		ACMD_DEF(refineui),
+		ACMD_DEFR(camerainfo, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 	};
 	AtCommandInfo *atcommand;
 	int i;

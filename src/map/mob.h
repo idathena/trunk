@@ -38,7 +38,7 @@
 #define MOB_CLONE_END MAX_MOB_DB
 
 //Used to determine default enemy type of mobs (for use in eachinrange calls)
-#define DEFAULT_ENEMY_TYPE(md) (md->special_state.ai ? BL_CHAR : BL_MOB|BL_PC|BL_HOM|BL_MER)
+#define DEFAULT_ENEMY_TYPE(md) (md->special_state.ai ? BL_CHAR : BL_PC|BL_MOB|BL_HOM|BL_MER|BL_ELEM)
 
 /**
  * Mob constants
@@ -354,7 +354,6 @@ void mob_heal(struct mob_data *md, unsigned int heal);
 
 #define mob_stop_walking(md, type) unit_stop_walking(&(md)->bl, type)
 #define mob_stop_attack(md) unit_stop_attack(&(md)->bl)
-#define mob_is_samename(md, mid) (strcmp(mob_db((md)->mob_id)->jname, mob_db(mid)->jname) == 0)
 
 void mob_clear_spawninfo();
 void do_init_mob(void);

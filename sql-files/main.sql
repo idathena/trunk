@@ -251,14 +251,13 @@ INSERT INTO `clan_alliance` VALUES ('4', '1', '2', 'Arcwand Clan');
 CREATE TABLE IF NOT EXISTS `elemental` (
   `ele_id` int(11) unsigned NOT NULL auto_increment,
   `char_id` int(11) NOT NULL,
-  `class` mediumint(9) unsigned NOT NULL default '0',
-  `mode` int(11) unsigned NOT NULL default '1',
+  `kind` smallint(1) NOT NULL,
+  `scale` smallint(1) NOT NULL,
   `hp` int(11) unsigned NOT NULL default '0',
   `sp` int(11) unsigned NOT NULL default '0',
   `max_hp` int(11) unsigned NOT NULL default '0',
   `max_sp` int(11) unsigned NOT NULL default '0',
-  `atk1` mediumint(6) unsigned NOT NULL default '0',
-  `atk2` mediumint(6) unsigned NOT NULL default '0',
+  `atk` mediumint(6) unsigned NOT NULL default '0',
   `matk` mediumint(6) unsigned NOT NULL default '0',
   `aspd` smallint(4) unsigned NOT NULL default '0',
   `def` smallint(4) unsigned NOT NULL default '0',
@@ -267,6 +266,24 @@ CREATE TABLE IF NOT EXISTS `elemental` (
   `hit` smallint(4) unsigned NOT NULL default '0',
   `life_time` int(11) NOT NULL default '0',
   PRIMARY KEY  (`ele_id`)
+) ENGINE=MyISAM;
+
+--
+-- Table structure for table `elemental_sc`
+--
+
+CREATE TABLE IF NOT EXISTS `elemental_sc` (
+  `ele_id` int(11) unsigned NOT NULL,
+  `char_id` int(11) unsigned NOT NULL,
+  `type` smallint(11) unsigned NOT NULL,
+  `tick` int(11) NOT NULL,
+  `val1` int(11) NOT NULL default '0',
+  `val2` int(11) NOT NULL default '0',
+  `val3` int(11) NOT NULL default '0',
+  `val4` int(11) NOT NULL default '0',
+  KEY (`ele_id`),
+  KEY (`char_id`),
+  PRIMARY KEY (`ele_id`,`char_id`,`type`)
 ) ENGINE=MyISAM;
 
 --
@@ -690,7 +707,7 @@ CREATE TABLE IF NOT EXISTS `mail` (
   `dest_name` varchar(30) NOT NULL default '',
   `dest_id` int(11) unsigned NOT NULL default '0',
   `title` varchar(45) NOT NULL default '',
-  `message` varchar(255) NOT NULL default '',
+  `message` varchar(500) NOT NULL default '',
   `time` int(11) unsigned NOT NULL default '0',
   `status` tinyint(2) NOT NULL default '0',
   `zeny` int(11) unsigned NOT NULL default '0',
@@ -897,6 +914,8 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1537575360);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1558911240);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1559387580);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1559824920);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1560073680);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1560615000);
 
 --
 -- Table structure for table `sstatus`

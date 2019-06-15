@@ -90,18 +90,18 @@ static TBL_PC *guild_sd_check(int guild_id, int account_id, int char_id)
 }
 
  // Modified [Komurka]
-int guild_skill_get_max (int id)
+int guild_skill_get_max(int id)
 {
 	if (id < GD_SKILLBASE || id >= GD_SKILLBASE+MAX_GUILDSKILL)
 		return 0;
-	return guild_skill_tree[id-GD_SKILLBASE].max;
+	return guild_skill_tree[id - GD_SKILLBASE].max;
 }
 
 // Retrive skill_lv learned by guild
 int guild_checkskill(struct guild *g, int id) {
 	int idx = id - GD_SKILLBASE;
 
-	if (idx < 0 || idx >= MAX_GUILDSKILL)
+	if (!g || idx < 0 || idx >= MAX_GUILDSKILL)
 		return 0;
 	return g->skill[idx].lv;
 }
@@ -265,19 +265,19 @@ void guild_makemember(struct guild_member *m,struct map_session_data *sd)
 	nullpo_retv(sd);
 
 	memset(m,0,sizeof(struct guild_member));
-	m->account_id	=sd->status.account_id;
-	m->char_id		=sd->status.char_id;
-	m->hair			=sd->status.hair;
-	m->hair_color	=sd->status.hair_color;
-	m->gender		=sd->status.sex;
-	m->class_		=sd->status.class_;
-	m->lv			=sd->status.base_level;
-//	m->exp			=0;
-//	m->exp_payper	=0;
-	m->online		=1;
-	m->position		=MAX_GUILDPOSITION-1;
-	memcpy(m->name,sd->status.name,NAME_LENGTH);
-	return;
+	m->account_id = sd->status.account_id;
+	m->char_id = sd->status.char_id;
+	m->hair = sd->status.hair;
+	m->hair_color = sd->status.hair_color;
+	m->gender = sd->status.sex;
+	m->class_ = sd->status.class_;
+	m->lv = sd->status.base_level;
+	//m->exp = 0;
+	//m->exp_payper = 0;
+	m->online = 1;
+	m->position = MAX_GUILDPOSITION - 1;
+	safestrncpy(m->name,sd->status.name,NAME_LENGTH);
+	m->last_login = (uint32)time(NULL);
 }
 
 /**
@@ -412,7 +412,7 @@ int guild_created(int account_id,int guild_id)
 	return 0;
 }
 
-// Information request
+// Information request
 int guild_request_info(int guild_id)
 {
 	return intif_guild_request_info(guild_id);
@@ -484,7 +484,7 @@ int guild_check_member(struct guild *g)
 	return 0;
 }
 
-// Delete association with guild_id for all characters
+// Delete association with guild_id for all characters
 int guild_recv_noinfo(int guild_id)
 {
 	struct map_session_data *sd;
@@ -613,7 +613,7 @@ int guild_invite(struct map_session_data *sd, struct map_session_data *tsd) {
 			return 0;
 		}
 	}
-	
+
 	if( !tsd->fd ) { //You can't invite someone who has already disconnected
 		clif_guild_inviteack(sd,1);
 		return 0;

@@ -808,6 +808,13 @@ typedef enum sc_type {
 	SC_CHEERUP,
 	SC_DRESSUP,
 	SC_GUIDEDATTACK,
+
+	//Elemental Mode
+	SC_EL_PASSIVE,
+	SC_EL_DEFENSIVE,
+	SC_EL_OFFENSIVE,
+	SC_EL_WAIT,
+
 	SC_MAX, //Automatically updated max, used in for's to check we are within bounds
 } sc_type;
 
@@ -2100,7 +2107,7 @@ enum e_status_calc_weight_opt {
 	CALCWT_CARTSTATE = 0x4,	//Whether to check for cart state
 };
 
-//Define to determine who gets HP/SP consumed on doing skills/etc. [Skotlex]
+//Define to determine who gets HP/SP consumed on doing skills/etc [Skotlex]
 #define BL_CONSUME (BL_PC|BL_HOM|BL_MER|BL_ELEM)
 //Define to determine who has regen
 #define BL_REGEN (BL_PC|BL_HOM|BL_MER|BL_ELEM)
@@ -2496,15 +2503,18 @@ int status_check_visibility(struct block_list *src, struct block_list *target); 
 int status_change_spread(struct block_list *src, struct block_list *bl, bool type);
 
 #ifndef RENEWAL
-	unsigned short status_base_matk_min(const struct status_data *status);
+unsigned short status_base_matk_min(const struct status_data *status);
+unsigned short status_base_matk_max(const struct status_data *status);
 #else
-	unsigned short status_weapon_atk(struct weapon_atk *watk);
-	unsigned short status_base_matk(struct block_list *bl, const struct status_data *status, int level);
+unsigned short status_weapon_atk(struct weapon_atk *watk);
+unsigned short status_base_atk_min(struct block_list *bl, const struct status_data* status, int level);
+unsigned short status_base_atk_max(struct block_list *bl, const struct status_data* status, int level);
+unsigned short status_base_matk(struct block_list *bl, const struct status_data *status, int level);
 #endif
 
 unsigned short status_get_rand_matk(unsigned short matk_max, unsigned short matk_min);
-void status_get_matk_sub(struct block_list *bl, int flag, unsigned short *matk_max, unsigned short *matk_min);
-int status_get_matk(struct block_list *bl, int flag);
+void status_get_matk_sub(struct block_list *bl, unsigned short *matk_max, unsigned short *matk_min, uint8 flag);
+int status_get_matk(struct block_list *bl, uint8 flag);
 
 void status_readdb(void);
 void do_init_status(void);

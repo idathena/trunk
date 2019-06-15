@@ -1984,26 +1984,25 @@ static TIMER_FUNC(mob_ai_hard)
  */
 void mob_setdropitem_option(struct item *itm, struct s_mob_drop *mobdrop)
 {
-	struct s_random_opt_group *g = NULL;
+	struct s_random_opt_group *entry = NULL;
 	int i;
 
 	if (!itm || !mobdrop || !mobdrop->randomopt_group)
 		return;
-	if ((g = itemdb_randomopt_group_exists(mobdrop->randomopt_group))) {
+	if ((entry = itemdb_randomopt_group_exists(mobdrop->randomopt_group))) {
+		int count;
+
 		for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
-			struct s_random_opt_subgroup *sg = NULL;
+			count = entry->option_count[i];
+			if (count > 0) {
+				int j = rnd()%count;
 
-			if (!g->subgroup_id[i])
-				continue;
-			if ((sg = itemdb_randomopt_subgroup_exists(g->subgroup_id[i])) && sg->total) {
-				int j = rnd()%sg->total;
-
-				g->option[i].id = sg->entries[j].id;
-				g->option[i].value = rnd_value(sg->entries[j].min_val, sg->entries[j].max_val);
-				g->option[i].param = 0;
+				entry->option[i].id = entry->options[i][j].id;
+				entry->option[i].value = rnd_value(entry->options[i][j].min_val, entry->options[i][j].max_val);
+				entry->option[i].param = 0;
 			}
 		}
-		memcpy(&itm->option, &g->option, sizeof(itm->option));
+		memcpy(&itm->option, &entry->option, sizeof(itm->option));
 	}
 }
 
@@ -2796,11 +2795,11 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			}
 		}
 		if(sd) {
-			struct mob_data *mission_md = map_id2md(sd->mission_mobid);
+			struct mob_db *mission_mdb = mob_db(sd->mission_mobid);
 
-			if(sd->mission_mobid == md->mob_id ||
-				(battle_config.taekwon_mission_mobname == 1 && status_get_race2(&md->bl) == RC2_GOBLIN && status_get_race2(&mission_md->bl) == RC2_GOBLIN && mission_md) ||
-				(battle_config.taekwon_mission_mobname == 2 && mob_is_samename(md, sd->mission_mobid)))
+			if(sd->mission_mobid == md->mob_id || (mission_mdb &&
+				((battle_config.taekwon_mission_mobname == 1 && status_get_race2(&md->bl) == RC2_GOBLIN && mission_mdb->race2 == RC2_GOBLIN) ||
+				(battle_config.taekwon_mission_mobname == 2 && !strcmp(mob_db(md->mob_id)->jname, mission_mdb->jname)))))
 			{ //TK_MISSION [Skotlex]
 				if(++sd->mission_count >= 100 && (temp = mob_get_random_id(MOBG_Taekwon_Mission, RMF_NONE, 0))) {
 					pc_addfame(sd, battle_config.fame_taekwon_mission);
@@ -3823,14 +3822,14 @@ static int mob_makedummymobdb(int mob_id)
 	if (mob_dummy != NULL) {
 		if (mob_db(mob_id) == mob_dummy)
 			return 1; //Using the mob_dummy data already. [Skotlex]
-		if (mob_id > 0 && mob_id <= MAX_MOB_DB) { //Remove the mob data so that it uses the dummy data instead.
+		if (mob_id > 0 && mob_id <= MAX_MOB_DB) { //Remove the mob data so that it uses the dummy data instead
 			aFree(mob_db_data[mob_id]);
 			mob_db_data[mob_id] = NULL;
 		}
 		return 0;
 	}
-	//Initialize dummy data.
-	mob_dummy = (struct mob_db *)aCalloc(1,sizeof(struct mob_db)); //Initializing the dummy mob.
+	//Initialize dummy data
+	mob_dummy = (struct mob_db *)aCalloc(1,sizeof(struct mob_db)); //Initializing the dummy mob
 	sprintf(mob_dummy->sprite,"DUMMY");
 	sprintf(mob_dummy->name,"Dummy");
 	sprintf(mob_dummy->jname,"Dummy");
@@ -3985,7 +3984,7 @@ static void mob_readdb_libconfig_sub_drops(config_setting_t *t, struct mob_db *e
 		if (!config_setting_lookup_int(tt, "ItemId", &nameid))
 			continue;
 		if (!itemdb_exists(nameid)) {
-			ShowWarning("Monster \"%s\"(id: %d) is dropping an unknown item \"%s\"(Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
+			ShowWarning("mob_readdb_libconfig_sub_drops: Monster \"%s\"(id: %d) is dropping an unknown item \"%s\"(Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
 			entry->dropitem[i].nameid = 0;
 			entry->dropitem[i].p = 0;
 			entry->dropitem[i].steal_protected = 0;
@@ -4089,8 +4088,13 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 	if (config_setting_lookup_int(it, "ATK1", &i32) && i32 >= 0)
 		status->rhw.atk = i32;
 
-	if (config_setting_lookup_int(it, "ATK2", &i32) && i32 >= 0)
+	if (config_setting_lookup_int(it, "ATK2", &i32) && i32 >= 0) {
+#ifdef RENEWAL
+		status->rhw.matk = i32;
+#else
 		status->rhw.atk2 = i32;
+#endif
+	}
 
 	if (config_setting_lookup_int(it, "DEF", &i32) && i32 >= 0)
 		status->def = i32;
@@ -5160,6 +5164,7 @@ static void mob_load(void)
  */
 static int mob_reload_sub(struct mob_data *md, va_list args) {
 	md->db = mob_db(md->mob_id); //Relink the mob to the new database entry
+	status_calc_mob(md, SCO_NONE); //Recalculate the monster status based on the new data
 	if (!md->vd_changed) { //If the view data was not overwritten manually
 		md->vd = mob_get_viewdata(md->mob_id); //Get the new view data from the mob database
 		if (md->bl.prev) { //If they are spawned right now

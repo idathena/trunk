@@ -707,7 +707,7 @@ int inter_guild_sql_init(void)
 	castle_db = idb_alloc(DB_OPT_RELEASE_DATA);
 
 	//Read exp file
-	sv_readdb("db", DBPATH"exp_guild.txt", ',', 1, 1, 100, exp_guild_parse_row);
+	sv_readdb("db", DBPATH"exp_guild.txt", ',', 1, 1, MAX_GUILDLEVEL, exp_guild_parse_row);
 
 	add_timer_func_list(guild_save_timer, "guild_save_timer");
 	add_timer(gettick() + 10000, guild_save_timer, 0, 0);
@@ -778,10 +778,10 @@ unsigned int guild_nextexp(int level)
 	if( level == 0 )
 		return 1;
 
-	if( level < 100 && level > 0 ) // Change by hack
-		return guild_exp[level - 1];
+	if( level < 0 || level > MAX_GUILDLEVEL )
+		return 0;
 
-	return 0;
+	return guild_exp[level - 1];
 }
 
 int guild_checkskill(struct guild *g, int id)
@@ -822,7 +822,7 @@ int guild_calcinfo(struct guild *g)
 		g->max_member = MAX_GUILD;
 	}
 
-	// Compute the guild average level level
+	// Compute the guild average level
 	g->average_lv = 0;
 	g->connect_member = 0;
 	for( i = c = 0; i < g->max_member; i++ ) {
@@ -1408,23 +1408,23 @@ int mapif_parse_GuildMessage(int fd, int guild_id, int account_id, char *mes, in
  */
 int mapif_parse_GuildBasicInfoChange(int fd, int guild_id, int type, const char *data, int len)
 {
-	struct guild *g = inter_guild_fromsql(guild_id);
+	struct guild *g = NULL;
 	struct guild_skill gd_skill;
-	short value;
+	int16 value;
 
-	if( g == NULL )
+	if( !(g = inter_guild_fromsql(guild_id)) )
 		return 0;
+
+	value = *((const int16 *)data);
 
 	switch( type ) {
 		case GBI_EXP:
-			value = *((const int16 *)data);
 			if( value < 0 && abs(value) > g->exp )
 				return 0;
 			g->exp += value;
 			guild_calcinfo(g);
 			break;
 		case GBI_GUILDLV:
-			value = *((const int16 *)data);
 			if( value > 0 && g->guild_lv + value <= MAX_GUILDLEVEL ) {
 				g->guild_lv += value;
 				g->skill_point += value;
@@ -1432,7 +1432,6 @@ int mapif_parse_GuildBasicInfoChange(int fd, int guild_id, int type, const char 
 				g->guild_lv += value;
 			break;
 		case GBI_SKILLPOINT:
-			value = *((const int16 *)data);
 			if( g->skill_point + value < 0 )
 				return 0;
 			g->skill_point += value;

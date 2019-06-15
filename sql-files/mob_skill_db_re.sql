@@ -11118,3 +11118,7 @@ REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@NPC_SPLASHATTACK','a
 REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@WZ_HEAVENDRIVE','attack',91,5,500,1200,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
 REPLACE INTO `mob_skill_db_re` VALUES (3200,'Wicked Chimera@WZ_HEAVENDRIVE','chase',91,5,500,1200,5000,'yes','target','always',NULL,NULL,NULL,NULL,NULL,NULL,'6',NULL);
 
+# Lasagna
+REPLACE INTO `mob_skill_db_re` VALUES (3505,'DR_BIG_EGGRING@NPC_SUMMONSLAVE','attack',196,4,10000,2000,10000,'no','self','slavele','3',3508,NULL,NULL,NULL,NULL,NULL,NULL);
+REPLACE INTO `mob_skill_db_re` VALUES (3505,'DR_BIG_EGGRING@NPC_SUMMONSLAVE','idle',196,4,10000,2000,10000,'no','self','slavele','3',3508,NULL,NULL,NULL,NULL,NULL,NULL);
+

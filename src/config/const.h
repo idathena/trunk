@@ -59,14 +59,14 @@
 	#define __64BPRTSIZE(y) y
 #endif
 
-// ATCMD_FUNC(mobinfo)
+// ACMD_FUNC(mobinfo)
+#define MOB_ATK1(mob)  ( (mob)->status.batk + (mob)->status.rhw.atk )
+#define MOB_ATK2(mob)  ( (mob)->status.batk + (mob)->status.rhw.atk2 )
+#define MOB_MATK1(mob) ( (mob)->status.matk_min )
+#define MOB_MATK2(mob) ( (mob)->status.matk_max )
 #ifdef RENEWAL
 	#define MOB_FLEE(mob) ( (mob)->lv + (mob)->status.agi + 100 )
 	#define MOB_HIT(mob)  ( (mob)->lv + (mob)->status.dex + 170 )
-	#define MOB_ATK1(mob) ( (mob)->lv + (mob)->status.str + (mob)->status.rhw.atk * 8 / 10 )
-	#define MOB_ATK2(mob) ( (mob)->lv + (mob)->status.str + (mob)->status.rhw.atk * 12 / 10 )
-	#define MOB_MATK1(mob)( (mob)->lv + (mob)->status.int_ + (mob)->status.rhw.atk2 * 7 / 10 )
-	#define MOB_MATK2(mob)( (mob)->lv + (mob)->status.int_ + (mob)->status.rhw.atk2 * 13 / 10 )
 #else
 	#define MOB_FLEE(mob) ( (mob)->lv + (mob)->status.agi )
 	#define MOB_HIT(mob)  ( (mob)->lv + (mob)->status.dex )
@@ -102,14 +102,17 @@
  * That map should be loaded by a mapserv
  */
 #ifdef RENEWAL
-    #define MAP_DEFAULT_NAME "iz_int"
-    #define MAP_DEFAULT_X 97
-    #define MAP_DEFAULT_Y 90
+	#define MAP_DEFAULT_NAME "iz_int"
+	#define MAP_DEFAULT_X 18
+	#define MAP_DEFAULT_Y 26
 #else
-    #define MAP_DEFAULT_NAME "new_1-1"
-    #define MAP_DEFAULT_X 53
-    #define MAP_DEFAULT_Y 111
+	#define MAP_DEFAULT_NAME "new_1-1"
+	#define MAP_DEFAULT_X 53
+	#define MAP_DEFAULT_Y 111
 #endif
+#define MAP_DORAM_DEFAULT_NAME "lasa_fild01"
+#define MAP_DORAM_DEFAULT_X 48
+#define MAP_DORAM_DEFAULT_Y 297
 
 /**
  * End of File

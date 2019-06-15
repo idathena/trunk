@@ -747,7 +747,7 @@ void clif_charselectok(int id, uint8 ok)
 /// Makes an item appear on the ground.
 /// 009e <id>.L <name id>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W (ZC_ITEM_FALL_ENTRY)
 /// 084b <id>.L <name id>.W <type>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W (ZC_ITEM_FALL_ENTRY4)
-/// 0add <id>.L <name id>.W <type>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W <show effect>.B <effect mode>.W
+/// 0add <id>.L <name id>.W <type>.W <identified>.B <x>.W <y>.W <subX>.B <subY>.B <amount>.W <show drop effect>.B <drop effect mode>.W (ZC_ITEM_FALL_ENTRY5)
 /// Effect mode:
 ///      0 - Client based (EffectID field in iteminfo)
 ///      1 - White
@@ -1568,11 +1568,7 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 	WBUFW(buf,29) = hd->homunculus.hunger;
 	WBUFW(buf,31) = (unsigned short) (hd->homunculus.intimacy / 100) ;
 	WBUFW(buf,33) = 0; //Equip id
-#ifdef RENEWAL
-	WBUFW(buf,35) = cap_value(status->rhw.atk2, 0, INT16_MAX);
-#else
-	WBUFW(buf,35) = cap_value(status->rhw.atk2 + status->batk, 0, INT16_MAX);
-#endif
+	WBUFW(buf,35) = cap_value(status->batk + status->rhw.atk2, 0, INT16_MAX);
 	WBUFW(buf,37) = cap_value(status->matk_max, 0, INT16_MAX);
 	WBUFW(buf,39) = status->hit;
 	if (battle_config.hom_setting&HOMSET_DISPLAY_LUK)
@@ -2445,6 +2441,7 @@ void clif_viewpoint(struct map_session_data *sd, int npc_id, int type, int x, in
 ///     2 = bottom right corner
 ///     3 = middle of screen, inside a movable window
 ///     4 = middle of screen, movable with a close button, chrome-less
+///   255 = clear all displayed cutins
 void clif_cutin(struct map_session_data *sd, const char *image, int type)
 {
 	int fd;
@@ -3712,7 +3709,7 @@ void clif_arrowequip(struct map_session_data *sd,int val)
 	nullpo_retv(sd);
 
 #if PACKETVER >= 20121128
-	clif_status_change(&sd->bl,SI_CLIENT_ONLY_EQUIP_ARROW,1,INVALID_TIMER,0,0,0);
+	clif_status_change(&sd->bl,SI_CLIENT_ONLY_EQUIP_ARROW,1,-1,0,0,0);
 #endif
 	fd = sd->fd;
 	WFIFOHEAD(fd,packet_len(0x13c));
@@ -3979,8 +3976,11 @@ void clif_changeoption(struct block_list *bl)
 
 	//Whenever we send "changeoption" to the client, the provoke icon is lost
 	//There is probably an option for the provoke icon, but as we don't know it, we have to do this for now
-	if(sc->data[SC_PROVOKE] && sc->data[SC_PROVOKE]->timer == INVALID_TIMER)
-		clif_status_change(bl,StatusIconChangeTable[SC_PROVOKE],1,-1,0,0,0);
+	if(sc->data[SC_PROVOKE]) {
+		const struct TimerData *td = get_timer(sc->data[SC_PROVOKE]->timer);
+
+		clif_status_change(bl,StatusIconChangeTable[SC_PROVOKE],1,(td ? DIFF_TICK(td->tick,gettick()) : -1),0,0,0);
+	}
 }
 
 
@@ -10381,7 +10381,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 
 	//Autotraders should ignore this entirely, clif_parse_LoadEndAck is always invoked manually for them
 	if(!sd->state.active || (!sd->state.autotrade && !sd->state.pc_loaded)) { //Character loading is not complete yet!
-		sd->state.connect_new = 0; //Let pc_reg_received or intif_parse_StorageReceived reinvoke this when ready
+		sd->state.connect_new = 0; //Let pc_reg_received or pc_scdata_received reinvoke this when ready
 		return;
 	}
 
@@ -10712,7 +10712,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 
 	mail_clear(sd);
 
-	if(sd->state.gmaster_flag) { //Guild Aura Init
+	if(sd->guild && sd->state.gmaster_flag) { //Guild Aura Init
 		guild_guildaura_refresh(sd,GD_LEADERSHIP,guild_checkskill(sd->guild,GD_LEADERSHIP));
 		guild_guildaura_refresh(sd,GD_GLORYWOUNDS,guild_checkskill(sd->guild,GD_GLORYWOUNDS));
 		guild_guildaura_refresh(sd,GD_SOULCOLD,guild_checkskill(sd->guild,GD_SOULCOLD));
@@ -10896,21 +10896,27 @@ void clif_progressbar_abort(struct map_session_data *sd)
 }
 
 
-/// Notification from the client, that the progress bar has reached 100% (CZ_PROGRESS).
-/// 02f1
+/// Notification from the client, that the progress bar has reached 100%.
+/// 02f1 (CZ_PROGRESS)
 void clif_parse_progressbar(int fd, struct map_session_data *sd)
 {
-	int npc_id = sd->progressbar.npc_id;
-	bool fail = false;
+	int npc_id;
+	bool closing = false;
 
-	if( gettick() < sd->progressbar.timeout && sd->st ) {
+	//No progressbar active, ignore it
+	if( !(npc_id = sd->progressbar.npc_id) )
+		return;
+
+	//Check if the progress was canceled
+	if( gettick() < sd->progressbar.timeout && sd->st ) { 
+		closing = true;
 		pc_close_npc(sd, 1);
-		fail = true;
 	}
 
-	sd->progressbar.npc_id = sd->progressbar.timeout = 0;
+	sd->progressbar.npc_id = 0;
+	sd->progressbar.timeout = 0;
 
-	if( !fail ) //Don't continue if it fails
+	if( !closing )
 		npc_scriptcont(sd, npc_id, false);
 }
 
@@ -11285,7 +11291,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 				break; //No sitting during these states either
 			sd->idletime = last_tick;
 			pc_setsit(sd);
-			skill_sit(sd,1);
+			skill_sit(sd,true);
 			clif_sitting(&sd->bl);
 			break;
 		case 0x03: //Standup
@@ -11297,7 +11303,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 				break;
 			sd->idletime = last_tick;
 			pc_setstand(sd);
-			skill_sit(sd,0);
+			skill_sit(sd,false);
 			break;
 	}
 }
@@ -12297,9 +12303,8 @@ void clif_parse_skill_toid(struct map_session_data *sd, uint16 skill_id, uint16 
 	if( sd->npc_shopid )
 		return;
 
-	if( (pc_cant_act2(sd) || sd->chatID) &&
-		skill_id != RK_REFRESH &&
-		!(skill_id == SR_GENTLETOUCH_CURE && (sd->sc.opt1 == OPT1_STONE || sd->sc.opt1 == OPT1_FREEZE || sd->sc.opt1 == OPT1_STUN)) &&
+	if( (pc_cant_act2(sd) || sd->chatID) && sd->sc.opt1 && sd->sc.opt1 != OPT1_STONEWAIT && sd->sc.opt1 != OPT1_BURNING &&
+		skill_id != RK_REFRESH && skill_id != SR_GENTLETOUCH_CURE && skill_id != SU_GROOMING && skill_id != SU_PURRING &&
 		!(sd->state.storage_flag && (inf&INF_SELF_SKILL)) ) //SELF skills can be used with the storage open, bugreport:8027
 		return;
 
@@ -15035,8 +15040,18 @@ void clif_parse_HomMenu(int fd, struct map_session_data *sd)
 /// 0292
 void clif_parse_AutoRevive(int fd, struct map_session_data *sd)
 {
-	short item_position = pc_search_inventory(sd, ITEMID_TOKEN_OF_SIEGFRIED);
+	const int token[3] = { ITEMID_F_TOKEN_OF_SIEGFRIED,ITEMID_E_TOKEN_OF_SIEGFRIED,ITEMID_TOKEN_OF_SIEGFRIED };
+	short item_position;
 	uint8 hp = 100, sp = 100;
+	int i;
+
+	if (sd->sc.data[SC_HELLPOWER])
+		return; //Cannot resurrect while under the effect of SC_HELLPOWER
+
+	for (i = 0; i < ARRAYLENGTH(token); i++) {
+		if ((item_position = pc_search_inventory(sd, token[i])) != INDEX_NOT_FOUND)
+			break;
+	}
 
 	if (item_position == INDEX_NOT_FOUND) {
 		if (sd->sc.data[SC_LIGHT_OF_REGENE]) {
@@ -15045,9 +15060,6 @@ void clif_parse_AutoRevive(int fd, struct map_session_data *sd)
 		} else
 			return;
 	}
-
-	if (sd->sc.data[SC_HELLPOWER])
-		return; //Cannot res while under the effect of SC_HELLPOWER
 
 	if (!status_revive(&sd->bl, hp, sp))
 		return;
@@ -16019,13 +16031,15 @@ void clif_parse_Mail_send(int fd, struct map_session_data *sd)
 		(char *)RFIFOP(fd,info->pos[4]), RFIFOB(fd,info->pos[3]));
 #else
 	unsigned short length;
-	static char receiver[NAME_LENGTH];
-	static char sender[NAME_LENGTH];
-	char *title;
-	char *text;
+	char receiver[NAME_LENGTH];
+	//char sender[NAME_LENGTH];
+	char title[MAIL_TITLE_LENGTH];
+	char text[MAIL_BODY_LENGTH];
 	uint64 zeny;
 	uint16 titleLength;
 	uint16 textLength;
+	uint16 realTitleLength;
+	uint16 realTextLength;
 
 	length = RFIFOW(fd,2);
 
@@ -16039,21 +16053,20 @@ void clif_parse_Mail_send(int fd, struct map_session_data *sd)
 		return; //Ignore it
 
 	safestrncpy(receiver, (char *)RFIFOP(fd,4), NAME_LENGTH);
-	safestrncpy(sender, (char *)RFIFOP(fd,28), NAME_LENGTH);
+	//safestrncpy(sender, (char *)RFIFOP(fd,28), NAME_LENGTH);
 	zeny = RFIFOQ(fd,52);
 	titleLength = RFIFOW(fd,60);
 	textLength = RFIFOW(fd,62);
-
-	title = (char *)aMalloc(titleLength);
-	text = (char *)aMalloc(textLength);
+	realTitleLength = min(titleLength, MAIL_TITLE_LENGTH);
+	realTextLength = min(textLength, MAIL_BODY_LENGTH);
 
 #if PACKETVER <= 20160330
-	safestrncpy(title, (char *)RFIFOP(fd,64), titleLength);
-	safestrncpy(text, (char *)RFIFOP(fd,64 + titleLength), textLength);
+	safestrncpy(title, (char *)RFIFOP(fd,64), realTitleLength);
+	safestrncpy(text, (char *)RFIFOP(fd,64 + titleLength), realTextLength);
 #else
 	//64 = <char id>.L
-	safestrncpy(title, (char *)RFIFOP(fd,68), titleLength);
-	safestrncpy(text, (char *)RFIFOP(fd,68 + titleLength), textLength);
+	safestrncpy(title, (char *)RFIFOP(fd,68), realTitleLength);
+	safestrncpy(text, (char *)RFIFOP(fd,68 + titleLength), realTextLength);
 #endif
 
 	if( zeny > 0 ) {
@@ -16063,10 +16076,7 @@ void clif_parse_Mail_send(int fd, struct map_session_data *sd)
 		}
 	}
 
-	mail_send(sd, receiver, title, text, textLength);
-
-	aFree(title);
-	aFree(text);
+	mail_send(sd, receiver, title, text, realTextLength);
 #endif
 }
 
@@ -17237,7 +17247,7 @@ void clif_mercenary_updatestatus(struct map_session_data *sd, int type)
 	WFIFOW(fd,2) = type;
 	switch( type ) {
 		case SP_ATK1: {
-				int atk = rnd()%(status->rhw.atk2 - status->rhw.atk + 1) + status->rhw.atk;
+				int atk = rnd()%(status->rhw.atk2 - status->rhw.atk + 1) + status->batk + status->rhw.atk;
 
 				WFIFOL(fd,4) = cap_value(atk, 0, INT16_MAX);
 			}
@@ -17310,8 +17320,8 @@ void clif_mercenary_info(struct map_session_data *sd)
 	WFIFOW(fd,0) = 0x29b;
 	WFIFOL(fd,2) = md->bl.id;
 
-	// Mercenary shows ATK as a random value between ATK ~ ATK2
-	atk = rnd()%(status->rhw.atk2 - status->rhw.atk + 1) + status->rhw.atk;
+	// Mercenary shows ATK as a random value between ATK1 ~ ATK2
+	atk = rnd()%(status->rhw.atk2 - status->rhw.atk + 1) + status->batk + status->rhw.atk;
 	WFIFOW(fd,6) = cap_value(atk, 0, INT16_MAX);
 #ifdef RENEWAL
 	matk = status_base_matk(&md->bl, status, status_get_lv(&md->bl));
@@ -17517,40 +17527,32 @@ void clif_bg_xy_remove(struct map_session_data *sd)
 }
 
 
-/// Notifies clients of a battleground message (ZC_BATTLEFIELD_CHAT).
-/// 02dc <packet len>.W <account id>.L <name>.24B <message>.?B
+/// Notifies clients of a battleground message.
+/// 02DC <packet len>.W <account id>.L <name>.24B <message>.?B (ZC_BATTLEFIELD_CHAT)
 void clif_bg_message(struct battleground_data *bg, int src_id, const char *name, const char *mes, int len)
 {
 	struct map_session_data *sd;
-	unsigned char *buf;
+	unsigned char buf[8 + NAME_LENGTH + CHAT_SIZE_MAX];
 
 	if( !(sd = bg_getavailablesd(bg)) )
 		return;
 
-	buf = (unsigned char *)aMalloc((len + NAME_LENGTH + 8) * sizeof(unsigned char));
+	//Limit length
+	len = min(len + 1, CHAT_SIZE_MAX);
 
 	WBUFW(buf,0) = 0x2dc;
 	WBUFW(buf,2) = len + NAME_LENGTH + 8;
 	WBUFL(buf,4) = src_id;
 	safestrncpy((char *)WBUFP(buf,8), name, NAME_LENGTH);
-	memcpy(WBUFP(buf,32), mes, len);
-	clif_send(buf,WBUFW(buf,2), &sd->bl, BG);
+	safestrncpy((char *)WBUFP(buf,8 + NAME_LENGTH), mes, len);
 
-	if( buf )
-		aFree(buf);
+	clif_send(buf, WBUFW(buf,2), &sd->bl, BG);
 }
 
 
-/**
- * Validates and processes battlechat messages [pakpil] (CZ_BATTLEFIELD_CHAT).
- *
- * @code
- * 0x2db <packet len>.W <text>.?B (<name> : <message>) 00
- * @endcode
- *
- * @param fd The incoming file descriptor.
- * @param sd The related character.
- */
+/// Validates and processes battlechat messages.
+/// All messages that are sent after enabling battleground chat with /battlechat.
+/// 02DB <packet len>.W <text>.?B (CZ_BATTLEFIELD_CHAT)
 void clif_parse_BattleChat(int fd, struct map_session_data *sd)
 {
 	char message[CHAT_SIZE_MAX + NAME_LENGTH + 3 + 1];
@@ -21332,6 +21334,39 @@ void clif_parse_equipswitch_request_single(int fd, struct map_session_data *sd)
 	}
 	pc_equipitem(sd, index, pc_equippoint(sd, index), true);
 #endif
+}
+
+
+/// Activates the client camera info or updates the client camera with the given values.
+/// 0A78 <type>.B <range>.F <rotation>.F <latitude>.F
+void clif_camerainfo(struct map_session_data *sd, bool show, float range, float rotation, float latitude)
+{
+#if PACKETVER >= 20160525
+	int fd = sd->fd;
+
+	WFIFOHEAD(fd,packet_len(0xa78));
+	WFIFOW(fd,0) = 0xa78;
+	WFIFOB(fd,2) = show;
+	WFIFOF(fd,3) = range;
+	WFIFOF(fd,7) = rotation;
+	WFIFOF(fd,11) = latitude;
+	WFIFOSET(fd,packet_len(0xa78));
+#endif
+}
+
+/// Activates or deactives the client camera info or updates the camera settings.
+/// This packet is triggered by /viewpointvalue or /setcamera
+/// 0A77 <type>.B <range>.F <rotation>.F <latitude>.F
+void clif_parse_camerainfo(int fd, struct map_session_data *sd)
+{
+	char command[CHAT_SIZE_MAX];
+
+	if( RFIFOB(fd,2) == 1 ) // /viewpointvalue
+		safesnprintf(command, sizeof(command), "%ccamerainfo", atcommand_symbol);
+	else // /setcamera
+		safesnprintf(command, sizeof(command), "%ccamerainfo %03.03f %03.03f %03.03f", atcommand_symbol, RFIFOF(fd,3), RFIFOF(fd,7), RFIFOF(fd,11));
+
+	is_atcommand(fd, sd, command, 1);
 }
 
 

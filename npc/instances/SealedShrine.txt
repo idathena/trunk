@@ -1,15 +1,15 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Sealed Shrine
-//===== By: ================================================== 
+//===== By: ==================================================
 //= L0ne_W0lf
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 2.3
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= [Official Conversion]
 //= Seal away the Great Demon Baphomet.
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First version. [L0ne_W0lf]
 //= 1.1 Added setquest for instance cooldown. [L0ne_W0lf]
 //= 1.2 Fixed Torch#12 not being disabled. (bugreport:4044) [L0ne_w0lf]
@@ -27,7 +27,7 @@
 //= 2.1 Fixed quest being removed before the 12 hours cool down. [Joseph]
 //= 2.2 Removed extra setquest (quest id:3040).	[Joseph]
 //= 2.3 Instance system rewrite. [Euphy]
-//============================================================ 
+//============================================================
 
 // Sealed Catacomb Entrance
 //============================================================
@@ -109,7 +109,7 @@ monk_test,309,146,3	script	Friar Patrick#edq	412,{
 			//set .@ins_bapho_check2,checkquest(3045,PLAYTIME);
 
 			if (.@ins_bapho_check == -1) {
-				if (getpartyleader(.@party_id,2) == getcharid(0) && instance_check_party(.@party_id,2,75)) {
+				if (instance_check_party(.@party_id,2,75) && is_party_leader()) {
 					mes "[Friar Patrick]";
 					mes "Party name is "+getpartyname(.@party_id)+"...";
 					mes "Name of the leader is "+strcharinfo(0)+"...";
@@ -263,7 +263,7 @@ prt_monk,261,91,3	script	Rust Blackhand#edq	826,{
 		mes "[Rust Blackhand]";
 		mes "Did you bring all of the ingredients?";
 		next;
-		if ((countitem(6004) > 0) && (countitem(2256) > 0) && (countitem(7799) > 29) && (countitem(7798) > 49) && (Zeny >= 990000)) {
+		if (countitem(6004) > 0 && countitem(2256) > 0 && countitem(7799) > 29 && countitem(7798) > 49 && Zeny >= 990000) {
 			mes "[Rust Blackhand]";
 			mes "kkk... You prepared the ingredients well. Why don't you leave it there and wait?";
 			next;
@@ -302,7 +302,7 @@ prt_monk,261,91,3	script	Rust Blackhand#edq	826,{
 			close;
 		}
 	}
-	else if ((.@new_maje == -1) && (countitem(6004) > 0)) {
+	else if (.@new_maje == -1 && countitem(6004) > 0) {
 		switch(select("About the Cursed Baphomet Doll:Stop talking.")) {
 		case 1:
 			mes "[Rust Blackhand]";
@@ -358,12 +358,12 @@ prt_monk,261,91,3	script	Rust Blackhand#edq	826,{
 			close;
 		}
 	}
-	else if ((.@new_maje == -1) && (countitem(6004) == 0)) {
+	else if (.@new_maje == -1 && countitem(6004) == 0) {
 		mes "[Rust Blackhand]";
 		mes "If you don't have business with me, go away! As you see, I make equipment for the Brothers at the monastery, not for adventurers like you. Do you understand?";
 		close;
 	}
-	else if ((.@new_maje == 2) && (countitem(6004) > 0)) {
+	else if (.@new_maje == 2 && countitem(6004) > 0) {
 		switch(select("About the Cursed Baphomet Doll:Stop talking.")) {
 		case 1:
 			mes "[Rust Blackhand]";
@@ -418,7 +418,7 @@ prt_monk,261,91,3	script	Rust Blackhand#edq	826,{
 			close;
 		}
 	}
-	else if ((.@new_maje == 2) && (countitem(6004) == 0)) {
+	else if (.@new_maje == 2 && countitem(6004) == 0) {
 		mes "[Rust Blackhand]";
 		mes "Why are you hanging around here? If you don't want a ^4d4dffGigantic Magestic Goat^000000, go away.";
 		close;
@@ -431,9 +431,8 @@ prt_monk,261,91,3	script	Rust Blackhand#edq	826,{
 OnInstanceInit:
 	// Pick one "true" Gravestone and 12 "false" Gravestones.
 	set .@true, rand(1,13);
-	for(set .@i,1; .@i<=13; set .@i,.@i+1) {
-		disablenpc instance_npcname("Gravestone#1F_"+.@i+((.@i == .@true)?"F":"T"));
-	}
+	for(set .@i,1; .@i<=13; set .@i,.@i+1)
+		disablenpc instance_npcname("Gravestone#1F_"+.@i+(.@i==.@true?"F":"T"));
 	disablenpc instance_npcname("ins_baphomet_lotto");
 	end;
 }
@@ -482,7 +481,6 @@ OnMyMobDead:
 // Soul of hero near the north grave
 //============================================================
 1@cata,141,221,0	script	Gravestone#	844,3,3,{
-	set .@party_id,getcharid(1);
 	if ('ins_baphomet == 0) {
 		mes "The gravestone is trembling...";
 		next;
@@ -539,7 +537,7 @@ OnMyMobDead:
 		mes "If your ^0000FFparty leader^000000 brings me the pendant, my soul can be substantialized. So, hurry up.";
 		close;
 	}
-	else if (('ins_baphomet == 2) && (getpartyleader(.@party_id,2) == getcharid(0))) {
+	else if ('ins_baphomet == 2 && is_party_leader()) {
 		mes "[Voice of the Gravestone]";
 		mes "Did you find the pendant?";
 		next;
@@ -589,7 +587,6 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 }
 
 1@cata,176,119,4	script	Ancient Hero's Soul#1F	411,{
-	set .@party_id,getcharid(1);
 	cutin "ins_cata_champ_n",2;
 	if ('ins_baphomet == 2) {
 		mes "[Ancient Hero's Soul]";
@@ -651,7 +648,7 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 				break;
 			case 3:
 				set .@ins_baphomet_1f_3,.@ins_baphomet_1f_3+1;
-				if (getpartyleader(.@party_id,2) == getcharid(0)) {
+				if (is_party_leader()) {
 					mes "[Ancient Hero's Soul]";
 					mes "You look like the leader of this party. You need to go and get ^0000FF10 Essence of Fire^000000 from the torches.";
 					next;
@@ -683,7 +680,7 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 				}
 				break;
 			case 4:
-				if ((.@ins_baphomet_1f_1 > 0) && (.@ins_baphomet_1f_2 > 0) && (.@ins_baphomet_1f_3 > 0)) {
+				if (.@ins_baphomet_1f_1 > 0 && .@ins_baphomet_1f_2 > 0 && .@ins_baphomet_1f_3 > 0) {
 					cutin "ins_cata_champ_n",2;
 					mes "[Ancient Hero's Soul]";
 					mes "Are you ready to go? Then I'll open this sealed gate now.";
@@ -701,9 +698,10 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 				}
 				break;
 			}
-			if (.@exitloop) break;
+			if (.@exitloop)
+				break;
 		}
-		if (getpartyleader(.@party_id,2) == getcharid(0)) {
+		if (is_party_leader()) {
 			mes "[Ancient Hero's Soul]";
 			mes "To remind you again, I must be substantialized within the next hour. So everyone, finish your work within that time!";
 			set 'ins_baphomet,3;
@@ -720,12 +718,12 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 		cutin "",255;
 		end;
 	}
-	else if (('ins_baphomet == 3) && (getpartyleader(.@party_id,2) == getcharid(0))) {
+	else if ('ins_baphomet == 3 && is_party_leader()) {
 		cutin "ins_cata_champ_n",2;
 		mes "[Ancient Hero's Soul]";
 		mes "Did you get 10 ^0000FFEssence of Fire^000000 and ^0000FFToken of Apostle^000000?";
 		next;
-		if ((countitem(6001) > 9) && (countitem(6002) > 0)) {
+		if (countitem(6001) > 9 && countitem(6002) > 0) {
 			delitem 6001,countitem(6001); //Essence_Of_Fire
 			set 'ins_baphomet,4;
 			mes "[Ancient Hero's Soul]";
@@ -757,7 +755,7 @@ OnInstanceInit: // Temporary fix for @reloadscript.
 		cutin "",255;
 		end;
 	}
-	else if (('ins_baphomet == 4) && (getpartyleader(.@party_id,2) == getcharid(0))) {
+	else if ('ins_baphomet == 4 && is_party_leader()) {
 		cutin "ins_cata_champ_n",2;
 		mes "[Ancient Hero's Soul]";
 		mes "Are you ready? I opened the sealed gate. To pass the gate, you should carry a ^0000FFToken of Apostle^000000.";
@@ -880,9 +878,8 @@ OnInstanceInit:
 // Bobbing Torches
 //============================================================
 -	script	Bobbing Torch#SS	-1,{
-	set .@party_id,getcharid(1);
-	if (getpartyleader(.@party_id,2) == getcharid(0)) {
-		if (('ins_baphomet == 3) && (countitem(6001) < 11)) {
+	if (is_party_leader()) {
+		if ('ins_baphomet == 3 && countitem(6001) < 11) {
 			mes "A huge torch appearing as if it can burn everything is bobbing up and down in front of me.";
 			next;
 			mes "The grand appearance and heat of the fire makes me step back... But I pluck up my courage and reach out to pick up the torch.";
@@ -893,7 +890,7 @@ OnInstanceInit:
 			disablenpc instance_npcname(strnpcinfo(0));
 			close;
 		}
-		else if (('ins_baphomet == 3) && (countitem(6001) > 10)) {
+		else if ('ins_baphomet == 3 && countitem(6001) > 10) {
 			mes "You have 10 Essence of Fire already, so you don't need to collect any more.";
 			close;
 		}
@@ -1119,8 +1116,7 @@ OnInstanceInit:
 2@cata,35,109,0	duplicate(Magical Seal#SS)	Magical Seal#10	844
 
 2@cata,79,65,0	script	The Main Altar#ss	844,{
-	set .@party_id,getcharid(1);
-	if (('ins_baphomet == 5) && (getpartyleader(.@party_id,2) == getcharid(0))) {
+	if ('ins_baphomet == 5 && is_party_leader()) {
 		mes "An evil power, too terrible to describe, lies under the great altar radiating a violet color.";
 		next;
 		mes "Complicated Magical Rune letters blink rapidly, attempting to suppress the dreadful power within.";

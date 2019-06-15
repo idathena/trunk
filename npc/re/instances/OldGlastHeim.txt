@@ -1,15 +1,15 @@
-//===== rAthena Script ======================================= 
+//===== rAthena Script =======================================
 //= Old Glast Heim
-//===== By: ================================================== 
+//===== By: ==================================================
 //= Ziu, Heris (translation)
-//===== Current Version: ===================================== 
+//===== Current Version: =====================================
 //= 1.4
-//===== Compatible With: ===================================== 
+//===== Compatible With: =====================================
 //= rAthena SVN
-//===== Description: ========================================= 
+//===== Description: =========================================
 //= Discover the history of events that took place in the
 //= Glast Heim castle and how it ended up in ruins.
-//===== Additional Comments: ================================= 
+//===== Additional Comments: =================================
 //= 1.0 First version. [Euphy]
 //=     This is a custom version, and may contain bugs.
 //= 1.1 Bug fixes; removed redundant OnInstanceInit scripts.
@@ -18,7 +18,7 @@
 //= 1.3 Add some NPCs placeholder. [exneval]
 //= 1.4 Update to its official text. [exneval]
 //=     Support merchant, enchant, socket features.
-//============================================================ 
+//============================================================
 
 glast_01,204,273,6	script	Hugin#ghinstance	755,{
 	if (BaseLevel < 130) {
@@ -89,7 +89,7 @@ glast_01,204,273,6	script	Hugin#ghinstance	755,{
 			mes "Why don't you make a party with more than 1 person and talk to me again?";
 			close;
 		}
-		if (getcharid(0) == getpartyleader(.@party_id,2)) {
+		if (is_party_leader()) {
 			if (checkquest(12316) == 1)
 				erasequest 12316;
 			if (checkquest(12318,HUNTING) == -1)
@@ -166,7 +166,7 @@ glast_01,204,273,6	script	Hugin#ghinstance	755,{
 // Floor 1
 //============================================================
 1@gl_k,149,41,6	script	Varmundt#ghinstance1	654,{
-	if (getcharid(0) == getpartyleader(getcharid(1),2)) {
+	if (is_party_leader()) {
 		cutin "gl_barmund1",2;
 		mes "[Varmundt]";
 		mes "Are you the one ^0000ffHerico^000000 sent to help me?";
@@ -275,7 +275,7 @@ OnEnable:
 1@gl_k,154,104,3	duplicate(Khalitzburg Knightage#1)	Khalitzburg Knightage#22	655
 
 1@gl_k,149,100,6	script	Heinrich#ghinstance1	652,{
-	if (getcharid(0) == getpartyleader(getcharid(1),2)) {
+	if (is_party_leader()) {
 		cutin "gl_heinrich2",2;
 		select("Sir. Heinrich. Varmundt...");
 		mes "["+strcharinfo(0)+"]";
@@ -519,7 +519,7 @@ OnTimer36000:
 	end;
 OnTimer41000:
 	donpcevent instance_npcname("Himelmez#ghinstance1")+"::OnTalk4";
-	end;	
+	end;
 OnTimer54000:
 	donpcevent instance_npcname("Himelmez#ghinstance1")+"::OnTalk5";
 	end;
@@ -553,7 +553,7 @@ OnTimer92000:
 	hideonnpc instance_npcname("Khalitzburg Knightage#22");
 
 	set .@map$,instance_mapname("1@gl_k");
-	set .@label$,instance_npcname("#talkinstance1")+"::OnMyMobDead"; 
+	set .@label$,instance_npcname("#talkinstance1")+"::OnMyMobDead";
 	monster .@map$,145,59,"Abysmal Knight",2470,1,.@label$;
 	monster .@map$,154,59,"Abysmal Knight",2470,1,.@label$;
 	monster .@map$,145,69,"Abysmal Knight",2470,1,.@label$;
@@ -830,7 +830,7 @@ OnMyMobDead:
 }
 
 1@gl_k,17,51,3	script	Altar boy Domun#clearGH	706,{
-	if (getcharid(0) == getpartyleader(getcharid(1),2)) {
+	if (is_party_leader()) {
 		mes "[Altar boy Domun]";
 		mes "Save me! Save me!!!";
 		npctalk "Save me! Save me!!!";
@@ -916,7 +916,7 @@ OnMyMobDead:
 }
 
 1@gl_k,291,145,3	script	Holgren the Destroyer	726,{
-	if (getcharid(0) == getpartyleader(getcharid(1),2)) {
+	if (is_party_leader()) {
 		mes "[Holgren the Destroyer]";
 		mes "Die!! You shall die!!!";
 		npctalk "Holgren the Destroyer: Die!! You shall die!!!";
