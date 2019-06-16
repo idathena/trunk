@@ -7696,7 +7696,7 @@ void clif_party_invite_reply(struct map_session_data *sd, const char *nick, enum
 /// flag:
 ///     0 = send to party
 ///     1 = send to sd
-void clif_party_option(struct party_data *p,struct map_session_data *sd,int flag)
+void clif_party_option(struct party_data *p, struct map_session_data *sd, int flag)
 {
 	unsigned char buf[16];
 #if PACKETVER < 20090603

@@ -1012,7 +1012,8 @@ int party_send_xy_clear(struct party_data *p)
 	return 0;
 }
 
-/** Party EXP and Zeny sharing
+/**
+ * Party EXP and Zeny sharing
  * @param p Party data
  * @param src EXP source (for renewal level penalty)
  * @param base_exp Base EXP gained from killed mob
@@ -1035,7 +1036,8 @@ void party_exp_share(struct party_data *p, struct block_list *src, unsigned int 
 
 	//Count the number of players eligible for exp sharing
 	for (i = c = 0; i < MAX_PARTY; i++) {
-		if (!(sd[c] = p->data[i].sd) || sd[c]->bl.m != src->m || pc_isdead(sd[c]) || (battle_config.idle_no_share && pc_isidle(sd[c])))
+		if (!(sd[c] = p->data[i].sd) || sd[c]->bl.m != src->m || pc_isdead(sd[c]) || (battle_config.idle_no_share && pc_isidle(sd[c])) ||
+			(battle_config.party_equal_share_size > 0 && distance_bl(src,&sd[c]->bl) > battle_config.party_equal_share_size))
 			continue;
 		c++;
 	}
@@ -1043,8 +1045,11 @@ void party_exp_share(struct party_data *p, struct block_list *src, unsigned int 
 	if (c < 1)
 		return;
 
-	base_exp /= c;
-	job_exp /= c;
+	if (!battle_config.party_equal_share_size) {
+		base_exp /= c;
+		job_exp /= c;
+	}
+
 	zeny /= c;
 
 	if (battle_config.party_even_share_bonus && c > 1) {
