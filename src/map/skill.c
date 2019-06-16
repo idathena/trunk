@@ -6521,11 +6521,11 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case RL_E_CHAIN:
 		case RL_P_ALTER:
 		case RL_HEAT_BARREL:
+		case SU_STOOP:
 		case SU_ARCLOUSEDASH:
 		case SU_TUNAPARTY:
 		case SU_FRESHSHRIMP:
 		case SU_GROOMING:
-		case SU_CHATTERING:
 		case HLIF_CHANGE:
 		case HAMI_BLOODLUST:
 		case HFLI_FLEET:
@@ -7959,7 +7959,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		case NPC_AGIUP:
-			sc_start(src,bl,SC_SPEEDUP1,100,100,skill_get_time(skill_id,skill_lv));
+			sc_start(src,bl,SC_SPEEDUP0,100,50,skill_get_time(skill_id,skill_lv));
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src,bl,type,100,100,skill_get_time(skill_id,skill_lv)));
 			break;
@@ -10628,11 +10628,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 
-		case SU_STOOP:
-			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
-			break;
-
 		case SU_SV_ROOTTWIST:
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			sc_start2(src,bl,type,100,skill_lv,src->id,skill_get_time(skill_id,skill_lv));
@@ -10652,25 +10647,30 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 			break;
 
+		case SU_POWEROFFLOCK:
+			if( flag&1 ) {
+				sc_start(src,bl,SC_FEAR,100,skill_lv,skill_get_time(skill_id,skill_lv));
+				sc_start(src,bl,SC_FREEZE,100,skill_lv,skill_get_time2(skill_id,skill_lv));
+			} else {
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,
+					skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
+			}
+			break;
+
 		case SU_HISS:
-			if( !sd || !sd->status.party_id || (flag&1) )
-				clif_skill_nodamage(bl,bl,skill_id,-1,sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-			else if( sd )
+			if( !sd || !sd->status.party_id || (flag&1) ) {
+				clif_skill_nodamage(bl,bl,skill_id,-1,
+					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
+				sc_start(src,bl,SC_DORAM_WALKSPEED,100,skill_lv,skill_get_time2(skill_id,skill_lv));
+			} else if( sd )
 				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 			break;
 
 		case SU_PURRING:
-		case SU_MEOWMEOW:
-			if( !sd || !sd->status.party_id || (flag&1) ) {
-				if( skill_id == SU_MEOWMEOW ) {
-					if( bl->id == src->id )
-						clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-					i = SU_CHATTERING;
-				} else
-					i = SU_GROOMING;
-				clif_skill_nodamage(bl,bl,i,-1,
-					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
-			} else if( sd )
+			if( !sd || !sd->status.party_id || (flag&1) )
+				clif_skill_nodamage(bl,bl,SU_GROOMING,-1,sc_start(src,bl,SC_GROOMING,100,skill_lv,skill_get_time(skill_id,skill_lv)));
+			else if( sd )
 				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 			break;
 
@@ -10685,15 +10685,21 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 			break;
 
-		case SU_POWEROFFLOCK:
-			if( flag&1 ) {
-				sc_start(src,bl,SC_FEAR,100,skill_lv,skill_get_time(skill_id,skill_lv));
-				sc_start(src,bl,SC_FREEZE,100,skill_lv,skill_get_time2(skill_id,skill_lv));
-			} else {
+		case SU_MEOWMEOW:
+			if( !sd || !sd->status.party_id || (flag&1) ) {
+				clif_skill_damage(bl,bl,tick,0,status_get_dmotion(bl),-30000,1,skill_id,-1,DMG_SPLASH);
+				sc_start(src,bl,SC_CHATTERING,100,skill_lv,skill_get_time(skill_id,skill_lv));
+				sc_start(src,bl,SC_DORAM_WALKSPEED,100,skill_lv,skill_get_time(skill_id,skill_lv));
+			} else if( sd ) {
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,
-					skill_id,skill_lv,tick,flag|BCT_ENEMY|1,skill_castend_nodamage_id);
+				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 			}
+			break;
+
+		case SU_CHATTERING:
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,
+				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));
+			sc_start(src,bl,SC_DORAM_WALKSPEED,100,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 
 		case NPC_PULSESTRIKE2:

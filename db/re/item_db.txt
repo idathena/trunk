@@ -6105,7 +6105,7 @@
 12013,Shadow_Arrow_Container,Shadow Arrow Quiver,2,2,,250,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 1767,500; },{},{}
 12014,Imma_Arrow_Container,Immaterial Arrow Quiver,2,2,,250,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 1757,500; },{},{}
 12015,Rusty_Arrow_Container,Rusty Arrow Quiver,2,2,,250,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 1762,500; },{},{}
-12016,Speed_Up_Potion,Speed Potion,2,2,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_SPEEDUP1,5000,100; },{},{}
+12016,Speed_Up_Potion,Speed Potion,2,2,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_SPEEDUP1,5000,50; },{},{}
 12017,Slow_Down_Potion,Slow Potion,2,2,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_SLOWDOWN,5000,100; },{},{}
 12018,Fire_Cracker,Firecracker,2,2,,20,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 12019,Holy_Egg,Holy Egg,11,2,,150,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "ALL_RESURRECTION",2; },{},{}
@@ -6794,7 +6794,7 @@
 12707,Lucky_Cookie02,Lucky Cookie,11,0,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "PR_MAGNIFICAT",1,1; },{},{}
 12708,Lucky_Cookie03,Lucky Cookie,11,0,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ itemskill "PR_IMPOSITIO",3,1; },{},{}
 12709,Guyak_Candy,Guyak Candy,0,0,,150,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 30,30; },{},{}
-12710,Guyak_Pudding,Guyak Pudding,2,0,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_SPEEDUP1,300000,100; },{},{}
+12710,Guyak_Pudding,Guyak Pudding,2,0,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_SPEEDUP1,300000,50; },{},{}
 12711,Pretzel,Pretzel,0,2,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(50,90),0; },{},{}
 12712,Green_Beer,Green Beer,2,2,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ percentheal 0,50; },{},{}
 12713,Monster_Extract,Monster Extract,2,20,,10,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
@@ -10758,7 +10758,7 @@
 22542,Center_Potion_B,Concentration Potion,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_ASPDPOTION0,1800000,4; },{},{}
 22543,Berserk_Potion_B,Berserk Potion,2,10,,200,,,,0,0x01E646A6,63,2,,,,,,{ sc_start SC_ASPDPOTION2,1800000,9; },{},{}
 22544,Awakening_Potion_B,Awakening Potion,2,10,,150,,,,0,0xFFF7FEEF,63,2,,,,,,{ sc_start SC_ASPDPOTION1,1800000,6; },{},{}
-22545,Speed_Up_Potion_B,Speed Potion,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_SPEEDUP1,5000,100; },{},{}
+22545,Speed_Up_Potion_B,Speed Potion,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_SPEEDUP1,5000,50; },{},{}
 22546,Slow_Down_Potion_B,Slow Potion,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_SLOWDOWN,5000,100; },{},{}
 22547,Anti_Payne_Moment,Anti-Payne Moment,2,10,,100,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}
 22548,Wed_Cursed,Wed Cursed,2,10,,30,,,,,0xFFFFFFFF,63,2,,,,,,{},{},{}

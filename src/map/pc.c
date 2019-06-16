@@ -10272,7 +10272,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 	}
 	if( pos == EQP_ARMS && id->equip == EQP_HAND_R ) { //Dual wield capable weapon
 		pos = (req_pos&EQP_ARMS);
-		if( pos == EQP_ARMS )
+		if( pos == EQP_ARMS ) //User specified both slots, pick one for them
 			pos = (equip_index[EQI_HAND_R] >= 0 ? EQP_HAND_L : EQP_HAND_R);
 	}
 	//Shadow System
