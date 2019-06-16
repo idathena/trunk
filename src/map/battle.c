@@ -3406,7 +3406,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 			break;
 		case RL_QD_SHOT:
 			if((i = sd->equip_index[EQI_AMMO]) >= 0 && sd->inventory_data[i] && sd->inventory.u.items_inventory[i].amount > 0) {
-				wd.div_ += status_get_job_lv(src) / 20;
+				wd.div_ = 1 + status_get_job_lv(src) / 20;
 				wd.div_ = min(wd.div_,sd->inventory.u.items_inventory[i].amount);
 				if(battle_config.ammo_decrement && wd.div_ > 1)
 					pc_delitem(sd,i,wd.div_ - 1,0,1,LOG_TYPE_CONSUME);

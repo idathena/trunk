@@ -3,7 +3,7 @@
 //===== By ===================================================
 //= Playtester, Paradox924X
 //===== Version ==============================================
-//= 2.0a
+//= 2.1
 //===== Compatible With ======================================
 //= rAthena SVN
 //===== Description ==========================================
@@ -18,7 +18,7 @@
 //= 1.5 Updated to match AEGIS script again. [Masao]
 //= 1.6 Moved Izlude duplicate to pre-re/re paths. [Euphy]
 //= 2.0 Clean-up. [Capuche]
-//= 2.0a Rebellion support (BaseJob -> BaseClass) [exneval]
+//= 2.1 Rebellion support (BaseJob -> BaseClass) [exneval]
 //============================================================
 
 alberta,118,160,3	script	Bullet Dealer Tony#alb::bdt	4_M_04,{
