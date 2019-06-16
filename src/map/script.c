@@ -1509,7 +1509,6 @@ const char *parse_subexpr(const char *p,int limit)
 			return p;
 		}
 	}
-
 	if( (op = C_ADD_PRE, p[0] == '+' && p[1] == '+') || (op = C_SUB_PRE, p[0] == '-' && p[1] == '-') ) // Pre ++ -- operators
 		p = parse_variable(p);
 	else if( (op = C_NEG, *p == '-') || (op = C_LNOT, *p == '!') || (op = C_NOT, *p == '~') ) { // Unary - ! ~ operators
@@ -1518,10 +1517,10 @@ const char *parse_subexpr(const char *p,int limit)
 	} else
 		p = parse_simpleexpr(p);
 	p = skip_space(p);
-	while((
+	while( (
 			(op = C_OP3, opl = 0, len = 1, *p == '?') ||
-			((op = C_ADD, opl = 9, len = 1, *p == '+') && p[1] != '+') ||
-			((op = C_SUB, opl = 9, len = 1, *p == '-') && p[1] != '-') ||
+			(op = C_ADD, opl = 9, len = 1, *p == '+' && p[1] != '+') ||
+			(op = C_SUB, opl = 9, len = 1, *p == '-' && p[1] != '-') ||
 			(op = C_MUL, opl = 10, len = 1, *p == '*') ||
 			(op = C_DIV, opl = 10, len = 1, *p == '/') ||
 			(op = C_MOD, opl = 10, len = 1, *p == '%') ||
@@ -1537,7 +1536,8 @@ const char *parse_subexpr(const char *p,int limit)
 			(op = C_GT, opl = 7, len = 1, *p == '>') ||
 			(op = C_L_SHIFT, opl = 8, len = 2, *p == '<' && p[1] == '<') ||
 			(op = C_LE, opl = 7, len = 2, *p == '<' && p[1] == '=') ||
-			(op = C_LT, opl = 7, len = 1, *p == '<')) && opl > limit) {
+			(op = C_LT, opl = 7, len = 1, *p == '<')) && opl > limit )
+	{
 		p += len;
 		if( op == C_OP3 ) {
 			p = parse_subexpr(p, -1);
@@ -1547,7 +1547,6 @@ const char *parse_subexpr(const char *p,int limit)
 			p = parse_subexpr(p, -1);
 		} else
 			p = parse_subexpr(p, opl);
-
 		add_scriptc(op);
 		p = skip_space(p);
 	}
@@ -5763,7 +5762,7 @@ BUILDIN_FUNC(setarray)
 	int32 i;
 	TBL_PC *sd = NULL;
 
-	data = script_getdata(st, 2);
+	data = script_getdata(st,2);
 	if( !data_isreference(data) ) {
 		ShowError("script:setarray: not a variable\n");
 		script_reportdata(data);

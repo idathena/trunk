@@ -7696,7 +7696,7 @@ void clif_party_invite_reply(struct map_session_data *sd, const char *nick, enum
 /// flag:
 ///     0 = send to party
 ///     1 = send to sd
-void clif_party_option(struct party_data *p,struct map_session_data *sd,int flag)
+void clif_party_option(struct party_data *p, struct map_session_data *sd, int flag)
 {
 	unsigned char buf[16];
 #if PACKETVER < 20090603
@@ -12304,7 +12304,7 @@ void clif_parse_skill_toid(struct map_session_data *sd, uint16 skill_id, uint16 
 		return;
 
 	if( (pc_cant_act2(sd) || sd->chatID) && sd->sc.opt1 && sd->sc.opt1 != OPT1_STONEWAIT && sd->sc.opt1 != OPT1_BURNING &&
-		skill_id != RK_REFRESH && skill_id != SR_GENTLETOUCH_CURE && skill_id != SU_GROOMING && skill_id != SU_PURRING &&
+		skill_id != RK_REFRESH && skill_id != SR_GENTLETOUCH_CURE &&
 		!(sd->state.storage_flag && (inf&INF_SELF_SKILL)) ) //SELF skills can be used with the storage open, bugreport:8027
 		return;
 

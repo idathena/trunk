@@ -165,7 +165,7 @@ static void set_sc(uint16 skill_id, sc_type sc, int icon, unsigned int flag)
 		ShowError("set_sc: Unsupported status change id %d\n", sc);
 		return;
 	}
-	if( StatusSkillChangeTable[sc] == 0 )
+	if( !StatusSkillChangeTable[sc] )
 		StatusSkillChangeTable[sc] = skill_id;
 	if( StatusIconChangeTable[sc] == SI_BLANK )
 		StatusIconChangeTable[sc] = icon;
@@ -889,10 +889,8 @@ void initChangeTables(void) {
 	set_sc( SU_HISS                 , SC_HISS         , SI_HISS            , SCB_FLEE2 );
 	set_sc( SU_NYANGGRASS           , SC_NYANGGRASS   , SI_NYANGGRASS      , SCB_DEF|SCB_MDEF );
 	set_sc( SU_GROOMING             , SC_GROOMING     , SI_GROOMING        , SCB_FLEE  );
-	add_sc( SU_PURRING              , SC_GROOMING     );
 	set_sc( SU_SHRIMPARTY           , SC_SHRIMPBLESSING, SI_PROTECTIONOFSHRIMP, SCB_REGEN );
 	set_sc( SU_CHATTERING           , SC_CHATTERING   , SI_CHATTERING      , SCB_WATK|SCB_MATK );
-	add_sc( SU_MEOWMEOW             , SC_CHATTERING   );
 
 	set_sc( WE_CHEERUP              , SC_CHEERUP      , SI_CHEERUP         , SCB_STR|SCB_AGI|SCB_VIT|SCB_INT|SCB_DEX|SCB_LUK );
 
@@ -2230,37 +2228,49 @@ int status_check_visibility(struct block_list *src, struct block_list *target)
 	return 1;
 }
 
-//Basic ASPD value
+/**
+ * Base ASPD value taken from the job tables
+ * @param sd: Player object
+ * @param status: Player status
+ * @return base amotion after single/dual weapon and shield adjustments [RENEWAL]
+ *	  base amotion after single/dual weapon and stats adjustments [PRE-RENEWAL]
+ */
 int status_base_amotion_pc(struct map_session_data *sd, struct status_data *status)
 {
 	int amotion;
 	int classidx = pc_class2idx(sd->status.class_);
 #ifdef RENEWAL_ASPD
-	short mod = -1;
+	uint8 lv = 0, val = 0;
+	float temp_aspd = 0;
 
-	switch( sd->weapontype2 ) { //Adjustment for dual weilding
-		case W_DAGGER:
-			mod = 0;
-			break; //0, 1, 1
-		case W_1HSWORD:
-		case W_1HAXE:
-			mod = 1;
-			if( (sd->class_&MAPID_THIRDMASK) == MAPID_GUILLOTINE_CROSS ) //0, 2, 3
-				mod = sd->weapontype2 / W_1HSWORD + W_1HSWORD / sd->weapontype2;
+	amotion = job_info[classidx].aspd_base[sd->weapontype1]; //Single weapon
+	if( sd->status.shield )
+		amotion += job_info[classidx].aspd_base[MAX_WEAPON_TYPE];
+	else if( sd->weapontype2 && sd->equip_index[EQI_HAND_R] != sd->equip_index[EQI_HAND_L] )
+		amotion += job_info[classidx].aspd_base[sd->weapontype2] / 4; //Dual-wield
+
+	switch( sd->status.weapon ) {
+		case W_BOW:	case W_MUSICAL:
+		case W_WHIP:	case W_REVOLVER:
+		case W_RIFLE:	case W_GATLING:
+		case W_SHOTGUN:	case W_GRENADE:
+			temp_aspd = status->dex * status->dex / 7.0f + status->agi * status->agi * 0.5f;
+			break;
+		default:
+			temp_aspd = status->dex * status->dex / 5.0f + status->agi * status->agi * 0.5f;
 			break;
 	}
-
-	amotion = (sd->status.weapon < MAX_WEAPON_TYPE && mod < 0)
-			? (job_info[classidx].aspd_base[sd->status.weapon]) //Single weapon
-			: ((job_info[classidx].aspd_base[sd->weapontype2] //Dual-wield
-			+ job_info[classidx].aspd_base[sd->weapontype2]) * 6 / 10 + 10 * mod
-			- job_info[classidx].aspd_base[sd->weapontype2]
-			+ job_info[classidx].aspd_base[sd->weapontype1]);
-
-	if( sd->status.shield )
-		amotion += (2000 - job_info[classidx].aspd_base[W_FIST]) + (job_info[classidx].aspd_base[MAX_WEAPON_TYPE] - 2000);
-
+	temp_aspd = (float)(sqrt(temp_aspd) * 0.25f) + 0xc4;
+	if( (lv = pc_checkskill(sd, SA_ADVANCEDBOOK)) > 0 && sd->status.weapon == W_BOOK )
+		val += (lv - 1) / 2 + 1;
+	if( (lv = pc_checkskill(sd, GS_SINGLEACTION)) > 0 && sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE )
+		val += ((lv + 1) / 2);
+	amotion = ((int)(temp_aspd + ((float)(status_calc_aspd(&sd->bl, &sd->sc, true) + val) * status->agi / 200)) - min(amotion, 200));
 #else
+	//Angra Manyu disregards aspd_base and similar
+	if( pc_checkequip2(sd, ITEMID_ANGRA_MANYU, EQI_ACC_L, EQI_MAX) )
+		return 0;
+
 	//Base weapon delay
 	amotion = (sd->status.weapon < MAX_WEAPON_TYPE)
 			? (job_info[classidx].aspd_base[sd->status.weapon]) //Single weapon
@@ -2273,10 +2283,6 @@ int status_base_amotion_pc(struct map_session_data *sd, struct status_data *stat
 	//Raw delay adjustment from bAspd bonus
 	amotion += sd->bonus.aspd_add;
 #endif
-
-	//Angra manyu disregards aspd_base and similar
-	if( sd->equip_index[EQI_HAND_R] >= 0 && sd->inventory.u.items_inventory[sd->equip_index[EQI_HAND_R]].nameid == ITEMID_ANGRA_MANYU )
-		return 0;
 
 	return amotion;
 }
@@ -2845,39 +2851,29 @@ int status_calc_mob_(struct mob_data *md, enum e_status_calc_opt opt)
 	status_calc_misc(&md->bl, status, md->level);
 
 	if (flag&4) { //Strengthen Guardians
-		struct guild_castle *gc;
+		struct guild_castle *gc = NULL;
 
-		gc = guild_mapname2gc(map[md->bl.m].name);
-		if (!gc)
+		if (!(gc = guild_mapname2gc(map[md->bl.m].name)))
 			ShowError("status_calc_mob: No castle set at map %s\n", map[md->bl.m].name);
-		else if (gc->castle_id < 24
-#ifndef RENEWAL
-			|| md->mob_id == MOBID_EMPERIUM
-#endif
-			) {
+		else if (gc->castle_id < 24 && gc->castle_id > 33) {
+			if (md->mob_id == MOBID_EMPERIUM) {
 #ifdef RENEWAL
-			if (md->mob_id != MOBID_EMPERIUM) { //In renewal, castle defense has no effect on the emperium [exneval]
-				status->max_hp += 50 * gc->defense;
-				status->max_sp += 70 * gc->defense;
-				status->def += (gc->defense + 2) / 3;
-				status->mdef += (gc->defense + 2) / 3;
-			}
+				status->max_hp += 50 * (gc->defense / 5);
 #else
-			status->max_hp += 1000 * gc->defense;
-			status->max_sp += 200 * gc->defense;
+				status->max_hp += 1000 * gc->defense;
+#endif
+			} else {
+				status->max_hp += 1000 * gc->defense;		
+				status->batk += status->batk * (2 * guardup_lv + 8) / 100;
+				status->rhw.atk += status->rhw.atk * (2 * guardup_lv + 8) / 100;
+#ifndef RENEWAL
+				status->rhw.atk2 += status->rhw.atk2 * (2 * guardup_lv + 8) / 100;
+#endif
+				status->aspd_rate -= 10 * (2 * guardup_lv + 3);
+			}
+			status->hp = status->max_hp;
 			status->def += (gc->defense + 2) / 3;
 			status->mdef += (gc->defense + 2) / 3;
-#endif
-			status->hp = status->max_hp;
-			status->sp = status->max_sp;
-		}
-		if (md->mob_id != MOBID_EMPERIUM) {
-			status->batk += status->batk * 10 * guardup_lv / 100;
-			status->rhw.atk += status->rhw.atk * 10 * guardup_lv / 100;
-#ifndef RENEWAL
-			status->rhw.atk2 += status->rhw.atk2 * 10 * guardup_lv / 100;
-#endif
-			status->aspd_rate -= 100 * guardup_lv;
 		}
 	}
 
@@ -4724,7 +4720,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 	const struct status_data *b_status = status_get_base_status(bl);
 	struct status_data *status = status_get_status_data(bl);
 	struct status_change *sc = status_get_sc(bl);
-	TBL_PC *sd = BL_CAST(BL_PC,bl);
+	TBL_PC *sd = BL_CAST(BL_PC, bl);
 	int temp = 0;
 
 	if( !b_status || !status )
@@ -5042,52 +5038,26 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 #else
 			amotion = (1000 - 4 * status->agi - status->dex) * ((TBL_HOM *)bl)->homunculusDB->baseASPD / 1000;
 			amotion = status_calc_aspd_rate(bl, sc, amotion);
-			if( status->aspd_rate != 1000 )
-				amotion = amotion * status->aspd_rate / 1000;
+			amotion = amotion * status->aspd_rate / 1000;
 #endif
 			amotion = status_calc_fix_aspd(bl, sc, amotion);
 			status->amotion = cap_value(amotion, battle_config.max_aspd, 2000);
 			status->adelay = status->amotion;
 		} else if( bl->type&BL_PC ) {
-			uint16 lv;
-#ifdef RENEWAL_ASPD
-			uint8 val = 0;
-			float temp_val = 0;
-#endif
+			uint8 lv = 0;
 
 			amotion = status_base_amotion_pc(sd, status);
 #ifndef RENEWAL_ASPD
 			status->aspd_rate = status_calc_aspd_rate(bl, sc, b_status->aspd_rate);
-			if( status->aspd_rate != 1000 )
-				amotion = amotion * status->aspd_rate / 1000;
-			if( sd->ud.skilltimer != INVALID_TIMER && (lv = pc_checkskill(sd, SA_FREECAST)) > 0 )
-				amotion = amotion * (lv + 10) * 5 / 100;
-#else //[malufett]
-			switch( sd->status.weapon ) {
-				case W_BOW:	case W_MUSICAL:
-				case W_WHIP:	case W_REVOLVER:
-				case W_RIFLE:	case W_GATLING:
-				case W_SHOTGUN:	case W_GRENADE:
-					temp_val = status->dex * status->dex / 7.0f + status->agi * status->agi * 0.5f;
-					break;
-				default:
-					temp_val = status->dex * status->dex / 5.0f + status->agi * status->agi * 0.5f;
-					break;
-			}
-			temp_val = (float)(sqrt(temp_val) * 0.25f);
-			if( (lv = pc_checkskill(sd,SA_ADVANCEDBOOK)) > 0 && sd->status.weapon == W_BOOK )
-				val += (lv - 1) / 2 + 1;
-			if( (lv = pc_checkskill(sd,GS_SINGLEACTION)) > 0 && sd->status.weapon >= W_REVOLVER && sd->status.weapon <= W_GRENADE )
-				val += ((lv + 1) / 2);
-			amotion -= (int)(temp_val + (float)((status_calc_aspd(bl, sc, true) + val) * status->agi) / 200) * 10;
+#endif
 			//Absolute ASPD % modifier
-			if( status->aspd_rate != 1000 )
-				amotion = (200 - (200 - amotion / 10) * status->aspd_rate / 1000) * 10;
+			amotion = amotion * status->aspd_rate / 1000;
 			if( sd->ud.skilltimer != INVALID_TIMER && (lv = pc_checkskill(sd, SA_FREECAST)) > 0 )
-				amotion = (200 - (200 - amotion / 10) * (lv + 10) * 5 / 100) * 10;
+				amotion = amotion * 5 * (lv + 10) / 100;
+#ifdef RENEWAL_ASPD
 			//RE ASPD % modifier
-			if( (status_calc_aspd(bl, sc, false) + status->aspd_rate2) )
-				amotion -= (amotion - pc_maxaspd(sd)) * (status_calc_aspd(bl, sc, false) + status->aspd_rate2) / 100 + 5; //Don't have round()
+			amotion += (max(0xc3 - amotion, 2) * (status->aspd_rate2 + status_calc_aspd(bl, sc, false))) / 100;
+			amotion = 10 * (200 - amotion);
 			amotion += sd->bonus.aspd_add;
 #endif
 			amotion = status_calc_fix_aspd(bl, sc, amotion);
@@ -5096,8 +5066,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 		} else { //Mercenary, elemental and mobs
 			amotion = b_status->amotion;
 			status->aspd_rate = status_calc_aspd_rate(bl, sc, b_status->aspd_rate);
-			if( status->aspd_rate != 1000 )
-				amotion = amotion * status->aspd_rate / 1000;
+			amotion = amotion * status->aspd_rate / 1000;
 			amotion = status_calc_fix_aspd(bl, sc, amotion);
 			status->amotion = cap_value(amotion, battle_config.monster_max_aspd, 2000);
 			temp = b_status->adelay * status->aspd_rate / 1000;
@@ -6547,7 +6516,7 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 			speed_rate += val;
 		}
 
-		if( sc->data[SC_MARSHOFABYSS] && speed_rate > 150 )
+		if( speed_rate > 150 && sc->data[SC_MARSHOFABYSS] )
 			speed_rate = 150;
 
 		//GetMoveHasteValue1()
@@ -9777,7 +9746,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				val2 = (status_get_lv(bl) + status->dex + status->luk); //Aspd increase
 				break;
 			case SC_QUAGMIRE:
-				val2 = (sd ? 5 : 10) * val1; //Agi/Dex/Move Speed reduction
+				val2 = (bl->type == BL_PC ? 5 : 10) * val1; //Agi/Dex/Move Speed reduction
 				break;
 			case SC_GATLINGFEVER:
 				val2 = 20 * val1; //Aspd increase
@@ -10138,7 +10107,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_GN_CARTBOOST:
 				if( val1 < 3 )
 					val2 = 50;
-				else if( val1 > 2 && val1 < 5 )
+				else if( val1 < 5 )
 					val2 = 75;
 				else
 					val2 = 100;
@@ -10701,14 +10670,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_HISS:
 				val2 = 500; //Perfect Dodge
-				sc_start(src,bl,SC_DORAM_WALKSPEED,100,val1,skill_get_time2(SU_HISS,val1));
 				break;
 			case SC_GROOMING:
 				val2 = 100; //Flee
 				break;
 			case SC_CHATTERING:
 				val2 = 100; //Watk & Matk
-				sc_start(src,bl,SC_DORAM_WALKSPEED,100,val1,skill_get_time2(SU_CHATTERING,val1));
 				break;
 			case SC_DORAM_MATK:
 				val2 = status_get_lv(bl);

@@ -2363,8 +2363,9 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 	if(src && src->type == BL_MOB)
 		mob_unlocktarget((struct mob_data *)src, tick);
 
-	//Filter out entries not eligible for exp distribution
 	memset(tmpsd, 0, sizeof(tmpsd));
+
+	//Filter out entries not eligible for exp distribution
 	for(i = 0, count = 0, mvp_damage = 0; i < DAMAGELOG_SIZE && md->dmglog[i].id; i++) {
 		struct map_session_data *tsd = NULL;
 
@@ -2508,19 +2509,17 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 						pt[j].base_exp = UINT_MAX;
 					else
 						pt[j].base_exp += base_exp;
-
 					if(pt[j].job_exp > UINT_MAX - job_exp)
 						pt[j].job_exp = UINT_MAX;
 					else
 						pt[j].job_exp += job_exp;
-
 					pt[j].zeny += zeny; //Zeny share [Valaris]
 					flag = 0;
 				}
 			}
 			if(base_exp && md->dmglog[i].flag == MDLF_HOMUN) //tmpsd[i] is null if it has no homunc
 				hom_gainexp(tmpsd[i]->hd, base_exp);
-			if(flag) {
+			if(flag) { //Solo EXP
 				if(base_exp || job_exp) {
 					if(md->dmglog[i].flag != MDLF_PET || battle_config.pet_attack_exp_to_master) {
 #ifdef RENEWAL_EXP
@@ -2543,7 +2542,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				pc_damage_log_clear(tmpsd[i], md->bl.id);
 		}
 		for(i = 0; i < pnum; i++) //Party share
-			party_exp_share(pt[i].p, &md->bl, pt[i].base_exp,pt[i].job_exp,pt[i].zeny);
+			party_exp_share(pt[i].p, &md->bl, pt[i].base_exp, pt[i].job_exp, pt[i].zeny);
 	}
 
 	if(!(type&1) && !map[m].flag.nomobloot && !md->state.rebirth && (

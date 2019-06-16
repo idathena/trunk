@@ -1353,7 +1353,7 @@ of 'end' stops this, and ends the script.
 ---------------------------------------
 
 *set <variable>,<expression>{,<char_id>};
-*set(<variable>,<expression>{,<char id>})
+*set(<variable>,<expression>{,<char_id>})
 
 This command will set a variable to the value that the expression results in. 
 Variables may either be set through this command or directly, much like any

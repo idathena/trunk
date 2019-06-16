@@ -1892,6 +1892,7 @@ OnTimer25000:
 	end;
 
 OnDisable:
+	stopnpctimer;
 	disablenpc "Satan Broadcast#edq";
 	end;
 }
@@ -1918,18 +1919,9 @@ moc_fild21,178,239,0	script	Group of Evil#edq	844,1,1,{
 		close;
 	}
 
-OnInit:
-	enablenpc "Group of Evil#edq";
-	end;
-
 OnEnable:
 	enablenpc "Group of Evil#edq";
 	set $@re_moc_time$,"";
-	end;
-
-OnDisable:
-	disablenpc "Group of Evil#edq";
-	donpcevent "Time-Space Gap#edq::OnEnable";
 	end;
 }
 
@@ -1973,8 +1965,6 @@ OnTimer1800000:
 	end;
 
 OnTimer21600000:
-	stopnpctimer;
-	set $@re_moc,0;
 	donpcevent "Time-Space Gap#edq::OnDisable";
 	end;
 }
@@ -2003,7 +1993,9 @@ OnMyMobDead:
 	mapannounce "moc_fild21","I'll let live just a little longer. You'll never find me through this time-space gap!",bc_map,"0xFFFF00";
 	donpcevent "Time-Space Gap#edq::OnEnable";
 	donpcevent "Satan Broadcast#edq::OnDisable";
-	donpcevent "Group of Evil#edq::OnDisable";
+	disablenpc "Group of Evil#edq";
+	stopnpctimer;
+	killmonster "moc_fild21","Satan Summon#edq::OnMyMobDead";
 	disablenpc "Satan Summon#edq";
 	end;
 

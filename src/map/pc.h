@@ -773,6 +773,7 @@ enum weapon_type {
 	W_DOUBLE_DS, // dagger + sword
 	W_DOUBLE_DA, // dagger + axe
 	W_DOUBLE_SA, // sword + axe
+	MAX_WEAPON_TYPE_ALL,
 };
 
 enum adopt_responses {

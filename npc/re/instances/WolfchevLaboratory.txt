@@ -1289,7 +1289,7 @@ OnTouch:
 		if (lhz_curse < 31) {
 			mes "- Whistling sound -";
 			mes "From below, there comes a gruesome sound mingling with the wind.";
-			close2;
+			close;
 		}
 		warp "lhz_dun04", 245, 56;
 	}

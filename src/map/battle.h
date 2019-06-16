@@ -430,6 +430,7 @@ extern struct Battle_Config
 	int idle_no_share;
 	int party_update_interval;
 	int party_even_share_bonus;
+	int party_equal_share_size;
 	int delay_battle_damage;
 	int hide_woe_damage;
 	int display_version;

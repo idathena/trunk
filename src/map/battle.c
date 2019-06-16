@@ -3406,7 +3406,7 @@ static struct Damage battle_calc_multi_attack(struct Damage wd, struct block_lis
 			break;
 		case RL_QD_SHOT:
 			if((i = sd->equip_index[EQI_AMMO]) >= 0 && sd->inventory_data[i] && sd->inventory.u.items_inventory[i].amount > 0) {
-				wd.div_ += status_get_job_lv(src) / 20;
+				wd.div_ = 1 + status_get_job_lv(src) / 20;
 				wd.div_ = min(wd.div_,sd->inventory.u.items_inventory[i].amount);
 				if(battle_config.ammo_decrement && wd.div_ > 1)
 					pc_delitem(sd,i,wd.div_ - 1,0,1,LOG_TYPE_CONSUME);
@@ -8483,6 +8483,7 @@ static const struct _battle_data {
 	{ "require_glory_guild",                &battle_config.require_glory_guild,             0,      0,      1,              },
 	{ "idle_no_share",                      &battle_config.idle_no_share,                   0,      0,      INT_MAX,        },
 	{ "party_even_share_bonus",             &battle_config.party_even_share_bonus,          0,      0,      INT_MAX,        },
+	{ "party_equal_share_size",             &battle_config.party_equal_share_size,          0,      -1,     INT_MAX,        },
 	{ "delay_battle_damage",                &battle_config.delay_battle_damage,             1,      0,      1,              },
 	{ "hide_woe_damage",                    &battle_config.hide_woe_damage,                 0,      0,      1,              },
 	{ "display_version",                    &battle_config.display_version,                 1,      0,      1,              },
