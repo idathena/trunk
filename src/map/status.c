@@ -8381,7 +8381,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( !opt_flag )
 					return 0;
 			}
-			if( tick == 1 )
+			if( tick <= 1 )
 				return 1; //Minimal duration: Only strip without causing the SC
 			break;
 		case SC_STRIPSHIELD:
@@ -8394,7 +8394,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					return 0;
 				pc_unequipitem(sd,i,1|2);
 			}
-			if( tick == 1 )
+			if( tick <= 1 )
 				return 1; //Minimal duration: Only strip without causing the SC
 			break;
 		case SC_STRIPARMOR:
@@ -8405,7 +8405,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					return 0;
 				pc_unequipitem(sd,i,1|2);
 			}
-			if( tick == 1 )
+			if( tick <= 1 )
 				return 1; //Minimal duration: Only strip without causing the SC
 			break;
 		case SC_STRIPHELM:
@@ -8416,7 +8416,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					return 0;
 				pc_unequipitem(sd,i,1|2);
 			}
-			if( tick == 1 )
+			if( tick <= 1 )
 				return 1; //Minimal duration: Only strip without causing the SC
 			break;
 		case SC_MERC_FLEEUP:
@@ -8489,7 +8489,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( i < 0 )
 					return 0;
 			}
-			if( tick == 1 )
+			if( tick <= 1 )
 				return 1; //Minimal duration: Only strip without causing the SC
 			break;
 		case SC_TOXIN:

@@ -5930,7 +5930,7 @@ void clif_skill_estimation(struct map_session_data *sd,struct block_list *dst)
 {
 	struct status_data *status;
 	unsigned char buf[64];
-	int i; //, fix;
+	int i, fix;
 
 	nullpo_retv(sd);
 	nullpo_retv(dst);
@@ -5951,10 +5951,8 @@ void clif_skill_estimation(struct map_session_data *sd,struct block_list *dst)
 	WBUFW(buf,16) = (battle_config.estimation_type&1 ? status->mdef : 0) +
 		(battle_config.estimation_type&2 ? status->mdef2 : 0);
 	WBUFW(buf,18)= status->def_ele;
-	for( i = 0; i < 9; i++ )
-		WBUFB(buf,20 + i) = (unsigned char)battle_attr_ratio(i + 1,status->def_ele,status->ele_lv);
-		//The following caps negative attributes to 0 since the client displays them as 255-fix. [Skotlex]
-		//WBUFB(buf,20 + i) = (unsigned char)((fix = battle_attr_ratio(i + 1,status->def_ele,status->ele_lv)) < 0 ? 0 : fix);
+	for( i = 0; i < 9; i++ ) //The following caps negative attributes to 0 since the client displays them as 255-fix [Skotlex]
+		WBUFB(buf,20 + i) = (unsigned char)((fix = battle_attr_ratio(i + 1,status->def_ele,status->ele_lv)) < 0 ? 0 : fix);
 
 	clif_send(buf,packet_len(0x18c),&sd->bl,sd->status.party_id > 0 ? PARTY_SAMEMAP : SELF);
 }
@@ -8008,9 +8006,8 @@ void clif_sendegg(struct map_session_data *sd)
 	WFIFOHEAD(fd,MAX_INVENTORY * 2 + 4);
 	WFIFOW(fd,0) = 0x1a6;
 	for(i = 0,n = 0; i < MAX_INVENTORY; i++) {
-		if(sd->inventory.u.items_inventory[i].nameid <= 0 || sd->inventory_data[i] == NULL ||
-		   sd->inventory_data[i]->type != IT_PETEGG ||
-		   sd->inventory.u.items_inventory[i].amount <= 0)
+		if(sd->inventory.u.items_inventory[i].nameid <= 0 || !sd->inventory_data[i] ||
+			sd->inventory_data[i]->type != IT_PETEGG || sd->inventory.u.items_inventory[i].amount <= 0)
 			continue;
 		WFIFOW(fd,n * 2 + 4) = i + 2;
 		n++;
@@ -8032,6 +8029,7 @@ void clif_sendegg(struct map_session_data *sd)
 ///     3 = accessory
 ///     4 = performance (data = 1~3: normal, 4: special)
 ///     5 = hairstyle
+///     6 = close egg selection ui and update egg in inventory (PACKETVER >= 20180704)
 ///
 /// If sd is null, the update is sent to nearby objects, otherwise it is sent only to that player.
 void clif_send_petdata(struct map_session_data *sd, struct pet_data *pd, int type, int param)
@@ -21085,6 +21083,35 @@ void clif_parse_req_style_change(int fd, struct map_session_data *sd) {
 		pc_stylist_process(sd, LOOK_HEAD_MID, head_mid, true);
 	if( head_bottom > 0 )
 		pc_stylist_process(sd, LOOK_HEAD_BOTTOM, head_bottom, true);
+
+	clif_style_change_response(sd, STYLIST_SHOP_SUCCESS);
+}
+
+
+void clif_parse_req_style_change2(int fd, struct map_session_data *sd) {
+	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
+	int16 hair_color = RFIFOW(fd,info->pos[0]);
+	int16 hair_style = RFIFOW(fd,info->pos[1]);
+	int16 cloth_color = RFIFOW(fd,info->pos[2]);
+	int16 head_top = RFIFOW(fd,info->pos[3]);
+	int16 head_mid = RFIFOW(fd,info->pos[4]);
+	int16 head_bottom = RFIFOW(fd,info->pos[5]);
+	int16 body_style = RFIFOW(fd,info->pos[6]);
+
+	if( hair_style > 0 )
+		pc_stylist_process(sd, LOOK_HAIR, hair_style, false);
+	if( hair_color > 0 )
+		pc_stylist_process(sd, LOOK_HAIR_COLOR, hair_color, false);
+	if( cloth_color > 0 )
+		pc_stylist_process(sd, LOOK_CLOTHES_COLOR, cloth_color, false);
+	if( head_top > 0 )
+		pc_stylist_process(sd, LOOK_HEAD_TOP, head_top, true);
+	if( head_mid > 0 )
+		pc_stylist_process(sd, LOOK_HEAD_MID, head_mid, true);
+	if( head_bottom > 0 )
+		pc_stylist_process(sd, LOOK_HEAD_BOTTOM, head_bottom, true);
+	if( body_style > 0 && pc_has_second_costume(sd->class_) )
+		pc_stylist_process(sd, LOOK_BODY2, body_style, false);
 
 	clif_style_change_response(sd, STYLIST_SHOP_SUCCESS);
 }

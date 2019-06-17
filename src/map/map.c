@@ -1532,7 +1532,7 @@ TIMER_FUNC(map_clearflooritem_timer)
 {
 	struct flooritem_data *fitem = (struct flooritem_data *)idb_get(id_db, id);
 
-	if (fitem == NULL || fitem->bl.type != BL_ITEM || (fitem->cleartimer != tid)) {
+	if (!fitem || fitem->bl.type != BL_ITEM || fitem->cleartimer != tid) {
 		ShowError("map_clearflooritem_timer : error\n");
 		return 1;
 	}
@@ -1553,10 +1553,10 @@ TIMER_FUNC(map_clearflooritem_timer)
 void map_clearflooritem(struct block_list *bl) {
 	struct flooritem_data *fitem = (struct flooritem_data *)bl;
 
-	if( fitem->cleartimer )
-		delete_timer(fitem->cleartimer,map_clearflooritem_timer);
+	if( fitem->cleartimer != INVALID_TIMER )
+		delete_timer(fitem->cleartimer, map_clearflooritem_timer);
 
-	clif_clearflooritem(fitem,0);
+	clif_clearflooritem(fitem, 0);
 	map_deliddb(&fitem->bl);
 	map_delblock(&fitem->bl);
 	map_freeblock(&fitem->bl);

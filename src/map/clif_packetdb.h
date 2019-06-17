@@ -2451,4 +2451,10 @@
 	packet(0x0A4C,28);
 #endif
 
+// 2018-05-16cRagexe, 2018-05-16cRagexeRE
+#if PACKETVER >= 20180516
+	// New packet
+	parseable_packet(0x0AFC,16,clif_parse_req_style_change2,2,4,6,8,10,12,14);
+#endif
+
 #endif /* _CLIF_PACKETDB_H_ */

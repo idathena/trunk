@@ -2698,6 +2698,7 @@ ACMD_FUNC(makeegg) {
  *------------------------------------------*/
 ACMD_FUNC(hatch) {
 	nullpo_retr(-1, sd);
+
 	if (sd->status.pet_id <= 0)
 		clif_sendegg(sd);
 	else {
