@@ -348,6 +348,10 @@ int pet_return_egg(struct map_session_data *sd, struct pet_data *pd)
 	}
 
 	pd->pet.incubate = 1;
+#if PACKETVER >= 20180704
+	clif_inventorylist(sd);
+	clif_send_petdata(sd,pd,6,0);
+#endif
 	unit_free(&pd->bl,CLR_OUTSIGHT);
 	status_calc_pc(sd,SCO_NONE);
 	sd->status.pet_id = 0;
@@ -458,6 +462,9 @@ int pet_birth_process(struct map_session_data *sd, struct s_pet *pet)
 		clif_spawn(&sd->pd->bl);
 		clif_send_petdata(sd, sd->pd, 0, 0);
 		clif_send_petdata(sd, sd->pd, 5, battle_config.pet_hair_style);
+#if PACKETVER >= 20180704
+		clif_send_petdata(sd, sd->pd, 6, 1);
+#endif
 		clif_pet_equip_area(sd->pd);
 		clif_send_petstatus(sd);
 	}
@@ -493,7 +500,7 @@ int pet_recv_petdata(int account_id,struct s_pet *p, int flag)
 		}
 	} else {
 		pet_data_init(sd,p);
-		if(sd->pd && sd->bl.prev != NULL) {
+		if(sd->pd && sd->bl.prev) {
 			if(map_addblock(&sd->pd->bl))
 				return 1;
 			clif_spawn(&sd->pd->bl);

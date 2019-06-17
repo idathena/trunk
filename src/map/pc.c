@@ -1027,6 +1027,9 @@ void pc_makesavestatus(struct map_session_data *sd)
 	if(!battle_config.save_clothcolor)
 		sd->status.clothes_color = 0;
 
+	if(!battle_config.save_body_style)
+		sd->status.body = 0;
+
 #ifdef NEW_CARTS //Only copy the Cart/Peco/Falcon options, the rest are handled via status change load/saving [Skotlex]
 	sd->status.option = sd->sc.option&(OPTION_INVISIBLE|OPTION_FALCON|OPTION_RIDING|OPTION_DRAGON|OPTION_WUG|OPTION_WUGRIDER|OPTION_MADOGEAR);
 #else
@@ -5014,7 +5017,7 @@ bool pc_dropitem(struct map_session_data *sd, int n, int amount)
 		!sd->inventory_data[n]) //pc_delitem would fail on this case
 		return false;
 
-	if(sd->inventory.u.items_inventory[n].equipSwitch)
+	if(sd->menuskill_id || sd->inventory.u.items_inventory[n].equipSwitch)
 		return false;
 
 	if(map[sd->bl.m].flag.nodrop) {
@@ -11818,7 +11821,7 @@ static void pc_readdb_attendance_libconfig(const char *filename)
 		count++;
 	}
 	config_destroy(&attendance_db_conf);
-	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s/%s"CL_RESET"'.\n", count, db_path, filename);
 }
 
 static void pc_readdb_stylist_libconfig_sub(struct config_setting_t *it, int16 count, const char *source)
@@ -11888,7 +11891,7 @@ static void pc_readdb_stylist_libconfig(const char *filename)
 		count++;
 	}
 	config_destroy(&stylist_db_conf);
-	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filename);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s/%s"CL_RESET"'.\n", count, db_path, filename);
 }
 
 /*==========================================

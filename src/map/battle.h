@@ -283,6 +283,7 @@ extern struct Battle_Config
 	int battle_log;
 	int etc_log;
 	int save_clothcolor;
+	int save_body_style;
 	int undead_detect_type;
 	int auto_counter_type;
 	int min_hitrate;	//[Skotlex]

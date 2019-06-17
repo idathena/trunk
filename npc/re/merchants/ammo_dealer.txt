@@ -14,5 +14,5 @@
 //= 1.2 Updated Izlude coordinates. [Euphy]
 //============================================================
 
-que_ng,187,156,3	duplicate(bdt)	Bullet Dealer Tony#ng	86
-izlude_in,74,106,3	duplicate(bdt)	Bullet Dealer Tony#iz	86
+que_ng,187,156,3	duplicate(bdt)	Bullet Dealer Tony#ng	4_M_04
+izlude_in,74,106,3	duplicate(bdt)	Bullet Dealer Tony#iz	4_M_04

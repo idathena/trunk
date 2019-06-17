@@ -8325,6 +8325,7 @@ static const struct _battle_data {
 	{ "battle_log",                         &battle_config.battle_log,                      0,      0,      1,              },
 	{ "etc_log",                            &battle_config.etc_log,                         1,      0,      1,              },
 	{ "save_clothcolor",                    &battle_config.save_clothcolor,                 1,      0,      1,              },
+	{ "save_body_style",                    &battle_config.save_body_style,                 1,      0,      1,              },
 	{ "undead_detect_type",                 &battle_config.undead_detect_type,              0,      0,      2,              },
 	{ "auto_counter_type",                  &battle_config.auto_counter_type,               BL_ALL, BL_NUL, BL_ALL,         },
 	{ "min_hitrate",                        &battle_config.min_hitrate,                     5,      0,      100,            },

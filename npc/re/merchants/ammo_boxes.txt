@@ -292,5 +292,5 @@ S_Close:
 	close;
 }
 
-que_ng,187,149,3	duplicate(mdk)	Magazine Dealer Kenny#ng	83
-izlude_in,74,104,3	duplicate(mdk)	Magazine Dealer Kenny#iz	83
+que_ng,187,149,3	duplicate(mdk)	Magazine Dealer Kenny#ng	4_M_01
+izlude_in,74,104,3	duplicate(mdk)	Magazine Dealer Kenny#iz	4_M_01

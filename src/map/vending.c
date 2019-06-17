@@ -526,7 +526,7 @@ void vending_reopen(struct map_session_data *sd) {
 			vending_autotrader_db->clear(vending_autotrader_db, vending_autotrader_free);
 	}
 
-	if( fail != 0 ) {
+	if( fail ) {
 		ShowError("vending_reopen: (Error:%d) Load failed for autotrader '"CL_WHITE"%s"CL_RESET"' (CID=%d/AID=%d)\n", fail, sd->status.name, sd->status.char_id, sd->status.account_id);
 		map_quit(sd);
 	}
