@@ -8005,7 +8005,7 @@ void clif_sendegg(struct map_session_data *sd)
 	}
 	WFIFOHEAD(fd,MAX_INVENTORY * 2 + 4);
 	WFIFOW(fd,0) = 0x1a6;
-	for(i = 0,n = 0; i < MAX_INVENTORY; i++) {
+	for(i = 0, n = 0; i < MAX_INVENTORY; i++) {
 		if(sd->inventory.u.items_inventory[i].nameid <= 0 || !sd->inventory_data[i] ||
 			sd->inventory_data[i]->type != IT_PETEGG || sd->inventory.u.items_inventory[i].amount <= 0)
 			continue;

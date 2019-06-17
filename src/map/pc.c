@@ -5017,10 +5017,7 @@ bool pc_dropitem(struct map_session_data *sd, int n, int amount)
 		!sd->inventory_data[n]) //pc_delitem would fail on this case
 		return false;
 
-	if(sd->menuskill_id)
-		return false;
-
-	if(sd->inventory.u.items_inventory[n].equipSwitch)
+	if(sd->menuskill_id || sd->inventory.u.items_inventory[n].equipSwitch)
 		return false;
 
 	if(map[sd->bl.m].flag.nodrop) {
