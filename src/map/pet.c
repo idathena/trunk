@@ -1111,6 +1111,11 @@ void pet_evolution(struct map_session_data *sd, unsigned short pet_idx)
 
 	nullpo_retv(sd);
 
+	if (!battle_config.feature_pet_evolution || !sd->pd) {
+		clif_pet_evolution_result(sd, PET_EVOL_UNKNOWN);
+		return;
+	}
+
 	if (!sd->pd->pet.pet_id) {
 		clif_pet_evolution_result(sd, PET_EVOL_NO_CALLPET);
 		return;
@@ -1123,7 +1128,7 @@ void pet_evolution(struct map_session_data *sd, unsigned short pet_idx)
 		return;
 	}
 
-	if (!sd->pd || sd->pd->pet.intimate < PETINTIMATE_LOYAL) {
+	if (sd->pd->pet.intimate < PETINTIMATE_LOYAL) {
 		clif_pet_evolution_result(sd, PET_EVOL_RG_FAMILIAR);
 		return;
 	}

@@ -14042,10 +14042,11 @@ void clif_parse_ChangePetName(int fd, struct map_session_data *sd)
 }
 
 
-/// Request to Evolve the pet (CZ_PET_EVOLUTION) [Dastgir]
-/// 09fb <Length>.W <EvolvedPetEggID>.W {<index>.W <amount>.W}*items
+/// Process the pet evolution request
+/// 09fb <packetType>.W <packetLength>.W <evolutionPetEggITID>.W (CZ_PET_EVOLUTION)
 void clif_parse_pet_evolution(int fd, struct map_session_data *sd)
 {
+#if PACKETVER >= 20141008
 	struct s_packet_db *info;
 	uint16 petIndex;
 
@@ -14060,19 +14061,18 @@ void clif_parse_pet_evolution(int fd, struct map_session_data *sd)
 		return;
 	}
 	pet_evolution(sd, petIndex);
+#endif
 }
 
-/**
- * Result of Pet Evolution (ZC_PET_EVOLUTION_RESULT)
- * 0x9fc <Result>.L
- */
+/// Sends the result of the evolution to the client
+/// 09fc <result>.L (ZC_PET_EVOLUTION_RESULT)
 void clif_pet_evolution_result(struct map_session_data *sd, enum e_pet_evolution_result result) {
-#if PACKETVER >= 20140122
+#if PACKETVER >= 20141008
 	int fd = sd->fd;
 
 	WFIFOHEAD(fd,packet_len(0x9fc));
 	WFIFOW(fd,0) = 0x9fc;
-	WFIFOL(fd,2) = result;
+	WFIFOL(fd,2) = (uint32)result;
 	WFIFOSET(fd,packet_len(0x9fc));
 #endif
 }

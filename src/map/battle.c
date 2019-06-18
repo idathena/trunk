@@ -8710,6 +8710,7 @@ static const struct _battle_data {
 	{ "millennium_shield_health",           &battle_config.millennium_shield_health,        1000,   1,      INT_MAX,        },
 	{ "hesperuslit_bonus_stack",            &battle_config.hesperuslit_bonus_stack,         0,      0,      1,              },
 	{ "load_custom_exp_tables",             &battle_config.load_custom_exp_tables,          0,      0,      1,              },
+	{ "feature.pet_evolution",              &battle_config.feature_pet_evolution,           1,      0,      1,              },
 	{ "feature.pet_autofeed",               &battle_config.feature_pet_autofeed,            1,      0,      1,              },
 	{ "pet_autofeed_always",                &battle_config.pet_autofeed_always,             1,      0,      1,              },
 	{ "feature.homunculus_autofeed",        &battle_config.feature_homunculus_autofeed,     1,      0,      1,              },
@@ -8864,9 +8865,13 @@ void battle_adjust_conf()
 	}
 #endif
 
-#if PACKETVER < 20150513
+#if PACKETVER < 20141008
+	if (battle_config.feature_pet_evolution) {
+		ShowWarning("conf/battle/feature.conf pet evolution is enabled but it requires PACKETVER 2014-10-08 or newer, disabling...\n");
+		battle_config.feature_pet_evolution = 0;
+	}
 	if (battle_config.feature_pet_autofeed) {
-		ShowWarning("conf/battle/feature.conf pet autofeeding is enabled but it requires PACKETVER 2015-05-13 or newer, disabling...\n");
+		ShowWarning("conf/battle/feature.conf pet autofeeding is enabled but it requires PACKETVER 2014-10-08 or newer, disabling...\n");
 		battle_config.feature_pet_autofeed = 0;
 	}
 #endif
