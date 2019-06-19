@@ -687,6 +687,7 @@ extern struct Battle_Config
 	int feature_equipswitch;
 	int min_shop_buy;
 	int min_shop_sell;
+	int homunculus_exp_gain;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

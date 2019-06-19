@@ -146,8 +146,8 @@ enum e_homun_grade {
 //Check Homunculus Class ID
 #define homdb_checkid(id) (id >=  HM_CLASS_BASE && id <= HM_CLASS_MAX)
 
-//merc_is_hom_alive(struct homun_data *)
-#define hom_is_active(x) (x && x->homunculus.vaporize == HOM_ST_ACTIVE && x->battle_status.hp > 0)
+bool hom_is_maxbaselv(struct homun_data *hd);
+#define hom_is_active(x) ((x) && (x)->homunculus.vaporize == HOM_ST_ACTIVE && (x)->battle_status.hp > 0)
 int hom_recv_data(int account_id, struct s_homunculus *sh, int flag); //Albator
 struct view_data *hom_get_viewdata(int class_);
 int hom_class2mapid(int hom_class);
@@ -178,7 +178,7 @@ int hom_search(int key,int type);
 void hom_menu(struct map_session_data *sd, int type);
 int hom_food(struct map_session_data *sd, struct homun_data *hd);
 int hom_hungry_timer_delete(struct homun_data *hd);
-int hom_change_name(struct map_session_data *sd,char *name);
+int hom_change_name(struct map_session_data *sd, char *name);
 void hom_change_name_ack(struct map_session_data *sd, char *name, int flag);
 #define hom_stop_walking(hd, type) unit_stop_walking(&(hd)->bl, type)
 #define hom_stop_attack(hd) unit_stop_attack(&(hd)->bl)

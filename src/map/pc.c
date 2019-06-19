@@ -6890,7 +6890,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 	clif_updatestatus(sd, SP_SKILLPOINT);
 	status_calc_pc(sd, SCO_FORCE);
 	clif_misceffect(&sd->bl, 1);
-	if (pc_checkskill(sd, SG_DEVIL) && pc_is_maxbaselv(sd))
+	if (pc_checkskill(sd, SG_DEVIL) > 0 && pc_is_maxbaselv(sd))
 		clif_status_change(&sd->bl, SI_DEVIL1, 1, 0, 0, 0, 1); //Permanent blind effect from SG_DEVIL
 
 	npc_script_event(sd, NPCE_JOBLVUP);
@@ -7010,6 +7010,11 @@ void pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned in
 		if (sd->status.guild_id > 0)
 			base_exp -= guild_payexp(sd, base_exp);
 	}
+
+#ifdef RENEWAL //Homunculus gains 10% of final EXP owner gained from any source
+	if (hom_is_active(sd->hd) && (base_exp || job_exp))
+		hom_gainexp(sd->hd, (base_exp + job_exp) * battle_config.homunculus_exp_gain / 100);
+#endif
 
 	flag = (base_exp ? 1 : 0)|(job_exp ? 2 : 0)|(pc_is_maxbaselv(sd) ? 4 : 0)|(pc_is_maxjoblv(sd) ? 8 : 0);
 	nextb = pc_nextbaseexp(sd);
@@ -7719,22 +7724,22 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 		//It has been confirmed on official servers that when you reset skills with a ranked Taekwon your skills are not reset (because you have all of them anyway)
 		if( pc_is_taekwon_ranker(sd) )
 			return 0;
-		if( pc_checkskill(sd, SG_DEVIL) && pc_is_maxjoblv(sd) )
+		if( pc_checkskill(sd, SG_DEVIL) > 0 && pc_is_maxjoblv(sd) )
 			clif_status_load(&sd->bl, SI_DEVIL1, 0); //Remove perma blindness due to skill-reset [Skotlex]
 		i = sd->sc.option;
-		if( i&OPTION_RIDING && pc_checkskill(sd, KN_RIDING) )
+		if( i&OPTION_RIDING && pc_checkskill(sd, KN_RIDING) > 0 )
 			i &= ~OPTION_RIDING;
-		if( i&OPTION_FALCON && pc_checkskill(sd, HT_FALCON) )
+		if( i&OPTION_FALCON && pc_checkskill(sd, HT_FALCON) > 0 )
 			i &= ~OPTION_FALCON;
-		if( i&OPTION_DRAGON && pc_checkskill(sd, RK_DRAGONTRAINING) )
+		if( i&OPTION_DRAGON && pc_checkskill(sd, RK_DRAGONTRAINING) > 0 )
 			i &= ~OPTION_DRAGON;
-		if( i&OPTION_WUG && pc_checkskill(sd, RA_WUGMASTERY) )
+		if( i&OPTION_WUG && pc_checkskill(sd, RA_WUGMASTERY) > 0 )
 			i &= ~OPTION_WUG;
-		if( i&OPTION_WUGRIDER && pc_checkskill(sd, RA_WUGRIDER) )
+		if( i&OPTION_WUGRIDER && pc_checkskill(sd, RA_WUGRIDER) > 0 )
 			i &= ~OPTION_WUGRIDER;
 		if( i&OPTION_MADOGEAR && (sd->class_&MAPID_THIRDMASK) == MAPID_MECHANIC )
 			i &= ~OPTION_MADOGEAR;
-		if( pc_checkskill(sd, MC_PUSHCART) ) {
+		if( pc_checkskill(sd, MC_PUSHCART) > 0 ) {
 #ifndef NEW_CARTS
 			if( i&OPTION_CART )
 				i &= ~OPTION_CART;
@@ -9357,7 +9362,7 @@ bool pc_setcart(struct map_session_data *sd, int type) {
 	if( type < 0 || type > MAX_CARTS )
 		return false; //Never trust the values sent by the client! [Skotlex]
 
-	if( pc_checkskill(sd,MC_PUSHCART) <= 0 && type )
+	if( type && !pc_checkskill(sd,MC_PUSHCART) )
 		return false; //Push cart is required
 
 #ifdef NEW_CARTS
@@ -11521,7 +11526,7 @@ static bool pc_readdb_job_exp(char *fields[], int columns, int current)
 		ShowError("pc_readdb_job_exp: Invalid maxlevel %d specified.\n", maxlvl);
 		return false;
 	}
-	if((maxlvl + 3) > columns) { //NB values = (maxlvl - startlvl) + 1 - index1stvalue
+	if(maxlvl + 3 > columns) { //NB values = (maxlvl - startlvl) + 1 - index1stvalue
 		ShowError("pc_readdb_job_exp: Number of columns %d defined is too low for max level %d.\n", columns, maxlvl);
 		return false;
 	}
@@ -11539,7 +11544,6 @@ static bool pc_readdb_job_exp(char *fields[], int columns, int current)
 		return false;
 	}
 	idx = pc_class2idx(job_id);
-
 	job_info[idx].max_level[type] = maxlvl;
 	for(i = 0; i < maxlvl; i++)
 		job_info[idx].exp_table[type][i] = ((uint32)atoi(fields[3 + i]));

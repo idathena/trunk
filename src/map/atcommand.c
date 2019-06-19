@@ -7345,7 +7345,7 @@ ACMD_FUNC(showmobs)
 ACMD_FUNC(homlevel)
 {
 	TBL_HOM *hd;
-	int level = 0, m_class;
+	int level = 0;
 
 	nullpo_retr(-1, sd);
 
@@ -7360,16 +7360,17 @@ ACMD_FUNC(homlevel)
 	}
 
 	hd = sd->hd;
-	m_class = hom_class2mapid(hd->homunculus.class_);
 
-	if (((m_class&HOM_REG) && battle_config.hom_max_level <= hd->homunculus.level) ||
-		((m_class&HOM_S) && battle_config.hom_S_max_level <= hd->homunculus.level)) {
+	if (hom_is_maxbaselv(hd)) {
 		clif_displaymessage(fd, "Homunculus already reached its maximum level.");
 		return 0;
 	}
 
 	do {
-		hd->homunculus.exp += hd->exp_next;
+		if ((uint64)hd->homunculus.exp + hd->exp_next > UINT32_MAX)
+			hd->homunculus.exp = UINT32_MAX;
+		else
+			hd->homunculus.exp += hd->exp_next;
 	} while (hd->homunculus.level < level && hom_levelup(hd));
 
 	status_calc_homunculus(hd, SCO_NONE);
@@ -7565,8 +7566,8 @@ ACMD_FUNC(hominfo)
 		status->hp, status->max_hp, status->sp, status->max_sp);
 	clif_displaymessage(fd, atcmd_output);
 
-	snprintf(atcmd_output, sizeof(atcmd_output), msg_txt(1263), // ATK: %d - MATK: %d~%d
-		status->batk + status->rhw.atk2, status->matk_min, status->matk_max);
+	snprintf(atcmd_output, sizeof(atcmd_output), msg_txt(1263), // ATK: %d - MATK: %d
+		status->rhw.atk2, status->matk_max);
 	clif_displaymessage(fd, atcmd_output);
 
 	snprintf(atcmd_output, sizeof(atcmd_output), msg_txt(1264), // Hungry: %d - Intimacy: %u
@@ -8514,8 +8515,8 @@ ACMD_FUNC(clone)
 	}
 
 	do {
-		x = sd->bl.x + (rnd() % 10 - 5);
-		y = sd->bl.y + (rnd() % 10 - 5);
+		x = sd->bl.x + (rnd()%10 - 5);
+		y = sd->bl.y + (rnd()%10 - 5);
 	} while (map_getcell(sd->bl.m,x,y,CELL_CHKNOPASS) && i++ < 10);
 
 	if (i >= 10) {
@@ -9319,44 +9320,49 @@ ACMD_FUNC(reloadnpcfile) {
 	}
 
 	npc_read_event_script();
-
 	clif_displaymessage(fd, msg_txt(262)); // Script loaded.
+
 	return 0;
 }
 
 ACMD_FUNC(cart) {
-#define MC_CART_MDFY(x) \
-	sd->status.skill[MC_PUSHCART].id = x ? MC_PUSHCART : 0; \
-	sd->status.skill[MC_PUSHCART].lv = x ? 1 : 0; \
-	sd->status.skill[MC_PUSHCART].flag = x ? SKILL_FLAG_TEMPORARY : SKILL_FLAG_PERMANENT;
+#define MC_CART_MDFY(idx, x) \
+	sd->status.skill[(idx)].id = (x) ? MC_PUSHCART : 0; \
+	sd->status.skill[(idx)].lv = (x) ? 10 : 0; \
+	sd->status.skill[(idx)].flag = (x) ? SKILL_FLAG_TEMPORARY : SKILL_FLAG_PERMANENT;
 
-	int val;
-	bool lv = (pc_checkskill(sd, MC_PUSHCART) ? false : true);
+	int val = atoi(message);
+	bool need_skill = (pc_checkskill(sd, MC_PUSHCART) == 0);
+	uint16 sk_idx = 0;
 
-	if( message )
-		val = atoi(message);
 	if( !message || !*message || val < 0 || val > MAX_CARTS ) {
 		sprintf(atcmd_output, msg_txt(1390), command, MAX_CARTS); // Unknown Cart (usage: %s <0-%d>).
 		clif_displaymessage(fd, atcmd_output);
 		return -1;
 	}
 
-	if( val == 0 && !pc_iscarton(sd) ) {
+	if( !val && !pc_iscarton(sd) ) {
 		clif_displaymessage(fd, msg_txt(1391)); // You do not possess a cart to be removed
 		return -1;
 	}
 
-	if( lv )
-		MC_CART_MDFY(1);
+	if( !(sk_idx = skill_get_index(MC_PUSHCART)) )
+		return -1;
+
+	if( need_skill ) {
+		MC_CART_MDFY(sk_idx, 1);
+	}
 
 	if( !pc_setcart(sd, val) ) {
-		if( lv )
-			MC_CART_MDFY(0);
+		if( need_skill ) {
+			MC_CART_MDFY(sk_idx, 0);
+		}
 		return -1; // @cart failed
 	}
 
-	if( lv )
-		MC_CART_MDFY(0);
+	if( need_skill ) {
+		MC_CART_MDFY(sk_idx, 0);
+	}
 
 	clif_displaymessage(fd, msg_txt(1392)); // Cart Added
 

@@ -2328,7 +2328,7 @@ static unsigned short status_base_atk(const struct block_list *bl, const struct 
 	switch( bl->type ) {
 		case BL_HOM:
 #ifdef RENEWAL
-			str = 2 * (level + status_get_homstr(bl));
+			str = 2 * (status_get_homstr(bl) + level);
 #else
 			dstr = str / 10;
 			str += dstr * dstr;
@@ -2385,7 +2385,7 @@ unsigned short status_base_atk_min(struct block_list *bl, const struct status_da
 		case BL_ELEM:
 			return status->rhw.atk * 80 / 100;
 		case BL_HOM:
-			return (status_get_homstr(bl) + status_get_homdex(bl)) / 5;
+			return ((status_get_homstr(bl) + status_get_homdex(bl)) / 5) + (level / 10);
 		default:
 			return status->rhw.atk;
 	}
@@ -2404,7 +2404,7 @@ unsigned short status_base_atk_max(struct block_list *bl, const struct status_da
 		case BL_ELEM:
 			return status->rhw.atk * 120 / 100;
 		case BL_HOM:
-			return (status_get_homluk(bl) + status_get_homstr(bl) + status_get_homdex(bl)) / 3;
+			return ((status_get_homstr(bl) + status_get_homdex(bl) + status_get_homluk(bl)) / 3) + (level / 10);
 		default:
 			return status->rhw.atk2;
 	}
@@ -2487,8 +2487,8 @@ void status_get_matk_sub(struct block_list *bl, unsigned short *matk_max, unsign
 			*matk_max += status->rhw.matk * 130 / 100;
 			break;
 		case BL_HOM:
-			*matk_min += (status_get_homint(bl) + status_get_homdex(bl)) / 5;
-			*matk_max += (status_get_homluk(bl) + status_get_homint(bl) + status_get_homdex(bl)) / 3;
+			*matk_min += ((status_get_homint(bl) + status_get_homdex(bl)) / 5) + (status_get_lv(bl) / 10) * 2;
+			*matk_max += ((status_get_homint(bl) + status_get_homdex(bl) + status_get_homluk(bl)) / 3) + (status_get_lv(bl) / 10) * 2;
 			break;
 	}
 #else
@@ -5222,7 +5222,7 @@ void status_calc_bl_(struct block_list *bl, enum scb_flag flag, enum e_status_ca
 	} else if( bl->type == BL_HOM ) {
 		TBL_HOM *hd = BL_CAST(BL_HOM, bl);
 
-		if( hd->master && memcmp(&b_status, status, sizeof(struct status_data)) != 0 )
+		if( hd->master && memcmp(&b_status, status, sizeof(struct status_data)) )
 			clif_hominfo(hd->master, hd, 0);
 	} else if( bl->type == BL_MER ) {
 		TBL_MER *md = BL_CAST(BL_MER, bl);
@@ -6170,7 +6170,7 @@ defType status_calc_def(struct block_list *bl, struct status_change *sc, int def
 	if(sc->data[SC_ODINS_POWER])
 		def -= 20 * sc->data[SC_ODINS_POWER]->val1;
 	if(sc->data[SC_ANGRIFFS_MODUS])
-		def -= 30 + 20 * sc->data[SC_ANGRIFFS_MODUS]->val1;
+		def -= 10 + 20 * sc->data[SC_ANGRIFFS_MODUS]->val1;
 	if(sc->data[SC_SKE])
 		def -= def * 50 / 100;
 	if(sc->data[SC_SIGNUMCRUCIS])
@@ -10504,7 +10504,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_ANGRIFFS_MODUS:
 				val2 = 50 + 20 * val1; //Atk bonus
-				val3 = 40 + 20 * val1; //Flee reduction
+				val3 = 25 + 10 * val1; //Flee reduction
 				tick_time = 1000;
 				val4 = tick / tick_time; //Hp/Sp reduction timer
 				break;
@@ -11593,10 +11593,6 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 					damage = status->hp - 1;
 				status_zap(bl,damage,0);
 			}
-			break;
-		case SC_PYROCLASTIC:
-			if (sd)
-				skill_break_equip(bl,bl,EQP_WEAPON,10000,BCT_SELF);
 			break;
 		case SC_KEEPING: {
 				struct unit_data *ud = unit_bl2ud(bl);

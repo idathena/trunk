@@ -1568,7 +1568,7 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 	WBUFW(buf,29) = hd->homunculus.hunger;
 	WBUFW(buf,31) = (unsigned short) (hd->homunculus.intimacy / 100) ;
 	WBUFW(buf,33) = 0; //Equip id
-	WBUFW(buf,35) = cap_value(status->batk + status->rhw.atk2, 0, INT16_MAX);
+	WBUFW(buf,35) = cap_value(status->rhw.atk2, 0, INT16_MAX);
 	WBUFW(buf,37) = cap_value(status->matk_max, 0, INT16_MAX);
 	WBUFW(buf,39) = status->hit;
 	if (battle_config.hom_setting&HOMSET_DISPLAY_LUK)
@@ -1614,17 +1614,6 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 	}
 	WBUFL(buf,59 + offset) = hd->homunculus.exp;
 	WBUFL(buf,63 + offset) = hd->exp_next;
-	switch (htype) {
-		case HT_REG:
-		case HT_EVO:
-			if (hd->homunculus.level >= battle_config.hom_max_level)
-				WBUFL(buf,63 + offset) = 0;
-			break;
-		case HT_S:
-			if (hd->homunculus.level >= battle_config.hom_S_max_level)
-				WBUFL(buf,63 + offset) = 0;
-			break;
-	}
 	WBUFW(buf,67 + offset) = hd->homunculus.skillpts;
 	WBUFW(buf,69 + offset) = status_get_range(&hd->bl);
 	clif_send(buf,packet_len(cmd),&sd->bl,SELF);

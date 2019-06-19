@@ -1623,13 +1623,13 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			status_change_start(src,bl,SC_STUN,1000 * skill_lv,skill_lv,0,0,0,skill_get_time2(skill_id,skill_lv),SCFLAG_FIXEDTICK);
 			break;
 		case MH_NEEDLE_OF_PARALYZE:
-			sc_start(src,bl,SC_PARALYSIS,40 + skill_lv * 5,skill_lv,skill_get_time(skill_id,skill_lv));
+			sc_start(src,bl,SC_PARALYSIS,30 + skill_lv * 5,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case MH_XENO_SLASHER:
 			sc_start(src,bl,SC_BLEEDING,skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case MH_SILVERVEIN_RUSH:
-			sc_start(src,bl,SC_STUN,20 + skill_lv * 5,skill_lv,skill_get_time(skill_id,skill_lv));
+			sc_start(src,bl,SC_STUN,5 * skill_lv,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case MH_MIDNIGHT_FRENZY: {
 				int spiritball = (hd ? hd->homunculus.spiritball : 1);
@@ -1667,10 +1667,10 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			}
 			break;
 		case MH_STAHL_HORN:
-			sc_start(src,bl,SC_STUN,16 + skill_lv * 4,skill_lv,skill_get_time(skill_id,skill_lv));
+			sc_start(src,bl,SC_STUN,20 + skill_lv * 2,skill_lv,skill_get_time(skill_id,skill_lv));
 			break;
 		case MH_LAVA_SLIDE:
-			sc_start(src,bl,SC_BURNING,10 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
+			sc_start(src,bl,SC_BURNING,5 * skill_lv,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
 		case GN_ILLUSIONDOPING:
 			if( sc_start(src,bl,SC_ILLUSIONDOPING,100 - skill_lv * 10,skill_lv,skill_get_time(skill_id,skill_lv)) )
