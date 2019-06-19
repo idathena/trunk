@@ -617,9 +617,6 @@ int hom_levelup(struct homun_data *hd)
 
 	hom_stats_cap_check(hd); //MaxHP/MaxSP/Stats Cap check
 	APPLY_HOMUN_LEVEL_STATWEIGHT();
-	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
-	status_calc_homunculus(hd, SCO_NONE);
-	status_percent_heal(&hd->bl, 100, 100);
 
 	if (hd->master && battle_config.homunculus_show_growth) {
 		char output[256];
@@ -825,24 +822,10 @@ int hom_mutate(struct homun_data *hd, int homun_id)
  */
 void hom_gainexp(struct homun_data *hd, int exp)
 {
-	int m_class;
-
 	nullpo_retv(hd);
 
-	if (hd->homunculus.vaporize)
+	if (hd->homunculus.vaporize || hom_is_maxbaselv(hd))
 		return;
-
-	if ((m_class = hom_class2mapid(hd->homunculus.class_)) == HT_INVALID) {
-		ShowError("hom_gainexp: Invalid class %d. \n", hd->homunculus.class_);
-		return;
-	}
-
-	if (hom_is_maxbaselv(hd)) {
-		if (hd->homunculus.exp >= MAX_HOM_LEVEL_EXP)
-			exp = 0;
-		else if ((uint64)hd->homunculus.exp + exp >= MAX_HOM_LEVEL_EXP)
-			exp = MAX_HOM_LEVEL_EXP - hd->homunculus.exp;
-	}
 
 	if (exp) {
 		if ((uint64)hd->homunculus.exp + exp > UINT32_MAX)
@@ -858,6 +841,10 @@ void hom_gainexp(struct homun_data *hd, int exp)
 
 	//Level up
 	while (hd->homunculus.exp > hd->exp_next && hom_levelup(hd));
+
+	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
+	status_calc_homunculus(hd, SCO_NONE);
+	status_percent_heal(&hd->bl, 100, 100);
 }
 
 /**
