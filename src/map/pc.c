@@ -11522,11 +11522,11 @@ static bool pc_readdb_job_exp(char *fields[], int columns, int current)
 	unsigned int ui, maxlvl;
 
 	maxlvl = atoi(fields[0]);
-	if(maxlvl > MAX_LEVEL || maxlvl < 1) {
+	if(maxlvl < 1 || maxlvl > MAX_LEVEL) {
 		ShowError("pc_readdb_job_exp: Invalid maxlevel %d specified.\n", maxlvl);
 		return false;
 	}
-	if(maxlvl + 3 > columns) { //NB values = (maxlvl - startlvl) + 1 - index1stvalue
+	if(columns < maxlvl + 3) { //NB values = (maxlvl - startlvl) + 1 - index1stvalue
 		ShowError("pc_readdb_job_exp: Number of columns %d defined is too low for max level %d.\n", columns, maxlvl);
 		return false;
 	}
