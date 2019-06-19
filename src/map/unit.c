@@ -2524,7 +2524,7 @@ static int unit_attack_timer_sub(struct block_list *src, int tid, unsigned int t
 			return 1;
 
 		ud->attackabletime = tick + sstatus->adelay;
-		//You can't move if you can't attack neither.
+		//You can't move if you can't attack neither
 		if( src->type&battle_config.attack_walk_delay )
 			unit_set_walkdelay(src,tick,sstatus->amotion,1);
 	}
