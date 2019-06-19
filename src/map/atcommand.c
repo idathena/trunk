@@ -7367,15 +7367,8 @@ ACMD_FUNC(homlevel)
 	}
 
 	do {
-		if ((uint64)hd->homunculus.exp + hd->exp_next > UINT32_MAX)
-			hd->homunculus.exp = UINT32_MAX;
-		else
-			hd->homunculus.exp += hd->exp_next;
+		hd->homunculus.exp = hd->exp_next;
 	} while (hd->homunculus.level < level && hom_levelup(hd));
-
-	status_calc_homunculus(hd, SCO_NONE);
-	status_percent_heal(&hd->bl, 100, 100);
-	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
 
 	return 0;
 }

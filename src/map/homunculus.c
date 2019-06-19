@@ -617,6 +617,9 @@ int hom_levelup(struct homun_data *hd)
 
 	hom_stats_cap_check(hd); //MaxHP/MaxSP/Stats Cap check
 	APPLY_HOMUN_LEVEL_STATWEIGHT();
+	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
+	status_calc_homunculus(hd, SCO_NONE);
+	status_percent_heal(&hd->bl, 100, 100);
 
 	if (hd->master && battle_config.homunculus_show_growth) {
 		char output[256];
@@ -841,10 +844,6 @@ void hom_gainexp(struct homun_data *hd, int exp)
 
 	//Level up
 	while (hd->homunculus.exp > hd->exp_next && hom_levelup(hd));
-
-	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
-	status_calc_homunculus(hd, SCO_NONE);
-	status_percent_heal(&hd->bl, 100, 100);
 }
 
 /**
@@ -1162,11 +1161,14 @@ void hom_alloc(struct map_session_data *sd, struct s_homunculus *hom)
 	sd->hd = hd = (struct homun_data *)aCalloc(1, sizeof(struct homun_data));
 	hd->bl.type = BL_HOM;
 	hd->bl.id = npc_get_new_npc_id();
-
 	hd->master = sd;
 	hd->homunculusDB = &homunculus_db[i];
 	memcpy(&hd->homunculus, hom, sizeof(struct s_homunculus));
-	hd->exp_next = hexptbl[hd->homunculus.level - 1];
+
+	if (hom_is_maxbaselv(hd))
+		hd->exp_next = MAX_HOM_LEVEL_EXP;
+	else
+		hd->exp_next = hexptbl[hd->homunculus.level - 1];
 
 	status_set_viewdata(&hd->bl, hd->homunculus.class_);
 	status_change_init(&hd->bl);
@@ -1481,10 +1483,7 @@ int hom_shuffle(struct homun_data *hd)
 	hom_reset_stats(hd); //Reset values to level 1
 
 	do { //Level it back up
-		if ((uint64)hd->homunculus.exp + hd->exp_next > UINT32_MAX)
-			hd->homunculus.exp = UINT32_MAX;
-		else
-			hd->homunculus.exp += hd->exp_next;
+		hd->homunculus.exp = hd->exp_next;
 	} while (hd->homunculus.level < lv && hom_levelup(hd));
 
 	if (hd->homunculus.class_ == hd->homunculusDB->evo_class) { //Evolved bonuses
@@ -1506,9 +1505,6 @@ int hom_shuffle(struct homun_data *hd)
 	memcpy(&hd->homunculus.hskill, &b_skill, sizeof(b_skill));
 	hd->homunculus.skillpts = skillpts;
 	clif_homskillinfoblock(sd);
-	status_calc_homunculus(hd, SCO_NONE);
-	status_percent_heal(&hd->bl, 100, 100);
-	clif_specialeffect(&hd->bl, EF_HO_UP, AREA);
 	return 1;
 }
 
