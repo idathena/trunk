@@ -3455,7 +3455,7 @@
 6513,Charm_Ice,Ice Amulet,3,100,,1,,,,,,,,,,,,,{},{},{}
 6514,Charm_Wind,Wind Amulet,3,100,,1,,,,,,,,,,,,,{},{},{}
 6515,Charm_Earth,Earth Amulet,3,100,,1,,,,,,,,,,,,,{},{},{}
-6707,Cash_Hair_Coupon,Cash Hair Coupon,3,10,,10,,,,,,,,,,,,,{},{},{}
+6707,Cash_Hair_Coupon,Jeremy Beauty Coupon,3,10,,10,,,,,,,,,,,,,{},{},{}
 6959,Costume_Change_Ticket,Costume Change Ticket,3,0,,0,,,,,,,,,,,,,{},{},{}
 7001,Mould_Powder,Mould Powder,3,466,,10,,,,,,,,,,,,,{},{},{}
 7002,Ogre_Tooth,Ogre Tooth,3,658,,10,,,,,,,,,,,,,{},{},{}
@@ -6633,3 +6633,4 @@
 22777,Gift_Buff_Set,Gift Buff Set,2,10,,100,,,,0,0xFFFFFFFF,7,2,,,1,,,{},{},{}
 23277,Mado_Box,Emergency Magic Gear,2,10000,,3000,,,,,0x00000400,8,2,,,100,,,{ setmadogear 1; },{},{}
 25187,Slug_Bullet,Slug Bullet,3,1200,,1200,,,,,,,,,,,,,{},{},{}
+25736,Cash_Hair_Coupon2,Jeremy's Beauty Coupon II,3,10,,10,,,,,,,,,,,,,{},{},{}

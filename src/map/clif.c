@@ -4735,7 +4735,8 @@ static int clif_calc_walkdelay(struct block_list *bl, int delay, char type, int6
 	if (div > 1) //Multi-hit skills mean higher delays
 		delay += battle_config.multihit_delay * (div - 1);
 
-	return (delay > 0) ? delay : 1; //Return 1 to specify there should be no noticeable delay, but you should stop walking.
+	//Return 1 to specify there should be no noticeable delay, but you should stop walking
+	return (delay > 0 ? delay : 1);
 }
 
 

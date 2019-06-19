@@ -2327,14 +2327,8 @@ static bool is_attack_critical(struct Damage wd, struct block_list *src, struct 
 		case NPC_CRITICALSLASH:
 		case LG_PINPOINTATTACK:
 			return true; //Always critical
-		case KN_AUTOCOUNTER:
-		case SN_SHARPSHOOTING:
-		case MA_SHARPSHOOTING:
-		case NJ_KIRIKAGE:
-			allow_cri = true;
-			break;
-		case MO_TRIPLEATTACK:
-			if(battle_config.enable_critical_multihit)
+		default:
+			if(skill_get_nk(skill_id)&NK_CRITICAL)
 				allow_cri = true;
 			break;
 	}
@@ -8477,7 +8471,7 @@ static const struct _battle_data {
 	{ "min_skill_delay_limit",              &battle_config.min_skill_delay_limit,           100,    10,     INT_MAX,        },
 	{ "default_walk_delay",                 &battle_config.default_walk_delay,              300,    0,      INT_MAX,        },
 	{ "no_skill_delay",                     &battle_config.no_skill_delay,                  BL_MOB, BL_NUL, BL_ALL,         },
-	{ "attack_walk_delay",                  &battle_config.attack_walk_delay,               BL_ALL, BL_NUL, BL_ALL,         },
+	{ "attack_walk_delay",                  &battle_config.attack_walk_delay,               BL_CHAR, BL_NUL, BL_ALL,        },
 	{ "require_glory_guild",                &battle_config.require_glory_guild,             0,      0,      1,              },
 	{ "idle_no_share",                      &battle_config.idle_no_share,                   0,      0,      INT_MAX,        },
 	{ "party_even_share_bonus",             &battle_config.party_even_share_bonus,          0,      0,      INT_MAX,        },
