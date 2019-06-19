@@ -673,6 +673,7 @@ extern struct Battle_Config
 	int millennium_shield_health;
 	int hesperuslit_bonus_stack;
 	int load_custom_exp_tables;
+	int feature_pet_evolution;
 	int feature_pet_autofeed;
 	int pet_autofeed_always;
 	int feature_homunculus_autofeed;
@@ -686,6 +687,7 @@ extern struct Battle_Config
 	int feature_equipswitch;
 	int min_shop_buy;
 	int min_shop_sell;
+	int homunculus_exp_gain;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

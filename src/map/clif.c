@@ -1549,7 +1549,6 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 	const int cmd = 0x9f7;
 #endif
 	int offset;
-	int htype;
 
 	nullpo_retv(hd);
 
@@ -1557,7 +1556,6 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 		return;
 
 	status = &hd->battle_status;
-	htype = hom_class2type(hd->homunculus.class_);
 
 	memset(buf,0,packet_len(cmd));
 	WBUFW(buf,0) = cmd;
@@ -1568,7 +1566,7 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 	WBUFW(buf,29) = hd->homunculus.hunger;
 	WBUFW(buf,31) = (unsigned short) (hd->homunculus.intimacy / 100) ;
 	WBUFW(buf,33) = 0; //Equip id
-	WBUFW(buf,35) = cap_value(status->batk + status->rhw.atk2, 0, INT16_MAX);
+	WBUFW(buf,35) = cap_value(status->rhw.atk2, 0, INT16_MAX);
 	WBUFW(buf,37) = cap_value(status->matk_max, 0, INT16_MAX);
 	WBUFW(buf,39) = status->hit;
 	if (battle_config.hom_setting&HOMSET_DISPLAY_LUK)
@@ -1614,17 +1612,6 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 	}
 	WBUFL(buf,59 + offset) = hd->homunculus.exp;
 	WBUFL(buf,63 + offset) = hd->exp_next;
-	switch (htype) {
-		case HT_REG:
-		case HT_EVO:
-			if (hd->homunculus.level >= battle_config.hom_max_level)
-				WBUFL(buf,63 + offset) = 0;
-			break;
-		case HT_S:
-			if (hd->homunculus.level >= battle_config.hom_S_max_level)
-				WBUFL(buf,63 + offset) = 0;
-			break;
-	}
 	WBUFW(buf,67 + offset) = hd->homunculus.skillpts;
 	WBUFW(buf,69 + offset) = status_get_range(&hd->bl);
 	clif_send(buf,packet_len(cmd),&sd->bl,SELF);
@@ -14042,10 +14029,11 @@ void clif_parse_ChangePetName(int fd, struct map_session_data *sd)
 }
 
 
-/// Request to Evolve the pet (CZ_PET_EVOLUTION) [Dastgir]
-/// 09fb <Length>.W <EvolvedPetEggID>.W {<index>.W <amount>.W}*items
+/// Process the pet evolution request
+/// 09fb <packetType>.W <packetLength>.W <evolutionPetEggITID>.W (CZ_PET_EVOLUTION)
 void clif_parse_pet_evolution(int fd, struct map_session_data *sd)
 {
+#if PACKETVER >= 20141008
 	struct s_packet_db *info;
 	uint16 petIndex;
 
@@ -14060,19 +14048,18 @@ void clif_parse_pet_evolution(int fd, struct map_session_data *sd)
 		return;
 	}
 	pet_evolution(sd, petIndex);
+#endif
 }
 
-/**
- * Result of Pet Evolution (ZC_PET_EVOLUTION_RESULT)
- * 0x9fc <Result>.L
- */
+/// Sends the result of the evolution to the client
+/// 09fc <result>.L (ZC_PET_EVOLUTION_RESULT)
 void clif_pet_evolution_result(struct map_session_data *sd, enum e_pet_evolution_result result) {
-#if PACKETVER >= 20140122
+#if PACKETVER >= 20141008
 	int fd = sd->fd;
 
 	WFIFOHEAD(fd,packet_len(0x9fc));
 	WFIFOW(fd,0) = 0x9fc;
-	WFIFOL(fd,2) = result;
+	WFIFOL(fd,2) = (uint32)result;
 	WFIFOSET(fd,packet_len(0x9fc));
 #endif
 }

@@ -2480,8 +2480,12 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				exp = apply_rate(exp, map[m].adjust.bexp);
 				base_exp = (unsigned int)cap_value(exp, 1, UINT_MAX);
 			}
-			if(map[m].flag.nojobexp || !md->db->job_exp || md->dmglog[i].flag == MDLF_HOMUN)
-				job_exp = 0; //Homun earned job-exp is always lost
+			if(map[m].flag.nojobexp || !md->db->job_exp
+#ifndef RENEWAL //Homun earned job-exp is always lost
+				|| md->dmglog[i].flag == MDLF_HOMUN
+#endif
+				)
+				job_exp = 0;
 			else {
 				double exp = apply_rate2(md->db->job_exp, per, 1);
 
@@ -2517,8 +2521,10 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 					flag = 0;
 				}
 			}
-			if(base_exp && md->dmglog[i].flag == MDLF_HOMUN) //tmpsd[i] is null if it has no homunc
-				hom_gainexp(tmpsd[i]->hd, base_exp);
+#ifndef RENEWAL
+			if(base_exp && md->dmglog[i].flag == MDLF_HOMUN) 
+				hom_gainexp(tmpsd[i]->hd, base_exp); //tmpsd[i] is null if it has no homunculus
+#endif
 			if(flag) { //Solo EXP
 				if(base_exp || job_exp) {
 					if(md->dmglog[i].flag != MDLF_PET || battle_config.pet_attack_exp_to_master) {
@@ -3337,7 +3343,7 @@ int mobskill_use(struct mob_data *md, unsigned int tick, int event)
 				continue;
 		}
 
-		if (rnd() % 10000 > ms[i].permillage) //Lupus (max value = 10000)
+		if (rnd()%10000 > ms[i].permillage) //Lupus (max value = 10000)
 			continue;
 
 		if (ms[i].cond1 == event)
