@@ -1549,7 +1549,6 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 	const int cmd = 0x9f7;
 #endif
 	int offset;
-	int htype;
 
 	nullpo_retv(hd);
 
@@ -1557,7 +1556,6 @@ void clif_hominfo(struct map_session_data *sd, struct homun_data *hd, int flag)
 		return;
 
 	status = &hd->battle_status;
-	htype = hom_class2type(hd->homunculus.class_);
 
 	memset(buf,0,packet_len(cmd));
 	WBUFW(buf,0) = cmd;
