@@ -97,12 +97,15 @@ struct s_attendance_period {
 
 struct s_attendance_period *attendance_periods;
 
-struct s_stylist_data {
-	int16 id;
+struct s_stylist_data_req {
 	int zeny;
 	int16 itemid;
 	int16 boxid;
-	bool allow_doram;
+};
+
+struct s_stylist_data {
+	int16 id;
+	struct s_stylist_data_req req[2];
 };
 
 #define MAX_STYLIST_TYPE LOOK_MAX
@@ -174,7 +177,7 @@ struct item_cd {
  */
 int pc_class2idx(int class_) {
 	if (class_ >= JOB_NOVICE_HIGH)
-		return class_- JOB_NOVICE_HIGH+JOB_MAX_BASIC;
+		return class_- JOB_NOVICE_HIGH + JOB_MAX_BASIC;
 	return class_;
 }
 
@@ -11453,12 +11456,19 @@ static unsigned int pc_calc_basehp(uint16 level, uint16 class_) {
 
 	base_hp = 35 + level * (job_info[idx].hp_multiplicator / 100.);
 #ifndef RENEWAL
-	if(level >= 10 && (class_ == JOB_NINJA || class_ == JOB_GUNSLINGER))
-		base_hp += 90;
+	switch(class_) {
+		case JOB_NINJA:
+		case JOB_BABY_NINJA:
+		case JOB_GUNSLINGER:
+		case JOB_BABY_GUNSLINGER:
+			if(level >= 10)
+				base_hp += 90;
+			break;
+	}
 #endif
 	for(i = 2; i <= level; i++)
 		base_hp += floor(i * (job_info[idx].hp_factor / 100.) + 0.5); //Don't have round()
-	if(class_ == JOB_SUMMONER)
+	if(class_ == JOB_SUMMONER || class_ == JOB_BABY_SUMMONER)
 		base_hp += floor((base_hp / 2) + 0.5);
 	return (unsigned int)base_hp;
 }
@@ -11476,18 +11486,21 @@ static unsigned int pc_calc_basesp(uint16 level, uint16 class_) {
 	base_sp = 10 + floor(level * (job_info[idx].sp_factor / 100.));
 	switch(class_) {
 		case JOB_NINJA:
+		case JOB_BABY_NINJA:
 			if(level >= 10)
 				base_sp -= 22;
 			else
 				base_sp = 11 + 3 * level;
 			break;
 		case JOB_GUNSLINGER:
+		case JOB_BABY_GUNSLINGER:
 			if(level >= 10)
 				base_sp -= 18;
 			else
 				base_sp = 9 + 3 * level;
 			break;
 		case JOB_SUMMONER:
+		case JOB_BABY_SUMMONER:
 			base_sp -= floor(base_sp / 2);
 			break;
 	}
@@ -11858,10 +11871,9 @@ static void pc_readdb_attendance_libconfig(const char *filename)
 
 static void pc_readdb_stylist_libconfig_sub(struct config_setting_t *it, int16 count, const char *source)
 {
-	int i32, type = 0, style = 0, zeny = 0, itemID = 0, boxItemID = 0;
-	bool allow_doram = false;
+	struct config_setting_t *human = NULL, *doram = NULL;
+	int i32, idx, type = 0, style = 0, zeny = 0, itemID = 0, boxItemID = 0;
 	const char *name;
-	int16 idx;
 
 	nullpo_retv(it);
 	nullpo_retv(source);
@@ -11887,23 +11899,31 @@ static void pc_readdb_stylist_libconfig_sub(struct config_setting_t *it, int16 c
 		idx = i32;
 	else
 		idx = style;
-	if (config_setting_lookup_int(it, "Zeny", &i32))
-		zeny = i32;
-	if (config_setting_lookup_int(it, "ItemID", &i32))
-		itemID = i32;
-	if (config_setting_lookup_int(it, "BoxItemID", &i32))
-		boxItemID = i32;
-	if (config_setting_lookup_bool(it, "AllowDoram", &i32))
-		allow_doram = (i32 != 0);
-	if (!stylist_datas[type])
-		CREATE(stylist_datas[type], struct s_stylist_data, 1);
-	else
-		RECREATE(stylist_datas[type], struct s_stylist_data, stylist_data_count + 1);
+	RECREATE(stylist_datas[type], struct s_stylist_data, stylist_data_count + 1);
+	memset(&stylist_datas[type][idx - 1].req, 0, sizeof(struct s_stylist_data_req) * 2);
 	stylist_datas[type][idx - 1].id = style;
-	stylist_datas[type][idx - 1].zeny = zeny;
-	stylist_datas[type][idx - 1].itemid = itemID;
-	stylist_datas[type][idx - 1].boxid = boxItemID;
-	stylist_datas[type][idx - 1].allow_doram = allow_doram;
+	if ((human = config_setting_get_member(it, "Human")) && config_setting_is_group(human)) {
+		if (config_setting_lookup_int(human, "Zeny", &i32))
+			zeny = i32;
+		if (config_setting_lookup_int(human, "ItemID", &i32))
+			itemID = i32;
+		if (config_setting_lookup_int(human, "BoxItemID", &i32))
+			boxItemID = i32;
+		stylist_datas[type][idx - 1].req[0].zeny = zeny;
+		stylist_datas[type][idx - 1].req[0].itemid = itemID;
+		stylist_datas[type][idx - 1].req[0].boxid = boxItemID;
+	}
+	if ((doram = config_setting_get_member(it, "Doram")) && config_setting_is_group(doram)) {
+		if (config_setting_lookup_int(doram, "Zeny", &i32))
+			zeny = i32;
+		if (config_setting_lookup_int(doram, "ItemID", &i32))
+			itemID = i32;
+		if (config_setting_lookup_int(doram, "BoxItemID", &i32))
+			boxItemID = i32;
+		stylist_datas[type][idx - 1].req[1].zeny = zeny;
+		stylist_datas[type][idx - 1].req[1].itemid = itemID;
+		stylist_datas[type][idx - 1].req[1].boxid = boxItemID;
+	}
 	stylist_data_count++;
 }
 
@@ -13274,29 +13294,53 @@ struct s_stylist_data *pc_stylist_data(int type, int16 idx) {
 
 static bool pc_stylist_validate_requirements(struct map_session_data *sd, int type, int16 idx) {
 	struct s_stylist_data *entry = pc_stylist_data(type, idx);
+	struct s_stylist_data_req *human = &entry->req[0], *doram = &entry->req[1];
+	bool is_doram = ((sd->class_&MAPID_BASEMASK) == MAPID_SUMMONER);
 	struct item it;
 
 	nullpo_retr(false, sd);
 
-	if (sd->status.class_ == JOB_SUMMONER && !entry->allow_doram)
-		return false;
+	if (is_doram) {
+		if (!doram)
+			return false;
+	} else {
+		if (!human)
+			return false;
+	}
 
 	if (entry->id >= 0) {
-		if (entry->zeny && pc_payzeny(sd, entry->zeny, LOG_TYPE_CONSUME, NULL))
-			return false;
-		else if (entry->itemid) {
-			it.nameid = entry->itemid;
-			it.amount = 1;
-			if (pc_delitem(sd, pc_search_inventory(sd, it.nameid), it.amount, 0, 0, LOG_TYPE_OTHER))
+		if (is_doram) {
+			if (doram->zeny && pc_payzeny(sd, doram->zeny, LOG_TYPE_CONSUME, NULL))
 				return false;
-		} else if (entry->boxid) {
-			it.nameid = entry->boxid;
-			it.amount = 1;
-			if (pc_delitem(sd, pc_search_inventory(sd, it.nameid), it.amount, 0, 0, LOG_TYPE_OTHER))
+			else if (doram->itemid) {
+				it.nameid = doram->itemid;
+				it.amount = 1;
+				if (pc_delitem(sd, pc_search_inventory(sd, it.nameid), it.amount, 0, 0, LOG_TYPE_OTHER))
+					return false;
+			} else if (doram->boxid) {
+				it.nameid = doram->boxid;
+				it.amount = 1;
+				if (pc_delitem(sd, pc_search_inventory(sd, it.nameid), it.amount, 0, 0, LOG_TYPE_OTHER))
+					return false;
+			}
+		} else {
+			if (human->zeny && pc_payzeny(sd, human->zeny, LOG_TYPE_CONSUME, NULL))
 				return false;
+			else if (human->itemid) {
+				it.nameid = human->itemid;
+				it.amount = 1;
+				if (pc_delitem(sd, pc_search_inventory(sd, it.nameid), it.amount, 0, 0, LOG_TYPE_OTHER))
+					return false;
+			} else if (human->boxid) {
+				it.nameid = human->boxid;
+				it.amount = 1;
+				if (pc_delitem(sd, pc_search_inventory(sd, it.nameid), it.amount, 0, 0, LOG_TYPE_OTHER))
+					return false;
+			}
 		}
 		return true;
 	}
+
 	return false;
 }
 

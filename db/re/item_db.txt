@@ -4615,7 +4615,7 @@
 6704,Warrior_Anger,Warrior Anger,3,10,,0,,,,,,,,,,,,,{},{},{}
 6705,Warrior_Certificate,Warrior Certificate,3,10,,0,,,,,,,,,,,,,{},{},{}
 6706,Guardian_Flowers,Guardian Flowers,3,10,,0,,,,,,,,,,,,,{},{},{}
-6707,Cash_Hair_Coupon,Cash Hair Coupon,3,10,,10,,,,,,,,,,,,,{},{},{}
+6707,Cash_Hair_Coupon,Jeremy Beauty Coupon,3,10,,10,,,,,,,,,,,,,{},{},{}
 6708,Mana_Crystal,Mana Crystal,3,10,,0,,,,,,,,,,,,,{},{},{}
 6709,Crisp_Silk,Crisp Silk,3,10,,0,,,,,,,,,,,,,{},{},{}
 6710,Tied_Snake,Tied Snake,3,10,,0,,,,,,,,,,,,,{},{},{}
@@ -11228,6 +11228,7 @@
 25377,Luxurious_Pet_Food,Luxurious Pet Food,3,20,,10,,,,,,,,,,,,,{},{},{}
 25408,Memories_Of_Gyoll,Memories of Gyoll,3,0,,0,,,,,,,,,,,,,{},{},{}
 25464,World_Tour_Ticket,World Tour Ticket,3,20,,0,,,,,,,,,,,,,{},{},{}
+25736,Cash_Hair_Coupon2,Jeremy's Beauty Coupon II,3,10,,10,,,,,,,,,,,,,{},{},{}
 // New Items
 //===================================================================
 26100,P_Foxtail_Staff2,Eden Foxtail Staff II,5,20,,0,135:165,,1,0,0x04000000,7,2,2,2,40,0,10,{ bonus bDex,4; bonus bInt,4; bonus bLongAtkRate,6; },{},{}
