@@ -417,8 +417,6 @@ unsigned short skill_dummy2skill_id(unsigned short skill_id) {
 			return RL_R_TRIP;
 		case RL_B_FLICKER_ATK:
 			return RL_FLICKER;
-		case RL_GLITTERING_GREED_ATK:
-			return RL_GLITTERING_GREED;
 		case SU_SV_ROOTTWIST_ATK:
 			return SU_SV_ROOTTWIST;
 		case SU_PICKYPECK_DOUBLE_ATK:

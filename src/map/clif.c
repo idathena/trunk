@@ -5617,7 +5617,7 @@ void clif_skill_cooldown_list(struct map_session_data *sd, uint16 skill_id, unsi
 /// Skill attack effect and damage.
 /// 0114 <skill id>.W <src id>.L <dst id>.L <tick>.L <src delay>.L <dst delay>.L <damage>.W <level>.W <div>.W <type>.B (ZC_NOTIFY_SKILL)
 /// 01de <skill id>.W <src id>.L <dst id>.L <tick>.L <src delay>.L <dst delay>.L <damage>.L <level>.W <div>.W <type>.B (ZC_NOTIFY_SKILL2)
-int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 in_damage,int div,uint16 skill_id,uint16 skill_lv,int type)
+int clif_skill_damage(struct block_list *src, struct block_list *dst, unsigned int tick, int sdelay, int ddelay, int64 in_damage, int div, uint16 skill_id, uint16 skill_lv, int type)
 {
 	unsigned char buf[64];
 	struct status_change *sc;
@@ -5710,7 +5710,7 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int
 /// Ground skill attack effect and damage (ZC_NOTIFY_SKILL_POSITION).
 /// 0115 <skill id>.W <src id>.L <dst id>.L <tick>.L <src delay>.L <dst delay>.L <x>.W <y>.W <damage>.W <level>.W <div>.W <type>.B
 /*
-int clif_skill_damage2(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 damage,int div,uint16 skill_id,uint16 skill_lv,int type)
+int clif_skill_damage2(struct block_list *src, struct block_list *dst, unsigned int tick, int sdelay, int ddelay, int64 damage, int div, uint16 skill_id, uint16 skill_lv, int type)
 {
 	unsigned char buf[64];
 	struct status_change *sc;
