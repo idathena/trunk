@@ -3036,6 +3036,7 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 				pc_delshieldball(sd, sd->shieldball, 1);
 				pc_delrageball(sd, sd->rageball, 1);
 				pc_delcharmball(sd, sd->charmball, sd->charmball_type);
+				pc_delsoulball(sd, sd->charmball, 1);
 				if( sd->reg ) { //Double logout already freed pointer fix [Skotlex]
 					aFree(sd->reg);
 					sd->reg = NULL;

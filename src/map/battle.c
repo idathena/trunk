@@ -314,7 +314,8 @@ int battle_delay_damage(unsigned int tick, int amotion, struct block_list *src, 
 
 	if( ((d_tbl && check_distance_bl(target, d_tbl, sc->data[SC_DEVOTION]->val3)) ||
 		(s_tsd && s_tsd->shadowform_id == target->id) || e_tbl) &&
-		damage > 0 && skill_id != CR_REFLECTSHIELD && skill_id != PA_PRESSURE && !isvanishdamage )
+		skill_id != CR_REFLECTSHIELD && skill_id != PA_PRESSURE && skill_id != SP_SOULEXPLOSION &&
+		damage > 0 && !isvanishdamage )
 		damage = 0;
 
 	if( !battle_config.delay_battle_damage || amotion <= 1 ) { //Deal damage
@@ -996,6 +997,7 @@ static bool battle_skill_check_bypass_modifiers(struct block_list *src, struct b
 		case NPC_MAXPAIN_ATK:
 		case PA_PRESSURE:
 		case HW_GRAVITATION:
+		case SP_SOULEXPLOSION:
 			return true;
 		case NPC_GRANDDARKNESS:
 		case CR_GRANDCROSS:
@@ -1099,6 +1101,7 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 	struct status_change_entry *sce = NULL;
 	int div_ = d->div_, flag = d->flag;
 
+	nullpo_ret(src);
 	nullpo_ret(bl);
 
 	if( !damage )
@@ -1470,6 +1473,11 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 
 		if( (sce = tsc->data[SC__DEADLYINFECT]) && (flag&(BF_SHORT|BF_MAGIC)) == BF_SHORT && rnd()%100 < 30 + 10 * sce->val1 )
 			status_change_spread(src,bl,false);
+
+		if( (sce = tsc->data[SC_SOULREAPER]) && rnd()%100 < sce->val2 && tsd ) {
+			clif_specialeffect(src,EF_ENERGYDRAIN_BLACK,AREA);
+			pc_addsoulball(tsd,skill_get_time2(SP_SOULREAPER,sce->val1), 5 + 3 * pc_checkskill(tsd,SP_SOULENERGY));
+		}
 
 		if( (sce = tsc->data[SC_STYLE_CHANGE]) && sce->val1 == MH_MD_FIGHTING ) { //When attacking
 			TBL_HOM *hd = BL_CAST(BL_HOM,src);
@@ -4284,11 +4292,16 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case KO_HUUMARANKA:
 			skillratio += -100 + 150 * skill_lv + sstatus->agi + sstatus->dex + 100 * (sd ? pc_checkskill(sd,NJ_HUUMA) : 5);
 			break;
-		case KO_SETSUDAN:
-			skillratio += 100 * (skill_lv - 1);
-			RE_LVL_DMOD(100);
-			if(tsc && tsc->data[SC_SPIRIT])
-				skillratio += 200 * tsc->data[SC_SPIRIT]->val1;
+		case KO_SETSUDAN: {
+				struct status_change_entry *sce = NULL;
+
+				skillratio += 100 * (skill_lv - 1);
+				RE_LVL_DMOD(100);
+				if(tsc && ((sce = tsc->data[SC_SPIRIT]) || (sce = tsc->data[SC_SOULGOLEM]) ||
+					(sce = tsc->data[SC_SOULSHADOW]) || (sce = tsc->data[SC_SOULFALCON]) ||
+					(sce = tsc->data[SC_SOULFAIRY])))
+					skillratio += 200 * sce->val1;
+			}
 			break;
 		case KO_BAKURETSU:
 			skillratio += -100 + (50 + sstatus->dex / 4) * (sd ? pc_checkskill(sd,NJ_TOBIDOUGU) : 10) * 4 * skill_lv / 10;
@@ -5892,6 +5905,8 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 			default:
 				MATK_ADD(status_get_matk(src, 2));
 
+				if(sd && sd->soulball > 0)
+					MATK_ADD(sd->soulball * 3);
 #ifdef RENEWAL
 				if(sd) //Card Fix for attacker (sd), 1 is added to the "left" flag meaning "attacker cards only"
 					ad.damage += battle_calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, ad.damage, 1, ad.flag);
@@ -6254,6 +6269,23 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 							RE_LVL_DMOD(100);
 						} else //Normal Demonic Fire Damage
 							skillratio += 10 + 20 * skill_lv;
+						break;
+					case SP_CURSEEXPLOSION:
+						if(tsc && tsc->data[SC_CURSE])
+							skillratio += 1400 + 200 * skill_lv;
+						else
+							skillratio += 300 + 100 * skill_lv;
+						break;
+					case SP_SPA:
+						skillratio += 400 + 250 * skill_lv;
+						RE_LVL_DMOD(100);
+						break;
+					case SP_SHA:
+						skillratio += -100 + 5 * skill_lv;
+						break;
+					case SP_SWHOO:
+						skillratio += 1000 + 200 * skill_lv;
+						RE_LVL_DMOD(100);
 						break;
 					case KO_KAIHOU:
 						skillratio += -100 + 200 * (sd ? sd->charmball_old : MAX_CHARMBALL);
@@ -6823,6 +6855,9 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 			if(status_has_mode(tstatus, MD_STATUS_IMMUNE)) //HP damage dealt is 1/10 the amount on boss monsters
 				md.damage = md.damage / 10;
 			md.damage += 10 * sstatus->dex;
+			break;
+		case SP_SOULEXPLOSION:
+			md.damage = tstatus->hp * (20 + 10 * skill_lv) / 100;
 			break;
 		case SU_SV_ROOTTWIST_ATK:
 			md.damage = 100;

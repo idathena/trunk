@@ -1064,6 +1064,7 @@ void clif_elemental_updatestatus(struct map_session_data *sd, int type);
 
 void clif_millenniumshield(struct block_list *bl, short shield_count);
 void clif_charmball(struct map_session_data *sd);
+void clif_soulball(struct map_session_data *sd);
 
 void clif_snap(struct block_list *bl, short x, short y);
 void clif_monster_hp_bar(struct mob_data *md, int fd);

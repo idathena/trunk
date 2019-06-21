@@ -444,7 +444,7 @@ static TIMER_FUNC(pc_shieldball_timer)
 		if( sd->shieldball_timer[0] != INVALID_TIMER )
 			delete_timer(sd->shieldball_timer[0], pc_shieldball_timer);
 		sd->shieldball--;
-		if( sd->shieldball != 0 )
+		if( sd->shieldball )
 			memmove(sd->shieldball_timer + 0, sd->shieldball_timer + 1, sd->shieldball * sizeof(int));
 		sd->shieldball_timer[sd->shieldball] = INVALID_TIMER;
 	}
@@ -698,13 +698,13 @@ void pc_addcharmball(struct map_session_data *sd, int interval, int max, int typ
 		if( sd->charmball_timer[0] != INVALID_TIMER )
 			delete_timer(sd->charmball_timer[0], pc_charmball_timer);
 		sd->charmball--;
-		if( sd->charmball != 0 )
+		if( sd->charmball )
 			memmove(sd->charmball_timer + 0, sd->charmball_timer + 1, sd->charmball * sizeof(int));
 		sd->charmball_timer[sd->charmball] = INVALID_TIMER;
 	}
 
 	tid = add_timer(gettick() + interval, pc_charmball_timer, sd->bl.id, 0);
-	ARR_FIND(0, sd->charmball, i, sd->charmball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->charmball_timer[i])->tick) < 0);
+	ARR_FIND(0, sd->charmball, i, (sd->charmball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->charmball_timer[i])->tick) < 0));
 
 	if( i != sd->charmball )
 		memmove(sd->charmball_timer + i + 1, sd->charmball_timer + i, (sd->charmball - i) * sizeof(int));
@@ -763,6 +763,126 @@ void pc_delcharmball(struct map_session_data *sd, int count, int type)
 		sd->charmball_type = CHARM_TYPE_NONE;
 
 	clif_charmball(sd);
+}
+
+/**
+ * Soulball expiration timer.
+ * @see TimerFunc
+ */
+static TIMER_FUNC(pc_soulball_timer)
+{
+	struct map_session_data *sd;
+	int i;
+
+	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
+		return 1;
+
+	if( sd->soulball <= 0 ) {
+		ShowError("pc_soulball_timer: %d soulball's available. (aid=%d cid=%d tid=%d)\n", sd->soulball, sd->status.account_id, sd->status.char_id, tid);
+		sd->soulball = 0;
+		return 0;
+	}
+
+	ARR_FIND(0, sd->soulball, i, sd->soulball_timer[i] == tid);
+
+	if( i == sd->soulball ) {
+		ShowError("pc_soulball_timer: timer not found (aid=%d cid=%d tid=%d)\n", sd->status.account_id, sd->status.char_id, tid);
+		return 0;
+	}
+
+	sd->soulball--;
+
+	if( i != sd->soulball )
+		memmove(sd->soulball_timer + i, sd->soulball_timer + i + 1, (sd->soulball - i) * sizeof(int));
+
+	sd->soulball_timer[sd->soulball] = INVALID_TIMER;
+
+	clif_soulball(sd);
+
+	return 0;
+}
+
+/**
+ * Adds a soulball.
+ * @param sd       Target character.
+ * @param interval Duration.
+ * @param max      Maximum amount of souls to add.
+ */
+void pc_addsoulball(struct map_session_data *sd, int interval, int max)
+{
+	int tid, i;
+
+	nullpo_retv(sd);
+
+	if( max > MAX_SOULBALL )
+		max = MAX_SOULBALL;
+
+	if( sd->soulball < 0 )
+		sd->soulball = 0;
+
+	if( sd->soulball && sd->soulball >= max ) {
+		if( sd->soulball_timer[0] != INVALID_TIMER )
+			delete_timer(sd->soulball_timer[0], pc_soulball_timer);
+		sd->soulball--;
+		if( sd->soulball )
+			memmove(sd->soulball_timer + 0, sd->soulball_timer + 1, sd->soulball * sizeof(int));
+		sd->soulball_timer[sd->soulball] = INVALID_TIMER;
+	}
+
+	tid = add_timer(gettick() + interval, pc_soulball_timer, sd->bl.id, 0);
+	ARR_FIND(0, sd->soulball, i, (sd->soulball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->soulball_timer[i])->tick) < 0));
+
+	if( i != sd->soulball )
+		memmove(sd->soulball_timer + i + 1, sd->soulball_timer + i, (sd->soulball - i) * sizeof(int));
+
+	sd->soulball_timer[i] = tid;
+	sd->soulball++;
+
+	clif_soulball(sd);
+}
+
+/**
+ * Removes one or more soulballs.
+ * @param sd    The target character.
+ * @param count Amount of souls to remove.
+ * @param type 1 = doesn't give client effect
+ */
+void pc_delsoulball(struct map_session_data *sd, int count, int type)
+{
+	int i;
+
+	nullpo_retv(sd);
+
+	if( sd->soulball <= 0 ) {
+		sd->soulball = 0;
+		return;
+	}
+
+	if( count <= 0 )
+		return;
+
+	if( count > sd->soulball )
+		count = sd->soulball;
+
+	sd->soulball -= count;
+
+	if( count > MAX_SOULBALL )
+		count = MAX_SOULBALL;
+
+	for( i = 0; i < count; i++ ) {
+		if( sd->soulball_timer[i] != INVALID_TIMER ) {
+			delete_timer(sd->soulball_timer[i], pc_soulball_timer);
+			sd->soulball_timer[i] = INVALID_TIMER;
+		}
+	}
+
+	for( i = count; i < MAX_SOULBALL; i++ ) {
+		sd->soulball_timer[i - count] = sd->soulball_timer[i];
+		sd->soulball_timer[i] = INVALID_TIMER;
+	}
+
+	if( !type )
+		clif_soulball(sd);
 }
 
 /**
@@ -1662,6 +1782,8 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 		sd->rageball_timer[i] = INVALID_TIMER;
 	for (i = 0; i < MAX_CHARMBALL; i++)
 		sd->charmball_timer[i] = INVALID_TIMER;
+	for (i = 0; i < MAX_SOULBALL; i++)
+		sd->soulball_timer[i] = INVALID_TIMER;
 	for (i = 0; i < ARRAYLENGTH(sd->autobonus); i++)
 		sd->autobonus[i].active = INVALID_TIMER;
 	for (i = 0; i < ARRAYLENGTH(sd->autobonus2); i++)
@@ -6925,7 +7047,7 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 	status_calc_pc(sd, SCO_FORCE);
 	clif_misceffect(&sd->bl, 1);
 	if (pc_checkskill(sd, SG_DEVIL) > 0 && pc_is_maxbaselv(sd))
-		clif_status_change(&sd->bl, SI_DEVIL1, 1, 0, 0, 0, 1); //Permanent blind effect from SG_DEVIL
+		clif_status_load(&sd->bl, SI_DEVIL1, 1); //Permanent blind effect from SG_DEVIL
 
 	npc_script_event(sd, NPCE_JOBLVUP);
 	achievement_update_objective(sd, AG_GOAL_LEVEL, 1, sd->status.job_level);
@@ -7529,6 +7651,8 @@ int pc_skillup(struct map_session_data *sd, uint16 skill_id)
 		clif_updatestatus(sd, SP_SKILLPOINT);
 		if( skill_id == GN_REMODELING_CART ) //Cart weight info was updated by status_calc_pc
 			clif_updatestatus(sd, SP_CARTINFO);
+		if( pc_checkskill(sd, SG_DEVIL) > 0 && ((sd->class_&MAPID_THIRDMASK) == MAPID_STAR_EMPEROR || pc_is_maxjoblv(sd)) )
+			clif_status_load(&sd->bl, SI_DEVIL1, 1);
 		if( !pc_has_permission(sd, PC_PERM_ALL_SKILL) ) //May skill everything at any time anyways, and this would cause a huge slowdown
 			clif_skillinfoblock(sd);
 	}
@@ -7758,7 +7882,7 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 		//It has been confirmed on official servers that when you reset skills with a ranked Taekwon your skills are not reset (because you have all of them anyway)
 		if( pc_is_taekwon_ranker(sd) )
 			return 0;
-		if( pc_checkskill(sd, SG_DEVIL) > 0 && pc_is_maxjoblv(sd) )
+		if( pc_checkskill(sd, SG_DEVIL) > 0 )
 			clif_status_load(&sd->bl, SI_DEVIL1, 0); //Remove perma blindness due to skill-reset [Skotlex]
 		i = sd->sc.option;
 		if( i&OPTION_RIDING && pc_checkskill(sd, KN_RIDING) > 0 )
@@ -7878,7 +8002,7 @@ int pc_resethate(struct map_session_data *sd)
 
 	nullpo_ret(sd);
 
-	for( i = 0; i < 3; i++ ) {
+	for( i = 0; i < MAX_PC_FEELHATE; i++ ) {
 		sd->hate_mob[i] = -1;
 		pc_setglobalreg(sd,sg_info[i].hate_var,0);
 	}
@@ -8158,6 +8282,9 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 	if( sd->charmball_type != CHARM_TYPE_NONE && sd->charmball > 0 )
 		pc_delcharmball(sd,sd->charmball,sd->charmball_type);
+
+	if( sd->soulball > 0 )
+		pc_delsoulball(sd,sd->soulball,0);
 
 	if( src ) {
 		switch( src->type ) {
@@ -13444,6 +13571,7 @@ void do_init_pc(void) {
 	add_timer_func_list(pc_shieldball_timer, "pc_shieldball_timer");
 	add_timer_func_list(pc_rageball_timer, "pc_rageball_timer");
 	add_timer_func_list(pc_charmball_timer, "pc_charmball_timer");
+	add_timer_func_list(pc_soulball_timer, "pc_soulball_timer");
 	add_timer_func_list(pc_follow_timer, "pc_follow_timer");
 	add_timer_func_list(pc_endautobonus, "pc_endautobonus");
 	add_timer_func_list(pc_global_expiration_timer, "pc_global_expiration_timer");

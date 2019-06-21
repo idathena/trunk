@@ -3408,6 +3408,34 @@ ACMD_FUNC(charmball)
 /*==========================================
  *
  *------------------------------------------*/
+ACMD_FUNC(soulball)
+{
+	uint32 max_soulballs;
+	int number;
+	nullpo_retr(-1, sd);
+
+	max_soulballs = zmin(ARRAYLENGTH(sd->soulball_timer), 0x7FFF);
+
+	if( !message || !*message || (number = atoi(message)) < 0 || number > max_soulballs ) {
+		char msg[CHAT_SIZE_MAX];
+
+		safesnprintf(msg, sizeof(msg), msg_txt(1058), max_soulballs); // Please enter a number (usage: @soulball <number: 0-%d>).
+		clif_displaymessage(fd, msg);
+		return -1;
+	}
+
+	if( sd->soulball > 0 )
+		pc_delsoulball(sd, sd->soulball, 1);
+	sd->soulball = number;
+	clif_soulball(sd);
+	// No message, player can look the difference
+
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------*/
 ACMD_FUNC(party)
 {
 	char party[NAME_LENGTH];
@@ -8573,6 +8601,17 @@ ACMD_FUNC(feelreset)
 }
 
 /*==========================================
+ * Hate (SG save monster/player) Reset
+ *------------------------------------------*/
+ACMD_FUNC(hatereset)
+{
+	pc_resethate(sd);
+	clif_displaymessage(fd, msg_txt(534)); // Reset 'Hated' monsters/players.
+
+	return 0;
+}
+
+/*==========================================
  * AUCTION SYSTEM
  *------------------------------------------*/
 ACMD_FUNC(auction)
@@ -10105,6 +10144,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(shieldball),
 		ACMD_DEF(rageball),
 		ACMD_DEF(charmball),
+		ACMD_DEF(soulball),
 		ACMD_DEF(party),
 		ACMD_DEF(guild),
 		ACMD_DEF(breakguild),
@@ -10259,6 +10299,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(hommax),
 		ACMD_DEF(showmobs),
 		ACMD_DEF(feelreset),
+		ACMD_DEF(hatereset),
 		ACMD_DEF(auction),
 		ACMD_DEF(mail),
 		ACMD_DEF2("noks", ksprotection),

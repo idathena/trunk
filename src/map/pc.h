@@ -514,6 +514,8 @@ struct map_session_data {
 	short charmball,charmball_old;
 	int charmball_type;
 	int charmball_timer[MAX_CHARMBALL];
+	short soulball,soulball_old;
+	int soulball_timer[MAX_SOULBALL];
 
 	unsigned char potion_success_counter; //Potion successes in row counter
 	unsigned char mission_count; //Stores the bounty kill count for TK_MISSION
@@ -1216,6 +1218,8 @@ void pc_addrageball(struct map_session_data *sd, int interval, int max);
 void pc_delrageball(struct map_session_data *sd, int count, int type);
 void pc_addcharmball(struct map_session_data *sd, int interval, int max, int type);
 void pc_delcharmball(struct map_session_data *sd, int count, int type);
+void pc_addsoulball(struct map_session_data *sd, int interval, int max);
+void pc_delsoulball(struct map_session_data *sd, int count, int type);
 void pc_addfame(struct map_session_data *sd, int count);
 unsigned char pc_famerank(int char_id, int job);
 bool pc_set_hate_mob(struct map_session_data *sd, int pos, struct block_list *bl);
