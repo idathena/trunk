@@ -3431,7 +3431,7 @@ int skill_attack(int attack_type, struct block_list *src, struct block_list *dsr
 		battle_delay_damage(tick, dmg.amotion, src, bl, dmg.flag, skill_id, skill_lv, damage, dmg.dmg_lv, dmg.dmotion, additional_effects, false, false);
 
 	if (tsc) {
-		if (skill_id != PA_PRESSURE && skill_id != HW_GRAVITATION && skill_id != NPC_EVILLAND && skillid != SP_SOULEXPLOSION) {
+		if (skill_id != PA_PRESSURE && skill_id != HW_GRAVITATION && skill_id != NPC_EVILLAND && skill_id != SP_SOULEXPLOSION) {
 			if (tsc->data[SC_DEVOTION]) {
 				struct status_change_entry *sce_d = tsc->data[SC_DEVOTION];
 				struct block_list *d_bl = map_id2bl(sce_d->val1);
@@ -7038,6 +7038,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case SL_KAAHI:
 		case SL_KAIZEL:
 		case SL_KAUPE:
+		case SP_KAUTE:
 			{
 				uint8 flag2 = 0;
 
@@ -7047,7 +7048,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						(dstsd->class_&MAPID_UPPERMASK) == MAPID_SOUL_LINKER ||
 						dstsd->status.char_id == sd->status.char_id ||
 						dstsd->status.char_id == sd->status.partner_id ||
-						dstsd->status.char_id == sd->status.child))
+						dstsd->status.char_id == sd->status.child ||
+						(skill_id == SP_KAUTE && dstsd->sc.data[SC_SOULUNITY])))
 					{
 						status_change_start(src,src,SC_STUN,10000,skill_lv,0,0,0,500,SCFLAG_FIXEDRATE);
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
@@ -7058,8 +7060,11 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						flag2 = 1;
 #endif
 				}
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,
-					sc_start4(src,bl,type,100,skill_lv,0,flag2,0,skill_get_time(skill_id,skill_lv)));
+				if (skill_id == SP_KAUTE) {
+					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+					status_heal(bl,0,status_get_max_sp(bl) * (10 + 2 * skill_lv) / 100,2);
+				} else
+					clif_skill_nodamage(src,bl,skill_id,skill_lv,sc_start4(src,bl,type,100,skill_lv,0,flag2,0,skill_get_time(skill_id,skill_lv)));
 			}
 			break;
 
@@ -10510,7 +10515,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				break;
 			}
-			status_heal(bl,0,50 * skilllv,2);
+			status_heal(bl,0,50 * skill_lv,2);
 			status_change_end(bl,SC_SPIRIT,INVALID_TIMER);
 			status_change_end(bl,SC_SOULGOLEM,INVALID_TIMER);
 			status_change_end(bl,SC_SOULSHADOW,INVALID_TIMER);
@@ -21123,7 +21128,7 @@ static bool skill_parse_row_requiredb(char *split[], int columns, int current)
 	else if( strcmpi(split[10],"elementalspirit")     == 0 ) skill_db[idx].require.state = ST_ELEMENTALSPIRIT;
 	else if( strcmpi(split[10],"peco")                == 0 ) skill_db[idx].require.state = ST_PECO;
 	else if( strcmpi(split[10],"sunstance")           == 0 ) skill_db[idx].require.state = ST_SUNSTANCE;
-	else if( strcmpi(split[10],"lunarstance")         == 0 ) skill_db[idx].require.state = ST_LUNARSTANCE;
+	else if( strcmpi(split[10],"moonstance")          == 0 ) skill_db[idx].require.state = ST_MOONSTANCE;
 	else if( strcmpi(split[10],"starstance")          == 0 ) skill_db[idx].require.state = ST_STARSTANCE;
 	else if( strcmpi(split[10],"universestance")      == 0 ) skill_db[idx].require.state = ST_UNIVERSESTANCE;
 	else skill_db[idx].require.state = ST_NONE; //Unknown or no state
