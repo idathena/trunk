@@ -5946,6 +5946,7 @@ enum e_setpos pc_setpos(struct map_session_data *sd, unsigned short mapindex, in
 			}
 			status_change_end(&sd->bl, SC_CLOAKINGEXCEED, INVALID_TIMER);
 			status_change_end(&sd->bl, SC_PROPERTYWALK, INVALID_TIMER);
+			status_change_end(&sd->bl, SC_NEWMOON, INVALID_TIMER);
 		}
 		for( i = 0; i < EQI_MAX; i++ ) {
 			if( sd->equip_index[i] >= 0 && pc_isequip(sd, sd->equip_index[i]) )

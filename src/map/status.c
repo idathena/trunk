@@ -1402,6 +1402,7 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_CLOAKINGEXCEED]      |= SCS_NOPICKITEM;
 	StatusChangeStateTable[SC_NOCHAT]              |= SCS_NOPICKITEM|SCS_NOPICKITEMCOND;
 	StatusChangeStateTable[SC_DEEPSLEEP]           |= SCS_NOPICKITEM;
+	StatusChangeStateTable[SC_NEWMOON]             |= SCS_NOPICKITEM;
 	StatusChangeStateTable[SC_SUHIDE]              |= SCS_NOPICKITEM;
 
 	//StatusChangeState (SCS_) NODROPITEMS
@@ -1664,6 +1665,8 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 				status_change_end(target, SC_CLOAKINGEXCEED, INVALID_TIMER);
 			if (sc->data[SC_KAGEMUSYA] && --(sc->data[SC_KAGEMUSYA]->val2) <= 0)
 				status_change_end(target, SC_KAGEMUSYA, INVALID_TIMER);
+			if (sc->data[SC_NEWMOON] && --(sc->data[SC_NEWMOON]->val2) <= 0)
+				status_change_end(target, SC_NEWMOON, INVALID_TIMER);
 		}
 
 		if (target->type == BL_PC)
@@ -2175,7 +2178,7 @@ bool status_check_skilluse(struct block_list *src, struct block_list *target, ui
 				if (tsc) {
 					if ((tsc->option&hide_flag) && !is_boss && (tsd->special_state.perfect_hiding || !is_detector))
 						return false;
-					if (tsc->data[SC_CLOAKINGEXCEED] && !is_boss && (tsd->special_state.perfect_hiding || is_detector))
+					if ((tsc->data[SC_CLOAKINGEXCEED] || tsc->data[SC_NEWMOON]) && !is_boss && (tsd->special_state.perfect_hiding || is_detector))
 						return false;
 					if ((tsc->data[SC_CAMOUFLAGE] || tsc->data[SC_SUHIDE]) && !(is_boss || is_detector) && (!skill_id || !flag))
 						return false;
@@ -2243,7 +2246,7 @@ int status_check_visibility(struct block_list *src, struct block_list *target)
 						tsc->data[SC_STEALTHFIELD] || tsc->data[SC_SUHIDE]) && !is_boss &&
 						(tsd->special_state.perfect_hiding || !is_detector) )
 						return 0;
-					if( tsc->data[SC_CLOAKINGEXCEED] && !is_boss && (tsd->special_state.perfect_hiding || is_detector) )
+					if( (tsc->data[SC_CLOAKINGEXCEED] || tsc->data[SC_NEWMOON]) && !is_boss && (tsd->special_state.perfect_hiding || is_detector) )
 						return 0;
 					if( tsc->data[SC__FEINTBOMB] )
 						return 0;
@@ -8595,7 +8598,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				return 0;
 			if( sc->data[SC_CLOAKING] || sc->data[SC_CHASEWALK] ||
 				sc->data[SC_CLOAKINGEXCEED] || sc->data[SC_CAMOUFLAGE] ||
-				sc->data[SC_STEALTHFIELD] || sc->data[SC__FEINTBOMB] )
+				sc->data[SC_STEALTHFIELD] || sc->data[SC__FEINTBOMB] ||
+				sc->data[SC_NEWMOON] )
 				return 0;
 			if( sc->data[type] ) { //Already mounted, just dismount
 				status_change_end(bl,type,INVALID_TIMER);
@@ -10560,6 +10564,13 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_UNIVERSESTANCE:
 				val2 = 2 + val1; //All Stats Increase
 				break;
+			case SC_NEWMOON:
+				val2 = 7; //Hits
+				if( bl->type == BL_PC )
+					val4 |= battle_config.pc_cloak_check_type&7;
+				else
+					val4 |= battle_config.monster_cloak_check_type&7;
+				break;
 			case SC_FALLINGSTAR:
 				val2 = min(8 + 2 * (1 + val1 / 2),15); //Autocast Chance
 				break;
@@ -11175,6 +11186,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_HANBOK:
 		case SC_OKTOBERFEST:
 		case SC_DRESSUP:
+		case SC_NEWMOON:
 		case SC_SUHIDE:
 			unit_stop_attack(bl);
 			break;
@@ -11333,6 +11345,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_CLOAKING:
 		case SC_CLOAKINGEXCEED:
 		case SC__INVISIBILITY:
+		case SC_NEWMOON:
 			sc->option |= OPTION_CLOAK;
 		//Fall through
 		case SC_CAMOUFLAGE:
@@ -12359,6 +12372,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 		case SC_CLOAKING:
 		case SC_CLOAKINGEXCEED:
 		case SC__INVISIBILITY:
+		case SC_NEWMOON:
 			sc->option &= ~OPTION_CLOAK;
 		//Fall through
 		case SC_CAMOUFLAGE:
@@ -12907,6 +12921,7 @@ TIMER_FUNC(status_change_timer)
 				status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 				status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 				status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+				status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
 				if( sc->data[SC__SHADOWFORM] && rnd()%100 < 100 - sc->data[SC__SHADOWFORM]->val1 * 10 )
 					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 			}
@@ -13613,16 +13628,18 @@ int status_change_timer_sub(struct block_list *bl, va_list ap) {
 			status_change_end(bl, SC_CLOAKING, INVALID_TIMER);
 			status_change_end(bl, SC_CLOAKINGEXCEED, INVALID_TIMER);
 			status_change_end(bl, SC_CAMOUFLAGE, INVALID_TIMER);
+			status_change_end(bl, SC_NEWMOON, INVALID_TIMER);
 			if( type == SC_CONCENTRATE && tsc && tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
 				status_change_end(bl, SC__SHADOWFORM, INVALID_TIMER);
 			break;
 		case SC_RUWACH: //Un-hides targets on 5*5 range and deals little damages
 			if( tsc ) {
-				if( tsc->data[SC_HIDING] || tsc->data[SC_CLOAKING] || tsc->data[SC_CLOAKINGEXCEED] || tsc->data[SC_CAMOUFLAGE] ) {
+				if( (tsc->option&(OPTION_HIDE|OPTION_CLOAK)) || tsc->data[SC_CAMOUFLAGE] ) {
 					status_change_end(bl, SC_HIDING, INVALID_TIMER);
 					status_change_end(bl, SC_CLOAKING, INVALID_TIMER);
 					status_change_end(bl, SC_CLOAKINGEXCEED, INVALID_TIMER);
 					status_change_end(bl, SC_CAMOUFLAGE, INVALID_TIMER);
+					status_change_end(bl, SC_NEWMOON, INVALID_TIMER);
 					if( battle_check_target(src, bl, BCT_ENEMY) > 0 )
 						skill_attack(BF_MAGIC, src, src, bl, status_sc2skill(type), 1, tick, 0);
 				}

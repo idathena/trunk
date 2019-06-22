@@ -1618,6 +1618,9 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case EL_TYPOON_MIS_ATK:
 			sc_start(src,bl,SC_SILENCE,25,skill_lv,skill_get_time(EL_TYPOON_MIS,skill_lv)); //Custom
 			break;
+		case SJ_FULLMOONKICK:
+			sc_start(src,bl,SC_BLIND,15 + skill_lv * 5,skill_lv,skill_get_time(skill_id,skill_lv));
+			break;
 		case SP_CURSEEXPLOSION:
 			status_change_end(bl,SC_CURSE,INVALID_TIMER);
 			break;
@@ -2673,6 +2676,7 @@ int skill_is_combo(uint16 skill_id) {
 		case GC_COUNTERSLASH:
 		case GC_WEAPONCRUSH:
 		case SR_DRAGONCOMBO:
+		case SJ_SOLARBURST:
 			return 1;
 		case SR_FALLENEMPIRE:
 		case SR_TIGERCANNON:
@@ -2801,6 +2805,10 @@ void skill_combo(struct block_list *src, struct block_list *dsrc, struct block_l
 				break;
 			case SR_FALLENEMPIRE:
 				if (pc_checkskill(sd, SR_TIGERCANNON) > 0 || pc_checkskill(sd, SR_GATEOFHELL) > 0)
+					duration = 1;
+				break;
+			case SJ_PROMINENCEKICK:
+				if (pc_checkskill(sd, SJ_SOLARBURST) > 0)
 					duration = 1;
 				break;
 		}
@@ -4987,6 +4995,9 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case RL_FIREDANCE:
 		case RL_R_TRIP:
 		case RL_HAMMER_OF_GOD:
+		case SJ_FULLMOONKICK:
+		case SJ_NEWMOONKICK:
+		case SJ_SOLARBURST:
 		case SJ_FALLINGSTAR_ATK2:
 		case SP_CURSEEXPLOSION:
 		case SP_SHA:
@@ -5478,6 +5489,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 					status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+					status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
 					skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 				}
 				if (tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
@@ -5618,6 +5630,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 						status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 						status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 						status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+						status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
 						skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 					}
 					if (tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
@@ -5667,6 +5680,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 					status_change_end(bl,SC_CHASEWALK,INVALID_TIMER);
 					status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+					status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
 					if (tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10)
 						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 				}
@@ -5792,6 +5806,17 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 						sc_start4(src,bl,SC_FLASHKICK,100,skill_lv,src->id,i,0,skill_get_time(skill_id,skill_lv));
 					}
 				}
+			}
+			break;
+
+		case SJ_PROMINENCEKICK:
+			if (flag&1)
+				skill_attack(skill_get_type(skill_id),src,src,bl,skill_id,skill_lv,tick,flag);
+			else {
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				skill_area_temp[1] = 0;
+				map_foreachinallrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR,src,
+					skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
 			}
 			break;
 
@@ -6982,6 +7007,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		case RL_R_TRIP:
 		case RL_FIREDANCE:
 		case RL_D_TAIL:
+		case SJ_FULLMOONKICK:
+		case SJ_NEWMOONKICK:
+		case SJ_SOLARBURST:
 		case KO_HAPPOKUNAI:
 			{
 				int starget = BL_CHAR|BL_SKILL;
@@ -6989,6 +7017,8 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if (skill_id == SR_HOWLINGOFLION || skill_id == RL_D_TAIL)
 					starget = splash_target(src);
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+				if (skill_id == SJ_NEWMOONKICK)
+					sc_start(src,src,SC_NEWMOON,100,skill_lv,skill_get_time(skill_id,skill_lv));
 				skill_area_temp[1] = 0;
 				map_foreachinrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),starget,src,
 					skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
@@ -9385,6 +9415,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 					status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+					status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
 					if( tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
 						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 					sc_start(src,bl,SC_INFRAREDSCAN,100,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -9468,6 +9499,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 				status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 				status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+				status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
 				if( tsc && tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
 					status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 				sc_start(src,bl,type,20 + 5 * skill_lv,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -10497,14 +10529,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case RL_C_MARKER: {
 				short count = MAX_CRIMSON_MARKS;
-				uint8 i = 0;
-
 				//Check if the target is already tagged by another source
 				if( tsce && tsce->val2 != src->id ) {
 					if( sd )
 						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					break;
 				}
+				i = 0;
 				//Marking the target
 				if( sd ) {
 					ARR_FIND(0,count,i,sd->crimson_mark[i] == bl->id);
@@ -10570,7 +10601,6 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case SP_SOULUNITY: {
 				short count = min(5 + skill_lv,MAX_UNITED_SOULS);
-				uint8 i = 0;
 
 				if( !sd || !sd->status.party_id || (flag&1) ) {
 					if( !dstsd || !sd ) { //Only put player's souls in unity
@@ -10584,6 +10614,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 						break;
 					}
+					i = 0;
 					//Unite player's soul with caster's soul
 					if( sd ) {
 						ARR_FIND(0, count, i, sd->united_soul[i] == bl->id);
@@ -10764,6 +10795,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 					status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 					status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+					status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
 					if( tsc->data[SC__SHADOWFORM] && rnd()%100 < 100 - tsc->data[SC__SHADOWFORM]->val1 * 10 )
 						status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 					sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -13332,6 +13364,7 @@ static int skill_unit_onplace(struct skill_unit *unit, struct block_list *bl, un
 			status_change_end(bl,SC_CLOAKING,INVALID_TIMER);
 			status_change_end(bl,SC_CAMOUFLAGE,INVALID_TIMER);
 			status_change_end(bl,SC_CLOAKINGEXCEED,INVALID_TIMER);
+			status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
 			if( sc && sc->data[SC__SHADOWFORM] && rnd()%100 < 100 - sc->data[SC__SHADOWFORM]->val1 * 10 )
 				status_change_end(bl,SC__SHADOWFORM,INVALID_TIMER);
 			if( !sce )
@@ -15559,6 +15592,34 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				return false;
 			}
 			break;
+		case RL_RICHS_COIN:
+			if( sd->spiritball >= 10 ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON,0,0);
+				return false;
+			}
+			break;
+		case RL_P_ALTER:
+			if( sc && (sc->data[SC_MADNESSCANCEL] || sc->data[SC_HEAT_BARREL]) ) {
+				clif_msg(sd,SKILL_REBEL_GUN_FAIL);
+				return false;
+			}
+			break;
+		case RL_HEAT_BARREL:
+			if( sc && (sc->data[SC_MADNESSCANCEL] || sc->data[SC_P_ALTER]) ) {
+				clif_msg(sd,SKILL_REBEL_GUN_FAIL);
+				return false;
+			}
+			break;
+		case SJ_FULLMOONKICK:
+			if( !(sc && sc->data[SC_NEWMOON]) ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false;
+			}
+			break;
+		case SJ_SOLARBURST:
+			if( !(sc && sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == SJ_PROMINENCEKICK) )
+				return false;
+			break;
 		case SP_SWHOO:
 			if( !(sc && sc->data[SC_USE_SKILL_SP_SPA]) )
 				return false;
@@ -15587,24 +15648,6 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 				return false;
 			}
 			sd->charmball_old = sd->charmball;
-			break;
-		case RL_RICHS_COIN:
-			if( sd->spiritball >= 10 ) {
-				clif_skill_fail(sd,skill_id,USESKILL_FAIL_SUMMON,0,0);
-				return false;
-			}
-			break;
-		case RL_P_ALTER:
-			if( sc && (sc->data[SC_MADNESSCANCEL] || sc->data[SC_HEAT_BARREL]) ) {
-				clif_msg(sd,SKILL_REBEL_GUN_FAIL);
-				return false;
-			}
-			break;
-		case RL_HEAT_BARREL:
-			if( sc && (sc->data[SC_MADNESSCANCEL] || sc->data[SC_P_ALTER]) ) {
-				clif_msg(sd,SKILL_REBEL_GUN_FAIL);
-				return false;
-			}
 			break;
 	}
 
@@ -15970,6 +16013,7 @@ bool skill_check_condition_castend(struct map_session_data *sd, uint16 skill_id,
 		case MO_INVESTIGATE:
 		case MO_FINGEROFFENSIVE:
 		case MO_EXTREMITYFIST:
+		case SJ_FULLMOONKICK:
 			break;
 		default:
 			if( !skill_check_condition_castbegin(sd,skill_id,skill_lv) )
@@ -17958,7 +18002,7 @@ void skill_enchant_elemental_end(struct block_list *bl, int type)
 }
 
 /**
- * Check camouflage condition
+ * Check cloaking condition
  * @param bl
  * @param sce
  * @return True if near wall; False otherwise
@@ -18005,9 +18049,9 @@ bool skill_can_cloak(struct map_session_data *sd)
 {
 	nullpo_retr(false, sd);
 
-	//Avoid cloaking with no wall and low skill level. [Skotlex]
+	//Avoid cloaking with no wall and low skill level [Skotlex]
 	//Due to the cloaking card, we have to check the wall versus to known
-	//skill level rather than the used one. [Skotlex]
+	//skill level rather than the used one [Skotlex]
 	//if( sd && val1 < 3 && skill_check_cloaking(bl, NULL) )
 	if( pc_checkskill(sd, AS_CLOAKING) < 3 && !skill_check_cloaking(&sd->bl, NULL) )
 		return false;
@@ -18020,9 +18064,11 @@ bool skill_can_cloak(struct map_session_data *sd)
  * Is called via map_foreachinallrange when any kind of wall disapears
  */
 int skill_check_cloaking_end(struct block_list *bl, va_list ap) {
-	TBL_PC *sd = BL_CAST(BL_PC, bl);
+	struct map_session_data *sd = NULL;
 
-	if( sd && sd->sc.data[SC_CLOAKING] && !skill_can_cloak(sd) )
+	nullpo_ret(bl);
+
+	if( (sd = map_id2sd(bl->id)) && sd->sc.data[SC_CLOAKING] && !skill_can_cloak(sd) )
 		status_change_end(bl, SC_CLOAKING, INVALID_TIMER);
 
 	return 0;
