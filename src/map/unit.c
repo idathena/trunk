@@ -1569,7 +1569,8 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 				break;
 			case CR_DEVOTION:
 				if( target->type == BL_PC ) {
-					uint8 i = 0, count = min(skill_lv, MAX_DEVOTION);
+					short count = min(skill_lv, MAX_DEVOTION);
+					uint8 i = 0;
 
 					ARR_FIND(0, count, i, sd->devotion[i] == target_id);
 					if( i == count ) {
@@ -1582,12 +1583,13 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 				}
 				break;
 			case RL_C_MARKER: {
+					short count = MAX_CRIMSON_MARKS;
 					uint8 i = 0;
 
-					ARR_FIND(0, MAX_SKILL_CRIMSON_MARKER, i, sd->c_marker[i] == target_id);
-					if( i == MAX_SKILL_CRIMSON_MARKER ) {
-						ARR_FIND(0, MAX_SKILL_CRIMSON_MARKER, i, sd->c_marker[i] == 0);
-						if( i == MAX_SKILL_CRIMSON_MARKER ) { //No free slots, skill fail
+					ARR_FIND(0, count, i, sd->crimson_mark[i] == target_id);
+					if( i == count ) {
+						ARR_FIND(0, count, i, sd->crimson_mark[i] == 0);
+						if( i == count ) {
 							clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 							return 0;
 						}
@@ -1595,12 +1597,42 @@ int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, ui
 				}
 				break;
 			case RL_H_MINE: {
+					short count = MAX_HOWL_MINES;
 					uint8 i = 0;
 
-					ARR_FIND(0, MAX_SKILL_HOWLING_MINE, i, sd->h_mine[i] == target_id);
-					if( i == MAX_SKILL_HOWLING_MINE ) {
-						ARR_FIND(0, MAX_SKILL_HOWLING_MINE, i, sd->h_mine[i] == 0);
-						if( i == MAX_SKILL_HOWLING_MINE ) {
+					ARR_FIND(0, count, i, sd->howl_mine[i] == target_id);
+					if( i == count ) {
+						ARR_FIND(0, count, i, sd->howl_mine[i] == 0);
+						if( i == count ) {
+							clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+							return 0;
+						}
+					}
+				}
+				break;
+			case SJ_FLASHKICK: {
+					short count = MAX_STELLAR_MARKS;
+					uint8 i = 0;
+
+					ARR_FIND(0, count, i, sd->stellar_mark[i] == target_id);
+					if( i == count ) {
+						ARR_FIND(0, count, i, sd->stellar_mark[i] == 0);
+						if( i == count ) {
+							clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+							return 0;
+						}
+					}
+				}
+				break;
+			case SP_SOULUNITY:
+				if( target->type == BL_PC ) {
+					short count = min(5 + skill_lv, MAX_UNITED_SOULS);
+					uint8 i = 0;
+
+					ARR_FIND(0, count, i, sd->united_soul[i] == target_id);
+					if( i == count ) {
+						ARR_FIND(0, count, i, sd->united_soul[i] == 0);
+						if( i == count ) {
 							clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 							return 0;
 						}
@@ -2770,6 +2802,8 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 		status_change_end(bl,SC_TINDER_BREAKER,INVALID_TIMER);
 		status_change_end(bl,SC_C_MARKER,INVALID_TIMER);
 		status_change_end(bl,SC_H_MINE,INVALID_TIMER);
+		status_change_end(bl,SC_FLASHKICK,INVALID_TIMER);
+		status_change_end(bl,SC_SOULUNITY,INVALID_TIMER);
 		status_change_end(bl,SC_KINGS_GRACE,INVALID_TIMER);
 		status_change_end(bl,SC_SUHIDE,INVALID_TIMER);
 	}

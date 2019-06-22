@@ -881,7 +881,7 @@ void initChangeTables(void) {
 	set_sc( SJ_LIGHTOFSTAR      , SC_LIGHTOFSTAR        , SI_LIGHTOFSTAR          , SCB_NONE  );
 	set_sc( SJ_STARSTANCE       , SC_STARSTANCE         , SI_STARSTANCE           , SCB_ASPD  );
 	set_sc( SJ_NEWMOONKICK      , SC_NEWMOON            , SI_NEWMOON              , SCB_NONE  );
-	set_sc( SJ_FLASHKICK        , SC_FLASHKICK          , SI_FLASHKICK            , SCB_NONE  );
+	set_sc_with_vfx( SJ_FLASHKICK, SC_FLASHKICK         , SI_FLASHKICK            , SCB_NONE  );
 	add_sc( SJ_STAREMPEROR      , SC_SILENCE            );
 	set_sc( SJ_NOVAEXPLOSING    , SC_NOVAEXPLOSING      , SI_NOVAEXPLOSING        , SCB_NONE  );
 	set_sc( SJ_UNIVERSESTANCE   , SC_UNIVERSESTANCE     , SI_UNIVERSESTANCE       , SCB_STR|SCB_AGI|SCB_VIT|SCB_INT|SCB_DEX|SCB_LUK );
@@ -1337,6 +1337,8 @@ void initChangeTables(void) {
 	StatusDisplayType[SC_C_MARKER]		  = true;
 	StatusDisplayType[SC_ANTI_M_BLAST]	  = true;
 	StatusDisplayType[SC_H_MINE]		  = true;
+	StatusDisplayType[SC_FLASHKICK]		  = true;
+	StatusDisplayType[SC_SOULUNITY]		  = true;
 	StatusDisplayType[SC_MOONSTAR]		  = true;
 	StatusDisplayType[SC_SUPER_STAR]	  = true;
 	StatusDisplayType[SC_STRANGELIGHTS]	  = true;
@@ -9046,6 +9048,17 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_EL_DEFENSIVE,INVALID_TIMER);
 			status_change_end(bl,SC_EL_PASSIVE,INVALID_TIMER);
 			break;
+		case SC_SUNSTANCE:
+		case SC_LUNARSTANCE:
+		case SC_STARSTANCE:
+		case SC_UNIVERSESTANCE:
+			if( sc->data[type] )
+				break;
+			status_change_end(bl,SC_SUNSTANCE,INVALID_TIMER);
+			status_change_end(bl,SC_LUNARSTANCE,INVALID_TIMER);
+			status_change_end(bl,SC_STARSTANCE,INVALID_TIMER);
+			status_change_end(bl,SC_UNIVERSESTANCE,INVALID_TIMER);
+			break;
 		case SC_SPIRIT:
 		case SC_SOULGOLEM:
 		case SC_SOULSHADOW:
@@ -9164,6 +9177,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_PUSH_CART:
 			case SC_C_MARKER:
 			case SC_H_MINE:
+			case SC_FLASHKICK:
+			case SC_SOULUNITY:
 				break;
 			case SC_GOSPEL:
 				if( sce->val4 == BCT_SELF )
@@ -10533,17 +10548,25 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( val4 <= 0 ) //Prevents a negeative value from happening
 					val4 = 0;
 				break;
+			case SC_SUNSTANCE:
+				val2 = 2 + val1; //ATK Increase
+				break;
 			case SC_LUNARSTANCE:
 				val2 = 2 + val1; //MaxHP Increase
+				break;
+			case SC_STARSTANCE:
+				val2 = 4 + 2 * val1; //ASPD Increase
 				break;
 			case SC_UNIVERSESTANCE:
 				val2 = 2 + val1; //All Stats Increase
 				break;
-			case SC_SUNSTANCE:
-				val2 = 2 + val1; //ATK Increase
+			case SC_FALLINGSTAR:
+				val2 = min(8 + 2 * (1 + val1 / 2),15); //Autocast Chance
 				break;
-			case SC_STARSTANCE:
-				val2 = 4 + 2 * val1; //ASPD Increase
+			case SC_LIGHTOFSUN:
+			case SC_LIGHTOFMOON:
+			case SC_LIGHTOFSTAR:
+				val2 = 5 * val1; //Skill Damage Increase
 				break;
 			case SC_SOULGOLEM:
 				val2 = 60 * val1 / 10; //DEF Increase
@@ -10574,7 +10597,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val3 += 4 * (val1 - 5);
 				break;
 			case SC_SOULUNITY:
-				val2 = 150 * val1; //Heal Amount
 				tick_time = 3000;
 				val4 = tick / tick_time;
 				break;
@@ -11051,10 +11073,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_DECORATION_OF_MUSIC:
 		case SC_ALL_RIDING:
 		case SC_MILLENNIUMSHIELD:
-		case SC_LUNARSTANCE:
-		case SC_UNIVERSESTANCE:
 		case SC_SUNSTANCE:
+		case SC_LUNARSTANCE:
 		case SC_STARSTANCE:
+		case SC_UNIVERSESTANCE:
 		case SC_SOULCOLLECT:
 		case SC_SPRITEMABLE:
 		case SC_SOULATTACK:
@@ -12140,37 +12162,44 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			break;
 		case SC_C_MARKER: {
 				struct map_session_data *tsd = NULL;
-				uint8 i = 0;
 
 				if (!(tsd = map_id2sd(sce->val2)))
 					break;
-				ARR_FIND(0,MAX_SKILL_CRIMSON_MARKER,i,tsd->c_marker[i] == bl->id);
-				if (i < MAX_SKILL_CRIMSON_MARKER) { //Remove mark data from caster
-					clif_crimson_marker(tsd,bl,1);
-					tsd->c_marker[i] = 0;
-				}
+				tsd->crimson_mark[sce->val3] = 0;
+				clif_crimson_marker(tsd,bl,1);
 			}
 			break;
 		case SC_H_MINE: {
 				struct map_session_data *tsd = NULL;
 				struct item it;
-				uint8 i = 0;
 
 				if (!(tsd = map_id2sd(sce->val2)))
 					break;
-				ARR_FIND(0,MAX_SKILL_HOWLING_MINE,i,tsd->h_mine[i] == bl->id);
-				if (i < MAX_SKILL_HOWLING_MINE)
-					tsd->h_mine[i] = 0;
-				if (sce->val3 || status_isdead(bl))
-					break;
-				if (!itemdb_exists(skill_get_itemid(RL_H_MINE,0)))
-					break;
+				tsd->howl_mine[sce->val3] = 0;
 				//Drop the material from target if status expired
+				if (sce->val4 || !itemdb_exists(skill_get_itemid(RL_H_MINE,0)))
+					break;
 				memset(&it,0,sizeof(it));
 				it.nameid = skill_get_itemid(RL_H_MINE,0);
 				it.amount = max(skill_get_itemqty(RL_H_MINE,0),1);
 				it.identify = 1;
 				map_addflooritem(&it,it.amount,bl->m,bl->x,bl->y,tsd->status.char_id,0,0,4,0,false);
+			}
+			break;
+		case SC_FLASHKICK: {
+				struct map_session_data *tsd = NULL;
+
+				if (!(tsd = map_id2sd(sce->val2)))
+					break;
+				tsd->stellar_mark[sce->val3] = 0;
+			}
+			break;
+		case SC_SOULUNITY: {
+				struct map_session_data *tsd = NULL;
+
+				if (!(tsd = map_id2sd(sce->val2)))
+					break;
+				tsd->united_soul[sce->val3] = 0;
 			}
 			break;
 		case SC_ALL_RIDING:
@@ -13374,7 +13403,11 @@ TIMER_FUNC(status_change_timer)
 
 		case SC_SOULUNITY:
 			if( --(sce->val4) >= 0 ) {
-				status_heal(bl,sce->val2,0,2);
+				struct block_list *src = map_id2bl(sce->val2);
+
+				if( !src || status_isdead(src) || src->m != bl->m || distance_bl(src,bl) >= 11 )
+					break;
+				status_heal(bl,150 * sce->val1,0,2);
 				sc_timer_next(3000 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}

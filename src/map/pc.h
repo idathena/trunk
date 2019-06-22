@@ -696,8 +696,10 @@ struct map_session_data {
 
 	uint16 dmglog[DAMAGELOG_SIZE_PC]; //Target ids
 
-	int c_marker[MAX_SKILL_CRIMSON_MARKER]; //Stores target that marked by Crimson Marker [Cydh]
-	int h_mine[MAX_SKILL_HOWLING_MINE]; //Stores target that tagged by with a Howling Mine
+	int crimson_mark[MAX_CRIMSON_MARKS];
+	int howl_mine[MAX_HOWL_MINES];
+	int stellar_mark[MAX_STELLAR_MARKS];
+	int united_soul[MAX_UNITED_SOULS];
 
 	//Bonus Script [Cydh]
 	struct s_bonus_script_list {
@@ -1262,7 +1264,7 @@ void pc_damage_log_clear(struct map_session_data *sd, int id);
 
 void pc_show_version(struct map_session_data *sd);
 
-void pc_crimson_marker_clear(struct map_session_data *sd);
+void pc_crimson_marks_clear(struct map_session_data *sd);
 
 TIMER_FUNC(pc_bonus_script_timer);
 void pc_bonus_script(struct map_session_data *sd);

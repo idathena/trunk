@@ -21,9 +21,11 @@ struct status_change_entry;
 #define MAX_ARROW_RESULT 5 //Max Arrow results/created
 #define MAX_SKILL_ABRA_DB 160 //Max Skill list of Abracadabra DB
 #define MAX_SKILL_IMPROVISE_DB 20 //Max Skill for Improvise
+#define MAX_CRIMSON_MARKS 3 //Max Crimson Marks
+#define MAX_HOWL_MINES 5 //Max Howl Mines
+#define MAX_STELLAR_MARKS 5 //Max Stellar Marks
+#define MAX_UNITED_SOULS 12 //Max United Souls
 #define MAX_SKILL_LEVEL 100 //Max Skill Level
-#define MAX_SKILL_CRIMSON_MARKER 3 //Max Crimson Marker targets (RL_C_MARKER)
-#define MAX_SKILL_HOWLING_MINE 5 //Max Howling Mine targets (RL_H_MINE)
 #define SKILL_NAME_LENGTH 31 //Max Skill Name length
 #define SKILL_DESC_LENGTH 31 //Max Skill Desc length
 
@@ -506,7 +508,7 @@ enum e_require_state {
 	ST_ELEMENTALSPIRIT,
 	ST_PECO,
 	ST_SUNSTANCE,
-	ST_MOONSTANCE,
+	ST_LUNARSTANCE,
 	ST_STARSTANCE,
 	ST_UNIVERSESTANCE
 };

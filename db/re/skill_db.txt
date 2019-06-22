@@ -1140,8 +1140,8 @@
 2591,1,6,4,0,0x1,0,3,1,yes,0,0,0,none,0,0,	SJ_SUNSTANCE,Sun Stance
 2592,1,8,4,-1,0,0,7,-3,yes,0,0,0,weapon,0,0,	SJ_SOLARBURST,Solar Burst
 2593,1,8,1,-1,0,0,7,1,yes,0,0,0,weapon,0,0,	SJ_PROMINENCEKICK,Prominence Kick
-2594,1,8,1,-1,0,0,7,-3,yes,0,0x4000,0,weapon,0,0,	SJ_FALLINGSTAR_ATK,Falling Star Attack
-2595,1,8,1,-1,0,0,7,-3,yes,0,0x4000,0,weapon,0,0,	SJ_FALLINGSTAR_ATK2,Falling Star Attack 2
+2594,1,8,1,-1,0x2,10,7,-3,yes,0,0,0,weapon,0,0,	SJ_FALLINGSTAR_ATK,Falling Star Attack
+2595,1,8,1,-1,0x2,2,7,-3,yes,0,0,0,weapon,0,0,	SJ_FALLINGSTAR_ATK2,Falling Star Attack 2
 
 //****
 // Soul Reaper

@@ -4280,6 +4280,31 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case EL_ROCK_CRUSHER:
 			skillratio += 700;
 			break;
+		case SJ_FULLMOONKICK:
+			skillratio += 1000 + 100 * skill_lv;
+			RE_LVL_DMOD(100);
+			if(sc && sc->data[SC_LIGHTOFMOON])
+				skillratio += skillratio * sc->data[SC_LIGHTOFMOON]->val2 / 100;
+			break;
+		case SJ_NEWMOONKICK:
+			skillratio += 600 + 100 * skill_lv;
+			break;
+		case SJ_SOLARBURST:
+			skillratio += 800 + 100 * skill_lv;
+			RE_LVL_DMOD(100);
+			if( sc && sc->data[SC_LIGHTOFSUN] )
+				skillratio += skillratio * sc->data[SC_LIGHTOFSUN]->val2 / 100;
+			break;
+		case SJ_PROMINENCEKICK:
+			skillratio += 50 + 50 * skill_lv;
+			break;
+		case SJ_FALLINGSTAR_ATK:
+		case SJ_FALLINGSTAR_ATK2:
+			skillratio += -100 + 100 * skill_lv;
+			RE_LVL_DMOD(100);
+			if( sc && sc->data[SC_LIGHTOFSTAR] )
+				skillratio += skillratio * sc->data[SC_LIGHTOFSTAR]->val2 / 100;
+			break;
 		case KO_JYUMONJIKIRI:
 			skillratio += -100 + 150 * skill_lv;
 			RE_LVL_DMOD(120);
@@ -5036,9 +5061,8 @@ struct Damage battle_calc_damage_modifiers(struct Damage wd, struct block_list *
 struct Damage battle_calc_attack_plant(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv)
 {
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
-	struct status_change *sc = status_get_sc(src);
 
-	if(sc && sc->data[SC_CAMOUFLAGE] && skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
+	if(skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
 		status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
 	//Plants receive 1 damage when hit
 	if(wd.damage > 0)
@@ -5200,9 +5224,10 @@ struct Damage battle_calc_weapon_final_atk_modifiers(struct Damage wd, struct bl
 				hp = hp * 2 / 100; //2% HP loss per hit
 			status_zap(src, hp, 0);
 		}
-		if(sc->data[SC_CAMOUFLAGE] && skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
-			status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
 	}
+
+	if(skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
+		status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
 
 	if(wd.damage > 0 && tsc) {
 		if((sce = tsc->data[SC_REJECTSWORD]) && (!sd ||
@@ -7513,19 +7538,6 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 
 	damage = wd.damage + wd.damage2;
 
-	if (damage > 0 && target->id != src->id) {
-		if (sc && sc->data[SC_DUPLELIGHT] && wd.flag&BF_SHORT &&
-			rnd()%100 <= 10 + 2 * sc->data[SC_DUPLELIGHT]->val1) { //Activates it only from melee damage
-			uint16 skill_id;
-
-			if (rnd()%2 == 1)
-				skill_id = AB_DUPLELIGHT_MELEE;
-			else
-				skill_id = AB_DUPLELIGHT_MAGIC;
-			skill_attack(skill_get_type(skill_id),src,src,target,skill_id,sc->data[SC_DUPLELIGHT]->val1,tick,flag);
-		}
-	}
-
 	wd.dmotion = clif_damage(src,target,tick,wd.amotion,wd.dmotion,wd.damage,wd.div_,(enum e_damage_type)wd.type,wd.damage2,wd.isspdamage);
 
 	if (damage > 0) {
@@ -7562,7 +7574,7 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 
 	battle_delay_damage(tick,wd.amotion,src,target,wd.flag,0,0,damage,wd.dmg_lv,wd.dmotion,true,wd.isvanishdamage,wd.isspdamage);
 
-	if (tsc) {
+	if (tsc && tsc->count) {
 		if (!wd.isvanishdamage) {
 			if (tsc->data[SC_DEVOTION]) {
 				struct status_change_entry *sce_d = tsc->data[SC_DEVOTION];
@@ -7618,8 +7630,8 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 
 	if (sc && sc->data[SC_AUTOSPELL] && rnd()%100 < sc->data[SC_AUTOSPELL]->val4) {
 		int sp = 0, i = rnd()%100;
-		uint16 skill_id = sc->data[SC_AUTOSPELL]->val2,
-			skill_lv = sc->data[SC_AUTOSPELL]->val3;
+		uint16 skill_id = sc->data[SC_AUTOSPELL]->val2;
+		uint16 skill_lv = sc->data[SC_AUTOSPELL]->val3;
 
 		if (sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_SAGE)
 			i = 0; //Max chance, no skill_lv reduction [Skotlex]
@@ -7634,6 +7646,8 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 		if (status_charge(src,0,sp)) {
 			struct unit_data *ud = unit_bl2ud(src);
 
+			if (sd)
+				sd->state.autocast = 1;
 			switch (skill_get_casttype(skill_id)) {
 				case CAST_GROUND:
 					skill_castend_pos2(src,target->x,target->y,skill_id,skill_lv,tick,flag);
@@ -7645,103 +7659,100 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 					skill_castend_damage_id(src,target,skill_id,skill_lv,tick,flag);
 					break;
 			}
+			if (sd)
+				sd->state.autocast = 0;
 			if (ud) {
 				int autospell_tick = skill_delayfix(src,skill_id,skill_lv);
 
 				if (DIFF_TICK(ud->canact_tick,tick + autospell_tick) < 0) {
 					ud->canact_tick = max(tick + autospell_tick,ud->canact_tick);
-					if (battle_config.display_status_timers && sd)
+					if (battle_config.display_status_timers)
 						clif_status_change(src,SI_POSTDELAY,1,autospell_tick,0,0,0);
 				}
 			}
 		}
 	}
 
-	if (sd && wd.flag&BF_WEAPON) {
-		if (sc && sc->data[SC__AUTOSHADOWSPELL] && rnd()%100 < sc->data[SC__AUTOSHADOWSPELL]->val4) {
-			uint16 skill_id = sc->data[SC__AUTOSHADOWSPELL]->val2,
-				skill_lv = sc->data[SC__AUTOSHADOWSPELL]->val3;
-			int type = skill_get_casttype(skill_id);
+	if (sc && sc->data[SC__AUTOSHADOWSPELL] && rnd()%100 < sc->data[SC__AUTOSHADOWSPELL]->val4) {
+		uint16 skill_id = sc->data[SC__AUTOSHADOWSPELL]->val2;
+		uint16 skill_lv = sc->data[SC__AUTOSHADOWSPELL]->val3;
+		int type;
 
-			if (type == CAST_GROUND) {
-				int maxcount = 0;
+		if ((type = skill_get_casttype(skill_id)) == CAST_GROUND &&
+			!skill_pos_maxcount_check(src,target->x,target->y,skill_id,skill_lv,BL_PC,true) ) {
+			map_freeblock_unlock();
+			return wd.dmg_lv;
+		}
+		if (status_charge(src,0,skill_get_sp(skill_id,skill_lv))) {
+			struct unit_data *ud = unit_bl2ud(src);
 
-				if (!(BL_PC&battle_config.skill_reiteration) &&
-					skill_get_unit_flag(skill_id)&UF_NOREITERATION)
-					type = -1;
-				if (BL_PC&battle_config.skill_nofootset &&
-					skill_get_unit_flag(skill_id)&UF_NOFOOTSET)
-					type = -1;
-				if (BL_PC&battle_config.land_skill_limit &&
-					(maxcount = skill_get_maxcount(skill_id,skill_lv)) > 0) {
-					int v;
-
-					for (v = 0; v < MAX_SKILLUNITGROUP && sd->ud.skillunit[v] && maxcount; v++) {
-						if (sd->ud.skillunit[v]->skill_id == skill_id)
-							maxcount--;
-					}
-					if (!maxcount)
-						type = -1;
-				}
-				if (type != CAST_GROUND) {
-					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					map_freeblock_unlock();
-					return wd.dmg_lv;
-				}
-			}
-			if (status_charge(src,0,skill_get_sp(skill_id,skill_lv))) {
-				struct unit_data *ud = unit_bl2ud(src);
-
+			if (sd)
 				sd->state.autocast = 1;
-				switch (type) {
-					case CAST_GROUND:
-						skill_castend_pos2(src,target->x,target->y,skill_id,skill_lv,tick,flag);
-						break;
-					case CAST_DAMAGE:
-						skill_castend_damage_id(src,target,skill_id,skill_lv,tick,flag);
-						break;
-					case CAST_NODAMAGE:
-						skill_castend_nodamage_id(src,target,skill_id,skill_lv,tick,flag);
-						break;
-				}
+			switch (type) {
+				case CAST_GROUND:
+					skill_castend_pos2(src,target->x,target->y,skill_id,skill_lv,tick,flag);
+					break;
+				case CAST_DAMAGE:
+					skill_castend_damage_id(src,target,skill_id,skill_lv,tick,flag);
+					break;
+				case CAST_NODAMAGE:
+					skill_castend_nodamage_id(src,target,skill_id,skill_lv,tick,flag);
+					break;
+			}
+			if (sd)
 				sd->state.autocast = 0;
-				if (ud) {
-					int delay = skill_delayfix(src,skill_id,skill_lv);
+			if (ud) {
+				int delay = skill_delayfix(src,skill_id,skill_lv);
 
-					if (DIFF_TICK(ud->canact_tick,tick + delay) < 0) {
-						ud->canact_tick = max(tick + delay,ud->canact_tick);
-						if (battle_config.display_status_timers)
-							clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
-					}
+				if (DIFF_TICK(ud->canact_tick,tick + delay) < 0) {
+					ud->canact_tick = max(tick + delay,ud->canact_tick);
+					if (battle_config.display_status_timers)
+						clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
 				}
 			}
 		}
-		if (damage > 0) {
+	}
+
+	if (damage > 0) {
+		if (sd) {
 			if (battle_config.left_cardfix_to_right)
 				battle_drain(sd,target,wd.damage,wd.damage,tstatus->race,tstatus->class_,true);
 			else
 				battle_drain(sd,target,wd.damage,wd.damage2,tstatus->race,tstatus->class_,true);
 		}
-	}
+		if (sc && sc->count) {
+			struct status_change_entry *sce = NULL;
 
-	if (damage > 0 && tsc) {
-		if (tsc->data[SC_POISONREACT] &&
-			(rnd()%100 < tsc->data[SC_POISONREACT]->val3 ||
-			sstatus->def_ele == ELE_POISON) &&
-			//check_distance_bl(src,target,tstatus->rhw.range + 1) && //Doesn't checks range!
-			status_check_skilluse(target,src,TF_POISON,0))
-		{ //Poison React
-			struct status_change_entry *sce = tsc->data[SC_POISONREACT];
+			if ((sce = sc->data[SC_DUPLELIGHT]) && rnd()%100 < 10 + 2 * sce->val1 &&
+				wd.flag&BF_SHORT) { //Activates it only from melee damage
+				uint16 skill_id;
 
-			if (sstatus->def_ele == ELE_POISON) {
-				sce->val2 = 0;
-				skill_attack(BF_WEAPON,target,target,src,AS_POISONREACT,sce->val1,tick,0);
-			} else {
-				skill_attack(BF_WEAPON,target,target,src,TF_POISON,5,tick,0);
-				--sce->val2;
+				if (rnd()%2 == 1)
+					skill_id = AB_DUPLELIGHT_MELEE;
+				else
+					skill_id = AB_DUPLELIGHT_MAGIC;
+				skill_attack(skill_get_type(skill_id),src,src,target,skill_id,sce->val1,tick,flag);
 			}
-			if (sce->val2 <= 0)
-				status_change_end(target,SC_POISONREACT,INVALID_TIMER);
+			if ((sce = sc->data[SC_FALLINGSTAR]) && rnd()%100 < sce->val2)
+				skill_castend_damage_id(src,src,SJ_FALLINGSTAR_ATK,sce->val1,tick,flag);
+		}
+		if (tsc) {
+			struct status_change_entry *sce = NULL;
+
+			if ((sce = tsc->data[SC_POISONREACT]) &&
+				(rnd()%100 < sce->val3 || sstatus->def_ele == ELE_POISON) &&
+				status_check_skilluse(target,src,TF_POISON,0))
+			{
+				if (sstatus->def_ele == ELE_POISON) {
+					sce->val2 = 0;
+					skill_attack(BF_WEAPON,target,target,src,AS_POISONREACT,sce->val1,tick,0);
+				} else {
+					skill_attack(BF_WEAPON,target,target,src,TF_POISON,5,tick,0);
+					--sce->val2;
+				}
+				if (sce->val2 <= 0)
+					status_change_end(target,SC_POISONREACT,INVALID_TIMER);
+			}
 		}
 	}
 

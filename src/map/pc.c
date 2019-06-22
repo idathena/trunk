@@ -8186,7 +8186,7 @@ void pc_close_npc(struct map_session_data *sd, int flag) {
 /*==========================================
  * Invoked when a player has negative current hp
  *------------------------------------------*/
-int pc_dead(struct map_session_data *sd,struct block_list *src)
+int pc_dead(struct map_session_data *sd, struct block_list *src)
 {
 	int k = 0;
 	unsigned int tick = gettick();
@@ -8214,11 +8214,35 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 	for( k = 0; k < MAX_DEVOTION; k++ ) {
 		if( sd->devotion[k] ) {
-			struct map_session_data *devsd = map_id2sd(sd->devotion[k]);
+			struct block_list *bl = map_id2bl(sd->devotion[k]);
 
-			if( devsd )
-				status_change_end(&devsd->bl,SC_DEVOTION,INVALID_TIMER);
-			sd->devotion[k] = 0;
+			status_change_end(bl,SC_DEVOTION,INVALID_TIMER);
+		}
+	}
+
+	pc_crimson_marks_clear(sd);
+
+	for( k = 0; k < MAX_HOWL_MINES; k++ ) {
+		if( sd->howl_mine[k] ) {
+			struct block_list *bl = map_id2bl(sd->howl_mine[k]);
+
+			status_change_end(bl,SC_H_MINE,INVALID_TIMER);
+		}
+	}
+
+	for( k = 0; k < MAX_STELLAR_MARKS; k++ ) {
+		if( sd->stellar_mark[k] ) {
+			struct block_list *bl = map_id2bl(sd->stellar_mark[k]);
+
+			status_change_end(bl,SC_FLASHKICK,INVALID_TIMER);
+		}
+	}
+
+	for( k = 0; k < MAX_UNITED_SOULS; k++ ) {
+		if( sd->united_soul[k] ) {
+			struct block_list *bl = map_id2bl(sd->united_soul[k]);
+
+			status_change_end(bl,SC_SOULUNITY,INVALID_TIMER);
 		}
 	}
 
@@ -12649,20 +12673,20 @@ void pc_show_version(struct map_session_data *sd) {
 }
 
 /**
- * Clear Crimson Marker data from caster
+ * Clear Crimson Marks data from caster
  * @param sd: Player
  */
-void pc_crimson_marker_clear(struct map_session_data *sd) {
+void pc_crimson_marks_clear(struct map_session_data *sd) {
 	uint8 i;
 
 	if( !sd )
 		return;
-	for( i = 0; i < MAX_SKILL_CRIMSON_MARKER; i++ ) {
-		struct block_list *bl = map_id2bl(sd->c_marker[i]);
+	for( i = 0; i < MAX_CRIMSON_MARKS; i++ ) {
+		if( sd->crimson_mark[i] ) {
+			struct block_list *bl = map_id2bl(sd->crimson_mark[i]);
 
-		if( sd->c_marker[i] && bl )
 			status_change_end(bl,SC_C_MARKER,INVALID_TIMER);
-		sd->c_marker[i] = 0;
+		}
 	}
 }
 

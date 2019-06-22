@@ -22,7 +22,7 @@
 //  elementalspirit = Requires to have an Elemental Spirit summoned
 //  peco = Requires riding a peco
 //  sunstance = Requires to have Sun Stance status active
-//  moonstance = Requires to have Lunar Stance status active
+//  lunarstance = Requires to have Lunar Stance status active
 //  starstance = Requires to have Star Stance status active
 //  universestance = Requires to have Universe Stance status active
 //
@@ -840,12 +840,12 @@
 
 //****
 // Star Emperor
-2574,0,0,40,0,0,0,99,0,0,moonstance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_LIGHTOFMOON#Light of Moon#
+2574,0,0,40,0,0,0,99,0,0,lunarstance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_LIGHTOFMOON#Light of Moon#
 2575,0,0,10,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_LUNARSTANCE#Lunar Stance#
-2576,0,0,30:35:40:45:50:55:60,0,0,0,99,0,0,moonstance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_FULLMOONKICK#Full Moon Kick#
+2576,0,0,30:35:40:45:50:55:60,0,0,0,99,0,0,lunarstance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_FULLMOONKICK#Full Moon Kick#
 2577,0,0,40,0,0,0,99,0,0,starstance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_LIGHTOFSTAR#Light of Star#
 2578,0,0,10,0,0,0,99,0,0,none,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_STARSTANCE#Star Stance#
-2579,0,0,20:25:30:35:40:45:50,0,0,0,99,0,0,moonstance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_NEWMOONKICK#New Moon Kick#
+2579,0,0,20:25:30:35:40:45:50,0,0,0,99,0,0,lunarstance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_NEWMOONKICK#New Moon Kick#
 2580,0,0,45:40:35:30:25:20:15,0,0,0,99,0,0,starstance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_FLASHKICK#Flash Kick#
 2581,0,0,70:75:80:85:90,0,0,0,99,0,0,universestance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_STAREMPEROR#Star Emperor#
 2582,0,0,60:65:70:75:80,0,0,0,99,0,0,universestance,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	//SJ_NOVAEXPLOSING#Nova Explosing#
