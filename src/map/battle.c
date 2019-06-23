@@ -1165,7 +1165,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			return 0;
 		}
 
-		//Gravitation and Pressure do damage without removing the effect
 		if( sc->data[SC_WHITEIMPRISON] ) {
 			if( (skill_id && skill_get_ele(skill_id,skill_lv) == ELE_GHOST) || (!skill_id && tstatus->rhw.ele == ELE_GHOST) )
 				status_change_end(bl,SC_WHITEIMPRISON,INVALID_TIMER); //Those skills do damage and removes effect
@@ -2892,8 +2891,6 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 {
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct status_change *sc = status_get_sc(src);
-	struct status_data *sstatus = status_get_status_data(src);
-	int t_class = status_get_class(target);
 	uint8 lv = 0;
 
 	//Add mastery damage
@@ -2977,9 +2974,7 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 				}
 				break;
 		}
-		if(sc) { //Status change considered as masteries
-			uint8 i = 0;
-
+		if(sc && sc->count) { //Status change considered as masteries
 #ifdef RENEWAL //The level 4 weapon limitation has been removed
 			if(sc->data[SC_NIBELUNGEN])
 				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, sc->data[SC_NIBELUNGEN]->val2);
@@ -3012,24 +3007,6 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 			if(sc->data[SC_PROVOKE])
 				ATK_ADDRATE(wd.masteryAtk, wd.masteryAtk2, sc->data[SC_PROVOKE]->val3);
 #endif
-			if(sd) {
-				if(sc->data[SC_MIRACLE])
-					i = 2; //Star anger
-				else
-					ARR_FIND(0, MAX_PC_FEELHATE, i, t_class == sd->hate_mob[i]);
-				if(i < MAX_PC_FEELHATE && (lv = pc_checkskill(sd,sg_info[i].anger_id)) > 0) {
-					int skillratio = sd->status.base_level + sstatus->dex + sstatus->luk;
-
-					if(i == 2)
-						skillratio += sstatus->str; //Star Anger
-					if(lv < 4)
-						skillratio /= 12 - 3 * lv;
-					ATK_ADDRATE(wd.damage, wd.damage2, skillratio);
-#ifdef RENEWAL
-					ATK_ADDRATE(wd.masteryAtk, wd.masteryAtk2, skillratio);
-#endif
-				}
-			}
 		}
 	}
 
@@ -4289,6 +4266,12 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case SJ_NEWMOONKICK:
 			skillratio += 600 + 100 * skill_lv;
 			break;
+		case SJ_STAREMPEROR:
+			skillratio += 700 + 200 * skill_lv;
+			break;
+		case SJ_NOVAEXPLOSING:
+			skillratio += 100 + 100 * skill_lv;
+			break;
 		case SJ_SOLARBURST:
 			skillratio += 800 + 100 * skill_lv;
 			RE_LVL_DMOD(100);
@@ -4717,7 +4700,10 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 					break;
 			}
 		}
-		if(sd) {
+		if(src->type == BL_PC) {
+			uint8 anger_id = 0, anger_lv = 0;
+			int t_class = status_get_class(target);
+
 			if((sce = sc->data[SC_INCATKRATE])) {
 				ATK_ADDRATE(wd.damage, wd.damage2, sce->val1);
 				RE_ALLATK_ADDRATE(wd, sce->val1);
@@ -4725,6 +4711,22 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			if((sce = sc->data[SC_CATNIPPOWDER])) {
 				ATK_ADDRATE(wd.damage, wd.damage2, -sce->val2);
 				RE_ALLATK_ADDRATE(wd, -sce->val2);
+			}
+			if(sc->data[SC_MIRACLE])
+				anger_id = 2; //Always treat all target as star flagged monster when in miracle state
+			if(sd) {
+				if(!anger_id)
+					ARR_FIND(0, MAX_PC_FEELHATE, anger_id, t_class == sd->hate_mob[anger_id]);
+				if(anger_id < MAX_PC_FEELHATE && (anger_lv = pc_checkskill(sd, sg_info[anger_id].anger_id)) > 0) {
+					int skillratio = status_get_lv(src) + status_get_dex(src) + status_get_luk(src);
+
+					if(anger_id == 2) 
+						skillratio += status_get_str(src);
+					if(anger_id < 4)
+						skillratio /= 12 - 3 * anger_lv;
+					ATK_ADDRATE(wd.damage, wd.damage2, skillratio);
+					RE_ALLATK_ADDRATE(wd, skillratio);
+				}
 			}
 		}
 		if(skill_id == AS_SONICBLOW && (sce = sc->data[SC_SPIRIT]) && sce->val2 == SL_ASSASIN) {
@@ -6958,6 +6960,13 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		md.damage = battle_calc_damage_sub(src, target, &md, md.damage, skill_id, skill_lv);
 
 	switch(skill_id) {
+		case NJ_ZENYNAGE:
+			if(sd) {
+				if(md.damage > sd->status.zeny)
+					md.damage = sd->status.zeny;
+				pc_payzeny(sd, (int)cap_value(md.damage, INT_MIN, INT_MAX), LOG_TYPE_STEAL, NULL);
+			}
+		//Fall through
 		case TF_THROWSTONE:
 		case HT_LANDMINE:
 		case MA_LANDMINE:
@@ -6980,6 +6989,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		case NC_MAGMA_ERUPTION_DOTDAMAGE:
 		case LG_RAYOFGENESIS:
 		case RL_B_TRAP:
+		case KO_MUCHANAGE:
 			md.flag |= BF_WEAPON;
 			break;
 		case NPC_GRANDDARKNESS:
@@ -6995,16 +7005,6 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		case GN_BLOOD_SUCKER:
 		case GN_HELLS_PLANT_ATK:
 			md.flag |= BF_MAGIC;
-			break;
-		case NJ_ZENYNAGE:
-			if(sd) {
-				if(md.damage > sd->status.zeny)
-					md.damage = sd->status.zeny;
-				pc_payzeny(sd, (int)cap_value(md.damage, INT_MIN, INT_MAX), LOG_TYPE_STEAL, NULL);
-			}
-		//Fall through
-		case KO_MUCHANAGE:
-			md.flag |= BF_WEAPON;
 			break;
 	}
 
@@ -7771,14 +7771,14 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
  */
 int battle_check_undead(int race, int element)
 {
-	if(!battle_config.undead_detect_type) {
-		if(element == ELE_UNDEAD)
+	if (!battle_config.undead_detect_type) {
+		if (element == ELE_UNDEAD)
 			return 1;
-	} else if(battle_config.undead_detect_type == 1) {
-		if(race == RC_UNDEAD)
+	} else if (battle_config.undead_detect_type == 1) {
+		if (race == RC_UNDEAD)
 			return 1;
 	} else {
-		if(element == ELE_UNDEAD || race == RC_UNDEAD)
+		if (element == ELE_UNDEAD || race == RC_UNDEAD)
 			return 1;
 	}
 	return 0;

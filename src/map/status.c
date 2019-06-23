@@ -1337,6 +1337,10 @@ void initChangeTables(void) {
 	StatusDisplayType[SC_C_MARKER]		  = true;
 	StatusDisplayType[SC_ANTI_M_BLAST]	  = true;
 	StatusDisplayType[SC_H_MINE]		  = true;
+	StatusDisplayType[SC_SUNSTANCE]		  = true;
+	StatusDisplayType[SC_LUNARSTANCE]	  = true;
+	StatusDisplayType[SC_STARSTANCE]	  = true;
+	StatusDisplayType[SC_UNIVERSESTANCE]  = true;
 	StatusDisplayType[SC_FLASHKICK]		  = true;
 	StatusDisplayType[SC_SOULUNITY]		  = true;
 	StatusDisplayType[SC_MOONSTAR]		  = true;
@@ -8546,7 +8550,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				return 0;
 			break;
 		case SC_RENOVATIO:
-			if( undead_flag && bl->type == BL_PC )
+			if( bl->type == BL_PC && undead_flag )
 				return 0;
 			break;
 		case SC_CAMOUFLAGE:
@@ -8692,6 +8696,13 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 	}
 
 	switch( type ) { //Before overlapping fail, one must check for status cured
+		case SC_PROVOKE:
+			status_change_end(bl,SC_FREEZE,INVALID_TIMER);
+			if( sc->data[SC_STONE] && sc->opt1 == OPT1_STONE )
+				status_change_end(bl,SC_STONE,INVALID_TIMER);
+			status_change_end(bl,SC_SLEEP,INVALID_TIMER);
+			status_change_end(bl,SC_TRICKDEAD,INVALID_TIMER);
+			break;
 		case SC_ENDURE:
 			if( sd && sd->special_state.no_walkdelay )
 				return 1;
@@ -8809,8 +8820,9 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_FUSION:
 			status_change_end(bl,SC_SPIRIT,INVALID_TIMER);
 			break;
-		//NPC_CHANGEUNDEAD will debuff Blessing and Agi Up
 		case SC_CHANGEUNDEAD:
+			if( undead_flag || status->def_ele == ELE_DARK )
+				return 0;
 			status_change_end(bl,SC_BLESSING,INVALID_TIMER);
 			status_change_end(bl,SC_INCREASEAGI,INVALID_TIMER);
 			break;

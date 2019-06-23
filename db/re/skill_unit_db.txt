@@ -167,6 +167,8 @@
 2555,0x104,   ,  0, 1:2:2:3:3,500,enemy, 0x002	//RL_B_TRAP
 2567,0x105,   , -1, 0, 100,enemy, 0x098	//RL_FIRE_RAIN
 
+2587,0x109,   ,  0, 2,500,enemy,  0x2018	//SJ_BOOKOFCREATINGSTAR
+
 3010,0xfc,    ,  0, 0,2000,enemy, 0x01A //KO_MAKIBISHI
 3020,0xf8,    ,  2, 0,1000,all,   0x201A	//KO_ZENKAI
 

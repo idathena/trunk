@@ -569,9 +569,9 @@ struct map_session_data {
 	struct elemental_data *ed;
 
 	struct s_hate_mob {
-		int  m; //-1 - none, other: map index corresponding to map name.
+		int  m; //-1: none, other: map index corresponding to map name
 		unsigned short index; //Map index
-	} feel_map[3]; // 0 - Sun; 1 - Moon; 2 - Stars
+	} feel_map[3]; // 0: Sun, 1: Moon; 2: Star
 	short hate_mob[3];
 
 	int pvp_timer;

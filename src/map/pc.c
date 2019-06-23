@@ -149,7 +149,7 @@ unsigned int equip_bitmask[EQI_MAX] = {
 	EQP_SHADOW_ACC_L
 };
 
-// Links related info to the sd->hate_mob[]/sd->feel_map[] entries
+// Links related info to the sd->hate_mob[] / sd->feel_map[] entries
 const struct sg_data sg_info[MAX_PC_FEELHATE] = {
 		{ SG_SUN_ANGER, SG_SUN_BLESS, SG_SUN_COMFORT, "PC_FEEL_SUN", "PC_HATE_MOB_SUN", is_day_of_sun },
 		{ SG_MOON_ANGER, SG_MOON_BLESS, SG_MOON_COMFORT, "PC_FEEL_MOON", "PC_HATE_MOB_MOON", is_day_of_moon },
@@ -1941,11 +1941,10 @@ bool pc_set_hate_mob(struct map_session_data *sd, int pos, struct block_list *bl
 
 	if (!sd || !bl || pos < 0 || pos > 2)
 		return false;
-	if (sd->hate_mob[pos] != -1) { //Can't change hate targets.
+	if (sd->hate_mob[pos] != -1) { //Can't change hate targets
 		clif_hate_info(sd, pos, sd->hate_mob[pos], 0); //Display current
 		return false;
 	}
-
 	class_ = status_get_class(bl);
 	if (!pcdb_checkid(class_)) {
 		unsigned int max_hp = status_get_max_hp(bl);
