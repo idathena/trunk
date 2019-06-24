@@ -4717,7 +4717,7 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 				if(anger_id < MAX_PC_FEELHATE && (anger_lv = pc_checkskill(sd, sg_info[anger_id].anger_id)) > 0) {
 					int skillratio = status_get_lv(src) + sstatus->dex + sstatus->luk;
 
-					if(anger_id == 2) 
+					if(anger_id == 2)
 						skillratio += sstatus->str;
 					if(anger_id < 4)
 						skillratio /= 12 - 3 * anger_lv;
