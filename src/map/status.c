@@ -12254,7 +12254,7 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 			status_change_end(bl,SC_DIMENSION,INVALID_TIMER);
 			break;
 		case SC_GRAVITYCONTROL:
-			status_fix_damage(src,bl,sce->val2,clif_damage(bl,bl,gettick(),0,0,sce->val2,1,DMG_NORMAL,0,false));
+			status_fix_damage(bl,bl,sce->val2,clif_damage(bl,bl,gettick(),0,0,sce->val2,1,DMG_NORMAL,0,false));
 			clif_specialeffect(bl,EF_GANBANTEIN,AREA);
 			clif_specialeffect(bl,EF_HITLINE,AREA);
 			break;
