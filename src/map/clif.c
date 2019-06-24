@@ -1399,6 +1399,16 @@ static void clif_charmball_single(int fd, struct map_session_data *sd)
 }
 
 
+static void clif_soulball_single(int fd, struct map_session_data *sd)
+{
+	WFIFOHEAD(fd,packet_len(0x1d0));
+	WFIFOW(fd,0) = 0x1d0;
+	WFIFOL(fd,2) = sd->bl.id;
+	WFIFOW(fd,6) = sd->soulball;
+	WFIFOSET(fd,packet_len(0x1d0));
+}
+
+
 /*==========================================
  * Run when player changes map / refreshes
  * Tells its client to display all weather settings being used by this map
@@ -1498,8 +1508,10 @@ int clif_spawn(struct block_list *bl)
 					clif_millenniumshield(bl,sd->shieldball);
 				if (sd->rageball > 0)
 					clif_millenniumshield(bl,sd->rageball);
-				if (sd->charmball_type != CHARM_TYPE_NONE && sd->charmball > 0)
+				if (sd->charmball > 0 && sd->charmball_type != CHARM_TYPE_NONE)
 					clif_charmball(sd);
+				if (sd->soulball > 0)
+					clif_soulball(sd);
 				if (sd->status.robe)
 					clif_refreshlook(bl,bl->id,LOOK_ROBE,sd->status.robe,AREA);
 				clif_efst_set_enter(bl,bl,AREA);
@@ -4608,8 +4620,10 @@ static void clif_getareachar_pc(struct map_session_data *sd,struct map_session_d
 		clif_millenniumshield_single(sd->fd, &dstsd->bl, dstsd->shieldball);
 	if( dstsd->rageball > 0 )
 		clif_millenniumshield_single(sd->fd, &dstsd->bl, dstsd->rageball);
-	if( dstsd->charmball_type != CHARM_TYPE_NONE && dstsd->charmball > 0 )
+	if( dstsd->charmball > 0 && dstsd->charmball_type != CHARM_TYPE_NONE )
 		clif_charmball_single(sd->fd, dstsd);
+	if( dstsd->soulball > 0 )
+		clif_soulball_single(sd->fd, dstsd);
 	if( (sd->status.party_id && dstsd->status.party_id == sd->status.party_id) || //Party-mate, or hp disp setting
 		(sd->bg_id && sd->bg_id == dstsd->bg_id) || //Battle Ground
 		pc_has_permission(sd, PC_PERM_VIEW_HPMETER) )
@@ -5617,7 +5631,7 @@ void clif_skill_cooldown_list(struct map_session_data *sd, uint16 skill_id, unsi
 /// Skill attack effect and damage.
 /// 0114 <skill id>.W <src id>.L <dst id>.L <tick>.L <src delay>.L <dst delay>.L <damage>.W <level>.W <div>.W <type>.B (ZC_NOTIFY_SKILL)
 /// 01de <skill id>.W <src id>.L <dst id>.L <tick>.L <src delay>.L <dst delay>.L <damage>.L <level>.W <div>.W <type>.B (ZC_NOTIFY_SKILL2)
-int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 in_damage,int div,uint16 skill_id,uint16 skill_lv,int type)
+int clif_skill_damage(struct block_list *src, struct block_list *dst, unsigned int tick, int sdelay, int ddelay, int64 in_damage, int div, uint16 skill_id, uint16 skill_lv, int type)
 {
 	unsigned char buf[64];
 	struct status_change *sc;
@@ -5710,7 +5724,7 @@ int clif_skill_damage(struct block_list *src,struct block_list *dst,unsigned int
 /// Ground skill attack effect and damage (ZC_NOTIFY_SKILL_POSITION).
 /// 0115 <skill id>.W <src id>.L <dst id>.L <tick>.L <src delay>.L <dst delay>.L <x>.W <y>.W <damage>.W <level>.W <div>.W <type>.B
 /*
-int clif_skill_damage2(struct block_list *src,struct block_list *dst,unsigned int tick,int sdelay,int ddelay,int64 damage,int div,uint16 skill_id,uint16 skill_lv,int type)
+int clif_skill_damage2(struct block_list *src, struct block_list *dst, unsigned int tick, int sdelay, int ddelay, int64 damage, int div, uint16 skill_id, uint16 skill_lv, int type)
 {
 	unsigned char buf[64];
 	struct status_change *sc;
@@ -9543,8 +9557,10 @@ void clif_refresh(struct map_session_data *sd)
 		clif_millenniumshield_single(sd->fd, &sd->bl, sd->shieldball);
 	if( sd->rageball > 0 )
 		clif_millenniumshield_single(sd->fd, &sd->bl, sd->rageball);
-	if( sd->charmball_type != CHARM_TYPE_NONE && sd->charmball > 0 )
+	if( sd->charmball > 0 && sd->charmball_type != CHARM_TYPE_NONE )
 		clif_charmball_single(sd->fd, sd);
+	if( sd->soulball > 0 )
+		clif_soulball_single(sd->fd, sd);
 	if( sd->vd.cloth_color )
 		clif_refreshlook(&sd->bl, sd->bl.id, LOOK_CLOTHES_COLOR, sd->vd.cloth_color, SELF);
 	if( sd->vd.body_style )
@@ -10714,7 +10730,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	if(!sd->state.autotrade && map[sd->bl.m].flag.loadevent) //Lance
 		npc_script_event(sd,NPCE_LOADMAP);
 
-	if(pc_checkskill(sd,SG_DEVIL) && pc_is_maxjoblv(sd))
+	if(pc_checkskill(sd,SG_DEVIL) > 0 && ((sd->class_&MAPID_THIRDMASK) == MAPID_STAR_EMPEROR || pc_is_maxjoblv(sd)))
 		clif_status_load(&sd->bl,SI_DEVIL1,1); //Blindness [Komurka]
 
 	if(sd->sc.opt2) //Client loses these on warp
@@ -11229,6 +11245,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 		sd->sc.data[SC_BLADESTOP] ||
 		sd->sc.data[SC_DEATHBOUND] ||
 		sd->sc.data[SC_DEEPSLEEP] ||
+		sd->sc.data[SC_GRAVITYCONTROL] ||
 		sd->sc.data[SC_SUHIDE]) )
 		return;
 
@@ -18682,6 +18699,18 @@ void clif_charmball(struct map_session_data *sd) {
 	WBUFW(buf,6) = sd->charmball_type;
 	WBUFW(buf,8) = sd->charmball;
 	clif_send(buf,packet_len(0x8cf),&sd->bl,AREA);
+}
+
+
+void clif_soulball(struct map_session_data *sd) {
+	unsigned char buf[8];
+
+	nullpo_ret(sd);
+
+	WBUFW(buf,0) = 0x1d0;
+	WBUFL(buf,2) = sd->bl.id;
+	WBUFW(buf,6) = sd->soulball;
+	clif_send(buf,packet_len(0x1d0),&sd->bl,AREA);
 }
 
 

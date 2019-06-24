@@ -494,7 +494,7 @@ struct map_session_data {
 	} bonus;
 	//Zeroed vars end here
 
-	int castrate, delayrate, hprate, sprate, dsprate;
+	int castrate, delayrate, cooldownrate, hprate, sprate, dsprate;
 	int hprecov_rate, sprecov_rate;
 	int matk_rate;
 	int critical_rate, hit_rate, flee_rate, flee2_rate, def_rate, def2_rate, mdef_rate, mdef2_rate;
@@ -514,6 +514,8 @@ struct map_session_data {
 	short charmball,charmball_old;
 	int charmball_type;
 	int charmball_timer[MAX_CHARMBALL];
+	short soulball,soulball_old;
+	int soulball_timer[MAX_SOULBALL];
 
 	unsigned char potion_success_counter; //Potion successes in row counter
 	unsigned char mission_count; //Stores the bounty kill count for TK_MISSION
@@ -567,9 +569,9 @@ struct map_session_data {
 	struct elemental_data *ed;
 
 	struct s_hate_mob {
-		int  m; //-1 - none, other: map index corresponding to map name.
+		int  m; //-1: none, other: map index corresponding to map name
 		unsigned short index; //Map index
-	} feel_map[3]; // 0 - Sun; 1 - Moon; 2 - Stars
+	} feel_map[3]; // 0: Sun, 1: Moon; 2: Star
 	short hate_mob[3];
 
 	int pvp_timer;
@@ -694,8 +696,10 @@ struct map_session_data {
 
 	uint16 dmglog[DAMAGELOG_SIZE_PC]; //Target ids
 
-	int c_marker[MAX_SKILL_CRIMSON_MARKER]; //Stores target that marked by Crimson Marker [Cydh]
-	int h_mine[MAX_SKILL_HOWLING_MINE]; //Stores target that tagged by with a Howling Mine
+	int crimson_mark[MAX_CRIMSON_MARKS];
+	int howl_mine[MAX_HOWL_MINES];
+	int stellar_mark[MAX_STELLAR_MARKS];
+	int united_soul[MAX_UNITED_SOULS];
 
 	//Bonus Script [Cydh]
 	struct s_bonus_script_list {
@@ -921,16 +925,16 @@ short pc_maxaspd(struct map_session_data *sd);
 #define pcdb_checkid_sub(class_) \
 ( \
 	( (class_) <  JOB_MAX_BASIC ) \
-||	( (class_) >= JOB_NOVICE_HIGH    && (class_) <= JOB_DARK_COLLECTOR ) \
-||	( (class_) >= JOB_RUNE_KNIGHT    && (class_) <= JOB_MECHANIC_T2    ) \
-||	( (class_) >= JOB_BABY_RUNE      && (class_) <= JOB_BABY_MECHANIC2 ) \
-||	( (class_) >= JOB_SUPER_NOVICE_E && (class_) <= JOB_SUPER_BABY_E   ) \
-||	( (class_) >= JOB_KAGEROU        && (class_) <= JOB_OBORO          ) \
-||	  (class_) == JOB_REBELLION                                          \
-||	  (class_) == JOB_SUMMONER                                           \
-||	  (class_) == JOB_BABY_SUMMONER                                      \
-||	( (class_) >= JOB_BABY_NINJA     && (class_) <= JOB_BABY_REBELLION ) \
-||	  (class_) == JOB_BABY_STAR_GLADIATOR2                               \
+||	( (class_) >= JOB_NOVICE_HIGH    && (class_) <= JOB_DARK_COLLECTOR )           \
+||	( (class_) >= JOB_RUNE_KNIGHT    && (class_) <= JOB_MECHANIC_T2    )           \
+||	( (class_) >= JOB_BABY_RUNE      && (class_) <= JOB_BABY_MECHANIC2 )           \
+||	( (class_) >= JOB_SUPER_NOVICE_E && (class_) <= JOB_SUPER_BABY_E   )           \
+||	( (class_) >= JOB_KAGEROU        && (class_) <= JOB_OBORO          )           \
+||	  (class_) == JOB_REBELLION                                                    \
+||	  (class_) == JOB_SUMMONER                                                     \
+||	  (class_) == JOB_BABY_SUMMONER                                                \
+||	( (class_) >= JOB_BABY_NINJA     && (class_) <= JOB_BABY_REBELLION )           \
+||	( (class_) >= JOB_BABY_STAR_GLADIATOR2 && (class_) <= JOB_BABY_STAR_EMPEROR2 ) \
 )
 #define pcdb_checkid(class_) pcdb_checkid_sub((unsigned int)class_)
 
@@ -1216,6 +1220,8 @@ void pc_addrageball(struct map_session_data *sd, int interval, int max);
 void pc_delrageball(struct map_session_data *sd, int count, int type);
 void pc_addcharmball(struct map_session_data *sd, int interval, int max, int type);
 void pc_delcharmball(struct map_session_data *sd, int count, int type);
+void pc_addsoulball(struct map_session_data *sd, int interval, int max);
+void pc_delsoulball(struct map_session_data *sd, int count, int type);
 void pc_addfame(struct map_session_data *sd, int count);
 unsigned char pc_famerank(int char_id, int job);
 bool pc_set_hate_mob(struct map_session_data *sd, int pos, struct block_list *bl);
@@ -1258,7 +1264,7 @@ void pc_damage_log_clear(struct map_session_data *sd, int id);
 
 void pc_show_version(struct map_session_data *sd);
 
-void pc_crimson_marker_clear(struct map_session_data *sd);
+void pc_crimson_marks_clear(struct map_session_data *sd);
 
 TIMER_FUNC(pc_bonus_script_timer);
 void pc_bonus_script(struct map_session_data *sd);

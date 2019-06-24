@@ -19,6 +19,7 @@
 #define MAX_SHIELDBALL 4
 #define MAX_RAGEBALL 15
 #define MAX_CHARMBALL 10
+#define MAX_SOULBALL 20
 
 /**
  * No settings past this point

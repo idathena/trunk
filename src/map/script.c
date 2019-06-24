@@ -20225,7 +20225,8 @@ BUILDIN_FUNC(setmounting) {
 		script_pushint(st,0); //Can't mount with one of these
 	} else if( sd->sc.data[SC_CLOAKING] || sd->sc.data[SC_CHASEWALK] ||
 		sd->sc.data[SC_CLOAKINGEXCEED] || sd->sc.data[SC_CAMOUFLAGE] ||
-		sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__FEINTBOMB] )
+		sd->sc.data[SC_STEALTHFIELD] || sd->sc.data[SC__FEINTBOMB] ||
+		sd->sc.data[SC_NEWMOON] )
 		script_pushint(st,0); //Silent failure
 	else {
 		if( sd->sc.data[SC_ALL_RIDING] )

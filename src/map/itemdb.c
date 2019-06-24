@@ -303,57 +303,54 @@ static void itemdb_jobid2mapid(unsigned int *bclass, unsigned int jobmask)
 	bclass[0] = bclass[1] = bclass[2] = 0;
 
 	//Novice And 1st Jobs
-	if (jobmask & 1<<JOB_NOVICE) { //Novice and Super Novice share the same job equip mask
+	if (jobmask & 1<<0) { //Novice and Super Novice
 		bclass[0] |= 1<<MAPID_NOVICE;
 		bclass[1] |= 1<<MAPID_NOVICE;
 	}
-	if (jobmask & 1<<JOB_SWORDMAN)
+	if (jobmask & 1<<1)
 		bclass[0] |= 1<<MAPID_SWORDMAN;
-	if (jobmask & 1<<JOB_MAGE)
+	if (jobmask & 1<<2)
 		bclass[0] |= 1<<MAPID_MAGE;
-	if (jobmask & 1<<JOB_ARCHER)
+	if (jobmask & 1<<3)
 		bclass[0] |= 1<<MAPID_ARCHER;
-	if (jobmask & 1<<JOB_ACOLYTE) { //Acolyte and Gangsi share the same job equip mask
+	if (jobmask & 1<<4) { //Acolyte and Gangsi
 		bclass[0] |= 1<<MAPID_ACOLYTE;
 		bclass[0] |= 1<<MAPID_GANGSI;
 	}
-	if (jobmask & 1<<JOB_MERCHANT)
+	if (jobmask & 1<<5)
 		bclass[0] |= 1<<MAPID_MERCHANT;
-	if (jobmask & 1<<JOB_THIEF)
+	if (jobmask & 1<<6)
 		bclass[0] |= 1<<MAPID_THIEF;
 	//2-1 classes
-	if (jobmask & 1<<JOB_KNIGHT) { //Knight and Death Knight share the same job equip mask
+	if (jobmask & 1<<7) { //Knight and Death Knight
 		bclass[1] |= 1<<MAPID_SWORDMAN;
 		bclass[1] |= 1<<MAPID_GANGSI;
 	}
-	if (jobmask & 1<<JOB_PRIEST)
+	if (jobmask & 1<<8)
 		bclass[1] |= 1<<MAPID_ACOLYTE;
-	if (jobmask & 1<<JOB_WIZARD)
+	if (jobmask & 1<<9)
 		bclass[1] |= 1<<MAPID_MAGE;
-	if (jobmask & 1<<JOB_BLACKSMITH)
+	if (jobmask & 1<<10)
 		bclass[1] |= 1<<MAPID_MERCHANT;
-	if (jobmask & 1<<JOB_HUNTER)
+	if (jobmask & 1<<11)
 		bclass[1] |= 1<<MAPID_ARCHER;
-	if (jobmask & 1<<JOB_ASSASSIN)
+	if (jobmask & 1<<12)
 		bclass[1] |= 1<<MAPID_THIEF;
 	//2-2 classes
-	if (jobmask & 1<<JOB_CRUSADER)
+	if (jobmask & 1<<14)
 		bclass[2] |= 1<<MAPID_SWORDMAN;
-	if (jobmask & 1<<JOB_MONK)
+	if (jobmask & 1<<15)
 		bclass[2] |= 1<<MAPID_ACOLYTE;
-	if (jobmask & 1<<JOB_SAGE) { //Sage and Dark Collector share the same job equip mask
+	if (jobmask & 1<<16) { //Sage and Dark Collector
 		bclass[2] |= 1<<MAPID_MAGE;
 		bclass[2] |= 1<<MAPID_GANGSI;
 	}
-	if (jobmask & 1<<JOB_ROGUE)
+	if (jobmask & 1<<17)
 		bclass[2] |= 1<<MAPID_THIEF;
-	if (jobmask & 1<<JOB_ALCHEMIST)
+	if (jobmask & 1<<18)
 		bclass[2] |= 1<<MAPID_MERCHANT;
-	if (jobmask & 1<<JOB_BARD)
+	if (jobmask & 1<<19) //Bard and Dancer
 		bclass[2] |= 1<<MAPID_ARCHER;
-	//Bard/Dancer share the same slot now
-	//if (jobmask & 1<<JOB_DANCER)
-		//bclass[2] |= 1<<MAPID_ARCHER;
 	//Expanded Jobs
 	if (jobmask & 1<<21) //Taekwon boy
 		bclass[0] |= 1<<MAPID_TAEKWON;
@@ -361,11 +358,11 @@ static void itemdb_jobid2mapid(unsigned int *bclass, unsigned int jobmask)
 		bclass[1] |= 1<<MAPID_TAEKWON;
 	if (jobmask & 1<<23) //Soul Linker
 		bclass[2] |= 1<<MAPID_TAEKWON;
-	if (jobmask & 1<<JOB_GUNSLINGER) { //Gunslinger and Rebellion share the same job equip mask
+	if (jobmask & 1<<24) { //Gunslinger and Rebellion
 		bclass[0] |= 1<<MAPID_GUNSLINGER;
 		bclass[1] |= 1<<MAPID_GUNSLINGER;
 	}
-	if (jobmask & 1<<JOB_NINJA) { //Ninja and Kagerou/Oboro share the same job equip mask
+	if (jobmask & 1<<25) { //Ninja, Kagerou and Oboro
 		bclass[0] |= 1<<MAPID_NINJA;
 		bclass[1] |= 1<<MAPID_NINJA;
 	}

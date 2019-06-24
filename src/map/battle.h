@@ -688,6 +688,9 @@ extern struct Battle_Config
 	int min_shop_buy;
 	int min_shop_sell;
 	int homunculus_exp_gain;
+	int cooldown_rate;
+	int min_skill_cooldown_limit;
+	int no_skill_cooldown;
 
 #include "../custom/battle_config_struct.inc"
 } battle_config;

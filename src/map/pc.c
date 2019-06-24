@@ -149,7 +149,7 @@ unsigned int equip_bitmask[EQI_MAX] = {
 	EQP_SHADOW_ACC_L
 };
 
-// Links related info to the sd->hate_mob[]/sd->feel_map[] entries
+// Links related info to the sd->hate_mob[] / sd->feel_map[] entries
 const struct sg_data sg_info[MAX_PC_FEELHATE] = {
 		{ SG_SUN_ANGER, SG_SUN_BLESS, SG_SUN_COMFORT, "PC_FEEL_SUN", "PC_HATE_MOB_SUN", is_day_of_sun },
 		{ SG_MOON_ANGER, SG_MOON_BLESS, SG_MOON_COMFORT, "PC_FEEL_MOON", "PC_HATE_MOB_MOON", is_day_of_moon },
@@ -444,7 +444,7 @@ static TIMER_FUNC(pc_shieldball_timer)
 		if( sd->shieldball_timer[0] != INVALID_TIMER )
 			delete_timer(sd->shieldball_timer[0], pc_shieldball_timer);
 		sd->shieldball--;
-		if( sd->shieldball != 0 )
+		if( sd->shieldball )
 			memmove(sd->shieldball_timer + 0, sd->shieldball_timer + 1, sd->shieldball * sizeof(int));
 		sd->shieldball_timer[sd->shieldball] = INVALID_TIMER;
 	}
@@ -698,13 +698,13 @@ void pc_addcharmball(struct map_session_data *sd, int interval, int max, int typ
 		if( sd->charmball_timer[0] != INVALID_TIMER )
 			delete_timer(sd->charmball_timer[0], pc_charmball_timer);
 		sd->charmball--;
-		if( sd->charmball != 0 )
+		if( sd->charmball )
 			memmove(sd->charmball_timer + 0, sd->charmball_timer + 1, sd->charmball * sizeof(int));
 		sd->charmball_timer[sd->charmball] = INVALID_TIMER;
 	}
 
 	tid = add_timer(gettick() + interval, pc_charmball_timer, sd->bl.id, 0);
-	ARR_FIND(0, sd->charmball, i, sd->charmball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->charmball_timer[i])->tick) < 0);
+	ARR_FIND(0, sd->charmball, i, (sd->charmball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->charmball_timer[i])->tick) < 0));
 
 	if( i != sd->charmball )
 		memmove(sd->charmball_timer + i + 1, sd->charmball_timer + i, (sd->charmball - i) * sizeof(int));
@@ -763,6 +763,126 @@ void pc_delcharmball(struct map_session_data *sd, int count, int type)
 		sd->charmball_type = CHARM_TYPE_NONE;
 
 	clif_charmball(sd);
+}
+
+/**
+ * Soulball expiration timer.
+ * @see TimerFunc
+ */
+static TIMER_FUNC(pc_soulball_timer)
+{
+	struct map_session_data *sd;
+	int i;
+
+	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
+		return 1;
+
+	if( sd->soulball <= 0 ) {
+		ShowError("pc_soulball_timer: %d soulball's available. (aid=%d cid=%d tid=%d)\n", sd->soulball, sd->status.account_id, sd->status.char_id, tid);
+		sd->soulball = 0;
+		return 0;
+	}
+
+	ARR_FIND(0, sd->soulball, i, sd->soulball_timer[i] == tid);
+
+	if( i == sd->soulball ) {
+		ShowError("pc_soulball_timer: timer not found (aid=%d cid=%d tid=%d)\n", sd->status.account_id, sd->status.char_id, tid);
+		return 0;
+	}
+
+	sd->soulball--;
+
+	if( i != sd->soulball )
+		memmove(sd->soulball_timer + i, sd->soulball_timer + i + 1, (sd->soulball - i) * sizeof(int));
+
+	sd->soulball_timer[sd->soulball] = INVALID_TIMER;
+
+	clif_soulball(sd);
+
+	return 0;
+}
+
+/**
+ * Adds a soulball.
+ * @param sd       Target character.
+ * @param interval Duration.
+ * @param max      Maximum amount of souls to add.
+ */
+void pc_addsoulball(struct map_session_data *sd, int interval, int max)
+{
+	int tid, i;
+
+	nullpo_retv(sd);
+
+	if( max > MAX_SOULBALL )
+		max = MAX_SOULBALL;
+
+	if( sd->soulball < 0 )
+		sd->soulball = 0;
+
+	if( sd->soulball && sd->soulball >= max ) {
+		if( sd->soulball_timer[0] != INVALID_TIMER )
+			delete_timer(sd->soulball_timer[0], pc_soulball_timer);
+		sd->soulball--;
+		if( sd->soulball )
+			memmove(sd->soulball_timer + 0, sd->soulball_timer + 1, sd->soulball * sizeof(int));
+		sd->soulball_timer[sd->soulball] = INVALID_TIMER;
+	}
+
+	tid = add_timer(gettick() + interval, pc_soulball_timer, sd->bl.id, 0);
+	ARR_FIND(0, sd->soulball, i, (sd->soulball_timer[i] == INVALID_TIMER || DIFF_TICK(get_timer(tid)->tick, get_timer(sd->soulball_timer[i])->tick) < 0));
+
+	if( i != sd->soulball )
+		memmove(sd->soulball_timer + i + 1, sd->soulball_timer + i, (sd->soulball - i) * sizeof(int));
+
+	sd->soulball_timer[i] = tid;
+	sd->soulball++;
+
+	clif_soulball(sd);
+}
+
+/**
+ * Removes one or more soulballs.
+ * @param sd    The target character.
+ * @param count Amount of souls to remove.
+ * @param type 1 = doesn't give client effect
+ */
+void pc_delsoulball(struct map_session_data *sd, int count, int type)
+{
+	int i;
+
+	nullpo_retv(sd);
+
+	if( sd->soulball <= 0 ) {
+		sd->soulball = 0;
+		return;
+	}
+
+	if( count <= 0 )
+		return;
+
+	if( count > sd->soulball )
+		count = sd->soulball;
+
+	sd->soulball -= count;
+
+	if( count > MAX_SOULBALL )
+		count = MAX_SOULBALL;
+
+	for( i = 0; i < count; i++ ) {
+		if( sd->soulball_timer[i] != INVALID_TIMER ) {
+			delete_timer(sd->soulball_timer[i], pc_soulball_timer);
+			sd->soulball_timer[i] = INVALID_TIMER;
+		}
+	}
+
+	for( i = count; i < MAX_SOULBALL; i++ ) {
+		sd->soulball_timer[i - count] = sd->soulball_timer[i];
+		sd->soulball_timer[i] = INVALID_TIMER;
+	}
+
+	if( !type )
+		clif_soulball(sd);
 }
 
 /**
@@ -1630,6 +1750,15 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	}
 	sd->status.body = cap_value(sd->status.body,MIN_BODY_STYLE,MAX_BODY_STYLE);
 
+	//Hair style 0 and body dye 1 arn't allowed on official servers
+	//Adjust them to hair style 1 and body dye 0 which are the same things but officially used
+	//This prevents visual glitches on the character select and equip window
+	//Example: Warlock on body dye 1 will show color glitch on the crystal shards on the outfit
+	if (sd->status.hair == 0)
+		sd->status.hair = 1;
+	if (sd->status.clothes_color == 1)
+		sd->status.clothes_color = 0;
+
 	//Initializations to null/0 unneeded since map_session_data was filled with 0 upon allocation
 	sd->state.connect_new = 1;
 
@@ -1662,6 +1791,8 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 		sd->rageball_timer[i] = INVALID_TIMER;
 	for (i = 0; i < MAX_CHARMBALL; i++)
 		sd->charmball_timer[i] = INVALID_TIMER;
+	for (i = 0; i < MAX_SOULBALL; i++)
+		sd->soulball_timer[i] = INVALID_TIMER;
 	for (i = 0; i < ARRAYLENGTH(sd->autobonus); i++)
 		sd->autobonus[i].active = INVALID_TIMER;
 	for (i = 0; i < ARRAYLENGTH(sd->autobonus2); i++)
@@ -1819,11 +1950,10 @@ bool pc_set_hate_mob(struct map_session_data *sd, int pos, struct block_list *bl
 
 	if (!sd || !bl || pos < 0 || pos > 2)
 		return false;
-	if (sd->hate_mob[pos] != -1) { //Can't change hate targets.
+	if (sd->hate_mob[pos] != -1) { //Can't change hate targets
 		clif_hate_info(sd, pos, sd->hate_mob[pos], 0); //Display current
 		return false;
 	}
-
 	class_ = status_get_class(bl);
 	if (!pcdb_checkid(class_)) {
 		unsigned int max_hp = status_get_max_hp(bl);
@@ -2122,7 +2252,6 @@ void pc_calc_skilltree(struct map_session_data *sd)
 				case OB_OBOROGENSOU_TRANSITION_ATK:
 				case RL_R_TRIP_PLUSATK:
 				case RL_B_FLICKER_ATK:
-				case RL_GLITTERING_GREED_ATK:
 				case SU_SV_ROOTTWIST_ATK:
 				case SU_PICKYPECK_DOUBLE_ATK:
 				case SU_CN_METEOR2:
@@ -3364,7 +3493,11 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			break;
 		case SP_DELAYRATE:
 			if(sd->state.lr_flag != 2)
-				sd->delayrate+=val;
+				sd->delayrate += val;
+			break;
+		case SP_COOLDOWNRATE:
+			if(sd->state.lr_flag != 2)
+				sd->cooldownrate += val;
 			break;
 		case SP_CRIT_ATK_RATE:
 			if(sd->state.lr_flag != 2)
@@ -5825,6 +5958,7 @@ enum e_setpos pc_setpos(struct map_session_data *sd, unsigned short mapindex, in
 			}
 			status_change_end(&sd->bl, SC_CLOAKINGEXCEED, INVALID_TIMER);
 			status_change_end(&sd->bl, SC_PROPERTYWALK, INVALID_TIMER);
+			status_change_end(&sd->bl, SC_NEWMOON, INVALID_TIMER);
 		}
 		for( i = 0; i < EQI_MAX; i++ ) {
 			if( sd->equip_index[i] >= 0 && pc_isequip(sd, sd->equip_index[i]) )
@@ -6299,6 +6433,7 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_ARCH_BISHOP:           return MAPID_ARCH_BISHOP;
 		case JOB_MECHANIC:              return MAPID_MECHANIC;
 		case JOB_GUILLOTINE_CROSS:      return MAPID_GUILLOTINE_CROSS;
+		case JOB_STAR_EMPEROR:          return MAPID_STAR_EMPEROR;
 		//3-2 Jobs
 		case JOB_ROYAL_GUARD:           return MAPID_ROYAL_GUARD;
 		case JOB_SORCERER:              return MAPID_SORCERER;
@@ -6307,6 +6442,7 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_SURA:                  return MAPID_SURA;
 		case JOB_GENETIC:               return MAPID_GENETIC;
 		case JOB_SHADOW_CHASER:         return MAPID_SHADOW_CHASER;
+		case JOB_SOUL_REAPER:           return MAPID_SOUL_REAPER;
 		//Trans 3-1 Jobs
 		case JOB_RUNE_KNIGHT_T:         return MAPID_RUNE_KNIGHT_T;
 		case JOB_WARLOCK_T:             return MAPID_WARLOCK_T;
@@ -6330,6 +6466,7 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_BABY_BISHOP:           return MAPID_BABY_BISHOP;
 		case JOB_BABY_MECHANIC:         return MAPID_BABY_MECHANIC;
 		case JOB_BABY_CROSS:            return MAPID_BABY_CROSS;
+		case JOB_BABY_STAR_EMPEROR:     return MAPID_BABY_STAR_EMPEROR;
 		//Baby 3-2 Jobs
 		case JOB_BABY_GUARD:            return MAPID_BABY_GUARD;
 		case JOB_BABY_SORCERER:         return MAPID_BABY_SORCERER;
@@ -6338,6 +6475,7 @@ int pc_jobid2mapid(unsigned short b_class)
 		case JOB_BABY_SURA:             return MAPID_BABY_SURA;
 		case JOB_BABY_GENETIC:          return MAPID_BABY_GENETIC;
 		case JOB_BABY_CHASER:           return MAPID_BABY_CHASER;
+		case JOB_BABY_SOUL_REAPER:      return MAPID_BABY_SOUL_REAPER;
 		//Summoner Job
 		case JOB_SUMMONER:              return MAPID_SUMMONER;
 		default:
@@ -6449,6 +6587,7 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_ARCH_BISHOP:           return JOB_ARCH_BISHOP;
 		case MAPID_MECHANIC:              return JOB_MECHANIC;
 		case MAPID_GUILLOTINE_CROSS:      return JOB_GUILLOTINE_CROSS;
+		case MAPID_STAR_EMPEROR:          return JOB_STAR_EMPEROR;
 		//3-2 Jobs
 		case MAPID_ROYAL_GUARD:           return JOB_ROYAL_GUARD;
 		case MAPID_SORCERER:              return JOB_SORCERER;
@@ -6456,6 +6595,7 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_SURA:                  return JOB_SURA;
 		case MAPID_GENETIC:               return JOB_GENETIC;
 		case MAPID_SHADOW_CHASER:         return JOB_SHADOW_CHASER;
+		case MAPID_SOUL_REAPER:           return JOB_SOUL_REAPER;
 		//Trans 3-1 Jobs
 		case MAPID_RUNE_KNIGHT_T:         return JOB_RUNE_KNIGHT_T;
 		case MAPID_WARLOCK_T:             return JOB_WARLOCK_T;
@@ -6478,6 +6618,7 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_BABY_BISHOP:           return JOB_BABY_BISHOP;
 		case MAPID_BABY_MECHANIC:         return JOB_BABY_MECHANIC;
 		case MAPID_BABY_CROSS:            return JOB_BABY_CROSS;
+		case MAPID_BABY_STAR_EMPEROR:     return JOB_BABY_STAR_EMPEROR;
 		//Baby 3-2 Jobs
 		case MAPID_BABY_GUARD:            return JOB_BABY_GUARD;
 		case MAPID_BABY_SORCERER:         return JOB_BABY_SORCERER;
@@ -6485,6 +6626,7 @@ int pc_mapid2jobid(unsigned short class_, int sex)
 		case MAPID_BABY_SURA:             return JOB_BABY_SURA;
 		case MAPID_BABY_GENETIC:          return JOB_BABY_GENETIC;
 		case MAPID_BABY_CHASER:           return JOB_BABY_CHASER;
+		case MAPID_BABY_SOUL_REAPER:      return JOB_BABY_SOUL_REAPER;
 		//Summoner Job
 		case MAPID_SUMMONER:              return JOB_SUMMONER;
 		default:
@@ -6734,6 +6876,18 @@ const char *job_name(int class_)
 		case JOB_BABY_STAR_GLADIATOR2:
 			return msg_txt(749);
 
+		case JOB_STAR_EMPEROR:
+		case JOB_SOUL_REAPER:
+		case JOB_BABY_STAR_EMPEROR:
+		case JOB_BABY_SOUL_REAPER:
+			return msg_txt(924 - JOB_STAR_EMPEROR + class_);
+
+		case JOB_STAR_EMPEROR2:
+			return msg_txt(924);
+
+		case JOB_BABY_STAR_EMPEROR2:
+			return msg_txt(926);
+
 		default:
 			return msg_txt(655);
 	}
@@ -6905,8 +7059,9 @@ int pc_checkjoblevelup(struct map_session_data *sd)
 	clif_updatestatus(sd, SP_SKILLPOINT);
 	status_calc_pc(sd, SCO_FORCE);
 	clif_misceffect(&sd->bl, 1);
-	if (pc_checkskill(sd, SG_DEVIL) > 0 && pc_is_maxbaselv(sd))
-		clif_status_change(&sd->bl, SI_DEVIL1, 1, 0, 0, 0, 1); //Permanent blind effect from SG_DEVIL
+
+	if (pc_checkskill(sd, SG_DEVIL) > 0 && ((sd->class_&MAPID_THIRDMASK) == MAPID_STAR_EMPEROR || pc_is_maxjoblv(sd)))
+		clif_status_load(&sd->bl, SI_DEVIL1, 1); //Permanent blind effect from SG_DEVIL
 
 	npc_script_event(sd, NPCE_JOBLVUP);
 	achievement_update_objective(sd, AG_GOAL_LEVEL, 1, sd->status.job_level);
@@ -7510,6 +7665,8 @@ int pc_skillup(struct map_session_data *sd, uint16 skill_id)
 		clif_updatestatus(sd, SP_SKILLPOINT);
 		if( skill_id == GN_REMODELING_CART ) //Cart weight info was updated by status_calc_pc
 			clif_updatestatus(sd, SP_CARTINFO);
+		if( pc_checkskill(sd, SG_DEVIL) > 0 && ((sd->class_&MAPID_THIRDMASK) == MAPID_STAR_EMPEROR || pc_is_maxjoblv(sd)) )
+			clif_status_load(&sd->bl, SI_DEVIL1, 1);
 		if( !pc_has_permission(sd, PC_PERM_ALL_SKILL) ) //May skill everything at any time anyways, and this would cause a huge slowdown
 			clif_skillinfoblock(sd);
 	}
@@ -7739,8 +7896,8 @@ int pc_resetskill(struct map_session_data *sd, int flag)
 		//It has been confirmed on official servers that when you reset skills with a ranked Taekwon your skills are not reset (because you have all of them anyway)
 		if( pc_is_taekwon_ranker(sd) )
 			return 0;
-		if( pc_checkskill(sd, SG_DEVIL) > 0 && pc_is_maxjoblv(sd) )
-			clif_status_load(&sd->bl, SI_DEVIL1, 0); //Remove perma blindness due to skill-reset [Skotlex]
+		if( pc_checkskill(sd, SG_DEVIL) > 0 )
+			clif_status_load(&sd->bl, SI_DEVIL1, 0); //Remove permanent blindness due to skill-reset [Skotlex]
 		i = sd->sc.option;
 		if( i&OPTION_RIDING && pc_checkskill(sd, KN_RIDING) > 0 )
 			i &= ~OPTION_RIDING;
@@ -7859,7 +8016,7 @@ int pc_resethate(struct map_session_data *sd)
 
 	nullpo_ret(sd);
 
-	for( i = 0; i < 3; i++ ) {
+	for( i = 0; i < MAX_PC_FEELHATE; i++ ) {
 		sd->hate_mob[i] = -1;
 		pc_setglobalreg(sd,sg_info[i].hate_var,0);
 	}
@@ -8043,7 +8200,7 @@ void pc_close_npc(struct map_session_data *sd, int flag) {
 /*==========================================
  * Invoked when a player has negative current hp
  *------------------------------------------*/
-int pc_dead(struct map_session_data *sd,struct block_list *src)
+int pc_dead(struct map_session_data *sd, struct block_list *src)
 {
 	int k = 0;
 	unsigned int tick = gettick();
@@ -8071,11 +8228,35 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 	for( k = 0; k < MAX_DEVOTION; k++ ) {
 		if( sd->devotion[k] ) {
-			struct map_session_data *devsd = map_id2sd(sd->devotion[k]);
+			struct block_list *bl = map_id2bl(sd->devotion[k]);
 
-			if( devsd )
-				status_change_end(&devsd->bl,SC_DEVOTION,INVALID_TIMER);
-			sd->devotion[k] = 0;
+			status_change_end(bl,SC_DEVOTION,INVALID_TIMER);
+		}
+	}
+
+	pc_crimson_marks_clear(sd);
+
+	for( k = 0; k < MAX_HOWL_MINES; k++ ) {
+		if( sd->howl_mine[k] ) {
+			struct block_list *bl = map_id2bl(sd->howl_mine[k]);
+
+			status_change_end(bl,SC_H_MINE,INVALID_TIMER);
+		}
+	}
+
+	for( k = 0; k < MAX_STELLAR_MARKS; k++ ) {
+		if( sd->stellar_mark[k] ) {
+			struct block_list *bl = map_id2bl(sd->stellar_mark[k]);
+
+			status_change_end(bl,SC_FLASHKICK,INVALID_TIMER);
+		}
+	}
+
+	for( k = 0; k < MAX_UNITED_SOULS; k++ ) {
+		if( sd->united_soul[k] ) {
+			struct block_list *bl = map_id2bl(sd->united_soul[k]);
+
+			status_change_end(bl,SC_SOULUNITY,INVALID_TIMER);
 		}
 	}
 
@@ -8139,6 +8320,9 @@ int pc_dead(struct map_session_data *sd,struct block_list *src)
 
 	if( sd->charmball_type != CHARM_TYPE_NONE && sd->charmball > 0 )
 		pc_delcharmball(sd,sd->charmball,sd->charmball_type);
+
+	if( sd->soulball > 0 )
+		pc_delsoulball(sd,sd->soulball,0);
 
 	if( src ) {
 		switch( src->type ) {
@@ -8543,6 +8727,7 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_BREAK_ARMOR_RATE:	val = sd->bonus.break_armor_rate; break;
 		case SP_ADD_STEAL_RATE:		val = sd->bonus.add_steal_rate; break;
 		case SP_DELAYRATE:		val = sd->delayrate; break;
+		case SP_COOLDOWNRATE:		val = sd->cooldownrate; break;
 		case SP_CRIT_ATK_RATE:		val = sd->bonus.crit_atk_rate; break;
 		case SP_UNSTRIPABLE:		val = sd->bonus.unstripable; break;
 		case SP_UNSTRIPABLE_WEAPON:	val = (sd->bonus.unstripable_equip&EQP_WEAPON) ? 1 : 0; break;
@@ -12503,20 +12688,20 @@ void pc_show_version(struct map_session_data *sd) {
 }
 
 /**
- * Clear Crimson Marker data from caster
+ * Clear Crimson Marks data from caster
  * @param sd: Player
  */
-void pc_crimson_marker_clear(struct map_session_data *sd) {
+void pc_crimson_marks_clear(struct map_session_data *sd) {
 	uint8 i;
 
 	if( !sd )
 		return;
-	for( i = 0; i < MAX_SKILL_CRIMSON_MARKER; i++ ) {
-		struct block_list *bl = map_id2bl(sd->c_marker[i]);
+	for( i = 0; i < MAX_CRIMSON_MARKS; i++ ) {
+		if( sd->crimson_mark[i] ) {
+			struct block_list *bl = map_id2bl(sd->crimson_mark[i]);
 
-		if( sd->c_marker[i] && bl )
 			status_change_end(bl,SC_C_MARKER,INVALID_TIMER);
-		sd->c_marker[i] = 0;
+		}
 	}
 }
 
@@ -13425,6 +13610,7 @@ void do_init_pc(void) {
 	add_timer_func_list(pc_shieldball_timer, "pc_shieldball_timer");
 	add_timer_func_list(pc_rageball_timer, "pc_rageball_timer");
 	add_timer_func_list(pc_charmball_timer, "pc_charmball_timer");
+	add_timer_func_list(pc_soulball_timer, "pc_soulball_timer");
 	add_timer_func_list(pc_follow_timer, "pc_follow_timer");
 	add_timer_func_list(pc_endautobonus, "pc_endautobonus");
 	add_timer_func_list(pc_global_expiration_timer, "pc_global_expiration_timer");

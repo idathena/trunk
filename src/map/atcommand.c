@@ -1055,7 +1055,8 @@ ACMD_FUNC(jobchange)
 
 	if (job == JOB_KNIGHT2 || job == JOB_CRUSADER2 || job == JOB_WEDDING || job == JOB_XMAS || job == JOB_SUMMER || job == JOB_HANBOK || job == JOB_OKTOBERFEST || job == JOB_SUMMER2 ||
 		job == JOB_LORD_KNIGHT2 || job == JOB_PALADIN2 || job == JOB_BABY_KNIGHT2 || job == JOB_BABY_CRUSADER2 || job == JOB_STAR_GLADIATOR2 ||
-		(job >= JOB_RUNE_KNIGHT2 && job <= JOB_MECHANIC_T2) || (job >= JOB_BABY_RUNE2 && job <= JOB_BABY_MECHANIC2) || job == JOB_BABY_STAR_GLADIATOR2)
+		(job >= JOB_RUNE_KNIGHT2 && job <= JOB_MECHANIC_T2) || (job >= JOB_BABY_RUNE2 && job <= JOB_BABY_MECHANIC2) || job == JOB_BABY_STAR_GLADIATOR2 ||
+		job == JOB_STAR_EMPEROR2 || job == JOB_BABY_STAR_EMPEROR2)
 	{ // Deny direct transformation into dummy jobs
 		clif_displaymessage(fd, msg_txt(923)); //"You can not change to this job by command."
 		return 0;
@@ -3399,6 +3400,34 @@ ACMD_FUNC(charmball)
 	sd->charmball = number;
 	sd->charmball_type = type;
 	clif_charmball(sd);
+	// No message, player can look the difference
+
+	return 0;
+}
+
+/*==========================================
+ *
+ *------------------------------------------*/
+ACMD_FUNC(soulball)
+{
+	uint32 max_soulballs;
+	int number;
+	nullpo_retr(-1, sd);
+
+	max_soulballs = zmin(ARRAYLENGTH(sd->soulball_timer), 0x7FFF);
+
+	if( !message || !*message || (number = atoi(message)) < 0 || number > max_soulballs ) {
+		char msg[CHAT_SIZE_MAX];
+
+		safesnprintf(msg, sizeof(msg), msg_txt(1058), max_soulballs); // Please enter a number (usage: @soulball <number: 0-%d>).
+		clif_displaymessage(fd, msg);
+		return -1;
+	}
+
+	if( sd->soulball > 0 )
+		pc_delsoulball(sd, sd->soulball, 1);
+	sd->soulball = number;
+	clif_soulball(sd);
 	// No message, player can look the difference
 
 	return 0;
@@ -8572,6 +8601,17 @@ ACMD_FUNC(feelreset)
 }
 
 /*==========================================
+ * Hate (SG save monster/player) Reset
+ *------------------------------------------*/
+ACMD_FUNC(hatereset)
+{
+	pc_resethate(sd);
+	clif_displaymessage(fd, msg_txt(534)); // Reset 'Hated' monsters/players.
+
+	return 0;
+}
+
+/*==========================================
  * AUCTION SYSTEM
  *------------------------------------------*/
 ACMD_FUNC(auction)
@@ -10104,6 +10144,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(shieldball),
 		ACMD_DEF(rageball),
 		ACMD_DEF(charmball),
+		ACMD_DEF(soulball),
 		ACMD_DEF(party),
 		ACMD_DEF(guild),
 		ACMD_DEF(breakguild),
@@ -10258,6 +10299,7 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(hommax),
 		ACMD_DEF(showmobs),
 		ACMD_DEF(feelreset),
+		ACMD_DEF(hatereset),
 		ACMD_DEF(auction),
 		ACMD_DEF(mail),
 		ACMD_DEF2("noks", ksprotection),

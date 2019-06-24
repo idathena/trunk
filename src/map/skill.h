@@ -21,9 +21,11 @@ struct status_change_entry;
 #define MAX_ARROW_RESULT 5 //Max Arrow results/created
 #define MAX_SKILL_ABRA_DB 160 //Max Skill list of Abracadabra DB
 #define MAX_SKILL_IMPROVISE_DB 20 //Max Skill for Improvise
+#define MAX_CRIMSON_MARKS 3 //Max Crimson Marks
+#define MAX_HOWL_MINES 5 //Max Howl Mines
+#define MAX_STELLAR_MARKS 5 //Max Stellar Marks
+#define MAX_UNITED_SOULS 12 //Max United Souls
 #define MAX_SKILL_LEVEL 100 //Max Skill Level
-#define MAX_SKILL_CRIMSON_MARKER 3 //Max Crimson Marker targets (RL_C_MARKER)
-#define MAX_SKILL_HOWLING_MINE 5 //Max Howling Mine targets (RL_H_MINE)
 #define SKILL_NAME_LENGTH 31 //Max Skill Name length
 #define SKILL_DESC_LENGTH 31 //Max Skill Desc length
 
@@ -418,6 +420,7 @@ int skill_castfix_sc(struct block_list *bl, double time, uint16 skill_id, uint16
 int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 skill_lv);
 #endif
 int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
+int skill_cooldownfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
 
 //Skill conditions check and remove [Inkfish]
 bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
@@ -505,6 +508,10 @@ enum e_require_state {
 	ST_MADO,
 	ST_ELEMENTALSPIRIT,
 	ST_PECO,
+	ST_SUNSTANCE,
+	ST_LUNARSTANCE,
+	ST_STARSTANCE,
+	ST_UNIVERSESTANCE
 };
 
 //List of Skills
@@ -1298,6 +1305,12 @@ enum e_skill {
 	NPC_LEASH,
 	NPC_WIDELEASH,
 	NPC_WIDECRITICALWOUND,
+	NPC_EARTHQUAKE_K,
+	NPC_ALL_STAT_DOWN,
+	NPC_GRADUAL_GRAVITY,
+	NPC_DAMAGE_HEAL,
+	NPC_IMMUNE_PROPERTY,
+	NPC_MOVE_COORDINATE,
 
 	KN_CHARGEATK = 1001,
 	CR_SHRINK,
@@ -1628,7 +1641,7 @@ enum e_skill {
 	ALL_BUYING_STORE,
 	ALL_GUARDIAN_RECALL,
 	ALL_ODINS_POWER,
-	BEER_BOTTLE_CAP,
+	ALL_BEER_BOTTLE_CAP,
 	NPC_ASSASSINCROSS,
 	NPC_DISSONANCE,
 	NPC_UGLYDANCE,
@@ -1664,7 +1677,46 @@ enum e_skill {
 	RL_HAMMER_OF_GOD,
 	RL_R_TRIP_PLUSATK,
 	RL_B_FLICKER_ATK,
-	RL_GLITTERING_GREED_ATK,
+
+	SJ_LIGHTOFMOON,
+	SJ_LUNARSTANCE,
+	SJ_FULLMOONKICK,
+	SJ_LIGHTOFSTAR,
+	SJ_STARSTANCE,
+	SJ_NEWMOONKICK,
+	SJ_FLASHKICK,
+	SJ_STAREMPEROR,
+	SJ_NOVAEXPLOSING,
+	SJ_UNIVERSESTANCE,
+	SJ_FALLINGSTAR,
+	SJ_GRAVITYCONTROL,
+	SJ_BOOKOFDIMENSION,
+	SJ_BOOKOFCREATINGSTAR,
+	SJ_DOCUMENT,
+	SJ_PURIFY,
+	SJ_LIGHTOFSUN,
+	SJ_SUNSTANCE,
+	SJ_SOLARBURST,
+	SJ_PROMINENCEKICK,
+	SJ_FALLINGSTAR_ATK,
+	SJ_FALLINGSTAR_ATK2,
+	SP_SOULGOLEM,
+	SP_SOULSHADOW,
+	SP_SOULFALCON,
+	SP_SOULFAIRY,
+	SP_CURSEEXPLOSION,
+	SP_SOULCURSE,
+	SP_SPA,
+	SP_SHA,
+	SP_SWHOO,
+	SP_SOULUNITY,
+	SP_SOULDIVISION,
+	SP_SOULREAPER,
+	SP_SOULREVOLVE,
+	SP_SOULCOLLECT,
+	SP_SOULEXPLOSION,
+	SP_SOULENERGY,
+	SP_KAUTE,
 
 	KO_YAMIKUMO = 3001,
 	KO_RIGHT,
@@ -1710,6 +1762,7 @@ enum e_skill {
 	ALL_PRONTERA_RECALL,
 	ALL_GLASTHEIM_RECALL,
 	ALL_THANATOS_RECALL,
+	ALL_LIGHTHALZEN_RECALL,
 
 	GC_DARKCROW = 5001,
 	RA_UNLIMIT,
@@ -2047,6 +2100,7 @@ enum {
 	UNT_CN_POWDERING,
 	UNT_NYANGGRASS,
 	UNT_GROUNDDRIFT_NEUTRAL,
+	UNT_CREATINGSTAR,
 
 	//Guild Auras
 	UNT_GD_LEADERSHIP = 0xc1,

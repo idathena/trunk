@@ -31,7 +31,7 @@
 	#define MAX_HOTKEYS 38
 #endif
 
-#define MAX_MAP_PER_SERVER 1500 //Increased to allow creation of Instance Maps
+#define MAX_MAP_PER_SERVER 2000 //Increased to allow creation of Instance Maps
 #define MAX_INVENTORY 100
 //Max number of characters per account. (Max value tested was 265)
 //Note: Changing this setting alone is not enough if the client is not hexed to support more characters as well.
@@ -917,6 +917,12 @@ enum e_job {
 	JOB_BABY_REBELLION,
 
 	JOB_BABY_STAR_GLADIATOR2 = 4238,
+	JOB_STAR_EMPEROR,
+	JOB_SOUL_REAPER,
+	JOB_BABY_STAR_EMPEROR,
+	JOB_BABY_SOUL_REAPER,
+	JOB_STAR_EMPEROR2,
+	JOB_BABY_STAR_EMPEROR2,
 
 	JOB_MAX,
 };

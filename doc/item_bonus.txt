@@ -208,6 +208,7 @@ bonus2 bSkillVariableCast,sk,t;		Increases variable cast time of skill sk by t m
 bonus bNoCastCancel,n;			Prevents casting from being interrupted when hit (does not work in GvG | n is meaningless)
 bonus bNoCastCancel2,n;			Prevents casting from being interrupted when hit (works even in GvG | n is meaningless)
 bonus bDelayrate,n;			Increases skill delay by n%
+bonus bCooldownrate,n;			Increases skill cooldown by n%
 bonus2 bSkillDelay,sk,t;		Increases delay of skill sk by t milliseconds
 bonus2 bSkillCooldown,sk,t;		Increases cooldown of skill sk by t milliseconds
 

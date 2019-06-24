@@ -204,6 +204,12 @@
 	export_constant(JOB_BABY_REBELLION);
 
 	export_constant(JOB_BABY_STAR_GLADIATOR2);
+	export_constant(JOB_STAR_EMPEROR);
+	export_constant(JOB_SOUL_REAPER);
+	export_constant(JOB_BABY_STAR_EMPEROR);
+	export_constant(JOB_BABY_SOUL_REAPER);
+	export_constant(JOB_STAR_EMPEROR2);
+	export_constant(JOB_BABY_STAR_EMPEROR2);
 
 	/* EA jobs */
 	export_constant2("EAJL_2_1",JOBL_2_1);
@@ -308,6 +314,7 @@
 	export_constant2("EAJ_ARCH_BISHOP",MAPID_ARCH_BISHOP);
 	export_constant2("EAJ_MECHANIC",MAPID_MECHANIC);
 	export_constant2("EAJ_GUILLOTINE_CROSS",MAPID_GUILLOTINE_CROSS);
+	export_constant2("EAJ_STAR_EMPEROR",MAPID_STAR_EMPEROR);
 
 	export_constant2("EAJ_ROYAL_GUARD",MAPID_ROYAL_GUARD);
 	export_constant2("EAJ_SORCERER",MAPID_SORCERER);
@@ -315,6 +322,7 @@
 	export_constant2("EAJ_SURA",MAPID_SURA);
 	export_constant2("EAJ_GENETIC",MAPID_GENETIC);
 	export_constant2("EAJ_SHADOW_CHASER",MAPID_SHADOW_CHASER);
+	export_constant2("EAJ_SOUL_REAPER",MAPID_SOUL_REAPER);
 
 	export_constant2("EAJ_RUNE_KNIGHT_T",MAPID_RUNE_KNIGHT_T);
 	export_constant2("EAJ_WARLOCK_T",MAPID_WARLOCK_T);
@@ -336,6 +344,7 @@
 	export_constant2("EAJ_BABY_BISHOP",MAPID_BABY_BISHOP);
 	export_constant2("EAJ_BABY_MECHANIC",MAPID_BABY_MECHANIC);
 	export_constant2("EAJ_BABY_CROSS",MAPID_BABY_CROSS);
+	export_constant2("EAJ_BABY_STAR_EMPEROR",MAPID_BABY_STAR_EMPEROR);
 
 	export_constant2("EAJ_BABY_GUARD",MAPID_BABY_GUARD);
 	export_constant2("EAJ_BABY_SORCERER",MAPID_BABY_SORCERER);
@@ -343,6 +352,7 @@
 	export_constant2("EAJ_BABY_SURA",MAPID_BABY_SURA);
 	export_constant2("EAJ_BABY_GENETIC",MAPID_BABY_GENETIC);
 	export_constant2("EAJ_BABY_CHASER",MAPID_BABY_CHASER);
+	export_constant2("EAJ_BABY_SOUL_REAPER",MAPID_BABY_SOUL_REAPER);
 
 	export_constant2("EAJ_SUPER_NOVICE",MAPID_SUPER_NOVICE);
 	export_constant2("EAJ_SUPER_BABY",MAPID_SUPER_BABY);
@@ -1478,6 +1488,38 @@
 	export_constant(SC_CHEERUP);
 	export_constant(SC_DRESSUP);
 	export_constant(SC_GUIDEDATTACK);
+	export_constant(SC_EL_PASSIVE);
+	export_constant(SC_EL_DEFENSIVE);
+	export_constant(SC_EL_OFFENSIVE);
+	export_constant(SC_EL_WAIT);
+	export_constant(SC_LIGHTOFMOON);
+	export_constant(SC_LIGHTOFSUN);
+	export_constant(SC_LIGHTOFSTAR);
+	export_constant(SC_LUNARSTANCE);
+	export_constant(SC_UNIVERSESTANCE);
+	export_constant(SC_SUNSTANCE);
+	export_constant(SC_FLASHKICK);
+	export_constant(SC_NEWMOON);
+	export_constant(SC_STARSTANCE);
+	export_constant(SC_DIMENSION);
+	export_constant(SC_DIMENSION1);
+	export_constant(SC_DIMENSION2);
+	export_constant(SC_CREATINGSTAR);
+	export_constant(SC_FALLINGSTAR);
+	export_constant(SC_NOVAEXPLOSING);
+	export_constant(SC_GRAVITYCONTROL);
+	export_constant(SC_SOULCOLLECT);
+	export_constant(SC_SOULREAPER);
+	export_constant(SC_SOULUNITY);
+	export_constant(SC_SOULSHADOW);
+	export_constant(SC_SOULFAIRY);
+	export_constant(SC_SOULFALCON);
+	export_constant(SC_SOULGOLEM);
+	export_constant(SC_SOULDIVISION);
+	export_constant(SC_SOULENERGY);
+	export_constant(SC_USE_SKILL_SP_SPA);
+	export_constant(SC_USE_SKILL_SP_SHA);
+	export_constant(SC_SP_SHA);
 
 	/* Status icons */
 	export_constant(SI_BLANK);
