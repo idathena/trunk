@@ -8252,13 +8252,7 @@ int pc_dead(struct map_session_data *sd, struct block_list *src)
 		}
 	}
 
-	for( k = 0; k < MAX_UNITED_SOULS; k++ ) {
-		if( sd->united_soul[k] ) {
-			struct block_list *bl = map_id2bl(sd->united_soul[k]);
-
-			status_change_end(bl,SC_SOULUNITY,INVALID_TIMER);
-		}
-	}
+	pc_united_souls_clear(sd);
 
 	if( sd->status.pet_id > 0 && sd->pd ) {
 		struct pet_data *pd = sd->pd;
@@ -12694,13 +12688,31 @@ void pc_show_version(struct map_session_data *sd) {
 void pc_crimson_marks_clear(struct map_session_data *sd) {
 	uint8 i;
 
-	if( !sd )
-		return;
+	nullpo_retv(sd);
+
 	for( i = 0; i < MAX_CRIMSON_MARKS; i++ ) {
 		if( sd->crimson_mark[i] ) {
 			struct block_list *bl = map_id2bl(sd->crimson_mark[i]);
 
 			status_change_end(bl,SC_C_MARKER,INVALID_TIMER);
+		}
+	}
+}
+
+/**
+ * Clear Soul Unity data from caster
+ * @param sd: Player
+ */
+void pc_united_souls_clear(struct map_session_data *sd) {
+	uint8 i;
+
+	nullpo_retv(sd);
+
+	for( i = 0; i < MAX_UNITED_SOULS; i++ ) {
+		if( sd->united_soul[i] ) {
+			struct block_list *bl = map_id2bl(sd->united_soul[i]);
+
+			status_change_end(bl,SC_SOULUNITY,INVALID_TIMER);
 		}
 	}
 }
