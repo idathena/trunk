@@ -1020,7 +1020,7 @@ int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, stru
 	struct status_change *sc = NULL;
 	struct status_change *tsc = NULL;
 	struct status_change_entry *sce = NULL;
-	int flag = d->flag;
+	int div_ = d->div_, flag = d->flag;
 
 	nullpo_ret(bl);
 
