@@ -965,8 +965,6 @@ bool battle_skill_check_no_cardfix_atk(uint16 skill_id) {
 		case RK_DRAGONBREATH:
 		case RK_DRAGONBREATH_WATER:
 		case NC_SELFDESTRUCTION:
-		case GN_HELLS_PLANT_ATK:
-		case SJ_NOVAEXPLOSING:
 			return false;
 	}
 	return (skill_get_nk(skill_id)&NK_NO_CARDFIX_ATK);
@@ -1016,14 +1014,16 @@ static bool battle_skill_check_bypass_modifiers(struct block_list *src, struct b
 
 int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, struct Damage *d, int64 damage, uint16 skill_id, uint16 skill_lv)
 {
-	struct map_session_data *tsd = NULL;
+	struct map_session_data *sd = NULL, *tsd = NULL;
 	struct status_change *sc = NULL;
 	struct status_change *tsc = NULL;
 	struct status_change_entry *sce = NULL;
 	int div_ = d->div_, flag = d->flag;
 
+	nullpo_ret(src);
 	nullpo_ret(bl);
 
+	sd = BL_CAST(BL_PC,bl);
 	sc = status_get_sc(bl);
 	tsd = BL_CAST(BL_PC,src);
 	tsc = status_get_sc(src);
@@ -1180,6 +1180,15 @@ int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, stru
 			} else
 				damage = 0;
 		}
+	}
+
+	if( sd && sd->shieldball > 0 ) {
+		sd->shieldball_health -= (int)cap_value(damage,INT_MIN,INT_MAX);
+		if( sd->shieldball_health <= 0 ) {
+			pc_delshieldball(sd,1,0);
+			status_change_start(src,bl,SC_STUN,10000,0,0,0,0,1000,SCFLAG_FIXEDTICK);
+		}
+		damage = 0;
 	}
 
 	if( tsc && tsc->data[SC_INVINCIBLE] && !tsc->data[SC_INVINCIBLEOFF] )
@@ -1375,15 +1384,6 @@ int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct D
 			}
 			if( (sce = sc->data[SC_BUNSINJYUTSU]) && --(sce->val2) <= 0 )
 				status_change_end(bl,SC_BUNSINJYUTSU,INVALID_TIMER);
-			return 0;
-		}
-
-		if( sd && sd->shieldball > 0 ) {
-			sd->shieldball_health -= (int)cap_value(damage,INT_MIN,INT_MAX);
-			if( sd->shieldball_health <= 0 ) {
-				pc_delshieldball(sd,1,0);
-				status_change_start(src,bl,SC_STUN,10000,0,0,0,0,1000,SCFLAG_FIXEDTICK);
-			}
 			return 0;
 		}
 
@@ -4308,9 +4308,6 @@ static int battle_calc_attack_skill_ratio(struct Damage wd,struct block_list *sr
 		case SJ_STAREMPEROR:
 			skillratio += 700 + 200 * skill_lv;
 			break;
-		case SJ_NOVAEXPLOSING:
-			skillratio += 100 + 100 * skill_lv;
-			break;
 		case SJ_SOLARBURST:
 			skillratio += 800 + 100 * skill_lv;
 			RE_LVL_DMOD(100);
@@ -4640,6 +4637,12 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, sce->val2);
 #endif
 		}
+		if((sce = sc->data[SC_SOULFALCON])) {
+			ATK_ADD(wd.damage, wd.damage2, sce->val2);
+#ifdef RENEWAL
+			ATK_ADD(wd.equipAtk, wd.equipAtk2, sce->val2);
+#endif
+		}
 #ifdef RENEWAL
 		if((sce = sc->data[SC_VOLCANO]))
 			ATK_ADD(wd.equipAtk, wd.equipAtk2, sce->val2);
@@ -4753,6 +4756,10 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 #ifdef RENEWAL
 			ATK_ADDRATE(wd.equipAtk, wd.equipAtk2, sce->val2);
 #endif
+		}
+		if((sce = sc->data[SC_SUNSTANCE])) {
+			ATK_ADDRATE(wd.damage, wd.damage2, sce->val2);
+			RE_ALLATK_ADDRATE(wd, sce->val2);
 		}
 		if((sce = sc->data[SC_UNLIMIT]) && wd.flag&BF_LONG && (!skill_id || (inf3&INF3_SC_UNLIMIT))) {
 			ATK_ADDRATE(wd.damage, wd.damage2, sce->val2);
@@ -5647,9 +5654,6 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 				ATK_ADD(wd.damage, wd.damage2, status_get_max_sp(src) * (100 + skill_lv * 20) / 100 + 40 * status_get_lv(src));
 			} else
 				ATK_ADD(wd.damage, wd.damage2, status_get_sp(src) * (100 + skill_lv * 20) / 100 + 10 * status_get_lv(src));
-			break;
-		case SJ_NOVAEXPLOSING:
-			ATK_ADD(wd.damage, wd.damage2, status_get_max_hp(src) / max((6 - skill_lv), 1) + status_get_max_sp(src) * skill_lv * 2);
 			break;
 	}
 
@@ -6883,6 +6887,12 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 				md.damage = md.damage / 10;
 			md.damage += 10 * sstatus->dex;
 			break;
+		case SJ_NOVAEXPLOSING:
+			//(Base ATK + Weapon ATK) * Ratio
+			md.damage = (sstatus->batk + sstatus->rhw.atk) * (200 + 100 * skill_lv) / 100;
+			//Additional Damage
+			md.damage += status_get_max_hp(src) / (6 - min(skill_lv, 5)) + status_get_max_sp(src) * 2 * skill_lv;
+			break;
 		case SP_SOULEXPLOSION:
 			md.damage = tstatus->hp * (20 + 10 * skill_lv) / 100;
 			break;
@@ -6990,6 +7000,7 @@ struct Damage battle_calc_misc_attack(struct block_list *src, struct block_list 
 		case LG_RAYOFGENESIS:
 		case GN_HELLS_PLANT_ATK:
 		case RL_B_TRAP:
+		case SJ_NOVAEXPLOSING:
 		case KO_MUCHANAGE:
 			md.flag |= BF_WEAPON;
 			break;

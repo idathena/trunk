@@ -5824,11 +5824,9 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			break;
 
 		case SJ_NOVAEXPLOSING:
-			if (sc && sc->data[SC_DIMENSION])
-				status_change_end(src,SC_DIMENSION,INVALID_TIMER);
-			else
+			if (!(sc && sc->data[SC_DIMENSION]))
 				sc_start(src,src,SC_NOVAEXPLOSING,100,skill_lv,skill_get_time(skill_id,skill_lv));
-			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+			skill_attack(BF_MISC,src,src,bl,skill_id,skill_lv,tick,flag);
 			break;
 
 		case SJ_PROMINENCEKICK:
@@ -16980,8 +16978,10 @@ int skill_cooldownfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 	if( bl->type&battle_config.no_skill_cooldown )
 		return battle_config.min_skill_cooldown_limit;
 
-	if( skill_id == SJ_NOVAEXPLOSING && sc && sc->data[SC_DIMENSION] )
+	if( skill_id == SJ_NOVAEXPLOSING && sc && sc->data[SC_DIMENSION] )  {
+		status_change_end(bl,SC_DIMENSION,INVALID_TIMER);
 		time = 0; //Dimension removes Nova Explosion's cooldown
+	}
 
 	if( sd && sd->cooldownrate != 100 )
 		time = time * sd->cooldownrate / 100;

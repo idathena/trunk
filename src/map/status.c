@@ -890,18 +890,18 @@ void initChangeTables(void) {
 	set_sc( SJ_BOOKOFDIMENSION  , SC_DIMENSION          , SI_DIMENSION            , SCB_NONE  );
 	set_sc( SJ_BOOKOFCREATINGSTAR, SC_CREATINGSTAR      , SI_CREATINGSTAR         , SCB_SPEED );
 	set_sc( SJ_LIGHTOFSUN       , SC_LIGHTOFSUN         , SI_LIGHTOFSUN           , SCB_NONE  );
-	set_sc( SJ_SUNSTANCE        , SC_SUNSTANCE          , SI_SUNSTANCE            , SCB_BATK|SCB_WATK );
+	set_sc( SJ_SUNSTANCE        , SC_SUNSTANCE          , SI_SUNSTANCE            , SCB_NONE  );
 
 	set_sc( SP_SOULGOLEM        , SC_SOULGOLEM          , SI_SOULGOLEM   , SCB_DEF|SCB_MDEF );
 	set_sc( SP_SOULSHADOW       , SC_SOULSHADOW         , SI_SOULSHADOW  , SCB_ASPD|SCB_CRI );
-	set_sc( SP_SOULFALCON       , SC_SOULFALCON         , SI_SOULFALCON  , SCB_WATK|SCB_HIT );
-	set_sc( SP_SOULFAIRY        , SC_SOULFAIRY          , SI_SOULFAIRY   , SCB_MATK  );
+	set_sc( SP_SOULFALCON       , SC_SOULFALCON         , SI_SOULFALCON  , SCB_HIT          );
+	set_sc( SP_SOULFAIRY        , SC_SOULFAIRY          , SI_SOULFAIRY   , SCB_MATK         );
 	add_sc( SP_SOULCURSE        , SC_CURSE              );
-	set_sc( SP_SHA              , SC_SP_SHA             , SI_SP_SHA      , SCB_SPEED );
-	set_sc( SP_SOULUNITY        , SC_SOULUNITY          , SI_SOULUNITY   , SCB_NONE  );
-	set_sc( SP_SOULDIVISION     , SC_SOULDIVISION       , SI_SOULDIVISION, SCB_NONE  );
-	set_sc( SP_SOULREAPER       , SC_SOULREAPER         , SI_SOULREAPER  , SCB_NONE  );
-	set_sc( SP_SOULCOLLECT      , SC_SOULCOLLECT        , SI_SOULCOLLECT , SCB_NONE  );
+	set_sc( SP_SHA              , SC_SP_SHA             , SI_SP_SHA      , SCB_SPEED        );
+	set_sc( SP_SOULUNITY        , SC_SOULUNITY          , SI_SOULUNITY   , SCB_NONE         );
+	set_sc( SP_SOULDIVISION     , SC_SOULDIVISION       , SI_SOULDIVISION, SCB_NONE         );
+	set_sc( SP_SOULREAPER       , SC_SOULREAPER         , SI_SOULREAPER  , SCB_NONE         );
+	set_sc( SP_SOULCOLLECT      , SC_SOULCOLLECT        , SI_SOULCOLLECT , SCB_NONE         );
 
 	set_sc( SU_HIDE                 , SC_SUHIDE       , SI_SUHIDE          , SCB_NONE  );
 	add_sc( SU_SCRATCH              , SC_BLEEDING     );
@@ -4100,8 +4100,8 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		status->aspd_rate += 500 - lv * 100;
 	else if ((lv = pc_checkskill(sd, RK_DRAGONTRAINING)) >= 0 && pc_isridingdragon(sd))
 		status->aspd_rate += 250 - lv * 50;
-#else //Needs more info
-	if ((lv = pc_checkskill(sd, SG_DEVIL)) > 0 && pc_is_maxjoblv(sd))
+#else
+	if ((lv = pc_checkskill(sd, SG_DEVIL)) > 0 && ((sd->class_&MAPID_THIRDMASK) == MAPID_STAR_EMPEROR || pc_is_maxjoblv(sd)))
 		status->aspd_rate += 10 + lv * 10;
 	if ((lv = pc_checkskill(sd, KN_CAVALIERMASTERY)) >= 0 && pc_isriding(sd))
 		status->aspd_rate -= 500 - lv * 100;
@@ -5745,8 +5745,6 @@ unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc,
 		batk += batk * sc->data[SC_BLOODLUST]->val2 / 100;
 	if(sc->data[SC_FLEET])
 		batk += batk * sc->data[SC_FLEET]->val3 / 100;
-	if(sc->data[SC_SUNSTANCE])
-		batk += batk * sc->data[SC_SUNSTANCE]->val2 / 100;
 	if(sc->data[SC_CURSE])
 		batk -= batk * 25 / 100;
 #ifdef RENEWAL
@@ -5813,8 +5811,6 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 		watk += sc->data[SC_FULL_SWING_K]->val1;
 	if(sc->data[SC_ANGRIFFS_MODUS])
 		watk += sc->data[SC_ANGRIFFS_MODUS]->val2;
-	if(sc->data[SC_SOULFALCON])
-		watk += sc->data[SC_SOULFALCON]->val2;
 	if(sc->data[SC_CHATTERING])
 		watk += sc->data[SC_CHATTERING]->val2;
 	if(sc->data[SC_PROVOKE]
@@ -5836,8 +5832,6 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 		watk += watk * 10 / 100;
 	if(sc->data[SC_TIDAL_WEAPON])
 		watk += watk * sc->data[SC_TIDAL_WEAPON]->val2 / 100;
-	if(sc->data[SC_SUNSTANCE])
-		watk += watk * sc->data[SC_SUNSTANCE]->val2 / 100;
 	if(sc->data[SC_CURSE])
 		watk -= watk * 25 / 100;
 #ifndef RENEWAL
@@ -10575,16 +10569,12 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					val4 = 0;
 				break;
 			case SC_SUNSTANCE:
-				val2 = 2 + val1; //ATK Increase
-				break;
 			case SC_LUNARSTANCE:
-				val2 = 2 + val1; //MaxHP Increase
+			case SC_UNIVERSESTANCE:
+				val2 = 2 + val1;
 				break;
 			case SC_STARSTANCE:
-				val2 = 4 + 2 * val1; //ASPD Increase
-				break;
-			case SC_UNIVERSESTANCE:
-				val2 = 2 + val1; //All Stats Increase
+				val2 = 4 + 2 * val1;
 				break;
 			case SC_NEWMOON:
 				val2 = 7; //Hits
@@ -11114,6 +11104,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_LUNARSTANCE:
 		case SC_STARSTANCE:
 		case SC_UNIVERSESTANCE:
+		case SC_CREATINGSTAR:
 		case SC_SOULCOLLECT:
 		case SC_SPRITEMABLE:
 		case SC_SOULATTACK:

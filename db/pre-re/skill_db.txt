@@ -1063,7 +1063,7 @@
 2488,1,6,2,0,0,0,1,1,no,0,0,0,none,0,0,	GN_FIRE_EXPANSION_TEAR_GAS,Fire Expansion Tear Gas
 2489,11,8,1,0,0x48,0,10,1:2:3:4:5:6:7:8:9:10,no,0,0x4000,0,misc,0,0,	GN_FIRE_EXPANSION_ACID,Fire Expansion Acid
 2490,9,6,2,0,0x3,1,5,1,yes,0,0x80,2:3:4:5:6,none,0,0,	GN_HELLS_PLANT,Hell's Plant
-2491,1,6,1,0,0xC8,0,5,1,no,0,0,0,misc,0,0,	GN_HELLS_PLANT_ATK,Hell's Plant Attack
+2491,1,6,1,0,0xC0,0,5,1,no,0,0,0,misc,0,0,	GN_HELLS_PLANT_ATK,Hell's Plant Attack
 2492,1,6,4,0,0x3,5:6:6:7:7,5,1,yes,0,0,0,none,0,0,	GN_MANDRAGORA,Howling of Mandragora
 2493,11,6,16,0,0x1,0,1,1,no,0,0x200,0,none,0,0,	GN_SLINGITEM,Sling Item
 2494,1,6,4,0,0x1,0,1,1,no,0,0,0,none,0,0,	GN_CHANGEMATERIAL,Change Material
@@ -1134,12 +1134,12 @@
 2579,1,6,4,-1,0x3,3,7,1,yes,0,0,0,weapon,0,0x10040,	SJ_NEWMOONKICK,New Moon Kick
 2580,1,6,1,-1,0,0,7,1,yes,0,0,0,weapon,0,0,	SJ_FLASHKICK,Flash Kick
 2581,1,6,4,-1,0x3,3,5,1,yes,0,0,0,weapon,0,0,	SJ_STAREMPEROR,Star Emperor
-2582,3,6,1,0,0xA8,0,5,1,yes,0,0x4000,0,weapon,0,0,	SJ_NOVAEXPLOSING,Nova Explosing
+2582,3,6,1,0,0xD0,0,5,1,yes,0,0x4000,0,misc,0,0,	SJ_NOVAEXPLOSING,Nova Explosing
 2583,1,6,4,0,0x1,0,3,1,yes,0,0,0,none,0,0,	SJ_UNIVERSESTANCE,Universe Stance
 2584,1,6,4,0,0x1,0,7,1,yes,0,0,0,none,0,0,	SJ_FALLINGSTAR,Falling Star
 2585,9,6,1,0,0x1,0,1,1,yes,0,0,0,none,0,0,	SJ_GRAVITYCONTROL,Gravity Control
 2586,1,6,4,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SJ_BOOKOFDIMENSION,Book of Dimension
-2587,7,6,2,-1,0,0,5,1,yes,0,0,0,weapon,0,0,	SJ_BOOKOFCREATINGSTAR,Book of Creating Star
+2587,7,6,2,-1,0x40,0,5,1,yes,0,0,0,weapon,0,0,	SJ_BOOKOFCREATINGSTAR,Book of Creating Star
 2588,1,6,4,0,0x1,0,3,1,yes,0,0,0,none,0,0,	SJ_DOCUMENT,Document
 2589,1,0,0,0,0,0,1,0,no,0,0,0,none,0,0,		SJ_PURIFY,Purify
 2590,1,6,4,0,0x1,0,5,1,yes,0,0,0,none,0,0,	SJ_LIGHTOFSUN,Light of Sun
