@@ -8786,6 +8786,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_SILENCE:
 			if( sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_SELF )
 				status_change_end(bl,SC_GOSPEL,INVALID_TIMER);
+		//Fall through
+		case SC_CURSE:
+			if( sc->data[SC_SOULUNITY] && sc->data[SC_SOULUNITY]->val2 == bl->id && sd )
+				pc_united_souls_clear(sd);
 			break;
 		case SC_HIDING:
 			status_change_end(bl,SC_CLOSECONFINE,INVALID_TIMER);
@@ -9078,6 +9082,15 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			status_change_end(bl,SC_LUNARSTANCE,INVALID_TIMER);
 			status_change_end(bl,SC_STARSTANCE,INVALID_TIMER);
 			status_change_end(bl,SC_UNIVERSESTANCE,INVALID_TIMER);
+			break;
+		case SC_LIGHTOFSUN:
+		case SC_LIGHTOFMOON:
+		case SC_LIGHTOFSTAR:
+			if( sc->data[type] )
+				break;
+			status_change_end(bl,SC_LIGHTOFSUN,INVALID_TIMER);
+			status_change_end(bl,SC_LIGHTOFMOON,INVALID_TIMER);
+			status_change_end(bl,SC_LIGHTOFSTAR,INVALID_TIMER);
 			break;
 		case SC_SPIRIT:
 		case SC_SOULGOLEM:

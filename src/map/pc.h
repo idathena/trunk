@@ -1265,6 +1265,7 @@ void pc_damage_log_clear(struct map_session_data *sd, int id);
 void pc_show_version(struct map_session_data *sd);
 
 void pc_crimson_marks_clear(struct map_session_data *sd);
+void pc_united_souls_clear(struct map_session_data *sd);
 
 TIMER_FUNC(pc_bonus_script_timer);
 void pc_bonus_script(struct map_session_data *sd);

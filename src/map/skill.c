@@ -5745,41 +5745,40 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION);
 			break;
 
-		case RL_H_MINE: {
-				short count = MAX_HOWL_MINES;
-				uint8 i = 0;
+		case RL_H_MINE:
+			if (flag&1) //Splash damage from explosion
+				skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION|16);
+			else if (flag&4) { //Triggered by RL_FLICKER
+				flag = 0; //Reset flag
+				map_foreachinallrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR|BL_SKILL,src,
+					skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
+				if (tsc && tsc->data[SC_H_MINE] && tsc->data[SC_H_MINE]->val2 == src->id) {
+					tsc->data[SC_H_MINE]->val4 = 1; //Mark the SC end because not expired
+					status_change_end(bl,SC_H_MINE,INVALID_TIMER);
+				}
+			} else {
+				//Check if the target is already tagged by another source
+				if (tsc && tsc->data[SC_H_MINE] && tsc->data[SC_H_MINE]->val2 != src->id) {
+					if (sd)
+						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+					break;
+				}
+				//Tagging the target
+				if (sd) {
+					short count = MAX_HOWL_MINES;
+					uint8 i = 0;
 
-				if (flag&1) //Splash damage from explosion
-					skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag|SD_ANIMATION|16);
-				else if (flag&4) { //Triggered by RL_FLICKER
-					flag = 0; //Reset flag
-					map_foreachinallrange(skill_area_sub,bl,skill_get_splash(skill_id,skill_lv),BL_CHAR|BL_SKILL,src,
-						skill_id,skill_lv,tick,flag|BCT_ENEMY|SD_SPLASH|1,skill_castend_damage_id);
-					if (tsc && tsc->data[SC_H_MINE] && tsc->data[SC_H_MINE]->val2 == src->id) {
-						tsc->data[SC_H_MINE]->val4 = 1; //Mark the SC end because not expired
-						status_change_end(bl,SC_H_MINE,INVALID_TIMER);
-					}
-				} else {
-					//Check if the target is already tagged by another source
-					if (tsc && tsc->data[SC_H_MINE] && tsc->data[SC_H_MINE]->val2 != src->id) {
-						if (sd)
-							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-						break;
-					}
-					//Tagging the target
-					if (sd) {
-						ARR_FIND(0,count,i,sd->howl_mine[i] == bl->id);
+					ARR_FIND(0,count,i,sd->howl_mine[i] == bl->id);
+					if (i == count) {
+						ARR_FIND(0,count,i,sd->howl_mine[i] == 0);
 						if (i == count) {
-							ARR_FIND(0,count,i,sd->howl_mine[i] == 0);
-							if (i == count) {
-								clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-								break;
-							}
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+							break;
 						}
-						if (skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag)) {
-							sd->howl_mine[i] = bl->id;
-							sc_start4(src,bl,SC_H_MINE,100,skill_lv,src->id,i,0,skill_get_time(skill_id,skill_lv));
-						}
+					}
+					if (skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag)) {
+						sd->howl_mine[i] = bl->id;
+						sc_start4(src,bl,SC_H_MINE,100,skill_lv,src->id,i,0,skill_get_time(skill_id,skill_lv));
 					}
 				}
 			}
@@ -5795,30 +5794,29 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 			}
 			break;
 
-		case SJ_FLASHKICK: {
+		case SJ_FLASHKICK:
+			//Check if the target is already tagged by another source
+			if (tsc && tsc->data[SC_FLASHKICK] && tsc->data[SC_FLASHKICK]->val2 != src->id) {
+				if (sd)
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				break;
+			}
+			//Tagging the target
+			if (sd) {
 				short count = MAX_STELLAR_MARKS;
-				int i = 0;
+				uint8 i = 0;
 
-				//Check if the target is already tagged by another source
-				if (tsc && tsc->data[SC_FLASHKICK] && tsc->data[SC_FLASHKICK]->val2 != src->id) {
-					if (sd)
-						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					break;
-				}
-				//Tagging the target
-				if (sd) {
-					ARR_FIND(0,count,i,sd->stellar_mark[i] == bl->id);
+				ARR_FIND(0,count,i,sd->stellar_mark[i] == bl->id);
+				if (i == count) {
+					ARR_FIND(0, count, i, sd->stellar_mark[i] == 0);
 					if (i == count) {
-						ARR_FIND(0, count, i, sd->stellar_mark[i] == 0);
-						if (i == count) {
-							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-							break;
-						}
+						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+						break;
 					}
-					if (skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag)) {
-						sd->stellar_mark[i] = bl->id;
-						sc_start4(src,bl,SC_FLASHKICK,100,skill_lv,src->id,i,0,skill_get_time(skill_id,skill_lv));
-					}
+				}
+				if (skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag)) {
+					sd->stellar_mark[i] = bl->id;
+					sc_start4(src,bl,SC_FLASHKICK,100,skill_lv,src->id,i,0,skill_get_time(skill_id,skill_lv));
 				}
 			}
 			break;
@@ -10525,32 +10523,32 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 			break;
 
-		case RL_C_MARKER: {
-				short count = MAX_CRIMSON_MARKS;
-				//Check if the target is already tagged by another source
-				if( tsce && tsce->val2 != src->id ) {
-					if( sd )
-						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-					break;
-				}
-				i = 0;
-				//Marking the target
-				if( sd ) {
-					ARR_FIND(0,count,i,sd->crimson_mark[i] == bl->id);
-					if( i == count ) {
-						ARR_FIND(0,count,i,sd->crimson_mark[i] == 0);
-						if( i == count ) {
-							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-							break;
-						}
-					}
-					sd->crimson_mark[i] = bl->id;
-					sc_start4(src,bl,type,100,skill_lv,src->id,i,0,skill_get_time(skill_id,skill_lv));
-				} else //If mob casts this, at least SC_C_MARKER as debuff
-					sc_start2(src,bl,type,100,skill_lv,src->id,skill_get_time(skill_id,skill_lv));
-				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				clif_skill_damage(src,bl,tick,0,status_get_dmotion(src),-30000,1,skill_id,skill_lv,DMG_SPLASH);
+		case RL_C_MARKER:
+			//Check if the target is already tagged by another source
+			if( tsce && tsce->val2 != src->id ) {
+				if( sd )
+					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				break;
 			}
+			//Marking the target
+			if( sd ) {
+				short count = MAX_CRIMSON_MARKS;
+
+				i = 0;
+				ARR_FIND(0,count,i,sd->crimson_mark[i] == bl->id);
+				if( i == count ) {
+					ARR_FIND(0,count,i,sd->crimson_mark[i] == 0);
+					if( i == count ) {
+						clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+						break;
+					}
+				}
+				sd->crimson_mark[i] = bl->id;
+				sc_start4(src,bl,type,100,skill_lv,src->id,i,0,skill_get_time(skill_id,skill_lv));
+			} else //If mob casts this, at least SC_C_MARKER as debuff
+				sc_start2(src,bl,type,100,skill_lv,src->id,skill_get_time(skill_id,skill_lv));
+			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			clif_skill_damage(src,bl,tick,0,status_get_dmotion(src),-30000,1,skill_id,skill_lv,DMG_SPLASH);
 			break;
 
 		case SJ_DOCUMENT:
@@ -10592,39 +10590,30 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			}
 			break;
 
-		case SP_SOULUNITY: {
-				short count = min(5 + skill_lv,MAX_UNITED_SOULS);
-
-				if( !sd || !sd->status.party_id || (flag&1) ) {
-					if( !dstsd || !sd ) { //Only put player's souls in unity
-						if( sd )
-							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-						break;
-					}
-					//Fail if a player is in unity with another source
-					if( tsce && tsce->val2 != src->id) {
-						if( sd )
-							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-						break;
-					}
+		case SP_SOULUNITY:
+			if( flag&1 ) {
+				//Fail if a player is in unity with another source
+				if( tsce && tsce->val2 != src->id )
+					break;
+				//Unite player's soul with caster's soul
+				if( sd ) {
+					short count = min(5 + skill_lv,MAX_UNITED_SOULS);
 					i = 0;
-					//Unite player's soul with caster's soul
-					if( sd ) {
-						ARR_FIND(0, count, i, sd->united_soul[i] == bl->id);
+
+					ARR_FIND(0, count, i, sd->united_soul[i] == bl->id);
+					if( i == count ) {
+						ARR_FIND(0, count, i, sd->united_soul[i] == 0);
 						if( i == count ) {
-							ARR_FIND(0, count, i, sd->united_soul[i] == 0);
-							if( i == count ) {
-								clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
-								break;
-							}
+							clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+							break;
 						}
-						sd->united_soul[i] = bl->id;
-						sc_start4(src,bl,type,100,skill_lv,src->id,i,0,skill_get_time(skill_id,skill_lv));
 					}
-					clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-				} else if ( sd )
-					party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
-			}
+					sd->united_soul[i] = bl->id;
+					sc_start4(src,bl,type,100,skill_lv,src->id,i,0,skill_get_time(skill_id,skill_lv));
+				}
+				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
+			} else if( sd )
+				party_foreachsamemap(skill_area_sub,sd,skill_get_splash(skill_id,skill_lv),src,skill_id,skill_lv,tick,flag|BCT_PARTY|1,skill_castend_nodamage_id);
 			break;
 
 		case SP_SOULREVOLVE:
@@ -15616,6 +15605,12 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 		case SJ_SOLARBURST:
 			if( !(sc && sc->data[SC_COMBO] && sc->data[SC_COMBO]->val1 == SJ_PROMINENCEKICK) )
 				return false;
+			break;
+		case SP_SOULUNITY:
+			if( !sd->status.party_id ) {
+				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
+				return false;
+			}
 			break;
 		case SP_SWHOO:
 			if( !(sc && sc->data[SC_USE_SKILL_SP_SPA]) )
