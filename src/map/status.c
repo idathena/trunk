@@ -1340,8 +1340,9 @@ void initChangeTables(void) {
 	StatusDisplayType[SC_SUNSTANCE]		  = true;
 	StatusDisplayType[SC_LUNARSTANCE]	  = true;
 	StatusDisplayType[SC_STARSTANCE]	  = true;
-	StatusDisplayType[SC_UNIVERSESTANCE]  = true;
+	StatusDisplayType[SC_UNIVERSESTANCE]	  = true;
 	StatusDisplayType[SC_FLASHKICK]		  = true;
+	StatusDisplayType[SC_GRAVITYCONTROL]	  = true;
 	StatusDisplayType[SC_SOULUNITY]		  = true;
 	StatusDisplayType[SC_MOONSTAR]		  = true;
 	StatusDisplayType[SC_SUPER_STAR]	  = true;
@@ -1357,8 +1358,8 @@ void initChangeTables(void) {
 	StatusDisplayType[SC_QSCARABA]		  = true;
 	StatusDisplayType[SC_LJOSALFAR]		  = true;
 	StatusDisplayType[SC_MAPLE_FALLS]	  = true;
-	StatusDisplayType[SC_MERMAID_LONGING] = true;
-	StatusDisplayType[SC_TIME_ACCESSORY]  = true;
+	StatusDisplayType[SC_MERMAID_LONGING]	  = true;
+	StatusDisplayType[SC_TIME_ACCESSORY]	  = true;
 	StatusDisplayType[SC_CLAN_INFO]		  = true;
 	StatusDisplayType[SC_MAXPAIN]		  = true;
 	StatusDisplayType[SC_DRESSUP]		  = true;
@@ -1391,6 +1392,7 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_CRYSTALIZE]           |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_VACUUM_EXTREME]       |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_THORNSTRAP]           |= SCS_NOMOVE;
+	StatusChangeStateTable[SC_GRAVITYCONTROL]       |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_KAGEHUMI]             |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_PARALYSIS]            |= SCS_NOMOVE;
 	StatusChangeStateTable[SC_TINDER_BREAKER]       |= SCS_NOMOVE;
@@ -1407,6 +1409,7 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_NOCHAT]              |= SCS_NOPICKITEM|SCS_NOPICKITEMCOND;
 	StatusChangeStateTable[SC_DEEPSLEEP]           |= SCS_NOPICKITEM;
 	StatusChangeStateTable[SC_NEWMOON]             |= SCS_NOPICKITEM;
+	StatusChangeStateTable[SC_GRAVITYCONTROL]      |= SCS_NOPICKITEM;
 	StatusChangeStateTable[SC_SUHIDE]              |= SCS_NOPICKITEM;
 
 	//StatusChangeState (SCS_) NODROPITEMS
@@ -1428,6 +1431,8 @@ void initChangeTables(void) {
 	StatusChangeStateTable[SC_DEEPSLEEP]           |= SCS_NOCAST;
 	StatusChangeStateTable[SC_CRYSTALIZE]          |= SCS_NOCAST;
 	StatusChangeStateTable[SC_KINGS_GRACE]         |= SCS_NOCAST;
+	StatusChangeStateTable[SC_NOVAEXPLOSING]       |= SCS_NOCAST;
+	StatusChangeStateTable[SC_GRAVITYCONTROL]      |= SCS_NOCAST;
 
 	//StatusChangeState (SCS_) NOCHAT (skills)
 	StatusChangeStateTable[SC_BERSERK]             |= SCS_NOCHAT;
@@ -3408,6 +3413,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	sd->sprate = 100;
 	sd->castrate = 100;
 	sd->delayrate = 100;
+	sd->cooldownrate = 100;
 	sd->dsprate = 100;
 	sd->hprecov_rate = 100;
 	sd->sprecov_rate = 100;
@@ -4135,6 +4141,8 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		sd->castrate = 0;
 	if (sd->delayrate < 0)
 		sd->delayrate = 0;
+	if (sd->cooldownrate < 0)
+		sd->cooldownrate = 0;
 	if (sd->hprecov_rate < 0)
 		sd->hprecov_rate = 0;
 	if (sd->sprecov_rate < 0)
@@ -6577,6 +6585,8 @@ unsigned short status_calc_speed(struct block_list *bl, struct status_change *sc
 				if( sc->data[SC_REBOUND] )
 					val = max( val, 25 );
 				if( sc->data[SC_B_TRAP] )
+					val = max( val, 90 );
+				if( sc->data[SC_CREATINGSTAR] )
 					val = max( val, 90 );
 				if( sc->data[SC_SP_SHA] )
 					val = max( val, 50 );
@@ -10586,6 +10596,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			case SC_FALLINGSTAR:
 				val2 = min(8 + 2 * (1 + val1 / 2),15); //Autocast Chance
 				break;
+			case SC_CREATINGSTAR:
+				tick_time = 500;
+				val4 = tick / tick_time;
+				break;
 			case SC_LIGHTOFSUN:
 			case SC_LIGHTOFMOON:
 			case SC_LIGHTOFSTAR:
@@ -11151,6 +11165,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 		case SC_CURSEDCIRCLE_ATKER:
 		case SC_FALLENEMPIRE:
 		case SC_KINGS_GRACE:
+		case SC_GRAVITYCONTROL:
 			unit_stop_attack(bl);
 			if (type == SC_FREEZE || type == SC_STUN || type == SC_SLEEP || type == SC_STONE || type == SC_WHITEIMPRISON)
 				break;
@@ -12218,6 +12233,30 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 					break;
 				tsd->stellar_mark[sce->val3] = 0;
 			}
+			break;
+		case SC_SUNSTANCE:
+			status_change_end(bl,SC_LIGHTOFSUN,INVALID_TIMER);
+			break;
+		case SC_LUNARSTANCE:
+			status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
+			status_change_end(bl,SC_LIGHTOFMOON,INVALID_TIMER);
+			break;
+		case SC_STARSTANCE:
+			status_change_end(bl,SC_FALLINGSTAR,INVALID_TIMER);
+			status_change_end(bl,SC_LIGHTOFSTAR,INVALID_TIMER);
+			break;
+		case SC_UNIVERSESTANCE:
+			status_change_end(bl,SC_LIGHTOFSUN,INVALID_TIMER);
+			status_change_end(bl,SC_NEWMOON,INVALID_TIMER);
+			status_change_end(bl,SC_LIGHTOFMOON,INVALID_TIMER);
+			status_change_end(bl,SC_FALLINGSTAR,INVALID_TIMER);
+			status_change_end(bl,SC_LIGHTOFSTAR,INVALID_TIMER);
+			status_change_end(bl,SC_DIMENSION,INVALID_TIMER);
+			break;
+		case SC_GRAVITYCONTROL:
+			status_fix_damage(src,bl,sce->val2,clif_damage(bl,bl,gettick(),0,0,sce->val2,1,DMG_NORMAL,0,false));
+			clif_specialeffect(bl,EF_GANBANTEIN,AREA);
+			clif_specialeffect(bl,EF_HITLINE,AREA);
 			break;
 		case SC_SOULUNITY: {
 				struct map_session_data *tsd = NULL;
@@ -13427,6 +13466,23 @@ TIMER_FUNC(status_change_timer)
 			//They only end by status_change_end
 			sc_timer_next(600000 + tick,status_change_timer,bl->id,data);
 			return 0;
+
+		case SC_CREATINGSTAR:
+			if( --(sce->val4) >= 0 ) {
+				struct block_list *src = map_id2bl(sce->val2), *unit_bl = map_id2bl(sce->val3);
+
+				if( !src || status_isdead(src) || src->m != bl->m )
+					break;
+				map_freeblock_lock();
+				if( unit_bl )
+					skill_attack(BF_WEAPON,src,unit_bl,bl,status_sc2skill(type),sce->val1,tick,0);
+				if( sc->data[type] ) {
+					sc_timer_next(500 + tick,status_change_timer,bl->id,data);
+				}
+				map_freeblock_unlock();
+				return 0;
+			}
+			break;
 
 		case SC_SOULUNITY:
 			if( --(sce->val4) >= 0 ) {

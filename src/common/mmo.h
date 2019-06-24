@@ -31,7 +31,7 @@
 	#define MAX_HOTKEYS 38
 #endif
 
-#define MAX_MAP_PER_SERVER 1500 //Increased to allow creation of Instance Maps
+#define MAX_MAP_PER_SERVER 2000 //Increased to allow creation of Instance Maps
 #define MAX_INVENTORY 100
 //Max number of characters per account. (Max value tested was 265)
 //Note: Changing this setting alone is not enough if the client is not hexed to support more characters as well.

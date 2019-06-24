@@ -420,6 +420,7 @@ int skill_castfix_sc(struct block_list *bl, double time, uint16 skill_id, uint16
 int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 skill_lv);
 #endif
 int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
+int skill_cooldownfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv);
 
 //Skill conditions check and remove [Inkfish]
 bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
@@ -1761,6 +1762,7 @@ enum e_skill {
 	ALL_PRONTERA_RECALL,
 	ALL_GLASTHEIM_RECALL,
 	ALL_THANATOS_RECALL,
+	ALL_LIGHTHALZEN_RECALL,
 
 	GC_DARKCROW = 5001,
 	RA_UNLIMIT,

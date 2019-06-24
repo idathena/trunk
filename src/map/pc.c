@@ -1750,6 +1750,15 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	}
 	sd->status.body = cap_value(sd->status.body,MIN_BODY_STYLE,MAX_BODY_STYLE);
 
+	//Hair style 0 and body dye 1 arn't allowed on official servers
+	//Adjust them to hair style 1 and body dye 0 which are the same things but officially used
+	//This prevents visual glitches on the character select and equip window
+	//Example: Warlock on body dye 1 will show color glitch on the crystal shards on the outfit
+	if (sd->status.hair == 0)
+		sd->status.hair = 1;
+	if (sd->status.clothes_color == 1)
+		sd->status.clothes_color = 0;
+
 	//Initializations to null/0 unneeded since map_session_data was filled with 0 upon allocation
 	sd->state.connect_new = 1;
 
@@ -3484,7 +3493,11 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			break;
 		case SP_DELAYRATE:
 			if(sd->state.lr_flag != 2)
-				sd->delayrate+=val;
+				sd->delayrate += val;
+			break;
+		case SP_COOLDOWNRATE:
+			if(sd->state.lr_flag != 2)
+				sd->cooldownrate += val;
 			break;
 		case SP_CRIT_ATK_RATE:
 			if(sd->state.lr_flag != 2)
@@ -8713,6 +8726,7 @@ int pc_readparam(struct map_session_data *sd,int type)
 		case SP_BREAK_ARMOR_RATE:	val = sd->bonus.break_armor_rate; break;
 		case SP_ADD_STEAL_RATE:		val = sd->bonus.add_steal_rate; break;
 		case SP_DELAYRATE:		val = sd->delayrate; break;
+		case SP_COOLDOWNRATE:		val = sd->cooldownrate; break;
 		case SP_CRIT_ATK_RATE:		val = sd->bonus.crit_atk_rate; break;
 		case SP_UNSTRIPABLE:		val = sd->bonus.unstripable; break;
 		case SP_UNSTRIPABLE_WEAPON:	val = (sd->bonus.unstripable_equip&EQP_WEAPON) ? 1 : 0; break;

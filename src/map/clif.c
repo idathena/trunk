@@ -11245,6 +11245,7 @@ void clif_parse_ActionRequest_sub(struct map_session_data *sd, int action_type, 
 		sd->sc.data[SC_BLADESTOP] ||
 		sd->sc.data[SC_DEATHBOUND] ||
 		sd->sc.data[SC_DEEPSLEEP] ||
+		sd->sc.data[SC_GRAVITYCONTROL] ||
 		sd->sc.data[SC_SUHIDE]) )
 		return;
 
