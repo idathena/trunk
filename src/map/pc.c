@@ -2951,13 +2951,14 @@ static void pc_bonus_subele(struct map_session_data *sd, unsigned char ele, shor
 	sd->subele2[i].flag = flag;
 }
 
-/** Add item group heal rate bonus to player
+/**
+ * Add item group heal rate bonus to player
  * @param sd Player
  * @param group_id Item Group ID
  * @param rate
  * @author Cydh
  */
-void pc_itemgrouphealrate(struct map_session_data *sd, uint16 group_id, short rate) {
+void pc_itemgrouphealrate_add(struct map_session_data *sd, uint16 group_id, short rate) {
 	struct s_pc_itemgrouphealrate *entry;
 	uint8 i;
 
@@ -2972,7 +2973,7 @@ void pc_itemgrouphealrate(struct map_session_data *sd, uint16 group_id, short ra
 	}
 
 	if (i >= UINT8_MAX) {
-		ShowError("pc_itemgrouphealrate_add: Reached max (%d) possible bonuses for this player %d\n", UINT8_MAX);
+		ShowError("pc_itemgrouphealrate_add: Reached max (%d) possible bonuses for player '%s' (%d:%d)\n", UINT8_MAX, sd->status.name, sd->status.account_id, sd->status.char_id);
 		return;
 	}
 
@@ -2984,7 +2985,8 @@ void pc_itemgrouphealrate(struct map_session_data *sd, uint16 group_id, short ra
 	sd->itemgrouphealrate[sd->itemgrouphealrate_count++] = entry;
 }
 
-/** Clear item group heal rate from player
+/**
+ * Clear item group heal rate from player
  * @param sd Player
  * @author Cydh
  */
@@ -4067,7 +4069,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				ShowError("pc_bonus2: SP_ADD_ITEMGROUP_HEAL_RATE: Invalid item group with id %d\n", type2);
 				break;
 			}
-			pc_itemgrouphealrate(sd, type2, val);
+			pc_itemgrouphealrate_add(sd, type2, val);
 			break;
 		case SP_EXP_ADDRACE:
 			PC_BONUS_CHK_RACE(type2, SP_EXP_ADDRACE);

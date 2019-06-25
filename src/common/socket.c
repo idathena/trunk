@@ -321,10 +321,10 @@ void setsocketopts(int fd,int delay_timeout){
 		timeout.tv_sec = delay_timeout;
 		timeout.tv_usec = 0;
 
-		if (sSetsockopt (fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
-			ShowError("setsocketopts: Unable to set SO_RCVTIMEO timeout for connection #%d!\n");
-		if (sSetsockopt (fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
-			ShowError("setsocketopts: Unable to set SO_SNDTIMEO timeout for connection #%d!\n");
+		if (sSetsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
+			ShowError("setsocketopts: Unable to set SO_RCVTIMEO timeout for connection #%d!\n", fd);
+		if (sSetsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
+			ShowError("setsocketopts: Unable to set SO_SNDTIMEO timeout for connection #%d!\n", fd);
 	}
 }
 

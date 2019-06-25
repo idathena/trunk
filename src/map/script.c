@@ -1204,8 +1204,12 @@ const char *parse_variable(const char *p) {
 	const char *p2 = NULL;
 	const char *var = p;
 
-	if( (p[0] == '+' && p[1] == '+' && (type = C_ADD_PRE)) // pre ++
-	 || (p[0] == '-' && p[1] == '-' && (type = C_SUB_PRE)) ) // pre --
+	if( p[0] == '+' && p[1] == '+' )
+		type = C_ADD_PRE; // pre ++
+	else if( p[0] == '-' && p[1] == '-' )
+		type = C_SUB_PRE; // pre --
+
+	if( type != C_NOP )
 		var = p = skip_space(&p[2]);
 
 	// Skip the variable where applicable
@@ -1229,22 +1233,38 @@ const char *parse_variable(const char *p) {
 			disp_error_message("Missing right expression or closing bracket for variable.", p);
 	}
 
-	if( type == C_NOP &&
-	!( (p[0] == '=' && p[1] != '=' && (type = C_EQ)) // =
-	|| (p[0] == '+' && p[1] == '=' && (type = C_ADD)) // +=
-	|| (p[0] == '-' && p[1] == '=' && (type = C_SUB)) // -=
-	|| (p[0] == '^' && p[1] == '=' && (type = C_XOR)) // ^=
-	|| (p[0] == '|' && p[1] == '=' && (type = C_OR )) // |=
-	|| (p[0] == '&' && p[1] == '=' && (type = C_AND)) // &=
-	|| (p[0] == '*' && p[1] == '=' && (type = C_MUL)) // *=
-	|| (p[0] == '/' && p[1] == '=' && (type = C_DIV)) // /=
-	|| (p[0] == '%' && p[1] == '=' && (type = C_MOD)) // %=
-	|| (p[0] == '+' && p[1] == '+' && (type = C_ADD_POST)) // post ++
-	|| (p[0] == '-' && p[1] == '-' && (type = C_SUB_POST)) // post --
-	|| (p[0] == '<' && p[1] == '<' && p[2] == '=' && (type = C_L_SHIFT)) // <<=
-	|| (p[0] == '>' && p[1] == '>' && p[2] == '=' && (type = C_R_SHIFT)) // >>=
-	) )
-		return NULL; // Failed to find a matching operator combination so invalid
+	if( type == C_NOP ) {
+		if( p[0] == '=' && p[1] != '=' )
+			type = C_EQ; // =
+		else if( p[0] == '+' && p[1] == '=' )
+			type = C_ADD; // +=
+		else if( p[0] == '-' && p[1] == '=' )
+			type = C_SUB; // -=
+		else if( p[0] == '^' && p[1] == '=' )
+			type = C_XOR; // ^=
+		else if( p[0] == '|' && p[1] == '=' )
+			type = C_OR; // |=
+		else if( p[0] == '&' && p[1] == '=' )
+			type = C_AND; // &=
+		else if( p[0] == '*' && p[1] == '=' )
+			type = C_MUL; // *=
+		else if( p[0] == '/' && p[1] == '=' )
+			type = C_DIV; // /=
+		else if( p[0] == '%' && p[1] == '=' )
+			type = C_MOD; // %=
+		else if( p[0] == '~' && p[1] == '=' )
+			type = C_NOT; // ~=
+		else if( p[0] == '+' && p[1] == '+' )
+			type = C_ADD_POST; // post ++
+		else if( p[0] == '-' && p[1] == '-' )
+			type = C_SUB_POST; // post --
+		else if( p[0] == '<' && p[1] == '<' && p[2] == '=' )
+			type = C_L_SHIFT; // <<=
+		else if( p[0] == '>' && p[1] == '>' && p[2] == '=' )
+			type = C_R_SHIFT; // >>=
+		else
+			return NULL; // Failed to find a matching operator combination so invalid
+	}
 
 	switch( type ) {
 		case C_ADD_PRE: // pre ++
@@ -22614,7 +22634,7 @@ static inline bool mail_sub(struct script_state *st, struct script_data *data, s
 
 	//Try to find the array's source pointer
 	if (not_array_variable(*name)) {
-		ShowError("buildin_mail: variable \"%s\" is not an array.\n");
+		ShowError("buildin_mail: variable \"%s\" is not an array.\n", name);
 		return false;
 	}
 
