@@ -18700,7 +18700,7 @@ void clif_charmball(struct map_session_data *sd) {
 void clif_soulball(struct map_session_data *sd) {
 	unsigned char buf[8];
 
-	nullpo_ret(sd);
+	nullpo_retv(sd);
 
 	WBUFW(buf,0) = 0x1d0;
 	WBUFL(buf,2) = sd->bl.id;

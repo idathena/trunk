@@ -4464,7 +4464,7 @@ int npc_parsesrcfile(const char *filepath, bool runOnInit)
 			p = npc_parse_duplicate(w1, w2, w3, w4, p, buffer, filepath);
 		else if( (strcmpi(w2, "monster") == 0 || strcmpi(w2, "boss_monster") == 0) && count > 3 )
 			p = npc_parse_mob(w1, w2, w3, w4, p, buffer, filepath);
-		else if( strcmpi(w2, "mapflag") == 0 && count > 3 )
+		else if( strcmpi(w2, "mapflag") == 0 )
 			p = npc_parse_mapflag(w1, w2, trim(w3), trim(w4), p, buffer, filepath);
 		else {
 			ShowError("npc_parsesrcfile: Unable to parse, probably a missing or extra TAB in file '%s', line '%d'. Skipping line...\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n", filepath, strline(buffer, p - buffer), w1, w2, w3, w4);
