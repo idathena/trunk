@@ -960,7 +960,7 @@ struct achievement_db *achievement_readdb_sub(struct config_setting_t *cs, int n
 	}
 
 	if (!config_setting_lookup_string(cs, "name", &name) || !*name) {
-		ShowWarning("achievement_readdb_sub: Missing achievement name for achievement %d in \"%s\", skipping.\n", name, achievement_id, source);
+		ShowWarning("achievement_readdb_sub: Missing achievement name for achievement %d in \"%s\", skipping.\n", achievement_id, source);
 		return NULL;
 	}
 

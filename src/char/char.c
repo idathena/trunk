@@ -3598,7 +3598,7 @@ int parse_frommap(int fd)
 					struct online_char_data *character;
 
 					if( size - 13 != sizeof(struct mmo_charstatus) ) {
-						ShowError("parse_from_map (save-char): Size mismatch! %d != %d\n", size - 13, sizeof(struct mmo_charstatus));
+						ShowError("parse_from_map (save-char): Size mismatch! %d != %" PRIuPTR "\n", size - 13, sizeof(struct mmo_charstatus));
 						RFIFOSKIP(fd,size);
 						break;
 					}
@@ -5897,7 +5897,7 @@ static void char_config_split_startpoint(char *w1_value, char *w2_value, struct 
 		}
 		start_point_cur[i].map = mapindex_name2id(fields[1]);
 		if(!start_point_cur[i].map) {
-			ShowError("Start point %s not found in map-index cache. Setting to default location.\n", start_point_cur[i].map);
+			ShowError("Start point %d not found in map-index cache. Setting to default location.\n", start_point_cur[i].map);
 			start_point_cur[i].map = mapindex_name2id(MAP_DEFAULT_NAME);
 			start_point_cur[i].x = MAP_DEFAULT_X;
 			start_point_cur[i].y = MAP_DEFAULT_Y;

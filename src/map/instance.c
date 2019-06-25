@@ -827,7 +827,7 @@ void do_reload_instance(void)
 				clif_displaymessage(sd->fd, msg_txt(515)); // Instance has been reloaded
 				instance_reqinfo(sd, p->instance_id);
 			} else // Something went wrong
-				ShowError("do_reload_instance: Error setting character at instance start: character_id=%d instance=%s.\n", sd->status.char_id, db->name);
+				ShowError("do_reload_instance: Error setting character at instance start: character_id=%d instance=%s.\n", sd->status.char_id, StringBuf_Value(db->name));
 		}
 	}
 	mapit_free(iter);

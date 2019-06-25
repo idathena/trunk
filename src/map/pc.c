@@ -11929,7 +11929,7 @@ static bool pc_readdb_job_noenter_map(char *str[], int columns, int current) {
 		}
 	}
 	if(!pcdb_checkid(class_) || (idx = pc_class2idx(class_)) < 0) {
-		ShowError("pc_readdb_job_noenter_map: Invalid job %d specified.\n", str[0]);
+		ShowError("pc_readdb_job_noenter_map: Invalid job %s specified.\n", str[0]);
 		return false;
 	}
 	job_info[idx].noenter_map.zone = atoi(str[1]);
@@ -12857,7 +12857,7 @@ TIMER_FUNC(pc_bonus_script_timer) {
 	if (tid == INVALID_TIMER)
 		return 0;
 	if (!sd->bonus_script.head || entry == NULL) {
-		ShowError("pc_bonus_script_timer: Invalid entry pointer 0x%08X!\n",entry);
+		ShowError("pc_bonus_script_timer: Invalid entry pointer %p!\n",entry);
 		return 0;
 	}
 	linkdb_erase(&sd->bonus_script.head,(void *)((intptr_t)entry));

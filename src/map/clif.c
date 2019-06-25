@@ -8960,7 +8960,7 @@ void clif_guild_message(struct guild *g, int account_id, const char *mes, int le
 	if( !len )
 		return;
 	else if( len > sizeof(buf) - 5 ) {
-		ShowWarning("clif_guild_message: Truncated message '%s' (len=%d, max=%d, guild_id=%d).\n", mes, len, sizeof(buf) - 5, g->guild_id);
+		ShowWarning("clif_guild_message: Truncated message '%s' (len=%d, max=%" PRIuPTR ", guild_id=%d).\n", mes, len, sizeof(buf) - 5, g->guild_id);
 		len = sizeof(buf) - 5;
 	}
 
@@ -9215,7 +9215,7 @@ void clif_disp_message(struct block_list *src, const char *mes, int len, enum se
 	if( !len )
 		return;
 	else if( len > sizeof(buf) - 5 ) {
-		ShowWarning("clif_disp_message: Truncated message '%s' (len=%d, max=%d, aid=%d).\n", mes, len, sizeof(buf) - 5, src->id);
+		ShowWarning("clif_disp_message: Truncated message '%s' (len=%d, max=%" PRIuPTR ", aid=%d).\n", mes, len, sizeof(buf) - 5, src->id);
 		len = sizeof(buf) - 5;
 	}
 
@@ -19334,7 +19334,7 @@ void clif_showscript(struct block_list *bl, const char *message, enum send_targe
 	len = strlen(message) + 1;
 
 	if( len > sizeof(buf) - 8 ) {
-		ShowWarning("clif_showscript: Truncating too long message '%s' (len=%d).\n", message, len);
+		ShowWarning("clif_showscript: Truncating too long message '%s' (len=%" PRIuPTR ").\n", message, len);
 		len = sizeof(buf) - 8;
 	}
 
@@ -19358,7 +19358,7 @@ void clif_clan_message(struct clan *clan, const char *mes, int len) {
 	if( !len )
 		return;
 	else if( len > (sizeof(buf) - 5 - NAME_LENGTH) ) {
-		ShowWarning("clif_clan_message: Truncated message '%s' (len=%d, max=%d, clan_id=%d).\n", mes, len, sizeof(buf) - 5, clan->id);
+		ShowWarning("clif_clan_message: Truncated message '%s' (len=%d, max=%" PRIuPTR ", clan_id=%d).\n", mes, len, sizeof(buf) - 5, clan->id);
 		len = sizeof(buf) - 5 - NAME_LENGTH;
 	}
 

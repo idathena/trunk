@@ -3948,7 +3948,7 @@ static void mob_readdb_libconfig_sub_mvpdrops(config_setting_t *t, struct mob_db
 		if (!config_setting_lookup_int(tt, "ItemId", &nameid))
 			continue;
 		if (!itemdb_exists(nameid)) {
-			ShowWarning("Monster \"%s\"(id: %d) is dropping an unknown item \"%s\"(MVP-Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
+			ShowWarning("Monster \"%s\"(id: %d) is dropping an unknown item \"%d\"(MVP-Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
 			entry->mvpitem[i].nameid = 0;
 			entry->mvpitem[i].p = 0;
 			entry->mvpitem[i].randomopt_group = 0;
@@ -3988,7 +3988,7 @@ static void mob_readdb_libconfig_sub_drops(config_setting_t *t, struct mob_db *e
 		if (!config_setting_lookup_int(tt, "ItemId", &nameid))
 			continue;
 		if (!itemdb_exists(nameid)) {
-			ShowWarning("mob_readdb_libconfig_sub_drops: Monster \"%s\"(id: %d) is dropping an unknown item \"%s\"(Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
+			ShowWarning("mob_readdb_libconfig_sub_drops: Monster \"%s\"(id: %d) is dropping an unknown item \"%d\"(Drop %d)\n", entry->name, mob_id, nameid, (i / 2) + 1);
 			entry->dropitem[i].nameid = 0;
 			entry->dropitem[i].p = 0;
 			entry->dropitem[i].steal_protected = 0;
@@ -4808,7 +4808,7 @@ static int mob_read_sqlskilldb(void)
 		//Free the query result
 		Sql_FreeResult(mmysql_handle);
 
-		ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, mob_skill_db_name[fi]);
+		ShowStatus("Done reading '"CL_WHITE"%u"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, mob_skill_db_name[fi]);
 	}
 	return 0;
 }

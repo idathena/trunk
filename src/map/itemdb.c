@@ -1135,7 +1135,7 @@ static void itemdb_read_combos() {
 		}
 
 		fclose(fp);
-		ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, path);
+		ShowStatus("Done reading '"CL_WHITE"%u"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, path);
 	}
 }
 
@@ -1562,7 +1562,7 @@ static int itemdb_readdb(void)
 
 		fclose(fp);
 
-		ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, path);
+		ShowStatus("Done reading '"CL_WHITE"%u"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, path);
 	}
 
 	return 0;
@@ -1612,7 +1612,7 @@ static int itemdb_read_sqldb(void) {
 		//Free the query result
 		Sql_FreeResult(mmysql_handle);
 
-		ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, item_db_name[fi]);
+		ShowStatus("Done reading '"CL_WHITE"%u"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, item_db_name[fi]);
 	}
 
 	return 0;
@@ -1759,7 +1759,7 @@ static void itemdb_read_randomopt() {
 	}
 
 	fclose(fp);
-	ShowStatus("Done reading '"CL_WHITE"%lu"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, path);
+	ShowStatus("Done reading '"CL_WHITE"%u"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, path);
 }
 
 /**

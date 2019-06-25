@@ -12546,12 +12546,12 @@ TIMER_FUNC(status_change_timer)
 	bool dounlock = false;
 
 	if( !(bl = map_id2bl(id)) ) {
-		ShowDebug("status_change_timer: Null pointer id: %d data: %d\n",id,data);
+		ShowDebug("status_change_timer: Null pointer id: %d data: %" PRIdPTR "\n",id,data);
 		return 0;
 	}
 
 	if( !(sc = status_get_sc(bl)) || !(sce = sc->data[type]) ) {
-		ShowDebug("status_change_timer: Null pointer id: %d data: %d bl-type: %d\n",id,data,bl->type);
+		ShowDebug("status_change_timer: Null pointer id: %d data: %" PRIdPTR " bl-type: %d\n",id,data,bl->type);
 		return 0;
 	}
 
