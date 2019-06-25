@@ -12447,9 +12447,9 @@ uint8 pc_itemcd_check(struct map_session_data *sd, struct item_data *id, unsigne
  * @param md
  */
 static void pc_clear_log_damage_sub(int char_id, struct mob_data *md) {
-	uint8 i;
+	uint8 i = 0;
 
-	ARR_FIND(0,DAMAGELOG_SIZE,i,md->dmglog[i].id == char_id);
+	ARR_FIND(0, DAMAGELOG_SIZE, i, md->dmglog[i].id == char_id);
 	if( i < DAMAGELOG_SIZE ) {
 		md->dmglog[i].id = 0;
 		md->dmglog[i].dmg = 0;
@@ -12465,14 +12465,17 @@ static void pc_clear_log_damage_sub(int char_id, struct mob_data *md) {
 void pc_damage_log_add(struct map_session_data *sd, int id) {
 	uint8 i = 0;
 
-	if( !sd )
+	if( !sd || !id )
 		return;
 	//Only store new data, don't need to renew the old one with same id
-	for( i = 0; i < DAMAGELOG_SIZE_PC; i++ ) {
-		if( sd->dmglog[i] == id )
-			return;
-		sd->dmglog[i] = id;
+	ARR_FIND(0, DAMAGELOG_SIZE, i, sd->dmglog[i] == id);
+	if( i < DAMAGELOG_SIZE_PC )
 		return;
+	for( i = 0; i < DAMAGELOG_SIZE_PC; i++ ) {
+		if( sd->dmglog[i] == 0 ) {
+			sd->dmglog[i] = id;
+			return;
+		}
 	}
 }
 
@@ -12482,8 +12485,8 @@ void pc_damage_log_add(struct map_session_data *sd, int id) {
  * @param id Monster's id
  */
 void pc_damage_log_clear(struct map_session_data *sd, int id) {
-	int i;
 	struct mob_data *md = NULL;
+	uint8 i = 0;
 
 	if( !sd )
 		return;
@@ -12491,16 +12494,14 @@ void pc_damage_log_clear(struct map_session_data *sd, int id) {
 		for( i = 0; i < DAMAGELOG_SIZE_PC; i++ ) {
 			if( !sd->dmglog[i] ) //Skip the empty value
 				continue;
-
 			if( (md = map_id2md(sd->dmglog[i])) )
-				pc_clear_log_damage_sub(sd->status.char_id,md);
+				pc_clear_log_damage_sub(sd->status.char_id, md);
 			sd->dmglog[i] = 0;
 		}
 	} else {
 		if( (md = map_id2md(id)) )
 			pc_clear_log_damage_sub(sd->status.char_id,md);
-
-		ARR_FIND(0,DAMAGELOG_SIZE_PC,i,sd->dmglog[i] == id); //Find the id position
+		ARR_FIND(0, DAMAGELOG_SIZE_PC, i, sd->dmglog[i] == id); //Find the id position
 		if( i < DAMAGELOG_SIZE_PC )
 			sd->dmglog[i] = 0;
 	}

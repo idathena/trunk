@@ -236,6 +236,7 @@ static void mapif_parse_elemental_save(int fd, struct s_elemental *ele) {
 void inter_elemental_sql_init(void) {
 	return;
 }
+
 void inter_elemental_sql_final(void) {
 	return;
 }

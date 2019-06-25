@@ -189,9 +189,9 @@ static void mapif_parse_mercenary_save(int fd, struct s_mercenary* merc)
 	mapif_mercenary_saved(fd, result);
 }
 
-int inter_mercenary_sql_init(void)
+void inter_mercenary_sql_init(void)
 {
-	return 0;
+	return;
 }
 void inter_mercenary_sql_final(void)
 {

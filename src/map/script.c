@@ -15339,7 +15339,7 @@ BUILDIN_FUNC(implode)
 		if( script_hasdata(st,3) ) {
 			glue = script_getstr(st,3);
 			glue_len = strlen(glue);
-			len += glue_len * (array_size);
+			len += (size_t)glue_len * array_size;
 		}
 		output = (char *)aMalloc(len + 1);
 
@@ -22698,11 +22698,7 @@ BUILDIN_FUNC(mail) {
 		if (zeny < 0) {
 			ShowError("buildin_mail: a negative amount of zeny can not be sent.\n" );
 			return 1;
-		} else if (zeny > MAX_ZENY) {
-			ShowError("buildin_mail: amount of zeny %u is exceeding maximum of %u. Capping...\n", zeny, MAX_ZENY);
-			zeny = MAX_ZENY;
 		}
-
 		msg.zeny = zeny;
 	}
 
@@ -22884,7 +22880,7 @@ BUILDIN_FUNC(identifyall) {
 
 BUILDIN_FUNC(airship_respond) {
 	struct map_session_data *sd = script_rid2sd(st);
-	uint32 response = script_getnum(st,2);
+	int8 response = script_getnum(st,2);
 
 	if (!(sd = script_rid2sd(st)))
 		return 1;

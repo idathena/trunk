@@ -16,10 +16,11 @@
 #include <string.h>
 
 
-int inter_homunculus_sql_init(void)
+void inter_homunculus_sql_init(void)
 {
-	return 0;
+	return;
 }
+
 void inter_homunculus_sql_final(void)
 {
 	return;
