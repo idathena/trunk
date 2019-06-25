@@ -98,11 +98,4 @@ extern struct Log_Config {
 	char log_branch[64], log_pick[64], log_zeny[64], log_mvpdrop[64], log_gm[64], log_npc[64], log_chat[64], log_cash[64], log_feeding[64];
 } log_config;
 
-#ifdef BETA_THREAD_TEST
-	struct {
-		char **entry;
-		int count;
-	} logThreadData;
-#endif
-
 #endif /* _LOG_H_ */

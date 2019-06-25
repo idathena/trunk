@@ -1474,7 +1474,7 @@ int intif_parse_LoadGuildStorage(int fd)
 		return 0;
 	}
 	if (RFIFOW(fd,2) - 13 != sizeof(struct s_storage)) {
-		ShowError("intif_parse_LoadGuildStorage: data size error %d %d\n", RFIFOW(fd,2) - 13 , sizeof(struct s_storage));
+		ShowError("intif_parse_LoadGuildStorage: data size error %d %" PRIuPTR "\n", RFIFOW(fd,2) - 13 , sizeof(struct s_storage));
 		gstor->status = false;
 		return 0;
 	}
@@ -1523,7 +1523,7 @@ int intif_parse_PartyInfo(int fd)
 	}
 
 	if (RFIFOW(fd,2) != 8 + sizeof(struct party))
-		ShowError("intif: party info : data size error (char_id=%d party_id=%d packet_len=%d expected_len=%d)\n", RFIFOL(fd,4), RFIFOL(fd,8), RFIFOW(fd,2), 8+sizeof(struct party));
+		ShowError("intif: party info : data size error (char_id=%d party_id=%d packet_len=%d expected_len=%" PRIuPTR ")\n", RFIFOL(fd,4), RFIFOL(fd,8), RFIFOW(fd,2), 8 + sizeof(struct party));
 	party_recv_info((struct party *)RFIFOP(fd,8), RFIFOL(fd,4));
 	return 1;
 }
@@ -1622,7 +1622,7 @@ int intif_parse_GuildInfo(int fd)
 		return 0;
 	}
 	if (RFIFOW(fd,2) != sizeof(struct guild) + 4)
-		ShowError("intif: guild info : data size error Gid: %d recv size: %d Expected size: %d\n", RFIFOL(fd,4), RFIFOW(fd,2), sizeof(struct guild) + 4);
+		ShowError("intif: guild info : data size error Gid: %d recv size: %d Expected size: %" PRIuPTR "\n", RFIFOL(fd,4), RFIFOW(fd,2), sizeof(struct guild) + 4);
 	guild_recv_info((struct guild *)RFIFOP(fd,4));
 	return 1;
 }
@@ -1757,7 +1757,7 @@ int intif_parse_GuildMemberInfoChanged(int fd)
 int intif_parse_GuildPosition(int fd)
 {
 	if (RFIFOW(fd,2) != sizeof(struct guild_position) + 12)
-		ShowError("intif: guild info : data size error\n %d %d %d", RFIFOL(fd,4), RFIFOW(fd,2), sizeof(struct guild_position) + 12);
+		ShowError("intif: guild info : data size error %d %d %" PRIuPTR "\n", RFIFOL(fd,4), RFIFOW(fd,2), sizeof(struct guild_position) + 12);
 	guild_position_changed(RFIFOL(fd,4), RFIFOL(fd,8), (struct guild_position *)RFIFOP(fd,12));
 	return 1;
 }
@@ -1861,7 +1861,7 @@ int intif_parse_RecvPetData(int fd)
 	len = RFIFOW(fd,2);
 	if (sizeof(struct s_pet) != len - 9) {
 		if(battle_config.etc_log)
-			ShowError("intif: pet data: data size error %d %d\n", sizeof(struct s_pet), len - 9);
+			ShowError("intif: pet data: data size error %" PRIuPTR " %d\n", sizeof(struct s_pet), len - 9);
 	} else {
 		memcpy(&p, RFIFOP(fd,9), sizeof(struct s_pet));
 		pet_recv_petdata(RFIFOL(fd,4), &p, RFIFOB(fd,8));
@@ -1937,7 +1937,7 @@ int intif_parse_CreateHomunculus(int fd)
 	len = RFIFOW(fd,2) - 9;
 	if (sizeof(struct s_homunculus) != len) {
 		if (battle_config.etc_log)
-			ShowError("intif: create homun data: data size error %d != %d\n", sizeof(struct s_homunculus), len);
+			ShowError("intif: create homun data: data size error %" PRIuPTR " != %d\n", sizeof(struct s_homunculus), len);
 		return 0;
 	}
 	hom_recv_data(RFIFOL(fd,4), (struct s_homunculus*)RFIFOP(fd,9), RFIFOB(fd,8));
@@ -1956,7 +1956,7 @@ int intif_parse_RecvHomunculusData(int fd)
 	len = RFIFOW(fd,2) - 9;
 	if (sizeof(struct s_homunculus) != len) {
 		if(battle_config.etc_log)
-			ShowError("intif: homun data: data size error %d %d\n", sizeof(struct s_homunculus), len);
+			ShowError("intif: homun data: data size error %" PRIuPTR " %d\n", sizeof(struct s_homunculus), len);
 		return 0;
 	}
 	hom_recv_data(RFIFOL(fd,4), (struct s_homunculus*)RFIFOP(fd,9), RFIFOB(fd,8));
@@ -2293,7 +2293,7 @@ int intif_parse_Mail_inboxreceived(int fd)
 		return 0;
 
 	if (RFIFOW(fd,2) - 10 != sizeof(struct mail_data)) {
-		ShowError("intif_parse_Mail_inboxreceived: data size error %d %d\n", RFIFOW(fd,2) - 10, sizeof(struct mail_data));
+		ShowError("intif_parse_Mail_inboxreceived: data size error %d %" PRIuPTR "\n", RFIFOW(fd,2) - 10, sizeof(struct mail_data));
 		return 0;
 	}
 
@@ -2370,7 +2370,7 @@ int intif_parse_Mail_getattach(int fd)
 	int i, mail_id, zeny;
 
 	if (RFIFOW(fd, 2) - 16 != sizeof(struct item) * MAIL_MAX_ITEM) {
-		ShowError("intif_parse_Mail_getattach: data size error %d %d\n", RFIFOW(fd, 2) - 16, sizeof(struct item));
+		ShowError("intif_parse_Mail_getattach: data size error %d %" PRIuPTR "\n", RFIFOW(fd, 2) - 16, sizeof(struct item));
 		return 0;
 	}
 
@@ -2544,7 +2544,7 @@ static void intif_parse_Mail_send(int fd)
 	bool fail;
 
 	if (RFIFOW(fd,2) - 4 != sizeof(struct mail_message)) {
-		ShowError("intif_parse_Mail_send: data size error %d %d\n", RFIFOW(fd,2) - 4, sizeof(struct mail_message));
+		ShowError("intif_parse_Mail_send: data size error %d %" PRIuPTR "\n", RFIFOW(fd,2) - 4, sizeof(struct mail_message));
 		return;
 	}
 
@@ -2698,7 +2698,7 @@ static void intif_parse_Auction_register(int fd)
 	struct auction_data auction;
 
 	if (RFIFOW(fd,2) - 4 != sizeof(struct auction_data)) {
-		ShowError("intif_parse_Auction_register: data size error %d %d\n", RFIFOW(fd,2) - 4, sizeof(struct auction_data));
+		ShowError("intif_parse_Auction_register: data size error %d %" PRIuPTR "\n", RFIFOW(fd,2) - 4, sizeof(struct auction_data));
 		return;
 	}
 
@@ -2901,7 +2901,7 @@ int intif_parse_mercenary_received(int fd)
 
 	if (sizeof(struct s_mercenary) != len) {
 		if (battle_config.etc_log)
-			ShowError("intif: create mercenary data size error %d != %d\n", sizeof(struct s_mercenary), len);
+			ShowError("intif: create mercenary data size error %" PRIuPTR " != %d\n", sizeof(struct s_mercenary), len);
 		return 0;
 	}
 
@@ -3030,7 +3030,7 @@ int intif_parse_elemental_received(int fd)
 
 	if (sizeof(struct s_elemental) != len) {
 		if (battle_config.etc_log)
-			ShowError("intif: create elemental data size error %d != %d\n", sizeof(struct s_elemental), len);
+			ShowError("intif: create elemental data size error %" PRIuPTR " != %d\n", sizeof(struct s_elemental), len);
 		return 0;
 	}
 
@@ -3589,7 +3589,7 @@ static bool intif_parse_StorageReceived(int fd)
 	}
 
 	if (RFIFOW(fd,2) - 10 != sz_stor) {
-		ShowError("intif_parse_StorageReceived: data size error %d %d\n", RFIFOW(fd,2) - 10 , sz_stor);
+		ShowError("intif_parse_StorageReceived: data size error %d %" PRIuPTR "\n", RFIFOW(fd,2) - 10 , sz_stor);
 		stor->status = false;
 		return false;
 	}

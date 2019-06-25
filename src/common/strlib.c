@@ -681,10 +681,10 @@ int sv_parse(const char *str, int len, int startoff, char delim, int *out_pos, i
 /// @param nfields Size of the field array
 /// @param opt Options that determine the parsing behaviour
 /// @return Number of fields found in the string or -1 if an error occured
-int sv_split(char *str, int len, int startoff, char delim, char **out_fields, int nfields, enum e_svopt opt)
+int sv_split(char *str, int len, int startoff, char delim, char **out_fields, size_t nfields, enum e_svopt opt)
 {
 	int pos[1024];
-	int i;
+	size_t i;
 	int done;
 	char *end;
 	int ret = sv_parse(str, len, startoff, delim, pos, ARRAYLENGTH(pos), opt);

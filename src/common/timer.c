@@ -87,7 +87,7 @@ int add_timer_func_list(TimerFunc func, char *name)
 }
 
 /// Returns the name of the timer function.
-char *search_timer_func_list(TimerFunc func)
+const char *search_timer_func_list(TimerFunc func)
 {
 	struct timer_func_list *tfl;
 

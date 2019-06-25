@@ -10,8 +10,6 @@
 #include "db.h"
 #include "socket.h"
 #include "timer.h"
-#include "thread.h"
-#include "mempool.h"
 #include "sql.h"
 #include "cbasetypes.h"
 #include "msg_conf.h"
@@ -249,8 +247,6 @@ int main(int argc, char **argv)
 	usercheck();
 
 	Sql_init();
-	rathread_init();
-	mempool_init();
 	db_init();
 	signals_init();
 
@@ -275,8 +271,6 @@ int main(int argc, char **argv)
 	timer_final();
 	socket_final();
 	db_final();
-	mempool_final();
-	rathread_final();
 #endif
 
 	malloc_final();
