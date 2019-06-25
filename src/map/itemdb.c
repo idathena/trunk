@@ -27,7 +27,7 @@ static DBMap *itemdb_randomopt_group; //Random option group DB
 
 struct item_data *dummy_item; //This is the default dummy item used for non-existant items [Skotlex]
 
-struct s_roulette_db rd;
+struct s_roulette_db roulette_data;
 
 struct config_t itemdb_randomopt_group_conf;
 static void itemdb_randomopt_group_free_sub(struct s_random_opt_group *group, bool free);
@@ -1177,15 +1177,15 @@ static bool itemdb_roulette_parse_dbrow(char *str[], int columns, int current)
 		chance = max(0, chance);
 	}
 	level--;
-	column = rd.items[level];
-	RECREATE(rd.nameid[level], unsigned short, ++rd.items[level]);
-	RECREATE(rd.qty[level], unsigned short, rd.items[level]);
-	RECREATE(rd.flag[level], int, rd.items[level]);
-	RECREATE(rd.chance[level], int, rd.items[level]);
-	rd.nameid[level][column] = item_id;
-	rd.qty[level][column] = amount;
-	rd.flag[level][column] = flag;
-	rd.chance[level][column] = chance;
+	column = roulette_data.items[level];
+	RECREATE(roulette_data.nameid[level], unsigned short, ++roulette_data.items[level]);
+	RECREATE(roulette_data.qty[level], unsigned short, roulette_data.items[level]);
+	RECREATE(roulette_data.flag[level], int, roulette_data.items[level]);
+	RECREATE(roulette_data.chance[level], int, roulette_data.items[level]);
+	roulette_data.nameid[level][column] = item_id;
+	roulette_data.qty[level][column] = amount;
+	roulette_data.flag[level][column] = flag;
+	roulette_data.chance[level][column] = chance;
 	return true;
 }
 
@@ -1196,32 +1196,32 @@ static void itemdb_roulette_read(void) {
 	int i, j;
 
 	for (i = 0; i < MAX_ROULETTE_LEVEL; i++)
-		rd.items[i] = 0;
+		roulette_data.items[i] = 0;
 
 	sv_readdb(db_path, "roulette_db.txt",    ',', 3, 5, -1, &itemdb_roulette_parse_dbrow);
 
 	for (i = 0; i < MAX_ROULETTE_LEVEL; i++) {
 		int limit = MAX_ROULETTE_COLUMNS - i;
 
-		if (rd.items[i] == limit)
+		if (roulette_data.items[i] == limit)
 			continue;
-		if (rd.items[i] > limit) {
-			ShowWarning("itemdb_roulette_read: Level %d has %d items, only %d supported, capping...\n", i + 1, rd.items[i], limit);
-			rd.items[i] = limit;
+		if (roulette_data.items[i] > limit) {
+			ShowWarning("itemdb_roulette_read: Level %d has %d items, only %d supported, capping...\n", i + 1, roulette_data.items[i], limit);
+			roulette_data.items[i] = limit;
 			continue;
 		}
-		// This scenario = rd.items[i] < limit
-		ShowWarning("itemdb_roulette_read: Level %d has %d items, %d are required. Filling with Apples...\n", i + 1, rd.items[i], limit);
-		rd.items[i] = limit;
-		RECREATE(rd.nameid[i], unsigned short, rd.items[i]);
-		RECREATE(rd.qty[i], unsigned short, rd.items[i]);
-		RECREATE(rd.flag[i], int, rd.items[i]);
+		// This scenario = roulette_data.items[i] < limit
+		ShowWarning("itemdb_roulette_read: Level %d has %d items, %d are required. Filling with Apples...\n", i + 1, roulette_data.items[i], limit);
+		roulette_data.items[i] = limit;
+		RECREATE(roulette_data.nameid[i], unsigned short, roulette_data.items[i]);
+		RECREATE(roulette_data.qty[i], unsigned short, roulette_data.items[i]);
+		RECREATE(roulette_data.flag[i], int, roulette_data.items[i]);
 		for (j = 0; j < MAX_ROULETTE_COLUMNS - i; j++) {
-			if (rd.qty[i][j])
+			if (roulette_data.qty[i][j])
 				continue;
-			rd.nameid[i][j] = ITEMID_APPLE;
-			rd.qty[i][j] = 1;
-			rd.flag[i][j] = 0;
+			roulette_data.nameid[i][j] = ITEMID_APPLE;
+			roulette_data.qty[i][j] = 1;
+			roulette_data.flag[i][j] = 0;
 		}
 	}
 }
@@ -1233,19 +1233,19 @@ static void itemdb_roulette_free(void) {
 	int i;
 
 	for (i = 0; i < MAX_ROULETTE_LEVEL; i++) {
-		if (rd.nameid[i])
-			aFree(rd.nameid[i]);
-		if (rd.qty[i])
-			aFree(rd.qty[i]);
-		if (rd.flag[i])
-			aFree(rd.flag[i]);
-		if (rd.chance[i])
-			aFree(rd.chance[i]);
-		rd.nameid[i] = NULL;
-		rd.qty[i] = NULL;
-		rd.flag[i] = NULL;
-		rd.chance[i] = NULL;
-		rd.items[i] = 0;
+		if (roulette_data.nameid[i])
+			aFree(roulette_data.nameid[i]);
+		if (roulette_data.qty[i])
+			aFree(roulette_data.qty[i]);
+		if (roulette_data.flag[i])
+			aFree(roulette_data.flag[i]);
+		if (roulette_data.chance[i])
+			aFree(roulette_data.chance[i]);
+		roulette_data.nameid[i] = NULL;
+		roulette_data.qty[i] = NULL;
+		roulette_data.flag[i] = NULL;
+		roulette_data.chance[i] = NULL;
+		roulette_data.items[i] = 0;
 	}
 }
 

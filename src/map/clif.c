@@ -19830,11 +19830,11 @@ void clif_roulette_info(struct map_session_data *sd) {
 			WFIFOW(fd,offset + 0) = i;
 			WFIFOW(fd,offset + 2) = j;
 #if PACKETVER < 20180516
-			WFIFOW(fd,offset + 4) = rd.nameid[i][j];
-			WFIFOW(fd,offset + 6) = rd.qty[i][j];
+			WFIFOW(fd,offset + 4) = roulette_data.nameid[i][j];
+			WFIFOW(fd,offset + 6) = roulette_data.qty[i][j];
 #else
-			WFIFOL(fd,offset + 4) = rd.nameid[i][j];
-			WFIFOL(fd,offset + 8) = rd.qty[i][j];
+			WFIFOL(fd,offset + 4) = roulette_data.nameid[i][j];
+			WFIFOL(fd,offset + 8) = roulette_data.qty[i][j];
 #endif
 			offset += size;
 		}
@@ -19902,10 +19902,10 @@ static uint8 clif_roulette_getitem(struct map_session_data *sd) {
 
 	memset(&it, 0, sizeof(it));
 
-	it.nameid = rd.nameid[sd->roulette.prizeStage][sd->roulette.prizeIdx];
+	it.nameid = roulette_data.nameid[sd->roulette.prizeStage][sd->roulette.prizeIdx];
 	it.identify = 1;
 
-	if( (res = pc_additem(sd, &it, rd.qty[sd->roulette.prizeStage][sd->roulette.prizeIdx], LOG_TYPE_ROULETTE)) == ADDITEM_SUCCESS ) {
+	if( (res = pc_additem(sd, &it, roulette_data.qty[sd->roulette.prizeStage][sd->roulette.prizeIdx], LOG_TYPE_ROULETTE)) == ADDITEM_SUCCESS ) {
 		; //onSuccess
 	}
 
@@ -19981,19 +19981,19 @@ void clif_parse_roulette_generate(int fd, struct map_session_data *sd) {
 		sd->roulette.prizeStage = sd->roulette.stage;
 		sd->roulette.claimPrize = true;
 		sd->roulette.tick = gettick() + max(1, (MAX_ROULETTE_COLUMNS - sd->roulette.prizeStage - 3)) * 1000;
-		for( i = 0; i < rd.items[sd->roulette.stage]; i++ ) {
-			if( !(rd.flag[sd->roulette.stage][i]&1) )
+		for( i = 0; i < roulette_data.items[sd->roulette.stage]; i++ ) {
+			if( !(roulette_data.flag[sd->roulette.stage][i]&1) )
 				continue;
 			loseIdx = i;
 		}
-		if( rnd()%100 < rd.chance[sd->roulette.stage][loseIdx] ) { //Chance to lose
+		if( rnd()%100 < roulette_data.chance[sd->roulette.stage][loseIdx] ) { //Chance to lose
 			result = GENERATE_ROULETTE_LOSING;
 			sd->roulette.prizeIdx = loseIdx;
 			sd->roulette.stage = 0;
 		} else {
-			winIdx = rnd()%rd.items[sd->roulette.stage];
+			winIdx = rnd()%roulette_data.items[sd->roulette.stage];
 			while( winIdx == loseIdx )
-				winIdx = rnd()%rd.items[sd->roulette.stage];
+				winIdx = rnd()%roulette_data.items[sd->roulette.stage];
 			result = GENERATE_ROULETTE_SUCCESS;
 			sd->roulette.prizeIdx = winIdx;
 			sd->roulette.stage++;
@@ -21276,7 +21276,7 @@ void clif_parse_equipswitch_add(int fd, struct map_session_data *sd)
 		return;
 
 	//Check if the index is valid
-	if( index < 0 || index >= MAX_INVENTORY )
+	if( index >= MAX_INVENTORY )
 		return;
 
 	if( !sd->inventory_data[index] )
