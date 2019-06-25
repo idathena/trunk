@@ -304,17 +304,18 @@ void achievement_get_reward(struct map_session_data *sd, int achievement_id, tim
 
 	//Only update in the cache, db was updated already
 	sd->achievement_data.achievements[i].rewarded = rewarded;
+	sd->achievement_data.save = true;
 
 	run_script(adb->rewards.script, 0, sd->bl.id, fake_nd->bl.id);
 	if (adb->rewards.title_id) {
 		RECREATE(sd->titles, int, sd->titleCount + 1);
 		sd->titles[sd->titleCount] = adb->rewards.title_id;
 		sd->titleCount++;
+		clif_achievement_list_all(sd);
+	} else {
+		clif_achievement_reward_ack(sd->fd, 1, achievement_id);
+		clif_achievement_update(sd, &sd->achievement_data.achievements[i], sd->achievement_data.count - sd->achievement_data.incompleteCount);
 	}
-
-	clif_achievement_reward_ack(sd->fd, 1, achievement_id);
-	clif_achievement_update(sd, &sd->achievement_data.achievements[i], sd->achievement_data.count - sd->achievement_data.incompleteCount);
-	clif_achievement_list_all(sd);
 }
 
 /**

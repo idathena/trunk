@@ -14906,17 +14906,15 @@ void clif_parse_FeelSaveOk(int fd,struct map_session_data *sd)
 
 	if (sd->menuskill_id != SG_FEEL)
 		return;
+
 	i = sd->menuskill_val - 1;
+
 	if (i < 0 || i >= MAX_PC_FEELHATE)
 		return; //Bug?
 
 	sd->feel_map[i].index = map_id2index(sd->bl.m);
 	sd->feel_map[i].m = sd->bl.m;
 	pc_setglobalreg(sd,sg_info[i].feel_var,sd->feel_map[i].index);
-
-//Are these really needed? Shouldn't they show up automatically from the feel save packet?
-//	clif_misceffect2(&sd->bl, 0x1b0);
-//	clif_misceffect2(&sd->bl, 0x21f);
 	clif_feel_info(sd, i, 0);
 	clif_menuskill_clear(sd);
 }
@@ -14931,8 +14929,8 @@ void clif_parse_FeelSaveOk(int fd,struct map_session_data *sd)
 void clif_feel_req(int fd, struct map_session_data *sd, uint16 skill_lv)
 {
 	WFIFOHEAD(fd,packet_len(0x253));
-	WFIFOW(fd,0)=0x253;
-	WFIFOB(fd,2)=TOB(skill_lv-1);
+	WFIFOW(fd,0) = 0x253;
+	WFIFOB(fd,2) = TOB(skill_lv - 1);
 	WFIFOSET(fd,packet_len(0x253));
 	sd->menuskill_id = SG_FEEL;
 	sd->menuskill_val = skill_lv;

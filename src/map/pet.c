@@ -643,14 +643,14 @@ bool pet_get_egg(int account_id, short pet_class, int pet_id)
 int pet_menu(struct map_session_data *sd, int menunum)
 {
 	struct item_data *egg_id;
+
 	nullpo_ret(sd);
 
-	if (sd->pd == NULL)
+	if(!sd->pd)
 		return 1;
 
-	//You lost the pet already.
 	if(!sd->status.pet_id || sd->pd->pet.intimate < PETINTIMATE_AWKWARD || sd->pd->pet.incubate)
-		return 1;
+		return 1; //You lost the pet already
 
 	egg_id = itemdb_exists(sd->pd->petDB->EggID);
 	if(egg_id) {

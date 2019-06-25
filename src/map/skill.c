@@ -2433,8 +2433,8 @@ bool skill_strip_equip(struct block_list *src, struct block_list *bl, uint16 ski
 	tsd = BL_CAST(BL_PC,bl);
 	tsc = status_get_sc(bl);
 
-	if (!tsc)
-		return false;
+	if (!tsc || (tsc->option&OPTION_MADOGEAR))
+		return false; //Mado Gear cannot be divested [Ind]
 
 	switch (skill_id) { //Success chance
 		case RG_STRIPWEAPON:
