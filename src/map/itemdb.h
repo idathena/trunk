@@ -378,7 +378,7 @@ extern struct s_roulette_db {
 	int *flag[MAX_ROULETTE_LEVEL]; //Whether the item is for loss or win
 	int *chance[MAX_ROULETTE_LEVEL]; //Chance to lose the game
 	int items[MAX_ROULETTE_LEVEL]; //Number of items in the list for each
-} rd;
+} roulette_data;
 
 //Main item data struct
 struct item_data {

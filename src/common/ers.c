@@ -189,7 +189,7 @@ static void *ers_obj_alloc_entry(ERS self)
 		instance->Cache->Used++;
 
 		instance->Cache->Free = ERS_BLOCK_ENTRIES -1;
-		ret = &instance->Cache->Blocks[instance->Cache->Used - 1][instance->Cache->Free * instance->Cache->ObjectSize + sizeof(struct ers_list)];
+		ret = &instance->Cache->Blocks[instance->Cache->Used - 1][(uint64)(instance->Cache->Free * instance->Cache->ObjectSize) + sizeof(struct ers_list)];
 	}
 
 	instance->Count++;
