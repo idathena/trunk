@@ -1672,6 +1672,8 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 			return ITEM_EQUIP_ACK_FAIL;
 		if ((item->equip&EQP_HEAD_TOP) && sd->sc.data[SC_STRIPHELM])
 			return ITEM_EQUIP_ACK_FAIL;
+		if ((item->equip&EQP_ARMS) && sd->sc.data[SC__WEAKNESS])
+			return ITEM_EQUIP_ACK_FAIL;
 		if ((item->equip&EQP_ACC) && sd->sc.data[SC__STRIPACCESSORY])
 			return ITEM_EQUIP_ACK_FAIL;
 		if (item->equip && (sd->sc.data[SC_KYOUGAKU] || sd->sc.data[SC_SUHIDE]))
@@ -5871,17 +5873,22 @@ bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 sk
  */
 int pc_steal_coin(struct map_session_data *sd, struct block_list *bl)
 {
+	struct mob_data *md = NULL;
+	uint8 lv;
 	int rate;
-	uint16 lv;
-	struct mob_data *md;
 
 	if( !sd || !bl || bl->type != BL_MOB )
 		return 0;
+
 	md = (TBL_MOB *)bl;
-	if( md->state.steal_coin_flag || md->sc.data[SC_STONE] || md->sc.data[SC_FREEZE] || status_bl_has_mode(bl,MD_STATUS_IMMUNE) || status_get_race2(&md->bl) == RC2_TREASURE )
+
+	if( md->state.steal_coin_flag || md->sc.data[SC_STONE] || md->sc.data[SC_FREEZE] ||
+		status_bl_has_mode(bl,MD_STATUS_IMMUNE) || status_get_race2(bl) == RC2_TREASURE )
 		return 0;
+
 	lv = pc_checkskill(sd,RG_STEALCOIN);
 	rate = lv * 10 + (sd->status.base_level - md->level) * 2 + sd->battle_status.dex / 2 + sd->battle_status.luk / 2;
+
 	if( rnd()%1000 < rate ) {
 		//mob_lv * skill_lv / 10 + random[mob_lv * 8, mob_lv * 10]
 		int amount = md->level * lv / 10 + md->level * 8 + rnd()%(md->level * 2 + 1);
@@ -8834,8 +8841,12 @@ bool pc_setparam(struct map_session_data *sd,int type,int val) {
 			sd->battle_status.hp = cap_value(val, 1, (int)sd->battle_status.max_hp);
 			break;
 		case SP_MAXHP:
-			sd->battle_status.max_hp = cap_value(val, 1, battle_config.max_hp);
-
+			if( sd->status.base_level < 100 )
+				sd->battle_status.max_hp = cap_value(val, 1, battle_config.max_hp_lv99);
+			else if( sd->status.base_level < 151 )
+				sd->battle_status.max_hp = cap_value(val, 1, battle_config.max_hp_lv150);
+			else
+				sd->battle_status.max_hp = cap_value(val, 1, battle_config.max_hp);
 			if( sd->battle_status.max_hp < sd->battle_status.hp ) {
 				sd->battle_status.hp = sd->battle_status.max_hp;
 				clif_updatestatus(sd, SP_HP);
@@ -11531,9 +11542,12 @@ static bool pc_readdb_skilltree(char *fields[], int columns, int current)
 		baselv = (uint32)atoi(fields[3]);
 		joblv = (uint32)atoi(fields[4]);
 		offset = 5;
-	} else {
+	} else if(columns == 3 + MAX_PC_SKILL_REQUIRE * 2) {
 		baselv = joblv = 0;
 		offset = 3;
+	} else {
+		ShowWarning("pc_readdb_skilltree: Invalid number of colums in skill %hu of job %d's tree.\n", skill_id, class_);
+		return false;
 	}
 
 	if(!pcdb_checkid(class_)) {

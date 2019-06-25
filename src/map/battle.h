@@ -274,6 +274,8 @@ extern struct Battle_Config
 	int ammo_check_weapon;
 	int max_aspd;
 	int max_walk_speed;	//Maximum walking speed after buffs [Skotlex]
+	int max_hp_lv99;
+	int max_hp_lv150;
 	int max_hp;
 	int max_sp;
 	int max_lv, aura_lv;

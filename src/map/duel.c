@@ -112,7 +112,6 @@ int duel_create(struct map_session_data *sd, const unsigned int maxpl)
 	clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 
 	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
-	//clif_misceffect2(&sd->bl, 159);
 	return i;
 }
 
@@ -195,7 +194,6 @@ void duel_accept(const unsigned int did, struct map_session_data *sd)
 	clif_disp_message(&sd->bl, output, strlen(output), DUEL_WOS);
 
 	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
-	//clif_misceffect2(&sd->bl, 159);
 }
 
 /**

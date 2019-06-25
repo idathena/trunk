@@ -3944,7 +3944,12 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	status->max_hp = status_calc_maxhpsp_pc(sd, true);
 	if (battle_config.hp_rate != 100)
 		status->max_hp = (unsigned int)(battle_config.hp_rate * (status->max_hp / 100.));
-	status->max_hp = cap_value(status->max_hp, 1, (unsigned int)battle_config.max_hp);
+	if (sd->status.base_level < 100)
+		status->max_hp = cap_value(status->max_hp, 1, (unsigned int)battle_config.max_hp_lv99);
+	else if (sd->status.base_level < 151)
+		status->max_hp = cap_value(status->max_hp, 1, (unsigned int)battle_config.max_hp_lv150);
+	else
+		status->max_hp = cap_value(status->max_hp, 1, (unsigned int)battle_config.max_hp);
 	sd->status.max_hp = status->max_hp;
 
 	//----- MAX SP CALCULATION -----
@@ -5024,7 +5029,12 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 			status->max_hp = status_calc_maxhpsp_pc(sd, true);
 			if( battle_config.hp_rate != 100 )
 				status->max_hp = (unsigned int)(battle_config.hp_rate * (status->max_hp / 100.));
-			status->max_hp = umin(status->max_hp, (unsigned int)battle_config.max_hp);
+			if( sd->status.base_level < 100 )
+				status->max_hp = umin(status->max_hp, (unsigned int)battle_config.max_hp_lv99);
+			else if( sd->status.base_level < 151 )
+				status->max_hp = umin(status->max_hp, (unsigned int)battle_config.max_hp_lv150);
+			else
+				status->max_hp = umin(status->max_hp, (unsigned int)battle_config.max_hp);
 		} else
 			status->max_hp = status_calc_maxhp(bl, b_status->max_hp);
 
@@ -8563,7 +8573,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			break;
 		case SC__STRIPACCESSORY:
 			if( sd ) {
-				short i;
+				short i = -1;
 
 				if( pc_ismadogear(sd) )
 					return 0;
@@ -9367,19 +9377,19 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				}
 				break;
 			case SC_STRIPWEAPON:
-				if( !sd ) //Watk reduction
+				if( bl->type != BL_PC ) //Watk reduction
 					val2 = 25;
 				break;
 			case SC_STRIPSHIELD:
-				if( !sd ) //Def reduction
+				if( bl->type != BL_PC ) //Def reduction
 					val2 = 15;
 				break;
 			case SC_STRIPARMOR:
-				if( !sd ) //Vit reduction
+				if( bl->type != BL_PC ) //Vit reduction
 					val2 = 40;
 				break;
 			case SC_STRIPHELM:
-				if( !sd ) //Int reduction
+				if( bl->type != BL_PC ) //Int reduction
 					val2 = 40;
 				break;
 			case SC_AUTOSPELL:
@@ -10216,9 +10226,6 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 						pet_menu(sd,3);
 					if( hom_is_active(sd->hd) )
 						hom_vaporize(sd,HOM_ST_ACTIVE);
-					//if( sd->md ) //Info shows nothing about Merc being removed. Probely true since their not a animal [Rytech]
-						//mercenary_delete(sd->md,3);
-					//Are rental mounts stripped as well? Well find out once I add them in
 				}
 				break;
 			case SC__LAZINESS:
@@ -10230,12 +10237,19 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC__WEAKNESS:
 				val2 = 10 * val1; //MaxHP Reduction
-				//Bypasses coating protection and MADO
-				sc_start(src,bl,SC_STRIPWEAPON,100,val1,tick);
-				sc_start(src,bl,SC_STRIPSHIELD,100,val1,tick);
+				clif_status_load(bl,SI_NOEQUIPWEAPON,1);
+				clif_status_load(bl,SI_NOEQUIPSHIELD,1);
+				if( sd ) {
+					short i = -1;
+
+					if( (i = sd->equip_index[EQI_HAND_R]) >= 0 && sd->inventory_data[i] )
+						pc_unequipitem(sd,i,1|2);
+					if( (i = sd->equip_index[EQI_HAND_L]) >= 0 && sd->inventory_data[i] )
+						pc_unequipitem(sd,i,1|2);
+				}
 				break;
 			case SC__STRIPACCESSORY:
-				if( !sd )
+				if( bl->type != BL_PC )
 					val2 = 20;
 				break;
 			case SC_GN_CARTBOOST:
@@ -12100,6 +12114,10 @@ int status_change_end_(struct block_list *bl, enum sc_type type, int tid, const 
 					s_sd->shadowform_id = 0;
 				status_change_end(bl,SC_ENDURE,INVALID_TIMER);
 			}
+			break;
+		case SC__WEAKNESS:
+			clif_status_load(bl,SI_NOEQUIPWEAPON,0);
+			clif_status_load(bl,SI_NOEQUIPSHIELD,0);
 			break;
 		case SC_CURSEDCIRCLE_ATKER:
 			if (sce->val2) //Used area size because there is a chance the caster could knock back and can't clear the target

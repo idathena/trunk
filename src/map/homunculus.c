@@ -1210,7 +1210,7 @@ void hom_init_timers(struct homun_data * hd)
  */
 bool hom_call(struct map_session_data *sd)
 {
-	struct homun_data *hd;
+	struct homun_data *hd = NULL;
 
 	if (!sd->status.hom_id) //Create a new homun
 		return hom_create_request(sd, HM_CLASS_BASE + rnd_value(0, 7));
