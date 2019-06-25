@@ -488,7 +488,7 @@ int elemental_change_mode_ack(struct elemental_data *ed, enum elemental_mode mod
 	if( !bl || mode == EL_MODE_WAIT || mode == EL_MODE_OFFENSIVE )
 		return 0;
 
-	ARR_FIND(1, MAX_EL_SKILL, i, ed->skill[mode][i].id == 0);
+	ARR_FIND(0, MAX_EL_SKILL, i, ed->skill[mode][i].id == 0);
 
 	if( (i--) > 0 )
 		i = rnd_value(0, i);

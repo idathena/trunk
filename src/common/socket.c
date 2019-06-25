@@ -245,7 +245,7 @@ struct socket_data* session[FD_SETSIZE];
 
 #ifdef SEND_SHORTLIST
 int send_shortlist_array[FD_SETSIZE];// we only support FD_SETSIZE sockets, limit the array to that
-int send_shortlist_count = 0;// how many fd's are in the shortlist
+size_t send_shortlist_count = 0;// how many fd's are in the shortlist
 uint32 send_shortlist_set[(FD_SETSIZE+31)/32];// to know if specific fd's are already in the shortlist
 #endif
 
@@ -321,10 +321,10 @@ void setsocketopts(int fd,int delay_timeout){
 		timeout.tv_sec = delay_timeout;
 		timeout.tv_usec = 0;
 
-		if (sSetsockopt (fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
-			ShowError("setsocketopts: Unable to set SO_RCVTIMEO timeout for connection #%d!\n");
-		if (sSetsockopt (fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
-			ShowError("setsocketopts: Unable to set SO_SNDTIMEO timeout for connection #%d!\n");
+		if (sSetsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
+			ShowError("setsocketopts: Unable to set SO_RCVTIMEO timeout for connection #%d!\n", fd);
+		if (sSetsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,sizeof(timeout)) < 0)
+			ShowError("setsocketopts: Unable to set SO_SNDTIMEO timeout for connection #%d!\n", fd);
 	}
 }
 
@@ -672,7 +672,7 @@ int RFIFOSKIP(int fd, size_t len)
 	s = session[fd];
 
 	if( s->rdata_size < s->rdata_pos + len ) {
-		ShowError("RFIFOSKIP: skipped past end of read buffer! Adjusting from %d to %d (session #%d)\n", len, RFIFOREST(fd), fd);
+		ShowError("RFIFOSKIP: skipped past end of read buffer! Adjusting from %" PRIuPTR " to %d (session #%d)\n", len, RFIFOREST(fd), fd);
 		len = RFIFOREST(fd);
 	}
 
@@ -721,7 +721,7 @@ int WFIFOSET(int fd, size_t len)
 	if( !s->flag.server ) {
 
 		if( len > socket_max_client_packet ) {// see declaration of socket_max_client_packet for details
-			ShowError("WFIFOSET: Dropped too large client packet 0x%04x (length=%u, max=%u).\n", WFIFOW(fd,0), len, socket_max_client_packet);
+			ShowError("WFIFOSET: Dropped too large client packet 0x%04x (length=%" PRIuPTR ", max=%" PRIuPTR ").\n", WFIFOW(fd,0), len, socket_max_client_packet);
 			return 0;
 		}
 
@@ -1309,7 +1309,7 @@ int socket_getips(uint32* ips, int max)
 
 void socket_init(void)
 {
-	char *SOCKET_CONF_FILENAME = "conf/packet_athena.conf";
+	const char *SOCKET_CONF_FILENAME = "conf/packet_athena.conf";
 	unsigned int rlim_cur = FD_SETSIZE;
 
 #ifdef WIN32
@@ -1508,7 +1508,7 @@ void send_shortlist_add_fd(int fd)
 
 	if( send_shortlist_count >= ARRAYLENGTH(send_shortlist_array) )
 	{
-		ShowDebug("send_shortlist_add_fd: shortlist is full, ignoring... (fd=%d shortlist.count=%d shortlist.length=%d)\n", fd, send_shortlist_count, ARRAYLENGTH(send_shortlist_array));
+		ShowDebug("send_shortlist_add_fd: shortlist is full, ignoring... (fd=%d shortlist.count=%" PRIuPTR " shortlist.length=%d)\n", fd, send_shortlist_count, ARRAYLENGTH(send_shortlist_array));
 		return;
 	}
 

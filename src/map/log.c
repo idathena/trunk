@@ -173,14 +173,8 @@ void log_branch(struct map_session_data *sd)
 		return;
 
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry, LOG_QUERY " INTO `%s` (`branch_date`, `account_id`, `char_id`, `char_name`, `map`) VALUES (NOW(), '%d', '%d', '%s', '%s')", log_config.log_branch, sd->status.account_id, sd->status.char_id, sd->status.name, mapindex_id2name(sd->mapindex));
-		queryThread_log(entry, e_length);
-#else
 		SqlStmt *stmt;
+
 		stmt = SqlStmt_Malloc(logmysql_handle);
 		if( SQL_SUCCESS != SqlStmt_Prepare(stmt, LOG_QUERY " INTO `%s` (`branch_date`, `account_id`, `char_id`, `char_name`, `map`) VALUES (NOW(), '%d', '%d', ?, '%s')", log_config.log_branch, sd->status.account_id, sd->status.char_id, mapindex_id2name(sd->mapindex) )
 		||  SQL_SUCCESS != SqlStmt_BindParam(stmt, 0, SQLDT_STRING, sd->status.name, strnlen(sd->status.name, NAME_LENGTH))
@@ -191,7 +185,6 @@ void log_branch(struct map_session_data *sd)
 			return;
 		}
 		SqlStmt_Free(stmt);
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;
@@ -219,14 +212,6 @@ void log_pick(int id, int16 m, e_log_pick_type type, int amount, struct item *it
 		return; //we skip logging this item set - it doesn't meet our logging conditions [Lupus]
 
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry, LOG_QUERY " INTO `%s` (`time`, `char_id`, `type`, `nameid`, `amount`, `refine`, `card0`, `card1`, `card2`, `card3`, `map`, `unique_id`, `bound`) VALUES (NOW(), '%d', '%c', '%hu', '%d', '%d', '%hu', '%hu', '%hu', '%hu', '%s', '%"PRIu64"', '%d')",
-			log_config.log_pick, id, log_picktype2char(type), itm->nameid, amount, itm->refine, itm->card[0], itm->card[1], itm->card[2], itm->card[3], (map[m].name[0] ? map[m].name : ""), itm->unique_id, itm->bound);
-		queryThread_log(entry, e_length);
-#else
 		int i;
 		SqlStmt *stmt = SqlStmt_Malloc(logmysql_handle);
 		StringBuf buf;
@@ -254,7 +239,6 @@ void log_pick(int id, int16 m, e_log_pick_type type, int amount, struct item *it
 
 		SqlStmt_Free(stmt);
 		StringBuf_Destroy(&buf);
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;
@@ -293,21 +277,12 @@ void log_zeny(struct map_session_data *sd, e_log_pick_type type, struct map_sess
 		return;
 
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry,  LOG_QUERY " INTO `%s` (`time`, `char_id`, `src_id`, `type`, `amount`, `map`) VALUES (NOW(), '%d', '%d', '%c', '%d', '%s')",
-				log_config.log_zeny, sd->status.char_id, src_sd->status.char_id, log_picktype2char(type), amount, mapindex_id2name(sd->mapindex));
-		queryThread_log(entry, e_length);
-#else
 		if( SQL_ERROR == Sql_Query(logmysql_handle, LOG_QUERY " INTO `%s` (`time`, `char_id`, `src_id`, `type`, `amount`, `map`) VALUES (NOW(), '%d', '%d', '%c', '%d', '%s')",
 			log_config.log_zeny, sd->status.char_id, src_sd->status.char_id, log_picktype2char(type), amount, mapindex_id2name(sd->mapindex)) )
 		{
 			Sql_ShowDebug(logmysql_handle);
 			return;
 		}
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;
@@ -332,21 +307,12 @@ void log_mvpdrop(struct map_session_data *sd, int monster_id, unsigned int *log_
 		return;
 
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry,  LOG_QUERY " INTO `%s` (`mvp_date`, `kill_char_id`, `monster_id`, `prize`, `mvpexp`, `map`) VALUES (NOW(), '%d', '%d', '%hu', '%d', '%s') ",
-			log_config.log_mvpdrop, sd->status.char_id, monster_id, (unsigned short)log_mvp[0], log_mvp[1], mapindex_id2name(sd->mapindex));
-		queryThread_log(entry, e_length);
-#else
 		if( SQL_ERROR == Sql_Query(logmysql_handle, LOG_QUERY " INTO `%s` (`mvp_date`, `kill_char_id`, `monster_id`, `prize`, `mvpexp`, `map`) VALUES (NOW(), '%d', '%d', '%hu', '%d', '%s') ",
 			log_config.log_mvpdrop, sd->status.char_id, monster_id, (unsigned short)log_mvp[0], log_mvp[1], mapindex_id2name(sd->mapindex)) )
 		{
 			Sql_ShowDebug(logmysql_handle);
 			return;
 		}
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;
@@ -372,13 +338,6 @@ void log_atcommand(struct map_session_data *sd, const char *message)
 		return;
 
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry,  LOG_QUERY " INTO `%s` (`atcommand_date`, `account_id`, `char_id`, `char_name`, `map`, `command`) VALUES (NOW(), '%d', '%d', '%s', '%s', '%s')", log_config.log_gm, sd->status.account_id, sd->status.char_id, sd->status.name ,mapindex_id2name(sd->mapindex), message);
-		queryThread_log(entry, e_length);
-#else
 		SqlStmt *stmt;
 
 		stmt = SqlStmt_Malloc(logmysql_handle);
@@ -392,7 +351,6 @@ void log_atcommand(struct map_session_data *sd, const char *message)
 			return;
 		}
 		SqlStmt_Free(stmt);
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;
@@ -417,14 +375,8 @@ void log_npc(struct map_session_data *sd, const char *message)
 		return;
 
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry, LOG_QUERY " INTO `%s` (`npc_date`, `account_id`, `char_id`, `char_name`, `map`, `mes`) VALUES (NOW(), '%d', '%d', '%s', '%s', '%s')", log_config.log_npc, sd->status.account_id, sd->status.char_id, sd->status.name, mapindex_id2name(sd->mapindex), message);
-		queryThread_log(entry, e_length);
-#else
 		SqlStmt *stmt;
+
 		stmt = SqlStmt_Malloc(logmysql_handle);
 		if( SQL_SUCCESS != SqlStmt_Prepare(stmt, LOG_QUERY " INTO `%s` (`npc_date`, `account_id`, `char_id`, `char_name`, `map`, `mes`) VALUES (NOW(), '%d', '%d', ?, '%s', ?)", log_config.log_npc, sd->status.account_id, sd->status.char_id, mapindex_id2name(sd->mapindex) )
 		||  SQL_SUCCESS != SqlStmt_BindParam(stmt, 0, SQLDT_STRING, sd->status.name, strnlen(sd->status.name, NAME_LENGTH))
@@ -436,7 +388,6 @@ void log_npc(struct map_session_data *sd, const char *message)
 			return;
 		}
 		SqlStmt_Free(stmt);
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;
@@ -460,13 +411,6 @@ void log_npc2(struct npc_data *nd, const char *message) {
 		return;
 
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry, LOG_QUERY " INTO `%s` (`npc_date`, `char_name`, `map`, `mes`) VALUES (NOW(), '%s', '%s', '%s')", log_config.log_npc, nd->name, map_mapid2mapname(nd->bl.m), message);
-		queryThread_log(entry, e_length);
-#else
 		SqlStmt *stmt;
 
 		stmt = SqlStmt_Malloc(logmysql_handle);
@@ -480,7 +424,6 @@ void log_npc2(struct npc_data *nd, const char *message) {
 			return;
 		}
 		SqlStmt_Free(stmt);
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;
@@ -506,13 +449,6 @@ void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, 
 		return;
 
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry, LOG_QUERY " INTO `%s` (`time`, `type`, `type_id`, `src_charid`, `src_accountid`, `src_map`, `src_map_x`, `src_map_y`, `dst_charname`, `message`) VALUES (NOW(), '%c', '%d', '%d', '%d', '%s', '%d', '%d', '%s', '%s')", log_config.log_chat, log_chattype2char(type), type_id, src_charid, src_accid, mapname, x, y, dst_charname, message);
-		queryThread_log(entry, e_length);
-#else
 		SqlStmt *stmt;
 
 		stmt = SqlStmt_Malloc(logmysql_handle);
@@ -526,7 +462,6 @@ void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, 
 			return;
 		}
 		SqlStmt_Free(stmt);
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;
@@ -550,21 +485,12 @@ void log_cash(struct map_session_data *sd, e_log_pick_type type, e_log_cash_type
 		return;
 
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry,  LOG_QUERY " INTO `%s` (`time`, `char_id`, `type`, `cash_type`, `amount`, `map`) VALUES (NOW(), '%d', '%c', '%c', '%d', '%s')",
-			log_config.log_cash, sd->status.char_id, log_picktype2char(type), log_cashtype2char(cash_type), amount, mapindex_id2name(sd->mapindex));
-		queryThread_log(entry, e_length);
-#else
 		if( SQL_ERROR == Sql_Query(logmysql_handle, LOG_QUERY " INTO `%s` (`time`, `char_id`, `type`, `cash_type`, `amount`, `map`) VALUES (NOW(), '%d', '%c', '%c', '%d', '%s')",
 			log_config.log_cash, sd->status.char_id, log_picktype2char(type), log_cashtype2char(cash_type), amount, mapindex_id2name(sd->mapindex)) )
 		{
 			Sql_ShowDebug(logmysql_handle);
 			return;
 		}
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;
@@ -612,21 +538,12 @@ void log_feeding(struct map_session_data *sd, e_log_feeding_type type, unsigned 
 			break;
 	}
 	if( log_config.sql_logs ) {
-#ifdef BETA_THREAD_TEST
-		char entry[512];
-		int e_length = 0;
-
-		e_length = sprintf(entry, LOG_QUERY " INTO `%s` (`time`, `char_id`, `target_id`, `target_class`, `type`, `intimacy`, `item_id`, `map`, `x`, `y`) VALUES ( NOW(), '%"PRIu32"', '%"PRIu32"', '%hu', '%c', '%"PRIu32"', '%hu', '%s', '%hu', '%hu' )",
-			log_config.log_feeding, sd->status.char_id, target_id, target_class, log_feedingtype2char(type), intimacy, nameid, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y);
-		queryThread_log(entry, e_length);
-#else
 		if( SQL_ERROR == Sql_Query(logmysql_handle, LOG_QUERY " INTO `%s` (`time`, `char_id`, `target_id`, `target_class`, `type`, `intimacy`, `item_id`, `map`, `x`, `y`) VALUES ( NOW(), '%"PRIu32"', '%"PRIu32"', '%hu', '%c', '%"PRIu32"', '%hu', '%s', '%hu', '%hu' )",
 			log_config.log_feeding, sd->status.char_id, target_id, target_class, log_feedingtype2char(type), intimacy, nameid, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y) )
 		{
 			Sql_ShowDebug(logmysql_handle);
 			return;
 		}
-#endif
 	} else {
 		char timestring[255];
 		time_t curtime;

@@ -175,7 +175,7 @@ static void *ers_obj_alloc_entry(ERS self)
 	else if (instance->Cache->Free > 0) 
 	{
 		instance->Cache->Free--;
-		ret = &instance->Cache->Blocks[instance->Cache->Used - 1][instance->Cache->Free * instance->Cache->ObjectSize + sizeof(struct ers_list)];
+		ret = &instance->Cache->Blocks[instance->Cache->Used - 1][(uint64)(instance->Cache->Free * instance->Cache->ObjectSize) + sizeof(struct ers_list)];
 	} 
 	else 
 	{

@@ -6,7 +6,7 @@
 
 struct s_mercenary;
 
-int inter_mercenary_sql_init(void);
+void inter_mercenary_sql_init(void);
 void inter_mercenary_sql_final(void);
 int inter_mercenary_parse_frommap(int fd);
 

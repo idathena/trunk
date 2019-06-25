@@ -2915,11 +2915,11 @@ static struct Damage battle_calc_attack_masteries(struct Damage wd, struct block
 			if(skill_id != MC_CARTREVOLUTION && pc_checkskill(sd, BS_HILTBINDING) > 0)
 				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, 4);
 			if(skill_id != CR_SHIELDBOOMERANG)
-				ATK_ADD2(wd.masteryAtk, wd.masteryAtk2, div_ * sd->right_weapon.star, div_ * sd->left_weapon.star);
+				ATK_ADD2(wd.masteryAtk, wd.masteryAtk2, (int64)div_ * sd->right_weapon.star, (int64)div_ * sd->left_weapon.star);
 			if(skill_id == MO_FINGEROFFENSIVE) {
-				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, div_ * sd->spiritball_old * 3);
+				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, (int64)div_ * sd->spiritball_old * 3);
 			} else
-				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, div_ * sd->spiritball * 3);
+				ATK_ADD(wd.masteryAtk, wd.masteryAtk2, (int64)div_ * sd->spiritball * 3);
 			if(!skill_id && sd->status.party_id && (lv = pc_checkskill(sd, TK_POWER)) > 0) { //Doesn't increase skill damage in renewal [exneval]
 				int members = party_foreachsamemap(party_sub_count, sd, 0);
 
@@ -3176,7 +3176,7 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 		case RK_DRAGONBREATH:
 		case RK_DRAGONBREATH_WATER:
 			{
-				int64 damagevalue = (sstatus->hp / 50 + status_get_max_sp(src) / 4) * skill_lv;
+				int64 damagevalue = (int64)(sstatus->hp / 50 + status_get_max_sp(src) / 4) * skill_lv;
 
 				if(status_get_lv(src) > 100)
 					damagevalue = damagevalue * status_get_lv(src) / 150;
@@ -3188,7 +3188,7 @@ struct Damage battle_calc_skill_base_damage(struct Damage wd, struct block_list 
 			}
 			break;
 		case NC_SELFDESTRUCTION: {
-				int64 damagevalue = (skill_lv + 1) * ((sd ? pc_checkskill(sd,NC_MAINFRAME) : 4) + 8) * (status_get_sp(src) + sstatus->vit);
+				int64 damagevalue = (int64)(skill_lv + 1) * ((sd ? pc_checkskill(sd,NC_MAINFRAME) : 4) + 8) * (status_get_sp(src) + sstatus->vit);
 
 				if(status_get_lv(src) > 100)
 					damagevalue = damagevalue * status_get_lv(src) / 100;
@@ -4596,9 +4596,9 @@ struct Damage battle_attack_sc_bonus(struct Damage wd, struct block_list *src, s
 			((sd->class_&MAPID_THIRDMASK) == MAPID_RANGER ||
 			(sd->class_&MAPID_THIRDMASK) == MAPID_MINSTRELWANDERER))
 		{
-			ATK_ADD(wd.damage, wd.damage2, 2 * sce->val1 * skill_chorus_count(sd,1));
+			ATK_ADD(wd.damage, wd.damage2, (int64)2 * sce->val1 * skill_chorus_count(sd,1));
 #ifdef RENEWAL
-			ATK_ADD(wd.equipAtk, wd.equipAtk2, 2 * sce->val1 * skill_chorus_count(sd,1));
+			ATK_ADD(wd.equipAtk, wd.equipAtk2, (int64)2 * sce->val1 * skill_chorus_count(sd,1));
 #endif
 		}
 		if((sce = sc->data[SC_SATURDAYNIGHTFEVER])) {
@@ -5634,7 +5634,7 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 			}
 			break;
 		case SR_FALLENEMPIRE:
-			ATK_ADD(wd.damage, wd.damage2, ((tstatus->size + 1) * 2 + (skill_lv - 1)) * sstatus->str);
+			ATK_ADD(wd.damage, wd.damage2, (int64)((tstatus->size + 1) * 2 + (skill_lv - 1)) * sstatus->str);
 			if(tsd && tsd->weight) {
 				ATK_ADD(wd.damage, wd.damage2, tsd->weight / 10 * sstatus->dex / 120);
 			} else
@@ -5665,11 +5665,11 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 		if((lv = pc_checkskill(sd, BS_WEAPONRESEARCH)) > 0)
 			ATK_ADD(wd.damage, wd.damage2, lv * 2);
 		if(skill_id != CR_SHIELDBOOMERANG) //Only Shield Boomerang doesn't takes the star crumb bonus
-			ATK_ADD2(wd.damage, wd.damage2, div_ * sd->right_weapon.star, div_ * sd->left_weapon.star);
+			ATK_ADD2(wd.damage, wd.damage2, (int64)div_ * sd->right_weapon.star, (int64)div_ * sd->left_weapon.star);
 		if(skill_id == MO_FINGEROFFENSIVE) { //The finger offensive spheres on moment of attack do count [Skotlex]
-			ATK_ADD(wd.damage, wd.damage2, div_ * sd->spiritball_old * 3);
+			ATK_ADD(wd.damage, wd.damage2, (int64)div_ * sd->spiritball_old * 3);
 		} else
-			ATK_ADD(wd.damage, wd.damage2, div_ * sd->spiritball * 3);
+			ATK_ADD(wd.damage, wd.damage2, (int64)div_ * sd->spiritball * 3);
 	}
 #endif
 
@@ -5931,7 +5931,7 @@ struct Damage battle_calc_magic_attack(struct block_list *src, struct block_list
 				break;
 			case NPC_ICEMINE:
 			case NPC_FLAMECROSS:
-				ad.damage = sstatus->rhw.atk * 20 * skill_lv;
+				ad.damage = (int64)sstatus->rhw.atk * 20 * skill_lv;
 				break;
 			default:
 				MATK_ADD(status_get_matk(src, 2));

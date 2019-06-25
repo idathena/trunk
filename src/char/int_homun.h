@@ -6,7 +6,7 @@
 
 struct s_homunculus;
 
-int inter_homunculus_sql_init(void);
+void inter_homunculus_sql_init(void);
 void inter_homunculus_sql_final(void);
 int inter_homunculus_parse_frommap(int fd);
 

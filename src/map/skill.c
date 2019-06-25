@@ -1904,8 +1904,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	if( sd && !status_isdead(bl) && sd->autospell[0].id ) {
 		struct block_list *tbl;
 		struct unit_data *ud;
-		uint16 as_skill_id;
-		uint16 as_skill_lv;
+		int16 as_skill_id, as_skill_lv;
 		int i, type;
 
 		for( i = 0; i < ARRAYLENGTH(sd->autospell) && sd->autospell[i].id; i++ ) {
@@ -2016,8 +2015,7 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 		return 0;
 
 	for( i = 0; i < ARRAYLENGTH(sd->autospell3) && sd->autospell3[i].flag; i++ ) {
-		uint16 as_skill_id;
-		uint16 as_skill_lv;
+		int16 as_skill_id, as_skill_lv;
 		int type;
 
 		if( sd->autospell3[i].flag != skill_id )
@@ -2026,10 +2024,10 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 		if( sd->autospell3[i].lock )
 			continue; //Autospell already being executed
 
-		as_skill_id = sd->autospell3[i].id;
+		as_skill_id = (sd->autospell3[i].id > 0 ? sd->autospell3[i].id : -sd->autospell3[i].id);
 		sd->state.autocast = 1; //Set this to bypass sd->canskill_tick check
 
-		if( skill_isNotOk((as_skill_id > 0 ? as_skill_id : as_skill_id * -1), sd) ) {
+		if( skill_isNotOk(as_skill_id,sd) ) {
 			sd->state.autocast = 0;
 			continue;
 		}
@@ -2223,8 +2221,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 			struct block_list *tbl;
 			struct unit_data *ud;
 			int i, type;
-			uint16 as_skill_id;
-			uint16 as_skill_lv;
+			int16 as_skill_id, as_skill_lv;
 
 			for(i = 0; i < ARRAYLENGTH(dstsd->autospell2) && dstsd->autospell2[i].id; i++) {
 				if(!(((dstsd->autospell2[i].flag)&attack_type)&BF_WEAPONMASK &&

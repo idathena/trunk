@@ -2951,13 +2951,14 @@ static void pc_bonus_subele(struct map_session_data *sd, unsigned char ele, shor
 	sd->subele2[i].flag = flag;
 }
 
-/** Add item group heal rate bonus to player
+/**
+ * Add item group heal rate bonus to player
  * @param sd Player
  * @param group_id Item Group ID
  * @param rate
  * @author Cydh
  */
-void pc_itemgrouphealrate(struct map_session_data *sd, uint16 group_id, short rate) {
+void pc_itemgrouphealrate_add(struct map_session_data *sd, uint16 group_id, short rate) {
 	struct s_pc_itemgrouphealrate *entry;
 	uint8 i;
 
@@ -2972,7 +2973,7 @@ void pc_itemgrouphealrate(struct map_session_data *sd, uint16 group_id, short ra
 	}
 
 	if (i >= UINT8_MAX) {
-		ShowError("pc_itemgrouphealrate_add: Reached max (%d) possible bonuses for this player %d\n", UINT8_MAX);
+		ShowError("pc_itemgrouphealrate_add: Reached max (%d) possible bonuses for player '%s' (%d:%d)\n", UINT8_MAX, sd->status.name, sd->status.account_id, sd->status.char_id);
 		return;
 	}
 
@@ -2984,7 +2985,8 @@ void pc_itemgrouphealrate(struct map_session_data *sd, uint16 group_id, short ra
 	sd->itemgrouphealrate[sd->itemgrouphealrate_count++] = entry;
 }
 
-/** Clear item group heal rate from player
+/**
+ * Clear item group heal rate from player
  * @param sd Player
  * @author Cydh
  */
@@ -4067,7 +4069,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				ShowError("pc_bonus2: SP_ADD_ITEMGROUP_HEAL_RATE: Invalid item group with id %d\n", type2);
 				break;
 			}
-			pc_itemgrouphealrate(sd, type2, val);
+			pc_itemgrouphealrate_add(sd, type2, val);
 			break;
 		case SP_EXP_ADDRACE:
 			PC_BONUS_CHK_RACE(type2, SP_EXP_ADDRACE);
@@ -11929,7 +11931,7 @@ static bool pc_readdb_job_noenter_map(char *str[], int columns, int current) {
 		}
 	}
 	if(!pcdb_checkid(class_) || (idx = pc_class2idx(class_)) < 0) {
-		ShowError("pc_readdb_job_noenter_map: Invalid job %d specified.\n", str[0]);
+		ShowError("pc_readdb_job_noenter_map: Invalid job %s specified.\n", str[0]);
 		return false;
 	}
 	job_info[idx].noenter_map.zone = atoi(str[1]);
@@ -12445,9 +12447,9 @@ uint8 pc_itemcd_check(struct map_session_data *sd, struct item_data *id, unsigne
  * @param md
  */
 static void pc_clear_log_damage_sub(int char_id, struct mob_data *md) {
-	uint8 i;
+	uint8 i = 0;
 
-	ARR_FIND(0,DAMAGELOG_SIZE,i,md->dmglog[i].id == char_id);
+	ARR_FIND(0, DAMAGELOG_SIZE, i, md->dmglog[i].id == char_id);
 	if( i < DAMAGELOG_SIZE ) {
 		md->dmglog[i].id = 0;
 		md->dmglog[i].dmg = 0;
@@ -12463,14 +12465,17 @@ static void pc_clear_log_damage_sub(int char_id, struct mob_data *md) {
 void pc_damage_log_add(struct map_session_data *sd, int id) {
 	uint8 i = 0;
 
-	if( !sd )
+	if( !sd || !id )
 		return;
 	//Only store new data, don't need to renew the old one with same id
-	for( i = 0; i < DAMAGELOG_SIZE_PC; i++ ) {
-		if( sd->dmglog[i] == id )
-			return;
-		sd->dmglog[i] = id;
+	ARR_FIND(0, DAMAGELOG_SIZE, i, sd->dmglog[i] == id);
+	if( i < DAMAGELOG_SIZE_PC )
 		return;
+	for( i = 0; i < DAMAGELOG_SIZE_PC; i++ ) {
+		if( sd->dmglog[i] == 0 ) {
+			sd->dmglog[i] = id;
+			return;
+		}
 	}
 }
 
@@ -12480,8 +12485,8 @@ void pc_damage_log_add(struct map_session_data *sd, int id) {
  * @param id Monster's id
  */
 void pc_damage_log_clear(struct map_session_data *sd, int id) {
-	int i;
 	struct mob_data *md = NULL;
+	uint8 i = 0;
 
 	if( !sd )
 		return;
@@ -12489,16 +12494,14 @@ void pc_damage_log_clear(struct map_session_data *sd, int id) {
 		for( i = 0; i < DAMAGELOG_SIZE_PC; i++ ) {
 			if( !sd->dmglog[i] ) //Skip the empty value
 				continue;
-
 			if( (md = map_id2md(sd->dmglog[i])) )
-				pc_clear_log_damage_sub(sd->status.char_id,md);
+				pc_clear_log_damage_sub(sd->status.char_id, md);
 			sd->dmglog[i] = 0;
 		}
 	} else {
 		if( (md = map_id2md(id)) )
 			pc_clear_log_damage_sub(sd->status.char_id,md);
-
-		ARR_FIND(0,DAMAGELOG_SIZE_PC,i,sd->dmglog[i] == id); //Find the id position
+		ARR_FIND(0, DAMAGELOG_SIZE_PC, i, sd->dmglog[i] == id); //Find the id position
 		if( i < DAMAGELOG_SIZE_PC )
 			sd->dmglog[i] = 0;
 	}
@@ -12857,7 +12860,7 @@ TIMER_FUNC(pc_bonus_script_timer) {
 	if (tid == INVALID_TIMER)
 		return 0;
 	if (!sd->bonus_script.head || entry == NULL) {
-		ShowError("pc_bonus_script_timer: Invalid entry pointer 0x%08X!\n",entry);
+		ShowError("pc_bonus_script_timer: Invalid entry pointer %p!\n",entry);
 		return 0;
 	}
 	linkdb_erase(&sd->bonus_script.head,(void *)((intptr_t)entry));

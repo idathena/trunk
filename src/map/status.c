@@ -6685,21 +6685,21 @@ short status_calc_aspd(struct block_list *bl, struct status_change *sc, bool fix
 		enum sc_type sc_val;
 
 		if(!sc->data[SC_QUAGMIRE]) {
-			struct status_change_entry *sce;
+			struct status_change_entry *sce = NULL;
 
 			if((sc->data[SC_TWOHANDQUICKEN] ||
 				sc->data[SC_ONEHAND] ||
 				sc->data[SC_MERC_QUICKEN] ||
-				sc->data[SC_SPEARQUICKEN]) && bonus < 7)
+				sc->data[SC_SPEARQUICKEN]))
 				bonus = 7;
-			else if(((sce = sc->data[SC_ADRENALINE]) || (sce = sc->data[SC_ADRENALINE2])) && bonus < (sce->val2 ? 7 : 6))
+			else if(((sce = sc->data[SC_ADRENALINE]) || (sce = sc->data[SC_ADRENALINE2])))
 				bonus = (sce->val2 ? 7 : 6);
-			else if(sc->data[SC_FLEET] && bonus < 5)
+			else if(sc->data[SC_FLEET])
 				bonus = 5;
 		}
-		if(sc->data[SC_MADNESSCANCEL] && bonus < 20)
+		if(sc->data[SC_MADNESSCANCEL])
 			bonus = 20;
-		else if(sc->data[SC_BERSERK] && bonus < 15)
+		else if(sc->data[SC_BERSERK])
 			bonus = 15;
 		if(sc->data[sc_val = SC_ASPDPOTION3] ||
 			sc->data[sc_val = SC_ASPDPOTION2] ||
@@ -6888,9 +6888,9 @@ short status_calc_aspd_rate(struct block_list *bl, struct status_change *sc, int
 		aspd_rate -= max;
 		//These stack with the rest of bonuses
 		max = 0;
-		if(sc->data[SC_BERSERK] && max < 300)
+		if(sc->data[SC_BERSERK])
 			max = 300;
-		if(sc->data[SC_MADNESSCANCEL] && max < 200)
+		else if(sc->data[SC_MADNESSCANCEL])
 			max = 200;
 		if(sc->data[SC_SWINGDANCE] && max < 10 * sc->data[SC_SWINGDANCE]->val3)
 			max = 10 * sc->data[SC_SWINGDANCE]->val3;
@@ -12546,12 +12546,12 @@ TIMER_FUNC(status_change_timer)
 	bool dounlock = false;
 
 	if( !(bl = map_id2bl(id)) ) {
-		ShowDebug("status_change_timer: Null pointer id: %d data: %d\n",id,data);
+		ShowDebug("status_change_timer: Null pointer id: %d data: %" PRIdPTR "\n",id,data);
 		return 0;
 	}
 
 	if( !(sc = status_get_sc(bl)) || !(sce = sc->data[type]) ) {
-		ShowDebug("status_change_timer: Null pointer id: %d data: %d bl-type: %d\n",id,data,bl->type);
+		ShowDebug("status_change_timer: Null pointer id: %d data: %" PRIdPTR " bl-type: %d\n",id,data,bl->type);
 		return 0;
 	}
 

@@ -700,8 +700,8 @@ static void questdb_free_sub(struct quest_db *quest, bool free) {
 		quest->dropitems = NULL;
 		quest->dropitem_count = 0;
 	}
-	if( &quest->name )
-		StringBuf_Destroy(&quest->name);
+	//if( &quest->name )
+	//	StringBuf_Destroy(&quest->name);
 	if( free )
 		aFree(quest);
 }

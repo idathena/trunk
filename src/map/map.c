@@ -2569,11 +2569,11 @@ int map_addinstancemap(const char *name, int id)
 	map[dst_m].npc_num = 0;
 
 	// Reallocate cells
-	num_cell = map[dst_m].xs * map[dst_m].ys;
+	num_cell = (size_t)map[dst_m].xs * map[dst_m].ys;
 	CREATE(map[dst_m].cell, struct mapcell, num_cell);
 	memcpy(map[dst_m].cell, map[src_m].cell, num_cell * sizeof(struct mapcell));
 
-	size = map[dst_m].bxs * map[dst_m].bys * sizeof(struct block_list *);
+	size = (size_t)(map[dst_m].bxs * map[dst_m].bys) * sizeof(struct block_list *);
 	map[dst_m].block = (struct block_list **)aCalloc(1,size);
 	map[dst_m].block_mob = (struct block_list **)aCalloc(1,size);
 
@@ -3587,9 +3587,9 @@ int map_readgat (struct map_data *m)
 	if (gat == NULL)
 		return 0;
 
-	m->xs = *(int32*)(gat+6);
-	m->ys = *(int32*)(gat+10);
-	num_cells = m->xs * m->ys;
+	m->xs = *(int32 *)(gat + 6);
+	m->ys = *(int32 *)(gat + 10);
+	num_cells = (size_t)m->xs * m->ys;
 	CREATE(m->cell, struct mapcell, num_cells);
 
 	water_height = map_waterheight(m->name);
@@ -3697,7 +3697,7 @@ int map_readallmaps (void)
 		map[i].bxs = (map[i].xs + BLOCK_SIZE - 1) / BLOCK_SIZE;
 		map[i].bys = (map[i].ys + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
-		size = map[i].bxs * map[i].bys * sizeof(struct block_list *);
+		size = (size_t)(map[i].bxs * map[i].bys) * sizeof(struct block_list *);
 		map[i].block = (struct block_list**)aCalloc(size, 1);
 		map[i].block_mob = (struct block_list**)aCalloc(size, 1);
 	}
@@ -4074,19 +4074,16 @@ int map_sql_close(void)
 	Sql_Free(qsmysql_handle);
 	mmysql_handle = NULL;
 	qsmysql_handle = NULL;
-#ifndef BETA_THREAD_TEST
 	if( log_config.sql_logs ) {
 		ShowStatus("Close Log DB Connection....\n");
 		Sql_Free(logmysql_handle);
 		logmysql_handle = NULL;
 	}
-#endif
 	return 0;
 }
 
 int log_sql_init(void)
 {
-#ifndef BETA_THREAD_TEST
 	// log db connection
 	logmysql_handle = Sql_Malloc();
 
@@ -4098,7 +4095,6 @@ int log_sql_init(void)
 	if( strlen(default_codepage) > 0 )
 		if ( SQL_ERROR == Sql_SetEncoding(logmysql_handle, default_codepage) )
 			Sql_ShowDebug(logmysql_handle);
-#endif
 	return 0;
 }
 

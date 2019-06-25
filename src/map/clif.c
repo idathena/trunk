@@ -8960,7 +8960,7 @@ void clif_guild_message(struct guild *g, int account_id, const char *mes, int le
 	if( !len )
 		return;
 	else if( len > sizeof(buf) - 5 ) {
-		ShowWarning("clif_guild_message: Truncated message '%s' (len=%d, max=%d, guild_id=%d).\n", mes, len, sizeof(buf) - 5, g->guild_id);
+		ShowWarning("clif_guild_message: Truncated message '%s' (len=%d, max=%" PRIuPTR ", guild_id=%d).\n", mes, len, sizeof(buf) - 5, g->guild_id);
 		len = sizeof(buf) - 5;
 	}
 
@@ -9215,7 +9215,7 @@ void clif_disp_message(struct block_list *src, const char *mes, int len, enum se
 	if( !len )
 		return;
 	else if( len > sizeof(buf) - 5 ) {
-		ShowWarning("clif_disp_message: Truncated message '%s' (len=%d, max=%d, aid=%d).\n", mes, len, sizeof(buf) - 5, src->id);
+		ShowWarning("clif_disp_message: Truncated message '%s' (len=%d, max=%" PRIuPTR ", aid=%d).\n", mes, len, sizeof(buf) - 5, src->id);
 		len = sizeof(buf) - 5;
 	}
 
@@ -12148,14 +12148,9 @@ void clif_parse_ChangeCart(int fd,struct map_session_data *sd)
 /// amount:
 ///     Old clients send always 1 for this, even when using /str+ and the like.
 ///     Newer clients (2013-12-23 and newer) send the correct amount.
-void clif_parse_StatusUp(int fd,struct map_session_data *sd)
+void clif_parse_StatusUp(int fd, struct map_session_data *sd)
 {
-	int increase_amount = RFIFOB(fd,packet_db[RFIFOW(fd,0)].pos[1]);
-
-	if( increase_amount < 0 )
-		ShowDebug("clif_parse_StatusUp: Negative 'increase' value sent by client! (fd: %d, value: %d)\n",fd,increase_amount);
-
-	pc_statusup(sd,RFIFOW(fd,packet_db[RFIFOW(fd,0)].pos[0]),increase_amount);
+	pc_statusup(sd, RFIFOW(fd,packet_db[RFIFOW(fd,0)].pos[0]), RFIFOB(fd,packet_db[RFIFOW(fd,0)].pos[1]));
 }
 
 
@@ -14053,7 +14048,7 @@ void clif_parse_pet_evolution(int fd, struct map_session_data *sd)
 {
 #if PACKETVER >= 20141008
 	struct s_packet_db *info;
-	uint16 petIndex;
+	int16 petIndex;
 
 	nullpo_retv(sd);
 
@@ -18705,7 +18700,7 @@ void clif_charmball(struct map_session_data *sd) {
 void clif_soulball(struct map_session_data *sd) {
 	unsigned char buf[8];
 
-	nullpo_ret(sd);
+	nullpo_retv(sd);
 
 	WBUFW(buf,0) = 0x1d0;
 	WBUFL(buf,2) = sd->bl.id;
@@ -19334,7 +19329,7 @@ void clif_showscript(struct block_list *bl, const char *message, enum send_targe
 	len = strlen(message) + 1;
 
 	if( len > sizeof(buf) - 8 ) {
-		ShowWarning("clif_showscript: Truncating too long message '%s' (len=%d).\n", message, len);
+		ShowWarning("clif_showscript: Truncating too long message '%s' (len=%" PRIuPTR ").\n", message, len);
 		len = sizeof(buf) - 8;
 	}
 
@@ -19358,7 +19353,7 @@ void clif_clan_message(struct clan *clan, const char *mes, int len) {
 	if( !len )
 		return;
 	else if( len > (sizeof(buf) - 5 - NAME_LENGTH) ) {
-		ShowWarning("clif_clan_message: Truncated message '%s' (len=%d, max=%d, clan_id=%d).\n", mes, len, sizeof(buf) - 5, clan->id);
+		ShowWarning("clif_clan_message: Truncated message '%s' (len=%d, max=%" PRIuPTR ", clan_id=%d).\n", mes, len, sizeof(buf) - 5, clan->id);
 		len = sizeof(buf) - 5 - NAME_LENGTH;
 	}
 
@@ -20927,7 +20922,7 @@ void clif_parse_refineui_add(int fd, struct map_session_data *sd) {
 		return;
 
 	//Check if the index is valid
-	if( index < 0 || index >= MAX_INVENTORY )
+	if( index >= MAX_INVENTORY )
 		return;
 
 	//Send out the requirements for the refine process
@@ -20943,13 +20938,12 @@ void clif_parse_refineui_add(int fd, struct map_session_data *sd) {
 void clif_parse_refineui_refine(int fd, struct map_session_data *sd) {
 #if PACKETVER >= 20161012
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
-
 	uint16 index = RFIFOW(fd,info->pos[0]) - 2;
 	uint16 material = RFIFOW(fd,info->pos[1]);
 	bool use_bs_blessing = (RFIFOB(fd,info->pos[2]) != 0);
 	struct s_refine_materials materials[REFINEUI_MAT_MAX];
 	uint8 i, material_count;
-	uint16 j;
+	int16 j;
 	struct item *item;
 	struct item_data *id;
 
@@ -20958,7 +20952,7 @@ void clif_parse_refineui_refine(int fd, struct map_session_data *sd) {
 		return;
 
 	//Check if the index is valid
-	if( index < 0 || index >= MAX_INVENTORY )
+	if( index >= MAX_INVENTORY )
 		return;
 
 	//Get the item db reference
@@ -21010,7 +21004,7 @@ void clif_parse_refineui_refine(int fd, struct map_session_data *sd) {
 	ARR_FIND(0, REFINEUI_MAT_MAX, i, materials[i].cost.nameid == material);
 
 	//The material was not in the list of possible materials
-	if( i >= REFINEUI_MAT_MAX || i < 0 )
+	if( i == REFINEUI_MAT_MAX )
 		return;
 
 	//Try to pay for the refine. By default, client checked if player has enough zeny or not
@@ -21244,7 +21238,7 @@ void clif_parse_equipswitch_remove(int fd, struct map_session_data *sd)
 		return;
 
 	//Check if the index is valid
-	if( index < 0 || index >= MAX_INVENTORY )
+	if( index >= MAX_INVENTORY )
 		return;
 
 	pc_equipswitch_remove(sd, index);
@@ -21357,7 +21351,7 @@ void clif_parse_equipswitch_request_single(int fd, struct map_session_data *sd)
 		return;
 
 	//Check if the index is valid
-	if( index < 0 || index >= MAX_INVENTORY )
+	if( index >= MAX_INVENTORY )
 		return;
 
 	if( !sd->inventory_data[index] )

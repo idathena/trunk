@@ -153,8 +153,7 @@ ACMD_FUNC(send)
 	long num;
 
 	// Read message type as hex number (without the 0x)
-	if(!message || !*message || !((sscanf(message, "len %x", &type) == 1 && (len = 1)) ||
-		sscanf(message, "%x", &type) == 1) ) {
+	if(!message || !*message || !((len = sscanf(message, "len %8x", &type)) == 1 || sscanf(message, "%8x", &type) == 1)) {
 		int i;
 
 		for(i = 900; i <= 903; ++i)

@@ -2051,7 +2051,7 @@ uint8 npc_selllist(struct map_session_data *sd, int n, unsigned short *item_list
 		idx = item_list[i * 2] - 2;
 		amount = item_list[i * 2 + 1];
 
-		if( idx < 0 || idx >= MAX_INVENTORY || amount < 0 )
+		if( idx < 0 || idx >= MAX_INVENTORY )
 			return 1;
 
 		nameid = sd->inventory.u.items_inventory[idx].nameid;
@@ -2080,7 +2080,7 @@ uint8 npc_selllist(struct map_session_data *sd, int n, unsigned short *item_list
 		idx = item_list[i * 2] - 2;
 		amount = item_list[i * 2 + 1];
 
-		if( idx < 0 || idx >= MAX_INVENTORY || amount < 0 )
+		if( idx < 0 || idx >= MAX_INVENTORY )
 			return 1;
 
 		nameid = sd->inventory.u.items_inventory[idx].nameid;
@@ -3872,9 +3872,7 @@ static const char *npc_parse_mob(char *w1, char *w2, char *w3, char *w4, const c
 	mob.y = (unsigned short)y;
 	mob.xs = (signed short)xs;
 	mob.ys = (signed short)ys;
-
-	if (mob_lv > 0 && mob_lv <= MAX_LEVEL)
-		mob.level = mob_lv;
+	mob.level = mob_lv;
 
 	if (CHK_MOBSIZE(size))
 		mob.state.size = size;
@@ -3882,12 +3880,10 @@ static const char *npc_parse_mob(char *w1, char *w2, char *w3, char *w4, const c
 	if (ai > AI_NONE && ai <= AI_MAX)
 		mob.state.ai = ai;
 
-	if (mob.num > 1 && battle_config.mob_count_rate != 100) {
-		if ((mob.num = mob.num * battle_config.mob_count_rate / 100) < 1)
-			mob.num = 1;
-	}
+	if (mob.num > 1 && battle_config.mob_count_rate != 100 && (mob.num = mob.num * battle_config.mob_count_rate / 100) < 1)
+		mob.num = 1;
 
-	if (battle_config.force_random_spawn || (mob.x == 0 && mob.y == 0)) { //Force a random spawn anywhere on the map
+	if (battle_config.force_random_spawn || (!mob.x && !mob.y)) { //Force a random spawn anywhere on the map
 		mob.x = mob.y = 0;
 		mob.xs = mob.ys = -1;
 	}
@@ -3978,7 +3974,7 @@ static const char *npc_parse_mapflag(char *w1, char *w2, char *w3, char *w4, con
 	}
 	m = map_mapname2mapid(mapname);
 	if (m < 0) {
-		ShowWarning("npc_parse_mapflag: Unknown map in file '%s', line '%d': %s\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n",mapname,filepath,strline(buffer,start - buffer),w1,w2,w3,w4);
+		ShowWarning("npc_parse_mapflag: Unknown map '%s' in file '%s', line '%d'.\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n",mapname,filepath,strline(buffer,start - buffer),w1,w2,w3,w4);
 		return strchr(start,'\n'); //Skip and continue
 	}
 
@@ -4468,7 +4464,7 @@ int npc_parsesrcfile(const char *filepath, bool runOnInit)
 			p = npc_parse_duplicate(w1, w2, w3, w4, p, buffer, filepath);
 		else if( (strcmpi(w2, "monster") == 0 || strcmpi(w2, "boss_monster") == 0) && count > 3 )
 			p = npc_parse_mob(w1, w2, w3, w4, p, buffer, filepath);
-		else if( strcmpi(w2, "mapflag") == 0 && count >= 3 )
+		else if( strcmpi(w2, "mapflag") == 0 )
 			p = npc_parse_mapflag(w1, w2, trim(w3), trim(w4), p, buffer, filepath);
 		else {
 			ShowError("npc_parsesrcfile: Unable to parse, probably a missing or extra TAB in file '%s', line '%d'. Skipping line...\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n", filepath, strline(buffer, p - buffer), w1, w2, w3, w4);

@@ -67,14 +67,6 @@
 #include <setjmp.h>
 #include <errno.h>
 
-#ifdef BETA_THREAD_TEST
-	#include "../common/atomic.h"
-	#include "../common/spinlock.h"
-	#include "../common/thread.h"
-	#include "../common/mutex.h"
-#endif
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // @TODO: Possible enhancements: [FlavioJS]
 // - 'callfunc' supporting labels in the current npc "::LabelName"
@@ -456,30 +448,6 @@ typedef struct script_function {
 extern script_function buildin_func[];
 
 static struct linkdb_node *sleep_db; //int oid -> struct script_state*
-
-#ifdef BETA_THREAD_TEST
-/**
- * MySQL Query Slave
- */
-static SPIN_LOCK queryThreadLock;
-static rAthread queryThread = NULL;
-static ramutex	queryThreadMutex = NULL;
-static racond	queryThreadCond = NULL;
-static volatile int32 queryThreadTerminate = 0;
-
-struct queryThreadEntry {
-	bool ok;
-	bool type; /* Main db or log db? */
-	struct script_state *st;
-};
-
-/* Ladies and Gentleman the Manager! */
-struct {
-	struct queryThreadEntry **entry; /* Array of structs */
-	int count;
-	int timer; /* Used to receive processed entries */
-} queryThreadData;
-#endif
 
 /*==========================================
  * (Only those needed) local declaration prototype
@@ -1236,8 +1204,12 @@ const char *parse_variable(const char *p) {
 	const char *p2 = NULL;
 	const char *var = p;
 
-	if( (p[0] == '+' && p[1] == '+' && (type = C_ADD_PRE)) // pre ++
-	 || (p[0] == '-' && p[1] == '-' && (type = C_SUB_PRE)) ) // pre --
+	if( p[0] == '+' && p[1] == '+' )
+		type = C_ADD_PRE; // pre ++
+	else if( p[0] == '-' && p[1] == '-' )
+		type = C_SUB_PRE; // pre --
+
+	if( type != C_NOP )
 		var = p = skip_space(&p[2]);
 
 	// Skip the variable where applicable
@@ -1261,22 +1233,38 @@ const char *parse_variable(const char *p) {
 			disp_error_message("Missing right expression or closing bracket for variable.", p);
 	}
 
-	if( type == C_NOP &&
-	!( (p[0] == '=' && p[1] != '=' && (type = C_EQ)) // =
-	|| (p[0] == '+' && p[1] == '=' && (type = C_ADD)) // +=
-	|| (p[0] == '-' && p[1] == '=' && (type = C_SUB)) // -=
-	|| (p[0] == '^' && p[1] == '=' && (type = C_XOR)) // ^=
-	|| (p[0] == '|' && p[1] == '=' && (type = C_OR )) // |=
-	|| (p[0] == '&' && p[1] == '=' && (type = C_AND)) // &=
-	|| (p[0] == '*' && p[1] == '=' && (type = C_MUL)) // *=
-	|| (p[0] == '/' && p[1] == '=' && (type = C_DIV)) // /=
-	|| (p[0] == '%' && p[1] == '=' && (type = C_MOD)) // %=
-	|| (p[0] == '+' && p[1] == '+' && (type = C_ADD_POST)) // post ++
-	|| (p[0] == '-' && p[1] == '-' && (type = C_SUB_POST)) // post --
-	|| (p[0] == '<' && p[1] == '<' && p[2] == '=' && (type = C_L_SHIFT)) // <<=
-	|| (p[0] == '>' && p[1] == '>' && p[2] == '=' && (type = C_R_SHIFT)) // >>=
-	) )
-		return NULL; // Failed to find a matching operator combination so invalid
+	if( type == C_NOP ) {
+		if( p[0] == '=' && p[1] != '=' )
+			type = C_EQ; // =
+		else if( p[0] == '+' && p[1] == '=' )
+			type = C_ADD; // +=
+		else if( p[0] == '-' && p[1] == '=' )
+			type = C_SUB; // -=
+		else if( p[0] == '^' && p[1] == '=' )
+			type = C_XOR; // ^=
+		else if( p[0] == '|' && p[1] == '=' )
+			type = C_OR; // |=
+		else if( p[0] == '&' && p[1] == '=' )
+			type = C_AND; // &=
+		else if( p[0] == '*' && p[1] == '=' )
+			type = C_MUL; // *=
+		else if( p[0] == '/' && p[1] == '=' )
+			type = C_DIV; // /=
+		else if( p[0] == '%' && p[1] == '=' )
+			type = C_MOD; // %=
+		else if( p[0] == '~' && p[1] == '=' )
+			type = C_NOT; // ~=
+		else if( p[0] == '+' && p[1] == '+' )
+			type = C_ADD_POST; // post ++
+		else if( p[0] == '-' && p[1] == '-' )
+			type = C_SUB_POST; // post --
+		else if( p[0] == '<' && p[1] == '<' && p[2] == '=' )
+			type = C_L_SHIFT; // <<=
+		else if( p[0] == '>' && p[1] == '>' && p[2] == '=' )
+			type = C_R_SHIFT; // >>=
+		else
+			return NULL; // Failed to find a matching operator combination so invalid
+	}
 
 	switch( type ) {
 		case C_ADD_PRE: // pre ++
@@ -4122,175 +4110,7 @@ void script_setarray_pc(struct map_session_data *sd, const char *varname, uint8 
 		refcache[0] = key;
 	}
 }
-#ifdef BETA_THREAD_TEST
-int buildin_query_sql_sub(struct script_state *st, Sql *handle);
 
-//Used to receive items the queryThread has already processed */
-TIMER_FUNC(queryThread_timer) {
-	int i, cursor = 0;
-	bool allOk = true;
-
-	EnterSpinLock(&queryThreadLock);
-
-	for( i = 0; i < queryThreadData.count; i++ ) {
-		struct queryThreadEntry *entry = queryThreadData.entry[i];
-
-		if( !entry->ok ) {
-			allOk = false;
-			continue;
-		}
-
-		run_script_main(entry->st);
-
-		entry->st = NULL; //Empty entries
-		aFree(entry);
-		queryThreadData.entry[i] = NULL;
-	}
-
-
-	if( allOk ) {
-		/* cancel the repeating timer -- it'll re-create itself when necessary, dont need to remain looping */
-		delete_timer(queryThreadData.timer, queryThread_timer);
-		queryThreadData.timer = INVALID_TIMER;
-	}
-
-	/* now lets clear the mess. */
-	for( i = 0; i < queryThreadData.count; i++ ) {
-		struct queryThreadEntry *entry = queryThreadData.entry[i];
-		if( entry == NULL )
-			continue;/* entry on hold */
-
-		/* move */
-		memmove(&queryThreadData.entry[cursor], &queryThreadData.entry[i], sizeof(struct queryThreadEntry*));
-
-		cursor++;
-	}
-
-	queryThreadData.count = cursor;
-
-	LeaveSpinLock(&queryThreadLock);
-
-	return 0;
-}
-
-void queryThread_add(struct script_state *st, bool type) {
-	int idx = 0;
-	struct queryThreadEntry* entry = NULL;
-
-	EnterSpinLock(&queryThreadLock);
-
-	if( queryThreadData.count++ != 0 )
-		RECREATE(queryThreadData.entry, struct queryThreadEntry* , queryThreadData.count);
-
-	idx = queryThreadData.count-1;
-
-	CREATE(queryThreadData.entry[idx],struct queryThreadEntry,1);
-
-	entry = queryThreadData.entry[idx];
-
-	entry->st = st;
-	entry->ok = false;
-	entry->type = type;
-	if( queryThreadData.timer == INVALID_TIMER ) { /* start the receiver timer */
-		queryThreadData.timer = add_timer_interval(gettick() + 100, queryThread_timer, 0, 0, 100);
-	}
-
-	LeaveSpinLock(&queryThreadLock);
-
-	/* unlock the queryThread */
-	racond_signal(queryThreadCond);
-}
-/* adds a new log to the queue */
-void queryThread_log(char *entry, int length) {
-	int idx = logThreadData.count;
-
-	EnterSpinLock(&queryThreadLock);
-
-	if( logThreadData.count++ != 0 )
-		RECREATE(logThreadData.entry, char *, logThreadData.count);
-
-	CREATE(logThreadData.entry[idx], char, length + 1 );
-	safestrncpy(logThreadData.entry[idx], entry, length + 1 );
-
-	LeaveSpinLock(&queryThreadLock);
-
-	/* unlock the queryThread */
-	racond_signal(queryThreadCond);
-}
-
-/* queryThread_main */
-static void *queryThread_main(void *x) {
-	Sql *queryThread_handle = Sql_Malloc();
-	int i;
-
-	if ( SQL_ERROR == Sql_Connect(queryThread_handle, map_server_id, map_server_pw, map_server_ip, map_server_port, map_server_db) )
-		exit(EXIT_FAILURE);
-
-	if( strlen(default_codepage) > 0 )
-		if ( SQL_ERROR == Sql_SetEncoding(queryThread_handle, default_codepage) )
-			Sql_ShowDebug(queryThread_handle);
-
-	if( log_config.sql_logs ) {
-		logmysql_handle = Sql_Malloc();
-
-		if ( SQL_ERROR == Sql_Connect(logmysql_handle, log_db_id, log_db_pw, log_db_ip, log_db_port, log_db_db) )
-			exit(EXIT_FAILURE);
-
-		if( strlen(default_codepage) > 0 )
-			if ( SQL_ERROR == Sql_SetEncoding(logmysql_handle, default_codepage) )
-				Sql_ShowDebug(logmysql_handle);
-	}
-
-	while( 1 ) {
-
-		if(queryThreadTerminate > 0)
-			break;
-
-		EnterSpinLock(&queryThreadLock);
-
-		/* mess with queryThreadData within the lock */
-		for( i = 0; i < queryThreadData.count; i++ ) {
-			struct queryThreadEntry *entry = queryThreadData.entry[i];
-
-			if( entry->ok )
-				continue;
-			else if ( !entry->st || !entry->st->stack ) {
-				entry->ok = true;/* dispose */
-				continue;
-			}
-
-			buildin_query_sql_sub(entry->st, entry->type ? logmysql_handle : queryThread_handle);
-
-			entry->ok = true;/* we're done with this */
-		}
-
-		/* also check for any logs in need to be sent */
-		if( log_config.sql_logs ) {
-			for( i = 0; i < logThreadData.count; i++ ) {
-				if( SQL_ERROR == Sql_Query(logmysql_handle, logThreadData.entry[i]) )
-					Sql_ShowDebug(logmysql_handle);
-				aFree(logThreadData.entry[i]);
-			}
-			logThreadData.count = 0;
-		}
-
-		LeaveSpinLock(&queryThreadLock);
-
-		ramutex_lock( queryThreadMutex );
-		racond_wait( queryThreadCond, queryThreadMutex, -1 );
-		ramutex_unlock( queryThreadMutex );
-
-	}
-
-	Sql_Free(queryThread_handle);
-
-	if( log_config.sql_logs ) {
-		Sql_Free(logmysql_handle);
-	}
-
-	return NULL;
-}
-#endif
 /*==========================================
  * Destructor
  *------------------------------------------*/
@@ -4375,30 +4195,10 @@ void do_final_script(void) {
 	for(i = 0; i < atcmd_binding_count; i++)
 		aFree(atcmd_binding[i]);
 
-	if(atcmd_binding_count != 0)
+	if(atcmd_binding_count)
 		aFree(atcmd_binding);
-#ifdef BETA_THREAD_TEST
-	/* QueryThread */
-	InterlockedIncrement(&queryThreadTerminate);
-	racond_signal(queryThreadCond);
-	rathread_wait(queryThread, NULL);
-
-	// Destroy cond var and mutex.
-	racond_destroy( queryThreadCond );
-	ramutex_destroy( queryThreadMutex );
-
-	/* Clear missing vars */
-	for(i = 0; i < queryThreadData.count; i++)
-		aFree(queryThreadData.entry[i]);
-
-	aFree(queryThreadData.entry);
-
-	for(i = 0; i < logThreadData.count; i++)
-		aFree(logThreadData.entry[i]);
-
-	aFree(logThreadData.entry);
-#endif
 }
+
 /*==========================================
  * Initialization
  *------------------------------------------*/
@@ -4408,50 +4208,10 @@ void do_init_script(void) {
 	autobonus_db = strdb_alloc(DB_OPT_DUP_KEY,0);
 
 	mapreg_init();
-#ifdef BETA_THREAD_TEST
-	CREATE(queryThreadData.entry, struct queryThreadEntry*, 1);
-	queryThreadData.count = 0;
-	CREATE(logThreadData.entry, char *, 1);
-	logThreadData.count = 0;
-	/* QueryThread Start */
-
-	InitializeSpinLock(&queryThreadLock);
-
-	queryThreadData.timer = INVALID_TIMER;
-	queryThreadTerminate = 0;
-	queryThreadMutex = ramutex_create();
-	queryThreadCond = racond_create();
-
-	queryThread = rathread_create(queryThread_main, NULL);
-
-	if(queryThread == NULL) {
-		ShowFatalError("do_init_script: cannot spawn Query Thread.\n");
-		exit(EXIT_FAILURE);
-	}
-
-	add_timer_func_list(queryThread_timer, "queryThread_timer");
-#endif
 }
 
 void script_reload(void) {
 	int i;
-
-#ifdef BETA_THREAD_TEST
-	//We're reloading so any queries undergoing should be...exterminated
-	EnterSpinLock(&queryThreadLock);
-
-	for(i = 0; i < queryThreadData.count; i++)
-		aFree(queryThreadData.entry[i]);
-
-	queryThreadData.count = 0;
-
-	if(queryThreadData.timer != INVALID_TIMER) {
-		delete_timer(queryThreadData.timer, queryThread_timer);
-		queryThreadData.timer = INVALID_TIMER;
-	}
-
-	LeaveSpinLock(&queryThreadLock);
-#endif
 
 	userfunc_db->clear(userfunc_db, db_script_free_code_sub);
 	db_clear(scriptlabel_db);
@@ -15579,7 +15339,7 @@ BUILDIN_FUNC(implode)
 		if( script_hasdata(st,3) ) {
 			glue = script_getstr(st,3);
 			glue_len = strlen(glue);
-			len += glue_len * (array_size);
+			len += (size_t)glue_len * array_size;
 		}
 		output = (char *)aMalloc(len + 1);
 
@@ -16412,18 +16172,7 @@ int buildin_query_sql_sub(struct script_state *st, Sql *handle)
 }
 
 BUILDIN_FUNC(query_sql) {
-#ifdef BETA_THREAD_TEST
-	if( st->state != RERUNLINE ) {
-		queryThread_add(st,false);
-
-		st->state = RERUNLINE; //Will continue when the query is finished running
-	} else
-		st->state = RUN;
-
-	return 0;
-#else
 	return buildin_query_sql_sub(st,qsmysql_handle);
-#endif
 }
 
 BUILDIN_FUNC(query_logsql) {
@@ -16432,18 +16181,7 @@ BUILDIN_FUNC(query_logsql) {
 		script_pushint(st,-1);
 		return 1;
 	}
-#ifdef BETA_THREAD_TEST
-	if( st->state != RERUNLINE ) {
-		queryThread_add(st,true);
-
-		st->state = RERUNLINE; //Will continue when the query is finished running
-	} else
-		st->state = RUN;
-
-	return 0;
-#else
 	return buildin_query_sql_sub(st,logmysql_handle);
-#endif
 }
 
 //Allows escaping of a given string
@@ -22896,7 +22634,7 @@ static inline bool mail_sub(struct script_state *st, struct script_data *data, s
 
 	//Try to find the array's source pointer
 	if (not_array_variable(*name)) {
-		ShowError("buildin_mail: variable \"%s\" is not an array.\n");
+		ShowError("buildin_mail: variable \"%s\" is not an array.\n", name);
 		return false;
 	}
 
@@ -22960,11 +22698,7 @@ BUILDIN_FUNC(mail) {
 		if (zeny < 0) {
 			ShowError("buildin_mail: a negative amount of zeny can not be sent.\n" );
 			return 1;
-		} else if (zeny > MAX_ZENY) {
-			ShowError("buildin_mail: amount of zeny %u is exceeding maximum of %u. Capping...\n", zeny, MAX_ZENY);
-			zeny = MAX_ZENY;
 		}
-
 		msg.zeny = zeny;
 	}
 
@@ -23146,7 +22880,7 @@ BUILDIN_FUNC(identifyall) {
 
 BUILDIN_FUNC(airship_respond) {
 	struct map_session_data *sd = script_rid2sd(st);
-	uint32 response = script_getnum(st,2);
+	int8 response = script_getnum(st,2);
 
 	if (!(sd = script_rid2sd(st)))
 		return 1;

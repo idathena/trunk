@@ -325,23 +325,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\common\mempool.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\common\mempool.h"
-				>
-			</File>
-			<File
 				RelativePath="..\src\common\mmo.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\common\mutex.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\common\mutex.h"
 				>
 			</File>
 			<File
@@ -350,14 +334,6 @@
 			</File>
 			<File
 				RelativePath="..\src\common\nullpo.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\common\raconf.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\common\raconf.h"
 				>
 			</File>
 			<File
@@ -398,14 +374,6 @@
 			</File>
 			<File
 				RelativePath="..\src\common\strlib.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\common\thread.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\common\thread.h"
 				>
 			</File>
 			<File

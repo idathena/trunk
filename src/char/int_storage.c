@@ -281,7 +281,7 @@ bool mapif_parse_SaveGuildStorage(int fd)
 	len = RFIFOW(fd,2);
 
 	if( sizeof(struct s_storage) != len - 12 )
-		ShowError("inter storage: data size error %d != %d\n", sizeof(struct s_storage), len - 12);
+		ShowError("inter storage: data size error %" PRIuPTR " != %d\n", sizeof(struct s_storage), len - 12);
 	else {
 		if( SQL_ERROR == Sql_Query(sql_handle, "SELECT `guild_id` FROM `%s` WHERE `guild_id`='%d'", guild_db, guild_id) )
 			Sql_ShowDebug(sql_handle);
