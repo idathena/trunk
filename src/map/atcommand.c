@@ -380,8 +380,8 @@ static void warp_get_suggestions(struct map_session_data *sd, const char *name) 
 
 	// Check for maps that contain string
 	for (i = 0; i < MAX_MAP_PER_SERVER; i++) {
-		if (count < MAX_SUGGESTIONS && strstr(map[i].name, name)) {
-			strcat(buffer, map[i].name);
+		if (count < MAX_SUGGESTIONS && strstr(mapdata[i].name, name)) {
+			strcat(buffer, mapdata[i].name);
 			strcat(buffer, " ");
 			if (++count >= MAX_SUGGESTIONS)
 				break;
@@ -395,10 +395,10 @@ static void warp_get_suggestions(struct map_session_data *sd, const char *name) 
 
 		// Calculate Levenshtein distance for all maps
 		for (i = 0; i < MAX_MAP_PER_SERVER; i++) {
-			if (strlen(map[i].name) < 4) // Invalid map name?
+			if (strlen(mapdata[i].name) < 4) // Invalid map name?
 				distance[i][0] = INT_MAX;
 			else {
-				distance[i][0] = levenshtein(map[i].name, name);
+				distance[i][0] = levenshtein(mapdata[i].name, name);
 				distance[i][1] = i;
 			}
 		}
@@ -419,7 +419,7 @@ static void warp_get_suggestions(struct map_session_data *sd, const char *name) 
 					return;
 				break;
 			}
-			strcat(buffer, map[distance[min][1]].name);
+			strcat(buffer, mapdata[distance[min][1]].name);
 			strcat(buffer, " ");
 
 			// Swap elements
@@ -474,11 +474,11 @@ ACMD_FUNC(mapmove)
 		if (!map_search_freecell(NULL, m, &x, &y, 10, 10, 1))
 			x = y = 0; //Invalid cell, use random spot
 	}
-	if ((map[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) || !pc_job_can_entermap((enum e_job)sd->status.class_, m, sd->group_level)) {
+	if ((mapdata[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) || !pc_job_can_entermap((enum e_job)sd->status.class_, m, sd->group_level)) {
 		clif_displaymessage(fd, msg_txt(247)); // You are not authorized to warp to this map.
 		return -1;
 	}
-	if (sd->bl.m >= 0 && map[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (sd->bl.m >= 0 && mapdata[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(248)); // You are not authorized to warp from your current map.
 		return -1;
 	}
@@ -537,7 +537,7 @@ ACMD_FUNC(jumpto)
 		return -1;
 	}
 
-	if (sd->bl.m >= 0 && map[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (sd->bl.m >= 0 && mapdata[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(248)); // You are not authorized to warp from your current map.
 		return -1;
 	}
@@ -552,7 +552,7 @@ ACMD_FUNC(jumpto)
 		return -1;
 	}
 
-	if (pl_sd->bl.m >= 0 && map[pl_sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (pl_sd->bl.m >= 0 && mapdata[pl_sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(247));	// You are not authorized to warp to this map.
 		return -1;
 	}
@@ -582,7 +582,7 @@ ACMD_FUNC(jump)
 
 	sscanf(message, "%hd %hd", &x, &y);
 
-	if (map[sd->bl.m].flag.noteleport && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (mapdata[sd->bl.m].flag.noteleport && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(248)); // You are not authorized to warp from your current map.
 		return -1;
 	}
@@ -700,11 +700,11 @@ ACMD_FUNC(who)
 			StringBuf_Printf(&buf, msg_txt(30), count); // %d players found.
 	} else {
 		if (!count)
-			StringBuf_Printf(&buf, msg_txt(54), map[map_id].name); // No player found in map '%s'.
+			StringBuf_Printf(&buf, msg_txt(54), mapdata[map_id].name); // No player found in map '%s'.
 		else if (count == 1)
-			StringBuf_Printf(&buf, msg_txt(55), map[map_id].name); // 1 player found in map '%s'.
+			StringBuf_Printf(&buf, msg_txt(55), mapdata[map_id].name); // 1 player found in map '%s'.
 		else
-			StringBuf_Printf(&buf, msg_txt(56), count, map[map_id].name); // %d players found in map '%s'.
+			StringBuf_Printf(&buf, msg_txt(56), count, mapdata[map_id].name); // %d players found in map '%s'.
 	}
 	clif_displaymessage(fd, StringBuf_Value(&buf));
 	StringBuf_Destroy(&buf);
@@ -803,7 +803,7 @@ ACMD_FUNC(save)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].instance_id) {
+	if (mapdata[sd->bl.m].instance_id) {
 		clif_displaymessage(fd, msg_txt(383)); // You cannot create a savepoint in an instance.
 		return 1;
 	}
@@ -829,11 +829,11 @@ ACMD_FUNC(load)
 	nullpo_retr(-1, sd);
 
 	m = map_mapindex2mapid(sd->status.save_point.map);
-	if (m >= 0 && map[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (m >= 0 && mapdata[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(249));	// You are not authorized to warp to your save map.
 		return -1;
 	}
-	if (sd->bl.m >= 0 && map[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (sd->bl.m >= 0 && mapdata[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(248));	// You are not authorized to warp from your current map.
 		return -1;
 	}
@@ -983,10 +983,10 @@ ACMD_FUNC(hide)
 		clif_displaymessage(fd, msg_txt(10)); // Invisible: Off
 
 		// Increment the number of pvp players on the map
-		map[sd->bl.m].users_pvp++;
+		mapdata[sd->bl.m].users_pvp++;
 
 		// Register the player for ranking calculations
-		if( !battle_config.pk_mode && map[sd->bl.m].flag.pvp && !map[sd->bl.m].flag.pvp_nocalcrank )
+		if( !battle_config.pk_mode && mapdata[sd->bl.m].flag.pvp && !mapdata[sd->bl.m].flag.pvp_nocalcrank )
 			sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
 
 		// bugreport:2266
@@ -997,10 +997,10 @@ ACMD_FUNC(hide)
 		clif_displaymessage(fd, msg_txt(11)); // Invisible: On
 
 		// Decrement the number of pvp players on the map
-		map[sd->bl.m].users_pvp--;
+		mapdata[sd->bl.m].users_pvp--;
 
 		// Unregister the player for ranking
-		if( map[sd->bl.m].flag.pvp && !map[sd->bl.m].flag.pvp_nocalcrank && sd->pvp_timer != INVALID_TIMER ) {
+		if( mapdata[sd->bl.m].flag.pvp && !mapdata[sd->bl.m].flag.pvp_nocalcrank && sd->pvp_timer != INVALID_TIMER ) {
 			delete_timer(sd->pvp_timer, pc_calc_pvprank_timer);
 			sd->pvp_timer = INVALID_TIMER;
 		}
@@ -1581,12 +1581,12 @@ ACMD_FUNC(pvpoff)
 {
 	nullpo_retr(-1, sd);
 
-	if (!map[sd->bl.m].flag.pvp) {
+	if (!mapdata[sd->bl.m].flag.pvp) {
 		clif_displaymessage(fd, msg_txt(160)); // PvP is already Off.
 		return -1;
 	}
 
-	map[sd->bl.m].flag.pvp = 0;
+	mapdata[sd->bl.m].flag.pvp = 0;
 	if (!battle_config.pk_mode)
 		clif_map_property_mapall(sd->bl.m, MAPPROPERTY_NOTHING);
 	map_foreachinmap(map_mapflag_pvp_stop, sd->bl.m, BL_PC);
@@ -1602,12 +1602,12 @@ ACMD_FUNC(pvpon)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.pvp) {
+	if (mapdata[sd->bl.m].flag.pvp) {
 		clif_displaymessage(fd, msg_txt(161)); // PvP is already On.
 		return -1;
 	}
 
-	map[sd->bl.m].flag.pvp = 1;
+	mapdata[sd->bl.m].flag.pvp = 1;
 
 	if (!battle_config.pk_mode) //Display pvp circle and rank
 		map_foreachinmap(map_mapflag_pvp_start, sd->bl.m, BL_PC);
@@ -1623,12 +1623,12 @@ ACMD_FUNC(gvgoff)
 {
 	nullpo_retr(-1, sd);
 
-	if (!map[sd->bl.m].flag.gvg) {
+	if (!mapdata[sd->bl.m].flag.gvg) {
 		clif_displaymessage(fd, msg_txt(162)); // GvG is already Off.
 		return -1;
 	}
 
-	map[sd->bl.m].flag.gvg = 0;
+	mapdata[sd->bl.m].flag.gvg = 0;
 	clif_map_property_mapall(sd->bl.m, MAPPROPERTY_NOTHING);
 	map_foreachinmap(unit_stopattack, sd->bl.m, BL_CHAR, 0);
 	clif_displaymessage(fd, msg_txt(33)); // GvG: Off.
@@ -1643,12 +1643,12 @@ ACMD_FUNC(gvgon)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.gvg) {
+	if (mapdata[sd->bl.m].flag.gvg) {
 		clif_displaymessage(fd, msg_txt(163)); // GvG is already On.
 		return -1;
 	}
 
-	map[sd->bl.m].flag.gvg = 1;
+	mapdata[sd->bl.m].flag.gvg = 1;
 	clif_map_property_mapall(sd->bl.m, MAPPROPERTY_AGITZONE);
 	clif_displaymessage(fd, msg_txt(34)); // GvG: On.
 
@@ -1855,7 +1855,7 @@ ACMD_FUNC(go)
 	char map_name[MAP_NAME_LENGTH];
 
 	const struct {
-		char map[MAP_NAME_LENGTH];
+		char mapdata[MAP_NAME_LENGTH];
 		int x, y;
 		int min_match; // Minimum string length to match
 	} data[] = {
@@ -1908,7 +1908,7 @@ ACMD_FUNC(go)
 
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.nogo && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (mapdata[sd->bl.m].flag.nogo && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(sd->fd,msg_txt(995)); // You cannot use @go on this map.
 		return 0;
 	}
@@ -1939,7 +1939,7 @@ ACMD_FUNC(go)
 
 		// Match maps on the list
 		for (i = 0; i < ARRAYLENGTH(data); i++) {
-			if (strncmpi(map_name, data[i].map, data[i].min_match) == 0) {
+			if (strncmpi(map_name, data[i].mapdata, data[i].min_match) == 0) {
 				town = i;
 				break;
 			}
@@ -1968,17 +1968,17 @@ ACMD_FUNC(go)
 	}
 
 	if (town >= 0 && town < ARRAYLENGTH(data)) {
-		int16 m = map_mapname2mapid(data[town].map);
+		int16 m = map_mapname2mapid(data[town].mapdata);
 
-		if (m >= 0 && map[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+		if (m >= 0 && mapdata[m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 			clif_displaymessage(fd, msg_txt(247)); // You are not authorized to warp to this map.
 			return -1;
 		}
-		if (sd->bl.m >= 0 && map[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+		if (sd->bl.m >= 0 && mapdata[sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 			clif_displaymessage(fd, msg_txt(248)); // You are not authorized to warp from your current map.
 			return -1;
 		}
-		if (pc_setpos(sd, mapindex_name2id(data[town].map), data[town].x, data[town].y, CLR_TELEPORT) == SETPOS_OK)
+		if (pc_setpos(sd, mapindex_name2id(data[town].mapdata), data[town].x, data[town].y, CLR_TELEPORT) == SETPOS_OK)
 			clif_displaymessage(fd, msg_txt(0)); // Warped.
 		else {
 			clif_displaymessage(fd, msg_txt(1)); // Map not found.
@@ -2334,7 +2334,7 @@ ACMD_FUNC(gat)
 
 	for (y = 2; y >= -2; y--) {
 		sprintf(atcmd_output, "%s (x= %d, y= %d) %02X %02X %02X %02X %02X",
-			map[sd->bl.m].name,   sd->bl.x - 2, sd->bl.y + y,
+			mapdata[sd->bl.m].name,   sd->bl.x - 2, sd->bl.y + y,
 			map_getcell(sd->bl.m, sd->bl.x - 2, sd->bl.y + y, CELL_GETTYPE),
 			map_getcell(sd->bl.m, sd->bl.x - 1, sd->bl.y + y, CELL_GETTYPE),
 			map_getcell(sd->bl.m, sd->bl.x,     sd->bl.y + y, CELL_GETTYPE),
@@ -2829,12 +2829,12 @@ ACMD_FUNC(recall) {
 		return -1;
 	}
 
-	if (sd->bl.m >= 0 && map[sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (sd->bl.m >= 0 && mapdata[sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(1019)); // You are not authorized to warp someone to this map.
 		return -1;
 	}
 
-	if (pl_sd->bl.m >= 0 && map[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (pl_sd->bl.m >= 0 && mapdata[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(1020)); // You are not authorized to warp this player from their map.
 		return -1;
 	}
@@ -3664,7 +3664,7 @@ ACMD_FUNC(recallall)
 
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
-	if (sd->bl.m >= 0 && map[sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (sd->bl.m >= 0 && mapdata[sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(1032)); // You are not authorized to warp someone to your current map.
 		return -1;
 	}
@@ -3675,7 +3675,7 @@ ACMD_FUNC(recallall)
 		if (sd->status.account_id != pl_sd->status.account_id && pc_get_group_level(sd) >= pc_get_group_level(pl_sd)) {
 			if (pl_sd->bl.m == sd->bl.m && pl_sd->bl.x == sd->bl.x && pl_sd->bl.y == sd->bl.y)
 				continue; // Don't waste time warping the character to the same place.
-			if (pl_sd->bl.m >= 0 && map[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE))
+			if (pl_sd->bl.m >= 0 && mapdata[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE))
 				count++;
 			else if (pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN) == SETPOS_AUTOTRADE)
 				count++;
@@ -3712,7 +3712,7 @@ ACMD_FUNC(guildrecall)
 		return -1;
 	}
 
-	if (sd->bl.m >= 0 && map[sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (sd->bl.m >= 0 && mapdata[sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(1032)); // You are not authorized to warp someone to your current map.
 		return -1;
 	}
@@ -3731,7 +3731,7 @@ ACMD_FUNC(guildrecall)
 		if (sd->status.account_id != pl_sd->status.account_id && pl_sd->status.guild_id == g->guild_id) {
 			if (pc_get_group_level(pl_sd) > pc_get_group_level(sd) || (pl_sd->bl.m == sd->bl.m && pl_sd->bl.x == sd->bl.x && pl_sd->bl.y == sd->bl.y))
 				continue; //Skip GMs greater than you.
-			if (pl_sd->bl.m >= 0 && map[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE))
+			if (pl_sd->bl.m >= 0 && mapdata[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE))
 				count++;
 			else if (pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN) == SETPOS_AUTOTRADE)
 				count++;
@@ -3769,7 +3769,7 @@ ACMD_FUNC(partyrecall)
 		return -1;
 	}
 
-	if (sd->bl.m >= 0 && map[sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
+	if (sd->bl.m >= 0 && mapdata[sd->bl.m].flag.nowarpto && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE)) {
 		clif_displaymessage(fd, msg_txt(1032)); // You are not authorized to warp someone to your current map.
 		return -1;
 	}
@@ -3788,7 +3788,7 @@ ACMD_FUNC(partyrecall)
 		if (sd->status.account_id != pl_sd->status.account_id && pl_sd->status.party_id == p->party.party_id) {
 			if (pc_get_group_level(pl_sd) > pc_get_group_level(sd) || (pl_sd->bl.m == sd->bl.m && pl_sd->bl.x == sd->bl.x && pl_sd->bl.y == sd->bl.y))
 				continue; //Skip GMs greater than you.
-			if (pl_sd->bl.m >= 0 && map[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE))
+			if (pl_sd->bl.m >= 0 && mapdata[pl_sd->bl.m].flag.nowarp && !pc_has_permission(sd, PC_PERM_WARP_ANYWHERE))
 				count++;
 			else if (pc_setpos(pl_sd, sd->mapindex, sd->bl.x, sd->bl.y, CLR_RESPAWN) == SETPOS_AUTOTRADE)
 				count++;
@@ -4031,50 +4031,50 @@ ACMD_FUNC(mapinfo)
 	}
 	mapit_free(iter);
 
-	sprintf(atcmd_output, msg_txt(1040), mapname, map[m_id].users, map[m_id].npc_num, chat_num, vend_num); // Map: %s | Players: %d | NPCs: %d | Chats: %d | Vendings: %d
+	sprintf(atcmd_output, msg_txt(1040), mapname, mapdata[m_id].users, mapdata[m_id].npc_num, chat_num, vend_num); // Map: %s | Players: %d | NPCs: %d | Chats: %d | Vendings: %d
 	clif_displaymessage(fd, atcmd_output);
 	clif_displaymessage(fd, msg_txt(1041)); // ------ Map Flags ------
-	if (map[m_id].flag.town)
+	if (mapdata[m_id].flag.town)
 		clif_displaymessage(fd, msg_txt(1042)); // Town Map
-	if (map[m_id].flag.restricted) {
-		sprintf(atcmd_output, "Restricted (zone %d)",map[m_id].zone);
+	if (mapdata[m_id].flag.restricted) {
+		sprintf(atcmd_output, "Restricted (zone %d)",mapdata[m_id].zone);
 		clif_displaymessage(fd, atcmd_output);
 	}
 
-	if (battle_config.autotrade_mapflag == map[m_id].flag.autotrade)
+	if (battle_config.autotrade_mapflag == mapdata[m_id].flag.autotrade)
 		clif_displaymessage(fd, msg_txt(1043)); // Autotrade Enabled
 	else
 		clif_displaymessage(fd, msg_txt(1044)); // Autotrade Disabled
 
-	if (map[m_id].flag.battleground) {
-		sprintf(atcmd_output, msg_txt(1045), map[m_id].flag.battleground); // Battlegrounds ON (type %d)
+	if (mapdata[m_id].flag.battleground) {
+		sprintf(atcmd_output, msg_txt(1045), mapdata[m_id].flag.battleground); // Battlegrounds ON (type %d)
 		clif_displaymessage(fd, atcmd_output);
 	}
 
 	// Skill damage adjustment info [Cydh]
 #ifdef ADJUST_SKILL_DAMAGE
-	if (map[m_id].flag.skill_damage) {
+	if (mapdata[m_id].flag.skill_damage) {
 		clif_displaymessage(fd,msg_txt(1052)); // Skill Damage Adjustments:
 		sprintf(atcmd_output," > [Map] %d%%, %d%%, %d%%, %d%% | Caster:%d"
-			,map[m_id].adjust.damage.pc
-			,map[m_id].adjust.damage.mob
-			,map[m_id].adjust.damage.boss
-			,map[m_id].adjust.damage.other
-			,map[m_id].adjust.damage.caster);
+			,mapdata[m_id].adjust.damage.pc
+			,mapdata[m_id].adjust.damage.mob
+			,mapdata[m_id].adjust.damage.boss
+			,mapdata[m_id].adjust.damage.other
+			,mapdata[m_id].adjust.damage.caster);
 		clif_displaymessage(fd, atcmd_output);
-		if (map[m_id].skill_damage.count) {
+		if (mapdata[m_id].skill_damage.count) {
 			uint8 j;
 
 			clif_displaymessage(fd," > [Map Skill] Name : Player, Monster, Boss Monster, Other | Caster");
-			for (j = 0; j < map[m_id].skill_damage.count; j++) {
+			for (j = 0; j < mapdata[m_id].skill_damage.count; j++) {
 				sprintf(atcmd_output,"     %d. %s : %d%%, %d%%, %d%%, %d%% | %d"
 					,j + 1
-					,skill_get_name(map[m_id].skill_damage.entries[j]->skill_id)
-					,map[m_id].skill_damage.entries[j]->pc
-					,map[m_id].skill_damage.entries[j]->mob
-					,map[m_id].skill_damage.entries[j]->boss
-					,map[m_id].skill_damage.entries[j]->other
-					,map[m_id].skill_damage.entries[j]->caster);
+					,skill_get_name(mapdata[m_id].skill_damage.entries[j]->skill_id)
+					,mapdata[m_id].skill_damage.entries[j]->pc
+					,mapdata[m_id].skill_damage.entries[j]->mob
+					,mapdata[m_id].skill_damage.entries[j]->boss
+					,mapdata[m_id].skill_damage.entries[j]->other
+					,mapdata[m_id].skill_damage.entries[j]->caster);
 				clif_displaymessage(fd,atcmd_output);
 			}
 		}
@@ -4082,147 +4082,147 @@ ACMD_FUNC(mapinfo)
 #endif
 
 	strcpy(atcmd_output,msg_txt(1046)); // PvP Flags:
-	if (map[m_id].flag.pvp)
+	if (mapdata[m_id].flag.pvp)
 		strcat(atcmd_output, " Pvp ON |");
-	if (map[m_id].flag.pvp_noguild)
+	if (mapdata[m_id].flag.pvp_noguild)
 		strcat(atcmd_output, " NoGuild |");
-	if (map[m_id].flag.pvp_noparty)
+	if (mapdata[m_id].flag.pvp_noparty)
 		strcat(atcmd_output, " NoParty |");
-	if (map[m_id].flag.pvp_nightmaredrop)
+	if (mapdata[m_id].flag.pvp_nightmaredrop)
 		strcat(atcmd_output, " NightmareDrop |");
-	if (map[m_id].flag.pvp_nocalcrank)
+	if (mapdata[m_id].flag.pvp_nocalcrank)
 		strcat(atcmd_output, " NoCalcRank |");
 	clif_displaymessage(fd, atcmd_output);
 
 	strcpy(atcmd_output,msg_txt(1047)); // GvG Flags:
-	if (map[m_id].flag.gvg)
+	if (mapdata[m_id].flag.gvg)
 		strcat(atcmd_output, " GvG ON |");
-	if (map[m_id].flag.gvg_dungeon)
+	if (mapdata[m_id].flag.gvg_dungeon)
 		strcat(atcmd_output, " GvG Dungeon |");
-	if (map[m_id].flag.gvg_castle)
+	if (mapdata[m_id].flag.gvg_castle)
 		strcat(atcmd_output, " GvG Castle |");
-	if (map[m_id].flag.gvg_te)
+	if (mapdata[m_id].flag.gvg_te)
 		strcat(atcmd_output, " GvG TE |");
-	if (map[m_id].flag.gvg_te_castle)
+	if (mapdata[m_id].flag.gvg_te_castle)
 		strcat(atcmd_output, " GvG TE Castle |");
-	if (map[m_id].flag.gvg_noparty)
+	if (mapdata[m_id].flag.gvg_noparty)
 		strcat(atcmd_output, " NoParty |");
 	clif_displaymessage(fd, atcmd_output);
 
 	strcpy(atcmd_output,msg_txt(1048)); // Teleport Flags:
-	if (map[m_id].flag.noteleport)
+	if (mapdata[m_id].flag.noteleport)
 		strcat(atcmd_output, " NoTeleport |");
-	if (map[m_id].flag.monster_noteleport)
+	if (mapdata[m_id].flag.monster_noteleport)
 		strcat(atcmd_output, " Monster NoTeleport |");
-	if (map[m_id].flag.nowarp)
+	if (mapdata[m_id].flag.nowarp)
 		strcat(atcmd_output, " NoWarp |");
-	if (map[m_id].flag.nowarpto)
+	if (mapdata[m_id].flag.nowarpto)
 		strcat(atcmd_output, " NoWarpTo |");
-	if (map[m_id].flag.noreturn)
+	if (mapdata[m_id].flag.noreturn)
 		strcat(atcmd_output, " NoReturn |");
-	if (map[m_id].flag.nogo)
+	if (mapdata[m_id].flag.nogo)
 		strcat(atcmd_output, " NoGo |");
-	if (map[m_id].flag.nomemo)
+	if (mapdata[m_id].flag.nomemo)
 		strcat(atcmd_output, "  NoMemo |");
 	clif_displaymessage(fd, atcmd_output);
 
 	sprintf(atcmd_output, msg_txt(1065),  // No Exp Penalty: %s | No Zeny Penalty: %s
-		(map[m_id].flag.noexppenalty) ? msg_txt(1066) : msg_txt(1067), (map[m_id].flag.nozenypenalty) ? msg_txt(1066) : msg_txt(1067)); // On / Off
+		(mapdata[m_id].flag.noexppenalty) ? msg_txt(1066) : msg_txt(1067), (mapdata[m_id].flag.nozenypenalty) ? msg_txt(1066) : msg_txt(1067)); // On / Off
 	clif_displaymessage(fd, atcmd_output);
 
-	if (map[m_id].flag.nosave) {
-		if (!map[m_id].save.map)
+	if (mapdata[m_id].flag.nosave) {
+		if (!mapdata[m_id].save.map)
 			clif_displaymessage(fd, msg_txt(1068)); // No Save (Return to last Save Point)
-		else if (map[m_id].save.x == -1 || map[m_id].save.y == -1 ) {
-			sprintf(atcmd_output, msg_txt(1069), mapindex_id2name(map[m_id].save.map)); // No Save, Save Point: %s,Random
+		else if (mapdata[m_id].save.x == -1 || mapdata[m_id].save.y == -1 ) {
+			sprintf(atcmd_output, msg_txt(1069), mapindex_id2name(mapdata[m_id].save.map)); // No Save, Save Point: %s,Random
 			clif_displaymessage(fd, atcmd_output);
 		} else {
 			sprintf(atcmd_output, msg_txt(1070), // No Save, Save Point: %s,%d,%d
-				mapindex_id2name(map[m_id].save.map),map[m_id].save.x,map[m_id].save.y);
+				mapindex_id2name(mapdata[m_id].save.map),mapdata[m_id].save.x,mapdata[m_id].save.y);
 			clif_displaymessage(fd, atcmd_output);
 		}
 	}
 
 	strcpy(atcmd_output,msg_txt(1049)); // Weather Flags:
-	if (map[m_id].flag.snow)
+	if (mapdata[m_id].flag.snow)
 		strcat(atcmd_output, " Snow |");
-	if (map[m_id].flag.fog)
+	if (mapdata[m_id].flag.fog)
 		strcat(atcmd_output, " Fog |");
-	if (map[m_id].flag.sakura)
+	if (mapdata[m_id].flag.sakura)
 		strcat(atcmd_output, " Sakura |");
-	if (map[m_id].flag.clouds)
+	if (mapdata[m_id].flag.clouds)
 		strcat(atcmd_output, " Clouds |");
-	if (map[m_id].flag.clouds2)
+	if (mapdata[m_id].flag.clouds2)
 		strcat(atcmd_output, "  Clouds2 |");
-	if (map[m_id].flag.fireworks)
+	if (mapdata[m_id].flag.fireworks)
 		strcat(atcmd_output, " Fireworks |");
-	if (map[m_id].flag.leaves)
+	if (mapdata[m_id].flag.leaves)
 		strcat(atcmd_output, "  Leaves |");
-	if (map[m_id].flag.nightenabled)
+	if (mapdata[m_id].flag.nightenabled)
 		strcat(atcmd_output, "  Displays Night |");
 	clif_displaymessage(fd, atcmd_output);
 
 	strcpy(atcmd_output,msg_txt(1050)); // Other Flags:
-	if (map[m_id].flag.nobranch)
+	if (mapdata[m_id].flag.nobranch)
 		strcat(atcmd_output, " NoBranch |");
-	if (map[m_id].flag.notrade)
+	if (mapdata[m_id].flag.notrade)
 		strcat(atcmd_output, " NoTrade |");
-	if (map[m_id].flag.novending)
+	if (mapdata[m_id].flag.novending)
 		strcat(atcmd_output, " NoVending |");
-	if (map[m_id].flag.nodrop)
+	if (mapdata[m_id].flag.nodrop)
 		strcat(atcmd_output, " NoDrop |");
-	if (map[m_id].flag.noskill)
+	if (mapdata[m_id].flag.noskill)
 		strcat(atcmd_output, " NoSkill |");
-	if (map[m_id].flag.noicewall)
+	if (mapdata[m_id].flag.noicewall)
 		strcat(atcmd_output, " NoIcewall |");
-	if (map[m_id].flag.allowks)
+	if (mapdata[m_id].flag.allowks)
 		strcat(atcmd_output, " AllowKS |");
-	if (map[m_id].flag.reset)
+	if (mapdata[m_id].flag.reset)
 		strcat(atcmd_output, " Reset |");
-	if (map[m_id].flag.hidemobhpbar)
+	if (mapdata[m_id].flag.hidemobhpbar)
 		strcat(atcmd_output, " HideMobHPBar |");
-	if (map[m_id].flag.privateairship_source)
+	if (mapdata[m_id].flag.privateairship_source)
 		strcat(atcmd_output, " PrivateAirshipSource |");
-	if (map[m_id].flag.privateairship_destination)
+	if (mapdata[m_id].flag.privateairship_destination)
 		strcat(atcmd_output, " PrivateAirshipDestination |");
 	clif_displaymessage(fd, atcmd_output);
 
 	strcpy(atcmd_output,msg_txt(1051)); // Other Flags:
-	if (map[m_id].nocommand)
+	if (mapdata[m_id].nocommand)
 		strcat(atcmd_output, " NoCommand |");
-	if (map[m_id].flag.nobaseexp)
+	if (mapdata[m_id].flag.nobaseexp)
 		strcat(atcmd_output, " NoBaseEXP |");
-	if (map[m_id].flag.nojobexp)
+	if (mapdata[m_id].flag.nojobexp)
 		strcat(atcmd_output, " NoJobEXP |");
-	if (map[m_id].flag.nomobloot)
+	if (mapdata[m_id].flag.nomobloot)
 		strcat(atcmd_output, " NoMobLoot |");
-	if (map[m_id].flag.nomvploot)
+	if (mapdata[m_id].flag.nomvploot)
 		strcat(atcmd_output, " NoMVPLoot |");
-	if (map[m_id].flag.partylock)
+	if (mapdata[m_id].flag.partylock)
 		strcat(atcmd_output, " PartyLock |");
-	if (map[m_id].flag.guildlock)
+	if (mapdata[m_id].flag.guildlock)
 		strcat(atcmd_output, " GuildLock |");
-	if (map[m_id].flag.loadevent)
+	if (mapdata[m_id].flag.loadevent)
 		strcat(atcmd_output, " Loadevent |");
-	if (map[m_id].flag.nochmautojoin)
+	if (mapdata[m_id].flag.nochmautojoin)
 		strcat(atcmd_output, " NoChmAutoJoin |");
-	if (map[m_id].flag.nousecart)
+	if (mapdata[m_id].flag.nousecart)
 		strcat(atcmd_output, " NoUsecart |");
-	if (map[m_id].flag.noitemconsumption)
+	if (mapdata[m_id].flag.noitemconsumption)
 		strcat(atcmd_output, " NoItemConsumption |");
-	if (map[m_id].flag.nosumstarmiracle)
+	if (mapdata[m_id].flag.nosumstarmiracle)
 		strcat(atcmd_output, " NoSumStarMiracle |");
-	if (map[m_id].flag.nomineeffect)
+	if (mapdata[m_id].flag.nomineeffect)
 		strcat(atcmd_output, " NoMineEffect |");
-	if (map[m_id].flag.nolockon)
+	if (mapdata[m_id].flag.nolockon)
 		strcat(atcmd_output, " NoLockOn |");
-	if (map[m_id].flag.notomb)
+	if (mapdata[m_id].flag.notomb)
 		strcat(atcmd_output, " NoTomb |");
-	if (map[m_id].flag.nocashshop)
+	if (mapdata[m_id].flag.nocashshop)
 		strcat(atcmd_output, " NoCashShop |");
-	if (map[m_id].flag.nobanking)
+	if (mapdata[m_id].flag.nobanking)
 		strcat(atcmd_output, " NoBanking |");
-	if (map[m_id].flag.nocostume)
+	if (mapdata[m_id].flag.nocostume)
 		strcat(atcmd_output, " NoCostume |");
 	clif_displaymessage(fd, atcmd_output);
 
@@ -4244,8 +4244,8 @@ ACMD_FUNC(mapinfo)
 			break;
 		case 2:
 			clif_displaymessage(fd, msg_txt(482)); // ----- NPCs in Map -----
-			for (i = 0; i < map[m_id].npc_num;) {
-				struct npc_data *nd = map[m_id].npc[i];
+			for (i = 0; i < mapdata[m_id].npc_num;) {
+				struct npc_data *nd = mapdata[m_id].npc[i];
 
 				switch(nd->ud.dir) {
 					case DIR_NORTH:      strcpy(direction, msg_txt(491)); break;
@@ -4735,17 +4735,17 @@ char *txt_time(unsigned int duration)
  *------------------------------------------*/
 ACMD_FUNC(servertime)
 {
-	time_t time_server;  // Variable for number of seconds (used with time() function)
-	struct tm *datetime; // Variable for time in structure ->tm_mday, ->tm_sec, ...
+	time_t time_server; // Variable for number of seconds (used with time() function)
+	struct tm datetime; // Variable for time in structure .tm_mday, .tm_sec, ...
 	char temp[CHAT_SIZE_MAX];
 	nullpo_retr(-1, sd);
 
 	memset(temp, '\0', sizeof(temp));
 
-	time(&time_server);  // Get time in seconds since 1/1/1970
-	datetime = localtime(&time_server); // Convert seconds in structure
+	time_server = time(NULL); // Get time in seconds since 1/1/1970
+	localtime_r(&time_server, &datetime); // Convert seconds in structure
 	// Like sprintf, but only for date/time (Sunday, November 02 2003 15:12:52)
-	strftime(temp, sizeof(temp) - 1, msg_txt(230), datetime); // Server time (normal time): %A, %B %d %Y %X.
+	strftime(temp, sizeof(temp) - 1, msg_txt(230), &datetime); // Server time (normal time): %A, %B %d %Y %X.
 	clif_displaymessage(fd, temp);
 
 	if (day_timer_tid != INVALID_TIMER && night_timer_tid != INVALID_TIMER) {
@@ -5351,7 +5351,7 @@ ACMD_FUNC(killable)
 ACMD_FUNC(skillon)
 {
 	nullpo_retr(-1, sd);
-	map[sd->bl.m].flag.noskill = 0;
+	mapdata[sd->bl.m].flag.noskill = 0;
 	clif_displaymessage(fd, msg_txt(244)); // Skills have been enabled on this map.
 	return 0;
 }
@@ -5363,7 +5363,7 @@ ACMD_FUNC(skillon)
 ACMD_FUNC(skilloff)
 {
 	nullpo_retr(-1, sd);
-	map[sd->bl.m].flag.noskill = 1;
+	mapdata[sd->bl.m].flag.noskill = 1;
 	clif_displaymessage(fd, msg_txt(243)); // Skills have been disabled on this map.
 	return 0;
 }
@@ -5394,8 +5394,8 @@ ACMD_FUNC(npcmove)
 		return -1;	//Not on a map.
 	}
 
-	x = cap_value(x, 0, map[m].xs - 1);
-	y = cap_value(y, 0, map[m].ys - 1);
+	x = cap_value(x, 0, mapdata[m].xs - 1);
+	y = cap_value(y, 0, mapdata[m].ys - 1);
 	map_foreachinallrange(clif_outsight, &nd->bl, AREA_SIZE, BL_PC, &nd->bl);
 	map_moveblock(&nd->bl, x, y, gettick());
 	map_foreachinallrange(clif_insight, &nd->bl, AREA_SIZE, BL_PC, &nd->bl);
@@ -5935,7 +5935,7 @@ ACMD_FUNC(autotrade)
 {
 	nullpo_retr(-1, sd);
 
-	if( map[sd->bl.m].flag.autotrade != battle_config.autotrade_mapflag ) {
+	if( mapdata[sd->bl.m].flag.autotrade != battle_config.autotrade_mapflag ) {
 		clif_displaymessage(fd, msg_txt(1179)); // Autotrade is not allowed on this map.
 		return -1;
 	}
@@ -5993,7 +5993,7 @@ ACMD_FUNC(changegm)
 		return -1;
 	}
 
-	if( map[sd->bl.m].flag.guildlock || map[sd->bl.m].flag.gvg_castle ) {
+	if( mapdata[sd->bl.m].flag.guildlock || mapdata[sd->bl.m].flag.gvg_castle ) {
 		clif_displaymessage(fd, msg_txt(1182)); // You cannot change guild leaders on this map.
 		return -1;
 	}
@@ -6319,12 +6319,12 @@ ACMD_FUNC(autoloottype)
 //ACMD_FUNC(rain)
 //{
 //	nullpo_retr(-1, sd);
-//	if (map[sd->bl.m].flag.rain) {
-//		map[sd->bl.m].flag.rain = 0;
+//	if (mapdata[sd->bl.m].flag.rain) {
+//		mapdata[sd->bl.m].flag.rain = 0;
 //		clif_weather(sd->bl.m);
 //		clif_displaymessage(fd, msg_txt(1201)); // The rain has stopped.
 //	} else {
-//		map[sd->bl.m].flag.rain = 1;
+//		mapdata[sd->bl.m].flag.rain = 1;
 //		clif_weather(sd->bl.m);
 //		clif_displaymessage(fd, msg_txt(1202)); // It has started to rain.
 //	}
@@ -6338,12 +6338,12 @@ ACMD_FUNC(snow)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.snow) {
-		map[sd->bl.m].flag.snow = 0;
+	if (mapdata[sd->bl.m].flag.snow) {
+		mapdata[sd->bl.m].flag.snow = 0;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1203)); // Snow has stopped falling.
 	} else {
-		map[sd->bl.m].flag.snow = 1;
+		mapdata[sd->bl.m].flag.snow = 1;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1204)); // It has started to snow.
 	}
@@ -6358,12 +6358,12 @@ ACMD_FUNC(sakura)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.sakura) {
-		map[sd->bl.m].flag.sakura = 0;
+	if (mapdata[sd->bl.m].flag.sakura) {
+		mapdata[sd->bl.m].flag.sakura = 0;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1205)); // Cherry tree leaves no longer fall.
 	} else {
-		map[sd->bl.m].flag.sakura = 1;
+		mapdata[sd->bl.m].flag.sakura = 1;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1206)); // Cherry tree leaves have begun to fall.
 	}
@@ -6378,12 +6378,12 @@ ACMD_FUNC(clouds)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.clouds) {
-		map[sd->bl.m].flag.clouds = 0;
+	if (mapdata[sd->bl.m].flag.clouds) {
+		mapdata[sd->bl.m].flag.clouds = 0;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1207)); // The clouds has disappear.
 	} else {
-		map[sd->bl.m].flag.clouds = 1;
+		mapdata[sd->bl.m].flag.clouds = 1;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1208)); // Clouds appear.
 	}
@@ -6398,12 +6398,12 @@ ACMD_FUNC(clouds2)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.clouds2) {
-		map[sd->bl.m].flag.clouds2 = 0;
+	if (mapdata[sd->bl.m].flag.clouds2) {
+		mapdata[sd->bl.m].flag.clouds2 = 0;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1209)); // The alternative clouds disappear.
 	} else {
-		map[sd->bl.m].flag.clouds2 = 1;
+		mapdata[sd->bl.m].flag.clouds2 = 1;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1210)); // Alternative clouds appear.
 	}
@@ -6418,12 +6418,12 @@ ACMD_FUNC(fog)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.fog) {
-		map[sd->bl.m].flag.fog = 0;
+	if (mapdata[sd->bl.m].flag.fog) {
+		mapdata[sd->bl.m].flag.fog = 0;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1211)); // The fog has gone.
 	} else {
-		map[sd->bl.m].flag.fog = 1;
+		mapdata[sd->bl.m].flag.fog = 1;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1212)); // Fog hangs over.
 	}
@@ -6438,12 +6438,12 @@ ACMD_FUNC(leaves)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.leaves) {
-		map[sd->bl.m].flag.leaves = 0;
+	if (mapdata[sd->bl.m].flag.leaves) {
+		mapdata[sd->bl.m].flag.leaves = 0;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1213)); // Leaves no longer fall.
 	} else {
-		map[sd->bl.m].flag.leaves = 1;
+		mapdata[sd->bl.m].flag.leaves = 1;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1214)); // Fallen leaves fall.
 	}
@@ -6458,12 +6458,12 @@ ACMD_FUNC(fireworks)
 {
 	nullpo_retr(-1, sd);
 
-	if (map[sd->bl.m].flag.fireworks) {
-		map[sd->bl.m].flag.fireworks = 0;
+	if (mapdata[sd->bl.m].flag.fireworks) {
+		mapdata[sd->bl.m].flag.fireworks = 0;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1215)); // Fireworks have ended.
 	} else {
-		map[sd->bl.m].flag.fireworks = 1;
+		mapdata[sd->bl.m].flag.fireworks = 1;
 		clif_weather(sd->bl.m);
 		clif_displaymessage(fd, msg_txt(1216)); // Fireworks have launched.
 	}
@@ -6478,13 +6478,13 @@ ACMD_FUNC(clearweather)
 {
 	nullpo_retr(-1, sd);
 
-	map[sd->bl.m].flag.snow = 0;
-	map[sd->bl.m].flag.sakura = 0;
-	map[sd->bl.m].flag.clouds = 0;
-	map[sd->bl.m].flag.clouds2 = 0;
-	map[sd->bl.m].flag.fog = 0;
-	map[sd->bl.m].flag.fireworks = 0;
-	map[sd->bl.m].flag.leaves = 0;
+	mapdata[sd->bl.m].flag.snow = 0;
+	mapdata[sd->bl.m].flag.sakura = 0;
+	mapdata[sd->bl.m].flag.clouds = 0;
+	mapdata[sd->bl.m].flag.clouds2 = 0;
+	mapdata[sd->bl.m].flag.fog = 0;
+	mapdata[sd->bl.m].flag.fireworks = 0;
+	mapdata[sd->bl.m].flag.leaves = 0;
 	clif_weather(sd->bl.m);
 	clif_displaymessage(fd, msg_txt(291)); // Weather effects will dispell on warp/refresh
 
@@ -7843,7 +7843,7 @@ ACMD_FUNC(whereis)
 			j = map_mapindex2mapid(mob->spawn[i].mapindex);
 			if (j < 0)
 				continue;
-			snprintf(atcmd_output, sizeof atcmd_output, "%s (%d)", map[j].name, mob->spawn[i].qty);
+			snprintf(atcmd_output, sizeof atcmd_output, "%s (%d)", mapdata[j].name, mob->spawn[i].qty);
 			clif_displaymessage(fd, atcmd_output);
 		}
 		if (i == 0)
@@ -8126,10 +8126,10 @@ ACMD_FUNC(fakename)
  * Ragnarok Resources
  *------------------------------------------*/
 ACMD_FUNC(mapflag) {
-#define checkflag( cmd ) if ( map[ sd->bl.m ].flag.cmd ) clif_displaymessage(sd->fd,#cmd)
+#define checkflag( cmd ) if ( mapdata[ sd->bl.m ].flag.cmd ) clif_displaymessage(sd->fd,#cmd)
 #define setflag( cmd ) \
 	if ( strcmp( flag_name , #cmd ) == 0 ){\
-		map[ sd->bl.m ].flag.cmd = flag;\
+		mapdata[ sd->bl.m ].flag.cmd = flag;\
 		sprintf(atcmd_output,"[ @mapflag ] %s flag has been set to %s value = %hd",#cmd,flag?"On":"Off",flag);\
 		clif_displaymessage(sd->fd,atcmd_output);\
 		return 0;\
@@ -8659,11 +8659,11 @@ ACMD_FUNC(allowks)
 {
 	nullpo_retr(-1,sd);
 
-	if( map[sd->bl.m].flag.allowks ) {
-		map[sd->bl.m].flag.allowks = 0;
+	if( mapdata[sd->bl.m].flag.allowks ) {
+		mapdata[sd->bl.m].flag.allowks = 0;
 		clif_displaymessage(fd, msg_txt(1330)); // [ Map K.S Protection Active ]
 	} else {
-		map[sd->bl.m].flag.allowks = 1;
+		mapdata[sd->bl.m].flag.allowks = 1;
 		clif_displaymessage(fd, msg_txt(1331)); // [ Map K.S Protection Inactive ]
 	}
 	return 0;
@@ -10509,7 +10509,7 @@ bool is_atcommand(const int fd, struct map_session_data *sd, const char *message
 	// Type value 0|2 = script|console invoked: bypass restrictions
 	if (type == 1 || type == 3) {
 		// Commands are disabled on maps flagged as 'nocommand'
-		if (map[sd->bl.m].nocommand && pc_get_group_level(sd) < map[sd->bl.m].nocommand) {
+		if (mapdata[sd->bl.m].nocommand && pc_get_group_level(sd) < mapdata[sd->bl.m].nocommand) {
 			clif_displaymessage(fd, msg_txt(143));  // Commands are disabled on this map.
 			return false;
 		}

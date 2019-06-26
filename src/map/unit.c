@@ -296,7 +296,7 @@ TIMER_FUNC(unit_step_timer)
 	//If stepaction is set then we remembered a client request that should be executed on the next step
 	//Execute request now if target is in attack range
 	if(ud->stepskill_id && skill_get_inf(ud->stepskill_id)&INF_GROUND_SKILL) {
-		struct map_data *md = &map[bl->m];			
+		struct map_data *md = &mapdata[bl->m];
 
 		unit_skilluse_pos(bl,target_id%md->xs,target_id / md->xs,ud->stepskill_id,ud->stepskill_lv); //Execute ground skill
 	} else { //If a player has target_id set and target is in range, attempt attack
@@ -453,7 +453,7 @@ static TIMER_FUNC(unit_walktoxy_timer) {
 			//Walk skills are triggered regardless of target due to the idle-walk mob state
 			//But avoid triggering on stop-walk calls
 			if(tid != INVALID_TIMER && !(ud->walk_count%WALK_SKILL_INTERVAL) &&
-				map[bl->m].users > 0 && mobskill_use(md,tick,-1)) {
+				mapdata[bl->m].users > 0 && mobskill_use(md,tick,-1)) {
 				if(!(ud->skill_id == NPC_SELFDESTRUCTION && ud->skilltimer != INVALID_TIMER) &&
 					md->state.skillstate != MSS_WALK) //Walk skills are supposed to be used while walking
 				{ //Skill used, abort walking
@@ -1091,7 +1091,7 @@ int unit_blown(struct block_list *bl, int dx, int dy, int count, int flag)
  */
 int unit_blown_immune(struct block_list *bl, int flag)
 {
-	if ((flag&0x1) && (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) && ((flag&0x2) || !(battle_config.skill_trap_type&0x1)))
+	if ((flag&0x1) && (map_flag_gvg2(bl->m) || mapdata[bl->m].flag.battleground) && ((flag&0x2) || !(battle_config.skill_trap_type&0x1)))
 		return 1; //No knocking back in WoE / BG
 
 	switch (bl->type) {
@@ -1158,26 +1158,26 @@ int unit_warp(struct block_list *bl,short m,short x,short y,clr_type type)
 
 	switch (bl->type) {
 		case BL_MOB:
-			if (map[bl->m].flag.monster_noteleport && !((TBL_MOB *)bl)->master_id)
+			if (mapdata[bl->m].flag.monster_noteleport && !((TBL_MOB *)bl)->master_id)
 				return 1;
-			if (m != bl->m && map[m].flag.nobranch && battle_config.mob_warp&4 && !(((TBL_MOB *)bl)->master_id))
+			if (m != bl->m && mapdata[m].flag.nobranch && battle_config.mob_warp&4 && !(((TBL_MOB *)bl)->master_id))
 				return 1;
 			break;
 		case BL_PC:
-			if (map[bl->m].flag.noteleport)
+			if (mapdata[bl->m].flag.noteleport)
 				return 1;
 			break;
 	}
 
 	if (x < 0 || y < 0) { //Random map position
 		if (!map_search_freecell(NULL, m, &x, &y, -1, -1, 1)) {
-			ShowWarning("unit_warp failed. Unit Id:%d/Type:%d, target position map %d (%s) at [%d,%d]\n", bl->id, bl->type, m, map[m].name, x, y);
+			ShowWarning("unit_warp failed. Unit Id:%d/Type:%d, target position map %d (%s) at [%d,%d]\n", bl->id, bl->type, m, mapdata[m].name, x, y);
 			return 2;
 		}
 	} else if (bl->type != BL_NPC && map_getcell(m,x,y,CELL_CHKNOREACH)) { //Invalid target cell
-		ShowWarning("unit_warp: Specified non-walkable target cell: %d (%s) at [%d,%d]\n", m, map[m].name, x,y);
+		ShowWarning("unit_warp: Specified non-walkable target cell: %d (%s) at [%d,%d]\n", m, mapdata[m].name, x,y);
 		if (!map_search_freecell(NULL, m, &x, &y, 4, 4, 1)) { //Can't find a nearby cell
-			ShowWarning("unit_warp failed. Unit Id:%d/Type:%d, target position map %d (%s) at [%d,%d]\n", bl->id, bl->type, m, map[m].name, x, y);
+			ShowWarning("unit_warp failed. Unit Id:%d/Type:%d, target position map %d (%s) at [%d,%d]\n", bl->id, bl->type, m, mapdata[m].name, x, y);
 			return 2;
 		}
 	}
@@ -1982,7 +1982,7 @@ int unit_skilluse_pos2(struct block_list *src, short skill_x, short skill_y, uin
 		unit_stop_stepaction(src);
 	//Remember the skill request from the client while walking to the next cell
 	if( src->type == BL_PC && ud->walktimer != INVALID_TIMER && !battle_check_range(src, &bl, range - 1) ) {
-		struct map_data *md = &map[src->m];
+		struct map_data *md = &mapdata[src->m];
 
 		//Convert coordinates to target_to so we can use it as target later
 		ud->stepaction = true;
@@ -2627,7 +2627,7 @@ int unit_skillcastcancel(struct block_list *bl, uint8 type)
 			return 0;
 		if (sd && !sd->sc.data[SC_TOXIN] && (sd->special_state.no_castcancel2 ||
 			((sd->sc.data[SC_UNLIMITEDHUMMINGVOICE] || sd->special_state.no_castcancel) &&
-			!map_flag_gvg2(bl->m) && !map[bl->m].flag.battleground))) //Fixed flags being read the wrong way around [blackhole89]
+			!map_flag_gvg2(bl->m) && !mapdata[bl->m].flag.battleground))) //Fixed flags being read the wrong way around [blackhole89]
 			return 0;
 	}
 
@@ -2871,7 +2871,7 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 				party_send_dot_remove(sd); //Minimap dot fix [Kevin]
 				guild_send_dot_remove(sd);
 				bg_send_dot_remove(sd);
-				if (map[bl->m].users <= 0 || sd->state.debug_remove_map) {
+				if (mapdata[bl->m].users <= 0 || sd->state.debug_remove_map) {
 					//This is only place where map users is decreased.
 					//If the mobs were removed too soon then this function was executed too many times [FlavioJS]
 					if (sd->debug_file == NULL || !sd->state.debug_remove_map) {
@@ -2886,14 +2886,14 @@ int unit_remove_map_(struct block_list *bl, clr_type clrtype, const char *file, 
 						" Please report this!!!\n",
 						sd->status.account_id,sd->status.char_id,
 						sd->state.active,sd->state.connect_new,sd->state.rewarp,sd->state.changemap,sd->state.debug_remove_map,
-						map[bl->m].name,map[bl->m].users,
+						mapdata[bl->m].name,mapdata[bl->m].users,
 						sd->debug_file,sd->debug_line,sd->debug_func,file,line,func);
-				} else if (--map[bl->m].users == 0 && battle_config.dynamic_mobs) //[Skotlex]
+				} else if (--mapdata[bl->m].users == 0 && battle_config.dynamic_mobs) //[Skotlex]
 					map_removemobs(bl->m);
 				if (!pc_isinvisible(sd)) //Decrement the number of active pvp players on the map
-					--map[bl->m].users_pvp;
+					--mapdata[bl->m].users_pvp;
 				if (sd->state.hpmeter_visible) {
-					map[bl->m].hpmeter_visible--;
+					mapdata[bl->m].hpmeter_visible--;
 					sd->state.hpmeter_visible = 0;
 				}
 				sd->state.debug_remove_map = 1; //Temporary state to track double remove_map's [FlavioJS]
@@ -2989,7 +2989,7 @@ void unit_refresh(struct block_list *bl)
 
 	//Using here CLR_TRICKDEAD because other flags show effects
 	//Probably need use other flag or other way to refresh it
-	if (map[bl->m].users) {
+	if (mapdata[bl->m].users) {
 		clif_clearunit_area(bl,CLR_TRICKDEAD); //Fade out
 		clif_spawn(bl); //Fade in
 	}

@@ -3,6 +3,8 @@
 
 #include "../common/cbasetypes.h"
 #include "../common/strlib.h" // StringBuf
+#include "../common/timer.h"
+
 #include "showmsg.h"
 #include "core.h" //[Ind] - For SERVER_TYPE
 
@@ -694,9 +696,10 @@ int _vShowMessage(enum msg_type flag, const char *string, va_list ap)
 		FILE *log = NULL;
 		if( (log = fopen(console_log_filepath, "a+")) ) {
 			char timestring[255];
-			time_t curtime;
-			time(&curtime);
-			strftime(timestring, 254, "%m/%d/%Y %H:%M:%S", localtime(&curtime));
+			const time_t curtime = time(NULL);
+			struct tm now;
+			localtime_r(&curtime, &now);
+			strftime(timestring, 254, "%m/%d/%Y %H:%M:%S", &now);
 			fprintf(log,"(%s) [ %s ] : ",
 				timestring,
 				flag == MSG_WARNING ? "Warning" :
@@ -721,10 +724,11 @@ int _vShowMessage(enum msg_type flag, const char *string, va_list ap)
 	)
 		return 0; //Do not print it.
 
-	if (timestamp_format[0] && flag != MSG_NONE)
-	{	//Display time format. [Skotlex]
-		time_t t = time(NULL);
-		strftime(prefix, 80, timestamp_format, localtime(&t));
+	if (timestamp_format[0] && flag != MSG_NONE) { //Display time format. [Skotlex]
+		const time_t t = time(NULL);
+		struct tm now;
+		localtime_r(&t, &now);
+		strftime(prefix, 80, timestamp_format, &now);
 	} else prefix[0]='\0';
 
 	switch (flag) {

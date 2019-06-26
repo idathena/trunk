@@ -647,9 +647,9 @@ int party_member_withdraw(int party_id, uint32 account_id, uint32 char_id, char 
 			if( p->instance_id ) {
 				int16 m = sd->bl.m;
 
-				if( map[m].instance_id ) { //User was on the instance map
-					if( map[m].save.map )
-						pc_setpos(sd, map[m].save.map, map[m].save.x, map[m].save.y, CLR_TELEPORT);
+				if( mapdata[m].instance_id ) { //User was on the instance map
+					if( mapdata[m].save.map )
+						pc_setpos(sd, mapdata[m].save.map, mapdata[m].save.x, mapdata[m].save.y, CLR_TELEPORT);
 					else
 						pc_setpos(sd, sd->status.save_point.map, sd->status.save_point.x, sd->status.save_point.y, CLR_TELEPORT);
 				}
@@ -751,7 +751,7 @@ int party_changeleader(struct map_session_data *sd, struct map_session_data *tsd
 			return -3;
 		}
 
-		if (map[sd->bl.m].flag.partylock) {
+		if (mapdata[sd->bl.m].flag.partylock) {
 			clif_displaymessage(sd->fd, msg_txt(287));
 			return 0;
 		}

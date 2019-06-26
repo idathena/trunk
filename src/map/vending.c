@@ -356,7 +356,7 @@ int8 vending_openvending(struct map_session_data *sd, const char *message, const
 	Sql_EscapeString(mmysql_handle, message_sql, sd->message);
 
 	if( Sql_Query(mmysql_handle, "INSERT INTO `%s`(`id`,`account_id`,`char_id`,`sex`,`map`,`x`,`y`,`title`,`autotrade`,`body_direction`,`head_direction`,`sit`) VALUES(%d, %d, %d, '%c', '%s', %d, %d, '%s', %d, '%d', '%d', '%d');",
-		vendings_db, sd->vender_id, sd->status.account_id, sd->status.char_id, (!sd->status.sex ? 'F' : 'M'), map[sd->bl.m].name, sd->bl.x, sd->bl.y, message_sql, sd->state.autotrade, (at ? at->dir : sd->ud.dir), (at ? at->head_dir : sd->head_dir), (at ? at->sit : pc_issit(sd))) != SQL_SUCCESS )
+		vendings_db, sd->vender_id, sd->status.account_id, sd->status.char_id, (!sd->status.sex ? 'F' : 'M'), mapdata[sd->bl.m].name, sd->bl.x, sd->bl.y, message_sql, sd->state.autotrade, (at ? at->dir : sd->ud.dir), (at ? at->head_dir : sd->head_dir), (at ? at->sit : pc_issit(sd))) != SQL_SUCCESS )
 		Sql_ShowDebug(mmysql_handle);
 
 	StringBuf_Init(&buf);
