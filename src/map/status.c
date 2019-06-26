@@ -2551,7 +2551,7 @@ void status_get_matk_sub(struct block_list *bl, unsigned short *matk_max, unsign
 		}
 	}
 
-	if( sc && sc->count ) {
+	if( !flag && sc && sc->count ) {
 		/* Another SC modifier goes here */
 		if( sc->data[SC_RECOGNIZEDSPELL] )
 			same_matk = true;
@@ -2571,8 +2571,10 @@ void status_get_matk_sub(struct block_list *bl, unsigned short *matk_max, unsign
 	}
 #endif
 
-	*matk_min = status_calc_matk(bl, sc, *matk_min, false);
-	*matk_max = status_calc_matk(bl, sc, *matk_max, false);
+	if( !flag ) {
+		*matk_min = status_calc_matk(bl, sc, *matk_min, false);
+		*matk_max = status_calc_matk(bl, sc, *matk_max, false);
+	}
 }
 
 /**
@@ -2721,7 +2723,7 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 	}
 #endif
 	//Matk
-	status_get_matk_sub(bl, &status->matk_max, &status->matk_min, 0);
+	status_get_matk_sub(bl, &status->matk_max, &status->matk_min, 3);
 
 	//Critical
 	if( bl->type&battle_config.enable_critical ) {

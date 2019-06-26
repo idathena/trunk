@@ -223,7 +223,7 @@ int main(int argc, char **argv)
 
 			SERVER_NAME = ++p1;
 			n = p1 - argv[0]; // Calc dir name len
-			pwd = safestrncpy((char *)malloc(n + 1), argv[0], n);
+			pwd = safestrncpy((char *)malloc(sizeof(char) * (n + 1)), argv[0], n);
 			if( chdir(pwd) != 0 )
 				ShowError("Couldn't change working directory to %s for %s, runtime will probably fail", pwd, SERVER_NAME);
 			free(pwd);
