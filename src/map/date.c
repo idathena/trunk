@@ -1,6 +1,8 @@
 // Copyright (c) Athena Dev Teams - Licensed under GNU GPL
 // For more information, see LICENCE in the main folder
 
+#include "../common/timer.h"
+
 #include "date.h"
 #include <time.h>
 
@@ -12,7 +14,7 @@ int date_get_year(void)
 	const time_t t = time(NULL);
 	struct tm lt;
 
-	localtime_s(&lt, &t);
+	localtime_r(&t, &lt);
 	return lt.tm_year + 1900;
 }
 
@@ -24,7 +26,7 @@ enum e_month date_get_month(void)
 	const time_t t = time(NULL);
 	struct tm lt;
 
-	localtime_s(&lt, &t);
+	localtime_r(&t, &lt);
 	return (enum e_month)(lt.tm_mon + 1);
 }
 
@@ -36,7 +38,7 @@ int date_get_dayofmonth(void)
 	const time_t t = time(NULL);
 	struct tm lt;
 
-	localtime_s(&lt, &t);
+	localtime_r(&t, &lt);
 	return lt.tm_mday;
 }
 
@@ -48,7 +50,7 @@ enum e_dayofweek date_get_dayofweek(void)
 	const time_t t = time(NULL);
 	struct tm lt;
 
-	localtime_s(&lt, &t);
+	localtime_r(&t, &lt);
 	return (enum e_dayofweek)lt.tm_wday;
 }
 
@@ -60,7 +62,7 @@ int date_get_dayofyear(void)
 	const time_t t = time(NULL);
 	struct tm lt;
 
-	localtime_s(&lt, &t);
+	localtime_r(&t, &lt);
 	return lt.tm_yday;
 }
 
@@ -72,7 +74,7 @@ int date_get_hour(void)
 	const time_t t = time(NULL);
 	struct tm lt;
 
-	localtime_s(&lt, &t);
+	localtime_r(&t, &lt);
 	return lt.tm_hour;
 }
 
@@ -84,7 +86,7 @@ int date_get_min(void)
 	const time_t t = time(NULL);
 	struct tm lt;
 
-	localtime_s(&lt, &t);
+	localtime_r(&t, &lt);
 	return lt.tm_min;
 }
 
@@ -96,7 +98,7 @@ int date_get_sec(void)
 	const time_t t = time(NULL);
 	struct tm lt;
 
-	localtime_s(&lt, &t);
+	localtime_r(&t, &lt);
 	return lt.tm_sec;
 }
 

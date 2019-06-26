@@ -121,7 +121,7 @@ int quest_add(struct map_session_data *sd, int quest_id) {
 			const time_t t = time(NULL);
 			struct tm lt;
 
-			localtime_s(&lt, &t);
+			localtime_r(&t, &lt);
 			time_today = lt.tm_hour * 3600 + lt.tm_min * 60 + lt.tm_sec;
 			if( time_today < qi->time )
 				sd->quest_log[n].time = (unsigned int)(time(NULL) + qi->time - time_today);
@@ -185,7 +185,7 @@ int quest_change(struct map_session_data *sd, int qid1, int qid2) {
 			const time_t t = time(NULL);
 			struct tm lt;
 
-			localtime_s(&lt, &t);
+			localtime_r(&t, &lt);
 			time_today = lt.tm_hour * 3600 + lt.tm_min * 60 + lt.tm_sec;
 			if( time_today < qi->time )
 				sd->quest_log[i].time = (unsigned int)(time(NULL) + qi->time - time_today);

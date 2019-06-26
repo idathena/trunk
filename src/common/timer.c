@@ -406,6 +406,14 @@ unsigned long get_uptime(void)
 	return (unsigned long)difftime(time(NULL), start_time);
 }
 
+#ifdef WIN32
+struct tm *localtime_r(const time_t *_clock, struct tm *_result)
+{
+    localtime_s(_result, _clock);
+    return _result;
+}
+#endif
+
 /**
  * Converting a timestamp is a srintf according to format
  * safefr then strftime as it ensure \0 at end of string
@@ -420,7 +428,7 @@ const char *timestamp2string(char *str, size_t size, const time_t timestamp, con
 	struct tm now;
 	size_t len;
 
-	localtime_s(&now, &timestamp);
+	localtime_r(&timestamp, &now);
 	len = strftime(str, size, format, &now);
 	memset(str + len, '\0', size - len);
 	return str;
@@ -469,7 +477,7 @@ double solve_time(char *modif_p)
 
 	nullpo_retr(0,modif_p);
 
-	localtime_s(&then_tm,&then);
+	localtime_r(&then,&then_tm);
 
 	while (modif_p[0] != '\0') {
 		int value = atoi(modif_p);

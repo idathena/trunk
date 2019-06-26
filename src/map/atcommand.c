@@ -4743,7 +4743,7 @@ ACMD_FUNC(servertime)
 	memset(temp, '\0', sizeof(temp));
 
 	time_server = time(NULL); // Get time in seconds since 1/1/1970
-	localtime_s(&datetime, &time_server); // Convert seconds in structure
+	localtime_r(&time_server, &datetime); // Convert seconds in structure
 	// Like sprintf, but only for date/time (Sunday, November 02 2003 15:12:52)
 	strftime(temp, sizeof(temp) - 1, msg_txt(230), &datetime); // Server time (normal time): %A, %B %d %Y %X.
 	clif_displaymessage(fd, temp);

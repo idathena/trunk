@@ -12559,7 +12559,7 @@ void pc_check_expiration(struct map_session_data *sd) {
 		struct tm now;
 		char tmpstr[1024];
 
-		localtime_s(&now, &exp_time);
+		localtime_r(&exp_time, &now);
 		strftime(tmpstr,sizeof(tmpstr) - 1,msg_txt(501),&now); // "Your account time limit is: %d-%m-%Y %H:%M:%S."
 		clif_wis_message(sd->fd,wisp_server_name,tmpstr,strlen(tmpstr));
 

@@ -1092,7 +1092,7 @@ int chrif_ban(int fd) {
 		char tmpstr[256];
 		char strtime[25];
 
-		localtime_s(&now, &timestamp);
+		localtime_r(&timestamp, &now);
 		strftime(strtime, 24, "%d-%m-%Y %H:%M:%S", &now);
 		safesnprintf(tmpstr, sizeof(tmpstr), msg_txt(423), (res == 2 ? "char" : "account"), strtime); // "Your %s has been banished until %s "
 		clif_displaymessage(sd->fd, tmpstr);

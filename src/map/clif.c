@@ -21414,7 +21414,7 @@ void DumpUnknow(int fd, TBL_PC *sd, int cmd, int packet_len) {
 	struct tm datetime;
 	char datestr[512];
 
-	localtime_s(&datetime, &time_server); //Convert seconds in structure
+	localtime_r(&time_server, &datetime); //Convert seconds in structure
 	//Like sprintf, but only for date/time (Sunday, November 02 2003 15:12:52)
 	strftime(datestr, sizeof(datestr) - 1, "%A, %B %d %Y %X.", &datetime); //Server time (normal time): %A, %B %d %Y %X.
 

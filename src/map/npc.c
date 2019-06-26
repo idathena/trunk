@@ -520,7 +520,7 @@ TIMER_FUNC(npc_event_do_clock)
 	char buf[EVENT_NAME_LENGTH];
 	int c = 0;
 
-	localtime_s(&t, &timer);
+	localtime_r(&timer, &t);
 	if (t.tm_min != ev_tm_b.tm_min ) {
 		const char *day = NULL;
 
@@ -1279,7 +1279,7 @@ void run_tomb(struct map_session_data *sd, struct npc_data *nd)
 	char buffer[200];
     char time[10];
 
-	localtime_s(&now, &nd->u.tomb.kill_time);
+	localtime_r(&nd->u.tomb.kill_time, &now);
     strftime(time, sizeof(time), "%H:%M", &now);
 
 	snprintf(buffer, sizeof(buffer), msg_txt(657), nd->u.tomb.md->db->name);

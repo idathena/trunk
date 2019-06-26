@@ -187,14 +187,14 @@ void log_branch(struct map_session_data *sd)
 		SqlStmt_Free(stmt);
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_branch, "a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp,"%s - %s[%d:%d]\t%s\n", timestring, sd->status.name, sd->status.account_id, sd->status.char_id, mapindex_id2name(sd->mapindex));
 		fclose(logfp);
@@ -243,14 +243,14 @@ void log_pick(int id, int16 m, e_log_pick_type type, int amount, struct item *it
 		StringBuf_Destroy(&buf);
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_pick, "a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp,"%s - %d\t%c\t%hu,%d,%d,%hu,%hu,%hu,%hu,%s,'%"PRIu64"',%d\n", timestring, id, log_picktype2char(type), itm->nameid, amount, itm->refine, itm->card[0], itm->card[1], itm->card[2], itm->card[3], (mapdata[m].name[0] ? mapdata[m].name : ""), itm->unique_id, itm->bound);
 		fclose(logfp);
@@ -289,14 +289,14 @@ void log_zeny(struct map_session_data *sd, e_log_pick_type type, struct map_sess
 		}
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_zeny, "a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp, "%s - %s[%d]\t%s[%d]\t%d\t\n", timestring, src_sd->status.name, src_sd->status.account_id, sd->status.name, sd->status.account_id, amount);
 		fclose(logfp);
@@ -321,14 +321,14 @@ void log_mvpdrop(struct map_session_data *sd, int monster_id, unsigned int *log_
 		}
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_mvpdrop,"a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp,"%s - %s[%d:%d]\t%d\t%hu,%u\n", timestring, sd->status.name, sd->status.account_id, sd->status.char_id, monster_id, log_mvp[0], log_mvp[1]);
 		fclose(logfp);
@@ -361,14 +361,14 @@ void log_atcommand(struct map_session_data *sd, const char *message)
 		SqlStmt_Free(stmt);
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_gm, "a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp, "%s - %s[%d]: %s\n", timestring, sd->status.name, sd->status.account_id, message);
 		fclose(logfp);
@@ -400,14 +400,14 @@ void log_npc(struct map_session_data *sd, const char *message)
 		SqlStmt_Free(stmt);
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_npc, "a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp, "%s - %s[%d]: %s\n", timestring, sd->status.name, sd->status.account_id, message);
 		fclose(logfp);
@@ -438,14 +438,14 @@ void log_npc2(struct npc_data *nd, const char *message) {
 		SqlStmt_Free(stmt);
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_npc, "a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp, "%s - %s: %s\n", timestring, nd->name, message);
 		fclose(logfp);
@@ -478,14 +478,14 @@ void log_chat(e_log_chat_type type, int type_id, int src_charid, int src_accid, 
 		SqlStmt_Free(stmt);
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_chat, "a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp, "%s - %c,%d,%d,%d,%s,%d,%d,%s,%s\n", timestring, log_chattype2char(type), type_id, src_charid, src_accid, mapname, x, y, dst_charname, message);
 		fclose(logfp);
@@ -509,14 +509,14 @@ void log_cash(struct map_session_data *sd, e_log_pick_type type, e_log_cash_type
 		}
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_cash, "a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp, "%s - %s[%d]\t%d(%c)\t\n", timestring, sd->status.name, sd->status.account_id, amount, log_cashtype2char(cash_type));
 		fclose(logfp);
@@ -564,14 +564,14 @@ void log_feeding(struct map_session_data *sd, e_log_feeding_type type, unsigned 
 		}
 	} else {
 		char timestring[255];
-		const time_t curtime = time(NULL);
+		time_t curtime;
 		struct tm now;
 		FILE *logfp;
 
 		if( (logfp = fopen(log_config.log_feeding, "a")) == NULL )
 			return;
-		
-		localtime_s(&now, &curtime);
+		curtime = time(NULL);
+		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
 		fprintf(logfp, "%s - %s[%d]\t%d\t%d(%c)\t%d\t%hu\t%s\t%hu,%hu\n", timestring, sd->status.name, sd->status.char_id, target_id, target_class, log_feedingtype2char(type), intimacy, nameid, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y);
 		fclose(logfp);

@@ -9168,7 +9168,7 @@ BUILDIN_FUNC(gettimetick) /* Asgard Version */
 				const time_t timer = time(NULL);
 				struct tm t;
 
-				localtime_s(&t, &timer);
+				localtime_r(&timer, &t);
 				script_pushint(st,(t.tm_hour * 3600 + t.tm_min * 60 + t.tm_sec));
 			}
 			break;
@@ -9239,7 +9239,7 @@ BUILDIN_FUNC(gettimestr)
 		now = time(NULL);
 
 	tmpstr = (char *)aMalloc((maxlen + 1) * sizeof(char));
-	localtime_s(&datetime, &now);
+	localtime_r(&now, &datetime);
 	strftime(tmpstr, maxlen, fmtstr, &datetime);
 	tmpstr[maxlen] = '\0';
 
