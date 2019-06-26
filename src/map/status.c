@@ -65,7 +65,7 @@ short current_equip_opt_index; /// Contains random option index of an equipped i
 
 unsigned int SCDisabled[SC_MAX]; /// List of disabled SC on map zones [Cydh]
 static bool status_change_isDisabledOnMap_(sc_type type, bool mapIsVS, bool mapIsPVP, bool mapIsGVG, bool mapIsBG, unsigned int mapZone, bool mapIsTE);
-#define status_change_isDisabledOnMap(type, m) ( status_change_isDisabledOnMap_((type), map_flag_vs2((m)), map[(m)].flag.pvp, map_flag_gvg2_no_te((m)), map[(m)].flag.battleground, map[(m)].zone << 3, map_flag_gvg2_te((m))) )
+#define status_change_isDisabledOnMap(type, m) ( status_change_isDisabledOnMap_((type), map_flag_vs2((m)), mapdata[(m)].flag.pvp, map_flag_gvg2_no_te((m)), mapdata[(m)].flag.battleground, mapdata[(m)].zone << 3, map_flag_gvg2_te((m))) )
 
 sc_type SkillStatusChangeTable[MAX_SKILL];
 int StatusIconChangeTable[SC_MAX];
@@ -1657,7 +1657,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 			status_change_end(target, SC_SUHIDE, INVALID_TIMER);
 			//Endure count is only reduced by non-players on non-gvg maps
 			if ((sce = sc->data[SC_ENDURE]) && !sce->val4 && //val4 signals infinite endure [Skotlex]
-				src && src->type != BL_PC && !map_flag_gvg2(target->m) && !map[target->m].flag.battleground && --(sce->val2) <= 0)
+				src && src->type != BL_PC && !map_flag_gvg2(target->m) && !mapdata[target->m].flag.battleground && --(sce->val2) <= 0)
 				status_change_end(target, SC_ENDURE, INVALID_TIMER);
 			if ((sce = sc->data[SC_GRAVITATION]) && sce->val3 == BCT_SELF) {
 				struct skill_unit_group *group = skill_id2group(sce->val4);
@@ -2897,8 +2897,8 @@ int status_calc_mob_(struct mob_data *md, enum e_status_calc_opt opt)
 	if (flag&4) { //Strengthen Guardians
 		struct guild_castle *gc = NULL;
 
-		if (!(gc = guild_mapname2gc(map[md->bl.m].name)))
-			ShowError("status_calc_mob: No castle set at map %s\n", map[md->bl.m].name);
+		if (!(gc = guild_mapname2gc(mapdata[md->bl.m].name)))
+			ShowError("status_calc_mob: No castle set at map %s\n", mapdata[md->bl.m].name);
 		else if (gc->castle_id < 24 && gc->castle_id > 33) {
 			if (md->mob_id == MOBID_EMPERIUM) {
 #ifdef RENEWAL
@@ -6061,7 +6061,7 @@ short status_calc_flee(struct block_list *bl, struct status_change *sc, int flee
 	if(bl->type == BL_PC) {
 		if(map_flag_gvg2(bl->m))
 			flee -= flee * battle_config.gvg_flee_penalty / 100;
-		else if(map[bl->m].flag.battleground)
+		else if(mapdata[bl->m].flag.battleground)
 			flee -= flee * battle_config.bg_flee_penalty / 100;
 	}
 
@@ -6987,7 +6987,7 @@ unsigned short status_calc_dmotion(struct block_list *bl, struct status_change *
 		return 0; //It has been confirmed on official servers that mvp mobs have no dmotion even without endure
 	if(bl->type == BL_PC && ((TBL_PC *)bl)->special_state.no_walkdelay)
 		return 0;
-	if(!sc || !sc->count || map_flag_gvg2(bl->m) || map[bl->m].flag.battleground)
+	if(!sc || !sc->count || map_flag_gvg2(bl->m) || mapdata[bl->m].flag.battleground)
 		return (unsigned short)cap_value(dmotion,0,USHRT_MAX);
 	if(sc->data[SC_ENDURE] || sc->data[SC_RUN] || sc->data[SC_WUGDASH])
 		return 0;
@@ -9269,7 +9269,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_ENDURE:
 				val2 = 7; //Hit-count [Celest]
-				if( !(flag&SCFLAG_NOAVOID) && (bl->type&(BL_PC|BL_MER)) && !map_flag_gvg2(bl->m) && !map[bl->m].flag.battleground && !val4 ) {
+				if( !(flag&SCFLAG_NOAVOID) && (bl->type&(BL_PC|BL_MER)) && !map_flag_gvg2(bl->m) && !mapdata[bl->m].flag.battleground && !val4 ) {
 					struct map_session_data *tsd = NULL;
 
 					if( sd ) {
@@ -9572,7 +9572,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				if( sc->data[SC_SPIRIT] && sc->data[SC_SPIRIT]->val2 == SL_ROGUE )
 					val3 -= 40;
 				val4 = 10 + val1 * 2; //SP cost
-				if( map_flag_gvg2(bl->m) || map[bl->m].flag.battleground )
+				if( map_flag_gvg2(bl->m) || mapdata[bl->m].flag.battleground )
 					val4 *= 5;
 				break;
 			case SC_CLOAKING:
@@ -9743,7 +9743,7 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 
 					if( (d_bl = map_id2bl(val1)) && (d_sc = status_get_sc(d_bl)) && d_sc->count ) { //Inherits status from source
 						const enum sc_type types[] = { SC_AUTOGUARD,SC_REFLECTSHIELD,SC_DEFENDER,SC_ENDURE };
-						int i = (map_flag_gvg2(bl->m) || map[bl->m].flag.battleground) ? 2 : 3;
+						int i = (map_flag_gvg2(bl->m) || mapdata[bl->m].flag.battleground) ? 2 : 3;
 
 						while( i >= 0 ) {
 							enum sc_type type2 = types[i];
@@ -14244,11 +14244,11 @@ void status_change_clear_onChangeMap(struct block_list *bl, struct status_change
 	if (sc && sc->count) {
 		unsigned short i;
 		bool mapIsVS = map_flag_vs2(bl->m);
-		bool mapIsPVP = map[bl->m].flag.pvp;
+		bool mapIsPVP = mapdata[bl->m].flag.pvp;
 		bool mapIsGVG = map_flag_gvg2_no_te(bl->m);
-		bool mapIsBG = map[bl->m].flag.battleground;
+		bool mapIsBG = mapdata[bl->m].flag.battleground;
 		bool mapIsTE = map_flag_gvg2_te(bl->m);
-		unsigned int mapZone = map[bl->m].zone<<3;
+		unsigned int mapZone = mapdata[bl->m].zone<<3;
 
 		for (i = 0; i < SC_MAX; i++) {
 			if (!sc->data[i] || !SCDisabled[i])

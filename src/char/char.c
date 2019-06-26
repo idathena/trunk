@@ -2597,7 +2597,7 @@ void loginif_on_ready(void)
 	send_accounts_tologin(INVALID_TIMER, gettick(), 0, 0);
 
 	// If no map-server already connected, display a message...
-	ARR_FIND(0, ARRAYLENGTH(server), i, server[i].fd > 0 && server[i].map);
+	ARR_FIND(0, ARRAYLENGTH(server), i, server[i].fd > 0 && server[i].mapdata);
 	if( i == ARRAYLENGTH(server) )
 		ShowStatus("Awaiting maps from map-server.\n");
 }
@@ -3150,14 +3150,14 @@ static void char_send_maps(int fd, int map_id, int count, unsigned char *mapbuf)
 		if (server[x].fd > 0 && x != map_id) {
 			uint16 i, j;
 
-			WFIFOHEAD(fd,10 + 4 * ARRAYLENGTH(server[x].map));
+			WFIFOHEAD(fd,10 + 4 * ARRAYLENGTH(server[x].mapdata));
 			WFIFOW(fd,0) = 0x2b04;
 			WFIFOL(fd,4) = htonl(server[x].ip);
 			WFIFOW(fd,8) = htons(server[x].port);
 			j = 0;
-			for (i = 0; i < ARRAYLENGTH(server[x].map); i++)
-				if (server[x].map[i])
-					WFIFOW(fd,10 + (j++) * 4) = server[x].map[i];
+			for (i = 0; i < ARRAYLENGTH(server[x].mapdata); i++)
+				if (server[x].mapdata[i])
+					WFIFOW(fd,10 + (j++) * 4) = server[x].mapdata[i];
 			if (j > 0) {
 				WFIFOW(fd,2) = j * 4 + 10;
 				WFIFOSET(fd,WFIFOW(fd,2));
@@ -3221,8 +3221,8 @@ void mapif_server_reset(int id)
 	WBUFW(buf,8) = htons(server[id].port);
 	j = 0;
 	for( i = 0; i < MAX_MAP_PER_SERVER; i++ )
-		if( server[id].map[i] )
-			WBUFW(buf,10 + (j++) * 4) = server[id].map[i];
+		if( server[id].mapdata[i] )
+			WBUFW(buf,10 + (j++) * 4) = server[id].mapdata[i];
 	if( j > 0 ) {
 		WBUFW(buf,2) = j * 4 + 10;
 		mapif_sendallwos(fd, buf, WBUFW(buf,2));
@@ -3482,10 +3482,10 @@ int parse_frommap(int fd)
 				if( RFIFOREST(fd) < 4 || RFIFOREST(fd) < RFIFOW(fd,2) )
 					return 0;
 
-				memset(server[id].map, 0, sizeof(server[id].map));
+				memset(server[id].mapdata, 0, sizeof(server[id].mapdata));
 				j = 0;
 				for( i = 4; i < RFIFOW(fd,2); i += 4 ) {
-					server[id].map[j] = RFIFOW(fd,i);
+					server[id].mapdata[j] = RFIFOW(fd,i);
 					j++;
 				}
 
@@ -4134,8 +4134,8 @@ int search_mapserver(unsigned short map, uint32 ip, uint16 port)
 		&& (ip == (uint32)-1 || server[i].ip == ip)
 		&& (port == (uint16)-1 || server[i].port == port))
 		{
-			for (j = 0; server[i].map[j]; j++)
-				if (server[i].map[j] == map)
+			for (j = 0; server[i].mapdata[j]; j++)
+				if (server[i].mapdata[j] == map)
 					return i;
 		}
 	}
@@ -4501,7 +4501,7 @@ int parse_char(int fd)
 					int slot = RFIFOB(fd,2);
 
 					RFIFOSKIP(fd,3);
-					ARR_FIND(0,ARRAYLENGTH(server),server_id,server[server_id].fd > 0 && server[server_id].map);
+					ARR_FIND(0,ARRAYLENGTH(server),server_id,server[server_id].fd > 0 && server[server_id].mapdata);
 					//Not available, tell it to wait (client wont close; char select will respawn)
 					//Magic response found by Ind thanks to Yommy <3
 					if( server_id == ARRAYLENGTH(server) ) {
@@ -4573,7 +4573,7 @@ int parse_char(int fd)
 						unsigned short j;
 
 						//First check that there's actually a map server online
-						ARR_FIND(0,ARRAYLENGTH(server),j,server[j].fd >= 0 && server[j].map);
+						ARR_FIND(0,ARRAYLENGTH(server),j,server[j].fd >= 0 && server[j].mapdata);
 						if( j == ARRAYLENGTH(server) ) {
 							ShowInfo("Connection Closed. No map servers available.\n");
 							WFIFOHEAD(fd,3);
@@ -4893,7 +4893,7 @@ int parse_char(int fd)
 						server[i].ip = ntohl(RFIFOL(fd,54));
 						server[i].port = ntohs(RFIFOW(fd,58));
 						server[i].users = 0;
-						memset(server[i].map,0,sizeof(server[i].map));
+						memset(server[i].mapdata,0,sizeof(server[i].mapdata));
 						session[fd]->func_parse = parse_frommap;
 						session[fd]->flag.server = 1;
 						realloc_fifo(fd,FIFOSIZE_SERVERLINK,FIFOSIZE_SERVERLINK);

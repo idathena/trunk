@@ -118,12 +118,11 @@ int quest_add(struct map_session_data *sd, int quest_id) {
 			sd->quest_log[n].time = (unsigned int)(time(NULL) + qi->time);
 		else { //Quest time limit at HH:MM
 			int time_today;
-			time_t t;
-			struct tm *lt;
+			const time_t t = time(NULL);
+			struct tm lt;
 
-			t = time(NULL);
-			lt = localtime(&t);
-			time_today = lt->tm_hour * 3600 + lt->tm_min * 60 + lt->tm_sec;
+			localtime_s(&lt, &t);
+			time_today = lt.tm_hour * 3600 + lt.tm_min * 60 + lt.tm_sec;
 			if( time_today < qi->time )
 				sd->quest_log[n].time = (unsigned int)(time(NULL) + qi->time - time_today);
 			else //Next day
@@ -183,12 +182,11 @@ int quest_change(struct map_session_data *sd, int qid1, int qid2) {
 			sd->quest_log[i].time = (unsigned int)(time(NULL) + qi->time);
 		else { //Quest time limit at HH:MM
 			int time_today;
-			time_t t;
-			struct tm *lt;
+			const time_t t = time(NULL);
+			struct tm lt;
 
-			t = time(NULL);
-			lt = localtime(&t);
-			time_today = lt->tm_hour * 3600 + lt->tm_min * 60 + lt->tm_sec;
+			localtime_s(&lt, &t);
+			time_today = lt.tm_hour * 3600 + lt.tm_min * 60 + lt.tm_sec;
 			if( time_today < qi->time )
 				sd->quest_log[i].time = (unsigned int)(time(NULL) + qi->time - time_today);
 			else //Next day

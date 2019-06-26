@@ -415,9 +415,13 @@ unsigned long get_uptime(void)
  * @param format, format to convert timestamp on, see strftime format
  * @return the string of timestamp
  */
-const char *timestamp2string(char *str, size_t size, time_t timestamp, const char *format)
+const char *timestamp2string(char *str, size_t size, const time_t timestamp, const char *format)
 {
-	size_t len = strftime(str, size, format, localtime(&timestamp));
+	struct tm now;
+	size_t len;
+
+	localtime_s(&now, &timestamp);
+	len = strftime(str, size, format, &now);
 	memset(str + len, '\0', size - len);
 	return str;
 }
@@ -459,12 +463,13 @@ void split_time(int timein, int *year, int *month, int *day, int *hour, int *min
 double solve_time(char *modif_p)
 {
 	double totaltime = 0;
-	struct tm then_tm;
-	time_t now = time(NULL);
+	const time_t now = time(NULL);
 	time_t then = now;
-	then_tm = *localtime(&then);
+	struct tm then_tm;
 
 	nullpo_retr(0,modif_p);
+
+	localtime_s(&then_tm,&then);
 
 	while (modif_p[0] != '\0') {
 		int value = atoi(modif_p);

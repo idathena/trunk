@@ -23,13 +23,11 @@ int duel_count = 0; //number of duel active
  */
 void duel_savetime(struct map_session_data *sd)
 {
-	time_t timer;
-	struct tm *t;
+	const time_t timer = time(NULL);
+	struct tm t;
 
-	time(&timer);
-	t = localtime(&timer);
-
-	pc_setglobalreg(sd, "PC_LAST_DUEL_TIME", t->tm_mday*24*60 + t->tm_hour*60 + t->tm_min);
+	localtime_s(&t, &timer);
+	pc_setglobalreg(sd, "PC_LAST_DUEL_TIME", t.tm_mday * 24 * 60 + t.tm_hour * 60 + t.tm_min);
 }
 
 /**
@@ -37,14 +35,12 @@ void duel_savetime(struct map_session_data *sd)
  */
 int duel_checktime(struct map_session_data *sd)
 {
+	const time_t timer = time(NULL);
+	struct tm t;
 	int diff;
-	time_t timer;
-	struct tm *t;
 
-	time(&timer);
-	t = localtime(&timer);
-
-	diff = t->tm_mday*24*60 + t->tm_hour*60 + t->tm_min - pc_readglobalreg(sd, "PC_LAST_DUEL_TIME");
+	localtime_s(&t, &timer);
+	diff = t.tm_mday * 24 * 60 + t.tm_hour * 60 + t.tm_min - pc_readglobalreg(sd, "PC_LAST_DUEL_TIME");
 
 	return !(diff >= 0 && diff < battle_config.duel_time_interval);
 }

@@ -52,7 +52,7 @@ int add_timer_func_list(TimerFunc func, char *name);
 
 unsigned long get_uptime(void);
 
-const char *timestamp2string(char *str, size_t size, time_t timestamp, const char *format);
+const char *timestamp2string(char *str, size_t size, const time_t timestamp, const char *format);
 void split_time(int time, int *year, int *month, int *day, int *hour, int *minute, int *second);
 double solve_time(char *modif_p);
 

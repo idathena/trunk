@@ -28,7 +28,7 @@
 #define INSTANCE_INTERVAL 60000 // Interval used to check when an instance is to be destroyed (ms)
 #define INSTANCE_LIMIT 300000 // Idle timer before instance is destroyed (ms) : 5 Minute Default
 
-int instance_start = 0; // To keep the last index + 1 of normal map inserted in the map[ARRAY]
+int instance_start = 0; // To keep the last index + 1 of normal map inserted in the mapdata[ARRAY]
 
 struct instance_data instance_data[MAX_INSTANCE_DATA];
 
@@ -254,11 +254,11 @@ void instance_addnpc(struct instance_data *im)
 
 	// First add the NPCs
 	for(i = 0; i < im->cnt_map; i++)
-		map_foreachinallarea(instance_addnpc_sub, im->map[i].src_m, 0, 0, map[im->map[i].src_m].xs, map[im->map[i].src_m].ys, BL_NPC, im->map[i].m);
+		map_foreachinallarea(instance_addnpc_sub, im->mapdata[i].src_m, 0, 0, mapdata[im->mapdata[i].src_m].xs, mapdata[im->mapdata[i].src_m].ys, BL_NPC, im->mapdata[i].m);
 
 	// Now run their OnInstanceInit
 	for(i = 0; i < im->cnt_map; i++)
-		map_foreachinallarea(instance_npcinit, im->map[i].m, 0, 0, map[im->map[i].m].xs, map[im->map[i].m].ys, BL_NPC, im->map[i].m);
+		map_foreachinallarea(instance_npcinit, im->mapdata[i].m, 0, 0, mapdata[im->mapdata[i].m].xs, mapdata[im->mapdata[i].m].ys, BL_NPC, im->mapdata[i].m);
 
 }
 
@@ -297,7 +297,7 @@ int instance_create(int party_id, const char *name)
 	instance_data[i].idle_limit = 0;
 	instance_data[i].idle_timer = INVALID_TIMER;
 	instance_data[i].vars = idb_alloc(DB_OPT_RELEASE_DATA);
-	memset(instance_data[i].map, 0, sizeof(instance_data[i].map));
+	memset(instance_data[i].mapdata, 0, sizeof(instance_data[i].mapdata));
 
 	p->instance_id = i;
 
@@ -352,8 +352,8 @@ int instance_addmap(short instance_id)
 			ShowError("instance_addmap: No maps added to instance %d.\n",instance_id);
 			return 0;
 		} else {
-			im->map[cnt_map].m = m;
-			im->map[cnt_map].src_m = map_mapname2mapid(StringBuf_Value(db->maplist[i]));
+			im->mapdata[cnt_map].m = m;
+			im->mapdata[cnt_map].src_m = map_mapname2mapid(StringBuf_Value(db->maplist[i]));
 			cnt_map++;
 		}
 	}
@@ -399,7 +399,7 @@ int instance_mapname2mapid(const char *name, short instance_id)
 		return m;
 
 	for(i = 0; i < MAX_MAP_PER_INSTANCE; i++)
-		if(im->map[i].src_m == m) {
+		if(im->mapdata[i].src_m == m) {
 			char alt_name[MAP_NAME_LENGTH];
 
 			if((strchr(iname,'@') == NULL) && strlen(iname) > 8) {
@@ -461,10 +461,10 @@ int instance_destroy(short instance_id)
 			type = 3;
 
 		for(i = 0; i < im->cnt_map; i++) //Run OnInstanceDestroy on all NPCs in the instance
-			map_foreachinallarea(instance_npcdestroy, im->map[i].m, 0, 0, map[im->map[i].m].xs, map[im->map[i].m].ys, BL_NPC, im->map[i].m);
+			map_foreachinallarea(instance_npcdestroy, im->mapdata[i].m, 0, 0, mapdata[im->mapdata[i].m].xs, mapdata[im->mapdata[i].m].ys, BL_NPC, im->mapdata[i].m);
 
 		for(i = 0; i < im->cnt_map; i++)
-			map_delinstancemap(im->map[i].m);
+			map_delinstancemap(im->mapdata[i].m);
 	}
 
 	if(im->keep_timer != INVALID_TIMER) {
@@ -628,8 +628,8 @@ int instance_delusers(short instance_id)
 		return 1;
 
 	// If no one is in the instance, start the idle timer
-	for(i = 0; i < im->cnt_map && im->map[i].m; i++)
-		users += max(map[im->map[i].m].users, 0);
+	for(i = 0; i < im->cnt_map && im->mapdata[i].m; i++)
+		users += max(mapdata[im->mapdata[i].m].users, 0);
 
 	// We check the actual map.users before being updated, hence the 1
 	// The instance should be empty if users are now <= 1
@@ -817,10 +817,10 @@ void do_reload_instance(void)
 	// Reset player to instance beginning
 	iter = mapit_getallusers();
 	for(sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); sd = (TBL_PC *)mapit_next(iter)) {
-		if(sd && map[sd->bl.m].instance_id) {
+		if(sd && mapdata[sd->bl.m].instance_id) {
 			struct party_data *p;
 
-			if(!(p = party_search(sd->status.party_id)) || p->instance_id != map[sd->bl.m].instance_id) // Someone not in party is on instance map
+			if(!(p = party_search(sd->status.party_id)) || p->instance_id != mapdata[sd->bl.m].instance_id) // Someone not in party is on instance map
 				continue;
 			im = &instance_data[p->instance_id];
 			if((db = instance_searchtype_db(im->type)) != NULL && !instance_enter(sd, StringBuf_Value(db->name))) { // All good

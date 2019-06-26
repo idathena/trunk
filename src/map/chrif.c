@@ -336,7 +336,7 @@ int chrif_save(struct map_session_data *sd, enum e_chrif_save_opt flag) {
 	WFIFOB(char_fd,12) = (flag&CSAVE_QUIT) ? 1 : 0; //Flag to tell char-server this character is quitting
 
 	//If the user is on a instance map, we have to fake his current position
-	if (map[sd->bl.m].instance_id) {
+	if (mapdata[sd->bl.m].instance_id) {
 		struct mmo_charstatus status;
 
 		//Copy the whole status
@@ -1087,12 +1087,13 @@ int chrif_ban(int fd) {
 		else
 			clif_displaymessage(sd->fd, msg_txt(420)); // "Your account has not more authorized."
 	} else if( res == 1 || res == 2 ) {
-		time_t timestamp;
+		const time_t timestamp = (time_t)RFIFOL(fd,7); //Status or final date of a banishment
+		struct tm now;
 		char tmpstr[256];
 		char strtime[25];
 
-		timestamp = (time_t)RFIFOL(fd,7); //Status or final date of a banishment
-		strftime(strtime, 24, "%d-%m-%Y %H:%M:%S", localtime(&timestamp));
+		localtime_s(&now, &timestamp);
+		strftime(strtime, 24, "%d-%m-%Y %H:%M:%S", &now);
 		safesnprintf(tmpstr, sizeof(tmpstr), msg_txt(423), (res == 2 ? "char" : "account"), strtime); // "Your %s has been banished until %s "
 		clif_displaymessage(sd->fd, tmpstr);
 	}

@@ -1128,7 +1128,7 @@ static int clif_set_unit_idle(struct block_list *bl, unsigned char *buffer, bool
 #endif
 
 #if PACKETVER >= 20120221
-	if( battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && status_get_hp(bl) < status_get_max_hp(bl) ) {
+	if( battle_config.monster_hp_bars_info && !mapdata[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && status_get_hp(bl) < status_get_max_hp(bl) ) {
 		WBUFL(buf,55) = status_get_max_hp(bl); //maxHP
 		WBUFL(buf,59) = status_get_hp(bl); //HP
 	} else {
@@ -1289,7 +1289,7 @@ static int clif_set_unit_walking(struct block_list *bl, struct unit_data *ud, un
 #endif
 
 #if PACKETVER >= 20120221
-	if( battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && status_get_hp(bl) < status_get_max_hp(bl) ) {
+	if( battle_config.monster_hp_bars_info && !mapdata[bl->m].flag.hidemobhpbar && bl->type == BL_MOB && status_get_hp(bl) < status_get_max_hp(bl) ) {
 		WBUFL(buf,62) = status_get_max_hp(bl); //maxHP
 		WBUFL(buf,66) = status_get_hp(bl); //HP
 	} else {
@@ -1418,30 +1418,30 @@ static void clif_weather_check(struct map_session_data *sd)
 	int16 m = sd->bl.m;
 	int fd = sd->fd;
 
-	if (map[m].flag.snow ||
-		map[m].flag.clouds ||
-		map[m].flag.fog ||
-		map[m].flag.fireworks ||
-		map[m].flag.sakura ||
-		map[m].flag.leaves ||
-		map[m].flag.clouds2)
+	if (mapdata[m].flag.snow ||
+		mapdata[m].flag.clouds ||
+		mapdata[m].flag.fog ||
+		mapdata[m].flag.fireworks ||
+		mapdata[m].flag.sakura ||
+		mapdata[m].flag.leaves ||
+		mapdata[m].flag.clouds2)
 	{
-		if (map[m].flag.snow)
+		if (mapdata[m].flag.snow)
 			clif_specialeffect_single(&sd->bl, EF_SNOW, fd);
-		if (map[m].flag.clouds)
+		if (mapdata[m].flag.clouds)
 			clif_specialeffect_single(&sd->bl, EF_CLOUD3, fd);
-		if (map[m].flag.clouds2)
+		if (mapdata[m].flag.clouds2)
 			clif_specialeffect_single(&sd->bl, EF_CLOUD5, fd);
-		if (map[m].flag.fog)
+		if (mapdata[m].flag.fog)
 			clif_specialeffect_single(&sd->bl, EF_CLOUD4, fd);
-		if (map[m].flag.fireworks) {
+		if (mapdata[m].flag.fireworks) {
 			clif_specialeffect_single(&sd->bl, EF_POKJUK, fd);
 			clif_specialeffect_single(&sd->bl, EF_THROWITEM2, fd);
 			clif_specialeffect_single(&sd->bl, EF_POKJUK_SOUND, fd);
 		}
-		if (map[m].flag.sakura)
+		if (mapdata[m].flag.sakura)
 			clif_specialeffect_single(&sd->bl, EF_SAKURA, fd);
-		if (map[m].flag.leaves)
+		if (mapdata[m].flag.leaves)
 			clif_specialeffect_single(&sd->bl, EF_MAPLE, fd);
 	}
 }
@@ -1500,7 +1500,7 @@ int clif_spawn(struct block_list *bl)
 					clif_specialeffect(bl,EF_GIANTBODY2,AREA);
 				else if (sd->state.size == SZ_MEDIUM)
 					clif_specialeffect(bl,EF_BABYBODY2,AREA);
-				if (sd->bg_id && map[bl->m].flag.battleground)
+				if (sd->bg_id && mapdata[bl->m].flag.battleground)
 					clif_sendbgemblem_area(sd);
 				if (sd->spiritball > 0)
 					clif_spiritball(bl);
@@ -3422,7 +3422,7 @@ void clif_updatestatus(struct map_session_data *sd,int type)
 			pc_update_job_and_level(sd);
 			break;
 		case SP_HP:
-			if( map[sd->bl.m].hpmeter_visible )
+			if( mapdata[sd->bl.m].hpmeter_visible )
 				clif_hpmeter(sd);
 			if( !battle_config.party_hp_mode && sd->status.party_id )
 				clif_party_hp(sd);
@@ -4672,7 +4672,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_specialeffect_single(bl,423,sd->fd);
 				else if(tsd->state.size == SZ_MEDIUM)
 					clif_specialeffect_single(bl,421,sd->fd);
-				if (tsd->bg_id && map[bl->m].flag.battleground)
+				if (tsd->bg_id && mapdata[bl->m].flag.battleground)
 					clif_sendbgemblem_single(sd->fd,tsd);
 				if (tsd->status.robe)
 					clif_refreshlook(&sd->bl,bl->id,LOOK_ROBE,tsd->status.robe,SELF);
@@ -4706,7 +4706,7 @@ void clif_getareachar_unit(struct map_session_data *sd,struct block_list *bl)
 					clif_specialeffect_single(bl,421,sd->fd);
 				clif_efst_set_enter(&sd->bl,bl,SELF);
 #if PACKETVER >= 20120404
-				if (battle_config.monster_hp_bars_info && !map[bl->m].flag.hidemobhpbar) {
+				if (battle_config.monster_hp_bars_info && !mapdata[bl->m].flag.hidemobhpbar) {
 					int i;
 
 					for (i = 0; i < DAMAGELOG_SIZE; i++) { //Must show hp bar to all char who already hit the mob
@@ -6474,17 +6474,17 @@ void clif_map_property(struct block_list *bl, enum map_property property, enum s
 	WBUFW(buf,0) = cmd;
 	WBUFW(buf,2) = property;
 #if PACKETVER >= 20121010
-	WBUFL(buf,4) = ((map[bl->m].flag.pvp ? 1 : 0)<<0)| //PARTY - Show attack cursor on non-party members (PvP)
-		(((map[bl->m].flag.battleground || map_flag_gvg2(bl->m)) ? 1 : 0)<<1)| //GUILD - Show attack cursor on non-guild members (GvG)
-		(((map[bl->m].flag.battleground || map_flag_gvg2(bl->m)) ? 1 : 0)<<2)| //SIEGE - Show emblem over characters heads
-		(((map[bl->m].flag.nomineeffect || !map_flag_gvg2(bl->m)) ? 0 : 1)<<3)| //USE_SIMPLE_EFFECT - Automatically enable /mineffect
-		((map[bl->m].flag.nolockon ? 0 : (map_flag_vs(bl->m) ? ((map[bl->m].flag.battleground || map_flag_gvg2(bl->m)) ? 0 : 1) : 0))<<4)| //DISABLE_LOCKON - Only allow attacks on other players with shift key or /ns active
-		((map[bl->m].flag.pvp ? 1 : 0)<<5)| //COUNT_PK - Show the PvP counter
-		((map[bl->m].flag.partylock ? 1 : 0)<<6)| //NO_PARTY_FORMATION - Prevents party creation/modification (Might be used for instance dungeons)
-		((map[bl->m].flag.battleground ? 1 : 0)<<7)| //BATTLEFIELD - Unknown (Does something for battlegrounds areas)
-		((map[bl->m].flag.nocostume ? 1 : 0)<<8)| //DISABLE_COSTUMEITEM - Disable costume sprites
-		((map[bl->m].flag.nousecart ? 0 : 1)<<9)| //USECART - Allow opening cart inventory (Well force it to always allow it)
-		((map[bl->m].flag.nosumstarmiracle ? 0 : 1)<<10); //SUNMOONSTAR_MIRACLE - Unknown - (Guessing it blocks Star Gladiator's Miracle from activating)
+	WBUFL(buf,4) = ((mapdata[bl->m].flag.pvp ? 1 : 0)<<0)| //PARTY - Show attack cursor on non-party members (PvP)
+		(((mapdata[bl->m].flag.battleground || map_flag_gvg2(bl->m)) ? 1 : 0)<<1)| //GUILD - Show attack cursor on non-guild members (GvG)
+		(((mapdata[bl->m].flag.battleground || map_flag_gvg2(bl->m)) ? 1 : 0)<<2)| //SIEGE - Show emblem over characters heads
+		(((mapdata[bl->m].flag.nomineeffect || !map_flag_gvg2(bl->m)) ? 0 : 1)<<3)| //USE_SIMPLE_EFFECT - Automatically enable /mineffect
+		((mapdata[bl->m].flag.nolockon ? 0 : (map_flag_vs(bl->m) ? ((mapdata[bl->m].flag.battleground || map_flag_gvg2(bl->m)) ? 0 : 1) : 0))<<4)| //DISABLE_LOCKON - Only allow attacks on other players with shift key or /ns active
+		((mapdata[bl->m].flag.pvp ? 1 : 0)<<5)| //COUNT_PK - Show the PvP counter
+		((mapdata[bl->m].flag.partylock ? 1 : 0)<<6)| //NO_PARTY_FORMATION - Prevents party creation/modification (Might be used for instance dungeons)
+		((mapdata[bl->m].flag.battleground ? 1 : 0)<<7)| //BATTLEFIELD - Unknown (Does something for battlegrounds areas)
+		((mapdata[bl->m].flag.nocostume ? 1 : 0)<<8)| //DISABLE_COSTUMEITEM - Disable costume sprites
+		((mapdata[bl->m].flag.nousecart ? 0 : 1)<<9)| //USECART - Allow opening cart inventory (Well force it to always allow it)
+		((mapdata[bl->m].flag.nosumstarmiracle ? 0 : 1)<<10); //SUNMOONSTAR_MIRACLE - Unknown - (Guessing it blocks Star Gladiator's Miracle from activating)
 		//(1<<11); //Unused bits. 1 - 10 is 0x1 length and 11 is 0x15 length. May be used for future settings
 #endif
 
@@ -7008,7 +7008,7 @@ void clif_parse_BankOpen(int fd, struct map_session_data *sd) {
 	if(!battle_config.feature_banking) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1510),false,SELF); // Banking is disabled
 		return;
-	} else if(map[sd->bl.m].flag.nobanking) {
+	} else if(mapdata[sd->bl.m].flag.nobanking) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1512),false,SELF); // Banking is disabled in this map
 		return;
 	} else {
@@ -7052,7 +7052,7 @@ void clif_parse_BankClose(int fd, struct map_session_data *sd) {
 	//Still allow to go trough to not stuck player if we have disable it while they was in
 	if(!battle_config.feature_banking)
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1510),false,SELF); // Banking is disabled
-	if(map[sd->bl.m].flag.nobanking)
+	if(mapdata[sd->bl.m].flag.nobanking)
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1512),false,SELF); // Banking is disabled in this map
 	if(sd->status.account_id == aid) {
 		sd->state.banking = 0;
@@ -7096,7 +7096,7 @@ void clif_parse_BankCheck(int fd, struct map_session_data *sd) {
 	if(!battle_config.feature_banking) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1510),false,SELF); // Banking is disabled
 		return;
-	} else if(map[sd->bl.m].flag.nobanking) {
+	} else if(mapdata[sd->bl.m].flag.nobanking) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1512),false,SELF); // Banking is disabled in this map
 		return;
 	} else {
@@ -7145,7 +7145,7 @@ void clif_parse_BankDeposit(int fd, struct map_session_data *sd) {
 	if(!battle_config.feature_banking) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1510),false,SELF); // Banking is disabled
 		return;
-	} else if(map[sd->bl.m].flag.nobanking) {
+	} else if(mapdata[sd->bl.m].flag.nobanking) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1512),false,SELF); // Banking is disabled in this map
 		return;
 	} else {
@@ -7197,7 +7197,7 @@ void clif_parse_BankWithdraw(int fd, struct map_session_data *sd) {
 	if(!battle_config.feature_banking) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1510),false,SELF); // Banking is disabled
 		return;
-	} else if(map[sd->bl.m].flag.nobanking) {
+	} else if(mapdata[sd->bl.m].flag.nobanking) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1512),false,SELF); // Banking is disabled in this map
 		return;
 	} else {
@@ -10225,7 +10225,7 @@ bool clif_process_whisper_message(struct map_session_data *sd, char *out_name, c
  */
 static inline void clif_pk_mode_message(struct map_session_data *sd)
 {
-	if( battle_config.pk_mode && battle_config.pk_mode_mes && sd && map[sd->bl.m].flag.pvp ) {
+	if( battle_config.pk_mode && battle_config.pk_mode_mes && sd && mapdata[sd->bl.m].flag.pvp ) {
 		if( (int)sd->status.base_level < battle_config.pk_min_level ) {
 			char output[CHAT_SIZE_MAX];
 
@@ -10436,16 +10436,16 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			pc_setinvincibletimer(sd,battle_config.pc_invincible_time);
 	}
 
-	if(map[sd->bl.m].users++ == 0 && battle_config.dynamic_mobs)
+	if(mapdata[sd->bl.m].users++ == 0 && battle_config.dynamic_mobs)
 		map_spawnmobs(sd->bl.m);
 
 	if(pc_has_permission(sd,PC_PERM_VIEW_HPMETER)) {
-		map[sd->bl.m].hpmeter_visible++;
+		mapdata[sd->bl.m].hpmeter_visible++;
 		sd->state.hpmeter_visible = 1;
 	}
 
 	if(!pc_isinvisible(sd)) //Increment the number of pvp players on the map
-		map[sd->bl.m].users_pvp++;
+		mapdata[sd->bl.m].users_pvp++;
 
 	sd->state.debug_remove_map = 0; //Temporary state to track double remove_map's [FlavioJS]
 	sd->state.callshop = 0; //Reset the callshop flag if the player changes map
@@ -10465,9 +10465,9 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	if(sd->bg_id)
 		clif_bg_hp(sd); //Battleground System
 
-	if(map[sd->bl.m].flag.pvp && !pc_isinvisible(sd)) {
+	if(mapdata[sd->bl.m].flag.pvp && !pc_isinvisible(sd)) {
 		if(!battle_config.pk_mode) { //Remove pvp stuff for pk_mode [Valaris]
-			if(!map[sd->bl.m].flag.pvp_nocalcrank)
+			if(!mapdata[sd->bl.m].flag.pvp_nocalcrank)
 				sd->pvp_timer = add_timer(gettick() + 200,pc_calc_pvprank_timer,sd->bl.id,0);
 			sd->pvp_rank = 0;
 			sd->pvp_lastusers = 0;
@@ -10478,7 +10478,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		clif_map_property(&sd->bl,MAPPROPERTY_FREEPVPZONE,SELF);
 	} else if(sd->duel_group) //Set flag, if it's a duel [LuzZza]
 		clif_map_property(&sd->bl,MAPPROPERTY_FREEPVPZONE,SELF);
-	else if(map[sd->bl.m].flag.gvg_dungeon)
+	else if(mapdata[sd->bl.m].flag.gvg_dungeon)
 		clif_map_property(&sd->bl,MAPPROPERTY_FREEPVPZONE,SELF); //@TODO: Figure out the real packet to send here
 	else if(map_flag_gvg2(sd->bl.m))
 		clif_map_property(&sd->bl,MAPPROPERTY_AGITZONE,SELF);
@@ -10572,7 +10572,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			clif_pet_emotion(sd->pd,(sd->pd->pet.class_ - 100) * 100 + 50 + pet_hungry_val(sd->pd));
 		if(hom_is_active(sd->hd))
 			hom_init_timers(sd->hd);
-		if(night_flag && map[sd->bl.m].flag.nightenabled) {
+		if(night_flag && mapdata[sd->bl.m].flag.nightenabled) {
 			sd->state.night = 1;
 			clif_status_load(&sd->bl,SI_SKE,1);
 		}
@@ -10667,9 +10667,9 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			guild_notice = false; //Do not display it twice
 		}
 		if((battle_config.bg_flee_penalty != 100 || battle_config.gvg_flee_penalty != 100) &&
-			(map_flag_gvg2(sd->state.pmap) || map_flag_gvg2(sd->bl.m) || map[sd->state.pmap].flag.battleground || map[sd->bl.m].flag.battleground))
+			(map_flag_gvg2(sd->state.pmap) || map_flag_gvg2(sd->bl.m) || mapdata[sd->state.pmap].flag.battleground || mapdata[sd->bl.m].flag.battleground))
 			status_calc_bl(&sd->bl,SCB_FLEE); //Refresh flee penalty
-		if(night_flag && map[sd->bl.m].flag.nightenabled) {
+		if(night_flag && mapdata[sd->bl.m].flag.nightenabled) {
 			if(!sd->state.night) {
 				sd->state.night = 1; //Display night
 				clif_status_load(&sd->bl,SI_SKE,1);
@@ -10678,12 +10678,12 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			sd->state.night = 0; //Clear night display
 			clif_status_load(&sd->bl,SI_SKE,0);
 		}
-		if(map[sd->bl.m].flag.battleground) {
+		if(mapdata[sd->bl.m].flag.battleground) {
 			clif_map_type(sd,MAPTYPE_BATTLEFIELD); //Battleground Mode
-			if(map[sd->bl.m].flag.battleground == 2)
+			if(mapdata[sd->bl.m].flag.battleground == 2)
 				clif_bg_updatescore_single(sd);
 		}
-		if(map[sd->bl.m].flag.allowks && !map_flag_ks(sd->bl.m)) {
+		if(mapdata[sd->bl.m].flag.allowks && !map_flag_ks(sd->bl.m)) {
 			char output[128];
 
 			safesnprintf(output,sizeof(output),"[ Kill Steal Protection Disabled. KS is allowed in this map ]");
@@ -10696,7 +10696,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 		if (!sd->state.connect_new &&
 			!sd->vip.disableshowrate &&
 			sd->state.pmap != sd->bl.m &&
-			map[sd->state.pmap].adjust.bexp != map[sd->bl.m].adjust.bexp)
+			mapdata[sd->state.pmap].adjust.bexp != mapdata[sd->bl.m].adjust.bexp)
 		{
 			clif_display_pinfo(sd,ZC_PERSONAL_INFOMATION);
 			//clif_vip_display_info(sd,ZC_PERSONAL_INFOMATION_CHN);
@@ -10704,7 +10704,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 #endif
 		//Instances do not need their own channels
 		if(channel_config.map_tmpl.name[0] && (channel_config.map_tmpl.opt&CHAN_OPT_AUTOJOIN) &&
-			!map[sd->bl.m].flag.nochmautojoin && !map[sd->bl.m].instance_id)
+			!mapdata[sd->bl.m].flag.nochmautojoin && !mapdata[sd->bl.m].instance_id)
 			channel_mjoin(sd); //Join new map
 		clif_pk_mode_message(sd);
 	}
@@ -10727,7 +10727,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 	}
 
 	//Don't trigger NPC event or opening vending/buyingstore will be failed
-	if(!sd->state.autotrade && map[sd->bl.m].flag.loadevent) //Lance
+	if(!sd->state.autotrade && mapdata[sd->bl.m].flag.loadevent) //Lance
 		npc_script_event(sd,NPCE_LOADMAP);
 
 	if(pc_checkskill(sd,SG_DEVIL) > 0 && ((sd->class_&MAPID_THIRDMASK) == MAPID_STAR_EMPEROR || pc_is_maxjoblv(sd)))
@@ -13047,7 +13047,7 @@ void clif_parse_CreateParty(int fd, struct map_session_data *sd)
 	char *name = (char *)RFIFOP(fd,packet_db[RFIFOW(fd,0)].pos[0]);
 	name[NAME_LENGTH - 1] = '\0';
 
-	if( map[sd->bl.m].flag.partylock ) { //Party locked
+	if( mapdata[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
@@ -13068,7 +13068,7 @@ void clif_parse_CreateParty2(int fd, struct map_session_data *sd)
 	int item2 = RFIFOB(fd,info->pos[2]);
 	name[NAME_LENGTH - 1] = '\0';
 
-	if( map[sd->bl.m].flag.partylock ) { //Party locked
+	if( mapdata[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
@@ -13087,7 +13087,7 @@ void clif_parse_PartyInvite(int fd, struct map_session_data *sd)
 {
 	struct map_session_data *t_sd;
 
-	if( map[sd->bl.m].flag.partylock ) { //Party locked
+	if( mapdata[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
@@ -13109,7 +13109,7 @@ void clif_parse_PartyInvite2(int fd, struct map_session_data *sd)
 	char *name = (char *)RFIFOP(fd,packet_db[RFIFOW(fd,0)].pos[0]);
 	name[NAME_LENGTH - 1] = '\0';
 
-	if( map[sd->bl.m].flag.partylock ) { //Party locked
+	if( mapdata[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
@@ -13150,7 +13150,7 @@ void clif_parse_ReplyPartyInvite2(int fd, struct map_session_data *sd)
 /// 0100
 void clif_parse_LeaveParty(int fd, struct map_session_data *sd)
 {
-	if( map[sd->bl.m].flag.partylock ) { //Party locked
+	if( mapdata[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
@@ -13165,7 +13165,7 @@ void clif_parse_RemovePartyMember(int fd, struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
 
-	if( map[sd->bl.m].flag.partylock ) { //Party locked
+	if( mapdata[sd->bl.m].flag.partylock ) { //Party locked
 		clif_displaymessage(fd, msg_txt(227));
 		return;
 	}
@@ -13503,7 +13503,7 @@ void clif_parse_OpenVending(int fd, struct map_session_data *sd)
 
 	if( sd->sc.data[SC_NOCHAT] && sd->sc.data[SC_NOCHAT]->val1&MANNER_NOROOM )
 		return;
-	if( map[sd->bl.m].flag.novending ) {
+	if( mapdata[sd->bl.m].flag.novending ) {
 		clif_displaymessage(sd->fd, msg_txt(276)); // "You can't open a shop on this map"
 		return;
 	}
@@ -13526,7 +13526,7 @@ void clif_parse_CreateGuild(int fd,struct map_session_data *sd)
 	char *name = (char *)RFIFOP(fd,packet_db[RFIFOW(fd,0)].pos[1]);
 	name[NAME_LENGTH - 1] = '\0';
 
-	if( map[sd->bl.m].flag.guildlock ) { //Guild locked
+	if( mapdata[sd->bl.m].flag.guildlock ) { //Guild locked
 		clif_displaymessage(fd, msg_txt(228));
 		return;
 	}
@@ -13743,7 +13743,7 @@ int clif_sub_guild_invite(int fd, struct map_session_data *sd, struct map_sessio
 	if( !t_sd ) // Not online or does not exist
 		return 1;
 
-	if( map[sd->bl.m].flag.guildlock ) { // Guild locked
+	if( mapdata[sd->bl.m].flag.guildlock ) { // Guild locked
 		clif_displaymessage(fd, msg_txt(228));
 		return 1;
 	}
@@ -13806,7 +13806,7 @@ void clif_parse_GuildLeave(int fd,struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
 
-	if( map[sd->bl.m].flag.guildlock ) { //Guild locked
+	if( mapdata[sd->bl.m].flag.guildlock ) { //Guild locked
 		clif_displaymessage(fd, msg_txt(228));
 		return;
 	}
@@ -13827,7 +13827,7 @@ void clif_parse_GuildExpulsion(int fd,struct map_session_data *sd)
 {
 	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
 
-	if( map[sd->bl.m].flag.guildlock || sd->bg_id ) { // Guild locked
+	if( mapdata[sd->bl.m].flag.guildlock || sd->bg_id ) { // Guild locked
 		clif_displaymessage(fd, msg_txt(228));
 		return;
 	}
@@ -13871,7 +13871,7 @@ void clif_parse_GuildRequestAlliance(int fd, struct map_session_data *sd)
 	if(!sd->state.gmaster_flag)
 		return;
 
-	if(map[sd->bl.m].flag.guildlock) { //Guild locked
+	if(mapdata[sd->bl.m].flag.guildlock) { //Guild locked
 		clif_displaymessage(fd, msg_txt(228));
 		return;
 	}
@@ -13916,7 +13916,7 @@ void clif_parse_GuildDelAlliance(int fd, struct map_session_data *sd)
 
 	if(!sd->state.gmaster_flag)
 		return;
-	if(map[sd->bl.m].flag.guildlock) { //Guild locked
+	if(mapdata[sd->bl.m].flag.guildlock) { //Guild locked
 		clif_displaymessage(fd, msg_txt(228));
 		return;
 	}
@@ -13935,7 +13935,7 @@ void clif_parse_GuildOpposition(int fd, struct map_session_data *sd)
 	if(!sd->state.gmaster_flag)
 		return;
 
-	if(map[sd->bl.m].flag.guildlock) { //Guild locked
+	if(mapdata[sd->bl.m].flag.guildlock) { //Guild locked
 		clif_displaymessage(fd, msg_txt(228));
 		return;
 	}
@@ -13959,7 +13959,7 @@ void clif_parse_GuildOpposition(int fd, struct map_session_data *sd)
 ///     field name and size is same as the one in CH_DELETE_CHAR.
 void clif_parse_GuildBreak(int fd, struct map_session_data *sd)
 {
-	if( map[sd->bl.m].flag.guildlock ) { //Guild locked
+	if( mapdata[sd->bl.m].flag.guildlock ) { //Guild locked
 		clif_displaymessage(fd, msg_txt(228));
 		return;
 	}
@@ -16441,7 +16441,7 @@ void clif_parse_Auction_buysell(int fd, struct map_session_data *sd)
 
 /// Cash/Point Shop
 void clif_cashshop_open(struct map_session_data *sd) {
-	if( map[sd->bl.m].flag.nocashshop ) {
+	if( mapdata[sd->bl.m].flag.nocashshop ) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1511),false,SELF); // Cash Shop is disabled in this map
 		return;
 	}
@@ -16624,7 +16624,7 @@ void clif_parse_cashshop_buy(int fd, struct map_session_data *sd)
 
 	info = &packet_db[cmd];
 
-	if( map[sd->bl.m].flag.nocashshop ) {
+	if( mapdata[sd->bl.m].flag.nocashshop ) {
 		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1511),false,SELF); // Cash Shop is disabled in this map
 		return;
 	}
@@ -17572,8 +17572,8 @@ void clif_bg_updatescore(int16 m)
 	bl.m = m;
 
 	WBUFW(buf,0) = 0x2de;
-	WBUFW(buf,2) = map[m].bgscore_lion;
-	WBUFW(buf,4) = map[m].bgscore_eagle;
+	WBUFW(buf,2) = mapdata[m].bgscore_lion;
+	WBUFW(buf,4) = mapdata[m].bgscore_eagle;
 	clif_send(buf,packet_len(0x2de),&bl,ALL_SAMEMAP);
 }
 
@@ -17587,8 +17587,8 @@ void clif_bg_updatescore_single(struct map_session_data *sd)
 
 	WFIFOHEAD(fd,packet_len(0x2de));
 	WFIFOW(fd,0) = 0x2de;
-	WFIFOW(fd,2) = map[sd->bl.m].bgscore_lion;
-	WFIFOW(fd,4) = map[sd->bl.m].bgscore_eagle;
+	WFIFOW(fd,2) = mapdata[sd->bl.m].bgscore_lion;
+	WFIFOW(fd,4) = mapdata[sd->bl.m].bgscore_eagle;
 	WFIFOSET(fd,packet_len(0x2de));
 }
 
@@ -19034,7 +19034,7 @@ void clif_display_pinfo(struct map_session_data *sd, int cmdtype) {
 		 * Set for EXP
 		 */
 		//0:PCRoom
-		details_bexp[0] = map[sd->bl.m].adjust.bexp;
+		details_bexp[0] = mapdata[sd->bl.m].adjust.bexp;
 		if(details_bexp[0] == 100 || !details_bexp[0])
 			details_bexp[0] = 0;
 		else {
@@ -21410,14 +21410,13 @@ void clif_parse_camerainfo(int fd, struct map_session_data *sd)
 void DumpUnknow(int fd, TBL_PC *sd, int cmd, int packet_len) {
 	const char *packet_txt = "save/packet.txt";
 	FILE *fp;
-	time_t time_server;
-	struct tm *datetime;
+	const time_t time_server = time(NULL); //Get time in seconds since 1/1/1970
+	struct tm datetime;
 	char datestr[512];
 
-	time(&time_server); //Get time in seconds since 1/1/1970
-	datetime = localtime(&time_server); //Convert seconds in structure
+	localtime_s(&datetime, &time_server); //Convert seconds in structure
 	//Like sprintf, but only for date/time (Sunday, November 02 2003 15:12:52)
-	strftime(datestr, sizeof(datestr) - 1, "%A, %B %d %Y %X.", datetime); //Server time (normal time): %A, %B %d %Y %X.
+	strftime(datestr, sizeof(datestr) - 1, "%A, %B %d %Y %X.", &datetime); //Server time (normal time): %A, %B %d %Y %X.
 
 	if( (fp = fopen(packet_txt , "a")) != NULL ) {
 		if( sd )

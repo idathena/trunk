@@ -227,20 +227,20 @@ enum e_mapid {
 #define DEFAULT_AUTOSAVE_INTERVAL 5 * 60 * 1000
 
 //Specifies maps where players may hit each other
-#define map_flag_vs(m) (map[m].flag.pvp || map[m].flag.gvg_dungeon || map[m].flag.gvg || ((agit_flag || agit2_flag) && map[m].flag.gvg_castle) || map[m].flag.gvg_te || (agit3_flag && map[m].flag.gvg_te_castle) || map[m].flag.battleground)
+#define map_flag_vs(m) (mapdata[m].flag.pvp || mapdata[m].flag.gvg_dungeon || mapdata[m].flag.gvg || ((agit_flag || agit2_flag) && mapdata[m].flag.gvg_castle) || mapdata[m].flag.gvg_te || (agit3_flag && mapdata[m].flag.gvg_te_castle) || mapdata[m].flag.battleground)
 //Versus map: PVP, BG, GVG, GVG Dungeons, and GVG Castles (regardless of agit_flag status)
-#define map_flag_vs2(m) (map[m].flag.pvp || map[m].flag.gvg_dungeon || map[m].flag.gvg || map[m].flag.gvg_castle || map[m].flag.gvg_te || map[m].flag.gvg_te_castle || map[m].flag.battleground)
+#define map_flag_vs2(m) (mapdata[m].flag.pvp || mapdata[m].flag.gvg_dungeon || mapdata[m].flag.gvg || mapdata[m].flag.gvg_castle || mapdata[m].flag.gvg_te || mapdata[m].flag.gvg_te_castle || mapdata[m].flag.battleground)
 //Specifies maps that have special GvG/WoE restrictions
-#define map_flag_gvg(m) (map[m].flag.gvg || ((agit_flag || agit2_flag) && map[m].flag.gvg_castle) || map[m].flag.gvg_te || (agit3_flag && map[m].flag.gvg_te_castle))
+#define map_flag_gvg(m) (mapdata[m].flag.gvg || ((agit_flag || agit2_flag) && mapdata[m].flag.gvg_castle) || mapdata[m].flag.gvg_te || (agit3_flag && mapdata[m].flag.gvg_te_castle))
 //Specifies if the map is tagged as GvG/WoE (regardless of agit_flag status)
-#define map_flag_gvg2(m) (map[m].flag.gvg || map[m].flag.gvg_te || map[m].flag.gvg_castle || map[m].flag.gvg_te_castle)
+#define map_flag_gvg2(m) (mapdata[m].flag.gvg || mapdata[m].flag.gvg_te || mapdata[m].flag.gvg_castle || mapdata[m].flag.gvg_te_castle)
 //No Kill Steal Protection
-#define map_flag_ks(m) (map[m].flag.town || map[m].flag.pvp || map[m].flag.gvg || map[m].flag.gvg_te || map[m].flag.battleground)
+#define map_flag_ks(m) (mapdata[m].flag.town || mapdata[m].flag.pvp || mapdata[m].flag.gvg || mapdata[m].flag.gvg_te || mapdata[m].flag.battleground)
 
 //WOE:TE Maps (regardless of agit_flag status) [Cydh]
-#define map_flag_gvg2_te(m) (map[m].flag.gvg_te || map[m].flag.gvg_te_castle)
+#define map_flag_gvg2_te(m) (mapdata[m].flag.gvg_te || mapdata[m].flag.gvg_te_castle)
 //Check if map is GVG maps exclusion for item, skill, and status restriction check (regardless of agit_flag status) [Cydh]
-#define map_flag_gvg2_no_te(m) (map[m].flag.gvg || map[m].flag.gvg_castle)
+#define map_flag_gvg2_no_te(m) (mapdata[m].flag.gvg || mapdata[m].flag.gvg_castle)
 
 //This stackable implementation does not means a BL can be more than one type at a time, but it's
 //meant to make it easier to check for multiple types at a time on invocations such as map_foreach* calls [Skotlex]
@@ -769,7 +769,7 @@ int map_getcellp(struct map_data *m,int16 x,int16 y,cell_chk cellchk);
 void map_setcell(int16 m, int16 x, int16 y, cell_t cell, bool flag);
 void map_setgatcell(int16 m, int16 x, int16 y, int gat);
 
-extern struct map_data map[];
+extern struct map_data mapdata[];
 extern int map_num;
 
 extern int autosave_interval;
@@ -882,7 +882,7 @@ struct chat_data *map_id2cd(int id);
 struct block_list *map_id2bl(int id);
 bool map_blid_exists(int id);
 
-#define map_id2index(id) map[(id)].index
+#define map_id2index(id) mapdata[(id)].index
 const char *map_mapid2mapname(int m);
 int16 map_mapindex2mapid(unsigned short mapindex);
 int16 map_mapname2mapid(const char *name);

@@ -29,7 +29,7 @@ struct instance_data {
 	struct {
 		int m;
 		int src_m;
-	} map[MAX_MAP_PER_INSTANCE];
+	} mapdata[MAX_MAP_PER_INSTANCE];
 };
 
 extern int instance_start;

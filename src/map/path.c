@@ -79,9 +79,9 @@ int path_blownpos(int16 m,int16 x0,int16 y0,int16 dx,int16 dy,int count)
 {
 	struct map_data *md;
 
-	if( !map[m].cell )
+	if( !mapdata[m].cell )
 		return -1;
-	md = &map[m];
+	md = &mapdata[m];
 
 	if( count>25 ){ //Cap to prevent too much processing...?
 		ShowWarning("path_blownpos: count too many %d !\n",count);
@@ -139,9 +139,9 @@ bool path_search_long(struct shootpath_data *spd,int16 m,int16 x0,int16 y0,int16
 	if( spd == NULL )
 		spd = &s_spd; // use dummy output variable
 
-	if (!map[m].cell)
+	if (!mapdata[m].cell)
 		return false;
-	md = &map[m];
+	md = &mapdata[m];
 
 	dx = (x1 - x0);
 	if (dx < 0) {
@@ -275,10 +275,10 @@ bool path_search(struct walkpath_data *wpd, int16 m, int16 x0, int16 y0, int16 x
 	if (wpd == NULL)
 		wpd = &s_wpd; // Use dummy output variable
 
-	if (!map[m].cell)
+	if (!mapdata[m].cell)
 		return false;
 
-	md = &map[m];
+	md = &mapdata[m];
 
 	// Do not check starting cell as that would get you stuck.
 	if (x0 < 0 || x0 >= md->xs || y0 < 0 || y0 >= md->ys /*|| map_getcellp(md,x0,y0,cell)*/)

@@ -64,7 +64,7 @@ int8 buyingstore_setup(struct map_session_data *sd, unsigned char slots) {
 	if( sd->sc.data[SC_NOCHAT] && (sd->sc.data[SC_NOCHAT]->val1&MANNER_NOROOM) ) // Custom: Mute limitation
 		return 2;
 
-	if( map[sd->bl.m].flag.novending ) { // Custom: No vending maps
+	if( mapdata[sd->bl.m].flag.novending ) { // Custom: No vending maps
 		clif_displaymessage(sd->fd, msg_txt(276)); // "You can't open a shop on this map"
 		return 3;
 	}
@@ -124,7 +124,7 @@ int8 buyingstore_create(struct map_session_data *sd, int zenylimit, unsigned cha
 	if( sd->sc.data[SC_NOCHAT] && (sd->sc.data[SC_NOCHAT]->val1&MANNER_NOROOM) ) // Custom: Mute limitation
 		return 2;
 
-	if( map[sd->bl.m].flag.novending ) { // Custom: No vending maps
+	if( mapdata[sd->bl.m].flag.novending ) { // Custom: No vending maps
 		clif_displaymessage(sd->fd, msg_txt(276)); // "You can't open a shop on this map"
 		return 3;
 	}
@@ -197,7 +197,7 @@ int8 buyingstore_create(struct map_session_data *sd, int zenylimit, unsigned cha
 	Sql_EscapeString(mmysql_handle, message_sql, sd->message);
 
 	if( Sql_Query(mmysql_handle, "INSERT INTO `%s`(`id`,`account_id`,`char_id`,`sex`,`map`,`x`,`y`,`title`,`limit`,`autotrade`,`body_direction`,`head_direction`,`sit`) VALUES(%d, %d, %d, '%c', '%s', %d, %d, '%s', %d, %d, '%d', '%d', '%d');",
-		buyingstores_db, sd->buyer_id, sd->status.account_id, sd->status.char_id, (!sd->status.sex ? 'F' : 'M'), map[sd->bl.m].name, sd->bl.x, sd->bl.y, message_sql, sd->buyingstore.zenylimit, sd->state.autotrade, (at ? at->dir : sd->ud.dir), (at ? at->head_dir : sd->head_dir), (at ? at->sit : pc_issit(sd))) != SQL_SUCCESS )
+		buyingstores_db, sd->buyer_id, sd->status.account_id, sd->status.char_id, (!sd->status.sex ? 'F' : 'M'), mapdata[sd->bl.m].name, sd->bl.x, sd->bl.y, message_sql, sd->buyingstore.zenylimit, sd->state.autotrade, (at ? at->dir : sd->ud.dir), (at ? at->head_dir : sd->head_dir), (at ? at->sit : pc_issit(sd))) != SQL_SUCCESS )
 		Sql_ShowDebug(mmysql_handle);
 
 	StringBuf_Init(&buf);
