@@ -219,11 +219,11 @@ int main(int argc, char **argv)
 
 		if( (p1 = strrchr(argv[0], '/')) != NULL || (p1 = strrchr(argv[0], '\\')) != NULL ) {
 			char *pwd = NULL; // Path working directory
-			int len = 0;
+			size_t len = 0;
 
 			SERVER_NAME = ++p1;
 			len = p1 - argv[0]; // Calc dir name len
-			pwd = (char *)malloc(sizeof(char) * len);
+			pwd = (char *)malloc(strlen(argv[0]) + 1);
 			safestrncpy(pwd, argv[0], len);
 			if( chdir(pwd) != 0 )
 				ShowError("Couldn't change working directory to %s for %s, runtime will probably fail", pwd, SERVER_NAME);
