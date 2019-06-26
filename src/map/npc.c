@@ -2376,13 +2376,14 @@ static void npc_parsename(struct npc_data *nd, const char *name, const char *sta
 	//Parse name
 	p = strstr(name,"::");
 	if( p ) { //<Display name>::<Unique name>
-		size_t len = p-name;
+		size_t len = p - name;
+
 		if( len > NPC_NAME_LENGTH ) {
 			ShowWarning("npc_parsename: Display name of '%s' is too long (len=%u) in file '%s', line '%d'. Truncating to %u characters.\n", name, (unsigned int)len, filepath, strline(buffer,start - buffer), NPC_NAME_LENGTH);
 			safestrncpy(nd->name, name, sizeof(nd->name));
 		} else {
 			memcpy(nd->name, name, len);
-			memset(nd->name + len, 0, sizeof(nd->name)-len);
+			memset(nd->name + len, 0, sizeof(nd->name) - len);
 		}
 		len = strlen(p + 2);
 		if( len > NPC_NAME_LENGTH )

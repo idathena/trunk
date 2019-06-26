@@ -219,11 +219,12 @@ int main(int argc, char **argv)
 
 		if( (p1 = strrchr(argv[0], '/')) != NULL || (p1 = strrchr(argv[0], '\\')) != NULL ) {
 			char *pwd = NULL; // Path working directory
-			int n = 0;
+			size_t len = 0;
 
 			SERVER_NAME = ++p1;
-			n = p1 - argv[0]; // Calc dir name len
-			pwd = safestrncpy((char *)malloc(sizeof(char) * (n + 1)), argv[0], n);
+			len = p1 - argv[0]; // Calc dir name len
+			pwd = (char *)malloc(strlen(argv[0]) + 1);
+			safestrncpy(pwd, argv[0], len);
 			if( chdir(pwd) != 0 )
 				ShowError("Couldn't change working directory to %s for %s, runtime will probably fail", pwd, SERVER_NAME);
 			free(pwd);
@@ -231,7 +232,6 @@ int main(int argc, char **argv)
 
 		arg_c = argc;
 		arg_v = argv;
-
 	}
 
 	malloc_init(); // Needed for Show* in display_title() [FlavioJS]
