@@ -3,6 +3,8 @@
 
 #include "../common/cbasetypes.h"
 #include "../common/strlib.h" // StringBuf
+#include "../common/timer.h"
+
 #include "showmsg.h"
 #include "core.h" //[Ind] - For SERVER_TYPE
 
@@ -696,7 +698,7 @@ int _vShowMessage(enum msg_type flag, const char *string, va_list ap)
 			char timestring[255];
 			const time_t curtime = time(NULL);
 			struct tm now;
-			localtime_s(&now, &curtime);
+			localtime_r(&curtime, &now);
 			strftime(timestring, 254, "%m/%d/%Y %H:%M:%S", &now);
 			fprintf(log,"(%s) [ %s ] : ",
 				timestring,
@@ -725,7 +727,7 @@ int _vShowMessage(enum msg_type flag, const char *string, va_list ap)
 	if (timestamp_format[0] && flag != MSG_NONE) { //Display time format. [Skotlex]
 		const time_t t = time(NULL);
 		struct tm now;
-		localtime_s(&now, &t);
+		localtime_r(&t, &now);
 		strftime(prefix, 80, timestamp_format, &now);
 	} else prefix[0]='\0';
 
