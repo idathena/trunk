@@ -25,7 +25,7 @@ struct mmo_map_server {
 	uint32 ip;
 	uint16 port;
 	int users;
-	unsigned short mapdata[MAX_MAP_PER_SERVER];
+	unsigned short map[MAX_MAP_PER_SERVER];
 } server[MAX_MAP_SERVERS];
 
 struct online_char_data {
