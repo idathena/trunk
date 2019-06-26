@@ -94,9 +94,6 @@ int64 battle_attr_fix(struct block_list *src, struct block_list *target, int64 d
 int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_list *target, int nk, int s_ele, int s_ele_, int64 damage, int left, int flag);
 int battle_get_weapon_element(struct Damage *d, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, short weapon_position);
 
-struct Damage battle_calc_attack_plant(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
-struct Damage battle_calc_attack_gvg_bg(struct Damage wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
-
 //Final calculation Damage
 int64 battle_calc_damage_sub(struct block_list *src, struct block_list *bl, struct Damage *d, int64 damage, uint16 skill_id, uint16 skill_lv);
 int64 battle_calc_damage(struct block_list *src, struct block_list *bl, struct Damage *d, int64 damage, uint16 skill_id, uint16 skill_lv);
