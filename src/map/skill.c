@@ -1381,7 +1381,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case WL_EARTHSTRAIN:
 			skill_strip_equip(src,bl,skill_id,skill_lv);
 			break;
-		case WL_FROSTMISTY: //FIXME: Should be able to give the status even the damage is missed
+		case WL_FROSTMISTY:
 			rate = 2 + (skill_lv - 1) * status_get_job_lv(src) / 7; //Job level bonus [exneval]
 			rate += 25 + skill_lv * 5;
 			sc_start(src,bl,SC_FREEZING,rate,skill_lv,skill_get_time(skill_id,skill_lv));
@@ -4164,7 +4164,9 @@ static TIMER_FUNC(skill_timerskill)
 				case WL_TETRAVORTEX_WATER:
 				case WL_TETRAVORTEX_WIND:
 				case WL_TETRAVORTEX_GROUND:
-					clif_skill_nodamage(target,target,skl->skill_id,-1,1);
+					if (status_isimmune(target))
+						break;
+					clif_skill_nodamage(src,target,skl->skill_id,-1,1);
 					skill_attack(BF_MAGIC,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag|SD_LEVEL|SD_ANIMATION);
 					if (skl->type == 4) { //Status inflicts are depend on what summoned element is used
 						const enum sc_type scs[] = { SC_BURNING,SC_BLEEDING,SC_FREEZING,SC_STUN };
@@ -4172,13 +4174,6 @@ static TIMER_FUNC(skill_timerskill)
 
 						sc_start(src,target,scs[index],rate,skl->skill_lv,time);
 					}
-					break;
-				case WL_SUMMON_ATK_FIRE:
-				case WL_SUMMON_ATK_WIND:
-				case WL_SUMMON_ATK_WATER:
-				case WL_SUMMON_ATK_GROUND:
-					clif_skill_nodamage(src,target,skl->skill_id,-1,1);
-					skill_attack(skl->type,src,src,target,skl->skill_id,skl->skill_lv,tick,skl->flag|SD_LEVEL|SD_ANIMATION);
 					break;
 				case WL_RELEASE: {
 						struct map_session_data *sd = map_id2sd(src->id);
@@ -4580,15 +4575,21 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 	if (!bl->prev || status_isdead(bl))
 		return 1;
 
-	//GTB makes all targeted magic display miss with a single bolt
-	if (skill_id && skill_get_type(skill_id) == BF_MAGIC && status_isimmune(bl)) {
-		sc_type sct = status_skill2sc(skill_id);
+	switch (skill_id) {
+		case WL_TETRAVORTEX:
+		case WL_RELEASE:
+			break;
+		default: //GTB makes all targeted magic display miss with a single bolt
+			if (skill_get_type(skill_id) == BF_MAGIC && status_isimmune(bl)) {
+				sc_type sct = status_skill2sc(skill_id);
 
-		if(sct != SC_NONE)
-			status_change_end(bl,sct,INVALID_TIMER);
-		clif_skill_damage(src,bl,tick,status_get_amotion(src),status_get_dmotion(bl),0,1,
-			skill_id,skill_lv,skill_get_hit(skill_id));
-		return 1;
+				if(sct != SC_NONE)
+					status_change_end(bl,sct,INVALID_TIMER);
+				clif_skill_damage(src,bl,tick,status_get_amotion(src),status_get_dmotion(bl),0,1,
+					skill_id,skill_lv,skill_get_hit(skill_id));
+				return 1;
+			}
+			break;
 	}
 
 	sc = status_get_sc(src);
@@ -5533,15 +5534,15 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 		case WL_TETRAVORTEX: {
 				int i, j = 0;
 				int types[][2] = { {0,0},{0,0},{0,0},{0,0} };
-				uint16 id;
+				uint16 skid;
 
 				if (!sd) {
 					for (i = 1; i <= 4; i++) {
 						switch (i) {
-							case 1: id = WL_TETRAVORTEX_FIRE; break;
-							case 2: id = WL_TETRAVORTEX_WATER; break;
-							case 3: id = WL_TETRAVORTEX_WIND; break;
-							case 4: id = WL_TETRAVORTEX_GROUND; break;
+							case 1: skid = WL_TETRAVORTEX_FIRE; break;
+							case 2: skid = WL_TETRAVORTEX_WATER; break;
+							case 3: skid = WL_TETRAVORTEX_WIND; break;
+							case 4: skid = WL_TETRAVORTEX_GROUND; break;
 						}
 						if (j < 4) {
 							int sc_index = 0, rate = 0;
@@ -5555,14 +5556,21 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 										rate += types[j][1];
 								}
 							}
-							skill_addtimerskill(src,tick + (i - 1) * 206,bl->id,sc_index,rate,id,skill_lv,j,flag);
+							if (!status_isimmune(bl))
+								skill_addtimerskill(src,tick + i * 206,bl->id,sc_index,rate,skid,skill_lv,j,flag);
 						}
 						j++;
 					}
 				} else if (sc) {
-					for (i = SC_SPHERE_5; i >= SC_SPHERE_1; i--) {
+					int k;
+
+					for (i = SC_SPHERE_4; i <= SC_SPHERE_5; i++) {
+						if (sc->data[i])
+							k = i;
+					}
+					for (i = k; i >= SC_SPHERE_1; i--) {
 						if (sc->data[i]) {
-							id = WL_TETRAVORTEX_FIRE + (sc->data[i]->val1 - WLS_FIRE) + (sc->data[i]->val1 == WLS_WIND) - (sc->data[i]->val1 == WLS_WATER);
+							skid = WL_TETRAVORTEX_FIRE + (sc->data[i]->val1 - WLS_FIRE) + (sc->data[i]->val1 == WLS_WIND) - (sc->data[i]->val1 == WLS_WATER);
 							if (j < 4) {
 								int sc_index = 0, rate = 0;
 
@@ -5575,7 +5583,7 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 											rate += types[j][1];
 									}
 								}
-								skill_addtimerskill(src,tick + (SC_SPHERE_5 - i) * 206,bl->id,sc_index,rate,id,skill_lv,j,flag);
+								skill_addtimerskill(src,tick + (k - i + 1) * 206,bl->id,sc_index,rate,skid,skill_lv,j,flag);
 							}
 							status_change_end(src,(sc_type)i,INVALID_TIMER);
 							j++;
@@ -5587,18 +5595,22 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 
 		case WL_RELEASE:
 			if (sc) {
-				int i;
-
 				clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
 				//Priority is to release Spell Book
 				if (sc->data[SC_FREEZE_SP]) //Check sealed spells
 					skill_addtimerskill(src,tick + status_get_adelay(src),bl->id,0,0,skill_id,skill_lv,BF_MAGIC,flag);
 				else { //Summon Balls
-					for (i = SC_SPHERE_5; i >= SC_SPHERE_1; i--) {
-						if (sc->data[i]) {
-							int id = WL_SUMMON_ATK_FIRE + (sc->data[i]->val1 - WLS_FIRE);
+					int i, j;
 
-							skill_addtimerskill(src,tick + (SC_SPHERE_5 - i) * status_get_adelay(src),bl->id,0,0,id,sc->data[i]->val2,BF_MAGIC,flag);
+					for (i = SC_SPHERE_1; i <= SC_SPHERE_5; i++) {
+						if (sc->data[i])
+							j = i;
+					}
+					for (i = j; i >= SC_SPHERE_1; i--) {
+						if (sc->data[i]) {
+							uint16 skid = WL_SUMMON_ATK_FIRE + (sc->data[i]->val1 - WLS_FIRE);
+
+							skill_addtimerskill(src,tick + (j - i + 1) * status_get_adelay(src),bl->id,0,0,skid,sc->data[i]->val2,BF_MAGIC,flag|SD_LEVEL|SD_ANIMATION);
 							status_change_end(src,(sc_type)i,INVALID_TIMER);
 							if (skill_lv == 1)
 								break;

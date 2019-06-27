@@ -2680,39 +2680,39 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 		stat = level + status_get_homagi(bl);
 		status->flee = cap_value(stat, 1, SHRT_MAX);
 		//Def2
-		stat = (int)(status_get_homvit(bl) + ((float)status_get_homagi(bl) / 2));
+		stat = (int)(status_get_homvit(bl) + (float)status_get_homagi(bl) / 2);
 		status->def2 = cap_value(stat, 0, SHRT_MAX);
 		//Mdef2
 		stat = (int)((float)(status_get_homvit(bl) + status_get_homint(bl)) / 2);
 		status->mdef2 = cap_value(stat, 0, SHRT_MAX);
 		//Def
 		stat = status->def;
-		stat += (int)(status_get_homvit(bl) + ((float)level / 2));
+		stat += (int)(status_get_homvit(bl) + (float)level / 2);
 		status->def = cap_value(stat, 0, SHRT_MAX);
 		//Mdef
-		stat = (int)(((float)(status_get_homvit(bl) + level) / 4) + ((float)status_get_homint(bl) / 2));
+		stat = (int)((float)(status_get_homvit(bl) + level) / 4 + (float)status_get_homint(bl) / 2);
 		status->mdef = cap_value(stat, 0, SHRT_MAX);
 	} else if( bl->type != BL_ELEM ) {
 		//Base level + (every 1 dex = +1 hit) + (every 3 luk = +1 hit) + 175
 		stat = status->hit;
-		stat += (int)(level + status->dex + (bl->type == BL_PC ? ((float)status->luk / 3) + 175 : 170));
+		stat += (int)(level + status->dex + (bl->type == BL_PC ? (float)status->luk / 3 + 175 : 170));
 		status->hit = cap_value(stat, 1, SHRT_MAX);
 		//Base level + (every 1 agi = +1 flee) + (every 5 luk = +1 flee) + 100
 		stat = status->flee;
-		stat += (int)(level + status->agi + (bl->type == BL_MER ? 0 : (bl->type == BL_PC ? ((float)status->luk / 5) : 0)) + 100);
+		stat += (int)(level + status->agi + (bl->type == BL_MER ? 0 : (bl->type == BL_PC ? (float)status->luk / 5 : 0)) + 100);
 		status->flee = cap_value(stat, 1, SHRT_MAX);
 		if( bl->type == BL_MER )
-			stat = (int)(status->vit + ((float)level / 10) + ((float)status->vit / 5));
-		else { //Base level + (every 2 vit = +1 def) + (every 5 agi = +1 def)
+			stat = (int)(status->vit + (float)level / 10 + (float)status->vit / 5);
+		else { //(Every 2 base level = +1 def) + (every 2 vit = +1 def) + (every 5 agi = +1 def)
 			stat = status->def2;
-			stat += (int)(((float)(level + status->vit) / 2) + (bl->type == BL_PC ? ((float)status->agi / 5) : 0));
+			stat += (int)((float)(level + status->vit) / 2 + (bl->type == BL_PC ? (float)status->agi / 5 : 0));
 		}
 		status->def2 = cap_value(stat, 0, SHRT_MAX);
 		if( bl->type == BL_MER )
-			stat = (int)(((float)level / 10) + ((float)status->int_ / 5));
+			stat = (int)((float)level / 10 + (float)status->int_ / 5);
 		else { //(Every 4 base level = +1 mdef) + (every 1 int = +1 mdef) + (every 5 dex = +1 mdef) + (every 5 vit = +1 mdef)
 			stat = status->mdef2;
-			stat += (int)(bl->type == BL_PC ? (status->int_ + ((float)level / 4) + ((float)(status->dex + status->vit) / 5)) : ((float)(level + status->int_) / 4));
+			stat += (int)(status->int_ + (float)level / 4 + (bl->type == BL_PC ? (float)(status->dex + status->vit) / 5 : 0));
 		}
 		status->mdef2 = cap_value(stat, 0, SHRT_MAX);
 	}
@@ -2728,7 +2728,7 @@ void status_calc_misc(struct block_list *bl, struct status_data *status, int lev
 	//Critical
 	if( bl->type&battle_config.enable_critical ) {
 		stat = status->cri;
-		stat += (int)(10 + ((float)(status->luk * 10) / 3)); //(Every 1 luk = +0.3 critical)
+		stat += (int)(10 + (float)(status->luk * 10) / 3); //(Every 1 luk = +0.3 critical)
 		status->cri = cap_value(stat, 1, SHRT_MAX);
 	} else
 		status->cri = 0;
@@ -4906,7 +4906,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 		else
 			status->hit = status_calc_hit(bl, sc, b_status->hit + (status->dex - b_status->dex)
 #ifdef RENEWAL
-			 + (status->luk / 3 - b_status->luk / 3)
+			 + (int)((float)(status->luk - b_status->luk) / 3)
 #endif
 			);
 	}
@@ -4921,7 +4921,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 		else
 			status->flee = status_calc_flee(bl, sc, b_status->flee + (status->agi - b_status->agi)
 #ifdef RENEWAL
-			+ (status->luk / 5 - b_status->luk / 5)
+			+ (int)((float)(status->luk - b_status->luk) / 5)
 #endif
 			);
 	}
@@ -4936,7 +4936,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 	if( flag&SCB_DEF ) {
 		status->def = status_calc_def(bl, sc, b_status->def, true);
 		if( bl->type&BL_HOM )
-			status->def += (status->vit / 5 - b_status->vit / 5);
+			status->def += (int)((float)(status->vit - b_status->vit) / 5);
 	}
 
 	if( flag&SCB_DEF2 ) {
@@ -4949,7 +4949,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 		else
 			status->def2 = status_calc_def2(bl, sc, b_status->def2
 #ifdef RENEWAL
-			+ (int)(((float)status->vit / 2 - (float)b_status->vit / 2) + ((float)status->agi / 5 - (float)b_status->agi / 5))
+			+ (int)((float)(status->vit - b_status->vit) / 2 + (bl->type& BL_PC ? (float)(status->agi - b_status->agi) / 5 : 0))
 #else
 			+ (status->vit - b_status->vit)
 #endif
@@ -4959,7 +4959,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 	if( flag&SCB_MDEF ) {
 		status->mdef = status_calc_mdef(bl, sc, b_status->mdef, true);
 		if( bl->type&BL_HOM )
-			status->mdef += (status->int_ / 5 - b_status->int_ / 5);
+			status->mdef += (int)((float)(status->int_ - b_status->int_) / 5);
 	}
 
 	if( flag&SCB_MDEF2 ) {
@@ -4972,7 +4972,7 @@ void status_calc_bl_main(struct block_list *bl, /*enum scb_flag*/int flag)
 		else
 			status->mdef2 = status_calc_mdef2(bl, sc, b_status->mdef2 + (status->int_ - b_status->int_) +
 #ifdef RENEWAL
-			(int)(((float)status->dex / 5 - (float)b_status->dex / 5) + ((float)status->vit / 5 - (float)b_status->vit / 5))
+			(bl->type&BL_PC ? (int)((float)((status->dex - b_status->dex) + (status->vit - b_status->vit)) / 5) : 0)
 #else
 			((status->vit - b_status->vit)>>1)
 #endif
