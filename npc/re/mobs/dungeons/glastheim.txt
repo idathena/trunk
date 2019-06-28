@@ -184,16 +184,41 @@ gl_step,0,0,0,0	monster	Mimic	1191,5,5000,0,0
 //==================================================
 // gl_cas02_ - Nightmare Mode 2f
 //==================================================
-gl_cas02_,0,0,0,0	monster	Evil Druid (Nightmare)	2480,20,5000,0,0
-gl_cas02_,0,0,0,0	monster	Chimera (Nightmare)	2485,10,5000,0,0
-gl_cas02_,0,0,0,0	monster	Mimic (Nightmare)	2479,40,5000,0,0
-gl_cas02_,0,0,0,0	monster	Rideword (Nightmare)	2478,40,5000,0,0
-gl_cas02_,0,0,0,0	monster	Wanderer (Nightmare)	2477,120,5000,0,0
-gl_cas02_,0,0,0,0	boss_monster	Baphomet (Nightmare)	2483,1,7200000,600000,1
+gl_cas02_,0,0,0,0	monster	Wanderer (Nightmare)	2477,60,5000,0,0
+gl_cas02_,0,0,0,0	monster	Cursed Book	2478,10,5000,0,0
+gl_cas02_,0,0,0,0	monster	Cursed Box	2479,19,5000,0,0
+gl_cas02_,193,167,5,5	monster	Wanderer (Nightmare)	2477,3,300000,120000,0
+gl_cas02_,193,135,5,5	monster	Wanderer (Nightmare)	2477,3,300000,120000,0
+gl_cas02_,104,145,5,5	monster	Mysteltainn	1203,1,7200000,3600000,1
+gl_cas02_,102,180,0,0	monster	Whisper	1185,1,1800000,900000,1
+gl_cas02_,105,180,0,0	monster	Whisper	1185,1,1800000,900000,1
+gl_cas02_,182,12,3,3	monster	Chimera (Nightmare)	2485,1,3600000,1800000,1
+gl_cas02_,185,11,8,8	monster	Cursed Book	2478,4,120000,60000,1
+gl_cas02_,174,11,8,8	monster	Evil Druid (Nightmare)	2480,4,120000,60000,1
+gl_cas02_,104,38,4,4	monster	Chimera (Nightmare)	2485,1,1800000,900000,1
+gl_cas02_,24,35,4,4	monster	Chimera (Nightmare)	2485,1,1800000,900000,1
+gl_cas02_,46,124,15,15	monster	Cursed Book	2478,15,360000,180000,1
+gl_cas02_,16,186,10,10	monster	Evil Druid (Nightmare)	2480,5,360000,180000,1
+gl_cas02_,133,83,3,3	monster	Wanderer (Nightmare)	2477,1,360000,180000,1
+gl_cas02_,45,177,3,3	monster	Wanderer (Nightmare)	2477,1,360000,180000,1
+gl_cas02_,182,65,3,3	monster	Wanderer (Nightmare)	2477,1,360000,180000,1
+gl_cas02_,173,127,3,3	monster	Wanderer (Nightmare)	2477,1,360000,180000,1
+gl_cas02_,173,167,3,3	monster	Wanderer (Nightmare)	2477,1,360000,180000,1
+gl_cas02_,93,177,3,3	monster	Chimera (Nightmare)	2485,1,1800000,900000,1
+gl_cas02_,115,177,3,3	monster	Chimera (Nightmare)	2485,1,1800000,900000,1
+gl_cas02_,83,84,2,2	monster	Cursed Box	2479,1,360000,180000,1
+gl_cas02_,83,80,2,2	monster	Cursed Box	2479,1,360000,180000,1
+gl_cas02_,0,0,0,0	boss_monster	Baphomet (Nightmare)	2483,1,7200000,3600000,1
+gl_cas02_,0,0,0,0	monster	Alice	1275,1,5000,0,0
+gl_cas02_,189,20,1,1	monster	Wanderer (Nightmare)	2477,1,360000,180000,1
+gl_cas02_,190,23,1,1	monster	Wanderer (Nightmare)	2477,1,360000,180000,1
+gl_cas02_,190,38,1,1	monster	Cursed Box	2479,1,360000,180000,1
 
 //==================================================
 // gl_chyard_ - Nightmare Mode Churchyard
 //==================================================
-gl_chyard_,0,0,0,0	monster	Wraith Dead (Nightmare)	2481,200,5000,0,0
-gl_chyard_,0,0,0,0	monster	Evil Druid (Nightmare)	2480,5,60000,0,0
-gl_chyard_,0,0,0,0	monster	Mimic (Nightmare)	2479,5,60000,0,0
+gl_chyard_,0,0,0,0	monster	Wraith Dead (Nightmare)	2481,60,5000,0,0
+gl_chyard_,0,0,0,0	monster	Wraith Dead	1291,25,5000,0,0
+gl_chyard_,0,0,0,0	monster	Evil Druid (Nightmare)	2480,15,5000,0,0
+gl_chyard_,0,0,0,0	monster	Cursed Box	2479,23,5000,0,0
+gl_chyard_,0,0,0,0	boss_monster	Dark Lord	1272,1,3600000,1800000,1

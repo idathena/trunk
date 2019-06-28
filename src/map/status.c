@@ -2339,13 +2339,14 @@ int status_base_amotion_pc(struct map_session_data *sd, struct status_data *stat
  */
 static unsigned short status_base_atk(const struct block_list *bl, const struct status_data *status, int level)
 {
+	struct map_session_data *sd = map_id2sd(bl->id);
 	int flag = 0, str, dex, dstr;
 
 	if( !(bl->type&battle_config.enable_baseatk) )
 		return 0;
 
-	if( bl->type == BL_PC ) {
-		switch( ((TBL_PC *)bl)->status.weapon ) {
+	if( sd ) {
+		switch( sd->status.weapon ) {
 			case W_BOW:	case W_MUSICAL:
 			case W_WHIP:	case W_REVOLVER:
 			case W_RIFLE:	case W_GATLING:
