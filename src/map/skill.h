@@ -2123,11 +2123,13 @@ enum wl_spheres {
 	WLS_WATER,
 	WLS_STONE,
 };
+
 struct s_skill_spellbook_db {
 	unsigned short nameid,
 		skill_id,
 		point;
 };
+
 extern struct s_skill_spellbook_db skill_spellbook_db[MAX_SKILL_SPELLBOOK_DB];
 void skill_spellbook(struct map_session_data *sd, unsigned short nameid);
 int skill_block_check(struct block_list *bl, enum sc_type type, uint16 skill_id);

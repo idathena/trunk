@@ -2005,9 +2005,6 @@ OnTimer5400000:
 
 OnTimer5415000:
 	mapannounce "moc_fild21","I don't have time for this! Go away!",bc_map,"0xFFFF00";
-	stopnpctimer;
-	killmonster "moc_fild21","Satan Summon#edq::OnMyMobDead";
-	set $@re_moc,0;
 	donpcevent "Satan Summon#edq::OnDisable";
 	end;
 }

@@ -959,9 +959,8 @@ bool battle_skill_check_no_cardfix_atk(uint16 skill_id) {
 		case WS_CARTTERMINATION:
 		case CR_ACIDDEMONSTRATION:
 		case GN_FIRE_EXPANSION_ACID:
-#endif
-		case RA_CLUSTERBOMB:
 			return true;
+#endif
 		case RK_DRAGONBREATH:
 		case RK_DRAGONBREATH_WATER:
 		case NC_SELFDESTRUCTION:
@@ -1805,9 +1804,9 @@ static int battle_calc_base_weapon_attack(struct block_list *src, struct status_
 	uint16 atkmax = atkmin;
 	int64 damage;
 	bool weapon_perfection = false;
-	short index = sd->equip_index[type];
+	short index = -1;
 
-	if(index >= 0 && sd->inventory_data[index]) {
+	if((index = sd->equip_index[type]) >= 0 && sd->inventory_data[index]) {
 		float strdex_bonus, variance;
 		short flag = 0, dstr;
 
@@ -1904,7 +1903,7 @@ static int64 battle_calc_base_damage(struct block_list *src, struct status_data 
 				atkmin = atkmin * (80 + sd->inventory_data[sd->equip_index[type]]->wlv * 20) / 100;
 			if(atkmin > atkmax)
 				atkmin = atkmax;
-			if(flag&2 && !(flag&16)) { //Bows
+			if((flag&2) && !(flag&16)) { //Bows
 				atkmin = atkmin * atkmax / 100;
 				if (atkmin > atkmax)
 					atkmax = atkmin;
@@ -1923,7 +1922,7 @@ static int64 battle_calc_base_damage(struct block_list *src, struct status_data 
 
 	if(sd) {
 		//Rodatazone says the range is 0~arrow_atk-1 for non crit
-		if(flag&2 && sd->bonus.arrow_atk)
+		if((flag&2) && sd->bonus.arrow_atk)
 			damage += ((flag&1) ? sd->bonus.arrow_atk : rnd()%sd->bonus.arrow_atk);
 		//Size fix only for player
 		if(!(sd->special_state.no_sizefix || (flag&8)))
@@ -2733,10 +2732,9 @@ int battle_get_weapon_element(struct Damage *d, struct block_list *src, struct b
 	int element = skill_get_ele(skill_id, skill_lv);
 
 	if(!skill_id || element == -1) { //Take weapon's element
-		if(sd && sd->charmball_type != CHARM_TYPE_NONE && sd->charmball >= MAX_CHARMBALL)
+		element = (weapon_position == EQI_HAND_L ? sstatus->lhw.ele : sstatus->rhw.ele);
+		if(sd && sd->charmball_type != CHARM_TYPE_NONE && sd->charmball >= MAX_CHARMBALL && element == ELE_NEUTRAL)
 			element = sd->charmball_type; //Summoning 10 charmball will endow your weapon
-		else
-			element = (weapon_position == EQI_HAND_L ? sstatus->lhw.ele : sstatus->rhw.ele);
 		if(is_skill_using_arrow(src, skill_id) && weapon_position == EQI_HAND_R && sd) {
 			if(sd->bonus.arrow_ele)
 				element = sd->bonus.arrow_ele;
@@ -2759,7 +2757,7 @@ int battle_get_weapon_element(struct Damage *d, struct block_list *src, struct b
 
 	switch(skill_id) {
 		case LK_SPIRALPIERCE:
-			if(!sd) //Forced neutral for monsters
+			if(src->type != BL_PC) //Forced neutral for monsters
 		//Fall through
 		case SO_VARETYR_SPEAR:
 			element = ELE_NEUTRAL;
@@ -5335,11 +5333,10 @@ static struct Damage initialize_weapon_data(struct block_list *src, struct block
 				wd.flag = (wd.flag&~BF_SKILLMASK)|BF_NORMAL;
 				break;
 			case MO_FINGEROFFENSIVE:
-				if(sd)
-					wd.div_ = (battle_config.finger_offensive_type ? 1 : max(sd->spiritball_old,1));
+				wd.div_ = (battle_config.finger_offensive_type ? 1 : (sd ? max(sd->spiritball_old,1) : 5));
 				break;
 			case LK_SPIRALPIERCE:
-				if(!sd)
+				if(src->type != BL_PC)
 					wd.flag = ((wd.flag&~(BF_RANGEMASK|BF_WEAPONMASK))|BF_LONG|BF_MISC);
 				break;
 			case LG_HESPERUSLIT: {
@@ -5365,8 +5362,14 @@ static struct Damage initialize_weapon_data(struct block_list *src, struct block
 					wd.div_ = 1;
 				break;
 		}
-	} else
-		wd.flag |= (is_skill_using_arrow(src, skill_id) ? BF_LONG : BF_SHORT);
+	} else {
+		struct status_change *sc = NULL;
+		bool is_long = false;
+
+		if(is_skill_using_arrow(src, skill_id) || ((sc = status_get_sc(src)) && sc->data[SC_SOULATTACK]))
+			is_long = true;
+		wd.flag |= (is_long ? BF_LONG : BF_SHORT);
+	}
 	return wd;
 }
 
@@ -7693,12 +7696,12 @@ enum damage_lv battle_weapon_attack(struct block_list *src, struct block_list *t
 			if (sd)
 				sd->state.autocast = 0;
 			if (ud) {
-				int delay = skill_delayfix(src,skill_id,skill_lv);
+				int autospell_tick = skill_delayfix(src,skill_id,skill_lv);
 
-				if (DIFF_TICK(ud->canact_tick,tick + delay) < 0) {
-					ud->canact_tick = max(tick + delay,ud->canact_tick);
+				if (DIFF_TICK(ud->canact_tick,tick + autospell_tick) < 0) {
+					ud->canact_tick = max(tick + autospell_tick,ud->canact_tick);
 					if (battle_config.display_status_timers)
-						clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
+						clif_status_change(src,SI_POSTDELAY,1,autospell_tick,0,0,0);
 				}
 			}
 		}
