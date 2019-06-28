@@ -2733,7 +2733,7 @@ int battle_get_weapon_element(struct Damage *d, struct block_list *src, struct b
 
 	if(!skill_id || element == -1) { //Take weapon's element
 		element = (weapon_position == EQI_HAND_L ? sstatus->lhw.ele : sstatus->rhw.ele);
-		if(sd && sd->charmball_type != CHARM_TYPE_NONE && sd->charmball >= MAX_CHARMBALL && element == ELE_NEUTRAL)
+		if(element == ELE_NEUTRAL && sd && sd->charmball_type != CHARM_TYPE_NONE && sd->charmball >= MAX_CHARMBALL)
 			element = sd->charmball_type; //Summoning 10 charmball will endow your weapon
 		if(is_skill_using_arrow(src, skill_id) && weapon_position == EQI_HAND_R && sd) {
 			if(sd->bonus.arrow_ele)

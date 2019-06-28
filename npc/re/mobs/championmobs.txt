@@ -164,8 +164,8 @@ ra_san02,0,0,0,0	monster	Isilla Ringleader	2791,2,180000,0,0
 ra_san03,0,0,0,0	monster	Hodremlin Ringleader	2801,2,180000,0,0
 ra_san04,0,0,0,0	monster	Echio Ringleader	2841,1,180000,0,0
 ra_san05,0,0,0,0	monster	Swift Agav	2911,2,180000,0,0
-teg_dun01,0,0,0,0	monster	Furious Rogue Wickebine	2783,2,300000,0
-teg_dun02,0,0,0,0	monster	Elusive Assassin Eremes	2782,3,300000,0
+teg_dun01,0,0,0,0	monster	Elusive Assassin Eremes	2783,2,300000,0
+teg_dun02,0,0,0,0	monster	Furious Rogue Wickebine	2782,3,300000,0
 tha_t01,0,0,0,0	monster	Swift Rideword	2681,1,180000,0,0
 tha_t02,0,0,0,0	monster	Ancient Mimic Ringleader	2903,2,180000,0,0
 tha_t03,0,0,0,0	monster	Death Word Ringleader	2860,2,180000,0,0
