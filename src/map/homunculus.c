@@ -831,7 +831,7 @@ void hom_gainexp(struct homun_data *hd, uint32 exp)
 		return;
 
 	if (exp) {
-		if ((uint64)(hd->homunculus.exp + exp) > UINT32_MAX)
+		if ((uint64)hd->homunculus.exp + exp > UINT32_MAX)
 			hd->homunculus.exp = UINT32_MAX;
 		else
 			hd->homunculus.exp += exp;

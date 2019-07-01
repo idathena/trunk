@@ -7233,7 +7233,7 @@ void pc_gainexp(struct map_session_data *sd, struct block_list *src, uint32 base
 
 	//Give EXP for Base Level
 	if (base_exp) {
-		if ((uint64)(sd->status.base_exp + base_exp) > UINT32_MAX)
+		if ((uint64)sd->status.base_exp + base_exp > UINT32_MAX)
 			sd->status.base_exp = UINT32_MAX;
 		else
 			sd->status.base_exp += base_exp;
@@ -7243,7 +7243,7 @@ void pc_gainexp(struct map_session_data *sd, struct block_list *src, uint32 base
 
 	//Give EXP for Job Level
 	if (job_exp) {
-		if ((uint64)(sd->status.job_exp + job_exp) > UINT32_MAX)
+		if ((uint64)sd->status.job_exp + job_exp > UINT32_MAX)
 			sd->status.job_exp = UINT32_MAX;
 		else
 			sd->status.job_exp += job_exp;
