@@ -5552,6 +5552,9 @@
 	export_constant(MOB_TYPE_DEF_ELE_NEUTRAL);
 	export_constant(MOB_TYPE_DEF_ELE_UNDEAD);
 
+	export_constant(BASE_EXP);
+	export_constant(JOB_EXP);
+
 	#undef export_constant
 	#undef export_constant2
 	#undef export_parameter

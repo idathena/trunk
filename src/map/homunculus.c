@@ -823,7 +823,7 @@ int hom_mutate(struct homun_data *hd, int homun_id)
  * @param hd
  * @param exp Added EXP
  */
-void hom_gainexp(struct homun_data *hd, int exp)
+void hom_gainexp(struct homun_data *hd, uint32 exp)
 {
 	nullpo_retv(hd);
 
@@ -831,7 +831,7 @@ void hom_gainexp(struct homun_data *hd, int exp)
 		return;
 
 	if (exp) {
-		if ((uint64)hd->homunculus.exp + exp > UINT32_MAX)
+		if ((uint64)(hd->homunculus.exp + exp) > UINT32_MAX)
 			hd->homunculus.exp = UINT32_MAX;
 		else
 			hd->homunculus.exp += exp;

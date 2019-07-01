@@ -11649,10 +11649,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
  *------------------------------------------*/
 int status_change_clear(struct block_list *bl, int type)
 {
-	struct status_change *sc = status_get_sc(bl);
+	struct status_change *sc = NULL;
 	int i;
 
-	if (!sc)
+	if (!(sc = status_get_sc(bl)))
 		return 0;
 
 	//Cleaning all extras vars

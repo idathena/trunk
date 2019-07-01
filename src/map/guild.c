@@ -236,7 +236,7 @@ struct map_session_data *guild_getavailablesd(struct guild *g)
 }
 
 /// lookup: player AID/CID -> member index
-int guild_getindex(struct guild *g,int account_id,int char_id)
+int guild_getindex(struct guild *g, int account_id, int char_id)
 {
 	int i;
 
@@ -1262,7 +1262,7 @@ static DBData create_expcache(DBKey key, va_list args)
 /*====================================================
  * Return taxed experience from player sd to guild
  *---------------------------------------------------*/
-unsigned int guild_payexp(struct map_session_data *sd,unsigned int exp)
+uint32 guild_payexp(struct map_session_data *sd, uint32 exp)
 {
 	struct guild *g;
 	struct guild_expcache *c;
@@ -1270,10 +1270,11 @@ unsigned int guild_payexp(struct map_session_data *sd,unsigned int exp)
 
 	nullpo_ret(sd);
 
-	if (!exp) return 0;
+	if (!exp)
+		return 0;
 
-	if (sd->status.guild_id == 0 ||
-		(g = sd->guild) == NULL ||
+	if (!sd->status.guild_id ||
+		!(g = sd->guild) ||
 		(per = guild_getposition(sd)) < 0 ||
 		(per = g->position[per].exp_mode) < 1)
 		return 0;
@@ -1281,7 +1282,7 @@ unsigned int guild_payexp(struct map_session_data *sd,unsigned int exp)
 
 	if (per < 100)
 		exp = exp * per / 100;
-	//Otherwise tax everything.
+	//Otherwise tax everything
 
 	c = db_data2ptr(guild_expcache_db->ensure(guild_expcache_db, db_i2key(sd->status.char_id), create_expcache, sd));
 
@@ -1298,12 +1299,13 @@ unsigned int guild_payexp(struct map_session_data *sd,unsigned int exp)
  * Add this experience to guild exp
  * [Celest]
  *---------------------------------------------------*/
-int guild_getexp(struct map_session_data *sd,int exp)
+uint32 guild_getexp(struct map_session_data *sd, uint32 exp)
 {
-	struct guild_expcache *c;
+	struct guild_expcache *c = NULL;
+
 	nullpo_ret(sd);
 
-	if (sd->status.guild_id == 0 || sd->guild == NULL)
+	if (!sd->status.guild_id || !sd->guild)
 		return 0;
 
 	c = db_data2ptr(guild_expcache_db->ensure(guild_expcache_db, db_i2key(sd->status.char_id), create_expcache, sd));

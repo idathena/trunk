@@ -39,10 +39,10 @@ struct guild_castle *guild_mapname2gc(const char *mapname);
 struct guild_castle *guild_mapindex2gc(short mapindex);
 
 struct map_session_data *guild_getavailablesd(struct guild *g);
-int guild_getindex(struct guild *g,int account_id,int char_id);
+int guild_getindex(struct guild *g, int account_id, int char_id);
 int guild_getposition(struct map_session_data *sd);
-unsigned int guild_payexp(struct map_session_data *sd,unsigned int exp);
-int guild_getexp(struct map_session_data *sd,int exp); // [Celest]
+uint32 guild_payexp(struct map_session_data *sd, uint32 exp);
+uint32 guild_getexp(struct map_session_data *sd, uint32 exp); // [Celest]
 
 int guild_create(struct map_session_data *sd, const char *name);
 int guild_created(int account_id,int guild_id);

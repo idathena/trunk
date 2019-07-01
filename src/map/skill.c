@@ -1851,6 +1851,8 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 					as_skill_id = sc->data[SC_TROPIC_OPTION]->val3;
 				else if( sc->data[SC_CHILLY_AIR_OPTION] )
 					as_skill_id = sc->data[SC_CHILLY_AIR_OPTION]->val3;
+				else
+					as_skill_id = 0;
 				if( as_skill_id && status_charge(src,0,skill_get_sp(as_skill_id,5)) ) {
 					struct unit_data *ud = unit_bl2ud(src);
 
@@ -6213,7 +6215,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				skill_area_temp[0]++;
 				skill_area_temp[0] = battle_config.exp_cost_redemptio_limit - skill_area_temp[0]; //The actual penalty
 				if(skill_area_temp[0] > 0 && battle_config.exp_cost_redemptio) //If total penalty is 1% => reduced 0.2% penalty per each revived player
-					pc_lostexp(sd,u32min(sd->status.base_exp,(pc_nextbaseexp(sd) * skill_area_temp[0] * battle_config.exp_cost_redemptio / battle_config.exp_cost_redemptio_limit) / 100),0);
+					pc_lostexp(sd,umin(sd->status.base_exp,(pc_nextbaseexp(sd) * skill_area_temp[0] * battle_config.exp_cost_redemptio / battle_config.exp_cost_redemptio_limit) / 100),0);
 				status_revive(bl,50,0);
 				clif_skill_nodamage(bl,bl,ALL_RESURRECTION,-1,1);
 			} else if(sd) {
@@ -6261,20 +6263,20 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					if(!(flag&1)) //AB_EPICLESIS have no resurrection animation
 						clif_skill_nodamage(src,bl,ALL_RESURRECTION,skill_lv,1);
 					if(sd && dstsd && battle_config.resurrection_exp) {
-						int exp = 0, jexp = 0;
+						uint32 bexp = 0, jexp = 0;
 						int lv = status_get_lv(bl) - status_get_lv(src),
 							jlv = status_get_job_lv(bl) - status_get_job_lv(src);
 
 						if(lv && pc_nextbaseexp(dstsd)) {
-							exp = (int)((double)dstsd->status.base_exp * (double)lv * (double)battle_config.resurrection_exp / 1000000.);
-							exp = max(exp,1);
+							bexp = (uint32)((double)dstsd->status.base_exp * (double)lv * (double)battle_config.resurrection_exp / 1000000.);
+							bexp = umax(bexp,1);
 						}
 						if(jlv && pc_nextjobexp(dstsd)) {
-							jexp = (int)((double)dstsd->status.job_exp * (double)jlv * (double)battle_config.resurrection_exp / 1000000.);
-							jexp = max(jexp,1);
+							jexp = (uint32)((double)dstsd->status.job_exp * (double)jlv * (double)battle_config.resurrection_exp / 1000000.);
+							jexp = umax(jexp,1);
 						}
-						if(exp || jexp)
-							pc_gainexp(sd,bl,exp,jexp,0);
+						if(bexp || jexp)
+							pc_gainexp(sd,bl,bexp,jexp,0);
 					}
 				}
 			}
@@ -9726,7 +9728,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case LG_INSPIRATION:
 			if( sd && battle_config.exp_cost_inspiration )
-				pc_lostexp(sd,u32min(sd->status.base_exp,pc_nextbaseexp(sd) * battle_config.exp_cost_inspiration / 100),0); //1% penalty
+				pc_lostexp(sd,umin(sd->status.base_exp,pc_nextbaseexp(sd) * battle_config.exp_cost_inspiration / 100),0); //1% penalty
 			status_change_clear_buffs(bl,SCCB_BUFFS|SCCB_DEBUFFS|SCCB_REFRESH,0);
 			clif_skill_nodamage(bl,src,skill_id,skill_lv,
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));

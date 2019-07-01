@@ -19,6 +19,9 @@
     <ClCompile Include="..\src\common\strlib.c">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\timer.c">
+      <Filter>common</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\common\utils.c">
       <Filter>common</Filter>
     </ClCompile>
@@ -49,6 +52,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\src\common\strlib.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\common\timer.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\src\common\utils.h">

@@ -382,7 +382,7 @@ struct s_homunculus {	//[orn]
 	struct s_skill hskill[MAX_HOMUNSKILL]; //albator
 	short skillpts;
 	short level;
-	unsigned int exp;
+	uint32 exp;
 	short rename_flag;
 	short vaporize; //albator
 	int str;
@@ -451,7 +451,7 @@ struct mmo_charstatus {
 	int mother;
 	int child;
 
-	unsigned int base_exp,job_exp;
+	uint32 base_exp,job_exp;
 	int zeny;
 
 	short class_; // Player's JobID

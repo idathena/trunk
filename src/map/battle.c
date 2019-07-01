@@ -8742,7 +8742,6 @@ static const struct _battle_data {
 	{ "show_skill_scale",                   &battle_config.show_skill_scale,                1,      0,      1,              },
 	{ "millennium_shield_health",           &battle_config.millennium_shield_health,        1000,   1,      INT_MAX,        },
 	{ "hesperuslit_bonus_stack",            &battle_config.hesperuslit_bonus_stack,         0,      0,      1,              },
-	{ "load_custom_exp_tables",             &battle_config.load_custom_exp_tables,          0,      0,      1,              },
 	{ "feature.pet_evolution",              &battle_config.feature_pet_evolution,           1,      0,      1,              },
 	{ "feature.pet_autofeed",               &battle_config.feature_pet_autofeed,            1,      0,      1,              },
 	{ "pet_autofeed_always",                &battle_config.pet_autofeed_always,             1,      0,      1,              },

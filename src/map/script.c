@@ -2902,8 +2902,8 @@ static int set_reg(struct script_state *st, TBL_PC *sd, int num, const char *nam
 		int val = (int)__64BPRTSIZE(value);
 
 		if( str_data[num&0x00ffffff].type == C_PARAM ) {
-			if( pc_setparam(sd, str_data[num&0x00ffffff].val, val) == 0 ) {
-				if( st != NULL ) {
+			if( !pc_setparam(sd, str_data[num&0x00ffffff].val, val) ) {
+				if( st ) {
 					ShowError("script:set_reg: failed to set param '%s' to %d.\n", name, val);
 					script_reportsrc(st);
 					st->state = END;
@@ -7828,7 +7828,7 @@ BUILDIN_FUNC(getequipuniqueid)
 		char buf[256];
 
 		memset(buf, 0, sizeof(buf));
-		snprintf(buf, sizeof(buf)-1, "%llu", (unsigned long long)item->unique_id);
+		snprintf(buf, sizeof(buf) - 1, "%" PRIu64, item->unique_id);
 
 		script_pushstr(st,buf);
 	} else
@@ -9476,14 +9476,12 @@ BUILDIN_FUNC(getexp2)
 BUILDIN_FUNC(guildgetexp)
 {
 	TBL_PC *sd;
-	int exp;
+	uint32 exp;
 
 	if( !(sd = script_rid2sd(st)) )
 		return 0;
 
 	exp = script_getnum(st,2);
-	if( exp < 0 )
-		return 0;
 	if( sd && sd->status.guild_id > 0 )
 		guild_getexp(sd,exp);
 

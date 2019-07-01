@@ -2333,7 +2333,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 	struct {
 		struct party_data *p;
 		int id, zeny;
-		unsigned int base_exp, job_exp;
+		uint32 base_exp, job_exp;
 	} pt[DAMAGELOG_SIZE];
 	int i, temp, count, m = md->bl.m;
 	int dmgbltypes = 0; //Bitfield of all bl types, that caused damage to the mob and are elligible for exp distribution
@@ -2436,7 +2436,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			bonus += (md->level - md->db->lv) * battle_config.mobs_level_up_exp_rate;
 		for(i = 0; i < DAMAGELOG_SIZE && md->dmglog[i].id; i++) {
 			int flag = 1, zeny = 0;
-			unsigned int base_exp, job_exp;
+			uint32 base_exp, job_exp;
 			double per; //Your share of the mob's exp
 
 			if(!tmpsd[i])
@@ -2477,7 +2477,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 
 				exp = apply_rate(exp, bonus);
 				exp = apply_rate(exp, mapdata[m].adjust.bexp);
-				base_exp = (unsigned int)cap_value(exp, 1, UINT_MAX);
+				base_exp = (uint32)cap_value(exp, 1, UINT32_MAX);
 			}
 			if(mapdata[m].flag.nojobexp || !md->db->job_exp
 #ifndef RENEWAL //Homun earned job-exp is always lost
@@ -2710,12 +2710,12 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		unsigned int log_mvp[2] = { 0 };
 
 		if(!(mapdata[m].flag.nobaseexp || type&2)) { //Mapflag: noexp check [Lorky]
-			unsigned int mexp;
+			uint32 mexp;
 			double exp = md->db->mexp;
 
 			if(count > 1)
 				exp += exp * (battle_config.exp_bonus_attacker * (count - 1)) / 100.; //[Gengar]
-			mexp = (unsigned int)cap_value(exp, 1, UINT_MAX);
+			mexp = (uint32)cap_value(exp, 1, UINT32_MAX);
 			clif_mvp_effect(mvp_sd);
 			clif_mvp_exp(mvp_sd, mexp);
 			pc_gainexp(mvp_sd, &md->bl, mexp, 0, 0);
@@ -4077,11 +4077,11 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 
 	if (config_setting_lookup_int(it, "EXP", &i32) && i32 >= 0)
 		exp = (double)i32 * (double)battle_config.base_exp_rate / 100.;
-	entry->base_exp = (unsigned int)cap_value(exp, 0, UINT_MAX);
+	entry->base_exp = (uint32)cap_value(exp, 0, UINT32_MAX);
 
 	if (config_setting_lookup_int(it, "JEXP", &i32) && i32 >= 0)
 		exp = (double)i32 * (double)battle_config.job_exp_rate / 100.;
-	entry->job_exp = (unsigned int)cap_value(exp, 0, UINT_MAX);
+	entry->job_exp = (uint32)cap_value(exp, 0, UINT32_MAX);
 
 	if (config_setting_lookup_int(it, "Range1", &i32) && i32 >= 0)
 		status->rhw.range = i32;
@@ -4209,7 +4209,7 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 	//Some new MVP's MEXP multipled by high exp-rate cause overflow [LuzZza]
 	if (config_setting_lookup_int(it, "MEXP", &i32) && i32 >= 0) {
 		exp = (double)i32 * (double)battle_config.mvp_exp_rate / 100.;
-		entry->mexp = (unsigned int)cap_value(exp, 0, UINT_MAX);
+		entry->mexp = (uint32)cap_value(exp, 0, UINT32_MAX);
 	}
 
 	//Now that we know if it is an mvp or not, apply battle_config modifiers [Skotlex]
