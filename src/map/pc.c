@@ -7201,14 +7201,14 @@ void pc_gainexp(struct map_session_data *sd, struct block_list *src, uint32 base
 	if (flag&4) {
 		if (sd->status.base_exp >= MAX_LEVEL_BASE_EXP)
 			base_exp = 0;
-		else if ((uint64)(sd->status.base_exp + base_exp) >= MAX_LEVEL_BASE_EXP)
+		else if ((uint64)sd->status.base_exp + base_exp >= MAX_LEVEL_BASE_EXP)
 			base_exp = MAX_LEVEL_BASE_EXP - sd->status.base_exp;
 	}
 
 	if (flag&8) {
 		if (sd->status.job_exp >= MAX_LEVEL_JOB_EXP)
 			job_exp = 0;
-		else if ((uint64)(sd->status.job_exp + job_exp) >= MAX_LEVEL_JOB_EXP)
+		else if ((uint64)sd->status.job_exp + job_exp >= MAX_LEVEL_JOB_EXP)
 			job_exp = MAX_LEVEL_JOB_EXP - sd->status.job_exp;
 	}
 

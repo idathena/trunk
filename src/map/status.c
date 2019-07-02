@@ -2408,21 +2408,6 @@ static unsigned short status_base_atk(const struct block_list *bl, const struct 
 
 #ifdef RENEWAL
 /**
- * Weapon attack value calculated for Players
- * @param watk: Weapon attack
- * @return weapon attack
- */
-unsigned short status_weapon_atk(struct weapon_atk *watk)
-{
-	return watk->atk + watk->atk2;
-}
-#endif
-
-#ifndef RENEWAL
-unsigned short status_base_matk_min(const struct status_data *status) { return status->int_ + (status->int_ / 7) * (status->int_ / 7); }
-unsigned short status_base_matk_max(const struct status_data *status) { return status->int_ + (status->int_ / 5) * (status->int_ / 5); }
-#else
-/**
  * Calculates minimum attack variance 80% from db's ATK1 for non BL_PC
  * status->batk (base attack) will be added in battle_calc_base_damage
  */
@@ -2461,6 +2446,16 @@ unsigned short status_base_atk_max(struct block_list *bl, const struct status_da
 }
 
 /**
+ * Weapon attack value calculated for Players
+ * @param watk: Weapon attack
+ * @return weapon attack
+ */
+unsigned short status_weapon_atk(struct weapon_atk *watk)
+{
+	return watk->atk + watk->atk2;
+}
+
+/**
  * Calculates base magic attack
  */
 unsigned short status_base_matk(struct block_list *bl, const struct status_data *status, int level)
@@ -2478,6 +2473,9 @@ unsigned short status_base_matk(struct block_list *bl, const struct status_data 
 			return status->int_ + (status->int_ / 2) + (status->dex / 5) + (status->luk / 3) + (level / 4);
 	}
 }
+#else
+unsigned short status_base_matk_min(const struct status_data *status) { return status->int_ + (status->int_ / 7) * (status->int_ / 7); }
+unsigned short status_base_matk_max(const struct status_data *status) { return status->int_ + (status->int_ / 5) * (status->int_ / 5); }
 #endif
 
 /**
