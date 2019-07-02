@@ -1055,9 +1055,9 @@ bool pc_adoption(struct map_session_data *p1_sd, struct map_session_data *p2_sd,
 
 void pc_updateweightstatus(struct map_session_data *sd);
 
-bool pc_addautobonus(struct s_autobonus *bonus,char max,const char *script,short rate,unsigned int dur,short atk_type,const char *o_script,unsigned int pos,bool onskill);
+bool pc_addautobonus(struct s_autobonus *bonus, char max, const char *script, short rate, unsigned int dur, short atk_type, const char *o_script, unsigned int pos, bool onskill);
 void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus);
-int pc_endautobonus(int tid, unsigned int tick,int id,intptr_t data);
+TIMER_FUNC(pc_endautobonus);
 void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, char max, bool restore);
 
 void pc_bonus(struct map_session_data *sd, int type, int val);
@@ -1065,7 +1065,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val);
 void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int val);
 void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int type4, int val);
 void pc_bonus5(struct map_session_data *sd, int type, int type2, int type3, int type4, int type5, int val);
-int pc_skill(TBL_PC *sd, int id, int level, int flag);
+int pc_skill(struct map_session_data *sd, int id, int level, int flag);
 
 bool pc_can_insert_card_into(struct map_session_data *sd, int idx_card, int idx_equip);
 bool pc_can_insert_card(struct map_session_data *sd, int idx_card);
@@ -1107,8 +1107,8 @@ int pc_resetfeel(struct map_session_data *);
 int pc_resethate(struct map_session_data *);
 bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equipswitch);
 void pc_unequipitem(struct map_session_data *sd, int n, int flag);
-int pc_equipswitch(struct map_session_data* sd, int index);
-void pc_equipswitch_remove(struct map_session_data* sd, int index);
+int pc_equipswitch(struct map_session_data *sd, int index);
+void pc_equipswitch_remove(struct map_session_data *sd, int index);
 void pc_checkitem(struct map_session_data *);
 void pc_check_available_item(struct map_session_data *sd, uint8 type);
 int pc_useitem(struct map_session_data *,int);

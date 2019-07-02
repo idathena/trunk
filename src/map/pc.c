@@ -2789,7 +2789,7 @@ static void pc_bonus_item_drop(struct s_add_drop *drop, const short max, unsigne
 	drop[i].rate = rate;
 }
 
-bool pc_addautobonus(struct s_autobonus *bonus,char max,const char *script,short rate,unsigned int dur,short flag,const char *other_script,unsigned int pos,bool onskill)
+bool pc_addautobonus(struct s_autobonus *bonus, char max, const char *script, short rate, unsigned int dur, short flag, const char *other_script, unsigned int pos, bool onskill)
 {
 	int i;
 
@@ -2847,10 +2847,8 @@ void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus,
 						script_run_autobonus(autobonus[i].bonus_script,sd,autobonus[i].pos);
 				}
 				continue;
-			} else { //Logout / Unequipped an item with an activated bonus
+			} else //Logout / Unequipped an item with an activated bonus
 				delete_timer(autobonus[i].active,pc_endautobonus);
-				autobonus[i].active = INVALID_TIMER;
-			}
 		}
 		if( autobonus[i].bonus_script )
 			aFree(autobonus[i].bonus_script);
@@ -2887,7 +2885,6 @@ void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus)
 
 	autobonus->active = add_timer(gettick() + autobonus->duration,pc_endautobonus,sd->bl.id,(intptr_t)autobonus);
 	sd->state.autobonus |= autobonus->pos;
-	status_calc_pc(sd,SCO_FORCE);
 }
 
 TIMER_FUNC(pc_endautobonus)
@@ -4525,7 +4522,7 @@ void pc_bonus5(struct map_session_data *sd, int type, int type2, int type3, int 
  *	2 - Like 1, except the level granted can stack with previously learned level.
  *	4 - Like 0, except the skill will ignore skill tree (saves through job changes and resets).
  */
-int pc_skill(TBL_PC *sd, int id, int level, int flag)
+int pc_skill(struct map_session_data *sd, int id, int level, int flag)
 {
 	nullpo_ret(sd);
 
@@ -10385,10 +10382,10 @@ int pc_load_combo(struct map_session_data *sd) {
 		if( id->combos_count )
 			ret += pc_checkcombo(sd,id);
 		if( !itemdb_isspecial(sd->inventory.u.items_inventory[idx].card[0]) ) {
-			struct item_data *data;
+			struct item_data *data = NULL;
 			int j;
 
-			for( j = 0; j < id->slot; j++ ) {
+			for( j = 0; j < MAX_SLOTS; j++ ) {
 				if( !sd->inventory.u.items_inventory[idx].card[j] )
 					continue;
 				if( (data = itemdb_exists(sd->inventory.u.items_inventory[idx].card[j])) && data->combos_count )
@@ -10473,7 +10470,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 			pos = (equip_index[EQI_ACC_R] >= 0 ? EQP_ACC_L : EQP_ACC_R);
 		//Accessories that have cards that force equip location
 		for( i = 0; i < sd->inventory_data[n]->slot; i++ ) {
-			struct item_data *card_data;
+			struct item_data *card_data = NULL;
 
 			if( !sd->inventory.u.items_inventory[n].card[i] )
 				continue;
@@ -10593,7 +10590,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 		; //No cards
 	else {
 		for( i = 0; i < MAX_SLOTS; i++ ) {
-			struct item_data *data;
+			struct item_data *data = NULL;
 
 			if( !sd->inventory.u.items_inventory[n].card[i] )
 				continue;
@@ -10610,7 +10607,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 		; //No cards
 	else {
 		for( i = 0; i < MAX_SLOTS; i++ ) {
-			struct item_data *data;
+			struct item_data *data = NULL;
 
 			if( !sd->inventory.u.items_inventory[n].card[i] )
 				continue;
@@ -10643,7 +10640,7 @@ static void pc_unequipitem_sub(struct map_session_data *sd, int n, int flag) {
 			; //No cards
 		else {
 			for( i = 0; i < MAX_SLOTS; i++ ) {
-				struct item_data *data;
+				struct item_data *data = NULL;
 
 				if( !sd->inventory.u.items_inventory[n].card[i] )
 					continue;
@@ -10661,7 +10658,7 @@ static void pc_unequipitem_sub(struct map_session_data *sd, int n, int flag) {
 			; //No cards
 		else {
 			for( i = 0; i < MAX_SLOTS; i++ ) {
-				struct item_data *data;
+				struct item_data *data = NULL;
 
 				if( !sd->inventory.u.items_inventory[n].card[i] )
 					continue;
