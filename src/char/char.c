@@ -1998,19 +1998,19 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 	buf = WBUFP(buffer,0);
 	WBUFL(buf,0) = p->char_id;
 #if PACKETVER >= 20170830
-	WBUFQ(buf,4) = u64min((uint64)p->base_exp,INT64_MAX);
+	WBUFQ(buf,4) = u64min((uint64)p->base_exp,UINT64_MAX);
 	offset += 4;
 	buf = WBUFP(buffer,offset);
 #else
-	WBUFL(buf,4) = umin(p->base_exp,INT32_MAX);
+	WBUFL(buf,4) = umin(p->base_exp,UINT32_MAX);
 #endif
 	WBUFL(buf,8) = p->zeny;
 #if PACKETVER >= 20170830
-	WBUFQ(buf,12) = u64min((uint64)p->job_exp,INT64_MAX);
+	WBUFQ(buf,12) = u64min((uint64)p->job_exp,UINT64_MAX);
 	offset += 4;
 	buf = WBUFP(buffer,offset);
 #else
-	WBUFL(buf,12) = umin(p->job_exp,INT32_MAX);
+	WBUFL(buf,12) = umin(p->job_exp,UINT32_MAX);
 #endif
 	WBUFL(buf,16) = p->job_level;
 	WBUFL(buf,20) = 0; //Probably opt1
@@ -2018,7 +2018,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 	WBUFL(buf,28) = (p->option&~0x40);
 	WBUFL(buf,32) = p->karma;
 	WBUFL(buf,36) = p->manner;
-	WBUFW(buf,40) = umin(p->status_point,INT16_MAX);
+	WBUFW(buf,40) = umin(p->status_point,UINT16_MAX);
 	WBUFL(buf,42) = p->hp;
 	WBUFL(buf,46) = p->max_hp;
 	offset += 4;
@@ -2038,7 +2038,7 @@ int mmo_char_tobuf(uint8 *buffer, struct mmo_charstatus *p)
 	WBUFW(buf,56) = (p->option&(0x20|0x80000|0x100000|0x200000|0x400000|0x800000|0x1000000|0x2000000|0x4000000|0x8000000) ? 0 : p->weapon);
 
 	WBUFW(buf,58) = p->base_level;
-	WBUFW(buf,60) = umin(p->skill_point,INT16_MAX);
+	WBUFW(buf,60) = umin(p->skill_point,UINT16_MAX);
 	WBUFW(buf,62) = p->head_bottom;
 	WBUFW(buf,64) = p->shield;
 	WBUFW(buf,66) = p->head_top;

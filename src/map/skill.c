@@ -1709,7 +1709,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 				for( i = 0; i < SC_MAX; i++ ) {
 					if( !tsc->data[i] )
 						continue;
-					if( !(status_get_sc_type(i)&SC_REM_DISPELL) )
+					if( !(status_get_sc_type((sc_type)i)&SC_REM_DISPELL) )
 						continue;
 					switch( i ) {
 						case SC_SILENCE:
@@ -1831,181 +1831,180 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		}
 	}
 
-	if( !skill_id && sd ) { //This effect does not work with skills
-		if( sd->def_set_race[tstatus->race].rate )
-			status_change_start(src,bl,SC_DEFSET_NUM,sd->def_set_race[tstatus->race].rate,sd->def_set_race[tstatus->race].value,0,0,0,sd->def_set_race[tstatus->race].tick,SCFLAG_FIXEDTICK);
-		if( sd->mdef_set_race[tstatus->race].rate )
-			status_change_start(src,bl,SC_MDEFSET_NUM,sd->mdef_set_race[tstatus->race].rate,sd->mdef_set_race[tstatus->race].value,0,0,0,sd->mdef_set_race[tstatus->race].tick,SCFLAG_FIXEDTICK);
-		if( sd->norecover_state_race[tstatus->race].rate )
-			status_change_start(src,bl,SC_NORECOVER_STATE,sd->norecover_state_race[tstatus->race].rate,0,0,0,0,sd->norecover_state_race[tstatus->race].tick,SCFLAG_NONE);
-		if( sc ) {
-			uint16 as_skill_id;
-			uint16 as_skill_lv;
-
-			if( !status_isdead(bl) && rnd()%100 < status_get_job_lv(src) / 2 ) {
-				if( sc->data[SC_WILD_STORM_OPTION] )
-					as_skill_id = sc->data[SC_WILD_STORM_OPTION]->val2;
-				else if( sc->data[SC_UPHEAVAL_OPTION] )
-					as_skill_id = sc->data[SC_UPHEAVAL_OPTION]->val2;
-				else if( sc->data[SC_TROPIC_OPTION] )
-					as_skill_id = sc->data[SC_TROPIC_OPTION]->val3;
-				else if( sc->data[SC_CHILLY_AIR_OPTION] )
-					as_skill_id = sc->data[SC_CHILLY_AIR_OPTION]->val3;
-				if( as_skill_id && status_charge(src,0,skill_get_sp(as_skill_id,5)) ) {
-					struct unit_data *ud = unit_bl2ud(src);
-
-					sd->state.autocast = 1;
-					skill_castend_damage_id(src,bl,as_skill_id,5,tick,0);
-					sd->state.autocast = 0;
-					if( ud ) { //Set can act delay [Skotlex]
-						int delay = skill_delayfix(src,as_skill_id,5);
-
-						if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
-							ud->canact_tick = max(tick + delay,ud->canact_tick);
-							if( battle_config.display_status_timers )
-								clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
-						}
-					}
-				}
-			}
-			if( sc->data[SC_PYROCLASTIC] && rnd()%100 < sc->data[SC_PYROCLASTIC]->val3 ) {
-				as_skill_id = BS_HAMMERFALL;
-				as_skill_lv = sc->data[SC_PYROCLASTIC]->val1;
-				if( status_charge(src,0,skill_get_sp(as_skill_id,as_skill_lv)) ) {
-					struct unit_data *ud = unit_bl2ud(src);
-
-					sd->state.autocast = 1;
-					skill_castend_pos2(src,bl->x,bl->y,as_skill_id,as_skill_lv,tick,0);
-					sd->state.autocast = 0;
-					if( ud ) {
-						int delay = skill_delayfix(src,as_skill_id,as_skill_lv);
-
-						if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
-							ud->canact_tick = max(tick + delay,ud->canact_tick);
-							if( battle_config.display_status_timers )
-								clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	//Autospell when attacking
-	if( sd && !status_isdead(bl) && sd->autospell[0].id ) {
-		struct block_list *tbl;
-		struct unit_data *ud;
-		int16 as_skill_id, as_skill_lv;
-		int i, type;
-
-		for( i = 0; i < ARRAYLENGTH(sd->autospell) && sd->autospell[i].id; i++ ) {
-			if( !(((sd->autospell[i].flag)&attack_type)&BF_WEAPONMASK &&
-				 ((sd->autospell[i].flag)&attack_type)&BF_RANGEMASK &&
-				 ((sd->autospell[i].flag)&attack_type)&BF_SKILLMASK) )
-				continue; //One or more trigger conditions were not fulfilled
-
-			as_skill_id = (sd->autospell[i].id > 0 ? sd->autospell[i].id : -sd->autospell[i].id);
-			sd->state.autocast = 1;
-
-			if( skill_isNotOk(as_skill_id,sd) ) {
-				sd->state.autocast = 0;
-				continue;
-			}
-
-			sd->state.autocast = 0;
-			as_skill_lv = (sd->autospell[i].lv ? sd->autospell[i].lv : 1);
-
-			if( as_skill_lv < 0 )
-				as_skill_lv = 1 + rnd()%(-as_skill_lv);
-
-			rate = sd->autospell[i].rate;
-
-			if( (attack_type&(BF_LONG|BF_MAGIC)) == BF_LONG )
-				rate /= 2;
-
-			if( rnd()%1000 >= rate )
-				continue;
-
-			tbl = (sd->autospell[i].id < 0 ? src : bl);
-
-			if( (type = skill_get_casttype(as_skill_id)) == CAST_GROUND &&
-				!skill_pos_maxcount_check(src,tbl->x,tbl->y,as_skill_id,as_skill_lv,BL_PC,false) )
-				continue;
-
-			if( battle_config.autospell_check_range &&
-				!battle_check_range(src,tbl,skill_get_range2(src,as_skill_id,as_skill_lv,true)) )
-				continue;
-
-			if( as_skill_id == AS_SONICBLOW )
-				pc_stop_attack(sd); //Special case, Sonic Blow autospell should stop the player attacking
-			else if( as_skill_id == PF_SPIDERWEB ) //Special case, due to its nature of coding
-				type = CAST_GROUND;
-
-			sd->state.autocast = 1;
-			skill_consume_requirement(sd,as_skill_id,as_skill_lv,1);
-			skill_toggle_magicpower(src,as_skill_id);
-
-			switch( type ) {
-				case CAST_GROUND:
-					skill_castend_pos2(src,tbl->x,tbl->y,as_skill_id,as_skill_lv,tick,0);
-					break;
-				case CAST_NODAMAGE:
-					skill_castend_nodamage_id(src,tbl,as_skill_id,as_skill_lv,tick,0);
-					break;
-				case CAST_DAMAGE:
-					skill_castend_damage_id(src,tbl,as_skill_id,as_skill_lv,tick,0);
-					break;
-			}
-
-			sd->state.autocast = 0;
-
-			if( (ud = unit_bl2ud(src)) ) {
-				int delay = skill_delayfix(src,as_skill_id,as_skill_lv);
-
-				if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
-					ud->canact_tick = max(tick + delay,ud->canact_tick);
-					if( battle_config.display_status_timers )
-						clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
-				}
-			}
-		}
-	}
-
-	//Autobonus when attacking
-	if( sd && sd->autobonus[0].rate ) {
+	if( sd ) {
 		int i;
 
-		for( i = 0; i < ARRAYLENGTH(sd->autobonus); i++ ) {
-			if( rnd()%1000 >= sd->autobonus[i].rate )
-				continue;
-			if( !(((sd->autobonus[i].atk_type)&attack_type)&BF_WEAPONMASK &&
-				 ((sd->autobonus[i].atk_type)&attack_type)&BF_RANGEMASK &&
-				 ((sd->autobonus[i].atk_type)&attack_type)&BF_SKILLMASK) )
-				continue; //One or more trigger conditions were not fulfilled
-			pc_exeautobonus(sd,&sd->autobonus[i]);
+		if( !skill_id ) { //This effect does not work with skills
+			if( !status_has_mode(tstatus,MD_STATUS_IMMUNE) && sd->bonus.classchange && rnd()%10000 < sd->bonus.classchange ) {
+				int mob_id = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,RMF_DB_RATE,0);
+
+				if( mob_id && mobdb_checkid(mob_id) && dstmd )
+					mob_class_change(dstmd,mob_id); //Polymorph
+			}
+			if( sd->def_set_race[tstatus->race].rate )
+				status_change_start(src,bl,SC_DEFSET_NUM,sd->def_set_race[tstatus->race].rate,sd->def_set_race[tstatus->race].value,0,0,0,sd->def_set_race[tstatus->race].tick,SCFLAG_FIXEDTICK);
+			if( sd->mdef_set_race[tstatus->race].rate )
+				status_change_start(src,bl,SC_MDEFSET_NUM,sd->mdef_set_race[tstatus->race].rate,sd->mdef_set_race[tstatus->race].value,0,0,0,sd->mdef_set_race[tstatus->race].tick,SCFLAG_FIXEDTICK);
+			if( sd->norecover_state_race[tstatus->race].rate )
+				status_change_start(src,bl,SC_NORECOVER_STATE,sd->norecover_state_race[tstatus->race].rate,0,0,0,0,sd->norecover_state_race[tstatus->race].tick,SCFLAG_NONE);
+			if( sc && sc->count ) {
+				uint16 as_skill_id;
+				uint16 as_skill_lv;
+
+				if( !status_isdead(bl) && rnd()%100 < status_get_job_lv(src) / 2 ) {
+					if( sc->data[SC_WILD_STORM_OPTION] )
+						as_skill_id = sc->data[SC_WILD_STORM_OPTION]->val2;
+					else if( sc->data[SC_UPHEAVAL_OPTION] )
+						as_skill_id = sc->data[SC_UPHEAVAL_OPTION]->val2;
+					else if( sc->data[SC_TROPIC_OPTION] )
+						as_skill_id = sc->data[SC_TROPIC_OPTION]->val3;
+					else if( sc->data[SC_CHILLY_AIR_OPTION] )
+						as_skill_id = sc->data[SC_CHILLY_AIR_OPTION]->val3;
+					else
+						as_skill_id = 0;
+					if( as_skill_id && status_charge(src,0,skill_get_sp(as_skill_id,5)) ) {
+						struct unit_data *ud = unit_bl2ud(src);
+
+						sd->state.autocast = 1;
+						skill_castend_damage_id(src,bl,as_skill_id,5,tick,0);
+						sd->state.autocast = 0;
+						if( ud ) { //Set can act delay [Skotlex]
+							int delay = skill_delayfix(src,as_skill_id,5);
+
+							if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
+								ud->canact_tick = max(tick + delay,ud->canact_tick);
+								if( battle_config.display_status_timers )
+									clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
+							}
+						}
+					}
+				}
+				if( sc->data[SC_PYROCLASTIC] && rnd()%100 < sc->data[SC_PYROCLASTIC]->val3 ) {
+					as_skill_id = BS_HAMMERFALL;
+					as_skill_lv = sc->data[SC_PYROCLASTIC]->val1;
+					if( status_charge(src,0,skill_get_sp(as_skill_id,as_skill_lv)) ) {
+						struct unit_data *ud = unit_bl2ud(src);
+
+						sd->state.autocast = 1;
+						skill_castend_pos2(src,bl->x,bl->y,as_skill_id,as_skill_lv,tick,0);
+						sd->state.autocast = 0;
+						if( ud ) {
+							int delay = skill_delayfix(src,as_skill_id,as_skill_lv);
+
+							if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
+								ud->canact_tick = max(tick + delay,ud->canact_tick);
+								if( battle_config.display_status_timers )
+									clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
+							}
+						}
+					}
+				}
+			}
 		}
-	}
+		if( !status_isdead(bl) && sd->autospell[0].id ) { //Autospell when attacking
+			struct block_list *tbl = NULL;
+			struct unit_data *ud = NULL;
+			int16 as_skill_id, as_skill_lv;
+			int type;
 
-	//Polymorph
-	if( !skill_id && !status_has_mode(tstatus,MD_STATUS_IMMUNE) && dstmd &&
-		sd && sd->bonus.classchange && rnd()%10000 < sd->bonus.classchange ) {
-		int class_ = mob_get_random_id(MOBG_Branch_Of_Dead_Tree,RMF_DB_RATE,0);
+			for( i = 0; i < ARRAYLENGTH(sd->autospell) && sd->autospell[i].id; i++ ) {
+				if( !(((sd->autospell[i].flag)&attack_type)&BF_WEAPONMASK &&
+					 ((sd->autospell[i].flag)&attack_type)&BF_RANGEMASK &&
+					 ((sd->autospell[i].flag)&attack_type)&BF_SKILLMASK) )
+					continue; //One or more trigger conditions were not fulfilled
 
-		if( class_ && mobdb_checkid(class_) )
-			mob_class_change(dstmd,class_);
+				as_skill_id = (sd->autospell[i].id > 0 ? sd->autospell[i].id : -sd->autospell[i].id);
+				sd->state.autocast = 1;
+
+				if( skill_isNotOk(as_skill_id,sd) ) {
+					sd->state.autocast = 0;
+					continue;
+				}
+
+				sd->state.autocast = 0;
+				as_skill_lv = (sd->autospell[i].lv ? sd->autospell[i].lv : 1);
+
+				if( as_skill_lv < 0 )
+					as_skill_lv = 1 + rnd()%(-as_skill_lv);
+
+				rate = sd->autospell[i].rate;
+
+				if( (attack_type&(BF_LONG|BF_MAGIC)) == BF_LONG )
+					rate /= 2;
+
+				if( rnd()%1000 >= rate )
+					continue;
+
+				tbl = (sd->autospell[i].id < 0 ? src : bl);
+
+				if( (type = skill_get_casttype(as_skill_id)) == CAST_GROUND &&
+					!skill_pos_maxcount_check(src,tbl->x,tbl->y,as_skill_id,as_skill_lv,BL_PC,false) )
+					continue;
+
+				if( battle_config.autospell_check_range &&
+					!battle_check_range(src,tbl,skill_get_range2(src,as_skill_id,as_skill_lv,true)) )
+					continue;
+
+				if( as_skill_id == AS_SONICBLOW )
+					pc_stop_attack(sd); //Special case, Sonic Blow autospell should stop the player attacking
+				else if( as_skill_id == PF_SPIDERWEB ) //Special case, due to its nature of coding
+					type = CAST_GROUND;
+
+				sd->state.autocast = 1;
+				skill_consume_requirement(sd,as_skill_id,as_skill_lv,1);
+				skill_toggle_magicpower(src,as_skill_id);
+
+				switch( type ) {
+					case CAST_GROUND:
+						skill_castend_pos2(src,tbl->x,tbl->y,as_skill_id,as_skill_lv,tick,0);
+						break;
+					case CAST_NODAMAGE:
+						skill_castend_nodamage_id(src,tbl,as_skill_id,as_skill_lv,tick,0);
+						break;
+					case CAST_DAMAGE:
+						skill_castend_damage_id(src,tbl,as_skill_id,as_skill_lv,tick,0);
+						break;
+				}
+
+				sd->state.autocast = 0;
+
+				if( (ud = unit_bl2ud(src)) ) {
+					int delay = skill_delayfix(src,as_skill_id,as_skill_lv);
+
+					if( DIFF_TICK(ud->canact_tick,tick + delay) < 0 ) {
+						ud->canact_tick = max(tick + delay,ud->canact_tick);
+						if( battle_config.display_status_timers )
+							clif_status_change(src,SI_POSTDELAY,1,delay,0,0,0);
+					}
+				}
+			}
+		}
+		if( sd->autobonus[0].rate ) { //Autobonus when attacking
+			for( i = 0; i < ARRAYLENGTH(sd->autobonus) && sd->autobonus[i].rate; i++ ) {
+				if( rnd()%1000 >= sd->autobonus[i].rate )
+					continue;
+				if( !(((sd->autobonus[i].atk_type)&attack_type)&BF_WEAPONMASK &&
+					 ((sd->autobonus[i].atk_type)&attack_type)&BF_RANGEMASK &&
+					 ((sd->autobonus[i].atk_type)&attack_type)&BF_SKILLMASK) )
+					continue; //One or more trigger conditions were not fulfilled
+				pc_exeautobonus(sd,&sd->autobonus[i]);
+			}
+			status_calc_pc(sd,SCO_FORCE);
+		}
 	}
 
 	return 0;
 }
 
-int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint16 skill_id, unsigned int tick) {
-	uint8 i;
-	struct block_list *tbl;
+int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint16 skill_id, unsigned int tick)
+{
+	int i;
 
 	if( !sd || !skill_id )
 		return 0;
 
 	for( i = 0; i < ARRAYLENGTH(sd->autospell3) && sd->autospell3[i].flag; i++ ) {
+		struct block_list *tbl = NULL;
 		int16 as_skill_id, as_skill_lv;
 		int type;
 
@@ -2063,13 +2062,14 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 	}
 
 	if( sd->autobonus3[0].rate ) {
-		for( i = 0; i < ARRAYLENGTH(sd->autobonus3); i++ ) {
+		for( i = 0; i < ARRAYLENGTH(sd->autobonus3) && sd->autobonus3[i].rate; i++ ) {
 			if( rnd()%1000 >= sd->autobonus3[i].rate )
 				continue;
 			if( sd->autobonus3[i].atk_type != skill_id )
 				continue;
 			pc_exeautobonus(sd,&sd->autobonus3[i]);
 		}
+		status_calc_pc(sd,SCO_FORCE);
 	}
 
 	return 1;
@@ -2088,7 +2088,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 	int rate;
 	struct map_session_data *sd = NULL;
 	struct map_session_data *dstsd = NULL;
-	struct status_change *sc;
+	struct status_change *sc = NULL;
 
 	nullpo_ret(src);
 	nullpo_ret(bl);
@@ -2208,10 +2208,12 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 	}
 
 	if(dstsd && !status_isdead(bl) && !(skill_id && skill_get_nk(skill_id)&NK_NO_DAMAGE)) {
+		int i;
+
 		if(dstsd->autospell2[0].id) { //Trigger counter-spells to retaliate against damage causing skills
-			struct block_list *tbl;
-			struct unit_data *ud;
-			int i, type;
+			struct block_list *tbl = NULL;
+			struct unit_data *ud = NULL;
+			int type;
 			int16 as_skill_id, as_skill_lv;
 
 			for(i = 0; i < ARRAYLENGTH(dstsd->autospell2) && dstsd->autospell2[i].id; i++) {
@@ -2281,9 +2283,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 			}
 		}
 		if(dstsd->autobonus2[0].rate) { //Autobonus when attacked
-			int i;
-
-			for(i = 0; i < ARRAYLENGTH(dstsd->autobonus2); i++) {
+			for(i = 0; i < ARRAYLENGTH(dstsd->autobonus2) && dstsd->autobonus2[i].rate; i++) {
 				if(rnd()%1000 >= dstsd->autobonus2[i].rate)
 					continue;
 				if(!(((dstsd->autobonus2[i].atk_type)&attack_type)&BF_WEAPONMASK &&
@@ -2292,8 +2292,9 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 					continue; //One or more trigger conditions were not fulfilled
 				pc_exeautobonus(dstsd,&dstsd->autobonus2[i]);
 			}
+			status_calc_pc(dstsd,SCO_FORCE);
 		}
-		if((sc = status_get_sc(bl)) && sc->data[SC_DORAM_SVSP] && attack_type&(BF_LONG|BF_MAGIC))
+		if((sc = status_get_sc(bl)) && sc->data[SC_DORAM_SVSP] && (attack_type&(BF_LONG|BF_MAGIC)))
 			skill_castend_damage_id(bl,src,SU_SV_STEMSPEAR,(dstsd ? pc_checkskill(dstsd,SU_SV_STEMSPEAR) : 5),tick,0);
 	}
 
@@ -6213,7 +6214,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				skill_area_temp[0]++;
 				skill_area_temp[0] = battle_config.exp_cost_redemptio_limit - skill_area_temp[0]; //The actual penalty
 				if(skill_area_temp[0] > 0 && battle_config.exp_cost_redemptio) //If total penalty is 1% => reduced 0.2% penalty per each revived player
-					pc_lostexp(sd,u32min(sd->status.base_exp,(pc_nextbaseexp(sd) * skill_area_temp[0] * battle_config.exp_cost_redemptio / battle_config.exp_cost_redemptio_limit) / 100),0);
+					pc_lostexp(sd,umin(sd->status.base_exp,(pc_nextbaseexp(sd) * skill_area_temp[0] * battle_config.exp_cost_redemptio / battle_config.exp_cost_redemptio_limit) / 100),0);
 				status_revive(bl,50,0);
 				clif_skill_nodamage(bl,bl,ALL_RESURRECTION,-1,1);
 			} else if(sd) {
@@ -6261,20 +6262,20 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					if(!(flag&1)) //AB_EPICLESIS have no resurrection animation
 						clif_skill_nodamage(src,bl,ALL_RESURRECTION,skill_lv,1);
 					if(sd && dstsd && battle_config.resurrection_exp) {
-						int exp = 0, jexp = 0;
+						uint32 bexp = 0, jexp = 0;
 						int lv = status_get_lv(bl) - status_get_lv(src),
 							jlv = status_get_job_lv(bl) - status_get_job_lv(src);
 
 						if(lv && pc_nextbaseexp(dstsd)) {
-							exp = (int)((double)dstsd->status.base_exp * (double)lv * (double)battle_config.resurrection_exp / 1000000.);
-							exp = max(exp,1);
+							bexp = (uint32)((double)dstsd->status.base_exp * (double)lv * (double)battle_config.resurrection_exp / 1000000.);
+							bexp = umax(bexp,1);
 						}
 						if(jlv && pc_nextjobexp(dstsd)) {
-							jexp = (int)((double)dstsd->status.job_exp * (double)jlv * (double)battle_config.resurrection_exp / 1000000.);
-							jexp = max(jexp,1);
+							jexp = (uint32)((double)dstsd->status.job_exp * (double)jlv * (double)battle_config.resurrection_exp / 1000000.);
+							jexp = umax(jexp,1);
 						}
-						if(exp || jexp)
-							pc_gainexp(sd,bl,exp,jexp,0);
+						if(bexp || jexp)
+							pc_gainexp(sd,bl,bexp,jexp,0);
 					}
 				}
 			}
@@ -7816,7 +7817,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				for( i = 0; i < SC_MAX; i++ ) {
 					if( !tsc->data[i] )
 						continue;
-					if( !(status_get_sc_type(i)&SC_REM_DISPELL) )
+					if( !(status_get_sc_type((sc_type)i)&SC_REM_DISPELL) )
 						continue;
 					switch( i ) {
 						case SC_SILENCE:
@@ -9140,7 +9141,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			for( i = 0; i < SC_MAX; i++ ) {
 				if( !tsc->data[i] )
 					continue;
-				if( !(status_get_sc_type(i)&SC_REM_CLEARANCE) )
+				if( !(status_get_sc_type((sc_type)i)&SC_REM_CLEARANCE) )
 					continue;
 				switch( i ) {
 					case SC_SILENCE:
@@ -9726,7 +9727,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 
 		case LG_INSPIRATION:
 			if( sd && battle_config.exp_cost_inspiration )
-				pc_lostexp(sd,u32min(sd->status.base_exp,pc_nextbaseexp(sd) * battle_config.exp_cost_inspiration / 100),0); //1% penalty
+				pc_lostexp(sd,umin(sd->status.base_exp,pc_nextbaseexp(sd) * battle_config.exp_cost_inspiration / 100),0); //1% penalty
 			status_change_clear_buffs(bl,SCCB_BUFFS|SCCB_DEBUFFS|SCCB_REFRESH,0);
 			clif_skill_nodamage(bl,src,skill_id,skill_lv,
 				sc_start(src,bl,type,100,skill_lv,skill_get_time(skill_id,skill_lv)));

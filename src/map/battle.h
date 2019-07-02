@@ -149,7 +149,7 @@ extern struct Battle_Config
 	int enable_critical;
 	int mob_critical_rate;
 	int critical_rate;
-	int enable_baseatk;
+	int enable_baseatk, enable_baseatk_renewal;
 	int enable_perfect_flee;
 	int cast_rate, delay_rate;
 	int delay_dependon_dex, delay_dependon_agi;
@@ -234,7 +234,7 @@ extern struct Battle_Config
 	int pet_attack_support;
 	int pet_damage_support;
 	int pet_support_min_friendly;	//[Skotlex]
-	int pet_bonus_min_friendly;
+	int pet_bonus_min_friendly, pet_bonus_min_friendly_renewal;
 	int pet_support_rate;
 	int pet_attack_exp_to_master;
 	int pet_attack_exp_rate;
@@ -671,7 +671,6 @@ extern struct Battle_Config
 	int show_skill_scale;
 	int millennium_shield_health;
 	int hesperuslit_bonus_stack;
-	int load_custom_exp_tables;
 	int feature_pet_evolution;
 	int feature_pet_autofeed;
 	int pet_autofeed_always;

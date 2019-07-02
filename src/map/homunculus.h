@@ -158,7 +158,7 @@ void hom_skillup(struct homun_data *hd, uint16 skill_id);
 void hom_calc_skilltree(struct homun_data *hd, bool flag_evolve);
 short hom_checkskill(struct homun_data *hd, uint16 skill_id);
 uint8 hom_skill_get_min_level(int class_, uint16 skill_id);
-void hom_gainexp(struct homun_data *hd, int exp);
+void hom_gainexp(struct homun_data *hd, uint32 exp);
 void hom_stats_cap_check(struct homun_data *hd);
 int hom_levelup(struct homun_data *hd);
 int hom_evolution(struct homun_data *hd);

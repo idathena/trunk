@@ -169,8 +169,7 @@ struct s_mob_drop {
 
 struct mob_db {
 	char sprite[NAME_LENGTH],name[NAME_LENGTH],jname[NAME_LENGTH];
-	unsigned int base_exp,job_exp;
-	unsigned int mexp;
+	uint32 base_exp,job_exp,mexp;
 	short range2,range3;
 	enum e_race2 race2; //Celest
 	unsigned short lv;

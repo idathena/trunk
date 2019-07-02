@@ -2341,8 +2341,13 @@ static unsigned short status_base_atk(const struct block_list *bl, const struct 
 {
 	struct map_session_data *sd = map_id2sd(bl->id);
 	int flag = 0, str, dex, dstr;
+#ifdef RENEWAL
+	int type = battle_config.enable_baseatk_renewal;
+#else
+	int type = battle_config.enable_baseatk;
+#endif
 
-	if( !(bl->type&battle_config.enable_baseatk) )
+	if( !(bl->type&type) )
 		return 0;
 
 	if( sd ) {
@@ -3550,12 +3555,12 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 
 	memset(&sd->bonus, 0, sizeof(sd->bonus));
 
+	pc_itemgrouphealrate_clear(sd);
+
 	//Autobonus
 	pc_delautobonus(sd, sd->autobonus, ARRAYLENGTH(sd->autobonus), true);
 	pc_delautobonus(sd, sd->autobonus2, ARRAYLENGTH(sd->autobonus2), true);
 	pc_delautobonus(sd, sd->autobonus3, ARRAYLENGTH(sd->autobonus3), true);
-
-	pc_itemgrouphealrate_clear(sd);
 
 	running_npc_stat_calc_event = true;
 	npc_script_event(sd, NPCE_STATCALC);
@@ -3827,7 +3832,13 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		struct pet_data *pd = sd->pd;
 
 		if (pd) {
-			if (pd->petDB && pd->petDB->pet_friendly_script && pd->pet.intimate >= battle_config.pet_bonus_min_friendly) {
+#ifdef RENEWAL
+			int bonus = battle_config.pet_bonus_min_friendly_renewal;
+#else
+			int bonus = battle_config.pet_bonus_min_friendly;
+#endif
+
+			if (pd->petDB && pd->petDB->pet_friendly_script && pd->pet.intimate >= bonus) {
 				current_equip_item_index = -1;
 				current_equip_pos = EQP_PET;
 				run_script(pd->petDB->pet_friendly_script, 0, sd->bl.id, 0);
@@ -11649,10 +11660,10 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
  *------------------------------------------*/
 int status_change_clear(struct block_list *bl, int type)
 {
-	struct status_change *sc = status_get_sc(bl);
+	struct status_change *sc = NULL;
 	int i;
 
-	if (!sc)
+	if (!(sc = status_get_sc(bl)))
 		return 0;
 
 	//Cleaning all extras vars
@@ -11670,7 +11681,7 @@ int status_change_clear(struct block_list *bl, int type)
 		if (!sc->data[i])
 			continue;
 		if (!type) {
-			if (status_get_sc_type(i)&SC_NO_REM_DEATH) {
+			if (status_get_sc_type((sc_type)i)&SC_NO_REM_DEATH) {
 				switch (i) { //Type 0: PC killed -> Place here statuses that do not dispel on death
 					case SC_ELEMENTALCHANGE: //Only when its Holy or Dark that it doesn't dispell on death
 						if (sc->data[i]->val2 != ELE_HOLY && sc->data[i]->val2 != ELE_DARK)
@@ -11681,7 +11692,7 @@ int status_change_clear(struct block_list *bl, int type)
 				}
 			}
 		}
-		if (type == 3 && status_get_sc_type(i)&SC_NO_CLEAR)
+		if (type == 3 && status_get_sc_type((sc_type)i)&SC_NO_CLEAR)
 			continue;
 		status_change_end(bl,(sc_type)i,INVALID_TIMER);
 		//If for some reason status_change_end decides to still keep the status when quitting [Skotlex]
@@ -13800,7 +13811,7 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 	for( i = SC_COMMON_MAX + 1; i < SC_MAX; i++ ) {
 		if( !sc->data[i] )
 			continue;
-		if( status_get_sc_type(i)&(SC_NO_REM_DEATH|SC_NO_CLEAR) )
+		if( status_get_sc_type((sc_type)i)&(SC_NO_REM_DEATH|SC_NO_CLEAR) )
 			continue; //Stuff that cannot be removed
 		switch( i ) {
 			case SC_CP_WEAPON:
@@ -13831,7 +13842,7 @@ void status_change_clear_buffs(struct block_list *bl, uint8 type, uint16 val1)
 				break;
 			default:
 				//Debuffs that can be removed
-				if( (type&SCCB_DEBUFFS) && !(status_get_sc_type(i)&SC_DEBUFF) )
+				if( (type&SCCB_DEBUFFS) && !(status_get_sc_type((sc_type)i)&SC_DEBUFF) )
 					continue;
 				//The rest are buffs that can be removed
 				if( !(type&(SCCB_BUFFS)) )

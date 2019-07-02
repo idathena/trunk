@@ -1055,9 +1055,9 @@ bool pc_adoption(struct map_session_data *p1_sd, struct map_session_data *p2_sd,
 
 void pc_updateweightstatus(struct map_session_data *sd);
 
-bool pc_addautobonus(struct s_autobonus *bonus,char max,const char *script,short rate,unsigned int dur,short atk_type,const char *o_script,unsigned int pos,bool onskill);
+bool pc_addautobonus(struct s_autobonus *bonus, char max, const char *script, short rate, unsigned int dur, short atk_type, const char *o_script, unsigned int pos, bool onskill);
 void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus);
-int pc_endautobonus(int tid, unsigned int tick,int id,intptr_t data);
+TIMER_FUNC(pc_endautobonus);
 void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, char max, bool restore);
 
 void pc_bonus(struct map_session_data *sd, int type, int val);
@@ -1065,7 +1065,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val);
 void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int val);
 void pc_bonus4(struct map_session_data *sd, int type, int type2, int type3, int type4, int val);
 void pc_bonus5(struct map_session_data *sd, int type, int type2, int type3, int type4, int type5, int val);
-int pc_skill(TBL_PC *sd, int id, int level, int flag);
+int pc_skill(struct map_session_data *sd, int id, int level, int flag);
 
 bool pc_can_insert_card_into(struct map_session_data *sd, int idx_card, int idx_equip);
 bool pc_can_insert_card(struct map_session_data *sd, int idx_card);
@@ -1088,11 +1088,11 @@ bool pc_is_maxbaselv(struct map_session_data *sd);
 bool pc_is_maxjoblv(struct map_session_data *sd);
 int pc_checkbaselevelup(struct map_session_data *sd);
 int pc_checkjoblevelup(struct map_session_data *sd);
-void pc_gainexp(struct map_session_data *sd, struct block_list *src, unsigned int base_exp, unsigned int job_exp, uint8 exp_flag);
-void pc_gainexp_disp(struct map_session_data *sd, unsigned int base_exp, unsigned int next_base_exp, unsigned int job_exp, unsigned int next_job_exp, bool lost);
-void pc_lostexp(struct map_session_data *sd, unsigned int base_exp, unsigned int job_exp);
-unsigned int pc_nextbaseexp(struct map_session_data *sd);
-unsigned int pc_nextjobexp(struct map_session_data *sd);
+void pc_gainexp_disp(struct map_session_data *sd, uint32 base_exp, uint32 next_base_exp, uint32 job_exp, uint32 next_job_exp, bool lost);
+void pc_gainexp(struct map_session_data *sd, struct block_list *src, uint32 base_exp, uint32 job_exp, uint8 exp_flag);
+void pc_lostexp(struct map_session_data *sd, uint32 base_exp, uint32 job_exp);
+uint32 pc_nextbaseexp(struct map_session_data *sd);
+uint32 pc_nextjobexp(struct map_session_data *sd);
 int pc_gets_status_point(int);
 int pc_need_status_point(struct map_session_data *,int,int);
 int pc_maxparameterincrease(struct map_session_data *sd, int type);
@@ -1107,8 +1107,8 @@ int pc_resetfeel(struct map_session_data *);
 int pc_resethate(struct map_session_data *);
 bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equipswitch);
 void pc_unequipitem(struct map_session_data *sd, int n, int flag);
-int pc_equipswitch(struct map_session_data* sd, int index);
-void pc_equipswitch_remove(struct map_session_data* sd, int index);
+int pc_equipswitch(struct map_session_data *sd, int index);
+void pc_equipswitch_remove(struct map_session_data *sd, int index);
 void pc_checkitem(struct map_session_data *);
 void pc_check_available_item(struct map_session_data *sd, uint8 type);
 int pc_useitem(struct map_session_data *,int);
@@ -1134,10 +1134,10 @@ void pc_changelook(struct map_session_data *sd, int type, int val);
 void pc_equiplookall(struct map_session_data *sd);
 void pc_set_costume_view(struct map_session_data *sd);
 
-int pc_readparam(struct map_session_data *,int);
-bool pc_setparam(struct map_session_data *,int,int);
-int pc_readreg(struct map_session_data *,int);
-bool pc_setreg(struct map_session_data *,int,int);
+int pc_readparam(struct map_session_data *sd, int type);
+bool pc_setparam(struct map_session_data *sd, int type, int val);
+int pc_readreg(struct map_session_data *sd, int reg);
+bool pc_setreg(struct map_session_data *sd, int reg, int val);
 char *pc_readregstr(struct map_session_data *sd, int reg);
 bool pc_setregstr(struct map_session_data *sd, int reg, const char *str);
 
@@ -1319,5 +1319,10 @@ void pc_attendance_claim_reward(struct map_session_data *sd);
 
 void pc_stylist_process(struct map_session_data *sd, int type, int16 idx, bool isItem);
 bool pc_has_second_costume(int class_);
+
+enum e_job_exp_db {
+	BASE_EXP,
+	JOB_EXP
+};
 
 #endif /* _PC_H_ */

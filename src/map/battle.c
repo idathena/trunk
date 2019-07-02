@@ -1982,7 +1982,7 @@ static int64 battle_calc_base_damage(struct block_list *src, struct status_data 
  *	Initial refactoring by Baalberith
  *	Refined and optimized by helvetica
  */
-void battle_consume_ammo(TBL_PC *sd, uint16 skill_id, uint16 skill_lv)
+void battle_consume_ammo(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv)
 {
 	int qty = 1;
 
@@ -2733,7 +2733,7 @@ int battle_get_weapon_element(struct Damage *d, struct block_list *src, struct b
 
 	if(!skill_id || element == -1) { //Take weapon's element
 		element = (weapon_position == EQI_HAND_L ? sstatus->lhw.ele : sstatus->rhw.ele);
-		if(sd && sd->charmball_type != CHARM_TYPE_NONE && sd->charmball >= MAX_CHARMBALL && element == ELE_NEUTRAL)
+		if(element == ELE_NEUTRAL && sd && sd->charmball_type != CHARM_TYPE_NONE && sd->charmball >= MAX_CHARMBALL)
 			element = sd->charmball_type; //Summoning 10 charmball will endow your weapon
 		if(is_skill_using_arrow(src, skill_id) && weapon_position == EQI_HAND_R && sd) {
 			if(sd->bonus.arrow_ele)
@@ -8210,7 +8210,8 @@ static const struct _battle_data {
 	{ "enable_critical",                    &battle_config.enable_critical,                 BL_PC,  BL_NUL, BL_ALL,         },
 	{ "mob_critical_rate",                  &battle_config.mob_critical_rate,               100,    0,      INT_MAX,        },
 	{ "critical_rate",                      &battle_config.critical_rate,                   100,    0,      INT_MAX,        },
-	{ "enable_baseatk",                     &battle_config.enable_baseatk,                  BL_CHAR|BL_NPC, BL_NUL, BL_ALL, },
+	{ "enable_baseatk",                     &battle_config.enable_baseatk,                  BL_CHAR|BL_HOM, BL_NUL, BL_ALL, },
+	{ "enable_baseatk_renewal",             &battle_config.enable_baseatk_renewal,          BL_ALL, BL_NUL, BL_ALL,         },
 	{ "enable_perfect_flee",                &battle_config.enable_perfect_flee,             BL_PC|BL_PET, BL_NUL, BL_ALL,   },
 	{ "casting_rate",                       &battle_config.cast_rate,                       100,    0,      INT_MAX,        },
 	{ "delay_rate",                         &battle_config.delay_rate,                      100,    0,      INT_MAX,        },
@@ -8302,11 +8303,8 @@ static const struct _battle_data {
 	{ "pet_attack_support",                 &battle_config.pet_attack_support,              0,      0,      1,              },
 	{ "pet_damage_support",                 &battle_config.pet_damage_support,              0,      0,      1,              },
 	{ "pet_support_min_friendly",           &battle_config.pet_support_min_friendly,        901,    0,      1000,           },
-#ifdef RENEWAL
-	{ "pet_bonus_min_friendly_re",          &battle_config.pet_bonus_min_friendly,          0,      0,      1000,           },
-#else
 	{ "pet_bonus_min_friendly",             &battle_config.pet_bonus_min_friendly,          751,    0,      1000,           },
-#endif
+	{ "pet_bonus_min_friendly_renewal",     &battle_config.pet_bonus_min_friendly_renewal,  0,      0,      1000,           },
 	{ "pet_support_rate",                   &battle_config.pet_support_rate,                100,    0,      INT_MAX,        },
 	{ "pet_attack_exp_to_master",           &battle_config.pet_attack_exp_to_master,        0,      0,      1,              },
 	{ "pet_attack_exp_rate",                &battle_config.pet_attack_exp_rate,             100,    0,      INT_MAX,        },
@@ -8742,7 +8740,6 @@ static const struct _battle_data {
 	{ "show_skill_scale",                   &battle_config.show_skill_scale,                1,      0,      1,              },
 	{ "millennium_shield_health",           &battle_config.millennium_shield_health,        1000,   1,      INT_MAX,        },
 	{ "hesperuslit_bonus_stack",            &battle_config.hesperuslit_bonus_stack,         0,      0,      1,              },
-	{ "load_custom_exp_tables",             &battle_config.load_custom_exp_tables,          0,      0,      1,              },
 	{ "feature.pet_evolution",              &battle_config.feature_pet_evolution,           1,      0,      1,              },
 	{ "feature.pet_autofeed",               &battle_config.feature_pet_autofeed,            1,      0,      1,              },
 	{ "pet_autofeed_always",                &battle_config.pet_autofeed_always,             1,      0,      1,              },

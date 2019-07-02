@@ -823,7 +823,7 @@ int hom_mutate(struct homun_data *hd, int homun_id)
  * @param hd
  * @param exp Added EXP
  */
-void hom_gainexp(struct homun_data *hd, int exp)
+void hom_gainexp(struct homun_data *hd, uint32 exp)
 {
 	nullpo_retv(hd);
 
@@ -899,7 +899,7 @@ void hom_heal(struct homun_data *hd) {
 void hom_save(struct homun_data *hd)
 {
 	//Copy data that must be saved in homunculus struct (hp / sp)
-	TBL_PC *sd;
+	struct map_session_data *sd = NULL;
 
 	nullpo_retv(hd);
 

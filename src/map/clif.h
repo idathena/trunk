@@ -788,7 +788,7 @@ void clif_item_skill(struct map_session_data *sd, uint16 skill_id, uint16 skill_
 
 void clif_mvp_effect(struct map_session_data *sd);
 void clif_mvp_item(struct map_session_data *sd, unsigned short nameid);
-void clif_mvp_exp(struct map_session_data *sd, unsigned int exp);
+void clif_mvp_exp(struct map_session_data *sd, uint32 exp);
 void clif_mvp_noitem(struct map_session_data *sd);
 void clif_changed_dir(struct block_list *bl, enum send_target target);
 
@@ -949,7 +949,7 @@ void clif_quest_delete(struct map_session_data *sd, int quest_id);
 void clif_quest_update_status(struct map_session_data *sd, int quest_id, bool active);
 void clif_quest_update_objective(struct map_session_data *sd, struct quest *qd);
 void clif_quest_show_event(struct map_session_data *sd, struct block_list *bl, short effect, short color);
-void clif_displayexp(struct map_session_data *sd, unsigned int exp, char type, bool quest, bool lost);
+void clif_displayexp(struct map_session_data *sd, uint32 exp, char type, bool quest, bool lost);
 
 int clif_send(const uint8 *buf, int len, struct block_list *bl, enum send_target type);
 void do_init_clif(void);

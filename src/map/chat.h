@@ -23,13 +23,13 @@ struct chat_data {
 	uint8 users;                     // Current user count
 	uint8 limit;                     // Join limit
 	uint8 trigger;                   // Number of users needed to trigger event
-	uint32 zeny;					 // required zeny to join
-	uint32 minLvl;					 // Minimum base level to join
-	uint32 maxLvl;					 // Maximum base level allowed to join
+	int zeny;                        // required zeny to join
+	uint32 minLvl;                   // Minimum base level to join
+	uint32 maxLvl;                   // Maximum base level allowed to join
 	struct map_session_data *usersd[MAX_CHAT_USERS];
 	struct block_list *owner;
 	char npc_event[EVENT_NAME_LENGTH];
-	DBMap *kick_list;				 // DBMap of users who were kicked from this chat
+	DBMap *kick_list;                // DBMap of users who were kicked from this chat
 };
 
 int chat_createpcchat(struct map_session_data *sd, const char *title, const char *pass, int limit, bool pub);

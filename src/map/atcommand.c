@@ -5191,15 +5191,16 @@ ACMD_FUNC(exp)
 	char output[CHAT_SIZE_MAX];
 	double nextb, nextj;
 	nullpo_retr(-1, sd);
+
 	memset(output, '\0', sizeof(output));
 
 	nextb = pc_nextbaseexp(sd);
 	if (nextb)
-		nextb = sd->status.base_exp*100.0/nextb;
+		nextb = (double)sd->status.base_exp * 100. / nextb;
 
 	nextj = pc_nextjobexp(sd);
 	if (nextj)
-		nextj = sd->status.job_exp*100.0/nextj;
+		nextj = (double)sd->status.job_exp * 100. / nextj;
 
 	sprintf(output, msg_txt(1148), sd->status.base_level, nextb, sd->status.job_level, nextj); // Base Level: %d (%.3f%%) | Job Level: %d (%.3f%%)
 	clif_displaymessage(fd, output);
@@ -7180,7 +7181,8 @@ ACMD_FUNC(mobinfo)
 	}
 
 	for (k = 0; k < count; k++) {
-		unsigned int j, base_exp, job_exp;
+		uint32 base_exp, job_exp;
+		int j;
 
 		mob = mob_array[k];
 		base_exp = mob->base_exp;
@@ -9733,7 +9735,7 @@ ACMD_FUNC(showrate) {
 
 ACMD_FUNC(fullstrip) {
 	int i;
-	TBL_PC *tsd;
+	struct map_session_data *tsd = NULL;
 
 	nullpo_retr(-1, sd);
 
@@ -9744,7 +9746,7 @@ ACMD_FUNC(fullstrip) {
 		return -1;
 	}
 
-	if ((tsd = map_nick2sd(atcmd_player_name)) == NULL && (tsd = map_id2sd(atoi(atcmd_player_name))) == NULL) {
+	if (!(tsd = map_nick2sd(atcmd_player_name)) && !(tsd = map_id2sd(atoi(atcmd_player_name)))) {
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
 	}

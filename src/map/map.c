@@ -2000,7 +2000,7 @@ int map_quit(struct map_session_data *sd) {
 	//(changing map-servers invokes unit_free but bypasses map_quit)
 	if (sd->sc.count) {
 		for (i = 0; i < SC_MAX; i++) { //Statuses that are removed on logout
-			if (status_get_sc_type(i)&SC_REM_ON_LOGOUT) {
+			if (status_get_sc_type((sc_type)i)&SC_REM_ON_LOGOUT) {
 				if (!sd->sc.data[i])
 					continue;
 				switch (i) {

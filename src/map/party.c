@@ -1024,7 +1024,7 @@ int party_send_xy_clear(struct party_data *p)
  * @param zeny Zeny gained from killed mob
  * @author Valaris
  */
-void party_exp_share(struct party_data *p, struct block_list *src, unsigned int base_exp, unsigned int job_exp, int zeny)
+void party_exp_share(struct party_data *p, struct block_list *src, uint32 base_exp, uint32 job_exp, int zeny)
 {
 	struct map_session_data *sd[MAX_PARTY];
 	unsigned int i, c;
@@ -1059,11 +1059,11 @@ void party_exp_share(struct party_data *p, struct block_list *src, unsigned int 
 		double bonus = 100 + battle_config.party_even_share_bonus * (c - 1);
 
 		if (base_exp)
-			base_exp = (unsigned int)cap_value(base_exp * bonus / 100,0,UINT_MAX);
+			base_exp = (uint32)cap_value(base_exp * bonus / 100,0,UINT32_MAX);
 		if (job_exp)
-			job_exp = (unsigned int)cap_value(job_exp * bonus / 100,0,UINT_MAX);
+			job_exp = (uint32)cap_value(job_exp * bonus / 100,0,UINT32_MAX);
 		if (zeny)
-			zeny = (unsigned int)cap_value(zeny * bonus / 100,INT_MIN,INT_MAX);
+			zeny = (int)cap_value(zeny * bonus / 100,0,INT_MAX);
 	}
 
 	for (i = 0; i < c; i++) {
@@ -1075,9 +1075,9 @@ void party_exp_share(struct party_data *p, struct block_list *src, unsigned int 
 
 			if (rate != 100) {
 				if (base_exp)
-					base_gained = (unsigned int)cap_value(apply_rate(base_exp,rate),1,UINT_MAX);
+					base_gained = (uint32)cap_value(apply_rate(base_exp,rate),1,UINT32_MAX);
 				if (job_exp)
-					job_gained = (unsigned int)cap_value(apply_rate(job_exp,rate),1,UINT_MAX);
+					job_gained = (uint32)cap_value(apply_rate(job_exp,rate),1,UINT32_MAX);
 			}
 		}
 		pc_gainexp(sd[i],src,base_gained,job_gained,0);

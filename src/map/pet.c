@@ -70,10 +70,18 @@ void pet_set_intimate(struct pet_data *pd, int value)
 	intimate = pd->pet.intimate;
 	sd = pd->master;
 	pd->pet.intimate = value;
-	if (sd && ((intimate < battle_config.pet_bonus_min_friendly && pd->pet.intimate >= battle_config.pet_bonus_min_friendly) ||
-		(intimate >= battle_config.pet_bonus_min_friendly && pd->pet.intimate > battle_config.pet_bonus_min_friendly) ||
-		(intimate >= battle_config.pet_bonus_min_friendly && pd->pet.intimate < battle_config.pet_bonus_min_friendly)))
-		status_calc_pc(sd,SCO_NONE);
+	if (sd) {
+#ifdef RENEWAL
+		int bonus = battle_config.pet_bonus_min_friendly_renewal;
+#else
+		int bonus = battle_config.pet_bonus_min_friendly;
+#endif
+
+		if ((intimate < bonus && pd->pet.intimate >= bonus) || (intimate >= bonus && pd->pet.intimate > bonus) ||
+			(intimate >= bonus && pd->pet.intimate < bonus))
+			status_calc_pc(sd,SCO_NONE);
+	}
+
 	if (value <= 0) { //Pet is lost, delete the egg
 		int i;
 

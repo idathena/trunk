@@ -259,6 +259,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\common\timer.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\common\timer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\common\utils.c"
 				>
 			</File>
