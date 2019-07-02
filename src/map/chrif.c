@@ -682,7 +682,7 @@ void chrif_authok(int fd) {
 	struct mmo_charstatus *status;
 	struct auth_node *node;
 	bool changing_mapservers;
-	TBL_PC *sd;
+	struct map_session_data *sd = NULL;
 
 	//Check if both servers agree on the struct's size
 	if( RFIFOW(fd,2) - 25 != sizeof(struct mmo_charstatus) ) {

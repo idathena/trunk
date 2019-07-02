@@ -899,7 +899,7 @@ void hom_heal(struct homun_data *hd) {
 void hom_save(struct homun_data *hd)
 {
 	//Copy data that must be saved in homunculus struct (hp / sp)
-	TBL_PC *sd;
+	struct map_session_data *sd = NULL;
 
 	nullpo_retv(hd);
 

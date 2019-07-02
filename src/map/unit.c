@@ -1362,7 +1362,7 @@ int unit_can_move(struct block_list *bl) {
 TIMER_FUNC(unit_resume_running)
 {
 	struct unit_data *ud = (struct unit_data *)data;
-	TBL_PC *sd = map_id2sd(id);
+	struct map_session_data *sd = map_id2sd(id);
 
 	if (sd && pc_isridingwug(sd))
 		clif_skill_nodamage(ud->bl,ud->bl,RA_WUGDASH,ud->skill_lv,sc_start4(ud->bl,ud->bl,status_skill2sc(RA_WUGDASH),100,ud->skill_lv,unit_getdir(ud->bl),0,0,0));

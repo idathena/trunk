@@ -1982,7 +1982,7 @@ static int64 battle_calc_base_damage(struct block_list *src, struct status_data 
  *	Initial refactoring by Baalberith
  *	Refined and optimized by helvetica
  */
-void battle_consume_ammo(TBL_PC *sd, uint16 skill_id, uint16 skill_lv)
+void battle_consume_ammo(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv)
 {
 	int qty = 1;
 
@@ -8210,7 +8210,8 @@ static const struct _battle_data {
 	{ "enable_critical",                    &battle_config.enable_critical,                 BL_PC,  BL_NUL, BL_ALL,         },
 	{ "mob_critical_rate",                  &battle_config.mob_critical_rate,               100,    0,      INT_MAX,        },
 	{ "critical_rate",                      &battle_config.critical_rate,                   100,    0,      INT_MAX,        },
-	{ "enable_baseatk",                     &battle_config.enable_baseatk,                  BL_CHAR|BL_NPC, BL_NUL, BL_ALL, },
+	{ "enable_baseatk",                     &battle_config.enable_baseatk,                  BL_CHAR|BL_HOM, BL_NUL, BL_ALL, },
+	{ "enable_baseatk_renewal",             &battle_config.enable_baseatk_renewal,          BL_ALL, BL_NUL, BL_ALL,         },
 	{ "enable_perfect_flee",                &battle_config.enable_perfect_flee,             BL_PC|BL_PET, BL_NUL, BL_ALL,   },
 	{ "casting_rate",                       &battle_config.cast_rate,                       100,    0,      INT_MAX,        },
 	{ "delay_rate",                         &battle_config.delay_rate,                      100,    0,      INT_MAX,        },
@@ -8302,11 +8303,8 @@ static const struct _battle_data {
 	{ "pet_attack_support",                 &battle_config.pet_attack_support,              0,      0,      1,              },
 	{ "pet_damage_support",                 &battle_config.pet_damage_support,              0,      0,      1,              },
 	{ "pet_support_min_friendly",           &battle_config.pet_support_min_friendly,        901,    0,      1000,           },
-#ifdef RENEWAL
-	{ "pet_bonus_min_friendly_re",          &battle_config.pet_bonus_min_friendly,          0,      0,      1000,           },
-#else
 	{ "pet_bonus_min_friendly",             &battle_config.pet_bonus_min_friendly,          751,    0,      1000,           },
-#endif
+	{ "pet_bonus_min_friendly_renewal",     &battle_config.pet_bonus_min_friendly_renewal,  0,      0,      1000,           },
 	{ "pet_support_rate",                   &battle_config.pet_support_rate,                100,    0,      INT_MAX,        },
 	{ "pet_attack_exp_to_master",           &battle_config.pet_attack_exp_to_master,        0,      0,      1,              },
 	{ "pet_attack_exp_rate",                &battle_config.pet_attack_exp_rate,             100,    0,      INT_MAX,        },

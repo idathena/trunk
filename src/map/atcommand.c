@@ -9735,7 +9735,7 @@ ACMD_FUNC(showrate) {
 
 ACMD_FUNC(fullstrip) {
 	int i;
-	TBL_PC *tsd;
+	struct map_session_data *tsd = NULL;
 
 	nullpo_retr(-1, sd);
 
@@ -9746,7 +9746,7 @@ ACMD_FUNC(fullstrip) {
 		return -1;
 	}
 
-	if ((tsd = map_nick2sd(atcmd_player_name)) == NULL && (tsd = map_id2sd(atoi(atcmd_player_name))) == NULL) {
+	if (!(tsd = map_nick2sd(atcmd_player_name)) && !(tsd = map_id2sd(atoi(atcmd_player_name)))) {
 		clif_displaymessage(fd, msg_txt(3)); // Character not found.
 		return -1;
 	}

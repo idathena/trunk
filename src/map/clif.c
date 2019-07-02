@@ -21420,7 +21420,7 @@ void DumpUnknow(int fd, TBL_PC *sd, int cmd, int packet_len) {
 	//Like sprintf, but only for date/time (Sunday, November 02 2003 15:12:52)
 	strftime(datestr, sizeof(datestr) - 1, "%A, %B %d %Y %X.", &datetime); //Server time (normal time): %A, %B %d %Y %X.
 
-	if( (fp = fopen(packet_txt , "a")) != NULL ) {
+	if( (fp = fopen(packet_txt , "a")) ) {
 		if( sd )
 			fprintf(fp, "Unknown packet 0x%04X (length %d), %s session #%d, %d/%d (AID/CID) at %s \n", cmd, packet_len, sd->state.active ? "authed" : "unauthed", fd, sd->status.account_id, sd->status.char_id,datestr);
 		else

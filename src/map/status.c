@@ -2341,8 +2341,13 @@ static unsigned short status_base_atk(const struct block_list *bl, const struct 
 {
 	struct map_session_data *sd = map_id2sd(bl->id);
 	int flag = 0, str, dex, dstr;
+#ifdef RENEWAL
+	int type = battle_config.enable_baseatk_renewal;
+#else
+	int type = battle_config.enable_baseatk;
+#endif
 
-	if( !(bl->type&battle_config.enable_baseatk) )
+	if( !(bl->type&type) )
 		return 0;
 
 	if( sd ) {
@@ -3827,7 +3832,13 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		struct pet_data *pd = sd->pd;
 
 		if (pd) {
-			if (pd->petDB && pd->petDB->pet_friendly_script && pd->pet.intimate >= battle_config.pet_bonus_min_friendly) {
+#ifdef RENEWAL
+			int bonus = battle_config.pet_bonus_min_friendly_renewal;
+#else
+			int bonus = battle_config.pet_bonus_min_friendly;
+#endif
+
+			if (pd->petDB && pd->petDB->pet_friendly_script && pd->pet.intimate >= bonus) {
 				current_equip_item_index = -1;
 				current_equip_pos = EQP_PET;
 				run_script(pd->petDB->pet_friendly_script, 0, sd->bl.id, 0);

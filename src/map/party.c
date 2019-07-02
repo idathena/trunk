@@ -1059,11 +1059,11 @@ void party_exp_share(struct party_data *p, struct block_list *src, uint32 base_e
 		double bonus = 100 + battle_config.party_even_share_bonus * (c - 1);
 
 		if (base_exp)
-			base_exp = (uint32)cap_value(base_exp * bonus / 100.,0,UINT32_MAX);
+			base_exp = (uint32)cap_value(base_exp * bonus / 100,0,UINT32_MAX);
 		if (job_exp)
-			job_exp = (uint32)cap_value(job_exp * bonus / 100.,0,UINT32_MAX);
+			job_exp = (uint32)cap_value(job_exp * bonus / 100,0,UINT32_MAX);
 		if (zeny)
-			zeny = (int)cap_value(zeny * bonus / 100.,0,INT_MAX);
+			zeny = (int)cap_value(zeny * bonus / 100,0,INT_MAX);
 	}
 
 	for (i = 0; i < c; i++) {
