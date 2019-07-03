@@ -8488,13 +8488,12 @@ BUILDIN_FUNC(bonus)
 BUILDIN_FUNC(autobonus)
 {
 	unsigned int dur, pos;
-	short rate;
-	short atk_type = 0;
+	short rate, atk_type = 0;
 	struct map_session_data *sd = NULL;
 	const char *bonus_script, *other_script = NULL;
+	int i;
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0; // No player attached
 
 	if( current_equip_pos )
@@ -8502,7 +8501,8 @@ BUILDIN_FUNC(autobonus)
 	else
 		pos = sd->inventory.u.items_inventory[current_equip_item_index].equip;
 
-	if( (sd->state.autobonus&pos) == pos )
+	ARR_FIND(0, MAX_PC_BONUS, i, sd->autobonus[i].pos == pos);
+	if( i < MAX_PC_BONUS )
 		return 0;
 
 	rate = script_getnum(st,3);
@@ -8517,7 +8517,7 @@ BUILDIN_FUNC(autobonus)
 	if( script_hasdata(st,6) )
 		other_script = script_getstr(st,6);
 
-	if( pc_addautobonus(sd->autobonus,ARRAYLENGTH(sd->autobonus),bonus_script,rate,dur,atk_type,other_script,pos,false) ) {
+	if( pc_addautobonus(sd->autobonus,bonus_script,rate,dur,atk_type,other_script,pos,false) ) {
 		script_add_autobonus(bonus_script);
 		if( other_script )
 			script_add_autobonus(other_script);
@@ -8529,13 +8529,12 @@ BUILDIN_FUNC(autobonus)
 BUILDIN_FUNC(autobonus2)
 {
 	unsigned int dur, pos;
-	short rate;
-	short atk_type = 0;
+	short rate, atk_type = 0;
 	struct map_session_data *sd = NULL;
 	const char *bonus_script, *other_script = NULL;
+	int i;
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0; // No player attached
 
 	if( current_equip_pos )
@@ -8543,7 +8542,8 @@ BUILDIN_FUNC(autobonus2)
 	else
 		pos = sd->inventory.u.items_inventory[current_equip_item_index].equip;
 
-	if( (sd->state.autobonus&pos) == pos )
+	ARR_FIND(0, MAX_PC_BONUS, i, sd->autobonus2[i].pos == pos);
+	if( i < MAX_PC_BONUS )
 		return 0;
 
 	rate = script_getnum(st,3);
@@ -8558,7 +8558,7 @@ BUILDIN_FUNC(autobonus2)
 	if( script_hasdata(st,6) )
 		other_script = script_getstr(st,6);
 
-	if( pc_addautobonus(sd->autobonus2,ARRAYLENGTH(sd->autobonus2),bonus_script,rate,dur,atk_type,other_script,pos,false) ) {
+	if( pc_addautobonus(sd->autobonus2,bonus_script,rate,dur,atk_type,other_script,pos,false) ) {
 		script_add_autobonus(bonus_script);
 		if( other_script )
 			script_add_autobonus(other_script);
@@ -8570,13 +8570,13 @@ BUILDIN_FUNC(autobonus2)
 BUILDIN_FUNC(autobonus3)
 {
 	unsigned int dur, pos;
-	short rate,atk_type;
+	short rate, atk_type;
 	struct map_session_data *sd = NULL;
 	const char *bonus_script, *other_script = NULL;
 	struct script_data *data;
+	int i;
 
-	sd = script_rid2sd(st);
-	if( sd == NULL )
+	if( !(sd = script_rid2sd(st)) )
 		return 0; // No player attached
 
 	if( current_equip_pos )
@@ -8584,7 +8584,8 @@ BUILDIN_FUNC(autobonus3)
 	else
 		pos = sd->inventory.u.items_inventory[current_equip_item_index].equip;
 
-	if( (sd->state.autobonus&pos) == pos )
+	ARR_FIND(0, MAX_PC_BONUS, i, sd->autobonus3[i].pos == pos);
+	if( i < MAX_PC_BONUS )
 		return 0;
 
 	rate = script_getnum(st,3);
@@ -8599,7 +8600,7 @@ BUILDIN_FUNC(autobonus3)
 	if( script_hasdata(st,6) )
 		other_script = script_getstr(st,6);
 
-	if( pc_addautobonus(sd->autobonus3,ARRAYLENGTH(sd->autobonus3),bonus_script,rate,dur,atk_type,other_script,pos,true) ) {
+	if( pc_addautobonus(sd->autobonus3,bonus_script,rate,dur,atk_type,other_script,pos,true) ) {
 		script_add_autobonus(bonus_script);
 		if( other_script )
 			script_add_autobonus(other_script);
@@ -19323,10 +19324,9 @@ BUILDIN_FUNC(instance_enter)
  *------------------------------------------*/
 BUILDIN_FUNC(instance_npcname)
 {
+	struct npc_data *nd = NULL;
 	const char *str;
 	short instance_id = 0;
-
-	struct npc_data *nd;
 
 	str = script_getstr(st,2);
 	if( script_hasdata(st,3) )
@@ -19334,7 +19334,7 @@ BUILDIN_FUNC(instance_npcname)
 	else
 		instance_id = script_instancegetid(st);
 
-	if( instance_id && (nd = npc_name2id(str)) != NULL ) {
+	if( instance_id && (nd = npc_name2id(str)) ) {
 		static char npcname[NAME_LENGTH];
 
 		snprintf(npcname, sizeof(npcname), "dup_%d_%d", instance_id, nd->bl.id);

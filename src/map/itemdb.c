@@ -418,7 +418,8 @@ struct item_data *itemdb_search(unsigned short nameid) {
 	return id;
 }
 
-/** Checks if item is equip type or not
+/**
+ * Checks if item is equip type or not
  * @param id Item data
  * @return True if item is equip, false otherwise
  */
