@@ -2829,7 +2829,7 @@ void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus,
 		return;
 
 	for( i = 0; i < MAX_PC_BONUS; i++ ) {
-		if( restore && autobonus[i].rate && (sd->state.autobonus&autobonus[i].pos) == autobonus[i].pos ) {
+		if( restore && (sd->state.autobonus&autobonus[i].pos) == autobonus[i].pos ) {
 			if( autobonus[i].active == INVALID_TIMER )
 				continue;
 			if( autobonus[i].bonus_script ) {
@@ -2846,15 +2846,15 @@ void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus,
 				if( (equip_pos&autobonus[i].pos) == autobonus[i].pos )
 					script_run_autobonus(autobonus[i].bonus_script,sd,autobonus[i].pos);
 			}
-		} else {
-			if( autobonus[i].bonus_script )
-				aFree(autobonus[i].bonus_script);
-			if( autobonus[i].other_script )
-				aFree(autobonus[i].other_script);
-			autobonus[i].bonus_script = autobonus[i].other_script = NULL;
-			autobonus[i].rate = autobonus[i].atk_type = autobonus[i].duration = autobonus[i].pos = 0;
-			autobonus[i].active = INVALID_TIMER;
+			continue;
 		}
+		if( autobonus[i].bonus_script )
+			aFree(autobonus[i].bonus_script);
+		if( autobonus[i].other_script )
+			aFree(autobonus[i].other_script);
+		autobonus[i].bonus_script = autobonus[i].other_script = NULL;
+		autobonus[i].rate = autobonus[i].atk_type = autobonus[i].duration = autobonus[i].pos = 0;
+		autobonus[i].active = INVALID_TIMER;
 	}
 }
 
