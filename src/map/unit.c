@@ -1435,9 +1435,9 @@ int unit_set_walkdelay(struct block_list *bl, unsigned int tick, int delay, int 
  */
 int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill_id, uint16 skill_lv, int casttime, int castcancel)
 {
-	struct unit_data *ud;
-	struct status_data *tstatus;
-	struct status_change *sc;
+	struct unit_data *ud = NULL;
+	struct status_data *tstatus = NULL;
+	struct status_change *sc = NULL;
 	struct map_session_data *sd = NULL;
 	struct block_list *target = NULL;
 	unsigned int tick = gettick();
@@ -3060,9 +3060,9 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 				if( status_isdead(bl) )
 					pc_setrestartvalue(sd, 2);
 				pc_delinvincibletimer(sd);
-				pc_delautobonus(sd, sd->autobonus, ARRAYLENGTH(sd->autobonus), false);
-				pc_delautobonus(sd, sd->autobonus2, ARRAYLENGTH(sd->autobonus2), false);
-				pc_delautobonus(sd, sd->autobonus3, ARRAYLENGTH(sd->autobonus3), false);
+				pc_delautobonus(sd, sd->autobonus, false);
+				pc_delautobonus(sd, sd->autobonus2, false);
+				pc_delautobonus(sd, sd->autobonus3, false);
 				if( sd->followtimer != INVALID_TIMER )
 					pc_stop_following(sd);
 				if( sd->duel_invite > 0 )

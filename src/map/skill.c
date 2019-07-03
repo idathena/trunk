@@ -919,7 +919,8 @@ struct s_skill_nounit_layout* skill_get_nounit_layout(uint16 skill_id, uint16 sk
 	return &skill_nounit_layout[0];
 }
 
-/** Stores temporary values.
+/**
+ * Stores temporary values.
  * Common usages:
  * [0] holds number of targets in area
  * [1] holds the id of the original target
@@ -1979,18 +1980,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 				}
 			}
 		}
-		if( sd->autobonus[0].rate ) { //Autobonus when attacking
-			for( i = 0; i < ARRAYLENGTH(sd->autobonus) && sd->autobonus[i].rate; i++ ) {
-				if( rnd()%1000 >= sd->autobonus[i].rate )
-					continue;
-				if( !(((sd->autobonus[i].atk_type)&attack_type)&BF_WEAPONMASK &&
-					 ((sd->autobonus[i].atk_type)&attack_type)&BF_RANGEMASK &&
-					 ((sd->autobonus[i].atk_type)&attack_type)&BF_SKILLMASK) )
-					continue; //One or more trigger conditions were not fulfilled
-				pc_exeautobonus(sd,&sd->autobonus[i]);
-			}
-			status_calc_pc(sd,SCO_FORCE);
-		}
+		pc_exeautobonus(sd,sd->autobonus,attack_type,false); //Autobonus when attacking
 	}
 
 	return 0;
@@ -2061,21 +2051,13 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
 		sd->state.autocast = 0;
 	}
 
-	if( sd->autobonus3[0].rate ) {
-		for( i = 0; i < ARRAYLENGTH(sd->autobonus3) && sd->autobonus3[i].rate; i++ ) {
-			if( rnd()%1000 >= sd->autobonus3[i].rate )
-				continue;
-			if( sd->autobonus3[i].atk_type != skill_id )
-				continue;
-			pc_exeautobonus(sd,&sd->autobonus3[i]);
-		}
-		status_calc_pc(sd,SCO_FORCE);
-	}
+	pc_exeautobonus(sd,sd->autobonus3,skill_id,true);
 
 	return 1;
 }
 
-/** Splitted off from skill_additional_effect, which is never called when the
+/**
+ * Splitted off from skill_additional_effect, which is never called when the
  * attack skill kills the enemy. Place in this function counter status effects
  * when using skills (eg: Asura's sp regen penalty, or counter-status effects
  * from cards) that will take effect on the source, not the target. [Skotlex]
@@ -2208,12 +2190,12 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 	}
 
 	if(dstsd && !status_isdead(bl) && !(skill_id && skill_get_nk(skill_id)&NK_NO_DAMAGE)) {
-		int i;
-
+		if((sc = status_get_sc(bl)) && sc->data[SC_DORAM_SVSP] && (attack_type&(BF_LONG|BF_MAGIC)))
+			skill_castend_damage_id(bl,src,SU_SV_STEMSPEAR,(dstsd ? pc_checkskill(dstsd,SU_SV_STEMSPEAR) : 5),tick,0);
 		if(dstsd->autospell2[0].id) { //Trigger counter-spells to retaliate against damage causing skills
 			struct block_list *tbl = NULL;
 			struct unit_data *ud = NULL;
-			int type;
+			int i, type;
 			int16 as_skill_id, as_skill_lv;
 
 			for(i = 0; i < ARRAYLENGTH(dstsd->autospell2) && dstsd->autospell2[i].id; i++) {
@@ -2282,20 +2264,7 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 				}
 			}
 		}
-		if(dstsd->autobonus2[0].rate) { //Autobonus when attacked
-			for(i = 0; i < ARRAYLENGTH(dstsd->autobonus2) && dstsd->autobonus2[i].rate; i++) {
-				if(rnd()%1000 >= dstsd->autobonus2[i].rate)
-					continue;
-				if(!(((dstsd->autobonus2[i].atk_type)&attack_type)&BF_WEAPONMASK &&
-					 ((dstsd->autobonus2[i].atk_type)&attack_type)&BF_RANGEMASK &&
-					 ((dstsd->autobonus2[i].atk_type)&attack_type)&BF_SKILLMASK))
-					continue; //One or more trigger conditions were not fulfilled
-				pc_exeautobonus(dstsd,&dstsd->autobonus2[i]);
-			}
-			status_calc_pc(dstsd,SCO_FORCE);
-		}
-		if((sc = status_get_sc(bl)) && sc->data[SC_DORAM_SVSP] && (attack_type&(BF_LONG|BF_MAGIC)))
-			skill_castend_damage_id(bl,src,SU_SV_STEMSPEAR,(dstsd ? pc_checkskill(dstsd,SU_SV_STEMSPEAR) : 5),tick,0);
+		pc_exeautobonus(dstsd,dstsd->autobonus2,attack_type,false); //Autobonus when attacked
 	}
 
 	return 0;

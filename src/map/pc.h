@@ -1055,10 +1055,10 @@ bool pc_adoption(struct map_session_data *p1_sd, struct map_session_data *p2_sd,
 
 void pc_updateweightstatus(struct map_session_data *sd);
 
-bool pc_addautobonus(struct s_autobonus *bonus, char max, const char *script, short rate, unsigned int dur, short atk_type, const char *o_script, unsigned int pos, bool onskill);
-void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus);
+bool pc_addautobonus(struct s_autobonus *bonus, const char *script, short rate, unsigned int dur, short atk_type, const char *o_script, unsigned int pos, bool onskill);
+void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, short atk_type, bool onskill);
 TIMER_FUNC(pc_endautobonus);
-void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, char max, bool restore);
+void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, bool restore);
 
 void pc_bonus(struct map_session_data *sd, int type, int val);
 void pc_bonus2(struct map_session_data *sd, int type, int type2, int val);

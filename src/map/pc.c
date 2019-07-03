@@ -1796,12 +1796,11 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 		sd->charmball_timer[i] = INVALID_TIMER;
 	for (i = 0; i < MAX_SOULBALL; i++)
 		sd->soulball_timer[i] = INVALID_TIMER;
-	for (i = 0; i < ARRAYLENGTH(sd->autobonus); i++)
+	for (i = 0; i < MAX_PC_BONUS; i++) {
 		sd->autobonus[i].active = INVALID_TIMER;
-	for (i = 0; i < ARRAYLENGTH(sd->autobonus2); i++)
 		sd->autobonus2[i].active = INVALID_TIMER;
-	for (i = 0; i < ARRAYLENGTH(sd->autobonus3); i++)
 		sd->autobonus3[i].active = INVALID_TIMER;
+	}
 
 	if (battle_config.item_auto_get)
 		sd->state.autoloot = 10000;
@@ -2789,66 +2788,65 @@ static void pc_bonus_item_drop(struct s_add_drop *drop, const short max, unsigne
 	drop[i].rate = rate;
 }
 
-bool pc_addautobonus(struct s_autobonus *bonus, char max, const char *script, short rate, unsigned int dur, short flag, const char *other_script, unsigned int pos, bool onskill)
+bool pc_addautobonus(struct s_autobonus *bonus, const char *script, short rate, unsigned int dur, short atk_type, const char *other_script, unsigned int pos, bool onskill)
 {
 	int i;
 
-	ARR_FIND(0, max, i, bonus[i].rate == 0);
-	if( i == max ) {
-		ShowWarning("pc_addautobonus: Reached max (%d) number of autobonus per character!\n", max);
+	ARR_FIND(0, MAX_PC_BONUS, i, bonus[i].rate == 0); //Check for free slot
+	if( i == MAX_PC_BONUS ) { //No free slot
+		ShowWarning("pc_addautobonus: Reached max (%d) number of autobonus per character!\n", MAX_PC_BONUS);
 		return false;
 	}
 
 	if( !onskill ) {
-		if( !(flag&BF_RANGEMASK) )
-			flag |= BF_SHORT|BF_LONG; //No range defined? Use both
-		if( !(flag&BF_WEAPONMASK) )
-			flag |= BF_WEAPON; //No attack type defined? Use weapon
-		if( !(flag&BF_SKILLMASK) ) {
-			if( flag&(BF_MAGIC|BF_MISC) )
-				flag |= BF_SKILL; //These two would never trigger without BF_SKILL
-			if( flag&BF_WEAPON )
-				flag |= BF_NORMAL|BF_SKILL;
+		if( !(atk_type&BF_RANGEMASK) )
+			atk_type |= BF_SHORT|BF_LONG; //No range defined? Use both
+		if( !(atk_type&BF_WEAPONMASK) )
+			atk_type |= BF_WEAPON; //No attack type defined? Use weapon
+		if( !(atk_type&BF_SKILLMASK) ) {
+			if( atk_type&(BF_MAGIC|BF_MISC) )
+				atk_type |= BF_SKILL; //These two would never trigger without BF_SKILL
+			if( atk_type&BF_WEAPON )
+				atk_type |= BF_NORMAL|BF_SKILL;
 		}
 	}
 
 	bonus[i].rate = rate;
 	bonus[i].duration = dur;
 	bonus[i].active = INVALID_TIMER;
-	bonus[i].atk_type = flag;
+	bonus[i].atk_type = atk_type;
 	bonus[i].pos = pos;
 	bonus[i].bonus_script = aStrdup(script);
 	bonus[i].other_script = (other_script ? aStrdup(other_script) : NULL);
 	return true;
 }
 
-void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, char max, bool restore)
+void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, bool restore)
 {
 	int i;
 
 	if( !sd )
 		return;
 
-	for( i = 0; i < max; i++ ) {
-		if( autobonus[i].active != INVALID_TIMER ) {
-			if( restore && (sd->state.autobonus&autobonus[i].pos) == autobonus[i].pos ) {
-				if( autobonus[i].bonus_script ) {
-					int j;
-					unsigned int equip_pos = 0;
-
-					//Create a list of all equipped positions to see if all items needed for the autobonus are still present [Playtester]
-					for( j = 0; j < EQI_MAX; j++ ) {
-						if( sd->equip_index[j] >= 0 )
-							equip_pos |= sd->inventory.u.items_inventory[sd->equip_index[j]].equip;
-						else if( j == EQI_PET && sd->status.pet_id > 0 && sd->pd )
-							equip_pos |= EQP_PET;
-					}
-					if( (equip_pos&autobonus[i].pos) == autobonus[i].pos )
-						script_run_autobonus(autobonus[i].bonus_script,sd,autobonus[i].pos);
-				}
+	for( i = 0; i < MAX_PC_BONUS; i++ ) {
+		if( restore && (sd->state.autobonus&autobonus[i].pos) == autobonus[i].pos ) {
+			if( autobonus[i].active == INVALID_TIMER )
 				continue;
-			} else //Logout / Unequipped an item with an activated bonus
-				delete_timer(autobonus[i].active,pc_endautobonus);
+			if( autobonus[i].bonus_script ) {
+				int j;
+				unsigned int equip_pos = 0;
+
+				//Create a list of all equipped positions to see if all items needed for the autobonus are still present [Playtester]
+				for( j = 0; j < EQI_MAX; j++ ) {
+					if( sd->equip_index[j] >= 0 )
+						equip_pos |= sd->inventory.u.items_inventory[sd->equip_index[j]].equip;
+					else if( j == EQI_PET && sd->status.pet_id > 0 && sd->pd )
+						equip_pos |= EQP_PET;
+				}
+				if( (equip_pos&autobonus[i].pos) == autobonus[i].pos )
+					script_run_autobonus(autobonus[i].bonus_script,sd,autobonus[i].pos);
+			}
+			continue;
 		}
 		if( autobonus[i].bonus_script )
 			aFree(autobonus[i].bonus_script);
@@ -2860,31 +2858,45 @@ void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus,
 	}
 }
 
-void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus)
+void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, short atk_type, bool onskill)
 {
-	if( !sd || !autobonus )
+	int i;
+
+	if( !sd || !autobonus[0].rate )
 		return;
 
-	if( autobonus->active != INVALID_TIMER )
-		delete_timer(autobonus->active,pc_endautobonus);
-
-	if( autobonus->other_script ) {
-		int j;
-		unsigned int equip_pos = 0;
-
-		//Create a list of all equipped positions to see if all items needed for the autobonus are still present [Playtester]
-		for( j = 0; j < EQI_MAX; j++ ) {
-			if( sd->equip_index[j] >= 0 )
-				equip_pos |= sd->inventory.u.items_inventory[sd->equip_index[j]].equip;
-			else if( j == EQI_PET && sd->status.pet_id > 0 && sd->pd )
-				equip_pos |= EQP_PET;
+	for( i = 0; i < MAX_PC_BONUS && autobonus[i].rate; i++ ) {
+		if( !onskill ) {
+			if( !(((autobonus[i].atk_type)&atk_type)&BF_WEAPONMASK &&
+				 ((autobonus[i].atk_type)&atk_type)&BF_RANGEMASK &&
+				 ((autobonus[i].atk_type)&atk_type)&BF_SKILLMASK) )
+				continue; //One or more trigger conditions were not fulfilled
+		} else {
+			if( autobonus[i].atk_type != atk_type )
+				continue;
 		}
-		if( (equip_pos&autobonus->pos) == autobonus->pos )
-			script_run_autobonus(autobonus->other_script,sd,autobonus->pos);
-	}
+		if( rnd()%1000 >= autobonus[i].rate )
+			continue;
+		if( autobonus[i].active != INVALID_TIMER )
+			delete_timer(autobonus[i].active,pc_endautobonus);
+		if( autobonus[i].other_script ) {
+			int j;
+			unsigned int equip_pos = 0;
 
-	autobonus->active = add_timer(gettick() + autobonus->duration,pc_endautobonus,sd->bl.id,(intptr_t)autobonus);
-	sd->state.autobonus |= autobonus->pos;
+			//Create a list of all equipped positions to see if all items needed for the autobonus are still present [Playtester]
+			for( j = 0; j < EQI_MAX; j++ ) {
+				if( sd->equip_index[j] >= 0 )
+					equip_pos |= sd->inventory.u.items_inventory[sd->equip_index[j]].equip;
+				else if( j == EQI_PET && sd->status.pet_id > 0 && sd->pd )
+					equip_pos |= EQP_PET;
+			}
+			if( (equip_pos&autobonus[i].pos) == autobonus[i].pos )
+				script_run_autobonus(autobonus[i].other_script,sd,autobonus[i].pos);
+		}
+		autobonus[i].active = add_timer(gettick() + autobonus[i].duration,pc_endautobonus,sd->bl.id,(intptr_t)&autobonus[i]);
+		sd->state.autobonus |= autobonus[i].pos;
+	}
+	status_calc_pc(sd,SCO_FORCE);
 }
 
 TIMER_FUNC(pc_endautobonus)
@@ -7201,14 +7213,14 @@ void pc_gainexp(struct map_session_data *sd, struct block_list *src, uint32 base
 	if (flag&4) {
 		if (sd->status.base_exp >= MAX_LEVEL_BASE_EXP)
 			base_exp = 0;
-		else if ((uint64)(sd->status.base_exp + base_exp) >= MAX_LEVEL_BASE_EXP)
+		else if ((uint64)sd->status.base_exp + base_exp >= MAX_LEVEL_BASE_EXP)
 			base_exp = MAX_LEVEL_BASE_EXP - sd->status.base_exp;
 	}
 
 	if (flag&8) {
 		if (sd->status.job_exp >= MAX_LEVEL_JOB_EXP)
 			job_exp = 0;
-		else if ((uint64)(sd->status.job_exp + job_exp) >= MAX_LEVEL_JOB_EXP)
+		else if ((uint64)sd->status.job_exp + job_exp >= MAX_LEVEL_JOB_EXP)
 			job_exp = MAX_LEVEL_JOB_EXP - sd->status.job_exp;
 	}
 
