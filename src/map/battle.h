@@ -85,8 +85,9 @@ struct Damage battle_calc_weapon_attack(struct block_list *src, struct block_lis
 
 int64 battle_calc_return_damage(struct block_list *bl, struct block_list *src, int64 *, int flag, uint16 skill_id, bool status_reflect);
 
+void battle_vanish_damage(struct map_session_data *sd, struct block_list *target);
+void battle_vellum_damage(struct map_session_data *sd, struct block_list *target, struct Damage *wd);
 void battle_drain(struct map_session_data *sd, struct block_list *tbl, int64 rdamage, int64 ldamage, int race, int class_, bool isdraindamage);
-void battle_vanish(struct map_session_data *sd, struct block_list *target, struct Damage *wd);
 void battle_do_reflect(struct Damage *d, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv);
 
 int battle_attr_ratio(int atk_elem, int def_type, int def_lv);

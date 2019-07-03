@@ -3546,6 +3546,8 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->sp_vanish_race)
 		+ sizeof(sd->subskill)
 		+ sizeof(sd->skilldelay)
+		+ sizeof(sd->percent_hp_regen)
+		+ sizeof(sd->percent_sp_regen)
 	);
 
 	if (sd->bonus.speed_rate < 0)

@@ -991,7 +991,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			uint8 i, sc_flag = SCFLAG_NONE;
 			unsigned int time = 0;
 
-			for( i = 0; i < ARRAYLENGTH(sd->addeff) && sd->addeff[i].flag; i++ ) {
+			for( i = 0; i < MAX_PC_BONUS && sd->addeff[i].flag; i++ ) {
 				rate = sd->addeff[i].rate;
 				if( attack_type&BF_LONG )
 					rate += sd->addeff[i].arrow_rate;
@@ -1025,7 +1025,7 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			uint8 i, sc_flag = SCFLAG_NONE;
 			unsigned int time = 0;
 
-			for( i = 0; i < ARRAYLENGTH(sd->addeff3) && sd->addeff3[i].skill_id; i++ ) {
+			for( i = 0; i < MAX_PC_BONUS && sd->addeff3[i].skill_id; i++ ) {
 				if( skill_id != sd->addeff3[i].skill_id || !sd->addeff3[i].rate )
 					continue;
 				type = sd->addeff3[i].sc;
@@ -2067,10 +2067,10 @@ int skill_onskillusage(struct map_session_data *sd, struct block_list *bl, uint1
  */
 int skill_counter_additional_effect(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int attack_type, unsigned int tick)
 {
-	int rate;
 	struct map_session_data *sd = NULL;
 	struct map_session_data *dstsd = NULL;
 	struct status_change *sc = NULL;
+	int rate;
 
 	nullpo_ret(src);
 	nullpo_ret(bl);
@@ -2087,10 +2087,10 @@ int skill_counter_additional_effect(struct block_list *src, struct block_list *b
 		uint8 i, sc_flag = SCFLAG_NONE;
 		unsigned int time = 0;
 
-		for(i = 0; i < ARRAYLENGTH(dstsd->addeff2) && dstsd->addeff2[i].flag; i++) {
+		for(i = 0; i < MAX_PC_BONUS && dstsd->addeff2[i].flag; i++) {
 			rate = dstsd->addeff2[i].rate;
 			if(attack_type&BF_LONG)
-				rate = dstsd->addeff2[i].arrow_rate;
+				rate += dstsd->addeff2[i].arrow_rate;
 			if(!rate)
 				continue;
 			if((dstsd->addeff2[i].flag&(ATF_LONG|ATF_SHORT)) != (ATF_LONG|ATF_SHORT)) { //Trigger has range consideration

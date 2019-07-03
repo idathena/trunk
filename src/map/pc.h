@@ -424,7 +424,7 @@ struct map_session_data {
 	} hp_loss, sp_loss, hp_regen, sp_regen, percent_hp_regen, percent_sp_regen;
 	struct {
 		short class_, rate;
-	}	add_def[MAX_PC_BONUS], add_mdef[MAX_PC_BONUS], add_mdmg[MAX_PC_BONUS];
+	} add_def[MAX_PC_BONUS], add_mdef[MAX_PC_BONUS], add_mdmg[MAX_PC_BONUS];
 	struct s_add_drop add_drop[MAX_PC_BONUS];
 	struct s_healrate {
 		unsigned short nameid;
