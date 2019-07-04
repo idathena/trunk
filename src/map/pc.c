@@ -2861,7 +2861,7 @@ bool pc_addautobonus(struct s_autobonus *bonus, const char *script, short rate, 
  * Remove an autobonus from player
  * @param sd: Player data
  * @param bonus: Autobonus array
- * @param restore: Run script or clear the bonus
+ * @param restore: Run script or clear it
  */
 void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, bool restore)
 {
@@ -3028,7 +3028,7 @@ static void pc_bonus_subele(struct map_session_data *sd, unsigned char ele, shor
 		if( flag&BF_WEAPON )
 			flag |= BF_NORMAL|BF_SKILL;
 	}
-	for( i = 0; i < MAX_PC_BONUS &&  sd->subele2[i].rate; i++ ) {
+	for( i = 0; i < MAX_PC_BONUS && sd->subele2[i].rate; i++ ) {
 		if( sd->subele2[i].ele == ele && sd->subele2[i].flag == flag ) {
 			sd->subele2[i].rate += rate;
 			return;
@@ -3058,21 +3058,17 @@ void pc_itemgrouphealrate_add(struct map_session_data *sd, uint16 group_id, shor
 		if( sd->itemgrouphealrate[i]->group_id == group_id )
 			break;
 	}
-
 	if( i != sd->itemgrouphealrate_count ) {
 		sd->itemgrouphealrate[i]->rate += rate;
 		return;
 	}
-
-	if( i >= UINT8_MAX ) {
+	if( i == UINT8_MAX ) {
 		ShowError("pc_itemgrouphealrate_add: Reached max (%d) possible bonuses for player '%s' (%d:%d)\n", UINT8_MAX, sd->status.name, sd->status.account_id, sd->status.char_id);
 		return;
 	}
-
 	entry = ers_alloc(pc_itemgrouphealrate_ers, struct s_pc_itemgrouphealrate);
 	entry->group_id = group_id;
 	entry->rate = rate;
-
 	RECREATE(sd->itemgrouphealrate, struct s_pc_itemgrouphealrate *, sd->itemgrouphealrate_count + 1);
 	sd->itemgrouphealrate[sd->itemgrouphealrate_count++] = entry;
 }

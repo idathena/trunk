@@ -1654,6 +1654,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 			status_change_end(target, SC_CAMOUFLAGE, INVALID_TIMER);
 			status_change_end(target, SC_SITDOWN_FORCE, INVALID_TIMER);
 			status_change_end(target, SC_BANANA_BOMB_SITDOWN, INVALID_TIMER);
+			status_change_end(target, SC_NEWMOON, INVALID_TIMER);
 			status_change_end(target, SC_SUHIDE, INVALID_TIMER);
 			//Endure count is only reduced by non-players on non-gvg maps
 			if ((sce = sc->data[SC_ENDURE]) && !sce->val4 && //val4 signals infinite endure [Skotlex]
@@ -1674,8 +1675,6 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 				status_change_end(target, SC_CLOAKINGEXCEED, INVALID_TIMER);
 			if (sc->data[SC_KAGEMUSYA] && --(sc->data[SC_KAGEMUSYA]->val2) <= 0)
 				status_change_end(target, SC_KAGEMUSYA, INVALID_TIMER);
-			if (sc->data[SC_NEWMOON] && --(sc->data[SC_NEWMOON]->val2) <= 0)
-				status_change_end(target, SC_NEWMOON, INVALID_TIMER);
 		}
 
 		if (target->type == BL_PC)
@@ -3523,31 +3522,31 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->skillusesp)
 		+ sizeof(sd->skillheal)
 		+ sizeof(sd->skillheal2)
+		+ sizeof(sd->skillblown)
+		+ sizeof(sd->skillcast)
+		+ sizeof(sd->skillfixcastrate)
+		+ sizeof(sd->subskill)
+		+ sizeof(sd->skillvarcast)
+		+ sizeof(sd->skillcooldown)
+		+ sizeof(sd->skillfixcast)
+		+ sizeof(sd->skilldelay)
 		+ sizeof(sd->hp_loss)
 		+ sizeof(sd->sp_loss)
 		+ sizeof(sd->hp_regen)
 		+ sizeof(sd->sp_regen)
-		+ sizeof(sd->skillblown)
-		+ sizeof(sd->skillcast)
+		+ sizeof(sd->percent_hp_regen)
+		+ sizeof(sd->percent_sp_regen)
 		+ sizeof(sd->add_def)
 		+ sizeof(sd->add_mdef)
 		+ sizeof(sd->add_mdmg)
 		+ sizeof(sd->add_drop)
 		+ sizeof(sd->itemhealrate)
 		+ sizeof(sd->subele2)
-		+ sizeof(sd->skillcooldown)
-		+ sizeof(sd->skillfixcast)
-		+ sizeof(sd->skillvarcast)
-		+ sizeof(sd->skillfixcastrate)
 		+ sizeof(sd->def_set_race)
 		+ sizeof(sd->mdef_set_race)
 		+ sizeof(sd->norecover_state_race)
 		+ sizeof(sd->hp_vanish_race)
 		+ sizeof(sd->sp_vanish_race)
-		+ sizeof(sd->subskill)
-		+ sizeof(sd->skilldelay)
-		+ sizeof(sd->percent_hp_regen)
-		+ sizeof(sd->percent_sp_regen)
 	);
 
 	if (sd->bonus.speed_rate < 0)
@@ -10619,10 +10618,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_NEWMOON:
 				val2 = 7; //Hits
-				if( bl->type == BL_PC )
-					val4 |= battle_config.pc_cloak_check_type&7;
-				else
-					val4 |= battle_config.monster_cloak_check_type&7;
+				tick_time = 1000;
+				val4 = tick / tick_time;
 				break;
 			case SC_FALLINGSTAR:
 				val2 = min(8 + 2 * (1 + val1 / 2),15); //Autocast Chance
@@ -13546,6 +13543,7 @@ TIMER_FUNC(status_change_timer)
 			}
 			break;
 
+		case SC_NEWMOON:
 		case SC_KAGEMUSYA:
 			if( --(sce->val4) >= 0 ) {
 				if( !status_charge(bl,0,1) )
