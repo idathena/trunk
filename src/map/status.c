@@ -1786,10 +1786,10 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 	//FIXME: Those ain't always run if a player die if he was resurect meanwhile
 	//cf SC_REBIRTH, SC_KAIZEL, pc_dead
 	if (target->type == BL_PC) {
-		TBL_PC *sd = BL_CAST(BL_PC,target);
+		struct map_session_data *sd = map_id2sd(target->id);
 
 		if (sd->bg_id) {
-			struct battleground_data *bg;
+			struct battleground_data *bg = NULL;
 
 			if ((bg = bg_team_search(sd->bg_id)) && bg->die_event[0])
 				npc_event(sd,bg->die_event,0);
