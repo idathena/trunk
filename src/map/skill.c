@@ -16303,7 +16303,8 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 	ARR_FIND(0,MAX_PC_BONUS,i,sd->skillusesprate[i].id == skill_id);
 	if( i < MAX_PC_BONUS )
 		sp_skill_rate_bonus += sd->skillusesprate[i].val;
-	require.sp = cap_value(require.sp * sp_skill_rate_bonus / 100,0,SHRT_MAX);
+	if( sp_skill_rate_bonus != 100 )
+		require.sp = cap_value(require.sp * sp_skill_rate_bonus / 100,0,SHRT_MAX);
 
 	ARR_FIND(0,MAX_PC_BONUS,i,sd->skillusesp[i].id == skill_id);
 	if( i < MAX_PC_BONUS )
