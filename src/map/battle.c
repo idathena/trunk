@@ -4355,7 +4355,7 @@ static int battle_calc_attack_skill_ratio(struct Damage *wd, struct block_list *
 			break;
 		case SU_BITE:
 			skillratio += 100;
-			if(status_get_hp(target) <= 70 * status_get_max_hp(target) / 100)
+			if(status_get_hp(target) <= status_get_max_hp(target) * 70 / 100)
 				skillratio += 100;
 			break;
 		case SU_SCRATCH:
@@ -5218,37 +5218,40 @@ static void battle_calc_weapon_final_atk_modifiers(struct Damage *wd, struct blo
 			break;
 	}
 
-	if(sc && sc->data[SC_FUSION]) { //SC_FUSION HP penalty [Komurka]
-		unsigned int hp = sstatus->max_hp;
+	if(wd->damage > 0) {
+		if(sc && sc->data[SC_FUSION]) { //SC_FUSION HP penalty [Komurka]
+			unsigned int hp = status_get_max_hp(src);
 
-		if(sd && tsd) {
-			hp /= 13;
-			if(sstatus->hp * 100 <= sstatus->max_hp * 20)
-				hp = sstatus->hp;
-		} else
-			hp = hp * 2 / 100; //2% HP loss per hit
-		status_zap(src, hp, 0);
-	}
-
-	if(wd->damage > 0 && tsc) {
-		if((sce = tsc->data[SC_REJECTSWORD]) && (!sd ||
-			sd->weapontype1 == W_DAGGER ||
-			sd->weapontype1 == W_1HSWORD ||
-			sd->status.weapon == W_2HSWORD) && rnd()%100 < sce->val2)
-		{ //Reject Sword bugreport:4493 by Daegaladh
-			ATK_RATER(wd->damage, 50);
-			status_fix_damage(target, src, wd->damage, clif_damage(target, src, gettick(), 0, 0, wd->damage, 0, DMG_NORMAL, 0, false));
-			if(--(sce->val3) <= 0)
-				status_change_end(target, SC_REJECTSWORD, INVALID_TIMER);
+			if(status_get_hp(src) <= hp / 5)
+				hp = status_get_hp(src);
+			else {
+				if(target->type == BL_PC)
+					hp /= 13; //Aegis: MaxHP/13
+				else
+					hp /= 50; //2% HP loss per hit
+			}
+			status_zap(src, hp, 0);
 		}
-		if((sce = tsc->data[SC_CRESCENTELBOW]) && wd->flag&BF_SHORT && !status_bl_has_mode(src, MD_STATUS_IMMUNE) && rnd()%100 < sce->val2) {
-			battle_damage_temp[0] = wd->damage; //Will be used for bonus part formula [exneval]
-			clif_skill_nodamage(target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, 1);
-			skill_attack(BF_WEAPON, target, target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, gettick(), 0);
-			wd->damage = battle_damage_temp[1] / 10;
-			if(is_attack_left_handed(src, skill_id))
-				wd->damage2 = battle_damage_temp[1] / 10;
-			status_change_end(target, SC_CRESCENTELBOW, INVALID_TIMER);
+		if(tsc) {
+			if((sce = tsc->data[SC_REJECTSWORD]) && (!sd ||
+				sd->weapontype1 == W_DAGGER ||
+				sd->weapontype1 == W_1HSWORD ||
+				sd->status.weapon == W_2HSWORD) && rnd()%100 < sce->val2)
+			{ //Reject Sword bugreport:4493 by Daegaladh
+				ATK_RATER(wd->damage, 50);
+				status_fix_damage(target, src, wd->damage, clif_damage(target, src, gettick(), 0, 0, wd->damage, 0, DMG_NORMAL, 0, false));
+				if(--(sce->val3) <= 0)
+					status_change_end(target, SC_REJECTSWORD, INVALID_TIMER);
+			}
+			if((sce = tsc->data[SC_CRESCENTELBOW]) && wd->flag&BF_SHORT && !status_bl_has_mode(src, MD_STATUS_IMMUNE) && rnd()%100 < sce->val2) {
+				battle_damage_temp[0] = wd->damage; //Will be used for bonus part formula [exneval]
+				clif_skill_nodamage(target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, 1);
+				skill_attack(BF_WEAPON, target, target, src, SR_CRESCENTELBOW_AUTOSPELL, sce->val1, gettick(), 0);
+				wd->damage = battle_damage_temp[1] / 10;
+				if(is_attack_left_handed(src, skill_id))
+					wd->damage2 = battle_damage_temp[1] / 10;
+				status_change_end(target, SC_CRESCENTELBOW, INVALID_TIMER);
+			}
 		}
 	}
 
