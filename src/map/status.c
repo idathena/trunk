@@ -7724,10 +7724,19 @@ int status_get_sc_interval(enum sc_type type)
 }
 
 /**
- * Applies SC defense to a given status change.
- *
- * @see status_change_start for the expected parameters.
- * @return the adjusted duration based on flag values.
+ * Applies SC defense to a given status change
+ * This function also determines whether or not the status change will be applied
+ * @param src: Source of the status change [PC|MOB|HOM|MER|ELEM|NPC]
+ * @param bl: Target of the status change
+ * @param type: Status change (SC_*)
+ * @param rate: Initial percentage rate of affecting bl (0~10000)
+ * @param val1: Additional value (meaning depends on type)
+ * @param val2: Additional value (meaning depends on type)
+ * @param val3: Additional value (meaning depends on type)
+ * @param val4: Additional value (meaning depends on type)
+ * @param tick: Initial duration that the status change affects bl
+ * @param flag: Value which determines what parts to calculate. See e_status_change_start_flags
+ * @return adjusted duration based on flag values
  */
 int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_type type, int rate, int val1, int val2, int val3, int val4, int tick, unsigned char flag)
 {
@@ -7741,8 +7750,8 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 	int sc_def2 = 0, tick_def2 = 0;
 
 	struct status_data *status, *status_src, *b_status;
-	struct status_change *sc;
-	struct map_session_data *sd;
+	struct status_change *sc = NULL;
+	struct map_session_data *sd = NULL;
 
 	nullpo_ret(bl);
 
@@ -7781,7 +7790,8 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		}
 	}
 
-	sd = BL_CAST(BL_PC,bl);
+	rate = cap_value(rate, 0, 10000);
+	sd = map_id2sd(bl->id);
 	status = status_get_status_data(bl);
 	status_src = status_get_status_data(src);
 	b_status = status_get_base_status(bl);
@@ -12592,7 +12602,7 @@ TIMER_FUNC(status_change_timer)
 	if( (sce = sc->data[type]) ) \
 		sce->timer = add_timer(t,f,i,d); \
 	else \
-		ShowError("status_change_timer: Unexpected NULL status change id: %d data: %d\n",id,data)
+		ShowError("status_change_timer: Unexpected NULL status change type: %d id: %d\n",type,id)
 
 	switch( type ) {
 		case SC_MAXIMIZEPOWER:
@@ -12889,11 +12899,11 @@ TIMER_FUNC(status_change_timer)
 			}
 			break;
 
-		case SC_BERSERK:
+		case SC_BERSERK: //5% MaxHP drain every 15 seconds
 			if( --(sce->val4) >= 0 ) {
-				if( !status_charge(bl,sce->val2,0) )
+				if( !status_charge(bl,sce->val2,0) || status->hp <= 100 )
 					break;
-				sc_timer_next(sce->val3 + tick,status_change_timer,bl->id,data); //5% MaxHP drain every 15 seconds
+				sc_timer_next(sce->val3 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
 			break;
@@ -13296,11 +13306,11 @@ TIMER_FUNC(status_change_timer)
 			}
 			break;
 
-		case SC_SATURDAYNIGHTFEVER:
+		case SC_SATURDAYNIGHTFEVER:  //1% MaxHP/MaxSP drain every val3 seconds [Jobbie]
 			if( --(sce->val4) >= 0 ) {
-				if( !status_charge(bl,sce->val2,status->max_sp / 100) )
+				if( !status_charge(bl,sce->val2,status->max_sp / 100) || status->hp <= 100 )
 					break;
-				sc_timer_next(sce->val3 + tick,status_change_timer,bl->id,data); //1% MaxHP/MaxSP drain every val3 seconds [Jobbie]
+				sc_timer_next(sce->val3 + tick,status_change_timer,bl->id,data);
 				return 0;
 			}
 			break;
@@ -13432,9 +13442,9 @@ TIMER_FUNC(status_change_timer)
 			}
 			break;
 
-		case SC_RAISINGDRAGON:
+		case SC_RAISINGDRAGON: //Officially tested its 1% HP drain [Jobbie]
 			if( --(sce->val4) >= 0 ) {
-				if( !status_charge(bl,status->max_hp / 100,0) ) //Officially tested its 1% HP drain [Jobbie]
+				if( !status_charge(bl,status->max_hp / 100,0) || status->hp <= 1000 )
 					break;
 				sc_timer_next(5000 + tick,status_change_timer,bl->id,data);
 				return 0;
