@@ -5175,22 +5175,25 @@ static void battle_calc_weapon_final_atk_modifiers(struct Damage *wd, struct blo
 #endif
 	int bonus_damage = 0;
 
-	if(sc) {
-		if(sc->data[SC_FUSION]) { //SC_FUSION HP penalty [Komurka]
-			unsigned int hp = sstatus->max_hp;
+#ifdef ADJUST_SKILL_DAMAGE
+	if((skill_damage = battle_skill_damage(src, target, skill_id)))
+		ATK_ADDRATE(wd->damage, wd->damage2, skill_damage);
+#endif
 
-			if(sd && tsd) {
-				hp /= 13;
-				if(sstatus->hp * 100 <= sstatus->max_hp * 20)
-					hp = sstatus->hp;
-			} else
-				hp = hp * 2 / 100; //2% HP loss per hit
-			status_zap(src, hp, 0);
-		}
+	if(sd) {
+#ifdef RENEWAL
+		if(is_attack_critical(wd, src, target, 0, 0, false))
+			ATK_ADDRATE(wd->damage, wd->damage2, 40 + sd->bonus.crit_atk_rate);
+#endif
+		if((bonus_damage = pc_skillatk_bonus(sd, skill_id)))
+			ATK_ADDRATE(wd->damage, wd->damage2, bonus_damage);
 	}
 
-	if(skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
-		status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
+	if(tsd && (bonus_damage = pc_sub_skillatk_bonus(tsd, skill_id)))
+		ATK_ADDRATE(wd->damage, wd->damage2, -bonus_damage);
+
+	if((bonus_damage = battle_adjust_skill_damage(src->m, skill_id)))
+		ATK_RATE(wd->damage, wd->damage2, bonus_damage);
 
 	switch(skill_id) {
 		case NC_AXETORNADO:
@@ -5215,25 +5218,17 @@ static void battle_calc_weapon_final_atk_modifiers(struct Damage *wd, struct blo
 			break;
 	}
 
-#ifdef ADJUST_SKILL_DAMAGE
-	if((skill_damage = battle_skill_damage(src, target, skill_id)))
-		ATK_ADDRATE(wd->damage, wd->damage2, skill_damage);
-#endif
+	if(sc && sc->data[SC_FUSION]) { //SC_FUSION HP penalty [Komurka]
+		unsigned int hp = sstatus->max_hp;
 
-	if(sd) {
-#ifdef RENEWAL
-		if(is_attack_critical(wd, src, target, 0, 0, false))
-			ATK_ADDRATE(wd->damage, wd->damage2, 40 + sd->bonus.crit_atk_rate);
-#endif
-		if((bonus_damage = pc_skillatk_bonus(sd, skill_id)))
-			ATK_ADDRATE(wd->damage, wd->damage2, bonus_damage);
+		if(sd && tsd) {
+			hp /= 13;
+			if(sstatus->hp * 100 <= sstatus->max_hp * 20)
+				hp = sstatus->hp;
+		} else
+			hp = hp * 2 / 100; //2% HP loss per hit
+		status_zap(src, hp, 0);
 	}
-
-	if(tsd && (bonus_damage = pc_sub_skillatk_bonus(tsd, skill_id)))
-		ATK_ADDRATE(wd->damage, wd->damage2, -bonus_damage);
-
-	if((bonus_damage = battle_adjust_skill_damage(src->m, skill_id)))
-		ATK_RATE(wd->damage, wd->damage2, bonus_damage);
 
 	if(wd->damage > 0 && tsc) {
 		if((sce = tsc->data[SC_REJECTSWORD]) && (!sd ||
@@ -5256,6 +5251,9 @@ static void battle_calc_weapon_final_atk_modifiers(struct Damage *wd, struct blo
 			status_change_end(target, SC_CRESCENTELBOW, INVALID_TIMER);
 		}
 	}
+
+	if(skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
+		status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
 }
 
 /*====================================================
