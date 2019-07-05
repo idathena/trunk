@@ -240,7 +240,9 @@ int skill_get_unit_bl_target(uint16 skill_id)                    { skill_get(ski
 int skill_get_unit_flag(uint16 skill_id)                         { skill_get(skill_db[skill_id].unit_flag, skill_id); }
 int skill_get_unit_layout_type(uint16 skill_id, uint16 skill_lv) { skill_get2(skill_db[skill_id].unit_layout_type[skill_lv - 1], skill_id, skill_lv); }
 int skill_get_cooldown(uint16 skill_id, uint16 skill_lv)         { skill_get2(skill_db[skill_id].cooldown[skill_lv - 1], skill_id, skill_lv); }
+#ifdef RENEWAL_CAST
 int skill_get_fixed_cast(uint16 skill_id, uint16 skill_lv)       { skill_get2(skill_db[skill_id].fixed_cast[skill_lv - 1], skill_id, skill_lv); }
+#endif
 //Skill requirements
 int skill_get_hp(uint16 skill_id, uint16 skill_lv)         { skill_get2(skill_db[skill_id].require.hp[skill_lv - 1], skill_id, skill_lv); }
 int skill_get_mhp(uint16 skill_id, uint16 skill_lv)        { skill_get2(skill_db[skill_id].require.mhp[skill_lv - 1], skill_id, skill_lv); }
@@ -16294,13 +16296,13 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 		require.sp += (status->sp * sp_rate) / 100;
 	else
 		require.sp += (status->max_sp * (-sp_rate)) / 100;
+
 	if( sd->dsprate != 100 )
 		require.sp = require.sp * sd->dsprate / 100;
 
 	ARR_FIND(0,MAX_PC_BONUS,i,sd->skillusesprate[i].id == skill_id);
 	if( i < MAX_PC_BONUS )
 		sp_skill_rate_bonus += sd->skillusesprate[i].val;
-
 	require.sp = cap_value(require.sp * sp_skill_rate_bonus / 100,0,SHRT_MAX);
 
 	ARR_FIND(0,MAX_PC_BONUS,i,sd->skillusesp[i].id == skill_id);
@@ -16821,7 +16823,7 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 		time = time * (1 - sqrt(((float)(status_get_dex(bl) * 2 + status_get_int(bl)) / battle_config.vcast_stat_scale)));
 
 	time = time * (1 - (float)min(reduce_ct_r, 100) / 100);
-	time = max(time, 0) + (1 - (float)min(fixcast_r, 100) / 100) * max(fixed, 0); //Underflow checking/capping
+	time = max(time + (1 - (float)min(fixcast_r, 100) / 100) * max(fixed, 0), 0); //Underflow checking/capping
 
 	return (int)time;
 }

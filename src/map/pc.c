@@ -4060,7 +4060,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 			break;
 		case SP_SKILL_USE_SP_RATE:
 			if(sd->state.lr_flag != 2)
-				pc_bonus_itembonus(sd->skillusesprate, type, type2, val, true);
+				pc_bonus_itembonus(sd->skillusesprate, type, type2, val, false);
 			break;
 		case SP_SKILL_DELAY:
 			if(sd->state.lr_flag != 2)
@@ -4073,11 +4073,11 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 #ifdef RENEWAL_CAST
 		case SP_VARCASTRATE:
 			if(sd->state.lr_flag != 2)
-				pc_bonus_itembonus(sd->skillcastrate, type, type2, -val, true); //Send inversed value here
+				pc_bonus_itembonus(sd->skillcastrate, type, type2, -val, false); //Send inversed value here
 			break;
 		case SP_FIXCASTRATE:
 			if(sd->state.lr_flag != 2)
-				pc_bonus_itembonus(sd->skillfixcastrate, type, type2, -val, true); //Send inversed value here
+				pc_bonus_itembonus(sd->skillfixcastrate, type, type2, -val, false); //Send inversed value here
 			break;
 		case SP_SKILL_VARIABLECAST:
 			if(sd->state.lr_flag != 2)
@@ -4090,7 +4090,7 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 #else
 		case SP_CASTRATE:
 			if(sd->state.lr_flag != 2)
-				pc_bonus_itembonus(sd->skillcastrate, type, type2, val, true);
+				pc_bonus_itembonus(sd->skillcastrate, type, type2, val, false);
 			break;
 #endif
 		case SP_SKILL_USE_SP:
