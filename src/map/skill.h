@@ -360,7 +360,7 @@ int skill_get_castcancel(uint16 skill_id);
 int skill_get_maxcount(uint16 skill_id, uint16 skill_lv);
 int skill_get_blewcount(uint16 skill_id, uint16 skill_lv);
 int skill_get_unit_flag(uint16 skill_id);
-int skill_get_cooldown(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
+int skill_get_cooldown(uint16 skill_id, uint16 skill_lv);
 int skill_get_unit_target(uint16 skill_id);
 int skill_get_inf3(uint16 skill_id);
 

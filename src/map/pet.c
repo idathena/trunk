@@ -353,13 +353,28 @@ int pet_return_egg(struct map_session_data *sd, struct pet_data *pd)
 	if (i != MAX_INVENTORY) {
 		sd->inventory.u.items_inventory[i].attribute = 0;
 		sd->inventory.u.items_inventory[i].bound = BOUND_NONE;
+	} else { //The pet egg wasn't found: it was probably hatched with the old system that deleted the egg
+		struct item tmp_item;
+		int flag;
+
+		memset(&tmp_item,0,sizeof(tmp_item));
+		tmp_item.nameid = pd->petDB->EggID;
+		tmp_item.identify = 1;
+		tmp_item.card[0] = CARD0_PET;
+		tmp_item.card[1] = GetWord(pd->pet.pet_id,0);
+		tmp_item.card[2] = GetWord(pd->pet.pet_id,1);
+		tmp_item.card[3] = pd->pet.rename_flag;
+		if ((flag = pc_additem(sd,&tmp_item,1,LOG_TYPE_OTHER))) {
+			clif_additem(sd,0,0,flag);
+			map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0,false);
+		}
 	}
 
-	pd->pet.incubate = 1;
 #if PACKETVER >= 20180704
 	clif_inventorylist(sd);
 	clif_send_petdata(sd,pd,6,0);
 #endif
+	pd->pet.incubate = 1;
 	unit_free(&pd->bl,CLR_OUTSIGHT);
 	status_calc_pc(sd,SCO_NONE);
 	sd->status.pet_id = 0;
@@ -639,7 +654,7 @@ bool pet_get_egg(int account_id, short pet_class, int pet_id)
 	tmp_item.card[0] = CARD0_PET;
 	tmp_item.card[1] = GetWord(pet_id,0);
 	tmp_item.card[2] = GetWord(pet_id,1);
-	tmp_item.card[3] = 0; //New pets are not named.
+	tmp_item.card[3] = 0; //New pets are not named
 	if((ret = pc_additem(sd,&tmp_item,1,LOG_TYPE_PICKDROP_PLAYER))) {
 		clif_additem(sd,0,0,ret);
 		map_addflooritem(&tmp_item,1,sd->bl.m,sd->bl.x,sd->bl.y,0,0,0,0,0,false);

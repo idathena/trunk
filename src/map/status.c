@@ -1268,13 +1268,6 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_GEFFEN_MAGIC3] |= SCB_ALL;
 	StatusChangeFlagTable[SC_GVG_GIANT] |= SCB_ALL;
 	StatusChangeFlagTable[SC_GVG_GOLEM] |= SCB_ALL;
-	StatusChangeFlagTable[SC_GVG_STUN] |= SCB_ALL;
-	StatusChangeFlagTable[SC_GVG_STONE] |= SCB_ALL;
-	StatusChangeFlagTable[SC_GVG_FREEZ] |= SCB_ALL;
-	StatusChangeFlagTable[SC_GVG_SLEEP] |= SCB_ALL;
-	StatusChangeFlagTable[SC_GVG_CURSE] |= SCB_ALL;
-	StatusChangeFlagTable[SC_GVG_SILENCE] |= SCB_ALL;
-	StatusChangeFlagTable[SC_GVG_BLIND] |= SCB_ALL;
 	StatusChangeFlagTable[SC_FENRIR_CARD] |= SCB_MATK;
 	StatusChangeFlagTable[SC_SWORDCLAN] |= SCB_STR|SCB_VIT|SCB_MAXHP|SCB_MAXSP;
 	StatusChangeFlagTable[SC_ARCWANDCLAN] |= SCB_INT|SCB_DEX|SCB_MAXHP|SCB_MAXSP;
@@ -1654,6 +1647,7 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 			status_change_end(target, SC_CAMOUFLAGE, INVALID_TIMER);
 			status_change_end(target, SC_SITDOWN_FORCE, INVALID_TIMER);
 			status_change_end(target, SC_BANANA_BOMB_SITDOWN, INVALID_TIMER);
+			status_change_end(target, SC_NEWMOON, INVALID_TIMER);
 			status_change_end(target, SC_SUHIDE, INVALID_TIMER);
 			//Endure count is only reduced by non-players on non-gvg maps
 			if ((sce = sc->data[SC_ENDURE]) && !sce->val4 && //val4 signals infinite endure [Skotlex]
@@ -1674,8 +1668,6 @@ int status_damage(struct block_list *src, struct block_list *target, int64 in_hp
 				status_change_end(target, SC_CLOAKINGEXCEED, INVALID_TIMER);
 			if (sc->data[SC_KAGEMUSYA] && --(sc->data[SC_KAGEMUSYA]->val2) <= 0)
 				status_change_end(target, SC_KAGEMUSYA, INVALID_TIMER);
-			if (sc->data[SC_NEWMOON] && --(sc->data[SC_NEWMOON]->val2) <= 0)
-				status_change_end(target, SC_NEWMOON, INVALID_TIMER);
 		}
 
 		if (target->type == BL_PC)
@@ -3440,7 +3432,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->subrace2)
 		+ sizeof(sd->subclass)
 		+ sizeof(sd->subsize)
-		+ sizeof(sd->reseff)
 		+ sizeof(sd->weapon_coma_ele)
 		+ sizeof(sd->weapon_coma_race)
 		+ sizeof(sd->weapon_coma_class)
@@ -3454,6 +3445,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->shield_addsize)
 		+ sizeof(sd->magic_adddefele)
 		+ sizeof(sd->magic_addrace)
+		+ sizeof(sd->magic_addrace2)
 		+ sizeof(sd->magic_addclass)
 		+ sizeof(sd->magic_addsize)
 		+ sizeof(sd->magic_atkele)
@@ -3467,7 +3459,6 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->sp_gain_race)
 		+ sizeof(sd->dropaddrace)
 		+ sizeof(sd->dropaddclass)
-		+ sizeof(sd->magic_addrace2)
 		);
 
 	memset(&sd->right_weapon.overrefine, 0, sizeof(sd->right_weapon) - sizeof(sd->right_weapon.atkmods));
@@ -3523,37 +3514,39 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->skillusesp)
 		+ sizeof(sd->skillheal)
 		+ sizeof(sd->skillheal2)
+		+ sizeof(sd->skillblown)
+		+ sizeof(sd->skillcastrate)
+		+ sizeof(sd->skillfixcastrate)
+		+ sizeof(sd->subskill)
+		+ sizeof(sd->skillvarcast)
+		+ sizeof(sd->skillfixcast)
+		+ sizeof(sd->skillcooldown)
+		+ sizeof(sd->skilldelay)
+		+ sizeof(sd->add_def)
+		+ sizeof(sd->add_mdef)
+		+ sizeof(sd->add_mdmg)
+		+ sizeof(sd->reseff)
+		+ sizeof(sd->itemhealrate)
+		+ sizeof(sd->itemgrouphealrate)
+		+ sizeof(sd->add_drop)
+		+ sizeof(sd->subele2)
 		+ sizeof(sd->hp_loss)
 		+ sizeof(sd->sp_loss)
 		+ sizeof(sd->hp_regen)
 		+ sizeof(sd->sp_regen)
-		+ sizeof(sd->skillblown)
-		+ sizeof(sd->skillcast)
-		+ sizeof(sd->add_def)
-		+ sizeof(sd->add_mdef)
-		+ sizeof(sd->add_mdmg)
-		+ sizeof(sd->add_drop)
-		+ sizeof(sd->itemhealrate)
-		+ sizeof(sd->subele2)
-		+ sizeof(sd->skillcooldown)
-		+ sizeof(sd->skillfixcast)
-		+ sizeof(sd->skillvarcast)
-		+ sizeof(sd->skillfixcastrate)
+		+ sizeof(sd->percent_hp_regen)
+		+ sizeof(sd->percent_sp_regen)
 		+ sizeof(sd->def_set_race)
 		+ sizeof(sd->mdef_set_race)
 		+ sizeof(sd->norecover_state_race)
 		+ sizeof(sd->hp_vanish_race)
 		+ sizeof(sd->sp_vanish_race)
-		+ sizeof(sd->subskill)
-		+ sizeof(sd->skilldelay)
 	);
 
 	if (sd->bonus.speed_rate < 0)
 		clif_status_load(&sd->bl, SI_MOVHASTE_INFINITY, 0);
 
 	memset(&sd->bonus, 0, sizeof(sd->bonus));
-
-	pc_itemgrouphealrate_clear(sd);
 
 	//Autobonus
 	pc_delautobonus(sd, sd->autobonus, true);
@@ -4257,7 +4250,7 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			sd->subele[ELE_NEUTRAL] += sc->data[SC_MTF_MLEATKED]->val1;
 		if (sc->data[SC_MTF_CRIDAMAGE])
 			sd->bonus.crit_atk_rate += sc->data[SC_MTF_CRIDAMAGE]->val1;
-		//Geffen Magic Tour. statuses
+		//GMT statuses
 		if (sc->data[SC_GEFFEN_MAGIC1]) {
 			sd->right_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC1]->val1;
 			sd->left_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC1]->val1;
@@ -4266,28 +4259,16 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 			sd->magic_addrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC2]->val1;
 		if (sc->data[SC_GEFFEN_MAGIC3])
 			sd->subrace[RC_DEMIHUMAN] += sc->data[SC_GEFFEN_MAGIC3]->val1;
-		if (sc->data[SC_GVG_GIANT]) {
-			sd->right_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GIANT]->val3;
-			sd->left_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GIANT]->val3;
-			sd->magic_addrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GIANT]->val3;
+		//WOE TE statuses
+		if (map_flag_vs(sd->bl.m)) {
+			if (sc->data[SC_GVG_GIANT]) {
+				sd->right_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GIANT]->val3;
+				sd->left_weapon.addrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GIANT]->val3;
+				sd->magic_addrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GIANT]->val3;
+			}
+			if (sc->data[SC_GVG_GOLEM])
+				sd->subrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GOLEM]->val4;
 		}
-		//Training Edition WOE statuses
-		if (sc->data[SC_GVG_GOLEM])
-			sd->subrace[RC_DEMIHUMAN] += sc->data[SC_GVG_GOLEM]->val3;
-		if (sc->data[SC_GVG_STUN])
-			sd->reseff[SC_STUN] = 10000;
-		if (sc->data[SC_GVG_STONE])
-			sd->reseff[SC_STONE] = 10000;
-		if (sc->data[SC_GVG_FREEZ])
-			sd->reseff[SC_FREEZE] = 10000;
-		if (sc->data[SC_GVG_SLEEP])
-			sd->reseff[SC_SLEEP] = 10000;
-		if (sc->data[SC_GVG_CURSE])
-			sd->reseff[SC_CURSE] = 10000;
-		if (sc->data[SC_GVG_SILENCE])
-			sd->reseff[SC_SILENCE] = 10000;
-		if (sc->data[SC_GVG_BLIND])
-			sd->reseff[SC_BLIND] = 10000;
 	}
 	status_cpy(&sd->battle_status, status);
 
@@ -8055,9 +8036,11 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		}
 		if (sd) {
 			int bonus = 0;
+			uint8 i;
 
-			if (sd->reseff[type] && type > SC_NONE && type < SC_MAX)
-				bonus += rate * sd->reseff[type] / 10000;
+			ARR_FIND(0, MAX_PC_BONUS, i, sd->reseff[i].id == type);
+			if (i < MAX_PC_BONUS)
+				bonus += rate * sd->reseff[i].val / 10000;
 			if (sd->sc.data[SC_COMMONSC_RESIST] && type >= SC_COMMON_MIN && type <= SC_COMMON_MAX)
 				bonus += rate * sd->sc.data[SC_COMMONSC_RESIST]->val1 / 100;
 			rate -= bonus; //Item resistance (only applies to rate%)
@@ -8365,18 +8348,22 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				return 0;
 			break;
 		case SC_STONE:
-			if( sc->data[SC_POWER_OF_GAIA] )
+			if( sc->data[SC_POWER_OF_GAIA] || sc->data[SC_GVG_STONE] )
 				return 0;
 		//Fall through
 		case SC_FREEZE:
 			if( undead_flag && !(flag&SCFLAG_NOAVOID) )
 				return 0; //Undead are immune to Stone/Freeze
-			if( type == SC_FREEZE && sc->data[SC_WARMER] )
+			if( type == SC_FREEZE && (sc->data[SC_WARMER] || sc->data[SC_GVG_FREEZ]) )
 				return 0; //Warmer makes you immune to freezing
 		//Fall through
 		case SC_STUN:
 		case SC_SLEEP:
 		case SC_BURNING:
+			if( type == SC_STUN && sc->data[SC_GVG_STUN] )
+				return 0;
+			if( type == SC_SLEEP && sc->data[SC_GVG_SLEEP] )
+				return 0;
 			if( type == SC_BURNING && sc->data[SC_FREEZING] )
 				return 0; //Burning can't be given to someone in freezing status
 		//Fall through
@@ -8389,8 +8376,16 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 			if( (type == SC_FREEZING && sc->data[SC_BURNING]) || sc->data[SC_WARMER] )
 				return 0; //Burning makes you immune to freezing
 			break;
+		case SC_CURSE:
+			if( sc->data[SC_GVG_CURSE] )
+				return 0;
+			break;
+		case SC_SILENCE:
+			if( sc->data[SC_GVG_SILENCE] )
+				return 0;
+			break;
 		case SC_BLIND:
-			if( sc->data[SC_FEAR] )
+			if( sc->data[SC_FEAR] || sc->data[SC_GVG_BLIND] )
 				return 0;
 			break;
 		case SC_BLEEDING:
@@ -10617,10 +10612,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				break;
 			case SC_NEWMOON:
 				val2 = 7; //Hits
-				if( bl->type == BL_PC )
-					val4 |= battle_config.pc_cloak_check_type&7;
-				else
-					val4 |= battle_config.monster_cloak_check_type&7;
+				tick_time = 1000;
+				val4 = tick / tick_time;
 				break;
 			case SC_FALLINGSTAR:
 				val2 = min(8 + 2 * (1 + val1 / 2),15); //Autocast Chance
@@ -13544,6 +13537,7 @@ TIMER_FUNC(status_change_timer)
 			}
 			break;
 
+		case SC_NEWMOON:
 		case SC_KAGEMUSYA:
 			if( --(sce->val4) >= 0 ) {
 				if( !status_charge(bl,0,1) )
