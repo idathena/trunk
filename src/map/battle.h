@@ -277,7 +277,7 @@ extern struct Battle_Config
 	int max_hp;
 	int max_sp;
 	int max_lv, aura_lv;
-	int max_parameter, max_baby_parameter;
+	int max_parameter, max_baby_parameter, max_parameter_renewal_jobs, max_baby_parameter_renewal_jobs;	
 	int max_cart_weight;
 	int skill_log;
 	int battle_log;
@@ -532,11 +532,6 @@ extern struct Battle_Config
 	int bg_misc_damage_rate;
 	int bg_flee_penalty;
 
-	int max_third_parameter;
-	int max_baby_third_parameter;
-	int max_trans_parameter;
-	int max_third_trans_parameter;
-	int max_extended_parameter;
 	int max_third_aspd;
 	int vcast_stat_scale;
 
@@ -637,7 +632,6 @@ extern struct Battle_Config
 	int feature_roulette;
 	int monster_hp_bars_info;
 	int mvp_exp_reward_message;
-	int max_summoner_parameter;
 	int mob_eye_range_bonus; //Vulture's Eye and Snake's Eye range bonus
 	int crimsonrock_knockback;
 	int tarotcard_equal_chance; //Official or equal chance for each card

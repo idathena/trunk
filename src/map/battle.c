@@ -600,11 +600,9 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				cardfix = cardfix * (100 + sd->magic_addsize[tstatus->size] + sd->magic_addsize[SZ_ALL]) / 100;
 				cardfix = cardfix * (100 + sd->magic_addrace2[t_race2]) / 100;
 				cardfix = cardfix * (100 + sd->magic_addclass[tstatus->class_] + sd->magic_addclass[CLASS_ALL]) / 100;
-				for( i = 0; i < ARRAYLENGTH(sd->add_mdmg) && sd->add_mdmg[i].rate; i++ ) {
-					if( sd->add_mdmg[i].class_ != t_class )
-						continue;
-					cardfix = cardfix * (100 + sd->add_mdmg[i].rate) / 100;
-				}
+				ARR_FIND(0, MAX_PC_BONUS, i, sd->add_mdmg[i].id == t_class);
+				if( i < MAX_PC_BONUS )
+					cardfix = cardfix * (100 + sd->add_mdmg[i].val) / 100;
 				APPLY_CARDFIX(damage,cardfix);
 			} else if( tsd && !(nk&NK_NO_CARDFIX_DEF) && !(left&1) ) { //Affected by target DEF bonuses
 				cardfix = 1000; //Reset var for target
@@ -628,11 +626,9 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				cardfix = cardfix * (100 - tsd->subrace2[s_race2]) / 100;
 				cardfix = cardfix * (100 - (tsd->subrace[sstatus->race] + tsd->subrace[RC_ALL])) / 100;
 				cardfix = cardfix * (100 - (tsd->subclass[sstatus->class_] + tsd->subclass[CLASS_ALL])) / 100;
-				for( i = 0; i < ARRAYLENGTH(tsd->add_mdef) && tsd->add_mdef[i].rate; i++ ) {
-					if( tsd->add_mdef[i].class_ != s_class )
-						continue;
-					cardfix = cardfix * (100 - tsd->add_mdef[i].rate) / 100;
-				}
+				ARR_FIND(0, MAX_PC_BONUS, i, tsd->add_mdef[i].id == s_class);
+				if( i < MAX_PC_BONUS )
+					cardfix = cardfix * (100 - tsd->add_mdef[i].val) / 100;
 #ifndef RENEWAL //It was discovered that ranged defense also counts vs magic! [Skotlex]
 				if( flag&BF_SHORT )
 					cardfix = cardfix * (100 - tsd->bonus.near_attack_def_rate) / 100;
@@ -672,11 +668,9 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 					cardfix = cardfix * (100 + sd->right_weapon.addrace2[t_race2]) / 100;
 					cardfix = cardfix * (100 + sd->right_weapon.addclass[tstatus->class_] + sd->arrow_addclass[tstatus->class_] +
 						sd->right_weapon.addclass[CLASS_ALL] + sd->arrow_addclass[CLASS_ALL]) / 100;
-					for( i = 0; i < ARRAYLENGTH(sd->right_weapon.add_dmg) && sd->right_weapon.add_dmg[i].rate; i++ ) {
-						if( sd->right_weapon.add_dmg[i].class_ != t_class )
-							continue;
-						cardfix = cardfix * (100 + sd->right_weapon.add_dmg[i].rate) / 100;
-					}
+					ARR_FIND(0, MAX_PC_BONUS, i, sd->right_weapon.add_dmg[i].id == t_class);
+					if( i < MAX_PC_BONUS )
+						cardfix = cardfix * (100 + sd->right_weapon.add_dmg[i].val) / 100;
 				} else { //Melee attack
 					uint16 lv;
 
@@ -704,11 +698,9 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 						cardfix = cardfix * (100 + sd->right_weapon.addrace2[t_race2]) / 100;
 						cardfix = cardfix * (100 + sd->right_weapon.addclass[tstatus->class_] + sd->shield_addclass[tstatus->class_] +
 							sd->right_weapon.addclass[CLASS_ALL] + sd->shield_addclass[CLASS_ALL]) / 100;
-						for( i = 0; i < ARRAYLENGTH(sd->right_weapon.add_dmg) && sd->right_weapon.add_dmg[i].rate; i++ ) {
-							if( sd->right_weapon.add_dmg[i].class_ != t_class )
-								continue;
-							cardfix = cardfix * (100 + sd->right_weapon.add_dmg[i].rate) / 100;
-						}
+						ARR_FIND(0, MAX_PC_BONUS, i, sd->right_weapon.add_dmg[i].id == t_class);
+						if( i < MAX_PC_BONUS )
+							cardfix = cardfix * (100 + sd->right_weapon.add_dmg[i].val) / 100;
 						if( left&1 ) { //Left-handed weapon
 							cardfix_ = cardfix_ * (100 + sd->left_weapon.addrace[tstatus->race] + sd->left_weapon.addrace[RC_ALL]) / 100;
 							if( !(nk&NK_NO_ELEFIX) ) { //Affected by Element modifier bonuses
@@ -728,11 +720,9 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 							cardfix_ = cardfix_ * (100 + sd->left_weapon.addsize[tstatus->size] + sd->left_weapon.addsize[SZ_ALL]) / 100;
 							cardfix_ = cardfix_ * (100 + sd->left_weapon.addrace2[t_race2]) / 100;
 							cardfix_ = cardfix_ * (100 + sd->left_weapon.addclass[tstatus->class_] + sd->left_weapon.addclass[CLASS_ALL]) / 100;
-							for( i = 0; i < ARRAYLENGTH(sd->left_weapon.add_dmg) && sd->left_weapon.add_dmg[i].rate; i++ ) {
-								if( sd->left_weapon.add_dmg[i].class_ != t_class )
-									continue;
-								cardfix_ = cardfix_ * (100 + sd->left_weapon.add_dmg[i].rate) / 100;
-							}
+							ARR_FIND(0, MAX_PC_BONUS, i, sd->left_weapon.add_dmg[i].id == t_class);
+							if( i < MAX_PC_BONUS )
+								cardfix_ = cardfix_ * (100 + sd->left_weapon.add_dmg[i].val) / 100;
 						}
 					} else { //Calculates right & left hand weapon as unity
 						int add_dmg = 0;
@@ -768,16 +758,12 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 						cardfix = cardfix * (100 + sd->right_weapon.addrace2[t_race2] + sd->left_weapon.addrace2[t_race2]) / 100;
 						cardfix = cardfix * (100 + sd->right_weapon.addclass[tstatus->class_] + sd->shield_addclass[tstatus->class_] + sd->left_weapon.addclass[tstatus->class_] +
 							sd->right_weapon.addclass[CLASS_ALL] + sd->shield_addclass[CLASS_ALL] + sd->left_weapon.addclass[CLASS_ALL]) / 100;
-						for( i = 0; i < ARRAYLENGTH(sd->right_weapon.add_dmg) && sd->right_weapon.add_dmg[i].rate; i++ ) {
-							if( sd->right_weapon.add_dmg[i].class_ != t_class )
-								continue;
-							add_dmg += sd->right_weapon.add_dmg[i].rate;
-						}
-						for( i = 0; i < ARRAYLENGTH(sd->left_weapon.add_dmg) && sd->left_weapon.add_dmg[i].rate; i++ ) {
-							if( sd->left_weapon.add_dmg[i].class_ != t_class )
-								continue;
-							add_dmg += sd->left_weapon.add_dmg[i].rate;
-						}
+						ARR_FIND(0, MAX_PC_BONUS, i, sd->right_weapon.add_dmg[i].id == t_class);
+						if( i < MAX_PC_BONUS )
+							add_dmg += sd->right_weapon.add_dmg[i].val;
+						ARR_FIND(0, MAX_PC_BONUS, i, sd->left_weapon.add_dmg[i].id == t_class);
+						if( i < MAX_PC_BONUS )
+							add_dmg += sd->left_weapon.add_dmg[i].val;
 						cardfix = cardfix * (100 + add_dmg) / 100;
 					}
 					//Adv. Katar Mastery functions similar to a +%ATK card on official [helvetica]
@@ -828,11 +814,9 @@ int battle_calc_cardfix(int attack_type, struct block_list *src, struct block_li
 				cardfix = cardfix * (100 - tsd->subrace2[s_race2]) / 100;
 				cardfix = cardfix * (100 - (tsd->subrace[sstatus->race] + tsd->subrace[RC_ALL])) / 100;
 				cardfix = cardfix * (100 - (tsd->subclass[sstatus->class_] + tsd->subclass[CLASS_ALL])) / 100;
-				for( i = 0; i < ARRAYLENGTH(tsd->add_def) && tsd->add_def[i].rate; i++ ) {
-					if( tsd->add_def[i].class_ != s_class )
-						continue;
-					cardfix = cardfix * (100 - tsd->add_def[i].rate) / 100;
-				}
+				ARR_FIND(0, MAX_PC_BONUS, i, tsd->add_def[i].id == s_class);
+				if( i < MAX_PC_BONUS )
+					cardfix = cardfix * (100 - tsd->add_def[i].val) / 100;
 				if( flag&BF_SHORT )
 					cardfix = cardfix * (100 - tsd->bonus.near_attack_def_rate) / 100;
 				else if( skill_id != SR_GATEOFHELL )
@@ -2047,13 +2031,11 @@ static int battle_blewcount_bonus(struct map_session_data *sd, uint16 skill_id)
 {
 	uint8 i;
 
-	if(!sd->skillblown[0].id)
-		return 0;
-
 	//Apply the bonus blewcount [Skotlex]
-	for(i = 0; i < ARRAYLENGTH(sd->skillblown) && sd->skillblown[i].id; i++)
-		if(sd->skillblown[i].id == skill_id)
-			return sd->skillblown[i].val;
+	ARR_FIND(0, MAX_PC_BONUS, i, sd->skillblown[i].id == skill_id);
+	if(i < MAX_PC_BONUS)
+		return sd->skillblown[i].val;
+
 	return 0;
 }
 
@@ -8353,6 +8335,8 @@ static const struct _battle_data {
 	{ "max_cart_weight",                    &battle_config.max_cart_weight,                 8000,   100,    1000000,        },
 	{ "max_parameter",                      &battle_config.max_parameter,                   99,     10,     SHRT_MAX,       },
 	{ "max_baby_parameter",                 &battle_config.max_baby_parameter,              80,     10,     SHRT_MAX,       },
+	{ "max_parameter_renewal_jobs",         &battle_config.max_parameter_renewal_jobs,      130,    10,     SHRT_MAX,       },
+	{ "max_baby_parameter_renewal_jobs",    &battle_config.max_baby_parameter_renewal_jobs, 117,    10,     SHRT_MAX,       },
 	{ "max_def",                            &battle_config.max_def,                         99,     0,      INT_MAX,        },
 	{ "over_def_bonus",                     &battle_config.over_def_bonus,                  0,      0,      1000,           },
 	{ "skill_log",                          &battle_config.skill_log,                       BL_NUL, BL_NUL, BL_ALL,         },
@@ -8604,11 +8588,6 @@ static const struct _battle_data {
 	{ "bg_magic_attack_damage_rate",        &battle_config.bg_magic_damage_rate,            60,     0,      INT_MAX,        },
 	{ "bg_misc_attack_damage_rate",         &battle_config.bg_misc_damage_rate,             60,     0,      INT_MAX,        },
 	{ "bg_flee_penalty",                    &battle_config.bg_flee_penalty,                 20,     0,      INT_MAX,        },
-	{ "max_third_parameter",                &battle_config.max_third_parameter,             130,    10,     SHRT_MAX,       },
-	{ "max_baby_third_parameter",           &battle_config.max_baby_third_parameter,        117,    10,     SHRT_MAX,       },
-	{ "max_trans_parameter",                &battle_config.max_trans_parameter,             99,     10,     SHRT_MAX,       },
-	{ "max_third_trans_parameter",          &battle_config.max_third_trans_parameter,       130,    10,     SHRT_MAX,       },
-	{ "max_extended_parameter",             &battle_config.max_extended_parameter,          125,    10,     SHRT_MAX,       },
 	{ "skill_amotion_leniency",             &battle_config.skill_amotion_leniency,          0,      0,      300,            },
 	{ "mvp_tomb_enabled",                   &battle_config.mvp_tomb_enabled,                1,      0,      1,              },
 	{ "mvp_tomb_delay",                     &battle_config.mvp_tomb_delay,               9000,      0,      INT_MAX,        },
@@ -8708,7 +8687,6 @@ static const struct _battle_data {
 	{ "feature.roulette",                   &battle_config.feature_roulette,                1,      0,      1,              },
 	{ "monster_hp_bars_info",               &battle_config.monster_hp_bars_info,            1,      0,      1,              },
 	{ "mvp_exp_reward_message",             &battle_config.mvp_exp_reward_message,          0,      0,      1,              },
-	{ "max_summoner_parameter",             &battle_config.max_summoner_parameter,          120,    10,     SHRT_MAX,       },
 	{ "monster_eye_range_bonus",            &battle_config.mob_eye_range_bonus,             0,      0,      10,             },
 	{ "crimsonrock_knockback",              &battle_config.crimsonrock_knockback,           1,      0,      1,              },
 	{ "tarotcard_equal_chance",             &battle_config.tarotcard_equal_chance,          0,      0,      1,              },

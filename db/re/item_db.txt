@@ -6950,7 +6950,7 @@
 12870,GLAST_HPSP,GLAST_HPSP,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_ENHANCE; bonus_script "{ bonus bMaxHP,10000; bonus bMaxSP,1000; }",30,15,1,SI_GLASTHEIM_HPSP; },{},{}
 12873,TE_Potion_Box,TE Potion Box,18,0,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 11558,10; },{},{}
 12874,Frost_Giant_Blood,Frost Giant Blood,2,0,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_POTION_CON; sc_start4 SC_GVG_GIANT,10000,3000,0,100,0; },{},{}
-12875,Golem_Stone,Golem Stone,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_POTION_CON; sc_start4 SC_GVG_GOLEM,10000,0,200,50,0; },{},{}
+12875,Golem_Stone,Golem Stone,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ specialeffect2 EF_POTION_CON; sc_start4 SC_GVG_GOLEM,10000,0,300,0,50; },{},{}
 12876,Elf_Tear_Stun,Elf Tear Stun,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_STUN,10000,3000,0; },{},{}
 12877,Elf_Tear_Stone_Curse,Elf Tear Stone Curse,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_STONE,10000,3000,0; },{},{}
 12878,Elf_Tear_Freezing,Elf Tear Freezing,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start2 SC_GVG_FREEZ,10000,3000,0; },{},{}

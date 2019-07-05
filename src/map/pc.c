@@ -76,7 +76,6 @@ int night_timer_tid = INVALID_TIMER;
 int pc_expiration_tid = INVALID_TIMER;
 
 struct eri *pc_sc_display_ers = NULL;
-struct eri *pc_itemgrouphealrate_ers = NULL;
 
 struct fame_list smith_fame_list[MAX_FAME_LIST];
 struct fame_list chemist_fame_list[MAX_FAME_LIST];
@@ -2972,12 +2971,9 @@ TIMER_FUNC(pc_endautobonus)
  * @param rate: Success chance
  * @param flag: Battle flag
  */
-static void pc_bonus_adddefele(struct map_session_data *sd, unsigned char ele, short rate, short flag)
+static void pc_bonus_adddefele(struct s_item_bonus_ele2 *bonus, unsigned char ele, short rate, short flag)
 {
-	struct weapon_data *wd = NULL;
 	uint8 i;
-
-	nullpo_retv(sd);
 
 	if( !(flag&BF_RANGEMASK) )
 		flag |= BF_SHORT|BF_LONG;
@@ -2989,10 +2985,9 @@ static void pc_bonus_adddefele(struct map_session_data *sd, unsigned char ele, s
 		if( flag&BF_WEAPON )
 			flag |= BF_NORMAL|BF_SKILL;
 	}
-	wd = (sd->state.lr_flag == 1 ? &sd->left_weapon : &sd->right_weapon);
-	for( i = 0; i < MAX_PC_BONUS && wd->adddefele2[i].rate; i++ ) {
-		if( wd->adddefele2[i].ele == ele && wd->adddefele2[i].flag == flag ) {
-			wd->adddefele2[i].rate += rate;
+	for( i = 0; i < MAX_PC_BONUS && bonus[i].rate; i++ ) {
+		if( bonus[i].ele == ele && bonus[i].flag == flag ) {
+			bonus[i].rate += rate;
 			return;
 		}
 	}
@@ -3000,9 +2995,9 @@ static void pc_bonus_adddefele(struct map_session_data *sd, unsigned char ele, s
 		ShowWarning("pc_bonus_adddefele: Reached max (%d) possible bonuses for this player.\n", MAX_PC_BONUS);
 		return;
 	}
-	wd->adddefele2[i].ele = ele;
-	wd->adddefele2[i].rate = rate;
-	wd->adddefele2[i].flag = flag;
+	bonus[i].ele = ele;
+	bonus[i].rate = rate;
+	bonus[i].flag = flag;
 }
 
 /**
@@ -3012,11 +3007,9 @@ static void pc_bonus_adddefele(struct map_session_data *sd, unsigned char ele, s
  * @param rate: Success chance
  * @param flag: Battle flag
  */
-static void pc_bonus_subele(struct map_session_data *sd, unsigned char ele, short rate, short flag)
+static void pc_bonus_subele(struct s_item_bonus_ele2 *bonus, unsigned char ele, short rate, short flag)
 {
 	uint8 i;
-
-	nullpo_retv(sd);
 
 	if( !(flag&BF_RANGEMASK) )
 		flag |= BF_SHORT|BF_LONG;
@@ -3028,9 +3021,9 @@ static void pc_bonus_subele(struct map_session_data *sd, unsigned char ele, shor
 		if( flag&BF_WEAPON )
 			flag |= BF_NORMAL|BF_SKILL;
 	}
-	for( i = 0; i < MAX_PC_BONUS && sd->subele2[i].rate; i++ ) {
-		if( sd->subele2[i].ele == ele && sd->subele2[i].flag == flag ) {
-			sd->subele2[i].rate += rate;
+	for( i = 0; i < MAX_PC_BONUS && bonus[i].rate; i++ ) {
+		if( bonus[i].ele == ele && bonus[i].flag == flag ) {
+			bonus[i].rate += rate;
 			return;
 		}
 	}
@@ -3038,58 +3031,42 @@ static void pc_bonus_subele(struct map_session_data *sd, unsigned char ele, shor
 		ShowWarning("pc_bonus_subele: Reached max (%d) possible bonuses for this player.\n", MAX_PC_BONUS);
 		return;
 	}
-	sd->subele2[i].ele = ele;
-	sd->subele2[i].rate = rate;
-	sd->subele2[i].flag = flag;
+	bonus[i].ele = ele;
+	bonus[i].rate = rate;
+	bonus[i].flag = flag;
 }
 
 /**
- * Add item group heal rate bonus to player
- * @param sd Player
- * @param group_id Item Group ID
- * @param rate
- * @author Cydh
+ * General item bonus for player
+ * @param bonus: Bonus array
+ * @param type: Bonus type used by bBonusName
+ * @param id: Key
+ * @param val: Value
+ * @param cap_rate: If Value is a rate value that needs to be capped
  */
-void pc_itemgrouphealrate_add(struct map_session_data *sd, uint16 group_id, short rate) {
-	struct s_pc_itemgrouphealrate *entry = NULL;
+static void pc_bonus_itembonus(struct s_item_bonus *bonus, int type, uint16 id, int val, bool cap_rate)
+{
 	uint8 i;
 
-	for( i = 0; i < sd->itemgrouphealrate_count; i++ ) {
-		if( sd->itemgrouphealrate[i]->group_id == group_id )
-			break;
+	for( i = 0; i < MAX_PC_BONUS && bonus[i].val; i++ ) {
+		if( bonus[i].id == id ) {
+			if( cap_rate )
+				bonus[i].val = cap_value(bonus[i].val + val, -10000, 10000);
+			else
+				bonus[i].val += val;
+			return;
+		}
 	}
-	if( i != sd->itemgrouphealrate_count ) {
-		sd->itemgrouphealrate[i]->rate += rate;
+	if( i == MAX_PC_BONUS ) {
+		ShowWarning("pc_bonus_itembonus: Type (%d) reached max (%d) possible bonuses for this player.\n", type, MAX_PC_BONUS);
 		return;
 	}
-	if( i == UINT8_MAX ) {
-		ShowError("pc_itemgrouphealrate_add: Reached max (%d) possible bonuses for player '%s' (%d:%d)\n", UINT8_MAX, sd->status.name, sd->status.account_id, sd->status.char_id);
-		return;
+	if( cap_rate && (val < -10000 || val > 10000) ) {
+		ShowWarning("pc_bonus_itembonus: Item bonus type %d val %d exceeds -10000~10000 range, capping.\n", type, val);
+		val = cap_value(val, -10000, 10000);
 	}
-	entry = ers_alloc(pc_itemgrouphealrate_ers, struct s_pc_itemgrouphealrate);
-	entry->group_id = group_id;
-	entry->rate = rate;
-	RECREATE(sd->itemgrouphealrate, struct s_pc_itemgrouphealrate *, sd->itemgrouphealrate_count + 1);
-	sd->itemgrouphealrate[sd->itemgrouphealrate_count++] = entry;
-}
-
-/**
- * Clear item group heal rate from player
- * @param sd Player
- * @author Cydh
- */
-void pc_itemgrouphealrate_clear(struct map_session_data *sd) {
-	if( !sd || !sd->itemgrouphealrate_count )
-		return;
-	else {
-		uint8 i;
-
-		for( i = 0; i < sd->itemgrouphealrate_count; i++ )
-			ers_free(pc_itemgrouphealrate_ers, sd->itemgrouphealrate[i]);
-		sd->itemgrouphealrate_count = 0;
-		aFree(sd->itemgrouphealrate);
-		sd->itemgrouphealrate = NULL;
-	}
+	bonus[i].id = id;
+	bonus[i].val = val;
 }
 
 /**
@@ -3242,13 +3219,6 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 		case SP_MAXSP:
 			if(sd->state.lr_flag != 2)
 				sd->bonus.sp += val;
-			break;
-#ifndef RENEWAL_CAST
-		case SP_VARCASTRATE:
-#endif
-		case SP_CASTRATE:
-			if(sd->state.lr_flag != 2)
-				sd->castrate += val;
 			break;
 		case SP_MAXHPRATE:
 			if(sd->state.lr_flag != 2)
@@ -3667,22 +3637,27 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			if(sd->state.lr_flag != 2)
 				sd->bonus.ematk += val;
 			break;
-		case SP_FIXCASTRATE:
-			if(sd->state.lr_flag != 2)
-				sd->bonus.fixcastrate = min(sd->bonus.fixcastrate,val);
-			break;
-		case SP_ADD_FIXEDCAST:
-			if(sd->state.lr_flag != 2)
-				sd->bonus.add_fixcast += val;
-			break;
 #ifdef RENEWAL_CAST
 		case SP_VARCASTRATE:
 			if(sd->state.lr_flag != 2)
 				sd->bonus.varcastrate -= val;
 			break;
+		case SP_FIXCASTRATE:
+			if(sd->state.lr_flag != 2)
+				sd->bonus.fixcastrate = min(sd->bonus.fixcastrate,val);
+			break;
 		case SP_ADD_VARIABLECAST:
 			if(sd->state.lr_flag != 2)
 				sd->bonus.add_varcast += val;
+			break;
+		case SP_ADD_FIXEDCAST:
+			if(sd->state.lr_flag != 2)
+				sd->bonus.add_fixcast += val;
+			break;
+#else
+		case SP_CASTRATE:
+			if(sd->state.lr_flag != 2)
+				sd->castrate += val;
 			break;
 #endif
 		case SP_ADDMAXWEIGHT:
@@ -3734,8 +3709,6 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
  */
 void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 {
-	int i;
-
 	nullpo_retv(sd);
 
 	switch(type) {
@@ -3810,10 +3783,8 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 			break;
 		case SP_RESEFF:
 			PC_BONUS_CHK_SC(type2, SP_RESEFF);
-			if(sd->state.lr_flag != 2) {
-				i = sd->reseff[type2] + val;
-				sd->reseff[type2] = cap_value(i, -10000, 10000);
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->reseff, type, type2, val, true);
 			break;
 		case SP_MAGIC_ADDDEF_ELE:
 			PC_BONUS_CHK_ELEMENT(type2, SP_MAGIC_ADDDEF_ELE);
@@ -3840,70 +3811,23 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 			if(sd->state.lr_flag != 2)
 				sd->magic_atkele[type2] += val;
 			break;
-		case SP_ADD_DAMAGE_CLASS:
-			switch(sd->state.lr_flag) {
-				case 0: //Right hand
-					ARR_FIND(0, ARRAYLENGTH(sd->right_weapon.add_dmg), i, (!sd->right_weapon.add_dmg[i].rate || sd->right_weapon.add_dmg[i].class_ == type2));
-					if(i == ARRAYLENGTH(sd->right_weapon.add_dmg)) {
-						ShowError("pc_bonus2: SP_ADD_DAMAGE_CLASS: Reached max (%d) number of add Class dmg bonuses per character!\n", ARRAYLENGTH(sd->right_weapon.add_dmg));
-						break;
-					}
-					sd->right_weapon.add_dmg[i].class_ = type2;
-					sd->right_weapon.add_dmg[i].rate += val;
-					if(!sd->right_weapon.add_dmg[i].rate) //Shift the rest of elements up
-						memmove(&sd->right_weapon.add_dmg[i], &sd->right_weapon.add_dmg[i + 1], sizeof(sd->right_weapon.add_dmg) - (i + 1) * sizeof(sd->right_weapon.add_dmg[0]));
-					break;
-				case 1: //Left hand
-					ARR_FIND(0, ARRAYLENGTH(sd->left_weapon.add_dmg), i, (!sd->left_weapon.add_dmg[i].rate || sd->left_weapon.add_dmg[i].class_ == type2));
-					if(i == ARRAYLENGTH(sd->left_weapon.add_dmg)) {
-						ShowError("pc_bonus2: SP_ADD_DAMAGE_CLASS: Reached max (%d) number of add Class dmg bonuses per character!\n", ARRAYLENGTH(sd->left_weapon.add_dmg));
-						break;
-					}
-					sd->left_weapon.add_dmg[i].class_ = type2;
-					sd->left_weapon.add_dmg[i].rate += val;
-					if(!sd->left_weapon.add_dmg[i].rate) //Shift the rest of elements up
-						memmove(&sd->left_weapon.add_dmg[i], &sd->left_weapon.add_dmg[i + 1], sizeof(sd->left_weapon.add_dmg) - (i + 1) * sizeof(sd->left_weapon.add_dmg[0]));
-					break;
+		case SP_ADD_DAMAGE_CLASS: {
+				struct weapon_data *wd = (sd->state.lr_flag == 1 ? &sd->left_weapon : &sd->right_weapon);
+
+				pc_bonus_itembonus(wd->add_dmg, type, type2, val, false);
 			}
 			break;
 		case SP_ADD_MAGIC_DAMAGE_CLASS:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->add_mdmg), i, (!sd->add_mdmg[i].rate || sd->add_mdmg[i].class_ == type2));
-			if(i == ARRAYLENGTH(sd->add_mdmg)) {
-				ShowError("pc_bonus2: SP_ADD_MAGIC_DAMAGE_CLASS: Reached max (%d) number of add Class magic dmg bonuses per character!\n", ARRAYLENGTH(sd->add_mdmg));
-				break;
-			}
-			sd->add_mdmg[i].class_ = type2;
-			sd->add_mdmg[i].rate += val;
-			if(!sd->add_mdmg[i].rate) //Shift the rest of elements up
-				memmove(&sd->add_mdmg[i], &sd->add_mdmg[i + 1], sizeof(sd->add_mdmg) - (i + 1) * sizeof(sd->add_mdmg[0]));
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->add_mdmg, type, type2, val, false);
 			break;
 		case SP_ADD_DEF_MONSTER:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->add_def), i, (!sd->add_def[i].rate || sd->add_def[i].class_ == type2));
-			if(i == ARRAYLENGTH(sd->add_def)) {
-				ShowError("pc_bonus2: SP_ADD_DEF_MONSTER: Reached max (%d) number of add Class def bonuses per character!\n", ARRAYLENGTH(sd->add_def));
-				break;
-			}
-			sd->add_def[i].class_ = type2;
-			sd->add_def[i].rate += val;
-			if(!sd->add_def[i].rate) //Shift the rest of elements up
-				memmove(&sd->add_def[i], &sd->add_def[i + 1], sizeof(sd->add_def) - (i + 1) * sizeof(sd->add_def[0]));
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->add_def, type, type2, val, false);
 			break;
 		case SP_ADD_MDEF_MONSTER:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->add_mdef), i, (!sd->add_mdef[i].rate || sd->add_mdef[i].class_ == type2));
-			if(i == ARRAYLENGTH(sd->add_mdef)) {
-				ShowError("pc_bonus2: SP_ADD_MDEF_MONSTER: Reached max (%d) number of add Class mdef bonuses per character!\n", ARRAYLENGTH(sd->add_mdef));
-				break;
-			}
-			sd->add_mdef[i].class_ = type2;
-			sd->add_mdef[i].rate += val;
-			if(!sd->add_mdef[i].rate) //Shift the rest of elements up
-				memmove(&sd->add_mdef[i], &sd->add_mdef[i + 1], sizeof(sd->add_mdef) - (i + 1) * sizeof(sd->add_mdef[0]));
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->add_mdef, type, type2, val, false);
 			break;
 		case SP_HP_DRAIN_RATE:
 			if(!sd->state.lr_flag) {
@@ -3979,120 +3903,20 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				pc_bonus_addeff(sd->addeff2, (sc_type)type2, val, 0, 0, 0);
 			break;
 		case SP_SKILL_ATK:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillatk), i, (!sd->skillatk[i].id || sd->skillatk[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillatk)) { //Better mention this so the array length can be updated [Skotlex]
-				ShowError("pc_bonus2: SP_SKILL_ATK: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillatk), type2, val);
-				break;
-			}
-			if(sd->skillatk[i].id == type2)
-				sd->skillatk[i].val += val;
-			else {
-				sd->skillatk[i].id = type2;
-				sd->skillatk[i].val = val;
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillatk, type, type2, val, false);
 			break;
 		case SP_SKILL_HEAL:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillheal), i, (!sd->skillheal[i].id || sd->skillheal[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillheal)) { //Better mention this so the array length can be updated. [Skotlex]
-				ShowError("pc_bonus2: SP_SKILL_HEAL: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillheal), type2, val);
-				break;
-			}
-			if(sd->skillheal[i].id == type2)
-				sd->skillheal[i].val += val;
-			else {
-				sd->skillheal[i].id = type2;
-				sd->skillheal[i].val = val;
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillheal, type, type2, val, false);
 			break;
 		case SP_SKILL_HEAL2:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillheal2), i, (!sd->skillheal2[i].id || sd->skillheal2[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillheal2)) { //Better mention this so the array length can be updated. [Skotlex]
-				ShowError("pc_bonus2: SP_SKILL_HEAL2: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillheal2), type2, val);
-				break;
-			}
-			if (sd->skillheal2[i].id == type2)
-				sd->skillheal2[i].val += val;
-			else {
-				sd->skillheal2[i].id = type2;
-				sd->skillheal2[i].val = val;
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillheal2, type, type2, val, false);
 			break;
 		case SP_ADD_SKILL_BLOW:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillblown), i, (!sd->skillblown[i].id || sd->skillblown[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillblown)) { //Better mention this so the array length can be updated. [Skotlex]
-				ShowError("pc_bonus2: SP_ADD_SKILL_BLOW: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillblown), type2, val);
-				break;
-			}
-			if(sd->skillblown[i].id == type2)
-				sd->skillblown[i].val += val;
-			else {
-				sd->skillblown[i].id = type2;
-				sd->skillblown[i].val = val;
-			}
-			break;
-#ifndef RENEWAL_CAST
-		case SP_VARCASTRATE:
-#endif
-		case SP_CASTRATE:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillcast), i, (!sd->skillcast[i].id || sd->skillcast[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillcast)) { //Better mention this so the array length can be updated [Skotlex]
-				ShowError("pc_bonus2: %s: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n",
-#ifndef RENEWAL_CAST
-				"SP_VARCASTRATE",
-#else
-				"SP_CASTRATE",
-#endif
-				ARRAYLENGTH(sd->skillcast), type2, val);
-				break;
-			}
-			if(sd->skillcast[i].id == type2)
-				sd->skillcast[i].val += val;
-			else {
-				sd->skillcast[i].id = type2;
-				sd->skillcast[i].val = val;
-			}
-			break;
-#ifdef RENEWAL_CAST
-		case SP_VARCASTRATE:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillcast), i, (!sd->skillcast[i].id || sd->skillcast[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillcast)) {
-				ShowError("pc_bonus2: SP_VARCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillcast), type2, val);
-				break;
-			}
-			if(sd->skillcast[i].id == type2)
-				sd->skillcast[i].val -= val;
-			else {
-				sd->skillcast[i].id = type2;
-				sd->skillcast[i].val -= val;
-			}
-			break;
-#endif
-		case SP_FIXCASTRATE:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillfixcastrate), i, (!sd->skillfixcastrate[i].id || sd->skillfixcastrate[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillfixcastrate)) {
-				ShowError("pc_bonus2: SP_FIXCASTRATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillfixcastrate), type2, val);
-				break;
-			}
-			if(sd->skillfixcastrate[i].id == type2)
-				sd->skillfixcastrate[i].val -= val;
-			else {
-				sd->skillfixcastrate[i].id = type2;
-				sd->skillfixcastrate[i].val -= val;
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillblown, type, type2, val, false);
 			break;
 		case SP_HP_LOSS_RATE:
 			if(sd->state.lr_flag != 2) {
@@ -4136,28 +3960,20 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->subrace2[type2] += val;
 			break;
 		case SP_ADD_ITEM_HEAL_RATE:
-			if(sd->state.lr_flag == 2)
-				break;
 			if(!itemdb_exists(type2)) {
-				ShowError("pc_bonus2: SP_ADD_ITEM_HEAL_RATE Invalid item with id %d\n", type2);
+				ShowWarning("pc_bonus2: SP_ADD_ITEM_HEAL_RATE Invalid item with id %d\n", type2);
 				break;
 			}
-			for(i = 0; i < ARRAYLENGTH(sd->itemhealrate) && sd->itemhealrate[i].nameid && sd->itemhealrate[i].nameid != type2; i++);
-			if(i == ARRAYLENGTH(sd->itemhealrate)) {
-				ShowError("pc_bonus2: SP_ADD_ITEM_HEAL_RATE: Reached max (%d) number of item heal bonuses per character!\n", ARRAYLENGTH(sd->itemhealrate));
-				break;
-			}
-			sd->itemhealrate[i].nameid = type2;
-			sd->itemhealrate[i].rate += val;
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->itemhealrate, type, type2, val, false);
 			break;
 		case SP_ADD_ITEMGROUP_HEAL_RATE:
-			if(sd->state.lr_flag == 2)
-				break;
 			if(!type2 || !itemdb_group_exists(type2)) {
-				ShowError("pc_bonus2: SP_ADD_ITEMGROUP_HEAL_RATE: Invalid item group with id %d\n", type2);
+				ShowWarning("pc_bonus2: SP_ADD_ITEMGROUP_HEAL_RATE: Invalid item group with id %d\n", type2);
 				break;
 			}
-			pc_itemgrouphealrate_add(sd, type2, val);
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->itemgrouphealrate, type, type2, val, false);
 			break;
 		case SP_EXP_ADDRACE:
 			PC_BONUS_CHK_RACE(type2, SP_EXP_ADDRACE);
@@ -4243,107 +4059,46 @@ void pc_bonus2(struct map_session_data *sd, int type, int type2, int val)
 				sd->ignore_def_by_class[type2] += val;
 			break;
 		case SP_SKILL_USE_SP_RATE:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillusesprate), i, (!sd->skillusesprate[i].id || sd->skillusesprate[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillusesprate)) {
-				ShowError("pc_bonus2: SP_SKILL_USE_SP_RATE: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillusesprate), type2, val);
-				break;
-			}
-			if(sd->skillusesprate[i].id == type2)
-				sd->skillusesprate[i].val += val;
-			else {
-				sd->skillusesprate[i].id = type2;
-				sd->skillusesprate[i].val = val;
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillusesprate, type, type2, val, true);
 			break;
 		case SP_SKILL_DELAY:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skilldelay), i, (!sd->skilldelay[i].id || sd->skilldelay[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skilldelay)) {
-				ShowError("pc_bonus2: SP_SKILL_DELAY: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skilldelay), type2, val);
-				break;
-			}
-			if(sd->skilldelay[i].id == type2)
-				sd->skilldelay[i].val += val;
-			else {
-				sd->skilldelay[i].id = type2;
-				sd->skilldelay[i].val = val;
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skilldelay, type, type2, val, false);
 			break;
 		case SP_SKILL_COOLDOWN:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillcooldown), i, (!sd->skillcooldown[i].id || sd->skillcooldown[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillcooldown)) {
-				ShowError("pc_bonus2: SP_SKILL_COOLDOWN: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillcooldown), type2, val);
-				break;
-			}
-			if(sd->skillcooldown[i].id == type2)
-				sd->skillcooldown[i].val += val;
-			else {
-				sd->skillcooldown[i].id = type2;
-				sd->skillcooldown[i].val = val;
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillcooldown, type, type2, val, false);
 			break;
-		case SP_SKILL_FIXEDCAST:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillfixcast), i, (!sd->skillfixcast[i].id || sd->skillfixcast[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillfixcast)) {
-				ShowError("pc_bonus2: SP_SKILL_FIXEDCAST: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillfixcast), type2, val);
-				break;
-			}
-			if(sd->skillfixcast[i].id == type2)
-				sd->skillfixcast[i].val += val;
-			else {
-				sd->skillfixcast[i].id = type2;
-				sd->skillfixcast[i].val = val;
-			}
+#ifdef RENEWAL_CAST
+		case SP_VARCASTRATE:
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillcastrate, type, type2, -val, true); //Send inversed value here
+			break;
+		case SP_FIXCASTRATE:
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillfixcastrate, type, type2, -val, true); //Send inversed value here
 			break;
 		case SP_SKILL_VARIABLECAST:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillvarcast), i, (!sd->skillvarcast[i].id || sd->skillvarcast[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillvarcast)) {
-				ShowError("pc_bonus2: SP_SKILL_VARIABLECAST: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillvarcast), type2, val);
-				break;
-			}
-			if(sd->skillvarcast[i].id == type2)
-				sd->skillvarcast[i].val += val;
-			else {
-				sd->skillvarcast[i].id = type2;
-				sd->skillvarcast[i].val = val;
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillvarcast, type, type2, val, false);
 			break;
+		case SP_SKILL_FIXEDCAST:
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillfixcast, type, type2, val, false);
+			break;
+#else
+		case SP_CASTRATE:
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillcastrate, type, type2, val, true);
+			break;
+#endif
 		case SP_SKILL_USE_SP:
-			if(sd->state.lr_flag == 2)
-				break;
-			ARR_FIND(0, ARRAYLENGTH(sd->skillusesp), i, (!sd->skillusesp[i].id || sd->skillusesp[i].id == type2));
-			if(i == ARRAYLENGTH(sd->skillusesp)) {
-				ShowError("pc_bonus2: SP_SKILL_USE_SP: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->skillusesp), type2, val);
-				break;
-			}
-			if(sd->skillusesp[i].id == type2)
-				sd->skillusesp[i].val += val;
-			else {
-				sd->skillusesp[i].id = type2;
-				sd->skillusesp[i].val = val;
-			}
+			if(sd->state.lr_flag != 2)
+				pc_bonus_itembonus(sd->skillusesp, type, type2, val, false);
 			break;
 		case SP_SUB_SKILL:
-			ARR_FIND(0, ARRAYLENGTH(sd->subskill), i, (!sd->subskill[i].id || sd->subskill[i].id == type2));
-			if(i == ARRAYLENGTH(sd->subskill)) {
-				ShowError("pc_bonus2: SP_SUB_SKILL: Reached max (%d) number of skills per character, bonus skill %d (%d) lost.\n", ARRAYLENGTH(sd->subskill), type2, val);
-				break;
-			}
-			if(sd->subskill[i].id == type2)
-				sd->subskill[i].val += val;
-			else {
-				sd->subskill[i].id = type2;
-				sd->subskill[i].val = val;
-			}
+			pc_bonus_itembonus(sd->subskill, type, type2, val, false);
 			break;
 		case SP_SUBDEF_ELE:
 			PC_BONUS_CHK_ELEMENT(type2,SP_SUBDEF_ELE);
@@ -4441,15 +4196,18 @@ void pc_bonus3(struct map_session_data *sd, int type, int type2, int type3, int 
 			if(sd->state.lr_flag != 2)
 				pc_bonus_addeff_onskill(sd->addeff3, (sc_type)type3, val, type2, ATF_TARGET, 0);
 			break;
-		case SP_ADDDEF_ELE:
-			PC_BONUS_CHK_ELEMENT(type2, SP_ADDDEF_ELE);
-			if(sd->state.lr_flag != 2)
-				pc_bonus_adddefele(sd, (unsigned char)type2, type3, val);
+		case SP_ADDDEF_ELE: {
+				struct weapon_data *wd = (sd->state.lr_flag == 1 ? &sd->left_weapon : &sd->right_weapon);
+
+				PC_BONUS_CHK_ELEMENT(type2, SP_ADDDEF_ELE);
+				if(sd->state.lr_flag != 2)
+					pc_bonus_adddefele(wd->adddefele2, (unsigned char)type2, type3, val);
+			}
 			break;
 		case SP_SUBELE:
 			PC_BONUS_CHK_ELEMENT(type2, SP_SUBELE);
 			if(sd->state.lr_flag != 2)
-				pc_bonus_subele(sd, (unsigned char)type2, type3, val);
+				pc_bonus_subele(sd->subele2, (unsigned char)type2, type3, val);
 			break;
 		case SP_STATE_NORECOVER_RACE:
 			PC_BONUS_CHK_RACE(type2, SP_STATE_NORECOVER_RACE);
@@ -8126,8 +7884,8 @@ int pc_skillatk_bonus(struct map_session_data *sd, uint16 skill_id)
 	nullpo_ret(sd);
 
 	skill_id = skill_dummy2skill_id(skill_id);
-	ARR_FIND(0, ARRAYLENGTH(sd->skillatk), i, sd->skillatk[i].id == skill_id);
-	if( i < ARRAYLENGTH(sd->skillatk) )
+	ARR_FIND(0, MAX_PC_BONUS, i, sd->skillatk[i].id == skill_id);
+	if( i < MAX_PC_BONUS )
 		bonus = sd->skillatk[i].val;
 
 	return bonus;
@@ -8140,8 +7898,8 @@ int pc_sub_skillatk_bonus(struct map_session_data *sd, uint16 skill_id)
 	nullpo_ret(sd);
 
 	skill_id = skill_dummy2skill_id(skill_id);
-	ARR_FIND(0, ARRAYLENGTH(sd->subskill), i, sd->subskill[i].id == skill_id);
-	if( i < ARRAYLENGTH(sd->subskill) )
+	ARR_FIND(0, MAX_PC_BONUS, i, sd->subskill[i].id == skill_id);
+	if( i < MAX_PC_BONUS )
 		bonus = sd->subskill[i].val;
 
 	return bonus;
@@ -8161,8 +7919,8 @@ int pc_skillheal_bonus(struct map_session_data *sd, uint16 skill_id) {
 		}
 	}
 
-	ARR_FIND(0, ARRAYLENGTH(sd->skillheal), i, sd->skillheal[i].id == skill_id);
-	if( i < ARRAYLENGTH(sd->skillheal) )
+	ARR_FIND(0, MAX_PC_BONUS, i, sd->skillheal[i].id == skill_id);
+	if( i < MAX_PC_BONUS )
 		bonus += sd->skillheal[i].val;
 
 	return bonus;
@@ -8171,9 +7929,8 @@ int pc_skillheal_bonus(struct map_session_data *sd, uint16 skill_id) {
 int pc_skillheal2_bonus(struct map_session_data *sd, uint16 skill_id) {
 	int i, bonus = sd->bonus.add_heal2_rate;
 
-	ARR_FIND(0, ARRAYLENGTH(sd->skillheal2), i, sd->skillheal2[i].id == skill_id);
-
-	if( i < ARRAYLENGTH(sd->skillheal2) )
+	ARR_FIND(0, MAX_PC_BONUS, i, sd->skillheal2[i].id == skill_id);
+	if( i < MAX_PC_BONUS )
 		bonus += sd->skillheal2[i].val;
 
 	return bonus;
@@ -8688,52 +8445,52 @@ int pc_readparam(struct map_session_data *sd, int type)
 	nullpo_ret(sd);
 
 	switch( type ) {
-		case SP_SKILLPOINT:	val = sd->status.skill_point; break;
-		case SP_STATUSPOINT:	val = sd->status.status_point; break;
-		case SP_ZENY:		val = sd->status.zeny; break;
-		case SP_BASELEVEL:	val = sd->status.base_level; break;
-		case SP_JOBLEVEL:	val = sd->status.job_level; break;
-		case SP_CLASS:		val = sd->status.class_; break;
-		case SP_BASEJOB:	val = pc_mapid2jobid(sd->class_&MAPID_UPPERMASK, sd->status.sex); break; //Base job, extracting upper type
-		case SP_UPPER:		val = (sd->class_&JOBL_UPPER) ? 1 : (sd->class_&JOBL_BABY) ? 2 : 0; break;
-		case SP_BASECLASS:	val = pc_mapid2jobid(sd->class_&MAPID_BASEMASK, sd->status.sex); break; //Extract base class tree [Skotlex]
-		case SP_SEX:		val = sd->status.sex; break;
-		case SP_WEIGHT:		val = sd->weight; break;
-		case SP_MAXWEIGHT:	val = sd->max_weight; break;
-		case SP_BASEEXP:	val = sd->status.base_exp; break;
-		case SP_JOBEXP:		val = sd->status.job_exp; break;
-		case SP_NEXTBASEEXP:	val = pc_nextbaseexp(sd); break;
-		case SP_NEXTJOBEXP:	val = pc_nextjobexp(sd); break;
-		case SP_HP:		val = sd->battle_status.hp; break;
-		case SP_MAXHP:		val = sd->battle_status.max_hp; break;
-		case SP_SP:		val = sd->battle_status.sp; break;
-		case SP_MAXSP:		val = sd->battle_status.max_sp; break;
-		case SP_STR:		val = sd->status.str; break;
-		case SP_AGI:		val = sd->status.agi; break;
-		case SP_VIT:		val = sd->status.vit; break;
-		case SP_INT:		val = sd->status.int_; break;
-		case SP_DEX:		val = sd->status.dex; break;
-		case SP_LUK:		val = sd->status.luk; break;
-		case SP_KARMA:		val = sd->status.karma; break;
-		case SP_MANNER:		val = sd->status.manner; break;
-		case SP_FAME:		val = sd->status.fame; break;
-		case SP_KILLERRID:	val = sd->killerrid; break;
-		case SP_KILLEDRID:	val = sd->killedrid; break;
-		case SP_SITTING:	val = (pc_issit(sd) ? 1 : 0); break;
-		case SP_CHARMOVE:	val = sd->status.character_moves; break;
-		case SP_CHARRENAME:	val = sd->status.rename; break;
-		case SP_CHARFONT:	val = sd->status.font; break;
-		case SP_BANK_VAULT:	val = sd->bank_vault; break;
-		case SP_CASHPOINTS:	val = sd->cashPoints; break;
-		case SP_KAFRAPOINTS:	val = sd->kafraPoints; break;
+		case SP_SKILLPOINT:		val = sd->status.skill_point; break;
+		case SP_STATUSPOINT:		val = sd->status.status_point; break;
+		case SP_ZENY:			val = sd->status.zeny; break;
+		case SP_BASELEVEL:		val = sd->status.base_level; break;
+		case SP_JOBLEVEL:		val = sd->status.job_level; break;
+		case SP_CLASS:			val = sd->status.class_; break;
+		case SP_BASEJOB:		val = pc_mapid2jobid(sd->class_&MAPID_UPPERMASK, sd->status.sex); break; //Base job, extracting upper type
+		case SP_UPPER:			val = (sd->class_&JOBL_UPPER) ? 1 : (sd->class_&JOBL_BABY) ? 2 : 0; break;
+		case SP_BASECLASS:		val = pc_mapid2jobid(sd->class_&MAPID_BASEMASK, sd->status.sex); break; //Extract base class tree [Skotlex]
+		case SP_SEX:			val = sd->status.sex; break;
+		case SP_WEIGHT:			val = sd->weight; break;
+		case SP_MAXWEIGHT:		val = sd->max_weight; break;
+		case SP_BASEEXP:		val = sd->status.base_exp; break;
+		case SP_JOBEXP:			val = sd->status.job_exp; break;
+		case SP_NEXTBASEEXP:		val = pc_nextbaseexp(sd); break;
+		case SP_NEXTJOBEXP:		val = pc_nextjobexp(sd); break;
+		case SP_HP:			val = sd->battle_status.hp; break;
+		case SP_MAXHP:			val = sd->battle_status.max_hp; break;
+		case SP_SP:			val = sd->battle_status.sp; break;
+		case SP_MAXSP:			val = sd->battle_status.max_sp; break;
+		case SP_STR:			val = sd->status.str; break;
+		case SP_AGI:			val = sd->status.agi; break;
+		case SP_VIT:			val = sd->status.vit; break;
+		case SP_INT:			val = sd->status.int_; break;
+		case SP_DEX:			val = sd->status.dex; break;
+		case SP_LUK:			val = sd->status.luk; break;
+		case SP_KARMA:			val = sd->status.karma; break;
+		case SP_MANNER:			val = sd->status.manner; break;
+		case SP_FAME:			val = sd->status.fame; break;
+		case SP_KILLERRID:		val = sd->killerrid; break;
+		case SP_KILLEDRID:		val = sd->killedrid; break;
+		case SP_SITTING:		val = (pc_issit(sd) ? 1 : 0); break;
+		case SP_CHARMOVE:		val = sd->status.character_moves; break;
+		case SP_CHARRENAME:		val = sd->status.rename; break;
+		case SP_CHARFONT:		val = sd->status.font; break;
+		case SP_BANK_VAULT:		val = sd->bank_vault; break;
+		case SP_CASHPOINTS:		val = sd->cashPoints; break;
+		case SP_KAFRAPOINTS:		val = sd->kafraPoints; break;
 		case SP_ROULETTE_BRONZE:	val = sd->roulette_point.bronze; break;
 		case SP_ROULETTE_SILVER:	val = sd->roulette_point.silver; break;
 		case SP_ROULETTE_GOLD:		val = sd->roulette_point.gold; break;
-		case SP_KILLEDGID:	val = sd->killedgid; break;
-		case SP_PCDIECOUNTER:	val = sd->die_counter; break;
-		case SP_COOKMASTERY:	val = sd->cook_mastery; break;
-		case SP_CRITICAL:	val = sd->battle_status.cri / 10; break;
-		case SP_ASPD:		val = (2000 - sd->battle_status.amotion) / 10; break;
+		case SP_KILLEDGID:		val = sd->killedgid; break;
+		case SP_PCDIECOUNTER:		val = sd->die_counter; break;
+		case SP_COOKMASTERY:		val = sd->cook_mastery; break;
+		case SP_CRITICAL:		val = sd->battle_status.cri / 10; break;
+		case SP_ASPD:			val = (2000 - sd->battle_status.amotion) / 10; break;
 		case SP_BASE_ATK:
 #ifdef RENEWAL
 			val = sd->bonus.eatk;
@@ -8741,25 +8498,19 @@ int pc_readparam(struct map_session_data *sd, int type)
 			val = sd->battle_status.batk;
 #endif
 			break;
-		case SP_DEF1:		val = sd->battle_status.def; break;
-		case SP_DEF2:		val = sd->battle_status.def2; break;
-		case SP_MDEF1:		val = sd->battle_status.mdef; break;
-		case SP_MDEF2:		val = sd->battle_status.mdef2; break;
-		case SP_HIT:		val = sd->battle_status.hit; break;
-		case SP_FLEE1:		val = sd->battle_status.flee; break;
-		case SP_FLEE2:		val = sd->battle_status.flee2; break;
-		case SP_DEFELE:		val = sd->battle_status.def_ele; break;
-#ifndef RENEWAL_CAST
-		case SP_VARCASTRATE:
-#endif
-		case SP_CASTRATE:
-				val = sd->castrate;
-			break;
-		case SP_MAXHPRATE:	val = sd->hprate; break;
-		case SP_MAXSPRATE:	val = sd->sprate; break;
-		case SP_SPRATE:		val = sd->dsprate; break;
-		case SP_SPEED_RATE:	val = sd->bonus.speed_rate; break;
-		case SP_SPEED_ADDRATE:	val = sd->bonus.speed_add_rate; break;
+		case SP_DEF1:			val = sd->battle_status.def; break;
+		case SP_DEF2:			val = sd->battle_status.def2; break;
+		case SP_MDEF1:			val = sd->battle_status.mdef; break;
+		case SP_MDEF2:			val = sd->battle_status.mdef2; break;
+		case SP_HIT:			val = sd->battle_status.hit; break;
+		case SP_FLEE1:			val = sd->battle_status.flee; break;
+		case SP_FLEE2:			val = sd->battle_status.flee2; break;
+		case SP_DEFELE:			val = sd->battle_status.def_ele; break;
+		case SP_MAXHPRATE:		val = sd->hprate; break;
+		case SP_MAXSPRATE:		val = sd->sprate; break;
+		case SP_SPRATE:			val = sd->dsprate; break;
+		case SP_SPEED_RATE:		val = sd->bonus.speed_rate; break;
+		case SP_SPEED_ADDRATE:		val = sd->bonus.speed_add_rate; break;
 		case SP_ASPD_RATE:
 #ifndef RENEWAL_ASPD
 			val = sd->battle_status.aspd_rate;
@@ -8832,11 +8583,13 @@ int pc_readparam(struct map_session_data *sd, int type)
 		case SP_ADD_HEAL2_RATE:		val = sd->bonus.add_heal2_rate; break;
 		case SP_ADD_ITEM_HEAL_RATE:	val = sd->bonus.itemhealrate2; break;
 		case SP_EMATK:			val = sd->bonus.ematk; break;
-		case SP_FIXCASTRATE:		val = sd->bonus.fixcastrate; break;
-		case SP_ADD_FIXEDCAST:		val = sd->bonus.add_fixcast; break;
 #ifdef RENEWAL_CAST
 		case SP_VARCASTRATE:		val = sd->bonus.varcastrate; break;
+		case SP_FIXCASTRATE:		val = sd->bonus.fixcastrate; break;
 		case SP_ADD_VARIABLECAST:	val = sd->bonus.add_varcast; break;
+		case SP_ADD_FIXEDCAST:		val = sd->bonus.add_fixcast; break;
+#else
+		case SP_CASTRATE:		val = sd->castrate; break;
 #endif
 		case SP_NO_MAGIC_GEAR_FUEL:	val = (sd->special_state.no_magic_gear_fuel ? 1 : 0); break;
 		case SP_NO_WALKDELAY:		val = (sd->special_state.no_walkdelay ? 1 : 0); break;
@@ -9112,12 +8865,9 @@ int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fi
 			//Item Group bonuses
 			bonus += pc_get_itemgroup_bonus(sd,itemid);
 			//Individual item bonuses
-			for(i = 0; i < ARRAYLENGTH(sd->itemhealrate) && sd->itemhealrate[i].nameid; i++) {
-				if(sd->itemhealrate[i].nameid == itemid) {
-					bonus += sd->itemhealrate[i].rate;
-					break;
-				}
-			}
+			ARR_FIND(0, MAX_PC_BONUS, i, sd->itemhealrate[i].id == itemid);
+			if(i < MAX_PC_BONUS)
+				bonus += sd->itemhealrate[i].val;
 			//Recovery Potion
 			if(sd->sc.data[SC_INCHEALRATE])
 				bonus += sd->sc.data[SC_INCHEALRATE]->val1;
@@ -13045,11 +12795,10 @@ short pc_maxparameter(struct map_session_data *sd, enum e_params param) {
 			return max_param;
 	}
 
-	return (class_&MAPID_BASEMASK) == MAPID_SUMMONER ? battle_config.max_summoner_parameter :
-		((class_&MAPID_UPPERMASK) == MAPID_KAGEROUOBORO || (class_&MAPID_UPPERMASK) == MAPID_REBELLION) ? battle_config.max_extended_parameter :
-		((class_&JOBL_THIRD) ? ((class_&JOBL_UPPER) ? battle_config.max_third_trans_parameter : ((class_&JOBL_BABY) ? battle_config.max_baby_third_parameter : battle_config.max_third_parameter)) :
-		((class_&JOBL_BABY) ? battle_config.max_baby_parameter :
-		((class_&JOBL_UPPER) ? battle_config.max_trans_parameter : battle_config.max_parameter)));
+	return ((class_&MAPID_UPPERMASK) == MAPID_KAGEROUOBORO || (class_&MAPID_UPPERMASK) == MAPID_REBELLION ||
+		(class_&MAPID_BASEMASK) == MAPID_SUMMONER || (class_&JOBL_THIRD) ?
+		((class_&JOBL_BABY) ? battle_config.max_baby_parameter_renewal_jobs : battle_config.max_parameter_renewal_jobs) :
+		((class_&JOBL_BABY) ? battle_config.max_baby_parameter : battle_config.max_parameter));
 }
 
 /**
@@ -13075,20 +12824,16 @@ short pc_get_itemgroup_bonus(struct map_session_data *sd, unsigned short nameid)
 	short bonus = 0;
 	uint8 i;
 
-	if (!sd->itemgrouphealrate_count)
-		return bonus;
-	for (i = 0; i < sd->itemgrouphealrate_count; i++) {
-		uint16 group_id = sd->itemgrouphealrate[i]->group_id, j;
+	for (i = 0; i < MAX_PC_BONUS && sd->itemgrouphealrate[i].val; i++) {
+		uint16 group_id = sd->itemgrouphealrate[i].id, j, max;
 		struct s_item_group_db *group = NULL;
 
 		if (!group_id || !(group = itemdb_group_exists(group_id)))
 			continue;
-		for (j = 0; j < group->random[0].data_qty; j++) {
-			if (group->random[0].data[j].nameid == nameid) {
-				bonus += sd->itemgrouphealrate[i]->rate;
-				break;
-			}
-		}
+		max = group->random[0].data_qty;
+		ARR_FIND(0, max, j, group->random[0].data[j].nameid == nameid);
+		if (j < max)
+			bonus += sd->itemgrouphealrate[i].val;
 	}
 
 	return bonus;
@@ -13101,16 +12846,13 @@ short pc_get_itemgroup_bonus(struct map_session_data *sd, unsigned short nameid)
  * @return Heal rate
  */
 short pc_get_itemgroup_bonus_group(struct map_session_data *sd, uint16 group_id) {
-	short bonus = 0;
 	uint8 i;
 
-	if (!sd->itemgrouphealrate_count)
-		return bonus;
-	for (i = 0; i < sd->itemgrouphealrate_count; i++)
-		if (sd->itemgrouphealrate[i]->group_id == group_id)
-			return sd->itemgrouphealrate[i]->rate;
+	ARR_FIND(0, MAX_PC_BONUS, i, sd->itemgrouphealrate[i].id == group_id);
+	if (i < MAX_PC_BONUS)
+		return sd->itemgrouphealrate[i].val;
 
-	return bonus;
+	return 0;
 }
 
 /**
@@ -13704,7 +13446,6 @@ void do_final_pc(void) {
 	do_final_pc_groups();
 
 	ers_destroy(pc_sc_display_ers);
-	ers_destroy(pc_itemgrouphealrate_ers);
 
 	if (battle_config.feature_attendance)
 		pc_attendance_clear();
@@ -13754,5 +13495,4 @@ void do_init_pc(void) {
 	do_init_pc_groups();
 
 	pc_sc_display_ers = ers_new(sizeof(struct sc_display_entry), "pc.c::pc_sc_display_ers", ERS_OPT_NONE);
-	pc_itemgrouphealrate_ers = ers_new(sizeof(struct s_pc_itemgrouphealrate), "pc.c::pc_itemgrouphealrate_ers", ERS_OPT_NONE);
 }

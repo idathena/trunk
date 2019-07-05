@@ -239,32 +239,8 @@ int skill_get_unit_target(uint16 skill_id)                       { skill_get(ski
 int skill_get_unit_bl_target(uint16 skill_id)                    { skill_get(skill_db[skill_id].unit_target&BL_ALL, skill_id); }
 int skill_get_unit_flag(uint16 skill_id)                         { skill_get(skill_db[skill_id].unit_flag, skill_id); }
 int skill_get_unit_layout_type(uint16 skill_id, uint16 skill_lv) { skill_get2(skill_db[skill_id].unit_layout_type[skill_lv - 1], skill_id, skill_lv); }
-int skill_get_cooldown(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv)
-{
-	int i, cooldown;
-
-	skill_chk(&skill_id);
-	if (!skill_id)
-		return 0;
-	cooldown = 0;
-	if (skill_db[skill_id].cooldown[skill_lv - 1])
-		cooldown = skill_db[skill_id].cooldown[skill_lv - 1];
-	if (sd) {
-		if (skill_id == SU_TUNABELLY && pc_checkskill(sd,SU_SPIRITOFSEA) > 0)
-			cooldown -= skill_get_time(skill_id,skill_lv);
-		for (i = 0; i < ARRAYLENGTH(sd->skillcooldown) && sd->skillcooldown[i].id; i++) {
-			if (sd->skillcooldown[i].id == skill_id) {
-				cooldown += sd->skillcooldown[i].val;
-				cooldown = max(cooldown, 0);
-				break;
-			}
-		}
-	}
-	return cooldown;
-}
-#ifdef RENEWAL_CAST
-	int skill_get_fixed_cast(uint16 skill_id, uint16 skill_lv) { skill_get2(skill_db[skill_id].fixed_cast[skill_lv - 1], skill_id, skill_lv); }
-#endif
+int skill_get_cooldown(uint16 skill_id, uint16 skill_lv)         { skill_get2(skill_db[skill_id].cooldown[skill_lv - 1], skill_id, skill_lv); }
+int skill_get_fixed_cast(uint16 skill_id, uint16 skill_lv)       { skill_get2(skill_db[skill_id].fixed_cast[skill_lv - 1], skill_id, skill_lv); }
 //Skill requirements
 int skill_get_hp(uint16 skill_id, uint16 skill_lv)         { skill_get2(skill_db[skill_id].require.hp[skill_lv - 1], skill_id, skill_lv); }
 int skill_get_mhp(uint16 skill_id, uint16 skill_lv)        { skill_get2(skill_db[skill_id].require.mhp[skill_lv - 1], skill_id, skill_lv); }
@@ -16321,16 +16297,14 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 	if( sd->dsprate != 100 )
 		require.sp = require.sp * sd->dsprate / 100;
 
-	ARR_FIND(0,ARRAYLENGTH(sd->skillusesprate),i,sd->skillusesprate[i].id == skill_id);
-
-	if( i < ARRAYLENGTH(sd->skillusesprate) )
+	ARR_FIND(0,MAX_PC_BONUS,i,sd->skillusesprate[i].id == skill_id);
+	if( i < MAX_PC_BONUS )
 		sp_skill_rate_bonus += sd->skillusesprate[i].val;
 
 	require.sp = cap_value(require.sp * sp_skill_rate_bonus / 100,0,SHRT_MAX);
 
-	ARR_FIND(0,ARRAYLENGTH(sd->skillusesp),i,sd->skillusesp[i].id == skill_id);
-
-	if( i < ARRAYLENGTH(sd->skillusesp) )
+	ARR_FIND(0,MAX_PC_BONUS,i,sd->skillusesp[i].id == skill_id);
+	if( i < MAX_PC_BONUS )
 		require.sp += sd->skillusesp[i].val;
 
 	if( sc ) {
@@ -16622,17 +16596,14 @@ int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv) {
 
 		//Calculate cast time reduced by item/card bonuses
 		if( sd ) {
-			int i;
+			uint8 i;
 
 			if( !(flag&4) && sd->castrate != 100 )
 				reduce_ct_r += 100 - sd->castrate;
 			//Skill-specific reductions work regardless of flag
-			for( i = 0; i < ARRAYLENGTH(sd->skillcast) && sd->skillcast[i].id; i++ ) {
-				if( sd->skillcast[i].id == skill_id ) {
-					time += time * sd->skillcast[i].val / 100;
-					break;
-				}
-			}
+			ARR_FIND(0, MAX_PC_BONUS, i, sd->skillcastrate[i].id == skill_id);
+			if( i < MAX_PC_BONUS )
+				time += time * sd->skillcastrate[i].val / 100;
 		}
 
 		//These cast time reductions are processed even if the skill fails
@@ -16753,30 +16724,18 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 			time += sd->bonus.add_varcast;
 		if( sd->bonus.add_fixcast )
 			fixed += sd->bonus.add_fixcast;
-		for( i = 0; i < ARRAYLENGTH(sd->skillfixcast) && sd->skillfixcast[i].id; i++ ) {
-			if( sd->skillfixcast[i].id == skill_id ) {
-				fixed += sd->skillfixcast[i].val;
-				break;
-			}
-		}
-		for( i = 0; i < ARRAYLENGTH(sd->skillvarcast) && sd->skillvarcast[i].id; i++ ) {
-			if( sd->skillvarcast[i].id == skill_id ) {
-				time += sd->skillvarcast[i].val;
-				break;
-			}
-		}
-		for( i = 0; i < ARRAYLENGTH(sd->skillcast) && sd->skillcast[i].id; i++ ) {
-			if( sd->skillcast[i].id == skill_id ) {
-				reduce_ct_r += sd->skillcast[i].val;
-				break;
-			}
-		}
-		for( i = 0; i < ARRAYLENGTH(sd->skillfixcastrate) && sd->skillfixcastrate[i].id; i++ ) {
-			if( sd->skillfixcastrate[i].id == skill_id ) {
-				fixcast_r = max(fixcast_r, sd->skillfixcastrate[i].val);
-				break;
-			}
-		}
+		ARR_FIND(0, MAX_PC_BONUS, i, sd->skillfixcast[i].id == skill_id);
+		if( i < MAX_PC_BONUS )
+			fixed += sd->skillfixcast[i].val;
+		ARR_FIND(0, MAX_PC_BONUS, i, sd->skillvarcast[i].id == skill_id);
+		if( i < MAX_PC_BONUS )
+			time += sd->skillvarcast[i].val;
+		ARR_FIND(0, MAX_PC_BONUS, i, sd->skillcastrate[i].id == skill_id);
+		if( i < MAX_PC_BONUS )
+			reduce_ct_r += sd->skillcastrate[i].val;
+		ARR_FIND(0, MAX_PC_BONUS, i, sd->skillfixcastrate[i].id == skill_id);
+		if( i < MAX_PC_BONUS )
+			fixcast_r = max(fixcast_r, sd->skillfixcastrate[i].val);
 	}
 
 	if( sc && sc->count ) {
@@ -16875,12 +16834,10 @@ int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 {
 	int delaynodex = skill_get_delaynodex(skill_id, skill_lv);
 	int time = skill_get_delay(skill_id, skill_lv);
-	struct map_session_data *sd;
+	struct map_session_data *sd = NULL;
 	struct status_change *sc = status_get_sc(bl);
 
 	nullpo_ret(bl);
-
-	sd = BL_CAST(BL_PC, bl);
 
 	if( skill_id == SA_ABRACADABRA || skill_id == WM_RANDOMIZESPELL )
 		return 0; //Will use picked skill's delay
@@ -16936,8 +16893,15 @@ int skill_delayfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 		}
 	}
 
-	if( !(delaynodex&4) && sd && sd->delayrate != 100 )
-		time = time * sd->delayrate / 100;
+	if( !(delaynodex&4) && (sd = map_id2sd(bl->id)) ) {
+		uint8 i;
+
+		ARR_FIND(0, MAX_PC_BONUS, i, sd->skilldelay[i].id == skill_id);
+		if( i < MAX_PC_BONUS )
+			time += sd->skilldelay[i].val;
+		if( sd->delayrate != 100 )
+			time = time * sd->delayrate / 100;
+	}
 
 	if( battle_config.delay_rate != 100 )
 		time = time * battle_config.delay_rate / 100;
@@ -16954,8 +16918,7 @@ int skill_cooldownfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 
 	nullpo_ret(bl);
 
-	sd = BL_CAST(BL_PC, bl);
-	time = skill_get_cooldown(sd, skill_id, skill_lv);
+	time = skill_get_cooldown(skill_id, skill_lv);
 
 	if( bl->type&battle_config.no_skill_cooldown )
 		return battle_config.min_skill_cooldown_limit;
@@ -16965,8 +16928,17 @@ int skill_cooldownfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv)
 		time = 0; //Dimension removes Nova Explosion's cooldown
 	}
 
-	if( sd && sd->cooldownrate != 100 )
-		time = time * sd->cooldownrate / 100;
+	if( (sd = map_id2sd(bl->id)) ) {
+		uint8 i;
+
+		if (skill_id == SU_TUNABELLY && pc_checkskill(sd, SU_SPIRITOFSEA) > 0)
+			time -= skill_get_time(skill_id, skill_lv);
+		ARR_FIND(0, MAX_PC_BONUS, i, sd->skillcooldown[i].id == skill_id);
+		if( i < MAX_PC_BONUS )
+			time += sd->skillcooldown[i].val;
+		if( sd->cooldownrate != 100 )
+			time = time * sd->cooldownrate / 100;
+	}
 
 	if( battle_config.cooldown_rate != 100 )
 		time = time * battle_config.cooldown_rate / 100;

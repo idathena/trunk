@@ -21322,7 +21322,7 @@ void clif_parse_equipswitch_request(int fd, struct map_session_data *sd)
 	if( DIFF_TICK(tick, sd->equipswitch_tick) < 0 )
 		return; //Client will not let you send a request
 
-	sd->equipswitch_tick = tick + skill_get_cooldown(sd, skill_id, skill_lv);
+	sd->equipswitch_tick = tick + skill_cooldownfix(&sd->bl, skill_id, skill_lv);
 
 	if( !battle_config.feature_equipswitch )
 		return;

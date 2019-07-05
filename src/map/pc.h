@@ -86,44 +86,6 @@ enum prevent_logout_trigger {
 	PLT_DAMAGE = 8
 };
 
-struct weapon_data {
-	int atkmods[3];
-	//All the variables except atkmods get zero'ed in each call of status_calc_pc
-	//NOTE: if you want to add a non-zeroed variable, you need to update the memset call
-	//in status_calc_pc as well! All the following are automatically zero'ed. [Skotlex]
-	int overrefine;
-	int star;
-	int ignore_def_ele;
-	int ignore_def_race;
-	int ignore_def_class;
-	int def_ratio_atk_ele;
-	int def_ratio_atk_race;
-	int def_ratio_atk_class;
-	int adddefele[ELE_MAX];
-	int addrace[RC_MAX];
-	int addrace2[RC2_MAX];
-	int addclass[CLASS_MAX];
-	int addsize[SZ_MAX];
-	short hp_drain_race[RC_MAX];
-	short sp_drain_race[RC_MAX];
-	short hp_drain_class[CLASS_MAX];
-	short sp_drain_class[CLASS_MAX];
-
-	struct drain_data {
-		short rate; //Success rate 10000 = 100%
-		short per; //Drain value/rate per attack
-	} hp_drain_rate, sp_drain_rate;
-
-	struct {
-		short class_, rate;
-	}	add_dmg[MAX_PC_BONUS];
-
-	struct {
-		short flag, rate;
-		unsigned char ele;
-	} adddefele2[MAX_PC_BONUS];
-};
-
 struct s_autospell {
 	short id, lv, rate, flag;
 	unsigned short card_id;
@@ -165,6 +127,17 @@ struct s_autobonus {
 	unsigned int pos;
 };
 
+//Miscellaneous item bonus struct
+struct s_item_bonus {
+	uint16 id;
+	int val;
+};
+
+struct s_item_bonus_ele2 {
+	short flag, rate;
+	unsigned char ele;
+};
+
 struct skill_cooldown_entry {
 	unsigned short skill_id;
 	int timer, duration;
@@ -184,12 +157,6 @@ enum npc_timeout_type {
 	NPCT_WAIT  = 2,
 };
 
-//Item Group heal rate struct
-struct s_pc_itemgrouphealrate {
-	uint16 group_id; //Item Group ID
-	short rate; //Rate
-};
-
 //Timed bonus 'bonus_script' struct [Cydh]
 struct s_bonus_script_entry {
 	struct script_code *script;
@@ -199,6 +166,38 @@ struct s_bonus_script_entry {
 	enum si_type icon;
 	uint8 type; //0 - Ignore; 1 - Buff; 2 - Debuff
 	int tid;
+};
+
+struct weapon_data {
+	int atkmods[3];
+	//All the variables except atkmods get zero'ed in each call of status_calc_pc
+	//NOTE: if you want to add a non-zeroed variable, you need to update the memset call
+	//in status_calc_pc as well! All the following are automatically zero'ed. [Skotlex]
+	int overrefine;
+	int star;
+	int ignore_def_ele;
+	int ignore_def_race;
+	int ignore_def_class;
+	int def_ratio_atk_ele;
+	int def_ratio_atk_race;
+	int def_ratio_atk_class;
+	int adddefele[ELE_MAX];
+	int addrace[RC_MAX];
+	int addrace2[RC2_MAX];
+	int addclass[CLASS_MAX];
+	int addsize[SZ_MAX];
+	short hp_drain_race[RC_MAX];
+	short sp_drain_race[RC_MAX];
+	short hp_drain_class[CLASS_MAX];
+	short sp_drain_class[CLASS_MAX];
+
+	struct drain_data {
+		short rate; //Success rate 10000 = 100%
+		short per; //Drain value/rate per attack
+	} hp_drain_rate, sp_drain_rate;
+
+	struct s_item_bonus add_dmg[MAX_PC_BONUS];
+	struct s_item_bonus_ele2 adddefele2[MAX_PC_BONUS];
 };
 
 struct map_session_data {
@@ -372,7 +371,6 @@ struct map_session_data {
 	int subrace2[RC2_MAX];
 	int subclass[CLASS_MAX];
 	int subsize[SZ_MAX];
-	short reseff[SC_MAX];
 	int weapon_coma_ele[ELE_MAX];
 	int weapon_coma_race[RC_MAX];
 	int weapon_coma_class[CLASS_MAX];
@@ -386,6 +384,7 @@ struct map_session_data {
 	int shield_addsize[SZ_MAX];
 	int magic_adddefele[ELE_MAX];
 	int magic_addrace[RC_MAX];
+	int magic_addrace2[RC2_MAX];
 	int magic_addclass[CLASS_MAX];
 	int magic_addsize[SZ_MAX];
 	int magic_atkele[ELE_MAX];
@@ -399,41 +398,25 @@ struct map_session_data {
 	short sp_gain_race[RC_MAX];
 	int dropaddrace[RC_MAX];
 	int dropaddclass[CLASS_MAX];
-	int magic_addrace2[RC2_MAX];
 	//Zeroed arrays end here
 
 	//Zeroed structures start here
 	struct s_autospell autospell[MAX_PC_BONUS], autospell2[MAX_PC_BONUS], autospell3[MAX_PC_BONUS];
 	struct s_addeffect addeff[MAX_PC_BONUS], addeff2[MAX_PC_BONUS];
 	struct s_addeffectonskill addeff3[MAX_PC_BONUS];
-
-	struct s_skill_bonus { //skillatk raises bonus dmg% of skills, skillheal increases heal%, skillblown increases bonus blewcount for some skills
-		unsigned short id;
-		short val;
-	} skillatk[MAX_PC_BONUS], skillusesprate[MAX_PC_BONUS], skillusesp[MAX_PC_BONUS],
+	struct s_item_bonus skillatk[MAX_PC_BONUS], skillusesprate[MAX_PC_BONUS], skillusesp[MAX_PC_BONUS],
 		skillheal[MAX_PC_BONUS], skillheal2[MAX_PC_BONUS], skillblown[MAX_PC_BONUS],
-		skillcast[MAX_PC_BONUS], skillfixcastrate[MAX_PC_BONUS], subskill[MAX_PC_BONUS];
-	struct s_skill_bonus_i32 {
-		uint16 id;
-		int32 val;
-	} skillvarcast[MAX_PC_BONUS], skillcooldown[MAX_PC_BONUS], skillfixcast[MAX_PC_BONUS], skilldelay[MAX_PC_BONUS];
+		skillcastrate[MAX_PC_BONUS], skillfixcastrate[MAX_PC_BONUS], subskill[MAX_PC_BONUS],
+		skillvarcast[MAX_PC_BONUS], skillfixcast[MAX_PC_BONUS], skillcooldown[MAX_PC_BONUS],
+		skilldelay[MAX_PC_BONUS], add_def[MAX_PC_BONUS], add_mdef[MAX_PC_BONUS], add_mdmg[MAX_PC_BONUS],
+		reseff[MAX_PC_BONUS], itemhealrate[MAX_PC_BONUS], itemgrouphealrate[MAX_PC_BONUS];
+	struct s_add_drop add_drop[MAX_PC_BONUS];
+	struct s_item_bonus_ele2 subele2[MAX_PC_BONUS];
 	struct s_regen {
 		short value;
 		int rate;
 		int tick;
 	} hp_loss, sp_loss, hp_regen, sp_regen, percent_hp_regen, percent_sp_regen;
-	struct {
-		short class_, rate;
-	} add_def[MAX_PC_BONUS], add_mdef[MAX_PC_BONUS], add_mdmg[MAX_PC_BONUS];
-	struct s_add_drop add_drop[MAX_PC_BONUS];
-	struct s_healrate {
-		unsigned short nameid;
-		int rate;
-	} itemhealrate[MAX_PC_BONUS];
-	struct s_subele2 {
-		short flag, rate;
-		unsigned char ele;
-	} subele2[MAX_PC_BONUS];
 	struct {
 		short value;
 		int rate, tick;
@@ -707,9 +690,6 @@ struct map_session_data {
 		uint16 count;
 	} bonus_script;
 
-	struct s_pc_itemgrouphealrate **itemgrouphealrate; //List of Item Group Heal rate bonus
-	uint8 itemgrouphealrate_count; //Number of rate bonuses
-
 #ifdef VIP_ENABLE
 	struct vip_info vip;
 #endif
@@ -740,7 +720,6 @@ struct map_session_data {
 };
 
 extern struct eri *pc_sc_display_ers; //Player's SC display table
-extern struct eri *pc_itemgrouphealrate_ers; //Player's Item Group Heal Rate table
 
 extern int pc_expiration_tid; //Global expiration timer id
 
@@ -1274,7 +1253,6 @@ void pc_bonus_script_clear(struct map_session_data *sd, uint16 flag);
 
 void pc_cell_basilica(struct map_session_data *sd);
 
-void pc_itemgrouphealrate_clear(struct map_session_data *sd);
 short pc_get_itemgroup_bonus(struct map_session_data *sd, unsigned short nameid);
 short pc_get_itemgroup_bonus_group(struct map_session_data *sd, uint16 group_id);
 

@@ -20364,8 +20364,8 @@ BUILDIN_FUNC(npcskill)
 
 	nd = (struct npc_data *)map_id2bl(sd->npc_id);
 
-	if( stat_point > battle_config.max_third_parameter ) {
-		ShowError("npcskill: stat point exceeded maximum of %d.\n",battle_config.max_third_parameter);
+	if( stat_point > battle_config.max_parameter_renewal_jobs ) {
+		ShowError("npcskill: stat point exceeded maximum of %d.\n",battle_config.max_parameter_renewal_jobs);
 		return 1;
 	}
 
