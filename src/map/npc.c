@@ -2752,8 +2752,9 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 	nd = npc_create_npc(m, x, y);
 	nd->u.shop.count = 0;
 	while( p ) {
-		unsigned short nameid2, qty = 0;
+		uint16 nameid2;
 		int value;
+		uint32 qty = 0;
 		struct item_data *id;
 		bool skip = false;
 
@@ -2763,7 +2764,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 		switch( type ) {
 			case NPCTYPE_MARKETSHOP:
 #if PACKETVER >= 20131223
-				if( sscanf(p, ",%hu:%d:%hu", &nameid2, &value, &qty) != 3 ) {
+				if( sscanf(p, ",%hu:%d:%u", &nameid2, &value, &qty) != 3 ) {
 					ShowError("npc_parse_shop: (MARKETSHOP) Invalid item definition in file '%s', line '%d'. Ignoring the rest of the line...\n * w1=%s\n * w2=%s\n * w3=%s\n * w4=%s\n", filepath, strline(buffer, start - buffer), w1, w2, w3, w4);
 					skip = true;
 				}
@@ -2803,7 +2804,7 @@ static const char *npc_parse_shop(char *w1, char *w2, char *w3, char *w4, const 
 				id->name, nameid2, value, (int)(value * 0.75), id->value_sell, (int)(id->value_sell * 1.24), filepath, strline(buffer, start - buffer));
 
 		if( type == NPCTYPE_MARKETSHOP && !qty ) {
-			ShowWarning("npc_parse_shop: Item %s [%hu] is stocked with invalid value %hu, changed to 1. File '%s', line '%d'.\n",
+			ShowWarning("npc_parse_shop: Item %s [%hu] is stocked with invalid value %u, changed to 1. File '%s', line '%d'.\n",
 				id->name, nameid2, qty, filepath, strline(buffer, start - buffer));
 			qty = 1;
 		}
@@ -3383,7 +3384,7 @@ int npc_instanceinit(struct npc_data *nd)
 void npc_market_tosql(const char *exname, struct npc_item_list *list) {
 	SqlStmt *stmt = SqlStmt_Malloc(mmysql_handle);
 
-	if( SQL_ERROR == SqlStmt_Prepare(stmt, "REPLACE INTO `%s` (`name`,`nameid`,`price`,`amount`,`flag`) VALUES ('%s','%hu','%d','%hu','%"PRIu8"')",
+	if( SQL_ERROR == SqlStmt_Prepare(stmt, "REPLACE INTO `%s` (`name`,`nameid`,`price`,`amount`,`flag`) VALUES ('%s','%hu','%u','%u','%"PRIu8"')",
 		markets_db, exname, list->nameid, list->value, list->qty, list->flag) ||
 		SQL_ERROR == SqlStmt_Execute(stmt) )
 		SqlStmt_ShowDebug(stmt);

@@ -16247,9 +16247,10 @@ BUILDIN_FUNC(callshop)
 	else if( nd->subtype == NPCTYPE_MARKETSHOP ) {
 		unsigned short i;
 
-		for( i = 0; i < nd->u.shop.count; i++ )
+		for( i = 0; i < nd->u.shop.count; i++ ) {
 			if( nd->u.shop.shop_item[i].qty )
 				break;
+		}
 		if( i == nd->u.shop.count ) {
 			clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(500),false,SELF);
 			return 0;
@@ -21266,9 +21267,9 @@ BUILDIN_FUNC(npcshopupdate) {
 	const char *npcname = script_getstr(st,2);
 	struct npc_data *nd = npc_name2id(npcname);
 	uint16 nameid = script_getnum(st,3);
-	int price = script_getnum(st,4);
+	uint32 price = script_getnum(st,4);
 #if PACKETVER >= 20131223
-	uint16 stock = (script_hasdata(st,5) ? script_getnum(st,5) : 0);
+	uint32 stock = (script_hasdata(st,5) ? script_getnum(st,5) : 0);
 #endif
 	int i;
 
@@ -21286,8 +21287,7 @@ BUILDIN_FUNC(npcshopupdate) {
 
 	for (i = 0; i < nd->u.shop.count; i++) {
 		if (nd->u.shop.shop_item[i].nameid == nameid) {
-
-			if (price != 0)
+			if (price)
 				nd->u.shop.shop_item[i].value = price;
 #if PACKETVER >= 20131223
 			if (nd->subtype == NPCTYPE_MARKETSHOP) {

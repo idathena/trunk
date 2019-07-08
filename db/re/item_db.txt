@@ -8,9 +8,9 @@
 // - You may use, for example: 10:25 for a item to give 10 atk and 25 weapon matk.
 // Healing Items
 //=============================================================
-501,Red_Potion,Red Potion,0,50,,70,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(45,65),0; },{},{}
-502,Orange_Potion,Orange Potion,0,200,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(105,145),0; },{},{}
-503,Yellow_Potion,Yellow Potion,0,550,,130,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(175,235),0; },{},{}
+501,Red_Potion,Red Potion,0,10,,70,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(45,65),0; },{},{}
+502,Orange_Potion,Orange Potion,0,50,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(105,145),0; },{},{}
+503,Yellow_Potion,Yellow Potion,0,180,,130,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(175,235),0; },{},{}
 504,White_Potion,White Potion,0,1200,,150,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal rand(325,405),0; },{},{}
 505,Blue_Potion,Blue Potion,0,5000,,150,,,,,0xFFFFFFFF,63,2,,,,,,{ itemheal 0,rand(40,60); },{},{}
 506,Green_Potion,Green Potion,0,40,,70,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_end SC_POISON; sc_end SC_SILENCE; sc_end SC_BLIND; sc_end SC_CONFUSION; sc_end SC_HALLUCINATION; },{},{}
@@ -149,7 +149,7 @@
 640,Shining_Stone,Shining Stone,11,3000,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ pet 1155; },{},{}
 641,Contracts_In_Shadow,Contract in Shadow,11,100,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ pet 1109; },{},{}
 642,Book_Of_Devil,Book of the Devil,11,1800,,50,,,,,0xFFFFFFFF,63,2,,,,,,{ pet 1101; },{},{}
-643,Pet_Incubator,Pet Incubator,2,3000,,30,,,,,0xFFFFFFFF,63,2,,,,,,{ bpet; },{},{}
+643,Pet_Incubator,Pet Incubator,2,10000,,30,,,,,0xFFFFFFFF,63,2,,,,,,{ bpet; },{},{}
 644,Gift_Box,Gift Box,2,1000,,200,,,,,0xFFFFFFFF,63,2,,,,,,{ getrandgroupitem(IG_GiftBox,1); },{},{}
 645,Center_Potion,Concentration Potion,2,1200,,100,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_ASPDPOTION0,1800000,4; },{},{}
 656,Awakening_Potion,Awakening Potion,2,2200,,150,,,,,0xFFF7FEEF,63,2,,,40,,,{ sc_start SC_ASPDPOTION1,1800000,6; },{},{}
@@ -321,7 +321,7 @@
 966,Flesh_Of_Clam,Clam Flesh,3,158,,10,,,,,,,,,,,,,{},{},{}
 967,Turtle_Shell,Turtle Shell,3,680,,10,,,,,,,,,,,,,{},{},{}
 968,Voucher_Of_Orcish_Hero,Heroic Emblem,3,3000,,10,,,,,,,,,,,,,{},{},{}
-969,Gold,Gold,3,200000,,200,,,,,,,,,,,,,{},{},{}
+969,Gold,Gold,3,150000,,200,,,,,,,,,,,,,{},{},{}
 970,Alchol,Alcohol,3,400,,30,,,,,,,,,,,,,{},{},{}
 971,Detrimindexta,Detrimindexta,3,400,,30,,,,,,,,,,,,,{},{},{}
 972,Karvodailnirol,Karvodailnirol,3,400,,30,,,,,,,,,,,,,{},{},{}
@@ -4063,7 +4063,7 @@
 6094,Traditional_Cookie,Traditional Sweets,3,20,,10,,,,,,,,,,,,,{},{},{}
 6095,Flavored_Alcohol,Flavored Alcohol,3,1000,,10,,,,,,,,,,,,,{},{},{}
 6096,Fish_With_Blue_Back,Fish With Blue Back,3,20,,10,,,,,,,,,,,,,{},{},{}
-6097,Pumpkin_Pie_,Pumpkin Pie,3,20,,10,,,,,,,,,,,,,{},{},{}
+6097,Pumpkin_Pie_,Pumpkin Pie,3,1000,,10,,,,,,,,,,,,,{},{},{}
 6098,Small_Snow_Flower,Small Snow Flower,3,1000,,10,,,,,,,,,,,,,{},{},{}
 6099,Grilled_Rice_Cake,Grilled Rice Cake,3,20,,10,,,,,,,,,,,,,{},{},{}
 6100,Damp_Darkness,Damp Darkness,3,1000,,10,,,,,,,,,,,,,{},{},{}
@@ -4073,7 +4073,7 @@
 6104,Big_Cell,Big Cell,3,1000,,10,,,,,,,,,,,,,{},{},{}
 6105,Morning_Dew,Morning Dew,3,20,,10,,,,,,,,,,,,,{},{},{}
 6106,Well_Ripened_Berry,Well Ripened Berry,3,20,,10,,,,,,,,,,,,,{},{},{}
-6107,Sunset_On_The_Rock,Sunset On The Rock,3,20,,10,,,,,,,,,,,,,{},{},{}
+6107,Sunset_On_The_Rock,Sunset On The Rock,3,1000,,10,,,,,,,,,,,,,{},{},{}
 6108,Apple_Pudding,Apple Pudding,3,1000,,10,,,,,,,,,,,,,{},{},{}
 6109,Plant_Neutrient,Plant Neutrient,3,20,,10,,,,,,,,,,,,,{},{},{}
 6110,Vital_Flower,Vital Flower,3,1000,,10,,,,,,,,,,,,,{},{},{}
@@ -5604,7 +5604,7 @@
 7821,Green_Apple,Green Apple,3,20,,10,,,,,,,,,,,,,{},{},{}
 7822,Whole_Barbecue,Whole Barbecue,3,20,,10,,,,,,,,,,,,,{},{},{}
 7823,Meat_Veg_Skewer,Meat Veg Skewer,3,20,,10,,,,,,,,,,,,,{},{},{}
-7824,Spirit_Liquor,Spirit Liquor,3,20,,10,,,,,,,,,,,,,{},{},{}
+7824,Spirit_Liquor,Spirit Liquor,3,1000,,10,,,,,,,,,,,,,{},{},{}
 7825,Heroic_Stone,Heroic Stone,3,20,,10,,,,,,,,,,,,,{},{},{}
 7826,Continental_Guard_Paper,Continental Guard Paper,3,0,,0,,,,,,,,,,,,,{},{},{}
 7827,Mineral_Report,Mineral Evals,3,0,,0,,,,,,,,,,,,,{},{},{}
@@ -10943,6 +10943,7 @@
 22984,Kahluna_Milk,Kahluna Milk,0,6,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_DORAM_BUF_01,180000,0; },{},{}
 22985,Basil,Basil,0,10,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ sc_start SC_DORAM_BUF_02,180000,0; },{},{}
 23012,S_Small_Mana_Potion,[Sale] Small Mana Potion,2,0,,10,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus2 bRegenPercentSP,5,5000; }",600,9; /* Fix me: unknown flag and specialeffect ; disabled when LK_BERSERK */ },{},{}
+23016,Cursed_Fragment,Cursed Fragment,2,0,,1,,,,,0xFFFFFFFF,63,2,,,,,,{ /* callfunc "F_Cursed_Fragment"; */ },{},{}
 23038,S_Slim_White_Box,[Sale] Slim White Potion Box,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 547,200; },{},{}
 23043,S_Seed_Of_Yggdrasil_Box,[Sale] Yggdrasil Seed Box,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ getitem 608,30; },{},{}
 23046,S_Mystic_Powder,[Sale] Mystic Powder,2,0,,0,,,,,0xFFFFFFFF,63,2,,,,,,{ bonus_script "{ bonus bFlee,20; bonus bLuk,10; }",300,9; /* Fix me: unknown flag and specialeffect */ },{},{}
@@ -11219,9 +11220,9 @@
 25049,Basilac_Clam,Basilac Clam,3,0,,0,,,,,,,,,,,,,{},{},{}
 25142,Doram_Token,Doram Token,3,0,,0,,,,,,,,,,,,,{},{},{}
 25187,Slug_Bullet,Slug Bullet,3,1200,,1200,,,,,,,,,,,,,{},{},{}
-25231,Suspicious_Bottle,Suspicious Bottle,3,20,,0,,,,,,,,,,,,,{},{},{}
-25232,Cheap_Lubricant,Cheap Lubricant,3,20,,0,,,,,,,,,,,,,{},{},{}
-25233,Cotton_Bundle,Cotton Bundle,3,20,,0,,,,,,,,,,,,,{},{},{}
+25231,Suspicious_Bottle,Suspicious Bottle,3,1000,,0,,,,,,,,,,,,,{},{},{}
+25232,Cheap_Lubricant,Cheap Lubricant,3,1000,,0,,,,,,,,,,,,,{},{},{}
+25233,Cotton_Bundle,Cotton Bundle,3,1000,,0,,,,,,,,,,,,,{},{},{}
 25245,Small_Pile_Of_Bones,Small Pile of Bones,3,0,,0,,,,,,,,,,,,,{},{},{}
 25290,Sweets_Festival_Coin,Sweets Festival Coin,3,0,,0,,,,,,,,,,,,,{},{},{}
 25375,Mightysoul_Essence,Mightysoul Essence,3,0,,0,,,,,,,,,,,,,{},{},{}

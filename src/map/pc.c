@@ -1080,6 +1080,9 @@ bool pc_can_sell_item(struct map_session_data *sd, struct item *item, enum npc_s
 	if(!sd || !item)
 		return false;
 
+	if(itemdb_ishatched_egg(item))
+		return false;
+
 	if(item->equip > 0 || item->amount < 0)
 		return false;
 
@@ -5395,6 +5398,9 @@ enum e_additem_result pc_cart_additem(struct map_session_data *sd, struct item *
 	if( !(item->nameid) || amount <= 0 )
 		return ADDITEM_INVALID;
 
+	if( itemdb_ishatched_egg(item) )
+		return ADDITEM_INVALID;
+
 	data = itemdb_search(item->nameid);
 	if( data->stack.cart && amount > data->stack.amount ) //Item stack limitation
 		return ADDITEM_STACKLIMIT;
@@ -9522,7 +9528,7 @@ bool pc_can_attack(struct map_session_data *sd, int target_id)
  *------------------------------------------*/
 bool pc_candrop(struct map_session_data *sd, struct item *item)
 {
-	if( item && (item->expire_time || (item->bound && !pc_can_give_bounded_items(sd))) )
+	if( item && (itemdb_ishatched_egg(item) || item->expire_time || (item->bound && !pc_can_give_bounded_items(sd))) )
 		return false;
 	if( !pc_can_give_items(sd) || sd->sc.cant.drop ) //Check if this GM level can drop items
 		return false;
