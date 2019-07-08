@@ -24,18 +24,18 @@ struct npc_label_list {
 
 //Item list for NPC sell/buy list
 struct npc_item_list {
-	unsigned short nameid;
-	unsigned int value;
+	uint16 nameid;
+	uint32 value;
 #if PACKETVER >= 20131223
-	unsigned short qty; //Stock counter (Market shop)
+	uint32 qty; //Stock counter (Market shop)
 	uint8 flag; //1: Item added by npcshopitem/npcshopadditem, force load! (Market shop)
 #endif
 };
 
 //List of bought/sold item for NPC shops
 struct s_npc_buy_list {
-	unsigned short qty; //Amount of item will be bought
-	unsigned short nameid; //ID of item will be bought
+	uint16 qty; //Amount of item will be bought
+	uint16 nameid; //ID of item will be bought
 };
 
 struct npc_data {

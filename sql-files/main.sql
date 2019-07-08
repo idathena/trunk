@@ -916,6 +916,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1559387580);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1559824920);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1560073680);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1560615000);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1562616480);
 
 --
 -- Table structure for table `sstatus`
@@ -1101,7 +1102,7 @@ CREATE TABLE IF NOT EXISTS `markets` (
   `name` varchar(50) NOT NULL default '',
   `nameid` smallint(5) unsigned NOT NULL,
   `price` int(11) unsigned NOT NULL,
-  `amount` smallint(5) unsigned NOT NULL,
+  `amount` int(11) unsigned NOT NULL default '0',
   `flag` tinyint(2) unsigned NOT NULL default '0',
   PRIMARY KEY (`name`,`nameid`)
 ) ENGINE=MyISAM default CHARSET=latin1;

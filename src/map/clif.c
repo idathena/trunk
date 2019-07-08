@@ -2157,7 +2157,7 @@ void clif_npc_market_purchase_ack(struct map_session_data *sd, uint8 res, uint8 
 		for( i = 0; i < n; i++ ) {
 			WFIFOW(fd,5 + i * 8) = list[i].nameid;
 			WFIFOW(fd,7 + i * 8) = list[i].qty;
-			ARR_FIND(0, count, j, (list[i].nameid == shop[j].nameid));
+			ARR_FIND(0, count, j, list[i].nameid == shop[j].nameid);
 			WFIFOL(fd,9 + i * 8) = (j != count) ? shop[j].value : 0;
 		}
 	}
@@ -2190,7 +2190,7 @@ void clif_parse_NPCMarketPurchase(int fd, struct map_session_data *sd) {
 	CREATE(item_list, struct s_npc_buy_list, n);
 	for( i = 0; i < n; i++ ) {
 		item_list[i].nameid = RFIFOW(fd,info->pos[1] + i * 6);
-		item_list[i].qty = (uint16)umin(RFIFOL(fd,info->pos[2] + i * 6),UINT16_MAX);
+		item_list[i].qty = (uint16)umin(RFIFOL(fd,info->pos[2] + i * 6), UINT16_MAX);
 	}
 
 	res = npc_buylist(sd, n, item_list);

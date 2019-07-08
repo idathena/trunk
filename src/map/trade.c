@@ -334,14 +334,14 @@ void trade_tradeadditem(struct map_session_data *sd, short index, short amount)
 	nullpo_retv(sd);
 
 	if( !sd->state.trading || sd->state.deal_locked > 0 )
-		return; //Can't add stuff.
+		return; //Can't add stuff
 
-	if( (target_sd = map_id2sd(sd->trade_partner)) == NULL ) {
+	if( !(target_sd = map_id2sd(sd->trade_partner)) ) {
 		trade_tradecancel(sd);
 		return;
 	}
 
-	if( amount == 0 ) { //Why do this.. ~.~ just send an ack, the item won't display on the trade window.
+	if( !amount ) { //Why do this.. ~.~ just send an ack, the item won't display on the trade window
 		clif_tradeitemok(sd, index, 0);
 		return;
 	}
@@ -351,19 +351,23 @@ void trade_tradeadditem(struct map_session_data *sd, short index, short amount)
 	//Item checks...
 	if( index < 0 || index >= MAX_INVENTORY )
 		return;
+
 	if( amount < 0 || amount > sd->inventory.u.items_inventory[index].amount )
 		return;
 
 	item = &sd->inventory.u.items_inventory[index];
 	src_lv = pc_get_group_level(sd);
 	dst_lv = pc_get_group_level(target_sd);
+
 	if( !itemdb_cantrade(item, src_lv, dst_lv) && //Can't trade
-		(pc_get_partner(sd) != target_sd || !itemdb_canpartnertrade(item, src_lv, dst_lv)) ) //Can't partner-trade
-	{
+		(pc_get_partner(sd) != target_sd || !itemdb_canpartnertrade(item, src_lv, dst_lv)) ) { //Can't partner-trade
 		clif_displaymessage (sd->fd, msg_txt(260));
 		clif_tradeitemok(sd, index + 2, 1);
 		return;
 	}
+
+	if( itemdb_ishatched_egg(item) )
+		return;
 
 	if( item->expire_time ) { //Rental System
 		clif_displaymessage(sd->fd, msg_txt(260));
@@ -386,7 +390,7 @@ void trade_tradeadditem(struct map_session_data *sd, short index, short amount)
 		sd->state.isBoundTrading |= (1<<item->bound);
 
 	//Locate a trade position
-	ARR_FIND(0, 10, trade_i, sd->deal.item[trade_i].index == index || sd->deal.item[trade_i].amount == 0);
+	ARR_FIND(0, 10, trade_i, (sd->deal.item[trade_i].index == index || !sd->deal.item[trade_i].amount));
 	if( trade_i == 10 ) { //No space left
 		clif_tradeitemok(sd, index + 2, 1);
 		return;
@@ -394,8 +398,7 @@ void trade_tradeadditem(struct map_session_data *sd, short index, short amount)
 
 	trade_weight = sd->inventory_data[index]->weight * amount;
 	if( target_sd->weight + sd->deal.weight + trade_weight > target_sd->max_weight ) {
-		//Fail to add item -- the player was over weighted.
-		clif_tradeitemok(sd, index + 2, 1);
+		clif_tradeitemok(sd, index + 2, 1); //Fail to add item -- the player was over weighted
 		return;
 	}
 
