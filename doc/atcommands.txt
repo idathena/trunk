@@ -1144,7 +1144,7 @@ Give or remove a cart to a player and also change the cart skin based on ID:
 
 @langtype <language>
 
-Changes the language attached to the player's account (LANGTYPE_VAR).
+Changes the language attached to the player's account (#langtype).
 If no parameter is given, a list of available languages is displayed.
 All languages are defined in '/src/common/msg_conf.h'.
 
