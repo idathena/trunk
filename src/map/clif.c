@@ -16380,7 +16380,7 @@ void clif_parse_Auction_bid(int fd, struct map_session_data *sd)
 	int bid = RFIFOL(fd,info->pos[1]);
 
 	if( !pc_can_give_items(sd) ) { //They aren't supposed to give zeny [Inkfish]
-		clif_displaymessage(sd->fd, msg_txt(sd, 246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		return;
 	}
 	if( bid <= 0 )

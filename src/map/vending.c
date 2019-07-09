@@ -75,11 +75,11 @@ void vending_vendinglistreq(struct map_session_data *sd, int id)
 		return;
 
 	if( !vsd->state.vending )
-		return; //not vending
+		return; //Not vending
 
 	if( !pc_can_give_items(sd) || !pc_can_give_items(vsd) ) { //Check if both GMs are allowed to trade
-		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // GM is not allowed to trade
-		return;
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
+		return; //GM is not allowed to trade
 	}
 
 	sd->vended_id = vsd->vender_id; //Register vending uid

@@ -70,9 +70,9 @@ void trade_traderequest(struct map_session_data *sd, struct map_session_data *ta
 	}
 
 	if (!pc_can_give_items(sd) || !pc_can_give_items(target_sd)) { //Check if both GMs are allowed to trade
-		clif_displaymessage(sd->fd, msg_txt(sd, 246));
-		clif_tradestart(sd, 2); //GM is not allowed to trade
-		return;
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
+		clif_tradestart(sd, 2);
+		return; //GM is not allowed to trade
 	}
 
 	//Players can not request trade from far away, unless they are allowed to use @trade.

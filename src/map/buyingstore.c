@@ -116,7 +116,7 @@ int8 buyingstore_create(struct map_session_data *sd, int zenylimit, unsigned cha
 
 	if( !pc_can_give_items(sd) ) { // Custom: GM is not allowed to buy (give zeny)
 		sd->buyingstore.slots = 0;
-		clif_displaymessage(sd->fd, msg_txt(sd, 246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		clif_buyingstore_open_failed(sd, BUYINGSTORE_CREATE, 0);
 		return 6;
 	}
@@ -254,7 +254,7 @@ void buyingstore_open(struct map_session_data *sd, int account_id) {
 		return;
 
 	if( !pc_can_give_items(sd) ) { // Custom: GM is not allowed to sell
-		clif_displaymessage(sd->fd, msg_txt(sd, 246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		return;
 	}
 
@@ -292,7 +292,7 @@ void buyingstore_trade(struct map_session_data *sd, int account_id, unsigned int
 	}
 
 	if( !pc_can_give_items(sd) ) { // Custom: GM is not allowed to sell
-		clif_displaymessage(sd->fd, msg_txt(sd, 246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		clif_buyingstore_trade_failed_seller(sd, BUYINGSTORE_TRADE_SELLER_FAILED, 0);
 		return;
 	}

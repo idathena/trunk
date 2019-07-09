@@ -162,7 +162,7 @@ int storage_storageopen(struct map_session_data *sd)
 		return 1; //Already open?
 
 	if (!pc_can_give_items(sd)) { //Check is this GM level is allowed to put items to storage
-		clif_displaymessage(sd->fd, msg_txt(sd, 246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		return 1;
 	}
 
@@ -616,7 +616,7 @@ char storage_guild_storageopen(struct map_session_data *sd)
 #endif
 
 	if (!pc_can_give_items(sd)) { //Check is this GM level can open guild storage and store items [Lupus]
-		clif_displaymessage(sd->fd, msg_txt(sd, 246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		return GSTORAGE_ALREADY_OPEN;
 	}
 
@@ -1170,7 +1170,7 @@ bool storage_premiumStorage_load(struct map_session_data *sd, uint8 num, uint8 m
 		return false;
 
 	if (!pc_can_give_items(sd)) { //Check if this GM level is allowed to put items to storage
-		clif_displaymessage(sd->fd, msg_txt(sd, 246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		return false;
 	}
 
