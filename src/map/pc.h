@@ -39,6 +39,7 @@
 #define PCDIECOUNTER_VAR "PC_DIE_COUNTER"
 #define ATTENDANCE_DATE_VAR "#AttendanceDate"
 #define ATTENDANCE_COUNT_VAR "#AttendanceCounter"
+#define LANGTYPE_VAR "#langtype"
 
 //Update this max as necessary, 86 is the value needed for Expanded Super Baby
 #define MAX_SKILL_TREE 86
@@ -293,6 +294,7 @@ struct map_session_data {
 	unsigned int permissions; //Group permissions
 	int count_rewarp; //Count how many time we being rewarped
 
+	int langtype;
 	struct mmo_charstatus status;
 	struct registry save_reg;
 

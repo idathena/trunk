@@ -25,12 +25,13 @@ enum E_MAPSERVER_ST {
 	MAPSERVER_ST_LAST
 };
 
-#define msg_config_read(cfgName) map_msg_config_read(cfgName)
-#define msg_txt(msg_number) map_msg_txt(msg_number)
+#define msg_config_read(cfgName, isnew) map_msg_config_read(cfgName, isnew)
+#define msg_txt(sd, msg_number) map_msg_txt(sd, msg_number)
 #define do_final_msg() map_do_final_msg()
-int map_msg_config_read(char *cfgName);
-const char *map_msg_txt(int msg_number);
+int map_msg_config_read(const char *cfgName, int lang);
+const char *map_msg_txt(struct map_session_data *sd, int msg_number);
 void map_do_final_msg(void);
+void map_msg_reload(void);
 
 #define MAX_NPC_PER_MAP 512
 #define AREA_SIZE battle_config.area_size
@@ -424,23 +425,15 @@ enum _sp {
 	SP_USTR,SP_UAGI,SP_UVIT,SP_UINT,SP_UDEX,SP_ULUK,SP_26,SP_27, // 32-39
 	SP_28,SP_ATK1,SP_ATK2,SP_MATK1,SP_MATK2,SP_DEF1,SP_DEF2,SP_MDEF1, // 40-47
 	SP_MDEF2,SP_HIT,SP_FLEE1,SP_FLEE2,SP_CRITICAL,SP_ASPD,SP_36,SP_JOBLEVEL, // 48-55
-	SP_UPPER,SP_PARTNER,SP_CART,SP_FAME,SP_UNBREAKABLE, //56-60
+	SP_UPPER,SP_PARTNER,SP_CART,SP_FAME,SP_UNBREAKABLE, // 56-60
 	SP_CARTINFO = 99, // 99
 
 	SP_BASEJOB = 119, // 100 + 19 - celest
 	SP_BASECLASS = 120, //Hmm.. why 100 + 19? I just use the next one [Skotlex]
-	SP_KILLERRID = 121,
-	SP_KILLEDRID = 122,
-	SP_SITTING = 123,
-	SP_CHARMOVE = 124,
-	SP_CHARRENAME = 125,
-	SP_CHARFONT = 126,
-	SP_BANK_VAULT = 127,
-	SP_ROULETTE_BRONZE = 128,
-	SP_ROULETTE_SILVER = 129,
-	SP_ROULETTE_GOLD = 130,
-	SP_KILLEDGID = 131,
-	SP_CASHPOINTS,SP_KAFRAPOINTS,SP_PCDIECOUNTER,SP_COOKMASTERY,
+	SP_KILLERRID,SP_KILLEDRID,SP_SITTING,SP_CHARMOVE,SP_CHARRENAME, // 121-125
+	SP_CHARFONT,SP_BANK_VAULT,SP_ROULETTE_BRONZE,SP_ROULETTE_SILVER,SP_ROULETTE_GOLD, // 126 - 130
+	SP_KILLEDGID,SP_CASHPOINTS,SP_KAFRAPOINTS,SP_PCDIECOUNTER,SP_COOKMASTERY, // 131 - 135
+	SP_LANGTYPE, // 136
 
 	// Mercenaries
 	SP_MERCFLEE = 165,SP_MERCKILLS = 189,SP_MERCFAITH = 190,
@@ -965,14 +958,17 @@ struct questinfo *map_has_questinfo(int m, struct npc_data *nd, int quest_id);
 int map_mapflag_pvp_start(struct block_list *bl, va_list ap);
 int map_mapflag_pvp_stop(struct block_list *bl, va_list ap);
 
+//Option readed in cli
 extern char *INTER_CONF_NAME;
 extern char *LOG_CONF_NAME;
 extern char *MAP_CONF_NAME;
 extern char *BATTLE_CONF_FILENAME;
 extern char *ATCOMMAND_CONF_FILENAME;
 extern char *SCRIPT_CONF_NAME;
-extern char *MSG_CONF_NAME;
+extern char *MSG_CONF_NAME_EN;
 extern char *GRF_PATH_FILENAME;
+//Other lang supported
+char *MSG_CONF_NAME_IDN;
 
 //Useful typedefs from jA [Skotlex]
 typedef struct map_session_data TBL_PC;

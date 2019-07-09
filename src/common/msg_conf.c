@@ -7,11 +7,11 @@
 #include "showmsg.h"
 #include "strlib.h"
 
-/*
+/**
  * Return the message string of the specified number by [Yor]
  * (read in table msg_table, with specified lenght table in size)
  */
-const char* _msg_txt(int msg_number, int size, char ** msg_table)
+const char *_msg_txt(int msg_number, int size, char **msg_table)
 {
     if (msg_number >= 0 && msg_number < size &&
 	    msg_table[msg_number] != NULL && msg_table[msg_number][0] != '\0')
@@ -20,11 +20,10 @@ const char* _msg_txt(int msg_number, int size, char ** msg_table)
     return "??";
 }
 
-
-/*
+/**
  * Read txt file and store them into msg_table
  */
-int _msg_config_read(const char* cfgName, int size, char ** msg_table)
+int _msg_config_read(const char *cfgName, int size, char **msg_table)
 {
 	int msg_number;
 	uint16 msg_count = 0, line_num = 0;
@@ -70,12 +69,61 @@ int _msg_config_read(const char* cfgName, int size, char ** msg_table)
 	return 0;
 }
 
-/*
+/**
  * Destroy msg_table (freeup mem)
  */
-void _do_final_msg(int size, char ** msg_table){
+void _do_final_msg(int size, char **msg_table)
+{
 	int i;
 
 	for (i = 0; i < size; i++)
 		aFree(msg_table[i]);
+}
+
+/**
+ * Lookup a langtype string into his associate langtype number
+ * return -1 if not found
+ */
+int msg_langstr2langtype(char *langtype)
+{
+	int lang = -1;
+
+	if (!strncmpi(langtype, "eng", 2))
+		lang = 0;
+	else if (!strncmpi(langtype, "idn", 2))
+		lang = 1;
+
+	return lang;
+}
+
+const char *msg_langtype2langstr(int langtype)
+{
+	switch (langtype) {
+		case 0: return "English (ENG)";
+		case 1: return "Bahasa Indonesia (IDN)";
+		default: return "??";
+	}
+}
+
+/**
+ * Verify that the choosen langtype is enable
+ * return
+ *  1 : langage enable
+ * -1 : false range
+ * -2 : disable
+ */
+int msg_checklangtype(int lang, bool display)
+{
+	uint16 test = (1<<(lang - 1));
+
+	if (!lang)
+		return 1; //Default English
+	else if (lang < 0 || test > LANG_MAX)
+		return -1; //False range
+	else if (LANG_ENABLE&test)
+		return 1;
+	else if (display)
+		ShowDebug("msg_checklangtype: Unsupported langtype '%d'.\n", lang);
+
+	return -2;
 }

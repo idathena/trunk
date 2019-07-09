@@ -71,13 +71,13 @@ void duel_showinfo(const unsigned int did, struct map_session_data *sd)
 	char output[256];
 
 	if(duel_list[did].max_players_limit > 0)
-		sprintf(output, msg_txt(370), // " -- Duels: %d/%d, Members: %d/%d, Max players: %d --"
+		sprintf(output, msg_txt(sd, 370), // " -- Duels: %d/%d, Members: %d/%d, Max players: %d --"
 			did, duel_count,
 			duel_list[did].members_count,
 			duel_list[did].members_count + duel_list[did].invites_count,
 			duel_list[did].max_players_limit);
 	else
-		sprintf(output, msg_txt(371), // " -- Duels: %d/%d, Members: %d/%d --"
+		sprintf(output, msg_txt(sd, 371), // " -- Duels: %d/%d, Members: %d/%d --"
 			did, duel_count,
 			duel_list[did].members_count,
 			duel_list[did].members_count + duel_list[did].invites_count);
@@ -104,7 +104,7 @@ int duel_create(struct map_session_data *sd, const unsigned int maxpl)
 	duel_list[i].invites_count = 0;
 	duel_list[i].max_players_limit = maxpl;
 
-	strcpy(output, msg_txt(372)); // " -- Duel has been created (@invite/@leave) --"
+	strcpy(output, msg_txt(sd, 372)); // " -- Duel has been created (@invite/@leave) --"
 	clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 
 	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
@@ -122,14 +122,14 @@ void duel_invite(const unsigned int did, struct map_session_data *sd, struct map
 	char output[256];
 
 	// " -- Player %s invites %s to duel --"
-	sprintf(output, msg_txt(373), sd->status.name, target_sd->status.name);
+	sprintf(output, msg_txt(sd, 373), sd->status.name, target_sd->status.name);
 	clif_disp_message(&sd->bl, output, strlen(output), DUEL_WOS);
 
 	target_sd->duel_invite = did;
 	duel_list[did].invites_count++;
 
 	// "Blue -- Player %s invites you to PVP duel (@accept/@reject) --"
-	sprintf(output, msg_txt(374), sd->status.name);
+	sprintf(output, msg_txt(sd, 374), sd->status.name);
 	clif_broadcast((struct block_list *)target_sd, output, strlen(output) + 1, BC_BLUE, SELF);
 }
 
@@ -156,7 +156,7 @@ void duel_leave(const unsigned int did, struct map_session_data *sd)
 	char output[256];
 
 	// " <- Player %s has left duel --"
-	sprintf(output, msg_txt(375), sd->status.name);
+	sprintf(output, msg_txt(sd, 375), sd->status.name);
 	clif_disp_message(&sd->bl, output, strlen(output), DUEL_WOS);
 
 	duel_list[did].members_count--;
@@ -186,7 +186,7 @@ void duel_accept(const unsigned int did, struct map_session_data *sd)
 	sd->duel_invite = 0;
 
 	// " -> Player %s has accepted duel --"
-	sprintf(output, msg_txt(376), sd->status.name);
+	sprintf(output, msg_txt(sd, 376), sd->status.name);
 	clif_disp_message(&sd->bl, output, strlen(output), DUEL_WOS);
 
 	clif_map_property(&sd->bl, MAPPROPERTY_FREEPVPZONE, SELF);
@@ -202,7 +202,7 @@ void duel_reject(const unsigned int did, struct map_session_data *sd)
 	char output[256];
 
 	// " -- Player %s has rejected duel --"
-	sprintf(output, msg_txt(377), sd->status.name);
+	sprintf(output, msg_txt(sd, 377), sd->status.name);
 	clif_disp_message(&sd->bl, output, strlen(output), DUEL_WOS);
 
 	duel_list[did].invites_count--;

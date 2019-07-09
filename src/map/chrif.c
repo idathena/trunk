@@ -903,7 +903,7 @@ int chrif_changesex(struct map_session_data *sd, bool change_account) {
 	if (!change_account)
 		WFIFOB(char_fd,32) = (sd->status.sex ? SEX_FEMALE : SEX_MALE);
 	WFIFOSET(char_fd,40);
-	clif_displaymessage(sd->fd, msg_txt(408)); // "Need disconnection to perform change-sex request..."
+	clif_displaymessage(sd->fd, msg_txt(sd, 408)); // "Need disconnection to perform change-sex request..."
 	if (sd->fd)
 		clif_authfail_fd(sd->fd, 15);
 	else
@@ -945,12 +945,12 @@ static void chrif_ack_login_req(int aid, const char *player_name, uint16 type, u
 		case CHRIF_OP_LOGIN_BAN:
 		case CHRIF_OP_LOGIN_UNBLOCK:
 		case CHRIF_OP_LOGIN_UNBAN:
-			snprintf(action, 25, "%s", msg_txt(427 + type)); // Block|Ban|Unblock|Unban|Change the sex of
+			snprintf(action, 25, "%s", msg_txt(sd, 427 + type)); // Block|Ban|Unblock|Unban|Change the sex of
 			break;
 		case CHRIF_OP_LOGIN_VIP:
 			if (!battle_config.disp_servervip_msg)
 				return;
-			snprintf(action, 25, "%s", msg_txt(436)); // VIP
+			snprintf(action, 25, "%s", msg_txt(sd, 436)); // VIP
 			break;
 		default:
 			snprintf(action, 25, "???");
@@ -958,11 +958,11 @@ static void chrif_ack_login_req(int aid, const char *player_name, uint16 type, u
 	}
 
 	switch (answer) {
-		case 0: sprintf(output, msg_txt(424), action, NAME_LENGTH, player_name); break; // Login-serv has been asked to %s the player '%.*s'.
-		case 1: sprintf(output, msg_txt(425), NAME_LENGTH, player_name); break;
-		case 2: sprintf(output, msg_txt(426), action, NAME_LENGTH, player_name); break;
-		case 3: sprintf(output, msg_txt(427), action, NAME_LENGTH, player_name); break;
-		case 4: sprintf(output, msg_txt(424), action, NAME_LENGTH, player_name); break;
+		case 0: sprintf(output, msg_txt(sd, 424), action, NAME_LENGTH, player_name); break; // Login-serv has been asked to %s the player '%.*s'.
+		case 1: sprintf(output, msg_txt(sd, 425), NAME_LENGTH, player_name); break;
+		case 2: sprintf(output, msg_txt(sd, 426), action, NAME_LENGTH, player_name); break;
+		case 3: sprintf(output, msg_txt(sd, 427), action, NAME_LENGTH, player_name); break;
+		case 4: sprintf(output, msg_txt(sd, 424), action, NAME_LENGTH, player_name); break;
 		default: output[0] = '\0'; break;
 	}
 
@@ -1081,11 +1081,11 @@ int chrif_ban(int fd) {
 		int ret_status = RFIFOL(fd,7); //Status or final date of a banishment
 
 		if( 0 < ret_status && ret_status <= 9 )
-			clif_displaymessage(sd->fd, msg_txt(411 + ret_status));
+			clif_displaymessage(sd->fd, msg_txt(sd, 411 + ret_status));
 		else if( ret_status == 100 )
-			clif_displaymessage(sd->fd, msg_txt(421));
+			clif_displaymessage(sd->fd, msg_txt(sd, 421));
 		else
-			clif_displaymessage(sd->fd, msg_txt(420)); // "Your account has not more authorized."
+			clif_displaymessage(sd->fd, msg_txt(sd, 420)); // "Your account has not more authorized."
 	} else if( res == 1 || res == 2 ) {
 		const time_t timestamp = (time_t)RFIFOL(fd,7); //Status or final date of a banishment
 		struct tm now;
@@ -1094,7 +1094,7 @@ int chrif_ban(int fd) {
 
 		localtime_r(&timestamp, &now);
 		strftime(strtime, 24, "%d-%m-%Y %H:%M:%S", &now);
-		safesnprintf(tmpstr, sizeof(tmpstr), msg_txt(423), (res == 2 ? "char" : "account"), strtime); // "Your %s has been banished until %s "
+		safesnprintf(tmpstr, sizeof(tmpstr), msg_txt(sd, 423), (res == 2 ? "char" : "account"), strtime); // "Your %s has been banished until %s "
 		clif_displaymessage(sd->fd, tmpstr);
 	}
 
@@ -1560,7 +1560,7 @@ void chrif_parse_ack_vipActive(int fd) {
 	pc_group_pc_load(sd);
 
 	if (flag&0x2) //isgm
-		clif_displaymessage(sd->fd,msg_txt(437)); // GM's cannot become a VIP.
+		clif_displaymessage(sd->fd,msg_txt(sd, 437)); // GM's cannot become a VIP.
 	else {
 		changed = (sd->vip.enabled != (flag&0x1));
 		if (flag&0x1) { //isvip
@@ -1576,7 +1576,7 @@ void chrif_parse_ack_vipActive(int fd) {
 			sd->vip.time = 0;
 			sd->storage.max_amount = MIN_STORAGE;
 			sd->special_state.no_gemstone = 0;
-			clif_displaymessage(sd->fd, msg_txt(438)); // You are no longer VIP.
+			clif_displaymessage(sd->fd, msg_txt(sd, 438)); // You are no longer VIP.
 		}
 	}
 

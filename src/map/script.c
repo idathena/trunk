@@ -13766,11 +13766,11 @@ int recovery_sub(struct map_session_data *sd, int revive)
 {
 	if( revive&(1|4) && pc_isdead(sd) ) {
 		status_revive(&sd->bl,100,100);
-		clif_displaymessage(sd->fd,msg_txt(16)); // You've been revived!
+		clif_displaymessage(sd->fd,msg_txt(sd,16)); // You've been revived!
 		clif_specialeffect(&sd->bl,EF_RESURRECTION,AREA);
 	} else if( revive&(1|2) && !pc_isdead(sd) ) {
 		status_percent_heal(&sd->bl,100,100);
-		clif_displaymessage(sd->fd,msg_txt(680)); // You have been recovered!
+		clif_displaymessage(sd->fd,msg_txt(sd,680)); // You have been recovered!
 	}
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -16252,7 +16252,7 @@ BUILDIN_FUNC(callshop)
 				break;
 		}
 		if( i == nd->u.shop.count ) {
-			clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(500),false,SELF);
+			clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(sd,500),false,SELF); // Shop is out of stock! Please come back later.
 			return 0;
 		}
 		sd->npc_shopid = nd->bl.id;
@@ -18262,7 +18262,7 @@ BUILDIN_FUNC(openauction)
 		return 1;
 
 	if( !battle_config.feature_auction ) {
-		clif_messagecolor(&sd->bl, color_table[COLOR_RED], msg_txt(1489), false, SELF);
+		clif_messagecolor(&sd->bl, color_table[COLOR_RED], msg_txt(sd, 1489), false, SELF); // Auction system isn't available.
 		return 0;
 	}
 
@@ -19794,7 +19794,7 @@ BUILDIN_FUNC(buyingstore)
 	if( npc_isnear(&sd->bl) ) {
 		char output[150];
 
-		sprintf(output,msg_txt(662),battle_config.min_npc_vendchat_distance);
+		sprintf(output,msg_txt(sd,662),battle_config.min_npc_vendchat_distance);
 		clif_displaymessage(sd->fd,output);
 		return 0;
 	}
@@ -20849,11 +20849,11 @@ BUILDIN_FUNC(montransform) {
 
 	if( tick != 0 ) {
 		if( battle_config.mon_trans_disable_in_gvg && map_flag_gvg2(sd->bl.m) ) {
-			clif_displaymessage(sd->fd,msg_txt(1493)); // Transforming into monster is not allowed in Guild Wars.
+			clif_displaymessage(sd->fd,msg_txt(sd,1493)); // Transforming into monster is not allowed in Guild Wars.
 			return 0;
 		}
 		if( sd->disguise ) {
-			clif_displaymessage(sd->fd,msg_txt(1491)); // Cannot transform into monster while in disguise.
+			clif_displaymessage(sd->fd,msg_txt(sd,1491)); // Cannot transform into monster while in disguise.
 			return 0;
 		}
 		if( !strcmp(cmd,"active_transform") ) {
@@ -22218,9 +22218,9 @@ BUILDIN_FUNC(channel_ban) {
 		if (tsd) {
 			strcpy(cbe->char_name,tsd->status.name);
 			channel_clean(ch, tsd, 0);
-			safesnprintf(output, CHAT_SIZE_MAX, msg_txt(762), ch->alias, tsd->status.name); // %s %s has been banned.
+			safesnprintf(output, CHAT_SIZE_MAX, msg_txt(NULL, 762), ch->alias, tsd->status.name); // %s %s has been banned.
 		} else
-			safesnprintf(output, CHAT_SIZE_MAX, msg_txt(762), ch->alias, "****"); // %s %s has been banned.
+			safesnprintf(output, CHAT_SIZE_MAX, msg_txt(NULL, 762), ch->alias, "****"); // %s %s has been banned.
 		idb_put(ch->banned, char_id, cbe);
 		clif_channel_msg(ch, output, ch->color);
 	}
@@ -22255,9 +22255,9 @@ BUILDIN_FUNC(channel_unban) {
 
 		TBL_PC *tsd = map_charid2sd(char_id);
 		if (tsd)
-			safesnprintf(output, CHAT_SIZE_MAX, msg_txt(763), ch->alias, tsd->status.name); // %s %s has been unbanned
+			safesnprintf(output, CHAT_SIZE_MAX, msg_txt(NULL, 763), ch->alias, tsd->status.name); // %s %s has been unbanned
 		else
-			safesnprintf(output, CHAT_SIZE_MAX, msg_txt(763), ch->alias, "****"); // %s %s has been unbanned.
+			safesnprintf(output, CHAT_SIZE_MAX, msg_txt(NULL, 763), ch->alias, "****"); // %s %s has been unbanned.
 		idb_remove(ch->banned, char_id);
 		clif_channel_msg(ch, output, ch->color);
 	}
@@ -22314,7 +22314,7 @@ BUILDIN_FUNC(channel_kick) {
 	if (!res) {
 		char output[CHAT_SIZE_MAX + 1];
 
-		safesnprintf(output, CHAT_SIZE_MAX, msg_txt(761), ch->alias, tsd->status.name); // "%s %s is kicked"
+		safesnprintf(output, CHAT_SIZE_MAX, msg_txt(NULL, 761), ch->alias, tsd->status.name); // "%s %s is kicked"
 		clif_channel_msg(ch, output, ch->color);
 	}
 

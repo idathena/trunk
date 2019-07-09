@@ -6256,15 +6256,15 @@ int do_init(int argc, char **argv)
 	safestrncpy(default_map, "prontera", MAP_NAME_LENGTH);
 
 	//Init default value
-	CHAR_CONF_NAME = "conf/char_athena.conf";
-	LAN_CONF_NAME = "conf/subnet_athena.conf";
-	SQL_CONF_NAME = "conf/inter_athena.conf";
-	MSG_CONF_NAME = "conf/msg_conf/char_msg.conf";
+	CHAR_CONF_NAME   = "conf/char_athena.conf";
+	LAN_CONF_NAME    = "conf/subnet_athena.conf";
+	SQL_CONF_NAME    = "conf/inter_athena.conf";
+	MSG_CONF_NAME_EN = "conf/msg_conf/char_msg.conf";
 	safestrncpy(console_log_filepath, "./log/char-msg_log.log", sizeof(console_log_filepath));
 
-	cli_get_options(argc,argv);
+	cli_get_options(argc, argv);
 
-	msg_config_read(MSG_CONF_NAME);
+	msg_config_read(MSG_CONF_NAME_EN);
 	char_config_read(CHAR_CONF_NAME);
 	char_config_adjust();
 	char_lan_config_read(LAN_CONF_NAME);
@@ -6359,9 +6359,9 @@ int do_init(int argc, char **argv)
 		runflag = CHARSERVER_ST_RUNNING;
 	}
 
-	if(console) { //start listening
+	if(console) { //Start listening
 		add_timer_func_list(parse_console_timer, "parse_console_timer");
-		add_timer_interval(gettick()+1000, parse_console_timer, 0, 0, 1000); //start in 1s each 1sec
+		add_timer_interval(gettick() + 1000, parse_console_timer, 0, 0, 1000); //Start in 1s each 1sec
 	}
 
 	return 0;
@@ -6370,9 +6370,11 @@ int do_init(int argc, char **argv)
 int char_msg_config_read(char *cfgName) {
 	return _msg_config_read(cfgName,CHAR_MAX_MSG,msg_table);
 }
+
 const char *char_msg_txt(int msg_number) {
 	return _msg_txt(msg_number,CHAR_MAX_MSG,msg_table);
 }
+
 void char_do_final_msg(void) {
 	_do_final_msg(CHAR_MAX_MSG,msg_table);
 }

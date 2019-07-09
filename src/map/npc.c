@@ -1282,17 +1282,17 @@ void run_tomb(struct map_session_data *sd, struct npc_data *nd)
 	localtime_r(&nd->u.tomb.kill_time, &now);
     strftime(time, sizeof(time), "%H:%M", &now);
 
-	snprintf(buffer, sizeof(buffer), msg_txt(657), nd->u.tomb.md->db->name);
+	snprintf(buffer, sizeof(buffer), msg_txt(sd, 657), nd->u.tomb.md->db->name);
     clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptmes(sd, nd->bl.id, msg_txt(658));
+    clif_scriptmes(sd, nd->bl.id, msg_txt(sd, 658));
 
-    snprintf(buffer, sizeof(buffer), msg_txt(659), time);
+    snprintf(buffer, sizeof(buffer), msg_txt(sd, 659), time);
     clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptmes(sd, nd->bl.id, msg_txt(660));
+    clif_scriptmes(sd, nd->bl.id, msg_txt(sd, 660));
 
-	snprintf(buffer, sizeof(buffer), msg_txt(661), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown");
+	snprintf(buffer, sizeof(buffer), msg_txt(sd, 661), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown");
     clif_scriptmes(sd, nd->bl.id, buffer);
 
     clif_scriptclose(sd, nd->bl.id);
@@ -1342,7 +1342,7 @@ int npc_click(struct map_session_data *sd, struct npc_data *nd)
 					if (nd->u.shop.shop_item[i].qty)
 						break;
 				if (i == nd->u.shop.count) {
-					clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(500),false,SELF);
+					clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(sd, 500),false,SELF); // Shop is out of stock! Please come back later.
 					return 0;
 				}
 				sd->npc_shopid = nd->bl.id;
@@ -1491,7 +1491,7 @@ static enum e_CASHSHOP_ACK npc_cashshop_process_payment(struct npc_data *nd, int
 
 					memset(output, '\0', sizeof(output));
 
-					sprintf(output, msg_txt(712), id->jname, id->nameid); // You do not have enough %s (ID: %hu).
+					sprintf(output, msg_txt(sd, 712), id->jname, id->nameid); // You do not have enough %s (ID: %hu).
 					clif_messagecolor(&sd->bl, color_table[COLOR_RED], output, false, SELF);
 					return ERROR_TYPE_PURCHASE_FAIL;
 				}
@@ -1523,12 +1523,12 @@ static enum e_CASHSHOP_ACK npc_cashshop_process_payment(struct npc_data *nd, int
 				memset(output, '\0', sizeof(output));
 
 				if( cost[1] < points || cost[0] < (price - points) ) {
-					sprintf(output, msg_txt(713), nd->u.shop.pointshop_str); // You do not have enough '%s'.
+					sprintf(output, msg_txt(sd, 713), nd->u.shop.pointshop_str); // You do not have enough '%s'.
 					clif_messagecolor(&sd->bl, color_table[COLOR_RED], output, false, SELF);
 					return ERROR_TYPE_PURCHASE_FAIL;
 				}
 				pc_setreg2(sd, nd->u.shop.pointshop_str, cost[0] - (price - points));
-				sprintf(output, msg_txt(716), nd->u.shop.pointshop_str, cost[0] - (price - points)); // Your '%s' is now: %d
+				sprintf(output, msg_txt(sd, 716), nd->u.shop.pointshop_str, cost[0] - (price - points)); // Your '%s' is now: %d
 				clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 			}
 			break;
@@ -1654,7 +1654,7 @@ void npc_shop_currency_type(struct map_session_data *sd, struct npc_data *nd, in
 
 						memset(output, '\0', sizeof(output));
 
-						sprintf(output, msg_txt(714), id->jname, id->nameid); // Item Shop List: %s (ID: %hu)
+						sprintf(output, msg_txt(sd, 714), id->jname, id->nameid); // Item Shop List: %s (ID: %hu)
 						clif_broadcast(&sd->bl, output, strlen(output) + 1, BC_BLUE, SELF);
 					}
 					for( i = 0; i < MAX_INVENTORY; i++ ) {
@@ -1672,7 +1672,7 @@ void npc_shop_currency_type(struct map_session_data *sd, struct npc_data *nd, in
 
 				memset(output, '\0', sizeof(output));
 
-				sprintf(output, msg_txt(715), nd->u.shop.pointshop_str); // Point Shop List: '%s'
+				sprintf(output, msg_txt(sd, 715), nd->u.shop.pointshop_str); // Point Shop List: '%s'
 				clif_broadcast(&sd->bl, output, strlen(output) + 1, BC_BLUE, SELF);
 			}
 			cost[0] = pc_readreg2(sd, nd->u.shop.pointshop_str);
