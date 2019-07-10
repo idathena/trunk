@@ -4532,6 +4532,7 @@ void map_do_init_msg(void)
 	const char *listelang[] = {
 		MSG_CONF_NAME_EN, //Default
 		MSG_CONF_NAME_IDN,
+		MSG_CONF_NAME_SPN,
 	};
 
 	map_msg_db = idb_alloc(DB_OPT_BASE);
@@ -4636,6 +4637,7 @@ int do_init(int argc, char *argv[])
 	// Multi language
 	MSG_CONF_NAME_EN = "conf/msg_conf/map_msg.conf";      // English (default)
 	MSG_CONF_NAME_IDN = "conf/msg_conf/map_msg_idn.conf"; // Bahasa Indonesia
+	MSG_CONF_NAME_SPN = "conf/msg_conf/map_msg_spn.conf"; // Spanish
 
 	// Default map
 	safestrncpy(map_default.mapname, "prontera", MAP_NAME_LENGTH);

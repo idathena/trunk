@@ -21363,9 +21363,10 @@ void clif_parse_equipswitch_request_single(int fd, struct map_session_data *sd)
 #ifdef RENEWAL
 			clif_msg(sd, WORK_IN_PROGRESS);
 			return;
-#endif
+#else
 			if( !sd->npc_item_flag )
 				return;
+#endif
 		}
 		pc_equipswitch(sd, index);
 		return;

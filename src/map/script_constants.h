@@ -713,7 +713,7 @@
 	export_constant2("bDropAddRace",SP_DROP_ADDRACE);
 	export_constant2("bDropAddClass",SP_DROP_ADDCLASS);
 	export_constant2("bMagicAddRace2",SP_MAGIC_ADDRACE2);
-	export_constant2("bNoMagicGearFuel",SP_NO_MAGIC_GEAR_FUEL);
+	export_constant2("bNoMadoFuel",SP_NO_MADO_FUEL);
 	export_constant2("bSkillDelay",SP_SKILL_DELAY);
 	export_constant2("bRegenPercentHP",SP_REGEN_PERCENT_HP);
 	export_constant2("bRegenPercentSP",SP_REGEN_PERCENT_SP);

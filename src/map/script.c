@@ -347,6 +347,8 @@ struct Script_Config script_config = {
 	"OnUnTouch", //onuntouch_event_name (run whenever a char walks from the OnTouch area)
 	"OnWhisperGlobal", //onwhisper_event_name (is executed when a player sends a whisper message to the NPC)
 	"OnCommand", //oncommand_event_name (is executed by script command cmdothernpc)
+	"OnBuyItem", //onbuy_event_name (is executed when items are bought)
+	"OnSellItem", //onsell_event_name (is executed when items are sold)
 	"OnAirShipRequest", //onairshiprequest_event_name (run whenever a char using private airship system)
 	// Init related
 	"OnInit", //init_event_name (is executed on all npcs when all npcs were loaded)
@@ -365,6 +367,7 @@ struct Script_Config script_config = {
 	"OnAgitEnd3", //agit_end3_event_name (is executed when WoE TE has ended)
 	// Timer related
 	"OnTimer", //timer_event_name (is executed by a timer at the specific second)
+	"OnTimerQuit", //timer_quit_event_name (is executed when a timer is aborted)
 	"OnMinute", //timer_minute_event_name (is executed by a timer at the specific minute)
 	"OnHour", //timer_hour_event_name (is executed by a timer at the specific hour)
 	"OnClock", //timer_clock_event_name (is executed by a timer at the specific hour and minute)
@@ -3093,7 +3096,7 @@ struct script_data *push_str(struct script_stack *stack, enum c_op type, char *s
 	stack->stack_data[stack->sp].u.str = str;
 	stack->stack_data[stack->sp].ref   = NULL;
 	stack->sp++;
-	return &stack->stack_data[stack->sp-1];
+	return &stack->stack_data[stack->sp - 1];
 }
 
 /// Pushes a retinfo into the stack
@@ -3813,7 +3816,7 @@ static void script_detach_state(struct script_state *st, bool dequeue_event)
 /// Attaches script state to possibly attached character and backups it's previous script, if any.
 ///
 /// @param st Script state to attach.
-static void script_attach_state(struct script_state *st)
+void script_attach_state(struct script_state *st)
 {
 	struct map_session_data *sd = NULL;
 
@@ -8400,7 +8403,7 @@ BUILDIN_FUNC(statusup2)
 BUILDIN_FUNC(bonus)
 {
 	int type;
-	int val1;
+	int val1 = 0;
 	int val2 = 0;
 	int val3 = 0;
 	int val4 = 0;
@@ -8437,11 +8440,13 @@ BUILDIN_FUNC(bonus)
 			val1 = (data_isstring(data) ? skill_name2id(script_getstr(st,3)) : script_getnum(st,3));
 			break;
 		default:
-			val1 = script_getnum(st,3);
+			if( script_hasdata(st,3) )
+				val1 = script_getnum(st,3);
 			break;
 	}
 
 	switch( script_lastdata(st) - 2 ) {
+		case 0:
 		case 1:
 			pc_bonus(sd,type,val1);
 			break;
@@ -16898,7 +16903,7 @@ BUILDIN_FUNC(getunitdata)
 	struct script_data *data = script_getdata(st,3);
 
 	if( !data_isreference(data) ) {
-		ShowWarning("buildin_getunitdata: Error in argument! Please give a variable to store values in.\n");
+		ShowError("buildin_getunitdata: Error in argument! Please give a variable to store values in.\n");
 		return 1;
 	}
 
@@ -16914,6 +16919,9 @@ BUILDIN_FUNC(getunitdata)
 		case BL_MER:  mc = map_id2mc(bl->id); break;
 		case BL_ELEM: ed = map_id2ed(bl->id); break;
 		case BL_NPC:  nd = map_id2nd(bl->id); break;
+		default:
+			ShowError("buildin_getunitdata: Invalid object type!\n");
+			return 1;
 	}
 
 	name = reference_getname(data);
@@ -16923,7 +16931,7 @@ BUILDIN_FUNC(getunitdata)
 	switch( bl->type ) {
 		case BL_MOB:
 			if( !md ) {
-				ShowWarning("buildin_getunitdata: Error in finding object BL_MOB!\n");
+				ShowError("buildin_getunitdata: Error in finding object BL_MOB!\n");
 				return 1;
 			}
 			getunitdata_sub(UMOB_SIZE, md->status.size);
@@ -16978,10 +16986,9 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UMOB_ADELAY, md->status.adelay);
 			getunitdata_sub(UMOB_DMOTION, md->status.dmotion);
 			break;
-
 		case BL_HOM:
 			if( !hd ) {
-				ShowWarning("buildin_getunitdata: Error in finding object BL_HOM!\n");
+				ShowError("buildin_getunitdata: Error in finding object BL_HOM!\n");
 				return 1;
 			}
 			getunitdata_sub(UHOM_SIZE, hd->base_status.size);
@@ -17024,10 +17031,9 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UHOM_ADELAY, hd->battle_status.adelay);
 			getunitdata_sub(UHOM_DMOTION, hd->battle_status.dmotion);
 			break;
-
 		case BL_PET:
 			if( !pd ) {
-				ShowWarning("buildin_getunitdata: Error in finding object BL_PET!\n");
+				ShowError("buildin_getunitdata: Error in finding object BL_PET!\n");
 				return 1;
 			}
 			getunitdata_sub(UPET_SIZE, pd->status.size);
@@ -17068,10 +17074,9 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UPET_ADELAY, pd->status.adelay);
 			getunitdata_sub(UPET_DMOTION, pd->status.dmotion);
 			break;
-
 		case BL_MER:
 			if( !mc ) {
-				ShowWarning("buildin_getunitdata: Error in finding object BL_MER!\n");
+				ShowError("buildin_getunitdata: Error in finding object BL_MER!\n");
 				return 1;
 			}
 			getunitdata_sub(UMER_SIZE, mc->base_status.size);
@@ -17111,10 +17116,9 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UMER_ADELAY, mc->base_status.adelay);
 			getunitdata_sub(UMER_DMOTION, mc->base_status.dmotion);
 			break;
-
 		case BL_ELEM:
 			if( !ed ) {
-				ShowWarning("buildin_getunitdata: Error in finding object BL_ELEM!\n");
+				ShowError("buildin_getunitdata: Error in finding object BL_ELEM!\n");
 				return 1;
 			}
 			getunitdata_sub(UELE_SIZE, ed->base_status.size);
@@ -17155,10 +17159,9 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UELE_ADELAY, ed->base_status.adelay);
 			getunitdata_sub(UELE_DMOTION, ed->base_status.dmotion);
 			break;
-
 		case BL_NPC:
 			if( !nd ) {
-				ShowWarning("buildin_getunitdata: Error in finding object BL_NPC!\n");
+				ShowError("buildin_getunitdata: Error in finding object BL_NPC!\n");
 				return 1;
 			}
 			getunitdata_sub(UNPC_LEVEL, nd->level);
@@ -17207,9 +17210,8 @@ BUILDIN_FUNC(getunitdata)
 			getunitdata_sub(UNPC_BODY2, nd->vd.body_style);
 			getunitdata_sub(UNPC_DEADSIT, nd->vd.dead_sit);
 			break;
-
 		default:
-			ShowWarning("buildin_getunitdata: Unknown object type!\n");
+			ShowError("buildin_getunitdata: Unknown object type!\n");
 			return 1;
 	}
 
@@ -17274,7 +17276,7 @@ BUILDIN_FUNC(setunitdata)
 	switch( bl->type ) {
 		case BL_MOB:
 			if( !md ) {
-				ShowWarning("buildin_setunitdata: Error in finding object BL_MOB!\n");
+				ShowError("buildin_setunitdata: Error in finding object BL_MOB!\n");
 				return 1;
 			}
 			if( !md->base_status ) {
@@ -17336,7 +17338,7 @@ BUILDIN_FUNC(setunitdata)
 						TBL_MOB *md2 = NULL;
 
 						if( !md->master_id || !(md2 = map_id2md(md->master_id)) ) {
-							ShowWarning("buildin_setunitdata: Trying to set UMOB_SLAVECPYMSTRMD on mob without master!\n");
+							ShowError("buildin_setunitdata: Trying to set UMOB_SLAVECPYMSTRMD on mob without master!\n");
 							break;
 						}
 						md->base_status->mode = md2->status.mode;
@@ -17370,7 +17372,7 @@ BUILDIN_FUNC(setunitdata)
 			break;
 		case BL_HOM:
 			if( !hd ) {
-				ShowWarning("buildin_setunitdata: Error in finding object BL_HOM!\n");
+				ShowError("buildin_setunitdata: Error in finding object BL_HOM!\n");
 				return 1;
 			}
 			switch( type ) {
@@ -17420,7 +17422,7 @@ BUILDIN_FUNC(setunitdata)
 			break;
 		case BL_PET:
 			if( !pd ) {
-				ShowWarning("buildin_setunitdata: Error in finding object BL_PET!\n");
+				ShowError("buildin_setunitdata: Error in finding object BL_PET!\n");
 				return 1;
 			}
 			switch( type ) {
@@ -17468,7 +17470,7 @@ BUILDIN_FUNC(setunitdata)
 			break;
 		case BL_MER:
 			if( !mc ) {
-				ShowWarning("buildin_setunitdata: Error in finding object BL_MER!\n");
+				ShowError("buildin_setunitdata: Error in finding object BL_MER!\n");
 				return 1;
 			}
 			switch( type ) {
@@ -17515,7 +17517,7 @@ BUILDIN_FUNC(setunitdata)
 			break;
 		case BL_ELEM:
 			if( !ed ) {
-				ShowWarning("buildin_setunitdata: Error in finding object BL_ELEM!\n");
+				ShowError("buildin_setunitdata: Error in finding object BL_ELEM!\n");
 				return 1;
 			}
 			switch( type ) {
@@ -17563,7 +17565,7 @@ BUILDIN_FUNC(setunitdata)
 			break;
 		case BL_NPC:
 			if( !nd ) {
-				ShowWarning("buildin_setunitdata: Error in finding object BL_NPC!\n");
+				ShowError("buildin_setunitdata: Error in finding object BL_NPC!\n");
 				return 1;
 			}
 			switch( type ) {
@@ -17617,7 +17619,7 @@ BUILDIN_FUNC(setunitdata)
 			}
 			break;
 		default:
-			ShowWarning("buildin_setunitdata: Unknown object type!\n");
+			ShowError("buildin_setunitdata: Unknown object type!\n");
 			return 1;
 	}
 
@@ -17684,32 +17686,35 @@ BUILDIN_FUNC(setunitname)
 		case BL_MOB:  md = map_id2md(bl->id); break;
 		case BL_HOM:  hd = map_id2hd(bl->id); break;
 		case BL_PET:  pd = map_id2pd(bl->id); break;
+		default:
+			ShowError("buildin_setunitname: Invalid object type!\n");
+			return 1;
 	}
 
 	switch( bl->type ) {
 		case BL_MOB:
 			if( !md ) {
-				ShowWarning("buildin_setunitname: Error in finding object BL_MOB!\n");
+				ShowError("buildin_setunitname: Error in finding object BL_MOB!\n");
 				return 1;
 			}
 			safestrncpy(md->name, script_getstr(st,3), NAME_LENGTH);
 			break;
 		case BL_HOM:
 			if( !hd ) {
-				ShowWarning("buildin_setunitname: Error in finding object BL_HOM!\n");
+				ShowError("buildin_setunitname: Error in finding object BL_HOM!\n");
 				return 1;
 			}
 			safestrncpy(hd->homunculus.name, script_getstr(st,3), NAME_LENGTH);
 			break;
 		case BL_PET:
 			if( !pd ) {
-				ShowWarning("buildin_setunitname: Error in finding object BL_PET!\n");
+				ShowError("buildin_setunitname: Error in finding object BL_PET!\n");
 				return 1;
 			}
 			safestrncpy(pd->pet.name, script_getstr(st,3), NAME_LENGTH);
 			break;
 		default:
-			ShowWarning("buildin_setunitname: Unknown object type!\n");
+			ShowError("buildin_setunitname: Unknown object type!\n");
 			return 1;
 	}
 
@@ -21358,7 +21363,6 @@ BUILDIN_FUNC(getvar) {
 	else
 		script_pushstrcopy(st,conv_str_(st, data, sd));
 
-	push_val2(st->stack, C_NAME, reference_getuid(data), reference_getref(data));
 	return SCRIPT_CMD_SUCCESS;
 }
 
@@ -23169,7 +23173,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(downrefitem,"i??"),
 	BUILDIN_DEF(statusup,"i?"),
 	BUILDIN_DEF(statusup2,"ii?"),
-	BUILDIN_DEF(bonus,"iv"),
+	BUILDIN_DEF(bonus,"i?"),
 	BUILDIN_DEF2(bonus,"bonus2","ivi"),
 	BUILDIN_DEF2(bonus,"bonus3","ivii"),
 	BUILDIN_DEF2(bonus,"bonus4","ivvii"),

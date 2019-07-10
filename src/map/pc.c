@@ -3685,9 +3685,9 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			if(sd->state.lr_flag != 2)
 				sd->bonus.weapon_matk_rate += val;
 			break;
-		case SP_NO_MAGIC_GEAR_FUEL:
+		case SP_NO_MADO_FUEL:
 			if(sd->state.lr_flag != 2)
-				sd->special_state.no_magic_gear_fuel = 1;
+				sd->special_state.no_mado_fuel = 1;
 			break;
 		case SP_NO_WALKDELAY:
 			if(sd->state.lr_flag != 2)
@@ -8602,7 +8602,7 @@ int pc_readparam(struct map_session_data *sd, int type)
 #else
 		case SP_CASTRATE:		val = sd->castrate; break;
 #endif
-		case SP_NO_MAGIC_GEAR_FUEL:	val = (sd->special_state.no_magic_gear_fuel ? 1 : 0); break;
+		case SP_NO_MADO_FUEL:	val = (sd->special_state.no_mado_fuel ? 1 : 0); break;
 		case SP_NO_WALKDELAY:		val = (sd->special_state.no_walkdelay ? 1 : 0); break;
 		default:
 			ShowError("pc_readparam: Attempt to read unknown parameter '%d'.\n", type);

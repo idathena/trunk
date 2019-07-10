@@ -1092,7 +1092,7 @@ OnPCStatCalcEvent:
 	if(BaseLevel >= 90) {
 		bonus bMaxHP,1000;
 		bonus bAspd,3;
-		bonus bIntravision,0;
+		bonus bIntravision;
 	}
 	// Never use 'end' or 'close' in this label, so that if by any chance a player
 	// triggers this event while still attached to a NPC (for example: Buffer NPC),

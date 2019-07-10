@@ -9,14 +9,15 @@ extern "C" {
 #endif
 
 enum e_lang_types {
-	LANG_IDN = 0x01,
+	LANG_IDN = 0x1,
+	LANG_SPN = 0x2,
 	LANG_MAX
 };
 
 // Multilanguage System.
 // Define which languages to enable (bitmask).
-// 0xFF will enable all, while 0x00 will enable English only.
-#define LANG_ENABLE 0x01
+// 0xF will enable all, while 0x0 will enable English only.
+#define LANG_ENABLE 0x3
 
 // Read msg in table
 const char *_msg_txt(int msg_number, int size, char **msg_table);

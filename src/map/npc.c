@@ -791,10 +791,10 @@ void npc_timerevent_quit(struct map_session_data *sd)
 		char buf[EVENT_NAME_LENGTH];
 		struct event_data *ev;
 
-		snprintf(buf, ARRAYLENGTH(buf), "%s::OnTimerQuit", nd->exname);
+		snprintf(buf, ARRAYLENGTH(buf), "%s::%s", nd->exname, script_config.timer_quit_event_name);
 		ev = (struct event_data *)strdb_get(ev_db, buf);
 		if( ev && ev->nd != nd ) {
-			ShowWarning("npc_timerevent_quit: Unable to execute \"OnTimerQuit\", two NPCs have the same event name [%s]!\n",buf);
+			ShowWarning("npc_timerevent_quit: Unable to execute \"%s\", two NPCs have the same event name [%s]!\n", script_config.timer_quit_event_name, buf);
 			ev = NULL;
 		}
 		if( ev ) {
@@ -811,7 +811,7 @@ void npc_timerevent_quit(struct map_session_data *sd)
 			nd->u.scr.timer = ted->time;
 
 			//Execute label
-			run_script(nd->u.scr.script,ev->pos,sd->bl.id,nd->bl.id);
+			run_script(nd->u.scr.script, ev->pos, sd->bl.id, nd->bl.id);
 
 			//Restore previous data
 			nd->u.scr.rid = old_rid;
@@ -1277,25 +1277,25 @@ void run_tomb(struct map_session_data *sd, struct npc_data *nd)
 {
 	struct tm now;
 	char buffer[200];
-    char time[10];
+	char time[10];
 
 	localtime_r(&nd->u.tomb.kill_time, &now);
-    strftime(time, sizeof(time), "%H:%M", &now);
+	strftime(time, sizeof(time), "%H:%M", &now);
 
 	snprintf(buffer, sizeof(buffer), msg_txt(sd, 657), nd->u.tomb.md->db->name);
-    clif_scriptmes(sd, nd->bl.id, buffer);
+	clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptmes(sd, nd->bl.id, msg_txt(sd, 658));
+	clif_scriptmes(sd, nd->bl.id, msg_txt(sd, 658));
 
-    snprintf(buffer, sizeof(buffer), msg_txt(sd, 659), time);
-    clif_scriptmes(sd, nd->bl.id, buffer);
+	snprintf(buffer, sizeof(buffer), msg_txt(sd, 659), time);
+	clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptmes(sd, nd->bl.id, msg_txt(sd, 660));
+	clif_scriptmes(sd, nd->bl.id, msg_txt(sd, 660));
 
 	snprintf(buffer, sizeof(buffer), msg_txt(sd, 661), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown");
-    clif_scriptmes(sd, nd->bl.id, buffer);
+	clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptclose(sd, nd->bl.id);
+	clif_scriptclose(sd, nd->bl.id);
 }
 
 /*==========================================
@@ -1790,7 +1790,7 @@ static int npc_buylist_sub(struct map_session_data *sd, uint16 n, struct s_npc_b
 	}
 
 	// Invoke event
-	snprintf(npc_ev, ARRAYLENGTH(npc_ev), "%s::OnBuyItem", nd->exname);
+	snprintf(npc_ev, ARRAYLENGTH(npc_ev), "%s::%s", nd->exname, script_config.onbuy_event_name);
 	npc_event(sd, npc_ev, 0);
 
 	return 0;
@@ -2018,7 +2018,7 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 	}
 
 	//Invoke event
-	snprintf(npc_ev, ARRAYLENGTH(npc_ev), "%s::OnSellItem", nd->exname);
+	snprintf(npc_ev, ARRAYLENGTH(npc_ev), "%s::%s", nd->exname, script_config.onsell_event_name);
 	npc_event(sd, npc_ev, 0);
 	return 0;
 }
@@ -3111,10 +3111,10 @@ static const char *npc_parse_script(char *w1, char *w2, char *w3, char *w4, cons
 		char evname[EVENT_NAME_LENGTH];
 		struct event_data *ev;
 
-		snprintf(evname, ARRAYLENGTH(evname), "%s::OnInit", nd->exname);
+		snprintf(evname, ARRAYLENGTH(evname), "%s::%s", nd->exname, script_config.init_event_name);
 
 		if( (ev = (struct event_data *)strdb_get(ev_db, evname)) ) //Execute OnInit
-			run_script(nd->u.scr.script,ev->pos,0,nd->bl.id);
+			run_script(nd->u.scr.script, ev->pos, 0, nd->bl.id);
 	}
 
 	return end;

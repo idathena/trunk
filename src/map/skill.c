@@ -16425,7 +16425,7 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 						}
 					}
 				}
-				if( require.itemid[i] == ITEMID_MAGIC_GEAR_FUEL && sd->special_state.no_magic_gear_fuel )
+				if( require.itemid[i] == ITEMID_MAGIC_GEAR_FUEL && sd->special_state.no_mado_fuel )
 					require.itemid[i] = require.amount[i] = 0;
 			}
 			break;

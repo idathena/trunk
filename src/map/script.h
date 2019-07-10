@@ -40,6 +40,8 @@ extern struct Script_Config {
 	const char *onuntouch_event_name;
 	const char *onwhisper_event_name;
 	const char *oncommand_event_name;
+	const char *onbuy_event_name;
+	const char *onsell_event_name;
 	const char *onairshiprequest_event_name;
 
 	// Init related
@@ -61,6 +63,7 @@ extern struct Script_Config {
 
 	// Timer related
 	const char *timer_event_name;
+	const char *timer_quit_event_name;
 	const char *timer_minute_event_name;
 	const char *timer_hour_event_name;
 	const char *timer_clock_event_name;
@@ -1754,6 +1757,7 @@ int set_var(struct map_session_data *sd, char *name, void *val);
 int conv_num(struct script_state *st,struct script_data *data);
 const char *conv_str(struct script_state *st,struct script_data *data);
 TIMER_FUNC(run_script_timer);
+void script_attach_state(struct script_state *st);
 void run_script_main(struct script_state *st);
 
 void script_stop_sleeptimers(int id);

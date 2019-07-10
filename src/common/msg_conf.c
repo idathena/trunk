@@ -92,6 +92,8 @@ int msg_langstr2langtype(char *langtype)
 		lang = 0;
 	else if (!strncmpi(langtype, "idn", 2))
 		lang = 1;
+	else if (!strncmpi(langtype, "spn", 2))
+		lang = 2;
 
 	return lang;
 }
@@ -101,6 +103,7 @@ const char *msg_langtype2langstr(int langtype)
 	switch (langtype) {
 		case 0: return "English (ENG)";
 		case 1: return "Bahasa Indonesia (IDN)";
+		case 2: return "Spanish (SPN)";
 		default: return "??";
 	}
 }
