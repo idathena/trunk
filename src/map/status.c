@@ -3379,7 +3379,7 @@ bool status_calc_cart_weight(struct map_session_data *sd, enum e_status_calc_wei
 
 //Calculates player data from scratch without counting SC adjustments.
 //Should be invoked whenever players raise stats, learn passive skills or change equipment.
-int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_opt opt)
+static int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_opt opt)
 {
 	static int calculating = 0; //Check for recursive call preemption [Skotlex]
 	struct status_data *status; //Pointer to the player's base status
