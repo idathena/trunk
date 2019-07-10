@@ -2032,12 +2032,12 @@ int do_init(int argc, char **argv)
 	// Init default value
 	LOGIN_CONF_NAME = "conf/login_athena.conf";
 	LAN_CONF_NAME = "conf/subnet_athena.conf";
-	MSG_CONF_NAME = "conf/msg_conf/login_msg.conf";
+	MSG_CONF_NAME_EN = "conf/msg_conf/login_msg.conf";
 	safestrncpy(console_log_filepath, "./log/login-msg_log.log", sizeof(console_log_filepath));
 
 	cli_get_options(argc,argv);
 
-	msg_config_read(MSG_CONF_NAME);
+	msg_config_read(MSG_CONF_NAME_EN);
 	login_config_read(LOGIN_CONF_NAME);
 	login_lan_config_read(LAN_CONF_NAME);
 
@@ -2104,7 +2104,7 @@ int do_init(int argc, char **argv)
 
 	if( login_config.console ) {
 		add_timer_func_list(parse_console_timer, "parse_console_timer");
-		add_timer_interval(gettick()+1000, parse_console_timer, 0, 0, 1000); //start in 1s each 1sec
+		add_timer_interval(gettick() + 1000, parse_console_timer, 0, 0, 1000); //Start in 1s each 1sec
 	}
 
 	return 0;
@@ -2113,9 +2113,11 @@ int do_init(int argc, char **argv)
 int login_msg_config_read(char *cfgName) {
 	return _msg_config_read(cfgName,LOGIN_MAX_MSG,msg_table);
 }
+
 const char *login_msg_txt(int msg_number) {
 	return _msg_txt(msg_number,LOGIN_MAX_MSG,msg_table);
 }
+
 void login_do_final_msg(void) {
 	_do_final_msg(LOGIN_MAX_MSG,msg_table);
 }

@@ -8,31 +8,30 @@
 extern "C" {
 #endif
 
-enum lang_types {
-	LANG_RUS = 0x01,
-	LANG_SPN = 0x02,
-	LANG_GRM = 0x04,
-	LANG_CHN = 0x08,
-	LANG_MAL = 0x10,
-	LANG_IDN = 0x20,
-	LANG_FRN = 0x40,
+enum e_lang_types {
+	LANG_IDN = 0x1,
+	LANG_SPN = 0x2,
 	LANG_MAX
 };
+
 // Multilanguage System.
 // Define which languages to enable (bitmask).
-// 0xFF will enable all, while 0x00 will enable English only.
-#define LANG_ENABLE 0x00
+// 0xF will enable all, while 0x0 will enable English only.
+#define LANG_ENABLE 0x3
 
-//read msg in table
-const char* _msg_txt(int msg_number, int size, char ** msg_table);
-//store msg from txtfile into msg_table
-int _msg_config_read(const char* cfgName, int size, char ** msg_table);
-//clear msg_table
-void _do_final_msg(int size, char ** msg_table);
+// Read msg in table
+const char *_msg_txt(int msg_number, int size, char **msg_table);
+// Store msg from txtfile into msg_table
+int _msg_config_read(const char *cfgName, int size, char **msg_table);
+// Clear msg_table
+void _do_final_msg(int size, char **msg_table);
+int msg_langstr2langtype(char *langtype);
+const char *msg_langtype2langstr(int langtype);
+// Verify that the choosen langtype is enabled.
+int msg_checklangtype(int lang, bool display);
 
 #ifdef	__cplusplus
 }
 #endif
 
 #endif	/* MSG_CONF_H */
-

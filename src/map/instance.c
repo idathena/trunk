@@ -824,7 +824,7 @@ void do_reload_instance(void)
 				continue;
 			im = &instance_data[p->instance_id];
 			if((db = instance_searchtype_db(im->type)) != NULL && !instance_enter(sd, StringBuf_Value(db->name))) { // All good
-				clif_displaymessage(sd->fd, msg_txt(515)); // Instance has been reloaded
+				clif_displaymessage(sd->fd, msg_txt(sd, 515)); // Instance has been reloaded
 				instance_reqinfo(sd, p->instance_id);
 			} else // Something went wrong
 				ShowError("do_reload_instance: Error setting character at instance start: character_id=%d instance=%s.\n", sd->status.char_id, StringBuf_Value(db->name));

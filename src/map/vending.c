@@ -67,19 +67,19 @@ void vending_closevending(struct map_session_data *sd)
  */
 void vending_vendinglistreq(struct map_session_data *sd, int id)
 {
-	struct map_session_data *vsd;
+	struct map_session_data *vsd = NULL;
 
 	nullpo_retv(sd);
 
-	if( (vsd = map_id2sd(id)) == NULL )
+	if( !(vsd = map_id2sd(id)) )
 		return;
+
 	if( !vsd->state.vending )
-		return; //not vending
+		return; //Not vending
 
 	if( !pc_can_give_items(sd) || !pc_can_give_items(vsd) ) { //Check if both GMs are allowed to trade
-		//GM is not allowed to trade
-		clif_displaymessage(sd->fd, msg_txt(246));
-		return;
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
+		return; //GM is not allowed to trade
 	}
 
 	sd->vended_id = vsd->vender_id; //Register vending uid
@@ -238,7 +238,7 @@ void vending_purchasereq(struct map_session_data *sd, int aid, int uid, const ui
 		if( battle_config.buyer_name ) {
 			char temp[256];
 
-			sprintf(temp, msg_txt(265), sd->status.name);
+			sprintf(temp, msg_txt(vsd, 265), sd->status.name);
 			clif_messagecolor(&vsd->bl, color_table[COLOR_LIGHT_GREEN], temp, false, SELF);
 		}
 	}
@@ -340,7 +340,7 @@ int8 vending_openvending(struct map_session_data *sd, const char *message, const
 	}
 
 	if( i != j )
-		clif_displaymessage(sd->fd, msg_txt(266)); // "Some of your items cannot be vended and were removed from the shop."
+		clif_displaymessage(sd->fd, msg_txt(sd, 266)); // "Some of your items cannot be vended and were removed from the shop."
 
 	if( i == 0 ) { //No valid item found
 		clif_skill_fail(sd, MC_VENDING, USESKILL_FAIL_LEVEL, 0, 0); //Custom reply packet

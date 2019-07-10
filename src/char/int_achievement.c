@@ -311,7 +311,7 @@ int mapif_parse_achievement_reward(int fd)
 		safesnprintf(mail_sender, NAME_LENGTH, msg_txt(212)); // GM
 		safestrncpy(mail_receiver, (char *)RFIFOP(fd,16), NAME_LENGTH);
 		safesnprintf(mail_title, MAIL_TITLE_LENGTH, msg_txt(213)); // Achievement Reward Mail
-		safesnprintf(mail_text, MAIL_BODY_LENGTH, msg_txt(214), (char *)RFIFOP(fd,16 + NAME_LENGTH) ); // [%s] Achievement Reward.
+		safesnprintf(mail_text, MAIL_BODY_LENGTH, msg_txt(214), (char *)RFIFOP(fd,16 + NAME_LENGTH)); // [%s] Achievement Reward.
 
 		if( !mail_sendmail(0, mail_sender, char_id, mail_receiver, mail_title, mail_text, 0, &item, 1) )
 			current = 0;

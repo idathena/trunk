@@ -268,7 +268,7 @@ void mvptomb_create(struct mob_data *md, char *killer, time_t time)
 	nd->ud.dir = md->ud.dir;
 	nd->bl.type = BL_NPC;
 
-	safestrncpy(nd->name, msg_txt(656), sizeof(nd->name));
+	safestrncpy(nd->name, msg_txt(NULL, 656), sizeof(nd->name));
 
 	nd->class_ = JT_MOB_TOMB;
 	nd->speed = 200;
@@ -2634,7 +2634,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 			if(mvp_sd && drop_rate <= battle_config.rare_drop_announce) { //A Rare Drop Global Announce by Lupus
 				char message[128];
 
-				sprintf(message, msg_txt(541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate / 100);
+				sprintf(message, msg_txt(NULL, 541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate / 100);
 				intif_broadcast(message, strlen(message) + 1, BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
 			}
 			//Announce first, or else ditem will be freed [Lance]
@@ -2764,7 +2764,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				if(temp <= battle_config.rare_drop_announce) { //A Rare MVP Drop Global Announce by Lupus
 					char message[128];
 
-					sprintf (message, msg_txt(541), mvp_sd->status.name, md->name, i_data->jname, temp / 100.);
+					sprintf (message, msg_txt(NULL, 541), mvp_sd->status.name, md->name, i_data->jname, temp / 100.);
 					intif_broadcast(message, strlen(message) + 1, BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
 				}
 				mob_setdropitem_option(&item, &mdrop[i]);

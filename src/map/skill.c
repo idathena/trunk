@@ -737,19 +737,19 @@ bool skill_isNotOk(uint16 skill_id, struct map_session_data *sd)
 		case MC_VENDING:
 		case ALL_BUYING_STORE:
 			if (mapdata[sd->bl.m].flag.novending) {
-				clif_displaymessage(sd->fd, msg_txt(276)); // "You can't open a shop on this map"
+				clif_displaymessage(sd->fd, msg_txt(sd, 276)); // "You can't open a shop on this map"
 				clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return true;
 			}
 			if (map_getcell(sd->bl.m, sd->bl.x, sd->bl.y, CELL_CHKNOVENDING)) {
-				clif_displaymessage(sd->fd, msg_txt(204)); // "You can't open a shop on this cell."
+				clif_displaymessage(sd->fd, msg_txt(sd, 204)); // "You can't open a shop on this cell."
 				clif_skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return true;
 			}
 			if (npc_isnear(&sd->bl)) {
 				//Uncomment for more verbose message
 				//char output[150];
-				//sprintf(output, msg_txt(662), battle_config.min_npc_vendchat_distance);
+				//sprintf(output, msg_txt(sd, 662), battle_config.min_npc_vendchat_distance);
 				//clif_displaymessage(sd->fd, output);
 				clif_skill_fail(sd, skill_id, USESKILL_FAIL_THERE_ARE_NPC_AROUND, 0, 0);
 				return true;
@@ -6485,7 +6485,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 				if (sd)
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 				if (skill_break_equip(src,bl,EQP_WEAPON,10000,BCT_PARTY) && sd && sd != dstsd)
-					clif_displaymessage(sd->fd,msg_txt(669));
+					clif_displaymessage(sd->fd,msg_txt(sd,669)); // You broke the target's weapon.
 			}
 			break;
 
@@ -7451,8 +7451,9 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					break;
 				}
 				if (!battle_config.duel_allow_teleport && sd->duel_group && skill_lv <= 2) { //Duel restriction [LuzZza]
-					char output[128]; sprintf(output,msg_txt(365),skill_get_name(AL_TELEPORT));
+					char output[128];
 
+					sprintf(output,msg_txt(sd,365),skill_get_name(AL_TELEPORT));
 					clif_displaymessage(sd->fd,output); //"Duel: Can't use %s in duel."
 					break;
 				}
@@ -8532,7 +8533,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			{
 				if (skill_id == SL_SUPERNOVICE && dstsd->die_counter && !(rnd()%100)) { //Erase death count 1% of the casts
 					dstsd->die_counter = 0;
-					pc_setglobalreg(dstsd,"PC_DIE_COUNTER",0);
+					pc_setglobalreg(dstsd,PCDIECOUNTER_VAR,0);
 					clif_specialeffect(bl,EF_ANGEL2,AREA);
 					//SC_SPIRIT invokes status_calc_pc for us
 				}
@@ -14965,8 +14966,9 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 	switch( skill_id ) { //Perform skill-specific checks (and actions)
 		case AL_WARP:
 			if( !battle_config.duel_allow_teleport && sd->duel_group ) { //Duel restriction [LuzZza]
-				char output[128]; sprintf(output,msg_txt(365),skill_get_name(AL_WARP));
+				char output[128];
 
+				sprintf(output,msg_txt(sd,365),skill_get_name(AL_WARP));
 				clif_displaymessage(sd->fd,output); //"Duel: Can't use %s in duel."
 				return false;
 			}
@@ -15517,7 +15519,7 @@ bool skill_check_condition_castbegin(struct map_session_data *sd, uint16 skill_i
 					MOBID_EMPERIUM,MOBID_GUARDIAN_STONE1,MOBID_GUARDIAN_STONE2) ) {
 					char output[128];
 
-					sprintf(output,"%s",msg_txt(382)); // You're too close to a stone or emperium to do this skill
+					sprintf(output,"%s",msg_txt(sd,382)); // You're too close to a stone or emperium to do this skill
 					clif_messagecolor(&sd->bl,color_table[COLOR_RED],output,false,SELF);
 					return false;
 				}
@@ -16423,7 +16425,7 @@ struct skill_condition skill_get_requirement(struct map_session_data *sd, uint16
 						}
 					}
 				}
-				if( require.itemid[i] == ITEMID_MAGIC_GEAR_FUEL && sd->special_state.no_magic_gear_fuel )
+				if( require.itemid[i] == ITEMID_MAGIC_GEAR_FUEL && sd->special_state.no_mado_fuel )
 					require.itemid[i] = require.amount[i] = 0;
 			}
 			break;
@@ -19703,7 +19705,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 					break;
 				default: //Cooking items
 					if( skill_produce_db[idx].itemlv > 10 && skill_produce_db[idx].itemlv <= 20 && sd->cook_mastery < 1999 )
-						pc_setglobalreg(sd,"COOK_MASTERY",sd->cook_mastery + (1<<((skill_produce_db[idx].itemlv - 11) / 2)) * 5);
+						pc_setglobalreg(sd,COOKMASTERY_VAR,sd->cook_mastery + (1<<((skill_produce_db[idx].itemlv - 11) / 2)) * 5);
 					clif_specialeffect(&sd->bl,EF_COOKING_OK,AREA);
 					break;
 			}
@@ -19819,7 +19821,7 @@ bool skill_produce_mix(struct map_session_data *sd, uint16 skill_id, unsigned sh
 				break;
 			default: //Cooking items
 				if( skill_produce_db[idx].itemlv > 10 && skill_produce_db[idx].itemlv <= 20 && sd->cook_mastery > 0 )
-					pc_setglobalreg(sd,"COOK_MASTERY",sd->cook_mastery - (1<<((skill_produce_db[idx].itemlv - 11) / 2)) - (((1<<((skill_produce_db[idx].itemlv - 11) / 2))>>1) * 3));
+					pc_setglobalreg(sd,COOKMASTERY_VAR,sd->cook_mastery - (1<<((skill_produce_db[idx].itemlv - 11) / 2)) - (((1<<((skill_produce_db[idx].itemlv - 11) / 2))>>1) * 3));
 				clif_specialeffect(&sd->bl,EF_COOKING_FAIL,AREA);
 				break;
 		}

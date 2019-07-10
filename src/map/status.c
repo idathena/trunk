@@ -3379,7 +3379,7 @@ bool status_calc_cart_weight(struct map_session_data *sd, enum e_status_calc_wei
 
 //Calculates player data from scratch without counting SC adjustments.
 //Should be invoked whenever players raise stats, learn passive skills or change equipment.
-int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
+static int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_opt opt)
 {
 	static int calculating = 0; //Check for recursive call preemption [Skotlex]
 	struct status_data *status; //Pointer to the player's base status
@@ -4288,6 +4288,17 @@ int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
 	calculating = 0;
 
 	return 0;
+}
+
+int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt opt)
+{
+	struct script_state *previous_st = sd->st; //Save the old script the player was attached to
+	int ret = status_calc_pc_sub(sd, opt); //Store the return value of the original function
+
+	if (previous_st) //If an old script is present
+		script_attach_state(previous_st); //Reattach the player to it, so that the limitations of that script kick back in
+
+	return ret; //Return the original return value
 }
 
 int status_calc_mercenary_(struct mercenary_data *md, enum e_status_calc_opt opt)

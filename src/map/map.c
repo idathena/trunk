@@ -107,6 +107,7 @@ static DBMap *map_db = NULL; // unsigned int mapindex -> struct map_data*
 static DBMap *nick_db = NULL; // int char_id -> struct charid2nick* (requested names of offline characters)
 static DBMap *charid_db = NULL; // int char_id -> struct map_session_data*
 static DBMap *regen_db = NULL; // int id -> struct block_list* (status_natural_heal processing)
+static DBMap *map_msg_db = NULL;
 
 static int map_users = 0;
 
@@ -120,7 +121,6 @@ static struct block_list *bl_list[BL_LIST_MAX];
 static int bl_list_count = 0;
 
 #define MAP_MAX_MSG 1550
-static char *msg_table[MAP_MAX_MSG]; // map Server messages
 
 struct map_data mapdata[MAX_MAP_PER_SERVER];
 int map_num = 0;
@@ -4514,6 +4514,91 @@ void set_server_type(void)
 	SERVER_TYPE = ATHENA_SERVER_MAP;
 }
 
+/*======================================================
+ * Message System
+ *------------------------------------------------------*/
+struct msg_data {
+	char *msg[MAP_MAX_MSG];
+};
+
+struct msg_data *map_lang2msgdb(uint8 lang)
+{
+	return (struct msg_data *)idb_get(map_msg_db, lang);
+}
+
+void map_do_init_msg(void)
+{
+	int test = 0, i = 0, size;
+	const char *listelang[] = {
+		MSG_CONF_NAME_EN, //Default
+		MSG_CONF_NAME_IDN,
+		MSG_CONF_NAME_SPN,
+	};
+
+	map_msg_db = idb_alloc(DB_OPT_BASE);
+	size = ARRAYLENGTH(listelang); //Avoid recalc
+	while( test != -1 && size > i ) { //For all enable lang + (English default)
+		test = msg_checklangtype(i, false);
+		if( test == 1 )
+			msg_config_read(listelang[i], i); //If enabled read it and assign i to langtype
+		i++;
+	}
+}
+
+void map_do_final_msg(void)
+{
+	DBIterator *iter = db_iterator(map_msg_db);
+	struct msg_data *mdb = NULL;
+
+	for( mdb = (struct msg_data *)dbi_first(iter); dbi_exists(iter); mdb = (struct msg_data *)dbi_next(iter) ) {
+		_do_final_msg(MAP_MAX_MSG, mdb->msg);
+		aFree(mdb);
+	}
+	dbi_destroy(iter);
+	map_msg_db->destroy(map_msg_db, NULL);
+}
+
+void map_msg_reload(void)
+{
+	map_do_final_msg(); //Clear data
+	map_do_init_msg();
+}
+
+int map_msg_config_read(const char *cfgName, int lang)
+{
+	struct msg_data *mdb = NULL;
+
+	if( !(mdb = map_lang2msgdb(lang)) )
+		CREATE(mdb, struct msg_data, 1);
+	else
+		idb_remove(map_msg_db, lang);
+	idb_put(map_msg_db, lang, mdb);
+
+	if( _msg_config_read(cfgName, MAP_MAX_MSG, mdb->msg) ) { //An error occur
+		idb_remove(map_msg_db, lang); //@TRYME
+		aFree(mdb);
+	}
+	return 0;
+}
+
+const char *map_msg_txt(struct map_session_data *sd, int msg_number) {
+	struct msg_data *mdb = NULL;
+	uint8 lang = 0; //Default
+
+	if( sd && sd->langtype )
+		lang = sd->langtype;
+	if( (mdb = map_lang2msgdb(lang)) ) {
+		const char *tmp = _msg_txt(msg_number, MAP_MAX_MSG, mdb->msg);
+
+		if( strcmp(tmp, "??") ) //To verify result
+			return tmp;
+		ShowDebug("map_msg_txt: Message #%d not found for langtype %d.\n", msg_number, lang);
+	}
+	ShowDebug("map_msg_txt: Selected langtype %d not loaded, trying fallback...\n", lang);
+	if( lang && (mdb = map_lang2msgdb(0)) ) //Fallback
+		return _msg_txt(msg_number, MAP_MAX_MSG, mdb->msg);
+	return "??";
+}
 
 /// Called when a terminate signal is received.
 void do_shutdown(void)
@@ -4546,9 +4631,13 @@ int do_init(int argc, char *argv[])
 	BATTLE_CONF_FILENAME = "conf/battle_athena.conf";
 	ATCOMMAND_CONF_FILENAME = "conf/atcommand_athena.conf";
 	SCRIPT_CONF_NAME = "conf/script_athena.conf";
-	MSG_CONF_NAME = "conf/msg_conf/map_msg.conf";
 	GRF_PATH_FILENAME = "conf/grf-files.txt";
 	safestrncpy(console_log_filepath, "./log/map-msg_log.log", sizeof(console_log_filepath));
+
+	// Multi language
+	MSG_CONF_NAME_EN = "conf/msg_conf/map_msg.conf";      // English (default)
+	MSG_CONF_NAME_IDN = "conf/msg_conf/map_msg_idn.conf"; // Bahasa Indonesia
+	MSG_CONF_NAME_SPN = "conf/msg_conf/map_msg_spn.conf"; // Spanish
 
 	// Default map
 	safestrncpy(map_default.mapname, "prontera", MAP_NAME_LENGTH);
@@ -4590,7 +4679,6 @@ int do_init(int argc, char *argv[])
 	}
 
 	battle_config_read(BATTLE_CONF_FILENAME);
-	msg_config_read(MSG_CONF_NAME);
 	script_config_read(SCRIPT_CONF_NAME);
 	inter_config_read(INTER_CONF_NAME);
 	log_config_read(LOG_CONF_NAME);
@@ -4603,7 +4691,6 @@ int do_init(int argc, char *argv[])
 	nick_db = idb_alloc(DB_OPT_BASE);
 	charid_db = idb_alloc(DB_OPT_BASE);
 	regen_db = idb_alloc(DB_OPT_BASE); // efficient status_natural_heal processing
-
 	iwall_db = strdb_alloc(DB_OPT_RELEASE_DATA, 2 * NAME_LENGTH + 2 + 1); // [Zephyrus] Invisible Walls
 
 #ifdef ADJUST_SKILL_DAMAGE
@@ -4625,6 +4712,7 @@ int do_init(int argc, char *argv[])
 	add_timer_func_list(map_removemobs_timer, "map_removemobs_timer");
 	add_timer_interval(gettick() + 1000, map_freeblock_timer, 0, 0, 60 * 1000);
 
+	map_do_init_msg();
 	do_init_path();
 	do_init_atcommand();
 	do_init_battle();
@@ -4680,14 +4768,4 @@ int do_init(int argc, char *argv[])
 	}
 
 	return 0;
-}
-
-int map_msg_config_read(char *cfgName) {
-	return _msg_config_read(cfgName,MAP_MAX_MSG,msg_table);
-}
-const char *map_msg_txt(int msg_number) {
-	return _msg_txt(msg_number,MAP_MAX_MSG,msg_table);
-}
-void map_do_final_msg(void) {
-	_do_final_msg(MAP_MAX_MSG,msg_table);
 }

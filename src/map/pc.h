@@ -39,6 +39,7 @@
 #define PCDIECOUNTER_VAR "PC_DIE_COUNTER"
 #define ATTENDANCE_DATE_VAR "#AttendanceDate"
 #define ATTENDANCE_COUNT_VAR "#AttendanceCounter"
+#define LANGTYPE_VAR "#langtype"
 
 //Update this max as necessary, 86 is the value needed for Expanded Super Baby
 #define MAX_SKILL_TREE 86
@@ -284,7 +285,7 @@ struct map_session_data {
 		unsigned int perfect_hiding : 1; //[Valaris]
 		unsigned int no_knockback : 1;
 		unsigned int bonus_coma : 1;
-		unsigned int no_magic_gear_fuel : 1;
+		unsigned int no_mado_fuel : 1;
 		unsigned int no_walkdelay : 1;
 	} special_state;
 	int login_id1, login_id2;
@@ -293,6 +294,7 @@ struct map_session_data {
 	unsigned int permissions; //Group permissions
 	int count_rewarp; //Count how many time we being rewarped
 
+	int langtype;
 	struct mmo_charstatus status;
 	struct registry save_reg;
 
@@ -1088,9 +1090,9 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 void pc_unequipitem(struct map_session_data *sd, int n, int flag);
 int pc_equipswitch(struct map_session_data *sd, int index);
 void pc_equipswitch_remove(struct map_session_data *sd, int index);
-void pc_checkitem(struct map_session_data *);
+void pc_checkitem(struct map_session_data *sd);
 void pc_check_available_item(struct map_session_data *sd, uint8 type);
-int pc_useitem(struct map_session_data *,int);
+int pc_useitem(struct map_session_data *sd, int n);
 
 int pc_skillatk_bonus(struct map_session_data *sd, uint16 skill_id);
 int pc_sub_skillatk_bonus(struct map_session_data *sd, uint16 skill_id);

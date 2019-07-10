@@ -791,10 +791,10 @@ void npc_timerevent_quit(struct map_session_data *sd)
 		char buf[EVENT_NAME_LENGTH];
 		struct event_data *ev;
 
-		snprintf(buf, ARRAYLENGTH(buf), "%s::OnTimerQuit", nd->exname);
+		snprintf(buf, ARRAYLENGTH(buf), "%s::%s", nd->exname, script_config.timer_quit_event_name);
 		ev = (struct event_data *)strdb_get(ev_db, buf);
 		if( ev && ev->nd != nd ) {
-			ShowWarning("npc_timerevent_quit: Unable to execute \"OnTimerQuit\", two NPCs have the same event name [%s]!\n",buf);
+			ShowWarning("npc_timerevent_quit: Unable to execute \"%s\", two NPCs have the same event name [%s]!\n", script_config.timer_quit_event_name, buf);
 			ev = NULL;
 		}
 		if( ev ) {
@@ -811,7 +811,7 @@ void npc_timerevent_quit(struct map_session_data *sd)
 			nd->u.scr.timer = ted->time;
 
 			//Execute label
-			run_script(nd->u.scr.script,ev->pos,sd->bl.id,nd->bl.id);
+			run_script(nd->u.scr.script, ev->pos, sd->bl.id, nd->bl.id);
 
 			//Restore previous data
 			nd->u.scr.rid = old_rid;
@@ -1277,25 +1277,25 @@ void run_tomb(struct map_session_data *sd, struct npc_data *nd)
 {
 	struct tm now;
 	char buffer[200];
-    char time[10];
+	char time[10];
 
 	localtime_r(&nd->u.tomb.kill_time, &now);
-    strftime(time, sizeof(time), "%H:%M", &now);
+	strftime(time, sizeof(time), "%H:%M", &now);
 
-	snprintf(buffer, sizeof(buffer), msg_txt(657), nd->u.tomb.md->db->name);
-    clif_scriptmes(sd, nd->bl.id, buffer);
+	snprintf(buffer, sizeof(buffer), msg_txt(sd, 657), nd->u.tomb.md->db->name);
+	clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptmes(sd, nd->bl.id, msg_txt(658));
+	clif_scriptmes(sd, nd->bl.id, msg_txt(sd, 658));
 
-    snprintf(buffer, sizeof(buffer), msg_txt(659), time);
-    clif_scriptmes(sd, nd->bl.id, buffer);
+	snprintf(buffer, sizeof(buffer), msg_txt(sd, 659), time);
+	clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptmes(sd, nd->bl.id, msg_txt(660));
+	clif_scriptmes(sd, nd->bl.id, msg_txt(sd, 660));
 
-	snprintf(buffer, sizeof(buffer), msg_txt(661), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown");
-    clif_scriptmes(sd, nd->bl.id, buffer);
+	snprintf(buffer, sizeof(buffer), msg_txt(sd, 661), nd->u.tomb.killer_name[0] ? nd->u.tomb.killer_name : "Unknown");
+	clif_scriptmes(sd, nd->bl.id, buffer);
 
-    clif_scriptclose(sd, nd->bl.id);
+	clif_scriptclose(sd, nd->bl.id);
 }
 
 /*==========================================
@@ -1342,7 +1342,7 @@ int npc_click(struct map_session_data *sd, struct npc_data *nd)
 					if (nd->u.shop.shop_item[i].qty)
 						break;
 				if (i == nd->u.shop.count) {
-					clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(500),false,SELF);
+					clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(sd, 500),false,SELF); // Shop is out of stock! Please come back later.
 					return 0;
 				}
 				sd->npc_shopid = nd->bl.id;
@@ -1491,7 +1491,7 @@ static enum e_CASHSHOP_ACK npc_cashshop_process_payment(struct npc_data *nd, int
 
 					memset(output, '\0', sizeof(output));
 
-					sprintf(output, msg_txt(712), id->jname, id->nameid); // You do not have enough %s (ID: %hu).
+					sprintf(output, msg_txt(sd, 712), id->jname, id->nameid); // You do not have enough %s (ID: %hu).
 					clif_messagecolor(&sd->bl, color_table[COLOR_RED], output, false, SELF);
 					return ERROR_TYPE_PURCHASE_FAIL;
 				}
@@ -1523,12 +1523,12 @@ static enum e_CASHSHOP_ACK npc_cashshop_process_payment(struct npc_data *nd, int
 				memset(output, '\0', sizeof(output));
 
 				if( cost[1] < points || cost[0] < (price - points) ) {
-					sprintf(output, msg_txt(713), nd->u.shop.pointshop_str); // You do not have enough '%s'.
+					sprintf(output, msg_txt(sd, 713), nd->u.shop.pointshop_str); // You do not have enough '%s'.
 					clif_messagecolor(&sd->bl, color_table[COLOR_RED], output, false, SELF);
 					return ERROR_TYPE_PURCHASE_FAIL;
 				}
 				pc_setreg2(sd, nd->u.shop.pointshop_str, cost[0] - (price - points));
-				sprintf(output, msg_txt(716), nd->u.shop.pointshop_str, cost[0] - (price - points)); // Your '%s' is now: %d
+				sprintf(output, msg_txt(sd, 716), nd->u.shop.pointshop_str, cost[0] - (price - points)); // Your '%s' is now: %d
 				clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 			}
 			break;
@@ -1654,7 +1654,7 @@ void npc_shop_currency_type(struct map_session_data *sd, struct npc_data *nd, in
 
 						memset(output, '\0', sizeof(output));
 
-						sprintf(output, msg_txt(714), id->jname, id->nameid); // Item Shop List: %s (ID: %hu)
+						sprintf(output, msg_txt(sd, 714), id->jname, id->nameid); // Item Shop List: %s (ID: %hu)
 						clif_broadcast(&sd->bl, output, strlen(output) + 1, BC_BLUE, SELF);
 					}
 					for( i = 0; i < MAX_INVENTORY; i++ ) {
@@ -1672,7 +1672,7 @@ void npc_shop_currency_type(struct map_session_data *sd, struct npc_data *nd, in
 
 				memset(output, '\0', sizeof(output));
 
-				sprintf(output, msg_txt(715), nd->u.shop.pointshop_str); // Point Shop List: '%s'
+				sprintf(output, msg_txt(sd, 715), nd->u.shop.pointshop_str); // Point Shop List: '%s'
 				clif_broadcast(&sd->bl, output, strlen(output) + 1, BC_BLUE, SELF);
 			}
 			cost[0] = pc_readreg2(sd, nd->u.shop.pointshop_str);
@@ -1790,7 +1790,7 @@ static int npc_buylist_sub(struct map_session_data *sd, uint16 n, struct s_npc_b
 	}
 
 	// Invoke event
-	snprintf(npc_ev, ARRAYLENGTH(npc_ev), "%s::OnBuyItem", nd->exname);
+	snprintf(npc_ev, ARRAYLENGTH(npc_ev), "%s::%s", nd->exname, script_config.onbuy_event_name);
 	npc_event(sd, npc_ev, 0);
 
 	return 0;
@@ -2018,7 +2018,7 @@ static int npc_selllist_sub(struct map_session_data *sd, int n, unsigned short *
 	}
 
 	//Invoke event
-	snprintf(npc_ev, ARRAYLENGTH(npc_ev), "%s::OnSellItem", nd->exname);
+	snprintf(npc_ev, ARRAYLENGTH(npc_ev), "%s::%s", nd->exname, script_config.onsell_event_name);
 	npc_event(sd, npc_ev, 0);
 	return 0;
 }
@@ -3111,10 +3111,10 @@ static const char *npc_parse_script(char *w1, char *w2, char *w3, char *w4, cons
 		char evname[EVENT_NAME_LENGTH];
 		struct event_data *ev;
 
-		snprintf(evname, ARRAYLENGTH(evname), "%s::OnInit", nd->exname);
+		snprintf(evname, ARRAYLENGTH(evname), "%s::%s", nd->exname, script_config.init_event_name);
 
 		if( (ev = (struct event_data *)strdb_get(ev_db, evname)) ) //Execute OnInit
-			run_script(nd->u.scr.script,ev->pos,0,nd->bl.id);
+			run_script(nd->u.scr.script, ev->pos, 0, nd->bl.id);
 	}
 
 	return end;

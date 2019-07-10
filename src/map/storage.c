@@ -162,7 +162,7 @@ int storage_storageopen(struct map_session_data *sd)
 		return 1; //Already open?
 
 	if (!pc_can_give_items(sd)) { //Check is this GM level is allowed to put items to storage
-		clif_displaymessage(sd->fd, msg_txt(246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		return 1;
 	}
 
@@ -274,12 +274,12 @@ static int storage_additem(struct map_session_data *sd, struct s_storage *stor, 
 		return 2;
 
 	if (!itemdb_canstore(it, pc_get_group_level(sd))) { //Check if item is storable. [Skotlex]
-		clif_displaymessage (sd->fd, msg_txt(264));
+		clif_displaymessage (sd->fd, msg_txt(sd, 264));
 		return 1;
 	}
 
 	if (it->bound > BOUND_ACCOUNT && !pc_can_give_bounded_items(sd)) {
-		clif_displaymessage(sd->fd, msg_txt(294));
+		clif_displaymessage(sd->fd, msg_txt(sd, 294));
 		return 1;
 	}
 
@@ -616,7 +616,7 @@ char storage_guild_storageopen(struct map_session_data *sd)
 #endif
 
 	if (!pc_can_give_items(sd)) { //Check is this GM level can open guild storage and store items [Lupus]
-		clif_displaymessage(sd->fd, msg_txt(246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		return GSTORAGE_ALREADY_OPEN;
 	}
 
@@ -787,12 +787,12 @@ bool storage_guild_additem(struct map_session_data *sd, struct s_storage *stor, 
 
 	//Check if item is storable [Skotlex]
 	if (!itemdb_canguildstore(item_data, pc_get_group_level(sd)) || item_data->expire_time) {
-		clif_displaymessage(sd->fd, msg_txt(264));
+		clif_displaymessage(sd->fd, msg_txt(sd, 264));
 		return false;
 	}
 
 	if ((item_data->bound == BOUND_ACCOUNT || item_data->bound > BOUND_GUILD) && !pc_can_give_bounded_items(sd)) {
-		clif_displaymessage(sd->fd, msg_txt(294));
+		clif_displaymessage(sd->fd, msg_txt(sd, 294));
 		return false;
 	}
 
@@ -1170,7 +1170,7 @@ bool storage_premiumStorage_load(struct map_session_data *sd, uint8 num, uint8 m
 		return false;
 
 	if (!pc_can_give_items(sd)) { //Check if this GM level is allowed to put items to storage
-		clif_displaymessage(sd->fd, msg_txt(246));
+		clif_displaymessage(sd->fd, msg_txt(sd, 246)); // Your GM level doesn't authorize you to preform this action.
 		return false;
 	}
 

@@ -1986,6 +1986,10 @@ void pc_reg_received(struct map_session_data *sd)
 	sd->change_level_3rd = pc_readglobalreg(sd,"jobchange_level_3rd");
 	sd->die_counter = pc_readglobalreg(sd,PCDIECOUNTER_VAR);
 
+	sd->langtype = pc_readaccountreg(sd,LANGTYPE_VAR);
+	if (msg_checklangtype(sd->langtype,true) < 0)
+		sd->langtype = 0; //Invalid langtype reset to default
+
 	//Cash shop
 	sd->cashPoints = pc_readaccountreg(sd,CASHPOINT_VAR);
 	sd->kafraPoints = pc_readaccountreg(sd,KAFRAPOINT_VAR);
@@ -2106,7 +2110,7 @@ void pc_reg_received(struct map_session_data *sd)
 
 	if (pc_isinvisible(sd)) {
 		sd->vd.class_ = JT_INVISIBLE;
-		clif_displaymessage(sd->fd, msg_txt(11)); // Invisible: On
+		clif_displaymessage(sd->fd, msg_txt(sd, 11)); // Invisible: On
 		//Decrement the number of pvp players on the map
 		mapdata[sd->bl.m].users_pvp--;
 		if (mapdata[sd->bl.m].flag.pvp && !mapdata[sd->bl.m].flag.pvp_nocalcrank && sd->pvp_timer != INVALID_TIMER) {
@@ -3681,9 +3685,9 @@ void pc_bonus(struct map_session_data *sd, int type, int val)
 			if(sd->state.lr_flag != 2)
 				sd->bonus.weapon_matk_rate += val;
 			break;
-		case SP_NO_MAGIC_GEAR_FUEL:
+		case SP_NO_MADO_FUEL:
 			if(sd->state.lr_flag != 2)
-				sd->special_state.no_magic_gear_fuel = 1;
+				sd->special_state.no_mado_fuel = 1;
 			break;
 		case SP_NO_WALKDELAY:
 			if(sd->state.lr_flag != 2)
@@ -4781,7 +4785,7 @@ int pc_paycash(struct map_session_data *sd, int price, int points, e_log_pick_ty
 	if( battle_config.cashshop_show_points ) {
 		char output[CHAT_SIZE_MAX];
 
-		sprintf(output, msg_txt(504), points, cash, sd->kafraPoints, sd->cashPoints); // Used %d kafra points and %d cash points. %d kafra and %d cash points remaining.
+		sprintf(output, msg_txt(sd, 504), points, cash, sd->kafraPoints, sd->cashPoints); // Used %d kafra points and %d cash points. %d kafra and %d cash points remaining.
 		clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 	}
 
@@ -4814,7 +4818,7 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 		sd->cashPoints += cash;
 		log_cash(sd, type, LOG_CASH_TYPE_CASH, cash);
 		if( battle_config.cashshop_show_points ) {
-			sprintf(output, msg_txt(505), cash, sd->cashPoints);
+			sprintf(output, msg_txt(sd, 505), cash, sd->cashPoints);
 			clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 		}
 		return cash;
@@ -4829,7 +4833,7 @@ int pc_getcash(struct map_session_data *sd, int cash, int points, e_log_pick_typ
 		sd->kafraPoints += points;
 		log_cash(sd, type, LOG_CASH_TYPE_KAFRA, points);
 		if( battle_config.cashshop_show_points ) {
-			sprintf(output, msg_txt(506), points, sd->kafraPoints);
+			sprintf(output, msg_txt(sd, 506), points, sd->kafraPoints);
 			clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
 		}
 		return points;
@@ -5020,12 +5024,12 @@ bool pc_dropitem(struct map_session_data *sd, int n, int amount)
 		return false;
 
 	if(mapdata[sd->bl.m].flag.nodrop) {
-		clif_displaymessage (sd->fd, msg_txt(271));
+		clif_displaymessage (sd->fd, msg_txt(sd, 271));
 		return false; //Can't drop items in nodrop mapflag maps
 	}
 
 	if(!pc_candrop(sd,&sd->inventory.u.items_inventory[n])) {
-		clif_displaymessage (sd->fd, msg_txt(263));
+		clif_displaymessage (sd->fd, msg_txt(sd, 263));
 		return false;
 	}
 
@@ -5141,7 +5145,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 		return false;
 
 	if( sd->state.storage_flag && item->type != IT_CASH ) {
-		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(388),false,SELF); // You cannot use this item while storage is open.
+		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(sd,388),false,SELF); // You cannot use this item while storage is open.
 		return false;
 	}
 
@@ -5193,7 +5197,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 		case ITEMID_WOB_LOCAL:
 		case ITEMID_SIEGE_TELEPORT_SCROLL:
 			if( sd->duel_group && !battle_config.duel_allow_teleport ) {
-				clif_displaymessage(sd->fd, msg_txt(663));
+				clif_displaymessage(sd->fd, msg_txt(sd, 663));
 				return false;
 			}
 			if( mapdata[sd->bl.m].flag.noreturn && nameid != ITEMID_WING_OF_FLY && nameid != ITEMID_GIANT_FLY_WING && nameid != ITEMID_N_FLY_WING )
@@ -5233,7 +5237,7 @@ bool pc_isUseitem(struct map_session_data *sd, int n)
 			return false;
 		}
 		if( !pc_inventoryblank(sd) ) {
-			clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1477),false,SELF); // Item cannot be open when inventory is full.
+			clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(sd,1477),false,SELF); // Item cannot be open when inventory is full.
 			return false;
 		}
 	}
@@ -5407,7 +5411,7 @@ enum e_additem_result pc_cart_additem(struct map_session_data *sd, struct item *
 
 	if( !itemdb_cancartstore(item, pc_get_group_level(sd)) ||
 		(item->bound > BOUND_ACCOUNT && !pc_can_give_bounded_items(sd)) ) { //Check item trade restrictions [Skotlex]
-		clif_displaymessage(sd->fd, msg_txt(264));
+		clif_displaymessage(sd->fd, msg_txt(sd, 264));
 		return ADDITEM_INVALID;
 	}
 
@@ -5704,11 +5708,11 @@ bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 sk
 
 	//A Rare Steal Global Announce by Lupus
 	if( md->db->dropitem[i].p <= battle_config.rare_drop_announce ) {
-		struct item_data *i_data;
+		struct item_data *i_data = NULL;
 		char message[128];
 
 		i_data = itemdb_search(itemid);
-		sprintf (message,msg_txt(542),(sd->status.name[0] ? sd->status.name : "GM"),md->db->jname,i_data->jname,(float)md->db->dropitem[i].p / 100);
+		sprintf(message,msg_txt(NULL,542),(sd->status.name[0] ? sd->status.name : "GM"),md->db->jname,i_data->jname,(float)md->db->dropitem[i].p / 100);
 		//MSG: "'%s' stole %s's %s (chance: %0.02f%%)"
 		intif_broadcast(message,strlen(message) + 1,BC_DEFAULT);
 	}
@@ -5832,7 +5836,7 @@ enum e_setpos pc_setpos(struct map_session_data *sd, unsigned short mapindex, in
 			sd->regen.state.gc = 0;
 		// Make sure vending is allowed here
 		if( sd->state.vending && mapdata[m].flag.novending ) {
-			clif_displaymessage (sd->fd, msg_txt(276)); // "You can't open a shop on this map."
+			clif_displaymessage (sd->fd, msg_txt(sd, 276)); // "You can't open a shop on this map."
 			vending_closevending(sd);
 		}
 		channel_pcquit(sd, 4); // Quit map channel
@@ -5882,7 +5886,7 @@ enum e_setpos pc_setpos(struct map_session_data *sd, unsigned short mapindex, in
 	}
 
 	if( sd->state.vending && map_getcell(m, x, y, CELL_CHKNOVENDING) ) {
-		clif_displaymessage(sd->fd, msg_txt(204)); // "You can't open a shop on this cell."
+		clif_displaymessage(sd->fd, msg_txt(sd, 204)); // "You can't open a shop on this cell."
 		vending_closevending(sd);
 	}
 
@@ -6015,7 +6019,7 @@ bool pc_memo(struct map_session_data *sd, int pos)
 		pos = 0;
 	}
 	if( mapdata[sd->bl.m].instance_id ) {
-		clif_displaymessage(sd->fd, msg_txt(384)); // You cannot create a memo in an instance.
+		clif_displaymessage(sd->fd, msg_txt(sd, 384)); // You cannot create a memo in an instance.
 		return false;
 	}
 	sd->status.memo_point[pos].map = map_id2index(sd->bl.m);
@@ -6506,7 +6510,7 @@ const char *job_name(int class_)
 		case JOB_ACOLYTE:
 		case JOB_MERCHANT:
 		case JOB_THIEF:
-			return msg_txt(550 - JOB_NOVICE + class_);
+			return msg_txt(NULL, 550 - JOB_NOVICE + class_);
 
 		case JOB_KNIGHT:
 		case JOB_PRIEST:
@@ -6514,10 +6518,10 @@ const char *job_name(int class_)
 		case JOB_BLACKSMITH:
 		case JOB_HUNTER:
 		case JOB_ASSASSIN:
-			return msg_txt(557 - JOB_KNIGHT + class_);
+			return msg_txt(NULL, 557 - JOB_KNIGHT + class_);
 
 		case JOB_KNIGHT2:
-			return msg_txt(557);
+			return msg_txt(NULL, 557);
 
 		case JOB_CRUSADER:
 		case JOB_MONK:
@@ -6526,27 +6530,27 @@ const char *job_name(int class_)
 		case JOB_ALCHEMIST:
 		case JOB_BARD:
 		case JOB_DANCER:
-			return msg_txt(563 - JOB_CRUSADER + class_);
+			return msg_txt(NULL, 563 - JOB_CRUSADER + class_);
 
 		case JOB_CRUSADER2:
-			return msg_txt(563);
+			return msg_txt(NULL, 563);
 
 		case JOB_WEDDING:
 		case JOB_SUPER_NOVICE:
 		case JOB_GUNSLINGER:
 		case JOB_NINJA:
 		case JOB_XMAS:
-			return msg_txt(570 - JOB_WEDDING + class_);
+			return msg_txt(NULL, 570 - JOB_WEDDING + class_);
 
 		case JOB_SUMMER:
 		case JOB_SUMMER2:
-			return msg_txt(621);
+			return msg_txt(NULL, 621);
 
 		case JOB_HANBOK:
-			return msg_txt(694);
+			return msg_txt(NULL, 694);
 
 		case JOB_OKTOBERFEST:
-			return msg_txt(696);
+			return msg_txt(NULL, 696);
 
 		case JOB_NOVICE_HIGH:
 		case JOB_SWORDMAN_HIGH:
@@ -6555,7 +6559,7 @@ const char *job_name(int class_)
 		case JOB_ACOLYTE_HIGH:
 		case JOB_MERCHANT_HIGH:
 		case JOB_THIEF_HIGH:
-			return msg_txt(575 - JOB_NOVICE_HIGH + class_);
+			return msg_txt(NULL, 575 - JOB_NOVICE_HIGH + class_);
 
 		case JOB_LORD_KNIGHT:
 		case JOB_HIGH_PRIEST:
@@ -6563,10 +6567,10 @@ const char *job_name(int class_)
 		case JOB_WHITESMITH:
 		case JOB_SNIPER:
 		case JOB_ASSASSIN_CROSS:
-			return msg_txt(582 - JOB_LORD_KNIGHT + class_);
+			return msg_txt(NULL, 582 - JOB_LORD_KNIGHT + class_);
 
 		case JOB_LORD_KNIGHT2:
-			return msg_txt(582);
+			return msg_txt(NULL, 582);
 
 		case JOB_PALADIN:
 		case JOB_CHAMPION:
@@ -6575,10 +6579,10 @@ const char *job_name(int class_)
 		case JOB_CREATOR:
 		case JOB_CLOWN:
 		case JOB_GYPSY:
-			return msg_txt(588 - JOB_PALADIN + class_);
+			return msg_txt(NULL, 588 - JOB_PALADIN + class_);
 
 		case JOB_PALADIN2:
-			return msg_txt(588);
+			return msg_txt(NULL, 588);
 
 		case JOB_BABY:
 		case JOB_BABY_SWORDMAN:
@@ -6587,7 +6591,7 @@ const char *job_name(int class_)
 		case JOB_BABY_ACOLYTE:
 		case JOB_BABY_MERCHANT:
 		case JOB_BABY_THIEF:
-			return msg_txt(595 - JOB_BABY + class_);
+			return msg_txt(NULL, 595 - JOB_BABY + class_);
 
 		case JOB_BABY_KNIGHT:
 		case JOB_BABY_PRIEST:
@@ -6595,10 +6599,10 @@ const char *job_name(int class_)
 		case JOB_BABY_BLACKSMITH:
 		case JOB_BABY_HUNTER:
 		case JOB_BABY_ASSASSIN:
-			return msg_txt(602 - JOB_BABY_KNIGHT + class_);
+			return msg_txt(NULL, 602 - JOB_BABY_KNIGHT + class_);
 
 		case JOB_BABY_KNIGHT2:
-			return msg_txt(602);
+			return msg_txt(NULL, 602);
 
 		case JOB_BABY_CRUSADER:
 		case JOB_BABY_MONK:
@@ -6607,26 +6611,26 @@ const char *job_name(int class_)
 		case JOB_BABY_ALCHEMIST:
 		case JOB_BABY_BARD:
 		case JOB_BABY_DANCER:
-			return msg_txt(608 - JOB_BABY_CRUSADER + class_);
+			return msg_txt(NULL, 608 - JOB_BABY_CRUSADER + class_);
 
 		case JOB_BABY_CRUSADER2:
-			return msg_txt(608);
+			return msg_txt(NULL, 608);
 
 		case JOB_SUPER_BABY:
-			return msg_txt(615);
+			return msg_txt(NULL, 615);
 
 		case JOB_TAEKWON:
-			return msg_txt(616);
+			return msg_txt(NULL, 616);
 		case JOB_STAR_GLADIATOR:
 		case JOB_STAR_GLADIATOR2:
-			return msg_txt(617);
+			return msg_txt(NULL, 617);
 		case JOB_SOUL_LINKER:
-			return msg_txt(618);
+			return msg_txt(NULL, 618);
 
 		case JOB_GANGSI:
 		case JOB_DEATH_KNIGHT:
 		case JOB_DARK_COLLECTOR:
-			return msg_txt(622 - JOB_GANGSI + class_);
+			return msg_txt(NULL, 622 - JOB_GANGSI + class_);
 
 		case JOB_RUNE_KNIGHT:
 		case JOB_WARLOCK:
@@ -6634,7 +6638,7 @@ const char *job_name(int class_)
 		case JOB_ARCH_BISHOP:
 		case JOB_MECHANIC:
 		case JOB_GUILLOTINE_CROSS:
-			return msg_txt(625 - JOB_RUNE_KNIGHT + class_);
+			return msg_txt(NULL, 625 - JOB_RUNE_KNIGHT + class_);
 
 		case JOB_RUNE_KNIGHT_T:
 		case JOB_WARLOCK_T:
@@ -6642,7 +6646,7 @@ const char *job_name(int class_)
 		case JOB_ARCH_BISHOP_T:
 		case JOB_MECHANIC_T:
 		case JOB_GUILLOTINE_CROSS_T:
-			return msg_txt(681 - JOB_RUNE_KNIGHT_T + class_);
+			return msg_txt(NULL, 681 - JOB_RUNE_KNIGHT_T + class_);
 
 		case JOB_ROYAL_GUARD:
 		case JOB_SORCERER:
@@ -6651,7 +6655,7 @@ const char *job_name(int class_)
 		case JOB_SURA:
 		case JOB_GENETIC:
 		case JOB_SHADOW_CHASER:
-			return msg_txt(631 - JOB_ROYAL_GUARD + class_);
+			return msg_txt(NULL, 631 - JOB_ROYAL_GUARD + class_);
 
 		case JOB_ROYAL_GUARD_T:
 		case JOB_SORCERER_T:
@@ -6660,23 +6664,23 @@ const char *job_name(int class_)
 		case JOB_SURA_T:
 		case JOB_GENETIC_T:
 		case JOB_SHADOW_CHASER_T:
-			return msg_txt(687 - JOB_ROYAL_GUARD_T + class_);
+			return msg_txt(NULL, 687 - JOB_ROYAL_GUARD_T + class_);
 
 		case JOB_RUNE_KNIGHT2:
 		case JOB_RUNE_KNIGHT_T2:
-			return msg_txt(625);
+			return msg_txt(NULL, 625);
 
 		case JOB_ROYAL_GUARD2:
 		case JOB_ROYAL_GUARD_T2:
-			return msg_txt(631);
+			return msg_txt(NULL, 631);
 
 		case JOB_RANGER2:
 		case JOB_RANGER_T2:
-			return msg_txt(627);
+			return msg_txt(NULL, 627);
 
 		case JOB_MECHANIC2:
 		case JOB_MECHANIC_T2:
-			return msg_txt(629);
+			return msg_txt(NULL, 629);
 
 		case JOB_BABY_RUNE:
 		case JOB_BABY_WARLOCK:
@@ -6691,36 +6695,36 @@ const char *job_name(int class_)
 		case JOB_BABY_SURA:
 		case JOB_BABY_GENETIC:
 		case JOB_BABY_CHASER:
-			return msg_txt(638 - JOB_BABY_RUNE + class_);
+			return msg_txt(NULL, 638 - JOB_BABY_RUNE + class_);
 
 		case JOB_BABY_RUNE2:
-			return msg_txt(638);
+			return msg_txt(NULL, 638);
 
 		case JOB_BABY_GUARD2:
-			return msg_txt(644);
+			return msg_txt(NULL, 644);
 
 		case JOB_BABY_RANGER2:
-			return msg_txt(640);
+			return msg_txt(NULL, 640);
 
 		case JOB_BABY_MECHANIC2:
-			return msg_txt(642);
+			return msg_txt(NULL, 642);
 
 		case JOB_SUPER_NOVICE_E:
 		case JOB_SUPER_BABY_E:
-			return msg_txt(651 - JOB_SUPER_NOVICE_E + class_);
+			return msg_txt(NULL, 651 - JOB_SUPER_NOVICE_E + class_);
 
 		case JOB_KAGEROU:
 		case JOB_OBORO:
-			return msg_txt(653 - JOB_KAGEROU + class_);
+			return msg_txt(NULL, 653 - JOB_KAGEROU + class_);
 
 		case JOB_REBELLION:
-			return msg_txt(695);
+			return msg_txt(NULL, 695);
 
 		case JOB_SUMMONER:
-			return msg_txt(697);
+			return msg_txt(NULL, 697);
 
 		case JOB_BABY_SUMMONER:
-			return msg_txt(698);
+			return msg_txt(NULL, 698);
 
 		case JOB_BABY_NINJA:
 		case JOB_BABY_KAGEROU:
@@ -6730,25 +6734,25 @@ const char *job_name(int class_)
 		case JOB_BABY_SOUL_LINKER:
 		case JOB_BABY_GUNSLINGER:
 		case JOB_BABY_REBELLION:
-			return msg_txt(745 - JOB_BABY_NINJA + class_);
+			return msg_txt(NULL, 745 - JOB_BABY_NINJA + class_);
 
 		case JOB_BABY_STAR_GLADIATOR2:
-			return msg_txt(749);
+			return msg_txt(NULL, 749);
 
 		case JOB_STAR_EMPEROR:
 		case JOB_SOUL_REAPER:
 		case JOB_BABY_STAR_EMPEROR:
 		case JOB_BABY_SOUL_REAPER:
-			return msg_txt(924 - JOB_STAR_EMPEROR + class_);
+			return msg_txt(NULL, 924 - JOB_STAR_EMPEROR + class_);
 
 		case JOB_STAR_EMPEROR2:
-			return msg_txt(924);
+			return msg_txt(NULL, 924);
 
 		case JOB_BABY_STAR_EMPEROR2:
-			return msg_txt(926);
+			return msg_txt(NULL, 926);
 
 		default:
-			return msg_txt(655);
+			return msg_txt(NULL, 655);
 	}
 }
 
@@ -7007,8 +7011,8 @@ void pc_gainexp_disp(struct map_session_data *sd, uint32 base_exp, uint32 next_b
 
 	nullpo_retv(sd);
 
-	sprintf(output, msg_txt(740), // Experience %s Base:%ld (%0.2f%%) Job:%ld (%0.2f%%)
-		(lost) ? msg_txt(739) : msg_txt(738),
+	sprintf(output, msg_txt(sd, 740), // Experience %s Base:%ld (%0.2f%%) Job:%ld (%0.2f%%)
+		(lost) ? msg_txt(sd, 739) : msg_txt(sd, 738),
 		(long)base_exp * (lost ? -1 : 1), (base_exp / (float)next_base_exp * 100 * (lost ? -1 : 1)),
 		(long)job_exp * (lost ? -1 : 1), (job_exp / (float)next_job_exp * 100 * (lost ? -1 : 1)));
 	clif_messagecolor(&sd->bl, color_table[COLOR_LIGHT_GREEN], output, false, SELF);
@@ -8151,7 +8155,7 @@ int pc_dead(struct map_session_data *sd, struct block_list *src)
 
 	pc_setdead(sd);
 	clif_party_dead(sd);
-	pc_setglobalreg(sd,"PC_DIE_COUNTER",sd->die_counter + 1);
+	pc_setglobalreg(sd,PCDIECOUNTER_VAR,sd->die_counter + 1);
 	pc_setparam(sd,SP_KILLERRID,src ? src->id : 0);
 
 	//Reset menu skills/item skills
@@ -8495,6 +8499,7 @@ int pc_readparam(struct map_session_data *sd, int type)
 		case SP_KILLEDGID:		val = sd->killedgid; break;
 		case SP_PCDIECOUNTER:		val = sd->die_counter; break;
 		case SP_COOKMASTERY:		val = sd->cook_mastery; break;
+		case SP_LANGTYPE:		val = sd->langtype; break;
 		case SP_CRITICAL:		val = sd->battle_status.cri / 10; break;
 		case SP_ASPD:			val = (2000 - sd->battle_status.amotion) / 10; break;
 		case SP_BASE_ATK:
@@ -8597,7 +8602,7 @@ int pc_readparam(struct map_session_data *sd, int type)
 #else
 		case SP_CASTRATE:		val = sd->castrate; break;
 #endif
-		case SP_NO_MAGIC_GEAR_FUEL:	val = (sd->special_state.no_magic_gear_fuel ? 1 : 0); break;
+		case SP_NO_MADO_FUEL:	val = (sd->special_state.no_mado_fuel ? 1 : 0); break;
 		case SP_NO_WALKDELAY:		val = (sd->special_state.no_walkdelay ? 1 : 0); break;
 		default:
 			ShowError("pc_readparam: Attempt to read unknown parameter '%d'.\n", type);
@@ -8814,6 +8819,10 @@ bool pc_setparam(struct map_session_data *sd, int type, int val) {
 			val = cap_value(val, 0, 1999);
 			sd->cook_mastery = val;
 			pc_setglobalreg(sd, COOKMASTERY_VAR, sd->cook_mastery);
+			return true;
+		case SP_LANGTYPE:
+			sd->langtype = val;
+			pc_setaccountreg(sd, LANGTYPE_VAR, sd->langtype);
 			return true;
 		default:
 			ShowError("pc_setparam: Attempted to set unknown parameter '%d'.\n", type);
@@ -10786,7 +10795,7 @@ void pc_check_available_item(struct map_session_data *sd, uint8 type) {
 			if( !nameid )
 				continue;
 			if( !itemdb_available(nameid) ) {
-				sprintf(output,msg_txt(709),nameid); // Item %hu has been removed from your inventory.
+				sprintf(output,msg_txt(sd,709),nameid); // Item %hu has been removed from your inventory.
 				clif_displaymessage(sd->fd,output);
 				ShowWarning("Removed invalid/disabled item (ID: %hu, amount: %d) from inventory (char_id: %d).\n",nameid,sd->inventory.u.items_inventory[i].amount,sd->status.char_id);
 				pc_delitem(sd,i,sd->inventory.u.items_inventory[i].amount,4,0,LOG_TYPE_OTHER);
@@ -10803,7 +10812,7 @@ void pc_check_available_item(struct map_session_data *sd, uint8 type) {
 			if( !nameid )
 				continue;
 			if( !itemdb_available(nameid) ) {
-				sprintf(output,msg_txt(710),nameid); // Item %hu has been removed from your cart.
+				sprintf(output,msg_txt(sd,710),nameid); // Item %hu has been removed from your cart.
 				clif_displaymessage(sd->fd,output);
 				ShowWarning("Removed invalid/disabled item (ID: %hu, amount: %d) from cart (char_id: %d).\n",nameid,sd->cart.u.items_cart[i].amount,sd->status.char_id);
 				pc_cart_delitem(sd,i,sd->cart.u.items_cart[i].amount,0,LOG_TYPE_OTHER);
@@ -10820,7 +10829,7 @@ void pc_check_available_item(struct map_session_data *sd, uint8 type) {
 			if( !nameid )
 				continue;
 			if( !itemdb_available(nameid) ) {
-				sprintf(output,msg_txt(711),nameid); // Item %hu has been removed from your storage.
+				sprintf(output,msg_txt(sd,711),nameid); // Item %hu has been removed from your storage.
 				clif_displaymessage(sd->fd,output);
 				ShowWarning("Removed invalid/disabled item (ID: %hu, amount: %d) from storage (char_id: %d).\n",nameid,sd->storage.u.items_storage[i].amount,sd->status.char_id);
 				storage_delitem(sd,&sd->storage,i,sd->storage.u.items_storage[i].amount);
@@ -11163,7 +11172,7 @@ TIMER_FUNC(map_day_timer)
 
 	night_flag = 0; //0 = day, 1 = night [Yor]
 	map_foreachpc(pc_daynight_timer_sub);
-	strcpy(tmp_soutput, (!data ? msg_txt(502) : msg_txt(60))); // The day has arrived!
+	strcpy(tmp_soutput, (!data ? msg_txt(NULL, 502) : msg_txt(NULL, 60))); // The day has arrived!
 	intif_broadcast(tmp_soutput, strlen(tmp_soutput) + 1, BC_DEFAULT);
 	return 0;
 }
@@ -11184,7 +11193,7 @@ TIMER_FUNC(map_night_timer)
 
 	night_flag = 1; //0 = day, 1 = night [Yor]
 	map_foreachpc(pc_daynight_timer_sub);
-	strcpy(tmp_soutput, (!data ? msg_txt(503) : msg_txt(59))); // The night has fallen
+	strcpy(tmp_soutput, (!data ? msg_txt(NULL, 503) : msg_txt(NULL, 59))); // The night has fallen
 	intif_broadcast(tmp_soutput, strlen(tmp_soutput) + 1, BC_DEFAULT);
 	return 0;
 }
@@ -12244,9 +12253,9 @@ uint8 pc_itemcd_add(struct map_session_data *sd, struct item_data *id, unsigned 
 				char e_msg[100];
 
 				if( e_tick > 99 )
-					sprintf(e_msg,msg_txt(379), (double)e_tick / 60); // Able to use %.1f min later.
+					sprintf(e_msg ,msg_txt(sd, 379), (double)e_tick / 60); // Able to use %.1f min later.
 				else
-					sprintf(e_msg,msg_txt(380), e_tick + 1); // Able to use %d sec later.
+					sprintf(e_msg, msg_txt(sd, 380), e_tick + 1); // Able to use %d sec later.
 				clif_messagecolor(&sd->bl,color_table[COLOR_YELLOW],e_msg,false,SELF);
 				return 1; //Delay has not expired yet
 			}
@@ -12402,7 +12411,7 @@ void pc_check_expiration(struct map_session_data *sd) {
 		char tmpstr[1024];
 
 		localtime_r(&exp_time, &now);
-		strftime(tmpstr,sizeof(tmpstr) - 1,msg_txt(501),&now); // "Your account time limit is: %d-%m-%Y %H:%M:%S."
+		strftime(tmpstr,sizeof(tmpstr) - 1,msg_txt(sd,501),&now); // "Your account time limit is: %d-%m-%Y %H:%M:%S."
 		clif_wis_message(sd->fd,wisp_server_name,tmpstr,strlen(tmpstr));
 
 		pc_expire_check(sd);
@@ -12515,7 +12524,7 @@ enum e_BANKING_WITHDRAW_ACK pc_bank_withdraw(struct map_session_data *sd, int mo
 		return BWA_NO_MONEY;
 	else if( limit_check > MAX_ZENY ) {
 		//No official response for this scenario exists
-		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(1509),false,SELF); // You can't withdraw that much money.
+		clif_messagecolor(&sd->bl,color_table[COLOR_RED],msg_txt(sd,1509),false,SELF); // You can't withdraw that much money.
 		return BWA_UNKNOWN_ERROR;
 	}
 	if( pc_getzeny(sd,money,LOG_TYPE_BANK,NULL) )
@@ -12536,10 +12545,10 @@ void pc_show_version(struct map_session_data *sd) {
 	char buf[CHAT_SIZE_MAX];
 
 	if( git[0] != UNKNOWN_VERSION ) {
-		sprintf(buf,msg_txt(1295),"GIT Hash: ",git); // idAthena Git Hash: %s
+		sprintf(buf,msg_txt(sd,1295),"GIT Hash: ",git); // idAthena Git Hash: %s
 		clif_displaymessage(sd->fd,buf);
 	} else
-		clif_displaymessage(sd->fd,msg_txt(1296)); // Can't find current Git version.
+		clif_displaymessage(sd->fd,msg_txt(sd,1296)); // Can't find current Git version.
 }
 
 /**
@@ -13063,19 +13072,19 @@ void pc_check_supernovice_call(struct map_session_data *sd, const char *message)
 	if ((battle_config.snovice_call_type || percent) && !(percent%100)) { //10.0%, 20.0%, ..., 90.0%
 		switch (sd->state.snovice_call_flag) {
 			case 0:
-				if (strstr(message, msg_txt(1481))) // "Dear angel, can you hear my voice?"
+				if (strstr(message, msg_txt(NULL, 1481))) // "Dear angel, can you hear my voice?"
 					sd->state.snovice_call_flag = 1;
 				break;
 			case 1: {
 					char buf[256];
 
-					snprintf(buf, 256, msg_txt(1482), sd->status.name);
+					snprintf(buf, 256, msg_txt(NULL, 1482), sd->status.name);
 					if (strstr(message, buf)) // "I am %s Super Novice~"
 						sd->state.snovice_call_flag = 2;
 				}
 				break;
 			case 2:
-				if (strstr(message, msg_txt(1483))) // "Help me out~ Please~ T_T"
+				if (strstr(message, msg_txt(NULL, 1483))) // "Help me out~ Please~ T_T"
 					sd->state.snovice_call_flag = 3;
 				break;
 			case 3:
@@ -13296,9 +13305,9 @@ void pc_attendance_claim_reward(struct map_session_data *sd) {
 	memset(&msg, 0, sizeof(struct mail_message));
 
 	msg.dest_id = sd->status.char_id;
-	safestrncpy(msg.send_name, msg_txt(764), NAME_LENGTH);
-	safesnprintf(msg.title, MAIL_TITLE_LENGTH, msg_txt(765), attendance_counter);
-	safesnprintf(msg.body, MAIL_BODY_LENGTH, msg_txt(766), attendance_counter);
+	safestrncpy(msg.send_name, msg_txt(NULL, 764), NAME_LENGTH);
+	safesnprintf(msg.title, MAIL_TITLE_LENGTH, msg_txt(NULL, 765), attendance_counter);
+	safesnprintf(msg.body, MAIL_BODY_LENGTH, msg_txt(NULL, 766), attendance_counter);
 
 	msg.item[0].nameid = period->rewards[attendance_counter - 1].itemid;
 	msg.item[0].amount = period->rewards[attendance_counter - 1].amount;
@@ -13402,9 +13411,9 @@ static void pc_stylist_recieve_item(struct map_session_data *sd, uint16 nameid) 
 	memset(&msg, 0, sizeof(struct mail_message));
 
 	msg.dest_id = sd->status.char_id;
-	safestrncpy(msg.send_name, msg_txt(782), NAME_LENGTH);
-	safestrncpy(msg.title, msg_txt(783), MAIL_TITLE_LENGTH);
-	safestrncpy(msg.body, msg_txt(784), MAIL_BODY_LENGTH);
+	safestrncpy(msg.send_name, msg_txt(NULL, 772), NAME_LENGTH); // Styling Shop
+	safestrncpy(msg.title, msg_txt(NULL, 773), MAIL_TITLE_LENGTH); // Item has been delivered
+	safestrncpy(msg.body, msg_txt(NULL, 774), MAIL_BODY_LENGTH); // Thank you for purchasing
 
 	msg.item[0].nameid = nameid;
 	msg.item[0].amount = 1;

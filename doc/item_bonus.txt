@@ -205,8 +205,8 @@ bonus2 bVariableCastrate,sk,n;		Variable cast time of skill sk +n% (has effect i
 bonus2 bFixedCastrate,sk,n;		Fixed cast time of skill sk +n% (has effect in RENEWAL_CAST only)
 bonus2 bSkillVariableCast,sk,t;		Increases variable cast time of skill sk by t milliseconds (has effect in RENEWAL_CAST only)
 bonus2 bSkillFixedCast,sk,t;		Increases fixed cast time of skill sk by t milliseconds (has effect in RENEWAL_CAST only)
-bonus bNoCastCancel,n;			Prevents casting from being interrupted when hit (does not work in GvG | n is meaningless)
-bonus bNoCastCancel2,n;			Prevents casting from being interrupted when hit (works even in GvG | n is meaningless)
+bonus bNoCastCancel;			Prevents casting from being interrupted when hit (does not work in GvG)
+bonus bNoCastCancel2;			Prevents casting from being interrupted when hit (works even in GvG)
 bonus bDelayrate,n;			Skill delay +n%
 bonus bCooldownrate,n;			Skill cooldown +n%
 bonus2 bSkillDelay,sk,t;		Increases delay of skill sk by t milliseconds
@@ -233,7 +233,7 @@ bonus2 bSubClass,c,n;			+ n% damage reduction against class c
 bonus2 bAddSize,s,n;			+ n% physical damage against size s
 bonus2 bMagicAddSize,s,n;		+ n% magical damage against size s
 bonus2 bSubSize,s,n;			+ n% damage reduction against size s
-bonus bNoSizeFix,n;			Ignores the size modifier when calculating damage (n is meaningless)
+bonus bNoSizeFix;			Ignores the size modifier when calculating damage
 bonus2 bAddDamageClass,mid,n;		+ n% physical damage against monster mid
 bonus2 bAddMagicDamageClass,mid,n;	+ n% magical damage against monster mid
 					NOTE: Against players, mid is the player's job id
@@ -359,17 +359,17 @@ bonus bMagicDamageReturn,n;		Adds a n% chance to reflect targetted magic spells 
 
 Strip/Break equipment
 ---------------------
-bonus bUnstripableWeapon,n;		Weapon cannot be taken off via Strip skills (n is meaningless)
-bonus bUnstripableArmor,n;		Armor cannot be taken off via Strip skills (n is meaningless)
-bonus bUnstripableHelm,n;		Helm cannot be taken off via Strip skills (n is meaningless)
-bonus bUnstripableShield,n;		Shield cannot be taken off via Strip skills (n is meaningless)
+bonus bUnstripableWeapon;		Weapon cannot be taken off via Strip skills
+bonus bUnstripableArmor;		Armor cannot be taken off via Strip skills
+bonus bUnstripableHelm;			Helm cannot be taken off via Strip skills
+bonus bUnstripableShield;		Shield cannot be taken off via Strip skills
 bonus bUnstripable,n;			Reduces the strip chance of all equipped equipment by n%
-bonus bUnbreakableGarment,n;		Garment cannot be damaged/broken by any means (n is meaningless)
-bonus bUnbreakableWeapon,n;		Weapon cannot be damaged/broken by any means (n is meaningless)
-bonus bUnbreakableArmor,n;		Armor cannot be damaged/broken by any means (n is meaningless)
-bonus bUnbreakableHelm,n;		Helm cannot be damaged/broken by any means (n is meaningless)
-bonus bUnbreakableShield,n;		Shield cannot be damaged/broken by any means (n is meaningless)
-bonus bUnbreakableShoes,n;		Shoes cannot be damaged/broken by any means (n is meaningless)
+bonus bUnbreakableGarment;		Garment cannot be damaged/broken by any means
+bonus bUnbreakableWeapon;		Weapon cannot be damaged/broken by any means
+bonus bUnbreakableArmor;		Armor cannot be damaged/broken by any means
+bonus bUnbreakableHelm;			Helm cannot be damaged/broken by any means
+bonus bUnbreakableShield;		Shield cannot be damaged/broken by any means
+bonus bUnbreakableShoes;		Shoes cannot be damaged/broken by any means
 bonus bUnbreakable,n;			Reduces the break chance of all equipped equipment by n%
 bonus bBreakWeaponRate,n;		Adds n/100% chance to break enemy's weapon while attacking (stacks with other break chances)
 bonus bBreakArmorRate,n;		Adds n/100% chance to break enemy's armor while attacking (stacks with other break chances)
@@ -400,13 +400,13 @@ bonus bSplashRange,n;			Splash attack radius + n (only the highest among all is 
 bonus bSplashAddRange,n;		Splash attack radius + n
 					NOTE: n=1 makes a 3*3 cells area, n=2 a 5*5 area, etc
 bonus2 bAddSkillBlow,sk,n;		Knock back the target by n cells when using skill sk
-bonus bNoKnockback,n;			Character is no longer knocked back by enemy skills with such effect (n is meaningless)
-bonus bNoGemStone,n;			Skills requiring Gemstones do not require them (n is meaningless)
+bonus bNoKnockback;			Character is no longer knocked back by enemy skills with such effect
+bonus bNoGemStone;			Skills requiring Gemstones do not require them
                           		NOTE: Hocus Pocus still requires 1 Yellow Gemstone and Ganbantein requirements not reduced
-bonus bIntravision,n;			Always see Hiding and Cloaking players/mobs (n is meaningless)
-bonus bPerfectHide,n;			Hidden/cloaked character is no longer detected by monsters with 'detector' mode (n is meaningless)
-bonus bRestartFullRecover,n;		When reviving, HP and SP are fully healed (n is meaningless)
+bonus bIntravision;			Always see Hiding and Cloaking players/mobs
+bonus bPerfectHide;			Hidden/cloaked character is no longer detected by monsters with 'detector' mode
+bonus bRestartFullRecover;		When reviving, HP and SP are fully healed
 bonus bClassChange,n;			Gives n/100% chance to change the attacked monster's class with normal attack
 bonus bAddStealRate,n;			Increases success rate of Steal skill by n/100%
-bonus bNoMagicGearFuel,n;		Skills requiring Magic Gear Fuel do not require them (n is meaningless)
-bonus bNoWalkDelay,n;			Recieve infinite Endure status (n is meaningless)
+bonus bNoMadoFuel;			Nullify Magic Gear Fuel requirement for skills.
+bonus bNoWalkDelay;			Recieve infinite Endure status
