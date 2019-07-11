@@ -8856,9 +8856,9 @@ void battle_adjust_conf()
 	}
 #endif
 
-#if PACKETVER < 20141022
+#if PACKETVER < 20141016
 	if (battle_config.feature_roulette) {
-		ShowWarning("conf/battle/feature.conf roulette is enabled but it requires PACKETVER 2014-10-22 or newer, disabling...\n");
+		ShowWarning("conf/battle/feature.conf roulette is enabled but it requires PACKETVER 2014-10-16 or newer, disabling...\n");
 		battle_config.feature_roulette = 0;
 	}
 #endif

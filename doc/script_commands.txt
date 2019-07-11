@@ -8924,6 +8924,13 @@ with the given character id.
 
 ---------------------------------------
 
+*close_roulette(<char_id>)
+
+Closes the roulette window for the currently attached character or the character
+with the given character id.
+
+---------------------------------------
+
 ========================
 |7.- Instance commands.|
 ========================

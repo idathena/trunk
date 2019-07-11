@@ -6189,7 +6189,7 @@ BUILDIN_FUNC(countitem)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-int checkweight_sub(TBL_PC *sd, int nbargs, unsigned short *eitemid, int32 *eamount)
+static int checkweight_sub(struct map_session_data *sd, int nbargs, unsigned short *eitemid, int32 *eamount)
 {
 	struct item_data *id = NULL;
 	unsigned short nameid;
@@ -6202,23 +6202,19 @@ int checkweight_sub(TBL_PC *sd, int nbargs, unsigned short *eitemid, int32 *eamo
 	for( i = 0; i < nbargs; i++ ) {
 		if( !eitemid[i] )
 			continue;
-		id = itemdb_exists(eitemid[i]);
-		if( id == NULL ) {
+		if( !(id = itemdb_exists(eitemid[i])) ) {
 			ShowError("checkweight_sub: Invalid item '%hu'.\n", eitemid[i]);
 			return 0;
 		}
 		nameid = id->nameid;
-
 		amount = eamount[i];
 		if( amount < 1 ) {
 			ShowError("checkweight_sub: Invalid amount '%d'.\n", eamount[i]);
 			return 0;
 		}
-
-		weight += (id->weight)*amount; // Total weight for all chk
+		weight += id->weight * amount; // Total weight for all chk
 		if( weight + sd->weight > sd->max_weight ) // Too heavy
 			return 0;
-
 		switch( pc_checkadditem(sd, nameid, amount) ) {
 			case CHKADDITEM_EXIST: // Item is already in inventory, but there is still space for the requested amount
 				break;
@@ -22592,7 +22588,7 @@ BUILDIN_FUNC(achievementupdate) {
 }
 
 BUILDIN_FUNC(open_roulette) {
-#if PACKETVER >= 20141022
+#if PACKETVER >= 20141016
 	struct map_session_data *sd = NULL;
 
 	if (!battle_config.feature_roulette) {
@@ -22606,7 +22602,27 @@ BUILDIN_FUNC(open_roulette) {
 	clif_roulette_open(sd);
 	return SCRIPT_CMD_SUCCESS;
 #else
-	ShowError("buildin_open_roulette: This command requires PACKETVER 2014-10-22 or newer.\n");
+	ShowError("buildin_open_roulette: This command requires PACKETVER 2014-10-16 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#endif
+}
+
+BUILDIN_FUNC(close_roulette) {
+#if PACKETVER >= 20141016
+	struct map_session_data *sd = NULL;
+
+	if (!battle_config.feature_roulette) {
+		ShowError("buildin_close_roulette: Roulette system is disabled.\n");
+		return 1;
+	}
+
+	if (!script_charid2sd(2,sd))
+		return 1;
+
+	clif_roulette_close(sd);
+	return SCRIPT_CMD_SUCCESS;
+#else
+	ShowError("buildin_close_roulette: This command requires PACKETVER 2014-10-16 or newer.\n");
 	return SCRIPT_CMD_FAILURE;
 #endif
 }
@@ -23661,6 +23677,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(achievementupdate,"iii?"),
 	//Roulette System
 	BUILDIN_DEF(open_roulette,"?"),
+	BUILDIN_DEF(close_roulette,"?"),
 	//Mail System
 	BUILDIN_DEF(mail,"isss*"),
 	BUILDIN_DEF(identifyall,"??"),

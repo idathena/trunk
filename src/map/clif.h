@@ -512,6 +512,8 @@ enum GENERATE_ROULETTE_ACK {
 	GENERATE_ROULETTE_FAILED = 0x1,
 	GENERATE_ROULETTE_NO_ENOUGH_POINT = 0x2,
 	GENERATE_ROULETTE_LOSING = 0x3,
+	GENERATE_ROULETTE_NO_ENOUGH_INVENTORY_SPACE = 0x4,
+	GENERATE_ROULETTE_CANT_PLAY = 0x5,
 };
 
 enum OPEN_ROULETTE_ACK {
@@ -1116,6 +1118,7 @@ void clif_broadcast_obtain_special_item(const char *char_name, unsigned short na
 
 //Roulette [Yommy]
 void clif_roulette_open(struct map_session_data *sd);
+void clif_roulette_close(struct map_session_data *sd);
 
 void clif_dressing_room(struct map_session_data *sd, int flag);
 void clif_navigateTo(struct map_session_data *sd, const char *map, uint16 x, uint16 y, uint8 flag, bool hideWindow, uint16 mob_id);

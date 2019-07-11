@@ -4640,7 +4640,7 @@ char pc_checkadditem(struct map_session_data *sd, unsigned short nameid, int amo
 		return CHKADDITEM_OVERAMOUNT;
 
 	for(i = 0; i < MAX_INVENTORY; i++) {
-		//FIXME: This does not consider the checked item's cards, thus could check a wrong slot for stackability.
+		//FIXME: This does not consider the checked item's cards, thus could check a wrong slot for stackability
 		if(sd->inventory.u.items_inventory[i].nameid == nameid) {
 			if(amount > MAX_AMOUNT - sd->inventory.u.items_inventory[i].amount ||
 				(data->stack.inventory && amount > data->stack.amount - sd->inventory.u.items_inventory[i].amount))

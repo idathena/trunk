@@ -19780,7 +19780,7 @@ void clif_roulette_open(struct map_session_data *sd) {
 	fd = sd->fd;
 	WFIFOHEAD(fd,packet_len(0xa1a));
 	WFIFOW(fd,0) = 0xa1a;
-	WFIFOB(fd,2) = 0; //Result
+	WFIFOB(fd,2) = OPEN_ROULETTE_SUCCESS; //Result
 	WFIFOL(fd,3) = 0; //Serial
 	WFIFOB(fd,7) = (sd->roulette.claimPrize ? sd->roulette.stage - 1 : 0);
 	WFIFOB(fd,8) = (sd->roulette.claimPrize ? sd->roulette.prizeIdx : -1);
@@ -19858,6 +19858,22 @@ void clif_parse_roulette_info(int fd, struct map_session_data *sd) {
 	clif_roulette_info(sd);
 }
 
+/// Sends the info about closing the roulette
+/// 0A1E (ZC_ACK_CLOSE_ROULETTE)
+void clif_roulette_close(struct map_session_data *sd) {
+#if PACKETVER >= 20141016
+	int fd;
+
+	nullpo_retv(sd);
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,packet_len(0xa1e));
+	WFIFOW(fd,0) = 0xa1e;
+	WFIFOB(fd,2) = CLOSE_ROULETTE_SUCCESS; //Result
+	WFIFOSET(fd,packet_len(0xa1e));
+#endif
+}
+
 /// Notification of the client that the roulette window was closed
 /// 0A1D (CZ_REQ_CLOSE_ROULETTE)
 void clif_parse_roulette_close(int fd, struct map_session_data *sd) {
@@ -19920,7 +19936,7 @@ static uint8 clif_roulette_getitem(struct map_session_data *sd) {
 
 /// Update Roulette window with current stats
 /// 0A20 <result>.B <stage>.W <price index>.W <bonus item>.W <gold>.L <silver>.L <bronze>.L (ZC_ACK_GENERATE_ROULETTE)
-void clif_roulette_generate(struct map_session_data *sd, unsigned char result, short stage, short prizeIdx, short bonusItemID) {
+void clif_roulette_generate(struct map_session_data *sd, enum GENERATE_ROULETTE_ACK result, short stage, short prizeIdx, short bonusItemID) {
 	int fd;
 
 	nullpo_retv(sd);
@@ -19928,7 +19944,7 @@ void clif_roulette_generate(struct map_session_data *sd, unsigned char result, s
 	fd = sd->fd;
 	WFIFOHEAD(fd,packet_len(0xa20));
 	WFIFOW(fd,0) = 0xa20;
-	WFIFOB(fd,2) = result;
+	WFIFOB(fd,2) = (uint8)result;
 	WFIFOW(fd,3) = stage;
 	WFIFOW(fd,5) = prizeIdx;
 	WFIFOW(fd,7) = bonusItemID;
@@ -19960,7 +19976,9 @@ void clif_parse_roulette_generate(int fd, struct map_session_data *sd) {
 		sd->roulette.prizeIdx = -1;
 	}
 
-	if( !sd->roulette.stage && sd->roulette_point.bronze <= 0 && sd->roulette_point.silver < 10 && sd->roulette_point.gold < 10 )
+	if( pc_inventoryblank(sd) < 5 )
+		result = GENERATE_ROULETTE_NO_ENOUGH_INVENTORY_SPACE;
+	else if( !sd->roulette.stage && sd->roulette_point.bronze <= 0 && sd->roulette_point.silver < 10 && sd->roulette_point.gold < 10 )
 		result = GENERATE_ROULETTE_NO_ENOUGH_POINT;
 	else {
 		int8 loseIdx = -1, winIdx = -1;
