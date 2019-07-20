@@ -1243,13 +1243,6 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 			if( !(battle_check_undead(tstatus->race,tstatus->def_ele) || tstatus->race == RC_DEMON) )
 				sc_start(src,bl,SC_BLEEDING,50,skill_lv,skill_get_time2(skill_id,skill_lv));
 			break;
-		case LK_JOINTBEAT:
-			status = status_skill2sc(skill_id);
-			if( tsc->jb_flag ) {
-				sc_start2(src,bl,status,5 + skill_lv * 5,skill_lv,(tsc->jb_flag&BREAK_FLAGS),skill_get_time2(skill_id,skill_lv));
-				tsc->jb_flag = 0;
-			}
-			break;
 		case ASC_METEORASSAULT:
 			switch( rnd()%3 ) { //Any enemies hit by this skill will receive Stun, Blind, or Bleeding status ailment with a 5%+skill_lv*5% chance
 				case 0:
@@ -4708,18 +4701,12 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			break;
 
-		case LK_JOINTBEAT: //Decide the ailment first (affects attack damage and effect)
-			switch (rnd()%6) {
-				case 0: flag |= BREAK_ANKLE; break;
-				case 1: flag |= BREAK_WRIST; break;
-				case 2: flag |= BREAK_KNEE; break;
-				case 3: flag |= BREAK_SHOULDER; break;
-				case 4: flag |= BREAK_WAIST; break;
-				case 5: flag |= BREAK_NECK; break;
-			}
-			if (tsc) //@TODO: Is there really no cleaner way to do this?
-				tsc->jb_flag = flag;
-			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+		case LK_JOINTBEAT:
+			flag = 1 << rnd()%6;
+			if (flag != BREAK_NECK && tsc && tsc->data[SC_JOINTBEAT]->val2&BREAK_NECK)
+				flag = BREAK_NECK; //Target should always receive double damage if neck is already broken
+			if (skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag))
+				sc_start4(src,bl,SC_JOINTBEAT,50 + skill_lv + 1,skill_lv,flag&BREAK_FLAGS,src->id,0,skill_get_time2(skill_id,skill_lv));
 			break;
 
 		case MO_COMBOFINISH: //Becomes a splash attack when Soul Linked

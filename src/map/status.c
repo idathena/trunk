@@ -2332,7 +2332,7 @@ int status_base_amotion_pc(struct map_session_data *sd, struct status_data *stat
 static unsigned short status_base_atk(const struct block_list *bl, const struct status_data *status, int level)
 {
 	struct map_session_data *sd = map_id2sd(bl->id);
-	int flag = 0, str, dex, dstr;
+	short flag = 0, str, dex, dstr;
 #ifdef RENEWAL
 	int type = battle_config.enable_baseatk_renewal;
 #else
@@ -7937,6 +7937,10 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		case SC_ANKLE:
 			tick_def2 = status->agi * 100;
 			break;
+		case SC_JOINTBEAT:
+			sc_def2 = 270 * status->str / 100; //270 * STR / 100
+			tick_def2 = (status->luk * 50 + status->agi * 200) / 2; //(50 * LUK / 100 + 20 * AGI / 100) / 2
+			break;
 		case SC_MARSHOFABYSS: //5 secs (Fixed) + 25 secs - {((INT + LUK) / 20 secs)}
 			tick_def2 = (status->int_ + status->luk) * 50;
 			break;
@@ -9276,6 +9280,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					return 0;
 				break;
 			case SC_JOINTBEAT:
+				if( sce->val2&BREAK_NECK )
+					return 0; //BREAK_NECK cannot be stacked with new breaks until the status is over
 				val2 |= sce->val2; //Stackable ailments
 			//Fall through
 			default:
