@@ -916,7 +916,6 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	struct homun_data *hd;
 	struct status_data *sstatus, *tstatus;
 	struct status_change *sc, *tsc;
-	enum sc_type status;
 	uint8 lv = 0;
 	int rate;
 

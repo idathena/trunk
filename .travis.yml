@@ -1,4 +1,10 @@
 language: c
+dist: xenial
+sudo: false
+
+services:
+  - mysql
+
 compiler:
   - clang
   - gcc
