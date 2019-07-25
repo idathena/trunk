@@ -976,7 +976,7 @@ void inter_Storage_sendInfo(int fd)
 	WFIFOW(fd,0) = 0x388c;
 	WFIFOW(fd,2) = len;
 	for( i = 0; i < interserv_config.storage_count; i++ ) {
-		if( !&interserv_config.storages[i] || !interserv_config.storages[i].name )
+		if( !&interserv_config.storages[i] )
 			continue;
 		memcpy(WFIFOP(fd, 4 + size * i), &interserv_config.storages[i], size);
 	}
@@ -1001,7 +1001,7 @@ int mapif_broadcast(unsigned char *mes, int len, unsigned long fontColor, short 
 
 	WBUFW(buf,0) = 0x3800;
 	WBUFW(buf,2) = len;
-	WBUFL(buf,4) = fontColor;
+	WBUFL(buf,4) = (uint32)fontColor;
 	WBUFW(buf,8) = fontType;
 	WBUFW(buf,10) = fontSize;
 	WBUFW(buf,12) = fontAlign;

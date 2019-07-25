@@ -350,7 +350,7 @@ int recv_to_fifo(int fd)
 	if( !session_isActive(fd) )
 		return -1;
 
-	len = sRecv(fd, (char *) session[fd]->rdata + session[fd]->rdata_size, (int)RFIFOSPACE(fd), 0);
+	len = (int)sRecv(fd, (char *) session[fd]->rdata + session[fd]->rdata_size, (int)RFIFOSPACE(fd), 0);
 
 	if( len == SOCKET_ERROR ) { //An exception has occured
 		if( sErrno != S_EWOULDBLOCK ) {
@@ -387,7 +387,7 @@ int send_from_fifo(int fd)
 	if( session[fd]->wdata_size == 0 )
 		return 0; // nothing to send
 
-	len = sSend(fd, (const char *) session[fd]->wdata, (int)session[fd]->wdata_size, MSG_NOSIGNAL);
+	len = (int)sSend(fd, (const char *) session[fd]->wdata, (int)session[fd]->wdata_size, MSG_NOSIGNAL);
 
 	if( len == SOCKET_ERROR ) { //An exception has occured
 		if( sErrno != S_EWOULDBLOCK ) {
@@ -1349,7 +1349,7 @@ void socket_init(void)
 					setrlimit(RLIMIT_NOFILE, &rlp);
 					// report limit
 					getrlimit(RLIMIT_NOFILE, &rlp);
-					rlim_cur = rlp.rlim_cur;
+					rlim_cur = (unsigned int)rlp.rlim_cur;
 					ShowWarning("socket_init: failed to set socket limit to %d, setting to maximum allowed (original limit=%d, current limit=%d, maximum allowed=%d, %s).\n", FD_SETSIZE, rlim_ori, (int)rlp.rlim_cur, (int)rlp.rlim_max, errmsg);
 				}
 			}
@@ -1523,7 +1523,7 @@ void send_shortlist_do_sends()
 {
 	int i;
 
-	for( i = send_shortlist_count-1; i >= 0; --i )
+	for( i = (int)(send_shortlist_count - 1); i >= 0; --i )
 	{
 		int fd = send_shortlist_array[i];
 		int idx = fd/32;

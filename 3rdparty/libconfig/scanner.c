@@ -364,7 +364,7 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
  */
 #define YY_DO_BEFORE_ACTION \
 	yyg->yytext_ptr = yy_bp; \
-	yyleng = (size_t) (yy_cp - yy_bp); \
+	yyleng = yy_cp - yy_bp; \
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
@@ -766,11 +766,11 @@ static int input (yyscan_t yyscanner );
 #define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
 #endif
 
-/* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
+/* Gets input and stuffs it into "buf", number of characters read, or YY_NULL,
  * is returned in "result".
  */
 #ifndef YY_INPUT
-#define YY_INPUT(buf,result,max_size) \
+#define YY_INPUT(buf, result, max_size) \
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
@@ -782,19 +782,19 @@ static int input (yyscan_t yyscanner );
 			buf[n++] = (char) c; \
 		if ( c == EOF && ferror( yyin ) ) \
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
-		result = n; \
+		result = (int) n; \
 		} \
 	else \
 		{ \
-		errno=0; \
-		while ( (result = fread(buf, 1, max_size, yyin))==0 && ferror(yyin)) \
+		errno = 0; \
+		while ( (result = (int) fread(buf, 1, max_size, yyin)) == 0 && ferror(yyin)) \
 			{ \
 			if( errno != EINTR) \
 				{ \
 				YY_FATAL_ERROR( "input in flex scanner failed" ); \
 				break; \
 				} \
-			errno=0; \
+			errno = 0; \
 			clearerr(yyin); \
 			} \
 		}\
@@ -1159,7 +1159,7 @@ case 33:
 YY_RULE_SETUP
 #line 168 "scanner.l"
 {
-                    yylval->ival = strtoul(yytext, NULL, 16);
+                    yylval->ival = (int)strtoul(yytext, NULL, 16);
                     return(TOK_HEX);
                   }
 	YY_BREAK
@@ -1414,7 +1414,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	else
 		{
 			int num_to_read =
-			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
+			(int)(YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1);
 
 		while ( num_to_read <= 0 )
 			{ /* Not enough room in the buffer - grow it. */
@@ -1427,7 +1427,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 			if ( b->yy_is_our_buffer )
 				{
-				int new_size = b->yy_buf_size * 2;
+				int new_size = (int)(b->yy_buf_size * 2);
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -1448,8 +1448,8 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 			yyg->yy_c_buf_p = &b->yy_ch_buf[yy_c_buf_p_offset];
 
-			num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
-						number_to_move - 1;
+			num_to_read = (int)(YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
+						number_to_move - 1);
 
 			}
 
@@ -1904,7 +1904,7 @@ static void libconfig_yyensure_buffer_stack (yyscan_t yyscanner)
 		/* Increase the buffer to prepare for a possible push. */
 		int grow_size = 8 /* arbitrary grow size */;
 
-		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
+		num_to_alloc = (int)(yyg->yy_buffer_stack_max + grow_size);
 		yyg->yy_buffer_stack = (struct yy_buffer_state**)libconfig_yyrealloc
 								(yyg->yy_buffer_stack,
 								num_to_alloc * sizeof(struct yy_buffer_state*)
@@ -1942,7 +1942,7 @@ YY_BUFFER_STATE libconfig_yy_scan_buffer  (char * base, yy_size_t  size , yyscan
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
 	b->yy_input_file = 0;
-	b->yy_n_chars = b->yy_buf_size;
+	b->yy_n_chars = (int)b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;
 	b->yy_fill_buffer = 0;
@@ -1964,7 +1964,7 @@ YY_BUFFER_STATE libconfig_yy_scan_buffer  (char * base, yy_size_t  size , yyscan
 YY_BUFFER_STATE libconfig_yy_scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
     
-	return libconfig_yy_scan_bytes(yystr,strlen(yystr) ,yyscanner);
+	return libconfig_yy_scan_bytes(yystr, (int)strlen(yystr) ,yyscanner);
 }
 
 /** Setup the input buffer state to scan the given bytes. The next call to libconfig_yylex() will

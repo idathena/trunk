@@ -50,9 +50,9 @@ struct clan *inter_clan_fromsql(int clan_id) {
 	memset(clan, 0, sizeof(struct clan));
 
 	clan->id = clan_id;
-	Sql_GetData(sql_handle, 0, &data, &len); memcpy(clan->name, data, min(len, NAME_LENGTH));
-	Sql_GetData(sql_handle, 1, &data, &len); memcpy(clan->master, data, min(len, NAME_LENGTH));
-	Sql_GetData(sql_handle, 2, &data, &len); memcpy(clan->map, data, min(len, MAP_NAME_LENGTH_EXT));
+	Sql_GetData(sql_handle, 0, &data, &len); memcpy(clan->name, data, zmin(len, NAME_LENGTH));
+	Sql_GetData(sql_handle, 1, &data, &len); memcpy(clan->master, data, zmin(len, NAME_LENGTH));
+	Sql_GetData(sql_handle, 2, &data, &len); memcpy(clan->map, data, zmin(len, MAP_NAME_LENGTH_EXT));
 	Sql_GetData(sql_handle, 3, &data, NULL); clan->max_member = atoi(data);
 
 	clan->connect_member = 0;
@@ -75,7 +75,7 @@ struct clan *inter_clan_fromsql(int clan_id) {
 
 		Sql_GetData(sql_handle, 0, &data, NULL); a->opposition = atoi(data);
 		Sql_GetData(sql_handle, 1, &data, NULL); a->clan_id = atoi(data);
-		Sql_GetData(sql_handle, 2, &data, &len); memcpy(a->name, data, min(len, NAME_LENGTH));
+		Sql_GetData(sql_handle, 2, &data, &len); memcpy(a->name, data, zmin(len, NAME_LENGTH));
 	}
 
 	idb_put(clan_db_, clan_id, clan);

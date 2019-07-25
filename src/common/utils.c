@@ -371,8 +371,8 @@ unsigned int get_percentage(const unsigned int A, const unsigned int B)
 int levenshtein(const char *s1, const char *s2) {
 	unsigned int s1len, s2len, x, y, lastdiag, olddiag, i;
 	unsigned int *column;
-	s1len = strlen(s1);
-	s2len = strlen(s2);
+	s1len = (unsigned int)strlen(s1);
+	s2len = (unsigned int)strlen(s2);
 	column = malloc((s1len+1) * sizeof(unsigned int));
 	for (y = 1; y <= s1len; y++)
 		column[y] = y;
