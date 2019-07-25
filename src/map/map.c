@@ -2665,7 +2665,7 @@ int map_delinstancemap(int m)
 // Returns the index of successful, or -1 if the list was full.
 int map_addmobtolist(unsigned short m, struct spawn_data *spawn)
 {
-	size_t i;
+	int i;
 
 	ARR_FIND(0, MAX_MOB_LIST_PER_MAP, i, mapdata[m].moblist[i] == NULL);
 	if( i < MAX_MOB_LIST_PER_MAP ) {

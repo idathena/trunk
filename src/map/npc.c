@@ -1655,7 +1655,7 @@ void npc_shop_currency_type(struct map_session_data *sd, struct npc_data *nd, in
 						memset(output, '\0', sizeof(output));
 
 						sprintf(output, msg_txt(sd, 714), id->jname, id->nameid); // Item Shop List: %s (ID: %hu)
-						clif_broadcast(&sd->bl, output, strlen(output) + 1, BC_BLUE, SELF);
+						clif_broadcast(&sd->bl, output, (int)(strlen(output) + 1), BC_BLUE, SELF);
 					}
 					for( i = 0; i < MAX_INVENTORY; i++ ) {
 						if( sd->inventory.u.items_inventory[i].amount > 0 && sd->inventory.u.items_inventory[i].nameid == id->nameid &&
@@ -1673,7 +1673,7 @@ void npc_shop_currency_type(struct map_session_data *sd, struct npc_data *nd, in
 				memset(output, '\0', sizeof(output));
 
 				sprintf(output, msg_txt(sd, 715), nd->u.shop.pointshop_str); // Point Shop List: '%s'
-				clif_broadcast(&sd->bl, output, strlen(output) + 1, BC_BLUE, SELF);
+				clif_broadcast(&sd->bl, output, (int)(strlen(output) + 1), BC_BLUE, SELF);
 			}
 			cost[0] = pc_readreg2(sd, nd->u.shop.pointshop_str);
 			break;
@@ -2927,7 +2927,7 @@ int npc_convertlabel_db(DBKey key, DBData *data, va_list ap)
 	p = lname;
 	while( ISALNUM(*p) || *p == '_' )
 		++p;
-	len = p-lname;
+	len = (int)(p - lname);
 
 	//Here we check if the label fit into the buffer
 	if( len > NAME_LENGTH ) {
@@ -4382,7 +4382,7 @@ int npc_parsesrcfile(const char *filepath, bool runOnInit)
 		lines++;
 
 		//w1<TAB>w2<TAB>w3<TAB>w4
-		count = sv_parse(p, len + buffer - p, 0, '\t', pos, ARRAYLENGTH(pos), (e_svopt)(SV_TERMINATE_LF|SV_TERMINATE_CRLF));
+		count = sv_parse(p, (int)(len + buffer - p), 0, '\t', pos, ARRAYLENGTH(pos), (e_svopt)(SV_TERMINATE_LF|SV_TERMINATE_CRLF));
 		if( count < 0 ) {
 			ShowError("npc_parsesrcfile: Parse error in file '%s', line '%d'. Stopping...\n", filepath, strline(buffer, p - buffer));
 			break;

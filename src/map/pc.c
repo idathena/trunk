@@ -1716,7 +1716,7 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_time, int group_id, struct mmo_charstatus *st, bool changing_mapservers)
 {
 	int i;
-	unsigned long tick = gettick();
+	unsigned int tick = gettick();
 	uint32 ip = session[sd->fd]->client_addr;
 
 	sd->login_id2 = login_id2;
@@ -4379,7 +4379,7 @@ int pc_skill(struct map_session_data *sd, int id, int level, int flag)
 {
 	nullpo_ret(sd);
 
-	if( id <= 0 || id >= MAX_SKILL || !skill_db[id].name) {
+	if( id <= 0 || id >= MAX_SKILL ) {
 		ShowError("pc_skill: Skill with id %d does not exist in the skill database\n", id);
 		return 0;
 	}
@@ -5372,7 +5372,7 @@ int pc_useitem(struct map_session_data *sd, int n)
 	potion_flag = 0;
 
 	//Check if the item is to be consumed immediately [Skotlex]
-	if( id->flag.keepAfterUse || ((nameid == ITEMID_EARTH_SCROLL_1_3 || ITEMID_EARTH_SCROLL_1_5) &&
+	if( id->flag.keepAfterUse || ((nameid == ITEMID_EARTH_SCROLL_1_3 || nameid == ITEMID_EARTH_SCROLL_1_5) &&
 		sd->sc.data[SC_EARTHSCROLL] && rnd()%100 >= sd->sc.data[SC_EARTHSCROLL]->val2) ) //[marquis007]
 		clif_useitemack(sd,n,amount,true); //Do not consume item
 	else {
@@ -5714,7 +5714,7 @@ bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 sk
 		i_data = itemdb_search(itemid);
 		sprintf(message,msg_txt(NULL,542),(sd->status.name[0] ? sd->status.name : "GM"),md->db->jname,i_data->jname,(float)md->db->dropitem[i].p / 100);
 		//MSG: "'%s' stole %s's %s (chance: %0.02f%%)"
-		intif_broadcast(message,strlen(message) + 1,BC_DEFAULT);
+		intif_broadcast(message,(int)(strlen(message) + 1),BC_DEFAULT);
 	}
 	return true;
 }
@@ -8009,10 +8009,10 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 
 TIMER_FUNC(pc_close_npc_timer)
 {
-	TBL_PC *sd = map_id2sd(id);
+	struct map_session_data *sd = NULL;
 
-	if( sd )
-		pc_close_npc(sd,data);
+	if( (sd = map_id2sd(id)) )
+		pc_close_npc(sd,(int)data);
 	return 0;
 }
 
@@ -11173,7 +11173,7 @@ TIMER_FUNC(map_day_timer)
 	night_flag = 0; //0 = day, 1 = night [Yor]
 	map_foreachpc(pc_daynight_timer_sub);
 	strcpy(tmp_soutput, (!data ? msg_txt(NULL, 502) : msg_txt(NULL, 60))); // The day has arrived!
-	intif_broadcast(tmp_soutput, strlen(tmp_soutput) + 1, BC_DEFAULT);
+	intif_broadcast(tmp_soutput, (int)(strlen(tmp_soutput) + 1), BC_DEFAULT);
 	return 0;
 }
 
@@ -11194,7 +11194,7 @@ TIMER_FUNC(map_night_timer)
 	night_flag = 1; //0 = day, 1 = night [Yor]
 	map_foreachpc(pc_daynight_timer_sub);
 	strcpy(tmp_soutput, (!data ? msg_txt(NULL, 503) : msg_txt(NULL, 59))); // The night has fallen
-	intif_broadcast(tmp_soutput, strlen(tmp_soutput) + 1, BC_DEFAULT);
+	intif_broadcast(tmp_soutput, (int)(strlen(tmp_soutput) + 1), BC_DEFAULT);
 	return 0;
 }
 
@@ -12090,7 +12090,7 @@ void pc_readdb(void)
 
 			if( line[0] == '/' && line[1] == '/' )
 				continue;
-			if( (stat = strtoul(line, NULL, 10)) < 0 )
+			if( (stat = (int)strtoul(line, NULL, 10)) < 0 )
 				stat = 0;
 			if( i > MAX_LEVEL )
 				break;
@@ -12412,7 +12412,7 @@ void pc_check_expiration(struct map_session_data *sd) {
 
 		localtime_r(&exp_time, &now);
 		strftime(tmpstr,sizeof(tmpstr) - 1,msg_txt(sd,501),&now); // "Your account time limit is: %d-%m-%Y %H:%M:%S."
-		clif_wis_message(sd->fd,wisp_server_name,tmpstr,strlen(tmpstr));
+		clif_wis_message(sd->fd,wisp_server_name,tmpstr,(int)strlen(tmpstr));
 
 		pc_expire_check(sd);
 	}

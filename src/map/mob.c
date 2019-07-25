@@ -2635,7 +2635,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				char message[128];
 
 				sprintf(message, msg_txt(NULL, 541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate / 100);
-				intif_broadcast(message, strlen(message) + 1, BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
+				intif_broadcast(message, (int)(strlen(message) + 1), BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
 			}
 			//Announce first, or else ditem will be freed [Lance]
 			//By popular demand, use base drop rate for autoloot code [Skotlex]
@@ -2765,7 +2765,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 					char message[128];
 
 					sprintf (message, msg_txt(NULL, 541), mvp_sd->status.name, md->name, i_data->jname, temp / 100.);
-					intif_broadcast(message, strlen(message) + 1, BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
+					intif_broadcast(message, (int)(strlen(message) + 1), BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
 				}
 				mob_setdropitem_option(&item, &mdrop[i]);
 				if((temp = pc_additem(mvp_sd, &item, 1, LOG_TYPE_PICKDROP_PLAYER))) {
@@ -4021,7 +4021,7 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 	struct mob_data data;
 	const char *str = NULL;
 	double maxhp;
-	double exp;
+	double exp = 0;
 
 	nullpo_ret(it);
 	nullpo_ret(source);

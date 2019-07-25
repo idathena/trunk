@@ -1323,7 +1323,7 @@ void party_booking_update(struct map_session_data *sd, short* job)
 	if (pb_ad == NULL)
 		return;
 	
-	pb_ad->starttime = (int)time(NULL); //Update time.
+	pb_ad->starttime = (int)time(NULL); //Update time
 
 	for (i = 0; i < MAX_PARTY_BOOKING_JOBS; i++)
 		if (job[i] != 0xFF)
@@ -1372,7 +1372,7 @@ bool party_booking_delete(struct map_session_data *sd)
 	struct party_booking_ad_info *pb_ad;
 
 	if ((pb_ad = (struct party_booking_ad_info*)idb_get(party_booking_db, sd->status.char_id)) != NULL) {
-		clif_PartyBookingDeleteNotify(sd, pb_ad->index);
+		clif_PartyBookingDeleteNotify(sd, (int)pb_ad->index);
 		idb_remove(party_booking_db,sd->status.char_id);
 	}
 	return true;

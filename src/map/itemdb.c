@@ -886,7 +886,7 @@ static bool itemdb_read_stack(char *fields[], int columns, int current)
 	}
 
 	amount = (unsigned short)strtoul(fields[1], NULL, 10);
-	type = strtoul(fields[2], NULL, 10);
+	type = (unsigned int)strtoul(fields[2], NULL, 10);
 
 	if( !amount ) //Ignore
 		return true;
