@@ -2395,7 +2395,7 @@ static unsigned short status_base_atk(const struct block_list *bl, const struct 
 #endif
 			break;
 	}
-	return cap_value(str, 0, USHRT_MAX);
+	return cap_value(str, 0, SHRT_MAX);
 }
 
 #ifdef RENEWAL
@@ -3387,7 +3387,7 @@ static int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_op
 	struct s_skill b_skill[MAX_SKILL]; //Previous skill tree
 	int i, lv, refinedef = 0;
 	uint8 passive_matk_rate = 0;
-	short index = -1;
+	short index = -1 , val;
 
 	if (++calculating > 10) //Too many recursive calls!
 		return -1;
@@ -3910,18 +3910,18 @@ static int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_op
 		status->int_ += 20;
 
 	//Bonuses from cards and equipment as well as base stat, remember to avoid overflows
-	i = status->str + sd->status.str + sd->param_bonus[0] + sd->param_equip[0];
-	status->str = cap_value(i, 0, USHRT_MAX);
-	i = status->agi + sd->status.agi + sd->param_bonus[1] + sd->param_equip[1];
-	status->agi = cap_value(i, 0, USHRT_MAX);
-	i = status->vit + sd->status.vit + sd->param_bonus[2] + sd->param_equip[2];
-	status->vit = cap_value(i, 0, USHRT_MAX);
-	i = status->int_+ sd->status.int_+ sd->param_bonus[3] + sd->param_equip[3];
-	status->int_ = cap_value(i, 0, USHRT_MAX);
-	i = status->dex + sd->status.dex + sd->param_bonus[4] + sd->param_equip[4];
-	status->dex = cap_value(i, 0, USHRT_MAX);
-	i = status->luk + sd->status.luk + sd->param_bonus[5] + sd->param_equip[5];
-	status->luk = cap_value(i, 0, USHRT_MAX);
+	val = status->str + sd->status.str + sd->param_bonus[0] + sd->param_equip[0];
+	status->str = cap_value(val, 0, SHRT_MAX);
+	val = status->agi + sd->status.agi + sd->param_bonus[1] + sd->param_equip[1];
+	status->agi = cap_value(val, 0, SHRT_MAX);
+	val = status->vit + sd->status.vit + sd->param_bonus[2] + sd->param_equip[2];
+	status->vit = cap_value(val, 0, SHRT_MAX);
+	val = status->int_+ sd->status.int_+ sd->param_bonus[3] + sd->param_equip[3];
+	status->int_ = cap_value(val, 0, SHRT_MAX);
+	val = status->dex + sd->status.dex + sd->param_bonus[4] + sd->param_equip[4];
+	status->dex = cap_value(val, 0, SHRT_MAX);
+	val = status->luk + sd->status.luk + sd->param_bonus[5] + sd->param_equip[5];
+	status->luk = cap_value(val, 0, SHRT_MAX);
 
 	if (sd->special_state.no_walkdelay) {
 		if (sc->data[SC_ENDURE]) {
@@ -3973,10 +3973,10 @@ static int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_op
 		if ((sd->class_&MAPID_BASEMASK) == MAPID_NOVICE && !(sd->class_&JOBL_2) && battle_config.restart_hp_rate < 50)
 			status->hp = status->max_hp>>1;
 		else
-			status->hp = (int64)status->max_hp * battle_config.restart_hp_rate / 100;
+			status->hp = status->max_hp * battle_config.restart_hp_rate / 100;
 		if (!status->hp)
 			status->hp = 1;
-		status->sp = (int64)status->max_sp * battle_config.restart_sp_rate / 100;
+		status->sp = status->max_sp * battle_config.restart_sp_rate / 100;
 		if (!status->sp) //The minimum for the respawn setting is SP: 1
 			status->sp = 1;
 	}
@@ -12703,7 +12703,7 @@ TIMER_FUNC(status_change_timer)
 					damage = (type == SC_DPOISON) ? 2 + status->max_hp / 50 : 2 + 3 * status->max_hp / 200;
 				else
 					damage = (type == SC_DPOISON) ? 2 + status->max_hp / 100 : 2 + status->max_hp / 200;
-				if( status->hp > max(status->max_hp / 4,damage) ) //Stop damaging after 25% HP left
+				if( status->hp > i64max(status->max_hp / 4,damage) ) //Stop damaging after 25% HP left
 					status_zap(bl,damage,0);
 			}
 			break;
@@ -13990,7 +13990,7 @@ int status_change_spread(struct block_list *src, struct block_list *bl, bool typ
 			data.val2 = sc->data[i]->val2;
 			data.val3 = sc->data[i]->val3;
 			data.val4 = sc->data[i]->val4;
-			status_change_start(src,bl,(sc_type)i,10000,data.val1,data.val2,data.val3,data.val4,data.tick,SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
+			status_change_start(src,bl,(sc_type)i,10000,(int)data.val1,(int)data.val2,(int)data.val3,(int)data.val4,(int)data.tick,SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
 			flag = 1;
 		}
 	}

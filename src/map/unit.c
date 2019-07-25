@@ -192,9 +192,9 @@ TIMER_FUNC(unit_teleport_timer) {
 	else if(*mast_tid != tid || !bl)
 		return 0;
 	else {
-		TBL_PC *msd = unit_get_master(bl);
+		struct map_session_data *msd = NULL;
 
-		if(msd && !check_distance_bl(&msd->bl, bl, data)) {
+		if((msd = unit_get_master(bl)) && !check_distance_bl(&msd->bl, bl, (int)data)) {
 			*mast_tid = INVALID_TIMER;
 			unit_warp(bl, msd->bl.m, msd->bl.x, msd->bl.y, CLR_TELEPORT);
 		} else //No timer needed
@@ -582,7 +582,7 @@ TIMER_FUNC(unit_delay_walktobl_timer)
 	else {
 		struct unit_data *ud = unit_bl2ud(bl);
 
-		unit_walktobl(bl, map_id2bl(data), 0, 0);
+		unit_walktobl(bl, map_id2bl((int)data), 0, 0);
 		ud->target_to = 0;
 	}
 	return 1;

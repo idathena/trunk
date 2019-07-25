@@ -14663,9 +14663,9 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 		case WE_MALE:
 		case WE_FEMALE:
 			if( sd ) {
-				struct map_session_data *p_sd = map_charid2sd(sd->status.partner_id);
+				struct map_session_data *p_sd = NULL;
 
-				if( !p_sd || !&p_sd->bl ) {
+				if( !(p_sd = map_charid2sd(sd->status.partner_id)) ) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					return false;
 				}
@@ -21363,8 +21363,8 @@ static bool skill_parse_row_unitdb(char *split[], int columns, int current)
 	if( !idx ) //Invalid skill id
 		return false;
 
-	skill_db[idx].unit_id[0] = strtol(split[1],NULL,16);
-	skill_db[idx].unit_id[1] = strtol(split[2],NULL,16);
+	skill_db[idx].unit_id[0] = (int)strtol(split[1],NULL,16);
+	skill_db[idx].unit_id[1] = (int)strtol(split[2],NULL,16);
 	skill_split_atoi(split[3],skill_db[idx].unit_layout_type);
 	skill_split_atoi(split[4],skill_db[idx].unit_range);
 	skill_db[idx].unit_interval = atoi(split[5]);
@@ -21380,9 +21380,9 @@ static bool skill_parse_row_unitdb(char *split[], int columns, int current)
 	else if( !strcmpi(split[6],"self") ) skill_db[idx].unit_target = BCT_SELF;
 	else if( !strcmpi(split[6],"sameguild") ) skill_db[idx].unit_target = BCT_GUILD|BCT_SAMEGUILD;
 	else if( !strcmpi(split[6],"noone") ) skill_db[idx].unit_target = BCT_NOONE;
-	else skill_db[idx].unit_target = strtol(split[6],NULL,16);
+	else skill_db[idx].unit_target = (int)strtol(split[6],NULL,16);
 
-	skill_db[idx].unit_flag = strtol(split[7],NULL,16);
+	skill_db[idx].unit_flag = (int)strtol(split[7],NULL,16);
 
 	if( skill_db[idx].unit_flag&UF_DEFNOTENEMY && battle_config.defnotenemy )
 		skill_db[idx].unit_target = BCT_NOENEMY;

@@ -16,7 +16,7 @@ void findfile(const char *p, const char *pat, void (func)(const char*));
 bool exists(const char *filename);
 
 // Caps values to min/max
-#define cap_value(a, min, max) (((a) >= (max)) ? (max) : ((a) <= (min)) ? (min) : (a))
+#define cap_value(val, min_val, max_val) (((val) >= (max_val)) ? (max_val) : ((val) <= (min_val)) ? (min_val) : (val))
 
 // Apply rate for val, divided by 100)
 #define apply_rate(val, rate) (((rate) == 100) ? (val) : ((val) > 100000) ? ((val) / 100 * (rate)) : ((val) * (rate) / 100))
