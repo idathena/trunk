@@ -1284,7 +1284,7 @@ static struct party_booking_ad_info *create_party_booking_data(void)
 	return pb_ad;
 }
 
-void party_booking_register(struct map_session_data *sd, short level, short mapid, short* job)
+void party_booking_register(struct map_session_data *sd, short level, short mapid, short *job)
 {
 	struct party_booking_ad_info *pb_ad;
 	int i;
@@ -1313,7 +1313,7 @@ void party_booking_register(struct map_session_data *sd, short level, short mapi
 	clif_PartyBookingInsertNotify(sd, pb_ad); //Notice
 }
 
-void party_booking_update(struct map_session_data *sd, short* job)
+void party_booking_update(struct map_session_data *sd, short *job)
 {
 	int i;
 	struct party_booking_ad_info *pb_ad;

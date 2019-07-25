@@ -138,7 +138,7 @@ static inline void WFIFOPOS2(int fd, unsigned short pos, short x0, short y0, sho
 	WBUFPOS2(WFIFOP(fd,pos), 0, x0, y0, x1, y1, sx0, sy0);
 }
 
-static inline void RBUFPOS(const uint8 *p, unsigned short pos, short* x, short* y, unsigned char *dir) {
+static inline void RBUFPOS(const uint8 *p, unsigned short pos, short *x, short *y, unsigned char *dir) {
 	p += pos;
 
 	if( x )
@@ -151,7 +151,13 @@ static inline void RBUFPOS(const uint8 *p, unsigned short pos, short* x, short* 
 		dir[0] = (p[2]&0x0f);
 }
 
-static inline void RBUFPOS2(const uint8 *p, unsigned short pos, short* x0, short* y0, short* x1, short* y1, unsigned char *sx0, unsigned char *sy0) {
+static inline void RFIFOPOS(int fd, unsigned short pos, short *x, short *y, unsigned char *dir) {
+	RBUFPOS(RFIFOP(fd,pos), 0, x, y, dir);
+}
+
+// Currently Unused
+/*
+static inline void RBUFPOS2(const uint8 *p, unsigned short pos, short *x0, short *y0, short *x1, short *y1, unsigned char *sx0, unsigned char *sy0) {
 	p += pos;
 
 	if( x0 )
@@ -173,15 +179,12 @@ static inline void RBUFPOS2(const uint8 *p, unsigned short pos, short* x0, short
 		sy0[0] = (p[5]&0x0f)>>0;
 }
 
-static inline void RFIFOPOS(int fd, unsigned short pos, short* x, short* y, unsigned char *dir) {
-	RBUFPOS(RFIFOP(fd,pos), 0, x, y, dir);
-}
-
-static inline void RFIFOPOS2(int fd, unsigned short pos, short* x0, short* y0, short* x1, short* y1, unsigned char *sx0, unsigned char *sy0) {
+static inline void RFIFOPOS2(int fd, unsigned short pos, short *x0, short *y0, short *x1, short *y1, unsigned char *sx0, unsigned char *sy0) {
 	RBUFPOS2(WFIFOP(fd,pos), 0, x0, y0, x1, y1, sx0, sy0);
 }
+*/
 
-//To idenfity disguised characters.
+//To idenfity disguised characters
 static inline bool disguised(struct block_list *bl) {
 	return (bool)(bl->type == BL_PC && ((TBL_PC *)bl)->disguise);
 }
@@ -2211,7 +2214,7 @@ void clif_parse_NPCMarketPurchase(int fd, struct map_session_data *sd) {
 void clif_scriptmes(struct map_session_data *sd, int npcid, const char *mes)
 {
 	int fd = sd->fd;
-	int slen = strlen(mes) + 9;
+	int slen = (int)(strlen(mes) + 9);
 
 	WFIFOHEAD(fd,slen);
 	WFIFOW(fd,0) = 0xb4;
@@ -2323,7 +2326,7 @@ void clif_sendfakenpc(struct map_session_data *sd, int npcid)
 void clif_scriptmenu(struct map_session_data *sd, int npcid, const char *mes)
 {
 	int fd = sd->fd;
-	int slen = strlen(mes) + 9;
+	int slen = (int)(strlen(mes) + 9);
 	struct block_list *bl = map_id2bl(npcid);
 
 	if (!sd->state.using_fake_npc && (npcid == fake_nd->bl.id || (bl && (bl->m != sd->bl.m ||
@@ -6293,7 +6296,7 @@ void clif_displaymessage(const int fd, const char *mes)
 #else
 		while (line != NULL) {
 			//Limit message to 255+1 characters (otherwise it causes a buffer overflow in the client)
-			int len = strnlen(line, CHAT_SIZE_MAX);
+			int len = (int)strnlen(line, CHAT_SIZE_MAX);
 
 			if (len > 0) { //Don't send a void message (it's not displaying on the client chat). @help can send void line.
 				WFIFOHEAD(fd,5 + len);
@@ -6338,12 +6341,13 @@ void clif_broadcast(struct block_list *bl, const char *mes, int len, int type, e
 void clif_GlobalMessage(struct block_list *bl, const char *message, enum send_target target) {
 	char buf[256];
 	int len;
+
 	nullpo_retv(bl);
 
 	if (!message)
 		return;
 
-	len = strlen(message) + 1;
+	len = (int)(strlen(message) + 1);
 
 	if (len > sizeof(buf) - 8) {
 		ShowWarning("clif_GlobalMessage: Truncating too long message '%s' (len=%d).\n", message, len);
@@ -6366,7 +6370,7 @@ void clif_broadcast2(struct block_list *bl, const char *mes, int len, unsigned l
 
 	WBUFW(buf,0)  = 0x1c3;
 	WBUFW(buf,2)  = len + 16;
-	WBUFL(buf,4)  = fontColor;
+	WBUFL(buf,4)  = (uint32)fontColor;
 	WBUFW(buf,8)  = fontType;
 	WBUFW(buf,10) = fontSize;
 	WBUFW(buf,12) = fontAlign;
@@ -6401,7 +6405,7 @@ void clif_channel_msg(struct Channel *channel, const char *msg, unsigned long co
 	WBUFW(buf,0) = 0x2C1;
 	WBUFW(buf,2) = (len = msg_len + 12);
 	WBUFL(buf,4) = 0;
-	WBUFL(buf,8) = color;
+	WBUFL(buf,8) = (uint32)color;
 	safestrncpy((char *)WBUFP(buf,12), msg, msg_len);
 
 	iter = db_iterator(channel->users);
@@ -9495,7 +9499,7 @@ void clif_messagecolor_target(struct block_list *bl, unsigned long color, const 
 	WBUFW(buf,0) = 0x2c1;
 	WBUFW(buf,2) = msg_len + 12;
 	WBUFL(buf,4) = bl->id;
-	WBUFL(buf,8) = color;
+	WBUFL(buf,8) = (uint32)color;
 	safestrncpy((char *)WBUFP(buf,12), msg, msg_len);
 
 	clif_send(buf, WBUFW(buf,2), (!sd ? bl : &sd->bl), type);
@@ -9660,7 +9664,7 @@ void clif_name(struct block_list *src, struct block_list *bl, send_target target
 					WBUFB(buf,78) = 0;
 				}
 #if PACKETVER >= 20150513
-				WBUFL(buf,102) = sd->status.title_id; //Title ID
+				WBUFL(buf,102) = (uint32)sd->status.title_id; //Title ID
 #endif
 			}
 			break;
@@ -9763,7 +9767,7 @@ void clif_slide(struct block_list *bl, int x, int y)
 void clif_disp_overhead_(struct block_list *bl, const char *mes, enum send_target flag)
 {
 	unsigned char buf[256]; //This should be more than sufficient, the theorical max is CHAT_SIZE + 8 (pads and extra inserted crap)
-	int len_mes = strlen(mes) + 1; //Account for \0
+	int len_mes = (int)(strlen(mes) + 1); //Account for \0
 
 	if( len_mes > sizeof(buf) - 8 ) {
 		ShowError("clif_disp_overhead: Message too long (length %d)\n", len_mes);
@@ -10128,7 +10132,7 @@ const char *clif_process_chat_message(struct map_session_data *sd, char *out_buf
 
 	//Name and message are separated by ' : '
 	srcname = packetmsg;
-	namelen = strnlen(sd->status.name, NAME_LENGTH - 1); //Name length (w/o zero byte)
+	namelen = (int)strnlen(sd->status.name, NAME_LENGTH - 1); //Name length (w/o zero byte)
 
 	if( strncmp(srcname, sd->status.name, namelen) != 0 || //The text must start with the speaker's name
 		srcname[namelen] != ' ' || srcname[namelen + 1] != ':' || srcname[namelen + 2] != ' ' ) //Followed by ' : '
@@ -10192,7 +10196,7 @@ bool clif_process_whisper_message(struct map_session_data *sd, char *out_name, c
 		return false;
 	}
 
-	namelen = strnlen(packetname, NAME_LENGTH - 1);
+	namelen = (int)strnlen(packetname, NAME_LENGTH - 1);
 
 	if( packetname[namelen] != '\0' ) { //Only restriction is that the name must be zero-terminated
 		ShowWarning("clif_process_whisper_message: Player '%s' sent an unterminated name!\n", sd->status.name);
@@ -10257,7 +10261,7 @@ static int clif_parse_WantToConnection_sub(int fd)
 
 	//By default, start searching on the default one
 	cmd = RFIFOW(fd,0);
-	packet_len = RFIFOREST(fd);
+	packet_len = (int)RFIFOREST(fd);
 
 	//FIXME: If the packet is not received at once, this will FAIL.
 	//Figure out, when it happens, that only part of the packet is
@@ -10687,7 +10691,7 @@ void clif_parse_LoadEndAck(int fd,struct map_session_data *sd) {
 			char output[128];
 
 			safesnprintf(output,sizeof(output),"[ Kill Steal Protection Disabled. KS is allowed in this map ]");
-			clif_broadcast(&sd->bl,output,strlen(output) + 1,BC_BLUE,SELF);
+			clif_broadcast(&sd->bl,output,(int)(strlen(output) + 1),BC_BLUE,SELF);
 		}
 		status_change_clear_onChangeMap(&sd->bl,&sd->sc);
 		map_iwall_get(sd); //Updates Walls Info on this Map to Client
@@ -10790,7 +10794,7 @@ void clif_notify_time(struct map_session_data *sd, unsigned long time)
 
 	WFIFOHEAD(fd,packet_len(0x7f));
 	WFIFOW(fd,0) = 0x7f;
-	WFIFOL(fd,2) = time;
+	WFIFOL(fd,2) = (uint32)time;
 	WFIFOSET(fd,packet_len(0x7f));
 }
 
@@ -10880,7 +10884,7 @@ void clif_progressbar(struct map_session_data *sd, unsigned long color, unsigned
 
 	WFIFOHEAD(fd,packet_len(0x2f0));
 	WFIFOW(fd,0) = 0x2f0;
-	WFIFOL(fd,2) = color;
+	WFIFOL(fd,2) = (uint32)color;
 	WFIFOL(fd,6) = second;
 	WFIFOSET(fd,packet_len(0x2f0));
 }
@@ -11071,9 +11075,9 @@ void clif_parse_GlobalMessage(int fd, struct map_session_data *sd)
 
 	if( sd->fakename[0] != '\0' ) {
 		is_fakename = true;
-		outlen = strlen(sd->fakename) + strlen(message) + 3 + 1;
+		outlen = (int)(strlen(sd->fakename) + strlen(message) + 3 + 1);
 	} else
-		outlen = strlen(full_message) + 1;
+		outlen = (int)(strlen(full_message) + 1);
 
 	{ //Send message to others
 		void *buf = aMalloc(8 + outlen);
@@ -11442,7 +11446,7 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 	//And if we ask for 'Test', we must not contact 'test' player
 	//So, we send information to inter-server, which is the only one which decide (and copy correct name)
 	if( !dstsd || strcmp(dstsd->status.name, target) != 0 ) {
-		intif_wis_message(sd, target, message, strlen(message));
+		intif_wis_message(sd, target, message, (int)strlen(message));
 		return;
 	}
 
@@ -11460,7 +11464,7 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 		char output[CHAT_SIZE_MAX];
 
 		safesnprintf(output, sizeof(output), "%s is in autotrade mode and cannot receive whispered messages.", dstsd->status.name);
-		clif_wis_message(fd, wisp_server_name, output, strlen(output));
+		clif_wis_message(fd, wisp_server_name, output, (int)strlen(output));
 		return;
 	}
 
@@ -11477,7 +11481,7 @@ void clif_parse_WisMessage(int fd, struct map_session_data *sd)
 	clif_wis_end(fd, 0); //0: Success to send wisper
 
 	//Normal message
-	clif_wis_message(dstsd->fd, sd->status.name, message, strlen(message));
+	clif_wis_message(dstsd->fd, sd->status.name, message, (int)strlen(message));
 }
 
 
@@ -13224,7 +13228,7 @@ void clif_parse_PartyMessage(int fd, struct map_session_data *sd)
 	if( !clif_process_chat_message(sd, message, sizeof message) )
 		return;
 
-	party_send_message(sd, message, strlen(message));
+	party_send_message(sd, message, (int)strlen(message));
 }
 
 
@@ -13318,9 +13322,9 @@ void clif_PartyBookingSearchAck(int fd, struct party_booking_ad_info** results, 
 	WFIFOB(fd,4) = more_result;
 	for(i = 0; i < count; i++) {
 		pb_ad = results[i];
-		WFIFOL(fd,i * size + 5) = pb_ad->index;
+		WFIFOL(fd,i * size + 5) = (uint32)pb_ad->index;
 		safestrncpy((char *)WFIFOP(fd,i * size + 9),pb_ad->charname,NAME_LENGTH);
-		WFIFOL(fd,i * size + 33) = pb_ad->starttime;  // FIXME: This is expire time
+		WFIFOL(fd,i * size + 33) = (uint32)pb_ad->starttime; //FIXME: This is expire time
 		WFIFOW(fd,i * size + 37) = pb_ad->p_detail.level;
 		WFIFOW(fd,i * size + 39) = pb_ad->p_detail.mapid;
 		for(j = 0; j < MAX_PARTY_BOOKING_JOBS; j++)
@@ -13383,9 +13387,9 @@ void clif_PartyBookingInsertNotify(struct map_session_data *sd, struct party_boo
 		return;
 
 	WBUFW(buf,0) = 0x809;
-	WBUFL(buf,2) = pb_ad->index;
+	WBUFL(buf,2) = (uint32)pb_ad->index;
 	safestrncpy((char *)WBUFP(buf,6), pb_ad->charname, NAME_LENGTH);
-	WBUFL(buf,30) = pb_ad->starttime; //FIXME: This is expire time
+	WBUFL(buf,30) = (uint32)pb_ad->starttime; //FIXME: This is expire time
 	WBUFW(buf,34) = pb_ad->p_detail.level;
 	WBUFW(buf,36) = pb_ad->p_detail.mapid;
 	for(i = 0; i < MAX_PARTY_BOOKING_JOBS; i++)
@@ -13406,7 +13410,7 @@ void clif_PartyBookingUpdateNotify(struct map_session_data *sd, struct party_boo
 		return;
 
 	WBUFW(buf,0) = 0x80a;
-	WBUFL(buf,2) = pb_ad->index;
+	WBUFL(buf,2) = (uint32)pb_ad->index;
 	for(i = 0; i < MAX_PARTY_BOOKING_JOBS; i++)
 		WBUFW(buf,6 + i * 2) = pb_ad->p_detail.job[i];
 	clif_send(buf, packet_len(0x80a), &sd->bl, ALL_CLIENT); //Now UPDATE all client
@@ -13709,7 +13713,7 @@ void clif_parse_GuildChangeEmblem(int fd,struct map_session_data *sd) {
 		return;
 	}
 
-	guild_change_emblem(sd,emblem_len,(const char *)emblem);
+	guild_change_emblem(sd,(int)emblem_len,(const char *)emblem);
 }
 
 
@@ -13856,9 +13860,9 @@ void clif_parse_GuildMessage(int fd, struct map_session_data *sd)
 		return;
 
 	if( sd->bg_id )
-		bg_send_message(sd, message, strlen(message));
+		bg_send_message(sd, message, (int)strlen(message));
 	else
-		guild_send_message(sd, message, strlen(message));
+		guild_send_message(sd, message, (int)strlen(message));
 }
 
 
@@ -15596,14 +15600,14 @@ void clif_Mail_read(struct map_session_data *sd, int mail_id)
 		struct mail_message *msg = &sd->mail.inbox.msg[i];
 		struct item *item;
 		struct item_data *data;
-		int msg_len = strlen(msg->body), len;
+		int msg_len = (int)strlen(msg->body), len;
 #if PACKETVER >= 20150513
 		int offset, j, itemsize, count = 0;
 #endif
 
 		if( !msg_len ) {
 			strcpy(msg->body, "(no message)"); //@TODO: Confirm for RODEX
-			msg_len = strlen(msg->body);
+			msg_len = (int)strlen(msg->body);
 		}
 
 #if PACKETVER < 20150513
@@ -17558,7 +17562,7 @@ void clif_parse_BattleChat(int fd, struct map_session_data *sd)
 	if( !clif_process_chat_message(sd, message, sizeof message) )
 		return;
 
-	bg_send_message(sd, message, strlen(message));
+	bg_send_message(sd, message, (int)strlen(message));
 }
 
 
@@ -18422,15 +18426,13 @@ void clif_parse_debug(int fd,struct map_session_data *sd)
 
 	if( sd ) {
 		packet_len = packet_db[cmd].len;
-
-		if( packet_len == 0 ) { // unknown
-			packet_len = RFIFOREST(fd);
-		} else if( packet_len == -1 ) { // variable length
-			packet_len = RFIFOW(fd,2);  // clif_parse ensures, that this amount of data is already received
-		}
+		if( packet_len == 0 ) // Unknown
+			packet_len = (int)RFIFOREST(fd);
+		else if( packet_len == -1 ) // Variable length
+			packet_len = RFIFOW(fd,2); // clif_parse ensures, that this amount of data is already received
 		ShowDebug("Packet debug of 0x%04X (length %d), %s session #%d, %d/%d (AID/CID)\n", cmd, packet_len, sd->state.active ? "authed" : "unauthed", fd, sd->status.account_id, sd->status.char_id);
 	} else {
-		packet_len = RFIFOREST(fd);
+		packet_len = (int)RFIFOREST(fd);
 		ShowDebug("Packet debug of 0x%04X (length %d), session #%d\n", cmd, packet_len, fd);
 	}
 
@@ -19380,7 +19382,7 @@ void clif_parse_clan_chat(int fd, struct map_session_data *sd) {
 	if( !clif_process_chat_message(sd, message, sizeof message) )
 		return;
 
-	clan_send_message(sd, message, strlen(message));
+	clan_send_message(sd, message, (int)strlen(message));
 #endif
 }
 
@@ -19496,7 +19498,7 @@ void clif_change_title_ack(struct map_session_data *sd, unsigned char result, un
 	WFIFOHEAD(fd,packet_len(0xa2f));
 	WFIFOW(fd,0) = 0xa2f;
 	WFIFOB(fd,2) = result;
-	WFIFOL(fd,3) = title_id;
+	WFIFOL(fd,3) = (uint32)title_id;
 	WFIFOSET(fd,packet_len(0xa2f));
 #endif
 }
@@ -20464,7 +20466,7 @@ void clif_progressbar_npc(struct npc_data *nd, struct map_session_data *sd) {
 	if( nd->progressbar.timeout > 0 ) {
 		WBUFW(buf,0) = 0x9d1;
 		WBUFL(buf,2) = nd->bl.id;
-		WBUFL(buf,6) = nd->progressbar.color;
+		WBUFL(buf,6) = (uint32)nd->progressbar.color;
 		WBUFL(buf,10) = (nd->progressbar.timeout - gettick()) / 1000;
 		if( sd )
 			clif_send(buf, packet_len(0x9d1), &sd->bl, SELF);
@@ -20659,7 +20661,7 @@ void clif_parse_open_ui(int fd, struct map_session_data *sd) {
 			else if( pc_attendance_enabled() )
 				clif_ui_open(sd, OUT_UI_ATTENDANCE, pc_attendance_counter(sd));
 			else
-				clif_msg_color(sd, MSG_ATTENDANCE_DISABLED, color_table[COLOR_RED]);
+				clif_msg_color(sd, MSG_ATTENDANCE_DISABLED, (uint32)color_table[COLOR_RED]);
 			break;
 	}
 }
