@@ -1352,7 +1352,7 @@ void login_auth_ok(struct login_session_data* sd)
 				WBUFL(buf,2) = sd->account_id;
 				charif_sendallwos(-1, buf, 6);
 				if( data->waiting_disconnect == INVALID_TIMER )
-					data->waiting_disconnect = add_timer(gettick()+AUTH_TIMEOUT, waiting_disconnect_timer, sd->account_id, 0);
+					data->waiting_disconnect = add_timer(gettick() + AUTH_TIMEOUT, waiting_disconnect_timer, sd->account_id, 0);
 
 				WFIFOHEAD(fd,3);
 				WFIFOW(fd,0) = 0x81;
@@ -1420,7 +1420,7 @@ void login_auth_ok(struct login_session_data* sd)
 		data = add_online_user(-1, sd->account_id);
 
 		// Schedule deletion of this node
-		data->waiting_disconnect = add_timer(gettick()+AUTH_TIMEOUT, waiting_disconnect_timer, sd->account_id, 0);
+		data->waiting_disconnect = add_timer(gettick() + AUTH_TIMEOUT, waiting_disconnect_timer, sd->account_id, 0);
 	}
 }
 
@@ -1583,9 +1583,9 @@ int parse_login(int fd)
 					char password[NAME_LENGTH];
 					unsigned char passhash[16];
 					uint8 clienttype;
-					bool israwpass = (command==0x0064 || command==0x0277 || command==0x02b0 || command == 0x0825);
+					bool israwpass = (command == 0x0064 || command == 0x0277 || command == 0x02b0 || command == 0x0825);
 
-					// Shinryo: For the time being, just use token as password.
+					// Shinryo: For the time being, just use token as password
 					if(command == 0x0825) {
 						char *accname = (char *)RFIFOP(fd, 9);
 						char *token = (char *)RFIFOP(fd, 0x5C);

@@ -594,7 +594,7 @@ static int achievement_update_objectives(DBKey key, DBData *data, va_list ap)
  * @param sp_value: SP parameter value
  * @param arg_count: va_arg count
  */
-void achievement_update_objective(struct map_session_data *sd, enum e_achievement_group group, uint8 arg_count, ...)
+void achievement_update_objective(struct map_session_data *sd, enum e_achievement_group group, int arg_count, ...)
 {
 	if (sd) {
 		va_list ap;
@@ -777,7 +777,7 @@ const char *av_parse_simpleexpr(const char *p, struct av_condition *parent)
 
 		if (skip_word(p) == p)
 			disp_error_message("av_parse_simpleexpr: unexpected character.", p);
-		len = skip_word(p) - p;
+		len = (int)(skip_word(p) - p);
 		if (!len)
 			disp_error_message("av_parse_simpleexpr: invalid word. A word consists of undercores and/or alphanumeric characters.", p);
 		word = (char *)aMalloc(len + 1);

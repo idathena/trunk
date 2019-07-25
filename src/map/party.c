@@ -1162,11 +1162,11 @@ int party_send_dot_remove(struct map_session_data *sd)
 }
 
 /// Executes 'func' for each party member on the same map and in range (0:whole map)
-int party_foreachsamemap(int (*func)(struct block_list*,va_list),struct map_session_data *sd,int range,...)
+int party_foreachsamemap(int (*func)(struct block_list*, va_list), struct map_session_data *sd, int range, ...)
 {
 	struct party_data *p;
 	int i;
-	int x0,y0,x1,y1;
+	int x0, y0, x1, y1;
 	struct block_list *list[MAX_PARTY];
 	int blockcount = 0;
 	int total = 0; //Return value

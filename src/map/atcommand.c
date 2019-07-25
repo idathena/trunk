@@ -1123,9 +1123,9 @@ ACMD_FUNC(kami)
 		}
 		sscanf(message, "%255[^\n]", atcmd_output);
 		if (strstr(command, "l"))
-			clif_broadcast(&sd->bl, atcmd_output, strlen(atcmd_output) + 1, BC_DEFAULT, ALL_SAMEMAP);
+			clif_broadcast(&sd->bl, atcmd_output, (int)(strlen(atcmd_output) + 1), BC_DEFAULT, ALL_SAMEMAP);
 		else
-			intif_broadcast(atcmd_output, strlen(atcmd_output) + 1, (*(command + 5) == 'b' || *(command + 5) == 'B') ? BC_BLUE : BC_YELLOW);
+			intif_broadcast(atcmd_output, (int)(strlen(atcmd_output) + 1), (*(command + 5) == 'b' || *(command + 5) == 'B') ? BC_BLUE : BC_YELLOW);
 	} else {
 		if (!message || !*message || (sscanf(message, "%lx %255[^\n]", &color, atcmd_output) < 2)) {
 			clif_displaymessage(fd, msg_txt(sd, 981)); // Please enter color and message (usage: @kamic <color> <message>).
@@ -1135,7 +1135,7 @@ ACMD_FUNC(kami)
 			clif_displaymessage(fd, msg_txt(sd, 982)); // Invalid color.
 			return -1;
 		}
-		intif_broadcast2(atcmd_output, strlen(atcmd_output) + 1, color, 0x190, 12, 0, 0);
+		intif_broadcast2(atcmd_output, (int)(strlen(atcmd_output) + 1), color, 0x190, 12, 0, 0);
 	}
 	return 0;
 }
@@ -2116,7 +2116,7 @@ static int atkillmonster_sub(struct block_list *bl, va_list ap)
 
 ACMD_FUNC(killmonster)
 {
-	int char_id, map_id, drop_flag;
+	int char_id = 0, map_id, drop_flag;
 	struct block_list *src;
 	char map_name[MAP_NAME_LENGTH_EXT];
 	nullpo_retr(-1, sd);
@@ -3294,7 +3294,7 @@ ACMD_FUNC(spiritball)
 	int number;
 	nullpo_retr(-1, sd);
 
-	max_spiritballs = zmin(ARRAYLENGTH(sd->spiritball_timer), 0x7FFF);
+	max_spiritballs = (uint32)zmin(ARRAYLENGTH(sd->spiritball_timer), 0x7FFF);
 
 	if( !message || !*message || (number = atoi(message)) < 0 || number > max_spiritballs ) {
 		char msg[CHAT_SIZE_MAX];
@@ -3322,7 +3322,7 @@ ACMD_FUNC(shieldball)
 	int number, health;
 	nullpo_retr(-1, sd);
 
-	max_shieldballs = zmin(ARRAYLENGTH(sd->shieldball_timer), 0x7FFF);
+	max_shieldballs = (uint32)zmin(ARRAYLENGTH(sd->shieldball_timer), 0x7FFF);
 
 	if( !message || !*message || sscanf(message, "%d %d", &number, &health) < 1 ||
 		number > max_shieldballs || health < 1 || health > 1000000000 ) {
@@ -3354,7 +3354,7 @@ ACMD_FUNC(rageball)
 	int number;
 	nullpo_retr(-1, sd);
 
-	max_rageballs = zmin(ARRAYLENGTH(sd->rageball_timer), 0x7FFF);
+	max_rageballs = (uint32)zmin(ARRAYLENGTH(sd->rageball_timer), 0x7FFF);
 
 	if( !message || !*message || (number = atoi(message)) < 0 || number > max_rageballs ) {
 		char msg[CHAT_SIZE_MAX];
@@ -3382,7 +3382,7 @@ ACMD_FUNC(charmball)
 	int number, type;
 	nullpo_retr(-1, sd);
 
-	max_charmballs = zmin(ARRAYLENGTH(sd->charmball_timer), 0x7FFF);
+	max_charmballs = (uint32)zmin(ARRAYLENGTH(sd->charmball_timer), 0x7FFF);
 
 	if( !message || !*message || sscanf(message, "%d %d", &number, &type) < 1 ||
 		number > max_charmballs || type < CHARM_TYPE_WATER || type > CHARM_TYPE_WIND ) {
@@ -3413,7 +3413,7 @@ ACMD_FUNC(soulball)
 	int number;
 	nullpo_retr(-1, sd);
 
-	max_soulballs = zmin(ARRAYLENGTH(sd->soulball_timer), 0x7FFF);
+	max_soulballs = (uint32)zmin(ARRAYLENGTH(sd->soulball_timer), 0x7FFF);
 
 	if( !message || !*message || (number = atoi(message)) < 0 || number > max_soulballs ) {
 		char msg[CHAT_SIZE_MAX];
@@ -5223,7 +5223,7 @@ ACMD_FUNC(broadcast)
 	}
 
 	sprintf(atcmd_output, "%s: %s", sd->status.name, message);
-	intif_broadcast(atcmd_output, strlen(atcmd_output) + 1, BC_DEFAULT);
+	intif_broadcast(atcmd_output, (int)(strlen(atcmd_output) + 1), BC_DEFAULT);
 
 	return 0;
 }
@@ -5244,7 +5244,7 @@ ACMD_FUNC(localbroadcast)
 
 	sprintf(atcmd_output, "%s: %s", sd->status.name, message);
 
-	clif_broadcast(&sd->bl, atcmd_output, strlen(atcmd_output) + 1, BC_DEFAULT, ALL_SAMEMAP);
+	clif_broadcast(&sd->bl, atcmd_output, (int)(strlen(atcmd_output) + 1), BC_DEFAULT, ALL_SAMEMAP);
 
 	return 0;
 }
@@ -5671,7 +5671,7 @@ ACMD_FUNC(skillid)
 		return -1;
 	}
 
-	skillen = strlen(message);
+	skillen = (int)strlen(message);
 
 	iter = db_iterator(skilldb_name2id);
 
@@ -7106,7 +7106,7 @@ ACMD_FUNC(gmotd)
 
 			if (len) {
 				buf[len] = 0;
-				intif_broadcast(buf, len + 1, 0);
+				intif_broadcast(buf, (int)(len + 1), 0);
 			}
 		}
 		fclose(fp);
@@ -9047,7 +9047,7 @@ static void atcommand_commands_sub(struct map_session_data *sd, const int fd, At
 				continue;
 		}
 
-		slen = strlen(cmd->command);
+		slen = (unsigned int)strlen(cmd->command);
 
 		// Flush the text buffer if this command won't fit into it
 		if( slen + cur - line_buff >= CHATBOX_SIZE ) {
@@ -9070,7 +9070,7 @@ static void atcommand_commands_sub(struct map_session_data *sd, const int fd, At
 
 		for( i = count_bind = 0; i < atcmd_binding_count; i++ ) {
 			if( gm_lvl >= ((type - 1) ? atcmd_binding[i]->level2 : atcmd_binding[i]->level) ) {
-				unsigned int slen = strlen(atcmd_binding[i]->command);
+				unsigned int slen = (unsigned int)strlen(atcmd_binding[i]->command);
 
 				if( count_bind == 0 ) {
 					cur = line_buff;
@@ -9173,7 +9173,7 @@ ACMD_FUNC(set) {
 
 	is_str = (reg[strlen(reg) - 1] == '$' ? true : false);
 
-	if( (len = strlen(val)) > 1 ) {
+	if( (len = (int)strlen(val)) > 1 ) {
 		if( val[0] == '"' && val[len - 1] == '"') {
 			val[len - 1] = '\0'; // Strip quotes.
 			memmove(val, val + 1, len - 1);

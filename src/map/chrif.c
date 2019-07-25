@@ -1369,7 +1369,7 @@ int chrif_load_scdata(int fd) {
 		struct status_change_data *data = (struct status_change_data *)RFIFOP(fd,14 + i * sizeof(struct status_change_data));
 
 		status_change_start(NULL, &sd->bl, (sc_type)data->type, 10000,
-			data->val1, data->val2, data->val3, data->val4, data->tick, SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_LOADED|SCFLAG_FIXEDRATE);
+			(int)data->val1, (int)data->val2, (int)data->val3, (int)data->val4, (int)data->tick, SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_LOADED|SCFLAG_FIXEDRATE);
 	}
 
 	pc_scdata_received(sd);
@@ -1403,7 +1403,7 @@ int chrif_skillcooldown_load(int fd) {
 	for (i = 0; i < count; i++) {
 		struct skill_cooldown_data *data = (struct skill_cooldown_data *)RFIFOP(fd,14 + i * sizeof(struct skill_cooldown_data));
 
-		skill_blockpc_start(sd, data->skill_id, data->tick);
+		skill_blockpc_start(sd, data->skill_id, (int)data->tick);
 		//clif_skill_cooldown_list(sd, data->skill_id, data->duration, data->tick);
 	}
 

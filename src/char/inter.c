@@ -808,7 +808,7 @@ int inter_log(char *fmt, ...)
 	char esc_str[sizeof(str) * 2 + 1]; // Escaped str
 	va_list ap;
 
-	va_start(ap,fmt);
+	va_start(ap, fmt);
 	vsnprintf(str, sizeof(str), fmt, ap);
 	va_end(ap);
 

@@ -86,7 +86,7 @@ int party_send_xy_clear(struct party_data *p);
 void party_exp_share(struct party_data *p, struct block_list *src, uint32 base_exp, uint32 job_exp, int zeny);
 int party_share_loot(struct party_data *p, struct map_session_data *sd, struct item *item, int first_charid);
 int party_send_dot_remove(struct map_session_data *sd);
-int party_foreachsamemap(int (*func)(struct block_list *,va_list),struct map_session_data *sd,int range,...);
+int party_foreachsamemap(int (*func)(struct block_list*, va_list), struct map_session_data *sd, int range, ...);
 int party_sub_count(struct block_list *bl, va_list ap);
 int party_sub_count_banding(struct block_list *bl, va_list ap);
 int party_sub_count_chorus(struct block_list *bl, va_list ap);

@@ -1812,11 +1812,11 @@ int guild_gm_change(int guild_id, uint32 char_id)
 
 	name = g->member[i].name;
 
-	if (strcmp(g->master, name) == 0) //Nothing to change.
+	if (strcmp(g->master, name) == 0) //Nothing to change
 		return 0;
 
-	//Notify servers that master has changed.
-	intif_guild_change_gm(guild_id, name, strlen(name) + 1);
+	//Notify servers that master has changed
+	intif_guild_change_gm(guild_id, name, (int)(strlen(name) + 1));
 	return 1;
 }
 

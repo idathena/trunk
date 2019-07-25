@@ -268,7 +268,7 @@ int intif_broadcast2(const char *mes, int len, unsigned long fontColor, short fo
 	WFIFOHEAD(inter_fd,16 + len);
 	WFIFOW(inter_fd,0)  = 0x3000;
 	WFIFOW(inter_fd,2)  = 16 + len;
-	WFIFOL(inter_fd,4)  = fontColor;
+	WFIFOL(inter_fd,4)  = (uint32)fontColor;
 	WFIFOW(inter_fd,8)  = fontType;
 	WFIFOW(inter_fd,10) = fontSize;
 	WFIFOW(inter_fd,12) = fontAlign;
@@ -295,7 +295,7 @@ int intif_main_message(struct map_session_data *sd, const char *message)
 	snprintf(output, sizeof(output), msg_txt(sd, 386), sd->status.name, message);
 
 	//Send the message using the inter-server broadcast service
-	intif_broadcast2(output, strlen(output) + 1, 0xFE000000, 0, 0, 0, 0);
+	intif_broadcast2(output, (int)(strlen(output) + 1), 0xFE000000, 0, 0, 0, 0);
 
 	//Log the chat message
 	log_chat(LOG_CHAT_MAINCHAT, 0, sd->status.char_id, sd->status.account_id, mapindex_id2name(sd->mapindex), sd->bl.x, sd->bl.y, NULL, message);
@@ -375,7 +375,7 @@ int intif_wis_message_to_gm(char *wisp_name, int permission, char *mes)
 	if (CheckForCharServer())
 		return 0;
 
-	mes_len = strlen(mes) + 1; //+ null
+	mes_len = (int)(strlen(mes) + 1); //+ null
 	WFIFOHEAD(inter_fd,mes_len + 8 + NAME_LENGTH);
 	WFIFOW(inter_fd,0) = 0x3003;
 	WFIFOW(inter_fd,2) = mes_len + 32;
@@ -3068,7 +3068,7 @@ void intif_parse_elemental_sc_received(int fd)
 		struct status_change_data *data = (struct status_change_data *)RFIFOP(fd,14 + i * sizeof(struct status_change_data));
 
 		status_change_start(NULL, &sd->ed->bl, (sc_type)data->type, 10000,
-			data->val1, data->val2, data->val3, data->val4, data->tick, SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_LOADED|SCFLAG_FIXEDRATE);
+			(int)data->val1, (int)data->val2, (int)data->val3, (int)data->val4, (int)data->tick, SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_LOADED|SCFLAG_FIXEDRATE);
 	}
 #endif
 	return;
