@@ -364,7 +364,7 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
  */
 #define YY_DO_BEFORE_ACTION \
 	yyg->yytext_ptr = yy_bp; \
-	yyleng = yy_cp - yy_bp; \
+	yyleng = (int)(yy_cp - yy_bp); \
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
