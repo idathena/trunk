@@ -11366,3 +11366,4 @@
 31021,Dancing_Marionette_Card,Dancing Marionette Card,6,20,,10,,,,,,,,2,,,,,{ bonus bAspdRate,10; bonus2 bAddClass,Class_All,-3; },{},{}
 31022,Abandoned_Teddy_Bear_Card,Abandoned Teddy Bear Card,6,20,,10,,,,,,,,64,,,,,{ bonus bMaxSPrate,20; bonus2 bAddEff2,Eff_Curse,100; bonus3 bAddEff,Eff_Curse,200,ATF_SELF|ATF_MAGIC; },{},{}
 31023,Celine_Kimi_Card,Celine Kimi Card,6,20,,10,,,,,,,,2,,,,,{ bonus2 bMagicAddRace,RC_All,10; bonus5 bAutoSpell,"NPC_CRITICALWOUND",3,50+100*(getrefine()/3),BF_MAGIC,1; },{},{}
+31026,Stephen_Jack_Ernest_Wolf_Card,Stephen Jack Ernest Wolf Card,6,20,,10,,,,,,,,64,,,,,{ /* TODO */ },{},{}

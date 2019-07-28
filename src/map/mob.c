@@ -4235,7 +4235,7 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 		mob_readdb_libconfig_sub_drops(t, entry, mob_id);
 
 	entry->dmg_mod = 100;
-	if (config_setting_lookup_int(it, "DamageTaken", &i32) && i32 >= 0)
+	if (config_setting_lookup_int(it, "DamageTakenRate", &i32) && i32 >= 0)
 		entry->dmg_mod = i32;
 
 	//Finally insert monster's data into the database

@@ -12110,9 +12110,9 @@ void pc_readdb(void)
 	battle_config.use_statpoint_table = k; //Restore setting
 
 #ifdef RENEWAL_ASPD
-	sv_readdb(db_path, "re/job_db1.txt", ',', 6 + MAX_WEAPON_TYPE, 6 + MAX_WEAPON_TYPE,CLASS_COUNT, &pc_readdb_job1);
+	sv_readdb(db_path, "re/job_db1.txt", ',', 6 + MAX_WEAPON_TYPE, 6 + MAX_WEAPON_TYPE, CLASS_COUNT, &pc_readdb_job1);
 #else
-	sv_readdb(db_path, "pre-re/job_db1.txt" , ',', 5 + MAX_WEAPON_TYPE, 5 + MAX_WEAPON_TYPE,CLASS_COUNT, &pc_readdb_job1);
+	sv_readdb(db_path, "pre-re/job_db1.txt" , ',', 5 + MAX_WEAPON_TYPE, 5 + MAX_WEAPON_TYPE, CLASS_COUNT, &pc_readdb_job1);
 #endif
 	sv_readdb(db_path, "job_db2.txt", ',', 1, 1 + MAX_LEVEL, CLASS_COUNT, &pc_readdb_job2);
 
