@@ -473,10 +473,13 @@ bool skill_pos_maxcount_check(struct block_list *src, int16 x, int16 y, uint16 s
  */
 int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool heal) {
 	uint16 lv;
-	int i, hp = 0, bonus = 100;
+	int i, hp = 0;
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct map_session_data *tsd = BL_CAST(BL_PC, target);
-	struct status_change *sc, *tsc;
+	struct status_change *sc = NULL, *tsc = NULL;
+#ifdef RENEWAL
+	int bonus = 100;
+#endif
 
 	sc = status_get_sc(src);
 	tsc = status_get_sc(target);
@@ -522,34 +525,71 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 #endif
 			}
 			if( sd ) {
-				if( (lv = pc_checkskill(sd, HP_MEDITATIO)) > 0 )
+				if( (lv = pc_checkskill(sd, HP_MEDITATIO)) > 0 ) {
+#ifdef RENEWAL
 					bonus += lv * 2;
-				if( pc_checkskill(sd, SU_POWEROFSEA) > 0 ) {
-					bonus += 8;
-					if( pc_checkskill_summoner(sd, TYPE_SEAFOOD) >= 20 )
-						bonus += 16;
+#else
+					hp += hp * lv * 2 / 100;
+#endif
 				}
-				if( skill_id == SU_FRESHSHRIMP && pc_checkskill(sd, SU_SPIRITOFSEA) > 0 )
+				if( pc_checkskill(sd, SU_POWEROFSEA) > 0 ) {
+#ifdef RENEWAL
+					bonus += 8;
+#else
+					hp += hp * 8 / 100;
+#endif
+					if( pc_checkskill_summoner(sd, TYPE_SEAFOOD) >= 20 ) {
+#ifdef RENEWAL
+						bonus += 16;
+#else
+						hp += hp * 16 / 100;
+#endif
+					}
+				}
+				if( skill_id == SU_FRESHSHRIMP && pc_checkskill(sd, SU_SPIRITOFSEA) > 0 ) {
+#ifdef RENEWAL
 					bonus += 16;
-				if( tsd && sd->status.partner_id == tsd->status.char_id && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex )
+#else
+					hp += hp * 16 / 100;
+#endif
+				}
+				if( tsd && sd->status.partner_id == tsd->status.char_id && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex ) {
+#ifdef RENEWAL
 					bonus += 100;
-			} else if( src->type == BL_HOM && (lv = hom_checkskill(((TBL_HOM *)src), HLIF_BRAIN)) > 0 )
+#else
+					hp *= 2;
+#endif
+				}
+			} else if( src->type == BL_HOM && (lv = hom_checkskill(((TBL_HOM *)src), HLIF_BRAIN)) > 0 ) {
+#ifdef RENEWAL
 				bonus += lv * 2;
+#else
+				hp += hp * lv * 2 / 100;
+#endif
+			}
 			break;
 	}
 
-	if( sd && (i = pc_skillheal_bonus(sd, skill_id)) )
+	if( sd && (i = pc_skillheal_bonus(sd, skill_id)) ) {
+#ifdef RENEWAL
 		bonus += i;
-
-	if( sc && sc->count ) {
-		if( sc->data[SC_OFFERTORIUM] )
-			bonus += sc->data[SC_OFFERTORIUM]->val2;
+#else
+		hp += hp * i / 100;
+#endif
 	}
 
+	if( sc && sc->data[SC_OFFERTORIUM] ) {
+#ifdef RENEWAL
+		bonus += sc->data[SC_OFFERTORIUM]->val2;
+#else
+		hp += hp * sc->data[SC_OFFERTORIUM]->val2 / 100;
+#endif
+	}
+
+#ifdef RENEWAL
 	if( bonus != 100 )
 		hp = hp * bonus / 100;
 
-#ifdef RENEWAL
 	switch( skill_id ) { //MATK part of the RE heal formula [malufett]
 		case BA_APPLEIDUN:
 		case PR_SANCTUARY:

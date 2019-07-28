@@ -2593,7 +2593,7 @@
 4443,Aqua_Elemental_Card,Aqua Elemental Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Water,20; bonus2 bAddDefEle,Ele_Water,5; },{},{}
 4444,Draco_Card,Draco Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Earth,20; bonus2 bAddDefEle,Ele_Earth,5; },{},{}
 4445,Luciola_Vespa_Card,Luciola Vespa Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Wind,20; bonus2 bAddDefEle,Ele_Wind,5; },{},{}
-4446,Enhanced_Skeleton_Card,Enhanced Skeleton Card,6,20,,10,,,,,,,,2,,,,,{ bonus bBaseAtk,15; bonus2 bAddEff,Eff_Stun,200+(BaseLevel>99?100:0); },{},{}
+4446,Powerful_Skeleton_Card,Powerful Skeleton Card,6,20,,10,,,,,,,,2,,,,,{ bonus bBaseAtk,15; bonus2 bAddEff,Eff_Stun,200+(BaseLevel>99?100:0); },{},{}
 4447,Centipede_Card,Centipede Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Poison,20; bonus2 bAddDefEle,Ele_Poison,5; },{},{}
 4448,Cornus_Card,Cornus Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Holy,20; bonus2 bAddDefEle,Ele_Holy,5; },{},{}
 4449,Dark_Shadow_Card,Dark Shadow Card,6,20,,10,,,,,,,,32,,,,,{ bonus2 bSubDefEle,Ele_Dark,20; bonus2 bAddDefEle,Ele_Dark,5; },{},{}
@@ -4788,15 +4788,19 @@
 6915,Captured_Soul,Captured Soul,3,10,,0,,,,,,,,,,,,,{},{},{}
 6916,Piece_Of_Soul_Monkey,Piece of Soul Monkey,3,10,,0,,,,,,,,,,,,,{},{},{}
 6917,Piece_Of_Soul_Chicken,Piece of Soul Chicken,3,10,,0,,,,,,,,,,,,,{},{},{}
-6919,Honor_Proof,Honor Token,3,10,,0,,,,,,,,,,,,,{},{},{}
-6921,Dehumidifiers,Dehumidifiers,3,10,,10,,,,,,,,,,,,,{},{},{}
-6922,Sandpaper,Sandpaper,3,10,,10,,,,,,,,,,,,,{},{},{}
+6919,Honor_Proof,Honor Token,3,20,,0,,,,,,,,,,,,,{},{},{}
+6921,Dehumidifier,Dehumidifier,3,0,,10,,,,,,,,,,,,,{},{},{}
+6922,Sandpaper,Sandpaper,3,1500,,10,,,,,,,,,,,,,{},{},{}
 6923,Bright_Fire_Lights,Bright Fire Lights,3,10,,10,,,,,,,,,,,,,{},{},{}
 6924,Red_Eye,Red Eye,3,10,,10,,,,,,,,,,,,,{},{},{}
 6925,Letter_Of_Prisoner,Letter Of Prisoner,3,10,,0,,,,,,,,,,,,,{},{},{}
 6926,Rune_Midgard_History_Book,Rune-Midgard History Book,3,10,,0,,,,,,,,,,,,,{},{},{}
 6927,Stone_That_Contained_Sea,Stone That Contained Sea,3,10,,0,,,,,,,,,,,,,{},{},{}
 6928,Poring_Scourer,Poring Scourer,3,10,,0,,,,,,,,,,,,,{},{},{}
+6939,Worn_Out_Belt,Worn-Out Belt,3,1400,,10,,,,,,,,,,,,,{},{},{}
+6940,Moving_Black_Material,Moving Black Material,3,2300,,10,,,,,,,,,,,,,{},{},{}
+6941,Valkyrie's_Power_Fragment,Valkyrie's Power Fragment,3,6000,,10,,,,,,,,,,,,,{},{},{}
+6942,Will_Of_Master,Master's Will,3,1400,,10,,,,,,,,,,,,,{},{},{}
 6943,Attack_Stone(Upper),Attack Stone(Upper),6,10,,100,,,,,,,,,,,,,{ bonus2 bAddClass,Class_All,1; },{},{}
 6944,Magic_Stone(Upper),Magic Stone(Upper),6,10,,100,,,,,,,,,,,,,{ bonus2 bMagicAddRace,RC_All,1; },{},{}
 6945,Strength_Stone(Middle),Strength Stone(Middle),6,10,,100,,,,,,,,,,,,,{ bonus bStr,1; },{},{}
@@ -4813,6 +4817,7 @@
 6957,Lamb_Fleece,Lamb Fleece,3,10,,0,,,,,,,,,,,,,{},{},{}
 6958,Lamb_Horns,Lamb Horns,3,10,,0,,,,,,,,,,,,,{},{},{}
 6959,Costume_Change_Ticket,Costume Change Ticket,3,0,,0,,,,,,,,,,,,,{},{},{}
+6960,Sky_Fortress_Key,Sky Fortress Key,3,0,,10,,,,,,,,,,,,,{},{},{}
 6961,Large_Scrap_Metal,Large Scrap Metal,3,0,,1000,,,,,,,,,,,,,{},{},{}
 6962,Old_Fuel_Tank,Old Fuel Tank,0,,,100,,,,,,,,,,,,,{},{},{}
 7001,Mould_Powder,Mould Powder,3,466,,10,,,,,,,,,,,,,{},{},{}
@@ -11366,4 +11371,6 @@
 31021,Dancing_Marionette_Card,Dancing Marionette Card,6,20,,10,,,,,,,,2,,,,,{ bonus bAspdRate,10; bonus2 bAddClass,Class_All,-3; },{},{}
 31022,Abandoned_Teddy_Bear_Card,Abandoned Teddy Bear Card,6,20,,10,,,,,,,,64,,,,,{ bonus bMaxSPrate,20; bonus2 bAddEff2,Eff_Curse,100; bonus3 bAddEff,Eff_Curse,200,ATF_SELF|ATF_MAGIC; },{},{}
 31023,Celine_Kimi_Card,Celine Kimi Card,6,20,,10,,,,,,,,2,,,,,{ bonus2 bMagicAddRace,RC_All,10; bonus5 bAutoSpell,"NPC_CRITICALWOUND",3,50+100*(getrefine()/3),BF_MAGIC,1; },{},{}
+31024,Immortal_Cursed_Knight_Card,Immortal Cursed Knight Card,6,20,,10,,,,,,,,2,,,,,{ /* TODO */ },{},{}
+31025,Immortal_Wind_Ghost_Card,Immortal Wind Ghost Card,6,20,,10,,,,,,,,2,,,,,{ /* TODO */ },{},{}
 31026,Stephen_Jack_Ernest_Wolf_Card,Stephen Jack Ernest Wolf Card,6,20,,10,,,,,,,,64,,,,,{ /* TODO */ },{},{}

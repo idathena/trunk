@@ -698,6 +698,7 @@ struct map_session_data {
 
 	short last_addeditem_index; //Index of latest item added
 	int autotrade_tid;
+	int respawn_tid;
 	int bank_vault; //Bank vault
 #ifdef PACKET_OBFUSCATION
 	unsigned int cryptKey; //Packet obfuscation key to be used for the next received packet
@@ -1102,6 +1103,7 @@ int pc_skillheal2_bonus(struct map_session_data *sd, uint16 skill_id);
 void pc_damage(struct map_session_data *sd, struct block_list *src, unsigned int hp, unsigned int sp);
 int pc_dead(struct map_session_data *sd, struct block_list *src);
 void pc_revive(struct map_session_data *sd, unsigned int hp, unsigned int sp);
+bool pc_revive_item(struct map_session_data *sd);
 void pc_heal(struct map_session_data *sd, unsigned int hp, unsigned int sp, int type);
 int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fixed);
 int pc_percentheal(struct map_session_data *sd, int, int);

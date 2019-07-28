@@ -1773,6 +1773,7 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	sd->pvp_timer = INVALID_TIMER;
 	sd->expiration_tid = INVALID_TIMER;
 	sd->autotrade_tid = INVALID_TIMER;
+	sd->respawn_tid = INVALID_TIMER;
 
 #ifdef SECURE_NPCTIMEOUT
 	//Initialize to defaults/expected
@@ -7967,7 +7968,8 @@ static TIMER_FUNC(pc_respawn_timer)
 
 	if( (sd = map_id2sd(id)) ) {
 		sd->pvp_point = 0;
-		pc_respawn(sd,CLR_OUTSIGHT);
+		sd->respawn_tid = INVALID_TIMER;
+		pc_respawn(sd, CLR_OUTSIGHT);
 	}
 
 	return 0;
@@ -7976,13 +7978,13 @@ static TIMER_FUNC(pc_respawn_timer)
 /*==========================================
  * Invoked when a player has received damage
  *------------------------------------------*/
-void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int hp, unsigned int sp)
+void pc_damage(struct map_session_data *sd, struct block_list *src, unsigned int hp, unsigned int sp)
 {
 	if( sp )
-		clif_updatestatus(sd,SP_SP);
+		clif_updatestatus(sd, SP_SP);
 
 	if( hp )
-		clif_updatestatus(sd,SP_HP);
+		clif_updatestatus(sd, SP_HP);
 	else
 		return;
 
@@ -7991,17 +7993,17 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 
 	if( pc_issit(sd) ) {
 		pc_setstand(sd);
-		skill_sit(sd,false);
+		skill_sit(sd, false);
 	}
 
 	if( sd->progressbar.npc_id )
 		clif_progressbar_abort(sd);
 
 	if( sd->status.pet_id > 0 && sd->pd && battle_config.pet_damage_support )
-		pet_target_check(sd->pd,src,1);
+		pet_target_check(sd->pd, src, 1);
 
 	if( sd->status.ele_id > 0 )
-		elemental_set_target(sd,src);
+		elemental_set_target(sd, src);
 
 	if( battle_config.prevent_logout_trigger&PLT_DAMAGE )
 		sd->canlog_tick = gettick();
@@ -8012,7 +8014,7 @@ TIMER_FUNC(pc_close_npc_timer)
 	struct map_session_data *sd = NULL;
 
 	if( (sd = map_id2sd(id)) )
-		pc_close_npc(sd,(int)data);
+		pc_close_npc(sd, (int)data);
 	return 0;
 }
 
@@ -8397,20 +8399,20 @@ int pc_dead(struct map_session_data *sd, struct block_list *src)
 			ssd->pvp_won++;
 		}
 		if( sd->pvp_point < 0 ) {
-			add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
+			sd->respawn_tid = add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
 			return 1|8;
 		}
 	}
 
 	//GvG
 	if( map_flag_gvg2(sd->bl.m) ) {
-		add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
+		sd->respawn_tid = add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
 		return 1|8;
 	} else if( sd->bg_id ) {
 		struct battleground_data *bg = bg_team_search(sd->bg_id);
 
 		if( bg && bg->mapindex > 0 ) { //Respawn by BG
-			add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
+			sd->respawn_tid = add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
 			return 1|8;
 		}
 	}
@@ -8441,6 +8443,47 @@ void pc_revive(struct map_session_data *sd,unsigned int hp, unsigned int sp)
 		guild_guildaura_refresh(sd,GD_SOULCOLD,guild_checkskill(sd->guild,GD_SOULCOLD));
 		guild_guildaura_refresh(sd,GD_HAWKEYES,guild_checkskill(sd->guild,GD_HAWKEYES));
 	}
+}
+
+bool pc_revive_item(struct map_session_data *sd)
+{
+	const int token[3] = { ITEMID_F_TOKEN_OF_SIEGFRIED,ITEMID_E_TOKEN_OF_SIEGFRIED,ITEMID_TOKEN_OF_SIEGFRIED };
+	int16 item_position;
+	uint8 hp = 100, sp = 100;
+	int i;
+
+	nullpo_retr(false,sd);
+
+	if( !pc_isdead(sd) || sd->respawn_tid != INVALID_TIMER )
+		return false;
+
+	if( sd->sc.data[SC_HELLPOWER] )
+		return false; //Cannot resurrect while under the effect of SC_HELLPOWER
+
+	for( i = 0; i < ARRAYLENGTH(token); i++ ) {
+		if( (item_position = pc_search_inventory(sd,token[i])) != INDEX_NOT_FOUND )
+			break;
+	}
+
+	if( item_position == INDEX_NOT_FOUND ) {
+		if( sd->sc.data[SC_LIGHT_OF_REGENE] ) {
+			hp = sd->sc.data[SC_LIGHT_OF_REGENE]->val2;
+			sp = 0;
+		} else
+			return false;
+	}
+
+	if( !status_revive(&sd->bl,hp,sp) )
+		return false;
+
+	if( item_position == INDEX_NOT_FOUND )
+		status_change_end(&sd->bl,SC_LIGHT_OF_REGENE,INVALID_TIMER);
+	else
+		pc_delitem(sd,item_position,1,0,1,LOG_TYPE_CONSUME);
+
+	clif_skill_nodamage(&sd->bl,&sd->bl,ALL_RESURRECTION,4,1);
+
+	return true;
 }
 
 // script

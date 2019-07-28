@@ -768,14 +768,14 @@
 22847	// Prontera_Medal
 22848	// Prison_Key
 22849	// Prontera_Time_Crystal
-6921	// Dehumidifiers
+6921	// Dehumidifier
 6922	// Sandpaper
 6924	// Red_Eye
 //6936
 //6937
 //6938
-//6939
-//6940
+6939	// Worn_Out_Belt
+6940	// Moving_Black_Material
 //6941
 //6942
 6961	// Large_Scrap_Metal

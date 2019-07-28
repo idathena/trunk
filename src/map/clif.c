@@ -15042,36 +15042,7 @@ void clif_parse_HomMenu(int fd, struct map_session_data *sd)
 /// 0292
 void clif_parse_AutoRevive(int fd, struct map_session_data *sd)
 {
-	const int token[3] = { ITEMID_F_TOKEN_OF_SIEGFRIED,ITEMID_E_TOKEN_OF_SIEGFRIED,ITEMID_TOKEN_OF_SIEGFRIED };
-	short item_position;
-	uint8 hp = 100, sp = 100;
-	int i;
-
-	if (sd->sc.data[SC_HELLPOWER])
-		return; //Cannot resurrect while under the effect of SC_HELLPOWER
-
-	for (i = 0; i < ARRAYLENGTH(token); i++) {
-		if ((item_position = pc_search_inventory(sd, token[i])) != INDEX_NOT_FOUND)
-			break;
-	}
-
-	if (item_position == INDEX_NOT_FOUND) {
-		if (sd->sc.data[SC_LIGHT_OF_REGENE]) {
-			hp = sd->sc.data[SC_LIGHT_OF_REGENE]->val2;
-			sp = 0;
-		} else
-			return;
-	}
-
-	if (!status_revive(&sd->bl, hp, sp))
-		return;
-
-	if (item_position == INDEX_NOT_FOUND)
-		status_change_end(&sd->bl, SC_LIGHT_OF_REGENE, INVALID_TIMER);
-	else
-		pc_delitem(sd, item_position, 1, 0, 1, LOG_TYPE_CONSUME);
-
-	clif_skill_nodamage(&sd->bl, &sd->bl, ALL_RESURRECTION, 4, 1);
+	pc_revive_item(sd);
 }
 
 
