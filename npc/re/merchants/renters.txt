@@ -161,7 +161,7 @@ prontera,125,208,5	script	Peco Peco Remover	105,{
 		mes "Welcome, Mechanic.";
 		mes "What would you like to do?";
 		next;
-		switch(select("Rent a Pushcart:Ride a Mado Gear:Buy Emergency Mado Gear:Upgrade Cooling Device:Cancel")) {
+		switch(select("Rent a Pushcart:Ride a Mado Gear:Buy Emergency Mado Gear:Upgrade Cooling Device:Quit")) {
 		case 1:
 			if (checkcart()) {
 				mes "[Mado Gear Armorer]";
@@ -196,67 +196,59 @@ prontera,125,208,5	script	Peco Peco Remover	105,{
 			close;
 		case 3:
 			mes "[Mado Gear Armorer]";
-			mes "Emergency Mado Gear is really useful for the emergency situations and it is sold at 1,000,000 Zeny.";
+			mes "We sell Emergency Mado Gear for 1,000,000 Zeny for emergencies.";
 			next;
-			if (select("Buy.:Don't buy.") == 2) {
+			if (select("Buy.:Quit.") == 2) {
 				mes "[Mado Gear Armorer]";
-				mes "I see. Please feel free to ask me if you change your mind.";
-				close;
-			}
-			if (countitem(23277) > 0) {
-				mes "[Mado Gear Armorer]";
-				mes "I'm sorry, but you already have an Emergency Mado Gear.";
+				mes "Thank you~.";
 				close;
 			}
 			if (Zeny < 1000000) {
 				mes "[Mado Gear Armorer]";
-				mes "I'm sorry, but you don't have enough zeny to buy it.";
+				mes "You do not have enough Zeny.";
 				close;
 			}
 			set Zeny,Zeny-1000000;
 			getitem 23277,1; //Mado_Box
 			mes "[Mado Gear Armorer]";
-			mes "There you go!";
+			mes "Hope this can help you.";
 			close;
 		case 4:
-			mes "[Mado Gear Armorer]";
-			mes "Which device do you want to upgrade?";
-			next;
-			if (select("Cooling Device:High Quality Cooler") == 1) {
-				mes "[Mado Gear Armorer]";
-				mes "Upgrading Cooling Device to High Quality Cooler needs 1 Cooling Device and 2,000,000 Zeny.";
-				next;
-				set .@itemid,2804;
-				set .@cost,2000000;
+			set .@opt,select("High Quality Cooler:Special Cooler:Quit");
+			if (.@opt == 1) {
+				setarray .@itemid[0],2804,2809; //Cooling_Device,High_Quality_Cooler
+				set .@price,2000000;
+			} else if (.@opt == 2) {
+				setarray .@itemid[0],2809,2810; //High_Quality_Cooler,Special_Cooler
+				set .@price,4000000;
 			} else {
 				mes "[Mado Gear Armorer]";
-				mes "Upgrading High Quality Cooler to Special Cooler needs 1 High Quality Cooler and 4,000,000 Zeny.";
-				next;
-				set .@itemid,2809;
-				set .@cost,4000000;
+				mes "Thank you~.";
+				close;
 			}
+			mes "[Mado Gear Armorer]";
+			mes "Upgrading " + getitemname(.@itemid[0]) + " to " + getitemname(.@itemid[1]) + " will cost one " + getitemname(.@itemid[0]) + " and " + callfunc("F_InsertComma",.@price) + " Zeny.";
+			next;
 			if (select("Upgrade.:Quit.") == 2) {
 				mes "[Mado Gear Armorer]";
-				mes "I see. Please feel free to ask me if you change your mind.";
+				mes "Thank you~.";
 				close;
 			}
-			if (!countitem(.@itemid)) {
+			if (!countitem(.@itemid[0]) || Zeny < .@price) {
 				mes "[Mado Gear Armorer]";
-				mes "I'm sorry, but you don't have the "+getitemname(.@itemid)+".";
+				mes "There is not enough material.";
+				mes "Please check again";
 				close;
 			}
-			if (Zeny < .@cost) {
-				mes "[Mado Gear Armorer]";
-				mes "I'm sorry, but you don't have enough zeny to upgrade the device.";
-				close;
-			}
-			set Zeny,Zeny-.@cost;
-			delitem .@itemid,1;
-			getitem (.@itemid == 2804 ? 2809 : 2810),1; //High_Quality_Cooler,Special_Cooler
+			set Zeny,Zeny-.@price;
+			delitem .@itemid[0],1;
+			getitem .@itemid[1],1;
 			mes "[Mado Gear Armorer]";
-			mes "There you go!";
+			mes "Hope this can help you.";
 			close;
 		case 5:
+			mes "[Mado Gear Armorer]";
+			mes "Thank you~.";
 			close;
 		}
 	}
@@ -264,6 +256,7 @@ prontera,125,208,5	script	Peco Peco Remover	105,{
 	mes "Mado Gears are only available for Mechanics.";
 	close;
 }
+
 prontera,163,178,3	duplicate(mgm)	Mado Gear Armorer#prt	105
 geffen,103,55,5	duplicate(mgm)	Mado Gear Armorer#gef	105
 payon,166,106,5	duplicate(mgm)	Mado Gear Armorer#pay	105

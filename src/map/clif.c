@@ -6320,6 +6320,11 @@ void clif_broadcast(struct block_list *bl, const char *mes, int len, int type, e
 	int lp = (type&BC_COLOR_MASK) ? 4 : 0;
 	unsigned char *buf = (unsigned char *)aMalloc((4 + lp + len) * sizeof(unsigned char));
 
+	nullpo_retv(mes);
+
+	if (len < 2)
+		return;
+
 	WBUFW(buf,0) = 0x9a;
 	WBUFW(buf,2) = 4 + lp + len;
 	if (type&BC_BLUE)
@@ -6367,6 +6372,11 @@ void clif_GlobalMessage(struct block_list *bl, const char *message, enum send_ta
 void clif_broadcast2(struct block_list *bl, const char *mes, int len, unsigned long fontColor, short fontType, short fontSize, short fontAlign, short fontY, enum send_target target)
 {
 	unsigned char *buf = (unsigned char *)aMalloc((16 + len) * sizeof(unsigned char));
+
+	nullpo_retv(mes);
+
+	if (len < 2)
+		return;
 
 	WBUFW(buf,0)  = 0x1c3;
 	WBUFW(buf,2)  = len + 16;
@@ -19172,11 +19182,11 @@ void clif_parse_GMFullStrip(int fd, struct map_session_data *sd) {
 
 
 /**
- * Close script when player is idle
+ * Clear NPC dialog
  * 08d6 <npc id>.L (ZC_CLEAR_DIALOG)
  * @author [Ind]
- * @param sd: player pointer
- * @param npcid: npc gid to close
+ * @param sd
+ * @param npcid
  */
 void clif_scriptclear(struct map_session_data *sd, int npcid) {
 	struct s_packet_db *info;

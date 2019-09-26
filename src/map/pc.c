@@ -4577,7 +4577,7 @@ int pc_identifyall(struct map_session_data *sd, bool identify_item)
 /*==========================================
  * Update buying value by skills
  *------------------------------------------*/
-int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
+int pc_modifybuyvalue(struct map_session_data *sd, int orig_value)
 {
 	uint16 lv;
 	int val = orig_value, rate1 = 0, rate2 = 0;
@@ -4599,7 +4599,7 @@ int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
 /*==========================================
  * Update selling value by skills
  *------------------------------------------*/
-int pc_modifysellvalue(struct map_session_data *sd,int orig_value)
+int pc_modifysellvalue(struct map_session_data *sd, int orig_value)
 {
 	uint16 lv;
 	int val = orig_value, rate = 0;
@@ -6817,7 +6817,7 @@ int pc_stop_following(struct map_session_data *sd)
 	return 0;
 }
 
-int pc_follow(struct map_session_data *sd,int target_id)
+int pc_follow(struct map_session_data *sd, int target_id)
 {
 	struct block_list *bl = map_id2bl(target_id);
 
@@ -7295,8 +7295,8 @@ int pc_need_status_point(struct map_session_data *sd, int type, int val)
 	if( val == 0 )
 		return 0;
 
-	low = pc_getstat(sd,type);
-	max = pc_maxparameter(sd,(enum e_params)(type - SP_STR));
+	low = pc_getstat(sd, type);
+	max = pc_maxparameter(sd, (enum e_params)(type - SP_STR));
 
 	if( low >= max && val > 0 )
 		return 0; //Official servers show '0' when max is reached
@@ -7326,9 +7326,9 @@ int pc_maxparameterincrease(struct map_session_data *sd, int type)
 
 	nullpo_ret(sd);
 
-	base = final_value = pc_getstat(sd,type);
+	base = final_value = pc_getstat(sd, type);
 	status_points = sd->status.status_point;
-	max_param = pc_maxparameter(sd,(enum e_params)(type - SP_STR));
+	max_param = pc_maxparameter(sd, (enum e_params)(type - SP_STR));
 
 	while( final_value <= max_param && status_points >= 0 ) {
 		status_points -= PC_STATUS_POINT_COST(final_value);
@@ -7359,43 +7359,43 @@ bool pc_statusup(struct map_session_data *sd, int type, int increase)
 	nullpo_ret(sd);
 
 	if( type < SP_STR || type > SP_LUK || increase <= 0 ) {
-		clif_statusupack(sd,type,0,0);
+		clif_statusupack(sd, type, 0, 0);
 		return false;
 	}
 
 	//Check limits
-	current = pc_getstat(sd,type);
-	max_increase = pc_maxparameterincrease(sd,type);
-	increase = cap_value(increase,0,max_increase); //Cap to the maximum status points available
-	if( increase <= 0 || current + increase > pc_maxparameter(sd,(enum e_params)(type - SP_STR)) ) {
-		clif_statusupack(sd,type,0,0);
+	current = pc_getstat(sd, type);
+	max_increase = pc_maxparameterincrease(sd, type);
+	increase = cap_value(increase, 0, max_increase); //Cap to the maximum status points available
+	if( increase <= 0 || current + increase > pc_maxparameter(sd, (enum e_params)(type - SP_STR)) ) {
+		clif_statusupack(sd, type, 0, 0);
 		return false;
 	}
 
 	//Check status points
-	needed_points = pc_need_status_point(sd,type,increase);
+	needed_points = pc_need_status_point(sd, type, increase);
 	if( needed_points < 0 || needed_points > sd->status.status_point ) { //Sanity check
-		clif_statusupack(sd,type,0,0);
+		clif_statusupack(sd, type, 0, 0);
 		return false;
 	}
 
 	//Set new values
-	final_value = pc_setstat(sd,type,current + increase);
+	final_value = pc_setstat(sd, type, current + increase);
 	sd->status.status_point -= needed_points;
 
-	status_calc_pc(sd,SCO_NONE);
+	status_calc_pc(sd, SCO_NONE);
 
 	//Update increase cost indicator
-	clif_updatestatus(sd,SP_USTR + type - SP_STR);
+	clif_updatestatus(sd, SP_USTR + type - SP_STR);
 
 	//Update statpoint count
-	clif_updatestatus(sd,SP_STATUSPOINT);
+	clif_updatestatus(sd, SP_STATUSPOINT);
 
 	//Update stat value
-	clif_statusupack(sd,type,1,final_value); //Required
-	clif_updatestatus(sd,type);
+	clif_statusupack(sd, type, 1, final_value); //Required
+	clif_updatestatus(sd, type);
 
-	achievement_update_objective(sd,AG_GOAL_STATUS,1,final_value);
+	achievement_update_objective(sd, AG_GOAL_STATUS, 1, final_value);
 
 	return true;
 }
@@ -7419,23 +7419,23 @@ int pc_statusup2(struct map_session_data *sd, int type, int val)
 	nullpo_ret(sd);
 
 	if( type < SP_STR || type > SP_LUK ) {
-		clif_statusupack(sd,type,0,0);
+		clif_statusupack(sd, type, 0, 0);
 		return 0;
 	}
 
-	need = pc_need_status_point(sd,type,1);
-	max = pc_maxparameter(sd,(enum e_params)(type - SP_STR)); //Set new value
-	val = pc_setstat(sd,type,cap_value(pc_getstat(sd,type) + val,1,max));
+	need = pc_need_status_point(sd, type, 1);
+	max = pc_maxparameter(sd, (enum e_params)(type - SP_STR)); //Set new value
+	val = pc_setstat(sd, type, cap_value(pc_getstat(sd, type) + val, 1, max));
 
-	status_calc_pc(sd,SCO_NONE);
+	status_calc_pc(sd, SCO_NONE);
 
 	//Update increase cost indicator
-	if( need != pc_need_status_point(sd,type,1) )
-		clif_updatestatus(sd,SP_USTR + type - SP_STR);
+	if( need != pc_need_status_point(sd, type, 1) )
+		clif_updatestatus(sd, SP_USTR + type - SP_STR);
 
 	//Update stat value
-	clif_statusupack(sd,type,1,val); //Required
-	clif_updatestatus(sd,type);
+	clif_statusupack(sd, type, 1, val); //Required
+	clif_updatestatus(sd, type);
 
 	return val;
 }
@@ -7557,7 +7557,7 @@ int pc_allskillup(struct map_session_data *sd)
 		}
 	}
 
-	if (pc_has_permission(sd,PC_PERM_ALL_SKILL)) {
+	if (pc_has_permission(sd, PC_PERM_ALL_SKILL)) {
 		//Get ALL skills except npc/guild ones [Skotlex]
 		//And except SG_DEVIL [Komurka] and MO_TRIPLEATTACK and RG_SNATCHER [ultramage]
 		for (i = 0; i < MAX_SKILL; i++) {
@@ -7584,10 +7584,10 @@ int pc_allskillup(struct map_session_data *sd)
 				id == SG_DEVIL)
 				continue; //Cannot be learned normally
 			sd->status.skill[id].id = id;
-			sd->status.skill[id].lv = skill_tree_get_max(id,sd->status.class_); //Celest
+			sd->status.skill[id].lv = skill_tree_get_max(id, sd->status.class_); //Celest
 		}
 	}
-	status_calc_pc(sd,SCO_NONE);
+	status_calc_pc(sd, SCO_NONE);
 	//Required because if you could level up all skills previously
 	//the update will not be sent as only the lv variable changes
 	clif_skillinfoblock(sd);
@@ -7597,7 +7597,7 @@ int pc_allskillup(struct map_session_data *sd)
 /*==========================================
  * /resetlvl
  *------------------------------------------*/
-int pc_resetlvl(struct map_session_data *sd,int type)
+int pc_resetlvl(struct map_session_data *sd, int type)
 {
 	int  i;
 
@@ -8050,7 +8050,6 @@ void pc_close_npc(struct map_session_data *sd, int flag) {
 		if (sd->st) {
 			if (sd->st->state == CLOSE) {
 				clif_scriptclose(sd,sd->npc_id);
-				clif_scriptclear(sd,sd->npc_id);
 				sd->st->state = END; //Force to end now
 			}
 			if (sd->st->state == END) { //Free attached scripts that are waiting

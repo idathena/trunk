@@ -83,39 +83,39 @@
 //25284
 //25285
 //--- 2015 / 12 / 16
-//25127
-//25128
-//25129
-//25130
-//25131
-23016
-//23080
-//4671
-//4672
-//4673
-//4674
-//4675
-//4676
-//4677
-//4678
-//4679
-//4680
-//4681
-//4682
-//4683
-//4684
-//4685
-//4686
-//4687
-//4688
-//4689
-//4690
-//4691
-//4692
-//4693
-//4694
-//4695
-//4696
+25127	// Silent_Energy_Particle
+25128	// Weak_Energy_Particle
+25129	// Unstable_Energy_Particle
+25130	// Sinister_Energy_Particle
+25131	// Fallen_Energy_Particle
+23016	// Cursed_Fragment
+23080	// Cursed_Crystal
+4671	// V_Celia_Card
+4672	// V_Chen_Card
+4673	// V_Alphoccio_Card
+4674	// V_Eremes_Card
+4675	// V_Magaleta_Card
+4676	// V_Shecil_Card
+4677	// V_Howard_Card
+4678	// V_Katrinn_Card
+4679	// V_Seyren_Card
+4680	// V_Randel_Card
+4681	// V_Flamel_Card
+4682	// V_Gertie_Card
+4683	// V_Trentini_Card
+4684	// V_B_Eremes_Card
+4685	// V_B_Magaleta_Card
+4686	// V_B_Katrinn_Card
+4687	// V_B_Shecil_Card
+4688	// V_B_Harword_Card
+4689	// V_B_Seyren_Card
+4690	// V_B_Randel_Card
+4691	// V_B_Flamel_Card
+4692	// V_B_Celia_Card
+4693	// V_B_Chen_Card
+4694	// V_B_Gertie_Card
+4695	// V_B_Trentini_Card
+4696	// V_B_Alphoccio_Card
 //--- 2015 / 11 / 19
 6905	// Broken_Magic_Stone
 //--- 2015 / 11 / 30

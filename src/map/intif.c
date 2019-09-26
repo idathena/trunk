@@ -216,6 +216,11 @@ int intif_broadcast(const char *mes, int len, int type)
 {
 	int lp = (type|BC_COLOR_MASK) ? 4 : 0;
 
+	nullpo_ret(mes);
+
+	if (len < 2)
+		return 0;
+
 	//Send to the local players
 	clif_broadcast(NULL, mes, len, type, ALL_CLIENT);
 
@@ -256,6 +261,11 @@ int intif_broadcast(const char *mes, int len, int type)
  */
 int intif_broadcast2(const char *mes, int len, unsigned long fontColor, short fontType, short fontSize, short fontAlign, short fontY)
 {
+	nullpo_ret(mes);
+
+	if (len < 2)
+		return 0;
+
 	//Send to the local players
 	clif_broadcast2(NULL, mes, len, fontColor, fontType, fontSize, fontAlign, fontY, ALL_CLIENT);
 

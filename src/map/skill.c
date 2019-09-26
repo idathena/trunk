@@ -16738,8 +16738,8 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 	if( bl->type == BL_MOB || bl->type == BL_NPC )
 		return (int)time; //Cast time is fixed nothing to alter
 
-	if( fixed < 0 || !battle_config.default_fixed_castrate ) //No fixed cast time
-		fixed = 0;
+	if( fixed < 0 )
+		fixed = 0; //No fixed cast time
 	else if( !fixed ) {
 		fixed = (int)time * battle_config.default_fixed_castrate / 100; //Fixed time
 		time = time * (100 - battle_config.default_fixed_castrate) / 100; //Variable time

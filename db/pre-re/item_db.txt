@@ -6631,6 +6631,6 @@
 //===================================================================
 22540,Runstone_Lux,Lux Anima Rune,11,2,,100,,,,,0xFFFFFFFF,7,2,,,,,,{ itemskill "RK_LUXANIMA",1; },{},{}
 22777,Gift_Buff_Set,Gift Buff Set,2,10,,100,,,,0,0xFFFFFFFF,7,2,,,1,,,{},{},{}
-23277,Mado_Box,Emergency Magic Gear,2,10000,,3000,,,,,0x00000400,8,2,,,100,,,{ setmadogear 1; },{},{}
+23277,Mado_Box,Emergency Magic Gear,2,10000,,3000,,,,,0x00000400,8,2,,,100,,,{ specialeffect2 EF_CLAYMORE; setmadogear 1; },{},{}
 25187,Slug_Bullet,Slug Bullet,3,1200,,1200,,,,,,,,,,,,,{},{},{}
 25736,Cash_Hair_Coupon2,Jeremy's Beauty Coupon II,3,10,,10,,,,,,,,,,,,,{},{},{}
