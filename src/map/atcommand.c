@@ -886,7 +886,7 @@ ACMD_FUNC(storage)
 {
 	nullpo_retr(-1, sd);
 
-	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading || sd->state.storage_flag)
+	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading || sd->state.storage_flag || sd->state.lapine_ui)
 		return -1;
 
 	if (storage_storageopen(sd) == 1) { //Already open.
@@ -907,7 +907,7 @@ ACMD_FUNC(guildstorage)
 {
 	nullpo_retr(-1, sd);
 
-	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading)
+	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading || sd->state.lapine_ui)
 		return -1;
 
 	switch (storage_guild_storageopen(sd)) {
@@ -10101,6 +10101,40 @@ ACMD_FUNC(resurrect)
 	return 0;
 }
 
+ACMD_FUNC(synthesisui) {
+#if PACKETVER >= 20160525
+	uint16 item_id;
+
+	nullpo_retr(-1, sd);
+
+	if (sscanf(message, "%hu", &item_id) < 1) {
+		clif_displaymessage(fd, "Please input id of synthesis item.");
+		return -1;
+	}
+	itemdb_synthesis_open(sd, item_id);
+#else
+	clif_displaymessage(fd, "Client is not supported.");
+#endif
+	return 0;
+}
+
+ACMD_FUNC(upgradeui) {
+#if PACKETVER >= 20160525
+	uint16 item_id;
+
+	nullpo_retr(-1, sd);
+
+	if (sscanf(message, "%hu", &item_id) < 1) {
+		clif_displaymessage(fd, "Please input item_id of upgrade id.");
+		return -1;
+	}
+	itemdb_upgrade_open(sd, item_id);
+#else
+	clif_displaymessage(fd, "Client is not supported.");
+#endif
+	return 0;
+}
+
 #include "../custom/atcommand.inc"
 
 /**
@@ -10409,6 +10443,8 @@ void atcommand_basecommands(void) {
 		ACMD_DEF(langtype),
 		ACMD_DEF(reloadmsgconf),
 		ACMD_DEFR(resurrect, ATCMD_NOCONSOLE),
+		ACMD_DEFR(synthesisui, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
+		ACMD_DEFR(upgradeui, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 	};
 	AtCommandInfo *atcommand;
 	int i;

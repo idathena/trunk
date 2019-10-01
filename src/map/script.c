@@ -23034,9 +23034,88 @@ BUILDIN_FUNC(camerainfo) {
 		return 1;
 
 	clif_camerainfo(sd, false, script_getnum(st,2) / 100.0f, script_getnum(st,3) / 100.0f, script_getnum(st,4) / 100.0f);
-
 	return SCRIPT_CMD_SUCCESS;
 #endif
+}
+
+/**
+ * Open Lapine Synthesis UI
+ * synthesisui(<id>,{<char_id>});
+ */
+BUILDIN_FUNC(synthesisui) {
+#if PACKETVER < 20160525
+	ShowError("buildin_synthesisui: This command requires PACKETVER 2016-05-25 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+
+	script_pushint(st,itemdb_synthesis_open(sd, script_getnum(st,2)));
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
+/**
+ * Open Lapine Upgrade UI
+ * upgradeui(<id>,{<char_id>});
+ */
+BUILDIN_FUNC(upgradeui) {
+#if PACKETVER < 20160525
+	ShowError("buildin_upgradeui: This command requires PACKETVER 2016-05-25 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+
+	script_pushint(st,itemdb_upgrade_open(sd, script_getnum(st,2)));
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
+/**
+ * Get possible random option data of the given id
+ * getrandomoptgroup(<group_id>,{<char_id>});
+ */
+BUILDIN_FUNC(getrandomoptgroup) {
+	struct map_session_data *sd = NULL;
+	struct script_data *data = NULL;
+	struct s_random_opt_group *entry = NULL;
+	int group_id = script_getnum(st,2);
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+
+	if ((entry = itemdb_randomopt_group_exists(group_id))) {
+		int count, i, k = 0;
+
+		for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
+			count = entry->option_count[i];
+			if (count > 0) {
+				int j = rnd()%count;
+
+				entry->option[i].id = entry->options[i][j].id;
+				entry->option[i].value = rnd_value(entry->options[i][j].min_val, entry->options[i][j].max_val);
+				entry->option[i].param = 0;
+				pc_setreg(sd, reference_uid(add_str("@opt_group_id"), k), entry->option[i].id);
+				pc_setreg(sd, reference_uid(add_str("@opt_group_val"), k), entry->option[i].value);
+				pc_setreg(sd, reference_uid(add_str("@opt_group_param"), k), entry->option[i].param);
+				k++;
+			}
+		}
+	}
+
+	script_pushint(st,1);
+	return SCRIPT_CMD_SUCCESS;
 }
 
 #include "../custom/script.inc"
@@ -23689,6 +23768,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(is_guild_leader,"?"),
 	BUILDIN_DEF(is_party_leader,"?"),
 	BUILDIN_DEF(camerainfo,"iii?"),
+	BUILDIN_DEF(synthesisui,"i?"),
+	BUILDIN_DEF(upgradeui,"i?"),
+	BUILDIN_DEF(getrandomoptgroup,"i?"),
 
 #include "../custom/script_def.inc"
 

@@ -625,7 +625,7 @@ void achievement_update_objective(struct map_session_data *sd, enum e_achievemen
 /*==========================================
  * Achievement condition parsing section
  *------------------------------------------*/
-static void disp_error_message2(const char *mes,const char *pos,int report)
+static void disp_error_message2(const char *mes, const char *pos, int report)
 {
 	av_error_msg = aStrdup(mes);
 	av_error_pos = pos;

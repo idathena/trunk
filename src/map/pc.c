@@ -176,7 +176,7 @@ struct item_cd {
  * @return Class Index
  */
 int pc_class2idx(int class_) {
-	if (class_ >= JOB_NOVICE_HIGH)
+	if( class_ >= JOB_NOVICE_HIGH )
 		return class_- JOB_NOVICE_HIGH + JOB_MAX_BASIC;
 	return class_;
 }
@@ -202,7 +202,7 @@ static TIMER_FUNC(pc_invincible_timer)
 {
 	struct map_session_data *sd;
 
-	if( (sd = (struct map_session_data *)map_id2sd(id)) == NULL || sd->bl.type!=BL_PC )
+	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
 		return 1;
 
 	if( sd->invincible_timer != tid ) {

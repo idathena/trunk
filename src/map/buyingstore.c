@@ -659,7 +659,7 @@ void do_init_buyingstore_autotrade(void) {
 				}
 
 				// Init the list
-				CREATE(at->entries, struct s_autotrade_entry *,at->count);
+				CREATE(at->entries, struct s_autotrade_entry *, at->count);
 
 				//Add the item into list
 				j = 0;

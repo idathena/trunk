@@ -1033,6 +1033,7 @@ int mob_count_sub(struct block_list *bl, va_list ap) {
 	ARR_FIND(0, 10, i, (mobid[i] = va_arg(ap, int)) == 0); //Fetch till 0
 	if (mobid[0]) { //If there one let's check it otherwise go backward
 		TBL_MOB *md = BL_CAST(BL_MOB, bl);
+
 		ARR_FIND(0, 10, i, md->mob_id == mobid[i]);
 		return (i < 10) ? 1 : 0;
 	}

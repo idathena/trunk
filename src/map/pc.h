@@ -273,6 +273,7 @@ struct map_session_data {
 		bool cashshop_open;
 		bool sale_open;
 		bool refineui_open;
+		unsigned int lapine_ui : 2; //Lapine Synthesis/Upgrade UI is opened
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -527,9 +528,9 @@ struct map_session_data {
 	int adopt_invite; //Adoption
 
 	struct guild *guild; //[Ind] speed everything up
-	int guild_invite,guild_invite_account;
-	int guild_emblem_id,guild_alliance,guild_alliance_account;
-	short guild_x,guild_y; //For guildmate position display. [Skotlex] should be short [zzo]
+	int guild_invite, guild_invite_account;
+	int guild_emblem_id, guild_alliance, guild_alliance_account;
+	short guild_x, guild_y; //For guildmate position display. [Skotlex] should be short [zzo]
 	int guildspy; //[Syrus22]
 	int partyspy; //[Syrus22]
 	int clanspy;
@@ -715,6 +716,7 @@ struct map_session_data {
 	} roulette;
 
 	short setlook_head_top, setlook_head_mid, setlook_head_bottom, setlook_robe; //Stores 'setlook' script command values
+	unsigned int last_lapine_box;
 
 #if PACKETVER >= 20150513
 	uint32 *hatEffectIDs;
@@ -844,10 +846,10 @@ extern struct s_job_info {
 #define pc_issit(sd)          ( (sd)->vd.dead_sit == 2 )
 #define pc_isidle(sd)         ( (sd)->chatID || (sd)->state.vending || (sd)->state.buyingstore || DIFF_TICK(last_tick, (sd)->idletime) >= battle_config.idle_no_share )
 #define pc_istrading(sd)      ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->state.trading )
-#define pc_cant_act(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->chatID || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend || (sd)->state.refineui_open )
+#define pc_cant_act(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->chatID || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend || (sd)->state.refineui_open || (sd)->state.lapine_ui )
 
 //Equals pc_cant_act except it doesn't check for chat rooms or npcs
-#define pc_cant_act2(sd)      ( (sd)->state.vending || (sd)->state.buyingstore || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend )
+#define pc_cant_act2(sd)      ( (sd)->state.vending || (sd)->state.buyingstore || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend || (sd)->state.refineui_open || (sd)->state.lapine_ui )
 
 #define pc_setdir(sd,b,h)     ( (sd)->ud.dir = (b), (sd)->head_dir = (h) )
 #define pc_setchatid(sd,n)    ( (sd)->chatID = n )

@@ -472,6 +472,19 @@
 4653:4654,{ bonus2 bSubRace,RC_Brute,5; bonus2 bSubRace,RC_Undead,5; bonus2 bIgnoreMdefRaceRate,RC_Brute,50; bonus2 bIgnoreMdefRaceRate,RC_Undead,50; }
 4653:4655,{ bonus2 bSubRace,RC_Brute,5; bonus2 bSubRace,RC_Undead,5; bonus2 bIgnoreDefRaceRate,RC_Brute,50; bonus2 bIgnoreDefRaceRate,RC_Undead,50; }
 4656:4657,{ bonus5 bAutoSpellWhenHit,"NPC_WIDESLEEP",2,30,BF_WEAPON|BF_MAGIC,0; bonus2 bSubEle,Ele_Neutral,5; }
+4671:4692,{ autobonus "{ bonus bMatk,100; }",30,6000,BF_MAGIC,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2223,6000; }"; }
+4672:4693,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2224,6000; }"; }
+4673:4696,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2226,6000; }"; }
+4674:4684,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1635,6000; }"; }
+4675:4685,{ autobonus "{ bonus bMatk,100; }",30,6000,BF_MAGIC,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1637,6000; }"; }
+4676:4687,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1638,6000; }"; }
+4677:4688,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1636,6000; }"; }
+4678:4686,{ autobonus "{ bonus bMatk,100; }",30,6000,BF_MAGIC,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1639,6000; }"; }
+4679:4689,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 1634,6000; }"; }
+4680:4690,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2221,6000; }"; }
+4681:4691,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2222,6000; }"; }
+4682:4694,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2225,6000; }"; }
+4683:4695,{ autobonus "{ bonus bBaseAtk,100; }",30,6000,BF_WEAPON,"{ specialeffect2 EF_POTION_BERSERK; active_transform 2227,6000; }"; }
 5007:18913,{ bonus2 bExpAddRace,RC_All,5; }
 5040:5442,{ bonus bAspdRate,3; bonus bVariableCastrate,3; }
 5040:18672,{ bonus bSPrecovRate,3; }

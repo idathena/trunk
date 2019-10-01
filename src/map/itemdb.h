@@ -27,11 +27,13 @@
 #define IG_FINDINGORE 6
 #define IG_POTION 37
 
-#define MAX_ITEMGROUP_RANDGROUP 4 //Max group for random item (increase this when needed). @TODO: Remove this limit and use dynamic size if needed
+//Max group for random item (increase this when needed). 
+#define MAX_ITEMGROUP_RANDGROUP 4 //@TODO: Remove this limit and use dynamic size if needed
 
 //Client-defined value
 #define MAX_ROULETTE_LEVEL 7
 #define MAX_ROULETTE_COLUMNS 9
+#define MAX_SYNTHESIS_SOURCES 10
 
 #define CARD0_FORGE 0x00FF
 #define CARD0_CREATE 0x00FE
@@ -472,6 +474,40 @@ struct s_random_opt_group {
 	struct s_item_randomoption option[MAX_ITEM_RDM_OPT];
 };
 
+//Struct for lapine synthesis list
+struct s_item_synthesis_list {
+	uint16 index;
+	uint16 amount;
+};
+
+//Struct for lapine synthesis source
+struct s_item_synthesis_source {
+	uint16 nameid;
+	uint16 amount;
+};
+
+//Struct for lapine synthesis
+struct s_item_synthesis {
+	uint16 id;
+	uint16 source_needed;
+	uint16 source_count;
+	struct s_item_synthesis_source *sources;
+	struct script_code *script;
+	uint8 source_refine_min;
+	uint8 source_refine_max;
+};
+
+//Struct for lapine upgrade
+struct s_item_upgrade {
+	uint16 id;
+	uint16 target_count;
+	int *targets;
+	struct script_code *script;
+	uint8 target_refine_min;
+	uint8 need_option_num;
+	bool not_socket_enchant;
+};
+
 struct item_data *itemdb_searchname(const char *name);
 int itemdb_searchname_array(struct item_data **data, int size, const char *str);
 struct item_data *itemdb_search(unsigned short nameid);
@@ -546,8 +582,15 @@ char itemdb_pc_get_itemgroup(uint16 group_id, struct map_session_data *sd);
 uint16 itemdb_get_randgroupitem_count(uint16 group_id, uint8 sub_group, unsigned short nameid);
 
 struct s_random_opt_data *itemdb_randomopt_exists(short id);
-struct s_random_opt_subgroup *itemdb_randomopt_subgroup_exists(int subgroup_id);
 struct s_random_opt_group *itemdb_randomopt_group_exists(int group_id);
+
+struct s_item_synthesis *itemdb_synthesis_exists(int synthesis_id);
+bool itemdb_synthesis_open(struct map_session_data *sd, uint16 item_id);
+enum e_item_synthesis_result itemdb_synthesis_submit(struct map_session_data *sd, uint16 item_id, uint16 n, struct s_item_synthesis_list *items);
+
+struct s_item_upgrade *itemdb_upgrade_exists(int upgrade_id);
+bool itemdb_upgrade_open(struct map_session_data *sd, uint16 item_id);
+enum e_item_upgrade_result itemdb_upgrade_submit(struct map_session_data *sd, uint16 item_id, uint16 target_index);
 
 void itemdb_reload_itemmob_data(void);
 void itemdb_reload(void);

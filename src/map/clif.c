@@ -11587,7 +11587,7 @@ void clif_parse_UseItem(int fd, struct map_session_data *sd)
 		return;
 	}
 
-	if ((!sd->npc_id && pc_istrading(sd)) || sd->chatID)
+	if ((!sd->npc_id && pc_istrading(sd)) || sd->chatID || sd->state.lapine_ui)
 		return;
 
 	//Whether the item is used or not is irrelevant, the char ain't idle [Skotlex]
@@ -16112,7 +16112,7 @@ void clif_Auction_results(struct map_session_data *sd, short count, short pages,
 		WFIFOL(fd,k) = auction.auction_id;
 		safestrncpy((char *)WFIFOP(fd,4 + k), auction.seller_name, NAME_LENGTH);
 
-		if( (item = itemdb_exists(auction.item.nameid)) != NULL && item->view_id > 0 )
+		if( (item = itemdb_exists(auction.item.nameid)) && item->view_id > 0 )
 			WFIFOW(fd,28 + k) = item->view_id;
 		else
 			WFIFOW(fd,28 + k) = auction.item.nameid;
@@ -21404,6 +21404,227 @@ void clif_parse_camerainfo(int fd, struct map_session_data *sd)
 		safesnprintf(command, sizeof(command), "%ccamerainfo %03.03f %03.03f %03.03f", atcommand_symbol, RFIFOF(fd,3), RFIFOF(fd,7), RFIFOF(fd,11));
 
 	is_atcommand(fd, sd, command, 1);
+}
+
+
+static void clif_lapine_ui_reset(struct map_session_data *sd)
+{
+	sd->state.lapine_ui = 0;
+	sd->last_lapine_box = 0;
+}
+
+/// ZC_LAPINE_SYNTHESIS_OPEN
+/// 0A4E W.<packet> W.<itemid>
+bool clif_synthesisui_open(struct map_session_data *sd, uint16 item_id)
+{
+#if PACKETVER >= 20160525
+	int fd = 0, cmd = 0;
+	struct s_packet_db *info = NULL;
+
+	nullpo_retr(false, sd);
+
+	cmd = packet_db_ack[ZC_LAPINE_SYNTHESIS_OPEN];
+	if( !cmd || !(info = &packet_db[cmd]) || !info->len )
+		return false;
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,info->len);
+	WFIFOW(fd,0) = cmd;
+	WFIFOW(fd,info->pos[0]) = item_id;
+	WFIFOSET(fd,info->len);
+	return true;
+#else
+	return false;
+#endif
+}
+
+/// ZC_LAPINE_SYNTHESIS_RESULT
+/// 0A50 W.<packet> W.<result>
+void clif_synthesisui_result(struct map_session_data *sd, enum e_item_synthesis_result result)
+{
+#if PACKETVER >= 20160525
+	int fd = 0, cmd = 0;
+	struct s_packet_db *info = NULL;
+
+	nullpo_retv(sd);
+
+	clif_lapine_ui_reset(sd);
+
+	cmd = packet_db_ack[ZC_LAPINE_SYNTHESIS_RESULT];
+	if( !cmd || !(info = &packet_db[cmd]) || !info->len )
+		return;
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,info->len);
+	WFIFOW(fd,0) = cmd;
+	WFIFOW(fd,info->pos[0]) = result;
+	WFIFOSET(fd,info->len);
+#endif
+}
+
+/// CZ_LAPINE_SYNTHESIS_ACK
+/// 0A4F W.<packet> W.<length> W.<itemid> { W.<index> W.<count> }.?
+void clif_parse_lapineSynthesis_submit(int fd, struct map_session_data *sd)
+{
+#if PACKETVER >= 20160525
+	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
+	int len = RFIFOW(fd,info->pos[0]), i;
+	uint16 item_id = RFIFOW(fd,info->pos[1]), n = (len - info->pos[2]) / info->pos[3];
+	struct item_data *id;
+	struct s_item_synthesis_list *items;
+
+	nullpo_retv(sd);
+
+	if( pc_istrading(sd) ) {
+		clif_synthesisui_result(sd, SYNTHESIS_INVALID_ITEM);
+		return;
+	}
+
+	if( sd->state.lapine_ui != 1 )
+		return;
+
+	if( n < 1 || n > MAX_SYNTHESIS_SOURCES || sd->last_lapine_box != item_id || sd->last_lapine_box != sd->itemid || !(id = itemdb_exists(item_id)) ) {
+		//clif_synthesisui_result(sd, SYNTHESIS_INVALID_ITEM);
+		return;
+	}
+
+	if( id->flag.keepAfterUse ) {
+		struct item *it;
+
+		if( sd->itemindex == -1 || sd->itemid == -1 || !(it = &sd->inventory.u.items_inventory[sd->itemindex]) || it->nameid != item_id ) {
+			//clif_synthesisui_result(sd, SYNTHESIS_INVALID_ITEM);
+			return;
+		}
+		pc_delitem(sd, sd->itemindex, 1, 0, 0, LOG_TYPE_CONSUME);
+	}
+
+	CREATE(items, struct s_item_synthesis_list, n);
+
+	for( i = 0; i < n; i++ ) {
+		int index = RFIFOW(fd, info->pos[2] + i * info->pos[3]) - 2;
+		int amount = RFIFOW(fd, info->pos[2] + i * info->pos[3] + 2);
+
+		if( amount < 1 || index < 0 || index >= MAX_INVENTORY ) {
+			//clif_synthesisui_result(sd, SYNTHESIS_INVALID_ITEM);
+			return;
+		}
+
+		items[i].index = (uint16)index;
+		items[i].amount = (uint16)amount;
+	}
+
+	clif_synthesisui_result(sd, itemdb_synthesis_submit(sd, item_id, n, items));
+	aFree(items);
+	sd->itemid = sd->itemindex = -1;
+#endif
+}
+
+/// CZ_LAPINE_SYNTHESIS_CLOSE
+/// 0A70
+void clif_parse_lapineSynthesis_close(int fd, struct map_session_data *sd)
+{
+#if PACKETVER >= 20160525
+	nullpo_retv(sd);
+
+	clif_lapine_ui_reset(sd);
+#endif
+}
+
+/// ZC_LAPINE_UPGRADE_OPEN
+/// 0AB4 W.<packet> W.<itemid>
+bool clif_lapine_upgrade_open(struct map_session_data *sd, uint16 item_id)
+{
+#if PACKETVER >= 20160525
+	int fd = 0, cmd = 0;
+	struct s_packet_db *info = NULL;
+
+	nullpo_retr(false, sd);
+
+	cmd = packet_db_ack[ZC_LAPINE_UPGRADE_OPEN];
+	if (!cmd || !(info = &packet_db[cmd]) || !info->len)
+		return false;
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,info->len);
+	WFIFOW(fd,0) = cmd;
+	WFIFOW(fd,info->pos[0]) = item_id;
+	WFIFOSET(fd,info->len);
+	return true;
+#else
+	return false;
+#endif
+}
+
+/// ZC_LAPINE_UPGRADE_RESULT
+/// 0AB7 W.<packet> W.<result>
+void clif_lapine_upgrade_result(struct map_session_data *sd, enum e_item_upgrade_result result)
+{
+#if PACKETVER >= 20160525
+	int fd = 0, cmd = 0;
+	struct s_packet_db *info = NULL;
+
+	nullpo_retv(sd);
+
+	clif_lapine_ui_reset(sd);
+
+	cmd = packet_db_ack[ZC_LAPINE_UPGRADE_RESULT];
+	if (!cmd || !(info = &packet_db[cmd]) || !info->len)
+		return;
+
+	fd = sd->fd;
+	WFIFOHEAD(fd,info->len);
+	WFIFOW(fd,0) = cmd;
+	WFIFOW(fd,info->pos[0]) = result;
+	WFIFOSET(fd,info->len);
+#endif
+}
+
+/// CZ_LAPINE_UPGRADE_ACK
+/// 0AB6 W.<packet> W.<itemid> W.<index>
+void clif_parse_lapineUpgrade_submit(int fd, struct map_session_data *sd)
+{
+#if PACKETVER >= 20160525
+	struct s_packet_db *info = &packet_db[RFIFOW(fd,0)];
+	uint16 item_id = RFIFOW(fd,info->pos[0]), index = RFIFOW(fd,info->pos[1]) - 2;
+	struct item_data *id;
+
+	nullpo_retv(sd);
+
+	if (pc_istrading(sd)) {
+		clif_lapine_upgrade_result(sd, LAPINE_UPRAGDE_FAILURE);
+		return;
+	}
+
+	if (sd->state.lapine_ui != 2)
+		return;
+
+	if (sd->last_lapine_box != item_id || sd->last_lapine_box != sd->itemid || index < 0 || index >= MAX_INVENTORY || !(id = itemdb_search(sd->last_lapine_box))) {
+		//clif_lapine_upgrade_result(sd, LAPINE_UPRAGDE_FAILURE);
+		return;
+	}
+
+	if (id->flag.keepAfterUse) {
+		if (sd->itemindex == -1 || sd->itemid == -1) {
+			//clif_lapine_upgrade_result(sd, LAPINE_UPRAGDE_FAILURE);
+			return;
+		}
+		pc_delitem(sd, sd->itemindex, 1, 0, 0, LOG_TYPE_CONSUME);
+	}
+
+	clif_lapine_upgrade_result(sd, itemdb_upgrade_submit(sd, item_id, index));
+	sd->itemid = sd->itemindex = -1;
+#endif
+}
+
+/// CZ_LAPINE_UPGRADE_CLOSE
+/// 0AB5
+void clif_parse_lapineUpgrade_close(int fd, struct map_session_data *sd)
+{
+#if PACKETVER >= 20160525
+	nullpo_retv(sd);
+
+	clif_lapine_ui_reset(sd);
+#endif
 }
 
 

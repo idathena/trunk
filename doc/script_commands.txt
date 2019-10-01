@@ -3008,7 +3008,7 @@ recreate these items perfectly if they are destroyed. Here's what you get:
 								 made by a specific craftsman.
 @cartinventorylist_expire[]    - expire time (Unix time stamp). 0 means never 
 								 expires.
-@cartinventorylist_bound       - whether it is an account bounded item or not.
+@cartinventorylist_bound[]     - whether it is an account bounded item or not.
 @cartinventorylist_count       - the number of items in these lists.
 
 This could be handy to save/restore a character's cart_inventory, since no 
@@ -10089,6 +10089,52 @@ index parameter can be 0 to MAX_ITEM_RDM_OPT-1 (default 0-4).
 ID - ID of random option. See db/const.txt for constants.
 Value - Value of random option
 Param - Parameter of random option
+
+---------------------------------------
+
+*synthesisui(<id>,{<char_id>});
+
+Open Lapine Synthesis UI for attached player. The id must be valid from
+db/[pre-]re/item_synthesis.conf.
+
+Returns 1 on success and 0 of failure.
+
+---------------------------------------
+
+*upgradeui(<id>,{<char_id>});
+
+Open Lapine Upgrade UI for attached player. The id must be valid from
+db/[pre-]re/item_upgrade.conf.
+
+This command also sets a bunch of last upgrade item data that can be used
+for getting the same item for the rewards script. Here's what you get:
+
+@last_lapine_id
+@last_lapine_refine
+@last_lapine_identify
+@last_lapine_attribute
+@last_lapine_card1
+@last_lapine_card2
+@last_lapine_card3
+@last_lapine_card4
+
+Returns 1 on success and 0 of failure.
+
+---------------------------------------
+
+*getrandomoptgroup(<group_id>,{<char_id>});
+
+Get possible random option data of the given group_id for attached player.
+The group_id is specified by using one of the RDMOPTG_* constants (db/const.txt).
+
+This command sets a bunch of arrays with a complete list of the possible random
+option data. Here's what you get:
+
+@opt_group_id[]
+@opt_group_val[]
+@opt_group_param[]
+
+Returns 1 on success and 0 of failure.
 
 ---------------------------------------
 
