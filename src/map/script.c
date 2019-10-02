@@ -23086,7 +23086,6 @@ BUILDIN_FUNC(upgradeui) {
  */
 BUILDIN_FUNC(getrandomoptgroup) {
 	struct map_session_data *sd = NULL;
-	struct script_data *data = NULL;
 	struct s_random_opt_group *entry = NULL;
 	int group_id = script_getnum(st,2);
 

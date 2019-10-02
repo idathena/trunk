@@ -68,7 +68,6 @@ char homunculus_db[DB_NAME_LEN] = "homunculus";
 char skill_homunculus_db[DB_NAME_LEN] = "skill_homunculus";
 char mercenary_db[DB_NAME_LEN] = "mercenary";
 char mercenary_owner_db[DB_NAME_LEN] = "mercenary_owner";
-char ragsrvinfo_db[DB_NAME_LEN] = "ragsrvinfo";
 char elemental_db[DB_NAME_LEN] = "elemental";
 char elemental_scdata_db[DB_NAME_LEN] = "elemental_sc";
 char interreg_db[32] = "interreg";
@@ -3227,8 +3226,6 @@ void mapif_server_reset(int id)
 		WBUFW(buf,2) = j * 4 + 10;
 		mapif_sendallwos(fd, buf, WBUFW(buf,2));
 	}
-	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `index`='%d'", ragsrvinfo_db, server[id].fd) )
-		Sql_ShowDebug(sql_handle);
 	online_char_db->foreach(online_char_db, char_db_setoffline, id); //Tag relevant chars as 'in disconnected' server.
 	mapif_server_destroy(id);
 	mapif_server_init(id);
@@ -3901,21 +3898,6 @@ int parse_frommap(int fd)
 						StringBuf_Destroy(&buf);
 					}
 					RFIFOSKIP(fd,RFIFOW(fd,2));
-				}
-				break;
-
-			case 0x2b16: //Receive rates [Wizputer]
-				if( RFIFOREST(fd) < 14 )
-					return 0;
-				{
-					char esc_server_name[sizeof(server_name) * 2 + 1];
-
-					Sql_EscapeString(sql_handle, esc_server_name, server_name);
-
-					if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` SET `index`='%d',`name`='%s',`exp`='%d',`jexp`='%d',`drop`='%d'",
-						ragsrvinfo_db, fd, esc_server_name, RFIFOL(fd,2), RFIFOL(fd,6), RFIFOL(fd,10)) )
-						Sql_ShowDebug(sql_handle);
-					RFIFOSKIP(fd,14);
 				}
 				break;
 
@@ -5842,12 +5824,10 @@ void sql_config_read(const char *cfgName)
 			safestrncpy(mercenary_db, w2, sizeof(mercenary_db));
 		else if(!strcmpi(w1, "mercenary_owner_db"))
 			safestrncpy(mercenary_owner_db, w2, sizeof(mercenary_owner_db));
-		else if(!strcmpi(w1, "ragsrvinfo_db"))
-			safestrncpy(ragsrvinfo_db, w2,sizeof(ragsrvinfo_db));
 		else if(!strcmpi(w1, "elemental_db"))
-			safestrncpy(elemental_db, w2,sizeof(elemental_db));
+			safestrncpy(elemental_db, w2, sizeof(elemental_db));
 		else if(!strcmpi(w1, "elemental_scdata_db"))
-			safestrncpy(elemental_scdata_db, w2,sizeof(elemental_scdata_db));
+			safestrncpy(elemental_scdata_db, w2, sizeof(elemental_scdata_db));
 		else if(!strcmpi(w1, "interreg_db"))
 			safestrncpy(interreg_db, w2, sizeof(interreg_db));
 		else if(!strcmpi(w1, "skillcooldown_db"))
@@ -6172,9 +6152,6 @@ void do_final(void)
 	do_final_msg();
 	do_final_mapif();
 	do_final_loginif();
-
-	if(SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s`", ragsrvinfo_db))
-		Sql_ShowDebug(sql_handle);
 
 	char_db_->destroy(char_db_, NULL);
 	online_char_db->destroy(online_char_db, NULL);

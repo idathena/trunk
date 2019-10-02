@@ -616,7 +616,7 @@ CREATE TABLE IF NOT EXISTS `inventory` (
 --
 
 CREATE TABLE IF NOT EXISTS `ipbanlist` (
-  `list` varchar(255) NOT NULL default '',
+  `list` varchar(15) NOT NULL default '',
   `btime` datetime NOT NULL,
   `rtime` datetime NOT NULL,
   `reason` varchar(255) NOT NULL default '',
@@ -847,18 +847,6 @@ CREATE TABLE IF NOT EXISTS `quest` (
 ) ENGINE=MyISAM;
 
 --
--- Table structure for table `ragsrvinfo`
---
-
-CREATE TABLE IF NOT EXISTS `ragsrvinfo` (
-  `index` int(11) NOT NULL default '0',
-  `name` varchar(255) NOT NULL default '',
-  `exp` int(11) unsigned NOT NULL default '0',
-  `jexp` int(11) unsigned NOT NULL default '0',
-  `drop` int(11) unsigned NOT NULL default '0'
-) ENGINE=MyISAM;
-
---
 -- Table structure for table `skill`
 --
 
@@ -917,6 +905,7 @@ INSERT INTO `sql_updates` (`timestamp`) VALUES (1559824920);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1560073680);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1560615000);
 INSERT INTO `sql_updates` (`timestamp`) VALUES (1562616480);
+INSERT INTO `sql_updates` (`timestamp`) VALUES (1569976467);
 
 --
 -- Table structure for table `sstatus`

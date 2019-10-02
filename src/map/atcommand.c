@@ -3866,7 +3866,7 @@ ACMD_FUNC(reload)
 
 		battle_config_read(BATTLE_CONF_FILENAME);
 
-		if( prev_config.item_rate_mvp          != battle_config.item_rate_mvp
+		if (prev_config.item_rate_mvp          != battle_config.item_rate_mvp
 		||  prev_config.item_rate_common       != battle_config.item_rate_common
 		||  prev_config.item_rate_common_boss  != battle_config.item_rate_common_boss
 		||  prev_config.item_rate_common_mvp   != battle_config.item_rate_common_mvp
@@ -3904,7 +3904,6 @@ ACMD_FUNC(reload)
 		)
 		{	// Exp or Drop rates changed.
 			mob_reload(); //Needed as well so rate changes take effect.
-			chrif_ragsrvinfo(battle_config.base_exp_rate, battle_config.job_exp_rate, battle_config.item_rate_common);
 		}
 		clif_displaymessage(fd, msg_txt(sd, 255)); // Battle configuration has been reloaded.
 	} else if (strstr(command, "statusdb") || strncmp(message, "statusdb", 3) == 0) {
@@ -3923,7 +3922,7 @@ ACMD_FUNC(reload)
 		//atcommand_broadcast( fd, sd, "@broadcast", "You will feel a bit of lag at this point !" );
 
 		iter = mapit_getallusers();
-		for( pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter) ) {
+		for (pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter)) {
 			pc_close_npc(pl_sd, 1);
 			clif_cutin(pl_sd, "", 255);
 		}
@@ -5507,12 +5506,15 @@ ACMD_FUNC(dropall)
 				continue;
 			}
 			if (type == -1 || type == (uint8)item_data->type) {
-				if (sd->inventory.u.items_inventory[i].equip != 0)
+				int amount = sd->inventory.u.items_inventory[i].amount;
+
+				if (sd->inventory.u.items_inventory[i].equip)
 					pc_unequipitem(sd, i, 1|2);
 				pc_equipswitch_remove(sd, i);
-				count += sd->inventory.u.items_inventory[i].amount;
-				if (!pc_dropitem(sd, i, sd->inventory.u.items_inventory[i].amount))
-					count2 += sd->inventory.u.items_inventory[i].amount;
+				if (pc_dropitem(sd, i, amount))
+					count += amount;
+				else
+					count2 += amount;
 			}
 		}
 	}
@@ -5540,7 +5542,7 @@ ACMD_FUNC(storeall)
 
 	for (i = 0; i < MAX_INVENTORY; i++) {
 		if (sd->inventory.u.items_inventory[i].amount) {
-			if(sd->inventory.u.items_inventory[i].equip != 0)
+			if(sd->inventory.u.items_inventory[i].equip)
 				pc_unequipitem(sd, i, 1|2);
 			pc_equipswitch_remove(sd, i);
 			storage_storageadd(sd, &sd->storage, i, sd->inventory.u.items_inventory[i].amount);

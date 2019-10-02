@@ -75,6 +75,10 @@
 //12205,60000	// Dex_Dish10_
 //12206,60000	// Luk_Dish10_
 //12207,60000	// Vit_Dish10_
+11621,10000	// Red_Syrup
+11622,10000	// Yellow_Syrup
+11623,10000	// White_Syrup
+11624,10000	// Blue_Syrup
 22508,7200000	// Para_Team_Mark_
 23277,180000	// Mado_Box
 22515,60000	// Twisted_Time_Key

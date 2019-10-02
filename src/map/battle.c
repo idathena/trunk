@@ -2268,10 +2268,10 @@ static bool is_attack_right_handed(struct block_list *src, uint16 skill_id)
 static bool is_attack_left_handed(struct block_list *src, uint16 skill_id)
 {
 	if(src) {
-		struct status_data *sstatus = status_get_status_data(src);
-		struct map_session_data *sd = BL_CAST(BL_PC, src);
-
 		if(!skill_id) { //Skills ALWAYS use ONLY your right-hand weapon (tested on Aegis 10.2)
+			struct map_session_data *sd = BL_CAST(BL_PC, src);
+			struct status_data *sstatus = status_get_status_data(src);
+
 			if(sd) {
 				if(!sd->weapontype1 && sd->weapontype2 > 0)
 					return true;
@@ -3619,7 +3619,7 @@ static int battle_calc_attack_skill_ratio(struct Damage *wd, struct block_list *
 			skillratio += 40 * skill_lv;
 			break;
 		case LK_JOINTBEAT:
-			skillratio += -100 + 10 * skill_lv - 50;
+			skillratio += 10 * skill_lv - 50;
 			if ((wd->miscflag&BREAK_NECK) || (tsc && tsc->data[SC_JOINTBEAT] && tsc->data[SC_JOINTBEAT]->val2&BREAK_NECK))
 				skillratio *= 2; //The 2x damage is only for the BREAK_NECK ailment
 			break;
@@ -5027,18 +5027,20 @@ static void battle_calc_damage_modifiers(struct Damage *wd, struct block_list *s
  */
 static void battle_calc_attack_plant(struct Damage *wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv)
 {
-	struct map_session_data *sd = BL_CAST(BL_PC, src);
-
 	if(skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
 		status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
 	//Plants receive 1 damage when hit
 	if(wd->damage > 0)
 		wd->damage = 1;
 	if(is_attack_left_handed(src, skill_id) && wd->damage2 > 0) {
-		if(sd->status.weapon == W_KATAR)
-			wd->damage2 = 0; //No backhand damage against plants
-		else
-			wd->damage2 = 1; //Deal 1 HP damage as long as there is a weapon in the left hand
+		struct map_session_data *sd = BL_CAST(BL_PC, src);
+
+		if(sd) {
+			if(sd->status.weapon == W_KATAR)
+				wd->damage2 = 0; //No backhand damage against plants
+			else
+				wd->damage2 = 1; //Deal 1 HP damage as long as there is a weapon in the left hand
+		}
 	}
 	//For plants we don't continue with the weapon attack code, so we have to apply DAMAGE_DIV_FIX here
 	battle_apply_div_fix(wd, skill_id);

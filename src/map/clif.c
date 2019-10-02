@@ -4820,7 +4820,9 @@ int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tic
 	damage = (int)cap_value(in_damage,INT_MIN,INT_MAX);
 	damage2 = (int)cap_value(in_damage2,INT_MIN,INT_MAX);
 
-	type = clif_calc_delay(type,div,damage + damage2,ddelay);
+	if(type != DMG_MULTI_HIT_CRITICAL)
+		type = clif_calc_delay(type,div,damage + damage2,ddelay);
+
 	if((sc = status_get_sc(dst)) && sc->count) {
 		if(sc->data[SC_HALLUCINATION] ||
 			(sc->data[SC_PYREXIA] && damage != 100)) { //Exclude damage from poison itself
@@ -4885,6 +4887,8 @@ int clif_damage(struct block_list *src, struct block_list *dst, unsigned int tic
 	if(src == dst)
 		unit_setdir(src,unit_getdir(src));
 
+	//In case this assignment is bypassed by DMG_MULTI_HIT_CRITICAL
+	type = clif_calc_delay(type,div,damage + damage2,ddelay);
 	//Return adjusted can't walk delay for further processing
 	return clif_calc_walkdelay(dst,ddelay,type,damage + damage2,div);
 }
@@ -15955,14 +15959,19 @@ void clif_parse_Mail_setattach(int fd, struct map_session_data *sd)
 /// 0a07 <result>.B <index>.W <amount>.W <weight>.W
 void clif_mail_removeitem(struct map_session_data *sd, bool success, int index, int amount)
 {
-	int fd = sd->fd;
+	int fd = sd->fd, total = 0, i;
 
 	WFIFOHEAD(fd,packet_len(0xa07));
 	WFIFOW(fd,0) = 0xa07;
 	WFIFOB(fd,2) = success;
 	WFIFOW(fd,3) = index;
 	WFIFOW(fd,5) = amount;
-	WFIFOW(fd,7) = 0; //@TODO: Which weight? item weight? removed weight? remaining weight?
+	for( i = 0; i < MAIL_MAX_ITEM; i++ ) {
+		if( !sd->mail.item[i].nameid )
+			break;
+		total += sd->mail.item[i].amount * (sd->inventory_data[sd->mail.item[i].index]->weight / 10);
+	}
+	WFIFOW(fd,7) = total;
 	WFIFOSET(fd,packet_len(0xa07));
 }
 
@@ -21598,7 +21607,7 @@ void clif_parse_lapineUpgrade_submit(int fd, struct map_session_data *sd)
 	if (sd->state.lapine_ui != 2)
 		return;
 
-	if (sd->last_lapine_box != item_id || sd->last_lapine_box != sd->itemid || index < 0 || index >= MAX_INVENTORY || !(id = itemdb_search(sd->last_lapine_box))) {
+	if (sd->last_lapine_box != item_id || sd->last_lapine_box != sd->itemid || index >= MAX_INVENTORY || !(id = itemdb_search(sd->last_lapine_box))) {
 		//clif_lapine_upgrade_result(sd, LAPINE_UPRAGDE_FAILURE);
 		return;
 	}
