@@ -5534,7 +5534,7 @@ ACMD_FUNC(storeall)
 	nullpo_retr(-1, sd);
 
 	if (sd->state.storage_flag != 1) { //Open storage.
-		if( storage_storageopen(sd) == 1 ) {
+		if (storage_storageopen(sd) == 1) {
 			clif_displaymessage(fd, msg_txt(sd, 1161)); // You currently cannot open your storage.
 			return -1;
 		}
@@ -5542,7 +5542,7 @@ ACMD_FUNC(storeall)
 
 	for (i = 0; i < MAX_INVENTORY; i++) {
 		if (sd->inventory.u.items_inventory[i].amount) {
-			if(sd->inventory.u.items_inventory[i].equip)
+			if (sd->inventory.u.items_inventory[i].equip)
 				pc_unequipitem(sd, i, 1|2);
 			pc_equipswitch_remove(sd, i);
 			storage_storageadd(sd, &sd->storage, i, sd->inventory.u.items_inventory[i].amount);
@@ -6613,7 +6613,7 @@ ACMD_FUNC(cleanarea)
  *------------------------------------------*/
 ACMD_FUNC(npctalk)
 {
-	char name[NAME_LENGTH],mes[100],temp[100];
+	char name[NAME_LENGTH], mes[100], temp[200];
 	struct npc_data *nd;
 	bool ifcolor = (*(command + 8) != 'c' && *(command + 8) != 'C') ? 0 : 1;
 	unsigned long color = 0;
@@ -6641,39 +6641,41 @@ ACMD_FUNC(npctalk)
 	strtok(name, "#"); // Discard extra name identifier if present
 	snprintf(temp, sizeof(temp), "%s : %s", name, mes);
 
-	if (ifcolor) clif_messagecolor(&nd->bl, color, temp, true, AREA_CHAT_WOC);
-	else clif_disp_overhead(&nd->bl, temp);
+	if (ifcolor)
+		clif_messagecolor(&nd->bl, color, temp, true, AREA_CHAT_WOC);
+	else
+		clif_disp_overhead(&nd->bl, temp);
 
 	return 0;
 }
 
 ACMD_FUNC(pettalk)
 {
-	char mes[100],temp[100];
+	char mes[100], temp[200];
 	struct pet_data *pd;
 
 	nullpo_retr(-1, sd);
 
-	if ( battle_config.min_chat_delay ) {
+	if( battle_config.min_chat_delay ) {
 		if( DIFF_TICK(sd->cantalk_tick, gettick()) > 0 )
 			return 0;
 		sd->cantalk_tick = gettick() + battle_config.min_chat_delay;
 	}
 
-	if(!sd->status.pet_id || !(pd = sd->pd)) {
+	if( !sd->status.pet_id || !(pd = sd->pd) ) {
 		clif_displaymessage(fd, msg_txt(sd, 184)); // Sorry, but you have no pet.
 		return -1;
 	}
 
-	if (sd->sc.cant.chat)
+	if( sd->sc.cant.chat )
 		return -1; //no "chatting" while muted.
 
-	if (!message || !*message || sscanf(message, "%99[^\n]", mes) < 1) {
+	if( !message || !*message || sscanf(message, "%99[^\n]", mes) < 1 ) {
 		clif_displaymessage(fd, msg_txt(sd, 1224)); // Please enter a message (usage: @pettalk <message>).
 		return -1;
 	}
 
-	if (message[0] == '/') { // pet emotion processing
+	if( message[0] == '/' ) { // pet emotion processing
 		const char *emo[] = {
 			"/!", "/?", "/ho", "/lv", "/swt", "/ic", "/an", "/ag", "/$", "/...",
 			"/scissors", "/rock", "/paper", "/korea", "/lv2", "/thx", "/wah", "/sry", "/heh", "/swt2",
@@ -6691,18 +6693,17 @@ ACMD_FUNC(pettalk)
 		if( i == E_DICE1 )
 			i = rnd()%6 + E_DICE1; // Randomize /dice
 		if( i < ARRAYLENGTH(emo) ) {
-			if (sd->emotionlasttime + 1 >= time(NULL)) { // Not more than 1 per second
-					sd->emotionlasttime = time(NULL);
-					return 0;
+			if( sd->emotionlasttime + 1 >= time(NULL) ) { // Not more than 1 per second
+				sd->emotionlasttime = time(NULL);
+				return 0;
 			}
 			sd->emotionlasttime = time(NULL);
-
 			clif_emotion(&pd->bl, i);
 			return 0;
 		}
 	}
 
-	snprintf(temp, sizeof temp ,"%s : %s", pd->pet.name, mes);
+	snprintf(temp, sizeof(temp), "%s : %s", pd->pet.name, mes);
 	clif_disp_overhead(&pd->bl, temp);
 
 	return 0;
@@ -7541,7 +7542,7 @@ ACMD_FUNC(homhungry)
  *------------------------------------------*/
 ACMD_FUNC(homtalk)
 {
-	char mes[100],temp[100];
+	char mes[100], temp[200];
 	nullpo_retr(-1, sd);
 
 	if (battle_config.min_chat_delay) {
@@ -7563,7 +7564,7 @@ ACMD_FUNC(homtalk)
 		return -1;
 	}
 
-	snprintf(temp, sizeof temp ,"%s : %s", sd->hd->homunculus.name, mes);
+	snprintf(temp, sizeof(temp), "%s : %s", sd->hd->homunculus.name, mes);
 	clif_disp_overhead(&sd->hd->bl, temp);
 
 	return 0;

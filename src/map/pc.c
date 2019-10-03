@@ -10307,14 +10307,14 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 
 	if( n < 0 || n >= MAX_INVENTORY ) {
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		else
 			clif_equipitemack(sd,0,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
 	}
 	if( DIFF_TICK(sd->canequip_tick,gettick()) > 0 ) {
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		else
 			clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
@@ -10326,18 +10326,18 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 		ShowInfo("equip %hu(%d) %x:%x\n",sd->inventory.u.items_inventory[n].nameid,n,id->equip,req_pos);
 	if( (res = pc_isequip(sd,n)) ) {
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,res);
 		else
 			clif_equipitemack(sd,n,0,res);
 		return false;
 	}
 	if( equipswitch && id->type == IT_AMMO ) {
-		clif_equipswitch_add(sd,n,req_pos,true);
+		clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		return false;
 	}
 	if( !(pos&req_pos) || sd->inventory.u.items_inventory[n].equip || sd->inventory.u.items_inventory[n].attribute ) { //[Valaris]
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		else
 			clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
@@ -10349,7 +10349,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 		(sd->sc.data[SC_PYROCLASTIC] && sd->inventory_data[n]->type == IT_WEAPON)) )
 	{
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		else
 			clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
@@ -10413,7 +10413,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 			}
 		}
 		sd->inventory.u.items_inventory[n].equipSwitch = pos;
-		clif_equipswitch_add(sd,n,pos,false);
+		clif_equipswitch_add(sd,n,pos,ITEM_EQUIP_ACK_OK);
 		return true;
 	} else {
 		for( i = 0; i < EQI_MAX; i++ ) {
@@ -10727,7 +10727,7 @@ int pc_equipswitch(struct map_session_data *sd, int index) {
 					sd->equip_switch_index[j] = unequipped_index;
 			}
 			sd->inventory.u.items_inventory[unequipped_index].equipSwitch = unequipped_position; //Set the correct position mask
-			clif_equipswitch_add(sd,unequipped_index,unequipped_position,false); //Notify the client
+			clif_equipswitch_add(sd,unequipped_index,unequipped_position,ITEM_EQUIP_ACK_OK); //Notify the client
 		}
 		if( unequipped ) {
 			aFree(unequipped);

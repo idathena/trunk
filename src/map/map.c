@@ -4322,7 +4322,8 @@ int map_mapflag_pvp_start(struct block_list *bl, va_list ap)
 	nullpo_retr(0, sd);
 
 	if( sd->pvp_timer == INVALID_TIMER ) {
-		sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
+		if( !mapdata[sd->bl.m].flag.pvp_nocalcrank )
+			sd->pvp_timer = add_timer(gettick() + 200, pc_calc_pvprank_timer, sd->bl.id, 0);
 		sd->pvp_rank = 0;
 		sd->pvp_lastusers = 0;
 		sd->pvp_point = 5;

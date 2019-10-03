@@ -2956,10 +2956,18 @@ static void battle_calc_attack_masteries(struct Damage *wd, struct block_list *s
 				break;
 		}
 		if(sc && sc->count) { //Status change considered as masteries
-#ifdef RENEWAL //The level 4 weapon limitation has been removed
-			if(sc->data[SC_NIBELUNGEN])
+			if(sc->data[SC_NIBELUNGEN]) {
+				if(sd) {
+					short index = (sd->equip_index[sd->state.lr_flag == 1 ? EQI_HAND_L : EQI_HAND_R]);
+
+					if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->wlv == 4)
+						ATK_ADD(wd->damage, wd->damage2, sc->data[SC_NIBELUNGEN]->val2);
+				} else
+					ATK_ADD(wd->damage, wd->damage2, sc->data[SC_NIBELUNGEN]->val2);
+#ifdef RENEWAL //Level 4 weapon limitation has been removed
 				ATK_ADD(wd->masteryAtk, wd->masteryAtk2, sc->data[SC_NIBELUNGEN]->val2);
 #endif
+			}
 			if(sc->data[SC_AURABLADE]) {
 				ATK_ADD(wd->damage, wd->damage2, 20 * sc->data[SC_AURABLADE]->val1);
 #ifdef RENEWAL
@@ -2984,10 +2992,6 @@ static void battle_calc_attack_masteries(struct Damage *wd, struct block_list *s
 				ATK_ADD(wd->masteryAtk, wd->masteryAtk2, sc->data[SC_RUSHWINDMILL]->val4);
 #endif
 			}
-#ifdef RENEWAL
-			if(sc->data[SC_PROVOKE])
-				ATK_ADDRATE(wd->masteryAtk, wd->masteryAtk2, sc->data[SC_PROVOKE]->val3);
-#endif
 		}
 	}
 }
@@ -4675,6 +4679,10 @@ static void battle_attack_sc_bonus(struct Damage *wd, struct block_list *src, st
 			if((sce = sc->data[SC_INCATKRATE])) {
 				ATK_ADDRATE(wd->damage, wd->damage2, sce->val1);
 				RE_ALLATK_ADDRATE(wd, sce->val1);
+			}
+			if((sce = sc->data[SC_PROVOKE])) {
+				ATK_ADDRATE(wd->damage, wd->damage2, sce->val3);
+				RE_ALLATK_ADDRATE(wd, sce->val3);
 			}
 			if((sce = sc->data[SC_CATNIPPOWDER])) {
 				ATK_ADDRATE(wd->damage, wd->damage2, -sce->val2);

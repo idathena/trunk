@@ -1173,7 +1173,7 @@ void clif_guild_storage_log(struct map_session_data *sd, enum e_guild_storage_lo
 
 //Equip Switch System
 void clif_equipswitch_list(struct map_session_data *sd);
-void clif_equipswitch_add(struct map_session_data *sd, uint16 index, uint32 pos, bool failed);
+void clif_equipswitch_add(struct map_session_data *sd, uint16 index, uint32 pos, uint8 flag);
 void clif_equipswitch_remove(struct map_session_data *sd, uint16 index, uint32 pos, bool failed);
 void clif_equipswitch_reply(struct map_session_data *sd, bool failed);
 
