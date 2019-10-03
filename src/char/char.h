@@ -129,7 +129,6 @@ extern char homunculus_db[DB_NAME_LEN];
 extern char skill_homunculus_db[DB_NAME_LEN];
 extern char mercenary_db[DB_NAME_LEN];
 extern char mercenary_owner_db[DB_NAME_LEN];
-extern char ragsrvinfo_db[DB_NAME_LEN];
 extern char elemental_db[DB_NAME_LEN];
 extern char elemental_scdata_db[DB_NAME_LEN];
 extern char interreg_db[32];

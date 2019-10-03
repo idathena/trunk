@@ -60,18 +60,21 @@ int mail_removeitem(struct map_session_data *sd, short flag, int idx, int amount
 		pc_delitem(sd, idx, amount, 0, 0, LOG_TYPE_MAIL); //RODEX refreshes the client inventory from the ACK packet
 #endif
 	} else {
-		for( ; i < MAIL_MAX_ITEM - 1; i++ ) {
-			if( !sd->mail.item[i + 1].nameid )
-				break;
-			sd->mail.item[i].index = sd->mail.item[i + 1].index;
-			sd->mail.item[i].nameid = sd->mail.item[i + 1].nameid;
-			sd->mail.item[i].amount = sd->mail.item[i + 1].amount;
-		}
+		sd->mail.item[i].amount -= amount;
 
-		for( ; i < MAIL_MAX_ITEM; i++ ) {
-			sd->mail.item[i].index = 0;
-			sd->mail.item[i].nameid = 0;
-			sd->mail.item[i].amount = 0;
+		if( sd->mail.item[i].amount <= 0 ) { //Item was removed completely
+			for( ; i < MAIL_MAX_ITEM - 1; i++ ) { //Move the rest of the array forward
+				if( !sd->mail.item[i + 1].nameid )
+					break;
+				sd->mail.item[i].index = sd->mail.item[i + 1].index;
+				sd->mail.item[i].nameid = sd->mail.item[i + 1].nameid;
+				sd->mail.item[i].amount = sd->mail.item[i + 1].amount;
+			}
+			for( ; i < MAIL_MAX_ITEM; i++ ) { //Zero the rest
+				sd->mail.item[i].index = 0;
+				sd->mail.item[i].nameid = 0;
+				sd->mail.item[i].amount = 0;
+			}
 		}
 
 #if PACKETVER < 20150513

@@ -1162,11 +1162,11 @@ int party_send_dot_remove(struct map_session_data *sd)
 }
 
 /// Executes 'func' for each party member on the same map and in range (0:whole map)
-int party_foreachsamemap(int (*func)(struct block_list*,va_list),struct map_session_data *sd,int range,...)
+int party_foreachsamemap(int (*func)(struct block_list*, va_list), struct map_session_data *sd, int range, ...)
 {
 	struct party_data *p;
 	int i;
-	int x0,y0,x1,y1;
+	int x0, y0, x1, y1;
 	struct block_list *list[MAX_PARTY];
 	int blockcount = 0;
 	int total = 0; //Return value
@@ -1284,7 +1284,7 @@ static struct party_booking_ad_info *create_party_booking_data(void)
 	return pb_ad;
 }
 
-void party_booking_register(struct map_session_data *sd, short level, short mapid, short* job)
+void party_booking_register(struct map_session_data *sd, short level, short mapid, short *job)
 {
 	struct party_booking_ad_info *pb_ad;
 	int i;
@@ -1313,7 +1313,7 @@ void party_booking_register(struct map_session_data *sd, short level, short mapi
 	clif_PartyBookingInsertNotify(sd, pb_ad); //Notice
 }
 
-void party_booking_update(struct map_session_data *sd, short* job)
+void party_booking_update(struct map_session_data *sd, short *job)
 {
 	int i;
 	struct party_booking_ad_info *pb_ad;
@@ -1323,7 +1323,7 @@ void party_booking_update(struct map_session_data *sd, short* job)
 	if (pb_ad == NULL)
 		return;
 	
-	pb_ad->starttime = (int)time(NULL); //Update time.
+	pb_ad->starttime = (int)time(NULL); //Update time
 
 	for (i = 0; i < MAX_PARTY_BOOKING_JOBS; i++)
 		if (job[i] != 0xFF)
@@ -1372,7 +1372,7 @@ bool party_booking_delete(struct map_session_data *sd)
 	struct party_booking_ad_info *pb_ad;
 
 	if ((pb_ad = (struct party_booking_ad_info*)idb_get(party_booking_db, sd->status.char_id)) != NULL) {
-		clif_PartyBookingDeleteNotify(sd, pb_ad->index);
+		clif_PartyBookingDeleteNotify(sd, (int)pb_ad->index);
 		idb_remove(party_booking_db,sd->status.char_id);
 	}
 	return true;

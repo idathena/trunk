@@ -2341,6 +2341,14 @@
 #if PACKETVER >= 20160525
 	parseable_packet(0x0A77,15,clif_parse_camerainfo,0);
 	packet(0x0A78,15);
+	ack_packet(ZC_LAPINE_SYNTHESIS_OPEN,0x0A4E,4,2); // ZC_LAPINE_SYNTHESIS_OPEN
+	parseable_packet(0x0A4F,-1,clif_parse_lapineSynthesis_submit,2,4,6,4); // CZ_LAPINE_SYNTHESIS_ACK
+	ack_packet(ZC_LAPINE_SYNTHESIS_RESULT,0x0A50,4,2); // ZC_LAPINE_SYNTHESIS_RESULT
+	parseable_packet(0x0A70,2,clif_parse_lapineSynthesis_close,0); // CZ_LAPINE_SYNTHESIS_CLOSE
+	ack_packet(ZC_LAPINE_UPGRADE_OPEN,0x0AB4,4,2); // ZC_LAPINE_UPGRADE_OPEN
+	parseable_packet(0x0AB5,2,clif_parse_lapineUpgrade_close,0); // CZ_LAPINE_UPGRADE_CLOSE
+	parseable_packet(0x0AB6,6,clif_parse_lapineUpgrade_submit,2,4); // CZ_LAPINE_UPGRADE_ACK
+	ack_packet(ZC_LAPINE_UPGRADE_RESULT,0x0AB7,4,2); // ZC_LAPINE_UPGRADE_RESULT
 #endif
 
 // 2016-06-01aRagexe

@@ -62,6 +62,10 @@ enum e_packet_ack {
 	ZC_MERGE_ITEM_OPEN,
 	ZC_ACK_MERGE_ITEM,
 	ZC_BROADCASTING_SPECIAL_ITEM_OBTAIN,
+	ZC_LAPINE_SYNTHESIS_OPEN,
+	ZC_LAPINE_SYNTHESIS_RESULT,
+	ZC_LAPINE_UPGRADE_OPEN,
+	ZC_LAPINE_UPGRADE_RESULT,
 	// Add other here
 	MAX_ACK_FUNC // Auto upd len
 };
@@ -129,6 +133,17 @@ enum e_pet_evolution_result {
 
 enum e_memorial_dungeon_command {
 	COMMAND_MEMORIALDUNGEON_DESTROY_FORCE = 0x3,
+};
+
+enum e_item_synthesis_result {
+	SYNTHESIS_SUCCESS = 0,
+	SYNTHESIS_INSUFFICIENT_AMOUNT = 5,
+	SYNTHESIS_INVALID_ITEM = 7,
+};
+
+enum e_item_upgrade_result {
+	LAPINE_UPRAGDE_SUCCESS = 0,
+	LAPINE_UPRAGDE_FAILURE,
 };
 
 #define packet_len(cmd) packet_db[cmd].len
@@ -512,6 +527,8 @@ enum GENERATE_ROULETTE_ACK {
 	GENERATE_ROULETTE_FAILED = 0x1,
 	GENERATE_ROULETTE_NO_ENOUGH_POINT = 0x2,
 	GENERATE_ROULETTE_LOSING = 0x3,
+	GENERATE_ROULETTE_NO_ENOUGH_INVENTORY_SPACE = 0x4,
+	GENERATE_ROULETTE_CANT_PLAY = 0x5,
 };
 
 enum OPEN_ROULETTE_ACK {
@@ -1116,6 +1133,7 @@ void clif_broadcast_obtain_special_item(const char *char_name, unsigned short na
 
 //Roulette [Yommy]
 void clif_roulette_open(struct map_session_data *sd);
+void clif_roulette_close(struct map_session_data *sd);
 
 void clif_dressing_room(struct map_session_data *sd, int flag);
 void clif_navigateTo(struct map_session_data *sd, const char *map, uint16 x, uint16 y, uint8 flag, bool hideWindow, uint16 mob_id);
@@ -1155,10 +1173,14 @@ void clif_guild_storage_log(struct map_session_data *sd, enum e_guild_storage_lo
 
 //Equip Switch System
 void clif_equipswitch_list(struct map_session_data *sd);
-void clif_equipswitch_add(struct map_session_data *sd, uint16 index, uint32 pos, bool failed);
+void clif_equipswitch_add(struct map_session_data *sd, uint16 index, uint32 pos, uint8 flag);
 void clif_equipswitch_remove(struct map_session_data *sd, uint16 index, uint32 pos, bool failed);
 void clif_equipswitch_reply(struct map_session_data *sd, bool failed);
 
 void clif_camerainfo(struct map_session_data *sd, bool show, float range, float rotation, float latitude);
+
+//Lapine System
+bool clif_synthesisui_open(struct map_session_data *sd, uint16 item_id);
+bool clif_lapine_upgrade_open(struct map_session_data *sd, uint16 item_id);
 
 #endif /* _CLIF_H_ */

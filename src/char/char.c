@@ -68,7 +68,6 @@ char homunculus_db[DB_NAME_LEN] = "homunculus";
 char skill_homunculus_db[DB_NAME_LEN] = "skill_homunculus";
 char mercenary_db[DB_NAME_LEN] = "mercenary";
 char mercenary_owner_db[DB_NAME_LEN] = "mercenary_owner";
-char ragsrvinfo_db[DB_NAME_LEN] = "ragsrvinfo";
 char elemental_db[DB_NAME_LEN] = "elemental";
 char elemental_scdata_db[DB_NAME_LEN] = "elemental_sc";
 char interreg_db[32] = "interreg";
@@ -2597,7 +2596,7 @@ void loginif_on_ready(void)
 	send_accounts_tologin(INVALID_TIMER, gettick(), 0, 0);
 
 	// If no map-server already connected, display a message...
-	ARR_FIND(0, ARRAYLENGTH(server), i, server[i].fd > 0 && server[i].map);
+	ARR_FIND(0, ARRAYLENGTH(server), i, server[i].fd > 0);
 	if( i == ARRAYLENGTH(server) )
 		ShowStatus("Awaiting maps from map-server.\n");
 }
@@ -3227,8 +3226,6 @@ void mapif_server_reset(int id)
 		WBUFW(buf,2) = j * 4 + 10;
 		mapif_sendallwos(fd, buf, WBUFW(buf,2));
 	}
-	if( SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s` WHERE `index`='%d'", ragsrvinfo_db, server[id].fd) )
-		Sql_ShowDebug(sql_handle);
 	online_char_db->foreach(online_char_db, char_db_setoffline, id); //Tag relevant chars as 'in disconnected' server.
 	mapif_server_destroy(id);
 	mapif_server_init(id);
@@ -3904,21 +3901,6 @@ int parse_frommap(int fd)
 				}
 				break;
 
-			case 0x2b16: //Receive rates [Wizputer]
-				if( RFIFOREST(fd) < 14 )
-					return 0;
-				{
-					char esc_server_name[sizeof(server_name) * 2 + 1];
-
-					Sql_EscapeString(sql_handle, esc_server_name, server_name);
-
-					if( SQL_ERROR == Sql_Query(sql_handle, "INSERT INTO `%s` SET `index`='%d',`name`='%s',`exp`='%d',`jexp`='%d',`drop`='%d'",
-						ragsrvinfo_db, fd, esc_server_name, RFIFOL(fd,2), RFIFOL(fd,6), RFIFOL(fd,10)) )
-						Sql_ShowDebug(sql_handle);
-					RFIFOSKIP(fd,14);
-				}
-				break;
-
 			case 0x2b17: //Character disconnected set online 0 [Wizputer]
 				if( RFIFOREST(fd) < 6 )
 					return 0;
@@ -4250,8 +4232,8 @@ static void char_delete2_req(int fd, struct char_session_data *sd)
 	}
 
 	Sql_GetData(sql_handle, 0, &data, NULL); delete_date = strtoul(data, NULL, 10);
-	Sql_GetData(sql_handle, 1, &data, NULL); party_id = strtoul(data, NULL, 10);
-	Sql_GetData(sql_handle, 2, &data, NULL); guild_id = strtoul(data, NULL, 10);
+	Sql_GetData(sql_handle, 1, &data, NULL); party_id = (int)strtoul(data, NULL, 10);
+	Sql_GetData(sql_handle, 2, &data, NULL); guild_id = (int)strtoul(data, NULL, 10);
 
 	if( delete_date ) { // Character already queued for deletion
 		char_delete2_ack(fd, char_id, 0, 0);
@@ -4501,7 +4483,7 @@ int parse_char(int fd)
 					int slot = RFIFOB(fd,2);
 
 					RFIFOSKIP(fd,3);
-					ARR_FIND(0,ARRAYLENGTH(server),server_id,server[server_id].fd > 0 && server[server_id].map);
+					ARR_FIND(0,ARRAYLENGTH(server),server_id,server[server_id].fd > 0);
 					//Not available, tell it to wait (client wont close; char select will respawn)
 					//Magic response found by Ind thanks to Yommy <3
 					if( server_id == ARRAYLENGTH(server) ) {
@@ -4573,7 +4555,7 @@ int parse_char(int fd)
 						unsigned short j;
 
 						//First check that there's actually a map server online
-						ARR_FIND(0,ARRAYLENGTH(server),j,server[j].fd >= 0 && server[j].map);
+						ARR_FIND(0,ARRAYLENGTH(server),j,server[j].fd >= 0);
 						if( j == ARRAYLENGTH(server) ) {
 							ShowInfo("Connection Closed. No map servers available.\n");
 							WFIFOHEAD(fd,3);
@@ -5222,7 +5204,7 @@ void pincode_setnew(int fd, struct char_session_data *sd) {
 
 	if( pincode_allowed(newpin) ) {
 		pincode_notifyLoginPinUpdate(sd->account_id,newpin);
-		strncpy(sd->pincode,newpin,strlen(newpin));
+		strncpy(sd->pincode,newpin,sizeof(newpin));
 		pincode_sendstate(fd,sd,PINCODE_PASSED);
 	} else
 		pincode_sendstate(fd,sd,PINCODE_ILLEGAL);
@@ -5842,12 +5824,10 @@ void sql_config_read(const char *cfgName)
 			safestrncpy(mercenary_db, w2, sizeof(mercenary_db));
 		else if(!strcmpi(w1, "mercenary_owner_db"))
 			safestrncpy(mercenary_owner_db, w2, sizeof(mercenary_owner_db));
-		else if(!strcmpi(w1, "ragsrvinfo_db"))
-			safestrncpy(ragsrvinfo_db, w2,sizeof(ragsrvinfo_db));
 		else if(!strcmpi(w1, "elemental_db"))
-			safestrncpy(elemental_db, w2,sizeof(elemental_db));
+			safestrncpy(elemental_db, w2, sizeof(elemental_db));
 		else if(!strcmpi(w1, "elemental_scdata_db"))
-			safestrncpy(elemental_scdata_db, w2,sizeof(elemental_scdata_db));
+			safestrncpy(elemental_scdata_db, w2, sizeof(elemental_scdata_db));
 		else if(!strcmpi(w1, "interreg_db"))
 			safestrncpy(interreg_db, w2, sizeof(interreg_db));
 		else if(!strcmpi(w1, "skillcooldown_db"))
@@ -5888,7 +5868,7 @@ static void char_config_split_startpoint(char *w1_value, char *w2_value, struct 
 	lineitem = strtok(w2_value, ":");
 
 	while(lineitem != NULL && (*count) < MAX_STARTPOINT) {
-		int n = sv_split(lineitem, strlen(lineitem), 0, ',', fields, fields_length, SV_NOESCAPE_NOTERMINATE);
+		int n = sv_split(lineitem, (int)strlen(lineitem), 0, ',', fields, fields_length, SV_NOESCAPE_NOTERMINATE);
 
 		if(n + 1 < fields_length) {
 			ShowDebug("%s: not enough arguments for %s! Skipping...\n", w1_value, lineitem);
@@ -5929,7 +5909,7 @@ static void char_config_split_startitem(char *w1_value, char *w2_value, struct s
 	lineitem = strtok(w2_value, ":");
 
 	while(lineitem != NULL && i < MAX_STARTITEM) {
-		int n = sv_split(lineitem, strlen(lineitem), 0, ',', fields, fields_length, SV_NOESCAPE_NOTERMINATE);
+		int n = sv_split(lineitem, (int)strlen(lineitem), 0, ',', fields, fields_length, SV_NOESCAPE_NOTERMINATE);
 
 		if(n + 1 < fields_length) {
 			ShowDebug("%s: not enough arguments for %s! Skipping...\n", w1_value, lineitem);
@@ -6172,9 +6152,6 @@ void do_final(void)
 	do_final_msg();
 	do_final_mapif();
 	do_final_loginif();
-
-	if(SQL_ERROR == Sql_Query(sql_handle, "DELETE FROM `%s`", ragsrvinfo_db))
-		Sql_ShowDebug(sql_handle);
 
 	char_db_->destroy(char_db_, NULL);
 	online_char_db->destroy(online_char_db, NULL);

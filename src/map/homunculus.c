@@ -1037,7 +1037,7 @@ static TIMER_FUNC(hom_hungry)
 	}
 
 	clif_send_homdata(sd, SP_HUNGRY, hd->homunculus.hunger);
-	hd->hungry_timer = add_timer(tick + hd->homunculusDB->hungryDelay,hom_hungry, sd->bl.id, 0); //Simple fix albator
+	hd->hungry_timer = add_timer((unsigned int)(tick + hd->homunculusDB->hungryDelay), hom_hungry, sd->bl.id, 0); //Simple fix albator
 	return 0;
 }
 
@@ -1197,7 +1197,7 @@ void hom_alloc(struct map_session_data *sd, struct s_homunculus *hom)
 void hom_init_timers(struct homun_data * hd)
 {
 	if (hd->hungry_timer == INVALID_TIMER)
-		hd->hungry_timer = add_timer(gettick() + hd->homunculusDB->hungryDelay, hom_hungry, hd->master->bl.id, 0);
+		hd->hungry_timer = add_timer((unsigned int)(gettick() + hd->homunculusDB->hungryDelay), hom_hungry, hd->master->bl.id, 0);
 
 	hd->regen.state.block = 0; //Restore HP/SP block
 	hd->masterteleport_timer = INVALID_TIMER;
@@ -1812,7 +1812,7 @@ void read_homunculus_expdb(void)
 		while (fgets(line, sizeof(line), fp) && j < MAX_LEVEL) {
 			if (line[0] == '/' && line[1] == '/')
 				continue;
-			hexptbl[j] = strtoul(line, NULL, 10);
+			hexptbl[j] = (unsigned int)strtoul(line, NULL, 10);
 			if (!hexptbl[j++])
 				break;
 		}

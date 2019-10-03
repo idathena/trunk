@@ -458,8 +458,6 @@ int quest_check(struct map_session_data *sd, int quest_id, enum quest_check_type
 	return -1;
 }
 
-
-
 /**
  * Reads and parses an entry from the quest_db.
  *

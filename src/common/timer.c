@@ -151,11 +151,11 @@ static unsigned int tick(void)
 #elif defined(HAVE_MONOTONIC_CLOCK)
 	struct timespec tval;
 	clock_gettime(CLOCK_MONOTONIC, &tval);
-	return tval.tv_sec * 1000 + tval.tv_nsec / 1000000;
+	return (unsigned int)(tval.tv_sec * 1000 + tval.tv_nsec / 1000000);
 #else
 	struct timeval tval;
 	gettimeofday(&tval, NULL);
-	return tval.tv_sec * 1000 + tval.tv_usec / 1000;
+	return (unsigned int)(tval.tv_sec * 1000 + tval.tv_usec / 1000);
 #endif
 }
 

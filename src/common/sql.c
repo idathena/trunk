@@ -1064,7 +1064,7 @@ void Sql_HerculesUpdateCheck(Sql *self) {
 		fseek (ufp,1,SEEK_SET);/* woo. skip the # */
 
 		if( fgets(timestamp,sizeof(timestamp),ufp) ) {
-			unsigned int timestampui = atol(timestamp);
+			unsigned int timestampui = (unsigned int)atol(timestamp);
 			if( SQL_ERROR == Sql_Query(self, "SELECT 1 FROM `sql_updates` WHERE `timestamp` = '%u' LIMIT 1", timestampui) )
 				Sql_ShowDebug(self);
 			if( Sql_NumRows(self) != 1 ) {

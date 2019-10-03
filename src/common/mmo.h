@@ -92,10 +92,10 @@
 #define WEDDING_RING_M 2634
 #define WEDDING_RING_F 2635
 
-//For character names, title names, guilds, maps, etc.
-//Includes null-terminator as it is the length of the array.
+//For character names, title names, guilds, maps, etc
+//Includes null-terminator as it is the length of the array
 #define NAME_LENGTH (23 + 1)
-//NPC names can be longer than it's displayed on client (NAME_LENGTH).
+//NPC names can be longer than it's displayed on client (NAME_LENGTH)
 #define NPC_NAME_LENGTH 50
 //<NPC_NAME_LENGTH> for npc name + 2 for a "::" + <NAME_LENGTH> for label + 1 for EOS
 #define EVENT_NAME_LENGTH (NPC_NAME_LENGTH + 2 + NAME_LENGTH + 1)

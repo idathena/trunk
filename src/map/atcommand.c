@@ -886,7 +886,7 @@ ACMD_FUNC(storage)
 {
 	nullpo_retr(-1, sd);
 
-	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading || sd->state.storage_flag)
+	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading || sd->state.storage_flag || sd->state.lapine_ui)
 		return -1;
 
 	if (storage_storageopen(sd) == 1) { //Already open.
@@ -907,7 +907,7 @@ ACMD_FUNC(guildstorage)
 {
 	nullpo_retr(-1, sd);
 
-	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading)
+	if (sd->npc_id || sd->state.vending || sd->state.buyingstore || sd->state.trading || sd->state.lapine_ui)
 		return -1;
 
 	switch (storage_guild_storageopen(sd)) {
@@ -1123,9 +1123,9 @@ ACMD_FUNC(kami)
 		}
 		sscanf(message, "%255[^\n]", atcmd_output);
 		if (strstr(command, "l"))
-			clif_broadcast(&sd->bl, atcmd_output, strlen(atcmd_output) + 1, BC_DEFAULT, ALL_SAMEMAP);
+			clif_broadcast(&sd->bl, atcmd_output, (int)(strlen(atcmd_output) + 1), BC_DEFAULT, ALL_SAMEMAP);
 		else
-			intif_broadcast(atcmd_output, strlen(atcmd_output) + 1, (*(command + 5) == 'b' || *(command + 5) == 'B') ? BC_BLUE : BC_YELLOW);
+			intif_broadcast(atcmd_output, (int)(strlen(atcmd_output) + 1), (*(command + 5) == 'b' || *(command + 5) == 'B') ? BC_BLUE : BC_YELLOW);
 	} else {
 		if (!message || !*message || (sscanf(message, "%lx %255[^\n]", &color, atcmd_output) < 2)) {
 			clif_displaymessage(fd, msg_txt(sd, 981)); // Please enter color and message (usage: @kamic <color> <message>).
@@ -1135,7 +1135,7 @@ ACMD_FUNC(kami)
 			clif_displaymessage(fd, msg_txt(sd, 982)); // Invalid color.
 			return -1;
 		}
-		intif_broadcast2(atcmd_output, strlen(atcmd_output) + 1, color, 0x190, 12, 0, 0);
+		intif_broadcast2(atcmd_output, (int)(strlen(atcmd_output) + 1), color, 0x190, 12, 0, 0);
 	}
 	return 0;
 }
@@ -2116,7 +2116,7 @@ static int atkillmonster_sub(struct block_list *bl, va_list ap)
 
 ACMD_FUNC(killmonster)
 {
-	int char_id, map_id, drop_flag;
+	int char_id = 0, map_id, drop_flag;
 	struct block_list *src;
 	char map_name[MAP_NAME_LENGTH_EXT];
 	nullpo_retr(-1, sd);
@@ -3294,7 +3294,7 @@ ACMD_FUNC(spiritball)
 	int number;
 	nullpo_retr(-1, sd);
 
-	max_spiritballs = zmin(ARRAYLENGTH(sd->spiritball_timer), 0x7FFF);
+	max_spiritballs = (uint32)zmin(ARRAYLENGTH(sd->spiritball_timer), 0x7FFF);
 
 	if( !message || !*message || (number = atoi(message)) < 0 || number > max_spiritballs ) {
 		char msg[CHAT_SIZE_MAX];
@@ -3322,7 +3322,7 @@ ACMD_FUNC(shieldball)
 	int number, health;
 	nullpo_retr(-1, sd);
 
-	max_shieldballs = zmin(ARRAYLENGTH(sd->shieldball_timer), 0x7FFF);
+	max_shieldballs = (uint32)zmin(ARRAYLENGTH(sd->shieldball_timer), 0x7FFF);
 
 	if( !message || !*message || sscanf(message, "%d %d", &number, &health) < 1 ||
 		number > max_shieldballs || health < 1 || health > 1000000000 ) {
@@ -3354,7 +3354,7 @@ ACMD_FUNC(rageball)
 	int number;
 	nullpo_retr(-1, sd);
 
-	max_rageballs = zmin(ARRAYLENGTH(sd->rageball_timer), 0x7FFF);
+	max_rageballs = (uint32)zmin(ARRAYLENGTH(sd->rageball_timer), 0x7FFF);
 
 	if( !message || !*message || (number = atoi(message)) < 0 || number > max_rageballs ) {
 		char msg[CHAT_SIZE_MAX];
@@ -3382,7 +3382,7 @@ ACMD_FUNC(charmball)
 	int number, type;
 	nullpo_retr(-1, sd);
 
-	max_charmballs = zmin(ARRAYLENGTH(sd->charmball_timer), 0x7FFF);
+	max_charmballs = (uint32)zmin(ARRAYLENGTH(sd->charmball_timer), 0x7FFF);
 
 	if( !message || !*message || sscanf(message, "%d %d", &number, &type) < 1 ||
 		number > max_charmballs || type < CHARM_TYPE_WATER || type > CHARM_TYPE_WIND ) {
@@ -3413,7 +3413,7 @@ ACMD_FUNC(soulball)
 	int number;
 	nullpo_retr(-1, sd);
 
-	max_soulballs = zmin(ARRAYLENGTH(sd->soulball_timer), 0x7FFF);
+	max_soulballs = (uint32)zmin(ARRAYLENGTH(sd->soulball_timer), 0x7FFF);
 
 	if( !message || !*message || (number = atoi(message)) < 0 || number > max_soulballs ) {
 		char msg[CHAT_SIZE_MAX];
@@ -3866,7 +3866,7 @@ ACMD_FUNC(reload)
 
 		battle_config_read(BATTLE_CONF_FILENAME);
 
-		if( prev_config.item_rate_mvp          != battle_config.item_rate_mvp
+		if (prev_config.item_rate_mvp          != battle_config.item_rate_mvp
 		||  prev_config.item_rate_common       != battle_config.item_rate_common
 		||  prev_config.item_rate_common_boss  != battle_config.item_rate_common_boss
 		||  prev_config.item_rate_common_mvp   != battle_config.item_rate_common_mvp
@@ -3904,7 +3904,6 @@ ACMD_FUNC(reload)
 		)
 		{	// Exp or Drop rates changed.
 			mob_reload(); //Needed as well so rate changes take effect.
-			chrif_ragsrvinfo(battle_config.base_exp_rate, battle_config.job_exp_rate, battle_config.item_rate_common);
 		}
 		clif_displaymessage(fd, msg_txt(sd, 255)); // Battle configuration has been reloaded.
 	} else if (strstr(command, "statusdb") || strncmp(message, "statusdb", 3) == 0) {
@@ -3923,7 +3922,7 @@ ACMD_FUNC(reload)
 		//atcommand_broadcast( fd, sd, "@broadcast", "You will feel a bit of lag at this point !" );
 
 		iter = mapit_getallusers();
-		for( pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter) ) {
+		for (pl_sd = (TBL_PC *)mapit_first(iter); mapit_exists(iter); pl_sd = (TBL_PC *)mapit_next(iter)) {
 			pc_close_npc(pl_sd, 1);
 			clif_cutin(pl_sd, "", 255);
 		}
@@ -5223,7 +5222,7 @@ ACMD_FUNC(broadcast)
 	}
 
 	sprintf(atcmd_output, "%s: %s", sd->status.name, message);
-	intif_broadcast(atcmd_output, strlen(atcmd_output) + 1, BC_DEFAULT);
+	intif_broadcast(atcmd_output, (int)(strlen(atcmd_output) + 1), BC_DEFAULT);
 
 	return 0;
 }
@@ -5244,7 +5243,7 @@ ACMD_FUNC(localbroadcast)
 
 	sprintf(atcmd_output, "%s: %s", sd->status.name, message);
 
-	clif_broadcast(&sd->bl, atcmd_output, strlen(atcmd_output) + 1, BC_DEFAULT, ALL_SAMEMAP);
+	clif_broadcast(&sd->bl, atcmd_output, (int)(strlen(atcmd_output) + 1), BC_DEFAULT, ALL_SAMEMAP);
 
 	return 0;
 }
@@ -5507,12 +5506,15 @@ ACMD_FUNC(dropall)
 				continue;
 			}
 			if (type == -1 || type == (uint8)item_data->type) {
-				if (sd->inventory.u.items_inventory[i].equip != 0)
+				int amount = sd->inventory.u.items_inventory[i].amount;
+
+				if (sd->inventory.u.items_inventory[i].equip)
 					pc_unequipitem(sd, i, 1|2);
 				pc_equipswitch_remove(sd, i);
-				count += sd->inventory.u.items_inventory[i].amount;
-				if (!pc_dropitem(sd, i, sd->inventory.u.items_inventory[i].amount))
-					count2 += sd->inventory.u.items_inventory[i].amount;
+				if (pc_dropitem(sd, i, amount))
+					count += amount;
+				else
+					count2 += amount;
 			}
 		}
 	}
@@ -5532,7 +5534,7 @@ ACMD_FUNC(storeall)
 	nullpo_retr(-1, sd);
 
 	if (sd->state.storage_flag != 1) { //Open storage.
-		if( storage_storageopen(sd) == 1 ) {
+		if (storage_storageopen(sd) == 1) {
 			clif_displaymessage(fd, msg_txt(sd, 1161)); // You currently cannot open your storage.
 			return -1;
 		}
@@ -5540,7 +5542,7 @@ ACMD_FUNC(storeall)
 
 	for (i = 0; i < MAX_INVENTORY; i++) {
 		if (sd->inventory.u.items_inventory[i].amount) {
-			if(sd->inventory.u.items_inventory[i].equip != 0)
+			if (sd->inventory.u.items_inventory[i].equip)
 				pc_unequipitem(sd, i, 1|2);
 			pc_equipswitch_remove(sd, i);
 			storage_storageadd(sd, &sd->storage, i, sd->inventory.u.items_inventory[i].amount);
@@ -5671,7 +5673,7 @@ ACMD_FUNC(skillid)
 		return -1;
 	}
 
-	skillen = strlen(message);
+	skillen = (int)strlen(message);
 
 	iter = db_iterator(skilldb_name2id);
 
@@ -6611,7 +6613,7 @@ ACMD_FUNC(cleanarea)
  *------------------------------------------*/
 ACMD_FUNC(npctalk)
 {
-	char name[NAME_LENGTH],mes[100],temp[100];
+	char name[NAME_LENGTH], mes[100], temp[200];
 	struct npc_data *nd;
 	bool ifcolor = (*(command + 8) != 'c' && *(command + 8) != 'C') ? 0 : 1;
 	unsigned long color = 0;
@@ -6639,39 +6641,41 @@ ACMD_FUNC(npctalk)
 	strtok(name, "#"); // Discard extra name identifier if present
 	snprintf(temp, sizeof(temp), "%s : %s", name, mes);
 
-	if (ifcolor) clif_messagecolor(&nd->bl, color, temp, true, AREA_CHAT_WOC);
-	else clif_disp_overhead(&nd->bl, temp);
+	if (ifcolor)
+		clif_messagecolor(&nd->bl, color, temp, true, AREA_CHAT_WOC);
+	else
+		clif_disp_overhead(&nd->bl, temp);
 
 	return 0;
 }
 
 ACMD_FUNC(pettalk)
 {
-	char mes[100],temp[100];
+	char mes[100], temp[200];
 	struct pet_data *pd;
 
 	nullpo_retr(-1, sd);
 
-	if ( battle_config.min_chat_delay ) {
+	if( battle_config.min_chat_delay ) {
 		if( DIFF_TICK(sd->cantalk_tick, gettick()) > 0 )
 			return 0;
 		sd->cantalk_tick = gettick() + battle_config.min_chat_delay;
 	}
 
-	if(!sd->status.pet_id || !(pd = sd->pd)) {
+	if( !sd->status.pet_id || !(pd = sd->pd) ) {
 		clif_displaymessage(fd, msg_txt(sd, 184)); // Sorry, but you have no pet.
 		return -1;
 	}
 
-	if (sd->sc.cant.chat)
+	if( sd->sc.cant.chat )
 		return -1; //no "chatting" while muted.
 
-	if (!message || !*message || sscanf(message, "%99[^\n]", mes) < 1) {
+	if( !message || !*message || sscanf(message, "%99[^\n]", mes) < 1 ) {
 		clif_displaymessage(fd, msg_txt(sd, 1224)); // Please enter a message (usage: @pettalk <message>).
 		return -1;
 	}
 
-	if (message[0] == '/') { // pet emotion processing
+	if( message[0] == '/' ) { // pet emotion processing
 		const char *emo[] = {
 			"/!", "/?", "/ho", "/lv", "/swt", "/ic", "/an", "/ag", "/$", "/...",
 			"/scissors", "/rock", "/paper", "/korea", "/lv2", "/thx", "/wah", "/sry", "/heh", "/swt2",
@@ -6689,18 +6693,17 @@ ACMD_FUNC(pettalk)
 		if( i == E_DICE1 )
 			i = rnd()%6 + E_DICE1; // Randomize /dice
 		if( i < ARRAYLENGTH(emo) ) {
-			if (sd->emotionlasttime + 1 >= time(NULL)) { // Not more than 1 per second
-					sd->emotionlasttime = time(NULL);
-					return 0;
+			if( sd->emotionlasttime + 1 >= time(NULL) ) { // Not more than 1 per second
+				sd->emotionlasttime = time(NULL);
+				return 0;
 			}
 			sd->emotionlasttime = time(NULL);
-
 			clif_emotion(&pd->bl, i);
 			return 0;
 		}
 	}
 
-	snprintf(temp, sizeof temp ,"%s : %s", pd->pet.name, mes);
+	snprintf(temp, sizeof(temp), "%s : %s", pd->pet.name, mes);
 	clif_disp_overhead(&pd->bl, temp);
 
 	return 0;
@@ -7106,7 +7109,7 @@ ACMD_FUNC(gmotd)
 
 			if (len) {
 				buf[len] = 0;
-				intif_broadcast(buf, len + 1, 0);
+				intif_broadcast(buf, (int)(len + 1), 0);
 			}
 		}
 		fclose(fp);
@@ -7539,7 +7542,7 @@ ACMD_FUNC(homhungry)
  *------------------------------------------*/
 ACMD_FUNC(homtalk)
 {
-	char mes[100],temp[100];
+	char mes[100], temp[200];
 	nullpo_retr(-1, sd);
 
 	if (battle_config.min_chat_delay) {
@@ -7561,7 +7564,7 @@ ACMD_FUNC(homtalk)
 		return -1;
 	}
 
-	snprintf(temp, sizeof temp ,"%s : %s", sd->hd->homunculus.name, mes);
+	snprintf(temp, sizeof(temp), "%s : %s", sd->hd->homunculus.name, mes);
 	clif_disp_overhead(&sd->hd->bl, temp);
 
 	return 0;
@@ -9047,7 +9050,7 @@ static void atcommand_commands_sub(struct map_session_data *sd, const int fd, At
 				continue;
 		}
 
-		slen = strlen(cmd->command);
+		slen = (unsigned int)strlen(cmd->command);
 
 		// Flush the text buffer if this command won't fit into it
 		if( slen + cur - line_buff >= CHATBOX_SIZE ) {
@@ -9070,7 +9073,7 @@ static void atcommand_commands_sub(struct map_session_data *sd, const int fd, At
 
 		for( i = count_bind = 0; i < atcmd_binding_count; i++ ) {
 			if( gm_lvl >= ((type - 1) ? atcmd_binding[i]->level2 : atcmd_binding[i]->level) ) {
-				unsigned int slen = strlen(atcmd_binding[i]->command);
+				unsigned int slen = (unsigned int)strlen(atcmd_binding[i]->command);
 
 				if( count_bind == 0 ) {
 					cur = line_buff;
@@ -9173,7 +9176,7 @@ ACMD_FUNC(set) {
 
 	is_str = (reg[strlen(reg) - 1] == '$' ? true : false);
 
-	if( (len = strlen(val)) > 1 ) {
+	if( (len = (int)strlen(val)) > 1 ) {
 		if( val[0] == '"' && val[len - 1] == '"') {
 			val[len - 1] = '\0'; // Strip quotes.
 			memmove(val, val + 1, len - 1);
@@ -10092,6 +10095,49 @@ ACMD_FUNC(reloadmsgconf)
 	return 0;
 }
 
+ACMD_FUNC(resurrect)
+{
+	nullpo_retr(-1, sd);
+
+	if (!pc_revive_item(sd))
+		return -1;
+	return 0;
+}
+
+ACMD_FUNC(synthesisui) {
+#if PACKETVER >= 20160525
+	uint16 item_id;
+
+	nullpo_retr(-1, sd);
+
+	if (sscanf(message, "%hu", &item_id) < 1) {
+		clif_displaymessage(fd, "Please input id of synthesis item.");
+		return -1;
+	}
+	itemdb_synthesis_open(sd, item_id);
+#else
+	clif_displaymessage(fd, "Client is not supported.");
+#endif
+	return 0;
+}
+
+ACMD_FUNC(upgradeui) {
+#if PACKETVER >= 20160525
+	uint16 item_id;
+
+	nullpo_retr(-1, sd);
+
+	if (sscanf(message, "%hu", &item_id) < 1) {
+		clif_displaymessage(fd, "Please input item_id of upgrade id.");
+		return -1;
+	}
+	itemdb_upgrade_open(sd, item_id);
+#else
+	clif_displaymessage(fd, "Client is not supported.");
+#endif
+	return 0;
+}
+
 #include "../custom/atcommand.inc"
 
 /**
@@ -10399,6 +10445,9 @@ void atcommand_basecommands(void) {
 		ACMD_DEFR(camerainfo, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 		ACMD_DEF(langtype),
 		ACMD_DEF(reloadmsgconf),
+		ACMD_DEFR(resurrect, ATCMD_NOCONSOLE),
+		ACMD_DEFR(synthesisui, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
+		ACMD_DEFR(upgradeui, ATCMD_NOCONSOLE|ATCMD_NOAUTOTRADE),
 	};
 	AtCommandInfo *atcommand;
 	int i;

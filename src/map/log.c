@@ -330,7 +330,7 @@ void log_mvpdrop(struct map_session_data *sd, int monster_id, unsigned int *log_
 		curtime = time(NULL);
 		localtime_r(&curtime, &now);
 		strftime(timestring, sizeof(timestring), "%m/%d/%Y %H:%M:%S", &now);
-		fprintf(logfp,"%s - %s[%d:%d]\t%d\t%hu,%u\n", timestring, sd->status.name, sd->status.account_id, sd->status.char_id, monster_id, log_mvp[0], log_mvp[1]);
+		fprintf(logfp,"%s - %s[%d:%d]\t%d\t%u,%u\n", timestring, sd->status.name, sd->status.account_id, sd->status.char_id, monster_id, log_mvp[0], log_mvp[1]);
 		fclose(logfp);
 	}
 }

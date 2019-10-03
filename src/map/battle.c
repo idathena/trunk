@@ -2268,10 +2268,10 @@ static bool is_attack_right_handed(struct block_list *src, uint16 skill_id)
 static bool is_attack_left_handed(struct block_list *src, uint16 skill_id)
 {
 	if(src) {
-		struct status_data *sstatus = status_get_status_data(src);
-		struct map_session_data *sd = BL_CAST(BL_PC, src);
-
 		if(!skill_id) { //Skills ALWAYS use ONLY your right-hand weapon (tested on Aegis 10.2)
+			struct map_session_data *sd = BL_CAST(BL_PC, src);
+			struct status_data *sstatus = status_get_status_data(src);
+
 			if(sd) {
 				if(!sd->weapontype1 && sd->weapontype2 > 0)
 					return true;
@@ -2956,10 +2956,18 @@ static void battle_calc_attack_masteries(struct Damage *wd, struct block_list *s
 				break;
 		}
 		if(sc && sc->count) { //Status change considered as masteries
-#ifdef RENEWAL //The level 4 weapon limitation has been removed
-			if(sc->data[SC_NIBELUNGEN])
+			if(sc->data[SC_NIBELUNGEN]) {
+				if(sd) {
+					short index = (sd->equip_index[sd->state.lr_flag == 1 ? EQI_HAND_L : EQI_HAND_R]);
+
+					if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->wlv == 4)
+						ATK_ADD(wd->damage, wd->damage2, sc->data[SC_NIBELUNGEN]->val2);
+				} else
+					ATK_ADD(wd->damage, wd->damage2, sc->data[SC_NIBELUNGEN]->val2);
+#ifdef RENEWAL //Level 4 weapon limitation has been removed
 				ATK_ADD(wd->masteryAtk, wd->masteryAtk2, sc->data[SC_NIBELUNGEN]->val2);
 #endif
+			}
 			if(sc->data[SC_AURABLADE]) {
 				ATK_ADD(wd->damage, wd->damage2, 20 * sc->data[SC_AURABLADE]->val1);
 #ifdef RENEWAL
@@ -2984,10 +2992,6 @@ static void battle_calc_attack_masteries(struct Damage *wd, struct block_list *s
 				ATK_ADD(wd->masteryAtk, wd->masteryAtk2, sc->data[SC_RUSHWINDMILL]->val4);
 #endif
 			}
-#ifdef RENEWAL
-			if(sc->data[SC_PROVOKE])
-				ATK_ADDRATE(wd->masteryAtk, wd->masteryAtk2, sc->data[SC_PROVOKE]->val3);
-#endif
 		}
 	}
 }
@@ -3619,10 +3623,9 @@ static int battle_calc_attack_skill_ratio(struct Damage *wd, struct block_list *
 			skillratio += 40 * skill_lv;
 			break;
 		case LK_JOINTBEAT:
-			i = -50 + 10 * skill_lv;
-			if(wd->miscflag&BREAK_NECK)
-				i *= 2; //Although not clear, it's being assumed that the 2x damage is only for the break neck ailment
-			skillratio += i;
+			skillratio += 10 * skill_lv - 50;
+			if ((wd->miscflag&BREAK_NECK) || (tsc && tsc->data[SC_JOINTBEAT] && tsc->data[SC_JOINTBEAT]->val2&BREAK_NECK))
+				skillratio *= 2; //The 2x damage is only for the BREAK_NECK ailment
 			break;
 #ifdef RENEWAL //Renewal: Skill ratio applies to entire damage [helvetica]
 		case LK_SPIRALPIERCE:
@@ -4677,6 +4680,10 @@ static void battle_attack_sc_bonus(struct Damage *wd, struct block_list *src, st
 				ATK_ADDRATE(wd->damage, wd->damage2, sce->val1);
 				RE_ALLATK_ADDRATE(wd, sce->val1);
 			}
+			if((sce = sc->data[SC_PROVOKE])) {
+				ATK_ADDRATE(wd->damage, wd->damage2, sce->val3);
+				RE_ALLATK_ADDRATE(wd, sce->val3);
+			}
 			if((sce = sc->data[SC_CATNIPPOWDER])) {
 				ATK_ADDRATE(wd->damage, wd->damage2, -sce->val2);
 				RE_ALLATK_ADDRATE(wd, -sce->val2);
@@ -5028,18 +5035,20 @@ static void battle_calc_damage_modifiers(struct Damage *wd, struct block_list *s
  */
 static void battle_calc_attack_plant(struct Damage *wd, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv)
 {
-	struct map_session_data *sd = BL_CAST(BL_PC, src);
-
 	if(skill_id != SN_SHARPSHOOTING && skill_id != RA_ARROWSTORM)
 		status_change_end(src, SC_CAMOUFLAGE, INVALID_TIMER);
 	//Plants receive 1 damage when hit
 	if(wd->damage > 0)
 		wd->damage = 1;
 	if(is_attack_left_handed(src, skill_id) && wd->damage2 > 0) {
-		if(sd->status.weapon == W_KATAR)
-			wd->damage2 = 0; //No backhand damage against plants
-		else
-			wd->damage2 = 1; //Deal 1 HP damage as long as there is a weapon in the left hand
+		struct map_session_data *sd = BL_CAST(BL_PC, src);
+
+		if(sd) {
+			if(sd->status.weapon == W_KATAR)
+				wd->damage2 = 0; //No backhand damage against plants
+			else
+				wd->damage2 = 1; //Deal 1 HP damage as long as there is a weapon in the left hand
+		}
 	}
 	//For plants we don't continue with the weapon attack code, so we have to apply DAMAGE_DIV_FIX here
 	battle_apply_div_fix(wd, skill_id);
@@ -8856,9 +8865,9 @@ void battle_adjust_conf()
 	}
 #endif
 
-#if PACKETVER < 20141022
+#if PACKETVER < 20141016
 	if (battle_config.feature_roulette) {
-		ShowWarning("conf/battle/feature.conf roulette is enabled but it requires PACKETVER 2014-10-22 or newer, disabling...\n");
+		ShowWarning("conf/battle/feature.conf roulette is enabled but it requires PACKETVER 2014-10-16 or newer, disabling...\n");
 		battle_config.feature_roulette = 0;
 	}
 #endif

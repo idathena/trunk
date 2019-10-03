@@ -101,7 +101,7 @@ struct map_session_data;
 struct block_list;
 struct config_setting_t;
 
-struct achievement_db achievement_dummy;	///< Dummy entry for invalid achievement lookups
+struct achievement_db achievement_dummy; ///< Dummy entry for invalid achievement lookups
 
 struct achievement_db *achievement_search(int achievement_id);
 bool achievement_mobexists(int mob_id);
@@ -114,7 +114,7 @@ void achievement_free(struct map_session_data *sd);
 int achievement_check_progress(struct map_session_data *sd, int achievement_id, int type);
 int *achievement_level(struct map_session_data *sd, bool flag);
 void achievement_get_titles(uint32 char_id);
-void achievement_update_objective(struct map_session_data *sd, enum e_achievement_group group, uint8 arg_count, ...);
+void achievement_update_objective(struct map_session_data *sd, enum e_achievement_group group, int arg_count, ...);
 void achievement_readdb(void);
 void achievement_db_reload(void);
 

@@ -1033,6 +1033,7 @@ int mob_count_sub(struct block_list *bl, va_list ap) {
 	ARR_FIND(0, 10, i, (mobid[i] = va_arg(ap, int)) == 0); //Fetch till 0
 	if (mobid[0]) { //If there one let's check it otherwise go backward
 		TBL_MOB *md = BL_CAST(BL_MOB, bl);
+
 		ARR_FIND(0, 10, i, md->mob_id == mobid[i]);
 		return (i < 10) ? 1 : 0;
 	}
@@ -2635,7 +2636,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 				char message[128];
 
 				sprintf(message, msg_txt(NULL, 541), mvp_sd->status.name, md->name, it->jname, (float)drop_rate / 100);
-				intif_broadcast(message, strlen(message) + 1, BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
+				intif_broadcast(message, (int)(strlen(message) + 1), BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
 			}
 			//Announce first, or else ditem will be freed [Lance]
 			//By popular demand, use base drop rate for autoloot code [Skotlex]
@@ -2765,7 +2766,7 @@ int mob_dead(struct mob_data *md, struct block_list *src, int type)
 					char message[128];
 
 					sprintf (message, msg_txt(NULL, 541), mvp_sd->status.name, md->name, i_data->jname, temp / 100.);
-					intif_broadcast(message, strlen(message) + 1, BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
+					intif_broadcast(message, (int)(strlen(message) + 1), BC_DEFAULT); // "'%s' won %s's %s (chance: %0.02f%%)"
 				}
 				mob_setdropitem_option(&item, &mdrop[i]);
 				if((temp = pc_additem(mvp_sd, &item, 1, LOG_TYPE_PICKDROP_PLAYER))) {
@@ -4021,7 +4022,7 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 	struct mob_data data;
 	const char *str = NULL;
 	double maxhp;
-	double exp;
+	double exp = 0;
 
 	nullpo_ret(it);
 	nullpo_ret(source);
@@ -4235,7 +4236,7 @@ static int mob_readdb_libconfig_sub(struct config_setting_t *it, int n, const ch
 		mob_readdb_libconfig_sub_drops(t, entry, mob_id);
 
 	entry->dmg_mod = 100;
-	if (config_setting_lookup_int(it, "DamageTaken", &i32) && i32 >= 0)
+	if (config_setting_lookup_int(it, "DamageTakenRate", &i32) && i32 >= 0)
 		entry->dmg_mod = i32;
 
 	//Finally insert monster's data into the database

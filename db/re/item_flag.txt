@@ -1718,4 +1718,3 @@
 12886,32 //C_Berserk_Potion
 12887,32 //C_Wing_Of_Fly
 22508,32 //Para_Team_Mark_
-23277,32 //Mado_Box

@@ -273,6 +273,7 @@ struct map_session_data {
 		bool cashshop_open;
 		bool sale_open;
 		bool refineui_open;
+		unsigned int lapine_ui : 2; //Lapine Synthesis/Upgrade UI is opened
 	} state;
 	struct {
 		unsigned char no_weapon_damage, no_magic_damage, no_misc_damage;
@@ -527,9 +528,9 @@ struct map_session_data {
 	int adopt_invite; //Adoption
 
 	struct guild *guild; //[Ind] speed everything up
-	int guild_invite,guild_invite_account;
-	int guild_emblem_id,guild_alliance,guild_alliance_account;
-	short guild_x,guild_y; //For guildmate position display. [Skotlex] should be short [zzo]
+	int guild_invite, guild_invite_account;
+	int guild_emblem_id, guild_alliance, guild_alliance_account;
+	short guild_x, guild_y; //For guildmate position display. [Skotlex] should be short [zzo]
 	int guildspy; //[Syrus22]
 	int partyspy; //[Syrus22]
 	int clanspy;
@@ -698,6 +699,7 @@ struct map_session_data {
 
 	short last_addeditem_index; //Index of latest item added
 	int autotrade_tid;
+	int respawn_tid;
 	int bank_vault; //Bank vault
 #ifdef PACKET_OBFUSCATION
 	unsigned int cryptKey; //Packet obfuscation key to be used for the next received packet
@@ -714,6 +716,7 @@ struct map_session_data {
 	} roulette;
 
 	short setlook_head_top, setlook_head_mid, setlook_head_bottom, setlook_robe; //Stores 'setlook' script command values
+	unsigned int last_lapine_box;
 
 #if PACKETVER >= 20150513
 	uint32 *hatEffectIDs;
@@ -843,10 +846,10 @@ extern struct s_job_info {
 #define pc_issit(sd)          ( (sd)->vd.dead_sit == 2 )
 #define pc_isidle(sd)         ( (sd)->chatID || (sd)->state.vending || (sd)->state.buyingstore || DIFF_TICK(last_tick, (sd)->idletime) >= battle_config.idle_no_share )
 #define pc_istrading(sd)      ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->state.trading )
-#define pc_cant_act(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->chatID || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend || (sd)->state.refineui_open )
+#define pc_cant_act(sd)       ( (sd)->npc_id || (sd)->state.vending || (sd)->state.buyingstore || (sd)->chatID || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend || (sd)->state.refineui_open || (sd)->state.lapine_ui )
 
 //Equals pc_cant_act except it doesn't check for chat rooms or npcs
-#define pc_cant_act2(sd)      ( (sd)->state.vending || (sd)->state.buyingstore || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend )
+#define pc_cant_act2(sd)      ( (sd)->state.vending || (sd)->state.buyingstore || ((sd)->sc.opt1 && (sd)->sc.opt1 != OPT1_STONEWAIT && (sd)->sc.opt1 != OPT1_BURNING) || (sd)->state.trading || (sd)->state.storage_flag || (sd)->state.prevend || (sd)->state.refineui_open || (sd)->state.lapine_ui )
 
 #define pc_setdir(sd,b,h)     ( (sd)->ud.dir = (b), (sd)->head_dir = (h) )
 #define pc_setchatid(sd,n)    ( (sd)->chatID = n )
@@ -972,8 +975,8 @@ void pc_setnewpc(struct map_session_data *sd, int account_id, int char_id, int l
 bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_time, int group_id, struct mmo_charstatus *st, bool changing_mapservers);
 void pc_authfail(struct map_session_data *sd);
 void pc_reg_received(struct map_session_data *sd);
-void pc_close_npc(struct map_session_data *sd,int flag);
-int pc_close_npc_timer(int tid,unsigned int tick,int id,intptr_t data);
+void pc_close_npc(struct map_session_data *sd, int flag);
+TIMER_FUNC(pc_close_npc_timer);
 
 void pc_setequipindex(struct map_session_data *sd);
 uint8 pc_isequip(struct map_session_data *sd, int n);
@@ -1036,7 +1039,7 @@ bool pc_adoption(struct map_session_data *p1_sd, struct map_session_data *p2_sd,
 
 void pc_updateweightstatus(struct map_session_data *sd);
 
-bool pc_addautobonus(struct s_autobonus *bonus, const char *script, short rate, unsigned int dur, short atk_type, const char *o_script, unsigned int pos, bool onskill);
+bool pc_addautobonus(struct s_autobonus *bonus, const char *script, short rate, unsigned int dur, short atk_type, const char *other_script, unsigned int pos, bool onskill);
 void pc_exeautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, short atk_type, bool onskill);
 TIMER_FUNC(pc_endautobonus);
 void pc_delautobonus(struct map_session_data *sd, struct s_autobonus *autobonus, bool restore);
@@ -1057,11 +1060,11 @@ int pc_identifyall(struct map_session_data *sd, bool identify_item);
 bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 skill_lv);
 int pc_steal_coin(struct map_session_data *sd, struct block_list *bl);
 
-int pc_modifybuyvalue(struct map_session_data *,int);
-int pc_modifysellvalue(struct map_session_data *,int);
+int pc_modifybuyvalue(struct map_session_data *sd, int orig_value);
+int pc_modifysellvalue(struct map_session_data *sd, int orig_value);
 
-int pc_follow(struct map_session_data *, int); // [MouseJstr]
-int pc_stop_following(struct map_session_data *);
+int pc_follow(struct map_session_data *sd, int target_id); // [MouseJstr]
+int pc_stop_following(struct map_session_data *sd);
 
 unsigned int pc_maxbaselv(struct map_session_data *sd);
 unsigned int pc_maxjoblv(struct map_session_data *sd);
@@ -1074,18 +1077,18 @@ void pc_gainexp(struct map_session_data *sd, struct block_list *src, uint32 base
 void pc_lostexp(struct map_session_data *sd, uint32 base_exp, uint32 job_exp);
 uint32 pc_nextbaseexp(struct map_session_data *sd);
 uint32 pc_nextjobexp(struct map_session_data *sd);
-int pc_gets_status_point(int);
-int pc_need_status_point(struct map_session_data *,int,int);
+int pc_gets_status_point(int level);
+int pc_need_status_point(struct map_session_data *sd, int type, int val);
 int pc_maxparameterincrease(struct map_session_data *sd, int type);
 bool pc_statusup(struct map_session_data *sd, int type, int increase);
-int pc_statusup2(struct map_session_data *,int,int);
-int pc_skillup(struct map_session_data *,uint16 skill_id);
-int pc_allskillup(struct map_session_data *);
-int pc_resetlvl(struct map_session_data *,int type);
-int pc_resetstate(struct map_session_data *);
-int pc_resetskill(struct map_session_data *, int);
-int pc_resetfeel(struct map_session_data *);
-int pc_resethate(struct map_session_data *);
+int pc_statusup2(struct map_session_data *sd, int type, int val);
+int pc_skillup(struct map_session_data *sd, uint16 skill_id);
+int pc_allskillup(struct map_session_data *sd);
+int pc_resetlvl(struct map_session_data *sd, int type);
+int pc_resetstate(struct map_session_data *sd);
+int pc_resetskill(struct map_session_data *sd, int flag);
+int pc_resetfeel(struct map_session_data *sd);
+int pc_resethate(struct map_session_data *sd);
 bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equipswitch);
 void pc_unequipitem(struct map_session_data *sd, int n, int flag);
 int pc_equipswitch(struct map_session_data *sd, int index);
@@ -1102,6 +1105,7 @@ int pc_skillheal2_bonus(struct map_session_data *sd, uint16 skill_id);
 void pc_damage(struct map_session_data *sd, struct block_list *src, unsigned int hp, unsigned int sp);
 int pc_dead(struct map_session_data *sd, struct block_list *src);
 void pc_revive(struct map_session_data *sd, unsigned int hp, unsigned int sp);
+bool pc_revive_item(struct map_session_data *sd);
 void pc_heal(struct map_session_data *sd, unsigned int hp, unsigned int sp, int type);
 int pc_itemheal(struct map_session_data *sd, int itemid, int hp, int sp, bool fixed);
 int pc_percentheal(struct map_session_data *sd, int, int);

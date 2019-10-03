@@ -147,6 +147,8 @@ OnTouch:
 }
 
 force_1-2,99,31,4	script	Slipslowrun#party	124,{
+	end;
+
 OnStart:
 	initnpctimer;
 	set $arena_minptst,gettime(DT_MINUTE);

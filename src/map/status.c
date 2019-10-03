@@ -213,7 +213,13 @@ void initChangeTables(void) {
 
 	//The main status definitions
 	add_sc( SM_BASH              , SC_STUN            );
-	set_sc( SM_PROVOKE           , SC_PROVOKE         , SI_PROVOKE         , SCB_BATK|SCB_WATK|SCB_DEF|SCB_DEF2 );
+	set_sc( SM_PROVOKE           , SC_PROVOKE         , SI_PROVOKE         , SCB_DEF|SCB_DEF2
+#ifdef RENEWAL
+		|SCB_BATK
+#else
+		|SCB_WATK
+#endif
+		);
 	add_sc( SM_MAGNUM            , SC_WATK_ELEMENT    );
 	set_sc( SM_ENDURE            , SC_ENDURE          , SI_ENDURE          , SCB_MDEF|SCB_DSPD );
 	add_sc( MG_SIGHT             , SC_SIGHT           );
@@ -361,13 +367,7 @@ void initChangeTables(void) {
 		|SCB_WATK
 #endif
 		);
-	set_sc( BD_RINGNIBELUNGEN    , SC_NIBELUNGEN      , SI_RINGNIBELUNGEN  ,
-#ifdef RENEWAL
-		SCB_NONE
-#else
-		SCB_WATK
-#endif
-		);
+	set_sc( BD_RINGNIBELUNGEN    , SC_NIBELUNGEN      , SI_RINGNIBELUNGEN  , SCB_NONE );
 	set_sc( BD_ROKISWEIL         , SC_ROKISWEIL       , SI_ROKISWEIL       , SCB_NONE );
 	set_sc( BD_INTOABYSS         , SC_INTOABYSS       , SI_INTOABYSS       , SCB_NONE );
 	set_sc( BD_SIEGFRIED         , SC_SIEGFRIED       , SI_SIEGFRIED       , SCB_ALL );
@@ -400,11 +400,9 @@ void initChangeTables(void) {
 #endif
 		);
 	set_sc( LK_TENSIONRELAX      , SC_TENSIONRELAX    , SI_TENSIONRELAX    , SCB_REGEN );
-	set_sc( LK_BERSERK           , SC_BERSERK         , SI_BERSERK         ,
+	set_sc( LK_BERSERK           , SC_BERSERK         , SI_BERSERK         , SCB_MAXHP|SCB_SPEED|SCB_ASPD|SCB_REGEN
 #ifndef RENEWAL
-		SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN
-#else
-		SCB_MAXHP|SCB_SPEED|SCB_ASPD|SCB_REGEN
+		|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2
 #endif
 		);
 	set_sc( HP_ASSUMPTIO         , SC_ASSUMPTIO       ,
@@ -471,7 +469,7 @@ void initChangeTables(void) {
 	set_sc( SL_SKE               , SC_SKE             , SI_BLANK           , SCB_BATK|SCB_WATK|SCB_DEF|SCB_DEF2 );
 	set_sc( SL_SKA               , SC_SKA             , SI_BLANK           , SCB_DEF2|SCB_MDEF2|SCB_SPEED|SCB_ASPD );
 	set_sc( SL_SMA               , SC_SMA             , SI_SMA_READY       , SCB_NONE );
-	set_sc( SM_SELFPROVOKE       , SC_PROVOKE         , SI_PROVOKE         , SCB_BATK|SCB_WATK|SCB_DEF|SCB_DEF2 );
+	add_sc( SM_SELFPROVOKE       , SC_PROVOKE         );
 	set_sc( ST_PRESERVE          , SC_PRESERVE        , SI_PRESERVE        , SCB_NONE );
 	set_sc( PF_DOUBLECASTING     , SC_DOUBLECAST      , SI_DOUBLECASTING   , SCB_NONE );
 	set_sc( HW_GRAVITATION       , SC_GRAVITATION     , SI_GRAVITATION     , SCB_ASPD );
@@ -538,15 +536,9 @@ void initChangeTables(void) {
 	set_sc( NPC_INVINCIBLE       , SC_INVINCIBLE      , SI_INVINCIBLE      , SCB_SPEED );
 	set_sc( NPC_INVINCIBLEOFF    , SC_INVINCIBLEOFF   , SI_BLANK           , SCB_SPEED );
 
-	set_sc( CASH_BLESSING        , SC_BLESSING        , SI_BLESSING        , SCB_STR|SCB_INT|SCB_DEX );
-	set_sc( CASH_INCAGI          , SC_INCREASEAGI     , SI_INC_AGI         , SCB_AGI|SCB_SPEED );
-	set_sc( CASH_ASSUMPTIO       , SC_ASSUMPTIO       ,
-#ifndef RENEWAL
-		SI_ASSUMPTIO             ,
-#else
-		SI_ASSUMPTIO2            ,
-#endif
-		SCB_NONE );
+	add_sc( CASH_BLESSING        , SC_BLESSING        );
+	add_sc( CASH_INCAGI          , SC_INCREASEAGI     );
+	add_sc( CASH_ASSUMPTIO       , SC_ASSUMPTIO       );
 
 	set_sc( ALL_PARTYFLEE        , SC_PARTYFLEE       , SI_PARTYFLEE       , SCB_FLEE );
 	set_sc( ALL_ODINS_POWER      , SC_ODINS_POWER     , SI_ODINS_POWER     , SCB_WATK|SCB_MATK|SCB_DEF|SCB_MDEF );
@@ -576,34 +568,28 @@ void initChangeTables(void) {
 	set_sc( HAMI_BLOODLUST       , SC_BLOODLUST       , SI_BLANK           , SCB_BATK|SCB_WATK );
 
 	add_sc( MER_CRASH            , SC_STUN            );
-	set_sc( MER_PROVOKE          , SC_PROVOKE         , SI_PROVOKE         , SCB_BATK|SCB_WATK|SCB_DEF|SCB_DEF2 );
+	add_sc( MER_PROVOKE          , SC_PROVOKE         );
 	add_sc( MS_MAGNUM            , SC_WATK_ELEMENT    );
 	add_sc( MER_SIGHT            , SC_SIGHT           );
-	set_sc( MER_DECAGI           , SC_DECREASEAGI     , SI_DEC_AGI         , SCB_AGI|SCB_SPEED );
-	set_sc( MER_MAGNIFICAT       , SC_MAGNIFICAT      , SI_MAGNIFICAT      , SCB_REGEN );
+	add_sc( MER_DECAGI           , SC_DECREASEAGI     );
+	add_sc( MER_MAGNIFICAT       , SC_MAGNIFICAT      );
 	add_sc( MER_LEXDIVINA        , SC_SILENCE         );
 	add_sc( MA_LANDMINE          , SC_STUN            );
 	add_sc( MA_SANDMAN           , SC_SLEEP           );
 	add_sc( MA_FREEZINGTRAP      , SC_FREEZE          );
-	set_sc( MER_AUTOBERSERK      , SC_AUTOBERSERK     , SI_AUTOBERSERK     , SCB_NONE );
-	set_sc( ML_AUTOGUARD         , SC_AUTOGUARD       , SI_AUTOGUARD       , SCB_NONE );
-	set_sc( MS_REFLECTSHIELD     , SC_REFLECTSHIELD   , SI_REFLECTSHIELD   , SCB_NONE );
-	set_sc( ML_DEFENDER          , SC_DEFENDER        , SI_DEFENDER        , SCB_SPEED|SCB_ASPD );
-	set_sc( MS_PARRYING          , SC_PARRYING        , SI_PARRYING        , SCB_NONE );
-	set_sc( MS_BERSERK           , SC_BERSERK         , SI_BERSERK         ,
-#ifndef RENEWAL
-		SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN
-#else
-		SCB_MAXHP|SCB_SPEED|SCB_ASPD|SCB_REGEN
-#endif
-		);
+	add_sc( MER_AUTOBERSERK      , SC_AUTOBERSERK     );
+	add_sc( ML_AUTOGUARD         , SC_AUTOGUARD       );
+	add_sc( MS_REFLECTSHIELD     , SC_REFLECTSHIELD   );
+	add_sc( ML_DEFENDER          , SC_DEFENDER        );
+	add_sc( MS_PARRYING          , SC_PARRYING        );
+	add_sc( MS_BERSERK           , SC_BERSERK         );
 	add_sc( ML_SPIRALPIERCE      , SC_STOP            );
 	set_sc( MER_QUICKEN          , SC_MERC_QUICKEN    , SI_BLANK           , SCB_ASPD );
 	add_sc( ML_DEVOTION          , SC_DEVOTION        );
-	set_sc( MER_KYRIE            , SC_KYRIE           , SI_KYRIE           , SCB_NONE );
-	set_sc( MER_BLESSING         , SC_BLESSING        , SI_BLESSING        , SCB_STR|SCB_INT|SCB_DEX );
-	set_sc( MER_INCAGI           , SC_INCREASEAGI     , SI_INC_AGI         , SCB_AGI|SCB_SPEED );
-	set_sc( MER_INVINCIBLEOFF2   , SC_INVINCIBLEOFF   , SI_BLANK           , SCB_SPEED );
+	add_sc( MER_KYRIE            , SC_KYRIE           );
+	add_sc( MER_BLESSING         , SC_BLESSING        );
+	add_sc( MER_INCAGI           , SC_INCREASEAGI     );
+	add_sc( MER_INVINCIBLEOFF2   , SC_INVINCIBLEOFF   );
 
 	set_sc( GD_LEADERSHIP        , SC_LEADERSHIP      , SI_BLANK           , SCB_STR );
 	set_sc( GD_GLORYWOUNDS       , SC_GLORYWOUNDS     , SI_BLANK           , SCB_VIT );
@@ -638,10 +624,10 @@ void initChangeTables(void) {
 	set_sc_with_vfx( GC_DARKCROW , SC_DARKCROW         , SI_DARKCROW           , SCB_NONE );
 
 	set_sc( AB_ADORAMUS          , SC_ADORAMUS        , SI_ADORAMUS        , SCB_AGI|SCB_SPEED );
-	set_sc( AB_CLEMENTIA         , SC_BLESSING        , SI_BLESSING        , SCB_STR|SCB_INT|SCB_DEX );
-	set_sc( AB_CANTO             , SC_INCREASEAGI     , SI_INC_AGI         , SCB_AGI|SCB_SPEED );
+	add_sc( AB_CLEMENTIA         , SC_BLESSING        );
+	add_sc( AB_CANTO             , SC_INCREASEAGI     );
 	set_sc( AB_EPICLESIS         , SC_EPICLESIS       , SI_EPICLESIS       , SCB_MAXHP );
-	set_sc( AB_PRAEFATIO         , SC_KYRIE           , SI_KYRIE           , SCB_NONE );
+	add_sc( AB_PRAEFATIO         , SC_KYRIE           );
 	set_sc_with_vfx( AB_ORATIO   , SC_ORATIO          , SI_ORATIO          , SCB_NONE );
 	set_sc( AB_LAUDAAGNUS        , SC_LAUDAAGNUS      , SI_LAUDAAGNUS      , SCB_MAXHP );
 	set_sc( AB_LAUDARAMUS        , SC_LAUDARAMUS      , SI_LAUDARAMUS      , SCB_ALL  );
@@ -712,13 +698,7 @@ void initChangeTables(void) {
 	set_sc( SC_STRIPACCESSARY    , SC__STRIPACCESSORY , SI_STRIPACCESSARY  , SCB_INT|SCB_DEX|SCB_LUK );
 	set_sc_with_vfx( SC_MANHOLE  , SC__MANHOLE        , SI_MANHOLE         , SCB_NONE );
 	add_sc( SC_CHAOSPANIC        , SC_CONFUSION       );
-	set_sc( SC_BLOODYLUST        , SC_BERSERK         , SI_BERSERK         ,
-#ifndef RENEWAL
-		SCB_MAXHP|SCB_FLEE|SCB_DEF|SCB_DEF2|SCB_MDEF|SCB_MDEF2|SCB_SPEED|SCB_ASPD|SCB_REGEN
-#else
-		SCB_MAXHP|SCB_SPEED|SCB_ASPD|SCB_REGEN
-#endif
-		);
+	add_sc( SC_BLOODYLUST        , SC_BERSERK         );
 	add_sc( SC_FEINTBOMB         , SC__FEINTBOMB      );
 	add_sc( SC_ESCAPE            , SC_ANKLE           );
 
@@ -785,7 +765,13 @@ void initChangeTables(void) {
 	add_sc( MH_STEINWAND          , SC_SAFETYWALL      );
 	set_sc( MH_LIGHT_OF_REGENE    , SC_LIGHT_OF_REGENE , SI_LIGHT_OF_REGENE    , SCB_NONE );
 	set_sc( MH_OVERED_BOOST       , SC_OVERED_BOOST    , SI_OVERED_BOOST       , SCB_FLEE|SCB_DEF|SCB_ASPD );
-	set_sc( MH_VOLCANIC_ASH       , SC_ASH             , SI_VOLCANIC_ASH       , SCB_BATK|SCB_HIT|SCB_FLEE|SCB_DEF|SCB_DEF2 );
+	set_sc( MH_VOLCANIC_ASH       , SC_ASH             , SI_VOLCANIC_ASH       , SCB_HIT|SCB_FLEE|SCB_DEF|SCB_DEF2
+#ifdef RENEWAL
+		|SCB_BATK
+#else
+		|SCB_WATK
+#endif
+		);
 	set_sc( MH_GRANITIC_ARMOR     , SC_GRANITIC_ARMOR  , SI_GRANITIC_ARMOR     , SCB_NONE );
 	set_sc( MH_MAGMA_FLOW         , SC_MAGMA_FLOW      , SI_MAGMA_FLOW         , SCB_NONE );
 	set_sc( MH_PYROCLASTIC        , SC_PYROCLASTIC     , SI_PYROCLASTIC        , SCB_WATK|SCB_ATK_ELE );
@@ -907,7 +893,13 @@ void initChangeTables(void) {
 	add_sc( SU_SCRATCH              , SC_BLEEDING     );
 	set_sc( SU_STOOP                , SC_SU_STOOP     , SI_SU_STOOP        , SCB_NONE  );
 	add_sc( SU_SV_STEMSPEAR         , SC_BLEEDING     );
-	set_sc( SU_CN_POWDERING         , SC_CATNIPPOWDER , SI_CATNIPPOWDER    , SCB_BATK|SCB_MATK|SCB_SPEED|SCB_REGEN );
+	set_sc( SU_CN_POWDERING         , SC_CATNIPPOWDER , SI_CATNIPPOWDER    , SCB_MATK|SCB_SPEED|SCB_REGEN
+#ifdef RENEWAL
+		|SCB_BATK
+#else
+		|SCB_WATK
+#endif
+		);
 	set_sc_with_vfx( SU_SV_ROOTTWIST, SC_SV_ROOTTWIST , SI_SV_ROOTTWIST    , SCB_NONE  );
 	set_sc( SU_SCAROFTAROU          , SC_BITESCAR     , SI_BITESCAR        , SCB_NONE  );
 	set_sc( SU_ARCLOUSEDASH         , SC_ARCLOUSEDASH , SI_ARCLOUSEDASH    , SCB_AGI|SCB_SPEED );
@@ -1180,7 +1172,13 @@ void initChangeTables(void) {
 	StatusChangeFlagTable[SC_INCMSPRATE] |= SCB_MAXSP;
 	StatusChangeFlagTable[SC_INCMHP] |= SCB_MAXHP;
 	StatusChangeFlagTable[SC_INCMSP] |= SCB_MAXSP;
-	StatusChangeFlagTable[SC_INCATKRATE] |= SCB_BATK;
+	StatusChangeFlagTable[SC_INCATKRATE] |=
+#ifdef RENEWAL
+		SCB_BATK
+#else
+		SCB_WATK
+#endif
+	;
 	StatusChangeFlagTable[SC_STRFOOD] |= SCB_STR;
 	StatusChangeFlagTable[SC_AGIFOOD] |= SCB_AGI;
 	StatusChangeFlagTable[SC_VITFOOD] |= SCB_VIT;
@@ -2332,7 +2330,7 @@ int status_base_amotion_pc(struct map_session_data *sd, struct status_data *stat
 static unsigned short status_base_atk(const struct block_list *bl, const struct status_data *status, int level)
 {
 	struct map_session_data *sd = map_id2sd(bl->id);
-	int flag = 0, str, dex, dstr;
+	short flag = 0, str, dex, dstr;
 #ifdef RENEWAL
 	int type = battle_config.enable_baseatk_renewal;
 #else
@@ -2395,7 +2393,7 @@ static unsigned short status_base_atk(const struct block_list *bl, const struct 
 #endif
 			break;
 	}
-	return cap_value(str, 0, USHRT_MAX);
+	return cap_value(str, 0, SHRT_MAX);
 }
 
 #ifdef RENEWAL
@@ -3387,7 +3385,7 @@ static int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_op
 	struct s_skill b_skill[MAX_SKILL]; //Previous skill tree
 	int i, lv, refinedef = 0;
 	uint8 passive_matk_rate = 0;
-	short index = -1;
+	short index = -1 , val;
 
 	if (++calculating > 10) //Too many recursive calls!
 		return -1;
@@ -3459,7 +3457,7 @@ static int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_op
 		+ sizeof(sd->sp_gain_race)
 		+ sizeof(sd->dropaddrace)
 		+ sizeof(sd->dropaddclass)
-		);
+	);
 
 	memset(&sd->right_weapon.overrefine, 0, sizeof(sd->right_weapon) - sizeof(sd->right_weapon.atkmods));
 	memset(&sd->left_weapon.overrefine, 0, sizeof(sd->left_weapon) - sizeof(sd->left_weapon.atkmods));
@@ -3910,18 +3908,18 @@ static int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_op
 		status->int_ += 20;
 
 	//Bonuses from cards and equipment as well as base stat, remember to avoid overflows
-	i = status->str + sd->status.str + sd->param_bonus[0] + sd->param_equip[0];
-	status->str = cap_value(i, 0, USHRT_MAX);
-	i = status->agi + sd->status.agi + sd->param_bonus[1] + sd->param_equip[1];
-	status->agi = cap_value(i, 0, USHRT_MAX);
-	i = status->vit + sd->status.vit + sd->param_bonus[2] + sd->param_equip[2];
-	status->vit = cap_value(i, 0, USHRT_MAX);
-	i = status->int_+ sd->status.int_+ sd->param_bonus[3] + sd->param_equip[3];
-	status->int_ = cap_value(i, 0, USHRT_MAX);
-	i = status->dex + sd->status.dex + sd->param_bonus[4] + sd->param_equip[4];
-	status->dex = cap_value(i, 0, USHRT_MAX);
-	i = status->luk + sd->status.luk + sd->param_bonus[5] + sd->param_equip[5];
-	status->luk = cap_value(i, 0, USHRT_MAX);
+	val = status->str + sd->status.str + sd->param_bonus[0] + sd->param_equip[0];
+	status->str = cap_value(val, 0, SHRT_MAX);
+	val = status->agi + sd->status.agi + sd->param_bonus[1] + sd->param_equip[1];
+	status->agi = cap_value(val, 0, SHRT_MAX);
+	val = status->vit + sd->status.vit + sd->param_bonus[2] + sd->param_equip[2];
+	status->vit = cap_value(val, 0, SHRT_MAX);
+	val = status->int_+ sd->status.int_+ sd->param_bonus[3] + sd->param_equip[3];
+	status->int_ = cap_value(val, 0, SHRT_MAX);
+	val = status->dex + sd->status.dex + sd->param_bonus[4] + sd->param_equip[4];
+	status->dex = cap_value(val, 0, SHRT_MAX);
+	val = status->luk + sd->status.luk + sd->param_bonus[5] + sd->param_equip[5];
+	status->luk = cap_value(val, 0, SHRT_MAX);
 
 	if (sd->special_state.no_walkdelay) {
 		if (sc->data[SC_ENDURE]) {
@@ -3973,10 +3971,10 @@ static int status_calc_pc_sub(struct map_session_data *sd, enum e_status_calc_op
 		if ((sd->class_&MAPID_BASEMASK) == MAPID_NOVICE && !(sd->class_&JOBL_2) && battle_config.restart_hp_rate < 50)
 			status->hp = status->max_hp>>1;
 		else
-			status->hp = (int64)status->max_hp * battle_config.restart_hp_rate / 100;
+			status->hp = status->max_hp * battle_config.restart_hp_rate / 100;
 		if (!status->hp)
 			status->hp = 1;
-		status->sp = (int64)status->max_sp * battle_config.restart_sp_rate / 100;
+		status->sp = status->max_sp * battle_config.restart_sp_rate / 100;
 		if (!status->sp) //The minimum for the respawn setting is SP: 1
 			status->sp = 1;
 	}
@@ -5743,15 +5741,14 @@ unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc,
 		batk += sc->data[SC_ANGRIFFS_MODUS]->val2;
 	if(sc->data[SC_SKE])
 		batk += 3 * batk;
-	if(sc->data[SC_INCATKRATE] && bl->type != BL_PC)
-		batk += batk * sc->data[SC_INCATKRATE]->val1 / 100;
-	if(sc->data[SC_PROVOKE]
 #ifdef RENEWAL
-		&& bl->type != BL_PC
-#endif
-		)
-		batk += batk * sc->data[SC_PROVOKE]->val3 / 100;
-#ifndef RENEWAL
+	if(bl->type != BL_PC) {
+		if(sc->data[SC_INCATKRATE])
+			batk += batk * sc->data[SC_INCATKRATE]->val1 / 100;
+		if(sc->data[SC_PROVOKE])
+			batk += batk * sc->data[SC_PROVOKE]->val3 / 100;
+	}
+#else
 	if(sc->data[SC_CONCENTRATION])
 		batk += batk * sc->data[SC_CONCENTRATION]->val2 / 100;
 #endif
@@ -5762,17 +5759,19 @@ unsigned short status_calc_batk(struct block_list *bl, struct status_change *sc,
 	if(sc->data[SC_CURSE])
 		batk -= batk * 25 / 100;
 #ifdef RENEWAL
-	if(sc->data[SC_STRIPWEAPON] && bl->type != BL_PC)
-		batk -= batk * sc->data[SC_STRIPWEAPON]->val2 / 100;
+	if(bl->type != BL_PC) {
+		if(sc->data[SC_STRIPWEAPON])
+			batk -= batk * sc->data[SC_STRIPWEAPON]->val2 / 100;
+		if(sc->data[SC_ASH])
+			batk -= batk * sc->data[SC_ASH]->val4 / 100;
+		if(sc->data[SC_CATNIPPOWDER])
+			batk -= batk * sc->data[SC_CATNIPPOWDER]->val2 / 100;
+	}
 #endif
 	if(sc->data[SC_JOINTBEAT] && sc->data[SC_JOINTBEAT]->val2&BREAK_WAIST)
 		batk -= batk * 25 / 100;
 	if(sc->data[SC__ENERVATION])
 		batk -= batk * sc->data[SC__ENERVATION]->val2 / 100;
-	if(sc->data[SC_ASH])
-		batk -= batk * sc->data[SC_ASH]->val4 / 100;
-	if(sc->data[SC_CATNIPPOWDER] && bl->type != BL_PC)
-		batk -= batk * sc->data[SC_CATNIPPOWDER]->val2 / 100;
 
 	return (unsigned short)cap_value(batk,0,USHRT_MAX);
 }
@@ -5791,17 +5790,6 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 		watk += sc->data[SC_VOLCANO]->val2;
 	if(sc->data[SC_DRUMBATTLE])
 		watk += sc->data[SC_DRUMBATTLE]->val2;
-	if(sc->data[SC_NIBELUNGEN]) {
-		if(bl->type != BL_PC)
-			watk += sc->data[SC_NIBELUNGEN]->val2;
-		else {
-			TBL_PC *sd = (TBL_PC *)bl;
-			short index = sd->equip_index[sd->state.lr_flag == 1 ? EQI_HAND_L : EQI_HAND_R];
-
-			if(index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->wlv == 4)
-				watk += sc->data[SC_NIBELUNGEN]->val2;
-		}
-	}
 #endif
 	if(sc->data[SC_MERC_ATKUP])
 		watk += sc->data[SC_MERC_ATKUP]->val2;
@@ -5827,13 +5815,13 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 		watk += sc->data[SC_ANGRIFFS_MODUS]->val2;
 	if(sc->data[SC_CHATTERING])
 		watk += sc->data[SC_CHATTERING]->val2;
-	if(sc->data[SC_PROVOKE]
-#ifdef RENEWAL
-		&& bl->type != BL_PC
-#endif
-		)
-		watk += watk * sc->data[SC_PROVOKE]->val3 / 100;
 #ifndef RENEWAL
+	if(bl->type != BL_PC) {
+		if(sc->data[SC_INCATKRATE])
+			watk += watk * sc->data[SC_INCATKRATE]->val1 / 100;
+		if(sc->data[SC_PROVOKE])
+			watk += watk * sc->data[SC_PROVOKE]->val3 / 100;
+	}
 	if(sc->data[SC_CONCENTRATION])
 		watk += watk * sc->data[SC_CONCENTRATION]->val2 / 100;
 #endif
@@ -5849,8 +5837,14 @@ unsigned short status_calc_watk(struct block_list *bl, struct status_change *sc,
 	if(sc->data[SC_CURSE])
 		watk -= watk * 25 / 100;
 #ifndef RENEWAL
-	if(sc->data[SC_STRIPWEAPON] && bl->type != BL_PC)
-		watk -= watk * sc->data[SC_STRIPWEAPON]->val2 / 100;
+	if(bl->type != BL_PC) {
+		if(sc->data[SC_STRIPWEAPON])
+			watk -= watk * sc->data[SC_STRIPWEAPON]->val2 / 100;
+		if(sc->data[SC_ASH])
+			watk -= watk * sc->data[SC_ASH]->val4 / 100;
+		if(sc->data[SC_CATNIPPOWDER])
+			watk -= watk * sc->data[SC_CATNIPPOWDER]->val2 / 100;
+	}
 #endif
 	if(sc->data[SC__ENERVATION])
 		watk -= watk * sc->data[SC__ENERVATION]->val2 / 100;
@@ -7937,6 +7931,10 @@ int status_get_sc_def(struct block_list *src, struct block_list *bl, enum sc_typ
 		case SC_ANKLE:
 			tick_def2 = status->agi * 100;
 			break;
+		case SC_JOINTBEAT:
+			sc_def2 = 270 * status->str / 100; //270 * STR / 100
+			tick_def2 = (status->luk * 50 + status->agi * 200) / 2; //(50 * LUK / 100 + 20 * AGI / 100) / 2
+			break;
 		case SC_MARSHOFABYSS: //5 secs (Fixed) + 25 secs - {((INT + LUK) / 20 secs)}
 			tick_def2 = (status->int_ + status->luk) * 50;
 			break;
@@ -9276,6 +9274,8 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 					return 0;
 				break;
 			case SC_JOINTBEAT:
+				if( sce->val2&BREAK_NECK )
+					return 0; //BREAK_NECK cannot be stacked with new breaks until the status is over
 				val2 |= sce->val2; //Stackable ailments
 			//Fall through
 			default:
@@ -10232,8 +10232,18 @@ int status_change_start(struct block_list *src, struct block_list *bl, enum sc_t
 				tick_time = 1000;
 				break;
 			case SC__ENERVATION:
-				if( sd )
-					pc_delspiritball(sd,sd->spiritball,0);
+				if( sd ) {
+					if( sd->spiritball > 0 )
+						pc_delspiritball(sd,sd->spiritball,0);
+					if( sd->shieldball > 0 )
+						pc_delshieldball(sd,sd->shieldball,0);
+					if( sd->rageball > 0 )
+						pc_delrageball(sd,sd->rageball,0);
+					if( sd->charmball_type != CHARM_TYPE_NONE && sd->charmball > 0 )
+						pc_delcharmball(sd,sd->charmball,sd->charmball_type);
+					if( sd->soulball > 0 )
+						pc_delsoulball(sd,sd->soulball,0);
+				}
 				val2 = 20 + 10 * val1; //ATK Reduction
 				break;
 			case SC__GROOMY:
@@ -12697,7 +12707,7 @@ TIMER_FUNC(status_change_timer)
 					damage = (type == SC_DPOISON) ? 2 + status->max_hp / 50 : 2 + 3 * status->max_hp / 200;
 				else
 					damage = (type == SC_DPOISON) ? 2 + status->max_hp / 100 : 2 + status->max_hp / 200;
-				if( status->hp > max(status->max_hp / 4,damage) ) //Stop damaging after 25% HP left
+				if( status->hp > i64max(status->max_hp / 4,damage) ) //Stop damaging after 25% HP left
 					status_zap(bl,damage,0);
 			}
 			break;
@@ -13984,7 +13994,7 @@ int status_change_spread(struct block_list *src, struct block_list *bl, bool typ
 			data.val2 = sc->data[i]->val2;
 			data.val3 = sc->data[i]->val3;
 			data.val4 = sc->data[i]->val4;
-			status_change_start(src,bl,(sc_type)i,10000,data.val1,data.val2,data.val3,data.val4,data.tick,SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
+			status_change_start(src,bl,(sc_type)i,10000,(int)data.val1,(int)data.val2,(int)data.val3,(int)data.val4,(int)data.tick,SCFLAG_NOAVOID|SCFLAG_FIXEDTICK|SCFLAG_FIXEDRATE);
 			flag = 1;
 		}
 	}

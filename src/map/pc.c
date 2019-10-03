@@ -176,7 +176,7 @@ struct item_cd {
  * @return Class Index
  */
 int pc_class2idx(int class_) {
-	if (class_ >= JOB_NOVICE_HIGH)
+	if( class_ >= JOB_NOVICE_HIGH )
 		return class_- JOB_NOVICE_HIGH + JOB_MAX_BASIC;
 	return class_;
 }
@@ -202,7 +202,7 @@ static TIMER_FUNC(pc_invincible_timer)
 {
 	struct map_session_data *sd;
 
-	if( (sd = (struct map_session_data *)map_id2sd(id)) == NULL || sd->bl.type!=BL_PC )
+	if( !(sd = (struct map_session_data *)map_id2sd(id)) || sd->bl.type != BL_PC )
 		return 1;
 
 	if( sd->invincible_timer != tid ) {
@@ -1716,7 +1716,7 @@ uint8 pc_isequip(struct map_session_data *sd, int n)
 bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_time, int group_id, struct mmo_charstatus *st, bool changing_mapservers)
 {
 	int i;
-	unsigned long tick = gettick();
+	unsigned int tick = gettick();
 	uint32 ip = session[sd->fd]->client_addr;
 
 	sd->login_id2 = login_id2;
@@ -1773,6 +1773,7 @@ bool pc_authok(struct map_session_data *sd, int login_id2, time_t expiration_tim
 	sd->pvp_timer = INVALID_TIMER;
 	sd->expiration_tid = INVALID_TIMER;
 	sd->autotrade_tid = INVALID_TIMER;
+	sd->respawn_tid = INVALID_TIMER;
 
 #ifdef SECURE_NPCTIMEOUT
 	//Initialize to defaults/expected
@@ -4379,7 +4380,7 @@ int pc_skill(struct map_session_data *sd, int id, int level, int flag)
 {
 	nullpo_ret(sd);
 
-	if( id <= 0 || id >= MAX_SKILL || !skill_db[id].name) {
+	if( id <= 0 || id >= MAX_SKILL ) {
 		ShowError("pc_skill: Skill with id %d does not exist in the skill database\n", id);
 		return 0;
 	}
@@ -4576,7 +4577,7 @@ int pc_identifyall(struct map_session_data *sd, bool identify_item)
 /*==========================================
  * Update buying value by skills
  *------------------------------------------*/
-int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
+int pc_modifybuyvalue(struct map_session_data *sd, int orig_value)
 {
 	uint16 lv;
 	int val = orig_value, rate1 = 0, rate2 = 0;
@@ -4598,7 +4599,7 @@ int pc_modifybuyvalue(struct map_session_data *sd,int orig_value)
 /*==========================================
  * Update selling value by skills
  *------------------------------------------*/
-int pc_modifysellvalue(struct map_session_data *sd,int orig_value)
+int pc_modifysellvalue(struct map_session_data *sd, int orig_value)
 {
 	uint16 lv;
 	int val = orig_value, rate = 0;
@@ -4640,7 +4641,7 @@ char pc_checkadditem(struct map_session_data *sd, unsigned short nameid, int amo
 		return CHKADDITEM_OVERAMOUNT;
 
 	for(i = 0; i < MAX_INVENTORY; i++) {
-		//FIXME: This does not consider the checked item's cards, thus could check a wrong slot for stackability.
+		//FIXME: This does not consider the checked item's cards, thus could check a wrong slot for stackability
 		if(sd->inventory.u.items_inventory[i].nameid == nameid) {
 			if(amount > MAX_AMOUNT - sd->inventory.u.items_inventory[i].amount ||
 				(data->stack.inventory && amount > data->stack.amount - sd->inventory.u.items_inventory[i].amount))
@@ -5372,7 +5373,7 @@ int pc_useitem(struct map_session_data *sd, int n)
 	potion_flag = 0;
 
 	//Check if the item is to be consumed immediately [Skotlex]
-	if( id->flag.keepAfterUse || ((nameid == ITEMID_EARTH_SCROLL_1_3 || ITEMID_EARTH_SCROLL_1_5) &&
+	if( id->flag.keepAfterUse || ((nameid == ITEMID_EARTH_SCROLL_1_3 || nameid == ITEMID_EARTH_SCROLL_1_5) &&
 		sd->sc.data[SC_EARTHSCROLL] && rnd()%100 >= sd->sc.data[SC_EARTHSCROLL]->val2) ) //[marquis007]
 		clif_useitemack(sd,n,amount,true); //Do not consume item
 	else {
@@ -5714,7 +5715,7 @@ bool pc_steal_item(struct map_session_data *sd, struct block_list *bl, uint16 sk
 		i_data = itemdb_search(itemid);
 		sprintf(message,msg_txt(NULL,542),(sd->status.name[0] ? sd->status.name : "GM"),md->db->jname,i_data->jname,(float)md->db->dropitem[i].p / 100);
 		//MSG: "'%s' stole %s's %s (chance: %0.02f%%)"
-		intif_broadcast(message,strlen(message) + 1,BC_DEFAULT);
+		intif_broadcast(message,(int)(strlen(message) + 1),BC_DEFAULT);
 	}
 	return true;
 }
@@ -6816,7 +6817,7 @@ int pc_stop_following(struct map_session_data *sd)
 	return 0;
 }
 
-int pc_follow(struct map_session_data *sd,int target_id)
+int pc_follow(struct map_session_data *sd, int target_id)
 {
 	struct block_list *bl = map_id2bl(target_id);
 
@@ -7294,8 +7295,8 @@ int pc_need_status_point(struct map_session_data *sd, int type, int val)
 	if( val == 0 )
 		return 0;
 
-	low = pc_getstat(sd,type);
-	max = pc_maxparameter(sd,(enum e_params)(type - SP_STR));
+	low = pc_getstat(sd, type);
+	max = pc_maxparameter(sd, (enum e_params)(type - SP_STR));
 
 	if( low >= max && val > 0 )
 		return 0; //Official servers show '0' when max is reached
@@ -7325,9 +7326,9 @@ int pc_maxparameterincrease(struct map_session_data *sd, int type)
 
 	nullpo_ret(sd);
 
-	base = final_value = pc_getstat(sd,type);
+	base = final_value = pc_getstat(sd, type);
 	status_points = sd->status.status_point;
-	max_param = pc_maxparameter(sd,(enum e_params)(type - SP_STR));
+	max_param = pc_maxparameter(sd, (enum e_params)(type - SP_STR));
 
 	while( final_value <= max_param && status_points >= 0 ) {
 		status_points -= PC_STATUS_POINT_COST(final_value);
@@ -7358,43 +7359,43 @@ bool pc_statusup(struct map_session_data *sd, int type, int increase)
 	nullpo_ret(sd);
 
 	if( type < SP_STR || type > SP_LUK || increase <= 0 ) {
-		clif_statusupack(sd,type,0,0);
+		clif_statusupack(sd, type, 0, 0);
 		return false;
 	}
 
 	//Check limits
-	current = pc_getstat(sd,type);
-	max_increase = pc_maxparameterincrease(sd,type);
-	increase = cap_value(increase,0,max_increase); //Cap to the maximum status points available
-	if( increase <= 0 || current + increase > pc_maxparameter(sd,(enum e_params)(type - SP_STR)) ) {
-		clif_statusupack(sd,type,0,0);
+	current = pc_getstat(sd, type);
+	max_increase = pc_maxparameterincrease(sd, type);
+	increase = cap_value(increase, 0, max_increase); //Cap to the maximum status points available
+	if( increase <= 0 || current + increase > pc_maxparameter(sd, (enum e_params)(type - SP_STR)) ) {
+		clif_statusupack(sd, type, 0, 0);
 		return false;
 	}
 
 	//Check status points
-	needed_points = pc_need_status_point(sd,type,increase);
+	needed_points = pc_need_status_point(sd, type, increase);
 	if( needed_points < 0 || needed_points > sd->status.status_point ) { //Sanity check
-		clif_statusupack(sd,type,0,0);
+		clif_statusupack(sd, type, 0, 0);
 		return false;
 	}
 
 	//Set new values
-	final_value = pc_setstat(sd,type,current + increase);
+	final_value = pc_setstat(sd, type, current + increase);
 	sd->status.status_point -= needed_points;
 
-	status_calc_pc(sd,SCO_NONE);
+	status_calc_pc(sd, SCO_NONE);
 
 	//Update increase cost indicator
-	clif_updatestatus(sd,SP_USTR + type - SP_STR);
+	clif_updatestatus(sd, SP_USTR + type - SP_STR);
 
 	//Update statpoint count
-	clif_updatestatus(sd,SP_STATUSPOINT);
+	clif_updatestatus(sd, SP_STATUSPOINT);
 
 	//Update stat value
-	clif_statusupack(sd,type,1,final_value); //Required
-	clif_updatestatus(sd,type);
+	clif_statusupack(sd, type, 1, final_value); //Required
+	clif_updatestatus(sd, type);
 
-	achievement_update_objective(sd,AG_GOAL_STATUS,1,final_value);
+	achievement_update_objective(sd, AG_GOAL_STATUS, 1, final_value);
 
 	return true;
 }
@@ -7418,23 +7419,23 @@ int pc_statusup2(struct map_session_data *sd, int type, int val)
 	nullpo_ret(sd);
 
 	if( type < SP_STR || type > SP_LUK ) {
-		clif_statusupack(sd,type,0,0);
+		clif_statusupack(sd, type, 0, 0);
 		return 0;
 	}
 
-	need = pc_need_status_point(sd,type,1);
-	max = pc_maxparameter(sd,(enum e_params)(type - SP_STR)); //Set new value
-	val = pc_setstat(sd,type,cap_value(pc_getstat(sd,type) + val,1,max));
+	need = pc_need_status_point(sd, type, 1);
+	max = pc_maxparameter(sd, (enum e_params)(type - SP_STR)); //Set new value
+	val = pc_setstat(sd, type, cap_value(pc_getstat(sd, type) + val, 1, max));
 
-	status_calc_pc(sd,SCO_NONE);
+	status_calc_pc(sd, SCO_NONE);
 
 	//Update increase cost indicator
-	if( need != pc_need_status_point(sd,type,1) )
-		clif_updatestatus(sd,SP_USTR + type - SP_STR);
+	if( need != pc_need_status_point(sd, type, 1) )
+		clif_updatestatus(sd, SP_USTR + type - SP_STR);
 
 	//Update stat value
-	clif_statusupack(sd,type,1,val); //Required
-	clif_updatestatus(sd,type);
+	clif_statusupack(sd, type, 1, val); //Required
+	clif_updatestatus(sd, type);
 
 	return val;
 }
@@ -7556,7 +7557,7 @@ int pc_allskillup(struct map_session_data *sd)
 		}
 	}
 
-	if (pc_has_permission(sd,PC_PERM_ALL_SKILL)) {
+	if (pc_has_permission(sd, PC_PERM_ALL_SKILL)) {
 		//Get ALL skills except npc/guild ones [Skotlex]
 		//And except SG_DEVIL [Komurka] and MO_TRIPLEATTACK and RG_SNATCHER [ultramage]
 		for (i = 0; i < MAX_SKILL; i++) {
@@ -7583,10 +7584,10 @@ int pc_allskillup(struct map_session_data *sd)
 				id == SG_DEVIL)
 				continue; //Cannot be learned normally
 			sd->status.skill[id].id = id;
-			sd->status.skill[id].lv = skill_tree_get_max(id,sd->status.class_); //Celest
+			sd->status.skill[id].lv = skill_tree_get_max(id, sd->status.class_); //Celest
 		}
 	}
-	status_calc_pc(sd,SCO_NONE);
+	status_calc_pc(sd, SCO_NONE);
 	//Required because if you could level up all skills previously
 	//the update will not be sent as only the lv variable changes
 	clif_skillinfoblock(sd);
@@ -7596,7 +7597,7 @@ int pc_allskillup(struct map_session_data *sd)
 /*==========================================
  * /resetlvl
  *------------------------------------------*/
-int pc_resetlvl(struct map_session_data *sd,int type)
+int pc_resetlvl(struct map_session_data *sd, int type)
 {
 	int  i;
 
@@ -7967,7 +7968,8 @@ static TIMER_FUNC(pc_respawn_timer)
 
 	if( (sd = map_id2sd(id)) ) {
 		sd->pvp_point = 0;
-		pc_respawn(sd,CLR_OUTSIGHT);
+		sd->respawn_tid = INVALID_TIMER;
+		pc_respawn(sd, CLR_OUTSIGHT);
 	}
 
 	return 0;
@@ -7976,13 +7978,13 @@ static TIMER_FUNC(pc_respawn_timer)
 /*==========================================
  * Invoked when a player has received damage
  *------------------------------------------*/
-void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int hp, unsigned int sp)
+void pc_damage(struct map_session_data *sd, struct block_list *src, unsigned int hp, unsigned int sp)
 {
 	if( sp )
-		clif_updatestatus(sd,SP_SP);
+		clif_updatestatus(sd, SP_SP);
 
 	if( hp )
-		clif_updatestatus(sd,SP_HP);
+		clif_updatestatus(sd, SP_HP);
 	else
 		return;
 
@@ -7991,17 +7993,17 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 
 	if( pc_issit(sd) ) {
 		pc_setstand(sd);
-		skill_sit(sd,false);
+		skill_sit(sd, false);
 	}
 
 	if( sd->progressbar.npc_id )
 		clif_progressbar_abort(sd);
 
 	if( sd->status.pet_id > 0 && sd->pd && battle_config.pet_damage_support )
-		pet_target_check(sd->pd,src,1);
+		pet_target_check(sd->pd, src, 1);
 
 	if( sd->status.ele_id > 0 )
-		elemental_set_target(sd,src);
+		elemental_set_target(sd, src);
 
 	if( battle_config.prevent_logout_trigger&PLT_DAMAGE )
 		sd->canlog_tick = gettick();
@@ -8009,10 +8011,10 @@ void pc_damage(struct map_session_data *sd,struct block_list *src,unsigned int h
 
 TIMER_FUNC(pc_close_npc_timer)
 {
-	TBL_PC *sd = map_id2sd(id);
+	struct map_session_data *sd = NULL;
 
-	if( sd )
-		pc_close_npc(sd,data);
+	if( (sd = map_id2sd(id)) )
+		pc_close_npc(sd, (int)data);
 	return 0;
 }
 
@@ -8048,7 +8050,6 @@ void pc_close_npc(struct map_session_data *sd, int flag) {
 		if (sd->st) {
 			if (sd->st->state == CLOSE) {
 				clif_scriptclose(sd,sd->npc_id);
-				clif_scriptclear(sd,sd->npc_id);
 				sd->st->state = END; //Force to end now
 			}
 			if (sd->st->state == END) { //Free attached scripts that are waiting
@@ -8397,20 +8398,20 @@ int pc_dead(struct map_session_data *sd, struct block_list *src)
 			ssd->pvp_won++;
 		}
 		if( sd->pvp_point < 0 ) {
-			add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
+			sd->respawn_tid = add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
 			return 1|8;
 		}
 	}
 
 	//GvG
 	if( map_flag_gvg2(sd->bl.m) ) {
-		add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
+		sd->respawn_tid = add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
 		return 1|8;
 	} else if( sd->bg_id ) {
 		struct battleground_data *bg = bg_team_search(sd->bg_id);
 
 		if( bg && bg->mapindex > 0 ) { //Respawn by BG
-			add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
+			sd->respawn_tid = add_timer(tick + 1,pc_respawn_timer,sd->bl.id,0);
 			return 1|8;
 		}
 	}
@@ -8441,6 +8442,47 @@ void pc_revive(struct map_session_data *sd,unsigned int hp, unsigned int sp)
 		guild_guildaura_refresh(sd,GD_SOULCOLD,guild_checkskill(sd->guild,GD_SOULCOLD));
 		guild_guildaura_refresh(sd,GD_HAWKEYES,guild_checkskill(sd->guild,GD_HAWKEYES));
 	}
+}
+
+bool pc_revive_item(struct map_session_data *sd)
+{
+	const int token[3] = { ITEMID_F_TOKEN_OF_SIEGFRIED,ITEMID_E_TOKEN_OF_SIEGFRIED,ITEMID_TOKEN_OF_SIEGFRIED };
+	int16 item_position;
+	uint8 hp = 100, sp = 100;
+	int i;
+
+	nullpo_retr(false,sd);
+
+	if( !pc_isdead(sd) || sd->respawn_tid != INVALID_TIMER )
+		return false;
+
+	if( sd->sc.data[SC_HELLPOWER] )
+		return false; //Cannot resurrect while under the effect of SC_HELLPOWER
+
+	for( i = 0; i < ARRAYLENGTH(token); i++ ) {
+		if( (item_position = pc_search_inventory(sd,token[i])) != INDEX_NOT_FOUND )
+			break;
+	}
+
+	if( item_position == INDEX_NOT_FOUND ) {
+		if( sd->sc.data[SC_LIGHT_OF_REGENE] ) {
+			hp = sd->sc.data[SC_LIGHT_OF_REGENE]->val2;
+			sp = 0;
+		} else
+			return false;
+	}
+
+	if( !status_revive(&sd->bl,hp,sp) )
+		return false;
+
+	if( item_position == INDEX_NOT_FOUND )
+		status_change_end(&sd->bl,SC_LIGHT_OF_REGENE,INVALID_TIMER);
+	else
+		pc_delitem(sd,item_position,1,0,1,LOG_TYPE_CONSUME);
+
+	clif_skill_nodamage(&sd->bl,&sd->bl,ALL_RESURRECTION,4,1);
+
+	return true;
 }
 
 // script
@@ -10265,14 +10307,14 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 
 	if( n < 0 || n >= MAX_INVENTORY ) {
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		else
 			clif_equipitemack(sd,0,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
 	}
 	if( DIFF_TICK(sd->canequip_tick,gettick()) > 0 ) {
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		else
 			clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
@@ -10284,18 +10326,18 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 		ShowInfo("equip %hu(%d) %x:%x\n",sd->inventory.u.items_inventory[n].nameid,n,id->equip,req_pos);
 	if( (res = pc_isequip(sd,n)) ) {
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,res);
 		else
 			clif_equipitemack(sd,n,0,res);
 		return false;
 	}
 	if( equipswitch && id->type == IT_AMMO ) {
-		clif_equipswitch_add(sd,n,req_pos,true);
+		clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		return false;
 	}
 	if( !(pos&req_pos) || sd->inventory.u.items_inventory[n].equip || sd->inventory.u.items_inventory[n].attribute ) { //[Valaris]
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		else
 			clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
@@ -10307,7 +10349,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 		(sd->sc.data[SC_PYROCLASTIC] && sd->inventory_data[n]->type == IT_WEAPON)) )
 	{
 		if( equipswitch )
-			clif_equipswitch_add(sd,n,req_pos,true);
+			clif_equipswitch_add(sd,n,req_pos,ITEM_EQUIP_ACK_FAIL);
 		else
 			clif_equipitemack(sd,n,0,ITEM_EQUIP_ACK_FAIL);
 		return false;
@@ -10371,7 +10413,7 @@ bool pc_equipitem(struct map_session_data *sd, short n, int req_pos, bool equips
 			}
 		}
 		sd->inventory.u.items_inventory[n].equipSwitch = pos;
-		clif_equipswitch_add(sd,n,pos,false);
+		clif_equipswitch_add(sd,n,pos,ITEM_EQUIP_ACK_OK);
 		return true;
 	} else {
 		for( i = 0; i < EQI_MAX; i++ ) {
@@ -10685,7 +10727,7 @@ int pc_equipswitch(struct map_session_data *sd, int index) {
 					sd->equip_switch_index[j] = unequipped_index;
 			}
 			sd->inventory.u.items_inventory[unequipped_index].equipSwitch = unequipped_position; //Set the correct position mask
-			clif_equipswitch_add(sd,unequipped_index,unequipped_position,false); //Notify the client
+			clif_equipswitch_add(sd,unequipped_index,unequipped_position,ITEM_EQUIP_ACK_OK); //Notify the client
 		}
 		if( unequipped ) {
 			aFree(unequipped);
@@ -11173,7 +11215,7 @@ TIMER_FUNC(map_day_timer)
 	night_flag = 0; //0 = day, 1 = night [Yor]
 	map_foreachpc(pc_daynight_timer_sub);
 	strcpy(tmp_soutput, (!data ? msg_txt(NULL, 502) : msg_txt(NULL, 60))); // The day has arrived!
-	intif_broadcast(tmp_soutput, strlen(tmp_soutput) + 1, BC_DEFAULT);
+	intif_broadcast(tmp_soutput, (int)(strlen(tmp_soutput) + 1), BC_DEFAULT);
 	return 0;
 }
 
@@ -11194,7 +11236,7 @@ TIMER_FUNC(map_night_timer)
 	night_flag = 1; //0 = day, 1 = night [Yor]
 	map_foreachpc(pc_daynight_timer_sub);
 	strcpy(tmp_soutput, (!data ? msg_txt(NULL, 503) : msg_txt(NULL, 59))); // The night has fallen
-	intif_broadcast(tmp_soutput, strlen(tmp_soutput) + 1, BC_DEFAULT);
+	intif_broadcast(tmp_soutput, (int)(strlen(tmp_soutput) + 1), BC_DEFAULT);
 	return 0;
 }
 
@@ -12090,7 +12132,7 @@ void pc_readdb(void)
 
 			if( line[0] == '/' && line[1] == '/' )
 				continue;
-			if( (stat = strtoul(line, NULL, 10)) < 0 )
+			if( (stat = (int)strtoul(line, NULL, 10)) < 0 )
 				stat = 0;
 			if( i > MAX_LEVEL )
 				break;
@@ -12110,9 +12152,9 @@ void pc_readdb(void)
 	battle_config.use_statpoint_table = k; //Restore setting
 
 #ifdef RENEWAL_ASPD
-	sv_readdb(db_path, "re/job_db1.txt", ',', 6 + MAX_WEAPON_TYPE, 6 + MAX_WEAPON_TYPE,CLASS_COUNT, &pc_readdb_job1);
+	sv_readdb(db_path, "re/job_db1.txt", ',', 6 + MAX_WEAPON_TYPE, 6 + MAX_WEAPON_TYPE, CLASS_COUNT, &pc_readdb_job1);
 #else
-	sv_readdb(db_path, "pre-re/job_db1.txt" , ',', 5 + MAX_WEAPON_TYPE, 5 + MAX_WEAPON_TYPE,CLASS_COUNT, &pc_readdb_job1);
+	sv_readdb(db_path, "pre-re/job_db1.txt" , ',', 5 + MAX_WEAPON_TYPE, 5 + MAX_WEAPON_TYPE, CLASS_COUNT, &pc_readdb_job1);
 #endif
 	sv_readdb(db_path, "job_db2.txt", ',', 1, 1 + MAX_LEVEL, CLASS_COUNT, &pc_readdb_job2);
 
@@ -12412,7 +12454,7 @@ void pc_check_expiration(struct map_session_data *sd) {
 
 		localtime_r(&exp_time, &now);
 		strftime(tmpstr,sizeof(tmpstr) - 1,msg_txt(sd,501),&now); // "Your account time limit is: %d-%m-%Y %H:%M:%S."
-		clif_wis_message(sd->fd,wisp_server_name,tmpstr,strlen(tmpstr));
+		clif_wis_message(sd->fd,wisp_server_name,tmpstr,(int)strlen(tmpstr));
 
 		pc_expire_check(sd);
 	}

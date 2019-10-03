@@ -3,7 +3,7 @@
 //===== By: ==================================================
 //= Euphy
 //===== Current Version: =====================================
-//= 1.1
+//= 1.2
 //===== Compatible With: =====================================
 //= rAthena SVN
 //===== Description: =========================================
@@ -11,42 +11,65 @@
 //===== Additional Comments: =================================
 //= 1.0 Initial script.
 //= 1.1 Switched to 'getbattleflag', credits to Saithis. [Euphy]
-//= 1.1 Updated to check for set style and dye maxes for Doram's. [exneval]
+//= 1.2 Fix style start at min_style, add Job_Summoner [AnnieRuru]
 //============================================================
 
-prontera,170,180,1	script	Stylist#custom_stylist	122,{
-	if(BaseClass == Job_Summoner)
-		setarray .@Styles[1],getbattleflag("max_doram_cloth_color"),getbattleflag("max_doram_hair_style"),getbattleflag("max_doram_hair_color");
+prontera,170,180,1	script	Stylist#custom_stylist	2_M_DYEINGER,{
+	.@choose = select(" ~ Hair style: ~ Hair color: ~ Cloth color") - 1;
+	.@part = .look[.@choose];
+	if (BaseClass != Job_Summoner)
+		callsub(L_styles, .@part, .minstyle[.@part], .maxstyle[.@part]);
 	else
-		setarray .@Styles[1],getbattleflag("max_cloth_color"),getbattleflag("max_hair_style"),getbattleflag("max_hair_color");
-	setarray .@Look[1],
-		LOOK_CLOTHES_COLOR,
-		LOOK_HAIR,
-		LOOK_HAIR_COLOR;
-	set .@s, select(" ~ Cloth color: ~ Hairstyle: ~ Hair color");
-	set .@Revert, getlook(.@Look[.@s]);
-	set .@Style,1;
-	while(1) {
-		setlook .@Look[.@s], .@Style;
-		message strcharinfo(0),"This is style #"+.@Style+".";
-		set .@menu$, " ~ Next (^0055FF"+((.@Style!=.@Styles[.@s])?.@Style+1:1)+"^000000): ~ Previous (^0055FF"+((.@Style!=1)?.@Style-1:.@Styles[.@s])+"^000000): ~ Jump to...: ~ Revert to original (^0055FF"+.@Revert+"^000000)";
-		switch(select(.@menu$)) {
+		callsub(L_styles, .@part, .doram_minstyle[.@part], .doram_maxstyle[.@part]);
+
+L_styles:
+	.@lookpart = getarg(0);
+	.@minstyle = getarg(1);
+	.@maxstyle = getarg(2);
+	.@i = .@revert = getlook(.@lookpart);
+	while (true) {
+		setlook .@lookpart, .@i;
+		message strcharinfo(0), "This is style #" + .@i + ".";
+		if (.@i == .@maxstyle)
+			.@next = .@minstyle;
+		else
+			.@next = .@i + 1;
+		if (.@i == .@minstyle)
+			.@previous = .@maxstyle;
+		else
+			.@previous = .@i - 1;
+		.@menu$ = " ~ Next (^0055FF" + .@next + "^000000): ~ Previous (^0055FF" + .@previous + "^000000): ~ Jump to...: ~ Revert to original (^0055FF" + .@revert + "^000000)";
+		switch (select(.@menu$)) {
 		case 1:
-			set .@Style, ((.@Style != .@Styles[.@s]) ? .@Style+1 : 1);
+			.@i = .@next;
 			break;
 		case 2:
-			set .@Style, ((.@Style != 1) ? .@Style-1 : .@Styles[.@s]);
+			.@i = .@previous;
 			break;
 		case 3:
-			message strcharinfo(0),"Choose a style between 1 - "+.@Styles[.@s]+".";
-			input .@Style,0,.@Styles[.@s];
-			if (!.@Style)
-				set .@Style, rand(1,.@Styles[.@s]);
+			message strcharinfo(0), "Choose a style between " + .@minstyle + " - " + .@maxstyle + ".";
+			input .@i, .@minstyle, .@maxstyle;
 			break;
 		case 4:
-			set .@Style, .@Revert;
-			setlook .@Look[.@s], .@Revert;
+			.@i = .@revert;
 			break;
 		}
 	}
+	end;
+
+OnInit:
+	setarray .look[0], LOOK_HAIR, LOOK_HAIR_COLOR, LOOK_CLOTHES_COLOR;
+	.minstyle[LOOK_HAIR] = getbattleflag("min_hair_style");
+	.maxstyle[LOOK_HAIR] = getbattleflag("max_hair_style");
+	.minstyle[LOOK_HAIR_COLOR] = getbattleflag("min_hair_color");
+	.maxstyle[LOOK_HAIR_COLOR] = getbattleflag("max_hair_color");
+	.minstyle[LOOK_CLOTHES_COLOR] = getbattleflag("min_cloth_color");
+	.maxstyle[LOOK_CLOTHES_COLOR] = getbattleflag("max_cloth_color");
+	.doram_minstyle[LOOK_HAIR] = getbattleflag("min_doram_hair_style");
+	.doram_maxstyle[LOOK_HAIR] = getbattleflag("max_doram_hair_style");
+	.doram_minstyle[LOOK_HAIR_COLOR] = getbattleflag("min_doram_hair_color");
+	.doram_maxstyle[LOOK_HAIR_COLOR] = getbattleflag("max_doram_hair_color");
+	.doram_minstyle[LOOK_CLOTHES_COLOR] = getbattleflag("min_doram_cloth_color");
+	.doram_maxstyle[LOOK_CLOTHES_COLOR] = getbattleflag("max_doram_cloth_color");
+	end;
 }

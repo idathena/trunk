@@ -1009,7 +1009,7 @@ bool sv_readdb(const char *directory, const char *filename, char delim, int minc
 		if( line[0] == '\0' || line[0] == '\n' || line[0] == '\r')
 			continue;
 
-		columns = sv_split(line, strlen(line), 0, delim, fields, nb_cols, (e_svopt)(SV_TERMINATE_LF|SV_TERMINATE_CRLF));
+		columns = sv_split(line, (int)strlen(line), 0, delim, fields, nb_cols, (e_svopt)(SV_TERMINATE_LF|SV_TERMINATE_CRLF));
 
 		if( columns < mincols ) {
 			ShowError("sv_readdb: Insufficient columns in line %d of \"%s\" (found %d, need at least %d).\n", lines, path, columns, mincols);
@@ -1087,7 +1087,7 @@ int _StringBuf_Vprintf(const char *file, int line, const char *func, StringBuf *
 
 		va_list apcopy;
 		/* Try to print in the allocated space. */
-		size = self->max_ - (self->ptr_ - self->buf_);
+		size = (int)(self->max_ - (self->ptr_ - self->buf_));
 		va_copy(apcopy, ap);
 		n = vsnprintf(self->ptr_, size, fmt, apcopy);
 		va_end(apcopy);
@@ -1107,7 +1107,7 @@ int _StringBuf_Vprintf(const char *file, int line, const char *func, StringBuf *
 /// Appends the contents of another StringBuf to the StringBuf
 int _StringBuf_Append(const char *file, int line, const char *func, StringBuf *self, const StringBuf *sbuf)
 {
-	int available = self->max_ - (self->ptr_ - self->buf_);
+	int available = (int)(self->max_ - (self->ptr_ - self->buf_));
 	int needed = (int)(sbuf->ptr_ - sbuf->buf_);
 
 	if( needed >= available ) {
@@ -1125,7 +1125,7 @@ int _StringBuf_Append(const char *file, int line, const char *func, StringBuf *s
 // Appends str to the StringBuf
 int _StringBuf_AppendStr(const char *file, int line, const char *func, StringBuf *self, const char *str)
 {
-	int available = self->max_ - (self->ptr_ - self->buf_);
+	int available = (int)(self->max_ - (self->ptr_ - self->buf_));
 	int needed = (int)strlen(str);
 
 	if( needed >= available ) { // not enough space, expand the buffer (minimum expansion = 1024)

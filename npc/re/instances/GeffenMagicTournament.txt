@@ -42,7 +42,8 @@ dali,98,141,3	script	Emmitt White	4_M_KHKYEL,{
 			if (checkquest(.@i) != -1)
 				erasequest .@i;
 		}
-		changequest 9315,9316;
+		if (checkquest(9315) != -1)
+			changequest 9315,9316;
 	}
 	if (checkquest(9308) != -1) {
 		mes .@n$;
@@ -57,7 +58,8 @@ dali,98,141,3	script	Emmitt White	4_M_KHKYEL,{
 			if (checkquest(.@i) != -1)
 				erasequest .@i;
 		}
-		changequest 9315,9316;
+		if (checkquest(9315) != -1)
+			changequest 9315,9316;
 	}
 	.@party_id = getcharid(1);
 	getpartymember(.@party_id,0);
@@ -1391,7 +1393,8 @@ OnTouch_:
 		close2;
 		cutin "",255;
 		'GMT_1QUE = 11;
-		changequest 9294,9295;
+		if (checkquest(9294) != -1)
+			changequest 9294,9295;
 		donpcevent instance_npcname("Geffen Academy Master")+"::OnStart";
 	}
 	end;

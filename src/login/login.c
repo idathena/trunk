@@ -1173,7 +1173,7 @@ int mmo_auth(struct login_session_data* sd, bool isServer) {
 
 	}
 
-	len = strnlen(sd->userid, NAME_LENGTH);
+	len = (int)strnlen(sd->userid, NAME_LENGTH);
 
 	// Account creation with _M/_F
 	if( login_config.new_account_flag ) {
@@ -1352,7 +1352,7 @@ void login_auth_ok(struct login_session_data* sd)
 				WBUFL(buf,2) = sd->account_id;
 				charif_sendallwos(-1, buf, 6);
 				if( data->waiting_disconnect == INVALID_TIMER )
-					data->waiting_disconnect = add_timer(gettick()+AUTH_TIMEOUT, waiting_disconnect_timer, sd->account_id, 0);
+					data->waiting_disconnect = add_timer(gettick() + AUTH_TIMEOUT, waiting_disconnect_timer, sd->account_id, 0);
 
 				WFIFOHEAD(fd,3);
 				WFIFOW(fd,0) = 0x81;
@@ -1374,9 +1374,9 @@ void login_auth_ok(struct login_session_data* sd)
 	WFIFOHEAD(fd,header + size * server_num);
 	WFIFOW(fd,0) = cmd;
 	WFIFOW(fd,2) = header + size * server_num;
-	WFIFOL(fd,4) = sd->login_id1;
+	WFIFOL(fd,4) = (uint32)sd->login_id1;
 	WFIFOL(fd,8) = sd->account_id;
-	WFIFOL(fd,12) = sd->login_id2;
+	WFIFOL(fd,12) = (uint32)sd->login_id2;
 	WFIFOL(fd,16) = 0; // In old version, that was for ip (not more used)
 	//memcpy(WFIFOP(fd,20), sd->lastlogin, 24); // In old version, that was for name (not more used)
 	memset(WFIFOP(fd,20), 0, 24);
@@ -1405,8 +1405,8 @@ void login_auth_ok(struct login_session_data* sd)
 	// Create temporary auth entry
 	CREATE(node, struct auth_node, 1);
 	node->account_id = sd->account_id;
-	node->login_id1 = sd->login_id1;
-	node->login_id2 = sd->login_id2;
+	node->login_id1 = (uint32)sd->login_id1;
+	node->login_id2 = (uint32)sd->login_id2;
 	node->sex = sd->sex;
 	node->ip = ip;
 	node->clienttype = sd->clienttype;
@@ -1420,7 +1420,7 @@ void login_auth_ok(struct login_session_data* sd)
 		data = add_online_user(-1, sd->account_id);
 
 		// Schedule deletion of this node
-		data->waiting_disconnect = add_timer(gettick()+AUTH_TIMEOUT, waiting_disconnect_timer, sd->account_id, 0);
+		data->waiting_disconnect = add_timer(gettick() + AUTH_TIMEOUT, waiting_disconnect_timer, sd->account_id, 0);
 	}
 }
 
@@ -1583,9 +1583,9 @@ int parse_login(int fd)
 					char password[NAME_LENGTH];
 					unsigned char passhash[16];
 					uint8 clienttype;
-					bool israwpass = (command==0x0064 || command==0x0277 || command==0x02b0 || command == 0x0825);
+					bool israwpass = (command == 0x0064 || command == 0x0277 || command == 0x02b0 || command == 0x0825);
 
-					// Shinryo: For the time being, just use token as password.
+					// Shinryo: For the time being, just use token as password
 					if(command == 0x0825) {
 						char *accname = (char *)RFIFOP(fd, 9);
 						char *token = (char *)RFIFOP(fd, 0x5C);

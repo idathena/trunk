@@ -24,13 +24,21 @@ static DBMap *itemdb_combo; //Item Combo DB
 static DBMap *itemdb_group; //Item Group DB
 static DBMap *itemdb_randomopt; //Random option DB
 static DBMap *itemdb_randomopt_group; //Random option group DB
+static DBMap *itemdb_synthesis; //Lapine Synthesis DB
+static DBMap *itemdb_upgrade; //Lapine Upgrade DB
 
 struct item_data *dummy_item; //This is the default dummy item used for non-existant items [Skotlex]
 
 struct s_roulette_db roulette_data;
 
 struct config_t itemdb_randomopt_group_conf;
-static void itemdb_randomopt_group_free_sub(struct s_random_opt_group *group, bool free);
+static void itemdb_randomopt_group_free_sub(struct s_random_opt_group *entry, bool free);
+
+struct config_t itemdb_synthesis_conf;
+static void itemdb_synthesis_free_sub(struct s_item_synthesis *entry, bool free);
+
+struct config_t itemdb_upgrade_conf;
+static void itemdb_upgrade_free_sub(struct s_item_upgrade *entry, bool free);
 
 /**
  * Check if combo exists
@@ -552,7 +560,7 @@ static bool itemdb_read_itemavail(char *str[], int columns, int current)
 
 	nameid = atoi(str[0]);
 
-	if( (id = itemdb_exists(nameid)) == NULL ) {
+	if( !(id = itemdb_exists(nameid)) ) {
 		ShowWarning("itemdb_read_itemavail: Invalid item id %hu.\n", nameid);
 		return false;
 	}
@@ -886,7 +894,7 @@ static bool itemdb_read_stack(char *fields[], int columns, int current)
 	}
 
 	amount = (unsigned short)strtoul(fields[1], NULL, 10);
-	type = strtoul(fields[2], NULL, 10);
+	type = (unsigned int)strtoul(fields[2], NULL, 10);
 
 	if( !amount ) //Ignore
 		return true;
@@ -1170,7 +1178,7 @@ static bool itemdb_roulette_parse_dbrow(char *str[], int columns, int current)
 		return false;
 	}
 	amount = atoi(str[2]);
-	if (amount < 1 || amount > MAX_AMOUNT) {
+	if (amount <= 0 || amount > MAX_AMOUNT) {
 		ShowWarning("itemdb_parse_roulette_db: Unsupported amount '%hu' for item ID '%hu' in level '%d'\n", amount, item_id, level);
 		return false;
 	}
@@ -1927,6 +1935,491 @@ void itemdb_read_randomopt_group(void)
 }
 
 /**
+ * Attempt to open synthesis UI for a player
+ * @param sd Open UI for this player
+ * @param item_id ID of synthesis UI
+ * @return True on succes, false on failure
+ */
+bool itemdb_synthesis_open(struct map_session_data *sd, uint16 item_id) {
+	nullpo_retr(false, sd);
+
+	if (pc_cant_act2(sd) || (sd)->chatID)
+		return false;
+
+	if (pc_is90overweight(sd) || !pc_inventoryblank(sd)) {
+		clif_msg(sd, ITEM_CANT_OBTAIN_WEIGHT);
+		return false;
+	}
+
+	if (!itemdb_synthesis_exists(item_id))
+		return false;
+
+	if (clif_synthesisui_open(sd, item_id)) {
+		sd->last_lapine_box = item_id;
+		sd->state.lapine_ui = 1;
+	}
+
+	return true;
+}
+
+static bool itemdb_synthesis_source_exists(struct s_item_synthesis *entry, uint16 item_id) {
+	int i, count = entry->source_count;
+
+	if (!itemdb_exists(item_id))
+		return false;
+
+	ARR_FIND(0, count, i, entry->sources[i].nameid == item_id);
+	if (i == count)
+		return false;
+
+	return true;
+}
+
+static bool itemdb_synthesis_check_requirement(struct map_session_data *sd, struct s_item_synthesis *entry, uint16 n, struct s_item_synthesis_list *items) {
+	struct item *item = NULL;
+	struct item_data *id = NULL;
+	int i;
+
+	if (!n || n != entry->source_needed)
+		return false;
+
+	for (i = 0; i < n; i++) {
+		if (items[i].index >= MAX_INVENTORY)
+			return false;
+		if (!(item = &sd->inventory.u.items_inventory[items[i].index]) || !(id = sd->inventory_data[items[i].index]))
+			return false;
+		if (item->equip || item->expire_time || item->amount < items[i].amount)
+			return false;
+		if (!itemdb_synthesis_source_exists(entry, item->nameid))
+			return false;
+		if (item->refine < entry->source_refine_min)
+			return false;
+		if (item->refine > entry->source_refine_max)
+			return false;
+		if (pc_delitem(sd, items[i].index, items[i].amount, 0, 0, LOG_TYPE_OTHER))
+			return false;
+	}
+
+	return true;
+}
+
+/**
+ * Proccess synthesis input from player
+ * @param sd Player who request
+ * @param item_id ID of synthesis item
+ * @param items Item list sent by player
+ * @return SYNTHESIS_SUCCESS on success. @see e_item_synthesis_result
+*/
+enum e_item_synthesis_result itemdb_synthesis_submit(struct map_session_data *sd, uint16 item_id, uint16 n, struct s_item_synthesis_list *items) {
+	struct s_item_synthesis *info = NULL;
+
+	nullpo_retr(SYNTHESIS_INVALID_ITEM, sd);
+
+	if (!sd->state.lapine_ui || item_id != sd->last_lapine_box) {
+		sd->state.lapine_ui = sd->last_lapine_box = 0;
+		return SYNTHESIS_INVALID_ITEM;
+	}
+
+	if (!(info = itemdb_synthesis_exists(item_id)) || !itemdb_synthesis_check_requirement(sd, info, n, items))
+		return SYNTHESIS_INSUFFICIENT_AMOUNT;
+
+	if (info->script)
+		run_script(info->script, 0, sd->status.account_id, 0);
+
+	sd->state.lapine_ui = sd->last_lapine_box = 0;
+	return SYNTHESIS_SUCCESS;
+}
+
+/**
+ * Clear Lapine Synthesis single entry
+ */
+static void itemdb_synthesis_free_sub(struct s_item_synthesis *entry, bool free) {
+	if (entry->sources) {
+		aFree(entry->sources);
+		entry->sources = NULL;
+		entry->source_count = 0;
+	}
+	if (entry->script) {
+		script_free_code(entry->script);
+		entry->script = NULL;
+	}
+	if (free)
+		aFree(entry);
+}
+
+/**
+ * Clear Lapine Synthesis from memory
+ */
+static int itemdb_synthesis_free(DBKey key, DBData *data, va_list ap) {
+	struct s_item_synthesis *entry = (struct s_item_synthesis *)db_data2ptr(data);
+
+	if (!entry)
+		return 0;
+	itemdb_synthesis_free_sub(entry, true);
+	return 1;
+}
+
+/**
+ * Get Lapine Synthesis from itemdb_synthesis MapDB
+ * @param synthesis_id Synthesis Item ID
+ * @return Lapine Synthesis data or NULL if not found
+ */
+struct s_item_synthesis *itemdb_synthesis_exists(int synthesis_id) {
+	return (struct s_item_synthesis *)uidb_get(itemdb_synthesis, synthesis_id);
+}
+
+static void itemdb_read_synthesis_sub_sources(config_setting_t *t, struct s_item_synthesis *entry, int id)
+{
+	int i, len = config_setting_length(t);
+
+	for (i = 0; i < len; i++) {
+		struct config_setting_t *tt = config_setting_get_elem(t, i);
+		int item_id, amount;
+
+		if (!tt)
+			break;
+		if (!config_setting_is_group(tt))
+			continue;
+		if (config_setting_lookup_int(tt, "Item", &item_id) && !itemdb_exists(item_id)) {
+			ShowWarning("itemdb_read_synthesis_sub_sources: Unknown source item id '%d' in synthesis id '%d'\n", item_id, id);
+			continue;
+		}
+		if (config_setting_lookup_int(tt, "Amount", &amount) && (amount <= 0 || amount > MAX_AMOUNT)) {
+			ShowWarning("itemdb_read_synthesis_sub_sources: Invalid source item amount (%d) in synthesis id '%d'\n", amount, id);
+			continue;
+		}
+		RECREATE(entry->sources, struct s_item_synthesis_source, entry->source_count + 1);
+		entry->sources[entry->source_count].nameid = (uint16)item_id;
+		entry->sources[entry->source_count].amount = (uint16)amount;
+		entry->source_count++;
+	}
+}
+
+struct s_item_synthesis *itemdb_read_synthesis_sub(struct config_setting_t *it, int n, const char *source)
+{
+	struct s_item_synthesis *entry = NULL;
+	struct config_setting_t *t = NULL;
+	const char *str = NULL;
+	int i32 = 0, min_val = 0, max_val = 0, id, count;
+
+	nullpo_retr(NULL, it);
+	nullpo_retr(NULL, source);
+
+	if (!config_setting_lookup_int(it, "Id", &id)) {
+		ShowWarning("itemdb_read_synthesis_sub: Missing Id in '%s', entry #%d, skipping.\n", source, n);
+		return NULL;
+	}
+
+	if (!config_setting_lookup_int(it, "SourceNeeded", &count)) {
+		ShowWarning("itemdb_read_synthesis_sub: Missing SourceNeeded in '%s', entry #%d, skipping.\n", source, n);
+		return NULL;
+	}
+
+	CREATE(entry, struct s_item_synthesis, 1);
+	entry->id = id;
+	entry->source_needed = count;
+
+	if ((t = config_setting_get_member(it, "SourceItems")) && config_setting_is_list(t))
+		itemdb_read_synthesis_sub_sources(t, entry, id);
+
+	if (config_setting_lookup_string(it, "Script", &str))
+		entry->script = (*str ? parse_script(str, source, id, SCRIPT_IGNORE_EXTERNAL_BRACKETS) : NULL);
+
+	if (config_setting_lookup_int(it, "NeedRefineMin", &i32) && i32 >= 0)
+		min_val = i32;
+
+	if (config_setting_lookup_int(it, "NeedRefineMax", &i32) && i32 >= 0)
+		max_val = i32;
+
+	if (min_val > 0 && !max_val)
+		max_val = MAX_REFINE;
+
+	entry->source_refine_min = (uint8)min_val;
+	entry->source_refine_max = (uint8)max_val;
+
+	return entry;
+}
+
+/**
+ * Read Lapine Synthesis from db file
+ */
+void itemdb_read_synthesis(void)
+{
+	struct config_setting_t *sdb = NULL, *t = NULL;
+	char filepath[256];
+	int count = 0;
+
+	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, DBPATH"item_synthesis.conf");
+	if (config_read_file(&itemdb_synthesis_conf, filepath))
+		return;
+
+	if (!(sdb = config_lookup(&itemdb_synthesis_conf, "item_synthesis")))
+		return;
+
+	while ((t = config_setting_get_elem(sdb, count))) {
+		struct s_item_synthesis *entry = itemdb_read_synthesis_sub(t, count, filepath);
+
+		if (!entry) {
+			ShowWarning("itemdb_read_synthesis: Failed to parse lapine synthesis entry %d.\n", count);
+			continue;
+		}
+		if (itemdb_synthesis_exists(entry->id)) {
+			ShowWarning("itemdb_read_synthesis: Duplicate synthesis id %d.\n", entry->id);
+			itemdb_synthesis_free_sub(entry, false);
+			continue;
+		}
+		uidb_put(itemdb_synthesis, entry->id, entry);
+		count++;
+	}
+
+	config_destroy(&itemdb_synthesis_conf);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filepath);
+}
+
+/**
+ * Attempt to open upgrade UI for a player
+ * @param sd Open UI for this player
+ * @param item_id ID of synthesis UI
+ * @return True on succes, false on failure
+ */
+bool itemdb_upgrade_open(struct map_session_data *sd, uint16 item_id) {
+	nullpo_retr(false, sd);
+
+	if (pc_cant_act2(sd) || (sd)->chatID)
+		return false;
+
+	if (pc_is90overweight(sd) || !pc_inventoryblank(sd)) {
+		clif_msg(sd, ITEM_CANT_OBTAIN_WEIGHT);
+		return false;
+	}
+
+	if (!itemdb_upgrade_exists(item_id))
+		return false;
+
+	if (clif_lapine_upgrade_open(sd, item_id)) {
+		sd->last_lapine_box = item_id;
+		sd->state.lapine_ui = 2;
+	}
+
+	return true;
+}
+
+static bool itemdb_upgrade_target_exists(struct s_item_upgrade *entry, uint16 item_id) {
+	int i, count = entry->target_count;
+
+	if (!itemdb_exists(item_id))
+		return false;
+
+	ARR_FIND(0, count, i, entry->targets[i] == item_id);
+	if (i == count)
+		return false;
+
+	return true;
+}
+
+static bool itemdb_upgrade_check_requirement(struct s_item_upgrade *entry, struct item *it, struct item_data *id) {
+	int i;
+
+	if (entry->target_refine_min > it->refine)
+		return false;
+
+	if (entry->not_socket_enchant) {
+		for (i = id->slot; i < MAX_SLOTS; i++) {
+			if (it->card[i])
+				return false;
+		}
+	}
+
+	if (entry->need_option_num) {
+		int c = 0;
+
+		for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
+			if (it->option[i].id)
+				c++;
+		}
+		if (c < entry->need_option_num)
+			return false;
+	}
+
+	return true;
+}
+
+enum e_item_upgrade_result itemdb_upgrade_submit(struct map_session_data *sd, uint16 item_id, uint16 target_index) {
+	struct s_item_upgrade *info = NULL;
+	struct item *it = NULL;
+
+	nullpo_retr(LAPINE_UPRAGDE_FAILURE, sd);
+
+	if (!sd->state.lapine_ui || item_id != sd->last_lapine_box) {
+		sd->state.lapine_ui = sd->last_lapine_box = 0;
+		return LAPINE_UPRAGDE_FAILURE;
+	}
+
+	if (target_index >= MAX_INVENTORY || !sd->inventory_data[target_index] || !(it = &sd->inventory.u.items_inventory[target_index]))
+		return LAPINE_UPRAGDE_FAILURE;
+
+	if (it->equip || it->expire_time)
+		return LAPINE_UPRAGDE_FAILURE;
+
+	if (!(info = itemdb_upgrade_exists(item_id)) || !itemdb_upgrade_target_exists(info, it->nameid) || !itemdb_upgrade_check_requirement(info, it, sd->inventory_data[target_index]))
+		return LAPINE_UPRAGDE_FAILURE;
+
+	pc_setreg(sd, add_str("@last_lapine_id"), it->nameid);
+	pc_setreg(sd, add_str("@last_lapine_refine"), it->refine);
+	pc_setreg(sd, add_str("@last_lapine_identify"), it->identify);
+	pc_setreg(sd, add_str("@last_lapine_attribute"), it->attribute);
+	pc_setreg(sd, add_str("@last_lapine_card1"), it->card[0]);
+	pc_setreg(sd, add_str("@last_lapine_card2"), it->card[1]);
+	pc_setreg(sd, add_str("@last_lapine_card3"), it->card[2]);
+	pc_setreg(sd, add_str("@last_lapine_card4"), it->card[3]);
+
+	pc_delitem(sd, target_index, 1, 0, 0, LOG_TYPE_OTHER);
+
+	if (info->script)
+		run_script(info->script, 0, sd->status.account_id, 0);
+
+	sd->state.lapine_ui = sd->last_lapine_box = 0;
+	return LAPINE_UPRAGDE_SUCCESS;
+}
+
+/**
+ * Clear Lapine Upgrade single entry
+ */
+static void itemdb_upgrade_free_sub(struct s_item_upgrade *entry, bool free) {
+	if (entry->targets) {
+		aFree(entry->targets);
+		entry->targets = NULL;
+		entry->target_count = 0;
+	}
+	if (entry->script) {
+		script_free_code(entry->script);
+		entry->script = NULL;
+	}
+	if (free)
+		aFree(entry);
+}
+
+/**
+ * Clear Lapine Upgrade from memory
+ */
+static int itemdb_upgrade_free(DBKey key, DBData *data, va_list ap) {
+	struct s_item_upgrade *entry = (struct s_item_upgrade *)db_data2ptr(data);
+
+	if (!entry)
+		return 0;
+	itemdb_upgrade_free_sub(entry, true);
+	return 1;
+}
+
+/**
+ * Get Lapine Upgrade from itemdb_upgrade MapDB
+ * @param upgrade_id Upgrade Item ID
+ * @return Lapine Upgrade data or NULL if not found
+ */
+struct s_item_upgrade *itemdb_upgrade_exists(int upgrade_id) {
+	return (struct s_item_upgrade *)uidb_get(itemdb_upgrade, upgrade_id);
+}
+
+static void itemdb_read_upgrade_sub_targets(config_setting_t *t, struct s_item_upgrade *entry, int id)
+{
+	int i, len = config_setting_length(t);
+
+	for (i = 0; i < len; i++) {
+		struct config_setting_t *tt = config_setting_get_elem(t, i);
+		int item_id;
+
+		if (!tt)
+			break;
+		if (!config_setting_is_group(tt))
+			continue;
+		if (config_setting_lookup_int(tt, "Item", &item_id) && !itemdb_exists(item_id)) {
+			ShowWarning("itemdb_read_upgrade_sub_targets: Unknown target item id '%d' in upgrade id '%d'\n", item_id, id);
+			continue;
+		}
+		RECREATE(entry->targets, int, entry->target_count + 1);
+		entry->targets[entry->target_count] = item_id;
+		entry->target_count++;
+	}
+}
+
+struct s_item_upgrade *itemdb_read_upgrade_sub(struct config_setting_t *it, int n, const char *source)
+{
+	struct s_item_upgrade *entry = NULL;
+	struct config_setting_t *t = NULL, *s = NULL;
+	const char *str = NULL;
+	int i32 = 0, min_val = 0, option_min = 0, id;
+	bool not_socket_enchant = true;
+
+	nullpo_retr(NULL, it);
+	nullpo_retr(NULL, source);
+
+	if (!config_setting_lookup_int(it, "Id", &id)) {
+		ShowWarning("itemdb_read_upgrade_sub: Missing Id in '%s', entry #%d, skipping.\n", source, n);
+		return NULL;
+	}
+
+	CREATE(entry, struct s_item_upgrade, 1);
+	entry->id = id;
+
+	if ((t = config_setting_get_member(it, "TargetItems")) && config_setting_is_list(t))
+		itemdb_read_upgrade_sub_targets(t, entry, id);
+
+	if (config_setting_lookup_string(it, "Script", &str))
+		entry->script = (*str ? parse_script(str, source, id, SCRIPT_IGNORE_EXTERNAL_BRACKETS) : NULL);
+
+	if (config_setting_lookup_int(it, "NeedRefineMin", &i32) && i32 >= 0)
+		min_val = i32;
+
+	if (config_setting_lookup_int(it, "NeedOptionNumMin", &i32) && i32 >= 0)
+		option_min = i32;
+
+	if ((s = config_setting_get_member(it, "NotSocketEnchantItem")))
+		not_socket_enchant = (config_setting_get_bool(s) ? true : false);
+
+	entry->target_refine_min = (uint8)min_val;
+	entry->need_option_num = (uint8)option_min;
+	entry->not_socket_enchant = not_socket_enchant;
+
+	return entry;
+}
+
+/**
+ * Read Lapine Upgrade from db file
+ */
+void itemdb_read_upgrade(void)
+{
+	struct config_setting_t *udb = NULL, *t = NULL;
+	char filepath[256];
+	int count = 0;
+
+	safesnprintf(filepath, sizeof(filepath), "%s/%s", db_path, DBPATH"item_upgrade.conf");
+	if (config_read_file(&itemdb_upgrade_conf, filepath))
+		return;
+
+	if (!(udb = config_lookup(&itemdb_upgrade_conf, "item_upgrade")))
+		return;
+
+	while ((t = config_setting_get_elem(udb, count))) {
+		struct s_item_upgrade *entry = itemdb_read_upgrade_sub(t, count, filepath);
+
+		if (!entry) {
+			ShowWarning("itemdb_read_upgrade: Failed to parse lapine upgrade entry %d.\n", count);
+			continue;
+		}
+		if (itemdb_upgrade_exists(entry->id)) {
+			ShowWarning("itemdb_read_upgrade: Duplicate upgrade id %d.\n", entry->id);
+			itemdb_upgrade_free_sub(entry, false);
+			continue;
+		}
+		uidb_put(itemdb_upgrade, entry->id, entry);
+		count++;
+	}
+
+	config_destroy(&itemdb_upgrade_conf);
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filepath);
+}
+
+/**
  * Read all item-related databases
  */
 static void itemdb_read(void) {
@@ -1942,6 +2435,8 @@ static void itemdb_read(void) {
 	itemdb_read_itemtrade();
 	itemdb_read_randomopt();
 	itemdb_read_randomopt_group();
+	itemdb_read_synthesis();
+	itemdb_read_upgrade();
 	sv_readdb(db_path, "item_avail.txt",         ',', 2, 2, -1, &itemdb_read_itemavail);
 	sv_readdb(db_path, DBPATH"item_delay.txt",   ',', 2, 3, -1, &itemdb_read_itemdelay);
 	sv_readdb(db_path, DBPATH"item_flag.txt",    ',', 2, 2, -1, &itemdb_read_flag);
@@ -2070,6 +2565,8 @@ void itemdb_reload(void) {
 	itemdb_group->clear(itemdb_group, itemdb_group_free);
 	itemdb_randomopt->clear(itemdb_randomopt, itemdb_randomopt_free);
 	itemdb_randomopt_group->clear(itemdb_randomopt_group, itemdb_randomopt_group_free);
+	itemdb_synthesis->clear(itemdb_synthesis, itemdb_synthesis_free);
+	itemdb_upgrade->clear(itemdb_upgrade, itemdb_upgrade_free);
 	itemdb->clear(itemdb, itemdb_final_sub);
 	db_clear(itemdb_combo);
 
@@ -2115,6 +2612,8 @@ void do_final_itemdb(void) {
 	itemdb_group->destroy(itemdb_group, itemdb_group_free);
 	itemdb_randomopt->destroy(itemdb_randomopt, itemdb_randomopt_free);
 	itemdb_randomopt_group->destroy(itemdb_randomopt_group, itemdb_randomopt_group_free);
+	itemdb_synthesis->destroy(itemdb_synthesis, itemdb_synthesis_free);
+	itemdb_upgrade->destroy(itemdb_upgrade, itemdb_upgrade_free);
 	itemdb->destroy(itemdb, itemdb_final_sub);
 	destroy_item_data(dummy_item);
 	if( battle_config.feature_roulette )
@@ -2130,6 +2629,8 @@ void do_init_itemdb(void) {
 	itemdb_group = uidb_alloc(DB_OPT_BASE);
 	itemdb_randomopt = uidb_alloc(DB_OPT_BASE);
 	itemdb_randomopt_group = uidb_alloc(DB_OPT_BASE);
+	itemdb_synthesis = uidb_alloc(DB_OPT_BASE);
+	itemdb_upgrade = uidb_alloc(DB_OPT_BASE);
 	itemdb_create_dummy();
 	itemdb_read();
 	if( battle_config.feature_roulette )

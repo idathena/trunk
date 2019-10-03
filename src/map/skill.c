@@ -473,10 +473,13 @@ bool skill_pos_maxcount_check(struct block_list *src, int16 x, int16 y, uint16 s
  */
 int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool heal) {
 	uint16 lv;
-	int i, hp = 0, bonus = 100;
+	int i, hp = 0;
 	struct map_session_data *sd = BL_CAST(BL_PC, src);
 	struct map_session_data *tsd = BL_CAST(BL_PC, target);
-	struct status_change *sc, *tsc;
+	struct status_change *sc = NULL, *tsc = NULL;
+#ifdef RENEWAL
+	int bonus = 100;
+#endif
 
 	sc = status_get_sc(src);
 	tsc = status_get_sc(target);
@@ -522,34 +525,71 @@ int skill_calc_heal(struct block_list *src, struct block_list *target, uint16 sk
 #endif
 			}
 			if( sd ) {
-				if( (lv = pc_checkskill(sd, HP_MEDITATIO)) > 0 )
+				if( (lv = pc_checkskill(sd, HP_MEDITATIO)) > 0 ) {
+#ifdef RENEWAL
 					bonus += lv * 2;
-				if( pc_checkskill(sd, SU_POWEROFSEA) > 0 ) {
-					bonus += 8;
-					if( pc_checkskill_summoner(sd, TYPE_SEAFOOD) >= 20 )
-						bonus += 16;
+#else
+					hp += hp * lv * 2 / 100;
+#endif
 				}
-				if( skill_id == SU_FRESHSHRIMP && pc_checkskill(sd, SU_SPIRITOFSEA) > 0 )
+				if( pc_checkskill(sd, SU_POWEROFSEA) > 0 ) {
+#ifdef RENEWAL
+					bonus += 8;
+#else
+					hp += hp * 8 / 100;
+#endif
+					if( pc_checkskill_summoner(sd, TYPE_SEAFOOD) >= 20 ) {
+#ifdef RENEWAL
+						bonus += 16;
+#else
+						hp += hp * 16 / 100;
+#endif
+					}
+				}
+				if( skill_id == SU_FRESHSHRIMP && pc_checkskill(sd, SU_SPIRITOFSEA) > 0 ) {
+#ifdef RENEWAL
 					bonus += 16;
-				if( tsd && sd->status.partner_id == tsd->status.char_id && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex )
+#else
+					hp += hp * 16 / 100;
+#endif
+				}
+				if( tsd && sd->status.partner_id == tsd->status.char_id && (sd->class_&MAPID_UPPERMASK) == MAPID_SUPER_NOVICE && !sd->status.sex ) {
+#ifdef RENEWAL
 					bonus += 100;
-			} else if( src->type == BL_HOM && (lv = hom_checkskill(((TBL_HOM *)src), HLIF_BRAIN)) > 0 )
+#else
+					hp *= 2;
+#endif
+				}
+			} else if( src->type == BL_HOM && (lv = hom_checkskill(((TBL_HOM *)src), HLIF_BRAIN)) > 0 ) {
+#ifdef RENEWAL
 				bonus += lv * 2;
+#else
+				hp += hp * lv * 2 / 100;
+#endif
+			}
 			break;
 	}
 
-	if( sd && (i = pc_skillheal_bonus(sd, skill_id)) )
+	if( sd && (i = pc_skillheal_bonus(sd, skill_id)) ) {
+#ifdef RENEWAL
 		bonus += i;
-
-	if( sc && sc->count ) {
-		if( sc->data[SC_OFFERTORIUM] )
-			bonus += sc->data[SC_OFFERTORIUM]->val2;
+#else
+		hp += hp * i / 100;
+#endif
 	}
 
+	if( sc && sc->data[SC_OFFERTORIUM] ) {
+#ifdef RENEWAL
+		bonus += sc->data[SC_OFFERTORIUM]->val2;
+#else
+		hp += hp * sc->data[SC_OFFERTORIUM]->val2 / 100;
+#endif
+	}
+
+#ifdef RENEWAL
 	if( bonus != 100 )
 		hp = hp * bonus / 100;
 
-#ifdef RENEWAL
 	switch( skill_id ) { //MATK part of the RE heal formula [malufett]
 		case BA_APPLEIDUN:
 		case PR_SANCTUARY:
@@ -916,7 +956,6 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 	struct homun_data *hd;
 	struct status_data *sstatus, *tstatus;
 	struct status_change *sc, *tsc;
-	enum sc_type status;
 	uint8 lv = 0;
 	int rate;
 
@@ -1242,13 +1281,6 @@ int skill_additional_effect(struct block_list *src, struct block_list *bl, uint1
 		case LK_HEADCRUSH: //Headcrush has chance of causing Bleeding status, except on demon and undead element
 			if( !(battle_check_undead(tstatus->race,tstatus->def_ele) || tstatus->race == RC_DEMON) )
 				sc_start(src,bl,SC_BLEEDING,50,skill_lv,skill_get_time2(skill_id,skill_lv));
-			break;
-		case LK_JOINTBEAT:
-			status = status_skill2sc(skill_id);
-			if( tsc->jb_flag ) {
-				sc_start2(src,bl,status,5 + skill_lv * 5,skill_lv,(tsc->jb_flag&BREAK_FLAGS),skill_get_time2(skill_id,skill_lv));
-				tsc->jb_flag = 0;
-			}
 			break;
 		case ASC_METEORASSAULT:
 			switch( rnd()%3 ) { //Any enemies hit by this skill will receive Stun, Blind, or Bleeding status ailment with a 5%+skill_lv*5% chance
@@ -4708,18 +4740,12 @@ int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint1
 				clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 			break;
 
-		case LK_JOINTBEAT: //Decide the ailment first (affects attack damage and effect)
-			switch (rnd()%6) {
-				case 0: flag |= BREAK_ANKLE; break;
-				case 1: flag |= BREAK_WRIST; break;
-				case 2: flag |= BREAK_KNEE; break;
-				case 3: flag |= BREAK_SHOULDER; break;
-				case 4: flag |= BREAK_WAIST; break;
-				case 5: flag |= BREAK_NECK; break;
-			}
-			if (tsc) //@TODO: Is there really no cleaner way to do this?
-				tsc->jb_flag = flag;
-			skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+		case LK_JOINTBEAT:
+			flag = 1 << rnd()%6;
+			if (flag != BREAK_NECK && tsc && tsc->data[SC_JOINTBEAT] && tsc->data[SC_JOINTBEAT]->val2&BREAK_NECK)
+				flag = BREAK_NECK; //Target should always receive double damage if neck is already broken
+			if (skill_attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag))
+				sc_start4(src,bl,SC_JOINTBEAT,50 + skill_lv + 1,skill_lv,flag&BREAK_FLAGS,src->id,0,skill_get_time2(skill_id,skill_lv));
 			break;
 
 		case MO_COMBOFINISH: //Becomes a splash attack when Soul Linked
@@ -14677,9 +14703,9 @@ bool skill_check_condition_target(struct block_list *src, struct block_list *bl,
 		case WE_MALE:
 		case WE_FEMALE:
 			if( sd ) {
-				struct map_session_data *p_sd = map_charid2sd(sd->status.partner_id);
+				struct map_session_data *p_sd = NULL;
 
-				if( !p_sd || !&p_sd->bl ) {
+				if( !(p_sd = map_charid2sd(sd->status.partner_id)) ) {
 					clif_skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0,0);
 					return false;
 				}
@@ -16712,8 +16738,8 @@ int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, uint16 
 	if( bl->type == BL_MOB || bl->type == BL_NPC )
 		return (int)time; //Cast time is fixed nothing to alter
 
-	if( fixed < 0 || !battle_config.default_fixed_castrate ) //No fixed cast time
-		fixed = 0;
+	if( fixed < 0 )
+		fixed = 0; //No fixed cast time
 	else if( !fixed ) {
 		fixed = (int)time * battle_config.default_fixed_castrate / 100; //Fixed time
 		time = time * (100 - battle_config.default_fixed_castrate) / 100; //Variable time
@@ -21377,8 +21403,8 @@ static bool skill_parse_row_unitdb(char *split[], int columns, int current)
 	if( !idx ) //Invalid skill id
 		return false;
 
-	skill_db[idx].unit_id[0] = strtol(split[1],NULL,16);
-	skill_db[idx].unit_id[1] = strtol(split[2],NULL,16);
+	skill_db[idx].unit_id[0] = (int)strtol(split[1],NULL,16);
+	skill_db[idx].unit_id[1] = (int)strtol(split[2],NULL,16);
 	skill_split_atoi(split[3],skill_db[idx].unit_layout_type);
 	skill_split_atoi(split[4],skill_db[idx].unit_range);
 	skill_db[idx].unit_interval = atoi(split[5]);
@@ -21394,9 +21420,9 @@ static bool skill_parse_row_unitdb(char *split[], int columns, int current)
 	else if( !strcmpi(split[6],"self") ) skill_db[idx].unit_target = BCT_SELF;
 	else if( !strcmpi(split[6],"sameguild") ) skill_db[idx].unit_target = BCT_GUILD|BCT_SAMEGUILD;
 	else if( !strcmpi(split[6],"noone") ) skill_db[idx].unit_target = BCT_NOONE;
-	else skill_db[idx].unit_target = strtol(split[6],NULL,16);
+	else skill_db[idx].unit_target = (int)strtol(split[6],NULL,16);
 
-	skill_db[idx].unit_flag = strtol(split[7],NULL,16);
+	skill_db[idx].unit_flag = (int)strtol(split[7],NULL,16);
 
 	if( skill_db[idx].unit_flag&UF_DEFNOTENEMY && battle_config.defnotenemy )
 		skill_db[idx].unit_target = BCT_NOENEMY;

@@ -407,7 +407,7 @@ void *grfio_reads(const char *fname, int *size)
 			fclose(in);
 
 			if( size )
-				*size = declen;
+				*size = (int)declen;
 		} else {
 			if (entry != NULL && entry->gentry < 0) {
 				entry->gentry = -entry->gentry;	// local file checked

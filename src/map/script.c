@@ -1045,7 +1045,7 @@ static int add_word(const char *p)
 	int i;
 
 	// Check for a word
-	len = skip_word(p) - p;
+	len = (int)(skip_word(p) - p);
 	if( len == 0 )
 		disp_error_message("script:add_word: invalid word. A word consists of undercores and/or alphanumeric characters, and valid variable prefixes/postfixes.", p);
 
@@ -6189,7 +6189,7 @@ BUILDIN_FUNC(countitem)
 	return SCRIPT_CMD_SUCCESS;
 }
 
-int checkweight_sub(TBL_PC *sd, int nbargs, unsigned short *eitemid, int32 *eamount)
+static int checkweight_sub(struct map_session_data *sd, int nbargs, unsigned short *eitemid, int32 *eamount)
 {
 	struct item_data *id = NULL;
 	unsigned short nameid;
@@ -6202,23 +6202,19 @@ int checkweight_sub(TBL_PC *sd, int nbargs, unsigned short *eitemid, int32 *eamo
 	for( i = 0; i < nbargs; i++ ) {
 		if( !eitemid[i] )
 			continue;
-		id = itemdb_exists(eitemid[i]);
-		if( id == NULL ) {
+		if( !(id = itemdb_exists(eitemid[i])) ) {
 			ShowError("checkweight_sub: Invalid item '%hu'.\n", eitemid[i]);
 			return 0;
 		}
 		nameid = id->nameid;
-
 		amount = eamount[i];
 		if( amount < 1 ) {
 			ShowError("checkweight_sub: Invalid amount '%d'.\n", eamount[i]);
 			return 0;
 		}
-
-		weight += (id->weight)*amount; // Total weight for all chk
+		weight += id->weight * amount; // Total weight for all chk
 		if( weight + sd->weight > sd->max_weight ) // Too heavy
 			return 0;
-
 		switch( pc_checkadditem(sd, nameid, amount) ) {
 			case CHKADDITEM_EXIST: // Item is already in inventory, but there is still space for the requested amount
 				break;
@@ -15112,7 +15108,7 @@ BUILDIN_FUNC(insertchar)
 	if(index < 0)
 		index = 0;
 	else if(index > len)
-		index = len;
+		index = (int)len;
 
 	output = (char *)aMalloc(len + 2);
 
@@ -15342,7 +15338,7 @@ BUILDIN_FUNC(implode)
 		//Allocate mem
 		if( script_hasdata(st,3) ) {
 			glue = script_getstr(st,3);
-			glue_len = strlen(glue);
+			glue_len = (int32)strlen(glue);
 			len += (size_t)glue_len * array_size;
 		}
 		output = (char *)aMalloc(len + 1);
@@ -15390,35 +15386,35 @@ BUILDIN_FUNC(sprintf)
 
 	// Fetch init data
 	format = script_getstr(st, 2);
-	argc = script_lastdata(st)-2;
-	len = strlen(format);
+	argc = script_lastdata(st) - 2;
+	len = (unsigned int)strlen(format);
 
-	// Skip parsing, where no parsing is required.
-	if(len==0){
+	// Skip parsing, where no parsing is required
+	if(len == 0) {
 		script_pushconststr(st,"");
 		return 0;
 	}
 
 	// Pessimistic alloc
-	CREATE(buf, char, len+1);
+	CREATE(buf, char, len + 1);
 
-	// Need not be parsed, just solve stuff like %%.
-	if(argc==0){
-		memcpy(buf,format,len+1);
-		script_pushstrcopy(st, buf);
+	// Need not be parsed, just solve stuff like %%
+	if(argc == 0) {
+		memcpy(buf, format, len + 1);
+		script_pushstrcopy(st,buf);
 		aFree(buf);
 		return 0;
 	}
 
-	safestrncpy(buf, format, len+1);
+	safestrncpy(buf, format, len + 1);
 
 	// Issue sprintf for each parameter
 	StringBuf_Init(&final_buf);
 	q = buf;
-	while((p = strchr(q, '%'))!=NULL){
-		if(p!=q){
-			len = p-q+1;
-			if(buf2_len<len){
+	while((p = strchr(q, '%')) != NULL) {
+		if(p != q) {
+			len = (unsigned int)(p - q + 1);
+			if(buf2_len < len) {
 				RECREATE(buf2, char, len);
 				buf2_len = len;
 			}
@@ -15426,19 +15422,19 @@ BUILDIN_FUNC(sprintf)
 			StringBuf_AppendStr(&final_buf, buf2);
 			q = p;
 		}
-		p = q+1;
-		if(*p=='%'){  // %%
+		p = q + 1;
+		if(*p == '%') { // %%
 			StringBuf_AppendStr(&final_buf, "%");
-			q+=2;
+			q += 2;
 			continue;
 		}
-		if(*p=='n'){  // %n
+		if(*p == 'n') { // %n
 			ShowWarning("buildin_sprintf: Format %%n not supported! Skipping...\n");
 			script_reportsrc(st);
-			q+=2;
+			q += 2;
 			continue;
 		}
-		if(arg>=argc){
+		if(arg >= argc) {
 			ShowError("buildin_sprintf: Not enough arguments passed!\n");
 			if(buf) aFree(buf);
 			if(buf2) aFree(buf2);
@@ -15446,11 +15442,10 @@ BUILDIN_FUNC(sprintf)
 			script_pushconststr(st,"");
 			return 1;
 		}
-		if((p = strchr(q+1, '%'))==NULL){
-			p = strchr(q, 0);  // EOS
-		}
-		len = p-q+1;
-		if(buf2_len<len){
+		if((p = strchr(q + 1, '%')) == NULL)
+			p = strchr(q, 0); // EOS
+		len = (unsigned int)(p - q + 1);
+		if(buf2_len < len) {
 			RECREATE(buf2, char, len);
 			buf2_len = len;
 		}
@@ -15461,20 +15456,20 @@ BUILDIN_FUNC(sprintf)
 		// type to the current format specifier. If not, the server
 		// probably crashes or returns anything else, than expected,
 		// but it would behave in normal code the same way so it's
-		// the scripter's responsibility.
-		data = script_getdata(st, arg+3);
-		if(data_isstring(data)){  // String
-			StringBuf_Printf(&final_buf, buf2, script_getstr(st, arg+3));
-		}else if(data_isint(data)){  // Number
-			StringBuf_Printf(&final_buf, buf2, script_getnum(st, arg+3));
-		}else if(data_isreference(data)){  // Variable
+		// the scripter's responsibility
+		data = script_getdata(st, arg + 3);
+		if(data_isstring(data)) // String
+			StringBuf_Printf(&final_buf, buf2, script_getstr(st,arg + 3));
+		else if(data_isint(data)) // Number
+			StringBuf_Printf(&final_buf, buf2, script_getnum(st,arg + 3));
+		else if(data_isreference(data)) { // Variable
 			char *name = reference_getname(data);
-			if(name[strlen(name)-1]=='$'){  // var Str
-				StringBuf_Printf(&final_buf, buf2, script_getstr(st, arg+3));
-			}else{  // var Int
-				StringBuf_Printf(&final_buf, buf2, script_getnum(st, arg+3));
-			}
-		}else{  // Unsupported type
+
+			if(name[strlen(name) - 1] == '$') // var Str
+				StringBuf_Printf(&final_buf, buf2, script_getstr(st,arg + 3));
+			else // var Int
+				StringBuf_Printf(&final_buf, buf2, script_getnum(st,arg + 3));
+		} else { // Unsupported type
 			ShowError("buildin_sprintf: Unknown argument type!\n");
 			if(buf) aFree(buf);
 			if(buf2) aFree(buf2);
@@ -15486,12 +15481,11 @@ BUILDIN_FUNC(sprintf)
 	}
 
 	// Append anything left
-	if(*q){
+	if(*q)
 		StringBuf_AppendStr(&final_buf, q);
-	}
 
 	// Passed more, than needed
-	if(arg<argc){
+	if(arg < argc) {
 		ShowWarning("buildin_sprintf: Unused arguments passed.\n");
 		script_reportsrc(st);
 	}
@@ -15527,7 +15521,7 @@ BUILDIN_FUNC(sscanf){
 	format = script_getstr(st, 3);
 	argc = script_lastdata(st) - 3;
 
-	len = strlen(format);
+	len = (unsigned int)strlen(format);
 
 	if(len != 0 && strlen(str) == 0) {
 		// If the source string is empty but the format string is not, we return -1
@@ -15564,7 +15558,7 @@ BUILDIN_FUNC(sscanf){
 		}
 		if((p = strchr(q + 1, '%')) == NULL)
 			p = strchr(q, 0); // EOS
-		len = p - q;
+		len = (unsigned int)(p - q);
 		strncat(buf, q, len);
 		q = p;
 		// Validate output
@@ -22528,7 +22522,7 @@ BUILDIN_FUNC(achievementexist) {
 			return 0;
 	}
 
-	ARR_FIND(0, sd->achievement_data.count, i, sd->achievement_data.achievements[i].achievement_id == achievement_id);
+	ARR_FIND(0, sd->achievement_data.count, i, sd->achievement_data.achievements[i].achievement_id == achievement_id && sd->achievement_data.achievements[i].completed > 0);
 	script_pushint(st,(i < sd->achievement_data.count ? true : false));
 	return SCRIPT_CMD_SUCCESS;
 }
@@ -22592,7 +22586,7 @@ BUILDIN_FUNC(achievementupdate) {
 }
 
 BUILDIN_FUNC(open_roulette) {
-#if PACKETVER >= 20141022
+#if PACKETVER >= 20141016
 	struct map_session_data *sd = NULL;
 
 	if (!battle_config.feature_roulette) {
@@ -22606,7 +22600,27 @@ BUILDIN_FUNC(open_roulette) {
 	clif_roulette_open(sd);
 	return SCRIPT_CMD_SUCCESS;
 #else
-	ShowError("buildin_open_roulette: This command requires PACKETVER 2014-10-22 or newer.\n");
+	ShowError("buildin_open_roulette: This command requires PACKETVER 2014-10-16 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#endif
+}
+
+BUILDIN_FUNC(close_roulette) {
+#if PACKETVER >= 20141016
+	struct map_session_data *sd = NULL;
+
+	if (!battle_config.feature_roulette) {
+		ShowError("buildin_close_roulette: Roulette system is disabled.\n");
+		return 1;
+	}
+
+	if (!script_charid2sd(2,sd))
+		return 1;
+
+	clif_roulette_close(sd);
+	return SCRIPT_CMD_SUCCESS;
+#else
+	ShowError("buildin_close_roulette: This command requires PACKETVER 2014-10-16 or newer.\n");
 	return SCRIPT_CMD_FAILURE;
 #endif
 }
@@ -23020,9 +23034,87 @@ BUILDIN_FUNC(camerainfo) {
 		return 1;
 
 	clif_camerainfo(sd, false, script_getnum(st,2) / 100.0f, script_getnum(st,3) / 100.0f, script_getnum(st,4) / 100.0f);
-
 	return SCRIPT_CMD_SUCCESS;
 #endif
+}
+
+/**
+ * Open Lapine Synthesis UI
+ * synthesisui(<id>,{<char_id>});
+ */
+BUILDIN_FUNC(synthesisui) {
+#if PACKETVER < 20160525
+	ShowError("buildin_synthesisui: This command requires PACKETVER 2016-05-25 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+
+	script_pushint(st,itemdb_synthesis_open(sd, script_getnum(st,2)));
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
+/**
+ * Open Lapine Upgrade UI
+ * upgradeui(<id>,{<char_id>});
+ */
+BUILDIN_FUNC(upgradeui) {
+#if PACKETVER < 20160525
+	ShowError("buildin_upgradeui: This command requires PACKETVER 2016-05-25 or newer.\n");
+	return SCRIPT_CMD_FAILURE;
+#else
+	struct map_session_data *sd = NULL;
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+
+	script_pushint(st,itemdb_upgrade_open(sd, script_getnum(st,2)));
+	return SCRIPT_CMD_SUCCESS;
+#endif
+}
+
+/**
+ * Get possible random option data of the given id
+ * getrandomoptgroup(<group_id>,{<char_id>});
+ */
+BUILDIN_FUNC(getrandomoptgroup) {
+	struct map_session_data *sd = NULL;
+	struct s_random_opt_group *entry = NULL;
+	int group_id = script_getnum(st,2);
+
+	if (!script_charid2sd(3,sd)) {
+		script_pushint(st,0);
+		return 1;
+	}
+
+	if ((entry = itemdb_randomopt_group_exists(group_id))) {
+		int count, i, k = 0;
+
+		for (i = 0; i < MAX_ITEM_RDM_OPT; i++) {
+			count = entry->option_count[i];
+			if (count > 0) {
+				int j = rnd()%count;
+
+				entry->option[i].id = entry->options[i][j].id;
+				entry->option[i].value = rnd_value(entry->options[i][j].min_val, entry->options[i][j].max_val);
+				entry->option[i].param = 0;
+				pc_setreg(sd, reference_uid(add_str("@opt_group_id"), k), entry->option[i].id);
+				pc_setreg(sd, reference_uid(add_str("@opt_group_val"), k), entry->option[i].value);
+				pc_setreg(sd, reference_uid(add_str("@opt_group_param"), k), entry->option[i].param);
+				k++;
+			}
+		}
+	}
+
+	script_pushint(st,1);
+	return SCRIPT_CMD_SUCCESS;
 }
 
 #include "../custom/script.inc"
@@ -23661,6 +23753,7 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(achievementupdate,"iii?"),
 	//Roulette System
 	BUILDIN_DEF(open_roulette,"?"),
+	BUILDIN_DEF(close_roulette,"?"),
 	//Mail System
 	BUILDIN_DEF(mail,"isss*"),
 	BUILDIN_DEF(identifyall,"??"),
@@ -23674,6 +23767,9 @@ struct script_function buildin_func[] = {
 	BUILDIN_DEF(is_guild_leader,"?"),
 	BUILDIN_DEF(is_party_leader,"?"),
 	BUILDIN_DEF(camerainfo,"iii?"),
+	BUILDIN_DEF(synthesisui,"i?"),
+	BUILDIN_DEF(upgradeui,"i?"),
+	BUILDIN_DEF(getrandomoptgroup,"i?"),
 
 #include "../custom/script_def.inc"
 
