@@ -1,5 +1,5 @@
 //===== rAthena Script ======================================= 
-//= Payon City Pre-Renovation
+//= Quest Payon Renewal
 //===== By: ================================================== 
 //= JohnnyPlayy
 //===== Current Version: ===================================== 
@@ -12,4 +12,4 @@
 //= 1.0 First version.
 //============================================================ 
 
-payon_in01,46,21,4	duplicate(Young man#12)	Young man#1	89
+payon_in01,46,21,4	duplicate(Young man#12)	Young man#1	4_M_ORIENT02
